@@ -370,7 +370,7 @@ function requestPowerOrGoAgain(ctx: ScriptCtx, hook: string): void {
 function resolvePowerOrGoAgain(ctx: ScriptCtx, hook: string, option: string, expectedHook: string): void {
   if (hook !== expectedHook) return;
   if (option === "power") ctx.addCardTempPower(ctx.self.instanceId, 1);
-  else if (option === "go-again") ctx.grantGoAgain();
+  else if (option === "go-again") ctx.grantGoAgain(ctx.self.instanceId);
 }
 
 function treasureCounters(ctx: ScriptCtx): number {

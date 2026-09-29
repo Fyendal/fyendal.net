@@ -603,13 +603,13 @@ function windowAbilityIntents(
   const intents: GameIntent[] = [];
   const isAttacker = !!link && link.attacker === player.seat;
   const windowKind = state.pendingDecision?.kind;
-  const chainAttackers = isAttacker
-    ? state.chain
-        .filter((candidate) =>
-          candidate.attacker === player.seat && candidate.flags.attackGone !== true
-        )
-        .map((candidate) => candidate.attackingCard)
-    : [];
+  const chainAttackers = state.chain
+    .filter((candidate) =>
+      candidate.attacker === player.seat &&
+      candidate.attackCardType === "action" &&
+      candidate.flags.attackGone !== true
+    )
+    .map((candidate) => candidate.attackingCard);
   const sources: CardInstance[] = [
     player.hero,
     ...(Object.values(player.equipment).filter((c): c is CardInstance => !!c)),
@@ -807,6 +807,58 @@ function windowAbilityIntents(
   return intents;
 }
 
+/** A defender remains on its chain link until the whole combat chain closes. */
+function defendingCardAbilityIntents(
+  state: GameStateInternal,
+  player: PlayerState,
+): GameIntent[] {
+  const intents: GameIntent[] = [];
+  if (opposingInstantsProhibited(state, player.seat)) return intents;
+  for (const link of state.chain) {
+    for (const card of link.defendingCards) {
+      if (card.owner !== player.seat || activatedAbilitiesSuppressed(state, card)) continue;
+      const ability = scriptOf(state, card.cardId, card)?.defenseAbility;
+      if (!ability || (ability.oncePerTurn && player.flags[`defAbility:${card.instanceId}`])) continue;
+      if (ability.discard !== 1) continue;
+      const subtype = ability.destroyOrDiscardSubtype?.toLowerCase();
+      const candidates = subtype
+        ? [
+            ...player.hand.filter((candidate) => cardTypesOf(state, candidate).includes(subtype)),
+            ...player.board.filter((candidate) => cardTypesOf(state, candidate).includes(subtype)),
+          ]
+        : player.hand;
+      const cardCostSelection: CardCostSelection = {
+        kind: "choose-card-cost",
+        cardLabel: subtype === "ally" ? "allies" : subtype ? `${subtype}s` : "cards",
+        minimum: ability.discard,
+        maximum: ability.discard,
+        modes: subtype
+          ? [
+              { kind: "destroy", maximum: ability.discard },
+              { kind: "discard", maximum: ability.discard },
+            ]
+          : [{
+              kind: ability.banishHandCard ? "banish" : "discard",
+              maximum: ability.discard,
+            }],
+      };
+      for (const candidate of candidates) {
+        intents.push({
+          kind: "activate-ability",
+          sourceInstanceId: card.instanceId,
+          // This established wire field carries the exact discard choice
+          // for while-defending abilities. The presentation hint prevents
+          // clients from projecting it as a resource pitch.
+          pitchInstanceIds: [candidate.instanceId],
+          deferActivationPresentation: true,
+          cardCostSelection,
+        });
+      }
+    }
+  }
+  return intents;
+}
+
 function reactionIntents(
   state: GameStateInternal,
   runtime: EngineRuntime,
@@ -848,51 +900,7 @@ function reactionIntents(
     { arr: cardsPlayableFromZone(state, runtime, player.seat, "deck"), fromArsenal: false, fromZone: "deck" },
   ];
   const intents: GameIntent[] = [];
-  // "while defending" abilities (e.g. Rally the Rearguard)
-  if (!isAttacker) {
-    for (const c of link.defendingCards) {
-      if (c.owner !== player.seat) continue;
-      const ability = scriptOf(state, c.cardId, c)?.defenseAbility;
-      if (!ability) continue;
-      if (ability.oncePerTurn && player.flags[`defAbility:${c.instanceId}`]) continue;
-      if (ability.discard === 1) {
-        const subtype = ability.destroyOrDiscardSubtype?.toLowerCase();
-        const candidates = subtype
-          ? [
-              ...player.hand.filter((card) => cardTypesOf(state, card).includes(subtype)),
-              ...player.board.filter((card) => cardTypesOf(state, card).includes(subtype)),
-            ]
-          : player.hand;
-        const cardCostSelection: CardCostSelection = {
-          kind: "choose-card-cost",
-          cardLabel: subtype === "ally" ? "allies" : subtype ? `${subtype}s` : "cards",
-          minimum: ability.discard,
-          maximum: ability.discard,
-          modes: subtype
-            ? [
-                { kind: "destroy", maximum: ability.discard },
-                { kind: "discard", maximum: ability.discard },
-              ]
-            : [{
-                kind: ability.banishHandCard ? "banish" : "discard",
-                maximum: ability.discard,
-              }],
-        };
-        for (const h of candidates) {
-          intents.push({
-            kind: "activate-ability",
-            sourceInstanceId: c.instanceId,
-            // This established wire field carries the exact discard choice
-            // for while-defending abilities. The presentation hint prevents
-            // clients from projecting it as a resource pitch.
-            pitchInstanceIds: [h.instanceId],
-            deferActivationPresentation: true,
-            cardCostSelection,
-          });
-        }
-      }
-    }
-  }
+  intents.push(...defendingCardAbilityIntents(state, player));
   for (const { arr, fromArsenal, fromZone } of zones) {
     for (const card of arr) {
       const data = instanceDataOf(state, card);
@@ -1056,9 +1064,15 @@ function abilityIntents(
 ): GameIntent[] {
   const intents: GameIntent[] = [];
   const controlledSources = controlledPermanents(state, player.seat);
-  const controlledIds = new Set(controlledSources.map((card) => card.instanceId));
+  const chainAttackers = state.chain
+    .filter((link) => link.attacker === player.seat &&
+      link.attackCardType === "action" && link.flags.attackGone !== true)
+    .map((link) => link.attackingCard);
+  const chainAttackIds = new Set(chainAttackers.map((card) => card.instanceId));
+  const controlledIds = new Set([...controlledSources, ...chainAttackers].map((card) => card.instanceId));
   const sources = [
     ...controlledSources,
+    ...chainAttackers,
     ...state.players.filter((controller) => controller.seat !== player.seat)
       .flatMap((controller) => controller.board)
       .filter((card) => abilityList(scriptOf(state, card.cardId, card)).some((ability) =>
@@ -1087,6 +1101,9 @@ function abilityIntents(
       if (card.faceDown && !ability.turnsFaceUp && !ability.usableWhileFaceDown) continue;
       if (ability.turnsFaceUp && !card.faceDown) continue;
       const timing = ability.timing ?? "action";
+      const grantedInstantTiming = abilitiesAsInstantForCard(state, player, card);
+      if (chainAttackIds.has(card.instanceId) && timing !== "instant" &&
+          !grantedInstantTiming) continue;
       if (timing === "action" && actionAbilityRestrictedByModifier(
         state,
         runtime,
@@ -1094,7 +1111,6 @@ function abilityIntents(
         card,
         ability.isAttack,
       )) continue;
-      const grantedInstantTiming = abilitiesAsInstantForCard(state, player, card);
       if ((timing === "instant" || grantedInstantTiming) && opposingInstantsProhibited(state, player.seat)) continue;
       if (timing === "action" && actionLimitReached(state, player)) continue;
       if (timing === "attack-reaction" || timing === "defense-reaction") continue;
@@ -1449,6 +1465,7 @@ function enumerateIntents(
         }
         if (!opposingActionsProhibited(state, seat)) {
           intentsOut.push(...windowAbilityIntents(state, runtime, player, false, includeUnaffordable));
+          intentsOut.push(...defendingCardAbilityIntents(state, player));
         }
         return filterOwnedCardActions(state, seat, [
           ...intentsOut,
@@ -1478,6 +1495,7 @@ function enumerateIntents(
       intents.push(...playIntentsForCard(state, runtime, player, top, "deck", includeUnaffordable));
     }
     intents.push(...abilityIntents(state, runtime, player, includeUnaffordable));
+    intents.push(...defendingCardAbilityIntents(state, player));
     if (!currentLink(state)) intents.push({ kind: "pass" });
     // the chain is still open (links present, last resolved, no new attack
     // declared): the active player may close it manually

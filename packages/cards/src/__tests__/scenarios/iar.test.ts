@@ -2832,6 +2832,42 @@ describe("September 3 IAR spoilers", () => {
     expect(g.state.players[1]!.board).toHaveLength(0);
   });
 
+  it("Corpse Cover can prevent damage from a later chain link while it still defends", () => {
+    const g = scenario({ seats: [
+      {
+        hero: "rhinar",
+        hand: ["head jab|3", "raging onslaught|1"],
+        resources: 3,
+        equipment: NO_EQUIPMENT,
+      },
+      {
+        hero: "dorinthea",
+        life: 20,
+        hand: ["corpse cover|1"],
+        board: ["restless cleric|1"],
+        equipment: NO_EQUIPMENT,
+      },
+    ] });
+
+    g.play("head jab|3").blockWith("corpse cover|1").settle();
+    const cover = g.state.chain[0]!.defendingCards[0]!;
+    const ally = g.state.players[1]!.board[0]!;
+    g.play("raging onslaught|1").blockWith().passPriority();
+    const activation = legalIntents(g.state, 1).find((intent) =>
+      intent.kind === "activate-ability" &&
+      intent.sourceInstanceId === cover.instanceId &&
+      intent.pitchInstanceIds[0] === ally.instanceId
+    );
+    expect(activation).toBeDefined();
+    expect(actionCandidates(g.state, 1)).toContainEqual(activation);
+    g.doRaw(activation!);
+    expect(legalIntents(g.state, 1).some((intent) =>
+      intent.kind === "activate-ability" && intent.sourceInstanceId === cover.instanceId
+    )).toBe(false);
+    g.settle().expectLife(1, 15);
+    expect(g.state.players[1]!.board).toHaveLength(0);
+  });
+
   it("Shadow Resist destroys its source and prevents damage from a Shadow hero", () => {
     const g = scenario({ seats: [
       {

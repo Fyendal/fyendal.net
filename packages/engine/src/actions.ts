@@ -594,13 +594,18 @@ export function activateAbility(
       return candidate.instanceId === sourceInstanceId && ability?.anyHeroAction === true &&
         (ability.timing ?? "action") === "action";
     });
+  const chainAttack = state.chain.find((link) =>
+    link.attacker === seat && link.attackCardType === "action" &&
+    link.attackingCard.instanceId === sourceInstanceId && link.flags.attackGone !== true
+  );
   const permanent =
     findCard(player, sourceInstanceId) ??
-    (player.hero.instanceId === sourceInstanceId ? player.hero : undefined) ?? sharedActionSource;
+    (player.hero.instanceId === sourceInstanceId ? player.hero : undefined) ??
+    chainAttack?.attackingCard ?? sharedActionSource;
   const isBanishSource = !!permanent && player.banish.some(
     (candidate) => candidate.instanceId === permanent.instanceId,
   );
-  if (!permanent || (!isPermanentSource(player, permanent.instanceId) && !isBanishSource && !sharedActionSource)) {
+  if (!permanent || (!isPermanentSource(player, permanent.instanceId) && !isBanishSource && !chainAttack && !sharedActionSource)) {
     const result = activateFromHandAbility(state, runtime, {
       mode: "action",
       seat,
@@ -655,6 +660,9 @@ export function activateAbility(
   if (timing === "attack-reaction") return "only usable as an attack reaction";
   if (timing === "defense-reaction") return "only usable as a defense reaction";
   const grantedInstantTiming = abilitiesAsInstantForCard(state, player, card);
+  if (chainAttack && timing !== "instant" && !grantedInstantTiming) {
+    return "only usable as an instant while on the combat chain";
+  }
   const costsAP = timing === "action" && !grantedInstantTiming;
   if (timing === "action" && actionAbilityRestrictedByModifier(state, runtime, seat, card, ability.isAttack)) {
     return "action ability is prohibited by a turn restriction";

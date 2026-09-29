@@ -509,6 +509,60 @@ describe("SEA — High Seas heroes and cogs", () => {
     )?.tapped).toBe(true);
   });
 
+  it("Cloud Skiff can activate from a previous link without giving the current attack go again", () => {
+    const g = scenario({ seats: [
+      {
+        hero: "rhinar",
+        hand: ["flying high|3", "cloud skiff|3", "raging onslaught|1"],
+        board: ["golden cog|0"],
+        resources: 4,
+      },
+      { hero: "dorinthea", hand: [] },
+    ] });
+
+    g.play("flying high|3")
+      .play("cloud skiff|3").blockWith().settle().expectAP(0, 1);
+    const skiff = g.state.chain[0]!.attackingCard;
+    g.play("raging onslaught|1").blockWith();
+    const activation = legalIntents(g.state, 0).find((intent) =>
+      intent.kind === "activate-ability" && intent.sourceInstanceId === skiff.instanceId
+    );
+    expect(activation).toBeDefined();
+    expect(actionCandidates(g.state, 0)).toContainEqual(activation);
+    g.doRaw(activation!);
+    const cogOption = g.state.pendingDecision?.options?.[0];
+    expect(cogOption).toBeDefined();
+    g.doRaw({ kind: "choose", optionId: cogOption! })
+      .passPriority()
+      .passPriority();
+    expect(g.state.pendingDecision?.chooseHook).toBe("skimmer-mode");
+    g.doRaw({ kind: "choose", optionId: "go-again" });
+    expect(g.state.chain[0]!.goAgain).toBe(true);
+    expect(g.state.chain[1]!.goAgain).toBe(false);
+  });
+
+  it("Cloud Skiff can activate between chain links while its card remains attacking", () => {
+    const g = scenario({ seats: [
+      {
+        hero: "rhinar",
+        hand: ["flying high|3", "cloud skiff|3"],
+        board: ["golden cog|0"],
+        resources: 1,
+      },
+      { hero: "dorinthea", hand: [] },
+    ] });
+
+    g.play("flying high|3").play("cloud skiff|3").blockWith().settle();
+    const skiff = g.state.chain[0]!.attackingCard;
+    const activation = legalIntents(g.state, 0).find((intent) =>
+      intent.kind === "activate-ability" && intent.sourceInstanceId === skiff.instanceId
+    );
+    expect(activation).toBeDefined();
+    expect(actionCandidates(g.state, 0)).toContainEqual(activation);
+    g.doRaw(activation!);
+    expect(g.state.pendingDecision?.options).toBeDefined();
+  });
+
   it("Golden Skywarden repeats Galvanize after destroying a Golden Cog", () => {
     const g = scenario({
       seats: [

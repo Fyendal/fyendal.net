@@ -167,15 +167,20 @@ function OnHitBadge({
 }
 
 export function chainCardIsActivatable(
-  link: ChainLinkView | undefined,
+  links: readonly ChainLinkView[],
   index: number,
-  linkCount: number,
   sourceInstanceId: number,
   activatableCardIds?: ReadonlySet<number>,
 ): boolean {
-  return index === linkCount - 1 &&
-    link?.resolved !== true &&
-    (activatableCardIds?.has(sourceInstanceId) ?? false);
+  if (!activatableCardIds?.has(sourceInstanceId)) return false;
+  // A replayed card can leave an older last-known presentation on the chain.
+  // Only its newest appearance represents the live source offered by the engine.
+  for (let i = links.length - 1; i > index; i--) {
+    const link = links[i]!;
+    if (link.attackingCard.instanceId === sourceInstanceId ||
+        link.defendingCards.some((card) => card.instanceId === sourceInstanceId)) return false;
+  }
+  return true;
 }
 
 /** Pointer browsing should return focus to the game board so Space remains the
@@ -272,13 +277,11 @@ export function ChainFloat({
   // that current position remains available in the timeline.
   const emptyCurrentExists = chainCurrent?.resolved === true;
   const showingEmptyCurrent = emptyCurrentExists && browsedIndex === null;
-  // A card can appear on several links with the same instance id. Legal intents
-  // refer to the live source, so only its newest unresolved chain-link
-  // appearance is interactive; older links are last-known snapshots.
+  // Legal intents determine whether a source is interactive, including a
+  // defending card on an earlier resolved link.
   const cardIsActivatable = (instanceId: number) => chainCardIsActivatable(
-    chain,
+    links,
     chainIdx,
-    chainLen,
     instanceId,
     activatableCardIds,
   );

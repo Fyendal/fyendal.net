@@ -579,18 +579,21 @@ export function applyIntent(
     }
     case "activate-ability": {
       const ai = intent.abilityIndex ?? 0;
+      const defending = next.chain.some((link) => link.defendingCards.some(
+        (card) => card.instanceId === intent.sourceInstanceId && card.owner === seat,
+      ));
       if (next.phase === "reaction" || next.phase === "defend") {
-        const link = currentLink(next);
-        const defending = link?.defendingCards.some(
-          (c) => c.instanceId === intent.sourceInstanceId && c.owner === seat,
-        );
         err = defending
           ? activateDefenseAbility(next, runtime, seat, intent.sourceInstanceId, intent.pitchInstanceIds)
           : activateWindowAbility(next, runtime, seat, intent.sourceInstanceId, intent.pitchInstanceIds, ai, [], false, [], intent.alternativeCostCardInstanceIds, [], undefined, intent.targetCardInstanceId);
       } else if (next.phase === "layer") {
-        err = activateWindowAbility(next, runtime, seat, intent.sourceInstanceId, intent.pitchInstanceIds, ai, [], false, [], intent.alternativeCostCardInstanceIds, [], undefined, intent.targetCardInstanceId);
+        err = defending
+          ? activateDefenseAbility(next, runtime, seat, intent.sourceInstanceId, intent.pitchInstanceIds)
+          : activateWindowAbility(next, runtime, seat, intent.sourceInstanceId, intent.pitchInstanceIds, ai, [], false, [], intent.alternativeCostCardInstanceIds, [], undefined, intent.targetCardInstanceId);
       } else {
-        err = activateAbility(next, runtime, seat, intent.sourceInstanceId, intent.pitchInstanceIds, ai, intent.targetAllyId, [], false, [], intent.alternativeCostCardInstanceIds, [], undefined, intent.targetCardInstanceId);
+        err = defending
+          ? activateDefenseAbility(next, runtime, seat, intent.sourceInstanceId, intent.pitchInstanceIds)
+          : activateAbility(next, runtime, seat, intent.sourceInstanceId, intent.pitchInstanceIds, ai, intent.targetAllyId, [], false, [], intent.alternativeCostCardInstanceIds, [], undefined, intent.targetCardInstanceId);
       }
       break;
     }

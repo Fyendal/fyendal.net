@@ -149,7 +149,7 @@ describe("combat-chain browsing", () => {
     expect(defenderClasses).toContain("card-clickable");
   });
 
-  it("only makes the newest unresolved appearance of an attack source interactive", () => {
+  it("makes a legal source interactive on its newest chain appearance", () => {
     const pastLink: ChainLinkView = {
       attackingCard: { instanceId: 42, cardId: "SBA016", owner: 0 },
       defendingCards: [],
@@ -163,9 +163,35 @@ describe("combat-chain browsing", () => {
     const currentLink = { ...pastLink, resolved: false };
     const activatable = new Set([42]);
 
-    expect(chainCardIsActivatable(pastLink, 0, 2, 42, activatable)).toBe(false);
-    expect(chainCardIsActivatable(currentLink, 1, 2, 42, activatable)).toBe(true);
-    expect(chainCardIsActivatable(pastLink, 0, 1, 42, activatable)).toBe(false);
+    expect(chainCardIsActivatable([pastLink, currentLink], 0, 42, activatable)).toBe(false);
+    expect(chainCardIsActivatable([pastLink, currentLink], 1, 42, activatable)).toBe(true);
+    expect(chainCardIsActivatable([pastLink], 0, 42, activatable)).toBe(true);
+    expect(chainCardIsActivatable([
+      pastLink,
+      { ...currentLink, attackingCard: { ...currentLink.attackingCard, instanceId: 43 } },
+    ], 0, 42, activatable)).toBe(true);
+    expect(chainCardIsActivatable([pastLink], 0, 42, new Set())).toBe(false);
+  });
+
+  it("allows a legal defending ability on an earlier resolved link", () => {
+    const pastLink: ChainLinkView = {
+      attackingCard: { instanceId: 42, cardId: "SBA016", owner: 0 },
+      defendingCards: [{ instanceId: 84, cardId: "IAR097", owner: 1 }],
+      reactions: [],
+      attackValue: 3,
+      defenseValue: 3,
+      damage: 0,
+      resolved: true,
+    };
+    const currentLink: ChainLinkView = {
+      ...pastLink,
+      attackingCard: { instanceId: 43, cardId: "SBA016", owner: 0 },
+      defendingCards: [],
+      resolved: false,
+    };
+
+    expect(chainCardIsActivatable([pastLink, currentLink], 0, 84, new Set([84])))
+      .toBe(true);
   });
 
   it("shows go again as a tooltip icon instead of a text label", () => {

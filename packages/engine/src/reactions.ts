@@ -847,11 +847,24 @@ export function activateDefenseAbility(
   sourceInstanceId: number,
   discardInstanceIds: number[],
 ): string | undefined {
-  const link = currentLink(state);
-  if (!link) return "no active combat";
-  if (state.phase !== "reaction" && state.phase !== "defend") return "cannot activate now";
-  const card = link.defendingCards.find((c) => c.instanceId === sourceInstanceId);
-  if (!card || card.owner !== seat) return "source is not defending for you";
+  if (state.phase !== "reaction" && state.phase !== "defend" &&
+      state.phase !== "layer" && state.phase !== "action") return "cannot activate now";
+  const windowKind = state.pendingDecision?.kind;
+  if (state.phase === "reaction" &&
+      windowKind !== "attack-reaction" && windowKind !== "defense-reaction") {
+    return "cannot activate now";
+  }
+  if (state.phase === "defend" && windowKind !== "defend") return "cannot activate now";
+  if (state.phase === "action" && state.pendingDecision) return "cannot activate now";
+  if (state.phase === "layer" && windowKind !== "priority-window") return "cannot activate now";
+  if (state.priorityPlayer !== seat ||
+      (state.pendingDecision && state.pendingDecision.player !== seat)) return "not your priority";
+  if (opposingInstantsProhibited(state, seat)) return "opposing effect prohibits instants";
+  const link = state.chain.find((candidate) =>
+    candidate.defendingCards.some((card) => card.instanceId === sourceInstanceId)
+  );
+  const card = link?.defendingCards.find((candidate) => candidate.instanceId === sourceInstanceId);
+  if (!link || !card || card.owner !== seat) return "source is not defending for you";
   if (activatedAbilitiesSuppressed(state, card)) return "activated abilities are suppressed";
   const script = scriptOf(state, card.cardId, card);
   const ability = script?.defenseAbility;
