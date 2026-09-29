@@ -509,6 +509,31 @@
   .hand .card-hand.card-pitched:hover { transform: translateY(-7px); }
   .hand .muted { transform: none; align-self: center; }
 
+  .hand-scroll-button {
+    position: fixed;
+    bottom: 216px;
+    z-index: 25;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    min-width: 42px;
+    height: 36px;
+    min-height: 36px;
+    border: 1px solid #b8933f88;
+    border-radius: 2px;
+    background: #050403;
+    box-shadow: 0 5px 18px #00000088;
+    opacity: 1;
+    font-size: 24px;
+    touch-action: manipulation;
+  }
+  .hand-scroll-button:hover,
+  .hand-scroll-button:focus-visible { background: #21180de6; }
+  .hand-scroll-glyph { transform: scale(.62, 1.25); }
+  .hand-scroll-button-left { left: 12px; }
+  .hand-scroll-button-right { right: 64px; left: auto; }
+
   .mobile-hand-toggle {
     position: fixed;
     right: 12px;
@@ -1105,12 +1130,14 @@
   }
   .replay-bar .replay-next-shortcut { display: none; }
   #root:has(.replay-bar:not(.replay-bar-collapsed)) .hand { bottom: 158px; }
+  #root:has(.replay-bar:not(.replay-bar-collapsed)) .hand-scroll-button { bottom: 302px; }
   #root:has(.replay-bar:not(.replay-bar-collapsed)) .board { padding-bottom: 310px; }
   #root:has(.replay-bar:not(.replay-bar-collapsed)) { scroll-padding-bottom: 314px; }
   #root:has(.replay-bar:not(.replay-bar-collapsed)) .decision-float { bottom: 308px !important; }
   #root:has(.replay-bar:not(.replay-bar-collapsed)) .zone-overlay { padding-bottom: 310px; }
 
   .mobile-hand-is-hidden .hand { display: none; }
+  .mobile-hand-is-hidden .hand-scroll-button { display: none; }
   .mobile-hand-is-hidden .board {
     padding-bottom: 12px;
   }

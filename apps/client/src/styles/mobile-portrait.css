@@ -274,6 +274,7 @@
     height: calc(max(8px, env(safe-area-inset-bottom)) + 304px);
   }
 
+  .hand-scroll-button,
   .mobile-hand-toggle {
     top: auto;
     bottom: calc(max(8px, env(safe-area-inset-bottom)) + 216px);
@@ -306,6 +307,9 @@
   }
 
   #root:has(.replay-bar:not(.replay-bar-collapsed)) .mobile-hand-toggle[aria-expanded="true"] {
+    bottom: calc(max(8px, env(safe-area-inset-bottom)) + 304px);
+  }
+  #root:has(.replay-bar:not(.replay-bar-collapsed)) .hand-scroll-button {
     bottom: calc(max(8px, env(safe-area-inset-bottom)) + 304px);
   }
   #root:has(.replay-bar:not(.replay-bar-collapsed)) .mobile-hand-toggle[aria-expanded="false"] {
@@ -346,20 +350,6 @@
     height: auto;
     align-self: flex-start;
     aspect-ratio: 90 / 124;
-  }
-
-  /* Keep a comfortable tap target while reducing the visible hide control to
-     the icon itself. */
-  .mobile-hand-toggle[aria-expanded="true"],
-  .mobile-hand-toggle[aria-expanded="true"]:hover {
-    border-color: transparent;
-    background: transparent;
-    box-shadow: none;
-    transform: translateY(6px);
-  }
-  .mobile-hand-toggle-icon {
-    width: 22px;
-    height: 22px;
   }
 }
 
