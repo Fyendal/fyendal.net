@@ -1,20 +1,16 @@
 import { useState } from "react";
 import { useIntl } from "react-intl";
-import { useShallow } from "zustand/react/shallow";
 import { preconsForFormat } from "@fyendal/cards/client";
 import type { DeckSummary } from "@fyendal/protocol";
 import type { CardPoolMode } from "@fyendal/shared";
 import type { ConstructedFormat } from "../domain.js";
 import { useStore } from "../store.js";
 import { preconPrepDeck } from "../prep/prepDeck.js";
-import { formatLabel, formatSelectLabel } from "./FormatBadge.js";
+import { formatSelectLabel } from "./FormatBadge.js";
 import { heroImageUrl } from "./heroImage.js";
 import { deckErrorMessages } from "./deckErrors.js";
-import { BotOpponentModal } from "./BotOpponentModal.js";
 import { ModalSurface } from "../components/ModalSurface.js";
-import { CardPoolModeControl } from "./CardPoolModeControl.js";
 
-export type DeckCatalogTab = "mine" | "precons";
 export type DeckLegalityFilter = "all" | "playable" | "attention";
 
 export function filterAndSortDecks(
@@ -23,7 +19,6 @@ export function filterAndSortDecks(
     query: string;
     legality: DeckLegalityFilter;
     cardPoolMode: CardPoolMode;
-    catalog: DeckCatalogTab;
   },
 ): DeckSummary[] {
   const query = options.query.trim().toLocaleLowerCase();
@@ -36,9 +31,7 @@ export function filterAndSortDecks(
         deck.heroName.toLocaleLowerCase().includes(query);
     })
     .slice()
-    .sort((left, right) => options.catalog === "mine"
-      ? right.updatedAt - left.updatedAt
-      : left.name.localeCompare(right.name));
+    .sort((left, right) => right.updatedAt - left.updatedAt);
 }
 
 /** Shared precons as deck tiles (synthesized, no DB row). */
@@ -64,68 +57,9 @@ export function deckIsLegalForRoom(deck: DeckSummary, cardPoolMode: CardPoolMode
     (cardPoolMode !== "legal" || !deck.futureCards?.length);
 }
 
-export function deckLegalityReason(deck: DeckSummary, cardPoolMode: CardPoolMode): string | undefined {
-  const blocked = [
-    ...(cardPoolMode === "open" ? [] : (deck.bannedCards ?? [])),
-    ...(cardPoolMode === "legal" ? (deck.futureCards ?? []) : []),
-  ];
-  return blocked.length > 0 ? `Illegal cards: ${blocked.join(", ")}` : undefined;
-}
-
-function DeckPoolControl(props: {
-  value: CardPoolMode;
-  disabled: boolean;
-  onChange: (mode: CardPoolMode) => void;
-}) {
-  return (
-    <CardPoolModeControl
-      className="deck-card-pool-control"
-      value={props.value}
-      disabled={props.disabled}
-      onChange={props.onChange}
-    />
-  );
-}
-
-function DeckLibraryFilters(props: {
-  className: string;
-  query: string;
-  legality: DeckLegalityFilter;
-  onQueryChange: (query: string) => void;
-  onLegalityChange: (legality: DeckLegalityFilter) => void;
-}) {
-  const intl = useIntl();
-  return (
-    <div className={props.className}>
-      <label>
-        <span>{intl.formatMessage({ id: "lobby.deck.search" })}</span>
-        <input
-          type="search"
-          name="deck-search"
-          value={props.query}
-          autoComplete="off"
-          placeholder={intl.formatMessage({ id: "lobby.deck.searchPlaceholder" })}
-          onChange={(event) => props.onQueryChange(event.target.value)}
-        />
-      </label>
-      <label>
-        <span>{intl.formatMessage({ id: "lobby.deck.legality" })}</span>
-        <select
-          value={props.legality}
-          onChange={(event) => props.onLegalityChange(event.target.value as DeckLegalityFilter)}
-        >
-          <option value="all">{intl.formatMessage({ id: "common.all" })}</option>
-          <option value="playable">{intl.formatMessage({ id: "lobby.deck.playable" })}</option>
-          <option value="attention">{intl.formatMessage({ id: "lobby.deck.needsAttention" })}</option>
-        </select>
-      </label>
-    </div>
-  );
-}
-
 /**
- * One deck tile: hero headshot + deck name. Shared by the constructed play
- * grid and the room-join picker. A headshot slug that misses on Fabrary
+ * One deck tile: hero headshot + deck name. Shared by the deck library
+ * and room-join picker. A headshot slug that misses on Fabrary
  * just hides the image — the tile stays usable.
  */
 export function DeckTile(props: {
@@ -197,327 +131,14 @@ export function DeckTile(props: {
   );
 }
 
-/**
- * Constructed play view: the format's decks as a tile grid. Selecting a tile
- * opens its play actions in a menu anchored directly beneath that deck.
- */
-export function DeckGrid(props: {
-  format: ConstructedFormat;
-  deckId: string;
-  onSelect: (id: string) => void;
-  onFormatChange?: (format: ConstructedFormat) => void;
-}) {
-  const intl = useIntl();
-  const selectedDeckId = props.deckId;
-  const {
-    decks,
-    queuedFormat,
-    queueJoin,
-    queueLeave,
-    createRoom,
-    createBotRoom,
-    cardPoolModes,
-    setCardPoolMode,
-  } = useStore(
-    useShallow((state) => ({
-      decks: state.decks,
-      queuedFormat: state.queuedFormat,
-      queueJoin: state.queueJoin,
-      queueLeave: state.queueLeave,
-      createRoom: state.createRoom,
-      createBotRoom: state.createBotRoom,
-      cardPoolModes: state.cardPoolModes,
-      setCardPoolMode: state.setCardPoolMode,
-    })),
-  );
-  const cardPoolMode = cardPoolModes[props.format];
-  const precons = preconSummaries(props.format, cardPoolMode);
-  const own = decks.filter((d) => d.format === props.format);
-  const queued = queuedFormat === props.format;
-  const [editingDeck, setEditingDeck] = useState<DeckSummary | null>(null);
-  const [importing, setImporting] = useState(false);
-  const [botDeckId, setBotDeckId] = useState<string | null>(null);
-  const [catalog, setCatalog] = useState<DeckCatalogTab>("mine");
-  const [query, setQuery] = useState("");
-  const [legality, setLegality] = useState<DeckLegalityFilter>("all");
-
-  const catalogDecks = catalog === "mine" ? own : precons;
-  const visibleDecks = filterAndSortDecks(
-    catalogDecks,
-    {
-      query,
-      legality,
-      cardPoolMode,
-      catalog,
-    },
-  );
-  const selectedDeck = catalogDecks.find((deck) => deck.id === selectedDeckId);
-  const selectedDeckIllegal = selectedDeck
-    ? !deckIsLegalForRoom(selectedDeck, cardPoolMode)
-    : false;
-  const selectedBlockedCards = selectedDeck ? [
-    ...(cardPoolMode === "open" ? [] : (selectedDeck.bannedCards ?? [])),
-    ...(cardPoolMode === "legal" ? (selectedDeck.futureCards ?? []) : []),
-  ] : [];
-  const selectedLegalityReason = selectedBlockedCards.length > 0
-    ? intl.formatMessage({ id: "lobby.deck.illegalCards" }, { cards: selectedBlockedCards.join(", ") })
-    : undefined;
-
-  const tiles = (list: DeckSummary[], editable: boolean) => (
-    <div className={`deck-grid${editable ? " deck-grid-saved" : " deck-grid-precons"}`}>
-      {list.map((d) => {
-        const selected = d.id === props.deckId;
-        return (
-          <div
-            className={`deck-choice${selected ? " selected" : ""}`}
-            key={d.id}
-          >
-            <DeckTile
-              deck={d}
-              selected={selected}
-              source={editable ? "saved" : "preconstructed"}
-              onSelect={() => props.onSelect(selected ? "" : d.id)}
-            />
-          </div>
-        );
-      })}
-    </div>
-  );
-
-  return (
-    <div className="panel deck-library-panel">
-      {props.onFormatChange ? (
-        <label className="mobile-deck-format-picker">
-          <span>{intl.formatMessage({ id: "common.format" })}</span>
-          <select
-            aria-label={intl.formatMessage({ id: "lobby.deck.format" })}
-            value={props.format}
-            onChange={(event) => props.onFormatChange?.(event.target.value as ConstructedFormat)}
-          >
-            <option value="cc">{formatSelectLabel(intl, "cc")}</option>
-            <option value="silver-age">{formatSelectLabel(intl, "silver-age")}</option>
-          </select>
-        </label>
-      ) : null}
-      <div className="deck-panel-heading">
-        <h2 className="panel-title">
-          {intl.formatMessage(
-            { id: "lobby.deck.formatDecks" },
-            { format: formatLabel(intl, props.format) },
-          )}
-        </h2>
-        <div className="deck-panel-actions">
-          <button className="btn-primary deck-import-action" onClick={() => setImporting(true)}>
-            {intl.formatMessage({ id: "lobby.deck.import" })}
-          </button>
-        </div>
-      </div>
-
-      <div
-        className="deck-catalog-tabs"
-        role="tablist"
-        aria-label={intl.formatMessage({ id: "lobby.deck.catalog" })}
-      >
-        <button
-          type="button"
-          role="tab"
-          aria-selected={catalog === "mine"}
-          className={catalog === "mine" ? "selected" : ""}
-          onClick={() => {
-            setCatalog("mine");
-            props.onSelect("");
-          }}
-        >
-          {intl.formatMessage({ id: "lobby.deck.mine" })} <span>{own.length}</span>
-        </button>
-        <button
-          type="button"
-          role="tab"
-          aria-selected={catalog === "precons"}
-          className={catalog === "precons" ? "selected" : ""}
-          onClick={() => {
-            setCatalog("precons");
-            props.onSelect("");
-          }}
-        >
-          {intl.formatMessage({ id: "lobby.deck.preconstructed" })} <span>{precons.length}</span>
-        </button>
-      </div>
-
-      <div className="mobile-deck-toolbar">
-        <button className="btn-primary" onClick={() => setImporting(true)}>
-          {intl.formatMessage({ id: "common.import" })}
-        </button>
-        <details className="mobile-deck-options">
-          <summary>{intl.formatMessage({ id: "lobby.deck.searchOptions" })}</summary>
-          <div className="mobile-deck-options-panel">
-            <DeckLibraryFilters
-              className="deck-library-tools mobile-deck-library-tools"
-              query={query}
-              legality={legality}
-              onQueryChange={setQuery}
-              onLegalityChange={setLegality}
-            />
-          </div>
-        </details>
-      </div>
-
-      <DeckLibraryFilters
-        className="deck-library-tools desktop-deck-library-tools"
-        query={query}
-        legality={legality}
-        onQueryChange={setQuery}
-        onLegalityChange={setLegality}
-      />
-
-      {visibleDecks.length > 0 ? tiles(visibleDecks, catalog === "mine") : (
-        <div className="deck-library-empty">
-          <h3>{intl.formatMessage({
-            id: catalog === "mine" && own.length === 0
-              ? "lobby.deck.emptySaved"
-              : "lobby.deck.emptyFiltered",
-          })}</h3>
-          <p>{intl.formatMessage({
-            id: catalog === "mine" && own.length === 0
-              ? "lobby.deck.emptySavedBody"
-              : "lobby.deck.emptyFilteredBody",
-          })}</p>
-          {catalog === "mine" && own.length === 0 ? (
-            <button className="btn-primary" onClick={() => setImporting(true)}>
-              {intl.formatMessage({ id: "lobby.deck.importFirst" })}
-            </button>
-          ) : null}
-        </div>
-      )}
-
-      {selectedDeck ? (
-        <ModalSurface
-          className="deck-play-modal"
-          title={intl.formatMessage({ id: "lobby.deck.playWith" }, { name: selectedDeck.name })}
-          onClose={() => props.onSelect("")}
-        >
-          <div className="deck-play-summary">
-            <img
-              src={heroImageUrl(selectedDeck.heroName)}
-              alt=""
-              width={64}
-              height={64}
-              onError={(event) => {
-                event.currentTarget.hidden = true;
-              }}
-            />
-            <div>
-              <strong>{selectedDeck.heroName}</strong>
-              <span>
-                {intl.formatMessage(
-                  { id: "lobby.deck.countAndSource" },
-                  {
-                    count: selectedDeck.deckSize,
-                    source: intl.formatMessage({
-                      id: catalog === "mine"
-                        ? "lobby.deck.source.saved"
-                        : "lobby.deck.source.preconstructed",
-                    }),
-                  },
-                )}
-              </span>
-            </div>
-          </div>
-
-          <DeckPoolControl
-            value={cardPoolMode}
-            disabled={queued}
-            onChange={(mode) => setCardPoolMode(props.format, mode)}
-          />
-
-          {selectedDeckIllegal ? (
-            <p className="deck-play-blocked" role="status">
-              {intl.formatMessage(
-                { id: "lobby.deck.blocked" },
-                { reason: selectedLegalityReason },
-              )}
-            </p>
-          ) : null}
-
-          <div className="deck-play-actions">
-            {queued ? (
-              <button className="btn-primary" data-modal-initial-focus onClick={queueLeave}>
-                {intl.formatMessage({ id: "lobby.action.cancelSearch" })}
-              </button>
-            ) : (
-              <button
-                className="btn-primary"
-                data-modal-initial-focus={selectedDeckIllegal ? undefined : ""}
-                disabled={selectedDeckIllegal}
-                onClick={() => queueJoin(props.format, { deckId: selectedDeck.id })}
-              >
-                {intl.formatMessage({ id: "lobby.action.findMatch" })}
-              </button>
-            )}
-            <div className="deck-play-secondary-actions">
-              <button
-                className="btn-private-room"
-                disabled={selectedDeckIllegal}
-                onClick={() => createRoom(props.format, { deckId: selectedDeck.id })}
-              >
-                {intl.formatMessage({ id: "lobby.action.inviteFriend" })}
-              </button>
-              <button
-                className="btn-bot"
-                disabled={selectedDeckIllegal}
-                onClick={() => {
-                  props.onSelect("");
-                  setBotDeckId(selectedDeck.id);
-                }}
-              >
-                {intl.formatMessage({ id: "lobby.action.playBot" })}
-              </button>
-            </div>
-          </div>
-
-          {catalog === "mine" ? (
-            <button
-              className="deck-play-edit-action"
-              onClick={() => {
-                props.onSelect("");
-                setEditingDeck(selectedDeck);
-              }}
-            >
-              {intl.formatMessage({ id: "lobby.deck.edit" })}
-            </button>
-          ) : null}
-        </ModalSurface>
-      ) : null}
-
-      {editingDeck ? (
-        <EditDeckModal deck={editingDeck} onClose={() => setEditingDeck(null)} />
-      ) : null}
-      {importing ? (
-        <ImportDeckModal format={props.format} onClose={() => setImporting(false)} />
-      ) : null}
-      {botDeckId ? (
-        <BotOpponentModal
-          format={props.format}
-          cardPoolMode={cardPoolMode}
-          onSelect={(bot, searchForPlayer) => {
-            createBotRoom(props.format, botDeckId, bot, searchForPlayer);
-            setBotDeckId(null);
-          }}
-          onClose={() => setBotDeckId(null)}
-        />
-      ) : null}
-    </div>
-  );
-}
-
 export function ImportDeckModal(props: {
   format: ConstructedFormat;
   onClose: () => void;
-  onImported?: () => void;
 }) {
   const intl = useIntl();
   const importDeck = useStore((state) => state.importDeck);
   const [source, setSource] = useState<"url" | "text">("url");
+  const [format, setFormat] = useState<ConstructedFormat>(props.format);
   const [name, setName] = useState("");
   const [url, setUrl] = useState("");
   const [decklist, setDecklist] = useState("");
@@ -531,13 +152,12 @@ export function ImportDeckModal(props: {
     setErrors([]);
     const result = await importDeck({
       name: name.trim(),
-      format: props.format,
+      format,
       ...(source === "url" ? { url: value } : { text: value }),
     });
     setBusy(false);
     if (result.ok) {
       props.onClose();
-      props.onImported?.();
       return;
     }
     setErrors(deckErrorMessages(
@@ -555,7 +175,7 @@ export function ImportDeckModal(props: {
 
   return (
     <ModalSurface
-      title={intl.formatMessage({ id: "lobby.deck.import" })}
+      title={intl.formatMessage({ id: "lobby.deck.createImport" })}
       className="deck-import-modal"
       onClose={props.onClose}
     >
@@ -586,6 +206,13 @@ export function ImportDeckModal(props: {
             void submit();
           }}
         >
+          <label>
+            <span>{intl.formatMessage({ id: "common.format" })}</span>
+            <select value={format} onChange={(event) => setFormat(event.target.value as ConstructedFormat)}>
+              <option value="cc">{formatSelectLabel(intl, "cc")}</option>
+              <option value="silver-age">{formatSelectLabel(intl, "silver-age")}</option>
+            </select>
+          </label>
           {source === "url" ? (
             <label className="deck-import-primary">
               <span>{intl.formatMessage({ id: "lobby.deck.fabraryLink" })}</span>
@@ -641,17 +268,13 @@ export function ImportDeckModal(props: {
   );
 }
 
-function EditDeckModal(props: { deck: DeckSummary; onClose: () => void }) {
+export function EditDeckModal(props: { deck: DeckSummary; onClose: () => void }) {
   const intl = useIntl();
-  const { updateDeck, deleteDeck } = useStore(useShallow((state) => ({
-    updateDeck: state.updateDeck,
-    deleteDeck: state.deleteDeck,
-  })));
+  const updateDeck = useStore((state) => state.updateDeck);
   const [name, setName] = useState(props.deck.name);
   const [url, setUrl] = useState(props.deck.fabraryUrl ?? "");
   const [text, setText] = useState("");
   const [busy, setBusy] = useState(false);
-  const [confirmingDelete, setConfirmingDelete] = useState(false);
   const [errors, setErrors] = useState<string[]>([]);
 
   const submit = async () => {
@@ -679,18 +302,6 @@ function EditDeckModal(props: { deck: DeckSummary; onClose: () => void }) {
         ),
       },
     ));
-  };
-
-  const remove = async () => {
-    setBusy(true);
-    setErrors([]);
-    const result = await deleteDeck(props.deck.id);
-    setBusy(false);
-    if (result.ok) {
-      props.onClose();
-      return;
-    }
-    setErrors([result.error]);
   };
 
   return (
@@ -742,32 +353,59 @@ function EditDeckModal(props: { deck: DeckSummary; onClose: () => void }) {
             </div>
           ) : null}
           <div className="deck-edit-actions">
-            {confirmingDelete ? (
-              <>
-                <button disabled={busy} onClick={() => setConfirmingDelete(false)}>
-                  {intl.formatMessage({ id: "lobby.deck.keep" })}
-                </button>
-                <button className="btn-danger" disabled={busy} onClick={() => void remove()}>
-                  {intl.formatMessage({ id: busy ? "lobby.deck.deleting" : "lobby.deck.confirmDelete" })}
-                </button>
-              </>
-            ) : (
-              <>
-                <button className="btn-danger" disabled={busy} onClick={() => setConfirmingDelete(true)}>
-                  {intl.formatMessage({ id: "lobby.deck.delete" })}
-                </button>
-                <button onClick={props.onClose}>{intl.formatMessage({ id: "common.cancel" })}</button>
-                <button
-                  className="btn-primary"
-                  disabled={busy || !name.trim()}
-                  onClick={() => void submit()}
-                >
-                  {intl.formatMessage({ id: busy ? "lobby.deck.saving" : "lobby.deck.saveChanges" })}
-                </button>
-              </>
-            )}
+            <button onClick={props.onClose}>{intl.formatMessage({ id: "common.cancel" })}</button>
+            <button
+              className="btn-primary"
+              disabled={busy || !name.trim()}
+              onClick={() => void submit()}
+            >
+              {intl.formatMessage({ id: busy ? "lobby.deck.saving" : "lobby.deck.saveChanges" })}
+            </button>
           </div>
         </div>
+    </ModalSurface>
+  );
+}
+
+export function DeleteDeckModal(props: { deck: DeckSummary; onClose: () => void }) {
+  const intl = useIntl();
+  const deleteDeck = useStore((state) => state.deleteDeck);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const remove = async () => {
+    if (busy) return;
+    setBusy(true);
+    setError(null);
+    const result = await deleteDeck(props.deck.id);
+    setBusy(false);
+    if (result.ok) {
+      props.onClose();
+    } else {
+      setError(result.error);
+    }
+  };
+
+  const close = () => {
+    if (!busy) props.onClose();
+  };
+
+  return (
+    <ModalSurface
+      title={intl.formatMessage({ id: "lobby.deck.delete" })}
+      description={intl.formatMessage({ id: "lobby.deck.deletePrompt" }, { name: props.deck.name })}
+      className="deck-delete-modal"
+      onClose={close}
+    >
+      {error ? <p className="import-errors" role="alert">{error}</p> : null}
+      <div className="deck-edit-actions">
+        <button data-modal-initial-focus disabled={busy} onClick={close}>
+          {intl.formatMessage({ id: "lobby.deck.keep" })}
+        </button>
+        <button className="btn-danger" disabled={busy} onClick={() => void remove()}>
+          {intl.formatMessage({ id: busy ? "lobby.deck.deleting" : "lobby.deck.confirmDelete" })}
+        </button>
+      </div>
     </ModalSurface>
   );
 }

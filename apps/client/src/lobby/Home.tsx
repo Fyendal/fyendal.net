@@ -1,288 +1,240 @@
-import { useState, type ReactNode } from "react";
+import { useId, useState } from "react";
 import { useIntl } from "react-intl";
 import { useShallow } from "zustand/react/shallow";
-import type { BotOpponent, CardPoolMode } from "@fyendal/shared";
-import type { DeckSummary } from "@fyendal/protocol";
+import type { CardPoolMode } from "@fyendal/shared";
 import type { ConstructedFormat } from "../domain.js";
+import { loadHomeFormat, loadHomeGameMode, saveHomeFormat, saveHomeGameMode, type HomeGameMode } from "../storage.js";
 import { useStore } from "../store.js";
-import silverAgeDeckArt from "../../../assets/Sage.jpg";
-import classicConstructedDeckArt from "../../../assets/CC.jpg";
-import silverAgePreconArt from "../../../assets/Sage Precon.png";
-import {
-  deckIsLegalForRoom,
-  ImportDeckModal,
-  preconSummaries,
-} from "./DeckGrid.js";
+import playPoster from "../../../assets/play-poster.jpg";
+import { deckChoicesFor, deckIsLegalForRoom } from "./DeckGrid.js";
 import { DeckDropdown } from "./CreateRoomModal.js";
 import { RoomCard } from "./RoomCard.js";
 import { BotOpponentModal } from "./BotOpponentModal.js";
-import { CardPoolModeControl } from "./CardPoolModeControl.js";
+import { formatSelectLabel } from "./FormatBadge.js";
 
-/** The focused starting point: play choices and rooms the account can reclaim. */
-export function Home(props: { onGoToFormat: (format: ConstructedFormat) => void }) {
-  const intl = useIntl();
-  const { rooms, joinRoom } = useStore(useShallow((state) => ({
-    rooms: state.rooms,
-    joinRoom: state.joinRoom,
-  })));
-  const rejoinRooms = rooms.filter((room) => room.yours === true);
-
-  return (
-    <div className="panel home-panel">
-      <HomePlayOptions onGoToFormat={props.onGoToFormat}>
-        {rejoinRooms.length > 0 ? (
-          <section className="room-section home-rejoin-section" aria-labelledby="rejoin-rooms-title">
-            <h3 id="rejoin-rooms-title" className="panel-title">
-              {intl.formatMessage({ id: "lobby.home.rejoinRooms" })}
-            </h3>
-            <div className="room-grid">
-              {rejoinRooms.map((room) => (
-                <RoomCard
-                  key={room.code}
-                  room={room}
-                  onRejoin={joinRoom}
-                />
-              ))}
-            </div>
-          </section>
-        ) : null}
-      </HomePlayOptions>
-    </div>
-  );
-}
-
-function HomePlayOptions(props: {
-  children: ReactNode;
-  onGoToFormat: (format: ConstructedFormat) => void;
-}) {
+/** Play setup and rooms the account can reclaim. */
+export function Home() {
   const intl = useIntl();
   const {
     authUser,
     cardPoolModes,
     createBotRoom,
+    createRoom,
     decks,
     decksLoading,
+    joinRoom,
     lastPlayedDecks,
     queuedFormat,
     queueJoin,
+    queueLeave,
+    rooms,
     setCardPoolMode,
   } = useStore(useShallow((state) => ({
     authUser: state.authUser,
     cardPoolModes: state.cardPoolModes,
     createBotRoom: state.createBotRoom,
+    createRoom: state.createRoom,
     decks: state.decks,
     decksLoading: state.decksLoading,
+    joinRoom: state.joinRoom,
     lastPlayedDecks: state.lastPlayedDecks,
     queuedFormat: state.queuedFormat,
     queueJoin: state.queueJoin,
+    queueLeave: state.queueLeave,
+    rooms: state.rooms,
     setCardPoolMode: state.setCardPoolMode,
   })));
-  const [importingFormat, setImportingFormat] = useState<ConstructedFormat | null>(null);
+  const [format, setFormat] = useState<ConstructedFormat>(() =>
+    typeof localStorage === "undefined"
+      ? "silver-age"
+      : loadHomeFormat(localStorage, authUser)
+  );
+  const [selectedDeckId, setSelectedDeckId] = useState("");
+  const [mode, setMode] = useState<HomeGameMode>(() =>
+    typeof localStorage === "undefined"
+      ? "find-match"
+      : loadHomeGameMode(localStorage, authUser)
+  );
+  const [choosingBot, setChoosingBot] = useState(false);
+  const cardPoolId = useId();
+  const cardPoolHelpId = useId();
 
   if (decksLoading) {
-    return <p className="muted" role="status">{intl.formatMessage({ id: "lobby.loadingDecks" })}</p>;
+    return <div className="panel home-panel"><p className="muted" role="status">{intl.formatMessage({ id: "lobby.loadingDecks" })}</p></div>;
   }
 
-  const hasSavedDecks = decks.length > 0;
-  const silverAgeCardPoolMode = cardPoolModes["silver-age"];
-  const precons = hasSavedDecks
-    ? []
-    : preconSummaries("silver-age", silverAgeCardPoolMode)
-      .filter((deck) => deckIsLegalForRoom(deck, silverAgeCardPoolMode));
-  const silverAgeDecks = decks.filter((deck) => deck.format === "silver-age");
-  const classicConstructedDecks = decks.filter((deck) => deck.format === "cc");
+  const cardPoolMode = cardPoolModes[format];
+  const choices = deckChoicesFor(format, decks, cardPoolMode);
+  const selectedDeck = choices.find((deck) =>
+    deck.id === selectedDeckId && deckIsLegalForRoom(deck, cardPoolMode)
+  ) ?? choices.find((deck) =>
+    deck.id === lastPlayedDecks[format] && deckIsLegalForRoom(deck, cardPoolMode)
+  ) ?? choices.find((deck) => deckIsLegalForRoom(deck, cardPoolMode));
+  const rejoinRooms = rooms.filter((room) => room.yours === true);
+
+  const selectMode = (nextMode: HomeGameMode) => {
+    setMode(nextMode);
+    if (typeof localStorage !== "undefined") {
+      saveHomeGameMode(localStorage, authUser, nextMode);
+    }
+  };
+
+  const start = () => {
+    if (!selectedDeck || queuedFormat !== null) return;
+    if (mode === "find-match") {
+      queueJoin(format, { deckId: selectedDeck.id });
+    } else if (mode === "invite-friend") {
+      createRoom(format, { deckId: selectedDeck.id }, "private");
+    } else {
+      setChoosingBot(true);
+    }
+  };
 
   return (
-    <>
-      <section className="new-player-welcome" aria-labelledby="new-player-welcome-title">
-        <div className={`new-player-welcome-copy${hasSavedDecks ? " returning" : ""}`}>
-          <h3 id="new-player-welcome-title">
-            {intl.formatMessage(
-              { id: hasSavedDecks ? "lobby.home.welcomeBack" : "lobby.home.welcome" },
-              { username: authUser ?? "" },
-            )}
+    <div className="panel home-panel">
+      {rejoinRooms.length > 0 ? (
+        <section className="room-section home-rejoin-section" aria-labelledby="rejoin-rooms-title">
+          <h3 id="rejoin-rooms-title" className="panel-title">
+            {intl.formatMessage({ id: "lobby.home.rejoinRooms" })}
           </h3>
-          {!hasSavedDecks ? <p>{intl.formatMessage({ id: "lobby.home.chooseStart" })}</p> : null}
-        </div>
-
-        {props.children}
-
-        <div className={`new-player-options${hasSavedDecks ? " two-options" : ""}`}>
-          {!hasSavedDecks ? (
-            <PlayableDeckCard
-              title={intl.formatMessage({ id: "lobby.home.tryPrecon" })}
-              art={silverAgePreconArt}
-              artStyle="precon"
-              format="silver-age"
-              decks={precons}
-              preferredDeckId={lastPlayedDecks["silver-age"]}
-              cardPoolMode={silverAgeCardPoolMode}
-              cardPoolDisabled={queuedFormat !== null}
-              onCardPoolModeChange={(mode) => setCardPoolMode("silver-age", mode)}
-              onFindMatch={queueJoin}
-              onPlayBot={createBotRoom}
-            />
-          ) : null}
-
-          {silverAgeDecks.length > 0 ? (
-            <PlayableDeckCard
-              title={intl.formatMessage({ id: "lobby.home.playSilverAge" })}
-              art={silverAgeDeckArt}
-              format="silver-age"
-              decks={silverAgeDecks}
-              preferredDeckId={lastPlayedDecks["silver-age"]}
-              cardPoolMode={silverAgeCardPoolMode}
-              cardPoolDisabled={queuedFormat !== null}
-              onCardPoolModeChange={(mode) => setCardPoolMode("silver-age", mode)}
-              onFindMatch={queueJoin}
-              onPlayBot={createBotRoom}
-            />
-          ) : (
-            <ImportDeckCard
-              title={intl.formatMessage({ id: "lobby.home.importSilverAge" })}
-              art={silverAgeDeckArt}
-              onClick={() => setImportingFormat("silver-age")}
-            />
-          )}
-
-          {classicConstructedDecks.length > 0 ? (
-            <PlayableDeckCard
-              title={intl.formatMessage({ id: "lobby.home.playCc" })}
-              art={classicConstructedDeckArt}
-              format="cc"
-              decks={classicConstructedDecks}
-              preferredDeckId={lastPlayedDecks.cc}
-              cardPoolMode={cardPoolModes.cc}
-              cardPoolDisabled={queuedFormat !== null}
-              onCardPoolModeChange={(mode) => setCardPoolMode("cc", mode)}
-              onFindMatch={queueJoin}
-              onPlayBot={createBotRoom}
-            />
-          ) : (
-            <ImportDeckCard
-              title={intl.formatMessage({ id: "lobby.home.importCc" })}
-              art={classicConstructedDeckArt}
-              onClick={() => setImportingFormat("cc")}
-            />
-          )}
-        </div>
-      </section>
-
-      {importingFormat ? (
-        <ImportDeckModal
-          format={importingFormat}
-          onClose={() => setImportingFormat(null)}
-          onImported={() => props.onGoToFormat(importingFormat)}
-        />
+          <div className="room-grid">
+            {rejoinRooms.map((room) => (
+              <RoomCard key={room.code} room={room} onRejoin={joinRoom} />
+            ))}
+          </div>
+        </section>
       ) : null}
-    </>
-  );
-}
 
-function PlayableDeckCard(props: {
-  title: string;
-  art: string;
-  artStyle?: "precon";
-  format: ConstructedFormat;
-  decks: DeckSummary[];
-  preferredDeckId: string | null;
-  cardPoolMode: CardPoolMode;
-  cardPoolDisabled: boolean;
-  onCardPoolModeChange: (mode: CardPoolMode) => void;
-  onFindMatch: (format: ConstructedFormat, choice: { deckId: string }) => void;
-  onPlayBot: (format: ConstructedFormat, deckId: string, bot?: BotOpponent, searchForPlayer?: boolean) => void;
-}) {
-  const intl = useIntl();
-  const [selectedDeckId, setSelectedDeckId] = useState("");
-  const [choosingBot, setChoosingBot] = useState(false);
-  const selectedDeck = props.decks.find((deck) =>
-    deck.id === selectedDeckId && deckIsLegalForRoom(deck, props.cardPoolMode)
-  ) ?? props.decks.find((deck) =>
-    deck.id === props.preferredDeckId && deckIsLegalForRoom(deck, props.cardPoolMode)
-  ) ??
-    props.decks.find((deck) => deckIsLegalForRoom(deck, props.cardPoolMode));
-  const selectionValid = selectedDeck !== undefined &&
-    deckIsLegalForRoom(selectedDeck, props.cardPoolMode);
-
-  return (
-    <article className={`new-player-card new-player-play-card${props.artStyle === "precon" ? " new-player-precon-card" : ""}`}>
-      <img
-        className={`new-player-card-art${props.artStyle === "precon" ? " precon-art" : ""}`}
-        src={props.art}
-        alt=""
-        width={960}
-        height={540}
-      />
-      <div className="new-player-card-header">
-        <h3 className="new-player-card-title">{props.title}</h3>
-        <CardPoolModeControl
-          className="home-card-pool-control"
-          value={props.cardPoolMode}
-          disabled={props.cardPoolDisabled}
-          onChange={props.onCardPoolModeChange}
-        />
-      </div>
-      <div className="new-player-card-content">
-        <div className="new-player-deck-select">
-          <DeckDropdown
-            decks={props.decks}
-            selected={selectedDeck}
-            cardPoolMode={props.cardPoolMode}
-            onSelect={setSelectedDeckId}
+      <section className="home-play" aria-label={intl.formatMessage({ id: "lobby.home.start" })}>
+        <div className="home-play-poster">
+          <img
+            src={playPoster}
+            alt=""
+            width={2050}
+            height={780}
           />
         </div>
-        <div className="new-player-play-actions">
-          <button
-            className="btn-primary"
-            disabled={!selectionValid}
-            onClick={() => {
-              if (selectedDeck) props.onFindMatch(props.format, { deckId: selectedDeck.id });
-            }}
-          >
-            {intl.formatMessage({ id: "lobby.action.findMatch" })}
-          </button>
-          <button
-            className="btn-bot"
-            disabled={!selectionValid}
-            onClick={() => {
-              if (!selectedDeck) return;
-              setChoosingBot(true);
-            }}
-          >
-            {intl.formatMessage({ id: "lobby.action.playBot" })}
-          </button>
-        </div>
-      </div>
+
+        <form className="home-play-form" onSubmit={(event) => {
+          event.preventDefault();
+          start();
+        }}>
+          <div className="home-play-primary-fields">
+            <label className="home-play-field">
+              <span>{intl.formatMessage({ id: "common.format" })}</span>
+              <span className="home-play-select">
+                <select
+                  value={format}
+                  disabled={queuedFormat !== null}
+                  onChange={(event) => {
+                    const nextFormat = event.target.value as ConstructedFormat;
+                    setFormat(nextFormat);
+                    setSelectedDeckId("");
+                    if (typeof localStorage !== "undefined") {
+                      saveHomeFormat(localStorage, authUser, nextFormat);
+                    }
+                  }}
+                >
+                  <option value="silver-age">{formatSelectLabel(intl, "silver-age")}</option>
+                  <option value="cc">{formatSelectLabel(intl, "cc")}</option>
+                </select>
+                <span className="create-room-deck-chevron" aria-hidden="true" />
+              </span>
+            </label>
+
+            <div className="home-play-field home-play-deck-field">
+              <span>{intl.formatMessage({ id: "common.deck" })}</span>
+              <DeckDropdown
+                key={format}
+                decks={choices}
+                selected={selectedDeck}
+                cardPoolMode={cardPoolMode}
+                onSelect={setSelectedDeckId}
+              />
+            </div>
+          </div>
+
+          <div className="home-play-field home-card-pool-field">
+            <div className="home-play-field-label">
+              <label htmlFor={cardPoolId}>{intl.formatMessage({ id: "lobby.cardPool.title" })}</label>
+              <button
+                type="button"
+                className="home-card-pool-help"
+                aria-label={intl.formatMessage({ id: "lobby.cardPool.help" })}
+                aria-describedby={cardPoolHelpId}
+              >?</button>
+              <div className="home-card-pool-tooltip" id={cardPoolHelpId} role="tooltip">
+                <dl>
+                  {(["legal", "future", "open"] as const).map((poolMode) => (
+                    <div key={poolMode}>
+                      <dt>{intl.formatMessage({ id: `lobby.cardPool.${poolMode}` })}</dt>
+                      <dd>{intl.formatMessage({ id: `lobby.cardPool.${poolMode}Description` })}</dd>
+                    </div>
+                  ))}
+                </dl>
+              </div>
+            </div>
+            <span className="home-play-select">
+              <select
+                id={cardPoolId}
+                value={cardPoolMode}
+                disabled={queuedFormat !== null}
+                onChange={(event) => setCardPoolMode(format, event.target.value as CardPoolMode)}
+              >
+                <option value="legal">{intl.formatMessage({ id: "lobby.cardPool.legal" })}</option>
+                <option value="future">{intl.formatMessage({ id: "lobby.cardPool.future" })}</option>
+                <option value="open">{intl.formatMessage({ id: "lobby.cardPool.open" })}</option>
+              </select>
+              <span className="create-room-deck-chevron" aria-hidden="true" />
+            </span>
+          </div>
+
+          <div className="home-play-field home-play-mode-field">
+            <span>{intl.formatMessage({ id: "lobby.home.gameMode" })}</span>
+            <div className="home-play-mode-segments" role="group" aria-label={intl.formatMessage({ id: "lobby.home.gameMode" })}>
+              {(["find-match", "invite-friend", "bot"] as const).map((gameMode) => (
+                <button
+                  key={gameMode}
+                  type="button"
+                  aria-pressed={mode === gameMode}
+                  disabled={queuedFormat !== null}
+                  onClick={() => selectMode(gameMode)}
+                >
+                  {intl.formatMessage({ id: gameMode === "find-match"
+                    ? "lobby.action.findMatch"
+                    : gameMode === "invite-friend"
+                      ? "lobby.action.inviteFriend"
+                      : "lobby.action.playBot" })}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="home-play-actions">
+            {queuedFormat !== null ? (
+              <button type="button" className="btn-primary" onClick={queueLeave}>
+                {intl.formatMessage({ id: "lobby.action.cancelSearch" })}
+              </button>
+            ) : (
+              <button type="submit" className="btn-primary" disabled={!selectedDeck}>
+                {intl.formatMessage({ id: "lobby.home.start" })}
+              </button>
+            )}
+          </div>
+        </form>
+      </section>
+
       {choosingBot && selectedDeck ? (
         <BotOpponentModal
-          format={props.format}
-          cardPoolMode={props.cardPoolMode}
+          format={format}
+          cardPoolMode={cardPoolMode}
           onSelect={(bot, searchForPlayer) => {
-            props.onPlayBot(props.format, selectedDeck.id, bot, searchForPlayer);
+            createBotRoom(format, selectedDeck.id, bot, searchForPlayer);
             setChoosingBot(false);
           }}
           onClose={() => setChoosingBot(false)}
         />
       ) : null}
-    </article>
-  );
-}
-
-function ImportDeckCard(props: { title: string; art: string; onClick: () => void }) {
-  const intl = useIntl();
-  return (
-    <button
-      className="new-player-card new-player-import-card"
-      aria-label={props.title}
-      onClick={props.onClick}
-    >
-      <img className="new-player-card-art" src={props.art} alt="" width={960} height={540} />
-      <span className="new-player-card-content">
-        <span className="new-player-card-eyebrow">
-          {intl.formatMessage({ id: "lobby.home.bringDeck" })}
-        </span>
-        <strong>{props.title}</strong>
-      </span>
-    </button>
+    </div>
   );
 }

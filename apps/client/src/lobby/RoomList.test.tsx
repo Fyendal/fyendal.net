@@ -88,7 +88,7 @@ describe("RoomList", () => {
         },
       ],
     };
-    const html = renderLocalized(<RoomList onGoToFormat={() => {}} />);
+    const html = renderLocalized(<RoomList onGoToDecks={() => {}} />);
 
     const yourHeading = html.indexOf("Your Rooms");
     const yourRoom = html.indexOf("Owned Hero");
@@ -116,7 +116,7 @@ describe("RoomList", () => {
     expect(html).not.toContain("Other Rooms");
   });
 
-  it("shows play options and only rejoinable rooms on Home", () => {
+  it("shows one play setup with every game mode and only rejoinable rooms", () => {
     roomListStore.state = {
       ...roomListStore.state,
       rooms: [
@@ -129,190 +129,89 @@ describe("RoomList", () => {
           yours: true,
         },
       ],
-      decks: [
-        {
-          id: "first-deck",
-          name: "First Bravo",
-          format: "cc",
-          fabraryUrl: null,
-          heroName: "Bravo",
-          deckSize: 80,
-          updatedAt: 1,
-        },
-        {
-          id: "remembered-deck",
-          name: "Last Played Bravo",
-          format: "cc",
-          fabraryUrl: null,
-          heroName: "Bravo",
-          deckSize: 80,
-          updatedAt: 2,
-        },
-      ],
-      lastPlayedDecks: { cc: "remembered-deck", "silver-age": null },
     };
 
-    const html = renderLocalized(<Home onGoToFormat={() => {}} />);
+    const html = renderLocalized(<Home />);
 
+    expect(html).toContain('class="home-play-poster"');
+    expect(html).not.toContain("Welcome to Fyendal");
+    expect(html).not.toContain("Choose a format");
+    expect(html).toContain("Precon");
+    expect(html).toContain("Find Match");
+    expect(html).toContain("Invite Friend");
+    expect(html).toContain("Play vs Bot");
+    expect(html).toContain('class="home-play-mode-segments" role="group" aria-label="Game mode"');
+    expect(html.match(/aria-pressed="true"/g)).toHaveLength(1);
+    expect(html).toContain('class="home-play-field home-card-pool-field"');
+    expect(html).toContain('<option value="future">Future</option>');
+    expect(html).toContain("About card pool modes");
+    expect(html).toContain("Tournament-legal cards only.");
+    expect(html).not.toContain("card-pool-segments");
+    expect(html).toContain('type="submit" class="btn-primary"');
+    expect(html).not.toContain("Manage Decks");
     expect(html).toContain("Rejoin Rooms");
     expect(html).toContain("Victor");
-    expect(html).toContain("Rejoin");
+    expect(html.indexOf("Rejoin Rooms")).toBeLessThan(html.indexOf("home-play-poster"));
     expect(html).not.toContain("Open Hero");
     expect(html).not.toContain("Started Hero");
-    expect(html).toContain("Welcome back, NewPlayer.");
-    expect(html).toContain(">Legal</button>");
-    expect(html).toContain(">Future</button>");
-    expect(html).toContain(">Open</button>");
-    expect(html).not.toContain('role="switch"');
-    expect(html).not.toContain("Choose how you’d like to start playing.");
-    expect(html).toContain("Play CC");
-    expect(html).toContain("Find Match");
-    expect(html).toContain("Play vs Bot");
-    expect(html).not.toContain("Hala");
-    expect(html).toContain("Last Played Bravo");
-    const deckTrigger = html.match(
-      /<button type="button" class="create-room-deck-trigger"[\s\S]*?<\/button>/,
-    )?.[0];
-    expect(deckTrigger).toContain("Last Played Bravo");
-    expect(deckTrigger).not.toContain("First Bravo");
-    expect(html).toContain("Import your Silver Age deck");
-    expect(html.indexOf("Rejoin Rooms")).toBeLessThan(html.indexOf("new-player-options"));
-    expect(html).not.toContain("Quick Match");
-    expect(html).not.toContain("Invite Friend");
   });
 
-  it("offers a Silver Age precon and hides an empty rejoin section on first run", () => {
-    const html = renderLocalized(<Home onGoToFormat={() => {}} />);
-
-    expect(html).toContain("Welcome to Fyendal, NewPlayer.");
-    expect(html).toContain("Choose one of these three ways to start playing.");
-    expect(html).toContain("Try with a precon");
-    expect(html).not.toContain("Choose a precon");
-    expect(html).toContain("Briar Precon");
-    expect(html).toContain("create-room-deck-trigger");
-    expect(html).toContain('aria-haspopup="listbox"');
-    expect(html).toContain("create-room-deck-option-content");
-    expect(html).not.toContain("<select");
-    expect(html).toContain("Find Match");
-    expect(html).toContain("Play vs Bot");
-    expect(html).toContain("Import your Silver Age deck");
-    expect(html).toContain("Import your CC deck");
-    expect(html.match(/class="new-player-card /g)).toHaveLength(3);
-    expect(html).not.toContain("Rejoin Rooms");
-    expect(html).not.toContain("Quick Match");
-    expect(html).not.toContain("Invite Friend");
-  });
-
-  it("shows an independent three-way card-pool control on each playable format", () => {
+  it("uses the last played saved deck in the selected format", () => {
     roomListStore.state = {
       ...roomListStore.state,
       decks: [
-        { id: "cc", name: "CC", format: "cc", fabraryUrl: null, heroName: "Bravo", deckSize: 60, updatedAt: 1 },
-        { id: "sa", name: "SA", format: "silver-age", fabraryUrl: null, heroName: "Briar", deckSize: 40, updatedAt: 1 },
+        { id: "first", name: "First Briar", format: "silver-age", fabraryUrl: null, heroName: "Briar", deckSize: 40, updatedAt: 1 },
+        { id: "remembered", name: "Last Played Briar", format: "silver-age", fabraryUrl: null, heroName: "Briar", deckSize: 40, updatedAt: 2 },
       ],
-      cardPoolModes: { cc: "open", "silver-age": "future" },
+      lastPlayedDecks: { cc: null, "silver-age": "remembered" },
     };
 
-    const enabledHtml = renderLocalized(<Home onGoToFormat={() => {}} />);
-    expect(enabledHtml.match(/class="card-pool-control home-card-pool-control"/g)).toHaveLength(2);
-    expect(enabledHtml).toContain('data-mode="open"');
-    expect(enabledHtml).toContain('data-mode="future"');
-    expect(enabledHtml.match(/aria-pressed="true"/g)).toHaveLength(2);
-    expect(enabledHtml).toContain('data-tooltip="All implemented cards, including banned cards and Living Legend heroes."');
-    expect(enabledHtml).toContain("card-pool-segment-description");
+    const html = renderLocalized(<Home />);
+    const trigger = html.match(/<button type="button" class="create-room-deck-trigger"[\s\S]*?<\/button>/)?.[0];
+
+    expect(html).not.toContain("Welcome back, NewPlayer.");
+    expect(trigger).toContain("Last Played Briar");
+    expect(trigger).not.toContain("First Briar");
+    expect(html.match(/class="home-play-field home-card-pool-field"/g)).toHaveLength(1);
   });
 
-  it("waits for deck loading before showing the new-player choices", () => {
+  it("restores the signed-in account's saved play preferences", () => {
+    vi.stubGlobal("localStorage", {
+      getItem: (key: string) => {
+        if (key === "fyendal-home-game-mode-newplayer") return "bot";
+        if (key === "fyendal-home-format-newplayer") return "cc";
+        return null;
+      },
+      setItem: vi.fn(),
+    });
+    try {
+      const html = renderLocalized(<Home />);
+      expect(html).toMatch(/<button[^>]*aria-pressed="true"[^>]*>Play vs Bot<\/button>/);
+      expect(html).toContain('<option value="cc" selected="">Classic Constructed</option>');
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
+
+  it("waits for deck loading before showing play setup", () => {
     roomListStore.state = { ...roomListStore.state, decksLoading: true };
 
-    const html = renderLocalized(<Home onGoToFormat={() => {}} />);
+    const html = renderLocalized(<Home />);
 
     expect(html).toContain("Loading your decks…");
-    expect(html).not.toContain("Welcome to Fyendal");
-    expect(html).not.toContain("Try with a precon");
-    expect(html).not.toContain("Rejoin Rooms");
+    expect(html).not.toContain("home-play-poster");
+    expect(html).not.toContain("Game mode");
   });
 
-  it("renders the authenticated home actions in Simplified Chinese", () => {
-    const html = renderLocalized(<Home onGoToFormat={() => {}} />, "zh-Hans");
+  it("localizes the play setup in Simplified Chinese", () => {
+    const html = renderLocalized(<Home />, "zh-Hans");
 
-    expect(html).toContain("欢迎来到 Fyendal，NewPlayer。");
-    expect(html).toContain("卡牌范围");
-    expect(html).toContain(">合法</button>");
-    expect(html).toContain(">未来</button>");
-    expect(html).toContain(">开放</button>");
-    expect(html).toContain('data-tooltip="允许比赛合法卡牌和已实现的未来卡牌。"');
-    expect(html).toContain('data-tooltip="允许所有已实现卡牌，包括禁用卡牌和传奇殿堂英雄。"');
-    expect(html).toContain("试用预构筑牌组");
+    expect(html).not.toContain("欢迎来到 Fyendal，NewPlayer。");
+    expect(html).toContain("游戏模式");
     expect(html).toContain("寻找对局");
+    expect(html).toContain("邀请好友");
     expect(html).toContain("对战AI");
-  });
-
-  it("turns imported format cards into playable deck pickers", () => {
-    roomListStore.state = {
-      ...roomListStore.state,
-      decks: [
-        {
-          id: "silver-first",
-          name: "First Silver Age Deck",
-          format: "silver-age",
-          fabraryUrl: null,
-          heroName: "Briar",
-          deckSize: 40,
-          updatedAt: 1,
-        },
-        {
-          id: "silver-deck",
-          name: "My Silver Age Deck",
-          format: "silver-age",
-          fabraryUrl: null,
-          heroName: "Briar",
-          deckSize: 40,
-          updatedAt: 1,
-        },
-        {
-          id: "cc-first",
-          name: "First CC Deck",
-          format: "cc",
-          fabraryUrl: null,
-          heroName: "Bravo",
-          deckSize: 80,
-          updatedAt: 1,
-        },
-        {
-          id: "cc-deck",
-          name: "My CC Deck",
-          format: "cc",
-          fabraryUrl: null,
-          heroName: "Bravo",
-          deckSize: 80,
-          updatedAt: 1,
-        },
-      ],
-      lastPlayedDecks: { cc: "cc-deck", "silver-age": "silver-deck" },
-    };
-
-    const html = renderLocalized(<Home onGoToFormat={() => {}} />);
-
-    expect(html).not.toContain("Choose how you’d like to start playing.");
-    expect(html).not.toContain("Try with a precon");
-    expect(html).toContain("Play Silver Age");
-    expect(html).toContain("My Silver Age Deck");
-    expect(html).toContain("Play CC");
-    expect(html).toContain("My CC Deck");
-    expect(html).not.toContain("Import your Silver Age deck");
-    expect(html).not.toContain("Import your CC deck");
-    expect(html.match(/class="new-player-card /g)).toHaveLength(2);
-    expect(html.match(/create-room-deck-trigger/g)).toHaveLength(2);
-    const triggers = html.match(
-      /<button type="button" class="create-room-deck-trigger"[\s\S]*?<\/button>/g,
-    );
-    expect(triggers).toHaveLength(2);
-    expect(triggers?.[0]).toContain("My Silver Age Deck");
-    expect(triggers?.[0]).not.toContain("First Silver Age Deck");
-    expect(triggers?.[1]).toContain("My CC Deck");
-    expect(triggers?.[1]).not.toContain("First CC Deck");
-    expect(html.match(/>Find Match<\/button>/g)).toHaveLength(2);
-    expect(html.match(/>Play vs Bot<\/button>/g)).toHaveLength(2);
+    expect(html).toContain("了解卡牌范围模式");
+    expect(html).not.toContain("管理牌组");
   });
 });

@@ -21792,6 +21792,12 @@
       "value": "允许比赛合法卡牌和已实现的未来卡牌。"
     }
   ],
+  "lobby.cardPool.help": [
+    {
+      "type": 0,
+      "value": "了解卡牌范围模式"
+    }
+  ],
   "lobby.cardPool.legal": [
     {
       "type": 0,
@@ -21894,6 +21900,12 @@
       "value": "操作"
     }
   ],
+  "lobby.deck.allFormats": [
+    {
+      "type": 0,
+      "value": "所有赛制"
+    }
+  ],
   "lobby.deck.bannedList": [
     {
       "type": 0,
@@ -21960,6 +21972,12 @@
       "value": "source"
     }
   ],
+  "lobby.deck.createImport": [
+    {
+      "type": 0,
+      "value": "创建 / 导入牌组"
+    }
+  ],
   "lobby.deck.deckList": [
     {
       "type": 0,
@@ -21976,6 +21994,20 @@
     {
       "type": 0,
       "value": "删除牌组"
+    }
+  ],
+  "lobby.deck.deletePrompt": [
+    {
+      "type": 0,
+      "value": "删除"
+    },
+    {
+      "type": 1,
+      "value": "name"
+    },
+    {
+      "type": 0,
+      "value": "？此操作无法撤销。"
     }
   ],
   "lobby.deck.deleting": [
@@ -22313,7 +22345,13 @@
   "lobby.home.chooseStart": [
     {
       "type": 0,
-      "value": "选择以下三种方式之一开始游戏。"
+      "value": "选择赛制、牌组和游戏模式后开始游戏。"
+    }
+  ],
+  "lobby.home.gameMode": [
+    {
+      "type": 0,
+      "value": "游戏模式"
     }
   ],
   "lobby.home.importCc": [
@@ -22326,6 +22364,12 @@
     {
       "type": 0,
       "value": "导入你的白银时代牌组"
+    }
+  ],
+  "lobby.home.manageDecks": [
+    {
+      "type": 0,
+      "value": "管理牌组"
     }
   ],
   "lobby.home.playCc": [
@@ -22344,6 +22388,12 @@
     {
       "type": 0,
       "value": "重新加入房间"
+    }
+  ],
+  "lobby.home.start": [
+    {
+      "type": 0,
+      "value": "开始"
     }
   ],
   "lobby.home.tryPrecon": [

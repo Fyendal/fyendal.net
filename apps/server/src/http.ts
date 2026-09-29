@@ -111,6 +111,8 @@ export interface ApiDeps {
   /** Number of rightmost proxy hops trusted to have appended XFF. Default 0. */
   trustedProxyHops?: number;
   rateLimiter?: RateLimiter;
+  /** Deck cleanup has a larger budget than login and other POST routes. */
+  deckDeleteRateLimiter?: RateLimiter;
   /** Separate limiter keyed by normalized login name, preventing IP rotation. */
   accountRateLimiter?: RateLimiter;
   /** separate throttle for GET /api/stats (defaults: 60 per 10 min per IP) */
@@ -306,6 +308,7 @@ export function createApiServer(deps: ApiDeps): http.Server {
     : (process.env.APP_ORIGIN ? new URL(process.env.APP_ORIGIN).origin : null);
   const trustedProxyHops = deps.trustedProxyHops ?? configuredTrustedProxyHops();
   const limiter = deps.rateLimiter ?? createRateLimiter();
+  const deckDeleteLimiter = deps.deckDeleteRateLimiter ?? createRateLimiter(120);
   const accountLimiter = deps.accountRateLimiter ?? createRateLimiter();
   const fabraryClient = deps.fabraryClient ?? createFabraryClient();
   const noticeLimiter = deps.noticeRateLimiter ?? createRateLimiter(600);
@@ -755,7 +758,8 @@ export function createApiServer(deps: ApiDeps): http.Server {
       return;
     }
     const ip = clientIp(req.headers, req.socket.remoteAddress, trustedProxyHops);
-    Promise.resolve(limiter.allow(ip, url.pathname))
+    const routeLimiter = url.pathname === "/api/decks/delete" ? deckDeleteLimiter : limiter;
+    Promise.resolve(routeLimiter.allow(ip, url.pathname))
       .then(async (allowed) => {
         if (!allowed) return { status: 429, body: { ok: false, error: "too many attempts, try again later" } };
         const [body, user] = await Promise.all([readBody(req), authUser(req)]);

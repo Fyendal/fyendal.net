@@ -4,14 +4,13 @@ import { useShallow } from "zustand/react/shallow";
 import { useStore } from "../store.js";
 import { apiStats, type StatsOk } from "../auth/auth.js";
 import { Auth } from "../auth/AuthCard.js";
-import { CONSTRUCTED_FORMATS, type ConstructedFormat } from "../domain.js";
+import type { ConstructedFormat } from "../domain.js";
 import { SiteFooter } from "../legal/SiteFooter.js";
 import { LobbyHeader } from "./LobbyHeader.js";
-import { FormatName } from "./FormatBadge.js";
 import { ModalSurface } from "../components/ModalSurface.js";
 import { LanguagePicker } from "../i18n/LanguagePicker.js";
 import { SocialMenuButton, UnreadMessageBadge } from "../social/MobileSocialControls.js";
-import { mobileDeckDestination, mobileLobbyDestinationSelected } from "./mobileNavigation.js";
+import { mobileLobbyDestinationSelected } from "./mobileNavigation.js";
 import {
   GuestLandingDetails,
   GuestLandingHero,
@@ -20,7 +19,7 @@ import {
 const RoomList = lazy(() => import("./RoomList.js").then((module) => ({ default: module.RoomList })));
 const Home = lazy(() => import("./Home.js").then((module) => ({ default: module.Home })));
 const RoomInviteModal = lazy(() => import("./RoomInviteModal.js").then((module) => ({ default: module.RoomInviteModal })));
-const DeckGrid = lazy(() => import("./DeckGrid.js").then((module) => ({ default: module.DeckGrid })));
+const DeckLibrary = lazy(() => import("./DeckLibrary.js").then((module) => ({ default: module.DeckLibrary })));
 const AccountPanel = lazy(() => import("../auth/AccountPanel.js").then((module) => ({ default: module.AccountPanel })));
 const ReplayLibrary = lazy(() => import("../replay/ReplayLibrary.js").then((module) => ({ default: module.ReplayLibrary })));
 
@@ -80,9 +79,7 @@ export function Lobby() {
     authUser,
     logout,
     listRooms,
-    decks,
     rooms,
-    queueCounts,
     inviteRoom,
     savedReplays,
     rail,
@@ -96,9 +93,7 @@ export function Lobby() {
     authUser: state.authUser,
     logout: state.logout,
     listRooms: state.listRooms,
-    decks: state.decks,
     rooms: state.rooms,
-    queueCounts: state.queueCounts,
     inviteRoom: state.inviteRoom,
     savedReplays: state.savedReplays,
     rail: state.lobbyRail,
@@ -106,13 +101,8 @@ export function Lobby() {
     unreadMessageCount: state.friends.reduce((total, friend) => total + friend.unreadCount, 0),
     setSocialOpen: state.setSocialOpen,
   })));
-  /** selected saved deck per constructed format */
-  const [deckFor, setDeckFor] = useState<Record<ConstructedFormat, string>>({
-    cc: "",
-    "silver-age": "",
-  });
+  const [deckFormatFilter, setDeckFormatFilter] = useState<"all" | ConstructedFormat>("all");
   const [stats, setStats] = useState<StatsOk | null>(null);
-  const [lastDeckFormat, setLastDeckFormat] = useState<ConstructedFormat>("cc");
   const [showMobileMore, setShowMobileMore] = useState(false);
   const rejoinRoomCount = rooms.reduce(
     (count, room) => count + (room.yours === true ? 1 : 0),
@@ -141,23 +131,10 @@ export function Lobby() {
     };
   }, [authUser]);
 
-  // Close a deck menu if its deck disappears or no longer belongs to the
-  // current format. Menus only open in response to an explicit deck click.
-  useEffect(() => {
-    setDeckFor((prev) => {
-      const next = { ...prev };
-      for (const f of CONSTRUCTED_FORMATS) {
-        const stillAvailable = next[f].startsWith("precon-") ||
-          decks.some((deck) => deck.id === next[f] && deck.format === f);
-        if (next[f] && !stillAvailable) next[f] = "";
-      }
-      return next;
-    });
-  }, [decks]);
-
-  useEffect(() => {
-    if (rail === "cc" || rail === "silver-age") setLastDeckFormat(rail);
-  }, [rail]);
+  const goToDecks = (format?: ConstructedFormat) => {
+    if (format) setDeckFormatFilter(format);
+    setRail("decks");
+  };
 
   if (!authUser) {
     return (
@@ -205,22 +182,12 @@ export function Lobby() {
                   </span>
                 ) : null}
               </button>
-              {CONSTRUCTED_FORMATS.map((f) => {
-                return (
-                  <button
-                    key={f}
-                    className={`format-card${f === rail ? " selected" : ""}`}
-                    onClick={() => setRail(f)}
-                  >
-                    <FormatName format={f} className="format-card-name" />
-                    {queueCounts[f] > 0 ? (
-                      <span className="format-card-queue">
-                        {intl.formatMessage({ id: "lobby.count.waiting" }, { count: queueCounts[f] })}
-                      </span>
-                    ) : null}
-                  </button>
-                );
-              })}
+              <button
+                className={`format-card${rail === "decks" ? " selected" : ""}`}
+                onClick={() => goToDecks()}
+              >
+                <span className="format-card-name">{intl.formatMessage({ id: "lobby.nav.decks" })}</span>
+              </button>
               <button
                 className={`format-card${rail === "all" ? " selected" : ""}`}
                 onClick={() => setRail("all")}
@@ -261,16 +228,10 @@ export function Lobby() {
                 </div>
               )
             : <p className="muted" role="status">{intl.formatMessage({ id: "common.loading" })}</p>}>
-            {rail === "home" && <Home onGoToFormat={setRail} />}
-            {rail === "all" && <RoomList onGoToFormat={setRail} />}
-            {(rail === "cc" || rail === "silver-age") && (
-              <DeckGrid
-                key={rail}
-                format={rail}
-                deckId={deckFor[rail]}
-                onSelect={(id) => setDeckFor((p) => ({ ...p, [rail]: id }))}
-                onFormatChange={setRail}
-              />
+            {rail === "home" && <Home />}
+            {rail === "all" && <RoomList onGoToDecks={goToDecks} />}
+            {rail === "decks" && (
+              <DeckLibrary formatFilter={deckFormatFilter} onFormatFilterChange={setDeckFormatFilter} />
             )}
             {rail === "replays" && <ReplayLibrary />}
             {rail === "account" && <AccountPanel />}
@@ -291,7 +252,7 @@ export function Lobby() {
           type="button"
           className={mobileLobbyDestinationSelected("decks", rail) ? "selected" : ""}
           aria-current={mobileLobbyDestinationSelected("decks", rail) ? "page" : undefined}
-          onClick={() => setRail(mobileDeckDestination(lastDeckFormat))}
+          onClick={() => goToDecks()}
         >
           <MobileLobbyIcon kind="decks" />
           <span className="mobile-lobby-nav-label">{intl.formatMessage({ id: "lobby.nav.decks" })}</span>

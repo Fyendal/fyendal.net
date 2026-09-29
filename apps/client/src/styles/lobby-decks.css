@@ -493,24 +493,7 @@
   font-size: 13px;
   letter-spacing: 1px;
 }
-.deck-play-edit-action {
-  display: block;
-  width: fit-content;
-  min-width: 0;
-  margin: 15px auto 0;
-  padding: 4px 8px;
-  border: 0;
-  background: transparent;
-  clip-path: none;
-  color: var(--text-secondary);
-  font-size: 12px;
-  letter-spacing: .8px;
-}
-.deck-play-edit-action:hover {
-  border-color: transparent;
-  background: transparent;
-  color: var(--gold);
-}
+.deck-delete-modal { width: min(440px, calc(100vw - 32px)); }
 
 @media (prefers-reduced-motion: reduce) {
   .card-pool-segments::before { transition: none; }
@@ -700,246 +683,264 @@
   letter-spacing: .8px;
 }
 
-/* ── home play options ── */
-.new-player-welcome { position: relative; }
-.new-player-welcome-copy {
-  margin-bottom: 22px;
-  text-align: center;
+.room-section + .room-section { margin-top: 24px; }
+.room-section .panel-title { font-size: 15px; margin-bottom: 10px; }
+
+/* Unified deck management and home play setup. */
+.deck-panel-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 20px;
 }
-.new-player-welcome-copy.returning {
-  margin-bottom: 18px;
-  text-align: left;
+.deck-panel-heading .panel-title { margin: 0; }
+.deck-library-management-tools {
+  grid-template-columns: minmax(180px, 1fr) minmax(145px, .55fr) minmax(145px, .55fr);
 }
-.new-player-welcome-copy.returning h3 {
-  font-size: clamp(20px, 2vw, 26px);
-  text-wrap: balance;
-}
-.new-player-welcome-copy h3 {
-  margin: 0 0 7px;
-  color: #efe3c8;
-  font: 600 clamp(22px, 2.5vw, 31px) var(--font-display);
-  font-family: var(--font-lobby-title);
-  font-weight: 750;
-  letter-spacing: -.02em;
-}
-.new-player-welcome-copy p {
-  margin: 0;
-  color: #b9aa92;
-  font-size: 16px;
-}
-.new-player-options {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 18px;
-}
-.new-player-options.two-options { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-.new-player-options.two-options .new-player-card {
-  height: clamp(280px, 24vw, 320px);
-  aspect-ratio: auto;
-}
-.new-player-card {
-  position: relative;
+.deck-library-card {
   min-width: 0;
-  aspect-ratio: 1;
-  overflow: hidden;
-  border: 1px solid #74572e;
-  border-radius: 4px;
+  border: 1px solid var(--border-subtle);
   background: #160e07;
-  box-shadow: 0 8px 24px #0008, inset 0 1px 0 #d4a9582b;
 }
-.new-player-card::after {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(180deg, #1009040f 20%, #10090499 58%, #100904f5 100%);
-  content: "";
-  pointer-events: none;
+.deck-library-card > .deck-card {
+  width: 100%;
+  min-height: 205px;
+  border: 0;
+  border-radius: 0;
 }
-.new-player-card-art {
+.deck-library-card-actions {
+  display: grid;
+  min-width: 0;
+  gap: 6px;
+  padding: 8px 10px;
+  border-top: 1px solid var(--border-subtle);
+}
+.deck-library-card-actions > .format-badge {
+  justify-self: center;
+  max-width: 100%;
+  overflow: hidden;
+  text-align: center;
+  text-overflow: ellipsis;
+}
+.deck-library-card-actions > div {
+  display: flex;
+  min-width: 0;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 4px;
+}
+.deck-library-card-actions button {
+  min-width: 0;
+  padding: 6px 8px;
+  border: 0;
+  background: transparent;
+  clip-path: none;
+  color: var(--text-secondary);
+  font-size: 12px;
+  letter-spacing: .4px;
+  white-space: nowrap;
+}
+.deck-library-card-actions button:hover { background: transparent; color: var(--gold); }
+.deck-library-card-actions .deck-library-delete { color: #e8a39c; }
+.deck-library-card-actions .deck-library-delete:hover { color: #ffc1b9; }
+
+.home-panel {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.home-play {
+  width: 100%;
+  overflow: visible;
+  border: 1px solid #59493a;
+  border-radius: 3px;
+  background: #211a15;
+  box-shadow: 0 18px 48px #0007;
+}
+.home-play-poster {
+  position: relative;
+  aspect-ratio: 2050 / 620;
+  overflow: hidden;
+  border-radius: 2px 2px 0 0;
+  background: #1b1512;
+}
+.home-play-poster img {
+  display: block;
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 180ms ease;
+  object-position: center 12.5%;
 }
-.new-player-play-card {
-  z-index: 2;
-  overflow: visible;
+.home-play-form {
+  display: grid;
+  grid-template-columns: minmax(0, 260px) minmax(0, 1fr) 180px;
+  gap: 16px;
+  max-width: 1120px;
+  margin-inline: auto;
+  padding: 26px clamp(20px, 3vw, 28px) 30px;
 }
-.new-player-play-card:focus-within { z-index: 12; }
-.new-player-play-card:has(.create-room-deck-options) { z-index: 25; }
-.new-player-play-card:has(.create-room-deck-options) .new-player-card-content { z-index: 3; }
-.new-player-precon-card {
-  background: radial-gradient(circle at 50% 30%, #41506e 0, #1d2434 38%, #100b08 76%);
-}
-.new-player-precon-card::after {
-  background: linear-gradient(180deg, transparent 32%, #10090499 55%, #100904f7 100%);
-}
-.new-player-card-art.precon-art {
-  inset: 9% 8% auto;
-  width: 84%;
-  height: 28%;
-  object-fit: contain;
-  filter: drop-shadow(0 5px 10px #000a);
-}
-.new-player-card-content {
-  position: absolute;
-  z-index: 1;
-  right: 16px;
-  bottom: 16px;
-  left: 16px;
-  display: flex;
+.home-play-primary-fields {
+  display: grid;
+  grid-column: 1 / -1;
+  grid-template-columns: minmax(0, 260px) minmax(0, 1fr);
   min-width: 0;
-  flex-direction: column;
-  gap: 9px;
+  gap: 16px;
 }
-.new-player-card-title,
-.new-player-card-content strong {
-  margin: 0;
-  color: #fff3dc;
-  font: 600 clamp(17px, 1.65vw, 22px) var(--font-display);
-  font-family: var(--font-lobby-title);
-  font-weight: 750;
-  letter-spacing: .25px;
-  line-height: 1.15;
-  text-shadow: 0 2px 7px #000;
-  text-transform: uppercase;
-}
-.new-player-card-title {
-  position: relative;
-  width: fit-content;
-  max-width: 100%;
-  padding: 5px 28px 6px 8px;
-  background: linear-gradient(90deg, #0c0704e0 0%, #0c07049c 68%, transparent 100%);
-  text-shadow: 0 2px 4px #000, 0 4px 12px #000b;
-  text-wrap: balance;
-}
-.new-player-card-header {
-  position: absolute;
-  z-index: 2;
-  top: 14px;
-  left: 14px;
-  display: grid;
-  max-width: calc(100% - 28px);
-  gap: 10px;
-}
-.home-card-pool-control {
-  width: 210px;
-  max-width: 100%;
-  justify-self: start;
-}
-.home-card-pool-control .card-pool-segments { padding: 2px; }
-.home-card-pool-control .card-pool-segments::before {
-  top: 2px;
-  bottom: 2px;
-  left: 2px;
-  width: calc((100% - 4px) / 3);
-  border-radius: 4px;
-}
-.home-card-pool-control .card-pool-segments button {
-  min-height: 26px;
-  padding: 4px 6px;
-  font-size: 9px;
-  letter-spacing: .75px;
-}
-.new-player-deck-select {
-  display: grid;
-  gap: 4px;
-  color: #d6c5a5;
-  font: 600 11px var(--font-display);
+.home-play-field { display: grid; min-width: 0; align-content: start; gap: 8px; }
+.home-play-field > span:first-child {
+  display: flex;
+  align-items: center;
+  min-height: 24px;
+  color: #bbaea0;
+  font: 700 11px var(--font-lobby-ui);
   letter-spacing: 1.1px;
   text-transform: uppercase;
 }
-.new-player-deck-select .create-room-deck-trigger {
-  border: 1px solid #806334;
-  background: #130d08e8;
-}
-.new-player-deck-select .create-room-deck-options {
-  z-index: 8;
-  max-height: 230px;
-}
-.new-player-play-actions {
-  display: grid;
-  grid-template-columns: minmax(0, 1.15fr) minmax(0, .85fr);
+.home-play-field-label {
+  position: relative;
+  display: flex;
+  min-height: 24px;
+  align-items: center;
   gap: 7px;
-}
-.home-panel {
-  border-color: transparent;
-  background: #160e07d9;
-  box-shadow: 0 10px 32px #0007;
-}
-
-@media (max-width: 480px) {
-  .new-player-play-actions { grid-template-columns: 1fr; }
-}
-.new-player-play-actions button {
-  min-width: 0;
-  min-height: 42px;
-  padding-inline: 8px;
-}
-button.new-player-import-card {
-  display: block;
-  padding: 0;
-  text-align: left;
-  text-transform: none;
-  letter-spacing: normal;
-}
-.new-player-card-eyebrow {
-  color: #d6ba82;
-  font: 600 11px var(--font-display);
-  letter-spacing: 1.5px;
+  color: #bbaea0;
+  font: 700 11px var(--font-lobby-ui);
+  letter-spacing: 1.1px;
   text-transform: uppercase;
 }
-button.new-player-import-card:hover,
-button.new-player-import-card:focus-visible {
-  border-color: #c39543;
-  background: #160e07;
-  box-shadow: 0 10px 30px #000b, 0 0 0 1px #c3954355;
+.home-card-pool-help {
+  position: relative;
+  display: grid;
+  width: 24px;
+  min-width: 24px;
+  min-height: 24px;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  clip-path: none;
+  background: transparent;
+  color: var(--gold);
+  font: 700 11px var(--font-lobby-ui);
+  letter-spacing: 0;
+  text-transform: none;
 }
-button.new-player-import-card:hover .new-player-card-art,
-button.new-player-import-card:focus-visible .new-player-card-art { transform: scale(1.035); }
+.home-card-pool-help::before {
+  position: absolute;
+  inset: 3px;
+  border: 1px solid #806334;
+  border-radius: 50%;
+  content: "";
+  pointer-events: none;
+}
+.home-card-pool-help:hover::before,
+.home-card-pool-help:focus-visible::before { border-color: var(--gold); }
+.home-card-pool-tooltip {
+  position: absolute;
+  top: calc(100% + 7px);
+  left: 0;
+  z-index: 20;
+  display: none;
+  width: min(360px, 100%);
+  padding: 12px 14px;
+  border: 1px solid #806334;
+  border-radius: 3px;
+  background: #130d08;
+  box-shadow: 0 10px 24px #0009;
+  color: var(--text-primary);
+  font: 12px/1.4 var(--font-lobby-ui);
+  letter-spacing: normal;
+  text-transform: none;
+}
+.home-card-pool-help:hover + .home-card-pool-tooltip,
+.home-card-pool-help:focus + .home-card-pool-tooltip { display: block; }
+.home-card-pool-tooltip dl { display: grid; gap: 7px; margin: 0; }
+.home-card-pool-tooltip dt { color: var(--gold); font-weight: 700; }
+.home-card-pool-tooltip dd { margin: 1px 0 0; color: var(--text-secondary); }
+.home-play-select { position: relative; display: block; min-width: 0; }
+.home-play-select > select {
+  appearance: none;
+  width: 100%;
+  min-height: 50px;
+  padding: 9px 42px 9px 14px;
+  border: 1px solid #5b4c3e;
+  border-radius: 3px;
+  background: #191510;
+  color: #eadfc9;
+  font: 600 14px "Segoe UI", system-ui, sans-serif;
+}
+.home-play-select > .create-room-deck-chevron { pointer-events: none; }
+.home-play-select > select:focus-visible,
+.home-play-deck-field .create-room-deck-trigger:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}
+.home-play-deck-field .create-room-deck-select { min-width: 0; }
+.home-play-deck-field .create-room-deck-trigger {
+  width: 100%;
+  min-height: 50px;
+  border: 1px solid #745c3f;
+  border-radius: 3px;
+  background: #221a13;
+}
+.home-play-mode-segments {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  min-height: 50px;
+  min-width: 0;
+  padding: 3px;
+  border: 1px solid #5b4c3e;
+  border-radius: 3px;
+  background: #191510;
+}
+.home-play-mode-segments button {
+  min-width: 0;
+  min-height: 42px;
+  padding: 5px 6px;
+  border: 1px solid transparent;
+  border-radius: 2px;
+  clip-path: none;
+  background: transparent;
+  color: var(--text-secondary);
+  font: 600 12px/1.2 var(--font-lobby-ui);
+  letter-spacing: normal;
+  text-transform: none;
+}
+.home-play-mode-segments button:hover:not(:disabled) { background: #332519; color: var(--text-primary); }
+.home-play-mode-segments button[aria-pressed="true"] {
+  border-color: #806334;
+  background: #4a311c;
+  color: var(--gold);
+}
+.home-play-actions {
+  display: flex;
+  align-self: end;
+}
+.home-play-actions button {
+  width: 100%;
+  min-height: 50px;
+  border-radius: 3px;
+  font-size: 16px;
+}
 .home-rejoin-section { margin: 0 0 24px; }
 
-@media (max-width: 640px) {
-  .new-player-welcome-copy.returning { display: none; }
-  .new-player-options.two-options .new-player-card {
-    min-height: 288px;
-    aspect-ratio: auto;
-  }
-  .new-player-card-title {
-    font-size: 18px;
-  }
-  .new-player-card-header {
-    top: 12px;
-    left: 12px;
-    max-width: calc(100% - 24px);
-    gap: 7px;
-  }
-  .home-card-pool-control { width: 186px; }
-  .home-card-pool-control .card-pool-segments {
-    padding: 1px;
-    border-color: #644b29;
-    border-radius: 5px;
-    background: #100a06d9;
-    box-shadow: 0 2px 8px #0007;
-  }
-  .home-card-pool-control .card-pool-segments::before {
-    top: 1px;
-    bottom: 1px;
-    left: 1px;
-    width: calc((100% - 2px) / 3);
-    border-radius: 3px;
-    background: linear-gradient(180deg, #a83b31, #76231e);
-    box-shadow: inset 0 1px 0 #ff9a7c38, 0 1px 4px #0007;
-  }
-  .home-card-pool-control .card-pool-segments button {
-    min-height: 26px;
-    padding: 4px;
-    color: #b9aa8c;
-    font-size: 9px;
-    letter-spacing: .65px;
-  }
+@media (min-width: 701px) and (max-width: 950px) {
+  .home-play-form { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .home-play-primary-fields { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .home-play-actions { grid-column: 1 / -1; justify-content: flex-end; }
+  .home-play-actions button { width: min(100%, 220px); }
 }
 
-.room-section + .room-section { margin-top: 24px; }
-.room-section .panel-title { font-size: 15px; margin-bottom: 10px; }
+@media (max-width: 700px) {
+  .home-play-poster { aspect-ratio: auto; }
+  .home-play-poster img { position: static; height: auto; }
+  .deck-panel-heading { display: flex; align-items: flex-start; flex-wrap: wrap; }
+  .deck-library-management-tools { grid-template-columns: 1fr; }
+  .deck-library-card > .deck-card { min-height: 150px; }
+  .home-play-form { grid-template-columns: 1fr; }
+  .home-play-primary-fields { grid-column: 1; grid-template-columns: 1fr; }
+  .home-play-actions { grid-column: 1; justify-content: center; }
+  .home-play-actions button { width: min(100%, 220px); }
+}

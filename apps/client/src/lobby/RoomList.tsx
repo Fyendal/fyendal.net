@@ -22,7 +22,7 @@ import { RoomCard } from "./RoomCard.js";
  * Rooms your account still seats offer a Rejoin button (the server reclaims
  * the seat by token or account).
  */
-export function RoomList(props: { onGoToFormat: (format: ConstructedFormat) => void }) {
+export function RoomList(props: { onGoToDecks: (format: ConstructedFormat) => void }) {
   const intl = useIntl();
   const { rooms, joinRoom, decks } = useStore(useShallow((state) => ({
     rooms: state.rooms,
@@ -130,7 +130,7 @@ export function RoomList(props: { onGoToFormat: (format: ConstructedFormat) => v
                   className="linklike"
                   onClick={() => {
                     setPicker(null);
-                    props.onGoToFormat(picker.format as ConstructedFormat);
+                    props.onGoToDecks(picker.format as ConstructedFormat);
                   }}
                 >
                   {intl.formatMessage({ id: "lobby.rooms.importOne" })}

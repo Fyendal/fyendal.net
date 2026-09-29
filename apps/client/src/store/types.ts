@@ -57,7 +57,7 @@ export interface PendingFabraryPlay {
 }
 
 export type Screen = "lobby" | "room-loading" | "waiting" | "prep" | "game" | "replay";
-export type LobbyRail = "home" | "all" | "cc" | "silver-age" | "replays" | "account";
+export type LobbyRail = "home" | "decks" | "all" | "replays" | "account";
 export type MatchAcceptanceRole = "existing" | "joining";
 export interface EmoteEvent {
   id: number;

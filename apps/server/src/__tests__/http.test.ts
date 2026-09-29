@@ -108,6 +108,42 @@ describe("rate limiter client key", () => {
   });
 });
 
+describe("deck deletion rate limit", () => {
+  it("allows deleting more than ten saved decks without consuming the general POST budget", async () => {
+    const deckDb = await freshDb();
+    await register(deckDb, "DeckCleanup", "password1");
+    const session = await login(deckDb, "deckcleanup", "password1");
+    if (!session.ok) throw new Error("login failed");
+    const user = await sessionForToken(deckDb, session.token);
+    if (!user) throw new Error("session missing");
+    const deck = precon("precon-ako");
+    if (!deck) throw new Error("test precon missing");
+    for (let i = 0; i < 11; i++) {
+      await deckDb.query(
+        `INSERT INTO decks(id, user_id, name, format, fabrary_url, decklist, hero_name, created_at, updated_at)
+         VALUES ($1, $2, $3, $4, NULL, $5, $6, $7, $7)`,
+        [`cleanup${i}`, user.id, `Deck ${i}`, deck.format, JSON.stringify(deck.pool), "Kayo", Date.now()],
+      );
+    }
+    const url = await startApi({
+      db: deckDb,
+      rateLimiter: createRateLimiter(10, 60_000),
+      deckDeleteRateLimiter: createRateLimiter(12, 60_000),
+    });
+    const remove = (id: string) => fetch(`${url}/api/decks/delete`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${session.token}` },
+      body: JSON.stringify({ id }),
+    });
+    for (let i = 0; i < 11; i++) {
+      expect((await remove(`cleanup${i}`)).status).toBe(200);
+    }
+    expect((await remove("missing")).status).toBe(404);
+    expect((await remove("missing")).status).toBe(429);
+    expect((await postLogin(url)).status).toBe(401);
+  });
+});
+
 describe("session logout", () => {
   it("revokes the bearer token and notifies the websocket gateway", async () => {
     await register(db, "LogoutUser", "password1");

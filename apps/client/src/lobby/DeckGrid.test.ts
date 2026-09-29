@@ -16,6 +16,10 @@ describe("deckChoicesFor", () => {
       setItem: (key, value) => values.set(key, value),
     };
     Object.defineProperty(globalThis, "localStorage", { value: storage, configurable: true });
+    Object.defineProperty(globalThis, "location", {
+      value: { pathname: "/", search: "" },
+      configurable: true,
+    });
     const { deckChoicesFor } = await import("./DeckGrid.js");
     const ownDeck: DeckSummary = {
       id: "saved-deck",
@@ -99,13 +103,11 @@ describe("filterAndSortDecks", () => {
       query: "bravo",
       legality: "playable",
       cardPoolMode: "legal",
-      catalog: "mine",
     }).map((deck) => deck.id)).toEqual(["new", "old"]);
     expect(filterAndSortDecks(decks, {
       query: "",
       legality: "attention",
       cardPoolMode: "legal",
-      catalog: "mine",
     }).map((deck) => deck.id)).toEqual(["future"]);
   });
 });

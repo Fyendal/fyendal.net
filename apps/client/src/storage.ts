@@ -7,11 +7,73 @@ export const ROOM_SESSION_STORAGE_KEY = "fyendal-room-session";
 export const REPLAY_STORAGE_PREFIX = "fyendal-replay-";
 export const GAME_SETTINGS_STORAGE_KEY = "fyendal-game-settings";
 export const BOT_MATCHMAKING_PREFERENCE_STORAGE_KEY = "fyendal-bot-matchmaking-preference";
+const HOME_GAME_MODE_STORAGE_PREFIX = "fyendal-home-game-mode-";
+const HOME_FORMAT_STORAGE_PREFIX = "fyendal-home-format-";
+export type HomeGameMode = "find-match" | "invite-friend" | "bot";
 /** Legacy browser-wide key. Read once to migrate it to the signed-in account. */
 export const LOBBY_SETTINGS_STORAGE_KEY = "fyendal-lobby-settings";
 const LOBBY_SETTINGS_STORAGE_PREFIX = `${LOBBY_SETTINGS_STORAGE_KEY}-`;
 const MATCHMAKING_AVOIDANCE_STORAGE_PREFIX = "fyendal-matchmaking-avoid-";
 const MATCHMAKING_AVOIDANCE_TTL_MS = 24 * 60 * 60 * 1000;
+
+function homeGameModeStorageKey(username: string): string {
+  return `${HOME_GAME_MODE_STORAGE_PREFIX}${username.toLowerCase()}`;
+}
+
+function homeFormatStorageKey(username: string): string {
+  return `${HOME_FORMAT_STORAGE_PREFIX}${username.toLowerCase()}`;
+}
+
+export function loadHomeFormat(
+  storage: Pick<Storage, "getItem">,
+  username: string | null,
+): ConstructedFormat {
+  if (!username) return "silver-age";
+  try {
+    return storage.getItem(homeFormatStorageKey(username)) === "cc" ? "cc" : "silver-age";
+  } catch {
+    return "silver-age";
+  }
+}
+
+export function saveHomeFormat(
+  storage: Pick<Storage, "setItem">,
+  username: string | null,
+  format: ConstructedFormat,
+): void {
+  if (!username) return;
+  try {
+    storage.setItem(homeFormatStorageKey(username), format);
+  } catch {
+    // A blocked/full localStorage must not prevent changing the format.
+  }
+}
+
+export function loadHomeGameMode(
+  storage: Pick<Storage, "getItem">,
+  username: string | null,
+): HomeGameMode {
+  if (!username) return "find-match";
+  try {
+    const mode = storage.getItem(homeGameModeStorageKey(username));
+    return mode === "invite-friend" || mode === "bot" ? mode : "find-match";
+  } catch {
+    return "find-match";
+  }
+}
+
+export function saveHomeGameMode(
+  storage: Pick<Storage, "setItem">,
+  username: string | null,
+  mode: HomeGameMode,
+): void {
+  if (!username) return;
+  try {
+    storage.setItem(homeGameModeStorageKey(username), mode);
+  } catch {
+    // A blocked/full localStorage must not prevent changing the game mode.
+  }
+}
 
 export function loadBotMatchmakingPreference(
   storage: Pick<Storage, "getItem">,

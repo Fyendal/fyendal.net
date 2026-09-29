@@ -10,6 +10,8 @@ import {
   loadRejectedMatchRoomsForChoice,
   loadGameSettings,
   loadBotMatchmakingPreference,
+  loadHomeGameMode,
+  loadHomeFormat,
   loadLobbySettings,
   lobbySettingsStorageKey,
   replayStorageKey,
@@ -18,6 +20,8 @@ import {
   ROOM_SESSION_STORAGE_KEY,
   saveGameSettings,
   saveBotMatchmakingPreference,
+  saveHomeGameMode,
+  saveHomeFormat,
   saveLobbySettings,
 } from "../storage.js";
 import {
@@ -79,6 +83,28 @@ describe("client storage keys", () => {
     expect(loadBotMatchmakingPreference(storage)).toBe(true);
     stored = JSON.stringify({ version: 1, searchForPlayer: "yes" });
     expect(loadBotMatchmakingPreference(storage)).toBe(true);
+  });
+
+  it("remembers the home game mode for each account across reloads", () => {
+    const storage = memoryStorage();
+    expect(loadHomeGameMode(storage, "Alice")).toBe("find-match");
+    saveHomeGameMode(storage, "Alice", "bot");
+    expect(loadHomeGameMode(storage, "ALICE")).toBe("bot");
+    expect(loadHomeGameMode(storage, "Bob")).toBe("find-match");
+    saveHomeGameMode(storage, "Bob", "invite-friend");
+    expect(loadHomeGameMode(storage, "Bob")).toBe("invite-friend");
+    storage.setItem("fyendal-home-game-mode-alice", "invalid");
+    expect(loadHomeGameMode(storage, "Alice")).toBe("find-match");
+  });
+
+  it("remembers the home format for each account across reloads", () => {
+    const storage = memoryStorage();
+    expect(loadHomeFormat(storage, "Alice")).toBe("silver-age");
+    saveHomeFormat(storage, "Alice", "cc");
+    expect(loadHomeFormat(storage, "ALICE")).toBe("cc");
+    expect(loadHomeFormat(storage, "Bob")).toBe("silver-age");
+    storage.setItem("fyendal-home-format-alice", "invalid");
+    expect(loadHomeFormat(storage, "Alice")).toBe("silver-age");
   });
 
   it("round-trips the versioned game settings", () => {

@@ -22656,6 +22656,12 @@
       "value": "Tournament-legal and implemented future cards."
     }
   ],
+  "lobby.cardPool.help": [
+    {
+      "type": 0,
+      "value": "About card pool modes"
+    }
+  ],
   "lobby.cardPool.legal": [
     {
       "type": 0,
@@ -22842,6 +22848,12 @@
       "value": " actions"
     }
   ],
+  "lobby.deck.allFormats": [
+    {
+      "type": 0,
+      "value": "All Formats"
+    }
+  ],
   "lobby.deck.bannedList": [
     {
       "type": 0,
@@ -22934,6 +22946,12 @@
       "value": "source"
     }
   ],
+  "lobby.deck.createImport": [
+    {
+      "type": 0,
+      "value": "Create / Import Deck"
+    }
+  ],
   "lobby.deck.deckList": [
     {
       "type": 0,
@@ -22950,6 +22968,20 @@
     {
       "type": 0,
       "value": "Delete Deck"
+    }
+  ],
+  "lobby.deck.deletePrompt": [
+    {
+      "type": 0,
+      "value": "Delete "
+    },
+    {
+      "type": 1,
+      "value": "name"
+    },
+    {
+      "type": 0,
+      "value": "? This cannot be undone."
     }
   ],
   "lobby.deck.deleting": [
@@ -23337,7 +23369,13 @@
   "lobby.home.chooseStart": [
     {
       "type": 0,
-      "value": "Choose one of these three ways to start playing."
+      "value": "Choose a format, deck, and game mode to start playing."
+    }
+  ],
+  "lobby.home.gameMode": [
+    {
+      "type": 0,
+      "value": "Game mode"
     }
   ],
   "lobby.home.importCc": [
@@ -23350,6 +23388,12 @@
     {
       "type": 0,
       "value": "Import your Silver Age deck"
+    }
+  ],
+  "lobby.home.manageDecks": [
+    {
+      "type": 0,
+      "value": "Manage Decks"
     }
   ],
   "lobby.home.playCc": [
@@ -23368,6 +23412,12 @@
     {
       "type": 0,
       "value": "Rejoin Rooms"
+    }
+  ],
+  "lobby.home.start": [
+    {
+      "type": 0,
+      "value": "Start"
     }
   ],
   "lobby.home.tryPrecon": [
