@@ -1,7 +1,9 @@
 import type { GamePresentations } from "./extractPresentations.js";
 import { opaqueMotionPresentationKey, type GameMotionEvent, type HandReflowMotionEvent } from "./motionTypes.js";
 
-const HAND_PHASE_RANK = { movement: 0, arsenal: 1, draw: 2 } as const;
+const HAND_PHASE_RANK = {
+  movement: 0, arsenal: 1, "effect-draw": 2, "effect-discard": 3, draw: 4,
+} as const;
 
 /** Only remaining, viewer-visible identities or anonymous hand slots slide.
  * The departing card has its own movement or focus presentation. */
@@ -24,12 +26,14 @@ export function handReflows(
     if (event.source.kind === "hand" && event.destination.kind !== "hand") {
       const seat = event.source.seat;
       departures.set(seat, (departures.get(seat) ?? 0) + event.count);
-      setPhase(seat, event.destination.kind === "arsenal" ? "arsenal" : "movement");
+      setPhase(seat, event.timeline === "effect-discard"
+        ? "effect-discard"
+        : event.destination.kind === "arsenal" ? "arsenal" : "movement");
     }
     if (event.destination.kind === "hand" && event.source.kind !== "hand") {
       const seat = event.destination.seat;
       arrivals.set(seat, (arrivals.get(seat) ?? 0) + event.count);
-      if (event.source.kind === "deck") setPhase(seat, "draw");
+      if (event.source.kind === "deck") setPhase(seat, event.timeline === "effect-draw" ? "effect-draw" : "draw");
     }
   }
   for (const count of previous.counts) {

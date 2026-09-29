@@ -30,6 +30,26 @@ function passTopLayer(state: ReturnType<typeof makeGame>): ReturnType<typeof mak
 }
 
 describe("game setup & turn structure", () => {
+  it("projects attack ability indexes for arena presentation", () => {
+    const state = makeGame(897);
+    state.scriptsRef = {
+      ...state.scriptsRef,
+      HERO_A: { activated: { cost: 0, isAttack: true, goAgain: false } },
+      SWORD: {
+        activated: [
+          { cost: 0, label: "Polish", isAttack: false, goAgain: false, onActivate() {} },
+          { cost: 1, label: "Attack", isAttack: true, goAgain: false },
+        ],
+      },
+    };
+
+    expect(projectStateFor(state, 0).players[0]?.weapons[0]).toMatchObject({
+      activatedAbilityLabels: ["Polish", "Attack"],
+      attackAbilityIndexes: [1],
+    });
+    expect(projectStateFor(state, 0).players[0]?.heroAttackAbilityIndexes).toEqual([0]);
+  });
+
   it("projects source-side combat damage modifiers before resolution", () => {
     const state = makeGame(898);
     const attack = player(state, 0).hand.shift()!;

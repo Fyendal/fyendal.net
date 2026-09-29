@@ -131,6 +131,9 @@ function cardView(state: GameStateInternal,
     grantsAuraAttackMarker(state, controller, c)
       ? abilities.length
       : undefined;
+  const attackAbilityIndexes = abilities.flatMap((ability, index) =>
+    ability.isAttack ? [index] : []);
+  if (grantedAuraAttackIndex !== undefined) attackAbilityIndexes.push(grantedAuraAttackIndex);
   const usedAbilityIndexes = grantedAuraAttackIndex !== undefined &&
     controller?.flags[activatedFlagKey(c.instanceId, grantedAuraAttackIndex)] === true
       ? [...nativeUsedAbilityIndexes, grantedAuraAttackIndex]
@@ -168,6 +171,7 @@ function cardView(state: GameStateInternal,
     ...(usedAbilityIndexes.length > 0 ? { usedAbilityIndexes } : {}),
     ...(hasRemainingMultipleActivation ? { remainingAbilityActivations } : {}),
     ...(abilities.length > 1 ? { activatedAbilityLabels: projectedAbilityLabels(abilities) } : {}),
+    ...(attackAbilityIndexes.length > 0 ? { attackAbilityIndexes } : {}),
     ...(c.grantedNames && c.grantedNames.length > 0 ? { grantedNames: c.grantedNames } : {}),
     ...(c.chosenName ? { chosenName: c.chosenName } : {}),
     ...(c.boundToInstanceId !== undefined ? { boundToInstanceId: c.boundToInstanceId } : {}),
@@ -248,7 +252,10 @@ function playerView(
   }
   const heroScript = scriptOf(state, p.hero.cardId, p.hero);
   const visibleDeckTop = self && heroScript?.lookAtTopDeck === true ? p.deck[0] : undefined;
-  const heroAbilityLabels = projectedAbilityLabels(abilityList(heroScript));
+  const heroAbilities = abilityList(heroScript);
+  const heroAbilityLabels = projectedAbilityLabels(heroAbilities);
+  const heroAttackAbilityIndexes = heroAbilities.flatMap((ability, index) =>
+    ability.isAttack ? [index] : []);
   const heroSubcards = cardView(state, runtime, p.hero).subcards;
   return {
     seat: p.seat,
@@ -261,6 +268,7 @@ function playerView(
     ...(p.hero.defCounters ? { heroDefCounters: p.hero.defCounters } : {}),
     ...(heroSubcards ? { heroSubcards } : {}),
     ...(heroAbilityLabels ? { heroAbilityLabels } : {}),
+    ...(heroAttackAbilityIndexes.length > 0 ? { heroAttackAbilityIndexes } : {}),
     heroName: dataOf(state, p.heroCardId).name,
     life: p.life,
     actionPoints: p.actionPoints,

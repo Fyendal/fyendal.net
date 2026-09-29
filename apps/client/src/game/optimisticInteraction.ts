@@ -1,7 +1,7 @@
 import type { CardView, GameView, PlayerView } from "@fyendal/shared";
 import { cardData } from "@fyendal/cards/client";
 import type { PendingInteraction } from "../store/types.js";
-import { heroCard } from "./board/BoardPrimitives.js";
+import { heroCard } from "./board/heroCard.js";
 import { optDecisionCards } from "./decisionPresentation.js";
 
 export interface OptimisticInteractionProjection {
@@ -108,6 +108,28 @@ function movePitches(
   ) as GameView["players"];
 }
 
+function projectPendingAttack(
+  view: GameView,
+  players: GameView["players"],
+  card: CardView,
+): GameView {
+  const attack = card.attack ?? cardData[card.cardId]?.attack ?? 0;
+  return {
+    ...view,
+    players,
+    chain: [...view.chain, {
+      attackingCard: { ...card, attack },
+      defendingCards: [],
+      attackValue: attack,
+      defenseValue: 0,
+      damage: attack,
+      resolved: false,
+      onStack: true,
+      reactions: [],
+    }],
+  };
+}
+
 function projectCardPlay(
   view: GameView,
   seat: number,
@@ -121,23 +143,7 @@ function projectCardPlay(
   const playedCard = withoutFaceDown(source);
   const data = cardData[playedCard.cardId];
   const isAttack = data?.cardType === "action" && (data.subtypes ?? []).includes("attack");
-  if (isAttack) {
-    const attack = playedCard.attack ?? data.attack ?? 0;
-    return {
-      ...view,
-      players,
-      chain: [...view.chain, {
-        attackingCard: { ...playedCard, attack },
-        defendingCards: [],
-        attackValue: attack,
-        defenseValue: 0,
-        damage: attack,
-        resolved: false,
-        onStack: true,
-        reactions: [],
-      }],
-    };
-  }
+  if (isAttack) return projectPendingAttack(view, players, playedCard);
   return {
     ...view,
     players,
@@ -204,8 +210,11 @@ function projectActivation(
     seat,
     intent.pitchInstanceIds,
   );
-  const player = view.players.find((candidate) => candidate.seat === source.owner);
   const abilityIndex = intent.abilityIndex ?? 0;
+  if (source.attackAbilityIndexes?.includes(abilityIndex)) {
+    return projectPendingAttack(view, players, source);
+  }
+  const player = view.players.find((candidate) => candidate.seat === source.owner);
   const labels = source.instanceId === player?.heroInstanceId
     ? player.heroAbilityLabels
     : source.activatedAbilityLabels;

@@ -1,6 +1,6 @@
 import type { CardView, GameView, PlayerView } from "@fyendal/shared";
 import { cardData } from "@fyendal/cards/client";
-import { heroCard } from "./board/BoardPrimitives.js";
+import { heroCard } from "./board/heroCard.js";
 
 function defenderCardsById(
   player: PlayerView,

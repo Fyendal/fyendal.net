@@ -110,6 +110,7 @@ function triggerSourceRank(source: CardPresentation): number {
     case "chain-target":
       return 2;
     case "board":
+    case "hero":
     case "equipment":
     case "weapon":
       return 3;
@@ -187,10 +188,13 @@ function detectFromPresentations(
     if (destination.location.kind === "stack-layer") {
       const triggerSource = currentTriggerSource(destination, currentByInstance);
       if (triggerSource) {
+        const cardCopy = triggerSource.location.kind === "hero"
+          || triggerSource.location.kind === "chain-attack";
         events.push({
           kind: "connect",
           source: triggerSource.location,
           destination: destination.location,
+          ...(cardCopy ? { visual: motionVisual(triggerSource, destination) } : {}),
           instanceId: destination.instanceId,
           sourcePresentationKey: triggerSource.key,
           destinationPresentationKey: destination.key,

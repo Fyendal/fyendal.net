@@ -1,6 +1,6 @@
 import type { CardView, GameView } from "@fyendal/shared";
 import type { Sel } from "./useActionAnnouncement.js";
-import { heroCard } from "./board/BoardPrimitives.js";
+import { heroCard } from "./board/heroCard.js";
 
 export interface PitchFocusSource {
   card: CardView;

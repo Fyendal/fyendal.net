@@ -33,6 +33,7 @@ import { useMotionPreference } from "./useMotionPreference.js";
 import { rememberStackFocusOrigins } from "../pitchFocusMotion.js";
 import {
   activateMotionDestinationMasks,
+  arriveMotionDestination,
   motionDestinationsRequiringEarlyMask,
   motionDestinationIsMasked,
   refreshMotionDestinationMasks,
@@ -62,7 +63,7 @@ export function useGameMotion({
 }): {
   batch: GameMotionBatch | null;
   turnStartUiReady: boolean;
-  arriveFlight: (batchId: string, destinationPresentationKey?: string) => void;
+  arriveFlight: (batchId: string, destinationPresentationKey?: string) => boolean;
   completeBatch: (batchId: string) => void;
   getStackFocusOrigin: (instanceId: number) => MotionRect | undefined;
 } {
@@ -157,19 +158,13 @@ export function useGameMotion({
     if (
       batchQueueRef.current.active?.id !== batchId
       || destinationPresentationKey === undefined
-    ) return;
-    const batchMasks = maskedElementsRef.current.get(batchId);
-    if (!batchMasks) return;
-    const element = batchMasks.get(destinationPresentationKey);
-    if (!element) return;
-    batchMasks.delete(destinationPresentationKey);
-    if (batchMasks.size === 0) maskedElementsRef.current.delete(batchId);
+    ) return false;
     // Hand off from the overlay to the real destination on this flight's own
     // arrival. Waiting for a later staggered card is what caused the visible
     // empty-frame blink in pitch and combat-chain batches.
-    if (!motionDestinationIsMasked(maskedElementsRef.current, element)) {
-      revealMotionDestination(element);
-    }
+    return arriveMotionDestination(
+      batchId, destinationPresentationKey, maskedElementsRef.current,
+    );
   }, []);
 
   // Run after every commit: view-independent layout changes (hand collapse,

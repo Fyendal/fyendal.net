@@ -22886,6 +22886,12 @@
       "value": "Choose a deck"
     }
   ],
+  "lobby.deck.clearSelection": [
+    {
+      "type": 0,
+      "value": "Clear selection"
+    }
+  ],
   "lobby.deck.closeActions": [
     {
       "type": 0,
@@ -22978,6 +22984,52 @@
     {
       "type": 1,
       "value": "name"
+    },
+    {
+      "type": 0,
+      "value": "? This cannot be undone."
+    }
+  ],
+  "lobby.deck.deleteSelected": [
+    {
+      "type": 0,
+      "value": "Delete selected"
+    }
+  ],
+  "lobby.deck.deleteSelectedPrompt": [
+    {
+      "type": 0,
+      "value": "Delete "
+    },
+    {
+      "type": 6,
+      "value": "count",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " selected deck"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " selected decks"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
     },
     {
       "type": 0,
@@ -23330,6 +23382,54 @@
       "value": "Deck or hero name…"
     }
   ],
+  "lobby.deck.selectNamed": [
+    {
+      "type": 0,
+      "value": "Select "
+    },
+    {
+      "type": 1,
+      "value": "name"
+    }
+  ],
+  "lobby.deck.selectedCount": [
+    {
+      "type": 6,
+      "value": "count",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " deck selected"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " decks selected"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    }
+  ],
+  "lobby.deck.selectionActions": [
+    {
+      "type": 0,
+      "value": "Selected deck actions"
+    }
+  ],
   "lobby.deck.source": [
     {
       "type": 0,
@@ -23346,6 +23446,20 @@
     {
       "type": 0,
       "value": "Saved"
+    }
+  ],
+  "lobby.deck.viewOnFabrary": [
+    {
+      "type": 0,
+      "value": "View "
+    },
+    {
+      "type": 1,
+      "value": "name"
+    },
+    {
+      "type": 0,
+      "value": " on Fabrary"
     }
   ],
   "lobby.discordCommunity": [

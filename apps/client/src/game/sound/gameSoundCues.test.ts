@@ -112,8 +112,19 @@ describe("game sound cues", () => {
     ];
 
     expect(gameSoundCuesForEvents(events, [])).toEqual([
-      { kind: "play", delayMs: 0 },
+      { kind: "play", delayMs: 390 },
     ]);
+  });
+
+  it("keeps the play sound when an attack is presented directly in the chain", () => {
+    expect(gameSoundCuesForEvents([{
+      kind: "move",
+      source: { kind: "hand", seat: 0 },
+      destination: { kind: "chain-attack", link: 0 },
+      visual: { kind: "face", card: card(1) },
+      count: 1,
+      confidence: "exact",
+    }], [])).toEqual([{ kind: "play", delayMs: 0 }]);
   });
 
   it("waits for arsenaling before staggering each card in a draw-up", () => {
@@ -144,7 +155,7 @@ describe("game sound cues", () => {
     ]);
   });
 
-  it("does not treat a trigger connection or stack resolution as another play", () => {
+  it("does not treat a trigger connection or chain departure as another play", () => {
     const events: GameMotionEvent[] = [
       {
         kind: "connect",
@@ -156,8 +167,8 @@ describe("game sound cues", () => {
       },
       {
         kind: "move",
-        source: { kind: "stack-attack" },
-        destination: { kind: "chain-attack", link: 0 },
+        source: { kind: "chain-attack", link: 0 },
+        destination: { kind: "graveyard", seat: 0 },
         visual: { kind: "face", card: card(5) },
         count: 1,
         confidence: "exact",

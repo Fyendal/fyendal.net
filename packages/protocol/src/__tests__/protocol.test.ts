@@ -168,6 +168,7 @@ const player = (seat: 0 | 1) => ({
   heroCardId: `HERO${seat}`,
   heroInstanceId: seat,
   heroName: `Hero ${seat}`,
+  heroAttackAbilityIndexes: [0],
   life: 20,
   actionPoints: 1,
   resources: 0,
@@ -205,6 +206,7 @@ const card = {
   usedAbilityIndexes: [0, 2],
   remainingAbilityActivations: [1, 0],
   activatedAbilityLabels: ["Attack", "Reload"],
+  attackAbilityIndexes: [0],
   life: 1,
   hidden: false,
 };

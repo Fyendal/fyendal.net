@@ -61,6 +61,24 @@ export function motionDestinationIsMasked(
   return false;
 }
 
+/** A queued authoritative edge can replace a hand card before its optimistic
+ * reflow finishes. Report whether there is a live destination to take over;
+ * otherwise its moving copy must stay visible until the next batch starts. */
+export function arriveMotionDestination(
+  batchId: string,
+  presentationKey: string,
+  maskedElements: MaskedElementsByBatch,
+): boolean {
+  const batchMasks = maskedElements.get(batchId);
+  const element = batchMasks?.get(presentationKey);
+  if (!batchMasks || !element) return false;
+  batchMasks.delete(presentationKey);
+  if (batchMasks.size === 0) maskedElements.delete(batchId);
+  const stillMasked = motionDestinationIsMasked(maskedElements, element);
+  if (!stillMasked) revealMotionDestination(element);
+  return element.isConnected && !stillMasked;
+}
+
 /** Reassert masks after every commit and transfer them when React replaces a
  * keyed presentation node. This closes the pre-animation frame caused by
  * hand legality/scroll rerenders changing a card's controlled className. */

@@ -20,7 +20,7 @@ import {
 
 function zoneMatches(location: MotionLocation, zone: GameTransitionZone): boolean {
   if (zone.kind === "stack") {
-    return location.kind === "stack-layer" || location.kind === "stack-attack";
+    return location.kind === "stack-layer";
   }
   if (zone.kind === "chain") return location.kind.startsWith("chain-");
   if (!("seat" in location) || location.seat !== zone.seat) return false;
@@ -113,7 +113,7 @@ function deferTurnStartStackEntry(event: GameMotionEvent): GameMotionEvent {
       : event;
   }
   if (event.kind !== "move") return event;
-  return event.destination.kind === "stack-layer" || event.destination.kind === "stack-attack"
+  return event.destination.kind === "stack-layer"
     ? { ...event, timeline: "turn-start" }
     : event;
 }
@@ -132,6 +132,15 @@ export function transitionMotionEvents(
   const destinationView = direction === "forward" ? current : previous;
   const source = extractGamePresentations(sourceView);
   const destination = extractGamePresentations(destinationView);
+  const sourcePresentationKeys = new Set(source.cards.map((card) => card.key));
+  // An arena card may attack more than once on a chain. The newest link is
+  // the one whose pending attack layer is resolving in this transition.
+  const destinationChainAttacks = new Map<number, CardPresentation>();
+  for (const card of destination.cards) {
+    if (card.location.kind === "chain-attack") {
+      destinationChainAttacks.set(card.instanceId, card);
+    }
+  }
   const moves = direction === "forward"
     ? transition.events
     : [...transition.events].reverse().map(reversedMove);
@@ -156,15 +165,41 @@ export function transitionMotionEvents(
   const anonymousDestinationOffsets = new Map<string, number>();
   const anonymousSourceOffsets = new Map<string, number>();
   const semantic: GameMotionEvent[] = [];
+  const effectDrawSeats = new Set<number>();
+  // Draw-up crosses the turn boundary; draws within a turn belong to the
+  // resolving card effect and must precede any discard recorded after them.
+  const isEffectDraw = direction === "forward" && sourceView.turn === destinationView.turn;
 
   for (const move of moves) {
+    const chainAttack = move.instanceId === undefined
+      ? undefined
+      : destinationChainAttacks.get(move.instanceId);
+    // The rules layer resolves into a link, but the attack has already been
+    // presented in the chain panel. Replaying that internal zone move would
+    // make the card jump between windows.
+    if (move.instanceId !== undefined && move.from?.kind === "stack" && move.to?.kind === "chain"
+      && chainAttack && sourcePresentationKeys.has(chainAttack.key)) {
+      continue;
+    }
+    const drawsForEffect = isEffectDraw
+      && move.from?.kind === "deck" && move.to?.kind === "hand";
+    const discardsAfterDraw = isEffectDraw
+      && move.from?.kind === "hand" && move.to?.kind === "graveyard"
+      && effectDrawSeats.has(move.from.seat);
+    if (drawsForEffect && move.to) effectDrawSeats.add(move.to.seat);
     const sourcePresentation = presentationFor(source.cards, move.instanceId, move.from);
-    const destinationPresentation = presentationFor(destination.cards, move.instanceId, move.to);
+    const declaredAttack = move.to?.kind === "stack"
+      ? chainAttack ?? null
+      : null;
+    const destinationPresentation = declaredAttack
+      ?? presentationFor(destination.cards, move.instanceId, move.to);
     const destinationAlreadyPresented = direction === "forward"
       && options.sourceIncludesPredictedTransition === true
       && move.instanceId !== undefined
       && move.to !== null
-      && presentationFor(source.cards, move.instanceId, move.to) !== null;
+      && (declaredAttack
+        ? sourcePresentationKeys.has(declaredAttack.key)
+        : presentationFor(source.cards, move.instanceId, move.to) !== null);
     const sourceLocation = sourcePresentation?.location
       ?? (move.from ? basicLocation(move.from) : null);
     const destinationLocation = destinationPresentation?.location
@@ -215,6 +250,8 @@ export function transitionMotionEvents(
           visual: visualFor(sourcePresentation, destinationPresentation),
           count: move.count,
           confidence: move.instanceId === undefined ? "inferred" : "exact",
+          ...(drawsForEffect ? { timeline: "effect-draw" as const } : {}),
+          ...(discardsAfterDraw ? { timeline: "effect-discard" as const } : {}),
           ...(move.instanceId === undefined ? {} : { instanceId: move.instanceId }),
           ...(sourcePresentationKey ? { sourcePresentationKey } : {}),
           ...(destinationPresentationKey ? { destinationPresentationKey } : {}),

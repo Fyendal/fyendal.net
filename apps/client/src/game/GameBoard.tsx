@@ -64,7 +64,8 @@ import { useGameSettings } from "./board/useGameSettings.js";
 import { useGameViewport } from "./board/useGameViewport.js";
 import { useIdleVictoryPrompt } from "./board/useIdleVictoryPrompt.js";
 import { useGameShortcuts } from "./board/useGameShortcuts.js";
-import { heroCard, type BoardOverlay } from "./board/BoardPrimitives.js";
+import type { BoardOverlay } from "./board/BoardPrimitives.js";
+import { heroCard } from "./board/heroCard.js";
 import { PlayerHalf } from "./board/PlayerHalf.js";
 import { PlayerHand } from "./board/PlayerHand.js";
 import { BoardOverlays, type BoardPreview } from "./board/BoardOverlays.js";
@@ -455,10 +456,9 @@ export function GameBoard() {
     : myTurn
       ? intl.formatMessage({ id: "game.turn.yours" })
       : intl.formatMessage({ id: "game.turn.opponent" });
-  const combatChainLinks = presentedView.chain.filter((link) => !link.onStack);
-  const hasActiveCombatChain = combatChainLinks.length > 0;
-  const activeChainAttackerInstanceId = combatChainLinks.length > 0
-    ? combatChainLinks[combatChainLinks.length - 1]!.attackingCard.instanceId
+  const hasActiveCombatChain = presentedView.chain.length > 0;
+  const activeChainAttackerInstanceId = hasActiveCombatChain
+    ? presentedView.chain[presentedView.chain.length - 1]!.attackingCard.instanceId
     : null;
   const optionCardLabels = cardChoiceLocationLabels(
     me.heroInstanceId,
@@ -1179,11 +1179,10 @@ export function GameBoard() {
       />
 
       {/* ── floating stack window: triggered ability layers + played cards
-          awaiting resolution; an attack still on the stack shows here too —
-          its chain link starts only once the attack resolves ── */}
+          awaiting resolution. The declared attack is shown in the chain panel
+          even while its rules layer is still awaiting resolution. ── */}
       {gameMotion.turnStartUiReady ? <StackFloat
         layers={presentedView.stack}
-        attack={presentedView.chain.find((l) => l.onStack)}
         context={view.stackContext}
         miniHost={splitLineMiniHost}
         visibility={mobileCombatFloatVisibility}
@@ -1198,7 +1197,7 @@ export function GameBoard() {
           both players and count into the live defense value (0 for the
           opponent — face-down staging leaks nothing) ── */}
       <ChainFloat
-        links={combatChainLinks}
+        links={presentedView.chain}
         onRect={setChainRect}
         miniHost={splitLineMiniHost}
         visibility={mobileCombatFloatVisibility}

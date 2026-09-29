@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import {
   activateMotionDestinationMasks,
+  arriveMotionDestination,
   concealMotionDestination,
   MOTION_DESTINATION_HIDDEN_ATTRIBUTE,
   motionDestinationsRequiringEarlyMask,
@@ -9,9 +10,10 @@ import {
   type MaskedElementsByBatch,
 } from "./motionDestinationMask.js";
 
-function fakeElement() {
+function fakeElement(isConnected = true) {
   const attributes = new Set<string>();
   const element = {
+    isConnected,
     setAttribute: vi.fn((name: string) => attributes.add(name)),
     removeAttribute: vi.fn((name: string) => attributes.delete(name)),
   } as unknown as HTMLElement;
@@ -26,6 +28,23 @@ describe("motion destination masks", () => {
     expect(target.attributes.has(MOTION_DESTINATION_HIDDEN_ATTRIBUTE)).toBe(true);
     revealMotionDestination(target.element);
     expect(target.attributes.has(MOTION_DESTINATION_HIDDEN_ATTRIBUTE)).toBe(false);
+  });
+
+  it("keeps a reflow copy when an authoritative update removes its destination", () => {
+    const departed = fakeElement(false);
+    const replacement = fakeElement();
+    const masks: MaskedElementsByBatch = new Map([
+      ["optimistic", new Map([["0:hand:39", departed.element]])],
+      ["authoritative", new Map([["0:hand:7", replacement.element]])],
+    ]);
+    concealMotionDestination(departed.element);
+    concealMotionDestination(replacement.element);
+
+    expect(arriveMotionDestination("optimistic", "0:hand:39", masks)).toBe(false);
+    expect(departed.attributes.has(MOTION_DESTINATION_HIDDEN_ATTRIBUTE)).toBe(false);
+    expect(replacement.attributes.has(MOTION_DESTINATION_HIDDEN_ATTRIBUTE)).toBe(true);
+    expect(arriveMotionDestination("authoritative", "0:hand:7", masks)).toBe(true);
+    expect(replacement.attributes.has(MOTION_DESTINATION_HIDDEN_ATTRIBUTE)).toBe(false);
   });
 
   it("reasserts a mask and transfers it to a replacement presentation node", () => {

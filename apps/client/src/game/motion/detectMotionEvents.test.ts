@@ -176,7 +176,7 @@ describe("game motion detection", () => {
     });
   });
 
-  it("moves a back from a hidden opponent hand and reveals only at the stack", () => {
+  it("moves a back from a hidden opponent hand and reveals at the chain preview", () => {
     const attack = face(3, 1);
     const previous = view([player(0), player(1, { handCount: 1 })]);
     const current = view(
@@ -198,16 +198,16 @@ describe("game motion detection", () => {
     expect(detectGameMotionEvents(previous, current)).toEqual([{
       kind: "move",
       source: { kind: "hand", seat: 1 },
-      destination: { kind: "stack-attack" },
+      destination: { kind: "chain-attack", link: 0 },
       visual: { kind: "back-reveal", card: attack },
       instanceId: 3,
-      destinationPresentationKey: "stack:attack:3",
+      destinationPresentationKey: "chain:0:attack:3",
       count: 1,
       confidence: "inferred",
     }]);
   });
 
-  it("moves a resolved attack from the stack onto its combat-chain link", () => {
+  it("keeps an attack in the same chain presentation when its layer resolves", () => {
     const attack = face(4);
     const stackLink = {
       attackingCard: attack,
@@ -225,17 +225,200 @@ describe("game motion detection", () => {
       { chain: [{ ...stackLink, onStack: false }] },
     );
 
-    expect(detectGameMotionEvents(previous, current)).toEqual([{
+    expect(detectGameMotionEvents(previous, current)).toEqual([]);
+  });
+
+  it("sources a hero trigger from the hero while an attack and draw arrive", () => {
+    const attack = face(3);
+    const drawn = face(7);
+    const hero = { instanceId: 100, cardId: "HERO-0", owner: 0 };
+    const previous = view([
+      player(0, { hand: [attack], handCount: 1, deckCount: 1 }),
+      player(1),
+    ]);
+    const current = view([
+      player(0, { hand: [drawn], handCount: 1, deckCount: 0 }),
+      player(1),
+    ], {
+      chain: [{
+        attackingCard: attack,
+        defendingCards: [],
+        reactions: [],
+        attackValue: 4,
+        defenseValue: 0,
+        damage: 0,
+        resolved: false,
+        onStack: true,
+      }],
+      stack: [{ card: hero, seat: 0, label: "Intimidate", optional: false }],
+    });
+    const trigger = {
+      kind: "connect",
+      source: { kind: "hero", seat: 0 },
+      destination: { kind: "stack-layer", index: 0 },
+      visual: { kind: "face", card: hero },
+      instanceId: 100,
+      sourcePresentationKey: "0:hero:100",
+      destinationPresentationKey: "stack:layer:100",
+    };
+
+    for (const events of [
+      detectGameMotionEvents(previous, current),
+      transitionMotionEvents(previous, current, {
+        fromVersion: 1,
+        kind: "forward",
+        events: [
+          { kind: "move", from: { kind: "hand", seat: 0 }, to: { kind: "stack", seat: 0 }, count: 1, instanceId: 3 },
+          { kind: "move", from: { kind: "deck", seat: 0 }, to: { kind: "hand", seat: 0 }, count: 1, instanceId: 7 },
+        ],
+      }, "forward"),
+    ]) {
+      expect(events).toContainEqual(trigger);
+      expect(events).toContainEqual(expect.objectContaining({
+        kind: "move",
+        instanceId: 3,
+        source: { kind: "hand", seat: 0 },
+        destination: { kind: "chain-attack", link: 0 },
+      }));
+      expect(events).not.toContainEqual(expect.objectContaining({
+        kind: "move",
+        instanceId: 100,
+      }));
+    }
+  });
+
+  it("shows an attack with its own trigger in the chain before connecting its stack layer", () => {
+    const attack = face(4);
+    const previous = view([
+      player(0, { hand: [attack], handCount: 1 }), player(1),
+    ]);
+    const pending = view([
+      player(0), player(1),
+    ], {
+      chain: [{
+        attackingCard: attack,
+        defendingCards: [],
+        reactions: [],
+        attackValue: 4,
+        defenseValue: 0,
+        damage: 0,
+        resolved: false,
+        onStack: true,
+      }],
+      stack: [{ card: attack, seat: 0, label: "When this attacks", optional: false }],
+    });
+    const playTransition = {
+      fromVersion: 1,
+      kind: "forward" as const,
+      events: [{
+        kind: "move" as const,
+        from: { kind: "hand" as const, seat: 0 },
+        to: { kind: "stack" as const, seat: 0 },
+        count: 1,
+        instanceId: 4,
+      }],
+    };
+    const events = transitionMotionEvents(previous, pending, playTransition, "forward");
+    expect(events).toContainEqual(expect.objectContaining({
       kind: "move",
-      source: { kind: "stack-attack" },
+      source: { kind: "hand", seat: 0 },
       destination: { kind: "chain-attack", link: 0 },
+      destinationPresentationKey: "chain:0:attack:4",
+    }));
+    expect(events).toContainEqual({
+      kind: "connect",
+      source: { kind: "chain-attack", link: 0 },
+      destination: { kind: "stack-layer", index: 0 },
       visual: { kind: "face", card: attack },
-      instanceId: attack.instanceId,
-      sourcePresentationKey: `stack:attack:${attack.instanceId}`,
-      destinationPresentationKey: `chain:0:attack:${attack.instanceId}`,
-      count: 1,
-      confidence: "exact",
-    }]);
+      instanceId: 4,
+      sourcePresentationKey: "chain:0:attack:4",
+      destinationPresentationKey: "stack:layer:4",
+    });
+    expect(events.filter((event) => event.kind === "move" && event.instanceId === 4)).toHaveLength(1);
+    expect(transitionMotionEvents(pending, pending, playTransition, "forward", {
+      sourceIncludesPredictedTransition: true,
+    })).toEqual([]);
+
+    const resolved = view([pending.players[0]!, pending.players[1]!], {
+      chain: [{ ...pending.chain[0]!, onStack: false }],
+    });
+    expect(transitionMotionEvents(pending, resolved, {
+      fromVersion: 2,
+      kind: "forward",
+      events: [{
+        kind: "move", from: { kind: "stack", seat: 0 },
+        to: { kind: "chain", seat: 0 }, count: 1, instanceId: 4,
+      }],
+    }, "forward")).toEqual([]);
+  });
+
+  it("copies a weapon attack from the arena to the chain, then its trigger from the chain to the stack", () => {
+    const weapon = face(24);
+    const previous = view([player(0, { weapons: [weapon] }), player(1)]);
+    const current = view([player(0, { weapons: [weapon] }), player(1)], {
+      chain: [{
+        attackingCard: weapon,
+        defendingCards: [],
+        reactions: [],
+        attackValue: 3,
+        defenseValue: 0,
+        damage: 3,
+        resolved: false,
+        onStack: true,
+      }],
+      stack: [{ card: weapon, seat: 0, label: "When this attacks", optional: false }],
+    });
+
+    const events = detectGameMotionEvents(previous, current);
+    expect(events).toContainEqual(expect.objectContaining({
+      kind: "move",
+      instanceId: weapon.instanceId,
+      source: { kind: "weapon", seat: 0, index: 0 },
+      destination: { kind: "chain-attack", link: 0 },
+    }));
+    expect(events).toContainEqual(expect.objectContaining({
+      kind: "connect",
+      instanceId: weapon.instanceId,
+      source: { kind: "chain-attack", link: 0 },
+      destination: { kind: "stack-layer", index: 0 },
+      visual: { kind: "face", card: weapon },
+    }));
+  });
+
+  it("targets the newest chain link when the same arena card attacks again", () => {
+    const attacker = face(25);
+    const oldLink = {
+      attackingCard: attacker,
+      defendingCards: [],
+      reactions: [],
+      attackValue: 3,
+      defenseValue: 0,
+      damage: 3,
+      resolved: true,
+    };
+    const source = view([player(0, { board: [attacker] }), player(1)], {
+      chain: [oldLink],
+    });
+    const destination = view([player(0, { board: [attacker] }), player(1)], {
+      chain: [oldLink, { ...oldLink, resolved: false, onStack: true }],
+    });
+    const events = transitionMotionEvents(source, destination, {
+      fromVersion: 1,
+      kind: "forward",
+      events: [{
+        kind: "move",
+        from: { kind: "board", seat: 0 },
+        to: { kind: "stack", seat: 0 },
+        instanceId: attacker.instanceId,
+        count: 1,
+      }],
+    }, "forward");
+
+    expect(events.filter((event) => event.kind === "move" && event.instanceId === attacker.instanceId))
+      .toEqual([expect.objectContaining({
+        source: { kind: "board", seat: 0 },
+        destination: { kind: "chain-attack", link: 1 },
+      })]);
   });
 
   it("treats a token created with an attack as a fade-in, not a card move", () => {
@@ -266,7 +449,7 @@ describe("game motion detection", () => {
       kind: "move",
       instanceId: attack.instanceId,
       source: { kind: "hand", seat: 0 },
-      destination: { kind: "stack-attack" },
+      destination: { kind: "chain-attack", link: 0 },
     }));
     expect(events).toContainEqual({
       kind: "appear",
@@ -312,10 +495,10 @@ describe("game motion detection", () => {
     expect(events).toContainEqual({
       kind: "move",
       source: { kind: "hand", seat: 1 },
-      destination: { kind: "stack-attack" },
+      destination: { kind: "chain-attack", link: 0 },
       visual: { kind: "back-reveal", card: attack },
       instanceId: attack.instanceId,
-      destinationPresentationKey: `stack:attack:${attack.instanceId}`,
+      destinationPresentationKey: `chain:0:attack:${attack.instanceId}`,
       count: 1,
       confidence: "inferred",
     });
@@ -1010,6 +1193,94 @@ describe("game motion detection", () => {
       destinationPresentationKey: `0:hand:${kept.instanceId}`,
       phase: "draw",
     });
+  });
+
+  it("plays an attack-effect draw before its random discard", () => {
+    const kept = face(120);
+    const discarded = face(121);
+    const previous = view([
+      player(0, { hand: [kept], handCount: 1, deckCount: 8 }),
+      player(1),
+    ]);
+    const current = view([
+      player(0, { hand: [kept], handCount: 1, deckCount: 7, graveyard: [discarded] }),
+      player(1),
+    ]);
+    const events = transitionMotionEvents(previous, current, {
+      fromVersion: 12,
+      kind: "forward",
+      events: [
+        { kind: "move", from: { kind: "deck", seat: 0 }, to: { kind: "hand", seat: 0 }, count: 1, instanceId: discarded.instanceId },
+        { kind: "move", from: { kind: "hand", seat: 0 }, to: { kind: "graveyard", seat: 0 }, count: 1, instanceId: discarded.instanceId },
+      ],
+    }, "forward");
+    expect(events.filter((event) => event.kind === "move").map((event) => event.timeline))
+      .toEqual(["effect-draw", "effect-discard"]);
+    expect(events).toContainEqual(expect.objectContaining({
+      kind: "reflow", instanceId: kept.instanceId, phase: "effect-discard",
+    }));
+
+    const rect = (left: number) => ({ left, top: 300, width: 100, height: 138 });
+    const batch = resolveMotionBatch(events, {
+      cards: new Map([[`0:hand:${kept.instanceId}`, rect(100)]]),
+      zones: new Map([["0:deck", rect(400)], ["0:hand", rect(100)]]),
+    }, {
+      cards: new Map([[`0:hand:${kept.instanceId}`, rect(100)], [`0:graveyard:${discarded.instanceId}`, rect(700)]]),
+      zones: new Map([["0:hand", rect(100)], ["0:graveyard", rect(700)]]),
+    }, "attack-draw-discard");
+    const draw = batch?.flights.find((flight) => flight.mode === "draw");
+    const discard = batch?.flights.find((flight) => flight.phase === "effect-discard" && flight.mode === "move");
+    expect(draw).toBeDefined();
+    expect(discard).toBeDefined();
+    expect(discard!.delayMs).toBeGreaterThanOrEqual(draw!.delayMs + 320);
+    expect(draw!.end).not.toEqual(rect(100));
+    expect(discard!.start).toEqual(draw!.end);
+    expect(draw!.lingerUntilMs).toBe(discard!.delayMs);
+  });
+
+  it("keeps a drawn card visible when an older hand card is discarded", () => {
+    const discarded = face(122);
+    const drawn = face(123);
+    const previous = view([
+      player(0, { hand: [discarded], handCount: 1, deckCount: 8 }),
+      player(1),
+    ]);
+    const current = view([
+      player(0, { hand: [drawn], handCount: 1, deckCount: 7, graveyard: [discarded] }),
+      player(1),
+    ]);
+    const events = transitionMotionEvents(previous, current, {
+      fromVersion: 13,
+      kind: "forward",
+      events: [
+        { kind: "move", from: { kind: "deck", seat: 0 }, to: { kind: "hand", seat: 0 }, count: 1, instanceId: drawn.instanceId },
+        { kind: "move", from: { kind: "hand", seat: 0 }, to: { kind: "graveyard", seat: 0 }, count: 1, instanceId: discarded.instanceId },
+      ],
+    }, "forward");
+    expect(events.filter((event) => event.kind === "move")).toEqual([
+      expect.objectContaining({ timeline: "effect-draw", visual: { kind: "face", card: drawn } }),
+      expect.objectContaining({ timeline: "effect-discard", visual: { kind: "face", card: discarded } }),
+    ]);
+    const rect = (left: number) => ({ left, top: 300, width: 100, height: 138 });
+    const batch = resolveMotionBatch(events, {
+      cards: new Map([[`0:hand:${discarded.instanceId}`, rect(100)]]),
+      zones: new Map([["0:deck", rect(400)], ["0:hand", rect(50)]]),
+    }, {
+      cards: new Map([[`0:hand:${drawn.instanceId}`, rect(100)], [`0:graveyard:${discarded.instanceId}`, rect(700)]]),
+      zones: new Map([["0:hand", rect(50)], ["0:graveyard", rect(700)]]),
+    }, "draw-then-old-discard");
+    const drawFlight = batch?.flights.find((flight) => flight.mode === "draw");
+    const settle = batch?.flights.find((flight) => (
+      flight.phase === "effect-discard" && flight.mode === "reflow"
+    ));
+    expect(settle).toEqual(expect.objectContaining({
+      start: drawFlight?.end,
+      end: rect(100),
+      destinationPresentationKey: `0:hand:${drawn.instanceId}`,
+      maskDestinationWhilePending: true,
+    }));
+    expect(drawFlight?.destinationPresentationKey).toBeUndefined();
+    expect(drawFlight?.lingerUntilMs).toBe(settle?.delayMs);
   });
 
   it("continues draw-up after an optimistic arsenal move without replaying it", () => {

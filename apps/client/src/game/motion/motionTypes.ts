@@ -9,10 +9,10 @@ export type MotionLocation =
   | { kind: "banish"; seat: number }
   | { kind: "soul"; seat: number }
   | { kind: "board"; seat: number }
+  | { kind: "hero"; seat: number }
   | { kind: "equipment"; seat: number; slot: EquipmentSlot }
   | { kind: "weapon"; seat: number; index: number }
   | { kind: "stack-layer"; index: number }
-  | { kind: "stack-attack" }
   | { kind: "chain-attack"; link: number }
   | { kind: "chain-staged"; link: number; index: number }
   | { kind: "chain-defender"; link: number; index: number }
@@ -54,7 +54,7 @@ export interface MoveMotionEvent {
   sourcePresentationKey?: string;
   destinationPresentationKey?: string;
   destinationCoverVisual?: MotionVisual;
-  timeline?: "turn-start";
+  timeline?: "effect-draw" | "effect-discard" | "turn-start";
 }
 
 /** A card that remains in hand while the authoritative snapshot changes the
@@ -68,7 +68,7 @@ export interface HandReflowMotionEvent {
   instanceId?: number;
   sourcePresentationKey: string;
   destinationPresentationKey: string;
-  phase: "arsenal" | "draw" | "movement";
+  phase: "arsenal" | "draw" | "effect-draw" | "effect-discard" | "movement";
 }
 
 export interface AppearMotionEvent {
@@ -91,6 +91,8 @@ export interface ConnectMotionEvent {
   kind: "connect";
   source: MotionLocation;
   destination: MotionLocation;
+  /** Public trigger sources can send a visible copy to the stack. */
+  visual?: MotionVisual;
   instanceId: number;
   sourcePresentationKey: string;
   destinationPresentationKey: string;
@@ -124,8 +126,6 @@ export function motionLocationKey(location: MotionLocation): string {
       return `${location.seat}:weapon:${location.index}`;
     case "stack-layer":
       return `stack:layer:${location.index}`;
-    case "stack-attack":
-      return "stack:attack";
     case "chain-attack":
       return `chain:${location.link}:attack`;
     case "chain-staged":

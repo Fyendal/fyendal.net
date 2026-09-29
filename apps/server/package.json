@@ -12,6 +12,7 @@
     "typecheck": "pnpm -w generate:bot-runtime && tsc -p tsconfig.json --noEmit",
     "dev": "APP_ORIGIN=${APP_ORIGIN:-http://localhost:5173} RULESET_VERSION=${RULESET_VERSION:-development-seed} WS_MAX_PER_IP=100 tsx watch src/dev.ts",
     "seed": "tsx src/seed.ts",
+    "seed:draw-discard": "tsx src/seedDrawDiscard.ts",
     "activate-ruleset": "tsx src/activateRuleset.ts",
     "start": "node dist/index.js",
     "test": "pnpm -w generate:bot-runtime && vitest run src"

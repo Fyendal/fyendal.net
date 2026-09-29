@@ -67,18 +67,8 @@ describe("stack popup visibility", () => {
     expect(stackActivityShouldReveal(triggerRevision, emptyRevision)).toBe(false);
   });
 
-  it("treats a newly pending attack as stack activity", () => {
-    const attackRevision = stackActivityRevision([], {
-      attackingCard: { instanceId: 42, cardId: "SBA016", owner: 0 },
-      defendingCards: [],
-      reactions: [],
-      attackValue: 3,
-      defenseValue: 0,
-      damage: 0,
-      resolved: false,
-    });
-
-    expect(stackActivityShouldReveal("", attackRevision)).toBe(true);
+  it("shows the stack window only when it contains a layer", () => {
+    expect(renderStack({ layers: [] })).toBe("");
   });
 });
 
@@ -171,29 +161,6 @@ describe("stack context", () => {
     expect(html.match(/class="stack-layer"/g)).toHaveLength(1);
   });
 
-  it("shows go again on a pending attack as a tooltip icon", () => {
-    const html = renderStack({
-      layers: [],
-      attack: {
-        attackingCard: { instanceId: 42, cardId: "SBA016", owner: 0, tapped: true },
-        defendingCards: [],
-        reactions: [],
-        attackValue: 3,
-        defenseValue: 0,
-        damage: 0,
-        resolved: false,
-        goAgain: true,
-      },
-    });
-
-    expect(html).toContain("/icons/go-again.png");
-    expect(html).toContain('role="tooltip">Go again');
-    expect(html).not.toContain("stack-label\">Go again");
-    expect(html).not.toContain("card-tapped");
-    expect(html).toContain('data-motion-zone="stack:attack"');
-    expect(html).toContain('data-motion-card="stack:attack:42"');
-  });
-
   it("uses stable motion card keys when resolving layers compact the stack", () => {
     const html = renderStack({
       layers: [
@@ -218,63 +185,4 @@ describe("stack context", () => {
     expect(html).toContain('data-motion-card="stack:layer:84"');
   });
 
-  it("shows dominate on a pending attack as a tooltip icon", () => {
-    const html = renderStack({
-      layers: [],
-      attack: {
-        attackingCard: { instanceId: 42, cardId: "SBA016", owner: 0 },
-        defendingCards: [],
-        reactions: [],
-        attackValue: 3,
-        defenseValue: 0,
-        damage: 0,
-        resolved: false,
-        dominate: true,
-      },
-    });
-
-    expect(html).toContain("/icons/dominate.png");
-    expect(html).toContain('role="tooltip">Dominate');
-    expect(html).not.toContain("stack-label\">Dominate");
-  });
-
-  it("shows overpower on a pending attack as a tooltip icon", () => {
-    const html = renderStack({
-      layers: [],
-      attack: {
-        attackingCard: { instanceId: 42, cardId: "SBA016", owner: 0 },
-        defendingCards: [],
-        reactions: [],
-        attackValue: 3,
-        defenseValue: 0,
-        damage: 0,
-        resolved: false,
-        overpower: true,
-      },
-    });
-
-    expect(html).toContain("/icons/overpower.svg");
-    expect(html).toContain('role="tooltip">Overpower');
-    expect(html).not.toContain("stack-label\">Overpower");
-  });
-
-  it("shows a completed wager on a pending attack as a tooltip icon", () => {
-    const html = renderStack({
-      layers: [],
-      attack: {
-        attackingCard: { instanceId: 42, cardId: "SBA016", owner: 0 },
-        defendingCards: [],
-        reactions: [],
-        attackValue: 3,
-        defenseValue: 0,
-        damage: 0,
-        resolved: false,
-        wagered: true,
-        wagerRewards: ["Winner creates Might", "Winner creates Vigor"],
-      },
-    });
-
-    expect(html).toContain("/icons/wager.png");
-    expect(html).toContain('role="tooltip">Wagered: Winner creates Might; Winner creates Vigor');
-  });
 });

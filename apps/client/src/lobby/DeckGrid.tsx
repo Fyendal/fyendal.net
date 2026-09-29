@@ -68,21 +68,15 @@ export function DeckTile(props: {
   blocked?: boolean;
   source?: "saved" | "preconstructed";
   onSelect: () => void;
+  href?: string;
 }) {
   const intl = useIntl();
   const [imgOk, setImgOk] = useState(true);
   const d = props.deck;
   const bannedCards = d.bannedCards ?? [];
   const futureCards = d.futureCards ?? [];
-  return (
-    <button
-      className={`deck-card${props.selected ? " selected" : ""}${props.blocked ? " blocked" : ""}`}
-      aria-disabled={props.blocked || undefined}
-      aria-expanded={props.selected || undefined}
-      onClick={() => {
-        if (!props.blocked) props.onSelect();
-      }}
-    >
+  const contents = (
+    <>
       {imgOk && (
         <img
           className="deck-card-img"
@@ -127,6 +121,22 @@ export function DeckTile(props: {
           {intl.formatMessage({ id: "lobby.deck.includesFuture" }, { count: futureCards.length })}
         </span>
       ) : null}
+    </>
+  );
+  const className = `deck-card${props.selected ? " selected" : ""}${props.blocked ? " blocked" : ""}`;
+  if (props.href) {
+    return (
+      <a className={className} href={props.href} target="_blank" rel="noopener noreferrer"
+        aria-label={intl.formatMessage({ id: "lobby.deck.viewOnFabrary" }, { name: d.name })}>
+        {contents}
+      </a>
+    );
+  }
+  return (
+    <button className={className} aria-disabled={props.blocked || undefined}
+      aria-expanded={props.selected || undefined}
+      onClick={() => { if (!props.blocked) props.onSelect(); }}>
+      {contents}
     </button>
   );
 }

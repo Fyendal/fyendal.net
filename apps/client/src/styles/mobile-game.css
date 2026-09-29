@@ -688,6 +688,12 @@
     overscroll-behavior: contain;
     padding: 0 9px 9px;
   }
+  /* The pending attack now stays in the chain panel. When a trigger opens the
+     stack, keep that panel beside the attack instead of covering its card. */
+  .table:has(.chain-float) .stack-float {
+    left: calc(100vw - 8px) !important;
+    transform: translateX(-100%) !important;
+  }
   .decision-float {
     top: auto !important;
     bottom: 214px !important;
@@ -1196,6 +1202,7 @@
 }
 
 @media (max-width: 360px) {
+  .table:has(.stack-float) .chain-float { left: calc(50% - 20px) !important; }
   .prep-page { padding-bottom: 230px; }
   .prep-ready-float {
     grid-template-columns: 1fr;

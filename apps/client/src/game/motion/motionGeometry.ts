@@ -63,6 +63,8 @@ export interface MotionFlight {
   showCount: boolean;
   delayMs: number;
   durationMs?: number;
+  /** Keep an effect draw visible in its temporary hand slot until discard starts. */
+  lingerUntilMs?: number;
   destinationPresentationKey?: string;
   maskDestinationWhilePending?: true;
   holdAtSource?: true;
@@ -195,8 +197,42 @@ function sameRect(left: MotionRect, right: MotionRect): boolean {
 function motionLayerForDestination(
   location: MotionLocation,
 ): MotionFlight["destinationLayer"] {
-  if (location.kind === "stack-layer" || location.kind === "stack-attack") return "stack";
+  if (location.kind === "stack-layer") return "stack";
   return location.kind.startsWith("chain-") ? "chain" : undefined;
+}
+
+function temporaryHandSlot(
+  previous: MotionAnchorSnapshot,
+  current: MotionAnchorSnapshot,
+  seat: number,
+  fallback: MotionRect,
+): MotionRect {
+  const prefix = `${seat}:hand:`;
+  const cards = [...previous.cards, ...current.cards]
+    .filter(([key]) => key.startsWith(prefix))
+    .map(([, card]) => card);
+  if (cards.length === 0) return fallback;
+  const width = cards[0]!.width;
+  const height = cards[0]!.height;
+  const top = Math.min(...cards.map((card) => card.top));
+  const left = Math.min(...cards.map((card) => card.left));
+  const right = Math.max(...cards.map((card) => card.left + card.width));
+  const zone = current.zones.get(`${seat}:hand`) ?? previous.zones.get(`${seat}:hand`);
+  const gap = 10;
+  if (!zone || right + gap + width <= zone.left + zone.width) {
+    return { left: right + gap, top, width, height };
+  }
+  if (left - gap - width >= zone.left) {
+    return { left: left - gap - width, top, width, height };
+  }
+  // On a narrow mobile tray, keep the fourth card fully visible above the
+  // row rather than landing it on top of one of the three final hand cards.
+  return {
+    left: Math.min(Math.max(right - width, zone.left), zone.left + zone.width - width),
+    top: top - height - gap,
+    width,
+    height,
+  };
 }
 
 export function resolveMotionBatch(
@@ -209,13 +245,15 @@ export function resolveMotionBatch(
   const flights: MotionFlight[] = [];
   const connectors: MotionConnector[] = [];
   const boardAppearances = new Map<string, MotionFlight>();
+  const effectDraws: Array<{ event: MoveMotionEvent; flight: MotionFlight }> = [];
+  const effectDiscards: Array<{ event: MoveMotionEvent; flight: MotionFlight }> = [];
 
   for (const event of events) {
     if (event.kind === "reflow" && event.instanceId !== undefined &&
       (previous.focusSources?.has(event.instanceId) || current.focusSources?.has(event.instanceId))) continue;
     const phase = motionTimelinePhase(event);
     if (event.kind === "connect") {
-      const focusSource = motionLayerForDestination(event.destination) === "stack"
+      const focusSource = !event.visual && motionLayerForDestination(event.destination) === "stack"
         ? previous.focusSources?.get(event.instanceId) : undefined;
       const source = (focusSource ? { rect: focusSource, exact: true } : null)
         ?? endpoint(current, event.sourcePresentationKey, event.source)
@@ -226,14 +264,30 @@ export function resolveMotionBatch(
         event.destination,
       );
       if (source && destination) {
-        connectors.push({
-          id: `${batchId}:connector:${connectors.length}`,
-          phase,
-          start: source.rect,
-          end: destination.rect,
-          delayMs: 0,
-          destinationPresentationKey: event.destinationPresentationKey,
-        });
+        if (event.visual && flights.length < MAX_DETAILED_FLIGHTS) {
+          flights.push({
+            id: `${batchId}:flight:${flights.length}`,
+            phase,
+            mode: "move",
+            start: source.rect,
+            end: destination.rect,
+            visual: event.visual,
+            count: 1,
+            showCount: false,
+            delayMs: 0,
+            destinationPresentationKey: event.destinationPresentationKey,
+            destinationLayer: "stack",
+          });
+        } else {
+          connectors.push({
+            id: `${batchId}:connector:${connectors.length}`,
+            phase,
+            start: source.rect,
+            end: destination.rect,
+            delayMs: 0,
+            destinationPresentationKey: event.destinationPresentationKey,
+          });
+        }
       }
       continue;
     }
@@ -305,7 +359,8 @@ export function resolveMotionBatch(
     }
 
     const focusSource = event.kind === "move" && event.instanceId !== undefined &&
-      motionLayerForDestination(event.destination) === "stack"
+      (motionLayerForDestination(event.destination) === "stack"
+        || event.destination.kind === "chain-attack")
       ? previous.focusSources?.get(event.instanceId) : undefined;
     const source = (focusSource ? { rect: focusSource, exact: true } : null)
       ?? endpoint(previous, event.sourcePresentationKey, event.source);
@@ -334,7 +389,7 @@ export function resolveMotionBatch(
           ? "deck-bottom"
           : "move";
     const destinationLayer = motionLayerForDestination(event.destination);
-    flights.push({
+    const flight: MotionFlight = {
       id: `${batchId}:flight:${flights.length}`,
       phase,
       mode,
@@ -355,7 +410,59 @@ export function resolveMotionBatch(
       ...(destinationLayer !== undefined
         ? { destinationLayer }
         : {}),
-    });
+    };
+    flights.push(flight);
+    if (event.kind === "move" && event.timeline === "effect-draw") {
+      effectDraws.push({ event, flight });
+    } else if (event.kind === "move" && event.timeline === "effect-discard") {
+      effectDiscards.push({ event, flight });
+    }
+  }
+
+  const stagedDraws: Array<{ draw: MotionFlight; successor: MotionFlight }> = [];
+  for (const { event: drawEvent, flight: draw } of effectDraws) {
+    if (drawEvent.destination.kind !== "hand") continue;
+    const seat = drawEvent.destination.seat;
+    if (effectDraws.filter(({ event }) => (
+      event.destination.kind === "hand" && event.destination.seat === seat
+    )).length !== 1) continue;
+    const matchingDiscards = effectDiscards.filter(({ event }) => (
+      event.source.kind === "hand" && event.source.seat === seat
+    ));
+    if (drawEvent.count !== 1 || matchingDiscards.length !== 1) continue;
+    const { event: discardEvent, flight: discard } = matchingDiscards[0]!;
+    const intermediate = temporaryHandSlot(
+      previous, current, seat, draw.end,
+    );
+    const finalEnd = draw.end;
+    const finalKey = drawEvent.instanceId === undefined
+      ? undefined
+      : draw.destinationPresentationKey;
+    draw.end = intermediate;
+    draw.destinationPresentationKey = undefined;
+    if ((drawEvent.instanceId !== undefined && drawEvent.instanceId === discardEvent.instanceId)
+      || (drawEvent.instanceId === undefined && discardEvent.instanceId === undefined)) {
+      discard.start = intermediate;
+    }
+    let successor = discard;
+    if (finalKey) {
+      const settle: MotionFlight = {
+        id: `${batchId}:flight:${flights.length}`,
+        phase: "effect-discard",
+        mode: "reflow",
+        start: intermediate,
+        end: finalEnd,
+        visual: draw.visual,
+        count: 1,
+        showCount: false,
+        delayMs: 0,
+        destinationPresentationKey: finalKey,
+        maskDestinationWhilePending: true,
+      };
+      flights.push(settle);
+      successor = settle;
+    }
+    stagedDraws.push({ draw, successor });
   }
 
   if (flights.length === 0 && connectors.length === 0) return null;
@@ -375,6 +482,9 @@ export function resolveMotionBatch(
   ], MOTION_SEQUENCE_GAP_MS);
   for (const flight of flights) flight.delayMs = delayById.get(flight.id) ?? 0;
   for (const connector of connectors) connector.delayMs = delayById.get(connector.id) ?? 0;
+  for (const { draw, successor } of stagedDraws) {
+    draw.lingerUntilMs = successor.delayMs;
+  }
   const durationMs = Math.max(
     0,
     ...flights.map((flight) => flight.delayMs + motionFlightDurationMs(flight)),

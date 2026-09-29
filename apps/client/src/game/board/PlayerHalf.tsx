@@ -22,7 +22,8 @@ import {
 } from "../boardGroups.js";
 import type { Sel } from "../useActionAnnouncement.js";
 import type { BoardLegalState } from "./boardModel.js";
-import { heroCard, MatZone, type BoardOverlay } from "./BoardPrimitives.js";
+import { MatZone, type BoardOverlay } from "./BoardPrimitives.js";
+import { heroCard } from "./heroCard.js";
 
 const EMPTY_INSTANCE_IDS: ReadonlySet<number> = new Set();
 
@@ -447,6 +448,7 @@ export function PlayerHalf({
           >
             <EquipmentStack
               card={hero}
+              motionLocation={{ kind: "hero", seat: player.seat }}
               underCards={player.soul}
               underCardMotionLocation={{ kind: "soul", seat: player.seat }}
               highlighted={heroCanActivate || heroCanBlock}

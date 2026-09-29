@@ -128,6 +128,7 @@ describe("PlayerHalf", () => {
     expect(html).toContain('data-motion-zone="0:arsenal"');
     expect(html).toContain('data-motion-zone="0:graveyard"');
     expect(html).toContain('data-motion-zone="0:banish"');
+    expect(html).toContain('data-motion-card="0:hero:1"');
     expect(html).toContain('data-motion-card="0:board:2"');
     expect(html).toContain('data-motion-card="0:board:3"');
     expect(html).not.toContain("soul-pip");

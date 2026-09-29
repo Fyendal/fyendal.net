@@ -83,9 +83,13 @@ function MotionFlightOverlay({
 }: {
   batchId: string;
   flight: MotionFlight;
-  onFlightArrive: (batchId: string, destinationPresentationKey?: string) => void;
+  onFlightArrive: (batchId: string, destinationPresentationKey?: string) => boolean;
   onCueComplete: (cueId: string) => void;
 }) {
+  const lingerTimerRef = useRef<number | null>(null);
+  useEffect(() => () => {
+    if (lingerTimerRef.current !== null) window.clearTimeout(lingerTimerRef.current);
+  }, []);
   return (
     <div
       className={`game-motion-flight game-motion-flight-${flight.mode}${
@@ -96,8 +100,19 @@ function MotionFlightOverlay({
         // Ignore the nested back/face reveal animations. The wrapper's
         // completion is the exact point at which the real card takes over.
         if (event.target !== event.currentTarget) return;
-        onFlightArrive(batchId, flight.destinationPresentationKey);
-        event.currentTarget.style.visibility = "hidden";
+        const destinationVisible = onFlightArrive(batchId, flight.destinationPresentationKey);
+        const element = event.currentTarget;
+        const lingerMs = Math.max(0,
+          (flight.lingerUntilMs ?? 0) - flight.delayMs - motionFlightDurationMs(flight),
+        );
+        if (lingerMs > 0) {
+          lingerTimerRef.current = window.setTimeout(() => {
+            element.style.visibility = "hidden";
+            lingerTimerRef.current = null;
+          }, lingerMs);
+        } else if (flight.mode !== "reflow" || destinationVisible) {
+          element.style.visibility = "hidden";
+        }
         onCueComplete(flight.id);
       }}
     >
@@ -127,7 +142,7 @@ export function GameMotionLayer({
   onComplete,
 }: {
   batch: GameMotionBatch | null;
-  onFlightArrive: (batchId: string, destinationPresentationKey?: string) => void;
+  onFlightArrive: (batchId: string, destinationPresentationKey?: string) => boolean;
   onComplete: (batchId: string) => void;
 }) {
   const completedCuesRef = useRef<{

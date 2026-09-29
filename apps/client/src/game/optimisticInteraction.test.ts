@@ -120,12 +120,12 @@ describe("optimistic interaction projection", () => {
     expect(projection.key).toBe("interaction:pre-stack:13");
   });
 
-  it("connects an activated source to a pending layer and moves its pitch", () => {
+  it("connects a non-attack ability to a pending layer and moves its pitch", () => {
     const weapon: CardView = {
       instanceId: 20,
       cardId: "WTR114",
       owner: 0,
-      activatedAbilityLabels: ["Attack"],
+      activatedAbilityLabels: ["Reload"],
     };
     const pitch: CardView = { instanceId: 21, cardId: "WTR171", owner: 0 };
     const view = game(player(0, {
@@ -142,7 +142,7 @@ describe("optimistic interaction projection", () => {
     }));
 
     expect(projection.predictsSemanticTransition).toBe(true);
-    expect(projection.view?.stack[0]).toMatchObject({ card: weapon, label: "Attack" });
+    expect(projection.view?.stack[0]).toMatchObject({ card: weapon, label: "Reload" });
     expect(projection.view?.players[0]?.pitch.map((card) => card.instanceId)).toEqual([21]);
     expect(projection.view?.players[0]?.weapons).toEqual([weapon]);
     expect(detectGameMotionEvents(view, projection.view!)).toContainEqual(expect.objectContaining({
@@ -150,6 +150,71 @@ describe("optimistic interaction projection", () => {
       instanceId: 20,
       source: { kind: "weapon", seat: 0, index: 0 },
       destination: { kind: "stack-layer", index: 0 },
+    }));
+  });
+
+  it("presents an arena attack ability directly in the chain after payment", () => {
+    const weapon: CardView = {
+      instanceId: 20,
+      cardId: "MON221B",
+      owner: 0,
+      attack: 3,
+      attackAbilityIndexes: [1],
+      activatedAbilityLabels: ["Other ability", "Attack"],
+    };
+    const pitch: CardView = { instanceId: 21, cardId: "WTR171", owner: 0 };
+    const view = game(player(0, {
+      hand: [pitch],
+      handCount: 1,
+      weapons: [weapon],
+    }));
+
+    const projection = optimisticInteractionView(view, 0, pending({
+      kind: "activate-ability",
+      sourceInstanceId: 20,
+      abilityIndex: 1,
+      pitchInstanceIds: [21],
+    }));
+
+    expect(projection.predictsSemanticTransition).toBe(true);
+    expect(projection.view?.stack).toEqual([]);
+    expect(projection.view?.chain).toEqual([expect.objectContaining({
+      attackingCard: expect.objectContaining({ instanceId: 20, attack: 3 }),
+      onStack: true,
+    })]);
+    expect(projection.view?.players[0]?.weapons).toEqual([weapon]);
+    expect(projection.view?.players[0]?.pitch.map((card) => card.instanceId)).toEqual([21]);
+    expect(detectGameMotionEvents(view, projection.view!)).toEqual(expect.arrayContaining([
+      expect.objectContaining({
+        kind: "move",
+        instanceId: 20,
+        source: { kind: "weapon", seat: 0, index: 0 },
+        destination: { kind: "chain-attack", link: 0 },
+      }),
+      expect.objectContaining({
+        kind: "move",
+        instanceId: 21,
+        source: { kind: "hand", seat: 0 },
+        destination: { kind: "pitch", seat: 0 },
+      }),
+    ]));
+  });
+
+  it("presents a hero attack ability in the chain too", () => {
+    const view = game(player(0, { heroAttackAbilityIndexes: [0] }));
+    const projection = optimisticInteractionView(view, 0, pending({
+      kind: "activate-ability",
+      sourceInstanceId: 100,
+      abilityIndex: 0,
+      pitchInstanceIds: [],
+    }));
+
+    expect(projection.view?.stack).toEqual([]);
+    expect(projection.view?.chain[0]?.attackingCard.instanceId).toBe(100);
+    expect(detectGameMotionEvents(view, projection.view!)).toContainEqual(expect.objectContaining({
+      kind: "move",
+      source: { kind: "hero", seat: 0 },
+      destination: { kind: "chain-attack", link: 0 },
     }));
   });
 
@@ -211,7 +276,7 @@ describe("optimistic interaction projection", () => {
     expect(detectGameMotionEvents(view, projection.view!)).toEqual([]);
   });
 
-  it("presents an attack action in the attack stack slot", () => {
+  it("presents an attack action in the chain preview while its layer waits", () => {
     const attack: CardView = { instanceId: 25, cardId: "WTR006", owner: 0, attack: 9 };
     const view = game(player(0, { hand: [attack], handCount: 1 }));
 
@@ -230,7 +295,7 @@ describe("optimistic interaction projection", () => {
       kind: "move",
       instanceId: 25,
       source: { kind: "hand", seat: 0 },
-      destination: { kind: "stack-attack" },
+      destination: { kind: "chain-attack", link: 0 },
     }));
   });
 

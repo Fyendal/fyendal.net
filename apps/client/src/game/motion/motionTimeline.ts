@@ -1,4 +1,4 @@
-import type { GameMotionEvent, MotionLocation } from "./motionTypes.js";
+import type { GameMotionEvent } from "./motionTypes.js";
 
 export type MotionTimelinePhase =
   | "staging"
@@ -7,6 +7,8 @@ export type MotionTimelinePhase =
   | "movement"
   | "stack-entry"
   | "resolution"
+  | "effect-draw"
+  | "effect-discard"
   | "trigger"
   | "result"
   | "arsenal"
@@ -17,10 +19,12 @@ export type MotionTimelinePhase =
 const PHASE_ORDER: readonly MotionTimelinePhase[] = [
   "staging",
   "confirmation",
-  "stack-entry",
   "payment",
   "movement",
+  "stack-entry",
   "resolution",
+  "effect-draw",
+  "effect-discard",
   "trigger",
   "result",
   "arsenal",
@@ -34,24 +38,24 @@ const PHASE_RANK = new Map(PHASE_ORDER.map((phase, index) => [phase, index]));
 const PHASE_STAGE: Readonly<Record<MotionTimelinePhase, number>> = {
   staging: 0,
   confirmation: 1,
-  "stack-entry": 2,
   payment: 2,
   movement: 2,
-  resolution: 3,
-  trigger: 4,
-  result: 5,
-  arsenal: 6,
-  cleanup: 7,
-  draw: 8,
-  "turn-start": 9,
+  "stack-entry": 3,
+  resolution: 4,
+  "effect-draw": 5,
+  "effect-discard": 6,
+  trigger: 7,
+  result: 8,
+  arsenal: 9,
+  cleanup: 10,
+  draw: 11,
+  "turn-start": 12,
 };
 
-function isStackLocation(location: MotionLocation): boolean {
-  return location.kind === "stack-layer" || location.kind === "stack-attack";
-}
+export const EFFECT_HAND_PAUSE_MS = 280;
 
 export function motionTimelinePhase(event: GameMotionEvent): MotionTimelinePhase {
-  if ("timeline" in event && event.timeline === "turn-start") return "turn-start";
+  if ("timeline" in event && event.timeline) return event.timeline;
   if (event.kind === "reflow") return event.phase;
   if (event.kind === "settle") return "confirmation";
   if (event.kind === "connect") return "trigger";
@@ -66,8 +70,8 @@ export function motionTimelinePhase(event: GameMotionEvent): MotionTimelinePhase
     return "cleanup";
   }
   if (event.source.kind === "deck" && event.destination.kind === "hand") return "draw";
-  if (isStackLocation(event.destination)) return "stack-entry";
-  if (isStackLocation(event.source)) return "resolution";
+  if (event.destination.kind === "stack-layer" || event.destination.kind === "chain-attack") return "stack-entry";
+  if (event.source.kind === "stack-layer") return "resolution";
   return "movement";
 }
 
@@ -78,10 +82,9 @@ export interface MotionTimelineCue {
   staggerMs: number;
 }
 
-/** Schedule only phases that are present in the batch. Causally related play,
- * payment, and movement phases share a stage: play leads by one short stagger,
- * but their animations overlap. Later stages wait for every cue in the prior
- * stage, plus a short pause. Input ordering never changes semantic phase order. */
+/** Schedule only phases that are present in the batch. Payment finishes before
+ * stack entry. An effect draw stays in the temporary hand long enough to be
+ * seen before the following discard begins. */
 export function scheduleMotionTimeline(
   cues: readonly MotionTimelineCue[],
   phaseGapMs: number,
@@ -121,7 +124,12 @@ export function scheduleMotionTimeline(
         stageEnd = Math.max(stageEnd, delay + cue.durationMs);
       }
     }
-    cursor = stageEnd + (stageIndex < presentStages.length - 1 ? phaseGapMs : 0);
+    const nextStage = presentStages[stageIndex + 1];
+    const gap = stage === PHASE_STAGE["effect-draw"]
+      && nextStage === PHASE_STAGE["effect-discard"]
+      ? EFFECT_HAND_PAUSE_MS
+      : phaseGapMs;
+    cursor = stageEnd + (nextStage !== undefined ? gap : 0);
   }
   return delays;
 }

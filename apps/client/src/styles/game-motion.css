@@ -195,6 +195,12 @@
   pointer-events: none !important;
 }
 
+/* Keep a new stack entry's label and count with its card until the flight or
+ * trigger connection arrives; masking only the card reveals the outcome early. */
+.stack-layer:has([data-game-motion-destination-hidden]) {
+  visibility: hidden;
+}
+
 @keyframes game-motion-travel {
   from { opacity: 1; transform: translate3d(0, 0, 0) scale(1, 1); }
   to {

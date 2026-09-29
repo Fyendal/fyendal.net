@@ -83,7 +83,7 @@ function isDraw(event: GameMotionEvent): event is MoveMotionEvent {
 function isPlayedCard(event: GameMotionEvent): event is MoveMotionEvent {
   if (
     event.kind !== "move"
-    || (event.destination.kind !== "stack-layer" && event.destination.kind !== "stack-attack")
+    || (event.destination.kind !== "stack-layer" && event.destination.kind !== "chain-attack")
   ) return false;
   // A permanent source copied onto the stack represents its ability or attack,
   // not a card leaving a playable zone. Trigger connectors are excluded too.
@@ -96,7 +96,7 @@ function isPlayedCard(event: GameMotionEvent): event is MoveMotionEvent {
 }
 
 function eventDurationMs(event: GameMotionEvent): number {
-  if (event.kind === "connect") return MOTION_CONNECT_MS;
+  if (event.kind === "connect") return event.visual ? MOTION_TRAVEL_MS : MOTION_CONNECT_MS;
   if (event.kind === "disappear") return MOTION_DISAPPEAR_MS;
   return MOTION_TRAVEL_MS;
 }

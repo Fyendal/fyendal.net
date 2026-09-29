@@ -214,6 +214,30 @@ describe("GameBoard spectator presentation", () => {
 });
 
 describe("GameBoard pending interactions", () => {
+  it("shows a pending attack in the chain and only its trigger in the stack", () => {
+    vi.stubGlobal("localStorage", { getItem: () => null });
+    const view = interactiveView();
+    view.chain[0]!.onStack = true;
+    gameStore.state = { ...liveState(false), view };
+    const render = () => renderToStaticMarkup(<TestI18nProvider><GameBoard /></TestI18nProvider>);
+
+    const pendingAttack = render();
+    expect(pendingAttack).toContain('data-motion-card="chain:0:attack:30"');
+    expect(pendingAttack).not.toContain('data-motion-zone="stack:attack"');
+    expect(pendingAttack).not.toContain('class="float stack-float"');
+
+    view.stack = [{
+      card: { instanceId: 1, cardId: "TST-HERO-0", owner: 0 },
+      seat: 0,
+      label: "Triggered ability",
+      optional: false,
+    }];
+    const withTrigger = render();
+    expect(withTrigger).toContain('data-motion-card="chain:0:attack:30"');
+    expect(withTrigger).toContain('data-motion-card="stack:layer:1"');
+    expect(withTrigger).toContain('data-motion-card="0:hero:1"');
+  });
+
   it("highlights only pitchable hand cards during payment and restores ordinary action cues afterwards", () => {
     vi.stubGlobal("localStorage", { getItem: () => null });
     const state = liveState(false);

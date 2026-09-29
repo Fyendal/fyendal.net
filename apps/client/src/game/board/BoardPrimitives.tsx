@@ -1,4 +1,4 @@
-import type { CardView, PlayerView } from "@fyendal/shared";
+import type { CardView } from "@fyendal/shared";
 
 export interface BoardOverlay {
   title: string;
@@ -6,19 +6,6 @@ export interface BoardOverlay {
   inactiveZone?: boolean;
   /** Allow the owner to inspect known face-down cards in this zone. */
   showOwnedFaceDownIdentities?: boolean;
-}
-
-export function heroCard(player: PlayerView): CardView {
-  return {
-    instanceId: player.heroInstanceId,
-    cardId: player.heroCardId,
-    owner: player.seat,
-    ...(player.heroTapped ? { tapped: true } : {}),
-    ...(player.heroCounters ? { counters: player.heroCounters } : {}),
-    ...(player.heroDefCounters ? { defCounters: player.heroDefCounters } : {}),
-    ...(player.heroSubcards ? { subcards: player.heroSubcards } : {}),
-    ...(player.heroAbilityLabels ? { activatedAbilityLabels: player.heroAbilityLabels } : {}),
-  };
 }
 
 export function MatZone({

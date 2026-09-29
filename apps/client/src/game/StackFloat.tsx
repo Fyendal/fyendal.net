@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useIntl } from "react-intl";
 import { createPortal } from "react-dom";
-import type { ChainLinkView, StackLayerView } from "@fyendal/shared";
+import type { StackLayerView } from "@fyendal/shared";
 import { CardBack, CardFace } from "./Card.js";
 import { BloodDebtTriggerTile, isBloodDebtTrigger } from "./BloodDebtTriggerTile.js";
 import type { FloatVisibilityController } from "./floatVisibility.js";
@@ -12,9 +12,7 @@ import { formatGameMessage } from "../i18n/GameMessage.js";
 
 export function stackActivityRevision(
   layers: readonly StackLayerView[],
-  attack?: ChainLinkView,
 ): string {
-  const attackKey = attack ? `attack:${attack.attackingCard.instanceId}` : "";
   const layerKeys = layers.map((layer, index) => [
     index,
     layer.card?.instanceId ?? "hidden",
@@ -25,9 +23,7 @@ export function stackActivityRevision(
     layer.optional ? 1 : 0,
     layer.count ?? 1,
   ].join(":"));
-  return attackKey || layerKeys.length > 0
-    ? [attackKey, ...layerKeys].join("|")
-    : "";
+  return layerKeys.join("|");
 }
 
 export function stackActivityShouldReveal(previous: string, current: string): boolean {
@@ -42,14 +38,11 @@ export function stackLayerLabel(label: string): string {
 }
 
 /** Floating stack window: played cards and triggered/activated ability layers
- *  awaiting resolution (index 0 resolves first and appears rightmost). An
- *  attack still on the stack renders as the bottom/leftmost layer — its combat
- *  chain link only starts once the attack resolves. On desktop it defaults in
- *  the open lane between the opponent's arms and first weapon, and can be
- *  dragged anywhere within the viewport. */
+ *  awaiting resolution (index 0 resolves first and appears rightmost). The
+ *  declared attack is presented in the chain panel. On desktop this defaults
+ *  in the open lane between the opponent's arms and first weapon. */
 export function StackFloat({
   layers,
-  attack,
   context,
   miniHost,
   visibility,
@@ -57,8 +50,6 @@ export function StackFloat({
   onSkipRunechants,
 }: {
   layers: StackLayerView[];
-  /** declared attack still on the stack (newest chain link, pre-defend) */
-  attack?: ChainLinkView;
   /** Combat phase/step and reason these layers are waiting. */
   context?: string;
   /** The playmat divider dock that anchors the minimized control. */
@@ -75,19 +66,11 @@ export function StackFloat({
   const stackHidden = visibility?.hidden ?? localHidden;
   const setStackHidden = visibility?.setHidden ?? setLocalHidden;
   const stackFloat = useFloatDrag();
-  const stackSize = layers.length + (attack ? 1 : 0);
-  const layerOccurrences = new Map<number, number>();
-  const layerMotionKeys = layers.map((layer, index) => {
-    if (!layer.card) return undefined;
-    const occurrence = layerOccurrences.get(layer.card.instanceId) ?? 0;
-    layerOccurrences.set(layer.card.instanceId, occurrence + 1);
-    return motionPresentationKey(
-      { kind: "stack-layer", index },
-      layer.card.instanceId,
-      occurrence,
-    );
-  });
-  const stackRevision = stackActivityRevision(layers, attack);
+  const stackSize = layers.length;
+  const layerMotionKeys = layers.map((layer, index) => layer.card
+    ? motionPresentationKey({ kind: "stack-layer", index }, layer.card.instanceId)
+    : undefined);
+  const stackRevision = stackActivityRevision(layers);
   const previousStackRevision = useRef("");
   useEffect(() => {
     const shouldReveal = stackActivityShouldReveal(previousStackRevision.current, stackRevision);
@@ -187,27 +170,6 @@ export function StackFloat({
             </div>
           );
         })}
-        {attack && (
-          <div
-            className="stack-layer stack-attack"
-            data-motion-zone={motionLocationKey({ kind: "stack-attack" })}
-          >
-            <CardFace
-              card={attack.attackingCard}
-              motionKey={motionPresentationKey(
-                { kind: "stack-attack" },
-                attack.attackingCard.instanceId,
-              )}
-              size="zone"
-              goAgain={attack.goAgain}
-              dominate={attack.dominate}
-              overpower={attack.overpower}
-              wagered={attack.wagered}
-              wagerRewards={attack.wagerRewards}
-              showTapped={false}
-            />
-          </div>
-        )}
       </div>
     </div>
   );

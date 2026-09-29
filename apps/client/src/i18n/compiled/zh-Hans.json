@@ -21938,6 +21938,12 @@
       "value": "选择牌组"
     }
   ],
+  "lobby.deck.clearSelection": [
+    {
+      "type": 0,
+      "value": "清除选择"
+    }
+  ],
   "lobby.deck.closeActions": [
     {
       "type": 0,
@@ -22008,6 +22014,26 @@
     {
       "type": 0,
       "value": "？此操作无法撤销。"
+    }
+  ],
+  "lobby.deck.deleteSelected": [
+    {
+      "type": 0,
+      "value": "删除所选牌组"
+    }
+  ],
+  "lobby.deck.deleteSelectedPrompt": [
+    {
+      "type": 0,
+      "value": "删除所选的"
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": "副牌组？此操作无法撤销。"
     }
   ],
   "lobby.deck.deleting": [
@@ -22306,6 +22332,36 @@
       "value": "牌组或英雄名称…"
     }
   ],
+  "lobby.deck.selectNamed": [
+    {
+      "type": 0,
+      "value": "选择"
+    },
+    {
+      "type": 1,
+      "value": "name"
+    }
+  ],
+  "lobby.deck.selectedCount": [
+    {
+      "type": 0,
+      "value": "已选择"
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": "副牌组"
+    }
+  ],
+  "lobby.deck.selectionActions": [
+    {
+      "type": 0,
+      "value": "已选牌组操作"
+    }
+  ],
   "lobby.deck.source": [
     {
       "type": 0,
@@ -22322,6 +22378,16 @@
     {
       "type": 0,
       "value": "已保存"
+    }
+  ],
+  "lobby.deck.viewOnFabrary": [
+    {
+      "type": 0,
+      "value": "在 Fabrary 查看"
+    },
+    {
+      "type": 1,
+      "value": "name"
     }
   ],
   "lobby.discordCommunity": [

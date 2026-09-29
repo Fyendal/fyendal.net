@@ -179,6 +179,9 @@ export interface CardView {
   /** Labels for sources with multiple activated abilities. Derived by the
    * authoritative engine so clients do not load executable card scripts. */
   activatedAbilityLabels?: string[];
+  /** Zero-based activated abilities that declare an attack. Presentation data
+   * for showing their pending attack in the combat chain. */
+  attackAbilityIndexes?: number[];
   /** Additional names currently granted to this object. */
   grantedNames?: string[];
   /** Public card name chosen for this object by a resolving effect. */
@@ -234,9 +237,8 @@ export interface ChainLinkView {
   preventionModifiers?: CombatValueModifierView[];
   damage: number;
   resolved: boolean;
-  /** The attack is declared but still on the stack (attack-declared priority
-   *  window open): the UI shows it in the stack window and only starts the
-   *  combat chain link once the attack resolves into the defend step */
+  /** The attack layer is waiting for priority to pass. The combat chain link
+   *  already exists, but the Attack Step has not begun. */
   onStack?: boolean;
   hit?: boolean;
   /** Effective keywords of the attack: printed or granted by modifiers.
@@ -329,6 +331,8 @@ export interface PlayerView {
   visibleDeckTop?: CardView;
   /** Labels for a hero with multiple activated abilities. */
   heroAbilityLabels?: string[];
+  /** Attack ability indexes for the hero's arena presentation. */
+  heroAttackAbilityIndexes?: number[];
   equipment: Partial<Record<EquipmentSlot, CardView>>;
   weapons: CardView[];
   /** Board-state cards in play: tokens/auras (e.g. Quicken), items, allies */

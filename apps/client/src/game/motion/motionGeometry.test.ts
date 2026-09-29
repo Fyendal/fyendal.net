@@ -56,19 +56,21 @@ describe("motion geometry", () => {
       .map((flight) => flight.destinationPresentationKey)).toEqual(["0:hand:10"]);
   });
 
-  it.each(["stack-layer", "stack-attack"] as const)("flies a focused play to %s from its enlarged presentation", (kind) => {
-    const destination = kind === "stack-layer" ? { kind, index: 0 } : { kind };
+  it.each(["stack-layer", "chain-attack"] as const)("flies a focused play to %s from its enlarged presentation", (kind) => {
+    const destination = kind === "stack-layer" ? { kind, index: 0 } : { kind, link: 0 };
+    const destinationKey = kind === "stack-layer" ? "stack:layer:7" : "chain:0:attack:7";
     const focus = rect(360, 240, 260, 358);
     const previous = anchors({ cards: [["0:hand:7", rect(40, 600, 160, 220)]] });
     previous.focusSources = new Map([[7, focus]]);
     const batch = resolveMotionBatch([{
       kind: "move", source: { kind: "hand", seat: 0 }, destination,
-      instanceId: 7, sourcePresentationKey: "0:hand:7", destinationPresentationKey: "stack:7",
+      instanceId: 7, sourcePresentationKey: "0:hand:7", destinationPresentationKey: destinationKey,
       visual: { kind: "face", card: { instanceId: 7, cardId: "SBA016", owner: 0 } },
       count: 1, confidence: "exact",
-    }], previous, anchors({ cards: [["stack:7", rect(720, 320, 124, 170)]] }), "focus");
+    }], previous, anchors({ cards: [[destinationKey, rect(720, 320, 124, 170)]] }), "focus");
     expect(batch?.flights[0]).toEqual(expect.objectContaining({
-      start: focus, end: rect(720, 320, 124, 170), destinationLayer: "stack",
+      start: focus, end: rect(720, 320, 124, 170),
+      destinationLayer: kind === "stack-layer" ? "stack" : "chain",
     }));
   });
 
@@ -301,7 +303,7 @@ describe("motion geometry", () => {
     ]);
   });
 
-  it("starts the played card before overlapping pitch payment", () => {
+  it("finishes pitch payment before moving the played card to the stack", () => {
     const playedSource = rect(220, 680, 140, 193);
     const pitchSource = rect(380, 680, 140, 193);
     const stackDestination = rect(520, 260, 100, 138);
@@ -350,8 +352,8 @@ describe("motion geometry", () => {
 
     const stackFlight = batch?.flights.find((flight) => flight.phase === "stack-entry");
     const pitchFlight = batch?.flights.find((flight) => flight.phase === "payment");
-    expect(stackFlight?.delayMs).toBe(0);
-    expect(pitchFlight?.delayMs).toBe(45);
+    expect(pitchFlight?.delayMs).toBe(0);
+    expect(stackFlight?.delayMs).toBe(390);
   });
 
   it("flips a pitch card before tucking it into the deck bottom", () => {
@@ -674,23 +676,23 @@ describe("motion geometry", () => {
     expect(result?.delayMs).toBe(390);
   });
 
-  it("lands an attack on the stack before fading in its created token", () => {
+  it("lands an attack in the chain preview before fading in its created token", () => {
     const handSource = rect(220, 680, 140, 193);
-    const stackDestination = rect(520, 260, 100, 138);
+    const chainDestination = rect(520, 260, 100, 138);
     const tokenDestination = rect(340, 120, 100, 138);
     const batch = resolveMotionBatch(
       [
         {
           kind: "move",
           source: { kind: "hand", seat: 0 },
-          destination: { kind: "stack-attack" },
+          destination: { kind: "chain-attack", link: 0 },
           visual: {
             kind: "face",
             card: { instanceId: 72, cardId: "HNT059", owner: 0 },
           },
           instanceId: 72,
           sourcePresentationKey: "0:hand:72",
-          destinationPresentationKey: "stack:attack:72",
+          destinationPresentationKey: "chain:0:attack:72",
           count: 1,
           confidence: "exact",
         },
@@ -707,7 +709,7 @@ describe("motion geometry", () => {
       ],
       anchors({ cards: [["0:hand:72", handSource]] }),
       anchors({ cards: [
-        ["stack:attack:72", stackDestination],
+        ["chain:0:attack:72", chainDestination],
         ["0:board:73", tokenDestination],
       ] }),
       13,
@@ -718,9 +720,9 @@ describe("motion geometry", () => {
     expect(attackArrival).toEqual(expect.objectContaining({
       mode: "move",
       start: handSource,
-      end: stackDestination,
+      end: chainDestination,
       delayMs: 0,
-      destinationLayer: "stack",
+      destinationLayer: "chain",
     }));
     expect(tokenAppearance).toEqual(expect.objectContaining({
       mode: "appear",
@@ -731,35 +733,30 @@ describe("motion geometry", () => {
     expect(batch?.connectors).toEqual([]);
   });
 
-  it("layers stack-to-chain travel above its chain destination but below the stack", () => {
-    const stackSource = rect(120, 280, 100, 138);
-    const chainDestination = rect(460, 330, 100, 138);
+  it("flies a visible copy of a hero trigger from the hero to its stack layer", () => {
+    const heroSource = rect(120, 280, 100, 138);
+    const stackDestination = rect(460, 330, 100, 138);
     const batch = resolveMotionBatch(
       [{
-        kind: "move",
-        source: { kind: "stack-attack" },
-        destination: { kind: "chain-attack", link: 0 },
-        visual: {
-          kind: "face",
-          card: { instanceId: 80, cardId: "AHA002", owner: 1 },
-        },
+        kind: "connect",
+        source: { kind: "hero", seat: 0 },
+        destination: { kind: "stack-layer", index: 0 },
+        visual: { kind: "face", card: { instanceId: 80, cardId: "HERO-0", owner: 0 } },
         instanceId: 80,
-        sourcePresentationKey: "stack:attack:80",
-        destinationPresentationKey: "chain:0:attack:80",
-        count: 1,
-        confidence: "exact",
+        sourcePresentationKey: "0:hero:80",
+        destinationPresentationKey: "stack:layer:80",
       }],
-      anchors({ cards: [["stack:attack:80", stackSource]] }),
-      anchors({ cards: [["chain:0:attack:80", chainDestination]] }),
+      anchors({ cards: [["0:hero:80", heroSource]] }),
+      anchors({ cards: [["0:hero:80", heroSource], ["stack:layer:80", stackDestination]] }),
       14,
     );
 
     expect(batch?.flights).toEqual([expect.objectContaining({
-      mode: "move",
-      start: stackSource,
-      end: chainDestination,
-      destinationLayer: "chain",
+      start: heroSource,
+      end: stackDestination,
+      destinationLayer: "stack",
     })]);
+    expect(batch?.connectors).toEqual([]);
   });
 
   it("centers an anonymous card-sized flight inside broad zone anchors", () => {

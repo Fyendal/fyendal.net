@@ -5,6 +5,7 @@ import type { DeckSummary } from "@fyendal/protocol";
 import { CONSTRUCTED_FORMATS, type ConstructedFormat } from "../domain.js";
 import { useStore } from "../store.js";
 import { FormatBadge, formatSelectLabel } from "./FormatBadge.js";
+import { ModalSurface } from "../components/ModalSurface.js";
 import {
   DeckTile,
   DeleteDeckModal,
@@ -15,6 +16,19 @@ import {
 } from "./DeckGrid.js";
 
 export type DeckFormatFilter = "all" | ConstructedFormat;
+
+function fabraryDeckHref(value: string | null): string | undefined {
+  if (!value) return undefined;
+  try {
+    const url = new URL(value);
+    const match = /^\/decks\/([0-9A-HJKMNP-TV-Z]{26})\/?$/i.exec(url.pathname);
+    if (url.protocol !== "https:" || !["fabrary.net", "www.fabrary.net"].includes(url.hostname)
+      || url.port || url.username || url.password || !match) return undefined;
+    return `https://fabrary.net/decks/${match[1]!.toUpperCase()}`;
+  } catch {
+    return undefined;
+  }
+}
 
 /** Saved decks from both constructed formats, with management actions only. */
 export function DeckLibrary(props: {
@@ -32,6 +46,8 @@ export function DeckLibrary(props: {
   const [importing, setImporting] = useState(false);
   const [editingDeck, setEditingDeck] = useState<DeckSummary | null>(null);
   const [deletingDeck, setDeletingDeck] = useState<DeckSummary | null>(null);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(() => new Set());
+  const [bulkDeletingDecks, setBulkDeletingDecks] = useState<DeckSummary[] | null>(null);
 
   const visibleDecks = CONSTRUCTED_FORMATS
     .filter((format) => props.formatFilter === "all" || props.formatFilter === format)
@@ -41,6 +57,13 @@ export function DeckLibrary(props: {
     ))
     .sort((left, right) => right.updatedAt - left.updatedAt);
   const openImport = () => setImporting(true);
+  const selectedDecks = decks.filter((deck) => selectedIds.has(deck.id));
+  const toggleSelected = (id: string) => setSelectedIds((current) => {
+    const next = new Set(current);
+    if (next.has(id)) next.delete(id);
+    else next.add(id);
+    return next;
+  });
 
   return (
     <div className="panel deck-library-panel">
@@ -88,13 +111,31 @@ export function DeckLibrary(props: {
         </label>
       </div>
 
+      {selectedDecks.length > 0 ? (
+        <div className="deck-bulk-actions" role="group" aria-label={intl.formatMessage({ id: "lobby.deck.selectionActions" })}>
+          <span role="status">{intl.formatMessage({ id: "lobby.deck.selectedCount" }, { count: selectedDecks.length })}</span>
+          <button onClick={() => setSelectedIds(new Set())}>
+            {intl.formatMessage({ id: "lobby.deck.clearSelection" })}
+          </button>
+          <button className="btn-danger" onClick={() => setBulkDeletingDecks(selectedDecks)}>
+            {intl.formatMessage({ id: "lobby.deck.deleteSelected" })}
+          </button>
+        </div>
+      ) : null}
+
       {decksLoading ? (
         <p className="muted" role="status">{intl.formatMessage({ id: "lobby.loadingDecks" })}</p>
       ) : visibleDecks.length > 0 ? (
         <div className="deck-grid deck-grid-saved">
           {visibleDecks.map((deck) => (
             <div className="deck-library-card" key={deck.id}>
-              <DeckTile deck={deck} source="saved" onSelect={() => setEditingDeck(deck)} />
+              <label className="deck-library-select">
+                <input type="checkbox" checked={selectedIds.has(deck.id)}
+                  aria-label={intl.formatMessage({ id: "lobby.deck.selectNamed" }, { name: deck.name })}
+                  onChange={() => toggleSelected(deck.id)} />
+              </label>
+              <DeckTile deck={deck} source="saved" href={fabraryDeckHref(deck.fabraryUrl)}
+                onSelect={() => setEditingDeck(deck)} />
               <div className="deck-library-card-actions">
                 <FormatBadge format={deck.format} />
                 <div>
@@ -129,6 +170,71 @@ export function DeckLibrary(props: {
       ) : null}
       {editingDeck ? <EditDeckModal deck={editingDeck} onClose={() => setEditingDeck(null)} /> : null}
       {deletingDeck ? <DeleteDeckModal deck={deletingDeck} onClose={() => setDeletingDeck(null)} /> : null}
+      {bulkDeletingDecks ? (
+        <DeleteSelectedDecksModal decks={bulkDeletingDecks}
+          onDeleted={(id) => setSelectedIds((current) => {
+            const next = new Set(current);
+            next.delete(id);
+            return next;
+          })}
+          onClose={() => setBulkDeletingDecks(null)} />
+      ) : null}
     </div>
+  );
+}
+
+function DeleteSelectedDecksModal(props: {
+  decks: DeckSummary[];
+  onDeleted: (id: string) => void;
+  onClose: () => void;
+}) {
+  const intl = useIntl();
+  const deleteDeck = useStore((state) => state.deleteDeck);
+  const [remaining, setRemaining] = useState(props.decks);
+  const [busy, setBusy] = useState(false);
+  const [errors, setErrors] = useState<string[]>([]);
+
+  const remove = async () => {
+    if (busy) return;
+    setBusy(true);
+    setErrors([]);
+    const failed: DeckSummary[] = [];
+    const nextErrors: string[] = [];
+    for (const deck of remaining) {
+      const result = await deleteDeck(deck.id);
+      if (result.ok) props.onDeleted(deck.id);
+      else {
+        failed.push(deck);
+        nextErrors.push(`${deck.name}: ${result.error}`);
+      }
+    }
+    setRemaining(failed);
+    setBusy(false);
+    if (failed.length === 0) props.onClose();
+    else setErrors(nextErrors);
+  };
+  const close = () => { if (!busy) props.onClose(); };
+
+  return (
+    <ModalSurface title={intl.formatMessage({ id: "lobby.deck.deleteSelected" })}
+      description={intl.formatMessage({ id: "lobby.deck.deleteSelectedPrompt" }, { count: remaining.length })}
+      className="deck-delete-modal" onClose={close}>
+      <ul className="deck-bulk-delete-list">
+        {remaining.map((deck) => <li key={deck.id}>{deck.name}</li>)}
+      </ul>
+      {errors.length > 0 ? (
+        <div className="import-errors" role="alert">
+          {errors.map((error, index) => <p key={index}>{error}</p>)}
+        </div>
+      ) : null}
+      <div className="deck-edit-actions">
+        <button data-modal-initial-focus disabled={busy} onClick={close}>
+          {intl.formatMessage({ id: "common.cancel" })}
+        </button>
+        <button className="btn-danger" disabled={busy} onClick={() => void remove()}>
+          {intl.formatMessage({ id: busy ? "lobby.deck.deleting" : "lobby.deck.confirmDelete" })}
+        </button>
+      </div>
+    </ModalSurface>
   );
 }

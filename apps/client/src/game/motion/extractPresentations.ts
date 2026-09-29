@@ -1,4 +1,5 @@
 import type { CardView, GameView } from "@fyendal/shared";
+import { heroCard } from "../board/heroCard.js";
 import {
   motionLocationKey,
   motionPresentationKey,
@@ -46,6 +47,7 @@ export function extractGamePresentations(view: GameView): GamePresentations {
 
   for (const player of view.players) {
     const seat = player.seat;
+    add(heroCard(player), { kind: "hero", seat }, "canonical");
     player.hand.forEach((card) => {
       // Staged hand defenders are rendered on the chain immediately. Treat
       // that as their displayed location so confirmation does not replay the
@@ -87,7 +89,7 @@ export function extractGamePresentations(view: GameView): GamePresentations {
   view.chain.forEach((link, linkIndex) => {
     add(
       link.attackingCard,
-      link.onStack ? { kind: "stack-attack" } : { kind: "chain-attack", link: linkIndex },
+      { kind: "chain-attack", link: linkIndex },
       "display",
     );
     link.defendingCards.forEach((card, index) => {
