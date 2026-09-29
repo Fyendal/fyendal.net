@@ -475,6 +475,8 @@ export interface PersistedGameTurnStatsV1 {
   threatened: [number, number];
   blocked: [number, number];
   damageDealt: [number, number];
+  /** Added compatibly after the initial persisted-state baseline. */
+  allyAbsorbed?: [number, number];
 }
 
 export interface PersistedGameStatsV1 {

@@ -56,7 +56,8 @@ export function GameOver({
     view.players[0]?.heroName ?? intl.formatMessage({ id: "game.playerNumber" }, { number: 1 }),
     view.players[1]?.heroName ?? intl.formatMessage({ id: "game.playerNumber" }, { number: 2 }),
   ];
-  const totalValue = stats.total.threatened[selectedSeat] + stats.total.blocked[selectedSeat];
+  const totalValue = stats.total.threatened[selectedSeat] + stats.total.blocked[selectedSeat]
+    + stats.total.allyAbsorbed[selectedSeat];
   const fmt = (n: number) => intl.formatNumber(n, { maximumFractionDigits: 1 });
   const opponent = selectedSeat === 0 ? 1 : 0;
 
@@ -141,6 +142,10 @@ export function GameOver({
                 <strong>{stats.total.blocked[selectedSeat]}</strong>
                 <span>{intl.formatMessage({ id: "game.stats.damageBlocked" })}</span>
               </div>
+              <div className="gameover-key-stat">
+                <strong>{stats.total.allyAbsorbed[selectedSeat]}</strong>
+                <span>{intl.formatMessage({ id: "game.stats.allyAbsorbed" })}</span>
+              </div>
               <div className="gameover-key-stat gameover-value-stat">
                 <strong>{totalPrevented(stats, selectedSeat)}</strong>
                 <span>{intl.formatMessage({ id: "game.stats.damagePrevented" })}</span>
@@ -179,6 +184,7 @@ export function GameOver({
                       <th>{intl.formatMessage({ id: "game.stats.threatened" })}</th>
                       <th>{intl.formatMessage({ id: "game.stats.dealt" })}</th>
                       <th>{intl.formatMessage({ id: "game.stats.blocked" })}</th>
+                      <th>{intl.formatMessage({ id: "game.stats.allyAbsorbed" })}</th>
                       <th>{intl.formatMessage({ id: "game.stats.prevented" })}</th>
                       <th>{intl.formatMessage({ id: "game.stats.value" })}</th>
                     </tr>
@@ -191,6 +197,7 @@ export function GameOver({
                         <td>{row.threatened[selectedSeat]}</td>
                         <td>{row.damageDealt[selectedSeat]}</td>
                         <td>{row.blocked[selectedSeat]}</td>
+                        <td>{row.allyAbsorbed[selectedSeat]}</td>
                         <td>{preventedDamage(row, selectedSeat)}</td>
                         <td>{cycleValue(row, selectedSeat)}</td>
                       </tr>
@@ -203,6 +210,7 @@ export function GameOver({
                       <td>{stats.total.threatened[selectedSeat]}</td>
                       <td>{stats.total.damageDealt[selectedSeat]}</td>
                       <td>{stats.total.blocked[selectedSeat]}</td>
+                      <td>{stats.total.allyAbsorbed[selectedSeat]}</td>
                       <td>{totalPrevented(stats, selectedSeat)}</td>
                       <td>{totalValue}</td>
                     </tr>

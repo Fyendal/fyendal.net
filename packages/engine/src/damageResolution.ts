@@ -14,7 +14,7 @@ import {
 import type { GameStateInternal } from "./runtimeState.js";
 
 import type { CardInstance, Modifier, PendingArcane, PlayerState, StackLayer } from "./state.js";
-import { recordEffectThreat, recordHeroDamage } from "./stats.js";
+import { recordAllyAbsorbed, recordEffectThreat, recordHeroDamage } from "./stats.js";
 import { tokenCreationCauseForModifier } from "./tokenQueries.js";
 import { createTokenFor, createTokensFor } from "./tokens.js";
 import { destroyPermanent, moveToGraveyard } from "./zoneMoves.js";
@@ -1235,6 +1235,7 @@ export function dealAllyDamage(state: GameStateInternal,
   const dealt = Math.max(0, replacement ?? packet.amount);
   packet.amount = dealt;
   ally.life -= dealt;
+  if (packet.sourceSeat !== found.seat) recordAllyAbsorbed(state, found.seat, dealt);
   if (!packet.combat) noteEffectDamageDealer(state, packet, src, false);
   logPublic(state, packet.combat && src
     ? gameLogMessage(

@@ -76,6 +76,7 @@ describe("computeCycleStats", () => {
           threatened: [2, 5],
           blocked: [1, 0],
           damageDealt: [2, 4],
+          allyAbsorbed: [1, 2],
         },
       ],
     };
@@ -87,6 +88,7 @@ describe("computeCycleStats", () => {
         threatened: [6, 8],
         blocked: [1, 2],
         damageDealt: [4, 7],
+        allyAbsorbed: [1, 2],
       }],
       cyclesPlayed: [1, 1],
       total: {
@@ -94,6 +96,7 @@ describe("computeCycleStats", () => {
         threatened: [6, 8],
         blocked: [1, 2],
         damageDealt: [4, 7],
+        allyAbsorbed: [1, 2],
       },
     });
   });
@@ -112,6 +115,7 @@ describe("computeCycleStats", () => {
         threatened: [6, 4],
         blocked: [4, 3],
         damageDealt: [3, 0],
+        allyAbsorbed: [0, 0],
       },
     ]);
     expect(stats.cyclesPlayed).toEqual([1, 1]);
@@ -120,6 +124,7 @@ describe("computeCycleStats", () => {
       threatened: [6, 4],
       blocked: [4, 3],
       damageDealt: [3, 0],
+      allyAbsorbed: [0, 0],
     });
   });
 
@@ -158,9 +163,15 @@ describe("computeCycleStats", () => {
   });
 
   it("does not count damage dealt to an ally as hero damage", () => {
-    const attack = { ...link(0, 4, 0), targetAllyName: "Ashwing" };
-    const stats = computeCycleStats([frame(1, 0, [attack])]);
+    const attack = { ...link(0, 4, 0), targetAllyName: "Ashwing", damage: 3 };
+    const stats = computeCycleStats([frame(1, 0, [attack]), frame(2, 1, [])]);
     expect(stats.total.damageDealt).toEqual([0, 0]);
+    expect(stats.total.allyAbsorbed).toEqual([0, 3]);
+    expect(stats.total.threatened).toEqual([0, 0]);
+    expect(stats.total.attacks).toEqual([0, 0]);
+    expect(stats.total.blocked).toEqual([0, 0]);
+    expect(cycleValue(stats.rows[0]!, 1)).toBe(3);
+    expect(averageValue(stats, 1)).toBe(3);
   });
 
   it("counts a weapon attacking again on a later turn", () => {
@@ -215,18 +226,20 @@ describe("computeCycleStats", () => {
       threatened: [0, 0],
       blocked: [0, 0],
       damageDealt: [0, 0],
+      allyAbsorbed: [0, 0],
     }]);
     expect(stats.total).toEqual({
       attacks: [0, 0],
       threatened: [0, 0],
       blocked: [0, 0],
       damageDealt: [0, 0],
+      allyAbsorbed: [0, 0],
     });
   });
 });
 
 describe("cycleValue / averageValue", () => {
-  it("value is threatened + blocked within the cycle", () => {
+  it("value is threatened + blocked + ally damage within the cycle", () => {
     const stats = computeCycleStats([
       frame(1, 0, [link(0, 6, 3)]),
       frame(2, 1, [link(1, 4, 4)]),

@@ -496,6 +496,8 @@ export interface GameTurnStatsView {
   threatened: [number, number];
   blocked: [number, number];
   damageDealt: [number, number];
+  /** Damage dealt by an opponent to this seat's allies. Absent in older games. */
+  allyAbsorbed?: [number, number];
 }
 
 export interface GameStatsView {

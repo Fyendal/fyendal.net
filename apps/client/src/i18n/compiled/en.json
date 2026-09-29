@@ -21508,6 +21508,12 @@
       "value": "Trigger"
     }
   ],
+  "game.stats.allyAbsorbed": [
+    {
+      "type": 0,
+      "value": "Damage absorbed by allies"
+    }
+  ],
   "game.stats.attacks": [
     {
       "type": 0,

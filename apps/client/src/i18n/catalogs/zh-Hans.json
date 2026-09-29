@@ -2196,6 +2196,7 @@
   "game.stats.damageThreatened": "威胁伤害",
   "game.stats.damageDealt": "造成伤害",
   "game.stats.damageBlocked": "防御伤害",
+  "game.stats.allyAbsorbed": "ally 承受的伤害",
   "game.stats.damagePrevented": "预防伤害",
   "game.stats.averages": "平均数据",
   "game.stats.valuePerRound": "每回合价值",

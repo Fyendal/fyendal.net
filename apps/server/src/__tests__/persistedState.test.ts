@@ -1087,10 +1087,19 @@ describe("PersistedStateV1", () => {
     expect(decoded.gameStats).toEqual({ turns: [] });
     expect(decoded.delayedTriggers).toEqual([]);
 
+    const beforeAllyStats = jsonCopy(encodePersistedState(game()));
+    delete beforeAllyStats.state.gameStats!.turns[0]!.allyAbsorbed;
+    expect(decodePersistedState(beforeAllyStats, "ABC123", cardData, scripts)
+      .gameStats.turns[0]?.allyAbsorbed).toBeUndefined();
+
     const corrupt = jsonCopy(encodePersistedState(game()));
     corrupt.state.gameStats!.turns[0]!.damageDealt[1] = -1;
     expect(() => decodePersistedState(corrupt, "ABC123", cardData, scripts))
       .toThrow(/damageDealt\[1\].*non-negative/);
+    const corruptAlly = jsonCopy(encodePersistedState(game()));
+    corruptAlly.state.gameStats!.turns[0]!.allyAbsorbed = [0, -1];
+    expect(() => decodePersistedState(corruptAlly, "ABC123", cardData, scripts))
+      .toThrow(/allyAbsorbed\[1\].*non-negative/);
   });
 
   it("round trips paused reaction costs and damage replacement modifiers", () => {

@@ -781,9 +781,37 @@ describe("GameView and server messages", () => {
           threatened: [4, 0],
           blocked: [0, 2],
           damageDealt: [2, 0],
+          allyAbsorbed: [0, 3],
         }],
       },
     })).not.toBeNull();
+    expect(decodeGameView({
+      ...gameView(),
+      gameStats: {
+        turns: [{
+          turn: 1,
+          activePlayer: 0,
+          attacks: [1, 0],
+          threatened: [4, 0],
+          blocked: [0, 2],
+          damageDealt: [2, 0],
+        }],
+      },
+    })).not.toBeNull();
+    expect(decodeGameView({
+      ...gameView(),
+      gameStats: {
+        turns: [{
+          turn: 1,
+          activePlayer: 0,
+          attacks: [1, 0],
+          threatened: [4, 0],
+          blocked: [0, 2],
+          damageDealt: [2, 0],
+          allyAbsorbed: [0, -1],
+        }],
+      },
+    })).toBeNull();
     expect(decodeGameView({
       ...gameView(),
       gameStats: {

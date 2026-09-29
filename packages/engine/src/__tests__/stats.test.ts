@@ -65,6 +65,38 @@ describe("authoritative match stats", () => {
     });
   });
 
+  it("credits damage dealt to an opponent's ally as the defender's separate value", () => {
+    const state = makeGame(84);
+    state.cardsRef = {
+      ...state.cardsRef,
+      TEST_ALLY: {
+        id: "TEST_ALLY", name: "Test Ally", cardType: "action",
+        subtypes: ["ally"], classes: ["generic"], life: 10, text: "",
+      },
+    };
+    const allyId = state.nextInstanceId++;
+    player(state, 1).board.push({
+      instanceId: allyId, cardId: "TEST_ALLY", owner: 1, life: 10,
+    });
+    const sourceId = giveCard(state, 0, "INSTANT");
+    const source = player(state, 0).hand.find((card) => card.instanceId === sourceId)!;
+
+    makeCtx(state, engineRuntime, 0, source).dealDamage(1, 4, { targetAllyId: allyId });
+
+    expect(state.gameStats.turns[0]).toMatchObject({
+      allyAbsorbed: [0, 4],
+      blocked: [0, 0],
+      damageDealt: [0, 0],
+    });
+    expect(player(state, 1).life).toBe(20);
+    expect(player(state, 1).board[0]?.life).toBe(6);
+
+    const ownSourceId = giveCard(state, 1, "INSTANT");
+    const ownSource = player(state, 1).hand.find((card) => card.instanceId === ownSourceId)!;
+    makeCtx(state, engineRuntime, 1, ownSource).dealDamage(1, 1, { targetAllyId: allyId });
+    expect(state.gameStats.turns[0]?.allyAbsorbed).toEqual([0, 4]);
+  });
+
   it("projects current-turn rules facts without requiring log inference", () => {
     const state = makeGame(83);
     player(state, 0).flags.attacksDeclaredThisTurn = 2;

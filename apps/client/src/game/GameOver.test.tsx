@@ -27,6 +27,15 @@ function finishedView(): GameView {
 describe("GameOver player statistics", () => {
   it("presents heroes as a switcher and labels the single selected stats panel", () => {
     const view = finishedView();
+    view.gameStats = { turns: [{
+      turn: 1,
+      activePlayer: 0,
+      attacks: [0, 0],
+      threatened: [0, 0],
+      blocked: [0, 0],
+      damageDealt: [0, 0],
+      allyAbsorbed: [4, 0],
+    }] };
     const html = renderToStaticMarkup(
       <TestI18nProvider>
         <GameOver
@@ -51,6 +60,7 @@ describe("GameOver player statistics", () => {
     expect(html).toContain('id="gameover-selected-player">Dash I/O</strong>');
     expect(html).toContain("Back to lobby");
     expect(html).toContain('class="btn-primary"');
+    expect(html).toContain("<strong>4</strong><span>Damage absorbed by allies</span>");
   });
 
   it("localizes the result actions and statistics in Chinese", () => {

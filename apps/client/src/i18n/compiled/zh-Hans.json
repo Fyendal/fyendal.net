@@ -20700,6 +20700,12 @@
       "value": "触发效果"
     }
   ],
+  "game.stats.allyAbsorbed": [
+    {
+      "type": 0,
+      "value": "ally 承受的伤害"
+    }
+  ],
   "game.stats.attacks": [
     {
       "type": 0,

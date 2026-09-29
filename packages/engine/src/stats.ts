@@ -17,6 +17,7 @@ export function beginStatsTurn(state: GameStateInternal): GameTurnStatsView {
     threatened: [0, 0],
     blocked: [0, 0],
     damageDealt: [0, 0],
+    allyAbsorbed: [0, 0],
   };
   state.gameStats.turns.push(row);
   return row;
@@ -51,4 +52,15 @@ export function recordHeroDamage(
 ): void {
   if (amount <= 0) return;
   addForSeat(beginStatsTurn(state).damageDealt, sourceSeat, amount);
+}
+
+export function recordAllyAbsorbed(
+  state: GameStateInternal,
+  defenderSeat: number,
+  amount: number,
+): void {
+  if (amount <= 0) return;
+  const row = beginStatsTurn(state);
+  row.allyAbsorbed ??= [0, 0];
+  addForSeat(row.allyAbsorbed, defenderSeat, amount);
 }

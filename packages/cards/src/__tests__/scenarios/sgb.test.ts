@@ -943,6 +943,8 @@ describe("SGB — allies being attacked (CR 8.2.8)", () => {
       .expectInZone(0, "barnacle|2", "graveyard");
     // 8.2.8e: the attacking hero is not considered to have dealt damage
     expect(g.state.players[1]!.flags.dealtDamageThisTurn ?? false).toBe(false);
+    expect(g.state.gameStats.turns[0]?.allyAbsorbed).toEqual([4, 0]);
+    expect(g.state.gameStats.turns[0]?.blocked).toEqual([0, 0]);
   });
 
   it("attacks default to the hero even with allies in play", () => {

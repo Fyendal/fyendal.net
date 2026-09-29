@@ -1007,10 +1007,12 @@ function seatCounters(value: unknown): value is [number, number] {
 function gameTurnStats(value: unknown): value is GameTurnStatsView {
   const stats = object(value);
   return !!stats && exactKeys(stats, [
-    "turn", "activePlayer", "attacks", "threatened", "blocked", "damageDealt",
-  ]) && nonNegativeInteger(stats.turn) && seat(stats.activePlayer)
+    "turn", "activePlayer", "attacks", "threatened", "blocked", "damageDealt", "allyAbsorbed",
+  ], ["turn", "activePlayer", "attacks", "threatened", "blocked", "damageDealt"])
+    && nonNegativeInteger(stats.turn) && seat(stats.activePlayer)
     && seatCounters(stats.attacks) && seatCounters(stats.threatened)
-    && seatCounters(stats.blocked) && seatCounters(stats.damageDealt);
+    && seatCounters(stats.blocked) && seatCounters(stats.damageDealt)
+    && (stats.allyAbsorbed === undefined || seatCounters(stats.allyAbsorbed));
 }
 
 function gameStats(value: unknown): value is GameStatsView {
