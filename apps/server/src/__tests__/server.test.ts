@@ -387,13 +387,13 @@ describe("auth gating", () => {
 });
 
 describe("server rooms over websocket", () => {
-  it("creates, sideboards, starts, and advances a Briar bot room", async () => {
+  it("creates, sideboards, starts, and advances a Briar bot room with a legal card pool", async () => {
     const a = await authedClient();
     a.sendMsg({
       type: "create-bot-room",
       format: "silver-age",
-      deckId: "precon-svi",
-      cardPoolMode: "open",
+      deckId: "precon-sly",
+      cardPoolMode: "legal",
     });
     const created = (await a.next((m) => m.type === "room-created")) as Extract<
       ServerMessage,
@@ -404,7 +404,7 @@ describe("server rooms over websocket", () => {
     )) as Extract<ServerMessage, { type: "prep-state" }>;
     expect(prep.prep.seats[1]).toMatchObject({ heroName: "Briar", connected: true });
 
-    const pool = silverAgePrecon("precon-svi")!.pool;
+    const pool = silverAgePrecon("precon-sly")!.pool;
     a.sendMsg({ type: "choose-first", first: false });
     await a.next((m) => m.type === "prep-state" && m.prep.startPlayer === 1);
     a.sendMsg({ type: "present-arena", arena: { weaponIds: pool.weaponIds.slice(0, 1), equipment: {} } });
@@ -756,22 +756,6 @@ describe("server rooms over websocket", () => {
     });
     a.sendMsg({ type: "leave-room", endGame: true });
     expect(await a.next((message) => message.type === "left")).toEqual({ type: "left" });
-    a.ws.close();
-  });
-
-  it("rejects the benched Briar bot outside Open mode", async () => {
-    const a = await authedClient();
-    a.sendMsg({
-      type: "create-bot-room",
-      format: "silver-age",
-      deckId: "precon-sly",
-      bot: "briar",
-    });
-    const error = (await a.next((message) => message.type === "error")) as Extract<
-      ServerMessage,
-      { type: "error" }
-    >;
-    expect(error.message).toContain("Briar is benched and not legal in Silver Age");
     a.ws.close();
   });
 

@@ -1,6 +1,5 @@
 import type {
   BotOpponent,
-  CardPoolMode,
   GameIntent,
   PresentedDeck,
   PresentedArena,
@@ -57,9 +56,6 @@ export interface BotDefinition {
   deckId: string;
   username: string;
   deckName: string;
-  /** Override only the bot's registered-pool legality check. Human decks keep
-   * the room's selected card-pool mode. */
-  presentationCardPoolMode?: CardPoolMode;
   chooseIntent(input: BotPolicyInput): GameIntent;
   /** Standard decision path used by the worker; planning telemetry is present
    * when the policy reached a bounded planner. */
@@ -197,7 +193,6 @@ export const BOT_DEFINITIONS = {
     deckId: "bot-starvo-boss",
     username: "Starvo Bot",
     deckName: "Bravo, Star of the Show — Boss Battle",
-    presentationCardPoolMode: "open",
     chooseIntent: chooseStarvoIntent,
     chooseDecision: (input) => botDecisionFromTrace(chooseStarvoIntentWithTrace(input), true),
     chooseContinuationIntent: chooseStarvoContinuationIntent,

@@ -2661,7 +2661,7 @@ export class PgRoomStore {
         }
         const legality = formatLegalityErrors(cardData, deck.decklist, room.format, {
           cardPoolMode: opts.controller === "bot"
-            ? botDefinitionForDeckId(deck.id)?.presentationCardPoolMode ?? room.cardPoolMode
+            ? "open"
             : room.cardPoolMode,
         });
         if (legality.length > 0) return { error: legality.join("; ") };
@@ -2816,7 +2816,7 @@ export class PgRoomStore {
           room.prep.startPlayer === botSeat ? "first" : "second",
         );
         const botValidation = validatePresentation(registered.pool, botPresentation, room.format, {
-          cardPoolMode: definition.presentationCardPoolMode ?? room.cardPoolMode,
+          cardPoolMode: "open",
         });
         if (!botValidation.ok) return { error: botValidation.error };
         bot.presented = botValidation.decklist;
@@ -2907,7 +2907,7 @@ export class PgRoomStore {
           { heroId }, room.prep.startPlayer === botSeat ? "first" : "second",
         );
         const validation = validateArena(registered.pool, arena, room.format, {
-          cardPoolMode: definition.presentationCardPoolMode ?? room.cardPoolMode,
+          cardPoolMode: "open",
         });
         if (!validation.ok) return { error: validation.error };
         room.prep.arenas[botSeat] = arena;

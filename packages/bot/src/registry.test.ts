@@ -44,7 +44,7 @@ describe("bot registry", () => {
         expect(deck.weaponIds).toEqual(arena.weaponIds);
         expect(deck.equipment).toEqual(arena.equipment);
         expect(validatePresentation(precon(definition.deckId)!.pool, deck, definition.format, {
-          cardPoolMode: definition.id === "briar" ? "open" : definition.presentationCardPoolMode,
+          cardPoolMode: "open",
         }).ok).toBe(true);
       }
     }
@@ -59,7 +59,7 @@ describe("bot registry", () => {
       for (const turnOrder of ["first", "second"] as const) {
         const presented = definition.presentationFor(opponent, turnOrder);
         expect(validatePresentation(registered.pool, presented, definition.format, {
-          cardPoolMode: definition.id === "briar" ? "open" : definition.presentationCardPoolMode,
+          cardPoolMode: "open",
         })).toMatchObject({
           ok: true,
         });

@@ -143,7 +143,7 @@ export function FabraryPlayPage() {
       </main>
       <SiteFooter />
       {showBots && request && deck && !blocked ? (
-        <BotOpponentModal format={request.format} cardPoolMode={mode} initialSearchForPlayer={false}
+        <BotOpponentModal format={request.format} initialSearchForPlayer={false}
           onClose={() => setShowBots(false)}
           onSelect={(bot, searchForPlayer) => { setShowBots(false); start({ kind: "bot", bot, searchForPlayer }); }} />
       ) : null}

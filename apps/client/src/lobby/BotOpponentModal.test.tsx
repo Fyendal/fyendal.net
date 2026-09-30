@@ -12,7 +12,7 @@ describe("BotOpponentModal", () => {
   it("can start Fabrary practice with player search disabled", () => {
     const html = renderToStaticMarkup(
       <TestI18nProvider>
-        <BotOpponentModal format="cc" cardPoolMode="open" initialSearchForPlayer={false}
+        <BotOpponentModal format="cc" initialSearchForPlayer={false}
           onSelect={vi.fn()} onClose={vi.fn()} />
       </TestI18nProvider>,
     );
@@ -22,7 +22,7 @@ describe("BotOpponentModal", () => {
   it("offers Ira, Hala, Cindra, Jarl, and Starvo in a focused opponent dialog", () => {
     const html = renderToStaticMarkup(
       <TestI18nProvider>
-        <BotOpponentModal format="cc" cardPoolMode="legal" onSelect={vi.fn()} onClose={vi.fn()} />
+        <BotOpponentModal format="cc" onSelect={vi.fn()} onClose={vi.fn()} />
       </TestI18nProvider>,
     );
 
@@ -56,7 +56,7 @@ describe("BotOpponentModal", () => {
   it("offers Kayo, Briar, and Bravo for Silver Age", () => {
     const html = renderToStaticMarkup(
       <TestI18nProvider>
-        <BotOpponentModal format="silver-age" cardPoolMode="open" onSelect={vi.fn()} onClose={vi.fn()} />
+        <BotOpponentModal format="silver-age" onSelect={vi.fn()} onClose={vi.fn()} />
       </TestI18nProvider>,
     );
 
@@ -70,19 +70,22 @@ describe("BotOpponentModal", () => {
     expect(html).not.toContain("Scarlet Revenger");
   });
 
-  it("hides benched Briar outside Open mode", () => {
+  it("shows benched Briar with an accessible custom tooltip for restricted cards", () => {
     const html = renderToStaticMarkup(
       <TestI18nProvider>
         <BotOpponentModal
           format="silver-age"
-          cardPoolMode="legal"
           onSelect={vi.fn()}
           onClose={vi.fn()}
         />
       </TestI18nProvider>,
     );
 
-    expect(html).not.toContain("Briar");
+    expect(html).toContain("Briar");
+    expect(html).toContain("Includes banned");
+    expect(html).toContain('role="tooltip">Banned cards:\nBriar');
+    expect(html).toContain('aria-describedby=');
+    expect(html).not.toContain('title="Banned cards:');
     expect(html).toContain("Kayo");
     expect(html).toContain("Bravo");
   });
@@ -97,7 +100,7 @@ describe("BotOpponentModal", () => {
     });
     const html = renderToStaticMarkup(
       <TestI18nProvider>
-        <BotOpponentModal format="cc" cardPoolMode="legal" onSelect={vi.fn()} onClose={vi.fn()} />
+        <BotOpponentModal format="cc" onSelect={vi.fn()} onClose={vi.fn()} />
       </TestI18nProvider>,
     );
 

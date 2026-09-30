@@ -187,13 +187,13 @@ describe("game sound cues", () => {
     }])).toEqual([{ kind: "shuffle", delayMs: 0 }]);
   });
 
-  it("sounds combat damage as a slash and arcane damage as a zap", () => {
+  it("sounds combat damage as a hit and arcane damage as a zap", () => {
     const before: GameLogViewEntry = {
       fallback: "Before",
       sequence: 4,
       message: { id: "engine.log.before" },
     };
-    const slash: GameLogViewEntry = {
+    const hit: GameLogViewEntry = {
       fallback: "Attack hits",
       sequence: 5,
       message: { id: "engine.log.damage.hit" },
@@ -215,11 +215,11 @@ describe("game sound cues", () => {
     expect(damageSoundCuesForViews(
       view({ log: [before.fallback], logEntries: [before] }),
       view({
-        log: [before.fallback, slash.fallback, physicalEffect.fallback, zap.fallback],
-        logEntries: [before, slash, physicalEffect, zap],
+        log: [before.fallback, hit.fallback, physicalEffect.fallback, zap.fallback],
+        logEntries: [before, hit, physicalEffect, zap],
       }),
     )).toEqual([
-      { kind: "slash", delayMs: 0 },
+      { kind: "hit", delayMs: 0 },
       { kind: "zap", delayMs: 90 },
     ]);
   });

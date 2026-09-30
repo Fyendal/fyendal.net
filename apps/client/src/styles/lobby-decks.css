@@ -307,6 +307,23 @@
   font-weight: 400;
   line-height: 1.35;
 }
+.bot-card-warnings {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+  margin-top: 8px;
+}
+.bot-card-warning-description {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+.bot-card-warning-tooltip {
+  white-space: pre-line;
+}
 .bot-opponent-cancel {
   width: 100%;
   margin-top: 14px;
@@ -370,7 +387,7 @@
   outline: 1px solid #ffd66b;
   outline-offset: -2px;
 }
-.card-pool-tooltip {
+.lobby-tooltip {
   position: fixed;
   z-index: 1000;
   width: max-content;

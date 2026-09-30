@@ -6,7 +6,7 @@ const SOUND_URLS: Readonly<Record<SampleSoundKind, readonly string[]>> = {
   draw: ["cards/draw-1.ogg", "cards/draw-2.ogg", "cards/draw-3.ogg"],
   play: ["cards/play-1.ogg", "cards/play-2.ogg"],
   shuffle: ["cards/shuffle.ogg"],
-  slash: ["damage/slash.wav"],
+  hit: ["damage/hit.mp3"],
   zap: ["damage/zap.wav"],
 };
 
@@ -15,15 +15,13 @@ const CUE_GAIN: Readonly<Record<GameSoundKind, number>> = {
   play: 0.7,
   shuffle: 0.45,
   priority: 0.32,
-  slash: 0.72,
+  hit: 0.9,
   zap: 0.58,
 };
 
 const MAX_CUE_DURATION_SECONDS: Readonly<Partial<Record<GameSoundKind, number>>> = {
   // Match the deck shuffle animation instead of playing the full 3-second sample.
   shuffle: 0.9,
-  // Keep combat hits tight even when the source sample has a longer decay.
-  slash: 0.65,
 };
 
 const CUE_FADE_SECONDS = 0.08;
@@ -53,7 +51,7 @@ export class GameAudioPlayer {
     draw: 0,
     play: 0,
     shuffle: 0,
-    slash: 0,
+    hit: 0,
     zap: 0,
   };
   private readonly activeSources = new Set<AudioScheduledSourceNode>();

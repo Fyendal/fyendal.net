@@ -227,7 +227,6 @@ export function Home() {
       {choosingBot && selectedDeck ? (
         <BotOpponentModal
           format={format}
-          cardPoolMode={cardPoolMode}
           onSelect={(bot, searchForPlayer) => {
             createBotRoom(format, selectedDeck.id, bot, searchForPlayer);
             setChoosingBot(false);

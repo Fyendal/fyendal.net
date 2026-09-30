@@ -127,7 +127,6 @@ export function CreateRoomModal({ onClose }: { onClose: () => void }) {
         {choosingBot ? (
           <BotOpponentModal
             format={format}
-            cardPoolMode={cardPoolMode}
             onSelect={playBot}
             onClose={() => setChoosingBot(false)}
           />

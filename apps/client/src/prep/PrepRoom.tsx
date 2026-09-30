@@ -566,7 +566,6 @@ export function PrepRoom() {
         && practiceFormat ? (
           <BotPracticeNudge
             format={practiceFormat}
-            cardPoolMode={prep?.cardPoolMode ?? "legal"}
             busy={botNudgeBusyFor === botNudgeKey}
             onPlay={(bot, searchForPlayer) => {
               setBotNudgeBusyFor(botNudgeKey);

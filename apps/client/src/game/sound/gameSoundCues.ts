@@ -20,7 +20,7 @@ export type GameSoundKind =
   | "play"
   | "shuffle"
   | "priority"
-  | "slash"
+  | "hit"
   | "zap";
 
 export interface GameSoundCue {
@@ -48,7 +48,7 @@ export function prioritySoundCueForViews(
 
 /** Damage audio follows the same locale-independent log metadata as the life
  * animations. Physical effect damage and raw life loss intentionally remain
- * quiet; only attack hits slash and arcane packets zap. */
+ * quiet; only attack hits and arcane packets play their respective samples. */
 export function damageSoundCuesForViews(
   previous: GameView,
   current: GameView,
@@ -68,7 +68,7 @@ export function damageSoundCuesForViews(
       entry.message.id === "engine.log.damage.hit"
       || entry.message.id === "engine.log.damage.redirected"
     ) {
-      cues.push({ kind: "slash", delayMs: cues.length * 90 });
+      cues.push({ kind: "hit", delayMs: cues.length * 90 });
     }
   }
   return cues;

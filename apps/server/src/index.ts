@@ -766,7 +766,7 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
           return;
         }
         const botLegality = formatLegalityIssues(cardData, registeredBotDeck.pool, botFormat, {
-          cardPoolMode: definition.presentationCardPoolMode ?? msg.cardPoolMode ?? "legal",
+          cardPoolMode: "open",
         });
         if (botLegality.length > 0) {
           send(ws, { type: "error", message: botLegality.map((issue) => issue.message).join("; ") });
