@@ -1559,6 +1559,22 @@ describe("Armory Decks — rules regression coverage", () => {
     g.expectPendingReturn(1, 1);
   });
 
+  it.each([
+    ["smell fear|2", 2, true],
+    ["bonebreaker bellow|2", 1, true],
+    ["primeval bellow|2", 1, false],
+  ] as const)("Massacre does not intimidate when discarded for %s", (action, intimidates, chooseDiscard) => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", hand: [action, "massacre|1"], resources: 1, equipment: NO_EQUIPMENT },
+        { hero: "dorinthea", hand: ["head jab|1", "head jab|2", "head jab|3"], equipment: NO_EQUIPMENT },
+      ],
+    });
+    g.play(action);
+    if (chooseDiscard) g.chooseCard("massacre|1");
+    g.expectPendingReturn(1, intimidates).expectNoLog("Massacre triggers: Intimidate");
+  });
+
   it("blue Edict of Steel waits on the stack before sharpening", () => {
     const g = scenario({
       seats: [

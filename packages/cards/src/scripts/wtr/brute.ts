@@ -3,9 +3,10 @@ import { isSixPlus, localizedLog, nextAttack, queueIntimidate } from "../shared-
 
 /** Store whether the random discard paid for this card had 6+ {p}. */
 function rememberDiscardedSixPlus(ctx: ScriptCtx): void {
-  ctx.setFlag("player", "discardingForBruteAttackCost", true);
+  const attackAction = ctx.data.cardType === "action" && ctx.data.subtypes?.includes("attack") === true;
+  if (attackAction) ctx.setFlag("player", "discardingForBruteAttackCost", true);
   const [discarded] = ctx.discardRandom(ctx.seat, 1);
-  ctx.setFlag("player", "discardingForBruteAttackCost", false);
+  if (attackAction) ctx.setFlag("player", "discardingForBruteAttackCost", false);
   if (discarded) {
     ctx.setCounter("discardedSixPlus", isSixPlus(ctx, discarded) ? 1 : 0);
   }
