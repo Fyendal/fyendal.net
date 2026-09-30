@@ -1,6 +1,7 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
 import {
   attackAbility,
+  decisionMessage,
   decisionPrompt,
   discardSixPlusPayoff,
   isSixPlus,
@@ -70,8 +71,20 @@ function strongestSurvive(): CardScript {
       ];
       const cardOptions = [
         ...revealable.map((card) => card.instanceId),
-        ...opponent.hand.map((card) => card.instanceId),
+        ...opponent.hand.map(() => null),
       ];
+      const optionMessages = Object.fromEntries([
+        ...revealable.map((card) => [
+          `reveal:${card.instanceId}`,
+          decisionMessage("card.ska.strongest.survive.reveal"),
+        ] as const),
+        ...opponent.hand.map((card) => [
+          `discard:${card.instanceId}`,
+          decisionMessage("card.ska.strongest.survive.discard", {
+            card: { kind: "card", cardId: card.cardId },
+          }),
+        ] as const),
+      ]);
       ctx.requestChoice(
         "strongest-survive",
         decisionPrompt(
@@ -82,6 +95,7 @@ function strongestSurvive(): CardScript {
               card: { kind: "card", cardId: ctx.self.cardId },
               damage,
             },
+            optionMessages,
           },
         ),
         options,

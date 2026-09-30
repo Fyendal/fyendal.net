@@ -307,15 +307,28 @@ export function PendingDecisionPanel({
   const revealedCards = pd.revealedCards ?? [];
   const revealedChoice = revealedCards.length > 0;
   const lookedCards = pd.lookedCards ?? [];
-  const cardChoiceOptionIds = new Map<number, string>();
-  (pd.options ?? []).forEach((option, index) => {
-    const optionCard = pd.optionCards?.[index];
-    if (optionCard) cardChoiceOptionIds.set(optionCard.instanceId, option);
+  const offeredCardIds = new Set<number>();
+  const choiceGridCards = (pd.optionCards ?? []).flatMap((card, index) => {
+    if (!card) return [];
+    offeredCardIds.add(card.instanceId);
+    const message = pd.optionMessages?.[index];
+    return [{
+      card,
+      key: `option:${index}`,
+      optionId: pd.options?.[index],
+      label: optionCardLabels?.get(card.instanceId) ??
+        (message ? formatGameMessage(intl, message, localizedOptionResolvers) : undefined),
+    }];
   });
-  const choiceGridCards: CardView[] = [
-    ...(pd.optionCards ?? []).filter((card): card is CardView => !!card),
-    ...lookedCards.filter((card) => !cardChoiceOptionIds.has(card.instanceId)),
-  ];
+  for (const card of lookedCards) {
+    if (offeredCardIds.has(card.instanceId)) continue;
+    choiceGridCards.push({
+      card,
+      key: `looked:${card.instanceId}`,
+      optionId: undefined,
+      label: optionCardLabels?.get(card.instanceId),
+    });
+  }
   const showChoiceGrid =
     !optDecision &&
     !bloodAllocation &&
@@ -483,22 +496,19 @@ export function PendingDecisionPanel({
       ) : null}
       {showChoiceGrid ? (
         <div className="decision-cards">
-          {choiceGridCards.map((card) => {
-            const optionId = cardChoiceOptionIds.get(card.instanceId);
-            return (
-              <CardFace
-                key={card.instanceId}
-                card={card}
-                size="hand"
-                label={optionCardLabels?.get(card.instanceId)}
-                highlighted={optionId !== undefined}
-                affiliation={cardAffiliation(card, viewerSeat)}
-                onClick={optionId !== undefined
-                  ? () => onSend({ kind: "choose", optionId })
-                  : undefined}
-              />
-            );
-          })}
+          {choiceGridCards.map(({ card, key, optionId, label }) => (
+            <CardFace
+              key={key}
+              card={card}
+              size="hand"
+              label={label}
+              highlighted={optionId !== undefined}
+              affiliation={cardAffiliation(card, viewerSeat)}
+              onClick={optionId !== undefined
+                ? () => onSend({ kind: "choose", optionId })
+                : undefined}
+            />
+          ))}
         </div>
       ) : null}
       {pd.kind === "choose-name" ? (

@@ -149,6 +149,7 @@ export function handCardChoiceOptions(
   for (let index = 0; index < decision.options.length; index += 1) {
     const card = decision.optionCards?.[index];
     if (!card || !handIds.has(card.instanceId)) return null;
+    if (options.has(card.instanceId)) return null;
     options.set(card.instanceId, decision.options[index]!);
   }
   return options;

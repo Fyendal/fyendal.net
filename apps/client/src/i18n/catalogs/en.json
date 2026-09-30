@@ -394,6 +394,8 @@
   "card.sea.treasure.counter.remove": "Remove a Treasure Island gold counter?",
   "card.ska.beaten.trackers.destroy": "Destroy Beaten Trackers to gain 1 action point?",
   "card.ska.strongest.survive.choose": "{card}: reveal a card with power greater than {damage}, or discard a card",
+  "card.ska.strongest.survive.discard": "Discard {card}",
+  "card.ska.strongest.survive.reveal": "Reveal",
   "card.ter.hard.knuckle.destroy": "Hard Knuckle: destroy this to give the attack +1 power?",
   "card.ter.terra.might.pay": "Terra: pay 1 resource to create a Might token?",
   "card.aps.crowd.cheer": "Have the crowd cheer you?",

@@ -1092,6 +1092,7 @@ function abilityIntents(
       if (!controlledIds.has(card.instanceId) &&
         !player.banish.some((source) => source.instanceId === card.instanceId) &&
         (ability.anyHeroAction !== true || (ability.timing ?? "action") !== "action")) continue;
+      if (ability.fromHand) continue;
       if (ability.isAttack && player.flags[`cannotAttackInstance:${card.instanceId}`] === true) continue;
       if (ability.isAttack && cardHasType(state, card, "weapon") && weaponAttacksProhibited(player)) continue;
       const fromBanish = player.banish.some((candidate) => candidate.instanceId === card.instanceId);

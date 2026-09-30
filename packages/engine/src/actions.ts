@@ -642,6 +642,7 @@ export function activateAbility(
     // ability of its own at this index attacks via another permanent's marker
     return activateAuraAttack(state, runtime, seat, player, card, pitchInstanceIds, targetAllyId, abilityIndex);
   }
+  if (ability.fromHand) return "only usable from hand";
   if (ability.isAttack && player.flags[`cannotAttackInstance:${card.instanceId}`] === true) {
     return `${nameOf(state, card.cardId)} cannot attack again this turn`;
   }

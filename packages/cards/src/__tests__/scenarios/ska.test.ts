@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { actionCandidates, basePowerOf, legalIntents } from "@fyendal/engine";
+import { actionCandidates, basePowerOf, legalIntents, projectStateFor } from "@fyendal/engine";
 import { cardData } from "../../index.js";
 import { printingId, scenario } from "../harness.js";
 
@@ -199,6 +199,33 @@ describe("SKA — attacks and clashes", () => {
       .chooseOption("reveal")
       .expectHandSize(1, 1)
       .expectLife(1, 15);
+  });
+
+  it("Strongest Survive offers reveal and discard separately for a 5-power Duty Bound Blitz after 3 damage", () => {
+    const g = scenario({
+      seats: [
+        { ...kayo, hand: ["strongest survive|3", "agile windup|3"] },
+        { hero: "dorinthea", heroKey: "boltyn|0", hand: ["head jab|1", "duty bound blitz|1"] },
+      ],
+    });
+
+    g.play("strongest survive|3", { pitch: ["agile windup|3"] })
+      .blockWith("head jab|1")
+      .settle();
+
+    const blitz = g.state.players[1]!.hand[0]!;
+    const decision = g.state.pendingDecision;
+    expect(decision?.options).toEqual([`reveal:${blitz.instanceId}`, `discard:${blitz.instanceId}`]);
+    expect(decision?.cardOptions).toEqual([blitz.instanceId, null]);
+    expect(projectStateFor(g.state, 1).pendingDecision?.optionCards).toEqual([
+      expect.objectContaining({ instanceId: blitz.instanceId, cardId: blitz.cardId }),
+      null,
+    ]);
+
+    g.chooseOption("reveal:")
+      .expectHandSize(1, 1)
+      .expectInZone(1, "duty bound blitz|1", "hand")
+      .expectLife(1, 17);
   });
 });
 

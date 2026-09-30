@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { legalIntents, projectStateFor } from "@fyendal/engine";
+import { applyIntent, legalIntents, projectStateFor } from "@fyendal/engine";
 import { cardData, scripts } from "../../index.js";
 import { functionalKeyOf } from "../../functional.js";
 import { scenario } from "../harness.js";
@@ -392,6 +392,29 @@ describe("HVY — Heavy Hitters mechanics", () => {
       .settle();
 
     expect(tokenCount(g, 0, "might|0")).toBe(2);
+  });
+
+  it("does not activate Ripple Away's discard ability while it attacks", () => {
+    const g = scenario({ seats: [
+      { hero: "rhinar", hand: ["ripple away|3"], resources: 2 },
+      { hero: "dorinthea" },
+    ] });
+    g.play("ripple away|3").blockWith().settle();
+
+    const ripple = g.state.chain.find((link) =>
+      functionalKeyOf(cardData[link.attackingCard.cardId]!) === "ripple away|3"
+    )?.attackingCard;
+    expect(ripple).toBeDefined();
+    const activation = {
+      kind: "activate-ability" as const,
+      sourceInstanceId: ripple!.instanceId,
+      pitchInstanceIds: [],
+    };
+    expect(legalIntents(g.state, 0)).not.toContainEqual(expect.objectContaining(activation));
+    expect(applyIntent(g.state, 0, activation)).toMatchObject({
+      ok: false,
+      error: "only usable from hand",
+    });
   });
 
   it.each([

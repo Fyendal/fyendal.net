@@ -480,6 +480,63 @@ describe("priority guidance help", () => {
 });
 
 describe("scripted card-choice presentation", () => {
+  it("keeps reveal and discard as distinct choices for the same hand card", () => {
+    const blitz = { instanceId: 41, cardId: "SBL013", owner: 0 };
+    expect(handCardChoiceOptions({
+      player: 0,
+      kind: "choose-target",
+      prompt: "Reveal or discard",
+      options: ["reveal:41", "discard:41"],
+      optionCards: [blitz, blitz],
+    }, [blitz])).toBeNull();
+
+    const model: PendingDecisionModel = {
+      decision: {
+        player: 0,
+        kind: "choose-target",
+        prompt: "Reveal or discard",
+        options: ["reveal:41", "discard:41"],
+        optionCards: [blitz, null],
+        optionMessages: [
+          { id: "card.ska.strongest.survive.reveal" },
+          { id: "card.ska.strongest.survive.discard", values: { card: { kind: "card", cardId: blitz.cardId } } },
+        ],
+      },
+      isMine: true,
+      decidingName: "Hero",
+      canPass: false,
+      defendPitchIds: new Set(),
+      hand: [blitz],
+      defendSel: [],
+      selectedPitchIds: [],
+      onTogglePitch: () => undefined,
+      resourcePaymentSelected: 0,
+      resourcePaymentRequired: 0,
+      confirmSkipArsenal: false,
+      onRequestPass: () => undefined,
+      onDisableGuidance: () => undefined,
+      onConfirmSkipArsenal: () => undefined,
+      onCancelSkipArsenal: () => undefined,
+      onSend: () => undefined,
+    };
+    const html = renderLocalized(<PendingDecisionPanel model={model} viewerSeat={0} />);
+
+    expect(html).toContain('class="c-zonelabel">Reveal</div>');
+    expect(html).toContain('aria-label="Discard Duty Bound Blitz"');
+
+    const duplicateCardsHtml = renderLocalized(
+      <PendingDecisionPanel
+        model={{
+          ...model,
+          decision: { ...model.decision!, optionCards: [blitz, blitz] },
+        }}
+        viewerSeat={0}
+      />,
+    );
+    expect(duplicateCardsHtml).toContain('class="c-zonelabel">Reveal</div>');
+    expect(duplicateCardsHtml).toContain('class="c-zonelabel">Discard Duty Bound Blitz</div>');
+  });
+
   it("labels hero choices relative to the deciding player", () => {
     expect(cardChoiceLocationLabels(11, 22, [], {
       yourHero: "Your Hero",

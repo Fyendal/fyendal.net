@@ -12125,6 +12125,22 @@
       "value": ", or discard a card"
     }
   ],
+  "card.ska.strongest.survive.discard": [
+    {
+      "type": 0,
+      "value": "Discard "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    }
+  ],
+  "card.ska.strongest.survive.reveal": [
+    {
+      "type": 0,
+      "value": "Reveal"
+    }
+  ],
   "card.sly.damage.source.choose": [
     {
       "type": 0,

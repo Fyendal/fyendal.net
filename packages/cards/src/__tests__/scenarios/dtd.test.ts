@@ -107,6 +107,37 @@ describe("DTD — registration and core mechanics", () => {
       .expectNotInZone(0, "reality refractor|0", "board");
   });
 
+  it("Nasreth does not trigger when another attack hits a hero", () => {
+    const s = scenario({
+      seats: [
+        { hero: "rhinar", board: ["nasreth, the soul harrower|0"], hand: ["wounding blow|3"] },
+        { hero: "dorinthea", soul: ["wounding blow|3"] },
+      ],
+    });
+
+    s.play("wounding blow|3").blockWith().settle();
+
+    s.expectNoLog("Nasreth, the Soul Harrower triggers: On hit")
+      .expectZoneSize(1, "soul", 1);
+    expect(s.state.pendingDecision).toBeNull();
+  });
+
+  it("Nasreth triggers when its own attack hits a hero", () => {
+    const s = scenario({
+      seats: [
+        { hero: "rhinar", board: ["nasreth, the soul harrower|0"] },
+        { hero: "dorinthea", soul: ["wounding blow|3"] },
+      ],
+    });
+
+    s.activate("nasreth, the soul harrower|0").blockWith().settle()
+      .expectLog("Nasreth, the Soul Harrower triggers: On hit");
+    expect(s.state.pendingDecision?.chooseHook).toBe("nasreth");
+    s.chooseCard("wounding blow|3")
+      .expectZoneSize(1, "soul", 0)
+      .expectInZone(1, "wounding blow|3", "banish");
+  });
+
   it("Flail of Agony pays 1 life and makes a banished Cull playable on the open chain", () => {
     const s = scenario({
       seats: [

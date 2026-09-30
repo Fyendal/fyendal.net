@@ -11567,6 +11567,22 @@
       "value": " 的牌，或弃置一张牌"
     }
   ],
+  "card.ska.strongest.survive.discard": [
+    {
+      "type": 0,
+      "value": "弃置 "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    }
+  ],
+  "card.ska.strongest.survive.reveal": [
+    {
+      "type": 0,
+      "value": "展示"
+    }
+  ],
   "card.sly.damage.source.choose": [
     {
       "type": 0,
