@@ -1,7 +1,7 @@
 import { useId, useRef, useState } from "react";
 import { useIntl } from "react-intl";
 import type { CardPoolMode } from "@fyendal/shared";
-import { LobbyTooltip } from "./LobbyTooltip.js";
+import { ViewportTooltip } from "../components/ViewportTooltip.js";
 
 const CARD_POOL_MODES = ["legal", "future", "open"] as const satisfies readonly CardPoolMode[];
 
@@ -57,10 +57,11 @@ export function CardPoolModeControl(props: {
         ))}
       </div>
       {activeMode
-        ? <LobbyTooltip
+        ? <ViewportTooltip
             key={activeMode}
             anchor={buttonRefs.current[activeMode] ?? null}
             content={intl.formatMessage({ id: `lobby.cardPool.${activeMode}Description` })}
+            className="lobby-tooltip"
             gap={10}
           />
         : null}

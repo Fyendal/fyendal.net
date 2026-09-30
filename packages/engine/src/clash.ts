@@ -5,6 +5,7 @@ import { basePowerOf } from "./combatValues.js";
 import {
   gameLogMessage,
   logCardValue,
+  logNameOf,
   logPublic,
   nameOf,
 } from "./gameLog.js";
@@ -68,7 +69,7 @@ function revealClash(state: GameStateInternal,
   const powA = topA ? basePowerOf(state, runtime, aSeat, topA, dataOf(state, topA.cardId).attack ?? 0) : -1;
   const powB = topB ? basePowerOf(state, runtime, bSeat, topB, dataOf(state, topB.cardId).attack ?? 0) : -1;
   if (topA) logPublic(state, gameLogMessage(
-    `${nameOf(state, a.heroCardId)} reveals ${nameOf(state, topA.cardId)} (${powA} power)`,
+    `${nameOf(state, a.heroCardId)} reveals ${logNameOf(state, topA.cardId)} (${powA} power)`,
     "engine.log.clash.reveals",
     {
       hero: logCardValue(a.heroCardId),
@@ -77,7 +78,7 @@ function revealClash(state: GameStateInternal,
     },
   ));
   if (topB) logPublic(state, gameLogMessage(
-    `${nameOf(state, b.heroCardId)} reveals ${nameOf(state, topB.cardId)} (${powB} power)`,
+    `${nameOf(state, b.heroCardId)} reveals ${logNameOf(state, topB.cardId)} (${powB} power)`,
     "engine.log.clash.reveals",
     {
       hero: logCardValue(b.heroCardId),

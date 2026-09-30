@@ -4,7 +4,7 @@ import { FUTURE_SET_CODES, cardData, formatLegalityIssues, precon } from "@fyend
 import type { BotOpponent } from "@fyendal/shared";
 import type { ConstructedFormat } from "../domain.js";
 import { heroImageUrl } from "./heroImage.js";
-import { LobbyTooltip } from "./LobbyTooltip.js";
+import { ViewportTooltip } from "../components/ViewportTooltip.js";
 
 interface BotOption {
   id: BotOpponent;
@@ -258,11 +258,11 @@ export function BotOpponentModal(props: {
         </button>
       </section>
       {activeBot && activeWarnings
-        ? <LobbyTooltip
+        ? <ViewportTooltip
             key={activeBot}
             anchor={warningRefs.current[activeBot] ?? null}
             content={warningText(activeWarnings)}
-            className="bot-card-warning-tooltip"
+            className="lobby-tooltip bot-card-warning-tooltip"
           />
         : null}
     </div>

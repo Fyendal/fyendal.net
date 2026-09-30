@@ -1,0 +1,10 @@
+.viewport-tooltip {
+  position: fixed;
+  z-index: 1000;
+  box-sizing: border-box;
+  width: max-content;
+  max-width: calc(100vw - 16px);
+  pointer-events: none;
+  transform: translateX(-50%);
+  white-space: normal;
+}

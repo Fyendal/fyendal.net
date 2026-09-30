@@ -388,11 +388,7 @@
   outline-offset: -2px;
 }
 .lobby-tooltip {
-  position: fixed;
-  z-index: 1000;
-  width: max-content;
   max-width: min(320px, calc(100vw - 16px));
-  box-sizing: border-box;
   padding: 7px 9px;
   border: 1px solid #806334;
   border-radius: 6px;
@@ -401,11 +397,8 @@
   color: #f3e8d2;
   font: 500 11px/1.35 var(--font-lobby-ui);
   letter-spacing: 0;
-  pointer-events: none;
   text-align: left;
   text-transform: none;
-  transform: translateX(-50%);
-  white-space: normal;
 }
 .card-pool-segments button.selected {
   background: transparent;

@@ -235,6 +235,38 @@ describe("SBR — defensive and token effects", () => {
       .expectInZone(0, "vigor|0", "board");
   });
 
+  it("clash reveal tags the red Debilitate when blue Debilitate is attacking", () => {
+    const g = scenario({
+      seats: [
+        {
+          ...bravo,
+          hand: ["SBR028"],
+          deck: ["SBR017"],
+          resources: 4,
+        },
+        {
+          hero: "rhinar",
+          heroKey: "levia|0",
+          hand: ["HVY159"],
+          deck: ["IAR017"],
+        },
+      ],
+    });
+
+    g.play("SBR028")
+      .blockWith("HVY159")
+      .settle()
+      .expectLog("Levia reveals Beckoning Hunger (7 power)")
+      .expectLog("Bravo, Flattering Showman reveals Debilitate (8 power)")
+      .expectLog("Bravo, Flattering Showman wins the clash");
+    const reveal = g.state.log.find((entry) =>
+      entry.publicText?.includes("reveals Debilitate (8 power)")
+    );
+    expect(reveal?.publicText).toBe(
+      "Bravo, Flattering Showman reveals Debilitate (8 power)⟦SBR017⟧",
+    );
+  });
+
   it("Seismic Surge breaks at the action phase and discounts the next Guardian attack", () => {
     const g = scenario({
       active: 1,

@@ -1,7 +1,7 @@
-import { useEffect, useId, useRef, useState, type CSSProperties } from "react";
-import { createPortal } from "react-dom";
+import { useId, useRef, useState, type CSSProperties } from "react";
 import type { CardView } from "@fyendal/shared";
 import { cardData } from "@fyendal/cards/client";
+import { ViewportTooltip } from "../components/ViewportTooltip.js";
 import { resolveCardImageUrl, resolveCardImageUrls } from "./cardImageUrl.js";
 
 const PITCH_CLASS: Record<number, string> = {
@@ -69,34 +69,7 @@ function CounterOverlay({
   const overlayRef = useRef<HTMLSpanElement>(null);
   const [hovered, setHovered] = useState(false);
   const [focused, setFocused] = useState(false);
-  const [tooltipPosition, setTooltipPosition] = useState<{
-    left: number;
-    bottom: number;
-  } | null>(null);
   const tooltipActive = hovered || focused;
-
-  useEffect(() => {
-    if (!tooltipActive) {
-      setTooltipPosition(null);
-      return;
-    }
-    const updatePosition = () => {
-      const overlay = overlayRef.current;
-      if (!overlay) return;
-      const anchor = overlay.getBoundingClientRect();
-      setTooltipPosition({
-        left: anchor.left + anchor.width / 2,
-        bottom: window.innerHeight - anchor.top + 9,
-      });
-    };
-    updatePosition();
-    window.addEventListener("resize", updatePosition);
-    window.addEventListener("scroll", updatePosition, true);
-    return () => {
-      window.removeEventListener("resize", updatePosition);
-      window.removeEventListener("scroll", updatePosition, true);
-    };
-  }, [tooltipActive]);
 
   return (
     <>
@@ -116,18 +89,15 @@ function CounterOverlay({
           {tooltip}
         </span>
       </span>
-      {tooltipActive && tooltipPosition && typeof document !== "undefined"
-        ? createPortal(
-            <span
-              className="c-counter-tip c-counter-tip-floating"
-              aria-hidden="true"
-              style={tooltipPosition}
-            >
-              {tooltip}
-            </span>,
-            document.body,
-          )
-        : null}
+      {tooltipActive ? (
+        <ViewportTooltip
+          anchor={overlayRef.current}
+          content={tooltip}
+          className="c-counter-tip"
+          gap={9}
+          preferredSide="above"
+        />
+      ) : null}
     </>
   );
 }

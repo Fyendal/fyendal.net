@@ -505,8 +505,7 @@
     0 2px 2px #000;
 }
 .c-counter-tip {
-  box-sizing: border-box;
-  width: max-content;
+  z-index: 100;
   max-width: min(230px, 72vw);
   padding: 8px 10px;
   border: 1px solid #b8933f66;
@@ -519,13 +518,6 @@
   font-weight: 600;
   line-height: 1.4;
   text-align: center;
-  white-space: normal;
-  pointer-events: none;
-}
-.c-counter-tip-floating {
-  position: fixed;
-  z-index: 100;
-  transform: translateX(-50%);
 }
 .c-counter-tip-accessible {
   position: absolute;
