@@ -5,6 +5,8 @@ import { actionCandidates, applyIntent, legalIntents, projectStateFor, projectSt
 import { declareAttack } from "../attacks.js";
 import { closeChain } from "../combatChain.js";
 import { computeAttack } from "../combatValues.js";
+import { pendingOnHitEffects } from "../hits.js";
+import type { CardInstance, ChainLinkState } from "../state.js";
 import { resolveWagerLayer, resumeWagerResult } from "../wagers.js";
 import { destroyPermanent } from "../zoneMoves.js";
 import { answerTokenCreationReplacement, answerTokenReplacementOrder } from "../tokens.js";
@@ -2500,6 +2502,51 @@ describe("pitch & costs", () => {
 });
 
 describe("combat", () => {
+  it("collects on-hit hooks only from the attack, its reactions, and explicit observers", () => {
+    const s = makeGame(3);
+    const p = player(s, 0);
+    const source = (cardId: string): CardInstance => ({ instanceId: s.nextInstanceId++, cardId, owner: 0 });
+    const attacker = source("ATK4");
+    const otherAttack = source("ATK6");
+    const observer = source("AURA");
+    const inheritedSource = { ...source("TOKEN"), grantedBaseAbilitiesCardId: "ATK6" };
+    const reaction = source("REACT");
+    p.graveyard.push(otherAttack);
+    p.board.push(observer, inheritedSource);
+    s.modifiers.push({
+      id: s.nextModifierId++, sourceInstanceId: otherAttack.instanceId,
+      seat: 0, scope: "until-end-of-turn",
+    });
+    s.scriptsRef = {
+      ...s.scriptsRef,
+      ATK4: { onHit() {} },
+      ATK6: { onHit() {} },
+      AURA: { onHitScope: "friendly", onHit() {} },
+      REACT: { onHit() {} },
+      HERO_A: { onHitScope: "friendly", onHit() {} },
+    };
+    const link: ChainLinkState = {
+      attacker: 0, attackingCard: attacker, attackCardType: "action",
+      defendingCards: [], defendingEquipment: [], reactions: [reaction],
+      goAgain: false, damage: 1, hit: true, resolved: false, flags: {},
+    };
+    s.chain = [link];
+
+    const hookCards = pendingOnHitEffects(s, engineRuntime, link)
+      .filter((effect) => effect.kind === "hook")
+      .map((effect) => effect.source.cardId);
+    expect(hookCards).toEqual(["ATK4", "REACT", "HERO_A", "AURA"]);
+
+    s.scriptsRef.ATK6 = { onHitScope: "friendly", onHit() {} };
+    const observedSourceIds = pendingOnHitEffects(s, engineRuntime, link)
+      .filter((effect) => effect.kind === "hook")
+      .map((effect) => effect.source.instanceId);
+    expect(observedSourceIds).toEqual(expect.arrayContaining([
+      otherAttack.instanceId,
+      inheritedSource.instanceId,
+    ]));
+  });
+
   it("projects native and granted on-hit effects with their card sources", () => {
     let s = makeGame(4);
     const blade = player(s, 0).weapons[0]!;

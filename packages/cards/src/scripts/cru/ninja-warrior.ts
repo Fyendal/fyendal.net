@@ -48,9 +48,6 @@ function nextAttack(ctx: ScriptCtx, attack = 0, appliesTo?: "any" | "weapon"): v
 
 export function bitteringThorns(): CardScript {
   return {
-    canTriggerOnHit(ctx) {
-      return ctx.link?.attackingCard.instanceId === ctx.self.instanceId;
-    },
     onHit(ctx) {
       nextAttack(ctx, 1);
     },

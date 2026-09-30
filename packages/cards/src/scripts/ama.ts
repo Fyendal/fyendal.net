@@ -280,9 +280,6 @@ export const ama: Record<string, CardScript> = {
       oncePerTurn: false,
       canActivate: controlsVox,
     }),
-    canTriggerOnHit(ctx) {
-      return ctx.link?.attackingCard.instanceId === ctx.self.instanceId;
-    },
     onHit(ctx) {
       ctx.grantGoAgain();
     },
@@ -311,10 +308,7 @@ export const ama: Record<string, CardScript> = {
       ctx.grantGoAgain();
     },
     canTriggerOnHit(ctx) {
-      return (
-        ctx.link?.attackingCard.instanceId === ctx.self.instanceId &&
-        ctx.link.targetAllyId === undefined
-      );
+      return !!ctx.link && ctx.link.targetAllyId === undefined;
     },
     onHit(ctx) {
       ctx.addModifier({

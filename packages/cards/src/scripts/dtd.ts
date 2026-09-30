@@ -477,7 +477,7 @@ export const dtd: Record<string, CardScript> = mergeSetScripts("DTD", dtdHighRar
   "nasreth, the soul harrower|0": {
     activated: attackAbility(0),
     canTriggerOnHit(ctx) {
-      return ctx.link?.attackingCard.instanceId === ctx.self.instanceId && ctx.link.targetAllyId === undefined;
+      return !!ctx.link && ctx.link.targetAllyId === undefined;
     },
     onHit(ctx) {
       const soul = ctx.player(opponentSeat(ctx)).soul;

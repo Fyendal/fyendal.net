@@ -220,9 +220,6 @@ export const tcc: Record<string, CardScript> = {
         label: "Attack (destroy on hit)",
       },
     ],
-    canTriggerOnHit(ctx) {
-      return ctx.link?.attackingCard.instanceId === ctx.self.instanceId;
-    },
     onHit(ctx) {
       ctx.destroySelf();
     },

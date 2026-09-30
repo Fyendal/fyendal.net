@@ -293,6 +293,13 @@ describe("SKA — utility cards", () => {
       sourceInstanceId: defendingCard.instanceId,
       pitchInstanceIds: [card.instanceId],
       deferActivationPresentation: true,
+      cardCostSelection: {
+        kind: "choose-card-cost",
+        cardLabel: "cards",
+        minimum: 1,
+        maximum: 1,
+        modes: [{ kind: "discard", maximum: 1 }],
+      },
     }))));
 
     g.activate(rally, { discard: ["bear hug|3"] })

@@ -167,6 +167,12 @@ expressed safely, add the narrowest generic command to `ScriptCtx`, implement
 it in the engine, and test it before using it from card scripts. Never expose a
 mutable player object or engine-internal state adapter.
 
+An `onHit` hook belongs to its attacking source by default. Effects that watch
+another friendly attack, including granted reaction riders and lasting hit
+watchers, opt into `onHitScope: "friendly"`; their `canTriggerOnHit` still checks
+any narrower condition in the printed text. The card registry audits those
+exceptions in `packages/cards/src/on-hit-scope.ts`.
+
 ## Module dependency direction
 
 Production modules form an acyclic graph, including type-only dependencies:

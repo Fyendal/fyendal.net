@@ -77,6 +77,7 @@ import { ter } from "./ter.js";
 import { upr } from "./upr.js";
 import { wtr } from "./wtr.js";
 import { withTriggerMessages } from "../trigger-messages.js";
+import { withFriendlyHitScope } from "../on-hit-scope.js";
 
 const setModules: Record<string, Record<string, CardScript>> = {
   "1HP": oneHp,
@@ -170,6 +171,6 @@ for (const [set, mod] of Object.entries(setModules)) {
     if (key in registry) {
       throw new Error(`duplicate functional script key "${key}" (set module ${set})`);
     }
-    registry[key] = withTriggerMessages(script);
+    registry[key] = withTriggerMessages(withFriendlyHitScope(key, script));
   }
 }

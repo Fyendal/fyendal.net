@@ -198,9 +198,7 @@ export const outHighRarity: Record<string, CardScript> = {
   "uzuri, switchblade|0": uzuriAbility,
   "nerve scalpel|0": dagger({
     canTriggerOnHit(ctx) {
-      return (
-        !!ctx.link && ctx.link.targetAllyId === undefined && ctx.link.attackingCard.instanceId === ctx.self.instanceId
-      );
+      return !!ctx.link && ctx.link.targetAllyId === undefined;
     },
     onHit(ctx) {
       ctx.addModifier({
@@ -223,9 +221,7 @@ export const outHighRarity: Record<string, CardScript> = {
   }),
   "orbitoclast|0": dagger({
     canTriggerOnHit(ctx) {
-      return (
-        !!ctx.link && ctx.link.targetAllyId === undefined && ctx.link.attackingCard.instanceId === ctx.self.instanceId
-      );
+      return !!ctx.link && ctx.link.targetAllyId === undefined;
     },
     onHit(ctx) {
       ctx.addModifier({
@@ -250,9 +246,7 @@ export const outHighRarity: Record<string, CardScript> = {
   }),
   "scale peeler|0": dagger({
     canTriggerOnHit(ctx) {
-      return (
-        !!ctx.link && ctx.link.targetAllyId === undefined && ctx.link.attackingCard.instanceId === ctx.self.instanceId
-      );
+      return !!ctx.link && ctx.link.targetAllyId === undefined;
     },
     onHit(ctx) {
       ctx.addModifier({

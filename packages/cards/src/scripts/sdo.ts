@@ -79,10 +79,7 @@ export const sdo: Record<string, CardScript> = {
       ctx.setFlag("player", key, (Number(ctx.getFlag("player", key)) || 0) + 1);
     },
     canTriggerOnHit(ctx) {
-      return (
-        ctx.link?.attackingCard.instanceId === ctx.self.instanceId &&
-        Number(ctx.getFlag("player", `hits:${ctx.self.instanceId}`)) === 2
-      );
+      return !!ctx.link && Number(ctx.getFlag("player", `hits:${ctx.self.instanceId}`)) === 2;
     },
     onHit(ctx) {
       ctx.addCounter(ctx.self.instanceId, "power", 1);

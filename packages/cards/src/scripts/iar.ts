@@ -501,7 +501,6 @@ function ingestTheUnknown(): CardScript {
 
 function hellboundAssault(): CardScript {
   return bloodDebt({
-    canTriggerOnHit: (ctx) => ctx.link?.attackingCard.instanceId === ctx.self.instanceId,
     onHit(ctx) {
       ctx.setFlag("link", "attackToBanish", true);
     },
@@ -2343,8 +2342,7 @@ export const iar: Record<string, CardScript> = {
       const shadow = hasType(ctx, card, "shadow");
       if (ctx.banish(card.instanceId) && shadow) ctx.setCounter("iarHarbingerShadow", 1);
     },
-    canTriggerOnHit: (ctx) =>
-      ctx.link?.attackingCard.instanceId === ctx.self.instanceId && ctx.getCounter("iarHarbingerShadow") > 0,
+    canTriggerOnHit: (ctx) => !!ctx.link && ctx.getCounter("iarHarbingerShadow") > 0,
     onHit(ctx) {
       ctx.createTokens(GATE, 2);
     },

@@ -593,6 +593,27 @@ describe("HNT — marked heroes and daggers", () => {
       .expectLog("loses 1 life (18 life)");
   });
 
+  it("Poisoned Blade watches a later dagger hit on the combat chain", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          resources: 2,
+          weapons: ["kunai of retribution|0"],
+          hand: ["poisoned blade|2"],
+        },
+        { hero: "dorinthea" },
+      ],
+    });
+
+    g.play("poisoned blade|2").blockWith().settle()
+      .expectNoLog("Poisoned Blade triggers: On hit");
+    const lifeAfterBlade = g.state.players[1]!.life;
+    g.attackWithWeapon("kunai of retribution|0").blockWith().settle()
+      .expectLog("Poisoned Blade triggers: On hit")
+      .expectLife(1, lifeAfterBlade - 2);
+  });
+
   it("Throw Dagger targets an off-link dagger when it is played", () => {
     const g = scenario({
       seats: [

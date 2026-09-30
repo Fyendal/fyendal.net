@@ -530,7 +530,7 @@ export const omnHighRarity: Record<string, CardScript> = {
   }),
   "razor ring|3": shuriken({
     canTriggerOnHit(ctx) {
-      return ctx.link?.attackingCard.instanceId === ctx.self.instanceId && ctx.link.targetAllyId === undefined;
+      return !!ctx.link && ctx.link.targetAllyId === undefined;
     },
     onHit(ctx) {
       ctx.addModifier({
@@ -545,7 +545,7 @@ export const omnHighRarity: Record<string, CardScript> = {
   }),
   "stun star|3": shuriken({
     canTriggerOnHit(ctx) {
-      return ctx.link?.attackingCard.instanceId === ctx.self.instanceId && ctx.link.targetAllyId === undefined;
+      return !!ctx.link && ctx.link.targetAllyId === undefined;
     },
     onHit(ctx) {
       ctx.tap(ctx.player(opponentSeat(ctx)).hero.instanceId);

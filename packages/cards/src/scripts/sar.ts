@@ -196,7 +196,7 @@ export const sar: Record<string, CardScript> = {
     },
     canTriggerOnHit(ctx) {
       const link = ctx.link;
-      return !!link && link.targetAllyId === undefined && link.attackingCard.instanceId === ctx.self.instanceId;
+      return !!link && link.targetAllyId === undefined;
     },
     onHit(ctx) {
       requestHuntsmanMark(ctx);

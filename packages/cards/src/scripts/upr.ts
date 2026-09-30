@@ -681,8 +681,7 @@ export const upr: Record<string, CardScript> = mergeSetScripts("UPR", uprHighRar
   },
   "kyloria|0": {
     activated: dragonAttack(),
-    canTriggerOnHit: (ctx) =>
-      !!ctx.link && ctx.link.targetAllyId === undefined && ctx.link.attackingCard.instanceId === ctx.self.instanceId,
+    canTriggerOnHit: (ctx) => !!ctx.link && ctx.link.targetAllyId === undefined,
     onHit(ctx) {
       const items = ctx.player(opponentSeat(ctx)).board.filter((card) => hasSubtype(ctx, card, "item"));
       if (items.length === 0) {

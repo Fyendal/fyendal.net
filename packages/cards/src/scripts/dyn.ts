@@ -1088,9 +1088,7 @@ export const dyn: Record<string, CardScript> = mergeSetScripts("DYN", dynHighRar
   "spider's bite|0": {
     activated: attackAbility(2, { goAgain: true }),
     canTriggerOnHit(ctx) {
-      return (
-        !!ctx.link && ctx.link.targetAllyId === undefined && ctx.link.attackingCard.instanceId === ctx.self.instanceId
-      );
+      return !!ctx.link && ctx.link.targetAllyId === undefined;
     },
     onHit(ctx) {
       ctx.addModifier({

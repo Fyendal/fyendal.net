@@ -1182,6 +1182,10 @@ export interface CardScript {
    * Limited/ordinal triggers use this to avoid creating a stack layer after
    * their trigger condition or per-turn limit has already been consumed. */
   canTriggerOnHit?(ctx: ScriptCtx): boolean;
+  /** By default, onHit belongs to this attack (or a reaction on its link).
+   * Set to friendly only for effects that watch another friendly attack hit;
+   * canTriggerOnHit must still enforce any narrower printed condition. */
+  onHitScope?: "friendly";
   /** Number of triggered layers this source's on-hit effect creates for the
    * pending hit-event. Replacement effects that make an ability trigger more
    * than once use this; the default is one. */

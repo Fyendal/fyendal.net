@@ -14,6 +14,7 @@ import {
   nameOf,
 } from "./gameLog.js";
 import type { CardInstance, ChainLinkState, Modifier, PlayerState, StackLayer } from "./state.js";
+import type { CardScript } from "./scripts.js";
 import { tokenCreationCauseForModifier } from "./tokenQueries.js";
 import { createTokensFor } from "./tokens.js";
 
@@ -198,18 +199,24 @@ export function pendingOnHitEffects(
   const attacker = state.players[link.attacker] as PlayerState;
   const effects: PendingOnHitEffect[] = [];
   const seenSources = new Set<number>();
+  const participatingSources = new Set([
+    link.attackingCard.instanceId,
+    ...link.reactions.map((reaction) => reaction.instanceId),
+  ]);
   const addHook = (source: CardInstance): void => {
     if (seenSources.has(source.instanceId)) return;
     seenSources.add(source.instanceId);
     if (cardAbilitiesSuppressed(state, source)) return;
     const ctx = runtime.makeCtx(state, link.attacker, source, link);
     const ownScript = scriptOf(state, source.cardId, source);
-    const ownHit = ownScript?.onHit && (ownScript.canTriggerOnHit?.(ctx) ?? true)
+    const canObserveHit = (scope: CardScript["onHitScope"]): boolean =>
+      participatingSources.has(source.instanceId) || scope === "friendly";
+    const ownHit = ownScript?.onHit && canObserveHit(ownScript.onHitScope) && (ownScript.canTriggerOnHit?.(ctx) ?? true)
       ? ownScript.onHit
       : undefined;
     const inheritedCardId = source.grantedBaseAbilitiesCardId;
     const inheritedScript = inheritedCardId ? state.scriptsRef[inheritedCardId] : undefined;
-    const inheritedHit = inheritedScript?.onHit && (inheritedScript.canTriggerOnHit?.(ctx) ?? true)
+    const inheritedHit = inheritedScript?.onHit && canObserveHit(inheritedScript.onHitScope) && (inheritedScript.canTriggerOnHit?.(ctx) ?? true)
       ? inheritedScript.onHit
       : undefined;
     if (!ownHit && !inheritedHit) return;
