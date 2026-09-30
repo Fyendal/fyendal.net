@@ -470,16 +470,9 @@ export const monHighRarity: Record<string, CardScript> = {
       ctx.dealDamage(ctx.seat, Math.max(0, 6 - blood), { sourceInstanceId: ctx.self.instanceId });
     },
   }),
-  "deep rooted evil|2": bloodDebt(
-    {
-      staticPlayableFrom: ["banish"],
-      canPlay: (ctx) => {
-        const inBanish = ctx.player(ctx.seat).banish.some((card) => card.instanceId === ctx.self.instanceId);
-        return !inBanish || ctx.getFlag("player", "banishedSixPlusThisTurn") === true;
-      },
-    },
-    true,
-  ),
+  "deep rooted evil|2": bloodDebt({
+    canPlayFromZone: (ctx) => ctx.getFlag("player", "banishedSixPlusThisTurn") === true,
+  }, true),
   "mark of the beast|2": bloodDebt({ graveyardReplacement: "banish" }),
   "shadow of blasmophet|1": bloodDebt({
     onAttackDeclared(ctx) {

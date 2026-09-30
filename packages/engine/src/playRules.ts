@@ -57,7 +57,20 @@ export function mayPlayFromZone(
     const hook = scriptOf(state, source.cardId, source)?.allowsFriendlyCardPlayFrom;
     if (hook?.(runtime.makeCtx(state, owner.seat, source), card, zone) === true) return true;
   }
-  return !card.faceDown && scriptOf(state, card.cardId, card)?.staticPlayableFrom?.includes(zone) === true;
+  return canUseStaticPlayPermission(state, runtime, card, zone, actingSeat);
+}
+
+function canUseStaticPlayPermission(
+  state: GameStateInternal,
+  runtime: EngineRuntime,
+  card: CardInstance,
+  zone: PlayableZone,
+  actingSeat: number,
+): boolean {
+  if (actingSeat !== card.owner || card.faceDown) return false;
+  const script = scriptOf(state, card.cardId, card);
+  return script?.staticPlayableFrom?.includes(zone) === true
+    && script.canPlayFromZone?.(runtime.makeCtx(state, actingSeat, card), zone) !== false;
 }
 
 /** Consume a shared one-use play-from-zone allowance after one eligible card
@@ -104,7 +117,7 @@ export function playFromZoneRequiresInstant(
     card.playableFrom?.includes(zone) === true
     || modifierGrantingPlayFromZone(state, card, zone, actingSeat) !== undefined
     || (zone === "banish" && canRuneGate(state, card))
-    || scriptOf(state, card.cardId, card)?.staticPlayableFrom?.includes(zone) === true
+    || canUseStaticPlayPermission(state, runtime, card, zone, actingSeat)
   ) return false;
 
   const owner = state.players[card.owner] as PlayerState;
@@ -147,7 +160,7 @@ export function playFromSourceCardId(
     const hook = scriptOf(state, source.cardId, source)?.allowsFriendlyCardPlayFrom;
     if (hook?.(runtime.makeCtx(state, owner.seat, source), card, zone) === true) return source.cardId;
   }
-  return scriptOf(state, card.cardId, card)?.staticPlayableFrom?.includes(zone) === true
+  return canUseStaticPlayPermission(state, runtime, card, zone, actingSeat)
     ? card.cardId
     : undefined;
 }

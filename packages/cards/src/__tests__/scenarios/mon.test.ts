@@ -573,7 +573,26 @@ describe("MON — Shadow Brute and Blood Debt", () => {
       seats: [leviaSeat({ banish: ["deep rooted evil|2"], hand: [BLUE] }), { hero: "dorinthea" }],
     });
     s.state.players[0]!.flags.banishedSixPlusThisTurn = false;
-    expect(legalIntents(s.state, 0).filter((i) => i.kind === "play-card")).toEqual([]);
+    expect(legalIntents(s.state, 0).filter((i) => i.kind === "play-from-zone" && i.zone === "banish")).toEqual([]);
+  });
+
+  it("Blasmophet can grant Deep Rooted Evil a separate play-from-banish permission", () => {
+    const s = scenario({
+      seats: [
+        leviaSeat({
+          banish: ["deep rooted evil|2"],
+          hand: [BLUE],
+          board: ["blasmophet, the insatiable hunger|0"],
+        }),
+        { hero: "dorinthea" },
+      ],
+    });
+    s.state.players[0]!.flags.banishedSixPlusThisTurn = false;
+
+    s.play("deep rooted evil|2", { pitch: [BLUE], fromZone: "banish" })
+      .blockWith()
+      .settle()
+      .expectFinalAttack(6);
   });
 });
 

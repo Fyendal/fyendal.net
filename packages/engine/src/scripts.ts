@@ -1026,7 +1026,7 @@ export interface CardScript {
   /** Game-setup effect ("you may start the game with …"), run on the hero
    *  after the decks are shuffled and before the opening hands are drawn. */
   onGameStart?(ctx: ScriptCtx): void;
-  /** Extra legality for playing this card from hand/arsenal (beyond type/cost/AP). */
+  /** Extra legality for playing this card from any zone (beyond type/cost/AP). */
   canPlay?(ctx: ScriptCtx): boolean;
   /** Card instances this play may target. A script with this hook requires one
    * of the returned targets to be announced in the play intent. Must be pure. */
@@ -1048,6 +1048,8 @@ export interface CardScript {
   banishSoulToPreventDamage?: number;
   /** Zones this card's own static text permits it to be played from. */
   staticPlayableFrom?: PlayableZone[];
+  /** Condition on this card's own play-from-zone permission; other grants remain independent. */
+  canPlayFromZone?(ctx: ScriptCtx, zone: PlayableZone): boolean;
   /** This (non-instant) action card may be played as though it were an instant
    *  (Cindering Foresight, Snapback, cards unlocked by Blaze, Firemind):
    *  playable in any priority/reaction window, no action point cost. */

@@ -11,3 +11,4 @@ dist/
 
 packages/bot/src/generated-runtime-id.ts
 apps/server/.manual-room/
+/.agents/
