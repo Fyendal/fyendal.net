@@ -10,7 +10,8 @@ import type { GameStatsView, GameView } from "@fyendal/shared";
  *  - threatened:  attack and effect damage aimed at the opposing hero before prevention
  *  - blocked:     damage actually blocked against the opponent's links,
  *                 capped at the attack value (over-block is not extra value)
- *  - value:       threatened + blocked + prevented + life gained - life lost
+ *  - value:       threatened + blocked + ally damage absorbed + prevented
+ *                 + life gained - life lost
  *  - damageDealt: damage actually dealt to the opposing hero
  *  - allyAbsorbed: damage dealt by the opponent to your allies
  */
@@ -188,9 +189,10 @@ export function computeCycleStats(views: GameView[]): CycleStats {
   };
 }
 
-/** Talishar's value: threat + blocks + prevention + life gain - life loss. */
+/** Match value: threat + blocks + ally damage absorbed + prevention + life gain - life loss. */
 export function cycleValue(row: CycleRow, seat: 0 | 1): number {
-  return row.threatened[seat] + row.blocked[seat] + preventedDamage(row, seat)
+  return row.threatened[seat] + row.blocked[seat] + row.allyAbsorbed[seat]
+    + preventedDamage(row, seat)
     + row.lifeGained[seat] - row.lifeLost[seat];
 }
 

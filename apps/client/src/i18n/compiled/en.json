@@ -15309,6 +15309,18 @@
       "value": "Format"
     }
   ],
+  "common.fullscreen.enter": [
+    {
+      "type": 0,
+      "value": "Enter full screen"
+    }
+  ],
+  "common.fullscreen.exit": [
+    {
+      "type": 0,
+      "value": "Exit full screen"
+    }
+  ],
   "common.import": [
     {
       "type": 0,

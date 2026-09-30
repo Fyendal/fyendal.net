@@ -31,6 +31,49 @@ import {
   type TurnPlan,
   type TurnPlannerRoot,
 } from "./turn-planner.js";
+import { iraPresentation } from "./sideboard.js";
+
+const BLOSSOM_KEY = "whirling mist blossom|2";
+const IRA_DECK = iraPresentation().deck;
+
+function irisHasSearchTarget(input: BotPolicyInput): boolean {
+  if (input.state) {
+    return input.state.players[input.seat].deck.some((card) =>
+      key(input.cards[card.cardId]) === BLOSSOM_KEY
+    );
+  }
+
+  // Reactive tasks have no simulation snapshot. Ira's fixed deck and all
+  // visible non-deck zones still prove when every copy has left the deck.
+  const visible = input.view.players.flatMap((player) => [
+    ...player.hand, ...player.arsenal, ...player.pitch, ...player.graveyard,
+    ...player.banish, ...player.soul, ...player.board, ...player.weapons,
+    ...Object.values(player.equipment).flatMap((card) => card ? [card] : []),
+  ]);
+  visible.push(...input.view.chain.flatMap((link) => [
+    link.attackingCard, ...link.defendingCards, ...link.reactions,
+  ]));
+  visible.push(...input.view.stack.flatMap((layer) => layer.card ? [layer.card] : []));
+  if (input.view.pendingDecision?.preStackSource) {
+    visible.push(input.view.pendingDecision.preStackSource.card);
+  }
+  const outsideDeck = new Set(visible.filter((card) =>
+    card.owner === input.seat && key(input.cards[card.cardId]) === BLOSSOM_KEY
+  ).map((card) => card.instanceId));
+  const totalBlossoms = IRA_DECK.filter((id) => key(input.cards[id]) === BLOSSOM_KEY).length;
+  return input.view.players[input.seat].deckCount > 0 && outsideDeck.size < totalBlossoms;
+}
+
+function withoutEmptyIrisSearch(input: BotPolicyInput): BotPolicyInput {
+  if (irisHasSearchTarget(input)) return input;
+  const irisId = input.view.players[input.seat].equipment.head?.instanceId;
+  return {
+    ...input,
+    legal: input.legal.filter((intent) =>
+      intent.kind !== "activate-ability" || intent.sourceInstanceId !== irisId
+    ),
+  };
+}
 
 function attacksThisTurn(input: BotPolicyInput): number {
   const projected = input.view.turnFacts?.players[input.seat].attacks;
@@ -384,7 +427,7 @@ function scorePlay(
 
 /** Deterministic, projection-only Ira policy. Equal scores retain engine order. */
 function chooseIraReactiveIntent(input: BotPolicyInput): GameIntent {
-  return chooseScoredIntent(input, {
+  return chooseScoredIntent(withoutEmptyIrisSearch(input), {
     defend: scoreDefend,
     choose: scoreChoice,
     play: scorePlay,
@@ -453,6 +496,7 @@ const IRA_MAX_TRANSITIONS = 8;
 const IRA_MAX_ROOT_CANDIDATES = 1;
 
 export function chooseIraIntentWithTrace(input: BotPolicyInput): IraIntentDecision {
+  input = withoutEmptyIrisSearch(input);
   if (shouldPreserveOpeningHand(input)) {
     return {
       intent: enforceAllyTargetPolicy(

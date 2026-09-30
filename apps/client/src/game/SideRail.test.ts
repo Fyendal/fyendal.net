@@ -84,6 +84,27 @@ describe("undo focus", () => {
 });
 
 describe("game control icons", () => {
+  it("keeps the full-screen control in the rail header when collapsed", () => {
+    const expanded = renderSideRail(sideRailProps({
+      fullscreenSupported: true,
+      fullscreenActive: false,
+      onToggleFullscreen: vi.fn(),
+    }));
+    const collapsed = renderSideRail(sideRailProps({
+      collapsed: true,
+      fullscreenSupported: true,
+      fullscreenActive: true,
+      onToggleFullscreen: vi.fn(),
+    }));
+
+    expect(expanded).toContain('aria-label="Enter full screen"');
+    expect(expanded).toContain('data-control-icon="fullscreen"');
+    expect(collapsed).toContain('aria-label="Exit full screen"');
+    expect(collapsed).toContain('data-control-icon="exit-fullscreen"');
+    expect(collapsed).toContain('class="rail-right rail-collapsed"');
+    expect(renderSideRail(sideRailProps())).not.toContain('data-control-icon="fullscreen"');
+  });
+
   it("shows unread messages on the mobile More button", () => {
     const html = renderSideRail(sideRailProps({ unreadMessageCount: 3 }));
     expect(html).toContain('class="mobile-more-button"');

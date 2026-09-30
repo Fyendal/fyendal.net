@@ -11,6 +11,7 @@ import { ModalSurface } from "../components/ModalSurface.js";
 import { LanguagePicker } from "../i18n/LanguagePicker.js";
 import { SocialMenuButton, UnreadMessageBadge } from "../social/MobileSocialControls.js";
 import { mobileLobbyDestinationSelected } from "./mobileNavigation.js";
+import { FullscreenButton } from "../components/FullscreenButton.js";
 import {
   GuestLandingDetails,
   GuestLandingHero,
@@ -75,7 +76,6 @@ export function Lobby() {
   const {
     error,
     spectatorKicked,
-    connected,
     authUser,
     logout,
     listRooms,
@@ -89,7 +89,6 @@ export function Lobby() {
   } = useStore(useShallow((state) => ({
     error: state.error,
     spectatorKicked: state.spectatorKicked,
-    connected: state.connected,
     authUser: state.authUser,
     logout: state.logout,
     listRooms: state.listRooms,
@@ -293,20 +292,13 @@ export function Lobby() {
           className="mobile-lobby-more"
           onClose={() => setShowMobileMore(false)}
         >
-          <div className="mobile-more-user">
-            <span>{authUser}</span>
-            <strong className={connected ? "connected" : "disconnected"}>
-              {intl.formatMessage({
-                id: connected ? "common.connection.connected" : "common.connection.reconnecting",
-              })}
-            </strong>
-          </div>
           <div className="mobile-more-actions">
+            <LanguagePicker />
+            <FullscreenButton placement="menu" onToggle={() => setShowMobileMore(false)} />
             <SocialMenuButton onOpen={() => {
               setShowMobileMore(false);
               setSocialOpen(true);
             }} />
-            <LanguagePicker />
             <button
               onClick={() => {
                 setRail("account");

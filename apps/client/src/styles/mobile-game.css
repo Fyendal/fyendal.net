@@ -1177,6 +1177,7 @@
   }
 
   .prep-topbar { align-items: flex-start; flex-direction: column; gap: 9px; }
+  .prep-topbar-actions { align-self: flex-end; }
   .prep-page [data-cardid] {
     -webkit-touch-callout: none;
     -webkit-user-select: none;

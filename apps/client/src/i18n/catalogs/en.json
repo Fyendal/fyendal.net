@@ -1720,6 +1720,8 @@
   "common.import": "Import",
   "common.closeNamed": "Close {title}",
   "common.close": "Close",
+  "common.fullscreen.enter": "Enter full screen",
+  "common.fullscreen.exit": "Exit full screen",
   "common.dismiss": "Dismiss",
   "common.done": "Done",
   "common.spaceKey": "Space key",

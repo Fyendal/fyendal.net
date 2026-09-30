@@ -1720,6 +1720,8 @@
   "common.import": "导入",
   "common.closeNamed": "关闭{title}",
   "common.close": "关闭",
+  "common.fullscreen.enter": "进入全屏",
+  "common.fullscreen.exit": "退出全屏",
   "common.dismiss": "关闭",
   "common.done": "完成",
   "common.spaceKey": "空格键",

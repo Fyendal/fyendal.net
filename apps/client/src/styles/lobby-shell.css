@@ -166,6 +166,8 @@
 }
 .topbar-icon-link:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
 .topbar-icon-link svg { width: 23px; height: 23px; fill: currentColor; }
+.topbar-fullscreen-button { padding: 0; clip-path: none; }
+.topbar-fullscreen-button svg { fill: none; }
 .lobby-topbar .topbar-tools > button { min-height: 42px; }
 .language-picker {
   position: relative;
@@ -588,19 +590,6 @@
 }
 .mobile-lobby-nav { display: none; }
 
-.mobile-more-user {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 14px;
-  padding: 12px;
-  border: 1px solid var(--border-subtle);
-  background: #120c07;
-}
-.mobile-more-user span { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
-.mobile-more-user strong { flex: 0 0 auto; color: var(--danger); font-size: 13px; }
-.mobile-more-user strong.connected { color: var(--success); }
 .mobile-more-actions { display: grid; gap: 8px; }
 .mobile-more-actions > a,
 .mobile-more-actions > button {

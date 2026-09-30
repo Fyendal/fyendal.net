@@ -6,6 +6,7 @@ import { LanguagePicker } from "../i18n/LanguagePicker.js";
 import { LobbyBrand } from "./GuestLanding.js";
 import { DiscordLink } from "./DiscordLink.js";
 import { BugFixedNotification } from "./BugFixedNotification.js";
+import { FullscreenButton } from "../components/FullscreenButton.js";
 
 export function LobbyHeader() {
   const intl = useIntl();
@@ -44,6 +45,7 @@ export function LobbyHeader() {
       ) : null}
       <div className="topbar-actions">
         <div className="topbar-tools">
+          <FullscreenButton placement="header" />
           <LanguagePicker />
           <DiscordLink />
         </div>

@@ -14711,6 +14711,18 @@
       "value": "赛制"
     }
   ],
+  "common.fullscreen.enter": [
+    {
+      "type": 0,
+      "value": "进入全屏"
+    }
+  ],
+  "common.fullscreen.exit": [
+    {
+      "type": 0,
+      "value": "退出全屏"
+    }
+  ],
   "common.import": [
     {
       "type": 0,

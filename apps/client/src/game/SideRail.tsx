@@ -127,7 +127,7 @@ function LogLines({
   ));
 }
 
-function ControlIcon({ kind }: { kind: "undo" | "bug" | "note" | "settings" }) {
+function ControlIcon({ kind }: { kind: "undo" | "bug" | "note" | "settings" | "fullscreen" | "exit-fullscreen" }) {
   const content = kind === "undo" ? (
     <>
       <path d="M9 7H5V3" />
@@ -144,6 +144,14 @@ function ControlIcon({ kind }: { kind: "undo" | "bug" | "note" | "settings" }) {
     <>
       <path d="M6 3h12v18l-6-4-6 4V3Z" />
       <path d="M9 8h6M12 5v6" />
+    </>
+  ) : kind === "fullscreen" ? (
+    <>
+      <path d="M8 3H3v5M16 3h5v5M3 16v5h5M21 16v5h-5" />
+    </>
+  ) : kind === "exit-fullscreen" ? (
+    <>
+      <path d="M3 8h5V3M21 8h-5V3M3 16h5v5M21 16h-5v5" />
     </>
   ) : (
     <>
@@ -183,6 +191,9 @@ export function undoWithoutFocus(
 export function SideRail({
   collapsed,
   onToggleCollapsed,
+  fullscreenSupported = false,
+  fullscreenActive = false,
+  onToggleFullscreen,
   turn,
   onUndo,
   undoDisabled = false,
@@ -237,6 +248,9 @@ export function SideRail({
 }: {
   collapsed: boolean;
   onToggleCollapsed: () => void;
+  fullscreenSupported?: boolean;
+  fullscreenActive?: boolean;
+  onToggleFullscreen?: () => void;
   turn: number;
   onUndo: ((target?: UndoTarget) => void) | null;
   undoDisabled?: boolean;
@@ -306,6 +320,9 @@ export function SideRail({
   const [confirmingAction, setConfirmingAction] = useState<"leave" | "concede" | null>(null);
   const leaveLabel = intl.formatMessage({
     id: leaveAction === "end-game" ? "common.endGame" : "common.leave",
+  });
+  const fullscreenLabel = intl.formatMessage({
+    id: fullscreenActive ? "common.fullscreen.exit" : "common.fullscreen.enter",
   });
   const showOpponentDisconnected = !replaying && !opponentConnected && winnerText === null;
   const openFrameNote = () => {
@@ -409,11 +426,29 @@ export function SideRail({
           })}
           onClick={onToggleCollapsed}
         >
-          {collapsed ? "‹" : "›"}
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4"
+            strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false">
+            <path d={collapsed ? "m15 5-6 7 6 7" : "m9 5 6 7-6 7"} />
+          </svg>
         </button>
         <div className="rail-turn">
           <strong>{intl.formatMessage({ id: "game.log.title" })}</strong>
         </div>
+        {fullscreenSupported && onToggleFullscreen ? (
+          <button
+            type="button"
+            className="rail-fullscreen-toggle"
+            aria-label={fullscreenLabel}
+            aria-pressed={fullscreenActive}
+            title={fullscreenLabel}
+            onClick={(event) => {
+              onToggleFullscreen();
+              event.currentTarget.blur();
+            }}
+          >
+            <ControlIcon kind={fullscreenActive ? "exit-fullscreen" : "fullscreen"} />
+          </button>
+        ) : null}
       </div>
       <div className="rail-actions">
         {onUndo && (
@@ -666,6 +701,14 @@ export function SideRail({
             <BackgroundMatchSearch placement="menu" onStop={onStopBackgroundSearch} />
           ) : null}
           <div className="game-utilities-actions">
+            {fullscreenSupported && onToggleFullscreen ? (
+              <button onClick={() => {
+                setShowUtilities(false);
+                onToggleFullscreen();
+              }}>
+                {fullscreenLabel}
+              </button>
+            ) : null}
             {onOpenSocial ? <SocialMenuButton onOpen={() => {
               setShowUtilities(false);
               onOpenSocial();

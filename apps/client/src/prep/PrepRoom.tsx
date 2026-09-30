@@ -39,6 +39,7 @@ import {
 } from "./BotPracticeNudge.js";
 import { PrepPresentation } from "./PrepPresentation.js";
 import { PrepArenaCards } from "./PrepArenaCards.js";
+import { FullscreenButton } from "../components/FullscreenButton.js";
 
 function heroKey(value: string): string {
   return value.toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_|_$/g, "");
@@ -414,7 +415,10 @@ export function PrepRoom() {
             </button>
           ) : null}
         </div>
-        <button onClick={leave}>{intl.formatMessage({ id: "common.leave" })}</button>
+        <div className="prep-topbar-actions">
+          <FullscreenButton placement="header" />
+          <button onClick={leave}>{intl.formatMessage({ id: "common.leave" })}</button>
+        </div>
       </div>
 
       <div className="prep-columns">

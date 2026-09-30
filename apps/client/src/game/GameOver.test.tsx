@@ -61,6 +61,8 @@ describe("GameOver player statistics", () => {
     expect(html).toContain("Back to lobby");
     expect(html).toContain('class="btn-primary"');
     expect(html).toContain("<strong>4</strong><span>Damage absorbed by allies</span>");
+    expect(html).toContain("<dt>Value per round</dt><dd>4</dd>");
+    expect(html).toContain("<td>4</td></tr></tfoot>");
   });
 
   it("localizes the result actions and statistics in Chinese", () => {

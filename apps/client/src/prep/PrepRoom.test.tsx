@@ -46,6 +46,18 @@ function render(prep: PrepView | null, mobile: boolean): string {
 }
 
 describe("preparation stage layout", () => {
+  it.each([false, true])("shows full-screen control beside Leave (mobile: %s)", (mobile) => {
+    vi.stubGlobal("document", {
+      documentElement: { requestFullscreen: vi.fn() },
+      exitFullscreen: vi.fn(),
+      fullscreenElement: null,
+    });
+    const html = render(pairedPrep("select-arena"), mobile);
+    const actions = html.match(/<div class="prep-topbar-actions">([\s\S]*?)<\/div>/)?.[1];
+    expect(actions).toContain('aria-label="Enter full screen"');
+    expect(actions).toContain("Leave");
+  });
+
   it.each([false, true])("allows arena drafting before either player chooses turn order (mobile: %s)", (mobile) => {
     for (const winner of [0, 1] as const) {
       const prep = pairedPrep("choose-first");

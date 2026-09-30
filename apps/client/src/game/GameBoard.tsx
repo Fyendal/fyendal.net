@@ -63,6 +63,7 @@ import { useMobileCardLongPress } from "./mobileCardLongPress.js";
 import { abilityLabelForSource, deriveBoardLegalState } from "./board/boardModel.js";
 import { useGameSettings } from "./board/useGameSettings.js";
 import { useGameViewport } from "./board/useGameViewport.js";
+import { useFullscreen } from "../components/useFullscreen.js";
 import { useIdleVictoryPrompt } from "./board/useIdleVictoryPrompt.js";
 import { useGameShortcuts } from "./board/useGameShortcuts.js";
 import type { BoardOverlay } from "./board/BoardPrimitives.js";
@@ -136,6 +137,7 @@ export function GameBoard() {
     })),
   );
   const tableRef = useRef<HTMLDivElement>(null);
+  const fullscreen = useFullscreen();
   const [overlay, setOverlay] = useState<BoardOverlay | null>(null);
   const [inspectedCardId, setInspectedCardId] = useState<string | null>(null);
   const cardLongPressHandlers = useMobileCardLongPress((cardId, target) => {
@@ -1311,6 +1313,9 @@ export function GameBoard() {
 
       {/* ── side panel: status + log ── */}
       <SideRail
+        fullscreenSupported={fullscreen.supported}
+        fullscreenActive={fullscreen.active}
+        onToggleFullscreen={fullscreen.toggle}
         unreadMessageCount={authUser && !replaying ? unreadMessageCount : 0}
         onOpenSocial={authUser && !replaying ? () => setSocialOpen(true) : undefined}
         collapsed={railCollapsed}

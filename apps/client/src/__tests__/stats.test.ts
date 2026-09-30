@@ -180,8 +180,8 @@ describe("computeCycleStats", () => {
     expect(stats.total.threatened).toEqual([0, 0]);
     expect(stats.total.attacks).toEqual([0, 0]);
     expect(stats.total.blocked).toEqual([0, 0]);
-    expect(cycleValue(stats.rows[0]!, 1)).toBe(0);
-    expect(averageValue(stats, 1)).toBe(0);
+    expect(cycleValue(stats.rows[0]!, 1)).toBe(3);
+    expect(averageValue(stats, 1)).toBe(3);
   });
 
   it("counts a weapon attacking again on a later turn", () => {
@@ -253,13 +253,24 @@ describe("computeCycleStats", () => {
 });
 
 describe("cycleValue / averageValue", () => {
-  it("value is threatened + blocked + prevented + life gained - life lost", () => {
+  it("value includes threat, blocks, ally damage absorbed, prevention, life gain, and life loss", () => {
     const stats = computeCycleStats([
       frame(1, 0, [link(0, 6, 3)]),
       frame(2, 1, [link(1, 4, 4)]),
     ]);
     expect(cycleValue(stats.rows[0]!, 0)).toBe(10); // 6 threatened + 4 blocked
     expect(cycleValue(stats.rows[0]!, 1)).toBe(7); // 4 threatened + 3 blocked
+  });
+
+  it("includes authoritative ally damage in value and averages", () => {
+    const view = frame(1, 0, []);
+    view.gameStats = { turns: [{
+      turn: 1, activePlayer: 0, attacks: [0, 0], threatened: [0, 0],
+      blocked: [0, 0], damageDealt: [0, 0], allyAbsorbed: [4, 0],
+    }] };
+    const stats = computeCycleStats([view]);
+    expect(cycleValue(stats.rows[0]!, 0)).toBe(4);
+    expect(averageValue(stats, 0)).toBe(4);
   });
 
   it("subtracts Blood Debt-like life loss without treating it as damage dealt", () => {
