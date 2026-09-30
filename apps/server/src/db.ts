@@ -661,6 +661,13 @@ export const MIGRATIONS: Migration[] = [
       ADD CONSTRAINT pending_bot_starts_bot_check
       CHECK (bot IN ('ira', 'hala', 'cindra', 'jarl', 'briar', 'bravo', 'starvo', 'kayo'));`,
   },
+  {
+    version: 39,
+    // End automatic early-tester awards while retaining existing entitlements
+    // and each account's displayed-badge preference.
+    sql: `ALTER TABLE users ALTER COLUMN early_tester SET DEFAULT FALSE;
+    ALTER TABLE users ALTER COLUMN selected_badge SET DEFAULT NULL;`,
+  },
 ];
 
 async function publicTables(db: Queryable): Promise<string[]> {

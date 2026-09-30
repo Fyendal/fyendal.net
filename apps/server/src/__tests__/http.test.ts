@@ -709,7 +709,7 @@ describe("replay transport compression", () => {
 });
 
 describe("account rights", () => {
-  it("offers one selected badge and rejects badges the account has not earned", async () => {
+  it("lets entitled accounts choose a displayed badge and rejects unearned badges", async () => {
     await register(db, "BadgeUser", "password1");
     const session = await login(db, "badgeuser", "password1");
     if (!session.ok) throw new Error("login failed");
@@ -721,6 +721,18 @@ describe("account rights", () => {
       "Content-Type": "application/json",
     };
 
+    const unearned = await fetch(`${url}/api/account/badges`, { headers });
+    expect(await unearned.json()).toEqual({ ok: true, availableBadges: [], selectedBadge: null });
+
+    const unavailable = await fetch(`${url}/api/account/badge`, {
+      method: "POST",
+      headers,
+      body: JSON.stringify({ badge: "early-tester" }),
+    });
+    expect(unavailable.status).toBe(400);
+    expect(await unavailable.json()).toEqual({ ok: false, error: "badge not available" });
+
+    await db.query("UPDATE users SET early_tester = TRUE, selected_badge = 'early-tester' WHERE id = $1", [user.id]);
     const initial = await fetch(`${url}/api/account/badges`, { headers });
     expect(initial.status).toBe(200);
     expect(await initial.json()).toEqual({
@@ -739,6 +751,14 @@ describe("account rights", () => {
     expect((await db.query("SELECT selected_badge FROM users WHERE id = $1", [user.id])).rows)
       .toEqual([{ selected_badge: null }]);
 
+    const restored = await fetch(`${url}/api/account/badge`, {
+      method: "POST",
+      headers,
+      body: JSON.stringify({ badge: "early-tester" }),
+    });
+    expect(restored.status).toBe(200);
+    expect(await restored.json()).toMatchObject({ ok: true, selectedBadge: "early-tester" });
+
     const invalid = await fetch(`${url}/api/account/badge`, {
       method: "POST",
       headers,
@@ -746,15 +766,6 @@ describe("account rights", () => {
     });
     expect(invalid.status).toBe(400);
     expect(await invalid.json()).toEqual({ ok: false, error: "invalid badge" });
-
-    await db.query("UPDATE users SET early_tester = FALSE WHERE id = $1", [user.id]);
-    const unavailable = await fetch(`${url}/api/account/badge`, {
-      method: "POST",
-      headers,
-      body: JSON.stringify({ badge: "early-tester" }),
-    });
-    expect(unavailable.status).toBe(400);
-    expect(await unavailable.json()).toEqual({ ok: false, error: "badge not available" });
   });
 
   it("exports account data and password-confirmed deletion removes account-bound data", async () => {
@@ -819,8 +830,8 @@ describe("account rights", () => {
     const exportBody = await exported.json() as any;
     expect(exportBody.export.account).toEqual(expect.objectContaining({
       username: "PrivacyUser",
-      earlyTester: true,
-      selectedBadge: "early-tester",
+      earlyTester: false,
+      selectedBadge: null,
     }));
     expect(exportBody.export.rooms).toEqual([
       expect.objectContaining({ code: "PRIV01", seat: 0 }),

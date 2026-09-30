@@ -40,6 +40,8 @@ describe("register", () => {
     const { rows } = await db.query("SELECT * FROM users WHERE username_lc = 'player1'");
     const user = rows[0] as UserRow;
     expect(user.username).toBe("Player1");
+    expect(user.early_tester).toBe(false);
+    expect(user.selected_badge).toBeNull();
     expect((await db.query(
       "SELECT event_type, format, game_mode FROM analytics_events",
     )).rows).toEqual([{ event_type: "user_registered", format: null, game_mode: null }]);

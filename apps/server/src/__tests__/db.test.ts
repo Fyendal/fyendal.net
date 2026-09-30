@@ -22,6 +22,27 @@ async function tables(db: Queryable): Promise<string[]> {
 }
 
 describe("initial schema", () => {
+  it("stops awarding early-tester badges to new users while preserving existing accounts", async () => {
+    const db = rawDb();
+    await applyMigrations(db, MIGRATIONS.filter((migration) => migration.version <= 38));
+    await db.query(`INSERT INTO users (username, username_lc, pass_hash, created_at)
+      VALUES ('Existing', 'existing', 'hash', 1)`);
+    await db.query("UPDATE users SET selected_badge = NULL WHERE username_lc = 'existing'");
+    await db.query(`INSERT INTO users (username, username_lc, pass_hash, created_at)
+      VALUES ('Displaying', 'displaying', 'hash', 1)`);
+
+    await applyMigrations(db, MIGRATIONS);
+    await db.query(`INSERT INTO users (username, username_lc, pass_hash, created_at)
+      VALUES ('NewPlayer', 'newplayer', 'hash', 2)`);
+    expect((await db.query(
+      "SELECT username_lc, early_tester, selected_badge FROM users ORDER BY id",
+    )).rows).toEqual([
+      { username_lc: "existing", early_tester: true, selected_badge: null },
+      { username_lc: "displaying", early_tester: true, selected_badge: "early-tester" },
+      { username_lc: "newplayer", early_tester: false, selected_badge: null },
+    ]);
+  });
+
   it("upgrades durable matchmaking to accept Kayo while retaining existing bot ids", async () => {
     const db = rawDb();
     await applyMigrations(db, MIGRATIONS.filter((migration) => migration.version <= 37));
