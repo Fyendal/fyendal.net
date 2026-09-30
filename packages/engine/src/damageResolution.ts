@@ -14,7 +14,7 @@ import {
 import type { GameStateInternal } from "./runtimeState.js";
 
 import type { CardInstance, Modifier, PendingArcane, PlayerState, StackLayer } from "./state.js";
-import { recordAllyAbsorbed, recordEffectThreat, recordHeroDamage } from "./stats.js";
+import { recordAllyAbsorbed, recordEffectThreat, recordHeroDamage, recordLifeGained } from "./stats.js";
 import { tokenCreationCauseForModifier } from "./tokenQueries.js";
 import { createTokenFor, createTokensFor } from "./tokens.js";
 import { destroyPermanent, moveToGraveyard } from "./zoneMoves.js";
@@ -2087,6 +2087,7 @@ export function gainHeroLife(state: GameStateInternal,
   }
   if (amount <= 0) return;
   player.life += amount;
+  recordLifeGained(state, targetSeat, amount);
   player.flags.lifeGainedThisTurn = (Number(player.flags.lifeGainedThisTurn) || 0) + amount;
   logPublic(state, gameLogMessage(
     `${nameOf(state, player.heroCardId)} gains ${amount} life (${player.life} life)`,

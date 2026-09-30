@@ -21450,6 +21450,12 @@
       "value": "Watching replay"
     }
   ],
+  "game.stack.attackLayer": [
+    {
+      "type": 0,
+      "value": "Attack layer"
+    }
+  ],
   "game.stack.groupedTriggers": [
     {
       "type": 1,
@@ -21578,6 +21584,18 @@
     {
       "type": 0,
       "value": "Final life"
+    }
+  ],
+  "game.stats.lifeGained": [
+    {
+      "type": 0,
+      "value": "Life gained"
+    }
+  ],
+  "game.stats.lifeLost": [
+    {
+      "type": 0,
+      "value": "Life lost"
     }
   ],
   "game.stats.match": [

@@ -65,6 +65,23 @@ describe("authoritative match stats", () => {
     });
   });
 
+  it("records Blood Debt-like life loss and life gain separately from damage", () => {
+    const state = makeGame(85);
+    const sourceId = giveCard(state, 0, "INSTANT");
+    const source = player(state, 0).hand.find((card) => card.instanceId === sourceId)!;
+    const ctx = makeCtx(state, engineRuntime, 0, source);
+
+    ctx.loseLife(0, 1);
+    ctx.gainLife(0, 2);
+
+    expect(player(state, 0).life).toBe(21);
+    expect(state.gameStats.turns[0]).toMatchObject({
+      damageDealt: [0, 0],
+      lifeGained: [2, 0],
+      lifeLost: [1, 0],
+    });
+  });
+
   it("credits damage dealt to an opponent's ally as the defender's separate value", () => {
     const state = makeGame(84);
     state.cardsRef = {

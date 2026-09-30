@@ -1,4 +1,5 @@
 import type { CardView, GameView } from "@fyendal/shared";
+import { attackLayerPresentation } from "../attackLayerPresentation.js";
 import { heroCard } from "../board/heroCard.js";
 import {
   motionLocationKey,
@@ -14,6 +15,7 @@ export interface GamePresentations {
 }
 
 export function extractGamePresentations(view: GameView): GamePresentations {
+  const combat = attackLayerPresentation(view);
   const cards: CardPresentation[] = [];
   const counts: MotionZoneCount[] = [];
   const repeatedKeys = new Map<string, number>();
@@ -81,12 +83,12 @@ export function extractGamePresentations(view: GameView): GamePresentations {
     );
   }
 
-  view.stack.forEach((layer, index) => {
+  combat.stack.forEach((layer, index) => {
     // A resolving layer shifts every remaining array index. Keep its motion
     // identity stable so ordinary stack compaction is not presented as a move.
     add(layer.card, { kind: "stack-layer", index }, "display");
   });
-  view.chain.forEach((link, linkIndex) => {
+  combat.chain.forEach((link, linkIndex) => {
     add(
       link.attackingCard,
       { kind: "chain-attack", link: linkIndex },
@@ -101,13 +103,7 @@ export function extractGamePresentations(view: GameView): GamePresentations {
     add(link.targetAlly, { kind: "chain-target", link: linkIndex }, "display");
   });
 
-  let stagedLinkIndex = -1;
-  for (let index = view.chain.length - 1; index >= 0; index -= 1) {
-    if (view.chain[index]?.onStack !== true) {
-      stagedLinkIndex = index;
-      break;
-    }
-  }
+  const stagedLinkIndex = combat.chain.length - 1;
   if (stagedLinkIndex >= 0) {
     stagedCards.forEach((card, index) => {
       // Opponents receive projection-local negative ids for staged hidden

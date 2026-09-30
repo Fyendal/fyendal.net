@@ -782,9 +782,18 @@ describe("GameView and server messages", () => {
           blocked: [0, 2],
           damageDealt: [2, 0],
           allyAbsorbed: [0, 3],
+          lifeGained: [1, 0],
+          lifeLost: [0, 1],
         }],
       },
     })).not.toBeNull();
+    expect(decodeGameView({
+      ...gameView(),
+      gameStats: { turns: [{
+        turn: 1, activePlayer: 0, attacks: [0, 0], threatened: [0, 0],
+        blocked: [0, 0], damageDealt: [0, 0], lifeLost: [0, -1],
+      }] },
+    })).toBeNull();
     expect(decodeGameView({
       ...gameView(),
       gameStats: {

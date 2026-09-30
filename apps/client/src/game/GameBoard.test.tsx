@@ -214,7 +214,7 @@ describe("GameBoard spectator presentation", () => {
 });
 
 describe("GameBoard pending interactions", () => {
-  it("shows a pending attack in the chain and only its trigger in the stack", () => {
+  it("shows a pending attack in the stack until the Attack Step", () => {
     vi.stubGlobal("localStorage", { getItem: () => null });
     const view = interactiveView();
     view.chain[0]!.onStack = true;
@@ -222,10 +222,12 @@ describe("GameBoard pending interactions", () => {
     const render = () => renderToStaticMarkup(<TestI18nProvider><GameBoard /></TestI18nProvider>);
 
     const pendingAttack = render();
-    expect(pendingAttack).toContain('data-motion-card="chain:0:attack:30"');
-    expect(pendingAttack).not.toContain('data-motion-zone="stack:attack"');
-    expect(pendingAttack).not.toContain('class="float stack-float"');
+    expect(pendingAttack).toContain('data-motion-card="stack:layer:30"');
+    expect(pendingAttack).not.toContain('data-motion-card="chain:0:attack:30"');
+    expect(pendingAttack).toContain('class="float stack-float"');
+    expect(pendingAttack).toContain('class="stack-context">LAYER STEP · ATTACK</div>');
 
+    view.chain[0]!.onStack = false;
     view.stack = [{
       card: { instanceId: 1, cardId: "TST-HERO-0", owner: 0 },
       seat: 0,
@@ -234,6 +236,7 @@ describe("GameBoard pending interactions", () => {
     }];
     const withTrigger = render();
     expect(withTrigger).toContain('data-motion-card="chain:0:attack:30"');
+    expect(withTrigger).not.toContain('data-motion-card="stack:layer:30"');
     expect(withTrigger).toContain('data-motion-card="stack:layer:1"');
     expect(withTrigger).toContain('data-motion-card="0:hero:1"');
   });

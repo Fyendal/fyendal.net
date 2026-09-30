@@ -20642,6 +20642,12 @@
       "value": "正在观看回放"
     }
   ],
+  "game.stack.attackLayer": [
+    {
+      "type": 0,
+      "value": "攻击层"
+    }
+  ],
   "game.stack.groupedTriggers": [
     {
       "type": 1,
@@ -20770,6 +20776,18 @@
     {
       "type": 0,
       "value": "最终生命"
+    }
+  ],
+  "game.stats.lifeGained": [
+    {
+      "type": 0,
+      "value": "获得生命"
+    }
+  ],
+  "game.stats.lifeLost": [
+    {
+      "type": 0,
+      "value": "失去生命"
     }
   ],
   "game.stats.match": [

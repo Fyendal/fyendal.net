@@ -1092,6 +1092,13 @@ describe("PersistedStateV1", () => {
     expect(decodePersistedState(beforeAllyStats, "ABC123", cardData, scripts)
       .gameStats.turns[0]?.allyAbsorbed).toBeUndefined();
 
+    const beforeLifeStats = jsonCopy(encodePersistedState(game()));
+    delete beforeLifeStats.state.gameStats!.turns[0]!.lifeGained;
+    delete beforeLifeStats.state.gameStats!.turns[0]!.lifeLost;
+    const decodedBeforeLifeStats = decodePersistedState(beforeLifeStats, "ABC123", cardData, scripts);
+    expect(decodedBeforeLifeStats.gameStats.turns[0]?.lifeGained).toBeUndefined();
+    expect(decodedBeforeLifeStats.gameStats.turns[0]?.lifeLost).toBeUndefined();
+
     const corrupt = jsonCopy(encodePersistedState(game()));
     corrupt.state.gameStats!.turns[0]!.damageDealt[1] = -1;
     expect(() => decodePersistedState(corrupt, "ABC123", cardData, scripts))
@@ -1100,6 +1107,10 @@ describe("PersistedStateV1", () => {
     corruptAlly.state.gameStats!.turns[0]!.allyAbsorbed = [0, -1];
     expect(() => decodePersistedState(corruptAlly, "ABC123", cardData, scripts))
       .toThrow(/allyAbsorbed\[1\].*non-negative/);
+    const corruptLifeLoss = jsonCopy(encodePersistedState(game()));
+    corruptLifeLoss.state.gameStats!.turns[0]!.lifeLost = [0, -1];
+    expect(() => decodePersistedState(corruptLifeLoss, "ABC123", cardData, scripts))
+      .toThrow(/lifeLost\[1\].*non-negative/);
   });
 
   it("round trips paused reaction costs and damage replacement modifiers", () => {

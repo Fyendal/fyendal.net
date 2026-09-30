@@ -176,7 +176,7 @@ describe("game motion detection", () => {
     });
   });
 
-  it("moves a back from a hidden opponent hand and reveals at the chain preview", () => {
+  it("moves a back from a hidden opponent hand and reveals on the attack layer", () => {
     const attack = face(3, 1);
     const previous = view([player(0), player(1, { handCount: 1 })]);
     const current = view(
@@ -198,16 +198,16 @@ describe("game motion detection", () => {
     expect(detectGameMotionEvents(previous, current)).toEqual([{
       kind: "move",
       source: { kind: "hand", seat: 1 },
-      destination: { kind: "chain-attack", link: 0 },
+      destination: { kind: "stack-layer", index: 0 },
       visual: { kind: "back-reveal", card: attack },
       instanceId: 3,
-      destinationPresentationKey: "chain:0:attack:3",
+      destinationPresentationKey: "stack:layer:3",
       count: 1,
       confidence: "inferred",
     }]);
   });
 
-  it("keeps an attack in the same chain presentation when its layer resolves", () => {
+  it("moves an attack from the stack to the chain when its layer resolves", () => {
     const attack = face(4);
     const stackLink = {
       attackingCard: attack,
@@ -225,7 +225,12 @@ describe("game motion detection", () => {
       { chain: [{ ...stackLink, onStack: false }] },
     );
 
-    expect(detectGameMotionEvents(previous, current)).toEqual([]);
+    expect(detectGameMotionEvents(previous, current)).toEqual([expect.objectContaining({
+      kind: "move",
+      source: { kind: "stack-layer", index: 0 },
+      destination: { kind: "chain-attack", link: 0 },
+      instanceId: attack.instanceId,
+    })]);
   });
 
   it("sources a hero trigger from the hero while an attack and draw arrive", () => {
@@ -278,7 +283,7 @@ describe("game motion detection", () => {
         kind: "move",
         instanceId: 3,
         source: { kind: "hand", seat: 0 },
-        destination: { kind: "chain-attack", link: 0 },
+        destination: { kind: "stack-layer", index: 1 },
       }));
       expect(events).not.toContainEqual(expect.objectContaining({
         kind: "move",
@@ -287,7 +292,7 @@ describe("game motion detection", () => {
     }
   });
 
-  it("shows an attack with its own trigger in the chain before connecting its stack layer", () => {
+  it("moves an attack through the stack before its attack trigger resolves", () => {
     const attack = face(4);
     const previous = view([
       player(0, { hand: [attack], handCount: 1 }), player(1),
@@ -305,7 +310,6 @@ describe("game motion detection", () => {
         resolved: false,
         onStack: true,
       }],
-      stack: [{ card: attack, seat: 0, label: "When this attacks", optional: false }],
     });
     const playTransition = {
       fromVersion: 1,
@@ -322,18 +326,9 @@ describe("game motion detection", () => {
     expect(events).toContainEqual(expect.objectContaining({
       kind: "move",
       source: { kind: "hand", seat: 0 },
-      destination: { kind: "chain-attack", link: 0 },
-      destinationPresentationKey: "chain:0:attack:4",
-    }));
-    expect(events).toContainEqual({
-      kind: "connect",
-      source: { kind: "chain-attack", link: 0 },
       destination: { kind: "stack-layer", index: 0 },
-      visual: { kind: "face", card: attack },
-      instanceId: 4,
-      sourcePresentationKey: "chain:0:attack:4",
       destinationPresentationKey: "stack:layer:4",
-    });
+    }));
     expect(events.filter((event) => event.kind === "move" && event.instanceId === 4)).toHaveLength(1);
     expect(transitionMotionEvents(pending, pending, playTransition, "forward", {
       sourceIncludesPredictedTransition: true,
@@ -341,18 +336,24 @@ describe("game motion detection", () => {
 
     const resolved = view([pending.players[0]!, pending.players[1]!], {
       chain: [{ ...pending.chain[0]!, onStack: false }],
+      stack: [{ card: attack, seat: 0, label: "When this attacks", optional: false }],
     });
-    expect(transitionMotionEvents(pending, resolved, {
+    const attackStepEvents = transitionMotionEvents(pending, resolved, {
       fromVersion: 2,
       kind: "forward",
       events: [{
         kind: "move", from: { kind: "stack", seat: 0 },
         to: { kind: "chain", seat: 0 }, count: 1, instanceId: 4,
       }],
-    }, "forward")).toEqual([]);
+    }, "forward");
+    expect(attackStepEvents).toContainEqual(expect.objectContaining({
+      kind: "move",
+      source: { kind: "stack-layer", index: 0 },
+      destination: { kind: "chain-attack", link: 0 },
+    }));
   });
 
-  it("copies a weapon attack from the arena to the chain, then its trigger from the chain to the stack", () => {
+  it("shows a weapon attack layer before the weapon attacks on the chain", () => {
     const weapon = face(24);
     const previous = view([player(0, { weapons: [weapon] }), player(1)]);
     const current = view([player(0, { weapons: [weapon] }), player(1)], {
@@ -366,26 +367,38 @@ describe("game motion detection", () => {
         resolved: false,
         onStack: true,
       }],
-      stack: [{ card: weapon, seat: 0, label: "When this attacks", optional: false }],
     });
 
     const events = detectGameMotionEvents(previous, current);
     expect(events).toContainEqual(expect.objectContaining({
-      kind: "move",
-      instanceId: weapon.instanceId,
-      source: { kind: "weapon", seat: 0, index: 0 },
-      destination: { kind: "chain-attack", link: 0 },
-    }));
-    expect(events).toContainEqual(expect.objectContaining({
       kind: "connect",
       instanceId: weapon.instanceId,
-      source: { kind: "chain-attack", link: 0 },
+      source: { kind: "weapon", seat: 0, index: 0 },
       destination: { kind: "stack-layer", index: 0 },
-      visual: { kind: "face", card: weapon },
+    }));
+    const attacking = view([player(0, { weapons: [weapon] }), player(1)], {
+      chain: [{ ...current.chain[0]!, onStack: false }],
+      stack: [{ card: weapon, seat: 0, label: "When this attacks", optional: false }],
+    });
+    expect(transitionMotionEvents(current, attacking, {
+      fromVersion: 2,
+      kind: "forward",
+      events: [{
+        kind: "move",
+        from: { kind: "stack", seat: 0 },
+        to: { kind: "chain", seat: 0 },
+        count: 1,
+        instanceId: weapon.instanceId,
+      }],
+    }, "forward")).toContainEqual(expect.objectContaining({
+      kind: "move",
+      instanceId: weapon.instanceId,
+      source: { kind: "stack-layer", index: 0 },
+      destination: { kind: "chain-attack", link: 0 },
     }));
   });
 
-  it("targets the newest chain link when the same arena card attacks again", () => {
+  it("targets the stack when the same arena card starts another attack", () => {
     const attacker = face(25);
     const oldLink = {
       attackingCard: attacker,
@@ -417,7 +430,7 @@ describe("game motion detection", () => {
     expect(events.filter((event) => event.kind === "move" && event.instanceId === attacker.instanceId))
       .toEqual([expect.objectContaining({
         source: { kind: "board", seat: 0 },
-        destination: { kind: "chain-attack", link: 1 },
+        destination: { kind: "stack-layer", index: 0 },
       })]);
   });
 
@@ -449,7 +462,7 @@ describe("game motion detection", () => {
       kind: "move",
       instanceId: attack.instanceId,
       source: { kind: "hand", seat: 0 },
-      destination: { kind: "chain-attack", link: 0 },
+      destination: { kind: "stack-layer", index: 0 },
     }));
     expect(events).toContainEqual({
       kind: "appear",
@@ -495,10 +508,10 @@ describe("game motion detection", () => {
     expect(events).toContainEqual({
       kind: "move",
       source: { kind: "hand", seat: 1 },
-      destination: { kind: "chain-attack", link: 0 },
+      destination: { kind: "stack-layer", index: 0 },
       visual: { kind: "back-reveal", card: attack },
       instanceId: attack.instanceId,
-      destinationPresentationKey: `chain:0:attack:${attack.instanceId}`,
+      destinationPresentationKey: `stack:layer:${attack.instanceId}`,
       count: 1,
       confidence: "inferred",
     });

@@ -201,9 +201,9 @@ export interface CardView {
   hidden?: boolean;
 }
 
-/** A triggered ability waiting on the stack (mentor flip, start/end-of-turn triggers, …) */
+/** A card or ability presented on the stack while awaiting resolution. */
 export interface StackLayerView {
-  /** The card that triggered; null if it left play before resolution */
+  /** The represented card or source; null if it is unavailable or hidden. */
   card: CardView | null;
   /** Controller of the trigger */
   seat: number;
@@ -498,6 +498,9 @@ export interface GameTurnStatsView {
   damageDealt: [number, number];
   /** Damage dealt by an opponent to this seat's allies. Absent in older games. */
   allyAbsorbed?: [number, number];
+  /** Life gained and non-damage life lost, for end-game value. Absent in older games. */
+  lifeGained?: [number, number];
+  lifeLost?: [number, number];
 }
 
 export interface GameStatsView {

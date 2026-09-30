@@ -1007,12 +1007,14 @@ function seatCounters(value: unknown): value is [number, number] {
 function gameTurnStats(value: unknown): value is GameTurnStatsView {
   const stats = object(value);
   return !!stats && exactKeys(stats, [
-    "turn", "activePlayer", "attacks", "threatened", "blocked", "damageDealt", "allyAbsorbed",
+    "turn", "activePlayer", "attacks", "threatened", "blocked", "damageDealt", "allyAbsorbed", "lifeGained", "lifeLost",
   ], ["turn", "activePlayer", "attacks", "threatened", "blocked", "damageDealt"])
     && nonNegativeInteger(stats.turn) && seat(stats.activePlayer)
     && seatCounters(stats.attacks) && seatCounters(stats.threatened)
     && seatCounters(stats.blocked) && seatCounters(stats.damageDealt)
-    && (stats.allyAbsorbed === undefined || seatCounters(stats.allyAbsorbed));
+    && (stats.allyAbsorbed === undefined || seatCounters(stats.allyAbsorbed))
+    && (stats.lifeGained === undefined || seatCounters(stats.lifeGained))
+    && (stats.lifeLost === undefined || seatCounters(stats.lifeLost));
 }
 
 function gameStats(value: unknown): value is GameStatsView {

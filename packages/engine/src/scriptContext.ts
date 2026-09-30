@@ -1,4 +1,5 @@
 import type { EngineRuntime } from "./runtimePorts.js";
+import { recordLifeLost } from "./stats.js";
 import type { GameStateInternal } from "./runtimeState.js";
 import type { EquipmentSlot, GameLogPayload } from "@fyendal/shared";
 import type {
@@ -1379,9 +1380,12 @@ export function makeCtx(
     },
     loseLife(targetSeat, n) {
       const target = state.players[targetSeat] as PlayerState;
-      const lost = Math.max(0, n);
-      target.life = Math.max(0, target.life - lost);
-      if (lost > 0) target.flags.lostLifeThisTurn = true;
+      const requested = Math.max(0, n);
+      const nextLife = Math.max(0, target.life - requested);
+      const lost = Math.max(0, target.life - nextLife);
+      target.life = nextLife;
+      recordLifeLost(state, targetSeat, lost);
+      if (requested > 0) target.flags.lostLifeThisTurn = true;
     },
     gainActionPoint() {
       // CR 8.5.7b: a non-turn-player cannot gain action points

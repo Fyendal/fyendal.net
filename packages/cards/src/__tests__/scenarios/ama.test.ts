@@ -558,6 +558,29 @@ describe("Malice Armory Deck spoiled cards", () => {
     expect(g.state.players[0]!.actionPoints).toBe(1);
   });
 
+  it("Clambering Corpses offers Restless Templar from hand as a discard", () => {
+    const g = scenario({ seats: [
+      {
+        hero: "rhinar",
+        hand: ["clambering corpses|3", "restless templar|1"],
+        equipment: NO_EQUIPMENT,
+      },
+      { hero: "dorinthea", equipment: NO_EQUIPMENT },
+    ] });
+    const templarId = g.state.players[0]!.hand.find((card) => card.cardId === "IAR059")!.instanceId;
+
+    g.play("clambering corpses|3", { settle: false });
+    // Without an available response the attack layer resolves immediately.
+    // The discard choice belongs to the Attack Step, when it attacks.
+    expect(g.state.chain.at(-1)?.flags.attackStepBegan).toBe(true);
+    const view = projectStateFor(g.state, 0);
+    expect(view.chain.at(-1)?.onStack).not.toBe(true);
+    expect(view.stackContext).toBe("ATTACK STEP · TRIGGERS");
+    expect(view.pendingDecision?.options).toContain(String(templarId));
+    g.chooseCard("restless templar|1").expectInZone(0, "restless templar|1", "graveyard");
+    g.expectAttackValue(4);
+  });
+
   it("Otherworldly Ossuary and Rites of Nightfall create their named objects", () => {
     const g = scenario({ seats: [
       {

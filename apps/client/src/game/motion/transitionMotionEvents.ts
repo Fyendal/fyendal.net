@@ -45,9 +45,12 @@ function presentationFor(
   zone: GameTransitionZone | null,
 ): CardPresentation | null {
   if (instanceId === undefined || zone === null) return null;
-  return cards.find((candidate) => (
+  const matching = cards.filter((candidate) => (
     candidate.instanceId === instanceId && zoneMatches(candidate.location, zone)
-  )) ?? null;
+  ));
+  // A card's own trigger may occupy a higher stack position with the same
+  // instance id. The attack layer is the bottommost matching presentation.
+  return (zone.kind === "stack" ? matching.at(-1) : matching[0]) ?? null;
 }
 
 function cardVisible(card: CardView): boolean {
@@ -132,15 +135,6 @@ export function transitionMotionEvents(
   const destinationView = direction === "forward" ? current : previous;
   const source = extractGamePresentations(sourceView);
   const destination = extractGamePresentations(destinationView);
-  const sourcePresentationKeys = new Set(source.cards.map((card) => card.key));
-  // An arena card may attack more than once on a chain. The newest link is
-  // the one whose pending attack layer is resolving in this transition.
-  const destinationChainAttacks = new Map<number, CardPresentation>();
-  for (const card of destination.cards) {
-    if (card.location.kind === "chain-attack") {
-      destinationChainAttacks.set(card.instanceId, card);
-    }
-  }
   const moves = direction === "forward"
     ? transition.events
     : [...transition.events].reverse().map(reversedMove);
@@ -171,16 +165,6 @@ export function transitionMotionEvents(
   const isEffectDraw = direction === "forward" && sourceView.turn === destinationView.turn;
 
   for (const move of moves) {
-    const chainAttack = move.instanceId === undefined
-      ? undefined
-      : destinationChainAttacks.get(move.instanceId);
-    // The rules layer resolves into a link, but the attack has already been
-    // presented in the chain panel. Replaying that internal zone move would
-    // make the card jump between windows.
-    if (move.instanceId !== undefined && move.from?.kind === "stack" && move.to?.kind === "chain"
-      && chainAttack && sourcePresentationKeys.has(chainAttack.key)) {
-      continue;
-    }
     const drawsForEffect = isEffectDraw
       && move.from?.kind === "deck" && move.to?.kind === "hand";
     const discardsAfterDraw = isEffectDraw
@@ -188,18 +172,12 @@ export function transitionMotionEvents(
       && effectDrawSeats.has(move.from.seat);
     if (drawsForEffect && move.to) effectDrawSeats.add(move.to.seat);
     const sourcePresentation = presentationFor(source.cards, move.instanceId, move.from);
-    const declaredAttack = move.to?.kind === "stack"
-      ? chainAttack ?? null
-      : null;
-    const destinationPresentation = declaredAttack
-      ?? presentationFor(destination.cards, move.instanceId, move.to);
+    const destinationPresentation = presentationFor(destination.cards, move.instanceId, move.to);
     const destinationAlreadyPresented = direction === "forward"
       && options.sourceIncludesPredictedTransition === true
       && move.instanceId !== undefined
       && move.to !== null
-      && (declaredAttack
-        ? sourcePresentationKeys.has(declaredAttack.key)
-        : presentationFor(source.cards, move.instanceId, move.to) !== null);
+      && presentationFor(source.cards, move.instanceId, move.to) !== null;
     const sourceLocation = sourcePresentation?.location
       ?? (move.from ? basicLocation(move.from) : null);
     const destinationLocation = destinationPresentation?.location

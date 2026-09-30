@@ -18,6 +18,8 @@ export function beginStatsTurn(state: GameStateInternal): GameTurnStatsView {
     blocked: [0, 0],
     damageDealt: [0, 0],
     allyAbsorbed: [0, 0],
+    lifeGained: [0, 0],
+    lifeLost: [0, 0],
   };
   state.gameStats.turns.push(row);
   return row;
@@ -63,4 +65,19 @@ export function recordAllyAbsorbed(
   const row = beginStatsTurn(state);
   row.allyAbsorbed ??= [0, 0];
   addForSeat(row.allyAbsorbed, defenderSeat, amount);
+}
+
+export function recordLifeGained(state: GameStateInternal, seat: number, amount: number): void {
+  if (amount <= 0) return;
+  const row = beginStatsTurn(state);
+  row.lifeGained ??= [0, 0];
+  addForSeat(row.lifeGained, seat, amount);
+}
+
+/** Life loss that is not already counted as opponent damage. */
+export function recordLifeLost(state: GameStateInternal, seat: number, amount: number): void {
+  if (amount <= 0) return;
+  const row = beginStatsTurn(state);
+  row.lifeLost ??= [0, 0];
+  addForSeat(row.lifeLost, seat, amount);
 }

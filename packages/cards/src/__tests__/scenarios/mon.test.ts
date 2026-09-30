@@ -392,6 +392,10 @@ describe("MON — Shadow Brute and Blood Debt", () => {
 
     s.passActionPhase();
     s.expectLife(0, 19).expectTurn(1);
+    expect(s.state.gameStats.turns[0]).toMatchObject({
+      lifeLost: [1, 0],
+      damageDealt: [0, 0],
+    });
     expect(s.state.pendingDecision?.kind).toBe("arsenal");
     expect(s.state.stack).toHaveLength(0);
     s.settle().expectTurn(2);

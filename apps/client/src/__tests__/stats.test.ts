@@ -77,6 +77,8 @@ describe("computeCycleStats", () => {
           blocked: [1, 0],
           damageDealt: [2, 4],
           allyAbsorbed: [1, 2],
+          lifeGained: [0, 2],
+          lifeLost: [1, 0],
         },
       ],
     };
@@ -89,6 +91,8 @@ describe("computeCycleStats", () => {
         blocked: [1, 2],
         damageDealt: [4, 7],
         allyAbsorbed: [1, 2],
+        lifeGained: [0, 2],
+        lifeLost: [1, 0],
       }],
       cyclesPlayed: [1, 1],
       total: {
@@ -97,6 +101,8 @@ describe("computeCycleStats", () => {
         blocked: [1, 2],
         damageDealt: [4, 7],
         allyAbsorbed: [1, 2],
+        lifeGained: [0, 2],
+        lifeLost: [1, 0],
       },
     });
   });
@@ -116,6 +122,8 @@ describe("computeCycleStats", () => {
         blocked: [4, 3],
         damageDealt: [3, 0],
         allyAbsorbed: [0, 0],
+        lifeGained: [0, 0],
+        lifeLost: [0, 0],
       },
     ]);
     expect(stats.cyclesPlayed).toEqual([1, 1]);
@@ -125,6 +133,8 @@ describe("computeCycleStats", () => {
       blocked: [4, 3],
       damageDealt: [3, 0],
       allyAbsorbed: [0, 0],
+      lifeGained: [0, 0],
+      lifeLost: [0, 0],
     });
   });
 
@@ -170,8 +180,8 @@ describe("computeCycleStats", () => {
     expect(stats.total.threatened).toEqual([0, 0]);
     expect(stats.total.attacks).toEqual([0, 0]);
     expect(stats.total.blocked).toEqual([0, 0]);
-    expect(cycleValue(stats.rows[0]!, 1)).toBe(3);
-    expect(averageValue(stats, 1)).toBe(3);
+    expect(cycleValue(stats.rows[0]!, 1)).toBe(0);
+    expect(averageValue(stats, 1)).toBe(0);
   });
 
   it("counts a weapon attacking again on a later turn", () => {
@@ -227,6 +237,8 @@ describe("computeCycleStats", () => {
       blocked: [0, 0],
       damageDealt: [0, 0],
       allyAbsorbed: [0, 0],
+      lifeGained: [0, 0],
+      lifeLost: [0, 0],
     }]);
     expect(stats.total).toEqual({
       attacks: [0, 0],
@@ -234,18 +246,43 @@ describe("computeCycleStats", () => {
       blocked: [0, 0],
       damageDealt: [0, 0],
       allyAbsorbed: [0, 0],
+      lifeGained: [0, 0],
+      lifeLost: [0, 0],
     });
   });
 });
 
 describe("cycleValue / averageValue", () => {
-  it("value is threatened + blocked + ally damage within the cycle", () => {
+  it("value is threatened + blocked + prevented + life gained - life lost", () => {
     const stats = computeCycleStats([
       frame(1, 0, [link(0, 6, 3)]),
       frame(2, 1, [link(1, 4, 4)]),
     ]);
     expect(cycleValue(stats.rows[0]!, 0)).toBe(10); // 6 threatened + 4 blocked
     expect(cycleValue(stats.rows[0]!, 1)).toBe(7); // 4 threatened + 3 blocked
+  });
+
+  it("subtracts Blood Debt-like life loss without treating it as damage dealt", () => {
+    const view = frame(1, 0, []);
+    view.gameStats = { turns: [{
+      turn: 1, activePlayer: 0, attacks: [0, 0], threatened: [0, 0],
+      blocked: [0, 0], damageDealt: [0, 0], lifeGained: [0, 0], lifeLost: [1, 0],
+    }] };
+    const stats = computeCycleStats([view]);
+    expect(stats.total.damageDealt).toEqual([0, 0]);
+    expect(cycleValue(stats.rows[0]!, 0)).toBe(-1);
+    expect(averageValue(stats, 0)).toBe(-1);
+  });
+
+  it("includes prevention and life gain in value", () => {
+    const view = frame(1, 0, []);
+    view.gameStats = { turns: [{
+      turn: 1, activePlayer: 0, attacks: [1, 0], threatened: [4, 0],
+      blocked: [0, 0], damageDealt: [1, 0], lifeGained: [0, 2], lifeLost: [0, 0],
+    }] };
+    const stats = computeCycleStats([view]);
+    expect(preventedDamage(stats.rows[0]!, 1)).toBe(3);
+    expect(cycleValue(stats.rows[0]!, 1)).toBe(5);
   });
 
   it("averages value over the cycles each seat played in", () => {

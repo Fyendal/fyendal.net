@@ -1,4 +1,5 @@
 import type { EngineRuntime } from "./runtimePorts.js";
+import { recordLifeLost } from "./stats.js";
 import type { GameStateInternal } from "./runtimeState.js";
 import type { GameMessage, MeldSide, PlayableZone } from "@fyendal/shared";
 import type { CardScript, TriggerEvent, TriggerEventContext } from "./scripts.js";
@@ -925,7 +926,10 @@ function advanceStack(state: GameStateInternal, runtime: EngineRuntime): void {
   }
   if (layer.engineEffect?.kind === "lose-life") {
     const player = state.players[layer.seat] as PlayerState;
-    player.life = Math.max(0, player.life - layer.engineEffect.amount);
+    const nextLife = Math.max(0, player.life - layer.engineEffect.amount);
+    const lost = Math.max(0, player.life - nextLife);
+    player.life = nextLife;
+    recordLifeLost(state, layer.seat, lost);
     player.flags.lostLifeThisTurn = true;
     logPublic(state, gameLogMessage(
       `${nameOf(state, player.heroCardId)} loses ${layer.engineEffect.amount} life`,

@@ -10,7 +10,7 @@ import type { GameStatsView, GameView } from "@fyendal/shared";
  *  - threatened:  attack and effect damage aimed at the opposing hero before prevention
  *  - blocked:     damage actually blocked against the opponent's links,
  *                 capped at the attack value (over-block is not extra value)
- *  - value:       threatened + blocked + allyAbsorbed
+ *  - value:       threatened + blocked + prevented + life gained - life lost
  *  - damageDealt: damage actually dealt to the opposing hero
  *  - allyAbsorbed: damage dealt by the opponent to your allies
  */
@@ -21,6 +21,8 @@ export interface CycleRow {
   blocked: [number, number];
   damageDealt: [number, number];
   allyAbsorbed: [number, number];
+  lifeGained: [number, number];
+  lifeLost: [number, number];
 }
 
 export interface CycleStats {
@@ -33,6 +35,8 @@ export interface CycleStats {
     blocked: [number, number];
     damageDealt: [number, number];
     allyAbsorbed: [number, number];
+    lifeGained: [number, number];
+    lifeLost: [number, number];
   };
 }
 
@@ -46,6 +50,8 @@ function totalRows(rows: CycleRow[]) {
     blocked: [0, 0] as [number, number],
     damageDealt: [0, 0] as [number, number],
     allyAbsorbed: [0, 0] as [number, number],
+    lifeGained: [0, 0] as [number, number],
+    lifeLost: [0, 0] as [number, number],
   };
   for (const row of rows) {
     for (const seat of [0, 1] as const) {
@@ -54,6 +60,8 @@ function totalRows(rows: CycleRow[]) {
       total.blocked[seat] += row.blocked[seat];
       total.damageDealt[seat] += row.damageDealt[seat];
       total.allyAbsorbed[seat] += row.allyAbsorbed[seat];
+      total.lifeGained[seat] += row.lifeGained[seat];
+      total.lifeLost[seat] += row.lifeLost[seat];
     }
   }
   return total;
@@ -73,6 +81,8 @@ function authoritativeStats(gameStats: GameStatsView): CycleStats {
       blocked: [0, 0],
       damageDealt: [0, 0],
       allyAbsorbed: [0, 0],
+      lifeGained: [0, 0],
+      lifeLost: [0, 0],
     } satisfies CycleRow;
     for (const seat of [0, 1] as const) {
       row.attacks[seat] += turn.attacks[seat];
@@ -80,6 +90,8 @@ function authoritativeStats(gameStats: GameStatsView): CycleStats {
       row.blocked[seat] += turn.blocked[seat];
       row.damageDealt[seat] += turn.damageDealt[seat];
       row.allyAbsorbed[seat] += turn.allyAbsorbed?.[seat] ?? 0;
+      row.lifeGained[seat] += turn.lifeGained?.[seat] ?? 0;
+      row.lifeLost[seat] += turn.lifeLost?.[seat] ?? 0;
     }
     byCycle.set(cycle, row);
   }
@@ -119,6 +131,8 @@ export function computeCycleStats(views: GameView[]): CycleStats {
         blocked: [0, 0],
         damageDealt: [0, 0],
         allyAbsorbed: [0, 0],
+        lifeGained: [0, 0],
+        lifeLost: [0, 0],
       };
       byCycle.set(cycle, row);
     }
@@ -174,9 +188,10 @@ export function computeCycleStats(views: GameView[]): CycleStats {
   };
 }
 
-/** A player's value for a cycle: threat, blocks, and damage absorbed by allies. */
+/** Talishar's value: threat + blocks + prevention + life gain - life loss. */
 export function cycleValue(row: CycleRow, seat: 0 | 1): number {
-  return row.threatened[seat] + row.blocked[seat] + row.allyAbsorbed[seat];
+  return row.threatened[seat] + row.blocked[seat] + preventedDamage(row, seat)
+    + row.lifeGained[seat] - row.lifeLost[seat];
 }
 
 /** Damage stopped after defense was applied (shields, Ward, Arcane Barrier,
@@ -197,7 +212,7 @@ export function totalPrevented(stats: CycleStats, seat: 0 | 1): number {
 export function averageValue(stats: CycleStats, seat: 0 | 1): number {
   const cycles = stats.cyclesPlayed[seat];
   if (cycles === 0) return 0;
-  return (stats.total.threatened[seat] + stats.total.blocked[seat] + stats.total.allyAbsorbed[seat]) / cycles;
+  return stats.rows.reduce((sum, row) => sum + cycleValue(row, seat), 0) / cycles;
 }
 
 export function averagePerRound(

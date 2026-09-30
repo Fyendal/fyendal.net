@@ -38,9 +38,9 @@ export function stackLayerLabel(label: string): string {
 }
 
 /** Floating stack window: played cards and triggered/activated ability layers
- *  awaiting resolution (index 0 resolves first and appears rightmost). The
- *  declared attack is presented in the chain panel. On desktop this defaults
- *  in the open lane between the opponent's arms and first weapon. */
+ *  awaiting resolution (index 0 resolves first and appears rightmost). On
+ *  desktop this defaults in the open lane between the opponent's arms and
+ *  first weapon. */
 export function StackFloat({
   layers,
   context,

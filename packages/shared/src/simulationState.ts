@@ -477,6 +477,8 @@ export interface PersistedGameTurnStatsV1 {
   damageDealt: [number, number];
   /** Added compatibly after the initial persisted-state baseline. */
   allyAbsorbed?: [number, number];
+  lifeGained?: [number, number];
+  lifeLost?: [number, number];
 }
 
 export interface PersistedGameStatsV1 {

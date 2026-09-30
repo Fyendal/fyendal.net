@@ -16,6 +16,7 @@ import {
   TurnTimingFloat,
 } from "./PriorityFloat.js";
 import { StackFloat } from "./StackFloat.js";
+import { attackLayerPresentation } from "./attackLayerPresentation.js";
 import { DecisionFloat } from "./DecisionFloat.js";
 import {
   CardSearchOverlay,
@@ -213,6 +214,9 @@ export function GameBoard() {
     () => optimisticDefenderView(interactionProjection.view, yourSeat, presentedDefenderIds),
     [interactionProjection.view, presentedDefenderIds, yourSeat],
   );
+  const combatPresentation = presentedView
+    ? attackLayerPresentation(presentedView)
+    : { chain: [], stack: [], context: undefined };
   const gameMotion = useGameMotion({
     rootRef: tableRef,
     view: presentedView,
@@ -1178,12 +1182,11 @@ export function GameBoard() {
         onPass={triggerPrimaryAction}
       />
 
-      {/* ── floating stack window: triggered ability layers + played cards
-          awaiting resolution. The declared attack is shown in the chain panel
-          even while its rules layer is still awaiting resolution. ── */}
+      {/* ── floating stack window: played cards and effects awaiting resolution,
+          including the attack before it moves onto the combat chain. ── */}
       {gameMotion.turnStartUiReady ? <StackFloat
-        layers={presentedView.stack}
-        context={view.stackContext}
+        layers={combatPresentation.stack}
+        context={combatPresentation.context}
         miniHost={splitLineMiniHost}
         visibility={mobileCombatFloatVisibility}
         lessGuidance={lessGuidance}
@@ -1197,7 +1200,7 @@ export function GameBoard() {
           both players and count into the live defense value (0 for the
           opponent — face-down staging leaks nothing) ── */}
       <ChainFloat
-        links={presentedView.chain}
+        links={combatPresentation.chain}
         onRect={setChainRect}
         miniHost={splitLineMiniHost}
         visibility={mobileCombatFloatVisibility}

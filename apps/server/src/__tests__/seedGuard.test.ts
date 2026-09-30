@@ -7,5 +7,8 @@ describe("production seed guard", () => {
     expect(() => assertSafeToSeed({ NODE_ENV: "production" })).toThrow(/refusing to seed/);
     expect(() => assertSafeToSeed({ K_SERVICE: "fyendal" })).toThrow(/refusing to seed/);
     expect(() => assertSafeToSeed({ DATABASE_URL: "postgres://u:p@/db?host=/cloudsql/project:region:db" })).toThrow(/refusing to seed/);
+    expect(() => assertSafeToSeed({ DATABASE_URL: "postgres://u:p@db.example.com/fyendal" })).toThrow(/refusing to seed/);
+    expect(() => assertSafeToSeed({ DATABASE_URL: "postgres://u:p@localhost/fyendal?host=remote.example.com" })).toThrow(/refusing to seed/);
+    expect(() => assertSafeToSeed({ DATABASE_URL: "postgres://u:p@127.0.0.1/fyendal" })).not.toThrow();
   });
 });

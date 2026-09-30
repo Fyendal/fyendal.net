@@ -75,15 +75,16 @@ through environment variables when needed:
 
 ### Seed data
 
-For a development-only fixture, run:
+For local test accounts, run:
 
 ```sh
 pnpm --filter @fyendal/server seed
 ```
 
-This creates local `alice` and `bob` accounts with password `password123` and
-the `DEMO00` room. The command refuses production environments and remote
-database connections. Never point it at a shared database.
+This creates local `alice`, `bob`, `charlie`, and `diana` accounts with password
+`password123`. For a card-specific manual room, use the repository
+[`seed-manual-room` skill](.agents/skills/seed-manual-room/SKILL.md). Both seed
+commands reject production and nonlocal database connections.
 
 ## Commands
 

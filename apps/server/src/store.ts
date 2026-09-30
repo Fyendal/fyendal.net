@@ -307,10 +307,6 @@ function isEmptyPriorityWindow(state: GameState, seat: number): boolean {
   return legal.some((candidate) => candidate.kind === "pass") &&
     legal.every((candidate) => candidate.kind === "pass" || candidate.kind === "concede");
 }
-/** Dev-only fixture (see seed.ts): a fixed in-progress classic-battles match
- *  anyone can spectate. GC-exempt and full by construction. `newCode` is hex,
- *  so "DEMO00" can never collide with a real room. */
-export const DEMO_ROOM_CODE = "DEMO00";
 /** Spectator slots per room — anonymous joins must not grow a room unboundedly. */
 const MAX_SPECTATORS = 20;
 /** Player-seat gate message, shared by the store and the ws gateway. */
@@ -727,7 +723,6 @@ function toRoom(value: unknown): RoomRow {
  * been abandoned.
  */
 function updateGc(room: RoomRow, now = Date.now()): void {
-  if (room.code === DEMO_ROOM_CODE) return; // the dev demo room never expires
   const over = room.state?.winner != null;
   const anyonePresent = room.seats.some((s) => s && isPresent(s.lastSeenAt, now));
   if (over || !anyonePresent) {
@@ -4048,7 +4043,6 @@ export class PgRoomStore {
       presence.filter((p) => p.seat != null).map((p) => p.room_code as string),
     );
     for (const raw of rows as { code: string; winner: string | null }[]) {
-      if (raw.code === DEMO_ROOM_CODE) continue;
       const over = raw.winner != null;
       const anyonePresent = roomsWithPlayers.has(raw.code);
       if (over || !anyonePresent) {
