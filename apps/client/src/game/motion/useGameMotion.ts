@@ -14,6 +14,7 @@ import { detectGameMotionEvents } from "./detectMotionEvents.js";
 import { transitionMotionEvents } from "./transitionMotionEvents.js";
 import { extractGamePresentations } from "./extractPresentations.js";
 import { focusHandReflows } from "./handReflow.js";
+import { motionPresentationKey } from "./motionTypes.js";
 import {
   completeMotionBatch,
   EMPTY_MOTION_BATCH_QUEUE,
@@ -69,6 +70,7 @@ export function useGameMotion({
   arriveFlight: (batchId: string, destinationPresentationKey?: string) => boolean;
   completeBatch: (batchId: string) => void;
   getStackFocusOrigin: (instanceId: number) => MotionRect | undefined;
+  getHandFocusOrigin: (seat: number, instanceId: number) => MotionRect | undefined;
 } {
   const reduceMotion = useMotionPreference(motionPreference);
   const [batch, setBatch] = useState<GameMotionBatch | null>(null);
@@ -88,6 +90,10 @@ export function useGameMotion({
   const getStackFocusOrigin = useCallback((instanceId: number) => {
     if (previousViewRef.current?.gameId !== gameId) return undefined;
     return stackFocusOriginsRef.current.get(instanceId);
+  }, [gameId]);
+  const getHandFocusOrigin = useCallback((seat: number, instanceId: number) => {
+    if (previousViewRef.current?.gameId !== gameId) return undefined;
+    return previousAnchorsRef.current.cards.get(motionPresentationKey({ kind: "hand", seat }, instanceId));
   }, [gameId]);
   const refreshStackFocusOrigins = useCallback((currentView: GameView, anchors: MotionAnchorSnapshot) => {
     stackFocusOriginsRef.current = rememberStackFocusOrigins(
@@ -324,5 +330,6 @@ export function useGameMotion({
     arriveFlight,
     completeBatch,
     getStackFocusOrigin,
+    getHandFocusOrigin,
   };
 }

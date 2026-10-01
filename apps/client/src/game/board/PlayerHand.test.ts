@@ -59,8 +59,11 @@ describe("hand motion anchors", () => {
       life: 20,
       actionPoints: 1,
       resources: 0,
-      hand: [{ instanceId: 7, cardId: "SBA016", owner: 0 }],
-      handCount: 1,
+      hand: [
+        { instanceId: 7, cardId: "SBA016", owner: 0 },
+        { instanceId: 8, cardId: "SBA017", owner: 0 },
+      ],
+      handCount: 2,
       deckCount: 0,
       arsenal: [],
       arsenalCount: 0,
@@ -88,7 +91,7 @@ describe("hand motion anchors", () => {
       winner: null,
       log: [],
     };
-    const html = renderToStaticMarkup(createElement(TestI18nProvider, null, createElement(PlayerHand, {
+    const renderHand = (pitchSelection: number[]) => renderToStaticMarkup(createElement(TestI18nProvider, null, createElement(PlayerHand, {
       view,
       player,
       viewerSeat: 0,
@@ -108,7 +111,8 @@ describe("hand motion anchors", () => {
         selection: { kind: "none" },
         preStackSelectedInstanceId: 7,
         choosingPitch,
-        pitchSelection: [],
+        focusedSourceInstanceId: choosingPitch ? 7 : null,
+        pitchSelection,
         selectedPaymentVariants: [],
         stagedIds: new Set<number>(),
         optimisticallyHiddenIds: new Set<number>(),
@@ -120,14 +124,18 @@ describe("hand motion anchors", () => {
         onSelect: () => undefined,
       },
     })));
+    const html = renderHand([]);
 
     expect(html).toContain('data-motion-zone="0:hand"');
     expect(html).toContain('data-motion-card="0:hand:7"');
     expect(html).toContain("card-selected");
     if (choosingPitch) {
+      expect(html).toContain("pitch-focus-source-hidden");
+      expect(renderHand([8])).toMatch(/class="[^"]*pitch-focus-source-hidden[^"]*" data-cardid="SBA016"/);
       expect(html).not.toContain("data-hand-instance-id");
       expect(html).not.toContain('aria-keyshortcuts="Alt+ArrowLeft Alt+ArrowRight"');
     } else {
+      expect(html).not.toContain("pitch-focus-source-hidden");
       expect(html).toContain('data-hand-instance-id="7"');
       expect(html).toContain('aria-keyshortcuts="Alt+ArrowLeft Alt+ArrowRight"');
     }

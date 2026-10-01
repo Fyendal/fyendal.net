@@ -3,7 +3,8 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import { TestI18nProvider } from "../../i18n/TestI18nProvider.js";
 import { ActionAnnouncementPanel } from "./ActionAnnouncementPanel.js";
-import type { ActionAnnouncementModel } from "./DecisionModels.js";
+import { DecisionFloat } from "../DecisionFloat.js";
+import type { ActionAnnouncementModel, PendingDecisionModel } from "./DecisionModels.js";
 
 const noop = () => undefined;
 
@@ -58,6 +59,41 @@ function paymentModel(
     onCancel: noop,
   };
 }
+
+describe("post-payment mode focus", () => {
+  it("keeps the boost choice in the pitch focus prompt", () => {
+    const pending: PendingDecisionModel = {
+      decision: null,
+      isMine: false,
+      decidingName: "",
+      canPass: false,
+      defendPitchIds: new Set(),
+      hand: [],
+      defendSel: [],
+      selectedPitchIds: [],
+      onTogglePitch: noop,
+      resourcePaymentSelected: 0,
+      resourcePaymentRequired: 0,
+      confirmSkipArsenal: false,
+      onRequestPass: noop,
+      onDisableGuidance: noop,
+      onConfirmSkipArsenal: noop,
+      onCancelSkipArsenal: noop,
+      onSend: noop,
+    };
+    const html = renderLocalized(
+      <DecisionFloat
+        pending={pending}
+        action={{ ...paymentModel(false), step: "boost", boostCount: null, boostOptions: [0, 1], pitchSel: [2] }}
+        viewerSeat={0}
+        pitchFocused
+      />,
+    );
+
+    expect(html).toContain('class="float decision-float decision-float-pitch"');
+    expect(html).toContain("Boost");
+  });
+});
 
 describe("alternative-cost payment choices", () => {
   it("separates compact alternative-cost cards from resource pitching", () => {

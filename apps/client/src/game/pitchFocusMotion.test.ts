@@ -38,5 +38,6 @@ describe("pitch focus animation origin", () => {
 
   it("keeps hand announcements anchored to their hand card", () => {
     expect(pitchFocusOrigin(true, arena, stack, previousStack)).toBe(arena);
+    expect(pitchFocusOrigin(true, undefined, stack, previousStack, arena)).toBe(arena);
   });
 });

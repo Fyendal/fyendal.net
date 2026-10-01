@@ -79,6 +79,7 @@ describe("optimistic defender staging", () => {
     if (projected?.pendingDecision?.kind !== "defend") throw new Error("expected defend decision");
     expect(projected.pendingDecision.stagedCards?.map((card) => card.instanceId))
       .toEqual([11, 14, 12, 13, 100]);
+    expect(projected.pendingDecision.stagedHandCount).toBe(1);
     expect(projected.pendingDecision.stagedDefense).toBe(10);
     expect(view.pendingDecision?.kind === "defend" && view.pendingDecision.stagedCards).toEqual([]);
     expect(view.pendingDecision?.kind === "defend" && view.pendingDecision.stagedDefense).toBe(0);

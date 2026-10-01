@@ -6,10 +6,12 @@ import type { MotionRect } from "./motion/motionGeometry.js";
 import { pitchFocusOrigin } from "./pitchFocusMotion.js";
 import type { PitchFocusSource } from "./pitchFocusSource.js";
 
-export function PitchFocus({ source, motionPreference, getStackFocusOrigin }: {
+export function PitchFocus({ source, seat, motionPreference, getStackFocusOrigin, getHandFocusOrigin }: {
   source: PitchFocusSource;
+  seat: number;
   motionPreference: MotionPreference;
   getStackFocusOrigin: (instanceId: number) => MotionRect | undefined;
+  getHandFocusOrigin: (seat: number, instanceId: number) => MotionRect | undefined;
 }) {
   const positionRef = useRef<HTMLDivElement>(null);
   const focusRef = useRef<HTMLDivElement>(null);
@@ -54,20 +56,19 @@ export function PitchFocus({ source, motionPreference, getStackFocusOrigin }: {
       : stackElement)
       ?? table.querySelector<HTMLElement>(`[data-card-stack-id="${instanceId}"]`)
       ?? candidates[0];
+    const sourceBounds = sourceElement?.getBoundingClientRect();
+    const sourceRect = sourceBounds && sourceBounds.width > 0 && sourceBounds.height > 0
+      ? sourceBounds : undefined;
     const start = pitchFocusOrigin(
       fromHand,
-      sourceElement?.getBoundingClientRect(),
+      sourceRect,
       stackElement?.getBoundingClientRect(),
       getStackFocusOrigin(instanceId),
+      getHandFocusOrigin(seat, instanceId),
     );
     if (!start) return;
     const end = focus.getBoundingClientRect();
-    const wasInert = sourceElement?.inert ?? false;
     let animation: Animation | undefined;
-    if (fromHand && sourceElement) {
-      sourceElement.classList.add("pitch-focus-source-hidden");
-      sourceElement.inert = true;
-    }
     if (!reducedMotion && start.width > 0 && start.height > 0 && end.width > 0 &&
       end.height > 0 && typeof focus.animate === "function") {
       animation = focus.animate([
@@ -77,12 +78,8 @@ export function PitchFocus({ source, motionPreference, getStackFocusOrigin }: {
     }
     return () => {
       animation?.cancel();
-      if (fromHand && sourceElement) {
-        sourceElement.classList.remove("pitch-focus-source-hidden");
-        sourceElement.inert = wasInert;
-      }
     };
-  }, [instanceId, source.card.cardId, fromHand, reducedMotion, getStackFocusOrigin]);
+  }, [instanceId, source.card.cardId, fromHand, seat, reducedMotion, getStackFocusOrigin, getHandFocusOrigin]);
 
   return (
     <div className="pitch-focus">

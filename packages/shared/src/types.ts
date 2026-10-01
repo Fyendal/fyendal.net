@@ -467,6 +467,9 @@ export interface PendingDecision {
    *  players — the defender sees the real cards, everyone else sees hand
    *  cards face-down (staged equipment stays face-up) */
   stagedCards?: CardView[];
+  /** Number of staged defenders still in the defending player's hand.
+   * Public presentation metadata; staging does not move cards between zones. */
+  stagedHandCount?: number;
   /** Combined defense of the staged cards — projected as 0 to anyone but the
    *  defender so face-down hand cards leak nothing before the commit */
   stagedDefense?: number;

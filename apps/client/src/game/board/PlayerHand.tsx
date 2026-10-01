@@ -95,6 +95,7 @@ export interface PlayerHandInteraction {
   selectedPaymentVariants: Parameters<typeof canAddPaymentCard>[0];
   resourcePayment?: ResourcePayment;
   choosingPitch?: boolean;
+  focusedSourceInstanceId?: number | null;
   stagedIds: ReadonlySet<number>;
   optimisticallyHiddenIds: ReadonlySet<number>;
   defending: boolean;
@@ -331,10 +332,12 @@ export function PlayerHand({
                 key={card.instanceId}
                 card={card}
                 motionKey={motionPresentationKey(handMotionLocation, card.instanceId)}
-                handReorderHint={reorderEnabled
+                focusSourceHidden={interaction.focusedSourceInstanceId === card.instanceId}
+                handReorderHint={reorderEnabled && interaction.focusedSourceInstanceId !== card.instanceId
                   ? intl.formatMessage({ id: "game.hand.reorderHint" })
                   : undefined}
-                onClick={actionable ? () => interaction.onCardClick(card) : undefined}
+                onClick={actionable && interaction.focusedSourceInstanceId !== card.instanceId
+                  ? () => interaction.onCardClick(card) : undefined}
                 explanation={explanation}
                 selected={selected || (
                   discardPayment && interaction.pitchSelection.includes(card.instanceId)

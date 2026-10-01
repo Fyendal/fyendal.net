@@ -195,6 +195,7 @@ export function CardFace({
   motionKey,
   motionZoneAnchor,
   handReorderHint,
+  focusSourceHidden,
 }: {
   card: CardView;
   size?: "hand" | "zone" | "preview";
@@ -235,6 +236,8 @@ export function CardFace({
   motionZoneAnchor?: string;
   /** Local hand sorting affordance, supplied only by the player's hand. */
   handReorderHint?: string;
+  /** Hide the hand copy while this card is displayed in the pitch focus. */
+  focusSourceHidden?: boolean;
 }) {
   // Try temporary Fabrary variants before falling back to the text layout.
   const [imageFailure, setImageFailure] = useState<{ cardId: string; attempts: number } | null>(null);
@@ -310,6 +313,7 @@ export function CardFace({
   const cls = [
     "card",
     size === "zone" ? "card-zone" : size === "preview" ? "card-preview-frame" : "card-hand",
+    focusSourceHidden ? "pitch-focus-source-hidden" : "",
     showImg ? "card-hasimg" : "",
     selected ? "card-selected" : "",
     pitched ? "card-pitched" : "",

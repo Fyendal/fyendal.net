@@ -10,6 +10,7 @@ vi.mock("../store.js", () => ({
 }));
 
 import { GameBoard } from "./GameBoard.js";
+import { presentedHandCount } from "./defenderState.js";
 import { TestI18nProvider } from "../i18n/TestI18nProvider.js";
 
 afterEach(() => vi.unstubAllGlobals());
@@ -133,6 +134,60 @@ function cardClasses(html: string, cardId: string): string {
   if (!match?.[1]) throw new Error(`Card ${cardId} was not rendered`);
   return match[1];
 }
+
+describe("staged defender hand presentation", () => {
+  it("counts a focused hand card once when another presentation also hides it", () => {
+    const view = interactiveView();
+    const me = view.players[0]!;
+    me.hand.push({ instanceId: 11, cardId: "WTR171", owner: 0 });
+    me.handCount = 2;
+    view.pendingDecision = {
+      player: 0,
+      kind: "defend",
+      prompt: "",
+      stagedCards: [me.hand[0]!],
+      stagedHandCount: 1,
+    };
+
+    expect(presentedHandCount(view, 0, new Set([10]))).toBe(1);
+    view.pendingDecision = null;
+    expect(presentedHandCount(view, 0, new Set([10]))).toBe(1);
+  });
+
+  it("removes only staged hand cards from the opponent's visible hand", () => {
+    vi.stubGlobal("localStorage", { getItem: () => null });
+    const view = interactiveView();
+    view.pendingDecision = {
+      player: 1,
+      kind: "defend",
+      prompt: "",
+      stagedCards: [
+        { instanceId: -1, cardId: "", owner: 1, hidden: true, faceDown: true },
+        { instanceId: -2, cardId: "", owner: 1, hidden: true, faceDown: true },
+        { instanceId: 41, cardId: "TST-EQUIPMENT", owner: 1 },
+      ],
+      stagedHandCount: 2,
+      stagedDefense: 0,
+    };
+    gameStore.state = { ...liveState(false), view };
+
+    const render = () => renderToStaticMarkup(<TestI18nProvider><GameBoard /></TestI18nProvider>);
+    const handBacks = (html: string) => html.match(/data-motion-card="1:hand:opaque(?::\d+)?"/g) ?? [];
+    expect(handBacks(render())).toHaveLength(2);
+
+    view.pendingDecision.stagedCards?.push(
+      { instanceId: -3, cardId: "", owner: 1, hidden: true, faceDown: true },
+      { instanceId: -4, cardId: "", owner: 1, hidden: true, faceDown: true },
+    );
+    view.pendingDecision.stagedHandCount = 4;
+    const emptyHand = render();
+    expect(handBacks(emptyHand)).toHaveLength(0);
+    expect(emptyHand).toContain("opponent has no cards in hand");
+
+    view.pendingDecision = null;
+    expect(handBacks(render())).toHaveLength(4);
+  });
+});
 
 describe("GameBoard social notifications", () => {
   it("counts unread messages across friends on More without counting invitations", () => {

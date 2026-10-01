@@ -1,7 +1,7 @@
 import type { GameView, PlayerView } from "@fyendal/shared";
 import { describe, expect, it } from "vitest";
 import { pitchFocusSource } from "./pitchFocusSource.js";
-import { retainedPitchFocus } from "./usePitchFocus.js";
+import { postPaymentPitchFocus, retainedPitchFocus } from "./usePitchFocus.js";
 
 function paymentView(): GameView {
   const player: PlayerView = {
@@ -21,6 +21,24 @@ function paymentView(): GameView {
 }
 
 describe("pitch focus source", () => {
+  it("keeps a pitched play focused through boost, targets, and confirmation", () => {
+    for (const step of ["boost", "target", "close-chain", "confirm"] as const) {
+      expect(postPaymentPitchFocus(step, 1, "resource")).toBe(true);
+      expect(postPaymentPitchFocus(step, 0, "resource")).toBe(false);
+      expect(postPaymentPitchFocus(step, 1, "discard")).toBe(false);
+    }
+    expect(postPaymentPitchFocus("method", 1, "resource")).toBe(false);
+    expect(postPaymentPitchFocus("payment", 1, "resource")).toBe(false);
+
+    const view = paymentView();
+    const selection = { kind: "play-hand" as const, instanceId: 2 };
+    // The choice can follow a pitch in the same render, before the effect
+    // that remembers the prior payment focus has run.
+    const focused = retainedPitchFocus(view, 0, selection, true, true, null);
+    expect(focused?.source.card.instanceId).toBe(2);
+    expect(focused?.source.fromHand).toBe(true);
+  });
+
   it("retains focus after pitching until submission, cancellation, or a different announcement", () => {
     const view = paymentView();
     const selection = { kind: "play-hand" as const, instanceId: 2 };

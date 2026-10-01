@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import type { GameView } from "@fyendal/shared";
 import { pitchFocusSource, type PitchFocusSource } from "./pitchFocusSource.js";
-import type { Sel } from "./useActionAnnouncement.js";
+import type { ActionStep, Sel } from "./useActionAnnouncement.js";
 
 interface FocusedAnnouncement {
   gameId: string;
@@ -9,19 +9,31 @@ interface FocusedAnnouncement {
   source: PitchFocusSource;
 }
 
-/** Keep the focus through target/confirmation steps, until the announcement
+/** A paid play remains in the pitch focus while its remaining local choices
+ * are made. Discard costs use the same selection array but are not pitching. */
+export function postPaymentPitchFocus(
+  step: ActionStep,
+  selectedPitchCount: number,
+  paymentKind: "resource" | "discard",
+): boolean {
+  return selectedPitchCount > 0 && paymentKind === "resource" && (
+    step === "boost" || step === "target" || step === "close-chain" || step === "confirm"
+  );
+}
+
+/** Keep the focus through mode, target, and confirmation steps, until the announcement
  * is cancelled or the submitted play changes the presented game view. */
 export function retainedPitchFocus(
   view: GameView | null,
   seat: number | null,
   selection: Sel,
-  choosingPitch: boolean,
+  focusRequested: boolean,
   enabled: boolean,
   previous: FocusedAnnouncement | null,
   submittedSourceId?: number,
 ): FocusedAnnouncement | null {
   if (!enabled || !view || seat === null) return null;
-  if (choosingPitch) {
+  if (focusRequested) {
     const source = pitchFocusSource(view, seat, selection);
     return source ? { gameId: view.gameId, seat, source } : null;
   }
@@ -41,14 +53,14 @@ export function usePitchFocus(
   view: GameView | null,
   seat: number | null,
   selection: Sel,
-  choosingPitch: boolean,
+  focusRequested: boolean,
   enabled: boolean,
   submittedSourceId?: number,
 ): PitchFocusSource | null {
   const [previous, setPrevious] = useState<FocusedAnnouncement | null>(null);
   const focus = useMemo(
-    () => retainedPitchFocus(view, seat, selection, choosingPitch, enabled, previous, submittedSourceId),
-    [view, seat, selection, choosingPitch, enabled, previous, submittedSourceId],
+    () => retainedPitchFocus(view, seat, selection, focusRequested, enabled, previous, submittedSourceId),
+    [view, seat, selection, focusRequested, enabled, previous, submittedSourceId],
   );
   useEffect(() => {
     if (focus?.gameId !== previous?.gameId || focus?.seat !== previous?.seat ||

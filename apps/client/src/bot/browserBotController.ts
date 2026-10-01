@@ -14,7 +14,7 @@ export interface BotWorkerPort {
   postMessage(value: unknown): void;
   terminate(): void;
   onmessage: ((event: { data: unknown }) => void) | null;
-  onerror: (() => void) | null;
+  onerror: ((event?: ErrorEvent) => void) | null;
   onmessageerror: (() => void) | null;
 }
 interface Deps {
@@ -107,8 +107,8 @@ export class BrowserBotController {
     this.active = task;
     this.command = null;
     this.taskStartedAt = Date.now();
-    if (task.type === "bot-fallback-needed") { this.fail("oversized"); return; }
-    if (this.failures >= MAX_FAILURES) { this.fail("circuit-open"); return; }
+    if (task.type === "bot-fallback-needed") { this.fail("oversized", "server-task-limit"); return; }
+    if (this.failures >= MAX_FAILURES) { this.fail("circuit-open", "repeated-failures"); return; }
     this.start(task);
   }
 
@@ -122,7 +122,7 @@ export class BrowserBotController {
         worker.onmessage = ({ data }) => {
           if (this.worker !== worker) return;
           const message = decodeBotWorkerResponse(data);
-          if (!message) { this.fail("invalid-result"); return; }
+          if (!message) { this.fail("invalid-result", "worker-response-decode"); return; }
           if (message.type === "ready") {
             if (this.ready) return;
             this.ready = true;
@@ -132,7 +132,7 @@ export class BrowserBotController {
           if (!this.active || message.code !== this.active.code
             || message.version !== this.active.version || this.command) return;
           this.busy = false;
-          if (message.type === "failed") { this.fail("crash"); return; }
+          if (message.type === "failed") { this.fail("crash", "worker-decision-exception"); return; }
           if (this.active.type !== "bot-task" || !isAdvertisedBotIntent(
             message.intent,
             this.active.legal,
@@ -140,30 +140,55 @@ export class BrowserBotController {
               ? this.active.view.pendingDecision.stagedCards?.map((card) => card.instanceId) ?? []
               : [],
           )) {
-            this.fail("invalid-result");
+            this.fail("invalid-result", "unadvertised-intent");
             return;
           }
           this.submit({ intent: message.intent }, message.computeMs);
         };
-        worker.onerror = () => {
-          if (this.worker === worker) this.fail(this.ready ? "crash" : "loading");
+        worker.onerror = (event) => {
+          if (this.worker !== worker) return;
+          if (import.meta.env.DEV) {
+            console.error("[bot] worker error event", {
+              message: event?.message,
+              filename: event?.filename,
+              line: event?.lineno,
+              column: event?.colno,
+              error: event?.error instanceof Error
+                ? { name: event.error.name, message: event.error.message, stack: event.error.stack }
+                : undefined,
+            });
+          }
+          this.fail(this.ready ? "crash" : "loading", "worker-error");
         };
-        worker.onmessageerror = () => { if (this.worker === worker) this.fail("invalid-result"); };
-      } catch { this.fail("loading"); return; }
+        worker.onmessageerror = () => { if (this.worker === worker) this.fail("invalid-result", "worker-message-error"); };
+      } catch { this.fail("loading", "worker-creation"); return; }
     }
-    this.timer = setTimeout(() => this.fail("loading"), Math.max(0, this.loadingDeadline - Date.now()));
+    this.timer = setTimeout(() => this.fail("loading", "worker-loading-timeout"), Math.max(0, this.loadingDeadline - Date.now()));
   }
 
   private compute(task: ClientBotTask): void {
     if (this.timer) clearTimeout(this.timer);
     this.busy = true;
-    this.timer = setTimeout(() => this.fail("timeout"), DECISION_TIMEOUT_MS);
-    try { this.worker?.postMessage(task); } catch { this.fail("crash"); }
+    this.timer = setTimeout(() => this.fail("timeout", "worker-decision-timeout"), DECISION_TIMEOUT_MS);
+    try { this.worker?.postMessage(task); } catch { this.fail("crash", "worker-post-message"); }
   }
 
-  private fail(failure: BotFailureReason): void {
+  private fail(failure: BotFailureReason, detail: string): void {
     this.terminate();
     if (!this.active || this.command) return;
+    if (import.meta.env.DEV) {
+      console.warn("[bot] browser computation fell back", {
+        reason: failure,
+        detail,
+        botId: this.active.type === "bot-task" ? this.active.botId : undefined,
+        version: this.active.version,
+        decision: this.active.type === "bot-task"
+          ? this.active.view.pendingDecision?.kind ?? this.active.view.phase
+          : undefined,
+        elapsedMs: Date.now() - this.taskStartedAt,
+        consecutiveFailures: this.failures + (failure === "circuit-open" || failure === "oversized" ? 0 : 1),
+      });
+    }
     if (failure !== "circuit-open" && failure !== "oversized") this.failures++;
     this.deps.status("fallback");
     this.submit({ failure });
@@ -194,7 +219,7 @@ export class BrowserBotController {
     if (message.status === "rejected") {
       if ("failure" in this.command) { this.deps.resync(); return; }
       this.command = null;
-      this.fail("rejected");
+      this.fail("rejected", "server-rejected-intent");
     } else {
       if ("intent" in this.command) {
         this.failures = 0;

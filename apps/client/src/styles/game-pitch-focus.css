@@ -140,6 +140,11 @@
     padding: calc(var(--pitch-mobile-card-width) * 413 / 300 + 24px) 10px 10px;
     gap: 8px;
   }
+  .decision-float-pitch > .decision-post-payment {
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+  }
   .decision-float-pitch .decision-prompt,
   .decision-float-pitch .decision-alternative-cost {
     grid-column: 1 / -1;

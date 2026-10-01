@@ -287,6 +287,7 @@ const gameView = () => ({
     optionCards: [card],
     revealedCards: [card],
     stagedCards: [card],
+    stagedHandCount: 1,
     stagedDefense: 3,
   },
   winner: null,
@@ -493,6 +494,18 @@ describe("client messages", () => {
 });
 
 describe("GameView and server messages", () => {
+  it("bounds the public staged hand count", () => {
+    expect(decodeGameView(gameView())).not.toBeNull();
+    expect(decodeGameView({
+      ...gameView(),
+      pendingDecision: { ...gameView().pendingDecision, stagedHandCount: -1 },
+    })).toBeNull();
+    expect(decodeGameView({
+      ...gameView(),
+      pendingDecision: { ...gameView().pendingDecision, stagedHandCount: 1.5 },
+    })).toBeNull();
+  });
+
   it("accepts bounded arsenal slot metadata", () => {
     const valid = gameView();
     const validPlayer = valid.players[0] as unknown as {

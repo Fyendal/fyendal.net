@@ -1218,12 +1218,17 @@ function projectState(
           // staged (uncommitted) defenders: the defender sees the real cards
           // and the live defense total; everyone else sees hand cards
           // face-down (staged equipment stays public) and a 0 total
-          let staged: { stagedCards: CardView[]; stagedDefense: number } | undefined;
+          let staged: {
+            stagedCards: CardView[];
+            stagedHandCount: number;
+            stagedDefense: number;
+          } | undefined;
           if (pd.kind === "defend" && pd.staged && pd.staged.length > 0) {
             const defender = state.players[pd.player] as PlayerState;
             const mine = revealAll || pd.player === seat;
             const cards: CardView[] = [];
             const stagedInstances: CardInstance[] = [];
+            let stagedHandCount = 0;
             for (const id of pd.staged) {
               const hc = defender.hand.find((c) => c.instanceId === id);
               const ac = defender.arsenal.find((c) => c.instanceId === id);
@@ -1233,6 +1238,7 @@ function projectState(
               const hero = defender.hero.instanceId === id ? defender.hero : undefined;
               const c = hc ?? ac ?? ec ?? wc ?? bc ?? hero;
               if (!c) continue;
+              if (hc) stagedHandCount += 1;
               stagedInstances.push(c);
               if (mine) {
                 cards.push(cardView(state, runtime, c));
@@ -1243,7 +1249,7 @@ function projectState(
             }
             const link = currentLink(state);
             const total = mine && link ? stagedDefenseTotal(state, runtime, link, stagedInstances) : 0;
-            staged = { stagedCards: cards, stagedDefense: mine ? total : 0 };
+            staged = { stagedCards: cards, stagedHandCount, stagedDefense: mine ? total : 0 };
           }
           const privateDecision = revealAll || pd.player === seat;
           const promptMessage = projectedDecisionPromptMessage(

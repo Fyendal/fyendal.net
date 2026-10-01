@@ -26,6 +26,7 @@ export function pitchFocusOrigin(
   sourceRect: MotionRect | undefined,
   stackRect: MotionRect | undefined,
   previousStackRect: MotionRect | undefined,
+  previousHandRect?: MotionRect,
 ): MotionRect | undefined {
-  return fromHand ? sourceRect : stackRect ?? previousStackRect ?? sourceRect;
+  return fromHand ? sourceRect ?? previousHandRect : stackRect ?? previousStackRect ?? sourceRect;
 }

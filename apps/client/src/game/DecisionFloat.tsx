@@ -46,12 +46,12 @@ export function DecisionFloat({
   pending,
   action,
   viewerSeat,
-  choosingPitch = false,
+  pitchFocused = false,
 }: {
   pending: PendingDecisionModel;
   action: ActionAnnouncementModel;
   viewerSeat: number;
-  choosingPitch?: boolean;
+  pitchFocused?: boolean;
 }) {
   const decisionFloat = useFloatDrag({
     resetKey: decisionFloatDragKey(
@@ -66,9 +66,9 @@ export function DecisionFloat({
 
   return (
     <div
-      className={`float decision-float${choosingPitch ? " decision-float-pitch" : ""}`}
-      style={choosingPitch ? undefined : decisionFloat.style}
-      {...(choosingPitch ? {} : decisionFloat.dragProps)}
+      className={`float decision-float${pitchFocused ? " decision-float-pitch" : ""}`}
+      style={pitchFocused ? undefined : decisionFloat.style}
+      {...(pitchFocused ? {} : decisionFloat.dragProps)}
     >
       <PendingDecisionPanel model={pending} viewerSeat={viewerSeat} />
       <ActionAnnouncementPanel model={action} viewerSeat={viewerSeat} />

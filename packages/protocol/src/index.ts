@@ -1052,7 +1052,7 @@ function turnFacts(value: unknown): value is TurnFactsView {
 function pendingDecision(value: unknown): boolean {
   const decision = object(value);
   return !!decision && exactKeys(decision, [
-    "player", "kind", "prompt", "promptMessage", "options", "minimumSelections", "maximumSelections", "defaultOption", "optionLabels", "optionMessages", "optionCounts", "optionCards", "revealedCards", "lookedCards", "stagedCards", "stagedDefense",
+    "player", "kind", "prompt", "promptMessage", "options", "minimumSelections", "maximumSelections", "defaultOption", "optionLabels", "optionMessages", "optionCounts", "optionCards", "revealedCards", "lookedCards", "stagedCards", "stagedHandCount", "stagedDefense",
     "resourcePayment", "preStackSource",
   ], ["player", "kind", "prompt"])
     && seat(decision.player) && DECISION_KINDS.has(String(decision.kind))
@@ -1072,7 +1072,10 @@ function pendingDecision(value: unknown): boolean {
       array(v, (item): item is CardView | null => item === null || cardView(item), MAX_CARDS))
     && optional(decision.revealedCards, cardViews)
     && optional(decision.lookedCards, cardViews)
-    && optional(decision.stagedCards, cardViews) && optional(decision.stagedDefense, finite)
+    && optional(decision.stagedCards, cardViews)
+    && optional(decision.stagedHandCount, (value): value is number =>
+      nonNegativeInteger(value) && value <= MAX_CARDS)
+    && optional(decision.stagedDefense, finite)
     && optional(decision.resourcePayment, (value): value is PendingDecision["resourcePayment"] => {
       const payment = object(value);
       return !!payment && exactKeys(payment, ["cost", "options", "sourceInstanceId"], ["cost", "options"])

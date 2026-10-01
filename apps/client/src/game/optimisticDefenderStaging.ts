@@ -68,6 +68,7 @@ export function optimisticDefenderView(
     pendingDecision: {
       ...decision,
       stagedCards,
+      stagedHandCount: player.hand.filter((card) => pendingInstanceIds.includes(card.instanceId)).length,
       stagedDefense: optimisticStagedDefense(
         authoritativeCards,
         decision.stagedDefense,

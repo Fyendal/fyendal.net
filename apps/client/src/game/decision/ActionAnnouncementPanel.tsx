@@ -82,6 +82,9 @@ export function ActionAnnouncementPanel({
   return (
     <div className={`decision decision-options${
       stagedAdditionalCost && !additionalCostConfirmed ? " decision-additional-cost" : ""
+    }${
+      step === "boost" || step === "target" || step === "close-chain" || step === "confirm"
+        ? " decision-post-payment" : ""
     }`}>
       {sel.kind === "choose-hand-action" ? (
         <>

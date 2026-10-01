@@ -3982,8 +3982,10 @@ describe("trigger stack & priority windows", () => {
 
     const mine = projectStateFor(s, 1).pendingDecision;
     expect(mine?.stagedCards?.map((c) => c.cardId)).toEqual(["BLOCK3", "BW", "BW"]);
+    expect(mine?.stagedHandCount).toBe(1);
     expect(mine?.stagedDefense).toBe(7); // 3 + 2 + 2
     const opp = projectStateFor(s, 0).pendingDecision;
+    expect(opp?.stagedHandCount).toBe(1);
     expect(opp?.stagedCards?.[0]!.hidden).toBe(true); // hand card face-down
     expect(opp?.stagedCards?.[0]!.cardId).toBe("");
     expect(opp?.stagedCards?.[1]!.cardId).toBe("BW"); // equipment stays public
@@ -3996,6 +3998,7 @@ describe("trigger stack & priority windows", () => {
     if (!r.ok) return;
     s = r.state;
     expect(projectStateFor(s, 1).pendingDecision?.stagedCards).toHaveLength(1);
+    expect(projectStateFor(s, 0).pendingDecision?.stagedHandCount).toBe(1);
     r = applyIntent(s, 1, { kind: "defend", instanceIds: [block] });
     expect(r.ok).toBe(true);
     if (!r.ok) return;

@@ -32,7 +32,7 @@ import {
   selectedResourcePaymentOption,
 } from "./legalSelection.js";
 import { arrangeBoundBoardCards, equipmentStackCards } from "./boardGroups.js";
-import { chainDefenderIds } from "./defenderState.js";
+import { chainDefenderIds, presentedHandCount as presentedDefenderHandCount } from "./defenderState.js";
 import {
   passHotkeyIntent,
   shouldConfirmArsenalPass,
@@ -85,7 +85,7 @@ import { useGameSounds } from "./sound/useGameSounds.js";
 import { handChoiceDismissal } from "./handChoiceDismissal.js";
 import { hoverPreviewTarget } from "./hoverPreviewTarget.js";
 import { PitchFocus } from "./PitchFocus.js";
-import { usePitchFocus } from "./usePitchFocus.js";
+import { postPaymentPitchFocus, usePitchFocus } from "./usePitchFocus.js";
 
 const EMPTY_INSTANCE_IDS: ReadonlySet<number> = new Set();
 
@@ -337,12 +337,15 @@ export function GameBoard() {
     localPitchPayment || (pendingPitchPayment !== undefined &&
       pendingPitchPayment.cost > (playerView?.resources ?? 0) + (playerView?.chi ?? 0))
   );
+  const pitchFocusRequested = choosingPitch || (
+    pitchFocusEnabled && postPaymentPitchFocus(actionStep, pitchSel.length, paymentProgress.kind)
+  );
   const submittedIntent = presentedInteraction?.intent;
   const submittedPitchSourceId = submittedIntent?.kind === "activate-ability" ? submittedIntent.sourceInstanceId
     : submittedIntent?.kind === "play-card" || submittedIntent?.kind === "play-from-arsenal" ||
       submittedIntent?.kind === "play-from-zone" ? submittedIntent.instanceId : undefined;
   const pitchSource = usePitchFocus(
-    presentedView, yourSeat, sel, choosingPitch, pitchFocusEnabled, submittedPitchSourceId,
+    presentedView, yourSeat, sel, pitchFocusRequested, pitchFocusEnabled, submittedPitchSourceId,
   );
   const defaultBoostCount = boostOptions.find((count) => count > 0) ?? null;
   const actionShortcutReady =
@@ -423,10 +426,10 @@ export function GameBoard() {
     authoritativeMe,
     authoritativeVisibleDeckTop,
   ) ?? EMPTY_INSTANCE_IDS;
-  const presentedHandCount = Math.max(
-    0,
-    me.handCount - me.hand.filter((card) => optimisticallyHiddenIds.has(card.instanceId)).length,
-  );
+  const hiddenHandIds = new Set(optimisticallyHiddenIds);
+  if (pitchSource?.fromHand) hiddenHandIds.add(pitchSource.card.instanceId);
+  const presentedHandCount = presentedDefenderHandCount(presentedView, seat, hiddenHandIds);
+  const presentedOppHandCount = presentedDefenderHandCount(presentedView, opp.seat);
   const pd = presentedView.pendingDecision;
   const myDecision = !spectating && pd !== null && pd.player === seat;
   const showCardSearchOverlay = myDecision && isCardSearchOverlayDecision(pd);
@@ -1015,8 +1018,10 @@ export function GameBoard() {
           <PitchFocus
             key={pitchSource.card.instanceId}
             source={pitchSource}
+            seat={seat}
             motionPreference={motionPreference}
             getStackFocusOrigin={gameMotion.getStackFocusOrigin}
+            getHandFocusOrigin={gameMotion.getHandFocusOrigin}
           />
         ) : null}
         <BrowserBotNotice />
@@ -1041,7 +1046,7 @@ export function GameBoard() {
                   )}
                 />
               ))
-            : Array.from({ length: opp.handCount }, (_, i) => (
+            : Array.from({ length: presentedOppHandCount }, (_, i) => (
                 <CardBack
                   key={i}
                   label=""
@@ -1049,12 +1054,12 @@ export function GameBoard() {
                     { kind: "hand", seat: opp.seat },
                     i,
                   )}
-                  motionZoneAnchor={i === opp.handCount - 1
+                  motionZoneAnchor={i === presentedOppHandCount - 1
                     ? motionLocationKey({ kind: "hand", seat: opp.seat })
                     : undefined}
                 />
               ))}
-          {opp.handCount === 0 && <span className="muted">opponent has no cards in hand</span>}
+          {presentedOppHandCount === 0 && <span className="muted">opponent has no cards in hand</span>}
         </div>
 
         {/* opponent half — mirrored vertically, same columns as yours */}
@@ -1124,6 +1129,7 @@ export function GameBoard() {
             preStackSelectedInstanceId,
             pitchSelection: pitchSel,
             choosingPitch,
+            focusedSourceInstanceId: pitchSource?.fromHand ? pitchSource.card.instanceId : null,
             selectedPaymentVariants:
               stagedAdditionalCostDefinition && !additionalCostConfirmed
                 ? []
@@ -1228,7 +1234,7 @@ export function GameBoard() {
       {/* ── floating decision window: prompts, choices, pitch selection ── */}
       {gameMotion.turnStartUiReady ? <DecisionFloat
         viewerSeat={seat}
-        choosingPitch={choosingPitch}
+        pitchFocused={choosingPitch || pitchSource !== null}
         pending={{
           decision: hidePriorityGuidance || showCardSearchOverlay ? null : pd,
           isMine: myDecision,
