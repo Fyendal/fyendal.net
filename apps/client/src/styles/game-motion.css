@@ -211,37 +211,9 @@
 }
 
 @keyframes game-motion-travel {
-  from {
-    opacity: 1;
-    clip-path: var(--motion-start-clip, inset(0px));
-    transform: translate3d(0, 0, 0) scale(1, 1);
-  }
+  from { opacity: 1; transform: translate3d(0, 0, 0) scale(1, 1); }
   to {
     opacity: 1;
-    clip-path: var(--motion-end-clip, inset(0px));
-    transform: translate3d(var(--motion-x), var(--motion-y), 0)
-      scale(var(--motion-scale-x), var(--motion-scale-y));
-  }
-}
-
-/* Lift a top-clipped hand back clear of its tray before horizontal travel. */
-.game-motion-flight-release-hand-clip {
-  animation-name: game-motion-travel-release-hand-clip;
-}
-
-@keyframes game-motion-travel-release-hand-clip {
-  from {
-    opacity: 1;
-    clip-path: var(--motion-start-clip, inset(0px));
-    transform: translate3d(0, 0, 0) scale(1, 1);
-  }
-  20% {
-    clip-path: var(--motion-end-clip, inset(0px));
-    transform: translate3d(0, var(--motion-release-y), 0) scale(1, 1);
-  }
-  to {
-    opacity: 1;
-    clip-path: var(--motion-end-clip, inset(0px));
     transform: translate3d(var(--motion-x), var(--motion-y), 0)
       scale(var(--motion-scale-x), var(--motion-scale-y));
   }
@@ -281,7 +253,6 @@
 @keyframes game-motion-arsenal {
   from {
     opacity: 1;
-    clip-path: var(--motion-start-clip, inset(0px));
     transform: translate3d(0, 0, 0) scale(1, 1) rotateZ(0);
   }
   82% {
@@ -291,7 +262,6 @@
   }
   to {
     opacity: 1;
-    clip-path: var(--motion-end-clip, inset(0px));
     transform: translate3d(var(--motion-x), var(--motion-y), 0)
       scale(var(--motion-scale-x), var(--motion-scale-y)) rotateZ(0);
   }
@@ -300,7 +270,6 @@
 @keyframes game-motion-draw {
   from {
     opacity: 1;
-    clip-path: var(--motion-start-clip, inset(0px));
     transform: translate3d(0, 0, 0) scale(1, 1) rotateZ(0);
   }
   78% {
@@ -310,7 +279,6 @@
   }
   to {
     opacity: 1;
-    clip-path: var(--motion-end-clip, inset(0px));
     transform: translate3d(var(--motion-x), var(--motion-y), 0)
       scale(var(--motion-scale-x), var(--motion-scale-y)) rotateZ(0);
   }

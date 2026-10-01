@@ -6,7 +6,6 @@ import {
   motionFlightDurationMs,
   type GameMotionBatch,
   type MotionConnector,
-  type MotionClip,
   type MotionFlight,
   type MotionRect,
 } from "./motionGeometry.js";
@@ -21,12 +20,6 @@ function rectStyle(rect: MotionRect): CSSProperties {
     width: rect.width,
     height: rect.height,
   };
-}
-
-function clipStyle(clip: MotionClip | undefined): string {
-  return clip
-    ? `inset(${clip.top}px ${clip.right}px ${clip.bottom}px ${clip.left}px)`
-    : "inset(0px)";
 }
 
 function visualFaceUrl(visual: MotionVisual): string | null {
@@ -62,9 +55,6 @@ function flightStyle(flight: MotionFlight): MotionStyle {
     "--motion-scale-y": String(flight.end.height / flight.start.height),
     "--motion-delay": `${flight.delayMs}ms`,
     "--motion-duration": `${motionFlightDurationMs(flight)}ms`,
-    "--motion-start-clip": clipStyle(flight.startClip),
-    "--motion-end-clip": clipStyle(flight.endClip),
-    "--motion-release-y": `${flight.startClip?.top ?? 0}px`,
   };
 }
 
@@ -104,9 +94,6 @@ function MotionFlightOverlay({
     <div
       className={`game-motion-flight game-motion-flight-${flight.mode}${
         flight.holdAtSource ? " game-motion-flight-hold-source" : ""
-      }${
-        flight.mode === "move" && (flight.startClip?.top ?? 0) > 0 && !flight.endClip
-          ? " game-motion-flight-release-hand-clip" : ""
       }`}
       style={flightStyle(flight)}
       onAnimationEnd={(event: AnimationEvent<HTMLDivElement>) => {
@@ -155,7 +142,7 @@ function QueuedHandSource({ flight }: { flight: MotionFlight }) {
       className={`game-motion-queued-source${
         flight.mode === "reflow" ? " game-motion-queued-source-reflow" : ""
       }`}
-      style={{ ...rectStyle(flight.start), clipPath: clipStyle(flight.startClip) }}
+      style={rectStyle(flight.start)}
     >
       <MotionCardVisual visual={flight.visual} count={flight.showCount ? flight.count : 1} />
     </div>

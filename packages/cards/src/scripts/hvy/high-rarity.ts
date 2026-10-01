@@ -587,7 +587,13 @@ export const hvyHighRarity: Record<string, CardScript> = {
     },
   },
   "tenacity|2": {
-    modifyAttack: (ctx) => (ctx.link?.defendingCards.length ?? 0) + (ctx.link?.defendingEquipment.length ?? 0),
+    onAttackDeclared(ctx) {
+      const defenders = ctx.state.chain.slice(0, -1).reduce(
+        (count, link) => count + link.defendingCards.length + link.defendingEquipment.length,
+        0,
+      );
+      if (defenders > 0) ctx.addCardTempPower(ctx.self.instanceId, defenders);
+    },
   },
   "seduce secrets|2": {
     onPlay(ctx) {

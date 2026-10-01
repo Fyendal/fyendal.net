@@ -109,6 +109,34 @@ describe("HVY — Pack Call (on defend, reveal top: 6+ stays, else bottom)", () 
   });
 });
 
+describe("HVY — Tenacity", () => {
+  it("counts prior defending hand cards and equipment when it attacks", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", heroKey: "katsu, the wanderer|0", hand: ["head jab|1", "tenacity|2"] },
+        {
+          hero: "dorinthea",
+          hand: ["wounding blow|1", "wounding blow|1"],
+          equipment: { head: "ironrot helm|0" },
+        },
+      ],
+    });
+
+    g.play("head jab|1")
+      .blockWith("wounding blow|1", "ironrot helm|0")
+      .settle()
+      .play("tenacity|2")
+      .expectAttackValue(4)
+      .blockWith("wounding blow|1")
+      .expectAttackValue(4)
+      .settle()
+      .expectLife(1, 19);
+
+    expect(g.state.chain[0]?.defendingCards).toHaveLength(1);
+    expect(g.state.chain[0]?.defendingEquipment).toHaveLength(1);
+  });
+});
+
 describe("HVY — Rally the Rearguard", () => {
   it.each(["HVY228", "HVY229", "HVY230"])("%s discards a card for +3 defense", (rally) => {
     const g = scenario({

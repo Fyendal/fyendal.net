@@ -29,18 +29,9 @@ export interface MotionRect {
   height: number;
 }
 
-export interface MotionClip {
-  top: number;
-  right: number;
-  bottom: number;
-  left: number;
-}
-
 export interface MotionAnchorSnapshot {
   cards: ReadonlyMap<string, MotionRect>;
   zones: ReadonlyMap<string, MotionRect>;
-  /** Full DOM zone bounds before a card-sized travel anchor overrides zones. */
-  zoneContainers?: ReadonlyMap<string, MotionRect>;
   /** Local announcement geometry; never changes the card's actual zone. */
   focusSources?: ReadonlyMap<number, MotionRect>;
 }
@@ -79,8 +70,6 @@ export interface MotionFlight {
   holdAtSource?: true;
   /** Preserve a hidden hand back at its old slot while this batch is queued. */
   queueHoldSource?: true;
-  startClip?: MotionClip;
-  endClip?: MotionClip;
   destinationCoverVisual?: MotionVisual;
   destinationLayer?: "chain" | "stack";
 }
@@ -130,7 +119,6 @@ function motionRect(element: Element): MotionRect | null {
 export function measureMotionAnchors(root: ParentNode): MeasuredMotionAnchors {
   const cards = new Map<string, MotionRect>();
   const zones = new Map<string, MotionRect>();
-  const zoneContainers = new Map<string, MotionRect>();
   const cardElements = new Map<string, HTMLElement>();
   const focusSources = new Map<number, MotionRect>();
   for (const element of root.querySelectorAll<HTMLElement>("[data-motion-card]")) {
@@ -152,10 +140,7 @@ export function measureMotionAnchors(root: ParentNode): MeasuredMotionAnchors {
     const key = element.dataset.motionZone;
     if (!key || zones.has(key)) continue;
     const rect = motionRect(element);
-    if (rect) {
-      zones.set(key, rect);
-      zoneContainers.set(key, rect);
-    }
+    if (rect) zones.set(key, rect);
   }
   // Count-only zones such as the opponent's hidden hand still render real
   // card backs. Prefer that card-sized endpoint over the broad container so a
@@ -173,7 +158,7 @@ export function measureMotionAnchors(root: ParentNode): MeasuredMotionAnchors {
     const rect = motionRect(element);
     if (Number.isSafeInteger(instanceId) && instanceId >= 0 && rect) focusSources.set(instanceId, rect);
   }
-  return { snapshot: { cards, zones, zoneContainers, focusSources }, cardElements };
+  return { snapshot: { cards, zones, focusSources }, cardElements };
 }
 
 function endpoint(
@@ -200,18 +185,6 @@ function cardRectWithinZone(zone: MotionRect, reference?: MotionRect): MotionRec
     width,
     height,
   };
-}
-
-/** A portaled hand card needs the same clipping as its source tray. */
-function handClip(rect: MotionRect, zone: MotionRect | undefined): MotionClip | undefined {
-  if (!zone) return undefined;
-  const clip = {
-    top: Math.max(0, zone.top - rect.top),
-    right: Math.max(0, rect.left + rect.width - zone.left - zone.width),
-    bottom: Math.max(0, rect.top + rect.height - zone.top - zone.height),
-    left: Math.max(0, zone.left - rect.left),
-  };
-  return Object.values(clip).some((value) => value > 0) ? clip : undefined;
 }
 
 function phaseStaggerMs(phase: MotionTimelinePhase): number {
@@ -441,14 +414,6 @@ export function resolveMotionBatch(
           && event.sourcePresentationKey !== undefined
           && event.instanceId === undefined))
         ? { queueHoldSource: true as const }
-        : {}),
-      ...(event.source.kind === "hand" && !focusSource
-        ? { startClip: handClip(start, previous.zoneContainers?.get(`${event.source.seat}:hand`)
-          ?? previous.zones.get(`${event.source.seat}:hand`)) }
-        : {}),
-      ...(event.destination.kind === "hand"
-        ? { endClip: handClip(end, current.zoneContainers?.get(`${event.destination.seat}:hand`)
-          ?? current.zones.get(`${event.destination.seat}:hand`)) }
         : {}),
       ...(event.kind === "move" && event.destinationCoverVisual
         ? { destinationCoverVisual: event.destinationCoverVisual }

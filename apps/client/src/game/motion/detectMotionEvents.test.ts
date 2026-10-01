@@ -231,7 +231,6 @@ describe("game motion detection", () => {
       visual: { kind: "back" },
       count: 1,
     });
-    const hand = { left: 80, top: 100, width: 200, height: 80 };
     const handCard = { left: 100, top: 40, width: 100, height: 138 };
     const reflowStart = { ...handCard, left: 110 };
     const reflowEnd = { ...handCard, left: 120 };
@@ -241,11 +240,9 @@ describe("game motion detection", () => {
         ["1:hand:opaque:3", handCard],
         ["1:hand:opaque", reflowStart],
       ]), zones: new Map([["1:hand", handCard]]),
-      zoneContainers: new Map([["1:hand", hand]]),
     }, {
       cards: new Map([["1:hand:opaque", reflowEnd]]),
       zones: new Map([["1:hand", reflowEnd], ["1:banish", banish]]),
-      zoneContainers: new Map([["1:hand", hand]]),
     }, "intimidate");
     expect(batch?.flights[0]).toMatchObject({
       mode: "move",
@@ -254,13 +251,7 @@ describe("game motion detection", () => {
       visual: { kind: "back" },
       holdAtSource: true,
       queueHoldSource: true,
-      startClip: { top: 60, right: 0, bottom: 0, left: 0 },
     });
-    expect(batch?.flights.find((flight) => flight.mode === "reflow" && flight.start.left === 110))
-      .toMatchObject({
-        startClip: { top: 60, right: 0, bottom: 0, left: 0 },
-        endClip: { top: 60, right: 0, bottom: 0, left: 0 },
-      });
     expect(batch?.flights.filter((flight) => flight.mode === "reflow")
       .every((flight) => flight.delayMs >= batch.flights[0]!.delayMs
         + motionFlightDurationMs(batch.flights[0]!)
