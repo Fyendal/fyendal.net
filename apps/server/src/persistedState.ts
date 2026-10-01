@@ -46,6 +46,7 @@ type PersistedEngineDecision = Omit<
   | "revealedCards"
   | "lookedCards"
   | "stagedCards"
+  | "stagedHandCount"
   | "stagedDefense"
   | "preStackSource"
 >;
