@@ -6,7 +6,7 @@ export type WireServerMessage = ServerMessage | { type: "error"; message: string
 function errorCodeFor(message: string): ErrorCode {
   if (message === "room not found") return "ROOM_NOT_FOUND";
   if (message === "room is busy, try again") return "ROOM_BUSY";
-  if (message === "leave your current room before joining another") return "ALREADY_IN_ROOM";
+  if (message === "this connection is already in a room") return "ALREADY_IN_ROOM";
   if (message === "log in to play") return "AUTH_REQUIRED";
   if (message === "not in a room") return "NOT_IN_ROOM";
   if (message === "room session replaced") return "SESSION_REPLACED";

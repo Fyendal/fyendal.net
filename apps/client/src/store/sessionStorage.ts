@@ -49,6 +49,16 @@ export function loadRoomSession(storage: Storage, code: string): StoredRoomSessi
   return null;
 }
 
+/** A spectator credential belongs to its tab so spectator tabs do not
+ * overwrite each other's room session. */
+export function loadTabRoomSession(
+  sharedStorage: Storage,
+  tabStorage: Storage,
+  code: string,
+): StoredRoomSession | null {
+  return loadRoomSession(tabStorage, code) ?? loadRoomSession(sharedStorage, code);
+}
+
 export function removeRoomSession(storage: Storage, code: string | null): void {
   if (code) storage.removeItem(`${ROOM_SESSION_PREFIX}${code.toUpperCase()}`);
   storage.removeItem(ROOM_SESSION_STORAGE_KEY);

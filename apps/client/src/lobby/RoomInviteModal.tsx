@@ -97,7 +97,7 @@ export function RoomInviteModal() {
     content = (
       <>
         <p>{intl.formatMessage({ id: "lobby.invite.alreadySeated" })}</p>
-        <button className="btn-primary" onClick={() => joinRoom(inviteRoom.code)}>
+        <button className="btn-primary" onClick={() => joinRoom(inviteRoom.code, undefined, false)}>
           {intl.formatMessage({ id: "lobby.action.rejoinRoom" })}
         </button>
       </>

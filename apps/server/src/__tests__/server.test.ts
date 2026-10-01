@@ -377,7 +377,8 @@ describe("auth gating", () => {
     again.sendMsg({ type: "join-room", code: created.code, token: created.token });
     const res = await again.next((m) => m.type === "joined" || m.type === "error");
     expect(res).toMatchObject({ type: "joined", seat: 0 });
-    await a.next((m) => m.type === "error" && m.message === "room session replaced");
+    expect(await a.next((m) => m.type === "error" && m.message === "room session replaced"))
+      .toMatchObject({ code: "SESSION_REPLACED" });
     a.sendMsg({ type: "intent", intent: { kind: "pass" } });
     await a.next((m) => m.type === "error" && m.message === "not in a room");
     a.ws.close();
@@ -1031,9 +1032,9 @@ describe("server rooms over websocket", () => {
     await s.next((m) => m.type === "authed");
     s.sendMsg({ type: "join-room", code: otherRoom.code, token: otherRoom.token });
     const switchError = (await s.next(
-      (m) => m.type === "error" && m.message === "leave your current room before joining another",
+      (m) => m.type === "error" && m.message === "this connection is already in a room",
     )) as Extract<ServerMessage, { type: "error" }>;
-    expect(switchError.message).toBe("leave your current room before joining another");
+    expect(switchError.message).toBe("this connection is already in a room");
 
     // Force a fresh Room A broadcast and verify both hands remain hidden.
     s.inbox.length = 0;

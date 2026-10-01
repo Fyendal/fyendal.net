@@ -35,6 +35,7 @@ import {
 } from "./storage.js";
 import {
   loadRoomSession,
+  loadTabRoomSession,
   loadStoredAuth,
   clearRoomSessions,
   removeRoomSession,
@@ -158,6 +159,8 @@ export const useStore = create<StoreState>((set, get) => {
   /** Coalesces React Strict Mode and other overlapping attempts to restore the
    *  same room before its first authoritative projection arrives. */
   let joiningRoomCode: string | null = null;
+  let pendingEntrySpectate = false;
+  let pendingLocalSpectatorToken: string | null = null;
   /** Visibility controls when retries run, but does not define socket health. */
   let pageActive = true;
   let reconnectOnActive = false;
@@ -265,7 +268,42 @@ export const useStore = create<StoreState>((set, get) => {
     pendingOpen = [];
     authedToken = null;
     joiningRoomCode = null;
+    pendingLocalSpectatorToken = null;
     resetRoomCommandPipeline();
+  }
+
+  function forgetRoomSession(code: string | null, spectator: boolean): void {
+    if (!code) return;
+    const spectatorSession = loadRoomSession(sessionStorage, code);
+    if (!spectator || (spectatorSession
+      && loadRoomSession(localStorage, code)?.token === spectatorSession.token)) {
+      removeRoomSession(localStorage, code);
+    }
+    removeRoomSession(sessionStorage, code);
+  }
+
+  function disconnectRoomView(): void {
+    closeCurrentSocket();
+    replayRuntime.detach();
+    prepDeckId = null;
+    prepHero = null;
+    preReplay = null;
+    activeReplayNoteServerTarget = null;
+    resetRoomVersionState();
+    set({ ...clearedRoomProjection(), connected: false });
+  }
+
+  /** A room switch disconnects only this tab. A player seat and its shared
+   * credential remain available for rejoining from another tab or later. */
+  function disconnectForRoomEntry(code: string, changeView = false): void {
+    const current = get();
+    const currentCode = current.roomCode;
+    if (currentCode && (currentCode.toUpperCase() !== code || changeView)) {
+      if (current.spectating) forgetRoomSession(currentCode, true);
+      disconnectRoomView();
+    } else if (joiningRoomCode !== null && (joiningRoomCode !== code || changeView)) {
+      closeCurrentSocket();
+    }
   }
 
   /** A failed initial room load must not leave the lobby associated with the
@@ -275,7 +313,9 @@ export const useStore = create<StoreState>((set, get) => {
     roomEntryPending = false;
     roomEntryRetryable = false;
     joiningRoomCode = null;
-    removeRoomSession(localStorage, get().roomCode ?? roomCodeFromLocation(location.pathname));
+    const code = get().roomCode ?? roomCodeFromLocation(location.pathname);
+    if (pendingEntrySpectate) removeRoomSession(sessionStorage, code);
+    else forgetRoomSession(code, false);
     closeCurrentSocket();
     history.replaceState(null, "", "/");
     replayRuntime.discard();
@@ -300,6 +340,7 @@ export const useStore = create<StoreState>((set, get) => {
   function clearAuthenticatedState(): void {
     localStorage.removeItem(AUTH_STORAGE_KEY);
     clearRoomSessions(localStorage);
+    clearRoomSessions(sessionStorage);
     roomEntryPending = false;
     roomEntryRetryable = false;
     joiningRoomCode = null;
@@ -824,6 +865,7 @@ export const useStore = create<StoreState>((set, get) => {
         roomEntryPending = false;
         roomEntryRetryable = false;
         joiningRoomCode = null;
+        removeRoomSession(sessionStorage, msg.code);
         saveRoomSession(localStorage, { code: msg.code, token: msg.token });
         history.replaceState(null, "", `/${msg.code}`);
         set({
@@ -850,7 +892,20 @@ export const useStore = create<StoreState>((set, get) => {
         completeFabraryPlay();
         liveBotParticipant = msg.spectator !== true;
         const fromMatchmaking = get().queuedFormat !== null || get().matchmakingActive;
-        saveRoomSession(localStorage, { code: msg.code, token: msg.token });
+        if (msg.spectator) {
+          // A successful spectator join identifies the old shared credential.
+          // Only remove that exact value: another tab may have saved a player
+          // credential for this room while the join was in flight.
+          if (pendingLocalSpectatorToken
+            && loadRoomSession(localStorage, msg.code)?.token === pendingLocalSpectatorToken) {
+            removeRoomSession(localStorage, msg.code);
+          }
+          saveRoomSession(sessionStorage, { code: msg.code, token: msg.token });
+        } else {
+          removeRoomSession(sessionStorage, msg.code);
+          saveRoomSession(localStorage, { code: msg.code, token: msg.token });
+        }
+        pendingLocalSpectatorToken = null;
         history.replaceState(null, "", `/${msg.code}`);
         set({
           roomCode: msg.code,
@@ -1034,7 +1089,7 @@ export const useStore = create<StoreState>((set, get) => {
           : { backgroundMatchmaking: msg.status, pendingBotStart: false });
         break;
       case "match-timeout":
-        removeRoomSession(localStorage, get().roomCode);
+        forgetRoomSession(get().roomCode, get().spectating);
         history.replaceState(null, "", "/");
         replayRuntime.discard(get().roomCode);
         prepDeckId = null;
@@ -1093,7 +1148,7 @@ export const useStore = create<StoreState>((set, get) => {
         break;
       case "spectator-kicked":
         cancelReconnect();
-        removeRoomSession(localStorage, get().roomCode);
+        forgetRoomSession(get().roomCode, true);
         history.replaceState(null, "", "/");
         replayRuntime.discard(get().roomCode);
         prepDeckId = null;
@@ -1116,6 +1171,18 @@ export const useStore = create<StoreState>((set, get) => {
         joiningRoomCode = null;
         if (SOCIAL_ERROR_CODES.has(msg.code)) {
           set({ socialError: msg.code });
+          break;
+        }
+        if (msg.code === "SESSION_REPLACED") {
+          // Another tab reclaimed this player seat. Keep its newly saved room
+          // credential, but stop this tab before it can automatically reclaim
+          // the seat back or continue displaying a private game projection.
+          roomEntryPending = false;
+          roomEntryRetryable = false;
+          disconnectRoomView();
+          history.replaceState(null, "", "/");
+          errors.show(msg.message);
+          get().listRooms();
           break;
         }
         const pendingPlay = get().pendingFabraryPlay;
@@ -1155,7 +1222,7 @@ export const useStore = create<StoreState>((set, get) => {
         // membership and return to the lobby instead of retrying forever.
         if (msg.code === "ROOM_NOT_FOUND") {
           cancelReconnect();
-          removeRoomSession(localStorage, get().roomCode);
+          forgetRoomSession(get().roomCode, get().spectating);
           history.replaceState(null, "", "/");
           replayRuntime.discard();
           prepDeckId = null;
@@ -1327,7 +1394,11 @@ export const useStore = create<StoreState>((set, get) => {
       const invite = get().friendGameInvites.find((candidate) => candidate.inviteId === inviteId);
       if (!invite) return;
       get().dismissFriendGameInvite(inviteId);
-      if (get().roomCode || get().screen !== "lobby") {
+      if (get().spectating && get().roomCode) {
+        history.replaceState(null, "", "/");
+        get().inspectRoom(invite.room.code);
+        set({ socialOpen: false });
+      } else if (get().roomCode || get().screen !== "lobby") {
         window.open(`/${invite.room.code}`, "_blank", "noopener,noreferrer");
       } else {
         set({ inviteRoom: invite.room, socialOpen: false });
@@ -1480,9 +1551,19 @@ export const useStore = create<StoreState>((set, get) => {
       // request is enough; a second would hit ALREADY_IN_ROOM after the first
       // succeeds on the same socket.
       if (joiningRoomCode === upperCode) return;
-      if (joiningRoomCode !== null) closeCurrentSocket();
+      if (get().roomCode?.toUpperCase() === upperCode
+        && ws?.readyState === WebSocket.OPEN
+        && (spectate === undefined || spectate === get().spectating)) return;
+      disconnectForRoomEntry(upperCode,
+        spectate !== undefined && get().spectating !== spectate);
+      const wantsSeat = spectate === false || !!deckId || !!hero;
+      if (wantsSeat) removeRoomSession(sessionStorage, upperCode);
+      const tabSession = loadRoomSession(sessionStorage, upperCode);
+      const effectiveSpectate = spectate === true || (!wantsSeat && tabSession !== null);
+      pendingEntrySpectate = effectiveSpectate;
+      pendingLocalSpectatorToken = null;
       joiningRoomCode = upperCode;
-      const session = loadRoomSession(localStorage, upperCode);
+      const session = loadTabRoomSession(localStorage, sessionStorage, upperCode);
       const restoresSavedMembership = session?.code === upperCode;
       // Automatic reconnects of an already-rendered room retain their normal
       // retry behavior. Lobby/URL entry remains pending through first state.
@@ -1503,12 +1584,20 @@ export const useStore = create<StoreState>((set, get) => {
         set({ prep: null, prepDeck: null });
       }
       connect(() => {
-        const currentSession = loadRoomSession(localStorage, upperCode);
-        const token = currentSession?.code === upperCode ? currentSession.token : undefined;
-        send({ type: "join-room", code, token, deckId, hero, spectate });
+        const currentTabSession = loadRoomSession(sessionStorage, upperCode);
+        const currentLocalSession = loadRoomSession(localStorage, upperCode);
+        if (effectiveSpectate && !currentTabSession) {
+          pendingLocalSpectatorToken = currentLocalSession?.token ?? null;
+        }
+        const currentSession = currentTabSession ?? currentLocalSession;
+        const token = deckId || hero ? undefined : currentSession?.token;
+        send({ type: "join-room", code, token, deckId, hero,
+          ...(effectiveSpectate ? { spectate: true } : {}) });
       });
     },
     inspectRoom: (code) => {
+      disconnectForRoomEntry(code.toUpperCase(), true);
+      pendingEntrySpectate = false;
       roomEntryPending = true;
       connect(() => send({ type: "inspect-room", code }));
     },
@@ -1675,7 +1764,7 @@ export const useStore = create<StoreState>((set, get) => {
       } else if (!get().roomCode && get().queuedFormat) {
         send({ type: "queue-leave" });
       }
-      removeRoomSession(localStorage, get().roomCode);
+      forgetRoomSession(get().roomCode, get().spectating);
       history.replaceState(null, "", "/");
       prepDeckId = null;
       prepHero = null;
@@ -1899,7 +1988,11 @@ function openReplay(
 
 /** Reconnect helper: returns the saved session code, if any. */
 export function hasSavedRoomSession(code: string): boolean {
-  return loadRoomSession(localStorage, code) !== null;
+  return loadTabRoomSession(localStorage, sessionStorage, code) !== null;
+}
+
+export function hasSavedSpectatorSession(code: string): boolean {
+  return loadRoomSession(sessionStorage, code) !== null;
 }
 
 /** Room code from the URL path (/ABC123), if present and well-formed. */

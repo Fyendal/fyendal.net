@@ -842,6 +842,28 @@ describe("PgRoomStore storage", () => {
     expect(row.rows[0].token_hash).toBe(hashReconnectToken(rejoined.token));
   });
 
+  it("does not let a seat owner spectate their own room", async () => {
+    const user = await db.query(
+      `INSERT INTO users (username, username_lc, pass_hash, created_at)
+       VALUES ('WatchingOwner','watchingowner','hash',1) RETURNING id`,
+    );
+    const userId = Number(user.rows[0]!.id);
+    const created = await store.createRoom("classic-battles", { hero: "rhinar", userId });
+    const before = await rawSeats(created.code);
+
+    expect(await store.joinRoom(created.code, created.token, {
+      allowPlayer: true, userId, spectate: true,
+    })).toEqual({ ok: false, error: "already a player in this room" });
+    expect((await rawSeats(created.code))[0]!.token_hash).toBe(before[0]!.token_hash);
+    expect(await store.joinRoom(created.code, undefined, {
+      allowPlayer: true, userId, spectate: true,
+    })).toEqual({ ok: false, error: "already a player in this room" });
+    expect((await rawSeats(created.code))[0]!.token_hash).toBe(before[0]!.token_hash);
+    expect(await store.joinRoom(created.code, created.token, {
+      allowPlayer: true, userId,
+    })).toMatchObject({ ok: true, kind: "player", seat: 0, reconnected: true });
+  });
+
   it("inserts and deletes only the affected player seat", async () => {
     const host = await store.createRoom("classic-battles", { hero: "rhinar" });
     await markStoredSeatPresent(host.code, 0);

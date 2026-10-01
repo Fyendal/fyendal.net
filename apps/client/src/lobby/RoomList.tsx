@@ -47,7 +47,7 @@ export function RoomList(props: { onGoToDecks: (format: ConstructedFormat) => vo
     }
     setPicker(room);
   };
-  const rejoin = (code: string) => joinRoom(code);
+  const rejoin = (code: string) => joinRoom(code, undefined, false);
   const spectate = (code: string) => joinRoom(code, undefined, true);
 
   const pickerDecks = picker

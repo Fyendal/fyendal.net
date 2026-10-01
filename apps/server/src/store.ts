@@ -2549,6 +2549,10 @@ export class PgRoomStore {
   ): Promise<JoinResult> {
     const upperCode = code.toUpperCase();
     const r = await this.withRetry<WithoutVersion<Extract<JoinResult, { ok: true }>>>(upperCode, async (room) => {
+      if (opts.spectate && opts.userId != null
+        && room.seats.some((seat) => seat?.userId === opts.userId)) {
+        return { error: "already a player in this room" };
+      }
       if (token) {
         const tokenHash = hashReconnectToken(token);
         const seat = room.seats.findIndex((s) => s?.tokenHash === tokenHash);
@@ -2582,10 +2586,7 @@ export class PgRoomStore {
           };
         }
       }
-      // Lost session token (client keeps only one stored session — spectating
-      // another room overwrites it — and storage can be cleared outright): a
-      // account that owns a seat reclaims it instead of landing in a
-      // new spectator slot on its own full room.
+      // A missing or stale seat token can be recovered by its account.
       if (opts.userId != null) {
         const owned = room.seats.findIndex((s) => s?.userId === opts.userId);
         if (owned !== -1) {

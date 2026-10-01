@@ -99,7 +99,11 @@ export function Home() {
           </h3>
           <div className="room-grid">
             {rejoinRooms.map((room) => (
-              <RoomCard key={room.code} room={room} onRejoin={joinRoom} />
+              <RoomCard
+                key={room.code}
+                room={room}
+                onRejoin={(code) => joinRoom(code, undefined, false)}
+              />
             ))}
           </div>
         </section>

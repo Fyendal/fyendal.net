@@ -1,6 +1,6 @@
 import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { useIntl } from "react-intl";
-import { hasSavedRoomSession, roomCodeFromUrl, useStore } from "./store.js";
+import { hasSavedRoomSession, hasSavedSpectatorSession, roomCodeFromUrl, useStore } from "./store.js";
 import { Lobby } from "./lobby/Lobby.js";
 import { RoomLoading } from "./lobby/RoomLoading.js";
 import { savedReplayIdFromPath } from "./replay/route.js";
@@ -105,8 +105,8 @@ function AppContent() {
     intl.formatMessage({ id: "meta.home.description" }),
   );
   const restoringSavedRoom = screen === "lobby"
-    && authUser !== null
     && routeRoomCode !== null
+    && (authUser !== null || hasSavedSpectatorSession(routeRoomCode))
     && hasSavedRoomSession(routeRoomCode);
 
   useEffect(() => {
@@ -131,7 +131,9 @@ function AppContent() {
     if (!routeRoomCode) return;
     // Known sessions reconnect immediately. New authenticated invitees first
     // inspect the room so they can choose the matching deck or box hero.
-    if (authUser && hasSavedRoomSession(routeRoomCode)) joinRoom(routeRoomCode);
+    if ((authUser || hasSavedSpectatorSession(routeRoomCode)) && hasSavedRoomSession(routeRoomCode)) {
+      joinRoom(routeRoomCode);
+    }
     else inspectRoom(routeRoomCode);
   }, [authUser, inspectRoom, joinRoom, routeRoomCode]);
 

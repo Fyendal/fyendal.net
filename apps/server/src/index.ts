@@ -65,7 +65,7 @@ const WS_MESSAGE_RATE_WINDOW_MS = 10_000;
 const WS_PING_INTERVAL_MS = 30_000;
 const EMOTE_COOLDOWN_MS = 1_000;
 const SESSION_SWEEP_INTERVAL_MS = 15 * 60 * 1000;
-const ALREADY_IN_ROOM = "leave your current room before joining another";
+const ALREADY_IN_ROOM = "this connection is already in a room";
 
 interface ServerDeps {
   db: Queryable;

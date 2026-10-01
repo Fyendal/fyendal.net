@@ -131,6 +131,7 @@ beforeEach(() => {
   vi.resetModules();
   FakeWebSocket.instances = [];
   vi.stubGlobal("localStorage", new MemoryStorage());
+  vi.stubGlobal("sessionStorage", new MemoryStorage());
   vi.stubGlobal("location", { hostname: "localhost", pathname: "/" });
   vi.stubGlobal("history", { pushState: vi.fn(), replaceState: vi.fn() });
   vi.stubGlobal("WebSocket", FakeWebSocket);
@@ -1003,6 +1004,160 @@ describe("client connection and account race fences", () => {
       error: null,
     });
     expect(localStorage.getItem("fyendal-room-session:BBBBBB")).toContain("BBBBBB");
+  });
+
+  it("switches directly between spectated rooms and clears the old tab credential", async () => {
+    const { useStore } = await import("../store.js");
+    useStore.getState().joinRoom("AAAAAA", undefined, true);
+    const first = FakeWebSocket.instances[0]!;
+    first.open();
+    first.message({ type: "joined", code: "AAAAAA", seat: null, token: "watch-a", spectator: true, version: 1 });
+    expect(sessionStorage.getItem("fyendal-room-session:AAAAAA")).toContain("watch-a");
+
+    useStore.getState().joinRoom("BBBBBB", undefined, true);
+    const second = FakeWebSocket.instances[1]!;
+    expect(first.readyState).toBe(FakeWebSocket.CLOSED);
+    expect(sessionStorage.getItem("fyendal-room-session:AAAAAA")).toBeNull();
+    second.open();
+    expect(second.sent.map((frame) => JSON.parse(frame))).toContainEqual({
+      type: "join-room", code: "BBBBBB", spectate: true,
+    });
+    expect(useStore.getState().roomCode).toBeNull();
+  });
+
+  it("moves a rotated legacy spectator credential out of shared storage", async () => {
+    localStorage.setItem("fyendal-room-session:AAAAAA", JSON.stringify({
+      code: "AAAAAA", token: "old-watch-token",
+    }));
+    const { useStore } = await import("../store.js");
+    useStore.getState().joinRoom("AAAAAA", undefined, true);
+    const socket = FakeWebSocket.instances[0]!;
+    socket.open();
+    socket.message({ type: "joined", code: "AAAAAA", seat: null,
+      token: "new-watch-token", spectator: true, version: 1 });
+
+    expect(localStorage.getItem("fyendal-room-session:AAAAAA")).toBeNull();
+    expect(sessionStorage.getItem("fyendal-room-session:AAAAAA")).toContain("new-watch-token");
+  });
+
+  it("keeps a player credential when an attempted spectator entry fails", async () => {
+    localStorage.setItem("fyendal-room-session:AAAAAA", JSON.stringify({
+      code: "AAAAAA", token: "player-token",
+    }));
+    sessionStorage.setItem("fyendal-room-session:AAAAAA", JSON.stringify({
+      code: "AAAAAA", token: "stale-watch-token",
+    }));
+    const { useStore } = await import("../store.js");
+    useStore.getState().joinRoom("AAAAAA", undefined, true);
+    const socket = FakeWebSocket.instances[0]!;
+    socket.open();
+    socket.message({ type: "error", message: "already a player in this room" });
+
+    expect(localStorage.getItem("fyendal-room-session:AAAAAA")).toContain("player-token");
+    expect(sessionStorage.getItem("fyendal-room-session:AAAAAA")).toBeNull();
+  });
+
+  it("returns a replaced player tab to the lobby without reclaiming the seat", async () => {
+    const { useStore } = await import("../store.js");
+    useStore.getState().joinRoom("AAAAAA");
+    const socket = FakeWebSocket.instances[0]!;
+    socket.open();
+    socket.message({ type: "joined", code: "AAAAAA", seat: 0, token: "old-token", version: 1 });
+    socket.message({ ...staleState, version: 2 });
+    localStorage.setItem("fyendal-room-session:AAAAAA", JSON.stringify({
+      code: "AAAAAA", token: "new-tab-token",
+    }));
+
+    socket.message({ type: "error", code: "SESSION_REPLACED", message: "room session replaced" });
+    expect(useStore.getState()).toMatchObject({
+      screen: "lobby", roomCode: null, view: null, connected: false,
+    });
+    expect(socket.readyState).toBe(FakeWebSocket.CLOSED);
+    expect(localStorage.getItem("fyendal-room-session:AAAAAA")).toContain("new-tab-token");
+    expect(history.replaceState).toHaveBeenLastCalledWith(null, "", "/");
+
+    const lobbySocket = FakeWebSocket.instances[1]!;
+    lobbySocket.open();
+    expect(lobbySocket.sent.map((frame) => JSON.parse(frame))).toContainEqual({ type: "list-rooms" });
+    expect(lobbySocket.sent.some((frame) => JSON.parse(frame).type === "join-room")).toBe(false);
+  });
+
+  it("preserves the new tab's credential when replacement arrives before the first state", async () => {
+    localStorage.setItem("fyendal-room-session:AAAAAA", JSON.stringify({
+      code: "AAAAAA", token: "old-token",
+    }));
+    const { useStore } = await import("../store.js");
+    useStore.getState().joinRoom("AAAAAA");
+    const socket = FakeWebSocket.instances[0]!;
+    socket.open();
+    socket.message({ type: "joined", code: "AAAAAA", seat: 0, token: "old-token", version: 1 });
+    localStorage.setItem("fyendal-room-session:AAAAAA", JSON.stringify({
+      code: "AAAAAA", token: "new-tab-token",
+    }));
+
+    socket.message({ type: "error", code: "SESSION_REPLACED", message: "room session replaced" });
+    expect(useStore.getState().roomCode).toBeNull();
+    expect(localStorage.getItem("fyendal-room-session:AAAAAA")).toContain("new-tab-token");
+  });
+
+  it("disconnects a playing tab to inspect another room without surrendering its seat", async () => {
+    const { useStore } = await import("../store.js");
+    useStore.getState().joinRoom("AAAAAA");
+    const first = FakeWebSocket.instances[0]!;
+    first.open();
+    first.message({ type: "joined", code: "AAAAAA", seat: 0, token: "player-token", version: 1 });
+
+    useStore.getState().inspectRoom("BBBBBB");
+    const second = FakeWebSocket.instances[1]!;
+    expect(first.readyState).toBe(FakeWebSocket.CLOSED);
+    expect(localStorage.getItem("fyendal-room-session:AAAAAA")).toContain("player-token");
+    second.open();
+    expect(second.sent.map((frame) => JSON.parse(frame))).toContainEqual({
+      type: "inspect-room", code: "BBBBBB",
+    });
+  });
+
+  it("joins another room without discarding the previous player credential", async () => {
+    const { useStore } = await import("../store.js");
+    useStore.getState().joinRoom("AAAAAA");
+    const first = FakeWebSocket.instances[0]!;
+    first.open();
+    first.message({ type: "joined", code: "AAAAAA", seat: 0, token: "player-token", version: 1 });
+
+    useStore.getState().joinRoom("BBBBBB", undefined, true);
+    const second = FakeWebSocket.instances[1]!;
+    expect(first.readyState).toBe(FakeWebSocket.CLOSED);
+    expect(localStorage.getItem("fyendal-room-session:AAAAAA")).toContain("player-token");
+    second.open();
+    expect(second.sent.map((frame) => JSON.parse(frame))).toContainEqual({
+      type: "join-room", code: "BBBBBB", spectate: true,
+    });
+  });
+
+  it("opens a friend invitation in the current spectator tab", async () => {
+    localStorage.setItem("fyendal-auth", JSON.stringify({ token: "account-token", username: "Alice" }));
+    const { useStore } = await import("../store.js");
+    useStore.getState().joinRoom("AAAAAA", undefined, true);
+    const first = FakeWebSocket.instances[0]!;
+    first.open();
+    first.message({ type: "joined", code: "AAAAAA", seat: null, token: "watch-a", spectator: true, version: 1 });
+    useStore.setState({
+      socialOpen: true,
+      friendGameInvites: [{
+        inviteId: "invite-b", fromUsername: "Bob",
+        room: { code: "BBBBBB", format: "classic-battles" }, sentAt: Date.now(),
+      }],
+    });
+
+    useStore.getState().acceptFriendGameInvite("invite-b");
+    const second = FakeWebSocket.instances[1]!;
+    expect(first.readyState).toBe(FakeWebSocket.CLOSED);
+    expect(sessionStorage.getItem("fyendal-room-session:AAAAAA")).toBeNull();
+    expect(useStore.getState().socialOpen).toBe(false);
+    second.open();
+    expect(second.sent.map((frame) => JSON.parse(frame))).toContainEqual({
+      type: "inspect-room", code: "BBBBBB",
+    });
   });
 
   it("aborts and discards deck work from a previous account", async () => {
