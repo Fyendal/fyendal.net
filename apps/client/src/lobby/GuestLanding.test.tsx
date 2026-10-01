@@ -17,7 +17,7 @@ describe("guest search landing", () => {
 
     expect(html).toContain("Play Flesh and Blood Online");
     expect(html).toContain("Play for free in your browser");
-    expect(html).toContain("Find opponents, practice against hero-specific bots");
+    expect(html).toContain("Find opponents, test your deck against hero-specific AI");
     expect(html).not.toContain('class="intro-logo"');
     expect(html).toContain("<strong>2</strong> in game");
     expect(html).toContain("<strong>1</strong> open room");
@@ -34,8 +34,10 @@ describe("guest search landing", () => {
     expect(html).not.toContain("See Fyendal in action");
     expect(html).not.toContain("<video");
     expect(html).toContain('src="/fyendal-gameplay-demo-poster.jpg"');
+    expect(html).toContain('width="1600" height="869"');
     expect(html).toContain('loading="lazy"');
     expect(html).toContain('id="practice-bots"');
+    expect(html).toContain("Play vs AI");
     expect(html.match(/<details/g)).toHaveLength(7);
     expect(html).toContain("Is Fyendal free to play?");
     expect(html).not.toContain("How do I create an account?");

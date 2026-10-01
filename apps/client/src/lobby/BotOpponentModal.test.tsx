@@ -9,17 +9,7 @@ afterEach(() => {
 });
 
 describe("BotOpponentModal", () => {
-  it("can start Fabrary practice with player search disabled", () => {
-    const html = renderToStaticMarkup(
-      <TestI18nProvider>
-        <BotOpponentModal format="cc" initialSearchForPlayer={false}
-          onSelect={vi.fn()} onClose={vi.fn()} />
-      </TestI18nProvider>,
-    );
-    expect(html).toContain('type="checkbox"');
-    expect(html).not.toContain('type="checkbox" checked=""');
-  });
-  it("offers Ira, Hala, Cindra, Jarl, and Starvo in a focused opponent dialog", () => {
+  it("offers Ira, Hala, Cindra, and Jarl in a focused opponent dialog", () => {
     const html = renderToStaticMarkup(
       <TestI18nProvider>
         <BotOpponentModal format="cc" onSelect={vi.fn()} onClose={vi.fn()} />
@@ -46,11 +36,9 @@ describe("BotOpponentModal", () => {
     expect(html).toContain("Vetreiði");
     expect(html).toContain("Defensive");
     expect(html).toContain("A patient Earth and Ice Guardian that blocks efficiently and attacks with disruptive two-card hands.");
-    expect(html).toContain("Starvo");
-    expect(html).toContain("Star of the Show");
-    expect(html).toContain("Boss");
-    expect(html).toContain("Challenge the best deck in FAB history.");
-    expect(html.match(/aria-hidden="true"/g)).toHaveLength(5);
+    expect(html).not.toContain("Starvo");
+    expect(html).not.toContain("Star of the Show");
+    expect(html.match(/aria-hidden="true"/g)).toHaveLength(4);
   });
 
   it("offers Kayo, Briar, and Bravo for Silver Age", () => {

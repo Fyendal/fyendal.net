@@ -18,6 +18,7 @@ let BackgroundMatchSearch: typeof import("./BackgroundMatchSearch.js").Backgroun
 
 beforeAll(async () => {
   vi.stubGlobal("localStorage", new MemoryStorage());
+  vi.stubGlobal("location", { pathname: "/", search: "", hostname: "localhost" });
   ({ BackgroundMatchOfferView } = await import("./BackgroundMatchOffer.js"));
   ({ BackgroundMatchSearch } = await import("./BackgroundMatchSearch.js"));
 });
@@ -78,6 +79,6 @@ describe("background matchmaking UI", () => {
     expect(html).toContain(">Bravo</span>");
     expect(html).not.toContain("BravoFan");
     expect(html).toContain("Accept");
-    expect(html).toContain("Keep playing bot");
+    expect(html).toContain("Keep playing against AI");
   });
 });

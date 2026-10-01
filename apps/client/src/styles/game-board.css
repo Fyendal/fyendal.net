@@ -826,7 +826,6 @@
   animation: none;
 }
 .hand-drag-card[data-reduced-motion="true"] .card-hand { transform: none; scale: 1; }
-.hand .muted { transform: translateY(calc(-1 * var(--hand-selected-lift))); }
 .hand-scroll-button {
   position: absolute;
   bottom: clamp(20px, 4.5vh, 52px);

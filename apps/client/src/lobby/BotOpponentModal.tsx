@@ -56,15 +56,6 @@ const BOTS: Readonly<Record<ConstructedFormat, readonly BotOption[]>> = {
       deckType: "guardian",
       descriptionId: "lobby.bot.jarl.description",
     },
-    {
-      id: "starvo",
-      name: "Starvo",
-      title: "Star of the Show",
-      heroName: "Bravo, Star of the Show",
-      deckId: "bot-starvo-boss",
-      deckType: "boss",
-      descriptionId: "lobby.bot.starvo.description",
-    },
   ],
   "silver-age": [
     {
@@ -125,12 +116,11 @@ const BOT_CARD_WARNINGS = new Map(
 
 export function BotOpponentModal(props: {
   format: ConstructedFormat;
-  initialSearchForPlayer?: boolean;
   onSelect: (bot: BotOpponent, searchForPlayer: boolean) => void;
   onClose: () => void;
 }) {
   const intl = useIntl();
-  const [searchForPlayer, setSearchForPlayer] = useState(props.initialSearchForPlayer ?? true);
+  const [searchForPlayer, setSearchForPlayer] = useState(true);
   const tooltipId = useId();
   const warningRefs = useRef<Partial<Record<BotOpponent, HTMLSpanElement | null>>>({});
   const [hoveredBot, setHoveredBot] = useState<BotOpponent | null>(null);

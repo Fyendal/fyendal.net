@@ -62,7 +62,7 @@ describe("bot practice nudge", () => {
     expect(html).toContain("No other active player is looking for a game right now.");
     expect(html).toContain('role="dialog"');
     expect(html).toContain('aria-modal="true"');
-    expect(html).toContain("Play vs Bot");
+    expect(html).toContain("Play vs AI");
     expect(html).not.toContain("Hala");
     expect(html).toContain("Keep waiting");
   });

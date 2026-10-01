@@ -141,8 +141,8 @@ function GuestLandingDetailsView({ intl }: { intl: IntlShape }) {
               className="landing-demo-image"
               src="/fyendal-gameplay-demo-poster.jpg"
               alt={intl.formatMessage({ id: "landing.demoAlt" })}
-              width={1280}
-              height={720}
+              width={1600}
+              height={869}
               loading="lazy"
               decoding="async"
             />

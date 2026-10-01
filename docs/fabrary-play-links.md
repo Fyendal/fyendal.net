@@ -32,9 +32,11 @@ the public link and a refresh after deployment before publishing the link.
 3. Load the latest public Fabrary deck. The account's existing deck with the
    same canonical source and format is refreshed; otherwise it is saved once.
    Existing user-selected deck names are preserved.
-4. Select a card pool and choose **Find a player** or **Play a bot**. Bot
-   practice starts with background player search unchecked, and the player
-   can enable it in the opponent picker.
+4. Select a card pool and choose **Find a player** or **Play vs AI**. AI
+   practice starts with background player search checked, and the player
+   can turn it off in the opponent picker.
+   On laptop screens, a short site introduction and gameplay image appear
+   beside the deck card.
 5. Continue through normal pre-game preparation, including equipment,
    sideboarding, Fabrary matchup plans, and deck presentation validation.
 

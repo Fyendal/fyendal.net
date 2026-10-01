@@ -19681,7 +19681,7 @@
   "game.bot.fallback": [
     {
       "type": 0,
-      "value": "The bot is using simpler moves while browser computation recovers."
+      "value": "The AI opponent is using simpler moves while browser computation recovers."
     }
   ],
   "game.bot.refresh": [
@@ -19693,13 +19693,13 @@
   "game.bot.refresh.required": [
     {
       "type": 0,
-      "value": "Refresh this page to update the bot."
+      "value": "Refresh this page to update the AI opponent."
     }
   ],
   "game.bot.retry": [
     {
       "type": 0,
-      "value": "Retry bot"
+      "value": "Retry AI opponent"
     }
   ],
   "game.bound.count": [
@@ -22197,19 +22197,19 @@
   "landing.bots.body": [
     {
       "type": 0,
-      "value": "Test decks against hero-specific bots with their own strategies."
+      "value": "Test decks against hero-specific AI opponents with their own strategies."
     }
   ],
   "landing.bots.title": [
     {
       "type": 0,
-      "value": "Practice against bots"
+      "value": "Play vs AI"
     }
   ],
   "landing.demoAlt": [
     {
       "type": 0,
-      "value": "A Fyendal game between Briar and a Bravo practice bot"
+      "value": "A Fyendal match between Malice, Domina of the Dead and Hala AI"
     }
   ],
   "landing.faq.contribute.answer": [
@@ -22447,7 +22447,7 @@
   "landing.startPlayingBody": [
     {
       "type": 0,
-      "value": "Create a free account to play matches and practice against bots."
+      "value": "Create a free account to play matches and test your deck against AI."
     }
   ],
   "landing.startPlayingLabel": [
@@ -22465,7 +22465,7 @@
   "landing.subtitle": [
     {
       "type": 0,
-      "value": "Play for free in your browser. Find opponents, practice against hero-specific bots, and bring your Fabrary decks."
+      "value": "Play for free in your browser. Find opponents, test your deck against hero-specific AI, and bring your Fabrary decks."
     }
   ],
   "landing.title": [
@@ -22531,7 +22531,7 @@
   "lobby.action.playBot": [
     {
       "type": 0,
-      "value": "Play vs Bot"
+      "value": "Play vs AI"
     }
   ],
   "lobby.action.rejoin": [
@@ -22615,7 +22615,7 @@
   "lobby.bot.searchForPlayer.description": [
     {
       "type": 0,
-      "value": "Practice against this bot while Fyendal looks for a PvP opponent."
+      "value": "Test your deck against this AI opponent while Fyendal looks for a PvP opponent."
     }
   ],
   "lobby.bot.starvo.description": [
@@ -24017,7 +24017,7 @@
   "matchmaking.background.keepBot": [
     {
       "type": 0,
-      "value": "Keep playing bot"
+      "value": "Keep playing against AI"
     }
   ],
   "matchmaking.background.searching": [
@@ -24047,7 +24047,7 @@
   "meta.home.description": [
     {
       "type": 0,
-      "value": "Play Flesh and Blood online for free. Find opponents, practice against hero-specific bots, import Fabrary decks, spectate games, and review replays."
+      "value": "Play Flesh and Blood online for free. Find opponents, test your deck against hero-specific AI, import Fabrary decks, spectate games, and review replays."
     }
   ],
   "meta.home.title": [
@@ -24083,7 +24083,7 @@
   "play.bot": [
     {
       "type": 0,
-      "value": "Play a bot"
+      "value": "Play vs AI"
     }
   ],
   "play.cards.banned": [
@@ -24186,6 +24186,12 @@
       "value": "Loading your latest Fabrary deck…"
     }
   ],
+  "play.intro.body": [
+    {
+      "type": 0,
+      "value": "Play with your Fabrary deck against real players or AI."
+    }
+  ],
   "play.preview.loading": [
     {
       "type": 0,
@@ -24202,12 +24208,6 @@
     {
       "type": 0,
       "value": "Try again"
-    }
-  ],
-  "play.sign.in": [
-    {
-      "type": 0,
-      "value": "Log in or create an account to play this deck."
     }
   ],
   "play.source": [
@@ -24327,7 +24327,7 @@
   "prep.botNudge.description": [
     {
       "type": 0,
-      "value": "No other active player is looking for a game right now. Would you like to test your deck against a bot while you wait?"
+      "value": "No other active player is looking for a game right now. Would you like to test your deck against AI while you wait?"
     }
   ],
   "prep.botNudge.keepWaiting": [
@@ -25159,7 +25159,7 @@
   "replay.emptyBody": [
     {
       "type": 0,
-      "value": "Completed games and manually ended bot games will appear here automatically."
+      "value": "Completed games and manually ended AI games will appear here automatically."
     }
   ],
   "replay.emptyTitle": [

@@ -44,7 +44,19 @@ describe("Fabrary play entry page", () => {
     expect(html).toContain('autoComplete="new-password"');
     expect(html).toContain('name="termsAccepted"');
     expect(html).toContain("Create account");
+    expect(html).toContain('class="fabrary-play-auth"');
+    expect(html).not.toContain("Start playing");
+    expect(html).not.toContain("Log in or create an account to play this deck.");
     expect(html).not.toContain("Find a player");
+    expect(html).not.toContain('class="fabrary-play-actions"');
+    expect(html).toContain("Play Flesh and Blood Online");
+    expect(html).toContain("Play with your Fabrary deck against real players or AI.");
+    expect(html).toContain('class="fabrary-play-intro-kicker" aria-hidden="true">Fyendal');
+    expect(html).not.toContain("Online Matches and Focused Practice");
+    expect(html).not.toContain("Spectate and review");
+    expect(html).toContain('src="/fyendal-gameplay-play-card.jpg"');
+    expect(html).toContain('width="1260" height="1118"');
+    expect(html).toContain('loading="lazy"');
     expect(html).toContain("lobby-topbar-guest");
     expect(html).toContain('class="brand-logo"');
     expect(html).not.toContain("fabrary-play-portrait");
@@ -61,6 +73,7 @@ describe("Fabrary play entry page", () => {
     expect(html).toContain("lobby-topbar-authenticated");
     expect(html).toContain('class="brand-logo"');
     expect(html).toContain("Alice");
+    expect(html).not.toContain('class="fabrary-play-auth"');
     expect(html).toContain("Log out");
     expect(html).toContain('class="conn-dot on"');
     expect(html).toContain("https://discord.gg/");
@@ -78,7 +91,7 @@ describe("Fabrary play entry page", () => {
     expect(html).toContain('name="username"');
     expect(html).toContain("Register");
     expect(html).not.toContain("Find a player");
-    expect(html).not.toContain("Play a bot");
+    expect(html).not.toContain('class="fabrary-play-actions"');
     expect(html).not.toContain("My deck");
     expect(html).not.toContain("fabrary-play-settings");
   });
@@ -117,7 +130,8 @@ describe("Fabrary play entry page", () => {
     const html = render();
     expect(html).not.toContain("Return to your game");
     expect(html).not.toContain('disabled="">Find a player');
-    expect(html).not.toContain('disabled="">Play a bot');
+    expect(html).toContain('>Play vs AI</button>');
+    expect(html).toContain('class="fabrary-play-intro"');
   });
 
   it("keeps a long future-card list collapsed and only asks for a mode change when needed", () => {
@@ -151,5 +165,7 @@ describe("Fabrary play entry page", () => {
     expect(html).toContain("来自 Fabrary");
     expect(html).toContain("选择开放模式");
     expect(html).toContain("寻找玩家");
+    expect(html).toContain("对战 AI");
+    expect(html).toContain("使用你的 Fabrary 牌组，与真人玩家或 AI 对战。");
   });
 });

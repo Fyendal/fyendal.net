@@ -372,10 +372,6 @@ export function PlayerHand({
             highlighted
           />
         ))}
-        {!spectating && visibleCards.length === 0 && playableZoneCards.length === 0 &&
-          activatableZoneCards.length === 0
-          ? <span className="muted">{intl.formatMessage({ id: "game.hand.empty" })}</span>
-          : null}
       </div>
       {scrollAvailability.left ? (
         <button

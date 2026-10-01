@@ -39,7 +39,7 @@ describe("DeckLibrary", () => {
     expect(html.match(/>Delete Deck<\/button>/g)).toHaveLength(2);
     expect(html).toContain("Create / Import Deck");
     expect(html).not.toContain("Find Match");
-    expect(html).not.toContain("Play vs Bot");
+    expect(html).not.toContain("Play vs AI");
 
     const ccOnly = renderToStaticMarkup(
       <TestI18nProvider>

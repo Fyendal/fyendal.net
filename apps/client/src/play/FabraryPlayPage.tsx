@@ -55,6 +55,18 @@ export function FabraryPlayPage() {
     <div className="lobby-page fabrary-play-page">
       <LobbyHeader />
       <main id="main-content" className="fabrary-play-main">
+        <aside className="fabrary-play-intro" aria-labelledby="fabrary-play-intro-title">
+          <img src="/fyendal-gameplay-play-card.jpg"
+            alt={intl.formatMessage({ id: "landing.demoAlt" })}
+            width={1260} height={1118} loading="lazy" decoding="async" />
+          <div className="fabrary-play-intro-content">
+            <span className="fabrary-play-intro-kicker" aria-hidden="true">Fyendal</span>
+            <p id="fabrary-play-intro-title" className="fabrary-play-intro-title">
+              {intl.formatMessage({ id: "landing.title" })}
+            </p>
+            <p className="fabrary-play-intro-body">{intl.formatMessage({ id: "play.intro.body" })}</p>
+          </div>
+        </aside>
         <section className="panel fabrary-play-panel" aria-labelledby="fabrary-play-title">
           <p className="fabrary-play-eyebrow">{intl.formatMessage({ id: "play.source" })}</p>
           <div className="fabrary-play-identity">
@@ -84,8 +96,9 @@ export function FabraryPlayPage() {
                     <button onClick={() => void preview()}>{intl.formatMessage({ id: "play.retry" })}</button>
                   </div>
                 ) : null}
-                <p className="muted">{intl.formatMessage({ id: "play.sign.in" })}</p>
-                <Auth initialMode="register" />
+                <div className="fabrary-play-auth">
+                  <Auth initialMode="register" />
+                </div>
               </>
             ) : pending.status === "idle" || pending.status === "loading" ? (
               <p role="status">{intl.formatMessage({ id: "play.importing" })}</p>
@@ -143,7 +156,7 @@ export function FabraryPlayPage() {
       </main>
       <SiteFooter />
       {showBots && request && deck && !blocked ? (
-        <BotOpponentModal format={request.format} initialSearchForPlayer={false}
+        <BotOpponentModal format={request.format}
           onClose={() => setShowBots(false)}
           onSelect={(bot, searchForPlayer) => { setShowBots(false); start({ kind: "bot", bot, searchForPlayer }); }} />
       ) : null}

@@ -18929,7 +18929,7 @@
   "game.bot.fallback": [
     {
       "type": 0,
-      "value": "浏览器计算恢复期间，机器人暂时使用较简单的行动。"
+      "value": "浏览器计算恢复期间，AI 对手暂时使用较简单的行动。"
     }
   ],
   "game.bot.refresh": [
@@ -18941,13 +18941,13 @@
   "game.bot.refresh.required": [
     {
       "type": 0,
-      "value": "请刷新页面以更新机器人。"
+      "value": "请刷新页面以更新 AI 对手。"
     }
   ],
   "game.bot.retry": [
     {
       "type": 0,
-      "value": "重试机器人"
+      "value": "重试 AI 对手"
     }
   ],
   "game.bound.count": [
@@ -21369,7 +21369,7 @@
   "landing.demoAlt": [
     {
       "type": 0,
-      "value": "Fyendal 中 Briar 与 Bravo 练习AI的一场对局"
+      "value": "Fyendal 中 Malice, Domina of the Dead 与 Hala AI 的对局"
     }
   ],
   "landing.faq.contribute.answer": [
@@ -21667,7 +21667,7 @@
   "lobby.action.playBot": [
     {
       "type": 0,
-      "value": "对战AI"
+      "value": "对战 AI"
     }
   ],
   "lobby.action.rejoin": [
@@ -23011,7 +23011,7 @@
   "play.bot": [
     {
       "type": 0,
-      "value": "与机器人对战"
+      "value": "对战 AI"
     }
   ],
   "play.cards.banned": [
@@ -23070,6 +23070,12 @@
       "value": "正在加载最新的 Fabrary 牌组…"
     }
   ],
+  "play.intro.body": [
+    {
+      "type": 0,
+      "value": "使用你的 Fabrary 牌组，与真人玩家或 AI 对战。"
+    }
+  ],
   "play.preview.loading": [
     {
       "type": 0,
@@ -23086,12 +23092,6 @@
     {
       "type": 0,
       "value": "重试"
-    }
-  ],
-  "play.sign.in": [
-    {
-      "type": 0,
-      "value": "登录或创建账号以使用此牌组。"
     }
   ],
   "play.source": [
@@ -23919,7 +23919,7 @@
   "replay.emptyBody": [
     {
       "type": 0,
-      "value": "已完成的对局和手动结束的人机对局会自动显示在这里。"
+      "value": "已完成的对局和手动结束的 AI 对局会自动显示在这里。"
     }
   ],
   "replay.emptyTitle": [

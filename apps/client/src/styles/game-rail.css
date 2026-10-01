@@ -522,7 +522,6 @@
   .hand .card-hand.card-selected:hover,
   .hand .card-hand.card-pitched,
   .hand .card-hand.card-pitched:hover { transform: translateY(-12px); }
-  .hand .muted { transform: translateY(-12px); }
   .hand-scroll-button {
     bottom: 10px;
     min-width: 52px;

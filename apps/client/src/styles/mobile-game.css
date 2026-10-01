@@ -507,8 +507,6 @@
   .hand .card-hand.card-selected:hover,
   .hand .card-hand.card-pitched,
   .hand .card-hand.card-pitched:hover { transform: translateY(-7px); }
-  .hand .muted { transform: none; align-self: center; }
-
   .hand-scroll-button {
     position: fixed;
     bottom: 216px;
