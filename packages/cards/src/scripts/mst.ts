@@ -626,6 +626,13 @@ export const mst: Record<string, CardScript> = {
       timing: "instant",
       label: "Look at and possibly banish the opponent's top card",
       onActivate(ctx) {
+        ctx.addModifier({
+          scope: "until-end-of-turn",
+          grantsPlayFromZone: "banish",
+          grantsPlayFromZoneOwner: "opponent",
+          appliesToPitch: 3,
+          playBaseCostOverride: 0,
+        });
         const top = ctx.player(opponentSeat(ctx)).deck[0];
         if (!top) return;
         ctx.lookAt(top.instanceId);
@@ -642,11 +649,7 @@ export const mst: Record<string, CardScript> = {
       if (hook !== "nuu-banish" || option !== "yes") return;
       const instanceId = ctx.getCounter("nuuTop");
       const card = ctx.player(opponentSeat(ctx)).deck.find((candidate) => candidate.instanceId === instanceId);
-      if (!card || !ctx.banish(instanceId)) return;
-      ctx.allowPlayFrom(instanceId, "banish", {
-        costReduction: data(ctx, card).cost ?? 0,
-        forSeat: ctx.seat,
-      });
+      if (card) ctx.banish(instanceId);
     },
   },
   "beckoning mistblade|0": {

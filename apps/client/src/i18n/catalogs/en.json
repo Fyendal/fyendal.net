@@ -1073,6 +1073,8 @@
   "card.ros.option.earth": "Embodiment of Earth",
   "card.ros.option.runechant": "Runechant",
   "card.ros.option.yourhero": "Your hero",
+  "card.ros.plan.hand.shuffle": "Choose {count} {count, plural, one {card} other {cards}} from your hand to shuffle into your deck",
+  "card.ros.plan.traps.search": "Search your deck for up to 3 traps",
   "card.ros.sigil.return": "Return a Sigil aura from your graveyard?",
   "card.ros.token.create": "Create which token?",
   "card.sba.crown.attack.top": "Crown of Providence: put an attack action from your hand on top?",

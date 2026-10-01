@@ -133,7 +133,13 @@ export class BrowserBotController {
             || message.version !== this.active.version || this.command) return;
           this.busy = false;
           if (message.type === "failed") { this.fail("crash"); return; }
-          if (this.active.type !== "bot-task" || !isAdvertisedBotIntent(message.intent, this.active.legal)) {
+          if (this.active.type !== "bot-task" || !isAdvertisedBotIntent(
+            message.intent,
+            this.active.legal,
+            this.active.view.pendingDecision?.kind === "defend"
+              ? this.active.view.pendingDecision.stagedCards?.map((card) => card.instanceId) ?? []
+              : [],
+          )) {
             this.fail("invalid-result");
             return;
           }

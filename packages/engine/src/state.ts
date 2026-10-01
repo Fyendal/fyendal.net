@@ -7,6 +7,7 @@ import type {
   MeldSide,
   PendingDecision,
   Phase,
+  PlayFromZoneOwner,
   PlayableZone,
 } from "@fyendal/shared";
 import type { TokenCreationContext } from "./eventTypes.js";
@@ -656,6 +657,12 @@ export interface Modifier {
    * unavailable zone. This is a card-classifying permission, so it also
    * applies to matching objects that enter the zone later in the duration. */
   grantsPlayFromZone?: PlayableZone;
+  /** Whose zone this permission covers. Defaults to "own" for existing
+   * persisted modifiers that predate this field. */
+  grantsPlayFromZoneOwner?: PlayFromZoneOwner;
+  /** Replace the matching card's printed resource cost before taxes and
+   * reductions are applied ("without paying its resource cost"). */
+  playBaseCostOverride?: number;
   /** Whole-word phrase required in one of the card's effective names for a
    * grantsPlayFromZone permission. */
   grantsPlayFromNameContains?: string;

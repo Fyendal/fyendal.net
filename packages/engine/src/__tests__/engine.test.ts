@@ -1117,6 +1117,29 @@ describe("game setup & turn structure", () => {
     expect(mayPlayFromZone(s, engineRuntime, runechant, "banish", 0)).toBe(false);
   });
 
+  it.each([
+    ["own", true, false],
+    ["opponent", false, true],
+    ["both", true, true],
+  ] as const)("limits zone-play permission to %s cards", (ownerScope, ownAllowed, opponentAllowed) => {
+    const s = makeGame(108);
+    const ownId = giveCard(s, 0, "AURA");
+    const opponentId = giveCard(s, 1, "AURA");
+    expect(makeCtx(s, engineRuntime, 0, player(s, 0).hero).banish(ownId)).toBe(true);
+    expect(makeCtx(s, engineRuntime, 1, player(s, 1).hero).banish(opponentId)).toBe(true);
+    const own = player(s, 0).banish.find((card) => card.instanceId === ownId)!;
+    const opposing = player(s, 1).banish.find((card) => card.instanceId === opponentId)!;
+
+    makeCtx(s, engineRuntime, 0, player(s, 0).hero).addModifier({
+      scope: "until-end-of-turn",
+      grantsPlayFromZone: "banish",
+      grantsPlayFromZoneOwner: ownerScope,
+    });
+
+    expect(mayPlayFromZone(s, engineRuntime, own, "banish", 0)).toBe(ownAllowed);
+    expect(mayPlayFromZone(s, engineRuntime, opposing, "banish", 0)).toBe(opponentAllowed);
+  });
+
   it("separates an attacker's declaration hook from friendly observers", () => {
     const s = makeGame(104);
     const p = player(s, 0);
@@ -2914,6 +2937,26 @@ describe("combat", () => {
     let r = applyIntent(s, 0, { kind: "play-card", instanceId: intim, pitchInstanceIds: [] });
     expect(r.ok).toBe(true);
     if (!r.ok) return;
+    const intimidateMove = r.events.find((event) =>
+      event.from?.kind === "hand" && event.from.seat === 1 && event.to?.kind === "banish",
+    );
+    expect(intimidateMove).toMatchObject({
+      from: { kind: "hand", seat: 1 },
+      to: { kind: "banish", seat: 1 },
+      fromPrivate: true,
+      toPrivate: true,
+    });
+    expect(projectTransitionEvents(r.events, 0).find((event) =>
+      event.from?.kind === "hand" && event.from.seat === 1 && event.to?.kind === "banish",
+    )).toEqual({
+      kind: "move",
+      from: { kind: "hand", seat: 1 },
+      to: { kind: "banish", seat: 1 },
+      count: 1,
+    });
+    expect(projectTransitionEvents(r.events, 1).find((event) =>
+      event.from?.kind === "hand" && event.from.seat === 1 && event.to?.kind === "banish",
+    )?.instanceId).toBe(intimidateMove?.card.instanceId);
     s = r.state;
     // no choice for the defender: a random card is banished right away (8.5.10)
     const pending = player(s, 1).banish.filter((c) => c.intimidated === true);

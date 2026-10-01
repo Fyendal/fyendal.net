@@ -1,9 +1,11 @@
-import type { BotPolicyInput } from "@fyendal/bot";
+import { requiredEquipmentStageIntent, type BotPolicyInput } from "@fyendal/bot";
 import type { GameIntent } from "@fyendal/shared";
 /** Conservative progress fallback for a failed policy. Selection stays within
  * the authoritative observation and never reads a hidden zone. */
 export function fallbackBotIntent(input: BotPolicyInput): GameIntent | undefined {
   if (input.view.pendingDecision?.kind === "defend") {
+    const requiredEquipment = requiredEquipmentStageIntent(input);
+    if (requiredEquipment) return requiredEquipment;
     const stagedIds = input.view.pendingDecision.stagedCards?.map((card) => card.instanceId) ?? [];
     const commit = input.legal.find((intent) =>
       intent.kind === "defend" && intent.instanceIds.length > 0
@@ -88,4 +90,3 @@ export function fallbackBotIntent(input: BotPolicyInput): GameIntent | undefined
   return input.legal.find((intent) => intent.kind === "pass")
     ?? input.legal.find((intent) => intent.kind !== "concede");
 }
-

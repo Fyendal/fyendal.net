@@ -1,4 +1,4 @@
-import type { GameMotionBatch } from "./motionGeometry.js";
+import type { GameMotionBatch, MotionFlight } from "./motionGeometry.js";
 
 export interface MotionBatchQueue {
   active: GameMotionBatch | null;
@@ -9,6 +9,17 @@ export const EMPTY_MOTION_BATCH_QUEUE: MotionBatchQueue = {
   active: null,
   pending: [],
 };
+
+const EMPTY_QUEUED_HAND_SOURCES: readonly MotionFlight[] = [];
+
+/** The view has already moved these hidden hand slots, but their flights wait
+ * behind an earlier batch. Keep a back at each old slot until they start. */
+export function queuedHandSourceFlights(queue: MotionBatchQueue): readonly MotionFlight[] {
+  if (queue.pending.length === 0) return EMPTY_QUEUED_HAND_SOURCES;
+  return queue.pending.flatMap((batch) => batch.flights.filter((flight) => (
+    flight.queueHoldSource === true
+  )));
+}
 
 interface MotionBatchEnqueueResult {
   queue: MotionBatchQueue;

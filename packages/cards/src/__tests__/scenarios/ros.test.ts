@@ -1078,6 +1078,84 @@ describe("ROS — Wizard and generic", () => {
 });
 
 describe("ROS — delayed end-phase effects", () => {
+  it("Plan for the Worst lets its controller choose traps and two hand cards to shuffle", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          hand: ["plan for the worst|3", "snatch|1", BLUE],
+          deck: ["CRU126", "OUT108", "CRU127", "OUT172", "wounding blow|1"],
+        },
+        { hero: "dorinthea", hand: ["scar for a scar|3"] },
+      ],
+    });
+
+    g.play("plan for the worst|3");
+    expect(g.state.pendingDecision).toMatchObject({
+      chooseHook: "plan-for-worst-traps",
+      minimumSelections: 0,
+      maximumSelections: 3,
+    });
+    expect(projectStateFor(g.state, 0).pendingDecision?.lookedCards).toHaveLength(5);
+    expect(projectStateFor(g.state, 1).pendingDecision?.lookedCards).toBeUndefined();
+
+    const deck = g.state.players[0]!.deck;
+    const chosen = ["CRU127", "OUT172"].map((key) =>
+      String(deck.find((card) => card.cardId === printingId(key))!.instanceId),
+    );
+    g.doRaw({ kind: "choose-many", optionIds: chosen }).settle();
+    expect(g.state.pendingDecision).toMatchObject({
+      chooseHook: "plan-for-worst-hand",
+      minimumSelections: 2,
+      maximumSelections: 2,
+    });
+    const hand = g.state.players[0]!.hand;
+    const returned = ["snatch|1", "CRU127"].map((key) =>
+      String(hand.find((card) => card.cardId === printingId(key))!.instanceId),
+    );
+    g.doRaw({ kind: "choose-many", optionIds: returned }).settle();
+
+    g.expectInZone(0, "OUT172", "hand")
+      .expectInZone(0, BLUE, "hand")
+      .expectInZone(0, "snatch|1", "deck")
+      .expectInZone(0, "CRU127", "deck")
+      .expectInZone(0, "CRU126", "deck")
+      .expectInZone(0, "OUT108", "deck");
+    expect(g.state.log.some((entry) => entry.publicText?.includes("Frailty Trap") && entry.publicText.includes("Pitfall Trap"))).toBe(true);
+    expect(g.state.log.some((entry) => entry.publicText?.includes("Snatch") && entry.publicText.includes("deck"))).toBe(false);
+  });
+
+  it("Plan for the Worst still shuffles two hand cards when the deck has no traps", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", hand: ["plan for the worst|3", "snatch|1", BLUE], deck: ["wounding blow|1"] },
+        { hero: "dorinthea" },
+      ],
+    });
+    g.play("plan for the worst|3");
+    expect(g.state.pendingDecision?.chooseHook).toBe("plan-for-worst-hand");
+    g.doRaw({ kind: "choose-many", optionIds: g.state.pendingDecision!.options! }).settle();
+    g.expectInZone(0, "snatch|1", "deck").expectInZone(0, BLUE, "deck");
+    expect(g.state.pendingDecision).toBeNull();
+  });
+
+  it("Plan for the Worst shuffles the remaining hand card when fewer than two are available", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", hand: ["plan for the worst|3", BLUE], deck: ["wounding blow|1"] },
+        { hero: "dorinthea" },
+      ],
+    });
+    g.play("plan for the worst|3");
+    expect(g.state.pendingDecision).toMatchObject({
+      chooseHook: "plan-for-worst-hand",
+      minimumSelections: 1,
+      maximumSelections: 1,
+    });
+    g.doRaw({ kind: "choose-many", optionIds: g.state.pendingDecision!.options! }).settle();
+    g.expectInZone(0, BLUE, "deck");
+  });
+
   it("Plan for the Worst discards the target's hand and destroys their arsenal at their next end phase", () => {
     const g = scenario({
       seats: [

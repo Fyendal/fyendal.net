@@ -29,9 +29,18 @@ export interface MotionRect {
   height: number;
 }
 
+export interface MotionClip {
+  top: number;
+  right: number;
+  bottom: number;
+  left: number;
+}
+
 export interface MotionAnchorSnapshot {
   cards: ReadonlyMap<string, MotionRect>;
   zones: ReadonlyMap<string, MotionRect>;
+  /** Full DOM zone bounds before a card-sized travel anchor overrides zones. */
+  zoneContainers?: ReadonlyMap<string, MotionRect>;
   /** Local announcement geometry; never changes the card's actual zone. */
   focusSources?: ReadonlyMap<number, MotionRect>;
 }
@@ -68,6 +77,10 @@ export interface MotionFlight {
   destinationPresentationKey?: string;
   maskDestinationWhilePending?: true;
   holdAtSource?: true;
+  /** Preserve a hidden hand back at its old slot while this batch is queued. */
+  queueHoldSource?: true;
+  startClip?: MotionClip;
+  endClip?: MotionClip;
   destinationCoverVisual?: MotionVisual;
   destinationLayer?: "chain" | "stack";
 }
@@ -117,6 +130,7 @@ function motionRect(element: Element): MotionRect | null {
 export function measureMotionAnchors(root: ParentNode): MeasuredMotionAnchors {
   const cards = new Map<string, MotionRect>();
   const zones = new Map<string, MotionRect>();
+  const zoneContainers = new Map<string, MotionRect>();
   const cardElements = new Map<string, HTMLElement>();
   const focusSources = new Map<number, MotionRect>();
   for (const element of root.querySelectorAll<HTMLElement>("[data-motion-card]")) {
@@ -138,7 +152,10 @@ export function measureMotionAnchors(root: ParentNode): MeasuredMotionAnchors {
     const key = element.dataset.motionZone;
     if (!key || zones.has(key)) continue;
     const rect = motionRect(element);
-    if (rect) zones.set(key, rect);
+    if (rect) {
+      zones.set(key, rect);
+      zoneContainers.set(key, rect);
+    }
   }
   // Count-only zones such as the opponent's hidden hand still render real
   // card backs. Prefer that card-sized endpoint over the broad container so a
@@ -156,7 +173,7 @@ export function measureMotionAnchors(root: ParentNode): MeasuredMotionAnchors {
     const rect = motionRect(element);
     if (Number.isSafeInteger(instanceId) && instanceId >= 0 && rect) focusSources.set(instanceId, rect);
   }
-  return { snapshot: { cards, zones, focusSources }, cardElements };
+  return { snapshot: { cards, zones, zoneContainers, focusSources }, cardElements };
 }
 
 function endpoint(
@@ -183,6 +200,18 @@ function cardRectWithinZone(zone: MotionRect, reference?: MotionRect): MotionRec
     width,
     height,
   };
+}
+
+/** A portaled hand card needs the same clipping as its source tray. */
+function handClip(rect: MotionRect, zone: MotionRect | undefined): MotionClip | undefined {
+  if (!zone) return undefined;
+  const clip = {
+    top: Math.max(0, zone.top - rect.top),
+    right: Math.max(0, rect.left + rect.width - zone.left - zone.width),
+    bottom: Math.max(0, rect.top + rect.height - zone.top - zone.height),
+    left: Math.max(0, zone.left - rect.left),
+  };
+  return Object.values(clip).some((value) => value > 0) ? clip : undefined;
 }
 
 function phaseStaggerMs(phase: MotionTimelinePhase): number {
@@ -247,6 +276,8 @@ export function resolveMotionBatch(
   const boardAppearances = new Map<string, MotionFlight>();
   const effectDraws: Array<{ event: MoveMotionEvent; flight: MotionFlight }> = [];
   const effectDiscards: Array<{ event: MoveMotionEvent; flight: MotionFlight }> = [];
+  const handDepartures: Array<{ seat: number; flight: MotionFlight }> = [];
+  const handReflows: Array<{ seat: number; flight: MotionFlight }> = [];
 
   for (const event of events) {
     if (event.kind === "reflow" && event.instanceId !== undefined &&
@@ -404,6 +435,21 @@ export function resolveMotionBatch(
       ...((event.kind === "reflow" || event.sourcePresentationKey !== undefined)
         ? { holdAtSource: true as const }
         : {}),
+      ...(event.source.kind === "hand" && event.visual.kind === "back"
+        && ((event.kind === "reflow" && event.destinationPresentationKey !== undefined)
+          || (event.kind === "move"
+          && event.sourcePresentationKey !== undefined
+          && event.instanceId === undefined))
+        ? { queueHoldSource: true as const }
+        : {}),
+      ...(event.source.kind === "hand" && !focusSource
+        ? { startClip: handClip(start, previous.zoneContainers?.get(`${event.source.seat}:hand`)
+          ?? previous.zones.get(`${event.source.seat}:hand`)) }
+        : {}),
+      ...(event.destination.kind === "hand"
+        ? { endClip: handClip(end, current.zoneContainers?.get(`${event.destination.seat}:hand`)
+          ?? current.zones.get(`${event.destination.seat}:hand`)) }
+        : {}),
       ...(event.kind === "move" && event.destinationCoverVisual
         ? { destinationCoverVisual: event.destinationCoverVisual }
         : {}),
@@ -412,6 +458,13 @@ export function resolveMotionBatch(
         : {}),
     };
     flights.push(flight);
+    if (event.kind === "move" && event.source.kind === "hand"
+      && event.destination.kind !== "hand" && event.visual.kind === "back") {
+      handDepartures.push({ seat: event.source.seat, flight });
+    } else if (event.kind === "reflow" && event.source.kind === "hand"
+      && event.visual.kind === "back") {
+      handReflows.push({ seat: event.source.seat, flight });
+    }
     if (event.kind === "move" && event.timeline === "effect-draw") {
       effectDraws.push({ event, flight });
     } else if (event.kind === "move" && event.timeline === "effect-discard") {
@@ -482,6 +535,18 @@ export function resolveMotionBatch(
   ], MOTION_SEQUENCE_GAP_MS);
   for (const flight of flights) flight.delayMs = delayById.get(flight.id) ?? 0;
   for (const connector of connectors) connector.delayMs = delayById.get(connector.id) ?? 0;
+  // Hidden hand backs must retain their old slots until the departing back
+  // reaches its destination; visible hand cards keep their normal timing.
+  const handClearTimes = new Map<number, number>();
+  for (const { seat, flight } of handDepartures) {
+    handClearTimes.set(seat, Math.max(
+      handClearTimes.get(seat) ?? 0,
+      flight.delayMs + motionFlightDurationMs(flight),
+    ));
+  }
+  for (const { seat, flight } of handReflows) {
+    flight.delayMs = Math.max(flight.delayMs, handClearTimes.get(seat) ?? 0);
+  }
   for (const { draw, successor } of stagedDraws) {
     draw.lingerUntilMs = successor.delayMs;
   }

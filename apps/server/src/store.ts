@@ -3546,7 +3546,10 @@ export class PgRoomStore {
           seat: seat as SeatIndex, view: message.view, legal: message.legal, cards: cardData,
         }) ?? null;
       }
-      if (!intent || !isAdvertisedBotIntent(intent, message.legal)) return { error: "unadvertised bot intent" };
+      const stagedIds = message.view.pendingDecision?.kind === "defend"
+        ? message.view.pendingDecision.stagedCards?.map((card) => card.instanceId) ?? []
+        : [];
+      if (!intent || !isAdvertisedBotIntent(intent, message.legal, stagedIds)) return { error: "unadvertised bot intent" };
       const res = engineApplyIntent(room.state, seat, intent);
       if (!res.ok) return { error: res.error };
       const snapshot = intent.kind === "stage-defenders" ? undefined : room.state;

@@ -32,6 +32,36 @@ beforeEach(() => vi.useFakeTimers());
 afterEach(() => vi.useRealTimers());
 
 describe("BrowserBotController", () => {
+  it("accepts a defender selection that retains a previously staged card", () => {
+    const { controller, workers, messages, status } = fixture();
+    const stagedCard = { instanceId: 11, cardId: "ASR006", owner: 1 as const };
+    const nextCard = { instanceId: 12, cardId: "ASR011", owner: 1 as const };
+    controller.receive({
+      ...task(),
+      view: {
+        ...view,
+        pendingDecision: {
+          player: 1, kind: "defend", prompt: "Choose defenders", stagedCards: [stagedCard],
+        },
+        players: [player(0), { ...player(1), hand: [nextCard], equipment: { legs: stagedCard } }],
+      },
+      legal: [{ kind: "stage-defenders", instanceIds: [nextCard.instanceId] }],
+    });
+    ready(workers[0]!);
+    workers[0]!.onmessage?.({
+      data: {
+        type: "decision", code: "ABC123", version: 1,
+        intent: { kind: "stage-defenders", instanceIds: [stagedCard.instanceId, nextCard.instanceId] },
+        computeMs: 20,
+      },
+    });
+    vi.advanceTimersByTime(1_000);
+    expect(messages[0]).toMatchObject({
+      intent: { kind: "stage-defenders", instanceIds: [stagedCard.instanceId, nextCard.instanceId] },
+    });
+    expect(status).not.toHaveBeenCalledWith("fallback");
+  });
+
   it("loads lazily, deduplicates tasks, and keeps one-second pacing", () => {
     const { controller, workers, messages } = fixture();
     expect(workers).toHaveLength(0);

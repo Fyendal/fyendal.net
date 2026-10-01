@@ -23,6 +23,33 @@ function jsonCopy<T>(value: T): T {
 }
 
 describe("PersistedStateV1", () => {
+  it.each(["own", "opponent", "both"] as const)(
+    "round trips %s-zone play permissions with a base-cost override",
+    (ownerScope) => {
+      const source = game();
+      source.modifiers.push({
+        id: source.nextModifierId++,
+        sourceInstanceId: source.players[0]!.hero.instanceId,
+        sourceCardId: source.players[0]!.hero.cardId,
+        seat: 0,
+        scope: "until-end-of-turn",
+        grantsPlayFromZone: "banish",
+        grantsPlayFromZoneOwner: ownerScope,
+        appliesToPitch: 3,
+        playBaseCostOverride: 0,
+      });
+
+      const decoded = decodePersistedState(
+        jsonCopy(encodePersistedState(source)),
+        "ABC123",
+        cardData,
+        scripts,
+      );
+
+      expect(decoded.modifiers).toEqual(source.modifiers);
+    },
+  );
+
   it("round trips delayed attack-from-banish token effects", () => {
     const source = game();
     source.modifiers.push({

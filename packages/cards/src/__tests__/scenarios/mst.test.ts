@@ -530,6 +530,49 @@ describe("MST — Assassin", () => {
       .expectInZone(1, "wounding blow|3", "graveyard")
       .expectNotInZone(1, "wounding blow|3", "banish");
   });
+
+  it("Nuu may play existing blue banished cards when the opponent's top card is red", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", heroKey: "nuu|0", hand: ["inner chi|3"] },
+        {
+          hero: "dorinthea",
+          deck: ["wounding blow|1"],
+          banish: ["brutal assault|3", "wounding blow|1"],
+        },
+      ],
+    });
+    g.activate("nuu|0", { pitch: ["inner chi|3"] });
+    const blue = g.state.players[1]!.banish.find((card) => card.cardId === printingId("brutal assault|3"))!;
+    const red = g.state.players[1]!.banish.find((card) => card.cardId === printingId("wounding blow|1"))!;
+    const plays = legalIntents(g.state, 0).filter((intent) => intent.kind === "play-from-zone");
+    expect(plays.some((intent) => intent.kind === "play-from-zone" &&
+      intent.instanceId === blue.instanceId && intent.pitchInstanceIds.length === 0)).toBe(true);
+    expect(plays.some((intent) => intent.kind === "play-from-zone" && intent.instanceId === red.instanceId)).toBe(false);
+    expect(projectStateFor(g.state, 0).players[1]!.banish.find((card) => card.instanceId === blue.instanceId)
+      ?.playableFromSourceCardId).toBe(printingId("nuu|0"));
+    g.play("brutal assault|3", { fromZone: "banish" })
+      .blockWith()
+      .settle()
+      .endTurn()
+      .expectInZone(1, "brutal assault|3", "graveyard");
+    expect(g.state.modifiers.some((modifier) => modifier.grantsPlayFromZoneOwner === "opponent")).toBe(false);
+  });
+
+  it("Nuu's play permission applies to a newly banished blue card after declining the top card", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", heroKey: "nuu|0", hand: ["inner chi|3", "bonds of attraction|1"] },
+        { hero: "dorinthea", deck: ["brutal assault|3", "wounding blow|3"] },
+      ],
+    });
+    g.activate("nuu|0", { pitch: ["inner chi|3"] }).chooseOption("no");
+    g.play("bonds of attraction|1").blockWith().settle();
+    const blue = g.state.players[1]!.banish.find((card) => card.cardId === printingId("brutal assault|3"));
+    expect(blue).toBeDefined();
+    expect(projectStateFor(g.state, 0).players[1]!.banish.find((card) => card.instanceId === blue!.instanceId)
+      ?.playableFromSourceCardId).toBe(printingId("nuu|0"));
+  });
 });
 
 describe("MST — Ninja and generic", () => {

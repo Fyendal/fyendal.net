@@ -3,6 +3,32 @@ import { describe, expect, it } from "vitest";
 import { fallbackBotIntent } from "../botFallback.js";
 
 describe("conservative bot fallback", () => {
+  it("stages required equipment before hand cards for Palantir Aeronought", () => {
+    const equipment = { instanceId: 1, cardId: "ASR006", owner: 1 as const, defense: 0 };
+    const hand = { instanceId: 2, cardId: "ASR011", owner: 1 as const, defense: 3 };
+    const inputView = {
+      pendingDecision: { player: 1, kind: "defend" as const, prompt: "Choose defending cards" },
+      chain: [{
+        attackingCard: { instanceId: 99, cardId: "SEA012", owner: 0 },
+        defendingCards: [], attackValue: 8, defenseValue: 0, damage: 8,
+        resolved: false, reactions: [],
+      }],
+      players: [
+        {} as BotPolicyInput["view"]["players"][0],
+        { hand: [hand], arsenal: [], equipment: { legs: equipment }, weapons: [] } as unknown as BotPolicyInput["view"]["players"][1],
+      ],
+    } as unknown as BotPolicyInput["view"];
+    const input: BotPolicyInput = {
+      seat: 1, view: inputView,
+      cards: { ASR006: { id: "ASR006", name: "Snapdragon Scalers", cardType: "equipment", defense: 0, text: "" } },
+      legal: [
+        { kind: "stage-defenders", instanceIds: [hand.instanceId] },
+        { kind: "stage-defenders", instanceIds: [equipment.instanceId] },
+      ],
+    };
+    expect(fallbackBotIntent(input)).toEqual({ kind: "stage-defenders", instanceIds: [equipment.instanceId] });
+  });
+
   it("stages the strongest visible defender before accepting fallback damage", () => {
     const inputView = {
       pendingDecision: {

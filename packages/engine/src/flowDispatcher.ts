@@ -24,7 +24,7 @@ const handlers: Readonly<Record<FlowStepName, { fn: FlowHandler; injectRuntime: 
   cancelEndActionPass: { fn: cancelEndActionPass, injectRuntime: false },
   closeChain: { fn: closeChain, injectRuntime: true },
   collectEventTriggerLayers: { fn: collectEventTriggerLayers, injectRuntime: true },
-  consumeQueuedIntimidate: { fn: consumeQueuedIntimidate, injectRuntime: false },
+  consumeQueuedIntimidate: { fn: consumeQueuedIntimidate, injectRuntime: true },
   continueEndPhase: { fn: continueEndPhase, injectRuntime: true },
   continueStack: { fn: continueStack, injectRuntime: true },
   dealAllyDamage: { fn: dealAllyDamage, injectRuntime: true },

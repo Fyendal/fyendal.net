@@ -1,6 +1,7 @@
 import type { GameLogEvent, GameLogPayload, GameMessage } from "./types.js";
 
 type FlagValue = number | boolean;
+export type PlayFromZoneOwner = "own" | "opponent" | "both";
 export interface PersistedCardInstanceV1 {
   instanceId: number;
   cardId: string;
@@ -283,6 +284,8 @@ export interface PersistedModifierV1 {
   restrictCardPlaysToType?: string;
   ongoingLabel?: string;
   grantsPlayFromZone?: "banish" | "graveyard" | "deck";
+  grantsPlayFromZoneOwner?: PlayFromZoneOwner;
+  playBaseCostOverride?: number;
   grantsPlayFromNameContains?: string;
   suppressesActivatedAbilitiesOfInstanceId?: number;
   cannotDefendWithInstanceId?: number;

@@ -1434,6 +1434,7 @@ export function GameBoard() {
       />
       <GameMotionLayer
         batch={gameMotion.batch}
+        queuedHandSources={gameMotion.queuedHandSources}
         onFlightArrive={gameMotion.arriveFlight}
         onComplete={gameMotion.completeBatch}
       />

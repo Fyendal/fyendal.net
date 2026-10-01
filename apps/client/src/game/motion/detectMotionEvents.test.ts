@@ -4,7 +4,7 @@ import { detectGameMotionEvents } from "./detectMotionEvents.js";
 import { transitionMotionEvents } from "./transitionMotionEvents.js";
 import { extractGamePresentations } from "./extractPresentations.js";
 import { focusHandReflows } from "./handReflow.js";
-import { resolveMotionBatch } from "./motionGeometry.js";
+import { motionFlightDurationMs, resolveMotionBatch } from "./motionGeometry.js";
 
 function player(seat: 0 | 1, overrides: Partial<PlayerView> = {}): PlayerView {
   return {
@@ -205,6 +205,66 @@ describe("game motion detection", () => {
       count: 1,
       confidence: "inferred",
     }]);
+  });
+
+  it("flies a hidden opponent card from hand to banish for intimidate", () => {
+    const previous = view([player(0), player(1, { handCount: 4 })]);
+    const current = view([player(0), player(1, {
+      handCount: 3,
+      banish: [{ instanceId: -1, cardId: "", owner: 1, hidden: true, faceDown: true, intimidated: true }],
+    })]);
+    const events = transitionMotionEvents(previous, current, {
+      fromVersion: 1,
+      kind: "forward",
+      events: [{
+        kind: "move",
+        from: { kind: "hand", seat: 1 },
+        to: { kind: "banish", seat: 1 },
+        count: 1,
+      }],
+    }, "forward");
+    expect(events[0]).toMatchObject({
+      kind: "move",
+      source: { kind: "hand", seat: 1 },
+      destination: { kind: "banish", seat: 1 },
+      sourcePresentationKey: "1:hand:opaque:3",
+      visual: { kind: "back" },
+      count: 1,
+    });
+    const hand = { left: 80, top: 100, width: 200, height: 80 };
+    const handCard = { left: 100, top: 40, width: 100, height: 138 };
+    const reflowStart = { ...handCard, left: 110 };
+    const reflowEnd = { ...handCard, left: 120 };
+    const banish = { left: 500, top: 100, width: 100, height: 138 };
+    const batch = resolveMotionBatch(events, {
+      cards: new Map([
+        ["1:hand:opaque:3", handCard],
+        ["1:hand:opaque", reflowStart],
+      ]), zones: new Map([["1:hand", handCard]]),
+      zoneContainers: new Map([["1:hand", hand]]),
+    }, {
+      cards: new Map([["1:hand:opaque", reflowEnd]]),
+      zones: new Map([["1:hand", reflowEnd], ["1:banish", banish]]),
+      zoneContainers: new Map([["1:hand", hand]]),
+    }, "intimidate");
+    expect(batch?.flights[0]).toMatchObject({
+      mode: "move",
+      start: handCard,
+      end: { left: banish.left },
+      visual: { kind: "back" },
+      holdAtSource: true,
+      queueHoldSource: true,
+      startClip: { top: 60, right: 0, bottom: 0, left: 0 },
+    });
+    expect(batch?.flights.find((flight) => flight.mode === "reflow" && flight.start.left === 110))
+      .toMatchObject({
+        startClip: { top: 60, right: 0, bottom: 0, left: 0 },
+        endClip: { top: 60, right: 0, bottom: 0, left: 0 },
+      });
+    expect(batch?.flights.filter((flight) => flight.mode === "reflow")
+      .every((flight) => flight.delayMs >= batch.flights[0]!.delayMs
+        + motionFlightDurationMs(batch.flights[0]!)
+        && flight.queueHoldSource)).toBe(true);
   });
 
   it("moves an attack from the stack to the chain when its layer resolves", () => {

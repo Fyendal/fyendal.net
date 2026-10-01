@@ -24,6 +24,35 @@ describe("ARR — Clearing Bellow", () => {
   });
 });
 
+describe("ARR — Massacre", () => {
+  it.each(["ARR010", "CRU008", "1HP012"])("%s intimidates once after a 6+ discard", (printing) => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", hand: [printing], resources: 3 },
+        { hero: "dorinthea", hand: ["dodge|3", "dodge|3", "dodge|3"] },
+      ],
+    });
+    g.state.players[0]!.flags.discardedSixPlusThisTurn = true;
+
+    g.play(printing)
+      .expectAttackValue(8)
+      .expectPendingReturn(1, 1);
+  });
+
+  it("does not intimidate before a 6+ discard", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", hand: ["massacre|1"], resources: 3 },
+        { hero: "dorinthea", hand: ["dodge|3", "dodge|3"] },
+      ],
+    });
+
+    g.play("massacre|1")
+      .expectAttackValue(6)
+      .expectPendingReturn(1, 0);
+  });
+});
+
 describe("ARR — Beat Chest equipment", () => {
   it("Bare Destruction gains go again when its Beat Chest trigger destroys Torc of Vim", () => {
     const g = scenario({

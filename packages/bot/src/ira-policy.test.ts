@@ -1,7 +1,9 @@
 import { cardData, decklists, precon, scripts } from "@fyendal/cards";
 import { applyIntent, createGame, legalIntents, projectStateFor } from "@fyendal/engine";
-import type { Decklist, GameIntent } from "@fyendal/shared";
+import type { ClientBotTask, Decklist, GameIntent } from "@fyendal/shared";
 import { describe, expect, it } from "vitest";
+import { ClientBotPolicy } from "./client-task.js";
+import { isAdvertisedBotIntent } from "./intents.js";
 import { chooseIraIntent, chooseIraIntentWithTrace } from "./ira-policy.js";
 import { iraPresentation } from "./sideboard.js";
 
@@ -51,6 +53,42 @@ function advanceUntil(
 }
 
 describe("Ira policy", () => {
+  it("completes Palantir Aeronought defense after staging required equipment", () => {
+    let state = createGame({
+      decklists: [iraDeck(), decklists.dorinthea],
+      cards: cardData, scripts, seed: 9120, startPlayer: 1,
+    });
+    state.players[1]!.resources = 2;
+    replaceHand(state, 1, ["SEA012"]);
+    replaceHand(state, 0, ["ASR011", "ASR018"]);
+    const shipId = state.players[1]!.hand[0]!.instanceId;
+    const play = legalIntents(state, 1).find((intent) =>
+      intent.kind === "play-card" && intent.instanceId === shipId && intent.pitchInstanceIds.length === 0
+    );
+    expect(play).toBeDefined();
+    state = advanceUntil(apply(state, 1, play!), (current) => current.pendingDecision?.kind === "defend");
+
+    const policy = new ClientBotPolicy();
+    let decisions = 0;
+    while (state.pendingDecision?.kind === "defend") {
+      const view = projectStateFor(state, 0);
+      const legal = legalIntents(state, 0);
+      const task: ClientBotTask = {
+        type: "bot-task", code: "TEST00", version: decisions, runtimeId: "a".repeat(64),
+        botId: "ira", seat: 0, view, legal, delayMs: 0,
+      };
+      const intent = policy.decide(task);
+      const staged = view.pendingDecision?.kind === "defend"
+        ? view.pendingDecision.stagedCards?.map((card) => card.instanceId) ?? []
+        : [];
+      expect(isAdvertisedBotIntent(intent, legal, staged)).toBe(true);
+      state = apply(state, 0, intent);
+      if (++decisions > 8) throw new Error("Ira did not complete defense");
+    }
+    expect(decisions).toBeGreaterThan(1);
+    expect(state.chain.at(-1)?.defendingEquipment).toHaveLength(1);
+  });
+
   it("uses an exact three-damage attack to clear untapped Sawbones", () => {
     const state = createGame({
       decklists: [iraDeck(), decklists.dorinthea],

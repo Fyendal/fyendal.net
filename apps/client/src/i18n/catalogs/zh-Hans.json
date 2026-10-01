@@ -1073,6 +1073,8 @@
   "card.ros.option.earth": "Embodiment of Earth",
   "card.ros.option.runechant": "Runechant",
   "card.ros.option.yourhero": "你的英雄",
+  "card.ros.plan.hand.shuffle": "选择 {count} 张手牌洗入你的牌库",
+  "card.ros.plan.traps.search": "从牌库搜寻至多 3 张陷阱牌",
   "card.ros.sigil.return": "将墓地中的一个 Sigil 灵气 (Aura)返回手牌？",
   "card.ros.token.create": "要创造哪个衍生物？",
   "card.sba.crown.attack.top": "Crown of Providence：将一张手牌中的攻击行动牌置于牌库顶？",

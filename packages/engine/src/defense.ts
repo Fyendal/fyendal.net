@@ -46,6 +46,7 @@ import { hookSources } from "./sourceQueries.js";
 import { drawCards } from "./cardLifecycle.js";
 import { snapshotSerializable } from "./ruleQueries.js";
 import { cardProhibitedByChosenName } from "./restrictions.js";
+import { transitionZone } from "./transitions.js";
 
 /** The attack becomes a chain link and is now attacking: intimidate, then the defend decision. */
 export function proceedWithAttack(state: GameStateInternal, runtime: EngineRuntime): void {
@@ -64,7 +65,7 @@ export function proceedWithAttack(state: GameStateInternal, runtime: EngineRunti
   const queued = Number(attacker.flags.pendingIntimidate) || 0;
   attacker.flags.pendingIntimidate = 0;
   const n = attackIntimidateCount(state, link) + queued;
-  if (n > 0) resolveIntimidate(state, link.attacker, n);
+  if (n > 0) resolveIntimidate(state, runtime, link.attacker, n);
   setupDefendDecision(state, runtime);
 }
 
@@ -103,6 +104,7 @@ function setupDefendDecision(state: GameStateInternal, runtime: EngineRuntime): 
  */
 export function resolveIntimidate(
   state: GameStateInternal,
+  runtime: EngineRuntime,
   attackerSeat: number,
   n: number,
   targetSeat = opponent(attackerSeat),
@@ -119,6 +121,12 @@ export function resolveIntimidate(
     card.faceDown = true;
     card.intimidated = true;
     defender.banish.push(card);
+    runtime.transitions.move(
+      card,
+      transitionZone("hand", targetSeat),
+      transitionZone("banish", targetSeat),
+      { from: true, to: true },
+    );
     logPublic(state, gameLogMessage(
       `${nameOf(state, defender.heroCardId)} banishes a random card face down (Intimidate)`,
       "engine.log.intimidate.random.card.banished",
@@ -132,12 +140,12 @@ export function resolveIntimidate(
  * Intimidate keyword like Barraging Beatdown, hero/mentor triggers) resolves
  * immediately: the opponent banishes from hand right away, then play continues.
  */
-export function consumeQueuedIntimidate(state: GameStateInternal, seat: number): void {
+export function consumeQueuedIntimidate(state: GameStateInternal, runtime: EngineRuntime, seat: number): void {
   const player = state.players[seat] as PlayerState;
   const n = Number(player.flags.pendingIntimidate) || 0;
   if (n === 0) return;
   player.flags.pendingIntimidate = 0;
-  resolveIntimidate(state, seat, n);
+  resolveIntimidate(state, runtime, seat, n);
 }
 
 /** Attack-side defender restrictions from the attacking object, hero, and
@@ -727,7 +735,7 @@ export function resolveDefendEventLayer(state: GameStateInternal,
     runtime.events.runHook(state, layer.seat, source, "onDefend", link);
     // Defender-side "when this defends, intimidate" (Scowling Flesh Bag) queues
     // on the defending seat; resolve it as the trigger resolves.
-    consumeQueuedIntimidate(state, layer.seat);
+    consumeQueuedIntimidate(state, runtime, layer.seat);
     return;
   }
   if (effect?.kind === "on-friendly-defended-hook") {

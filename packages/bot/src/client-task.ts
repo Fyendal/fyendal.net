@@ -29,13 +29,16 @@ export class ClientBotPolicy {
       };
     }
     const input: BotPolicyInput = { seat: task.seat, view: task.view, legal: task.legal, cards: cardData, state };
+    const stagedIds = task.view.pendingDecision?.kind === "defend"
+      ? task.view.pendingDecision.stagedCards?.map((card) => card.instanceId) ?? []
+      : [];
     const cached = this.continuation;
     if (cached && (cached.code !== task.code || cached.botId !== task.botId || cached.turn !== task.view.turn)) {
       this.clear();
     }
     if (state && isCleanActionDecision(state, task.seat) && this.continuation && definition.chooseContinuationIntent) {
       const [step, ...remaining] = this.continuation.steps;
-      if (step && step.observationKey === botObservationKey(input) && isAdvertisedBotIntent(step.intent, task.legal)) {
+      if (step && step.observationKey === botObservationKey(input) && isAdvertisedBotIntent(step.intent, task.legal, stagedIds)) {
         const guarded = definition.chooseContinuationIntent(input, step.intent);
         if (JSON.stringify(guarded) === JSON.stringify(step.intent)) {
           this.continuation.steps = remaining;
@@ -45,7 +48,7 @@ export class ClientBotPolicy {
       this.clear();
     }
     const decision = definition.chooseDecision(input);
-    if (!isAdvertisedBotIntent(decision.intent, task.legal)) {
+    if (!isAdvertisedBotIntent(decision.intent, task.legal, stagedIds)) {
       this.clear();
       throw new Error("unadvertised bot intent");
     }

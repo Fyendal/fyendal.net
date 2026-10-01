@@ -5,6 +5,7 @@ import {
   EMPTY_MOTION_BATCH_QUEUE,
   enqueueMotionBatch,
   motionQueueBlocksTurnStartUi,
+  queuedHandSourceFlights,
 } from "./motionBatchQueue.js";
 
 function batch(id: number): GameMotionBatch {
@@ -60,6 +61,48 @@ describe("motion batch queue", () => {
       active: chainEntry,
       pending: [],
     });
+  });
+
+  it("holds a hidden departing card and surviving hand slots until their queued flights start", () => {
+    const stackEntry = batch(12);
+    const intimidate = {
+      ...batch(13),
+      flights: [{
+        id: "13:flight:0",
+        phase: "resolution" as const,
+        mode: "move" as const,
+        start: { left: 100, top: 0, width: 100, height: 138 },
+        end: { left: 500, top: 0, width: 100, height: 138 },
+        visual: { kind: "back" as const },
+        count: 1,
+        showCount: false,
+        delayMs: 0,
+        holdAtSource: true as const,
+        queueHoldSource: true as const,
+      }, {
+        id: "13:flight:1",
+        phase: "movement" as const,
+        mode: "reflow" as const,
+        start: { left: 0, top: 0, width: 100, height: 138 },
+        end: { left: 20, top: 0, width: 100, height: 138 },
+        visual: { kind: "back" as const },
+        count: 1,
+        showCount: false,
+        delayMs: 320,
+        holdAtSource: true as const,
+        queueHoldSource: true as const,
+        destinationPresentationKey: "1:hand:opaque",
+      }],
+    };
+    const queued = enqueueMotionBatch(
+      enqueueMotionBatch(EMPTY_MOTION_BATCH_QUEUE, stackEntry).queue,
+      intimidate,
+    ).queue;
+
+    expect(queuedHandSourceFlights(queued)).toEqual(intimidate.flights);
+    const started = completeMotionBatch(queued, stackEntry.id);
+    expect(started.active).toBe(intimidate);
+    expect(queuedHandSourceFlights(started)).toEqual([]);
   });
 
   it("ignores stale completion events", () => {

@@ -10509,6 +10509,26 @@
       "value": "你的英雄"
     }
   ],
+  "card.ros.plan.hand.shuffle": [
+    {
+      "type": 0,
+      "value": "选择 "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " 张手牌洗入你的牌库"
+    }
+  ],
+  "card.ros.plan.traps.search": [
+    {
+      "type": 0,
+      "value": "从牌库搜寻至多 3 张陷阱牌"
+    }
+  ],
   "card.ros.sigil.return": [
     {
       "type": 0,

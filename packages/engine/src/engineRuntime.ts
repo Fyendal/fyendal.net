@@ -85,7 +85,7 @@ export function createEngineRuntime(
       replaceAttackFromHand: bind(replaceAttackFromHand, true),
       replaceTemporalPowerGain: bind(replaceTemporalPowerGain, false),
       requestClash: bind(requestClash, true),
-      resolveIntimidate: bind(resolveIntimidate, false),
+      resolveIntimidate: bind(resolveIntimidate, true),
       rollIgnoringLowest: bind(rollIgnoringLowest, false),
       scriptedPaymentOptions: bind(scriptedPaymentOptions, false),
       setAttackActivationLimitKey: bind(setAttackActivationLimitKey, false),

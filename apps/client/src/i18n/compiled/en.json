@@ -11013,6 +11013,54 @@
       "value": "Your hero"
     }
   ],
+  "card.ros.plan.hand.shuffle": [
+    {
+      "type": 0,
+      "value": "Choose "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " "
+    },
+    {
+      "type": 6,
+      "value": "count",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 0,
+              "value": "card"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 0,
+              "value": "cards"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    },
+    {
+      "type": 0,
+      "value": " from your hand to shuffle into your deck"
+    }
+  ],
+  "card.ros.plan.traps.search": [
+    {
+      "type": 0,
+      "value": "Search your deck for up to 3 traps"
+    }
+  ],
   "card.ros.sigil.return": [
     {
       "type": 0,

@@ -30,6 +30,24 @@ function hasTag(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, tag: string): 
   return ctx.cardTypes(card).includes(tag.toLowerCase());
 }
 
+function requestPlanForWorstHandShuffle(ctx: ScriptCtx): void {
+  const hand = ctx.player(ctx.seat).hand;
+  if (hand.length === 0) {
+    ctx.shuffleDeck();
+    return;
+  }
+  const count = Math.min(2, hand.length);
+  ctx.requestCardChoices(
+    "plan-for-worst-hand",
+    decisionPrompt(`Choose ${count} card(s) from your hand to shuffle into your deck`, "card.ros.plan.hand.shuffle", {
+      values: { count },
+    }),
+    hand.map((card) => card.instanceId),
+    count,
+    count,
+  );
+}
+
 function isAura(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
   return hasTag(ctx, card, "aura");
 }
@@ -1630,13 +1648,40 @@ Object.assign(ros, {
       // their hand and destroy all cards in their arsenal." — the shared
       // end-phase wipe consumed in endTurn()
       ctx.setCardCounter(target.hero.instanceId, "clearHandAndArsenalAtEndPhaseTurn", ctx.state.turn + 1);
-      const traps = ctx
-        .player(ctx.seat)
-        .deck.filter((card) => hasTag(ctx, card, "trap"))
-        .slice(0, 3);
-      if (traps.length) ctx.revealCards(traps.map((card) => card.instanceId));
-      for (const card of traps) ctx.moveToHand(card.instanceId);
-      ctx.shuffleDeck();
+      const deck = ctx.player(ctx.seat).deck;
+      const traps = ctx.canSearchDeck() ? deck.filter((card) => hasTag(ctx, card, "trap")) : [];
+      if (traps.length) {
+        ctx.requestCardChoices(
+          "plan-for-worst-traps",
+          decisionPrompt("Search your deck for up to 3 traps", "card.ros.plan.traps.search"),
+          traps.map((card) => card.instanceId),
+          0,
+          Math.min(3, traps.length),
+          ctx.seat,
+          undefined,
+          deck.map((card) => card.instanceId),
+        );
+      } else {
+        requestPlanForWorstHandShuffle(ctx);
+      }
+    },
+    onChooseMany(ctx: ScriptCtx, hook: string, options: readonly string[]) {
+      if (hook === "plan-for-worst-traps") {
+        const chosen = options.map(Number).filter((instanceId) =>
+          ctx.player(ctx.seat).deck.some((card) => card.instanceId === instanceId && hasTag(ctx, card, "trap")),
+        );
+        if (chosen.length) ctx.revealCards(chosen);
+        for (const instanceId of chosen) ctx.moveToHand(instanceId);
+        requestPlanForWorstHandShuffle(ctx);
+      } else if (hook === "plan-for-worst-hand") {
+        for (const option of options) {
+          const instanceId = Number(option);
+          if (ctx.player(ctx.seat).hand.some((card) => card.instanceId === instanceId)) {
+            ctx.putOnDeckBottom(instanceId);
+          }
+        }
+        ctx.shuffleDeck();
+      }
     },
   },
   "unsheathed|1": {

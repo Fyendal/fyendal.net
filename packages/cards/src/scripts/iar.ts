@@ -1937,6 +1937,7 @@ export const iar: Record<string, CardScript> = {
       ctx.addModifier({
         scope: "until-end-of-turn",
         grantsPlayFromZone: "banish",
+        grantsPlayFromZoneOwner: "own",
         grantsPlayFromNameContains: "runechant",
         appliesToSubtype: "aura",
         ongoingLabel: "You may play an aura with Runechant in its name from banish",

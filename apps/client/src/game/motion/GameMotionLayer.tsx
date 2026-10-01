@@ -6,6 +6,7 @@ import {
   motionFlightDurationMs,
   type GameMotionBatch,
   type MotionConnector,
+  type MotionClip,
   type MotionFlight,
   type MotionRect,
 } from "./motionGeometry.js";
@@ -20,6 +21,12 @@ function rectStyle(rect: MotionRect): CSSProperties {
     width: rect.width,
     height: rect.height,
   };
+}
+
+function clipStyle(clip: MotionClip | undefined): string {
+  return clip
+    ? `inset(${clip.top}px ${clip.right}px ${clip.bottom}px ${clip.left}px)`
+    : "inset(0px)";
 }
 
 function visualFaceUrl(visual: MotionVisual): string | null {
@@ -55,6 +62,9 @@ function flightStyle(flight: MotionFlight): MotionStyle {
     "--motion-scale-y": String(flight.end.height / flight.start.height),
     "--motion-delay": `${flight.delayMs}ms`,
     "--motion-duration": `${motionFlightDurationMs(flight)}ms`,
+    "--motion-start-clip": clipStyle(flight.startClip),
+    "--motion-end-clip": clipStyle(flight.endClip),
+    "--motion-release-y": `${flight.startClip?.top ?? 0}px`,
   };
 }
 
@@ -94,6 +104,9 @@ function MotionFlightOverlay({
     <div
       className={`game-motion-flight game-motion-flight-${flight.mode}${
         flight.holdAtSource ? " game-motion-flight-hold-source" : ""
+      }${
+        flight.mode === "move" && (flight.startClip?.top ?? 0) > 0 && !flight.endClip
+          ? " game-motion-flight-release-hand-clip" : ""
       }`}
       style={flightStyle(flight)}
       onAnimationEnd={(event: AnimationEvent<HTMLDivElement>) => {
@@ -136,12 +149,27 @@ function MotionDeckCover({ flight }: { flight: MotionFlight }) {
   );
 }
 
+function QueuedHandSource({ flight }: { flight: MotionFlight }) {
+  return (
+    <div
+      className={`game-motion-queued-source${
+        flight.mode === "reflow" ? " game-motion-queued-source-reflow" : ""
+      }`}
+      style={{ ...rectStyle(flight.start), clipPath: clipStyle(flight.startClip) }}
+    >
+      <MotionCardVisual visual={flight.visual} count={flight.showCount ? flight.count : 1} />
+    </div>
+  );
+}
+
 export function GameMotionLayer({
   batch,
+  queuedHandSources,
   onFlightArrive,
   onComplete,
 }: {
   batch: GameMotionBatch | null;
+  queuedHandSources: readonly MotionFlight[];
   onFlightArrive: (batchId: string, destinationPresentationKey?: string) => boolean;
   onComplete: (batchId: string) => void;
 }) {
@@ -212,6 +240,9 @@ export function GameMotionLayer({
         data-game-motion-batch={batch.id}
         aria-hidden="true"
       >
+        {queuedHandSources.map((flight) => (
+          <QueuedHandSource flight={flight} key={flight.id} />
+        ))}
         {batch.connectors.map((connector) => (
           <div
             className="game-motion-connector"

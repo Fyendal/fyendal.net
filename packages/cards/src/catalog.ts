@@ -182,6 +182,8 @@ const KEYWORD_OVERRIDES: Record<string, string[]> = {
   "pulping|1": [],
   // Wrecking Ball only intimidates if a 6+ card is discarded
   "wrecking ball|1": [],
+  // Massacre gains intimidate only after a 6+ discard; its script handles that attack trigger.
+  "massacre|1": [],
   // Breakneck Battery only GAINS go again if the discarded random card has 6+ {p}
   "breakneck battery|1": [],
   "breakneck battery|2": [],

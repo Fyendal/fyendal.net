@@ -1170,6 +1170,7 @@ Object.assign(sup, {
       ctx.addModifier({
         scope: "until-end-of-turn",
         grantsPlayFromZone: "graveyard",
+        grantsPlayFromZoneOwner: "own",
         appliesToSubtype: "aura",
         appliesToKeyword: "suspense",
         once: true,

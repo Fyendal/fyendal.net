@@ -239,6 +239,7 @@ function playerView(
   p: PlayerState,
   self: boolean,
   revealAll = false,
+  viewerSeat: number | null = null,
 ): PlayerView {
   const gameOver = state.winner !== null;
   const equipment: Partial<Record<EquipmentSlot, CardView>> = {};
@@ -304,7 +305,9 @@ function playerView(
         : cardView(state, runtime, c, {
             includeCounters: false,
             includeLife: false,
-            ...(self && !revealAll ? { playableFrom: { zone: "banish", actingSeat: p.seat } } : {}),
+            ...(viewerSeat !== null && !revealAll
+              ? { playableFrom: { zone: "banish", actingSeat: viewerSeat } }
+              : {}),
           })
     ),
     // the soul is face-up and public
@@ -1200,8 +1203,8 @@ function projectState(
       ? { endTurnPassPending: true as const }
       : {}),
     players: [
-      playerView(state, runtime, state.players[0] as PlayerState, seat === 0, revealAll),
-      playerView(state, runtime, state.players[1] as PlayerState, seat === 1, revealAll),
+      playerView(state, runtime, state.players[0] as PlayerState, seat === 0, revealAll, seat),
+      playerView(state, runtime, state.players[1] as PlayerState, seat === 1, revealAll, seat),
     ],
     chain,
     stack: projectedStackLayers(state, runtime, seat, revealAll),

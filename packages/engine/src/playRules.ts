@@ -49,8 +49,8 @@ export function mayPlayFromZone(
       ? actingSeat === card.owner
       : actingSeat === card.playableBySeat)
   ) return true;
-  if (actingSeat !== card.owner) return false;
   if (modifierGrantingPlayFromZone(state, card, zone, actingSeat)) return true;
+  if (actingSeat !== card.owner) return false;
   if (zone === "banish" && canRuneGate(state, card)) return true;
   const owner = state.players[card.owner] as PlayerState;
   for (const source of controlledPermanents(state, owner.seat, { faceDownEquipment: false })) {
@@ -151,9 +151,9 @@ export function playFromSourceCardId(
       ? actingSeat === card.owner
       : actingSeat === card.playableBySeat)
   ) return card.playableFromSourceCardId;
-  if (actingSeat !== card.owner) return undefined;
   const modifier = modifierGrantingPlayFromZone(state, card, zone, actingSeat);
   if (modifier) return modifier.sourceCardId;
+  if (actingSeat !== card.owner) return undefined;
   if (zone === "banish" && canRuneGate(state, card)) return card.cardId;
   const owner = state.players[card.owner] as PlayerState;
   for (const source of controlledPermanents(state, owner.seat, { faceDownEquipment: false })) {
@@ -184,6 +184,7 @@ function modifierGrantingPlayFromZone(
     modifier.consumed !== true &&
     modifier.seat === actingSeat &&
     modifier.grantsPlayFromZone === zone &&
+    playFromZoneOwnerMatches(modifier, card, actingSeat) &&
     modifierMatchesPlayedCard(state, modifier, card) &&
     (
       !modifier.grantsPlayFromNameContains ||
@@ -192,6 +193,16 @@ function modifierGrantingPlayFromZone(
       )
     )
   );
+}
+
+/** Match the owner of a card covered by a modifier's zone-play permission. */
+export function playFromZoneOwnerMatches(
+  modifier: Pick<Modifier, "grantsPlayFromZoneOwner">,
+  card: CardInstance,
+  actingSeat: number,
+): boolean {
+  const owner = modifier.grantsPlayFromZoneOwner ?? "own";
+  return owner === "both" || (owner === "own" ? card.owner === actingSeat : card.owner !== actingSeat);
 }
 
 /** Cards in a zone that `actingSeat` may play, including explicitly granted
@@ -909,16 +920,21 @@ export function cardPlayCost(
   },
 ): number {
   const player = state.players[seat] as PlayerState;
+  const owner = state.players[card.owner] as PlayerState;
   const data = instanceDataOf(state, card);
   const script = scriptOf(state, card.cardId, card);
+  const banishGrant = owner.banish.some(
+    (candidate) => candidate.instanceId === card.instanceId,
+  ) ? modifierGrantingPlayFromZone(state, card, "banish", seat) : undefined;
+  const baseCost = banishGrant?.playBaseCostOverride ?? opts?.baseCostOverride ?? data.cost ?? 0;
   if (script?.unmodifiableCharacteristics?.includes("cost")) {
-    return Math.max(0, opts?.baseCostOverride ?? data.cost ?? 0);
+    return Math.max(0, baseCost);
   }
   const replacesPrintedCost = opts?.alternativeCost &&
     script?.alternativePlayCost?.replacesResourceCost !== false;
   let cost = replacesPrintedCost || opts?.runeGate
     ? 0
-    : (opts?.baseCostOverride ?? data.cost ?? 0) * (opts?.meldSide === "both" ? 2 : 1);
+    : baseCost * (opts?.meldSide === "both" ? 2 : 1);
   // CR 1.14.2: numerical increases are applied before numerical decreases.
   cost += Number(player.flags.costMoreThisTurn || 0);
   cost += controlledPermanents(state, seat, { faceDownEquipment: false })
@@ -932,12 +948,12 @@ export function cardPlayCost(
     cost += Number(player.flags.nextDefenseReactionExtraCost || 0);
   }
   cost += Number(opts?.extraCost || 0);
-  const origin: "hand" | "arsenal" | PlayableZone = player.hand.some((candidate) => candidate.instanceId === card.instanceId)
+  const origin: "hand" | "arsenal" | PlayableZone = owner.hand.some((candidate) => candidate.instanceId === card.instanceId)
     ? "hand"
-    : player.arsenal.some((candidate) => candidate.instanceId === card.instanceId)
+    : owner.arsenal.some((candidate) => candidate.instanceId === card.instanceId)
       ? "arsenal"
       : (["banish", "graveyard", "deck"] as const).find((zone) =>
-    player[zone].some((candidate) => candidate.instanceId === card.instanceId),
+    owner[zone].some((candidate) => candidate.instanceId === card.instanceId),
   ) ?? "hand";
   const hook = script?.modifyPlayCost;
   if (hook) {

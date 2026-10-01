@@ -13,4 +13,12 @@ describe("advertised bot intents", () => {
     }
     expect(isAdvertisedBotIntent({ kind: "concede" }, legal)).toBe(false);
   });
+
+  it("allows adding advertised defenders to an already staged selection", () => {
+    const legal = [{ kind: "stage-defenders" as const, instanceIds: [2] }];
+    expect(isAdvertisedBotIntent({ kind: "stage-defenders", instanceIds: [1, 2] }, legal, [1])).toBe(true);
+    for (const ids of [[1], [2], [1, 3], [1, 1, 2]]) {
+      expect(isAdvertisedBotIntent({ kind: "stage-defenders", instanceIds: ids }, legal, [1])).toBe(false);
+    }
+  });
 });
