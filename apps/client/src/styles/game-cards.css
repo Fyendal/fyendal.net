@@ -462,6 +462,10 @@
   transform: translateY(-50%);
   pointer-events: none;
 }
+.board-square-name-hero {
+  left: -4px;
+  right: -4px;
+}
 .board-square-name-text {
   display: block;
   min-width: 0;

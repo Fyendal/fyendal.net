@@ -221,6 +221,11 @@ describe("CardFace payment state", () => {
       size: "zone",
       squareArt: true,
     }));
+    const hero = renderToStaticMarkup(createElement(CardFace, {
+      card: { instanceId: 5, cardId: "WTR001", owner: 0 },
+      size: "zone",
+      squareArt: true,
+    }));
 
     expect(board).toContain("card-board-square");
     expect(board).toContain("board-square-name");
@@ -239,6 +244,8 @@ describe("CardFace payment state", () => {
     expect(attackAndDefense).toContain('src="/icons/attack.png"');
     expect(attackAndDefense).toContain('data-pitch="3"');
     expect(attackAndDefense).toContain('src="/icons/defence.png"');
+    expect(hero).toContain("board-square-name-hero");
+    expect(other).not.toContain("board-square-name-hero");
   });
 
   it("shows Marvel art without reconstructed frame edges on a square card", () => {
