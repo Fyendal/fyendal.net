@@ -9,6 +9,9 @@ export function useGameViewport() {
   const [railCollapsed, setRailCollapsed] = useState(
     () => typeof window !== "undefined" && window.matchMedia(MOBILE_LANDSCAPE_RAIL_QUERY).matches,
   );
+  const [mobileLandscapeViewport, setMobileLandscapeViewport] = useState(
+    () => typeof window !== "undefined" && window.matchMedia(MOBILE_LANDSCAPE_RAIL_QUERY).matches,
+  );
   const [mobileFloatViewport, setMobileFloatViewport] = useState(
     () => typeof window !== "undefined" && window.matchMedia(MOBILE_FLOAT_QUERY).matches,
   );
@@ -17,7 +20,10 @@ export function useGameViewport() {
 
   useEffect(() => {
     const mobileLandscape = window.matchMedia(MOBILE_LANDSCAPE_RAIL_QUERY);
-    const syncRailToViewport = (event: MediaQueryListEvent) => setRailCollapsed(event.matches);
+    const syncRailToViewport = (event: MediaQueryListEvent) => {
+      setRailCollapsed(event.matches);
+      setMobileLandscapeViewport(event.matches);
+    };
     mobileLandscape.addEventListener("change", syncRailToViewport);
     return () => mobileLandscape.removeEventListener("change", syncRailToViewport);
   }, []);
@@ -45,6 +51,7 @@ export function useGameViewport() {
   return {
     railCollapsed,
     setRailCollapsed,
+    mobileLandscapeViewport,
     mobileFloatViewport,
     mobileHandIsHidden: mobileFloatViewport && mobileHandHidden,
     toggleMobileHand: () => setMobileHandHidden((hidden) => !hidden),

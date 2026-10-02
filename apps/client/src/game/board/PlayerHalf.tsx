@@ -98,6 +98,7 @@ export function PlayerHalf({
   latestEmote,
   canSendEmote,
   mobileFloatViewport,
+  mobileLandscapeViewport,
   activeChainAttackerInstanceId,
   onSendEmote,
   onOpenOverlay,
@@ -114,6 +115,7 @@ export function PlayerHalf({
   latestEmote: EmoteEvent | null;
   canSendEmote: boolean;
   mobileFloatViewport: boolean;
+  mobileLandscapeViewport: boolean;
   activeChainAttackerInstanceId: number | null;
   onSendEmote: (message: EmoteMessage) => void;
   onOpenOverlay: (overlay: BoardOverlay) => void;
@@ -132,6 +134,8 @@ export function PlayerHalf({
   const presentedDeckTop = visibleDeckTop && !optimisticallyHiddenIds.has(visibleDeckTop.instanceId)
     ? visibleDeckTop
     : undefined;
+  const hero = heroCard(player);
+  const squareBoard = !mobileFloatViewport && !mobileLandscapeViewport;
   const deckTopPlayable =
     presentedDeckTop !== undefined && interaction.legal.playableZones.get(presentedDeckTop.instanceId) === "deck";
   const arenaBoard = boardCardsOutsideEquipmentZones(
@@ -182,6 +186,7 @@ export function PlayerHalf({
         >
           <EquipmentStack
             card={card}
+            squareArt={squareBoard}
             motionLocation={cardLocation}
             underCardCountLabel={underCardCountLabel}
             dimmed={interaction.stagedIds.has(card.instanceId) ||
@@ -205,6 +210,7 @@ export function PlayerHalf({
       >
         <EquipmentStack
           card={card}
+          squareArt={squareBoard}
           motionLocation={cardLocation}
           underCardCountLabel={underCardCountLabel}
           highlighted={canActivate || canBlock}
@@ -248,6 +254,7 @@ export function PlayerHalf({
         {card ? (
           <EquipmentStack
             card={card}
+            squareArt={squareBoard}
             motionLocation={location}
             showActivationDots
             chainSourceLabel={card.instanceId === activeChainAttackerInstanceId
@@ -276,7 +283,6 @@ export function PlayerHalf({
     );
   };
 
-  const hero = heroCard(player);
   const heroBlocking = interaction.stagedIds.has(hero.instanceId) ||
     interaction.committedDefenderIds.has(hero.instanceId);
   const heroCanBlock = mine && interaction.defending && !heroBlocking &&
@@ -314,11 +320,16 @@ export function PlayerHalf({
         >
           <InactiveZoneCard
             card={cards[cards.length - 1]!}
+            squareArt={squareBoard}
             showOverlays={false}
             motionKey={motionPresentationKey(location, cards[cards.length - 1]!.instanceId)}
           />
           <span className="pip pile-pip">{cards.length}</span>
         </div>
+      ) : squareBoard ? (
+        <span className="card-zone equipment-zone-empty zone-pile-empty" role="img" aria-label={zoneLabel(kind)}>
+          <span className="mat-zone-label">{zoneLabel(kind)}</span>
+        </span>
       ) : null}
       {kind === "banished" ? <BloodDebtCounter cards={cards} /> : null}
     </MatZone>
@@ -326,7 +337,7 @@ export function PlayerHalf({
   };
 
   return (
-    <div className={`mat-half ${mirrored ? "mat-opp" : ""}`}>
+    <div className={`mat-half ${mirrored ? "mat-opp" : ""}${squareBoard ? " mat-square-board" : ""}`}>
       {equipmentZone("head", `${row(1)} / 1`)}
       <MatZone
         area={`${row(1)} / 2 / span 1 / span 7`}
@@ -381,6 +392,7 @@ export function PlayerHalf({
                 >
                   <EquipmentStack
                     card={group.card}
+                    squareArt={squareBoard}
                     underCards={boundCards}
                     underCardMotionLocation={{ kind: "board", seat: player.seat }}
                     boundCount={boundCards.length || undefined}
@@ -448,6 +460,7 @@ export function PlayerHalf({
           >
             <EquipmentStack
               card={hero}
+              squareArt={squareBoard}
               motionLocation={{ kind: "hero", seat: player.seat }}
               underCards={player.soul}
               underCardMotionLocation={{ kind: "soul", seat: player.seat }}
@@ -479,11 +492,18 @@ export function PlayerHalf({
           ? () => onOpenOverlay({ title: ownedZoneTitle("pitch"), cards: player.pitch })
           : undefined}
       >
-        <PitchStack
-          cards={player.pitch}
-          resources={player.resources}
-          motionSeat={player.seat}
-        />
+        {squareBoard && player.pitch.length === 0 && player.resources === 0 ? (
+          <span className="card-zone equipment-zone-empty zone-pile-empty" role="img" aria-label={zoneLabel("pitch")}>
+            <span className="mat-zone-label">{zoneLabel("pitch")}</span>
+          </span>
+        ) : (
+          <PitchStack
+            cards={player.pitch}
+            resources={player.resources}
+            motionSeat={player.seat}
+            squareArt={squareBoard}
+          />
+        )}
       </MatZone>
       <MatZone
         area="2 / 9"
@@ -508,6 +528,7 @@ export function PlayerHalf({
             <CardFace
               card={presentedDeckTop}
               size="zone"
+              squareArt={squareBoard}
               motionZoneAnchor={motionLocationKey({ kind: "deck", seat: player.seat })}
               motionKey={motionPresentationKey(
                 { kind: "deck", seat: player.seat },
@@ -530,10 +551,20 @@ export function PlayerHalf({
                   }
                 : undefined}
             />
+          ) : player.deckCount === 0 && squareBoard ? (
+            <span
+              className="card-zone equipment-zone-empty zone-pile-empty"
+              role="img"
+              aria-label={zoneLabel("deck")}
+              data-motion-zone-anchor={motionLocationKey({ kind: "deck", seat: player.seat })}
+            >
+              <span className="mat-zone-label">{zoneLabel("deck")}</span>
+            </span>
           ) : (
             <CardBack
               label={zoneLabel("deck")}
               count={player.deckCount}
+              square={squareBoard}
               motionZoneAnchor={motionLocationKey({ kind: "deck", seat: player.seat })}
             />
           )}
@@ -541,10 +572,10 @@ export function PlayerHalf({
         {deckShuffling ? (
           <>
             <div className="deck-shuffle-copy deck-shuffle-copy-left" aria-hidden="true">
-              <CardBack label="" />
+              <CardBack label="" square={squareBoard} />
             </div>
             <div className="deck-shuffle-copy deck-shuffle-copy-right" aria-hidden="true">
-              <CardBack label="" />
+              <CardBack label="" square={squareBoard} />
             </div>
           </>
         ) : null}
@@ -580,6 +611,7 @@ export function PlayerHalf({
                   <CardFace
                     card={card}
                     size="zone"
+                    squareArt={squareBoard}
                     motionKey={motionPresentationKey(
                       { kind: "arsenal", seat: player.seat },
                       card.instanceId,
@@ -601,6 +633,7 @@ export function PlayerHalf({
                 ) : slot.hidden ? (
                   <CardBack
                     label={zoneLabel("arsenal")}
+                    square={squareBoard}
                     motionKey={opaqueMotionPresentationKey(
                       { kind: "arsenal", seat: player.seat },
                       slot.opaqueOccurrence,

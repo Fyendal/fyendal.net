@@ -366,6 +366,123 @@
   object-position: center;
   border-radius: 6px;
 }
+/* Source pixels y=92..500 fill the square at their
+   original proportions. The two narrow edge slices bring back the printing's
+   own class/talent frame, while source pixels outside the frame stay hidden. */
+.mat-half .card-zone.card-board-square {
+  width: var(--arena-square-size);
+  height: var(--arena-square-size);
+  aspect-ratio: 1;
+  padding: 0;
+  border: 0;
+  border-radius: 2px;
+  overflow: visible;
+}
+.table:not([data-playability-cue="high-contrast"])
+  .card-board-square.card-highlight:not(.card-selected):not(.card-chain-source) {
+  box-shadow: 0 0 0 1px #62d994, 0 0 11px 3px #34c978b3;
+}
+.table[data-playability-cue="glow"]
+  .card-board-square.card-highlight:not(.card-selected)::before {
+  content: none;
+}
+.board-square-media {
+  position: absolute;
+  inset: 0;
+  display: block;
+  overflow: hidden;
+  border-radius: inherit;
+  background: #111518;
+  pointer-events: none;
+}
+.board-square-media .board-square-art {
+  position: absolute;
+  top: -22.55%;
+  left: -23.53%;
+  width: 147.06%;
+  height: 205.39%;
+  object-fit: fill;
+  border-radius: 0;
+}
+.board-square-frame-edge {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+.board-square-frame-edge img {
+  position: absolute;
+  top: -22.55%;
+  width: 147.06%;
+  height: 205.39%;
+}
+.board-square-frame-left { clip-path: inset(0 93.6% 0 0); }
+.board-square-frame-left img { left: -6.86%; }
+.board-square-frame-right { clip-path: inset(0 0 0 93.6%); }
+.board-square-frame-right img { left: -40.2%; }
+.board-square-name {
+  position: absolute;
+  z-index: 2;
+  top: 0;
+  left: 3px;
+  right: 3px;
+  display: block;
+  overflow: hidden;
+  padding: 2px 3px;
+  border: 1px solid #8e8067;
+  border-radius: 4px;
+  background: linear-gradient(#f7f1e5, #d9cebb);
+  box-shadow: 0 1px 4px #000b, inset 0 1px #fff9;
+  color: #201a15;
+  font-size: clamp(6px, .85vh, 11px);
+  font-weight: 700;
+  line-height: 1.1;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+.board-square-name-long { font-size: clamp(5px, .78vh, 10px); }
+.board-square-stats {
+  position: absolute;
+  z-index: 2;
+  right: 3px;
+  bottom: 3px;
+  display: flex;
+  gap: 2px;
+  pointer-events: none;
+}
+.board-square-stat {
+  display: grid;
+  min-width: 20px;
+  height: 20px;
+  padding-inline: 2px;
+  place-items: center;
+  border: 1px solid #f5e2bc;
+  border-radius: 5px;
+  background: #12151de8;
+  box-shadow: 0 1px 4px #000c;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1;
+}
+.board-square-attack { border-color: #f6a86f; color: #ffb58c; }
+.board-square-defense { border-color: #86c9f5; color: #b0dfff; }
+.board-square-life { border-color: #ef9b9b; color: #ffd0d0; }
+.mat-square-board :is(.zone-deck, .zone-graveyard, .zone-banished, .zone-pitch)
+  .card-zone.card-board-square {
+  width: var(--mat-zone-col);
+  height: var(--mat-zone-col);
+}
+.mat-square-board :is(.zone-deck, .zone-graveyard, .zone-banished, .zone-pitch)
+  .board-square-name {
+  font-size: clamp(5px, .75vh, 9px);
+}
+.mat-square-board :is(.zone-deck, .zone-graveyard, .zone-banished, .zone-pitch)
+  .board-square-name-long {
+  font-size: clamp(4.5px, .65vh, 8px);
+}
 .card-hasimg .c-zonelabel {
   bottom: 5px;
   text-shadow: 0 1px 3px #000, 0 0 7px #000;
@@ -579,6 +696,17 @@
   align-items: center;
   justify-content: center;
   gap: 2px;
+}
+.mat-square-board .card-back.card-back-square {
+  width: var(--mat-zone-col);
+  height: var(--mat-zone-col);
+  aspect-ratio: 1;
+  border: 0;
+  border-radius: 2px;
+}
+.mat-square-board .zone-arsenal .card-back.card-back-square {
+  width: var(--arena-square-size);
+  height: var(--arena-square-size);
 }
 .c-backimg {
   display: block;

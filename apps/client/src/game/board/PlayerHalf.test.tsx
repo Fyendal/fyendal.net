@@ -37,6 +37,8 @@ function renderPlayerHalf(
   stageableDefenderId?: number,
   locale: "en" | "zh-Hans" = "en",
   activeChainAttackerInstanceId: number | null = null,
+  mobileFloatViewport = false,
+  mobileLandscapeViewport = false,
 ): string {
   return renderToStaticMarkup(
     <TestI18nProvider locale={locale}>
@@ -74,7 +76,8 @@ function renderPlayerHalf(
       }}
       latestEmote={null}
       canSendEmote={false}
-      mobileFloatViewport={false}
+      mobileFloatViewport={mobileFloatViewport}
+      mobileLandscapeViewport={mobileLandscapeViewport}
       activeChainAttackerInstanceId={activeChainAttackerInstanceId}
       onSendEmote={() => undefined}
       onOpenOverlay={() => undefined}
@@ -84,6 +87,48 @@ function renderPlayerHalf(
 }
 
 describe("PlayerHalf", () => {
+  it("keeps full portrait card art on mobile", () => {
+    const html = renderPlayerHalf({
+      ...player,
+      heroCardId: "SBA001",
+      deckCount: 3,
+      equipment: { head: { instanceId: 12, cardId: "SBA004", owner: 0 } },
+      board: [{ instanceId: 13, cardId: "SBA034", owner: 0 }],
+      graveyard: [{ instanceId: 14, cardId: "SBA005", owner: 0 }],
+    }, true, undefined, undefined, "en", null, true);
+
+    expect(html).not.toContain("card-board-square");
+    expect(html).not.toContain("card-back-square");
+    expect(html).not.toContain("mat-square-board");
+    expect(html).not.toContain("zone-pile-empty");
+    expect(html).toContain("https://content.fabrary.net/cards/SBA004.webp");
+    expect(html).toContain("https://content.fabrary.net/cards/SBA001.webp");
+  });
+
+  it("keeps full portrait card art on a wide phone in landscape", () => {
+    const html = renderPlayerHalf(player, true, undefined, undefined, "en", null, false, true);
+
+    expect(html).not.toContain("mat-square-board");
+    expect(html).not.toContain("card-board-square");
+  });
+
+  it("squares arena cards, piles, and empty slots for any hero", () => {
+    const html = renderPlayerHalf({
+      ...player,
+      deckCount: 3,
+      pitch: [{ instanceId: 15, cardId: "WTR160", owner: 0 }],
+      arsenal: [{ instanceId: 16, cardId: "WTR160", owner: 0, arsenalSlot: 0 }],
+      arsenalCount: 1,
+      graveyard: [{ instanceId: 14, cardId: "WTR160", owner: 0 }],
+    });
+
+    expect(html).toContain("mat-square-board");
+    expect(html).toContain("card-back-square");
+    expect(html).toMatch(/card-board-square[^>]*data-cardid="TST-HERO"/);
+    expect(html.match(/card-board-square[^>]*data-cardid="WTR160"/g)).toHaveLength(3);
+    expect(html).toContain("zone-pile-empty");
+  });
+
   it("localizes board zone labels in Chinese", () => {
     const html = renderPlayerHalf(player, true, undefined, undefined, "zh-Hans");
 
@@ -226,6 +271,7 @@ describe("PlayerHalf", () => {
     }, false);
 
     expect(html).toContain('<div class="c-backlabel">Arsenal</div>');
+    expect(html).toContain("card-back-square");
     expect(html).toContain('data-motion-card="1:arsenal:opaque"');
   });
 
@@ -247,6 +293,8 @@ describe("PlayerHalf", () => {
     expect(html).toContain('aria-label="Arsenal 2"');
     expect(html).toContain('data-cardid="TST-ARROW-1"');
     expect(html).toContain('data-cardid="TST-ARROW-2"');
+    expect(html).toMatch(/card-board-square[^>]*data-cardid="TST-ARROW-1"/);
+    expect(html).toMatch(/card-board-square[^>]*data-cardid="TST-ARROW-2"/);
     expect(html).not.toContain("arsenal-slot-index");
   });
 
@@ -364,6 +412,7 @@ describe("PlayerHalf", () => {
           latestEmote={null}
           canSendEmote={false}
           mobileFloatViewport={false}
+          mobileLandscapeViewport={false}
           activeChainAttackerInstanceId={null}
           onSendEmote={() => undefined}
           onOpenOverlay={() => undefined}

@@ -8,10 +8,12 @@ export function PitchStack({
   cards,
   resources,
   motionSeat,
+  squareArt = false,
 }: {
   cards: readonly CardView[];
   resources: number;
   motionSeat?: number;
+  squareArt?: boolean;
 }) {
   if (cards.length === 0) {
     return resources > 0
@@ -37,6 +39,7 @@ export function PitchStack({
             <CardFace
               card={card}
               size="zone"
+              squareArt={squareArt}
               motionKey={motionSeat === undefined
                 ? undefined
                 : motionPresentationKey({ kind: "pitch", seat: motionSeat }, card.instanceId)}

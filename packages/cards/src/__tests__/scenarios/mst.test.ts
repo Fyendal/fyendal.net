@@ -532,6 +532,47 @@ describe("MST — Assassin", () => {
       .expectLife(0, 22);
   });
 
+  it("Just a Nick's banish does not add a hand color for Persuasive Prognosis", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", hand: ["persuasive prognosis|3", "just a nick|1"] },
+        {
+          hero: "dorinthea",
+          hand: ["raging onslaught|1", "raging onslaught|3"],
+          deck: ["wounding blow|1", "wounding blow|3"],
+        },
+      ],
+    });
+
+    g.play("persuasive prognosis|3")
+      .blockWith()
+      .react("just a nick|1", { settle: false })
+      .doRaw({ kind: "choose", optionId: "both" });
+
+    for (let i = 0; i < 12 && g.state.pendingDecision?.chooseHook !== "trigger-order"; i++) {
+      g.passPriority();
+    }
+    const layers = g.state.pendingDecision?.triggerOrder?.remaining ?? [];
+    const prognosis = layers.find((layer) => layer.engineEffect?.kind === "on-hit-hook");
+    const nick = layers.find((layer) => layer.engineEffect?.kind === "on-hit-modifier");
+    expect(prognosis).toBeDefined();
+    expect(nick).toBeDefined();
+    g.doRaw({
+      kind: "order-triggers",
+      optionIds: [nick!, prognosis!].map((layer) => `${layer.sourceInstanceId}:${layer.triggerIndex}`),
+    }).settle();
+
+    expect(g.state.pendingDecision?.chooseHook).toBe("prognosis-hand");
+    const defender = g.state.players[1]!;
+    expect(defender.banish.map((card) => card.cardId)).toEqual([
+      printingId("wounding blow|1"),
+      printingId("wounding blow|3"),
+    ]);
+    expect((g.state.pendingDecision?.options ?? []).map((id) =>
+      defender.hand.find((card) => card.instanceId === Number(id))?.cardId,
+    )).toEqual([printingId("raging onslaught|3")]);
+  });
+
   it("Nuu may play an opponent's banished blue card for free", () => {
     const g = scenario({
       seats: [

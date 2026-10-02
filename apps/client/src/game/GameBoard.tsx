@@ -178,6 +178,7 @@ export function GameBoard() {
   const {
     railCollapsed,
     setRailCollapsed,
+    mobileLandscapeViewport,
     mobileFloatViewport,
     mobileHandIsHidden,
     toggleMobileHand,
@@ -1075,6 +1076,7 @@ export function GameBoard() {
           latestEmote={latestEmote}
           canSendEmote={canSendEmote}
           mobileFloatViewport={mobileFloatViewport}
+          mobileLandscapeViewport={mobileLandscapeViewport}
           activeChainAttackerInstanceId={activeChainAttackerInstanceId}
           onSendEmote={sendEmote}
           onOpenOverlay={setOverlay}
@@ -1109,6 +1111,7 @@ export function GameBoard() {
           latestEmote={latestEmote}
           canSendEmote={canSendEmote}
           mobileFloatViewport={mobileFloatViewport}
+          mobileLandscapeViewport={mobileLandscapeViewport}
           activeChainAttackerInstanceId={activeChainAttackerInstanceId}
           onSendEmote={sendEmote}
           onOpenOverlay={setOverlay}

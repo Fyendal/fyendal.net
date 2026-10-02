@@ -196,6 +196,7 @@ export function CardFace({
   motionZoneAnchor,
   handReorderHint,
   focusSourceHidden,
+  squareArt = false,
 }: {
   card: CardView;
   size?: "hand" | "zone" | "preview";
@@ -238,6 +239,8 @@ export function CardFace({
   handReorderHint?: string;
   /** Hide the hand copy while this card is displayed in the pitch focus. */
   focusSourceHidden?: boolean;
+  /** Square presentation for cards in the desktop arena. */
+  squareArt?: boolean;
 }) {
   // Try temporary Fabrary variants before falling back to the text layout.
   const [imageFailure, setImageFailure] = useState<{ cardId: string; attempts: number } | null>(null);
@@ -250,7 +253,7 @@ export function CardFace({
         data-motion-card={motionKey}
         data-motion-zone-anchor={motionZoneAnchor}
       >
-        <CardBack label={label ?? "Face down"} />
+        <CardBack label={label ?? "Face down"} square={squareArt && size === "zone"} />
         {showOverlays && card.intimidated ? (
           <div className="c-ovls">
             <CounterOverlay
@@ -266,6 +269,7 @@ export function CardFace({
   }
   const data = cardData[card.cardId];
   const name = data?.name ?? card.name ?? card.cardId;
+  const boardSquare = size === "zone" && squareArt;
   const imageUrls = resolveCardImageUrls(card.cardId, data);
   const failedAttempts = imageFailure?.cardId === card.cardId ? imageFailure.attempts : 0;
   const showImg = card.cardId !== "" && failedAttempts < imageUrls.length;
@@ -313,6 +317,7 @@ export function CardFace({
   const cls = [
     "card",
     size === "zone" ? "card-zone" : size === "preview" ? "card-preview-frame" : "card-hand",
+    boardSquare ? "card-board-square" : "",
     focusSourceHidden ? "pitch-focus-source-hidden" : "",
     showImg ? "card-hasimg" : "",
     selected ? "card-selected" : "",
@@ -357,7 +362,43 @@ export function CardFace({
           aria-keyshortcuts={handReorderHint ? "Alt+ArrowLeft Alt+ArrowRight" : undefined}
         />
       ) : null}
-      {showImg ? (
+      {boardSquare ? (
+        <>
+          <span className="board-square-media" aria-hidden="true">
+            {showImg ? (
+              <img
+                className="c-img board-square-art"
+                src={imageUrls[failedAttempts]}
+                alt=""
+                draggable={false}
+                loading="eager"
+                onError={() => setImageFailure((current) => ({
+                  cardId: card.cardId,
+                  attempts: current?.cardId === card.cardId ? current.attempts + 1 : 1,
+                }))}
+              />
+            ) : null}
+            {showImg ? (
+              <>
+                <span className="board-square-frame-edge board-square-frame-left">
+                  <img src={imageUrls[failedAttempts]} alt="" draggable={false} />
+                </span>
+                <span className="board-square-frame-edge board-square-frame-right">
+                  <img src={imageUrls[failedAttempts]} alt="" draggable={false} />
+                </span>
+              </>
+            ) : null}
+          </span>
+          <span className={`board-square-name${name.length >= 22 ? " board-square-name-long" : ""}`} title={name}>{name}</span>
+          {attack !== undefined || defense !== undefined || card.life !== undefined ? (
+            <span className="board-square-stats">
+              {attack !== undefined ? <span className="board-square-stat board-square-attack">{attack}</span> : null}
+              {defense !== undefined ? <span className="board-square-stat board-square-defense">{defense}</span> : null}
+              {card.life !== undefined ? <span className="board-square-stat board-square-life">{card.life}</span> : null}
+            </span>
+          ) : null}
+        </>
+      ) : showImg ? (
         <img
           className="c-img"
           src={imageUrls[failedAttempts]}
@@ -592,6 +633,7 @@ export function CardBack({
   count,
   label,
   size = "zone",
+  square = false,
   motionKey,
   motionZoneAnchor,
   onClick,
@@ -599,6 +641,7 @@ export function CardBack({
   count?: number;
   label: string;
   size?: "zone" | "hand";
+  square?: boolean;
   motionKey?: string;
   /** Optional card-sized endpoint for an otherwise broad motion zone. */
   motionZoneAnchor?: string;
@@ -606,7 +649,13 @@ export function CardBack({
 }) {
   return (
     <div
-      className={`card ${size === "hand" ? "card-hand" : "card-zone"} card-back ${onClick ? "card-clickable" : ""}`}
+      className={[
+        "card",
+        size === "hand" ? "card-hand" : "card-zone",
+        "card-back",
+        square && size === "zone" ? "card-back-square" : "",
+        onClick ? "card-clickable" : "",
+      ].filter(Boolean).join(" ")}
       data-motion-card={motionKey}
       data-motion-zone-anchor={motionZoneAnchor}
     >
@@ -638,12 +687,14 @@ export function CardBack({
 export function InactiveZoneCard({
   card,
   showOverlays = true,
+  squareArt = false,
   showFaceDownIdentity = false,
   revealOwnerIntimidated = false,
   motionKey,
 }: {
   card: CardView;
   showOverlays?: boolean;
+  squareArt?: boolean;
   /** Privately show a known face-down card while preserving its face-down state visually. */
   showFaceDownIdentity?: boolean;
   revealOwnerIntimidated?: boolean;
@@ -661,6 +712,7 @@ export function InactiveZoneCard({
       <CardFace
         card={card}
         size="zone"
+        squareArt={squareArt}
         showOverlays={showOverlays}
         showTapped={false}
         dimmed={showKnownFaceDown}
@@ -676,6 +728,7 @@ export function InactiveZoneCard({
     <CardFace
       card={faceDownCard}
       size="zone"
+      squareArt={squareArt}
       showOverlays={showOverlays}
       showTapped={false}
       motionKey={motionKey}

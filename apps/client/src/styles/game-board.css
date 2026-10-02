@@ -208,6 +208,39 @@
 }
 .mat-half.mat-opp { align-content: end; }
 
+/* Square arena art uses the row's full height. Keep the equipment/hero cluster
+   together and reserve the flexible runway for board permanents and piles. */
+.mat-half.mat-square-board {
+  --arena-square-size: clamp(86px, 13vh, 170px);
+  --mat-outer-col: var(--arena-square-size);
+  --mat-arms-col: var(--arena-square-size);
+  --mat-weapon-0-col: var(--arena-square-size);
+  --mat-hero-col: var(--arena-square-size);
+  --mat-weapon-1-col: var(--arena-square-size);
+  column-gap: clamp(6px, .8vh, 10px);
+  row-gap: clamp(12px, 1.7vh, 18px);
+  grid-template-columns:
+    var(--mat-outer-col)
+    var(--mat-arms-col)
+    minmax(clamp(6px, .8vw, 16px), 1fr)
+    var(--mat-weapon-0-col)
+    var(--mat-hero-col)
+    var(--mat-weapon-1-col)
+    minmax(0, 1fr)
+    var(--mat-zone-col)
+    var(--mat-zone-col);
+}
+/* Equal outer track widths let the two flexible gaps center the hero and
+   weapon trio on roomy laptop and desktop boards. */
+@media (min-width: 1101px) {
+  .mat-half.mat-square-board { --mat-zone-col: var(--arena-square-size); }
+}
+@media (min-width: 1024px) and (max-width: 1100px) {
+  .mat-half.mat-square-board > :is(.zone-weapon-0, .zone-hero, .zone-weapon-1) {
+    transform: translateX(-18px);
+  }
+}
+
 /* Full-size tapped arena cards need a landscape-width grid track. Only the
    affected semantic column expands; the neighboring flexible spacer absorbs
    the change without moving the other card clusters off the mat. */
@@ -321,6 +354,20 @@
   border-radius: 6px;
   box-shadow: inset 0 0 12px #0003;
 }
+.mat-square-board .equipment-zone-empty {
+  width: var(--arena-square-size);
+  height: var(--arena-square-size);
+  border-radius: 2px;
+}
+.mat-square-board .zone-pile-empty {
+  width: var(--mat-zone-col);
+  height: var(--mat-zone-col);
+}
+.zone-pile-empty .mat-zone-label {
+  font-size: clamp(8px, 1.1vh, 12px);
+  letter-spacing: .5px;
+  text-align: center;
+}
 .equipment-zone-icon {
   width: 30%;
   max-width: 32px;
@@ -381,6 +428,7 @@
   padding-left: 41px;
   margin-block: -10px;
 }
+.mat-square-board .board-cards { padding-left: 8px; }
 /* Expanded material stacks may cross the center seam. Lift their zone above
    the neighboring mat half and relax the strip clip only for the preview. */
 @media (hover: hover) and (pointer: fine) {
@@ -469,6 +517,10 @@
 .board-card-stack-tapped {
   width: clamp(86px, 13vh, 170px);
   height: clamp(63px, 9.49vh, 124px);
+}
+.board-card-stack-tapped:has(.card-board-square) {
+  width: var(--arena-square-size);
+  height: var(--arena-square-size);
 }
 .board-card-stack-tapped > .equipment-stack {
   position: absolute;
@@ -770,6 +822,13 @@
   transition: transform 0.12s ease;
   pointer-events: auto;
 }
+/* On compact laptops, keep the resting hand clear of the enlarged leg card. */
+@media (min-width: 701px) and (max-width: 1100px) {
+  .table:has(.mat-square-board) .hand {
+    padding-left: calc(clamp(86px, 13vh, 170px) + 18px);
+    gap: 6px;
+  }
+}
 .hand .card-hand:hover { transform: none; }
 .hand .card-hand.card-selected,
 .hand .card-hand.card-selected:hover { transform: translateY(calc(-1 * var(--hand-selected-lift))); }
@@ -868,9 +927,7 @@
 .mobile-hand-toggle { display: none; }
 
 /* Keep card geometry viewport-relative on large and zoomed-out desktops.
-   Fixed pixel ceilings made cards physically shrink as browser zoom reduced,
-   while leaving most of a 2K/4K playmat empty. The 546:762 ratio matches the
-   Fabrary source, preserving the full image without cropping. */
+   Scale square arena art with the rows while preserving full-card hand sizing. */
 @media (min-width: 1600px) and (min-height: 900px) {
   .table {
     --large-zone-card-height: min(13vh, 10.88vw);
@@ -885,6 +942,9 @@
     --mat-weapon-1-col: var(--large-zone-card-width);
     --mat-tapped-col: var(--large-zone-card-height);
     grid-template-rows: repeat(3, var(--large-zone-card-height));
+  }
+  .mat-half.mat-square-board {
+    --arena-square-size: var(--large-zone-card-height);
   }
   .mat-half .card-zone {
     width: var(--large-zone-card-width);

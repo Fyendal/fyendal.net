@@ -149,11 +149,51 @@ describe("CardBack", () => {
     const staticCard = renderToStaticMarkup(createElement(CardBack, { label: "Deck" }));
 
     expect(interactive).toContain('<button type="button" class="card-action" aria-label="Deck"');
-    expect(staticCard).toContain('<div class="card card-zone card-back ');
+    expect(staticCard).toContain('<div class="card card-zone card-back">');
+  });
+
+  it("uses a square card back for a hidden pile top without exposing its identity", () => {
+    const html = renderToStaticMarkup(createElement(CardFace, {
+      card: { instanceId: 8, cardId: "", owner: 1, hidden: true },
+      size: "zone",
+      squareArt: true,
+    }));
+
+    expect(html).toContain("card-back-square");
+    expect(html).not.toContain("data-cardid");
   });
 });
 
 describe("CardFace payment state", () => {
+  it("uses square art and live stats for any desktop arena card", () => {
+    const board = renderToStaticMarkup(createElement(CardFace, {
+      card: { instanceId: 1, cardId: "SBA002", owner: 0, attack: 3 },
+      size: "zone",
+      squareArt: true,
+    }));
+    const hand = renderToStaticMarkup(createElement(CardFace, {
+      card: { instanceId: 2, cardId: "SBA002", owner: 0 },
+      size: "hand",
+      squareArt: true,
+    }));
+    const other = renderToStaticMarkup(createElement(CardFace, {
+      card: { instanceId: 3, cardId: "WTR160", owner: 0 },
+      size: "zone",
+      squareArt: true,
+    }));
+
+    expect(board).toContain("card-board-square");
+    expect(board).toContain("board-square-name");
+    expect(board).toContain("board-square-frame-left");
+    expect(board).toContain("board-square-frame-right");
+    expect(board).toContain("Scorpio, Comet Tail");
+    expect(board).toContain('src="https://content.fabrary.net/cards/SBA002.webp"');
+    expect(board).toContain('board-square-attack">3</span>');
+    expect(hand).not.toContain("card-board-square");
+    expect(other).toContain("card-board-square");
+    expect(other).toContain('src="https://content.fabrary.net/cards/WTR160.webp"');
+  });
+
   it("loads card art eagerly so visible cards do not wait for hover", () => {
     const html = renderToStaticMarkup(createElement(CardFace, {
       card: { instanceId: 1, cardId: "WTR160", owner: 0 },

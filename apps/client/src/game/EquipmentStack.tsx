@@ -22,6 +22,7 @@ export function EquipmentStack({
   boundCount,
   boundCountLabel,
   underCardCountLabel,
+  squareArt = false,
 }: {
   card: CardView;
   /** Additional public cards rendered behind the permanent, oldest first. */
@@ -44,6 +45,8 @@ export function EquipmentStack({
   boundCountLabel?: string;
   /** Accessible description for the generic public cards under this permanent. */
   underCardCountLabel?: string;
+  /** Square presentation for cards in the desktop arena. */
+  squareArt?: boolean;
 }) {
   const cards = [...underCards, ...equipmentStackCards(card)];
   const step = cardStackStep(cards.length);
@@ -78,6 +81,7 @@ export function EquipmentStack({
             <CardFace
               card={stackCard}
               size="zone"
+              squareArt={squareArt}
               motionKey={
                 isTop && motionLocation
                   ? motionPresentationKey(motionLocation, stackCard.instanceId)
