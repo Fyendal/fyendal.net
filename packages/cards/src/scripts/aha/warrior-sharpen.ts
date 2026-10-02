@@ -102,14 +102,19 @@ export function resolveSharpenFollowup(
   }
 }
 
+/** Queue one replacement for the next sword sharpen this turn. */
+export function addNextSharpenBonus(ctx: ScriptCtx): void {
+  ctx.setFlag("player", "ahaExtraSharpen", Number(ctx.getFlag("player", "ahaExtraSharpen")) + 1);
+}
+
 /** Apply the Sharpen keyword and the Hala armory-deck interactions that can
  * replace or continuously react to that event. */
 export function sharpenSword(ctx: ScriptCtx, instanceId: number, count = 1, followup?: SharpenFollowup): void {
   const sword = controlledSword(ctx, instanceId);
   if (!sword) return;
 
-  const extra = ctx.getFlag("player", "ahaExtraSharpen") === true ? 1 : 0;
-  if (extra) ctx.setFlag("player", "ahaExtraSharpen", false);
+  const extra = Number(ctx.getFlag("player", "ahaExtraSharpen"));
+  if (extra) ctx.setFlag("player", "ahaExtraSharpen", 0);
   const total = count + extra;
   ctx.addCounter(instanceId, "power", total);
   ctx.setCardCounter(instanceId, "sharpenedTurn", ctx.state.turn);

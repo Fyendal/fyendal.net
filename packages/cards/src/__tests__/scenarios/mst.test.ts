@@ -511,6 +511,27 @@ describe("MST — Assassin", () => {
       .expectZoneSize(1, "deck", 0);
   });
 
+  it("Just a Nick's granted banish counts as Bonds of Attraction banishing a matching card", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", hand: ["bonds of attraction|3", "just a nick|1"] },
+        {
+          hero: "dorinthea",
+          deck: ["wounding blow|1", "wounding blow|1"],
+          graveyard: ["raging onslaught|1"],
+        },
+      ],
+    });
+
+    g.play("bonds of attraction|3")
+      .blockWith()
+      .react("just a nick|1")
+      .chooseOption("both")
+      .chooseCard("raging onslaught|1")
+      .expectZoneSize(1, "banish", 3)
+      .expectLife(0, 22);
+  });
+
   it("Nuu may play an opponent's banished blue card for free", () => {
     const g = scenario({
       seats: [

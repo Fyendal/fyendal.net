@@ -1602,7 +1602,7 @@ Object.assign(mst, {
     onGrantedHit(ctx, hook) {
       if (hook !== "just-a-nick-hit" || ctx.link?.targetAllyId !== undefined) return;
       const top = ctx.player(opponentSeat(ctx)).deck[0];
-      if (top) ctx.banish(top.instanceId);
+      if (top) ctx.banish(top.instanceId, { asAttackingCard: true });
     },
   },
   "10,000 year reunion|1": { wardValue: () => 10 },

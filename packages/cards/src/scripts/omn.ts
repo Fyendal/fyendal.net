@@ -803,6 +803,7 @@ function chromatic(pitch: number): CardScript {
       }),
     ),
     onFriendlyPlay(ctx, played) {
+      if (ctx.cardColor(played) !== pitch) return;
       const marker = consumeSourceModifier(
         ctx,
         (modifier) => modifier.playCostReduction === 1 && modifier.appliesToPitch === pitch,

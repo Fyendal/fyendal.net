@@ -11,6 +11,28 @@ it("registers every ROS printing as implemented", () => {
   expect(cards.filter((card) => !isImplemented(card)).map((card) => card.id)).toEqual([]);
 });
 
+it("Eclectic Magnetism lets one non-attack action card be played as an instant on its chain link", () => {
+  const g = scenario({
+    seats: [
+      { hero: "rhinar", hand: ["eclectic magnetism|1", "strike twice|1", "come to fight|1"], resources: 2 },
+      { hero: "dorinthea", hand: [] },
+    ],
+  });
+
+  g.play("eclectic magnetism|1").blockWith();
+  const strike = g.state.players[0]!.hand.find((card) => card.cardId === printingId("strike twice|1"))!;
+  expect(legalIntents(g.state, 0)).toContainEqual(expect.objectContaining({
+    kind: "play-card",
+    instanceId: strike.instanceId,
+    asInstant: true,
+  }));
+  g.react("strike twice|1", { settle: false });
+  const next = g.state.players[0]!.hand.find((card) => card.cardId === printingId("come to fight|1"))!;
+  expect(legalIntents(g.state, 0).some((intent) =>
+    intent.kind === "play-card" && intent.instanceId === next.instanceId,
+  )).toBe(false);
+});
+
 describe("ROS — Earth heroes and Decompose", () => {
   it("Fruits of the Forest can discard itself for 2 life in a priority window", () => {
     const g = scenario({

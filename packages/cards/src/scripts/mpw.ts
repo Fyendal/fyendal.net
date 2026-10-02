@@ -8,7 +8,7 @@ import {
   opponentSeat,
   yesNoPrompt,
 } from "./shared-helpers.js";
-import { SHARPEN_FOLLOWUP, sharpenSword } from "./aha/warrior-sharpen.js";
+import { addNextSharpenBonus, SHARPEN_FOLLOWUP, sharpenSword } from "./aha/warrior-sharpen.js";
 
 const BLADE_DANCE = "MPW134";
 const FLURRY = "MPW135";
@@ -829,7 +829,7 @@ export const mpw: Record<string, CardScript> = {
   "swordmaster's path|2": {
     onPlay(ctx) {
       buffNextAttack(ctx, { attack: 2, appliesToSubtype: "sword" });
-      ctx.setFlag("player", "ahaExtraSharpen", true);
+      addNextSharpenBonus(ctx);
     },
   },
   "heavy swing|1": {

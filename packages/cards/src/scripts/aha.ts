@@ -9,7 +9,7 @@ import {
   localizedCardLog,
   yesNoPrompt,
 } from "./shared-helpers.js";
-import { resolveSharpenFollowup, SHARPEN_FOLLOWUP, sharpenSword } from "./aha/warrior-sharpen.js";
+import { addNextSharpenBonus, resolveSharpenFollowup, SHARPEN_FOLLOWUP, sharpenSword } from "./aha/warrior-sharpen.js";
 
 const FLURRY = "SBL036";
 
@@ -77,7 +77,7 @@ function swordPath(power: number): CardScript {
   return {
     onPlay(ctx) {
       buffNextAttack(ctx, { attack: power, appliesToSubtype: "sword" });
-      ctx.setFlag("player", "ahaExtraSharpen", true);
+      addNextSharpenBonus(ctx);
     },
   };
 }

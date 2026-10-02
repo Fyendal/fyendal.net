@@ -21,8 +21,8 @@ function firstHyperDriver(ctx: ScriptCtx) {
   return ctx.player(ctx.seat).board.find((c) => isHyperDriver(ctx, c));
 }
 
-function addHyperSteam(ctx: ScriptCtx): void {
-  const driver = firstHyperDriver(ctx);
+function addHyperSteam(ctx: ScriptCtx, instanceId: number): void {
+  const driver = ctx.player(ctx.seat).board.find((c) => c.instanceId === instanceId && isHyperDriver(ctx, c));
   if (!driver) return;
   const steam = driver.counters?.steam ?? 0;
   ctx.addCounter(driver.instanceId, "steam", 1);
@@ -183,7 +183,16 @@ export const sda: Record<string, CardScript> = {
 
   "re-charge!|1": {
     onPlay(ctx) {
-      addHyperSteam(ctx);
+      const drivers = ctx.player(ctx.seat).board.filter((card) => isHyperDriver(ctx, card));
+      if (drivers.length === 1) {
+        addHyperSteam(ctx, drivers[0]!.instanceId);
+      } else if (drivers.length > 1) {
+        ctx.requestCardChoice(
+          "re-charge-hyper-driver",
+          decisionPrompt("Put a steam counter on a Hyper Driver", "card.common.hyperdriver.steam.add"),
+          drivers.map((card) => card.instanceId),
+        );
+      }
       ctx.addModifier({ scope: "until-end-of-turn", onBoostAttack: 4 });
       ctx.logPublic(
         localizedCardLog(
@@ -193,6 +202,9 @@ export const sda: Record<string, CardScript> = {
           { amount: 4 },
         ),
       );
+    },
+    onChoose(ctx, hook, option) {
+      if (hook === "re-charge-hyper-driver") addHyperSteam(ctx, Number(option));
     },
   },
 

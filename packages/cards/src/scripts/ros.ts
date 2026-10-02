@@ -1324,7 +1324,30 @@ Object.assign(ros, {
       }
     },
   },
-  "eclectic magnetism|1": { onAttackDeclared: (ctx: ScriptCtx) => ctx.allowAbilitiesAsInstant("action") },
+  "eclectic magnetism|1": {
+    onAttackDeclared(ctx: ScriptCtx) {
+      // Keep this attack's one-card permission observable while it is on the chain.
+      ctx.addModifier({ scope: "combat-chain" });
+    },
+    allowsFriendlyCardPlayAsInstant(ctx, card) {
+      return ctx.link?.attackingCard.instanceId === ctx.self.instanceId &&
+        isNonAttackAction(ctx, card) &&
+        ctx.state.modifiers.some((modifier) =>
+          modifier.sourceInstanceId === ctx.self.instanceId &&
+          modifier.scope === "combat-chain" &&
+          !modifier.consumed
+        );
+    },
+    onFriendlyPlay(ctx, played) {
+      if (ctx.link?.attackingCard.instanceId !== ctx.self.instanceId || !isNonAttackAction(ctx, played)) return;
+      const marker = ctx.state.modifiers.find((modifier) =>
+        modifier.sourceInstanceId === ctx.self.instanceId &&
+        modifier.scope === "combat-chain" &&
+        !modifier.consumed
+      );
+      if (marker) ctx.consumeModifier(marker.id);
+    },
+  },
   "gone in a flash|1": {
     onAttackDeclared(ctx: ScriptCtx) {
       ctx.setCounter("goneInAFlashReady", 1);

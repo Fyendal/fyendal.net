@@ -1575,6 +1575,35 @@ describe("Armory Decks — rules regression coverage", () => {
     g.expectPendingReturn(1, intimidates).expectNoLog("Massacre triggers: Intimidate");
   });
 
+  it.each([
+    ["swordmaster's path|1", "swordmaster's path|3"],
+    ["swordmaster's path|2", "swordmaster's path|3"],
+  ])("%s and %s both add to the next sharpen", (firstPath, secondPath) => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          weapons: ["zenith blade|0"],
+          hand: [firstPath, secondPath, "edict of steel|3", "edict of steel|1"],
+          resources: 2,
+          equipment: NO_EQUIPMENT,
+        },
+        { hero: "dorinthea", equipment: NO_EQUIPMENT },
+      ],
+    });
+
+    g.play(firstPath).play(secondPath);
+    expect(g.state.players[0]!.flags.ahaExtraSharpen).toBe(2);
+
+    g.play("edict of steel|3");
+    expect(g.state.players[0]!.weapons[0]!.counters?.power).toBe(3);
+    expect(g.state.players[0]!.flags.ahaExtraSharpen).toBe(0);
+    g.expectInZone(0, "flurry|0", "board");
+
+    g.play("edict of steel|1");
+    expect(g.state.players[0]!.weapons[0]!.counters?.power).toBe(4);
+  });
+
   it("blue Edict of Steel waits on the stack before sharpening", () => {
     const g = scenario({
       seats: [

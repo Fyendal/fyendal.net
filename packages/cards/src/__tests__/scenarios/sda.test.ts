@@ -192,6 +192,35 @@ describe("SDA — Dash attack and item effects", () => {
       .settle();
   });
 
+  it("Re-Charge lets its controller choose which Hyper Driver gains steam", () => {
+    const g = scenario({
+      seats: [
+        {
+          ...dash,
+          board: ["hyper driver|1", "hyper driver|2"],
+          hand: ["re-charge!|1", "zipper hit|3"],
+        },
+        { hero: "dorinthea", hand: [] },
+      ],
+    });
+    const first = boardCard(g, "hyper driver|1");
+    const second = boardCard(g, "hyper driver|2");
+    first.counters = { steam: 1 };
+    second.counters = { steam: 2 };
+
+    g.play("re-charge!|1", { pitch: ["zipper hit|3"] });
+    expect(g.state.pendingDecision).toMatchObject({
+      player: 0,
+      chooseHook: "re-charge-hyper-driver",
+      options: [String(first.instanceId), String(second.instanceId)],
+    });
+    g.chooseCard("hyper driver|2");
+
+    expect(boardCard(g, "hyper driver|1").counters?.steam).toBe(1);
+    expect(boardCard(g, "hyper driver|2").counters?.steam).toBe(3);
+    g.expectLog("Hyper Driver gains a steam counter (2 → 3)");
+  });
+
   it("Jump Start and Rev Up each cost one less while Hyper Driver is controlled", () => {
     const jump = scenario({
       seats: [

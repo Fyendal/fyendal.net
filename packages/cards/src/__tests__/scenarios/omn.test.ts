@@ -1249,6 +1249,36 @@ describe("OMN — import and set mechanics", () => {
       .expectLife(1, 14);
   });
 
+  it("Chromatic Refinement discounts Strike Twice from arsenal after arcane damage", () => {
+    const g = scenario({
+      seats: [
+        hero("oscilio, forked continuum|0", {
+          board: ["chromatic refinement|1"],
+          hand: ["destructive aethertide|3"],
+          arsenalFaceDown: ["strike twice|1"],
+        }),
+        foe(),
+      ],
+    });
+
+    g.endTurn().endTurn()
+      .expectInZone(0, "chromatic refinement|1", "graveyard")
+      .play("destructive aethertide|3")
+      .chooseOption("opposing hero");
+    expect(g.state.players[0]!.flags.arcaneDamageDealtToOpposingHeroThisTurn).toBe(true);
+    expect(g.state.modifiers.some((modifier) => modifier.playCostReduction === 1 && !modifier.consumed)).toBe(true);
+    const strike = g.state.players[0]!.arsenal.find((card) => card.cardId === printingId("strike twice|1"))!;
+    expect(legalIntents(g.state, 0)).toContainEqual(expect.objectContaining({
+      kind: "play-from-arsenal",
+      instanceId: strike.instanceId,
+      asInstant: true,
+      pitchInstanceIds: [],
+    }));
+    g.play("strike twice|1", { fromArsenal: true, asInstant: true })
+      .chooseOption("opponent")
+      .expectLife(1, 15);
+  });
+
   it("Beckoning Brilliance discounts the next instant only on its chain link", () => {
     const g = scenario({
       seats: [
