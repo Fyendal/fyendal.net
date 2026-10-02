@@ -453,7 +453,7 @@
   background: linear-gradient(180deg, #fbfaf6 0%, #edeeeb 58%, #d6d9d6 100%);
   box-shadow: 0 1px 2px #0009, inset 0 0 0 1px #b7bfba, inset 0 1px 0 #fff;
   color: #28302f;
-  font-family: Palatino, "Palatino Linotype", "Book Antiqua", Georgia, serif;
+  font-family: Alegreya, Palatino, "Palatino Linotype", "Book Antiqua", Georgia, serif;
   font-size: clamp(7px, .8vh, 8px);
   font-weight: 500;
   letter-spacing: normal;
