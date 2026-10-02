@@ -208,17 +208,19 @@
 }
 .mat-half.mat-opp { align-content: end; }
 
-/* Square arena art uses the row's full height. Keep the equipment/hero cluster
-   together and reserve the flexible runway for board permanents and piles. */
+/* Arena card art and its overhanging labels fit within square grid rows. Keep
+   the equipment/hero cluster together and reserve the flexible runway for
+   board permanents and piles. */
 .mat-half.mat-square-board {
-  --arena-square-size: clamp(86px, 13vh, 170px);
+  --arena-square-size: clamp(84px, 12vh, 165px);
+  --mat-column-gap: clamp(10px, 1.35vh, 15px);
   --mat-outer-col: var(--arena-square-size);
   --mat-arms-col: var(--arena-square-size);
   --mat-weapon-0-col: var(--arena-square-size);
   --mat-hero-col: var(--arena-square-size);
   --mat-weapon-1-col: var(--arena-square-size);
-  column-gap: clamp(6px, .8vh, 10px);
-  row-gap: clamp(12px, 1.7vh, 18px);
+  row-gap: clamp(14px, 1.9vh, 20px);
+  grid-template-rows: repeat(3, var(--arena-square-size));
   grid-template-columns:
     var(--mat-outer-col)
     var(--mat-arms-col)
@@ -262,8 +264,8 @@
   --mat-weapon-1-col: var(--mat-tapped-col);
 }
 
-/* Keep the packed desktop rows off the center inlay. The remaining slack
-   stays on the outer edge, where it separates lingering effects from hand. */
+/* Reserve space around the center inlay for the square cards' raised bars and
+   glow, while leaving the other edge clear of names and lingering effects. */
 @media (min-width: 701px) and (min-height: 701px) {
   .mat-half { padding-top: clamp(10px, 1.8vh, 22px); }
   .mat-half.mat-opp {
@@ -271,6 +273,8 @@
     padding-bottom: clamp(10px, 1.8vh, 22px);
   }
 }
+.mat-half.mat-square-board { padding-top: clamp(14px, 2.1vh, 22px); padding-bottom: 0; }
+.mat-half.mat-square-board.mat-opp { padding-top: 0; padding-bottom: clamp(14px, 2.1vh, 22px); }
 
 /* center divider between the two mat halves: a brass-inlay strip — hard
    gradient edges, no blur, so the seam stays crisp (both halves keep the
@@ -354,14 +358,17 @@
   border-radius: 6px;
   box-shadow: inset 0 0 12px #0003;
 }
-.mat-square-board .equipment-zone-empty {
+.mat-half.mat-square-board .equipment-zone-empty {
   width: var(--arena-square-size);
-  height: var(--arena-square-size);
-  border-radius: 2px;
+  height: calc(var(--arena-square-size) * .88);
+  border-color: #a9946b88;
+  border-radius: min(8px, 5%);
+  background: linear-gradient(160deg, #c2ad780d, #0b080212);
+  box-shadow: inset 0 0 0 1px #0004, inset 0 0 14px #0004;
 }
-.mat-square-board .zone-pile-empty {
+.mat-half.mat-square-board .zone-pile-empty {
   width: var(--mat-zone-col);
-  height: var(--mat-zone-col);
+  height: calc(var(--mat-zone-col) * .88);
 }
 .zone-pile-empty .mat-zone-label {
   font-size: clamp(8px, 1.1vh, 12px);
@@ -428,7 +435,7 @@
   padding-left: 41px;
   margin-block: -10px;
 }
-.mat-square-board .board-cards { padding-left: 8px; }
+.mat-square-board .board-cards { padding-left: 20px; }
 /* Expanded material stacks may cross the center seam. Lift their zone above
    the neighboring mat half and relax the strip clip only for the preview. */
 @media (hover: hover) and (pointer: fine) {
@@ -944,7 +951,7 @@
     grid-template-rows: repeat(3, var(--large-zone-card-height));
   }
   .mat-half.mat-square-board {
-    --arena-square-size: var(--large-zone-card-height);
+    --arena-square-size: min(12vh, 10.05vw);
   }
   .mat-half .card-zone {
     width: var(--large-zone-card-width);

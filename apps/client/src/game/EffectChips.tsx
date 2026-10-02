@@ -1,6 +1,6 @@
 import type { OngoingEffectView } from "@fyendal/shared";
 import { useIntl } from "react-intl";
-import { cardImageUrl } from "./Card.js";
+import { CardBack, CardFace } from "./Card.js";
 
 interface OngoingEffectStack {
   effect: OngoingEffectView;
@@ -53,9 +53,14 @@ export function EffectChips({
           {...(effect.cardId ? { "data-cardid": effect.cardId } : {})}
         >
           {effect.cardId ? (
-            <img className="effect-mini-img" src={cardImageUrl(effect.cardId)} alt="" draggable={false} loading="eager" />
+            <CardFace
+              card={{ instanceId: -1, cardId: effect.cardId, owner: effect.seat }}
+              size="zone"
+              showOverlays={false}
+              showTapped={false}
+            />
           ) : (
-            <div className="effect-mini-img effect-back" />
+            <CardBack label="" />
           )}
           {count > 1 ? (
             <span

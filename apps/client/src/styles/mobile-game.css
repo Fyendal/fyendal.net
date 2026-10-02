@@ -396,7 +396,7 @@
     -webkit-overflow-scrolling: touch;
   }
   .effects-row::-webkit-scrollbar { display: none; }
-  .effect-mini-img { width: 43px; height: 59px; }
+  .effect-mini > .card { width: 43px; height: 59px; }
   .effect-tip { display: none !important; }
   .chain-on-hit-tip { display: none !important; }
   .chain-on-hit-mobile-backdrop {

@@ -2,6 +2,7 @@ import { createElement, type ComponentProps } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import { TestI18nProvider } from "../i18n/TestI18nProvider.js";
+import { SquareCardPresentation } from "./Card.js";
 import {
   StackFloat,
   stackActivityRevision,
@@ -15,11 +16,25 @@ function renderStack(
 ) {
   return renderToStaticMarkup(createElement(TestI18nProvider, {
     locale,
-    children: createElement(StackFloat, props),
+    children: createElement(SquareCardPresentation, { enabled: true }, createElement(StackFloat, props)),
   }));
 }
 
 describe("stack popup visibility", () => {
+  it("keeps full card faces and trigger backs inside a square board", () => {
+    const html = renderStack({
+      layers: [
+        { card: { instanceId: 7, cardId: "WTR160", owner: 0 }, seat: 0, label: "Played card", optional: false },
+        { card: null, seat: 1, label: "Trigger", optional: false },
+      ],
+    });
+
+    expect(html).toContain('data-cardid="WTR160"');
+    expect(html).toContain('class="card card-zone card-back"');
+    expect(html).not.toContain("card-board-square");
+    expect(html).not.toContain("card-back-square");
+  });
+
   it("renders semantic trigger labels in the selected locale", () => {
     const html = renderStack({
       layers: [{

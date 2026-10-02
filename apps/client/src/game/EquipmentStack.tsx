@@ -22,7 +22,7 @@ export function EquipmentStack({
   boundCount,
   boundCountLabel,
   underCardCountLabel,
-  squareArt = false,
+  squareArt,
 }: {
   card: CardView;
   /** Additional public cards rendered behind the permanent, oldest first. */

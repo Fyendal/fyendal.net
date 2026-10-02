@@ -495,6 +495,10 @@
   gap: 9px;
   padding-left: 25px;
 }
+.mat-square-board .effects-row {
+  align-items: flex-start;
+  padding-top: 2px;
+}
 .effect-mini {
   position: relative;
   flex: 0 0 auto;
@@ -502,21 +506,35 @@
 .effect-mini-stacked {
   margin-right: 5px;
 }
-.effect-mini-stacked .effect-mini-img {
+.effect-mini-stacked > .card {
   box-shadow: 3px 2px 0 #20150d, 6px 4px 0 #80622f;
 }
-.effect-mini-img {
-  display: block;
+.effect-mini > .card {
   width: clamp(38px, 5.2vh, 68px);
   height: clamp(52px, 7.2vh, 93px);
-  object-fit: cover;
-  border-radius: 3px;
   border: 1px solid var(--bronze);
   animation: effect-blink 1.8s ease-in-out infinite;
 }
-.effect-back {
-  background: repeating-linear-gradient(45deg, #241a10, #241a10 5px, #17100a 5px, #17100a 9px);
-  border: 1px solid #b8933f33;
+.mat-square-board .effect-mini > .card {
+  width: clamp(55px, 7vh, 85px);
+  height: calc(clamp(55px, 7vh, 85px) * .88);
+}
+.effect-mini .board-square-name {
+  height: clamp(9px, 1vh, 11px);
+  font-size: clamp(5px, .6vh, 6px);
+}
+.effect-mini .board-square-stats {
+  height: clamp(12px, 1.55vh, 15px);
+}
+.effect-mini .board-square-stat {
+  min-width: 16px;
+  gap: 0;
+  padding-inline: 1px;
+  font-size: 8px;
+}
+.effect-mini .board-square-stat img {
+  width: 7px;
+  height: 7px;
 }
 .effect-count {
   position: absolute;

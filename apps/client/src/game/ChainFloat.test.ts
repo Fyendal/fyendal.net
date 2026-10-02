@@ -3,6 +3,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import type { ChainLinkView } from "@fyendal/shared";
 import { describe, expect, it, vi } from "vitest";
 import { TestI18nProvider } from "../i18n/TestI18nProvider.js";
+import { SquareCardPresentation } from "./Card.js";
 import { browseChainLink, ChainFloat, chainCardIsActivatable } from "./ChainFloat.js";
 import { chainTimelineRevision } from "./chainTimeline.js";
 
@@ -10,11 +11,30 @@ function renderChain(props: ComponentProps<typeof ChainFloat>, children?: ReactN
   return renderToStaticMarkup(createElement(
     TestI18nProvider,
     null,
-    createElement(ChainFloat, props, children),
+    createElement(SquareCardPresentation, { enabled: true }, createElement(ChainFloat, props, children)),
   ));
 }
 
 describe("combat-chain browsing", () => {
+  it("keeps attack and defense cards full size inside a square board", () => {
+    const html = renderChain({
+      links: [{
+        attackingCard: { instanceId: 42, cardId: "SBA016", owner: 0 },
+        defendingCards: [{ instanceId: 84, cardId: "SEA225", owner: 1 }],
+        reactions: [],
+        attackValue: 3,
+        defenseValue: 2,
+        damage: 1,
+        resolved: false,
+      }],
+      onRect: vi.fn(),
+    });
+
+    expect(html).toContain('data-cardid="SBA016"');
+    expect(html).toContain('data-cardid="SEA225"');
+    expect(html).not.toContain("card-board-square");
+  });
+
   it("releases pointer focus after browsing so Space can pass", () => {
     const blur = vi.fn();
     const browse = vi.fn();

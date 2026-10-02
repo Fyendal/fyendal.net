@@ -1,6 +1,6 @@
 import { useEffect, useRef, type AnimationEvent, type CSSProperties } from "react";
 import { createPortal } from "react-dom";
-import { CARD_BACK_IMAGE_URL, cardImageUrl } from "../Card.js";
+import { CARD_BACK_IMAGE_URL, CardBack, CardFace, cardImageUrl } from "../Card.js";
 import {
   MOTION_CONNECT_MS,
   motionFlightDurationMs,
@@ -29,30 +29,75 @@ function visualFaceUrl(visual: MotionVisual): string | null {
     : null;
 }
 
-function MotionCardVisual({ visual, count }: { visual: MotionVisual; count: number }) {
+/** The board's square cards have a different aspect ratio from hand and float
+ * cards. Use the destination shape so the flying copy matches the card that
+ * replaces it, including on responsive desktop layouts. */
+export function squareMotionFlight(flight: MotionFlight, squareCardsEnabled: boolean): boolean {
+  return squareCardsEnabled
+    && flight.destinationLayer === undefined
+    && flight.end.width / flight.end.height >= .9;
+}
+
+export function MotionCardVisual({
+  visual,
+  count,
+  square = false,
+}: {
+  visual: MotionVisual;
+  count: number;
+  square?: boolean;
+}) {
   const faceUrl = visualFaceUrl(visual);
   return (
-    <div className={`game-motion-visual game-motion-visual-${visual.kind}`}>
+    <div className={`game-motion-visual game-motion-visual-${visual.kind}${square ? " game-motion-visual-square" : ""}`}>
       {visual.kind !== "face" ? (
-        <img className="game-motion-image game-motion-back" src={CARD_BACK_IMAGE_URL} alt="" />
+        square ? (
+          <span className="game-motion-card-side game-motion-back">
+            <CardBack label="" square />
+          </span>
+        ) : (
+          <img className="game-motion-image game-motion-back" src={CARD_BACK_IMAGE_URL} alt="" />
+        )
       ) : null}
       {faceUrl ? (
-        <img className="game-motion-image game-motion-face" src={faceUrl} alt="" />
+        square && visual.kind !== "back" ? (
+          <span className="game-motion-card-side game-motion-face">
+            <CardFace card={visual.card} size="zone" squareArt showOverlays={false} showTapped={false} />
+          </span>
+        ) : (
+          <img className="game-motion-image game-motion-face" src={faceUrl} alt="" />
+        )
       ) : null}
       {count > 1 ? <span className="game-motion-count">×{count}</span> : null}
     </div>
   );
 }
 
-function flightStyle(flight: MotionFlight): MotionStyle {
-  const translateX = flight.end.left - flight.start.left;
-  const translateY = flight.end.top - flight.start.top;
+/** When a flight crosses between compact and full presentations, show the
+ * destination card at its natural proportions for the entire trip. */
+export function motionFlightStartRect(flight: MotionFlight, squareCardsEnabled: boolean): MotionRect {
+  const sourceIsSquare = flight.start.width / flight.start.height >= .9;
+  const destinationIsFull = flight.end.width / flight.end.height < .9;
+  const useDestinationSize = squareMotionFlight(flight, squareCardsEnabled)
+    || (squareCardsEnabled && sourceIsSquare && destinationIsFull);
+  return useDestinationSize ? {
+    left: flight.start.left + (flight.start.width - flight.end.width) / 2,
+    top: flight.start.top + (flight.start.height - flight.end.height) / 2,
+    width: flight.end.width,
+    height: flight.end.height,
+  } : flight.start;
+}
+
+function flightStyle(flight: MotionFlight, squareCardsEnabled: boolean): MotionStyle {
+  const start = motionFlightStartRect(flight, squareCardsEnabled);
+  const translateX = flight.end.left - start.left;
+  const translateY = flight.end.top - start.top;
   return {
-    ...rectStyle(flight.start),
+    ...rectStyle(start),
     "--motion-x": `${translateX}px`,
     "--motion-y": `${translateY}px`,
-    "--motion-scale-x": String(flight.end.width / flight.start.width),
-    "--motion-scale-y": String(flight.end.height / flight.start.height),
+    "--motion-scale-x": String(flight.end.width / start.width),
+    "--motion-scale-y": String(flight.end.height / start.height),
     "--motion-delay": `${flight.delayMs}ms`,
     "--motion-duration": `${motionFlightDurationMs(flight)}ms`,
   };
@@ -78,11 +123,13 @@ function connectorStyle(connector: MotionConnector): MotionStyle {
 function MotionFlightOverlay({
   batchId,
   flight,
+  squareCardsEnabled,
   onFlightArrive,
   onCueComplete,
 }: {
   batchId: string;
   flight: MotionFlight;
+  squareCardsEnabled: boolean;
   onFlightArrive: (batchId: string, destinationPresentationKey?: string) => boolean;
   onCueComplete: (cueId: string) => void;
 }) {
@@ -95,7 +142,7 @@ function MotionFlightOverlay({
       className={`game-motion-flight game-motion-flight-${flight.mode}${
         flight.holdAtSource ? " game-motion-flight-hold-source" : ""
       }`}
-      style={flightStyle(flight)}
+      style={flightStyle(flight, squareCardsEnabled)}
       onAnimationEnd={(event: AnimationEvent<HTMLDivElement>) => {
         // Ignore the nested back/face reveal animations. The wrapper's
         // completion is the exact point at which the real card takes over.
@@ -119,19 +166,20 @@ function MotionFlightOverlay({
       <MotionCardVisual
         visual={flight.visual}
         count={flight.showCount ? flight.count : 1}
+        square={squareMotionFlight(flight, squareCardsEnabled)}
       />
     </div>
   );
 }
 
-function MotionDeckCover({ flight }: { flight: MotionFlight }) {
+function MotionDeckCover({ flight, squareCardsEnabled }: { flight: MotionFlight; squareCardsEnabled: boolean }) {
   if (!flight.destinationCoverVisual) return null;
   return (
     <div
       className="game-motion-deck-cover"
       style={rectStyle(flight.end)}
     >
-      <MotionCardVisual visual={flight.destinationCoverVisual} count={1} />
+      <MotionCardVisual visual={flight.destinationCoverVisual} count={1} square={squareMotionFlight(flight, squareCardsEnabled)} />
     </div>
   );
 }
@@ -152,11 +200,13 @@ function QueuedHandSource({ flight }: { flight: MotionFlight }) {
 export function GameMotionLayer({
   batch,
   queuedHandSources,
+  squareCardsEnabled,
   onFlightArrive,
   onComplete,
 }: {
   batch: GameMotionBatch | null;
   queuedHandSources: readonly MotionFlight[];
+  squareCardsEnabled: boolean;
   onFlightArrive: (batchId: string, destinationPresentationKey?: string) => boolean;
   onComplete: (batchId: string) => void;
 }) {
@@ -215,6 +265,7 @@ export function GameMotionLayer({
             <MotionFlightOverlay
               batchId={batch.id}
               flight={flight}
+              squareCardsEnabled={squareCardsEnabled}
               key={flight.id}
               onFlightArrive={onFlightArrive}
               onCueComplete={completeCue}
@@ -247,13 +298,14 @@ export function GameMotionLayer({
           <MotionFlightOverlay
             batchId={batch.id}
             flight={flight}
+            squareCardsEnabled={squareCardsEnabled}
             key={flight.id}
             onFlightArrive={onFlightArrive}
             onCueComplete={completeCue}
           />
         ))}
         {boardFlights.map((flight) => (
-          <MotionDeckCover flight={flight} key={`${flight.id}:deck-cover`} />
+          <MotionDeckCover flight={flight} squareCardsEnabled={squareCardsEnabled} key={`${flight.id}:deck-cover`} />
         ))}
       </div>
       {chainFlights.length > 0 ? (
@@ -265,13 +317,14 @@ export function GameMotionLayer({
             <MotionFlightOverlay
               batchId={batch.id}
               flight={flight}
+              squareCardsEnabled={squareCardsEnabled}
               key={flight.id}
               onFlightArrive={onFlightArrive}
               onCueComplete={completeCue}
             />
           ))}
           {chainFlights.map((flight) => (
-            <MotionDeckCover flight={flight} key={`${flight.id}:deck-cover`} />
+            <MotionDeckCover flight={flight} squareCardsEnabled={squareCardsEnabled} key={`${flight.id}:deck-cover`} />
           ))}
         </div>
       ) : null}
@@ -284,13 +337,14 @@ export function GameMotionLayer({
             <MotionFlightOverlay
               batchId={batch.id}
               flight={flight}
+              squareCardsEnabled={squareCardsEnabled}
               key={flight.id}
               onFlightArrive={onFlightArrive}
               onCueComplete={completeCue}
             />
           ))}
           {stackFlights.map((flight) => (
-            <MotionDeckCover flight={flight} key={`${flight.id}:deck-cover`} />
+            <MotionDeckCover flight={flight} squareCardsEnabled={squareCardsEnabled} key={`${flight.id}:deck-cover`} />
           ))}
         </div>
       ) : null}

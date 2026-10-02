@@ -8,7 +8,7 @@ export function PitchStack({
   cards,
   resources,
   motionSeat,
-  squareArt = false,
+  squareArt,
 }: {
   cards: readonly CardView[];
   resources: number;

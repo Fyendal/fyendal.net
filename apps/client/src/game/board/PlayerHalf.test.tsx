@@ -127,6 +127,10 @@ describe("PlayerHalf", () => {
     expect(html).toMatch(/card-board-square[^>]*data-cardid="TST-HERO"/);
     expect(html.match(/card-board-square[^>]*data-cardid="WTR160"/g)).toHaveLength(3);
     expect(html).toContain("zone-pile-empty");
+    expect(html).not.toContain("data-empty-label");
+    const emptyPiles = renderPlayerHalf(player);
+    expect(emptyPiles).toContain('<span class="mat-zone-label">Deck</span>');
+    expect(emptyPiles).toContain('<span class="mat-zone-label">Pitch</span>');
   });
 
   it("localizes board zone labels in Chinese", () => {

@@ -139,11 +139,12 @@ export function StackFloat({
                 <CardFace
                   card={l.card}
                   size="zone"
+                  squareArt={false}
                   dimmed={l.card.faceDown}
                   motionKey={layerMotionKeys[i]}
                 />
               ) : (
-                <CardBack label={intl.formatMessage({ id: "game.stack.trigger" })} />
+                <CardBack label={intl.formatMessage({ id: "game.stack.trigger" })} square={false} />
               )}
               {!bloodDebt && count > 1 ? (
                 <span

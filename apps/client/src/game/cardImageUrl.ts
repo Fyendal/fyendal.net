@@ -177,3 +177,9 @@ export function resolveCardImageUrls(cardId: string, data?: CardImageData): stri
     `${IMG_BASE}/${cardId}-MV.webp`,
   ])];
 }
+
+/** The selected Fabrary object, rather than the card id, determines whether
+ * the square presentation should use its full-bleed Marvel artwork. */
+export function isMarvelCardImageUrl(url: string): boolean {
+  return /-MV\.webp(?:[?#]|$)/i.test(url);
+}

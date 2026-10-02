@@ -1,8 +1,8 @@
-import { useId, useRef, useState, type CSSProperties } from "react";
+import { createContext, useContext, useId, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import type { CardView } from "@fyendal/shared";
 import { cardData } from "@fyendal/cards/client";
 import { ViewportTooltip } from "../components/ViewportTooltip.js";
-import { resolveCardImageUrl, resolveCardImageUrls } from "./cardImageUrl.js";
+import { isMarvelCardImageUrl, resolveCardImageUrl, resolveCardImageUrls } from "./cardImageUrl.js";
 
 const PITCH_CLASS: Record<number, string> = {
   1: "pitch-red",
@@ -11,6 +11,15 @@ const PITCH_CLASS: Record<number, string> = {
   4: "pitch-purple",
 };
 const MARKED_TOKEN_ID = "HNT244";
+const SquareCardPresentationContext = createContext(false);
+
+export function SquareCardPresentation({ enabled, children }: { enabled: boolean; children?: ReactNode }) {
+  return (
+    <SquareCardPresentationContext.Provider value={enabled}>
+      {children}
+    </SquareCardPresentationContext.Provider>
+  );
+}
 const INTIMIDATED_TOOLTIP = "Intimidated — returns to hand at the beginning of the end phase";
 /** Rules counters that use the generic text-chip presentation. Card scripts
  * also keep implementation state in CardView.counters, so unknown keys must
@@ -196,7 +205,7 @@ export function CardFace({
   motionZoneAnchor,
   handReorderHint,
   focusSourceHidden,
-  squareArt = false,
+  squareArt,
 }: {
   card: CardView;
   size?: "hand" | "zone" | "preview";
@@ -242,6 +251,8 @@ export function CardFace({
   /** Square presentation for cards in the desktop arena. */
   squareArt?: boolean;
 }) {
+  const squarePresentationEnabled = useContext(SquareCardPresentationContext);
+  const squareCard = size === "zone" && (squareArt ?? squarePresentationEnabled);
   // Try temporary Fabrary variants before falling back to the text layout.
   const [imageFailure, setImageFailure] = useState<{ cardId: string; attempts: number } | null>(null);
   // identity is secret to this viewer — render as a card back; the intimidated
@@ -253,7 +264,7 @@ export function CardFace({
         data-motion-card={motionKey}
         data-motion-zone-anchor={motionZoneAnchor}
       >
-        <CardBack label={label ?? "Face down"} square={squareArt && size === "zone"} />
+        <CardBack label={label ?? "Face down"} size={size === "hand" ? "hand" : "zone"} square={squareCard} />
         {showOverlays && card.intimidated ? (
           <div className="c-ovls">
             <CounterOverlay
@@ -269,10 +280,11 @@ export function CardFace({
   }
   const data = cardData[card.cardId];
   const name = data?.name ?? card.name ?? card.cardId;
-  const boardSquare = size === "zone" && squareArt;
   const imageUrls = resolveCardImageUrls(card.cardId, data);
   const failedAttempts = imageFailure?.cardId === card.cardId ? imageFailure.attempts : 0;
-  const showImg = card.cardId !== "" && failedAttempts < imageUrls.length;
+  const imageUrl = card.cardId !== "" ? imageUrls[failedAttempts] : undefined;
+  const showImg = imageUrl !== undefined;
+  const marvelArt = imageUrl !== undefined && isMarvelCardImageUrl(imageUrl);
   const attack = card.attack ?? data?.attack;
   const defense = card.defense ?? data?.defense;
   const marked = (card.counters?.marked ?? 0) > 0;
@@ -317,7 +329,7 @@ export function CardFace({
   const cls = [
     "card",
     size === "zone" ? "card-zone" : size === "preview" ? "card-preview-frame" : "card-hand",
-    boardSquare ? "card-board-square" : "",
+    squareCard ? "card-board-square" : "",
     focusSourceHidden ? "pitch-focus-source-hidden" : "",
     showImg ? "card-hasimg" : "",
     selected ? "card-selected" : "",
@@ -362,13 +374,13 @@ export function CardFace({
           aria-keyshortcuts={handReorderHint ? "Alt+ArrowLeft Alt+ArrowRight" : undefined}
         />
       ) : null}
-      {boardSquare ? (
+      {squareCard ? (
         <>
           <span className="board-square-media" aria-hidden="true">
             {showImg ? (
               <img
                 className="c-img board-square-art"
-                src={imageUrls[failedAttempts]}
+                src={imageUrl}
                 alt=""
                 draggable={false}
                 loading="eager"
@@ -378,30 +390,49 @@ export function CardFace({
                 }))}
               />
             ) : null}
-            {showImg ? (
+            {showImg && !marvelArt ? (
               <>
                 <span className="board-square-frame-edge board-square-frame-left">
-                  <img src={imageUrls[failedAttempts]} alt="" draggable={false} />
+                  <img src={imageUrl} alt="" draggable={false} />
                 </span>
                 <span className="board-square-frame-edge board-square-frame-right">
-                  <img src={imageUrls[failedAttempts]} alt="" draggable={false} />
+                  <img src={imageUrl} alt="" draggable={false} />
                 </span>
               </>
             ) : null}
           </span>
-          <span className={`board-square-name${name.length >= 22 ? " board-square-name-long" : ""}`} title={name}>{name}</span>
+          <span
+            className="board-square-name"
+            data-pitch={data?.pitch && PITCH_CLASS[data.pitch] ? data.pitch : undefined}
+            title={name}
+          ><span className="board-square-name-text">{name}</span></span>
           {attack !== undefined || defense !== undefined || card.life !== undefined ? (
             <span className="board-square-stats">
-              {attack !== undefined ? <span className="board-square-stat board-square-attack">{attack}</span> : null}
-              {defense !== undefined ? <span className="board-square-stat board-square-defense">{defense}</span> : null}
-              {card.life !== undefined ? <span className="board-square-stat board-square-life">{card.life}</span> : null}
+              {attack !== undefined ? (
+                <span className="board-square-stat">
+                  <img src="/icons/attack.png" alt="" aria-hidden="true" />
+                  {attack}
+                </span>
+              ) : null}
+              {defense !== undefined ? (
+                <span className="board-square-stat">
+                  <img src="/icons/defence.png" alt="" aria-hidden="true" />
+                  {defense}
+                </span>
+              ) : null}
+              {card.life !== undefined ? (
+                <span className="board-square-stat">
+                  <img src="/icons/life.png" alt="" aria-hidden="true" />
+                  {card.life}
+                </span>
+              ) : null}
             </span>
           ) : null}
         </>
       ) : showImg ? (
         <img
           className="c-img"
-          src={imageUrls[failedAttempts]}
+          src={imageUrl}
           alt={name}
           draggable={false}
           loading="eager"
@@ -633,7 +664,7 @@ export function CardBack({
   count,
   label,
   size = "zone",
-  square = false,
+  square,
   motionKey,
   motionZoneAnchor,
   onClick,
@@ -647,13 +678,15 @@ export function CardBack({
   motionZoneAnchor?: string;
   onClick?: () => void;
 }) {
+  const squarePresentationEnabled = useContext(SquareCardPresentationContext);
+  const squareCard = size === "zone" && (square ?? squarePresentationEnabled);
   return (
     <div
       className={[
         "card",
         size === "hand" ? "card-hand" : "card-zone",
         "card-back",
-        square && size === "zone" ? "card-back-square" : "",
+        squareCard ? "card-back-square" : "",
         onClick ? "card-clickable" : "",
       ].filter(Boolean).join(" ")}
       data-motion-card={motionKey}
@@ -687,7 +720,7 @@ export function CardBack({
 export function InactiveZoneCard({
   card,
   showOverlays = true,
-  squareArt = false,
+  squareArt,
   showFaceDownIdentity = false,
   revealOwnerIntimidated = false,
   motionKey,

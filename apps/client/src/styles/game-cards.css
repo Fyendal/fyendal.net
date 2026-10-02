@@ -267,6 +267,14 @@
   background: #0009;
   pointer-events: none;
 }
+.card-board-square.card-dim {
+  /* The name and stat bars extend outside the image window. Dim the whole
+     compact card so those bars receive the same treatment as its artwork. */
+  filter: brightness(.4);
+}
+.card-board-square.card-dim::after {
+  content: none;
+}
 .card-explained { overflow: visible; }
 .card-explained:not(.card-clickable):focus-visible {
   outline: 3px solid #f1d98d;
@@ -366,27 +374,39 @@
   object-position: center;
   border-radius: 6px;
 }
-/* Source pixels y=92..500 fill the square at their
-   original proportions. The two narrow edge slices bring back the printing's
-   own class/talent frame, while source pixels outside the frame stay hidden. */
-.mat-half .card-zone.card-board-square {
-  width: var(--arena-square-size);
-  height: var(--arena-square-size);
-  aspect-ratio: 1;
+/* The art window is a little shorter than its width so its overhanging name
+   and stat bars leave the complete card with a square silhouette. The image
+   keeps its native aspect ratio; edge slices restore the printing's frame. */
+.card-zone.card-board-square {
+  width: var(--arena-square-size, clamp(84px, 12vh, 165px));
+  height: calc(var(--arena-square-size, clamp(84px, 12vh, 165px)) * .88);
   padding: 0;
   border: 0;
-  border-radius: 2px;
+  border-radius: min(8px, 5%);
   overflow: visible;
 }
 .table:not([data-playability-cue="high-contrast"])
   .card-board-square.card-highlight:not(.card-selected):not(.card-chain-source) {
-  box-shadow: 0 0 0 1px #62d994, 0 0 11px 3px #34c978b3;
+  --board-square-glow:
+    drop-shadow(0 0 2px #adffca)
+    drop-shadow(0 0 6px #46e991e6)
+    drop-shadow(0 0 12px #20a960b3);
+  box-shadow: none;
+  filter: var(--board-square-glow);
+}
+.table:not([data-playability-cue="high-contrast"])
+  .card-board-square.card-highlight.card-tapped:not(.card-selected):not(.card-chain-source) {
+  filter: brightness(.75) var(--board-square-glow);
 }
 .table[data-playability-cue="glow"]
   .card-board-square.card-highlight:not(.card-selected)::before {
   content: none;
 }
 .board-square-media {
+  /* At the standard 600×838 printing size, this shows roughly source rows
+     106–497: the artwork and its lower frame, before the rules box. Keep
+     every frame slice on the same offset at every rendered card size. */
+  --board-square-image-top: -27%;
   position: absolute;
   inset: 0;
   display: block;
@@ -395,13 +415,16 @@
   background: #111518;
   pointer-events: none;
 }
-.board-square-media .board-square-art {
+.board-square-media .board-square-art,
+.board-square-frame-edge img {
   position: absolute;
-  top: -22.55%;
-  left: -23.53%;
-  width: 147.06%;
-  height: 205.39%;
-  object-fit: fill;
+  top: var(--board-square-image-top);
+  width: 135%;
+  height: auto;
+  max-width: none;
+}
+.board-square-media .board-square-art {
+  left: -17.5%;
   border-radius: 0;
 }
 .board-square-frame-edge {
@@ -409,79 +432,93 @@
   inset: 0;
   overflow: hidden;
 }
-.board-square-frame-edge img {
-  position: absolute;
-  top: -22.55%;
-  width: 147.06%;
-  height: 205.39%;
-}
-.board-square-frame-left { clip-path: inset(0 93.6% 0 0); }
-.board-square-frame-left img { left: -6.86%; }
-.board-square-frame-right { clip-path: inset(0 0 0 93.6%); }
-.board-square-frame-right img { left: -40.2%; }
+.board-square-frame-left { clip-path: inset(0 91.5% 0 0); }
+.board-square-frame-left img { left: -6.3%; }
+.board-square-frame-right { clip-path: inset(0 0 0 91.5%); }
+.board-square-frame-right img { left: -28.7%; }
 .board-square-name {
   position: absolute;
   z-index: 2;
   top: 0;
-  left: 3px;
-  right: 3px;
-  display: block;
+  left: 6px;
+  right: 6px;
+  display: flex;
+  height: clamp(13px, 1.5vh, 15px);
+  align-items: center;
+  justify-content: center;
   overflow: hidden;
-  padding: 2px 3px;
-  border: 1px solid #8e8067;
-  border-radius: 4px;
-  background: linear-gradient(#f7f1e5, #d9cebb);
-  box-shadow: 0 1px 4px #000b, inset 0 1px #fff9;
-  color: #201a15;
-  font-size: clamp(6px, .85vh, 11px);
-  font-weight: 700;
-  line-height: 1.1;
+  padding: 0 4px;
+  border: 1px solid #414a49;
+  border-radius: 7px;
+  background: linear-gradient(180deg, #fbfaf6 0%, #edeeeb 58%, #d6d9d6 100%);
+  box-shadow: 0 1px 2px #0009, inset 0 0 0 1px #b7bfba, inset 0 1px 0 #fff;
+  color: #28302f;
+  font-family: Palatino, "Palatino Linotype", "Book Antiqua", Georgia, serif;
+  font-size: clamp(7px, .8vh, 8px);
+  font-weight: 500;
+  letter-spacing: normal;
+  line-height: 1;
   text-align: center;
-  text-overflow: ellipsis;
-  white-space: nowrap;
   transform: translateY(-50%);
   pointer-events: none;
 }
-.board-square-name-long { font-size: clamp(5px, .78vh, 10px); }
+.board-square-name-text {
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.board-square-name[data-pitch="1"] { --board-pitch-accent: #e5534b; }
+.board-square-name[data-pitch="2"] { --board-pitch-accent: #e3b341; }
+.board-square-name[data-pitch="3"] { --board-pitch-accent: #539bf5; }
+.board-square-name[data-pitch="4"] { --board-pitch-accent: #a970ff; }
+.board-square-name[data-pitch] {
+  border-top: 2px solid var(--board-pitch-accent);
+}
 .board-square-stats {
   position: absolute;
   z-index: 2;
-  right: 3px;
-  bottom: 3px;
-  display: flex;
-  gap: 2px;
+  right: 1px;
+  bottom: 0;
+  display: inline-flex;
+  align-items: stretch;
+  max-width: calc(100% - 4px);
+  height: clamp(16px, 2vh, 19px);
+  overflow: hidden;
+  border: 1px solid #697470;
+  border-radius: 5px 7px 7px 5px;
+  background: linear-gradient(180deg, #edf0ed 0%, #d7ddda 100%);
+  box-shadow: 0 1px 2px #0007, inset 0 0 0 1px #c2c9c4;
+  transform: translateY(9%);
   pointer-events: none;
 }
 .board-square-stat {
-  display: grid;
-  min-width: 20px;
-  height: 20px;
+  display: inline-flex;
+  min-width: 19px;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
   padding-inline: 2px;
-  place-items: center;
-  border: 1px solid #f5e2bc;
-  border-radius: 5px;
-  background: #12151de8;
-  box-shadow: 0 1px 4px #000c;
-  color: #fff;
-  font-size: 13px;
-  font-weight: 800;
+  color: #344b5f;
+  font-size: clamp(9px, 1.2vh, 11px);
+  font-weight: 750;
   line-height: 1;
 }
-.board-square-attack { border-color: #f6a86f; color: #ffb58c; }
-.board-square-defense { border-color: #86c9f5; color: #b0dfff; }
-.board-square-life { border-color: #ef9b9b; color: #ffd0d0; }
+.board-square-stat + .board-square-stat {
+  border-left: 1px solid #b8beba;
+}
+.board-square-stat img {
+  display: block;
+  width: clamp(8px, 1vh, 10px);
+  height: clamp(8px, 1vh, 10px);
+  flex: 0 0 auto;
+  opacity: .82;
+}
 .mat-square-board :is(.zone-deck, .zone-graveyard, .zone-banished, .zone-pitch)
   .card-zone.card-board-square {
   width: var(--mat-zone-col);
-  height: var(--mat-zone-col);
-}
-.mat-square-board :is(.zone-deck, .zone-graveyard, .zone-banished, .zone-pitch)
-  .board-square-name {
-  font-size: clamp(5px, .75vh, 9px);
-}
-.mat-square-board :is(.zone-deck, .zone-graveyard, .zone-banished, .zone-pitch)
-  .board-square-name-long {
-  font-size: clamp(4.5px, .65vh, 8px);
+  height: calc(var(--mat-zone-col) * .88);
 }
 .card-hasimg .c-zonelabel {
   bottom: 5px;
@@ -697,12 +734,16 @@
   justify-content: center;
   gap: 2px;
 }
+.card-back.card-back-square {
+  width: var(--arena-square-size, clamp(84px, 12vh, 165px));
+  height: var(--arena-square-size, clamp(84px, 12vh, 165px));
+  border: 1px solid #a99262;
+  border-radius: 6px;
+  box-shadow: 0 0 0 1px #21180f, 0 3px 8px #0008;
+}
 .mat-square-board .card-back.card-back-square {
   width: var(--mat-zone-col);
   height: var(--mat-zone-col);
-  aspect-ratio: 1;
-  border: 0;
-  border-radius: 2px;
 }
 .mat-square-board .zone-arsenal .card-back.card-back-square {
   width: var(--arena-square-size);
@@ -714,6 +755,13 @@
   height: 100%;
   object-fit: cover;
   border-radius: inherit;
+}
+.card-back-square .c-backimg {
+  /* The source back includes dark strips along its sides. Zoom the square
+     viewport slightly so those strips fall outside its clipped edges. */
+  position: absolute;
+  inset: 0;
+  transform: scale(1.15);
 }
 /* Keep public overlays anchored to the hidden card back they describe. */
 .card-hidden-wrap {

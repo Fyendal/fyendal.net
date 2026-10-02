@@ -5,7 +5,7 @@ import { useShallow } from "zustand/react/shallow";
 import type { CardView, GameIntent, MeldSide } from "@fyendal/shared";
 import { cardData } from "@fyendal/cards/client";
 import { useStore } from "../store.js";
-import { cardPreviewSize, CardBack, CardFace } from "./Card.js";
+import { cardPreviewSize, CardBack, CardFace, SquareCardPresentation } from "./Card.js";
 import { ChainFloat } from "./ChainFloat.js";
 import { EndTurnPassToast } from "./EndTurnPassToast.js";
 import { StatusFloat, type PrimaryAction } from "./StatusFloat.js";
@@ -1001,6 +1001,7 @@ export function GameBoard() {
   };
 
   return (
+    <SquareCardPresentation enabled={!mobileFloatViewport && !mobileLandscapeViewport}>
     <div
       ref={tableRef}
       className={`table${railCollapsed ? " rail-is-collapsed" : ""}${view.winner !== null ? " game-is-over" : ""}${hasActiveCombatChain ? " has-active-combat-chain" : ""}${mobileHandIsHidden ? " mobile-hand-is-hidden" : ""}${hasOwnPriority ? " has-own-priority" : ""}`}
@@ -1051,6 +1052,7 @@ export function GameBoard() {
                 <CardBack
                   key={i}
                   label=""
+                  size="hand"
                   motionKey={opaqueMotionPresentationKey(
                     { kind: "hand", seat: opp.seat },
                     i,
@@ -1444,9 +1446,11 @@ export function GameBoard() {
       <GameMotionLayer
         batch={gameMotion.batch}
         queuedHandSources={gameMotion.queuedHandSources}
+        squareCardsEnabled={!mobileFloatViewport && !mobileLandscapeViewport}
         onFlightArrive={gameMotion.arriveFlight}
         onComplete={gameMotion.completeBatch}
       />
     </div>
+    </SquareCardPresentation>
   );
 }

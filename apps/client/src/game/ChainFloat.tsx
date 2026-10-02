@@ -430,6 +430,8 @@ export function ChainFloat({
                     >
                       <CardFace
                         card={chain.attackingCard}
+                        size="zone"
+                        squareArt={false}
                         motionKey={motionPresentationKey(
                           { kind: "chain-attack", link: chainIdx },
                           chain.attackingCard.instanceId,
@@ -464,6 +466,7 @@ export function ChainFloat({
                           key={reaction.instanceId}
                           card={reaction}
                           size="zone"
+                          squareArt={false}
                           showTapped={false}
                           motionKey={motionPresentationKey(
                             {
@@ -517,6 +520,7 @@ export function ChainFloat({
                         <CardFace
                           card={chain.targetAlly}
                           size="zone"
+                          squareArt={false}
                           showTapped={false}
                           motionKey={motionPresentationKey(
                             { kind: "chain-target", link: chainIdx },
@@ -531,6 +535,7 @@ export function ChainFloat({
                             key={defender.instanceId}
                             card={defender}
                             size="zone"
+                            squareArt={false}
                             showTapped={false}
                             highlighted={activatable}
                             selected={
@@ -569,6 +574,7 @@ export function ChainFloat({
                               <CardFace
                                 card={c}
                                 size="zone"
+                                squareArt={false}
                                 showTapped={false}
                                 ghost
                                 motionKey={motionPresentationKey(
@@ -593,6 +599,7 @@ export function ChainFloat({
                             key={reaction.instanceId}
                             card={reaction}
                             size="zone"
+                            squareArt={false}
                             showTapped={false}
                             motionKey={motionPresentationKey(
                               {

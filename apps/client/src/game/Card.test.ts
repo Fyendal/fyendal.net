@@ -5,10 +5,11 @@ import {
   CardBack,
   CardFace,
   InactiveZoneCard,
+  SquareCardPresentation,
   cardImageUrl,
   cardPreviewSize,
 } from "./Card.js";
-import { resolveCardImageUrls } from "./cardImageUrl.js";
+import { isMarvelCardImageUrl, resolveCardImageUrls } from "./cardImageUrl.js";
 
 describe("cardImageUrl", () => {
   it.each(["ARC112", "CRU157", "DYN191", "SBA036", "ROS162"])(
@@ -85,6 +86,12 @@ describe("cardImageUrl", () => {
       "https://content.fabrary.net/cards/IAR083-CF.webp",
       "https://content.fabrary.net/cards/IAR083-MV.webp",
     ]);
+  });
+
+  it("recognizes the selected Marvel object, including a fallback candidate", () => {
+    expect(isMarvelCardImageUrl(cardImageUrl("FAB464"))).toBe(true);
+    expect(isMarvelCardImageUrl("https://content.fabrary.net/cards/IAR084-MV.webp")).toBe(true);
+    expect(isMarvelCardImageUrl(cardImageUrl("WTR160"))).toBe(false);
   });
 
   it("keeps a verified IAR override first without duplicate candidates", () => {
@@ -165,6 +172,34 @@ describe("CardBack", () => {
 });
 
 describe("CardFace payment state", () => {
+  it("uses square cards for desktop zone views while keeping hands and previews full", () => {
+    const renderWithSquareCards = (size: "zone" | "hand" | "preview") => renderToStaticMarkup(
+      createElement(SquareCardPresentation, { enabled: true }, createElement(CardFace, {
+        card: { instanceId: 5, cardId: "WTR160", owner: 0 },
+        size,
+      })),
+    );
+
+    expect(renderWithSquareCards("zone")).toContain("card-board-square");
+    expect(renderWithSquareCards("hand")).not.toContain("card-board-square");
+    expect(renderWithSquareCards("preview")).not.toContain("card-board-square");
+    expect(renderToStaticMarkup(createElement(SquareCardPresentation, { enabled: true },
+      createElement(CardBack, { label: "Hand", size: "hand" }),
+    ))).not.toContain("card-back-square");
+    expect(renderToStaticMarkup(createElement(SquareCardPresentation, { enabled: true },
+      createElement(CardFace, {
+        card: { instanceId: 6, cardId: "", owner: 1, hidden: true },
+        size: "hand",
+      }),
+    ))).toContain("card card-hand card-back");
+    expect(renderToStaticMarkup(createElement(SquareCardPresentation, { enabled: false },
+      createElement(CardFace, {
+        card: { instanceId: 5, cardId: "WTR160", owner: 0 },
+        size: "zone",
+      }),
+    ))).not.toContain("card-board-square");
+  });
+
   it("uses square art and live stats for any desktop arena card", () => {
     const board = renderToStaticMarkup(createElement(CardFace, {
       card: { instanceId: 1, cardId: "SBA002", owner: 0, attack: 3 },
@@ -181,17 +216,47 @@ describe("CardFace payment state", () => {
       size: "zone",
       squareArt: true,
     }));
+    const attackAndDefense = renderToStaticMarkup(createElement(CardFace, {
+      card: { instanceId: 4, cardId: "WTR161", owner: 0 },
+      size: "zone",
+      squareArt: true,
+    }));
 
     expect(board).toContain("card-board-square");
     expect(board).toContain("board-square-name");
+    expect(board).not.toContain("data-pitch=");
     expect(board).toContain("board-square-frame-left");
     expect(board).toContain("board-square-frame-right");
     expect(board).toContain("Scorpio, Comet Tail");
     expect(board).toContain('src="https://content.fabrary.net/cards/SBA002.webp"');
-    expect(board).toContain('board-square-attack">3</span>');
+    expect(board).toContain('src="/icons/attack.png"');
+    expect(board).toContain('aria-hidden="true"/>3</span>');
     expect(hand).not.toContain("card-board-square");
     expect(other).toContain("card-board-square");
+    expect(other).toContain('data-pitch="2"');
     expect(other).toContain('src="https://content.fabrary.net/cards/WTR160.webp"');
+    expect(other).toContain('src="/icons/defence.png"');
+    expect(attackAndDefense).toContain('src="/icons/attack.png"');
+    expect(attackAndDefense).toContain('data-pitch="3"');
+    expect(attackAndDefense).toContain('src="/icons/defence.png"');
+  });
+
+  it("shows Marvel art without reconstructed frame edges on a square card", () => {
+    const marvel = renderToStaticMarkup(createElement(CardFace, {
+      card: { instanceId: 1, cardId: "FAB464", owner: 0 },
+      size: "zone",
+      squareArt: true,
+    }));
+    const standard = renderToStaticMarkup(createElement(CardFace, {
+      card: { instanceId: 2, cardId: "WTR160", owner: 0 },
+      size: "zone",
+      squareArt: true,
+    }));
+
+    expect(marvel).toContain("board-square-art");
+    expect(marvel).not.toContain("board-square-frame-edge");
+    expect(marvel).toContain("board-square-name");
+    expect(standard).toContain("board-square-frame-edge");
   });
 
   it("loads card art eagerly so visible cards do not wait for hover", () => {

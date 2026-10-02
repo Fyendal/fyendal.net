@@ -78,6 +78,7 @@
   min-height: 0;
   overflow-y: auto;
   overscroll-behavior: contain;
+  padding: 10px 2px 6px;
 }
 .card-search-overlay-panel {
   width: min(1180px, 92vw);
@@ -144,6 +145,7 @@
 /* Pile cards stay compact enough to show several at once; hover/tap inspection
    provides the full-size view. */
 .overlay-cards .card-zone { width: 116px; height: 160px; }
+.overlay-cards .card-zone.card-board-square { width: 116px; height: 102px; }
 .overlay-cards .card-zone .c-name { font-size: 10px; }
 .overlay-cards .card-zone .c-atk,
 .overlay-cards .card-zone .c-def { font-size: 14px; }
