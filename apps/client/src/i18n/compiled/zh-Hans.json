@@ -149,6 +149,18 @@
       "value": "账户"
     }
   ],
+  "achievements.againsttheodds.description": [
+    {
+      "type": 0,
+      "value": "开局回合后，双方都完成至少一个回合，再曾落后至少 15 点生命值，最终赢得对局。"
+    }
+  ],
+  "achievements.againsttheodds.name": [
+    {
+      "type": 0,
+      "value": "逆转乾坤"
+    }
+  ],
   "achievements.beatbravo.description": [
     {
       "type": 0,
@@ -273,6 +285,18 @@
       "value": "date"
     }
   ],
+  "achievements.emptytank.description": [
+    {
+      "type": 0,
+      "value": "牌库中没有剩余卡牌时赢得对局。"
+    }
+  ],
+  "achievements.emptytank.name": [
+    {
+      "type": 0,
+      "value": "弹尽粮绝"
+    }
+  ],
   "achievements.filter.all": [
     {
       "type": 0,
@@ -339,10 +363,34 @@
       "value": "首场胜利"
     }
   ],
+  "achievements.fivestriketurn.description": [
+    {
+      "type": 0,
+      "value": "在一场已结束的对局中，单个自己的回合发起至少 5 次攻击。"
+    }
+  ],
+  "achievements.fivestriketurn.name": [
+    {
+      "type": 0,
+      "value": "五连攻回合"
+    }
+  ],
   "achievements.footnote": [
     {
       "type": 0,
       "value": "百分比以已进行过对局的玩家为基准。成就从功能上线后完成的对局开始计算。"
+    }
+  ],
+  "achievements.fullhand.description": [
+    {
+      "type": 0,
+      "value": "在一场已结束的对局中，同时拥有至少 6 张手牌。"
+    }
+  ],
+  "achievements.fullhand.name": [
+    {
+      "type": 0,
+      "value": "手牌充盈"
     }
   ],
   "achievements.group.bots": [
@@ -363,10 +411,46 @@
       "value": "初次体验"
     }
   ],
+  "achievements.healthyvictory.description": [
+    {
+      "type": 0,
+      "value": "以超过 20 点剩余生命值赢得一场对局。"
+    }
+  ],
+  "achievements.healthyvictory.name": [
+    {
+      "type": 0,
+      "value": "游刃有余"
+    }
+  ],
   "achievements.intro": [
     {
       "type": 0,
       "value": "记录你在合法卡池对局中的胜利、精彩回合与击败的对手。"
+    }
+  ],
+  "achievements.ironwall.description": [
+    {
+      "type": 0,
+      "value": "在一场已结束的对局中，于对手的单个回合阻挡至少 20 点伤害。"
+    }
+  ],
+  "achievements.ironwall.name": [
+    {
+      "type": 0,
+      "value": "铜墙铁壁"
+    }
+  ],
+  "achievements.lastlife.description": [
+    {
+      "type": 0,
+      "value": "以恰好 1 点剩余生命值赢得一场对局。"
+    }
+  ],
+  "achievements.lastlife.name": [
+    {
+      "type": 0,
+      "value": "一线生机"
     }
   ],
   "achievements.loadError": [
@@ -381,10 +465,34 @@
       "value": "未解锁"
     }
   ],
+  "achievements.longgame.description": [
+    {
+      "type": 0,
+      "value": "在第 15 回合或之后赢得对局。"
+    }
+  ],
+  "achievements.longgame.name": [
+    {
+      "type": 0,
+      "value": "持久战"
+    }
+  ],
   "achievements.matchEarned": [
     {
       "type": 0,
       "value": "本局解锁的成就"
+    }
+  ],
+  "achievements.overkill.description": [
+    {
+      "type": 0,
+      "value": "赢得一场对局，且对手的生命值为 −10 或更低。"
+    }
+  ],
+  "achievements.overkill.name": [
+    {
+      "type": 0,
+      "value": "致命一击"
     }
   ],
   "achievements.progress": [
@@ -457,6 +565,18 @@
     {
       "type": 0,
       "value": "重试"
+    }
+  ],
+  "achievements.secondwind.description": [
+    {
+      "type": 0,
+      "value": "在一场对局中累计获得至少 10 点生命值并获胜。"
+    }
+  ],
+  "achievements.secondwind.name": [
+    {
+      "type": 0,
+      "value": "重振旗鼓"
     }
   ],
   "achievements.title": [

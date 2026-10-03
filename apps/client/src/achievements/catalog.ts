@@ -5,7 +5,10 @@ export const ACHIEVEMENT_GROUPS: ReadonlyArray<{
   ids: readonly AchievementId[];
 }> = [
   { titleId: "achievements.group.first", ids: ["first-victory", "first-pvp-win", "first-bot-win"] },
-  { titleId: "achievements.group.challenges", ids: ["big-turn", "relentless-victory"] },
+  { titleId: "achievements.group.challenges", ids: [
+    "big-turn", "relentless-victory", "full-hand", "overkill", "healthy-victory", "last-life",
+    "five-strike-turn", "iron-wall", "second-wind", "long-game", "against-the-odds", "empty-tank",
+  ] },
   { titleId: "achievements.group.bots", ids: [
     "beat-bravo", "beat-briar", "beat-kayo", "beat-cindra",
     "beat-ira", "beat-hala", "beat-jarl",

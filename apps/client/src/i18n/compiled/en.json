@@ -149,6 +149,18 @@
       "value": "Account"
     }
   ],
+  "achievements.againsttheodds.description": [
+    {
+      "type": 0,
+      "value": "Win after trailing by at least 15 life once both players have completed a turn after the opening turn."
+    }
+  ],
+  "achievements.againsttheodds.name": [
+    {
+      "type": 0,
+      "value": "Against the Odds"
+    }
+  ],
   "achievements.beatbravo.description": [
     {
       "type": 0,
@@ -273,6 +285,18 @@
       "value": "date"
     }
   ],
+  "achievements.emptytank.description": [
+    {
+      "type": 0,
+      "value": "Win with no cards left in your deck."
+    }
+  ],
+  "achievements.emptytank.name": [
+    {
+      "type": 0,
+      "value": "Empty Tank"
+    }
+  ],
   "achievements.filter.all": [
     {
       "type": 0,
@@ -339,10 +363,34 @@
       "value": "First Victory"
     }
   ],
+  "achievements.fivestriketurn.description": [
+    {
+      "type": 0,
+      "value": "Make at least 5 attacks during one of your turns in a completed game."
+    }
+  ],
+  "achievements.fivestriketurn.name": [
+    {
+      "type": 0,
+      "value": "Five-Strike Turn"
+    }
+  ],
   "achievements.footnote": [
     {
       "type": 0,
       "value": "Percentages compare players who have played a game. Achievements begin with games completed after launch."
+    }
+  ],
+  "achievements.fullhand.description": [
+    {
+      "type": 0,
+      "value": "Have at least 6 cards in hand at once during a completed game."
+    }
+  ],
+  "achievements.fullhand.name": [
+    {
+      "type": 0,
+      "value": "Full Hand"
     }
   ],
   "achievements.group.bots": [
@@ -363,10 +411,46 @@
       "value": "First steps"
     }
   ],
+  "achievements.healthyvictory.description": [
+    {
+      "type": 0,
+      "value": "Win a game with more than 20 life remaining."
+    }
+  ],
+  "achievements.healthyvictory.name": [
+    {
+      "type": 0,
+      "value": "Fit for Another Round"
+    }
+  ],
   "achievements.intro": [
     {
       "type": 0,
       "value": "Your wins, standout turns, and opponents defeated in legal card-pool games."
+    }
+  ],
+  "achievements.ironwall.description": [
+    {
+      "type": 0,
+      "value": "Block at least 20 damage during one opponent turn in a completed game."
+    }
+  ],
+  "achievements.ironwall.name": [
+    {
+      "type": 0,
+      "value": "Iron Wall"
+    }
+  ],
+  "achievements.lastlife.description": [
+    {
+      "type": 0,
+      "value": "Win a game with exactly 1 life remaining."
+    }
+  ],
+  "achievements.lastlife.name": [
+    {
+      "type": 0,
+      "value": "By a Thread"
     }
   ],
   "achievements.loadError": [
@@ -381,10 +465,34 @@
       "value": "Locked"
     }
   ],
+  "achievements.longgame.description": [
+    {
+      "type": 0,
+      "value": "Win on turn 15 or later."
+    }
+  ],
+  "achievements.longgame.name": [
+    {
+      "type": 0,
+      "value": "The Long Game"
+    }
+  ],
   "achievements.matchEarned": [
     {
       "type": 0,
       "value": "Achievements earned this match"
+    }
+  ],
+  "achievements.overkill.description": [
+    {
+      "type": 0,
+      "value": "Win a game with your opponent at −10 life or lower."
+    }
+  ],
+  "achievements.overkill.name": [
+    {
+      "type": 0,
+      "value": "Overkill"
     }
   ],
   "achievements.progress": [
@@ -453,6 +561,18 @@
     {
       "type": 0,
       "value": "Retry"
+    }
+  ],
+  "achievements.secondwind.description": [
+    {
+      "type": 0,
+      "value": "Gain at least 10 life during a game and win."
+    }
+  ],
+  "achievements.secondwind.name": [
+    {
+      "type": 0,
+      "value": "Second Wind"
     }
   ],
   "achievements.title": [

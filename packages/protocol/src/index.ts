@@ -171,6 +171,8 @@ export interface AccountBadgesResponse {
 }
 export const ACHIEVEMENT_IDS = [
   "first-victory", "first-pvp-win", "first-bot-win", "big-turn", "relentless-victory",
+  "full-hand", "overkill", "healthy-victory", "last-life",
+  "five-strike-turn", "iron-wall", "second-wind", "long-game", "against-the-odds", "empty-tank",
   "beat-bravo", "beat-briar", "beat-kayo", "beat-cindra",
   "beat-ira", "beat-hala", "beat-jarl", "beat-starvo",
 ] as const;

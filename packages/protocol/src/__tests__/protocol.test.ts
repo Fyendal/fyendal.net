@@ -1097,10 +1097,20 @@ describe("replays and HTTP responses", () => {
       unlocks: [{ id: "big-turn", unlockedAt: 123, roomCode: "ABC123" }],
       percentages: [
         "first-victory", "first-pvp-win", "first-bot-win", "big-turn", "relentless-victory",
+        "full-hand", "overkill", "healthy-victory", "last-life",
+        "five-strike-turn", "iron-wall", "second-wind", "long-game", "against-the-odds", "empty-tank",
         "beat-bravo", "beat-briar", "beat-kayo", "beat-cindra", "beat-ira", "beat-hala",
         "beat-jarl", "beat-starvo",
       ].map((id) => ({ id, percent: 12.5 })),
     };
+    for (const id of [
+      "full-hand", "overkill", "healthy-victory", "last-life",
+      "five-strike-turn", "iron-wall", "second-wind", "long-game", "against-the-odds", "empty-tank",
+    ]) {
+      expect(decodeAchievementsResponse({ ...achievements, unlocks: [
+        { id, unlockedAt: 123, roomCode: "ABC123" },
+      ] })).not.toBeNull();
+    }
     expect(ACTIVE_ACHIEVEMENT_IDS).not.toContain("beat-starvo");
     expect(decodeAchievementsResponse(achievements)).not.toBeNull();
     expect(decodeAchievementsResponse({ ...achievements, unlocks: [
