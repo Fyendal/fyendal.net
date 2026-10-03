@@ -414,6 +414,7 @@ export function CardFace({
           </span>
           <span
             className={`board-square-name${data?.cardType === "hero" ? " board-square-name-hero" : ""}`}
+            data-card-type={data?.cardType}
             data-pitch={data?.pitch && PITCH_CLASS[data.pitch] ? data.pitch : undefined}
             title={name}
           ><span className="board-square-name-text">{name}</span></span>

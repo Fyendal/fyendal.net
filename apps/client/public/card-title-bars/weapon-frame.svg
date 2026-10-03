@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="320" height="28" viewBox="0 0 320 28" preserveAspectRatio="none">
+  <defs>
+    <linearGradient id="edge">
+      <stop stop-color="#ad704c" stop-opacity=".4"/>
+      <stop offset=".55" stop-color="#ad704c" stop-opacity=".18"/>
+      <stop offset="1" stop-color="#ad704c" stop-opacity="0"/>
+    </linearGradient>
+    <g id="dissolve">
+      <path fill="url(#edge)" d="M0 0h29v28H0z"/>
+      <g fill="#ad704c" fill-opacity=".24">
+        <circle cx="26" cy="6" r="2.2"/>
+        <circle cx="32" cy="12" r="1.7"/>
+        <circle cx="27" cy="21" r="1.9"/>
+        <circle cx="35" cy="20" r="1.2"/>
+      </g>
+    </g>
+  </defs>
+  <path fill="#f3e5d5" d="M0 0h320v28H0z"/>
+  <use href="#dissolve"/>
+  <use href="#dissolve" transform="translate(320) scale(-1 1)"/>
+</svg>
