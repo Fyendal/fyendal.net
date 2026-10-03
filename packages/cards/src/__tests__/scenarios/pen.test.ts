@@ -15,6 +15,77 @@ describe("PEN — import and set mechanics", () => {
     expect(new Set(cards.map(functionalKeyOf))).toHaveLength(348);
   });
 
+  it("Bone Puppetry lets its defender decline the ally return", () => {
+    const g = scenario({ active: 1, seats: [
+      {
+        hero: "rhinar",
+        hand: ["dodge|3"],
+        graveyard: ["limpit, hop-a-long|2"],
+        equipment: { ...NO_EQUIPMENT, arms: "bone puppetry|0" },
+      },
+      { hero: "dorinthea", hand: ["head jab|1"], equipment: NO_EQUIPMENT },
+    ] });
+
+    g.play("head jab|1").blockWith("bone puppetry|0").settle();
+    expect(g.state.pendingDecision?.prompt).toContain("Return an ally");
+    g.chooseOption("no").settle();
+    g.expectZoneSize(0, "board", 0).expectHandSize(0, 1);
+    g.endTurn().expectHandSize(0, 1);
+  });
+
+  it("Bone Puppetry's delayed cleanup survives Blade Break and discards the defender's hand", () => {
+    const g = scenario({ active: 1, seats: [
+      {
+        hero: "rhinar",
+        hand: ["dodge|3", "pack hunt|1"],
+        graveyard: ["limpit, hop-a-long|2", "cutty shark, quick clip|2"],
+        equipment: { ...NO_EQUIPMENT, arms: "bone puppetry|0" },
+      },
+      { hero: "dorinthea", hand: ["head jab|1"], equipment: NO_EQUIPMENT },
+    ] });
+
+    g.play("head jab|1").blockWith("bone puppetry|0").settle()
+      .chooseCard("cutty shark, quick clip|2")
+      .settle()
+      .expectZoneSize(0, "board", 1)
+      .expectHandSize(0, 2);
+    g.endTurn()
+      .expectNoEquipment(0, "arms")
+      .expectInZone(0, "bone puppetry|0", "graveyard")
+      .expectZoneSize(0, "board", 0)
+      .expectInZone(0, "cutty shark, quick clip|2", "graveyard")
+      .expectHandSize(0, 0)
+      .expectInZone(0, "dodge|3", "graveyard")
+      .expectInZone(0, "pack hunt|1", "graveyard");
+  });
+
+  it("Bone Puppetry still discards the defender's hand if the returned ally dies first", () => {
+    const g = scenario({ active: 1, seats: [
+      {
+        hero: "rhinar",
+        life: 20,
+        hand: ["dodge|3", "pack hunt|1"],
+        graveyard: ["limpit, hop-a-long|2"],
+        equipment: { ...NO_EQUIPMENT, arms: "bone puppetry|0" },
+      },
+      {
+        hero: "dorinthea",
+        life: 10,
+        hand: ["scar for a scar|1", "head jab|1"],
+        equipment: NO_EQUIPMENT,
+      },
+    ] });
+
+    g.play("scar for a scar|1").blockWith("bone puppetry|0").settle()
+      .chooseCard("limpit, hop-a-long|2")
+      .settle()
+      .play("head jab|1", { targetAlly: "limpit, hop-a-long|2" })
+      .settle()
+      .expectZoneSize(0, "board", 0)
+      .expectHandSize(0, 2);
+    g.endTurn().expectHandSize(0, 0);
+  });
+
   it("High Current Currency can target energy counters on opposing equipment", () => {
     const g = scenario({ seats: [
       {

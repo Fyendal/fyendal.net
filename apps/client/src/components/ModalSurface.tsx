@@ -17,12 +17,16 @@ export function ModalSurface({
   children,
   className = "",
   description,
+  eyebrow,
+  showCloseButton = true,
 }: {
   title: string;
   onClose: () => void;
   children?: ReactNode;
   className?: string;
-  description?: string;
+  description?: ReactNode;
+  eyebrow?: string;
+  showCloseButton?: boolean;
 }) {
   const intl = useIntl();
   const titleId = useId();
@@ -103,17 +107,22 @@ export function ModalSurface({
         onKeyDown={onKeyDown}
       >
         <header className="modal-surface-header">
-          <h2 id={titleId}>{title}</h2>
-          <button
-            type="button"
-            className="modal-surface-close"
-            aria-label={intl.formatMessage({ id: "common.closeNamed" }, { title })}
-            onClick={onClose}
-          >
-            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-              <path d="M6 6 18 18M18 6 6 18" />
-            </svg>
-          </button>
+          <div>
+            {eyebrow ? <span className="modal-surface-eyebrow">{eyebrow}</span> : null}
+            <h2 id={titleId}>{title}</h2>
+          </div>
+          {showCloseButton ? (
+            <button
+              type="button"
+              className="modal-surface-close"
+              aria-label={intl.formatMessage({ id: "common.closeNamed" }, { title })}
+              onClick={onClose}
+            >
+              <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <path d="M6 6 18 18M18 6 6 18" />
+              </svg>
+            </button>
+          ) : null}
         </header>
         {description ? <p id={descriptionId} className="modal-surface-description">{description}</p> : null}
         {children}

@@ -9945,6 +9945,12 @@
       "value": " 个灵气衍生物目标"
     }
   ],
+  "card.pen.bonepuppetry.ally.return": [
+    {
+      "type": 0,
+      "value": "将一名盟友从你的坟场返回 arena？"
+    }
+  ],
   "card.pen.card.banish": [
     {
       "type": 0,
@@ -12561,10 +12567,10 @@
       "value": " 点资源"
     }
   ],
-  "card.trigger.common.bonepuppetry.discard": [
+  "card.trigger.common.bonepuppetry.cleanup": [
     {
       "type": 0,
-      "value": "结算 Bone Puppetry 的弃牌效果"
+      "value": "摧毁返回的盟友并弃掉你的手牌"
     }
   ],
   "card.trigger.common.bridgeofdamnation.maintain": [
@@ -25058,6 +25064,12 @@
       "value": "知道了"
     }
   ],
+  "versionUpdate.kicker": [
+    {
+      "type": 0,
+      "value": "版本更新"
+    }
+  ],
   "versionUpdate.title": [
     {
       "type": 0,
@@ -25066,10 +25078,16 @@
     {
       "type": 1,
       "value": "version"
-    },
+    }
+  ],
+  "versionUpdate.updatedAt": [
     {
       "type": 0,
-      "value": " 更新"
+      "value": "更新于"
+    },
+    {
+      "type": 1,
+      "value": "date"
     }
   ]
 }

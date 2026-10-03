@@ -25,8 +25,39 @@ export function VersionUpdateBody({ markdown }: { markdown: string }) {
   );
 }
 
-export function VersionUpdateModal({ username }: { username: string }) {
+export function VersionUpdateDialog({ notice, onDismiss }: {
+  notice: VersionUpdateNotice;
+  onDismiss: () => void;
+}) {
   const intl = useIntl();
+  const publishedAt = notice.publishedAt;
+  const updated = publishedAt === null ? undefined : (
+    <time dateTime={new Date(publishedAt).toISOString()}>
+      {intl.formatMessage({ id: "versionUpdate.updatedAt" }, {
+        date: intl.formatDate(publishedAt, { dateStyle: "medium", timeStyle: "short" }),
+      })}
+    </time>
+  );
+  return (
+    <ModalSurface
+      title={intl.formatMessage({ id: "versionUpdate.title" }, { version: notice.version })}
+      eyebrow={intl.formatMessage({ id: "versionUpdate.kicker" })}
+      description={updated}
+      showCloseButton={false}
+      onClose={onDismiss}
+      className="version-update-modal"
+    >
+      <VersionUpdateBody markdown={notice.markdown} />
+      <div className="version-update-actions">
+        <button className="version-update-confirm" type="button" data-modal-initial-focus onClick={onDismiss}>
+          {intl.formatMessage({ id: "versionUpdate.dismiss" })}
+        </button>
+      </div>
+    </ModalSurface>
+  );
+}
+
+export function VersionUpdateModal({ username }: { username: string }) {
   const [notice, setNotice] = useState<VersionUpdateNotice | null>(null);
   const [dismissedId, setDismissedId] = useState<string | null>(null);
 
@@ -46,12 +77,5 @@ export function VersionUpdateModal({ username }: { username: string }) {
     try { localStorage.setItem(versionUpdateSeenKey(username, notice.id), "1"); }
     catch { /* Session dismissal still works when storage is unavailable. */ }
   };
-  return (
-    <ModalSurface title={intl.formatMessage({ id: "versionUpdate.title" }, { version: notice.version })} onClose={dismiss} className="version-update-modal">
-      <VersionUpdateBody markdown={notice.markdown} />
-      <div className="version-update-actions">
-        <button type="button" data-modal-initial-focus onClick={dismiss}>{intl.formatMessage({ id: "versionUpdate.dismiss" })}</button>
-      </div>
-    </ModalSurface>
-  );
+  return <VersionUpdateDialog notice={notice} onDismiss={dismiss} />;
 }

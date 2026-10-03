@@ -1,7 +1,9 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
 import { TestI18nProvider } from "../i18n/TestI18nProvider.js";
-import { VersionUpdateBody, VersionUpdateModal, seenUpdate, versionUpdateSeenKey } from "./VersionUpdateModal.js";
+import {
+  VersionUpdateBody, VersionUpdateDialog, VersionUpdateModal, seenUpdate, versionUpdateSeenKey,
+} from "./VersionUpdateModal.js";
 
 describe("VersionUpdateModal", () => {
   it("scopes dismissal to account and publication", () => {
@@ -29,5 +31,21 @@ describe("VersionUpdateModal", () => {
     expect(html).not.toContain("<img");
     expect(html).not.toContain("javascript:");
     expect(html).toContain('href="https://fyendal.net/"');
+  });
+  it("shows the update time and one visible dismissal control", () => {
+    const html = renderToStaticMarkup(
+      <TestI18nProvider>
+        <VersionUpdateDialog
+          notice={{ id: "test", version: "2.0", markdown: "## New features", publishedAt: 1_700_000_000_000 }}
+          onDismiss={vi.fn()}
+        />
+      </TestI18nProvider>,
+    );
+    expect(html).toContain("Fyendal 2.0");
+    expect(html).toContain("Version update");
+    expect(html).toContain("Updated ");
+    expect(html).toContain('dateTime="2023-11-14T22:13:20.000Z"');
+    expect(html.match(/<button\b/g)).toHaveLength(1);
+    expect(html).not.toContain("modal-surface-close");
   });
 });

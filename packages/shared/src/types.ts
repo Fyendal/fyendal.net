@@ -1006,4 +1006,6 @@ export interface VersionUpdateNotice {
   id: string;
   version: string;
   markdown: string;
+  /** UTC epoch milliseconds. Null only for notices published before this field existed. */
+  publishedAt: number | null;
 }

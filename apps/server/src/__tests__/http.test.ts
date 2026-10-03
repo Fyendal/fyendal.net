@@ -73,7 +73,7 @@ describe("public version update", () => {
     const noticeDb = await freshDb();
     const url = await startApi({ db: noticeDb });
     expect(await (await fetch(`${url}/api/version-update`)).json()).toEqual({ ok: true, notice: null });
-    const notice = { id: "version-2", version: "2.0", markdown: "## New\n\n- Something" };
+    const notice = { id: "version-2", version: "2.0", markdown: "## New\n\n- Something", publishedAt: 1_700_000_000_000 };
     await noticeDb.query("INSERT INTO version_update_notice(singleton, notice) VALUES (TRUE, $1)", [JSON.stringify(notice)]);
     const response = await fetch(`${url}/api/version-update`);
     expect(response.headers.get("cache-control")).toBe("no-store");

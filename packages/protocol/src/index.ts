@@ -53,11 +53,18 @@ export const MAX_VERSION_UPDATE_MARKDOWN_LENGTH = 10_000;
 
 export function decodeVersionUpdateNotice(value: unknown): VersionUpdateNotice | null {
   const notice = object(value);
-  if (!notice || !exactKeys(notice, ["id", "version", "markdown"])
+  const legacy = notice !== null && !Object.hasOwn(notice, "publishedAt");
+  const publishedAt = legacy ? null : notice?.publishedAt;
+  if (!notice || !exactKeys(notice, legacy
+    ? ["id", "version", "markdown"]
+    : ["id", "version", "markdown", "publishedAt"])
     || !id(notice.id) || !string(notice.version, 80, false) || !notice.version.trim()
     || !string(notice.markdown, MAX_VERSION_UPDATE_MARKDOWN_LENGTH, false)
-    || !notice.markdown.trim()) return null;
-  return { id: notice.id, version: notice.version, markdown: notice.markdown };
+    || !notice.markdown.trim()
+    || !(publishedAt === null || (nonNegativeInteger(publishedAt)
+      && publishedAt <= 8_640_000_000_000_000))) return null;
+  return { id: notice.id, version: notice.version, markdown: notice.markdown,
+    publishedAt };
 }
 
 export function decodeVersionUpdateNoticeResponse(value: unknown): VersionUpdateNoticeResponse | null {

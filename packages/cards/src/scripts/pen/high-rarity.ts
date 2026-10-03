@@ -602,22 +602,32 @@ export const penHighRarity: Record<string, CardScript> = {
   },
   "bone puppetry|0": {
     onDefend(ctx) {
-      const ally = ctx.player(ctx.seat).graveyard.find((card) => has(ctx, card, "ally"));
-      if (ally && ctx.settleCard(ally.instanceId)) {
-        ctx.setCounter("puppet", ally.instanceId);
-        ctx.destroyAtEndPhase(ally.instanceId);
-      }
+      const allies = ctx.player(ctx.seat).graveyard.filter((card) => has(ctx, card, "ally"));
+      if (allies.length) ctx.requestCardChoice(
+        "bone-puppetry-ally",
+        decisionPrompt("Return an ally from your graveyard?", "card.pen.bonepuppetry.ally.return", {
+          optionMessages: commonOptionMessages("no"),
+        }),
+        ["no", ...allies.map((card) => card.instanceId)],
+      );
     },
-    triggers: [
-      {
-        event: "end-of-turn",
-        label: "Bone Puppetry discard",
-        condition: (ctx) => ctx.getCounter("puppet") > 0,
-        effect(ctx) {
-          for (const card of [...ctx.player(ctx.seat).hand]) ctx.discardCard(ctx.seat, card.instanceId);
-        },
-      },
-    ],
+    onChoose(ctx, hook, option) {
+      if (hook !== "bone-puppetry-ally" || option === "no") return;
+      const allyId = Number(option);
+      if (!ctx.settleCard(allyId)) return;
+      ctx.setCounter("puppet", allyId);
+      ctx.scheduleEndOfTurnTrigger(
+        "bone-puppetry-cleanup",
+        decisionPrompt("Destroy the returned ally and discard your hand", "card.trigger.common.bonepuppetry.cleanup"),
+        ctx.state.activePlayer,
+      );
+    },
+    onDelayedTrigger(ctx, hook) {
+      if (hook !== "bone-puppetry-cleanup") return;
+      const allyId = ctx.getCounter("puppet");
+      if (allyId) ctx.destroyPermanent(allyId);
+      for (const card of [...ctx.player(ctx.seat).hand]) ctx.discardCard(ctx.seat, card.instanceId);
+    },
   },
   "boo, resident spook|2": {
     activated: attackAbility(0, { tap: true }),

@@ -103,7 +103,6 @@ const triggerMessagesByLabel: Readonly<Record<string, GameMessage>> = {
   "Banish two Loyalty Beyond the Grave to draw": { id: "card.trigger.common.loyalty.banish.draw", values: { count: 2 } },
   "Banish until a 6 power card is found": { id: "card.trigger.common.deck.banish.power", values: { amount: 6 } },
   "Bios Update — put the banished item into the arena": { id: "card.trigger.common.biosupdate.arena" },
-  "Bone Puppetry discard": { id: "card.trigger.common.bonepuppetry.discard" },
   "Both heroes gain 3 life": { id: "card.trigger.common.heroes.life.gain", values: { amount: 3 } },
   "Bottom another aura": { id: "card.trigger.common.aura.bottom.another" },
   "Check Korshem": { id: "card.trigger.common.korshem.check" },

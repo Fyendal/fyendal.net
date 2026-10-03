@@ -10449,6 +10449,12 @@
       "value": "total"
     }
   ],
+  "card.pen.bonepuppetry.ally.return": [
+    {
+      "type": 0,
+      "value": "Return an ally from your graveyard?"
+    }
+  ],
   "card.pen.card.banish": [
     {
       "type": 0,
@@ -13183,10 +13189,10 @@
       "value": " resources"
     }
   ],
-  "card.trigger.common.bonepuppetry.discard": [
+  "card.trigger.common.bonepuppetry.cleanup": [
     {
       "type": 0,
-      "value": "Resolve Bone Puppetry's discard"
+      "value": "Destroy the returned ally and discard your hand"
     }
   ],
   "card.trigger.common.bridgeofdamnation.maintain": [
@@ -26360,6 +26366,12 @@
       "value": "Got it"
     }
   ],
+  "versionUpdate.kicker": [
+    {
+      "type": 0,
+      "value": "Version update"
+    }
+  ],
   "versionUpdate.title": [
     {
       "type": 0,
@@ -26368,10 +26380,16 @@
     {
       "type": 1,
       "value": "version"
-    },
+    }
+  ],
+  "versionUpdate.updatedAt": [
     {
       "type": 0,
-      "value": " update"
+      "value": "Updated "
+    },
+    {
+      "type": 1,
+      "value": "date"
     }
   ]
 }
