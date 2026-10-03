@@ -22337,7 +22337,7 @@
   "landing.demoAlt": [
     {
       "type": 0,
-      "value": "A Fyendal match between Malice, Domina of the Dead and Hala AI"
+      "value": "A Fyendal match between Dash I/O and Cindra Bot"
     }
   ],
   "landing.faq.contribute.answer": [
@@ -22593,7 +22593,7 @@
   "landing.subtitle": [
     {
       "type": 0,
-      "value": "Play for free in your browser. Find opponents, test your deck against hero-specific AI, and bring your Fabrary decks."
+      "value": "A free, open source and community driven platform to play Flesh and Blood in your browser. Find opponents, test your deck against hero-specific AI, and bring your Fabrary decks."
     }
   ],
   "landing.title": [
@@ -24317,7 +24317,13 @@
   "play.intro.body": [
     {
       "type": 0,
-      "value": "Play with your Fabrary deck against real players or AI."
+      "value": "Bring your Fabrary deck to face other players or practice against AI."
+    }
+  ],
+  "play.intro.title": [
+    {
+      "type": 0,
+      "value": "A Free, Open Source Platform to play Flesh and Blood online"
     }
   ],
   "play.preview.loading": [

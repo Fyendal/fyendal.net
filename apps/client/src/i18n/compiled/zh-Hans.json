@@ -21473,7 +21473,7 @@
   "landing.demoAlt": [
     {
       "type": 0,
-      "value": "Fyendal 中 Malice, Domina of the Dead 与 Hala AI 的对局"
+      "value": "Fyendal 中 Dash I/O 与 Cindra Bot 的对局"
     }
   ],
   "landing.faq.contribute.answer": [
@@ -23177,7 +23177,13 @@
   "play.intro.body": [
     {
       "type": 0,
-      "value": "使用你的 Fabrary 牌组，与真人玩家或 AI 对战。"
+      "value": "使用你的 Fabrary 牌组，与其他玩家对战或和 AI 练习。"
+    }
+  ],
+  "play.intro.title": [
+    {
+      "type": 0,
+      "value": "免费、由社区打造的在线赤魂战纪 (Flesh & Blood) 对战平台"
     }
   ],
   "play.preview.loading": [

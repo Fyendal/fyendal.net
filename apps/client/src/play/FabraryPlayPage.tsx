@@ -56,13 +56,13 @@ export function FabraryPlayPage() {
       <LobbyHeader />
       <main id="main-content" className="fabrary-play-main">
         <aside className="fabrary-play-intro" aria-labelledby="fabrary-play-intro-title">
-          <img src="/fyendal-gameplay-play-card.jpg"
+          <img src="/fyendal-gameplay-cindra-play.jpg"
             alt={intl.formatMessage({ id: "landing.demoAlt" })}
             width={1260} height={1118} loading="lazy" decoding="async" />
           <div className="fabrary-play-intro-content">
             <span className="fabrary-play-intro-kicker" aria-hidden="true">Fyendal</span>
             <p id="fabrary-play-intro-title" className="fabrary-play-intro-title">
-              {intl.formatMessage({ id: "landing.title" })}
+              {intl.formatMessage({ id: "play.intro.title" })}
             </p>
             <p className="fabrary-play-intro-body">{intl.formatMessage({ id: "play.intro.body" })}</p>
           </div>

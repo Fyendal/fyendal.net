@@ -103,7 +103,7 @@
   display: block;
   width: 100%;
   height: auto;
-  aspect-ratio: 16 / 9;
+  aspect-ratio: 2940 / 1600;
   object-fit: cover;
 }
 .landing-section-heading h2,

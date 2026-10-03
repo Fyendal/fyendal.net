@@ -33,8 +33,8 @@ describe("guest search landing", () => {
     expect(html).not.toContain('href="#create-account"');
     expect(html).not.toContain("See Fyendal in action");
     expect(html).not.toContain("<video");
-    expect(html).toContain('src="/fyendal-gameplay-demo-poster.jpg"');
-    expect(html).toContain('width="1600" height="869"');
+    expect(html).toContain('src="/fyendal-gameplay-cindra-home.jpg"');
+    expect(html).toContain('width="1600" height="871"');
     expect(html).toContain('loading="lazy"');
     expect(html).toContain('id="practice-bots"');
     expect(html).toContain("Play vs AI");
