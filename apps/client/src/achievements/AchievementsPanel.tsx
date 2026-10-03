@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useIntl } from "react-intl";
-import { ACHIEVEMENT_IDS, type AchievementsResponse } from "@fyendal/protocol";
+import { ACTIVE_ACHIEVEMENT_IDS, type AchievementsResponse } from "@fyendal/protocol";
 import { apiAchievements } from "../auth/auth.js";
 import { heroImageUrl } from "../lobby/heroImage.js";
 import { useStore } from "../store.js";
@@ -28,12 +28,14 @@ export function AchievementsPanel() {
     return () => controller.abort();
   }, [token, revision]);
 
-  const unlocked = new Map(data?.unlocks.map((item) => [item.id, item.unlockedAt]));
+  const unlocked = new Map(data?.unlocks
+    .filter((item) => ACTIVE_ACHIEVEMENT_IDS.includes(item.id))
+    .map((item) => [item.id, item.unlockedAt]));
   const percentages = new Map(data?.percentages.map((item) => [item.id, item.percent]));
   const count = unlocked.size;
-  const visibleCount = filter === "all" ? ACHIEVEMENT_IDS.length
-    : filter === "unlocked" ? count : ACHIEVEMENT_IDS.length - count;
-  const progressLabel = intl.formatMessage({ id: "achievements.progress" }, { count, total: ACHIEVEMENT_IDS.length });
+  const visibleCount = filter === "all" ? ACTIVE_ACHIEVEMENT_IDS.length
+    : filter === "unlocked" ? count : ACTIVE_ACHIEVEMENT_IDS.length - count;
+  const progressLabel = intl.formatMessage({ id: "achievements.progress" }, { count, total: ACTIVE_ACHIEVEMENT_IDS.length });
 
   return (
     <div className="panel achievements-panel">
@@ -45,9 +47,9 @@ export function AchievementsPanel() {
         <div className="achievements-progress">
           <div className="achievements-progress-copy" aria-hidden="true">
             <span>{intl.formatMessage({ id: "achievements.unlocked" })}</span>
-            <strong>{count}<span> / {ACHIEVEMENT_IDS.length}</span></strong>
+            <strong>{count}<span> / {ACTIVE_ACHIEVEMENT_IDS.length}</span></strong>
           </div>
-          <progress value={count} max={ACHIEVEMENT_IDS.length} aria-label={progressLabel} />
+          <progress value={count} max={ACTIVE_ACHIEVEMENT_IDS.length} aria-label={progressLabel} />
         </div>
       </header>
       {error ? (
@@ -61,7 +63,7 @@ export function AchievementsPanel() {
         {(["all", "locked", "unlocked"] as const).map((option) => (
           <button key={option} type="button" className={filter === option ? "selected" : ""} aria-pressed={filter === option} onClick={() => setFilter(option)}>
             {intl.formatMessage({ id: `achievements.filter.${option}` })}
-            <span>{option === "all" ? ACHIEVEMENT_IDS.length : option === "locked" ? ACHIEVEMENT_IDS.length - count : count}</span>
+            <span>{option === "all" ? ACTIVE_ACHIEVEMENT_IDS.length : option === "locked" ? ACTIVE_ACHIEVEMENT_IDS.length - count : count}</span>
           </button>
         ))}
       </div> : null}

@@ -8,7 +8,7 @@ export const ACHIEVEMENT_GROUPS: ReadonlyArray<{
   { titleId: "achievements.group.challenges", ids: ["big-turn", "relentless-victory"] },
   { titleId: "achievements.group.bots", ids: [
     "beat-bravo", "beat-briar", "beat-kayo", "beat-cindra",
-    "beat-ira", "beat-hala", "beat-jarl", "beat-starvo",
+    "beat-ira", "beat-hala", "beat-jarl",
   ] },
 ];
 
@@ -20,7 +20,6 @@ export const ACHIEVEMENT_BOT_HEROES: Partial<Record<AchievementId, string>> = {
   "beat-ira": "Ira, Scarlet Revenger",
   "beat-hala": "Hala, Bladesaint of the Vow",
   "beat-jarl": "Jarl Vetreiði",
-  "beat-starvo": "Bravo, Star of the Show",
 };
 
 export function achievementMessageId(id: AchievementId, part: "name" | "description"): string {

@@ -41,7 +41,10 @@ describe("achievements", () => {
       const awards = achievementsForSeat(match({
         opponent: { controller: "bot", deckId: bot.deckId },
       }), 0);
-      expect(awards).toEqual(["first-victory", "first-bot-win", `beat-${bot.id}`]);
+      expect(awards).toEqual([
+        "first-victory", "first-bot-win",
+        ...(bot.id === "starvo" ? [] : [`beat-${bot.id}`]),
+      ]);
     }
   });
 
@@ -67,6 +70,21 @@ describe("achievements", () => {
       [userId, "first-victory", 8_640_000_000_000_001, "ABCDEF"],
     );
     await expect(listUserAchievements(db, userId)).rejects.toThrow("invalid achievement row");
+  });
+
+  it("keeps previously earned Starvo unlocks readable", async () => {
+    const db = await freshDb();
+    const { rows } = await db.query(
+      "INSERT INTO users (username, username_lc, pass_hash, created_at) VALUES ('Alice','alice','hash',1) RETURNING id",
+    );
+    const userId = Number(rows[0]!.id);
+    await db.query(
+      "INSERT INTO user_achievements (user_id, achievement_id, unlocked_at, room_code) VALUES ($1, $2, $3, $4)",
+      [userId, "beat-starvo", 123, "ABCDEF"],
+    );
+    expect(await listUserAchievements(db, userId)).toEqual([
+      { id: "beat-starvo", unlockedAt: 123, roomCode: "ABCDEF" },
+    ]);
   });
 
   it("persists unlocks once and reports percentages over players who played", async () => {

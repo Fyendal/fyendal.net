@@ -1,5 +1,5 @@
 import { botDefinitionForDeckId } from "@fyendal/bot";
-import { ACHIEVEMENT_IDS, decodeAchievementUnlock, type AchievementId, type AchievementsResponse } from "@fyendal/protocol";
+import { ACHIEVEMENT_IDS, ACTIVE_ACHIEVEMENT_IDS, decodeAchievementUnlock, type AchievementId, type AchievementsResponse } from "@fyendal/protocol";
 import type { Queryable } from "./db.js";
 import type { RoomRow, SeatRow } from "./store.js";
 
@@ -24,7 +24,10 @@ export function achievementsForSeat(room: AchievementMatch, seat: 0 | 1): Achiev
     if (opponent?.controller === "bot") {
       result.push("first-bot-win");
       const bot = botDefinitionForDeckId(opponent.deckId);
-      if (bot) result.push(`beat-${bot.id}`);
+      if (bot) {
+        const botAchievement: AchievementId = `beat-${bot.id}`;
+        if (ACTIVE_ACHIEVEMENT_IDS.includes(botAchievement)) result.push(botAchievement);
+      }
     } else if (opponent?.userId) {
       result.push("first-pvp-win");
     }

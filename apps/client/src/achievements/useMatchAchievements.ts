@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { ACHIEVEMENT_IDS, type AchievementId } from "@fyendal/protocol";
+import { ACTIVE_ACHIEVEMENT_IDS, type AchievementId } from "@fyendal/protocol";
 import { apiAchievements } from "../auth/auth.js";
 import type { ViewUpdate } from "../store/types.js";
 
@@ -37,8 +37,10 @@ export function useMatchAchievements({
     const controller = new AbortController();
     void apiAchievements(token, controller.signal).then((result) => {
       if (controller.signal.aborted || !result.ok) return;
-      const ids = result.unlocks.filter((item) => item.roomCode === roomCode).map((item) => item.id)
-        .sort((a, b) => ACHIEVEMENT_IDS.indexOf(a) - ACHIEVEMENT_IDS.indexOf(b));
+      const ids = result.unlocks
+        .filter((item) => item.roomCode === roomCode && ACTIVE_ACHIEVEMENT_IDS.includes(item.id))
+        .map((item) => item.id)
+        .sort((a, b) => ACTIVE_ACHIEVEMENT_IDS.indexOf(a) - ACTIVE_ACHIEVEMENT_IDS.indexOf(b));
       if (ids.length > 0) {
         setToastExiting(false);
         setToastPercent(result.percentages.find((item) => item.id === ids[0])?.percent ?? null);

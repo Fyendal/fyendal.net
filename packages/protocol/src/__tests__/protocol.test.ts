@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  ACTIVE_ACHIEVEMENT_IDS,
   decodeAccountExportResponse,
   decodeAccountBadgesResponse,
   decodeAchievementsResponse,
@@ -1100,7 +1101,11 @@ describe("replays and HTTP responses", () => {
         "beat-jarl", "beat-starvo",
       ].map((id) => ({ id, percent: 12.5 })),
     };
+    expect(ACTIVE_ACHIEVEMENT_IDS).not.toContain("beat-starvo");
     expect(decodeAchievementsResponse(achievements)).not.toBeNull();
+    expect(decodeAchievementsResponse({ ...achievements, unlocks: [
+      { id: "beat-starvo", unlockedAt: 123, roomCode: "ABC123" },
+    ] })).not.toBeNull();
     expect(decodeAchievementsResponse({ ...achievements, unlocks: [
       { id: "big-turn", unlockedAt: 123, roomCode: "ABC123", secret: true },
     ] })).toBeNull();

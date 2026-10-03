@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import { apiAchievements } from "../auth/auth.js";
+import type { AchievementId } from "@fyendal/protocol";
 import { useMatchAchievements } from "./useMatchAchievements.js";
 
 // Run the hook's effects and cleanups without a browser or a DOM dependency.
@@ -44,13 +45,13 @@ function TestHook(input: Input) {
   hooks.pending.splice(0).forEach((effect) => effect());
   return result;
 }
-function pendingResponse() {
+function pendingResponse(id: AchievementId = "first-victory") {
   let resolve!: (value: Awaited<ReturnType<typeof apiAchievements>>) => void;
   vi.mocked(apiAchievements).mockReturnValueOnce(new Promise((done) => { resolve = done; }));
   return () => resolve({
     ok: true,
-    unlocks: [{ id: "first-victory", roomCode: "ABCDEF", unlockedAt: 123 }],
-    percentages: [{ id: "first-victory", percent: 4.2 }],
+    unlocks: [{ id, roomCode: "ABCDEF", unlockedAt: 123 }],
+    percentages: [{ id, percent: 4.2 }],
   });
 }
 
@@ -122,4 +123,14 @@ it("clears the toast on account changes and ignores the previous account's looku
   current();
   await Promise.resolve();
   expect(TestHook(otherAccount).toast).toEqual(["first-victory"]);
+});
+
+it("does not show a toast for a retired Starvo unlock", async () => {
+  TestHook(initial);
+  const resolve = pendingResponse("beat-starvo");
+  const finish = { ...initial, gameOver: true };
+  TestHook(finish);
+  resolve();
+  await Promise.resolve();
+  expect(TestHook(finish).toast).toEqual([]);
 });
