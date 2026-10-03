@@ -17,7 +17,7 @@ describe("guest search landing", () => {
 
     expect(html).toContain("Play Flesh and Blood Online");
     expect(html).toContain("Free, open source, and built by the community.");
-    expect(html).toContain("against other players or hero-specific AI with your Fabrary decks");
+    expect(html).toContain("against other players or competitive, hero-specific bots with your Fabrary decks");
     expect(html).not.toContain('class="intro-logo"');
     expect(html).toContain("<strong>2</strong> in game");
     expect(html).toContain("<strong>1</strong> open room");
@@ -37,7 +37,7 @@ describe("guest search landing", () => {
     expect(html).toContain('width="1600" height="871"');
     expect(html).toContain('loading="lazy"');
     expect(html).toContain('id="practice-bots"');
-    expect(html).toContain("Play vs AI");
+    expect(html).toContain("Challenge competitive bots");
     expect(html.match(/<details/g)).toHaveLength(7);
     expect(html).toContain("Is Fyendal free to play?");
     expect(html).not.toContain("How do I create an account?");

@@ -19803,7 +19803,7 @@
   "game.bot.fallback": [
     {
       "type": 0,
-      "value": "The AI opponent is using simpler moves while browser computation recovers."
+      "value": "The bot is using simpler moves while browser computation recovers."
     }
   ],
   "game.bot.refresh": [
@@ -19815,13 +19815,13 @@
   "game.bot.refresh.required": [
     {
       "type": 0,
-      "value": "Refresh this page to update the AI opponent."
+      "value": "Refresh this page to update the bot."
     }
   ],
   "game.bot.retry": [
     {
       "type": 0,
-      "value": "Retry AI opponent"
+      "value": "Retry bot"
     }
   ],
   "game.bound.count": [
@@ -22325,13 +22325,13 @@
   "landing.bots.body": [
     {
       "type": 0,
-      "value": "Test decks against hero-specific AI opponents with their own strategies."
+      "value": "Test decks against hero-specific bots with distinct strategies."
     }
   ],
   "landing.bots.title": [
     {
       "type": 0,
-      "value": "Play vs AI"
+      "value": "Challenge competitive bots"
     }
   ],
   "landing.demoAlt": [
@@ -22575,7 +22575,7 @@
   "landing.startPlayingBody": [
     {
       "type": 0,
-      "value": "Create a free account to play matches and test your deck against AI."
+      "value": "Create a free account to play matches and challenge competitive bots."
     }
   ],
   "landing.startPlayingLabel": [
@@ -22593,7 +22593,7 @@
   "landing.subtitle": [
     {
       "type": 0,
-      "value": "Free, open source, and built by the community. Play in your browser against other players or hero-specific AI with your Fabrary decks."
+      "value": "Free, open source, and built by the community. Play in your browser against other players or competitive, hero-specific bots with your Fabrary decks."
     }
   ],
   "landing.title": [
@@ -22659,7 +22659,7 @@
   "lobby.action.playBot": [
     {
       "type": 0,
-      "value": "Play vs AI"
+      "value": "Play vs bot"
     }
   ],
   "lobby.action.rejoin": [
@@ -22731,7 +22731,7 @@
   "lobby.bot.prompt": [
     {
       "type": 0,
-      "value": "Who would you like to practice against?"
+      "value": "Choose a bot to play against."
     }
   ],
   "lobby.bot.searchForPlayer": [
@@ -22743,7 +22743,7 @@
   "lobby.bot.searchForPlayer.description": [
     {
       "type": 0,
-      "value": "Test your deck against this AI opponent while Fyendal looks for a PvP opponent."
+      "value": "Play against this bot while Fyendal looks for another player."
     }
   ],
   "lobby.bot.starvo.description": [
@@ -24145,7 +24145,7 @@
   "matchmaking.background.keepBot": [
     {
       "type": 0,
-      "value": "Keep playing against AI"
+      "value": "Keep playing against the bot"
     }
   ],
   "matchmaking.background.searching": [
@@ -24175,7 +24175,7 @@
   "meta.home.description": [
     {
       "type": 0,
-      "value": "Play Flesh and Blood online for free. Find opponents, test your deck against hero-specific AI, import Fabrary decks, spectate games, and review replays."
+      "value": "Play Flesh and Blood online for free. Find opponents, challenge competitive hero-specific bots, import Fabrary decks, spectate games, and review replays."
     }
   ],
   "meta.home.title": [
@@ -24211,7 +24211,7 @@
   "play.bot": [
     {
       "type": 0,
-      "value": "Play vs AI"
+      "value": "Play vs bot"
     }
   ],
   "play.cards.banned": [
@@ -24317,7 +24317,7 @@
   "play.intro.body": [
     {
       "type": 0,
-      "value": "Bring your Fabrary deck to face other players or practice against AI."
+      "value": "Bring your Fabrary deck to face other players or challenge a competitive bot."
     }
   ],
   "play.intro.kicker": [
@@ -24467,7 +24467,7 @@
   "prep.botNudge.description": [
     {
       "type": 0,
-      "value": "No other active player is looking for a game right now. Would you like to test your deck against AI while you wait?"
+      "value": "Challenge a competitive, hero-specific bot now. You can keep searching for a player while you play."
     }
   ],
   "prep.botNudge.keepWaiting": [
@@ -24485,7 +24485,7 @@
   "prep.botNudge.starting": [
     {
       "type": 0,
-      "value": "Starting practice…"
+      "value": "Starting bot game…"
     }
   ],
   "prep.botNudge.title": [
@@ -25299,7 +25299,7 @@
   "replay.emptyBody": [
     {
       "type": 0,
-      "value": "Completed games and manually ended AI games will appear here automatically."
+      "value": "Completed games and manually ended bot games will appear here automatically."
     }
   ],
   "replay.emptyTitle": [

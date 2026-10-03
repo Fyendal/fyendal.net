@@ -139,7 +139,7 @@ describe("RoomList", () => {
     expect(html).toContain("Precon");
     expect(html).toContain("Find Match");
     expect(html).toContain("Invite Friend");
-    expect(html).toContain("Play vs AI");
+    expect(html).toContain("Play vs bot");
     expect(html).toContain('class="home-play-mode-segments" role="group" aria-label="Game mode"');
     expect(html.match(/aria-pressed="true"/g)).toHaveLength(1);
     expect(html).toContain('class="home-play-field home-card-pool-field"');
@@ -186,7 +186,7 @@ describe("RoomList", () => {
     });
     try {
       const html = renderLocalized(<Home />);
-      expect(html).toMatch(/<button[^>]*aria-pressed="true"[^>]*>Play vs AI<\/button>/);
+      expect(html).toMatch(/<button[^>]*aria-pressed="true"[^>]*>Play vs bot<\/button>/);
       expect(html).toContain('<option value="cc" selected="">Classic Constructed</option>');
     } finally {
       vi.unstubAllGlobals();
@@ -210,7 +210,7 @@ describe("RoomList", () => {
     expect(html).toContain("游戏模式");
     expect(html).toContain("寻找对局");
     expect(html).toContain("邀请好友");
-    expect(html).toContain("对战 AI");
+    expect(html).toContain("对战机器人");
     expect(html).toContain("了解卡牌范围模式");
     expect(html).not.toContain("管理牌组");
   });

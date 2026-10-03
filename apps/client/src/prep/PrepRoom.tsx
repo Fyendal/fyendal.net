@@ -138,7 +138,6 @@ export function PrepRoom() {
     format: prepFormat,
     matchmakingActive,
     opponentPresent,
-    queueCount: prepFormat ? queueCounts[prepFormat] : 0,
   });
   const botNudgeKey = botNudgeEligible && prepDeck
     ? `${roomCode ?? "queue"}:${prepDeck.id}`

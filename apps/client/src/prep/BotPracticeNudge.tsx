@@ -4,7 +4,7 @@ import type { BotOpponent, Format } from "@fyendal/shared";
 import type { ConstructedFormat } from "../domain.js";
 import { BotOpponentModal } from "../lobby/BotOpponentModal.js";
 
-export const BOT_PRACTICE_NUDGE_DELAY_MS = 30_000;
+export const BOT_PRACTICE_NUDGE_DELAY_MS = 10_000;
 
 export function botPracticeFormat(format: Format | undefined): ConstructedFormat | null {
   return format === "cc" || format === "silver-age" ? format : null;
@@ -14,13 +14,10 @@ export function shouldOfferBotPractice(input: {
   format: Format | undefined;
   matchmakingActive: boolean;
   opponentPresent: boolean;
-  queueCount: number;
 }): boolean {
   return botPracticeFormat(input.format) !== null
     && input.matchmakingActive
-    && !input.opponentPresent
-    // Matchmaking depth includes this player after their entry commits.
-    && input.queueCount <= 1;
+    && !input.opponentPresent;
 }
 
 export function BotPracticeNudge(props: {

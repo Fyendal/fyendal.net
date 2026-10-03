@@ -79,6 +79,6 @@ describe("background matchmaking UI", () => {
     expect(html).toContain(">Bravo</span>");
     expect(html).not.toContain("BravoFan");
     expect(html).toContain("Accept");
-    expect(html).toContain("Keep playing against AI");
+    expect(html).toContain("Keep playing against the bot");
   });
 });

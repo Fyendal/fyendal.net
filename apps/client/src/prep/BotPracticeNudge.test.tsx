@@ -9,40 +9,35 @@ import {
 import { TestI18nProvider } from "../i18n/TestI18nProvider.js";
 
 describe("bot practice nudge", () => {
-  it("waits 30 seconds before appearing", () => {
-    expect(BOT_PRACTICE_NUDGE_DELAY_MS).toBe(30_000);
+  it("offers a bot after 10 seconds of matchmaking", () => {
+    expect(BOT_PRACTICE_NUDGE_DELAY_MS).toBe(10_000);
   });
 
-  it("only offers practice to an unmatched constructed player in an empty queue", () => {
+  it("only offers a bot to an unmatched constructed player while searching", () => {
     expect(shouldOfferBotPractice({
       format: "cc",
       matchmakingActive: true,
       opponentPresent: false,
-      queueCount: 0,
     })).toBe(true);
     expect(shouldOfferBotPractice({
       format: "silver-age",
       matchmakingActive: true,
       opponentPresent: true,
-      queueCount: 0,
     })).toBe(false);
     expect(shouldOfferBotPractice({
       format: "cc",
       matchmakingActive: false,
       opponentPresent: false,
-      queueCount: 0,
     })).toBe(false);
     expect(shouldOfferBotPractice({
-      format: "cc",
+      format: "silver-age",
       matchmakingActive: true,
       opponentPresent: false,
-      queueCount: 1,
     })).toBe(true);
     expect(shouldOfferBotPractice({
-      format: "cc",
+      format: "classic-battles",
       matchmakingActive: true,
       opponentPresent: false,
-      queueCount: 2,
     })).toBe(false);
     expect(botPracticeFormat("classic-battles")).toBeNull();
   });
@@ -59,10 +54,11 @@ describe("bot practice nudge", () => {
       </TestI18nProvider>,
     );
 
-    expect(html).toContain("No other active player is looking for a game right now.");
+    expect(html).toContain("Challenge a competitive, hero-specific bot now.");
+    expect(html).toContain("You can keep searching for a player while you play.");
     expect(html).toContain('role="dialog"');
     expect(html).toContain('aria-modal="true"');
-    expect(html).toContain("Play vs AI");
+    expect(html).toContain("Play vs bot");
     expect(html).not.toContain("Hala");
     expect(html).toContain("Keep waiting");
   });
@@ -80,7 +76,7 @@ describe("bot practice nudge", () => {
     );
 
     expect(html).toContain("暂未找到对局");
-    expect(html).toContain("与AI对战测试你的牌组");
+    expect(html).toContain("挑战实力强劲的英雄专属机器人");
     expect(html).toContain("继续等待");
   });
 });

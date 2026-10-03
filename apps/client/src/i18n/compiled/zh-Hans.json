@@ -19027,7 +19027,7 @@
   "game.bot.fallback": [
     {
       "type": 0,
-      "value": "浏览器计算恢复期间，AI 对手暂时使用较简单的行动。"
+      "value": "浏览器计算恢复期间，机器人对手暂时使用较简单的行动。"
     }
   ],
   "game.bot.refresh": [
@@ -19039,13 +19039,13 @@
   "game.bot.refresh.required": [
     {
       "type": 0,
-      "value": "请刷新页面以更新 AI 对手。"
+      "value": "请刷新页面以更新机器人对手。"
     }
   ],
   "game.bot.retry": [
     {
       "type": 0,
-      "value": "重试 AI 对手"
+      "value": "重试机器人对手"
     }
   ],
   "game.bound.count": [
@@ -21461,13 +21461,13 @@
   "landing.bots.body": [
     {
       "type": 0,
-      "value": "使用拥有独立策略、针对不同英雄设计的AI测试牌组。"
+      "value": "与采用不同英雄和策略的机器人对战，测试你的牌组。"
     }
   ],
   "landing.bots.title": [
     {
       "type": 0,
-      "value": "与AI练习"
+      "value": "挑战强力机器人"
     }
   ],
   "landing.demoAlt": [
@@ -21687,7 +21687,7 @@
   "landing.startPlayingBody": [
     {
       "type": 0,
-      "value": "创建免费账户，即可参与对局并与AI练习。"
+      "value": "创建免费账户，即可参与对局并挑战强力机器人。"
     }
   ],
   "landing.startPlayingLabel": [
@@ -21705,7 +21705,7 @@
   "landing.subtitle": [
     {
       "type": 0,
-      "value": "免费、开源，由社区共同打造。使用 Fabrary 牌组，在浏览器中与其他玩家对战，或与针对不同英雄设计的 AI 练习。"
+      "value": "免费、开源，由社区共同打造。使用 Fabrary 牌组，在浏览器中与其他玩家或实力强劲的英雄专属机器人对战。"
     }
   ],
   "landing.title": [
@@ -21771,7 +21771,7 @@
   "lobby.action.playBot": [
     {
       "type": 0,
-      "value": "对战 AI"
+      "value": "对战机器人"
     }
   ],
   "lobby.action.rejoin": [
@@ -21843,7 +21843,7 @@
   "lobby.bot.prompt": [
     {
       "type": 0,
-      "value": "你想与谁练习？"
+      "value": "选择一位机器人对手。"
     }
   ],
   "lobby.bot.searchForPlayer": [
@@ -21855,7 +21855,7 @@
   "lobby.bot.searchForPlayer.description": [
     {
       "type": 0,
-      "value": "与此 AI 练习时，Fyendal 会同时寻找 PvP 对手。"
+      "value": "与此机器人对战时，Fyendal 会同时寻找其他玩家。"
     }
   ],
   "lobby.bot.starvo.description": [
@@ -23049,7 +23049,7 @@
   "matchmaking.background.keepBot": [
     {
       "type": 0,
-      "value": "继续与 AI 对战"
+      "value": "继续与机器人对战"
     }
   ],
   "matchmaking.background.searching": [
@@ -23079,7 +23079,7 @@
   "meta.home.description": [
     {
       "type": 0,
-      "value": "免费在线畅玩 Flesh and Blood。寻找对手、与针对不同英雄设计的AI练习、导入 Fabrary 牌组、观看对局并查看回放。"
+      "value": "免费在线畅玩 Flesh and Blood。寻找对手、挑战实力强劲的英雄专属机器人、导入 Fabrary 牌组、观看对局并查看回放。"
     }
   ],
   "meta.home.title": [
@@ -23115,7 +23115,7 @@
   "play.bot": [
     {
       "type": 0,
-      "value": "对战 AI"
+      "value": "对战机器人"
     }
   ],
   "play.cards.banned": [
@@ -23177,7 +23177,7 @@
   "play.intro.body": [
     {
       "type": 0,
-      "value": "使用你的 Fabrary 牌组，与其他玩家对战或和 AI 练习。"
+      "value": "使用你的 Fabrary 牌组，与其他玩家对战或挑战强力机器人。"
     }
   ],
   "play.intro.kicker": [
@@ -23327,7 +23327,7 @@
   "prep.botNudge.description": [
     {
       "type": 0,
-      "value": "目前没有其他活跃玩家正在寻找对局。等待期间，要不要先与AI对战测试你的牌组？"
+      "value": "现在就挑战实力强劲的英雄专属机器人。你也可以边玩边继续寻找玩家。"
     }
   ],
   "prep.botNudge.keepWaiting": [
@@ -23345,7 +23345,7 @@
   "prep.botNudge.starting": [
     {
       "type": 0,
-      "value": "正在开始练习…"
+      "value": "正在开始机器人对局…"
     }
   ],
   "prep.botNudge.title": [
@@ -24035,7 +24035,7 @@
   "replay.emptyBody": [
     {
       "type": 0,
-      "value": "已完成的对局和手动结束的 AI 对局会自动显示在这里。"
+      "value": "已完成的对局和手动结束的机器人对局会自动显示在这里。"
     }
   ],
   "replay.emptyTitle": [
