@@ -6,7 +6,7 @@ import type { ConstructedFormat } from "../domain.js";
 import { loadHomeFormat, loadHomeGameMode, saveHomeFormat, saveHomeGameMode, type HomeGameMode } from "../storage.js";
 import { useStore } from "../store.js";
 import playPoster from "../../../assets/play-poster.jpg";
-import { deckChoicesFor, deckIsLegalForRoom } from "./DeckGrid.js";
+import { deckChoicesFor, deckIsLegalForRoom, sortDecksForPicker } from "./DeckGrid.js";
 import { DeckDropdown } from "./CreateRoomModal.js";
 import { RoomCard } from "./RoomCard.js";
 import { BotOpponentModal } from "./BotOpponentModal.js";
@@ -22,12 +22,13 @@ export function Home() {
     createRoom,
     decks,
     decksLoading,
+    deckPlayedAt,
     joinRoom,
-    lastPlayedDecks,
     queuedFormat,
     queueJoin,
     queueLeave,
     rooms,
+    refreshDecks,
     setCardPoolMode,
   } = useStore(useShallow((state) => ({
     authUser: state.authUser,
@@ -36,12 +37,13 @@ export function Home() {
     createRoom: state.createRoom,
     decks: state.decks,
     decksLoading: state.decksLoading,
+    deckPlayedAt: state.deckPlayedAt,
     joinRoom: state.joinRoom,
-    lastPlayedDecks: state.lastPlayedDecks,
     queuedFormat: state.queuedFormat,
     queueJoin: state.queueJoin,
     queueLeave: state.queueLeave,
     rooms: state.rooms,
+    refreshDecks: state.refreshDecks,
     setCardPoolMode: state.setCardPoolMode,
   })));
   const [format, setFormat] = useState<ConstructedFormat>(() =>
@@ -67,9 +69,7 @@ export function Home() {
   const choices = deckChoicesFor(format, decks, cardPoolMode);
   const selectedDeck = choices.find((deck) =>
     deck.id === selectedDeckId && deckIsLegalForRoom(deck, cardPoolMode)
-  ) ?? choices.find((deck) =>
-    deck.id === lastPlayedDecks[format] && deckIsLegalForRoom(deck, cardPoolMode)
-  ) ?? choices.find((deck) => deckIsLegalForRoom(deck, cardPoolMode));
+  ) ?? sortDecksForPicker(choices, deckPlayedAt).find((deck) => deckIsLegalForRoom(deck, cardPoolMode));
   const rejoinRooms = rooms.filter((room) => room.yours === true);
 
   const selectMode = (nextMode: HomeGameMode) => {
@@ -153,6 +153,8 @@ export function Home() {
                 decks={choices}
                 selected={selectedDeck}
                 cardPoolMode={cardPoolMode}
+                deckPlayedAt={deckPlayedAt}
+                onOpen={() => { void refreshDecks(true); }}
                 onSelect={setSelectedDeckId}
               />
             </div>

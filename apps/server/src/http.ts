@@ -14,7 +14,8 @@ import {
   type AuthUser,
 } from "./auth.js";
 import {
-  deleteDeck, getDeck, importDeck, listDecks, parseDecklistText, resolveFabraryPlayDeck, resolveFreshDeck, updateDeck,
+  deleteDeck, getDeck, importDeck, listDeckPlays, listDecks, parseDecklistText,
+  resolveFabraryPlayDeck, resolveFreshDeck, updateDeck,
 } from "./decks.js";
 import { clientIp, configuredTrustedProxyHops } from "./network.js";
 import {
@@ -633,8 +634,15 @@ export function createApiServer(deps: ApiDeps): http.Server {
       authUser(req)
         .then(async (user) => {
           if (!user) return sendJson(res, 401, { ok: false, error: "not logged in" });
-          const decks = await listDecks(deps.db, user.id);
-          sendJson(res, 200, { ok: true, decks: decks.map(deckOut) });
+          const [decks, plays] = await Promise.all([
+            listDecks(deps.db, user.id),
+            listDeckPlays(deps.db, user.id),
+          ]);
+          sendJson(res, 200, {
+            ok: true,
+            decks: decks.map(deckOut),
+            plays,
+          });
         })
         .catch((e) => internalError(res, e));
       return;

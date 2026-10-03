@@ -678,6 +678,16 @@ export const MIGRATIONS: Migration[] = [
       PRIMARY KEY (day_utc, user_id)
     );`,
   },
+  {
+    version: 41,
+    // Shared precons have no decks row, so deck_id is not a foreign key.
+    sql: `CREATE TABLE deck_plays (
+      user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      deck_id TEXT NOT NULL,
+      last_played_at BIGINT NOT NULL CHECK (last_played_at >= 0),
+      PRIMARY KEY (user_id, deck_id)
+    );`,
+  },
 ];
 
 async function publicTables(db: Queryable): Promise<string[]> {

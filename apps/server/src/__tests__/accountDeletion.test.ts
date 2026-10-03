@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { decodeAccountExportResponse } from "@fyendal/protocol";
 import { register } from "../auth.js";
 import { deleteAccount, exportAccount } from "../accounts.js";
+import { recordDeckPlay } from "../decks.js";
 import type { Queryable } from "../db.js";
 import { PgRoomStore } from "../store.js";
 import { freshDb } from "./testdb.js";
@@ -15,6 +16,7 @@ describe("account deletion races", () => {
     const exportedId = Number(users.rows[0]!.id);
     const candidateId = Number(users.rows[1]!.id);
     await db.query("INSERT INTO daily_game_players (day_utc, user_id) VALUES ($1, $2)", [1_700_006_400_000, exportedId]);
+    await recordDeckPlay(db, exportedId, "precon-asb", 123);
     const store = new PgRoomStore(db, "test-ruleset");
     const candidate = await store.queueForMatch("cc", {
       userId: candidateId,
@@ -58,6 +60,7 @@ describe("account deletion races", () => {
       offer: { roomCode: candidate.code, opponentUserId: candidateId },
     });
     expect(exported?.gameDays).toEqual([1_700_006_400_000]);
+    expect(exported?.deckPlays).toEqual([{ deckId: "precon-asb", playedAt: 123 }]);
     expect(decodeAccountExportResponse({ ok: true, export: exported })).not.toBeNull();
 
     await db.query(
@@ -77,6 +80,7 @@ describe("account deletion races", () => {
       [exportedId],
     )).rows).toEqual([]);
     expect((await db.query("SELECT 1 FROM daily_game_players WHERE user_id = $1", [exportedId])).rows).toEqual([]);
+    expect((await db.query("SELECT 1 FROM deck_plays WHERE user_id = $1", [exportedId])).rows).toEqual([]);
   });
 
   it("prevents a deleted cached identity from creating a new seat", async () => {

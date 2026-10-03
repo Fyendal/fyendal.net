@@ -5,6 +5,7 @@ import { gzipSync } from "node:zlib";
 import { cardData, decklists, precon } from "@fyendal/cards";
 import { createApiServer, createRateLimiter, type ApiDeps } from "../http.js";
 import { login, register, sessionForToken } from "../auth.js";
+import { recordDeckPlay } from "../decks.js";
 import type { Queryable } from "../db.js";
 import { finalizeReplay } from "../replays.js";
 import { PgRoomStore } from "../store.js";
@@ -471,6 +472,9 @@ describe("Fabrary URL imports", () => {
     });
     const imported = await importedResponse.json() as { deck: { id: string } };
     expect(importedResponse.status).toBe(200);
+    const owner = await sessionForToken(db, session.token);
+    if (!owner) throw new Error("session missing");
+    await recordDeckPlay(db, owner.id, imported.deck.id, 123);
 
     const updatedResponse = await fetch(`${url}/api/decks/update`, {
       method: "POST",
@@ -486,6 +490,7 @@ describe("Fabrary URL imports", () => {
     expect(await decksResponse.json()).toMatchObject({
       ok: true,
       decks: [{ id: imported.deck.id, fabraryUrl: originalUrl }],
+      plays: [{ deckId: imported.deck.id, playedAt: 123 }],
     });
   });
 });
@@ -774,6 +779,7 @@ describe("account rights", () => {
     if (!session.ok) throw new Error("login failed");
     const user = await sessionForToken(db, session.token);
     if (!user) throw new Error("session missing");
+    await recordDeckPlay(db, user.id, "precon-asb", 123);
     await db.query(
       `INSERT INTO rooms
        (code, format, spectators, state, prep, ruleset_version, version, created_at, gc_at, status, winner)
@@ -837,6 +843,7 @@ describe("account rights", () => {
       expect.objectContaining({ code: "PRIV01", seat: 0 }),
     ]);
     expect(exportBody.export.replays).toEqual([]);
+    expect(exportBody.export.deckPlays).toEqual([{ deckId: "precon-asb", playedAt: 123 }]);
     expect(exportBody.export.bugReports).toEqual([
       expect.objectContaining({
         id: reportedBody.reportId,

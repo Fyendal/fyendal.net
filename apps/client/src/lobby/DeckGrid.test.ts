@@ -65,6 +65,29 @@ describe("deckChoicesFor", () => {
   });
 });
 
+describe("sortDecksForPicker", () => {
+  it("orders decks by the later of their play and update times without changing the input", async () => {
+    const { sortDecksForPicker } = await import("./DeckGrid.js");
+    const deck = (id: string, updatedAt: number): DeckSummary => ({
+      id,
+      name: id,
+      format: "silver-age",
+      fabraryUrl: null,
+      heroName: "Briar",
+      deckSize: 40,
+      updatedAt,
+    });
+    const decks = [deck("older", 1), deck("newest", 9), deck("played", 2), deck("precon", 0)];
+
+    expect(sortDecksForPicker(decks, { played: 12, older: 4 }).map((choice) => choice.id))
+      .toEqual(["played", "newest", "older", "precon"]);
+    expect(sortDecksForPicker(decks, { played: 5, newest: 3 }).map((choice) => choice.id))
+      .toEqual(["newest", "played", "older", "precon"]);
+    expect(decks.map((choice) => choice.id))
+      .toEqual(["older", "newest", "played", "precon"]);
+  });
+});
+
 describe("filterAndSortDecks", () => {
   it("searches by hero, filters legality, and sorts saved decks by update time", async () => {
     const { filterAndSortDecks } = await import("./DeckGrid.js");

@@ -4,8 +4,10 @@ import { cardData, findPrinting, formatLegalityIssues } from "@fyendal/cards";
 import {
   deleteDeck,
   importDeck,
+  listDeckPlays,
   listDecks,
   parseDecklistText,
+  recordDeckPlay,
   resolveFreshDeck,
   updateDeck,
   validateDeck,
@@ -763,11 +765,20 @@ describe("deck storage", () => {
     expect(listed).toHaveLength(1);
     expect(listed[0]!.name).toBe("Rhinar CC");
 
+    await recordDeckPlay(db, userId, imp.deck.id, 100);
+    await recordDeckPlay(db, userId, imp.deck.id, 90);
+    await recordDeckPlay(db, userId, "precon-asb", 110);
+    expect(await listDeckPlays(db, userId)).toEqual([
+      { deckId: "precon-asb", playedAt: 110 },
+      { deckId: imp.deck.id, playedAt: 100 },
+    ]);
+
     const upd = await updateDeck(db, userId, imp.deck.id, { name: "Rhinar CC v2" });
     expect(upd.ok && upd.deck.name).toBe("Rhinar CC v2");
 
     expect(await deleteDeck(db, userId, imp.deck.id)).toBe(true);
     expect(await listDecks(db, userId)).toHaveLength(0);
+    expect(await listDeckPlays(db, userId)).toEqual([{ deckId: "precon-asb", playedAt: 110 }]);
   });
 
   it("rejects invalid imports without storing anything", async () => {

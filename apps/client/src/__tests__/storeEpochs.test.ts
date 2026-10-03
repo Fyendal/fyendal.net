@@ -206,14 +206,14 @@ describe("Fabrary play handoff", () => {
     vi.stubGlobal("fetch", vi.fn(async (input: string | URL | Request) => {
       if (String(input).endsWith("/api/decks")) {
         lists += 1;
-        return lists === 1 ? oldList.promise : jsonResponse({ ok: true, decks: [fabraryDeck] });
+        return lists === 1 ? oldList.promise : jsonResponse({ ok: true, decks: [fabraryDeck], plays: [] });
       }
       return jsonResponse({ ok: true, deck: fabraryDeck });
     }));
     const { useStore } = await import("../store.js");
     const refresh = useStore.getState().refreshDecks();
     await useStore.getState().resolveFabraryPlay();
-    oldList.resolve(jsonResponse({ ok: true, decks: [] }));
+    oldList.resolve(jsonResponse({ ok: true, decks: [], plays: [] }));
     await refresh;
     expect(lists).toBe(2);
     expect(useStore.getState().decks).toEqual([fabraryDeck]);
@@ -224,7 +224,7 @@ describe("Fabrary play handoff", () => {
       if (String(input).endsWith("/api/register")) return jsonResponse({ ok: true });
       if (String(input).endsWith("/api/login")) return jsonResponse({ ok: true, username: "Alice", token: "token-a" });
       if (String(input).endsWith("/api/decks/play")) return jsonResponse({ ok: true, deck: fabraryDeck });
-      return jsonResponse({ ok: true, decks: [] });
+      return jsonResponse({ ok: true, decks: [], plays: [] });
     });
     vi.stubGlobal("fetch", fetcher);
     const { useStore } = await import("../store.js");
@@ -398,7 +398,7 @@ describe("client connection and account race fences", () => {
     expect(useStore.getState().decksLoading).toBe(true);
 
     const refreshPromise = useStore.getState().refreshDecks();
-    decks.resolve(jsonResponse({ ok: true, decks: [] }));
+    decks.resolve(jsonResponse({ ok: true, decks: [], plays: [] }));
     await refreshPromise;
 
     expect(useStore.getState().decksLoading).toBe(false);
@@ -421,38 +421,88 @@ describe("client connection and account race fences", () => {
     }));
 
     const { useStore } = await import("../store.js");
-    expect(useStore.getState().lastPlayedDecks).toEqual({
-      cc: null,
-      "silver-age": "precon-sba",
-    });
-
     await useStore.getState().logout();
-    expect(useStore.getState().lastPlayedDecks).toEqual({ cc: null, "silver-age": null });
+    expect(useStore.getState().deckPlayedAt).toEqual({});
     expect(useStore.getState().cardPoolModes).toEqual({ cc: "legal", "silver-age": "legal" });
 
     await useStore.getState().login("Bob", "password");
     expect(useStore.getState().authUser).toBe("Bob");
-    expect(useStore.getState().lastPlayedDecks).toEqual({ cc: null, "silver-age": null });
+    expect(useStore.getState().deckPlayedAt).toEqual({});
     expect(useStore.getState().cardPoolModes).toEqual({ cc: "legal", "silver-age": "legal" });
   });
 
-  it("remembers the last played deck independently for each constructed format", async () => {
+  it("loads server deck play times without saving them in the browser", async () => {
     localStorage.setItem("fyendal-auth", JSON.stringify({ token: "token-a", username: "Alice" }));
+    let playedAt = 100;
+    vi.stubGlobal("fetch", vi.fn((input: string | URL | Request) => {
+      if (!String(input).endsWith("/api/decks")) throw new Error("unexpected request");
+      return Promise.resolve(jsonResponse({
+        ok: true,
+        decks: [],
+        plays: [{ deckId: "precon-sba", playedAt }],
+      }));
+    }));
     const { useStore } = await import("../store.js");
 
-    useStore.getState().queueJoin("cc", { deckId: "cc-deck" });
-    useStore.getState().queueJoin("silver-age", { deckId: "silver-deck" });
+    await useStore.getState().refreshDecks();
+    expect(useStore.getState().deckPlayedAt).toEqual({ "precon-sba": 100 });
+    expect(localStorage.getItem("fyendal-lobby-settings-alice")).toBeNull();
 
-    expect(useStore.getState().lastPlayedDecks).toEqual({
-      cc: "cc-deck",
-      "silver-age": "silver-deck",
-    });
-    expect(JSON.parse(localStorage.getItem("fyendal-lobby-settings-alice")!)).toEqual({
-      version: 4,
-      cardPoolModes: { cc: "legal", "silver-age": "legal" },
-      lastPlayedDecks: { cc: "cc-deck", "silver-age": "silver-deck" },
-    });
+    playedAt = 200;
+    await useStore.getState().refreshDecks(true);
+    expect(useStore.getState().deckPlayedAt).toEqual({ "precon-sba": 200 });
+    expect(localStorage.getItem("fyendal-lobby-settings-alice")).toBeNull();
   });
+
+  it.each(["import", "update", "delete"] as const)(
+    "does not restore stale decks when a refresh overlaps a %s",
+    async (mutation) => {
+      localStorage.setItem("fyendal-auth", JSON.stringify({ token: "token-a", username: "Alice" }));
+      const original = {
+        id: "deck-1", name: "Original", format: "silver-age" as const, fabraryUrl: null,
+        heroName: "Briar", deckSize: 40, updatedAt: 1,
+      };
+      const changed = { ...original, id: mutation === "import" ? "deck-2" : original.id,
+        name: "Changed", updatedAt: 2 };
+      const staleList = deferred<Response>();
+      let listRequests = 0;
+      vi.stubGlobal("fetch", vi.fn((input: string | URL | Request) => {
+        const url = String(input);
+        if (url.endsWith("/api/decks")) {
+          listRequests += 1;
+          return listRequests === 1 ? staleList.promise : Promise.resolve(jsonResponse({
+            ok: true,
+            decks: mutation === "delete" ? [] : mutation === "import" ? [original, changed] : [changed],
+            plays: [],
+          }));
+        }
+        if (url.endsWith(`/api/decks/${mutation}`)) {
+          return Promise.resolve(jsonResponse(mutation === "delete"
+            ? { ok: true } : { ok: true, deck: changed }));
+        }
+        throw new Error(`unexpected fetch ${url}`);
+      }));
+
+      const { useStore } = await import("../store.js");
+      useStore.setState({ decks: [original], deckPlayedAt: { [original.id]: 10 } });
+      const refresh = useStore.getState().refreshDecks();
+      if (mutation === "import") {
+        await useStore.getState().importDeck({ name: changed.name, format: changed.format, text: "deck" });
+      } else if (mutation === "update") {
+        await useStore.getState().updateDeck({ id: original.id, name: changed.name });
+      } else {
+        await useStore.getState().deleteDeck(original.id);
+      }
+      staleList.resolve(jsonResponse({ ok: true, decks: [original], plays: [{ deckId: original.id, playedAt: 10 }] }));
+      await refresh;
+
+      expect(listRequests).toBe(2);
+      expect(useStore.getState().decks).toEqual(
+        mutation === "delete" ? [] : mutation === "import" ? [original, changed] : [changed],
+      );
+      if (mutation === "delete") expect(useStore.getState().deckPlayedAt).toEqual({});
+    },
+  );
 
   it("keeps a declined room only for an unchanged matchmaking choice", async () => {
     localStorage.setItem("fyendal-auth", JSON.stringify({ token: "account-token", username: "Alice" }));
@@ -1198,7 +1248,7 @@ describe("client connection and account race fences", () => {
     const bobDeck = { ...oldDeck, id: "bob", name: "Bob's deck" };
     useStore.setState({ decks: [bobDeck] });
 
-    decks.resolve(jsonResponse({ ok: true, decks: [oldDeck] }));
+    decks.resolve(jsonResponse({ ok: true, decks: [oldDeck], plays: [] }));
     imported.resolve(jsonResponse({ ok: true, deck: oldDeck }));
     deleted.resolve(jsonResponse({ ok: true }));
     await Promise.all([refreshPromise, importPromise, deletePromise]);

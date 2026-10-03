@@ -45,9 +45,9 @@ export function LobbyHeader() {
       ) : null}
       <div className="topbar-actions">
         <div className="topbar-tools">
-          <FullscreenButton placement="header" />
           <LanguagePicker />
           <DiscordLink />
+          <FullscreenButton placement="header" />
         </div>
         {authUser ? (
           <div className="topbar-account">

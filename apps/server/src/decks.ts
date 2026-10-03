@@ -495,6 +495,36 @@ export async function listDecks(db: Queryable, userId: number): Promise<DeckRow[
   return rows.map(toDeck);
 }
 
+export interface DeckPlay {
+  deckId: string;
+  playedAt: number;
+}
+
+export async function listDeckPlays(db: Queryable, userId: number): Promise<DeckPlay[]> {
+  const { rows } = await db.query(
+    "SELECT deck_id, last_played_at FROM deck_plays WHERE user_id = $1 ORDER BY last_played_at DESC, deck_id",
+    [userId],
+  );
+  return rows.map((row) => ({
+    deckId: dbString(row.deck_id, "deck_id"),
+    playedAt: dbSafeInteger(row.last_played_at, "last_played_at"),
+  }));
+}
+
+export async function recordDeckPlay(
+  db: Queryable,
+  userId: number,
+  deckId: string,
+  playedAt = Date.now(),
+): Promise<void> {
+  await db.query(
+    `INSERT INTO deck_plays (user_id, deck_id, last_played_at) VALUES ($1, $2, $3)
+     ON CONFLICT (user_id, deck_id) DO UPDATE
+       SET last_played_at = GREATEST(deck_plays.last_played_at, EXCLUDED.last_played_at)`,
+    [userId, deckId, playedAt],
+  );
+}
+
 /** A play link refreshes the account's linked deck, or creates it once. Fetch
  * before taking the account lock so provider latency never holds a DB lock.
  * The account row serializes concurrent links across gateway instances. */
@@ -583,9 +613,13 @@ export async function updateDeck(
 }
 
 export async function deleteDeck(db: Queryable, userId: number, id: string): Promise<boolean> {
-  const { rowCount } = await db.query(
-    "DELETE FROM decks WHERE id = $1 AND user_id = $2",
-    [id, userId],
-  );
-  return rowCount === 1;
+  return withTransaction(db, async (tx) => {
+    const { rowCount } = await tx.query(
+      "DELETE FROM decks WHERE id = $1 AND user_id = $2",
+      [id, userId],
+    );
+    if (rowCount !== 1) return false;
+    await tx.query("DELETE FROM deck_plays WHERE user_id = $1 AND deck_id = $2", [userId, id]);
+    return true;
+  });
 }

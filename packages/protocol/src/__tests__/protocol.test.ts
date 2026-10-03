@@ -1059,7 +1059,10 @@ describe("replays and HTTP responses", () => {
     expect(decodeDecksResponse({
       ok: true,
       decks: [{ ...summary, bannedCards: ["Art of War"], futureCards: ["Tomorrow's Attack"] }],
+      plays: [{ deckId: summary.id, playedAt: 123 }],
     })).not.toBeNull();
+    expect(decodeDecksResponse({ ok: true, decks: [], plays: [{ deckId: "precon-sba", playedAt: -1 }] })).toBeNull();
+    expect(decodeDecksResponse({ ok: true, decks: [] })).toBeNull();
     expect(decodeDeckResponse({ ok: true, deck: summary })).not.toBeNull();
     expect(decodeDeckDetailResponse({
       ok: true,
@@ -1102,6 +1105,7 @@ describe("replays and HTTP responses", () => {
           createdAt: 1,
           updatedAt: summary.updatedAt,
         }],
+        deckPlays: [{ deckId: summary.id, playedAt: 2 }],
         rooms: [{ code: "ABC123", format: "cc", status: "playing", winner: null, createdAt: 1, seat: 0, cardPoolMode: "open" }],
         matchmaking: {
           format: "silver-age",
@@ -1174,7 +1178,7 @@ describe("replays and HTTP responses", () => {
         ok: true,
         notifications: [{ reportId: "report-id", fixedAt: 123 }],
       }],
-      [decodeDecksResponse, { ok: true, decks: [summary] }],
+      [decodeDecksResponse, { ok: true, decks: [summary], plays: [] }],
       [decodeDeckResponse, { ok: true, deck: summary }],
       [decodeDeckDetailResponse, { ok: true, deck: { ...summary, decklist: pool } }],
       [decodeDeckInvalidResponse, { ok: false, errors: ["bad"], missing: [], unimplemented: [] }],
@@ -1189,6 +1193,7 @@ describe("replays and HTTP responses", () => {
           exportedAt: "2026-01-01T00:00:00.000Z",
           account: { username: "alice", createdAt: 1, earlyTester: true, selectedBadge: "early-tester" },
           decks: [],
+          deckPlays: [],
           rooms: [],
           matchmaking: null,
           bugReports: [],
@@ -1206,7 +1211,7 @@ describe("replays and HTTP responses", () => {
       expect(decode({ ...response, unknown: true })).toBeNull();
     }
     expect(decodeStatsResponse({ ok: true, inGame: -1, openRooms: 2 })).toBeNull();
-    expect(decodeDecksResponse({ ok: true, decks: Array(1_001).fill(summary) })).toBeNull();
+    expect(decodeDecksResponse({ ok: true, decks: Array(1_001).fill(summary), plays: [] })).toBeNull();
     expect(decodeDeckDetailResponse({ ok: true, deck: { ...summary, decklist: { ...pool, nested: {} } } })).toBeNull();
     expect(decodeDeckDetailResponse({
       ok: true,

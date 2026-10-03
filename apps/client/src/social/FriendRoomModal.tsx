@@ -17,6 +17,8 @@ export function FriendRoomModal() {
     target,
     decks,
     cardPoolModes,
+    deckPlayedAt,
+    refreshDecks,
     socialError,
     clearSocialError,
     setCardPoolMode,
@@ -26,6 +28,8 @@ export function FriendRoomModal() {
     target: state.friendInviteTarget,
     decks: state.decks,
     cardPoolModes: state.cardPoolModes,
+    deckPlayedAt: state.deckPlayedAt,
+    refreshDecks: state.refreshDecks,
     socialError: state.socialError,
     clearSocialError: state.clearSocialError,
     setCardPoolMode: state.setCardPoolMode,
@@ -76,6 +80,8 @@ export function FriendRoomModal() {
           decks={choices}
           selected={selected}
           cardPoolMode={cardPoolMode}
+          deckPlayedAt={deckPlayedAt}
+          onOpen={() => { void refreshDecks(true); }}
           onSelect={(id) => setDeckFor((current) => ({ ...current, [format]: id }))}
         />
       </fieldset>

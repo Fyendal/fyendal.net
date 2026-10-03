@@ -6,9 +6,9 @@ import { ClientBotPolicy } from "@fyendal/bot/client-task";
 import type { ClientMessage, PresentedDeck, ServerMessage } from "@fyendal/shared";
 import { cardData, decklists, formatLegalityIssues, precon, silverAgePrecon } from "@fyendal/cards";
 import { broadcastCommittedRoom, createGameServer } from "../index.js";
-import { login, register } from "../auth.js";
+import { login, register, sessionForToken } from "../auth.js";
 import type { Queryable } from "../db.js";
-import { getDeck, importDeck } from "../decks.js";
+import { getDeck, importDeck, listDeckPlays } from "../decks.js";
 import { PgRoomStore } from "../store.js";
 import { freshDb } from "./testdb.js";
 
@@ -1304,6 +1304,11 @@ describe("lobby and matchmaking", () => {
     >;
     expect(queued.format).toBe("silver-age");
     await a.next((message) => message.type === "room-created");
+    const user = await sessionForToken(db, a.authToken);
+    if (!user) throw new Error("session missing");
+    expect(await listDeckPlays(db, user.id)).toEqual([
+      { deckId: "precon-sly", playedAt: expect.any(Number) },
+    ]);
 
     a.sendMsg({ type: "leave-room" });
     await a.next((message) => message.type === "left");
@@ -1442,6 +1447,11 @@ describe("cc prep room", () => {
       "SELECT card_pool_mode FROM rooms WHERE code = $1",
       [created.code],
     )).rows).toEqual([{ card_pool_mode: "open" }]);
+    const user = await sessionForToken(db, c.authToken);
+    if (!user) throw new Error("session missing");
+    expect(await listDeckPlays(db, user.id)).toEqual([
+      { deckId: "precon-aaz", playedAt: expect.any(Number) },
+    ]);
     c.ws.close();
   });
 

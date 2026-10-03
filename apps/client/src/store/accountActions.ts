@@ -48,7 +48,8 @@ export function createAccountActions({
   isCurrentAuth: (request: AuthRequest) => boolean;
 }): Pick<StoreState, AccountActionKey> {
   const superseded = { ok: false, error: "account request was superseded" } as const;
-  let playRevision = 0;
+  let deckMutationRevision = 0;
+  let deckListRevision = 0;
 
   return {
     previewFabraryPlay: async () => {
@@ -77,32 +78,36 @@ export function createAccountActions({
         await get().logout();
         return;
       }
-      if (result.ok) playRevision += 1;
+      if (result.ok) deckMutationRevision += 1;
       set({
         pendingFabraryPlay: { ...pending, status: result.ok ? "ready" : "error", result },
         ...(result.ok ? { decks: [...get().decks.filter((deck) => deck.id !== result.deck.id), result.deck] } : {}),
       });
     },
-    refreshDecks: async () => {
+    refreshDecks: async (silent = false) => {
       const token = get().authToken;
       if (!token) {
-        set({ decks: [], decksLoading: false });
+        set({ decks: [], deckPlayedAt: {}, decksLoading: false });
         return;
       }
       const request = authRequest(token);
-      const revision = playRevision;
-      set({ decksLoading: true });
+      const revision = deckMutationRevision;
+      const listRevision = ++deckListRevision;
+      if (!silent) set({ decksLoading: true });
       const result = await apiDecks(token, request.signal);
-      if (!isCurrentAuth(request)) return;
-      // Login's list request may predate the link import. Reload instead of
-      // replacing the newly saved deck with that older account snapshot.
-      if (revision !== playRevision) {
-        await get().refreshDecks();
+      if (!isCurrentAuth(request) || listRevision !== deckListRevision) return;
+      // A list response may predate a saved deck change. Reload before it can
+      // replace the locally updated account snapshot.
+      if (revision !== deckMutationRevision) {
+        await get().refreshDecks(silent);
         return;
       }
       set({
         decksLoading: false,
-        ...(result.ok ? { decks: result.decks } : {}),
+        ...(result.ok ? {
+          decks: result.decks,
+          deckPlayedAt: Object.fromEntries(result.plays.map((play) => [play.deckId, play.playedAt])),
+        } : {}),
       });
     },
     importDeck: async (input) => {
@@ -111,7 +116,10 @@ export function createAccountActions({
       const request = authRequest(token);
       const result = await apiImportDeck(token, input, request.signal);
       if (!isCurrentAuth(request)) return superseded;
-      if (result.ok) set({ decks: [...get().decks, result.deck] });
+      if (result.ok) {
+        deckMutationRevision += 1;
+        set({ decks: [...get().decks, result.deck] });
+      }
       return result;
     },
     updateDeck: async (input) => {
@@ -121,6 +129,7 @@ export function createAccountActions({
       const result = await apiUpdateDeck(token, input, request.signal);
       if (!isCurrentAuth(request)) return superseded;
       if (result.ok) {
+        deckMutationRevision += 1;
         set({ decks: get().decks.map((deck) => deck.id === result.deck.id ? result.deck : deck) });
       }
       return result;
@@ -131,7 +140,11 @@ export function createAccountActions({
       const request = authRequest(token);
       const result = await apiDeleteDeck(token, id, request.signal);
       if (!isCurrentAuth(request)) return superseded;
-      if (result.ok) set({ decks: get().decks.filter((deck) => deck.id !== id) });
+      if (result.ok) {
+        deckMutationRevision += 1;
+        const { [id]: _removed, ...deckPlayedAt } = get().deckPlayedAt;
+        set({ decks: get().decks.filter((deck) => deck.id !== id), deckPlayedAt });
+      }
       return result;
     },
     exportAccount: async () => {

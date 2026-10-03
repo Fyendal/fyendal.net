@@ -1,6 +1,6 @@
 import { withTransaction, type Queryable } from "./db.js";
 import { verifyPassword } from "./auth.js";
-import { listDecks } from "./decks.js";
+import { listDeckPlays, listDecks, type DeckPlay } from "./decks.js";
 import { attachReplayNotes, getReplay, getReplayNotes, listReplays } from "./replays.js";
 import { appendClusterEvent } from "./clusterEvents.js";
 import type { CardPoolMode, PlayerBadge, ReplayFile } from "@fyendal/shared";
@@ -56,6 +56,7 @@ export interface AccountExport {
     selectedBadge: PlayerBadge | null;
   };
   decks: Array<Record<string, unknown>>;
+  deckPlays: DeckPlay[];
   rooms: Array<{
     code: string;
     format: string;
@@ -137,6 +138,7 @@ export async function exportAccount(db: Queryable, userId: number): Promise<Acco
   const [
     { rows: users },
     decks,
+    deckPlays,
     { rows: roomRows },
     { rows: queueRows },
     { rows: pendingBotRows },
@@ -148,6 +150,7 @@ export async function exportAccount(db: Queryable, userId: number): Promise<Acco
   ] = await Promise.all([
     db.query("SELECT username, created_at, early_tester, selected_badge FROM users WHERE id = $1", [userId]),
     listDecks(db, userId),
+    listDeckPlays(db, userId),
     db.query(
       `SELECT r.code, r.format, r.status, r.winner, r.created_at, r.card_pool_mode, s.seat
        FROM rooms r JOIN room_seats s ON s.room_code = r.code
@@ -259,6 +262,7 @@ export async function exportAccount(db: Queryable, userId: number): Promise<Acco
       createdAt: deck.createdAt,
       updatedAt: deck.updatedAt,
     })),
+    deckPlays,
     rooms,
     matchmaking: queueRows[0]
       ? {

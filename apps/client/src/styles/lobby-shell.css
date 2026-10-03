@@ -168,7 +168,7 @@
 .topbar-icon-link svg { width: 23px; height: 23px; fill: currentColor; }
 .topbar-fullscreen-button { padding: 0; clip-path: none; }
 .topbar-fullscreen-button svg { fill: none; }
-.lobby-topbar .topbar-tools > button { min-height: 42px; }
+.lobby-topbar .topbar-tools > .topbar-fullscreen-button { min-height: 38px; padding: 0; }
 .language-picker {
   position: relative;
   display: inline-flex;
@@ -227,7 +227,7 @@
 }
 .user-chip {
   display: flex;
-  min-height: 42px;
+  min-height: 38px;
   align-items: center;
   gap: 9px;
   padding: 5px 14px;

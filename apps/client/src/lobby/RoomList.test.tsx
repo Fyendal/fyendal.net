@@ -62,7 +62,7 @@ describe("RoomList", () => {
       decks: [],
       decksLoading: false,
       joinRoom: roomListStore.joinRoom,
-      lastPlayedDecks: { cc: null, "silver-age": null },
+      deckPlayedAt: {},
       cardPoolModes: { cc: "legal", "silver-age": "legal" },
       queuedFormat: null,
       queueJoin: roomListStore.queueJoin,
@@ -156,14 +156,14 @@ describe("RoomList", () => {
     expect(html).not.toContain("Started Hero");
   });
 
-  it("uses the last played saved deck in the selected format", () => {
+  it("selects the deck with the latest play or update time", () => {
     roomListStore.state = {
       ...roomListStore.state,
       decks: [
-        { id: "first", name: "First Briar", format: "silver-age", fabraryUrl: null, heroName: "Briar", deckSize: 40, updatedAt: 1 },
+        { id: "first", name: "First Briar", format: "silver-age", fabraryUrl: null, heroName: "Briar", deckSize: 40, updatedAt: 3 },
         { id: "remembered", name: "Last Played Briar", format: "silver-age", fabraryUrl: null, heroName: "Briar", deckSize: 40, updatedAt: 2 },
       ],
-      lastPlayedDecks: { cc: null, "silver-age": "remembered" },
+      deckPlayedAt: { remembered: 4 },
     };
 
     const html = renderLocalized(<Home />);

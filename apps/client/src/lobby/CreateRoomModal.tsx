@@ -5,7 +5,7 @@ import type { DeckSummary } from "@fyendal/protocol";
 import type { BotOpponent, CardPoolMode } from "@fyendal/shared";
 import type { ConstructedFormat } from "../domain.js";
 import { useStore } from "../store.js";
-import { deckChoicesFor, deckIsLegalForRoom } from "./DeckGrid.js";
+import { deckChoicesFor, deckIsLegalForRoom, sortDecksForPicker } from "./DeckGrid.js";
 import { FormatName } from "./FormatBadge.js";
 import { heroImageUrl } from "./heroImage.js";
 import { BotOpponentModal } from "./BotOpponentModal.js";
@@ -24,12 +24,16 @@ export function CreateRoomModal({ onClose }: { onClose: () => void }) {
     createRoom,
     createBotRoom,
     cardPoolModes,
+    deckPlayedAt,
+    refreshDecks,
     setCardPoolMode,
   } = useStore(useShallow((state) => ({
     decks: state.decks,
     createRoom: state.createRoom,
     createBotRoom: state.createBotRoom,
     cardPoolModes: state.cardPoolModes,
+    deckPlayedAt: state.deckPlayedAt,
+    refreshDecks: state.refreshDecks,
     setCardPoolMode: state.setCardPoolMode,
   })));
   const [format, setFormat] = useState<ConstructedFormat>("cc");
@@ -102,6 +106,8 @@ export function CreateRoomModal({ onClose }: { onClose: () => void }) {
             decks={choices}
             selected={selectedDeck}
             cardPoolMode={cardPoolMode}
+            deckPlayedAt={deckPlayedAt}
+            onOpen={() => { void refreshDecks(true); }}
             onSelect={(id) => setDeckFor((current) => ({ ...current, [format]: id }))}
           />
         </fieldset>
@@ -140,11 +146,15 @@ export function DeckDropdown({
   decks,
   selected,
   cardPoolMode,
+  deckPlayedAt,
+  onOpen,
   onSelect,
 }: {
   decks: DeckSummary[];
   selected: DeckSummary | undefined;
   cardPoolMode: CardPoolMode;
+  deckPlayedAt: Readonly<Record<string, number>>;
+  onOpen?: () => void;
   onSelect: (id: string) => void;
 }) {
   const intl = useIntl();
@@ -153,6 +163,7 @@ export function DeckDropdown({
   const dropdownRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const optionsRef = useRef<HTMLDivElement>(null);
+  const orderedDecks = sortDecksForPicker(decks, deckPlayedAt);
 
   useEffect(() => {
     if (!open) return;
@@ -227,7 +238,10 @@ export function DeckDropdown({
         className="create-room-deck-trigger"
         aria-haspopup="listbox"
         aria-expanded={open}
-        onClick={() => setOpen((current) => !current)}
+        onClick={() => {
+          if (!open) onOpen?.();
+          setOpen((current) => !current);
+        }}
       >
         {selected
           ? <DeckOptionContent key={selected.id} deck={selected} />
@@ -243,7 +257,7 @@ export function DeckDropdown({
           data-placement={layout.placement}
           style={{ maxHeight: layout.maxHeight }}
         >
-          {decks.map((deck) => {
+          {orderedDecks.map((deck) => {
             const blocked = !deckIsLegalForRoom(deck, cardPoolMode);
             return (
               <button

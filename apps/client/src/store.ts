@@ -378,7 +378,7 @@ export const useStore = create<StoreState>((set, get) => {
       queueCounts: { "classic-battles": 0, cc: 0, "silver-age": 0 },
       lobbyRail: "home",
       cardPoolModes: { ...DEFAULT_LOBBY_SETTINGS.cardPoolModes },
-      lastPlayedDecks: { ...DEFAULT_LOBBY_SETTINGS.lastPlayedDecks },
+      deckPlayedAt: {},
     });
   }
 
@@ -1255,16 +1255,6 @@ export const useStore = create<StoreState>((set, get) => {
     if (username) saveLobbySettings(localStorage, username, settings);
   };
 
-  const rememberPlayedDeck = (format: ConstructedFormat, deckId: string) => {
-    const lastPlayedDecks = { ...get().lastPlayedDecks, [format]: deckId };
-    set({ lastPlayedDecks });
-    persistLobbySettings({
-      version: 4,
-      cardPoolModes: get().cardPoolModes,
-      lastPlayedDecks,
-    });
-  };
-
   const accountActions = createAccountActions({ set, get, authRequest, isCurrentAuth });
   const initialPlayRoute = fabraryPlayRoute(location.pathname, location.search ?? "");
   const replayActions = createReplayActions({
@@ -1365,7 +1355,6 @@ export const useStore = create<StoreState>((set, get) => {
         set({ friendInviteTarget: null });
         return;
       }
-      rememberPlayedDeck(format, deckId);
       prepDeckId = deckId;
       prepHero = null;
       roomEntryPending = false;
@@ -1409,9 +1398,8 @@ export const useStore = create<StoreState>((set, get) => {
       const cardPoolModes = { ...get().cardPoolModes, [format]: mode };
       set({ cardPoolModes });
       persistLobbySettings({
-        version: 4,
+        version: 6,
         cardPoolModes,
-        lastPlayedDecks: get().lastPlayedDecks,
       });
     },
     selectPrepMatchup: async (matchupId) => {
@@ -1447,7 +1435,7 @@ export const useStore = create<StoreState>((set, get) => {
         decksLoading: true,
         bugReportNotifications: [],
         cardPoolModes: accountLobbySettings.cardPoolModes,
-        lastPlayedDecks: accountLobbySettings.lastPlayedDecks,
+        deckPlayedAt: {},
       });
       // proactively open the socket so ws auth happens without needing to
       // create/join a room first
@@ -1473,9 +1461,6 @@ export const useStore = create<StoreState>((set, get) => {
     createRoom: (format, choice, visibility = "private") => {
       roomEntryPending = false;
       pendingBotRoom = null;
-      if (format !== "classic-battles" && choice.deckId) {
-        rememberPlayedDeck(format, choice.deckId);
-      }
       // hosts land on the prep room once the room exists
       prepDeckId = format === "classic-battles" ? null : (choice.deckId ?? null);
       prepHero = format === "classic-battles" ? (choice.hero ?? null) : null;
@@ -1497,7 +1482,6 @@ export const useStore = create<StoreState>((set, get) => {
     },
     createBotRoom: (format, deckId, bot, searchForPlayer = false) => {
       roomEntryPending = false;
-      rememberPlayedDeck(format, deckId);
       prepDeckId = deckId;
       prepHero = null;
       const cardPoolMode = get().cardPoolModes[format];
@@ -1541,11 +1525,6 @@ export const useStore = create<StoreState>((set, get) => {
     joinRoom: (code, deckId, spectate, hero) => {
       pendingBotRoom = null;
       const upperCode = code.toUpperCase();
-      if (deckId) {
-        const room = get().rooms.find((candidate) => candidate.code.toUpperCase() === upperCode) ??
-          (get().inviteRoom?.code.toUpperCase() === upperCode ? get().inviteRoom : undefined);
-        if (room && room.format !== "classic-battles") rememberPlayedDeck(room.format, deckId);
-      }
       // App startup effects can run twice in development, and multiple UI
       // paths can converge while a socket is still opening. One recovery
       // request is enough; a second would hit ALREADY_IN_ROOM after the first
@@ -1619,9 +1598,6 @@ export const useStore = create<StoreState>((set, get) => {
         : get().cardPoolModes[format];
       const choiceKey = matchmakingChoiceKey(format, choice, cardPoolMode);
       activeMatchmakingChoiceKey = choiceKey;
-      if (format !== "classic-battles" && choice.deckId) {
-        rememberPlayedDeck(format, choice.deckId);
-      }
       prepDeckId = format === "classic-battles" ? null : (choice.deckId ?? null);
       prepHero = format === "classic-battles" ? (choice.hero ?? null) : null;
       if (prepDeckId || prepHero) {
@@ -1778,6 +1754,7 @@ export const useStore = create<StoreState>((set, get) => {
       else replayRuntime.detach();
       preReplay = null;
       set(clearedRoomProjection());
+      if (get().authToken) void get().refreshDecks(true);
     },
     watchReplay: async () => {
       const before = get();

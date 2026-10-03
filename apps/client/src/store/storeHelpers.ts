@@ -66,7 +66,7 @@ export function initialStoreProjection(
     prepDeck: null,
     prep: null,
     cardPoolModes: lobbySettings.cardPoolModes,
-    lastPlayedDecks: lobbySettings.lastPlayedDecks,
+    deckPlayedAt: {},
   };
 }
 

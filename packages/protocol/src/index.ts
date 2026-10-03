@@ -78,7 +78,8 @@ export interface DeckSummary {
   bannedCards?: string[];
   futureCards?: string[];
 }
-export interface DecksResponse { ok: true; decks: DeckSummary[] }
+export interface DeckPlay { deckId: string; playedAt: number }
+export interface DecksResponse { ok: true; decks: DeckSummary[]; plays: DeckPlay[] }
 export interface DeckResponse { ok: true; deck: DeckSummary }
 export interface FabraryMatchup {
   id: string;
@@ -159,6 +160,7 @@ export interface AccountExport {
     createdAt: number;
     updatedAt: number;
   }>;
+  deckPlays: DeckPlay[];
   rooms: Array<{
     code: string;
     format: Format;
@@ -231,6 +233,7 @@ const MAX_INPUT_CARDS = 100;
 const MAX_LOG = 200;
 const MAX_ROOMS = 10_000;
 const MAX_DECKS = 1_000;
+const MAX_DECK_PLAYS = MAX_DECKS + 500;
 const MAX_REPLAY_VIEWS = 10_000;
 export const MAX_REPLAY_NOTE_LENGTH = 2_000;
 const MAX_REPLAY_NOTES = MAX_REPLAY_VIEWS;
@@ -1659,10 +1662,17 @@ function decodeDeckSummary(value: unknown): DeckSummary | null {
 
 export const decodeDecksResponse: Decoder<DecksResponse> = (value) => {
   const data = object(value);
-  if (!data || !exactKeys(data, ["ok", "decks"]) || data.ok !== true || !Array.isArray(data.decks)
+  if (!data || !exactKeys(data, ["ok", "decks", "plays"])
+    || data.ok !== true || !Array.isArray(data.decks)
     || data.decks.length > MAX_DECKS) return null;
   const decks = data.decks.map(decodeDeckSummary);
-  return decks.every((deck): deck is DeckSummary => deck !== null) ? { ok: true, decks } : null;
+  if (!decks.every((deck): deck is DeckSummary => deck !== null)) return null;
+  if (!array(data.plays, (item): item is DeckPlay => {
+    const play = object(item);
+    return !!play && exactKeys(play, ["deckId", "playedAt"])
+      && id(play.deckId) && nonNegativeInteger(play.playedAt);
+  }, MAX_DECK_PLAYS)) return null;
+  return { ok: true, decks, plays: data.plays };
 };
 
 export interface FabraryDeckPreviewResponse {
@@ -1836,13 +1846,22 @@ export const decodeAccountExportResponse: Decoder<AccountExportResponse> = (valu
   const exported = data?.ok === true ? object(data.export) : null;
   const account = exported ? object(exported.account) : null;
   const valid = !!data && exactKeys(data, ["ok", "export"]) && data.ok === true && !!exported
-    && exactKeys(exported, ["exportedAt", "account", "decks", "rooms", "matchmaking", "bugReports", "gameDays", "replays", "friends", "friendRequests", "friendMessages"]) && !!account
+    && exactKeys(
+      exported,
+      ["exportedAt", "account", "decks", "deckPlays", "rooms", "matchmaking", "bugReports",
+        "gameDays", "replays", "friends", "friendRequests", "friendMessages"],
+    ) && !!account
     && exactKeys(account, ["username", "createdAt", "earlyTester", "selectedBadge"])
     && string(exported.exportedAt, 64, false) && string(account.username, MAX_SHORT_TEXT, false)
     && nonNegativeInteger(account.createdAt) && typeof account.earlyTester === "boolean"
     && (account.selectedBadge === null || playerBadge(account.selectedBadge))
     && (account.selectedBadge === null || account.earlyTester === true)
     && array(exported.decks, (item): item is AccountExport["decks"][number] => exportDeck(item), MAX_DECKS)
+    && array(exported.deckPlays, (item): item is DeckPlay => {
+      const play = object(item);
+      return !!play && exactKeys(play, ["deckId", "playedAt"])
+        && id(play.deckId) && nonNegativeInteger(play.playedAt);
+    }, MAX_DECK_PLAYS)
     && array(exported.rooms, (item): item is AccountExport["rooms"][number] => exportRoom(item), MAX_ROOMS)
     && exportMatchmaking(exported.matchmaking)
     && array(exported.bugReports, (item): item is AccountExport["bugReports"][number] => exportBugReport(item), MAX_ROOMS)

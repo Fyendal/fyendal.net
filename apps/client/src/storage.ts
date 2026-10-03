@@ -260,15 +260,13 @@ export function pruneRejectedMatchRooms(
 }
 
 export interface LobbySettings {
-  version: 4;
+  version: 6;
   cardPoolModes: Record<ConstructedFormat, CardPoolMode>;
-  lastPlayedDecks: Record<ConstructedFormat, string | null>;
 }
 
 export const DEFAULT_LOBBY_SETTINGS: LobbySettings = {
-  version: 4,
+  version: 6,
   cardPoolModes: { cc: "legal", "silver-age": "legal" },
-  lastPlayedDecks: { cc: null, "silver-age": null },
 };
 
 export function lobbySettingsStorageKey(username: string): string {
@@ -278,12 +276,12 @@ export function lobbySettingsStorageKey(username: string): string {
 function decodeLobbySettings(raw: string): LobbySettings {
   try {
     const value: unknown = JSON.parse(raw);
-    if (!value || typeof value !== "object") return DEFAULT_LOBBY_SETTINGS;
+    if (!value || typeof value !== "object" || Array.isArray(value)) return DEFAULT_LOBBY_SETTINGS;
     const record = value as Record<string, unknown>;
     let cardPoolModes: Record<ConstructedFormat, CardPoolMode>;
-    if (record.version === 4) {
+    if (record.version === 4 || record.version === 5 || record.version === 6) {
       const modes = record.cardPoolModes;
-      if (!modes || typeof modes !== "object") return DEFAULT_LOBBY_SETTINGS;
+      if (!modes || typeof modes !== "object" || Array.isArray(modes)) return DEFAULT_LOBBY_SETTINGS;
       const decoded = modes as Record<string, unknown>;
       if (
         !["legal", "future", "open"].includes(String(decoded.cc)) ||
@@ -293,9 +291,9 @@ function decodeLobbySettings(raw: string): LobbySettings {
         cc: decoded.cc as CardPoolMode,
         "silver-age": decoded["silver-age"] as CardPoolMode,
       };
-    } else {
+    } else if (record.version === 1 || record.version === 2 || record.version === 3) {
       const future = record.allowFutureCards;
-      if (!future || typeof future !== "object") return DEFAULT_LOBBY_SETTINGS;
+      if (!future || typeof future !== "object" || Array.isArray(future)) return DEFAULT_LOBBY_SETTINGS;
       const flags = future as Record<string, unknown>;
       if (typeof flags.cc !== "boolean" || typeof flags["silver-age"] !== "boolean") {
         return DEFAULT_LOBBY_SETTINGS;
@@ -304,63 +302,10 @@ function decodeLobbySettings(raw: string): LobbySettings {
         cc: flags.cc ? "future" : "legal",
         "silver-age": flags["silver-age"] ? "future" : "legal",
       };
+    } else {
+      return DEFAULT_LOBBY_SETTINGS;
     }
-    if (record.version === 1) {
-      return {
-        version: 4,
-        cardPoolModes,
-        lastPlayedDecks: { cc: null, "silver-age": null },
-      };
-    }
-    if (record.version === 2) {
-      const lastPlayed = record.lastPlayedDeck;
-      if (lastPlayed === null) {
-        return {
-          version: 4,
-          cardPoolModes,
-          lastPlayedDecks: { cc: null, "silver-age": null },
-        };
-      }
-      if (!lastPlayed || typeof lastPlayed !== "object") return DEFAULT_LOBBY_SETTINGS;
-      const choice = lastPlayed as Record<string, unknown>;
-      if (
-        (choice.format !== "cc" && choice.format !== "silver-age") ||
-        typeof choice.deckId !== "string" ||
-        choice.deckId.length === 0 ||
-        choice.deckId.length > 256
-      ) return DEFAULT_LOBBY_SETTINGS;
-      return {
-        version: 4,
-        cardPoolModes,
-        lastPlayedDecks: {
-          cc: choice.format === "cc" ? choice.deckId : null,
-          "silver-age": choice.format === "silver-age" ? choice.deckId : null,
-        },
-      };
-    }
-    if (record.version !== 3 && record.version !== 4) return DEFAULT_LOBBY_SETTINGS;
-
-    const lastPlayed = record.lastPlayedDecks;
-    if (!lastPlayed || typeof lastPlayed !== "object") return DEFAULT_LOBBY_SETTINGS;
-    const choices = lastPlayed as Record<string, unknown>;
-    if (
-      (choices.cc !== null && (
-        typeof choices.cc !== "string" || choices.cc.length === 0 || choices.cc.length > 256
-      )) ||
-      (choices["silver-age"] !== null && (
-        typeof choices["silver-age"] !== "string" ||
-        choices["silver-age"].length === 0 ||
-        choices["silver-age"].length > 256
-      ))
-    ) return DEFAULT_LOBBY_SETTINGS;
-    return {
-      version: 4,
-      cardPoolModes,
-      lastPlayedDecks: {
-        cc: choices.cc as string | null,
-        "silver-age": choices["silver-age"] as string | null,
-      },
-    };
+    return { version: 6, cardPoolModes };
   } catch {
     return DEFAULT_LOBBY_SETTINGS;
   }
@@ -375,7 +320,14 @@ export function loadLobbySettings(
   const accountKey = lobbySettingsStorageKey(username);
   try {
     const accountRaw = storage.getItem(accountKey);
-    if (accountRaw !== null) return decodeLobbySettings(accountRaw);
+    if (accountRaw !== null) {
+      const settings = decodeLobbySettings(accountRaw);
+      const canonical = JSON.stringify(settings);
+      if (accountRaw !== canonical) {
+        try { storage.setItem(accountKey, canonical); } catch { /* Read-only storage. */ }
+      }
+      return settings;
+    }
 
     if (options?.migrateLegacy !== true) return DEFAULT_LOBBY_SETTINGS;
     const legacyRaw = storage.getItem(LOBBY_SETTINGS_STORAGE_KEY);

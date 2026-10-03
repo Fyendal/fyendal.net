@@ -251,7 +251,7 @@ describe("client storage keys", () => {
     })).toEqual(DEFAULT_GAME_SETTINGS);
   });
 
-  it("keeps lobby preferences independent by account and constructed format", () => {
+  it("keeps card-pool preferences independent by account and format", () => {
     const values = new Map<string, string>();
     const storage = {
       getItem: (key: string) => values.get(key) ?? null,
@@ -260,19 +260,17 @@ describe("client storage keys", () => {
     };
     expect(loadLobbySettings(storage, "Alice")).toEqual(DEFAULT_LOBBY_SETTINGS);
     saveLobbySettings(storage, "Alice", {
-      version: 4,
+      version: 6,
       cardPoolModes: { cc: "open", "silver-age": "legal" },
-      lastPlayedDecks: { cc: "deck-cc", "silver-age": "deck-123" },
     });
     expect(loadLobbySettings(storage, "ALICE")).toEqual({
-      version: 4,
+      version: 6,
       cardPoolModes: { cc: "open", "silver-age": "legal" },
-      lastPlayedDecks: { cc: "deck-cc", "silver-age": "deck-123" },
     });
     expect(loadLobbySettings(storage, "Bob")).toEqual(DEFAULT_LOBBY_SETTINGS);
   });
 
-  it("migrates old lobby settings and rejects malformed remembered decks", () => {
+  it("migrates old lobby settings and removes browser deck-play history", () => {
     const values = new Map<string, string>([[
       LOBBY_SETTINGS_STORAGE_KEY,
       JSON.stringify({
@@ -289,29 +287,34 @@ describe("client storage keys", () => {
     expect(loadLobbySettings(storage, "Bob")).toEqual(DEFAULT_LOBBY_SETTINGS);
     expect(values.has(LOBBY_SETTINGS_STORAGE_KEY)).toBe(true);
 
-    expect(loadLobbySettings(storage, "Alice", { migrateLegacy: true })).toEqual({
-      version: 4,
+    const oldSettings = {
+      version: 6,
       cardPoolModes: { cc: "future", "silver-age": "legal" },
-      lastPlayedDecks: { cc: null, "silver-age": "precon-sba" },
-    });
+    };
+    expect(loadLobbySettings(storage, "Alice", { migrateLegacy: true })).toEqual(oldSettings);
     expect(values.has(LOBBY_SETTINGS_STORAGE_KEY)).toBe(false);
-    expect(values.has(lobbySettingsStorageKey("Alice"))).toBe(true);
+    expect(JSON.parse(values.get(lobbySettingsStorageKey("Alice"))!)).toEqual(oldSettings);
 
-    values.set(lobbySettingsStorageKey("Charlie"), JSON.stringify({
-      version: 1,
-      allowFutureCards: { cc: false, "silver-age": true },
+    values.set(lobbySettingsStorageKey("Dana"), JSON.stringify({
+      version: 5,
+      cardPoolModes: { cc: "open", "silver-age": "legal" },
+      lastPlayedDecks: { cc: "old-deck", "silver-age": null },
+      deckPlayedAt: { "old-deck": 123 },
     }));
-    expect(loadLobbySettings(storage, "Charlie")).toEqual({
-      version: 4,
-      cardPoolModes: { cc: "legal", "silver-age": "future" },
-      lastPlayedDecks: { cc: null, "silver-age": null },
+    expect(loadLobbySettings(storage, "Dana")).toEqual({
+      version: 6,
+      cardPoolModes: { cc: "open", "silver-age": "legal" },
+    });
+    expect(JSON.parse(values.get(lobbySettingsStorageKey("Dana"))!)).toEqual({
+      version: 6,
+      cardPoolModes: { cc: "open", "silver-age": "legal" },
     });
 
     values.set(lobbySettingsStorageKey("Bob"), JSON.stringify({
-        version: 2,
-        allowFutureCards: { cc: false, "silver-age": false },
-        lastPlayedDeck: { format: "classic-battles", deckId: "rhinar" },
-      }));
+      version: 2,
+      allowFutureCards: { cc: false, "silver-age": false },
+      lastPlayedDeck: { format: "classic-battles", deckId: "rhinar" },
+    }));
     expect(loadLobbySettings(storage, "Bob")).toEqual(DEFAULT_LOBBY_SETTINGS);
   });
 

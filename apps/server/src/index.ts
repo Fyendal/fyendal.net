@@ -7,7 +7,7 @@ import { cardData, formatLegalityIssues, precon } from "@fyendal/cards";
 import { botDefinition } from "@fyendal/bot";
 import { deleteExpiredSessions, hashSessionToken, sessionForToken, type AuthUser } from "./auth.js";
 import type { Queryable } from "./db.js";
-import { resolveFreshDeck } from "./decks.js";
+import { recordDeckPlay, resolveFreshDeck } from "./decks.js";
 import { createApiServer } from "./http.js";
 import { createFabraryClient, type FabraryClient } from "./fabrary.js";
 import { clientIp, configuredTrustedProxyHops } from "./network.js";
@@ -145,6 +145,16 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
   };
   const sendSocialError = (ctx: ClientCtx, code: keyof typeof socialErrorMessage): void => {
     ctx.send({ type: "error", code, message: socialErrorMessage[code] });
+  };
+  const rememberAcceptedDeck = async (userId: number, deckId: string | undefined): Promise<void> => {
+    if (!deckId) return;
+    try {
+      await recordDeckPlay(deps.db, userId, deckId);
+    } catch (error) {
+      // The room or queue change has already committed; a preference write
+      // must not turn a successful game entry into a client-visible failure.
+      consoleError("deck play timestamp write failed", error);
+    }
   };
   const localClientsForUser = (userId: number): ClientCtx[] =>
     [...allClients].filter((client) => client.user?.id === userId && !client.closed);
@@ -689,6 +699,7 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
           username: ctx.user.username,
           userId: ctx.user.id,
         }, "private", cardPoolMode);
+        await rememberAcceptedDeck(ctx.user.id, choice.choice.deckId);
         connections.attach(ctx, code, seat, token);
         const version = await markAttachedPresent(ctx);
         const invite = {
@@ -732,6 +743,7 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
           username: ctx.user.username,
           userId: ctx.user.id,
         }, msg.private ? "private" : "public", cardPoolMode);
+        await rememberAcceptedDeck(ctx.user.id, choice.choice.deckId);
         connections.attach(ctx, code, seat, token);
         const version = await markAttachedPresent(ctx);
         send(ws, { type: "room-created", code, seat, token, version });
@@ -807,6 +819,7 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
             return;
           }
           if (queued.kind === "matched") {
+            await rememberAcceptedDeck(ctx.user.id, choice.choice.deckId);
             clusterConsumer?.nudge();
             return;
           }
@@ -821,6 +834,7 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
           username: ctx.user.username,
           userId: ctx.user.id,
         }, msg.cardPoolMode ?? "legal", botOpponent);
+        await rememberAcceptedDeck(ctx.user.id, choice.choice.deckId);
         if (retainedQueueCode) connections.detach(ctx);
         connections.attach(ctx, code, seat, token);
         const version = await markAttachedPresent(ctx);
@@ -884,6 +898,7 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
           await publishRoomEvent({ code, kind: "spectators", version });
           return;
         }
+        if (!r.reconnected && ctx.user) await rememberAcceptedDeck(ctx.user.id, msg.deckId);
         send(ws, {
           type: "joined",
           code,
@@ -966,6 +981,7 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
           send(ws, { type: "error", message: result.error });
           return;
         }
+        await rememberAcceptedDeck(ctx.user.id, choice.choice.deckId);
         if (result.kind === "opened") {
           await deliverMatch(ctx.user.id, result.code, true, true, msg.format);
         }

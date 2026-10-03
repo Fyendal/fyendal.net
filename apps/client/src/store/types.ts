@@ -151,7 +151,7 @@ export interface StoreState {
   previewFabraryPlay: () => Promise<void>;
   dismissFabraryPlay: () => void;
   startFabraryPlay: (choice: { kind: "player" } | { kind: "bot"; bot: BotOpponent; searchForPlayer: boolean }) => void;
-  refreshDecks: () => Promise<void>;
+  refreshDecks: (silent?: boolean) => Promise<void>;
   importDeck: (input: {
     name: string;
     format: ConstructedFormat;
@@ -171,7 +171,7 @@ export interface StoreState {
   lobbyRail: LobbyRail;
   setLobbyRail: (rail: LobbyRail) => void;
   cardPoolModes: Record<ConstructedFormat, CardPoolMode>;
-  lastPlayedDecks: Record<ConstructedFormat, string | null>;
+  deckPlayedAt: Record<string, number>;
   setCardPoolMode: (format: ConstructedFormat, mode: CardPoolMode) => void;
   roomCode: string | null;
   yourSeat: number | null;

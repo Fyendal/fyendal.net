@@ -52,6 +52,16 @@ export function deckChoicesFor(
   return [...own, ...preconSummaries(format, cardPoolMode)];
 }
 
+export function sortDecksForPicker(
+  decks: readonly DeckSummary[],
+  deckPlayedAt: Readonly<Record<string, number>>,
+): DeckSummary[] {
+  return [...decks].sort((left, right) =>
+    Math.max(right.updatedAt, deckPlayedAt[right.id] ?? 0) -
+    Math.max(left.updatedAt, deckPlayedAt[left.id] ?? 0)
+  );
+}
+
 export function deckIsLegalForRoom(deck: DeckSummary, cardPoolMode: CardPoolMode): boolean {
   return (cardPoolMode === "open" || !deck.bannedCards?.length) &&
     (cardPoolMode !== "legal" || !deck.futureCards?.length);
