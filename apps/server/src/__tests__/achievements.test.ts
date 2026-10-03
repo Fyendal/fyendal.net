@@ -4,6 +4,7 @@ import { cardData, decklists, scripts } from "@fyendal/cards";
 import { appendReplayView, startReplay, pruneReplayFramesFrom } from "../replays.js";
 import { botDefinitions } from "@fyendal/bot";
 import { achievementsForSeat, awardAchievements, getAchievements, listUserAchievements } from "../achievements.js";
+import type { Queryable } from "../db.js";
 import { freshDb } from "./testdb.js";
 
 type Match = Parameters<typeof achievementsForSeat>[0];
@@ -172,7 +173,9 @@ describe("achievements", () => {
     const userId = Number(rows[0]!.id);
     const room = match({ winner: 1, opponent: null });
     room.seats[0] = { userId };
-    const state = createGame({ decklists: [decklists.rhinar, decklists.dorinthea], cards: cardData, scripts, seed: 1, startPlayer: 0 });
+    const state = createGame({
+      decklists: [decklists.rhinar, decklists.dorinthea], cards: cardData, scripts, seed: 1, startPlayer: 0,
+    });
     while (state.players[0].hand.length < 6) state.players[0].hand.push(state.players[0].deck.pop()!);
     await startReplay(db, {
       roomCode: room.code, rulesetVersion: "test", format: "classic-battles", state, roomVersion: 1,
@@ -200,7 +203,9 @@ describe("achievements", () => {
     const userId = Number(rows[0]!.id);
     const room = match({ opponent: null });
     room.seats[0] = { userId };
-    const state = createGame({ decklists: [decklists.rhinar, decklists.dorinthea], cards: cardData, scripts, seed: 2, startPlayer: 0 });
+    const state = createGame({
+      decklists: [decklists.rhinar, decklists.dorinthea], cards: cardData, scripts, seed: 2, startPlayer: 0,
+    });
     const statsTurn = (turn: number, activePlayer: number) => ({
       turn, activePlayer, attacks: [0, 0] as [number, number],
       threatened: [0, 0] as [number, number], blocked: [0, 0] as [number, number],
@@ -239,6 +244,110 @@ describe("achievements", () => {
     await awardAchievements(db, room, 103);
     expect((await listUserAchievements(db, userId)).map((unlock) => unlock.id)).not.toContain("against-the-odds");
   });
+
+  it("skips replay reads for previously earned history awards and inserts new awards together", async () => {
+    const db = await freshDb();
+    const { rows } = await db.query(
+      `INSERT INTO users (username, username_lc, pass_hash, created_at)
+       VALUES ('Alice','alice','hash',1), ('Bob','bob','hash',1) RETURNING id`,
+    );
+    const alice = Number(rows[0]!.id);
+    const bob = Number(rows[1]!.id);
+    for (const [userId, id] of [
+      [alice, "full-hand"], [alice, "against-the-odds"], [bob, "full-hand"],
+    ] as const) {
+      await db.query(
+        "INSERT INTO user_achievements (user_id, achievement_id, unlocked_at, room_code) VALUES ($1, $2, 1, 'ABCDEF')",
+        [userId, id],
+      );
+    }
+    let replayReads = 0;
+    let inserts = 0;
+    const counted: Queryable = { query: async (sql, params) => {
+      if (sql.includes("FROM replay_frames")) replayReads++;
+      if (sql.startsWith("INSERT INTO user_achievements")) inserts++;
+      return db.query(sql, params);
+    } };
+    const room = match({ damage: [26] });
+    room.seats = [{ userId: alice }, { userId: bob }];
+    room.state!.gameStats.turns[0]!.blocked[1] = 20;
+    await awardAchievements(counted, room, 123);
+    expect(replayReads).toBe(0);
+    expect(inserts).toBe(1);
+    expect((await listUserAchievements(db, alice)).map((unlock) => unlock.id)).toEqual([
+      "big-turn", "first-pvp-win", "first-victory", "relentless-victory", "against-the-odds", "full-hand",
+    ]);
+    expect((await listUserAchievements(db, bob)).map((unlock) => unlock.id)).toEqual(["iron-wall", "full-hand"]);
+    await awardAchievements(counted, room, 124);
+    expect(replayReads).toBe(0);
+    expect(inserts).toBe(1);
+  });
+
+  it.each(["full-hand", "against-the-odds"] as const)(
+    "continues past an early %s unlock and stops when both history checks finish", async (firstAward) => {
+      const db = await freshDb();
+      const { rows: users } = await db.query(
+        `INSERT INTO users (username, username_lc, pass_hash, created_at)
+         VALUES ('Alice','alice','hash',1) RETURNING id`,
+      );
+      const userId = Number(users[0]!.id);
+      const room = match({ winner: 1 });
+      room.seats = [{ controller: "bot" }, { userId }];
+      room.state!.players[0].life = 0;
+      room.state!.players[1].life = 10;
+      const state = createGame({
+        decklists: [decklists.rhinar, decklists.dorinthea], cards: cardData, scripts, seed: 3, startPlayer: 0,
+      });
+      const firstTurn = state.gameStats.turns[0]!;
+      state.gameStats.turns = [firstTurn, { ...firstTurn, turn: 2, activePlayer: 1 },
+        { ...firstTurn, turn: 3, activePlayer: 0 }, { ...firstTurn, turn: 4, activePlayer: 1 }];
+      state.turn = 4;
+      state.activePlayer = 1;
+      state.players[0].life = 20;
+      state.players[1].life = firstAward === "against-the-odds" ? 5 : 6;
+      const fillHand = () => {
+        while (state.players[1].hand.length < 6) state.players[1].hand.push(state.players[1].deck.pop()!);
+      };
+      if (firstAward === "full-hand") fillHand();
+      await startReplay(db, {
+        roomCode: room.code, rulesetVersion: "test", format: "classic-battles", state, roomVersion: 1,
+        participants: [
+          { seat: 0, heroId: decklists.rhinar.heroId },
+          { seat: 1, userId, heroId: decklists.dorinthea.heroId },
+        ],
+      });
+      const fillPage = async (sourceVersion: number) => {
+        const { rows } = await db.query(
+          "SELECT replay_id, view FROM replay_frames WHERE room_version = $1", [sourceVersion],
+        );
+        const source = rows[0]!;
+        const values: unknown[] = [];
+        const placeholders = Array.from({ length: 99 }, (_, i) => {
+          values.push(source.replay_id, sourceVersion + i + 1, JSON.stringify(source.view));
+          return `($${i * 3 + 1}, $${i * 3 + 2}, $${i * 3 + 3})`;
+        });
+        await db.query(
+          `INSERT INTO replay_frames (replay_id, room_version, view) VALUES ${placeholders.join(", ")}`, values,
+        );
+      };
+      await fillPage(1);
+      fillHand();
+      state.players[1].life = 5;
+      await appendReplayView(db, room.code, 101, state, null, null);
+      await fillPage(101);
+      const replayQueries: string[] = [];
+      const counted: Queryable = { query: (sql, params) => {
+        if (sql.includes("FROM replay_frames")) replayQueries.push(sql);
+        return db.query(sql, params);
+      } };
+      await awardAchievements(counted, room, 123);
+      expect(replayQueries).toHaveLength(2);
+      expect(replayQueries[1]!.includes("view->'gameStats'")).toBe(firstAward !== "against-the-odds");
+      expect((await listUserAchievements(db, userId)).map((unlock) => unlock.id)).toEqual([
+        "against-the-odds", "first-bot-win", "first-victory", "full-hand",
+      ]);
+    },
+  );
 
   it("rejects unlock timestamps that cannot be displayed as dates", async () => {
     const db = await freshDb();

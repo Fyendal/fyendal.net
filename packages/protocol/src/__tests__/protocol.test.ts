@@ -3,6 +3,7 @@ import {
   ACTIVE_ACHIEVEMENT_IDS,
   decodeAccountExportResponse,
   decodeAccountBadgesResponse,
+  decodeAchievementReplaySnapshot,
   decodeAchievementsResponse,
   decodeBugReportNotificationsResponse,
   decodeBugReportResponse,
@@ -26,6 +27,32 @@ import {
   decodeServerMessage,
   decodeStatsResponse,
 } from "../index.js";
+
+describe("achievement replay projection", () => {
+  it("decodes only bounded life, hand, and turn facts", () => {
+    const snapshot = {
+      turn: 4, life0: -1, life1: 20, handCount0: 6, handCount1: 3,
+      gameStats: { turns: [{ turn: 2, activePlayer: 1, attacks: [0, 0],
+        threatened: [0, 0], blocked: [0, 0], damageDealt: [0, 0] }] },
+    };
+    expect(decodeAchievementReplaySnapshot(snapshot)).toEqual({
+      turn: 4, players: [{ life: -1, handCount: 6 }, { life: 20, handCount: 3 }], gameStats: snapshot.gameStats,
+    });
+    expect(decodeAchievementReplaySnapshot({ ...snapshot, gameStats: null })).toEqual({
+      turn: 4, players: [{ life: -1, handCount: 6 }, { life: 20, handCount: 3 }],
+    });
+    for (const invalid of [
+      { ...snapshot, life0: "-1" },
+      { ...snapshot, life1: Infinity },
+      { ...snapshot, turn: Number.MAX_SAFE_INTEGER + 1 },
+      { ...snapshot, handCount0: -1 },
+      { ...snapshot, handCount1: 1.5 },
+      { ...snapshot, gameStats: { turns: [{ ...snapshot.gameStats.turns[0], activePlayer: 3 }] } },
+      { ...snapshot, gameStats: { turns: Array(10_001).fill(snapshot.gameStats.turns[0]) } },
+      { ...snapshot, cards: [] },
+    ]) expect(decodeAchievementReplaySnapshot(invalid)).toBeNull();
+  });
+});
 
 describe("Fabrary deck previews", () => {
   it("decodes bounded public metadata, including a missing hero", () => {

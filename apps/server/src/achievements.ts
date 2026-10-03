@@ -1,5 +1,8 @@
 import { botDefinitionForDeckId } from "@fyendal/bot";
-import { ACHIEVEMENT_IDS, ACTIVE_ACHIEVEMENT_IDS, decodeAchievementUnlock, decodeGameView, type AchievementId, type AchievementsResponse } from "@fyendal/protocol";
+import {
+  ACHIEVEMENT_IDS, ACTIVE_ACHIEVEMENT_IDS, decodeAchievementReplaySnapshot, decodeAchievementUnlock,
+  type AchievementId, type AchievementsResponse,
+} from "@fyendal/protocol";
 import type { Queryable } from "./db.js";
 import type { RoomRow, SeatRow } from "./store.js";
 
@@ -15,14 +18,22 @@ type AchievementMatch = Pick<RoomRow, "code" | "cardPoolMode"> & {
 type AchievementHistory = { maxHandCount: number; trailedAfterRound: boolean };
 
 function trailedAfterFullRound(
-  snapshot: { turn: number; gameStats?: { turns: readonly { turn: number; activePlayer: number }[] }; players: readonly { life: number }[] },
+  snapshot: {
+    turn: number;
+    gameStats?: { turns: readonly { turn: number; activePlayer: number }[] };
+    players: readonly { life: number }[];
+  },
   seat: 0 | 1,
 ): boolean {
   // Engine turn 1 is the opening turn; a full numbered round starts with turns 2 and 3.
-  const completed = snapshot.gameStats?.turns.filter((turn) => turn.turn >= 2 && turn.turn < snapshot.turn) ?? [];
-  return completed.some((turn) => turn.activePlayer === 0)
-    && completed.some((turn) => turn.activePlayer === 1)
-    && snapshot.players[1 - seat]!.life - snapshot.players[seat]!.life >= 15;
+  if (snapshot.players[1 - seat]!.life - snapshot.players[seat]!.life < 15) return false;
+  let completedSeats = 0;
+  for (const turn of snapshot.gameStats?.turns ?? []) {
+    if (turn.turn < 2 || turn.turn >= snapshot.turn) continue;
+    completedSeats |= 1 << turn.activePlayer;
+    if (completedSeats === 3) return true;
+  }
+  return false;
 }
 
 /** Eligible rewards are persisted alongside the final room state in its transaction. */
@@ -80,14 +91,49 @@ export function achievementsForSeat(
 
 export async function awardAchievements(db: Queryable, room: AchievementMatch, now = Date.now()): Promise<void> {
   if (room.cardPoolMode !== "legal" || room.state?.phase !== "game-over") return;
-  // Replay frames follow undo pruning, so undone hands do not earn rewards.
-  // The final state is checked separately because its frame has not been appended yet.
-  const maxHands: [number, number] = [0, 0];
+  const eligible = ([0, 1] as const).filter((seat) =>
+    room.seats[seat]?.userId && room.seats[seat]?.controller !== "bot");
+  if (eligible.length === 0) return;
+  const userIds = eligible.map((seat) => room.seats[seat]!.userId!);
+  const { rows: existing } = await db.query(
+    "SELECT user_id, achievement_id FROM user_achievements WHERE user_id = $1 OR user_id = $2",
+    [userIds[0], userIds[1] ?? null],
+  );
+  const unlocked: [Set<string>, Set<string>] = [new Set(), new Set()];
+  for (const row of existing) {
+    const userId = Number(row.user_id);
+    if (!Number.isSafeInteger(userId) || typeof row.achievement_id !== "string") {
+      throw new Error("invalid achievement row");
+    }
+    for (const seat of eligible) {
+      if (room.seats[seat]!.userId === userId) unlocked[seat].add(row.achievement_id);
+    }
+  }
+
+  const maxHands: [number, number] = [room.state.players[0].hand.length, room.state.players[1].hand.length];
+  const winner = room.state.winner;
   const trailedAfterRound: [boolean, boolean] = [false, false];
+  if (winner === 0 || winner === 1) {
+    trailedAfterRound[winner] = trailedAfterFullRound(room.state, winner);
+  }
+  const pendingHands = new Set(eligible.filter((seat) => !unlocked[seat].has("full-hand") && maxHands[seat] < 6));
+  let pendingOdds: 0 | 1 | null = (winner === 0 || winner === 1) && eligible.includes(winner)
+    && !unlocked[winner].has("against-the-odds") && !trailedAfterRound[winner] ? winner : null;
+
+  // Replay frames follow undo pruning. The final state is already checked above
+  // because its frame has not been appended to the recording yet.
   let afterVersion = -1;
-  while (true) {
+  while (pendingHands.size > 0 || pendingOdds !== null) {
+    const statsProjection = pendingOdds !== null ? "view->'gameStats'" : "NULL";
     const { rows } = await db.query(
-      `SELECT room_version, view FROM replay_frames
+      `SELECT room_version,
+              view->'turn' AS turn,
+              view->'players'->0->'life' AS life0,
+              view->'players'->1->'life' AS life1,
+              view->'players'->0->'handCount' AS "handCount0",
+              view->'players'->1->'handCount' AS "handCount1",
+              ${statsProjection} AS "gameStats"
+       FROM replay_frames
        WHERE replay_id = (
          SELECT id FROM replay_games WHERE room_code = $1 AND status = 'recording'
          ORDER BY created_at DESC LIMIT 1
@@ -97,31 +143,45 @@ export async function awardAchievements(db: Queryable, room: AchievementMatch, n
     );
     for (const row of rows) {
       const version = Number(row.room_version);
-      const view = decodeGameView(row.view);
-      if (!Number.isSafeInteger(version) || version <= afterVersion || !view) {
+      const snapshot = decodeAchievementReplaySnapshot({
+        turn: row.turn, life0: row.life0, life1: row.life1,
+        handCount0: row.handCount0, handCount1: row.handCount1,
+        gameStats: row.gameStats,
+      });
+      if (!Number.isSafeInteger(version) || version <= afterVersion || !snapshot) {
         throw new Error("invalid achievement replay frame");
       }
       afterVersion = version;
-      for (const seat of [0, 1] as const) {
-        maxHands[seat] = Math.max(maxHands[seat], view.players[seat].handCount);
-        trailedAfterRound[seat] ||= trailedAfterFullRound(view, seat);
+      for (const seat of pendingHands) {
+        maxHands[seat] = Math.max(maxHands[seat], snapshot.players[seat].handCount);
+        if (maxHands[seat] >= 6) pendingHands.delete(seat);
       }
+      if (pendingOdds !== null && trailedAfterFullRound(snapshot, pendingOdds)) {
+        trailedAfterRound[pendingOdds] = true;
+        pendingOdds = null;
+      }
+      if (pendingHands.size === 0 && pendingOdds === null) break;
     }
-    if (rows.length < 100 || (maxHands.every((count) => count >= 6) && trailedAfterRound.every(Boolean))) break;
+    if (rows.length < 100) break;
   }
-  for (const seat of [0, 1] as const) {
-    const userId = room.seats[seat]?.userId;
-    if (!userId) continue;
+
+  const values: Array<string | number> = [];
+  const placeholders: string[] = [];
+  for (const seat of eligible) {
     for (const id of achievementsForSeat(room, seat, {
       maxHandCount: maxHands[seat], trailedAfterRound: trailedAfterRound[seat],
     })) {
-      await db.query(
-        `INSERT INTO user_achievements (user_id, achievement_id, unlocked_at, room_code)
-         VALUES ($1, $2, $3, $4) ON CONFLICT (user_id, achievement_id) DO NOTHING`,
-        [userId, id, now, room.code],
-      );
+      if (unlocked[seat].has(id)) continue;
+      const start = values.length + 1;
+      placeholders.push(`($${start}, $${start + 1}, $${start + 2}, $${start + 3})`);
+      values.push(room.seats[seat]!.userId!, id, now, room.code);
     }
   }
+  if (values.length > 0) await db.query(
+    `INSERT INTO user_achievements (user_id, achievement_id, unlocked_at, room_code)
+     VALUES ${placeholders.join(", ")} ON CONFLICT (user_id, achievement_id) DO NOTHING`,
+    values,
+  );
 }
 
 export async function listUserAchievements(

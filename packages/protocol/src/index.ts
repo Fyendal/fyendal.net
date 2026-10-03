@@ -1080,6 +1080,29 @@ function gameStats(value: unknown): value is GameStatsView {
     && array(stats.turns, gameTurnStats, MAX_REPLAY_VIEWS);
 }
 
+/** Only the replay facts needed for historical achievements. Database JSON is
+ * projected before decoding so full cards and logs never cross this boundary. */
+export function decodeAchievementReplaySnapshot(value: unknown): {
+  turn: number;
+  players: [{ life: number; handCount: number }, { life: number; handCount: number }];
+  gameStats?: GameStatsView;
+} | null {
+  const snapshot = object(value);
+  if (!snapshot || !exactKeys(snapshot, ["turn", "life0", "life1", "handCount0", "handCount1", "gameStats"])
+    || !nonNegativeInteger(snapshot.turn)
+    || !integer(snapshot.life0) || !integer(snapshot.life1)
+    || !nonNegativeInteger(snapshot.handCount0) || !nonNegativeInteger(snapshot.handCount1)
+    || !(snapshot.gameStats === null || gameStats(snapshot.gameStats))) return null;
+  return {
+    turn: snapshot.turn,
+    players: [
+      { life: snapshot.life0, handCount: snapshot.handCount0 },
+      { life: snapshot.life1, handCount: snapshot.handCount1 },
+    ],
+    ...(snapshot.gameStats === null ? {} : { gameStats: snapshot.gameStats }),
+  };
+}
+
 function playerTurnFacts(value: unknown): value is PlayerTurnFactsView {
   const facts = object(value);
   return !!facts && exactKeys(facts, [
