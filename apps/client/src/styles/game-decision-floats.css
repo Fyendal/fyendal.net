@@ -520,7 +520,7 @@
   height: calc(clamp(55px, 7vh, 85px) * .88);
 }
 .effect-mini .board-square-name {
-  height: clamp(9px, 12cqi, 11px);
+  --board-name-height: clamp(13px, 14cqi, 15px);
   font-size: clamp(5px, 7cqi, 7px);
 }
 .effect-count {

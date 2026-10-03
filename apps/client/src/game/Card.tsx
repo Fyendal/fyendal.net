@@ -297,6 +297,7 @@ export function CardFace({
   const attack = card.attack ?? data?.attack;
   const defense = card.defense ?? data?.defense;
   const squareHero = data?.cardType === "hero";
+  const squarePitch = data?.pitch && PITCH_CLASS[data.pitch] ? data.pitch : undefined;
   const printedLife = data?.life;
   const marked = (card.counters?.marked ?? 0) > 0;
   const namedCounters = Object.entries(card.counters ?? {}).filter(
@@ -415,12 +416,19 @@ export function CardFace({
               </>
             ) : null}
           </span>
-          <span
+          <div
             className={`board-square-name${data?.cardType === "hero" ? " board-square-name-hero" : ""}`}
             data-card-type={data?.cardType}
-            data-pitch={data?.pitch && PITCH_CLASS[data.pitch] ? data.pitch : undefined}
+            data-pitch={squarePitch}
             title={name}
-          ><span className="board-square-name-text">{name}</span></span>
+          >
+            {squarePitch !== undefined ? (
+              <div className="board-square-pitch-backing" aria-hidden="true" />
+            ) : null}
+            <span className="board-square-name-frame">
+              <span className="board-square-name-text">{name}</span>
+            </span>
+          </div>
           {showStats && (
             attack !== undefined || defense !== undefined ||
             (squareHero && data.intellect !== undefined) || printedLife !== undefined

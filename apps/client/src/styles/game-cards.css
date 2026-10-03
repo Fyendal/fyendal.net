@@ -465,22 +465,15 @@
 .board-square-frame-right { clip-path: inset(0 0 0 91.5%); }
 .board-square-frame-right img { left: -28.7%; }
 .board-square-name {
+  --board-name-height: clamp(16px, 14cqi, 23px);
   position: absolute;
   z-index: 2;
   top: 0;
   left: 0;
   right: 0;
-  display: flex;
-  height: clamp(13px, 12cqi, 20px);
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-  padding: 0 4px;
-  border: 1px solid #514b40;
-  border-top-width: 2px;
-  border-radius: 8px 8px 2px 2px;
-  background: #eee9dd url("/card-title-bars/board-frame.svg") center / 100% 100% no-repeat;
-  color: #2d2a24;
+  height: var(--board-name-height);
+  border-radius: 999px;
+  color: #211f1b;
   font-family: Alegreya, Palatino, "Palatino Linotype", "Book Antiqua", Georgia, serif;
   font-size: clamp(7px, 7cqi, 12px);
   font-weight: 500;
@@ -492,19 +485,46 @@
      across it keeps equipment/soul stacks expanded. */
   pointer-events: auto;
 }
-.board-square-name[data-card-type="hero"] {
+.board-square-name-frame {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  padding: 0 7px;
+  border: 1px solid #272823;
+  border-radius: inherit;
+  box-shadow: inset 0 0 0 1px #d2d0bd, 0 1px 2px #000b;
+  background: #eee9dd url("/card-title-bars/board-frame.svg") center / 100% 100% no-repeat;
+}
+/* A one-pixel ivory reveal separates the two ink contours, like the printed
+   nameplate. CSS keeps this gap constant as the arena card changes size. */
+.board-square-name-frame::after {
+  content: "";
+  position: absolute;
+  inset: 1px;
+  border: 1px solid #45453c;
+  border-radius: inherit;
+  pointer-events: none;
+}
+.board-square-name[data-card-type="hero"] .board-square-name-frame {
   background-image: url("/card-title-bars/hero-frame.svg");
 }
-.board-square-name[data-card-type="equipment"] {
+.board-square-name[data-card-type="equipment"] .board-square-name-frame {
   background-image: url("/card-title-bars/equipment-frame.svg");
 }
-.board-square-name[data-card-type="weapon"] {
+.board-square-name[data-card-type="weapon"] .board-square-name-frame {
   background-image: url("/card-title-bars/weapon-frame.svg");
+}
+.board-square-name:not([data-pitch]) .board-square-name-frame {
+  border-top-color: var(--square-frame-color, #272823);
+  border-inline-color: var(--square-frame-color, #272823);
 }
 .board-square-name-hero {
   left: -4px;
   right: -4px;
-  border-radius: 7px;
 }
 .board-square-name-text {
   display: block;
@@ -513,18 +533,28 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.card-board-square .board-square-name:not([data-pitch]) {
-  border-top-color: var(--square-frame-color, #514b40);
-  border-inline-color: var(--square-frame-color, #514b40);
-}
-.board-square-name[data-pitch="1"] { --board-pitch-accent: #e5534b; }
-.board-square-name[data-pitch="2"] { --board-pitch-accent: #e3b341; }
-.board-square-name[data-pitch="3"] { --board-pitch-accent: #539bf5; }
-.board-square-name[data-pitch="4"] { --board-pitch-accent: #a970ff; }
+.board-square-name[data-pitch="1"] { --board-pitch-accent: #d91830; }
+.board-square-name[data-pitch="2"] { --board-pitch-accent: #d6ad18; }
+.board-square-name[data-pitch="3"] { --board-pitch-accent: #159de0; }
+.board-square-name[data-pitch="4"] { --board-pitch-accent: #723a97; }
 .board-square-name[data-pitch] {
-  border-top-color: var(--board-pitch-accent);
-  border-right-color: var(--board-pitch-accent);
-  border-left-color: var(--board-pitch-accent);
+  border-radius: 4px;
+}
+.board-square-pitch-backing {
+  /* The opaque name frame covers this solid backing, exposing two pixels of
+     pitch color and its one-pixel outer border above the title. */
+  position: absolute;
+  top: -3px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border: 1px solid #20211d;
+  border-radius: 6px 6px 5px 5px;
+  background: var(--board-pitch-accent);
+  pointer-events: none;
+}
+.board-square-name[data-pitch] .board-square-name-frame::after {
+  border-radius: 2px;
 }
 .board-square-stats {
   position: absolute;
