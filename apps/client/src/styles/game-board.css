@@ -587,6 +587,11 @@
   line-height: 1;
   z-index: 3;
 }
+.mat-hero {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 .mat-hero .card:not(.card-highlight):not(.card-selected) {
   border-color: #c9a627;
 }
@@ -602,8 +607,10 @@
   bottom: 100%;
   left: 50%;
   z-index: 7; /* keep the hover bridge above the combat chain (z-index 6) */
-  width: calc(100% + 16px);
-  height: 50px;
+  /* Bridge only the gap below the button. A full-card-width bridge captures
+     exposed soul-card title bars and collapses their hover preview. */
+  width: 48px;
+  height: 8px;
   pointer-events: none;
   transform: translateX(-50%);
 }

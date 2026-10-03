@@ -226,6 +226,11 @@ describe("CardFace payment state", () => {
       size: "zone",
       squareArt: true,
     }));
+    const damagedAlly = renderToStaticMarkup(createElement(CardFace, {
+      card: { instanceId: 6, cardId: "AGB014", owner: 0, life: 1 },
+      size: "zone",
+      squareArt: true,
+    }));
 
     expect(board).toContain("card-board-square");
     expect(board).toContain("board-square-name");
@@ -245,6 +250,11 @@ describe("CardFace payment state", () => {
     expect(attackAndDefense).toContain('data-pitch="3"');
     expect(attackAndDefense).toContain('src="/icons/defence.png"');
     expect(hero).toContain("board-square-name-hero");
+    expect(hero.match(/class="board-square-stats"/g)).toHaveLength(1);
+    expect(hero).not.toContain("board-square-stats-left");
+    expect(hero).toContain('src="/icons/intellect.png" alt="" aria-hidden="true"/>4');
+    expect(hero).toContain('src="/icons/life.png" alt="" aria-hidden="true"/>40');
+    expect(damagedAlly).toContain('src="/icons/life.png" alt="" aria-hidden="true"/>3');
     expect(other).not.toContain("board-square-name-hero");
   });
 

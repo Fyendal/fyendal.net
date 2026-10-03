@@ -385,6 +385,44 @@
   border-radius: min(8px, 5%);
   overflow: visible;
 }
+.card-board-square .card-chain-source-badge {
+  top: auto;
+  bottom: 5px;
+  left: 5px;
+  max-width: calc(100% - 30px);
+  padding: 1px 5px;
+  transform: none;
+  border-radius: 5px;
+  font-size: 9px;
+}
+/* Square cards extend above and below their art window. Put zone and chain
+   frames around that complete silhouette instead of the cropped image box. */
+.board-cards .card-board-square:not(.card-highlight):not(.card-selected):not(.card-chain-source) {
+  --square-frame-color: #5a8a9c;
+  --square-frame-glow: #5a8a9c55;
+  box-shadow: none;
+}
+.mat-opp .board-cards .card-board-square:not(.card-highlight):not(.card-selected):not(.card-chain-source) {
+  --square-frame-color: #c23a2c;
+  --square-frame-glow: #c23a2c66;
+}
+.card-board-square.card-chain-source {
+  --square-frame-color: #e2b75f;
+  --square-frame-glow: #d99d3eaa;
+  --square-frame-width: 2px;
+  box-shadow: none;
+}
+.board-cards .card-board-square:not(.card-highlight):not(.card-selected):not(.card-chain-source)::after,
+.card-board-square.card-chain-source::after {
+  content: "";
+  position: absolute;
+  z-index: 6;
+  inset: -8px 0 -2px;
+  border: var(--square-frame-width, 1px) solid var(--square-frame-color);
+  border-radius: 8px;
+  box-shadow: 0 0 7px 1px var(--square-frame-glow);
+  pointer-events: none;
+}
 .table:not([data-playability-cue="high-contrast"])
   .card-board-square.card-highlight:not(.card-selected):not(.card-chain-source) {
   --board-square-glow:
@@ -440,8 +478,8 @@
   position: absolute;
   z-index: 2;
   top: 0;
-  left: 6px;
-  right: 6px;
+  left: 0;
+  right: 0;
   display: flex;
   height: clamp(13px, 1.5vh, 15px);
   align-items: center;
@@ -449,7 +487,7 @@
   overflow: hidden;
   padding: 0 4px;
   border: 1px solid #414a49;
-  border-radius: 7px;
+  border-radius: 8px 8px 2px 2px;
   background: linear-gradient(180deg, #fbfaf6 0%, #edeeeb 58%, #d6d9d6 100%);
   box-shadow: 0 1px 2px #0009, inset 0 0 0 1px #b7bfba, inset 0 1px 0 #fff;
   color: #28302f;
@@ -460,11 +498,14 @@
   line-height: 1;
   text-align: center;
   transform: translateY(-50%);
-  pointer-events: none;
+  /* The bar overhangs the card box; it must remain hit-testable so hovering
+     across it keeps equipment/soul stacks expanded. */
+  pointer-events: auto;
 }
 .board-square-name-hero {
   left: -4px;
   right: -4px;
+  border-radius: 7px;
 }
 .board-square-name-text {
   display: block;
@@ -518,6 +559,11 @@
   height: clamp(8px, 1vh, 10px);
   flex: 0 0 auto;
   opacity: .82;
+}
+.board-square-stat-intellect img {
+  width: clamp(11px, 1.4vh, 13px);
+  height: clamp(11px, 1.4vh, 13px);
+  opacity: 1;
 }
 .mat-square-board :is(.zone-deck, .zone-graveyard, .zone-banished, .zone-pitch)
   .card-zone.card-board-square {

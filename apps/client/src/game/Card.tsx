@@ -287,6 +287,8 @@ export function CardFace({
   const marvelArt = imageUrl !== undefined && isMarvelCardImageUrl(imageUrl);
   const attack = card.attack ?? data?.attack;
   const defense = card.defense ?? data?.defense;
+  const squareHero = data?.cardType === "hero";
+  const printedLife = data?.life;
   const marked = (card.counters?.marked ?? 0) > 0;
   const namedCounters = Object.entries(card.counters ?? {}).filter(
     ([counter, count]) =>
@@ -406,7 +408,8 @@ export function CardFace({
             data-pitch={data?.pitch && PITCH_CLASS[data.pitch] ? data.pitch : undefined}
             title={name}
           ><span className="board-square-name-text">{name}</span></span>
-          {attack !== undefined || defense !== undefined || card.life !== undefined ? (
+          {attack !== undefined || defense !== undefined ||
+            (squareHero && data.intellect !== undefined) || printedLife !== undefined ? (
             <span className="board-square-stats">
               {attack !== undefined ? (
                 <span className="board-square-stat">
@@ -420,10 +423,16 @@ export function CardFace({
                   {defense}
                 </span>
               ) : null}
-              {card.life !== undefined ? (
+              {squareHero && data.intellect !== undefined ? (
+                <span className="board-square-stat board-square-stat-intellect">
+                  <img src="/icons/intellect.png" alt="" aria-hidden="true" />
+                  {data.intellect}
+                </span>
+              ) : null}
+              {printedLife !== undefined ? (
                 <span className="board-square-stat">
                   <img src="/icons/life.png" alt="" aria-hidden="true" />
-                  {card.life}
+                  {printedLife}
                 </span>
               ) : null}
             </span>

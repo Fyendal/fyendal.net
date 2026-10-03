@@ -133,6 +133,18 @@ describe("PlayerHalf", () => {
     expect(emptyPiles).toContain('<span class="mat-zone-label">Pitch</span>');
   });
 
+  it("shows printed hero life and intellect on its square card", () => {
+    const html = renderPlayerHalf({
+      ...player,
+      heroCardId: "WTR001",
+      heroName: "Rhinar, Reckless Rampage",
+      life: 27,
+    });
+
+    expect(html).toContain('src="/icons/intellect.png" alt="" aria-hidden="true"/>4');
+    expect(html).toContain('src="/icons/life.png" alt="" aria-hidden="true"/>40');
+  });
+
   it("localizes board zone labels in Chinese", () => {
     const html = renderPlayerHalf(player, true, undefined, undefined, "zh-Hans");
 
