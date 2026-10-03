@@ -441,9 +441,7 @@
   content: none;
 }
 .board-square-media {
-  /* At the standard 600×838 printing size, this shows roughly source rows
-     106–497: the artwork and its lower frame, before the rules box. Keep
-     every frame slice on the same offset at every rendered card size. */
+  /* Keep the artwork and frame-edge slices on the same offset at every size. */
   --board-square-image-top: -27%;
   position: absolute;
   inset: 0;
@@ -452,6 +450,10 @@
   border-radius: inherit;
   background: #111518;
   pointer-events: none;
+}
+.board-square-media-legacy {
+  /* Older printings place the art/rules divider lower on the source card. */
+  --board-square-image-top: -31%;
 }
 .board-square-media .board-square-art,
 .board-square-frame-edge img {

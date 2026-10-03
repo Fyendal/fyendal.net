@@ -2,7 +2,12 @@ import { createContext, useContext, useId, useRef, useState, type CSSProperties,
 import type { CardView } from "@fyendal/shared";
 import { cardData } from "@fyendal/cards/client";
 import { ViewportTooltip } from "../components/ViewportTooltip.js";
-import { isMarvelCardImageUrl, resolveCardImageUrl, resolveCardImageUrls } from "./cardImageUrl.js";
+import {
+  hasLegacySquareCardFrame,
+  isMarvelCardImageUrl,
+  resolveCardImageUrl,
+  resolveCardImageUrls,
+} from "./cardImageUrl.js";
 
 const PITCH_CLASS: Record<number, string> = {
   1: "pitch-red",
@@ -285,6 +290,7 @@ export function CardFace({
   const imageUrl = card.cardId !== "" ? imageUrls[failedAttempts] : undefined;
   const showImg = imageUrl !== undefined;
   const marvelArt = imageUrl !== undefined && isMarvelCardImageUrl(imageUrl);
+  const legacySquareFrame = imageUrl !== undefined && !marvelArt && hasLegacySquareCardFrame(imageUrl);
   const attack = card.attack ?? data?.attack;
   const defense = card.defense ?? data?.defense;
   const squareHero = data?.cardType === "hero";
@@ -378,7 +384,10 @@ export function CardFace({
       ) : null}
       {squareCard ? (
         <>
-          <span className="board-square-media" aria-hidden="true">
+          <span
+            className={`board-square-media${legacySquareFrame ? " board-square-media-legacy" : ""}`}
+            aria-hidden="true"
+          >
             {showImg ? (
               <img
                 className="c-img board-square-art"

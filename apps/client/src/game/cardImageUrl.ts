@@ -183,3 +183,18 @@ export function resolveCardImageUrls(cardId: string, data?: CardImageData): stri
 export function isMarvelCardImageUrl(url: string): boolean {
   return /-MV\.webp(?:[?#]|$)/i.test(url);
 }
+
+/** Standard printings before Heavy Hitters place the art/rules divider lower
+ * in the frame. Promo sets mix both layouts, so only verified promo objects
+ * use the older square-card crop. */
+const LEGACY_FRAME_SETS = new Set([
+  "1HP", "ARC", "CRU", "DTD", "DVR", "DYN", "ELE", "EVO", "EVR",
+  "FAI", "HER", "MON", "OUT", "UPR", "WTR",
+]);
+const LEGACY_FRAME_PROMOS = new Set(["FAB005", "FAB087", "FAB124"]);
+
+export function hasLegacySquareCardFrame(url: string): boolean {
+  const printingId = /\/cards\/([A-Z0-9]+)(?:[-_]\w+)?\.webp(?:[?#]|$)/i.exec(url)?.[1];
+  return printingId !== undefined &&
+    (LEGACY_FRAME_SETS.has(printingId.slice(0, 3)) || LEGACY_FRAME_PROMOS.has(printingId));
+}

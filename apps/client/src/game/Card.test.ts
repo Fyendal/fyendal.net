@@ -9,9 +9,22 @@ import {
   cardImageUrl,
   cardPreviewSize,
 } from "./Card.js";
-import { isMarvelCardImageUrl, resolveCardImageUrls } from "./cardImageUrl.js";
+import { hasLegacySquareCardFrame, isMarvelCardImageUrl, resolveCardImageUrls } from "./cardImageUrl.js";
 
 describe("cardImageUrl", () => {
+  it.each([
+    ["WTR079", true],
+    ["UPR084", true],
+    ["OUT139", true],
+    ["FAB005", true],
+    ["FAB290", false],
+    ["HVY008", false],
+    ["HNT143", false],
+    ["FAB464-MV", false],
+  ] as const)("selects the frame crop for %s", (printingId, legacy) => {
+    expect(hasLegacySquareCardFrame(`https://content.fabrary.net/cards/${printingId}.webp`)).toBe(legacy);
+  });
+
   it.each(["ARC112", "CRU157", "DYN191", "SBA036", "ROS162"])(
     "uses one stable Runechant art for %s",
     (printingId) => {
@@ -274,6 +287,22 @@ describe("CardFace payment state", () => {
     expect(marvel).not.toContain("board-square-frame-edge");
     expect(marvel).toContain("board-square-name");
     expect(standard).toContain("board-square-frame-edge");
+  });
+
+  it("uses the lower art divider on older square-card printings", () => {
+    const oldFrame = renderToStaticMarkup(createElement(CardFace, {
+      card: { instanceId: 1, cardId: "WTR079", owner: 0 },
+      size: "zone",
+      squareArt: true,
+    }));
+    const newerFrame = renderToStaticMarkup(createElement(CardFace, {
+      card: { instanceId: 2, cardId: "HNT143", owner: 0 },
+      size: "zone",
+      squareArt: true,
+    }));
+
+    expect(oldFrame).toContain("board-square-media board-square-media-legacy");
+    expect(newerFrame).toContain('class="board-square-media"');
   });
 
   it("loads card art eagerly so visible cards do not wait for hover", () => {
