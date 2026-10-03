@@ -425,9 +425,7 @@
   padding-inline: 7px;
   overflow: hidden;
 }
-/* board cards: same size as other zone cards, but inset further from the
-   helmet and the arms piece than the equipment grid gap; colored border to
-   tell board cards apart — steel-blue for yours, blood-red for the opponent's */
+/* Board cards sit further from the helmet and arms than the equipment grid gap. */
 .board-cards {
   /* Keep keyboard focus inside the strip's vertical clip boundary. Negative
      margins preserve the card position and row footprint. */
@@ -448,23 +446,15 @@
     overflow: visible;
   }
 }
-.board-cards .card:not(.card-highlight):not(.card-selected) {
-  border-color: #5a8a9c;
-  box-shadow: 0 0 7px #5a8a9c33;
-}
 .board-card-stack {
   position: relative;
   flex: 0 0 auto;
-}
-.board-card-stack-multiple {
-  --board-stack-edge: #6e9aaa;
-  --board-stack-fill-start: #344a52;
-  --board-stack-fill-end: #17252a;
 }
 .zone-card-pile {
   position: relative;
   display: flex;
 }
+.board-card-stack-multiple,
 .zone-card-pile-multiple {
   --board-stack-edge: #9b8457;
   --board-stack-fill-start: #4a3b25;
@@ -513,11 +503,6 @@
 .zone-card-pile-multiple[data-stack-depth="2"]::before {
   display: none;
 }
-.mat-opp .board-card-stack-multiple {
-  --board-stack-edge: #b34b40;
-  --board-stack-fill-start: #592b27;
-  --board-stack-fill-end: #321714;
-}
 /* A transform does not change flex layout dimensions. Swap the wrapper's
    footprint for tapped cards so both neighbors start after the full landscape
    card instead of overlapping its rotated overflow. */
@@ -555,10 +540,6 @@
   font-weight: 800;
   line-height: 1;
   pointer-events: none;
-}
-.mat-opp .board-cards .card:not(.card-highlight):not(.card-selected) {
-  border-color: #c23a2c;
-  box-shadow: 0 0 7px #c23a2c44;
 }
 .mat-count {
   position: absolute;

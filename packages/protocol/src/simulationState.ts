@@ -882,7 +882,7 @@ function validateDecision(value: unknown, code: string, path: string, depth = 0)
 function validateState(value: unknown, code: string): PersistedGameStateV1 {
   const path = "state";
   const required = ["seed", "rngState", "nextInstanceId", "nextModifierId", "turn", "activePlayer", "priorityPlayer", "phase", "players", "chain", "resolving", "pendingDecision", "pendingTokenCreations", "reactionPasses", "stack", "stackPasses", "stackResume", "modifiers", "pendingDestructions", "controlReturns", "log", "winner"] as const;
-  const state = exact(value, code, path, required, ["gameStats", "globalCardIds", "extraTurnSeats", "delayedTriggers", "pendingTriggeredLayers", "nextLogSequence"]);
+  const state = exact(value, code, path, required, ["gameStats", "globalCardIds", "extraTurnSeats", "delayedTriggers", "pendingTriggeredLayers", "nextLogSequence", "drawOfferSeat"]);
   for (const key of ["seed", "rngState", "nextInstanceId", "nextModifierId", "turn", "activePlayer", "priorityPlayer", "reactionPasses", "stackPasses"] as const) integer(state[key], code, `${path}.${key}`);
   optional(state, "globalCardIds", (value, valuePath) => {
     array(value, code, valuePath, 32).forEach((entry, index) => {
@@ -1043,6 +1043,8 @@ function validateState(value: unknown, code: string): PersistedGameStateV1 {
     }
   }
   if (!(state.winner === null || state.winner === 0 || state.winner === 1)) fail(code, `${path}.winner`, "expected null, 0, or 1");
+  if (state.drawOfferSeat !== undefined && state.drawOfferSeat !== 0 && state.drawOfferSeat !== 1) fail(code, `${path}.drawOfferSeat`, "expected seat 0 or 1");
+  if (state.phase === "game-over" && state.drawOfferSeat !== undefined) fail(code, `${path}.drawOfferSeat`, "ended game cannot have a draw offer");
   return state as unknown as PersistedGameStateV1;
 }
 

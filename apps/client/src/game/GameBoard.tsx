@@ -248,7 +248,7 @@ export function GameBoard() {
   } | null>(null);
   const showDeckCardEvents = screen !== "replay";
   const deckCardFeedback = useDeckCardFeedback(view, showDeckCardEvents);
-  const winnerNow = view?.winner ?? null;
+  const winnerNow = view?.phase === "game-over" ? view.winner ?? "draw" : null;
   const arsenalDecisionKey =
     view?.pendingDecision?.kind === "arsenal" && view.pendingDecision.player === yourSeat
       ? `${view.turn}:${view.pendingDecision.player}`
@@ -533,7 +533,7 @@ export function GameBoard() {
   const showIdleToast = shouldShowIdleVictoryClaim({
     botGame,
     replaying,
-    gameOver: view.winner !== null,
+    gameOver: view.phase === "game-over",
     waitingOnOpponent: waitingOnOpp,
     opponentLastAction: oppLastAction,
     opponentIdleMs: oppIdleMs,
@@ -831,7 +831,7 @@ export function GameBoard() {
 
   // no available action at all → we're just waiting on the opponent
   const waitingForOpponent =
-    view.winner === null &&
+    view.phase !== "game-over" &&
     !myDecision &&
     sel.kind === "none" &&
     !derived.canPass &&
@@ -865,7 +865,7 @@ export function GameBoard() {
         ? derived.canPass && statusPassDecision
           ? "pass"
           : null // button-choice decisions carry their own pass/decline button
-        : spectating || replaying || view.winner !== null
+        : spectating || replaying || view.phase === "game-over"
           ? null
           : view.phase === "action" && myTurn
             ? "end-turn"
@@ -1004,7 +1004,7 @@ export function GameBoard() {
     <SquareCardPresentation enabled={!mobileFloatViewport && !mobileLandscapeViewport}>
     <div
       ref={tableRef}
-      className={`table${railCollapsed ? " rail-is-collapsed" : ""}${view.winner !== null ? " game-is-over" : ""}${hasActiveCombatChain ? " has-active-combat-chain" : ""}${mobileHandIsHidden ? " mobile-hand-is-hidden" : ""}${hasOwnPriority ? " has-own-priority" : ""}`}
+      className={`table${railCollapsed ? " rail-is-collapsed" : ""}${view.phase === "game-over" ? " game-is-over" : ""}${hasActiveCombatChain ? " has-active-combat-chain" : ""}${mobileHandIsHidden ? " mobile-hand-is-hidden" : ""}${hasOwnPriority ? " has-own-priority" : ""}`}
       data-playability-cue={playabilityCuePreference}
       data-motion-preference={motionPreference}
       onMouseOver={onHoverCard}
@@ -1034,10 +1034,10 @@ export function GameBoard() {
           </>
         ) : null}
         <div
-          className={`opp-hand${view.winner !== null || replaying ? " opp-hand-revealed" : ""}`}
+          className={`opp-hand${view.phase === "game-over" || replaying ? " opp-hand-revealed" : ""}`}
           data-motion-zone={motionLocationKey({ kind: "hand", seat: opp.seat })}
         >
-          {view.winner !== null || replaying
+          {view.phase === "game-over" || replaying
             ? opp.hand.map((card) => (
                 <CardFace
                   key={card.instanceId}
@@ -1071,7 +1071,7 @@ export function GameBoard() {
           mine={false}
           mirrored
           ongoing={view.ongoing.filter((effect) => effect.seat === opp.seat)}
-          gameOver={view.winner !== null}
+          gameOver={view.phase === "game-over"}
           replaying={replaying}
           deckShuffling={deckCardFeedback.shuffledSeats.has(opp.seat)}
           interaction={playerHalfInteraction}
@@ -1105,7 +1105,7 @@ export function GameBoard() {
           mine={!spectating || replaying}
           mirrored={false}
           ongoing={view.ongoing.filter((effect) => effect.seat === me.seat)}
-          gameOver={view.winner !== null}
+          gameOver={view.phase === "game-over"}
           replaying={replaying}
           visibleDeckTop={myVisibleDeckTop}
           deckShuffling={deckCardFeedback.shuffledSeats.has(me.seat)}
@@ -1332,15 +1332,20 @@ export function GameBoard() {
         collapsed={railCollapsed}
         onToggleCollapsed={() => setRailCollapsed((collapsed) => !collapsed)}
         turn={view.turn}
-        onUndo={!spectating && !replaying && view.winner === null ? undo : null}
+        onUndo={!spectating && !replaying && view.phase !== "game-over" ? undo : null}
         undoDisabled={roomCommandPending}
         onLeave={leave}
         leaveAction={botGame && !spectating ? "end-game" : "leave"}
         onConcede={
-          !spectating && !replaying && view.winner === null
+          !spectating && !replaying && view.phase !== "game-over"
             ? () => send({ kind: "concede" })
             : null
         }
+        drawOfferSeat={view.drawOfferSeat}
+        drawSeat={seat}
+        onDrawIntent={!spectating && !replaying && !botGame && view.phase !== "game-over"
+          ? (kind) => send({ kind })
+          : null}
         spectating={spectating}
         spectatorCount={spectatorCount}
         spectatorUsernames={spectatorUsernames}
@@ -1349,8 +1354,10 @@ export function GameBoard() {
         connectionIssueVisible={connectionIssueVisible}
         error={error}
         winnerText={
-          view.winner !== null
-            ? spectating
+          view.phase === "game-over"
+            ? view.winner === null
+              ? intl.formatMessage({ id: "game.result.draw" })
+              : spectating
               ? intl.formatMessage({ id: "game.result.namedWinner" }, { winner: winnerName })
               : view.winner === seat
                 ? intl.formatMessage({ id: "game.result.victory" })
@@ -1366,7 +1373,7 @@ export function GameBoard() {
         noteText={liveNoteText}
         onSetFrameNote={!spectating && !replaying ? setLiveReplayNote : null}
         onShowGameOver={
-          !replaying && view.winner !== null && gameOverDismissed
+          !replaying && view.phase === "game-over" && gameOverDismissed
             ? () => setGameOverDismissed(false)
             : null
         }
@@ -1442,6 +1449,11 @@ export function GameBoard() {
         onInspectCard={setInspectedCardId}
         opponentUsername={playerProfiles?.[1 - seat]?.username ?? null}
         botGame={botGame}
+        drawOfferSeat={view.drawOfferSeat}
+        onAcceptDraw={!spectating && !replaying && !botGame && view.phase !== "game-over"
+          ? () => send({ kind: "accept-draw" }) : null}
+        onDeclineDraw={!spectating && !replaying && !botGame && view.phase !== "game-over"
+          ? () => send({ kind: "decline-draw" }) : null}
       />
       <GameMotionLayer
         batch={gameMotion.batch}

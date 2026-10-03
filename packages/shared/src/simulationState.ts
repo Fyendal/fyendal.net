@@ -531,7 +531,9 @@ export interface PersistedGameStateV1 {
   /** Optional until the first structured log event is emitted. */
   nextLogSequence?: number;
   log: PersistedGameLogEntryV1[];
+  /** Null during play and after a draw; phase distinguishes the two. */
   winner: number | null;
+  drawOfferSeat?: number;
 }
 
 

@@ -3204,7 +3204,7 @@
   "card.evo.fabricate.option.defense": [
     {
       "type": 0,
-      "value": "Your equipment gets +1 defense"
+      "value": "Your Evo permanents get +1 defense"
     }
   ],
   "card.evo.fabricate.option.equip": [
@@ -8443,6 +8443,28 @@
       "value": " attack"
     }
   ],
+  "card.log.wtr.estrike.mode.chosen": [
+    {
+      "type": 1,
+      "value": "player"
+    },
+    {
+      "type": 0,
+      "value": " chooses “"
+    },
+    {
+      "type": 1,
+      "value": "mode"
+    },
+    {
+      "type": 0,
+      "value": "” for "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    }
+  ],
   "card.log.wtr.flicflak.defense": [
     {
       "type": 1,
@@ -9369,12 +9391,6 @@
       "value": "Fearless Confrontation: choose an attack"
     }
   ],
-  "card.mpg.attack.top": [
-    {
-      "type": 0,
-      "value": "Call for Backup: put an attack on top"
-    }
-  ],
   "card.mpg.aura.destroy": [
     {
       "type": 1,
@@ -9395,6 +9411,24 @@
     {
       "type": 0,
       "value": "Break Stature: destroy an aura token"
+    }
+  ],
+  "card.mpg.backup.banish": [
+    {
+      "type": 0,
+      "value": "Call for Backup: choose an attack action card to banish"
+    }
+  ],
+  "card.mpg.backup.first": [
+    {
+      "type": 0,
+      "value": "Call for Backup: choose the first attack action card"
+    }
+  ],
+  "card.mpg.backup.second": [
+    {
+      "type": 0,
+      "value": "Call for Backup: choose an attack action card with a different name"
     }
   ],
   "card.mpg.card.discard": [
@@ -18530,6 +18564,46 @@
       "value": " concedes"
     }
   ],
+  "engine.log.game.draw.accepted": [
+    {
+      "type": 1,
+      "value": "player"
+    },
+    {
+      "type": 0,
+      "value": " accepts the draw — the game ends in a draw"
+    }
+  ],
+  "engine.log.game.draw.declined": [
+    {
+      "type": 1,
+      "value": "player"
+    },
+    {
+      "type": 0,
+      "value": " declines the draw offer"
+    }
+  ],
+  "engine.log.game.draw.offered": [
+    {
+      "type": 1,
+      "value": "player"
+    },
+    {
+      "type": 0,
+      "value": " offers a draw"
+    }
+  ],
+  "engine.log.game.draw.withdrawn": [
+    {
+      "type": 1,
+      "value": "player"
+    },
+    {
+      "type": 0,
+      "value": " withdraws the draw offer"
+    }
+  ],
   "engine.log.game.player.loses": [
     {
       "type": 1,
@@ -21254,6 +21328,12 @@
     {
       "type": 0,
       "value": "Defeat"
+    }
+  ],
+  "game.result.draw": [
+    {
+      "type": 0,
+      "value": "Draw"
     }
   ],
   "game.result.namedWinner": [
@@ -25616,6 +25696,48 @@
     {
       "type": 0,
       "value": "Danger Zone"
+    }
+  ],
+  "settings.draw.accept": [
+    {
+      "type": 0,
+      "value": "Accept draw"
+    }
+  ],
+  "settings.draw.decline": [
+    {
+      "type": 0,
+      "value": "Decline draw"
+    }
+  ],
+  "settings.draw.offer": [
+    {
+      "type": 0,
+      "value": "Offer a draw"
+    }
+  ],
+  "settings.draw.received": [
+    {
+      "type": 0,
+      "value": "Your opponent offers a draw"
+    }
+  ],
+  "settings.draw.title": [
+    {
+      "type": 0,
+      "value": "Draw"
+    }
+  ],
+  "settings.draw.waiting": [
+    {
+      "type": 0,
+      "value": "Waiting for your opponent to accept the draw"
+    }
+  ],
+  "settings.draw.withdraw": [
+    {
+      "type": 0,
+      "value": "Withdraw offer"
     }
   ],
   "settings.gameplay": [

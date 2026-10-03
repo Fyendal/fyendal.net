@@ -251,12 +251,15 @@ export function isArrowData(data: CardData): boolean {
   return (data.subtypes ?? []).includes("arrow");
 }
 
-/** Ward N of a card's static data (CR 8.3.20: "If you would be dealt damage,
- * destroy this to prevent N of that damage"), if it has the keyword. */
-export function wardValueOf(data: CardData): number | undefined {
-  for (const keyword of data.keywords ?? []) {
+/** Ward N of a card's printed or temporarily granted keywords (CR 8.3.20).
+ * A permanent can be destroyed only once for a damage event, so use its
+ * highest active Ward value when it has more than one. */
+export function wardValueOf(data: CardData, instance?: CardInstance): number | undefined {
+  let value: number | undefined;
+  for (const keyword of [...(data.keywords ?? []), ...(instance?.grantedKeywords ?? [])]) {
+    if (instance?.suppressedKeywords?.includes(keyword.toLowerCase())) continue;
     const match = /^ward (\d+)$/i.exec(keyword.trim());
-    if (match) return Number(match[1]);
+    if (match) value = Math.max(value ?? 0, Number(match[1]));
   }
-  return undefined;
+  return value;
 }

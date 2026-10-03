@@ -241,7 +241,7 @@ function playerView(
   revealAll = false,
   viewerSeat: number | null = null,
 ): PlayerView {
-  const gameOver = state.winner !== null;
+  const gameOver = state.phase === "game-over";
   const equipment: Partial<Record<EquipmentSlot, CardView>> = {};
   for (const [slot, c] of Object.entries(p.equipment)) {
     if (!c) continue;
@@ -1360,6 +1360,7 @@ function projectState(
         })()
       : null,
     winner: state.winner,
+    ...(state.drawOfferSeat === undefined ? {} : { drawOfferSeat: state.drawOfferSeat }),
     ...projectedGameLog,
   };
 }

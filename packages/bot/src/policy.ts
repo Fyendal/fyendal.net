@@ -1482,6 +1482,10 @@ function scoreIntent(
     case "pass": score = 0; break;
     case "stage-defenders": score = -1_000; break;
     case "concede": score = -1_000_000; break;
+    case "offer-draw":
+    case "accept-draw":
+    case "decline-draw":
+    case "withdraw-draw": score = -1_000_000; break;
   }
   return score - nextTurnArsenalOpportunityCost(
     input,

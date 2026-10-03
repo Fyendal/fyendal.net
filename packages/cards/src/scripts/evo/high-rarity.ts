@@ -1003,7 +1003,12 @@ export const evoHighRarity: Record<string, CardScript> = {
         if (base) ctx.equipFromInventory(base.instanceId);
       }
       if (ctx.getCounter("fabricate-mode:defense") > 0) {
-        ctx.addModifier({ scope: "until-end-of-turn", defense: 1, appliesToEquipment: true });
+        ctx.addModifier({
+          scope: "until-end-of-turn",
+          defense: 1,
+          appliesToEquipment: true,
+          appliesToSubtype: "evo",
+        });
       }
       if (ctx.getCounter("fabricate-mode:under") > 0) {
         const evos = Object.values(ctx.player(ctx.seat).equipment).filter(

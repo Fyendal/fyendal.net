@@ -584,6 +584,10 @@ function decodeGameIntentValue(value: unknown): value is GameIntent {
     case "pass":
     case "close-chain":
     case "concede":
+    case "offer-draw":
+    case "accept-draw":
+    case "decline-draw":
+    case "withdraw-draw":
       return exactKeys(intent, ["kind"]);
     default:
       return false;
@@ -1120,7 +1124,7 @@ export function decodeGameView(value: unknown): GameView | null {
   const view = object(value);
   if (!view || !exactKeys(view, [
     "gameId", "turn", "phase", "activePlayer", "priorityPlayer", "endTurnPassPending", "players", "chain", "stack",
-    "stackContext", "ongoing", "pendingDecision", "gameStats", "turnFacts", "winner", "log", "logEntries",
+    "stackContext", "ongoing", "pendingDecision", "gameStats", "turnFacts", "winner", "drawOfferSeat", "log", "logEntries",
   ], [
     "gameId", "turn", "phase", "activePlayer", "priorityPlayer", "players", "chain", "stack",
     "ongoing", "pendingDecision", "winner", "log",
@@ -1137,6 +1141,7 @@ export function decodeGameView(value: unknown): GameView | null {
     && optional(view.gameStats, gameStats)
     && optional(view.turnFacts, turnFacts)
     && nullableSeat(view.winner)
+    && optional(view.drawOfferSeat, seat)
     && array(view.log, (item): item is string => string(item, MAX_TEXT), MAX_LOG)
     && optional(view.logEntries, (entries): entries is GameLogViewEntry[] =>
       gameLogViewEntries(entries, view.log));

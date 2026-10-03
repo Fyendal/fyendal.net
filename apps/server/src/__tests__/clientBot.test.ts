@@ -44,6 +44,16 @@ function task(room: RoomRow): ClientBotTask {
 }
 
 describe("client bot tasks", () => {
+  it("keeps mutual draw actions out of bot rooms and delegated tasks", async () => {
+    const { store, room, credentials } = await fixture();
+    expect(task(room).legal.every((intent) => !intent.kind.endsWith("-draw"))).toBe(true);
+    expect(await store.applyIntent(room.code, credentials, { kind: "offer-draw" })).toMatchObject({ ok: false });
+    expect(await store.applyBotIntent(room.code, room.version, { kind: "offer-draw" }, {
+      credentials,
+      command: { id: "no-bot-draw", expectedVersion: room.version },
+    })).toMatchObject({ ok: false });
+  });
+
   it("removes private randomness, deck order and history without changing the room", async () => {
     const { room } = await fixture();
     room.state!.log = [{ publicText: "public history", seatText: ["private human history", "private bot history"] }];
@@ -181,6 +191,7 @@ describe("client bot tasks", () => {
   it("does not negotiate or deliver bot work after game completion", async () => {
     const { db, store, room } = await fixture();
     room.state!.winner = 1;
+    room.state!.phase = "game-over";
     await db.query("UPDATE rooms SET state = $1 WHERE code = $2", [
       JSON.stringify(encodePersistedState(room.state!, room.rulesetVersion)), room.code,
     ]);

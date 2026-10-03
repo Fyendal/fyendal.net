@@ -200,6 +200,9 @@ export function SideRail({
   onLeave,
   leaveAction,
   onConcede,
+  drawOfferSeat,
+  drawSeat = 0,
+  onDrawIntent = null,
   spectating,
   spectatorCount,
   spectatorUsernames = [],
@@ -258,6 +261,9 @@ export function SideRail({
   leaveAction: "leave" | "end-game";
   /** seated player in a live game: concede ends it in the opponent's favor */
   onConcede: (() => void) | null;
+  drawOfferSeat?: number;
+  drawSeat?: number;
+  onDrawIntent?: ((kind: "offer-draw" | "accept-draw" | "decline-draw" | "withdraw-draw") => void) | null;
   spectating: boolean;
   spectatorCount: number;
   spectatorUsernames: Array<string | null>;
@@ -609,6 +615,9 @@ export function SideRail({
           onUndo={onUndo}
           undoDisabled={undoDisabled}
           onConcede={onConcede}
+          drawOfferSeat={drawOfferSeat}
+          drawSeat={drawSeat}
+          onDrawIntent={onDrawIntent}
           priorityWindowMode={priorityWindowMode}
           onPriorityWindowModeChange={onPriorityWindowModeChange}
           lessGuidance={lessGuidance}

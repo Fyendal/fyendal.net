@@ -134,9 +134,10 @@ During a game it reveals public zones, hides private card identities, projects
 pending choices only to the entitled seat, and supplies only that viewer's
 legal intents. Spectators use `seat = null`.
 
-After `winner` is set, `projectStateFor` reveals both players' hands, ordered
-decks, and arsenals. `projectStateForReplay` always produces a full-information
-view of every zone while omitting live action capabilities and the RNG seed.
+After `phase` becomes `game-over` (including a draw), `projectStateFor` reveals
+both players' hands, ordered decks, and arsenals. `projectStateForReplay`
+always produces a full-information view of every zone while omitting live
+action capabilities and the RNG seed.
 The server may persist replay projections while a game is active, but callers
 must not expose them until the game is over.
 

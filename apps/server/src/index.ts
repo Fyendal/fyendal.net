@@ -434,7 +434,7 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
     if (replayFinalizationId) {
       replayFinalizer.enqueue(replayFinalizationId);
       const committedRoom = await rooms.getRoom(code);
-      if (committedRoom?.state && committedRoom.state.winner !== null
+      if (committedRoom?.state && committedRoom.state.phase === "game-over"
         && committedRoom.seats.some((seat) => seat?.controller === "bot")) {
         await rooms.stopBackgroundMatchmakingForSource(code);
       }

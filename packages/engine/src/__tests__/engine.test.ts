@@ -32,6 +32,45 @@ function passTopLayer(state: ReturnType<typeof makeGame>): ReturnType<typeof mak
 }
 
 describe("game setup & turn structure", () => {
+  it("ends in a draw only after the other player accepts an outstanding offer", () => {
+    const initial = makeGame(901);
+    expect(applyIntent(initial, 1, { kind: "accept-draw" })).toMatchObject({ ok: false });
+    const offered = applyIntent(initial, 0, { kind: "offer-draw" });
+    expect(offered.ok).toBe(true);
+    if (!offered.ok) return;
+    expect(offered.state.drawOfferSeat).toBe(0);
+    expect(offered.state.phase).not.toBe("game-over");
+    expect(projectStateFor(offered.state, 1).drawOfferSeat).toBe(0);
+    expect(legalIntents(offered.state, 1)).toContainEqual({ kind: "accept-draw" });
+    expect(legalIntents(offered.state, 0)).not.toContainEqual({ kind: "accept-draw" });
+    expect(applyIntent(offered.state, 0, { kind: "accept-draw" })).toMatchObject({ ok: false });
+    const accepted = applyIntent(offered.state, 1, { kind: "accept-draw" });
+    expect(accepted.ok).toBe(true);
+    if (!accepted.ok) return;
+    expect(accepted.state.phase).toBe("game-over");
+    expect(accepted.state.winner).toBeNull();
+    expect(accepted.state.drawOfferSeat).toBeUndefined();
+    expect(legalIntents(accepted.state, 0)).toEqual([]);
+    expect(projectStateFor(accepted.state, null).phase).toBe("game-over");
+    expect(applyIntent(accepted.state, 0, { kind: "concede" })).toMatchObject({ ok: false });
+  });
+
+  it("lets either player cancel a draw offer without ending play", () => {
+    const initial = makeGame(902);
+    const offered = applyIntent(initial, 0, { kind: "offer-draw" });
+    if (!offered.ok) throw new Error(offered.error);
+    const declined = applyIntent(offered.state, 1, { kind: "decline-draw" });
+    if (!declined.ok) throw new Error(declined.error);
+    expect(declined.state.drawOfferSeat).toBeUndefined();
+    expect(declined.state.phase).not.toBe("game-over");
+    const reoffered = applyIntent(declined.state, 0, { kind: "offer-draw" });
+    if (!reoffered.ok) throw new Error(reoffered.error);
+    const withdrawn = applyIntent(reoffered.state, 0, { kind: "withdraw-draw" });
+    if (!withdrawn.ok) throw new Error(withdrawn.error);
+    expect(withdrawn.state.drawOfferSeat).toBeUndefined();
+    expect(withdrawn.state.phase).not.toBe("game-over");
+  });
+
   it("projects attack ability indexes for arena presentation", () => {
     const state = makeGame(897);
     state.scriptsRef = {
@@ -3385,7 +3424,7 @@ describe("legalIntents / applyIntent contract", () => {
     const rand = () => rngNext(carrier);
     for (let game = 0; game < 5; game++) {
       let s = makeGame(100 + game);
-      for (let step = 0; step < 300 && s.winner === null; step++) {
+      for (let step = 0; step < 300 && s.phase !== "game-over"; step++) {
         const seat = s.pendingDecision?.player ?? s.priorityPlayer;
         const options = legalIntents(s, seat).filter((i) => i.kind !== "concede");
         expect(options.length).toBeGreaterThan(0);

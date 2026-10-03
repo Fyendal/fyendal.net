@@ -7,7 +7,7 @@ import { encodePersistedState } from "./persistedState.js";
 import { stateMessage, type RoomRow } from "./store.js";
 
 export function clientBotTask(room: RoomRow, runtimeId: string, delayMs: number): ServerMessage | null {
-  if (!room.state || room.state.winner !== null) return null;
+  if (!room.state || room.state.phase === "game-over") return null;
   const seat = room.seats.findIndex((s) => s?.controller === "bot");
   if (!(seat === 0 || seat === 1)
     || (room.state.pendingDecision?.player ?? room.state.priorityPlayer) !== seat) return null;
@@ -20,11 +20,11 @@ export function clientBotTask(room: RoomRow, runtimeId: string, delayMs: number)
   };
   const task: ClientBotTask = {
     type: "bot-task", code: room.code, version: room.version, runtimeId,
-    botId: bot.id, seat, view, legal: message.legal, delayMs,
+    botId: bot.id, seat, view, legal: message.legal.filter((intent) => !intent.kind.endsWith("-draw")), delayMs,
   };
   if (isCleanActionDecision(room.state, seat)) {
     const simulation = cloneStateForBotSimulation(room.state, room.code);
-    const seed = Number.parseInt(botObservationKey({ view, legal: message.legal }).slice(0, 8), 16) | 0;
+    const seed = Number.parseInt(botObservationKey({ view, legal: task.legal }).slice(0, 8), 16) | 0;
     simulation.seed = seed;
     simulation.rngState = seed;
     task.simulation = encodePersistedState(simulation, room.rulesetVersion);

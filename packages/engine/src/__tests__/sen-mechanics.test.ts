@@ -775,7 +775,7 @@ describe("declarative defender selection", () => {
       { kind: "defend", instanceIds: [] },
     ]);
     expect(legal.filter((intent) => intent.kind === "stage-defenders")).toHaveLength(10);
-    expect(legal).toHaveLength(12); // confirm + ten candidates + concede
+    expect(legal).toHaveLength(13); // confirm + ten candidates + concede + draw offer
   });
 
   it("rejects a third staged non-block defender but permits block cards", () => {

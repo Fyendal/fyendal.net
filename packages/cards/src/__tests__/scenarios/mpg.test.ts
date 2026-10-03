@@ -196,6 +196,50 @@ describe("MPG — import and Guardian pressure", () => {
       .expectLog("Raging Onslaught is added to the chain link as a defending card");
   });
 
+  it("Call for Backup lets the defender choose different attacks and the opponent choose which to banish", () => {
+    const g = scenario({
+      active: 1,
+      seats: [
+        {
+          hero: "rhinar",
+          hand: ["call for backup|1"],
+          graveyard: ["head jab|1", "head jab|2", "raging onslaught|1"],
+        },
+        { hero: "dorinthea", hand: ["head jab|1"] },
+      ],
+    });
+
+    g.play("head jab|1").blockWith("call for backup|1").settle();
+    expect(g.state.pendingDecision).toMatchObject({ player: 0, chooseHook: "backup-first" });
+    g.chooseCard("head jab|1");
+    const raging = g.state.players[0]!.graveyard.find((card) => cardData[card.cardId]?.name === "Raging Onslaught")!;
+    expect(g.state.pendingDecision?.options).toEqual([String(raging.instanceId)]);
+    g.chooseCard("raging onslaught|1");
+    expect(g.state.pendingDecision).toMatchObject({ player: 1 });
+    g.chooseCard("raging onslaught|1");
+
+    expect(g.state.players[0]!.banish.map((card) => cardData[card.cardId]?.name))
+      .toContain("Raging Onslaught");
+    expect(cardData[g.state.players[0]!.deck[0]!.cardId]?.name).toBe("Head Jab");
+    expect(g.state.players[0]!.graveyard.map((card) => cardData[card.cardId]?.name))
+      .toContain("Head Jab");
+  });
+
+  it("Call for Backup does nothing without two differently named attacks in the graveyard", () => {
+    const g = scenario({
+      active: 1,
+      seats: [
+        { hero: "rhinar", hand: ["call for backup|1"], graveyard: ["head jab|1", "head jab|2"] },
+        { hero: "dorinthea", hand: ["head jab|1"] },
+      ],
+    });
+
+    g.play("head jab|1").blockWith("call for backup|1").settle();
+    expect(g.state.pendingDecision?.chooseHook).not.toBe("backup-first");
+    expect(g.state.players[0]!.banish).toHaveLength(0);
+    expect(g.state.players[0]!.graveyard).toHaveLength(2);
+  });
+
   it("Leave a Dent grants its deck-mill crush trigger to the next Guardian attack", () => {
     const g = scenario({
       seats: [

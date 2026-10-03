@@ -219,6 +219,25 @@ function replayDml(queries: string[]): string[] {
 }
 
 describe("PgRoomStore storage", () => {
+  it("persists mutual draw offers and finishes a drawn game and replay", async () => {
+    const { code, tokens } = await fullRoom();
+    await startGame(code, tokens);
+    expect((await store.applyIntent(code, { token: tokens[0] }, { kind: "offer-draw" })).ok).toBe(true);
+    const offered = await store.getRoom(code);
+    expect(offered?.state?.drawOfferSeat).toBe(0);
+    expect(offered?.state?.phase).not.toBe("game-over");
+    expect(stateMessage(offered!, 1)?.type).toBe("state");
+    expect((await store.applyIntent(code, { token: tokens[1] }, { kind: "accept-draw" })).ok).toBe(true);
+    const finished = await store.getRoom(code);
+    expect(finished?.state).toMatchObject({ phase: "game-over", winner: null });
+    expect(finished?.state?.drawOfferSeat).toBeUndefined();
+    expect((await db.query("SELECT status, winner FROM rooms WHERE code = $1", [code])).rows[0]).toMatchObject({
+      status: "finished", winner: null,
+    });
+    const replay = (await db.query("SELECT id, status, winner FROM replay_games WHERE room_code = $1 ORDER BY created_at DESC LIMIT 1", [code])).rows[0];
+    expect(replay).toMatchObject({ status: "finalizing", winner: null });
+  });
+
   it("persists and advertises a room's card-pool mode", async () => {
     const created = await store.createRoom(
       "cc",
@@ -388,7 +407,7 @@ describe("PgRoomStore storage", () => {
     room = await store.getRoom(created.code);
     expect(room!.state).not.toBeNull();
     expect(room!.state!.activePlayer).toBe(1);
-    const legal = legalIntents(room!.state!, 1).filter((intent) => intent.kind !== "concede");
+    const legal = legalIntents(room!.state!, 1).filter((intent) => intent.kind !== "concede" && !intent.kind.endsWith("-draw"));
     const botQueries: string[] = [];
     const applied = await tracedStore(botQueries).applyBotIntent(created.code, room!.version, legal[0]!, {
       credentials: { token: created.token, userId },
@@ -1377,7 +1396,7 @@ describe("PgRoomStore storage", () => {
     });
     expect(current!.state!.stackResume).toBe("end-action-phase");
     expect(legalIntents(current!.state!, opponent).every(
-      (intent) => intent.kind === "pass" || intent.kind === "concede",
+      (intent) => intent.kind === "pass" || intent.kind === "concede" || intent.kind.endsWith("-draw"),
     )).toBe(true);
 
     // Opting into auto-pass immediately takes the same empty window and lets

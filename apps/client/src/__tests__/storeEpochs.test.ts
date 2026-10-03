@@ -1633,7 +1633,7 @@ describe("client connection and account race fences", () => {
     socket.open();
     socket.message({ type: "room-created", code: "BOT001", seat: 0, token: "seat", version: 1 });
     socket.message({ type: "game-started", version: 2 });
-    const finalView = { ...staleState.view, gameId: "BOT001", winner: 0 };
+    const finalView = { ...staleState.view, gameId: "BOT001", winner: 0, phase: "game-over" };
     socket.message({
       ...staleState,
       version: 3,

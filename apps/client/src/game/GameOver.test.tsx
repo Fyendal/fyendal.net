@@ -25,6 +25,27 @@ function finishedView(): GameView {
 }
 
 describe("GameOver player statistics", () => {
+  it("shows a draw without naming a winner", () => {
+    const view = { ...finishedView(), winner: null };
+    const html = renderToStaticMarkup(
+      <TestI18nProvider>
+        <GameOver
+          view={view}
+          seat={0}
+          spectating={false}
+          recordedViews={[view]}
+          onWatchReplay={null}
+          onDownloadReplay={null}
+          onBackToLobby={() => undefined}
+          onClose={() => undefined}
+        />
+      </TestI18nProvider>,
+    );
+    expect(html).toContain('class="gameover-headline">Draw</div>');
+    expect(html).not.toContain("wins the game");
+    expect(html).not.toContain('class="gameover-winner-tag"');
+  });
+
   it("presents heroes as a switcher and labels the single selected stats panel", () => {
     const view = finishedView();
     view.gameStats = { turns: [{

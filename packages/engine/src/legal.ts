@@ -1292,9 +1292,12 @@ function enumerateIntents(
   seat: number,
   includeUnaffordable: boolean,
 ): GameIntent[] {
-  if (state.winner !== null) return [{ kind: "concede" }];
+  if (state.phase === "game-over") return [];
   const pd = state.pendingDecision;
   const intents: GameIntent[] = [{ kind: "concede" }];
+  if (state.drawOfferSeat === undefined) intents.push({ kind: "offer-draw" });
+  else if (state.drawOfferSeat === seat) intents.push({ kind: "withdraw-draw" });
+  else intents.push({ kind: "accept-draw" }, { kind: "decline-draw" });
 
   if (pd) {
     if (pd.player !== seat) return intents;

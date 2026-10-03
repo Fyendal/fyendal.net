@@ -391,7 +391,7 @@ export function isBotObservationKey(value: unknown): value is string {
 }
 
 export function isCleanActionDecision(state: GameState, seat: 0 | 1): boolean {
-  return state.winner === null &&
+  return state.phase !== "game-over" &&
     state.phase === "action" &&
     state.activePlayer === seat &&
     state.priorityPlayer === seat &&
@@ -408,7 +408,7 @@ function isEndTurnPassPending(state: GameState, seat: 0 | 1): boolean {
 
 function opponentRolloutIntent(state: GameState): GameIntent | undefined {
   const actor = (state.pendingDecision?.player ?? state.priorityPlayer) as 0 | 1;
-  const legal = legalIntents(state, actor).filter((intent) => intent.kind !== "concede");
+  const legal = legalIntents(state, actor).filter((intent) => intent.kind !== "concede" && !intent.kind.endsWith("-draw"));
   if (legal.length === 0) return undefined;
   if (state.pendingDecision?.kind === "defend") {
     const noBlock = legal.find((intent) => intent.kind === "defend" && intent.instanceIds.length === 0);
@@ -437,7 +437,7 @@ function advanceForced<Evaluation extends TurnEvaluation>(
   let current = state;
   const { root, config } = context;
   for (let step = 0; step < (config.maxForcedSteps ?? DEFAULT_MAX_FORCED_STEPS); step++) {
-    if (current.winner !== null || current.turn !== root.turn) {
+    if (current.phase === "game-over" || current.turn !== root.turn) {
       return { kind: "terminal", state: current, complete: true };
     }
     if (isEndTurnPassPending(current, root.seat)) {
@@ -475,6 +475,7 @@ function stateKey(input: BotPolicyInput, depth: number): string {
 
 function genericCandidatePriority(intent: GameIntent, input: BotPolicyInput): number {
   if (intent.kind === "concede") return Number.NEGATIVE_INFINITY;
+  if (intent.kind === "offer-draw" || intent.kind === "accept-draw" || intent.kind === "decline-draw" || intent.kind === "withdraw-draw") return Number.NEGATIVE_INFINITY;
   if (intent.kind === "pass") return -1_000;
   if (intent.kind === "close-chain") return -500;
   if (

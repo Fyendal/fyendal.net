@@ -44,10 +44,12 @@ export function GameOver({
     () => computeCycleStats(recordedViews.length > 0 ? recordedViews : [view]),
     [recordedViews, view],
   );
-  if (winner === null) return null;
+  if (view.phase !== "game-over") return null;
 
-  const winnerName = view.players[winner]?.heroName ?? "";
-  const headline = spectating
+  const winnerName = winner === null ? "" : view.players[winner]?.heroName ?? "";
+  const headline = winner === null
+    ? intl.formatMessage({ id: "game.result.draw" })
+    : spectating
     ? intl.formatMessage({ id: "game.result.namedWinner" }, { winner: winnerName })
     : winner === seat
       ? intl.formatMessage({ id: "game.result.victory" })
@@ -64,7 +66,7 @@ export function GameOver({
     <div className="overlay gameover-overlay">
       <div className="overlay-panel gameover-panel">
         <div className="gameover-headline">{headline}</div>
-        {!spectating ? (
+        {!spectating && winner !== null ? (
           <div className="gameover-sub">
             {intl.formatMessage({ id: "game.over.winsGame" }, { winner: winnerName })}
           </div>

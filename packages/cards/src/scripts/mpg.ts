@@ -907,15 +907,48 @@ Object.assign(mpg, {
       const attacks = ctx
         .player(ctx.seat)
         .graveyard.filter((card) => ctx.hasCardType(card, "action") && hasType(ctx, card, "attack"));
-      if (attacks.length)
+      if (new Set(attacks.map((card) => data(ctx, card).name)).size >= 2)
         ctx.requestCardChoice(
-          "backup-top",
-          decisionPrompt("Call for Backup: put an attack on top", "card.mpg.attack.top"),
+          "backup-first",
+          decisionPrompt("Call for Backup: choose the first attack action card", "card.mpg.backup.first"),
           attacks.map((card) => card.instanceId),
         );
     },
     onChoose(ctx: ScriptCtx, hook: string, option: string) {
-      if (hook === "backup-top") ctx.putOnDeckTop(Number(option));
+      const attacks = ctx.player(ctx.seat).graveyard.filter(
+        (card) => ctx.hasCardType(card, "action") && hasType(ctx, card, "attack"),
+      );
+      if (hook === "backup-first") {
+        const first = attacks.find((card) => card.instanceId === Number(option));
+        if (!first) return;
+        ctx.requestCardChoice(
+          `backup-second:${first.instanceId}`,
+          decisionPrompt("Call for Backup: choose an attack action card with a different name", "card.mpg.backup.second"),
+          attacks.filter((card) => data(ctx, card).name !== data(ctx, first).name)
+            .map((card) => card.instanceId),
+        );
+        return;
+      }
+      if (hook.startsWith("backup-second:")) {
+        const first = attacks.find((card) => card.instanceId === Number(hook.slice("backup-second:".length)));
+        const second = attacks.find((card) => card.instanceId === Number(option));
+        if (!first || !second || data(ctx, first).name === data(ctx, second).name) return;
+        ctx.requestCardChoice(
+          `backup-banish:${first.instanceId}:${second.instanceId}`,
+          decisionPrompt("Call for Backup: choose an attack action card to banish", "card.mpg.backup.banish"),
+          [first.instanceId, second.instanceId],
+          opponentSeat(ctx),
+        );
+        return;
+      }
+      if (hook.startsWith("backup-banish:")) {
+        const [firstId, secondId] = hook.slice("backup-banish:".length).split(":").map(Number);
+        const chosenId = Number(option);
+        if (chosenId !== firstId && chosenId !== secondId) return;
+        if (!attacks.some((card) => card.instanceId === firstId)
+          || !attacks.some((card) => card.instanceId === secondId)) return;
+        if (ctx.banish(chosenId)) ctx.putOnDeckTop(chosenId === firstId ? secondId! : firstId!);
+      }
     },
   },
   "captain of the guard|3": {

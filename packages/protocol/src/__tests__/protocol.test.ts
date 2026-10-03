@@ -414,6 +414,10 @@ describe("client messages", () => {
     { kind: "skip-runechant" },
     { kind: "close-chain" },
     { kind: "concede" },
+    { kind: "offer-draw" },
+    { kind: "accept-draw" },
+    { kind: "decline-draw" },
+    { kind: "withdraw-draw" },
   ];
 
   it("accepts every variant and every intent variant", () => {
@@ -494,6 +498,11 @@ describe("client messages", () => {
 });
 
 describe("GameView and server messages", () => {
+  it("decodes a pending draw offer and a completed drawn game", () => {
+    expect(decodeGameView({ ...gameView(), drawOfferSeat: 0 })).not.toBeNull();
+    expect(decodeGameView({ ...gameView(), drawOfferSeat: 2 })).toBeNull();
+    expect(decodeGameView({ ...gameView(), phase: "game-over", winner: null })).not.toBeNull();
+  });
   it("bounds the public staged hand count", () => {
     expect(decodeGameView(gameView())).not.toBeNull();
     expect(decodeGameView({

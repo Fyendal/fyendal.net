@@ -24,6 +24,9 @@ export function GameSettingsDialog({
   onUndo,
   undoDisabled = false,
   onConcede,
+  drawOfferSeat,
+  drawSeat = 0,
+  onDrawIntent = null,
   priorityWindowMode,
   onPriorityWindowModeChange,
   lessGuidance,
@@ -44,6 +47,9 @@ export function GameSettingsDialog({
   onUndo: ((target?: UndoTarget) => void) | null;
   undoDisabled?: boolean;
   onConcede: (() => void) | null;
+  drawOfferSeat?: number;
+  drawSeat?: number;
+  onDrawIntent?: ((kind: "offer-draw" | "accept-draw" | "decline-draw" | "withdraw-draw") => void) | null;
   priorityWindowMode: PriorityWindowMode;
   onPriorityWindowModeChange: ((mode: PriorityWindowMode) => void) | null;
   lessGuidance: boolean;
@@ -326,6 +332,33 @@ export function GameSettingsDialog({
                   </div>
                 </div>
               ) : null}
+            </section>
+          ) : null}
+          {onDrawIntent ? (
+            <section className="settings-section">
+              <h3 className="settings-heading">{intl.formatMessage({ id: "settings.draw.title" })}</h3>
+              {drawOfferSeat === undefined ? (
+                <button onClick={() => { onDrawIntent("offer-draw"); close(); }}>
+                  {intl.formatMessage({ id: "settings.draw.offer" })}
+                </button>
+              ) : drawOfferSeat === drawSeat ? (
+                <div className="settings-confirm">
+                  <span>{intl.formatMessage({ id: "settings.draw.waiting" })}</span>
+                  <button onClick={() => { onDrawIntent("withdraw-draw"); close(); }}>
+                    {intl.formatMessage({ id: "settings.draw.withdraw" })}
+                  </button>
+                </div>
+              ) : (
+                <div className="settings-confirm">
+                  <span>{intl.formatMessage({ id: "settings.draw.received" })}</span>
+                  <button className="btn-primary" onClick={() => { onDrawIntent("accept-draw"); close(); }}>
+                    {intl.formatMessage({ id: "settings.draw.accept" })}
+                  </button>
+                  <button onClick={() => { onDrawIntent("decline-draw"); close(); }}>
+                    {intl.formatMessage({ id: "settings.draw.decline" })}
+                  </button>
+                </div>
+              )}
             </section>
           ) : null}
           {onConcede ? (

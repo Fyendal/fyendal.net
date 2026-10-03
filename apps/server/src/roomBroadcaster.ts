@@ -85,7 +85,7 @@ export class RoomBroadcaster<Client extends RoomBroadcastClient> {
       || event.kind === "left"
       || event.kind === "game-started"
       || event.kind === "deleted"
-      || (event.kind === "state" && room.state?.winner != null);
+      || (event.kind === "state" && room.state?.phase === "game-over");
     if (refreshLobby) await this.deps.broadcastLobby();
 
     const announcesGameStart = event.kind === "game-started"
@@ -114,7 +114,7 @@ export class RoomBroadcaster<Client extends RoomBroadcastClient> {
       if (sendState) {
         const payload = encoded(`state-${projectionKey}`, () => stateMessage(room, projectionSeat));
         if (payload) client.sendRaw(payload);
-        if (room.state?.winner === null && projectionSeat !== null
+        if (room.state?.phase !== "game-over" && projectionSeat !== null
           && room.seats[projectionSeat]?.controller !== "bot"
           && room.seats.some((seat) => seat?.controller === "bot")) {
           if (this.deps.botReady(client)) {

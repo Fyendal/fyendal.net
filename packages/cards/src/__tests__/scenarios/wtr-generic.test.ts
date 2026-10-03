@@ -100,11 +100,21 @@ describe("WTR generic — attacks", () => {
     expect(goAgain.ok).toBe(true);
     if (!goAgain.ok) return;
     expect(goAgain.state.chain.at(-1)?.goAgain).toBe(true);
+    expect(projectStateFor(goAgain.state, 1).logEntries?.find(
+      (entry) => "message" in entry && entry.message.id === "card.log.wtr.estrike.mode.chosen",
+    )).toMatchObject({
+      message: { values: { mode: { kind: "term", id: "card.wtr.estrike.option.goagain" } } },
+    });
 
     const plusTwo = applyIntent(modeSnapshot, 0, { kind: "choose", optionId: "+2" });
     expect(plusTwo.ok).toBe(true);
     if (!plusTwo.ok) return;
     expect(plusTwo.state.chain.at(-1)?.goAgain).toBe(false);
+    expect(projectStateFor(plusTwo.state, 1).logEntries?.find(
+      (entry) => "message" in entry && entry.message.id === "card.log.wtr.estrike.mode.chosen",
+    )).toMatchObject({
+      message: { values: { mode: { kind: "term", id: "card.wtr.estrike.option.power" } } },
+    });
     g.state = plusTwo.state;
     g.expectAttackValue(7);
 
@@ -113,6 +123,11 @@ describe("WTR generic — attacks", () => {
     if (!draw.ok) return;
     expect(draw.state.chain.at(-1)?.goAgain).toBe(false);
     expect(draw.state.players[0]!.hand).toHaveLength(1);
+    expect(projectStateFor(draw.state, 1).logEntries?.find(
+      (entry) => "message" in entry && entry.message.id === "card.log.wtr.estrike.mode.chosen",
+    )).toMatchObject({
+      message: { values: { mode: { kind: "term", id: "card.wtr.estrike.option.draw" } } },
+    });
   });
 
   it("Barraging Brawnhide gains +1 while defended by fewer than 2 non-equipment cards", () => {

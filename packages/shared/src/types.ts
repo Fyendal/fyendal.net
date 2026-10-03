@@ -556,7 +556,10 @@ export interface GameView {
   gameStats?: GameStatsView;
   /** Absent only on legacy replay files recorded before typed turn facts. */
   turnFacts?: TurnFactsView;
+  /** Null during play and after a draw; phase distinguishes the two. */
   winner: number | null;
+  /** Seat with an unanswered offer to end this game in a draw. */
+  drawOfferSeat?: number;
   /** Recent human-readable log lines, newest last */
   log: string[];
   /** Structured equivalents aligned one-to-one with `log`. Absent for legacy
@@ -656,7 +659,11 @@ export type GameIntent =
   | { kind: "order-triggers"; optionIds: string[] }
   | { kind: "skip-runechant" }
   | { kind: "close-chain" }
-  | { kind: "concede" };
+  | { kind: "concede" }
+  | { kind: "offer-draw" }
+  | { kind: "accept-draw" }
+  | { kind: "decline-draw" }
+  | { kind: "withdraw-draw" };
 
 // ── Replays ────────────────────────────────────────────────────────────────
 

@@ -392,30 +392,20 @@
   border-radius: 5px;
   font-size: 9px;
 }
-/* Square cards extend above and below their art window. Put zone and chain
-   frames around that complete silhouette instead of the cropped image box. */
-.board-cards .card-board-square:not(.card-highlight):not(.card-selected):not(.card-chain-source) {
-  --square-frame-color: #5a8a9c;
-  --square-frame-glow: #5a8a9c55;
-  box-shadow: none;
-}
-.mat-opp .board-cards .card-board-square:not(.card-highlight):not(.card-selected):not(.card-chain-source) {
-  --square-frame-color: #c23a2c;
-  --square-frame-glow: #c23a2c66;
-}
+/* The attacking weapon keeps a yellow frame around its complete silhouette. */
 .card-board-square.card-chain-source {
   --square-frame-color: #e2b75f;
   --square-frame-glow: #d99d3eaa;
-  --square-frame-width: 2px;
   box-shadow: none;
 }
-.board-cards .card-board-square:not(.card-highlight):not(.card-selected):not(.card-chain-source)::after,
 .card-board-square.card-chain-source::after {
   content: "";
   position: absolute;
-  z-index: 6;
-  inset: -8px 0 -2px;
-  border: var(--square-frame-width, 1px) solid var(--square-frame-color);
+  z-index: 1;
+  /* The name bar supplies the top edge; avoid a second line over its pitch strip. */
+  inset: calc(0px - clamp(6.5px, .75vh, 7.5px)) 0 0;
+  border: 2px solid var(--square-frame-color);
+  border-top: 0;
   border-radius: 8px;
   box-shadow: 0 0 7px 1px var(--square-frame-glow);
   pointer-events: none;
@@ -486,6 +476,7 @@
   overflow: hidden;
   padding: 0 4px;
   border: 1px solid #514b40;
+  border-top-width: 2px;
   border-radius: 8px 8px 2px 2px;
   background: #eee9dd;
   color: #2d2a24;
@@ -512,12 +503,16 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+.card-board-square .board-square-name:not([data-pitch]) {
+  border-top-color: var(--square-frame-color, #514b40);
+  border-inline-color: var(--square-frame-color, #514b40);
+}
 .board-square-name[data-pitch="1"] { --board-pitch-accent: #e5534b; }
 .board-square-name[data-pitch="2"] { --board-pitch-accent: #e3b341; }
 .board-square-name[data-pitch="3"] { --board-pitch-accent: #539bf5; }
 .board-square-name[data-pitch="4"] { --board-pitch-accent: #a970ff; }
 .board-square-name[data-pitch] {
-  border-top: 2px solid var(--board-pitch-accent);
+  border-top-color: var(--board-pitch-accent);
   border-right-color: var(--board-pitch-accent);
   border-left-color: var(--board-pitch-accent);
 }

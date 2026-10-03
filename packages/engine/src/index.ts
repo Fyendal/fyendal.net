@@ -4,7 +4,7 @@ import { activateAbility, answerChoice, answerChoices, playCard } from "./action
 import { declareTail } from "./attacks.js";
 import { assignDefenders, stageDefenders } from "./defense.js";
 import { scriptOf } from "./cardProperties.js";
-import { gameLogMessage, logCardValue, logPublic, nameOf } from "./gameLog.js";
+import { gameLogMessage, logCardValue, logPlayerValue, logPublic, nameOf } from "./gameLog.js";
 import { checkWin } from "./win.js";
 import { currentLink, findCardAnywhere, opponent } from "./zoneQueries.js";
 import { closeChain } from "./combatChain.js";
@@ -488,7 +488,7 @@ export function applyIntent(
   seat: number,
   intent: GameIntent,
 ): ApplyResult {
-  if (state.winner !== null) return { ok: false, error: "game is over" };
+  if (state.phase === "game-over") return { ok: false, error: "game is over" };
   if (
     (intent.kind === "play-card" ||
       intent.kind === "play-from-arsenal" ||
@@ -518,7 +518,50 @@ export function applyIntent(
   let err: string | undefined;
 
   switch (intent.kind) {
+    case "offer-draw": {
+      if (next.drawOfferSeat !== undefined || !next.players[seat]) {
+        err = "draw offer is unavailable";
+        break;
+      }
+      next.drawOfferSeat = seat;
+      logPublic(next, gameLogMessage(
+        `${nameOf(next, next.players[seat]!.heroCardId)} offers a draw`,
+        "engine.log.game.draw.offered",
+        { player: logPlayerValue(seat) },
+      ));
+      break;
+    }
+    case "accept-draw": {
+      if (next.drawOfferSeat !== opponent(seat)) {
+        err = "no draw offer to accept";
+        break;
+      }
+      delete next.drawOfferSeat;
+      next.phase = "game-over";
+      next.pendingDecision = null;
+      logPublic(next, gameLogMessage(
+        `${nameOf(next, next.players[seat]!.heroCardId)} accepts the draw — the game ends in a draw`,
+        "engine.log.game.draw.accepted",
+        { player: logPlayerValue(seat) },
+      ));
+      break;
+    }
+    case "decline-draw":
+    case "withdraw-draw": {
+      if (next.drawOfferSeat !== (intent.kind === "withdraw-draw" ? seat : opponent(seat))) {
+        err = "no draw offer to cancel";
+        break;
+      }
+      delete next.drawOfferSeat;
+      logPublic(next, gameLogMessage(
+        `${nameOf(next, next.players[seat]!.heroCardId)} ${intent.kind === "withdraw-draw" ? "withdraws" : "declines"} the draw offer`,
+        intent.kind === "withdraw-draw" ? "engine.log.game.draw.withdrawn" : "engine.log.game.draw.declined",
+        { player: logPlayerValue(seat) },
+      ));
+      break;
+    }
     case "concede": {
+      delete next.drawOfferSeat;
       next.winner = opponent(seat);
       next.phase = "game-over";
       next.pendingDecision = null;

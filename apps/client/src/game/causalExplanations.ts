@@ -18,7 +18,7 @@ function stackTiming(view: GameView): string | undefined {
 
 /** CR 4.0.3a phase, independent of the engine's internal flow state. */
 export function gamePhaseLabel(view: GameView): TurnPhaseLabel {
-  if (view.winner !== null || view.phase === "game-over") return "GAME OVER";
+  if (view.phase === "game-over") return "GAME OVER";
   const timing = stackTiming(view);
   if (timing?.startsWith("START PHASE")) return "START PHASE";
   if (timing?.startsWith("END PHASE")) return "END PHASE";
@@ -46,7 +46,7 @@ export function gameTimingLabel(view: GameView): string {
 
 /** Whether to show priority attention cues, including the defender choosing blocks. */
 export function gameHasPriority(view: GameView): boolean {
-  if (view.winner !== null) return false;
+  if (view.phase === "game-over") return false;
   const decision = view.pendingDecision?.kind;
   if (decision === undefined) return view.phase === "action";
   return (
@@ -112,7 +112,7 @@ function decisionStatus(view: GameView, seat: number | null, pd: PendingDecision
 }
 
 export function causalStatus(view: GameView, seat: number | null): CausalStatus {
-  if (view.winner !== null) {
+  if (view.phase === "game-over") {
     return { kind: "complete", heading: "GAME OVER" };
   }
   if (view.pendingDecision) return decisionStatus(view, seat, view.pendingDecision);

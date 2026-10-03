@@ -269,7 +269,7 @@ export function PlayerHand({
         data-reduced-motion={reducedMotion ? "true" : undefined}
         {...reorderHandlers}
       >
-        {spectating && view.winner === null && !(replaying && player.hand.length > 0)
+        {spectating && view.phase !== "game-over" && !(replaying && player.hand.length > 0)
           ? Array.from({ length: player.handCount }, (_, index) => (
               <CardBack
                 key={index}

@@ -36,6 +36,9 @@ export function BoardOverlays({
   onInspectCard,
   opponentUsername,
   botGame,
+  drawOfferSeat,
+  onAcceptDraw,
+  onDeclineDraw,
 }: {
   preview: BoardPreview | null;
   overlay: BoardOverlay | null;
@@ -62,6 +65,9 @@ export function BoardOverlays({
   onInspectCard: (cardId: string | null) => void;
   opponentUsername: string | null;
   botGame: boolean;
+  drawOfferSeat: number | undefined;
+  onAcceptDraw: (() => void) | null;
+  onDeclineDraw: (() => void) | null;
 }) {
   const intl = useIntl();
   return (
@@ -112,7 +118,18 @@ export function BoardOverlays({
           </button>
         </div>
       ) : null}
-      {!replaying && gameView.winner !== null && !gameOverDismissed ? (
+      {drawOfferSeat !== undefined && drawOfferSeat !== yourSeat && onAcceptDraw && onDeclineDraw ? (
+        <div className="idle-toast" role="status">
+          <span>{intl.formatMessage({ id: "settings.draw.received" })}</span>
+          <button className="btn-primary" onClick={onAcceptDraw}>
+            {intl.formatMessage({ id: "settings.draw.accept" })}
+          </button>
+          <button className="linklike" onClick={onDeclineDraw}>
+            {intl.formatMessage({ id: "settings.draw.decline" })}
+          </button>
+        </div>
+      ) : null}
+      {!replaying && gameView.phase === "game-over" && !gameOverDismissed ? (
         <GameOver
           view={gameView}
           seat={seat}

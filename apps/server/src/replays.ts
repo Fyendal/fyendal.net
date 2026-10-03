@@ -164,7 +164,7 @@ export async function appendReplayView(
   );
   if (!inserted.rows.length) return null;
   const id = String(inserted.rows[0].replay_id);
-  if (winner === 0 || winner === 1) {
+  if (state.phase === "game-over") {
     const finalized = await db.query(
       `UPDATE replay_games SET winner=$2, status='finalizing', finished_at=$3, expires_at=$4
        WHERE id=$1 AND status='recording' RETURNING id`,

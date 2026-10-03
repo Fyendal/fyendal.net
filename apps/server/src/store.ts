@@ -296,8 +296,8 @@ const AUTO_PASS_WINDOW_KINDS: ReadonlySet<PendingDecision["kind"]> = new Set([
 ]);
 
 /** The auto-pass condition, verified server-side: the seat holds a
- *  priority/reaction window in which nothing but pass/concede is legal.
- *  Conceding is always offered and never blocks auto-pass. */
+ *  priority/reaction window in which nothing but pass, concede, and draw
+ *  actions is legal. These actions never block auto-pass. */
 function isEmptyPriorityWindow(state: GameState, seat: number): boolean {
   const decision = state.pendingDecision;
   if (!decision || decision.player !== seat || !AUTO_PASS_WINDOW_KINDS.has(decision.kind)) {
@@ -305,7 +305,7 @@ function isEmptyPriorityWindow(state: GameState, seat: number): boolean {
   }
   const legal = legalIntents(state, seat);
   return legal.some((candidate) => candidate.kind === "pass") &&
-    legal.every((candidate) => candidate.kind === "pass" || candidate.kind === "concede");
+    legal.every((candidate) => candidate.kind === "pass" || candidate.kind === "concede" || candidate.kind.endsWith("-draw"));
 }
 /** Spectator slots per room — anonymous joins must not grow a room unboundedly. */
 const MAX_SPECTATORS = 20;
@@ -723,7 +723,7 @@ function toRoom(value: unknown): RoomRow {
  * been abandoned.
  */
 function updateGc(room: RoomRow, now = Date.now()): void {
-  const over = room.state?.winner != null;
+  const over = room.state?.phase === "game-over";
   const anyonePresent = room.seats.some((s) => s && isPresent(s.lastSeenAt, now));
   if (over || !anyonePresent) {
     room.gcAt ??= now + GC_DELAY_MS;
@@ -734,9 +734,9 @@ function updateGc(room: RoomRow, now = Date.now()): void {
 
 function lifecycle(room: RoomRow): { status: "open" | "prep" | "active" | "finished"; winner: number | null } {
   if (room.state) {
-    return room.state.winner == null
-      ? { status: "active", winner: null }
-      : { status: "finished", winner: room.state.winner };
+    return room.state.phase === "game-over"
+      ? { status: "finished", winner: room.state.winner }
+      : { status: "active", winner: null };
   }
   return room.seats[0] && room.seats[1]
     ? { status: "prep", winner: null }
@@ -881,7 +881,7 @@ export class PgRoomStore {
    *  deck or hero before attempting to take the open seat. */
   async roomInvite(code: string, userId?: number): Promise<RoomInvite | null> {
     const room = await this.getRoom(code.toUpperCase());
-    if (!room || (room.state && room.state.winner !== null) || !room.seats.some(Boolean)) return null;
+    if (!room || room.state?.phase === "game-over" || !room.seats.some(Boolean)) return null;
     return {
       code: room.code,
       format: room.format,
@@ -3364,7 +3364,7 @@ export class PgRoomStore {
     // Each shortcut strictly advances the game; the bound is insurance only.
     for (let guard = 0; guard < 64; guard++) {
       const state = room.state;
-      if (!state || state.winner !== null) {
+      if (!state || state.phase === "game-over") {
         for (const member of room.seats) if (member) member.runechantSkip = false;
         return;
       }
@@ -3409,7 +3409,7 @@ export class PgRoomStore {
       room.seats[seat]!.priorityMode = mode;
       const shouldPass = mode === "auto-pass"
         && !!room.state
-        && room.state.winner === null
+        && room.state.phase !== "game-over"
         && isEmptyPriorityWindow(room.state, seat);
       if (!shouldPass) return { room, result: { autoPassed: false }, versionNeutral: true };
       const events: EngineTransitionMove[] = [];
@@ -3445,7 +3445,7 @@ export class PgRoomStore {
         return { room, result: { advanced: false }, versionNeutral: true };
       }
       const choicePresented = !!room.state
-        && room.state.winner === null
+        && room.state.phase !== "game-over"
         && room.state.pendingDecision?.player === seat
         && runechantSequenceActive(room.state)
         && legalIntents(room.state, seat).some((candidate) => candidate.kind === "skip-runechant");
@@ -3477,6 +3477,10 @@ export class PgRoomStore {
       if (!room.state) return { error: "game has not started" };
       const seat = seatForCredentials(room, credentials);
       if (seat === null) return { error: "not a player in this room" };
+      if (room.seats.some((member) => member?.controller === "bot") &&
+        (intent.kind === "offer-draw" || intent.kind === "accept-draw" || intent.kind === "decline-draw" || intent.kind === "withdraw-draw")) {
+        return { error: "draw offers are only available in player games" };
+      }
       // autoPass is a presence-only hint from legacy clients: verify the
       // empty-window condition before folding the pass into the preceding
       // action's undo step.
@@ -3542,15 +3546,17 @@ export class PgRoomStore {
       if (actor !== seat) return { error: "bot does not have priority" };
       const message = stateMessage(room, seat);
       if (message?.type !== "state") return { error: "game has not started" };
+      const botLegal = message.legal.filter((candidate) => !candidate.kind.endsWith("-draw"));
       if (!intent) {
         intent = fallbackBotIntent({
-          seat: seat as SeatIndex, view: message.view, legal: message.legal, cards: cardData,
+          seat: seat as SeatIndex, view: message.view, legal: botLegal, cards: cardData,
         }) ?? null;
       }
+      if (intent?.kind.endsWith("-draw")) return { error: "bot cannot offer or accept a draw" };
       const stagedIds = message.view.pendingDecision?.kind === "defend"
         ? message.view.pendingDecision.stagedCards?.map((card) => card.instanceId) ?? []
         : [];
-      if (!intent || !isAdvertisedBotIntent(intent, message.legal, stagedIds)) return { error: "unadvertised bot intent" };
+      if (!intent || !isAdvertisedBotIntent(intent, botLegal, stagedIds)) return { error: "unadvertised bot intent" };
       const res = engineApplyIntent(room.state, seat, intent);
       if (!res.ok) return { error: res.error };
       const snapshot = intent.kind === "stage-defenders" ? undefined : room.state;
@@ -3610,7 +3616,7 @@ export class PgRoomStore {
           }
         }
         if (!room.state) return { ok: false as const, error: "game has not started" };
-        if (room.state.winner !== null) return { ok: false as const, error: "game is already over" };
+        if (room.state.phase === "game-over") return { ok: false as const, error: "game is already over" };
         const candidates = await this.loadHistoryMetadata(db, upper, room.rulesetVersion);
         if (!candidates.length) return { ok: false as const, error: "nothing to undo" };
         const targetTurn = target === "current-turn"
@@ -3717,7 +3723,7 @@ export class PgRoomStore {
   ): Promise<{ ok: true; version: number; replayFinalizationId?: string } | { ok: false; error: string }> {
     const r = await this.withRetry<undefined>(code.toUpperCase(), (room) => {
       if (!room.state) return { error: "game has not started" };
-      if (room.state.winner !== null) return { error: "game is already over" };
+      if (room.state.phase === "game-over") return { error: "game is already over" };
       const seatIdx = seatForCredentials(room, credentials);
       if (seatIdx === null) return { error: "not a player in this room" };
       const waitingOn = room.state.pendingDecision?.player ?? room.state.activePlayer;
@@ -3729,6 +3735,8 @@ export class PgRoomStore {
       room.state = {
         ...room.state,
         winner: seatIdx as 0 | 1,
+        phase: "game-over",
+        pendingDecision: null,
         ...appendSemanticGameLog(room.state, {
           fallback: `🏳 ${name} claims victory — the opponent was idle`,
           message: {
@@ -3737,6 +3745,7 @@ export class PgRoomStore {
           },
         }),
       };
+      delete room.state.drawOfferSeat;
       return { room, result: undefined, snapshot, replay: { kind: "frame" } };
     }, command ? {
       meta: command,
@@ -4037,7 +4046,7 @@ export class PgRoomStore {
       now - PRESENCE_TIMEOUT_MS,
     ]);
     const { rows } = await this.db.query(
-      "SELECT code, winner FROM rooms WHERE gc_at IS NULL",
+      "SELECT code, status FROM rooms WHERE gc_at IS NULL",
     );
     const { rows: presence } = await this.db.query(
       "SELECT room_code, seat FROM room_presence WHERE last_seen_at > $1",
@@ -4046,8 +4055,8 @@ export class PgRoomStore {
     const roomsWithPlayers = new Set(
       presence.filter((p) => p.seat != null).map((p) => p.room_code as string),
     );
-    for (const raw of rows as { code: string; winner: string | null }[]) {
-      const over = raw.winner != null;
+    for (const raw of rows as { code: string; status: string }[]) {
+      const over = raw.status === "finished";
       const anyonePresent = roomsWithPlayers.has(raw.code);
       if (over || !anyonePresent) {
         await this.db.query("UPDATE rooms SET gc_at = $2 WHERE code = $1 AND gc_at IS NULL", [

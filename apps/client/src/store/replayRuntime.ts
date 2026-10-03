@@ -27,7 +27,7 @@ export function createReplayRuntime(storage: Storage): ReplayRuntime {
     recordFrame: (code, roomVersion, view, seat, transition) => {
       const activeRecorder = ensureRecorder(code);
       activeRecorder.record(roomVersion, view, seat, transition);
-      if (view.winner !== null) activeRecorder.finish();
+      if (view.phase === "game-over") activeRecorder.finish();
       return activeRecorder.length;
     },
     discard: (code) => {

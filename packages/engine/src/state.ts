@@ -992,7 +992,10 @@ export interface GameState {
    * semantic entry is emitted so legacy rooms retain their persisted shape. */
   nextLogSequence?: number;
   log: GameLogEntry[];
+  /** Null during play and after a draw; phase distinguishes the two. */
   winner: number | null;
+  /** Unanswered mutual draw offer. */
+  drawOfferSeat?: number;
 }
 
 /** One audience-aware game log event. A seated viewer receives their seat

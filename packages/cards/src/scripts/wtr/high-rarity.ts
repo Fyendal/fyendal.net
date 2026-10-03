@@ -5,6 +5,7 @@ import {
   decisionMessage,
   decisionPrompt,
   isSixPlus,
+  localizedCardLog,
   opponentSeat,
   previousAttackHasName,
   reprise,
@@ -483,7 +484,24 @@ export const wtrHighRarity: Record<string, CardScript> = {
           );
         return;
       }
-      if (hook === "estrike-mode") ctx.setCounter("estrikeMode", option === "draw" ? 1 : option === "+2" ? 2 : 3);
+      if (hook === "estrike-mode") {
+        const modeLabel = option === "draw" ? "draw a card" : option === "+2" ? "+2 power" : "go again";
+        const modeMessage = option === "draw"
+          ? decisionMessage("card.wtr.estrike.option.draw")
+          : option === "+2"
+            ? decisionMessage("card.wtr.estrike.option.power")
+            : decisionMessage("card.wtr.estrike.option.goagain");
+        ctx.setCounter("estrikeMode", option === "draw" ? 1 : option === "+2" ? 2 : 3);
+        ctx.logPublic(localizedCardLog(
+          ctx,
+          `${ctx.cardData(ctx.player(ctx.seat).heroCardId).name} chooses ${modeLabel} for ${ctx.data.name}`,
+          "card.log.wtr.estrike.mode.chosen",
+          {
+            player: { kind: "player", seat: ctx.seat },
+            mode: { kind: "term", id: modeMessage.id },
+          },
+        ));
+      }
     },
     onAttackDeclared(ctx) {
       const mode = ctx.getCounter("estrikeMode");

@@ -966,7 +966,7 @@ export const useStore = create<StoreState>((set, get) => {
         break;
       case "state": {
         const liveCode = get().roomCode;
-        if (liveCode) browserBot.observe(liveCode, msg.version, msg.transition?.kind === "replace", msg.view.winner !== null);
+        if (liveCode) browserBot.observe(liveCode, msg.version, msg.transition?.kind === "replace", msg.view.phase === "game-over");
         roomEntryPending = false;
         roomEntryRetryable = false;
         joiningRoomCode = null;
@@ -1048,7 +1048,7 @@ export const useStore = create<StoreState>((set, get) => {
         if (commandState.defenderStageIds) {
           queueOrSendDefenderStage(commandState.defenderStageIds);
         }
-        if (msg.view.winner !== null && get().authToken) {
+        if (msg.view.phase === "game-over" && get().authToken) {
           if (code) void syncCompletedReplay(code);
           void get().refreshReplays();
         }
@@ -1782,7 +1782,7 @@ export const useStore = create<StoreState>((set, get) => {
     watchReplay: async () => {
       const before = get();
       const code = before.roomCode;
-      if (code && before.authToken && !before.spectating && before.view?.winner !== null) {
+      if (code && before.authToken && !before.spectating && before.view?.phase === "game-over") {
         const file = await syncCompletedReplay(code);
         const current = get();
         if (current.roomCode !== code || current.screen !== "game") return;

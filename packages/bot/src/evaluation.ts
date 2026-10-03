@@ -80,9 +80,9 @@ export function evaluateBotMatch(options: BotMatchEvaluationOptions): BotMatchEv
   const now = options.now ?? (() => performance.now());
   const maxSteps = options.maxSteps ?? 2_000;
   let steps = 0;
-  for (; steps < maxSteps && state.winner === null; steps++) {
+  for (; steps < maxSteps && state.phase !== "game-over"; steps++) {
     const actor = (state.pendingDecision?.player ?? state.priorityPlayer) as 0 | 1;
-    const legal = legalIntents(state, actor).filter((intent) => intent.kind !== "concede");
+    const legal = legalIntents(state, actor).filter((intent) => intent.kind !== "concede" && !intent.kind.endsWith("-draw"));
     if (legal.length === 0) throw new Error(`bot ${definitions[actor].id} has no legal intent`);
     const startedAt = now();
     const intent = definitions[actor].chooseIntent({
@@ -111,6 +111,6 @@ export function evaluateBotMatch(options: BotMatchEvaluationOptions): BotMatchEv
     totalDecisionMs,
     maxDecisionMs,
     actionDigest: digestIntents(intents),
-    complete: state.winner !== null,
+    complete: state.phase === "game-over",
   };
 }

@@ -47,6 +47,35 @@ describe("UPR — Crown of Providence reaction transition", () => {
 });
 
 describe("UPR — registration and heroes", () => {
+  it.each([
+    ["sand cover|1", 4, 20],
+    ["sand cover|2", 3, 19],
+    ["sand cover|3", 2, 18],
+  ] as const)("%s grants Ash ward %i against Snatch", (sandCover, ward, life) => {
+    const s = scenario({
+      active: 1,
+      seats: [
+        { hero: "rhinar", heroKey: "dromai|0", hand: [sandCover], board: ["ash|0"] },
+        { hero: "dorinthea", hand: ["snatch|1"] },
+      ],
+    });
+    const ashId = s.state.players[0]!.board[0]!.instanceId;
+
+    s.play("snatch|1").blockWith().passPriority().react(sandCover).chooseCard("ash|0");
+    expect(s.state.players[0]!.board[0]?.grantedKeywords).toContain(`ward ${ward}`);
+    expect(s.state.pendingDecision).toMatchObject({
+      player: 0,
+      chooseHook: "ward",
+      options: [`destroy ${ashId}`],
+    });
+
+    s.chooseOption(`destroy ${ashId}`).expectLife(0, life);
+    s.expectNotInZone(0, "ash|0", "board");
+    if (ward === 4) {
+      expect(s.state.log.some((entry) => entry.publicText?.includes("Snatch triggers: On hit"))).toBe(false);
+    }
+  });
+
   it("registers every printing, invocation back, and hero", () => {
     expect(cardData.UPR002?.name).toBe("Dromai");
     expect(cardData.UPR045?.name).toBe("Fai");

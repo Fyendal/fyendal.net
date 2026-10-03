@@ -228,6 +228,33 @@ describe("EVO — registration and core mechanics", () => {
     ]));
   });
 
+  it("Fabricate adds defense to Evo equipment, including Evo bases, but not ordinary bases", () => {
+    const s = scenario({
+      active: 1,
+      seats: [
+        {
+          hero: "rhinar",
+          hand: ["fabricate|1"],
+          equipment: {
+            head: "synapse sparkcap|0",
+            legs: "evo beta base legs|3",
+          },
+        },
+        { hero: "dorinthea", hand: ["head jab|1"] },
+      ],
+    });
+
+    s.play("head jab|1")
+      .blockWith("synapse sparkcap|0", "evo beta base legs|3")
+      .passPriority()
+      .react("fabricate|1")
+      .chooseOption("defense")
+      .chooseOption("hand");
+
+    expect(projectStateFor(s.state, 0).chain.at(-1)?.defenseValue).toBe(3);
+    s.settle().expectLife(0, 20);
+  });
+
   it("Teklovossen lets high-rarity Evos from hand and banish be played as instants", () => {
     const s = scenario({
       seats: [

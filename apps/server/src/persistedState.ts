@@ -207,6 +207,7 @@ export function encodePersistedState(state: GameState, rulesetVersion = "test-ru
     ...(state.nextLogSequence === undefined ? {} : { nextLogSequence: state.nextLogSequence }),
     log: state.log,
     winner: state.winner,
+    ...(state.drawOfferSeat === undefined ? {} : { drawOfferSeat: state.drawOfferSeat }),
   };
   return { schemaVersion: 1, rulesetVersion, state: persisted };
 }

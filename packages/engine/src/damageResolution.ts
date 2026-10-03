@@ -936,7 +936,7 @@ export function wardPieces(state: GameStateInternal,
     const dynamic = scriptOf(state, c.cardId, c)?.wardValue;
     const n = dynamic
       ? Math.max(0, dynamic(runtime.makeCtx(state, player.seat, c, currentLink(state))))
-      : wardValueOf(dataOf(state, c.cardId));
+      : wardValueOf(instanceDataOf(state, c), c);
     if (n !== undefined && n > 0) out.push({ id: c.instanceId, n });
   }
   return out;

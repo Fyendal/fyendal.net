@@ -3100,7 +3100,7 @@
   "card.evo.fabricate.option.defense": [
     {
       "type": 0,
-      "value": "你的装备 +1 防御"
+      "value": "你操控的 Evo 永久物 +1 防御"
     }
   ],
   "card.evo.fabricate.option.equip": [
@@ -8039,6 +8039,32 @@
       "value": " 力量"
     }
   ],
+  "card.log.wtr.estrike.mode.chosen": [
+    {
+      "type": 1,
+      "value": "player"
+    },
+    {
+      "type": 0,
+      "value": " 为 "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 选择“"
+    },
+    {
+      "type": 1,
+      "value": "mode"
+    },
+    {
+      "type": 0,
+      "value": "”"
+    }
+  ],
   "card.log.wtr.flicflak.defense": [
     {
       "type": 1,
@@ -8895,12 +8921,6 @@
       "value": "Fearless Confrontation：选择一次攻击"
     }
   ],
-  "card.mpg.attack.top": [
-    {
-      "type": 0,
-      "value": "Call for Backup：将一张攻击牌置于牌库顶"
-    }
-  ],
   "card.mpg.aura.destroy": [
     {
       "type": 1,
@@ -8921,6 +8941,24 @@
     {
       "type": 0,
       "value": "Break Stature：摧毁一个灵气 (Aura)衍生物"
+    }
+  ],
+  "card.mpg.backup.banish": [
+    {
+      "type": 0,
+      "value": "Call for Backup：选择一张要放逐的攻击行动牌"
+    }
+  ],
+  "card.mpg.backup.first": [
+    {
+      "type": 0,
+      "value": "Call for Backup：选择第一张攻击行动牌"
+    }
+  ],
+  "card.mpg.backup.second": [
+    {
+      "type": 0,
+      "value": "Call for Backup：选择一张名称不同的攻击行动牌"
     }
   ],
   "card.mpg.card.discard": [
@@ -17870,6 +17908,46 @@
       "value": " 认输"
     }
   ],
+  "engine.log.game.draw.accepted": [
+    {
+      "type": 1,
+      "value": "player"
+    },
+    {
+      "type": 0,
+      "value": " 接受平局提议——本局以平局结束"
+    }
+  ],
+  "engine.log.game.draw.declined": [
+    {
+      "type": 1,
+      "value": "player"
+    },
+    {
+      "type": 0,
+      "value": " 拒绝平局提议"
+    }
+  ],
+  "engine.log.game.draw.offered": [
+    {
+      "type": 1,
+      "value": "player"
+    },
+    {
+      "type": 0,
+      "value": " 提议平局"
+    }
+  ],
+  "engine.log.game.draw.withdrawn": [
+    {
+      "type": 1,
+      "value": "player"
+    },
+    {
+      "type": 0,
+      "value": " 撤回平局提议"
+    }
+  ],
   "engine.log.game.player.loses": [
     {
       "type": 1,
@@ -20462,6 +20540,12 @@
     {
       "type": 0,
       "value": "失败"
+    }
+  ],
+  "game.result.draw": [
+    {
+      "type": 0,
+      "value": "平局"
     }
   ],
   "game.result.namedWinner": [
@@ -24350,6 +24434,48 @@
     {
       "type": 0,
       "value": "危险操作"
+    }
+  ],
+  "settings.draw.accept": [
+    {
+      "type": 0,
+      "value": "接受平局"
+    }
+  ],
+  "settings.draw.decline": [
+    {
+      "type": 0,
+      "value": "拒绝平局"
+    }
+  ],
+  "settings.draw.offer": [
+    {
+      "type": 0,
+      "value": "提议平局"
+    }
+  ],
+  "settings.draw.received": [
+    {
+      "type": 0,
+      "value": "对手提议平局"
+    }
+  ],
+  "settings.draw.title": [
+    {
+      "type": 0,
+      "value": "平局"
+    }
+  ],
+  "settings.draw.waiting": [
+    {
+      "type": 0,
+      "value": "等待对手接受平局提议"
+    }
+  ],
+  "settings.draw.withdraw": [
+    {
+      "type": 0,
+      "value": "撤回提议"
     }
   ],
   "settings.gameplay": [

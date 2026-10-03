@@ -618,8 +618,9 @@ export function makeCtx(
       ));
     },
     loseGame(targetSeat) {
-      if (!state.players[targetSeat] || state.winner !== null) return;
+      if (!state.players[targetSeat] || state.phase === "game-over") return;
       state.winner = opponent(targetSeat);
+      delete state.drawOfferSeat;
       state.phase = "game-over";
       state.pendingDecision = null;
       state.stack = [];

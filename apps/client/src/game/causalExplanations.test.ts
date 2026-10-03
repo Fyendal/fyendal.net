@@ -200,7 +200,7 @@ describe("gameHasPriority", () => {
       pendingDecision: { player: 1, kind: "choose-target", prompt: "Choose a target" },
       priorityPlayer: 1,
     }))).toBe(false);
-    expect(gameHasPriority(view({ winner: 0 }))).toBe(false);
+    expect(gameHasPriority(view({ winner: 0, phase: "game-over" }))).toBe(false);
   });
 });
 

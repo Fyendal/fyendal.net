@@ -35,7 +35,15 @@ function matchingOneShotDefenseCards(
     const equipment = link.defendingEquipment.some(
       (candidate) => candidate.instanceId === card.instanceId,
     );
-    if (equipment) return modifier.appliesToEquipment === true;
+    if (equipment) {
+      return modifier.appliesToEquipment === true && modifierAppliesToDefense(
+        state,
+        modifier,
+        dataOf(state, card.cardId),
+        cardColorOf(state, card),
+        card,
+      );
+    }
     if (modifier.appliesToEquipment === true) return false;
     return modifierAppliesToDefense(
       state,
@@ -529,14 +537,15 @@ function defendingEquipmentModifiers(
   state: GameStateInternal,
   card: CardInstance,
 ): Modifier[] {
+  const data = dataOf(state, card.cardId);
+  const color = cardColorOf(state, card);
   return state.modifiers.filter((modifier) =>
     !!modifier.defense &&
     !modifier.consumed &&
     (!modifier.once || modifier.scope === "chain-link") &&
     modifier.appliesToEquipment === true &&
     modifier.seat === card.owner &&
-    (modifier.appliesToInstanceId === undefined ||
-      modifier.appliesToInstanceId === card.instanceId) &&
+    modifierAppliesToDefense(state, modifier, data, color, card) &&
     (
       modifier.scope === "static" ||
       modifier.scope === "until-end-of-turn" ||

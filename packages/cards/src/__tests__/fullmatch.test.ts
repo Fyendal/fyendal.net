@@ -7,10 +7,14 @@
  * (or a new set's decks) becomes legal.
  */
 import { describe, expect, it } from "vitest";
-import { applyIntent, createGame, legalIntents, projectStateFor, rngNext } from "@fyendal/engine";
+import { applyIntent, createGame, legalIntents as engineLegalIntents, projectStateFor, rngNext } from "@fyendal/engine";
 import type { GameState } from "@fyendal/engine";
 import type { Decklist } from "@fyendal/shared";
 import { cardData, decklists, scripts } from "../index.js";
+
+// Golden playouts exercise card play, not voluntary player draw agreements.
+const legalIntents = (state: GameState, seat: number) =>
+  engineLegalIntents(state, seat).filter((intent) => !intent.kind.endsWith("-draw"));
 
 function formatLog(log: GameState["log"]): string {
   return log.map((entry) => entry.publicText

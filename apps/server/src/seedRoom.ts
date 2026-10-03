@@ -56,7 +56,7 @@ function validateFixture(value: unknown): asserts value is ManualRoomFixture {
   }
   const state = fixture.state as GameState | undefined;
   if (!state || !Array.isArray(state.players) || state.players.length !== 2 ||
-    state.winner !== null || state.players.some((player) => !player?.hero?.cardId)) {
+    state.phase === "game-over" || state.players.some((player) => !player?.hero?.cardId)) {
     throw new Error("fixture needs an unfinished two-player game state");
   }
 }
