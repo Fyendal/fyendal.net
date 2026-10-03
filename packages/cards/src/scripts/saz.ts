@@ -279,7 +279,8 @@ export const saz: Record<string, CardScript> = {
         const link = ctx.link;
         if (!link || link.attacker !== ctx.seat) return false;
         if (!isArrow(ctx, link.attackingCard)) return false;
-        return ctx.attackBonusAboveBase(link.attackingCard.instanceId) > 0;
+        // The target arrow's own conditional power counts toward its current {p}.
+        return ctx.attackBonusAboveBase() > 0;
       },
       onActivate(ctx) {
         ctx.grantGoAgain();

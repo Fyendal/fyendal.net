@@ -274,6 +274,26 @@ describe("SAZ — arrows", () => {
       .expectAP(0, 1); // go again refunded
   });
 
+  it("Bolt'n Boots count an aimed Infecting Shot's own +1{p}", () => {
+    const s = scenario({
+      seats: [
+        azaleaSeat({
+          equipment: { ...NO_EQUIPMENT, legs: "bolt'n boots|0" },
+          arsenal: ["infecting shot|1"],
+          resources: 2,
+        }),
+        { hero: "rhinar", hand: [] },
+      ],
+    });
+    s.state.players[0]!.arsenal[0]!.counters = { aim: 1 }; // setup stamp
+    s.play("infecting shot|1", { fromArsenal: true })
+      .expectAttackValue(6) // 5 base + 1 from its aim counter
+      .blockWith()
+      .activate("bolt'n boots|0")
+      .expectNoEquipment(0, "legs")
+      .expectAP(0, 1);
+  });
+
   it("Drill Shot with an aim counter has piercing 1 and counters equipment on hit", () => {
     const s = scenario({
       seats: [azaleaSeat({ arsenal: ["drill shot|1"] }), { hero: "rhinar", hand: [] }],
