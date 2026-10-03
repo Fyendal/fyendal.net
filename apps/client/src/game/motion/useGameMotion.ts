@@ -33,7 +33,7 @@ import {
   type MotionFlight,
 } from "./motionGeometry.js";
 import { useMotionPreference } from "./useMotionPreference.js";
-import { rememberStackFocusOrigins } from "../pitchFocusMotion.js";
+import { rememberHandFocusOrigins, rememberStackFocusOrigins } from "../pitchFocusMotion.js";
 import {
   activateMotionDestinationMasks,
   arriveMotionDestination,
@@ -80,6 +80,7 @@ export function useGameMotion({
   const layoutMotionSequenceRef = useRef(0);
   const previousAnchorsRef = useRef<MotionAnchorSnapshot>(EMPTY_ANCHORS);
   const stackFocusOriginsRef = useRef<ReadonlyMap<number, MotionRect>>(new Map());
+  const handFocusOriginsRef = useRef<ReadonlyMap<string, MotionRect>>(new Map());
   const processedUpdateKeyRef = useRef<string | null>(null);
   const previousViewUpdateSequenceRef = useRef<number | null>(null);
   const previousViewPredictedSemanticTransitionRef = useRef(false);
@@ -93,7 +94,7 @@ export function useGameMotion({
   }, [gameId]);
   const getHandFocusOrigin = useCallback((seat: number, instanceId: number) => {
     if (previousViewRef.current?.gameId !== gameId) return undefined;
-    return previousAnchorsRef.current.cards.get(motionPresentationKey({ kind: "hand", seat }, instanceId));
+    return handFocusOriginsRef.current.get(motionPresentationKey({ kind: "hand", seat }, instanceId));
   }, [gameId]);
   const refreshStackFocusOrigins = useCallback((currentView: GameView, anchors: MotionAnchorSnapshot) => {
     stackFocusOriginsRef.current = rememberStackFocusOrigins(
@@ -101,6 +102,14 @@ export function useGameMotion({
       anchors,
       currentView.stack.flatMap((layer) => layer.card ? [layer.card.instanceId] : []),
       currentView.pendingDecision?.resourcePayment?.sourceInstanceId,
+    );
+  }, []);
+  const refreshHandFocusOrigins = useCallback((currentView: GameView, anchors: MotionAnchorSnapshot) => {
+    handFocusOriginsRef.current = rememberHandFocusOrigins(
+      previousViewRef.current?.gameId === currentView.gameId ? handFocusOriginsRef.current : new Map(),
+      anchors,
+      currentView.players.flatMap((player) => player.hand.map((card) =>
+        motionPresentationKey({ kind: "hand", seat: player.seat }, card.instanceId))),
     );
   }, []);
 
@@ -189,6 +198,7 @@ export function useGameMotion({
       previousViewRef.current = view;
       previousAnchorsRef.current = EMPTY_ANCHORS;
       stackFocusOriginsRef.current = new Map();
+      handFocusOriginsRef.current = new Map();
       processedUpdateKeyRef.current = updateKey;
       previousViewUpdateSequenceRef.current = viewUpdate.sequence;
       previousViewPredictedSemanticTransitionRef.current = predictsSemanticTransition;
@@ -200,6 +210,7 @@ export function useGameMotion({
     // has been completely resolved, avoiding read/write layout interleaving.
     const measured = measureMotionAnchors(root);
     refreshStackFocusOrigins(view, measured.snapshot);
+    refreshHandFocusOrigins(view, measured.snapshot);
     refreshMotionDestinationMasks(maskedElementsRef.current, measured.cardElements);
     if (reduceMotionRef.current !== reduceMotion) {
       reduceMotionRef.current = reduceMotion;
@@ -314,14 +325,17 @@ export function useGameMotion({
       if (root) {
         const anchors = measureMotionAnchors(root).snapshot;
         previousAnchorsRef.current = anchors;
-        if (previousViewRef.current) refreshStackFocusOrigins(previousViewRef.current, anchors);
+        if (previousViewRef.current) {
+          refreshStackFocusOrigins(previousViewRef.current, anchors);
+          refreshHandFocusOrigins(previousViewRef.current, anchors);
+        }
       }
     };
     window.addEventListener("resize", settleAfterResize);
     return () => {
       window.removeEventListener("resize", settleAfterResize);
     };
-  }, [cancelMotionQueue, rootRef, refreshStackFocusOrigins]);
+  }, [cancelMotionQueue, rootRef, refreshHandFocusOrigins, refreshStackFocusOrigins]);
 
   return {
     batch,

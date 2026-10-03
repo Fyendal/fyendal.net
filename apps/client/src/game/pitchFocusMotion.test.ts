@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { pitchFocusOrigin, rememberStackFocusOrigins } from "./pitchFocusMotion.js";
+import { pitchFocusOrigin, rememberHandFocusOrigins, rememberStackFocusOrigins } from "./pitchFocusMotion.js";
 
 const arena = { left: 40, top: 400, width: 90, height: 124 };
 const stack = { left: 200, top: 100, width: 70, height: 96 };
@@ -39,5 +39,14 @@ describe("pitch focus animation origin", () => {
   it("keeps hand announcements anchored to their hand card", () => {
     expect(pitchFocusOrigin(true, arena, stack, previousStack)).toBe(arena);
     expect(pitchFocusOrigin(true, undefined, stack, previousStack, arena)).toBe(arena);
+  });
+
+  it("retains a hand source after focus hides it from layout", () => {
+    const key = "0:hand:7";
+    const visible = { cards: new Map([[key, arena]]), zones: new Map() };
+    const hidden = { cards: new Map<string, typeof arena>(), zones: new Map() };
+    let origins = rememberHandFocusOrigins(new Map(), visible, [key]);
+    origins = rememberHandFocusOrigins(origins, hidden, [key]);
+    expect(pitchFocusOrigin(true, undefined, undefined, undefined, origins.get(key))).toBe(arena);
   });
 });

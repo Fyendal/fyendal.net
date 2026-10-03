@@ -111,15 +111,13 @@
   outline-offset: 4px;
 }
 .card-highlight {
-  /* MTGA-style cue: keep the strongest color in a narrow rim, then use a
-     compact but visible halo. The 8.49:1 edge remains the signal; the glow
-     makes it easier to find after display scaling and against the mat texture. */
-  border-color: #51c982;
+  /* Full-size playable cards use a narrow edge and soft halo; compact arena
+     cards use their artwork-shaped glow below. */
+  border-color: #58cf88;
   box-shadow:
-    0 0 0 2px #51c982,
-    0 0 6px 2px #34c978cc,
-    0 0 13px 2px #20864d66,
-    inset 0 0 0 1px #91e4b266;
+    0 0 0 1px #58cf88,
+    0 0 7px 2px #34c97888,
+    0 0 13px 3px #20864d3f;
 }
 .card-chain-source {
   border-color: #e2b75f;
@@ -149,28 +147,28 @@
   pointer-events: none;
 }
 .table[data-playability-cue="glow"] .card-highlight:not(.card-selected) {
-  --playable-breathe-border: #66dc97;
-  --playable-breathe-near: #43dc8be6;
-  --playable-breathe-far: #20864d80;
+  --playable-breathe-border: #70da9c;
+  --playable-breathe-near: #43dc8b99;
+  --playable-breathe-far: #20864d55;
 }
 .table[data-playability-cue="glow"] .card-highlight:not(.card-selected)::before {
   content: "";
   position: absolute;
   z-index: 2;
-  inset: -3px;
-  border: 2px solid var(--playable-breathe-border);
+  inset: -2px;
+  border: 1px solid var(--playable-breathe-border);
   border-radius: 5px;
   box-shadow:
-    0 0 9px 3px var(--playable-breathe-near),
-    0 0 19px 5px var(--playable-breathe-far);
-  opacity: .28;
+    0 0 6px 2px var(--playable-breathe-near),
+    0 0 12px 3px var(--playable-breathe-far);
+  opacity: .2;
   pointer-events: none;
-  transform: scale(.985);
+  transform: scale(.995);
   animation: playable-card-breathe 3.6s ease-in-out infinite;
 }
 @keyframes playable-card-breathe {
-  0%, 100% { opacity: .28; transform: scale(.985); }
-  50% { opacity: .88; transform: scale(1.025); }
+  0%, 100% { opacity: .2; transform: scale(.995); }
+  50% { opacity: .6; transform: scale(1.01); }
 }
 /* Decision windows identify card ownership relative to the viewer. Keep the
    ownership accent quieter than the selectable boundary. */
@@ -183,12 +181,11 @@
   box-shadow: inset 0 0 0 1px #d9796f80;
 }
 .decision-float .card-highlight.card-friendly {
-  border-color: #51c982;
+  border-color: #58cf88;
   box-shadow:
-    0 0 0 2px #51c982,
-    0 0 6px 2px #34c978cc,
-    0 0 13px 2px #20864d66,
-    inset 0 0 0 1px #91e4b266;
+    0 0 0 1px #58cf88,
+    0 0 7px 2px #34c97888,
+    0 0 13px 3px #20864d3f;
 }
 .decision-float .card-highlight.card-opponent {
   box-shadow:
@@ -488,11 +485,10 @@
   justify-content: center;
   overflow: hidden;
   padding: 0 4px;
-  border: 1px solid #414a49;
+  border: 1px solid #514b40;
   border-radius: 8px 8px 2px 2px;
-  background: linear-gradient(180deg, #fbfaf6 0%, #edeeeb 58%, #d6d9d6 100%);
-  box-shadow: 0 1px 2px #0009, inset 0 0 0 1px #b7bfba, inset 0 1px 0 #fff;
-  color: #28302f;
+  background: #eee9dd;
+  color: #2d2a24;
   font-family: Alegreya, Palatino, "Palatino Linotype", "Book Antiqua", Georgia, serif;
   font-size: clamp(7px, .8vh, 8px);
   font-weight: 500;
@@ -522,6 +518,8 @@
 .board-square-name[data-pitch="4"] { --board-pitch-accent: #a970ff; }
 .board-square-name[data-pitch] {
   border-top: 2px solid var(--board-pitch-accent);
+  border-right-color: var(--board-pitch-accent);
+  border-left-color: var(--board-pitch-accent);
 }
 .board-square-stats {
   position: absolute;
@@ -533,10 +531,9 @@
   max-width: calc(100% - 4px);
   height: clamp(16px, 2vh, 19px);
   overflow: hidden;
-  border: 1px solid #697470;
+  border: 1px solid #756f62;
   border-radius: 5px 7px 7px 5px;
-  background: linear-gradient(180deg, #edf0ed 0%, #d7ddda 100%);
-  box-shadow: 0 1px 2px #0007, inset 0 0 0 1px #c2c9c4;
+  background: #eee9dd;
   transform: translateY(9%);
   pointer-events: none;
 }
@@ -553,7 +550,7 @@
   line-height: 1;
 }
 .board-square-stat + .board-square-stat {
-  border-left: 1px solid #b8beba;
+  border-left: 1px solid #c4b9a8;
 }
 .board-square-stat img {
   display: block;

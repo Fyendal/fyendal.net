@@ -20,6 +20,21 @@ export function rememberStackFocusOrigins(
   return next;
 }
 
+/** A hand source is removed from layout while focus is open. Preserve its last
+ * visible position across any motion batches that delay the focus mounting. */
+export function rememberHandFocusOrigins(
+  previous: ReadonlyMap<string, MotionRect>,
+  current: MotionAnchorSnapshot,
+  handPresentationKeys: readonly string[],
+): ReadonlyMap<string, MotionRect> {
+  const next = new Map(previous);
+  for (const key of handPresentationKeys) {
+    const rect = current.cards.get(key);
+    if (rect) next.set(key, rect);
+  }
+  return next;
+}
+
 /** A resolving trigger may leave the stack in the update that opens payment. */
 export function pitchFocusOrigin(
   fromHand: boolean,
