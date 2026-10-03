@@ -16,8 +16,8 @@ describe("guest search landing", () => {
     );
 
     expect(html).toContain("Play Flesh and Blood Online");
-    expect(html).toContain("Play for free in your browser");
-    expect(html).toContain("Find opponents, test your deck against hero-specific AI");
+    expect(html).toContain("Free, open source, and built by the community.");
+    expect(html).toContain("against other players or hero-specific AI with your Fabrary decks");
     expect(html).not.toContain('class="intro-logo"');
     expect(html).toContain("<strong>2</strong> in game");
     expect(html).toContain("<strong>1</strong> open room");

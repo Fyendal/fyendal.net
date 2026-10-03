@@ -21705,7 +21705,7 @@
   "landing.subtitle": [
     {
       "type": 0,
-      "value": "免费在浏览器中畅玩。寻找对手、与针对不同英雄设计的AI练习，一键导入你的 Fabrary 牌组。"
+      "value": "免费、开源，由社区共同打造。使用 Fabrary 牌组，在浏览器中与其他玩家对战，或与针对不同英雄设计的 AI 练习。"
     }
   ],
   "landing.title": [
@@ -23180,10 +23180,16 @@
       "value": "使用你的 Fabrary 牌组，与其他玩家对战或和 AI 练习。"
     }
   ],
+  "play.intro.kicker": [
+    {
+      "type": 0,
+      "value": "免费 · 开源 · 社区共建"
+    }
+  ],
   "play.intro.title": [
     {
       "type": 0,
-      "value": "免费、由社区打造的在线赤魂战纪 (Flesh & Blood) 对战平台"
+      "value": "在线畅玩赤魂战纪 (Flesh & Blood)"
     }
   ],
   "play.preview.loading": [

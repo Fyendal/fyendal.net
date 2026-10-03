@@ -60,7 +60,9 @@ export function FabraryPlayPage() {
             alt={intl.formatMessage({ id: "landing.demoAlt" })}
             width={1260} height={1118} loading="lazy" decoding="async" />
           <div className="fabrary-play-intro-content">
-            <span className="fabrary-play-intro-kicker" aria-hidden="true">Fyendal</span>
+            <span className="fabrary-play-intro-kicker">
+              {intl.formatMessage({ id: "play.intro.kicker" })}
+            </span>
             <p id="fabrary-play-intro-title" className="fabrary-play-intro-title">
               {intl.formatMessage({ id: "play.intro.title" })}
             </p>
@@ -68,22 +70,24 @@ export function FabraryPlayPage() {
           </div>
         </aside>
         <section className="panel fabrary-play-panel" aria-labelledby="fabrary-play-title">
-          <p className="fabrary-play-eyebrow">{intl.formatMessage({ id: "play.source" })}</p>
-          <div className="fabrary-play-identity">
-            {identity?.heroName ? <HeroPortrait key={identity.heroName} heroName={identity.heroName} /> : null}
-            <div className="fabrary-play-names">
-              <h1 id="fabrary-play-title">{identity?.name ?? intl.formatMessage({ id: "play.title" })}</h1>
-              {identity?.heroName ? <p className="fabrary-play-hero">{identity.heroName}</p> : null}
+          <div className="fabrary-play-deck">
+            <p className="fabrary-play-eyebrow">{intl.formatMessage({ id: "play.source" })}</p>
+            <div className="fabrary-play-identity">
+              {identity?.heroName ? <HeroPortrait key={identity.heroName} heroName={identity.heroName} /> : null}
+              <div className="fabrary-play-names">
+                <h1 id="fabrary-play-title">{identity?.name ?? intl.formatMessage({ id: "play.title" })}</h1>
+                {identity?.heroName ? <p className="fabrary-play-hero">{identity.heroName}</p> : null}
+              </div>
             </div>
+            {request ? (
+              <div className="fabrary-play-source">
+                <FormatName format={request.format} />
+                <a href={request.url} target="_blank" rel="noreferrer">
+                  {intl.formatMessage({ id: "play.view.deck" })}
+                </a>
+              </div>
+            ) : null}
           </div>
-          {request ? (
-            <div className="fabrary-play-source">
-              <FormatName format={request.format} />
-              <a href={request.url} target="_blank" rel="noreferrer">
-                {intl.formatMessage({ id: "play.view.deck" })}
-              </a>
-            </div>
-          ) : null}
 
           {!pending.route.ok ? <p className="error" role="alert">{intl.formatMessage({ id: pending.route.error })}</p>
             : !authUser ? (

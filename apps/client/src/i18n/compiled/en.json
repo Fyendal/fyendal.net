@@ -22593,7 +22593,7 @@
   "landing.subtitle": [
     {
       "type": 0,
-      "value": "A free, open source and community driven platform to play Flesh and Blood in your browser. Find opponents, test your deck against hero-specific AI, and bring your Fabrary decks."
+      "value": "Free, open source, and built by the community. Play in your browser against other players or hero-specific AI with your Fabrary decks."
     }
   ],
   "landing.title": [
@@ -24320,10 +24320,16 @@
       "value": "Bring your Fabrary deck to face other players or practice against AI."
     }
   ],
+  "play.intro.kicker": [
+    {
+      "type": 0,
+      "value": "Free · Open source · Community driven"
+    }
+  ],
   "play.intro.title": [
     {
       "type": 0,
-      "value": "A Free, Open Source Platform to play Flesh and Blood online"
+      "value": "Play Flesh and Blood online"
     }
   ],
   "play.preview.loading": [
