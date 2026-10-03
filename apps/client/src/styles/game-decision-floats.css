@@ -523,19 +523,6 @@
   height: clamp(9px, 1vh, 11px);
   font-size: clamp(5px, .6vh, 6px);
 }
-.effect-mini .board-square-stats {
-  height: clamp(12px, 1.55vh, 15px);
-}
-.effect-mini .board-square-stat {
-  min-width: 16px;
-  gap: 0;
-  padding-inline: 1px;
-  font-size: 8px;
-}
-.effect-mini .board-square-stat img {
-  width: 7px;
-  height: 7px;
-}
 .effect-count {
   position: absolute;
   z-index: 2;

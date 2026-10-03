@@ -57,6 +57,7 @@ export function EffectChips({
               card={{ instanceId: -1, cardId: effect.cardId, owner: effect.seat }}
               size="zone"
               showOverlays={false}
+              showStats={false}
               showTapped={false}
             />
           ) : (

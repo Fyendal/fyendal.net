@@ -40,7 +40,8 @@ describe("EffectChips", () => {
 
     expect(html).toContain("card-board-square");
     expect(html).toContain("board-square-name");
-    expect(html).toContain('src="/icons/defence.png"');
+    expect(html).not.toContain("board-square-stats");
+    expect(html).not.toContain('src="/icons/defence.png"');
     expect(html).toContain('loading="eager"');
     expect(html).toContain("effect-mini-stacked");
     expect(html).toContain("×2");

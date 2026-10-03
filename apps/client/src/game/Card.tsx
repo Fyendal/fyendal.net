@@ -195,6 +195,7 @@ export function CardFace({
   wagered,
   wagerRewards,
   showOverlays = true,
+  showStats = true,
   showTapped = true,
   selected,
   pitched,
@@ -228,6 +229,8 @@ export function CardFace({
   wagerRewards?: readonly string[];
   /** Whether status and counter icons should be rendered in this presentation. */
   showOverlays?: boolean;
+  /** Whether card stats should be rendered outside the artwork. */
+  showStats?: boolean;
   /** Whether arena tap state should rotate this presentation of the card. */
   showTapped?: boolean;
   selected?: boolean;
@@ -418,8 +421,10 @@ export function CardFace({
             data-pitch={data?.pitch && PITCH_CLASS[data.pitch] ? data.pitch : undefined}
             title={name}
           ><span className="board-square-name-text">{name}</span></span>
-          {attack !== undefined || defense !== undefined ||
-            (squareHero && data.intellect !== undefined) || printedLife !== undefined ? (
+          {showStats && (
+            attack !== undefined || defense !== undefined ||
+            (squareHero && data.intellect !== undefined) || printedLife !== undefined
+          ) ? (
             <span className="board-square-stats">
               {attack !== undefined ? (
                 <span className="board-square-stat">
@@ -471,10 +476,12 @@ export function CardFace({
             </div>
           )}
           {size !== "zone" && text && <div className="c-text">{text}</div>}
-          <div className="c-stats">
-            {attack !== undefined && <span className="c-atk">{attack}</span>}
-            {defense !== undefined && <span className="c-def">{defense}</span>}
-          </div>
+          {showStats ? (
+            <div className="c-stats">
+              {attack !== undefined && <span className="c-atk">{attack}</span>}
+              {defense !== undefined && <span className="c-def">{defense}</span>}
+            </div>
+          ) : null}
         </>
       )}
       {label && <div className="c-zonelabel">{label}</div>}
