@@ -1,4 +1,3 @@
-:root { --global-notice-height: 0px; }
 .global-notice-container {
   position: sticky;
   top: 0;
@@ -36,14 +35,16 @@
   cursor: pointer;
 }
 .global-notice button:focus-visible { outline: 2px solid #fff0c6; outline-offset: 2px; }
-.table { height: calc(100dvh - var(--global-notice-height)); }
-/* Top-anchored game controls share the space reserved by the banner. */
-.player-nameplate-opponent, .status-float, .deck-card-toast {
-  translate: 0 var(--global-notice-height);
-}
+.version-update-modal { width: min(680px, calc(100vw - 32px)); }
+.version-update-markdown { max-height: min(58vh, 560px); overflow: auto; line-height: 1.6; overflow-wrap: anywhere; }
+.version-update-markdown > :first-child { margin-top: 0; }
+.version-update-markdown a { color: #e8bf66; text-decoration: underline; }
+.version-update-markdown pre { overflow: auto; padding: 12px; background: #120c07; }
+.version-update-markdown code { overflow-wrap: anywhere; }
+.version-update-markdown blockquote { margin-inline: 0; padding-left: 16px; border-left: 3px solid #b8933f; }
+.version-update-actions { display: flex; justify-content: flex-end; margin-top: 20px; }
 @media (max-width: 700px) {
   .global-notice { gap: 8px; font-size: 13px; }
   .global-notice strong { display: none; }
   .global-notice button { width: 44px; min-height: 44px; }
-  .stack-float { translate: 0 var(--global-notice-height); }
 }

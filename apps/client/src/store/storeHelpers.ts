@@ -7,7 +7,6 @@ export function initialStoreProjection(
   lobbySettings: LobbySettings,
 ) {
   return {
-    globalNotice: null,
     screen: "lobby" as const,
     lobbyRail: "home" as const,
     connected: false,

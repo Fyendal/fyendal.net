@@ -19,6 +19,7 @@ import type {
   GameTurnStatsView,
   GameView,
   GlobalNotice,
+  VersionUpdateNotice,
   FriendGameInvite,
   FriendRequestSummary,
   FriendSummary,
@@ -47,6 +48,25 @@ export interface OkResponse { ok: true }
 export interface LoginResponse { ok: true; token: string; username: string }
 export interface StatsResponse { ok: true; inGame: number; openRooms: number }
 export interface GlobalNoticeResponse { ok: true; notice: GlobalNotice | null }
+export interface VersionUpdateNoticeResponse { ok: true; notice: VersionUpdateNotice | null }
+export const MAX_VERSION_UPDATE_MARKDOWN_LENGTH = 10_000;
+
+export function decodeVersionUpdateNotice(value: unknown): VersionUpdateNotice | null {
+  const notice = object(value);
+  if (!notice || !exactKeys(notice, ["id", "version", "markdown"])
+    || !id(notice.id) || !string(notice.version, 80, false) || !notice.version.trim()
+    || !string(notice.markdown, MAX_VERSION_UPDATE_MARKDOWN_LENGTH, false)
+    || !notice.markdown.trim()) return null;
+  return { id: notice.id, version: notice.version, markdown: notice.markdown };
+}
+
+export function decodeVersionUpdateNoticeResponse(value: unknown): VersionUpdateNoticeResponse | null {
+  const data = object(value);
+  if (!data || !exactKeys(data, ["ok", "notice"]) || data.ok !== true) return null;
+  if (data.notice === null) return { ok: true, notice: null };
+  const notice = decodeVersionUpdateNotice(data.notice);
+  return notice ? { ok: true, notice } : null;
+}
 export const MAX_GLOBAL_NOTICE_LENGTH = 1_000;
 
 export function decodeGlobalNotice(value: unknown): GlobalNotice | null {

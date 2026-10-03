@@ -99,7 +99,6 @@ export interface ViewUpdate {
 
 /** The single public Zustand contract. Implementation details stay in store.ts. */
 export interface StoreState {
-  globalNotice: import("@fyendal/shared").GlobalNotice | null;
   connected: boolean;
   /** Delayed presentation state: brief automatic reconnects stay silent. */
   connectionIssueVisible: boolean;

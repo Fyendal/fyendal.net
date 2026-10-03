@@ -25051,5 +25051,25 @@
       "type": 0,
       "value": "用户名"
     }
+  ],
+  "versionUpdate.dismiss": [
+    {
+      "type": 0,
+      "value": "知道了"
+    }
+  ],
+  "versionUpdate.title": [
+    {
+      "type": 0,
+      "value": "Fyendal "
+    },
+    {
+      "type": 1,
+      "value": "version"
+    },
+    {
+      "type": 0,
+      "value": " 更新"
+    }
   ]
 }

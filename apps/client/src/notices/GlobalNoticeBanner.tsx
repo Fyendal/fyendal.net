@@ -1,28 +1,47 @@
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { useStore } from "../store.js";
-import { startNoticePolling } from "./polling.js";
+import { useEffect, useState } from "react";
+import type { GlobalNotice } from "@fyendal/shared";
+import { apiGlobalNotice } from "../auth/auth.js";
 import { NoticeBanner } from "./NoticeBanner.js";
 
+let dismissedNoticeId: string | null = null;
+
+/** Expire an already fetched notice without making another request. */
+export function scheduleNoticeExpiry(expiresAt: number, onExpire: () => void): () => void {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const expire = () => {
+    const remaining = expiresAt - Date.now();
+    if (remaining <= 0) onExpire();
+    else timer = setTimeout(expire, Math.min(remaining, 2_147_483_647));
+  };
+  expire();
+  return () => clearTimeout(timer);
+}
+
 export function GlobalNoticeBanner() {
-  const notice = useStore((state) => state.globalNotice);
-  const [dismissedId, setDismissedId] = useState<string | null>(null);
-  const container = useRef<HTMLDivElement>(null);
+  const [notice, setNotice] = useState<GlobalNotice | null>(null);
+  const [dismissedId, setDismissedId] = useState(dismissedNoticeId);
   const visible = notice !== null && notice.id !== dismissedId;
-  useEffect(() => startNoticePolling((globalNotice) => useStore.setState({ globalNotice })), []);
-  useLayoutEffect(() => {
-    const root = document.documentElement;
-    const measure = () => root.style.setProperty("--global-notice-height", `${container.current?.getBoundingClientRect().height ?? 0}px`);
-    measure();
-    const observer = new ResizeObserver(measure);
-    if (container.current) observer.observe(container.current);
-    return () => {
-      observer.disconnect();
-      root.style.removeProperty("--global-notice-height");
-    };
-  }, [visible]);
+  useEffect(() => {
+    const controller = new AbortController();
+    void apiGlobalNotice(controller.signal).then((result) => {
+      if (!controller.signal.aborted && result.ok) setNotice(result.notice);
+    }).catch(() => {
+      // Try again the next time Home opens.
+    });
+    return () => controller.abort();
+  }, []);
+  useEffect(() => {
+    const expiresAt = notice?.expiresAt;
+    if (expiresAt === null || expiresAt === undefined) return;
+    return scheduleNoticeExpiry(expiresAt, () => setNotice(null));
+  }, [notice]);
+  if (!visible) return null;
   return (
-    <div ref={container} className="global-notice-container">
-      {visible ? <NoticeBanner notice={notice} onDismiss={() => setDismissedId(notice.id)} /> : null}
+    <div className="global-notice-container">
+      <NoticeBanner notice={notice} onDismiss={() => {
+        dismissedNoticeId = notice.id;
+        setDismissedId(notice.id);
+      }} />
     </div>
   );
 }

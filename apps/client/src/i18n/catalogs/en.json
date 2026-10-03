@@ -1,6 +1,8 @@
 {
   "notice.label": "Notice",
   "notice.dismiss": "Dismiss notice",
+  "versionUpdate.title": "Fyendal {version} update",
+  "versionUpdate.dismiss": "Got it",
   "language.label": "Language",
   "brand.subtitle": "Flesh and Blood Online",
   "landing.title": "Play Flesh and Blood Online",

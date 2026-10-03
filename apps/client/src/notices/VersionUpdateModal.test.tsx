@@ -1,0 +1,33 @@
+import { renderToStaticMarkup } from "react-dom/server";
+import { describe, expect, it, vi } from "vitest";
+import { TestI18nProvider } from "../i18n/TestI18nProvider.js";
+import { VersionUpdateBody, VersionUpdateModal, seenUpdate, versionUpdateSeenKey } from "./VersionUpdateModal.js";
+
+describe("VersionUpdateModal", () => {
+  it("scopes dismissal to account and publication", () => {
+    expect(versionUpdateSeenKey("Alice", "first")).toBe(versionUpdateSeenKey("ALICE", "first"));
+    expect(versionUpdateSeenKey("Alice", "second")).not.toBe(versionUpdateSeenKey("Alice", "first"));
+    expect(versionUpdateSeenKey("Bob", "first")).not.toBe(versionUpdateSeenKey("Alice", "first"));
+    const seen = new Map([[versionUpdateSeenKey("Alice", "first"), "1"]]);
+    vi.stubGlobal("localStorage", { getItem: (key: string) => seen.get(key) ?? null });
+    expect(seenUpdate("ALICE", "first")).toBe(true);
+    expect(seenUpdate("Alice", "second")).toBe(false);
+    expect(seenUpdate("Bob", "first")).toBe(false);
+    vi.unstubAllGlobals();
+  });
+  it("does not show a modal before the home-tab update is fetched", () => {
+    vi.stubGlobal("localStorage", { getItem: () => null });
+    const html = renderToStaticMarkup(<TestI18nProvider><VersionUpdateModal username="Alice" /></TestI18nProvider>);
+    expect(html).toBe("");
+    vi.unstubAllGlobals();
+  });
+  it("renders Markdown while ignoring HTML, images, and unsafe links", () => {
+    const html = renderToStaticMarkup(<VersionUpdateBody markdown={'## Features\n\n- **Improved** play\n\n<script>alert(1)</script>\n\n![image](https://example.com/track.png)\n\n[unsafe](javascript:alert(1)) [safe](https://fyendal.net/)'} />);
+    expect(html).toContain("<h2>Features</h2>");
+    expect(html).toContain("<strong>Improved</strong>");
+    expect(html).not.toContain("<script>");
+    expect(html).not.toContain("<img");
+    expect(html).not.toContain("javascript:");
+    expect(html).toContain('href="https://fyendal.net/"');
+  });
+});

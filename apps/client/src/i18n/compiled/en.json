@@ -26353,5 +26353,25 @@
       "type": 0,
       "value": "Username"
     }
+  ],
+  "versionUpdate.dismiss": [
+    {
+      "type": 0,
+      "value": "Got it"
+    }
+  ],
+  "versionUpdate.title": [
+    {
+      "type": 0,
+      "value": "Fyendal "
+    },
+    {
+      "type": 1,
+      "value": "version"
+    },
+    {
+      "type": 0,
+      "value": " update"
+    }
   ]
 }

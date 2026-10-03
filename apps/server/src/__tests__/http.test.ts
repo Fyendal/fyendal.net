@@ -68,6 +68,20 @@ describe("public global notice", () => {
   });
 });
 
+describe("public version update", () => {
+  it("serves the published update to the client but cannot publish through the public API", async () => {
+    const noticeDb = await freshDb();
+    const url = await startApi({ db: noticeDb });
+    expect(await (await fetch(`${url}/api/version-update`)).json()).toEqual({ ok: true, notice: null });
+    const notice = { id: "version-2", version: "2.0", markdown: "## New\n\n- Something" };
+    await noticeDb.query("INSERT INTO version_update_notice(singleton, notice) VALUES (TRUE, $1)", [JSON.stringify(notice)]);
+    const response = await fetch(`${url}/api/version-update`);
+    expect(response.headers.get("cache-control")).toBe("no-store");
+    expect(await response.json()).toEqual({ ok: true, notice });
+    expect((await fetch(`${url}/api/version-update`, { method: "POST", body: "{}" })).status).toBe(404);
+  });
+});
+
 describe("rate limiter client key", () => {
   it("peels only the configured trusted suffix instead of trusting the first XFF value", async () => {
     const url = await startApi({

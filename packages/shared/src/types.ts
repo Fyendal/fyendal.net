@@ -1001,3 +1001,9 @@ export interface GlobalNotice {
   message: string;
   expiresAt: number | null;
 }
+/** Operator-authored update shown once on Home for each browser account. */
+export interface VersionUpdateNotice {
+  id: string;
+  version: string;
+  markdown: string;
+}

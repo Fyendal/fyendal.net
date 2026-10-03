@@ -31,6 +31,7 @@ import {
 } from "./bugReports.js";
 import { consoleError } from "./logging.js";
 import { getGlobalNotice } from "./globalNotice.js";
+import { getVersionUpdateNotice } from "./versionUpdateNotice.js";
 import { asRecord } from "./validation.js";
 import {
   deleteReplay,
@@ -118,7 +119,7 @@ export interface ApiDeps {
   accountRateLimiter?: RateLimiter;
   /** separate throttle for GET /api/stats (defaults: 60 per 10 min per IP) */
   statsRateLimiter?: RateLimiter;
-  /** Public notice polling permits several browsers behind a shared IP. */
+  /** Public Home notice reads permit several browsers behind a shared IP. */
   noticeRateLimiter?: RateLimiter;
   /** live lobby stats for the logged-out landing view (queue depth is held by
    *  the ws gateway, so it's injected rather than queried) */
@@ -571,6 +572,14 @@ export function createApiServer(deps: ApiDeps): http.Server {
       Promise.resolve(noticeLimiter.allow(clientIp(req.headers, req.socket.remoteAddress, trustedProxyHops), "/api/notice"))
         .then(async (allowed) => allowed
           ? sendJson(res, 200, { ok: true, notice: await getGlobalNotice(deps.db) })
+          : sendJson(res, 429, { ok: false, error: "too many attempts, try again later" }))
+        .catch((e) => internalError(res, e));
+      return;
+    }
+    if (req.method === "GET" && url.pathname === "/api/version-update") {
+      Promise.resolve(noticeLimiter.allow(clientIp(req.headers, req.socket.remoteAddress, trustedProxyHops), "/api/version-update"))
+        .then(async (allowed) => allowed
+          ? sendJson(res, 200, { ok: true, notice: await getVersionUpdateNotice(deps.db) })
           : sendJson(res, 429, { ok: false, error: "too many attempts, try again later" }))
         .catch((e) => internalError(res, e));
       return;

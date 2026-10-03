@@ -17,7 +17,9 @@ import {
   decodeReplaysResponse,
   decodeStatsResponse,
   decodeGlobalNoticeResponse,
+  decodeVersionUpdateNoticeResponse,
   type GlobalNoticeResponse,
+  type VersionUpdateNoticeResponse,
   type AccountBadgesResponse,
   type AccountExport,
   type ApiError,
@@ -106,6 +108,10 @@ function get<T extends { ok: boolean }>(
 
 export function apiGlobalNotice(signal?: AbortSignal): Promise<GlobalNoticeResponse | ApiError> {
   return get("notice", decodeGlobalNoticeResponse, { signal });
+}
+
+export function apiVersionUpdateNotice(signal?: AbortSignal): Promise<VersionUpdateNoticeResponse | ApiError> {
+  return get("version-update", decodeVersionUpdateNoticeResponse, { signal });
 }
 
 export function apiRegister(username: string, password: string): Promise<RegisterResult> {

@@ -12,6 +12,7 @@ import { LanguagePicker } from "../i18n/LanguagePicker.js";
 import { SocialMenuButton, UnreadMessageBadge } from "../social/MobileSocialControls.js";
 import { mobileLobbyDestinationSelected } from "./mobileNavigation.js";
 import { FullscreenButton } from "../components/FullscreenButton.js";
+import { GlobalNoticeBanner } from "../notices/GlobalNoticeBanner.js";
 import {
   GuestLandingDetails,
   GuestLandingHero,
@@ -23,6 +24,8 @@ const RoomInviteModal = lazy(() => import("./RoomInviteModal.js").then((module) 
 const DeckLibrary = lazy(() => import("./DeckLibrary.js").then((module) => ({ default: module.DeckLibrary })));
 const AccountPanel = lazy(() => import("../auth/AccountPanel.js").then((module) => ({ default: module.AccountPanel })));
 const ReplayLibrary = lazy(() => import("../replay/ReplayLibrary.js").then((module) => ({ default: module.ReplayLibrary })));
+const VersionUpdateModal = lazy(() => import("../notices/VersionUpdateModal.js")
+  .then((module) => ({ default: module.VersionUpdateModal })));
 
 function MobileLobbyIcon({ kind }: { kind: "home" | "decks" | "rooms" | "replays" | "more" }) {
   const content = kind === "home" ? (
@@ -138,6 +141,7 @@ export function Lobby() {
   if (!authUser) {
     return (
       <div className="lobby-page">
+        <GlobalNoticeBanner />
         <LobbyHeader />
 
         <main id="main-content" className="guest-landing">
@@ -164,7 +168,11 @@ export function Lobby() {
 
   return (
     <div className="lobby-page lobby-page-authenticated">
+      {rail === "home" ? <GlobalNoticeBanner /> : null}
       <LobbyHeader />
+      {rail === "home" && !inviteRoom
+        ? <Suspense fallback={null}><VersionUpdateModal key={authUser} username={authUser} /></Suspense>
+        : null}
 
       <div className="lobby-grid">
         <div className="lobby-rail">

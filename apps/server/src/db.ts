@@ -688,6 +688,13 @@ export const MIGRATIONS: Migration[] = [
       PRIMARY KEY (user_id, deck_id)
     );`,
   },
+  {
+    version: 42,
+    sql: `CREATE TABLE version_update_notice (
+      singleton BOOLEAN PRIMARY KEY DEFAULT TRUE CHECK (singleton = TRUE),
+      notice JSONB NOT NULL
+    );`,
+  },
 ];
 
 async function publicTables(db: Queryable): Promise<string[]> {

@@ -11,14 +11,15 @@
     "test": "pnpm -w generate:bot-runtime && vitest run src --passWithNoTests"
   },
   "dependencies": {
+    "@fyendal/bot": "workspace:*",
     "@fyendal/cards": "workspace:*",
     "@fyendal/protocol": "workspace:*",
     "@fyendal/shared": "workspace:*",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-intl": "^10.1.25",
-    "zustand": "^4.5.0",
-    "@fyendal/bot": "workspace:*"
+    "react-markdown": "^10.1.0",
+    "zustand": "^4.5.0"
   },
   "devDependencies": {
     "@formatjs/cli": "^6.16.22",
