@@ -5,7 +5,7 @@ import {
   EMPTY_MOTION_BATCH_QUEUE,
   enqueueMotionBatch,
   motionQueueBlocksTurnStartUi,
-  queuedHandSourceFlights,
+  queuedSourceFlights,
 } from "./motionBatchQueue.js";
 
 function batch(id: number): GameMotionBatch {
@@ -99,10 +99,37 @@ describe("motion batch queue", () => {
       intimidate,
     ).queue;
 
-    expect(queuedHandSourceFlights(queued)).toEqual(intimidate.flights);
+    expect(queuedSourceFlights(queued)).toEqual(intimidate.flights);
     const started = completeMotionBatch(queued, stackEntry.id);
     expect(started.active).toBe(intimidate);
-    expect(queuedHandSourceFlights(started)).toEqual([]);
+    expect(queuedSourceFlights(started)).toEqual([]);
+  });
+
+  it("keeps a face-up pile top visible while its departure waits in the queue", () => {
+    const earlier = batch(14);
+    const transfer: GameMotionBatch = {
+      ...batch(15),
+      flights: [{
+        id: "15:flight:0",
+        phase: "resolution",
+        mode: "move",
+        start: { left: 100, top: 0, width: 100, height: 138 },
+        end: { left: 500, top: 0, width: 100, height: 138 },
+        visual: { kind: "face", card: { instanceId: 7, cardId: "TST007", owner: 0 } },
+        count: 1,
+        showCount: false,
+        delayMs: 0,
+        queueHoldSource: true,
+        sourceRevealPresentationKey: "0:graveyard:8",
+      }],
+    };
+    const queued = enqueueMotionBatch(
+      enqueueMotionBatch(EMPTY_MOTION_BATCH_QUEUE, earlier).queue,
+      transfer,
+    ).queue;
+
+    expect(queuedSourceFlights(queued)).toEqual(transfer.flights);
+    expect(queuedSourceFlights(completeMotionBatch(queued, earlier.id))).toEqual([]);
   });
 
   it("ignores stale completion events", () => {

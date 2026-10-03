@@ -1457,9 +1457,10 @@ export function GameBoard() {
       />
       <GameMotionLayer
         batch={gameMotion.batch}
-        queuedHandSources={gameMotion.queuedHandSources}
+        queuedSources={gameMotion.queuedSources}
         squareCardsEnabled={!mobileFloatViewport && !mobileLandscapeViewport}
         onFlightArrive={gameMotion.arriveFlight}
+        onFlightDepart={gameMotion.departFlight}
         onComplete={gameMotion.completeBatch}
       />
     </div>

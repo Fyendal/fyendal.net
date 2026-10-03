@@ -142,6 +142,44 @@ describe("motion geometry", () => {
     })]);
   });
 
+  it.each(["graveyard", "banish", "deck"] as const)(
+    "holds the newly exposed %s top until its face-up card departs",
+    (kind) => {
+      const sourceKey = `0:${kind}:7`;
+      const nextTopKey = `0:${kind}:8`;
+      const destinationKey = "0:board:7";
+      const source = rect(40, 500);
+      const destination = rect(500, 300);
+      const event: GameMotionEvent = {
+        kind: "move",
+        source: { kind, seat: 0 },
+        destination: { kind: "board", seat: 0 },
+        visual: { kind: "face", card: { instanceId: 7, cardId: "TST007", owner: 0 } },
+        instanceId: 7,
+        sourcePresentationKey: sourceKey,
+        destinationPresentationKey: destinationKey,
+        count: 1,
+        confidence: "exact",
+      };
+      const current = anchors({ cards: [
+        [nextTopKey, source],
+        [destinationKey, destination],
+      ] });
+      const batch = resolveMotionBatch(
+        [event], anchors({ cards: [[sourceKey, source]] }), current, kind,
+      );
+
+      expect(batch?.flights[0]).toEqual(expect.objectContaining({
+        start: source,
+        sourceRevealPresentationKey: nextTopKey,
+        queueHoldSource: true,
+      }));
+      expect(resolveMotionBatch(
+        [event], anchors({ zones: [[`0:${kind}`, source]] }), current, `${kind}:unknown`,
+      )?.flights[0]?.sourceRevealPresentationKey).toBeUndefined();
+    },
+  );
+
   it("marks hand-to-arsenal travel for its dedicated settle animation", () => {
     const source = rect(60, 620, 160, 220);
     const destination = rect(520, 470, 100, 138);

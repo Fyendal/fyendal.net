@@ -20,7 +20,7 @@ import {
   EMPTY_MOTION_BATCH_QUEUE,
   enqueueMotionBatch,
   motionQueueBlocksTurnStartUi,
-  queuedHandSourceFlights,
+  queuedSourceFlights,
   type MotionBatchQueue,
 } from "./motionBatchQueue.js";
 import {
@@ -65,16 +65,17 @@ export function useGameMotion({
   predictsSemanticTransition?: boolean;
 }): {
   batch: GameMotionBatch | null;
-  queuedHandSources: readonly MotionFlight[];
+  queuedSources: readonly MotionFlight[];
   turnStartUiReady: boolean;
   arriveFlight: (batchId: string, destinationPresentationKey?: string) => boolean;
+  departFlight: (batchId: string, sourceRevealPresentationKey?: string) => void;
   completeBatch: (batchId: string) => void;
   getStackFocusOrigin: (instanceId: number) => MotionRect | undefined;
   getHandFocusOrigin: (seat: number, instanceId: number) => MotionRect | undefined;
 } {
   const reduceMotion = useMotionPreference(motionPreference);
   const [batch, setBatch] = useState<GameMotionBatch | null>(null);
-  const [queuedHandSources, setQueuedHandSources] = useState<readonly MotionFlight[]>([]);
+  const [queuedSources, setQueuedSources] = useState<readonly MotionFlight[]>([]);
   const [turnStartUiReady, setTurnStartUiReady] = useState(true);
   const previousViewRef = useRef<GameView | null>(null);
   const layoutMotionSequenceRef = useRef(0);
@@ -118,7 +119,13 @@ export function useGameMotion({
     measuredElements?: ReadonlyMap<string, HTMLElement>,
   ) => {
     if (!candidate) return;
-    const arrivals = [...candidate.flights, ...candidate.connectors];
+    const arrivals = [
+      ...candidate.flights,
+      ...candidate.connectors,
+      ...candidate.flights.flatMap((flight) => flight.sourceRevealPresentationKey
+        ? [{ destinationPresentationKey: flight.sourceRevealPresentationKey }]
+        : []),
+    ];
     if (!arrivals.some((arrival) => arrival.destinationPresentationKey !== undefined)) return;
     const elements = measuredElements
       ?? (rootRef.current ? measureMotionAnchors(rootRef.current).cardElements : null);
@@ -158,7 +165,7 @@ export function useGameMotion({
     clearMaskedElements();
     setTurnStartUiReady(true);
     setBatch(null);
-    setQueuedHandSources((current) => current.length === 0 ? current : []);
+    setQueuedSources((current) => current.length === 0 ? current : []);
   }, [clearMaskedElements]);
 
   const completeBatch = useCallback((batchId: string) => {
@@ -169,7 +176,7 @@ export function useGameMotion({
     activateBatchMasks(nextQueue.active);
     setTurnStartUiReady(!motionQueueBlocksTurnStartUi(nextQueue));
     setBatch(nextQueue.active);
-    setQueuedHandSources(queuedHandSourceFlights(nextQueue));
+    setQueuedSources(queuedSourceFlights(nextQueue));
   }, [activateBatchMasks, releaseBatchMasks]);
 
   const arriveFlight = useCallback((
@@ -186,6 +193,11 @@ export function useGameMotion({
     return arriveMotionDestination(
       batchId, destinationPresentationKey, maskedElementsRef.current,
     );
+  }, []);
+
+  const departFlight = useCallback((batchId: string, sourceRevealPresentationKey?: string) => {
+    if (batchQueueRef.current.active?.id !== batchId || !sourceRevealPresentationKey) return;
+    arriveMotionDestination(batchId, sourceRevealPresentationKey, maskedElementsRef.current);
   }, []);
 
   // Run after every commit: view-independent layout changes (hand collapse,
@@ -275,10 +287,15 @@ export function useGameMotion({
     for (const nextBatch of nextBatches) {
       activateMotionDestinationMasks(
         nextBatch.id,
-        motionDestinationsRequiringEarlyMask([
-          ...nextBatch.flights,
-          ...nextBatch.connectors,
-        ]),
+        [
+          ...motionDestinationsRequiringEarlyMask([
+            ...nextBatch.flights,
+            ...nextBatch.connectors,
+          ]),
+          ...nextBatch.flights.flatMap((flight) => flight.sourceRevealPresentationKey
+            ? [{ destinationPresentationKey: flight.sourceRevealPresentationKey }]
+            : []),
+        ],
         measured.cardElements,
         maskedElementsRef.current,
       );
@@ -294,9 +311,9 @@ export function useGameMotion({
         }
       }
       batchQueueRef.current = nextQueue;
-      setQueuedHandSources(queuedHandSourceFlights(nextQueue));
-      // The authoritative DOM has already recentered these hidden cards.
-      // Conceal it while queued source copies preserve the old hand layout.
+      setQueuedSources(queuedSourceFlights(nextQueue));
+      // The authoritative DOM has already changed. Conceal queued hand
+      // reflows while source copies preserve their old presentation.
       for (const pendingBatch of nextQueue.pending) {
         activateMotionDestinationMasks(
           pendingBatch.id,
@@ -339,9 +356,10 @@ export function useGameMotion({
 
   return {
     batch,
-    queuedHandSources,
+    queuedSources,
     turnStartUiReady,
     arriveFlight,
+    departFlight,
     completeBatch,
     getStackFocusOrigin,
     getHandFocusOrigin,

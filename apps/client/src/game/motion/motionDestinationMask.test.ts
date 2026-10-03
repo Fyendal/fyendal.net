@@ -67,6 +67,23 @@ describe("motion destination masks", () => {
     expect(masks.get("7")?.get("0:hand:42")).toBe(current.element);
   });
 
+  it("reveals the next pile top only when its outgoing flight departs", () => {
+    const nextTop = fakeElement();
+    const masks: MaskedElementsByBatch = new Map();
+    const key = "0:graveyard:8";
+
+    activateMotionDestinationMasks(
+      "graveyard-to-banish",
+      [{ destinationPresentationKey: key }],
+      new Map([[key, nextTop.element]]),
+      masks,
+    );
+    expect(nextTop.attributes.has(MOTION_DESTINATION_HIDDEN_ATTRIBUTE)).toBe(true);
+
+    expect(arriveMotionDestination("graveyard-to-banish", key, masks)).toBe(true);
+    expect(nextTop.attributes.has(MOTION_DESTINATION_HIDDEN_ATTRIBUTE)).toBe(false);
+  });
+
   it("masks pending arrivals but leaves persistent reflows visible until activation", () => {
     const active = fakeElement();
     const drawn = fakeElement();

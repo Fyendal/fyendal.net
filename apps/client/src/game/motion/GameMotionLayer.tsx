@@ -125,12 +125,14 @@ function MotionFlightOverlay({
   flight,
   squareCardsEnabled,
   onFlightArrive,
+  onFlightDepart,
   onCueComplete,
 }: {
   batchId: string;
   flight: MotionFlight;
   squareCardsEnabled: boolean;
   onFlightArrive: (batchId: string, destinationPresentationKey?: string) => boolean;
+  onFlightDepart: (batchId: string, sourceRevealPresentationKey?: string) => void;
   onCueComplete: (cueId: string) => void;
 }) {
   const lingerTimerRef = useRef<number | null>(null);
@@ -143,10 +145,16 @@ function MotionFlightOverlay({
         flight.holdAtSource ? " game-motion-flight-hold-source" : ""
       }`}
       style={flightStyle(flight, squareCardsEnabled)}
+      onAnimationStart={(event: AnimationEvent<HTMLDivElement>) => {
+        if (event.target === event.currentTarget) {
+          onFlightDepart(batchId, flight.sourceRevealPresentationKey);
+        }
+      }}
       onAnimationEnd={(event: AnimationEvent<HTMLDivElement>) => {
         // Ignore the nested back/face reveal animations. The wrapper's
         // completion is the exact point at which the real card takes over.
         if (event.target !== event.currentTarget) return;
+        onFlightDepart(batchId, flight.sourceRevealPresentationKey);
         const destinationVisible = onFlightArrive(batchId, flight.destinationPresentationKey);
         const element = event.currentTarget;
         const lingerMs = Math.max(0,
@@ -184,7 +192,7 @@ function MotionDeckCover({ flight, squareCardsEnabled }: { flight: MotionFlight;
   );
 }
 
-function QueuedHandSource({ flight }: { flight: MotionFlight }) {
+function QueuedSource({ flight, squareCardsEnabled }: { flight: MotionFlight; squareCardsEnabled: boolean }) {
   return (
     <div
       className={`game-motion-queued-source${
@@ -192,22 +200,28 @@ function QueuedHandSource({ flight }: { flight: MotionFlight }) {
       }`}
       style={rectStyle(flight.start)}
     >
-      <MotionCardVisual visual={flight.visual} count={flight.showCount ? flight.count : 1} />
+      <MotionCardVisual
+        visual={flight.visual}
+        count={flight.showCount ? flight.count : 1}
+        square={squareCardsEnabled && flight.start.width / flight.start.height >= .9}
+      />
     </div>
   );
 }
 
 export function GameMotionLayer({
   batch,
-  queuedHandSources,
+  queuedSources,
   squareCardsEnabled,
   onFlightArrive,
+  onFlightDepart,
   onComplete,
 }: {
   batch: GameMotionBatch | null;
-  queuedHandSources: readonly MotionFlight[];
+  queuedSources: readonly MotionFlight[];
   squareCardsEnabled: boolean;
   onFlightArrive: (batchId: string, destinationPresentationKey?: string) => boolean;
+  onFlightDepart: (batchId: string, sourceRevealPresentationKey?: string) => void;
   onComplete: (batchId: string) => void;
 }) {
   const completedCuesRef = useRef<{
@@ -268,6 +282,7 @@ export function GameMotionLayer({
               squareCardsEnabled={squareCardsEnabled}
               key={flight.id}
               onFlightArrive={onFlightArrive}
+              onFlightDepart={onFlightDepart}
               onCueComplete={completeCue}
             />
           ))}
@@ -278,8 +293,8 @@ export function GameMotionLayer({
         data-game-motion-batch={batch.id}
         aria-hidden="true"
       >
-        {queuedHandSources.map((flight) => (
-          <QueuedHandSource flight={flight} key={flight.id} />
+        {queuedSources.map((flight) => (
+          <QueuedSource flight={flight} squareCardsEnabled={squareCardsEnabled} key={flight.id} />
         ))}
         {batch.connectors.map((connector) => (
           <div
@@ -301,6 +316,7 @@ export function GameMotionLayer({
             squareCardsEnabled={squareCardsEnabled}
             key={flight.id}
             onFlightArrive={onFlightArrive}
+            onFlightDepart={onFlightDepart}
             onCueComplete={completeCue}
           />
         ))}
@@ -320,6 +336,7 @@ export function GameMotionLayer({
               squareCardsEnabled={squareCardsEnabled}
               key={flight.id}
               onFlightArrive={onFlightArrive}
+              onFlightDepart={onFlightDepart}
               onCueComplete={completeCue}
             />
           ))}
@@ -340,6 +357,7 @@ export function GameMotionLayer({
               squareCardsEnabled={squareCardsEnabled}
               key={flight.id}
               onFlightArrive={onFlightArrive}
+              onFlightDepart={onFlightDepart}
               onCueComplete={completeCue}
             />
           ))}

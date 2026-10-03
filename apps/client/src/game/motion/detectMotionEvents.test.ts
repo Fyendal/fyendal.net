@@ -60,6 +60,46 @@ const face = (instanceId: number, owner = 0): CardView => ({
 });
 
 describe("game motion detection", () => {
+  it.each(["graveyard", "deck"] as const)(
+    "keeps the visible %s top as the source of a move to banish",
+    (kind) => {
+      const moving = face(51);
+      const nextTop = face(52);
+      const previous = view([
+        player(0, kind === "graveyard"
+          ? { graveyard: [nextTop, moving] }
+          : { deckCount: 2, visibleDeckTop: moving }),
+        player(1),
+      ]);
+      const current = view([
+        player(0, {
+          ...(kind === "graveyard"
+            ? { graveyard: [nextTop] }
+            : { deckCount: 1, visibleDeckTop: nextTop }),
+          banish: [moving],
+        }),
+        player(1),
+      ]);
+
+      expect(transitionMotionEvents(previous, current, {
+        fromVersion: 1,
+        kind: "forward",
+        events: [{
+          kind: "move",
+          from: { kind, seat: 0 },
+          to: { kind: "banish", seat: 0 },
+          count: 1,
+          instanceId: moving.instanceId,
+        }],
+      }, "forward")).toContainEqual(expect.objectContaining({
+        kind: "move",
+        sourcePresentationKey: `0:${kind}:${moving.instanceId}`,
+        destinationPresentationKey: `0:banish:${moving.instanceId}`,
+        visual: { kind: "face", card: moving },
+      }));
+    },
+  );
+
   it.each(["pitch", "graveyard", "banish", "stack"] as const)("closes hand gaps for cards leaving for %s", (zone) => {
     const cards = [face(1), face(2), face(3)];
     const previous = view([player(0, { hand: cards, handCount: 3 }), player(1)]);

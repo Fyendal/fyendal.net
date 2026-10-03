@@ -10,12 +10,12 @@ export const EMPTY_MOTION_BATCH_QUEUE: MotionBatchQueue = {
   pending: [],
 };
 
-const EMPTY_QUEUED_HAND_SOURCES: readonly MotionFlight[] = [];
+const EMPTY_QUEUED_SOURCES: readonly MotionFlight[] = [];
 
-/** The view has already moved these hidden hand slots, but their flights wait
- * behind an earlier batch. Keep a back at each old slot until they start. */
-export function queuedHandSourceFlights(queue: MotionBatchQueue): readonly MotionFlight[] {
-  if (queue.pending.length === 0) return EMPTY_QUEUED_HAND_SOURCES;
+/** Keep a copy at the old slot while a hand or exposed pile departure waits
+ * behind an earlier batch. */
+export function queuedSourceFlights(queue: MotionBatchQueue): readonly MotionFlight[] {
+  if (queue.pending.length === 0) return EMPTY_QUEUED_SOURCES;
   return queue.pending.flatMap((batch) => batch.flights.filter((flight) => (
     flight.queueHoldSource === true
   )));

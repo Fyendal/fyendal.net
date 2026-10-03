@@ -66,9 +66,11 @@ export interface MotionFlight {
   /** Keep an effect draw visible in its temporary hand slot until discard starts. */
   lingerUntilMs?: number;
   destinationPresentationKey?: string;
+  /** The newly exposed source-pile top stays hidden until this flight departs. */
+  sourceRevealPresentationKey?: string;
   maskDestinationWhilePending?: true;
   holdAtSource?: true;
-  /** Preserve a hidden hand back at its old slot while this batch is queued. */
+  /** Preserve the old source card while this batch is queued. */
   queueHoldSource?: true;
   destinationCoverVisual?: MotionVisual;
   destinationLayer?: "chain" | "stack";
@@ -201,6 +203,19 @@ function motionLayerForDestination(
 ): MotionFlight["destinationLayer"] {
   if (location.kind === "stack-layer") return "stack";
   return location.kind.startsWith("chain-") ? "chain" : undefined;
+}
+
+function exposedSourceTopKey(
+  event: MoveMotionEvent,
+  previous: MotionAnchorSnapshot,
+  current: MotionAnchorSnapshot,
+): string | undefined {
+  if (event.source.kind !== "deck" && event.source.kind !== "graveyard"
+    && event.source.kind !== "banish") return undefined;
+  const sourceKey = event.sourcePresentationKey;
+  if (!sourceKey || !previous.cards.has(sourceKey)) return undefined;
+  const prefix = `${motionLocationKey(event.source)}:`;
+  return [...current.cards.keys()].find((key) => key.startsWith(prefix) && key !== sourceKey);
 }
 
 function temporaryHandSlot(
@@ -393,6 +408,9 @@ export function resolveMotionBatch(
           ? "deck-bottom"
           : "move";
     const destinationLayer = motionLayerForDestination(event.destination);
+    const sourceRevealPresentationKey = event.kind === "move"
+      ? exposedSourceTopKey(event, previous, current)
+      : undefined;
     const flight: MotionFlight = {
       id: `${batchId}:flight:${flights.length}`,
       phase,
@@ -405,14 +423,16 @@ export function resolveMotionBatch(
       showCount: event.kind === "move" && event.count > 1,
       delayMs: 0,
       destinationPresentationKey: event.destinationPresentationKey,
+      ...(sourceRevealPresentationKey ? { sourceRevealPresentationKey } : {}),
       ...((event.kind === "reflow" || event.sourcePresentationKey !== undefined)
         ? { holdAtSource: true as const }
         : {}),
-      ...(event.source.kind === "hand" && event.visual.kind === "back"
-        && ((event.kind === "reflow" && event.destinationPresentationKey !== undefined)
-          || (event.kind === "move"
-          && event.sourcePresentationKey !== undefined
-          && event.instanceId === undefined))
+      ...((sourceRevealPresentationKey !== undefined ||
+        (event.source.kind === "hand" && event.visual.kind === "back"
+          && ((event.kind === "reflow" && event.destinationPresentationKey !== undefined)
+            || (event.kind === "move"
+            && event.sourcePresentationKey !== undefined
+            && event.instanceId === undefined))))
         ? { queueHoldSource: true as const }
         : {}),
       ...(event.kind === "move" && event.destinationCoverVisual
