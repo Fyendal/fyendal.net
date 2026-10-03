@@ -137,6 +137,7 @@ export function GameBoard() {
     })),
   );
   const tableRef = useRef<HTMLDivElement>(null);
+  const boardRef = useRef<HTMLDivElement>(null);
   const fullscreen = useFullscreen();
   const [overlay, setOverlay] = useState<BoardOverlay | null>(null);
   const [inspectedCardId, setInspectedCardId] = useState<string | null>(null);
@@ -184,8 +185,8 @@ export function GameBoard() {
     mobileHandIsHidden,
     toggleMobileHand,
     mobileCombatFloatVisibility,
-  } = useGameViewport();
-  const compactBoard = compactDesktopViewport && !mobileLandscapeViewport;
+  } = useGameViewport(boardRef);
+  const compactBoard = compactDesktopViewport && !mobileFloatViewport && !mobileLandscapeViewport;
   const squareCardsEnabled = !mobileFloatViewport && !mobileLandscapeViewport && !compactBoard;
   const {
     lessGuidance,
@@ -1022,7 +1023,7 @@ export function GameBoard() {
     >
       {hasOwnPriority ? <div className="own-priority-arrival" aria-hidden="true" /> : null}
       {/* ── playmat board: opponent half on top, your half below ── */}
-      <div className="board">
+      <div ref={boardRef} className="board">
         {gameMotion.turnStartUiReady && pitchSource ? (
           <PitchFocus
             key={pitchSource.card.instanceId}

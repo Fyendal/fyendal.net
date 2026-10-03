@@ -239,12 +239,15 @@
 }
 /* Seven portrait-card tracks fit beside the rail. Keep the outer pairs and
    center trio close together; the two spacer tracks take any extra width. */
-@media (min-width: 701px) and (max-width: 1200px) {
-  .mat-half.mat-compact-board {
-    --mat-column-gap: 5px;
+@media (min-width: 701px) {
+  .table:has(.mat-compact-board) {
     /* Board padding, eight gaps, and two 5px spacers leave seven card tracks. */
     --compact-card-width: min(9.49vh, calc((100vw - var(--rail-w) - 86px) / 7));
     --compact-card-height: calc(var(--compact-card-width) * 1.365);
+    --mat-zone-col: var(--compact-card-width);
+  }
+  .mat-half.mat-compact-board {
+    --mat-column-gap: 5px;
     --mat-outer-col: var(--compact-card-width);
     --mat-arms-col: var(--compact-card-width);
     --mat-weapon-0-col: var(--compact-card-width);
