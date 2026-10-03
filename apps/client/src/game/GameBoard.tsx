@@ -328,6 +328,10 @@ export function GameBoard() {
     toggleAdditionalCostCard,
     confirmAdditionalCost,
   } = announcement;
+  const undoAndDismissAnnouncement: typeof undo = (target) => {
+    resetSel();
+    undo(target);
+  };
   const localPitchPayment = sel.kind !== "none" && !autoCommitPending && actionStep === "payment" &&
     (!stagedAdditionalCostDefinition || additionalCostConfirmed) &&
     paymentProgress.kind === "resource" && paymentProgress.required > 0;
@@ -981,7 +985,7 @@ export function GameBoard() {
     event.preventDefault();
     event.stopPropagation();
     if (dismissal === "reset-local") resetSel();
-    else undo("last-action");
+    else undoAndDismissAnnouncement("last-action");
   };
 
   const playerHalfInteraction = {
@@ -1332,7 +1336,7 @@ export function GameBoard() {
         collapsed={railCollapsed}
         onToggleCollapsed={() => setRailCollapsed((collapsed) => !collapsed)}
         turn={view.turn}
-        onUndo={!spectating && !replaying && view.phase !== "game-over" ? undo : null}
+        onUndo={!spectating && !replaying && view.phase !== "game-over" ? undoAndDismissAnnouncement : null}
         undoDisabled={roomCommandPending}
         onLeave={leave}
         leaveAction={botGame && !spectating ? "end-game" : "leave"}
