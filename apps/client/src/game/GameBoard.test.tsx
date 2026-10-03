@@ -206,6 +206,34 @@ describe("GameBoard social notifications", () => {
   });
 });
 
+describe("GameBoard replay result", () => {
+  it("shows the game-ending dialog only on the final replay frame", () => {
+    vi.stubGlobal("localStorage", { getItem: () => null });
+    const first = spectatorView();
+    const final = { ...first, phase: "game-over" as const, winner: 1 as const };
+    const base = liveState(false);
+    gameStore.state = {
+      ...base,
+      screen: "replay",
+      spectating: true,
+      view: first,
+      replayViews: [first, final],
+      replayStep: 0,
+      closeReplay: vi.fn(),
+    };
+    const render = () => renderToStaticMarkup(<TestI18nProvider><GameBoard /></TestI18nProvider>);
+
+    expect(render()).not.toContain('class="overlay gameover-overlay"');
+    gameStore.state = { ...gameStore.state, view: final, replayStep: 1 };
+    const html = render();
+    expect(html).toContain('class="overlay gameover-overlay"');
+    expect(html).toContain('class="gameover-headline">Hero 1 wins!</div>');
+    expect(html).toContain("Exit replay");
+    expect(html).not.toContain("Watch replay");
+    expect(html).not.toContain("Back to lobby");
+  });
+});
+
 describe("GameBoard spectator presentation", () => {
   it("shows hidden arsenal card backs for both players", () => {
     gameStore.state = {

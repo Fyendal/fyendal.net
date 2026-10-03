@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { ChainLinkView, GameView } from "@fyendal/shared";
+import type { ChainLinkView, GameTurnStatsView, GameView } from "@fyendal/shared";
 import {
   averagePerRound,
   averageThreatPerAttack,
@@ -84,17 +84,29 @@ describe("computeCycleStats", () => {
     };
 
     expect(computeCycleStats([view])).toEqual({
-      rows: [{
-        cycle: 1,
-        attacks: [1, 1],
-        threatened: [6, 8],
-        blocked: [1, 2],
-        damageDealt: [4, 7],
-        allyAbsorbed: [1, 2],
-        lifeGained: [0, 2],
-        lifeLost: [1, 0],
-      }],
-      cyclesPlayed: [1, 1],
+      rows: [
+        {
+          cycle: 0,
+          attacks: [1, 0],
+          threatened: [4, 3],
+          blocked: [0, 2],
+          damageDealt: [2, 3],
+          allyAbsorbed: [0, 0],
+          lifeGained: [0, 0],
+          lifeLost: [0, 0],
+        },
+        {
+          cycle: 1,
+          attacks: [0, 1],
+          threatened: [2, 5],
+          blocked: [1, 0],
+          damageDealt: [2, 4],
+          allyAbsorbed: [1, 2],
+          lifeGained: [0, 2],
+          lifeLost: [1, 0],
+        },
+      ],
+      cyclesPlayed: [0, 1],
       total: {
         attacks: [1, 1],
         threatened: [6, 8],
@@ -107,7 +119,7 @@ describe("computeCycleStats", () => {
     });
   });
 
-  it("pairs turns into cycles: threatened on your turn, blocked on the opponent's", () => {
+  it("separates the opening turn and pairs later turns into rounds", () => {
     const views = [
       frame(1, 0, [link(0, 6, 3)]), // seat 0 threatens 6, seat 1 blocks 3
       frame(1, 0, []), // chain closed
@@ -116,17 +128,27 @@ describe("computeCycleStats", () => {
     const stats = computeCycleStats(views);
     expect(stats.rows).toEqual([
       {
-        cycle: 1,
-        attacks: [1, 1],
-        threatened: [6, 4],
-        blocked: [4, 3],
+        cycle: 0,
+        attacks: [1, 0],
+        threatened: [6, 0],
+        blocked: [0, 3],
         damageDealt: [3, 0],
         allyAbsorbed: [0, 0],
         lifeGained: [0, 0],
         lifeLost: [0, 0],
       },
+      {
+        cycle: 1,
+        attacks: [0, 1],
+        threatened: [0, 4],
+        blocked: [4, 0],
+        damageDealt: [0, 0],
+        allyAbsorbed: [0, 0],
+        lifeGained: [0, 0],
+        lifeLost: [0, 0],
+      },
     ]);
-    expect(stats.cyclesPlayed).toEqual([1, 1]);
+    expect(stats.cyclesPlayed).toEqual([0, 1]);
     expect(stats.total).toEqual({
       attacks: [1, 1],
       threatened: [6, 4],
@@ -146,7 +168,7 @@ describe("computeCycleStats", () => {
       frame(2, 1, [link(1, 5, 0)], [14, 17]), // seat 0 drops 20 → 14
     ];
     const stats = computeCycleStats(views);
-    expect(stats.rows[0]!.damageDealt).toEqual([3, 5]);
+    expect(stats.rows.map((row) => row.damageDealt)).toEqual([[3, 0], [0, 5]]);
     expect(stats.total.damageDealt).toEqual([3, 5]);
   });
 
@@ -172,7 +194,7 @@ describe("computeCycleStats", () => {
     expect(totalPrevented(stats, 1)).toBe(3);
   });
 
-  it("does not count damage dealt to an ally as hero damage", () => {
+  it("reports ally damage separately without adding it to Talishar value", () => {
     const attack = { ...link(0, 4, 0), targetAllyName: "Ashwing", damage: 3 };
     const stats = computeCycleStats([frame(1, 0, [attack]), frame(2, 1, [])]);
     expect(stats.total.damageDealt).toEqual([0, 0]);
@@ -180,8 +202,8 @@ describe("computeCycleStats", () => {
     expect(stats.total.threatened).toEqual([0, 0]);
     expect(stats.total.attacks).toEqual([0, 0]);
     expect(stats.total.blocked).toEqual([0, 0]);
-    expect(cycleValue(stats.rows[0]!, 1)).toBe(3);
-    expect(averageValue(stats, 1)).toBe(3);
+    expect(cycleValue(stats.rows[0]!, 1)).toBe(0);
+    expect(averageValue(stats, 1)).toBe(0);
   });
 
   it("counts a weapon attacking again on a later turn", () => {
@@ -231,7 +253,7 @@ describe("computeCycleStats", () => {
   it("handles a game with no combat and no damage", () => {
     const stats = computeCycleStats([frame(1, 0, [])]);
     expect(stats.rows).toEqual([{
-      cycle: 1,
+      cycle: 0,
       attacks: [0, 0],
       threatened: [0, 0],
       blocked: [0, 0],
@@ -253,24 +275,98 @@ describe("computeCycleStats", () => {
 });
 
 describe("cycleValue / averageValue", () => {
-  it("value includes threat, blocks, ally damage absorbed, prevention, life gain, and life loss", () => {
+  it("matches the Dash I/O replay after treating engine turn 1 as opening turn 0", () => {
+    const turn = (
+      number: number,
+      activePlayer: number,
+      threatened: [number, number],
+      blocked: [number, number],
+      damageDealt: [number, number],
+    ): GameTurnStatsView => ({
+      turn: number, activePlayer, attacks: [0, 0], threatened, blocked, damageDealt,
+    });
+    const view = frame(9, 0, []);
+    view.gameStats = { turns: [
+      turn(1, 0, [0, 0], [0, 0], [0, 0]),
+      turn(2, 1, [0, 10], [0, 0], [0, 10]),
+      turn(3, 0, [15, 0], [0, 11], [4, 0]),
+      turn(4, 1, [0, 6], [0, 0], [0, 6]),
+      turn(5, 0, [15, 0], [0, 3], [12, 0]),
+      turn(6, 1, [0, 8], [2, 0], [0, 6]),
+      turn(7, 0, [23, 0], [0, 3], [20, 0]),
+      turn(8, 1, [0, 8], [3, 0], [0, 5]),
+      turn(9, 0, [11, 0], [0, 4], [5, 0]),
+    ] };
+
+    const stats = computeCycleStats([view]);
+    expect(stats.rows.map((row) => row.cycle)).toEqual([0, 1, 2, 3, 4]);
+    expect(stats.cyclesPlayed).toEqual([4, 4]);
+    expect(stats.rows.map((row) => cycleValue(row, 0))).toEqual([0, 15, 15, 25, 14]);
+    expect(stats.rows.map((row) => cycleValue(row, 1))).toEqual([0, 21, 9, 11, 14]);
+    expect(averageValue(stats, 0)).toBe(17.25);
+    expect(averageValue(stats, 1)).toBe(13.75);
+  });
+
+  it("folds legacy turn 0 into the FaB opening turn and excludes both from averages", () => {
+    const view = frame(2, 1, []);
+    view.gameStats = { turns: [
+      {
+        turn: 0, activePlayer: 0, attacks: [0, 0], threatened: [0, 0],
+        blocked: [0, 0], damageDealt: [0, 0], lifeGained: [2, 0],
+      },
+      {
+        turn: 1, activePlayer: 0, attacks: [1, 0], threatened: [6, 0],
+        blocked: [0, 0], damageDealt: [6, 0],
+      },
+      {
+        turn: 2, activePlayer: 1, attacks: [0, 0], threatened: [0, 0],
+        blocked: [0, 0], damageDealt: [0, 0],
+      },
+      {
+        turn: 3, activePlayer: 0, attacks: [1, 0], threatened: [4, 0],
+        blocked: [0, 0], damageDealt: [4, 0],
+      },
+    ] };
+    const stats = computeCycleStats([view]);
+    expect(stats.rows.map((row) => row.cycle)).toEqual([0, 1]);
+    expect(stats.cyclesPlayed).toEqual([1, 1]);
+    expect(cycleValue(stats.rows[0]!, 0)).toBe(8);
+    expect(averageValue(stats, 0)).toBe(4);
+    expect(averagePerRound(stats, 0, "threatened")).toBe(4);
+  });
+
+  it("folds legacy replay turn 0 into the opening row", () => {
+    const stats = computeCycleStats([
+      frame(0, 0, [link(0, 2, 0)]),
+      frame(0, 0, []),
+      frame(1, 0, [link(0, 4, 0)]),
+    ]);
+    expect(stats.rows.map((row) => row.cycle)).toEqual([0]);
+    expect(stats.cyclesPlayed).toEqual([0, 0]);
+    expect(averageValue(stats, 0)).toBe(0);
+  });
+
+  it("value includes threat, blocks, prevention, life gain, and life loss", () => {
     const stats = computeCycleStats([
       frame(1, 0, [link(0, 6, 3)]),
       frame(2, 1, [link(1, 4, 4)]),
     ]);
-    expect(cycleValue(stats.rows[0]!, 0)).toBe(10); // 6 threatened + 4 blocked
-    expect(cycleValue(stats.rows[0]!, 1)).toBe(7); // 4 threatened + 3 blocked
+    expect(cycleValue(stats.rows[0]!, 0)).toBe(6); // opening threat
+    expect(cycleValue(stats.rows[0]!, 1)).toBe(3); // opening block
+    expect(cycleValue(stats.rows[1]!, 0)).toBe(4); // block during round 1
+    expect(cycleValue(stats.rows[1]!, 1)).toBe(4); // threat during round 1
   });
 
-  it("includes authoritative ally damage in value and averages", () => {
+  it("keeps authoritative ally damage out of value and averages", () => {
     const view = frame(1, 0, []);
     view.gameStats = { turns: [{
       turn: 1, activePlayer: 0, attacks: [0, 0], threatened: [0, 0],
       blocked: [0, 0], damageDealt: [0, 0], allyAbsorbed: [4, 0],
     }] };
     const stats = computeCycleStats([view]);
-    expect(cycleValue(stats.rows[0]!, 0)).toBe(4);
-    expect(averageValue(stats, 0)).toBe(4);
+    expect(stats.total.allyAbsorbed[0]).toBe(4);
+    expect(cycleValue(stats.rows[0]!, 0)).toBe(0);
+    expect(averageValue(stats, 0)).toBe(0);
   });
 
   it("subtracts Blood Debt-like life loss without treating it as damage dealt", () => {
@@ -282,7 +378,7 @@ describe("cycleValue / averageValue", () => {
     const stats = computeCycleStats([view]);
     expect(stats.total.damageDealt).toEqual([0, 0]);
     expect(cycleValue(stats.rows[0]!, 0)).toBe(-1);
-    expect(averageValue(stats, 0)).toBe(-1);
+    expect(averageValue(stats, 0)).toBe(0); // opening life loss is excluded
   });
 
   it("includes prevention and life gain in value", () => {
@@ -296,17 +392,17 @@ describe("cycleValue / averageValue", () => {
     expect(cycleValue(stats.rows[0]!, 1)).toBe(5);
   });
 
-  it("averages value over the cycles each seat played in", () => {
+  it("averages value over post-opening rounds each seat played in", () => {
     const stats = computeCycleStats([
       frame(1, 0, [link(0, 6, 2)]),
       frame(2, 1, [link(1, 4, 1)]),
       frame(3, 0, [link(0, 4, 0)]),
       frame(4, 1, []),
     ]);
-    // seat 0: (6+1) + (4+0) = 11 over 2 cycles = 5.5
-    expect(averageValue(stats, 0)).toBe(5.5);
-    // seat 1: (4+2) + (0+0) = 6 over 2 cycles = 3
-    expect(averageValue(stats, 1)).toBe(3);
+    // Seat 0's opening threat is excluded; round 1 has 4 threat + 1 block.
+    expect(averageValue(stats, 0)).toBe(5);
+    // Seat 1 has 4 threat over rounds 1 and 2; opening block is excluded.
+    expect(averageValue(stats, 1)).toBe(2);
   });
 
   it("returns zero with no recorded turns", () => {
@@ -321,8 +417,8 @@ describe("cycleValue / averageValue", () => {
       frame(3, 0, [link(0, 4, 0)]),
       frame(4, 1, []),
     ]);
-    expect(averagePerRound(stats, 0, "threatened")).toBe(5);
-    expect(averagePerRound(stats, 0, "blocked")).toBe(0.5);
+    expect(averagePerRound(stats, 0, "threatened")).toBe(4);
+    expect(averagePerRound(stats, 0, "blocked")).toBe(1);
     expect(averageThreatPerAttack(stats, 0)).toBe(5);
   });
 });

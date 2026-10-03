@@ -207,6 +207,7 @@ export function CardSearchOverlay({
                       key={card.instanceId}
                       card={card}
                       size="zone"
+                      squareArt={false}
                       highlighted={option !== undefined}
                       selected={selected}
                       onClick={option === undefined || !canSelect

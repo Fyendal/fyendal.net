@@ -2,6 +2,7 @@ import type { CardView } from "@fyendal/shared";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import { TestI18nProvider } from "../../i18n/TestI18nProvider.js";
+import { SquareCardPresentation } from "../Card.js";
 import { ZoneOverlay, sortZoneCards } from "./ZoneOverlay.js";
 
 const cards: CardView[] = [
@@ -59,5 +60,50 @@ describe("shared zone overlay sorting", () => {
     expect(html.indexOf('data-cardid="UNKNOWN-Z"')).toBeLessThan(
       html.indexOf('data-cardid="UNKNOWN-A-1"'),
     );
+  });
+
+  it.each([
+    ["Graveyard", true],
+    ["Banished", true],
+    ["Deck", false],
+  ] as const)("shows full cards in the %s viewer even on a square board", (title, inactiveZone) => {
+    const html = renderToStaticMarkup(
+      <TestI18nProvider>
+        <SquareCardPresentation enabled>
+          <ZoneOverlay
+            overlay={{ title, cards: [{ instanceId: 20, cardId: "WTR160", owner: 0 }], inactiveZone }}
+            yourSeat={0}
+            onClose={() => undefined}
+            onInspectCard={() => undefined}
+          />
+        </SquareCardPresentation>
+      </TestI18nProvider>,
+    );
+
+    expect(html).toContain("card-zone");
+    expect(html).not.toContain("card-board-square");
+  });
+
+  it("keeps face-down banished cards full-sized without revealing their identity", () => {
+    const html = renderToStaticMarkup(
+      <TestI18nProvider>
+        <SquareCardPresentation enabled>
+          <ZoneOverlay
+            overlay={{
+              title: "Banished",
+              cards: [{ instanceId: 21, cardId: "WTR160", owner: 1, faceDown: true }],
+              inactiveZone: true,
+            }}
+            yourSeat={0}
+            onClose={() => undefined}
+            onInspectCard={() => undefined}
+          />
+        </SquareCardPresentation>
+      </TestI18nProvider>,
+    );
+
+    expect(html).toContain("card-back");
+    expect(html).not.toContain("card-back-square");
+    expect(html).not.toContain('data-cardid="WTR160"');
   });
 });

@@ -4,14 +4,14 @@ import type { GameStatsView, GameView } from "@fyendal/shared";
  * Per-round match stats. New games use authoritative counters recorded by the
  * engine; legacy replays fall back to resolved combat links.
  *
- * A "turn cycle" is one full round: your turn plus the adjacent opponent turn.
- * Since players alternate, cycle n pairs engine turns 2n-1 and 2n. For each
+ * Engine turn 1 is FaB's opening turn (turn 0). Later rounds pair engine
+ * turns (2,3), (4,5), …; any legacy engine turn 0 activity joins the
+ * opening row. For each
  * player a cycle tallies:
  *  - threatened:  attack and effect damage aimed at the opposing hero before prevention
  *  - blocked:     damage actually blocked against the opponent's links,
  *                 capped at the attack value (over-block is not extra value)
- *  - value:       threatened + blocked + ally damage absorbed + prevented
- *                 + life gained - life lost
+ *  - value:       threatened + blocked + prevented + life gained - life lost
  *  - damageDealt: damage actually dealt to the opposing hero
  *  - allyAbsorbed: damage dealt by the opponent to your allies
  */
@@ -28,7 +28,7 @@ export interface CycleRow {
 
 export interface CycleStats {
   rows: CycleRow[];
-  /** Distinct cycles each seat took a turn in. */
+  /** Distinct post-opening rounds each seat took a turn in. */
   cyclesPlayed: [number, number];
   total: {
     attacks: [number, number];
@@ -41,8 +41,8 @@ export interface CycleStats {
   };
 }
 
-/** Engine turns pair up as (1,2), (3,4), … — one pair per cycle. */
-const cycleOf = (turn: number): number => Math.ceil(turn / 2);
+/** Engine turn 1 is opening turn 0; rounds 1+ pair (2,3), (4,5), …. */
+const cycleOf = (turn: number): number => Math.max(0, Math.floor(turn / 2));
 
 function totalRows(rows: CycleRow[]) {
   const total = {
@@ -74,7 +74,7 @@ function authoritativeStats(gameStats: GameStatsView): CycleStats {
   for (const turn of gameStats.turns) {
     const cycle = cycleOf(turn.turn);
     const activeSeat = turn.activePlayer === 0 ? 0 : 1;
-    active[activeSeat].add(cycle);
+    if (cycle > 0) active[activeSeat].add(cycle);
     const row = byCycle.get(cycle) ?? {
       cycle,
       attacks: [0, 0],
@@ -143,7 +143,7 @@ export function computeCycleStats(views: GameView[]): CycleStats {
   for (const view of views) {
     const seat: 0 | 1 = view.activePlayer === 0 ? 0 : 1;
     const cycle = cycleOf(view.turn);
-    active[seat].add(cycle);
+    if (cycle > 0) active[seat].add(cycle);
     rowFor(cycle);
 
     // instances no longer on the chain start a fresh tally next time
@@ -189,9 +189,9 @@ export function computeCycleStats(views: GameView[]): CycleStats {
   };
 }
 
-/** Match value: threat + blocks + ally damage absorbed + prevention + life gain - life loss. */
+/** Talishar-style value: threat + blocks + prevention + life gain - life loss. */
 export function cycleValue(row: CycleRow, seat: 0 | 1): number {
-  return row.threatened[seat] + row.blocked[seat] + row.allyAbsorbed[seat]
+  return row.threatened[seat] + row.blocked[seat]
     + preventedDamage(row, seat)
     + row.lifeGained[seat] - row.lifeLost[seat];
 }
@@ -210,11 +210,11 @@ export function totalPrevented(stats: CycleStats, seat: 0 | 1): number {
   return stats.rows.reduce((sum, row) => sum + preventedDamage(row, seat), 0);
 }
 
-/** Average value per turn cycle for a seat, over the cycles they played in. */
+/** Average value over post-opening rounds in which the seat took a turn. */
 export function averageValue(stats: CycleStats, seat: 0 | 1): number {
   const cycles = stats.cyclesPlayed[seat];
   if (cycles === 0) return 0;
-  return stats.rows.reduce((sum, row) => sum + cycleValue(row, seat), 0) / cycles;
+  return stats.rows.reduce((sum, row) => sum + (row.cycle > 0 ? cycleValue(row, seat) : 0), 0) / cycles;
 }
 
 export function averagePerRound(
@@ -223,7 +223,10 @@ export function averagePerRound(
   metric: "threatened" | "blocked" | "damageDealt",
 ): number {
   const cycles = stats.cyclesPlayed[seat];
-  return cycles === 0 ? 0 : stats.total[metric][seat] / cycles;
+  return cycles === 0 ? 0 : stats.rows.reduce(
+    (sum, row) => sum + (row.cycle > 0 ? row[metric][seat] : 0),
+    0,
+  ) / cycles;
 }
 
 export function averageThreatPerAttack(stats: CycleStats, seat: 0 | 1): number {

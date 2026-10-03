@@ -2,6 +2,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import type { CardView, PendingDecision } from "@fyendal/shared";
 import { describe, expect, it } from "vitest";
 import { TestI18nProvider } from "../../i18n/TestI18nProvider.js";
+import { SquareCardPresentation } from "../Card.js";
 import {
   CardSearchOverlay,
   MinimizedCardSearch,
@@ -49,11 +50,13 @@ describe("private card search overlay", () => {
   it("renders all searched cards in a required zone-style dialog", () => {
     const html = renderToStaticMarkup(
       <TestI18nProvider>
-        <CardSearchOverlay
-          decision={searchDecision()}
-          zoneCounts={{ hand: 1, deck: 1, arsenal: 1 }}
-          onSubmit={() => undefined}
-        />
+        <SquareCardPresentation enabled>
+          <CardSearchOverlay
+            decision={searchDecision()}
+            zoneCounts={{ hand: 1, deck: 1, arsenal: 1 }}
+            onSubmit={() => undefined}
+          />
+        </SquareCardPresentation>
       </TestI18nProvider>,
     );
 
@@ -67,6 +70,7 @@ describe("private card search overlay", () => {
     expect(html).toContain('data-cardid="ARSENAL"');
     expect(html.match(/class="card-action"/g)).toHaveLength(1);
     expect(html).not.toContain("card-dim");
+    expect(html).not.toContain("card-board-square");
     expect(html).toContain('aria-label="Minimize card search"');
     expect(html).toContain(">Done</button>");
   });

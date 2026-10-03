@@ -20462,6 +20462,18 @@
       "value": "返回大厅"
     }
   ],
+  "game.over.matchComplete": [
+    {
+      "type": 0,
+      "value": "对局结束"
+    }
+  ],
+  "game.over.playerStats": [
+    {
+      "type": 0,
+      "value": "玩家数据"
+    }
+  ],
   "game.over.retention": [
     {
       "type": 0,
@@ -20838,6 +20850,12 @@
       "value": "触发效果"
     }
   ],
+  "game.stats.allies": [
+    {
+      "type": 0,
+      "value": "ally"
+    }
+  ],
   "game.stats.allyAbsorbed": [
     {
       "type": 0,
@@ -20862,6 +20880,12 @@
       "value": "防御"
     }
   ],
+  "game.stats.blockedPerTurn": [
+    {
+      "type": 0,
+      "value": "每回合防御伤害"
+    }
+  ],
   "game.stats.breakdown": [
     {
       "type": 0,
@@ -20884,6 +20908,12 @@
     {
       "type": 0,
       "value": "每回合伤害"
+    }
+  ],
+  "game.stats.damagePerTurn": [
+    {
+      "type": 0,
+      "value": "每回合造成伤害"
     }
   ],
   "game.stats.damagePrevented": [
@@ -20928,6 +20958,18 @@
       "value": "对局"
     }
   ],
+  "game.stats.openingExcluded": [
+    {
+      "type": 0,
+      "value": "开局回合（第 0 回合）不计入每回合平均值。"
+    }
+  ],
+  "game.stats.openingTurn": [
+    {
+      "type": 0,
+      "value": "0（开局）"
+    }
+  ],
   "game.stats.opponentFinalLife": [
     {
       "type": 0,
@@ -20964,6 +21006,12 @@
       "value": "每回合威胁"
     }
   ],
+  "game.stats.threatPerTurn": [
+    {
+      "type": 0,
+      "value": "每回合威胁伤害"
+    }
+  ],
   "game.stats.threatened": [
     {
       "type": 0,
@@ -20976,6 +21024,12 @@
       "value": "总计"
     }
   ],
+  "game.stats.turnsCounted": [
+    {
+      "type": 0,
+      "value": "计入回合数"
+    }
+  ],
   "game.stats.value": [
     {
       "type": 0,
@@ -20986,6 +21040,12 @@
     {
       "type": 0,
       "value": "每回合价值"
+    }
+  ],
+  "game.stats.valuePerTurn": [
+    {
+      "type": 0,
+      "value": "每回合平均价值"
     }
   ],
   "game.summary": [

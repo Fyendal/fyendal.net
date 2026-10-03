@@ -37,4 +37,17 @@ describe("PitchStack", () => {
     expect(html).toContain("pitch-pip-bare");
     expect(html).not.toContain("pitch-stack-card");
   });
+
+  it("spaces square cards by their full title height", () => {
+    const html = renderToStaticMarkup(createElement(PitchStack, {
+      cards: [
+        { instanceId: 11, cardId: "WTR160", owner: 0 },
+        { instanceId: 12, cardId: "WTR161", owner: 0 },
+      ],
+      resources: 0,
+      squareArt: true,
+    }));
+
+    expect(html).toContain("calc(-1 * clamp(16px, calc(var(--mat-zone-col) * .12 + 3px), 23px))");
+  });
 });

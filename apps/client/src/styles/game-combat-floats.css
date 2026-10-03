@@ -128,6 +128,17 @@
   cursor: default;
   box-shadow: 0 12px 38px #000c, inset 0 1px 0 #ffd4791c;
 }
+/* Match the square board's pile column and leave space beside its graveyards. */
+@media (min-width: 701px) {
+  .table:has(.mat-square-board) .status-float {
+    right: calc(var(--rail-w) + var(--mat-zone-col) + 50px);
+  }
+}
+@media (min-width: 1101px) {
+  .table:has(.mat-square-board) .status-float {
+    right: calc(var(--rail-w) + var(--arena-square-size) + 50px);
+  }
+}
 
 /* Match the floating controls to the portrait cards when the arena switches
    to its compact seven-card layout. Keep real control dimensions for clicking

@@ -21250,6 +21250,18 @@
       "value": "Back to lobby"
     }
   ],
+  "game.over.matchComplete": [
+    {
+      "type": 0,
+      "value": "Match complete"
+    }
+  ],
+  "game.over.playerStats": [
+    {
+      "type": 0,
+      "value": "Player stats"
+    }
+  ],
   "game.over.retention": [
     {
       "type": 0,
@@ -21670,6 +21682,12 @@
       "value": "Trigger"
     }
   ],
+  "game.stats.allies": [
+    {
+      "type": 0,
+      "value": "Allies"
+    }
+  ],
   "game.stats.allyAbsorbed": [
     {
       "type": 0,
@@ -21694,6 +21712,12 @@
       "value": "Blocked"
     }
   ],
+  "game.stats.blockedPerTurn": [
+    {
+      "type": 0,
+      "value": "Damage blocked per turn"
+    }
+  ],
   "game.stats.breakdown": [
     {
       "type": 0,
@@ -21716,6 +21740,12 @@
     {
       "type": 0,
       "value": "Damage per round"
+    }
+  ],
+  "game.stats.damagePerTurn": [
+    {
+      "type": 0,
+      "value": "Damage dealt per turn"
     }
   ],
   "game.stats.damagePrevented": [
@@ -21760,6 +21790,18 @@
       "value": "Match"
     }
   ],
+  "game.stats.openingExcluded": [
+    {
+      "type": 0,
+      "value": "Opening turn (0) is excluded from per-turn averages."
+    }
+  ],
+  "game.stats.openingTurn": [
+    {
+      "type": 0,
+      "value": "0 (opening)"
+    }
+  ],
   "game.stats.opponentFinalLife": [
     {
       "type": 0,
@@ -21796,6 +21838,12 @@
       "value": "Threat per round"
     }
   ],
+  "game.stats.threatPerTurn": [
+    {
+      "type": 0,
+      "value": "Damage threatened per turn"
+    }
+  ],
   "game.stats.threatened": [
     {
       "type": 0,
@@ -21808,6 +21856,12 @@
       "value": "Total"
     }
   ],
+  "game.stats.turnsCounted": [
+    {
+      "type": 0,
+      "value": "Turns counted"
+    }
+  ],
   "game.stats.value": [
     {
       "type": 0,
@@ -21818,6 +21872,12 @@
     {
       "type": 0,
       "value": "Value per round"
+    }
+  ],
+  "game.stats.valuePerTurn": [
+    {
+      "type": 0,
+      "value": "Average value per turn"
     }
   ],
   "game.summary": [

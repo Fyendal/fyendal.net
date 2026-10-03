@@ -25,12 +25,15 @@ export function BoardOverlays({
   gameView,
   spectating,
   replaying,
+  replayAtEnd,
   gameOverDismissed,
   getRecordedViews,
+  replayViews,
   replayAvailable,
   onWatchReplay,
   onDownloadReplay,
   onLeave,
+  onCloseReplay,
   onDismissGameOver,
   onCloseOverlay,
   onInspectCard,
@@ -54,12 +57,15 @@ export function BoardOverlays({
   gameView: GameView;
   spectating: boolean;
   replaying: boolean;
+  replayAtEnd: boolean;
   gameOverDismissed: boolean;
   getRecordedViews: () => GameView[];
+  replayViews: GameView[] | null;
   replayAvailable: boolean;
   onWatchReplay: () => void;
   onDownloadReplay: () => void;
   onLeave: () => void;
+  onCloseReplay: () => void;
   onDismissGameOver: () => void;
   onCloseOverlay: () => void;
   onInspectCard: (cardId: string | null) => void;
@@ -129,17 +135,18 @@ export function BoardOverlays({
           </button>
         </div>
       ) : null}
-      {!replaying && gameView.phase === "game-over" && !gameOverDismissed ? (
+      {(!replaying || replayAtEnd) && gameView.phase === "game-over" && !gameOverDismissed ? (
         <GameOver
           view={gameView}
           seat={seat}
           spectating={spectating}
-          recordedViews={getRecordedViews()}
-          onWatchReplay={replayAvailable ? onWatchReplay : null}
-          onDownloadReplay={replayAvailable ? onDownloadReplay : null}
-          onBackToLobby={onLeave}
+          recordedViews={replaying ? replayViews ?? [gameView] : getRecordedViews()}
+          onWatchReplay={!replaying && replayAvailable ? onWatchReplay : null}
+          onDownloadReplay={replaying || replayAvailable ? onDownloadReplay : null}
+          onBackToLobby={replaying ? onCloseReplay : onLeave}
+          replaying={replaying}
           onClose={onDismissGameOver}
-          friendAction={!botGame && !spectating && opponentUsername
+          friendAction={!replaying && !botGame && !spectating && opponentUsername
             ? <PostGameFriendAction username={opponentUsername} />
             : null}
         />

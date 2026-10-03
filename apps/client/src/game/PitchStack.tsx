@@ -1,7 +1,7 @@
 import type { CardView } from "@fyendal/shared";
 import { CardFace } from "./Card.js";
 import { motionPresentationKey } from "./motion/motionTypes.js";
-import { cardStackStep } from "./stackLayout.js";
+import { cardStackStep, squareCardStackOffset } from "./stackLayout.js";
 
 /** Face-up pitch cards, oldest at the back and newest in front. */
 export function PitchStack({
@@ -32,7 +32,9 @@ export function PitchStack({
             className="pitch-stack-card"
             key={card.instanceId}
             style={{
-              transform: `translateY(-${depth * step}px)`,
+              transform: `translateY(${squareArt
+                ? squareCardStackOffset(depth, "--mat-zone-col")
+                : `-${depth * step}px`})`,
               zIndex: index,
             }}
           >

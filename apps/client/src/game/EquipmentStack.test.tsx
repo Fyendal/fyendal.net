@@ -114,6 +114,16 @@ describe("EquipmentStack", () => {
     expect(html).toContain('data-motion-card="0:soul:12"');
   });
 
+  it("exposes each square soul card's complete title on hover", () => {
+    const html = renderToStaticMarkup(createElement(EquipmentStack, {
+      card: { instanceId: 10, cardId: "MON031", owner: 0 },
+      underCards: [{ instanceId: 11, cardId: "MON062", owner: 0 }],
+      squareArt: true,
+    }));
+
+    expect(html).toContain("calc(-1 * clamp(16px, calc(var(--arena-square-size) * .12 + 3px), 23px))");
+  });
+
   it("omits the hero soul icon at zero", () => {
     const html = renderToStaticMarkup(createElement(EquipmentStack, {
       card: { instanceId: 20, cardId: "MON031", owner: 0 },

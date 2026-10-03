@@ -3,7 +3,7 @@ import type { CardView } from "@fyendal/shared";
 import { CardFace } from "./Card.js";
 import { equipmentStackCards } from "./boardGroups.js";
 import { motionPresentationKey, type MotionLocation } from "./motion/motionTypes.js";
-import { cardStackStep } from "./stackLayout.js";
+import { cardStackStep, squareCardStackOffset } from "./stackLayout.js";
 
 /** Public arena sub-cards, oldest at the back and current permanent in front. */
 export function EquipmentStack({
@@ -74,7 +74,9 @@ export function EquipmentStack({
             data-bound-preview-card={visibleBoundCount !== null && isExplicitUnderCard ? "true" : undefined}
             key={stackCard.instanceId}
             style={{
-              "--equipment-stack-offset": `-${depth * step}px`,
+              "--equipment-stack-offset": squareArt
+                ? squareCardStackOffset(depth, "--arena-square-size")
+                : `-${depth * step}px`,
               zIndex: index,
             } as CSSProperties}
           >

@@ -91,7 +91,7 @@ const EMPTY_INSTANCE_IDS: ReadonlySet<number> = new Set();
 
 export function GameBoard() {
   const intl = useIntl();
-  const { view, viewUpdate, playerProfiles, legal, actionCandidates, roomCommandPending, pendingInteraction, pendingDefenderStageIds, yourSeat, spectating, spectatorCount, spectatorUsernames, botGame, sendIntent, sendPriorityMode, sendRunechantSkip, sendEmote, kickSpectator, latestEmote, undo, error, leave, opponentConnected, connected, connectionIssueVisible, roomCode, screen, replayFrames, replayNotes, setLiveReplayNote, watchReplay, downloadReplay, getRecordedViews, lastActionAt, claimVictory, reportBug, backgroundSearching, stopBackgroundMatchmaking, authUser, unreadMessageCount, setSocialOpen } = useStore(
+  const { view, viewUpdate, playerProfiles, legal, actionCandidates, roomCommandPending, pendingInteraction, pendingDefenderStageIds, yourSeat, spectating, spectatorCount, spectatorUsernames, botGame, sendIntent, sendPriorityMode, sendRunechantSkip, sendEmote, kickSpectator, latestEmote, undo, error, leave, opponentConnected, connected, connectionIssueVisible, roomCode, screen, replayFrames, replayViews, replayStep, replayNotes, setLiveReplayNote, watchReplay, downloadReplay, closeReplay, getRecordedViews, lastActionAt, claimVictory, reportBug, backgroundSearching, stopBackgroundMatchmaking, authUser, unreadMessageCount, setSocialOpen } = useStore(
     useShallow((state) => ({
       view: state.view,
       viewUpdate: state.viewUpdate,
@@ -121,10 +121,13 @@ export function GameBoard() {
       roomCode: state.roomCode,
       screen: state.screen,
       replayFrames: state.replayFrames,
+      replayViews: state.replayViews,
+      replayStep: state.replayStep,
       replayNotes: state.replayNotes,
       setLiveReplayNote: state.setLiveReplayNote,
       watchReplay: state.watchReplay,
       downloadReplay: state.downloadReplay,
+      closeReplay: state.closeReplay,
       getRecordedViews: state.getRecordedViews,
       lastActionAt: state.lastActionAt,
       claimVictory: state.claimVictory,
@@ -242,8 +245,8 @@ export function GameBoard() {
     volume: soundEffectsVolume,
     seat: spectating ? null : yourSeat,
   });
-  // end-of-game popup can be dismissed to inspect the final board; re-arm it
-  // whenever a new winner is decided (fresh game in the same room)
+  // End-of-game popup can be dismissed to inspect the final board. Re-arm it
+  // for a fresh result or after leaving and returning to the replay's last frame.
   const [gameOverDismissed, setGameOverDismissed] = useState(false);
   const [confirmSkipArsenal, setConfirmSkipArsenal] = useState(false);
   const [boundedChoiceSelection, setBoundedChoiceSelection] = useState<{
@@ -252,7 +255,11 @@ export function GameBoard() {
   } | null>(null);
   const showDeckCardEvents = screen !== "replay";
   const deckCardFeedback = useDeckCardFeedback(view, showDeckCardEvents);
-  const winnerNow = view?.phase === "game-over" ? view.winner ?? "draw" : null;
+  const replayAtEnd = screen === "replay" && replayViews !== null
+    && replayViews.length > 0 && replayStep === replayViews.length - 1;
+  const winnerNow = view?.phase === "game-over" && (screen !== "replay" || replayAtEnd)
+    ? view.winner ?? "draw"
+    : null;
   const arsenalDecisionKey =
     view?.pendingDecision?.kind === "arsenal" && view.pendingDecision.player === yourSeat
       ? `${view.turn}:${view.pendingDecision.player}`
@@ -1383,7 +1390,7 @@ export function GameBoard() {
         noteText={liveNoteText}
         onSetFrameNote={!spectating && !replaying ? setLiveReplayNote : null}
         onShowGameOver={
-          !replaying && view.phase === "game-over" && gameOverDismissed
+          view.phase === "game-over" && (!replaying || replayAtEnd) && gameOverDismissed
             ? () => setGameOverDismissed(false)
             : null
         }
@@ -1448,12 +1455,15 @@ export function GameBoard() {
         gameView={view}
         spectating={spectating}
         replaying={replaying}
+        replayAtEnd={replayAtEnd}
         gameOverDismissed={gameOverDismissed}
         getRecordedViews={getRecordedViews}
+        replayViews={replayViews}
         replayAvailable={replayFrames > 0}
         onWatchReplay={watchReplay}
         onDownloadReplay={downloadReplay}
         onLeave={leave}
+        onCloseReplay={closeReplay}
         onDismissGameOver={() => setGameOverDismissed(true)}
         onCloseOverlay={() => setOverlay(null)}
         onInspectCard={setInspectedCardId}

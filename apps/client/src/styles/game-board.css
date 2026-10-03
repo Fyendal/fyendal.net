@@ -20,6 +20,9 @@
   background: #0d0703;
 }
 .table.rail-is-collapsed { --rail-w: 40px; }
+.table:has(.mat-square-board) {
+  --arena-square-size: clamp(84px, 12vh, 165px);
+}
 
 /* leather playmat */
 .board {
@@ -212,7 +215,6 @@
    the equipment/hero cluster together and reserve the flexible runway for
    board permanents and piles. */
 .mat-half.mat-square-board {
-  --arena-square-size: clamp(84px, 12vh, 165px);
   --mat-column-gap: clamp(10px, 1.35vh, 15px);
   --mat-outer-col: var(--arena-square-size);
   --mat-arms-col: var(--arena-square-size);
@@ -978,7 +980,7 @@
     --mat-tapped-col: var(--large-zone-card-height);
     grid-template-rows: repeat(3, var(--large-zone-card-height));
   }
-  .mat-half.mat-square-board {
+  .table:has(.mat-square-board) {
     --arena-square-size: min(12vh, 10.05vw);
   }
   .mat-half .card-zone {

@@ -113,6 +113,7 @@ export function ZoneOverlay({
             <InactiveZoneCard
               key={card.instanceId}
               card={card}
+              squareArt={false}
               showFaceDownIdentity={
                 overlay.showOwnedFaceDownIdentities === true &&
                 yourSeat !== null &&
@@ -120,7 +121,7 @@ export function ZoneOverlay({
               }
               revealOwnerIntimidated={yourSeat !== null && card.owner === yourSeat}
             />
-          ) : <CardFace key={card.instanceId} card={card} size="zone" />)}
+          ) : <CardFace key={card.instanceId} card={card} size="zone" squareArt={false} />)}
         </div>
       </div>
     </div>
