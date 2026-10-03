@@ -16,8 +16,9 @@
   z-index: 4;
 }
 
-/* A flight sits immediately above its destination surface. Higher gameplay
-   floats and prompts therefore remain readable throughout the transfer. */
+/* Flights clear both their source and destination combat surfaces. Stack
+   departures use the stack layer even when landing on the lower chain float.
+   Higher gameplay prompts remain readable throughout the transfer. */
 .game-motion-layer-chain {
   z-index: var(--game-z-chain-motion);
 }

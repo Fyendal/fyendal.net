@@ -490,6 +490,14 @@
   align-items: center;
   gap: 5px;
 }
+/* Use card-zone sizing so the empty row matches real blockers at every
+   viewport, including the mobile and short-window card overrides. */
+.chain-blocker-placeholder {
+  flex-shrink: 0;
+  border: 1px dashed #b8933f55;
+  border-radius: 3px;
+  background: #00000022;
+}
 .chain-unblock-all {
   display: inline-flex;
   align-items: center;

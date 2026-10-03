@@ -38,6 +38,18 @@ export function squareMotionFlight(flight: MotionFlight, squareCardsEnabled: boo
     && flight.end.width / flight.end.height >= .9;
 }
 
+/** Stack departures must clear their source float as well as their destination. */
+export function motionFlightLayer(flight: MotionFlight): "stack" | "chain" | undefined {
+  return flight.sourceMaskPresentationKey ? "stack" : flight.destinationLayer;
+}
+
+/** A queued transition can still mask or replace the real destination. Keep
+ * the landed copy until the next batch mounts instead of exposing an empty slot. */
+export function motionFlightHandsOff(flight: MotionFlight, destinationVisible: boolean): boolean {
+  return destinationVisible
+    || (flight.destinationPresentationKey === undefined && flight.mode !== "reflow");
+}
+
 export function MotionCardVisual({
   visual,
   count,
@@ -132,7 +144,7 @@ function MotionFlightOverlay({
   flight: MotionFlight;
   squareCardsEnabled: boolean;
   onFlightArrive: (batchId: string, destinationPresentationKey?: string) => boolean;
-  onFlightDepart: (batchId: string, sourceRevealPresentationKey?: string) => void;
+  onFlightDepart: (batchId: string, flight: MotionFlight) => void;
   onCueComplete: (cueId: string) => void;
 }) {
   const lingerTimerRef = useRef<number | null>(null);
@@ -147,14 +159,14 @@ function MotionFlightOverlay({
       style={flightStyle(flight, squareCardsEnabled)}
       onAnimationStart={(event: AnimationEvent<HTMLDivElement>) => {
         if (event.target === event.currentTarget) {
-          onFlightDepart(batchId, flight.sourceRevealPresentationKey);
+          onFlightDepart(batchId, flight);
         }
       }}
       onAnimationEnd={(event: AnimationEvent<HTMLDivElement>) => {
         // Ignore the nested back/face reveal animations. The wrapper's
         // completion is the exact point at which the real card takes over.
         if (event.target !== event.currentTarget) return;
-        onFlightDepart(batchId, flight.sourceRevealPresentationKey);
+        onFlightDepart(batchId, flight);
         const destinationVisible = onFlightArrive(batchId, flight.destinationPresentationKey);
         const element = event.currentTarget;
         const lingerMs = Math.max(0,
@@ -165,7 +177,7 @@ function MotionFlightOverlay({
             element.style.visibility = "hidden";
             lingerTimerRef.current = null;
           }, lingerMs);
-        } else if (flight.mode !== "reflow" || destinationVisible) {
+        } else if (motionFlightHandsOff(flight, destinationVisible)) {
           element.style.visibility = "hidden";
         }
         onCueComplete(flight.id);
@@ -221,7 +233,7 @@ export function GameMotionLayer({
   queuedSources: readonly MotionFlight[];
   squareCardsEnabled: boolean;
   onFlightArrive: (batchId: string, destinationPresentationKey?: string) => boolean;
-  onFlightDepart: (batchId: string, sourceRevealPresentationKey?: string) => void;
+  onFlightDepart: (batchId: string, flight: MotionFlight) => void;
   onComplete: (batchId: string) => void;
 }) {
   const completedCuesRef = useRef<{
@@ -263,8 +275,9 @@ export function GameMotionLayer({
   const chainFlights: MotionFlight[] = [];
   const stackFlights: MotionFlight[] = [];
   for (const flight of batch.flights) {
-    if (flight.destinationLayer === "chain") chainFlights.push(flight);
-    else if (flight.destinationLayer === "stack") stackFlights.push(flight);
+    const layer = motionFlightLayer(flight);
+    if (layer === "chain") chainFlights.push(flight);
+    else if (layer === "stack") stackFlights.push(flight);
     else if (flight.mode === "appear") appearanceFlights.push(flight);
     else boardFlights.push(flight);
   }

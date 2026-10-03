@@ -9,6 +9,7 @@ import {
 import type { GameView } from "@fyendal/shared";
 import type { ViewUpdate } from "../../store/types.js";
 import type { MotionPreference } from "../../storage.js";
+import { motionCombatPresentation } from "./combatMotionPresentation.js";
 import { classifyViewUpdate } from "./classifyViewUpdate.js";
 import { detectGameMotionEvents } from "./detectMotionEvents.js";
 import { transitionMotionEvents } from "./transitionMotionEvents.js";
@@ -32,6 +33,7 @@ import {
   type MotionRect,
   type MotionFlight,
 } from "./motionGeometry.js";
+import { attackLayerPresentation } from "../attackLayerPresentation.js";
 import { useMotionPreference } from "./useMotionPreference.js";
 import { rememberHandFocusOrigins, rememberStackFocusOrigins } from "../pitchFocusMotion.js";
 import {
@@ -43,6 +45,8 @@ import {
   revealMotionDestination,
   type MaskedElementsByBatch,
 } from "./motionDestinationMask.js";
+
+const EMPTY_STARTED_FLIGHTS: ReadonlySet<string> = new Set();
 
 const EMPTY_ANCHORS: MotionAnchorSnapshot = {
   cards: new Map(),
@@ -65,18 +69,18 @@ export function useGameMotion({
   predictsSemanticTransition?: boolean;
 }): {
   batch: GameMotionBatch | null;
+  combatPresentation: ReturnType<typeof motionCombatPresentation>;
   queuedSources: readonly MotionFlight[];
   turnStartUiReady: boolean;
   arriveFlight: (batchId: string, destinationPresentationKey?: string) => boolean;
-  departFlight: (batchId: string, sourceRevealPresentationKey?: string) => void;
+  departFlight: (batchId: string, flight: MotionFlight) => void;
   completeBatch: (batchId: string) => void;
   getStackFocusOrigin: (instanceId: number) => MotionRect | undefined;
   getHandFocusOrigin: (seat: number, instanceId: number) => MotionRect | undefined;
 } {
   const reduceMotion = useMotionPreference(motionPreference);
-  const [batch, setBatch] = useState<GameMotionBatch | null>(null);
-  const [queuedSources, setQueuedSources] = useState<readonly MotionFlight[]>([]);
-  const [turnStartUiReady, setTurnStartUiReady] = useState(true);
+  const [queue, setQueue] = useState<MotionBatchQueue>(EMPTY_MOTION_BATCH_QUEUE);
+  const [startedFlightIds, setStartedFlightIds] = useState(EMPTY_STARTED_FLIGHTS);
   const previousViewRef = useRef<GameView | null>(null);
   const layoutMotionSequenceRef = useRef(0);
   const previousAnchorsRef = useRef<MotionAnchorSnapshot>(EMPTY_ANCHORS);
@@ -87,6 +91,7 @@ export function useGameMotion({
   const previousViewPredictedSemanticTransitionRef = useRef(false);
   const reduceMotionRef = useRef(reduceMotion);
   const batchQueueRef = useRef<MotionBatchQueue>(EMPTY_MOTION_BATCH_QUEUE);
+  const mountedBatchIdRef = useRef<string | null>(null);
   const maskedElementsRef = useRef<MaskedElementsByBatch>(new Map());
   const gameId = view?.gameId;
   const getStackFocusOrigin = useCallback((instanceId: number) => {
@@ -115,28 +120,26 @@ export function useGameMotion({
   }, []);
 
   const activateBatchMasks = useCallback((
-    candidate: GameMotionBatch | null,
-    measuredElements?: ReadonlyMap<string, HTMLElement>,
+    candidate: GameMotionBatch,
+    elements: ReadonlyMap<string, HTMLElement>,
   ) => {
-    if (!candidate) return;
     const arrivals = [
       ...candidate.flights,
       ...candidate.connectors,
+      ...candidate.flights.flatMap((flight) => flight.sourceMaskPresentationKey
+        ? [{ destinationPresentationKey: flight.sourceMaskPresentationKey }]
+        : []),
       ...candidate.flights.flatMap((flight) => flight.sourceRevealPresentationKey
         ? [{ destinationPresentationKey: flight.sourceRevealPresentationKey }]
         : []),
     ];
-    if (!arrivals.some((arrival) => arrival.destinationPresentationKey !== undefined)) return;
-    const elements = measuredElements
-      ?? (rootRef.current ? measureMotionAnchors(rootRef.current).cardElements : null);
-    if (!elements) return;
     activateMotionDestinationMasks(
       candidate.id,
       arrivals,
       elements,
       maskedElementsRef.current,
     );
-  }, [rootRef]);
+  }, []);
 
   const releaseBatchMasks = useCallback((batchId: string) => {
     const batchMasks = maskedElementsRef.current.get(batchId);
@@ -162,10 +165,10 @@ export function useGameMotion({
 
   const cancelMotionQueue = useCallback(() => {
     batchQueueRef.current = EMPTY_MOTION_BATCH_QUEUE;
+    mountedBatchIdRef.current = null;
     clearMaskedElements();
-    setTurnStartUiReady(true);
-    setBatch(null);
-    setQueuedSources((current) => current.length === 0 ? current : []);
+    setQueue(EMPTY_MOTION_BATCH_QUEUE);
+    setStartedFlightIds(EMPTY_STARTED_FLIGHTS);
   }, [clearMaskedElements]);
 
   const completeBatch = useCallback((batchId: string) => {
@@ -173,11 +176,9 @@ export function useGameMotion({
     releaseBatchMasks(batchId);
     const nextQueue = completeMotionBatch(batchQueueRef.current, batchId);
     batchQueueRef.current = nextQueue;
-    activateBatchMasks(nextQueue.active);
-    setTurnStartUiReady(!motionQueueBlocksTurnStartUi(nextQueue));
-    setBatch(nextQueue.active);
-    setQueuedSources(queuedSourceFlights(nextQueue));
-  }, [activateBatchMasks, releaseBatchMasks]);
+    setQueue(nextQueue);
+    setStartedFlightIds(EMPTY_STARTED_FLIGHTS);
+  }, [releaseBatchMasks]);
 
   const arriveFlight = useCallback((
     batchId: string,
@@ -195,9 +196,18 @@ export function useGameMotion({
     );
   }, []);
 
-  const departFlight = useCallback((batchId: string, sourceRevealPresentationKey?: string) => {
-    if (batchQueueRef.current.active?.id !== batchId || !sourceRevealPresentationKey) return;
-    arriveMotionDestination(batchId, sourceRevealPresentationKey, maskedElementsRef.current);
+  const departFlight = useCallback((batchId: string, flight: MotionFlight) => {
+    if (batchQueueRef.current.active?.id !== batchId) return;
+    // Only float-bound flights affect React presentation. Other departures
+    // reveal their source pile directly without rerendering the board.
+    if (flight.destinationLayer) {
+      setStartedFlightIds((current) => (
+        current.has(flight.id) ? current : new Set([...current, flight.id])
+      ));
+    }
+    if (flight.sourceRevealPresentationKey) {
+      arriveMotionDestination(batchId, flight.sourceRevealPresentationKey, maskedElementsRef.current);
+    }
   }, []);
 
   // Run after every commit: view-independent layout changes (hand collapse,
@@ -224,6 +234,14 @@ export function useGameMotion({
     refreshStackFocusOrigins(view, measured.snapshot);
     refreshHandFocusOrigins(view, measured.snapshot);
     refreshMotionDestinationMasks(maskedElementsRef.current, measured.cardElements);
+    // The outgoing overlay must be in the committed DOM before concealing its
+    // retained stack source. Doing this in completeBatch leaves an empty slot
+    // between the animationend event and React mounting the next batch.
+    if (queue.active && queue.active === batchQueueRef.current.active
+      && mountedBatchIdRef.current !== queue.active.id) {
+      activateBatchMasks(queue.active, measured.cardElements);
+      mountedBatchIdRef.current = queue.active.id;
+    }
     if (reduceMotionRef.current !== reduceMotion) {
       reduceMotionRef.current = reduceMotion;
       cancelMotionQueue();
@@ -281,6 +299,15 @@ export function useGameMotion({
       }
     }
 
+    if (nextBatches.length > 0) {
+      const combatPresentation = attackLayerPresentation(view);
+      const sourceCombatPresentation = previousView ? attackLayerPresentation(previousView) : undefined;
+      for (const candidate of nextBatches) {
+        candidate.combatPresentation = combatPresentation;
+        candidate.sourceCombatPresentation = sourceCombatPresentation;
+      }
+    }
+
     if (!previousView || classification.kind !== "animate") {
       cancelMotionQueue();
     }
@@ -301,7 +328,6 @@ export function useGameMotion({
       );
     }
     if (nextBatches.length > 0) {
-      const previousActive = batchQueueRef.current.active;
       let nextQueue = batchQueueRef.current;
       for (const nextBatch of nextBatches) {
         const enqueueResult = enqueueMotionBatch(nextQueue, nextBatch);
@@ -311,7 +337,7 @@ export function useGameMotion({
         }
       }
       batchQueueRef.current = nextQueue;
-      setQueuedSources(queuedSourceFlights(nextQueue));
+      setQueue(nextQueue);
       // The authoritative DOM has already changed. Conceal queued hand
       // reflows while source copies preserve their old presentation.
       for (const pendingBatch of nextQueue.pending) {
@@ -321,11 +347,6 @@ export function useGameMotion({
           measured.cardElements,
           maskedElementsRef.current,
         );
-      }
-      setTurnStartUiReady(!motionQueueBlocksTurnStartUi(nextQueue));
-      if (nextQueue.active !== previousActive) {
-        activateBatchMasks(nextQueue.active, measured.cardElements);
-        setBatch(nextQueue.active);
       }
     }
     previousViewRef.current = view;
@@ -355,9 +376,12 @@ export function useGameMotion({
   }, [cancelMotionQueue, rootRef, refreshHandFocusOrigins, refreshStackFocusOrigins]);
 
   return {
-    batch,
-    queuedSources,
-    turnStartUiReady,
+    batch: queue.active,
+    combatPresentation: motionCombatPresentation(
+      view ? attackLayerPresentation(view) : { chain: [], stack: [] }, queue, startedFlightIds,
+    ),
+    queuedSources: queuedSourceFlights(queue),
+    turnStartUiReady: !motionQueueBlocksTurnStartUi(queue),
     arriveFlight,
     departFlight,
     completeBatch,

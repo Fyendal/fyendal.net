@@ -18,7 +18,6 @@ import {
   TurnTimingFloat,
 } from "./PriorityFloat.js";
 import { StackFloat } from "./StackFloat.js";
-import { attackLayerPresentation } from "./attackLayerPresentation.js";
 import { DecisionFloat } from "./DecisionFloat.js";
 import {
   CardSearchOverlay,
@@ -228,9 +227,6 @@ export function GameBoard() {
     () => optimisticDefenderView(interactionProjection.view, yourSeat, presentedDefenderIds),
     [interactionProjection.view, presentedDefenderIds, yourSeat],
   );
-  const combatPresentation = presentedView
-    ? attackLayerPresentation(presentedView)
-    : { chain: [], stack: [], context: undefined };
   const gameMotion = useGameMotion({
     rootRef: tableRef,
     view: presentedView,
@@ -242,6 +238,7 @@ export function GameBoard() {
     predictsSemanticTransition:
       interactionProjection.predictsSemanticTransition || presentedDefenderIds !== null,
   });
+  const { combatPresentation } = gameMotion;
   // End-of-game popup can be dismissed to inspect the final board. Re-arm it
   // for a fresh result or after leaving and returning to the replay's last frame.
   const [gameOverDismissed, setGameOverDismissed] = useState(false);
@@ -1233,6 +1230,7 @@ export function GameBoard() {
       {/* ── floating stack window: played cards and effects awaiting resolution,
           including the attack before it moves onto the combat chain. ── */}
       {gameMotion.turnStartUiReady ? <StackFloat
+        motionDeferred={combatPresentation.deferStack}
         layers={combatPresentation.stack}
         context={combatPresentation.context}
         miniHost={splitLineMiniHost}
@@ -1248,6 +1246,7 @@ export function GameBoard() {
           both players and count into the live defense value (0 for the
           opponent — face-down staging leaks nothing) ── */}
       <ChainFloat
+        motionDeferred={combatPresentation.deferChain}
         links={combatPresentation.chain}
         onRect={setChainRect}
         miniHost={splitLineMiniHost}

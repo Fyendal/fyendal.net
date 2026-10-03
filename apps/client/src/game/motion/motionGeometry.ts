@@ -1,3 +1,4 @@
+import type { CombatPresentation } from "../attackLayerPresentation.js";
 import {
   motionLocationKey,
   type GameMotionEvent,
@@ -66,6 +67,8 @@ export interface MotionFlight {
   /** Keep an effect draw visible in its temporary hand slot until discard starts. */
   lingerUntilMs?: number;
   destinationPresentationKey?: string;
+  /** Retained stack source covered by this active flight, including its delay. */
+  sourceMaskPresentationKey?: string;
   /** The newly exposed source-pile top stays hidden until this flight departs. */
   sourceRevealPresentationKey?: string;
   maskDestinationWhilePending?: true;
@@ -96,6 +99,9 @@ export interface MotionConnector {
 }
 
 export interface GameMotionBatch {
+  /** Float lifecycle follows the same queue as card travel. */
+  combatPresentation?: CombatPresentation;
+  sourceCombatPresentation?: CombatPresentation;
   id: string;
   stage?: "end-turn" | "turn-start";
   flights: MotionFlight[];
@@ -424,6 +430,8 @@ export function resolveMotionBatch(
       delayMs: 0,
       destinationPresentationKey: event.destinationPresentationKey,
       ...(sourceRevealPresentationKey ? { sourceRevealPresentationKey } : {}),
+      ...(event.source.kind === "stack-layer" && event.sourcePresentationKey
+        ? { sourceMaskPresentationKey: event.sourcePresentationKey } : {}),
       ...((event.kind === "reflow" || event.sourcePresentationKey !== undefined)
         ? { holdAtSource: true as const }
         : {}),

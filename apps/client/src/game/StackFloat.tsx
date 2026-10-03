@@ -46,10 +46,13 @@ export function StackFloat({
   context,
   miniHost,
   visibility,
+  motionDeferred = false,
   lessGuidance = false,
   onSkipRunechants,
 }: {
   layers: StackLayerView[];
+  /** Keep geometry mounted until the incoming card actually starts moving. */
+  motionDeferred?: boolean;
   /** Combat phase/step and reason these layers are waiting. */
   context?: string;
   /** The playmat divider dock that anchors the minimized control. */
@@ -82,7 +85,7 @@ export function StackFloat({
     const minimized = (
       <button
         className={`stack-mini${miniHost ? " stack-mini-anchored" : ""}`}
-        style={miniHost ? undefined : stackFloat.style}
+        style={{ ...(miniHost ? {} : stackFloat.style), visibility: motionDeferred ? "hidden" : undefined }}
         onClick={() => setStackHidden(false)}
         title={intl.formatMessage({ id: "game.stack.show" })}
       >
@@ -96,7 +99,11 @@ export function StackFloat({
     return miniHost ? createPortal(minimized, miniHost) : minimized;
   }
   return (
-    <div className="float stack-float" style={stackFloat.style} {...stackFloat.dragProps}>
+    <div
+      className="float stack-float"
+      style={{ ...stackFloat.style, visibility: motionDeferred ? "hidden" : undefined }}
+      {...stackFloat.dragProps}
+    >
       <div className="chain-float-bar">
         <span className="chain-float-title stack-title">
           {intl.formatMessage({ id: "game.stack.title" })}

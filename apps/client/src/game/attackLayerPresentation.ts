@@ -1,13 +1,15 @@
 import type { ChainLinkView, GameView, StackLayerView } from "@fyendal/shared";
 
-/** The engine keeps a provisional link for attack calculations during the
- * Layer Step. Present that unresolved attack on the stack until it becomes
- * attacking in the Attack Step. */
-export function attackLayerPresentation(view: GameView): {
+export interface CombatPresentation {
   chain: ChainLinkView[];
   stack: StackLayerView[];
   context?: string;
-} {
+}
+
+/** The engine keeps a provisional link for attack calculations during the
+ * Layer Step. Present that unresolved attack on the stack until it becomes
+ * attacking in the Attack Step. */
+export function attackLayerPresentation(view: GameView): CombatPresentation {
   const pending = view.chain.at(-1);
   if (!pending?.onStack) {
     return { chain: view.chain, stack: view.stack, context: view.stackContext };

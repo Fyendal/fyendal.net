@@ -16,7 +16,7 @@ const link: ChainLinkView = {
   resolved: false,
 };
 
-function renderCombatFloats(hidden: boolean) {
+function renderCombatFloats(hidden: boolean, motionDeferred = false) {
   const visibility = { hidden, setHidden: vi.fn() };
   return renderToStaticMarkup(createElement(
     TestI18nProvider,
@@ -27,13 +27,22 @@ function renderCombatFloats(hidden: boolean) {
       createElement(StackFloat, {
         layers: [{ card: null, seat: 0, label: "On hit", optional: false }],
         visibility,
+        motionDeferred,
       }),
-      createElement(ChainFloat, { links: [link], onRect: vi.fn(), visibility }),
+      createElement(ChainFloat, { links: [link], onRect: vi.fn(), visibility, motionDeferred }),
     ),
   ));
 }
 
 describe("shared combat-float visibility", () => {
+  it.each([false, true])("conceals queued combat UI while retaining its layout (minimized: %s)", (hidden) => {
+    const html = renderCombatFloats(hidden, true);
+    expect(html.match(/visibility:hidden/g)).toHaveLength(2);
+    expect(html).toContain(hidden ? "chain-mini" : "float chain-float");
+    expect(html).toContain(hidden ? "stack-mini" : "float stack-float");
+    expect(html).not.toContain("display:none");
+  });
+
   it("shows both expanded windows together", () => {
     const html = renderCombatFloats(false);
 

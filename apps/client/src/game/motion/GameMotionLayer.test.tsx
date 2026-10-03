@@ -1,12 +1,28 @@
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
-import { MotionCardVisual, motionFlightStartRect, squareMotionFlight } from "./GameMotionLayer.js";
+import { MotionCardVisual, motionFlightHandsOff, motionFlightLayer, motionFlightStartRect, squareMotionFlight } from "./GameMotionLayer.js";
 import type { MotionFlight } from "./motionGeometry.js";
 
 const card = { instanceId: 12, cardId: "WTR160", owner: 0 };
 
 describe("motion card presentation", () => {
+  it("keeps the landed attack visible until its stack destination can take over", () => {
+    const flight = {
+      mode: "move", destinationPresentationKey: "stack:layer:42",
+    } as MotionFlight;
+    expect(motionFlightHandsOff(flight, false)).toBe(false);
+    expect(motionFlightHandsOff(flight, true)).toBe(true);
+    expect(motionFlightHandsOff({ ...flight, mode: "settle" }, false)).toBe(false);
+    expect(motionFlightHandsOff({ ...flight, mode: "disappear", destinationPresentationKey: undefined }, false)).toBe(true);
+  });
+  it("keeps a delayed stack departure above its source float on the way to combat", () => {
+    const flight = {
+      destinationLayer: "chain", sourceMaskPresentationKey: "stack:layer:42", delayMs: 290,
+    } as MotionFlight;
+    expect(motionFlightLayer(flight)).toBe("stack");
+    expect(motionFlightLayer({ ...flight, sourceMaskPresentationKey: undefined })).toBe("chain");
+  });
   it("uses the square card's name, frame crop, and stat badge during a compact flight", () => {
     const html = renderToStaticMarkup(createElement(MotionCardVisual, {
       visual: { kind: "face", card },

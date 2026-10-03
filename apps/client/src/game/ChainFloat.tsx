@@ -213,9 +213,12 @@ export function ChainFloat({
   onActivateCard,
   miniHost,
   visibility,
+  motionDeferred = false,
   children,
 }: {
   links: ChainLinkView[];
+  /** Preserve measurable anchors until the incoming attack starts moving. */
+  motionDeferred?: boolean;
   onRect: React.Dispatch<React.SetStateAction<DOMRect | null>>;
   /** defenders staged on the current link this defend step */
   staged?: CardView[];
@@ -288,10 +291,16 @@ export function ChainFloat({
   const attackActivatable = cardIsActivatable(chain?.attackingCard.instanceId ?? -1);
   // staged defenders only belong to the link currently being defended
   const showStaged = staging && !showingEmptyCurrent && chainIdx === chainLen - 1;
+  const hasBlockerCard = chain !== undefined && (
+    chain.targetAlly !== undefined || chain.defendingCards.length > 0 || showStaged
+    || chain.reactions.some((reaction) => reaction.owner !== chain.attackingCard.owner)
+  );
+  const canUnstageAll = showStaged && onUnstageAll !== undefined;
   const open = chain !== undefined && !chainHidden;
   const minimized = chainCurrent && chainHidden ? (
     <button
       className={`chain-mini${miniHost ? " chain-mini-anchored" : ""}`}
+      style={{ visibility: motionDeferred ? "hidden" : undefined }}
       onClick={() => setChainHidden(false)}
       title={intl.formatMessage({ id: "game.chain.show" })}
     >
@@ -315,7 +324,7 @@ export function ChainFloat({
   // to its right edge (re-measured after drags, resizes and content changes)
   useEffect(() => {
     const el = chainRef.current;
-    if (!el) {
+    if (!el || motionDeferred) {
       onRect(null);
       return;
     }
@@ -335,7 +344,7 @@ export function ChainFloat({
     const ro = new ResizeObserver(update);
     ro.observe(el);
     return () => ro.disconnect();
-  }, [open, chainFloat.pos, onRect]);
+  }, [open, chainFloat.pos, onRect, motionDeferred]);
 
   return (
     <>
@@ -345,7 +354,7 @@ export function ChainFloat({
           className="float chain-float"
           role="region"
           aria-label={intl.formatMessage({ id: "game.chain.title" })}
-          style={chainFloat.style}
+          style={{ ...chainFloat.style, visibility: motionDeferred ? "hidden" : undefined }}
           {...chainFloat.dragProps}
         >
           <div className="chain-float-bar">
@@ -516,6 +525,9 @@ export function ChainFloat({
                   </div>
                   <div className="chain-blockers">
                     <div className="chain-group">
+                      {!hasBlockerCard ? (
+                        <div className="card-zone chain-blocker-placeholder" aria-hidden="true" />
+                      ) : null}
                       {chain.targetAlly ? (
                         <CardFace
                           card={chain.targetAlly}
@@ -613,8 +625,13 @@ export function ChainFloat({
                         ) : null
                       ))}
                     </div>
-                    {showStaged && onUnstageAll ? (
-                      <button className="chain-unblock-all" onClick={onUnstageAll}>
+                    {onUnstage || onUnstageAll ? (
+                      <button
+                        className="chain-unblock-all"
+                        onClick={onUnstageAll}
+                        disabled={!canUnstageAll}
+                        style={{ visibility: canUnstageAll ? undefined : "hidden" }}
+                      >
                         {intl.formatMessage({ id: "game.chain.unblockAll" })}
                       </button>
                     ) : null}

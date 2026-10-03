@@ -153,7 +153,7 @@ describe("optimistic interaction projection", () => {
     }));
   });
 
-  it("presents an arena attack ability directly in the chain after payment", () => {
+  it("presents an arena attack ability on the stack after payment", () => {
     const weapon: CardView = {
       instanceId: 20,
       cardId: "MON221B",
@@ -186,10 +186,10 @@ describe("optimistic interaction projection", () => {
     expect(projection.view?.players[0]?.pitch.map((card) => card.instanceId)).toEqual([21]);
     expect(detectGameMotionEvents(view, projection.view!)).toEqual(expect.arrayContaining([
       expect.objectContaining({
-        kind: "move",
+        kind: "connect",
         instanceId: 20,
         source: { kind: "weapon", seat: 0, index: 0 },
-        destination: { kind: "chain-attack", link: 0 },
+        destination: { kind: "stack-layer", index: 0 },
       }),
       expect.objectContaining({
         kind: "move",
@@ -200,7 +200,7 @@ describe("optimistic interaction projection", () => {
     ]));
   });
 
-  it("presents a hero attack ability in the chain too", () => {
+  it("presents a hero attack ability on the stack too", () => {
     const view = game(player(0, { heroAttackAbilityIndexes: [0] }));
     const projection = optimisticInteractionView(view, 0, pending({
       kind: "activate-ability",
@@ -212,9 +212,9 @@ describe("optimistic interaction projection", () => {
     expect(projection.view?.stack).toEqual([]);
     expect(projection.view?.chain[0]?.attackingCard.instanceId).toBe(100);
     expect(detectGameMotionEvents(view, projection.view!)).toContainEqual(expect.objectContaining({
-      kind: "move",
+      kind: "connect",
       source: { kind: "hero", seat: 0 },
-      destination: { kind: "chain-attack", link: 0 },
+      destination: { kind: "stack-layer", index: 0 },
     }));
   });
 
@@ -276,7 +276,7 @@ describe("optimistic interaction projection", () => {
     expect(detectGameMotionEvents(view, projection.view!)).toEqual([]);
   });
 
-  it("presents an attack action in the chain preview while its layer waits", () => {
+  it("presents an attack action on the stack while its layer waits", () => {
     const attack: CardView = { instanceId: 25, cardId: "WTR006", owner: 0, attack: 9 };
     const view = game(player(0, { hand: [attack], handCount: 1 }));
 
@@ -295,7 +295,7 @@ describe("optimistic interaction projection", () => {
       kind: "move",
       instanceId: 25,
       source: { kind: "hand", seat: 0 },
-      destination: { kind: "chain-attack", link: 0 },
+      destination: { kind: "stack-layer", index: 0 },
     }));
   });
 
