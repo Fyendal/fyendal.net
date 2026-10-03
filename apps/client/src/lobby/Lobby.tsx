@@ -23,6 +23,7 @@ const Home = lazy(() => import("./Home.js").then((module) => ({ default: module.
 const RoomInviteModal = lazy(() => import("./RoomInviteModal.js").then((module) => ({ default: module.RoomInviteModal })));
 const DeckLibrary = lazy(() => import("./DeckLibrary.js").then((module) => ({ default: module.DeckLibrary })));
 const AccountPanel = lazy(() => import("../auth/AccountPanel.js").then((module) => ({ default: module.AccountPanel })));
+const AchievementsPanel = lazy(() => import("../achievements/AchievementsPanel.js").then((module) => ({ default: module.AchievementsPanel })));
 const ReplayLibrary = lazy(() => import("../replay/ReplayLibrary.js").then((module) => ({ default: module.ReplayLibrary })));
 const VersionUpdateModal = lazy(() => import("../notices/VersionUpdateModal.js")
   .then((module) => ({ default: module.VersionUpdateModal })));
@@ -218,6 +219,12 @@ export function Lobby() {
                 ) : null}
               </button>
               <button
+                className={`format-card${rail === "achievements" ? " selected" : ""}`}
+                onClick={() => setRail("achievements")}
+              >
+                <span className="format-card-name">{intl.formatMessage({ id: "achievements.title" })}</span>
+              </button>
+              <button
                 className={`format-card${rail === "account" ? " selected" : ""}`}
                 onClick={() => setRail("account")}
               >
@@ -241,6 +248,7 @@ export function Lobby() {
               <DeckLibrary formatFilter={deckFormatFilter} onFormatFilterChange={setDeckFormatFilter} />
             )}
             {rail === "replays" && <ReplayLibrary />}
+            {rail === "achievements" && <AchievementsPanel />}
             {rail === "account" && <AccountPanel />}
           </Suspense>
         </div>
@@ -307,6 +315,9 @@ export function Lobby() {
               setShowMobileMore(false);
               setSocialOpen(true);
             }} />
+            <button onClick={() => { setRail("achievements"); setShowMobileMore(false); }}>
+              {intl.formatMessage({ id: "achievements.title" })}
+            </button>
             <button
               onClick={() => {
                 setRail("account");

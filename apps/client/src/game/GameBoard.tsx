@@ -1,4 +1,6 @@
 import { BrowserBotNotice } from "../bot/BrowserBotNotice.js";
+import { useMatchAchievements } from "../achievements/useMatchAchievements.js";
+import { AchievementToast } from "../achievements/AchievementToast.js";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useIntl } from "react-intl";
 import { useShallow } from "zustand/react/shallow";
@@ -91,7 +93,7 @@ const EMPTY_INSTANCE_IDS: ReadonlySet<number> = new Set();
 
 export function GameBoard() {
   const intl = useIntl();
-  const { view, viewUpdate, playerProfiles, legal, actionCandidates, roomCommandPending, pendingInteraction, pendingDefenderStageIds, yourSeat, spectating, spectatorCount, spectatorUsernames, botGame, sendIntent, sendPriorityMode, sendRunechantSkip, sendEmote, kickSpectator, latestEmote, undo, error, leave, opponentConnected, connected, connectionIssueVisible, roomCode, screen, replayFrames, replayViews, replayStep, replayNotes, setLiveReplayNote, watchReplay, downloadReplay, closeReplay, getRecordedViews, lastActionAt, claimVictory, reportBug, backgroundSearching, stopBackgroundMatchmaking, authUser, unreadMessageCount, setSocialOpen } = useStore(
+  const { view, viewUpdate, playerProfiles, legal, actionCandidates, roomCommandPending, pendingInteraction, pendingDefenderStageIds, yourSeat, spectating, spectatorCount, spectatorUsernames, botGame, sendIntent, sendPriorityMode, sendRunechantSkip, sendEmote, kickSpectator, latestEmote, undo, error, leave, opponentConnected, connected, connectionIssueVisible, roomCode, screen, replayFrames, replayViews, replayStep, replayNotes, setLiveReplayNote, watchReplay, downloadReplay, closeReplay, getRecordedViews, lastActionAt, claimVictory, reportBug, backgroundSearching, stopBackgroundMatchmaking, authUser, authToken, setLobbyRail, unreadMessageCount, setSocialOpen } = useStore(
     useShallow((state) => ({
       view: state.view,
       viewUpdate: state.viewUpdate,
@@ -135,6 +137,8 @@ export function GameBoard() {
       backgroundSearching: state.backgroundMatchmaking.state === "searching",
       stopBackgroundMatchmaking: state.stopBackgroundMatchmaking,
       authUser: state.authUser,
+      authToken: state.authToken,
+      setLobbyRail: state.setLobbyRail,
       unreadMessageCount: state.friends.reduce((total, friend) => total + friend.unreadCount, 0),
       setSocialOpen: state.setSocialOpen,
     })),
@@ -238,13 +242,6 @@ export function GameBoard() {
     predictsSemanticTransition:
       interactionProjection.predictsSemanticTransition || presentedDefenderIds !== null,
   });
-  useGameSounds({
-    view,
-    viewUpdate,
-    enabled: soundEffectsEnabled && screen !== "replay",
-    volume: soundEffectsVolume,
-    seat: spectating ? null : yourSeat,
-  });
   // End-of-game popup can be dismissed to inspect the final board. Re-arm it
   // for a fresh result or after leaving and returning to the replay's last frame.
   const [gameOverDismissed, setGameOverDismissed] = useState(false);
@@ -260,6 +257,21 @@ export function GameBoard() {
   const winnerNow = view?.phase === "game-over" && (screen !== "replay" || replayAtEnd)
     ? view.winner ?? "draw"
     : null;
+  const matchAchievements = useMatchAchievements({
+    token: authToken,
+    roomCode,
+    gameOver: view?.phase === "game-over",
+    live: screen !== "replay" && !spectating && yourSeat !== null,
+    viewUpdate,
+  });
+  useGameSounds({
+    view,
+    viewUpdate,
+    enabled: soundEffectsEnabled && screen !== "replay",
+    volume: soundEffectsVolume,
+    seat: spectating ? null : yourSeat,
+    achievementToastVisible: matchAchievements.toast.length > 0,
+  });
   const arsenalDecisionKey =
     view?.pendingDecision?.kind === "arsenal" && view.pendingDecision.player === yourSeat
       ? `${view.turn}:${view.pendingDecision.player}`
@@ -1028,6 +1040,11 @@ export function GameBoard() {
       onClickCapture={onTableClickCapture}
       onClick={onTableClick}
     >
+      <AchievementToast
+        achievements={matchAchievements.toast}
+        exiting={matchAchievements.toastExiting}
+        onDismiss={matchAchievements.dismissToast}
+      />
       {hasOwnPriority ? <div className="own-priority-arrival" aria-hidden="true" /> : null}
       {/* ── playmat board: opponent half on top, your half below ── */}
       <div ref={boardRef} className="board">
@@ -1457,6 +1474,8 @@ export function GameBoard() {
         replaying={replaying}
         replayAtEnd={replayAtEnd}
         gameOverDismissed={gameOverDismissed}
+        matchAchievements={matchAchievements.earned}
+        onViewAchievements={() => { leave(); setLobbyRail("achievements"); }}
         getRecordedViews={getRecordedViews}
         replayViews={replayViews}
         replayAvailable={replayFrames > 0}

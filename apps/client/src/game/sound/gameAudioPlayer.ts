@@ -8,6 +8,7 @@ const SOUND_URLS: Readonly<Record<SampleSoundKind, readonly string[]>> = {
   shuffle: ["cards/shuffle.ogg"],
   hit: ["damage/hit.mp3"],
   zap: ["damage/zap.wav"],
+  achievement: ["ui/achievement-unlocked.mp3"],
 };
 
 const CUE_GAIN: Readonly<Record<GameSoundKind, number>> = {
@@ -17,6 +18,7 @@ const CUE_GAIN: Readonly<Record<GameSoundKind, number>> = {
   priority: 0.32,
   hit: 0.9,
   zap: 0.58,
+  achievement: 0.7,
 };
 
 const MAX_CUE_DURATION_SECONDS: Readonly<Partial<Record<GameSoundKind, number>>> = {
@@ -53,6 +55,7 @@ export class GameAudioPlayer {
     shuffle: 0,
     hit: 0,
     zap: 0,
+    achievement: 0,
   };
   private readonly activeSources = new Set<AudioScheduledSourceNode>();
   private enabled = true;

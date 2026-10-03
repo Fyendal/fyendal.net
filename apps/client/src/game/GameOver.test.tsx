@@ -25,6 +25,30 @@ function finishedView(): GameView {
 }
 
 describe("GameOver player statistics", () => {
+  it("shows achievements earned in the completed match", () => {
+    const view = finishedView();
+    const html = renderToStaticMarkup(
+      <TestI18nProvider>
+        <GameOver
+          view={view}
+          seat={1}
+          spectating={false}
+          recordedViews={[view]}
+          onWatchReplay={null}
+          onDownloadReplay={null}
+          onBackToLobby={() => undefined}
+          onClose={() => undefined}
+          matchAchievements={["first-victory", "beat-ira"]}
+          onViewAchievements={() => undefined}
+        />
+      </TestI18nProvider>,
+    );
+    expect(html).toContain("Achievements earned this match");
+    expect(html).toContain("First Victory");
+    expect(html).toContain("Beat Ira Bot");
+    expect(html).toContain("View all achievements");
+  });
+
   it("shows a draw without naming a winner", () => {
     const view = { ...finishedView(), winner: null };
     const html = renderToStaticMarkup(

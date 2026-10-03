@@ -219,14 +219,6 @@ input::placeholder {
   .waiting.waiting-hidden { opacity: 0; }
 }
 
-.deck-panel-heading {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  margin-bottom: 16px;
-}
-.deck-panel-heading .panel-title { margin-bottom: 0; }
 .toggle-switch {
   display: inline-flex;
   align-items: center;

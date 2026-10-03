@@ -1,6 +1,7 @@
 .social-dock {
   position: fixed;
-  z-index: 70;
+  z-index: 50;
+  --social-bubble-size: 44px;
   right: auto;
   bottom: max(28px, env(safe-area-inset-bottom));
   left: max(28px, env(safe-area-inset-left));
@@ -45,8 +46,8 @@
 .social-bubble {
   position: relative;
   display: grid;
-  width: 52px;
-  height: 52px;
+  width: var(--social-bubble-size);
+  height: var(--social-bubble-size);
   place-items: center;
   padding: 0;
   clip-path: none;
@@ -61,7 +62,7 @@
 .social-dock[data-dragging="true"] .social-bubble { cursor: grabbing; }
 .social-bubble:hover,
 .social-bubble[aria-expanded="true"] { background: radial-gradient(circle at 35% 25%, #604521, #2b1b0a 68%); }
-.social-bubble svg { width: 27px; height: 27px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.8; }
+.social-bubble svg { width: 23px; height: 23px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.8; }
 .social-bubble > span,
 .social-row-badge {
   display: grid;
@@ -106,7 +107,7 @@
 
 .social-message-toast {
   position: absolute;
-  bottom: 63px;
+  bottom: calc(var(--social-bubble-size) + 11px);
   left: 0;
   width: min(224px, calc(100vw - 56px));
   filter: none;
@@ -188,7 +189,7 @@
 
 .social-panel {
   position: absolute;
-  bottom: 64px;
+  bottom: calc(var(--social-bubble-size) + 12px);
   left: 0;
   display: flex;
   width: 320px;
@@ -725,7 +726,7 @@
   .social-panel {
     position: absolute;
     right: auto;
-    bottom: 64px;
+    bottom: calc(var(--social-bubble-size) + 12px);
     left: 0;
     width: min(320px, calc(100vw - 32px));
     height: auto;
@@ -767,13 +768,13 @@
 }
 .social-dock[data-user-position="true"][data-panel-vertical="below"] .social-panel,
 .social-dock[data-user-position="true"][data-panel-vertical="below"] .social-message-toast {
-  top: 64px;
+  top: calc(var(--social-bubble-size) + 12px);
   bottom: auto;
 }
 .social-dock[data-user-position="true"][data-panel-vertical="above"] .social-panel,
 .social-dock[data-user-position="true"][data-panel-vertical="above"] .social-message-toast {
   top: auto;
-  bottom: 64px;
+  bottom: calc(var(--social-bubble-size) + 12px);
 }
 
 @media (max-width: 700px) {

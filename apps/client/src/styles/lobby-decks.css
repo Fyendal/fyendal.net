@@ -109,7 +109,6 @@
 .mobile-deck-format-picker,
 .mobile-deck-toolbar { display: none; }
 .deck-panel-actions { display: flex; align-items: center; gap: 14px; }
-.deck-import-action { min-height: 42px; white-space: nowrap; }
 .deck-catalog-tabs {
   display: flex;
   gap: 8px;
@@ -669,24 +668,15 @@
   .bot-opponent-options > button { min-height: 112px; padding: 13px; }
 }
 
-/* ── rooms header (title + join-by-code) ── */
-.rooms-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 14px;
-  margin-bottom: 16px;
-  border-bottom: 1px solid #45331f88;
-  padding-bottom: 9px;
-}
-.rooms-header .panel-title { margin: 0; border-bottom: none; padding-bottom: 0; }
+/* ── room listings ── */
+.rooms-header .panel-title { margin: 0; }
 
 /* Room listings prioritize quick scanning over the lobby's decorative type. */
 .all-rooms-panel {
   --font-display: "Segoe UI", system-ui, sans-serif;
   font-family: "Segoe UI", system-ui, sans-serif;
 }
-.lobby-page .all-rooms-panel .panel-title {
+.lobby-page .all-rooms-panel .room-section .panel-title {
   font-family: var(--font-display);
   letter-spacing: 1px;
 }
@@ -701,13 +691,6 @@
 .room-section .panel-title { font-size: 15px; margin-bottom: 10px; }
 
 /* Unified deck management and home play setup. */
-.deck-panel-heading {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  margin-bottom: 20px;
-}
 .deck-panel-heading .panel-title { margin: 0; }
 .deck-library-management-tools {
   grid-template-columns: minmax(180px, 1fr) minmax(145px, .55fr) minmax(145px, .55fr);

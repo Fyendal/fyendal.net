@@ -21,7 +21,8 @@ export type GameSoundKind =
   | "shuffle"
   | "priority"
   | "hit"
-  | "zap";
+  | "zap"
+  | "achievement";
 
 export interface GameSoundCue {
   kind: GameSoundKind;

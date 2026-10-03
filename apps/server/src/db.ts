@@ -695,6 +695,17 @@ export const MIGRATIONS: Migration[] = [
       notice JSONB NOT NULL
     );`,
   },
+  {
+    version: 43,
+    sql: `CREATE TABLE user_achievements (
+      user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      achievement_id TEXT NOT NULL,
+      unlocked_at BIGINT NOT NULL CHECK (unlocked_at >= 0),
+      room_code TEXT NOT NULL,
+      PRIMARY KEY (user_id, achievement_id)
+    );
+    CREATE INDEX user_achievements_id_idx ON user_achievements (achievement_id);`,
+  },
 ];
 
 async function publicTables(db: Queryable): Promise<string[]> {

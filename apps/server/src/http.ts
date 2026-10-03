@@ -32,6 +32,7 @@ import {
 import { consoleError } from "./logging.js";
 import { getGlobalNotice } from "./globalNotice.js";
 import { getVersionUpdateNotice } from "./versionUpdateNotice.js";
+import { getAchievements } from "./achievements.js";
 import { asRecord } from "./validation.js";
 import {
   deleteReplay,
@@ -624,6 +625,15 @@ export function createApiServer(deps: ApiDeps): http.Server {
           const preferences = await getAccountBadges(deps.db, user.id);
           if (!preferences) return sendJson(res, 404, { ok: false, error: "account not found" });
           sendJson(res, 200, { ok: true, ...preferences });
+        })
+        .catch((e) => internalError(res, e));
+      return;
+    }
+    if (req.method === "GET" && url.pathname === "/api/account/achievements") {
+      authUser(req)
+        .then(async (user) => {
+          if (!user) return sendJson(res, 401, { ok: false, error: "not logged in" });
+          sendJson(res, 200, { ...await getAchievements(deps.db, user.id) });
         })
         .catch((e) => internalError(res, e));
       return;

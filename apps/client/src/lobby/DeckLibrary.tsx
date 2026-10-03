@@ -69,7 +69,7 @@ export function DeckLibrary(props: {
     <div className="panel deck-library-panel">
       <div className="deck-panel-heading">
         <h2 className="panel-title">{intl.formatMessage({ id: "lobby.nav.decks" })}</h2>
-        <button className="btn-primary deck-import-action" onClick={openImport}>
+        <button className="btn-primary lobby-panel-action" onClick={openImport}>
           {intl.formatMessage({ id: "lobby.deck.createImport" })}
         </button>
       </div>

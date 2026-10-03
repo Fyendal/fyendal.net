@@ -16,6 +16,10 @@ describe("account deletion races", () => {
     const exportedId = Number(users.rows[0]!.id);
     const candidateId = Number(users.rows[1]!.id);
     await db.query("INSERT INTO daily_game_players (day_utc, user_id) VALUES ($1, $2)", [1_700_006_400_000, exportedId]);
+    await db.query(
+      "INSERT INTO user_achievements (user_id, achievement_id, unlocked_at, room_code) VALUES ($1, $2, $3, $4)",
+      [exportedId, "first-victory", 123, "ABC123"],
+    );
     await recordDeckPlay(db, exportedId, "precon-asb", 123);
     const store = new PgRoomStore(db, "test-ruleset");
     const candidate = await store.queueForMatch("cc", {
@@ -60,6 +64,7 @@ describe("account deletion races", () => {
       offer: { roomCode: candidate.code, opponentUserId: candidateId },
     });
     expect(exported?.gameDays).toEqual([1_700_006_400_000]);
+    expect(exported?.achievements).toEqual([{ id: "first-victory", unlockedAt: 123, roomCode: "ABC123" }]);
     expect(exported?.deckPlays).toEqual([{ deckId: "precon-asb", playedAt: 123 }]);
     expect(decodeAccountExportResponse({ ok: true, export: exported })).not.toBeNull();
 
@@ -80,6 +85,7 @@ describe("account deletion races", () => {
       [exportedId],
     )).rows).toEqual([]);
     expect((await db.query("SELECT 1 FROM daily_game_players WHERE user_id = $1", [exportedId])).rows).toEqual([]);
+    expect((await db.query("SELECT 1 FROM user_achievements WHERE user_id = $1", [exportedId])).rows).toEqual([]);
     expect((await db.query("SELECT 1 FROM deck_plays WHERE user_id = $1", [exportedId])).rows).toEqual([]);
   });
 

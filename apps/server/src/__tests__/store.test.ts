@@ -15,6 +15,7 @@ import {
   stateMessage,
 } from "../store.js";
 import { freshDb } from "./testdb.js";
+import { getAchievements } from "../achievements.js";
 
 let db: Queryable;
 let store: PgRoomStore;
@@ -1049,6 +1050,30 @@ describe("PgRoomStore storage", () => {
     expect(replayDml(queries)).toHaveLength(2);
     expect(replayDml(queries)[0]).toContain("INSERT INTO replay_frames");
     expect(replayDml(queries)[1]).toContain("UPDATE replay_games");
+  });
+
+  it("awards the winner when a game-over transition commits", async () => {
+    const { code, tokens } = await fullRoom();
+    const { rows } = await db.query(
+      `INSERT INTO users (username, username_lc, pass_hash, created_at)
+       VALUES ('WinnerA','winnera','hash',1), ('WinnerB','winnerb','hash',1) RETURNING id`,
+    );
+    const userIds = rows.map((row) => Number(row.id));
+    await startGame(code, tokens);
+    for (const seat of [0, 1] as const) {
+      await db.query("UPDATE room_seats SET user_id = $3 WHERE room_code = $1 AND seat = $2", [
+        code, seat, userIds[seat],
+      ]);
+    }
+    await db.query("INSERT INTO daily_game_players (day_utc, user_id) VALUES (0, $1), (0, $2)", userIds);
+    const room = (await store.getRoom(code))!;
+    const waitingOn = (room.state!.pendingDecision?.player ?? room.state!.activePlayer) as 0 | 1;
+    const winner = (1 - waitingOn) as 0 | 1;
+    const claimed = await store.claimVictory(code, { token: tokens[winner], userId: userIds[winner] }, Date.now() + 10_000_000_000);
+    expect(claimed.ok).toBe(true);
+    const achievements = await getAchievements(db, userIds[winner]!);
+    expect(achievements.unlocks.map((item) => item.id)).toEqual(["first-pvp-win", "first-victory"]);
+    expect(achievements.percentages.find((item) => item.id === "first-victory")?.percent).toBe(50);
   });
 
   it("does not rewrite seats for spectator membership", async () => {

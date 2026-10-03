@@ -1,7 +1,10 @@
 import { useId, useMemo, useState, type ReactNode } from "react";
 import { useIntl } from "react-intl";
 import type { GameView } from "@fyendal/shared";
+import type { AchievementId } from "@fyendal/protocol";
 import { heroImageUrl } from "../lobby/heroImage.js";
+import { achievementMessageId } from "../achievements/catalog.js";
+import "../styles/achievements.css";
 import {
   averagePerRound,
   averageValue,
@@ -26,6 +29,8 @@ export function GameOver({
   onClose,
   replaying = false,
   friendAction = null,
+  matchAchievements = [],
+  onViewAchievements,
 }: {
   view: GameView;
   seat: number;
@@ -37,6 +42,8 @@ export function GameOver({
   onClose: () => void;
   replaying?: boolean;
   friendAction?: ReactNode;
+  matchAchievements?: AchievementId[];
+  onViewAchievements?: () => void;
 }) {
   const intl = useIntl();
   const openingTooltipId = useId();
@@ -93,6 +100,20 @@ export function GameOver({
           <p className="gameover-replay-retention">
             {intl.formatMessage({ id: "game.over.retention" })}
           </p>
+        ) : null}
+
+        {matchAchievements.length > 0 ? (
+          <section className="gameover-achievements">
+            <div className="gameover-achievements-heading">
+              <h3>{intl.formatMessage({ id: "achievements.matchEarned" })}</h3>
+              {onViewAchievements ? <button type="button" className="gameover-achievements-link" onClick={onViewAchievements}>
+                {intl.formatMessage({ id: "achievements.viewAll" })}<span aria-hidden="true">→</span>
+              </button> : null}
+            </div>
+            <ul>{matchAchievements.map((id) => (
+              <li key={id}>{intl.formatMessage({ id: achievementMessageId(id, "name") })}</li>
+            ))}</ul>
+          </section>
         ) : null}
 
         <div className="gameover-switcher">

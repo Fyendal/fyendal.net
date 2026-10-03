@@ -149,6 +149,356 @@
       "value": "Account"
     }
   ],
+  "achievements.beatbravo.description": [
+    {
+      "type": 0,
+      "value": "Defeat Bravo Bot in a practice game."
+    }
+  ],
+  "achievements.beatbravo.name": [
+    {
+      "type": 0,
+      "value": "Beat Bravo Bot"
+    }
+  ],
+  "achievements.beatbriar.description": [
+    {
+      "type": 0,
+      "value": "Defeat Briar Bot in a practice game."
+    }
+  ],
+  "achievements.beatbriar.name": [
+    {
+      "type": 0,
+      "value": "Beat Briar Bot"
+    }
+  ],
+  "achievements.beatcindra.description": [
+    {
+      "type": 0,
+      "value": "Defeat Cindra Bot in a practice game."
+    }
+  ],
+  "achievements.beatcindra.name": [
+    {
+      "type": 0,
+      "value": "Beat Cindra Bot"
+    }
+  ],
+  "achievements.beathala.description": [
+    {
+      "type": 0,
+      "value": "Defeat Hala Bot in a practice game."
+    }
+  ],
+  "achievements.beathala.name": [
+    {
+      "type": 0,
+      "value": "Beat Hala Bot"
+    }
+  ],
+  "achievements.beatira.description": [
+    {
+      "type": 0,
+      "value": "Defeat Ira Bot in a practice game."
+    }
+  ],
+  "achievements.beatira.name": [
+    {
+      "type": 0,
+      "value": "Beat Ira Bot"
+    }
+  ],
+  "achievements.beatjarl.description": [
+    {
+      "type": 0,
+      "value": "Defeat Jarl Bot in a practice game."
+    }
+  ],
+  "achievements.beatjarl.name": [
+    {
+      "type": 0,
+      "value": "Beat Jarl Bot"
+    }
+  ],
+  "achievements.beatkayo.description": [
+    {
+      "type": 0,
+      "value": "Defeat Kayo Bot in a practice game."
+    }
+  ],
+  "achievements.beatkayo.name": [
+    {
+      "type": 0,
+      "value": "Beat Kayo Bot"
+    }
+  ],
+  "achievements.beatstarvo.description": [
+    {
+      "type": 0,
+      "value": "Defeat Starvo Bot in a practice game."
+    }
+  ],
+  "achievements.beatstarvo.name": [
+    {
+      "type": 0,
+      "value": "Beat Starvo Bot"
+    }
+  ],
+  "achievements.bigturn.description": [
+    {
+      "type": 0,
+      "value": "Deal more than 25 damage to the opposing hero during one of your turns in a completed game."
+    }
+  ],
+  "achievements.bigturn.name": [
+    {
+      "type": 0,
+      "value": "Big Turn"
+    }
+  ],
+  "achievements.earned": [
+    {
+      "type": 0,
+      "value": "Unlocked"
+    }
+  ],
+  "achievements.earnedOn": [
+    {
+      "type": 0,
+      "value": "Unlocked "
+    },
+    {
+      "type": 1,
+      "value": "date"
+    }
+  ],
+  "achievements.filter.all": [
+    {
+      "type": 0,
+      "value": "All"
+    }
+  ],
+  "achievements.filter.empty": [
+    {
+      "type": 0,
+      "value": "No achievements in this view."
+    }
+  ],
+  "achievements.filter.label": [
+    {
+      "type": 0,
+      "value": "Filter achievements"
+    }
+  ],
+  "achievements.filter.locked": [
+    {
+      "type": 0,
+      "value": "Locked"
+    }
+  ],
+  "achievements.filter.unlocked": [
+    {
+      "type": 0,
+      "value": "Unlocked"
+    }
+  ],
+  "achievements.firstbotwin.description": [
+    {
+      "type": 0,
+      "value": "Win a practice game against any bot."
+    }
+  ],
+  "achievements.firstbotwin.name": [
+    {
+      "type": 0,
+      "value": "First Bot Win"
+    }
+  ],
+  "achievements.firstpvpwin.description": [
+    {
+      "type": 0,
+      "value": "Win a game against another player."
+    }
+  ],
+  "achievements.firstpvpwin.name": [
+    {
+      "type": 0,
+      "value": "First PvP Win"
+    }
+  ],
+  "achievements.firstvictory.description": [
+    {
+      "type": 0,
+      "value": "Win your first game."
+    }
+  ],
+  "achievements.firstvictory.name": [
+    {
+      "type": 0,
+      "value": "First Victory"
+    }
+  ],
+  "achievements.footnote": [
+    {
+      "type": 0,
+      "value": "Percentages compare players who have played a game. Achievements begin with games completed after launch."
+    }
+  ],
+  "achievements.group.bots": [
+    {
+      "type": 0,
+      "value": "Bot opponents"
+    }
+  ],
+  "achievements.group.challenges": [
+    {
+      "type": 0,
+      "value": "Challenges"
+    }
+  ],
+  "achievements.group.first": [
+    {
+      "type": 0,
+      "value": "First steps"
+    }
+  ],
+  "achievements.intro": [
+    {
+      "type": 0,
+      "value": "Your wins, standout turns, and opponents defeated in legal card-pool games."
+    }
+  ],
+  "achievements.loadError": [
+    {
+      "type": 0,
+      "value": "Could not load achievements."
+    }
+  ],
+  "achievements.locked": [
+    {
+      "type": 0,
+      "value": "Locked"
+    }
+  ],
+  "achievements.matchEarned": [
+    {
+      "type": 0,
+      "value": "Achievements earned this match"
+    }
+  ],
+  "achievements.progress": [
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " of "
+    },
+    {
+      "type": 1,
+      "value": "total"
+    },
+    {
+      "type": 0,
+      "value": " achievements unlocked"
+    }
+  ],
+  "achievements.rarity": [
+    {
+      "type": 1,
+      "value": "percent"
+    },
+    {
+      "type": 0,
+      "value": "% of players have earned this"
+    }
+  ],
+  "achievements.rarityCompact": [
+    {
+      "type": 1,
+      "value": "percent"
+    },
+    {
+      "type": 0,
+      "value": "% of players"
+    }
+  ],
+  "achievements.rarityCompactRare": [
+    {
+      "type": 0,
+      "value": "<0.1% of players"
+    }
+  ],
+  "achievements.rarityRare": [
+    {
+      "type": 0,
+      "value": "Less than 0.1% of players have earned this"
+    }
+  ],
+  "achievements.relentlessvictory.description": [
+    {
+      "type": 0,
+      "value": "Win a game while averaging more than 16 damage to the opposing hero per post-opening turn."
+    }
+  ],
+  "achievements.relentlessvictory.name": [
+    {
+      "type": 0,
+      "value": "Relentless Victory"
+    }
+  ],
+  "achievements.retry": [
+    {
+      "type": 0,
+      "value": "Retry"
+    }
+  ],
+  "achievements.title": [
+    {
+      "type": 0,
+      "value": "Achievements"
+    }
+  ],
+  "achievements.toast.dismiss": [
+    {
+      "type": 0,
+      "value": "Dismiss achievement notification"
+    }
+  ],
+  "achievements.toast.more": [
+    {
+      "type": 0,
+      "value": "+"
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " more"
+    }
+  ],
+  "achievements.toast.title": [
+    {
+      "type": 0,
+      "value": "Achievement unlocked"
+    }
+  ],
+  "achievements.unlocked": [
+    {
+      "type": 0,
+      "value": "unlocked"
+    }
+  ],
+  "achievements.viewAll": [
+    {
+      "type": 0,
+      "value": "View all achievements"
+    }
+  ],
   "auth.consent": [
     {
       "type": 0,

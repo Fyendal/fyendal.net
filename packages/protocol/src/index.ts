@@ -169,6 +169,22 @@ export interface AccountBadgesResponse {
   availableBadges: PlayerBadge[];
   selectedBadge: PlayerBadge | null;
 }
+export const ACHIEVEMENT_IDS = [
+  "first-victory", "first-pvp-win", "first-bot-win", "big-turn", "relentless-victory",
+  "beat-bravo", "beat-briar", "beat-kayo", "beat-cindra",
+  "beat-ira", "beat-hala", "beat-jarl", "beat-starvo",
+] as const;
+export type AchievementId = typeof ACHIEVEMENT_IDS[number];
+export interface AchievementUnlock {
+  id: AchievementId;
+  unlockedAt: number;
+  roomCode: string;
+}
+export interface AchievementsResponse {
+  ok: true;
+  unlocks: AchievementUnlock[];
+  percentages: Array<{ id: AchievementId; percent: number }>;
+}
 export interface AccountExport {
   exportedAt: string;
   account: {
@@ -239,6 +255,7 @@ export interface AccountExport {
     resolutionMessage?: string | null;
   }>;
   gameDays: number[];
+  achievements: AchievementUnlock[];
   replays: Array<{
     id: string;
     finishedAt: number;
@@ -1670,6 +1687,34 @@ export const decodeAccountBadgesResponse: Decoder<AccountBadgesResponse> = (valu
     : null;
 };
 
+function achievementUnlock(value: unknown): value is AchievementUnlock {
+  const item = object(value);
+  return !!item && exactKeys(item, ["id", "unlockedAt", "roomCode"])
+    && typeof item.id === "string" && (ACHIEVEMENT_IDS as readonly string[]).includes(item.id)
+    && nonNegativeInteger(item.unlockedAt) && item.unlockedAt <= 8_640_000_000_000_000
+    && roomCode(item.roomCode);
+}
+
+export const decodeAchievementUnlock: Decoder<AchievementUnlock> = (value) =>
+  achievementUnlock(value) ? value : null;
+
+export const decodeAchievementsResponse: Decoder<AchievementsResponse> = (value) => {
+  const data = object(value);
+  if (!data || !exactKeys(data, ["ok", "unlocks", "percentages"]) || data.ok !== true
+    || !array(data.unlocks, achievementUnlock, ACHIEVEMENT_IDS.length)) return null;
+  const percentages = data.percentages;
+  if (!array(percentages, (entry): entry is AchievementsResponse["percentages"][number] => {
+    const item = object(entry);
+    return !!item && exactKeys(item, ["id", "percent"])
+      && typeof item.id === "string" && (ACHIEVEMENT_IDS as readonly string[]).includes(item.id)
+      && typeof item.percent === "number" && Number.isFinite(item.percent)
+      && item.percent >= 0 && item.percent <= 100;
+  }, ACHIEVEMENT_IDS.length) || percentages.length !== ACHIEVEMENT_IDS.length) return null;
+  if (new Set(data.unlocks.map((item) => item.id)).size !== data.unlocks.length
+    || new Set(percentages.map((item) => item.id)).size !== percentages.length) return null;
+  return { ok: true, unlocks: data.unlocks, percentages };
+};
+
 function decodeDeckSummary(value: unknown): DeckSummary | null {
   const deck = object(value);
   return deck && exactKeys(
@@ -1876,7 +1921,7 @@ export const decodeAccountExportResponse: Decoder<AccountExportResponse> = (valu
     && exactKeys(
       exported,
       ["exportedAt", "account", "decks", "deckPlays", "rooms", "matchmaking", "bugReports",
-        "gameDays", "replays", "friends", "friendRequests", "friendMessages"],
+        "gameDays", "achievements", "replays", "friends", "friendRequests", "friendMessages"],
     ) && !!account
     && exactKeys(account, ["username", "createdAt", "earlyTester", "selectedBadge"])
     && string(exported.exportedAt, 64, false) && string(account.username, MAX_SHORT_TEXT, false)
@@ -1893,6 +1938,7 @@ export const decodeAccountExportResponse: Decoder<AccountExportResponse> = (valu
     && exportMatchmaking(exported.matchmaking)
     && array(exported.bugReports, (item): item is AccountExport["bugReports"][number] => exportBugReport(item), MAX_ROOMS)
     && array(exported.gameDays, (item): item is number => nonNegativeInteger(item) && item % 86_400_000 === 0, MAX_ROOMS)
+    && array(exported.achievements, achievementUnlock, ACHIEVEMENT_IDS.length)
     && array(exported.replays, (item): item is AccountExport["replays"][number] => exportReplay(item), MAX_ROOMS)
     && array(exported.friends, (item): item is AccountExport["friends"][number] => {
       const friend = object(item);

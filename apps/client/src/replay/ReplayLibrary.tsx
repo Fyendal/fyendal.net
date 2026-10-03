@@ -119,6 +119,7 @@ export function ReplayLibrary() {
             }}
           />
           <button
+            className="lobby-panel-action"
             aria-label={intl.formatMessage({ id: "replay.openFile" })}
             onClick={() => fileInput.current?.click()}
           >
@@ -129,7 +130,7 @@ export function ReplayLibrary() {
       </header>
 
       <div
-        className="replay-library-tabs"
+        className="lobby-panel-tabs replay-library-tabs"
         role="tablist"
         aria-label={intl.formatMessage({ id: "replay.filterLabel" })}
       >

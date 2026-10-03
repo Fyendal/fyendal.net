@@ -149,6 +149,360 @@
       "value": "账户"
     }
   ],
+  "achievements.beatbravo.description": [
+    {
+      "type": 0,
+      "value": "在练习对局中击败 Bravo 机器人。"
+    }
+  ],
+  "achievements.beatbravo.name": [
+    {
+      "type": 0,
+      "value": "击败 Bravo 机器人"
+    }
+  ],
+  "achievements.beatbriar.description": [
+    {
+      "type": 0,
+      "value": "在练习对局中击败 Briar 机器人。"
+    }
+  ],
+  "achievements.beatbriar.name": [
+    {
+      "type": 0,
+      "value": "击败 Briar 机器人"
+    }
+  ],
+  "achievements.beatcindra.description": [
+    {
+      "type": 0,
+      "value": "在练习对局中击败 Cindra 机器人。"
+    }
+  ],
+  "achievements.beatcindra.name": [
+    {
+      "type": 0,
+      "value": "击败 Cindra 机器人"
+    }
+  ],
+  "achievements.beathala.description": [
+    {
+      "type": 0,
+      "value": "在练习对局中击败 Hala 机器人。"
+    }
+  ],
+  "achievements.beathala.name": [
+    {
+      "type": 0,
+      "value": "击败 Hala 机器人"
+    }
+  ],
+  "achievements.beatira.description": [
+    {
+      "type": 0,
+      "value": "在练习对局中击败 Ira 机器人。"
+    }
+  ],
+  "achievements.beatira.name": [
+    {
+      "type": 0,
+      "value": "击败 Ira 机器人"
+    }
+  ],
+  "achievements.beatjarl.description": [
+    {
+      "type": 0,
+      "value": "在练习对局中击败 Jarl 机器人。"
+    }
+  ],
+  "achievements.beatjarl.name": [
+    {
+      "type": 0,
+      "value": "击败 Jarl 机器人"
+    }
+  ],
+  "achievements.beatkayo.description": [
+    {
+      "type": 0,
+      "value": "在练习对局中击败 Kayo 机器人。"
+    }
+  ],
+  "achievements.beatkayo.name": [
+    {
+      "type": 0,
+      "value": "击败 Kayo 机器人"
+    }
+  ],
+  "achievements.beatstarvo.description": [
+    {
+      "type": 0,
+      "value": "在练习对局中击败 Starvo 机器人。"
+    }
+  ],
+  "achievements.beatstarvo.name": [
+    {
+      "type": 0,
+      "value": "击败 Starvo 机器人"
+    }
+  ],
+  "achievements.bigturn.description": [
+    {
+      "type": 0,
+      "value": "在一场已结束的对局中，单个自己的回合对对方英雄造成超过 25 点伤害。"
+    }
+  ],
+  "achievements.bigturn.name": [
+    {
+      "type": 0,
+      "value": "爆发回合"
+    }
+  ],
+  "achievements.earned": [
+    {
+      "type": 0,
+      "value": "已解锁"
+    }
+  ],
+  "achievements.earnedOn": [
+    {
+      "type": 0,
+      "value": "解锁于 "
+    },
+    {
+      "type": 1,
+      "value": "date"
+    }
+  ],
+  "achievements.filter.all": [
+    {
+      "type": 0,
+      "value": "全部"
+    }
+  ],
+  "achievements.filter.empty": [
+    {
+      "type": 0,
+      "value": "此筛选条件下没有成就。"
+    }
+  ],
+  "achievements.filter.label": [
+    {
+      "type": 0,
+      "value": "筛选成就"
+    }
+  ],
+  "achievements.filter.locked": [
+    {
+      "type": 0,
+      "value": "未解锁"
+    }
+  ],
+  "achievements.filter.unlocked": [
+    {
+      "type": 0,
+      "value": "已解锁"
+    }
+  ],
+  "achievements.firstbotwin.description": [
+    {
+      "type": 0,
+      "value": "首次击败任意练习机器人。"
+    }
+  ],
+  "achievements.firstbotwin.name": [
+    {
+      "type": 0,
+      "value": "首次机器人对战胜利"
+    }
+  ],
+  "achievements.firstpvpwin.description": [
+    {
+      "type": 0,
+      "value": "首次击败另一名玩家。"
+    }
+  ],
+  "achievements.firstpvpwin.name": [
+    {
+      "type": 0,
+      "value": "首次玩家对战胜利"
+    }
+  ],
+  "achievements.firstvictory.description": [
+    {
+      "type": 0,
+      "value": "赢得你的第一场对局。"
+    }
+  ],
+  "achievements.firstvictory.name": [
+    {
+      "type": 0,
+      "value": "首场胜利"
+    }
+  ],
+  "achievements.footnote": [
+    {
+      "type": 0,
+      "value": "百分比以已进行过对局的玩家为基准。成就从功能上线后完成的对局开始计算。"
+    }
+  ],
+  "achievements.group.bots": [
+    {
+      "type": 0,
+      "value": "机器人对手"
+    }
+  ],
+  "achievements.group.challenges": [
+    {
+      "type": 0,
+      "value": "挑战"
+    }
+  ],
+  "achievements.group.first": [
+    {
+      "type": 0,
+      "value": "初次体验"
+    }
+  ],
+  "achievements.intro": [
+    {
+      "type": 0,
+      "value": "记录你在合法卡池对局中的胜利、精彩回合与击败的对手。"
+    }
+  ],
+  "achievements.loadError": [
+    {
+      "type": 0,
+      "value": "无法加载成就。"
+    }
+  ],
+  "achievements.locked": [
+    {
+      "type": 0,
+      "value": "未解锁"
+    }
+  ],
+  "achievements.matchEarned": [
+    {
+      "type": 0,
+      "value": "本局解锁的成就"
+    }
+  ],
+  "achievements.progress": [
+    {
+      "type": 0,
+      "value": "已解锁 "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": "/"
+    },
+    {
+      "type": 1,
+      "value": "total"
+    },
+    {
+      "type": 0,
+      "value": " 项成就"
+    }
+  ],
+  "achievements.rarity": [
+    {
+      "type": 1,
+      "value": "percent"
+    },
+    {
+      "type": 0,
+      "value": "% 的玩家已解锁"
+    }
+  ],
+  "achievements.rarityCompact": [
+    {
+      "type": 1,
+      "value": "percent"
+    },
+    {
+      "type": 0,
+      "value": "% 的玩家"
+    }
+  ],
+  "achievements.rarityCompactRare": [
+    {
+      "type": 0,
+      "value": "不到 0.1% 的玩家"
+    }
+  ],
+  "achievements.rarityRare": [
+    {
+      "type": 0,
+      "value": "不到 0.1% 的玩家已解锁"
+    }
+  ],
+  "achievements.relentlessvictory.description": [
+    {
+      "type": 0,
+      "value": "赢得一场对局，且开局回合后每个自己的回合平均对对方英雄造成超过 16 点伤害。"
+    }
+  ],
+  "achievements.relentlessvictory.name": [
+    {
+      "type": 0,
+      "value": "持续猛攻"
+    }
+  ],
+  "achievements.retry": [
+    {
+      "type": 0,
+      "value": "重试"
+    }
+  ],
+  "achievements.title": [
+    {
+      "type": 0,
+      "value": "成就"
+    }
+  ],
+  "achievements.toast.dismiss": [
+    {
+      "type": 0,
+      "value": "关闭成就通知"
+    }
+  ],
+  "achievements.toast.more": [
+    {
+      "type": 0,
+      "value": "另有 "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " 项"
+    }
+  ],
+  "achievements.toast.title": [
+    {
+      "type": 0,
+      "value": "成就已解锁"
+    }
+  ],
+  "achievements.unlocked": [
+    {
+      "type": 0,
+      "value": "已解锁"
+    }
+  ],
+  "achievements.viewAll": [
+    {
+      "type": 0,
+      "value": "查看所有成就"
+    }
+  ],
   "auth.consent": [
     {
       "type": 0,

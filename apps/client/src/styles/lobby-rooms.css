@@ -495,7 +495,6 @@
    format, room-list, and matchmaking views. */
 .lobby-page :is(
   .new-player-play-actions,
-  .rooms-header,
   .room-card-actions,
   .match-accept-panel,
   .prep-match-accept-prompt

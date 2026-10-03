@@ -17,17 +17,20 @@ export function useGameSounds({
   enabled,
   volume,
   seat,
+  achievementToastVisible,
 }: {
   view: GameView | null;
   viewUpdate: ViewUpdate;
   enabled: boolean;
   volume: number;
   seat: number | null;
+  achievementToastVisible: boolean;
 }): void {
   const playerRef = useRef<GameAudioPlayer | null>(null);
   if (!playerRef.current) playerRef.current = new GameAudioPlayer();
   const previousViewRef = useRef<GameView | null>(view);
   const processedSequenceRef = useRef(viewUpdate.sequence);
+  const previousAchievementToastVisibleRef = useRef(achievementToastVisible);
 
   useEffect(() => {
     const player = playerRef.current!;
@@ -70,5 +73,13 @@ export function useGameSounds({
     ];
     playerRef.current?.play(cues);
   }, [enabled, seat, view, viewUpdate]);
+
+  useEffect(() => {
+    const wasVisible = previousAchievementToastVisibleRef.current;
+    previousAchievementToastVisibleRef.current = achievementToastVisible;
+    if (enabled && achievementToastVisible && !wasVisible) {
+      playerRef.current?.play([{ kind: "achievement", delayMs: 0 }]);
+    }
+  }, [achievementToastVisible, enabled]);
 
 }

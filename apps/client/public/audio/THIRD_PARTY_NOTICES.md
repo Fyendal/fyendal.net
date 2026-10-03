@@ -30,3 +30,15 @@ Creator: BMacZero (Brian MacIntosh)
 License: [Creative Commons Zero 1.0 Universal (CC0 1.0)](https://creativecommons.org/publicdomain/zero/1.0/)
 
 Retrieved: 2026-09-06
+
+## Achievement unlock
+
+The file `ui/achievement-unlocked.mp3` is a renamed, otherwise unmodified
+copy of **scale e6** by Leszek_Szary (Freesound), supplied through Pixabay's
+freesound_community collection.
+
+Source: <https://pixabay.com/sound-effects/film-special-effects-scale-e6-14577/>
+
+License: [Pixabay Content License](https://pixabay.com/service/license-summary/)
+
+Retrieved: 2026-10-02

@@ -6,6 +6,7 @@ import { appendClusterEvent } from "./clusterEvents.js";
 import type { CardPoolMode, PlayerBadge, ReplayFile } from "@fyendal/shared";
 import { MAX_MATCHMAKING_AVOID_ROOM_CODES } from "@fyendal/protocol";
 import { exportSocialData } from "./social.js";
+import { listUserAchievements } from "./achievements.js";
 
 export interface AccountBadgePreferences {
   availableBadges: PlayerBadge[];
@@ -108,6 +109,7 @@ export interface AccountExport {
     resolutionMessage: string | null;
   }>;
   gameDays: number[];
+  achievements: Awaited<ReturnType<typeof listUserAchievements>>;
   replays: Array<{
     id: string;
     finishedAt: number;
@@ -227,7 +229,10 @@ export async function exportAccount(db: Queryable, userId: number): Promise<Acco
       resolutionMessage: row.resolution_message == null ? null : String(row.resolution_message),
     });
   }
-  const replaySummaries = await listReplays(db, userId);
+  const [replaySummaries, achievements] = await Promise.all([
+    listReplays(db, userId),
+    listUserAchievements(db, userId),
+  ]);
   const replays: AccountExport["replays"] = [];
   for (const summary of replaySummaries) {
     const [replay, notes] = await Promise.all([
@@ -263,6 +268,7 @@ export async function exportAccount(db: Queryable, userId: number): Promise<Acco
       updatedAt: deck.updatedAt,
     })),
     deckPlays,
+    achievements,
     rooms,
     matchmaking: queueRows[0]
       ? {

@@ -2,6 +2,7 @@ import { afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 import type { Server } from "node:http";
 import type { AddressInfo } from "node:net";
 import { gzipSync } from "node:zlib";
+import { decodeAchievementsResponse } from "@fyendal/protocol";
 import { cardData, decklists, precon } from "@fyendal/cards";
 import { createApiServer, createRateLimiter, type ApiDeps } from "../http.js";
 import { login, register, sessionForToken } from "../auth.js";
@@ -728,6 +729,31 @@ describe("replay transport compression", () => {
 });
 
 describe("account rights", () => {
+  it("serves only the signed-in account's achievements and global percentages", async () => {
+    await register(db, "AchievementHttpUser", "password1");
+    const session = await login(db, "achievementhttpuser", "password1");
+    if (!session.ok) throw new Error("login failed");
+    const user = await sessionForToken(db, session.token);
+    if (!user) throw new Error("session missing");
+    await db.query("INSERT INTO daily_game_players (day_utc, user_id) VALUES (0, $1)", [user.id]);
+    await db.query(
+      "INSERT INTO user_achievements (user_id, achievement_id, unlocked_at, room_code) VALUES ($1, 'first-victory', 123, 'ABC123')",
+      [user.id],
+    );
+    const url = await startApi();
+    expect((await fetch(`${url}/api/account/achievements`)).status).toBe(401);
+    const response = await fetch(`${url}/api/account/achievements`, {
+      headers: { Authorization: `Bearer ${session.token}` },
+    });
+    expect(response.status).toBe(200);
+    const body = decodeAchievementsResponse(await response.json());
+    expect(body).not.toBeNull();
+    expect(body?.unlocks).toEqual([{ id: "first-victory", unlockedAt: 123, roomCode: "ABC123" }]);
+    expect(body?.percentages).toEqual(expect.arrayContaining([
+      { id: "first-victory", percent: expect.any(Number) },
+    ]));
+  });
+
   it("lets entitled accounts choose a displayed badge and rejects unearned badges", async () => {
     await register(db, "BadgeUser", "password1");
     const session = await login(db, "badgeuser", "password1");

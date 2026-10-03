@@ -6,4 +6,7 @@ describe("mobile lobby navigation", () => {
     expect(mobileLobbyDestinationSelected("decks", "decks")).toBe(true);
     expect(mobileLobbyDestinationSelected("decks", "home")).toBe(false);
   });
+  it("keeps achievements under More on mobile", () => {
+    expect(mobileLobbyDestinationSelected("more", "achievements")).toBe(true);
+  });
 });

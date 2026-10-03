@@ -193,6 +193,7 @@
   .lobby-page-authenticated > .site-footer { display: none; }
   .panel { padding: 14px; }
   .rooms-header { align-items: stretch; flex-direction: column; }
+  .rooms-header .lobby-panel-action { width: 100%; }
   .new-player-options,
   .new-player-options.two-options {
     width: 100%;

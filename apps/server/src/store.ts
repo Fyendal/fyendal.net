@@ -53,6 +53,7 @@ import {
 } from "@fyendal/cards";
 import { decodePresentedArena, MAX_MATCHMAKING_AVOID_ROOM_CODES } from "@fyendal/protocol";
 import { recordGameCompletion, recordGamePlayers } from "./analytics.js";
+import { awardAchievements } from "./achievements.js";
 import { resolveDeck, validatePresentation } from "./decks.js";
 import { appendClusterEvent, type ClusterEvent } from "./clusterEvents.js";
 import { assertActiveRuleset } from "./rulesetFence.js";
@@ -1248,6 +1249,7 @@ export class PgRoomStore {
         const preferencesBefore = room.seats.map((seat) => seat
           ? [seat.priorityMode ?? "always-pause", seat.runechantSkip ?? false] as const
           : null);
+        const wasGameOver = room.state?.phase === "game-over";
         const out = await fn(room);
         if ("error" in out) return { ok: false as const, error: out.error };
         const fullSeatWrites = new Set(
@@ -1272,6 +1274,9 @@ export class PgRoomStore {
         updateGc(out.room);
         if (!(await this.save(out.room, db))) throw VERSION_CONFLICT;
         await this.applySeatWrites(db, out.room, out.seatWrites ?? []);
+        if (!wasGameOver && out.room.state?.phase === "game-over") {
+          await awardAchievements(db, out.room);
+        }
         if (out.releaseMatchmaking) {
           const released = out.releaseMatchmaking.joiningUserId === undefined
             ? await db.query(

@@ -24,13 +24,13 @@ describe("VersionUpdateModal", () => {
     vi.unstubAllGlobals();
   });
   it("renders Markdown while ignoring HTML, images, and unsafe links", () => {
-    const html = renderToStaticMarkup(<VersionUpdateBody markdown={'## Features\n\n- **Improved** play\n\n<script>alert(1)</script>\n\n![image](https://example.com/track.png)\n\n[unsafe](javascript:alert(1)) [safe](https://fyendal.net/)'} />);
+    const html = renderToStaticMarkup(<VersionUpdateBody markdown={'## Features\n\n- **Improved** play\n\n<script>alert(1)</script>\n\n![image](https://example.com/track.png)\n\n[unsafe](javascript:alert(1)) [Join us on Discord](https://discord.gg/DpTjVbfPVv)'} />);
     expect(html).toContain("<h2>Features</h2>");
     expect(html).toContain("<strong>Improved</strong>");
     expect(html).not.toContain("<script>");
     expect(html).not.toContain("<img");
     expect(html).not.toContain("javascript:");
-    expect(html).toContain('href="https://fyendal.net/"');
+    expect(html).toContain('<a href="https://discord.gg/DpTjVbfPVv" target="_blank" rel="noopener noreferrer">Join us on Discord</a>');
   });
   it("shows the update time and one visible dismissal control", () => {
     const html = renderToStaticMarkup(

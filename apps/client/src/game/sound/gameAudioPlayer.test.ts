@@ -13,5 +13,6 @@ describe("game audio playback duration", () => {
     expect(gameSoundPlaybackDuration("priority", 3.06)).toBe(3.06);
     expect(gameSoundPlaybackDuration("hit", 0.94)).toBe(0.94);
     expect(gameSoundPlaybackDuration("zap", 3.06)).toBe(3.06);
+    expect(gameSoundPlaybackDuration("achievement", 2.496)).toBe(2.496);
   });
 });

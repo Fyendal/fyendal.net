@@ -9,6 +9,7 @@ import { FriendRoomModal } from "./FriendRoomModal.js";
 
 const SOCIAL_DOCK_MARGIN = 8;
 const SOCIAL_DOCK_DRAG_THRESHOLD = 5;
+const SOCIAL_BUBBLE_SIZE = 44;
 
 interface DockPosition {
   x: number;
@@ -179,10 +180,10 @@ export function SocialDock() {
   if (!authUser) return null;
 
   const panelHorizontal = dockPosition
-    ? dockPosition.x <= window.innerWidth - dockPosition.x - 52 ? "start" : "end"
+    ? dockPosition.x <= window.innerWidth - dockPosition.x - SOCIAL_BUBBLE_SIZE ? "start" : "end"
     : undefined;
   const panelVertical = dockPosition
-    ? dockPosition.y <= window.innerHeight - dockPosition.y - 52 ? "below" : "above"
+    ? dockPosition.y <= window.innerHeight - dockPosition.y - SOCIAL_BUBBLE_SIZE ? "below" : "above"
     : undefined;
   const dockStyle: (CSSProperties & { "--social-panel-available-height"?: string }) | undefined = dockPosition
     ? {
@@ -193,7 +194,7 @@ export function SocialDock() {
         "--social-panel-available-height": `${Math.max(
           0,
           panelVertical === "below"
-            ? window.innerHeight - dockPosition.y - 72
+            ? window.innerHeight - dockPosition.y - SOCIAL_BUBBLE_SIZE - 20
             : dockPosition.y - 20,
         )}px`,
       }

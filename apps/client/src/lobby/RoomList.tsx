@@ -58,7 +58,7 @@ export function RoomList(props: { onGoToDecks: (format: ConstructedFormat) => vo
     <div className="panel all-rooms-panel">
       <div className="rooms-header">
         <h2 className="panel-title">{intl.formatMessage({ id: "lobby.rooms.all" })}</h2>
-        <button className="btn-primary" onClick={() => setCreating(true)}>
+        <button className="btn-primary lobby-panel-action" onClick={() => setCreating(true)}>
           {intl.formatMessage({ id: "lobby.rooms.create" })}
         </button>
       </div>

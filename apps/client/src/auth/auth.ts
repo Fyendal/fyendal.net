@@ -1,6 +1,7 @@
 /** HTTP auth API wrapper — thin fetch layer over the server's /api endpoints. */
 import {
   decodeAccountBadgesResponse,
+  decodeAchievementsResponse,
   decodeAccountExportResponse,
   decodeApiError,
   decodeBugReportNotificationsResponse,
@@ -21,6 +22,7 @@ import {
   type GlobalNoticeResponse,
   type VersionUpdateNoticeResponse,
   type AccountBadgesResponse,
+  type AchievementsResponse,
   type AccountExport,
   type ApiError,
   type BugReportNotificationsResponse,
@@ -146,6 +148,13 @@ export function apiAccountBadges(
   signal?: AbortSignal,
 ): Promise<AccountBadgesResponse | ApiError> {
   return get("account/badges", decodeAccountBadgesResponse, { token, signal });
+}
+
+export function apiAchievements(
+  token: string,
+  signal?: AbortSignal,
+): Promise<AchievementsResponse | ApiError> {
+  return get("account/achievements", decodeAchievementsResponse, { token, signal });
 }
 
 export function apiSelectAccountBadge(

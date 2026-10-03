@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   decodeAccountExportResponse,
   decodeAccountBadgesResponse,
+  decodeAchievementsResponse,
   decodeBugReportNotificationsResponse,
   decodeBugReportResponse,
   decodeApiError,
@@ -1090,6 +1091,19 @@ describe("replays and HTTP responses", () => {
       availableBadges: [],
       selectedBadge: "early-tester",
     })).toBeNull();
+    const achievements = {
+      ok: true,
+      unlocks: [{ id: "big-turn", unlockedAt: 123, roomCode: "ABC123" }],
+      percentages: [
+        "first-victory", "first-pvp-win", "first-bot-win", "big-turn", "relentless-victory",
+        "beat-bravo", "beat-briar", "beat-kayo", "beat-cindra", "beat-ira", "beat-hala",
+        "beat-jarl", "beat-starvo",
+      ].map((id) => ({ id, percent: 12.5 })),
+    };
+    expect(decodeAchievementsResponse(achievements)).not.toBeNull();
+    expect(decodeAchievementsResponse({ ...achievements, unlocks: [
+      { id: "big-turn", unlockedAt: 123, roomCode: "ABC123", secret: true },
+    ] })).toBeNull();
     expect(decodeAccountExportResponse({
       ok: true,
       export: {
@@ -1139,6 +1153,7 @@ describe("replays and HTTP responses", () => {
           dismissedAt: null,
         }],
         gameDays: [1_700_006_400_000],
+        achievements: [],
         replays: [{
           id: "replay-id",
           finishedAt: 3,
@@ -1198,6 +1213,7 @@ describe("replays and HTTP responses", () => {
           matchmaking: null,
           bugReports: [],
           gameDays: [],
+          achievements: [],
           replays: [],
           friends: [],
           friendRequests: [],
