@@ -3,14 +3,16 @@ import type { AchievementId } from "@fyendal/protocol";
 import { achievementMessageId } from "./catalog.js";
 import "../styles/achievements.css";
 
-export function AchievementToast({ achievements, exiting, onDismiss }: {
+export function AchievementToast({ achievements, percent, exiting, onViewAchievements }: {
   achievements: readonly AchievementId[];
+  percent: number | null;
   exiting: boolean;
-  onDismiss: () => void;
+  onViewAchievements: () => void;
 }) {
   const intl = useIntl();
   const first = achievements[0];
   if (!first) return null;
+  const viewAllLabel = intl.formatMessage({ id: "achievements.viewAll" });
   return (
     <div className={`achievement-toast${exiting ? " achievement-toast-exiting" : ""}`} role="status">
       <span className="achievement-toast-icon" aria-hidden="true">
@@ -26,12 +28,20 @@ export function AchievementToast({ achievements, exiting, onDismiss }: {
             {intl.formatMessage({ id: "achievements.toast.more" }, { count: achievements.length - 1 })}
           </span> : null}
         </div>
+        <div className="achievement-toast-footer">
+          {percent !== null ? <span className="achievement-toast-rarity">
+            {percent > 0 && percent < .1
+              ? intl.formatMessage({ id: "achievements.rarityCompactRare" })
+              : intl.formatMessage({ id: "achievements.rarityCompact" }, {
+                percent: intl.formatNumber(percent, { maximumFractionDigits: 1 }),
+              })}
+          </span> : null}
+          <button type="button" className="achievement-toast-link" onClick={onViewAchievements}
+            aria-label={viewAllLabel}>
+            {intl.formatMessage({ id: "achievements.toast.viewAll" })}
+          </button>
+        </div>
       </div>
-      <button type="button" onClick={onDismiss} aria-label={intl.formatMessage({ id: "achievements.toast.dismiss" })}>
-        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-          <path d="M6 6 18 18M18 6 6 18" />
-        </svg>
-      </button>
     </div>
   );
 }

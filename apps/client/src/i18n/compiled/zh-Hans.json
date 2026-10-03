@@ -491,6 +491,12 @@
       "value": "成就已解锁"
     }
   ],
+  "achievements.toast.viewAll": [
+    {
+      "type": 0,
+      "value": "查看全部"
+    }
+  ],
   "achievements.unlocked": [
     {
       "type": 0,

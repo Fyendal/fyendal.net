@@ -50,7 +50,7 @@ function pendingResponse() {
   return () => resolve({
     ok: true,
     unlocks: [{ id: "first-victory", roomCode: "ABCDEF", unlockedAt: 123 }],
-    percentages: [],
+    percentages: [{ id: "first-victory", percent: 4.2 }],
   });
 }
 
@@ -68,7 +68,7 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
-it("restarts a cancelled match lookup when returning from replay", async () => {
+it("cancels the lookup in replay without replaying the toast on return", async () => {
   const finish = { ...initial, gameOver: true };
   TestHook(initial);
   const stale = pendingResponse();
@@ -76,15 +76,10 @@ it("restarts a cancelled match lookup when returning from replay", async () => {
   const signal = vi.mocked(apiAchievements).mock.calls[0]![1];
   TestHook({ ...finish, live: false });
   expect(signal?.aborted).toBe(true);
-  const current = pendingResponse();
   TestHook(finish);
-  expect(apiAchievements).toHaveBeenCalledTimes(2);
+  expect(apiAchievements).toHaveBeenCalledTimes(1);
   stale();
   await Promise.resolve();
-  expect(TestHook(finish).earned).toEqual([]);
-  current();
-  await Promise.resolve();
-  expect(TestHook(finish).earned).toEqual(["first-victory"]);
   expect(TestHook(finish).toast).toEqual([]);
 });
 
@@ -96,25 +91,35 @@ it("keeps the pending lookup on live refreshes and expires its toast", async () 
   const refreshed = { ...finish, viewUpdate: { ...finish.viewUpdate, sequence: 2 } };
   TestHook(refreshed);
   expect(apiAchievements).toHaveBeenCalledTimes(1);
+  expect(apiAchievements).toHaveBeenCalledWith("alice", expect.any(AbortSignal));
   resolve();
   await Promise.resolve();
   expect(TestHook(refreshed).toast).toEqual(["first-victory"]);
+  expect(TestHook(refreshed).toastPercent).toBe(4.2);
   vi.advanceTimersByTime(5_000);
   expect(TestHook(refreshed).toastExiting).toBe(true);
   vi.advanceTimersByTime(220);
   expect(TestHook(refreshed).toast).toEqual([]);
+  expect(TestHook(refreshed).toastPercent).toBeNull();
 });
 
-it("clears account-specific unlocks and reloads on account changes", async () => {
-  const resolve = pendingResponse();
+it("clears the toast on account changes and ignores the previous account's lookup", async () => {
+  TestHook(initial);
+  const stale = pendingResponse();
   const finish = { ...initial, gameOver: true };
   TestHook(finish);
-  resolve();
-  await Promise.resolve();
-  expect(TestHook(finish).earned).toEqual(["first-victory"]);
-  pendingResponse();
   const otherAccount = { ...finish, token: "bob" };
   TestHook(otherAccount);
-  expect(TestHook(otherAccount).earned).toEqual([]);
+  stale();
+  await Promise.resolve();
+  expect(TestHook(otherAccount).toast).toEqual([]);
+  expect(apiAchievements).toHaveBeenCalledTimes(1);
+
+  TestHook({ ...otherAccount, gameOver: false });
+  const current = pendingResponse();
+  TestHook(otherAccount);
   expect(apiAchievements).toHaveBeenLastCalledWith("bob", expect.any(AbortSignal));
+  current();
+  await Promise.resolve();
+  expect(TestHook(otherAccount).toast).toEqual(["first-victory"]);
 });

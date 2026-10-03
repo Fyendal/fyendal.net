@@ -987,9 +987,9 @@ export function GameBoard() {
 
   const onTableClickCapture = (event: React.MouseEvent) => {
     const target = event.target as HTMLElement;
-    // Modal controls own the tap, including dismissal of a card inspection.
+    // Modal and toast controls own the tap, including dismissal of a card inspection.
     // Capture runs before their close handlers and must not reset the action.
-    if (target.closest(".modal-surface-backdrop")) return;
+    if (target.closest(".modal-surface-backdrop, .achievement-toast")) return;
     cardLongPressHandlers.onClickCapture(event);
     if (event.defaultPrevented) return;
 
@@ -1042,8 +1042,9 @@ export function GameBoard() {
     >
       <AchievementToast
         achievements={matchAchievements.toast}
+        percent={matchAchievements.toastPercent}
         exiting={matchAchievements.toastExiting}
-        onDismiss={matchAchievements.dismissToast}
+        onViewAchievements={() => { leave(); setLobbyRail("achievements"); }}
       />
       {hasOwnPriority ? <div className="own-priority-arrival" aria-hidden="true" /> : null}
       {/* ── playmat board: opponent half on top, your half below ── */}
@@ -1474,8 +1475,6 @@ export function GameBoard() {
         replaying={replaying}
         replayAtEnd={replayAtEnd}
         gameOverDismissed={gameOverDismissed}
-        matchAchievements={matchAchievements.earned}
-        onViewAchievements={() => { leave(); setLobbyRail("achievements"); }}
         getRecordedViews={getRecordedViews}
         replayViews={replayViews}
         replayAvailable={replayFrames > 0}

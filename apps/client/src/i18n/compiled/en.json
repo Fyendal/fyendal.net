@@ -487,6 +487,12 @@
       "value": "Achievement unlocked"
     }
   ],
+  "achievements.toast.viewAll": [
+    {
+      "type": 0,
+      "value": "View all"
+    }
+  ],
   "achievements.unlocked": [
     {
       "type": 0,

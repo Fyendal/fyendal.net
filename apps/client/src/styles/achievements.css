@@ -52,49 +52,6 @@
   .achievement-portrait { width: 36px; height: 36px; }
   .achievement-meta { grid-column: 2; display: flex; justify-content: flex-start; gap: 5px 12px; padding-top: 0; text-align: left; }
 }
-.gameover-achievements {
-  flex: 0 0 auto;
-  display: grid;
-  gap: 10px;
-  padding: 11px 0 13px;
-  border-top: 1px solid #493a29;
-  border-bottom: 1px solid #493a29;
-  font-family: var(--font-lobby-ui);
-}
-.gameover-achievements-heading { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 6px 16px; }
-.gameover-achievements h3 {
-  margin: 0;
-  color: #ad9e85;
-  font-size: 11px;
-  font-weight: 750;
-  letter-spacing: .08em;
-  line-height: 1.3;
-  text-transform: uppercase;
-}
-.gameover-achievements ul { display: flex; flex-wrap: wrap; gap: 6px 20px; margin: 0; padding: 0; list-style: none; }
-.gameover-achievements li { display: inline-flex; align-items: center; gap: 8px; color: #e9ddc6; font-size: 14px; font-weight: 650; line-height: 1.3; }
-.gameover-achievements li::before { width: 5px; height: 5px; flex: none; background: #bd964f; content: ""; }
-.gameover-achievements-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  min-height: 30px;
-  padding: 2px 0;
-  border: 0;
-  border-radius: 0;
-  clip-path: none;
-  background: transparent;
-  color: #d2ac68;
-  font: 700 11px/1.2 var(--font-lobby-ui);
-  letter-spacing: .05em;
-  text-transform: uppercase;
-}
-.gameover-achievements-link:hover { background: transparent; color: #f0cc7e; }
-.gameover-achievements-link span { font-size: 16px; font-weight: 400; line-height: 1; }
-@media (max-width: 700px) {
-  .gameover-achievements { gap: 8px; padding: 10px 0; }
-  .gameover-achievements li { font-size: 13px; }
-}
 .achievement-toast {
   --achievement-toast-offset: 18px;
   position: fixed;
@@ -102,14 +59,14 @@
   right: max(16px, env(safe-area-inset-right));
   bottom: max(16px, env(safe-area-inset-bottom));
   display: grid;
-  grid-template-columns: 40px minmax(0, 1fr) 30px;
+  grid-template-columns: 36px minmax(0, 1fr);
   align-items: center;
-  gap: 12px;
-  width: min(340px, calc(100vw - 32px));
-  min-height: 68px;
-  padding: 12px 12px 12px 14px;
+  gap: 10px;
+  width: min(318px, calc(100vw - 32px));
+  min-height: 72px;
+  padding: 10px 14px;
   border: 1px solid #80613a;
-  border-radius: 5px;
+  border-radius: 6px;
   background: linear-gradient(145deg, #291c0f, #1d140c);
   box-shadow: 0 12px 30px #000b, inset 0 1px #f1c4751a;
   color: var(--text-primary);
@@ -122,44 +79,41 @@
 }
 .achievement-toast-icon {
   display: grid;
-  width: 40px;
-  height: 40px;
+  width: 36px;
+  height: 36px;
   place-items: center;
   border: 1px solid #966c37;
   border-radius: 50%;
   background: radial-gradient(circle at 40% 30%, #60411e, #382512);
-  box-shadow: inset 0 1px #ffe0a329, 0 0 0 3px #c9a15a12;
+  box-shadow: inset 0 1px #ffe0a329;
   color: #efc46f;
 }
-.achievement-toast-icon svg { display: block; width: 22px; height: 22px; fill: currentColor; }
-.achievement-toast-copy { display: grid; min-width: 0; gap: 4px; }
-.achievement-toast-label { color: #c6a25e; font-size: 10px; font-weight: 750; letter-spacing: .11em; line-height: 1.2; text-transform: uppercase; }
-.achievement-toast-detail { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 9px; line-height: 1.25; }
-.achievement-toast-detail strong { font-size: 16px; font-weight: 700; }
-.achievement-toast-detail > span { color: var(--text-muted); font-size: 12px; }
-.achievement-toast button {
-  display: grid;
-  width: 30px;
-  height: 30px;
-  min-height: 30px;
-  place-items: center;
-  padding: 0;
+.achievement-toast-icon svg { display: block; width: 19px; height: 19px; fill: currentColor; }
+.achievement-toast-copy { display: flex; flex-direction: column; min-width: 0; gap: 2px; }
+.achievement-toast-label { color: #c6a25e; font: 600 11px/1.2 var(--font-lobby-ui); letter-spacing: .01em; }
+.achievement-toast-detail { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 8px; line-height: 1.2; }
+.achievement-toast-detail strong { font: 700 16px/1.2 var(--font-lobby-title); }
+.achievement-toast-detail > span { color: var(--text-muted); font-size: 11px; }
+.achievement-toast-footer { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 20px; }
+.achievement-toast-rarity { color: #b9a78c; font-size: 11px; line-height: 1.2; }
+.achievement-toast .achievement-toast-link {
+  flex: none;
+  margin-left: auto;
+  width: auto;
+  height: auto;
+  min-height: 20px;
+  padding: 0 0 0 4px;
   border: 0;
-  border-radius: 2px;
+  border-radius: 0;
   clip-path: none;
   background: transparent;
-  color: var(--text-muted);
+  color: #d2ac68;
+  font: 650 11px/1.2 var(--font-lobby-ui);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  white-space: nowrap;
 }
-.achievement-toast button:hover { background: #ffffff10; color: var(--text-primary); }
-.achievement-toast button svg {
-  display: block;
-  width: 16px;
-  height: 16px;
-  fill: none;
-  stroke: currentColor;
-  stroke-linecap: round;
-  stroke-width: 2;
-}
+.achievement-toast .achievement-toast-link:hover { background: transparent; color: #f0cc7e; }
 @keyframes achievement-toast-in {
   from { opacity: 0; transform: translateY(var(--achievement-toast-offset)) scale(.97); }
   to { opacity: 1; transform: translateY(0) scale(1); }
@@ -169,8 +123,8 @@
   to { opacity: 0; transform: translateY(var(--achievement-toast-offset)) scale(.97); }
 }
 @media (max-width: 600px) {
-  .achievement-toast { --achievement-toast-offset: -18px; top: max(16px, env(safe-area-inset-top)); bottom: auto; left: 16px; right: 16px; width: auto; grid-template-columns: 40px minmax(0, 1fr) 44px; }
-  .achievement-toast button { width: 44px; height: 44px; min-height: 44px; }
+  .achievement-toast { --achievement-toast-offset: -18px; top: max(16px, env(safe-area-inset-top)); bottom: auto; left: 16px; right: 16px; width: auto; }
+  .achievement-toast .achievement-toast-link { min-height: 24px; }
 }
 @media (prefers-reduced-motion: reduce) {
   .table:not([data-motion-preference="full"]) .achievement-toast { animation: none; }

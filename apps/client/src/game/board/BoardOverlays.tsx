@@ -1,5 +1,4 @@
 import type { GameView } from "@fyendal/shared";
-import type { AchievementId } from "@fyendal/protocol";
 import { useIntl } from "react-intl";
 import { DeckCardToast, type useDeckCardFeedback } from "../DeckCardToast.js";
 import { GameOver } from "../GameOver.js";
@@ -28,8 +27,6 @@ export function BoardOverlays({
   replaying,
   replayAtEnd,
   gameOverDismissed,
-  matchAchievements,
-  onViewAchievements,
   getRecordedViews,
   replayViews,
   replayAvailable,
@@ -62,8 +59,6 @@ export function BoardOverlays({
   replaying: boolean;
   replayAtEnd: boolean;
   gameOverDismissed: boolean;
-  matchAchievements: AchievementId[];
-  onViewAchievements: () => void;
   getRecordedViews: () => GameView[];
   replayViews: GameView[] | null;
   replayAvailable: boolean;
@@ -149,8 +144,6 @@ export function BoardOverlays({
           onWatchReplay={!replaying && replayAvailable ? onWatchReplay : null}
           onDownloadReplay={replaying || replayAvailable ? onDownloadReplay : null}
           onBackToLobby={replaying ? onCloseReplay : onLeave}
-          matchAchievements={replaying ? [] : matchAchievements}
-          onViewAchievements={onViewAchievements}
           replaying={replaying}
           onClose={onDismissGameOver}
           friendAction={!replaying && !botGame && !spectating && opponentUsername

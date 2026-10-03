@@ -2749,6 +2749,7 @@
   "achievements.viewAll": "View all achievements",
   "achievements.toast.title": "Achievement unlocked",
   "achievements.toast.more": "+{count} more",
+  "achievements.toast.viewAll": "View all",
   "achievements.toast.dismiss": "Dismiss achievement notification",
   "achievements.firstvictory.name": "First Victory",
   "achievements.firstvictory.description": "Win your first game.",

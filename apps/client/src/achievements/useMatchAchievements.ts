@@ -14,9 +14,9 @@ export function useMatchAchievements({
   gameOver: boolean;
   live: boolean;
   viewUpdate: ViewUpdate;
-}): { earned: AchievementId[]; toast: AchievementId[]; toastExiting: boolean; dismissToast: () => void } {
-  const [earned, setEarned] = useState<AchievementId[]>([]);
+}): { toast: AchievementId[]; toastPercent: number | null; toastExiting: boolean } {
   const [toast, setToast] = useState<AchievementId[]>([]);
+  const [toastPercent, setToastPercent] = useState<number | null>(null);
   const [toastExiting, setToastExiting] = useState(false);
   const previous = useRef({ token, roomCode, gameOver, live });
   const source = viewUpdate.source;
@@ -27,21 +27,21 @@ export function useMatchAchievements({
     const prior = previous.current;
     previous.current = { token, roomCode, gameOver, live };
     if (prior.token !== token || prior.roomCode !== roomCode || !gameOver || !live) {
-      setEarned([]);
       setToast([]);
+      setToastPercent(null);
       setToastExiting(false);
     }
-    if (!token || !roomCode || !gameOver || !live) return;
     const witnessedFinish = prior.token === token && prior.roomCode === roomCode
       && prior.live && !prior.gameOver && source === "live";
+    if (!token || !roomCode || !gameOver || !live || !witnessedFinish) return;
     const controller = new AbortController();
     void apiAchievements(token, controller.signal).then((result) => {
       if (controller.signal.aborted || !result.ok) return;
       const ids = result.unlocks.filter((item) => item.roomCode === roomCode).map((item) => item.id)
         .sort((a, b) => ACHIEVEMENT_IDS.indexOf(a) - ACHIEVEMENT_IDS.indexOf(b));
-      setEarned(ids);
-      if (witnessedFinish && ids.length > 0) {
+      if (ids.length > 0) {
         setToastExiting(false);
+        setToastPercent(result.percentages.find((item) => item.id === ids[0])?.percent ?? null);
         setToast(ids);
       }
     });
@@ -58,10 +58,11 @@ export function useMatchAchievements({
     if (!toastExiting) return;
     const timer = window.setTimeout(() => {
       setToast([]);
+      setToastPercent(null);
       setToastExiting(false);
     }, TOAST_EXIT_MS);
     return () => window.clearTimeout(timer);
   }, [toastExiting]);
 
-  return { earned, toast, toastExiting, dismissToast: () => setToastExiting(true) };
+  return { toast, toastPercent, toastExiting };
 }

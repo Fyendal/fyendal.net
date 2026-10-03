@@ -2749,6 +2749,7 @@
   "achievements.viewAll": "查看所有成就",
   "achievements.toast.title": "成就已解锁",
   "achievements.toast.more": "另有 {count} 项",
+  "achievements.toast.viewAll": "查看全部",
   "achievements.toast.dismiss": "关闭成就通知",
   "achievements.firstvictory.name": "首场胜利",
   "achievements.firstvictory.description": "赢得你的第一场对局。",
