@@ -39,6 +39,7 @@ function renderPlayerHalf(
   activeChainAttackerInstanceId: number | null = null,
   mobileFloatViewport = false,
   mobileLandscapeViewport = false,
+  compactBoard = false,
 ): string {
   return renderToStaticMarkup(
     <TestI18nProvider locale={locale}>
@@ -78,6 +79,7 @@ function renderPlayerHalf(
       canSendEmote={false}
       mobileFloatViewport={mobileFloatViewport}
       mobileLandscapeViewport={mobileLandscapeViewport}
+      compactBoard={compactBoard}
       activeChainAttackerInstanceId={activeChainAttackerInstanceId}
       onSendEmote={() => undefined}
       onOpenOverlay={() => undefined}
@@ -110,6 +112,22 @@ describe("PlayerHalf", () => {
 
     expect(html).not.toContain("mat-square-board");
     expect(html).not.toContain("card-board-square");
+  });
+
+  it("uses full portrait cards in the compact seven-column desktop layout", () => {
+    const html = renderPlayerHalf({
+      ...player,
+      heroCardId: "SBA001",
+      deckCount: 3,
+      equipment: { head: { instanceId: 12, cardId: "SBA004", owner: 0 } },
+      graveyard: [{ instanceId: 14, cardId: "SBA005", owner: 0 }],
+    }, true, undefined, undefined, "en", null, false, false, true);
+
+    expect(html).toContain("mat-compact-board");
+    expect(html).not.toContain("mat-square-board");
+    expect(html).not.toContain("card-board-square");
+    expect(html).not.toContain("card-back-square");
+    expect(html).toContain("https://content.fabrary.net/cards/SBA004.webp");
   });
 
   it("keeps arsenal portrait while squaring arena cards and piles", () => {

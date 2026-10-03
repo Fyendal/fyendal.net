@@ -99,6 +99,7 @@ export function PlayerHalf({
   canSendEmote,
   mobileFloatViewport,
   mobileLandscapeViewport,
+  compactBoard = false,
   activeChainAttackerInstanceId,
   onSendEmote,
   onOpenOverlay,
@@ -116,6 +117,7 @@ export function PlayerHalf({
   canSendEmote: boolean;
   mobileFloatViewport: boolean;
   mobileLandscapeViewport: boolean;
+  compactBoard?: boolean;
   activeChainAttackerInstanceId: number | null;
   onSendEmote: (message: EmoteMessage) => void;
   onOpenOverlay: (overlay: BoardOverlay) => void;
@@ -135,7 +137,7 @@ export function PlayerHalf({
     ? visibleDeckTop
     : undefined;
   const hero = heroCard(player);
-  const squareBoard = !mobileFloatViewport && !mobileLandscapeViewport;
+  const squareBoard = !mobileFloatViewport && !mobileLandscapeViewport && !compactBoard;
   const deckTopPlayable =
     presentedDeckTop !== undefined && interaction.legal.playableZones.get(presentedDeckTop.instanceId) === "deck";
   const arenaBoard = boardCardsOutsideEquipmentZones(
@@ -337,7 +339,7 @@ export function PlayerHalf({
   };
 
   return (
-    <div className={`mat-half ${mirrored ? "mat-opp" : ""}${squareBoard ? " mat-square-board" : ""}`}>
+    <div className={`mat-half ${mirrored ? "mat-opp" : ""}${squareBoard ? " mat-square-board" : ""}${compactBoard ? " mat-compact-board" : ""}`}>
       {equipmentZone("head", `${row(1)} / 1`)}
       <MatZone
         area={`${row(1)} / 2 / span 1 / span 7`}

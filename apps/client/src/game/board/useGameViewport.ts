@@ -4,6 +4,7 @@ import type { FloatVisibilityController } from "../floatVisibility.js";
 const MOBILE_LANDSCAPE_RAIL_QUERY =
   "(min-width: 701px) and (orientation: landscape) and (pointer: coarse)";
 const MOBILE_FLOAT_QUERY = "(max-width: 700px)";
+const COMPACT_DESKTOP_QUERY = "(min-width: 701px) and (max-width: 1200px)";
 
 export function useGameViewport() {
   const [railCollapsed, setRailCollapsed] = useState(
@@ -14,6 +15,9 @@ export function useGameViewport() {
   );
   const [mobileFloatViewport, setMobileFloatViewport] = useState(
     () => typeof window !== "undefined" && window.matchMedia(MOBILE_FLOAT_QUERY).matches,
+  );
+  const [compactDesktopViewport, setCompactDesktopViewport] = useState(
+    () => typeof window !== "undefined" && window.matchMedia(COMPACT_DESKTOP_QUERY).matches,
   );
   const [mobileHandHidden, setMobileHandHidden] = useState(false);
   const [mobileCombatFloatsHidden, setMobileCombatFloatsHidden] = useState(false);
@@ -41,6 +45,15 @@ export function useGameViewport() {
     return () => mobileFloat.removeEventListener("change", syncFloatVisibility);
   }, []);
 
+  useEffect(() => {
+    const compactDesktop = window.matchMedia(COMPACT_DESKTOP_QUERY);
+    const syncCompactDesktop = (event: MediaQueryListEvent) => {
+      setCompactDesktopViewport(event.matches);
+    };
+    compactDesktop.addEventListener("change", syncCompactDesktop);
+    return () => compactDesktop.removeEventListener("change", syncCompactDesktop);
+  }, []);
+
   const mobileCombatFloatVisibility = useMemo<FloatVisibilityController | undefined>(
     () => mobileFloatViewport
       ? { hidden: mobileCombatFloatsHidden, setHidden: setMobileCombatFloatsHidden }
@@ -53,6 +66,7 @@ export function useGameViewport() {
     setRailCollapsed,
     mobileLandscapeViewport,
     mobileFloatViewport,
+    compactDesktopViewport,
     mobileHandIsHidden: mobileFloatViewport && mobileHandHidden,
     toggleMobileHand: () => setMobileHandHidden((hidden) => !hidden),
     mobileCombatFloatVisibility,

@@ -237,10 +237,43 @@
 @media (min-width: 1101px) {
   .mat-half.mat-square-board { --mat-zone-col: var(--arena-square-size); }
 }
-@media (min-width: 1024px) and (max-width: 1100px) {
-  .mat-half.mat-square-board > :is(.zone-weapon-0, .zone-hero, .zone-weapon-1) {
-    transform: translateX(-18px);
+/* Seven portrait-card tracks fit beside the rail. Keep the outer pairs and
+   center trio close together; the two spacer tracks take any extra width. */
+@media (min-width: 701px) and (max-width: 1200px) {
+  .mat-half.mat-compact-board {
+    --mat-column-gap: 5px;
+    /* Board padding, eight gaps, and two 5px spacers leave seven card tracks. */
+    --compact-card-width: min(9.49vh, calc((100vw - var(--rail-w) - 86px) / 7));
+    --compact-card-height: calc(var(--compact-card-width) * 1.365);
+    --mat-outer-col: var(--compact-card-width);
+    --mat-arms-col: var(--compact-card-width);
+    --mat-weapon-0-col: var(--compact-card-width);
+    --mat-hero-col: var(--compact-card-width);
+    --mat-weapon-1-col: var(--compact-card-width);
+    --mat-zone-col: var(--compact-card-width);
+    --mat-tapped-col: var(--compact-card-height);
+    grid-template-columns:
+      var(--mat-outer-col)
+      var(--mat-arms-col)
+      minmax(5px, 1fr)
+      var(--mat-weapon-0-col)
+      var(--mat-hero-col)
+      var(--mat-weapon-1-col)
+      minmax(5px, 1fr)
+      var(--mat-zone-col)
+      var(--mat-zone-col);
+    grid-template-rows: repeat(3, var(--compact-card-height));
+    row-gap: 8px;
   }
+  .mat-half.mat-compact-board .card-zone {
+    width: var(--compact-card-width);
+    height: var(--compact-card-height);
+  }
+  .mat-half.mat-compact-board .board-card-stack-tapped {
+    width: var(--compact-card-height);
+    height: var(--compact-card-width);
+  }
+  .mat-half.mat-compact-board .effects-row { gap: 5px; padding-left: 0; }
 }
 
 /* Full-size tapped arena cards need a landscape-width grid track. Only the

@@ -87,16 +87,26 @@
     padding-bottom: calc(224px + env(safe-area-inset-bottom));
   }
 
-  /* Seven columns keep equipment, both weapons, hero, pitch, and deck on one
-     row. Lingering effects remain beside the legs, matching the desktop mat. */
+  /* Seven card tracks keep equipment, both weapons, hero, pitch, and deck on
+     one row. Two flexible spacers keep the outer pairs close together. */
   .mat-half {
+    --portrait-card-width: min(51px, calc((100vw - 36px) / 7));
+    --mat-outer-col: var(--portrait-card-width);
+    --mat-arms-col: var(--portrait-card-width);
+    --mat-weapon-0-col: var(--portrait-card-width);
+    --mat-hero-col: var(--portrait-card-width);
+    --mat-weapon-1-col: var(--portrait-card-width);
+    --mat-zone-col: var(--portrait-card-width);
     grid-template-columns:
       var(--mat-outer-col)
       var(--mat-arms-col)
+      minmax(0, 1fr)
       var(--mat-weapon-0-col)
       var(--mat-hero-col)
       var(--mat-weapon-1-col)
-      repeat(2, minmax(0, 1fr));
+      minmax(0, 1fr)
+      var(--mat-zone-col)
+      var(--mat-zone-col);
     padding-top: clamp(12px, 2dvh, 20px);
   }
   .mat-half.mat-opp {
@@ -104,7 +114,7 @@
     padding-bottom: clamp(12px, 2dvh, 20px);
   }
   .mat-half .card-zone {
-    width: min(51px, 13vw);
+    width: var(--portrait-card-width);
     height: auto;
     aspect-ratio: 51 / 70;
   }
@@ -113,38 +123,38 @@
     height: min(51px, 13vw);
   }
   .mat-half .zone-head { grid-area: 1 / 1 !important; }
-  .mat-half .zone-board { grid-area: 1 / 2 / 2 / 7 !important; }
-  .mat-half .zone-graveyard { grid-area: 1 / 7 !important; }
+  .mat-half .zone-board { grid-area: 1 / 2 / 2 / 9 !important; }
+  .mat-half .zone-graveyard { grid-area: 1 / 9 !important; }
   .mat-half .zone-chest { grid-area: 2 / 1 !important; }
   .mat-half .zone-arms { grid-area: 2 / 2 !important; }
-  .mat-half .zone-weapon-0 { grid-area: 2 / 3 !important; }
-  .mat-half .zone-hero { grid-area: 2 / 4 !important; }
-  .mat-half .zone-weapon-1 { grid-area: 2 / 5 !important; }
-  .mat-half .zone-pitch { grid-area: 2 / 6 !important; }
-  .mat-half .zone-deck { grid-area: 2 / 7 !important; }
+  .mat-half .zone-weapon-0 { grid-area: 2 / 4 !important; }
+  .mat-half .zone-hero { grid-area: 2 / 5 !important; }
+  .mat-half .zone-weapon-1 { grid-area: 2 / 6 !important; }
+  .mat-half .zone-pitch { grid-area: 2 / 8 !important; }
+  .mat-half .zone-deck { grid-area: 2 / 9 !important; }
   .mat-half .zone-legs { grid-area: 3 / 1 !important; }
-  .mat-half .effects-row { grid-area: 3 / 2 / 4 / 4 !important; }
-  .mat-half .zone-arsenal { grid-area: 3 / 4 !important; }
-  .mat-half .zone-banished { grid-area: 3 / 7 !important; }
+  .mat-half .effects-row { grid-area: 3 / 2 / 4 / 5 !important; }
+  .mat-half .zone-arsenal { grid-area: 3 / 5 !important; }
+  .mat-half .zone-banished { grid-area: 3 / 9 !important; }
 
   .mat-half.mat-opp .zone-legs { grid-area: 1 / 1 !important; }
-  .mat-half.mat-opp .effects-row { grid-area: 1 / 2 / 2 / 4 !important; }
-  .mat-half.mat-opp .zone-arsenal { grid-area: 1 / 4 !important; }
-  .mat-half.mat-opp .zone-banished { grid-area: 1 / 7 !important; }
+  .mat-half.mat-opp .effects-row { grid-area: 1 / 2 / 2 / 5 !important; }
+  .mat-half.mat-opp .zone-arsenal { grid-area: 1 / 5 !important; }
+  .mat-half.mat-opp .zone-banished { grid-area: 1 / 9 !important; }
   .mat-half.mat-opp .zone-head { grid-area: 3 / 1 !important; }
-  .mat-half.mat-opp .zone-board { grid-area: 3 / 2 / 4 / 7 !important; }
-  .mat-half.mat-opp .zone-graveyard { grid-area: 3 / 7 !important; }
+  .mat-half.mat-opp .zone-board { grid-area: 3 / 2 / 4 / 9 !important; }
+  .mat-half.mat-opp .zone-graveyard { grid-area: 3 / 9 !important; }
   .mat-half:has(> .zone-arsenal-multiple) .effects-row {
-    grid-area: 3 / 2 / 4 / 4 !important;
+    grid-area: 3 / 2 / 4 / 5 !important;
   }
   .mat-half:has(> .zone-arsenal-multiple) .zone-arsenal {
-    grid-area: 3 / 4 / 4 / 6 !important;
+    grid-area: 3 / 5 / 4 / 7 !important;
   }
   .mat-half.mat-opp:has(> .zone-arsenal-multiple) .effects-row {
-    grid-area: 1 / 2 / 2 / 4 !important;
+    grid-area: 1 / 2 / 2 / 5 !important;
   }
   .mat-half.mat-opp:has(> .zone-arsenal-multiple) .zone-arsenal {
-    grid-area: 1 / 4 / 2 / 6 !important;
+    grid-area: 1 / 5 / 2 / 7 !important;
   }
 
   .board {

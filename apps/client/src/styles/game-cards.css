@@ -377,6 +377,7 @@
 .card-zone.card-board-square {
   width: var(--arena-square-size, clamp(84px, 12vh, 165px));
   height: calc(var(--arena-square-size, clamp(84px, 12vh, 165px)) * .88);
+  container-type: inline-size;
   padding: 0;
   border: 0;
   border-radius: min(8px, 5%);
@@ -470,7 +471,7 @@
   left: 0;
   right: 0;
   display: flex;
-  height: clamp(13px, 1.5vh, 15px);
+  height: clamp(13px, 12cqi, 20px);
   align-items: center;
   justify-content: center;
   overflow: hidden;
@@ -481,7 +482,7 @@
   background: #eee9dd url("/card-title-bars/board-frame.svg") center / 100% 100% no-repeat;
   color: #2d2a24;
   font-family: Alegreya, Palatino, "Palatino Linotype", "Book Antiqua", Georgia, serif;
-  font-size: clamp(7px, .8vh, 8px);
+  font-size: clamp(7px, 7cqi, 12px);
   font-weight: 500;
   letter-spacing: normal;
   line-height: 1;

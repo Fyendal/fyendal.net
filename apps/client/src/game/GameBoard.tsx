@@ -180,10 +180,13 @@ export function GameBoard() {
     setRailCollapsed,
     mobileLandscapeViewport,
     mobileFloatViewport,
+    compactDesktopViewport,
     mobileHandIsHidden,
     toggleMobileHand,
     mobileCombatFloatVisibility,
   } = useGameViewport();
+  const compactBoard = compactDesktopViewport && !mobileLandscapeViewport;
+  const squareCardsEnabled = !mobileFloatViewport && !mobileLandscapeViewport && !compactBoard;
   const {
     lessGuidance,
     motionPreference,
@@ -1005,7 +1008,7 @@ export function GameBoard() {
   };
 
   return (
-    <SquareCardPresentation enabled={!mobileFloatViewport && !mobileLandscapeViewport}>
+    <SquareCardPresentation enabled={squareCardsEnabled}>
     <div
       ref={tableRef}
       className={`table${railCollapsed ? " rail-is-collapsed" : ""}${view.phase === "game-over" ? " game-is-over" : ""}${hasActiveCombatChain ? " has-active-combat-chain" : ""}${mobileHandIsHidden ? " mobile-hand-is-hidden" : ""}${hasOwnPriority ? " has-own-priority" : ""}`}
@@ -1083,6 +1086,7 @@ export function GameBoard() {
           canSendEmote={canSendEmote}
           mobileFloatViewport={mobileFloatViewport}
           mobileLandscapeViewport={mobileLandscapeViewport}
+          compactBoard={compactBoard}
           activeChainAttackerInstanceId={activeChainAttackerInstanceId}
           onSendEmote={sendEmote}
           onOpenOverlay={setOverlay}
@@ -1118,6 +1122,7 @@ export function GameBoard() {
           canSendEmote={canSendEmote}
           mobileFloatViewport={mobileFloatViewport}
           mobileLandscapeViewport={mobileLandscapeViewport}
+          compactBoard={compactBoard}
           activeChainAttackerInstanceId={activeChainAttackerInstanceId}
           onSendEmote={sendEmote}
           onOpenOverlay={setOverlay}
@@ -1462,7 +1467,7 @@ export function GameBoard() {
       <GameMotionLayer
         batch={gameMotion.batch}
         queuedSources={gameMotion.queuedSources}
-        squareCardsEnabled={!mobileFloatViewport && !mobileLandscapeViewport}
+        squareCardsEnabled={squareCardsEnabled}
         onFlightArrive={gameMotion.arriveFlight}
         onFlightDepart={gameMotion.departFlight}
         onComplete={gameMotion.completeBatch}
