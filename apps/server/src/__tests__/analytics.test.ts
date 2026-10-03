@@ -1,8 +1,31 @@
 import { describe, expect, it } from "vitest";
-import { recordGameCompletion } from "../analytics.js";
+import { recordGameCompletion, recordGamePlayers } from "../analytics.js";
 import { freshDb } from "./testdb.js";
 
 describe("anonymous product analytics", () => {
+  it("counts each human player once per UTC game-start day and deletes account activity", async () => {
+    const db = await freshDb();
+    const users = await db.query(`INSERT INTO users (username, username_lc, pass_hash, created_at)
+      VALUES ('Alice', 'alice', 'hash', 1), ('Bob', 'bob', 'hash', 1) RETURNING id`);
+    const alice = Number(users.rows[0]!.id);
+    const bob = Number(users.rows[1]!.id);
+    const firstDay = Date.UTC(2026, 9, 2);
+
+    await recordGamePlayers(db, [alice, bob], firstDay + 1);
+    await recordGamePlayers(db, [alice, undefined], firstDay + 2);
+    await recordGamePlayers(db, [alice, alice], firstDay + 3);
+    await recordGamePlayers(db, [alice], firstDay + 86_400_001);
+
+    expect((await db.query("SELECT day_utc, user_id FROM daily_game_players ORDER BY day_utc, user_id")).rows)
+      .toEqual([
+        { day_utc: firstDay, user_id: alice },
+        { day_utc: firstDay, user_id: bob },
+        { day_utc: firstDay + 86_400_000, user_id: alice },
+      ]);
+    await db.query("DELETE FROM users WHERE id = $1", [alice]);
+    expect((await db.query("SELECT day_utc, user_id FROM daily_game_players")).rows)
+      .toEqual([{ day_utc: firstDay, user_id: bob }]);
+  });
   it("records a completed game without retaining its replay id", async () => {
     const db = await freshDb();
     await recordGameCompletion(db, {

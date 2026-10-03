@@ -209,6 +209,7 @@ export interface AccountExport {
     dismissedAt: number | null;
     resolutionMessage?: string | null;
   }>;
+  gameDays: number[];
   replays: Array<{
     id: string;
     finishedAt: number;
@@ -1835,7 +1836,7 @@ export const decodeAccountExportResponse: Decoder<AccountExportResponse> = (valu
   const exported = data?.ok === true ? object(data.export) : null;
   const account = exported ? object(exported.account) : null;
   const valid = !!data && exactKeys(data, ["ok", "export"]) && data.ok === true && !!exported
-    && exactKeys(exported, ["exportedAt", "account", "decks", "rooms", "matchmaking", "bugReports", "replays", "friends", "friendRequests", "friendMessages"]) && !!account
+    && exactKeys(exported, ["exportedAt", "account", "decks", "rooms", "matchmaking", "bugReports", "gameDays", "replays", "friends", "friendRequests", "friendMessages"]) && !!account
     && exactKeys(account, ["username", "createdAt", "earlyTester", "selectedBadge"])
     && string(exported.exportedAt, 64, false) && string(account.username, MAX_SHORT_TEXT, false)
     && nonNegativeInteger(account.createdAt) && typeof account.earlyTester === "boolean"
@@ -1845,6 +1846,7 @@ export const decodeAccountExportResponse: Decoder<AccountExportResponse> = (valu
     && array(exported.rooms, (item): item is AccountExport["rooms"][number] => exportRoom(item), MAX_ROOMS)
     && exportMatchmaking(exported.matchmaking)
     && array(exported.bugReports, (item): item is AccountExport["bugReports"][number] => exportBugReport(item), MAX_ROOMS)
+    && array(exported.gameDays, (item): item is number => nonNegativeInteger(item) && item % 86_400_000 === 0, MAX_ROOMS)
     && array(exported.replays, (item): item is AccountExport["replays"][number] => exportReplay(item), MAX_ROOMS)
     && array(exported.friends, (item): item is AccountExport["friends"][number] => {
       const friend = object(item);

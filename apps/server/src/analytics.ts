@@ -4,6 +4,23 @@ import type { Queryable } from "./db.js";
 
 export type AnalyticsGameMode = "pvp" | "bot";
 
+/** A game counts for each human participant on its UTC start day. The
+ * primary key deduplicates repeat games and concurrent starts. */
+export async function recordGamePlayers(
+  db: Queryable,
+  userIds: readonly (number | undefined)[],
+  occurredAt = Date.now(),
+): Promise<void> {
+  const dayUtc = Math.floor(occurredAt / 86_400_000) * 86_400_000;
+  for (const userId of new Set(userIds.filter((id): id is number => id !== undefined))) {
+    await db.query(
+      `INSERT INTO daily_game_players (day_utc, user_id)
+       VALUES ($1, $2) ON CONFLICT (day_utc, user_id) DO NOTHING`,
+      [dayUtc, userId],
+    );
+  }
+}
+
 /** Record a successful registration without retaining an account identifier. */
 export async function recordUserRegistration(
   db: Queryable,

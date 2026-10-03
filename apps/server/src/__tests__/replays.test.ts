@@ -257,6 +257,10 @@ describe("server replay retention", () => {
 
   it("stores omniscient frames and finalizes replay files without engine reconstruction", async () => {
     const game = await startedGame();
+    expect((await db.query(
+      "SELECT user_id FROM daily_game_players WHERE day_utc = $1 ORDER BY user_id",
+      [Math.floor(Date.now() / 86_400_000) * 86_400_000],
+    )).rows).toEqual(game.users.map((userId) => ({ user_id: userId })));
     const initialRow = (await db.query(
       `SELECT f.view FROM replay_frames f JOIN replay_games g ON g.id=f.replay_id
        WHERE g.room_code=$1`,

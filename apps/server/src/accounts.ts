@@ -106,6 +106,7 @@ export interface AccountExport {
     dismissedAt: number | null;
     resolutionMessage: string | null;
   }>;
+  gameDays: number[];
   replays: Array<{
     id: string;
     finishedAt: number;
@@ -142,6 +143,7 @@ export async function exportAccount(db: Queryable, userId: number): Promise<Acco
     { rows: candidateRows },
     { rows: offerRows },
     { rows: reportRows },
+    { rows: gameDayRows },
     social,
   ] = await Promise.all([
     db.query("SELECT username, created_at, early_tester, selected_badge FROM users WHERE id = $1", [userId]),
@@ -183,6 +185,7 @@ export async function exportAccount(db: Queryable, userId: number): Promise<Acco
        FROM bug_reports WHERE reporter_user_id = $1 ORDER BY created_at, id`,
       [userId],
     ),
+    db.query("SELECT day_utc FROM daily_game_players WHERE user_id = $1 ORDER BY day_utc", [userId]),
     exportSocialData(db, userId),
   ]);
   const user = users[0] as {
@@ -298,6 +301,7 @@ export async function exportAccount(db: Queryable, userId: number): Promise<Acco
         }
       : null,
     bugReports,
+    gameDays: gameDayRows.map((row) => Number(row.day_utc)),
     replays,
     ...social,
   };

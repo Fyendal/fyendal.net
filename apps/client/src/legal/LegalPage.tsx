@@ -71,6 +71,7 @@ const PRIVACY: Section[] = [
       "Game data: your saved decklists, room membership, private replay notes, and the state and history of games you play (needed to run, reconnect, resume, and review games). Completed replays contain full-information frames, including both players' hidden zones; they are available only to the two signed-in participants. A replay note is available only to the participant who created it and is not shown in the opponent's replay.",
       "Social data: friend requests and connections, direct messages and their delivery or read information, whether friends are available, and game invitations. Your username, availability, and messages are shown only as needed to provide these features to the players involved.",
       "Bug reports: when you choose to submit one, we store your description, a report reference, and a server-side copy of the room's current state and recent history. The trace can contain both players' hidden game zones and is available only to service operators for diagnosis; it is not returned through the player-facing API.",
+      "Product activity: Fyendal stores the UTC dates on which your account starts a game to count daily active players. Operators see daily counts. These dates are included in your account export and removed when you delete your account.",
     ],
   },
   {
@@ -88,7 +89,7 @@ const PRIVACY: Section[] = [
   {
     title: "Service providers and sharing",
     body: [
-      "Fyendal has no advertising or analytics, does not track you across other websites, and does not sell or share your information with third parties for their own purposes. Because there is no cross-site tracking, browser Do Not Track signals do not change how Fyendal operates.",
+      "Fyendal has no advertising or third-party analytics and does not track you across other websites. It counts registrations, completed games, and daily active players for its own operations. Fyendal does not sell or share your information with third parties for their own purposes. Because there is no cross-site tracking, browser Do Not Track signals do not change how Fyendal operates.",
       "Service providers that help operate Fyendal may process information on Fyendal's behalf. They are not permitted to use it for their own purposes.",
       "Card and hero images come from a third-party content provider. Loading those images shares standard connection information with that provider, but Fyendal does not send your account credentials or username with the request.",
     ],
@@ -97,7 +98,7 @@ const PRIVACY: Section[] = [
     title: "Retention",
     body: [
       "Direct messages are kept for up to 30 days. Removing a friendship deletes the retained conversation. Friend connections remain until either player removes the friendship, and pending requests remain until they are accepted, declined, or canceled. Availability and game invitations are short-lived.",
-      "Rooms are normally deleted 15 minutes after a finished game or after everyone leaves. Completed player replays and their private notes expire 7 days after the game ends. Sign-in sessions expire after 30 days without renewal. Accounts, saved decks, and submitted bug reports persist until deletion.",
+      "Rooms are normally deleted 15 minutes after a finished game or after everyone leaves. Completed player replays and their private notes expire 7 days after the game ends. Sign-in sessions expire after 30 days without renewal. Accounts, saved decks, submitted bug reports, and your game activity dates persist until deletion.",
       "Deleted information may remain briefly in routine backup copies before those copies expire automatically.",
     ],
   },

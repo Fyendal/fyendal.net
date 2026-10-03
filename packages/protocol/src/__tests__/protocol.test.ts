@@ -1134,6 +1134,7 @@ describe("replays and HTTP responses", () => {
           closedAt: null,
           dismissedAt: null,
         }],
+        gameDays: [1_700_006_400_000],
         replays: [{
           id: "replay-id",
           finishedAt: 3,
@@ -1191,6 +1192,7 @@ describe("replays and HTTP responses", () => {
           rooms: [],
           matchmaking: null,
           bugReports: [],
+          gameDays: [],
           replays: [],
           friends: [],
           friendRequests: [],

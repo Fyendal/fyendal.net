@@ -14,6 +14,7 @@ describe("account deletion races", () => {
     const users = await db.query("SELECT id, username FROM users ORDER BY id");
     const exportedId = Number(users.rows[0]!.id);
     const candidateId = Number(users.rows[1]!.id);
+    await db.query("INSERT INTO daily_game_players (day_utc, user_id) VALUES ($1, $2)", [1_700_006_400_000, exportedId]);
     const store = new PgRoomStore(db, "test-ruleset");
     const candidate = await store.queueForMatch("cc", {
       userId: candidateId,
@@ -56,6 +57,7 @@ describe("account deletion races", () => {
       },
       offer: { roomCode: candidate.code, opponentUserId: candidateId },
     });
+    expect(exported?.gameDays).toEqual([1_700_006_400_000]);
     expect(decodeAccountExportResponse({ ok: true, export: exported })).not.toBeNull();
 
     await db.query(
@@ -74,6 +76,7 @@ describe("account deletion races", () => {
       "SELECT 1 FROM matchmaking_offers WHERE first_user_id = $1 OR second_user_id = $1",
       [exportedId],
     )).rows).toEqual([]);
+    expect((await db.query("SELECT 1 FROM daily_game_players WHERE user_id = $1", [exportedId])).rows).toEqual([]);
   });
 
   it("prevents a deleted cached identity from creating a new seat", async () => {

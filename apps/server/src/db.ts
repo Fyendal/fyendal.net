@@ -668,6 +668,16 @@ export const MIGRATIONS: Migration[] = [
     sql: `ALTER TABLE users ALTER COLUMN early_tester SET DEFAULT FALSE;
     ALTER TABLE users ALTER COLUMN selected_badge SET DEFAULT NULL;`,
   },
+  {
+    version: 40,
+    // One account per UTC game-start day. The account FK makes these
+    // activity records exportable and removes them on account deletion.
+    sql: `CREATE TABLE daily_game_players (
+      day_utc BIGINT NOT NULL CHECK (day_utc >= 0),
+      user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      PRIMARY KEY (day_utc, user_id)
+    );`,
+  },
 ];
 
 async function publicTables(db: Queryable): Promise<string[]> {

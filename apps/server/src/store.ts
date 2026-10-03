@@ -52,7 +52,7 @@ import {
   validateArena,
 } from "@fyendal/cards";
 import { decodePresentedArena, MAX_MATCHMAKING_AVOID_ROOM_CODES } from "@fyendal/protocol";
-import { recordGameCompletion } from "./analytics.js";
+import { recordGameCompletion, recordGamePlayers } from "./analytics.js";
 import { resolveDeck, validatePresentation } from "./decks.js";
 import { appendClusterEvent, type ClusterEvent } from "./clusterEvents.js";
 import { assertActiveRuleset } from "./rulesetFence.js";
@@ -1308,6 +1308,7 @@ export class PgRoomStore {
             roomVersion: room.version + 1,
             participants,
           });
+          await recordGamePlayers(db, participants.map((participant) => participant.userId));
         } else if (out.replay?.kind === "frame" && out.room.state) {
           const replayFrameAt = Date.now();
           replayFinalizationId = (await appendReplayView(
