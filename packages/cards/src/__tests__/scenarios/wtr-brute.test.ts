@@ -4,6 +4,7 @@ import { scenario } from "../harness.js";
 /**
  * Scenarios for the WTR Brute pool: next-attack buffs, random-discount attacks,
  * conditional go again, and equipment resource generation.
+ * Added: Bloodrush Bellow
  *
  * Pitch fodder: "raging onslaught|2" (yellow), "wrecker romp|3" (blue).
  */
@@ -131,7 +132,7 @@ describe("WTR Brute — next-attack buffs", () => {
   });
 });
 
-describe("WTR Brute — random-discount attacks", () => {
+describe("WTR Brute — random-discard actions", () => {
   it("Savage Swing can be played and resolves", () => {
     const g = scenario({
       seats: [
@@ -198,8 +199,44 @@ describe("WTR Brute — random-discount attacks", () => {
       .expectNoLog("Breakneck Battery gains go again")
       .expectAP(0, 0);
   });
-});
+  it("Bloodrush Bellow doesn't have GA and doesn't draw cards when discard condition (6+ {p} discard) not met", () => {
+    const sadBrbTurn = scenario({
+      seats: [
+        { hero: "rhinar", 
+          hand: ["call to the grave|3", "bloodrush bellow|2", "wrecker romp|3", "blink|3"], 
+          weapons: ["romping club|0"], 
+          deck: ["aggressive pounce|3", "clash of agility|1"]},
+        { hero: "rhinar", hand: [] },
+      ],
+    });
+    sadBrbTurn
+      .play("blink|3") //Gain an extra action point for the romping club attack. This confirms that the BRB buff is still active.
+      .play("bloodrush bellow|2", { pitch: ["wrecker romp|3"] })
+      .expectHandSize(0, 0)
+      .expectZoneSize(0, "deck", 2)
+      .expectAP(0, 1)
+      .attackWithWeapon()
+      .expectAttackValue(6); //Brb's buff is active regardless of the discarded card
 
+    const happyBrbTurn = scenario({
+      seats: [
+        { hero: "rhinar", 
+          hand: ["call to the grave|3", "bloodrush bellow|2", "wrecker romp|3"], 
+          weapons: ["romping club|0"], 
+          deck: ["titanium bauble|3", "clash of agility|1"]},
+        { hero: "rhinar", hand: [] },
+      ],
+          });
+    happyBrbTurn
+      .play("bloodrush bellow|2", { pitch: ["call to the grave|3"] })
+      .expectAP(0, 1)
+      .expectHandSize(0, 2)
+      .expectZoneSize(0, "deck", 0)
+      .play("clash of agility|1")
+      .expectAttackValue(8);
+
+  });
+});
 describe("WTR Brute — equipment", () => {
   it("Barkbone Strapping: destroy to roll a die and gain resources", () => {
     const g = scenario({

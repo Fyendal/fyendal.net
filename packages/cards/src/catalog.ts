@@ -140,6 +140,31 @@ export type { PresentationResult } from "./presentation.js";
  * card's own text. Keyed by functional key so reprints inherit the override.
  */
 const KEYWORD_OVERRIDES: Record<string, string[]> = {
+  // The following cards have conditional go again and need to have their keywords overridden here.
+    "bloodrush bellow|2": [],
+    "astral strike|1": [],
+    "open the center|1": ["Combo"],
+    "open the center|2": ["Combo"],
+    "open the center|3": ["Combo"],
+    "rising knee thrust|1": ["Combo"],
+    "rising knee thrust|2": ["Combo"],
+    "rising knee thrust|3": ["Combo"],
+    "mugenshi: release|2": ["Combo"],
+    "hurricane technique|2": ["Combo"],
+    "flood of force|2": ["Combo"],
+    "tiger swipe|1": ["Combo"],
+    "scour the battlescape|1": [],
+    "scour the battlescape|2": [],
+    "scour the battlescape|3": [],
+    "swarming gloomveil|1": [],
+    "bingo|1": [],
+    "douse in runeblood|1": [],
+    "tooth and claw|1": [],
+    "levels of enlightenment|3": [],
+    "emissary of wind|1": [],
+    "cogwerx dovetail|1": [],
+    "soul reaping|1": [],
+    "shadow of ursur|3": ["Blood Debt"],
   // Older OUT data predates the explicit Blade Break keyword field.
   "mask of many faces|0": ["Blade Break"],
   // Harmonized Kodachi gains go again only while its controller has a cost-0

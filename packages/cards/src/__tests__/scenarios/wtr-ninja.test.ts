@@ -58,11 +58,14 @@ describe("WTR Ninja — combo attacks", () => {
   it("Blackout Kick gains +3 attack after Rising Knee Thrust", () => {
     const g = scenario({
       seats: [
-        { hero: "dorinthea", hand: ["rising knee thrust|1", "blackout kick|1", "raging onslaught|2"] },
+        { hero: "dorinthea", hand: ["leg tap|1", "rising knee thrust|1", "blackout kick|1", "raging onslaught|2"] },
         { hero: "rhinar", hand: [] },
       ],
     });
-    g.play("rising knee thrust|1") // cost 0, go again
+    g.play("leg tap|1", { pitch: ["raging onslaught|2"] })
+      .blockWith()
+      .settle()
+      .play("rising knee thrust|1") // go again via Leg Tap combo
       .blockWith()
       .settle()
       .expectAP(0, 1)
@@ -70,7 +73,7 @@ describe("WTR Ninja — combo attacks", () => {
       .expectAttackValue(7) // 4 + 3
       .blockWith()
       .settle()
-      .expectLife(1, 10); // 3 + 7
+      .expectLife(1, 4); // 4 + 5 + 7
   });
 
   it("Open the Center gains +1, go again, and dominate after Head Jab", () => {
@@ -197,21 +200,23 @@ describe("WTR Ninja — combo attacks", () => {
       seats: [
         {
           hero: "dorinthea",
-          hand: ["open the center|1", "fluster fist|1", "raging onslaught|2"],
+          hand: ["head jab|1", "open the center|1", "fluster fist|1", "raging onslaught|2"],
         },
         { hero: "rhinar", hand: [] },
       ],
     });
-    g.play("open the center|1", { pitch: ["raging onslaught|2"] })
-      .expectAttackValue(5)
+    g.play("head jab|1")
+      .blockWith()
+      .settle()
+      .play("open the center|1", { pitch: ["raging onslaught|2"] })
       .blockWith()
       .settle()
       .expectAP(0, 1)
       .play("fluster fist|1")
-      .expectAttackValue(5) // 4 + 1 hit
+      .expectAttackValue(6) // 4 + 2 hits
       .blockWith()
       .settle()
-      .expectLife(1, 10); // 5 + 5
+      .expectLife(1, 5); // 3 + 6 + 6
   });
 });
 

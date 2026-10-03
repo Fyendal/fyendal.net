@@ -1,8 +1,23 @@
-import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
+import type { CardInstance, CardScript, DeepReadonly, ScriptCtx, grantCardKeyword } from "@fyendal/engine";
 import { functionalKeyOf } from "../../functional.js";
 import { commonOptionMessages, decisionMessage, decisionPrompt, isSixPlus, opponentSeat, previousAttackHasName, reprise } from "../shared-helpers.js";
 
 const SEISMIC_SURGE = "WTR075B";
+
+/** Store whether the random discard paid for this card had 6+ {p}. */
+function rememberDiscardedSixPlus(ctx: ScriptCtx): void {
+  ctx.setFlag("player", "discardingForBruteAttackCost", true);
+  const [discarded] = ctx.discardRandom(ctx.seat, 1);
+  ctx.setFlag("player", "discardingForBruteAttackCost", false);
+  if (discarded) {
+    ctx.setCounter("discardedSixPlus", isSixPlus(ctx, discarded) ? 1 : 0);
+  }
+}
+
+/** Was the card's additional-cost discard a 6+ card? */
+function discardedSixPlus(ctx: ScriptCtx): boolean {
+  return ctx.getCounter("discardedSixPlus") === 1;
+}
 
 function nameOf(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): string {
   return functionalKeyOf(ctx.cardData(card.cardId)).split("|")[0]!;
@@ -72,12 +87,12 @@ const heartOfFyendal: CardScript = {
 
 const bloodrushBellow: CardScript = {
   requiredHandCardsForAdditionalCost: 1,
-  additionalCost: rememberRandomDiscard,
+  additionalCost: rememberDiscardedSixPlus,
   onPlay(ctx) {
     ctx.addModifier({ scope: "until-end-of-turn", attack: 2, appliesToClass: "brute" });
-    if (ctx.getCounter("discardedSixPlus") === 1) {
+    if (discardedSixPlus(ctx)) {
       ctx.drawCards(ctx.seat, 2);
-      ctx.grantGoAgain();
+      ctx.grantCardKeyword(ctx.self.instanceId, "go again");
     }
   },
 };
