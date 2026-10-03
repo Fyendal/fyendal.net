@@ -2,6 +2,7 @@ import { createElement, type ReactNode } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import { createTestIntl, TestI18nProvider } from "../i18n/TestI18nProvider.js";
+import { SquareCardPresentation } from "./Card.js";
 import { decisionFloatDragKey } from "./DecisionFloat.js";
 import { BloodModeDecision } from "./decision/BloodModeDecision.js";
 import { ActionTargetCards, RevealedChoiceCards } from "./decision/CardChoices.js";
@@ -908,17 +909,18 @@ describe("simultaneous trigger ordering", () => {
   });
 
   it("renders draggable cards with keyboard reorder controls and one confirmation", () => {
-    const html = renderLocalized(createElement(TriggerOrderDecision, {
-      options: ["41:0", "42:0"],
-      labels: ["Create a Might token", "Draw a card"],
-      counts: [],
-      cards: [
-        { instanceId: 41, cardId: "IAR999", name: "Uncatalogued IAR Trigger", owner: 0 },
-        { instanceId: 42, cardId: "SECOND", owner: 0 },
-      ],
-      viewerSeat: 0,
-      onConfirm: () => undefined,
-    }));
+    const html = renderLocalized(createElement(SquareCardPresentation, { enabled: true },
+      createElement(TriggerOrderDecision, {
+        options: ["41:0", "42:0"],
+        labels: ["Create a Might token", "Draw a card"],
+        counts: [],
+        cards: [
+          { instanceId: 41, cardId: "IAR999", name: "Uncatalogued IAR Trigger", owner: 0 },
+          { instanceId: 42, cardId: "SECOND", owner: 0 },
+        ],
+        viewerSeat: 0,
+        onConfirm: () => undefined,
+      })));
 
     expect(html.match(/draggable="true"/g)).toHaveLength(2);
     expect(html).toContain("The first trigger resolves first");
@@ -928,6 +930,7 @@ describe("simultaneous trigger ordering", () => {
     expect(html).toContain("Confirm Order");
     expect(html).toContain("Confirm Order (Space)");
     expect(html).toContain('aria-keyshortcuts="Space"');
+    expect(html).not.toContain("card-board-square");
   });
 
   it("renders consolidated Blood Debt instead of its representative source card", () => {

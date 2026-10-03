@@ -112,7 +112,7 @@ describe("PlayerHalf", () => {
     expect(html).not.toContain("card-board-square");
   });
 
-  it("squares arena cards, piles, and empty slots for any hero", () => {
+  it("keeps arsenal portrait while squaring arena cards and piles", () => {
     const html = renderPlayerHalf({
       ...player,
       deckCount: 3,
@@ -125,7 +125,8 @@ describe("PlayerHalf", () => {
     expect(html).toContain("mat-square-board");
     expect(html).toContain("card-back-square");
     expect(html).toMatch(/card-board-square[^>]*data-cardid="TST-HERO"/);
-    expect(html.match(/card-board-square[^>]*data-cardid="WTR160"/g)).toHaveLength(3);
+    expect(html.match(/card-board-square[^>]*data-cardid="WTR160"/g)).toHaveLength(2);
+    expect(html).toMatch(/card-zone card-hasimg[^>]*data-cardid="WTR160"[^>]*data-motion-card="0:arsenal:16"/);
     expect(html).toContain("zone-pile-empty");
     expect(html).not.toContain("data-empty-label");
     const emptyPiles = renderPlayerHalf(player);
@@ -287,7 +288,7 @@ describe("PlayerHalf", () => {
     }, false);
 
     expect(html).toContain('<div class="c-backlabel">Arsenal</div>');
-    expect(html).toContain("card-back-square");
+    expect(html).toMatch(/class="card card-zone card-back" data-motion-card="1:arsenal:opaque"/);
     expect(html).toContain('data-motion-card="1:arsenal:opaque"');
   });
 
@@ -309,8 +310,9 @@ describe("PlayerHalf", () => {
     expect(html).toContain('aria-label="Arsenal 2"');
     expect(html).toContain('data-cardid="TST-ARROW-1"');
     expect(html).toContain('data-cardid="TST-ARROW-2"');
-    expect(html).toMatch(/card-board-square[^>]*data-cardid="TST-ARROW-1"/);
-    expect(html).toMatch(/card-board-square[^>]*data-cardid="TST-ARROW-2"/);
+    expect(html).toMatch(/card-zone[^>]*data-cardid="TST-ARROW-1"/);
+    expect(html).toMatch(/card-zone[^>]*data-cardid="TST-ARROW-2"/);
+    expect(html).not.toMatch(/card-board-square[^>]*data-cardid="TST-ARROW-[12]"/);
     expect(html).not.toContain("arsenal-slot-index");
   });
 

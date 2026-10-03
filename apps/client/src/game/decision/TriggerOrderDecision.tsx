@@ -141,6 +141,7 @@ export function TriggerOrderDecision({
               <CardFace
                 card={item.card}
                 size="zone"
+                squareArt={false}
                 affiliation={cardAffiliation(item.card, viewerSeat)}
               />
             ) : null}

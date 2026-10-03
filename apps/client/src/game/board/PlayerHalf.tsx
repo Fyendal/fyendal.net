@@ -611,7 +611,7 @@ export function PlayerHalf({
                   <CardFace
                     card={card}
                     size="zone"
-                    squareArt={squareBoard}
+                    squareArt={false}
                     motionKey={motionPresentationKey(
                       { kind: "arsenal", seat: player.seat },
                       card.instanceId,
@@ -633,7 +633,7 @@ export function PlayerHalf({
                 ) : slot.hidden ? (
                   <CardBack
                     label={zoneLabel("arsenal")}
-                    square={squareBoard}
+                    square={false}
                     motionKey={opaqueMotionPresentationKey(
                       { kind: "arsenal", seat: player.seat },
                       slot.opaqueOccurrence,
