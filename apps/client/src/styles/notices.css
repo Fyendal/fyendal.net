@@ -36,7 +36,7 @@
 }
 .global-notice button:focus-visible { outline: 2px solid #fff0c6; outline-offset: 2px; }
 .version-update-modal {
-  width: min(620px, calc(100vw - 32px));
+  width: min(880px, calc(100vw - 32px));
   border-color: #936c37;
   background: radial-gradient(ellipse at 80% -30%, #5b351831, transparent 55%),
     linear-gradient(180deg, #21160b, #150e08);
@@ -87,6 +87,26 @@
 .version-update-markdown :is(p, ul, ol) { margin: 0 0 14px; }
 .version-update-markdown li + li { margin-top: 5px; }
 .version-update-markdown a { color: #e8bf66; text-decoration: underline; }
+.version-update-markdown a:hover { color: #ffe0a0; }
+.version-update-markdown a:focus-visible { outline: 2px solid #ffe0a0; outline-offset: 2px; }
+.version-update-markdown a.version-update-discord-link {
+  padding: .05em .25em;
+  border-radius: 3px;
+  background: #5865f22b;
+  color: #c5c9ff;
+  text-decoration: none;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+.version-update-markdown a.version-update-discord-link:hover { background: #5865f247; color: #eef0ff; }
+.version-update-markdown a.version-update-discord-link:focus-visible { outline: 2px solid #a5adff; outline-offset: 2px; }
+.version-update-discord-icon {
+  width: 1.05em;
+  height: 1.05em;
+  margin-right: .35em;
+  vertical-align: -.14em;
+  fill: #5865f2;
+}
 .version-update-markdown pre { overflow: auto; padding: 12px; background: #120c07; }
 .version-update-markdown code { overflow-wrap: anywhere; }
 .version-update-markdown blockquote { margin-inline: 0; padding-left: 16px; border-left: 3px solid #b8933f; }

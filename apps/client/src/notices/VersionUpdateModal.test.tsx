@@ -30,7 +30,14 @@ describe("VersionUpdateModal", () => {
     expect(html).not.toContain("<script>");
     expect(html).not.toContain("<img");
     expect(html).not.toContain("javascript:");
-    expect(html).toContain('<a href="https://discord.gg/DpTjVbfPVv" target="_blank" rel="noopener noreferrer">Join us on Discord</a>');
+    expect(html).toContain('<a class="version-update-discord-link" href="https://discord.gg/DpTjVbfPVv" target="_blank" rel="noopener noreferrer"><svg class="version-update-discord-icon"');
+    expect(html).toContain('Join us on Discord</a>');
+  });
+  it("adds the Discord mark only to Discord links", () => {
+    const html = renderToStaticMarkup(<VersionUpdateBody markdown={'[Discord](https://discord.com/invite/example) [Website](https://example.com) [Impostor](https://discord.gg.evil.example)'} />);
+    expect(html.match(/version-update-discord-icon/g)).toHaveLength(1);
+    expect(html).toContain('<a href="https://example.com" target="_blank" rel="noopener noreferrer">Website</a>');
+    expect(html).toContain('<a href="https://discord.gg.evil.example" target="_blank" rel="noopener noreferrer">Impostor</a>');
   });
   it("shows the update time and one visible dismissal control", () => {
     const html = renderToStaticMarkup(

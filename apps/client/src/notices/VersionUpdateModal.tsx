@@ -3,7 +3,19 @@ import { useIntl } from "react-intl";
 import ReactMarkdown from "react-markdown";
 import type { VersionUpdateNotice } from "@fyendal/shared";
 import { apiVersionUpdateNotice } from "../auth/auth.js";
+import { DiscordIcon } from "../components/DiscordIcon.js";
 import { ModalSurface } from "../components/ModalSurface.js";
+
+function isDiscordLink(href: string | undefined): boolean {
+  if (!href) return false;
+  try {
+    const url = new URL(href);
+    return (url.protocol === "https:" || url.protocol === "http:")
+      && ["discord.gg", "discord.com", "discordapp.com"].includes(url.hostname.replace(/^www\./, ""));
+  } catch {
+    return false;
+  }
+}
 
 export function versionUpdateSeenKey(username: string, id: string): string {
   return `fyendal-version-update-seen-${username.toLowerCase()}-${id}`;
@@ -19,7 +31,20 @@ export function VersionUpdateBody({ markdown }: { markdown: string }) {
     <div className="version-update-markdown">
       <ReactMarkdown skipHtml components={{
         img: () => null,
-        a: ({ href, children }) => <a href={href} target="_blank" rel="noopener noreferrer">{children}</a>,
+        a: ({ href, children }) => {
+          const discord = isDiscordLink(href);
+          return (
+            <a
+              className={discord ? "version-update-discord-link" : undefined}
+              href={href}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {discord ? <DiscordIcon className="version-update-discord-icon" /> : null}
+              {children}
+            </a>
+          );
+        },
       }}>{markdown}</ReactMarkdown>
     </div>
   );
