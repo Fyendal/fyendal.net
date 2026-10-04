@@ -356,6 +356,38 @@ describe("Hala policy", () => {
     });
   });
 
+  it.each([false, true])("finishes two sword swings with Brimming and And Again (Flurry: %s)", (flurry) => {
+    let state = createGame({
+      decklists: [halaDeck(), decklists.dorinthea],
+      cards: cardData,
+      scripts,
+      seed: 9344,
+      startPlayer: 0,
+    });
+    state.turn = 2;
+    // The public report does not identify the arsenaled fourth card. Use a
+    // red Shelter to reproduce its Hala -> Brimming (pitch And Again) line.
+    replaceHand(state, 0, ["HVY209", "AHA011", "MPW028", "PEN321"]);
+    replaceHand(state, 1, ["HVY209", "HVY209"]);
+    if (flurry) state.players[0]!.board.push({
+      instanceId: state.nextInstanceId++, cardId: "MPW135", owner: 0,
+    });
+    for (let step = 0; step < 120 && state.activePlayer === 0; step++) {
+      const actor = (state.pendingDecision?.player ?? state.priorityPlayer) as 0 | 1;
+      const legal = legalIntents(state, actor).filter((intent) => !intent.kind.endsWith("-draw"));
+      const intent = actor === 0
+        ? chooseHalaIntent({ seat: 0, view: projectStateFor(state, 0), legal, cards: cardData, state })
+        : state.pendingDecision?.kind === "defend"
+        ? { kind: "defend" as const, instanceIds: state.players[1]!.hand.map((card) => card.instanceId) }
+        : legal.find((candidate) => candidate.kind === "pass");
+      if (!intent) throw new Error(`no rollout intent for ${state.phase}`);
+      state = apply(state, actor, intent);
+    }
+    expect(state.activePlayer).toBe(1);
+    expect(state.log.filter((entry) => entry.publicText?.includes("attacks with Zenith Blade")),
+      state.log.map((entry) => entry.publicText).join("\n")).toHaveLength(2);
+  });
+
   it("pitches a blue so a Flurry turn can pay for both Zenith Blade attacks", () => {
     const state = createGame({
       decklists: [halaDeck(), decklists.dorinthea],

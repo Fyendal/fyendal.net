@@ -928,6 +928,28 @@ function sharpenBeforeAdditionalSwingIntent(input: BotPolicyInput): GameIntent |
     extendsSwordTurn(input.cards[card.cardId])
   ).map((card) => card.instanceId));
   const own = ownCards(input);
+  // A cheap go-again sharpen can fund the same two-swing line without
+  // spending three resources on Hala and then pitching the extender to pay
+  // for another setup card (for example, Brimming Blade).
+  const sharpenIntents = input.legal.filter((intent) => {
+    if (intent.kind !== "play-card" && intent.kind !== "play-from-arsenal") return false;
+    const card = intentCard(intent, own);
+    const data = card ? input.cards[card.cardId] : undefined;
+    if (!card || !data || !isPreferredPreSwordSharpener(data) ||
+      reservedIds.has(card.instanceId) ||
+      pitchIds(intent).some((id) => reservedIds.has(id))) return false;
+    const counters = sharpenCount(input) + (key(data) === "brimming blade|1" ? 2 : 1);
+    return extenders.some((extender) => {
+      const extenderData = input.cards[extender.cardId];
+      const threshold = sharpenThreshold(extenderData);
+      if (threshold !== undefined && counters + 1 < threshold) return false;
+      const excluded = new Set([card.instanceId, extender.instanceId, ...pitchIds(intent)]);
+      return resourcesAfter(intent, data, input, own) + remainingPitchValue(input, excluded) >=
+        1 + Number(extenderData?.cost ?? 0);
+    });
+  });
+  const cheapSharpen = preferredPitchIntents(sharpenIntents, input, own)[0];
+  if (cheapSharpen) return cheapSharpen;
   const heroIntents = input.legal.filter((intent) => {
     if (intent.kind !== "activate-ability" || pitchIds(intent).some((id) => reservedIds.has(id))) {
       return false;
