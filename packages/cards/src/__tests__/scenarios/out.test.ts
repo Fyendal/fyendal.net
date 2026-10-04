@@ -508,6 +508,24 @@ describe("OUT — rules regression coverage", () => {
       expect(s.state.chain.at(-1)!.attackingCard.grantedNames).toContain(chosenName);
     },
   );
+  it("Buzzsaw Trap prevents an attack from gaining power", () => {
+    const s = scenario({
+      active: 1,
+      seats: [
+        { hero: "rhinar", hand: ["buzzsaw trap|3"] },
+        { hero: "dorinthea", hand: ["head jab|1", "nimblism|1", "razor reflex|1"], resources: 1 },
+      ],
+    });
+    s.play("nimblism|1").settle();
+    s.play("head jab|1").blockWith().expectAttackValue(6).passPriority()
+      .react("buzzsaw trap|3", { settle: false })
+      .passPriority().passPriority() // Resolve Buzzsaw Trap.
+      .passPriority().passPriority() // Resolve its "when this defends" trigger.
+      .expectAttackValue(3) // Buzzsaw Trap stops buffs that already happened
+      .react("razor reflex|1", { settle: false })
+      .passPriority().passPriority()
+      .expectAttackValue(3); // Buzzsaw Trap stops future buffs from happening
+  });
 
   it("Riptide deals damage when a controlled trap triggers", () => {
     const s = scenario({

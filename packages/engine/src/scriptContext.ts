@@ -1028,7 +1028,8 @@ export function makeCtx(
         delta > 0 &&
         active?.attackCardType === "action" &&
         active.attackingCard.instanceId === instanceId &&
-        ((state.players[active.attacker] as PlayerState).flags.attacksCannotGainPower === true ||
+        (active.flags.cannotGainPower === true ||
+          (state.players[active.attacker] as PlayerState).flags.attacksCannotGainPower === true ||
           (state.players.some((candidate) => candidate.flags.suppressAttackPowerEffectGains === true) &&
             (self.instanceId === instanceId || dataOf(state, self.cardId).cardType === "attack-reaction")));
       let adjusted =
