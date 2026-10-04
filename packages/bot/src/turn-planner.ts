@@ -538,8 +538,12 @@ function plannerCandidates<Evaluation extends TurnEvaluation>(
   context: SearchContext<Evaluation>,
   depth: number,
 ): GameIntent[] {
+  // Bot tasks omit draw negotiation, but speculative observations regenerate
+  // legal intents from the engine. Keep offer/withdraw loops out of every
+  // search depth so they cannot consume the budget or become a continuation.
   const generated = input.legal.filter((intent) =>
-    intent.kind !== "concede" && intent.kind !== "stage-defenders"
+    intent.kind !== "concede" && intent.kind !== "stage-defenders" &&
+    !intent.kind.endsWith("-draw")
   );
   const strategic = strategicPitchIntents(
     generated,

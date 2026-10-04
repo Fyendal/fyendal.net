@@ -211,6 +211,46 @@ describe("bounded turn planning", () => {
     expect(plan?.checkpoints[0]?.observationKey).toBe(botObservationKey(input));
   });
 
+  it.each([false, true])("excludes draw negotiation at every search depth (filtered task: %s)", (filtered) => {
+    const state = createGame({
+      decklists: [decklists.dorinthea, decklists.rhinar],
+      cards: cardData,
+      scripts,
+      seed: 80,
+      startPlayer: 0,
+    });
+    state.players[0]!.hand = [];
+    state.players[0]!.resources = 1;
+    const legal = legalIntents(state, 0);
+    expect(legal.some((intent) => intent.kind === "offer-draw")).toBe(true);
+    const weaponId = state.players[0]!.weapons[0]!.instanceId;
+    const depths: number[] = [];
+    const plan = planTurn({
+      seat: 0,
+      view: projectStateFor(state, 0),
+      legal: filtered ? legal.filter((intent) => !intent.kind.endsWith("-draw")) : legal,
+      cards: cardData,
+      state,
+    }, {
+      chooseForced: (forced) => forcedIntent(forced.legal),
+      cardOpportunity: () => 0,
+      rankCandidate: (intent) => intent.kind === "activate-ability" &&
+        intent.sourceInstanceId === weaponId ? 100 : 0,
+      prepareCandidates(candidates, _input, { depth }) {
+        depths.push(depth);
+        expect(candidates.some((intent) => intent.kind.endsWith("-draw"))).toBe(false);
+        return candidates;
+      },
+      evaluateEnd: (_state, _observed, _root, complete) => ({ score: 0, complete }),
+      maxRootCandidates: 1,
+      maxSearchNodes: 8,
+    });
+    expect(plan?.intent).toMatchObject({ kind: "activate-ability", sourceInstanceId: weaponId });
+    expect(depths.some((depth) => depth > 0)).toBe(true);
+    expect(plan?.evaluation.complete).toBe(true);
+    expect(plan?.line.some((intent) => intent.kind.endsWith("-draw"))).toBe(false);
+  });
+
   it("ranks root candidates before applying a one-node cap", () => {
     const state = createGame({
       decklists: [decklists.dorinthea, decklists.rhinar],
@@ -221,7 +261,8 @@ describe("bounded turn planning", () => {
     });
     const legal = legalIntents(state, 0).filter((intent) => intent.kind !== "concede");
     const pass = legal.find((intent) => intent.kind === "pass")!;
-    const action = legal.find((intent) => intent.kind !== "pass")!;
+    const action = legal.find((intent) => intent.kind === "activate-ability")!;
+    expect(action).toBeDefined();
     const input = {
       seat: 0 as const,
       view: projectStateFor(state, 0),
