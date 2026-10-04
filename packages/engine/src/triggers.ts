@@ -672,6 +672,15 @@ export function playWindowInstant(
     );
     if (alternativeErr) return alternativeErr;
   }
+  if (script?.onPlayCostPaid) {
+    const paidCards = pitchInstanceIds
+      .map((id) => player.pitch.find((candidate) => candidate.instanceId === id))
+      .filter((candidate): candidate is CardInstance => candidate !== undefined);
+    script.onPlayCostPaid(
+      runtime.makeCtx(state, seat, card, link, fromArsenal),
+      paidCards,
+    );
+  }
   removeFromArray(source, card.instanceId);
   delete card.faceDown;
   const origin = fromZone ?? (fromArsenal ? "arsenal" : source === player.banish ? "banish" : "hand");

@@ -921,7 +921,6 @@ export const dynHighRarity: Record<string, CardScript> = {
       },
     },
   },
-  "mind warp|2": arcane(2),
   "swell tidings|1": arcane(5, (ctx, dealt) => {
     if (dealt > 5) ctx.createToken(PONDER);
   }),

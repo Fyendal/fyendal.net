@@ -329,7 +329,7 @@ const contractGoAgain: ContractTest = (ctx, card) =>
   (data(ctx, card).keywords ?? []).some((keyword) => keyword.toLowerCase() === "go again");
 const contractNonAttack: ContractTest = (ctx, card) => isNonAttackAction(ctx, card);
 
-function arcaneTargetSpell(amount: number, surge: "go-again" | "opt" | "energy" | null): CardScript {
+function arcaneTargetSpell(amount: number, surge: "go-again" | "opt" | "energy" | "hand" | null): CardScript {
   return {
     arcaneDamageEffect: true,
     arcaneDamageEffectAmounts: [amount],
@@ -343,7 +343,12 @@ function arcaneTargetSpell(amount: number, surge: "go-again" | "opt" | "energy" 
       if (!arcane || dealt <= amount || surge === null) return;
       if (surge === "go-again") ctx.gainActionPoint();
       else if (surge === "opt") optN(ctx, 1);
-      else {
+      else if (surge === "hand") {
+        const hand = [...ctx.player(target).hand];
+        for (const card of hand) ctx.putOnDeckBottom(card.instanceId);
+        ctx.shuffleDeck(target);
+        ctx.drawCards(target, Math.max(0, hand.length - 1));
+      } else {
         const permanents = [
           ...ctx.player(target).board,
           ...ctx.player(target).weapons,
@@ -1278,6 +1283,7 @@ export const dyn: Record<string, CardScript> = mergeSetScripts("DYN", dynHighRar
   },
 
   // Wizard
+  "mind warp|2": arcaneTargetSpell(2, "hand"),
   "aether quickening|1": arcaneTargetSpell(4, "go-again"),
   "aether quickening|2": arcaneTargetSpell(3, "go-again"),
   "prognosticate|1": arcaneTargetSpell(3, "opt"),

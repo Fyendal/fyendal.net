@@ -576,3 +576,54 @@ describe("DYN — granted hit effects", () => {
     expect(s.state.pendingDecision).toBeNull();
   });
 });
+
+describe("DYN — Mind Warp", () => {
+  const equipment = { head: null, chest: null, arms: null, legs: null };
+  function setup(handSize = 4, barrier = false) {
+    return scenario({
+      seats: [
+        { hero: "rhinar", weapons: ["volzar, meteor storm|0"], hand: ["mind warp|2", "sigil of solace|1"], equipment },
+        { hero: "dorinthea", hand: Array.from({ length: handSize }, () => "head jab|1"),
+          deck: ["wrecker romp|3", "wrecker romp|2", "wrecker romp|1"],
+          resources: barrier ? 1 : 0,
+          equipment: { ...equipment, head: barrier ? "nullrune hood|0" : null } },
+      ],
+    });
+  }
+
+  it.each([0, 1, 4])("shuffles a %i-card hand and draws one fewer after amplified damage", (handSize) => {
+    const g = setup(handSize);
+    const originalCards = [...g.state.players[1]!.hand, ...g.state.players[1]!.deck]
+      .map((card) => card.instanceId).sort();
+    g.play("sigil of solace|1").activate("volzar, meteor storm|0").play("mind warp|2").chooseOption("opposing hero")
+      .expectLife(1, 17).expectHandSize(1, Math.max(0, handSize - 1));
+    expect([...g.state.players[1]!.hand, ...g.state.players[1]!.deck]
+      .map((card) => card.instanceId).sort()).toEqual(originalCards);
+    const publicLogs = JSON.stringify(projectStateFor(g.state, null).log);
+    expect(publicLogs).not.toContain("Head Jab");
+    expect(publicLogs).not.toContain("Wrecker Romp");
+  });
+
+  it("applies Surge to the chosen hero, including its controller", () => {
+    const g = setup();
+    const opponentHand = g.state.players[1]!.hand.map((card) => card.instanceId);
+    g.play("sigil of solace|1").activate("volzar, meteor storm|0")
+      .play("mind warp|2").chooseOption("your hero").expectLife(0, 20).expectLife(1, 20);
+    expect(g.state.players[1]!.hand.map((card) => card.instanceId)).toEqual(opponentHand);
+  });
+
+  it("does not shuffle a hand when it deals only 2 damage", () => {
+    const g = setup();
+    const hand = g.state.players[1]!.hand.map((card) => card.instanceId);
+    g.play("mind warp|2").chooseOption("opposing hero").expectLife(1, 18);
+    expect(g.state.players[1]!.hand.map((card) => card.instanceId)).toEqual(hand);
+  });
+
+  it.each(["pay 0", "pay 1"])("checks actual damage after arcane barrier: %s", (payment) => {
+    const g = setup(4, true);
+    g.play("sigil of solace|1").activate("volzar, meteor storm|0").play("mind warp|2").chooseOption("opposing hero");
+    expect(g.state.pendingDecision?.chooseHook).toBe("arcane-barrier");
+    g.chooseOption(payment).expectLife(1, payment === "pay 0" ? 17 : 18)
+      .expectHandSize(1, payment === "pay 0" ? 3 : 4);
+  });
+});

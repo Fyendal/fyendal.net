@@ -1308,13 +1308,13 @@ describe("PEN — generalized rules interactions", () => {
       .expectAP(0, 1);
   });
 
-  it("Voltic Veil deals arcane damage when Second Strike is pitched to play it", () => {
+  it.each(["second strike|1", "sigil of brilliance|2"])("Voltic Veil deals arcane damage when %s is pitched to play it", (pitch) => {
     const g = scenario({
       seats: [
         { hero: "rhinar", hand: ["head jab|1"], equipment: NO_EQUIPMENT },
         {
           hero: "dorinthea",
-          hand: ["voltic veil|1", "second strike|1"],
+          hand: ["voltic veil|1", pitch],
           equipment: NO_EQUIPMENT,
         },
       ],
@@ -1323,7 +1323,7 @@ describe("PEN — generalized rules interactions", () => {
     g.play("head jab|1")
       .blockWith()
       .passPriority()
-      .react("voltic veil|1", { pitch: ["second strike|1"] })
+      .react("voltic veil|1", { pitch: [pitch] })
       .settle()
       .expectLife(0, 19);
   });

@@ -15,6 +15,24 @@ function countOnBoard(g: Scenario, seat: number, key: string): number {
 }
 
 describe("Earth Bond and Lightning Bond", () => {
+  it.each([
+    ["flash bolt|1", 19],
+    ["raging onslaught|3", 20],
+  ] as const)("Voltic Veil checks %s pitched in a priority window", (pitch, life) => {
+    const g = scenario({ seats: [
+      { hero: "rhinar", hand: ["head jab|1"], equipment: NO_EQUIPMENT },
+      { hero: "dorinthea", hand: ["voltic veil|1", pitch], equipment: NO_EQUIPMENT },
+    ] });
+
+    g.play("head jab|1", { settle: false })
+      .passPriority()
+      .react("voltic veil|1", { pitch: [pitch] })
+      .expectLife(0, life)
+      .blockWith()
+      .settle()
+      .expectLife(1, 20);
+  });
+
   it("keeps an explicit inventory with paid-card hooks for every Bond card", () => {
     const bondPrintings = Object.values(cardData)
       .filter((card) => card.keywords?.some(
