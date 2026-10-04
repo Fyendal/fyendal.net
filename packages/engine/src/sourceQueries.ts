@@ -87,7 +87,7 @@ export function lingeringModifierSources(
   for (const modifier of state.modifiers) {
     if (
       modifier.seat !== seat ||
-      (modifier.scope !== "until-end-of-turn" && modifier.scope !== "combat-chain") ||
+      (modifier.scope !== "until-end-of-turn" && modifier.scope !== "combat-chain" && modifier.scope !== "chain-link") ||
       modifier.consumed
     ) continue;
     if (seen.has(modifier.sourceInstanceId)) continue;

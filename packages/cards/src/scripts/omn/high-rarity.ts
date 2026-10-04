@@ -239,7 +239,7 @@ export const omnHighRarity: Record<string, CardScript> = {
   "settle the bill|1": {
     onPlay(ctx) { const arrows = ctx.player(ctx.seat).hand.filter((card) => has(ctx, card, "arrow")); if (arrows.length && ctx.player(ctx.seat).arsenal.length === 0) ctx.requestCardChoice("settle-arrow", decisionPrompt("Put an arrow into arsenal?", "card.omn.arrow.arsenal", { optionMessages: commonOptionMessages("no") }), ["no", ...arrows.map((card) => card.instanceId)]); },
     onChoose(ctx, hook, option) { if (hook === "settle-arrow" && option !== "no" && ctx.putIntoArsenal(Number(option), "hand", { faceUp: true })) { ctx.addCardTempPower(Number(option), 3); ctx.addModifier({ scope: "until-end-of-turn", appliesToInstanceId: Number(option) }); } },
-    canTriggerOnHit(ctx) { return ctx.link?.targetAllyId === undefined && ctx.state.modifiers.some((modifier) => modifier.sourceInstanceId === ctx.self.instanceId && modifier.scope === "chain-link"); },
+    canTriggerOnHit(ctx) { const arrow = ctx.link?.attackingCard.instanceId; return ctx.link?.targetAllyId === undefined && ctx.state.modifiers.some((modifier) => modifier.sourceInstanceId === ctx.self.instanceId && modifier.scope === "until-end-of-turn" && modifier.appliesToInstanceId === arrow); },
     onHit(ctx) { for (const card of [...ctx.player(opponentSeat(ctx)).arsenal]) ctx.moveToGraveyard(card.instanceId, "arsenal"); },
   },
   "beckon steel|3": {
