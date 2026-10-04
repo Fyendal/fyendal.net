@@ -556,6 +556,30 @@ describe("IAR cards", () => {
       .expectInZone(0, "runechant|0", "board");
   });
 
+  it("Deathly Delight destroys Sloth without usurping it or gaining go again", () => {
+    const g = scenario({ seats: [
+      {
+        hero: "rhinar",
+        hand: ["deathly delight|1"],
+        board: ["runechant of sloth|2"],
+        resources: 2,
+        equipment: NO_EQUIPMENT,
+      },
+      { hero: "dorinthea", life: 20, equipment: NO_EQUIPMENT },
+    ] });
+
+    g.play("deathly delight|1")
+      .blockWith()
+      .settle()
+      .expectLife(1, 15)
+      .expectAP(0, 0)
+      .expectInZone(0, "runechant of sloth|2", "graveyard")
+      .expectInZone(0, "runechant|0", "board");
+
+    expect(g.state.players[0]!.flags.usurpedThisTurn).not.toBe(true);
+    expect(boardNames(g, 0)).toEqual(["Runechant"]);
+  });
+
   it("Become the Shadow Lord and Open the Gate each create their Gate", () => {
     const g = scenario({ seats: [
       {

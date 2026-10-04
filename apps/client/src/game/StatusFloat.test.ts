@@ -116,6 +116,8 @@ describe("status action", () => {
   it("uses the status button to confirm staged blocks", () => {
     const html = renderStatus({
       dockRect: null,
+      oppHeroCardId: "MON001",
+      myHeroCardId: "WTR001",
       oppLife: 20,
       myLife: 19,
       oppHeroName: "Rhinar",
@@ -147,6 +149,8 @@ describe("status action", () => {
   ] as const)("renders the derived %s primary action", (primaryAction, title) => {
     const html = renderStatus({
       dockRect: null,
+      oppHeroCardId: "MON001",
+      myHeroCardId: "WTR001",
       oppLife: 20,
       myLife: 20,
       oppHeroName: "Rhinar",
@@ -165,6 +169,8 @@ describe("status action", () => {
   it("disables the primary action while its room command is pending", () => {
     const html = renderStatus({
       dockRect: null,
+      oppHeroCardId: "MON001",
+      myHeroCardId: "WTR001",
       oppLife: 20,
       myLife: 20,
       oppHeroName: "Rhinar",
@@ -184,6 +190,8 @@ describe("status action", () => {
   it("shows action points without duplicating the board's turn status", () => {
     const html = renderStatus({
       dockRect: null,
+      oppHeroCardId: "MON001",
+      myHeroCardId: "WTR001",
       oppLife: 20,
       myLife: 20,
       oppHeroName: "Briar",
@@ -202,6 +210,8 @@ describe("status action", () => {
   it("renders the primary game HUD in Simplified Chinese", () => {
     const html = renderStatus({
       dockRect: null,
+      oppHeroCardId: "MON001",
+      myHeroCardId: "WTR001",
       oppLife: 20,
       myLife: 18,
       oppHeroName: "Rhinar",

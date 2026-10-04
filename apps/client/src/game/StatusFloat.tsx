@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { useIntl } from "react-intl";
 import type { GameLogViewEntry } from "@fyendal/shared";
-import { heroImageUrl } from "../lobby/heroImage.js";
+import { LifeHeroPortrait } from "./LifeHeroPortrait.js";
 
 export type PrimaryAction = "end-turn" | "confirm-blocks" | "confirm-no-blocks" | "pass";
 
@@ -112,6 +112,7 @@ function LifeStatus({
   side,
   seat,
   heroName,
+  heroCardId,
   log,
   logEntries,
 }: {
@@ -119,6 +120,7 @@ function LifeStatus({
   side: "opp" | "me";
   seat: number;
   heroName: string;
+  heroCardId: string;
   log: readonly string[];
   logEntries?: readonly GameLogViewEntry[];
 }) {
@@ -171,17 +173,7 @@ function LifeStatus({
     ? displayedPackets.find((packet) => packet.animation !== "default")?.animation ?? "damage"
     : activeChange?.kind;
   const heroPortrait = (
-    <img
-      className="life-hero"
-      src={heroImageUrl(heroName)}
-      alt=""
-      width={32}
-      height={32}
-      aria-hidden="true"
-      onError={(event) => {
-        event.currentTarget.hidden = true;
-      }}
-    />
+    <LifeHeroPortrait heroName={heroName} heroCardId={heroCardId} />
   );
   return (
     <div
@@ -270,6 +262,8 @@ export function StatusFloat({
   myLife,
   oppHeroName,
   myHeroName,
+  oppHeroCardId,
+  myHeroCardId,
   mySeat = 0,
   log,
   logEntries,
@@ -284,6 +278,8 @@ export function StatusFloat({
   myLife: number;
   oppHeroName: string;
   myHeroName: string;
+  oppHeroCardId: string;
+  myHeroCardId: string;
   mySeat?: 0 | 1;
   log: readonly string[];
   logEntries?: readonly GameLogViewEntry[];
@@ -304,6 +300,7 @@ export function StatusFloat({
         side="opp"
         seat={mySeat === 0 ? 1 : 0}
         heroName={oppHeroName}
+        heroCardId={oppHeroCardId}
         log={log}
         logEntries={logEntries}
       />
@@ -329,6 +326,7 @@ export function StatusFloat({
         side="me"
         seat={mySeat}
         heroName={myHeroName}
+        heroCardId={myHeroCardId}
         log={log}
         logEntries={logEntries}
       />

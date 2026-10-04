@@ -690,7 +690,9 @@ describe("ROS — Lightning and Runeblade", () => {
     }));
 
     g.react("succumb to temptation|2")
-      .expectNotInZone(0, "succumb to temptation|2", "hand");
+      .expectNotInZone(0, "succumb to temptation|2", "hand")
+      .settle()
+      .expectAP(0, 2);
   });
 
   it("Vaporize // Shock can meld during combat and destroy an aura after Shock resolves", () => {

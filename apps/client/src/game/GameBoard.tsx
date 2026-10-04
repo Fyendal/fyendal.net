@@ -1217,6 +1217,8 @@ export function GameBoard() {
         myLife={me.life}
         oppHeroName={opp.heroName}
         myHeroName={me.heroName}
+        oppHeroCardId={opp.heroCardId}
+        myHeroCardId={me.heroCardId}
         mySeat={seat}
         log={view.log}
         logEntries={view.logEntries}
