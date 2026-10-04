@@ -226,16 +226,25 @@ describe("SGB — equipment", () => {
   it("Carrion Crown: discard an ally, destroy, draw; go again", () => {
     const g = scenario({
       seats: [
-        { hero: "rhinar", equipment: { head: "carrion crown|0" }, hand: ["barnacle|2"], deck: [] },
+        { hero: "rhinar", equipment: { head: "carrion crown|0" }, hand: ["barnacle|2"], deck: ["raging onslaught|3"] },
         { hero: "dorinthea", hand: [] },
       ],
     });
-    g.activate("carrion crown|0", { settle: false })
-      .passPriority()
-      .passPriority()
-      .chooseCard("barnacle|2")
+    g.expectAP(0, 1);
+    g.activate("carrion crown|0", { settle: false });
+    expect(g.state.pendingDecision).toMatchObject({
+      player: 0,
+      chooseHook: "engine-activation-effect-cost",
+      options: [String(g.state.players[0]!.hand[0]!.instanceId)],
+    });
+    const ally = g.state.players[0]!.hand[0]!;
+    g.doRaw({ kind: "choose", optionId: String(ally.instanceId) })
+      .expectAP(0, 0)
       .expectInZone(0, "barnacle|2", "graveyard")
+      .passPriority()
+      .passPriority()
       .expectNoEquipment(0, "head")
+      .expectInZone(0, "raging onslaught|3", "hand")
       .expectAP(0, 1);
   });
 

@@ -92,10 +92,13 @@ describe("interactions — choice option projection", () => {
         { hero: "dorinthea", hand: [] },
       ],
     });
-    g.activate("carrion crown|0", { settle: false })
-      .passPriority()
-      .passPriority();
+    g.activate("carrion crown|0", { settle: false });
     const ally = g.state.players[0]!.hand[0]!;
+    expect(g.state.pendingDecision).toMatchObject({
+      player: 0,
+      chooseHook: "engine-activation-effect-cost",
+      cardOptions: [ally.instanceId],
+    });
     const own = projectStateFor(g.state, 0).pendingDecision;
     expect(own?.options).toEqual([String(ally.instanceId)]);
     expect(own?.optionCards?.[0]?.cardId).toBe(ally.cardId);

@@ -285,23 +285,20 @@ export const sgb: Record<string, CardScript> = {
       isAttack: false,
       goAgain: true,
       destroySelfCost: true,
+      effectCardCosts: [{
+        zone: "hand",
+        move: "discard",
+        count: 1,
+        subtype: "ally",
+        prompt: decisionPrompt(
+          "Carrion Crown: discard an ally",
+          "card.sgb.carrion.ally.discard",
+        ),
+      }],
       canActivate: (ctx) => ctx.player(ctx.seat).hand.some((c) => isAlly(ctx, c)),
       onActivate(ctx) {
-        const allies = ctx.player(ctx.seat).hand.filter((c) => isAlly(ctx, c));
-        ctx.requestCardChoice(
-          "carrion-discard",
-          decisionPrompt(
-            "Carrion Crown: discard an ally",
-            "card.sgb.carrion.ally.discard",
-          ),
-          allies.map((c) => c.instanceId),
-        );
+        ctx.drawCards(ctx.seat, 1);
       },
-    },
-    onChoose(ctx, hook, option) {
-      if (hook !== "carrion-discard") return;
-      if (!ctx.discardCard(ctx.seat, Number(option))) return;
-      ctx.drawCards(ctx.seat, 1);
     },
   },
 
