@@ -790,7 +790,8 @@ export const omnHighRarity: Record<string, CardScript> = {
   "lionclaw maul|0": {
     activated: attackAbility(2, { tap: true }),
     modifyAttack(ctx) {
-      return ctx.link?.attackingCard.instanceId === ctx.self.instanceId && ctx.attackBonusAboveBase() > 0 ? 1 : 0;
+      return ctx.link?.attackingCard.instanceId === ctx.self.instanceId &&
+        ctx.attackBonusAboveBase(ctx.self.instanceId) > 0 ? 1 : 0;
     },
     canTriggerOnHit(ctx) {
       return ctx.link?.targetAllyId === undefined;

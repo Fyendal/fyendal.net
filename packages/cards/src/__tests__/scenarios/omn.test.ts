@@ -25,6 +25,30 @@ function foe(spec: Partial<SeatSpec> = {}): SeatSpec {
   };
 }
 
+describe("OMN — Lionclaw Maul", () => {
+  it.each([false, true])("resolves Lyath's attack against Ira with an external buff: %s", (buffed) => {
+    const g = scenario({ seats: [
+      hero("lyath goldmane|0", {
+        weapons: ["lionclaw maul|0"],
+        hand: ["power play|3"],
+        board: buffed ? ["concealed object|3"] : [],
+      }),
+      hero("ira, scarlet revenger|0", { life: 20 }),
+    ] });
+
+    g.attackWithWeapon("lionclaw maul|0", { pitch: ["power play|3"] })
+      .expectAttackValue(1);
+    if (buffed) {
+      g.blockWith();
+      g.activate("concealed object|3");
+    } else {
+      g.blockWith();
+    }
+    g.settle().expectFinalAttack(buffed ? 3 : 1).expectLife(1, 20 - (buffed ? 3 : 1));
+    expect(g.state.players[0]!.board.some((card) => card.cardId === printingId("might|0"))).toBe(true);
+  });
+});
+
 describe("OMN — wager targeting", () => {
   it("Pile Driver may wager with the defending hero when it attacks an ally", () => {
     const g = scenario({ seats: [
