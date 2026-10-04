@@ -3684,12 +3684,14 @@ describe("Cindra engine-driven behavior scenarios", () => {
     if (throwDagger.kind !== "play-from-arsenal") return;
     expect(game.players[0]!.arsenal.find((card) => card.instanceId === throwDagger.instanceId)?.cardId)
       .toBe("HNT175");
+    const thrownDaggerId = daggerIds.find((id) => id !== openingDagger.sourceInstanceId)!;
+    expect(throwDagger.targetCardInstanceId).toBe(thrownDaggerId);
     game = apply(game, 0, throwDagger);
-    game = advanceUntil(game, (candidate) => candidate.pendingDecision?.prompt === "Choose a dagger");
-    game = applyCindra(game);
     game = advanceUntil(game, (candidate) =>
       candidate.pendingDecision?.prompt.includes("Blood Splattered Vest") === true
     );
+    expect(game.players[0]!.graveyard.some((card) => card.instanceId === thrownDaggerId)).toBe(true);
+    expect(game.players[0]!.weapons.map((card) => card.instanceId)).toEqual([openingDagger.sourceInstanceId]);
     expect(cindraIntent(game)).toEqual({ kind: "choose", optionId: "yes" });
     game = applyCindra(game);
     game = advanceUntil(game, (candidate) =>
@@ -4713,12 +4715,14 @@ describe("Cindra engine-driven behavior scenarios", () => {
     if (throwDagger.kind !== "play-card") return;
     expect(game.players[0]!.hand.find((card) => card.instanceId === throwDagger.instanceId)?.cardId)
       .toBe("HNT175");
+    const thrownDaggerId = throwDagger.targetCardInstanceId;
+    expect(game.players[0]!.weapons.map((card) => card.instanceId)).toContain(thrownDaggerId);
     game = apply(game, 0, throwDagger);
-    game = advanceUntil(game, (candidate) => candidate.pendingDecision?.prompt === "Choose a dagger");
-    game = applyCindra(game);
     game = advanceUntil(game, (candidate) =>
       candidate.pendingDecision?.prompt.includes("Blood Splattered Vest") === true
     );
+    expect(game.players[0]!.graveyard.some((card) => card.instanceId === thrownDaggerId)).toBe(true);
+    expect(game.players[0]!.weapons).toHaveLength(1);
     expect(cindraIntent(game)).toEqual({ kind: "choose", optionId: "yes" });
     game = applyCindra(game);
 
