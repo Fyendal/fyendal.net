@@ -15,7 +15,7 @@
     "seed:room": "tsx src/seedRoom.ts",
     "activate-ruleset": "tsx src/activateRuleset.ts",
     "start": "node dist/index.js",
-    "test": "pnpm -w generate:bot-runtime && vitest run src"
+    "test": "pnpm -w generate:bot-runtime && vitest run src --maxWorkers=4"
   },
   "dependencies": {
     "pg": "^8.22.0",

@@ -227,7 +227,7 @@ describe("GameBoard replay result", () => {
     gameStore.state = { ...gameStore.state, view: final, replayStep: 1 };
     const html = render();
     expect(html).toContain('class="overlay gameover-overlay"');
-    expect(html).toContain('class="gameover-headline">Hero 1 wins!</div>');
+    expect(html).toContain('<h2 class="gameover-headline">Hero 1 wins!</h2>');
     expect(html).toContain("Exit replay");
     expect(html).not.toContain("Watch replay");
     expect(html).not.toContain("Back to lobby");

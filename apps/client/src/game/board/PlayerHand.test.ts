@@ -212,7 +212,7 @@ describe("hand motion anchors", () => {
     })));
 
     expect(html).toContain('class="hand"');
-    expect(html).toContain('class="card card-hand card-back ');
+    expect(html).toContain('class="card card-hand card-back"');
     expect(html).toContain('data-motion-card="0:hand:opaque"');
     expect(html).toContain('data-motion-card="0:hand:opaque:1"');
     expect(html).not.toContain("data-hand-instance-id");

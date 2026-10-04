@@ -36,7 +36,7 @@ function beatChest(extra: CardScript = {}): CardScript {
     onChoose(ctx, hook, option) {
       if (hook === "arr-beat-chest") {
         ctx.setFlag("player", "discardingToBeatChest", true);
-        const attackAction = ctx.data.cardType === "action" && ctx.data.subtypes?.includes("attack") === true;
+        const attackAction = ctx.hasCardType(ctx.self, "action") && ctx.cardTypes(ctx.self).includes("attack");
         if (attackAction) ctx.setFlag("player", "discardingForBruteAttackCost", true);
         const discarded = option !== "no" && ctx.discardCard(ctx.seat, Number(option));
         ctx.setFlag("player", "discardingToBeatChest", false);

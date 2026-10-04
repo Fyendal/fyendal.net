@@ -8,7 +8,7 @@
     "i18n:compile": "formatjs compile-folder src/i18n/catalogs src/i18n/compiled --format simple --ast",
     "typecheck": "pnpm -w generate:bot-runtime && tsc -p tsconfig.json --noEmit",
     "preview": "vite preview",
-    "test": "pnpm -w generate:bot-runtime && vitest run src --passWithNoTests"
+    "test": "pnpm -w generate:bot-runtime && vitest run src --passWithNoTests --maxWorkers=4"
   },
   "dependencies": {
     "@fyendal/bot": "workspace:*",

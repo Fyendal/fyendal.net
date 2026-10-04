@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import type { AddressInfo } from "node:net";
+import { createServer, type Server } from "node:http";
 import WebSocket from "ws";
 import type { ClientMessage, ServerMessage } from "@fyendal/shared";
 import { precon } from "@fyendal/cards";
@@ -15,8 +16,11 @@ interface TestClient {
   next(predicate: (message: ServerMessage) => boolean): Promise<ServerMessage>;
 }
 
-async function connect(port: number): Promise<TestClient> {
-  const ws = new WebSocket(`ws://127.0.0.1:${port}`);
+async function connect(server: Server): Promise<TestClient> {
+  const address = server.address();
+  if (!address || typeof address === "string") throw new Error("expected a listening TCP gateway");
+  const host = address.family === "IPv6" ? "[::1]" : "127.0.0.1";
+  const ws = new WebSocket(`ws://${host}:${address.port}`);
   const inbox: ServerMessage[] = [];
   const waiters: Array<{
     predicate: (message: ServerMessage) => boolean;
@@ -78,32 +82,51 @@ describe("multi-instance gateways", () => {
     await (db as Queryable & { end(): Promise<void> }).end();
   });
 
-  async function authed(port: number, username: string): Promise<TestClient> {
+  async function authed(server: Server, username: string): Promise<TestClient> {
     expect(await register(db, username, "password1")).toEqual({ ok: true });
     const session = await login(db, username, "password1");
     if (!session.ok) throw new Error("login failed");
-    const client = await connect(port);
+    const client = await connect(server);
     clients.push(client);
     client.send({ type: "auth", token: session.token });
     await client.next((message) => message.type === "authed");
     return client;
   }
 
-  async function authedWithToken(port: number, token: string): Promise<TestClient> {
-    const client = await connect(port);
+  async function authedWithToken(server: Server, token: string): Promise<TestClient> {
+    const client = await connect(server);
     clients.push(client);
     client.send({ type: "auth", token });
     await client.next((message) => message.type === "authed");
     return client;
   }
 
+  // Darwin permits separate IPv4 and IPv6 listeners to share a port. A client
+  // must use the gateway's address family instead of assuming IPv4 loopback.
+  it.runIf(process.platform === "darwin")("connects to the gateway when IPv4 shares its port", async () => {
+    const decoy = createServer((_request, response) => response.end("IPv4 HTTP server"));
+    try {
+      await new Promise<void>((resolve, reject) => {
+        decoy.once("error", reject);
+        decoy.listen(0, "127.0.0.1", resolve);
+      });
+      await closeGameServer(first);
+      first = createGameServer((decoy.address() as AddressInfo).port, { db, rooms: new PgRoomStore(db, "rules-a") });
+      await new Promise<void>((resolve) => first.once("listening", resolve));
+      const client = await authed(first, "BoundAddress");
+      expect(client.ws.readyState).toBe(WebSocket.OPEN);
+    } finally {
+      await new Promise<void>((resolve) => decoy.close(() => resolve()));
+    }
+  });
+
   it("fans social state, chat, multi-tab presence, and ephemeral invites across gateways", async () => {
-    const alice = await authed((first.address() as AddressInfo).port, "SocialAlice");
+    const alice = await authed(first, "SocialAlice");
     expect(await register(db, "SocialBob", "password1")).toEqual({ ok: true });
     const bobSession = await login(db, "SocialBob", "password1");
     if (!bobSession.ok) throw new Error("login failed");
-    const bob = await authedWithToken((second.address() as AddressInfo).port, bobSession.token);
-    const bobOtherTab = await authedWithToken((first.address() as AddressInfo).port, bobSession.token);
+    const bob = await authedWithToken(second, bobSession.token);
+    const bobOtherTab = await authedWithToken(first, bobSession.token);
 
     alice.send({ type: "friend-request", username: "socialbob" });
     await bob.next((message) => message.type === "social-snapshot"
@@ -157,8 +180,8 @@ describe("multi-instance gateways", () => {
   });
 
   it("fans a room mutation out to the opponent's gateway", async () => {
-    const a = await authed((first.address() as AddressInfo).port, "CrossRoomA");
-    const b = await authed((second.address() as AddressInfo).port, "CrossRoomB");
+    const a = await authed(first, "CrossRoomA");
+    const b = await authed(second, "CrossRoomB");
     a.send({ type: "create-room", format: "classic-battles", hero: "rhinar" });
     const created = await a.next((message) => message.type === "room-created") as Extract<ServerMessage, { type: "room-created" }>;
 
@@ -173,8 +196,8 @@ describe("multi-instance gateways", () => {
   });
 
   it("pairs queue entries owned by different gateways exactly once", async () => {
-    const a = await authed((first.address() as AddressInfo).port, "CrossQueueA");
-    const b = await authed((second.address() as AddressInfo).port, "CrossQueueB");
+    const a = await authed(first, "CrossQueueA");
+    const b = await authed(second, "CrossQueueB");
     a.send({ type: "queue-join", format: "classic-battles", hero: "rhinar" });
     await a.next((message) => message.type === "queued");
 
@@ -190,8 +213,8 @@ describe("multi-instance gateways", () => {
   });
 
   it("hands a practicing player to PvP while preserving the active bot game", async () => {
-    const a = await authed((first.address() as AddressInfo).port, "CrossBotA");
-    const b = await authed((second.address() as AddressInfo).port, "CrossBotB");
+    const a = await authed(first, "CrossBotA");
+    const b = await authed(second, "CrossBotB");
     a.send({
       type: "create-bot-room",
       format: "cc",
@@ -255,8 +278,8 @@ describe("multi-instance gateways", () => {
   });
 
   it("does not rematch a decliner with the retained room on another gateway", async () => {
-    const a = await authed((first.address() as AddressInfo).port, "CrossAvoidA");
-    const b = await authed((second.address() as AddressInfo).port, "CrossAvoidB");
+    const a = await authed(first, "CrossAvoidA");
+    const b = await authed(second, "CrossAvoidB");
     a.send({ type: "queue-join", format: "classic-battles", hero: "rhinar" });
     await a.next((message) => message.type === "queued");
     b.send({ type: "queue-join", format: "classic-battles", hero: "dorinthea" });

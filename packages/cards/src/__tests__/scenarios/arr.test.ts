@@ -25,6 +25,27 @@ describe("ARR — Clearing Bellow", () => {
 });
 
 describe("ARR — Massacre", () => {
+  it.each([
+    { card: "primeval bellow|1", beatChest: false, ownIntimidate: 0 },
+    { card: "bonebreaker bellow|1", beatChest: true, ownIntimidate: 0 },
+    { card: "smell fear|2", beatChest: true, ownIntimidate: 1 },
+  ])("uses the current Attack subtype when $card discards Massacre", ({ card, beatChest, ownIntimidate }) => {
+    for (const gainsAttack of [false, true]) {
+      const g = scenario({
+        seats: [
+          { hero: "dorinthea", hand: [card, "massacre|1"], resources: 3 },
+          { hero: "rhinar", hand: ["dodge|3", "dodge|3", "dodge|3"] },
+        ],
+      });
+      // Model a type-granting effect already applied before the additional cost.
+      if (gainsAttack) g.state.players[0]!.hand[0]!.grantedTypes = ["attack"];
+
+      g.play(card);
+      if (beatChest) g.chooseCard("massacre|1");
+      g.expectPendingReturn(1, ownIntimidate + Number(gainsAttack));
+    }
+  });
+
   it.each(["ARR010", "CRU008", "1HP012"])("%s intimidates once after a 6+ discard", (printing) => {
     const g = scenario({
       seats: [
