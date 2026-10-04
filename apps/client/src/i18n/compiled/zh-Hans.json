@@ -20712,6 +20712,12 @@
       "value": "结束对局？"
     }
   ],
+  "game.flipCard": [
+    {
+      "type": 0,
+      "value": "翻转卡牌"
+    }
+  ],
   "game.hand.empty": [
     {
       "type": 0,

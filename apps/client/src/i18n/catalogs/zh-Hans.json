@@ -1840,6 +1840,7 @@
   "replay.notes.previousPage": "上一组已标记帧",
   "replay.notes.nextPage": "下一组已标记帧",
   "game.cardDetails": "卡牌详情",
+  "game.flipCard": "翻转卡牌",
   "game.owner.your": "你的",
   "game.owner.opponent": "对手的",
   "game.zone.head": "头部",

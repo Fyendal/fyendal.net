@@ -1840,6 +1840,7 @@
   "replay.notes.previousPage": "Previous marked frames",
   "replay.notes.nextPage": "Next marked frames",
   "game.cardDetails": "Card Details",
+  "game.flipCard": "Flip card",
   "game.owner.your": "Your",
   "game.owner.opponent": "Opponent",
   "game.zone.head": "Head",

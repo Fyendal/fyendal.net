@@ -21478,6 +21478,12 @@
       "value": "End Game?"
     }
   ],
+  "game.flipCard": [
+    {
+      "type": 0,
+      "value": "Flip card"
+    }
+  ],
   "game.hand.empty": [
     {
       "type": 0,
