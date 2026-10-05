@@ -255,8 +255,8 @@ describe("CardFace payment state", () => {
     expect(board).toContain("card-board-square");
     expect(board).toContain("board-square-name");
     expect(board).not.toContain("data-pitch=");
-    expect(board).toContain("board-square-frame-left");
-    expect(board).toContain("board-square-frame-right");
+    expect(board).toContain("board-square-printed-frame");
+    expect(board).not.toContain("board-square-frame-edge");
     expect(board).toContain("Scorpio, Comet Tail");
     expect(board).toContain('src="https://content.fabrary.net/cards/SBA002.webp"');
     expect(board).toContain('src="/icons/attack.png"');
@@ -292,6 +292,7 @@ describe("CardFace payment state", () => {
 
     expect(marvel).toContain("board-square-art");
     expect(marvel).not.toContain("board-square-frame-edge");
+    expect(marvel).not.toContain("board-square-printed-frame");
     expect(marvel).toContain("board-square-name");
     expect(standard).toContain("board-square-frame-edge");
   });
@@ -316,14 +317,17 @@ describe("CardFace payment state", () => {
     ["EVR018", "48 170 904 922"],
     ["EVO247", "48 170 904 695"],
     ["HNT143", "48 170 904 660"],
-  ] as const)("keeps the complete printed equipment frame for %s", (cardId, frameWindow) => {
+    ["AMA002", "48 170 904 660"],
+    ["AMA001", "48 170 904 680"],
+    ["WTR001", "48 170 904 695"],
+  ] as const)("keeps the complete printed arena frame for %s", (cardId, frameWindow) => {
     const html = renderToStaticMarkup(createElement(CardFace, {
       card: { instanceId: 1, cardId, owner: 0 },
       size: "zone",
       squareArt: true,
     }));
 
-    expect(html).toContain('class="board-square-equipment-frame"');
+    expect(html).toContain('class="board-square-printed-frame"');
     expect(html).toContain(`viewBox="${frameWindow}"`);
     expect(html).toContain(`<image href="${cardImageUrl(cardId)}"`);
     expect(html).not.toContain("board-square-frame-edge");

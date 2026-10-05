@@ -473,14 +473,14 @@
 .board-square-frame-left img { left: -6.3%; }
 .board-square-frame-right { clip-path: inset(0 0 0 91.5%); }
 .board-square-frame-right img { left: -28.7%; }
-.board-square-media[data-card-type="equipment"] {
+.board-square-media:is([data-card-type="equipment"], [data-card-type="weapon"], [data-card-type="hero"]) {
   --board-square-image-top: -21.6cqi;
   border-radius: 3%;
 }
-.board-square-media-legacy[data-card-type="equipment"] {
+.board-square-media-legacy:is([data-card-type="equipment"], [data-card-type="weapon"], [data-card-type="hero"]) {
   --board-square-image-top: -25.65cqi;
 }
-.board-square-equipment-frame {
+.board-square-printed-frame {
   position: absolute;
   inset: 0;
   width: 100%;
@@ -489,6 +489,11 @@
      without stretching the independently cropped artwork in the middle. */
   clip-path: polygon(evenodd, 0 0, 100% 0, 100% 100%, 0 100%, 0 0,
     4% 4%, 4% 96%, 96% 96%, 96% 4%, 4% 4%);
+}
+.board-square-media[data-card-type="hero"] .board-square-printed-frame {
+  /* Hero ornaments reach farther into the art than a metal equipment rim. */
+  clip-path: polygon(evenodd, 0 0, 100% 0, 100% 100%, 0 100%, 0 0,
+    8% 4%, 8% 94%, 92% 94%, 92% 4%, 8% 4%);
 }
 .board-square-name {
   position: absolute;
@@ -546,10 +551,6 @@
 .board-square-name:not([data-pitch]) .board-square-name-frame {
   border-top-color: var(--square-frame-color, #272823);
   border-inline-color: var(--square-frame-color, #272823);
-}
-.board-square-name-hero {
-  left: -4px;
-  right: -4px;
 }
 .board-square-name-text {
   display: block;

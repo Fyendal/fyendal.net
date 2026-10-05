@@ -299,6 +299,7 @@ export function CardFace({
   const attack = card.attack ?? data?.attack;
   const defense = card.defense ?? data?.defense;
   const squareHero = data?.cardType === "hero";
+  const printedArenaFrame = squareHero || data?.cardType === "weapon" || data?.cardType === "equipment";
   const squarePitch = data?.pitch && PITCH_CLASS[data.pitch] ? data.pitch : undefined;
   const printedLife = data?.life;
   const marked = (card.counters?.marked ?? 0) > 0;
@@ -408,11 +409,12 @@ export function CardFace({
                 }))}
               />
             ) : null}
-            {showImg && !marvelArt && data?.cardType === "equipment" ? (
+            {showImg && !marvelArt && printedArenaFrame ? (
               <svg
-                className="board-square-equipment-frame"
+                className="board-square-printed-frame"
                 viewBox={tallEquipmentFrame ? "48 170 904 922"
-                  : legacySquareFrame ? "48 170 904 695" : "48 170 904 660"}
+                  : legacySquareFrame ? "48 170 904 695"
+                    : squareHero ? "48 170 904 680" : "48 170 904 660"}
                 preserveAspectRatio="none"
                 focusable="false"
               >
