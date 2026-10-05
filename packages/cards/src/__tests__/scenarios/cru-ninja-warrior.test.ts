@@ -202,6 +202,64 @@ describe("CRU — Ninja heroes and weapons", () => {
 });
 
 describe("CRU — Ninja attack actions and token", () => {
+  it("Breeze Rider Boots gives the hitting Gustwave and later combo attacks go again", () => {
+    const g = scenario({
+      seats: [
+        {
+          ...ninja,
+          equipment: { legs: "breeze rider boots|0" },
+          hand: ["gustwave of the second wind|1", "gustwave of the second wind|1", "flying kick|1"],
+          resources: 2,
+        },
+        { hero: "dorinthea", weapons: [], hand: [] },
+      ],
+    });
+
+    g.play("gustwave of the second wind|1").blockWith().settle();
+    expect(g.state.pendingDecision?.chooseHook).toBe("breeze-destroy");
+    g.chooseOption("yes")
+      .expectInZone(0, "breeze rider boots|0", "graveyard")
+      .expectAP(0, 1);
+    expect(projectStateFor(g.state, 0).chain.at(-1)?.goAgain).toBe(true);
+    g.play("gustwave of the second wind|1").blockWith().settle().expectAP(0, 1);
+    expect(g.state.pendingDecision).toBeNull();
+    g.play("flying kick|1").blockWith().settle().expectAP(0, 0);
+  });
+
+  it("declining Breeze Rider Boots leaves Gustwave without go again", () => {
+    const g = scenario({
+      seats: [
+        {
+          ...ninja,
+          equipment: { legs: "breeze rider boots|0" },
+          hand: ["gustwave of the second wind|1"],
+        },
+        { hero: "dorinthea", weapons: [], hand: [] },
+      ],
+    });
+
+    g.play("gustwave of the second wind|1").blockWith().settle().chooseOption("no").expectAP(0, 0);
+    expect(g.state.players[0]!.equipment.legs?.cardId).toBe(printingId("breeze rider boots|0"));
+  });
+
+  it("Breeze Rider Boots does not give the triggering non-combo Ninja attack go again", () => {
+    const g = scenario({
+      seats: [
+        {
+          ...ninja,
+          equipment: { legs: "breeze rider boots|0" },
+          hand: ["flying kick|1"],
+          resources: 2,
+        },
+        { hero: "dorinthea", weapons: [], hand: [] },
+      ],
+    });
+
+    g.play("flying kick|1").blockWith().settle().chooseOption("yes")
+      .expectInZone(0, "breeze rider boots|0", "graveyard")
+      .expectAP(0, 0);
+  });
+
   it("Crane Dance combo rejects attack defenders above the chain-link count", () => {
     const g = scenario({
       seats: [

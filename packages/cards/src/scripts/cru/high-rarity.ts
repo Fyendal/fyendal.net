@@ -516,9 +516,23 @@ export const cruHighRarity: Record<string, CardScript> = {
       ]);
     },
     onChoose(ctx, hook, option) {
-      if (hook === "breeze-destroy" && option === "yes") {
+      // A queued trigger can outlive its source; the benefit still requires
+      // destroying the equipment when this choice resolves.
+      if (
+        hook === "breeze-destroy" && option === "yes" &&
+        Object.values(ctx.player(ctx.seat).equipment).some((card) => card?.instanceId === ctx.self.instanceId)
+      ) {
         ctx.destroySelf();
         ctx.addModifier({ scope: "until-end-of-turn", goAgain: true, appliesToKeyword: "combo" });
+        // The hit happens before the Resolution Step's go again payout
+        // (CR 7.6.2). Include the attack already on the chain in this grant.
+        if (
+          ctx.link?.attackCardType === "action" &&
+          ctx.link.attacker === ctx.seat &&
+          (ctx.cardData(ctx.link.attackingCard.cardId).keywords ?? []).some(
+            (keyword) => keyword.toLowerCase() === "combo",
+          )
+        ) ctx.grantGoAgain();
       }
     },
   },

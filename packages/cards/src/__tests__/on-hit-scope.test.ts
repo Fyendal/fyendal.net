@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { cardData, scripts } from "../index.js";
 import { functionalKeyOf } from "../functional.js";
-import { friendlyHitSourceKeys } from "../on-hit-scope.js";
+import { friendlyHitSourceKeys, modifierHitSourceKeys } from "../on-hit-scope.js";
 
 describe("on-hit source scopes", () => {
   it("classifies every non-attacking hit observer and limits attack exceptions", () => {
@@ -12,6 +12,7 @@ describe("on-hit source scopes", () => {
       const card = cardData[id]!;
       const key = functionalKeyOf(card);
       seen.add(key);
+      expect(script.onHitFromModifier === true, key).toBe(modifierHitSourceKeys.has(key));
       if (card.attack === undefined) {
         expect(script.onHitScope, key).toBe("friendly");
       }
@@ -21,6 +22,7 @@ describe("on-hit source scopes", () => {
     }
 
     expect([...friendlyHitSourceKeys].filter((key) => !seen.has(key))).toEqual([]);
+    expect([...modifierHitSourceKeys].filter((key) => !friendlyHitSourceKeys.has(key))).toEqual([]);
     expect([...attackExceptions].sort()).toEqual([
       "beckoning light",
       "blizzard bolt",

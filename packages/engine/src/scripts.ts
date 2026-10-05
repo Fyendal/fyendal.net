@@ -1188,6 +1188,12 @@ export interface CardScript {
    * Set to friendly only for effects that watch another friendly attack hit;
    * canTriggerOnHit must still enforce any narrower printed condition. */
   onHitScope?: "friendly";
+  /** This hook represents a delayed/granted hit effect kept by a modifier
+   * sourced from this card. Only these hooks may be collected from modifier
+   * sources outside the active arena/attack/reaction sources. An unrelated
+   * modifier never keeps a source's ordinary printed hit trigger active.
+   * canTriggerOnHit still checks the matching effect's lifetime and target. */
+  onHitFromModifier?: true;
   /** Number of triggered layers this source's on-hit effect creates for the
    * pending hit-event. Replacement effects that make an ability trigger more
    * than once use this; the default is one. */

@@ -1148,17 +1148,25 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
             decisionPrompt("Return an ally", "card.pen.ally.return"),
             allies.map((card) => card.instanceId),
           );
+        else
+          requestDiscardChoice(
+            ctx,
+            "pen-reach-discard",
+            decisionPrompt("Choose a card to discard", "card.pen.card.discard"),
+            ctx.seat,
+          );
       },
     },
     onChoose(ctx, hook, option) {
-      if (hook === "pen-reach-ally" && ctx.moveToHand(Number(option)))
+      if (hook === "pen-reach-ally") {
+        ctx.moveToHand(Number(option));
         requestDiscardChoice(
           ctx,
           "pen-reach-discard",
           decisionPrompt("Choose a card to discard", "card.pen.card.discard"),
           ctx.seat,
         );
-      else if (hook === "pen-reach-discard") resolveDiscardChoice(ctx, option, ctx.seat);
+      } else if (hook === "pen-reach-discard") resolveDiscardChoice(ctx, option, ctx.seat);
     },
   },
   "beneath the surface|2": {},

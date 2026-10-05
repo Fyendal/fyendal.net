@@ -174,6 +174,13 @@ watchers, opt into `onHitScope: "friendly"`; their `canTriggerOnHit` still check
 any narrower condition in the printed text. The card registry audits those
 exceptions in `packages/cards/src/on-hit-scope.ts`.
 
+Sources of modifiers do not automatically retain their printed hit triggers
+after leaving the arena. Delayed or granted hit hooks additionally opt into
+`onHitFromModifier: true`; the registry audits those separately. Their
+`canTriggerOnHit` checks still enforce the effect's lifetime and target.
+New granted effects may use the explicit `onHitScriptHook` modifier and
+`onGrantedHit` hook instead of observing the source's ordinary `onHit`.
+
 ## Module dependency direction
 
 Production modules form an acyclic graph, including type-only dependencies:

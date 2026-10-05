@@ -15,6 +15,72 @@ describe("PEN — import and set mechanics", () => {
     expect(new Set(cards.map(functionalKeyOf))).toHaveLength(348);
   });
 
+  it("Reach Beyond the Grave still discards when no ally can be returned", () => {
+    const g = scenario({ seats: [
+      {
+        hero: "rhinar",
+        hand: ["dodge|3", "pack hunt|1"],
+        graveyard: ["head jab|1"],
+        equipment: { ...NO_EQUIPMENT, arms: "reach beyond the grave|0" },
+      },
+      { hero: "dorinthea", equipment: NO_EQUIPMENT },
+    ] });
+
+    g.activate("reach beyond the grave|0")
+      .expectNoEquipment(0, "arms")
+      .expectInZone(0, "reach beyond the grave|0", "graveyard");
+    expect(g.state.pendingDecision?.prompt).toBe("Choose a card to discard");
+    g.chooseCard("dodge|3")
+      .expectInZone(0, "dodge|3", "graveyard")
+      .expectInZone(0, "pack hunt|1", "hand")
+      .expectHandSize(0, 1)
+      .expectAP(0, 1);
+    expect(g.state.pendingDecision).toBeNull();
+  });
+
+  it.each([{ hand: [] }, { hand: ["dodge|3"] }])(
+    "Reach Beyond the Grave returns an ally before discarding with initial hand $hand",
+    ({ hand }) => {
+      const g = scenario({ seats: [
+        {
+          hero: "rhinar",
+          hand,
+          graveyard: ["limpit, hop-a-long|2"],
+          equipment: { ...NO_EQUIPMENT, arms: "reach beyond the grave|0" },
+        },
+        { hero: "dorinthea", equipment: NO_EQUIPMENT },
+      ] });
+
+      g.activate("reach beyond the grave|0");
+      expect(g.state.pendingDecision?.prompt).toBe("Return an ally");
+      g.chooseCard("limpit, hop-a-long|2").expectInZone(0, "limpit, hop-a-long|2", "hand");
+      expect(g.state.pendingDecision?.prompt).toBe("Choose a card to discard");
+      g.chooseCard("limpit, hop-a-long|2")
+        .expectInZone(0, "limpit, hop-a-long|2", "graveyard")
+        .expectHandSize(0, hand.length)
+        .expectAP(0, 1);
+      expect(g.state.pendingDecision).toBeNull();
+    },
+  );
+
+  it("Reach Beyond the Grave resolves with no ally and an empty hand", () => {
+    const g = scenario({ seats: [
+      {
+        hero: "rhinar",
+        hand: [],
+        equipment: { ...NO_EQUIPMENT, arms: "reach beyond the grave|0" },
+      },
+      { hero: "dorinthea", equipment: NO_EQUIPMENT },
+    ] });
+
+    g.activate("reach beyond the grave|0")
+      .expectNoEquipment(0, "arms")
+      .expectInZone(0, "reach beyond the grave|0", "graveyard")
+      .expectHandSize(0, 0)
+      .expectAP(0, 1);
+    expect(g.state.pendingDecision).toBeNull();
+  });
+
   it("Bone Puppetry lets its defender decline the ally return", () => {
     const g = scenario({ active: 1, seats: [
       {

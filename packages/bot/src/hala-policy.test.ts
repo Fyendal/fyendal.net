@@ -268,6 +268,36 @@ describe("Hala policy", () => {
     },
   );
 
+  it.each([false, true])("keeps Blunten in hand at the arsenal decision (simulation state: %s)", (withState) => {
+    let state = createGame({
+      decklists: [halaDeck(), decklists.dorinthea],
+      cards: cardData,
+      scripts,
+      seed: 9340,
+      startPlayer: 0,
+    });
+    replaceHand(state, 0, ["PEN049"]);
+    const blunten = state.players[0]!.hand[0]!;
+    state = apply(state, 0, { kind: "pass" });
+    state = apply(state, 1, { kind: "pass" });
+    expect(state.pendingDecision?.kind).toBe("arsenal");
+    const legal = legalIntents(state, 0);
+    expect(legal).toContainEqual({ kind: "choose", optionId: String(blunten.instanceId) });
+
+    const intent = chooseHalaIntent({
+      seat: 0,
+      view: projectStateFor(state, 0),
+      legal,
+      cards: cardData,
+      state: withState ? state : undefined,
+    });
+    expect(intent).toEqual({ kind: "pass" });
+    expect(legal).toContainEqual(intent);
+    state = apply(state, 0, intent);
+    expect(state.players[0]!.arsenal).toHaveLength(0);
+    expect(state.players[0]!.hand).toContainEqual(blunten);
+  });
+
   it("keeps Ripple Away in hand to block instead of putting it into an empty arsenal", () => {
     const state = createGame({
       decklists: [halaDeck(), decklists.dorinthea],

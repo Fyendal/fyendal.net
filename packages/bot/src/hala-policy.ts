@@ -1546,6 +1546,8 @@ function scoreDefend(
 
 function nextTurnArsenalValue(card: CardView, input: BotPolicyInput): number {
   const data = input.cards[card.cardId];
+  // Block cards cannot be played or used to defend from arsenal.
+  if (data?.cardType === "block") return -30;
   const functional = key(data);
   const roles = halaCardRoles(card, input);
   if (functional === "toe the line|1") return 110;

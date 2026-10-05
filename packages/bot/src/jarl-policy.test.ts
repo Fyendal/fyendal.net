@@ -3,7 +3,7 @@ import { applyIntent, createGame, legalIntents, projectStateFor } from "@fyendal
 import type { CardView, Decklist, GameIntent } from "@fyendal/shared";
 import { describe, expect, it } from "vitest";
 import { chooseJarlIntent } from "./jarl-policy.js";
-import { jarlPresentationFor } from "./sideboard.js";
+import { halaPresentationFor, jarlPresentationFor } from "./sideboard.js";
 
 function jarlDeck(opponent: Decklist = decklists.dorinthea): Decklist {
   const pool = precon("bot-jarl")!.pool;
@@ -369,6 +369,19 @@ describe("Jarl policy", () => {
       cards: cardData,
     })).toEqual({ kind: "pass" });
 
+    // Resolve the first reaction before deciding whether the remaining damage
+    // merits another card, including when that damage would be lethal.
+    view.stack = [];
+    view.chain[0]!.reactions = [rootbound!];
+    view.chain[0]!.defenseValue = 4;
+    view.chain[0]!.damage = 1;
+    expect(chooseJarlIntent({
+      seat: 0,
+      view,
+      legal: [playSink, { kind: "pass" }],
+      cards: cardData,
+    })).toEqual({ kind: "pass" });
+
     view.players[0].life = 1;
     expect(chooseJarlIntent({
       seat: 0,
@@ -377,6 +390,80 @@ describe("Jarl policy", () => {
       cards: cardData,
     })).toEqual(playSink);
   });
+
+  it.each([
+    { secondReaction: "ASR018", decompose: true, life: 40 },
+    { secondReaction: "ELE114", decompose: true, life: 40 },
+    { secondReaction: "ROS042", decompose: true, life: 40 },
+    { secondReaction: "ASR018", decompose: true, life: 1 },
+    { secondReaction: "ASR018", decompose: false, life: 40 },
+    { secondReaction: "ASR018", decompose: false, life: 1 },
+  ])(
+    "reassesses $secondReaction after Rootbound resolves against Zenith (decompose=$decompose, life=$life)",
+    ({ secondReaction, decompose, life }) => {
+      const opponent = {
+        heroId: "AHA001",
+        ...halaPresentationFor(jarlDeck()),
+      };
+      let state = createGame({
+        decklists: [jarlDeck(opponent), opponent],
+        cards: cardData,
+        scripts,
+        seed: 12_109_3,
+        startPlayer: 1,
+      });
+      state.turn = 2;
+      replaceHand(state, ["ROS042", secondReaction, "ELE146"]);
+      const [rootbound, spare] = state.players[0]!.hand;
+      state.players[0]!.resources = 2;
+      state.players[0]!.life = life;
+      state.players[0]!.graveyard = (decompose ? ["PEN206", "ROS057", "SIY033"] : []).map((cardId) => ({
+        instanceId: state.nextInstanceId++, cardId, owner: 0,
+      }));
+      const blade = state.players[1]!.weapons.find((card) => cardData[card.cardId]?.name === "Zenith Blade")!;
+      blade.counters = { power: 1, sharpenedTurn: 2 };
+      state.players[1]!.resources = 1;
+      const attack = legalIntents(state, 1).find((intent) =>
+        intent.kind === "activate-ability" && intent.sourceInstanceId === blade.instanceId
+      )!;
+      state = apply(state, attack, 1);
+      for (let step = 0; step < 20 && state.pendingDecision?.kind !== "defend"; step++) {
+        state = apply(state, { kind: "pass" }, state.priorityPlayer as 0 | 1);
+      }
+      state = apply(state, { kind: "defend", instanceIds: [] });
+      state = apply(state, { kind: "pass" }, 1);
+      expect(projectStateFor(state, 0).chain[0]!.onHitEffects?.length).toBeGreaterThan(0);
+      const playRootbound = legalIntents(state, 0).find((intent) =>
+        intent.kind === "play-card" && intent.instanceId === rootbound!.instanceId
+      )!;
+      state = apply(state, playRootbound);
+      expect(chooseJarlIntent(inputFor(state))).toEqual({ kind: "pass" });
+
+      for (let step = 0; step < 30; step++) {
+        if (state.stack.length === 0 && state.pendingDecision?.kind === "defense-reaction") break;
+        const actor = (state.pendingDecision?.player ?? state.priorityPlayer) as 0 | 1;
+        const intent = actor === 0 ? chooseJarlIntent(inputFor(state)) : { kind: "pass" } as const;
+        expect(legalIntents(state, actor)).toContainEqual(intent);
+        state = apply(state, intent, actor);
+      }
+      const view = projectStateFor(state, 0);
+      expect(state.pendingDecision?.kind).toBe("defense-reaction");
+      expect(state.stack).toHaveLength(0);
+      expect(view.chain[0]).toMatchObject({
+        attackValue: 4, defenseValue: decompose ? 4 : 3, damage: decompose ? 0 : 1,
+      });
+      expect(state.players[0]!.life).toBe(life);
+      expect(state.players[0]!.banish).toHaveLength(decompose ? 3 : 0);
+      expect(state.players[0]!.hand.some((card) => card.instanceId === spare!.instanceId)).toBe(true);
+      const next = chooseJarlIntent(inputFor(state));
+      expect(next).toMatchObject(decompose
+        ? { kind: "pass" }
+        : { kind: "play-card", instanceId: spare!.instanceId });
+      expect(legalIntents(state, 0)).toContainEqual(next);
+      state = apply(state, next);
+      expect(state.winner).toBeNull();
+    },
+  );
 
   it("only plays defense reactions above three attack or to prevent lethal", () => {
     const state = createGame({

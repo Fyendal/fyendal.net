@@ -2603,10 +2603,25 @@ describe("combat", () => {
     const observedSourceIds = pendingOnHitEffects(s, engineRuntime, link)
       .filter((effect) => effect.kind === "hook")
       .map((effect) => effect.source.instanceId);
-    expect(observedSourceIds).toEqual(expect.arrayContaining([
-      otherAttack.instanceId,
-      inheritedSource.instanceId,
-    ]));
+    expect(observedSourceIds).toContain(inheritedSource.instanceId);
+    expect(observedSourceIds).not.toContain(otherAttack.instanceId);
+
+    s.scriptsRef.ATK6 = { onHitScope: "friendly", onHitFromModifier: true, onHit() {} };
+    const delayedSources = () => pendingOnHitEffects(s, engineRuntime, link)
+      .filter((effect) => effect.kind === "hook")
+      .map((effect) => effect.source.instanceId);
+    expect(delayedSources()).toContain(otherAttack.instanceId);
+    s.modifiers = [];
+    expect(delayedSources()).not.toContain(otherAttack.instanceId);
+
+    // An ordinary arena observer disappears even if its continuous buff lasts.
+    p.board.splice(p.board.indexOf(observer), 1);
+    p.graveyard.push(observer);
+    s.modifiers.push({
+      id: s.nextModifierId++, sourceInstanceId: observer.instanceId,
+      seat: 0, scope: "until-end-of-turn", attack: 1,
+    });
+    expect(delayedSources()).not.toContain(observer.instanceId);
   });
 
   it("projects native and granted on-hit effects with their card sources", () => {

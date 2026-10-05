@@ -380,18 +380,20 @@ function shouldActivateOmnisBoots(input: BotPolicyInput, boots: CardView): boole
 
 function wastesStackedDefenseReaction(data: CardData, input: BotPolicyInput): boolean {
   const link = currentLink(input);
-  if (!link || input.view.pendingDecision?.kind !== "defense-reaction") return false;
+  if (!link || data.cardType !== "defense-reaction" ||
+    input.view.pendingDecision?.kind !== "defense-reaction") return false;
 
-  const pendingDefense = input.view.stack.reduce((total, layer) => {
-    if (layer.seat !== input.seat || !layer.card) return total;
-    const pending = input.cards[layer.card.cardId];
-    return pending?.cardType === "defense-reaction"
-      ? total + Math.max(0, layer.card.defense ?? pending.defense ?? 0)
-      : total;
-  }, 0);
-  if (pendingDefense === 0) return false;
+  // Let committed reactions finish their choices and defense bonuses before
+  // spending another card. Passing with a layer pending resolves that layer;
+  // Jarl gets another reaction window before combat damage, even at low life.
+  if (input.view.stack.some((layer) => layer.seat === input.seat && layer.card &&
+    input.cards[layer.card.cardId]?.cardType === "defense-reaction")) return true;
 
-  const incoming = Math.max(0, incomingAttackDamage(input) - pendingDefense);
+  const alreadyReacted = link.reactions.some((card) => card.owner === input.seat &&
+    input.cards[card.cardId]?.cardType === "defense-reaction");
+  if (!alreadyReacted) return false;
+
+  const incoming = incomingAttackDamage(input);
   const meaningfulHit = (link.onHitEffects?.length ?? 0) > 0 || link.wagered === true;
   return !meaningfulHit && incoming > 0 && incoming < input.view.players[input.seat].life &&
     Math.max(0, data.defense ?? 0) > incoming;
@@ -426,7 +428,7 @@ function scorePlay(
   // Preserve Jarl's high-value defense reactions on attacks whose current,
   // fully modified attack value is three or less, unless the remaining damage
   // would otherwise be lethal.
-  if (shouldSaveDefenseReaction(data, input)) return -100;
+  if (shouldSaveDefenseReaction(data, input) || wastesStackedDefenseReaction(data, input)) return -100;
 
   let score: number;
   if (intent.kind === "activate-ability") {
@@ -474,9 +476,7 @@ function scorePlay(
   } else if (functional === "fruits of the forest|3") {
     score = 5;
   } else if (data.cardType === "defense-reaction") {
-    score = wastesStackedDefenseReaction(data, input)
-      ? -100
-      : scoreDefenseReaction(data, input);
+    score = scoreDefenseReaction(data, input);
   } else if (isAttack(data)) {
     score = gravy && functional === "mangle|1" && compassIsMarked
       ? 275

@@ -203,20 +203,21 @@ export function pendingOnHitEffects(
     link.attackingCard.instanceId,
     ...link.reactions.map((reaction) => reaction.instanceId),
   ]);
-  const addHook = (source: CardInstance): void => {
+  const addHook = (source: CardInstance, fromModifier = false): void => {
     if (seenSources.has(source.instanceId)) return;
     seenSources.add(source.instanceId);
     if (cardAbilitiesSuppressed(state, source)) return;
     const ctx = runtime.makeCtx(state, link.attacker, source, link);
     const ownScript = scriptOf(state, source.cardId, source);
-    const canObserveHit = (scope: CardScript["onHitScope"]): boolean =>
-      participatingSources.has(source.instanceId) || scope === "friendly";
-    const ownHit = ownScript?.onHit && canObserveHit(ownScript.onHitScope) && (ownScript.canTriggerOnHit?.(ctx) ?? true)
+    const canObserveHit = (script: CardScript): boolean =>
+      (!fromModifier || script.onHitFromModifier === true) &&
+      (participatingSources.has(source.instanceId) || script.onHitScope === "friendly");
+    const ownHit = ownScript?.onHit && canObserveHit(ownScript) && (ownScript.canTriggerOnHit?.(ctx) ?? true)
       ? ownScript.onHit
       : undefined;
     const inheritedCardId = source.grantedBaseAbilitiesCardId;
     const inheritedScript = inheritedCardId ? state.scriptsRef[inheritedCardId] : undefined;
-    const inheritedHit = inheritedScript?.onHit && canObserveHit(inheritedScript.onHitScope) && (inheritedScript.canTriggerOnHit?.(ctx) ?? true)
+    const inheritedHit = inheritedScript?.onHit && canObserveHit(inheritedScript) && (inheritedScript.canTriggerOnHit?.(ctx) ?? true)
       ? inheritedScript.onHit
       : undefined;
     if (!ownHit && !inheritedHit) return;
@@ -256,9 +257,12 @@ export function pendingOnHitEffects(
   }
   // Some delayed riders consume their marker when the matching attack is
   // declared, but retain event data on the link for their on-hit hook.
+  // Only explicitly delayed/granted hooks survive via that marker; a
+  // continuous modifier does not preserve its source's static trigger
+  // after the source leaves the arena (CR 6.6.3–6.6.4).
   for (const mod of state.modifiers) {
     const found = findCardAnywhere(state, mod.sourceInstanceId);
-    if (found?.seat === link.attacker) addHook(found.card);
+    if (found?.seat === link.attacker) addHook(found.card, true);
   }
 
   const triggeredModifiers = new Map<number, Modifier>();
