@@ -247,13 +247,12 @@ export function rememberRejectedMatchRoom(
 export function pruneRejectedMatchRooms(
   storage: Pick<Storage, "getItem" | "setItem">,
   username: string,
-  listedRoomCodes: ReadonlySet<string>,
   now = Date.now(),
 ): void {
   const state = loadRejectedMatchEntries(storage, username);
-  const rooms = state.rooms.filter((room) =>
-    rejectionIsCurrent(room, now) && listedRoomCodes.has(room.code)
-  );
+  // Lobby projections omit background searches and disconnected opponents.
+  // Absence from that projection does not mean a rejected room was deleted.
+  const rooms = state.rooms.filter((room) => rejectionIsCurrent(room, now));
   if (rooms.length !== state.rooms.length && state.choiceKey !== null) {
     saveRejectedMatchEntries(storage, username, state.choiceKey, rooms);
   }

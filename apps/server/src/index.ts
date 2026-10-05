@@ -130,6 +130,7 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
   /** Socket delivery bindings are local; queue membership and pairing are
    * durable in Postgres and addressed back to users through cluster events. */
   const queuedUsers = new Map<number, ClientCtx>();
+  const pendingBotDeclines = new Map<ClientCtx, string>();
   const connections = new ConnectionRegistry();
   const clientsByRoom = connections.byRoom;
   const allClients = connections.all;
@@ -363,11 +364,12 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
         return;
       }
       case "bot-practice-ready": {
+        if (await rooms.backgroundPracticeRoom(event.userId) !== event.code) return;
         const ctx = queuedUsers.get(event.userId)
           ?? [...allClients].find((client) => client.user?.id === event.userId && !client.closed);
         if (!ctx) return;
         queuedUsers.set(event.userId, ctx);
-        connections.detach(ctx);
+        if (ctx.code !== event.code) connections.detach(ctx);
         await deliverMatch(event.userId, event.code, true);
         return;
       }
@@ -485,10 +487,13 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
         return;
       }
       const previousRoom = await rooms.getRoom(ctx.code);
-      if (previousRoom) return;
+      if (previousRoom && pendingBotDeclines.get(ctx) !== ctx.code) return;
       connections.detach(ctx);
     }
     const durableMatchmakingStatus = await rooms.backgroundMatchmakingStatus(userId);
+    // Authentication can have reported inactive before this request existed.
+    // Restore the durable startup intent before exposing the Decline button.
+    ctx.send({ type: "background-matchmaking", status: durableMatchmakingStatus });
     if (!keepQueued && durableMatchmakingStatus.state === "inactive") queuedUsers.delete(userId);
 
     if (ctx.code === code && ctx.seat !== null) {
@@ -530,6 +535,9 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
   /** Return the seat this socket is currently authorized to view. Undefined
    * means a formerly privileged socket has been superseded and was detached. */
   function authorizedProjectionSeat(room: RoomRow, ctx: ClientCtx): number | null | undefined {
+    // Leaving an offer intentionally removes this membership before the next
+    // room is attached. Its intermediate broadcast is not session theft.
+    if (pendingBotDeclines.get(ctx) === room.code) return undefined;
     if (ctx.seat === null) {
       if (ctx.token && room.spectators.some(
         (spectator) => spectator.tokenHash === hashReconnectToken(ctx.token!),
@@ -827,6 +835,10 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
             send(ws, { type: "error", message: "could not start matchmaking" });
             return;
           }
+          await rememberAcceptedDeck(ctx.user.id, choice.choice.deckId);
+          await rooms.startPendingBotPractice(ctx.user.id);
+          clusterConsumer?.nudge();
+          return;
         }
         const { code, seat, token } = await rooms.createBotRoom(botFormat, {
           deckId: choice.choice.deckId,
@@ -835,18 +847,8 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
           userId: ctx.user.id,
         }, msg.cardPoolMode ?? "legal", botOpponent);
         await rememberAcceptedDeck(ctx.user.id, choice.choice.deckId);
-        if (retainedQueueCode) connections.detach(ctx);
         connections.attach(ctx, code, seat, token);
         const version = await markAttachedPresent(ctx);
-        if (msg.searchForPlayer) {
-          const backgroundStarted = await rooms.setBackgroundMatchmaking(ctx.user.id, code);
-          send(ws, {
-            type: "background-matchmaking",
-            status: backgroundStarted
-              ? await rooms.backgroundMatchmakingStatus(ctx.user.id)
-              : { state: "inactive" },
-          });
-        }
         send(ws, { type: "room-created", code, seat, token, version });
         await publishRoomEvent({ code, kind: "created", version });
         await publishRoomEvent({ code, kind: "prep", version });
@@ -856,6 +858,14 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
         if (ctx.code !== null) {
           send(ws, { type: "error", message: ALREADY_IN_ROOM });
           return;
+        }
+        if (ctx.user && !msg.spectate) {
+          const practiceCode = await rooms.backgroundPracticeRoom(ctx.user.id, msg.code);
+          if (practiceCode && practiceCode !== msg.code.toUpperCase()) {
+            queuedUsers.set(ctx.user.id, ctx);
+            await deliverMatch(ctx.user.id, practiceCode, true);
+            return;
+          }
         }
         // Player seats (new or seat-token reconnect) require an account.
         // Guests may still spectate; authenticated spectators expose only
@@ -1008,9 +1018,12 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
         return;
       }
       case "background-matchmaking-leave": {
-        if (ctx.user && await rooms.stopBackgroundMatchmaking(ctx.user.id)) {
-          queuedUsers.delete(ctx.user.id);
-          clusterConsumer?.nudge();
+        if (ctx.user) {
+          if (await rooms.stopBackgroundMatchmaking(ctx.user.id)) {
+            queuedUsers.delete(ctx.user.id);
+            clusterConsumer?.nudge();
+          }
+          send(ws, { type: "background-matchmaking", status: await rooms.backgroundMatchmakingStatus(ctx.user.id) });
         }
         return;
       }
@@ -1050,12 +1063,22 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
         }
         const credentials = seatCredentials(ctx);
         if (!credentials) return;
-        const r = await rooms.declinePendingBotMatch(ctx.user.id, msg.roomCode, credentials);
+        pendingBotDeclines.set(ctx, msg.roomCode.toUpperCase());
+        let r: Awaited<ReturnType<PgRoomStore["declinePendingBotMatch"]>>;
+        try {
+          r = await rooms.declinePendingBotMatch(ctx.user.id, msg.roomCode, credentials);
+        } finally {
+          pendingBotDeclines.delete(ctx);
+        }
         if (!r.ok) {
           send(ws, { type: "error", message: r.error });
           return;
         }
-        connections.detach(ctx);
+        // The event consumer may already have attached the next offer or bot
+        // room while the decline was committing. Only detach the old binding.
+        if (ctx.code === msg.roomCode.toUpperCase() && ctx.token === credentials.token) {
+          connections.detach(ctx);
+        }
         clusterConsumer?.nudge();
         return;
       }

@@ -1476,6 +1476,35 @@ describe("client connection and account race fences", () => {
     expect(useStore.getState().backgroundMatchmaking).toEqual({ state: "inactive" });
   });
 
+  it("stays in the bot-start flow through authentication, rejection, and bot prep", async () => {
+    localStorage.setItem("fyendal-auth", JSON.stringify({ token: "token-a", username: "Alice" }));
+    const { useStore } = await import("../store.js");
+    useStore.getState().createBotRoom("cc", "precon-asb", "ira", true);
+    const socket = FakeWebSocket.instances[0]!;
+    socket.open();
+    socket.message({ type: "background-matchmaking", status: { state: "inactive" } });
+    socket.message({ type: "background-matchmaking", status: { state: "pending", format: "cc" } });
+    socket.message({ type: "joined", code: "PVP123", seat: 1, token: "pvp-seat", version: 5 });
+    socket.message({ type: "prep-state", prep: matchPrep([false, false], "accept"), version: 5 });
+    useStore.getState().declineMatch();
+    expect(JSON.parse(socket.sent.at(-1)!)).toEqual({ type: "decline-pending-bot-match", roomCode: "PVP123" });
+    expect(useStore.getState().screen).not.toBe("lobby");
+    socket.message({ type: "rooms", rooms: [] });
+    const { loadRejectedMatchRooms } = await import("../storage.js");
+    expect(loadRejectedMatchRooms(localStorage, "Alice")).toEqual(["PVP123"]);
+    socket.message({ type: "background-matchmaking", status: { state: "searching", format: "cc" } });
+    socket.message({ type: "room-created", code: "BOT123", seat: 0, token: "bot-seat", version: 2 });
+    const prep = matchPrep([false, false], "accept");
+    socket.message({ type: "prep-state", version: 2, prep: {
+      ...prep, yourSeat: 0, yourDeckId: "precon-asb", botGame: true,
+      phase: "choose-first", deadlineAt: undefined, deadlinePhase: undefined,
+    } });
+    expect(useStore.getState()).toMatchObject({
+      screen: "prep", roomCode: "BOT123", botGame: true, pendingBotStart: false,
+      backgroundMatchmaking: { state: "searching", format: "cc" },
+    });
+  });
+
   it("preserves the retained matchmaking room when starting bot practice", async () => {
     localStorage.setItem("fyendal-auth", JSON.stringify({ token: "token-a", username: "Alice" }));
     const { useStore } = await import("../store.js");

@@ -75,6 +75,23 @@ async function matchedRoom(): Promise<{
   return { code: matched.code, userIds, tokens: [joinedA.token, joinedB.token] };
 }
 
+async function searchingBot() {
+  const user = await db.query(
+    `INSERT INTO users (username, username_lc, pass_hash, created_at)
+     VALUES ('SearchingBot','searchingbot','hash',1) RETURNING id`,
+  );
+  const userId = Number(user.rows[0]!.id);
+  const queued = await store.queueForMatch("cc", {
+    userId, username: "SearchingBot", deckId: "precon-asb", cardPoolMode: "legal",
+    pendingBotStart: { format: "cc", deckId: "precon-asb", bot: "ira", requestedAt: Date.now() },
+  });
+  if (!queued.ok || queued.kind !== "opened") throw new Error("missing search opener");
+  const source = await store.startPendingBotPractice(userId);
+  if (!source) throw new Error("missing bot practice");
+  await store.markPresent(source.code, source.token, "searching-bot", 0, userId);
+  return { userId, source, retainedCode: queued.code };
+}
+
 async function pendingBotOffer(): Promise<{
   offerCode: string;
   firstBotCode: string;
@@ -101,10 +118,8 @@ async function pendingBotOffer(): Promise<{
     },
   });
   if (!firstQueue.ok || firstQueue.kind !== "opened") throw new Error("first bot queue did not open");
-  const firstBot = await store.createBotRoom("cc", {
-    userId: userIds[0], username: "BotOfferA", deckId: "precon-asb",
-  }, "legal", "ira");
-  await store.setBackgroundMatchmaking(userIds[0], firstBot.code);
+  const firstBot = await store.startPendingBotPractice(userIds[0]);
+  if (!firstBot) throw new Error("first bot practice did not start");
   await markStoredSeatPresent(firstBot.code, 0, "first-bot-source");
   const matched = await store.queueForMatch("cc", {
     userId: userIds[1],
@@ -1958,11 +1973,8 @@ describe("PgRoomStore storage", () => {
       },
     });
     if (!firstQueue.ok || firstQueue.kind !== "opened") throw new Error("first bot queue did not open");
-    const firstBot = await store.createBotRoom("cc", {
-      userId: firstId,
-      username: "BotQueueA",
-      deckId: "precon-asb",
-    }, "legal", "ira");
+    const firstBot = await store.startPendingBotPractice(firstId);
+    if (!firstBot) throw new Error("first bot practice did not start");
     await chooseBotTurn(firstBot.code, firstBot.token, firstId);
     const boltyn = precon("precon-asb")!.pool;
     expect(await presentBotDeck(store, firstBot.code, { token: firstBot.token, userId: firstId }, {
@@ -1970,7 +1982,6 @@ describe("PgRoomStore storage", () => {
       equipment: {},
       deck: boltyn.deck,
     })).toMatchObject({ ok: true, started: true });
-    await store.setBackgroundMatchmaking(firstId, firstBot.code);
     await markStoredSeatPresent(firstBot.code, 0, "first-bot-source");
 
     const second = await store.queueForMatch("cc", {
@@ -2036,6 +2047,215 @@ describe("PgRoomStore storage", () => {
     ]));
   });
 
+  it("hides search openers, preserves them during practice, and deletes them when search stops", async () => {
+    const { userId, source, retainedCode } = await searchingBot();
+    expect((await store.listRooms(userId)).filter((room) => room.yours).map((room) => room.code)).toEqual([source.code]);
+    expect(await store.listRooms()).toEqual([]);
+    await db.query("UPDATE rooms SET gc_at = $2 WHERE code = $1", [retainedCode, Date.now() - 1]);
+    await store.sweepRooms();
+    expect(await store.getRoom(retainedCode)).not.toBeNull();
+    expect(await store.stopBackgroundMatchmaking(userId)).toBe(true);
+    expect(await store.stopBackgroundMatchmaking(userId)).toBe(false);
+    expect(await store.getRoom(retainedCode)).toBeNull();
+    expect(await store.getRoom(source.code)).not.toBeNull();
+    expect(await store.backgroundMatchmakingStatus(userId)).toEqual({ state: "inactive" });
+    expect(await store.queueForMatch("cc", {
+      userId, username: "SearchingBot", deckId: "precon-asb", cardPoolMode: "legal",
+      mode: "background", sourceRoomCode: source.code, continueBackgroundSearch: true,
+    })).toMatchObject({ ok: false });
+    expect(await store.backgroundMatchmakingStatus(userId)).toEqual({ state: "inactive" });
+  });
+
+  it("repairs search cleanup after game completion without a gateway callback", async () => {
+    const { userId, source, retainedCode } = await searchingBot();
+    await db.query("UPDATE rooms SET status = 'finished' WHERE code = $1", [source.code]);
+    await new PgRoomStore(db, "rules-a").sweepRooms();
+    expect(await store.backgroundMatchmakingStatus(userId)).toEqual({ state: "inactive" });
+    expect(await store.getRoom(retainedCode)).toBeNull();
+    expect(await store.getRoom(source.code)).not.toBeNull();
+  });
+
+  it("deletes the hidden search in the same sweep as an inactive bot room", async () => {
+    const { userId, source, retainedCode } = await searchingBot();
+    await db.query("DELETE FROM room_presence WHERE room_code = $1", [source.code]);
+    await db.query("UPDATE rooms SET gc_at = $2 WHERE code = $1", [source.code, Date.now() - 1]);
+    const removed = await store.sweepRooms();
+    expect(removed.map((room) => room.code).sort()).toEqual([source.code, retainedCode].sort());
+    expect(await store.getRoom(source.code)).toBeNull();
+    expect(await store.getRoom(retainedCode)).toBeNull();
+    expect(await store.listRooms(userId)).toEqual([]);
+    expect(await store.backgroundMatchmakingStatus(userId)).toEqual({ state: "inactive" });
+    expect(await store.backgroundPracticeRoom(userId, retainedCode)).toBeNull();
+    expect(await store.sweepRooms()).toEqual([]);
+  });
+
+  it("releases an expired bot's offer and lets the pending opponent enter practice", async () => {
+    const offer = await pendingBotOffer();
+    await db.query("DELETE FROM room_presence WHERE room_code = $1", [offer.firstBotCode]);
+    await db.query("UPDATE rooms SET gc_at = $2 WHERE code = $1", [offer.firstBotCode, Date.now() - 1]);
+    await store.sweepRooms();
+    expect(await store.getRoom(offer.firstBotCode)).toBeNull();
+    expect(await store.listRooms(offer.userIds[0])).toEqual([]);
+    expect(await store.backgroundMatchmakingStatus(offer.userIds[0])).toEqual({ state: "inactive" });
+    expect(await store.backgroundMatchmakingStatus(offer.userIds[1])).toEqual({ state: "searching", format: "cc" });
+    expect((await store.getRoom(offer.offerCode))?.seats.filter(Boolean).map((seat) => seat?.userId))
+      .toEqual([offer.userIds[1]]);
+    expect(await store.backgroundPracticeRoom(offer.userIds[1])).not.toBeNull();
+    expect((await db.query("SELECT room_code FROM matchmaking_offers")).rows).toEqual([]);
+  });
+
+  it("keeps bot practice and search if a heartbeat disarms GC before deletion", async () => {
+    const { userId, source, retainedCode } = await searchingBot();
+    await db.query("UPDATE rooms SET gc_at = $2 WHERE code = $1", [source.code, Date.now() - 1]);
+    let reconnected = false;
+    const racingStore = new PgRoomStore({
+      query: async (sql, params) => {
+        if (!reconnected && sql.startsWith("DELETE FROM rooms WHERE code = $1 AND gc_at = $2")) {
+          reconnected = true;
+          await store.markPresent(source.code, source.token, "reconnected-before-gc", 0, userId);
+        }
+        return db.query(sql, params);
+      },
+    }, "rules-a");
+    expect(await racingStore.sweepRooms()).toEqual([]);
+    expect(reconnected).toBe(true);
+    expect(await store.getRoom(source.code)).not.toBeNull();
+    expect(await store.getRoom(retainedCode)).not.toBeNull();
+    expect(await store.backgroundMatchmakingStatus(userId)).toEqual({ state: "searching", format: "cc" });
+  });
+
+  it("preserves the foreground opponent's search when bot practice expires", async () => {
+    const { userId, source, retainedCode } = await searchingBot();
+    const user = await db.query(
+      `INSERT INTO users (username, username_lc, pass_hash, created_at)
+       VALUES ('WaitingHuman','waitinghuman','hash',1) RETURNING id`,
+    );
+    const opponentId = Number(user.rows[0]!.id);
+    expect(await store.queueForMatch("cc", {
+      userId: opponentId, username: "WaitingHuman", deckId: "precon-asb", cardPoolMode: "legal",
+    })).toMatchObject({ ok: true, kind: "matched", code: retainedCode });
+    await markStoredSeatPresent(retainedCode, 1, "waiting-human");
+    await db.query("DELETE FROM room_presence WHERE room_code = $1", [source.code]);
+    await db.query("UPDATE rooms SET gc_at = $2 WHERE code = $1", [source.code, Date.now() - 1]);
+    await store.sweepRooms();
+    expect((await store.listRooms(userId)).filter((room) => room.yours)).toEqual([]);
+    expect((await store.listRooms(opponentId)).filter((room) => room.yours).map((room) => room.code))
+      .toEqual([retainedCode]);
+    expect((await db.query(
+      "SELECT retained_room_code, pending_offer_room_code FROM matchmaking_entries WHERE user_id = $1", [opponentId],
+    )).rows).toEqual([{ retained_room_code: retainedCode, pending_offer_room_code: null }]);
+  });
+
+  it("preserves an accepted PvP game when the old bot practice expires", async () => {
+    const offer = await pendingBotOffer();
+    await store.acceptBackgroundMatch(offer.userIds[0], offer.offerCode);
+    await store.acceptMatch(offer.offerCode, { token: offer.pendingToken, userId: offer.userIds[1] });
+    const before = await store.getRoom(offer.offerCode);
+    await db.query("DELETE FROM room_presence WHERE room_code = $1", [offer.firstBotCode]);
+    await db.query("UPDATE rooms SET gc_at = $2 WHERE code = $1", [offer.firstBotCode, Date.now() - 1]);
+    await store.sweepRooms();
+    expect(await store.getRoom(offer.firstBotCode)).toBeNull();
+    const after = await store.getRoom(offer.offerCode);
+    expect(after?.version).toBe(before?.version);
+    expect(after?.seats.map((seat) => seat?.userId)).toEqual(offer.userIds);
+    expect(after?.seats.every((seat) => seat?.accepted)).toBe(true);
+  });
+
+  it.each([false, true])("retries bot room code collisions (pending startup: %s)", async (pending) => {
+    const user = await db.query(
+      `INSERT INTO users (username, username_lc, pass_hash, created_at)
+       VALUES ('CollisionBot','collisionbot','hash',1) RETURNING id`,
+    );
+    const userId = Number(user.rows[0]!.id);
+    if (pending) {
+      await store.queueForMatch("cc", {
+        userId, username: "CollisionBot", deckId: "precon-asb", cardPoolMode: "legal",
+        pendingBotStart: { format: "cc", deckId: "precon-asb", bot: "ira", requestedAt: Date.now() },
+      });
+    }
+    let collidedCode: unknown;
+    const collisionStore = new PgRoomStore({
+      query: async (sql, params) => {
+        if (collidedCode === undefined && sql.includes("ON CONFLICT (code) DO NOTHING RETURNING code")) {
+          // Occupy the first generated code before the actual creation tries it.
+          const occupied = await db.query(sql, params);
+          collidedCode = params?.[0];
+          // pg-mem incorrectly returns the existing row for DO NOTHING.
+          // Supply PostgreSQL's empty result for this simulated collision.
+          return { ...occupied, rows: [], rowCount: 0 };
+        }
+        return db.query(sql, params);
+      },
+    }, "rules-a");
+    const created = pending
+      ? await collisionStore.startPendingBotPractice(userId)
+      : await collisionStore.createBotRoom("cc", {
+        userId, username: "CollisionBot", deckId: "precon-asb",
+      }, "legal", "ira");
+    expect(created).not.toBeNull();
+    expect(collidedCode).toEqual(expect.any(String));
+    expect(created!.code).not.toBe(collidedCode);
+    const room = await store.getRoom(created!.code);
+    expect(room?.seats[0]?.userId).toBe(userId);
+    expect(room?.seats[1]?.controller).toBe("bot");
+    expect((await db.query("SELECT seat FROM room_seats WHERE room_code = $1", [collidedCode])).rows)
+      .toEqual([]);
+    if (pending) {
+      expect(await store.backgroundPracticeRoom(userId)).toBe(created!.code);
+      expect((await db.query("SELECT user_id FROM pending_bot_starts WHERE user_id = $1", [userId])).rows)
+        .toEqual([]);
+    }
+  });
+
+  it("recovers an interrupted pending bot startup once after reconnect or restart", async () => {
+    const { userId, source } = await searchingBot();
+    expect(await store.startPendingBotPractice(userId)).toBeNull();
+    expect(await store.advancePendingBotStart(userId)).toBe("none");
+    expect((await db.query("SELECT room_code FROM room_seats WHERE controller = 'bot'")).rows)
+      .toEqual([{ room_code: source.code }]);
+    // Simulate a request committed before the gateway could create practice.
+    await store.stopBackgroundMatchmaking(userId);
+    await store.queueForMatch("cc", {
+      userId, username: "SearchingBot", deckId: "precon-asb", cardPoolMode: "legal",
+      pendingBotStart: { format: "cc", deckId: "precon-asb", bot: "ira", requestedAt: Date.now() },
+    });
+    expect(await store.leaveForegroundMatchmakingOnDisconnect(userId)).toBe(false);
+    const restarted = new PgRoomStore(db, "rules-a");
+    await restarted.sweepMatchmadePrep();
+    const destination = await restarted.backgroundPracticeRoom(userId);
+    expect(destination).not.toBeNull();
+    expect(destination).not.toBe(source.code);
+    await restarted.sweepMatchmadePrep();
+    expect(await restarted.backgroundPracticeRoom(userId)).toBe(destination);
+  });
+
+  it("rechecks pairing under the format lock before stopping a search", async () => {
+    const { userId, source, retainedCode } = await searchingBot();
+    const newcomer = await db.query(
+      `INSERT INTO users (username, username_lc, pass_hash, created_at)
+       VALUES ('ArrivingPlayer','arrivingplayer','hash',1) RETURNING id`,
+    );
+    const newcomerId = Number(newcomer.rows[0]!.id);
+    let paired = false;
+    const racingStore = new PgRoomStore({
+      query: async (sql, params) => {
+        if (!paired && sql.startsWith("UPDATE matchmaking_locks SET generation")) {
+          paired = true;
+          expect(await store.queueForMatch("cc", {
+            userId: newcomerId, username: "ArrivingPlayer", deckId: "precon-asb", cardPoolMode: "legal",
+          })).toMatchObject({ ok: true, kind: "matched", code: retainedCode });
+        }
+        return db.query(sql, params);
+      },
+    }, "rules-a");
+    expect(await racingStore.stopBackgroundMatchmaking(userId)).toBe(true);
+    const surviving = await store.getRoom(retainedCode);
+    expect(surviving?.seats.filter((seat) => seat !== null).map((seat) => seat?.userId)).toEqual([newcomerId]);
+    expect(await store.getRoom(source.code)).not.toBeNull();
+    expect(await store.backgroundMatchmakingStatus(userId)).toEqual({ state: "inactive" });
+    expect((await db.query("SELECT room_code FROM matchmaking_offers")).rows).toEqual([]);
+  });
+
   it("preserves background matchmaking when its socket disconnects", async () => {
     const users = await db.query(
       `INSERT INTO users (username, username_lc, pass_hash, created_at)
@@ -2057,12 +2277,7 @@ describe("PgRoomStore storage", () => {
       },
     });
     if (!queued.ok || queued.kind !== "opened") throw new Error("bot queue did not open");
-    const source = await store.createBotRoom("cc", {
-      userId: backgroundUserId,
-      username: "ReconnectBot",
-      deckId: "precon-asb",
-    }, "legal", "ira");
-    expect(await store.setBackgroundMatchmaking(backgroundUserId, source.code)).toBe(true);
+    expect(await store.startPendingBotPractice(backgroundUserId)).not.toBeNull();
 
     expect(await store.leaveForegroundMatchmakingOnDisconnect(backgroundUserId)).toBe(false);
     expect(await store.backgroundMatchmakingStatus(backgroundUserId)).toEqual({
@@ -2363,6 +2578,22 @@ describe("PgRoomStore storage", () => {
       { candidate_user_id: firstId, ordinal: 0, attempted: true, skipped: false },
       { candidate_user_id: secondId, ordinal: 1, attempted: false, skipped: false },
     ]);
+    // A delayed completion of the first decline must not cancel a newer
+    // offer already selected by another gateway or the recovery sweeper.
+    expect(await store.advancePendingBotStart(starterId, firstId)).toBe("matched");
+    expect((await db.query("SELECT room_code FROM matchmaking_offers")).rows).toEqual([{ room_code: second.code }]);
+    const secondJoin = await store.joinRoom(second.code, undefined, {
+      allowPlayer: true, userId: starterId, username: "SnapshotStarter",
+    });
+    if (!secondJoin.ok || secondJoin.kind !== "player") throw new Error("starter did not join second offer");
+    expect(await store.declinePendingBotMatch(starterId, second.code, { token: secondJoin.token, userId: starterId }))
+      .toMatchObject({ ok: true });
+    expect(await store.backgroundMatchmakingStatus(starterId)).toEqual({ state: "searching", format: "cc" });
+    const practice = await store.backgroundPracticeRoom(starterId, second.code);
+    expect(practice).not.toBeNull();
+    expect(await store.backgroundPracticeRoom(starterId, first.code)).toBe(practice);
+    expect(await store.backgroundPracticeRoom(starterId, "NOPE00")).toBeNull();
+    expect((await store.listRooms(starterId)).filter((room) => room.yours).map((room) => room.code)).toEqual([practice]);
   });
 
   it("cancels a timed-out pending bot start and safely requeues the practicing survivor", async () => {

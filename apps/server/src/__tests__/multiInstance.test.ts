@@ -212,6 +212,59 @@ describe("multi-instance gateways", () => {
     expect((await db.query("SELECT COUNT(*) AS count FROM matchmaking_entries")).rows[0]!.count).toBe(0);
   });
 
+  it("delivers pending startup before an offer and enters bot prep after the last rejection", async () => {
+    const opponent = await authed(first, "DeclinedOpponent");
+    opponent.send({ type: "queue-join", format: "cc", deckId: "precon-asb" });
+    const opening = await opponent.next((message) => message.type === "room-created");
+    if (opening.type !== "room-created") throw new Error("missing opening");
+
+    const starter = await authed(second, "BotStarter");
+    // Authentication initially reports no search. The subsequent offer must
+    // restore pending-bot state before the client can press Decline.
+    await starter.next((message) => message.type === "background-matchmaking");
+    starter.send({ type: "create-bot-room", format: "cc", deckId: "precon-asb", bot: "ira", searchForPlayer: true });
+    const firstMessage = await starter.next((message) =>
+      message.type === "joined" || message.type === "background-matchmaking"
+    );
+    expect(firstMessage).toMatchObject({ type: "background-matchmaking", status: { state: "pending" } });
+    const joined = await starter.next((message) => message.type === "joined");
+    if (joined.type !== "joined") throw new Error("missing offer");
+    expect(joined.code).toBe(opening.code);
+    starter.send({ type: "decline-pending-bot-match", roomCode: joined.code });
+    const created = await starter.next((message) => message.type === "room-created" || message.type === "error");
+    expect(created.type).toBe("room-created");
+    if (created.type !== "room-created") throw new Error("missing bot room");
+    expect(await starter.next((message) => message.type === "prep-state" && message.prep.botGame === true))
+      .toMatchObject({ prep: { yourDeckId: "precon-asb", botGame: true } });
+    // A command proves that the decline handler did not detach the new room.
+    starter.send({ type: "choose-first", first: true });
+    await starter.next((message) => message.type === "prep-state" && message.prep.startPlayer !== null);
+    starter.send({ type: "list-rooms" });
+    const listed = await starter.next((message) => message.type === "rooms");
+    if (listed.type !== "rooms") throw new Error("missing rooms");
+    expect(listed.rooms.filter((room) => room.yours).map((room) => room.code)).toEqual([created.code]);
+    const closed = new Promise<void>((resolve) => starter.ws.once("close", () => resolve()));
+    starter.ws.close();
+    await closed;
+    const session = await login(db, "BotStarter", "password1");
+    if (!session.ok) throw new Error("login failed");
+    const reconnected = await authedWithToken(first, session.token);
+    // A gateway restart can lose delivery after commit; the browser still has
+    // the rejected offer URL and credential in that case.
+    reconnected.send({ type: "join-room", code: joined.code, token: joined.token });
+    expect(await reconnected.next((message) => message.type === "room-created"))
+      .toMatchObject({ code: created.code });
+    await reconnected.next((message) => message.type === "prep-state" && message.prep.botGame === true);
+    reconnected.send({ type: "background-matchmaking-leave" });
+    await reconnected.next((message) => message.type === "background-matchmaking" && message.status.state === "inactive");
+    reconnected.send({ type: "list-rooms" });
+    const stoppedRooms = await reconnected.next((message) => message.type === "rooms");
+    if (stoppedRooms.type !== "rooms") throw new Error("missing rooms");
+    expect(stoppedRooms.rooms.filter((room) => room.yours).map((room) => room.code)).toEqual([created.code]);
+    expect((await db.query("SELECT room_code FROM room_seats WHERE controller = 'bot'")).rows)
+      .toEqual([{ room_code: created.code }]);
+  });
+
   it("hands a practicing player to PvP while preserving the active bot game", async () => {
     const a = await authed(first, "CrossBotA");
     const b = await authed(second, "CrossBotB");

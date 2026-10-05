@@ -331,8 +331,9 @@ describe("client storage keys", () => {
     expect(loadRejectedMatchRooms(storage, "Alice", now + 2)).toEqual(["ABC123", "DEF456"]);
     expect(loadRejectedMatchRooms(storage, "Bob", now + 2)).toEqual([]);
 
-    pruneRejectedMatchRooms(storage, "Alice", new Set(["DEF456"]), now + 3);
-    expect(loadRejectedMatchRooms(storage, "Alice", now + 3)).toEqual(["DEF456"]);
+    pruneRejectedMatchRooms(storage, "Alice", now + 3);
+    expect(loadRejectedMatchRooms(storage, "Alice", now + 3)).toEqual(["ABC123", "DEF456"]);
+    pruneRejectedMatchRooms(storage, "Alice", now + 24 * 60 * 60 * 1000 + 2);
     expect(loadRejectedMatchRooms(storage, "Alice", now + 24 * 60 * 60 * 1000 + 2)).toEqual([]);
   });
 

@@ -1065,7 +1065,6 @@ export const useStore = create<StoreState>((set, get) => {
           pruneRejectedMatchRooms(
             localStorage,
             get().authUser!,
-            new Set(msg.rooms.map((room) => room.code.toUpperCase())),
           );
         }
         set({ rooms: msg.rooms });
@@ -1172,6 +1171,10 @@ export const useStore = create<StoreState>((set, get) => {
         if (SOCIAL_ERROR_CODES.has(msg.code)) {
           set({ socialError: msg.code });
           break;
+        }
+        if (get().pendingBotStart && get().screen === "room-loading"
+          && get().prep?.deadlinePhase === "accept") {
+          set({ screen: "waiting" });
         }
         if (msg.code === "SESSION_REPLACED") {
           // Another tab reclaimed this player seat. Keep its newly saved room
@@ -1672,7 +1675,9 @@ export const useStore = create<StoreState>((set, get) => {
         rememberRejectedMatchRoom(localStorage, username, code, Date.now(), choiceKey);
       }
       if (get().pendingBotStart && code) {
-        send({ type: "decline-pending-bot-match", roomCode: code });
+        if (send({ type: "decline-pending-bot-match", roomCode: code })) {
+          set({ screen: "room-loading" });
+        }
       } else {
         get().leave();
       }
