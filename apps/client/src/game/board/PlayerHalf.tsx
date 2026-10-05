@@ -1,5 +1,6 @@
 import type { CardView, EmoteMessage, PlayerView } from "@fyendal/shared";
 import { useIntl } from "react-intl";
+import type { CardDisplayPreference } from "../../storage.js";
 import type { EmoteEvent } from "../../store/types.js";
 import { BloodDebtCounter } from "../BloodDebtCounter.js";
 import { CardBack, CardFace, InactiveZoneCard } from "../Card.js";
@@ -100,6 +101,7 @@ export function PlayerHalf({
   mobileFloatViewport,
   mobileLandscapeViewport,
   compactBoard = false,
+  cardDisplayPreference = "square",
   activeChainAttackerInstanceId,
   onSendEmote,
   onOpenOverlay,
@@ -118,6 +120,7 @@ export function PlayerHalf({
   mobileFloatViewport: boolean;
   mobileLandscapeViewport: boolean;
   compactBoard?: boolean;
+  cardDisplayPreference?: CardDisplayPreference;
   activeChainAttackerInstanceId: number | null;
   onSendEmote: (message: EmoteMessage) => void;
   onOpenOverlay: (overlay: BoardOverlay) => void;
@@ -137,7 +140,8 @@ export function PlayerHalf({
     ? visibleDeckTop
     : undefined;
   const hero = heroCard(player);
-  const squareBoard = !mobileFloatViewport && !mobileLandscapeViewport && !compactBoard;
+  const squareBoard = cardDisplayPreference === "square"
+    && !mobileFloatViewport && !mobileLandscapeViewport && !compactBoard;
   const deckTopPlayable =
     presentedDeckTop !== undefined && interaction.legal.playableZones.get(presentedDeckTop.instanceId) === "deck";
   const arenaBoard = boardCardsOutsideEquipmentZones(

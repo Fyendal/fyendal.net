@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import {
   loadGameSettings,
   saveGameSettings,
+  type CardDisplayPreference,
   type MotionPreference,
   type PlayabilityCuePreference,
   type PriorityWindowMode,
@@ -42,6 +43,13 @@ export function useGameSettings({
       return next;
     });
   };
+  const updateCardDisplayPreference = (cardDisplayPreference: CardDisplayPreference) => {
+    setSettings((current) => {
+      const next = { ...current, cardDisplayPreference };
+      saveGameSettings(localStorage, next);
+      return next;
+    });
+  };
   const updateMotionPreference = (motionPreference: MotionPreference) => {
     setSettings((current) => {
       const next = { ...current, motionPreference };
@@ -78,6 +86,7 @@ export function useGameSettings({
     updatePriorityWindowMode,
     updateLessGuidance,
     updateSkipPlayConfirmation,
+    updateCardDisplayPreference,
     updateMotionPreference,
     updatePlayabilityCuePreference,
     updateSoundEffectsEnabled,

@@ -357,14 +357,16 @@ export function saveLobbySettings(
 }
 
 export type { PriorityWindowMode };
+export type CardDisplayPreference = "square" | "full";
 export type MotionPreference = "system" | "full" | "reduced";
 export type PlayabilityCuePreference = "glow" | "high-contrast";
 
 export interface GameSettings {
-  version: 6;
+  version: 7;
   priorityWindowMode: PriorityWindowMode;
   lessGuidance: boolean;
   skipPlayConfirmation: boolean;
+  cardDisplayPreference: CardDisplayPreference;
   motionPreference: MotionPreference;
   playabilityCuePreference: PlayabilityCuePreference;
   soundEffectsEnabled: boolean;
@@ -372,10 +374,11 @@ export interface GameSettings {
 }
 
 export const DEFAULT_GAME_SETTINGS: GameSettings = {
-  version: 6,
+  version: 7,
   priorityWindowMode: "always-pause",
   lessGuidance: true,
   skipPlayConfirmation: true,
+  cardDisplayPreference: "square",
   motionPreference: "system",
   playabilityCuePreference: "glow",
   soundEffectsEnabled: true,
@@ -407,6 +410,7 @@ export function loadGameSettings(storage: Pick<Storage, "getItem">): GameSetting
         && record.version !== 4
         && record.version !== 5
         && record.version !== 6
+        && record.version !== 7
       )
       || (
         record.priorityWindowMode !== "auto-pass"
@@ -418,6 +422,7 @@ export function loadGameSettings(storage: Pick<Storage, "getItem">): GameSetting
       || record.version === 4
       || record.version === 5
       || record.version === 6
+      || record.version === 7
     )
       && (
         record.motionPreference === "system"
@@ -427,7 +432,7 @@ export function loadGameSettings(storage: Pick<Storage, "getItem">): GameSetting
       ? record.motionPreference
       : "system";
     if (
-      (record.version === 4 || record.version === 5 || record.version === 6)
+      (record.version === 4 || record.version === 5 || record.version === 6 || record.version === 7)
       && (
         typeof record.soundEffectsEnabled !== "boolean"
         || typeof record.soundEffectsVolume !== "number"
@@ -436,17 +441,22 @@ export function loadGameSettings(storage: Pick<Storage, "getItem">): GameSetting
         || record.soundEffectsVolume > 100
       )
     ) return DEFAULT_GAME_SETTINGS;
-    const playabilityCuePreference = record.version === 5 || record.version === 6
+    const playabilityCuePreference = record.version === 5 || record.version === 6 || record.version === 7
       ? record.playabilityCuePreference
       : "glow";
     if (
       playabilityCuePreference !== "glow"
       && playabilityCuePreference !== "high-contrast"
     ) return DEFAULT_GAME_SETTINGS;
+    const cardDisplayPreference = record.version === 7 ? record.cardDisplayPreference : "square";
+    if (cardDisplayPreference !== "square" && cardDisplayPreference !== "full") {
+      return DEFAULT_GAME_SETTINGS;
+    }
     return {
-      version: 6,
+      version: 7,
+      cardDisplayPreference,
       priorityWindowMode: record.priorityWindowMode,
-      lessGuidance: record.version === 6 && typeof record.lessGuidance === "boolean"
+      lessGuidance: (record.version === 6 || record.version === 7) && typeof record.lessGuidance === "boolean"
         ? record.lessGuidance
         : true,
       skipPlayConfirmation: typeof record.skipPlayConfirmation === "boolean"
@@ -454,10 +464,10 @@ export function loadGameSettings(storage: Pick<Storage, "getItem">): GameSetting
         : true,
       motionPreference,
       playabilityCuePreference,
-      soundEffectsEnabled: record.version === 4 || record.version === 5 || record.version === 6
+      soundEffectsEnabled: record.version === 4 || record.version === 5 || record.version === 6 || record.version === 7
         ? record.soundEffectsEnabled as boolean
         : true,
-      soundEffectsVolume: record.version === 4 || record.version === 5 || record.version === 6
+      soundEffectsVolume: record.version === 4 || record.version === 5 || record.version === 6 || record.version === 7
         ? record.soundEffectsVolume as number
         : 35,
     };

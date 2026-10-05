@@ -29,6 +29,8 @@ describe("game settings dialog", () => {
       onSkipPlayConfirmationChange: vi.fn(),
       motionPreference: "reduced",
       onMotionPreferenceChange: vi.fn(),
+      cardDisplayPreference: "full",
+      onCardDisplayPreferenceChange: vi.fn(),
       playabilityCuePreference: "high-contrast",
       onPlayabilityCuePreferenceChange: vi.fn(),
       soundEffectsEnabled: true,
@@ -38,6 +40,9 @@ describe("game settings dialog", () => {
       onClose: vi.fn(),
     });
 
+    expect(html).toContain('aria-label="Card display"');
+    expect(html).toContain('class="settings-selected" aria-pressed="true">Full card</button>');
+    expect(html).toContain('aria-pressed="false">Square</button>');
     expect(html).toContain('aria-label="Animation preference"');
     expect(html).toContain('class="settings-grid"');
     expect(html.match(/class="settings-section/g)).toHaveLength(4);
@@ -77,6 +82,8 @@ describe("game settings dialog", () => {
       onSkipPlayConfirmationChange: vi.fn(),
       motionPreference: "system",
       onMotionPreferenceChange: vi.fn(),
+      cardDisplayPreference: "square",
+      onCardDisplayPreferenceChange: vi.fn(),
       playabilityCuePreference: "glow",
       onPlayabilityCuePreferenceChange: vi.fn(),
       soundEffectsEnabled: true,
@@ -102,6 +109,8 @@ describe("game settings dialog", () => {
       onSkipPlayConfirmationChange: vi.fn(),
       motionPreference: "system",
       onMotionPreferenceChange: vi.fn(),
+      cardDisplayPreference: "square",
+      onCardDisplayPreferenceChange: vi.fn(),
       playabilityCuePreference: "glow",
       onPlayabilityCuePreferenceChange: vi.fn(),
       soundEffectsEnabled: true,
@@ -111,6 +120,9 @@ describe("game settings dialog", () => {
       onClose: vi.fn(),
     }, "zh-Hans");
 
+    expect(html).toContain('aria-label="卡牌显示"');
+    expect(html).toContain('class="settings-selected" aria-pressed="true">方形</button>');
+    expect(html).toContain('aria-pressed="false">完整卡牌</button>');
     expect(html).toContain(">设置</h2>");
     expect(html).toContain(">游戏操作</h3>");
     expect(html).toContain(">自动跳过</button>");

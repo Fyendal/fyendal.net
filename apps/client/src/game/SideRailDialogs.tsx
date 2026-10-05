@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState, type CSSProperties } from "react";
 import { useIntl } from "react-intl";
 import type { UndoTarget } from "@fyendal/shared";
 import type {
+  CardDisplayPreference,
   MotionPreference,
   PlayabilityCuePreference,
   PriorityWindowMode,
@@ -33,6 +34,8 @@ export function GameSettingsDialog({
   onLessGuidanceChange,
   skipPlayConfirmation,
   onSkipPlayConfirmationChange,
+  cardDisplayPreference,
+  onCardDisplayPreferenceChange,
   motionPreference,
   onMotionPreferenceChange,
   playabilityCuePreference,
@@ -56,6 +59,8 @@ export function GameSettingsDialog({
   onLessGuidanceChange: (enabled: boolean) => void;
   skipPlayConfirmation: boolean;
   onSkipPlayConfirmationChange: (enabled: boolean) => void;
+  cardDisplayPreference: CardDisplayPreference;
+  onCardDisplayPreferenceChange: (preference: CardDisplayPreference) => void;
   motionPreference: MotionPreference;
   onMotionPreferenceChange: (preference: MotionPreference) => void;
   playabilityCuePreference: PlayabilityCuePreference;
@@ -177,6 +182,33 @@ export function GameSettingsDialog({
           <section className="settings-section settings-presentation">
             <h3 className="settings-heading">{intl.formatMessage({ id: "settings.audioVisuals" })}</h3>
             <div className="settings-control-list">
+              <div className="settings-control-row settings-choice-row">
+                <span className="settings-control-name">
+                  {intl.formatMessage({ id: "settings.cardDisplay" })}
+                </span>
+                <div
+                  className="settings-segmented"
+                  role="group"
+                  aria-label={intl.formatMessage({ id: "settings.cardDisplay" })}
+                >
+                  <button
+                    type="button"
+                    className={cardDisplayPreference === "square" ? "settings-selected" : ""}
+                    aria-pressed={cardDisplayPreference === "square"}
+                    onClick={() => onCardDisplayPreferenceChange("square")}
+                  >
+                    {intl.formatMessage({ id: "settings.cardDisplay.square" })}
+                  </button>
+                  <button
+                    type="button"
+                    className={cardDisplayPreference === "full" ? "settings-selected" : ""}
+                    aria-pressed={cardDisplayPreference === "full"}
+                    onClick={() => onCardDisplayPreferenceChange("full")}
+                  >
+                    {intl.formatMessage({ id: "settings.cardDisplay.full" })}
+                  </button>
+                </div>
+              </div>
               <div className="settings-control-row settings-motion-row">
                 <span className="settings-control-name">
                   {intl.formatMessage({ id: "settings.animations" })}

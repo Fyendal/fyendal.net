@@ -9,6 +9,7 @@ vi.mock("../store.js", () => ({
   useStore: (selector: (state: StoreState) => unknown) => selector(gameStore.state),
 }));
 
+import { DEFAULT_GAME_SETTINGS, GAME_SETTINGS_STORAGE_KEY } from "../storage.js";
 import { GameBoard } from "./GameBoard.js";
 import { presentedHandCount } from "./defenderState.js";
 import { TestI18nProvider } from "../i18n/TestI18nProvider.js";
@@ -475,5 +476,25 @@ describe("GameBoard pending interactions", () => {
     }
     expect(pendingHtml.match(/class="btn-primary btn-pass shortcut-button"[^>]*disabled=""/g))
       .toHaveLength(2);
+  });
+});
+
+describe("card display preference", () => {
+  it.each(["square", "full"] as const)("uses %s cards across both player mats while preserving full hand and combat cards", (cardDisplayPreference) => {
+    vi.stubGlobal("localStorage", {
+      getItem: (key: string) => key === GAME_SETTINGS_STORAGE_KEY
+        ? JSON.stringify({ ...DEFAULT_GAME_SETTINGS, cardDisplayPreference })
+        : null,
+    });
+    gameStore.state = liveState(false);
+    const html = renderToStaticMarkup(<TestI18nProvider><GameBoard /></TestI18nProvider>);
+
+    for (const cardId of ["TST-HERO-0", "TST-HERO-1", "TST-BOARD"]) {
+      expect(cardClasses(html, cardId).includes("card-board-square"), cardId).toBe(cardDisplayPreference === "square");
+    }
+    expect(html.includes("card-back-square")).toBe(cardDisplayPreference === "square");
+    expect(html.match(/mat-square-board/g) ?? []).toHaveLength(cardDisplayPreference === "square" ? 2 : 0);
+    expect(cardClasses(html, "TST-HAND")).not.toContain("card-board-square");
+    expect(cardClasses(html, "TST-CHAIN")).not.toContain("card-board-square");
   });
 });

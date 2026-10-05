@@ -202,9 +202,9 @@ export function GameBoard() {
     mobileCombatFloatVisibility,
   } = useGameViewport(boardRef);
   const compactBoard = compactDesktopViewport && !mobileFloatViewport && !mobileLandscapeViewport;
-  const squareCardsEnabled = !mobileFloatViewport && !mobileLandscapeViewport && !compactBoard;
   const {
     lessGuidance,
+    cardDisplayPreference,
     motionPreference,
     playabilityCuePreference,
     priorityWindowMode,
@@ -213,6 +213,7 @@ export function GameBoard() {
     soundEffectsVolume,
     updatePriorityWindowMode,
     updateLessGuidance,
+    updateCardDisplayPreference,
     updateMotionPreference,
     updatePlayabilityCuePreference,
     updateSkipPlayConfirmation,
@@ -222,6 +223,8 @@ export function GameBoard() {
     syncPriorityMode: connected && screen !== "replay" && !spectating && yourSeat !== null,
     sendPriorityMode,
   });
+  const squareCardsEnabled = cardDisplayPreference === "square"
+    && !mobileFloatViewport && !mobileLandscapeViewport && !compactBoard;
   const presentedDefenderIds = screen === "replay" || spectating
     ? null
     : pendingDefenderStageIds;
@@ -1127,6 +1130,7 @@ export function GameBoard() {
           mobileFloatViewport={mobileFloatViewport}
           mobileLandscapeViewport={mobileLandscapeViewport}
           compactBoard={compactBoard}
+          cardDisplayPreference={cardDisplayPreference}
           activeChainAttackerInstanceId={activeChainAttackerInstanceId}
           onSendEmote={sendEmote}
           onOpenOverlay={setOverlay}
@@ -1163,6 +1167,7 @@ export function GameBoard() {
           mobileFloatViewport={mobileFloatViewport}
           mobileLandscapeViewport={mobileLandscapeViewport}
           compactBoard={compactBoard}
+          cardDisplayPreference={cardDisplayPreference}
           activeChainAttackerInstanceId={activeChainAttackerInstanceId}
           onSendEmote={sendEmote}
           onOpenOverlay={setOverlay}
@@ -1439,6 +1444,8 @@ export function GameBoard() {
         onSkipPlayConfirmationChange={updateSkipPlayConfirmation}
         motionPreference={motionPreference}
         onMotionPreferenceChange={updateMotionPreference}
+        cardDisplayPreference={cardDisplayPreference}
+        onCardDisplayPreferenceChange={updateCardDisplayPreference}
         playabilityCuePreference={playabilityCuePreference}
         onPlayabilityCuePreferenceChange={updatePlayabilityCuePreference}
         soundEffectsEnabled={soundEffectsEnabled}

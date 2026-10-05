@@ -25032,6 +25032,24 @@
       "value": "音频与视觉"
     }
   ],
+  "settings.cardDisplay": [
+    {
+      "type": 0,
+      "value": "卡牌显示"
+    }
+  ],
+  "settings.cardDisplay.full": [
+    {
+      "type": 0,
+      "value": "完整卡牌"
+    }
+  ],
+  "settings.cardDisplay.square": [
+    {
+      "type": 0,
+      "value": "方形"
+    }
+  ],
   "settings.close": [
     {
       "type": 0,

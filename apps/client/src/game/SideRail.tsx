@@ -3,6 +3,7 @@ import { useIntl } from "react-intl";
 import type { EmoteMessage, GameLogViewEntry, UndoTarget } from "@fyendal/shared";
 import { cardData } from "@fyendal/cards/client";
 import type {
+  CardDisplayPreference,
   MotionPreference,
   PlayabilityCuePreference,
   PriorityWindowMode,
@@ -226,6 +227,8 @@ export function SideRail({
   onLessGuidanceChange,
   skipPlayConfirmation,
   onSkipPlayConfirmationChange,
+  cardDisplayPreference,
+  onCardDisplayPreferenceChange,
   motionPreference,
   onMotionPreferenceChange,
   playabilityCuePreference,
@@ -289,6 +292,8 @@ export function SideRail({
   onLessGuidanceChange: (enabled: boolean) => void;
   skipPlayConfirmation: boolean;
   onSkipPlayConfirmationChange: (enabled: boolean) => void;
+  cardDisplayPreference: CardDisplayPreference;
+  onCardDisplayPreferenceChange: (preference: CardDisplayPreference) => void;
   motionPreference: MotionPreference;
   onMotionPreferenceChange: (preference: MotionPreference) => void;
   playabilityCuePreference: PlayabilityCuePreference;
@@ -624,6 +629,8 @@ export function SideRail({
           onLessGuidanceChange={onLessGuidanceChange}
           skipPlayConfirmation={skipPlayConfirmation}
           onSkipPlayConfirmationChange={onSkipPlayConfirmationChange}
+          cardDisplayPreference={cardDisplayPreference}
+          onCardDisplayPreferenceChange={onCardDisplayPreferenceChange}
           motionPreference={motionPreference}
           onMotionPreferenceChange={onMotionPreferenceChange}
           playabilityCuePreference={playabilityCuePreference}

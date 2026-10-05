@@ -26290,6 +26290,24 @@
       "value": "Audio & Visuals"
     }
   ],
+  "settings.cardDisplay": [
+    {
+      "type": 0,
+      "value": "Card display"
+    }
+  ],
+  "settings.cardDisplay.full": [
+    {
+      "type": 0,
+      "value": "Full card"
+    }
+  ],
+  "settings.cardDisplay.square": [
+    {
+      "type": 0,
+      "value": "Square"
+    }
+  ],
   "settings.close": [
     {
       "type": 0,

@@ -117,7 +117,8 @@ describe("client storage keys", () => {
     };
 
     expect(loadGameSettings(storage)).toEqual({
-      version: 6,
+      version: 7,
+      cardDisplayPreference: "square",
       priorityWindowMode: "always-pause",
       lessGuidance: true,
       skipPlayConfirmation: true,
@@ -127,7 +128,8 @@ describe("client storage keys", () => {
       soundEffectsVolume: 35,
     });
     saveGameSettings(storage, {
-      version: 6,
+      version: 7,
+      cardDisplayPreference: "full",
       priorityWindowMode: "auto-pass",
       lessGuidance: false,
       skipPlayConfirmation: false,
@@ -137,7 +139,8 @@ describe("client storage keys", () => {
       soundEffectsVolume: 60,
     });
     expect(loadGameSettings(storage)).toEqual({
-      version: 6,
+      version: 7,
+      cardDisplayPreference: "full",
       priorityWindowMode: "auto-pass",
       lessGuidance: false,
       skipPlayConfirmation: false,
@@ -157,7 +160,8 @@ describe("client storage keys", () => {
         skipPlayConfirmation: false,
       }),
     })).toEqual({
-      version: 6,
+      version: 7,
+      cardDisplayPreference: "square",
       priorityWindowMode: "auto-pass",
       lessGuidance: true,
       skipPlayConfirmation: false,
@@ -178,7 +182,8 @@ describe("client storage keys", () => {
         motionPreference: "reduced",
       }),
     })).toEqual({
-      version: 6,
+      version: 7,
+      cardDisplayPreference: "square",
       priorityWindowMode: "auto-pass",
       lessGuidance: true,
       skipPlayConfirmation: false,
@@ -201,7 +206,8 @@ describe("client storage keys", () => {
         soundEffectsVolume: 60,
       }),
     })).toEqual({
-      version: 6,
+      version: 7,
+      cardDisplayPreference: "square",
       priorityWindowMode: "auto-pass",
       lessGuidance: true,
       skipPlayConfirmation: false,
@@ -241,13 +247,37 @@ describe("client storage keys", () => {
   it("falls back safely for invalid or future settings", () => {
     expect(loadGameSettings({ getItem: () => "not json" })).toEqual(DEFAULT_GAME_SETTINGS);
     expect(loadGameSettings({
-      getItem: () => JSON.stringify({ version: 7, priorityWindowMode: "auto-pass" }),
+      getItem: () => JSON.stringify({ version: 8, priorityWindowMode: "auto-pass" }),
     })).toEqual(DEFAULT_GAME_SETTINGS);
     expect(loadGameSettings({
       getItem: () => JSON.stringify({
         ...DEFAULT_GAME_SETTINGS,
         soundEffectsVolume: 101,
       }),
+    })).toEqual(DEFAULT_GAME_SETTINGS);
+  });
+
+  it("adds square cards to version 6 settings without resetting existing choices", () => {
+    const previous = {
+      version: 6,
+      priorityWindowMode: "auto-pass",
+      lessGuidance: false,
+      skipPlayConfirmation: false,
+      motionPreference: "reduced",
+      playabilityCuePreference: "high-contrast",
+      soundEffectsEnabled: false,
+      soundEffectsVolume: 60,
+    };
+    expect(loadGameSettings({ getItem: () => JSON.stringify(previous) })).toEqual({
+      ...previous,
+      version: 7,
+      cardDisplayPreference: "square",
+    });
+  });
+
+  it("rejects invalid card display preferences", () => {
+    expect(loadGameSettings({
+      getItem: () => JSON.stringify({ ...DEFAULT_GAME_SETTINGS, cardDisplayPreference: "wide" }),
     })).toEqual(DEFAULT_GAME_SETTINGS);
   });
 

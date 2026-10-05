@@ -50,6 +50,8 @@ function sideRailProps(
     onSkipPlayConfirmationChange: vi.fn(),
     motionPreference: "system",
     onMotionPreferenceChange: vi.fn(),
+    cardDisplayPreference: "square",
+    onCardDisplayPreferenceChange: vi.fn(),
     playabilityCuePreference: "glow",
     onPlayabilityCuePreferenceChange: vi.fn(),
     soundEffectsEnabled: true,
