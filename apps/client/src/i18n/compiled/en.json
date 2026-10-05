@@ -24626,6 +24626,12 @@
       "value": "Your Rooms"
     }
   ],
+  "lobby.waiting.accepted": [
+    {
+      "type": 0,
+      "value": "You have accepted. Preparation will open once your opponent accepts too."
+    }
+  ],
   "lobby.waiting.forOpponent": [
     {
       "type": 0,
@@ -24718,6 +24724,44 @@
     {
       "type": 0,
       "value": "Accepted — waiting for opponent"
+    }
+  ],
+  "matchmaking.fallback.continue": [
+    {
+      "type": 0,
+      "value": "Continue to bot prep"
+    }
+  ],
+  "matchmaking.fallback.description": [
+    {
+      "type": 0,
+      "value": "Your opponent is now "
+    },
+    {
+      "type": 1,
+      "value": "username"
+    },
+    {
+      "type": 0,
+      "value": ", a practice bot. Continue when you're ready to prepare for this matchup."
+    }
+  ],
+  "matchmaking.fallback.practice": [
+    {
+      "type": 0,
+      "value": "Bot practice"
+    }
+  ],
+  "matchmaking.fallback.searching": [
+    {
+      "type": 0,
+      "value": "We're still looking for a real player in the background."
+    }
+  ],
+  "matchmaking.fallback.title": [
+    {
+      "type": 0,
+      "value": "The PvP match didn't go ahead"
     }
   ],
   "meta.home.description": [

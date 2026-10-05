@@ -691,12 +691,15 @@ export const useStore = create<StoreState>((set, get) => {
   }
 
   function enterPrep() {
+    // A handoff acknowledgement is not yet an authoritative opponent view.
+    // Wait for prep-state before exposing the new room's preparation controls.
+    const screen = get().botMatchTransition !== null ? "room-loading" : "prep";
     if (prepDeckId) {
-      set({ screen: "prep" });
+      set({ screen });
       void loadPrepDeck(prepDeckId);
     } else if (prepHero) {
       const hero = prepHero;
-      set({ screen: "prep", prepDeck: null });
+      set({ screen, prepDeck: null });
       loadClassicPrepDeck(hero);
     }
   }
@@ -1038,6 +1041,7 @@ export const useStore = create<StoreState>((set, get) => {
           yourSeat: msg.yourSeat,
           spectatorCount: msg.spectators ?? 0,
           botGame: msg.botGame === true,
+          botMatchTransition: null,
           lastActionAt: msg.lastActionAt,
           screen: "game",
           replayFrames: frames,
@@ -1114,14 +1118,26 @@ export const useStore = create<StoreState>((set, get) => {
         const matchAcceptanceRole = accepting
           ? current.matchAcceptanceRole ?? "existing"
           : null;
-        const screen = accepting && matchAcceptanceRole === "joining" && currentSeat?.accepted !== true
-          ? "waiting" as const
-          : "prep" as const;
+        let botMatchTransition = current.botMatchTransition;
+        if (msg.prep.botGame === true) {
+          if (botMatchTransition === "accepted") botMatchTransition = "fallback";
+        } else if (accepting && current.pendingBotStart && currentSeat?.accepted === true) {
+          botMatchTransition = "accepted";
+        } else if (!accepting && msg.prep.seats.every((seat) => seat !== null)) {
+          botMatchTransition = null;
+        }
+        const screen = botMatchTransition === "accepted" && !accepting
+          ? "room-loading" as const
+          : botMatchTransition === "fallback"
+            || (accepting && (matchAcceptanceRole === "joining" || current.pendingBotStart))
+            ? "waiting" as const
+            : "prep" as const;
         set({
           prep: msg.prep,
           botGame: msg.prep.botGame === true,
           queuedFormat: null,
           matchAcceptanceRole,
+          botMatchTransition,
         });
         // reconnect path: recover the pool from the seat's deck id
         if (msg.prep.yourDeckId) {
@@ -1501,6 +1517,7 @@ export const useStore = create<StoreState>((set, get) => {
         matchmakingActive: searchForPlayer,
         backgroundMatchmaking: { state: "inactive" },
         pendingBotStart: searchForPlayer,
+        botMatchTransition: null,
       });
       connect(() => {
         send({
@@ -1659,7 +1676,16 @@ export const useStore = create<StoreState>((set, get) => {
       get().clearError();
       send({ type: "present-deck", deck });
     },
-    acceptMatch: () => send({ type: "accept-match" }),
+    acceptMatch: () => {
+      if (send({ type: "accept-match" }) && get().pendingBotStart) {
+        set({ botMatchTransition: "accepted" });
+      }
+    },
+    acknowledgeBotMatchFallback: () => {
+      if (get().botMatchTransition === "fallback" && get().prep?.botGame === true) {
+        set({ botMatchTransition: null, screen: "prep" });
+      }
+    },
     declineMatch: () => {
       const username = get().authUser;
       const code = get().roomCode;
@@ -1676,7 +1702,7 @@ export const useStore = create<StoreState>((set, get) => {
       }
       if (get().pendingBotStart && code) {
         if (send({ type: "decline-pending-bot-match", roomCode: code })) {
-          set({ screen: "room-loading" });
+          set({ screen: "room-loading", botMatchTransition: null });
         }
       } else {
         get().leave();

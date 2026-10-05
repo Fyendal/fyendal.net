@@ -546,7 +546,7 @@ describe("client connection and account race fences", () => {
     });
   });
 
-  it("keeps a matchmaking joiner outside prep until they accept", async () => {
+  it("keeps a matchmaking joiner outside prep until both players accept", async () => {
     const { useStore } = await import("../store.js");
     useStore.getState().listRooms();
     const socket = FakeWebSocket.instances[0]!;
@@ -564,7 +564,7 @@ describe("client connection and account race fences", () => {
 
     socket.message({ type: "prep-state", prep: matchPrep([false, true], "accept"), version: 3 });
     expect(useStore.getState()).toMatchObject({
-      screen: "prep",
+      screen: "waiting",
       matchAcceptanceRole: "joining",
     });
 
@@ -1503,6 +1503,73 @@ describe("client connection and account race fences", () => {
       screen: "prep", roomCode: "BOT123", botGame: true, pendingBotStart: false,
       backgroundMatchmaking: { state: "searching", format: "cc" },
     });
+  });
+
+  it.each(["room-created", "joined"] as const)(
+    "requires acknowledgement when an accepted bot-start offer falls back to practice (%s)", async (handoffType) => {
+      localStorage.setItem("fyendal-auth", JSON.stringify({ token: "token-a", username: "Alice" }));
+      const { useStore } = await import("../store.js");
+      useStore.getState().createBotRoom("cc", "precon-asb", "ira", true);
+      const socket = FakeWebSocket.instances[0]!;
+      socket.open();
+      socket.message({ type: "background-matchmaking", status: { state: "pending", format: "cc" } });
+      socket.message({ type: "joined", code: "PVP123", seat: 1, token: "pvp-seat", version: 1 });
+      socket.message({ type: "prep-state", prep: matchPrep([false, false], "accept"), version: 1 });
+      useStore.getState().acceptMatch();
+      expect(JSON.parse(socket.sent.at(-1)!)).toEqual({ type: "accept-match" });
+      socket.message({ type: "prep-state", prep: matchPrep([false, true], "accept"), version: 2 });
+      expect(useStore.getState()).toMatchObject({ screen: "waiting", botMatchTransition: "accepted" });
+
+      // The opponent can leave or time out. The empty retained room and search
+      // status arrive before the bot room and must not erase the handoff notice.
+      const solo = matchPrep([false, false], "accept");
+      socket.message({ type: "prep-state", prep: {
+        ...solo, seats: [null, solo.seats[1]], phase: "waiting", die: null,
+        deadlineAt: undefined, deadlinePhase: undefined,
+      }, version: 3 });
+      expect(useStore.getState().screen).toBe("room-loading");
+      socket.message({ type: "background-matchmaking", status: { state: "searching", format: "cc" } });
+      socket.message({ type: handoffType, code: "BOT123", seat: 0, token: "bot-seat", version: 0 });
+      expect(useStore.getState().screen).not.toBe("prep");
+      const botPrep = {
+        ...matchPrep([false, false], "accept"), yourSeat: 0 as const, yourDeckId: "precon-asb", botGame: true,
+        phase: "choose-first" as const, deadlineAt: undefined, deadlinePhase: undefined,
+      };
+      socket.message({ type: "prep-state", prep: botPrep, version: 0 });
+      expect(useStore.getState()).toMatchObject({
+        screen: "waiting", roomCode: "BOT123", botGame: true, botMatchTransition: "fallback",
+        backgroundMatchmaking: { state: "searching", format: "cc" },
+      });
+      socket.message({ type: "prep-state", prep: botPrep, version: 1 });
+      expect(useStore.getState().screen).toBe("waiting");
+      useStore.getState().acknowledgeBotMatchFallback();
+      expect(useStore.getState()).toMatchObject({ screen: "prep", botMatchTransition: null });
+      socket.message({ type: "prep-state", prep: botPrep, version: 2 });
+      expect(useStore.getState()).toMatchObject({ screen: "prep", botMatchTransition: null });
+    },
+  );
+
+  it("restores an accepted pending bot offer and opens PvP prep when both accept", async () => {
+    const { useStore } = await import("../store.js");
+    useStore.getState().listRooms();
+    const socket = FakeWebSocket.instances[0]!;
+    socket.open();
+    socket.message({ type: "background-matchmaking", status: { state: "pending", format: "cc" } });
+    socket.message({ type: "joined", code: "PVP123", seat: 1, token: "pvp-seat", version: 1 });
+    socket.message({ type: "prep-state", prep: matchPrep([false, true], "accept"), version: 1 });
+    expect(useStore.getState()).toMatchObject({ screen: "waiting", botMatchTransition: "accepted" });
+    socket.message({ type: "background-matchmaking", status: { state: "inactive" } });
+    socket.message({ type: "prep-state", prep: matchPrep([true, true], "select-deck"), version: 2 });
+    expect(useStore.getState()).toMatchObject({ screen: "prep", botGame: false, botMatchTransition: null });
+  });
+
+  it("clears the bot fallback acknowledgement when leaving", async () => {
+    const { useStore } = await import("../store.js");
+    useStore.setState({ roomCode: "BOT123", screen: "waiting", botGame: true, botMatchTransition: "fallback" });
+    useStore.getState().leave();
+    expect(useStore.getState()).toMatchObject({ screen: "lobby", botMatchTransition: null });
+    useStore.getState().acknowledgeBotMatchFallback();
+    expect(useStore.getState().screen).toBe("lobby");
   });
 
   it("preserves the retained matchmaking room when starting bot practice", async () => {

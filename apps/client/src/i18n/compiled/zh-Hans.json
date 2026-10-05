@@ -23534,6 +23534,12 @@
       "value": "你的房间"
     }
   ],
+  "lobby.waiting.accepted": [
+    {
+      "type": 0,
+      "value": "你已接受对局。对手也接受后，将进入准备房间。"
+    }
+  ],
   "lobby.waiting.forOpponent": [
     {
       "type": 0,
@@ -23626,6 +23632,44 @@
     {
       "type": 0,
       "value": "已接受——等待对手"
+    }
+  ],
+  "matchmaking.fallback.continue": [
+    {
+      "type": 0,
+      "value": "进入机器人准备房间"
+    }
+  ],
+  "matchmaking.fallback.description": [
+    {
+      "type": 0,
+      "value": "你的对手现在是练习机器人 "
+    },
+    {
+      "type": 1,
+      "value": "username"
+    },
+    {
+      "type": 0,
+      "value": "。准备好后，点击继续为这场对局做准备。"
+    }
+  ],
+  "matchmaking.fallback.practice": [
+    {
+      "type": 0,
+      "value": "机器人练习"
+    }
+  ],
+  "matchmaking.fallback.searching": [
+    {
+      "type": 0,
+      "value": "我们仍在后台寻找真人玩家。"
+    }
+  ],
+  "matchmaking.fallback.title": [
+    {
+      "type": 0,
+      "value": "真人对局未能继续"
     }
   ],
   "meta.home.description": [

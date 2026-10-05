@@ -203,6 +203,9 @@ export interface StoreState {
   matchmakingActive: boolean;
   backgroundMatchmaking: BackgroundMatchmakingStatus;
   pendingBotStart: boolean;
+  /** Keep an accepted PvP offer distinct from its fallback to bot practice. */
+  botMatchTransition: "accepted" | "fallback" | null;
+  acknowledgeBotMatchFallback: () => void;
   matchAcceptanceRole: MatchAcceptanceRole | null;
   prep: PrepView | null;
   createRoom: (

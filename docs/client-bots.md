@@ -32,6 +32,12 @@ The recovery notice offers a retry, and reconnect also resets the circuit.
 Disconnected and incompatible clients pause bot play. An incompatible client
 must refresh; it does not trigger expensive server search.
 
+During bot startup, accepting a PvP offer keeps the player on the acceptance
+screen until both players accept. If that offer falls through and startup
+switches to bot practice, the client names the new bot opponent and requires
+acknowledgement before opening prep. This notice survives intermediate search
+updates; voluntarily declining an offer continues directly to bot prep.
+
 The root command `pnpm generate:bot-runtime` generates an ignored runtime
 fingerprint from shared contracts, protocol, engine, cards, bot sources, and
 dependency versions. Package build, test, typecheck, and dev scripts delegate

@@ -47,6 +47,7 @@ export function initialStoreProjection(
     matchmakingActive: false,
     backgroundMatchmaking: { state: "inactive" as const },
     pendingBotStart: false,
+    botMatchTransition: null,
     matchAcceptanceRole: null,
     decks: [],
     decksLoading: auth !== null,
@@ -112,6 +113,7 @@ export function clearedRoomProjection(): Pick<
   | "matchmakingActive"
   | "backgroundMatchmaking"
   | "pendingBotStart"
+  | "botMatchTransition"
   | "matchAcceptanceRole"
   | "prep"
   | "prepDeck"
@@ -150,6 +152,7 @@ export function clearedRoomProjection(): Pick<
     matchmakingActive: false,
     backgroundMatchmaking: { state: "inactive" },
     pendingBotStart: false,
+    botMatchTransition: null,
     matchAcceptanceRole: null,
     prep: null,
     prepDeck: null,
