@@ -32,6 +32,7 @@ services:
       # Only the directly connected Caddy proxy is trusted to append XFF.
       TRUSTED_PROXY_HOPS: "1"
       AUTH_KDF_CONCURRENCY: ${AUTH_KDF_CONCURRENCY:-1}
+      WS_COMPRESSION: ${WS_COMPRESSION:-true}
       FABRARY_API_SECRET: ${FABRARY_API_SECRET:-}
       PORT: 8080
     depends_on:

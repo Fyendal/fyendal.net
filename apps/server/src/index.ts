@@ -2,6 +2,7 @@ import { BOT_RUNTIME_ID } from "@fyendal/bot/runtime-id";
 import http from "node:http";
 import { randomUUID } from "node:crypto";
 import { WebSocketServer, WebSocket } from "ws";
+import { configuredWebSocketCompression } from "./webSocketCompression.js";
 import type { CardPoolMode, ClientMessage, Format, HeroId, ServerMessage } from "@fyendal/shared";
 import { cardData, formatLegalityIssues, precon } from "@fyendal/cards";
 import { botDefinition } from "@fyendal/bot";
@@ -55,8 +56,8 @@ import {
   type SeatCredentials,
 } from "./store.js";
 
-/** Cap on incoming ws frames — clients send small intents; large game states
- *  only flow server→client. ws terminates sockets that exceed it. */
+/** Cap on decompressed incoming ws messages — clients send small intents;
+ * large game states only flow server→client. ws closes oversized messages. */
 const WS_MAX_PAYLOAD = 64 * 1024;
 const WS_MAX_BUFFERED_BYTES = 1024 * 1024;
 const WS_MAX_PENDING_MESSAGES = 32;
@@ -96,6 +97,7 @@ const clusterPublisherByServer = new WeakMap<http.Server, (event: Parameters<Roo
 const disconnectTasksByServer = new WeakMap<http.Server, Set<Promise<void>>>();
 
 export function createGameServer(port: number, deps: ServerDeps): http.Server {
+  const perMessageDeflate = configuredWebSocketCompression();
   const rooms = deps.rooms;
   const fabraryClient = deps.fabraryClient ?? createFabraryClient();
   const trustedProxyHops = deps.trustedProxyHops ?? configuredTrustedProxyHops();
@@ -206,6 +208,7 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
   const wss = new WebSocketServer({
     server,
     maxPayload: WS_MAX_PAYLOAD,
+    perMessageDeflate,
     verifyClient: allowedOrigin
       ? ({ origin }: { origin: string }) => origin === allowedOrigin
       : undefined,

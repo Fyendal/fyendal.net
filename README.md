@@ -70,6 +70,10 @@ through environment variables when needed:
 - `PORT` — API and WebSocket port; defaults to `8080`.
 - `TRUSTED_PROXY_HOPS` — trusted rightmost proxy hops; defaults to `0`.
 - `AUTH_KDF_CONCURRENCY` — concurrent password scrypt jobs; defaults to `1`.
+- `WS_COMPRESSION` — WebSocket compression; defaults to `true`. Outgoing messages
+  below 1 KiB stay uncompressed, and clients without compression support still work.
+  Set `false` in the server/container environment and restart the gateway to
+  disable it. Compression does not change game rules or `RULESET_VERSION`.
 - `VITE_API_ORIGIN` — API and WebSocket origin for hosted client builds; local
   development uses port `8080` automatically.
 
