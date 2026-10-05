@@ -2348,7 +2348,6 @@
   "game.decision.chooseTarget": "选择目标",
   "game.decision.targetNamed": "以{target}为目标",
   "game.decision.playerDeciding": "{player} 正在决定…",
-  "game.decision.playerPlaying": "{player} 正在打出 {card}…",
   "game.decision.defensePitch": "扣置卡牌以支付此次防御费用",
   "game.decision.defensePitchList": "扣置卡牌以支付此次防御费用：",
   "game.decision.choosePitch": "选择要扣置以支付资源的手牌。",

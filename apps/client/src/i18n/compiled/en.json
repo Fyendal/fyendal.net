@@ -21258,24 +21258,6 @@
       "value": " is deciding…"
     }
   ],
-  "game.decision.playerPlaying": [
-    {
-      "type": 1,
-      "value": "player"
-    },
-    {
-      "type": 0,
-      "value": " is playing "
-    },
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": "…"
-    }
-  ],
   "game.decision.removeCard": [
     {
       "type": 0,

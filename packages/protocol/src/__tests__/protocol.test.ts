@@ -796,6 +796,15 @@ describe("GameView and server messages", () => {
         preStackSource: { card, zone: "resolving" },
       },
     })).toBeNull();
+    for (const zone of ["hero", "equipment", "weapon", "board"]) {
+      expect(decodeGameView({
+        ...gameView(),
+        pendingDecision: {
+          player: 0, kind: "choose-target", prompt: "",
+          preStackSource: { card, zone },
+        },
+      })).not.toBeNull();
+    }
     const triggerOrder = {
       ...gameView(),
       pendingDecision: {

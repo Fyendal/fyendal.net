@@ -165,6 +165,10 @@ function presentPreStackSource(view: GameView, seat: number): GameView {
     : undefined;
   const player = view.players[seat];
   if (!source || !player || cardInPlayer(player, source.card.instanceId)) return view;
+  // An activated source stays in its arena location, which can belong to
+  // another player when control differs from ownership.
+  if (source.zone === "hero" || source.zone === "equipment"
+    || source.zone === "weapon" || source.zone === "board") return view;
   const withSource: PlayerView = source.zone === "hand"
     ? {
         ...player,

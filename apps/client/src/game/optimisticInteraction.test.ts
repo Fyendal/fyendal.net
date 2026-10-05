@@ -52,6 +52,19 @@ function pending(intent: PendingInteraction["intent"]): PendingInteraction {
 }
 
 describe("optimistic interaction projection", () => {
+  it("does not restore an arena activation source into the acting player's deck", () => {
+    const source: CardView = { instanceId: 12, cardId: "ALLY", owner: 1 };
+    const view = game(player(0), {
+      player: 0, kind: "choose-target", prompt: "Choose X",
+      preStackSource: { card: source, zone: "board" },
+    });
+    view.players[1].board = [source];
+    const projection = optimisticInteractionView(view, 0, null);
+    expect(projection.view).toBe(view);
+    expect(projection.view?.players[0].visibleDeckTop).toBeUndefined();
+    expect(projection.view?.players[0].deckCount).toBe(0);
+  });
+
   it("moves a played card and declared pitch cards before acknowledgement", () => {
     const played: CardView = { instanceId: 10, cardId: "WTR170", owner: 0 };
     const pitch: CardView = { instanceId: 11, cardId: "WTR171", owner: 0 };

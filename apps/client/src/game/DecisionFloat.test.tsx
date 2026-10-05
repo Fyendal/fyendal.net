@@ -77,41 +77,12 @@ describe("opponent's announced play", () => {
     onSend: () => undefined,
   };
 
-  it("shows the announced card while private payment or mode options are omitted", () => {
-    const html = renderLocalized(
-      <SquareCardPresentation enabled>
-        <PendingDecisionPanel model={model} viewerSeat={0} />
-      </SquareCardPresentation>,
-    );
-    expect(html).toContain("Opponent is playing Modal Action…");
-    expect(html).toContain('data-card-instance-id="41"');
-    expect(html).toContain("cards/ANNOUNCED.webp");
-    expect(html).not.toContain("card-square");
-    expect(html).not.toContain("<button");
-  });
-
-  it("returns to the ordinary waiting message when there is no public announcement", () => {
-    const html = renderLocalized(<PendingDecisionPanel model={{
-      ...model,
-      decision: { player: 1, kind: "choose-target", prompt: "" },
-    }} viewerSeat={0} />);
-    expect(html).toContain("Opponent is deciding…");
-    expect(html).not.toContain("ANNOUNCED");
-  });
-
-  it("does not display a hidden announcement's identity", () => {
-    const html = renderLocalized(<PendingDecisionPanel model={{
-      ...model,
-      decision: {
-        ...model.decision!,
-        preStackSource: {
-          card: { ...model.decision!.preStackSource!.card, hidden: true }, zone: "hand",
-        },
-      },
-    }} viewerSeat={0} />);
+  it("shows only a waiting message during the opponent's payment and mode choices", () => {
+    const html = renderLocalized(<PendingDecisionPanel model={model} viewerSeat={0} />);
     expect(html).toContain("Opponent is deciding…");
     expect(html).not.toContain("Modal Action");
     expect(html).not.toContain("ANNOUNCED");
+    expect(html).not.toContain("<button");
   });
 });
 

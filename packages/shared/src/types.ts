@@ -482,12 +482,13 @@ export interface PendingDecision {
     /** Source of a scripted payment; clients resolve it against visible cards. */
     sourceInstanceId?: number;
   };
-  /** Publicly announced card whose play is paused on a declaration, resource
-   * payment, or additional-cost choice before it becomes a stack layer.
+  /** Publicly announced card or arena ability whose play/activation is paused
+   * on a declaration, resource payment, or additional-cost choice before its
+   * new stack layer is ready. Arena sources remain in place unless a cost moves them.
    * The original zone does not grant visibility to any other cards there. */
   preStackSource?: {
     card: CardView;
-    zone: "hand" | "arsenal" | PlayableZone;
+    zone: "hand" | "arsenal" | PlayableZone | "hero" | "equipment" | "weapon" | "board";
   };
 }
 

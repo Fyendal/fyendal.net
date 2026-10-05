@@ -20,7 +20,7 @@ import { decisionSpaceOption } from "../passHotkey.js";
 import { ArsenalSkipConfirmation, OptDecisionInstructions } from "./ActionConfirmations.js";
 import { BloodModeDecision } from "./BloodModeDecision.js";
 import { RevealedChoiceCards } from "./CardChoices.js";
-import { CardRef, cardAffiliation, cardDisplayName, DecisionPrompt, PitchPaymentProgress } from "./DecisionShared.js";
+import { CardRef, cardAffiliation, DecisionPrompt, PitchPaymentProgress } from "./DecisionShared.js";
 import type { PendingDecisionModel } from "./DecisionModels.js";
 import { NameChoiceAutocomplete } from "./NameChoiceAutocomplete.js";
 import { TriggerOrderDecision } from "./TriggerOrderDecision.js";
@@ -347,28 +347,11 @@ export function PendingDecisionPanel({
   const priorityGuidanceDecision = isPriorityGuidanceDecision(pd);
 
   if (!isMine) {
-    const announcedCard = pd.preStackSource?.card;
-    const visibleAnnouncement = announcedCard && !announcedCard.hidden ? announcedCard : null;
     return (
-      <div className={`decision decision-passive${revealedChoice || visibleAnnouncement ? " decision-options" : ""}`}>
+      <div className={`decision decision-passive${revealedChoice ? " decision-options" : ""}`}>
         <span className="decision-prompt muted">
-          {visibleAnnouncement
-            ? intl.formatMessage({ id: "game.decision.playerPlaying" }, {
-                player: decidingName,
-                card: cardDisplayName(visibleAnnouncement),
-              })
-            : intl.formatMessage({ id: "game.decision.playerDeciding" }, { player: decidingName })}
+          {intl.formatMessage({ id: "game.decision.playerDeciding" }, { player: decidingName })}
         </span>
-        {visibleAnnouncement ? (
-          <div className="decision-cards">
-            <CardFace
-              card={visibleAnnouncement}
-              size="hand"
-              squareArt={false}
-              affiliation={cardAffiliation(visibleAnnouncement, viewerSeat)}
-            />
-          </div>
-        ) : null}
         {revealedChoice ? (
           <RevealedChoiceCards
             cards={revealedCards}

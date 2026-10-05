@@ -20,11 +20,6 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.decision-passive.decision-options .decision-prompt {
-  white-space: normal;
-  overflow-wrap: anywhere;
-  text-align: center;
-}
 .decision-prompt-warning { color: #ff7b72; font-weight: 700; }
 .decision-context {
   color: #a99f8a;

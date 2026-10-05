@@ -20488,24 +20488,6 @@
       "value": " 正在决定…"
     }
   ],
-  "game.decision.playerPlaying": [
-    {
-      "type": 1,
-      "value": "player"
-    },
-    {
-      "type": 0,
-      "value": " 正在打出 "
-    },
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": "…"
-    }
-  ],
   "game.decision.removeCard": [
     {
       "type": 0,

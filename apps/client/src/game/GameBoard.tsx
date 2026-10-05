@@ -87,12 +87,13 @@ import { handChoiceDismissal } from "./handChoiceDismissal.js";
 import { hoverPreviewTarget } from "./hoverPreviewTarget.js";
 import { PitchFocus } from "./PitchFocus.js";
 import { postPaymentPitchFocus, usePitchFocus } from "./usePitchFocus.js";
+import { useOpponentPlayPresentation } from "./useOpponentPlayPresentation.js";
 
 const EMPTY_INSTANCE_IDS: ReadonlySet<number> = new Set();
 
 export function GameBoard() {
   const intl = useIntl();
-  const { view, viewUpdate, playerProfiles, legal, actionCandidates, roomCommandPending, pendingInteraction, pendingDefenderStageIds, yourSeat, spectating, spectatorCount, spectatorUsernames, botGame, sendIntent, sendPriorityMode, sendRunechantSkip, sendEmote, kickSpectator, latestEmote, undo, error, leave, opponentConnected, connected, connectionIssueVisible, roomCode, screen, replayFrames, replayViews, replayStep, replayNotes, setLiveReplayNote, watchReplay, downloadReplay, closeReplay, getRecordedViews, lastActionAt, claimVictory, reportBug, backgroundSearching, stopBackgroundMatchmaking, authUser, authToken, setLobbyRail, unreadMessageCount, setSocialOpen } = useStore(
+  const { view: authoritativeView, viewUpdate: authoritativeViewUpdate, playerProfiles, legal, actionCandidates, roomCommandPending, pendingInteraction, pendingDefenderStageIds, yourSeat, spectating, spectatorCount, spectatorUsernames, botGame, sendIntent, sendPriorityMode, sendRunechantSkip, sendEmote, kickSpectator, latestEmote, undo, error, leave, opponentConnected, connected, connectionIssueVisible, roomCode, screen, replayFrames, replayViews, replayStep, replayNotes, setLiveReplayNote, watchReplay, downloadReplay, closeReplay, getRecordedViews, lastActionAt, claimVictory, reportBug, backgroundSearching, stopBackgroundMatchmaking, authUser, authToken, setLobbyRail, unreadMessageCount, setSocialOpen } = useStore(
     useShallow((state) => ({
       view: state.view,
       viewUpdate: state.viewUpdate,
@@ -142,6 +143,13 @@ export function GameBoard() {
       setSocialOpen: state.setSocialOpen,
     })),
   );
+  const { view, update: viewUpdate } = useOpponentPlayPresentation({
+    view: authoritativeView,
+    update: authoritativeViewUpdate,
+    viewerSeat: spectating ? null : yourSeat,
+    enabled: connected && screen !== "replay",
+    scope: `${roomCode}:${authUser}:${screen}:${spectating}`,
+  });
   const tableRef = useRef<HTMLDivElement>(null);
   const boardRef = useRef<HTMLDivElement>(null);
   const fullscreen = useFullscreen();

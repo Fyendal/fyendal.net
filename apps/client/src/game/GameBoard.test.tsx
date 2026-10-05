@@ -400,6 +400,25 @@ describe("GameBoard pending interactions", () => {
     expect(spectatorHtml).not.toContain("decision-float-pitch");
   });
 
+  it("shows a waiting message without the opponent's pre-stack card", () => {
+    vi.stubGlobal("localStorage", { getItem: () => null });
+    const view = interactiveView();
+    view.activePlayer = 1;
+    view.priorityPlayer = 1;
+    view.pendingDecision = {
+      player: 1, kind: "choose-target", prompt: "",
+      preStackSource: {
+        card: { instanceId: 90, cardId: "OPPONENT-ANNOUNCED", name: "Pending Action", owner: 1 },
+        zone: "hand",
+      },
+    };
+    gameStore.state = { ...liveState(false), view, legal: [], actionCandidates: [] };
+    const html = renderToStaticMarkup(<TestI18nProvider><GameBoard /></TestI18nProvider>);
+    expect(html).toContain("Hero 1 is deciding…");
+    expect(html).not.toContain("OPPONENT-ANNOUNCED");
+    expect(html).not.toContain('class="pitch-focus-card"');
+  });
+
   it("keeps a disabled Pass action in both HUD layouts while waiting on the opponent", () => {
     vi.stubGlobal("localStorage", {
       getItem: () => null,

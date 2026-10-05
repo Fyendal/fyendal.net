@@ -1178,7 +1178,8 @@ function pendingDecision(value: unknown): boolean {
       const source = object(value);
       return !!source && exactKeys(source, ["card", "zone"], ["card", "zone"])
         && cardView(source.card)
-        && (source.zone === "hand" || source.zone === "arsenal" || PLAYABLE_ZONES.has(String(source.zone)));
+        && (source.zone === "hand" || source.zone === "arsenal" || PLAYABLE_ZONES.has(String(source.zone))
+          || source.zone === "hero" || source.zone === "equipment" || source.zone === "weapon" || source.zone === "board");
     })
     && (!(Array.isArray(decision.options) && Array.isArray(decision.optionCards))
       || decision.options.length === decision.optionCards.length)

@@ -10,6 +10,7 @@ import type {
   GameView,
   OnHitEffectView,
   OngoingEffectView,
+  PendingDecision,
   PlayableZone,
   PlayerView,
   StackLayerView,
@@ -967,6 +968,44 @@ function projectedStackLayers(
   });
 }
 
+/** Project only announcement continuations, never ordinary resolution choices. */
+function projectedPreStackSource(
+  state: GameStateInternal,
+  runtime: EngineRuntime,
+  pd: PendingDecisionState,
+  privateDecision: boolean,
+): PendingDecision["preStackSource"] {
+  const activation = pd.variableActivationCost ?? pd.activationCost;
+  if (activation) {
+    for (const player of state.players) {
+      const zones = [
+        ["hero", [player.hero]], ["equipment", Object.values(player.equipment)],
+        ["weapon", player.weapons], ["board", player.board],
+      ] as const;
+      for (const [zone, cards] of zones) {
+        const card = cards.find((candidate) => candidate?.instanceId === activation.sourceInstanceId);
+        if (card) return privateDecision || !card.faceDown
+          ? { card: cardView(state, runtime, card), zone }
+          : undefined;
+      }
+    }
+    return undefined;
+  }
+
+  const resume = pd.resume;
+  const play = pd.variablePlayCost ?? (resume?.kind === "continue-play-after-declaration"
+    ? resume
+    : resume?.kind === "finish-play" || resume?.kind === "finish-reaction" || resume?.kind === "finish-window-instant"
+      ? { instanceId: resume.card.instanceId, from: resume.from }
+      : undefined);
+  const card = play ? findCardAnywhere(state, play.instanceId)?.card : undefined;
+  // CR 5.1.2: the announced card is public before costs and modes are chosen,
+  // even while an engine continuation retains it in its original zone.
+  return play && card
+    ? { card: cardView(state, runtime, { ...card, faceDown: false }), zone: play.from }
+    : undefined;
+}
+
 function projectedDecisionPromptMessage(
   state: GameStateInternal,
   runtime: EngineRuntime,
@@ -1258,27 +1297,7 @@ function projectState(
             pd,
             revealAll ? pd.player : seat,
           );
-          const preStackFlow = pd.variablePlayCost
-            ? {
-                instanceId: pd.variablePlayCost.instanceId,
-                zone: pd.variablePlayCost.from,
-              }
-            : pd.resume?.kind === "continue-play-after-declaration"
-              ? {
-                  instanceId: pd.resume.instanceId,
-                  zone: pd.resume.from,
-                }
-            : pd.resume?.kind === "finish-play"
-              || pd.resume?.kind === "finish-reaction"
-              || pd.resume?.kind === "finish-window-instant"
-              ? {
-                  instanceId: pd.resume.card.instanceId,
-                  zone: pd.resume.from,
-                }
-              : undefined;
-          const preStackCard = preStackFlow
-            ? findCardAnywhere(state, preStackFlow.instanceId)?.card
-            : undefined;
+          const preStackSource = projectedPreStackSource(state, runtime, pd, privateDecision);
           return {
             player: pd.player,
             kind: pd.kind,
@@ -1347,17 +1366,7 @@ function projectState(
                   },
                 }
               : {}),
-            // CR 5.1.2: the announced card is public while costs and modes
-            // are chosen, even when the engine continuation retains it in
-            // its original zone. Choice options and payment cards stay private.
-            ...(preStackFlow && preStackCard
-              ? {
-                  preStackSource: {
-                    card: cardView(state, runtime, { ...preStackCard, faceDown: false }),
-                    zone: preStackFlow.zone,
-                  },
-                }
-              : {}),
+            ...(preStackSource ? { preStackSource } : {}),
             ...staged,
           };
         })()
