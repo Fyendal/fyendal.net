@@ -21484,6 +21484,12 @@
       "value": "Nice play!"
     }
   ],
+  "game.emote.no.problem": [
+    {
+      "type": 0,
+      "value": "No problem!"
+    }
+  ],
   "game.emote.oops": [
     {
       "type": 0,

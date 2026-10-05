@@ -11,6 +11,7 @@ describe("hero emotes", () => {
       "Good game!",
       "Thanks!",
       "Sorry!",
+      "No problem!",
       "Nice play!",
       "Thinking...",
       "Oops!",
@@ -38,15 +39,15 @@ describe("hero emotes", () => {
   });
 
   it("localizes received wire messages while preserving the protocol value", () => {
-    const event = { id: 4, seat: 1, message: "Good game!" as const };
+    const event = { id: 4, seat: 1, message: "No problem!" as const };
     const html = renderToStaticMarkup(
       <TestI18nProvider locale="zh-Hans">
         <HeroEmote seat={1} event={event} canSend={true} onSend={() => undefined} />
       </TestI18nProvider>,
     );
 
-    expect(html).toContain("精彩对局！");
+    expect(html).toContain("没关系！");
     expect(html).toContain('aria-label="发送消息"');
-    expect(event.message).toBe("Good game!");
+    expect(event.message).toBe("No problem!");
   });
 });

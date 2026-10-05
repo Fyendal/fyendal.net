@@ -184,6 +184,11 @@ export function isMarvelCardImageUrl(url: string): boolean {
   return /-MV\.webp(?:[?#]|$)/i.test(url);
 }
 
+/** These equipment printings put the lower frame below the usual art window. */
+export function hasTallEquipmentCardFrame(url: string): boolean {
+  return /\/cards\/(?:EVR018|FAB078)(?:-CF)?\.webp(?:[?#]|$)/i.test(url);
+}
+
 /** Standard printings before Heavy Hitters place the art/rules divider lower
  * in the frame. Promo sets mix both layouts, so only verified promo objects
  * use the older square-card crop. */

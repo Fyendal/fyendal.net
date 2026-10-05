@@ -822,12 +822,12 @@ describe("server rooms over websocket", () => {
       "SELECT version FROM rooms WHERE code = $1",
       [created.code],
     )).rows[0].version);
-    a.sendMsg({ type: "emote", message: "Good luck, have fun!" });
+    a.sendMsg({ type: "emote", message: "No problem!" });
     const [echo, received] = await Promise.all([
       a.next((message) => message.type === "emote"),
       b.next((message) => message.type === "emote"),
     ]);
-    expect(echo).toEqual({ type: "emote", seat: 0, message: "Good luck, have fun!" });
+    expect(echo).toEqual({ type: "emote", seat: 0, message: "No problem!" });
     expect(received).toEqual(echo);
     const after = Number((await db.query(
       "SELECT version FROM rooms WHERE code = $1",

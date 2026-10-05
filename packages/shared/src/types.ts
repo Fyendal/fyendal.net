@@ -827,6 +827,7 @@ export type EmoteMessage =
   | "Good game!"
   | "Thanks!"
   | "Sorry!"
+  | "No problem!"
   | "Nice play!"
   | "Thinking..."
   | "Oops!";

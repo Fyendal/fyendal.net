@@ -20718,6 +20718,12 @@
       "value": "打得漂亮！"
     }
   ],
+  "game.emote.no.problem": [
+    {
+      "type": 0,
+      "value": "没关系！"
+    }
+  ],
   "game.emote.oops": [
     {
       "type": 0,

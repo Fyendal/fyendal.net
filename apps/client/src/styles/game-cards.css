@@ -378,8 +378,10 @@
   --square-card-size: var(--arena-square-size, clamp(84px, 12vh, 165px));
   --board-name-height: clamp(16px, calc(var(--square-card-size) * .14), 23px);
   --board-stat-height: clamp(16px, 2vh, 19px);
-  --board-art-top: calc(var(--board-name-height) / 2 + 3px);
-  --board-art-bottom: calc(var(--board-stat-height) * .09);
+  /* Artwork geometry scales together; readable title/stat sizes may clamp
+     independently without changing which part of the source image is shown. */
+  --board-art-top: 9cqi;
+  --board-art-bottom: 1cqi;
   width: var(--square-card-size);
   height: var(--square-card-size);
   container-type: inline-size;
@@ -410,7 +412,7 @@
   position: absolute;
   z-index: 1;
   /* The name bar supplies the top edge; avoid a second line over its pitch strip. */
-  inset: calc(0px - clamp(6.5px, .75vh, 7.5px)) 0 0;
+  inset: calc(var(--board-art-top) - var(--board-name-height) / 2) 0 var(--board-art-bottom);
   border: 2px solid var(--square-frame-color);
   border-top: 0;
   border-radius: 8px;
@@ -435,8 +437,9 @@
   content: none;
 }
 .board-square-media {
-  /* Keep the artwork and frame-edge slices on the same offset at every size. */
-  --board-square-image-top: -27%;
+  /* Use the card width for both image scale and offset. Height percentages
+     drift when the title or stats reach their readable-size clamps. */
+  --board-square-image-top: -24.3cqi;
   position: absolute;
   inset: var(--board-art-top) 0 var(--board-art-bottom);
   display: block;
@@ -447,7 +450,7 @@
 }
 .board-square-media-legacy {
   /* Older printings place the art/rules divider lower on the source card. */
-  --board-square-image-top: -31%;
+  --board-square-image-top: -27.9cqi;
 }
 .board-square-media .board-square-art,
 .board-square-frame-edge img {
@@ -470,6 +473,23 @@
 .board-square-frame-left img { left: -6.3%; }
 .board-square-frame-right { clip-path: inset(0 0 0 91.5%); }
 .board-square-frame-right img { left: -28.7%; }
+.board-square-media[data-card-type="equipment"] {
+  --board-square-image-top: -21.6cqi;
+  border-radius: 3%;
+}
+.board-square-media-legacy[data-card-type="equipment"] {
+  --board-square-image-top: -25.65cqi;
+}
+.board-square-equipment-frame {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  /* Reconstruct the complete printed rim, including its lower corners,
+     without stretching the independently cropped artwork in the middle. */
+  clip-path: polygon(evenodd, 0 0, 100% 0, 100% 100%, 0 100%, 0 0,
+    4% 4%, 4% 96%, 96% 96%, 96% 4%, 4% 4%);
+}
 .board-square-name {
   position: absolute;
   z-index: 2;

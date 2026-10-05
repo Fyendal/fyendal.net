@@ -394,6 +394,7 @@ describe("client messages", () => {
     { type: "leave-room", endGame: true },
     { type: "undo" },
     { type: "emote", message: "Thinking..." },
+    { type: "emote", message: "No problem!" },
     { type: "kick-spectator", username: "Alice_1" },
     { type: "claim-victory" },
   ];
@@ -905,6 +906,7 @@ describe("GameView and server messages", () => {
       { type: "spectator-list", usernames: ["Alice", null], version: 1 },
       { type: "opponent-disconnected", version: 1 }, { type: "opponent-reconnected", version: 1 },
       { type: "emote", seat: 1, message: "Good game!" },
+      { type: "emote", seat: 1, message: "No problem!" },
       { type: "spectator-kicked" },
       { type: "rooms", rooms: [{ code: "ABC123", format: "cc", heroes: ["A", null], createdAt: 1, spectateOnly: false, yours: true, cardPoolMode: "open" }] },
       { type: "room-info", room: { code: "ABC123", format: "silver-age", spectateOnly: true, yours: false, cardPoolMode: "future" } },

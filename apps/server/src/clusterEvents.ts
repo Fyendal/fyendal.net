@@ -44,7 +44,7 @@ const ROOM_KINDS = new Set<RoomBroadcastEvent["kind"]>([
 ]);
 
 const EMOTES = new Set<EmoteMessage>([
-  "Hello!", "Good luck, have fun!", "Good game!", "Thanks!", "Sorry!", "Nice play!", "Thinking...", "Oops!",
+  "Hello!", "Good luck, have fun!", "Good game!", "Thanks!", "Sorry!", "No problem!", "Nice play!", "Thinking...", "Oops!",
 ]);
 
 function decodeRow(value: unknown): { id: number; event: ClusterEvent } | null {

@@ -4,6 +4,7 @@ import { cardData } from "@fyendal/cards/client";
 import { ViewportTooltip } from "../components/ViewportTooltip.js";
 import {
   hasLegacySquareCardFrame,
+  hasTallEquipmentCardFrame,
   isMarvelCardImageUrl,
   resolveCardImageUrl,
   resolveCardImageUrls,
@@ -294,6 +295,7 @@ export function CardFace({
   const showImg = imageUrl !== undefined;
   const marvelArt = imageUrl !== undefined && isMarvelCardImageUrl(imageUrl);
   const legacySquareFrame = imageUrl !== undefined && !marvelArt && hasLegacySquareCardFrame(imageUrl);
+  const tallEquipmentFrame = imageUrl !== undefined && !marvelArt && hasTallEquipmentCardFrame(imageUrl);
   const attack = card.attack ?? data?.attack;
   const defense = card.defense ?? data?.defense;
   const squareHero = data?.cardType === "hero";
@@ -390,6 +392,7 @@ export function CardFace({
         <>
           <span
             className={`board-square-media${legacySquareFrame ? " board-square-media-legacy" : ""}`}
+            data-card-type={!marvelArt ? data?.cardType : undefined}
             aria-hidden="true"
           >
             {showImg ? (
@@ -405,7 +408,17 @@ export function CardFace({
                 }))}
               />
             ) : null}
-            {showImg && !marvelArt ? (
+            {showImg && !marvelArt && data?.cardType === "equipment" ? (
+              <svg
+                className="board-square-equipment-frame"
+                viewBox={tallEquipmentFrame ? "48 170 904 922"
+                  : legacySquareFrame ? "48 170 904 695" : "48 170 904 660"}
+                preserveAspectRatio="none"
+                focusable="false"
+              >
+                <image href={imageUrl} width="1000" height="1395.6" />
+              </svg>
+            ) : showImg && !marvelArt ? (
               <>
                 <span className="board-square-frame-edge board-square-frame-left">
                   <img src={imageUrl} alt="" draggable={false} />

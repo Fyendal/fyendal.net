@@ -9,7 +9,7 @@ import {
   cardImageUrl,
   cardPreviewSize,
 } from "./Card.js";
-import { hasLegacySquareCardFrame, isMarvelCardImageUrl, resolveCardImageUrls } from "./cardImageUrl.js";
+import { hasLegacySquareCardFrame, hasTallEquipmentCardFrame, isMarvelCardImageUrl, resolveCardImageUrls } from "./cardImageUrl.js";
 
 describe("cardImageUrl", () => {
   it.each([
@@ -105,6 +105,13 @@ describe("cardImageUrl", () => {
     expect(isMarvelCardImageUrl(cardImageUrl("FAB464"))).toBe(true);
     expect(isMarvelCardImageUrl("https://content.fabrary.net/cards/IAR084-MV.webp")).toBe(true);
     expect(isMarvelCardImageUrl(cardImageUrl("WTR160"))).toBe(false);
+  });
+
+  it("recognizes the tall Stalagmite window without changing ordinary equipment crops", () => {
+    expect(hasTallEquipmentCardFrame(cardImageUrl("EVR018"))).toBe(true);
+    expect(hasTallEquipmentCardFrame(cardImageUrl("FAB078"))).toBe(true);
+    expect(hasTallEquipmentCardFrame(cardImageUrl("EVO247"))).toBe(false);
+    expect(hasLegacySquareCardFrame(cardImageUrl("EVR018"))).toBe(true);
   });
 
   it("keeps a verified IAR override first without duplicate candidates", () => {
@@ -303,6 +310,23 @@ describe("CardFace payment state", () => {
 
     expect(oldFrame).toContain("board-square-media board-square-media-legacy");
     expect(newerFrame).toContain('class="board-square-media"');
+  });
+
+  it.each([
+    ["EVR018", "48 170 904 922"],
+    ["EVO247", "48 170 904 695"],
+    ["HNT143", "48 170 904 660"],
+  ] as const)("keeps the complete printed equipment frame for %s", (cardId, frameWindow) => {
+    const html = renderToStaticMarkup(createElement(CardFace, {
+      card: { instanceId: 1, cardId, owner: 0 },
+      size: "zone",
+      squareArt: true,
+    }));
+
+    expect(html).toContain('class="board-square-equipment-frame"');
+    expect(html).toContain(`viewBox="${frameWindow}"`);
+    expect(html).toContain(`<image href="${cardImageUrl(cardId)}"`);
+    expect(html).not.toContain("board-square-frame-edge");
   });
 
   it("loads card art eagerly so visible cards do not wait for hover", () => {
