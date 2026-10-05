@@ -23,6 +23,58 @@ function forcedIntent(legal: readonly GameIntent[]): GameIntent {
 }
 
 describe("bounded turn planning", () => {
+  it.each([1, 2])("resolves %i mandatory ward sources during opponent rollout", (wardCount) => {
+    const state = createGame({
+      decklists: [decklists.dorinthea, decklists.rhinar],
+      cards: cardData,
+      scripts,
+      seed: 81,
+      startPlayer: 0,
+    });
+    state.players[0]!.hand = [];
+    state.players[0]!.resources = 1;
+    for (let index = 0; index < wardCount; index++) {
+      state.players[1]!.board.push({
+        instanceId: state.nextInstanceId++,
+        cardId: "MST133",
+        owner: 1,
+      });
+    }
+    const weapon = state.players[0]!.weapons[0]!;
+    weapon.counters = { power: 2 };
+    const attack = cardData[weapon.cardId]!.attack! + 2;
+    const weaponId = weapon.instanceId;
+    const input = {
+      seat: 0 as const,
+      view: projectStateFor(state, 0),
+      legal: legalIntents(state, 0),
+      cards: cardData,
+      state,
+    };
+    const config = {
+      chooseForced: (forced: typeof input) => forcedIntent(forced.legal),
+      cardOpportunity: () => 0,
+      rankCandidate: (intent: GameIntent) => intent.kind === "activate-ability" &&
+        intent.sourceInstanceId === weaponId ? 100 : 0,
+      evaluateEnd: (_state: typeof state, observed: typeof input, root: TurnPlannerRoot, complete: boolean) => ({
+        score: root.opponentLife - observed.view.players[1].life,
+        wardsRemaining: observed.view.players[1].board.length,
+        complete,
+      }),
+      maxRootCandidates: 1,
+      maxSearchNodes: 8,
+    };
+    const plan = planTurn(input, config);
+    expect(plan?.intent).toMatchObject({ kind: "activate-ability", sourceInstanceId: weaponId });
+    expect(plan?.evaluation).toEqual({
+      score: Math.max(0, attack - wardCount * 2),
+      wardsRemaining: 0,
+      complete: true,
+    });
+    expect(planTurn(input, config)).toEqual(plan);
+    expect(state.players[1]!.board).toHaveLength(wardCount);
+  });
+
   it("removes presentation history from simulation clones without mutating live state", () => {
     const state = createGame({
       decklists: [decklists.dorinthea, decklists.rhinar],

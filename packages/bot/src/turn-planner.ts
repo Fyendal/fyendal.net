@@ -414,6 +414,12 @@ function opponentRolloutIntent(state: GameState): GameIntent | undefined {
     const noBlock = legal.find((intent) => intent.kind === "defend" && intent.instanceIds.length === 0);
     if (noBlock) return noBlock;
   }
+  // Ward destruction is mandatory. Resolve a legal public source in stable
+  // option order so rollouts can reach damage and subsequent attacks instead
+  // of treating the prevention choice as the end of the turn.
+  if (state.pendingDecision?.chooseHook === "ward") {
+    return legal.find((intent) => intent.kind === "choose");
+  }
   const payNothing = legal.find((intent) => intent.kind === "choose" && intent.optionId === "pay 0");
   if (payNothing) return payNothing;
   const decline = legal.find((intent) => intent.kind === "choose" &&

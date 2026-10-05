@@ -151,6 +151,42 @@ function chooseRerebracePayment(options: {
 }
 
 describe("Hala policy", () => {
+  it("plans a complete damaging attack through Restless Coalescence after sharpening", () => {
+    const state = createGame({
+      decklists: [halaDeck(), decklists.dorinthea],
+      cards: cardData,
+      scripts,
+      seed: 9402,
+      startPlayer: 0,
+    });
+    state.turn = 2;
+    replaceHand(state, 0, ["PEN048", "PEN053", "PEN321"]);
+    state.players[0]!.resources = 0;
+    state.players[0]!.hero.tapped = true;
+    const blade = state.players[0]!.weapons[0]!;
+    blade.counters = { power: 1, sharpenedTurn: state.turn };
+    state.players[1]!.board.push({
+      instanceId: state.nextInstanceId++,
+      cardId: "MST133",
+      owner: 1,
+    });
+
+    const decision = chooseHalaIntentWithTrace({
+      seat: 0,
+      view: projectStateFor(state, 0),
+      legal: legalIntents(state, 0),
+      cards: cardData,
+      state,
+    });
+    expect(decision.intent).toMatchObject({
+      kind: "activate-ability",
+      sourceInstanceId: blade.instanceId,
+    });
+    expect(decision.plan?.evaluation.complete).toBe(true);
+    expect(decision.plan?.evaluation.damage).toBeGreaterThan(0);
+    expect(applyIntent(state, 0, decision.intent).ok).toBe(true);
+  });
+
   it("preserves its opening hand and prioritizes a Flurry generator for arsenal", () => {
     let state = createGame({
       decklists: [halaDeck(), decklists.dorinthea],
