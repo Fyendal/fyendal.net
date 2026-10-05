@@ -54,6 +54,28 @@ describe("Soulbond Resolve", () => {
       .chooseCard("wounding blow|2").expectLife(1, 14);
   });
 
+  it.each([0, 3])("Saving Grace enables prevention only before the first damage event (%s earlier Runechants)", (runechants) => {
+    // Report e7e218d6: three Runechants dealt damage before Saving Grace
+    // charged Blessing of Suraya against Arknight Descendancy on turn 5.
+    const s = scenario({ seats: [
+      { hero: "rhinar", heroKey: "viserai, usurper|0",
+        resources: 5, hand: ["IAR111"], board: Array<string>(runechants).fill("runechant|0") },
+      { hero: "dorinthea", heroKey: "ser boltyn, breaker of dawn|0", life: 29,
+        hand: ["saving grace|2", "blessing of suraya|2"], equipment: {
+          ...NO_EQUIPMENT, chest: "soulbond resolve|0",
+        } },
+    ] });
+    s.play("IAR111").expectLife(1, 29 - runechants).blockWith().passPriority();
+    s.react("saving grace|2");
+    expect(s.state.pendingDecision?.chooseHook).toBe("asb-charge");
+    s.chooseCard("blessing of suraya|2");
+    expect(s.state.players[1]!.flags.chargedThisTurn).toBe(true);
+    // Six power, minus two from Saving Grace, minus its three defense:
+    // the remaining one damage is prevented only without earlier Runechants.
+    expect(s.state.chain[0]!.damage).toBe(runechants === 0 ? 0 : 1);
+    s.expectLife(1, runechants === 0 ? 29 : 25);
+  });
+
   it("resets prevention and charge eligibility each turn", () => {
     const s = scenario({ seats: [
       { hero: "rhinar", resources: 3, hand: ["raging onslaught|1"],

@@ -913,12 +913,15 @@ export const ros: Record<string, CardScript> = {
   "sigil of forethought|3": beginningAura(undefined, (ctx) => ctx.createToken(PONDER)),
   "sigil of cycles|3": beginningAura(undefined, (ctx) => {
     const hand = ctx.player(ctx.seat).hand;
-    if (hand.length)
+    if (hand.length) {
       ctx.requestCardChoice(
         "cycles-discard",
         decisionPrompt("Discard a card", "card.ros.card.discard"),
         hand.map((card) => card.instanceId),
       );
+    } else {
+      ctx.drawCards(ctx.seat, 1);
+    }
   }),
   "sigil of fyendal|3": beginningAura(undefined, (ctx) => ctx.gainLife(ctx.seat, 1)),
   "sigil of earth|3": beginningAura(undefined, (ctx) => ctx.createToken(EARTH)),

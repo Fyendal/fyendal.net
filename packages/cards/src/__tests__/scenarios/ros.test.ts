@@ -1010,6 +1010,49 @@ describe("ROS — Wizard and generic", () => {
     expect(g.state.players[0]!.flags.nextArcaneBonus).toBe(0);
   });
 
+  it.each(["ROS226", "LGS329"])("Sigil of Cycles (%s) draws when its controller has no cards to discard", (printing) => {
+    const g = scenario({
+      active: 1,
+      seats: [
+        { hero: "rhinar", board: [printing], hand: [], deck: [BLUE, "snatch|1"] },
+        { hero: "dorinthea" },
+      ],
+    });
+    g.state.turn = 2; // Mid-game: only the turn player draws during the end phase.
+
+    g.endTurn()
+      .expectNotInZone(0, printing, "board")
+      .expectInZone(0, printing, "graveyard")
+      .expectHandSize(0, 1)
+      .expectInZone(0, BLUE, "hand")
+      .expectDeckTop(0, "snatch|1");
+    expect(g.state.pendingDecision).toBeNull();
+  });
+
+  it("Sigil of Cycles requires a discard before drawing when its controller has cards in hand", () => {
+    const g = scenario({
+      active: 1,
+      seats: [
+        { hero: "rhinar", board: ["sigil of cycles|3"], hand: ["snatch|1", "wounding blow|1"], deck: [BLUE] },
+        { hero: "dorinthea" },
+      ],
+    });
+    g.state.turn = 2;
+
+    g.endTurn().expectHandSize(0, 2).expectDeckTop(0, BLUE);
+    expect(g.state.pendingDecision).toMatchObject({ player: 0, chooseHook: "cycles-discard" });
+    expect(g.state.pendingDecision?.options).toEqual(
+      g.state.players[0]!.hand.map((card) => String(card.instanceId)),
+    );
+    g.chooseCard("snatch|1")
+      .expectInZone(0, "snatch|1", "graveyard")
+      .expectInZone(0, "wounding blow|1", "hand")
+      .expectInZone(0, BLUE, "hand")
+      .expectHandSize(0, 2)
+      .expectZoneSize(0, "deck", 0);
+    expect(g.state.pendingDecision).toBeNull();
+  });
+
   it("Sigil of Aether deals arcane damage when it leaves and amps after dealing damage", () => {
     const g = scenario({
       seats: [

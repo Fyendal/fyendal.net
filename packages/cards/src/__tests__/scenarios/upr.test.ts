@@ -417,6 +417,79 @@ describe("UPR — rules regression coverage", () => {
     expect(s.state.pendingDestructions).toContainEqual({ seat: 0, instanceId: slippers.instanceId });
   });
 
+  it.each([
+    "azvolai", "cromai", "kyloria", "nekria", "ouvia", "themai",
+    "vynserakai", "yendurai", "dracona optimai", "tomeltai", "dominia",
+  ])("Phantasm removes invoked %s from the arena when defended by 8 power", (name) => {
+    const dragonKey = `${name}|0`;
+    const invocationKey = `invoke ${name}|1`;
+    const s = scenario({
+      seats: [
+        {
+          hero: "rhinar", heroKey: "dromai|0", resources: 6,
+          hand: [invocationKey], board: ["ash|0"], deck: [BLUE, BLUE, BLUE],
+          weapons: ["storm of sandikai|0"],
+          equipment: { arms: "ghostly touch|0" },
+        },
+        { hero: "dorinthea", hand: [RED] },
+      ],
+    });
+    expect(cardData[printingId(RED)]?.attack).toBe(8);
+    s.play(invocationKey).chooseCard("ash|0");
+    const dragon = s.state.players[0]!.board.find((card) => card.cardId === printingId(dragonKey))!;
+    s.activate(dragonKey);
+    if (name === "azvolai") s.chooseOption("done");
+    s.blockWith(RED).settle();
+
+    expect(s.state.log.some((entry) => entry.publicText === `${cardData[dragon.cardId]!.name} is destroyed (Phantasm)`)).toBe(true);
+    s.expectNotInZone(0, dragonKey, "board");
+    expect(s.state.players[0]!.graveyard.filter((card) => card.instanceId === dragon.instanceId)).toHaveLength(1);
+    expect(projectStateFor(s.state, 0).players[0]!.board.some((card) => card.instanceId === dragon.instanceId)).toBe(false);
+    expect(s.state.chain).toHaveLength(0);
+    // Cromai gains its action point on attack, before Phantasm resolves.
+    expect(s.state.players[0]!.actionPoints).toBe(name === "cromai" ? 1 : 0);
+    expect(s.state.players[0]!.equipment.arms?.counters?.haunt).toBe(1);
+    s.expectLife(1, 20).expectInZone(1, RED, "graveyard");
+  });
+
+  it("Phantasm removes an Ash-transformed Aether Ashwing without putting the token in the graveyard", () => {
+    const s = scenario({ seats: [
+      {
+        hero: "rhinar", heroKey: "dromai|0", resources: 1,
+        hand: ["rake the embers|3"], weapons: ["storm of sandikai|0"],
+      },
+      { hero: "dorinthea", hand: [RED] },
+    ] });
+    s.play("rake the embers|3").chooseCard("ash|0")
+      .activate("aether ashwing|0").blockWith(RED).settle();
+    s.expectNotInZone(0, "aether ashwing|0", "board")
+      .expectNotInZone(0, "aether ashwing|0", "graveyard")
+      .expectLife(1, 20);
+    expect(s.state.chain).toHaveLength(0);
+  });
+
+  it("Miragai protects the first dragon attack but is destroyed by Phantasm when it attacks second", () => {
+    const s = scenario({ seats: [
+      {
+        hero: "rhinar", heroKey: "dromai|0", resources: 3,
+        hand: ["invoke miragai|1", "skittering sands|3"], board: ["ash|0", "ash|0"],
+        weapons: ["storm of sandikai|0"],
+      },
+      { hero: "dorinthea", hand: [RED, RED] },
+    ] });
+    s.play("invoke miragai|1").chooseCard("ash|0")
+      .play("skittering sands|3").chooseCard("ash|0")
+      .activate("aether ashwing|0").blockWith(RED).settle();
+    s.expectInZone(0, "aether ashwing|0", "board");
+    expect(s.state.log.some((entry) => entry.publicText?.includes("triggers Phantasm"))).toBe(false);
+    s.activate("miragai|0").blockWith(RED).settle();
+    s.expectNotInZone(0, "miragai|0", "board")
+      .expectInZone(0, "miragai|0", "graveyard")
+      .expectInZone(0, "aether ashwing|0", "board")
+      .expectLife(1, 20);
+    expect(s.state.chain).toHaveLength(0);
+  });
+
   it("Themai removes opposing plays and activations during its controller's turn", () => {
     const s = scenario({
       seats: [

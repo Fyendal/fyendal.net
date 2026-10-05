@@ -37,6 +37,7 @@ import type { CardInstance, ChainLinkState, PlayerState, StackLayer } from "./st
 import {
   currentLink,
   findCardAnywhere,
+  findPermanent,
   opponent,
   removeFromArray,
 } from "./zoneQueries.js";
@@ -598,12 +599,19 @@ function phantasmDestroy(state: GameStateInternal,
   link.hit = false;
   const destroyedDraw = activeModifiers(state, link, ["chain-link"])
     .reduce((sum, modifier) => sum + Number(modifier.onDestroyedDraw || 0), 0);
-  // closeChain must not bury the attack a second time
-  link.flags.attackGone = true;
   state.modifiers = state.modifiers.filter((m) => m.scope !== "chain-link");
-  moveToGraveyard(state, runtime, link.attackingCard, "chain");
-  runtime.events.runHook(state, link.attacker, link.attackingCard, "onDestroyed", link);
-  runtime.events.fireFriendlyDestroyed(state, link.attacker, link.attackingCard);
+  const permanent = findPermanent(state, link.attackingCard.instanceId);
+  if (permanent) {
+    // Attacking permanents also remain in their arena zone. Use their normal
+    // destruction path to remove that object and fire leave-arena hooks.
+    destroyPermanent(state, runtime, link.attacker, permanent.card);
+  } else {
+    // closeChain must not bury the attack a second time.
+    link.flags.attackGone = true;
+    moveToGraveyard(state, runtime, link.attackingCard, "chain");
+    runtime.events.runHook(state, link.attacker, link.attackingCard, "onDestroyed", link);
+    runtime.events.fireFriendlyDestroyed(state, link.attacker, link.attackingCard);
+  }
   if (destroyedDraw > 0) drawCards(state, runtime, state.players[link.attacker] as PlayerState, destroyedDraw);
   runtime.dispatchFlow("closeChain", state);
   state.reactionPasses = 0;

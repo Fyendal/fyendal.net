@@ -73,6 +73,168 @@ function reachEnlightenedStrikeMode(
 }
 
 describe("Jarl policy", () => {
+  function pendingOpponentAction(cardId: string, power: number, withPath = false) {
+    const opponent = { heroId: "AHA001", ...halaPresentationFor(jarlDeck()) };
+    let state = createGame({
+      decklists: [jarlDeck(opponent), opponent], cards: cardData, scripts,
+      seed: 12_120, startPlayer: 1,
+    });
+    state.turn = 19;
+    replaceHand(state, ["HVY209", "HVY209"]);
+    state.players[1]!.hand = ["AHA014", cardId].map((id) => ({
+      instanceId: state.nextInstanceId++, cardId: id, owner: 1,
+    }));
+    state.players[1]!.equipment.arms = undefined;
+    state.players[1]!.resources = 3;
+    const blade = state.players[1]!.weapons.find((card) => cardData[card.cardId]?.name === "Zenith Blade")!;
+    blade.counters = { power };
+    const play = (id: string) => {
+      const card = state.players[1]!.hand.find((card) => card.cardId === id)!;
+      const intent = legalIntents(state, 1).find((intent) =>
+        intent.kind === "play-card" && intent.instanceId === card.instanceId
+      )!;
+      expect(intent).toBeDefined();
+      state = apply(state, intent, 1);
+    };
+    if (withPath) {
+      play("AHA014");
+      for (let step = 0; step < 10 && state.stack.length; step++) {
+        state = apply(state, { kind: "pass" }, state.priorityPlayer as 0 | 1);
+      }
+      expect(state.stack).toHaveLength(0);
+    }
+    play(cardId);
+    state = apply(state, { kind: "pass" }, 1);
+    return state;
+  }
+
+  it.each([
+    { cardId: "AHA012", power: 0, withPath: true },
+    { cardId: "AHA017", power: 1, withPath: false },
+    { cardId: "AHA022", power: 2, withPath: false },
+  ])("uses Ripple before $cardId creates Flurry", ({ cardId, power, withPath }) => {
+    let state = pendingOpponentAction(cardId, power, withPath);
+    let withoutRipple = state;
+    for (let step = 0; step < 20 && withoutRipple.stack.length; step++) {
+      withoutRipple = apply(withoutRipple, { kind: "pass" }, withoutRipple.priorityPlayer as 0 | 1);
+    }
+    expect(withoutRipple.stack).toHaveLength(0);
+    expect(withoutRipple.players[1]!.board.some((card) => cardData[card.cardId]?.name === "Flurry")).toBe(true);
+    const rippleId = state.players[0]!.hand[0]!.instanceId;
+    const intent = chooseJarlIntent(inputFor(state));
+    expect(intent).toMatchObject({ kind: "activate-ability", sourceInstanceId: rippleId });
+    expect(legalIntents(state, 0)).toContainEqual(intent);
+    // The projection-only policy used during forced rollout makes the same choice.
+    expect(chooseJarlIntent({ ...inputFor(state), state: undefined })).toEqual(intent);
+    state = apply(state, intent);
+    expect(chooseJarlIntent(inputFor(state))).toEqual({ kind: "pass" });
+
+    for (let step = 0; step < 20 && state.stack.length; step++) {
+      const actor = state.priorityPlayer as 0 | 1;
+      const next = actor === 0 ? chooseJarlIntent(inputFor(state)) : { kind: "pass" } as const;
+      expect(legalIntents(state, actor)).toContainEqual(next);
+      state = apply(state, next, actor);
+    }
+    expect(state.stack).toHaveLength(0);
+    expect(state.players[1]!.board.some((card) => cardData[card.cardId]?.name === "Flurry")).toBe(false);
+    expect(state.players[1]!.weapons.find((card) => cardData[card.cardId]?.name === "Zenith Blade")!.counters?.power)
+      .toBe(power + (withPath ? 2 : 1));
+    expect(state.players[0]!.hand).toHaveLength(1);
+  });
+
+  it.each(["AHA017", "AHA022"])("saves Ripple when %s does not reach its Flurry threshold", (cardId) => {
+    const state = pendingOpponentAction(cardId, 0);
+    expect(chooseJarlIntent(inputFor(state))).toEqual({ kind: "pass" });
+  });
+
+  it.each([
+    { cardId: "AHA024", token: "Flurry", count: 1 },
+    { cardId: "HVY192", token: "Vigor", count: 1 },
+    { cardId: "EVR030", token: "Seismic Surge", count: 3 },
+    { cardId: "ARC109", token: "Runechant", count: 3 },
+    { cardId: "MPW115", token: "Blade Dance", count: 1 },
+    { cardId: "MPW123", token: "Blade Dance", count: 1 },
+  ])("uses Ripple to reduce $cardId's $token creation", ({ cardId, token, count }) => {
+    let state = pendingOpponentAction(cardId, 0);
+    const intent = chooseJarlIntent(inputFor(state));
+    expect(intent).toMatchObject({
+      kind: "activate-ability", sourceInstanceId: state.players[0]!.hand[0]!.instanceId,
+    });
+    expect(legalIntents(state, 0)).toContainEqual(intent);
+    state = apply(state, intent);
+    for (let step = 0; step < 20 && state.stack.length; step++) {
+      const actor = state.priorityPlayer as 0 | 1;
+      state = apply(state, actor === 0 ? chooseJarlIntent(inputFor(state)) : { kind: "pass" }, actor);
+    }
+    expect(state.stack).toHaveLength(0);
+    expect(state.players[1]!.board.filter((card) => cardData[card.cardId]?.name === token)).toHaveLength(count - 1);
+    expect(state.players[0]!.hand).toHaveLength(1);
+  });
+
+  it("waits until Strike Gold hits before spending Ripple on its Gold trigger", () => {
+    let state = pendingOpponentAction("SEA229", 0);
+    expect(chooseJarlIntent(inputFor(state))).toEqual({ kind: "pass" });
+    for (let step = 0; step < 30 && projectStateFor(state, 0).stack[0]?.label !== "On hit"; step++) {
+      const actor = (state.pendingDecision?.player ?? state.priorityPlayer) as 0 | 1;
+      const intent: GameIntent = state.pendingDecision?.kind === "defend"
+        ? { kind: "defend", instanceIds: [] } : { kind: "pass" };
+      expect(legalIntents(state, actor)).toContainEqual(intent);
+      state = apply(state, intent, actor);
+    }
+    expect(projectStateFor(state, 0).stack[0]?.label).toBe("On hit");
+    if (state.priorityPlayer === 1) state = apply(state, { kind: "pass" }, 1);
+    const intent = chooseJarlIntent(inputFor(state));
+    expect(intent).toMatchObject({ kind: "activate-ability" });
+    state = apply(state, intent);
+    for (let step = 0; step < 20 && state.stack.length; step++) {
+      state = apply(state, { kind: "pass" }, state.priorityPlayer as 0 | 1);
+    }
+    expect(state.stack).toHaveLength(0);
+    expect(state.players[1]!.board.some((card) => cardData[card.cardId]?.name === "Gold")).toBe(false);
+  });
+
+  it.each(["AHA014", "AHA001", "SBL036", "AHA015", "AHA021", "MPW126", "PEN306", "EVR158"])("does not waste Ripple on %s", (cardId) => {
+    const state = pendingOpponentAction("AHA012", 0);
+    const view = projectStateFor(state, 0);
+    view.stack[0]!.card!.cardId = cardId;
+    expect(chooseJarlIntent({ ...inputFor(state), view, state: undefined })).toEqual({ kind: "pass" });
+  });
+
+  it("responds to a queued action-card token trigger, but not a wager or its own effect", () => {
+    const state = pendingOpponentAction("AHA012", 0);
+    const view = projectStateFor(state, 0);
+    const nastySurprise = Object.values(cardData).find((card) => card.name === "Nasty Surprise")!;
+    view.stack[0]!.card!.cardId = nastySurprise.id;
+    view.stack[0]!.label = "Create Agility, Might, and Vigor tokens";
+    const input = { ...inputFor(state), view, state: undefined };
+    expect(chooseJarlIntent(input)).toMatchObject({ kind: "activate-ability" });
+    view.stack[0]!.label = "Resolve wager: Winner creates Might";
+    expect(chooseJarlIntent(input)).toEqual({ kind: "pass" });
+    view.stack[0]!.label = "Create 3 Might tokens";
+    view.stack[0]!.seat = 0;
+    expect(chooseJarlIntent(input)).toEqual({ kind: "pass" });
+  });
+
+  it("recognizes a delayed token effect from its public on-hit projection", () => {
+    const state = pendingOpponentAction("AHA012", 0);
+    const view = projectStateFor(state, 0);
+    view.stack[0]!.card!.cardId = "PEN306";
+    view.stack[0]!.label = "On hit";
+    view.chain = [{
+      attackingCard: { instanceId: 90_001, cardId: "WTR123", owner: 1 },
+      defendingCards: [], reactions: [], attackValue: 6, defenseValue: 0,
+      damage: 6, resolved: false, hit: true,
+      onHitEffects: [{
+        sourceCardId: "PEN306", text: "When this hits, create 3 Might tokens.",
+        impact: { createsToken: true },
+      }],
+    }];
+    const input = { ...inputFor(state), view, state: undefined };
+    expect(chooseJarlIntent(input)).toMatchObject({ kind: "activate-ability" });
+    view.chain[0]!.onHitEffects![0]!.sourceCardId = "AHA001";
+    expect(chooseJarlIntent(input)).toEqual({ kind: "pass" });
+  });
+
   it("uses Imposing Visage for a turn-zero Crumble setup in a non-aggro matchup", () => {
     const state = createGame({
       decklists: [jarlDeck(), decklists.dorinthea],

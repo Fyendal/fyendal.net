@@ -2,6 +2,7 @@ import type { CardData, CardView, GameIntent } from "@fyendal/shared";
 import {
   chooseScoredIntent,
   currentLink,
+  effectIsCommitted,
   enforceAllyTargetPolicy,
   enforceSpectraPolicy,
   functionalKey as key,
@@ -408,6 +409,54 @@ function shouldSaveDefenseReaction(data: CardData, input: BotPolicyInput): boole
   return !!link && link.attackValue <= 3 && link.damage < me.life;
 }
 
+/** A fixed token batch, independent of choices, hidden cards, or future hits.
+ * Keep paragraphs intact so a later sentence in a conditional ability is not
+ * mistaken for an unconditional effect (for example, "Create that many"). */
+function createsKnownTokens(text: string): boolean {
+  return /^(?:you )?create (?!x\b|that\b|up to\b|no\b|0\b)(?:an? |[1-9]\d* )?[a-z][^.\n]*\btokens?\b/i.test(text.trim()) &&
+    !/\b(for each|equal to|that many|instead|unless)\b/i.test(text);
+}
+
+function shouldActivateRippleAway(input: BotPolicyInput): boolean {
+  if (effectIsCommitted(input, "ripple away|3")) return false;
+  const layer = input.view.stack[0];
+  if (!layer?.card || layer.seat === input.seat) return false;
+  const source = input.cards[layer.card.cardId];
+  if (source?.cardType !== "action") return false;
+  if (/\b(wager|clash)\b/i.test(layer.label)) return false;
+
+  // A queued token trigger is already committed, even if its printed ability
+  // depends on an event such as a hit or a discard.
+  if (createsKnownTokens(layer.label)) return true;
+  const paragraphs = source.text.split(/\n/);
+  if (paragraphs.some(createsKnownTokens)) return true;
+
+  // "On hit" only appears after the hit has happened. Do not spend Ripple
+  // merely because an unresolved attack or a future attack buff mentions tokens.
+  if (layer.label === "On hit") {
+    const projectedEffects = currentLink(input)?.onHitEffects?.filter((effect) =>
+      effect.sourceCardId === layer.card!.cardId && effect.impact?.createsToken === true
+    ).map((effect) => effect.text) ?? [];
+    if ([...paragraphs, ...projectedEffects].some((paragraph) => {
+      const effect = /^when (?:this|[^,]+) hits(?: a hero)?,\s*(.*)$/i.exec(paragraph)?.[1];
+      return effect !== undefined && createsKnownTokens(effect);
+    })) return true;
+  }
+
+  // Sharpen-then-create effects share the same visible counter condition,
+  // regardless of the card's identity or the token it creates.
+  const sharpenThreshold = /^sharpen target sword you control\.\s*if it has (\d+) or more \+1\{p\} counters,\s*([^\n]+)/i.exec(source.text);
+  if (sharpenThreshold && createsKnownTokens(sharpenThreshold[2]!)) {
+    const swords = input.view.players[1 - input.seat]!.weapons.filter((weapon) =>
+      hasSubtype(input.cards[weapon.cardId], "sword")
+    );
+    return swords.length > 0 && swords.every((sword) =>
+      Number(sword.counters?.power ?? 0) + 1 >= Number(sharpenThreshold[1])
+    );
+  }
+  return false;
+}
+
 function scorePlay(
   intent: GameIntent,
   input: BotPolicyInput,
@@ -437,6 +486,8 @@ function scorePlay(
       score = missingLife > 0 && (me.hand.length === 3 || me.life <= 8) ? 75 : -100;
     } else if (functional === "boots of omnis ward|0") {
       score = shouldActivateOmnisBoots(input, card) ? 90 : -100;
+    } else if (functional === "ripple away|3") {
+      score = shouldActivateRippleAway(input) ? 80 : -100;
     } else if (data.cardType === "weapon") {
       score = 24 + (data.attack ?? 0);
     } else {
