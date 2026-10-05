@@ -176,6 +176,10 @@ function applyPreventionShields(
       preventionSource,
     )?.fixedDamagePrevention;
     if (!replacement || replacement.amount <= 0) continue;
+    if (replacement.firstDamageEventEachTurn && Number(target.flags.damageEventsThisTurn) !== 1) continue;
+    if (replacement.condition && !replacement.condition(
+      runtime.makeCtx(state, target.seat, preventionSource, currentLink(state)),
+    )) continue;
     if (
       replacement.oncePerTurn &&
       Number(preventionSource.counters?.fixedPreventionUsedTurn ?? -1) === state.turn
@@ -1499,6 +1503,12 @@ export function beginHeroDamage(state: GameStateInternal,
   }
   applyHeroDamageRedirect(state, packet);
   const target = state.players[packet.targetSeat] as PlayerState;
+  // Track the proposed event before prevention, even if it ultimately deals
+  // no damage or prevention is prohibited. Ordinal replacements care about
+  // the first time damage would be dealt, not the first life lost.
+  if (packet.amount > 0) {
+    target.flags.damageEventsThisTurn = Number(target.flags.damageEventsThisTurn ?? 0) + 1;
+  }
   if (!packet.unpreventable && packet.amount > 0) {
     for (const source of controlledPermanents(state, target.seat, { faceDownEquipment: false })) {
       const replace = scriptOf(state, source.cardId, source)?.replaceDamageToController;

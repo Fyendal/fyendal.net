@@ -15,7 +15,9 @@ import { clearPlayFromZoneGrant, destroyControlledCard, destroyPermanent, enterB
 import { currentLink, findCardAnywhere, opponent, removeFromArray } from "./zoneQueries.js";
 import type { MeldSide, PlayableZone } from "@fyendal/shared";
 import { noteActionPlayedOrActivated } from "./cardLifecycle.js";
-import { actionLimitReached, firstActionExtraCost, goAgainSuppressed } from "./ruleQueries.js";
+import {
+  actionKindRestrictionApplies, actionLimitReached, firstActionExtraCost, goAgainSuppressed,
+} from "./ruleQueries.js";
 import { cardProhibitedByChosenName } from "./restrictions.js";
 
 export /** Static taxes imposed by opposing arena objects. */
@@ -863,8 +865,10 @@ export function cardPlayRestrictedByModifier(
   const nonAttackCap = temporalCaps.reduce((cap, modifier) => Math.min(cap, modifier.nonAttackActionCardCap ?? Infinity), Infinity);
   const isAttackAction = data.cardType === "action" && (data.subtypes ?? []).includes("attack");
   if (data.cardType === "action" && temporalCaps.some((modifier) =>
-    (modifier.restrictActionsToWeaponOrAttack === true && !isAttackAction) ||
-    (modifier.restrictActionsToNonWeaponNonAttack === true && isAttackAction)
+    actionKindRestrictionApplies(state, modifier, seat) && (
+      (modifier.restrictActionsToWeaponOrAttack === true && !isAttackAction) ||
+      (modifier.restrictActionsToNonWeaponNonAttack === true && isAttackAction)
+    )
   )) return true;
   if (isAttackAction &&
     Number(player.flags.attackActionsPlayedThisTurn ?? 0) >= attackCap) return true;

@@ -9,9 +9,9 @@ import {
   decodeBotTask, decodeBotWorkerResponse, decodeClientMessage, decodeServerMessage, MAX_BOT_TASK_BYTES,
   LiveServerMessageDecoder, liveWebSocketUrl,
 } from "@fyendal/protocol";
-import type { ClientBotTask, ServerMessage } from "@fyendal/shared";
+import type { ClientBotTask, GameIntent, ServerMessage } from "@fyendal/shared";
 import { clientBotTask } from "../clientBotTask.js";
-import { encodePersistedState } from "../persistedState.js";
+import { decodePersistedState, encodePersistedState } from "../persistedState.js";
 import { PgRoomStore, type RoomRow } from "../store.js";
 import { RoomBroadcaster } from "../roomBroadcaster.js";
 import { freshDb } from "./testdb.js";
@@ -45,6 +45,78 @@ function task(room: RoomRow): ClientBotTask {
 }
 
 describe("client bot tasks", () => {
+  it.each(["unrestricted", "bot-choice", "war", "peace"] as const)(
+    "preserves Warmonger's Diplomacy through Hala's Edict and sword worker turn (%s)",
+    async (mode) => {
+      const { room } = await fixture();
+      room.seats[1]!.deckId = "precon-hala-masterclass";
+      let state = createGame({
+        decklists: [decklists.rhinar, {
+          heroId: "MPW003", weaponIds: ["MPW005"], equipment: { arms: "AHA005" },
+          deck: ["MPW103", "MPW121", "HNT117", "HNT117"],
+        }],
+        cards: cardData, scripts, seed: 731, startPlayer: 0,
+      });
+      for (const player of state.players) {
+        player.deck = [];
+        player.hand = (player.seat === 0 ? ["DTD230"] : ["MPW103", "MPW121", "HNT117", "HNT117"])
+          .map((cardId) => ({ cardId, owner: player.seat, instanceId: state.nextInstanceId++ }));
+      }
+      const browser = new ClientBotPolicy();
+      const edict = state.players[1].hand[0]!;
+      const sword = state.players[1].weapons[0]!;
+      const botIntents: GameIntent[] = [];
+      let chosenMode: string = mode;
+      for (let step = 0; step < 120 && state.turn < 3; step++) {
+        const json: unknown = JSON.parse(JSON.stringify(encodePersistedState(state, room.rulesetVersion)));
+        state = decodePersistedState(json, room.code, cardData, scripts, room.rulesetVersion);
+        room.state = state;
+        const actor = state.pendingDecision?.player ?? state.priorityPlayer;
+        const legal = legalIntents(state, actor);
+        let intent: GameIntent | undefined;
+        if (step === 0 && mode !== "unrestricted") {
+          intent = legal.find((candidate) => candidate.kind === "play-card" &&
+            candidate.instanceId === state.players[0].hand[0]!.instanceId);
+        } else if (actor === 1) {
+          intent = state.pendingDecision?.chooseHook === "diplomacy-opponent" && mode !== "bot-choice"
+            ? legal.find((candidate) => candidate.kind === "choose" && candidate.optionId === mode)
+            : browser.decide(task(room));
+          if (state.pendingDecision?.chooseHook === "diplomacy-opponent" && intent?.kind === "choose") {
+            chosenMode = intent.optionId;
+          }
+        } else if (state.pendingDecision?.chooseHook === "diplomacy-self") {
+          intent = legal.find((candidate) => candidate.kind === "choose" && candidate.optionId === "peace");
+        } else if (state.pendingDecision?.kind === "defend") {
+          intent = legal.find((candidate) => candidate.kind === "defend" && candidate.instanceIds.length === 0);
+        } else {
+          intent = legal.find((candidate) => candidate.kind === "pass" ||
+            (candidate.kind === "choose" && candidate.optionId === "pass"));
+        }
+        expect(intent).toBeDefined();
+        if (!intent) throw new Error("expected turn continuation");
+        if (actor === 1) botIntents.push(intent);
+        const result = applyIntent(state, actor, intent);
+        if (!result.ok) throw new Error(result.error);
+        state = result.state;
+      }
+      expect(state.turn).toBe(3);
+      const playedEdict = botIntents.some((intent) =>
+        intent.kind === "play-card" && intent.instanceId === edict.instanceId);
+      const attackedWithSword = botIntents.some((intent) =>
+        intent.kind === "activate-ability" && intent.sourceInstanceId === sword.instanceId);
+      if (mode !== "unrestricted") expect(["war", "peace"]).toContain(chosenMode);
+      if (chosenMode === "unrestricted") {
+        expect(playedEdict).toBe(true);
+        expect(attackedWithSword).toBe(true);
+      } else if (chosenMode === "war") {
+        expect(playedEdict).toBe(false);
+        expect(attackedWithSword).toBe(true);
+      } else {
+        expect(attackedWithSword).toBe(false);
+      }
+    },
+  );
+
   it("keeps mutual draw actions out of bot rooms and delegated tasks", async () => {
     const { store, room, credentials } = await fixture();
     expect(task(room).legal.every((intent) => !intent.kind.endsWith("-draw"))).toBe(true);

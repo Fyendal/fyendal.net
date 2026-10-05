@@ -3,13 +3,26 @@ import { dataOf, scriptOf } from "./cardProperties.js";
 import { controlledPermanents } from "./sourceQueries.js";
 import { gameLogMessage, logCardValue, logPublic, nameOf } from "./gameLog.js";
 import type { GameStateInternal } from "./runtimeState.js";
-import type { CardInstance, PlayerState } from "./state.js";
+import type { CardInstance, Modifier, PlayerState } from "./state.js";
 import { currentLink } from "./zoneQueries.js";
 
 /** Engine objects are JSON-safe; triggered layers retain independent
  * last-known snapshots when their sources leave play before resolution. */
 export function snapshotSerializable<T>(value: T): T {
   return JSON.parse(JSON.stringify(value)) as T;
+}
+
+/** Action-kind restrictions with a seat-relative end boundary apply only
+ * during that seat's next turn, not while waiting for that turn to begin. */
+export function actionKindRestrictionApplies(
+  state: GameStateInternal,
+  modifier: Modifier,
+  seat: number,
+): boolean {
+  return modifier.seat === seat && !modifier.consumed &&
+    (modifier.expiresAtEndOfSeatTurn === undefined ||
+      (modifier.expiresAtEndOfSeatTurn === state.activePlayer &&
+        Number(modifier.createdTurn ?? -1) < state.turn));
 }
 
 /** Whether an opposing attack/stack object currently prohibits instant cards

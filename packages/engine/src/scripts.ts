@@ -1369,6 +1369,11 @@ export interface CardScript {
     banishSource?: boolean;
     /** Apply at most once each turn while this source remains in the arena. */
     oncePerTurn?: boolean;
+    /** Only the first positive damage event proposed for this hero each turn,
+     * including events that are fully prevented or cannot be prevented. */
+    firstDamageEventEachTurn?: boolean;
+    /** Additional eligibility for the replacement. Must be pure. */
+    condition?(ctx: ScriptCtx): boolean;
   };
   /** Optional prevention replacement offered whenever this source's
    * controller would be dealt preventable damage. Applying it moves this

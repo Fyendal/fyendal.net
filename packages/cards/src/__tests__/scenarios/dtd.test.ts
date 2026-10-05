@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { actionCandidates, legalIntents, projectStateFor } from "@fyendal/engine";
+import { actionCandidates, applyIntent, legalIntents, projectStateFor } from "@fyendal/engine";
 import { cardData, scripts } from "../../index.js";
 import { functionalKeyOf } from "../../functional.js";
 import { printingId, scenario } from "../harness.js";
@@ -614,6 +614,24 @@ describe("DTD — registration and core mechanics", () => {
     });
     s.chooseOption("peace");
 
+    for (const viewer of [0, 1, null]) {
+      const choices = (projectStateFor(s.state, viewer).logEntries ?? []).filter((entry) =>
+        "message" in entry && entry.message.id === "card.log.dtd.diplomacy.mode.chosen"
+      );
+      expect(choices.map((entry) => "message" in entry ? entry.message.values : undefined)).toEqual([
+        {
+          card: { kind: "card", cardId: printingId("warmonger's diplomacy|3") },
+          player: { kind: "player", seat: 1 },
+          mode: { kind: "term", id: "card.dtd.option.war" },
+        },
+        {
+          card: { kind: "card", cardId: printingId("warmonger's diplomacy|3") },
+          player: { kind: "player", seat: 0 },
+          mode: { kind: "term", id: "card.dtd.option.peace" },
+        },
+      ]);
+    }
+
     expect(projectStateFor(s.state, 0).ongoing).toEqual(expect.arrayContaining([
       {
         seat: 1,
@@ -629,8 +647,77 @@ describe("DTD — registration and core mechanics", () => {
   });
 
   it.each(["war", "peace"] as const)(
-    "Warmonger's Diplomacy still allows instant cards after choosing %s",
+    "Warmonger's Diplomacy %s leaves the caster's current turn unrestricted",
     (mode) => {
+      const s = scenario({
+        seats: [
+          {
+            hero: "rhinar",
+            hand: ["warmonger's diplomacy|3", "nimblism|1", BLUE],
+            board: ["timesnap potion|3"],
+          },
+          { hero: "dorinthea" },
+        ],
+      });
+      s.activate("timesnap potion|3")
+        .play("warmonger's diplomacy|3")
+        .chooseOption("war")
+        .chooseOption(mode)
+        .play("nimblism|1")
+        .attackWithWeapon(undefined, { pitch: [BLUE] })
+        .blockWith();
+    },
+  );
+
+  it.each([
+    { seat: 0, mode: "war" }, { seat: 0, mode: "peace" },
+    { seat: 1, mode: "war" }, { seat: 1, mode: "peace" },
+  ] as const)(
+    "Warmonger's Diplomacy enforces $mode for seat $seat's next turn and then expires",
+    ({ seat, mode }) => {
+      const s = scenario({
+        seats: [
+          { hero: "rhinar", hand: ["warmonger's diplomacy|3", "nimblism|1", "head jab|1", BLUE] },
+          { hero: "dorinthea", hand: ["nimblism|1", "head jab|1", BLUE] },
+        ],
+      });
+      s.play("warmonger's diplomacy|3")
+        .chooseOption(mode)
+        .chooseOption(mode)
+        .endTurn();
+      if (seat === 0) s.endTurn();
+      const player = s.state.players[seat]!;
+      const naa = player.hand.find((card) => card.cardId === printingId("nimblism|1"))!;
+      const attack = player.hand.find((card) => card.cardId === printingId("head jab|1"))!;
+      const weapon = player.weapons[0]!;
+      const pitch = player.hand.find((card) => card.cardId === printingId(BLUE))!;
+      for (const intents of [legalIntents(s.state, seat), actionCandidates(s.state, seat)]) {
+        expect(intents.some((intent) =>
+          intent.kind === "play-card" && intent.instanceId === naa.instanceId)).toBe(mode === "peace");
+        expect(intents.some((intent) =>
+          intent.kind === "play-card" && intent.instanceId === attack.instanceId)).toBe(mode === "war");
+        expect(intents.some((intent) =>
+          intent.kind === "activate-ability" && intent.sourceInstanceId === weapon.instanceId)).toBe(mode === "war");
+      }
+      const forbidden = mode === "war"
+        ? { kind: "play-card" as const, instanceId: naa.instanceId, pitchInstanceIds: [] }
+        : {
+            kind: "activate-ability" as const,
+            sourceInstanceId: weapon.instanceId,
+            pitchInstanceIds: [pitch.instanceId],
+          };
+      expect(applyIntent(s.state, seat, forbidden).ok).toBe(false);
+      s.endTurn().endTurn();
+      s.play("nimblism|1").attackWithWeapon(undefined, { pitch: [BLUE] }).blockWith();
+    },
+  );
+
+  it.each([
+    { mode: "war", turns: 0 }, { mode: "peace", turns: 0 },
+    { mode: "war", turns: 2 }, { mode: "peace", turns: 2 },
+  ] as const)(
+    "Warmonger's Diplomacy allows instants after choosing $mode and advancing $turns turns",
+    ({ mode, turns }) => {
       const s = scenario({
         seats: [
           {
@@ -644,9 +731,38 @@ describe("DTD — registration and core mechanics", () => {
 
       s.play("warmonger's diplomacy|3")
         .chooseOption("war")
-        .chooseOption(mode)
-        .play("sigil of solace|1")
-        .expectLife(0, 20);
+        .chooseOption(mode);
+      for (let turn = 0; turn < turns; turn++) s.endTurn();
+      s.play("sigil of solace|1").expectLife(0, 20);
+    },
+  );
+
+  it.each(["MPW103", "MPW104", "MPW105"])(
+    "Warmonger's Diplomacy peace still blocks Zenith Blade after resolving Edict %s",
+    (edict) => {
+      const s = scenario({
+        seats: [
+          { hero: "rhinar", hand: ["warmonger's diplomacy|3"] },
+          {
+            hero: "dorinthea", heroKey: "MPW003", weapons: ["MPW005"],
+            hand: [edict, BLUE], equipment: { ...NO_EQUIPMENT, arms: "AHA005" },
+          },
+        ],
+      });
+      s.play("warmonger's diplomacy|3")
+        .chooseOption("peace")
+        .chooseOption("war")
+        .endTurn()
+        .play(edict)
+        .chooseOption("no");
+      expect(s.state.players[1].actionPoints).toBe(1);
+      expect(s.state.players[1].weapons[0]!.counters?.power).toBe(1);
+      expect(() => s.attackWithWeapon("MPW005", { pitch: [BLUE] })).toThrow(/no legal weapon attack/);
+      expect(applyIntent(s.state, 1, {
+        kind: "activate-ability",
+        sourceInstanceId: s.state.players[1].weapons[0]!.instanceId,
+        pitchInstanceIds: [s.state.players[1].hand[0]!.instanceId],
+      }).ok).toBe(false);
     },
   );
 

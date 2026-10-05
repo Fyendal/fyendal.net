@@ -525,7 +525,8 @@ export interface Modifier {
   attackActionCardCap?: number;
   nonAttackActionCardCap?: number;
   /** Restrict action card plays and action-ability activations by action kind.
-   * Instants and instant abilities remain unaffected. */
+   * Instants and instant abilities remain unaffected. With a seat-relative
+   * end boundary, applies only during that seat's next turn after creation. */
   restrictActionsToWeaponOrAttack?: boolean;
   restrictActionsToNonWeaponNonAttack?: boolean;
   /** Defense reactions whose effective name occurs in the affected hero's

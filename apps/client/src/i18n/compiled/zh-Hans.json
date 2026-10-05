@@ -6107,6 +6107,32 @@
       "value": " 力量和压制 (dominate)"
     }
   ],
+  "card.log.dtd.diplomacy.mode.chosen": [
+    {
+      "type": 1,
+      "value": "player"
+    },
+    {
+      "type": 0,
+      "value": " 为 "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 选择“"
+    },
+    {
+      "type": 1,
+      "value": "mode"
+    },
+    {
+      "type": 0,
+      "value": "”"
+    }
+  ],
   "card.log.dvr.dawnblade.counter": [
     {
       "type": 1,

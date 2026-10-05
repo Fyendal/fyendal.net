@@ -20,7 +20,9 @@ import { currentLink, findCardAnywhere, heroSoulCards } from "./zoneQueries.js";
 import { tapPermanent } from "./cardLifecycle.js";
 import { MAX_ALTERNATIVE_COST_OPTIONS, consumeMatchingActivationCostReductions, controlledCostCards, costModifierScopeApplies, exactCardCombinations, modifierMatchesPlayedCard, opposingStaticCostIncrease, payDiscardCost, validateDiscardCost } from "./playRules.js";
 import { attackBasePowerRestricted } from "./combatRestrictions.js";
-import { consumeFirstActionExtraCost, firstActionExtraCost } from "./ruleQueries.js";
+import {
+  actionKindRestrictionApplies, consumeFirstActionExtraCost, firstActionExtraCost,
+} from "./ruleQueries.js";
 
 /** Printed abilities plus temporary abilities granted to this owned card.
  * The returned functions are process definitions only; they are never stored
@@ -739,8 +741,7 @@ export function actionAbilityRestrictedByModifier(
   if (isAttack && attackBasePowerRestricted(state, runtime, seat, source)) return true;
   const isWeapon = cardHasType(state, source, "weapon");
   return state.modifiers.some((modifier) =>
-    modifier.seat === seat &&
-    !modifier.consumed &&
+    actionKindRestrictionApplies(state, modifier, seat) &&
     (
       (modifier.restrictActionsToWeaponOrAttack === true && !isWeapon && !isAttack) ||
       (modifier.restrictActionsToNonWeaponNonAttack === true && (isWeapon || isAttack))

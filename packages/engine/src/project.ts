@@ -627,6 +627,9 @@ function projectedCombatPrevention(
     if (
       !fixed ||
       fixed.amount <= 0 ||
+      (fixed.firstDamageEventEachTurn &&
+        Number(target.flags.damageEventsThisTurn ?? 0) !== (pendingPacket ? 1 : 0)) ||
+      (fixed.condition && !fixed.condition(runtime.makeCtx(state, targetSeat, preventionSource, link))) ||
       (fixed.oncePerTurn &&
         Number(preventionSource.counters?.fixedPreventionUsedTurn ?? -1) === state.turn)
     ) continue;

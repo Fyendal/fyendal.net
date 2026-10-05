@@ -1518,6 +1518,7 @@
   "card.trigger.common.wager.defender.optional": "Wager with the defending hero?",
   "card.trigger.hyperdriver.boost": "Remove a steam counter and gain 1 resource",
   "card.trigger.iar.mark.neverest": "Turn a banished card face down to create a Corrupted Corpse",
+  "card.log.dtd.diplomacy.mode.chosen": "{player} chooses “{mode}” for {card}",
   "card.log.dvr.dawnblade.counter": "{card} gets a +{amount} attack counter",
   "card.log.dvr.dawnblade.turn.attack": "{card} gains +{amount} attack until end of turn",
   "card.log.dvr.dorinthea.additionalattack": "{card}: Dawnblade may attack an additional time this turn",

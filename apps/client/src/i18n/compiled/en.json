@@ -6437,6 +6437,28 @@
       "value": " attack and dominate"
     }
   ],
+  "card.log.dtd.diplomacy.mode.chosen": [
+    {
+      "type": 1,
+      "value": "player"
+    },
+    {
+      "type": 0,
+      "value": " chooses “"
+    },
+    {
+      "type": 1,
+      "value": "mode"
+    },
+    {
+      "type": 0,
+      "value": "” for "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    }
+  ],
   "card.log.dvr.dawnblade.counter": [
     {
       "type": 1,

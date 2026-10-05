@@ -6,6 +6,7 @@ import {
   commonOptionMessages,
   decisionMessage,
   decisionPrompt,
+  localizedCardLog,
   opponentSeat,
   queueIntimidate,
   yesNoPrompt,
@@ -347,6 +348,12 @@ export const dtdHighRarity: Record<string, CardScript> = {
       ctx.addCounter(card.instanceId, "power", 1);
   }),
   "soulbond resolve|0": {
+    fixedDamagePrevention: {
+      amount: 1,
+      oncePerTurn: true,
+      firstDamageEventEachTurn: true,
+      condition: (ctx) => ctx.getFlag("player", "chargedThisTurn") === true,
+    },
     onDefend(ctx) {
       const hand = ctx.player(ctx.seat).hand;
       if (hand.length)
@@ -357,7 +364,7 @@ export const dtdHighRarity: Record<string, CardScript> = {
         );
     },
     onChoose(ctx, hook, option) {
-      if (hook === "soulbond" && option !== "no" && ctx.charge(Number(option))) ctx.preventNextDamage(ctx.seat, 1);
+      if (hook === "soulbond" && option !== "no") ctx.charge(Number(option));
     },
   },
   "banneret of courage|2": solflareToken(COURAGE),
@@ -992,6 +999,15 @@ export const dtdHighRarity: Record<string, CardScript> = {
       const target =
         hook === "diplomacy-opponent" ? opponentSeat(ctx) : hook === "diplomacy-self" ? ctx.seat : undefined;
       if (target === undefined) return;
+      ctx.logPublic(localizedCardLog(
+        ctx,
+        `${ctx.cardData(ctx.player(target).heroCardId).name} chooses ${option} for ${ctx.data.name}`,
+        "card.log.dtd.diplomacy.mode.chosen",
+        {
+          player: { kind: "player", seat: target },
+          mode: { kind: "term", id: option === "war" ? "card.dtd.option.war" : "card.dtd.option.peace" },
+        },
+      ));
       ctx.addModifier({
         scope: "until-end-of-turn",
         seat: target,
