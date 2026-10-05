@@ -371,16 +371,22 @@
   object-position: center;
   border-radius: 6px;
 }
-/* The art window is a little shorter than its width so its overhanging name
-   and stat bars leave the complete card with a square silhouette. The image
-   keeps its native aspect ratio; edge slices restore the printing's frame. */
+/* The complete card owns a square box, including its raised title and stats.
+   Keep the art inset inside that box so faces, backs, and empty zones have
+   identical layout and animation bounds. */
 .card-zone.card-board-square {
-  width: var(--arena-square-size, clamp(84px, 12vh, 165px));
-  height: calc(var(--arena-square-size, clamp(84px, 12vh, 165px)) * .88);
+  --square-card-size: var(--arena-square-size, clamp(84px, 12vh, 165px));
+  --board-name-height: clamp(16px, calc(var(--square-card-size) * .14), 23px);
+  --board-stat-height: clamp(16px, 2vh, 19px);
+  --board-art-top: calc(var(--board-name-height) / 2 + 3px);
+  --board-art-bottom: calc(var(--board-stat-height) * .09);
+  width: var(--square-card-size);
+  height: var(--square-card-size);
   container-type: inline-size;
   padding: 0;
   border: 0;
   border-radius: min(8px, 5%);
+  background: none;
   overflow: visible;
 }
 .card-board-square .card-chain-source-badge {
@@ -432,7 +438,7 @@
   /* Keep the artwork and frame-edge slices on the same offset at every size. */
   --board-square-image-top: -27%;
   position: absolute;
-  inset: 0;
+  inset: var(--board-art-top) 0 var(--board-art-bottom);
   display: block;
   overflow: hidden;
   border-radius: inherit;
@@ -465,10 +471,9 @@
 .board-square-frame-right { clip-path: inset(0 0 0 91.5%); }
 .board-square-frame-right img { left: -28.7%; }
 .board-square-name {
-  --board-name-height: clamp(16px, 14cqi, 23px);
   position: absolute;
   z-index: 2;
-  top: 0;
+  top: var(--board-art-top);
   left: 0;
   right: 0;
   height: var(--board-name-height);
@@ -481,7 +486,7 @@
   line-height: 1;
   text-align: center;
   transform: translateY(-50%);
-  /* The bar overhangs the card box; it must remain hit-testable so hovering
+  /* The bar overhangs the art; it must remain hit-testable so hovering
      across it keeps equipment/soul stacks expanded. */
   pointer-events: auto;
 }
@@ -560,11 +565,11 @@
   position: absolute;
   z-index: 2;
   right: 1px;
-  bottom: 0;
+  bottom: var(--board-art-bottom);
   display: inline-flex;
   align-items: stretch;
   max-width: calc(100% - 4px);
-  height: clamp(16px, 2vh, 19px);
+  height: var(--board-stat-height);
   overflow: hidden;
   border: 1px solid #756f62;
   border-radius: 5px 7px 7px 5px;
@@ -601,8 +606,7 @@
 }
 .mat-square-board :is(.zone-deck, .zone-graveyard, .zone-banished, .zone-pitch)
   .card-zone.card-board-square {
-  width: var(--mat-zone-col);
-  height: calc(var(--mat-zone-col) * .88);
+  --square-card-size: var(--mat-zone-col);
 }
 .card-hasimg .c-zonelabel {
   bottom: 5px;
@@ -822,7 +826,7 @@
   width: var(--arena-square-size, clamp(84px, 12vh, 165px));
   height: var(--arena-square-size, clamp(84px, 12vh, 165px));
   border: 1px solid #a99262;
-  border-radius: 6px;
+  border-radius: min(8px, 5%);
   box-shadow: 0 0 0 1px #21180f, 0 3px 8px #0008;
 }
 .mat-square-board .card-back.card-back-square {

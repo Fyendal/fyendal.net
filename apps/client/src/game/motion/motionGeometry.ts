@@ -33,6 +33,8 @@ export interface MotionRect {
 export interface MotionAnchorSnapshot {
   cards: ReadonlyMap<string, MotionRect>;
   zones: ReadonlyMap<string, MotionRect>;
+  /** Zones measured from a card or card-sized placeholder, not a container. */
+  cardSizedZones?: ReadonlySet<string>;
   /** Local announcement geometry; never changes the card's actual zone. */
   focusSources?: ReadonlyMap<number, MotionRect>;
 }
@@ -127,6 +129,7 @@ function motionRect(element: Element): MotionRect | null {
 export function measureMotionAnchors(root: ParentNode): MeasuredMotionAnchors {
   const cards = new Map<string, MotionRect>();
   const zones = new Map<string, MotionRect>();
+  const cardSizedZones = new Set<string>();
   const cardElements = new Map<string, HTMLElement>();
   const focusSources = new Map<number, MotionRect>();
   for (const element of root.querySelectorAll<HTMLElement>("[data-motion-card]")) {
@@ -157,7 +160,10 @@ export function measureMotionAnchors(root: ParentNode): MeasuredMotionAnchors {
     const key = element.dataset.motionZoneAnchor;
     if (!key) continue;
     const rect = motionRect(element);
-    if (rect) zones.set(key, rect);
+    if (rect) {
+      zones.set(key, rect);
+      cardSizedZones.add(key);
+    }
   }
   for (const element of root.querySelectorAll<HTMLElement>("[data-motion-focus-source]")) {
     const rawId = element.dataset.motionFocusSource;
@@ -166,7 +172,7 @@ export function measureMotionAnchors(root: ParentNode): MeasuredMotionAnchors {
     const rect = motionRect(element);
     if (Number.isSafeInteger(instanceId) && instanceId >= 0 && rect) focusSources.set(instanceId, rect);
   }
-  return { snapshot: { cards, zones, focusSources }, cardElements };
+  return { snapshot: { cards, zones, cardSizedZones, focusSources }, cardElements };
 }
 
 function endpoint(
@@ -176,8 +182,9 @@ function endpoint(
 ): { rect: MotionRect; exact: boolean } | null {
   const card = presentationKey ? anchors.cards.get(presentationKey) : undefined;
   if (card) return { rect: card, exact: true };
-  const zone = anchors.zones.get(motionLocationKey(location));
-  return zone ? { rect: zone, exact: false } : null;
+  const zoneKey = motionLocationKey(location);
+  const zone = anchors.zones.get(zoneKey);
+  return zone ? { rect: zone, exact: anchors.cardSizedZones?.has(zoneKey) === true } : null;
 }
 
 function cardRectWithinZone(zone: MotionRect, reference?: MotionRect): MotionRect {

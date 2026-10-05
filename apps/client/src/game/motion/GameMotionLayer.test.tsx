@@ -2,11 +2,49 @@ import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import { MotionCardVisual, motionFlightHandsOff, motionFlightLayer, motionFlightStartRect, squareMotionFlight } from "./GameMotionLayer.js";
-import type { MotionFlight } from "./motionGeometry.js";
+import { measureMotionAnchors, resolveMotionBatch, type MotionFlight } from "./motionGeometry.js";
 
 const card = { instanceId: 12, cardId: "WTR160", owner: 0 };
 
 describe("motion card presentation", () => {
+  it.each(["graveyard", "banish"] as const)(
+    "matches the %s pile when a deck card has no visible destination card",
+    (kind) => {
+      const deck = { left: 600, top: 300, width: 120, height: 106 };
+      const pile = { left: 600, top: 100, width: 120, height: 106 };
+      const zoneAnchors = [
+        { dataset: { motionZoneAnchor: "0:deck" }, getBoundingClientRect: () => deck },
+        { dataset: { motionZoneAnchor: `0:${kind}` }, getBoundingClientRect: () => pile },
+      ];
+      const root = {
+        querySelectorAll: (selector: string) => selector === "[data-motion-zone-anchor]" ? zoneAnchors : [],
+      } as unknown as ParentNode;
+      const { snapshot } = measureMotionAnchors(root);
+      const batch = resolveMotionBatch([{
+        kind: "move",
+        source: { kind: "deck", seat: 0 },
+        destination: { kind, seat: 0 },
+        destinationPresentationKey: `0:${kind}:${card.instanceId}`,
+        visual: { kind: "face", card },
+        instanceId: card.instanceId,
+        count: 1,
+        confidence: "exact",
+      }], snapshot, snapshot, "deck-to-pile");
+      const flight = batch!.flights[0]!;
+
+      expect(flight.start).toEqual(deck);
+      expect(flight.end).toEqual(pile);
+      expect(squareMotionFlight(flight, true)).toBe(true);
+      const html = renderToStaticMarkup(createElement(MotionCardVisual, {
+        visual: flight.visual,
+        count: 1,
+        square: squareMotionFlight(flight, true),
+      }));
+      expect(html).toContain("card-board-square");
+      expect(html).not.toContain("game-motion-image game-motion-face");
+    },
+  );
+
   it("keeps the landed attack visible until its stack destination can take over", () => {
     const flight = {
       mode: "move", destinationPresentationKey: "stack:layer:42",

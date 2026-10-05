@@ -211,11 +211,12 @@
 }
 .mat-half.mat-opp { align-content: end; }
 
-/* Arena card art and its overhanging labels fit within square grid rows. Keep
+/* Arena cards, backs, and empty zones fit within square grid rows. Keep
    the equipment/hero cluster together and reserve the flexible runway for
    board permanents and piles. */
 .mat-half.mat-square-board {
   --mat-column-gap: clamp(10px, 1.35vh, 15px);
+  --mat-zone-col: var(--arena-square-size);
   --mat-outer-col: var(--arena-square-size);
   --mat-arms-col: var(--arena-square-size);
   --mat-weapon-0-col: var(--arena-square-size);
@@ -233,11 +234,6 @@
     minmax(0, 1fr)
     var(--mat-zone-col)
     var(--mat-zone-col);
-}
-/* Equal outer track widths let the two flexible gaps center the hero and
-   weapon trio on roomy laptop and desktop boards. */
-@media (min-width: 1101px) {
-  .mat-half.mat-square-board { --mat-zone-col: var(--arena-square-size); }
 }
 /* Seven portrait-card tracks fit beside the rail. Keep the outer pairs and
    center trio close together; the two spacer tracks take any extra width. */
@@ -398,7 +394,7 @@
 }
 .mat-half.mat-square-board .equipment-zone-empty {
   width: var(--arena-square-size);
-  height: calc(var(--arena-square-size) * .88);
+  height: var(--arena-square-size);
   border-color: #a9946b88;
   border-radius: min(8px, 5%);
   background: linear-gradient(160deg, #c2ad780d, #0b080212);
@@ -410,7 +406,7 @@
 }
 .mat-half.mat-square-board .zone-pile-empty {
   width: var(--mat-zone-col);
-  height: calc(var(--mat-zone-col) * .88);
+  height: var(--mat-zone-col);
 }
 .zone-pile-empty .mat-zone-label {
   font-size: clamp(8px, 1.1vh, 12px);

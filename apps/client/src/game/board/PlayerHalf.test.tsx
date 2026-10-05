@@ -146,8 +146,12 @@ describe("PlayerHalf", () => {
     expect(html.match(/card-board-square[^>]*data-cardid="WTR160"/g)).toHaveLength(2);
     expect(html).toMatch(/card-zone card-hasimg[^>]*data-cardid="WTR160"[^>]*data-motion-card="0:arsenal:16"/);
     expect(html).toContain("zone-pile-empty");
+    expect(html).toContain('data-motion-zone-anchor="0:graveyard"');
+    expect(html).toContain('data-motion-zone-anchor="0:banish"');
     expect(html).not.toContain("data-empty-label");
     const emptyPiles = renderPlayerHalf(player);
+    expect(emptyPiles).toContain('data-motion-zone-anchor="0:graveyard"');
+    expect(emptyPiles).toContain('data-motion-zone-anchor="0:banish"');
     expect(emptyPiles).toContain('<span class="mat-zone-label">Deck</span>');
     expect(emptyPiles).toContain('<span class="mat-zone-label">Pitch</span>');
   });

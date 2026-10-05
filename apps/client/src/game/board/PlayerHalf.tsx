@@ -319,6 +319,7 @@ export function PlayerHalf({
         <div
           className={`pitch-top zone-card-pile${cards.length > 1 ? " zone-card-pile-multiple" : ""}`}
           data-stack-depth={cards.length > 1 ? Math.min(cards.length, 3) : undefined}
+          data-motion-zone-anchor={motionLocationKey(location)}
         >
           <InactiveZoneCard
             card={cards[cards.length - 1]!}
@@ -329,7 +330,12 @@ export function PlayerHalf({
           <span className="pip pile-pip">{cards.length}</span>
         </div>
       ) : squareBoard ? (
-        <span className="card-zone equipment-zone-empty zone-pile-empty" role="img" aria-label={zoneLabel(kind)}>
+        <span
+          className="card-zone equipment-zone-empty zone-pile-empty"
+          role="img"
+          aria-label={zoneLabel(kind)}
+          data-motion-zone-anchor={motionLocationKey(location)}
+        >
           <span className="mat-zone-label">{zoneLabel(kind)}</span>
         </span>
       ) : null}

@@ -181,6 +181,7 @@ export function GameBoard() {
     }
   });
   const [preview, setPreview] = useState<BoardPreview | null>(null);
+  const previewTargetRef = useRef<HTMLElement | null>(null);
 
   const {
     railCollapsed,
@@ -904,7 +905,8 @@ export function GameBoard() {
       }
     : requestPass;
 
-  // hover preview next to the hovered card (event delegation via data-cardid)
+  // Require mouse movement: animations can fire mouseover when a card moves
+  // under a stationary pointer, including Dash I/O's changing deck top.
   const onHoverCard = (e: React.MouseEvent) => {
     if (!window.matchMedia("(hover: hover) and (pointer: fine)").matches) return;
     const target = e.target as HTMLElement;
@@ -922,6 +924,12 @@ export function GameBoard() {
     const r = el.getBoundingClientRect();
     const cardId = el.dataset.cardid ?? null;
     const effectLabel = el.dataset.effectLabel;
+    // Moving within the same card should not rerender the whole board.
+    if (
+      preview && previewTargetRef.current === el && preview.id === cardId &&
+      preview.effectTooltip?.label === effectLabel
+    ) return;
+    previewTargetRef.current = el;
     if (!cardId && effectLabel) {
       const above = r.top >= window.innerHeight - r.bottom;
       const maxWidth = Math.min(360, window.innerWidth - 16);
@@ -1031,7 +1039,8 @@ export function GameBoard() {
       className={`table${railCollapsed ? " rail-is-collapsed" : ""}${view.phase === "game-over" ? " game-is-over" : ""}${hasActiveCombatChain ? " has-active-combat-chain" : ""}${mobileHandIsHidden ? " mobile-hand-is-hidden" : ""}${hasOwnPriority ? " has-own-priority" : ""}`}
       data-playability-cue={playabilityCuePreference}
       data-motion-preference={motionPreference}
-      onMouseOver={onHoverCard}
+      onMouseMove={onHoverCard}
+      onMouseOut={() => setPreview(null)}
       onMouseLeave={() => setPreview(null)}
       {...cardLongPressHandlers}
       onClickCapture={onTableClickCapture}
