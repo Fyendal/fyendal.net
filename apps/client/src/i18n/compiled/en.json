@@ -15199,6 +15199,18 @@
       "value": "Turn a banished card face down to create a Corrupted Corpse"
     }
   ],
+  "card.trigger.pen.themis.facedown": [
+    {
+      "type": 0,
+      "value": "Turn the named banished card face-down"
+    }
+  ],
+  "card.trigger.pen.themis.name": [
+    {
+      "type": 0,
+      "value": "Name a card and turn matching banished cards face-down"
+    }
+  ],
   "card.trigger.steam.maintain": [
     {
       "type": 0,
@@ -26545,7 +26557,7 @@
   "settings.showGuidance.tooltip": [
     {
       "type": 0,
-      "value": "Shows priority-window prompts and trigger descriptions."
+      "value": "Shows priority and reaction window prompts."
     }
   ],
   "settings.soundEffects": [

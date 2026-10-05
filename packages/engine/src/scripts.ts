@@ -933,6 +933,9 @@ export interface CardScript {
   allZoneNames?: string[];
   /** Additional classes/subtypes this face-up object has in every zone. */
   allZoneTypes?: string[];
+  /** Additional classes/subtypes granted to the controller's hero while this
+   * equipment is equipped face up and its abilities are functional. */
+  equippedHeroTypes?: string[];
   /** This active object makes its controller count as having this many
    * additional equipped objects of each class/subtype. */
   countsAsEquipped?: Readonly<Record<string, number>>;

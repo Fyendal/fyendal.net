@@ -322,6 +322,8 @@ describe("GameBoard pending interactions", () => {
     expect(withTrigger).not.toContain('data-motion-card="stack:layer:30"');
     expect(withTrigger).toContain('data-motion-card="stack:layer:1"');
     expect(withTrigger).toContain('data-motion-card="0:hero:1"');
+    // Default settings hide guidance, but the stack still identifies its effects.
+    expect(withTrigger).toContain('class="stack-label">Triggered ability</div>');
   });
 
   it("highlights only pitchable hand cards during payment and restores ordinary action cues afterwards", () => {

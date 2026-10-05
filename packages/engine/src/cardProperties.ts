@@ -219,6 +219,15 @@ export function cardTypesOf(state: GameStateInternal, card: CardInstance): strin
   // an effect such as Erase Face does not by itself remove the gained class.
   const controllerSeat = findCardAnywhere(state, card.instanceId)?.seat ?? card.owner;
   const controllerHero = state.players[controllerSeat]?.hero ?? state.players[card.owner]?.hero;
+  // CR 6.2.3a: an equipment's static grant ends when its ability stops
+  // functioning. Derive it from current equipment instead of stamping the hero.
+  const equippedHeroTypes = controllerHero?.instanceId === card.instanceId
+    ? Object.values(state.players[controllerSeat]!.equipment).flatMap((equipment) =>
+      equipment && !equipment.faceDown
+        ? (scriptOf(state, equipment.cardId, equipment)?.equippedHeroTypes ?? [])
+        : []
+    )
+    : [];
   const universalClasses = !card.faceDown &&
       instanceHasKeyword(state, card, "universal") && controllerHero
     ? (instanceDataOf(state, controllerHero).classes ?? [])
@@ -230,6 +239,7 @@ export function cardTypesOf(state: GameStateInternal, card: CardInstance): strin
     ),
     ...universalClasses,
     ...allZone,
+    ...equippedHeroTypes,
     ...(card.grantedTypes ?? []),
     ...(card.temporaryAlly ? ["ally"] : []),
     ...state.modifiers.flatMap((modifier) => {

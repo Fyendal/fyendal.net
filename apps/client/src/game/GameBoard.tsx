@@ -1246,7 +1246,6 @@ export function GameBoard() {
         context={combatPresentation.context}
         miniHost={splitLineMiniHost}
         visibility={mobileCombatFloatVisibility}
-        lessGuidance={lessGuidance}
         onSkipRunechants={connected && !spectating && !replaying && canSkipCurrentRunechant
           ? () => sendRunechantSkip(true)
           : undefined}

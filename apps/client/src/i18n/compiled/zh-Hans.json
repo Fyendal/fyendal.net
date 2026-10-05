@@ -14581,6 +14581,18 @@
       "value": "将一张已放逐的牌翻至面朝下，以生成一张 Corrupted Corpse"
     }
   ],
+  "card.trigger.pen.themis.facedown": [
+    {
+      "type": 0,
+      "value": "将放逐区中该名称的牌翻至牌面朝下"
+    }
+  ],
+  "card.trigger.pen.themis.name": [
+    {
+      "type": 0,
+      "value": "说出一个牌名，并将放逐区中同名的牌翻至牌面朝下"
+    }
+  ],
   "card.trigger.steam.maintain": [
     {
       "type": 0,
@@ -25291,7 +25303,7 @@
   "settings.showGuidance.tooltip": [
     {
       "type": 0,
-      "value": "显示优先权窗口提示和触发效果说明。"
+      "value": "显示优先权窗口和响应窗口提示。"
     }
   ],
   "settings.soundEffects": [

@@ -400,7 +400,7 @@ export function fireFriendlyDestroyed(
   }
 }
 
-/** Notify the owner's hero and permanents that one of their cards was banished. */
+/** Queue banish triggers for either player, then notify the owner's hero and permanents. */
 export function fireCardBanished(
   state: GameStateInternal,
   runtime: EngineRuntime,
@@ -408,6 +408,7 @@ export function fireCardBanished(
   card: CardInstance,
   from: string,
 ): void {
+  runtime.events.queueTriggeredEvent(state, "card-banished", seat, card, { from, to: "banish" });
   for (const src of hookSources(state, seat, {
     board: true,
     equipment: true,

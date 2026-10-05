@@ -565,6 +565,46 @@ describe("game setup & turn structure", () => {
     expect(cardTypesOf(s, card)).not.toContain("ice");
   });
 
+  it("grants equipped hero types only while the equipment's ability is functional", () => {
+    const s = makeGame(106);
+    s.scriptsRef = {
+      ...s.scriptsRef,
+      HELM: { equippedHeroTypes: ["royal"] },
+    };
+    const p = player(s, 0);
+    const helm: CardInstance = { instanceId: s.nextInstanceId++, cardId: "HELM", owner: 0 };
+    p.equipment.head = helm;
+    expect(cardTypesOf(s, p.hero)).toContain("royal");
+    expect(cardTypesOf(s, helm)).not.toContain("royal");
+    expect(cardTypesOf(s, p.hand[0]!)).not.toContain("royal");
+
+    helm.faceDown = true;
+    expect(cardTypesOf(s, p.hero)).not.toContain("royal");
+    helm.faceDown = false;
+    p.hero.counters = { ownedCardAbilitiesDisabledTurn: s.turn };
+    expect(cardTypesOf(s, p.hero)).not.toContain("royal");
+    delete p.hero.counters.ownedCardAbilitiesDisabledTurn;
+    expect(cardTypesOf(s, p.hero)).toContain("royal");
+
+    destroyPermanent(s, engineRuntime, 0, helm);
+    expect(p.graveyard).toContainEqual(expect.objectContaining({ instanceId: helm.instanceId }));
+    expect(cardTypesOf(s, p.hero)).not.toContain("royal");
+  });
+
+  it("equipped hero types follow the equipment's controller rather than its owner", () => {
+    const s = makeGame(107);
+    s.scriptsRef = { ...s.scriptsRef, HELM: { equippedHeroTypes: ["royal"] } };
+    const p0 = player(s, 0);
+    const p1 = player(s, 1);
+    const helm = p0.equipment.head = { instanceId: s.nextInstanceId++, cardId: "HELM", owner: 0 };
+    delete p0.equipment.head;
+    p1.equipment.head = helm;
+
+    expect(helm.owner).toBe(0);
+    expect(cardTypesOf(s, p0.hero)).not.toContain("royal");
+    expect(cardTypesOf(s, p1.hero)).toContain("royal");
+  });
+
   it("gives Universal cards their controller's hero class in every face-up zone", () => {
     const s = makeGame(105);
     s.cardsRef = {

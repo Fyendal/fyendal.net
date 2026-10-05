@@ -47,7 +47,6 @@ export function StackFloat({
   miniHost,
   visibility,
   motionDeferred = false,
-  lessGuidance = false,
   onSkipRunechants,
 }: {
   layers: StackLayerView[];
@@ -59,8 +58,6 @@ export function StackFloat({
   miniHost?: HTMLElement | null;
   /** Optional controller shared with sibling floats on compact layouts. */
   visibility?: FloatVisibilityController;
-  /** Hide explanatory layer labels while retaining the stack objects. */
-  lessGuidance?: boolean;
   /** One-shot shortcut offered only during the viewer's Runechant choice. */
   onSkipRunechants?: () => void;
 }) {
@@ -161,7 +158,7 @@ export function StackFloat({
                   ×{count}
                 </span>
               ) : null}
-              {!bloodDebt && !lessGuidance ? (
+              {!bloodDebt ? (
                 <div className="stack-label">
                   {stackLayerLabel(l.labelMessage
                     ? formatGameMessage(intl, l.labelMessage, {

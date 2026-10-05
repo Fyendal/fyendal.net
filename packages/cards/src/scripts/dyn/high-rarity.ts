@@ -1001,7 +1001,7 @@ export const dynHighRarity: Record<string, CardScript> = {
     ],
   },
   "crown of dominion|0": {
-    allZoneTypes: ["royal"],
+    equippedHeroTypes: ["royal"],
     onGameStart(ctx) {
       ctx.createToken("DYN243");
     },

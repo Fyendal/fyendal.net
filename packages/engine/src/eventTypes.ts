@@ -9,6 +9,7 @@ export type TriggerEvent =
   | "card-drawn"
   | "card-left-arena"
   | "card-discarded"
+  | "card-banished"
   | "card-banished-for-boost"
   | "card-boosted"
   | "card-put-into-graveyard"

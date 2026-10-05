@@ -1304,12 +1304,49 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
   },
   "solray plating|0": { optionalDamagePrevention: { amount: 1, moveSource: "destroy" } },
   "blessing of themis|2": {
+    onEnterArena(ctx) {
+      ctx.setCounter("themisNamed", 0);
+    },
+    onChoose(ctx, hook, option) {
+      if (hook !== "pen-themis-name") return;
+      ctx.setChosenName(option);
+      ctx.setCounter("themisNamed", 1);
+      for (const player of ctx.state.players) {
+        for (const card of player.banish) {
+          if (!card.faceDown && named(ctx, card, option)) ctx.setCardFaceDown(card.instanceId, true);
+        }
+      }
+    },
     triggers: [
       {
         event: "start-of-turn",
         label: "Put Blessing of Themis into your soul",
+        labelMessage: decisionMessage("card.trigger.common.soul.put", { target: "Blessing of Themis" }),
         effect(ctx) {
           ctx.putIntoSoul(ctx.self.instanceId);
+        },
+      },
+      {
+        event: "card-entered-arena",
+        label: "Name a card and turn matching banished cards face-down",
+        labelMessage: decisionMessage("card.trigger.pen.themis.name"),
+        condition: (ctx, card) => card?.instanceId === ctx.self.instanceId,
+        effect(ctx) {
+          ctx.requestNameChoice("pen-themis-name", decisionPrompt("Name a card", "card.pen.card.name"));
+        },
+      },
+      {
+        event: "card-banished",
+        whose: "any",
+        label: "Turn the named banished card face-down",
+        labelMessage: decisionMessage("card.trigger.pen.themis.facedown"),
+        condition: (ctx, card) => ctx.getCounter("themisNamed") === 1 &&
+          !!card && !card.faceDown && !!ctx.self.chosenName &&
+          named(ctx, card, ctx.self.chosenName),
+        effect(ctx, card) {
+          if (!card) return;
+          const banished = ctx.player(card.owner).banish.find((entry) => entry.instanceId === card.instanceId);
+          if (banished && !banished.faceDown) ctx.setCardFaceDown(banished.instanceId, true);
         },
       },
     ],

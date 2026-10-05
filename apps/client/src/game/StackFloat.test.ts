@@ -145,16 +145,15 @@ describe("stack context", () => {
     expect(html).toContain("Skip consecutive Runechants in this priority window");
   });
 
-  it("hides trigger effect text with Less Guidance", () => {
+  it("shows trigger effect text and optionality without a visible source card", () => {
     const html = renderStack({
       layers: [{ card: null, seat: 0, label: "Create an Eloquence token", optional: true }],
-      lessGuidance: true,
     });
 
     expect(html).toContain("The Stack");
     expect(html).toContain("Trigger");
-    expect(html).not.toContain("Create an Eloquence token");
-    expect(html).not.toContain("(may)");
+    expect(html).toContain("Create an Eloquence token");
+    expect(html).toContain("(may)");
   });
 
   it("renders grouped Blood Debt as one life-loss tile", () => {
@@ -166,7 +165,6 @@ describe("stack context", () => {
         optional: false,
         count: 3,
       }],
-      lessGuidance: true,
     });
 
     expect(html).toContain("blood-debt-stack-tile");
