@@ -1,4 +1,4 @@
-import { CLIENT_UPDATE_MESSAGE, LiveServerMessageDecoder, decodeStateFrame, liveWebSocketUrl } from "@fyendal/protocol";
+import { LiveServerMessageDecoder, decodeStateFrame, liveWebSocketUrl } from "@fyendal/protocol";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { AddressInfo } from "node:net";
 import { once } from "node:events";
@@ -176,7 +176,7 @@ describe("gateway WebSocket compression", () => {
     ws.on("message", (raw) => messages.push(JSON.parse(String(raw))));
     const [code] = await once(ws, "close");
     expect(code).toBe(4406);
-    expect(messages).toEqual([{ type: "error", code: "INVALID_MESSAGE", message: CLIENT_UPDATE_MESSAGE }]);
+    expect(messages).toEqual([]);
   });
 
   it("enforces the incoming size limit after decompression", async () => {

@@ -89,7 +89,7 @@ describe("incremental log transport", () => {
     expect(human.encode(state(1, 21)).state.view.log).toEqual(["event 21"]);
   });
 
-  it.each(["gap", "duplicate", "stream", "seat", "game", "overflow", "sequence", "drop", "legacy"])(
+  it.each(["gap", "duplicate", "stream", "seat", "game", "overflow", "sequence", "drop"])(
     "rejects %s without applying a partial state", (kind) => {
       const encoder = new StateLogTransport();
       const decoder = new LiveServerMessageDecoder();
@@ -105,21 +105,28 @@ describe("incremental log transport", () => {
         fallback: "event 201", sequence: 1, message: { id: "server.log.undo.turn" },
       }];
       if (kind === "drop") frame.drop = 201;
-      expect(() => decoder.decode(kind === "legacy" ? frame.state : frame)).toThrow(StateStreamError);
+      expect(() => decoder.decode(frame)).toThrow(StateStreamError);
       expect(() => decoder.decode(encoder.encode(state(3, 200, 3)))).toThrow(StateStreamError);
       encoder.reset();
       expect(decoder.decode(encoder.encode(state(3, 200, 3)))).toEqual(state(3, 200, 3));
     },
   );
 
-  it("validates exact frame keys and bounds and rejects unframed legacy states", () => {
+  it("validates exact frame keys and bounds", () => {
     const frame = new StateLogTransport().encode(state(1, 20));
     for (const invalid of [{ ...frame, extra: true }, { ...frame, sequence: 0 },
       { ...frame, sequence: Number.MAX_SAFE_INTEGER + 1 }, { ...frame, drop: -1 },
       { ...frame, drop: 0.5 }, { ...frame, stream: "" }, { ...frame, stream: "a".repeat(65) }]) {
       expect(decodeStateFrame(invalid)).toBeNull();
     }
-    expect(() => new LiveServerMessageDecoder().decode(frame.state)).toThrow(StateStreamError);
+  });
+
+  it("ignores unsupported messages without disturbing the state stream", () => {
+    const encoder = new StateLogTransport();
+    const decoder = new LiveServerMessageDecoder();
+    decoder.decode(encoder.encode(state(1, 20)));
+    expect(decoder.decode({ type: "unsupported", payload: {} })).toBeNull();
+    expect(decoder.decode(encoder.encode(state(1, 21)))).toEqual(state(1, 21));
   });
 
   it("resets on auth/room acknowledgements and isolates its baseline from consumers", () => {

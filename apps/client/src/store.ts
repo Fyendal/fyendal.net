@@ -22,7 +22,6 @@ import {
   StateStreamError,
   liveWebSocketUrl,
   CLIENT_UPDATE_CLOSE_CODE,
-  CLIENT_UPDATE_MESSAGE,
   MAX_REPLAY_NOTE_LENGTH,
   replayFileNotes,
   type ReplayServerNote,
@@ -441,7 +440,7 @@ export const useStore = create<StoreState>((set, get) => {
       joiningRoomCode = null;
       resetRoomCommandPipeline();
       set({ connected: false });
-      if (event.code === CLIENT_UPDATE_CLOSE_CODE || get().clientUpdateRequired) {
+      if (event.code === CLIENT_UPDATE_CLOSE_CODE) {
         cancelReconnect();
         errors.clear();
         reconnectOnActive = false;
@@ -478,14 +477,6 @@ export const useStore = create<StoreState>((set, get) => {
       if (ws !== socket || connectionEpoch !== epoch || streamFailed) return;
       try {
         const message = decoder.decode(JSON.parse(String(ev.data)));
-        if (message?.type === "error" && message.code === "INVALID_MESSAGE"
-          && message.message === CLIENT_UPDATE_MESSAGE) {
-          streamFailed = true;
-          // Keep the rejection even if the close handshake is interrupted.
-          set({ clientUpdateRequired: true });
-          socket.close(CLIENT_UPDATE_CLOSE_CODE, "client update required");
-          return;
-        }
         if (message) handleMessage(message);
         else failPendingRoomEntry("room state could not be loaded");
       } catch (error) {
@@ -1244,9 +1235,7 @@ export const useStore = create<StoreState>((set, get) => {
         }
         if (failPendingRoomEntry(msg.message)) break;
         resetRoomCommandPipeline();
-        const staleVersion = msg.message === "stale room version";
-        const legacyStaleVersion = msg.code === "CONFLICT" && staleVersion;
-        if (msg.code === "RESYNC_REQUIRED" || legacyStaleVersion) {
+        if (msg.code === "RESYNC_REQUIRED") {
           // Keep only the current room credential needed for an authoritative
           // rejoin. All room projections and version assumptions are stale.
           resetRoomVersionState();

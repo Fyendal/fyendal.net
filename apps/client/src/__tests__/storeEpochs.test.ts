@@ -2235,7 +2235,7 @@ describe("client connection and account race fences", () => {
     useStore.getState().leave();
   });
 
-  it("silently reloads the room when a stale version conflict still occurs", async () => {
+  it("uses RESYNC_REQUIRED rather than error text to reload a stale room", async () => {
     const { useStore } = await import("../store.js");
     useStore.getState().joinRoom("AAAAAA");
     const socket = FakeWebSocket.instances[0]!;
@@ -2244,7 +2244,11 @@ describe("client connection and account race fences", () => {
     socket.message({ ...staleState, version: 2, legal: [{ kind: "pass" }] });
     useStore.getState().sendIntent({ kind: "pass" });
 
-    socket.message({ type: "error", code: "RESYNC_REQUIRED", message: "stale room version" });
+    socket.message({ type: "error", code: "CONFLICT", message: "stale room version" });
+    expect(useStore.getState()).toMatchObject({ connected: true, view: staleState.view });
+    expect(socket.readyState).toBe(FakeWebSocket.OPEN);
+
+    socket.message({ type: "error", code: "RESYNC_REQUIRED", message: "reload the authoritative room" });
 
     expect(useStore.getState()).toMatchObject({
       roomCode: "AAAAAA",
@@ -2283,38 +2287,26 @@ describe("client connection and account race fences", () => {
     useStore.getState().leave();
   });
 
-  it.each(["close-code", "error", "interrupted-close"])(
-    "keeps the refresh requirement and stops retries (%s)", async (rejection) => {
-      vi.useFakeTimers();
-      localStorage.setItem("fyendal-auth", JSON.stringify({ token: "token-a", username: "Alice" }));
-      const { useStore } = await import("../store.js");
-      useStore.getState().joinRoom("AAAAAA");
-      const socket = FakeWebSocket.instances[0]!;
-      expect(new URL(socket.url).searchParams.get("transport")).toBe("2");
-      socket.open();
-      if (rejection === "close-code") socket.close(4406);
-      else {
-        if (rejection === "interrupted-close") {
-          vi.spyOn(socket, "close").mockImplementation(() => {
-            socket.readyState = FakeWebSocket.CLOSED;
-            socket.onclose?.({ code: 1006 } as CloseEvent);
-          });
-        }
-        socket.message({ type: "error", code: "INVALID_MESSAGE",
-          message: "Client update required. Reload this page to continue." });
-      }
-      await vi.advanceTimersByTimeAsync(30_000);
-      expect(FakeWebSocket.instances).toHaveLength(1);
-      expect(useStore.getState()).toMatchObject({ connected: false, clientUpdateRequired: true });
-      useStore.getState().setError("another transient error");
-      useStore.getState().setConnectionActive(false);
-      useStore.getState().setConnectionActive(true);
-      useStore.getState().listRooms();
-      await vi.advanceTimersByTimeAsync(30_000);
-      expect(FakeWebSocket.instances).toHaveLength(1);
-      expect(useStore.getState()).toMatchObject({ clientUpdateRequired: true, connectionIssueVisible: false });
-    },
-  );
+  it("keeps the refresh requirement and stops retries after an incompatible close", async () => {
+    vi.useFakeTimers();
+    localStorage.setItem("fyendal-auth", JSON.stringify({ token: "token-a", username: "Alice" }));
+    const { useStore } = await import("../store.js");
+    useStore.getState().joinRoom("AAAAAA");
+    const socket = FakeWebSocket.instances[0]!;
+    expect(new URL(socket.url).searchParams.get("transport")).toBe("2");
+    socket.open();
+    socket.close(4406);
+    await vi.advanceTimersByTimeAsync(30_000);
+    expect(FakeWebSocket.instances).toHaveLength(1);
+    expect(useStore.getState()).toMatchObject({ connected: false, clientUpdateRequired: true });
+    useStore.getState().setError("another transient error");
+    useStore.getState().setConnectionActive(false);
+    useStore.getState().setConnectionActive(true);
+    useStore.getState().listRooms();
+    await vi.advanceTimersByTimeAsync(30_000);
+    expect(FakeWebSocket.instances).toHaveLength(1);
+    expect(useStore.getState()).toMatchObject({ clientUpdateRequired: true, connectionIssueVisible: false });
+  });
 
   it("reconstructs live logs while replay viewing and rejects a missing delta", async () => {
     vi.useFakeTimers();

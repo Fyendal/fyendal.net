@@ -37,6 +37,7 @@ import type {
   RoomSummary,
   ServerMessage,
   StateFrame,
+  StateMessage,
   PlayerTurnFactsView,
   TurnFactsView,
 } from "@fyendal/shared";
@@ -1367,7 +1368,34 @@ function backgroundMatchmakingStatus(value: unknown): boolean {
     && typeof status.opponentAccepted === "boolean";
 }
 
+/** Decode complete application messages, including reconstructed game state. */
 export function decodeServerMessage(value: unknown): ServerMessage | null {
+  return decodeStateMessage(value) ?? decodeServerEvent(value);
+}
+
+function decodeStateMessage(value: unknown): StateMessage | null {
+  const message = object(value);
+  if (!message || message.type !== "state") return null;
+  const valid = exactKeys(message, [
+    "type", "version", "view", "transition", "playerProfiles", "yourSeat", "legal", "actionCandidates",
+    "spectators", "lastActionAt", "botGame",
+  ], ["type", "version", "view", "playerProfiles", "yourSeat", "legal", "lastActionAt"])
+    && nonNegativeInteger(message.version) && decodeGameView(message.view) !== null && nullableSeat(message.yourSeat)
+    && optional(message.transition, gameTransitionView)
+    && Array.isArray(message.playerProfiles) && message.playerProfiles.length === 2
+    && message.playerProfiles.every(playerProfile)
+    && array(message.legal, decodeGameIntentValue, MAX_CARDS)
+    && optional(message.actionCandidates, (v): v is GameIntent[] =>
+      array(v, decodeGameIntentValue, MAX_CARDS))
+    && optional(message.spectators, nonNegativeInteger)
+    && optional(message.botGame, (v): v is boolean => typeof v === "boolean")
+    && Array.isArray(message.lastActionAt) && message.lastActionAt.length === 2
+    && message.lastActionAt.every(nonNegativeInteger);
+  return valid ? value as StateMessage : null;
+}
+
+/** Events sent directly on the socket; game state travels inside state-frame. */
+function decodeServerEvent(value: unknown): Exclude<ServerMessage, StateMessage> | null {
   const message = object(value);
   if (!message || !string(message.type, 32, false)) return null;
   const version = () => nonNegativeInteger(message.version);
@@ -1440,20 +1468,6 @@ export function decodeServerMessage(value: unknown): ServerMessage | null {
       valid = exactKeys(message, ["type", "seat", "message"])
         && seat(message.seat) && EMOTE_MESSAGES.has(String(message.message));
       break;
-    case "state":
-      valid = exactKeys(message, ["type", "version", "view", "transition", "playerProfiles", "yourSeat", "legal", "actionCandidates", "spectators", "lastActionAt", "botGame"], ["type", "version", "view", "playerProfiles", "yourSeat", "legal", "lastActionAt"])
-        && version() && decodeGameView(message.view) !== null && nullableSeat(message.yourSeat)
-        && optional(message.transition, gameTransitionView)
-        && Array.isArray(message.playerProfiles) && message.playerProfiles.length === 2
-        && message.playerProfiles.every(playerProfile)
-        && array(message.legal, decodeGameIntentValue, MAX_CARDS)
-        && optional(message.actionCandidates, (v): v is GameIntent[] =>
-          array(v, decodeGameIntentValue, MAX_CARDS))
-        && optional(message.spectators, nonNegativeInteger)
-        && optional(message.botGame, (v): v is boolean => typeof v === "boolean")
-        && Array.isArray(message.lastActionAt) && message.lastActionAt.length === 2
-        && message.lastActionAt.every(nonNegativeInteger);
-      break;
     case "spectators":
       valid = exactKeys(message, ["type", "count", "version"])
         && nonNegativeInteger(message.count) && version();
@@ -1486,7 +1500,7 @@ export function decodeServerMessage(value: unknown): ServerMessage | null {
         && string(message.message, MAX_TEXT);
       break;
   }
-  return valid ? value as ServerMessage : null;
+  return valid ? value as Exclude<ServerMessage, StateMessage> : null;
 }
 
 export function decodeReplayFile(value: unknown): ReplayFile | null {
@@ -1986,7 +2000,6 @@ export { decodeSerializedStateEnvelope, CorruptRoomError, PERSISTED_STATE_VERSIO
 /** Bump whenever the live socket framing changes incompatibly. */
 export const LIVE_TRANSPORT_VERSION = "2";
 export const CLIENT_UPDATE_CLOSE_CODE = 4406;
-export const CLIENT_UPDATE_MESSAGE = "Client update required. Reload this page to continue.";
 
 /** Both ends discard delivery history at the same session boundaries. */
 export function resetsStateStream(type: ServerMessage["type"]): boolean {
@@ -2011,8 +2024,8 @@ export function decodeStateFrame(value: unknown): StateFrame | null {
     || frame.type !== "state-frame" || !string(frame.stream, 64, false)
     || !nonNegativeInteger(frame.sequence) || frame.sequence === 0
     || !(frame.drop === null || (nonNegativeInteger(frame.drop) && frame.drop <= MAX_LOG))) return null;
-  const state = decodeServerMessage(frame.state);
-  return state?.type === "state" ? {
+  const state = decodeStateMessage(frame.state);
+  return state ? {
     type: "state-frame", stream: frame.stream, sequence: frame.sequence, drop: frame.drop, state,
   } : null;
 }
@@ -2034,9 +2047,7 @@ export class LiveServerMessageDecoder {
   decode(value: unknown): ServerMessage | null {
     const raw = object(value);
     if (raw?.type !== "state-frame") {
-      // Plain state messages are internal application values, never live frames.
-      if (raw?.type === "state") { this.reset(); throw new StateStreamError(); }
-      const message = decodeServerMessage(value);
+      const message = decodeServerEvent(value);
       if (message && resetsStateStream(message.type)) this.reset();
       return message;
     }

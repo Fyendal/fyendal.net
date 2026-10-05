@@ -13,7 +13,7 @@ import { createApiServer } from "./http.js";
 import { createFabraryClient, type FabraryClient } from "./fabrary.js";
 import { clientIp, configuredTrustedProxyHops } from "./network.js";
 import {
-  CLIENT_UPDATE_CLOSE_CODE, CLIENT_UPDATE_MESSAGE, LIVE_TRANSPORT_VERSION, decodeClientMessage, resetsStateStream,
+  CLIENT_UPDATE_CLOSE_CODE, LIVE_TRANSPORT_VERSION, decodeClientMessage, resetsStateStream,
 } from "@fyendal/protocol";
 import { StateLogTransport } from "./stateLogTransport.js";
 import { encodeWireMessage, type WireServerMessage } from "./errors.js";
@@ -1412,7 +1412,6 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
       // A malformed upgrade target is an incompatible connection, not a server error.
     }
     if (transportVersion !== LIVE_TRANSPORT_VERSION) {
-      send(ws, { type: "error", code: "INVALID_MESSAGE", message: CLIENT_UPDATE_MESSAGE });
       ws.close(CLIENT_UPDATE_CLOSE_CODE, "client update required");
       return;
     }
