@@ -92,6 +92,7 @@ export class RoomBroadcaster<Client extends RoomBroadcastClient> {
       || ((event.kind === "prep" || event.kind === "sync") && !!room.state);
     const sendState = event.kind === "state" || (event.kind === "sync" && !!room.state) || announcesGameStart;
     const sendPrep = (event.kind === "prep" || event.kind === "sync") && !room.state;
+    const states = new Map<string, ServerMessage | null>();
     const payloads = new Map<string, string>();
     const encoded = (key: string, make: () => ServerMessage | null): string | null => {
       const cached = payloads.get(key);
@@ -112,8 +113,10 @@ export class RoomBroadcaster<Client extends RoomBroadcastClient> {
         client.sendRaw(encoded("game-started", () => ({ type: "game-started", version: room.version }))!);
       }
       if (sendState) {
-        const payload = encoded(`state-${projectionKey}`, () => stateMessage(room, projectionSeat));
-        if (payload) client.sendRaw(payload);
+        if (!states.has(projectionKey)) states.set(projectionKey, stateMessage(room, projectionSeat));
+        const state = states.get(projectionKey);
+        // Projection is shared per role; delivery history remains socket-local.
+        if (state) client.send(state);
         if (room.state?.phase !== "game-over" && projectionSeat !== null
           && room.seats[projectionSeat]?.controller !== "bot"
           && room.seats.some((seat) => seat?.controller === "bot")) {

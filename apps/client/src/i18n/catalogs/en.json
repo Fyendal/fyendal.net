@@ -2803,5 +2803,8 @@
   "achievements.beatjarl.name": "Beat Jarl Bot",
   "achievements.beatjarl.description": "Defeat Jarl Bot in a practice game.",
   "achievements.beatstarvo.name": "Beat Starvo Bot",
-  "achievements.beatstarvo.description": "Defeat Starvo Bot in a practice game."
+  "achievements.beatstarvo.description": "Defeat Starvo Bot in a practice game.",
+  "connection.update.title": "Update available",
+  "connection.update.description": "Refresh this page to reconnect with the latest version.",
+  "connection.update.refresh": "Refresh page"
 }

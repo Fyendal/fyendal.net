@@ -16055,6 +16055,24 @@
       "value": "vs"
     }
   ],
+  "connection.update.description": [
+    {
+      "type": 0,
+      "value": "Refresh this page to reconnect with the latest version."
+    }
+  ],
+  "connection.update.refresh": [
+    {
+      "type": 0,
+      "value": "Refresh page"
+    }
+  ],
+  "connection.update.title": [
+    {
+      "type": 0,
+      "value": "Update available"
+    }
+  ],
   "discord.label": [
     {
       "type": 0,

@@ -15437,6 +15437,24 @@
       "value": "对阵"
     }
   ],
+  "connection.update.description": [
+    {
+      "type": 0,
+      "value": "请刷新页面，使用最新版本重新连接。"
+    }
+  ],
+  "connection.update.refresh": [
+    {
+      "type": 0,
+      "value": "刷新页面"
+    }
+  ],
+  "connection.update.title": [
+    {
+      "type": 0,
+      "value": "有可用更新"
+    }
+  ],
   "discord.label": [
     {
       "type": 0,

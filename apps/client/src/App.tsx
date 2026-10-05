@@ -2,6 +2,7 @@ import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { useIntl } from "react-intl";
 import { hasSavedRoomSession, hasSavedSpectatorSession, roomCodeFromUrl, useStore } from "./store.js";
 import { Lobby } from "./lobby/Lobby.js";
+import { ClientUpdateRequired } from "./lobby/ClientUpdateRequired.js";
 import { RoomLoading } from "./lobby/RoomLoading.js";
 import { savedReplayIdFromPath } from "./replay/route.js";
 import { BackgroundMatchOffer } from "./matchmaking/BackgroundMatchOffer.js";
@@ -84,6 +85,7 @@ function AppContent() {
   const authUser = useStore((state) => state.authUser);
   const authToken = useStore((state) => state.authToken);
   const screen = useStore((state) => state.screen);
+  const clientUpdateRequired = useStore((state) => state.clientUpdateRequired);
   const pendingFabraryPlay = useStore((state) => state.pendingFabraryPlay);
   const roomCode = useStore((state) => state.roomCode);
   const activeSavedReplayId = useStore((state) => state.activeSavedReplayId);
@@ -166,6 +168,7 @@ function AppContent() {
     );
   }
 
+  if (clientUpdateRequired) return <ClientUpdateRequired />;
   if (savedReplayId && authToken && screen !== "replay") return <ScreenFallback />;
 
   let content: React.ReactNode;

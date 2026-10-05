@@ -974,6 +974,19 @@ export type ServerMessage =
   | { type: "left" }
   | { type: "error"; code: ErrorCode; message: string };
 
+/** Full application state after socket log reconstruction. */
+export type StateMessage = Extract<ServerMessage, { type: "state" }>;
+
+/** With drop=null, state contains the complete log. Otherwise its log arrays
+ * contain only the suffix to append after dropping entries from the baseline. */
+export interface StateFrame {
+  type: "state-frame";
+  stream: string;
+  sequence: number;
+  drop: number | null;
+  state: StateMessage;
+}
+
 /** Stable machine-readable failures. Human messages may change freely. */
 export type ErrorCode =
   | "AUTH_REQUIRED"

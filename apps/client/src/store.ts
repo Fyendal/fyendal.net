@@ -18,7 +18,11 @@ import { savedReplayIdFromPath } from "./replay/route.js";
 import { fabraryPlayRoute } from "./play/route.js";
 import { RoomVersionGate } from "./versionGate.js";
 import {
-  decodeServerMessage,
+  LiveServerMessageDecoder,
+  StateStreamError,
+  liveWebSocketUrl,
+  CLIENT_UPDATE_CLOSE_CODE,
+  CLIENT_UPDATE_MESSAGE,
   MAX_REPLAY_NOTE_LENGTH,
   replayFileNotes,
   type ReplayServerNote,
@@ -399,6 +403,7 @@ export const useStore = create<StoreState>((set, get) => {
   }
 
   function connect(onOpen: () => void): void {
+    if (get().clientUpdateRequired) return;
     if (ws && ws.readyState === WebSocket.OPEN) {
       authSocketIfNeeded();
       return onOpen();
@@ -410,7 +415,9 @@ export const useStore = create<StoreState>((set, get) => {
     const url = apiOrigin
       ? apiOrigin.replace(/^http(s?):\/\//, "ws$1://")
       : `ws://${location.hostname}:8080`;
-    const socket = new WebSocket(url);
+    const socket = new WebSocket(liveWebSocketUrl(url));
+    const decoder = new LiveServerMessageDecoder();
+    let streamFailed = false;
     ws = socket;
     const epoch = ++connectionEpoch;
     socket.onopen = () => {
@@ -423,9 +430,10 @@ export const useStore = create<StoreState>((set, get) => {
       pendingOpen = [];
       for (const cb of cbs) cb();
     };
-    socket.onclose = () => {
+    socket.onclose = (event) => {
       if (ws !== socket || connectionEpoch !== epoch) return;
       browserBot.reset();
+      decoder.reset();
       ws = null;
       connectionEpoch += 1;
       pendingOpen = [];
@@ -433,6 +441,13 @@ export const useStore = create<StoreState>((set, get) => {
       joiningRoomCode = null;
       resetRoomCommandPipeline();
       set({ connected: false });
+      if (event.code === CLIENT_UPDATE_CLOSE_CODE || get().clientUpdateRequired) {
+        cancelReconnect();
+        errors.clear();
+        reconnectOnActive = false;
+        set({ clientUpdateRequired: true, connectionIssueVisible: false });
+        return;
+      }
       const pendingPlay = get().pendingFabraryPlay;
       if (pendingPlay?.status === "starting") {
         set({ pendingFabraryPlay: { ...pendingPlay, status: "ready" },
@@ -460,12 +475,26 @@ export const useStore = create<StoreState>((set, get) => {
       if (!get().roomCode) errors.show("connection failed — is the server running?");
     };
     socket.onmessage = (ev) => {
-      if (ws !== socket || connectionEpoch !== epoch) return;
+      if (ws !== socket || connectionEpoch !== epoch || streamFailed) return;
       try {
-        const message = decodeServerMessage(JSON.parse(String(ev.data)));
+        const message = decoder.decode(JSON.parse(String(ev.data)));
+        if (message?.type === "error" && message.code === "INVALID_MESSAGE"
+          && message.message === CLIENT_UPDATE_MESSAGE) {
+          streamFailed = true;
+          // Keep the rejection even if the close handshake is interrupted.
+          set({ clientUpdateRequired: true });
+          socket.close(CLIENT_UPDATE_CLOSE_CODE, "client update required");
+          return;
+        }
         if (message) handleMessage(message);
         else failPendingRoomEntry("room state could not be loaded");
-      } catch {
+      } catch (error) {
+        if (error instanceof StateStreamError) {
+          streamFailed = true;
+          browserBot.reset();
+          socket.close(4000, "log resync required");
+          return;
+        }
         // A bad unrelated frame must not kill a working game, but during room
         // entry it means there is no usable projection to render.
         failPendingRoomEntry("room state could not be loaded");
@@ -479,7 +508,7 @@ export const useStore = create<StoreState>((set, get) => {
    * 1s, 2s, 4s … capped at 10s, plus jitter.
    */
   function scheduleReconnect(): void {
-    if (reconnectTimer) return;
+    if (get().clientUpdateRequired || reconnectTimer) return;
     if (!get().roomCode && !get().authToken) return;
     const delay = Math.min(1000 * 2 ** reconnectAttempts, 10_000) + Math.random() * 500;
     reconnectAttempts += 1;
@@ -505,6 +534,7 @@ export const useStore = create<StoreState>((set, get) => {
    * close event has already run. */
   function setConnectionActive(active: boolean): void {
     pageActive = active;
+    if (get().clientUpdateRequired) return;
 
     if (!active) {
       if (reconnectTimer) {
@@ -908,6 +938,9 @@ export const useStore = create<StoreState>((set, get) => {
           removeRoomSession(sessionStorage, msg.code);
           saveRoomSession(localStorage, { code: msg.code, token: msg.token });
         }
+        // Once membership is acknowledged, the new token can recover even if
+        // the first full state frame is lost or malformed.
+        if (roomEntryPending) roomEntryRetryable = true;
         pendingLocalSpectatorToken = null;
         history.replaceState(null, "", `/${msg.code}`);
         set({

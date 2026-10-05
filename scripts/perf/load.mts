@@ -15,7 +15,8 @@ import type {
 } from "../../packages/shared/src/index.js";
 import {
   decodeReplayResponse,
-  decodeServerMessage,
+  LiveServerMessageDecoder,
+  liveWebSocketUrl,
   replayFileViews,
 } from "../../packages/protocol/src/index.js";
 import { decklists } from "../../packages/cards/src/index.js";
@@ -99,7 +100,7 @@ function webSocketUrl(appUrl: string): URL {
   url.protocol = url.protocol === "https:" ? "wss:" : "ws:";
   url.pathname = "/";
   url.search = "";
-  return url;
+  return new URL(liveWebSocketUrl(url));
 }
 
 function delay(ms: number): Promise<void> {
@@ -120,6 +121,7 @@ interface Waiter {
 
 class LoadClient {
   private socket: WebSocket | null = null;
+  private decoder = new LiveServerMessageDecoder();
   private readonly waiters = new Set<Waiter>();
   private expectedClose = false;
   readonly failures: string[] = [];
@@ -138,6 +140,7 @@ class LoadClient {
   ) {}
 
   async connect(): Promise<void> {
+    this.decoder = new LiveServerMessageDecoder();
     const socket = new WebSocket(webSocketUrl(config.appUrls[this.gatewayIndex]!), { origin: appOrigin });
     this.socket = socket;
     socket.on("message", (raw) => this.onMessage(raw));
@@ -186,9 +189,11 @@ class LoadClient {
       this.fail("received invalid JSON");
       return;
     }
-    const message = decodeServerMessage(value);
+    let message: ServerMessage | null;
+    try { message = this.decoder.decode(value); }
+    catch { this.fail("received an invalid log stream"); return; }
     if (!message) {
-      this.fail("received a frame rejected by decodeServerMessage");
+      this.fail("received a frame rejected by LiveServerMessageDecoder");
       return;
     }
     this.messages.push(message);

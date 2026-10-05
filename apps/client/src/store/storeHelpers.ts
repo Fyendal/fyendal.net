@@ -10,6 +10,7 @@ export function initialStoreProjection(
     screen: "lobby" as const,
     lobbyRail: "home" as const,
     connected: false,
+    clientUpdateRequired: false,
     connectionIssueVisible: false,
     roomCode: null,
     yourSeat: null,

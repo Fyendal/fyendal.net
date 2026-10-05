@@ -12,7 +12,10 @@ import { recordDeckPlay, resolveFreshDeck } from "./decks.js";
 import { createApiServer } from "./http.js";
 import { createFabraryClient, type FabraryClient } from "./fabrary.js";
 import { clientIp, configuredTrustedProxyHops } from "./network.js";
-import { decodeClientMessage } from "@fyendal/protocol";
+import {
+  CLIENT_UPDATE_CLOSE_CODE, CLIENT_UPDATE_MESSAGE, LIVE_TRANSPORT_VERSION, decodeClientMessage, resetsStateStream,
+} from "@fyendal/protocol";
+import { StateLogTransport } from "./stateLogTransport.js";
 import { encodeWireMessage, type WireServerMessage } from "./errors.js";
 import { RoomBroadcaster } from "./roomBroadcaster.js";
 import { ConnectionRegistry, type ClientCtx } from "./gateway/connectionSession.js";
@@ -55,6 +58,8 @@ import {
   type RoomRow,
   type SeatCredentials,
 } from "./store.js";
+
+const stateTransports = new WeakMap<WebSocket, StateLogTransport>();
 
 /** Cap on decompressed incoming ws messages — clients send small intents;
  * large game states only flow server→client. ws closes oversized messages. */
@@ -1398,6 +1403,20 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
   const WS_MAX_PER_IP = Number(process.env.WS_MAX_PER_IP ?? 10);
 
   wss.on("connection", (ws, req) => {
+    // Also handle errors on sockets rejected before registration.
+    ws.on("error", (error) => consoleError("ws connection error", error));
+    let transportVersion: string | null = null;
+    try {
+      transportVersion = new URL(req.url ?? "/", "http://gateway").searchParams.get("transport");
+    } catch {
+      // A malformed upgrade target is an incompatible connection, not a server error.
+    }
+    if (transportVersion !== LIVE_TRANSPORT_VERSION) {
+      send(ws, { type: "error", code: "INVALID_MESSAGE", message: CLIENT_UPDATE_MESSAGE });
+      ws.close(CLIENT_UPDATE_CLOSE_CODE, "client update required");
+      return;
+    }
+    stateTransports.set(ws, new StateLogTransport());
     const ip = clientIp(req.headers, req.socket.remoteAddress, trustedProxyHops);
     const count = connsByIp.get(ip) ?? 0;
     if (count >= WS_MAX_PER_IP) {
@@ -1434,8 +1453,6 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
       .then((counts) => ctx.send({ type: "queue-status", counts }))
       .catch((error) => consoleError("queue status load failed", error));
 
-    // e.g. a client exceeding maxPayload — log instead of crashing the process
-    ws.on("error", (error) => consoleError("ws connection error", error));
     ws.on("pong", () => {
       socketAlive.set(ws, true);
     });
@@ -1630,7 +1647,11 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
 }
 
 function send(ws: WebSocket, msg: WireServerMessage): boolean {
-  return sendRaw(ws, JSON.stringify(encodeWireMessage(msg)));
+  const transport = stateTransports.get(ws);
+  if (resetsStateStream(msg.type)) transport?.reset();
+  if (msg.type === "state" && !transport) { ws.terminate(); return false; }
+  const wire = msg.type === "state" ? transport!.encode(msg) : encodeWireMessage(msg);
+  return sendRaw(ws, JSON.stringify(wire));
 }
 
 function sendRaw(ws: WebSocket, payload: string): boolean {
@@ -1639,7 +1660,10 @@ function sendRaw(ws: WebSocket, payload: string): boolean {
     ws.terminate();
     return false;
   }
-  ws.send(payload);
+  ws.send(payload, (error) => {
+    // Never continue a stream after an asynchronously failed write.
+    if (error) ws.terminate();
+  });
   return true;
 }
 

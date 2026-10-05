@@ -100,6 +100,8 @@ export interface ViewUpdate {
 /** The single public Zustand contract. Implementation details stay in store.ts. */
 export interface StoreState {
   connected: boolean;
+  /** Sticky until page reload; independent of transient errors and room state. */
+  clientUpdateRequired: boolean;
   /** Delayed presentation state: brief automatic reconnects stay silent. */
   connectionIssueVisible: boolean;
   authUser: string | null;

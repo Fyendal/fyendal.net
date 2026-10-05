@@ -1,3 +1,4 @@
+import { LiveServerMessageDecoder, liveWebSocketUrl } from "@fyendal/protocol";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import type { AddressInfo } from "node:net";
 import { createServer, type Server } from "node:http";
@@ -20,14 +21,16 @@ async function connect(server: Server): Promise<TestClient> {
   const address = server.address();
   if (!address || typeof address === "string") throw new Error("expected a listening TCP gateway");
   const host = address.family === "IPv6" ? "[::1]" : "127.0.0.1";
-  const ws = new WebSocket(`ws://${host}:${address.port}`);
+  const ws = new WebSocket(liveWebSocketUrl(`ws://${host}:${address.port}`));
   const inbox: ServerMessage[] = [];
   const waiters: Array<{
     predicate: (message: ServerMessage) => boolean;
     resolve: (message: ServerMessage) => void;
   }> = [];
+  const decoder = new LiveServerMessageDecoder();
   ws.on("message", (raw) => {
-    const message = JSON.parse(String(raw)) as ServerMessage;
+    const message = decoder.decode(JSON.parse(String(raw)));
+      if (!message) throw new Error("invalid server frame");
     const waiter = waiters.find((candidate) => candidate.predicate(message));
     if (waiter) {
       waiters.splice(waiters.indexOf(waiter), 1);

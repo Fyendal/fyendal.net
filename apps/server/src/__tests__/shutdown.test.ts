@@ -1,7 +1,7 @@
+import { LiveServerMessageDecoder, liveWebSocketUrl } from "@fyendal/protocol";
 import { afterEach, describe, expect, it } from "vitest";
 import type { AddressInfo } from "node:net";
 import WebSocket from "ws";
-import type { ServerMessage } from "@fyendal/shared";
 import { login, register } from "../auth.js";
 import type { Queryable } from "../db.js";
 import { closeGameServer, createGameServer } from "../index.js";
@@ -24,7 +24,7 @@ describe("game server shutdown", () => {
     });
     await new Promise<void>((resolve) => server.once("listening", resolve));
 
-    const socket = new WebSocket(`ws://127.0.0.1:${(server.address() as AddressInfo).port}`);
+    const socket = new WebSocket(liveWebSocketUrl(`ws://127.0.0.1:${(server.address() as AddressInfo).port}`));
     await new Promise<void>((resolve, reject) => {
       socket.once("open", resolve);
       socket.once("error", reject);
@@ -69,14 +69,16 @@ describe("game server shutdown", () => {
     });
     await new Promise<void>((resolve) => server.once("listening", resolve));
 
-    const socket = new WebSocket(`ws://127.0.0.1:${(server.address() as AddressInfo).port}`);
+    const socket = new WebSocket(liveWebSocketUrl(`ws://127.0.0.1:${(server.address() as AddressInfo).port}`));
     await new Promise<void>((resolve, reject) => {
       socket.once("open", resolve);
       socket.once("error", reject);
     });
     const authed = new Promise<void>((resolve) => {
+      const decoder = new LiveServerMessageDecoder();
       socket.on("message", (raw) => {
-        const message = JSON.parse(String(raw)) as ServerMessage;
+        const message = decoder.decode(JSON.parse(String(raw)));
+        if (!message) throw new Error("invalid server frame");
         if (message.type === "authed") resolve();
       });
     });

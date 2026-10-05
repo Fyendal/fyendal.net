@@ -7,6 +7,7 @@ import { cardData, decklists, precon, scripts } from "@fyendal/cards";
 import { applyIntent, createGame, legalIntents, projectStateFor } from "@fyendal/engine";
 import {
   decodeBotTask, decodeBotWorkerResponse, decodeClientMessage, decodeServerMessage, MAX_BOT_TASK_BYTES,
+  LiveServerMessageDecoder, liveWebSocketUrl,
 } from "@fyendal/protocol";
 import type { ClientBotTask, ServerMessage } from "@fyendal/shared";
 import { clientBotTask } from "../clientBotTask.js";
@@ -265,11 +266,12 @@ describe("delegated bot commits", () => {
 });
 
 async function socketClient(port: number) {
-  const ws = new WebSocket(`ws://127.0.0.1:${port}`);
+  const ws = new WebSocket(liveWebSocketUrl(`ws://127.0.0.1:${port}`));
   const inbox: ServerMessage[] = [];
   const waiters: Array<{ predicate: (m: ServerMessage) => boolean; resolve: (m: ServerMessage) => void }> = [];
+  const decoder = new LiveServerMessageDecoder();
   ws.on("message", (raw) => {
-    const message = decodeServerMessage(JSON.parse(String(raw)));
+    const message = decoder.decode(JSON.parse(String(raw)));
     if (!message) throw new Error("invalid server frame");
     const index = waiters.findIndex((w) => w.predicate(message));
     if (index === -1) inbox.push(message);

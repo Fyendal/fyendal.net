@@ -2803,5 +2803,8 @@
   "achievements.beatjarl.name": "击败 Jarl 机器人",
   "achievements.beatjarl.description": "在练习对局中击败 Jarl 机器人。",
   "achievements.beatstarvo.name": "击败 Starvo 机器人",
-  "achievements.beatstarvo.description": "在练习对局中击败 Starvo 机器人。"
+  "achievements.beatstarvo.description": "在练习对局中击败 Starvo 机器人。",
+  "connection.update.title": "有可用更新",
+  "connection.update.description": "请刷新页面，使用最新版本重新连接。",
+  "connection.update.refresh": "刷新页面"
 }

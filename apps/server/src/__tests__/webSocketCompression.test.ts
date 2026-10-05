@@ -1,3 +1,4 @@
+import { CLIENT_UPDATE_MESSAGE, LiveServerMessageDecoder, decodeStateFrame, liveWebSocketUrl } from "@fyendal/protocol";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { AddressInfo } from "node:net";
 import { once } from "node:events";
@@ -5,7 +6,6 @@ import WebSocket from "ws";
 import { BOT_RUNTIME_ID } from "@fyendal/bot/runtime-id";
 import { cardData, decklists, scripts } from "@fyendal/cards";
 import { createGame } from "@fyendal/engine";
-import { decodeServerMessage } from "@fyendal/protocol";
 import type { ClientMessage, ServerMessage } from "@fyendal/shared";
 import { hashPassword, login } from "../auth.js";
 import { clientBotTask } from "../clientBotTask.js";
@@ -16,7 +16,7 @@ import { configuredWebSocketCompression } from "../webSocketCompression.js";
 import { freshDb } from "./testdb.js";
 
 interface Frame { compressed: boolean; bytes: number }
-interface Received { message: ServerMessage; frame: Frame }
+interface Received { message: ServerMessage; frame: Frame; wire: unknown }
 
 /** Inspect actual server frame headers without depending on ws private fields.
  * The gateway sends complete text frames; TCP chunks may split/coalesce them. */
@@ -69,7 +69,7 @@ describe("gateway WebSocket compression", () => {
   }
 
   async function connect(port: number, compression = true) {
-    const ws = new WebSocket(`ws://127.0.0.1:${port}`, { perMessageDeflate: compression });
+    const ws = new WebSocket(liveWebSocketUrl(`ws://127.0.0.1:${port}`), { perMessageDeflate: compression });
     cleanups.push(async () => { ws.terminate(); });
     const frames: Frame[] = [];
     const received: Received[] = [];
@@ -83,12 +83,13 @@ describe("gateway WebSocket compression", () => {
       // response before ws has attached its own data listener.
       ws.once("open", () => response.socket.prependListener("data", frameReader(frames)));
     });
+    const decoder = new LiveServerMessageDecoder();
     ws.on("message", (raw) => {
       const value: unknown = JSON.parse(String(raw));
-      const message = decodeServerMessage(value);
+      const message = decoder.decode(value);
       const frame = frames.shift();
       if (!message || !frame) throw new Error("invalid or unframed server message");
-      received.push({ message, frame });
+      received.push({ message, frame, wire: value });
     });
     await once(ws, "open");
     return {
@@ -152,15 +153,31 @@ describe("gateway WebSocket compression", () => {
     expect(deliveredState.message).toEqual(stateMessage(room, 0));
     client.send({ type: "bot-ready", runtimeId: BOT_RUNTIME_ID });
     const deliveredTask = await client.next("bot-task");
+    const repeatedState = await client.next("state", (message) =>
+      "version" in message && message.version === room.version);
+    expect(repeatedState.message).toEqual(stateMessage(room, 0));
+    expect(decodeStateFrame(repeatedState.wire)).toMatchObject({
+      drop: 0, state: { view: { log: [], logEntries: [] } },
+    });
     expect(deliveredTask.message).toEqual(clientBotTask(room, BOT_RUNTIME_ID, 0));
     for (const delivered of [deliveredState, deliveredTask]) {
-      const jsonBytes = Buffer.byteLength(JSON.stringify(delivered.message));
+      const jsonBytes = Buffer.byteLength(JSON.stringify(delivered.wire));
       expect(jsonBytes).toBeGreaterThan(1024);
       expect(delivered.frame.compressed).toBe(compressed);
       if (compressed) expect(delivered.frame.bytes).toBeLessThan(jsonBytes / 2);
       else expect(delivered.frame.bytes).toBeGreaterThanOrEqual(jsonBytes);
     }
   }, 10_000);
+
+  it.each(["", "?transport=1", "?transport=3", "//[?transport=2"])("rejects incompatible upgrade targets (%s)", async (query) => {
+    const { port } = await gateway();
+    const ws = new WebSocket(`ws://127.0.0.1:${port}${query}`);
+    const messages: unknown[] = [];
+    ws.on("message", (raw) => messages.push(JSON.parse(String(raw))));
+    const [code] = await once(ws, "close");
+    expect(code).toBe(4406);
+    expect(messages).toEqual([{ type: "error", code: "INVALID_MESSAGE", message: CLIENT_UPDATE_MESSAGE }]);
+  });
 
   it("enforces the incoming size limit after decompression", async () => {
     vi.stubEnv("WS_COMPRESSION", "true");

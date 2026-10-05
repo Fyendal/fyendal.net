@@ -34,6 +34,11 @@ class FakeWebSocket {
   }
 
   message(value: unknown): void {
+    // Existing store scenarios specify complete application states. Deliver
+    // them using the required live snapshot framing.
+    if (value && typeof value === "object" && "type" in value && value.type === "state") {
+      value = { type: "state-frame", stream: "test", sequence: 1, drop: null, state: value };
+    }
     this.onmessage?.({ data: JSON.stringify(value) } as MessageEvent);
   }
 
@@ -41,9 +46,9 @@ class FakeWebSocket {
     this.sent.push(value);
   }
 
-  close(): void {
+  close(code = 1000): void {
     this.readyState = FakeWebSocket.CLOSED;
-    this.onclose?.({ code: 1000 } as CloseEvent);
+    this.onclose?.({ code } as CloseEvent);
   }
 }
 
@@ -2253,33 +2258,92 @@ describe("client connection and account race fences", () => {
     useStore.getState().leave();
   });
 
-  it("abandons a room entry when its authoritative state cannot be decoded", async () => {
+  it.each([true, false])("recovers an invalid first state (existing membership: %s)", async (saved) => {
+    vi.useFakeTimers();
     localStorage.setItem("fyendal-auth", JSON.stringify({ token: "token-a", username: "Alice" }));
-    localStorage.setItem("fyendal-room-session", JSON.stringify({
-      code: "AAAAAA",
-      token: "seat-token",
-    }));
+    if (saved) localStorage.setItem("fyendal-room-session", JSON.stringify({ code: "AAAAAA", token: "seat-token" }));
     const { useStore } = await import("../store.js");
-
     useStore.getState().joinRoom("AAAAAA");
     const socket = FakeWebSocket.instances[0]!;
     socket.open();
     socket.message({ type: "joined", code: "AAAAAA", seat: 0, token: "rotated", version: 1 });
     socket.message({ type: "state", version: 2, invalid: true });
-
-    expect(useStore.getState()).toMatchObject({
-      screen: "lobby",
-      roomCode: null,
-      yourSeat: null,
-      prep: null,
-      view: null,
-      connected: false,
-      error: "room state could not be loaded",
-    });
-    expect(localStorage.getItem("fyendal-room-session")).toBeNull();
-    expect(history.replaceState).toHaveBeenLastCalledWith(null, "", "/");
+    expect(useStore.getState()).toMatchObject({ roomCode: "AAAAAA", view: null, connected: false });
+    expect(localStorage.getItem("fyendal-room-session:AAAAAA")).toContain("rotated");
     expect(socket.readyState).toBe(FakeWebSocket.CLOSED);
-    expect(FakeWebSocket.instances).toHaveLength(2);
+    await vi.advanceTimersByTimeAsync(1_500);
+    const replacement = FakeWebSocket.instances.at(-1)!;
+    expect(replacement).not.toBe(socket);
+    replacement.open();
+    expect(replacement.sent.map((text) => JSON.parse(text))).toContainEqual(
+      expect.objectContaining({ type: "join-room", code: "AAAAAA", token: "rotated" }));
+    replacement.message({ type: "joined", code: "AAAAAA", seat: 0, token: "rotated", version: 2 });
+    replacement.message({ ...staleState, version: 3 });
+    expect(useStore.getState().view).toEqual(staleState.view);
+    useStore.getState().leave();
+  });
+
+  it.each(["close-code", "error", "interrupted-close"])(
+    "keeps the refresh requirement and stops retries (%s)", async (rejection) => {
+      vi.useFakeTimers();
+      localStorage.setItem("fyendal-auth", JSON.stringify({ token: "token-a", username: "Alice" }));
+      const { useStore } = await import("../store.js");
+      useStore.getState().joinRoom("AAAAAA");
+      const socket = FakeWebSocket.instances[0]!;
+      expect(new URL(socket.url).searchParams.get("transport")).toBe("2");
+      socket.open();
+      if (rejection === "close-code") socket.close(4406);
+      else {
+        if (rejection === "interrupted-close") {
+          vi.spyOn(socket, "close").mockImplementation(() => {
+            socket.readyState = FakeWebSocket.CLOSED;
+            socket.onclose?.({ code: 1006 } as CloseEvent);
+          });
+        }
+        socket.message({ type: "error", code: "INVALID_MESSAGE",
+          message: "Client update required. Reload this page to continue." });
+      }
+      await vi.advanceTimersByTimeAsync(30_000);
+      expect(FakeWebSocket.instances).toHaveLength(1);
+      expect(useStore.getState()).toMatchObject({ connected: false, clientUpdateRequired: true });
+      useStore.getState().setError("another transient error");
+      useStore.getState().setConnectionActive(false);
+      useStore.getState().setConnectionActive(true);
+      useStore.getState().listRooms();
+      await vi.advanceTimersByTimeAsync(30_000);
+      expect(FakeWebSocket.instances).toHaveLength(1);
+      expect(useStore.getState()).toMatchObject({ clientUpdateRequired: true, connectionIssueVisible: false });
+    },
+  );
+
+  it("reconstructs live logs while replay viewing and rejects a missing delta", async () => {
+    vi.useFakeTimers();
+    const { useStore } = await import("../store.js");
+    useStore.getState().joinRoom("AAAAAA", undefined, true);
+    const socket = FakeWebSocket.instances[0]!;
+    socket.open();
+    socket.message({ type: "joined", code: "AAAAAA", seat: null, spectator: true, token: "watch", version: 1 });
+    const initial = { ...staleState, yourSeat: null, version: 2,
+      view: { ...staleState.view, gameId: "AAAAAA", log: ["first"] } };
+    socket.message(initial);
+    const replay = JSON.stringify({ version: 1, seat: null, views: [initial.view] });
+    expect(useStore.getState().openReplayText(replay)).toBeNull();
+    const update = { ...initial, version: 3, view: { ...initial.view, turn: 2, log: ["second"] } };
+    socket.message({ type: "state-frame", stream: "test", sequence: 2, drop: 0, state: update });
+    expect(useStore.getState()).toMatchObject({ screen: "replay", view: initial.view });
+    socket.message({ type: "state-frame", stream: "test", sequence: 3, drop: 0,
+      state: { ...update, version: 3, view: { ...update.view, turn: 3, log: ["third"] } } });
+    // Even a state suppressed by room-version filtering advances the wire baseline.
+    socket.message({ type: "state-frame", stream: "test", sequence: 4, drop: 0,
+      state: { ...update, version: 4, view: { ...update.view, turn: 4, log: ["fourth"] } } });
+    // Returning to the local live replay reveals reconstructed complete frames.
+    await useStore.getState().watchReplay();
+    expect(useStore.getState().replayViews?.at(-1)?.log).toEqual(["first", "second", "third", "fourth"]);
+    socket.message({ type: "state-frame", stream: "test", sequence: 6, drop: 0,
+      state: { ...update, version: 5, view: { ...update.view, log: ["missing predecessor"] } } });
+    expect(socket.readyState).toBe(FakeWebSocket.CLOSED);
+    expect(useStore.getState().replayViews?.at(-1)?.log).toEqual(["first", "second", "third", "fourth"]);
+    useStore.getState().leave();
   });
 
   it("abandons a room entry rejected before the joined acknowledgement", async () => {

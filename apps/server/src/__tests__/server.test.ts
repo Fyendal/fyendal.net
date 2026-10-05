@@ -1,3 +1,4 @@
+import { LiveServerMessageDecoder, liveWebSocketUrl } from "@fyendal/protocol";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import WebSocket from "ws";
 import type { AddressInfo } from "node:net";
@@ -34,11 +35,13 @@ function client(): Promise<{
   sendMsg: (m: ClientMessage) => void;
 }> {
   return new Promise((resolve, reject) => {
-    const ws = new WebSocket(`ws://localhost:${PORT}`);
+    const ws = new WebSocket(liveWebSocketUrl(`ws://localhost:${PORT}`));
     const inbox: ServerMessage[] = [];
     const waiters: { pred: (m: ServerMessage) => boolean; res: (m: ServerMessage) => void }[] = [];
+    const decoder = new LiveServerMessageDecoder();
     ws.on("message", (raw) => {
-      const msg = JSON.parse(String(raw)) as ServerMessage;
+      const msg = decoder.decode(JSON.parse(String(raw)));
+      if (!msg) throw new Error("invalid server frame");
       inbox.push(msg);
       for (let i = waiters.length - 1; i >= 0; i--) {
         if (waiters[i]!.pred(msg)) {
@@ -176,7 +179,7 @@ describe("auth gating", () => {
     const port = (srv.address() as AddressInfo).port;
     const open = () =>
       new Promise<WebSocket>((res, rej) => {
-        const w = new WebSocket(`ws://localhost:${port}`);
+        const w = new WebSocket(liveWebSocketUrl(`ws://localhost:${port}`));
         w.on("open", () => res(w));
         w.on("error", rej);
       });
@@ -184,7 +187,7 @@ describe("auth gating", () => {
     try {
       for (let i = 0; i < 3; i++) socks.push(await open());
       // the 4th connection from the same IP is closed with 1008
-      const w4 = new WebSocket(`ws://localhost:${port}`);
+      const w4 = new WebSocket(liveWebSocketUrl(`ws://localhost:${port}`));
       const code = await new Promise<number>((res) => w4.on("close", res));
       expect(code).toBe(1008);
       // freeing a slot lets the next one in
@@ -247,7 +250,7 @@ describe("auth gating", () => {
     });
     await new Promise<void>((res) => rateServer.on("listening", res));
     const ratePort = (rateServer.address() as AddressInfo).port;
-    const rateSocket = new WebSocket(`ws://localhost:${ratePort}`);
+    const rateSocket = new WebSocket(liveWebSocketUrl(`ws://localhost:${ratePort}`));
     await new Promise<void>((res, rej) => {
       rateSocket.on("open", () => res());
       rateSocket.on("error", rej);
@@ -263,7 +266,7 @@ describe("auth gating", () => {
     });
     await new Promise<void>((res) => pendingServer.on("listening", res));
     const pendingPort = (pendingServer.address() as AddressInfo).port;
-    const pendingSocket = new WebSocket(`ws://localhost:${pendingPort}`);
+    const pendingSocket = new WebSocket(liveWebSocketUrl(`ws://localhost:${pendingPort}`));
     await new Promise<void>((res, rej) => {
       pendingSocket.on("open", () => res());
       pendingSocket.on("error", rej);
@@ -283,7 +286,7 @@ describe("auth gating", () => {
     await new Promise<void>((res) => srv.on("listening", res));
     const originPort = (srv.address() as AddressInfo).port;
 
-    const rejected = new WebSocket(`ws://localhost:${originPort}`, {
+    const rejected = new WebSocket(liveWebSocketUrl(`ws://localhost:${originPort}`), {
       origin: "https://evil.example.com",
     });
     rejected.on("error", () => {});
@@ -292,7 +295,7 @@ describe("auth gating", () => {
     });
     expect(status).toBe(401);
 
-    const accepted = new WebSocket(`ws://localhost:${originPort}`, {
+    const accepted = new WebSocket(liveWebSocketUrl(`ws://localhost:${originPort}`), {
       origin: "https://play.example.com",
     });
     await new Promise<void>((res, rej) => {

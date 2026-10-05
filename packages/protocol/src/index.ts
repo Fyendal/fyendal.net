@@ -36,6 +36,7 @@ import type {
   ReplayNote,
   RoomSummary,
   ServerMessage,
+  StateFrame,
   PlayerTurnFactsView,
   TurnFactsView,
 } from "@fyendal/shared";
@@ -1981,3 +1982,87 @@ export const decodeAccountExportResponse: Decoder<AccountExportResponse> = (valu
 export { decodeGameIntentValue as isGameIntent };
 
 export { decodeSerializedStateEnvelope, CorruptRoomError, PERSISTED_STATE_VERSION, MAX_PERSISTED_STATE_BYTES } from "./simulationState.js";
+
+/** Bump whenever the live socket framing changes incompatibly. */
+export const LIVE_TRANSPORT_VERSION = "2";
+export const CLIENT_UPDATE_CLOSE_CODE = 4406;
+export const CLIENT_UPDATE_MESSAGE = "Client update required. Reload this page to continue.";
+
+/** Both ends discard delivery history at the same session boundaries. */
+export function resetsStateStream(type: ServerMessage["type"]): boolean {
+  switch (type) {
+    case "authed": case "auth-failed": case "joined":
+    case "room-created": case "left": case "spectator-kicked":
+      return true;
+    default:
+      return false;
+  }
+}
+
+export function liveWebSocketUrl(url: string | URL): string {
+  const result = new URL(url);
+  result.searchParams.set("transport", LIVE_TRANSPORT_VERSION);
+  return result.toString();
+}
+
+export function decodeStateFrame(value: unknown): StateFrame | null {
+  const frame = object(value);
+  if (!frame || !exactKeys(frame, ["type", "stream", "sequence", "drop", "state"])
+    || frame.type !== "state-frame" || !string(frame.stream, 64, false)
+    || !nonNegativeInteger(frame.sequence) || frame.sequence === 0
+    || !(frame.drop === null || (nonNegativeInteger(frame.drop) && frame.drop <= MAX_LOG))) return null;
+  const state = decodeServerMessage(frame.state);
+  return state?.type === "state" ? {
+    type: "state-frame", stream: frame.stream, sequence: frame.sequence, drop: frame.drop, state,
+  } : null;
+}
+
+export class StateStreamError extends Error {
+  constructor() { super("Live log stream must be reloaded"); }
+}
+
+/** Socket-local delivery history, independent of room versions and replay UI.
+ * Only projected logs are retained; callers always receive a complete state. */
+export class LiveServerMessageDecoder {
+  private baseline: {
+    stream: string; sequence: number; gameId: string; seat: number | null;
+    log: string[]; logEntries: GameLogViewEntry[] | undefined;
+  } | null = null;
+
+  reset(): void { this.baseline = null; }
+
+  decode(value: unknown): ServerMessage | null {
+    const raw = object(value);
+    if (raw?.type !== "state-frame") {
+      // Plain state messages are internal application values, never live frames.
+      if (raw?.type === "state") { this.reset(); throw new StateStreamError(); }
+      const message = decodeServerMessage(value);
+      if (message && resetsStateStream(message.type)) this.reset();
+      return message;
+    }
+    const frame = decodeStateFrame(value);
+    if (!frame) { this.reset(); throw new StateStreamError(); }
+    let state = frame.state;
+    if (frame.drop !== null) {
+      const previous = this.baseline;
+      if (!previous || previous.stream !== frame.stream || previous.sequence + 1 !== frame.sequence
+        || previous.gameId !== state.view.gameId || previous.seat !== state.yourSeat
+        || frame.drop > previous.log.length
+        || (previous.logEntries === undefined) !== (state.view.logEntries === undefined)) {
+        this.reset(); throw new StateStreamError();
+      }
+      const view = { ...state.view, log: [...previous.log.slice(frame.drop), ...state.view.log] };
+      if (previous.logEntries && state.view.logEntries) {
+        view.logEntries = [...previous.logEntries.slice(frame.drop), ...state.view.logEntries];
+      }
+      // Validate the combined bound and entry sequence across the append boundary.
+      if (!decodeGameView(view)) { this.reset(); throw new StateStreamError(); }
+      state = { ...state, view };
+    }
+    this.baseline = {
+      stream: frame.stream, sequence: frame.sequence, gameId: state.view.gameId, seat: state.yourSeat,
+      log: [...state.view.log], logEntries: state.view.logEntries && structuredClone(state.view.logEntries),
+    };
+    return state;
+  }
+}
