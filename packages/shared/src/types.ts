@@ -482,8 +482,9 @@ export interface PendingDecision {
     /** Source of a scripted payment; clients resolve it against visible cards. */
     sourceInstanceId?: number;
   };
-  /** Card whose play is paused on a declaration or additional-cost choice
-   * before it becomes a stack layer. Private to the deciding player. */
+  /** Publicly announced card whose play is paused on a declaration, resource
+   * payment, or additional-cost choice before it becomes a stack layer.
+   * The original zone does not grant visibility to any other cards there. */
   preStackSource?: {
     card: CardView;
     zone: "hand" | "arsenal" | PlayableZone;

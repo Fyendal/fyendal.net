@@ -308,6 +308,15 @@ describe("Malice Armory Deck spoiled cards", () => {
 
     g.chooseOption("X = 2");
     expect(g.state.pendingDecision?.resourcePayment?.cost).toBe(2);
+    for (const viewer of [1, null]) {
+      const view = projectStateFor(g.state, viewer);
+      expect(view.pendingDecision?.preStackSource).toMatchObject({
+        card: { instanceId: dig.instanceId, cardId: "AMA011" }, zone: "hand",
+      });
+      expect(view.pendingDecision?.resourcePayment).toBeUndefined();
+      expect(view.pendingDecision?.options).toBeUndefined();
+      expect(view.players[0]!.hand).toEqual([]);
+    }
     g.chooseOption("pitch Titanium Bauble");
     expect(g.state.players[0]!.hand.some((card) => card.cardId === "AMA011")).toBe(false);
     expect(g.state.stack).toHaveLength(1);

@@ -1347,10 +1347,13 @@ function projectState(
                   },
                 }
               : {}),
-            ...(privateDecision && preStackFlow && preStackCard
+            // CR 5.1.2: the announced card is public while costs and modes
+            // are chosen, even when the engine continuation retains it in
+            // its original zone. Choice options and payment cards stay private.
+            ...(preStackFlow && preStackCard
               ? {
                   preStackSource: {
-                    card: cardView(state, runtime, preStackCard),
+                    card: cardView(state, runtime, { ...preStackCard, faceDown: false }),
                     zone: preStackFlow.zone,
                   },
                 }

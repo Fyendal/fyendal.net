@@ -2347,6 +2347,7 @@
   "game.decision.chooseTarget": "Choose a target",
   "game.decision.targetNamed": "Target {target}",
   "game.decision.playerDeciding": "{player} is deciding…",
+  "game.decision.playerPlaying": "{player} is playing {card}…",
   "game.decision.defensePitch": "Pitch to pay this defense cost",
   "game.decision.defensePitchList": "Pitch to pay this defense cost:",
   "game.decision.choosePitch": "Choose cards from your hand to pitch.",

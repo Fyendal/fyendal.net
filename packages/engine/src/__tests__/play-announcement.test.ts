@@ -92,10 +92,12 @@ describe("card-play announcement", () => {
     expect(player(state, 0).hand.map((card) => card.instanceId)).toEqual([attackId, pitchId]);
     expect(player(state, 0).pitch).toHaveLength(0);
     expect(player(state, 0).resources).toBe(0);
-    expect(projectStateFor(state, 0).pendingDecision?.preStackSource).toMatchObject({
-      card: { instanceId: attackId },
-      zone: "hand",
-    });
+    for (const viewer of [0, 1, null]) {
+      expect(projectStateFor(state, viewer).pendingDecision?.preStackSource).toMatchObject({
+        card: { instanceId: attackId },
+        zone: "hand",
+      });
+    }
 
     result = applyIntent(state, 0, { kind: "choose", optionId: "yes" });
     expect(result.ok).toBe(true);
@@ -204,7 +206,13 @@ describe("card-play announcement", () => {
       card: { instanceId: cardId },
       zone: "hand",
     });
-    expect(projectStateFor(state, 1).pendingDecision?.preStackSource).toBeUndefined();
+    for (const viewer of [1, null]) {
+      expect(projectStateFor(state, viewer).pendingDecision?.preStackSource).toMatchObject({
+        card: { instanceId: cardId, cardId: "MODE_ACTION" },
+        zone: "hand",
+      });
+      expect(projectStateFor(state, viewer).pendingDecision?.options).toBeUndefined();
+    }
     expect(legalIntents(state, 0).some((intent) => intent.kind === "pass")).toBe(false);
 
     result = applyIntent(state, 0, { kind: "choose", optionId: "second" });
@@ -218,6 +226,79 @@ describe("card-play announcement", () => {
     expect(state.pendingDecision).toMatchObject({ kind: "priority-window", player: 0 });
     expect(legalIntents(state, 0).some((intent) => intent.kind === "pass")).toBe(true);
   });
+
+  it.each(["hand", "arsenal"] as const)(
+    "keeps a play from %s public through pitching and mode choices without exposing the other cards",
+    (from) => {
+      let state = makeGame(154);
+      player(state, 0).hand = [];
+      state.scriptsRef = {
+        ...state.scriptsRef,
+        INSTANT: {
+          additionalCost(ctx) {
+            ctx.requestPayment("extra-payment", "Pay 2 resources", 2);
+          },
+          onChoose(ctx, hook) {
+            if (hook === "extra-payment") {
+              ctx.requestChoice("mode", "Choose a mode", ["first", "second"]);
+            }
+          },
+        },
+      };
+      const cardId = giveCard(state, 0, "INSTANT");
+      if (from === "arsenal") {
+        const card = player(state, 0).hand.pop()!;
+        player(state, 0).arsenal.push({ ...card, faceDown: true });
+      }
+      const pitchId = giveCard(state, 0, "BLUE");
+      giveCard(state, 0, "YEL");
+      const play = legalIntents(state, 0).find((intent) =>
+        intent.kind === (from === "hand" ? "play-card" : "play-from-arsenal") &&
+        intent.instanceId === cardId,
+      );
+      expect(play).toBeDefined();
+      const result = applyIntent(state, 0, play!);
+      expect(result.ok).toBe(true);
+      if (!result.ok) throw new Error(result.error);
+      state = result.state;
+
+      const expectPublicAnnouncement = () => {
+        for (const viewer of [0, 1, null]) {
+          const view = projectStateFor(state, viewer);
+          expect(view.pendingDecision?.preStackSource).toMatchObject({
+            card: { instanceId: cardId, cardId: "INSTANT" }, zone: from,
+          });
+          expect(view.pendingDecision?.preStackSource?.card.faceDown).toBeUndefined();
+          if (viewer !== 0) {
+            expect(view.pendingDecision?.options).toBeUndefined();
+            expect(view.pendingDecision?.resourcePayment).toBeUndefined();
+            expect(view.pendingDecision?.prompt).toBe("");
+            expect(view.players[0]!.hand).toEqual([]);
+            expect(JSON.stringify(view)).not.toContain('"cardId":"YEL"');
+          }
+        }
+      };
+      expect(state.pendingDecision?.resourcePayment).toBeDefined();
+      expectPublicAnnouncement();
+
+      const payment = state.pendingDecision!.resourcePayment!.options.find(
+        (option) => option.pitchInstanceIds.length === 1 && option.pitchInstanceIds[0] === pitchId,
+      )!;
+      const paid = applyIntent(state, 0, { kind: "choose", optionId: payment.optionId });
+      expect(paid.ok).toBe(true);
+      if (!paid.ok) throw new Error(paid.error);
+      state = paid.state;
+      expect(player(state, 0).pitch.map((card) => card.instanceId)).toEqual([pitchId]);
+      expect(state.pendingDecision?.chooseHook).toBe("mode");
+      expectPublicAnnouncement();
+
+      const chosen = applyIntent(state, 0, { kind: "choose", optionId: "first" });
+      expect(chosen.ok).toBe(true);
+      if (!chosen.ok) throw new Error(chosen.error);
+      expect(projectStateFor(chosen.state, 1).pendingDecision?.preStackSource).toBeUndefined();
+      expect(projectStateFor(chosen.state, 1).stack[0]?.card?.instanceId).toBe(cardId);
+    },
+  );
 
   it("an instant pays its alternative cost over another layer", () => {
     let state = makeGame(148);

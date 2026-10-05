@@ -48,6 +48,73 @@ function renderLocalized(node: ReactNode) {
   return renderToStaticMarkup(<TestI18nProvider>{node}</TestI18nProvider>);
 }
 
+describe("opponent's announced play", () => {
+  const model: PendingDecisionModel = {
+    decision: {
+      player: 1,
+      kind: "choose-target",
+      prompt: "",
+      preStackSource: {
+        card: { instanceId: 41, cardId: "ANNOUNCED", name: "Modal Action", owner: 1 },
+        zone: "hand",
+      },
+    },
+    isMine: false,
+    decidingName: "Opponent",
+    canPass: false,
+    defendPitchIds: new Set(),
+    hand: [],
+    defendSel: [],
+    selectedPitchIds: [],
+    onTogglePitch: () => undefined,
+    resourcePaymentSelected: 0,
+    resourcePaymentRequired: 0,
+    confirmSkipArsenal: false,
+    onRequestPass: () => undefined,
+    onDisableGuidance: () => undefined,
+    onConfirmSkipArsenal: () => undefined,
+    onCancelSkipArsenal: () => undefined,
+    onSend: () => undefined,
+  };
+
+  it("shows the announced card while private payment or mode options are omitted", () => {
+    const html = renderLocalized(
+      <SquareCardPresentation enabled>
+        <PendingDecisionPanel model={model} viewerSeat={0} />
+      </SquareCardPresentation>,
+    );
+    expect(html).toContain("Opponent is playing Modal Action…");
+    expect(html).toContain('data-card-instance-id="41"');
+    expect(html).toContain("cards/ANNOUNCED.webp");
+    expect(html).not.toContain("card-square");
+    expect(html).not.toContain("<button");
+  });
+
+  it("returns to the ordinary waiting message when there is no public announcement", () => {
+    const html = renderLocalized(<PendingDecisionPanel model={{
+      ...model,
+      decision: { player: 1, kind: "choose-target", prompt: "" },
+    }} viewerSeat={0} />);
+    expect(html).toContain("Opponent is deciding…");
+    expect(html).not.toContain("ANNOUNCED");
+  });
+
+  it("does not display a hidden announcement's identity", () => {
+    const html = renderLocalized(<PendingDecisionPanel model={{
+      ...model,
+      decision: {
+        ...model.decision!,
+        preStackSource: {
+          card: { ...model.decision!.preStackSource!.card, hidden: true }, zone: "hand",
+        },
+      },
+    }} viewerSeat={0} />);
+    expect(html).toContain("Opponent is deciding…");
+    expect(html).not.toContain("Modal Action");
+    expect(html).not.toContain("ANNOUNCED");
+  });
+});
+
 function bloodDecision(selected = 1, required = 2) {
   const weapons = [
     { instanceId: 41, cardId: "FIRST", owner: 0 },
