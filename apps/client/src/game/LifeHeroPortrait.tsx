@@ -1,11 +1,11 @@
 import { heroImageUrl } from "../lobby/heroImage.js";
-import { resolveCardImageUrl } from "./cardImageUrl.js";
+import { resolveCardImageUrls } from "./cardImageUrl.js";
 
 export function LifeHeroPortrait({ heroName, heroCardId }: {
   heroName: string;
   heroCardId: string;
 }) {
-  const fallback = resolveCardImageUrl(heroCardId);
+  const fallbacks = resolveCardImageUrls(heroCardId);
   return (
     <img
       key={`${heroName}:${heroCardId}`}
@@ -18,7 +18,8 @@ export function LifeHeroPortrait({ heroName, heroCardId }: {
       onError={(event) => {
         const image = event.currentTarget;
         // Transformed heroes may have card art but no dedicated headshot.
-        if (image.src !== fallback) image.src = fallback;
+        const next = fallbacks[fallbacks.indexOf(image.src) + 1];
+        if (next) image.src = next;
         else image.hidden = true;
       }}
     />

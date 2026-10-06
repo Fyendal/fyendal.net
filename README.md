@@ -77,6 +77,22 @@ through environment variables when needed:
 - `VITE_API_ORIGIN` — API and WebSocket origin for hosted client builds; local
   development uses port `8080` automatically.
 
+### Experimental Marvel artwork
+
+Marvel mode is disabled in the client and has no browser storage toggle.
+The internal resolver and artwork manifest remain available for offline audits.
+
+The artwork manifest is generated from the English `card.json` in the
+[the-fab-cube dataset](https://github.com/the-fab-cube/flesh-and-blood-cards),
+with newer-set additions from official Card Vault records kept in
+`scripts/data/marvel-art-supplement.json`.
+To refresh it and check the selected Fabrary images:
+
+```sh
+node scripts/generate-marvel-art.mjs /path/to/card.json
+pnpm check:card-images --marvel
+```
+
 ### Seed data
 
 For local test accounts, run:

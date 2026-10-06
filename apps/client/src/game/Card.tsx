@@ -345,6 +345,7 @@ export function CardFace({
     "card",
     size === "zone" ? "card-zone" : size === "preview" ? "card-preview-frame" : "card-hand",
     squareCard ? "card-board-square" : "",
+    squareCard && marvelArt ? "card-board-square-marvel" : "",
     focusSourceHidden ? "pitch-focus-source-hidden" : "",
     showImg ? "card-hasimg" : "",
     selected ? "card-selected" : "",
@@ -431,19 +432,23 @@ export function CardFace({
               </>
             ) : null}
           </span>
-          <div
-            className={`board-square-name${data?.cardType === "hero" ? " board-square-name-hero" : ""}`}
-            data-card-type={data?.cardType}
-            data-pitch={squarePitch}
-            title={name}
-          >
-            {squarePitch !== undefined ? (
-              <div className="board-square-pitch-backing" aria-hidden="true" />
-            ) : null}
-            <span className="board-square-name-frame">
-              <span className="board-square-name-text">{name}</span>
-            </span>
-          </div>
+          {marvelArt ? (
+            <span className="board-square-accessible-name">{name}</span>
+          ) : (
+            <div
+              className={`board-square-name${data?.cardType === "hero" ? " board-square-name-hero" : ""}`}
+              data-card-type={data?.cardType}
+              data-pitch={squarePitch}
+              title={name}
+            >
+              {squarePitch !== undefined ? (
+                <div className="board-square-pitch-backing" aria-hidden="true" />
+              ) : null}
+              <span className="board-square-name-frame">
+                <span className="board-square-name-text">{name}</span>
+              </span>
+            </div>
+          )}
           {showStats && (
             attack !== undefined || defense !== undefined ||
             (squareHero && data.intellect !== undefined) || printedLife !== undefined

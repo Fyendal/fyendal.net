@@ -1,4 +1,5 @@
-import { cardList } from "@fyendal/cards/client";
+import { cardData, cardList } from "@fyendal/cards/client";
+import marvelArt from "./marvelArt.json" with { type: "json" };
 
 const IMG_BASE = "https://content.fabrary.net/cards";
 
@@ -8,6 +9,8 @@ const BLACK_BORDER_ART_FOR_1HP = new Map<string, string>();
 const originalArtByCard = new Map<string, string>();
 const artKey = (card: CardImageData) =>
   `${card.cardType}|${card.name.trim().toLowerCase().replace(/\s+/g, " ")}|${card.pitch ?? 0}`;
+const MARVEL_ART_BY_CARD: Readonly<Record<string, string>> = marvelArt;
+const MARVEL_IMAGE_IDS = new Set(Object.values(MARVEL_ART_BY_CARD));
 for (const set of ["WTR", "ARC", "CRU"]) {
   for (const card of cardList) {
     if (card.set !== set) continue;
@@ -173,8 +176,7 @@ export interface CardImageData {
   pitch?: number;
 }
 
-/** Resolve the exact Fabrary URL used by the client for a printing. */
-export function resolveCardImageUrl(cardId: string, data?: CardImageData): string {
+function standardCardImageUrl(cardId: string, data?: CardImageData): string {
   const tokenKey = data?.cardType === "token"
     ? `${data.name.trim().toLowerCase().replace(/\s+/g, " ")}|${data.pitch ?? 0}`
     : undefined;
@@ -189,28 +191,53 @@ export function resolveCardImageUrl(cardId: string, data?: CardImageData): strin
   return `${IMG_BASE}/${imageId}.webp`;
 }
 
-/** Candidate Fabrary objects for a printing. IAR preview assets can arrive
+function marvelCardImageUrl(cardId: string, data?: CardImageData): string | undefined {
+  const card = data ?? cardData[cardId];
+  const imageId = card ? MARVEL_ART_BY_CARD[artKey(card)] : undefined;
+  return imageId ? `${IMG_BASE}/${imageId}.webp` : undefined;
+}
+
+/** Resolve artwork by functional identity without changing the printing used
+ * by decks, rules, or replays. Marvel selection is reserved for explicit offline
+ * audits; the client always defaults to ordinary artwork. */
+export function resolveCardImageUrl(
+  cardId: string,
+  data?: CardImageData,
+  preferMarvel = false,
+): string {
+  return (preferMarvel ? marvelCardImageUrl(cardId, data) : undefined) ?? standardCardImageUrl(cardId, data);
+}
+
+/** Try known Marvel artwork first, then the ordinary art. IAR preview assets can arrive
  * after card data, so temporarily try the common foil objects before the UI
  * falls back to its text-card presentation. */
-export function resolveCardImageUrls(cardId: string, data?: CardImageData): string[] {
-  const primary = resolveCardImageUrl(cardId, data);
+export function resolveCardImageUrls(
+  cardId: string,
+  data?: CardImageData,
+  preferMarvel = false,
+): string[] {
+  const primary = resolveCardImageUrl(cardId, data, preferMarvel);
+  const urls = [primary, standardCardImageUrl(cardId, data)];
   if (BLACK_BORDER_ART_FOR_1HP.has(cardId)) {
-    return [primary, `${IMG_BASE}/${cardId}.webp`];
+    urls.push(`${IMG_BASE}/${cardId}.webp`);
   }
-  if (!/^IAR\d{3}$/.test(cardId)) return [primary];
-  return [...new Set([
-    primary,
-    `${IMG_BASE}/${cardId}.webp`,
-    `${IMG_BASE}/${cardId}-RF.webp`,
-    `${IMG_BASE}/${cardId}-CF.webp`,
-    `${IMG_BASE}/${cardId}-MV.webp`,
-  ])];
+  if (/^IAR\d{3}$/.test(cardId)) {
+    urls.push(
+      `${IMG_BASE}/${cardId}.webp`,
+      `${IMG_BASE}/${cardId}-RF.webp`,
+      `${IMG_BASE}/${cardId}-CF.webp`,
+      `${IMG_BASE}/${cardId}-MV.webp`,
+    );
+  }
+  return [...new Set(urls)];
 }
 
 /** The selected Fabrary object, rather than the card id, determines whether
  * the square presentation should use its full-bleed Marvel artwork. */
 export function isMarvelCardImageUrl(url: string): boolean {
-  return /-MV\.webp(?:[?#]|$)/i.test(url);
+  const imageId = /\/cards\/([^/]+)\.webp(?:[?#]|$)/i.exec(url)?.[1];
+  return imageId !== undefined && (MARVEL_IMAGE_IDS.has(imageId)
+    || /-MV[A-Z]?(?:_BACK)?$/i.test(imageId));
 }
 
 /** These equipment printings put the lower frame below the usual art window. */

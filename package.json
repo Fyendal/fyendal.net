@@ -8,7 +8,7 @@
     "generate:bot-runtime": "node scripts/generate-bot-runtime.mjs",
     "build": "pnpm -r build",
     "test": "pnpm -r test",
-    "check:card-images": "node scripts/check-card-images.mjs",
+    "check:card-images": "pnpm --filter @fyendal/server exec node --import tsx ../../scripts/check-card-images.mjs",
     "check:rules-limitations": "node scripts/check-rules-limitations.mjs",
     "audit:card-pool": "node scripts/audit-card-pool.mjs",
     "sync:card-pool": "node scripts/sync-card-pool.mjs",

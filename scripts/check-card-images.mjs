@@ -3,7 +3,7 @@ import { createHash } from "node:crypto";
 import { appendFile, mkdir, readFile, readdir, unlink, writeFile } from "node:fs/promises";
 import { dirname, join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { resolveCardImageUrl } from "../apps/client/src/game/cardImageUrl.ts";
+import { isMarvelCardImageUrl, resolveCardImageUrl } from "../apps/client/src/game/cardImageUrl.ts";
 
 const DEFAULT_DELAY_MS = 500;
 const MINIMUM_DELAY_MS = 250;
@@ -21,6 +21,7 @@ function usage() {
 Checks every client card-image URL with sequential HEAD requests.
 
 Options:
+  --marvel        Check only preferred Marvel artwork
   --set CODE       Check one set only (may be repeated)
   --delay-ms N     Delay between requests (default ${DEFAULT_DELAY_MS}, minimum ${MINIMUM_DELAY_MS})
   --timeout-ms N   Per-request timeout (default ${DEFAULT_TIMEOUT_MS})
@@ -47,6 +48,7 @@ function parseArguments(args) {
     checkpoint: undefined,
     fresh: false,
     status: false,
+    marvel: false,
     sets: new Set(),
   };
   for (let index = 0; index < args.length; index++) {
@@ -62,6 +64,10 @@ function parseArguments(args) {
     }
     if (argument === "--status") {
       options.status = true;
+      continue;
+    }
+    if (argument === "--marvel") {
+      options.marvel = true;
       continue;
     }
     if (!["--set", "--delay-ms", "--timeout-ms", "--limit", "--checkpoint"].includes(argument)) {
@@ -136,7 +142,7 @@ const wait = (milliseconds) => new Promise((resolve) => setTimeout(resolve, mill
 function defaultCheckpointPath(options) {
   const scope = options.sets.size > 0 ? [...options.sets].sort().join("-") : "all";
   const limit = options.limit === undefined ? "" : `-limit-${options.limit}`;
-  return join(checkpointDirectory, `${scope}${limit}.checkpoint`);
+  return join(checkpointDirectory, `${options.marvel ? "marvel-" : ""}${scope}${limit}.checkpoint`);
 }
 
 function checkpointFingerprint(urls) {
@@ -296,7 +302,8 @@ const seenIds = new Set();
 for (const card of cards) {
   if (seenIds.has(card.id)) throw new Error(`duplicate printing id: ${card.id}`);
   seenIds.add(card.id);
-  const url = resolveCardImageUrl(card.id, card);
+  const url = resolveCardImageUrl(card.id, card, options.marvel);
+  if (options.marvel && !isMarvelCardImageUrl(url)) continue;
   const entries = cardsByUrl.get(url) ?? [];
   entries.push({ id: card.id, name: card.name });
   cardsByUrl.set(url, entries);

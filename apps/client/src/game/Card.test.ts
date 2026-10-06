@@ -315,8 +315,11 @@ describe("CardFace payment state", () => {
     expect(marvel).toContain("board-square-art");
     expect(marvel).not.toContain("board-square-frame-edge");
     expect(marvel).not.toContain("board-square-printed-frame");
-    expect(marvel).toContain("board-square-name");
+    expect(marvel).not.toContain("board-square-name");
+    expect(marvel).toContain("board-square-accessible-name");
+    expect(marvel).toContain("card-board-square-marvel");
     expect(standard).toContain("board-square-frame-edge");
+    expect(standard).toContain("board-square-name");
   });
 
   it("uses the lower art divider on older square-card printings", () => {

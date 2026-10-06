@@ -464,6 +464,31 @@
   left: -17.5%;
   border-radius: 0;
 }
+/* Marvel faces keep the printed name near the top with a small margin above it.
+   A 546 x 762 card needs 143.3% width to fill a square from half its height. */
+.card-zone.card-board-square-marvel {
+  --board-art-top: 0cqi;
+  --board-art-bottom: 0cqi;
+}
+.card-board-square-marvel .board-square-media {
+  --board-square-image-top: -4cqi;
+}
+.card-board-square-marvel .board-square-art {
+  width: 143.3%;
+  left: -21.65%;
+}
+.card-board-square-marvel.card-chain-source::after {
+  inset: 0;
+  border-top: 2px solid var(--square-frame-color);
+}
+.board-square-accessible-name {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
 .board-square-frame-edge {
   position: absolute;
   inset: 0;

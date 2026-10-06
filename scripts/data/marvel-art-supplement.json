@@ -1,0 +1,29 @@
+{
+  "source": "https://api.cardvault.fabtcg.com/carddb/api/v1/product-cards/usurp-the-shadow-throne/",
+  "note": "English published Marvel and promo-Marvel faces from the product's card_id detail records. These identities are missing from the community dataset. Regeneration always merges this supplement.",
+  "artByCard": {
+    "action|become the shadow lord|3": "IAR113-MV",
+    "action|corrupt and conquer|1": "FAB516-CF",
+    "action|corrupted corpse|0": "FAB514-MVA",
+    "action|open the gate to i'arathael|1": "FAB509-CF",
+    "action|restless cleric|1": "IAR084-MV",
+    "action|restless corporal|1": "IAR085-MV",
+    "action|restless looter|1": "IAR063-MV",
+    "action|restless magister|1": "IAR064-MV",
+    "action|restless outlaw|1": "IAR086-MV",
+    "action|restless plowman|1": "IAR087-MV",
+    "action|restless quartermaster|1": "IAR065-MV",
+    "action|restless shieldmaiden|1": "IAR088-MV",
+    "action|restless steed|1": "IAR089-MV",
+    "action|restless templar|1": "IAR059-MV",
+    "action|usurp the shadow throne|3": "IAR110-MV",
+    "equipment|circlet of eternal end|0": "FAB491-MV",
+    "hero|levia|0": "IAR002-MV",
+    "hero|malice, domina of the dead|0": "GEM184-MV",
+    "hero|malice|0": "IAR054-MV",
+    "hero|viserai, between worlds|0": "IAR107-MV",
+    "hero|viserai, the forsaken|0": "IAR106-MV",
+    "hero|viserai, usurper|0": "IAR106-MV_BACK",
+    "token|blasmophet, the insatiable hunger|0": "IAR221-MV"
+  }
+}
