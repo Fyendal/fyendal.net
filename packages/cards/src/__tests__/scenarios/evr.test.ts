@@ -30,6 +30,39 @@ describe("EVR — registration and combat designs", () => {
     s.expectAttackValue(4);
   });
 
+  it("Winds of Eternity follows Hundred Winds and shuffles owned copies on hit", () => {
+    const s = scenario({
+      seats: [
+        { hero: "rhinar", hand: ["hundred winds|1", "hundred winds|1", "winds of eternity|3"] },
+        { hero: "dorinthea" },
+      ],
+    });
+    s.play("hundred winds|1").blockWith().settle();
+    s.play("hundred winds|1").blockWith().settle();
+    s.play("winds of eternity|3").expectAttackValue(4).blockWith().settle();
+
+    expect(s.state.players[0]!.deck.filter((card) => cardData[card.cardId]?.name === "Hundred Winds"))
+      .toHaveLength(2);
+    expect(s.state.chain.slice(0, 2).every((link) => link.flags.attackGone === true)).toBe(true);
+    expect(s.state.players[0]!.graveyard.some((card) => cardData[card.cardId]?.name === "Hundred Winds"))
+      .toBe(false);
+    s.doRaw({ kind: "close-chain" });
+    expect(s.state.players[0]!.deck.filter((card) => cardData[card.cardId]?.name === "Hundred Winds"))
+      .toHaveLength(2);
+  });
+
+  it("Winds of Eternity has no combo bonus or shuffle without a preceding Hundred Winds", () => {
+    const s = scenario({
+      seats: [
+        { hero: "rhinar", hand: ["winds of eternity|3"], graveyard: ["hundred winds|1"] },
+        { hero: "dorinthea" },
+      ],
+    });
+    s.play("winds of eternity|3").expectAttackValue(2).blockWith().settle();
+    s.expectInZone(0, "hundred winds|1", "graveyard");
+    expect(s.state.players[0]!.deck).toHaveLength(0);
+  });
+
   it("a boosted T-Bone requires an equipment defender when one is able", () => {
     const s = scenario({
       seats: [

@@ -685,7 +685,7 @@
   "id": "EVR040",
   "name": "Winds of Eternity",
   "cardType": "action",
-  "text": "Combo - If Winds of Eternity was the last attack this combat chain, Winds of Eternity gains +2{p} and \"If this hits, shuffle all cards named Hundred Winds you control on this combat chain into your deck.\"",
+  "text": "Combo - If Hundred Winds was the last attack this combat chain, this gets +2{p} and \"When this hits, shuffle all cards you own named Hundred Winds on the combat chain into your deck.\"",
   "pitch": 3,
   "cost": 0,
   "attack": 2,

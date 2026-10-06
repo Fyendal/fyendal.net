@@ -15,6 +15,55 @@ describe("PEN — import and set mechanics", () => {
     expect(new Set(cards.map(functionalKeyOf))).toHaveLength(348);
   });
 
+  it.each([
+    { board: ["sigil of conductivity|3"], opposingBoard: [], expected: 6 },
+    { board: [], opposingBoard: [], expected: 4 },
+    { board: [], opposingBoard: ["sigil of forethought|3"], expected: 4 },
+  ])("Glyph Power Spell deals $expected arcane damage with own $board and opposing $opposingBoard", ({ board, opposingBoard, expected }) => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          board,
+          hand: ["glyph power spell|1", "sigil of solace|3"],
+          resources: 2,
+          equipment: NO_EQUIPMENT,
+        },
+        { hero: "dorinthea", board: opposingBoard, life: 20, equipment: NO_EQUIPMENT },
+      ],
+    });
+
+    g.play("glyph power spell|1");
+    expect(g.state.pendingDecision?.prompt).toContain(`deal ${expected} arcane damage`);
+    g.chooseOption("opponent")
+      .expectLog(`Glyph Power Spell would deal ${expected} arcane damage`)
+      .expectLife(1, 20 - expected);
+  });
+
+  it("Glyph Power Spell combines its controlled-Sigil replacement with Volzar's amp", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          board: ["sigil of conductivity|3"],
+          weapons: ["volzar, meteor storm|0"],
+          hand: ["sigil of solace|3", "glyph power spell|1"],
+          resources: 2,
+          equipment: NO_EQUIPMENT,
+        },
+        { hero: "dorinthea", life: 20, equipment: NO_EQUIPMENT },
+      ],
+    });
+
+    g.play("sigil of solace|3")
+      .activate("volzar, meteor storm|0")
+      .play("glyph power spell|1");
+    expect(g.state.pendingDecision?.prompt).toContain("deal 7 arcane damage");
+    g.chooseOption("opponent")
+      .expectLog("Glyph Power Spell would deal 7 arcane damage")
+      .expectLife(1, 13);
+  });
+
   it("Reach Beyond the Grave still discards when no ally can be returned", () => {
     const g = scenario({ seats: [
       {

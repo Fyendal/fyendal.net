@@ -184,18 +184,24 @@ function higherLife(ctx: ScriptCtx): boolean {
   return ctx.compareLife(ctx.seat, opponentSeat(ctx)) > 0;
 }
 
-function arcaneSpell(amount: number, createSigil = false): CardScript {
+function arcaneSpell(
+  amount: number,
+  createSigil = false,
+  replacement?: { amount: number; when: (ctx: ScriptCtx) => boolean },
+): CardScript {
+  const damage = (ctx: ScriptCtx) => replacement?.when(ctx) ? replacement.amount : amount;
   return {
     arcaneDamageEffect: true,
-    arcaneDamageEffectAmounts: [amount],
+    arcaneDamageEffectAmounts: replacement ? [amount, replacement.amount] : [amount],
     onPlay(ctx) {
+      const spellDamage = damage(ctx);
       ctx.requestChoice(
         "pen-arcane",
         decisionPrompt(
-          `${ctx.data.name}: deal ${ctx.previewArcaneDamage(amount)} arcane damage to which hero?`,
+          `${ctx.data.name}: deal ${ctx.previewArcaneDamage(spellDamage)} arcane damage to which hero?`,
           "card.pen.arcane.hero.choose",
           {
-            values: { card: { kind: "card", cardId: ctx.self.cardId }, amount: ctx.previewArcaneDamage(amount) },
+            values: { card: { kind: "card", cardId: ctx.self.cardId }, amount: ctx.previewArcaneDamage(spellDamage) },
             optionMessages: {
               opponent: decisionMessage("common.option.opponent"),
               you: decisionMessage("card.pen.option.you"),
@@ -209,7 +215,7 @@ function arcaneSpell(amount: number, createSigil = false): CardScript {
       if (createSigil && arcane && dealt > 0) create(ctx, SIGIL_OF_FATE);
     },
     onChoose(ctx, hook, option) {
-      if (hook === "pen-arcane") dealArcane(ctx, option === "you" ? ctx.seat : opponentSeat(ctx), amount);
+      if (hook === "pen-arcane") dealArcane(ctx, option === "you" ? ctx.seat : opponentSeat(ctx), damage(ctx));
     },
   };
 }
@@ -1044,7 +1050,14 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
       if (hook === "pen-erase-aura") ctx.destroyPermanent(Number(option));
     },
   },
-  "glyph power spell|1": arcaneSpell(4),
+  "glyph power spell|1": arcaneSpell(4, false, {
+    amount: 6,
+    when: (ctx) => [
+      ...ctx.player(ctx.seat).board,
+      ...ctx.player(ctx.seat).weapons,
+      ...Object.values(ctx.player(ctx.seat).equipment).filter((card): card is Card => card !== undefined),
+    ].some((card) => !card.faceDown && ctx.cardNames(card).some((name) => name.includes("sigil"))),
+  }),
   "painful premonition|1": arcaneSpell(3, true),
   "painful premonition|2": arcaneSpell(2, true),
   "painful premonition|3": arcaneSpell(1, true),

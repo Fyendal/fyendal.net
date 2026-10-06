@@ -543,7 +543,23 @@ export const evrHighRarity: Record<string, CardScript> = {
       if (count > 0) ctx.drawCards(ctx.seat, count);
     },
   },
-  "winds of eternity|3": { modifyAttack: (ctx) => (previousAttackHasName(ctx, "winds of eternity") ? 2 : 0) },
+  "winds of eternity|3": {
+    onAttackDeclared(ctx) {
+      if (!previousAttackHasName(ctx, "hundred winds")) return;
+      ctx.setFlag("link", "windsOfEternityCombo", true);
+      ctx.addModifier({ scope: "chain-link", attack: 2 });
+    },
+    canTriggerOnHit: (ctx) => ctx.getFlag("link", "windsOfEternityCombo") === true,
+    onHit(ctx) {
+      const hundredWinds = ctx.state.chain
+        .filter((link) => link.flags.attackGone !== true)
+        .map((link) => link.attackingCard)
+        .filter((card) => card.owner === ctx.seat && named(ctx, card, "hundred winds"));
+      let moved = false;
+      for (const card of hundredWinds) moved = ctx.putOnDeckBottom(card.instanceId) || moved;
+      if (moved) ctx.shuffleDeck();
+    },
+  },
   "helm of sharp eye|0": {
     activated: {
       cost: 0,

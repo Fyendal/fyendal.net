@@ -852,7 +852,25 @@ export function putCardOnDeckBottom(
   instanceId: number,
   asActivationCost = false,
 ): boolean {
-  const found = removeFromOwnerZones(state, instanceId);
+  let found = removeFromOwnerZones(state, instanceId);
+  if (!found) {
+    const link = state.chain.find((candidate) =>
+      candidate.attackCardType === "action" &&
+      candidate.attackingCard.instanceId === instanceId &&
+      candidate.flags.attackGone !== true
+    );
+    if (link) {
+      const card = link.attackingCard;
+      link.attackingCard = snapshotSerializable(card);
+      link.flags.attackGone = true;
+      found = {
+        owner: state.players[card.owner] as PlayerState,
+        card,
+        fromArena: false,
+        fromZone: "chain",
+      };
+    }
+  }
   if (!found) return false;
   const privateSource = found.fromZone === "hand" || found.fromZone === "deck"
     || (found.fromZone === "arsenal" && found.card.faceDown)
