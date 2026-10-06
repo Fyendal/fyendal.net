@@ -1,4 +1,29 @@
+import { cardList } from "@fyendal/cards/client";
+
 const IMG_BASE = "https://content.fabrary.net/cards";
+
+/** English History Pack 1 uses white borders. Its cards are reprints of the
+ * black-border WTR, ARC, and CRU sets, so use those printings for art only. */
+const BLACK_BORDER_ART_FOR_1HP = new Map<string, string>();
+const originalArtByCard = new Map<string, string>();
+const artKey = (card: CardImageData) =>
+  `${card.cardType}|${card.name.trim().toLowerCase().replace(/\s+/g, " ")}|${card.pitch ?? 0}`;
+for (const set of ["WTR", "ARC", "CRU"]) {
+  for (const card of cardList) {
+    if (card.set !== set) continue;
+    const key = artKey(card);
+    const current = originalArtByCard.get(key);
+    // Prefer a dedicated front-facing object over an old token back face.
+    if (!current || (current.endsWith("B") && !card.id.endsWith("B"))) {
+      originalArtByCard.set(key, card.id);
+    }
+  }
+}
+for (const card of cardList) {
+  if (card.set !== "1HP") continue;
+  const originalId = originalArtByCard.get(artKey(card));
+  if (originalId) BLACK_BORDER_ART_FOR_1HP.set(card.id, originalId);
+}
 
 /** Fabrary has no plain image objects for some printings. Prefer an exact
  * foil object; where no exact object exists, use a verified printing of the
@@ -153,7 +178,8 @@ export function resolveCardImageUrl(cardId: string, data?: CardImageData): strin
   const tokenKey = data?.cardType === "token"
     ? `${data.name.trim().toLowerCase().replace(/\s+/g, " ")}|${data.pitch ?? 0}`
     : undefined;
-  const artCardId = tokenKey ? CANONICAL_TOKEN_ART_IDS[tokenKey] ?? cardId : cardId;
+  const canonicalCardId = tokenKey ? CANONICAL_TOKEN_ART_IDS[tokenKey] ?? cardId : cardId;
+  const artCardId = BLACK_BORDER_ART_FOR_1HP.get(canonicalCardId) ?? canonicalCardId;
   const imageOverride = FABRARY_IMAGE_ID_OVERRIDES[artCardId];
   let imageId = imageOverride ?? artCardId;
   if (!imageOverride && artCardId.endsWith("B")) {
@@ -168,6 +194,9 @@ export function resolveCardImageUrl(cardId: string, data?: CardImageData): strin
  * falls back to its text-card presentation. */
 export function resolveCardImageUrls(cardId: string, data?: CardImageData): string[] {
   const primary = resolveCardImageUrl(cardId, data);
+  if (BLACK_BORDER_ART_FOR_1HP.has(cardId)) {
+    return [primary, `${IMG_BASE}/${cardId}.webp`];
+  }
   if (!/^IAR\d{3}$/.test(cardId)) return [primary];
   return [...new Set([
     primary,

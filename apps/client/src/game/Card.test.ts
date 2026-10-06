@@ -1,6 +1,7 @@
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
+import { cardList } from "@fyendal/cards/client";
 import {
   CardBack,
   CardFace,
@@ -12,6 +13,27 @@ import {
 import { hasLegacySquareCardFrame, hasTallEquipmentCardFrame, isMarvelCardImageUrl, resolveCardImageUrls } from "./cardImageUrl.js";
 
 describe("cardImageUrl", () => {
+  it("uses matching black-border art for every History Pack 1 printing", () => {
+    const historyPack = cardList.filter((card) => card.set === "1HP");
+    const originals = cardList.filter((card) => ["WTR", "ARC", "CRU"].includes(card.set ?? ""));
+    expect(historyPack).toHaveLength(427);
+
+    for (const card of historyPack) {
+      const imageUrl = cardImageUrl(card.id);
+      const equivalentArtUrls = originals
+        .filter((original) => original.name === card.name
+          && original.pitch === card.pitch && original.cardType === card.cardType)
+        .map((original) => cardImageUrl(original.id));
+      expect(imageUrl, `${card.id} (${card.name})`).toMatch(/\/cards\/(?:WTR|ARC|CRU)/);
+      expect(equivalentArtUrls, `${card.id} (${card.name})`).toContain(imageUrl);
+    }
+
+    expect(resolveCardImageUrls("1HP010")).toEqual([
+      "https://content.fabrary.net/cards/WTR006.webp",
+      "https://content.fabrary.net/cards/1HP010.webp",
+    ]);
+  });
+
   it.each([
     ["WTR079", true],
     ["UPR084", true],
