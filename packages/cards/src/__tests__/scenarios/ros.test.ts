@@ -391,6 +391,34 @@ describe("ROS — Lightning and Runeblade", () => {
       .expectAP(0, 2);
   });
 
+  it("Lightning Greaves does not give a later Cosmo aura attack go again", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          weapons: ["cosmo, scroll of ancestral tapestry|0"],
+          equipment: { legs: "lightning greaves|0" },
+          hand: ["crackle from afar|3", "raging onslaught|3"],
+          resources: 1,
+        },
+        { hero: "dorinthea" },
+      ],
+    });
+
+    g.activate("lightning greaves|0")
+      .play("crackle from afar|3")
+      .expectAP(0, 2)
+      .activate("crackle from afar|3", { pitch: ["raging onslaught|3"] });
+    expect(g.state.chain.at(-1)).toMatchObject({
+      attackCardType: "weapon",
+      attackingCard: { cardId: printingId("crackle from afar|3") },
+      goAgain: false,
+    });
+    expect(projectStateFor(g.state, 0).chain.at(-1)?.attackingCard.cardId)
+      .toBe(printingId("crackle from afar|3"));
+    g.blockWith().settle().expectAP(0, 1);
+  });
+
   it("can activate Lightning Greaves with a resource gained from Tunic during Damage Step priority", () => {
     const g = scenario({
       seats: [

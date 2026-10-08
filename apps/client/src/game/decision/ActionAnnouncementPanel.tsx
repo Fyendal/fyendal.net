@@ -85,6 +85,8 @@ export function ActionAnnouncementPanel({
     }${
       step === "boost" || step === "target" || step === "close-chain" || step === "confirm"
         ? " decision-post-payment" : ""
+    }${
+      sel.kind === "activate" && step === "ability" ? " decision-ability" : ""
     }`}>
       {sel.kind === "choose-hand-action" ? (
         <>
@@ -294,10 +296,11 @@ export function ActionAnnouncementPanel({
               { card: selCardId ? <CardRef id={selCardId} /> : intl.formatMessage({ id: "game.card" }) },
             )}
           </span>
-          <div className="decision-buttons">
+          <div className="decision-ability-list">
             {abilityChoices.map((choice) => (
               <button
                 key={choice.index}
+                className="decision-ability-option"
                 aria-label={choice.label.replaceAll("{p}", ` ${attackLabel}`).trim()}
                 onClick={(event) =>
                   chooseWithoutFocus(event.currentTarget, () => onSelectAbility(choice.index))}
@@ -315,8 +318,10 @@ export function ActionAnnouncementPanel({
                 )}
               </button>
             ))}
-            <button onClick={onCancel}>{intl.formatMessage({ id: "common.cancel" })}</button>
           </div>
+          <button className="decision-ability-cancel" onClick={onCancel}>
+            {intl.formatMessage({ id: "common.cancel" })}
+          </button>
         </>
       ) : null}
       {sel.kind !== "choose-hand-action" && step === "method" && playMethodChoiceRequired ? (

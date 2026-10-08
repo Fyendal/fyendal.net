@@ -98,11 +98,15 @@ interface CardViewOptions {
 
 function projectedAbilityLabels(
   abilities: ReturnType<typeof abilityList>,
+  grantedAuraAttack = false,
 ): string[] | undefined {
-  if (abilities.length <= 1) return undefined;
-  return abilities.map(
-    (ability, index) => ability.label ?? (ability.isAttack ? "Attack" : `Ability ${index + 1}`),
-  );
+  if (abilities.length + (grantedAuraAttack ? 1 : 0) <= 1) return undefined;
+  return [
+    ...abilities.map(
+      (ability, index) => ability.label ?? (ability.isAttack ? "Attack" : `Ability ${index + 1}`),
+    ),
+    ...(grantedAuraAttack ? ["Attack with this aura"] : []),
+  ];
 }
 
 function cardView(state: GameStateInternal,
@@ -132,6 +136,7 @@ function cardView(state: GameStateInternal,
     grantsAuraAttackMarker(state, controller, c)
       ? abilities.length
       : undefined;
+  const activatedAbilityLabels = projectedAbilityLabels(abilities, grantedAuraAttackIndex !== undefined);
   const attackAbilityIndexes = abilities.flatMap((ability, index) =>
     ability.isAttack ? [index] : []);
   if (grantedAuraAttackIndex !== undefined) attackAbilityIndexes.push(grantedAuraAttackIndex);
@@ -171,7 +176,7 @@ function cardView(state: GameStateInternal,
     ...(playableFromSource ? { playableFromSourceCardId: playableFromSource } : {}),
     ...(usedAbilityIndexes.length > 0 ? { usedAbilityIndexes } : {}),
     ...(hasRemainingMultipleActivation ? { remainingAbilityActivations } : {}),
-    ...(abilities.length > 1 ? { activatedAbilityLabels: projectedAbilityLabels(abilities) } : {}),
+    ...(activatedAbilityLabels ? { activatedAbilityLabels } : {}),
     ...(attackAbilityIndexes.length > 0 ? { attackAbilityIndexes } : {}),
     ...(c.grantedNames && c.grantedNames.length > 0 ? { grantedNames: c.grantedNames } : {}),
     ...(c.chosenName ? { chosenName: c.chosenName } : {}),

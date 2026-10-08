@@ -498,11 +498,11 @@
 .board-square-frame-left img { left: -6.3%; }
 .board-square-frame-right { clip-path: inset(0 0 0 91.5%); }
 .board-square-frame-right img { left: -28.7%; }
-.board-square-media:is([data-card-type="equipment"], [data-card-type="weapon"], [data-card-type="hero"]) {
+.board-square-media:is([data-card-type="equipment"], [data-card-type="weapon"], [data-card-type="hero"], [data-card-type="token"]) {
   --board-square-image-top: -21.6cqi;
   border-radius: 3%;
 }
-.board-square-media-legacy:is([data-card-type="equipment"], [data-card-type="weapon"], [data-card-type="hero"]) {
+.board-square-media-legacy:is([data-card-type="equipment"], [data-card-type="weapon"], [data-card-type="hero"], [data-card-type="token"]) {
   --board-square-image-top: -25.65cqi;
 }
 .board-square-printed-frame {
@@ -572,6 +572,9 @@
 }
 .board-square-name[data-card-type="weapon"] .board-square-name-frame {
   background-image: url("/card-title-bars/weapon-frame.svg");
+}
+.board-square-name[data-card-type="token"] .board-square-name-frame {
+  background-image: url("/card-title-bars/token-frame.svg");
 }
 .board-square-name:not([data-pitch]) .board-square-name-frame {
   border-top-color: var(--square-frame-color, #272823);

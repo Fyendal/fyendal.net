@@ -263,6 +263,9 @@ function attackGoAgain(state: GameStateInternal, card: CardInstance, cardType: "
   return state.modifiers.some(
     (m) =>
       m.goAgain &&
+      // The attack's type can differ from its source card's printed type:
+      // Cosmo turns an instant aura into a weapon attack, for example.
+      (m.appliesToCardType === undefined || m.appliesToCardType === cardType) &&
       (m.scope === "until-end-of-turn" || m.scope === "next-attack" || m.scope === "combat-chain") &&
       (link
         ? modifierApplies(state, m, link)

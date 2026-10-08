@@ -299,7 +299,8 @@ export function CardFace({
   const attack = card.attack ?? data?.attack;
   const defense = card.defense ?? data?.defense;
   const squareHero = data?.cardType === "hero";
-  const printedArenaFrame = squareHero || data?.cardType === "weapon" || data?.cardType === "equipment";
+  const printedArenaFrame = squareHero || data?.cardType === "weapon" ||
+    data?.cardType === "equipment" || data?.cardType === "token";
   const squarePitch = data?.pitch && PITCH_CLASS[data.pitch] ? data.pitch : undefined;
   const printedLife = data?.life;
   const marked = (card.counters?.marked ?? 0) > 0;

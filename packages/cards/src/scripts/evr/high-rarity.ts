@@ -530,8 +530,18 @@ export const evrHighRarity: Record<string, CardScript> = {
   "break tide|2": {
     modifyAttack: (ctx) => (previousAttackHasName(ctx, "rushing river", "flood of force") ? 3 : 0),
     onAttackDeclared(ctx) {
-      if (previousAttackHasName(ctx, "rushing river", "flood of force"))
+      if (previousAttackHasName(ctx, "rushing river", "flood of force")) {
+        ctx.setFlag("link", "breakTideCombo", true);
         ctx.addModifier({ scope: "chain-link", dominate: true });
+      }
+    },
+    canTriggerOnHit(ctx) {
+      return ctx.getFlag("link", "breakTideCombo") === true;
+    },
+    onHit(ctx) {
+      const top = ctx.player(ctx.seat).deck[0];
+      if (top && ctx.banish(top.instanceId))
+        ctx.allowPlayFrom(top.instanceId, "banish", { untilEndOfNextTurn: true });
     },
   },
   "spring tidings|2": {

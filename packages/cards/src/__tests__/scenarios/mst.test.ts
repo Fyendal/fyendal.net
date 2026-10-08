@@ -144,6 +144,7 @@ describe("MST — Mystic heroes and cloaked equipment", () => {
       seats: [
         {
           hero: "rhinar",
+          weapons: ["cosmo, scroll of ancestral tapestry|0"],
           board: ["spectral shield|0"],
           hand: ["astral etchings|1", "restless coalescence|2", "wrecker romp|3"],
         },
@@ -166,6 +167,12 @@ describe("MST — Mystic heroes and cloaked equipment", () => {
     )!;
     expect(shield.counters?.power).toBe(1);
     expect(restless.counters?.power).toBe(2);
+    expect(projectStateFor(g.state, 0).players[0]?.board.find(
+      (card) => card.instanceId === restless.instanceId,
+    )?.activatedAbilityLabels).toEqual([
+      "Remove a +1 power counter: Create a Spectral Shield",
+      "Attack with this aura",
+    ]);
   });
 });
 

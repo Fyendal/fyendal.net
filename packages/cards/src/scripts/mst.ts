@@ -1636,6 +1636,7 @@ Object.assign(mst, {
       goAgain: false,
       timing: "instant",
       oncePerTurn: true,
+      label: "Remove a +1 power counter: Create a Spectral Shield",
       removeCounterCost: { key: "power", amount: 1 },
       canActivate: (ctx) => ctx.getCounter("power") > 0,
       onActivate(ctx) {

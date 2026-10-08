@@ -339,6 +339,8 @@ describe("CardFace payment state", () => {
   });
 
   it.each([
+    ["MST158", "48 170 904 660"],
+    ["ARC112", "48 170 904 695"],
     ["EVR018", "48 170 904 922"],
     ["EVO247", "48 170 904 695"],
     ["HNT143", "48 170 904 660"],
@@ -356,6 +358,18 @@ describe("CardFace payment state", () => {
     expect(html).toContain(`viewBox="${frameWindow}"`);
     expect(html).toContain(`<image href="${cardImageUrl(cardId)}"`);
     expect(html).not.toContain("board-square-frame-edge");
+  });
+
+  it("gives board tokens their printed rim and neutral title frame", () => {
+    const html = renderToStaticMarkup(createElement(CardFace, {
+      card: { instanceId: 1, cardId: "MST158", owner: 0 },
+      size: "zone",
+      squareArt: true,
+    }));
+
+    expect(html).toContain('data-card-type="token"');
+    expect(html).toContain('class="board-square-printed-frame"');
+    expect(html).toContain('class="board-square-name" data-card-type="token"');
   });
 
   it("loads card art eagerly so visible cards do not wait for hover", () => {

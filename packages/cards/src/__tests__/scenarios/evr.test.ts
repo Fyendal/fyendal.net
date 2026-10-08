@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { legalIntents, projectStateFor } from "@fyendal/engine";
 import { cardData, scripts } from "../../index.js";
-import { scenario } from "../harness.js";
+import { printingId, scenario } from "../harness.js";
 
 const BLUE = "wrecker romp|3";
 const RED_SIX = "wrecker romp|1";
@@ -61,6 +61,50 @@ describe("EVR — registration and combat designs", () => {
     s.play("winds of eternity|3").expectAttackValue(2).blockWith().settle();
     s.expectInZone(0, "hundred winds|1", "graveyard");
     expect(s.state.players[0]!.deck).toHaveLength(0);
+  });
+
+  it("Break Tide's combo hit banishes the deck top and permits play through the next turn", () => {
+    const s = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          weapons: [],
+          resources: 1,
+          hand: ["torrent of tempo|1", "rushing river|1", "break tide|2"],
+          deck: ["head jab|1"],
+        },
+        { hero: "dorinthea", weapons: [], hand: ["raging onslaught|1", "raging onslaught|1"] },
+      ],
+    });
+
+    s.play("torrent of tempo|1").blockWith().settle()
+      .play("rushing river|1").blockWith("raging onslaught|1", "raging onslaught|1").settle()
+      .play("break tide|2").expectAttackValue(5).blockWith().settle();
+
+    const banished = s.state.players[0]!.banish.find((card) => card.cardId === printingId("head jab|1"));
+    expect(banished?.playableFrom).toContain("banish");
+    expect(banished?.playableFromUntilEndOfSeatTurn).toBe(0);
+
+    s.endTurn().endTurn();
+    expect(legalIntents(s.state, 0).some((intent) =>
+      intent.kind === "play-from-zone" && intent.instanceId === banished?.instanceId
+    )).toBe(true);
+
+    s.endTurn();
+    expect(s.state.players[0]!.banish.find((card) => card.instanceId === banished?.instanceId)?.playableFrom)
+      .toBeUndefined();
+  });
+
+  it("Break Tide without combo does not banish a card on hit", () => {
+    const s = scenario({
+      seats: [
+        { hero: "rhinar", hand: ["break tide|2"], deck: ["head jab|1"] },
+        { hero: "dorinthea", weapons: [] },
+      ],
+    });
+
+    s.play("break tide|2").expectAttackValue(2).blockWith().settle();
+    s.expectDeckTop(0, "head jab|1").expectZoneSize(0, "banish", 0);
   });
 
   it("a boosted T-Bone requires an equipment defender when one is able", () => {
