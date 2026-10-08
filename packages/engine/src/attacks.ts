@@ -53,7 +53,10 @@ function replacePowerGain(
   amount: number,
 ): number {
   if (amount <= 0 || link.attackingCard.faceDown) return amount;
-  if ((state.players[link.attacker] as PlayerState).flags.attacksCannotGainPower === true) return 0;
+  if (
+    link.flags.cannotGainPower === true ||
+    (state.players[link.attacker] as PlayerState).flags.attacksCannotGainPower === true
+  ) return 0;
   let replaced = scriptOf(state, link.attackingCard.cardId, link.attackingCard)?.replacePowerGain?.(
     runtime.makeCtx(state, link.attacker, link.attackingCard, link),
     amount,

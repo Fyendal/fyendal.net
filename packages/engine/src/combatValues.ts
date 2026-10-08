@@ -357,6 +357,7 @@ function attackCannotGainPower(
 ): boolean {
   const attacker = state.players[link.attacker] as PlayerState;
   return (
+    link.flags.cannotGainPower === true ||
     attacker.flags.attacksCannotGainPower === true ||
     (isAttackActionData(data) &&
       Number(attacker.hero.counters?.attackActionNoPowerGainUntilTurn ?? 0) === state.turn)
