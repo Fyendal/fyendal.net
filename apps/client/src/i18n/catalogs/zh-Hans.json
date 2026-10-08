@@ -616,6 +616,7 @@
   "card.evr.deck.position": "留在牌库顶部，还是置于牌库底部？",
   "card.evr.dejavu.pitch.first": "Potion of Déjà Vu：选择下一张要置于牌库顶部的资源牌（最后选择的牌最终位于顶部）",
   "card.evr.dejavu.pitch.next": "选择下一张要置于牌库顶部的资源牌（最后选择的牌最终位于顶部）",
+  "card.evr.dreadbore.arrow.load": "将一张手牌中的箭矢面朝上放入 arsenal？",
   "card.evr.discard.choose": "{card}：选择一张要弃置的牌",
   "card.evr.discard.next": "再选择一张要弃置的牌",
   "card.evr.echoes.hero.choose": "Amulet of Echoes：选择一位英雄弃置 {amount} 张牌",

@@ -616,6 +616,7 @@
   "card.evr.deck.position": "Leave on top or put on bottom?",
   "card.evr.dejavu.pitch.first": "Potion of Déjà Vu: choose the next pitch card to put on top (the last choice ends on top)",
   "card.evr.dejavu.pitch.next": "Choose the next pitch card to put on top (the last choice ends on top)",
+  "card.evr.dreadbore.arrow.load": "Put an arrow from your hand face up into arsenal?",
   "card.evr.discard.choose": "{card}: choose a card to discard",
   "card.evr.discard.next": "Choose another card to discard",
   "card.evr.echoes.hero.choose": "Amulet of Echoes: choose a hero to discard {amount} cards",

@@ -726,11 +726,38 @@ export const evrHighRarity: Record<string, CardScript> = {
       }
     },
   },
-  "dreadbore|0": weapon(1, {
-    onFriendlyAttackDeclared(ctx) {
-      ctx.addModifier({ scope: "chain-link", attack: 1, appliesToSubtype: ["arrow"] });
+  "dreadbore|0": {
+    activated: {
+      cost: 1,
+      isAttack: false,
+      goAgain: true,
+      oncePerTurn: true,
+      onActivate(ctx) {
+        if (!ctx.hasArsenalSpace()) return;
+        const arrows = ctx.player(ctx.seat).hand.filter((card) => hasType(ctx, card, "arrow"));
+        if (!arrows.length) return;
+        ctx.requestCardChoice(
+          "dreadbore-load",
+          decisionPrompt("Put an arrow from your hand face up into arsenal?", "card.evr.dreadbore.arrow.load", {
+            optionMessages: commonOptionMessages("pass"),
+          }),
+          ["pass", ...arrows.map((card) => card.instanceId)],
+        );
+      },
     },
-  }),
+    onChoose(ctx, hook, option) {
+      if (hook !== "dreadbore-load" || option === "pass") return;
+      const arrowId = Number(option);
+      if (ctx.putIntoArsenal(arrowId, "hand", { faceUp: true })) {
+        ctx.addModifier({ scope: "until-end-of-turn", attack: 1, appliesToInstanceId: arrowId });
+      }
+    },
+    onFriendlyAttackDeclared(ctx) {
+      if (ctx.link && hasType(ctx, ctx.link.attackingCard, "arrow")) {
+        ctx.addModifier({ scope: "chain-link", noDefenseReactionsFromHand: true });
+      }
+    },
+  },
   "battering bolt|1": {
     canTriggerOnHit: (ctx) => ctx.link?.targetAllyId === undefined,
     onHit(ctx) {

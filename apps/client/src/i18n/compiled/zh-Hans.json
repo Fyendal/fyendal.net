@@ -4139,6 +4139,12 @@
       "value": "再选择一张要弃置的牌"
     }
   ],
+  "card.evr.dreadbore.arrow.load": [
+    {
+      "type": 0,
+      "value": "将一张手牌中的箭矢面朝上放入 arsenal？"
+    }
+  ],
   "card.evr.echoes.hero.choose": [
     {
       "type": 0,

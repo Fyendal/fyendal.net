@@ -164,13 +164,11 @@ export const aps: Record<string, CardScript> = {
   "pleiades, superstar|0": pleiades(),
   "moment maker|0": {
     activated: attackAbility(3),
-    onAttackDeclared(ctx) {
-      if (suspenseTargets(ctx).length < 3) return;
-      ctx.addModifier({ scope: "chain-link", attack: 2 });
-      ctx.setFlag("link", "momentMakerCheer", true);
+    modifyAttack(ctx) {
+      return suspenseTargets(ctx).length >= 3 ? 2 : 0;
     },
     canTriggerOnHit(ctx) {
-      return ctx.link?.targetAllyId === undefined && ctx.getFlag("link", "momentMakerCheer") === true;
+      return ctx.link?.targetAllyId === undefined && suspenseTargets(ctx).length >= 3;
     },
     onHit(ctx) {
       ctx.crowdCheer(ctx.seat);

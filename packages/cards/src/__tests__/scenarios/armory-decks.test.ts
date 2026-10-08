@@ -531,6 +531,35 @@ describe("Armory Decks — APS, ARR, and AAC", () => {
     expect(g.state.players[0]!.board.some((card) => functionalKeyOf(cardData[card.cardId]!) === "confidence|0")).toBe(true);
   });
 
+  it("Moment Maker gains power and its hit ability when a third suspense aura enters during reactions", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          heroKey: "pleiades, superstar|0",
+          weapons: ["moment maker|0"],
+          board: ["tension in the air|3", "what happens next?|3"],
+          hand: ["what happens next?|3"],
+          resources: 3,
+          equipment: NO_EQUIPMENT,
+        },
+        { hero: "dorinthea", hand: ["raging onslaught|2"], equipment: NO_EQUIPMENT },
+      ],
+    });
+
+    g.attackWithWeapon("moment maker|0")
+      .expectAttackValue(4)
+      .blockWith("raging onslaught|2")
+      .react("what happens next?|3", { settle: false })
+      .passPriority()
+      .passPriority()
+      .expectAttackValue(6)
+      .settle()
+      .expectFinalAttack(6)
+      .expectLife(1, 17);
+    expect(g.state.players[0]!.board.some((card) => functionalKeyOf(cardData[card.cardId]!) === "confidence|0")).toBe(true);
+  });
+
   it("Bare Swing beats chest and gets +2 power while no chest is equipped", () => {
     const g = scenario({
       seats: [

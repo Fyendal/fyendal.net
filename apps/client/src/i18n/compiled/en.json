@@ -4263,6 +4263,12 @@
       "value": "Choose another card to discard"
     }
   ],
+  "card.evr.dreadbore.arrow.load": [
+    {
+      "type": 0,
+      "value": "Put an arrow from your hand face up into arsenal?"
+    }
+  ],
   "card.evr.echoes.hero.choose": [
     {
       "type": 0,

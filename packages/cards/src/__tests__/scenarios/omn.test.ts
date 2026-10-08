@@ -1273,6 +1273,30 @@ describe("OMN — import and set mechanics", () => {
       .expectLife(1, 14);
   });
 
+  it("Chromatic Refinement buffs only the bound card when Constella Uplift responds", () => {
+    const g = scenario({
+      seats: [
+        hero("oscilio, scion of the third age|0", {
+          board: ["chromatic refinement|1"],
+          weapons: ["volzar, meteor storm|0"],
+          hand: ["meteoric impact|1", "constella uplift|2"],
+        }),
+        foe(),
+      ],
+    });
+
+    g.endTurn().endTurn()
+      .play("meteoric impact|1", { settle: false })
+      .activate("volzar, meteor storm|0", { settle: false })
+      .play("constella uplift|2");
+
+    expect(g.state.pendingDecision?.prompt).toBe("Constella Uplift: deal 1 arcane damage to a hero");
+    g.chooseOption("opposing hero")
+      .expectLife(1, 19)
+      .chooseOption("opposing hero")
+      .expectLife(1, 12);
+  });
+
   it("Chromatic Refinement discounts Strike Twice from arsenal after arcane damage", () => {
     const g = scenario({
       seats: [

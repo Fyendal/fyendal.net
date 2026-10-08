@@ -1304,6 +1304,7 @@ export function effectDamageBonus(state: GameStateInternal, packet: PendingArcan
       !mod.damage ||
       mod.consumed ||
       mod.seat !== packet.sourceSeat ||
+      (mod.appliesToInstanceId !== undefined && mod.appliesToInstanceId !== source.instanceId) ||
       !["chain-link", "combat-chain", "until-end-of-turn", "static"].includes(mod.scope)
     ) return sum;
     if (mod.appliesTo === "weapon" || mod.appliesTo === "sword") return sum;

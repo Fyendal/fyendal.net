@@ -285,6 +285,34 @@ describe("client bot tasks", () => {
 });
 
 describe("delegated bot commits", () => {
+  it("passes an empty bot action window restored by undo without a browser task", async () => {
+    const { db, store, room, credentials } = await fixture();
+    const state = room.state!;
+    state.phase = "action";
+    state.activePlayer = 1;
+    state.priorityPlayer = 1;
+    state.pendingDecision = null;
+    state.chain = [];
+    state.stack = [];
+    state.players[1]!.actionPoints = 0;
+    state.players[1]!.hand = [];
+    state.players[1]!.arsenal = [];
+    state.players[1]!.weapons = [];
+    state.players[1]!.equipment = {};
+    state.players[1]!.board = [];
+    expect(legalIntents(state, 1).map((intent) => intent.kind).sort()).toEqual(["concede", "offer-draw", "pass"]);
+    await db.query("UPDATE rooms SET version = $2 WHERE code = $1", [room.code, 2]);
+    await db.query(
+      "INSERT INTO room_history (room_code, version, state) VALUES ($1, $2, $3)",
+      [room.code, 2, JSON.stringify(encodePersistedState(state, room.rulesetVersion))],
+    );
+
+    expect(await store.undo(room.code, credentials, "current-turn")).toMatchObject({ ok: true });
+    const restored = (await store.getRoom(room.code))!.state!;
+    expect(restored.phase).not.toBe("action");
+    expect(restored.pendingDecision?.player).toBe(0);
+  });
+
   it("shares valid bot-room credentials across tabs but fences account recovery", async () => {
     const { store, room, credentials } = await fixture();
     const options = { allowPlayer: true, userId: credentials.userId };

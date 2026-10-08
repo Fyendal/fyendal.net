@@ -312,6 +312,16 @@ function isEmptyPriorityWindow(state: GameState, seat: number): boolean {
   return legal.some((candidate) => candidate.kind === "pass") &&
     legal.every((candidate) => candidate.kind === "pass" || candidate.kind === "concede" || candidate.kind.endsWith("-draw"));
 }
+
+/** A bot with no action or instant available has no choice to compute. Passing
+ * offers the opponent the normal end-of-action priority window. */
+function isEmptyBotActionWindow(state: GameState, seat: number): boolean {
+  if (state.phase !== "action" || state.pendingDecision !== null ||
+    state.activePlayer !== seat || state.priorityPlayer !== seat) return false;
+  const legal = legalIntents(state, seat);
+  return legal.some((candidate) => candidate.kind === "pass") &&
+    legal.every((candidate) => candidate.kind === "pass" || candidate.kind === "concede" || candidate.kind.endsWith("-draw"));
+}
 /** Spectator slots per room — anonymous joins must not grow a room unboundedly. */
 const MAX_SPECTATORS = 20;
 /** Player-seat gate message, shared by the store and the ws gateway. */
@@ -3538,7 +3548,8 @@ export class PgRoomStore {
         // a later Runechant is a new sequence and requires a new click.
         for (const member of room.seats) if (member) member.runechantSkip = false;
       }
-      const seat = state.pendingDecision?.player;
+      const seat = state.pendingDecision?.player ??
+        (state.phase === "action" ? state.priorityPlayer : undefined);
       if (seat === undefined) return;
       const skipRunechant =
         inRunechantSequence &&
@@ -3546,7 +3557,8 @@ export class PgRoomStore {
         legalIntents(state, seat).some((candidate) => candidate.kind === "skip-runechant");
       const intent: GameIntent | null = skipRunechant
         ? { kind: "skip-runechant" }
-        : autoPasses(seat) && isEmptyPriorityWindow(state, seat)
+        : autoPasses(seat) && (isEmptyPriorityWindow(state, seat) ||
+          (room.seats[seat]?.controller === "bot" && isEmptyBotActionWindow(state, seat)))
           ? { kind: "pass" }
           : null;
       if (!intent) return;

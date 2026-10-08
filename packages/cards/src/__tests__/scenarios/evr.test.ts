@@ -16,6 +16,106 @@ describe("EVR — registration and combat designs", () => {
     expect(scripts.EVR085).toBeDefined();
   });
 
+  it("Dreadbore loads an arrow face up, buffs it, and does not attack", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          heroKey: "riptide, lurker of the deep|0",
+          weapons: ["dreadbore|0"],
+          resources: 2,
+          hand: ["infecting shot|1", "sink below|1"],
+        },
+        { hero: "dorinthea" },
+      ],
+    });
+
+    g.activate("dreadbore|0");
+    expect(g.state.chain).toHaveLength(0);
+    expect(g.state.pendingDecision?.options).toContain("pass");
+    expect(g.state.pendingDecision?.options).toHaveLength(2);
+    g.chooseCard("infecting shot|1")
+      .expectInZone(0, "infecting shot|1", "arsenal")
+      .expectFaceDown(0, "infecting shot|1", false)
+      .expectAP(0, 1);
+    expect(g.state.players[0]!.resources).toBe(1);
+    expect(g.state.chain).toHaveLength(0);
+    const dreadboreId = g.state.players[0]!.weapons[0]!.instanceId;
+    expect(legalIntents(g.state, 0).some((intent) =>
+      intent.kind === "activate-ability" && intent.sourceInstanceId === dreadboreId
+    )).toBe(false);
+    g.play("infecting shot|1", { fromArsenal: true }).expectAttackValue(6);
+  });
+
+  it("Dreadbore's power bonus stays on the arrow it loaded", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          heroKey: "riptide, lurker of the deep|0",
+          weapons: ["dreadbore|0"],
+          equipment: { head: "new horizon|0" },
+          resources: 2,
+          arsenal: ["pathing helix|1"],
+          hand: ["infecting shot|1"],
+        },
+        { hero: "dorinthea" },
+      ],
+    });
+
+    g.activate("dreadbore|0").chooseCard("infecting shot|1");
+    expect(g.state.players[0]!.arsenal).toHaveLength(2);
+    g.play("pathing helix|1", { fromArsenal: true }).expectAttackValue(4);
+  });
+
+  it("Dreadbore's arrow reaction restriction applies without loading", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          heroKey: "riptide, lurker of the deep|0",
+          weapons: ["dreadbore|0"],
+          resources: 1,
+          arsenal: ["infecting shot|1"],
+        },
+        {
+          hero: "dorinthea",
+          hand: ["sink below|1"],
+          arsenal: ["fate foreseen|1"],
+        },
+      ],
+    });
+
+    g.play("infecting shot|1", { fromArsenal: true })
+      .expectAttackValue(5)
+      .blockWith()
+      .passPriority();
+    const legal = legalIntents(g.state, 1);
+    const handId = g.state.players[1]!.hand[0]!.instanceId;
+    const arsenalId = g.state.players[1]!.arsenal[0]!.instanceId;
+    expect(legal.some((intent) => intent.kind === "play-card" && intent.instanceId === handId)).toBe(false);
+    expect(legal.some((intent) => intent.kind === "play-from-arsenal" && intent.instanceId === arsenalId)).toBe(true);
+  });
+
+  it("Dreadbore can decline the load and still gets go again", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          heroKey: "riptide, lurker of the deep|0",
+          weapons: ["dreadbore|0"],
+          resources: 1,
+          hand: ["infecting shot|1"],
+        },
+        { hero: "dorinthea" },
+      ],
+    });
+
+    g.activate("dreadbore|0").chooseOption("pass").expectAP(0, 1);
+    g.expectInZone(0, "infecting shot|1", "hand").expectNotInZone(0, "infecting shot|1", "arsenal");
+    expect(g.state.chain).toHaveLength(0);
+  });
+
   it("Hundred Winds counts earlier copies on the combat chain", () => {
     const s = scenario({
       seats: [
