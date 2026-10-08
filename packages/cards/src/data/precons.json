@@ -753,7 +753,7 @@
             ]
         }
     },
-    "_comment_bot_jarl": "Source: https://fabrary.net/decks/01M0K4BKRHN7J89ZSB6XGDHRSH. The registered pool preserves the source printings; one Mangle is stored in deck rather than sideboard so every CC bot-only registration retains a sixty-card default while matchup presentation reconstructs the published branches from the complete pool.",
+    "_comment_bot_jarl": "100th Calling: Atlanta 3rd (user-supplied list). The 67 deck cards are stored as a 60-card registered deck plus seven sideboard cards; the bot presents all 67 in every matchup.",
     "bot-jarl": {
         "name": "Jarl",
         "format": "cc",
@@ -762,41 +762,40 @@
             "heroId": "MPG000",
             "weaponIds": ["SBR002", "EVR018", "SLY002"],
             "equipmentPool": [
-                "ROS028", "OMN204", "PEN215", "PEN310",
-                "EVO249", "AJV006", "ELE144", "SBL010"
+                "ROS028", "OMN204", "IAR223", "PEN215", "PEN227",
+                "PEN310", "EVO249", "AJV006", "ELE144", "PEN313"
             ],
             "deck": [
-                "AJV014", "AJV014", "AJV014",
-                "ELE147",
-                "ELE146", "ELE146", "ELE146",
-                "PEN206", "PEN206",
+                "IAR261", "IAR261", "IAR261",
                 "PEN319", "PEN319", "PEN319",
-                "AJV018", "AJV018", "AJV018",
-                "PEN320", "PEN320", "PEN320",
-                "SEA258", "SEA258", "SEA258",
+                "PEN320",
                 "SUP261", "SUP261", "SUP261",
-                "AJV020", "AJV020", "AJV020",
-                "ROS057", "ROS057", "ROS057",
-                "EVR022", "EVR022", "EVR022",
+                "AJV011", "AJV011",
                 "ELE005", "ELE005", "ELE005",
-                "SUP262", "SUP262",
-                "ELE114",
-                "HVY209", "HVY209",
+                "SBR020", "SBR020",
                 "ROS042", "ROS042", "ROS042",
                 "PEN321", "PEN321", "PEN321",
-                "ASR018", "ASR018", "ASR018",
-                "ELE142",
+                "ASR018", "ASR018",
                 "SBA028", "SBA028", "SBA028",
-                "APS021", "APS021", "APS021",
-                "SIY033", "SIY033",
-                "AJV011"
+                "SBR021",
+                "SUP262", "SUP262", "SUP262",
+                "AJV014", "AJV014", "AJV014",
+                "ELE147",
+                "TER027", "TER027",
+                "ELE146", "ELE146", "ELE146",
+                "AJV018", "AJV018", "AJV018",
+                "SEA258", "SEA258", "SEA258",
+                "AJV020", "AJV020", "AJV020",
+                "ROS057", "ROS057", "ROS057",
+                "ELE018", "ELE018",
+                "IAR260", "IAR260", "IAR260",
+                "EVR022", "EVR022"
             ],
             "sideboard": [
-                "AJV017",
-                "WTR161", "WTR161",
-                "AJV011", "AJV011",
-                "HNT231", "HNT231",
-                "SBR021", "SBR021"
+                "ELE114",
+                "HVY209", "HVY209",
+                "APS021", "APS021",
+                "SIY033", "SIY033"
             ]
         }
     },

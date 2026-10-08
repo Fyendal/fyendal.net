@@ -322,8 +322,8 @@ describe("Jarl policy", () => {
 
   it.each([
     [40, "defend"],
-    [20, "stage-defenders"],
-  ] as const)("times two-block Temper armor at %s life", (life, expectedKind) => {
+    [20, "defend"],
+  ] as const)("preserves two-block Temper armor against two damage at %s life", (life, expectedKind) => {
     const state = createGame({
       decklists: [jarlDeck(), decklists.dorinthea],
       cards: cardData,
@@ -332,6 +332,8 @@ describe("Jarl policy", () => {
       startPlayer: 1,
     });
     state.turn = 3;
+    replaceHand(state, ["ELE005", "ELE114", "AJV014", "AJV020"]);
+    state.players[0]!.arsenal = [];
     const view = projectStateFor(state, 0);
     view.players[0].life = life;
     const gauntlets = view.players[0].equipment.arms!;
@@ -875,6 +877,190 @@ describe("Jarl policy", () => {
       kind: "activate-ability",
       sourceInstanceId: fruits.instanceId,
     });
+  });
+
+  it.each([
+    { attackId: "IAR261", bondId: "AJV014", otherId: "ELE146" },
+    { attackId: "IAR260", bondId: "ELE146", otherId: "AJV014" },
+  ])("plays $attackId using its Bond element as payment", ({ attackId, bondId, otherId }) => {
+    const state = createGame({
+      decklists: [jarlDeck(), decklists.dorinthea], cards: cardData, scripts,
+      seed: 12_201, startPlayer: 0,
+    });
+    state.turn = 2;
+    replaceHand(state, [attackId, bondId, otherId]);
+    const attack = state.players[0]!.hand[0]!;
+    const bond = state.players[0]!.hand[1]!;
+    const chosen = chooseJarlIntent(inputFor(state));
+    expect(legalIntents(state, 0)).toContainEqual(chosen);
+    expect(chosen).toMatchObject({
+      kind: "play-card", instanceId: attack.instanceId, pitchInstanceIds: [bond.instanceId],
+    });
+  });
+
+  it("plays Glacial Footsteps when it can pay six and keep an Ice card to fuse", () => {
+    const state = createGame({
+      decklists: [jarlDeck(), decklists.dorinthea], cards: cardData, scripts,
+      seed: 12_202, startPlayer: 0,
+    });
+    state.turn = 2;
+    state.players[0]!.resources = 3;
+    replaceHand(state, ["ELE018", "AJV014", "ELE146"]);
+    const glacial = state.players[0]!.hand[0]!;
+    const chosen = chooseJarlIntent(inputFor(state));
+    expect(legalIntents(state, 0)).toContainEqual(chosen);
+    expect(chosen).toMatchObject({ kind: "play-card", instanceId: glacial.instanceId });
+    expect(chosen.kind === "play-card" ? chosen.pitchInstanceIds : []).not.toContain(
+      state.players[0]!.hand[2]!.instanceId,
+    );
+  });
+
+  it("plays Plow Under after four Earth cards are banished", () => {
+    const state = createGame({
+      decklists: [jarlDeck(), decklists.dorinthea], cards: cardData, scripts,
+      seed: 12_203, startPlayer: 0,
+    });
+    state.turn = 2;
+    replaceHand(state, ["SUP262", "AJV014", "ELE146"]);
+    state.players[0]!.banish = ["AJV014", "ROS042", "ROS057", "IAR260"].map((cardId) => ({
+      instanceId: state.nextInstanceId++, cardId, owner: 0,
+    }));
+    const chosen = chooseJarlIntent(inputFor(state));
+    expect(legalIntents(state, 0)).toContainEqual(chosen);
+    expect(chosen).toMatchObject({ kind: "play-card", instanceId: state.players[0]!.hand[0]!.instanceId });
+  });
+
+  it("uses Pummel to push an otherwise blocked attack through", () => {
+    const state = createGame({
+      decklists: [jarlDeck(), decklists.dorinthea], cards: cardData, scripts,
+      seed: 12_204, startPlayer: 0,
+    });
+    state.turn = 2;
+    replaceHand(state, ["SBR020", "AJV014"]);
+    const view = projectStateFor(state, 0);
+    const [pummel, blue] = view.players[0].hand;
+    view.phase = "reaction";
+    view.priorityPlayer = 0;
+    view.pendingDecision = { player: 0, kind: "attack-reaction", prompt: "Attack reactions" };
+    view.chain = [{
+      attackingCard: { instanceId: 90_204, cardId: "IAR261", owner: 0 },
+      defendingCards: [], attackValue: 6, defenseValue: 6, damage: 0,
+      resolved: false, reactions: [],
+    }];
+    const legal: GameIntent[] = [
+      { kind: "pass" },
+      { kind: "play-card", instanceId: pummel!.instanceId, pitchInstanceIds: [blue!.instanceId] },
+    ];
+    expect(chooseJarlIntent({ seat: 0, view, legal, cards: cardData }))
+      .toMatchObject({ kind: "play-card", instanceId: pummel!.instanceId });
+    view.chain[0]!.defenseValue = 11;
+    expect(chooseJarlIntent({ seat: 0, view, legal, cards: cardData }))
+      .toEqual({ kind: "pass" });
+  });
+
+  it("defends with Canopy Shelter to preserve life and create Might", () => {
+    const state = createGame({
+      decklists: [jarlDeck(), decklists.dorinthea], cards: cardData, scripts,
+      seed: 12_205, startPlayer: 1,
+    });
+    state.turn = 3;
+    replaceHand(state, ["TER027", "AJV014"]);
+    const view = projectStateFor(state, 0);
+    view.players[0].life = 12;
+    view.phase = "defend";
+    view.priorityPlayer = 0;
+    view.pendingDecision = { player: 0, kind: "defend", prompt: "Choose defenders" };
+    view.chain = [{
+      attackingCard: { instanceId: 90_205, cardId: "WTR159", owner: 1 },
+      defendingCards: [], attackValue: 2, defenseValue: 0, damage: 2,
+      resolved: false, reactions: [],
+    }];
+    const canopy = view.players[0].hand[0]!;
+    const legal: GameIntent[] = [
+      { kind: "defend", instanceIds: [] },
+      { kind: "stage-defenders", instanceIds: [canopy.instanceId] },
+    ];
+    expect(chooseJarlIntent({ seat: 0, view, legal, cards: cardData }))
+      .toEqual({ kind: "stage-defenders", instanceIds: [canopy.instanceId] });
+  });
+
+  it("activates equipped Quickdodge Flexors to survive a reaction window", () => {
+    const state = createGame({
+      decklists: [jarlDeck(), decklists.dorinthea], cards: cardData, scripts,
+      seed: 12_206, startPlayer: 1,
+    });
+    const view = projectStateFor(state, 0);
+    const flexors = view.players[0].equipment.legs!;
+    flexors.cardId = "PEN313";
+    view.players[0].life = 2;
+    view.phase = "reaction";
+    view.priorityPlayer = 0;
+    view.pendingDecision = { player: 0, kind: "defense-reaction", prompt: "Defense reactions" };
+    view.chain = [{
+      attackingCard: { instanceId: 90_206, cardId: "WTR159", owner: 1 },
+      defendingCards: [], attackValue: 2, defenseValue: 0, damage: 2,
+      resolved: false, reactions: [],
+    }];
+    const activate: GameIntent = {
+      kind: "activate-ability", sourceInstanceId: flexors.instanceId,
+      pitchInstanceIds: [view.players[0].hand[0]!.instanceId],
+    };
+    expect(chooseJarlIntent({ seat: 0, view, legal: [activate, { kind: "pass" }], cards: cardData }))
+      .toEqual(activate);
+    view.chain[0]!.damage = 0;
+    expect(chooseJarlIntent({ seat: 0, view, legal: [activate, { kind: "pass" }], cards: cardData }))
+      .toEqual({ kind: "pass" });
+  });
+
+  it("defends with Circlet when an on-hit is threatening and the attacker has a banished card", () => {
+    const state = createGame({
+      decklists: [jarlDeck(), decklists.dorinthea], cards: cardData, scripts,
+      seed: 12_207, startPlayer: 1,
+    });
+    const view = projectStateFor(state, 0);
+    const circlet = view.players[0].equipment.head!;
+    circlet.cardId = "IAR223";
+    view.players[1].banish = [{ instanceId: 90_208, cardId: "WTR159", owner: 1 }];
+    view.phase = "defend";
+    view.priorityPlayer = 0;
+    view.pendingDecision = { player: 0, kind: "defend", prompt: "Choose defenders" };
+    view.chain = [{
+      attackingCard: { instanceId: 90_207, cardId: "WTR159", owner: 1 },
+      defendingCards: [], attackValue: 2, defenseValue: 0, damage: 2,
+      onHitEffects: [{ sourceCardId: "WTR159", text: "Discard a card" }],
+      resolved: false, reactions: [],
+    }];
+    const legal: GameIntent[] = [
+      { kind: "defend", instanceIds: [] },
+      { kind: "stage-defenders", instanceIds: [circlet.instanceId] },
+    ];
+    expect(chooseJarlIntent({ seat: 0, view, legal, cards: cardData }))
+      .toEqual({ kind: "stage-defenders", instanceIds: [circlet.instanceId] });
+  });
+
+  it("defends with equipped Frozen Thoughts to stop a go-again on-hit", () => {
+    const state = createGame({
+      decklists: [jarlDeck(), decklists.dorinthea], cards: cardData, scripts,
+      seed: 12_208, startPlayer: 1,
+    });
+    const view = projectStateFor(state, 0);
+    const crown = view.players[0].equipment.head!;
+    crown.cardId = "PEN227";
+    view.phase = "defend";
+    view.priorityPlayer = 0;
+    view.pendingDecision = { player: 0, kind: "defend", prompt: "Choose defenders" };
+    view.chain = [{
+      attackingCard: { instanceId: 90_209, cardId: "WTR159", owner: 1 },
+      defendingCards: [], attackValue: 2, defenseValue: 0, damage: 2,
+      onHitEffects: [{ sourceCardId: "WTR159", text: "Discard a card" }],
+      goAgain: true, resolved: false, reactions: [],
+    }];
+    const legal: GameIntent[] = [
+      { kind: "defend", instanceIds: [] },
+      { kind: "stage-defenders", instanceIds: [crown.instanceId] },
+    ];
+    expect(chooseJarlIntent({ seat: 0, view, legal, cards: cardData }))
+      .toEqual({ kind: "stage-defenders", instanceIds: [crown.instanceId] });
   });
 
   it("arsenals Pulse or Sow but never Crumble or another ordinary blue", () => {

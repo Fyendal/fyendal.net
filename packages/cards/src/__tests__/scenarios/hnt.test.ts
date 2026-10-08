@@ -175,7 +175,7 @@ describe("HNT — marked heroes and daggers", () => {
     );
   });
 
-  it("Quickdodge Flexors has 2 base defense on each chain link without stacking", () => {
+  it("Quickdodge Flexors moves to the new link instead of appearing on both", () => {
     const g = scenario({
       seats: [
         {
@@ -204,7 +204,40 @@ describe("HNT — marked heroes and daggers", () => {
       .expectFinalDefense(2);
 
     expect(g.state.chain).toHaveLength(2);
-    expect(g.state.chain.every((link) => link.defendingEquipment.length === 1)).toBe(true);
+    expect(g.state.chain[0]!.defendingEquipment).toHaveLength(0);
+    expect(g.state.chain[1]!.defendingEquipment).toHaveLength(1);
+    expect(g.state.chain[0]!.finalDefense).toBe(2);
+    const projected = projectStateFor(g.state, 1).chain;
+    expect(projected.flatMap((link) => [...link.defendingCards, ...link.reactions]).filter(
+      (card) => card.cardId === printingId("quickdodge flexors|0"),
+    )).toHaveLength(1);
+  });
+
+  it("Quickdodge Flexors can set its base defense after it is already defending", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", hand: ["oath of loyalty|1"] },
+        {
+          hero: "dorinthea",
+          resources: 1,
+          equipment: { legs: "quickdodge flexors|0" },
+        },
+      ],
+    });
+
+    g.play("oath of loyalty|1")
+      .blockWith("quickdodge flexors|0")
+      .passPriority()
+      .activate("quickdodge flexors|0")
+      .settle()
+      .expectFinalDefense(2);
+
+    expect(g.state.chain[0]!.defendingEquipment).toHaveLength(1);
+    const projected = projectStateFor(g.state, 1).chain[0]!;
+    expect(projected.defendingCards[0]?.defense).toBe(2);
+    expect([...projected.defendingCards, ...projected.reactions].filter(
+      (card) => card.cardId === printingId("quickdodge flexors|0"),
+    )).toHaveLength(1);
   });
 
   it("Kabuto of Imperial Authority prohibits subsequent weapon attacks this turn", () => {

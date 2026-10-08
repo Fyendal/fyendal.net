@@ -214,6 +214,60 @@ describe("combat-chain browsing", () => {
       .toBe(true);
   });
 
+  it.each(["HNT215", "OUT139"])("keeps defending equipment %s passive in the combat float", (cardId) => {
+    const link: ChainLinkView = {
+      attackingCard: { instanceId: 42, cardId: "CIN020", owner: 0 },
+      defendingCards: [{ instanceId: 84, cardId, owner: 1 }],
+      reactions: [],
+      attackValue: 3,
+      defenseValue: 2,
+      damage: 1,
+      resolved: false,
+    };
+    const html = renderChain({
+      links: [link],
+      onRect: vi.fn(),
+      activatableCardIds: new Set([84]),
+      selectedAbilitySourceInstanceId: 84,
+      onActivateCard: vi.fn(),
+    });
+
+    const classes = html.match(new RegExp(`<div class="([^"]*)" data-cardid="${cardId}"`))?.[1];
+    expect(classes).not.toContain("card-highlight");
+    expect(classes).not.toContain("card-selected");
+    expect(classes).not.toContain("card-clickable");
+  });
+
+  it("keeps equipment attack and reaction presentations passive", () => {
+    const link: ChainLinkView = {
+      attackingCard: { instanceId: 42, cardId: "HNT215", owner: 0 },
+      defendingCards: [],
+      reactions: [
+        { instanceId: 84, cardId: "OUT139", owner: 0 },
+        { instanceId: 85, cardId: "OUT139", owner: 1 },
+      ],
+      attackValue: 3,
+      defenseValue: 0,
+      damage: 3,
+      resolved: false,
+    };
+    const html = renderChain({
+      links: [link],
+      onRect: vi.fn(),
+      activatableCardIds: new Set([42, 84, 85]),
+      onActivateCard: vi.fn(),
+    });
+
+    for (const [cardId, count] of [["HNT215", 1], ["OUT139", 2]] as const) {
+      const copies = [...html.matchAll(new RegExp(`<div class="([^"]*)" data-cardid="${cardId}"`, "g"))];
+      expect(copies).toHaveLength(count);
+      for (const [, classes] of copies) {
+        expect(classes).not.toContain("card-highlight");
+        expect(classes).not.toContain("card-clickable");
+      }
+    }
+  });
+
   it("shows go again as a tooltip icon instead of a text label", () => {
     const link: ChainLinkView = {
       attackingCard: { instanceId: 42, cardId: "SBA016", owner: 0 },

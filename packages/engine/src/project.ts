@@ -1116,7 +1116,18 @@ function projectState(
   // stack. Attack-step triggers run after it has become attacking.
   const attackOnStack = state.stackResume === "start-attack-step";
   const lastLink = state.chain.length - 1;
+  const defendingCardIds = new Set(state.chain.flatMap((link) => [
+    ...link.defendingCards.map((card) => card.instanceId),
+    ...link.defendingEquipment.map((card) => card.instanceId),
+  ]));
   const chain = state.chain.map((link, i): ChainLinkView => {
+    const defendingCardView = (card: CardInstance): CardView => {
+      const projected = cardView(state, runtime, card);
+      const baseOverride = link.flags[`baseDefense:${card.instanceId}`];
+      return typeof baseOverride === "number"
+        ? { ...projected, defense: Math.max(0, baseOverride - (card.defCounters ?? 0)) }
+        : projected;
+    };
     const attack =
       link.resolved && link.finalAttack !== undefined
         ? link.finalAttack
@@ -1141,8 +1152,8 @@ function projectState(
         attack,
       },
       defendingCards: [
-        ...link.defendingCards.map((c) => cardView(state, runtime, c)),
-        ...link.defendingEquipment.map((c) => cardView(state, runtime, c)),
+        ...link.defendingCards.map(defendingCardView),
+        ...link.defendingEquipment.map(defendingCardView),
       ],
       attackValue: attack,
       defenseValue: defense,
@@ -1197,7 +1208,11 @@ function projectState(
         : {}),
       reactions: [
         ...link.reactions,
-        ...(link.resolvedReactionAbilitySources ?? []),
+        // A resolved ability may retain a display snapshot of its source.
+        // Show the physical defender once when that source is on the chain.
+        ...(link.resolvedReactionAbilitySources ?? []).filter(
+          (source) => !defendingCardIds.has(source.instanceId),
+        ),
       ].map((c) => cardView(state, runtime, c)),
       ...(attackOnStack && i === lastLink && !link.resolved ? { onStack: true } : {}),
       ...(link.targetAllyId !== undefined

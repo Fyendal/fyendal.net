@@ -58,38 +58,6 @@ type BravoMatchup =
   | "oscilio"
   | "default";
 
-type JarlMatchup =
-  | "arakni-huntsman"
-  | "arakni-marionette"
-  | "aurora"
-  | "cindra"
-  | "dash-io"
-  | "dorinthea"
-  | "fai"
-  | "fang"
-  | "gravy"
-  | "guardian"
-  | "ira"
-  | "jarl"
-  | "kassai"
-  | "kayo"
-  | "marlynn"
-  | "oscilio"
-  | "rhinar"
-  | "vynnset"
-  | "default";
-
-const JARL_FLEX_IDS = new Set([
-  "AJV017", // Channel Mount Isen (blue)
-  "WTR161", // Last Ditch Effort (blue)
-  "AJV011", // Mangle (red)
-  "HNT231", // Sigil of Solace (red)
-  "SBR021", // Staunch Response (red)
-]);
-
-const JARL_MANGLE = ["AJV011", "AJV011"];
-const JARL_LAST_DITCH = ["WTR161", "WTR161"];
-
 const HALA_FLEX_IDS = new Set([
   "MPW076", // Big Blinder (red)
   "MPW126", // Showdown (red)
@@ -280,66 +248,10 @@ export function cindraPresentationFor(
   };
 }
 
-function jarlMatchupFor(
-  opponent: BotPrepOpponent,
-  cards: Readonly<Record<string, CardData>>,
-): JarlMatchup {
-  const name = opponentHeroName(opponent, cards);
-  const classes = cards[opponent.heroId]?.classes?.map((value) => value.toLowerCase()) ?? [];
-  if (name.includes("arakni, huntsman")) return "arakni-huntsman";
-  if (name.includes("arakni, marionette")) return "arakni-marionette";
-  if (name.includes("aurora")) return "aurora";
-  if (name.includes("cindra")) return "cindra";
-  if (name.includes("dash i/o") || name.includes("dash io")) return "dash-io";
-  if (name.includes("dorinthea")) return "dorinthea";
-  if (name.includes("fai")) return "fai";
-  if (name.includes("fang")) return "fang";
-  if (name.includes("gravy bones")) return "gravy";
-  if (name.includes("ira")) return "ira";
-  if (name.includes("jarl")) return "jarl";
-  if (name.includes("kassai")) return "kassai";
-  if (name.includes("kayo")) return "kayo";
-  if (name.includes("marlynn")) return "marlynn";
-  if (name.includes("oscilio")) return "oscilio";
-  if (name.includes("rhinar")) return "rhinar";
-  if (name.includes("vynnset")) return "vynnset";
-  if (classes.includes("guardian")) return "guardian";
-  return "default";
-}
-
-function jarlPhysicalEquipment(): Partial<Record<EquipmentSlot, string>> {
-  return {
-    head: "PEN310",
-    chest: "ROS028",
-    arms: "AJV006",
-    legs: "OMN204",
-  };
-}
-
-function jarlArcaneEquipment(): Partial<Record<EquipmentSlot, string>> {
-  return {
-    head: "PEN215",
-    chest: "ELE144",
-    arms: "AJV006",
-    legs: "SBL010",
-  };
-}
-
-function jarlRunebladeEquipment(): Partial<Record<EquipmentSlot, string>> {
-  return {
-    ...jarlPhysicalEquipment(),
-    legs: "SBL010",
-  };
-}
-
 /**
- * Present the supplied Jarl Fabrary pool using each published matchup's main
- * deck quantities. The Fabrary guide declares no turn-order preference and
- * exposes the full arena pool rather than one equipment loadout, so the bot
- * uses Barkskin for physical games, AB1 against Vynnset's one-damage
- * Runechant packets, and the registered AB package for Wizard-style arcane
- * heroes. Unknown opponents get the guide's sixty-card Guardian branch.
- * Source: https://fabrary.net/decks/01M0K4BKRHN7J89ZSB6XGDHRSH
+ * Present the complete user-supplied 100th Calling: Atlanta 3rd list.
+ * Crown of Frozen Thoughts is reserved for Malice, Boltyn, Arakni Marionette,
+ * and Teklovossen. Wizards get AB3; Runeblades get AB1 from Heart of Ice.
  */
 export function jarlPresentationFor(
   opponent: BotPrepOpponent,
@@ -349,41 +261,21 @@ export function jarlPresentationFor(
   if (!registered || registered.format !== "cc" || registered.botOnly !== true) {
     throw new Error("Jarl bot deck is not registered");
   }
-  const matchup = jarlMatchupFor(opponent, cards);
-  const allCards = [...registered.pool.deck, ...(registered.pool.sideboard ?? [])];
-  const deck = allCards.filter((id) => !JARL_FLEX_IDS.has(id));
-  if (deck.length !== 59) {
-    throw new Error(`Jarl source main has ${deck.length} cards, expected 59`);
-  }
-
-  if (matchup === "arakni-huntsman") {
-    deck.push("AJV017", ...JARL_LAST_DITCH, "AJV011", "AJV011", "AJV011", "HNT231", "HNT231");
-  } else if (matchup === "arakni-marionette") {
-    removeCopies(deck, "PEN321", 1);
-    deck.push(...JARL_LAST_DITCH);
-  } else if (matchup === "oscilio") {
-    removeCopies(deck, "ROS042", 3);
-    removeCopies(deck, "PEN321", 1);
-    deck.push("AJV017", ...JARL_LAST_DITCH, ...JARL_MANGLE);
-  } else if (matchup === "marlynn") {
-    removeCopies(deck, "ELE147", 1);
-    deck.push("SBR021", "SBR021");
-  } else if (matchup === "jarl") {
-    deck.push("AJV017", ...JARL_LAST_DITCH, "AJV011", "AJV011", "AJV011");
-  } else if (matchup === "gravy" || matchup === "rhinar" || matchup === "vynnset") {
-    deck.push(...JARL_MANGLE);
-  } else {
-    removeCopies(deck, "PEN321", 1);
-    deck.push(...JARL_MANGLE);
-  }
-
-  const arcane = matchup === "aurora" || matchup === "oscilio";
+  const name = opponentHeroName(opponent, cards);
+  const classes = cards[opponent.heroId]?.classes?.map((value) => value.toLowerCase()) ?? [];
+  const frozenHead = name.includes("malice") || name.includes("boltyn") ||
+    name.includes("arakni, marionette") || name.includes("teklo");
+  const wizard = classes.includes("wizard");
+  const runeblade = classes.includes("runeblade");
   return {
     weaponIds: ["SLY002", "EVR018"],
-    equipment: matchup === "vynnset"
-      ? jarlRunebladeEquipment()
-      : arcane ? jarlArcaneEquipment() : jarlPhysicalEquipment(),
-    deck,
+    equipment: {
+      head: frozenHead ? "PEN227" : wizard ? "PEN215" : "PEN310",
+      chest: wizard || runeblade ? "ELE144" : "ROS028",
+      arms: "AJV006",
+      legs: "OMN204",
+    },
+    deck: [...registered.pool.deck, ...(registered.pool.sideboard ?? [])],
   };
 }
 

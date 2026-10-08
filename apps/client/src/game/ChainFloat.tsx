@@ -280,15 +280,13 @@ export function ChainFloat({
   // that current position remains available in the timeline.
   const emptyCurrentExists = chainCurrent?.resolved === true;
   const showingEmptyCurrent = emptyCurrentExists && browsedIndex === null;
-  // Legal intents determine whether a source is interactive, including a
-  // defending card on an earlier resolved link.
-  const cardIsActivatable = (instanceId: number) => chainCardIsActivatable(
-    links,
-    chainIdx,
-    instanceId,
-    activatableCardIds,
-  );
-  const attackActivatable = cardIsActivatable(chain?.attackingCard.instanceId ?? -1);
+  // Arena equipment is activated from its slot, even when another presentation
+  // of the same card appears on the combat chain.
+  const cardIsActivatable = (card: CardView) =>
+    cardData[card.cardId]?.cardType !== "equipment" &&
+    chainCardIsActivatable(links, chainIdx, card.instanceId, activatableCardIds);
+  const attackActivatable = chain?.attackingCard
+    ? cardIsActivatable(chain.attackingCard) : false;
   // staged defenders only belong to the link currently being defended
   const showStaged = staging && !showingEmptyCurrent && chainIdx === chainLen - 1;
   const hasBlockerCard = chain !== undefined && (
@@ -541,7 +539,7 @@ export function ChainFloat({
                         />
                       ) : null}
                       {chain.defendingCards.map((defender, defenderIndex) => {
-                        const activatable = cardIsActivatable(defender.instanceId);
+                        const activatable = cardIsActivatable(defender);
                         return (
                           <CardFace
                             key={defender.instanceId}

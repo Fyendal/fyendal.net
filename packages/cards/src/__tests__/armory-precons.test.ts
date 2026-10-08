@@ -87,10 +87,10 @@ describe("Classic Constructed shared decks", () => {
     }
   });
 
-  it("registers the Jarl Fabrary pool only for the practice bot", () => {
+  it("registers the complete Atlanta Jarl list only for the practice bot", () => {
     const jarl = precon("bot-jarl");
     expect(jarl).toMatchObject({
-      name: "Jarl",
+      name: "100th Calling: Atlanta 3rd 🇺🇸",
       format: "cc",
       botOnly: true,
     });
@@ -100,6 +100,22 @@ describe("Classic Constructed shared decks", () => {
     expect(pool.deck).toHaveLength(60);
     expect(pool.weaponIds.length + pool.equipmentPool.length + pool.deck.length + pool.sideboard!.length)
       .toBe(80);
+    expect(new Set([...pool.weaponIds, ...pool.equipmentPool])).toEqual(new Set([
+      "ROS028", "OMN204", "IAR223", "PEN215", "PEN227", "PEN310",
+      "EVO249", "AJV006", "ELE144", "PEN313", "SBR002", "EVR018", "SLY002",
+    ]));
+    const counts = Object.fromEntries(
+      [...pool.deck, ...pool.sideboard!].map((id) => [id, 0]),
+    );
+    for (const id of [...pool.deck, ...pool.sideboard!]) counts[id] = (counts[id] ?? 0) + 1;
+    expect(counts).toEqual({
+      IAR261: 3, PEN319: 3, PEN320: 1, SUP261: 3, AJV011: 2,
+      ELE005: 3, SBR020: 2, ROS042: 3, PEN321: 3, ASR018: 2,
+      SBA028: 3, SBR021: 1, SUP262: 3, AJV014: 3, ELE147: 1,
+      TER027: 2, ELE146: 3, AJV018: 3, SEA258: 3, AJV020: 3,
+      ROS057: 3, ELE018: 2, IAR260: 3, EVR022: 2, ELE114: 1,
+      HVY209: 2, APS021: 2, SIY033: 2,
+    });
     for (const id of [...pool.weaponIds, ...pool.equipmentPool, ...pool.deck, ...pool.sideboard!]) {
       expect(cardData[id], id).toBeTruthy();
       expect(isImplemented(cardData[id]!), id).toBe(true);

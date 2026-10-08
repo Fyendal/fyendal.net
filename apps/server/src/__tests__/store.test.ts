@@ -670,13 +670,13 @@ describe("PgRoomStore storage", () => {
       heroId: "MPG000",
       weaponIds: ["SLY002", "EVR018"],
       equipment: {
-        head: "PEN310",
+        head: "PEN227",
         chest: "ROS028",
         arms: "AJV006",
         legs: "OMN204",
       },
     });
-    expect(room!.seats[1]!.presented!.deck).toHaveLength(60);
+    expect(room!.seats[1]!.presented!.deck).toHaveLength(67);
   });
 
   it("round-trips a bot-room state with Plasma Barrel Shot through the wire decoder", async () => {

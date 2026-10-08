@@ -2519,6 +2519,11 @@ export function makeCtx(
       if (current.defendingEquipment.some((candidate) => candidate.instanceId === live.instanceId)) {
         return false;
       }
+      // The equipment can move from an earlier link to the active one, but a
+      // physical card cannot remain defending on both links at once.
+      for (const previous of state.chain) {
+        if (previous !== current) removeFromArray(previous.defendingEquipment, live.instanceId);
+      }
       current.defendingEquipment.push(live);
       runtime.commands.applyOneShotDefenseModifiers(state, current, [live]);
       const fragmentTriggered = runtime.commands.noteAttackDefendedBy(state, current, live);

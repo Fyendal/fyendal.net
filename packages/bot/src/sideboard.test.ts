@@ -222,9 +222,9 @@ describe("Cindra Fabrary matchup presentation", () => {
   });
 });
 
-describe("Jarl Fabrary matchup presentation", () => {
-  it("uses the published anti-aggro quantities and physical equipment", () => {
-    const presented = jarlPresentationFor(opponent({ heroId: "HNT054" }));
+describe("Jarl Atlanta matchup presentation", () => {
+  it("presents all 67 deck cards with physical equipment by default", () => {
+    const presented = jarlPresentationFor(opponent({ heroId: "RNR001" }));
     expect(presented).toMatchObject({
       weaponIds: ["SLY002", "EVR018"],
       equipment: {
@@ -234,45 +234,39 @@ describe("Jarl Fabrary matchup presentation", () => {
         legs: "OMN204",
       },
     });
-    expect(presented.deck).toHaveLength(60);
+    expect(presented.deck).toHaveLength(67);
     expect(presented.deck.filter((id) => id === "AJV011")).toHaveLength(2);
-    expect(presented.deck.filter((id) => id === "PEN321")).toHaveLength(2);
+    expect(presented.deck.filter((id) => id === "PEN321")).toHaveLength(3);
   });
 
-  it("uses the exact Oscilio and Huntsman branches from Fabrary", () => {
-    const oscilio = jarlPresentationFor(opponent({ heroId: "ROS019" }));
-    expect(oscilio.deck).toHaveLength(60);
-    expect(oscilio.deck).toContain("AJV017");
-    expect(oscilio.deck.filter((id) => id === "WTR161")).toHaveLength(2);
-    expect(oscilio.deck).not.toContain("ROS042");
-    expect(oscilio.equipment).toMatchObject({
-      head: "PEN215",
-      chest: "ELE144",
-      legs: "SBL010",
-    });
+  it.each(["AMA001", "IAR054", "ASB001", "BOL001", "HNT001", "TCC001", "EVO008"])(
+    "uses Crown of Frozen Thoughts against %s",
+    (heroId) => {
+      const presented = jarlPresentationFor(opponent({ heroId }));
+      expect(presented.equipment.head).toBe("PEN227");
+    },
+  );
 
-    const huntsman = jarlPresentationFor(opponent({ heroId: "HNT263" }));
-    expect(huntsman.deck).toHaveLength(67);
-    expect(huntsman.deck.filter((id) => id === "AJV011")).toHaveLength(3);
-    expect(huntsman.deck.filter((id) => id === "HNT231")).toHaveLength(2);
-  });
-
-  it("uses only AB1 against Vynnset's one-damage Runechant packets", () => {
-    const presented = jarlPresentationFor(opponent({ heroId: "DTD133" }));
-    expect(presented.equipment).toEqual({
-      head: "PEN310",
-      chest: "ROS028",
-      arms: "AJV006",
-      legs: "SBL010",
-    });
-    const arcaneBarrier = Object.values(presented.equipment).reduce((total, id) =>
-      total + (cardData[id!]?.keywords ?? []).reduce((pieceTotal, keyword) => {
-        const amount = /^Arcane Barrier (\d+)$/.exec(keyword)?.[1];
-        return pieceTotal + Number(amount ?? 0);
-      }, 0),
-    0);
-    expect(arcaneBarrier).toBe(1);
-  });
+  it.each([
+    ["ROS019", 3, "PEN215"], ["SBZ001", 3, "PEN215"],
+    ["ARC113", 3, "PEN215"], ["SIY001", 3, "PEN215"],
+    ["ROS007", 1, "PEN310"], ["DTD133", 1, "PEN310"],
+    ["SBA001", 1, "PEN310"], ["SVI001", 1, "PEN310"],
+  ] as const)(
+    "equips against %s with AB%s",
+    (heroId, amount, head) => {
+      const presented = jarlPresentationFor(opponent({ heroId }));
+      expect(presented.equipment).toMatchObject({
+        head,
+        chest: "ELE144",
+        legs: "OMN204",
+      });
+      const barrier = Object.values(presented.equipment).reduce((total, id) =>
+        total + (cardData[id!]?.keywords ?? []).reduce((pieceTotal, keyword) =>
+          pieceTotal + Number(/^Arcane Barrier (\d+)$/.exec(keyword)?.[1] ?? 0), 0), 0);
+      expect(barrier).toBe(amount);
+    },
+  );
 
   it("always produces a legal presentation from the bot-only pool", () => {
     const pool = precon("bot-jarl")!.pool;
@@ -280,6 +274,8 @@ describe("Jarl Fabrary matchup presentation", () => {
       "RNR001", "HNT263", "HNT001", "ROS007", "HNT054", "AIO001",
       "CRU076", "UPR001", "HNT073", "AGB001", "ASR001", "MPG000",
       "SDO001", "AKO001", "SEA010", "ROS019", "DTD133",
+      "AMA001", "ASB001", "TCC001", "EVO008", "SBZ001",
+      "ARC113", "SIY001", "SBA001", "SVI001",
     ]) {
       expect(validatePresentation(pool, jarlPresentationFor(opponent({ heroId })), "cc"))
         .toMatchObject({ ok: true });

@@ -130,6 +130,11 @@ function scoreDefend(
     }),
     cardOpportunity,
     responseLossWeight: opponentIsGravy(input) ? 0.1 : 1.2,
+    equipmentUseIsFree(card, observed) {
+      // Freezing a go-again attacker offsets the one-use crown's wear cost.
+      return key(observed.cards[card.cardId]) === "crown of frozen thoughts|0" &&
+        currentLink(observed)?.goAgain === true && incomingAttackDamage(observed) > 0;
+    },
     defensePermission(candidate) {
       const usesStalagmite = candidate.chosen.some((card) =>
         key(candidate.input.cards[card.cardId]) === "stalagmite, bastion of isenloft|0"
@@ -149,6 +154,12 @@ function scoreDefend(
       if (earlyBarkskin) {
         adjustment -= candidate.onHit.value > 0 || candidate.lethal ? 2 : 9;
       }
+      if (currentLink(candidate.input)?.goAgain === true && candidate.chosen.some((card) =>
+        key(candidate.input.cards[card.cardId]) === "crown of frozen thoughts|0"
+      )) adjustment += 8;
+      if (candidate.chosen.some((card) =>
+        key(candidate.input.cards[card.cardId]) === "canopy shelter|3"
+      )) adjustment += 2;
       return adjustment === 0
         ? value
         : adjustValueBreakdown(value, {
@@ -486,6 +497,13 @@ function scorePlay(
       score = missingLife > 0 && (me.hand.length === 3 || me.life <= 8) ? 75 : -100;
     } else if (functional === "boots of omnis ward|0") {
       score = shouldActivateOmnisBoots(input, card) ? 90 : -100;
+    } else if (functional === "quickdodge flexors|0") {
+      const link = currentLink(input);
+      const incoming = incomingAttackDamage(input);
+      score = input.view.pendingDecision?.kind === "defense-reaction" &&
+        incoming > 0 && incoming <= 2 && (incoming >= me.life ||
+          (link?.onHitEffects?.length ?? 0) > 0)
+        ? 90 : -100;
     } else if (functional === "ripple away|3") {
       score = shouldActivateRippleAway(input) ? 80 : -100;
     } else if (data.cardType === "weapon") {
@@ -524,6 +542,12 @@ function scorePlay(
       (equipment.defCounters ?? 0) > 0
     );
     score = gravy && compassIsMarked && canFuse ? 290 : markedEquipment && canFuse ? 55 : aggro ? 25 : 12;
+  } else if (functional === "pummel|1") {
+    const link = currentLink(input);
+    const deficit = link ? link.defenseValue - link.attackValue : Number.POSITIVE_INFINITY;
+    score = link?.attackingCard.owner === input.seat && deficit < 4
+      ? 62 + Math.max(0, input.view.players[1 - input.seat]!.handCount) * 2
+      : -100;
   } else if (functional === "fruits of the forest|3") {
     score = 5;
   } else if (data.cardType === "defense-reaction") {
@@ -532,6 +556,9 @@ function scorePlay(
     score = gravy && functional === "mangle|1" && compassIsMarked
       ? 275
       : 25 + attackValue(data, input);
+    if (functional === "ancient earth oak|1") score += 8;
+    if (functional === "ice aged oak|3") score += 6;
+    if (functional === "glacial footsteps|3") score += 7;
   } else if (data.cardType === "instant") {
     score = 8;
   } else {
@@ -539,6 +566,14 @@ function scorePlay(
   }
 
   const pitched = pitchIds(intent).flatMap((id) => own.get(id) ?? []);
+  if (functional === "ancient earth oak|1" && pitched.some((spent) =>
+    hasSubtype(input.cards[spent.cardId], "earth")
+  )) score += 12;
+  if (functional === "ice aged oak|3" && pitched.some((spent) =>
+    hasSubtype(input.cards[spent.cardId], "ice")
+  )) score += 12;
+  if (functional === "glacial footsteps|3" &&
+    remainingSubtypeCount(intent, input, own, "ice") >= 1) score += 8;
   score -= pitched.reduce((total, spent) => total + cardOpportunity(spent, input) * 0.6, 0);
   score -= Math.max(0, pitched.length - 1) * 5;
   if (!aggro && pitched.every((spent) => (spent.pitchCount ?? 0) === 0)) {
