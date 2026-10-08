@@ -1,5 +1,6 @@
 import type { CardData, CardView, GameIntent } from "@fyendal/shared";
 import { intentCard, isAttack, ownCards, type BotPolicyInput } from "./policy.js";
+import { leviaEffectActive } from "./levia-turn.js";
 
 export type LeviaMacro = "redeem" | "stabilize" | "engine" | "bloodrush" | "attrition" | "pressure";
 
@@ -54,6 +55,7 @@ export function chooseLeviaMacro(input: BotPolicyInput): LeviaMacroChoice {
   if (canRedeem && (me.life <= 8 || (!suppressed && debt >= me.life))) {
     return { goal: "redeem", matchup: context };
   }
+  if (leviaEffectActive(input, "bloodrush bellow")) return { goal: "bloodrush", matchup: context };
   if (debt > 0 && !suppressed && (me.life <= debt + 5 || attacks.length === 0)) {
     return { goal: "stabilize", matchup: context };
   }
@@ -61,7 +63,7 @@ export function chooseLeviaMacro(input: BotPolicyInput): LeviaMacroChoice {
     (attacks.length > 1 || opponent.life <= 14 || context === "race")) {
     return { goal: "bloodrush", matchup: context };
   }
-  if (!hasEngine && (me.graveyard.length < 8 || context === "grindy")) {
+  if (!hasEngine && input.view.turn === 1) {
     return { goal: "engine", matchup: context };
   }
   if (context === "grindy" || context === "assassin") return { goal: "attrition", matchup: context };
@@ -86,7 +88,7 @@ export function leviaMacroIntentBonus(
     if (named === "hexagore, the death hydra") return -45;
   }
   if (macro.goal === "engine") {
-    if (named === "gate to i'arathael" || named === "cleave the heavens") return 34;
+    if (input.view.turn === 1 && (named === "gate to i'arathael" || named === "cleave the heavens")) return 12;
     if (named === "call to the grave" || named === "pull from beyond") return 18;
   }
   if (macro.goal === "bloodrush") {
@@ -94,7 +96,7 @@ export function leviaMacroIntentBonus(
     if (named === "feeding frenzy" || named === "shadowrealm horror") return 14;
   }
   if (macro.goal === "attrition") {
-    if (named === "gate to i'arathael" || named === "goremass summoning") return 24;
+    if (named === "goremass summoning") return 24;
     if (named === "scabskin leathers") return -25;
   }
   return 0;
@@ -120,7 +122,8 @@ export function leviaMacroPositionBonus(
   if (me.life <= reserve && start.life > reserve) score -= 600;
   if (macro.goal === "stabilize" && suppressed) score += 180;
   if (macro.goal === "engine" || macro.goal === "attrition") {
-    score += Math.max(0, enginePermanents(me.board, observed) - enginePermanents(start.board, root)) * 170;
+    score += Math.max(0, enginePermanents(me.board, observed) - enginePermanents(start.board, root)) *
+      (root.view.turn === 1 ? 80 : 15);
     score += Math.min(6, Math.max(0, me.graveyard.length - start.graveyard.length)) * 9;
   }
   if (macro.goal === "bloodrush") {

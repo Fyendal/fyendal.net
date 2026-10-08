@@ -49,7 +49,7 @@ describe("achievements", () => {
       }), 0);
       expect(awards).toEqual([
         "first-victory", "first-bot-win",
-        ...(bot.id === "starvo" || bot.id === "levia" ? [] : [`beat-${bot.id}`]),
+        ...(bot.id === "starvo" ? [] : [`beat-${bot.id}`]),
       ]);
     }
   });

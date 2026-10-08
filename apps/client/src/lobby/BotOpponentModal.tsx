@@ -56,6 +56,15 @@ const BOTS: Readonly<Record<ConstructedFormat, readonly BotOption[]>> = {
       deckType: "guardian",
       descriptionId: "lobby.bot.jarl.description",
     },
+    {
+      id: "levia",
+      name: "Levia",
+      title: "Shadowborn Abomination",
+      heroName: "Levia, Shadowborn Abomination",
+      deckId: "bot-levia-gates",
+      deckType: "midrange",
+      descriptionId: "lobby.bot.levia.description",
+    },
   ],
   "silver-age": [
     {

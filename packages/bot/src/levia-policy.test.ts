@@ -32,6 +32,51 @@ function choice(state: ReturnType<typeof game>): GameIntent {
   return intent;
 }
 
+function playAndResolve(state: ReturnType<typeof game>, intent: GameIntent): ReturnType<typeof game> {
+  expect(legalIntents(state, state.priorityPlayer)).toContainEqual(intent);
+  const result = applyIntent(state, state.priorityPlayer, intent);
+  if (!result.ok) throw new Error(JSON.stringify(result));
+  state = result.state;
+  for (let step = 0; step < 20; step++) {
+    if (state.phase === "action" && state.priorityPlayer === 0 && state.stack.length === 0 && !state.pendingDecision) return state;
+    const passed = applyIntent(state, state.priorityPlayer, { kind: "pass" });
+    if (!passed.ok) throw new Error(JSON.stringify(passed));
+    state = passed.state;
+  }
+  throw new Error("Action did not resolve");
+}
+
+function bloodrushTurn(draws: string[]) {
+  const state = game();
+  hand(state, ["WTR007", "MON140", "MST236"]);
+  state.players[0]!.deck = draws.map((cardId) => ({ instanceId: state.nextInstanceId++, cardId, owner: 0 }));
+  const [bellow, blue] = state.players[0]!.hand;
+  const play = legalIntents(state, 0).find((intent) => intent.kind === "play-card" &&
+    intent.instanceId === bellow!.instanceId && intent.pitchInstanceIds.includes(blue!.instanceId));
+  expect(play).toBeDefined();
+  return playAndResolve(state, play!);
+}
+
+function defending(state: ReturnType<typeof game>) {
+  state.activePlayer = 1;
+  state.priorityPlayer = 1;
+  state.players[0]!.actionPoints = 0;
+  state.players[1]!.actionPoints = 1;
+  const attack = { instanceId: state.nextInstanceId++, cardId: "WTR203", owner: 1 };
+  state.players[1]!.hand = [attack];
+  const play = legalIntents(state, 1).find((intent) => intent.kind === "play-card" && intent.instanceId === attack.instanceId)!;
+  let applied = applyIntent(state, 1, play);
+  if (!applied.ok) throw new Error(JSON.stringify(applied));
+  state = applied.state;
+  for (let step = 0; step < 10; step++) {
+    if (state.priorityPlayer === 0 && legalIntents(state, 0).some((intent) => intent.kind === "stage-defenders")) return state;
+    applied = applyIntent(state, state.priorityPlayer, { kind: "pass" });
+    if (!applied.ok) throw new Error(JSON.stringify(applied));
+    state = applied.state;
+  }
+  throw new Error("Attack did not reach defense");
+}
+
 describe("Levia Gates policy", () => {
   it.each([1, 3])("preserves its hand before the opponent may attack on turn %i", (turn) => {
     let state = game();
@@ -194,11 +239,14 @@ describe("Levia Gates policy", () => {
 
   it("chooses setup, Bloodrush, and attrition goals from playable public positions", () => {
     const state = game();
+    state.turn = 1;
     hand(state, ["IAR020", "IAR026", "MON140", "ROS218"]);
     const decide = () => chooseLeviaIntentWithTrace({
       seat: 0, view: projectStateFor(state, 0), legal: legalIntents(state, 0), cards: cardData, state,
     });
     expect(decide().macro.goal).toBe("engine");
+    state.turn = 3;
+    expect(decide().macro.goal).toBe("pressure");
     hand(state, ["WTR007", "IAR026", "MON140", "PEN322"]);
     expect(decide().macro.goal).toBe("bloodrush");
     state.players[1]!.heroCardId = "MPG000";
@@ -348,14 +396,184 @@ describe("Levia Gates policy", () => {
     expect(selected).toMatchObject({ kind: "play-from-zone", instanceId: feedingFrenzy.instanceId });
   });
 
-  it("creates a Gate before spending the attack hand", () => {
+  it("creates a Gate before spending the opening-turn attack hand", () => {
     const state = game();
+    state.turn = 1;
     hand(state, ["IAR020", "IAR026", "MON140", "ROS218"]);
     const selected = choice(state);
     expect(selected).toMatchObject({ kind: "activate-ability" });
     if (selected.kind !== "activate-ability") return;
     const card = state.players[0]!.hand.find((item) => item.instanceId === selected.sourceInstanceId);
     expect(card?.cardId).toBe("IAR020");
+  });
+
+  it("keeps Cleave as pitch for an attack after the opening turn", () => {
+    const state = game();
+    hand(state, ["IAR022", "IAR026"]);
+    const [cleave, frenzy] = state.players[0]!.hand;
+    expect(choice(state)).toMatchObject({ kind: "play-card", instanceId: frenzy!.instanceId,
+      pitchInstanceIds: [cleave!.instanceId] });
+  });
+
+  it("can bank an otherwise unconvertible hand as a Gate", () => {
+    const state = game();
+    hand(state, ["IAR020"]);
+    expect(choice(state)).toMatchObject({ kind: "activate-ability", sourceInstanceId: state.players[0]!.hand[0]!.instanceId });
+  });
+
+  it("creates and uses a Gate for a two-cost banished attack backed by a spare blue", () => {
+    let state = game();
+    hand(state, ["IAR022", "MON140"]);
+    const cleave = state.players[0]!.hand[0]!;
+    const frenzy = { instanceId: state.nextInstanceId++, cardId: "IAR026", owner: 0 };
+    state.players[0]!.banish = [frenzy];
+    const setup = choice(state);
+    expect(setup).toMatchObject({ kind: "activate-ability", sourceInstanceId: cleave.instanceId });
+    state = playAndResolve(state, setup);
+    const gate = state.players[0]!.board.find((card) => card.cardId === "IAR222")!;
+    const access = choice(state);
+    expect(access).toMatchObject({ kind: "activate-ability", sourceInstanceId: gate.instanceId,
+      targetCardInstanceId: frenzy.instanceId });
+    state = playAndResolve(state, access);
+    expect(choice(state)).toMatchObject({ kind: "play-from-zone", instanceId: frenzy.instanceId });
+  });
+
+  it("does not create a Gate for a banished two-cost attack without a spare blue", () => {
+    const state = game();
+    hand(state, ["IAR022", "IAR026"]);
+    state.players[0]!.banish = [{ instanceId: state.nextInstanceId++, cardId: "IAR026", owner: 0 }];
+    expect(choice(state)).toMatchObject({ kind: "play-card", instanceId: state.players[0]!.hand[1]!.instanceId });
+  });
+
+  it.each([["IAR026", "IAR022"], ["IAR026", "IAR009"]])(
+    "keeps the Bloodrush macro after resolving it and attacks with %s while holding %s", (...draws) => {
+      const state = bloodrushTurn(draws);
+      const frenzy = state.players[0]!.hand.find((card) => card.cardId === "IAR026")!;
+      state.players[0]!.board.push({ instanceId: state.nextInstanceId++, cardId: "IAR222", owner: 0 });
+      state.players[0]!.banish.push({ instanceId: state.nextInstanceId++, cardId: "IAR020", owner: 0 });
+      const input = { seat: 0 as const, view: projectStateFor(state, 0), legal: legalIntents(state, 0), cards: cardData };
+      expect(input.view.ongoing.some((effect) => cardData[effect.cardId]?.name === "Bloodrush Bellow")).toBe(true);
+      expect(chooseLeviaIntentWithTrace(input).macro.goal).toBe("bloodrush");
+      expect(chooseLeviaIntent(input)).toMatchObject({ kind: "play-card", instanceId: frenzy.instanceId });
+      expect(choice(state)).toMatchObject({ kind: "play-card", instanceId: frenzy.instanceId });
+    },
+  );
+
+  it("waits for Bloodrush to resolve instead of treating its priority window as an unconvertible hand", () => {
+    let state = game();
+    hand(state, ["WTR007", "MON140", "IAR020", "IAR020"]);
+    const [bellow, blue] = state.players[0]!.hand;
+    const play = legalIntents(state, 0).find((intent) => intent.kind === "play-card" &&
+      intent.instanceId === bellow!.instanceId && intent.pitchInstanceIds.includes(blue!.instanceId))!;
+    const applied = applyIntent(state, 0, play);
+    if (!applied.ok) throw new Error(JSON.stringify(applied));
+    state = applied.state;
+    for (let step = 0; step < 5 && state.priorityPlayer !== 0; step++) {
+      const passed = applyIntent(state, state.priorityPlayer, { kind: "pass" });
+      if (!passed.ok) throw new Error(JSON.stringify(passed));
+      state = passed.state;
+    }
+    expect(state.stack.length).toBeGreaterThan(0);
+    expect(legalIntents(state, 0).some((intent) => intent.kind === "activate-ability" &&
+      state.players[0]!.hand.some((card) => card.instanceId === intent.sourceInstanceId && card.cardId === "IAR020"))).toBe(true);
+    expect(choice(state)).toEqual({ kind: "pass" });
+  });
+
+  it("opens a Gate during Bloodrush when its go-again attack enables a second attack", () => {
+    let state = bloodrushTurn(["IAR020", "MON140", "MON140"]);
+    const frenzy = { instanceId: state.nextInstanceId++, cardId: "IAR026", owner: 0 };
+    state.players[0]!.banish.push(frenzy);
+    const gate = { instanceId: state.nextInstanceId++, cardId: "IAR222", owner: 0 };
+    state.players[0]!.board.push(gate);
+    const selected = choice(state);
+    expect(selected).toMatchObject({ kind: "activate-ability", sourceInstanceId: gate.instanceId,
+      targetCardInstanceId: frenzy.instanceId });
+    state = playAndResolve(state, selected);
+    expect(choice(state)).toMatchObject({ kind: "play-from-zone", instanceId: frenzy.instanceId });
+  });
+
+  it("destroys Savage Sash to turn one blue into two six-power attacks", () => {
+    let state = game();
+    hand(state, ["IAR026", "IAR020", "MON140"]);
+    state.players[0]!.flags.banishedSixPlusThisTurn = true;
+    const sash = { instanceId: state.nextInstanceId++, cardId: "AKO004", owner: 0 };
+    state.players[0]!.equipment.chest = sash;
+    const selected = choice(state);
+    expect(selected).toMatchObject({ kind: "activate-ability", sourceInstanceId: sash.instanceId });
+    state = playAndResolve(state, selected);
+    const frenzy = state.players[0]!.hand.find((card) => card.cardId === "IAR026")!;
+    expect(choice(state)).toMatchObject({ kind: "play-card", instanceId: frenzy.instanceId });
+  });
+
+  it("preserves Savage Sash when the attacks are already affordable", () => {
+    const state = game();
+    hand(state, ["IAR026", "IAR020", "MON140"]);
+    state.players[0]!.resources = 4;
+    state.players[0]!.flags.banishedSixPlusThisTurn = true;
+    const sash = { instanceId: state.nextInstanceId++, cardId: "AKO004", owner: 0 };
+    state.players[0]!.equipment.chest = sash;
+    expect(choice(state)).not.toMatchObject({ kind: "activate-ability", sourceInstanceId: sash.instanceId });
+  });
+
+  it.each([0, 1])("blocks with fresh Sash before its planned sacrifice, preserving worn Sash (counters=%i)", (defCounters) => {
+    let state = game();
+    hand(state, ["IAR026", "IAR020", "MON140"]);
+    const sash = { instanceId: state.nextInstanceId++, cardId: "AKO004", owner: 0, defCounters };
+    state.players[0]!.equipment.chest = sash;
+    state = defending(state);
+    const selected = choice(state);
+    expect(["stage-defenders", "defend"]).toContain(selected.kind);
+    if (selected.kind !== "stage-defenders" && selected.kind !== "defend") return;
+    expect(selected.instanceIds.includes(sash.instanceId)).toBe(defCounters === 0);
+    if (defCounters === 0) expect(selected.instanceIds).toEqual([sash.instanceId]);
+  });
+
+  it("preserves fresh Sash on defense when the remaining hand has no discounted second attack", () => {
+    let state = game();
+    hand(state, ["IAR026", "MON140"]);
+    const sash = { instanceId: state.nextInstanceId++, cardId: "AKO004", owner: 0 };
+    state.players[0]!.equipment.chest = sash;
+    state = defending(state);
+    const selected = choice(state);
+    expect(["stage-defenders", "defend"]).toContain(selected.kind);
+    if (selected.kind === "stage-defenders" || selected.kind === "defend") {
+      expect(selected.instanceIds).not.toContain(sash.instanceId);
+    }
+  });
+
+  it("uses Consuming Lash only when paying for it preserves two affordable attacks needing go again", () => {
+    const state = game();
+    hand(state, ["IAR009", "IAR020", "IAR020", "MON140"]);
+    state.players[0]!.resources = 2;
+    const lash = state.players[0]!.hand[0]!;
+    expect(choice(state)).toMatchObject({ kind: "activate-ability", sourceInstanceId: lash.instanceId });
+    state.players[0]!.resources = 0;
+    expect(choice(state)).not.toMatchObject({ kind: "activate-ability", sourceInstanceId: lash.instanceId });
+  });
+
+  it("converts a resolved Bloodrush into two buffed Brute attacks using Savage Sash", () => {
+    let state = bloodrushTurn(["IAR026", "IAR026", "MON140", "MON140"]);
+    const sash = { instanceId: state.nextInstanceId++, cardId: "AKO004", owner: 0 };
+    state.players[0]!.equipment.chest = sash;
+    expect(state.players[0]!.resources).toBe(2);
+    const selected = choice(state);
+    expect(selected).toMatchObject({ kind: "activate-ability", sourceInstanceId: sash.instanceId });
+    state = playAndResolve(state, selected);
+    const attacks: number[] = [];
+    for (let step = 0; step < 60 && attacks.length < 2 && state.turn === 3; step++) {
+      const actor = state.priorityPlayer as 0 | 1;
+      const legal = legalIntents(state, actor);
+      const intent = actor === 0 ? choice(state) : legal.find((candidate) => candidate.kind === "pass")
+        ?? legal.find((candidate) => candidate.kind === "defend" && candidate.instanceIds.length === 0)!;
+      const applied = applyIntent(state, actor, intent);
+      if (!applied.ok) throw new Error(JSON.stringify(applied));
+      state = applied.state;
+      if (actor === 0 && intent.kind === "play-card") attacks.push(intent.instanceId);
+    }
+    expect(attacks).toHaveLength(2);
+    expect(new Set(attacks).size).toBe(2);
+    expect(projectStateFor(state, 0).chain.map((link) => link.attackValue)).toEqual([8, 8]);
+    expect(state.players[0]!.resources).toBe(0);
   });
 
   it("starts a Bloodrush turn when it has an attack and a blue", () => {
