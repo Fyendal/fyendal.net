@@ -1111,10 +1111,15 @@ function playerTurnFacts(value: unknown): value is PlayerTurnFactsView {
   return !!facts && exactKeys(facts, [
     "attacks", "weaponAttacks", "playedSubtypes", "usedOncePerTurnEffectSourceIds", "dealtDamage",
     "physicalDamageDealt", "arcaneDamageDealt", "damageTaken",
+    "physicalDamageTaken", "arcaneDamageTaken", "banishedSixPlusThisTurn",
+  ], [
+    "attacks", "weaponAttacks", "playedSubtypes", "usedOncePerTurnEffectSourceIds", "dealtDamage",
+    "physicalDamageDealt", "arcaneDamageDealt", "damageTaken",
     "physicalDamageTaken", "arcaneDamageTaken",
   ])
     && nonNegativeInteger(facts.attacks)
     && nonNegativeInteger(facts.weaponAttacks)
+    && optional(facts.banishedSixPlusThisTurn, (value): value is boolean => typeof value === "boolean")
     && shortStrings(facts.playedSubtypes)
     && array(facts.usedOncePerTurnEffectSourceIds, instanceId, MAX_CARDS)
     && typeof facts.dealtDamage === "boolean"

@@ -2345,7 +2345,7 @@ describe("PgRoomStore storage", () => {
     ]);
   });
 
-  it("persists Starvo as a pending background-practice opponent", async () => {
+  it.each(["starvo", "levia"] as const)("persists %s as a pending background-practice opponent", async (bot) => {
     const user = await db.query(
       `INSERT INTO users (username, username_lc, pass_hash, created_at)
        VALUES ('StarvoPractice','starvopractice','hash',1) RETURNING id`,
@@ -2360,7 +2360,7 @@ describe("PgRoomStore storage", () => {
       pendingBotStart: {
         format: "cc",
         deckId: "precon-asb",
-        bot: "starvo",
+        bot,
         requestedAt: 10,
       },
     })).resolves.toMatchObject({ ok: true, kind: "opened" });
@@ -2368,7 +2368,7 @@ describe("PgRoomStore storage", () => {
     expect((await db.query(
       "SELECT format, bot, card_pool_mode FROM pending_bot_starts WHERE user_id = $1",
       [userId],
-    )).rows).toEqual([{ format: "cc", bot: "starvo", card_pool_mode: "legal" }]);
+    )).rows).toEqual([{ format: "cc", bot, card_pool_mode: "legal" }]);
   });
 
   it("preserves an existing queue time and retained room when switching to bot practice", async () => {

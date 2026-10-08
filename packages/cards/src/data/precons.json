@@ -753,7 +753,7 @@
             ]
         }
     },
-    "_comment_bot_levia": "Source: https://fabrary.net/decks/01M34PF2XGB3QJT17TE8T1BCCN (user-supplied 68-card pool and matchup guide). The common 60-card presentation is registered as deck; its eight matchup flex cards are sideboard. Levia, Redeemed is an inventory card and the matchup guide cuts it from every arena presentation.",
+    "_comment_bot_levia": "Source: https://fabrary.net/decks/01M34PF2XGB3QJT17TE8T1BCCN (user-supplied 68-card pool and matchup guide). The common 60-card presentation is registered as deck; its eight matchup flex cards are sideboard. The Consumed/Redeemed twin card starts in inventory (DTD164 front face) even though the guide cuts it from every arena presentation.",
     "bot-levia-gates": {
         "name": "Levia — Gates and Bloodrush",
         "format": "cc",
@@ -765,7 +765,7 @@
                 "IAR038", "MON187", "PEN192", "WTR150", "IAR004",
                 "ARC157", "AKO004", "WTR004", "CRU006"
             ],
-            "inventoryPool": ["DTD164B"],
+            "inventoryPool": ["DTD164"],
             "deck": [
                 "IAR017", "IAR017", "IAR017",
                 "IAR020", "IAR020", "IAR020",

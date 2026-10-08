@@ -27,8 +27,11 @@ export interface TacticalTurnConfig {
   estimateRemaining(cards: readonly CardView[], input: BotPolicyInput): number;
   rankCandidate?(intent: GameIntent, input: BotPolicyInput): number;
   scoreIntent?(intent: GameIntent, input: BotPolicyInput): number;
+  positionBonus?(input: BotPolicyInput, complete: boolean): number;
   prepareCandidates?: TurnPlannerConfig<TacticalTurnEvaluation>["prepareCandidates"];
   equipmentCost?: number;
+  /** Use a smaller win bonus when speculative opponent no-blocks are uncertain. */
+  simulatedWinBonus?: number;
   maxSearchNodes?: number;
   maxTransitions?: number;
   recordCheckpoints?: boolean;
@@ -70,7 +73,7 @@ function evaluateTacticalTurn(
   );
   const equipmentSpent = [...root.equipmentIds].filter((id) => !currentEquipmentIds.has(id)).length;
   const winnerScore = state.winner === root.seat
-    ? 1_000_000
+    ? (config.simulatedWinBonus ?? 1_000_000)
     : state.winner === 1 - root.seat
     ? -1_000_000
     : 0;
@@ -78,6 +81,7 @@ function evaluateTacticalTurn(
     score: winnerScore
       + responseWeightedDamage(opponentResponse) * 100
       + future.score
+      + (config.positionBonus?.(input, complete) ?? 0)
       - equipmentSpent * (config.equipmentCost ?? 14)
       - (complete ? me.resources * 3 : 0),
     damage: opponentResponse.rawDamage,

@@ -86,6 +86,14 @@ describe("Levia Gates matchup guide", () => {
     expect(guide("Riptide, Lurker of the Deep").preference).toBe("second");
     expect(guide("Teklovossen, Esteemed Magnate").preference).toBe("second");
   });
+
+  it("keeps the cut twin hero in inventory for both transformation routes", () => {
+    for (const name of ["Oscilio, Constella Intelligence", "Jarl Vetreiði", "Levia, Shadowborn Abomination"]) {
+      const result = validatePresentation(pool, guide(name).presented, "cc", { cardPoolMode: "open" });
+      expect(result.ok, name).toBe(true);
+      if (result.ok) expect(result.decklist.inventory).toContain("DTD164");
+    }
+  });
 });
 
 describe("Briar matchup presentation", () => {

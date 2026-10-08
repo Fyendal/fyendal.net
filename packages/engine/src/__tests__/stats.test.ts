@@ -65,6 +65,14 @@ describe("authoritative match stats", () => {
     });
   });
 
+  it("projects the six-power banish fact only to its owner", () => {
+    const state = makeGame(83);
+    expect(projectStateFor(state, 0, "game").turnFacts?.players[0].banishedSixPlusThisTurn).toBe(false);
+    state.players[0]!.flags.banishedSixPlusThisTurn = true;
+    expect(projectStateFor(state, 0, "game").turnFacts?.players[0].banishedSixPlusThisTurn).toBe(true);
+    expect(projectStateFor(state, 1, "game").turnFacts?.players[0].banishedSixPlusThisTurn).toBeUndefined();
+  });
+
   it("records Blood Debt-like life loss and life gain separately from damage", () => {
     const state = makeGame(85);
     const sourceId = giveCard(state, 0, "INSTANT");

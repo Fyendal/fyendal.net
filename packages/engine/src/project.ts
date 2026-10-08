@@ -1233,6 +1233,9 @@ function projectState(
     players: state.players.map((player) => ({
       attacks: Number(player.flags.attacksDeclaredThisTurn) || 0,
       weaponAttacks: Number(player.flags.weaponAttackCount) || 0,
+      ...((seat === player.seat || revealAll)
+        ? { banishedSixPlusThisTurn: player.flags.banishedSixPlusThisTurn === true }
+        : {}),
       playedSubtypes: Object.keys(player.flags)
         .filter((flag) => flag.startsWith("playedSubtype:") && player.flags[flag] === true)
         .map((flag) => flag.slice("playedSubtype:".length))

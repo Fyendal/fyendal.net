@@ -95,7 +95,7 @@ describe("Classic Constructed shared decks", () => {
     expect(pool.heroId).toBe("MON119");
     expect(pool.deck).toHaveLength(60);
     expect(pool.sideboard).toHaveLength(8);
-    expect(pool.inventoryPool).toEqual(["DTD164B"]);
+    expect(pool.inventoryPool).toEqual(["DTD164"]);
     expect(pool.weaponIds).toEqual(["MON121", "MON221B"]);
     expect(new Set(pool.equipmentPool)).toEqual(new Set([
       "IAR038", "MON187", "PEN192", "WTR150", "IAR004",

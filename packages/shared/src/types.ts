@@ -512,12 +512,15 @@ export interface GameStatsView {
   turns: GameTurnStatsView[];
 }
 
-/** Public facts for rules and policies that depend on events earlier in the
+/** View-visible facts for rules and policies that depend on events earlier in the
  * current turn. These are projected from engine flags so consumers never need
  * to reconstruct rules state from combat-chain retention or human logs. */
 export interface PlayerTurnFactsView {
   attacks: number;
   weaponAttacks: number;
+  /** Whether this player has banished a card with at least six power this turn.
+   * Visible only to that player; optional in opponent views and older replays. */
+  banishedSixPlusThisTurn?: boolean;
   playedSubtypes: string[];
   /** Public permanent instance ids whose once-per-turn triggered effects have
    * already been consumed this turn. */

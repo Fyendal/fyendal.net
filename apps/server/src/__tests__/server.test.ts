@@ -703,6 +703,31 @@ describe("server rooms over websocket", () => {
     a.ws.close();
   });
 
+  it("starts Levia background practice while searching for a player", async () => {
+    const a = await authedClient();
+    a.sendMsg({
+      type: "create-bot-room",
+      format: "cc",
+      deckId: "precon-asb",
+      bot: "levia",
+      searchForPlayer: true,
+    });
+    expect(await a.next((message) =>
+      message.type === "background-matchmaking" && message.status.state === "searching"
+    )).toMatchObject({ type: "background-matchmaking", status: { state: "searching", format: "cc" } });
+    await a.next((message) => message.type === "room-created");
+    expect(await a.next((message) =>
+      message.type === "prep-state" && message.prep.seats[1]?.username === "Levia Bot"
+    )).toMatchObject({ type: "prep-state", prep: { botGame: true } });
+    a.sendMsg({ type: "background-matchmaking-leave" });
+    await a.next((message) =>
+      message.type === "background-matchmaking" && message.status.state === "inactive"
+    );
+    a.sendMsg({ type: "leave-room", endGame: true });
+    await a.next((message) => message.type === "left");
+    a.ws.close();
+  });
+
   it("creates the selected open-pool Starvo boss in a Classic Constructed room", async () => {
     const a = await authedClient();
     a.sendMsg({

@@ -250,6 +250,7 @@ const gameView = () => ({
     players: [0, 1].map(() => ({
       attacks: 0,
       weaponAttacks: 0,
+      banishedSixPlusThisTurn: false,
       playedSubtypes: [],
       usedOncePerTurnEffectSourceIds: [],
       dealtDamage: false,
@@ -529,6 +530,16 @@ describe("client messages", () => {
 });
 
 describe("GameView and server messages", () => {
+  it("accepts an owner-visible six-power banish fact and rejects malformed values", () => {
+    const current = gameView();
+    expect(decodeGameView(current)).not.toBeNull();
+    const previous = gameView();
+    Reflect.deleteProperty(previous.turnFacts.players[0]!, "banishedSixPlusThisTurn");
+    expect(decodeGameView(previous)).not.toBeNull();
+    const malformed = gameView();
+    Object.assign(malformed.turnFacts.players[0]!, { banishedSixPlusThisTurn: "yes" });
+    expect(decodeGameView(malformed)).toBeNull();
+  });
   it("decodes a pending draw offer and a completed drawn game", () => {
     expect(decodeGameView({ ...gameView(), drawOfferSeat: 0 })).not.toBeNull();
     expect(decodeGameView({ ...gameView(), drawOfferSeat: 2 })).toBeNull();

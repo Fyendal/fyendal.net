@@ -706,6 +706,14 @@ export const MIGRATIONS: Migration[] = [
     );
     CREATE INDEX user_achievements_id_idx ON user_achievements (achievement_id);`,
   },
+  {
+    version: 44,
+    sql: `ALTER TABLE pending_bot_starts
+      DROP CONSTRAINT IF EXISTS pending_bot_starts_bot_check;
+    ALTER TABLE pending_bot_starts
+      ADD CONSTRAINT pending_bot_starts_bot_check
+      CHECK (bot IN ('ira', 'hala', 'cindra', 'jarl', 'briar', 'bravo', 'starvo', 'kayo', 'levia'));`,
+  },
 ];
 
 async function publicTables(db: Queryable): Promise<string[]> {
