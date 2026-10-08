@@ -13,6 +13,7 @@ const CINDRA_BOT_DECK_ID = "bot-cindra-head-jabs";
 const HALA_MASTERCLASS_PRECON_ID = "precon-hala-masterclass";
 const IRA_PRECON_ID = "precon-asr";
 const JARL_BOT_DECK_ID = "bot-jarl";
+const LEVIA_BOT_DECK_ID = "bot-levia-gates";
 const STARVO_BOT_DECK_ID = "bot-starvo-boss";
 
 const BRAVO_ARCANE_POLARITY = ["SBA030", "SBA030"];
@@ -277,6 +278,102 @@ export function jarlPresentationFor(
     },
     deck: [...registered.pool.deck, ...(registered.pool.sideboard ?? [])],
   };
+}
+
+type LeviaPackage = "physical" | "grindy" | "marlynn" | "mirror" | "runeblade" |
+  "huntsman" | "gravy" | "malice" | "tuffnut" | "puffin" | "wizard";
+
+/** The guide's arena and deck cuts are keyed only by the revealed hero. */
+function leviaMatchup(name: string): LeviaPackage {
+  if (name.includes("oscilio")) return "wizard";
+  if (name.includes("marlynn")) return "marlynn";
+  if (name.includes("levia")) return "mirror";
+  if (name.includes("viserai") || name.includes("vynnset")) return "runeblade";
+  if (name.includes("arakni, huntsman")) return "huntsman";
+  if (name.includes("gravy bones")) return "gravy";
+  if (name.includes("malice")) return "malice";
+  if (name.includes("tuffnut")) return "tuffnut";
+  if (name.includes("puffin")) return "puffin";
+  if (["jarl", "betsy", "bravo", "mortimer", "hala", "kayo", "pleiades", "teklovossen", "zyggy", "maxx", "lyath", "valda"].some((hero) => name.includes(hero))) {
+    return "grindy";
+  }
+  return "physical";
+}
+
+/** Published first-player preference; in bot rooms the human makes the pick. */
+export function leviaPreferredTurnOrderFor(
+  opponent: BotPrepOpponent,
+  cards: Readonly<Record<string, CardData>> = cardData,
+): "first" | "second" {
+  const name = opponentHeroName(opponent, cards);
+  return ["levia", "fang", "kayo", "riptide", "boltyn", "teklovossen"].some((hero) =>
+    name.includes(hero)
+  ) ? "second" : "first";
+}
+
+/**
+ * Levia's 68-card Gates/Bloodrush pool, with the exact published 60-card cuts
+ * (63 into Arakni, Huntsman) and five-card arena for each guide package.
+ * Unknown heroes use the guide's common physical package and go-first plan.
+ * Source: https://fabrary.net/decks/01M34PF2XGB3QJT17TE8T1BCCN
+ */
+export function leviaPresentationFor(
+  opponent: BotPrepOpponent,
+  cards: Readonly<Record<string, CardData>> = cardData,
+): PresentedDeck {
+  const registered = precon(LEVIA_BOT_DECK_ID);
+  if (!registered || registered.format !== "cc" || registered.botOnly !== true) {
+    throw new Error("Levia bot deck is not registered");
+  }
+  const name = opponentHeroName(opponent, cards);
+  const matchup = leviaMatchup(name);
+  const deck = [...registered.pool.deck, ...(registered.pool.sideboard ?? [])];
+  const cut = (id: string, count: number) => removeCopies(deck, id, count);
+
+  if (matchup === "wizard") {
+    cut("IAR218", 2); cut("MON126", 1); cut("PEN194", 2); cut("SUP165", 3);
+  } else if (matchup === "marlynn") {
+    cut("IAR218", 2); cut("IAR014", 1); cut("IAR009", 3); cut("SUP165", 2);
+  } else if (matchup === "mirror") {
+    cut("IAR009", 3); cut("SUP165", 3); cut("IAR037", 2);
+  } else if (matchup === "huntsman") {
+    cut("IAR218", 2); cut("IAR014", 1); cut("DTD170", 2);
+  } else if (matchup === "gravy") {
+    cut("IAR218", 2); cut("MON126", 1); cut("PEN194", 2);
+    cut("IAR165", 1); cut("IAR037", 2);
+  } else if (matchup === "malice") {
+    cut("MON126", 1); cut("PEN194", 2); cut("IAR165", 3); cut("DTD170", 2);
+  } else if (matchup === "tuffnut") {
+    cut("IAR218", 2); cut("IAR014", 1); cut("IAR165", 3); cut("DTD170", 2);
+  } else if (matchup === "puffin") {
+    cut("IAR017", 1); cut("IAR218", 2); cut("IAR009", 3); cut("DTD170", 2);
+  } else if (matchup === "runeblade") {
+    cut("IAR020", 2); cut("IAR014", 1); cut("IAR009", 3); cut("DTD170", 2);
+  } else if (matchup === "grindy") {
+    cut("IAR017", 1); cut("IAR218", 2); cut("IAR014", 1);
+    cut("PEN194", 2); cut("DTD170", 2);
+  } else {
+    cut("IAR218", 2); cut("IAR014", 1); cut("IAR009", 3); cut("DTD170", 2);
+  }
+
+  const wizard = matchup === "wizard";
+  const carrion = ["dorinthea", "rhinar", "olympia", "lyath", "valda", "uzuri", "vynnset"].some((hero) =>
+    name.includes(hero)
+  );
+  const grindy = ["jarl", "betsy", "bravo", "mortimer", "hala", "kayo", "pleiades", "teklovossen", "zyggy", "arakni, huntsman"].some((hero) =>
+    name.includes(hero)
+  );
+  const equipment: Partial<Record<EquipmentSlot, string>> = {
+    head: wizard ? "CRU006" : "IAR038",
+    chest: wizard ? "AKO004" : grindy ? "WTR150" : carrion || matchup === "marlynn" ? "MON187" : "AKO004",
+    arms: wizard || matchup === "runeblade" ? "ARC157" : grindy ? "IAR004" : "PEN192",
+    legs: "WTR004",
+  };
+  const weaponIds = [wizard ? "MON221B" : "MON121"];
+  if (deck.length !== (matchup === "huntsman" ? 63 : 60)) {
+    throw new Error(`Levia matchup presentation has ${deck.length} cards`);
+  }
+  return { weaponIds, equipment, deck };
 }
 
 function bravoMatchupFor(

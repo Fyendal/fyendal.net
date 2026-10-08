@@ -45,6 +45,7 @@ it("does not expose internal bot decks through player deck resolution", async ()
     "bot-cindra-head-jabs",
     "precon-hala-masterclass",
     "bot-jarl",
+    "bot-levia-gates",
     "bot-starvo-boss",
   ]) {
     const result = await resolveFreshDeck(db, 1, id, {

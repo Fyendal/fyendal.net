@@ -7,6 +7,8 @@ export {
   halaPresentationFor,
   iraPresentation,
   jarlPresentationFor,
+  leviaPresentationFor,
+  leviaPreferredTurnOrderFor,
   starvoPresentationFor,
 } from "./sideboard.js";
 export { chooseBriarIntent, chooseBriarIntentWithTrace } from "./briar-policy.js";
@@ -46,6 +48,8 @@ export { chooseIraIntent, chooseIraIntentWithTrace } from "./ira-policy.js";
 export type { IraIntentDecision, IraTurnEvaluation, IraTurnPlan } from "./ira-policy.js";
 export { chooseJarlIntent, chooseJarlIntentWithTrace } from "./jarl-policy.js";
 export type { JarlIntentDecision } from "./jarl-policy.js";
+export { chooseLeviaIntent, chooseLeviaIntentWithTrace } from "./levia-policy.js";
+export type { LeviaIntentDecision } from "./levia-policy.js";
 export { chooseStarvoIntent, chooseStarvoIntentWithTrace } from "./starvo-policy.js";
 export type { StarvoIntentDecision } from "./starvo-policy.js";
 export { cloneStateForBotSimulation } from "./turn-planner.js";

@@ -680,6 +680,29 @@ describe("server rooms over websocket", () => {
     a.ws.close();
   });
 
+  it("creates the selected Classic Constructed Levia bot room", async () => {
+    const a = await authedClient();
+    a.sendMsg({ type: "create-bot-room", format: "cc", deckId: "precon-asb", bot: "levia" });
+    await a.next((message) => message.type === "room-created");
+    const prep = await a.next(
+      (message) => message.type === "prep-state" && message.prep.seats[1]?.username === "Levia Bot",
+    );
+    expect(prep).toMatchObject({
+      type: "prep-state",
+      prep: {
+        format: "cc", botGame: true,
+        seats: [expect.anything(), {
+          username: "Levia Bot",
+          heroName: "Levia, Shadowborn Abomination",
+          connected: true,
+        }],
+      },
+    });
+    a.sendMsg({ type: "leave-room", endGame: true });
+    expect(await a.next((message) => message.type === "left")).toEqual({ type: "left" });
+    a.ws.close();
+  });
+
   it("creates the selected open-pool Starvo boss in a Classic Constructed room", async () => {
     const a = await authedClient();
     a.sendMsg({

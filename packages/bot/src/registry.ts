@@ -15,6 +15,7 @@ import {
 import { chooseHalaIntent, chooseHalaIntentWithTrace } from "./hala-policy.js";
 import { chooseIraIntent, chooseIraIntentWithTrace } from "./ira-policy.js";
 import { chooseJarlIntent, chooseJarlIntentWithTrace } from "./jarl-policy.js";
+import { chooseLeviaIntent, chooseLeviaIntentWithTrace } from "./levia-policy.js";
 import {
   chooseStarvoContinuationIntent,
   chooseStarvoIntent,
@@ -35,6 +36,7 @@ import {
   halaPresentationFor,
   iraPresentation,
   jarlPresentationFor,
+  leviaPresentationFor,
   starvoPresentationFor,
 } from "./sideboard.js";
 
@@ -186,6 +188,16 @@ export const BOT_DEFINITIONS = {
     chooseIntent: chooseJarlIntent,
     chooseDecision: (input) => botDecisionFromTrace(chooseJarlIntentWithTrace(input)),
     presentationFor: (opponent) => jarlPresentationFor(opponent),
+  }),
+  levia: stagedDefinition({
+    id: "levia",
+    format: "cc",
+    deckId: "bot-levia-gates",
+    username: "Levia Bot",
+    deckName: "Levia — Gates and Bloodrush",
+    chooseIntent: chooseLeviaIntent,
+    chooseDecision: (input) => botDecisionFromTrace(chooseLeviaIntentWithTrace(input)),
+    presentationFor: (opponent) => leviaPresentationFor(opponent),
   }),
   starvo: stagedDefinition({
     id: "starvo",

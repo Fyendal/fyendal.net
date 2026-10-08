@@ -8,6 +8,8 @@ import {
   halaPresentationFor,
   iraPresentation,
   jarlPresentationFor,
+  leviaPresentationFor,
+  leviaPreferredTurnOrderFor,
   starvoPresentationFor,
 } from "./sideboard.js";
 
@@ -20,6 +22,71 @@ function opponent(overrides: Partial<Decklist> = {}): Decklist {
     ...overrides,
   };
 }
+
+describe("Levia Gates matchup guide", () => {
+  const pool = precon("bot-levia-gates")!.pool;
+  const guide = (heroName: string) => {
+    const cards = { ...cardData, GUIDE_HERO: { ...cardData["MON119"]!, name: heroName } };
+    const opponent = { heroId: "GUIDE_HERO", weaponIds: [], equipment: {} };
+    return {
+      presented: leviaPresentationFor(opponent, cards),
+      preference: leviaPreferredTurnOrderFor(opponent, cards),
+    };
+  };
+
+  it("uses the anti-Wizard AB3 arena and cuts", () => {
+    const { presented, preference } = guide("Oscilio, Constella Intelligence");
+    expect(preference).toBe("first");
+    expect(presented).toMatchObject({
+      weaponIds: ["MON221B"],
+      equipment: { head: "CRU006", chest: "AKO004", arms: "ARC157", legs: "WTR004" },
+    });
+    expect(presented.deck).toHaveLength(60);
+    expect(presented.deck).not.toContain("SUP165");
+    expect(presented.deck).not.toContain("PEN194");
+  });
+
+  it("keeps 63 cards into Huntsman and 60 into all other named heroes", () => {
+    const names = [
+      "Marlynn", "Levia, Shadowborn Abomination", "Jarl Vetreiði", "Viserai, Between Worlds",
+      "Arakni, 5L!p3d 7hRu 7h3 cR4X", "Arakni, Huntsman", "Arakni, Marionette",
+      "Aurora, Legacy of Tempest", "Betsy", "Bravo, Showstopper", "Cindra, Dracai of Retribution",
+      "Dash I/O", "Dorinthea Ironsong", "Fai, Rising Rebellion", "Fang, Dracai of Blades",
+      "Mortimer", "Gravy Bones, Shipwrecked Looter", "Ira, Scarlet Revenger", "Kassai of the Golden Sand",
+      "Hala, Bladesaint of the Vow", "Katsu, the Wanderer", "Kayo, Armed and Dangerous",
+      "Lyath Goldmane, Vile Savant", "Malice, Domina of the Dead", "Maxx Nitro",
+      "Olympia, Prized Fighter", "Puffin, Hightail", "Pleiades, Superstar", "Rhinar, Reckless Rampage",
+      "Riptide, Lurker of the Deep", "Boltyn, Breaker of Dawn", "Tuffnut, Bumbling Hulkster",
+      "Teklovossen, Esteemed Magnate", "Vynnset, Iron Maiden", "Valda Brightaxe", "Uzuri, Switchblade",
+      "Zyggy Starlight", "Unknown Hero",
+    ];
+    for (const name of names) {
+      const { presented } = guide(name);
+      expect(presented.deck, name).toHaveLength(name === "Arakni, Huntsman" ? 63 : 60);
+      expect(validatePresentation(pool, presented, "cc", { cardPoolMode: "open" }), name)
+        .toMatchObject({ ok: true });
+    }
+  });
+
+  it("selects the guide's distinct plans and second-player preferences", () => {
+    const mirror = guide("Levia, Shadowborn Abomination");
+    expect(mirror.preference).toBe("second");
+    expect(mirror.presented.deck).not.toContain("SUP165");
+    expect(mirror.presented.deck.filter((id) => id === "IAR037")).toHaveLength(1);
+    const jarl = guide("Jarl Vetreiði").presented;
+    expect(jarl.equipment).toMatchObject({ chest: "WTR150", arms: "IAR004" });
+    expect(jarl.deck.filter((id) => id === "IAR017")).toHaveLength(2);
+    const vynnset = guide("Vynnset, Iron Maiden").presented;
+    expect(vynnset.equipment).toMatchObject({ chest: "MON187", arms: "ARC157" });
+    expect(vynnset.deck.filter((id) => id === "IAR020")).toHaveLength(1);
+    const marlynn = guide("Marlynn, Treasure Hunter").presented;
+    expect(marlynn.equipment.chest).toBe("MON187");
+    expect(marlynn.deck.filter((id) => id === "SUP165")).toHaveLength(1);
+    expect(guide("Fang, Dracai of Blades").preference).toBe("second");
+    expect(guide("Riptide, Lurker of the Deep").preference).toBe("second");
+    expect(guide("Teklovossen, Esteemed Magnate").preference).toBe("second");
+  });
+});
 
 describe("Briar matchup presentation", () => {
   it("uses the published Ninja, fatigue, Wizard, and Runeblade plans", () => {

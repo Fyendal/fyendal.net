@@ -245,6 +245,18 @@
       "value": "Beat Kayo Bot"
     }
   ],
+  "achievements.beatlevia.description": [
+    {
+      "type": 0,
+      "value": "Defeat Levia Bot in a practice game."
+    }
+  ],
+  "achievements.beatlevia.name": [
+    {
+      "type": 0,
+      "value": "Beat Levia Bot"
+    }
+  ],
   "achievements.beatstarvo.description": [
     {
       "type": 0,
@@ -23338,6 +23350,12 @@
     {
       "type": 0,
       "value": "An aggressive Brute deck that leads with go again, swings Mandible Claw, and finishes with big attacks."
+    }
+  ],
+  "lobby.bot.levia.description": [
+    {
+      "type": 0,
+      "value": "A Shadow Brute that builds Gates and unleashes Bloodrush turns."
     }
   ],
   "lobby.bot.prompt": [

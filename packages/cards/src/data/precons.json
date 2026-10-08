@@ -753,6 +753,51 @@
             ]
         }
     },
+    "_comment_bot_levia": "Source: https://fabrary.net/decks/01M34PF2XGB3QJT17TE8T1BCCN (user-supplied 68-card pool and matchup guide). The common 60-card presentation is registered as deck; its eight matchup flex cards are sideboard. Levia, Redeemed is an inventory card and the matchup guide cuts it from every arena presentation.",
+    "bot-levia-gates": {
+        "name": "Levia — Gates and Bloodrush",
+        "format": "cc",
+        "botOnly": true,
+        "pool": {
+            "heroId": "MON119",
+            "weaponIds": ["MON121", "MON221B"],
+            "equipmentPool": [
+                "IAR038", "MON187", "PEN192", "WTR150", "IAR004",
+                "ARC157", "AKO004", "WTR004", "CRU006"
+            ],
+            "inventoryPool": ["DTD164B"],
+            "deck": [
+                "IAR017", "IAR017", "IAR017",
+                "IAR020", "IAR020", "IAR020",
+                "LEV011", "LEV011", "LEV011",
+                "MON126",
+                "IAR026", "IAR026", "IAR026",
+                "MST236", "MST236", "MST236",
+                "CRU007", "CRU007", "CRU007",
+                "WTR007", "WTR007", "WTR007",
+                "PEN194", "PEN194",
+                "IAR165", "IAR165", "IAR165",
+                "SUP165", "SUP165", "SUP165",
+                "ARC178",
+                "ROS218", "ROS218", "ROS218",
+                "IAR022", "IAR022", "IAR022",
+                "MON140", "MON140", "MON140",
+                "DTD107", "DTD107", "DTD107",
+                "MON189",
+                "IAR037", "IAR037", "IAR037",
+                "IAR214", "IAR214", "IAR214",
+                "PEN322", "PEN322", "PEN322",
+                "MON198",
+                "WTR031", "WTR031", "WTR031",
+                "IAR005", "IAR005", "IAR005"
+            ],
+            "sideboard": [
+                "IAR218", "IAR218", "IAR014",
+                "IAR009", "IAR009", "IAR009",
+                "DTD170", "DTD170"
+            ]
+        }
+    },
     "_comment_bot_jarl": "100th Calling: Atlanta 3rd (user-supplied list). The 67 deck cards are stored as a 60-card registered deck plus seven sideboard cards; the bot presents all 67 in every matchup.",
     "bot-jarl": {
         "name": "Jarl",

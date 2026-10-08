@@ -18,7 +18,7 @@ const opponent: Decklist = {
 
 describe("bot registry", () => {
   it("registers every bot with unique stable identity and deck mappings", () => {
-    expect(botDefinitions).toHaveLength(8);
+    expect(botDefinitions).toHaveLength(9);
     expect(new Set(botDefinitions.map(({ id }) => id)).size).toBe(botDefinitions.length);
     expect(new Set(botDefinitions.map(({ deckId }) => deckId)).size).toBe(botDefinitions.length);
     expect(Object.keys(BOT_DEFINITIONS).sort()).toEqual(

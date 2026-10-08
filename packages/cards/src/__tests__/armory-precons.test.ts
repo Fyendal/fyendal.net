@@ -87,10 +87,43 @@ describe("Classic Constructed shared decks", () => {
     }
   });
 
+  it("keeps the complete Levia Gates pool internal and implemented", () => {
+    const levia = precon("bot-levia-gates");
+    expect(levia).toMatchObject({ name: "Levia — Gates and Bloodrush", format: "cc", botOnly: true });
+    expect(preconsForFormat("cc").map((deck) => deck.id)).not.toContain("bot-levia-gates");
+    const pool = levia!.pool;
+    expect(pool.heroId).toBe("MON119");
+    expect(pool.deck).toHaveLength(60);
+    expect(pool.sideboard).toHaveLength(8);
+    expect(pool.inventoryPool).toEqual(["DTD164B"]);
+    expect(pool.weaponIds).toEqual(["MON121", "MON221B"]);
+    expect(new Set(pool.equipmentPool)).toEqual(new Set([
+      "IAR038", "MON187", "PEN192", "WTR150", "IAR004",
+      "ARC157", "AKO004", "WTR004", "CRU006",
+    ]));
+    const counts: Record<string, number> = {};
+    for (const id of [...pool.deck, ...pool.sideboard!]) counts[id] = (counts[id] ?? 0) + 1;
+    expect(counts).toEqual({
+      IAR017: 3, IAR020: 3, IAR218: 2, LEV011: 3, MON126: 1,
+      IAR026: 3, IAR014: 1, MST236: 3, CRU007: 3, WTR007: 3,
+      IAR009: 3, PEN194: 2, IAR165: 3, SUP165: 3, ARC178: 1,
+      ROS218: 3, DTD170: 2, IAR022: 3, MON140: 3, DTD107: 3,
+      MON189: 1, IAR037: 3, IAR214: 3, PEN322: 3, MON198: 1,
+      WTR031: 3, IAR005: 3,
+    });
+    for (const id of [
+      ...pool.weaponIds, ...pool.equipmentPool, ...(pool.inventoryPool ?? []),
+      ...pool.deck, ...(pool.sideboard ?? []),
+    ]) {
+      expect(cardData[id], id).toBeTruthy();
+      expect(isImplemented(cardData[id]!), id).toBe(true);
+    }
+  });
+
   it("registers the complete Atlanta Jarl list only for the practice bot", () => {
     const jarl = precon("bot-jarl");
     expect(jarl).toMatchObject({
-      name: "100th Calling: Atlanta 3rd 🇺🇸",
+      name: "Jarl",
       format: "cc",
       botOnly: true,
     });

@@ -245,6 +245,18 @@
       "value": "击败 Kayo 机器人"
     }
   ],
+  "achievements.beatlevia.description": [
+    {
+      "type": 0,
+      "value": "在练习对局中击败 Levia 机器人。"
+    }
+  ],
+  "achievements.beatlevia.name": [
+    {
+      "type": 0,
+      "value": "击败 Levia 机器人"
+    }
+  ],
   "achievements.beatstarvo.description": [
     {
       "type": 0,
@@ -22458,6 +22470,12 @@
     {
       "type": 0,
       "value": "以 go again 起手，衔接 Mandible Claw，再用高攻击力终结的进攻型蛮族牌组。"
+    }
+  ],
+  "lobby.bot.levia.description": [
+    {
+      "type": 0,
+      "value": "暗影蛮勇通过传送门积累资源，并在血涌回合发起猛攻。"
     }
   ],
   "lobby.bot.prompt": [
