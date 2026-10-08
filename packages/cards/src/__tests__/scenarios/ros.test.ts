@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { legalIntents, projectStateFor } from "@fyendal/engine";
 import { cardData, isImplemented } from "../../index.js";
-import { printingId, scenario } from "../harness.js";
+import { printingId, scenario, type SeatSpec } from "../harness.js";
 
 const BLUE = "raging onslaught|3";
 
@@ -1084,5 +1084,38 @@ describe("ROS — wager triggers", () => {
     ] });
     allyAttack.play("drink 'em under the table|1", { targetAlly: "barnacle|2" }).settle();
     expect(allyAttack.state.log.some((entry) => entry.publicText?.includes("wagers with"))).toBe(false);
+  });
+});
+
+describe("ROS — Blast to Oblivion", () => {
+  const NO_EQUIPMENT = { head: null, chest: null, arms: null, legs: null } as const;
+  const seats = (hand: string[]): [SeatSpec, SeatSpec] => [
+    { hero: "rhinar", hand, weapons: [], equipment: NO_EQUIPMENT },
+    { hero: "dorinthea", board: ["sigil of aether|3", "sigil of aether|3"], weapons: [], equipment: NO_EQUIPMENT },
+  ];
+
+  it("returns an aura the next time you play an instant this chain link, and only that time", () => {
+    const s = scenario({ seats: seats(["blast to oblivion|1", "sigil of solace|1", "sigil of solace|1"]) });
+    s.play("blast to oblivion|1").blockWith()
+      .react("sigil of solace|1", { settle: false })
+      .passPriority().passPriority() // Resolve the Blast to Oblivion trigger.
+      .chooseCard("sigil of aether|3")
+      .doRaw({ kind: "choose", optionId: "opposing hero" }) // Sigil of Aether's leave-the-arena damage.
+      .passPriority().passPriority(); // Resolve it and Sigil of Solace.
+    s.expectInZone(1, "sigil of aether|3", "hand");
+    expect(s.state.chain.at(-1)?.resolved).toBe(false);
+    s.react("sigil of solace|1", { settle: false });
+    expect(s.state.stack).toHaveLength(1); // No second trigger.
+    s.settle();
+    expect(s.state.players[1]!.hand).toHaveLength(1);
+    expect(s.state.players[1]!.board.filter((card) => card.cardId === printingId("sigil of aether|3"))).toHaveLength(1);
+  });
+
+  it("does not trigger from an instant played on a later chain link", () => {
+    const s = scenario({ seats: seats(["blast to oblivion|1", "head jab|1", "sigil of solace|1"]) });
+    s.play("blast to oblivion|1").blockWith().settle();
+    s.state.players[0]!.actionPoints = 1;
+    s.play("head jab|1").blockWith().react("sigil of solace|1").settle();
+    expect(s.state.players[1]!.hand).toHaveLength(0);
   });
 });

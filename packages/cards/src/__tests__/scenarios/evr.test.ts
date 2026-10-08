@@ -469,3 +469,26 @@ describe("EVR — rules regression coverage", () => {
     s.expectAP(0, 1).expectNotInZone(0, "talisman of featherfoot|2", "board");
   });
 });
+
+describe("EVR — Sigil of Parapets", () => {
+  it("gains +2{d} each time you play a Wizard card while it defends", () => {
+    const NO_EQUIPMENT = { head: null, chest: null, arms: null, legs: null } as const;
+    const s = scenario({
+      seats: [
+        { hero: "rhinar", hand: ["raging onslaught|1"], resources: 3, weapons: [], equipment: NO_EQUIPMENT },
+        { hero: "dorinthea", hand: ["sigil of parapets|3", "sigil of brilliance|2", "sigil of brilliance|2"], life: 20, resources: 3, weapons: [], equipment: NO_EQUIPMENT },
+      ],
+    });
+    s.play("raging onslaught|1").blockWith().passPriority()
+      .react("sigil of parapets|3", { settle: false })
+      .passPriority().passPriority() // Resolve Sigil of Parapets.
+      .passPriority().passPriority() // Resolve its "when this defends" trigger.
+      .passPriority()
+      .react("sigil of brilliance|2", { settle: false })
+      .passPriority().passPriority() // Resolve the first Parapets trigger.
+      .passPriority()
+      .react("sigil of brilliance|2", { settle: false })
+      .settle();
+    s.expectLife(1, 20 - (7 - (2 + 2 + 2)));
+  });
+});

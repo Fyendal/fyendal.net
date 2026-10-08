@@ -1211,3 +1211,17 @@ describe("OMN — import and set mechanics", () => {
       .settle();
   });
 });
+
+describe("OMN — Settle the Bill", () => {
+  it("gives the arsenaled arrow +3{p} and destroys their arsenal when it hits", () => {
+    const s = scenario({
+      seats: [
+        { hero: "rhinar", hand: ["settle the bill|1", "rusty harpoon|3"], resources: 1, weapons: ["red liner|0"], equipment: NO_EQUIPMENT },
+        foe({ arsenal: ["fry|2"], life: 20 }),
+      ],
+    });
+    s.play("settle the bill|1").chooseCard("rusty harpoon|3").settle();
+    s.play("rusty harpoon|3", { fromArsenal: true }).expectAttackValue(4).blockWith().settle();
+    s.expectLife(1, 16).expectInZone(1, "fry|2", "graveyard");
+  });
+});
