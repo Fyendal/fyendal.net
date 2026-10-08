@@ -179,9 +179,9 @@ export const ACHIEVEMENT_IDS = [
   "beat-ira", "beat-hala", "beat-jarl", "beat-levia", "beat-starvo",
 ] as const;
 export type AchievementId = typeof ACHIEVEMENT_IDS[number];
-// Keep retired IDs decodable so existing unlocks and account exports remain valid.
+// Keep hidden and retired IDs decodable so existing unlocks and account exports remain valid.
 export const ACTIVE_ACHIEVEMENT_IDS: readonly AchievementId[] = ACHIEVEMENT_IDS
-  .filter((id) => id !== "beat-starvo");
+  .filter((id) => id !== "beat-starvo" && id !== "beat-levia");
 export interface AchievementUnlock {
   id: AchievementId;
   unlockedAt: number;

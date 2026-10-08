@@ -42,14 +42,14 @@ function match({
 }
 
 describe("achievements", () => {
-  it("awards each registered bot by its existing deck identity", () => {
+  it("awards active bot achievements by deck identity", () => {
     for (const bot of botDefinitions) {
       const awards = achievementsForSeat(match({
         opponent: { controller: "bot", deckId: bot.deckId },
       }), 0);
       expect(awards).toEqual([
         "first-victory", "first-bot-win",
-        ...(bot.id === "starvo" ? [] : [`beat-${bot.id}`]),
+        ...(bot.id === "starvo" || bot.id === "levia" ? [] : [`beat-${bot.id}`]),
       ]);
     }
   });

@@ -1162,7 +1162,11 @@ describe("replays and HTTP responses", () => {
       ] })).not.toBeNull();
     }
     expect(ACTIVE_ACHIEVEMENT_IDS).not.toContain("beat-starvo");
+    expect(ACTIVE_ACHIEVEMENT_IDS).not.toContain("beat-levia");
     expect(decodeAchievementsResponse(achievements)).not.toBeNull();
+    expect(decodeAchievementsResponse({ ...achievements, unlocks: [
+      { id: "beat-levia", unlockedAt: 123, roomCode: "ABC123" },
+    ] })).not.toBeNull();
     expect(decodeAchievementsResponse({ ...achievements, unlocks: [
       { id: "beat-starvo", unlockedAt: 123, roomCode: "ABC123" },
     ] })).not.toBeNull();

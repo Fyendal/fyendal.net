@@ -9,7 +9,7 @@ afterEach(() => {
 });
 
 describe("BotOpponentModal", () => {
-  it("offers Ira, Hala, Cindra, Jarl, and Levia in a focused opponent dialog", () => {
+  it("offers the available Classic Constructed bots in a focused opponent dialog", () => {
     const html = renderToStaticMarkup(
       <TestI18nProvider>
         <BotOpponentModal format="cc" onSelect={vi.fn()} onClose={vi.fn()} />
@@ -36,12 +36,11 @@ describe("BotOpponentModal", () => {
     expect(html).toContain("Vetreiði");
     expect(html).toContain("Defensive");
     expect(html).toContain("A patient Earth and Ice Guardian that blocks efficiently and attacks with disruptive two-card hands.");
-    expect(html).toContain("Levia");
-    expect(html).toContain("Shadowborn Abomination");
-    expect(html).toContain("A Shadow Brute that builds Gates and unleashes Bloodrush turns.");
+    expect(html).not.toContain("Levia");
+    expect(html).not.toContain("Shadowborn Abomination");
     expect(html).not.toContain("Starvo");
     expect(html).not.toContain("Star of the Show");
-    expect(html.match(/aria-hidden="true"/g)).toHaveLength(5);
+    expect(html.match(/aria-hidden="true"/g)).toHaveLength(4);
   });
 
   it("offers Kayo, Briar, and Bravo for Silver Age", () => {

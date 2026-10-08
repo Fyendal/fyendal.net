@@ -784,7 +784,8 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
         const botFormat = msg.format ?? "silver-age";
         const botOpponent = msg.bot ?? (botFormat === "cc" ? "hala" : "briar");
         const definition = botDefinition(botOpponent);
-        if (!definition || definition.format !== botFormat) {
+        // Keep the registered Levia policy available to existing games while practice is hidden.
+        if (!definition || definition.format !== botFormat || botOpponent === "levia") {
           send(ws, { type: "error", message: `choose a ${botFormat} bot` });
           return;
         }
