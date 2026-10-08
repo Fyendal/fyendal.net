@@ -9861,6 +9861,12 @@
       "value": "count"
     }
   ],
+  "card.mpa.prolonged.copy": [
+    {
+      "type": 0,
+      "value": "Create a copy of the first destroyed disease token of this name"
+    }
+  ],
   "card.mpa.remember.hand.banish": [
     {
       "type": 0,

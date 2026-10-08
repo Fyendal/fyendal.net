@@ -8,6 +8,7 @@ const HUMOUR_PLUNGE = "humour plunge|0";
 const MAD = "mutually assured destruction|1";
 const PREY = "prey on insecurity|1";
 const REMEMBER = "remember the mists|3";
+const PROLONGED = "prolonged illness|3";
 const VIRAL_DIFFUSION = "viral diffusion|1";
 const WIDESPREAD_RUIN = "widespread ruin|1";
 const NO_EQUIPMENT = { head: null, chest: null, arms: null, legs: null } as const;
@@ -95,6 +96,100 @@ describe("Armory Deck Mortimer and Mastery Pack Assassin spoilers", () => {
     expect(boardNames(game, 0)).not.toContain("Silver");
     expect(game.state.players[0]!.hero.tapped).toBe(true);
     expect(game.state.players[0]!.actionPoints).toBe(1);
+  });
+
+  it.each([
+    ["seed bloodrot|3", "Bloodrot Pox"],
+    ["seed frailty|3", "Frailty"],
+    ["seed inertia|3", "Inertia"],
+  ])("%s creates a disease under each hero", (seed, disease) => {
+    const game = scenario({ seats: [
+      { hero: "rhinar", hand: [seed], weapons: [], equipment: NO_EQUIPMENT },
+      { hero: "dorinthea", weapons: [], equipment: NO_EQUIPMENT },
+    ] });
+
+    game.play(seed);
+
+    expect(boardNames(game, 0)).toContain(disease);
+    expect(boardNames(game, 1)).toContain(disease);
+  });
+
+  it("Prolonged Illness copies only the first destroyed token of each disease name", () => {
+    const game = scenario({ seats: [
+      {
+        hero: "rhinar",
+        hand: [PROLONGED],
+        board: ["frailty|0", "frailty|0", "inertia|0"],
+        weapons: [],
+        equipment: NO_EQUIPMENT,
+      },
+      { hero: "dorinthea", weapons: [], equipment: NO_EQUIPMENT },
+    ] });
+
+    game.play(PROLONGED).endTurn();
+
+    expect(boardNames(game, 0).filter((name) => name === "Frailty")).toHaveLength(1);
+    expect(boardNames(game, 0).filter((name) => name === "Inertia")).toHaveLength(1);
+    expect(boardNames(game, 1)).not.toContain("Frailty");
+  });
+
+  it("Prolonged Illness copies a disease under the hero whose token was destroyed", () => {
+    const game = scenario({ seats: [
+      {
+        hero: "rhinar",
+        heroKey: DR_MORTIMER,
+        hand: [PROLONGED],
+        weapons: [],
+        equipment: NO_EQUIPMENT,
+      },
+      {
+        hero: "dorinthea",
+        board: ["frailty|0"],
+        weapons: [],
+        equipment: NO_EQUIPMENT,
+      },
+    ] });
+
+    game.play(PROLONGED).activate(DR_MORTIMER, { ability: 0 }).chooseCard("frailty|0");
+
+    expect(boardNames(game, 1)).toContain("Frailty");
+    expect(boardNames(game, 0)).not.toContain("Frailty");
+  });
+
+  it("Prolonged Illness does not copy a disease already destroyed earlier this turn", () => {
+    const game = scenario({ seats: [
+      {
+        hero: "rhinar",
+        heroKey: DR_MORTIMER,
+        hand: [PROLONGED],
+        board: ["frailty|0"],
+        weapons: [],
+        equipment: NO_EQUIPMENT,
+      },
+      {
+        hero: "dorinthea",
+        board: ["frailty|0"],
+        weapons: [],
+        equipment: NO_EQUIPMENT,
+      },
+    ] });
+
+    game.activate(DR_MORTIMER, { ability: 0 }).chooseCard("frailty|0")
+      .play(PROLONGED).endTurn();
+
+    expect(boardNames(game, 0)).not.toContain("Frailty");
+    expect(boardNames(game, 1)).not.toContain("Frailty");
+  });
+
+  it("Prolonged Illness expires when the turn ends", () => {
+    const game = scenario({ seats: [
+      { hero: "rhinar", hand: [PROLONGED], weapons: [], equipment: NO_EQUIPMENT },
+      { hero: "dorinthea", board: ["frailty|0"], weapons: [], equipment: NO_EQUIPMENT },
+    ] });
+
+    game.play(PROLONGED).endTurn().endTurn();
+
+    expect(boardNames(game, 1)).not.toContain("Frailty");
   });
 
   it("Viral Diffusion creates all three diseases under the attacking hero", () => {

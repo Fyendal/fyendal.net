@@ -2,6 +2,16 @@ import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal
 import { contractWithSilver, decisionPrompt, opponentSeat } from "./shared-helpers.js";
 
 const BLOODROT_POX = "OUT234";
+const FRAILTY = "OUT235";
+const INERTIA = "OUT236";
+
+function seedDisease(tokenId: string): CardScript {
+  return {
+    onPlay(ctx) {
+      for (const player of ctx.state.players) ctx.createToken(tokenId, player.seat);
+    },
+  };
+}
 
 function isReaction(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
   return ctx.hasCardType(card, "attack-reaction") || ctx.hasCardType(card, "defense-reaction");
@@ -12,6 +22,40 @@ function isInfected(ctx: ScriptCtx, seat: number): boolean {
 }
 
 export const mpa: Record<string, CardScript> = {
+  "seed bloodrot|3": seedDisease(BLOODROT_POX),
+  "seed frailty|3": seedDisease(FRAILTY),
+  "seed inertia|3": seedDisease(INERTIA),
+
+  "prolonged illness|3": {
+    onPlay(ctx) {
+      ctx.addModifier({ scope: "until-end-of-turn" });
+    },
+    triggers: [
+      {
+        event: "card-left-arena",
+        whose: "any",
+        label: "Create a copy of the first destroyed disease token of this name",
+        labelMessage: { id: "card.mpa.prolonged.copy" },
+        condition(ctx, left, event) {
+          if (!left || event?.destroyed !== true || event.controllerSeat === undefined) return false;
+          if (!ctx.cardTypes(left).includes("disease") || !ctx.hasCardType(left, "token")) return false;
+          const name = ctx.cardData(left.cardId).name.trim().toLowerCase().replace(/\s+/g, " ");
+          return ctx.state.players.every(
+            (player) => Number(player.flags[`destroyedNameCount:${name}`] ?? 0) === 0,
+          );
+        },
+        onTrigger(ctx, left, event) {
+          if (left && event?.controllerSeat !== undefined) {
+            ctx.setCounter(`copySeat:${left.instanceId}`, event.controllerSeat);
+          }
+        },
+        effect(ctx, destroyed) {
+          if (destroyed) ctx.createTokenCopyOf(destroyed, ctx.getCounter(`copySeat:${destroyed.instanceId}`));
+        },
+      },
+    ],
+  },
+
   "prey on insecurity|1": {
     activated: {
       cost: 0,

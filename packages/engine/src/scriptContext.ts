@@ -1938,6 +1938,21 @@ export function makeCtx(
       }
       return token;
     },
+    createTokenCopyOf(source, tokenSeat) {
+      const target = state.players[tokenSeat] as PlayerState | undefined;
+      if (!target) return undefined;
+      const token = runtime.commands.createTokenFor(state, target, source.cardId, tokenCreationCause);
+      if (!token) return undefined;
+      token.copyOriginalCardId = source.copyOriginalCardId ?? source.cardId;
+      if (source.grantedTypes) token.grantedTypes = [...source.grantedTypes];
+      if (source.grantedNames) token.grantedNames = [...source.grantedNames];
+      if (source.grantedKeywords) token.grantedKeywords = [...source.grantedKeywords];
+      if (source.grantedBaseAbilitiesCardId) token.grantedBaseAbilitiesCardId = source.grantedBaseAbilitiesCardId;
+      if (source.grantedBaseAbilitiesCardIds) {
+        token.grantedBaseAbilitiesCardIds = [...source.grantedBaseAbilitiesCardIds];
+      }
+      return token;
+    },
     createTokens(cardId, count, tokenSeat, initialCounters) {
       const target =
         tokenSeat === undefined ? player : (state.players[tokenSeat] as PlayerState);

@@ -9399,6 +9399,12 @@
       "value": " 张"
     }
   ],
+  "card.mpa.prolonged.copy": [
+    {
+      "type": 0,
+      "value": "复制本回合首次被摧毁的该名称疾病衍生物"
+    }
+  ],
   "card.mpa.remember.hand.banish": [
     {
       "type": 0,

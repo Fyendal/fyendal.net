@@ -246,6 +246,7 @@ export function fireLeaveArena(
   card: CardInstance,
   to: "graveyard" | "banish" | "soul" | "deck" | "hand" | "subcard" | "cease-to-exist",
   asActivationCost = false,
+  destroyed = false,
 ): void {
   // Continuous effects sourced by a permanent end as soon as it leaves the
   // arena, regardless of which destination moved it there.
@@ -257,7 +258,7 @@ export function fireLeaveArena(
     "card-left-arena",
     seat,
     card,
-    { from: "arena", to },
+    { from: "arena", to, controllerSeat: seat, destroyed },
   );
   delete card.boundToInstanceId;
   const attachments = (state.players as PlayerState[]).flatMap((player) =>
@@ -364,7 +365,7 @@ export function destroyPermanent(state: GameStateInternal,
       transitionZone(sourceKind, controllerSeat),
       null,
     );
-    fireLeaveArena(state, runtime, controllerSeat, card, "cease-to-exist");
+    fireLeaveArena(state, runtime, controllerSeat, card, "cease-to-exist", false, true);
     logPublic(state, gameLogMessage(
       `${nameOf(state, card.cardId)} ceases to exist (Incarnate)`,
       "engine.log.card.ceases.to.exist.incarnate",
@@ -373,7 +374,7 @@ export function destroyPermanent(state: GameStateInternal,
     return true;
   }
   moveToGraveyard(state, runtime, card, "arena", seat);
-  fireLeaveArena(state, runtime, controllerSeat, card, "graveyard");
+  fireLeaveArena(state, runtime, controllerSeat, card, "graveyard", false, true);
   logPublic(state, cardDestroyedLogMessage(state, card.cardId));
   runtime.events.runHook(state, controllerSeat, card, "onDestroyed");
   runtime.events.fireFriendlyDestroyed(state, controllerSeat, card, seat);

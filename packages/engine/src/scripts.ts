@@ -401,6 +401,9 @@ export interface ScriptCtx {
   /** Create a token copy of a public arena object, preserving its copiable
    * granted characteristics but not counters or temporary modifiers. */
   createTokenCopy(instanceId: number): DeepReadonly<CardInstance> | undefined;
+  /** Copy a token from its last-known public characteristics after it has left
+   * the arena, placing the copy under the specified hero's control. */
+  createTokenCopyOf(source: DeepReadonly<CardInstance>, seat: number): DeepReadonly<CardInstance> | undefined;
   /** Create one token batch. Replacement effects that change "one or more"
    * token creation events observe the batch once, before any token enters. */
   createTokens(

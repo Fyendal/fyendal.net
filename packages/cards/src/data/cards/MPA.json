@@ -50,5 +50,46 @@
     "classes": ["assassin"],
     "subtypes": ["attack"],
     "set": "MPA"
+  },
+  {
+    "id": "MPA032",
+    "name": "Prolonged Illness",
+    "cardType": "instant",
+    "text": "Until end of turn, whenever a disease token is destroyed, if it's the first disease token with that name that's been destroyed this turn, create a token copy of it under the same hero's control.",
+    "pitch": 3,
+    "cost": 0,
+    "defense": 3,
+    "classes": ["assassin"],
+    "set": "MPA"
+  },
+  {
+    "id": "MPA125",
+    "name": "Seed Bloodrot",
+    "cardType": "instant",
+    "text": "Create a Bloodrot Pox token under each hero's control.",
+    "pitch": 3,
+    "cost": 0,
+    "classes": ["assassin"],
+    "set": "MPA"
+  },
+  {
+    "id": "MPA126",
+    "name": "Seed Frailty",
+    "cardType": "instant",
+    "text": "Create a Frailty token under each hero's control.",
+    "pitch": 3,
+    "cost": 0,
+    "classes": ["assassin"],
+    "set": "MPA"
+  },
+  {
+    "id": "MPA127",
+    "name": "Seed Inertia",
+    "cardType": "instant",
+    "text": "Create an Inertia token under each hero's control.",
+    "pitch": 3,
+    "cost": 0,
+    "classes": ["assassin"],
+    "set": "MPA"
   }
 ]

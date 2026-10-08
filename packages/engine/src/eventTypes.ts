@@ -31,6 +31,10 @@ export interface TriggerEventContext {
   readonly effectSource?: "action-card" | "activated-ability" | "other";
   readonly atRandom?: boolean;
   readonly tokenCount?: number;
+  /** Last controller of a permanent leaving the arena. */
+  readonly controllerSeat?: number;
+  /** True when the arena departure was a destruction event. */
+  readonly destroyed?: boolean;
   readonly to?: "arsenal" | "banish" | "soul" | "hand" | "arena" | "graveyard" | "pitch" | "deck" | "subcard" | "cease-to-exist";
 }
 
