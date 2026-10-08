@@ -26,6 +26,38 @@ export const mpa: Record<string, CardScript> = {
   "seed frailty|3": seedDisease(FRAILTY),
   "seed inertia|3": seedDisease(INERTIA),
 
+  "outbreak|1": {
+    playTargetOptions(ctx) {
+      return ctx.state.chain
+        .filter((link) =>
+          link.flags.attackGone !== true &&
+          link.attackCardType === "action" &&
+          ctx.cardTypes(link.attackingCard).includes("assassin")
+        )
+        .map((link) => link.attackingCard.instanceId);
+    },
+    onPlay(ctx) {
+      if (ctx.playTargetInstanceId === undefined) return;
+      ctx.addModifier({
+        scope: "chain-link",
+        attack: 3,
+        appliesTo: "attack-action",
+        appliesToInstanceId: ctx.playTargetInstanceId,
+        onHitScriptHook: {
+          hook: "mpa-outbreak-hit",
+          label: "create a Frailty, Inertia, and Bloodrot Pox token under the hit hero's control",
+          heroOnly: true,
+        },
+      });
+    },
+    onGrantedHit(ctx, hook) {
+      if (hook !== "mpa-outbreak-hit") return;
+      for (const tokenId of [FRAILTY, INERTIA, BLOODROT_POX]) {
+        ctx.createToken(tokenId, opponentSeat(ctx));
+      }
+    },
+  },
+
   "prolonged illness|3": {
     onPlay(ctx) {
       ctx.addModifier({ scope: "until-end-of-turn" });

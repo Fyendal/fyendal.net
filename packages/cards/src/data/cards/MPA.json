@@ -52,6 +52,17 @@
     "set": "MPA"
   },
   {
+    "id": "MPA031",
+    "name": "Outbreak",
+    "cardType": "attack-reaction",
+    "text": "Target Assassin attack action card gets +3{p} and \"When this hits a hero, create a Frailty, Inertia, and Bloodrot Pox token under their control.\"",
+    "pitch": 1,
+    "cost": 3,
+    "defense": 3,
+    "classes": ["assassin"],
+    "set": "MPA"
+  },
+  {
     "id": "MPA032",
     "name": "Prolonged Illness",
     "cardType": "instant",

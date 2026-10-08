@@ -12,6 +12,7 @@ const PROLONGED = "prolonged illness|3";
 const VIRAL_DIFFUSION = "viral diffusion|1";
 const WIDESPREAD_RUIN = "widespread ruin|1";
 const NO_EQUIPMENT = { head: null, chest: null, arms: null, legs: null } as const;
+const OUTBREAK = "outbreak|1";
 
 function boardNames(game: ReturnType<typeof scenario>, seat: number): string[] {
   return game.state.players[seat]!.board.map((card) => cardData[card.cardId]!.name);
@@ -112,6 +113,74 @@ describe("Armory Deck Mortimer and Mastery Pack Assassin spoilers", () => {
 
     expect(boardNames(game, 0)).toContain(disease);
     expect(boardNames(game, 1)).toContain(disease);
+  });
+
+  it("Outbreak gives an Assassin attack +3 and all three diseases on a hero hit", () => {
+    const game = scenario({ seats: [
+      {
+        hero: "rhinar",
+        hand: [PREY, OUTBREAK],
+        resources: 3,
+        weapons: [],
+        equipment: NO_EQUIPMENT,
+      },
+      { hero: "dorinthea", weapons: [], equipment: NO_EQUIPMENT },
+    ] });
+
+    game.play(PREY).blockWith().react(OUTBREAK, { targetCard: PREY });
+
+    game.expectLife(1, 14);
+
+    expect(boardNames(game, 1)).toEqual(expect.arrayContaining([
+      "Frailty", "Inertia", "Bloodrot Pox",
+    ]));
+    expect(boardNames(game, 0)).not.toContain("Frailty");
+  });
+
+  it("Outbreak's disease rider does not trigger when the attack is fully defended", () => {
+    const game = scenario({ seats: [
+      {
+        hero: "rhinar",
+        hand: [PREY, OUTBREAK],
+        resources: 3,
+        weapons: [],
+        equipment: NO_EQUIPMENT,
+      },
+      {
+        hero: "dorinthea",
+        hand: ["raging onslaught|1", "raging onslaught|2"],
+        weapons: [],
+        equipment: NO_EQUIPMENT,
+      },
+    ] });
+
+    game.play(PREY).blockWith("raging onslaught|1", "raging onslaught|2")
+      .react(OUTBREAK, { targetCard: PREY }).settle();
+
+    expect(boardNames(game, 1)).not.toContain("Frailty");
+    expect(boardNames(game, 1)).not.toContain("Inertia");
+    expect(boardNames(game, 1)).not.toContain("Bloodrot Pox");
+  });
+
+  it("Outbreak cannot target a non-Assassin attack action card", () => {
+    const game = scenario({ seats: [
+      {
+        hero: "rhinar",
+        hand: ["head jab|1", OUTBREAK],
+        resources: 3,
+        weapons: [],
+        equipment: NO_EQUIPMENT,
+      },
+      { hero: "dorinthea", weapons: [], equipment: NO_EQUIPMENT },
+    ] });
+
+    game.play("head jab|1").blockWith();
+
+    const outbreak = game.state.players[0]!.hand.find((card) => cardData[card.cardId]?.name === "Outbreak")!;
+    expect(legalIntents(game.state, 0)).not.toContainEqual(expect.objectContaining({
+      kind: "play-card",
+      instanceId: outbreak.instanceId,
+    }));
   });
 
   it("Prolonged Illness copies only the first destroyed token of each disease name", () => {
