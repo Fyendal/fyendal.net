@@ -1,11 +1,15 @@
 import type { GameState } from "@fyendal/engine";
 import type { CardView, GameIntent } from "@fyendal/shared";
+import { handDamage, type HeroRulesFactory } from "./hand-value.js";
 import type { BotPolicyInput } from "./policy.js";
 import {
   evaluateOpponentResponse,
-  planTurn,
   evaluateTurnFuture,
+  horizonScore,
+  planTurn,
+  POINTS_PER_DAMAGE,
   responseWeightedDamage,
+  spentEquipmentValue,
   type TurnPlan,
   type TurnPlannerRoot,
 } from "./turn-planner.js";
@@ -14,9 +18,10 @@ export interface BriarTurnEvaluation {
   score: number;
   damage: number;
   healing: number;
-  intelligencePenalty: number;
-  nextHandValue: number;
+  cardsHeld: number;
+  heldValue: number;
   arsenalValue: number;
+  /** Damage-equivalent blocking value of equipment this line spent. */
   equipmentSpent: number;
   unusedSetups: number;
   runechantsCreated: number;
@@ -38,9 +43,7 @@ const BRIAR_MAX_ROOT_CANDIDATES = 2;
 
 interface PlannerConfig {
   chooseForced(input: BotPolicyInput): GameIntent;
-  cardOpportunity(card: CardView, input: BotPolicyInput): number;
-  nextTurnArsenal(card: CardView, input: BotPolicyInput): number;
-  estimateRemaining(cards: readonly CardView[], input: BotPolicyInput): number;
+  rules: HeroRulesFactory;
   comparePitchOrder(left: GameIntent, right: GameIntent, input: BotPolicyInput): number;
   scoreIntent(intent: GameIntent, input: BotPolicyInput): number;
   rankCandidate(intent: GameIntent, input: BotPolicyInput): number;
@@ -69,12 +72,8 @@ function evaluateBriarTurn(
   const damage = Math.max(0, root.opponentLife - opponent.life);
   const opponentResponse = evaluateOpponentResponse(input, root);
   const healing = Math.max(0, me.life - root.life);
-  const future = evaluateTurnFuture(input, root, config);
-
-  const currentEquipmentIds = new Set(
-    Object.values(me.equipment).flatMap((card) => card ? [card.instanceId] : []),
-  );
-  const equipmentSpent = [...root.equipmentIds].filter((id) => !currentEquipmentIds.has(id)).length;
+  const future = evaluateTurnFuture(input, root, config.rules);
+  const equipmentSpent = spentEquipmentValue(input, root);
   const unusedSetups = input.view.ongoing.filter((effect) =>
     effect.seat === root.seat && effect.label.includes("next attack")
   ).length;
@@ -107,10 +106,10 @@ function evaluateBriarTurn(
     ? -1_000_000
     : 0;
   const score = winnerScore
-    + responseWeightedDamage(opponentResponse) * 100
+    + responseWeightedDamage(opponentResponse) * POINTS_PER_DAMAGE
     + healing * 25
     + future.score
-    - equipmentSpent * 12
+    - equipmentSpent * POINTS_PER_DAMAGE
     - unusedSetups * 15
     + runechantsCreated * 30
     - (!evergreenPreservedForArsenal && state.winner !== root.seat ? 900 : 0);
@@ -119,8 +118,8 @@ function evaluateBriarTurn(
     score,
     damage,
     healing,
-    intelligencePenalty: future.intelligencePenalty,
-    nextHandValue: future.nextHandValue,
+    cardsHeld: future.cardsHeld,
+    heldValue: future.heldValue,
     arsenalValue: future.arsenalValue,
     equipmentSpent,
     unusedSetups,
@@ -183,7 +182,6 @@ export function planBriarTurn(
     maxTransitions: BRIAR_MAX_TRANSITIONS,
     maxRootCandidates: BRIAR_MAX_ROOT_CANDIDATES,
     chooseForced: config.chooseForced,
-    cardOpportunity: config.cardOpportunity,
     comparePitchOrder: config.comparePitchOrder,
     scoreIntent: config.scoreIntent,
     rankCandidate: config.rankCandidate,
@@ -194,8 +192,9 @@ export function planBriarTurn(
     evaluateHorizon(state, observed, root) {
       const base = evaluate(state, observed, root, false);
       const me = observed.view.players[root.seat];
-      const remaining = config.estimateRemaining([...me.hand, ...me.arsenal], observed);
-      return { ...base, score: base.score + remaining * 80, complete: false };
+      const remaining = handDamage([...me.hand, ...me.arsenal], observed, config.rules);
+      const futureScore = (base.heldValue + base.arsenalValue) * POINTS_PER_DAMAGE;
+      return { ...base, score: horizonScore(base.score, futureScore, remaining), complete: false };
     },
   });
   if (!plan) return undefined;

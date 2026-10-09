@@ -1,16 +1,29 @@
 import { sha256 } from "@noble/hashes/sha2.js";
 import { bytesToHex, utf8ToBytes } from "@noble/hashes/utils.js";
 import { applyIntent, legalIntents, projectStateFor, type GameState } from "@fyendal/engine";
-import type { CardView, GameIntent } from "@fyendal/shared";
+import type { GameIntent } from "@fyendal/shared";
+import { arsenalCardValue, equipmentValue, heldCardValue, type HeroRulesFactory } from "./hand-value.js";
 import { strategicPitchIntents, type BotPolicyInput } from "./policy.js";
 
 export const DEFAULT_MAX_SEARCH_NODES = 64;
 export const DEFAULT_MAX_SEARCH_TRANSITIONS = 512;
 export const MAX_ROOT_CANDIDATES = 48;
 export const BOT_OBSERVATION_KEY_LENGTH = 64;
+/** Score points per damage equivalent. Every planner term uses this scale. */
+export const POINTS_PER_DAMAGE = 100;
+/** Unexplored damage at a search horizon is worth slightly less than damage
+ * the rollout actually reached. */
+export const HORIZON_DAMAGE_POINTS = 85;
 export const MAX_BOT_CONTINUATION_STEPS = 32;
 const DEFAULT_MAX_ACTION_DEPTH = 12;
 const DEFAULT_MAX_FORCED_STEPS = 160;
+
+/** Score at a search horizon. The unplayed hand is either played out this
+ * turn or kept for later, never both, so it counts as the better of its held
+ * value and its remaining damage. */
+export function horizonScore(score: number, futureScore: number, remainingDamage: number): number {
+  return score - futureScore + Math.max(futureScore, remainingDamage * HORIZON_DAMAGE_POINTS);
+}
 
 export interface TurnEvaluation {
   score: number;
@@ -50,10 +63,21 @@ export interface TurnPlannerRoot {
   opponentHandCount: number;
   opponentEquipmentDefense: number;
   threatenedAtRoot: number;
-  equipmentIds: ReadonlySet<number>;
+  /** Blocking value given up when each root equipment piece is spent. */
+  equipmentValues: ReadonlyMap<number, number>;
   deckIds: ReadonlySet<number>;
-  expectedDrawValue: number;
   cards: BotPolicyInput["cards"];
+  decklists: BotPolicyInput["decklists"];
+}
+
+/** Damage-equivalent blocking value of root equipment spent by this line. */
+export function spentEquipmentValue(input: BotPolicyInput, root: TurnPlannerRoot): number {
+  const equipped = new Set(
+    Object.values(input.view.players[root.seat].equipment).flatMap((card) => card ? [card.instanceId] : []),
+  );
+  let spent = 0;
+  for (const [id, value] of root.equipmentValues) if (!equipped.has(id)) spent += value;
+  return spent;
 }
 
 export interface OpponentResponseEvaluation {
@@ -129,87 +153,51 @@ export function evaluateOpponentResponse(
 }
 
 export interface TurnFutureValue {
+  /** Points: POINTS_PER_DAMAGE × (held value + arsenal value). */
   score: number;
-  intelligencePenalty: number;
-  nextHandValue: number;
+  heldValue: number;
   arsenalValue: number;
+  /** Hand cards still held after the arsenal choice (each displaces a draw). */
+  cardsHeld: number;
   arsenalCardInstanceId?: number;
 }
 
-export interface TurnFutureConfig {
-  cardOpportunity(card: CardView, input: BotPolicyInput): number;
-  nextTurnArsenal(card: CardView, input: BotPolicyInput): number;
-  handWeight?: number;
-  arsenalWeight?: number;
-  retainedCardPenalty?: number;
-  /** Extra tempo value for turning the final hand card into a new arsenal,
-   * preserving a five-card turn instead of spending the card for marginal
-   * damage. Hero evaluators should disable this in closing range. */
-  emptyArsenalBonus?: number | ((card: CardView, input: BotPolicyInput) => number);
-}
-
-/** Values the best legal end-of-turn arsenal choice without advancing cleanup
- * or exposing a simulated private draw. */
+/**
+ * Damage-equivalent value the turn carries forward: each card left in hand is
+ * worth its margin over the draw it displaces, the arsenal card its arsenal
+ * value, and with an empty arsenal the best leftover goes there when that
+ * beats holding it. Evaluated without advancing cleanup or exposing a draw.
+ */
 export function evaluateTurnFuture(
   input: BotPolicyInput,
   root: TurnPlannerRoot,
-  config: TurnFutureConfig,
+  rules: HeroRulesFactory,
 ): TurnFutureValue {
   const me = input.view.players[root.seat];
-  const intellect = root.cards[me.heroCardId]?.intellect ?? 4;
-  const opportunity = (card: CardView): number =>
-    root.deckIds.has(card.instanceId)
-      ? root.expectedDrawValue
-      : config.cardOpportunity(card, input);
-  const existingArsenalValue = me.arsenal.reduce(
-    (total, card) => total + config.nextTurnArsenal(card, input),
-    0,
-  );
-  const arsenalCandidates: Array<CardView | undefined> = me.arsenal.length === 0
-    ? [undefined, ...me.hand]
-    : [undefined];
-  let best: TurnFutureValue | undefined;
-  for (const arsenalCard of arsenalCandidates) {
-    const remaining = arsenalCard
-      ? me.hand.filter((card) => card.instanceId !== arsenalCard.instanceId)
-      : me.hand;
-    const carry = remaining.reduce((total, card) => total + opportunity(card), 0);
-    const drawSlots = Math.max(0, intellect - remaining.length);
-    const nextHandValue = carry + drawSlots * root.expectedDrawValue;
-    const arsenalValue = existingArsenalValue + (
-      arsenalCard ? config.nextTurnArsenal(arsenalCard, input) : 0
-    );
-    const intelligencePenalty = remaining.length;
-    const emptyArsenalBonus = arsenalCard && me.arsenal.length === 0 && me.hand.length === 1
-      ? typeof config.emptyArsenalBonus === "function"
-        ? config.emptyArsenalBonus(arsenalCard, input)
-        : (config.emptyArsenalBonus ?? 0)
-      : 0;
-    const score = nextHandValue * (config.handWeight ?? 3)
-      + arsenalValue * (config.arsenalWeight ?? 2)
-      + emptyArsenalBonus
-      - intelligencePenalty * (config.retainedCardPenalty ?? 2);
-    if (!best || score > best.score) {
-      best = {
-        score,
-        intelligencePenalty,
-        nextHandValue,
-        arsenalValue,
-        ...(arsenalCard ? { arsenalCardInstanceId: arsenalCard.instanceId } : {}),
-      };
+  const arsenalValue = me.arsenal.reduce((total, card) => total + arsenalCardValue(card, input, rules), 0);
+  let heldValue = 0;
+  let bestGain = 0;
+  let arsenalCardInstanceId: number | undefined;
+  for (const card of me.hand) {
+    const held = heldCardValue(card, input, rules);
+    heldValue += held;
+    const gain = me.arsenal.length === 0 ? arsenalCardValue(card, input, rules) - held : 0;
+    if (gain > bestGain) {
+      bestGain = gain;
+      arsenalCardInstanceId = card.instanceId;
     }
   }
-  return best ?? {
-    score: 0,
-    intelligencePenalty: 0,
-    nextHandValue: 0,
-    arsenalValue: existingArsenalValue,
+  return {
+    score: (heldValue + arsenalValue + bestGain) * POINTS_PER_DAMAGE,
+    heldValue,
+    arsenalValue: arsenalValue + bestGain,
+    cardsHeld: me.hand.length - (arsenalCardInstanceId !== undefined ? 1 : 0),
+    ...(arsenalCardInstanceId !== undefined ? { arsenalCardInstanceId } : {}),
   };
 }
 
 export interface TurnPlannerConfig<Evaluation extends TurnEvaluation> {
   chooseForced(input: BotPolicyInput): GameIntent;
-  cardOpportunity(card: CardView, input: BotPolicyInput): number;
   evaluateEnd(
     state: GameState,
     input: BotPolicyInput,
@@ -346,17 +334,13 @@ function applySimulationIntent(
   return applied;
 }
 
-function observation(
-  state: GameState,
-  seat: 0 | 1,
-  cards: BotPolicyInput["cards"],
-  publicGameId: string,
-): BotPolicyInput {
+function observation(state: GameState, root: TurnPlannerRoot, publicGameId: string): BotPolicyInput {
   return {
-    seat,
-    view: projectStateFor(state, seat, publicGameId),
-    legal: legalIntents(state, seat),
-    cards,
+    seat: root.seat,
+    view: projectStateFor(state, root.seat, publicGameId),
+    legal: legalIntents(state, root.seat),
+    cards: root.cards,
+    ...(root.decklists ? { decklists: root.decklists } : {}),
   };
 }
 
@@ -459,7 +443,7 @@ function advanceForced<Evaluation extends TurnEvaluation>(
     }
     const actor = (current.pendingDecision?.player ?? current.priorityPlayer) as 0 | 1;
     const intent = actor === root.seat
-      ? config.chooseForced(observation(current, root.seat, root.cards, context.publicGameId))
+      ? config.chooseForced(observation(current, root, context.publicGameId))
       : opponentRolloutIntent(current);
     if (!intent) return { kind: "terminal", state: current, complete: false };
     context.transitions++;
@@ -515,12 +499,7 @@ function evaluateEnd<Evaluation extends TurnEvaluation>(
   context: SearchContext<Evaluation>,
   complete: boolean,
 ): Evaluation {
-  const input = observation(
-    state,
-    context.root.seat,
-    context.root.cards,
-    context.publicGameId,
-  );
+  const input = observation(state, context.root, context.publicGameId);
   return context.config.evaluateEnd(state, input, context.root, complete);
 }
 
@@ -528,12 +507,7 @@ function evaluateHorizon<Evaluation extends TurnEvaluation>(
   state: GameState,
   context: SearchContext<Evaluation>,
 ): Evaluation {
-  const input = observation(
-    state,
-    context.root.seat,
-    context.root.cards,
-    context.publicGameId,
-  );
+  const input = observation(state, context.root, context.publicGameId);
   return context.config.evaluateHorizon
     ? context.config.evaluateHorizon(state, input, context.root)
     : context.config.evaluateEnd(state, input, context.root, false);
@@ -616,12 +590,7 @@ function search<Evaluation extends TurnEvaluation>(
   // Projection and legal-intent generation are among the planner's heavier
   // operations. Build the observation once and reuse it for both the memo key
   // and candidate preparation.
-  const observed = observation(
-    state,
-    context.root.seat,
-    context.root.cards,
-    context.publicGameId,
-  );
+  const observed = observation(state, context.root, context.publicGameId);
   const key = stateKey(observed, depth);
   const cached = context.memo.get(key);
   if (cached) return cached;
@@ -688,14 +657,12 @@ export function planTurn<Evaluation extends TurnEvaluation>(
       .flatMap((card) => card ? [card] : [])
       .reduce((total, card) => total + Math.max(0, card.defense ?? input.cards[card.cardId]?.defense ?? 0), 0),
     threatenedAtRoot: threatenedThisTurn(input, input.seat),
-    equipmentIds: new Set(
-      Object.values(me.equipment).flatMap((card) => card ? [card.instanceId] : []),
+    equipmentValues: new Map(
+      Object.values(me.equipment).flatMap((card) => card ? [[card.instanceId, equipmentValue(card, input)]] : []),
     ),
     deckIds: new Set(deck.map((card) => card.instanceId)),
-    expectedDrawValue: deck.length === 0
-      ? 0
-      : deck.reduce((total, card) => total + config.cardOpportunity(card, input), 0) / deck.length,
     cards: input.cards,
+    decklists: input.decklists,
   };
   const context: SearchContext<Evaluation> = {
     root,

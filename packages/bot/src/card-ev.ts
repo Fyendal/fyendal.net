@@ -48,7 +48,21 @@ export interface CardUses {
   pump: number;
   /** Extra value of pump riders, such as granting go again. */
   pumpRider?: number;
+  /** Ambush: can defend from arsenal like a card in hand. */
+  ambush?: boolean;
+  /** A blue card that is still worth playing out of arsenal: printed
+   * "played from arsenal" bonuses, or set by hero rules. */
+  arsenalPlay?: boolean;
 }
+
+/** A card that can never leave arsenal (a block or other unplayable card)
+ * wastes the slot: about one card's worth for as long as it sits there. */
+export const DEAD_ARSENAL_COST = DEFAULT_DRAW_VALUE;
+/** A blue card pitches for 3 or blocks from hand. Face down in arsenal it can
+ * do neither, and playing it is usually below rate, so it costs about a card
+ * on top of its play value. Defense reactions and Ambush cards still defend
+ * from arsenal and are exempt, as are cards marked `arsenalPlay`. */
+export const BLUE_ARSENAL_COST = DEAD_ARSENAL_COST;
 
 /** Offensive value: an attack's damage (a terminal attack competes for the
  * single last slot, so it counts at a discount) or a pump's added power. */
@@ -67,7 +81,10 @@ function blockValue(uses: CardUses): number {
 
 /** Arsenal value for the next turn: go-again attacks at full attack value,
  * terminal attacks discounted, pumps at their pump value, defense reactions
- * at the damage they stop; all reduced by the disruption discount. */
+ * (and Ambush cards, if better) at the damage they stop; all reduced by the
+ * disruption discount. A card that cannot be played from arsenal only blocks
+ * the slot, and a blue card that cannot defend from there pays
+ * BLUE_ARSENAL_COST. */
 export function arsenalValue(uses: CardUses, discount: number, hitChance = DEFAULT_HIT_CHANCE): number {
   let value: number;
   switch (uses.kind) {
@@ -76,15 +93,17 @@ export function arsenalValue(uses: CardUses, discount: number, hitChance = DEFAU
     case "action":
     case "instant":
       value = offenseValue(uses, hitChance) || uses.pitch * 0.25;
+      if (uses.ambush) value = Math.max(value, blockValue(uses));
       break;
     case "defense-reaction":
       value = blockValue(uses);
       break;
     default:
-      return 0;
+      return -DEAD_ARSENAL_COST;
   }
   const share = uses.kind === "defense-reaction" ? DEFENSE_REACTION_DISCOUNT_SHARE : 1;
-  return value * (1 - discount * share);
+  const stranded = uses.pitch >= 3 && uses.kind !== "defense-reaction" && !uses.ambush && !uses.arsenalPlay;
+  return value * (1 - discount * share) - (stranded ? BLUE_ARSENAL_COST : 0);
 }
 
 /** Best single use of a card drawn into a fresh hand. */
@@ -129,6 +148,9 @@ export function defaultCardUses(data: CardData, power = data.attack ?? 0, defens
     reliableGoAgain: hasStaticGoAgain(data),
     pump,
     pumpRider: /next [^.]*attack[^.]*gets? go again/i.test(data.text) && kind !== "attack" ? 2 : 0,
+    ...(data.keywords?.includes("Ambush") || /^Ambush\b/m.test(data.text) ? { ambush: true } : {}),
+    // Cards with a bonus for being played from arsenal (e.g. Sow Tomorrow).
+    ...(/\bplayed from (?:your )?arsenal\b/i.test(data.text) ? { arsenalPlay: true } : {}),
   };
 }
 

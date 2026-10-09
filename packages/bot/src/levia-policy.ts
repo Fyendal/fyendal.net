@@ -19,6 +19,9 @@ import {
   scoreSpendCardChoice,
   type BotPolicyInput,
 } from "./policy.js";
+import type { HeroSolverRules, SolverCardPatch } from "./card-model.js";
+import type { PendingEffect } from "./hand-solver.js";
+import { arsenalValuer, handResponse } from "./hand-value.js";
 import { planTacticalTurn, type TacticalTurnPlan } from "./tactical-turn-planner.js";
 import {
   chooseLeviaMacro,
@@ -159,28 +162,49 @@ function cardOpportunity(card: CardView, input: BotPolicyInput): number {
   return Math.max(1, data.pitch ?? 0);
 }
 
-function nextTurnArsenal(card: CardView, input: BotPolicyInput): number {
-  const data = input.cards[card.cardId];
-  const named = name(data);
-  if (named === "bloodrush bellow") return 70;
-  if (named === "goremass summoning" || named === "call to the grave") return 48;
-  if (named === "shadowrealm horror" || named === "feeding frenzy") return 42;
-  if (named === "cleave the heavens" || named === "blood harvest") return 38;
-  return isAttack(data) ? (data?.attack ?? 0) * 4 : data?.pitch ?? 0;
+/** Bloodrush Bellow: Brute attacks gain +2{p} for the rest of the turn. */
+function bloodrushPending(key: string): PendingEffect {
+  return { key, uses: Number.POSITIVE_INFINITY, power: 2, appliesTo: (card, view) => view.hasTrait(card, "brute") };
 }
 
-/** Projection-only hand value for blocks and the bounded next-action rollout. */
-function estimateDamage(cards: readonly CardView[], input: BotPolicyInput): number {
-  const included = new Set(cards.map((card) => card.instanceId));
-  const attacks = [...cards, ...playableBanishAttacks(input, included)].filter((card) =>
-    isAttack(input.cards[card.cardId])
-  );
-  const pitch = cards.filter((card) => (input.cards[card.cardId]?.pitch ?? 0) >= 2).length;
-  const bloodrush = leviaEffectActive(input, "bloodrush bellow") ||
-    cards.some((card) => name(input.cards[card.cardId]) === "bloodrush bellow");
-  const best = attacks.reduce((value, card) => Math.max(value, input.cards[card.cardId]?.attack ?? 0), 0);
-  const second = attacks.length > 1 && pitch > 0 ? Math.min(6, attacks.length * 2) : 0;
-  return best + second + (bloodrush && attacks.length > 0 ? 4 : 0);
+/** Hand-value rules: Levia's attack playability and go-again conditions,
+ * Bloodrush Bellow, and attacks whose power depends on the board. */
+function leviaSolverRules(input: BotPolicyInput): HeroSolverRules {
+  const me = input.view.players[input.seat];
+  const nextTurn = input.view.activePlayer !== input.seat;
+  const banishedSix = !nextTurn && input.view.turnFacts?.players[input.seat]?.banishedSixPlusThisTurn === true;
+  const weaponPower = Math.max(0, ...me.weapons.map((weapon) => input.cards[weapon.cardId]?.attack ?? 0));
+  return {
+    name: "levia",
+    trackedTraits: [],
+    startPending(observed, next) {
+      return !next && leviaEffectActive(observed, "bloodrush bellow") ? [bloodrushPending("bloodrush-active")] : [];
+    },
+    card(data, card) {
+      const patch: SolverCardPatch = {};
+      if (isAttack(data)) {
+        const continues = leviaAttackContinues(card, input, nextTurn);
+        patch.canPlay = () => leviaAttackPlayable(card, input);
+        patch.goAgainIn = () => continues;
+        if (continues) patch.uses = { reliableGoAgain: true };
+      }
+      switch (name(data)) {
+        case "bloodrush bellow":
+          patch.after = () => ({ pending: [bloodrushPending(`bloodrush#${card.instanceId}`)] });
+          patch.uses = { pump: 4 };
+          break;
+        case "diabolic offering":
+          patch.powerIn = () => banishedSix ? 6 : 0;
+          break;
+        case "rockyard rodeo":
+          patch.powerIn = () => weaponPower;
+          break;
+        default:
+          break;
+      }
+      return patch;
+    },
+  };
 }
 
 function scorePlay(intent: GameIntent, input: BotPolicyInput, own: ReadonlyMap<number, CardView>): number {
@@ -290,7 +314,9 @@ function scorePullOptChoice(
 }
 
 function scoreChoice(intent: Extract<GameIntent, { kind: "choose" }>, input: BotPolicyInput): number {
-  if (input.view.pendingDecision?.kind === "arsenal") return scoreArsenalChoice(intent, input, nextTurnArsenal);
+  if (input.view.pendingDecision?.kind === "arsenal") {
+    return scoreArsenalChoice(intent, input, arsenalValuer(leviaSolverRules));
+  }
   const pullOpt = scorePullOptChoice(intent, input);
   if (pullOpt !== undefined) return pullOpt;
   const payment = resourcePaymentPitchIds(intent, input);
@@ -328,10 +354,14 @@ function scoreDefense(
     offensiveCards: (policy) => [
       ...policy.view.players[policy.seat].hand, ...policy.view.players[policy.seat].arsenal,
     ],
-    evaluateResponse: (cards, policy) => responseEvaluation({
-      damageThreatened: estimateDamage(cards, policy),
-      strategicAdjustment: ownBloodDebt(policy) > 0 && cards.length === 0 ? -4 : 0,
-    }),
+    evaluateResponse: (cards, policy) => {
+      const response = handResponse(cards, policy, leviaSolverRules);
+      // Blood debt drains each end phase; keep something to shed it with.
+      return ownBloodDebt(policy) > 0 && cards.length === 0
+        ? responseEvaluation({ ...response, strategicAdjustment: response.strategicAdjustment - 4 })
+        : response;
+    },
+    // Play style: Levia leans slightly toward keeping her attack pair.
     responseLossWeight: 1.1,
   });
 }
@@ -340,7 +370,7 @@ function chooseReactive(input: BotPolicyInput): GameIntent {
   return chooseScoredIntent(input, {
     play: scorePlay,
     choose: scoreChoice,
-    nextTurnArsenal,
+    nextTurnArsenal: arsenalValuer(leviaSolverRules),
     defend: scoreDefense,
   });
 }
@@ -381,9 +411,7 @@ export function chooseLeviaIntentWithTrace(input: BotPolicyInput): LeviaIntentDe
   const reactive = chooseReactive(input);
   const plan = planTacticalTurn(input, {
     chooseForced: (forced) => chooseReactive({ ...forced, state: undefined }),
-    cardOpportunity,
-    nextTurnArsenal,
-    estimateRemaining: estimateDamage,
+    rules: leviaSolverRules,
     rankCandidate: (intent, observed) => scoreCandidate(intent, observed, macro),
     scoreIntent: (intent, observed) => leviaMacroIntentBonus(macro, intent, observed),
     positionBonus: (observed, complete) => leviaMacroPositionBonus(macro, input, observed, complete),

@@ -355,6 +355,8 @@ describe("Hala policy", () => {
       optionCards: [ripple, null],
     };
 
+    // A blue card in arsenal can neither pitch nor block, and its attack is
+    // below rate, so the slot stays empty.
     expect(chooseHalaIntent({
       seat: 0,
       view,

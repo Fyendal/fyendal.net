@@ -916,7 +916,10 @@ describe("Ira policy", () => {
     const blocker = view.players[0].hand.find((card) =>
       card.instanceId === intent.instanceIds[0]
     );
-    expect(blocker?.cardId).toBe("ASR026");
+    // Give and Take and Legacy of Ikaru both block 3. Keeping blue Legacy
+    // pitches for 3 and funds Thorns, Razor Reflex and Edge of Autumn next
+    // turn; the three cost-1 reds alone cannot pay for each other.
+    expect(blocker?.cardId).toBe("ASR010");
     expect(blocker?.defense).toBeGreaterThan(0);
   });
 

@@ -53,7 +53,6 @@ describe("bounded turn planning", () => {
     };
     const config = {
       chooseForced: (forced: typeof input) => forcedIntent(forced.legal),
-      cardOpportunity: () => 0,
       rankCandidate: (intent: GameIntent) => intent.kind === "activate-ability" &&
         intent.sourceInstanceId === weaponId ? 100 : 0,
       evaluateEnd: (_state: typeof state, observed: typeof input, root: TurnPlannerRoot, complete: boolean) => ({
@@ -178,10 +177,10 @@ describe("bounded turn planning", () => {
       opponentHandCount: 4,
       opponentEquipmentDefense: 2,
       threatenedAtRoot: 0,
-      equipmentIds: new Set(),
+      equipmentValues: new Map(),
       deckIds: new Set(),
-      expectedDrawValue: 0,
       cards: cardData,
+      decklists: undefined,
     };
     const response = evaluateOpponentResponse({ seat: 0, view, legal: [], cards: cardData }, root);
     expect(response.rawDamage).toBe(10);
@@ -215,7 +214,6 @@ describe("bounded turn planning", () => {
     expect(input.legal.length).toBeGreaterThan(1);
     const config = {
       chooseForced: (forced: typeof input) => forcedIntent(forced.legal),
-      cardOpportunity: () => 0,
       evaluateEnd: (_state: typeof state, _observed: typeof input, _root: unknown, complete: boolean) => ({
         score: 0,
         complete,
@@ -253,7 +251,6 @@ describe("bounded turn planning", () => {
     };
     const plan = planTurn(input, {
       chooseForced: (forced) => forcedIntent(forced.legal),
-      cardOpportunity: () => 0,
       evaluateEnd: (_state, _observed, _root, complete) => ({ score: 0, complete }),
       maxSearchNodes: 8,
       maxTransitions: 1,
@@ -285,7 +282,6 @@ describe("bounded turn planning", () => {
       state,
     }, {
       chooseForced: (forced) => forcedIntent(forced.legal),
-      cardOpportunity: () => 0,
       rankCandidate: (intent) => intent.kind === "activate-ability" &&
         intent.sourceInstanceId === weaponId ? 100 : 0,
       prepareCandidates(candidates, _input, { depth }) {
@@ -324,7 +320,6 @@ describe("bounded turn planning", () => {
     };
     const plan = planTurn(input, {
       chooseForced: (forced) => forcedIntent(forced.legal),
-      cardOpportunity: () => 0,
       rankCandidate: (intent) => intent === action ? 100 : 0,
       evaluateEnd: (_state, _observed, _root, complete) => ({ score: 0, complete }),
       maxSearchNodes: 1,

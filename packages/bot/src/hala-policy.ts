@@ -42,11 +42,16 @@ import {
   type BotPolicyInput,
   type TargetableAttackIntent,
 } from "./policy.js";
+import type { CardUses } from "./card-ev.js";
+import type { HeroSolverRules } from "./card-model.js";
+import { arsenalValuer } from "./hand-value.js";
 import { adjustValueBreakdown } from "./value.js";
 import {
   evaluateOpponentResponse,
   evaluateTurnFuture,
+  HORIZON_DAMAGE_POINTS,
   planTurn,
+  POINTS_PER_DAMAGE,
   responseWeightedDamage,
   type TurnPlan,
   type TurnPlannerRoot,
@@ -780,7 +785,8 @@ function halaCandidatePriority(intent: GameIntent, input: BotPolicyInput): numbe
 /** Collapse payments with the same action and total pitch value. Fewer cards
  * win first (for example, one blue over yellow + red), then Hala's role cost
  * chooses among equivalent cards. Payments that leave a different amount of
- * floating resource remain searchable. */
+ * floating resource remain searchable unless they only add cards to another
+ * sufficient payment. */
 function prepareHalaCandidates(
   candidates: readonly GameIntent[],
   input: BotPolicyInput,
@@ -801,7 +807,19 @@ function prepareHalaCandidates(
     ) bestByClass.set(paymentClass, intent);
   }
 
-  let prepared = [...bestByClass.values()];
+  // Pitching a card the cost does not need only floats resources that a later
+  // payment can pitch for on demand, so drop payments that strictly contain
+  // another sufficient payment for the same action.
+  const sufficient = [...bestByClass.values()];
+  let prepared = sufficient.filter((intent) => {
+    const ids = pitchIds(intent);
+    const action = JSON.stringify(actionWithoutPitch(intent));
+    return !sufficient.some((other) => {
+      if (other === intent || JSON.stringify(actionWithoutPitch(other)) !== action) return false;
+      const otherIds = pitchIds(other);
+      return otherIds.length < ids.length && otherIds.every((id) => ids.includes(id));
+    });
+  });
   if (weaponAttacksThisTurn(input) > 0) {
     // Turn setup belongs before Zenith's first activation. Removing these
     // roots prevents dead post-swing sharpens and makes Flurry lines search
@@ -1544,34 +1562,39 @@ function scoreDefend(
   });
 }
 
-function nextTurnArsenalValue(card: CardView, input: BotPolicyInput): number {
-  const data = input.cards[card.cardId];
-  // Block cards cannot be played or used to defend from arsenal.
-  if (data?.cardType === "block") return -30;
-  const functional = key(data);
-  const roles = halaCardRoles(card, input);
-  if (functional === "toe the line|1") return 110;
-  if (functional === "shelter from the storm|1") return 96;
-  if (functional.startsWith("edict of steel|")) return 105 - (data?.pitch ?? 0);
-  if (functional.startsWith("showdown|") || functional.startsWith("big blinder|")) return 98;
-  if (functional === "olé|3" || functional === "and again...|3") return 94;
-  if (functional === "beckon steel|3" || functional === "drawn to the blade|2") return 90;
-  if (functional === "swordmaster's shine|1") return 87;
-  if (functional === "command and conquer|1" || functional === "the weakest link|1") return 82;
-  // An ordinary blue block-three is more useful in hand during the opponent's
-  // turn than face-down in arsenal. Named setup/payoff cards above and cards
-  // with a dedicated reaction or prevention role remain valid arsenal plans.
-  if (
-    hasCardRole(roles, "blue-block-3") &&
-    !hasCardRole(roles, "setup") &&
-    !hasCardRole(roles, "defense-reaction") &&
-    !hasCardRole(roles, "attack-reaction") &&
-    !hasCardRole(roles, "prevention")
-  ) return -30;
-  if (data?.cardType === "defense-reaction") return 78;
-  if (data?.cardType === "attack-reaction") return 68 + Math.max(0, 3 - (data.pitch ?? 0));
-  if (isAttack(data)) return 55 + (data?.attack ?? 0);
-  return 30 + cardOpportunity(card, input);
+/** Arsenal worth of Hala's sword-support cards in damage equivalents. Her
+ * damage itself comes from estimateHalaConversion; these only price cards
+ * held for next turn. A sharpen counter stays on Zenith Blade and is
+ * priced at about two swings of +1{p}, a Flurry at roughly one more swing,
+ * a drawn card at a card. */
+const SHARPEN_VALUE = 2;
+const FLURRY_VALUE = 4;
+const DRAW_VALUE = 3;
+// Hala's blue sword setups cost 0-1 and feed Zenith Blade, so unlike most
+// blue cards they are still at rate when played out of arsenal.
+const HALA_CARD_USES: Readonly<Record<string, Partial<CardUses>>> = {
+  "toe the line|1": { kind: "defense-reaction", defense: 3 },
+  "brimming blade|1": { pump: 2 * SHARPEN_VALUE },
+  // Edict's Flurry threshold rises with pitch: 1, 2 or 3 counters.
+  "edict of steel|1": { pump: SHARPEN_VALUE, pumpRider: FLURRY_VALUE },
+  "edict of steel|2": { pump: SHARPEN_VALUE, pumpRider: FLURRY_VALUE * 0.6 },
+  "edict of steel|3": { pump: SHARPEN_VALUE, pumpRider: FLURRY_VALUE * 0.3, arsenalPlay: true },
+  "drawn to the blade|2": { pump: SHARPEN_VALUE, pumpRider: DRAW_VALUE * 0.5 },
+  "cut n' carve|3": { pump: SHARPEN_VALUE, arsenalPlay: true },
+  "sharp incline|3": { pump: SHARPEN_VALUE, pumpRider: 0.5, arsenalPlay: true },
+  "olé|3": { pump: FLURRY_VALUE + DRAW_VALUE - SHARPEN_VALUE, arsenalPlay: true },
+  "and again...|3": { pump: FLURRY_VALUE, arsenalPlay: true },
+  "beckon steel|3": { pump: SHARPEN_VALUE * 0.8, arsenalPlay: true },
+};
+
+function halaSolverRules(_input: BotPolicyInput): HeroSolverRules {
+  return {
+    name: "hala",
+    card(data) {
+      const uses = HALA_CARD_USES[key(data)];
+      return uses ? { uses } : undefined;
+    },
+  };
 }
 
 function sharpenThreshold(data: CardData | undefined): number | undefined {
@@ -1711,7 +1734,7 @@ function scoreChoice(intent: Extract<GameIntent, { kind: "choose" }>, input: Bot
   const card = optionCard(intent, input);
 
   if (decision.kind === "arsenal") {
-    return scoreArsenalChoice(intent, input, nextTurnArsenalValue, -20);
+    return scoreArsenalChoice(intent, input, arsenalValuer(halaSolverRules));
   }
   if (prompt.includes("choose a sword") || prompt.includes("target sword")) {
     return card && key(input.cards[card.cardId]) === "zenith blade|0" ? 100 : 0;
@@ -1926,7 +1949,7 @@ function chooseHalaReactiveIntent(input: BotPolicyInput): GameIntent {
     defend: scoreDefend,
     choose: scoreChoice,
     play: scorePlay,
-    nextTurnArsenal: nextTurnArsenalValue,
+    nextTurnArsenal: arsenalValuer(halaSolverRules),
   });
 }
 
@@ -1958,10 +1981,7 @@ function evaluateHalaTurn(
   const opponent = input.view.players[1 - root.seat]!;
   const damage = Math.max(0, root.opponentLife - opponent.life);
   const opponentResponse = evaluateOpponentResponse(input, root);
-  const future = evaluateTurnFuture(input, root, {
-    cardOpportunity,
-    nextTurnArsenal: nextTurnArsenalValue,
-  });
+  const future = evaluateTurnFuture(input, root, halaSolverRules);
   const blade = me.weapons.find((card) => key(root.cards[card.cardId]) === "zenith blade|0");
   const sharpenCounters = Number(blade?.counters?.power ?? 0);
   const flurry = me.board.some((card) => key(root.cards[card.cardId]) === "flurry|0");
@@ -1983,12 +2003,13 @@ function evaluateHalaTurn(
     : 0;
   const allyValue = destroyedAllyValue(allyTargets, input);
   const score = winnerScore
-    + responseWeightedDamage(opponentResponse) * 100
+    + responseWeightedDamage(opponentResponse) * POINTS_PER_DAMAGE
     + allyValue
     + future.score
+    // Sharpen counters outlast the turn.
+    + sharpenCounters * SHARPEN_VALUE * POINTS_PER_DAMAGE
     + vigor * 8
-    - unusedSetups * 18
-    - (complete ? me.resources * 4 : 0);
+    - unusedSetups * 18;
   return {
     score,
     damage,
@@ -2080,7 +2101,6 @@ function chooseUnfinalizedHalaIntentWithTrace(input: BotPolicyInput): HalaIntent
     maxTransitions: deepSearch ? HALA_DEEP_MAX_TRANSITIONS : HALA_MAX_TRANSITIONS,
     maxRootCandidates: HALA_MAX_ROOT_CANDIDATES,
     chooseForced: (forced) => chooseHalaReactiveIntent({ ...forced, state: undefined }),
-    cardOpportunity,
     prepareCandidates: (candidates, observed) => prepareHalaCandidates(candidates, observed),
     scoreIntent(intent, observed) {
       const card = intentCard(intent, ownCards(observed));
@@ -2095,7 +2115,9 @@ function chooseUnfinalizedHalaIntentWithTrace(input: BotPolicyInput): HalaIntent
       const base = evaluateHalaTurn(state, observed, root, false, allyTargets);
       return {
         ...base,
-        score: base.score + base.projectedDamage * 80,
+        // Hala's conversion includes Zenith swings that spend no cards, so
+        // it adds to held value rather than replacing it (cf. horizonScore).
+        score: base.score + base.projectedDamage * HORIZON_DAMAGE_POINTS,
         complete: false,
       };
     },

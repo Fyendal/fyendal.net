@@ -610,7 +610,7 @@ describe("Levia Gates policy", () => {
     choice(state);
   });
 
-  it("blocks a visible Snatch on-hit with a four-block card", () => {
+  it("stops a visible Snatch on-hit while keeping its Bloodrush pitch", () => {
     let state = game();
     state.activePlayer = 1;
     state.priorityPlayer = 1;
@@ -638,9 +638,23 @@ describe("Levia Gates policy", () => {
       if (!result.ok) return;
       state = result.state;
     }
-    const selected = choice(state);
+    // Legal intents enumerate single-card stages; combined stages are still
+    // valid client intents, so check them through the rules engine instead.
+    const selected = chooseLeviaIntent({
+      seat: 0, view: projectStateFor(state, 0), legal: legalIntents(state, 0), cards: cardData, state,
+    });
     expect(selected).toMatchObject({ kind: "stage-defenders" });
-    if (selected.kind === "stage-defenders") expect(selected.instanceIds).toContain(dam.instanceId);
+    if (selected.kind !== "stage-defenders") return;
+    expect(applyIntent(state, 0, selected).ok).toBe(true);
+    // Any four points of defense stop the hit. Dam the Shadowake is also the
+    // pitch that funds next turn's Bloodrush Bellow, so an exact armor block
+    // that keeps the whole hand is preferred over spending it.
+    const me = projectStateFor(state, 0).players[0];
+    const blockers = [...me.hand, ...Object.values(me.equipment).flatMap((card) => card ? [card] : [])]
+      .filter((card) => selected.instanceIds.includes(card.instanceId));
+    const defense = blockers.reduce((sum, card) => sum + (card.defense ?? cardData[card.cardId]?.defense ?? 0), 0);
+    expect(defense).toBeGreaterThanOrEqual(4);
+    expect(selected.instanceIds).not.toContain(dam.instanceId);
   });
 
   it("plays through action, response, and choice windows with legal intents", () => {

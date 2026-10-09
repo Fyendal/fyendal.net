@@ -4,6 +4,8 @@ import { describe, expect, it } from "vitest";
 import {
   arsenalValue,
   ARSENAL_TERMINAL_FACTOR,
+  BLUE_ARSENAL_COST,
+  DEAD_ARSENAL_COST,
   defaultCardUses,
   DISRUPTION_BASE,
   DISRUPTION_CAP,
@@ -79,8 +81,25 @@ describe("card values", () => {
     expect(arsenalValue(sizzle, 0)).toBe(3);
     const sprout = defaultCardUses(findPrinting("Sprout Strength", 1)!);
     expect(arsenalValue(sprout, 0)).toBe(3);
+    // A block card can never leave arsenal: it only wastes the slot.
     const block = defaultCardUses(findPrinting("Crash and Bash", 1)!);
-    expect(arsenalValue(block, 0)).toBe(0);
+    expect(arsenalValue(block, 0)).toBe(-DEAD_ARSENAL_COST);
+  });
+
+  it("charges blue cards that cannot defend from arsenal", () => {
+    // Ripple Away (blue, 4 power) would pitch for 3 or block from hand.
+    const ripple = defaultCardUses(findPrinting("Ripple Away", 3)!);
+    expect(arsenalValue(ripple, 0)).toBeCloseTo(4 * ARSENAL_TERMINAL_FACTOR - BLUE_ARSENAL_COST);
+    expect(arsenalValue(ripple, 0)).toBeLessThan(0);
+    expect(arsenalValue({ ...ripple, arsenalPlay: true }, 0)).toBeCloseTo(4 * ARSENAL_TERMINAL_FACTOR);
+    // Ambush defends from arsenal, so Overcrowded keeps its blocking value.
+    const overcrowded = defaultCardUses(findPrinting("Overcrowded", 3)!);
+    expect(overcrowded.ambush).toBe(true);
+    expect(arsenalValue(overcrowded, 0)).toBeGreaterThan(0);
+    // A printed "played from arsenal" bonus marks a card meant for arsenal.
+    expect(defaultCardUses(findPrinting("Sow Tomorrow", 3)!).arsenalPlay).toBe(true);
+    // A blue defense reaction is played from arsenal on the opposing turn.
+    expect(arsenalValue(defaultCardUses(findPrinting("Toughen Up", 3)!), 0)).toBeGreaterThan(0);
   });
 
   it("values a held card only by its margin over an average draw", () => {

@@ -14,7 +14,6 @@ import {
   ownCards,
   pitchIds,
   resourcesAfterCost,
-  responseEvaluation,
   scoreArsenalChoice,
   scoreBinaryChoice,
   scoreDefenseIntent,
@@ -25,6 +24,9 @@ import {
   visibleOpponentDamageAmount,
   type BotPolicyInput,
 } from "./policy.js";
+import { abilitySource, type HeroSolverRules } from "./card-model.js";
+import { guardianPatch } from "./guardian-rules.js";
+import { arsenalValuer, handResponse } from "./hand-value.js";
 import {
   chooseTacticalIntentWithTrace,
   type TacticalTurnPlan,
@@ -72,28 +74,47 @@ function cardOpportunity(card: CardView, input: BotPolicyInput): number {
   return Math.max(1, data.pitch ?? 0, data.defense ?? 0);
 }
 
-/** Best attack that can be funded by one other held card. This is the two-card
- * line Bravo protects while committing the rest of its hand to defense. */
-function estimateBravoDamage(cards: readonly CardView[], input: BotPolicyInput): number {
-  const unique = [...new Map(cards.map((card) => [card.instanceId, card])).values()];
-  const resources = input.view.players[input.seat].resources;
-  let best = 0;
-  for (const attack of unique) {
-    const data = input.cards[attack.cardId];
-    if (!data || !(isAttack(data) || data.cardType === "weapon")) continue;
-    const cost = attackCost(data);
-    const canPay = cost <= resources || unique.some((pitch) =>
-      pitch.instanceId !== attack.instanceId &&
-      resources + Number(input.cards[pitch.cardId]?.pitch ?? 0) >= cost
-    );
-    if (canPay) best = Math.max(best, attackValue(data, input));
-  }
-  return best;
+/** Hand-value rules: shared Guardian cards, Fault Line, and Bravo's ability
+ * turning a face-down Crush arsenal card face up for +2{p} (go again). */
+function bravoSolverRules(input: BotPolicyInput): HeroSolverRules {
+  const me = input.view.players[input.seat];
+  const nextTurn = input.view.activePlayer !== input.seat;
+  const faceDownCrush = heroArsenalAttack(input);
+  return {
+    name: "bravo",
+    trackedTraits: [],
+    card(data, card) {
+      const patch = guardianPatch(data, card, input);
+      if (key(data) === "fault line|1" && me.arsenalCount > 0) {
+        patch.powerIn = () => (card.attack ?? data.attack ?? 0) + 1;
+      }
+      return patch;
+    },
+    abilities() {
+      if (!faceDownCrush || (!nextTurn && me.heroTapped)) return [];
+      return [abilitySource({
+        instanceId: me.heroInstanceId,
+        cardId: me.heroCardId,
+        name: "Bravo, Flattering Showman",
+        cost: 2,
+        goAgain: true,
+        canPlay: (view) => view.held.some((card) => card.instanceId === faceDownCrush.instanceId),
+        after: () => ({
+          pending: [{
+            key: "bravo-showman",
+            uses: 1,
+            power: 2,
+            appliesTo: (card) => card.instanceId === faceDownCrush.instanceId,
+          }],
+        }),
+      })];
+    },
+  };
 }
 
 function offensiveCards(input: BotPolicyInput): readonly CardView[] {
   const me = input.view.players[input.seat];
-  return [...me.hand, ...me.arsenal, ...me.weapons];
+  return [...me.hand, ...me.arsenal];
 }
 
 function committedOasisPrevention(input: BotPolicyInput): number {
@@ -143,9 +164,7 @@ function scoreDefend(
 ): number {
   return scoreDefenseIntent(intent, input, own, {
     offensiveCards,
-    evaluateResponse: (cards, policyInput) => responseEvaluation({
-      damageThreatened: estimateBravoDamage(cards, policyInput),
-    }),
+    evaluateResponse: (cards, policyInput) => handResponse(cards, policyInput, bravoSolverRules),
     cardOpportunity,
     responseLossWeight: isWizardFatigueMatchup(input) ? 0.1 : 1,
     defensePermission: (candidate) => {
@@ -161,17 +180,6 @@ function scoreDefend(
         : "allow";
     },
   });
-}
-
-function nextTurnArsenalValue(card: CardView, input: BotPolicyInput): number {
-  const data = input.cards[card.cardId];
-  if (!data) return 0;
-  if (isAttack(data) && data.keywords?.includes("Crush")) {
-    return 100 + attackValue(data, input) + (data.pitch === 1 ? 8 : 0);
-  }
-  if (key(data) === "pummel|1") return 85;
-  if (key(data) === "staunch response|1") return 75;
-  return 20 + cardOpportunity(card, input);
 }
 
 function scoreChoice(intent: Extract<GameIntent, { kind: "choose" }>, input: BotPolicyInput): number {
@@ -194,7 +202,7 @@ function scoreChoice(intent: Extract<GameIntent, { kind: "choose" }>, input: Bot
     return Number(/^pay (\d+)$/.exec(intent.optionId)?.[1] ?? -1) * 10;
   }
   if (decision.kind === "arsenal") {
-    return scoreArsenalChoice(intent, input, nextTurnArsenalValue, -10);
+    return scoreArsenalChoice(intent, input, arsenalValuer(bravoSolverRules));
   }
   if (isWizardFatigueMatchup(input) &&
     (decision.promptMessage?.id === "engine.decision.damage.arcane.barrier.pay" ||
@@ -314,7 +322,7 @@ function chooseBravoReactiveIntent(input: BotPolicyInput): GameIntent {
     defend: scoreDefend,
     choose: scoreChoice,
     play: scorePlay,
-    nextTurnArsenal: nextTurnArsenalValue,
+    nextTurnArsenal: arsenalValuer(bravoSolverRules),
   });
 }
 
@@ -330,9 +338,7 @@ export function chooseBravoIntentWithTrace(input: BotPolicyInput): BravoIntentDe
   const reactive = chooseBravoReactiveIntent(input);
   const decision = chooseTacticalIntentWithTrace(input, reactive, {
     chooseForced: (forced) => chooseBravoReactiveIntent({ ...forced, state: undefined }),
-    cardOpportunity,
-    nextTurnArsenal: nextTurnArsenalValue,
-    estimateRemaining: estimateBravoDamage,
+    rules: bravoSolverRules,
     rankCandidate: (intent, observed) => scorePlay(intent, observed, ownCards(observed)),
     rootScore: (intent, observed) => scorePlay(intent, observed, ownCards(observed)),
   });

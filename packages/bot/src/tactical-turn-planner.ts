@@ -1,11 +1,15 @@
 import type { GameState } from "@fyendal/engine";
-import type { CardView, GameIntent } from "@fyendal/shared";
+import type { GameIntent } from "@fyendal/shared";
+import { handDamage, type HeroRulesFactory } from "./hand-value.js";
 import { isOpeningTurn, type BotPolicyInput } from "./policy.js";
 import {
   evaluateOpponentResponse,
   evaluateTurnFuture,
+  horizonScore,
   planTurn,
+  POINTS_PER_DAMAGE,
   responseWeightedDamage,
+  spentEquipmentValue,
   type TurnPlan,
   type TurnPlannerConfig,
   type TurnPlannerRoot,
@@ -16,20 +20,19 @@ export interface TacticalTurnEvaluation {
   damage: number;
   expectedDamage: number;
   futureValue: number;
+  /** Damage-equivalent blocking value of equipment this line spent. */
   equipmentSpent: number;
   complete: boolean;
 }
 
 export interface TacticalTurnConfig {
   chooseForced(input: BotPolicyInput): GameIntent;
-  cardOpportunity(card: CardView, input: BotPolicyInput): number;
-  nextTurnArsenal(card: CardView, input: BotPolicyInput): number;
-  estimateRemaining(cards: readonly CardView[], input: BotPolicyInput): number;
+  /** Hero hand-value rules: future hand, arsenal and horizon estimates. */
+  rules: HeroRulesFactory;
   rankCandidate?(intent: GameIntent, input: BotPolicyInput): number;
   scoreIntent?(intent: GameIntent, input: BotPolicyInput): number;
   positionBonus?(input: BotPolicyInput, complete: boolean): number;
   prepareCandidates?: TurnPlannerConfig<TacticalTurnEvaluation>["prepareCandidates"];
-  equipmentCost?: number;
   /** Use a smaller win bonus when speculative opponent no-blocks are uncertain. */
   simulatedWinBonus?: number;
   maxSearchNodes?: number;
@@ -62,16 +65,9 @@ function evaluateTacticalTurn(
   config: TacticalTurnConfig,
   complete: boolean,
 ): TacticalTurnEvaluation {
-  const me = input.view.players[root.seat];
   const opponentResponse = evaluateOpponentResponse(input, root);
-  const future = evaluateTurnFuture(input, root, {
-    cardOpportunity: config.cardOpportunity,
-    nextTurnArsenal: config.nextTurnArsenal,
-  });
-  const currentEquipmentIds = new Set(
-    Object.values(me.equipment).flatMap((card) => card ? [card.instanceId] : []),
-  );
-  const equipmentSpent = [...root.equipmentIds].filter((id) => !currentEquipmentIds.has(id)).length;
+  const future = evaluateTurnFuture(input, root, config.rules);
+  const equipmentSpent = spentEquipmentValue(input, root);
   const winnerScore = state.winner === root.seat
     ? (config.simulatedWinBonus ?? 1_000_000)
     : state.winner === 1 - root.seat
@@ -79,11 +75,10 @@ function evaluateTacticalTurn(
     : 0;
   return {
     score: winnerScore
-      + responseWeightedDamage(opponentResponse) * 100
+      + responseWeightedDamage(opponentResponse) * POINTS_PER_DAMAGE
       + future.score
       + (config.positionBonus?.(input, complete) ?? 0)
-      - equipmentSpent * (config.equipmentCost ?? 14)
-      - (complete ? me.resources * 3 : 0),
+      - equipmentSpent * POINTS_PER_DAMAGE,
     damage: opponentResponse.rawDamage,
     expectedDamage: opponentResponse.expectedDamage,
     futureValue: future.score,
@@ -100,7 +95,6 @@ export function planTacticalTurn(
 ): TacticalTurnPlan | undefined {
   return planTurn(input, {
     chooseForced: config.chooseForced,
-    cardOpportunity: config.cardOpportunity,
     rankCandidate: config.rankCandidate,
     scoreIntent: config.scoreIntent,
     prepareCandidates: config.prepareCandidates,
@@ -117,15 +111,8 @@ export function planTacticalTurn(
     evaluateHorizon(state, observed, root) {
       const base = evaluateTacticalTurn(state, observed, root, config, false);
       const me = observed.view.players[root.seat];
-      const remaining = config.estimateRemaining(
-        [...me.hand, ...me.arsenal, ...me.weapons],
-        observed,
-      );
-      return {
-        ...base,
-        score: base.score + remaining * 70,
-        complete: false,
-      };
+      const remaining = handDamage([...me.hand, ...me.arsenal], observed, config.rules);
+      return { ...base, score: horizonScore(base.score, base.futureValue, remaining), complete: false };
     },
   });
 }

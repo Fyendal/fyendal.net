@@ -9,7 +9,6 @@ import {
   optionCard,
   ownCards,
   pitchIds,
-  responseEvaluation,
   resourcePaymentPitchIds,
   scoreArsenalChoice,
   scoreBinaryChoice,
@@ -18,6 +17,8 @@ import {
   scoreSpendCardChoice,
   type BotPolicyInput,
 } from "./policy.js";
+import { arsenalValuer, handResponse } from "./hand-value.js";
+import { kayoSolverRules } from "./kayo-rules.js";
 import { planTacticalTurn, type TacticalIntentDecision } from "./tactical-turn-planner.js";
 
 function named(data: CardData | undefined, name: string): boolean {
@@ -59,55 +60,14 @@ function cardOpportunity(card: CardView, input: BotPolicyInput): number {
   return data?.pitch ?? 0;
 }
 
-function nextTurnArsenal(card: CardView, input: BotPolicyInput): number {
+/** Worth keeping face-down for next turn's Agility go-again: Bare Fangs or a
+ * 6+ power attack other than the Windups and Wild Ride. */
+function agilityArsenalCandidate(card: CardView, input: BotPolicyInput): boolean {
   const data = input.cards[card.cardId];
-  if (!isAttack(data)) return 0;
-  const setup = input.view.players[input.seat].board.some((token) => named(input.cards[token.cardId], "agility"));
-  if (named(data, "bare fangs")) return setup ? 85 : 45;
-  if (named(data, "wild ride")) return 50;
-  if (named(data, "agile windup") || named(data, "mighty windup")) return 5;
-  return (data?.attack ?? 0) * (setup ? 9 : 5);
-}
-
-/** Resource-aware offensive value for selective blocks and rollout horizons.
- * Only the bot's visible cards participate; random draw/discard is valued as
- * potential rather than reading future deck positions. */
-function estimateDamage(cards: readonly CardView[], input: BotPolicyInput): number {
-  const me = input.view.players[input.seat];
-  const handIds = new Set(me.hand.map((card) => card.instanceId));
-  const initialSix = me.pitch.some((card) => sixPlus(card, input));
-  const claw = me.weapons.find((card) => named(input.cards[card.cardId], "mandible claw"));
-  const clawReady = !!claw && !claw.usedAbilityIndexes?.includes(0);
-  function search(remaining: readonly CardView[], resources: number, pitchedSix: boolean,
-    discardedSix: boolean, agility: boolean, weaponReady: boolean): number {
-    let best = 0;
-    const attacks = remaining.filter((card) => isAttack(input.cards[card.cardId]));
-    const candidates = [...attacks, ...(weaponReady && claw ? [claw] : [])];
-    for (const attack of candidates) {
-      const data = input.cards[attack.cardId]!;
-      const weapon = data.cardType === "weapon";
-      const pitchable = remaining.filter((card) =>
-        card.instanceId !== attack.instanceId && handIds.has(card.instanceId)
-      );
-      for (let mask = 0; mask < 2 ** pitchable.length; mask++) {
-        const pitched = pitchable.filter((_, index) => (mask & 2 ** index) !== 0);
-        const available = resources + pitched.reduce((sum, card) => sum + (input.cards[card.cardId]?.pitch ?? 0), 0);
-        const cost = weapon ? 2 : data.cost ?? 0;
-        if (available < cost) continue;
-        const six = pitchedSix || pitched.some((card) => sixPlus(card, input));
-        if (named(data, "bear hug") && !six) continue;
-        if (named(data, "run roughshod") && !discardedSix) continue;
-        const after = remaining.filter((card) => card.instanceId !== attack.instanceId && !pitched.includes(card));
-        const discards = discardedSix || named(data, "wild ride");
-        const go = weapon ? discardedSix : agility || named(data, "wild ride") || (named(data, "buckwild") && six);
-        const followup = go ? search(after, available - cost, six, discards,
-          weapon && agility, weapon ? false : weaponReady) : 0;
-        best = Math.max(best, (data.attack ?? 0) + followup);
-      }
-    }
-    return best;
+  if (!isAttack(data) || named(data, "wild ride") || named(data, "agile windup") || named(data, "mighty windup")) {
+    return false;
   }
-  return search(cards, me.resources, initialSix, false, agilityReady(input), clawReady);
+  return named(data, "bare fangs") || (data?.attack ?? 0) >= 6;
 }
 
 function scorePlay(intent: GameIntent, input: BotPolicyInput, own: ReadonlyMap<number, CardView>): number {
@@ -158,7 +118,7 @@ function scorePlay(intent: GameIntent, input: BotPolicyInput, own: ReadonlyMap<n
   if (isOpeningTurn(input) && !/briar|kayo|fai/i.test(input.view.players[1 - input.seat]!.heroName)) return -100;
   // Once the boots are gone, reserve the high attack for next turn's Agility.
   if (me.arsenal.length === 0 && me.board.some((token) => named(input.cards[token.cardId], "agility")) &&
-      nextTurnArsenal(card, input) >= 54 && attacks.length === 0 &&
+      agilityArsenalCandidate(card, input) && attacks.length === 0 &&
       input.view.players[1 - input.seat]!.life > (data.attack ?? 0)) return -100;
   let score = 12 + (data.attack ?? 0);
   if (likelyGoAgain(data, intent, input) && attacks.length > 0) score += 40;
@@ -185,18 +145,19 @@ function chooseReactive(input: BotPolicyInput): GameIntent {
   }
   return chooseScoredIntent(input, {
     play: scorePlay,
-    nextTurnArsenal,
+    nextTurnArsenal: arsenalValuer(kayoSolverRules),
     defend: (intent, observed, own) => scoreDefenseIntent(intent, observed, own, {
       cardOpportunity,
       offensiveCards: (policy) => [
         ...policy.view.players[policy.seat].hand, ...policy.view.players[policy.seat].arsenal,
       ],
-      evaluateResponse: (cards, policy) => responseEvaluation({ damageThreatened: estimateDamage(cards, policy) }),
+      evaluateResponse: (cards, policy) => handResponse(cards, policy, kayoSolverRules),
+      // Play style: Kayo leans toward keeping its large attacks.
       responseLossWeight: 1.3,
     }),
     choose: (intent, observed) => {
       if (observed.view.pendingDecision?.kind === "arsenal") {
-        return scoreArsenalChoice(intent, observed, nextTurnArsenal);
+        return scoreArsenalChoice(intent, observed, arsenalValuer(kayoSolverRules));
       }
       // Revealing to Strongest Survive preserves the card; spending a lower
       // value discard is never preferable when a legal reveal is offered.
@@ -232,7 +193,7 @@ export function chooseKayoIntentWithTrace(input: BotPolicyInput): TacticalIntent
   if (input.view.turn === 1 || rootScore >= 150) return { intent: enforceSpectraPolicy(input, reactive) };
   const plan = planTacticalTurn(input, {
     chooseForced: (forced) => chooseReactive({ ...forced, state: undefined }),
-    cardOpportunity, nextTurnArsenal, estimateRemaining: estimateDamage,
+    rules: kayoSolverRules,
     rankCandidate: (intent, observed) => scorePlay(intent, observed, ownCards(observed)),
     prepareCandidates: (candidates, observed) => candidates.filter((intent) =>
       intent.kind === "pass" || intent.kind === "close-chain" || scorePlay(intent, observed, ownCards(observed)) > 0

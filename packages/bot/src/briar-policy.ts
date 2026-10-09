@@ -1,6 +1,9 @@
 import type { CardData, CardView, GameIntent, GameView } from "@fyendal/shared";
 import { planBriarTurn, type BriarTurnPlan } from "./briar-turn-planner.js";
+import { briarSolverRules } from "./briar-rules.js";
 import { briarMatchupForHeroName } from "./briar-strategy.js";
+import { arsenalValuer, handResponse, solveHand } from "./hand-value.js";
+import { POINTS_PER_DAMAGE } from "./turn-planner.js";
 import {
   chooseScoredIntent,
   committedEffectAmount,
@@ -13,7 +16,6 @@ import {
   ownCards,
   pitchIds,
   resourcesAfterCost,
-  responseEvaluation,
   scoreArsenalChoice,
   scoreBinaryChoice,
   scoreDefenseIntent,
@@ -348,175 +350,6 @@ function arcaneSeedsLifeIsLastSurvivalOption(
   return arcane === me.life && !hasAvailableArcanePrevention(input);
 }
 
-type AttackBuffKind = "any" | "low-cost-action" | "elemental-action" | "elemental-attack";
-
-interface EstimatedAttackBuff {
-  kind: AttackBuffKind;
-  amount: number;
-  weave?: boolean;
-}
-
-function buffMatches(kind: AttackBuffKind, data: CardData): boolean {
-  const attackAction = isAttack(data);
-  const elemental = hasSubtype(data, "lightning") || hasSubtype(data, "elemental");
-  if (kind === "any") return attackAction;
-  if (kind === "low-cost-action") return attackAction && (data.cost ?? 0) <= 1;
-  if (kind === "elemental-action") return attackAction && elemental;
-  return elemental;
-}
-
-function printedAttackBuff(data: CardData): number {
-  return [...data.text.matchAll(/\+(\d+)\{p\}/g)]
-    .reduce((sum, match) => sum + Number(match[1]), 0);
-}
-
-/**
- * Estimate Briar's best raw damage from a surviving hand and arsenal. A small
- * exhaustive attack-order search models filtered pumps, Quick Succession,
- * Embodiment go again, conditional attack go again, Runechants, and melds.
- */
-function estimateBriarDamage(cards: readonly CardView[], input: BotPolicyInput): number {
-  const unique = [...new Map(cards.map((card) => [card.instanceId, card])).values()];
-  const attacks = unique.filter((card) => isAttack(input.cards[card.cardId]));
-  const arsenalIds = new Set(input.view.players[input.seat].arsenal.map((card) => card.instanceId));
-  const buffs: EstimatedAttackBuff[] = [];
-  const quickCounts: number[] = [];
-  let usefulNonAttacks = 0;
-  let burnCount = 0;
-  let runechants = input.view.players[input.seat].board.filter((card) =>
-    key(input.cards[card.cardId]) === "runechant|0"
-  ).length;
-  let playedLightning = false;
-
-  for (const card of unique) {
-    const data = input.cards[card.cardId];
-    if (!data || isAttack(data)) continue;
-    const functional = key(data);
-    let buff: EstimatedAttackBuff | undefined;
-    if (functional.startsWith("nimblism|")) {
-      buff = { kind: "low-cost-action", amount: printedAttackBuff(data) };
-    } else if (functional === "sizzle|1") {
-      buff = { kind: "elemental-attack", amount: printedAttackBuff(data) };
-    } else if (functional === "sprout strength|1") {
-      buff = { kind: "any", amount: printedAttackBuff(data) };
-    } else if (functional.startsWith("weave lightning|")) {
-      buff = { kind: "elemental-action", amount: printedAttackBuff(data), weave: true };
-    } else if (functional.startsWith("lightning press|")) {
-      buff = { kind: "low-cost-action", amount: printedAttackBuff(data) };
-    } else if (functional.startsWith("quick succession|")) {
-      quickCounts.push(4 - (data.pitch ?? 3));
-      usefulNonAttacks++;
-    } else if (functional === "burn up // shock|1") {
-      burnCount++;
-    } else if (functional === "arcane seeds // life|1") {
-      runechants += 2;
-    }
-    if (buff && attacks.some((attack) => buffMatches(buff.kind, input.cards[attack.cardId]!))) {
-      buffs.push(buff);
-      if (isNonAttack(data)) usefulNonAttacks++;
-    }
-    if (
-      (buff || functional === "burn up // shock|1" || functional.startsWith("quick succession|")) &&
-      hasSubtype(data, "lightning")
-    ) playedLightning = true;
-  }
-
-  if (attacks.length === 0) return burnCount;
-  const hasBoardEmbodiment = input.view.players[input.seat].board.some((card) =>
-    key(input.cards[card.cardId]) === "embodiment of lightning|0"
-  );
-  const initialEmbodiment = hasBoardEmbodiment || usefulNonAttacks >= 2;
-  const graveyardHasNimblism = input.view.players[input.seat].graveyard.some((card) =>
-    input.cards[card.cardId]?.name.trim().toLowerCase() === "nimblism"
-  );
-  const me = input.view.players[input.seat];
-  const opponent = input.view.players[1 - input.seat]!;
-
-  function search(
-    remaining: readonly CardView[],
-    pendingBuffs: readonly EstimatedAttackBuff[],
-    priorDamage: boolean,
-    embodiment: boolean,
-    pendingRunechants: number,
-    burnArmed: boolean,
-    lightningPlayed: boolean,
-    pendingQuickCounts: readonly number[],
-    quickGrantAvailable: boolean,
-  ): number {
-    let best = 0;
-    for (let index = 0; index < remaining.length; index++) {
-      const card = remaining[index]!;
-      const data = input.cards[card.cardId];
-      if (!data) continue;
-      const functional = key(data);
-      const after = remaining.filter((_, candidate) => candidate !== index);
-      const matching = pendingBuffs.filter((buff) => buffMatches(buff.kind, data));
-      const retained = pendingBuffs.filter((buff) => !buffMatches(buff.kind, data));
-      const canFuse = after.some((candidate) => hasSubtype(input.cards[candidate.cardId]!, "lightning"));
-      const quickEligible = isRunebladeOrLightningAttack(data);
-      let goAgain = data.keywords?.includes("Go again") && !CONDITIONAL_GO_AGAIN.has(functional);
-      if (functional === "jack be nimble|1") goAgain = graveyardHasNimblism;
-      if (functional === "lightning surge|1") goAgain = arsenalIds.has(card.instanceId);
-      if (functional === "path of same ends|1") goAgain = true;
-      if (functional === "scar for a scar|1") goAgain = me.life < opponent.life;
-      if (functional === "second strike|1") goAgain = priorDamage;
-      if (functional === "entwine lightning|1") goAgain = canFuse;
-      if (matching.some((buff) => buff.weave) && canFuse) goAgain = true;
-      if (embodiment) goAgain = true;
-      if (quickGrantAvailable && quickEligible) goAgain = true;
-
-      const quickBonus = goAgain && quickEligible ? pendingQuickCounts.length : 0;
-      const nextQuickCounts = goAgain && quickEligible
-        ? pendingQuickCounts.map((remaining) => remaining - 1).filter((remaining) => remaining > 0)
-        : pendingQuickCounts;
-      const nextQuickGrant = quickEligible ? false : quickGrantAvailable;
-
-      let damage = data.attack ?? 0;
-      if (functional === "jack be nimble|1" && graveyardHasNimblism) damage += 1;
-      if (functional === "ravenous rabble|1") damage = Math.max(0, damage - 1);
-      if (functional === "rush of power|1") damage += 1 + (goAgain ? 1 : 0);
-      if (functional === "path of same ends|1") damage += 1;
-      if (functional === "second strike|1" && priorDamage) damage += 1;
-      if (functional === "static shock|1" && lightningPlayed) damage += 1;
-      if (functional === "arcanic shockwave|1" && canFuse) damage += 1;
-      damage += matching.reduce((sum, buff) => sum + buff.amount, 0);
-      damage += quickBonus;
-      damage += pendingRunechants;
-      if (burnArmed) damage += 4;
-
-      const rest = goAgain
-        ? search(
-            after,
-            retained,
-            true,
-            false,
-            0,
-            false,
-            lightningPlayed || hasSubtype(data, "lightning"),
-            nextQuickCounts,
-            nextQuickGrant,
-          )
-        : 0;
-      best = Math.max(best, damage + rest);
-    }
-    return best;
-  }
-
-  // Each Shock half deals 1 immediately; one armed Burn Up trigger adds 4 to
-  // the first hit. Multiple copies share the same once-per-hit player flag.
-  return burnCount + search(
-    attacks,
-    buffs,
-    false,
-    initialEmbodiment,
-    runechants,
-    burnCount > 0,
-    playedLightning,
-    quickCounts,
-    quickCounts.length > 0,
-  );
-}
-
 function cardOpportunity(card: CardView, input: BotPolicyInput): number {
   const data = input.cards[card.cardId];
   if (!data) return 0;
@@ -539,9 +372,9 @@ function scoreDefend(intent: Extract<GameIntent, { kind: "defend" }>, input: Bot
       const me = policyInput.view.players[policyInput.seat];
       return [...me.hand, ...me.arsenal];
     },
-    evaluateResponse: (cards, policyInput) => responseEvaluation({
-      damageThreatened: estimateBriarDamage(cards, policyInput),
-    }),
+    evaluateResponse: (cards, policyInput) => handResponse(cards, policyInput, briarSolverRules),
+    // Play style: Briar leans toward keeping its Lightning sequences.
+    responseLossWeight: 1.25,
     cardOpportunity,
     plannedPrevention(policyInput, _defendIntent, spentIds, reactionPlan) {
       const link = [...policyInput.view.chain].reverse().find((candidate) => !candidate.resolved);
@@ -580,20 +413,7 @@ function scoreDefend(intent: Extract<GameIntent, { kind: "defend" }>, input: Bot
         preventionIds: [...(reactionPlan.preventionIds ?? []), ...available.slice(0, copies)],
       };
     },
-    responseLossWeight: 1.25,
   });
-}
-
-function nextTurnArsenalValue(card: CardView, input: BotPolicyInput): number {
-  const data = input.cards[card.cardId];
-  const functional = key(data);
-  if (functional === "evergreen|1") return 130;
-  if (functional === "lightning surge|1") return 100;
-  if (data?.cardType === "defense-reaction") return 80;
-  if (data?.cardType === "instant") return 65;
-  if (isNonAttack(data)) return 50;
-  if (isAttack(data)) return (data?.attack ?? 0) + 25;
-  return 20 + cardOpportunity(card, input);
 }
 
 function scoreChoice(intent: Extract<GameIntent, { kind: "choose" }>, input: BotPolicyInput): number {
@@ -631,11 +451,12 @@ function scoreChoice(intent: Extract<GameIntent, { kind: "choose" }>, input: Bot
     );
     // Survival has already been established by the payment choice. Among the
     // legal pitch cards, keep the choice that preserves the strongest next
-    // Briar turn; card opportunity breaks equal-damage ties.
-    return estimateBriarDamage(remaining, input) * 100 - cardOpportunity(card, input);
+    // Briar turn (damage and what it leaves held or arsenaled); card
+    // opportunity breaks ties.
+    return solveHand(remaining, input, briarSolverRules).value * POINTS_PER_DAMAGE - cardOpportunity(card, input);
   }
   if (decision.kind === "arsenal") {
-    return scoreArsenalChoice(intent, input, nextTurnArsenalValue, -10);
+    return scoreArsenalChoice(intent, input, arsenalValuer(briarSolverRules));
   }
   const binary = scoreBinaryChoice(intent.optionId, 5, -2);
   if (binary !== undefined) return binary;
@@ -776,7 +597,7 @@ function chooseBriarReactiveIntent(input: BotPolicyInput): GameIntent {
     defend: scoreDefend,
     choose: scoreChoice,
     play: scorePlay,
-    nextTurnArsenal: nextTurnArsenalValue,
+    nextTurnArsenal: arsenalValuer(briarSolverRules),
   });
 }
 
@@ -794,9 +615,7 @@ export function chooseBriarIntentWithTrace(input: BotPolicyInput): BriarIntentDe
   }
   const plan = planBriarTurn(input, {
     chooseForced: (forced) => chooseBriarReactiveIntent({ ...forced, state: undefined }),
-    cardOpportunity,
-    nextTurnArsenal: nextTurnArsenalValue,
-    estimateRemaining: estimateBriarDamage,
+    rules: briarSolverRules,
     comparePitchOrder: compareBriarPitchOrder,
     scoreIntent: scoreBriarPlannedIntent,
     rankCandidate: (intent, observed) => scorePlay(intent, observed, ownCards(observed)),

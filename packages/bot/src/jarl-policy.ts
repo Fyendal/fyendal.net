@@ -14,7 +14,6 @@ import {
   ownCards,
   pitchIds,
   resourcePaymentPitchIds,
-  responseEvaluation,
   scoreArsenalChoice,
   scoreBinaryChoice,
   scoreDefenseIntent,
@@ -25,6 +24,9 @@ import {
   visibleOpponentDamageAmount,
   type BotPolicyInput,
 } from "./policy.js";
+import type { HeroSolverRules } from "./card-model.js";
+import { guardianPatch } from "./guardian-rules.js";
+import { arsenalValuer, handResponse } from "./hand-value.js";
 import { adjustValueBreakdown } from "./value.js";
 import {
   chooseTacticalIntentWithTrace,
@@ -96,26 +98,45 @@ function cardOpportunity(card: CardView, input: BotPolicyInput): number {
   return Math.max(1, data.defense ?? 0, data.pitch ?? 0);
 }
 
-function estimateJarlDamage(cards: readonly CardView[], input: BotPolicyInput): number {
-  const unique = [...new Map(cards.map((card) => [card.instanceId, card])).values()];
-  const resources = input.view.players[input.seat].resources;
-  let best = 0;
-  for (const attack of unique) {
-    const data = input.cards[attack.cardId];
-    if (!data || !(isAttack(data) || data.cardType === "weapon")) continue;
-    const cost = attackCost(data);
-    const canPay = cost <= resources || unique.some((pitch) =>
-      pitch.instanceId !== attack.instanceId &&
-      resources + Number(input.cards[pitch.cardId]?.pitch ?? 0) >= cost
-    );
-    if (canPay) best = Math.max(best, attackValue(data, input));
-  }
-  return best;
+/** Damage-equivalent of Tear Asunder's hit: the defender discards 2 cards. */
+const TEAR_ASUNDER_ON_HIT = 6;
+
+/** Hand-value rules: shared Guardian cards, Earth Bond, and Tear Asunder's
+ * Guardian-attack rider. */
+function jarlSolverRules(input: BotPolicyInput): HeroSolverRules {
+  return {
+    name: "jarl",
+    trackedTraits: [],
+    card(data, card) {
+      const patch = guardianPatch(data, card, input);
+      const power = card.attack ?? data.attack ?? 0;
+      if (hasSubtype(data, "earth") && Number(data.pitch ?? 0) > 0) {
+        patch.onPitch = () => ({ flags: { pitchedEarth: 1 } });
+      }
+      if (key(data) === "ancient earth oak|1") {
+        patch.powerIn = (view) => power + (view.flag("pitchedEarth") > 0 ? 2 : 0);
+      }
+      if (key(data) === "tear asunder|3") {
+        patch.replaceAfter = true;
+        patch.after = () => ({
+          pending: [{
+            key: `tear#${card.instanceId}`,
+            uses: 1,
+            power: 1,
+            onHit: TEAR_ASUNDER_ON_HIT,
+            appliesTo: (target, view) => view.hasTrait(target, "guardian"),
+          }],
+        });
+        patch.uses = { pump: 1 + TEAR_ASUNDER_ON_HIT * 0.6 };
+      }
+      return patch;
+    },
+  };
 }
 
 function offensiveCards(input: BotPolicyInput): readonly CardView[] {
   const me = input.view.players[input.seat];
-  return [...me.hand, ...me.arsenal, ...me.weapons];
+  return [...me.hand, ...me.arsenal];
 }
 
 function scoreDefend(
@@ -125,9 +146,7 @@ function scoreDefend(
 ): number {
   return scoreDefenseIntent(intent, input, own, {
     offensiveCards,
-    evaluateResponse: (cards, policyInput) => responseEvaluation({
-      damageThreatened: estimateJarlDamage(cards, policyInput),
-    }),
+    evaluateResponse: (cards, policyInput) => handResponse(cards, policyInput, jarlSolverRules),
     cardOpportunity,
     responseLossWeight: opponentIsGravy(input) ? 0.1 : 1.2,
     equipmentUseIsFree(card, observed) {
@@ -169,19 +188,6 @@ function scoreDefend(
   });
 }
 
-function nextTurnArsenalValue(card: CardView, input: BotPolicyInput): number {
-  const data = input.cards[card.cardId];
-  if (!data) return -100;
-  const functional = key(data);
-  if (functional === "pulse of isenloft|3") return 100;
-  if (functional === "sow tomorrow|3") return 90;
-  if (functional === "crumble to eternity|3") return -200;
-  if (data.pitch === 3) return -100;
-  if (data.cardType === "defense-reaction") return 75 + (data.defense ?? 0);
-  if (isAttack(data)) return 40 + attackValue(data, input);
-  return 10 + cardOpportunity(card, input);
-}
-
 function targetEquipmentValue(card: CardView, input: BotPolicyInput): number {
   if (card.owner === input.seat) return -100;
   const name = input.cards[card.cardId]?.name.toLowerCase() ?? "";
@@ -199,7 +205,7 @@ function scoreChoice(intent: Extract<GameIntent, { kind: "choose" }>, input: Bot
   const card = optionCard(intent, input);
 
   if (decision.kind === "arsenal") {
-    return scoreArsenalChoice(intent, input, nextTurnArsenalValue, 0);
+    return scoreArsenalChoice(intent, input, arsenalValuer(jarlSolverRules));
   }
   if (decision.resourcePayment) {
     const ids = resourcePaymentPitchIds(intent, input) ?? [];
@@ -593,7 +599,7 @@ function chooseJarlReactiveIntent(input: BotPolicyInput): GameIntent {
     defend: scoreDefend,
     choose: scoreChoice,
     play: scorePlay,
-    nextTurnArsenal: nextTurnArsenalValue,
+    nextTurnArsenal: arsenalValuer(jarlSolverRules),
   });
 }
 
@@ -611,9 +617,7 @@ export function chooseJarlIntentWithTrace(input: BotPolicyInput): JarlIntentDeci
   const reactive = chooseJarlReactiveIntent(input);
   const decision = chooseTacticalIntentWithTrace(input, reactive, {
     chooseForced: (forced) => chooseJarlReactiveIntent({ ...forced, state: undefined }),
-    cardOpportunity,
-    nextTurnArsenal: nextTurnArsenalValue,
-    estimateRemaining: estimateJarlDamage,
+    rules: jarlSolverRules,
     rankCandidate: (intent, observed) => scorePlay(intent, observed, ownCards(observed)),
     rootScore: (intent, observed) => scorePlay(intent, observed, ownCards(observed)),
   });

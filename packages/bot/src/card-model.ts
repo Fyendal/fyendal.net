@@ -75,6 +75,8 @@ export interface HeroSolverRules {
   card?(data: CardData, card: CardView, context: ModelContext): SolverCardPatch | undefined;
   /** Model an equipment activation; omit for passive or block-only pieces. */
   equipment?(data: CardData, card: CardView, context: ModelContext): SolverCardPatch | undefined;
+  /** Hero activated abilities as solver sources (zone "ability"). */
+  abilities?(context: ModelContext, nextTurn: boolean): readonly SolverCard[];
 }
 
 const NO_HERO_RULES: HeroSolverRules = { name: "generic" };
@@ -97,12 +99,15 @@ export function weaponCost(data: CardData): number {
   return (ability.match(/\{r\}/g) ?? []).length;
 }
 
+/** On-hit clause, including Crush ("When this deals 4 or more damage to a
+ * hero, ..."), which a connecting attack of that size triggers. */
 function onHitText(text: string): string | undefined {
-  return /when (?:this|it) hits(?: a hero)?,?\s*([^.]*(?:\.[^.]*?draw[^.]*)?)/i.exec(text)?.[1];
+  return /when (?:this|it) hits(?: a hero)?,?\s*([^.]*(?:\.[^.]*?draw[^.]*)?)/i.exec(text)?.[1] ??
+    /crush - (?:when|if) [^,]*? deals 4 or more damage to a hero, ([^.]*)/i.exec(text)?.[1];
 }
 
 const TARGET_PHRASE =
-  /(?:target|next) ((?:[A-Z][a-z]+(?: or [A-Z][a-z]+)? )*)attack( action card)?(?:[^.]*?with cost (\d+) or less)?/;
+  /\b(?:[Tt]arget|[Nn]ext) ((?:[A-Z][a-z]+,? (?:or )?)*)attack( action card)?(?:[^.]*?with cost (\d+) or less)?/;
 
 /** Trait words required of a pump's target, parsed from "target X attack" or
  * "next X attack" phrasing (e.g. Ninja, Draconic, Lightning or Elemental). */
@@ -110,7 +115,7 @@ function targetFilter(text: string): ((card: SolverCard, view: SolverView) => bo
   const phrase = TARGET_PHRASE.exec(text);
   if (!phrase) return undefined;
   const words = (phrase[1] ?? "").trim();
-  const alternatives = words ? words.toLowerCase().split(/\s+or\s+/) : [];
+  const alternatives = words ? words.toLowerCase().split(/,\s*(?:or\s+)?|\s+or\s+/).filter(Boolean) : [];
   const actionOnly = phrase[2] !== undefined;
   const maxCost = phrase[3] === undefined ? undefined : Number(phrase[3]);
   if (alternatives.length === 0 && !actionOnly && maxCost === undefined) return undefined;
@@ -214,6 +219,26 @@ export function solverCard(card: CardView, zone: SolverZone, context: ModelConte
   return { ...base, ...overrides };
 }
 
+/** A hero activated ability as a solver source: not consumed, no card value. */
+export function abilitySource(
+  fields: Pick<SolverCard, "instanceId" | "cardId" | "name" | "cost"> & Partial<SolverCard>,
+): SolverCard {
+  return {
+    kind: "equipment",
+    zone: "ability",
+    speed: "action",
+    pitch: 0,
+    power: 0,
+    defense: 0,
+    goAgain: false,
+    traits: [],
+    onHit: 0,
+    arsenalValue: 0,
+    heldValue: 0,
+    ...fields,
+  };
+}
+
 /** Turn state already on the bot's open combat chain during its own turn:
  * chain links, attacks made, and per-trait link counts (e.g. Draconic). */
 export function chainStartFlags(input: BotPolicyInput): { links: number; flags: SolverFlags } {
@@ -248,10 +273,17 @@ export function buildHandSolver(context: ModelContext): HandSolver {
   };
   for (const card of me.hand) add(card, "hand");
   for (const card of me.arsenal) add(card, "arsenal");
+  // A permission to play a banished card lasts only for the current turn.
+  if (!nextTurn) {
+    for (const card of me.banish) {
+      if (card.playableFromSourceCardId !== undefined && !card.faceDown) add(card, "banish");
+    }
+  }
   for (const weapon of me.weapons) {
     if (nextTurn || !weapon.usedAbilityIndexes?.includes(0)) add(weapon, "weapon");
   }
   for (const equipment of Object.values(me.equipment)) if (equipment) add(equipment, "equipment");
+  sources.push(...(rules.abilities?.(context, nextTurn) ?? []));
   return new HandSolver(sources, {
     startResources: (nextTurn ? 0 : me.resources) + (rules.startResources?.(input, nextTurn) ?? 0),
     startActionPoints: nextTurn ? 1 : me.actionPoints,

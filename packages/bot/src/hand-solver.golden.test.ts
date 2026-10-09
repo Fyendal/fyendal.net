@@ -82,10 +82,12 @@ describe("hand solver on real hands", () => {
       opponentTurn: true,
     });
     const result = solve(input, kayoSolverRules(input));
-    expect(result.damage).toBeGreaterThanOrEqual(12);
-    const played = names(input, result.line.filter((step) => step.kind === "play").map((step) => step.instanceId));
-    expect(played).toContain("Rough Up");
-    expect(played).toContain("High Pitched Howl");
+    // Rough Up's go again (Agility) leads into Claw. High Pitched Howl goes to
+    // arsenal rather than a blue card, which could neither pitch nor block there.
+    const played = names(input, result.line.map((step) => step.instanceId));
+    expect(played).toEqual(["Rough Up", "Mandible Claw"]);
+    expect(result.damage).toBeGreaterThanOrEqual(10);
+    expect(names(input, [result.arsenalInstanceId!])).toEqual(["High Pitched Howl"]);
   });
 
   it("Briar: Star Fall extends a Lightning line (was excluded)", () => {

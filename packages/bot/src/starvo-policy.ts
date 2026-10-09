@@ -17,7 +17,6 @@ import {
   pitchIds,
   resourcePaymentPitchIds,
   resourcesAfterCost,
-  responseEvaluation,
   scoreArsenalChoice,
   scoreBinaryChoice,
   scoreDefenseIntent,
@@ -27,12 +26,17 @@ import {
   spendsOpeningArsenalReserve,
   targetableAttackIntent,
   type BotPolicyInput,
+  type ResponseEvaluation,
 } from "./policy.js";
 import {
   chooseTacticalIntentWithTrace,
   type TacticalIntentConfig,
   type TacticalTurnPlan,
 } from "./tactical-turn-planner.js";
+import { abilitySource, type HeroSolverRules } from "./card-model.js";
+import { guardianPatch } from "./guardian-rules.js";
+import type { PendingEffect, SolverCard, SolverView } from "./hand-solver.js";
+import { arsenalValuer, handResponse } from "./hand-value.js";
 import { adjustValueBreakdown, evaluateOnHit } from "./value.js";
 
 export interface StarvoIntentDecision {
@@ -223,62 +227,75 @@ function hasIcePitch(
     (input.cards[card.cardId]?.pitch ?? 0) > 0 && hasSubtype(input.cards[card.cardId], "ice"));
 }
 
-function estimateStarvoResponse(
-  cards: readonly CardView[],
-  input: BotPolicyInput,
-): ReturnType<typeof responseEvaluation> {
-  const retained = new Set(cards.map((card) => card.instanceId));
+/** Starvo's hero bonus: the next attack action card with cost 3+ gains +2{p},
+ * dominate and go again. */
+function starvoHeroBonus(key: string): PendingEffect {
+  return { key, uses: 1, power: 2, grantsGoAgain: true, appliesTo: (card) => card.kind === "attack" && card.cost >= 3 };
+}
+
+/** Hand-value rules: shared Guardian cards, disruption riders as on-hit
+ * value, active Pulse/hero bonuses, and the start-of-turn element reveal. */
+function starvoSolverRules(input: BotPolicyInput): HeroSolverRules {
   const me = input.view.players[input.seat];
-  const hand = me.hand.filter((card) => retained.has(card.instanceId));
-  const reveal = canRevealElements(hand, input);
-  let best = 0;
-  for (const attack of cards) {
-    const data = input.cards[attack.cardId];
-    if (!data || (!isAttack(data) && data.cardType !== "weapon")) continue;
-    const excluded = new Set([attack.instanceId]);
-    const cost = attackCost(data);
-    if (me.resources + availablePitch(hand, excluded, input) < cost) continue;
-    const eligible = isEligibleStarvoAttack(data) && reveal;
-    let value = attackPressure(data, input) + disruptionValue(data, input) + (eligible ? 5 : 0);
-    const wail = cards.find((candidate) => key(input.cards[candidate.cardId]) === WINTERS_WAIL);
-    if (eligible && wail) {
-      const totalResources = me.resources + availablePitch(hand, excluded, input);
-      if (totalResources >= cost + 3) {
-        value += 4 + (hasIcePitch(hand, excluded, input) ? 3 : 0);
+  return {
+    name: "starvo",
+    trackedTraits: [],
+    startPending(observed, nextTurn) {
+      if (nextTurn) return [];
+      return [
+        ...(starvoBonusActive(observed) ? [starvoHeroBonus("starvo-active")] : []),
+        ...(pulseBonusActive(observed)
+          ? [{
+            key: "pulse-active",
+            uses: 1,
+            power: 4,
+            appliesTo: (card: SolverCard, view: SolverView) =>
+              ["ice", "lightning", "elemental"].some((element) => view.hasTrait(card, element)),
+          }]
+          : []),
+      ];
+    },
+    card(data, card) {
+      const patch = guardianPatch(data, card, input);
+      const disruption = disruptionValue(data, input);
+      if (disruption > 0 && (isAttack(data) || data.cardType === "weapon")) {
+        patch.onHit = disruption;
+        patch.uses = { onHit: disruption };
+      } else if (disruption > 0) {
+        patch.bonusIn = () => disruption;
       }
-    }
-    best = Math.max(best, value);
-  }
-  const arsenalValue = me.arsenal
-    .filter((card) => retained.has(card.instanceId))
-    .reduce((total, card) => total + nextTurnArsenalValue(card, input) * 0.04, 0);
-  return responseEvaluation({
-    damageThreatened: best,
-    arsenalValue,
-    strategicAdjustment: reveal ? 3 : 0,
-  });
+      return patch;
+    },
+    abilities(_context, nextTurn) {
+      // The reveal happens at the start of Starvo's turn.
+      if (!nextTurn) return [];
+      return [abilitySource({
+        instanceId: me.heroInstanceId,
+        cardId: me.heroCardId,
+        name: "Bravo, Star of the Show",
+        cost: 0,
+        speed: "instant",
+        canPlay: (view) => view.flag("played") === 0 && view.flag("attacks") === 0 &&
+          ["earth", "ice", "lightning"].every((element) =>
+            view.held.some((held) => held.zone === "hand" && view.hasTrait(held, element))
+          ),
+        after: () => ({ pending: [starvoHeroBonus("starvo-reveal")] }),
+      })];
+    },
+  };
 }
 
 function offensiveCards(input: BotPolicyInput): readonly CardView[] {
   const me = input.view.players[input.seat];
-  return [...me.hand, ...me.arsenal, ...me.weapons];
+  return [...me.hand, ...me.arsenal];
 }
 
-function nextTurnArsenalValue(card: CardView, input: BotPolicyInput): number {
-  const data = input.cards[card.cardId];
-  if (!data) return -100;
+/** Arsenal cards worth protecting with a held reveal (Pulse decisions). */
+function isPremiumArsenal(data: CardData | undefined, input: BotPolicyInput): boolean {
   const functional = key(data);
-  if (functional === OAKEN_OLD) return 145;
-  if (functional === CRIPPLING_CRUSH) return 140;
-  if (functional === SPINAL_CRUSH) return 135;
-  if (isEligibleStarvoAttack(data)) {
-    return 105 + attackPressure(data, input) + disruptionValue(data, input);
-  }
-  if (functional === PULSE_ISENLOFT) return 92;
-  if (data.cardType === "defense-reaction") return 78 + Math.max(0, data.defense ?? 0);
-  if (functional === PULSE_VOLTHAVEN) return 58;
-  if (data.pitch === 3) return 12;
-  return 20 + cardOpportunity(card, input);
+  if (!data) return false;
+  if (functional === OAKEN_OLD || functional === CRIPPLING_CRUSH || functional === SPINAL_CRUSH) return true;
+  return isEligibleStarvoAttack(data) && attackPressure(data, input) + disruptionValue(data, input) >= 15;
 }
 
 function scoreDefend(
@@ -288,8 +305,9 @@ function scoreDefend(
 ): number {
   return scoreDefenseIntent(intent, input, own, {
     offensiveCards,
-    evaluateResponse: estimateStarvoResponse,
+    evaluateResponse: (cards, policyInput) => handResponse(cards, policyInput, starvoSolverRules),
     cardOpportunity,
+    // Play style: Starvo protects its large-attack turns over chip prevention.
     responseLossWeight: 2.25,
     defensePermission(candidate) {
       const usesTunic = candidate.chosen.some((card) => key(input.cards[card.cardId]) === TUNIC);
@@ -332,11 +350,12 @@ function defenseValue(intent: Extract<GameIntent, { kind: "defend" }>, input: Bo
 function responseAfterDefense(
   intent: Extract<GameIntent, { kind: "defend" }>,
   input: BotPolicyInput,
-): ReturnType<typeof responseEvaluation> {
+): ResponseEvaluation {
   const spent = new Set([...intent.instanceIds, ...(intent.pitchInstanceIds ?? [])]);
-  return estimateStarvoResponse(
+  return handResponse(
     offensiveCards(input).filter((card) => !spent.has(card.instanceId)),
     input,
+    starvoSolverRules,
   );
 }
 
@@ -367,7 +386,7 @@ function scoreChoice(intent: Extract<GameIntent, { kind: "choose" }>, input: Bot
     return scoreRevealChoice(intent) ?? -100;
   }
   if (decision.kind === "arsenal") {
-    return scoreArsenalChoice(intent, input, nextTurnArsenalValue, -10);
+    return scoreArsenalChoice(intent, input, arsenalValuer(starvoSolverRules));
   }
   if (decision.resourcePayment) {
     const ids = resourcePaymentPitchIds(intent, input) ?? [];
@@ -542,10 +561,6 @@ function scorePlay(
   return score;
 }
 
-function estimatedDamage(cards: readonly CardView[], input: BotPolicyInput): number {
-  return estimateStarvoResponse(cards, input).damageThreatened;
-}
-
 function isPulseIntent(intent: GameIntent, input: BotPolicyInput): boolean {
   const card = intentCard(intent, ownCards(input));
   return key(input.cards[card?.cardId ?? ""]) === PULSE_VOLTHAVEN;
@@ -626,7 +641,7 @@ function crownIsWorthUsing(
   if (!arsenal) return false;
   const lethal = incomingAttackDamage(input) >= me.life;
   const meaningful = meaningfulIncomingOnHit(input);
-  const premiumArsenal = nextTurnArsenalValue(arsenal, input) >= 120;
+  const premiumArsenal = isPremiumArsenal(input.cards[arsenal.cardId], input);
   const spent = new Set(intent.pitchInstanceIds);
   const hand = me.hand.filter((card) => !spent.has(card.instanceId));
   const pitchCost = intent.pitchInstanceIds.reduce((total, id) => {
@@ -814,7 +829,7 @@ function chooseStarvoReactiveIntent(input: BotPolicyInput): GameIntent {
     defend: scoreDefend,
     choose: scoreChoice,
     play: scorePlay,
-    nextTurnArsenal: nextTurnArsenalValue,
+    nextTurnArsenal: arsenalValuer(starvoSolverRules),
   });
 }
 
@@ -875,9 +890,7 @@ function starvoTacticalConfig(): TacticalIntentConfig {
         starvoPriorityOverride(guarded) ?? chooseStarvoReactiveIntent(guarded),
       );
     },
-    cardOpportunity,
-    nextTurnArsenal: nextTurnArsenalValue,
-    estimateRemaining: estimatedDamage,
+    rules: starvoSolverRules,
     rankCandidate: (intent, observed) => scorePlay(intent, observed, ownCards(observed)),
     prepareCandidates: (candidates, observed, context) =>
       prepareStarvoRootCandidates(candidates, observed, context.depth),

@@ -13,7 +13,6 @@ import {
   optionCard,
   ownCards,
   pitchIds,
-  responseEvaluation,
   scoreArsenalChoice,
   scoreBinaryChoice,
   scoreDefenseIntent,
@@ -26,11 +25,17 @@ import {
 import {
   evaluateOpponentResponse,
   evaluateTurnFuture,
+  horizonScore,
   planTurn,
+  POINTS_PER_DAMAGE,
   responseWeightedDamage,
+  spentEquipmentValue,
   type TurnPlan,
   type TurnPlannerRoot,
 } from "./turn-planner.js";
+import type { HeroSolverRules, SolverCardPatch } from "./card-model.js";
+import type { PendingEffect, SolverCard } from "./hand-solver.js";
+import { arsenalValuer, handDamage, handResponse } from "./hand-value.js";
 import { iraPresentation } from "./sideboard.js";
 
 const BLOSSOM_KEY = "whirling mist blossom|2";
@@ -176,53 +181,76 @@ function cardOpportunity(card: CardView, input: BotPolicyInput): number {
   return Math.max(1, data.pitch ?? 0);
 }
 
-/**
- * Small projection-only search used to value the offensive cards lost while
- * blocking. It assumes conditional on-hit go again succeeds, but models Ira's
- * second-attack buff, Edge combo links, Flying Kick, Bittering Thorns, and the
- * two attack reactions in the precon.
- */
-function estimateIraDamage(cards: readonly CardView[], input: BotPolicyInput): number {
-  const unique = [...new Map(cards.map((card) => [card.instanceId, card])).values()];
-  const attacks = unique.filter((card) => {
-    const data = input.cards[card.cardId];
-    return isAttack(data) || data?.cardType === "weapon";
-  });
-  const reactionDamage = unique.reduce((sum, card) => {
-    const functional = key(input.cards[card.cardId]);
-    if (functional.startsWith("razor reflex|")) return sum + 3;
-    if (functional === "legacy of ikaru|3") return sum + 1;
-    return sum;
-  }, 0);
-  const alreadyAttacked = attacksThisTurn(input);
+/** Damage equivalents of Ira's non-damage on-hit riders. */
+const DESTROY_ARSENAL_VALUE = 4;
+const DRAW_TWO_VALUE = 6;
 
-  function search(
-    remaining: readonly CardView[],
-    previous: string,
-    sequence: number,
-    bitteringBuff: boolean,
-  ): number {
-    let best = 0;
-    for (let index = 0; index < remaining.length; index++) {
-      const card = remaining[index]!;
-      const data = input.cards[card.cardId];
-      if (!data) continue;
+/** Ira: her second attack each turn gets +1{p}. */
+const IRA_SECOND_ATTACK: PendingEffect = {
+  key: "ira-second-attack",
+  uses: 1,
+  power: 1,
+  appliesTo: (_card, view) => view.flag("attacks") === 1,
+};
+
+/** Hand-value rules: the second-attack bonus, on-hit go again (assumed to
+ * connect, as the planner's public rollout does), Edge of Autumn combos,
+ * Flying Kick, Bittering Thorns, Whirling Mist Blossom and Razor Reflex. */
+function iraSolverRules(input: BotPolicyInput): HeroSolverRules {
+  const me = input.view.players[input.seat];
+  const opponent = input.view.players[1 - input.seat]!;
+  const behind = me.life < opponent.life;
+  return {
+    name: "ira",
+    trackedTraits: [],
+    startFlags(observed, nextTurn): Record<string, number> {
+      return !nextTurn && previousAttackKey(observed) === "edge of autumn|0" ? { lastEdge: 1 } : {};
+    },
+    startPending(observed, nextTurn) {
+      return nextTurn || attacksThisTurn(observed) < 2 ? [IRA_SECOND_ATTACK] : [];
+    },
+    card(data, card) {
       const functional = key(data);
-      const attackNumber = alreadyAttacked + sequence + 1;
-      let damage = data.attack ?? 0;
-      if (attackNumber === 2) damage += 1;
-      if (functional.startsWith("flying kick|") && attackNumber >= 3) damage += 2;
-      if (bitteringBuff) damage += 1;
-      const after = remaining.filter((_, candidate) => candidate !== index);
-      const rest = likelyGoAgain(functional, data, previous, input)
-        ? search(after, functional, sequence + 1, functional.startsWith("bittering thorns|"))
-        : 0;
-      best = Math.max(best, damage + rest);
-    }
-    return best;
-  }
-
-  return reactionDamage + search(attacks, previousAttackKey(input), 0, false);
+      const power = card.attack ?? data.attack ?? 0;
+      const patch: SolverCardPatch = {};
+      const isEdge = functional === "edge of autumn|0";
+      if (isAttack(data) || isEdge) {
+        // Combo cards check whether Edge of Autumn was the previous attack.
+        patch.after = () => ({ flags: { lastEdge: isEdge ? 1 : 0 } });
+      }
+      if (functional.startsWith("soulbead strike|") || functional.startsWith("torrent of tempo|")) {
+        patch.goAgainIn = () => true;
+        patch.uses = { reliableGoAgain: true };
+      } else if (functional.startsWith("scar for a scar|")) {
+        patch.goAgainIn = () => behind;
+        patch.uses = { reliableGoAgain: behind };
+      } else if (functional.startsWith("seek vengeance|") || functional === "vengeance never rests|3") {
+        patch.goAgainIn = (view) => view.flag("lastEdge") > 0;
+      } else if (functional === "enact vengeance|1") {
+        patch.onHitIn = (view) => view.flag("lastEdge") > 0 && opponent.arsenalCount > 0 ? DESTROY_ARSENAL_VALUE : 0;
+      } else if (functional.startsWith("flying kick|")) {
+        patch.powerIn = (view) => power + (view.links >= 2 ? 2 : 0);
+      } else if (functional === "whirling mist blossom|2") {
+        // Draw two when it is the second or later chain link in a row to hit.
+        patch.onHitIn = (view) => view.links >= 1 ? DRAW_TWO_VALUE : 0;
+      } else if (functional.startsWith("bittering thorns|")) {
+        patch.after = () => ({
+          flags: { lastEdge: 0 },
+          pending: [{ key: `thorns#${card.instanceId}`, uses: 1, power: 1 }],
+        });
+      } else if (functional.startsWith("razor reflex|")) {
+        const lowCost = (attack: SolverCard) => attack.kind === "attack" && attack.cost <= 1;
+        patch.reactionPower = 3;
+        patch.reactionTarget = (attack) => lowCost(attack) ||
+          (attack.kind === "weapon" && (attack.traits.includes("sword") || attack.traits.includes("dagger")));
+        // The low-cost mode also grants go again when the attack hits.
+        patch.after = (view) => view.lastAttack && lowCost(view.lastAttack) && view.flag("lastAttackGoAgain") === 0
+          ? { actionPoints: 1, flags: { lastAttackGoAgain: 1 } }
+          : undefined;
+      }
+      return patch;
+    },
+  };
 }
 
 function scoreDefend(
@@ -233,23 +261,11 @@ function scoreDefend(
   return scoreDefenseIntent(intent, input, own, {
     offensiveCards: (policyInput) => {
       const me = policyInput.view.players[policyInput.seat];
-      return [...me.hand, ...me.arsenal, ...me.weapons];
+      return [...me.hand, ...me.arsenal];
     },
-    evaluateResponse: (cards, policyInput) => responseEvaluation({
-      damageThreatened: estimateIraDamage(cards, policyInput),
-    }),
+    evaluateResponse: (cards, policyInput) => handResponse(cards, policyInput, iraSolverRules),
     cardOpportunity,
   });
-}
-
-function nextTurnArsenalValue(card: CardView, input: BotPolicyInput): number {
-  const data = input.cards[card.cardId];
-  const functional = key(data);
-  if (data?.cardType === "defense-reaction") return 90;
-  if (data?.cardType === "attack-reaction") return 80;
-  if (functional === "whirling mist blossom|2") return 75;
-  if (isAttack(data) && (data?.cost ?? 0) === 0) return 60 + (data?.attack ?? 0);
-  return 25 + cardOpportunity(card, input);
 }
 
 function canFundBlossomAfterIris(
@@ -302,7 +318,7 @@ function scoreChoice(intent: Extract<GameIntent, { kind: "choose" }>, input: Bot
   const functional = key(data);
 
   if (decision.kind === "arsenal") {
-    return scoreArsenalChoice(intent, input, nextTurnArsenalValue, -10);
+    return scoreArsenalChoice(intent, input, arsenalValuer(iraSolverRules));
   }
 
   if (/sink below|bottom of your deck/i.test(decision.prompt)) {
@@ -431,7 +447,7 @@ function chooseIraReactiveIntent(input: BotPolicyInput): GameIntent {
     defend: scoreDefend,
     choose: scoreChoice,
     play: scorePlay,
-    nextTurnArsenal: nextTurnArsenalValue,
+    nextTurnArsenal: arsenalValuer(iraSolverRules),
   });
 }
 
@@ -440,6 +456,7 @@ export interface IraTurnEvaluation {
   damage: number;
   attacks: number;
   futureValue: number;
+  /** Damage-equivalent blocking value of equipment this line spent. */
   equipmentSpent: number;
   complete: boolean;
 }
@@ -452,30 +469,22 @@ function evaluateIraTurn(
   root: TurnPlannerRoot,
   complete: boolean,
 ): IraTurnEvaluation {
-  const me = input.view.players[root.seat];
   const opponent = input.view.players[1 - root.seat]!;
   const damage = Math.max(0, root.opponentLife - opponent.life);
   const opponentResponse = evaluateOpponentResponse(input, root);
   const attacks = input.view.turnFacts?.players[root.seat].attacks ?? attacksThisTurn(input);
-  const future = evaluateTurnFuture(input, root, {
-    cardOpportunity,
-    nextTurnArsenal: nextTurnArsenalValue,
-  });
-  const currentEquipmentIds = new Set(
-    Object.values(me.equipment).flatMap((card) => card ? [card.instanceId] : []),
-  );
-  const equipmentSpent = [...root.equipmentIds].filter((id) => !currentEquipmentIds.has(id)).length;
+  const future = evaluateTurnFuture(input, root, iraSolverRules);
+  const equipmentSpent = spentEquipmentValue(input, root);
   const winnerScore = state.winner === root.seat
     ? 1_000_000
     : state.winner === 1 - root.seat
     ? -1_000_000
     : 0;
   const score = winnerScore
-    + responseWeightedDamage(opponentResponse) * 100
+    + responseWeightedDamage(opponentResponse) * POINTS_PER_DAMAGE
     + future.score
     + attacks * 3
-    - equipmentSpent * 14
-    - (complete ? me.resources * 3 : 0);
+    - equipmentSpent * POINTS_PER_DAMAGE;
   return {
     score,
     damage,
@@ -510,14 +519,13 @@ export function chooseIraIntentWithTrace(input: BotPolicyInput): IraIntentDecisi
     maxTransitions: IRA_MAX_TRANSITIONS,
     maxRootCandidates: IRA_MAX_ROOT_CANDIDATES,
     chooseForced: (forced) => chooseIraReactiveIntent({ ...forced, state: undefined }),
-    cardOpportunity,
     rankCandidate: (intent, observed) => scorePlay(intent, observed, ownCards(observed)),
     evaluateEnd: evaluateIraTurn,
     evaluateHorizon(state, observed, root) {
       const base = evaluateIraTurn(state, observed, root, false);
       const me = observed.view.players[root.seat];
-      const remaining = estimateIraDamage([...me.hand, ...me.arsenal, ...me.weapons], observed);
-      return { ...base, score: base.score + remaining * 80, complete: false };
+      const remaining = handDamage([...me.hand, ...me.arsenal], observed, iraSolverRules);
+      return { ...base, score: horizonScore(base.score, base.futureValue, remaining), complete: false };
     },
   });
   const intent = enforceAllyTargetPolicy(

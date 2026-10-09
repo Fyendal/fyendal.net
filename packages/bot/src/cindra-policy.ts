@@ -15,7 +15,6 @@ import {
   preferredPitchIntents,
   remainingPitchValue,
   resourcesAfterCost,
-  responseEvaluation,
   scoreArsenalChoice,
   scoreBinaryChoice,
   scoreDefenseIntent,
@@ -32,6 +31,8 @@ import {
   type TacticalIntentConfig,
   type TacticalTurnPlan,
 } from "./tactical-turn-planner.js";
+import { cindraSolverRules } from "./cindra-rules.js";
+import { arsenalValuer, handResponse, solveHand } from "./hand-value.js";
 
 const CARD = {
   ancestralEmpowerment: "ancestral empowerment|1",
@@ -1015,111 +1016,6 @@ function cardOpportunity(card: CardView, input: BotPolicyInput): number {
   return Math.max(1, data.pitch ?? 0);
 }
 
-function estimatedSequenceGoAgain(
-  card: CardView,
-  input: BotPolicyInput,
-  linksBefore: number,
-  draconicLinksBefore: number,
-  daggerHasHit: boolean,
-): boolean {
-  const data = input.cards[card.cardId];
-  if (!data) return false;
-  const functional = key(data);
-  if (functional === CARD.artOfTheDragonBlood) return isDraconicCard(card, input);
-  if (functional === CARD.bloodRunsDeep) return true;
-  if (functional === CARD.kunaiOfRetribution) return true;
-  if (functional === "blaze headlong|1") return linksBefore > 0;
-  if (cardNeedsTwoDraconicLinksForGoAgain(data)) return draconicLinksBefore >= 1;
-  if (isCutThrough(data)) return daggerHasHit;
-  return data.keywords?.some((keyword) => keyword.toLowerCase() === "go again") === true;
-}
-
-function estimatedSequenceAttack(
-  card: CardView,
-  input: BotPolicyInput,
-  linksBefore: number,
-  draconicLinksBefore: number,
-  daggerHasHit: boolean,
-): number {
-  const data = input.cards[card.cardId];
-  const functional = key(data);
-  let damage = Math.max(0, card.attack ?? data?.attack ?? 0);
-  if (functional === CARD.lavaBurst && linksBefore >= 3) damage += 3;
-  if (functional === CARD.enflameTheFirebrand && draconicLinksBefore >= 3) damage += 2;
-  if (isCutThrough(data) && daggerHasHit) damage += 1;
-  return damage;
-}
-
-/** Projection-only subset search for the best sequence Cindra can actually
- * spend. With at most a hand, arsenal, and two weapons this has no more than
- * 2^8 attack subsets; terminal attacks stop the branch instead of all being
- * counted as usable damage. */
-function estimateCindraDamage(cards: readonly CardView[], input: BotPolicyInput): number {
-  const unique = [...new Map(cards.map((card) => [card.instanceId, card])).values()];
-  const dracoFires = unique.filter((card) =>
-    key(input.cards[card.cardId]) === CARD.dracoFire
-  ).length;
-  const attacks = unique.filter((card) => {
-    const data = input.cards[card.cardId];
-    return isAttack(data) || isDagger(data);
-  });
-  const memo = new Map<string, number>();
-
-  function search(
-    remainingMask: number,
-    links: number,
-    draconicLinks: number,
-    daggerHasHit: boolean,
-    availableDracoFires: number,
-  ): number {
-    const memoKey = `${remainingMask}:${links}:${draconicLinks}:${daggerHasHit ? 1 : 0}:${availableDracoFires}`;
-    const cached = memo.get(memoKey);
-    if (cached !== undefined) return cached;
-    let best = 0;
-    for (let index = 0; index < attacks.length; index++) {
-      if ((remainingMask & (1 << index)) === 0) continue;
-      const card = attacks[index]!;
-      const data = input.cards[card.cardId];
-      const draconic = isDraconicCard(card, input);
-      const damage = estimatedSequenceAttack(
-        card,
-        input,
-        links,
-        draconicLinks,
-        daggerHasHit,
-      ) + (draconic ? availableDracoFires * 2 : 0);
-      const goAgain = estimatedSequenceGoAgain(
-        card,
-        input,
-        links,
-        draconicLinks,
-        daggerHasHit,
-      );
-      const rest = goAgain
-        ? search(
-          remainingMask & ~(1 << index),
-          links + 1,
-          draconicLinks + (draconic ? 1 : 0),
-          daggerHasHit || isDagger(data),
-          draconic ? 0 : availableDracoFires,
-        )
-        : 0;
-      best = Math.max(best, damage + rest);
-    }
-    memo.set(memoKey, best);
-    return best;
-  }
-
-  const base = attacks.length === 0
-    ? 0
-    : search((1 << attacks.length) - 1, 0, 0, false, dracoFires);
-  const reactions = unique.reduce((total, card) => {
-    const functional = key(input.cards[card.cardId]);
-    return total + (functional === CARD.ancestralEmpowerment ? 2 : functional === CARD.throwDagger ? 2 : 0);
-  }, 0);
-  return base > 0 ? base + reactions : 0;
-}
-
 function flightPathWillBeConsumedNextTurn(input: BotPolicyInput): boolean {
   if (isCindraTurn(input) ||
     !equipmentHasKey(input, "legs", CARD.dragonscalerFlightPath)) return false;
@@ -1143,12 +1039,11 @@ function scoreDefend(
   return scoreDefenseIntent(intent, input, own, {
     offensiveCards(policyInput) {
       const me = policyInput.view.players[policyInput.seat];
-      return [...me.hand, ...me.arsenal, ...me.weapons];
+      return [...me.hand, ...me.arsenal];
     },
-    evaluateResponse: (cards, policyInput) => responseEvaluation({
-      damageThreatened: estimateCindraDamage(cards, policyInput),
-    }),
+    evaluateResponse: (cards, policyInput) => handResponse(cards, policyInput, cindraSolverRules),
     cardOpportunity,
+    // Play style: Cindra races, valuing next turn's damage over prevention.
     responseLossWeight: 2,
     equipmentUseIsFree(card, policyInput) {
       return key(policyInput.cards[card.cardId]) === CARD.dragonscalerFlightPath &&
@@ -1177,11 +1072,13 @@ function scoreDefend(
       const handIds = new Set(me.hand.map((card) => card.instanceId));
       const usesOnlyHandCards = candidate.chosen.every((card) => handIds.has(card.instanceId));
       if (usesOnlyHandCards) {
-        const offense = [...me.hand, ...me.arsenal, ...me.weapons];
-        const spentIds = new Set(candidate.chosen.map((card) => card.instanceId));
-        const remaining = offense.filter((card) => !spentIds.has(card.instanceId));
-        if (estimateCindraDamage(remaining, candidate.input) >=
-          estimateCindraDamage(offense, candidate.input)) return "allow";
+        // Block only with cards the best offensive line does not play; a card
+        // it would merely pitch or leave over is expendable.
+        const played = new Set(
+          solveHand([...me.hand, ...me.arsenal], candidate.input, cindraSolverRules).line
+            .map((step) => step.instanceId),
+        );
+        if (candidate.chosen.every((card) => !played.has(card.instanceId))) return "allow";
       }
       if (candidate.onHit.value >= 6) return "allow";
       if (candidate.onHit.handCardsLost >= 2) return "allow";
@@ -1189,18 +1086,6 @@ function scoreDefend(
       return "forbid";
     },
   });
-}
-
-function nextTurnArsenalValue(card: CardView, input: BotPolicyInput): number {
-  const data = input.cards[card.cardId];
-  const functional = key(data);
-  if (data?.cardType === "defense-reaction") return 220;
-  if (functional === CARD.ancestralEmpowerment) return 200;
-  if (functional === CARD.throwDagger) return 190;
-  if (functional === CARD.lavaBurst && lavaBurstCanRupture(card, input)) return 170;
-  if (isAttack(data) && likelyGoAgain(card, input)) return 130 + (data?.attack ?? 0);
-  if (isAttack(data)) return 90 + (data?.attack ?? 0);
-  return 20 + cardOpportunity(card, input);
 }
 
 function vestResourceFundsHandCard(input: BotPolicyInput): boolean {
@@ -1274,7 +1159,7 @@ function scoreChoice(intent: Extract<GameIntent, { kind: "choose" }>, input: Bot
   }
 
   if (decision.kind === "arsenal") {
-    return scoreArsenalChoice(intent, input, nextTurnArsenalValue, -20);
+    return scoreArsenalChoice(intent, input, arsenalValuer(cindraSolverRules));
   }
   if (prompt.includes("equip") && prompt.includes("dagger")) {
     return intent.optionId === "pass" ? -500 : isDagger(data) ? 500 : 0;
@@ -1775,7 +1660,7 @@ function chooseCindraReactiveIntent(input: BotPolicyInput): GameIntent {
     defend: scoreDefend,
     choose: scoreChoice,
     play: scorePlay,
-    nextTurnArsenal: nextTurnArsenalValue,
+    nextTurnArsenal: arsenalValuer(cindraSolverRules),
   });
 }
 
@@ -1816,9 +1701,7 @@ const CINDRA_MAX_FORCED_STEPS = 48;
 function cindraTacticalConfig(): TacticalIntentConfig {
   return {
     chooseForced: (forced) => chooseCindraReactiveIntent({ ...forced, state: undefined }),
-    cardOpportunity,
-    nextTurnArsenal: nextTurnArsenalValue,
-    estimateRemaining: estimateCindraDamage,
+    rules: cindraSolverRules,
     rankCandidate: (intent, observed) => scorePlay(intent, observed, ownCards(observed)),
     rootScore: (intent, observed) => scorePlay(intent, observed, ownCards(observed)),
     maxSearchNodes: CINDRA_MAX_SEARCH_NODES,

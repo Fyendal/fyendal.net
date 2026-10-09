@@ -33,7 +33,9 @@ export interface BotPolicyScorers {
   nextTurnArsenal(card: CardView, input: BotPolicyInput): number;
 }
 
-const NEXT_TURN_ARSENAL_OPPORTUNITY_WEIGHT = 0.1;
+/** `nextTurnArsenal` is in damage equivalents (card-ev.ts); reactive scores
+ * treat one point of attack as one point, so the margin applies at par. */
+const NEXT_TURN_ARSENAL_OPPORTUNITY_WEIGHT = 1;
 export const MAX_OPTIONAL_DEFENDERS = 10;
 
 function sameIds(left: readonly number[], right: readonly number[]): boolean {
@@ -521,10 +523,10 @@ export function scoreArsenalChoice(
   intent: ChooseIntent,
   input: BotPolicyInput,
   value: (card: CardView, input: BotPolicyInput) => number,
-  passScore = -10,
 ): number {
+  // Passing leaves the slot empty, worth 0; dead cards score below it.
   const card = optionCard(intent, input);
-  return intent.optionId === "pass" || !card ? passScore : value(card, input);
+  return intent.optionId === "pass" || !card ? 0 : value(card, input);
 }
 
 export function scoreSpendCardChoice(

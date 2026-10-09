@@ -6,6 +6,9 @@ import type { BotPolicyInput } from "./policy.js";
 
 const named = (data: CardData | undefined): string => data?.name.trim().toLowerCase() ?? "";
 
+/** Damage-equivalent of stealing an opposing item for the action phase. */
+const STEAL_ITEM_VALUE = 2;
+
 function runechantPending(prefix: string, count: number): PendingEffect[] {
   // Every Runechant fires on the next attack action card or weapon attack.
   return Array.from({ length: count }, (_, index) => ({
@@ -35,6 +38,9 @@ export function briarSolverRules(input: BotPolicyInput): HeroSolverRules {
     input.cards[card.cardId]?.keywords?.some((keyword) => keyword.toLowerCase() === "lightning fusion")
   ).map((card) => card.instanceId));
   const topPitch = expectedTopPitch(input);
+  const opponentHasItem = opponent.board.some((card) =>
+    input.cards[card.cardId]?.subtypes?.some((subtype) => subtype.toLowerCase() === "item")
+  );
   const canFuse = (view: SolverView, self: number) =>
     view.held.some((card) => card.instanceId !== self && view.hasTrait(card, "lightning"));
   const fused = (card: SolverCard, view: SolverView) =>
@@ -64,6 +70,9 @@ export function briarSolverRules(input: BotPolicyInput): HeroSolverRules {
         return {
           goAgainIn: (view) => view.flag("nimblismGrave") > 0,
           powerIn: (view) => power + (view.flag("nimblismGrave") > 0 ? 1 : 0),
+          // Stealing an item is only worth something if the opponent has one.
+          onHit: opponentHasItem ? STEAL_ITEM_VALUE : 0,
+          uses: { onHit: opponentHasItem ? STEAL_ITEM_VALUE : 0 },
           after: (view) => view.flag("nimblismGrave") > 0
             ? { flags: { nimblismGrave: view.flag("nimblismGrave") - 1 } }
             : undefined,

@@ -109,7 +109,7 @@ describe("Briar policy", () => {
 
     expect(decision.intent.kind).toBe("play-card");
     expect(decision.plan?.evaluation.damage).toBeGreaterThanOrEqual(4);
-    expect(decision.plan?.evaluation.intelligencePenalty).toBe(0);
+    expect(decision.plan?.evaluation.cardsHeld).toBe(0);
   });
 
   it("plans a go-again attack into the remaining 0-for-4", () => {
@@ -141,7 +141,7 @@ describe("Briar policy", () => {
     expect(played).toContain(fry!.instanceId);
     expect(played).toContain(snatch!.instanceId);
     expect(decision.plan?.evaluation.damage).toBeGreaterThanOrEqual(7);
-    expect(decision.plan?.evaluation.intelligencePenalty).toBe(0);
+    expect(decision.plan?.evaluation.cardsHeld).toBe(0);
   });
 
   it("uses Star Fall to consume a Lightning setup before the generic attack", () => {
@@ -1205,8 +1205,11 @@ describe("Briar policy", () => {
 
     // Cloud Cover handles the first 3; blocks are still used for damage above
     // that amount rather than treating its shield as unlimited prevention.
-    view.chain[0]!.attackValue = 5;
-    view.chain[0]!.damage = 5;
+    // Sizzle is worth more next turn than 2 ordinary prevented damage, so the
+    // excess must matter: here the 4 past Cloud Cover would be lethal.
+    view.chain[0]!.attackValue = 7;
+    view.chain[0]!.damage = 7;
+    view.players[0]!.life = 4;
     expect(chooseBriarIntent({ seat: 0, view, legal, cards: cardData }))
       .toEqual({ kind: "defend", instanceIds: [sizzle.instanceId] });
   });

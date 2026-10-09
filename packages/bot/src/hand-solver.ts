@@ -25,7 +25,10 @@ export type SolverCardKind =
   | "equipment"
   | "other";
 
-export type SolverZone = "hand" | "arsenal" | "weapon" | "equipment";
+/** `banish`: a card playable from the banished zone this turn only. It cannot
+ * be pitched and has no leftover value. `ability`: a hero activated ability,
+ * modelled like an equipment activation that is not consumed. */
+export type SolverZone = "hand" | "arsenal" | "banish" | "weapon" | "equipment" | "ability";
 
 export type SolverFlags = Readonly<Record<string, number>>;
 
@@ -47,6 +50,7 @@ export interface SolverView {
 export interface PendingEffect {
   /** Stable identity used in memo keys; include the source card id. */
   readonly key: string;
+  /** Remaining applications; Infinity for a whole-turn effect. */
   readonly uses: number;
   readonly power?: number;
   readonly costReduction?: number;
@@ -226,7 +230,7 @@ class TurnView implements SolverView {
 }
 
 function isPersistent(card: SolverCard): boolean {
-  return card.zone === "weapon" || card.zone === "equipment";
+  return card.zone === "weapon" || card.zone === "equipment" || card.zone === "ability";
 }
 
 function lineArray(line: LineNode | null): SolverStep[] {
@@ -292,7 +296,8 @@ export class HandSolver {
   }
 
   /** Best line using only the cards whose instance ids are in `available`
-   * (default: every card). Weapons and equipment are always available. */
+   * (default: every card). Weapons, equipment and abilities are always
+   * available. */
   solve(available?: ReadonlySet<number>): SolverResult {
     let remaining = 0;
     this.cards.forEach((card, index) => {

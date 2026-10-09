@@ -135,7 +135,7 @@ describe("Kayo policy", () => {
     expect(chooseKayoIntent(observed)).toEqual(intent);
     apply(state, 0, intent);
   });
-  it("leads with conditional go again and makes a two-attack turn without Claw", () => {
+  it("leads with conditional go again and follows up with a second attack", () => {
     let state = game([["Buckwild", 1], ["Bear Hug", 3], ["Vigorous Smashup", 3], ["Rough Up", 1]]);
     delete state.players[0]!.equipment.legs;
     const attacks: string[] = [];
@@ -144,11 +144,16 @@ describe("Kayo policy", () => {
       const intent = seat === 0 ? chooseKayoIntent(input(state))
         : opponentPass(state, seat);
       const name = seat === 0 ? cardName(intent, state) : undefined;
-      if (intent.kind === "play-card" && name) attacks.push(name);
+      if ((intent.kind === "play-card" || intent.kind === "activate-ability") && name) attacks.push(name);
       state = apply(state, seat, intent);
     }
     expect(attacks[0]).toBe("Buckwild");
     expect(attacks.length).toBeGreaterThanOrEqual(2);
+    // The go-again chain continues with either Rough Up or Claw. Swinging Claw
+    // keeps the red Rough Up in arsenal as next turn's attack.
+    if (!attacks.includes("Rough Up")) {
+      expect(state.players[0]!.arsenal.map((card) => cardData[card.cardId]?.name)).toContain("Rough Up");
+    }
   });
 
   it("discards opening Windup while defending when its instant is legal", () => {
