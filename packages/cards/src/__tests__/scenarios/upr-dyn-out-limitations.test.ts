@@ -145,6 +145,18 @@ describe("Uprising, Dynasty, and Outsiders rules regression coverage", () => {
     g.expectNotInZone(1, "aether ashwing|0", "board");
   });
   it("Pulsewave Harpoon inserts a forced defender", () => implementation("pulsewave harpoon|1", (script) => !!script.onAttackDeclared && !!script.onChoose));
+  it("Pulsewave Harpoon compares defense with boosts this chain, not the revealed hand size", () => {
+    const g = scenario({ seats: [
+      { hero: "rhinar", resources: 1, hand: ["pulsewave harpoon|1"], deck: ["zipper hit|1"] },
+      { hero: "dorinthea", hand: ["frozen to death|3", "oaken old|1"] },
+    ] });
+    g.state.players[0]!.flags.boostCountThisChain = 2;
+    g.play("pulsewave harpoon|1", { boost: true, settle: false });
+    expect(g.state.pendingDecision?.chooseHook).toBe("harpoon-defender");
+    expect(g.state.pendingDecision?.options).toHaveLength(2);
+    g.chooseCard("oaken old|1");
+    g.expectNotInZone(1, "oaken old|1", "hand");
+  });
   it("Bios Update puts its delayed item trigger on the stack and offers Crank on resolution", () => {
     const g = scenario({ seats: [
       { hero: "rhinar", resources: 1, hand: ["bios update|1", "zipper hit|1"], deck: ["prismatic lens|2"] },

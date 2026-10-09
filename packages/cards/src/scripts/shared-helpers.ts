@@ -580,7 +580,7 @@ export function revealTopSixPlusStays(ctx: ScriptCtx): void {
   const top = p.deck[0];
   if (!top) return;
   const d = ctx.cardData(top.cardId);
-  if ((d.attack ?? 0) >= 6) {
+  if (ctx.basePower(top) >= 6) {
     ctx.logPublic(
       localizedLog(
         `${ctx.data.name} reveals ${d.name} — it stays on top`,

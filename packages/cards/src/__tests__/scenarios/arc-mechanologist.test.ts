@@ -417,4 +417,25 @@ describe("ARC — Mechanologist items", () => {
     g.activate("optekal monocle|3").chooseOption("top");
     expect(g.state.players[0]!.hero.counters?.energy).toBe(1);
   });
+  it("Teklo Pounder spends steam on only the first boost each turn", () => {
+    const g = scenario({
+      seats: [
+        {
+          ...mech,
+          board: ["teklo pounder|3"],
+          hand: ["zero to sixty|3", "zero to sixty|3"],
+          deck: ["zipper hit|3", "zipper hit|3", "zipper hit|3"],
+        },
+        { hero: "dorinthea", weapons: [], hand: [] },
+      ],
+    });
+    boardCard(g, 0, "teklo pounder|3").counters = { steam: 3 };
+
+    g.play("zero to sixty|3", { boost: true }).expectAttackValue(4);
+    expect(boardCard(g, 0, "teklo pounder|3").counters?.steam).toBe(2);
+
+    g.blockWith().settle()
+      .play("zero to sixty|3", { boost: true }).expectAttackValue(2);
+    expect(boardCard(g, 0, "teklo pounder|3").counters?.steam).toBe(2);
+  });
 });

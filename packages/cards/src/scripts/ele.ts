@@ -476,6 +476,32 @@ function boltNShot(): CardScript {
   };
 }
 
+function thump(): CardScript {
+  // "While Thump's {p} is greater than its base {p}" is continuous: a buff
+  // gained after declaration (e.g. in the reaction step) still grants both
+  // dominate and the on-hit discard.
+  const aboveBase = (ctx: ScriptCtx) => ctx.attackBonusAboveBase(ctx.self.instanceId) > 0;
+  return {
+    hasConditionalDominate: aboveBase,
+    canTriggerOnHit(ctx) {
+      return ctx.link?.targetAllyId === undefined && aboveBase(ctx);
+    },
+    onHit(ctx) {
+      const hand = ctx.player(opponentSeat(ctx)).hand;
+      if (hand.length > 0)
+        ctx.requestCardChoice(
+          "thump-discard",
+          decisionPrompt("Thump: choose a card to discard", "card.ele.thump.discard"),
+          hand.map((card) => card.instanceId),
+          opponentSeat(ctx),
+        );
+    },
+    onChoose(ctx, hook, option) {
+      if (hook === "thump-discard") ctx.discardCard(opponentSeat(ctx), Number(option));
+    },
+  };
+}
+
 function sigilOfSuffering(): CardScript {
   return {
     onPlay(ctx) {
@@ -1626,78 +1652,9 @@ export const ele: Record<string, CardScript> = mergeSetScripts("ELE", eleHighRar
       },
     ],
   },
-  "thump|1": {
-    onAttackDeclared(ctx) {
-      if (ctx.attackBonusAboveBase(ctx.self.instanceId) > 0) {
-        ctx.addModifier({ scope: "chain-link", dominate: true });
-        ctx.setFlag("link", "thumpDiscard", true);
-      }
-    },
-    canTriggerOnHit(ctx) {
-      return ctx.link?.targetAllyId === undefined && ctx.getFlag("link", "thumpDiscard") === true;
-    },
-    onHit(ctx) {
-      const hand = ctx.player(opponentSeat(ctx)).hand;
-      if (hand.length > 0)
-        ctx.requestCardChoice(
-          "thump-discard",
-          decisionPrompt("Thump: choose a card to discard", "card.ele.thump.discard"),
-          hand.map((card) => card.instanceId),
-          opponentSeat(ctx),
-        );
-    },
-    onChoose(ctx, hook, option) {
-      if (hook === "thump-discard") ctx.discardCard(opponentSeat(ctx), Number(option));
-    },
-  },
-  "thump|2": {
-    onAttackDeclared(ctx) {
-      if (ctx.attackBonusAboveBase(ctx.self.instanceId) > 0) {
-        ctx.addModifier({ scope: "chain-link", dominate: true });
-        ctx.setFlag("link", "thumpDiscard", true);
-      }
-    },
-    canTriggerOnHit(ctx) {
-      return ctx.link?.targetAllyId === undefined && ctx.getFlag("link", "thumpDiscard") === true;
-    },
-    onHit(ctx) {
-      const hand = ctx.player(opponentSeat(ctx)).hand;
-      if (hand.length > 0)
-        ctx.requestCardChoice(
-          "thump-discard",
-          decisionPrompt("Thump: choose a card to discard", "card.ele.thump.discard"),
-          hand.map((card) => card.instanceId),
-          opponentSeat(ctx),
-        );
-    },
-    onChoose(ctx, hook, option) {
-      if (hook === "thump-discard") ctx.discardCard(opponentSeat(ctx), Number(option));
-    },
-  },
-  "thump|3": {
-    onAttackDeclared(ctx) {
-      if (ctx.attackBonusAboveBase(ctx.self.instanceId) > 0) {
-        ctx.addModifier({ scope: "chain-link", dominate: true });
-        ctx.setFlag("link", "thumpDiscard", true);
-      }
-    },
-    canTriggerOnHit(ctx) {
-      return ctx.link?.targetAllyId === undefined && ctx.getFlag("link", "thumpDiscard") === true;
-    },
-    onHit(ctx) {
-      const hand = ctx.player(opponentSeat(ctx)).hand;
-      if (hand.length > 0)
-        ctx.requestCardChoice(
-          "thump-discard",
-          decisionPrompt("Thump: choose a card to discard", "card.ele.thump.discard"),
-          hand.map((card) => card.instanceId),
-          opponentSeat(ctx),
-        );
-    },
-    onChoose(ctx, hook, option) {
-      if (hook === "thump-discard") ctx.discardCard(opponentSeat(ctx), Number(option));
-    },
-  },
+  "thump|1": thump(),
+  "thump|2": thump(),
+  "thump|3": thump(),
   "honing hood|0": {
     activated: {
       cost: 0,

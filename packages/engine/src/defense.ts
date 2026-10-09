@@ -263,12 +263,13 @@ export function legalDefenderCards(
  * the UI cannot advertise a defender that would make the staged set illegal. */
 export function defenderSelectionError(
   state: GameStateInternal,
+  runtime: EngineRuntime,
   link: ChainLinkState,
   defenders: ReturnType<typeof legalDefenderCards>,
   instanceIds: readonly number[],
 ): string | undefined {
   const { hand, arsenal, equipment } = defenders;
-  const dominate = attackHasDominate(state, link);
+  const dominate = attackHasDominate(state, runtime, link);
   const overpower = attackHasOverpower(state, link);
   const maxNonBlock = attackMaxNonBlockDefenders(state, link);
   const seen = new Set<number>();
@@ -331,7 +332,7 @@ export function stageDefenders(
   if (!link) return "no attack to defend";
   const defenders = legalDefenderCards(state, runtime, seat);
   const unique = [...new Set(instanceIds)];
-  const restrictionError = defenderSelectionError(state, link, defenders, unique);
+  const restrictionError = defenderSelectionError(state, runtime, link, defenders, unique);
   if (restrictionError) return restrictionError;
   pd.staged = unique.length > 0 ? unique : undefined;
   return undefined;
@@ -645,7 +646,7 @@ export function assignDefenders(
   if (selectedEquipment < requiredEquipment) {
     return `this attack must be defended with ${requiredEquipment} equipment if able`;
   }
-  const restrictionError = defenderSelectionError(state, link, defenders, instanceIds);
+  const restrictionError = defenderSelectionError(state, runtime, link, defenders, instanceIds);
   if (restrictionError) return restrictionError;
   let handCount = 0;
   for (const id of instanceIds) {

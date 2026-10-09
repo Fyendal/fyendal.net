@@ -108,9 +108,13 @@ function warhornPermanents(ctx: ScriptCtx, seat: number): readonly DeepReadonly<
     .player(seat)
     .board.filter((card) => ["ally", "aura", "item", "landmark"].some((type) => has(ctx, card, type)));
 }
+// Reveals started before the reveal count was tracked separately used X.
+function harpoonRevealCount(ctx: ScriptCtx): number {
+  return ctx.getCounter("harpoonRevealCount") || ctx.getCounter("harpoonX");
+}
 function finishHarpoonReveal(ctx: ScriptCtx): void {
   const x = ctx.getCounter("harpoonX");
-  const ids = Array.from({ length: x }, (_, index) => ctx.getCounter(`harpoonReveal:${index}`)).filter((id) => id > 0);
+  const ids = Array.from({ length: harpoonRevealCount(ctx) }, (_, index) => ctx.getCounter(`harpoonReveal:${index}`)).filter((id) => id > 0);
   if (!ctx.revealCards(ids, opponentSeat(ctx))) return;
   const hand = ctx.player(opponentSeat(ctx)).hand;
   const actions = ids.flatMap((id) => {
@@ -381,14 +385,14 @@ export const dynHighRarity: Record<string, CardScript> = {
   },
   "pulsewave harpoon|1": {
     onAttackDeclared(ctx) {
-      const x = Math.min(
-        Number(ctx.getFlag("player", "boostCountThisTurn")),
-        ctx.player(opponentSeat(ctx)).hand.length,
-      );
-      ctx.setCounter("harpoonX", x);
-      if (x <= 0) return;
+      // X bounds the defender's {d}; only the reveal count is capped by hand size.
+      const x = Number(ctx.getFlag("player", "boostCountThisChain")) || 0;
       const hand = ctx.player(opponentSeat(ctx)).hand;
-      if (hand.length === x) {
+      const revealCount = Math.min(x, hand.length);
+      ctx.setCounter("harpoonX", x);
+      ctx.setCounter("harpoonRevealCount", revealCount);
+      if (revealCount <= 0) return;
+      if (hand.length === revealCount) {
         hand.forEach((card, index) =>
           ctx.setCardCounter(ctx.self.instanceId, `harpoonReveal:${index}`, card.instanceId),
         );
@@ -409,7 +413,7 @@ export const dynHighRarity: Record<string, CardScript> = {
       if (!hook.startsWith("harpoon-reveal:")) return;
       const index = Number(hook.split(":")[1]);
       ctx.setCardCounter(ctx.self.instanceId, `harpoonReveal:${index}`, Number(option));
-      if (index + 1 >= ctx.getCounter("harpoonX")) {
+      if (index + 1 >= harpoonRevealCount(ctx)) {
         finishHarpoonReveal(ctx);
         return;
       }

@@ -531,6 +531,35 @@ describe("Armory Decks — APS, ARR, and AAC", () => {
     expect(g.state.players[0]!.board.some((card) => functionalKeyOf(cardData[card.cardId]!) === "confidence|0")).toBe(true);
   });
 
+  it("Pleiades still resolves after paying the last counter of Up on a Pedestal", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          heroKey: "pleiades, superstar|0",
+          board: ["up on a pedestal|3", "the suspense is killing me|3"],
+          graveyard: ["thump|3"],
+          equipment: NO_EQUIPMENT,
+        },
+        { hero: "dorinthea", equipment: NO_EQUIPMENT },
+      ],
+    });
+    for (const card of g.state.players[0]!.board) card.counters = { suspense: 1 };
+
+    g.activate("pleiades, superstar|0", { settle: false })
+      .chooseCard("up on a pedestal|3")
+      .chooseCard("thump|3");
+    expect(g.state.pendingDecision?.chooseHook).toBe("aps-pleiades-add");
+    g.chooseCard("the suspense is killing me|3");
+
+    const me = g.state.players[0]!;
+    expect(me.deck[0] && functionalKeyOf(cardData[me.deck[0].cardId]!)).toBe("thump|3");
+    expect(me.board.map((card) => [functionalKeyOf(cardData[card.cardId]!), card.counters?.suspense])).toEqual([
+      ["the suspense is killing me|3", 2],
+    ]);
+    expect(g.state.stack).toHaveLength(0);
+  });
+
   it("Moment Maker gains power and its hit ability when a third suspense aura enters during reactions", () => {
     const g = scenario({
       seats: [

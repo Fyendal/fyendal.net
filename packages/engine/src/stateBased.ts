@@ -9,6 +9,9 @@ import { destroyPermanent } from "./zoneMoves.js";
  * explicitly reduced to 0 (Suspense's "when this has no suspense counters").
  */
 export function checkStateBased(state: GameStateInternal, runtime: EngineRuntime): void {
+  // A leave-arena choice from a destroyed permanent replaces an open layer priority
+  // window. Resume the stack for the same holder once that choice is answered.
+  const priorityWindow = state.pendingDecision?.kind === "priority-window" ? state.pendingDecision : undefined;
   for (const p of state.players) {
     for (const c of [...p.board]) {
       const marker = scriptOf(state, c.cardId, c)?.destroyAtZeroCounter;
@@ -17,5 +20,9 @@ export function checkStateBased(state: GameStateInternal, runtime: EngineRuntime
       if (n === undefined || n > 0) continue;
       destroyPermanent(state, runtime, p.seat, c);
     }
+  }
+  const raised = state.pendingDecision;
+  if (priorityWindow && raised !== priorityWindow && raised?.chooseHook) {
+    raised.resume ??= { kind: "continue-stack", seat: priorityWindow.player };
   }
 }

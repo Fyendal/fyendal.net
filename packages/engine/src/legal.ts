@@ -882,7 +882,7 @@ function reactionIntents(
       : ["defense-reaction", "instant"];
   // Dominate (8.3.4b): no defense reactions from hand once defended from hand
   const blockHandDefReacts =
-    !isAttacker && attackHasDominate(state, link) && link.flags.defendedFromHand === true;
+    !isAttacker && attackHasDominate(state, runtime, link) && link.flags.defendedFromHand === true;
   const maxNonBlock = attackMaxNonBlockDefenders(state, link);
   const nonBlockDefenderLimitReached =
     !isAttacker &&
@@ -1048,7 +1048,7 @@ function defendIntents(state: GameStateInternal,
     Number(link.flags.mustDefendWithEquipmentCount ?? (requiredEquip ? 1 : 0)),
   );
   if (stagedEquipment.length < requiredEquipCount) return [];
-  if (defenderSelectionError(state, link, defenders, stagedIds)) return [];
+  if (defenderSelectionError(state, runtime, link, defenders, stagedIds)) return [];
 
   // Optional "when this defends, you may pay" costs are paid only when that
   // triggered layer resolves. requestPayment/requestXPayment enumerate any
@@ -1314,6 +1314,7 @@ function enumerateIntents(
             link !== undefined &&
             defenderSelectionError(
               state,
+              runtime,
               link,
               defenders,
               [...stagedIds, card.instanceId],

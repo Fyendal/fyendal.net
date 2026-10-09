@@ -619,7 +619,7 @@ export function playReaction(
   if (
     isDefReact &&
     !fromArsenal &&
-    attackHasDominate(state, link) &&
+    attackHasDominate(state, runtime, link) &&
     link.flags.defendedFromHand === true
   ) {
     return "Dominate: cannot play defense reactions from hand against this attack";

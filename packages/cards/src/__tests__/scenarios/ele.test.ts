@@ -803,3 +803,22 @@ describe("ELE — data registration", () => {
     expect(printingId("rotten old buckler|0")).toBe("ELE204");
   });
 });
+
+describe("ELE — Thump", () => {
+  it("gains dominate and its discard when its power rises above base during the reaction step", () => {
+    const g = scenario({
+      seats: [
+        { ...oldhim, resources: 4, hand: ["thump|1", "the suspense is killing me|3"] },
+        { hero: "dorinthea", hand: ["head jab|1"] },
+      ],
+    });
+    g.play("thump|1");
+    expect(projectStateFor(g.state, 0).chain.at(-1)?.dominate).toBe(false);
+    g.blockWith()
+      .react("the suspense is killing me|3", { settle: false })
+      .passPriority()
+      .passPriority();
+    expect(projectStateFor(g.state, 0).chain.at(-1)?.dominate).toBe(true);
+    g.settle().chooseCard("head jab|1").expectInZone(1, "head jab|1", "graveyard");
+  });
+});

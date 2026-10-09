@@ -712,6 +712,9 @@ export const evrHighRarity: Record<string, CardScript> = {
       ctx.addCounter(ctx.self.instanceId, "steam", 3);
     },
     onBoosted(ctx) {
+      const usedKey = `tekloPounderUsed:${ctx.self.instanceId}`;
+      if (ctx.getFlag("player", usedKey)) return;
+      ctx.setFlag("player", usedKey, true);
       if (ctx.getCounter("steam") > 0) {
         ctx.addCounter(ctx.self.instanceId, "steam", -1);
         buffNextAttack(ctx, { attack: 2, appliesToType: ["mechanologist"] });

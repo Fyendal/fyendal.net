@@ -107,6 +107,25 @@ describe("HVY — Pack Call (on defend, reveal top: 6+ stays, else bottom)", () 
       .expectDeckTop(1, "raging onslaught|2")
       .expectDeckBottom(1, "dodge|3");
   });
+
+  it("uses the revealed card's defined power, not its printed power", () => {
+    const g = scenario({
+      seats: [
+        { hero: "dorinthea", hand: ["en garde|1"] },
+        {
+          hero: "rhinar",
+          hand: ["pack call|2"],
+          deck: ["rockyard rodeo|3", "dodge|3"],
+          weapons: ["hexagore, the death hydra|0"],
+        },
+      ],
+    });
+    g.attackWithWeapon()
+      .blockWith("pack call|2")
+      .settle()
+      .expectLog("it stays on top")
+      .expectDeckTop(1, "rockyard rodeo|3");
+  });
 });
 
 describe("HVY — Tenacity", () => {

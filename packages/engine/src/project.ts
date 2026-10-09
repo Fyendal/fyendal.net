@@ -1199,7 +1199,7 @@ function projectState(
       ...(link.wagerRewards?.length ? { wagerRewards: [...link.wagerRewards] } : {}),
       dominate: link.resolved
         ? link.flags.dominateAtResolution === true
-        : attackHasDominate(state, link),
+        : attackHasDominate(state, runtime, link),
       overpower: link.resolved
         ? link.flags.overpowerAtResolution === true
         : attackHasOverpower(state, link),

@@ -1090,6 +1090,10 @@ export interface CardScript {
    * static ability. Re-evaluated when the attack is declared, projected, and
    * at the beginning of the Resolution Step. */
   hasConditionalGoAgain?(ctx: ScriptCtx): boolean;
+  /** Whether this attack currently has dominate from its own conditional
+   * static ability. Evaluated live wherever dominate is checked, so a power
+   * change during the reaction step takes effect immediately. */
+  hasConditionalDominate?(ctx: ScriptCtx): boolean;
   /** Continuous adjustment to a friendly attack while this source is active. */
   modifyFriendlyAttack?(ctx: ScriptCtx, attacking: DeepReadonly<CardInstance>): number;
   /** Replace one positive power gain applied to this face-up object. The

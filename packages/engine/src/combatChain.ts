@@ -49,7 +49,7 @@ function expireLinkModifiers(state: GameStateInternal,
   link.finalAttackModifiers = attackValueModifiers(state, runtime, link);
   link.finalDefenseModifiers = defenseValueModifiers(state, runtime, link);
   // Snapshot keyword presence too: granted keywords disappear with the modifiers.
-  link.flags.dominateAtResolution = attackHasDominate(state, link);
+  link.flags.dominateAtResolution = attackHasDominate(state, runtime, link);
   link.flags.overpowerAtResolution = attackHasOverpower(state, link);
   state.modifiers = state.modifiers.filter((m) => m.scope !== "chain-link");
 }
@@ -371,6 +371,7 @@ export function closeChain(state: GameStateInternal, runtime: EngineRuntime): vo
   // per-instance "this combat chain" defense grants (Shred) expire too
   for (const p of state.players as PlayerState[]) {
     delete p.flags.soulBanishedThisChain;
+    delete p.flags.boostCountThisChain;
     for (const zone of [p.hand, p.deck, p.arsenal, p.pitch, p.graveyard, p.banish, p.board]) {
       for (const c of zone) {
         if (c.playableFromUntilChainClose !== true) continue;

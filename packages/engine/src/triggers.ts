@@ -1163,7 +1163,7 @@ export function resolveTopStackCard(state: GameStateInternal, runtime: EngineRun
       finishStackCardResolution(state, runtime, seat, false);
       return;
     }
-    if (layer.fromHand && attackHasDominate(state, link) && link.flags.defendedFromHand === true) {
+    if (layer.fromHand && attackHasDominate(state, runtime, link) && link.flags.defendedFromHand === true) {
       logPublic(state, gameLogMessage(
         `${nameOf(state, card.cardId)} fails to resolve (Dominate)`,
         "engine.log.card.resolve.failed.dominate",

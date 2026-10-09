@@ -126,6 +126,7 @@ export function effectiveDefense(state: GameStateInternal, card: CardInstance): 
 
 export function attackHasDominate(
   state: GameStateInternal,
+  runtime: EngineRuntime,
   link: ChainLinkState,
 ): boolean {
   if (link.flags.attackAbilitiesSuppressed === true) return false;
@@ -135,6 +136,11 @@ export function attackHasDominate(
     return false;
   }
   if (instanceHasKeyword(state, link.attackingCard, "dominate")) return true;
+  if (
+    scriptOf(state, link.attackingCard.cardId, link.attackingCard)?.hasConditionalDominate?.(
+      runtime.makeCtx(state, link.attacker, link.attackingCard, link),
+    ) === true
+  ) return true;
   return activeModifiers(state, link, ["chain-link", "until-end-of-turn"])
     .some((modifier) => modifier.dominate);
 }

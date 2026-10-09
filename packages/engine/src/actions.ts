@@ -496,6 +496,7 @@ export function finishPlayCard(
         boostSucceeded = boostSucceeded || cardTypesOf(state, banished).includes("mechanologist");
         player.flags.boostedThisTurn = true;
         player.flags.boostCountThisTurn = (Number(player.flags.boostCountThisTurn) || 0) + 1;
+        player.flags.boostCountThisChain = (Number(player.flags.boostCountThisChain) || 0) + 1;
         player.flags.lastBoostedCardInstanceId = banished.instanceId;
         const boostMods = state.modifiers.filter(
           (m) =>
