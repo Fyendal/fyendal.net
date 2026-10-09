@@ -230,6 +230,11 @@ describe("client bot tasks", () => {
     expect(decodeBotTask({ ...input, fallback: "oversized" })).toBeNull();
     expect(decodeBotTask({ ...input, botId: { toString: "bravo" } })).toBeNull();
     expect(decodeBotTask({ ...input, view: { ...input.view, gameId: "ZZZ999" } })).toBeNull();
+    expect(input.decklists?.own?.length).toBeGreaterThan(0);
+    expect(input.decklists?.opponent?.length).toBeGreaterThan(0);
+    expect(decodeBotTask(input)).not.toBeNull();
+    expect(decodeBotTask({ ...input, decklists: { own: [1] } })).toBeNull();
+    expect(decodeBotTask({ ...input, decklists: { own: [], hand: [] } })).toBeNull();
     const submission = { type: "bot-intent", runtimeId, commandId: "command-123", expectedVersion: 1, elapsedMs: 5, failure: "timeout" };
     expect(decodeClientMessage(submission)).toEqual(submission);
     expect(decodeClientMessage({ ...submission, intent: { kind: "pass" } })).toBeNull();

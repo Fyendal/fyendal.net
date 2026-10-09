@@ -14,6 +14,7 @@ apps/server/.manual-room/
 /.agents/
 
 # Local agent config
+/AGENTS.md
 /CLAUDE.md
 /CLAUDE.local.md
 /.claude/

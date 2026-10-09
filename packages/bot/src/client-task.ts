@@ -28,7 +28,10 @@ export class ClientBotPolicy {
         gameStats: decoded.gameStats ?? { turns: [] }, cardsRef: cardData, scriptsRef: scripts,
       };
     }
-    const input: BotPolicyInput = { seat: task.seat, view: task.view, legal: task.legal, cards: cardData, state };
+    const input: BotPolicyInput = {
+      seat: task.seat, view: task.view, legal: task.legal, cards: cardData, state,
+      ...(task.decklists ? { decklists: task.decklists } : {}),
+    };
     const stagedIds = task.view.pendingDecision?.kind === "defend"
       ? task.view.pendingDecision.stagedCards?.map((card) => card.instanceId) ?? []
       : [];

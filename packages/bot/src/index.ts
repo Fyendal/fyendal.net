@@ -15,6 +15,7 @@ export { chooseBriarIntent, chooseBriarIntentWithTrace } from "./briar-policy.js
 export type { BriarIntentDecision } from "./briar-policy.js";
 export type { BriarTurnEvaluation, BriarTurnPlan } from "./briar-turn-planner.js";
 export type { BotPolicyInput } from "./policy.js";
+export { decklistsFromState } from "./deck-knowledge.js";
 export { requiredEquipmentStageIntent } from "./defense.js";
 export { defaultCardRoles, hasCardRole } from "./card-roles.js";
 export type { CardRoleEvaluator, CardRoleTag, CardRoles } from "./card-roles.js";

@@ -1,6 +1,12 @@
 import type { BotOpponent, GameIntent, GameView } from "./types.js";
 import type { BotSimulationSnapshotV1 } from "./simulationState.js";
 
+/** Main-deck card ids (a multiset) for the bot and its opponent. Bots only
+ * derive unseen-card counts from these; zone and order stay hidden. */
+export interface BotDecklists {
+  own?: string[];
+  opponent?: string[];
+}
 export type BotFailureReason = "loading" | "crash" | "timeout" | "invalid-result" | "rejected" | "circuit-open" | "oversized";
 export interface ClientBotTask {
   type: "bot-task";
@@ -12,6 +18,7 @@ export interface ClientBotTask {
   view: GameView;
   legal: GameIntent[];
   simulation?: BotSimulationSnapshotV1;
+  decklists?: BotDecklists;
   delayMs: number;
 }
 export type BotSubmission = {

@@ -666,10 +666,17 @@ const BOT_RESULT_STATUSES = new Set(["applied", "stale", "rejected"]);
 const roomCode = (value: unknown): value is string => typeof value === "string" && /^[A-Z0-9]{6}$/.test(value);
 const runtimeId = (value: unknown): value is string => typeof value === "string" && /^[a-f0-9]{64}$/.test(value);
 
+function botDecklists(value: unknown): boolean {
+  const lists = object(value);
+  return !!lists && exactKeys(lists, ["own", "opponent"], [])
+    && optional(lists.own, (v): v is string[] => shortStrings(v))
+    && optional(lists.opponent, (v): v is string[] => shortStrings(v));
+}
+
 export function decodeBotTask(value: unknown): ClientBotTask | null {
   const message = object(value);
   const required = ["type", "code", "version", "runtimeId", "botId", "seat", "view", "legal", "delayMs"];
-  if (!message || !exactKeys(message, [...required, "simulation"], required)) return null;
+  if (!message || !exactKeys(message, [...required, "simulation", "decklists"], required)) return null;
   try {
     if (new TextEncoder().encode(JSON.stringify(value)).byteLength > MAX_BOT_TASK_BYTES) return null;
     const view = decodeGameView(message.view);
@@ -678,6 +685,7 @@ export function decodeBotTask(value: unknown): ClientBotTask | null {
       || !seat(message.seat) || !view || view.gameId !== message.code
       || !array(message.legal, decodeGameIntentValue, MAX_CARDS)
       || !nonNegativeInteger(message.delayMs) || message.delayMs > 10_000) return null;
+    if (message.decklists !== undefined && !botDecklists(message.decklists)) return null;
     if (message.simulation !== undefined) decodeSerializedStateEnvelope(message.simulation, message.code);
     return message as unknown as ClientBotTask;
   } catch { return null; }

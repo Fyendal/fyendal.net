@@ -1,4 +1,4 @@
-import type { CardData, CardView, GameIntent, GameView } from "@fyendal/shared";
+import type { BotDecklists, CardData, CardView, GameIntent, GameView } from "@fyendal/shared";
 import type { GameState } from "@fyendal/engine";
 import { requiredEquipmentStageIntent } from "./defense.js";
 import {
@@ -18,6 +18,9 @@ export interface BotPolicyInput {
   /** Authoritative state is used only by bounded, projection-safe rollout
    * adapters. Ordinary policy scoring must continue to read `view`. */
   state?: GameState;
+  /** Optional full main-deck lists. Value models read them only through
+   * `deck-knowledge.ts`, which exposes unseen counts and never zones. */
+  decklists?: BotDecklists;
 }
 
 export type DefendIntent = Extract<GameIntent, { kind: "defend" }>;

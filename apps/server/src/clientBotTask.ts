@@ -1,5 +1,6 @@
 import {
   botDefinitionForDeckId, botObservationKey, isCleanActionDecision, cloneStateForBotSimulation,
+  decklistsFromState,
 } from "@fyendal/bot";
 import { MAX_BOT_TASK_BYTES } from "@fyendal/protocol";
 import type { ClientBotTask, ServerMessage } from "@fyendal/shared";
@@ -21,6 +22,9 @@ export function clientBotTask(room: RoomRow, runtimeId: string, delayMs: number)
   const task: ClientBotTask = {
     type: "bot-task", code: room.code, version: room.version, runtimeId,
     botId: bot.id, seat, view, legal: message.legal.filter((intent) => !intent.kind.endsWith("-draw")), delayMs,
+    // Full main-deck lists (multisets only). Bots turn these into unseen-card
+    // counts for draw and disruption estimates; zones and order stay hidden.
+    decklists: decklistsFromState(room.state, seat),
   };
   if (isCleanActionDecision(room.state, seat)) {
     const simulation = cloneStateForBotSimulation(room.state, room.code);

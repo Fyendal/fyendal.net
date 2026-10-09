@@ -1,6 +1,7 @@
 import { cardData, precon, scripts } from "@fyendal/cards";
 import { applyIntent, createGame, legalIntents, projectStateFor } from "@fyendal/engine";
 import type { Decklist, GameIntent } from "@fyendal/shared";
+import { decklistsFromState } from "./deck-knowledge.js";
 import { botDefinition, type BotDefinition } from "./registry.js";
 
 export interface BotMatchEvaluation {
@@ -79,6 +80,7 @@ export function evaluateBotMatch(options: BotMatchEvaluationOptions): BotMatchEv
   const intents: GameIntent[] = [];
   const now = options.now ?? (() => performance.now());
   const maxSteps = options.maxSteps ?? 2_000;
+  const decklists = [decklistsFromState(state, 0), decklistsFromState(state, 1)] as const;
   let steps = 0;
   for (; steps < maxSteps && state.phase !== "game-over"; steps++) {
     const actor = (state.pendingDecision?.player ?? state.priorityPlayer) as 0 | 1;
@@ -91,6 +93,7 @@ export function evaluateBotMatch(options: BotMatchEvaluationOptions): BotMatchEv
       legal,
       cards: cardData,
       state,
+      decklists: decklists[actor],
     });
     const elapsed = Math.max(0, now() - startedAt);
     decisions[actor]++;
