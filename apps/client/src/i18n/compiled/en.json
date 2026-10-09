@@ -25402,30 +25402,6 @@
       "value": "Ready"
     }
   ],
-  "prep.opponentStatus.disconnected": [
-    {
-      "type": 0,
-      "value": "disconnected"
-    }
-  ],
-  "prep.opponentStatus.preparing": [
-    {
-      "type": 0,
-      "value": "preparing"
-    }
-  ],
-  "prep.opponentStatus.ready": [
-    {
-      "type": 0,
-      "value": "ready"
-    }
-  ],
-  "prep.opponentStatus.waiting": [
-    {
-      "type": 0,
-      "value": "waiting"
-    }
-  ],
   "prep.othersInQueue": [
     {
       "type": 6,

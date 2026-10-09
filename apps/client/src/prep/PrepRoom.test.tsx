@@ -32,11 +32,11 @@ function pairedPrep(phase: PrepView["phase"]): PrepView {
   };
 }
 
-function render(prep: PrepView | null, mobile: boolean): string {
+function render(prep: PrepView | null, mobile: boolean, prepDeck: typeof deck = deck): string {
   vi.stubGlobal("window", { matchMedia: () => ({ matches: mobile }) });
   vi.stubGlobal("location", { origin: "http://localhost" });
   store.set({
-    prepDeck: deck, prep, roomCode: "ABC123", queueCounts: {},
+    prepDeck, prep, roomCode: "ABC123", queueCounts: {},
     matchmakingActive: false, matchAcceptanceRole: null,
     acceptMatch: vi.fn(), declineMatch: vi.fn(), playBotFromPrep: vi.fn(),
     presentArena: vi.fn(), presentDeck: vi.fn(), prepUnready: vi.fn(),
@@ -105,6 +105,36 @@ describe("preparation stage layout", () => {
     expect(html).not.toContain("Your presentation");
   });
 
+  it("heads the desktop selection column with the matchup plan, not the match sheet", () => {
+    const withPlans = {
+      ...deck,
+      matchups: [{ id: "levia", name: "Levia", preferredTurnOrder: "first" as const, notes: "Race them." }],
+      selectedMatchupId: "levia",
+    };
+    const html = render(pairedPrep("select-arena"), false, withPlans);
+    const sheet = html.match(/<section class="panel prep-opponent prep-sheet"[\s\S]*?<\/section>/)?.[0];
+    const column = html.match(/<div class="prep-selection-column">([\s\S]*)/)?.[1];
+    expect(sheet).not.toContain("fabrary-matchup");
+    expect(column?.indexOf('id="fabrary-matchup"')).toBeLessThan(column?.indexOf("prep-arena-stage") ?? -1);
+    expect(column).toContain("Prefers going first");
+  });
+
+  it("keeps the mobile bar to one row: opponent hero, turn order, deck count and Ready", () => {
+    const html = render(pairedPrep("select-deck"), true);
+    const row = html.match(/<div class="prep-bar-row">([\s\S]*?)<\/button><\/div><\/div>/)?.[1];
+    expect(row).toContain("prep-ready-opponent-art");
+    expect(row).toContain('<p class="prep-sheet-turn">You go <strong>first</strong></p>');
+    expect(row).toContain("Main Deck (");
+    expect(row).toContain("Ready");
+    expect(row).not.toContain("preparing");
+  });
+
+  it("offers the matchup plan on mobile too", () => {
+    const withPlans = { ...deck, matchups: [{ id: "levia", name: "Levia", preferredTurnOrder: null }] };
+    const html = render(pairedPrep("select-arena"), true, withPlans);
+    expect(html).toContain('id="fabrary-matchup"');
+  });
+
   it("only reports the opponent when they finish a step ahead of you", () => {
     const prep = pairedPrep("select-arena");
     prep.seats[1] = { ...prep.seats[1]!, arenaLocked: true };
@@ -140,7 +170,7 @@ describe("preparation stage layout", () => {
 
   it("uses the mobile footer for the arena action without duplicating it in the panel", () => {
     const html = render(pairedPrep("select-arena"), true);
-    expect(html).toContain("prep-ready-float prep-arena-mobile");
+    expect(html).toContain('<div class="prep-ready-float">');
     expect(html.match(/Lock arena cards/g)).toHaveLength(1);
     expect(html).not.toContain("prep-desktop-arena-action");
   });

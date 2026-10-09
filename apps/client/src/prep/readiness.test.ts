@@ -5,8 +5,6 @@ const READY_INPUT = {
   accepting: false,
   mainCountValid: true,
   opponentPresent: true,
-  opponentReady: false,
-  opponentConnected: true,
   ready: false,
   startPlayer: 0 as const,
 };
@@ -16,7 +14,6 @@ describe("prep readiness", () => {
     expect(derivePrepReadiness(READY_INPUT)).toEqual({
       canReady: true,
       blockingReason: null,
-      opponentStatus: "preparing",
     });
   });
 
@@ -29,10 +26,5 @@ describe("prep readiness", () => {
     const result = derivePrepReadiness({ ...READY_INPUT, ...change });
     expect(result.canReady).toBe(false);
     expect(result.blockingReason).toBe(reason);
-  });
-
-  it("distinguishes ready and disconnected opponents without changing readiness", () => {
-    expect(derivePrepReadiness({ ...READY_INPUT, opponentReady: true }).opponentStatus).toBe("ready");
-    expect(derivePrepReadiness({ ...READY_INPUT, opponentConnected: false }).opponentStatus).toBe("disconnected");
   });
 });

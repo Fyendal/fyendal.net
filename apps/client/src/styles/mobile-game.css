@@ -1187,8 +1187,7 @@
     overflow-y: hidden;
     padding: 8px 9px 8px 0;
   }
-  .prep-page { padding-bottom: 270px; }
-  .prep-ready-controls button { min-height: 44px; }
+  .prep-page { padding-bottom: 104px; }
 }
 
 @media (max-width: 700px) and (orientation: landscape) {
@@ -1199,15 +1198,4 @@
 
 @media (max-width: 360px) {
   .table:has(.stack-float) .chain-float { left: calc(50% - 20px) !important; }
-  .prep-page { padding-bottom: 230px; }
-  .prep-ready-float {
-    grid-template-columns: 1fr;
-    grid-template-areas:
-      "count"
-      "controls"
-      "status"
-      "errors";
-  }
-  .prep-ready-controls { justify-content: space-between; }
-  .prep-ready-controls .btn-primary:only-child { width: 100%; }
 }

@@ -8,7 +8,7 @@ type OpponentPrepState = "arena-locked" | "ready" | "disconnected";
 
 /** Both players are always on the same step, so only report the opponent
  *  when they have finished it ahead of you or dropped out. */
-function opponentPrepState(phase: PrepPhase, opponent: PrepSeatView): OpponentPrepState | null {
+export function opponentPrepState(phase: PrepPhase, opponent: PrepSeatView): OpponentPrepState | null {
   if (!opponent.connected) return "disconnected";
   if (phase === "select-deck") return opponent.ready ? "ready" : null;
   if (phase === "select-arena" || phase === "choose-first") {
@@ -113,7 +113,6 @@ export function PrepMatchSheet({
   yourArena,
   opponentArena,
   notice,
-  plan,
   action,
 }: {
   phase: PrepPhase;
@@ -123,7 +122,6 @@ export function PrepMatchSheet({
   yourArena: RevealedArena;
   opponentArena?: RevealedArena;
   notice: ReactNode;
-  plan: ReactNode;
   action: ReactNode;
 }) {
   const intl = useIntl();
@@ -158,7 +156,6 @@ export function PrepMatchSheet({
           side="yours"
         />
         {notice}
-        {plan}
       </div>
       <div className="prep-sheet-action">{action}</div>
     </section>

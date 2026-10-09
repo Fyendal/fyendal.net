@@ -94,11 +94,14 @@
 .prep-matchup-plan {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  margin-top: 18px;
-  padding-top: 16px;
-  border-top: 1px solid #45331f;
-  text-align: left;
+  gap: 10px;
+  padding-block: 12px;
+}
+.prep-matchup-pick {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 14px;
 }
 .prep-matchup-plan > label {
   color: #9c8a6d;
@@ -108,7 +111,8 @@
   text-transform: uppercase;
 }
 .prep-matchup-plan select {
-  width: 100%;
+  flex: 0 1 360px;
+  min-width: 0;
   background: #120c06;
   border: 1px solid #5a4426;
   border-radius: 2px;
@@ -258,27 +262,49 @@
 }
 .prep-stack-card .card-artwork-placeholder { border-radius: inherit; }
 .prep-empty-zone { margin: 0; align-self: center; }
+/* Phone action bar: docked flush to the bottom edge as one row — opponent
+   hero, turn order and deck count, then the single action. */
 .prep-ready-float {
   position: fixed;
-  right: max(18px, env(safe-area-inset-right));
-  bottom: max(18px, env(safe-area-inset-bottom));
-  left: auto;
+  right: 0;
+  bottom: 0;
+  left: 0;
   z-index: 30;
-  display: grid;
-  grid-template-columns: minmax(150px, 1fr) auto;
-  grid-template-areas:
-    "count controls"
-    "errors errors";
-  align-items: center;
-  gap: 10px 16px;
-  width: min(470px, calc(100vw - 36px));
-  padding: 12px 14px;
-  border: 1px solid #8b6c37;
-  border-radius: 5px;
-  background: linear-gradient(180deg, #2a1b0df7, #160e07f7);
-  box-shadow: 0 10px 30px #000d, inset 0 1px 0 #ffd4791f;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding:
+    10px max(14px, env(safe-area-inset-right))
+    max(10px, env(safe-area-inset-bottom)) max(14px, env(safe-area-inset-left));
+  border-top: 1px solid #8b6c37;
+  background: linear-gradient(180deg, #24170bf7, #140c06fa);
+  box-shadow: 0 -10px 28px #000c;
   backdrop-filter: blur(8px);
-  transform: none;
+}
+.prep-bar-row { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.prep-bar-copy {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+  font-size: 16px;
+  line-height: 1.3;
+}
+.prep-bar-copy .prep-sheet-turn,
+.prep-bar-copy .prep-sheet-prompt,
+.prep-bar-copy .prep-decision-status { font-size: 16px; text-align: left; }
+.prep-bar-copy .prep-sheet-state { font-size: 14px; }
+.prep-bar-count { color: var(--text-secondary); font-size: 14px; }
+.prep-bar-count.valid { color: var(--success); }
+.prep-bar-count.invalid { color: #e0684a; }
+.prep-ready-float .prep-ready-controls { flex: none; }
+.prep-ready-float .prep-ready-controls button {
+  min-height: 44px;
+  max-width: 48vw;
+  padding: 10px 18px;
+  font-size: 15px;
+  white-space: normal;
 }
 .prep-match-accept-backdrop {
   position: fixed;
@@ -304,7 +330,6 @@
   cursor: wait;
 }
 .prep-main-count {
-  grid-area: count;
   display: flex;
   flex-direction: column;
   gap: 2px;
@@ -328,33 +353,15 @@
 .prep-main-count.valid strong { color: #8fd48f; }
 .prep-main-count.invalid strong { color: #e0684a; }
 .prep-ready-controls {
-  grid-area: controls;
   display: flex;
   align-items: center;
   justify-content: flex-end;
   gap: 10px;
 }
 .prep-ready-controls button { min-height: 40px; }
-.prep-match-status {
-  grid-area: status;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(160px, 1.35fr);
-  align-items: center;
-  gap: 14px;
-  min-width: 0;
-  border-left: 1px solid #8b6c374d;
-  padding-left: 14px;
-}
-.prep-match-status.no-opponent { grid-template-columns: 1fr; }
-.prep-ready-opponent {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  min-width: 0;
-}
 .prep-ready-opponent-art {
-  width: 38px;
-  height: 52px;
+  width: 42px;
+  height: 58px;
   aspect-ratio: 300 / 413;
   flex: 0 0 auto;
   border: 1px solid #5a4426;
@@ -366,30 +373,10 @@
 .prep-ready-opponent-art .c-text,
 .prep-ready-opponent-art .c-cost,
 .prep-ready-opponent-art .c-stats { display: none; }
-.prep-ready-opponent div {
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-}
-.prep-ready-opponent span {
-  color: #9c8a6d;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 1.5px;
-  text-transform: uppercase;
-}
-.prep-ready-opponent strong {
-  overflow: hidden;
-  color: #e8dcc4;
-  font-size: 12px;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
 .prep-decision-status {
   color: var(--gold);
   font-size: 13px;
   font-weight: 600;
-  text-align: right;
 }
 .prep-decision-status.pending { color: #b7a78b; }
 .prep-float-pick {
@@ -399,13 +386,12 @@
   min-width: 0;
 }
 .prep-float-pick button {
-  min-height: 36px;
+  min-height: 44px;
   padding: 6px 8px;
-  font-size: 11px;
+  font-size: 15px;
   white-space: normal;
 }
 .prep-errors {
-  grid-area: errors;
   list-style: none;
   margin: 0;
   padding: 0;
@@ -442,51 +428,7 @@
   .prep-zone-heading { align-items: flex-start; flex-direction: column; gap: 4px; }
   .prep-card-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .prep-arena-stage .prep-cardrow { overflow: visible; }
-  .prep-ready-float {
-    right: max(12px, env(safe-area-inset-right));
-    bottom: max(12px, env(safe-area-inset-bottom));
-    left: max(12px, env(safe-area-inset-left));
-    width: auto;
-    max-height: calc(100dvh - 24px);
-    overflow-y: auto;
-    overscroll-behavior: contain;
-    grid-template-columns: minmax(105px, 1fr) auto;
-    grid-template-areas:
-      "count controls"
-      "status status"
-      "errors errors";
-    transform: none;
-  }
-  .prep-ready-float.prep-arena-mobile {
-    grid-template-columns: minmax(0, 1fr);
-    grid-template-areas: "controls" "status" "errors";
-  }
-  .prep-match-status {
-    grid-template-columns: minmax(0, 1fr);
-    gap: 10px;
-    border-top: 0;
-    border-left: 0;
-    padding-top: 0;
-    padding-left: 0;
-  }
-  .prep-ready-controls + .prep-mobile-match-status {
-    border-top: 1px solid #8b6c374d;
-    padding-top: 9px;
-  }
-  .prep-float-pick { width: 100%; }
-  .prep-ready-controls { min-width: 0; }
-  .prep-ready-controls button { max-width: 100%; white-space: normal; }
-  .prep-arena-mobile .prep-ready-controls .btn-primary { width: 100%; }
-  .prep-mobile-match-status .prep-mobile-opponent-copy { gap: 3px; }
-  .prep-mobile-match-status .prep-decision-status {
-    color: var(--gold);
-    font-size: 12px;
-    font-weight: 500;
-    line-height: 1.35;
-    text-align: left;
-    white-space: normal;
-  }
-  .prep-mobile-match-status .prep-decision-status.pending { color: #b7a78b; }
+  .prep-matchup-plan select { flex-basis: 100%; }
   .prep-group,
   .prep-cardrow { max-width: 100%; min-width: 0; }
   .waiting-panel.match-accept-panel { padding: 20px; }

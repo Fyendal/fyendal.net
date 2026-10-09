@@ -24244,30 +24244,6 @@
       "value": "准备完成"
     }
   ],
-  "prep.opponentStatus.disconnected": [
-    {
-      "type": 0,
-      "value": "已断开连接"
-    }
-  ],
-  "prep.opponentStatus.preparing": [
-    {
-      "type": 0,
-      "value": "准备中"
-    }
-  ],
-  "prep.opponentStatus.ready": [
-    {
-      "type": 0,
-      "value": "已准备"
-    }
-  ],
-  "prep.opponentStatus.waiting": [
-    {
-      "type": 0,
-      "value": "等待中"
-    }
-  ],
   "prep.othersInQueue": [
     {
       "type": 0,

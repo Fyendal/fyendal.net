@@ -40,7 +40,7 @@ import {
 } from "./BotPracticeNudge.js";
 import { PrepPresentation } from "./PrepPresentation.js";
 import { PrepArenaCards } from "./PrepArenaCards.js";
-import { PrepMatchSheet } from "./PrepMatchSheet.js";
+import { opponentPrepState, PrepMatchSheet } from "./PrepMatchSheet.js";
 import { nextPrepStep, useStepNudge } from "./nextStepNudge.js";
 import { FullscreenButton } from "../components/FullscreenButton.js";
 
@@ -359,8 +359,6 @@ export function PrepRoom() {
     accepting,
     mainCountValid,
     opponentPresent: opp !== null,
-    opponentReady: opp?.ready ?? false,
-    opponentConnected: opp?.connected ?? false,
     ready,
     startPlayer: prep?.startPlayer ?? null,
   });
@@ -433,29 +431,33 @@ export function PrepRoom() {
     weaponIds: selection.weaponIndexes.map((index) => pool.weaponIds[index]!),
     equipment: selection.equipment,
   };
+  // The plan decides which cards the right column offers, so it heads that
+  // column instead of crowding the match sheet.
   const matchupPlan = matchups.length > 0 ? (
-    <div className="prep-matchup-plan">
-      <label htmlFor="fabrary-matchup">
-        {intl.formatMessage({ id: "prep.matchupPlan" })}
-      </label>
-      <select
-        id="fabrary-matchup"
-        value={prepDeck.selectedMatchupId ?? ""}
-        disabled={matchupLocked || matchupBusy}
-        onChange={(event) => void chooseMatchup(event.target.value)}
-      >
-        <option value="">{intl.formatMessage({ id: "prep.defaultDeck" })}</option>
-        {matchups.map((matchup) => (
-          <option key={matchup.id} value={matchup.id}>
-            {matchup.name}{suggestedMatchups.has(matchup.id)
-              ? ` — ${intl.formatMessage({ id: "prep.suggested" })}`
-              : ""}
-          </option>
-        ))}
-      </select>
-      {matchupBusy ? (
-        <span className="muted">{intl.formatMessage({ id: "prep.loadingPlan" })}</span>
-      ) : null}
+    <section className="panel prep-matchup-plan">
+      <div className="prep-matchup-pick">
+        <label htmlFor="fabrary-matchup">
+          {intl.formatMessage({ id: "prep.matchupPlan" })}
+        </label>
+        <select
+          id="fabrary-matchup"
+          value={prepDeck.selectedMatchupId ?? ""}
+          disabled={matchupLocked || matchupBusy}
+          onChange={(event) => void chooseMatchup(event.target.value)}
+        >
+          <option value="">{intl.formatMessage({ id: "prep.defaultDeck" })}</option>
+          {matchups.map((matchup) => (
+            <option key={matchup.id} value={matchup.id}>
+              {matchup.name}{suggestedMatchups.has(matchup.id)
+                ? ` — ${intl.formatMessage({ id: "prep.suggested" })}`
+                : ""}
+            </option>
+          ))}
+        </select>
+        {matchupBusy ? (
+          <span className="muted">{intl.formatMessage({ id: "prep.loadingPlan" })}</span>
+        ) : null}
+      </div>
       {selectedMatchup ? (
         <div className="prep-matchup-detail">
           {selectedMatchup.preferredTurnOrder ? (
@@ -471,7 +473,7 @@ export function PrepRoom() {
           {selectedMatchup.notes ? <p>{plainMatchupNotes(selectedMatchup.notes)}</p> : null}
         </div>
       ) : null}
-    </div>
+    </section>
   ) : null;
   const dieNotice = die && opp && !prep?.botGame ? (
     <p className="prep-die">
@@ -516,21 +518,24 @@ export function PrepRoom() {
       {prep?.deadlineAt ? <> · <DeadlineCountdown deadlineAt={prep.deadlineAt} /></> : null}
     </button>
   );
+  const turnOrderLine = prep?.startPlayer != null ? (
+    <p className="prep-sheet-turn">
+      {intl.formatMessage(
+        { id: prep.startPlayer === yourSeat ? "prep.turnOrder.youFirst" : "prep.turnOrder.youSecond" },
+        { order: (chunks) => <strong>{chunks}</strong> },
+      )}
+    </p>
+  ) : null;
+  const choosePrompt = intl.formatMessage({
+    id: prep?.botGame ? "prep.practiceChooseFirst" : "prep.rollWonYou",
+  });
+  const opponentState = opp && prep ? opponentPrepState(prep.phase, opp) : null;
   const sheetAction = (
     <>
-      {prep?.startPlayer != null ? (
-        <p className="prep-sheet-turn">
-          {intl.formatMessage(
-            { id: prep.startPlayer === yourSeat ? "prep.turnOrder.youFirst" : "prep.turnOrder.youSecond" },
-            { order: (chunks) => <strong>{chunks}</strong> },
-          )}
-        </p>
-      ) : null}
+      {turnOrderLine}
       {pickPending && iChooseFirst ? (
         <>
-          <p className="prep-sheet-prompt">
-            {intl.formatMessage({ id: prep?.botGame ? "prep.practiceChooseFirst" : "prep.rollWonYou" })}
-          </p>
+          <p className="prep-sheet-prompt">{choosePrompt}</p>
           <FirstPlayerChoice
             className="prep-pick"
             nudge={nudge === "first-player"}
@@ -597,7 +602,6 @@ export function PrepRoom() {
             yourArena={prep.yourArena ?? draftArena}
             opponentArena={opp.arena}
             notice={pickPending ? dieNotice : null}
-            plan={matchupPlan}
             action={sheetAction}
           />
         ) : !mobilePrepLayout ? (
@@ -612,11 +616,11 @@ export function PrepRoom() {
                   )})`
                 : null}
             </p>
-            {matchupPlan}
           </section>
         ) : null}
 
         <div className="prep-selection-column">
+          {matchupPlan}
           {!deckStage || mobilePrepLayout ? <section className="panel prep-arena-stage" aria-live="polite">
             <h3 className="panel-title">
               {intl.formatMessage({ id: deckStage ? "prep.arena.revealed" : "prep.arena.select" })}
@@ -686,48 +690,59 @@ export function PrepRoom() {
         </div>
       ) : null}
 
-      {floatingFooter ? <div className={`prep-ready-float${deckStage ? "" : " prep-arena-mobile"}`}>
-        {deckStage ? mainCountMeter : null}
-        {deckStage || arenaStage ? <div
-          className={`prep-ready-controls${
-            nudge === "arena" || (nudge === "ready" && canReady) ? " prep-nudge" : ""
-          }`}
-        >
-          {!deckStage ? arenaLockButton : readyControls}
-        </div> : null}
-        {mobilePrepLayout ? (
-          <div className={`prep-match-status prep-mobile-match-status${opp ? "" : " no-opponent"}`}>
+      {floatingFooter ? (
+        <div className="prep-ready-float">
+          <div className="prep-bar-row">
             {opp ? (
-              <div className="prep-ready-opponent">
-                <CardArtwork
-                  className="prep-ready-opponent-art"
-                  cardId={opp.heroId}
-                  alt={intl.formatMessage({ id: "prep.opponentHeroAria" }, { hero: opp.heroName })}
-                  width={38}
-                  height={52}
-                />
-                <div className="prep-mobile-opponent-copy">
-                  <span>{intl.formatMessage({ id: "prep.opponent" })}</span>
-                  <strong title={opp.heroName}>
-                    {opp.heroName} · {intl.formatMessage({
-                      id: `prep.opponentStatus.${readiness.opponentStatus}`,
-                    })}
-                  </strong>
-                  {turnStatus}
+              <CardArtwork
+                className="prep-ready-opponent-art"
+                cardId={opp.heroId}
+                alt={intl.formatMessage({ id: "prep.opponentHeroAria" }, { hero: opp.heroName })}
+                width={42}
+                height={58}
+              />
+            ) : null}
+            <div className="prep-bar-copy">
+              {turnOrderLine ?? (pickPending && iChooseFirst
+                ? <p className="prep-sheet-prompt">{choosePrompt}</p>
+                : turnStatus)}
+              {deckStage ? (
+                <span
+                  className={`prep-bar-count${mainCountValid ? " valid" : " invalid"}`}
+                  aria-live="polite"
+                >
+                  {intl.formatMessage(
+                    { id: "prep.presentation.mainCount" },
+                    { count: mainCount, requirement: mainCountRequirement },
+                  )}
+                </span>
+              ) : null}
+              {opponentState ? (
+                <div className={`prep-sheet-state ${opponentState}`}>
+                  {intl.formatMessage({ id: `prep.opponentState.${opponentState}` })}
                 </div>
+              ) : null}
+            </div>
+            {deckStage || arenaStage ? (
+              <div
+                className={`prep-ready-controls${
+                  nudge === "arena" || (nudge === "ready" && canReady) ? " prep-nudge" : ""
+                }`}
+              >
+                {deckStage ? readyControls : arenaLockButton}
               </div>
             ) : null}
-            {pickPending && iChooseFirst ? (
-              <FirstPlayerChoice
-                className="prep-float-pick"
-                nudge={nudge === "first-player"}
-                onChoose={chooseFirst}
-              />
-            ) : !opp ? turnStatus : null}
           </div>
-        ) : null}
-        {prepErrors}
-      </div> : null}
+          {pickPending && iChooseFirst ? (
+            <FirstPlayerChoice
+              className="prep-float-pick"
+              nudge={nudge === "first-player"}
+              onChoose={chooseFirst}
+            />
+          ) : null}
+          {prepErrors}
+        </div>
+      ) : null}
 
       {weaponToast ? (
         <div key={weaponToast.shownAt} className="prep-toast" role="status" aria-live="polite">
