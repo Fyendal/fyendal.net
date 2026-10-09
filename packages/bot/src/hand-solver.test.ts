@@ -27,6 +27,15 @@ const red = (power: number, extra: Partial<SolverCard> = {}) =>
 const blue = (extra: Partial<SolverCard> = {}) => card({ kind: "block", pitch: 3, name: "blue", ...extra });
 
 describe("hand solver", () => {
+  it("keeps banish permissions available when solving a hand subset", () => {
+    const banished = red(6, { zone: "banish", cost: 3 });
+    const pitch = blue();
+    const solver = new HandSolver([banished, pitch, red(4)]);
+    const result = solver.solve(new Set([pitch.instanceId]));
+    expect(result.damage).toBe(6);
+    expect(result.line[0]?.instanceId).toBe(banished.instanceId);
+  });
+
   it("plays one terminal attack per action point", () => {
     const result = new HandSolver([red(6), red(5)]).solve();
     expect(result.damage).toBe(6);

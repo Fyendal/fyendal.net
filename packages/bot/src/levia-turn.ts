@@ -74,3 +74,60 @@ export function leviaSashEnablesPair(input: BotPolicyInput, cards: readonly Card
   return leviaAttackPair(input, cards, { sash: true, future }) &&
     !leviaAttackPair(input, cards, { future });
 }
+
+const GATE = "Gate to i'Arathael";
+const BLASMOPHET = "Blasmophet, the Insatiable Hunger";
+
+/** A Gate's activation cost. */
+export const LEVIA_GATE_COST = 1;
+
+function controls(input: BotPolicyInput, name: string): number {
+  return input.view.players[input.seat].board.filter((card) => input.cards[card.cardId]?.name === name).length;
+}
+
+export function leviaBloodDebtAction(card: CardView, input: BotPolicyInput): boolean {
+  const data = input.cards[card.cardId];
+  return !card.faceDown && data?.cardType === "action" && data.keywords?.includes("Blood Debt") === true;
+}
+
+/** Whether Blasmophet's once-per-turn banish play is still available. */
+function blasmophetPlayOpen(input: BotPolicyInput, nextTurn: boolean): boolean {
+  if (controls(input, BLASMOPHET) === 0) return false;
+  const me = input.view.players[input.seat];
+  if (nextTurn || input.view.pendingDecision !== null || input.view.stack.length > 0 ||
+    input.view.chain.some((link) => !link.resolved) || me.actionPoints < 1) return true;
+  return input.legal.some((intent) => {
+    if (intent.kind !== "play-from-zone" || intent.zone !== "banish") return false;
+    const card = me.banish.find((candidate) => candidate.instanceId === intent.instanceId);
+    return card !== undefined && card.playableFromSourceCardId === undefined && leviaBloodDebtAction(card, input);
+  });
+}
+
+export interface LeviaBanishAccess {
+  readonly card: CardView;
+  readonly viaGate: boolean;
+}
+
+/** Banished Blood Debt attacks reachable through Gates and Blasmophet, one per
+ * permission, best first. `extra` adds hypothetical Gates and banished cards. */
+export function leviaBanishAccess(
+  input: BotPolicyInput,
+  nextTurn: boolean,
+  extra: { gates?: number; banished?: readonly CardView[] } = {},
+): LeviaBanishAccess[] {
+  const me = input.view.players[input.seat];
+  const blasmophet = blasmophetPlayOpen(input, nextTurn) ? 1 : 0;
+  const slots = controls(input, GATE) + (extra.gates ?? 0) + blasmophet;
+  if (slots === 0) return [];
+  return [...me.banish, ...(extra.banished ?? [])]
+    .filter((card) => card.playableFromSourceCardId === undefined && leviaBloodDebtAction(card, input) &&
+      leviaAttackPlayable(card, input))
+    .sort((left, right) => {
+      const a = input.cards[left.cardId];
+      const b = input.cards[right.cardId];
+      return (b?.attack ?? 0) - (a?.attack ?? 0) || (a?.cost ?? 0) - (b?.cost ?? 0) ||
+        left.instanceId - right.instanceId;
+    })
+    .slice(0, slots)
+    .map((card, index) => ({ card, viaGate: index >= blasmophet }));
+}

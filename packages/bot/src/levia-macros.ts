@@ -1,6 +1,7 @@
 import type { CardData, CardView, GameIntent } from "@fyendal/shared";
 import { intentCard, isAttack, ownCards, type BotPolicyInput } from "./policy.js";
 import { leviaEffectActive } from "./levia-turn.js";
+import { POINTS_PER_DAMAGE } from "./turn-planner.js";
 
 export type LeviaMacro = "redeem" | "stabilize" | "engine" | "bloodrush" | "attrition" | "pressure";
 
@@ -108,6 +109,7 @@ export function leviaMacroPositionBonus(
   root: BotPolicyInput,
   observed: BotPolicyInput,
   complete: boolean,
+  engineValue?: (input: BotPolicyInput) => number,
 ): number {
   const start = root.view.players[root.seat];
   const me = observed.view.players[root.seat];
@@ -121,9 +123,9 @@ export function leviaMacroPositionBonus(
   if (me.life <= reserve && exposedDebt > 0) score -= 2_000;
   if (me.life <= reserve && start.life > reserve) score -= 600;
   if (macro.goal === "stabilize" && suppressed) score += 180;
+  // Unused Gates and Blasmophet carry into next turn.
+  if (complete && engineValue) score += (engineValue(observed) - engineValue(root)) * POINTS_PER_DAMAGE;
   if (macro.goal === "engine" || macro.goal === "attrition") {
-    score += Math.max(0, enginePermanents(me.board, observed) - enginePermanents(start.board, root)) *
-      (root.view.turn === 1 ? 80 : 15);
     score += Math.min(6, Math.max(0, me.graveyard.length - start.graveyard.length)) * 9;
   }
   if (macro.goal === "bloodrush") {

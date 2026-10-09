@@ -295,13 +295,14 @@ export class HandSolver {
     return this.cards;
   }
 
-  /** Best line using only the cards whose instance ids are in `available`
-   * (default: every card). Weapons, equipment and abilities are always
-   * available. */
+  /** Best line using only the hand and arsenal cards in `available` (default:
+   * every card). All other sources are always available. */
   solve(available?: ReadonlySet<number>): SolverResult {
     let remaining = 0;
     this.cards.forEach((card, index) => {
-      if (isPersistent(card) || !available || available.has(card.instanceId)) remaining |= 1 << index;
+      if ((card.zone !== "hand" && card.zone !== "arsenal") || !available || available.has(card.instanceId)) {
+        remaining |= 1 << index;
+      }
     });
     return this.result(this.solveMask(remaining));
   }
