@@ -132,7 +132,12 @@ export {
   formatLegalityIssues,
   type FormatLegalityIssue,
 } from "./formatLegality.js";
-export { EXACT_DECK_SIZE, MIN_DECK_SIZE, weaponSelectionError } from "./presentation.js";
+export {
+  arenaWeaponIssue,
+  EXACT_DECK_SIZE,
+  MIN_DECK_SIZE,
+  weaponSelectionError,
+} from "./presentation.js";
 export type { PresentationResult } from "./presentation.js";
 
 /**

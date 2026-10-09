@@ -4,7 +4,7 @@
   --prep-content-gutter: 25px;
   max-width: 100%;
   overflow-x: clip;
-  padding-bottom: 132px;
+  padding-bottom: 32px;
 }
 .prep-topbar {
   display: flex;
@@ -55,48 +55,8 @@
 }
 .prep-selection-column { min-width: 0; display: grid; gap: 16px; }
 .prep-arena-stage .prep-cardrow { flex-wrap: wrap; }
-.prep-desktop-arena-action {
-  position: sticky;
-  bottom: max(18px, env(safe-area-inset-bottom));
-  z-index: 30;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 10px;
-  margin-top: 20px;
-}
-.prep-desktop-arena-action button { max-width: 100%; white-space: normal; }
 .prep-cloaked-card { display: grid; place-items: center; padding: 12px; text-align: center; }
 .prep-card-choice:disabled { cursor: default; }
-.prep-versus { display: flex; align-items: flex-start; justify-content: center; gap: 14px; }
-.prep-vs-side { max-width: 138px; }
-.prep-vs {
-  align-self: center;
-  font-family: var(--font-display);
-  font-size: 30px;
-  letter-spacing: 2px;
-  color: #b03228;
-  text-shadow: 0 2px 9px #000;
-}
-.prep-hero {
-  display: block;
-  width: 126px;
-  height: 174px;
-  border-radius: 9px;
-  border: 1px solid #5a4426;
-  box-shadow: 0 7px 23px #000a;
-}
-.prep-opp-name {
-  font-family: var(--font-display);
-  text-transform: uppercase;
-  letter-spacing: 2px;
-  color: #cbb37a;
-  margin-top: 12px;
-}
-.prep-die {
-  margin-top: 14px;
-  color: #e8dcc4;
-}
 .prep-bot-nudge-backdrop {
   position: fixed;
   inset: 0;
@@ -162,12 +122,6 @@
 }
 .prep-matchup-detail strong { color: var(--gold); font-size: 13px; }
 .prep-matchup-detail p { margin: 6px 0 0; color: #b7a78b; font-size: 13px; line-height: 1.45; }
-.prep-pick { display: flex; gap: 12px; justify-content: center; margin-top: 14px; }
-.prep-desktop-decision {
-  display: block;
-  margin-top: 14px;
-  text-align: center;
-}
 .prep-section { margin-bottom: 18px; }
 .prep-groups { display: flex; flex-wrap: wrap; gap: 12px 33px; align-items: stretch; }
 .prep-group { position: relative; }
@@ -579,4 +533,237 @@
   line-height: 1.5;
   max-width: 72ch;
   margin: 0 auto;
+}
+
+/* Next-step nudge: after a step sits idle, its control breathes in the same
+   gold the board uses for "you can act". The halo lives on the wrapper because
+   chamfered buttons clip their own shadows. */
+.prep-nudge {
+  animation:
+    prep-nudge-arrive 0.9s ease-out,
+    prep-nudge-breathe 2.4s ease-in-out 0.9s infinite;
+}
+.prep-nudge button:not(:disabled) { border-color: var(--gold); }
+@keyframes prep-nudge-arrive {
+  0% { filter: drop-shadow(0 0 0 #ffd47900); }
+  35% { filter: drop-shadow(0 0 10px #ffd479e6) drop-shadow(0 0 26px #e8bd4a99); }
+  100% { filter: drop-shadow(0 0 3px #ffd47966) drop-shadow(0 0 8px #e8bd4a33); }
+}
+@keyframes prep-nudge-breathe {
+  0%, 100% { filter: drop-shadow(0 0 3px #ffd47966) drop-shadow(0 0 8px #e8bd4a33); }
+  50% { filter: drop-shadow(0 0 7px #ffd479cc) drop-shadow(0 0 18px #e8bd4a80); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .prep-nudge {
+    animation: none;
+    filter: drop-shadow(0 0 6px #ffd479b3) drop-shadow(0 0 14px #e8bd4a66);
+  }
+}
+
+/* Desktop match sheet: heroes face off across the VS spine, each arena sits
+   under its own hero, and the step that advances preparation always sits in
+   the footer. */
+.panel.prep-sheet {
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100dvh - 36px);
+  padding: 0;
+  overflow: hidden;
+  text-align: left;
+}
+.prep-sheet-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 16px 12px;
+  scrollbar-width: thin;
+}
+.prep-mat {
+  --owner: #76b995;
+  display: grid;
+  /* Proportional so the hero stays larger than its equipment as the column
+     narrows on smaller laptops. */
+  grid-template-columns:
+    repeat(2, minmax(0, 5fr)) minmax(0, 0.4fr)
+    minmax(0, 5fr) minmax(0, 6fr) minmax(0, 5fr);
+  align-items: center;
+  grid-template-rows: repeat(3, auto);
+  gap: 5px;
+}
+/* Ownership dots use the board's friendly/opponent colours. */
+.prep-mat.theirs { --owner: #d9796f; }
+/* Zone placement follows the game board: head, chest and legs down the left
+   with arms beside chest; weapons flank the hero. The opponent's half is
+   flipped vertically so both heads face the centre line. */
+.prep-mat .at-head { grid-area: 1 / 1; }
+.prep-mat .at-chest { grid-area: 2 / 1; }
+.prep-mat .at-arms { grid-area: 2 / 2; }
+.prep-mat .at-legs { grid-area: 3 / 1; }
+.prep-mat .at-weapon-left { grid-area: 2 / 4; }
+.prep-mat .at-hero { grid-area: 2 / 5; }
+.prep-mat .at-weapon-right { grid-area: 2 / 6; }
+.prep-mat-player { grid-area: 3 / 2 / 4 / -1; align-self: end; padding-left: 6px; }
+.prep-mat.theirs .at-head { grid-area: 3 / 1; }
+.prep-mat.theirs .at-legs { grid-area: 1 / 1; }
+.prep-mat.theirs .prep-mat-player { grid-area: 1 / 2 / 2 / -1; align-self: start; }
+
+.prep-mat-zone {
+  display: block;
+  width: 100%;
+  aspect-ratio: 300 / 413;
+  border: 1px solid var(--border-subtle);
+  border-radius: 4px;
+  overflow: hidden;
+  isolation: isolate;
+  box-shadow: 0 3px 8px #000a;
+}
+.prep-mat-zone[data-cardid] { cursor: help; }
+.prep-mat-zone[data-cardid]:hover { border-color: var(--gold); }
+.prep-mat-zone .card-artwork { display: block; width: 100%; height: 100%; }
+.prep-mat-zone .card-artwork-placeholder { padding: 3px; }
+.prep-mat-zone .c-name { padding: 0; font-size: 6px; }
+.prep-mat-zone .c-text,
+.prep-mat-zone .c-cost,
+.prep-mat-zone .c-stats { display: none; }
+.prep-mat-hero { border-color: var(--border-strong); }
+.prep-mat-empty {
+  display: grid;
+  place-items: center;
+  border-color: #c2ad7855;
+  background: linear-gradient(160deg, #c2ad780d, #0b080212);
+  box-shadow: inset 0 0 12px #0004;
+}
+.prep-mat-empty .equipment-zone-icon { width: 46%; }
+.prep-mat-hidden { border-style: dashed; border-color: #c2ad7833; background: none; box-shadow: none; }
+.prep-mat-hidden .equipment-zone-icon { opacity: .18; }
+.prep-mat-cloaked { background: repeating-linear-gradient(135deg, #2a1b0d 0 6px, #1c130a 6px 12px); }
+.at-weapon-right .equipment-zone-icon-weapon { transform: scaleX(-1); }
+
+.prep-mat-hero-name {
+  color: #e8d6ad;
+  font-family: var(--font-fantasy-title);
+  font-size: 15px;
+  line-height: 1.2;
+  overflow-wrap: break-word;
+}
+.prep-mat-owner { margin-top: 3px; color: var(--text-secondary); font-size: 13px; }
+.prep-sheet-state { margin-top: 4px; color: var(--text-secondary); font-size: 12px; line-height: 1.3; }
+.prep-mat-owner::before,
+.prep-sheet-state::before {
+  content: "";
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  margin-right: 6px;
+  vertical-align: 1px;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+}
+.prep-mat-owner::before { border-color: var(--owner); background: var(--owner); }
+.prep-sheet-state.arena-locked::before,
+.prep-sheet-state.ready::before { border-color: var(--gold); background: var(--gold); }
+.prep-sheet-state.disconnected { color: var(--danger); }
+.prep-sheet-state.disconnected::before { border-style: dashed; }
+.prep-mat-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 10px 0;
+}
+.prep-mat-divider::before,
+.prep-mat-divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--border-strong));
+}
+.prep-mat-divider::after { background: linear-gradient(90deg, var(--border-strong), transparent); }
+/* Small caps in the card-title face, matching the hero names it separates. */
+.prep-vs {
+  color: var(--bronze);
+  font-family: var(--font-fantasy-title);
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: .06em;
+  line-height: 1;
+  text-shadow: 0 1px 2px #000;
+  text-transform: lowercase;
+}
+.prep-die { margin: 16px 0 0; color: var(--text-secondary); font-size: 13px; text-align: center; }
+
+.prep-sheet-action {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px 16px 16px;
+  border-top: 1px solid var(--border-strong);
+  background: linear-gradient(180deg, #2a1b0d, #1a1108);
+  box-shadow: 0 -8px 18px #0006;
+}
+.prep-sheet-action:empty { display: none; }
+.prep-sheet-turn { margin: 0; color: var(--text-secondary); font-size: 13px; }
+.prep-sheet-turn strong { color: var(--gold); font-weight: 600; }
+.prep-sheet-prompt {
+  margin: 0;
+  color: var(--text-primary);
+  font-size: 14px;
+  line-height: 1.4;
+  text-align: center;
+}
+.prep-pick {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+.prep-pick button,
+.prep-sheet-lock button { width: 100%; min-height: 44px; white-space: normal; }
+.prep-sheet .prep-decision-status { text-align: center; }
+.prep-sheet-ready { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+
+/* Stacked tablet layout: the sheet scrolls away above the deck, so its action
+   floats where the deck footer used to be. */
+@media (max-width: 1035px) and (orientation: portrait) {
+  .prep-page { padding-bottom: 132px; }
+  .panel.prep-sheet { max-height: none; overflow: visible; }
+  .prep-sheet-action {
+    position: fixed;
+    right: max(18px, env(safe-area-inset-right));
+    bottom: max(18px, env(safe-area-inset-bottom));
+    z-index: 30;
+    width: min(470px, calc(100vw - 36px));
+    border: 1px solid #8b6c37;
+    border-radius: 5px;
+    box-shadow: 0 10px 30px #000d;
+  }
+}
+
+/* Short-lived explanation when a pick is refused, e.g. a second weapon beside
+   a two-hander. Sits under the top bar so it never covers the action footer. */
+.prep-toast {
+  position: fixed;
+  top: 72px;
+  left: 50%;
+  z-index: 45;
+  width: max-content;
+  max-width: min(460px, calc(100vw - 32px));
+  padding: 10px 16px;
+  border: 1px solid #d6b44f;
+  border-radius: 5px;
+  background: #21170df2;
+  box-shadow: 0 7px 24px #000c, 0 0 12px #d6b44f40;
+  color: #f2dda0;
+  font-size: 14px;
+  line-height: 1.4;
+  text-align: center;
+  pointer-events: none;
+  transform: translateX(-50%);
+  animation: prep-toast-in 0.18s ease-out;
+}
+@keyframes prep-toast-in {
+  from { opacity: 0; transform: translate(-50%, -6px); }
+  to { opacity: 1; transform: translate(-50%, 0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .prep-toast { animation: none; }
 }

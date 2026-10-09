@@ -11,7 +11,7 @@ describe("PrepPresentation equipment controls", () => {
       pool: { heroId: "HVY195", weaponIds: ["SEA045"], equipmentPool: ["HVY195"], deck: ["HVY103"] },
       selection: { forDeck: "deck", weaponIndexes: [0], equipment: {}, main: new Map([["HVY103", 1]]) },
       selectionKey: "deck",
-      mainCount: 1, minimumMainCount: 60, inventoryCount: 0, poolMainEntries: [["HVY103", 1]] as [string, number][],
+      showHero: true, mainCount: 1, minimumMainCount: 60, inventoryCount: 0, poolMainEntries: [["HVY103", 1]] as [string, number][],
       fixedInventoryCounts: new Map<string, number>(),
       onToggleWeapon: vi.fn(), onToggleEquipment: vi.fn(), onMoveMainCopy: vi.fn(),
     };
@@ -38,6 +38,7 @@ describe("PrepPresentation equipment controls", () => {
     };
     const html = renderToStaticMarkup(createElement(TestI18nProvider, null, createElement(PrepPresentation, {
       sections: "arena",
+      showHero: true,
       pool,
       selection: {
         forDeck: "deck",
@@ -75,6 +76,7 @@ describe("PrepPresentation equipment controls", () => {
     };
     const html = renderToStaticMarkup(createElement(TestI18nProvider, null, createElement(PrepPresentation, {
       sections: "deck",
+      showHero: true,
       pool,
       selection: {
         forDeck: "deck",
@@ -110,6 +112,7 @@ describe("PrepPresentation equipment controls", () => {
     };
     const html = renderToStaticMarkup(createElement(TestI18nProvider, null, createElement(PrepPresentation, {
       sections: "arena",
+      showHero: true,
       pool,
       selection: {
         forDeck: "deck",
@@ -146,6 +149,7 @@ describe("PrepPresentation equipment controls", () => {
       <TestI18nProvider locale="zh-Hans">
         <PrepPresentation
           sections="deck"
+          showHero
           pool={pool}
           selection={{
             forDeck: "deck",

@@ -58,17 +58,28 @@ describe("preparation stage layout", () => {
     expect(actions).toContain("Leave");
   });
 
-  it.each([false, true])("allows arena drafting before either player chooses turn order (mobile: %s)", (mobile) => {
-    for (const winner of [0, 1] as const) {
-      const prep = pairedPrep("choose-first");
-      prep.botGame = false;
-      prep.die = { rolls: winner === 0 ? [5, 3] : [3, 5], winner };
-      const html = render(prep, mobile);
-      const choices = html.match(/<button\b[^>]*class="prep-card-choice[^>]*>/g) ?? [];
-      expect(choices.length).toBeGreaterThan(0);
-      for (const choice of choices) expect(choice).not.toContain("disabled");
-      expect(html).not.toContain("Lock arena cards");
-    }
+  it.each([false, true])("allows arena drafting while the opponent chooses turn order (mobile: %s)", (mobile) => {
+    const prep = pairedPrep("choose-first");
+    prep.botGame = false;
+    prep.die = { rolls: [3, 5], winner: 1 };
+    const html = render(prep, mobile);
+    const choices = html.match(/<button\b[^>]*class="prep-card-choice[^>]*>/g) ?? [];
+    expect(choices.length).toBeGreaterThan(0);
+    for (const choice of choices) expect(choice).not.toContain("disabled");
+    expect(html).not.toContain("Lock arena cards");
+    expect(html).not.toContain("Arena cards open once turn order is decided.");
+  });
+
+  it.each([false, true])("keeps arena drafting disabled while you choose turn order (bot game: %s)", (botGame) => {
+    const prep = pairedPrep("choose-first");
+    prep.botGame = botGame;
+    prep.die = { rolls: [5, 3], winner: 0 };
+    const html = render(prep, false);
+    const choices = html.match(/<button\b[^>]*class="prep-card-choice[^>]*>/g) ?? [];
+    expect(choices.length).toBeGreaterThan(0);
+    for (const choice of choices) expect(choice).toContain("disabled");
+    expect(html).toContain("Arena cards open once turn order is decided.");
+    expect(html).not.toMatch(/<select id="fabrary-matchup"[^>]*disabled/);
   });
 
   it("keeps arena drafting disabled during match acceptance", () => {
@@ -80,12 +91,43 @@ describe("preparation stage layout", () => {
     for (const choice of choices) expect(choice).toContain("disabled");
   });
 
-  it("keeps desktop arena selection and its sticky action in one panel", () => {
+  it("puts the desktop arena lock in the match sheet beside both player mats", () => {
     const html = render(pairedPrep("select-arena"), false);
-    expect(html).toContain("prep-desktop-arena-action");
+    const action = html.match(/<div class="prep-sheet-action">([\s\S]*?)<\/section>/)?.[1];
+    expect(action).toContain("Lock arena cards");
     expect(html.match(/Lock arena cards/g)).toHaveLength(1);
+    expect(html.match(/class="prep-mat[ "]/g)).toHaveLength(2);
+    expect(html).toContain("prep-mat-hidden");
+    expect(html).not.toContain("Both selections are revealed");
+    expect(html).not.toContain("prep-sheet-state");
+    expect(html).not.toContain("sideboarding");
     expect(html).not.toContain("prep-ready-float");
     expect(html).not.toContain("Your presentation");
+  });
+
+  it("only reports the opponent when they finish a step ahead of you", () => {
+    const prep = pairedPrep("select-arena");
+    prep.seats[1] = { ...prep.seats[1]!, arenaLocked: true };
+    const html = render(prep, false);
+    expect(html).toContain('<div class="prep-sheet-state arena-locked">Arena cards locked</div>');
+  });
+
+  it("offers the desktop turn-order choice as the sheet action", () => {
+    const html = render(pairedPrep("choose-first"), false);
+    const action = html.match(/<div class="prep-sheet-action">([\s\S]*?)<\/section>/)?.[1];
+    expect(action).toContain("Go first");
+    expect(action).toContain("Go second");
+    expect(html).not.toContain("prep-sheet-turn");
+  });
+
+  it("states turn order and readies the deck from the desktop sheet", () => {
+    const html = render(pairedPrep("select-deck"), false);
+    expect(html).toContain('<p class="prep-sheet-turn">You go <strong>first</strong></p>');
+    const action = html.match(/<div class="prep-sheet-action">([\s\S]*?)<\/section>/)?.[1];
+    expect(action).toContain("Ready");
+    expect(html).not.toContain("prep-ready-float");
+    expect(html).not.toContain("Arena cards revealed");
+    expect(html).toContain("Your presentation");
   });
 
   it("shows mobile first-player choices without an arena lock action", () => {

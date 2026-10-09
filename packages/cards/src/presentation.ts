@@ -49,26 +49,41 @@ function hasKeyword(card: CardData | undefined, keyword: string): boolean {
   return card?.keywords?.some((candidate) => candidate.trim().toLowerCase() === keyword) === true;
 }
 
-/** Validate the cards presented into the two weapon zones. A two-hander only
+export type WeaponSelectionIssueCode =
+  | "not-weapon-zone"
+  | "single-weapon-zone"
+  | "multiple-quivers"
+  | "multiple-off-hands"
+  | "too-many"
+  | "multiple-two-handers"
+  | "two-hander-pairing";
+
+export interface WeaponSelectionIssue {
+  code: WeaponSelectionIssueCode;
+  /** The offending card, when one card alone causes the issue. */
+  cardId?: string;
+}
+
+const SINGLE_WEAPON_ZONE_HEROES = ["kayo, strong-arm", "kayo, armed and dangerous"];
+
+/** Find why cards can't share the two weapon zones. A two-hander only
  * occupies one of the zones it is equipped to, allowing a quiver with a 2H bow
  * or a Perched off-hand with any 2H weapon to occupy the other zone. */
-export function weaponSelectionError(
+function weaponZoneIssue(
   cards: Record<string, CardData>,
   ids: readonly string[],
-): string | null {
+): WeaponSelectionIssue | null {
   const invalid = ids.find((id) => !isWeaponZoneCard(cards[id]));
-  if (invalid) return `${cards[invalid]?.name ?? invalid} can't be equipped to a weapon zone`;
+  if (invalid) return { code: "not-weapon-zone", cardId: invalid };
   const quivers = ids.filter((id) => cards[id]?.subtypes?.includes("quiver"));
   const offHands = ids.filter((id) => cards[id]?.subtypes?.includes("off-hand"));
-  if (quivers.length > 1) return "only one quiver may be presented";
-  if (offHands.length > 1) return "only one off-hand may be presented";
-  if (ids.length > MAX_PRESENTED_WEAPONS) {
-    return `too many weapons (${ids.length}, max ${MAX_PRESENTED_WEAPONS})`;
-  }
+  if (quivers.length > 1) return { code: "multiple-quivers" };
+  if (offHands.length > 1) return { code: "multiple-off-hands" };
+  if (ids.length > MAX_PRESENTED_WEAPONS) return { code: "too-many" };
 
   const twoHanders = ids.filter((id) => cards[id]?.subtypes?.includes("2h"));
   if (twoHanders.length === 0 || ids.length === 1) return null;
-  if (twoHanders.length > 1) return "only one two-hand weapon may be presented";
+  if (twoHanders.length > 1) return { code: "multiple-two-handers", cardId: twoHanders[0] };
 
   const twoHander = cards[twoHanders[0]!];
   const companionId = ids.find((id) => id !== twoHanders[0]);
@@ -76,8 +91,48 @@ export function weaponSelectionError(
   const canShare = hasKeyword(companion, "perched") ||
     (companion?.subtypes?.includes("quiver") === true &&
       twoHander?.subtypes?.includes("bow") === true);
-  if (!canShare) return "a two-hand weapon can only be paired with a compatible quiver or Perched card";
+  if (!canShare) return { code: "two-hander-pairing", cardId: twoHanders[0] };
   return null;
+}
+
+/** Find why a weapon-zone selection is illegal for this hero, as a stable
+ * code the client can explain in the player's language. */
+export function arenaWeaponIssue(
+  cards: Record<string, CardData>,
+  heroId: string,
+  ids: readonly string[],
+): WeaponSelectionIssue | null {
+  if (SINGLE_WEAPON_ZONE_HEROES.includes(cards[heroId]?.name.toLowerCase() ?? "") && ids.length > 1) {
+    return { code: "single-weapon-zone", cardId: heroId };
+  }
+  return weaponZoneIssue(cards, ids);
+}
+
+function weaponIssueMessage(
+  cards: Record<string, CardData>,
+  ids: readonly string[],
+  issue: WeaponSelectionIssue,
+): string {
+  const name = issue.cardId ? cards[issue.cardId]?.name ?? issue.cardId : "";
+  switch (issue.code) {
+    case "single-weapon-zone": return `${name} starts with only one weapon zone`;
+    case "not-weapon-zone": return `${name} can't be equipped to a weapon zone`;
+    case "multiple-quivers": return "only one quiver may be presented";
+    case "multiple-off-hands": return "only one off-hand may be presented";
+    case "too-many": return `too many weapons (${ids.length}, max ${MAX_PRESENTED_WEAPONS})`;
+    case "multiple-two-handers": return "only one two-hand weapon may be presented";
+    case "two-hander-pairing":
+      return "a two-hand weapon can only be paired with a compatible quiver or Perched card";
+  }
+}
+
+/** English validation error for a weapon-zone selection, ignoring hero limits. */
+export function weaponSelectionError(
+  cards: Record<string, CardData>,
+  ids: readonly string[],
+): string | null {
+  const issue = weaponZoneIssue(cards, ids);
+  return issue ? weaponIssueMessage(cards, ids, issue) : null;
 }
 
 /** Pure presentation validator shared by browser and server. */
@@ -91,14 +146,10 @@ export function validateArenaAgainstCards(
   const legalityIssue = formatLegalityIssues(cards, pool, format, options)[0];
   if (legalityIssue) return { ok: false, error: legalityIssue.message };
 
-  if (
-    ["kayo, strong-arm", "kayo, armed and dangerous"].includes(cards[pool.heroId]?.name.toLowerCase() ?? "") &&
-    presented.weaponIds.length > 1
-  ) {
-    return { ok: false, error: `${cards[pool.heroId]!.name} starts with only one weapon zone` };
+  const weaponIssue = arenaWeaponIssue(cards, pool.heroId, presented.weaponIds);
+  if (weaponIssue) {
+    return { ok: false, error: weaponIssueMessage(cards, presented.weaponIds, weaponIssue) };
   }
-  const invalidWeapons = weaponSelectionError(cards, presented.weaponIds);
-  if (invalidWeapons) return { ok: false, error: invalidWeapons };
   const badWeapon = outsideSubset(cards, counts(presented.weaponIds), counts(pool.weaponIds));
   if (badWeapon) return { ok: false, error: `${badWeapon} is not in your registered weapons` };
 

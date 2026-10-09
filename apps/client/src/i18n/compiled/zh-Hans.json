@@ -23952,6 +23952,12 @@
       "value": "正在等待你的对手"
     }
   ],
+  "prep.arena.afterTurnOrder": [
+    {
+      "type": 0,
+      "value": "决定先后手后即可选择场上卡牌。"
+    }
+  ],
   "prep.arena.cloaked": [
     {
       "type": 0,
@@ -23962,12 +23968,6 @@
     {
       "type": 0,
       "value": "锁定场上卡牌"
-    }
-  ],
-  "prep.arena.lockHint": [
-    {
-      "type": 0,
-      "value": "选择武器和装备。双方锁定后，将同时公开所选卡牌。"
     }
   ],
   "prep.arena.locked": [
@@ -24226,6 +24226,24 @@
       "value": "hero"
     }
   ],
+  "prep.opponentState.arena-locked": [
+    {
+      "type": 0,
+      "value": "场上卡牌已锁定"
+    }
+  ],
+  "prep.opponentState.disconnected": [
+    {
+      "type": 0,
+      "value": "已断开连接"
+    }
+  ],
+  "prep.opponentState.ready": [
+    {
+      "type": 0,
+      "value": "准备完成"
+    }
+  ],
   "prep.opponentStatus.disconnected": [
     {
       "type": 0,
@@ -24464,16 +24482,6 @@
       "value": "）"
     }
   ],
-  "prep.rollWonOpponent": [
-    {
-      "type": 1,
-      "value": "username"
-    },
-    {
-      "type": 0,
-      "value": " 赢得掷骰，并决定谁先手。"
-    }
-  ],
   "prep.rollWonYou": [
     {
       "type": 0,
@@ -24504,22 +24512,16 @@
       "value": "腿部"
     }
   ],
+  "prep.slot.weapon": [
+    {
+      "type": 0,
+      "value": "武器"
+    }
+  ],
   "prep.status.ready": [
     {
       "type": 0,
       "value": "准备完成"
-    }
-  ],
-  "prep.status.readyLower": [
-    {
-      "type": 0,
-      "value": "已准备"
-    }
-  ],
-  "prep.status.sideboarding": [
-    {
-      "type": 0,
-      "value": "正在调整备牌…"
     }
   ],
   "prep.suggested": [
@@ -24550,6 +24552,38 @@
       "value": "后手"
     }
   ],
+  "prep.turnOrder.youFirst": [
+    {
+      "type": 0,
+      "value": "你"
+    },
+    {
+      "type": 8,
+      "value": "order",
+      "children": [
+        {
+          "type": 0,
+          "value": "先手"
+        }
+      ]
+    }
+  ],
+  "prep.turnOrder.youSecond": [
+    {
+      "type": 0,
+      "value": "你"
+    },
+    {
+      "type": 8,
+      "value": "order",
+      "children": [
+        {
+          "type": 0,
+          "value": "后手"
+        }
+      ]
+    }
+  ],
   "prep.unknownHero": [
     {
       "type": 0,
@@ -24566,6 +24600,64 @@
     {
       "type": 0,
       "value": "正在等待对手"
+    }
+  ],
+  "prep.weaponIssue.multiple-off-hands": [
+    {
+      "type": 0,
+      "value": "只能携带一件副手。"
+    }
+  ],
+  "prep.weaponIssue.multiple-quivers": [
+    {
+      "type": 0,
+      "value": "只能携带一个箭袋。"
+    }
+  ],
+  "prep.weaponIssue.multiple-two-handers": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "需要双手。请先移除一件武器。"
+    }
+  ],
+  "prep.weaponIssue.not-weapon-zone": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "不能放入武器区。"
+    }
+  ],
+  "prep.weaponIssue.single-weapon-zone": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "只有一个武器区。请先移除已选武器。"
+    }
+  ],
+  "prep.weaponIssue.too-many": [
+    {
+      "type": 0,
+      "value": "双手已满。请先移除一件武器。"
+    }
+  ],
+  "prep.weaponIssue.two-hander-pairing": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "需要双手。请先移除一件武器。"
     }
   ],
   "prep.you": [

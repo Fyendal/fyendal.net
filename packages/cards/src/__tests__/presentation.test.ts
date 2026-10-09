@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 import type { CardData, DeckPool, Format, PresentedDeck } from "@fyendal/shared";
-import { validateArenaAgainstCards, validatePresentationAgainstCards } from "../presentation.js";
+import {
+  arenaWeaponIssue,
+  validateArenaAgainstCards,
+  validatePresentationAgainstCards,
+} from "../presentation.js";
 
 const card = (id: string, cardType: CardData["cardType"], subtypes: string[] = []): CardData => ({
   id,
@@ -155,5 +159,19 @@ describe("shared presentation validation", () => {
   ] as [Format, number, boolean][])("enforces %s size %d", (format, size, ok) => {
     const pool = basePool(Math.max(60, size));
     expect(validatePresentationAgainstCards(cards, pool, presentation(size), format).ok).toBe(ok);
+  });
+});
+
+describe("arena weapon issues", () => {
+  it.each([
+    ["HERO", ["TWO", "ONE"], { code: "two-hander-pairing", cardId: "TWO" }],
+    ["HERO", ["TWO", "TWO_CLUB"], { code: "multiple-two-handers", cardId: "TWO" }],
+    ["HERO", ["ONE", "ONE", "OFF_HAND"], { code: "too-many" }],
+    ["HERO", ["OFF_HAND", "PERCHED"], { code: "multiple-off-hands" }],
+    ["HERO", ["MAIN"], { code: "not-weapon-zone", cardId: "MAIN" }],
+    ["KAYO", ["ONE", "ONE"], { code: "single-weapon-zone", cardId: "KAYO" }],
+    ["HERO", ["TWO", "QUIVER"], null],
+  ] as const)("reports %s with %j", (heroId, ids, expected) => {
+    expect(arenaWeaponIssue(cards, heroId, ids)).toEqual(expected);
   });
 });

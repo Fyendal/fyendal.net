@@ -25084,6 +25084,12 @@
       "value": "Waiting for your opponent"
     }
   ],
+  "prep.arena.afterTurnOrder": [
+    {
+      "type": 0,
+      "value": "Arena cards open once turn order is decided."
+    }
+  ],
   "prep.arena.cloaked": [
     {
       "type": 0,
@@ -25094,12 +25100,6 @@
     {
       "type": 0,
       "value": "Lock arena cards"
-    }
-  ],
-  "prep.arena.lockHint": [
-    {
-      "type": 0,
-      "value": "Choose your weapons and equipment. Both selections are revealed after both players lock them."
     }
   ],
   "prep.arena.locked": [
@@ -25384,6 +25384,24 @@
       "value": "hero"
     }
   ],
+  "prep.opponentState.arena-locked": [
+    {
+      "type": 0,
+      "value": "Arena cards locked"
+    }
+  ],
+  "prep.opponentState.disconnected": [
+    {
+      "type": 0,
+      "value": "Disconnected"
+    }
+  ],
+  "prep.opponentState.ready": [
+    {
+      "type": 0,
+      "value": "Ready"
+    }
+  ],
   "prep.opponentStatus.disconnected": [
     {
       "type": 0,
@@ -25636,16 +25654,6 @@
       "value": ")"
     }
   ],
-  "prep.rollWonOpponent": [
-    {
-      "type": 1,
-      "value": "username"
-    },
-    {
-      "type": 0,
-      "value": " won the roll and decides who goes first."
-    }
-  ],
   "prep.rollWonYou": [
     {
       "type": 0,
@@ -25676,22 +25684,16 @@
       "value": "legs"
     }
   ],
+  "prep.slot.weapon": [
+    {
+      "type": 0,
+      "value": "weapon"
+    }
+  ],
   "prep.status.ready": [
     {
       "type": 0,
       "value": "Ready"
-    }
-  ],
-  "prep.status.readyLower": [
-    {
-      "type": 0,
-      "value": "ready"
-    }
-  ],
-  "prep.status.sideboarding": [
-    {
-      "type": 0,
-      "value": "sideboarding…"
     }
   ],
   "prep.suggested": [
@@ -25722,6 +25724,38 @@
       "value": "second"
     }
   ],
+  "prep.turnOrder.youFirst": [
+    {
+      "type": 0,
+      "value": "You go "
+    },
+    {
+      "type": 8,
+      "value": "order",
+      "children": [
+        {
+          "type": 0,
+          "value": "first"
+        }
+      ]
+    }
+  ],
+  "prep.turnOrder.youSecond": [
+    {
+      "type": 0,
+      "value": "You go "
+    },
+    {
+      "type": 8,
+      "value": "order",
+      "children": [
+        {
+          "type": 0,
+          "value": "second"
+        }
+      ]
+    }
+  ],
   "prep.unknownHero": [
     {
       "type": 0,
@@ -25738,6 +25772,64 @@
     {
       "type": 0,
       "value": "Waiting for opponent"
+    }
+  ],
+  "prep.weaponIssue.multiple-off-hands": [
+    {
+      "type": 0,
+      "value": "You can only bring one off-hand."
+    }
+  ],
+  "prep.weaponIssue.multiple-quivers": [
+    {
+      "type": 0,
+      "value": "You can only bring one quiver."
+    }
+  ],
+  "prep.weaponIssue.multiple-two-handers": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " needs both hands. Remove a weapon first."
+    }
+  ],
+  "prep.weaponIssue.not-weapon-zone": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " can't go in a weapon zone."
+    }
+  ],
+  "prep.weaponIssue.single-weapon-zone": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " has only one weapon zone. Remove your weapon first."
+    }
+  ],
+  "prep.weaponIssue.too-many": [
+    {
+      "type": 0,
+      "value": "Both hands are full. Remove a weapon first."
+    }
+  ],
+  "prep.weaponIssue.two-hander-pairing": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " needs both hands. Remove a weapon first."
     }
   ],
   "prep.you": [

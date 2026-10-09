@@ -3,6 +3,7 @@ import { useIntl } from "react-intl";
 import { useShallow } from "zustand/react/shallow";
 import type { EquipmentSlot } from "@fyendal/shared";
 import {
+  arenaWeaponIssue,
   cardData,
   EXACT_DECK_SIZE,
   MIN_DECK_SIZE,
@@ -39,7 +40,11 @@ import {
 } from "./BotPracticeNudge.js";
 import { PrepPresentation } from "./PrepPresentation.js";
 import { PrepArenaCards } from "./PrepArenaCards.js";
+import { PrepMatchSheet } from "./PrepMatchSheet.js";
+import { nextPrepStep, useStepNudge } from "./nextStepNudge.js";
 import { FullscreenButton } from "../components/FullscreenButton.js";
+
+const WEAPON_TOAST_MS = 3_500;
 
 function heroKey(value: string): string {
   return value.toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_|_$/g, "");
@@ -66,15 +71,17 @@ function plainMatchupNotes(notes: string): string {
 
 function FirstPlayerChoice({
   className,
+  nudge,
   onChoose,
 }: {
   className: string;
+  nudge: boolean;
   onChoose: (first: boolean) => void;
 }) {
   const intl = useIntl();
   return (
     <div
-      className={className}
+      className={`${className}${nudge ? " prep-nudge" : ""}`}
       role="group"
       aria-label={intl.formatMessage({ id: "prep.firstPlayer.choose" })}
     >
@@ -121,6 +128,7 @@ export function PrepRoom() {
   const [inspectedCardId, setInspectedCardId] = useState<string | null>(null);
   const cardLongPressHandlers = useMobileCardLongPress((cardId) => setInspectedCardId(cardId));
   const [errors, setErrors] = useState<string[]>([]);
+  const [weaponToast, setWeaponToast] = useState<{ message: string; shownAt: number } | null>(null);
   const [inviteCopied, setInviteCopied] = useState(false);
   const [matchupBusy, setMatchupBusy] = useState(false);
   const [mobilePrepLayout, setMobilePrepLayout] = useState(
@@ -142,6 +150,9 @@ export function PrepRoom() {
   const botNudgeKey = botNudgeEligible && prepDeck
     ? `${roomCode ?? "queue"}:${prepDeck.id}`
     : null;
+  const nextStep = nextPrepStep(prep);
+  const nudgeActive = useStepNudge(nextStep ? `${roomCode ?? "queue"}:${nextStep}` : null);
+  const nudge = nudgeActive ? nextStep : null;
   const otherPlayersInQueue = matchmakingActive
     ? Math.max(0, (prepFormat ? queueCounts[prepFormat] : 0) - 1)
     : (prepFormat ? queueCounts[prepFormat] : 0);
@@ -152,6 +163,12 @@ export function PrepRoom() {
     query.addEventListener("change", syncLayout);
     return () => query.removeEventListener("change", syncLayout);
   }, []);
+
+  useEffect(() => {
+    if (!weaponToast) return;
+    const timer = window.setTimeout(() => setWeaponToast(null), WEAPON_TOAST_MS);
+    return () => window.clearTimeout(timer);
+  }, [weaponToast]);
 
   useEffect(() => {
     if (!botNudgeKey) {
@@ -201,11 +218,13 @@ export function PrepRoom() {
   const accepting = prep?.phase === "accept";
   const deckStage = prep?.phase === "select-deck";
   const arenaStage = prep?.phase === "select-arena";
-  const arenaLocked = accepting || deckStage || me?.arenaLocked === true;
+  // While you pick turn order, arena picks wait so that decision is not buried
+  // under the card grid. Waiting on an opponent's pick still allows drafting.
+  const choosingTurnOrder = nextStep === "first-player";
+  const arenaLocked = accepting || choosingTurnOrder || deckStage || me?.arenaLocked === true;
   const locked = ready || !deckStage;
   const matchupLocked = ready || accepting || (me?.arenaLocked === true && !deckStage);
-  const desktopArenaAction = !mobilePrepLayout && arenaStage;
-  const floatingFooter = deckStage || (mobilePrepLayout && !accepting && opp !== null);
+  const floatingFooter = mobilePrepLayout && (deckStage || (!accepting && opp !== null));
   const matchups = prepDeck.matchups ?? [];
   const selectedMatchup = matchups.find((matchup) => matchup.id === prepDeck.selectedMatchupId);
   const suggestedMatchups = opp
@@ -253,6 +272,21 @@ export function PrepRoom() {
   const toggleWeapon = (index: number) => {
     if (arenaLocked) return;
     const has = selection.weaponIndexes.includes(index);
+    if (!has) {
+      const candidate = [...selection.weaponIndexes, index].map((i) => pool.weaponIds[i]!);
+      const issue = arenaWeaponIssue(cardData, pool.heroId, candidate);
+      if (issue) {
+        setWeaponToast({
+          message: intl.formatMessage(
+            { id: `prep.weaponIssue.${issue.code}` },
+            { card: issue.cardId ? cardData[issue.cardId]?.name ?? issue.cardId : "" },
+          ),
+          shownAt: Date.now(),
+        });
+        return;
+      }
+    }
+    setWeaponToast(null);
     setErrors([]);
     setSel({
       ...selection,
@@ -305,7 +339,6 @@ export function PrepRoom() {
   };
 
   const die = prep?.die ?? null;
-  const iWonDie = die !== null && die.winner === yourSeat;
   const iChooseFirst = canChooseFirst({
     botGame: prep?.botGame === true,
     dieWinner: die?.winner ?? null,
@@ -357,6 +390,7 @@ export function PrepRoom() {
       selectionKey={selectionKey}
       locked={deckStage ? locked : arenaLocked}
       sections={deckStage ? "deck" : "arena"}
+      showHero={mobilePrepLayout}
       mainCount={mainCount}
       minimumMainCount={min}
       exactMainCount={exact}
@@ -387,6 +421,139 @@ export function PrepRoom() {
       {errors.map((error) => <li key={error}>{error}</li>)}
     </ul>
   ) : null;
+
+  // The desktop sheet already states lock progress; the grid only explains
+  // why it is disabled.
+  const arenaNote = deckStage
+    ? null
+    : choosingTurnOrder
+      ? "prep.arena.afterTurnOrder"
+      : mobilePrepLayout && me?.arenaLocked ? "prep.arena.waiting" : null;
+  const draftArena = {
+    weaponIds: selection.weaponIndexes.map((index) => pool.weaponIds[index]!),
+    equipment: selection.equipment,
+  };
+  const matchupPlan = matchups.length > 0 ? (
+    <div className="prep-matchup-plan">
+      <label htmlFor="fabrary-matchup">
+        {intl.formatMessage({ id: "prep.matchupPlan" })}
+      </label>
+      <select
+        id="fabrary-matchup"
+        value={prepDeck.selectedMatchupId ?? ""}
+        disabled={matchupLocked || matchupBusy}
+        onChange={(event) => void chooseMatchup(event.target.value)}
+      >
+        <option value="">{intl.formatMessage({ id: "prep.defaultDeck" })}</option>
+        {matchups.map((matchup) => (
+          <option key={matchup.id} value={matchup.id}>
+            {matchup.name}{suggestedMatchups.has(matchup.id)
+              ? ` — ${intl.formatMessage({ id: "prep.suggested" })}`
+              : ""}
+          </option>
+        ))}
+      </select>
+      {matchupBusy ? (
+        <span className="muted">{intl.formatMessage({ id: "prep.loadingPlan" })}</span>
+      ) : null}
+      {selectedMatchup ? (
+        <div className="prep-matchup-detail">
+          {selectedMatchup.preferredTurnOrder ? (
+            <strong>{intl.formatMessage(
+              { id: "prep.prefersTurnOrder" },
+              {
+                order: intl.formatMessage({
+                  id: `prep.turnOrder.${selectedMatchup.preferredTurnOrder}`,
+                }),
+              },
+            )}</strong>
+          ) : null}
+          {selectedMatchup.notes ? <p>{plainMatchupNotes(selectedMatchup.notes)}</p> : null}
+        </div>
+      ) : null}
+    </div>
+  ) : null;
+  const dieNotice = die && opp && !prep?.botGame ? (
+    <p className="prep-die">
+      {intl.formatMessage(
+        { id: "prep.dieRoll" },
+        {
+          you: me?.username ?? intl.formatMessage({ id: "prep.youLower" }),
+          yourRoll: die.rolls[yourSeat],
+          opponentRoll: die.rolls[1 - yourSeat],
+          opponent: opp.username,
+        },
+      )}
+    </p>
+  ) : null;
+  const mainCountMeter = (
+    <div
+      className={`prep-main-count${mainCountValid ? " valid" : " invalid"}`}
+      aria-live="polite"
+      aria-label={intl.formatMessage(
+        { id: "prep.mainDeckAria" },
+        { count: mainCount, requirement: mainCountRequirement },
+      )}
+    >
+      <span>{intl.formatMessage({ id: "prep.zone.main" })}</span>
+      <strong>{mainCount} / {mainCountRequirement}</strong>
+    </div>
+  );
+  const readyControls = ready ? (
+    <>
+      <span className="prep-ready-badge">
+        {intl.formatMessage({ id: "prep.status.ready" })} ✓
+      </span>
+      <button onClick={prepUnready}>{intl.formatMessage({ id: "lobby.deck.edit" })}</button>
+    </>
+  ) : (
+    <button
+      className="btn-primary"
+      onClick={onReady}
+      disabled={!canReady}
+    >
+      {intl.formatMessage({ id: "prep.status.ready" })}
+      {prep?.deadlineAt ? <> · <DeadlineCountdown deadlineAt={prep.deadlineAt} /></> : null}
+    </button>
+  );
+  const sheetAction = (
+    <>
+      {prep?.startPlayer != null ? (
+        <p className="prep-sheet-turn">
+          {intl.formatMessage(
+            { id: prep.startPlayer === yourSeat ? "prep.turnOrder.youFirst" : "prep.turnOrder.youSecond" },
+            { order: (chunks) => <strong>{chunks}</strong> },
+          )}
+        </p>
+      ) : null}
+      {pickPending && iChooseFirst ? (
+        <>
+          <p className="prep-sheet-prompt">
+            {intl.formatMessage({ id: prep?.botGame ? "prep.practiceChooseFirst" : "prep.rollWonYou" })}
+          </p>
+          <FirstPlayerChoice
+            className="prep-pick"
+            nudge={nudge === "first-player"}
+            onChoose={chooseFirst}
+          />
+        </>
+      ) : pickPending ? (
+        <strong className="prep-decision-status pending" aria-live="polite">{decisionStatusLabel}</strong>
+      ) : arenaStage && !me?.arenaLocked ? (
+        <div className={`prep-sheet-lock${nudge === "arena" ? " prep-nudge" : ""}`}>{arenaLockButton}</div>
+      ) : arenaStage ? (
+        <p className="prep-sheet-prompt">{intl.formatMessage({ id: "prep.arena.waiting" })}</p>
+      ) : deckStage ? (
+        <div className="prep-sheet-ready">
+          {mainCountMeter}
+          <div className={`prep-ready-controls${nudge === "ready" && canReady ? " prep-nudge" : ""}`}>
+            {readyControls}
+          </div>
+        </div>
+      ) : null}
+      {prepErrors}
+    </>
+  );
 
   return (
     <div
@@ -421,68 +588,21 @@ export function PrepRoom() {
       </div>
 
       <div className="prep-columns">
-        {!mobilePrepLayout ? <section className="panel prep-opponent">
-          <h3 className="panel-title">{intl.formatMessage({ id: "prep.matchup" })}</h3>
-          {opp ? (
-            <>
-              <div className="prep-versus">
-                <div className="prep-vs-side">
-                  <CardArtwork
-                    className="prep-hero" cardId={pool.heroId}
-                    alt={intl.formatMessage({ id: "prep.yourHero" })} width={126} height={174}
-                  />
-                  <div className="prep-opp-name">
-                    {cardData[pool.heroId]?.name ?? intl.formatMessage({ id: "prep.yourHero" })}
-                  </div>
-                  <div className="muted">{intl.formatMessage({ id: "prep.you" })}</div>
-                </div>
-                <div className="prep-vs">VS</div>
-                <div className="prep-vs-side">
-                  <CardArtwork className="prep-hero" cardId={opp.heroId} alt={opp.heroName} width={126} height={174} />
-                  <div className="prep-opp-name">{opp.heroName}</div>
-                  <div className="muted">
-                    {opp.username} — {intl.formatMessage({
-                      id: opp.ready ? "prep.status.readyLower" : "prep.status.sideboarding",
-                    })}
-                    {!opp.connected
-                      ? ` (${intl.formatMessage({ id: "common.connection.disconnected" })})`
-                      : null}
-                  </div>
-                </div>
-              </div>
-              {die && !prep?.botGame && (
-                <div className="prep-die">
-                  <div>
-                    {intl.formatMessage(
-                      { id: "prep.dieRoll" },
-                      {
-                        you: me?.username ?? intl.formatMessage({ id: "prep.youLower" }),
-                        yourRoll: die.rolls[yourSeat],
-                        opponentRoll: die.rolls[1 - yourSeat],
-                        opponent: opp.username,
-                      },
-                    )}
-                  </div>
-                  <div>{iWonDie
-                    ? intl.formatMessage({ id: "prep.rollWonYou" })
-                    : intl.formatMessage({ id: "prep.rollWonOpponent" }, { username: opp.username })}</div>
-                </div>
-              )}
-              {prep?.botGame && pickPending ? (
-                <p className="prep-die">{intl.formatMessage({ id: "prep.practiceChooseFirst" })}</p>
-              ) : null}
-              {pickPending && iChooseFirst ? (
-                <FirstPlayerChoice className="prep-pick prep-desktop-pick" onChoose={chooseFirst} />
-              ) : (
-                <strong
-                  className={`prep-decision-status prep-desktop-decision${prep?.startPlayer == null ? " pending" : ""}`}
-                  aria-live="polite"
-                >
-                  {decisionStatusLabel}
-                </strong>
-              )}
-            </>
-          ) : (
+        {!mobilePrepLayout && opp && prep ? (
+          <PrepMatchSheet
+            phase={prep.phase}
+            yourHeroId={pool.heroId}
+            yourHeroName={cardData[pool.heroId]?.name ?? intl.formatMessage({ id: "prep.yourHero" })}
+            opponent={opp}
+            yourArena={prep.yourArena ?? draftArena}
+            opponentArena={opp.arena}
+            notice={pickPending ? dieNotice : null}
+            plan={matchupPlan}
+            action={sheetAction}
+          />
+        ) : !mobilePrepLayout ? (
+          <section className="panel prep-opponent">
+            <h3 className="panel-title">{intl.formatMessage({ id: "prep.matchup" })}</h3>
             <p className="muted">
               {intl.formatMessage({ id: "prep.waitingOpponent" })}
               {otherPlayersInQueue > 0
@@ -492,68 +612,21 @@ export function PrepRoom() {
                   )})`
                 : null}
             </p>
-          )}
-          {matchups.length > 0 ? (
-            <div className="prep-matchup-plan">
-              <label htmlFor="fabrary-matchup">
-                {intl.formatMessage({ id: "prep.matchupPlan" })}
-              </label>
-              <select
-                id="fabrary-matchup"
-                value={prepDeck.selectedMatchupId ?? ""}
-                disabled={matchupLocked || matchupBusy}
-                onChange={(event) => void chooseMatchup(event.target.value)}
-              >
-                <option value="">{intl.formatMessage({ id: "prep.defaultDeck" })}</option>
-                {matchups.map((matchup) => (
-                  <option key={matchup.id} value={matchup.id}>
-                    {matchup.name}{suggestedMatchups.has(matchup.id)
-                      ? ` — ${intl.formatMessage({ id: "prep.suggested" })}`
-                      : ""}
-                  </option>
-                ))}
-              </select>
-              {matchupBusy ? (
-                <span className="muted">{intl.formatMessage({ id: "prep.loadingPlan" })}</span>
-              ) : null}
-              {selectedMatchup ? (
-                <div className="prep-matchup-detail">
-                  {selectedMatchup.preferredTurnOrder ? (
-                    <strong>{intl.formatMessage(
-                      { id: "prep.prefersTurnOrder" },
-                      {
-                        order: intl.formatMessage({
-                          id: `prep.turnOrder.${selectedMatchup.preferredTurnOrder}`,
-                        }),
-                      },
-                    )}</strong>
-                  ) : null}
-                  {selectedMatchup.notes ? <p>{plainMatchupNotes(selectedMatchup.notes)}</p> : null}
-                </div>
-              ) : null}
-            </div>
-          ) : null}
-        </section> : null}
+            {matchupPlan}
+          </section>
+        ) : null}
 
         <div className="prep-selection-column">
-          <section className="panel prep-arena-stage" aria-live="polite">
+          {!deckStage || mobilePrepLayout ? <section className="panel prep-arena-stage" aria-live="polite">
             <h3 className="panel-title">
               {intl.formatMessage({ id: deckStage ? "prep.arena.revealed" : "prep.arena.select" })}
             </h3>
-            {!deckStage ? <p className="muted">{intl.formatMessage({
-              id: me?.arenaLocked ? "prep.arena.waiting" : "prep.arena.lockHint",
-            })}</p> : null}
-            {prep?.yourArena ? <PrepArenaCards arena={prep.yourArena} owner="you" /> : null}
-            {opp?.arena ? <PrepArenaCards arena={opp.arena} owner="opponent" /> : null}
-            {!deckStage && !me?.arenaLocked ? presentation : null}
-            {desktopArenaAction ? (
-              <div className="prep-desktop-arena-action">
-                {arenaLockButton}
-                {prepErrors}
-              </div>
-            ) : null}
-            {!floatingFooter && !desktopArenaAction ? prepErrors : null}
-          </section>
+            {arenaNote ? <p className="muted">{intl.formatMessage({ id: arenaNote })}</p> : null}
+            {mobilePrepLayout && prep?.yourArena ? <PrepArenaCards arena={prep.yourArena} owner="you" /> : null}
+            {mobilePrepLayout && opp?.arena ? <PrepArenaCards arena={opp.arena} owner="opponent" /> : null}
+            {!deckStage && (!me?.arenaLocked || !mobilePrepLayout) ? presentation : null}
+            {!floatingFooter && !opp ? prepErrors : null}
+          </section> : null}
 
           {deckStage ? presentation : null}
         </div>
@@ -614,37 +687,13 @@ export function PrepRoom() {
       ) : null}
 
       {floatingFooter ? <div className={`prep-ready-float${deckStage ? "" : " prep-arena-mobile"}`}>
-        {deckStage ? <div
-          className={`prep-main-count${mainCountValid ? " valid" : " invalid"}`}
-          aria-live="polite"
-          aria-label={intl.formatMessage(
-            { id: "prep.mainDeckAria" },
-            { count: mainCount, requirement: mainCountRequirement },
-          )}
+        {deckStage ? mainCountMeter : null}
+        {deckStage || arenaStage ? <div
+          className={`prep-ready-controls${
+            nudge === "arena" || (nudge === "ready" && canReady) ? " prep-nudge" : ""
+          }`}
         >
-          <span>{intl.formatMessage({ id: "prep.zone.main" })}</span>
-          <strong>{mainCount} / {mainCountRequirement}</strong>
-        </div> : null}
-        {deckStage || arenaStage ? <div className="prep-ready-controls">
-          {!deckStage ? (
-            arenaLockButton
-          ) : ready ? (
-            <>
-              <span className="prep-ready-badge">
-                {intl.formatMessage({ id: "prep.status.ready" })} ✓
-              </span>
-              <button onClick={prepUnready}>{intl.formatMessage({ id: "lobby.deck.edit" })}</button>
-            </>
-          ) : (
-            <button
-              className="btn-primary"
-              onClick={onReady}
-              disabled={!canReady}
-            >
-              {intl.formatMessage({ id: "prep.status.ready" })}
-              {prep?.deadlineAt ? <> · <DeadlineCountdown deadlineAt={prep.deadlineAt} /></> : null}
-            </button>
-          )}
+          {!deckStage ? arenaLockButton : readyControls}
         </div> : null}
         {mobilePrepLayout ? (
           <div className={`prep-match-status prep-mobile-match-status${opp ? "" : " no-opponent"}`}>
@@ -669,12 +718,22 @@ export function PrepRoom() {
               </div>
             ) : null}
             {pickPending && iChooseFirst ? (
-              <FirstPlayerChoice className="prep-float-pick" onChoose={chooseFirst} />
+              <FirstPlayerChoice
+                className="prep-float-pick"
+                nudge={nudge === "first-player"}
+                onChoose={chooseFirst}
+              />
             ) : !opp ? turnStatus : null}
           </div>
         ) : null}
         {prepErrors}
       </div> : null}
+
+      {weaponToast ? (
+        <div key={weaponToast.shownAt} className="prep-toast" role="status" aria-live="polite">
+          {weaponToast.message}
+        </div>
+      ) : null}
 
       {preview && cardData[preview.id] && (
         <div

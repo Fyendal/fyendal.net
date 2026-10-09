@@ -98,6 +98,7 @@ export const PrepPresentation = memo(function PrepPresentation({
   selectionKey,
   locked,
   sections,
+  showHero,
   mainCount,
   minimumMainCount,
   exactMainCount,
@@ -113,6 +114,8 @@ export const PrepPresentation = memo(function PrepPresentation({
   selectionKey: string;
   locked: boolean;
   sections: "arena" | "deck";
+  /** The desktop match sheet already shows the hero beside its arena. */
+  showHero: boolean;
   mainCount: number;
   minimumMainCount: number;
   exactMainCount?: number;
@@ -134,7 +137,7 @@ export const PrepPresentation = memo(function PrepPresentation({
       {sections === "deck" ? (
         <h3 className="panel-title">{intl.formatMessage({ id: "prep.presentation.title" })}</h3>
       ) : null}
-      {sections !== "deck" ? <div className="prep-section">
+      {sections !== "deck" && showHero ? <div className="prep-section">
         <span className="play-label">{intl.formatMessage({ id: "prep.presentation.hero" })}</span>
         <div className="prep-cardrow">
           <CardArtwork
