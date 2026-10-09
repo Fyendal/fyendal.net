@@ -35,13 +35,16 @@ describe("BotOpponentModal", () => {
     expect(html).toContain("Jarl");
     expect(html).toContain("Vetreiði");
     expect(html).toContain("Defensive");
-    expect(html).toContain("A patient Earth and Ice Guardian that blocks efficiently and attacks with disruptive two-card hands.");
+    expect(html).toContain("A fatigue deck that blocks efficiently and wins the long game.");
     expect(html).toContain("Levia");
     expect(html).toContain("Shadowborn Abomination");
-    expect(html).toContain("A Shadow Brute that builds Gates and unleashes Bloodrush turns.");
+    expect(html).toContain("An aggressive deck that builds Gates for explosive Bloodrush turns.");
     expect(html).not.toContain("Starvo");
     expect(html).not.toContain("Star of the Show");
-    expect(html.match(/aria-hidden="true"/g)).toHaveLength(5);
+    expect(html).toContain('aria-label="Close Choose your opponent"');
+    expect(html).toContain('class="bot-deck-type bot-deck-type-aggro">Aggro</span>');
+    // Deck-type chips are text only; the dialog's close icon is the sole decoration.
+    expect(html.match(/aria-hidden="true"/g)).toHaveLength(1);
   });
 
   it("offers Kayo, Briar, and Bravo for Silver Age", () => {

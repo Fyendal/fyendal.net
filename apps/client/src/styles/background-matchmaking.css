@@ -115,21 +115,6 @@
   letter-spacing: .04em;
 }
 
-.bot-matchmaking-option {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  margin: 12px 0;
-  padding: 10px 12px;
-  border: 1px solid #73582f99;
-  border-radius: 5px;
-  background: #21170d;
-  cursor: pointer;
-}
-.bot-matchmaking-option input { margin-top: 3px; }
-.bot-matchmaking-option span { display: grid; gap: 3px; }
-.bot-matchmaking-option small { color: #b8aa96; }
-
 @media (max-width: 700px) {
   .background-match-offer { align-items: stretch; flex-direction: column; gap: 7px; }
   .background-match-hero-image {

@@ -68,6 +68,7 @@ export function ModalSurface({
   const onKeyDown = (event: React.KeyboardEvent) => {
     if (event.key === "Escape") {
       event.preventDefault();
+      event.stopPropagation();
       onClose();
       return;
     }

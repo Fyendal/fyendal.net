@@ -23349,25 +23349,19 @@
   "lobby.bot.jarl.description": [
     {
       "type": 0,
-      "value": "A patient Earth and Ice Guardian that blocks efficiently and attacks with disruptive two-card hands."
+      "value": "A fatigue deck that blocks efficiently and wins the long game."
     }
   ],
   "lobby.bot.kayo.description": [
     {
       "type": 0,
-      "value": "An aggressive Brute deck that leads with go again, swings Mandible Claw, and finishes with big attacks."
+      "value": "An aggressive deck that pressures early and finishes with big attacks."
     }
   ],
   "lobby.bot.levia.description": [
     {
       "type": 0,
-      "value": "A Shadow Brute that builds Gates and unleashes Bloodrush turns."
-    }
-  ],
-  "lobby.bot.prompt": [
-    {
-      "type": 0,
-      "value": "Choose a bot to play against."
+      "value": "An aggressive deck that builds Gates for explosive Bloodrush turns."
     }
   ],
   "lobby.bot.searchForPlayer": [

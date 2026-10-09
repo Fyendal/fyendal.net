@@ -4,6 +4,7 @@ import { FUTURE_SET_CODES, cardData, formatLegalityIssues, precon } from "@fyend
 import type { BotOpponent } from "@fyendal/shared";
 import type { ConstructedFormat } from "../domain.js";
 import { heroImageUrl } from "./heroImage.js";
+import { ModalSurface } from "../components/ModalSurface.js";
 import { ViewportTooltip } from "../components/ViewportTooltip.js";
 
 interface BotOption {
@@ -62,7 +63,7 @@ const BOTS: Readonly<Record<ConstructedFormat, readonly BotOption[]>> = {
       title: "Shadowborn Abomination",
       heroName: "Levia, Shadowborn Abomination",
       deckId: "bot-levia-gates",
-      deckType: "midrange",
+      deckType: "aggro",
       descriptionId: "lobby.bot.levia.description",
     },
   ],
@@ -147,115 +148,97 @@ export function BotOpponentModal(props: {
 
   const activeWarnings = activeBot ? BOT_CARD_WARNINGS.get(activeBot) : undefined;
   return (
-    <div
-      className="modal-backdrop bot-opponent-backdrop"
-      onMouseDown={(event) => {
-        if (event.target === event.currentTarget) props.onClose();
-      }}
+    <ModalSurface
+      className="bot-opponent-modal"
+      title={intl.formatMessage({ id: "lobby.bot.chooseOpponent" })}
+      onClose={props.onClose}
     >
-      <section
-        className="deck-pick-modal bot-opponent-modal"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="bot-opponent-title"
-        onKeyDown={(event) => {
-          if (event.key === "Escape") props.onClose();
-        }}
-      >
-        <h2 className="panel-title" id="bot-opponent-title">
-          {intl.formatMessage({ id: "lobby.bot.chooseOpponent" })}
-        </h2>
-        <p className="muted">{intl.formatMessage({ id: "lobby.bot.prompt" })}</p>
-        <label className="bot-matchmaking-option">
-          <input
-            type="checkbox"
-            checked={searchForPlayer}
-            onChange={(event) => {
-              setSearchForPlayer(event.target.checked);
-            }}
-          />
-          <span>
-            <strong>{intl.formatMessage({ id: "lobby.bot.searchForPlayer" })}</strong>
-            <small>{intl.formatMessage({ id: "lobby.bot.searchForPlayer.description" })}</small>
-          </span>
-        </label>
-        <div className="bot-opponent-options">
-          {BOTS[props.format].map((bot, index) => {
-            const warnings = BOT_CARD_WARNINGS.get(bot.id)!;
-            return (
-              <button
-                type="button"
-                key={bot.id}
-                autoFocus={index === 0}
-                aria-describedby={warnings.banned.length > 0 || warnings.future.length > 0
-                  ? `${tooltipId}-${bot.id}`
-                  : undefined}
-                onFocus={() => {
-                  if (warnings.banned.length > 0 || warnings.future.length > 0) {
-                    setFocusedBot(bot.id);
-                  }
-                }}
-                onBlur={() => setFocusedBot((current) => current === bot.id ? null : current)}
-                onClick={() => props.onSelect(bot.id, searchForPlayer)}
-              >
-                <BotPortrait name={bot.name} heroName={bot.heroName} />
-                <span className="bot-opponent-details">
-                  <span className="bot-opponent-heading">
-                    <strong>{bot.name}</strong>
-                    <span className={`bot-deck-type bot-deck-type-${bot.deckType}`}>
-                      <DeckTypeIcon type={bot.deckType} />
-                      {intl.formatMessage({ id: `lobby.bot.type.${bot.deckType}` })}
-                    </span>
-                  </span>
-                  <small className="bot-opponent-title">{bot.title}</small>
-                  <span className="bot-opponent-description">
-                    {intl.formatMessage({ id: bot.descriptionId })}
-                  </span>
-                  {warnings.banned.length > 0 || warnings.future.length > 0 ? (
-                    <span
-                      className="bot-card-warnings"
-                      ref={(element) => { warningRefs.current[bot.id] = element; }}
-                      onPointerEnter={() => setHoveredBot(bot.id)}
-                      onPointerLeave={() => setHoveredBot((current) => current === bot.id ? null : current)}
-                    >
-                      {warnings.banned.length > 0 ? (
-                        <span className="deck-legality-hint banned">
-                          {intl.formatMessage({ id: "lobby.deck.includesBanned" }, {
-                            count: warnings.banned.length,
-                          })}
-                        </span>
-                      ) : null}
-                      {warnings.future.length > 0 ? (
-                        <span className="deck-legality-hint future">
-                          {intl.formatMessage({ id: "lobby.deck.includesFuture" }, {
-                            count: warnings.future.length,
-                          })}
-                        </span>
-                      ) : null}
-                    </span>
-                  ) : null}
-                </span>
-              </button>
-            );
-          })}
-        </div>
-        {BOTS[props.format].map((bot) => {
+      <label className="bot-matchmaking-option">
+        <span className="bot-matchmaking-copy">
+          <strong>{intl.formatMessage({ id: "lobby.bot.searchForPlayer" })}</strong>
+          <small>{intl.formatMessage({ id: "lobby.bot.searchForPlayer.description" })}</small>
+        </span>
+        <input
+          type="checkbox"
+          checked={searchForPlayer}
+          onChange={(event) => {
+            setSearchForPlayer(event.target.checked);
+          }}
+        />
+        <span className="switch-track" />
+      </label>
+      <div className="bot-opponent-options">
+        {BOTS[props.format].map((bot, index) => {
           const warnings = BOT_CARD_WARNINGS.get(bot.id)!;
-          return warnings.banned.length > 0 || warnings.future.length > 0 ? (
-            <span
+          return (
+            <button
+              type="button"
               key={bot.id}
-              className="bot-card-warning-description"
-              id={`${tooltipId}-${bot.id}`}
-              role="tooltip"
+              data-modal-initial-focus={index === 0 ? "" : undefined}
+              aria-describedby={warnings.banned.length > 0 || warnings.future.length > 0
+                ? `${tooltipId}-${bot.id}`
+                : undefined}
+              onFocus={() => {
+                if (warnings.banned.length > 0 || warnings.future.length > 0) {
+                  setFocusedBot(bot.id);
+                }
+              }}
+              onBlur={() => setFocusedBot((current) => current === bot.id ? null : current)}
+              onClick={() => props.onSelect(bot.id, searchForPlayer)}
             >
-              {warningText(warnings)}
-            </span>
-          ) : null;
+              <BotPortrait name={bot.name} heroName={bot.heroName} />
+              <span className="bot-opponent-details">
+                <span className="bot-opponent-heading">
+                  <strong>{bot.name}</strong>
+                  <small className="bot-opponent-title">{bot.title}</small>
+                  <span className={`bot-deck-type bot-deck-type-${bot.deckType}`}>
+                    {intl.formatMessage({ id: `lobby.bot.type.${bot.deckType}` })}
+                  </span>
+                </span>
+                <span className="bot-opponent-description">
+                  {intl.formatMessage({ id: bot.descriptionId })}
+                </span>
+                {warnings.banned.length > 0 || warnings.future.length > 0 ? (
+                  <span
+                    className="bot-card-warnings"
+                    ref={(element) => { warningRefs.current[bot.id] = element; }}
+                    onPointerEnter={() => setHoveredBot(bot.id)}
+                    onPointerLeave={() => setHoveredBot((current) => current === bot.id ? null : current)}
+                  >
+                    {warnings.banned.length > 0 ? (
+                      <span className="deck-legality-hint banned">
+                        {intl.formatMessage({ id: "lobby.deck.includesBanned" }, {
+                          count: warnings.banned.length,
+                        })}
+                      </span>
+                    ) : null}
+                    {warnings.future.length > 0 ? (
+                      <span className="deck-legality-hint future">
+                        {intl.formatMessage({ id: "lobby.deck.includesFuture" }, {
+                          count: warnings.future.length,
+                        })}
+                      </span>
+                    ) : null}
+                  </span>
+                ) : null}
+              </span>
+            </button>
+          );
         })}
-        <button className="bot-opponent-cancel" onClick={props.onClose}>
-          {intl.formatMessage({ id: "common.cancel" })}
-        </button>
-      </section>
+      </div>
+      {BOTS[props.format].map((bot) => {
+        const warnings = BOT_CARD_WARNINGS.get(bot.id)!;
+        return warnings.banned.length > 0 || warnings.future.length > 0 ? (
+          <span
+            key={bot.id}
+            className="bot-card-warning-description"
+            id={`${tooltipId}-${bot.id}`}
+            role="tooltip"
+          >
+            {warningText(warnings)}
+          </span>
+        ) : null;
+      })}
       {activeBot && activeWarnings
         ? <ViewportTooltip
             key={activeBot}
@@ -264,50 +247,7 @@ export function BotOpponentModal(props: {
             className="lobby-tooltip bot-card-warning-tooltip"
           />
         : null}
-    </div>
-  );
-}
-
-function DeckTypeIcon(props: { type: DeckType }) {
-  if (props.type === "beginner") {
-    return (
-      <svg viewBox="0 0 24 24" aria-hidden="true">
-        <path d="M5 21V4m1 1h10l-2.5 3L16 11H6" />
-      </svg>
-    );
-  }
-  if (props.type === "midrange") {
-    return (
-      <svg viewBox="0 0 24 24" aria-hidden="true">
-        <path d="M12 3v18M5 6h14M7 6l-4 7h8L7 6Zm10 0-4 7h8l-4-7ZM8 21h8" />
-      </svg>
-    );
-  }
-  if (props.type === "aggro") {
-    return (
-      <svg viewBox="0 0 24 24" aria-hidden="true">
-        <path d="M12 22c4 0 7-2.7 7-6.5 0-3-1.6-5.4-4.8-8.5.1 2-1 3.5-2.2 4.2.2-3.6-1.8-6.6-5-9.2.3 4.4-2 6.5-2 10.8C5 18.2 8 22 12 22Z" />
-      </svg>
-    );
-  }
-  if (props.type === "elemental") {
-    return (
-      <svg viewBox="0 0 24 24" aria-hidden="true">
-        <path d="m13 2-8 12h7l-1 8 8-12h-7l1-8Z" />
-      </svg>
-    );
-  }
-  if (props.type === "boss") {
-    return (
-      <svg viewBox="0 0 24 24" aria-hidden="true">
-        <path d="m12 2 2.8 5.8 6.2.9-4.5 4.4 1.1 6.2-5.6-2.9-5.6 2.9 1.1-6.2L3 8.7l6.2-.9L12 2Z" />
-      </svg>
-    );
-  }
-  return (
-    <svg viewBox="0 0 24 24" aria-hidden="true">
-      <path d="M12 3 5 6v5c0 4.7 2.7 8.2 7 10 4.3-1.8 7-5.3 7-10V6l-7-3Z" />
-    </svg>
+    </ModalSurface>
   );
 }
 

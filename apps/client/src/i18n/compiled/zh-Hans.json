@@ -22469,25 +22469,19 @@
   "lobby.bot.jarl.description": [
     {
       "type": 0,
-      "value": "耐心的土冰守护者，擅长高效防御并用两卡手牌发动干扰性攻击。"
+      "value": "高效防御、拖入持久战并以疲劳取胜的牌组。"
     }
   ],
   "lobby.bot.kayo.description": [
     {
       "type": 0,
-      "value": "以 go again 起手，衔接 Mandible Claw，再用高攻击力终结的进攻型蛮族牌组。"
+      "value": "前期持续施压、以高攻击力收尾的快攻牌组。"
     }
   ],
   "lobby.bot.levia.description": [
     {
       "type": 0,
-      "value": "暗影蛮勇通过传送门积累资源，并在血涌回合发起猛攻。"
-    }
-  ],
-  "lobby.bot.prompt": [
-    {
-      "type": 0,
-      "value": "选择一位机器人对手。"
+      "value": "构筑传送门，在血涌回合爆发进攻的快攻牌组。"
     }
   ],
   "lobby.bot.searchForPlayer": [

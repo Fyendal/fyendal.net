@@ -194,95 +194,160 @@
   outline-offset: 3px;
 }
 
-.bot-opponent-backdrop { z-index: 70; }
+/* Flat opponent list: matches the home play panel's surfaces and states. */
 .bot-opponent-modal {
-  width: min(720px, calc(100vw - 40px));
-  overflow: visible;
+  width: min(640px, calc(100vw - 40px));
+  border-color: #59493a;
+  border-radius: 3px;
+  background: #211a15;
+  box-shadow: 0 18px 48px #000a;
+  font-family: var(--font-lobby-ui);
 }
-.bot-opponent-modal > .panel-title { font-size: 22px; }
-.bot-opponent-modal > .muted {
-  margin: -3px 0 20px;
-  font-size: 16px;
+.bot-opponent-modal .modal-surface-header {
+  border-bottom-color: #3d3128;
+  background: #211a15;
 }
+.bot-opponent-modal .modal-surface-header h2 { font-size: 20px; }
+.bot-opponent-modal .modal-surface-close {
+  width: 36px;
+  min-width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: 3px;
+  background: transparent;
+  color: var(--text-muted);
+}
+.bot-opponent-modal .modal-surface-close:hover { background: #332519; color: var(--text-primary); }
+.bot-opponent-modal .modal-surface-close svg { width: 16px; height: 16px; stroke-width: 2.25; }
+
+.bot-matchmaking-option {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 16px;
+  padding: 12px 14px;
+  border: 1px solid #5b4c3e;
+  border-radius: 3px;
+  background: #191510;
+  cursor: pointer;
+}
+.bot-matchmaking-option:hover { border-color: #745c3f; }
+.bot-matchmaking-copy { display: grid; min-width: 0; flex: 1; gap: 2px; }
+.bot-matchmaking-copy strong { color: var(--text-primary); font-size: 14px; font-weight: 600; }
+.bot-matchmaking-copy small { color: var(--text-muted); font-size: 13px; line-height: 1.35; }
+.bot-matchmaking-option input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+.bot-matchmaking-option input:checked + .switch-track {
+  border-color: #806334;
+  background: #4a311c;
+}
+.bot-matchmaking-option input:checked + .switch-track::after {
+  transform: translateX(16px);
+  background: var(--gold);
+}
+.bot-matchmaking-option input:focus-visible + .switch-track {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}
+
 .bot-opponent-options {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
+  overflow: hidden;
+  border: 1px solid #5b4c3e;
+  border-radius: 3px;
+  background: #191510;
 }
 .bot-opponent-options > button {
-  display: flex;
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr) 10px;
   min-width: 0;
-  min-height: 128px;
-  align-items: flex-start;
-  gap: 14px;
-  padding: 15px;
-  border-color: #4e3a20;
-  background: linear-gradient(180deg, #24180c, #180f08);
-  font-family: "Segoe UI", system-ui, sans-serif;
+  align-items: start;
+  gap: 4px 14px;
+  padding: 14px 16px 14px 14px;
+  border: 0;
+  border-radius: 0;
+  clip-path: none;
+  background: transparent;
+  color: inherit;
+  font: inherit;
   letter-spacing: 0;
   text-align: left;
   text-transform: none;
 }
-.bot-opponent-options > button:hover {
-  border-color: var(--bronze);
-  background: linear-gradient(180deg, #382612, #241608);
-  box-shadow: inset 0 0 0 1px #b8933f2e;
+.bot-opponent-options > button + button { border-top: 1px solid #3d3128; }
+.bot-opponent-options > button::after {
+  width: 7px;
+  height: 7px;
+  align-self: center;
+  border-right: 2px solid #6e5c48;
+  border-bottom: 2px solid #6e5c48;
+  content: "";
+  transform: rotate(-45deg);
+}
+.bot-opponent-options > button:hover { background: #2a201a; }
+.bot-opponent-options > button:hover::after,
+.bot-opponent-options > button:focus-visible::after { border-color: var(--gold); }
+.bot-opponent-options > button:focus-visible {
+  background: #2a201a;
+  outline: 2px solid var(--gold);
+  outline-offset: -2px;
 }
 .bot-opponent-options img,
 .bot-opponent-fallback {
   display: grid;
-  width: 52px;
-  height: 52px;
-  flex: 0 0 auto;
+  width: 48px;
+  height: 48px;
   place-items: center;
   border: 1px solid #6b5326;
   border-radius: 50%;
   background: #181008;
   color: var(--gold);
-  font-family: var(--font-display);
+  font: 700 18px var(--font-lobby-title);
   object-fit: cover;
 }
 .bot-opponent-details {
-  display: flex;
+  display: grid;
   min-width: 0;
-  flex: 1;
-  flex-direction: column;
+  gap: 4px;
+  padding-top: 2px;
 }
 .bot-opponent-heading {
   display: flex;
   min-width: 0;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 8px;
 }
-.bot-opponent-options strong {
-  color: #f3e6ca;
-  font-size: 19px;
-  line-height: 1.2;
+.bot-opponent-heading strong {
+  color: var(--text-primary);
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.25;
+}
+.bot-opponent-options > button:hover .bot-opponent-heading strong { color: var(--gold); }
+.bot-opponent-title {
+  color: var(--text-muted);
+  font-size: 13px;
+  line-height: 1.25;
+}
+.bot-opponent-description {
+  color: var(--text-secondary);
+  font-size: 14px;
+  line-height: 1.45;
 }
 .bot-deck-type {
-  display: inline-flex;
-  flex: 0 0 auto;
-  align-items: center;
-  gap: 4px;
-  border: 1px solid #6b5326;
-  border-radius: 999px;
-  padding: 3px 7px;
-  background: #120c07aa;
+  margin-left: auto;
+  padding: 3px 8px;
+  border-radius: 3px;
+  background: color-mix(in srgb, currentColor 12%, transparent);
   color: #cdbb97;
-  font-size: 11px;
-  font-weight: 700;
-  line-height: 1.2;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.3;
   white-space: nowrap;
-}
-.bot-deck-type svg {
-  width: 14px;
-  height: 14px;
-  fill: none;
-  stroke: currentColor;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  stroke-width: 1.8;
 }
 .bot-deck-type-beginner { color: #b9d99b; }
 .bot-deck-type-midrange { color: #d8c48e; }
@@ -290,27 +355,11 @@
 .bot-deck-type-elemental { color: #aacdf0; }
 .bot-deck-type-guardian { color: #c4b8a1; }
 .bot-deck-type-boss { color: #f3cf72; }
-.bot-opponent-title {
-  overflow: hidden;
-  margin-top: 1px;
-  color: #a9987d;
-  font-size: 14px;
-  line-height: 1.3;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.bot-opponent-description {
-  margin-top: 8px;
-  color: #c8b99f;
-  font-size: 14px;
-  font-weight: 400;
-  line-height: 1.35;
-}
 .bot-card-warnings {
   display: flex;
   flex-wrap: wrap;
   gap: 4px 10px;
-  margin-top: 8px;
+  margin-top: 2px;
 }
 .bot-card-warning-description {
   position: absolute;
@@ -322,11 +371,6 @@
 }
 .bot-card-warning-tooltip {
   white-space: pre-line;
-}
-.bot-opponent-cancel {
-  width: 100%;
-  margin-top: 14px;
-  font-size: 16px;
 }
 
 .card-pool-control {
@@ -657,15 +701,14 @@
   .deck-play-secondary-actions button { min-height: 46px; }
   .deck-actions { flex-direction: column; }
   .btn-bot { width: 100%; min-width: 0; }
-  .bot-opponent-modal {
-    width: calc(100vw - 20px);
-    max-height: calc(100dvh - 20px);
-    padding: 16px;
-    overflow-y: auto;
+  .bot-opponent-modal { width: 100%; border-radius: 10px 10px 3px 3px; }
+  .bot-opponent-options > button {
+    grid-template-columns: 40px minmax(0, 1fr) 10px;
+    gap: 4px 12px;
+    padding: 12px;
   }
-  .bot-opponent-modal > .panel-title { font-size: 19px; }
-  .bot-opponent-options { grid-template-columns: 1fr; }
-  .bot-opponent-options > button { min-height: 112px; padding: 13px; }
+  .bot-opponent-options img,
+  .bot-opponent-fallback { width: 40px; height: 40px; }
 }
 
 /* ── room listings ── */
