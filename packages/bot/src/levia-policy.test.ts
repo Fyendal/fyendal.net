@@ -678,4 +678,97 @@ describe("Levia Gates policy", () => {
     expect(trace.some((entry) => entry.includes('"kind":"play-card"') || entry.includes('"kind":"play-from-zone"'))).toBe(true);
     expect(trace.some((entry) => entry.includes('"kind":"pass"'))).toBe(true);
   });
+
+  describe("Hex Gauntlet", () => {
+    function withHex(state: ReturnType<typeof game>) {
+      const hex = { instanceId: state.nextInstanceId++, cardId: "IAR004", owner: 0 };
+      state.players[0]!.equipment.arms = hex;
+      return hex;
+    }
+
+    function banishDebt(state: ReturnType<typeof game>, count: number) {
+      for (let index = 0; index < count; index++) {
+        state.players[0]!.banish.push({ instanceId: state.nextInstanceId++, cardId: "IAR028", owner: 0 });
+      }
+    }
+
+    it("is not spent at the start of a turn with attacks available", () => {
+      const state = game();
+      const hex = withHex(state);
+      banishDebt(state, 4);
+      hand(state, ["IAR026", "IAR026", "MON140", "MON140"]);
+      expect(choice(state)).not.toMatchObject({ kind: "activate-ability", sourceInstanceId: hex.instanceId });
+    });
+
+    it("is not spent in a priority window during a non-Frenzy attack", () => {
+      let state = game();
+      const hex = withHex(state);
+      banishDebt(state, 4);
+      hand(state, ["WTR203", "IAR026", "MON140"]);
+      const blow = state.players[0]!.hand[0]!;
+      const play = legalIntents(state, 0).find((intent) => intent.kind === "play-card" &&
+        intent.instanceId === blow.instanceId)!;
+      let applied = applyIntent(state, 0, play);
+      if (!applied.ok) throw new Error(JSON.stringify(applied));
+      state = applied.state;
+      for (let step = 0; step < 10; step++) {
+        const view = projectStateFor(state, 0);
+        if (state.priorityPlayer === 0 && view.stack.length === 0 && view.chain.some((link) => !link.resolved && !link.onStack)) break;
+        applied = applyIntent(state, state.priorityPlayer, { kind: "pass" });
+        if (!applied.ok) throw new Error(JSON.stringify(applied));
+        state = applied.state;
+      }
+      expect(choice(state)).not.toMatchObject({ kind: "activate-ability", sourceInstanceId: hex.instanceId });
+    });
+
+    it("grants Feeding Frenzy go again after its own banish misses and another attack follows", () => {
+      let state = game();
+      const hex = withHex(state);
+      hand(state, ["IAR026", "IAR026", "MON140", "MON140"]);
+      state.players[0]!.deck = [{ instanceId: state.nextInstanceId++, cardId: "WTR203", owner: 0 }];
+      const [frenzy, , blue] = state.players[0]!.hand;
+      const play = legalIntents(state, 0).find((intent) => intent.kind === "play-card" &&
+        intent.instanceId === frenzy!.instanceId && intent.pitchInstanceIds.includes(blue!.instanceId))!;
+      let applied = applyIntent(state, 0, play);
+      if (!applied.ok) throw new Error(JSON.stringify(applied));
+      state = applied.state;
+      for (let step = 0; step < 10; step++) {
+        const view = projectStateFor(state, 0);
+        if (state.priorityPlayer === 0 && view.stack.length === 0 && view.chain.some((link) => !link.resolved && !link.onStack)) break;
+        applied = applyIntent(state, state.priorityPlayer, { kind: "pass" });
+        if (!applied.ok) throw new Error(JSON.stringify(applied));
+        state = applied.state;
+      }
+      expect(state.players[0]!.flags.banishedSixPlusThisTurn).not.toBe(true);
+      expect(choice(state)).toMatchObject({ kind: "activate-ability", sourceInstanceId: hex.instanceId });
+    });
+
+    it("suppresses heavy blood debt once nothing else is left to do", () => {
+      const state = game();
+      const hex = withHex(state);
+      banishDebt(state, 4);
+      hand(state, []);
+      state.players[0]!.actionPoints = 0;
+      expect(choice(state)).toMatchObject({ kind: "activate-ability", sourceInstanceId: hex.instanceId });
+    });
+
+    it("keeps the Gauntlet for later when blood debt is light and life is healthy", () => {
+      const state = game();
+      const hex = withHex(state);
+      banishDebt(state, 1);
+      hand(state, []);
+      state.players[0]!.actionPoints = 0;
+      expect(choice(state)).not.toMatchObject({ kind: "activate-ability", sourceInstanceId: hex.instanceId });
+    });
+
+    it("is not spent once a 6 power card was already banished this turn", () => {
+      const state = game();
+      const hex = withHex(state);
+      banishDebt(state, 4);
+      hand(state, []);
+      state.players[0]!.actionPoints = 0;
+      state.players[0]!.flags.banishedSixPlusThisTurn = true;
+      expect(choice(state)).not.toMatchObject({ kind: "activate-ability", sourceInstanceId: hex.instanceId });
+    });
+  });
 });

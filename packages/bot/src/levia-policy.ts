@@ -150,6 +150,38 @@ function gateSetupValue(card: CardView, input: BotPolicyInput, own: ReadonlyMap<
   return affordableTarget ? 46 : !convertible ? 24 : -80;
 }
 
+function affordableFollowups(input: BotPolicyInput, spent: ReadonlySet<number>): number {
+  const me = input.view.players[input.seat];
+  const pitch = me.hand.filter((card) => !spent.has(card.instanceId))
+    .reduce((total, card) => total + (input.cards[card.cardId]?.pitch ?? 0), 0);
+  return attackReserve(input, spent).filter((card) => leviaAttackPlayable(card, input) &&
+    (input.cards[card.cardId]?.cost ?? 0) <= me.resources + pitch -
+      (me.hand.some((held) => held.instanceId === card.instanceId) ? input.cards[card.cardId]?.pitch ?? 0 : 0)
+  ).length;
+}
+
+/** Hex Gauntlet is a one-shot 6{p} banish. Spend it only where that banish
+ * matters: after Feeding Frenzy's own banish missed and its go again is needed
+ * for the next attack, or as the turn's last action to suppress blood debt. */
+function hexGauntletValue(input: BotPolicyInput, gauntlet: CardView): number {
+  const me = input.view.players[input.seat];
+  if (input.view.activePlayer !== input.seat || input.view.stack.length > 0 ||
+    input.view.turnFacts?.players[input.seat]?.banishedSixPlusThisTurn === true) return -80;
+  const open = input.view.chain.find((link) => !link.resolved);
+  if (open) {
+    // Wait until the attack trigger has banished the top card.
+    if (open.onStack || open.attackingCard.owner !== input.seat ||
+      name(input.cards[open.attackingCard.cardId]) !== "feeding frenzy") return -80;
+    const spent = new Set([gauntlet.instanceId, open.attackingCard.instanceId]);
+    return affordableFollowups(input, spent) > me.actionPoints ? 90 : -80;
+  }
+  const debt = ownBloodDebt(input);
+  if (input.view.phase !== "action" || debt === 0 || (debt < 3 && me.life > debt + 5)) return -80;
+  // Above pass and close-chain only: every useful play this turn comes first,
+  // so a natural 6{p} banish can still make the Gauntlet unnecessary.
+  return 2;
+}
+
 function cardOpportunity(card: CardView, input: BotPolicyInput): number {
   const data = input.cards[card.cardId];
   if (!data) return 0;
@@ -261,7 +293,9 @@ function scorePlay(intent: GameIntent, input: BotPolicyInput, own: ReadonlyMap<n
       !leviaAttackPair(input, reserve) && leviaAttackPair(input, reserve, { grantGoAgain: true }) ? 53 : -55;
   } else if (named === "fyendal's spring tunic") {
     score = followups() > 0 ? 32 : -30;
-  } else if (named === "hex gauntlet" || named === "embraforged gauntlet") {
+  } else if (named === "hex gauntlet") {
+    score = hexGauntletValue(input, card);
+  } else if (named === "embraforged gauntlet") {
     score = followups() > 0 ? 35 : -35;
   } else if (data.cardType === "defense-reaction") {
     score = scoreDefenseReaction(data, input);
