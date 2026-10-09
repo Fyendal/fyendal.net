@@ -648,18 +648,24 @@
   z-index: 12;
   width: 34px;
   height: 34px;
+  min-height: 0;
   padding: 0;
-  border: 1px solid #ead685;
+  border: 1px solid #b8933f99;
   border-radius: 50%;
-  background: #17100af2;
-  box-shadow: 0 3px 10px #000b;
-  color: #fff8db;
+  clip-path: none;
+  background: #140d07f2;
+  box-shadow: 0 4px 14px #0009;
+  color: var(--text-secondary);
   font-size: 17px;
   line-height: 1;
   opacity: 0;
   pointer-events: none;
   transform: translate(-50%, 4px) scale(.92);
-  transition: opacity 120ms ease, transform 120ms ease, background 120ms ease;
+  transition: opacity 120ms ease, transform 120ms ease, color 120ms ease, border-color 120ms ease;
+}
+.hero-emote-button .game-control-icon {
+  width: 18px;
+  height: 18px;
 }
 .hero-emote-button::before {
   content: "";
@@ -674,101 +680,117 @@
   transform: translateX(-50%) scale(1);
 }
 .hero-emote-button:hover,
+.hero-emote-open .hero-emote-button {
+  border-color: var(--bronze);
+  background: #140d07f2;
+  color: var(--gold);
+}
 .hero-emote-button:focus-visible {
-  background: #3b2a17;
-  outline: 2px solid #f4dc77;
+  outline: 2px solid var(--focus-ring);
   outline-offset: 2px;
 }
-.hero-emote-picker {
-  position: absolute;
-  left: 50%;
-  bottom: calc(100% + 54px);
-  z-index: 13;
-  width: min(230px, 72vw);
-  padding: 10px;
-  border: 1px solid #b89b4c;
-  border-radius: 12px;
-  background: #17100af7;
-  box-shadow: 0 10px 30px #000d;
-  color: #fff3c4;
-  transform: translateX(-50%);
-}
-.hero-emote-picker::after {
-  content: "";
-  position: absolute;
-  top: 100%;
-  left: 50%;
-  border: 8px solid transparent;
-  border-top-color: #b89b4c;
-  transform: translateX(-50%);
-}
-.hero-emote-picker-title {
-  margin: 0 2px 8px;
-  color: #d9c47e;
-  font-size: 11px;
-  font-weight: 800;
-  letter-spacing: .08em;
-  text-transform: uppercase;
-}
-.hero-emote-options {
-  display: grid;
-  gap: 6px;
-}
-.hero-emote-options button {
-  width: 100%;
-  padding: 7px 9px;
-  border: 1px solid #715d2f;
-  border-radius: 7px;
-  background: #2b2115;
-  color: #fff7db;
-  font: inherit;
-  font-size: 13px;
-  text-align: left;
-}
-.hero-emote-options button:hover,
-.hero-emote-options button:focus-visible {
-  border-color: #ead685;
-  background: #4a3820;
-  outline: none;
-}
+/* Picker and toast share the in-game float surface: flat, dark, thin bronze
+   rule. Tails are rotated squares so they carry the same border. */
+.hero-emote-picker,
 .hero-emote-toast {
   position: absolute;
   left: 50%;
-  bottom: calc(100% + 10px);
   z-index: 13;
-  width: max-content;
-  max-width: min(240px, 70vw);
-  padding: 9px 13px;
-  border: 1px solid #ead685;
-  border-radius: 14px;
-  background: #fff8e7;
-  box-shadow: 0 5px 18px #000b;
-  color: #25170b;
-  font-size: 14px;
-  font-weight: 700;
-  line-height: 1.25;
-  text-align: center;
-  pointer-events: none;
+  border: 1px solid #b8933f66;
+  background: #140d07;
+  color: var(--text-primary);
   transform: translateX(-50%);
-  animation: hero-emote-toast 4s ease both;
 }
-.hero-emote:has(> .hero-emote-toast) .hero-emote-button {
-  opacity: 0;
-  pointer-events: none;
-}
+.hero-emote-picker::after,
 .hero-emote-toast::after {
   content: "";
   position: absolute;
   top: 100%;
   left: 50%;
-  border: 7px solid transparent;
-  border-top-color: #fff8e7;
-  transform: translateX(-50%);
+  width: 9px;
+  height: 9px;
+  border: solid #b8933f66;
+  border-width: 0 1px 1px 0;
+  background: #140d07;
+  transform: translate(-50%, -50%) rotate(45deg);
+}
+.hero-emote-picker {
+  bottom: calc(100% + 54px);
+  width: min(208px, 72vw);
+  padding: 6px;
+  border-radius: 12px;
+  box-shadow: 0 12px 38px #000c, inset 0 1px 0 #ffd4791c;
+}
+.hero-emote-picker-title {
+  margin: 4px 8px 6px;
+  color: var(--text-muted);
+  font-family: var(--font-fantasy-meta);
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.2;
+}
+.hero-emote-options {
+  display: grid;
+  gap: 1px;
+}
+.hero-emote-options button {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-height: 32px;
+  padding: 6px 10px;
+  border: 0;
+  border-radius: 7px;
+  clip-path: none;
+  background: transparent;
+  color: var(--text-primary);
+  font-family: var(--font-lobby-ui);
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0;
+  line-height: 1.25;
+  text-align: left;
+  text-transform: none;
+}
+.hero-emote-options button:hover {
+  background: #b8933f24;
+  color: #fff4dc;
+}
+.hero-emote-options button:focus-visible {
+  background: #b8933f24;
+  outline: 1px solid var(--focus-ring);
+  outline-offset: -1px;
+}
+.hero-emote-options button:active {
+  background: #b8933f3d;
+}
+.hero-emote-toast {
+  bottom: calc(100% + 12px);
+  width: max-content;
+  max-width: min(240px, 70vw);
+  padding: 8px 14px;
+  border-color: #b8933f99;
+  border-radius: 10px;
+  box-shadow: 0 8px 24px #000b, inset 0 1px 0 #ffd4791c;
+  font-family: var(--font-lobby-ui);
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.25;
+  text-align: center;
+  pointer-events: none;
+  animation: hero-emote-toast 4s ease both;
+}
+.hero-emote-toast::after {
+  border-color: #b8933f99;
+}
+.hero-emote:has(> .hero-emote-toast) .hero-emote-button {
+  opacity: 0;
+  pointer-events: none;
 }
 @keyframes hero-emote-toast {
-  0% { opacity: 0; transform: translate(-50%, 8px) scale(.96); }
-  8%, 82% { opacity: 1; transform: translate(-50%, 0) scale(1); }
-  100% { opacity: 0; transform: translate(-50%, -4px) scale(.98); }
+  0% { opacity: 0; transform: translate(-50%, 6px); }
+  6%, 85% { opacity: 1; transform: translate(-50%, 0); }
+  100% { opacity: 0; transform: translate(-50%, 0); }
 }
 @media (hover: none), (pointer: coarse) {
   .hero-emote-button {

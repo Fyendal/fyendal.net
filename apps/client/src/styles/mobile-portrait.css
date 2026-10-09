@@ -78,8 +78,6 @@
   .hero-emote-toolbar .hero-emote-picker::after {
     top: 100%;
     bottom: auto;
-    border-top-color: #b89b4c;
-    border-bottom-color: transparent;
   }
 
   .zone-overlay {

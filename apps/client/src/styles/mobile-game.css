@@ -1006,7 +1006,7 @@
   .mobile-gamebar-actions .hero-emote-options button {
     justify-content: flex-start;
     min-height: 38px;
-    padding: 7px 9px;
+    padding: 7px 10px;
   }
   .mobile-game-alerts { display: block; }
   .mobile-game-alerts .toast {
