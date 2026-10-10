@@ -24332,6 +24332,12 @@
       "value": "准备完成"
     }
   ],
+  "prep.otherMatchups": [
+    {
+      "type": 0,
+      "value": "全部对阵"
+    }
+  ],
   "prep.othersInQueue": [
     {
       "type": 0,
@@ -24588,10 +24594,57 @@
       "value": "准备完成"
     }
   ],
-  "prep.suggested": [
+  "prep.suggestedAgainst": [
+    {
+      "type": 0,
+      "value": "对阵 "
+    },
+    {
+      "type": 1,
+      "value": "hero"
+    },
+    {
+      "type": 0,
+      "value": " 推荐"
+    }
+  ],
+  "prep.suggestedTag": [
     {
       "type": 0,
       "value": "推荐"
+    }
+  ],
+  "prep.suggestionHint": [
+    {
+      "type": 6,
+      "value": "count",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 0,
+              "value": "推荐："
+            },
+            {
+              "type": 1,
+              "value": "name"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " 个推荐"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
     }
   ],
   "prep.title": [

@@ -126,24 +126,21 @@ export function Home() {
           <div className="home-play-primary-fields">
             <label className="home-play-field">
               <span>{intl.formatMessage({ id: "common.format" })}</span>
-              <span className="home-play-select">
-                <select
-                  value={format}
-                  disabled={queuedFormat !== null}
-                  onChange={(event) => {
-                    const nextFormat = event.target.value as ConstructedFormat;
-                    setFormat(nextFormat);
-                    setSelectedDeckId("");
-                    if (typeof localStorage !== "undefined") {
-                      saveHomeFormat(localStorage, authUser, nextFormat);
-                    }
-                  }}
-                >
-                  <option value="silver-age">{formatSelectLabel(intl, "silver-age")}</option>
-                  <option value="cc">{formatSelectLabel(intl, "cc")}</option>
-                </select>
-                <span className="create-room-deck-chevron" aria-hidden="true" />
-              </span>
+              <select
+                value={format}
+                disabled={queuedFormat !== null}
+                onChange={(event) => {
+                  const nextFormat = event.target.value as ConstructedFormat;
+                  setFormat(nextFormat);
+                  setSelectedDeckId("");
+                  if (typeof localStorage !== "undefined") {
+                    saveHomeFormat(localStorage, authUser, nextFormat);
+                  }
+                }}
+              >
+                <option value="silver-age">{formatSelectLabel(intl, "silver-age")}</option>
+                <option value="cc">{formatSelectLabel(intl, "cc")}</option>
+              </select>
             </label>
 
             <div className="home-play-field home-play-deck-field">
@@ -180,19 +177,16 @@ export function Home() {
                 </dl>
               </div>
             </div>
-            <span className="home-play-select">
-              <select
-                id={cardPoolId}
-                value={cardPoolMode}
-                disabled={queuedFormat !== null}
-                onChange={(event) => setCardPoolMode(format, event.target.value as CardPoolMode)}
-              >
-                <option value="legal">{intl.formatMessage({ id: "lobby.cardPool.legal" })}</option>
-                <option value="future">{intl.formatMessage({ id: "lobby.cardPool.future" })}</option>
-                <option value="open">{intl.formatMessage({ id: "lobby.cardPool.open" })}</option>
-              </select>
-              <span className="create-room-deck-chevron" aria-hidden="true" />
-            </span>
+            <select
+              id={cardPoolId}
+              value={cardPoolMode}
+              disabled={queuedFormat !== null}
+              onChange={(event) => setCardPoolMode(format, event.target.value as CardPoolMode)}
+            >
+              <option value="legal">{intl.formatMessage({ id: "lobby.cardPool.legal" })}</option>
+              <option value="future">{intl.formatMessage({ id: "lobby.cardPool.future" })}</option>
+              <option value="open">{intl.formatMessage({ id: "lobby.cardPool.open" })}</option>
+            </select>
           </div>
 
           <div className="home-play-field home-play-mode-field">

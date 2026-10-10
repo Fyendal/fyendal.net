@@ -99,7 +99,6 @@
   font: 600 13px var(--font-lobby-ui);
 }
 .deck-section:first-of-type { margin-top: 0; }
-.mobile-deck-format-picker,
 .mobile-deck-toolbar { display: none; }
 .deck-panel-actions { display: flex; align-items: center; gap: 14px; }
 .deck-catalog-tabs {
@@ -145,15 +144,15 @@
   color: var(--text-muted);
   font: 600 13px var(--font-lobby-ui);
 }
-.deck-library-tools input,
-.deck-library-tools select {
+.deck-library-tools input {
   width: 100%;
   min-height: 42px;
-  background: #120c06;
+  background: var(--surface-well);
   border: 1px solid var(--border-subtle);
   color: var(--text-primary);
   padding: 8px 12px;
 }
+.deck-library-tools select { width: 100%; }
 .deck-library-empty {
   display: grid;
   justify-items: center;
@@ -548,49 +547,6 @@
 
 @media (max-width: 700px) {
   .deck-library-panel { padding-bottom: 18px; }
-  .mobile-deck-format-picker {
-    position: relative;
-    display: block;
-    margin-bottom: 12px;
-  }
-  .mobile-deck-format-picker::after {
-    position: absolute;
-    z-index: 2;
-    top: 50%;
-    right: 16px;
-    width: 8px;
-    height: 8px;
-    border-right: 2px solid var(--gold);
-    border-bottom: 2px solid var(--gold);
-    content: "";
-    pointer-events: none;
-    transform: translateY(-70%) rotate(45deg);
-  }
-  .mobile-deck-format-picker > span {
-    position: absolute;
-    z-index: 2;
-    top: 8px;
-    left: 15px;
-    color: #a99a80;
-    font: 600 11px var(--font-lobby-ui);
-    pointer-events: none;
-  }
-  .mobile-deck-format-picker select {
-    appearance: none;
-    width: 100%;
-    min-height: 58px;
-    border: 1px solid #72592e;
-    border-radius: 3px;
-    background: linear-gradient(180deg, #2a1d0f, #1d1309);
-    color: var(--text-primary);
-    padding: 22px 46px 7px 15px;
-    box-shadow: inset 0 1px 0 #ffd47914, 0 4px 12px #0005;
-    font: 650 16px/1.2 var(--font-lobby-ui);
-  }
-  .mobile-deck-format-picker:focus-within select {
-    border-color: var(--gold);
-    box-shadow: inset 0 1px 0 #ffd4791f, 0 0 0 2px #ffd4791c;
-  }
   .deck-panel-heading { display: none; }
   .deck-catalog-tabs {
     gap: 4px;
@@ -926,32 +882,12 @@
 .home-card-pool-tooltip dl { display: grid; gap: 7px; margin: 0; }
 .home-card-pool-tooltip dt { color: var(--gold); font-weight: 700; }
 .home-card-pool-tooltip dd { margin: 1px 0 0; color: var(--text-secondary); }
-.home-play-select { position: relative; display: block; min-width: 0; }
-.home-play-select > select {
-  appearance: none;
+.home-play-field select {
   width: 100%;
   min-height: 50px;
-  padding: 9px 42px 9px 14px;
-  border: 1px solid #5b4c3e;
-  border-radius: 3px;
-  background: #191510;
-  color: #eadfc9;
-  font: 600 14px "Segoe UI", system-ui, sans-serif;
 }
-.home-play-select > .create-room-deck-chevron { pointer-events: none; }
-.home-play-select > select:focus-visible,
-.home-play-deck-field .create-room-deck-trigger:focus-visible {
-  outline: 2px solid var(--gold);
-  outline-offset: 2px;
-}
-.home-play-deck-field .create-room-deck-select { min-width: 0; }
-.home-play-deck-field .create-room-deck-trigger {
-  width: 100%;
-  min-height: 50px;
-  border: 1px solid #745c3f;
-  border-radius: 3px;
-  background: #221a13;
-}
+.home-play-deck-field .listbox { min-width: 0; }
+.home-play-deck-field .listbox-trigger { min-height: 50px; }
 .home-play-mode-segments {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));

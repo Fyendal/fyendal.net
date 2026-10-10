@@ -463,15 +463,11 @@
   min-height: 34px;
   padding: 5px 7px;
 }
-.friend-room-modal .create-room-deck-trigger {
+.friend-room-modal .listbox-trigger {
   min-height: 48px;
-  border-color: #594326;
   border-radius: 10px;
-  background: #100a06;
-  clip-path: none;
 }
-.friend-room-modal .create-room-deck-trigger:hover { border-color: #8d6934; background: #171008; }
-.friend-room-modal .create-room-deck-options { border-radius: 10px; }
+.friend-room-modal .listbox-options { border-radius: 10px; }
 .friend-room-modal > .muted {
   margin: -6px 2px 14px;
   color: #a99b84;

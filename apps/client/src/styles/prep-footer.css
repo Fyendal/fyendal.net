@@ -107,14 +107,42 @@
   color: #9c8a6d;
   font: 600 13px var(--font-lobby-ui);
 }
-.prep-matchup-plan select {
-  flex: 0 1 360px;
+.prep-matchup-plan .listbox { flex: 0 1 360px; }
+.prep-matchup-plan .listbox-trigger { min-height: 42px; padding-left: 12px; }
+.prep-matchup-plan .listbox-options { min-width: 260px; }
+.matchup-choice {
+  display: flex;
   min-width: 0;
-  background: #120c06;
-  border: 1px solid #5a4426;
+  flex: 1;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.matchup-choice-name {
+  min-width: 0;
+  overflow: hidden;
+  font: 500 15px/1.25 var(--font-lobby-ui);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.matchup-tag {
+  flex: none;
+  max-width: 55%;
+  overflow: hidden;
+  padding: 2px 7px;
+  border: 1px solid #ffd47966;
   border-radius: 2px;
-  color: #e8dcc4;
-  padding: 8px 10px;
+  background: #ffd4791a;
+  color: var(--gold);
+  font: 600 12px/1.3 var(--font-lobby-ui);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+/* An unchosen suggestion reads as a quieter invitation than a chosen one. */
+.matchup-tag-hint {
+  border-style: dashed;
+  background: transparent;
+  color: #e0bf73;
 }
 .prep-matchup-detail {
   padding: 9px 10px;
@@ -423,7 +451,7 @@
   .prep-zone-heading { align-items: flex-start; flex-direction: column; gap: 4px; }
   .prep-card-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .prep-arena-stage .prep-cardrow { overflow: visible; }
-  .prep-matchup-plan select { flex-basis: 100%; }
+  .prep-matchup-plan .listbox { flex-basis: 100%; }
   .prep-group,
   .prep-cardrow { max-width: 100%; min-width: 0; }
   .waiting-panel.match-accept-panel { padding: 20px; }

@@ -25508,6 +25508,12 @@
       "value": "Ready"
     }
   ],
+  "prep.otherMatchups": [
+    {
+      "type": 0,
+      "value": "All matchups"
+    }
+  ],
   "prep.othersInQueue": [
     {
       "type": 6,
@@ -25778,10 +25784,53 @@
       "value": "Ready"
     }
   ],
-  "prep.suggested": [
+  "prep.suggestedAgainst": [
     {
       "type": 0,
-      "value": "suggested"
+      "value": "Suggested against "
+    },
+    {
+      "type": 1,
+      "value": "hero"
+    }
+  ],
+  "prep.suggestedTag": [
+    {
+      "type": 0,
+      "value": "Suggested"
+    }
+  ],
+  "prep.suggestionHint": [
+    {
+      "type": 6,
+      "value": "count",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 0,
+              "value": "Suggested: "
+            },
+            {
+              "type": 1,
+              "value": "name"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " suggested"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
     }
   ],
   "prep.title": [

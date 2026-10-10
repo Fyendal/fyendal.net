@@ -32,6 +32,7 @@ import { canChooseFirst, firstPlayerStatus } from "./firstPlayerStatus.js";
 import { derivePrepReadiness } from "./readiness.js";
 import { DeadlineCountdown } from "./DeadlineCountdown.js";
 import { AcceptHeroMatchup } from "./AcceptHeroMatchup.js";
+import { MatchupPicker } from "./MatchupPicker.js";
 import {
   BOT_PRACTICE_NUDGE_DELAY_MS,
   BotPracticeNudge,
@@ -439,21 +440,15 @@ export function PrepRoom() {
         <label htmlFor="fabrary-matchup">
           {intl.formatMessage({ id: "prep.matchupPlan" })}
         </label>
-        <select
+        <MatchupPicker
           id="fabrary-matchup"
-          value={prepDeck.selectedMatchupId ?? ""}
+          matchups={matchups}
+          selectedId={prepDeck.selectedMatchupId}
+          suggestedIds={suggestedMatchups}
+          opponentHero={opp?.heroName}
           disabled={matchupLocked || matchupBusy}
-          onChange={(event) => void chooseMatchup(event.target.value)}
-        >
-          <option value="">{intl.formatMessage({ id: "prep.defaultDeck" })}</option>
-          {matchups.map((matchup) => (
-            <option key={matchup.id} value={matchup.id}>
-              {matchup.name}{suggestedMatchups.has(matchup.id)
-                ? ` — ${intl.formatMessage({ id: "prep.suggested" })}`
-                : ""}
-            </option>
-          ))}
-        </select>
+          onChoose={(matchupId) => void chooseMatchup(matchupId)}
+        />
         {matchupBusy ? (
           <span className="muted">{intl.formatMessage({ id: "prep.loadingPlan" })}</span>
         ) : null}

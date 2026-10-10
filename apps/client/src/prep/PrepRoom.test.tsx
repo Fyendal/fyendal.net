@@ -79,7 +79,7 @@ describe("preparation stage layout", () => {
     expect(choices.length).toBeGreaterThan(0);
     for (const choice of choices) expect(choice).toContain("disabled");
     expect(html).toContain("Arena cards open once turn order is decided.");
-    expect(html).not.toMatch(/<select id="fabrary-matchup"[^>]*disabled/);
+    expect(html).not.toMatch(/<button[^>]*id="fabrary-matchup"[^>]*disabled/);
   });
 
   it("keeps arena drafting disabled during match acceptance", () => {

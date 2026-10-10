@@ -3,7 +3,7 @@
    sentence case, the lobby UI face, 6px corners and solid fills. The
    chamfered all-caps display buttons in base.css are reserved for places and
    the main action of a view: lobby navigation, panel actions such as Start or
-   Rejoin, and the board HUD.
+   Rejoin, the prep turn-order and Ready controls, and the board HUD.
 
    :where() keeps each rule at the specificity of its last compound, so any
    component class still styles its own controls. Every button rule repeats
@@ -20,8 +20,6 @@
   .match-accept-panel,
   .prep-match-accept-prompt,
   .prep-bot-nudge,
-  .prep-pick,
-  .prep-float-pick,
   .background-match-offer,
   .account-panel,
   .social-panel
@@ -48,8 +46,6 @@
   .match-accept-panel,
   .prep-match-accept-prompt,
   .prep-bot-nudge,
-  .prep-pick,
-  .prep-float-pick,
   .background-match-offer,
   .account-panel,
   .social-panel
@@ -68,8 +64,6 @@
   .match-accept-panel,
   .prep-match-accept-prompt,
   .prep-bot-nudge,
-  .prep-pick,
-  .prep-float-pick,
   .background-match-offer,
   .account-panel,
   .social-panel
@@ -90,8 +84,6 @@
   .match-accept-panel,
   .prep-match-accept-prompt,
   .prep-bot-nudge,
-  .prep-pick,
-  .prep-float-pick,
   .background-match-offer,
   .account-panel,
   .social-panel
@@ -110,8 +102,6 @@
   .match-accept-panel,
   .prep-match-accept-prompt,
   .prep-bot-nudge,
-  .prep-pick,
-  .prep-float-pick,
   .background-match-offer,
   .account-panel,
   .social-panel
@@ -133,8 +123,6 @@
   .match-accept-panel,
   .prep-match-accept-prompt,
   .prep-bot-nudge,
-  .prep-pick,
-  .prep-float-pick,
   .background-match-offer,
   .account-panel,
   .social-panel

@@ -56,76 +56,6 @@
   color: var(--gold);
 }
 .create-room-card-pool-control { margin: -32px 0 11px auto; width: min(280px, 100%); }
-.create-room-deck-select {
-  position: relative;
-  min-width: 0;
-  max-width: 100%;
-}
-.create-room-deck-trigger {
-  position: relative;
-  display: flex;
-  width: 100%;
-  min-width: 0;
-  min-height: 46px;
-  overflow: hidden;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 4px 42px 4px 10px;
-  font-family: "Segoe UI", system-ui, sans-serif;
-  font-weight: 500;
-  letter-spacing: 0;
-  text-align: left;
-  text-transform: none;
-}
-.create-room-deck-trigger .muted { font-weight: 400; }
-.create-room-deck-chevron {
-  position: absolute;
-  top: 50%;
-  right: 16px;
-  width: 9px;
-  height: 9px;
-  border-right: 3px solid var(--gold);
-  border-bottom: 3px solid var(--gold);
-  transform: translateY(-70%) rotate(45deg);
-}
-.create-room-deck-options {
-  position: absolute;
-  top: calc(100% + 5px);
-  right: 0;
-  left: 0;
-  z-index: 4;
-  max-height: 260px;
-  padding: 5px;
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  border: 1px solid #806334;
-  border-radius: 3px;
-  background: linear-gradient(180deg, #2a1c0d, #160e07);
-  box-shadow: 0 14px 34px #000e;
-}
-.create-room-deck-options[data-placement="above"] {
-  top: auto;
-  bottom: calc(100% + 5px);
-}
-.create-room-deck-options > button {
-  width: 100%;
-  min-width: 0;
-  min-height: 52px;
-  overflow: hidden;
-  padding: 5px 7px;
-  border-color: transparent;
-  background: transparent;
-  font-family: "Segoe UI", system-ui, sans-serif;
-  letter-spacing: 0;
-  text-align: left;
-  text-transform: none;
-}
-.create-room-deck-options > button:hover:not(:disabled),
-.create-room-deck-options > button[aria-selected="true"] {
-  border-color: #5f4828;
-  background: #35230f;
-}
 .create-room-deck-option-content {
   display: flex;
   width: 100%;
@@ -181,7 +111,6 @@
     padding: 16px;
   }
   .create-room-card-pool-control { margin: 0 0 11px; width: 100%; }
-  .create-room-deck-options { max-height: 42dvh; }
   .create-room-actions { grid-template-columns: 1fr; }
   .create-room-actions > button:last-child { grid-column: auto; }
 }

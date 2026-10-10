@@ -167,7 +167,7 @@ describe("RoomList", () => {
     };
 
     const html = renderLocalized(<Home />);
-    const trigger = html.match(/<button type="button" class="create-room-deck-trigger"[\s\S]*?<\/button>/)?.[0];
+    const trigger = html.match(/<button type="button" class="listbox-trigger"[\s\S]*?<\/button>/)?.[0];
 
     expect(html).not.toContain("Welcome back, NewPlayer.");
     expect(trigger).toContain("Last Played Briar");

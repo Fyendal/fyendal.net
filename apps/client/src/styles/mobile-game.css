@@ -211,9 +211,9 @@
     aspect-ratio: auto;
   }
   .new-player-play-card { overflow: hidden; }
-  .new-player-play-card:has(.create-room-deck-options) { overflow: visible; }
+  .new-player-play-card:has(.listbox-options) { overflow: visible; }
   .new-player-deck-select,
-  .new-player-deck-select .create-room-deck-select,
+  .new-player-deck-select .listbox,
   .new-player-play-actions {
     width: 100%;
     min-width: 0;

@@ -49,6 +49,11 @@
   --success: #8fd48f;
   --danger: #ff7b72;
   --shadow-raised: 0 9px 28px #0009;
+  /* Inset well shared by text inputs and field dropdowns. */
+  --surface-well: #120c06;
+  /* One chevron geometry for every dropdown; only its ink changes. */
+  --chevron-gold: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'%3E%3Cpath d='M1.5 1.5 6 6l4.5-4.5' fill='none' stroke='%23ffd479' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  --chevron-muted: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'%3E%3Cpath d='M1.5 1.5 6 6l4.5-4.5' fill='none' stroke='%23c9b78f' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
   color-scheme: dark;
 }
 
@@ -128,6 +133,148 @@ input {
   padding: 8px 12px;
 }
 input:focus { outline: 1px solid #b8933f88; border-color: #b8933f; }
+
+/* Dropdowns come in two kinds. A field dropdown is a form choice and shares
+   the input well; ListboxDropdown (.listbox-trigger) wears the same skin
+   when options need portraits, tags or groups. A toolbar dropdown
+   (.language-picker) is compact top-bar chrome. Context rules may size a
+   dropdown but must not restyle its skin, and `background` shorthands there
+   would erase the chevron. */
+select {
+  appearance: none;
+  min-width: 0;
+  min-height: 42px;
+  padding: 8px 40px 8px 12px;
+  border: 1px solid var(--border-subtle);
+  border-radius: 2px;
+  background: var(--surface-well) var(--chevron-gold) no-repeat right 14px center / 12px 8px;
+  color: var(--text-primary);
+  font: 500 15px/1.25 var(--font-lobby-ui);
+  text-overflow: ellipsis;
+  cursor: pointer;
+}
+select:hover:not(:disabled) { border-color: var(--border-strong); }
+select:focus { border-color: var(--bronze); }
+select:disabled { cursor: default; opacity: .55; }
+option { background: var(--surface-raised); color: var(--text-primary); }
+@media (max-width: 700px) {
+  select { min-height: 44px; }
+}
+
+/* Rich field dropdown (ListboxDropdown): the field skin on a button, with a
+   custom option list for options that carry portraits, tags or groups. */
+.listbox {
+  position: relative;
+  min-width: 0;
+  max-width: 100%;
+}
+.listbox-trigger {
+  position: relative;
+  display: flex;
+  width: 100%;
+  min-width: 0;
+  min-height: 46px;
+  overflow: hidden;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 4px 42px 4px 10px;
+  border: 1px solid var(--border-subtle);
+  border-radius: 2px;
+  background: var(--surface-well);
+  clip-path: none;
+  color: var(--text-primary);
+  font-family: "Segoe UI", system-ui, sans-serif;
+  font-weight: 500;
+  letter-spacing: 0;
+  text-align: left;
+  text-transform: none;
+}
+.listbox-trigger:hover:not(:disabled) { border-color: var(--border-strong); background: var(--surface-well); }
+.listbox-trigger:disabled { cursor: default; opacity: .55; }
+.listbox-trigger[aria-expanded="true"] { border-color: var(--bronze); }
+.listbox-trigger .muted { font-weight: 400; }
+.listbox-chevron {
+  position: absolute;
+  top: 50%;
+  right: 14px;
+  width: 12px;
+  height: 8px;
+  margin-top: -4px;
+  background: var(--chevron-gold) no-repeat center / contain;
+  pointer-events: none;
+  transition: transform .15s ease;
+}
+.listbox-trigger[aria-expanded="true"] .listbox-chevron { transform: rotate(180deg); }
+@media (prefers-reduced-motion: reduce) {
+  .listbox-chevron { transition: none; }
+}
+.listbox-options {
+  position: absolute;
+  top: calc(100% + 5px);
+  right: 0;
+  left: 0;
+  z-index: 4;
+  max-height: 260px;
+  padding: 5px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  border: 1px solid #806334;
+  border-radius: 3px;
+  background: linear-gradient(180deg, #2a1c0d, #160e07);
+  box-shadow: 0 14px 34px #000e;
+}
+.listbox-options[data-placement="above"] {
+  top: auto;
+  bottom: calc(100% + 5px);
+}
+.listbox-options button[role="option"] {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-width: 0;
+  min-height: 40px;
+  overflow: hidden;
+  padding: 5px 7px;
+  border-color: transparent;
+  background: transparent;
+  font-family: "Segoe UI", system-ui, sans-serif;
+  letter-spacing: 0;
+  text-align: left;
+  text-transform: none;
+}
+.listbox-options button[role="option"]:hover:not(:disabled),
+.listbox-options button[role="option"]:focus-visible {
+  border-color: #5f4828;
+  background: #35230f;
+}
+.listbox-options button[role="option"]:focus-visible { outline: 0; border-color: var(--bronze); }
+/* Selection is a gold edge, so it stays distinct from hover and focus. */
+.listbox-options button[role="option"][aria-selected="true"] {
+  background: #35230f;
+  box-shadow: inset 3px 0 0 var(--gold);
+}
+.listbox-group + .listbox-group {
+  margin-top: 5px;
+  padding-top: 5px;
+  border-top: 1px solid var(--border-subtle);
+}
+.listbox-group-label {
+  padding: 6px 7px 4px;
+  color: var(--text-muted);
+  font: 600 12px/1.3 var(--font-lobby-ui);
+}
+/* Recommended options sit first on a faint gold wash under a gold heading. */
+.listbox-group[data-tone="suggested"] {
+  border-radius: 2px;
+  background: #ffd4790d;
+}
+.listbox-group[data-tone="suggested"] .listbox-group-label { color: var(--gold); }
+.listbox-group[data-tone="suggested"] button[role="option"] { color: #ffe2a0; }
+@media (max-width: 620px) {
+  .listbox-options { max-height: 42dvh; }
+}
+
 input::placeholder {
   color: #8a7f6d;
   font-size: 14px;
