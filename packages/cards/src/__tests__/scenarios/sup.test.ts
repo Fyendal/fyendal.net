@@ -252,6 +252,59 @@ describe("SUP — heroes and the crowd", () => {
     ]);
   });
 
+  it("Numbskull Charm resolves only the modes its controller chooses", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", weapons: [], hand: ["numbskull charm|2"], deck: ["apex buster|2"], board: ["might|0"] },
+        foe(),
+      ],
+    });
+
+    g.play("numbskull charm|2", { settle: false });
+    expect(g.state.pendingDecision).toMatchObject({
+      chooseHook: "numbskull-mode",
+      options: ["destroy", "cheer", "pitch", "done"],
+    });
+    g.chooseOption("cheer");
+    expect(g.state.pendingDecision?.options).toEqual(["destroy", "pitch", "done"]);
+    g.chooseOption("done").settle();
+
+    expect(g.state.players[0]!.flags.cheeredThisTurn).toBe(true);
+    g.expectInZone(0, "apex buster|2", "deck");
+    expect(g.state.players[0]!.board.map((card) => card.cardId)).toEqual([printingId("might|0")]);
+  });
+
+  it("Numbskull Charm destroys one chosen token and pitches a 6-power top card for Vigor", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          weapons: [],
+          hand: ["numbskull charm|2"],
+          deck: ["apex buster|2"],
+          board: ["confidence|0"],
+        },
+        foe({ board: ["might|0"] }),
+      ],
+    });
+
+    g.play("numbskull charm|2", { settle: false })
+      .chooseOption("destroy")
+      .chooseOption("pitch")
+      .chooseOption("done")
+      .settle();
+    expect(g.state.pendingDecision).toMatchObject({ chooseHook: "numbskull-destroy" });
+    g.chooseCard("might|0").settle();
+
+    expect(g.state.players[1]!.board).toHaveLength(0);
+    expect(g.state.players[0]!.board.map((card) => card.cardId)).toEqual([
+      printingId("confidence|0"),
+      printingId("vigor|0"),
+    ]);
+    expect(g.state.players[0]!.flags.cheeredThisTurn).not.toBe(true);
+    g.expectInZone(0, "apex buster|2", "pitch");
+  });
+
   it("Backspin Thrust untaps a cog, then chooses one bonus once per turn", () => {
     const g = scenario({
       seats: [

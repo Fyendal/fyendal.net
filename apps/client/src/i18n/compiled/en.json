@@ -13077,6 +13077,18 @@
       "value": "Choose up to 3 more cards with the named card's name"
     }
   ],
+  "card.sup.numbskull.modes.choose": [
+    {
+      "type": 0,
+      "value": "Numbskull Charm: choose any number of modes"
+    }
+  ],
+  "card.sup.numbskull.token.destroy": [
+    {
+      "type": 0,
+      "value": "Destroy a Confidence or Might token"
+    }
+  ],
   "card.sup.option.abilities": [
     {
       "type": 0,
@@ -13129,6 +13141,24 @@
     {
       "type": 0,
       "value": "Defending cards can't gain defense"
+    }
+  ],
+  "card.sup.option.numbskull.cheer": [
+    {
+      "type": 0,
+      "value": "The crowd cheers you"
+    }
+  ],
+  "card.sup.option.numbskull.destroy": [
+    {
+      "type": 0,
+      "value": "Destroy a Confidence or Might token"
+    }
+  ],
+  "card.sup.option.numbskull.pitch": [
+    {
+      "type": 0,
+      "value": "Pitch the top card of your deck"
     }
   ],
   "card.sup.option.steal": [
@@ -21340,6 +21370,22 @@
     {
       "type": 1,
       "value": "card"
+    }
+  ],
+  "game.decision.targetAlreadyPlayable": [
+    {
+      "type": 0,
+      "value": "Already playable"
+    }
+  ],
+  "game.decision.targetAlreadyPlayableVia": [
+    {
+      "type": 0,
+      "value": "Already playable via "
+    },
+    {
+      "type": 1,
+      "value": "source"
     }
   ],
   "game.decision.targetNamed": [

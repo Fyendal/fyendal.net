@@ -2624,6 +2624,34 @@ describe("September 3 IAR spoilers", () => {
     expect(boardNames(g, 0)).toContain("Gate to i'Arathael");
   });
 
+  it("keeps the other Restless Templar's Decay visible while ordering both Gate triggers", () => {
+    const g = scenario({ seats: [
+      {
+        hero: "rhinar",
+        board: ["restless templar|1", "restless templar|1"],
+        deck: ["snatch|1", "snatch|1", "snatch|1", "snatch|1"],
+        equipment: NO_EQUIPMENT,
+      },
+      { hero: "dorinthea", equipment: NO_EQUIPMENT },
+    ] });
+    const [dying, survivor] = g.state.players[0]!.board;
+    dying!.life = 1;
+    survivor!.life = 2;
+
+    g.passActionPhase();
+    for (let guard = 0; guard < 4 && g.state.pendingDecision?.kind !== "order-triggers"; guard++) {
+      g.passPriority();
+    }
+
+    const pd = g.state.pendingDecision!;
+    expect(pd.kind).toBe("order-triggers");
+    expect(pd.options).toEqual([`${survivor!.instanceId}:0`, `${dying!.instanceId}:1`]);
+    expect(pd.optionMessages?.map((message) => message?.id))
+      .toEqual(["card.iar.forsaken.option.gate", "card.iar.forsaken.option.gate"]);
+    expect(projectStateFor(g.state, 0).stack.map((layer) => [layer.card?.instanceId, layer.labelMessage?.id]))
+      .toEqual([[survivor!.instanceId, "card.trigger.common.decay"]]);
+  });
+
   it("Tome of Necrosis can discard an ally, then draws and untaps the hero", () => {
     const g = scenario({ seats: [
       {

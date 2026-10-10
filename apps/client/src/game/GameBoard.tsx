@@ -19,6 +19,7 @@ import {
 } from "./PriorityFloat.js";
 import { StackFloat } from "./StackFloat.js";
 import { DecisionFloat } from "./DecisionFloat.js";
+import { targetPlayPermissionNote } from "./decision/CardChoices.js";
 import {
   CardSearchOverlay,
   isCardSearchOverlayDecision,
@@ -815,13 +816,25 @@ export function GameBoard() {
       ...player.weapons,
       ...Object.values(player.equipment).filter((card): card is CardView => card !== undefined),
     ]);
-    return [...ids].flatMap((id) => {
+    const choices = [...ids].flatMap((id) => {
       const card = [...combatCards, ...publicZoneCards]
         .find((candidate) => candidate.instanceId === id);
-      return card
-        ? [{ id, label: cardData[card.cardId]?.name ?? "card", card, life: card.life }]
-        : [];
+      if (!card) return [];
+      const playPermission = targetPlayPermissionNote(intl, card);
+      return [{
+        id,
+        label: cardData[card.cardId]?.name ?? "card",
+        card,
+        life: card.life,
+        ...(playPermission !== undefined ? { playPermission } : {}),
+      }];
     });
+    // Cards an effect already made playable are rarely the intended target;
+    // list the fresh ones first.
+    return [
+      ...choices.filter((choice) => choice.playPermission === undefined),
+      ...choices.filter((choice) => choice.playPermission !== undefined),
+    ];
   })();
   const controlledCards = [
     ...me.hand,

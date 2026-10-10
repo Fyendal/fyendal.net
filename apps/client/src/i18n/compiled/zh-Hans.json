@@ -12455,6 +12455,18 @@
       "value": "再选择至多 3 张与指定牌名相同的牌"
     }
   ],
+  "card.sup.numbskull.modes.choose": [
+    {
+      "type": 0,
+      "value": "Numbskull Charm：选择任意数量的模式"
+    }
+  ],
+  "card.sup.numbskull.token.destroy": [
+    {
+      "type": 0,
+      "value": "摧毁一个 Confidence 或 Might 衍生物"
+    }
+  ],
   "card.sup.option.abilities": [
     {
       "type": 0,
@@ -12507,6 +12519,24 @@
     {
       "type": 0,
       "value": "防守牌不能获得防御加成"
+    }
+  ],
+  "card.sup.option.numbskull.cheer": [
+    {
+      "type": 0,
+      "value": "让观众为你欢呼 (cheer)"
+    }
+  ],
+  "card.sup.option.numbskull.destroy": [
+    {
+      "type": 0,
+      "value": "摧毁一个 Confidence 或 Might 衍生物"
+    }
+  ],
+  "card.sup.option.numbskull.pitch": [
+    {
+      "type": 0,
+      "value": "将你的牌库顶牌作为资源 (pitch)"
     }
   ],
   "card.sup.option.steal": [
@@ -20574,6 +20604,26 @@
     {
       "type": 1,
       "value": "card"
+    }
+  ],
+  "game.decision.targetAlreadyPlayable": [
+    {
+      "type": 0,
+      "value": "已可打出"
+    }
+  ],
+  "game.decision.targetAlreadyPlayableVia": [
+    {
+      "type": 0,
+      "value": "已可通过"
+    },
+    {
+      "type": 1,
+      "value": "source"
+    },
+    {
+      "type": 0,
+      "value": "打出"
     }
   ],
   "game.decision.targetNamed": [

@@ -71,6 +71,47 @@ function finishLiarsCharmModes(ctx: ScriptCtx, modes: number): void {
     );
   else ctx.suppressHeroAbilitiesThroughNextTurn(target);
 }
+const NUMBSKULL_CHARM_MODES = [
+  { option: "destroy", bit: 1, message: "card.sup.option.numbskull.destroy" },
+  { option: "cheer", bit: 2, message: "card.sup.option.numbskull.cheer" },
+  { option: "pitch", bit: 4, message: "card.sup.option.numbskull.pitch" },
+] as const;
+
+function requestNumbskullCharmMode(ctx: ScriptCtx): void {
+  const selected = ctx.getCounter("numbskull-modes");
+  const chosen = NUMBSKULL_CHARM_MODES.filter((mode) => (selected & mode.bit) !== 0);
+  const remaining = NUMBSKULL_CHARM_MODES.filter((mode) => (selected & mode.bit) === 0);
+  if (remaining.length === 0) return;
+  ctx.requestChoice(
+    "numbskull-mode",
+    decisionPrompt("Numbskull Charm: choose any number of modes", "card.sup.numbskull.modes.choose", {
+      optionMessages: {
+        ...Object.fromEntries(NUMBSKULL_CHARM_MODES.map((mode) => [mode.option, decisionMessage(mode.message)])),
+        ...commonOptionMessages("done"),
+      },
+      chosen: chosen.map((mode) => mode.option),
+    }),
+    [...remaining.map((mode) => mode.option), "done"],
+    undefined,
+    undefined,
+    "done",
+  );
+}
+
+/** Resolve the cheer and pitch modes after any token destruction, in printed
+ * order, then clear the mode counter so a later play starts fresh. */
+function resolveNumbskullCharm(ctx: ScriptCtx): void {
+  const modes = ctx.getCounter("numbskull-modes");
+  ctx.setCounter("numbskull-modes", 0);
+  if ((modes & 2) !== 0) ctx.crowdCheer(ctx.seat);
+  if ((modes & 4) === 0) return;
+  const top = ctx.player(ctx.seat).deck[0];
+  if (!top) return;
+  const six = isSixPlus(ctx, top);
+  ctx.pitchCard(top.instanceId);
+  if (six) ctx.createToken(VIGOR);
+}
+
 function suspenseAura(ctx: ScriptCtx, card: Card): boolean {
   return aura(ctx, card) && (data(ctx, card).keywords ?? []).some((keyword) => keyword.toLowerCase() === "suspense");
 }
@@ -1146,18 +1187,38 @@ Object.assign(sup, {
     },
   },
   "numbskull charm|2": {
+    additionalCost(ctx: ScriptCtx) {
+      ctx.setCounter("numbskull-modes", 0);
+      requestNumbskullCharmMode(ctx);
+    },
+    onChoose(ctx: ScriptCtx, hook: string, option: string) {
+      if (hook === "numbskull-mode") {
+        const mode = NUMBSKULL_CHARM_MODES.find((candidate) => candidate.option === option);
+        if (!mode) return;
+        ctx.setCounter("numbskull-modes", ctx.getCounter("numbskull-modes") | mode.bit);
+        requestNumbskullCharmMode(ctx);
+      } else if (hook === "numbskull-destroy") {
+        ctx.destroyPermanent(Number(option));
+        resolveNumbskullCharm(ctx);
+      }
+    },
     onPlay(ctx: ScriptCtx) {
-      for (const name of ["Confidence", "Might"]) {
-        const token = tokenNamed(ctx, opponentSeat(ctx), name) ?? tokenNamed(ctx, ctx.seat, name);
-        if (token) ctx.destroyPermanent(token.instanceId);
+      const modes = ctx.getCounter("numbskull-modes");
+      if ((modes & 1) !== 0) {
+        const tokens = ctx.state.players.flatMap((player) =>
+          player.board.filter((card) => tokenAura(ctx, card) && (named(ctx, card, "Confidence") || named(ctx, card, "Might"))),
+        );
+        if (tokens.length > 1) {
+          ctx.requestCardChoice(
+            "numbskull-destroy",
+            decisionPrompt("Destroy a Confidence or Might token", "card.sup.numbskull.token.destroy"),
+            tokens.map((card) => card.instanceId),
+          );
+          return;
+        }
+        if (tokens[0]) ctx.destroyPermanent(tokens[0].instanceId);
       }
-      ctx.crowdCheer(ctx.seat);
-      const top = ctx.player(ctx.seat).deck[0];
-      if (top) {
-        const six = isSixPlus(ctx, top);
-        ctx.pitchCard(top.instanceId);
-        if (six) ctx.createToken(VIGOR);
-      }
+      resolveNumbskullCharm(ctx);
     },
   },
   "cries of encore|1": {

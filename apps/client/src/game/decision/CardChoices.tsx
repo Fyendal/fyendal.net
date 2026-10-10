@@ -1,5 +1,6 @@
+import { cardData } from "@fyendal/cards/client";
 import type { CardView } from "@fyendal/shared";
-import { useIntl } from "react-intl";
+import { type IntlShape, useIntl } from "react-intl";
 import { CardFace } from "../Card.js";
 import { cardAffiliation, chooseWithoutFocus } from "./DecisionShared.js";
 
@@ -8,6 +9,20 @@ export interface ActionTargetChoice {
   label: string;
   card: CardView;
   life?: number;
+  /** Set when an effect already lets this player play the card from its
+   *  zone; the full sentence naming that effect. */
+  playPermission?: string;
+}
+
+/** Flags a target this player may already play from a public zone (such as
+ *  a banished card an earlier Gate activation chose), so it is not chosen twice. */
+export function targetPlayPermissionNote(intl: IntlShape, card: CardView): string | undefined {
+  const sourceCardId = card.playableFromSourceCardId;
+  if (sourceCardId === undefined) return undefined;
+  const sourceName = sourceCardId !== card.cardId ? cardData[sourceCardId]?.name : undefined;
+  return sourceName !== undefined
+    ? intl.formatMessage({ id: "game.decision.targetAlreadyPlayableVia" }, { source: sourceName })
+    : intl.formatMessage({ id: "game.decision.targetAlreadyPlayable" });
 }
 
 export function RevealedChoiceCards({
@@ -61,21 +76,34 @@ export function ActionTargetCards({
         return (
           <button
             key={choice.id ?? "hero"}
-            className={`decision-target-card ${selected ? "decision-target-selected" : ""}`}
+            className={[
+              "decision-target-card",
+              selected ? "decision-target-selected" : "",
+              choice.playPermission !== undefined ? "decision-target-granted" : "",
+            ].filter(Boolean).join(" ")}
             aria-label={intl.formatMessage(
               { id: "game.decision.targetNamed" },
               { target: choice.label },
             )}
+            aria-description={choice.playPermission}
+            title={choice.playPermission}
             aria-pressed={selected}
             onClick={(event) =>
               chooseWithoutFocus(event.currentTarget, () => onSelect(choice.id))}
           >
-            <CardFace
-              card={choice.card}
-              size="hand"
-              affiliation={cardAffiliation(choice.card, viewerSeat)}
-            />
-            <span>{choice.label}</span>
+            <span className="decision-target-face">
+              <CardFace
+                card={choice.card}
+                size="hand"
+                affiliation={cardAffiliation(choice.card, viewerSeat)}
+              />
+              {choice.playPermission !== undefined && (
+                <span className="decision-target-band" aria-hidden="true">
+                  {intl.formatMessage({ id: "game.decision.targetAlreadyPlayable" })}
+                </span>
+              )}
+            </span>
+            <span className="decision-target-name">{choice.label}</span>
             {choice.life !== undefined && (
               <small>{intl.formatMessage({ id: "game.life.amount" }, { life: choice.life })}</small>
             )}

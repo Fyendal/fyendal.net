@@ -947,14 +947,17 @@ export function projectStateForReplay(
 }
 
 /** Project the authoritative stack one-for-one. Counted server layers expose
- * their remaining occurrence count directly; the client does no grouping. */
+ * their remaining occurrence count directly; the client does no grouping.
+ * While new triggers are being ordered, the lower stack is parked on the
+ * decision; it is still on the stack, so it remains visible beneath them. */
 function projectedStackLayers(
   state: GameStateInternal,
   runtime: EngineRuntime,
   seat: number | null,
   revealAll: boolean,
 ): StackLayerView[] {
-  return state.stack.map((layer) => {
+  const parked = state.pendingDecision?.triggerOrder?.baseStack ?? [];
+  return [...state.stack, ...parked].map((layer) => {
     // Card layers carry their card; trigger layers point at a source in a zone.
     // A face-down source remains secret to an opposing viewer.
     const card = layer.card ??

@@ -5,7 +5,7 @@ import { createTestIntl, TestI18nProvider } from "../i18n/TestI18nProvider.js";
 import { SquareCardPresentation } from "./Card.js";
 import { decisionFloatDragKey } from "./DecisionFloat.js";
 import { BloodModeDecision } from "./decision/BloodModeDecision.js";
-import { ActionTargetCards, RevealedChoiceCards } from "./decision/CardChoices.js";
+import { ActionTargetCards, RevealedChoiceCards, targetPlayPermissionNote } from "./decision/CardChoices.js";
 import type { PendingDecisionModel } from "./decision/DecisionModels.js";
 import {
   GuidanceSettingsPopover,
@@ -950,6 +950,31 @@ describe("attack target choices", () => {
     expect(html).toContain("card-tapped");
     expect(html).toContain("3 life");
     expect(html).toContain("2 steam counters");
+  });
+
+  it("marks a banished target that an earlier Gate activation already made playable", () => {
+    const intl = createTestIntl();
+    const granted = { instanceId: 7, cardId: "IAR026", owner: 0, playableFromSourceCardId: "IAR222" };
+    const fresh = { instanceId: 8, cardId: "IAR026", owner: 0 };
+    const note = targetPlayPermissionNote(intl, granted);
+    expect(note).toBe("Already playable via Gate to i'Arathael");
+    expect(targetPlayPermissionNote(intl, fresh)).toBeUndefined();
+    expect(targetPlayPermissionNote(intl, { ...granted, playableFromSourceCardId: "IAR026" }))
+      .toBe("Already playable");
+
+    const html = renderLocalized(createElement(ActionTargetCards, {
+      choices: [
+        { id: 7, label: "Feeding Frenzy", card: granted, ...(note !== undefined ? { playPermission: note } : {}) },
+        { id: 8, label: "Feeding Frenzy", card: fresh },
+      ],
+      viewerSeat: 0,
+      selectedId: null,
+      selectionMade: false,
+      onSelect: () => undefined,
+    }));
+    expect(html.match(/decision-target-granted/g)).toHaveLength(1);
+    expect(html.match(/decision-target-band/g)).toHaveLength(1);
+    expect(html).toContain("title=\"Already playable via Gate to i&#x27;Arathael\"");
   });
 });
 

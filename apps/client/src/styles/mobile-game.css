@@ -933,10 +933,62 @@
   .trigger-order-controls button { min-width: 34px; min-height: 34px; padding: 4px 8px; }
   .decision-cards .card-hand { width: 90px; height: 124px; }
   .decision-cards > .card-tapped { margin-inline: 17px; }
-  .decision-target-cards { max-width: 100%; max-height: 30dvh; padding: 5px; }
-  .decision-target-card { min-width: 108px; padding: 7px; }
-  .decision-target-card:has(.card-tapped) { min-width: 138px; }
-  .decision-target-card .card-hand { width: 90px; height: 124px; }
+  /* Targets read like a hand: bare card faces in a dense grid, sized so a
+     partial third row shows when the list scrolls. */
+  .decision-target-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, 74px);
+    grid-auto-rows: max-content;
+    justify-content: center;
+    gap: 10px 8px;
+    width: 100%;
+    max-width: 100%;
+    max-height: none;
+    padding: 4px 4px 8px;
+    overscroll-behavior: contain;
+    scroll-snap-type: y proximity;
+  }
+  /* Only the card grid scrolls; the prompt and Cancel stay in view. */
+  .decision-float:has(> .decision > .decision-target-cards) {
+    display: flex;
+    flex-direction: column;
+  }
+  .decision-float > .decision:has(> .decision-target-cards) { min-height: 0; }
+  .decision > .decision-target-cards { flex: 0 1 auto; min-height: 0; }
+  .decision-target-card {
+    gap: 5px;
+    min-width: 0;
+    padding: 0;
+    border: 0;
+    background: none;
+    letter-spacing: 0;
+    text-transform: none;
+    scroll-snap-align: start;
+  }
+  .decision-target-card:hover { border-color: transparent; background: none; }
+  .decision-target-card:focus-visible { outline: none; }
+  .decision-target-card:focus-visible .decision-target-face {
+    outline: 2px solid #e6c96a;
+    outline-offset: 2px;
+  }
+  .decision-target-card:has(.card-tapped) { grid-column: span 2; min-width: 0; }
+  .decision-target-card .card-hand { width: 74px; height: 103px; }
+  .decision-target-selected { background: none; box-shadow: none; }
+  .decision-target-selected .decision-target-face {
+    border-radius: 5px;
+    box-shadow: 0 0 0 2px #e6c96a, 0 0 12px #c9a627aa;
+  }
+  .decision-target-card > .decision-target-name {
+    display: -webkit-box;
+    max-width: 100%;
+    overflow: hidden;
+    font: 600 11px/1.2 var(--font-lobby-ui);
+    text-align: center;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+  .decision-target-card > small { font-size: 11px; letter-spacing: 0; }
+  .decision-target-band { padding: 3px 2px; font-size: 10px; }
   .decision-optcard:has(.card-tapped) { width: 124px; }
   .decision-optcard button { min-width: 90px; }
 
