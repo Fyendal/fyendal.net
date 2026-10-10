@@ -95,6 +95,8 @@ export function ActionAnnouncementPanel({
         ? " decision-post-payment" : ""
     }${
       choiceStep ? " decision-choice" : ""
+    }${
+      step === "target" ? " decision-target-choice" : ""
     }`}>
       {sel.kind === "choose-hand-action" ? (
         <>

@@ -22032,6 +22032,16 @@
       "value": "场上"
     }
   ],
+  "game.zone.cardCount": [
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " 张牌"
+    }
+  ],
   "game.zone.chest": [
     {
       "type": 0,

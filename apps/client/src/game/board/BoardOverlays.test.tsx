@@ -53,10 +53,13 @@ describe("shared zone overlay sorting", () => {
       </TestI18nProvider>,
     );
 
-    expect(html).toContain("Sort by");
-    expect(html).toContain('<option value="zone" selected="">Zone order</option>');
-    expect(html).toContain('<option value="pitch">Pitch</option>');
-    expect(html).toContain('<option value="name">Name</option>');
+    expect(html).toContain('role="group" aria-label="Sort by"');
+    expect(html).toContain('aria-pressed="true">Zone order</button>');
+    expect(html).toContain(
+      'aria-pressed="false"><span class="zone-viewer-pips" aria-hidden="true"><i></i><i></i><i></i></span>Pitch</button>',
+    );
+    expect(html).toContain('aria-pressed="false">Name</button>');
+    expect(html).toContain("3 cards");
     expect(html.indexOf('data-cardid="UNKNOWN-Z"')).toBeLessThan(
       html.indexOf('data-cardid="UNKNOWN-A-1"'),
     );

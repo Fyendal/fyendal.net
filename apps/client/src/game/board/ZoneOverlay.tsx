@@ -1,6 +1,6 @@
 import { cardData } from "@fyendal/cards/client";
 import type { CardView } from "@fyendal/shared";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useIntl } from "react-intl";
 import { CardFace, InactiveZoneCard } from "../Card.js";
 import type { BoardOverlay } from "./BoardPrimitives.js";
@@ -37,6 +37,12 @@ export function sortZoneCards(
   });
 }
 
+const SORT_OPTIONS: readonly { value: ZoneSortOrder; messageId: string }[] = [
+  { value: "zone", messageId: "game.zone.sort.zoneOrder" },
+  { value: "pitch", messageId: "game.zone.sort.pitch" },
+  { value: "name", messageId: "game.zone.sort.cardName" },
+];
+
 export function ZoneOverlay({
   overlay,
   yourSeat,
@@ -49,58 +55,81 @@ export function ZoneOverlay({
   onInspectCard: (cardId: string) => void;
 }) {
   const intl = useIntl();
+  const panelRef = useRef<HTMLDivElement>(null);
   const [sortOrder, setSortOrder] = useState<ZoneSortOrder>("zone");
   const cards = useMemo(
     () => sortZoneCards(overlay.cards, sortOrder),
     [overlay.cards, sortOrder],
   );
 
+  useEffect(() => {
+    const previousFocus = document.activeElement instanceof HTMLElement
+      ? document.activeElement
+      : null;
+    panelRef.current?.focus({ preventScroll: true });
+    return () => previousFocus?.focus({ preventScroll: true });
+  }, []);
+
   return (
     <div className="overlay zone-overlay" onClick={onClose}>
       <div
-        className="overlay-panel zone-overlay-panel"
+        ref={panelRef}
+        className="overlay-panel zone-overlay-panel zone-viewer"
         role="dialog"
         aria-modal="true"
         aria-labelledby="zone-overlay-title"
+        tabIndex={-1}
         onClick={(event) => event.stopPropagation()}
+        onKeyDown={(event) => {
+          if (event.key !== "Escape") return;
+          event.preventDefault();
+          event.stopPropagation();
+          onClose();
+        }}
       >
-        <div className="zone-overlay-header">
-          <div className="overlay-title" id="zone-overlay-title">{overlay.title}</div>
+        <div className="zone-viewer-header">
+          <div className="zone-viewer-heading">
+            <h2 className="zone-viewer-title" id="zone-overlay-title">{overlay.title}</h2>
+            <span className="zone-viewer-count">
+              {intl.formatMessage({ id: "game.zone.cardCount" }, { count: overlay.cards.length })}
+            </span>
+          </div>
+          {overlay.cards.length > 1 ? (
+            <div
+              className="zone-viewer-sort"
+              role="group"
+              aria-label={intl.formatMessage({ id: "game.zone.sort.label" })}
+            >
+              {SORT_OPTIONS.map(({ value, messageId }) => (
+                <button
+                  key={value}
+                  type="button"
+                  aria-pressed={sortOrder === value}
+                  onClick={() => setSortOrder(value)}
+                >
+                  {value === "pitch" ? (
+                    <span className="zone-viewer-pips" aria-hidden="true">
+                      <i /><i /><i />
+                    </span>
+                  ) : null}
+                  {intl.formatMessage({ id: messageId })}
+                </button>
+              ))}
+            </div>
+          ) : null}
           <button
             type="button"
-            className="zone-overlay-close"
+            className="zone-viewer-close"
             aria-label={intl.formatMessage({ id: "common.closeNamed" }, { title: overlay.title })}
             onClick={onClose}
           >
-            ×
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path d="M6 6 18 18M18 6 6 18" />
+            </svg>
           </button>
         </div>
-        <div className="zone-overlay-toolbar">
-          <label className="zone-overlay-sort">
-            <span>{intl.formatMessage({ id: "game.zone.sort.label" })}</span>
-            <select
-              value={sortOrder}
-              onChange={(event) => {
-                const value = event.target.value;
-                if (value === "zone" || value === "pitch" || value === "name") {
-                  setSortOrder(value);
-                }
-              }}
-            >
-              <option value="zone">
-                {intl.formatMessage({ id: "game.zone.sort.zoneOrder" })}
-              </option>
-              <option value="pitch">
-                {intl.formatMessage({ id: "game.zone.sort.pitch" })}
-              </option>
-              <option value="name">
-                {intl.formatMessage({ id: "game.zone.sort.cardName" })}
-              </option>
-            </select>
-          </label>
-        </div>
         <div
-          className="overlay-cards"
+          className="overlay-cards zone-viewer-cards"
           onClick={(event) => {
             if (!window.matchMedia("(max-width: 700px)").matches) return;
             const cardId = (event.target as HTMLElement)

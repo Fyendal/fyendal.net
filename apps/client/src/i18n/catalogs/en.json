@@ -1872,6 +1872,7 @@
   "game.zone.opponent": "Opponent's {zone}",
   "game.zone.deckMineOrder": "Your Deck — draw order, next card first",
   "game.zone.deckOpponentOrder": "Opponent's Deck — draw order, next card first",
+  "game.zone.cardCount": "{count, plural, one {# card} other {# cards}}",
   "game.zone.sort.label": "Sort by",
   "game.zone.sort.zoneOrder": "Zone order",
   "game.zone.sort.pitch": "Pitch",

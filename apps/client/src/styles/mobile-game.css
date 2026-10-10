@@ -1121,7 +1121,15 @@
   .zone-overlay .overlay-cards .card-zone .c-name { font-size: 9px; }
   .zone-overlay .overlay-cards .card-zone .c-atk,
   .zone-overlay .overlay-cards .card-zone .c-def { font-size: 13px; }
-  .zone-overlay-close { width: 42px; height: 42px; }
+  .zone-viewer-header {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas: "heading close" "sort sort";
+    gap: 10px 8px;
+    padding: 10px 8px 10px 14px;
+  }
+  .zone-viewer-close { width: 40px; height: 40px; min-height: 40px; }
+  .zone-viewer-sort button { flex: 1; justify-content: center; min-height: 34px; }
+  .zone-viewer > .zone-viewer-cards { padding: 12px 8px; }
   .settings-panel {
     width: calc(100vw - 20px);
     max-height: calc(100dvh - 24px);

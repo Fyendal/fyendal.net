@@ -88,6 +88,9 @@ export function ActionTargetCards({
             aria-description={choice.playPermission}
             title={choice.playPermission}
             aria-pressed={selected}
+            // The face ignores the pointer so the whole button is the hit
+            // target; this routes the board's hover preview to that face.
+            data-bound-preview-card="true"
             onClick={(event) =>
               chooseWithoutFocus(event.currentTarget, () => onSelect(choice.id))}
           >
@@ -104,7 +107,8 @@ export function ActionTargetCards({
               )}
             </span>
             <span className="decision-target-name">{choice.label}</span>
-            {choice.life !== undefined && (
+            {/* A card that tracks its own life shows it as a face counter. */}
+            {choice.life !== undefined && choice.card.life === undefined && (
               <small>{intl.formatMessage({ id: "game.life.amount" }, { life: choice.life })}</small>
             )}
           </button>

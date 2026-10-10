@@ -947,6 +947,7 @@ describe("attack target choices", () => {
 
     expect(html).toContain("aria-label=\"Target Test Ally\"");
     expect(html).toContain("aria-pressed=\"true\"");
+    expect(html).toContain("data-bound-preview-card=\"true\"");
     expect(html).toContain("card-tapped");
     expect(html).toContain("3 life");
     expect(html).toContain("2 steam counters");
