@@ -33,10 +33,12 @@ import {
   type TacticalIntentConfig,
   type TacticalTurnPlan,
 } from "./tactical-turn-planner.js";
-import { abilitySource, type HeroSolverRules } from "./card-model.js";
+import { abilitySource, cardUses, type HeroSolverRules, type ModelContext } from "./card-model.js";
+import { PITCH_FUNDING_RATE, standaloneValue } from "./card-ev.js";
+import { unseenCounts } from "./deck-knowledge.js";
 import { guardianPatch } from "./guardian-rules.js";
 import type { PendingEffect, SolverCard, SolverView } from "./hand-solver.js";
-import { arsenalValuer, handResponse } from "./hand-value.js";
+import { arsenalValuer, handResponse, opportunityValuer } from "./hand-value.js";
 import { evaluateOnHit } from "./on-hit.js";
 import { adjustValueBreakdown } from "./value.js";
 
@@ -55,7 +57,6 @@ const HEART_OF_ICE = "heart of ice|0";
 const SHOCK_CHARMERS = "shock charmers|0";
 const BALANCE = "balance of justice|0";
 const PULSE_VOLTHAVEN = "pulse of volthaven|1";
-const PULSE_ISENLOFT = "pulse of isenloft|3";
 const AWAKENING = "awakening|3";
 const OAKEN_OLD = "oaken old|1";
 const CRIPPLING_CRUSH = "crippling crush|1";
@@ -187,27 +188,7 @@ function disruptionValue(data: CardData, input: BotPolicyInput): number {
   return data.keywords?.some((keyword) => keyword.toLowerCase() === "crush") ? 3 : 0;
 }
 
-function cardOpportunity(card: CardView, input: BotPolicyInput): number {
-  const data = input.cards[card.cardId];
-  if (!data) return 0;
-  const functional = key(data);
-  if (functional === OAKEN_OLD) return 17;
-  if (functional === CRIPPLING_CRUSH) return 16;
-  if (functional === SPINAL_CRUSH) return aggressiveOpponent(input) ? 15 : 13;
-  if (functional === PULSE_VOLTHAVEN) return 13;
-  if (functional === PULSE_ISENLOFT) return 12;
-  if (functional === FELLING) return earthBanished(input) >= 4 ? 14 : 7;
-  if (functional === TILLING_RED) {
-    return canDecompose(input) && earthBanished(input) < 4 ? 12 : 7;
-  }
-  if (functional === AWAKENING) {
-    return input.view.players[input.seat].life < input.view.players[1 - input.seat]!.life ? 12 : 3;
-  }
-  if (isAttack(data)) return attackPressure(data, input) + disruptionValue(data, input);
-  if (data.cardType === "defense-reaction") return Math.max(7, data.defense ?? 0);
-  if (data.pitch === 3) return Math.max(2, data.defense ?? 0);
-  return Math.max(1, data.pitch ?? 0, data.defense ?? 0);
-}
+const cardOpportunity = opportunityValuer(starvoSolverRules);
 
 function availablePitch(
   cards: readonly CardView[],
@@ -226,6 +207,34 @@ function hasIcePitch(
 ): boolean {
   return cards.some((card) => !excluded.has(card.instanceId) &&
     (input.cards[card.cardId]?.pitch ?? 0) > 0 && hasSubtype(input.cards[card.cardId], "ice"));
+}
+
+/** Awakening while behind on life: Seismic Surge tokens equal to the
+ * difference (twice that if fused with a held Earth card), and a tutored
+ * Guardian attack costing at most that many. The tutor replaces a random draw
+ * with the best eligible card left in the deck; the Surges discount its cost. */
+function awakeningValue(input: BotPolicyInput, card: CardView, context: ModelContext): number {
+  const me = input.view.players[input.seat];
+  const deficit = input.view.players[1 - input.seat]!.life - me.life;
+  if (deficit <= 0) return 0;
+  const fused = me.hand.some((held) =>
+    held.instanceId !== card.instanceId && hasSubtype(input.cards[held.cardId], "earth")
+  );
+  const surges = fused ? deficit * 2 : deficit;
+  const counts = unseenCounts(input, "own");
+  if (!counts) return 0;
+  let best = 0;
+  for (const cardId of counts.keys()) {
+    const data = input.cards[cardId];
+    if (
+      !data || !isAttack(data) || data.cardType !== "action" ||
+      !data.classes?.some((cardClass) => cardClass.toLowerCase() === "guardian")
+    ) continue;
+    const cost = Math.max(0, data.cost ?? 0);
+    if (cost > surges) continue;
+    best = Math.max(best, standaloneValue(cardUses(data, input), context.hitChance) + cost * PITCH_FUNDING_RATE);
+  }
+  return best;
 }
 
 /** Starvo's hero bonus: the next attack action card with cost 3+ gains +2{p},
@@ -256,14 +265,18 @@ function starvoSolverRules(input: BotPolicyInput): HeroSolverRules {
           : []),
       ];
     },
-    card(data, card) {
+    card(data, card, context) {
       const patch = guardianPatch(data, card, input);
       const disruption = disruptionValue(data, input);
       if (disruption > 0 && (isAttack(data) || data.cardType === "weapon")) {
         patch.onHit = disruption;
-        patch.uses = { onHit: disruption };
+        patch.uses = { ...patch.uses, onHit: disruption };
       } else if (disruption > 0) {
         patch.bonusIn = () => disruption;
+      }
+      if (key(data) === AWAKENING) {
+        const alternative = awakeningValue(input, card, context);
+        if (alternative > 0) patch.uses = { ...patch.uses, alternative };
       }
       return patch;
     },

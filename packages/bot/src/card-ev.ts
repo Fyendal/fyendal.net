@@ -44,6 +44,9 @@ export interface CardUses {
   onHit: number;
   /** Printed go again, or conditional go again the hero model expects to hold. */
   reliableGoAgain: boolean;
+  /** A terminal attack the hero model expects to end this turn's chain with,
+   * so it does not compete for a later hand's terminal slot. */
+  finisher?: boolean;
   /** Pump value: power an attack reaction or "next attack" effect adds. */
   pump: number;
   /** Extra value of pump riders, such as granting go again. */
@@ -53,6 +56,10 @@ export interface CardUses {
   /** A blue card that is still worth playing out of arsenal: printed
    * "played from arsenal" bonuses, or set by hero rules. */
   arsenalPlay?: boolean;
+  /** Damage-equivalent value of a mode usable only from hand, outside its
+   * attack, block or pitch: printed damage prevention, or a hero-rule effect
+   * such as banishing the card for a lasting one. */
+  alternative?: number;
 }
 
 /** A card that can never leave arsenal (a block or other unplayable card)
@@ -69,7 +76,7 @@ export const BLUE_ARSENAL_COST = DEAD_ARSENAL_COST;
 function offenseValue(uses: CardUses, hitChance: number): number {
   if (uses.kind === "attack") {
     const value = uses.power + uses.onHit * hitChance;
-    return uses.reliableGoAgain ? value : value * ARSENAL_TERMINAL_FACTOR;
+    return uses.reliableGoAgain || uses.finisher ? value : value * ARSENAL_TERMINAL_FACTOR;
   }
   return uses.pump + (uses.pumpRider ?? 0);
 }
@@ -108,7 +115,9 @@ export function arsenalValue(uses: CardUses, discount: number, hitChance = DEFAU
 
 /** Best single use of a card drawn into a fresh hand. */
 export function standaloneValue(uses: CardUses, hitChance = DEFAULT_HIT_CHANCE): number {
-  return Math.max(offenseValue(uses, hitChance), blockValue(uses), uses.pitch * PITCH_FUNDING_RATE);
+  return Math.max(
+    offenseValue(uses, hitChance), blockValue(uses), uses.pitch * PITCH_FUNDING_RATE, uses.alternative ?? 0,
+  );
 }
 
 /** A card kept in hand displaces one draw, so it is worth only its margin. */
@@ -134,6 +143,7 @@ export function defaultCardUses(data: CardData, power = data.attack ?? 0, defens
         data.cardType === "defense-reaction" || data.cardType === "block" || data.cardType === "equipment"
     ? data.cardType
     : "other";
+  const prevented = handPrevention(data);
   const pumpMatch = /\+(\d+)\{p\}/.exec(data.text);
   const pumpCount = (data.text.match(/next attack[^.]*\+(\d+)\{p\}/gi) ?? []).length;
   const pump = kind === "attack" || kind === "weapon"
@@ -151,7 +161,19 @@ export function defaultCardUses(data: CardData, power = data.attack ?? 0, defens
     ...(data.keywords?.includes("Ambush") || /^Ambush\b/m.test(data.text) ? { ambush: true } : {}),
     // Cards with a bonus for being played from arsenal (e.g. Sow Tomorrow).
     ...(/\bplayed from (?:your )?arsenal\b/i.test(data.text) ? { arsenalPlay: true } : {}),
+    ...(prevented > 0 ? { alternative: Math.min(prevented, TYPICAL_INCOMING) * BLOCK_USE_RATE } : {}),
   };
+}
+
+const PREVENT_AMOUNT = /\bprevent (?:the next )?(\d+)(?: of that)? damage/i;
+const HAND_INSTANT_PREVENT = /Instant - [^:]*\b(?:discard|banish) this(?: from your hand)?:\s*Prevent the next (\d+) damage/i;
+
+/** Fixed damage a card prevents when used from hand: a prevention instant,
+ * or an instant-speed discard/banish mode (e.g. Fallen Herald). */
+function handPrevention(data: CardData): number {
+  const mode = HAND_INSTANT_PREVENT.exec(data.text);
+  if (mode) return Number(mode[1]);
+  return data.cardType === "instant" ? Number(PREVENT_AMOUNT.exec(data.text)?.[1] ?? 0) : 0;
 }
 
 const ARSENAL_DISRUPTION = new RegExp(

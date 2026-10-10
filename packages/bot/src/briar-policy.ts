@@ -2,7 +2,7 @@ import type { CardData, CardView, GameIntent, GameView } from "@fyendal/shared";
 import { planBriarTurn, type BriarTurnPlan } from "./briar-turn-planner.js";
 import { briarSolverRules } from "./briar-rules.js";
 import { briarMatchupForHeroName } from "./briar-strategy.js";
-import { arsenalValuer, handResponse, solveHand } from "./hand-value.js";
+import { arsenalValuer, handResponse, opportunityValuer, solveHand } from "./hand-value.js";
 import { POINTS_PER_DAMAGE } from "./turn-planner.js";
 import {
   chooseScoredIntent,
@@ -350,21 +350,7 @@ function arcaneSeedsLifeIsLastSurvivalOption(
   return arcane === me.life && !hasAvailableArcanePrevention(input);
 }
 
-function cardOpportunity(card: CardView, input: BotPolicyInput): number {
-  const data = input.cards[card.cardId];
-  if (!data) return 0;
-  const functional = key(data);
-  if (functional === "evergreen|1") return 12;
-  if (functional === "burn up // shock|1" && isFatiguePlan(input)) return 9;
-  if (NON_ATTACK_PRIORITIES[functional]) return 5;
-  // Rush is the cleanest payoff for Briar's Lightning setup and Embodiment
-  // token. Preserve it rather than trade it for a small, nonlethal partial block.
-  if (functional === "rush of power|1") return 8;
-  if (data.cardType === "defense-reaction") return 4.5;
-  if (data.cardType === "instant") return 3.5;
-  if (isAttack(data)) return (data.attack ?? 0) + (data.keywords?.includes("Go again") ? 3 : 0);
-  return Math.max(1, data.pitch ?? 0);
-}
+const cardOpportunity = opportunityValuer(briarSolverRules);
 
 function scoreDefend(intent: Extract<GameIntent, { kind: "defend" }>, input: BotPolicyInput, own: ReadonlyMap<number, CardView>): number {
   return scoreDefenseIntent(intent, input, own, {

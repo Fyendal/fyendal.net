@@ -42,9 +42,9 @@ import {
   type BotPolicyInput,
   type TargetableAttackIntent,
 } from "./policy.js";
-import type { CardUses } from "./card-ev.js";
+import { BLOCK_USE_RATE, type CardUses } from "./card-ev.js";
 import type { HeroSolverRules } from "./card-model.js";
-import { arsenalValuer } from "./hand-value.js";
+import { arsenalValuer, opportunityValuer } from "./hand-value.js";
 import { adjustValueBreakdown } from "./value.js";
 import {
   evaluateOpponentResponse,
@@ -610,27 +610,7 @@ function canRefreshValiantDynamo(input: BotPolicyInput): boolean {
   ]));
 }
 
-function cardOpportunity(card: CardView, input: BotPolicyInput): number {
-  const data = input.cards[card.cardId];
-  if (!data) return 0;
-  const functional = key(data);
-  if (functional === "ripple away|3") {
-    const drawnReady = hasCard(input, new Set(["drawn to the blade|2"]));
-    return drawnReady && input.view.players[input.seat].heroTapped !== true ? 18 : 10;
-  }
-  if (functional === "toe the line|1") return 15;
-  if (functional === "shelter from the storm|1") return 18;
-  if (functional.startsWith("edict of steel|")) return 14 - (data.pitch ?? 1);
-  if (functional === "beckon steel|3" || functional === "drawn to the blade|2") return 15;
-  if (functional === "and again...|3" || functional === "olé|3") return 13;
-  if (functional === "swordmaster's shine|1" || functional === "polished blade|1") return 12;
-  if (functional.startsWith("showdown|") || functional.startsWith("big blinder|")) return 12;
-  if (functional === "brimming blade|1" || functional.startsWith("swordmaster's path|")) return 11;
-  if (data.cardType === "defense-reaction") return Math.max(8, data.defense ?? 0);
-  if (data.cardType === "attack-reaction") return 7 + Math.max(0, 3 - (data.pitch ?? 0));
-  if (isAttack(data)) return (data.attack ?? 0) + (/discard|arsenal/i.test(data.text) ? 3 : 0);
-  return Math.max(1, data.pitch ?? 0);
-}
+const cardOpportunity = opportunityValuer(halaSolverRules);
 
 const HALA_SETUP_ROLE: CardRoleTag = "hero:hala-setup";
 
@@ -1570,10 +1550,17 @@ function scoreDefend(
 const SHARPEN_VALUE = 2;
 const FLURRY_VALUE = 4;
 const DRAW_VALUE = 3;
+/** A wager is an even contest absent other information. */
+const WAGER_WIN_CHANCE = 0.5;
 // Hala's blue sword setups cost 0-1 and feed Zenith Blade, so unlike most
 // blue cards they are still at rate when played out of arsenal.
 const HALA_CARD_USES: Readonly<Record<string, Partial<CardUses>>> = {
-  "toe the line|1": { kind: "defense-reaction", defense: 3 },
+  // Prevents 2 and creates a Flurry when damage arrives on the opposing turn.
+  "toe the line|1": {
+    kind: "defense-reaction",
+    defense: 3,
+    alternative: (2 + FLURRY_VALUE) * BLOCK_USE_RATE,
+  },
   "brimming blade|1": { pump: 2 * SHARPEN_VALUE },
   // Edict's Flurry threshold rises with pitch: 1, 2 or 3 counters.
   "edict of steel|1": { pump: SHARPEN_VALUE, pumpRider: FLURRY_VALUE },
@@ -1585,6 +1572,9 @@ const HALA_CARD_USES: Readonly<Record<string, Partial<CardUses>>> = {
   "olé|3": { pump: FLURRY_VALUE + DRAW_VALUE - SHARPEN_VALUE, arsenalPlay: true },
   "and again...|3": { pump: FLURRY_VALUE, arsenalPlay: true },
   "beckon steel|3": { pump: SHARPEN_VALUE * 0.8, arsenalPlay: true },
+  "swordmaster's path|1": { pumpRider: SHARPEN_VALUE },
+  "showdown|1": { pumpRider: FLURRY_VALUE * WAGER_WIN_CHANCE },
+  "big blinder|1": { pumpRider: FLURRY_VALUE * WAGER_WIN_CHANCE },
 };
 
 function halaSolverRules(_input: BotPolicyInput): HeroSolverRules {

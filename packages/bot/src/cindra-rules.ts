@@ -1,8 +1,8 @@
-import type { CardData } from "@fyendal/shared";
-import { BLOCK_USE_RATE, expectedTopPitch } from "./card-ev.js";
+import type { CardData, CardView } from "@fyendal/shared";
+import { BLOCK_USE_RATE, PITCH_FUNDING_RATE, expectedTopPitch } from "./card-ev.js";
 import { cardTraits, type HeroSolverRules, type SolverCardPatch } from "./card-model.js";
 import type { PendingEffect, SolverCard, SolverView } from "./hand-solver.js";
-import type { BotPolicyInput } from "./policy.js";
+import { isAttack, type BotPolicyInput } from "./policy.js";
 
 const named = (data: CardData | undefined): string => data?.name.trim().toLowerCase() ?? "";
 
@@ -47,6 +47,22 @@ export function cindraSolverRules(input: BotPolicyInput): HeroSolverRules {
   const daggers = me.weapons.filter((card) => input.cards[card.cardId]?.subtypes?.includes("dagger")).length;
   const daggersLeft = (view: SolverView) => Math.max(0, daggers - view.flag("daggersSpent"));
   const topPitch = expectedTopPitch(input);
+  const ownLinks = input.view.chain.filter((link) => link.attackingCard.owner === input.seat);
+  const ownDraconicLinks = ownLinks.filter((link) =>
+    [...(input.cards[link.attackingCard.cardId]?.subtypes ?? []), ...(link.attackingCard.grantedTypes ?? [])]
+      .some((type) => type.toLowerCase() === "draconic")
+  ).length;
+  const ourTurn = input.view.activePlayer === input.seat;
+  const readyDaggers = me.weapons.filter((weapon) =>
+    input.cards[weapon.cardId]?.subtypes?.includes("dagger") && !weapon.usedAbilityIndexes?.includes(0)
+  ).length;
+  /** Rupture (chain link 4+) is reachable this turn: the links already made
+   * plus the other attacks held and ready daggers reach three. */
+  const ruptureReachable = (self: CardView) => ourTurn &&
+    ownLinks.length + readyDaggers +
+        [...me.hand, ...me.arsenal].filter((held) =>
+          held.instanceId !== self.instanceId && isAttack(input.cards[held.cardId])
+        ).length >= 3;
 
   // Oath of Loyalty: after it, only Draconic cards may be played this turn.
   const withOathRestriction = (patch: SolverCardPatch): SolverCardPatch => {
@@ -75,6 +91,8 @@ export function cindraSolverRules(input: BotPolicyInput): HeroSolverRules {
       }
       if (TWO_DRACONIC_LINKS.test(data.text)) {
         patch.goAgainIn = (view) => draconicLinksWithThis(view) >= 2;
+        // A Draconic link already on the chain makes the condition certain.
+        if (ownDraconicLinks >= 1) patch.uses = { ...patch.uses, reliableGoAgain: true };
       }
       switch (name) {
         case "art of the dragon: blood":
@@ -116,6 +134,7 @@ export function cindraSolverRules(input: BotPolicyInput): HeroSolverRules {
           break;
         case "lava burst":
           patch.powerIn = (view) => power + (view.links >= 3 ? 3 : 0);
+          if (ruptureReachable(card)) patch.uses = { ...patch.uses, power: power + 3, finisher: true };
           break;
         case "breaking point":
           patch.onHitIn = (view) => view.links >= 3 && opponent.arsenalCount > 0 ? 4 : 0;
@@ -123,6 +142,10 @@ export function cindraSolverRules(input: BotPolicyInput): HeroSolverRules {
         case "cut through":
           patch.goAgainIn = (view) => view.flag("daggerHit") > 0;
           patch.powerIn = (view) => power + (view.flag("daggerHit") > 0 ? 1 : 0);
+          break;
+        case "draco fire":
+          // The {r} it saves funds damage like a pitched resource.
+          patch.uses = { ...patch.uses, pumpRider: PITCH_FUNDING_RATE };
           break;
         case "ignite":
           patch.after = () => ({ pending: [draconicCostReduction(`ignite#${card.instanceId}`, 1)] });
@@ -147,6 +170,7 @@ export function cindraSolverRules(input: BotPolicyInput): HeroSolverRules {
           break;
         case "ancestral empowerment":
           patch.bonusIn = () => CARD_DRAW_VALUE;
+          patch.uses = { ...patch.uses, pumpRider: CARD_DRAW_VALUE };
           break;
         case "throw dagger":
           // One dagger damage that hits, drawing a card.
@@ -155,7 +179,7 @@ export function cindraSolverRules(input: BotPolicyInput): HeroSolverRules {
           patch.canPlay = (view) => daggersLeft(view) > 0 &&
             !(view.lastAttack !== undefined && isDagger(view.lastAttack) && daggersLeft(view) <= 1);
           patch.after = (view) => ({ flags: { daggerHit: 1, daggersSpent: view.flag("daggersSpent") + 1 } });
-          patch.uses = { pump: 4 };
+          patch.uses = { ...patch.uses, pump: 1 + CARD_DRAW_VALUE };
           break;
         case "kunai of retribution":
         case "claw of vynserakai":

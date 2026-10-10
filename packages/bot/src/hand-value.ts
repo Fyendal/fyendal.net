@@ -1,7 +1,8 @@
 import type { CardView } from "@fyendal/shared";
-import { BLOCK_USE_RATE, defaultCardUses, heldValue } from "./card-ev.js";
+import { BLOCK_USE_RATE, defaultCardUses, heldValue, standaloneValue } from "./card-ev.js";
 import {
   buildHandSolver,
+  heldCardUses,
   modelContext,
   solverCard,
   type HeroSolverRules,
@@ -122,6 +123,21 @@ export function heldCardValue(card: CardView, input: BotPolicyInput, factory: He
   if (model) return model.heldValue;
   const data = input.cards[card.cardId];
   return data ? heldValue(defaultCardUses(data), context.averageDraw, context.hitChance) : 0;
+}
+
+/** Cost of spending a hand card now (pitching, blocking, discarding): its
+ * best single use over the draw that replaces it. Unlike `heldCardValue` it
+ * is not floored at zero, so below-average cards still rank against each
+ * other. */
+export function cardOpportunity(card: CardView, input: BotPolicyInput, factory: HeroRulesFactory): number {
+  const { context } = cachedHand(input, factory);
+  const uses = heldCardUses(card, context);
+  return uses ? standaloneValue(uses, context.hitChance) - context.averageDraw : 0;
+}
+
+/** `cardOpportunity` bound to one hero's rules. */
+export function opportunityValuer(factory: HeroRulesFactory): (card: CardView, input: BotPolicyInput) => number {
+  return (card, input) => cardOpportunity(card, input, factory);
 }
 
 /** Blocking value an equipment piece gives up when it is spent. */

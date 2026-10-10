@@ -178,6 +178,13 @@ export function modelContext(
   };
 }
 
+/** A held card's static uses after hero rules refine them. */
+export function heldCardUses(card: CardView, context: ModelContext): CardUses | undefined {
+  const data = context.input.cards[card.cardId];
+  if (!data) return undefined;
+  return { ...cardUses(data, context.input, card), ...(context.rules.card?.(data, card, context)?.uses ?? {}) };
+}
+
 /** Default solver model for a card the bot holds, then hero-patched. */
 export function solverCard(card: CardView, zone: SolverZone, context: ModelContext): SolverCard | undefined {
   const { input, rules } = context;

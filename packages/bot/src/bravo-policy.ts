@@ -26,7 +26,7 @@ import {
 } from "./policy.js";
 import { abilitySource, type HeroSolverRules } from "./card-model.js";
 import { guardianPatch } from "./guardian-rules.js";
-import { arsenalValuer, handResponse } from "./hand-value.js";
+import { arsenalValuer, handResponse, opportunityValuer } from "./hand-value.js";
 import {
   chooseTacticalIntentWithTrace,
   type TacticalTurnPlan,
@@ -54,28 +54,20 @@ function attackValue(data: CardData, input: BotPolicyInput): number {
   return value;
 }
 
-function cardOpportunity(card: CardView, input: BotPolicyInput): number {
-  const data = input.cards[card.cardId];
-  if (!data) return 0;
-  const functional = key(data);
-  if (functional === "staunch response|1") return 10;
-  if (functional === "pummel|1") return 9;
-  if (functional === "oasis respite|1") return 8;
-  if (functional === "arcane polarity|1") {
-    return input.view.turnFacts?.players[input.seat].arcaneDamageTaken ? 8 : 2;
-  }
-  if (isWizardFatigueMatchup(input) && data.pitch === 3) {
-    // A blue represents up to the full AB3 activation against the next arcane
-    // packet, so preserve it over an otherwise interchangeable red blocker.
-    return 15 + Math.max(0, data.defense ?? 0);
-  }
-  if (isAttack(data)) return attackValue(data, input);
-  if (data.cardType === "block") return Math.max(2, data.defense ?? 0);
-  return Math.max(1, data.pitch ?? 0, data.defense ?? 0);
+/** Arcane Polarity's life gain while held: the larger amount once arcane
+ * damage has been dealt this turn. */
+function lifeGainAlternative(data: CardData, input: BotPolicyInput): number {
+  if (data.cardType !== "instant") return 0;
+  const arcaneTaken = input.view.turnFacts?.players[input.seat].arcaneDamageTaken === true;
+  return Number(
+    (arcaneTaken ? /if you've been dealt arcane damage this turn, instead gain (\d+)\{h\}/i : /^gain (\d+)\{h\}/im)
+      .exec(data.text)?.[1] ?? 0,
+  );
 }
 
-/** Hand-value rules: shared Guardian cards, Fault Line, and Bravo's ability
- * turning a face-down Crush arsenal card face up for +2{p} (go again). */
+/** Hand-value rules: shared Guardian cards, Fault Line, Arcane Polarity,
+ * and Bravo's ability turning a face-down Crush arsenal card face up for
+ * +2{p} (go again). */
 function bravoSolverRules(input: BotPolicyInput): HeroSolverRules {
   const me = input.view.players[input.seat];
   const nextTurn = input.view.activePlayer !== input.seat;
@@ -85,9 +77,13 @@ function bravoSolverRules(input: BotPolicyInput): HeroSolverRules {
     trackedTraits: [],
     card(data, card) {
       const patch = guardianPatch(data, card, input);
+      const power = card.attack ?? data.attack ?? 0;
       if (key(data) === "fault line|1" && me.arsenalCount > 0) {
-        patch.powerIn = () => (card.attack ?? data.attack ?? 0) + 1;
+        patch.powerIn = () => power + 1;
+        patch.uses = { ...patch.uses, power: power + 1 };
       }
+      const alternative = lifeGainAlternative(data, input);
+      if (alternative > 0) patch.uses = { ...patch.uses, alternative };
       return patch;
     },
     abilities() {
@@ -111,6 +107,8 @@ function bravoSolverRules(input: BotPolicyInput): HeroSolverRules {
     },
   };
 }
+
+const cardOpportunity = opportunityValuer(bravoSolverRules);
 
 function offensiveCards(input: BotPolicyInput): readonly CardView[] {
   const me = input.view.players[input.seat];

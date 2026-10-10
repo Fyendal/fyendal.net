@@ -32,7 +32,7 @@ import {
   type TacticalTurnPlan,
 } from "./tactical-turn-planner.js";
 import { cindraSolverRules } from "./cindra-rules.js";
-import { arsenalValuer, handResponse, solveHand } from "./hand-value.js";
+import { arsenalValuer, handResponse, opportunityValuer, solveHand } from "./hand-value.js";
 
 const CARD = {
   ancestralEmpowerment: "ancestral empowerment|1",
@@ -46,6 +46,7 @@ const CARD = {
   enflameTheFirebrand: "enflame the firebrand|1",
   fealty: "fealty|0",
   fireTenetStrikeFirst: "fire tenet: strike first|1",
+  flamescaleFurnace: "flamescale furnace|0",
   flickKnives: "flick knives|0",
   kunaiOfRetribution: "kunai of retribution|0",
   lavaBurst: "lava burst|1",
@@ -993,26 +994,7 @@ function likelyGoAgain(card: CardView, input: BotPolicyInput): boolean {
   return data.keywords?.some((keyword) => keyword.toLowerCase() === "go again") === true;
 }
 
-function lavaBurstCanRupture(card: CardView, input: BotPolicyInput): boolean {
-  if (key(input.cards[card.cardId]) !== CARD.lavaBurst) return false;
-  const linksNeededBeforeLava = Math.max(0, 3 - ourChainLinks(input));
-  if (linksNeededBeforeLava === 0) return true;
-  return fundableAttacks(input, new Set([card.instanceId])).length >= linksNeededBeforeLava;
-}
-
-function cardOpportunity(card: CardView, input: BotPolicyInput): number {
-  const data = input.cards[card.cardId];
-  if (!data) return 0;
-  const functional = key(data);
-  if (data.cardType === "defense-reaction") return 14;
-  if (functional === CARD.throwDagger) return 15;
-  if (functional === CARD.ancestralEmpowerment) return 14;
-  if (functional === CARD.lavaBurst && lavaBurstCanRupture(card, input)) return 40;
-  if (isAttack(data)) return (data.attack ?? 0) + (likelyGoAgain(card, input) ? 6 : 2);
-  if (data.cardType === "weapon") return 6;
-  if (functional === CARD.dracoFire) return 7;
-  return Math.max(1, data.pitch ?? 0);
-}
+const cardOpportunity = opportunityValuer(cindraSolverRules);
 
 function flightPathWillBeConsumedNextTurn(input: BotPolicyInput): boolean {
   if (isCindraTurn(input) ||
@@ -1201,6 +1183,18 @@ interface PlayScoreContext {
   draconicLinks: number;
 }
 
+/** Flamescale Furnace costs {r} and gains {r} per red card in the pitch zone,
+ * counting the cards pitched to pay for it. */
+function furnaceResourceGain(
+  intent: Extract<GameIntent, { kind: "activate-ability" }>,
+  input: BotPolicyInput,
+): number {
+  const me = input.view.players[input.seat];
+  const pitched = pitchIds(intent);
+  const pitchZone = [...me.pitch, ...me.hand.filter((card) => pitched.includes(card.instanceId))];
+  return pitchZone.filter((card) => input.cards[card.cardId]?.pitch === 1).length - 1;
+}
+
 function scoreActivation(
   intent: Extract<GameIntent, { kind: "activate-ability" }>,
   input: BotPolicyInput,
@@ -1238,6 +1232,7 @@ function scoreActivation(
     if (!shouldUseFlightPath(input, excludedIds)) return -10_000;
     return pitchIds(intent).length === 0 ? 1_600 : 1_000;
   }
+  if (functional === CARD.flamescaleFurnace && furnaceResourceGain(intent, input) <= 0) return -10_000;
   if (!isDagger(data)) return 10;
   if (!shouldAttackWithDagger(intent, card, input)) return -10_000;
   if (dracoFireDiscountAvailable(input) && shouldSpendDracoFireOnDagger(input)) {

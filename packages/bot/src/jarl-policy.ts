@@ -26,7 +26,7 @@ import {
 } from "./policy.js";
 import type { HeroSolverRules } from "./card-model.js";
 import { guardianPatch } from "./guardian-rules.js";
-import { arsenalValuer, handResponse } from "./hand-value.js";
+import { arsenalValuer, handResponse, opportunityValuer } from "./hand-value.js";
 import { adjustValueBreakdown } from "./value.js";
 import {
   chooseTacticalIntentWithTrace,
@@ -77,27 +77,6 @@ function attackValue(data: CardData, input: BotPolicyInput): number {
   return value;
 }
 
-function cardOpportunity(card: CardView, input: BotPolicyInput): number {
-  const data = input.cards[card.cardId];
-  if (!data) return 0;
-  const functional = key(data);
-  if (functional === "pulse of isenloft|3") return 14;
-  if (functional === "sow tomorrow|3") return 12;
-  if (functional === "oaken old|1") return 12;
-  if (functional === "rootbound carapace|1") return earthBanished(input) < 4 ? 11 : 7;
-  if (functional === "felling of the crown|1") return earthBanished(input) >= 4 ? 13 : 4;
-  if (functional === "tear asunder|3") return (card.pitchCount ?? 0) > 0 ? 10 : 2;
-  if (functional === "crumble to eternity|3") return opponentIsAggro(input) ? 3 : 9;
-  if (opponentIsGravy(input) && functional === "frozen to death|3" && markedCompass(input)) return 16;
-  if (opponentIsGravy(input) && functional === "mangle|1" && markedCompass(input)) return 16;
-  if (functional === "everbloom // life|3") return (card.pitchCount ?? 0) > 0 ? 8 : 2;
-  if (functional === "fruits of the forest|3") return 1;
-  if (isAttack(data)) return attackValue(data, input);
-  // Most blues are deliberately treated as interchangeable three-blocks.
-  if (data.pitch === 3) return Math.max(1, (data.defense ?? 0) - 1);
-  return Math.max(1, data.defense ?? 0, data.pitch ?? 0);
-}
-
 /** Damage-equivalent of Tear Asunder's hit: the defender discards 2 cards. */
 const TEAR_ASUNDER_ON_HIT = 6;
 
@@ -133,6 +112,8 @@ function jarlSolverRules(input: BotPolicyInput): HeroSolverRules {
     },
   };
 }
+
+const cardOpportunity = opportunityValuer(jarlSolverRules);
 
 function offensiveCards(input: BotPolicyInput): readonly CardView[] {
   const me = input.view.players[input.seat];

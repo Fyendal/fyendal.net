@@ -1444,10 +1444,10 @@ export function scoreDefenseIntentWithTrace(
   if (lethal) {
     const handDefenseNeeded = Math.max(0, incomingAfterPlannedPrevention - me.life + 1);
     const survives = defense >= handDefenseNeeded;
-    const preservationCost = chosen.reduce(
-      (sum, card) => sum + model.cardOpportunity(card, input),
-      0,
-    ) + plannedOpportunityCost;
+    // Equipment wear is priced by equipmentCost; opportunity is for hand cards.
+    const preservationCost = chosen
+      .filter((card) => !equipmentIds.has(card.instanceId))
+      .reduce((sum, card) => sum + model.cardOpportunity(card, input), 0) + plannedOpportunityCost;
     if (!survives) {
       return {
         score: defense * 100 - equipmentCost - preservationCost,

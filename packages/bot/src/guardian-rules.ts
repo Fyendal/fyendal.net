@@ -1,6 +1,8 @@
 import type { CardData, CardView } from "@fyendal/shared";
+import { DEFAULT_HIT_CHANCE } from "./card-ev.js";
 import type { SolverCardPatch } from "./card-model.js";
 import type { SolverCard, SolverView } from "./hand-solver.js";
+import { evaluateOnHit } from "./on-hit.js";
 import type { BotPolicyInput } from "./policy.js";
 
 /**
@@ -34,6 +36,21 @@ function canFuse(view: SolverView, self: number, elements: readonly string[]): b
   return elements.every((element) => others.some((card) => view.hasTrait(card, element)));
 }
 
+/** Fusion from the current hand, for static card uses. */
+function handCanFuse(input: BotPolicyInput, self: number, elements: readonly string[]): boolean {
+  const others = input.view.players[input.seat].hand.filter((card) => card.instanceId !== self);
+  return elements.every((element) => others.some((card) => hasSubtype(input.cards[card.cardId], element)));
+}
+
+/** Pummel's attack-action mode adds "When this hits a hero, they discard a card." */
+const PUMMEL_ON_HIT_RIDER = evaluateOnHit({
+  effects: [{ text: "they discard a card" }],
+  attackerCanContinue: false,
+  attackerCanArsenal: true,
+  defenderHasHand: true,
+  defenderHasArsenal: false,
+}).value * DEFAULT_HIT_CHANCE;
+
 function isClubOrHammerWeapon(card: SolverCard): boolean {
   return card.kind === "weapon" && (card.traits.includes("club") || card.traits.includes("hammer"));
 }
@@ -55,19 +72,32 @@ export function guardianPatch(data: CardData, card: CardView, input: BotPolicyIn
       patch.powerIn = (view) => power + (view.flag("pitchedCost3") > 0 ? 1 : 0);
       break;
     case "pummel":
-      patch.reactionPower = 4;
+      patch.reactionPower = Number(/\+(\d+)\{p\}/.exec(data.text)?.[1] ?? 0);
+      patch.uses = { pumpRider: PUMMEL_ON_HIT_RIDER };
       patch.reactionTarget = (attack) => isClubOrHammerWeapon(attack) || (attack.kind === "attack" && attack.cost >= 2);
       break;
     case "felling of the crown":
     case "plow under":
-      if (earthBanished(input) >= 4) patch.powerIn = () => power + 4;
+      if (earthBanished(input) >= 4) {
+        patch.powerIn = () => power + 4;
+        patch.uses = { power: power + 4 };
+      }
       break;
     case "cadaverous tilling":
-      if (canDecompose(input)) patch.powerIn = () => power + 2;
+      if (canDecompose(input)) {
+        patch.powerIn = () => power + 2;
+        patch.uses = { power: power + 2 };
+      }
+      break;
+    case "rootbound carapace":
+      if (canDecompose(input)) patch.uses = { defense: (card.defense ?? data.defense ?? 0) + 1 };
       break;
     case "oaken old":
       patch.powerIn = (view) => power + (canFuse(view, card.instanceId, ["earth", "ice"]) ? 2 : 0);
       patch.onHitIn = (view) => canFuse(view, card.instanceId, ["earth", "ice"]) ? OAKEN_OLD_FUSED_ON_HIT : 0;
+      if (handCanFuse(input, card.instanceId, ["earth", "ice"])) {
+        patch.uses = { power: power + 2, onHit: OAKEN_OLD_FUSED_ON_HIT };
+      }
       break;
     default:
       break;

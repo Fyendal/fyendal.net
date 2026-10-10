@@ -17,7 +17,7 @@ import {
   scoreSpendCardChoice,
   type BotPolicyInput,
 } from "./policy.js";
-import { arsenalValuer, handResponse } from "./hand-value.js";
+import { arsenalValuer, handResponse, opportunityValuer } from "./hand-value.js";
 import { kayoSolverRules } from "./kayo-rules.js";
 import { planTacticalTurn, type TacticalIntentDecision } from "./tactical-turn-planner.js";
 
@@ -53,12 +53,7 @@ function likelyGoAgain(data: CardData, intent: GameIntent, input: BotPolicyInput
   return data.keywords?.includes("Go again") === true || (isAttack(data) && agilityReady(input));
 }
 
-function cardOpportunity(card: CardView, input: BotPolicyInput): number {
-  const data = input.cards[card.cardId];
-  if (named(data, "agile windup")) return 9;
-  if (isAttack(data)) return (data?.attack ?? 0) + (named(data, "wild ride") || named(data, "buckwild") ? 4 : 0);
-  return data?.pitch ?? 0;
-}
+const cardOpportunity = opportunityValuer(kayoSolverRules);
 
 /** Worth keeping face-down for next turn's Agility go-again: Bare Fangs or a
  * 6+ power attack other than the Windups and Wild Ride. */

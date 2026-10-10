@@ -21,11 +21,13 @@ import {
   scoreSpendCardChoice,
   type BotPolicyInput,
 } from "./policy.js";
-import { BLOCK_USE_RATE, DISRUPTION_HIT_CHANCE, TYPICAL_INCOMING } from "./card-ev.js";
+import { DISRUPTION_HIT_CHANCE } from "./card-ev.js";
 import { probabilityAtLeastOne, totalCount, unseenCounts } from "./deck-knowledge.js";
 import { solverCard, type HeroSolverRules, type SolverCardPatch } from "./card-model.js";
 import type { PendingEffect, SolverCard, SolverView } from "./hand-solver.js";
-import { arsenalCardValue, arsenalValuer, handResponse, heldCardValue, solveHand } from "./hand-value.js";
+import {
+  arsenalCardValue, arsenalValuer, handResponse, heldCardValue, opportunityValuer, solveHand,
+} from "./hand-value.js";
 import { planTacticalTurn, type TacticalTurnPlan } from "./tactical-turn-planner.js";
 import {
   chooseLeviaMacro,
@@ -116,15 +118,18 @@ function gateTargetValue(intent: GameIntent, input: BotPolicyInput, own: Readonl
   );
   const reduction = leviaEffectActive(input, "savage sash") && (targetData.attack ?? 0) >= 6 ? 1 : 0;
   if (Math.max(0, (targetData.cost ?? 0) - reduction) > afterActivation + remainingPitch) return -500;
+  const bloodrushActive = leviaEffectActive(input, "bloodrush bellow");
+  // Rank targets by the attack they will make, not by their value in hand.
+  const power = (targetData.attack ?? 0) + (bloodrushActive && targetData.classes?.includes("brute") ? 2 : 0);
   const reserve = [...me.hand, ...me.arsenal].filter((card) => !pitched.has(card.instanceId));
   if (!leviaAttackPair(input, reserve) &&
     leviaAttackPair(input, [...reserve, target], { resources: afterActivation })) {
-    return leviaEffectActive(input, "bloodrush bellow") ? 95 : 66;
+    return (bloodrushActive ? 95 : 66) + power * 0.1;
   }
   // A Gate costs a resource and an attack permission. Prefer an attack already
   // available, especially while Bloodrush is running, before paying for access.
-  if (hasDirectAttack(input, own)) return leviaAttackContinues(target, input) ? 42 : 24;
-  return 54 + Math.min(30, cardOpportunity(target, input) * 3);
+  if (hasDirectAttack(input, own)) return (leviaAttackContinues(target, input) ? 42 : 24) + power * 0.1;
+  return 54 + Math.min(30, power * 3);
 }
 
 function hasDirectAttack(input: BotPolicyInput, own: ReadonlyMap<number, CardView>): boolean {
@@ -184,17 +189,7 @@ function hexGauntletValue(input: BotPolicyInput, gauntlet: CardView): number {
   return 2;
 }
 
-function cardOpportunity(card: CardView, input: BotPolicyInput): number {
-  const data = input.cards[card.cardId];
-  if (!data) return 0;
-  const named = name(data);
-  if (named === "bloodrush bellow") return 9;
-  if (named === "cleave the heavens") return 8;
-  if (named === "feeding frenzy" || named === "shadowrealm horror") return 8;
-  if (named === "call to the grave") return 5;
-  if (isAttack(data)) return (data.attack ?? 0) + (data.pitch === 3 ? 1 : 0);
-  return Math.max(1, data.pitch ?? 0);
-}
+const cardOpportunity = opportunityValuer(leviaSolverRules);
 
 /** Bloodrush Bellow: Brute attacks gain +2{p} for the rest of the turn. */
 function bloodrushPending(key: string): PendingEffect {
@@ -202,8 +197,19 @@ function bloodrushPending(key: string): PendingEffect {
 }
 
 /** Hand-value rules: Levia's attack playability and go-again conditions,
- * Bloodrush Bellow, and attacks whose power depends on the board. */
+ * Bloodrush Bellow, Cleave's Gate mode, and attacks whose power depends on
+ * the board. */
 export function leviaSolverRules(input: BotPolicyInput): HeroSolverRules {
+  return leviaRules(input, true);
+}
+
+/** Rules for arsenal valuation, which never reads a hand-only mode. Valuing
+ * Gate access through these avoids re-valuing Cleave's own Gate mode. */
+function leviaArsenalRules(input: BotPolicyInput): HeroSolverRules {
+  return leviaRules(input, false);
+}
+
+function leviaRules(input: BotPolicyInput, gateMode: boolean): HeroSolverRules {
   const me = input.view.players[input.seat];
   const nextTurn = input.view.activePlayer !== input.seat;
   const banishedSix = !nextTurn && input.view.turnFacts?.players[input.seat]?.banishedSixPlusThisTurn === true;
@@ -224,6 +230,12 @@ export function leviaSolverRules(input: BotPolicyInput): HeroSolverRules {
         if (continues) patch.uses = { reliableGoAgain: true };
       }
       switch (name(data)) {
+        case "cleave the heavens":
+          // Held, it can also be banished for a Gate at instant speed.
+          if (gateMode && me.hand.some((held) => held.instanceId === card.instanceId)) {
+            patch.uses = { ...patch.uses, alternative: Math.max(0, banishGain(card, input)) };
+          }
+          break;
         case "bloodrush bellow": {
           // Go again and draw 2 when most other held cards have 6+ power.
           const others = (view: SolverView) => view.held.filter((held) => held.instanceId !== card.instanceId);
@@ -290,7 +302,7 @@ function gateRemovalChance(input: BotPolicyInput): number {
 function accessValue(access: readonly LeviaBanishAccess[], input: BotPolicyInput): number {
   const gateKept = access.some(({ viaGate }) => viaGate) ? 1 - gateRemovalChance(input) : 1;
   return access.reduce((total, { card, viaGate }) => {
-    const value = Math.max(0, arsenalCardValue(card, input, leviaSolverRules) - (viaGate ? LEVIA_GATE_COST : 0));
+    const value = Math.max(0, arsenalCardValue(card, input, leviaArsenalRules) - (viaGate ? LEVIA_GATE_COST : 0));
     return total + (viaGate ? value * gateKept : value);
   }, 0);
 }
@@ -307,8 +319,15 @@ function newGateValue(input: BotPolicyInput, banished: CardView): number {
 
 const HAND_BANISH_INSTANTS = ["cleave the heavens", "fallen herald", "blood harvest", "consuming lash"];
 
-/** Fallen Herald held for the opponent's turn prevents 4. */
-const HERALD_HOLD_VALUE = Math.min(4, TYPICAL_INCOMING) * BLOCK_USE_RATE;
+/** Gain from banishing a held card: this turn's blood-debt suppression or
+ * drain, and the Gate a Cleave creates. */
+function banishGain(card: CardView, input: BotPolicyInput): number {
+  const data = input.cards[card.cardId];
+  if (!data) return -Infinity;
+  const suppressed = input.view.turnFacts?.players[input.seat]?.banishedSixPlusThisTurn === true;
+  const gain = suppressed ? 0 : (data.attack ?? 0) >= 6 ? ownBloodDebt(input) : -1;
+  return name(data) === "cleave the heavens" ? gain + newGateValue(input, card) : gain;
+}
 
 /** Net gain from banishing a held card at end of turn. The hand refills, so
  * the card costs only its margin over a draw. */
@@ -316,11 +335,8 @@ function endOfTurnBanishGain(card: CardView, input: BotPolicyInput): number {
   const data = input.cards[card.cardId];
   if (!data) return -Infinity;
   const me = input.view.players[input.seat];
-  const suppressed = input.view.turnFacts?.players[input.seat]?.banishedSixPlusThisTurn === true;
-  let gain = suppressed ? 0 : (data.attack ?? 0) >= 6 ? ownBloodDebt(input) : -1;
-  if (name(data) === "cleave the heavens") gain += newGateValue(input, card);
-  const held = heldCardValue(card, input, leviaSolverRules) +
-    (name(data) === "fallen herald" ? HERALD_HOLD_VALUE : 0);
+  const gain = banishGain(card, input);
+  const held = heldCardValue(card, input, leviaSolverRules);
   const kept = me.arsenal.length === 0 ? Math.max(held, arsenalCardValue(card, input, leviaSolverRules)) : held;
   return gain - kept;
 }

@@ -35,7 +35,7 @@ import {
 } from "./turn-planner.js";
 import type { HeroSolverRules, SolverCardPatch } from "./card-model.js";
 import type { PendingEffect, SolverCard } from "./hand-solver.js";
-import { arsenalValuer, handDamage, handResponse } from "./hand-value.js";
+import { arsenalValuer, handDamage, handResponse, opportunityValuer } from "./hand-value.js";
 import { iraPresentation } from "./sideboard.js";
 
 const BLOSSOM_KEY = "whirling mist blossom|2";
@@ -162,24 +162,7 @@ function attackInReserve(
   );
 }
 
-function cardOpportunity(card: CardView, input: BotPolicyInput): number {
-  const data = input.cards[card.cardId];
-  if (!data) return 0;
-  const functional = key(data);
-  if (data.cardType === "defense-reaction") return 5;
-  if (data.cardType === "attack-reaction") {
-    return functional.startsWith("razor reflex|") ? 7 : 5;
-  }
-  if (isAttack(data)) {
-    let value = data.attack ?? 0;
-    if (likelyGoAgain(functional, data, "edge of autumn|0", input)) value += 3;
-    if (functional === "whirling mist blossom|2") value += 3;
-    if (functional === "enact vengeance|1") value += 2;
-    return value;
-  }
-  if (functional === "energy potion|3") return 2;
-  return Math.max(1, data.pitch ?? 0);
-}
+const cardOpportunity = opportunityValuer(iraSolverRules);
 
 /** Damage equivalents of Ira's non-damage on-hit riders. */
 const DESTROY_ARSENAL_VALUE = 4;
@@ -200,6 +183,7 @@ function iraSolverRules(input: BotPolicyInput): HeroSolverRules {
   const me = input.view.players[input.seat];
   const opponent = input.view.players[1 - input.seat]!;
   const behind = me.life < opponent.life;
+  const wieldsEdge = me.weapons.some((weapon) => key(input.cards[weapon.cardId]) === "edge of autumn|0");
   return {
     name: "ira",
     trackedTraits: [],
@@ -226,6 +210,8 @@ function iraSolverRules(input: BotPolicyInput): HeroSolverRules {
         patch.uses = { reliableGoAgain: behind };
       } else if (functional.startsWith("seek vengeance|") || functional === "vengeance never rests|3") {
         patch.goAgainIn = (view) => view.flag("lastEdge") > 0;
+        // Edge of Autumn has go again, so its Combo is available every turn.
+        patch.uses = { reliableGoAgain: wieldsEdge };
       } else if (functional === "enact vengeance|1") {
         patch.onHitIn = (view) => view.flag("lastEdge") > 0 && opponent.arsenalCount > 0 ? DESTROY_ARSENAL_VALUE : 0;
       } else if (functional.startsWith("flying kick|")) {

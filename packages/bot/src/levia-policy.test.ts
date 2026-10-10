@@ -426,6 +426,20 @@ describe("Levia Gates policy", () => {
     expect(selected).toMatchObject({ kind: "play-from-zone", instanceId: feedingFrenzy.instanceId });
   });
 
+  it("opens a Gate on the stronger of two banished attacks without go again", () => {
+    const state = game();
+    hand(state, ["MON140"]);
+    state.players[0]!.resources = 0;
+    const blueCleave = { instanceId: state.nextInstanceId++, cardId: "IAR022", owner: 0 };
+    const herald = { instanceId: state.nextInstanceId++, cardId: "IAR165", owner: 0 };
+    state.players[0]!.banish = [blueCleave, herald];
+    const gate = { instanceId: state.nextInstanceId++, cardId: "IAR222", owner: 0 };
+    state.players[0]!.board.push(gate);
+    expect(choice(state)).toMatchObject({
+      kind: "activate-ability", sourceInstanceId: gate.instanceId, targetCardInstanceId: herald.instanceId,
+    });
+  });
+
   it("creates a Gate before spending the opening-turn attack hand", () => {
     const state = game();
     state.turn = 1;
