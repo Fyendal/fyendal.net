@@ -37,7 +37,8 @@ import { abilitySource, type HeroSolverRules } from "./card-model.js";
 import { guardianPatch } from "./guardian-rules.js";
 import type { PendingEffect, SolverCard, SolverView } from "./hand-solver.js";
 import { arsenalValuer, handResponse } from "./hand-value.js";
-import { adjustValueBreakdown, evaluateOnHit } from "./value.js";
+import { evaluateOnHit } from "./on-hit.js";
+import { adjustValueBreakdown } from "./value.js";
 
 export interface StarvoIntentDecision {
   intent: GameIntent;

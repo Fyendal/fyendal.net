@@ -2,11 +2,15 @@ import type { BotDecklists, CardData, CardView, GameIntent, GameView } from "@fy
 import type { GameState } from "@fyendal/engine";
 import { requiredEquipmentStageIntent } from "./defense.js";
 import {
+  EMPTY_ON_HIT_EVALUATION,
   evaluateOnHit,
+  SIGNIFICANT_ON_HIT_VALUE,
+  type OnHitEvaluation,
+} from "./on-hit.js";
+import {
   lifeThresholdRisk,
   valueBreakdown,
   type LifeThreshold,
-  type OnHitEvaluation,
   type ValueBreakdown,
 } from "./value.js";
 
@@ -949,15 +953,6 @@ export interface DefenseCycleTrace {
 export type DefenseValueTrace = DefenseCycleTrace;
 
 const EMPTY_RESPONSE = responseEvaluation({});
-const EMPTY_ON_HIT: OnHitEvaluation = {
-  value: 0,
-  cardDraw: 0,
-  delayedDamage: 0,
-  handCardsLost: 0,
-  destroysOccupiedArsenal: false,
-  equipmentDamage: false,
-  tokenCreation: false,
-};
 
 function traceDefaults(): Pick<DefenseCycleTrace,
   "permission" | "onHit" | "stopProbability" | "representativeAttack" |
@@ -968,7 +963,7 @@ function traceDefaults(): Pick<DefenseCycleTrace,
 > {
   return {
     permission: "allow",
-    onHit: EMPTY_ON_HIT,
+    onHit: EMPTY_ON_HIT_EVALUATION,
     stopProbability: 1,
     representativeAttack: 0,
     stopResponse: EMPTY_RESPONSE,
@@ -1131,6 +1126,45 @@ function bestContinuationResponse(
   return best;
 }
 
+/**
+ * Whether a hand card the next offensive line will not convert is left
+ * unblocked. The hand refills every turn but armor wears permanently, so a
+ * spare card blocks before any equipment does. A card is spare when removing
+ * it from the remaining offensive cards does not reduce threatened damage.
+ */
+function hasSpareHandBlocker(
+  input: BotPolicyInput,
+  link: NonNullable<ReturnType<typeof currentLink>>,
+  model: HeroCycleModel,
+  chosen: readonly CardView[],
+  spentIds: ReadonlySet<number>,
+  offensiveCards: readonly CardView[],
+  responseInput: BotPolicyInput,
+): boolean {
+  // Defender limits can make the spare card an illegal addition.
+  if (link.dominate || link.overpower || link.maxNonBlockDefenders !== undefined) return false;
+  const stageable = new Set(input.legal.flatMap((intent) =>
+    intent.kind === "stage-defenders" ? intent.instanceIds : []
+  ));
+  const chosenIds = new Set(chosen.map((card) => card.instanceId));
+  const candidates = input.view.players[input.seat].hand.filter((card) =>
+    !chosenIds.has(card.instanceId) && !spentIds.has(card.instanceId) &&
+    (stageable.size === 0 || stageable.has(card.instanceId)) &&
+    input.cards[card.cardId]?.cardType !== "defense-reaction" &&
+    defenderDefense(card, input) > 0 &&
+    (model.canUseDefender?.(card, input) ?? true)
+  );
+  if (candidates.length === 0) return false;
+  const remaining = offensiveCards.filter((card) => !spentIds.has(card.instanceId));
+  const damage = model.evaluateResponse(remaining, responseInput).damageThreatened;
+  return candidates.some((spare) =>
+    model.evaluateResponse(
+      remaining.filter((card) => card.instanceId !== spare.instanceId),
+      responseInput,
+    ).damageThreatened >= damage - 1e-9
+  );
+}
+
 /** Shared block valuation with hero-specific offense and prevention projections. */
 export function scoreDefenseIntentWithTrace(
   intent: DefendIntent,
@@ -1204,7 +1238,9 @@ export function scoreDefenseIntentWithTrace(
     defenderHasHand: me.handCount > 0,
     defenderHasArsenal: me.arsenalCount > 0,
   });
-  const meaningfulOnHit = onHit.value > 0;
+  // Marks, pumps and tempo are not worth wearing armor; disruption and card
+  // advantage are.
+  const meaningfulOnHit = onHit.value >= SIGNIFICANT_ON_HIT_VALUE;
   const stopsHit = incoming > 0 && defense + plannedPrevention.amount >= incoming;
   const stopHitValue = stopsHit
     ? onHit.value + (link.wagered ? wagerDefenseSwing(link.wagerRewards) : 0)
@@ -1275,7 +1311,16 @@ export function scoreDefenseIntentWithTrace(
     if (attackIsWeapon && isBladeBeckoner(card, input)) return false;
     return true;
   });
-  if (protectedEquipment.length > 0) {
+  const offensiveCards = model.offensiveCards(input);
+  const responseInput = projectedResponseInput(input, plannedPrevention);
+  // Even when armor is otherwise justified, spare hand cards block first.
+  const spendsArmor = !lethal && selectedEquipment.some((card) =>
+    !stagedIds.has(card.instanceId) && !model.equipmentUseIsFree?.(card, input)
+  );
+  if (
+    protectedEquipment.length > 0 ||
+    spendsArmor && hasSpareHandBlocker(input, link, model, chosen, plannedSpentIds, offensiveCards, responseInput)
+  ) {
     return {
       score: -1_000_000,
       value: valueBreakdown({ strategicAdjustment: -1_000_000 }),
@@ -1301,9 +1346,7 @@ export function scoreDefenseIntentWithTrace(
   const handOpportunityCost = chosen
     .filter((card) => !equipmentIds.has(card.instanceId))
     .reduce((total, card) => total + model.cardOpportunity(card, input) * 0.1, 0);
-  const offensiveCards = model.offensiveCards(input);
   const fullResponse = model.evaluateResponse(offensiveCards, input);
-  const responseInput = projectedResponseInput(input, plannedPrevention);
   const remainingRawResponse = model.evaluateResponse(
     offensiveCards.filter((card) => !plannedSpentIds.has(card.instanceId)),
     responseInput,

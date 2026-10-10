@@ -19,7 +19,7 @@ import {
   type SolverZone,
 } from "./hand-solver.js";
 import type { BotPolicyInput } from "./policy.js";
-import { evaluateOnHit } from "./value.js";
+import { evaluateOnHit } from "./on-hit.js";
 
 /** Shared context for building solver cards for one decision. */
 export interface ModelContext {

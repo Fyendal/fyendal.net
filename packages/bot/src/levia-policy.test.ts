@@ -78,6 +78,35 @@ function defending(state: ReturnType<typeof game>) {
   throw new Error("Attack did not reach defense");
 }
 
+const DIG_FOR_SOULS = "When this hits, destroy this zombie.\"";
+const COMMAND_AND_CONQUER = "When this hits a hero, destroy all cards in their arsenal.";
+
+/** Defends an 8-power attack carrying `onHit` with four armor pieces and a
+ * full arsenal, so hand cards outside next turn's attack are spare. */
+function armoredBlock(cards: readonly string[], onHit: string) {
+  let state = game();
+  hand(state, cards);
+  const player = state.players[0]!;
+  player.equipment = {
+    head: { instanceId: state.nextInstanceId++, cardId: "IAR038", owner: 0 },
+    arms: { instanceId: state.nextInstanceId++, cardId: "PEN192", owner: 0 },
+    chest: { instanceId: state.nextInstanceId++, cardId: "AKO004", owner: 0 },
+    legs: { instanceId: state.nextInstanceId++, cardId: "WTR004", owner: 0 },
+  };
+  player.arsenal = [{ instanceId: state.nextInstanceId++, cardId: "MON140", owner: 0, faceDown: true }];
+  const handIds = player.hand.map((card) => card.instanceId);
+  state = defending(state);
+  const view = projectStateFor(state, 0);
+  const link = { ...view.chain.at(-1)!, damage: 8, onHitEffects: [{ sourceCardId: "", text: onHit }] };
+  const intent = chooseLeviaIntent({
+    seat: 0, view: { ...view, chain: [...view.chain.slice(0, -1), link] },
+    legal: legalIntents(state, 0), cards: cardData, state,
+  });
+  expect(["stage-defenders", "defend"]).toContain(intent.kind);
+  const selected = intent.kind === "stage-defenders" || intent.kind === "defend" ? [...intent.instanceIds] : [];
+  return { selected, handIds };
+}
+
 describe("Levia Gates policy", () => {
   it.each([1, 3])("preserves its hand before the opponent may attack on turn %i", (turn) => {
     let state = game();
@@ -529,6 +558,23 @@ describe("Levia Gates policy", () => {
     if (defCounters === 0) expect(selected.instanceIds).toEqual([sash.instanceId]);
   });
 
+  it.each([
+    // Dig for Souls' zombie destroys itself on hit; Cleave pitched by Cleave
+    // remains next turn's attack, so Smashup and Rodeo are spare.
+    ["a self-destroying zombie", ["SUP165", "IAR020", "IAR022", "PEN322"], DIG_FOR_SOULS, [0, 3]],
+    // Rumbler pitched into the arsenal Rumbler is next turn's only attack, so
+    // the other three cards are spare and stop all 8 without armor.
+    ["a disruptive on-hit", ["SUP165", "IAR022", "IAR017", "MON140"], COMMAND_AND_CONQUER, [0, 1, 2]],
+    // Feeding Frenzy converts the whole hand into two attacks.
+    ["a disruptive on-hit with a fully converting hand", ["SUP165", "IAR022", "IAR017", "IAR026"],
+      COMMAND_AND_CONQUER, []],
+  ] as const)("blocks %s with spare hand cards before armor", (_label, cards, onHit, spareIndexes) => {
+    const { selected, handIds } = armoredBlock(cards, onHit);
+    const fromHand = selected.filter((id) => handIds.includes(id));
+    expect(fromHand.sort()).toEqual(spareIndexes.map((index) => handIds[index]!).sort());
+    if (spareIndexes.length > 0) expect(selected).toHaveLength(spareIndexes.length);
+  });
+
   it("preserves fresh Sash on defense when the remaining hand has no discounted second attack", () => {
     let state = game();
     hand(state, ["IAR026", "MON140"]);
@@ -611,7 +657,7 @@ describe("Levia Gates policy", () => {
     choice(state);
   });
 
-  it("stops a visible Snatch on-hit while keeping its Bloodrush pitch", () => {
+  it("stops a visible Snatch on-hit with a spare Dam instead of armor", () => {
     let state = game();
     state.activePlayer = 1;
     state.priorityPlayer = 1;
@@ -647,15 +693,9 @@ describe("Levia Gates policy", () => {
     expect(selected).toMatchObject({ kind: "stage-defenders" });
     if (selected.kind !== "stage-defenders") return;
     expect(applyIntent(state, 0, selected).ok).toBe(true);
-    // Any four points of defense stop the hit. Dam the Shadowake is also the
-    // pitch that funds next turn's Bloodrush Bellow, so an exact armor block
-    // that keeps the whole hand is preferred over spending it.
-    const me = projectStateFor(state, 0).players[0];
-    const blockers = [...me.hand, ...Object.values(me.equipment).flatMap((card) => card ? [card] : [])]
-      .filter((card) => selected.instanceIds.includes(card.instanceId));
-    const defense = blockers.reduce((sum, card) => sum + (card.defense ?? cardData[card.cardId]?.defense ?? 0), 0);
-    expect(defense).toBeGreaterThanOrEqual(4);
-    expect(selected.instanceIds).not.toContain(dam.instanceId);
+    // Rumbler funds next turn's Bloodrush Bellow and Frenzy remains its only
+    // discard, so Dam the Shadowake is spare and stops the hit before armor.
+    expect(selected.instanceIds).toEqual([dam.instanceId]);
   });
 
   it("plays through action, response, and choice windows with legal intents", () => {
