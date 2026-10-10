@@ -38,8 +38,8 @@ describe("room invite onboarding", () => {
     const html = renderInvite();
 
     expect(html).toContain("You’ve been invited to play Silver Age");
-    expect(html).toContain("Create Player Account");
-    expect(html).toContain("I Have an Account");
+    expect(html).toContain("Create player account");
+    expect(html).toContain("I have an account");
     expect(html).toContain("Just spectate without an account");
   });
 
@@ -57,6 +57,6 @@ describe("room invite onboarding", () => {
 
     expect(html).toContain("already has two players");
     expect(html).toContain("Spectate");
-    expect(html).not.toContain("Create Player Account");
+    expect(html).not.toContain("Create player account");
   });
 });

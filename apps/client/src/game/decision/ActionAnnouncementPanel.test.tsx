@@ -342,7 +342,7 @@ describe("Boost choices", () => {
 
     expect(html).toContain('class="decision decision-options decision-post-payment decision-choice"');
     expect(html.indexOf(">Boost</span>")).toBeLessThan(
-      html.indexOf(">Don&#x27;t Boost</span>"),
+      html.indexOf(">Don&#x27;t boost</span>"),
     );
     expect(html).toContain('class="decision-choice-option decision-choice-selected shortcut-button"');
     expect(html).toContain('title="Boost (Space)"');

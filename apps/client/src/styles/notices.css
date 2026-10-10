@@ -51,11 +51,7 @@
   display: block;
   margin-bottom: 7px;
   color: #cda45b;
-  font-family: var(--font-display);
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: .16em;
-  text-transform: uppercase;
+  font: 600 13px var(--font-lobby-ui);
 }
 .version-update-modal .modal-surface-header h2 {
   color: #ffe0a0;
@@ -121,13 +117,13 @@
   min-width: 144px;
   min-height: 42px;
   border-color: #c3984d;
-  background: linear-gradient(180deg, #865b22, #573610);
+  background: #6b4a1c;
   color: #fff2d4;
-  font-weight: 700;
+  font-weight: 600;
 }
 .version-update-confirm:hover {
   border-color: #e1b763;
-  background: linear-gradient(180deg, #9b6c2a, #674317);
+  background: #7d5823;
 }
 @media (max-width: 700px) {
   .global-notice { gap: 8px; font-size: 13px; }

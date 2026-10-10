@@ -39,7 +39,7 @@ describe("ReplayLibrary", () => {
       createElement(TestI18nProvider, null, createElement(ReplayLibrary)),
     );
 
-    expect(html).toContain("Open Replay File…");
+    expect(html).toContain("Open replay file…");
     expect(html).toContain('aria-label="Replay lists"');
     expect(html).toContain('id="replay-tab-all"');
     expect(html).toContain('id="replay-tab-favorites"');

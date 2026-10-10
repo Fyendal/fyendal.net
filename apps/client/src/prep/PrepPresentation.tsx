@@ -196,7 +196,7 @@ export const PrepPresentation = memo(function PrepPresentation({
             if (options.length === 0) return null;
             return (
               <div className="prep-group" key={slot}>
-                <span className="play-label">{intl.formatMessage({ id: `prep.slot.${slot}` })}</span>
+                <span className="play-label">{intl.formatMessage({ id: `game.zone.${slot}` })}</span>
                 <div className="prep-cardrow">
                   {options.map((id, index) => (
                     <button

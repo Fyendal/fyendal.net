@@ -66,7 +66,7 @@
   "account.currentPasswordPlaceholder": [
     {
       "type": 0,
-      "value": "current password"
+      "value": "Current password"
     }
   ],
   "account.delete.action": [
@@ -628,7 +628,7 @@
   "achievements.unlocked": [
     {
       "type": 0,
-      "value": "unlocked"
+      "value": "Unlocked"
     }
   ],
   "achievements.viewAll": [
@@ -15952,7 +15952,7 @@
   "common.endGame": [
     {
       "type": 0,
-      "value": "End Game"
+      "value": "End game"
     }
   ],
   "common.format": [
@@ -20569,7 +20569,7 @@
   "game.cardDetails": [
     {
       "type": 0,
-      "value": "Card Details"
+      "value": "Card details"
     }
   ],
   "game.cardName": [
@@ -20799,7 +20799,7 @@
   "game.concede": [
     {
       "type": 0,
-      "value": "Concede Game"
+      "value": "Concede game"
     }
   ],
   "game.concede.confirmDescription": [
@@ -20811,7 +20811,7 @@
   "game.concede.confirmTitle": [
     {
       "type": 0,
-      "value": "Concede Game?"
+      "value": "Concede game?"
     }
   ],
   "game.concede.short": [
@@ -20889,7 +20889,7 @@
   "game.decision.arsenal.action": [
     {
       "type": 0,
-      "value": "Skip Arsenal"
+      "value": "Skip arsenal"
     }
   ],
   "game.decision.arsenal.choosePrompt": [
@@ -20913,7 +20913,7 @@
   "game.decision.bloodMode.confirm": [
     {
       "type": 0,
-      "value": "Confirm Modes"
+      "value": "Confirm modes"
     }
   ],
   "game.decision.bloodMode.decrease": [
@@ -21043,7 +21043,7 @@
   "game.decision.boost.none": [
     {
       "type": 0,
-      "value": "Don't Boost"
+      "value": "Don't boost"
     }
   ],
   "game.decision.boost.once": [
@@ -21187,7 +21187,7 @@
   "game.decision.closeChain.action": [
     {
       "type": 0,
-      "value": "Close Chain and Play"
+      "value": "Close chain and play"
     }
   ],
   "game.decision.closeChain.context": [
@@ -21401,7 +21401,7 @@
   "game.decision.triggerOrder.confirm": [
     {
       "type": 0,
-      "value": "Confirm Order"
+      "value": "Confirm order"
     }
   ],
   "game.decision.triggerOrder.earlier": [
@@ -21631,7 +21631,7 @@
   "game.end.confirmTitle": [
     {
       "type": 0,
-      "value": "End Game?"
+      "value": "End game?"
     }
   ],
   "game.flipCard": [
@@ -21745,7 +21745,7 @@
   "game.keepPlaying": [
     {
       "type": 0,
-      "value": "Keep Playing"
+      "value": "Keep playing"
     }
   ],
   "game.life.amount": [
@@ -23365,7 +23365,7 @@
   "lobby.action.cancelSearch": [
     {
       "type": 0,
-      "value": "Cancel Match Search"
+      "value": "Cancel match search"
     }
   ],
   "lobby.action.decline": [
@@ -23377,13 +23377,13 @@
   "lobby.action.findMatch": [
     {
       "type": 0,
-      "value": "Find Match"
+      "value": "Find match"
     }
   ],
   "lobby.action.inviteFriend": [
     {
       "type": 0,
-      "value": "Invite Friend"
+      "value": "Invite friend"
     }
   ],
   "lobby.action.join": [
@@ -23407,7 +23407,7 @@
   "lobby.action.rejoinRoom": [
     {
       "type": 0,
-      "value": "Rejoin Room"
+      "value": "Rejoin room"
     }
   ],
   "lobby.action.spectate": [
@@ -23605,7 +23605,7 @@
   "lobby.cardPool.title": [
     {
       "type": 0,
-      "value": "Card Pool"
+      "value": "Card pool"
     }
   ],
   "lobby.count.live": [
@@ -23739,13 +23739,13 @@
   "lobby.createRoom.open": [
     {
       "type": 0,
-      "value": "Open Room"
+      "value": "Open room"
     }
   ],
   "lobby.createRoom.private": [
     {
       "type": 0,
-      "value": "Private Room"
+      "value": "Private room"
     }
   ],
   "lobby.createRoom.title": [
@@ -23767,7 +23767,7 @@
   "lobby.deck.allFormats": [
     {
       "type": 0,
-      "value": "All Formats"
+      "value": "All formats"
     }
   ],
   "lobby.deck.bannedList": [
@@ -23825,7 +23825,7 @@
   "lobby.deck.confirmDelete": [
     {
       "type": 0,
-      "value": "Confirm Delete"
+      "value": "Confirm delete"
     }
   ],
   "lobby.deck.countAndSource": [
@@ -23871,7 +23871,7 @@
   "lobby.deck.createImport": [
     {
       "type": 0,
-      "value": "Create / Import Deck"
+      "value": "Create / import deck"
     }
   ],
   "lobby.deck.deckList": [
@@ -23889,7 +23889,7 @@
   "lobby.deck.delete": [
     {
       "type": 0,
-      "value": "Delete Deck"
+      "value": "Delete deck"
     }
   ],
   "lobby.deck.deletePrompt": [
@@ -23961,7 +23961,7 @@
   "lobby.deck.edit": [
     {
       "type": 0,
-      "value": "Edit Deck"
+      "value": "Edit deck"
     }
   ],
   "lobby.deck.emptyFiltered": [
@@ -24117,13 +24117,13 @@
   "lobby.deck.import": [
     {
       "type": 0,
-      "value": "Import Deck"
+      "value": "Import deck"
     }
   ],
   "lobby.deck.importFirst": [
     {
       "type": 0,
-      "value": "Import Your First Deck"
+      "value": "Import your first deck"
     }
   ],
   "lobby.deck.importing": [
@@ -24195,7 +24195,7 @@
   "lobby.deck.keep": [
     {
       "type": 0,
-      "value": "Keep Deck"
+      "value": "Keep deck"
     }
   ],
   "lobby.deck.legality": [
@@ -24207,7 +24207,7 @@
   "lobby.deck.mine": [
     {
       "type": 0,
-      "value": "My Decks"
+      "value": "My decks"
     }
   ],
   "lobby.deck.name": [
@@ -24219,7 +24219,7 @@
   "lobby.deck.needsAttention": [
     {
       "type": 0,
-      "value": "Needs Attention"
+      "value": "Needs attention"
     }
   ],
   "lobby.deck.optionalName": [
@@ -24271,7 +24271,7 @@
   "lobby.deck.saveChanges": [
     {
       "type": 0,
-      "value": "Save Changes"
+      "value": "Save changes"
     }
   ],
   "lobby.deck.saving": [
@@ -24289,7 +24289,7 @@
   "lobby.deck.searchOptions": [
     {
       "type": 0,
-      "value": "Search & Options"
+      "value": "Search & options"
     }
   ],
   "lobby.deck.searchPlaceholder": [
@@ -24423,7 +24423,7 @@
   "lobby.home.manageDecks": [
     {
       "type": 0,
-      "value": "Manage Decks"
+      "value": "Manage decks"
     }
   ],
   "lobby.home.playCc": [
@@ -24441,7 +24441,7 @@
   "lobby.home.rejoinRooms": [
     {
       "type": 0,
-      "value": "Rejoin Rooms"
+      "value": "Rejoin rooms"
     }
   ],
   "lobby.home.start": [
@@ -24537,7 +24537,7 @@
   "lobby.invite.createAccount": [
     {
       "type": 0,
-      "value": "Create Player Account"
+      "value": "Create player account"
     }
   ],
   "lobby.invite.createAccountTitle": [
@@ -24575,7 +24575,7 @@
   "lobby.invite.haveAccount": [
     {
       "type": 0,
-      "value": "I Have an Account"
+      "value": "I have an account"
     }
   ],
   "lobby.invite.invited": [
@@ -24643,7 +24643,7 @@
   "lobby.nav.allRooms": [
     {
       "type": 0,
-      "value": "All Rooms"
+      "value": "All rooms"
     }
   ],
   "lobby.nav.decks": [
@@ -24703,7 +24703,7 @@
   "lobby.room.restoring": [
     {
       "type": 0,
-      "value": "Restoring Game…"
+      "value": "Restoring game…"
     }
   ],
   "lobby.room.status.full": [
@@ -24733,13 +24733,13 @@
   "lobby.rooms.all": [
     {
       "type": 0,
-      "value": "All Rooms"
+      "value": "All rooms"
     }
   ],
   "lobby.rooms.create": [
     {
       "type": 0,
-      "value": "Create Room"
+      "value": "Create room"
     }
   ],
   "lobby.rooms.empty": [
@@ -24771,7 +24771,7 @@
   "lobby.rooms.open": [
     {
       "type": 0,
-      "value": "Open Rooms"
+      "value": "Open rooms"
     }
   ],
   "lobby.rooms.pickDeck": [
@@ -24805,13 +24805,13 @@
   "lobby.rooms.started": [
     {
       "type": 0,
-      "value": "Started Games"
+      "value": "Started games"
     }
   ],
   "lobby.rooms.yours": [
     {
       "type": 0,
-      "value": "Your Rooms"
+      "value": "Your rooms"
     }
   ],
   "lobby.waiting.accepted": [
@@ -25595,7 +25595,7 @@
   "prep.presentation.mainCount": [
     {
       "type": 0,
-      "value": "Main Deck ("
+      "value": "Main deck ("
     },
     {
       "type": 1,
@@ -25651,7 +25651,7 @@
   "prep.presentation.moveToMainHint": [
     {
       "type": 0,
-      "value": "Click a card to move one copy to Main Deck."
+      "value": "Click a card to move one copy to the main deck."
     }
   ],
   "prep.presentation.noneRegistered": [
@@ -25941,7 +25941,7 @@
   "prep.zone.main": [
     {
       "type": 0,
-      "value": "Main Deck"
+      "value": "Main deck"
     }
   ],
   "replay.confirmDelete": [
@@ -26405,13 +26405,13 @@
   "replay.openFile": [
     {
       "type": 0,
-      "value": "Open Replay File…"
+      "value": "Open replay file…"
     }
   ],
   "replay.openFileShort": [
     {
       "type": 0,
-      "value": "Open File"
+      "value": "Open file"
     }
   ],
   "replay.prepareExport": [
@@ -26429,7 +26429,7 @@
   "replay.title": [
     {
       "type": 0,
-      "value": "My Replays"
+      "value": "My replays"
     }
   ],
   "replay.unfavorite": [
@@ -26507,7 +26507,7 @@
   "settings.audioVisuals": [
     {
       "type": 0,
-      "value": "Audio & Visuals"
+      "value": "Audio & visuals"
     }
   ],
   "settings.cardDisplay": [
@@ -26573,7 +26573,7 @@
   "settings.danger": [
     {
       "type": 0,
-      "value": "Danger Zone"
+      "value": "Danger zone"
     }
   ],
   "settings.draw.accept": [
@@ -26651,7 +26651,7 @@
   "settings.history": [
     {
       "type": 0,
-      "value": "Game History"
+      "value": "Game history"
     }
   ],
   "settings.history.previousTurnStart": [
@@ -26843,13 +26843,13 @@
   "social.acceptFriend": [
     {
       "type": 0,
-      "value": "Accept Friend"
+      "value": "Accept friend"
     }
   ],
   "social.addFriend": [
     {
       "type": 0,
-      "value": "Add Friend"
+      "value": "Add friend"
     }
   ],
   "social.cancelRequest": [

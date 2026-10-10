@@ -130,9 +130,6 @@ input {
 input:focus { outline: 1px solid #b8933f88; border-color: #b8933f; }
 input::placeholder {
   color: #8a7f6d;
-  letter-spacing: normal;
-  font-family: var(--font-display);
-  text-transform: uppercase;
   font-size: 14px;
 }
 
@@ -181,7 +178,15 @@ input::placeholder {
   height: 44px;
   place-items: center;
   padding: 0;
+  border-color: transparent;
+  background: transparent;
   clip-path: none;
+  color: var(--text-muted);
+}
+.modal-surface-close:hover {
+  border-color: transparent;
+  background: #ffffff0f;
+  color: var(--text-primary);
 }
 .modal-surface-close svg {
   display: block;

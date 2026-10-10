@@ -94,7 +94,7 @@ export function AchievementsPanel() {
                     <span>{botHero.slice(0, 1)}</span>
                     <img src={heroImageUrl(botHero)} alt="" loading="lazy" onError={(event) => { event.currentTarget.hidden = true; }} />
                   </span> : <span className="achievement-number" aria-hidden="true">
-                    {String(group.ids.indexOf(id) + 1).padStart(2, "0")}
+                    {String(ids.indexOf(id) + 1).padStart(2, "0")}
                   </span>}
                   <div className="achievement-copy">
                     <h4>{intl.formatMessage({ id: achievementMessageId(id, "name") })}</h4>

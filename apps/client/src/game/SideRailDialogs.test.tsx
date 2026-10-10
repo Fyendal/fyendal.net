@@ -47,9 +47,9 @@ describe("game settings dialog", () => {
     expect(html).toContain('class="settings-grid"');
     expect(html.match(/class="settings-section/g)).toHaveLength(4);
     expect(html).toContain(">Gameplay</h3>");
-    expect(html).toContain(">Audio &amp; Visuals</h3>");
-    expect(html).toContain(">Game History</h3>");
-    expect(html).toContain(">Danger Zone</h3>");
+    expect(html).toContain(">Audio &amp; visuals</h3>");
+    expect(html).toContain(">Game history</h3>");
+    expect(html).toContain(">Danger zone</h3>");
     expect(html).toContain('class="settings-control-row settings-motion-row"');
     expect(html).toContain(">Default</button>");
     expect(html).toContain(">Full</button>");

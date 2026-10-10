@@ -391,9 +391,8 @@
 }
 .settings-segmented button.settings-selected {
   border-color: #b8933f;
-  background: linear-gradient(180deg, #6b4b19, #3c270b);
+  background: #4a3413;
   color: #fff0c5;
-  box-shadow: inset 0 1px 0 #ffe2a02b;
 }
 .settings-control-row input:checked + .switch-track {
   border-color: #d4a958;
@@ -673,9 +672,7 @@
 }
 .gameover-eyebrow {
   color: #a99a81;
-  font: 650 12px/1.2 var(--font-lobby-ui);
-  letter-spacing: .08em;
-  text-transform: uppercase;
+  font: 600 13px/1.2 var(--font-lobby-ui);
 }
 .gameover-headline {
   margin: 0;
@@ -700,12 +697,12 @@
   background: #2a2015;
   border-color: #5e482f;
   color: #e1d4bb;
-  font-size: 12px;
+  font-size: 13px;
   line-height: 1.15;
   white-space: normal;
 }
 .gameover-actions button:hover { background: #382918; border-color: #8b6d40; }
-.gameover-actions .btn-primary { background: #9e3028; border-color: #b84d3e; color: #fff0dc; text-shadow: none; }
+.gameover-actions .btn-primary { background: #9e3028; border-color: #b84d3e; color: #fff0dc; }
 .gameover-actions .btn-primary:hover { background: #b43a2e; border-color: #cf5b46; }
 .gameover-replay-retention {
   margin: 0;
@@ -733,9 +730,7 @@
 }
 .gameover-switcher-label {
   color: #ad9e85;
-  font: 700 12px/1.2 var(--font-lobby-ui);
-  letter-spacing: .06em;
-  text-transform: uppercase;
+  font: 600 13px/1.2 var(--font-lobby-ui);
   white-space: nowrap;
 }
 .gameover-player-tabs {

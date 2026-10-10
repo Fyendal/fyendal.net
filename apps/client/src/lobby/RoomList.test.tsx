@@ -90,12 +90,12 @@ describe("RoomList", () => {
     };
     const html = renderLocalized(<RoomList onGoToDecks={() => {}} />);
 
-    const yourHeading = html.indexOf("Your Rooms");
+    const yourHeading = html.indexOf("Your rooms");
     const yourRoom = html.indexOf("Owned Hero");
-    const openHeading = html.indexOf("Open Rooms");
+    const openHeading = html.indexOf("Open rooms");
     const openRoom = html.indexOf("Open Hero");
     const fullPrepRoom = html.indexOf("Prep Hero");
-    const startedHeading = html.indexOf("Started Games");
+    const startedHeading = html.indexOf("Started games");
     const startedRoom = html.indexOf("Started Hero");
 
     expect(yourHeading).toBeGreaterThan(-1);
@@ -109,7 +109,7 @@ describe("RoomList", () => {
     expect(html).toContain(">Started</span>");
     expect(html).toContain('class="room-card-status"');
     expect(html).not.toContain(">Future cards</span>");
-    expect(html).toContain("Create Room");
+    expect(html).toContain("Create room");
     expect(html.match(/<article class="room-card/g)).toHaveLength(4);
     expect(html).not.toContain("Quick Match");
     expect(html).not.toContain("Find Game");
@@ -137,8 +137,8 @@ describe("RoomList", () => {
     expect(html).not.toContain("Welcome to Fyendal");
     expect(html).not.toContain("Choose a format");
     expect(html).toContain("Precon");
-    expect(html).toContain("Find Match");
-    expect(html).toContain("Invite Friend");
+    expect(html).toContain("Find match");
+    expect(html).toContain("Invite friend");
     expect(html).toContain("Play vs bot");
     expect(html).toContain('class="home-play-mode-segments" role="group" aria-label="Game mode"');
     expect(html.match(/aria-pressed="true"/g)).toHaveLength(1);
@@ -148,10 +148,10 @@ describe("RoomList", () => {
     expect(html).toContain("Tournament-legal cards only.");
     expect(html).not.toContain("card-pool-segments");
     expect(html).toContain('type="submit" class="btn-primary"');
-    expect(html).not.toContain("Manage Decks");
-    expect(html).toContain("Rejoin Rooms");
+    expect(html).not.toContain("Manage decks");
+    expect(html).toContain("Rejoin rooms");
     expect(html).toContain("Victor");
-    expect(html.indexOf("Rejoin Rooms")).toBeLessThan(html.indexOf("home-play-poster"));
+    expect(html.indexOf("Rejoin rooms")).toBeLessThan(html.indexOf("home-play-poster"));
     expect(html).not.toContain("Open Hero");
     expect(html).not.toContain("Started Hero");
   });

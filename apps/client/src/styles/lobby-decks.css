@@ -33,12 +33,11 @@
   border: 1px solid #6b5326;
   box-shadow: 0 2px 9px #000;
 }
+/* Deck names are the player's own words: shown exactly as written. */
 .deck-card-name {
-  font-family: var(--font-display);
+  font-family: var(--font-lobby-ui);
   font-size: 16px;
-  font-weight: 600;
-  letter-spacing: 1px;
-  text-transform: uppercase;
+  font-weight: 650;
   color: #efe3c8;
 }
 .deck-card:not(.deck-import-card) .deck-card-name {
@@ -64,10 +63,8 @@
 .deck-card.blocked { cursor: not-allowed; }
 .deck-card-meta { font-size: 13px; color: #9c8a6d; }
 .deck-legality-hint {
-  font-size: 11px;
+  font-size: 12px;
   line-height: 1.2;
-  text-transform: uppercase;
-  letter-spacing: 0.7px;
 }
 .deck-legality-hint.banned {
   color: #ff6b64;
@@ -98,12 +95,8 @@
 }
 .deck-section {
   margin: 18px 0 12px;
-  font-family: var(--font-display);
-  font-size: 14px;
   color: #9c8a6d;
-  text-transform: uppercase;
-  letter-spacing: 2px;
-  font-weight: 500;
+  font: 600 13px var(--font-lobby-ui);
 }
 .deck-section:first-of-type { margin-top: 0; }
 .mobile-deck-format-picker,
@@ -122,6 +115,9 @@
   clip-path: none;
   background: transparent;
   color: var(--text-secondary);
+  font: 600 14px var(--font-lobby-ui);
+  letter-spacing: normal;
+  text-transform: none;
 }
 .deck-catalog-tabs button.selected {
   border-bottom-color: var(--gold);
@@ -147,9 +143,7 @@
 .deck-library-tools label { display: grid; gap: 5px; }
 .deck-library-tools label > span {
   color: var(--text-muted);
-  font: 700 11px var(--font-lobby-ui);
-  letter-spacing: 1px;
-  text-transform: uppercase;
+  font: 600 13px var(--font-lobby-ui);
 }
 .deck-library-tools input,
 .deck-library-tools select {
@@ -171,23 +165,20 @@
 .deck-library-empty h3 { margin: 0 0 7px; color: var(--text-primary); }
 .deck-library-empty p { margin: 0 0 18px; color: var(--text-muted); }
 .deck-actions { display: flex; gap: 12px; margin-top: 18px; }
-.deck-actions button { flex: 1; padding: 12px 16px; font-size: 17px; letter-spacing: 3px; }
+.deck-actions button { flex: 1; padding: 12px 16px; font-size: 15px; }
+/* Bot practice is offered only inside prompts and modals: a flat gold action. */
 .btn-bot {
   min-width: 0;
   padding: 13px 20px;
-  border-color: #d4a958;
-  background: linear-gradient(180deg, #33230f, #211508);
-  box-shadow: inset 0 1px 0 #fff1b81f;
+  border-color: #b8933f;
+  background: #3a2a12;
   color: #ffe2a0;
-  font-size: 17px;
-  font-weight: 800;
-  letter-spacing: 3px;
-  text-shadow: 0 1px 2px #000;
+  font-size: 15px;
+  font-weight: 700;
 }
 .btn-bot:hover {
-  border-color: #f0c76c;
-  background: linear-gradient(180deg, #493315, #2d1d09);
-  box-shadow: inset 0 1px 0 #fff8d433, 0 4px 14px #d6a32f22;
+  border-color: #e0b45f;
+  background: #4a3615;
 }
 .btn-bot:focus-visible {
   outline: 2px solid #ffe8a8;
@@ -396,8 +387,7 @@
   left: 3px;
   width: calc((100% - 6px) / 3);
   border-radius: 5px;
-  background: linear-gradient(180deg, #c34134, #96251f);
-  box-shadow: inset 0 1px 0 #ff9a7c55, 0 2px 7px #0008;
+  background: var(--blood);
   content: "";
   transform: translateX(0);
   transition: transform 200ms cubic-bezier(.2, .8, .2, 1);
@@ -416,9 +406,9 @@
   background: transparent;
   clip-path: none;
   color: #c9b995;
-  font: 700 10px var(--font-lobby-ui);
-  letter-spacing: .9px;
-  text-transform: uppercase;
+  font: 600 12px var(--font-lobby-ui);
+  letter-spacing: normal;
+  text-transform: none;
   transition: color 160ms ease;
 }
 .card-pool-segments button:hover:not(:disabled) {
@@ -582,10 +572,8 @@
     top: 8px;
     left: 15px;
     color: #a99a80;
-    font: 700 9px var(--font-lobby-ui);
-    letter-spacing: 1.15px;
+    font: 600 11px var(--font-lobby-ui);
     pointer-events: none;
-    text-transform: uppercase;
   }
   .mobile-deck-format-picker select {
     appearance: none;
@@ -612,8 +600,6 @@
     min-width: 0;
     flex: 1;
     padding-inline: 7px;
-    font-size: 14px;
-    letter-spacing: .6px;
   }
   .deck-catalog-tabs button span { display: none; }
   .desktop-deck-library-tools { display: none; }
@@ -636,17 +622,19 @@
     border: 1px solid var(--border-subtle);
     background: var(--surface-control);
     color: var(--text-secondary);
+    border-radius: 6px;
+    clip-path: none;
     cursor: pointer;
-    font: 700 12px var(--font-lobby-ui);
-    letter-spacing: .5px;
+    font: 600 13px var(--font-lobby-ui);
+    letter-spacing: normal;
     list-style: none;
     text-align: center;
-    text-transform: uppercase;
+    text-transform: none;
   }
   .mobile-deck-toolbar > .btn-primary {
-    border-color: #d4553f;
-    background: linear-gradient(180deg, var(--blood-hi), var(--blood));
-    color: var(--text-primary);
+    border-color: #c4483b;
+    background: var(--blood);
+    color: #fff3e2;
   }
   .mobile-deck-options > summary::-webkit-details-marker { display: none; }
   .mobile-deck-options > summary::after { margin-left: 6px; color: var(--gold); content: "+"; }
@@ -819,8 +807,9 @@
   background: transparent;
   clip-path: none;
   color: var(--text-secondary);
-  font-size: 12px;
-  letter-spacing: .4px;
+  font: 500 13px var(--font-lobby-ui);
+  letter-spacing: normal;
+  text-transform: none;
   white-space: nowrap;
 }
 .deck-library-card-actions button:hover { background: transparent; color: var(--gold); }
@@ -878,9 +867,7 @@
   align-items: center;
   min-height: 24px;
   color: #bbaea0;
-  font: 700 11px var(--font-lobby-ui);
-  letter-spacing: 1.1px;
-  text-transform: uppercase;
+  font: 600 13px var(--font-lobby-ui);
 }
 .home-play-field-label {
   position: relative;
@@ -889,9 +876,7 @@
   align-items: center;
   gap: 7px;
   color: #bbaea0;
-  font: 700 11px var(--font-lobby-ui);
-  letter-spacing: 1.1px;
-  text-transform: uppercase;
+  font: 600 13px var(--font-lobby-ui);
 }
 .home-card-pool-help {
   position: relative;

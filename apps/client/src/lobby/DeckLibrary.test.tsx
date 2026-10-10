@@ -35,10 +35,10 @@ describe("DeckLibrary", () => {
     expect(html).toContain('aria-label="Select Bravo Deck"');
     expect(html).toContain('aria-label="Select Briar Deck"');
     expect(html.match(/type="checkbox"/g)).toHaveLength(2);
-    expect(html.match(/>Edit Deck<\/button>/g)).toHaveLength(2);
-    expect(html.match(/>Delete Deck<\/button>/g)).toHaveLength(2);
-    expect(html).toContain("Create / Import Deck");
-    expect(html).not.toContain("Find Match");
+    expect(html.match(/>Edit deck<\/button>/g)).toHaveLength(2);
+    expect(html.match(/>Delete deck<\/button>/g)).toHaveLength(2);
+    expect(html).toContain("Create / import deck");
+    expect(html).not.toContain("Find match");
     expect(html).not.toContain("Play vs bot");
 
     const ccOnly = renderToStaticMarkup(

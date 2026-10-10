@@ -849,8 +849,8 @@ describe("Blood on Her Hands mode allocation", () => {
     expect(html).toContain("Each mode may be selected up to twice across all weapons");
     expect(html).toContain("Decrease Attacks get +1 power for FIRST");
     expect(html).toContain("Increase Attacks get +1 power for FIRST");
-    expect(html).toContain("Confirm Modes");
-    expect(html).toMatch(/Confirm Modes<\/button>/);
+    expect(html).toContain("Confirm modes");
+    expect(html).toMatch(/Confirm modes<\/button>/);
   });
 });
 
@@ -858,7 +858,7 @@ describe("boost announcement labels", () => {
   it("uses a simple Boost label when the attack can only boost once", () => {
     const intl = createTestIntl();
     expect([0, 1].map((count) => boostOptionLabel(intl, count, false))).toEqual([
-      "Don't Boost",
+      "Don't boost",
       "Boost",
     ]);
   });
@@ -866,13 +866,13 @@ describe("boost announcement labels", () => {
   it("keeps numbered labels when the attack can boost more than once", () => {
     const intl = createTestIntl();
     expect([0, 1, 2].map((count) => boostOptionLabel(intl, count, true))).toEqual([
-      "Don't Boost",
+      "Don't boost",
       "Boost once",
       "Boost 2 times",
     ]);
   });
 
-  it("orders affirmative Boost choices before Don't Boost", () => {
+  it("orders affirmative Boost choices before Don't boost", () => {
     expect(orderedBoostOptions([0, 1])).toEqual([1, 0]);
     expect(orderedBoostOptions([0, 1, 2])).toEqual([1, 2, 0]);
   });
@@ -887,8 +887,8 @@ describe("combat-chain close confirmation", () => {
     }));
 
     expect(html).toContain("Close the combat chain?");
-    expect(html).toContain("Close Chain and Play");
-    expect(html).toContain("Close Chain and Play (Space)");
+    expect(html).toContain("Close chain and play");
+    expect(html).toContain("Close chain and play (Space)");
     expect(html).toContain('aria-keyshortcuts="Space"');
     expect(html).toContain("Cancel");
   });
@@ -918,7 +918,7 @@ describe("arsenal skip confirmation", () => {
     }));
 
     expect(html).toContain("Skip arsenal?");
-    expect(html).toContain("Skip Arsenal");
+    expect(html).toContain("Skip arsenal");
     expect(html).toContain("Cancel");
   });
 });
@@ -1025,8 +1025,8 @@ describe("simultaneous trigger ordering", () => {
     expect(html).toContain("Move Uncatalogued IAR Trigger: Create a Might token later");
     expect(html).toContain(">Uncatalogued IAR Trigger<");
     expect(html).toContain("Move SECOND: Draw a card earlier");
-    expect(html).toContain("Confirm Order");
-    expect(html).toContain("Confirm Order (Space)");
+    expect(html).toContain("Confirm order");
+    expect(html).toContain("Confirm order (Space)");
     expect(html).toContain('aria-keyshortcuts="Space"');
     expect(html).not.toContain("card-board-square");
   });

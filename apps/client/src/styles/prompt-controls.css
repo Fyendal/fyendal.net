@@ -1,0 +1,154 @@
+/* ── flat controls ──
+   Prompts, modals and settings-like panels share one flat control language:
+   sentence case, the lobby UI face, 6px corners and solid fills. The
+   chamfered all-caps display buttons in base.css are reserved for places and
+   the main action of a view: lobby navigation, panel actions such as Start or
+   Rejoin, and the board HUD.
+
+   :where() keeps each rule at the specificity of its last compound, so any
+   component class still styles its own controls. Every button rule repeats
+   the same scope list; extend all of them together. This file loads last so the flat
+   button variants replace the gradient ones in the lobby stylesheets. */
+:where(
+  .modal-surface,
+  .overlay-panel,
+  .decision,
+  .card-search-minimized,
+  .mobile-log-sheet,
+  .idle-toast,
+  .deck-pick-modal,
+  .match-accept-panel,
+  .prep-match-accept-prompt,
+  .prep-bot-nudge,
+  .prep-pick,
+  .prep-float-pick,
+  .background-match-offer,
+  .account-panel,
+  .social-panel
+) button {
+  border: 1px solid #5b4b38;
+  border-radius: 6px;
+  background: #2b231b;
+  clip-path: none;
+  color: var(--text-primary);
+  font-family: var(--font-lobby-ui);
+  font-size: 14px;
+  letter-spacing: normal;
+  text-shadow: none;
+  text-transform: none;
+}
+:where(
+  .modal-surface,
+  .overlay-panel,
+  .decision,
+  .card-search-minimized,
+  .mobile-log-sheet,
+  .idle-toast,
+  .deck-pick-modal,
+  .match-accept-panel,
+  .prep-match-accept-prompt,
+  .prep-bot-nudge,
+  .prep-pick,
+  .prep-float-pick,
+  .background-match-offer,
+  .account-panel,
+  .social-panel
+) button:hover {
+  border-color: #b8933f;
+  background: #382c1e;
+}
+:where(
+  .modal-surface,
+  .overlay-panel,
+  .decision,
+  .card-search-minimized,
+  .mobile-log-sheet,
+  .idle-toast,
+  .deck-pick-modal,
+  .match-accept-panel,
+  .prep-match-accept-prompt,
+  .prep-bot-nudge,
+  .prep-pick,
+  .prep-float-pick,
+  .background-match-offer,
+  .account-panel,
+  .social-panel
+) .btn-primary {
+  border-color: #c4483b;
+  background: var(--blood);
+  color: #fff3e2;
+  font-weight: 600;
+}
+:where(
+  .modal-surface,
+  .overlay-panel,
+  .decision,
+  .card-search-minimized,
+  .mobile-log-sheet,
+  .idle-toast,
+  .deck-pick-modal,
+  .match-accept-panel,
+  .prep-match-accept-prompt,
+  .prep-bot-nudge,
+  .prep-pick,
+  .prep-float-pick,
+  .background-match-offer,
+  .account-panel,
+  .social-panel
+) .btn-primary:hover {
+  border-color: #dc6250;
+  background: var(--blood-hi);
+}
+:where(
+  .modal-surface,
+  .overlay-panel,
+  .decision,
+  .card-search-minimized,
+  .mobile-log-sheet,
+  .idle-toast,
+  .deck-pick-modal,
+  .match-accept-panel,
+  .prep-match-accept-prompt,
+  .prep-bot-nudge,
+  .prep-pick,
+  .prep-float-pick,
+  .background-match-offer,
+  .account-panel,
+  .social-panel
+) .btn-private-room {
+  border-color: #b8933f;
+  background: #4a3413;
+  box-shadow: none;
+  color: #ffe2a0;
+  font-weight: 600;
+}
+:where(
+  .modal-surface,
+  .overlay-panel,
+  .decision,
+  .card-search-minimized,
+  .mobile-log-sheet,
+  .idle-toast,
+  .deck-pick-modal,
+  .match-accept-panel,
+  .prep-match-accept-prompt,
+  .prep-bot-nudge,
+  .prep-pick,
+  .prep-float-pick,
+  .background-match-offer,
+  .account-panel,
+  .social-panel
+) .btn-private-room:hover {
+  border-color: #e0b45f;
+  background: #5c4118;
+  color: #fff0c5;
+}
+:where(.deck-pick-modal, .match-accept-panel, .prep-match-accept-prompt, .prep-bot-nudge) .panel-title {
+  font-family: var(--font-lobby-title);
+  letter-spacing: normal;
+  text-transform: none;
+}
+:where(.deck-pick-modal, .modal-surface) .deck-card.selected {
+  background: #2c1d0e;
+  box-shadow: inset 0 0 0 1px #b8933f55;
+}

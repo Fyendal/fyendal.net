@@ -136,7 +136,7 @@ describe("game control icons", () => {
     expect(emotePosition).toBeLessThan(morePosition);
     expect(html).not.toContain("mobile-gamebar-status");
     expect(html).not.toContain("ACTION PHASE");
-    expect(html).not.toContain("End Game");
+    expect(html).not.toContain("End game");
     expect(html).not.toContain(">Undo</button>");
     expect(html).toContain(">Leave</button>");
     expect(html.match(/aria-label="More game controls"/g)).toHaveLength(1);

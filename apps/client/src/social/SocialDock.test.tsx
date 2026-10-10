@@ -148,7 +148,7 @@ describe("PostGameFriendAction", () => {
   it("moves through add, pending, accept, and message relationship states", () => {
     Object.assign(mocks.state, { friends: [], friendRequests: [] });
     expect(renderToStaticMarkup(<TestI18nProvider><PostGameFriendAction username="Opponent" /></TestI18nProvider>))
-      .toContain("Add Friend");
+      .toContain("Add friend");
     Object.assign(mocks.state, {
       friendRequests: [{ username: "Opponent", direction: "outgoing", createdAt: 1 }],
     });
@@ -158,7 +158,7 @@ describe("PostGameFriendAction", () => {
       friendRequests: [{ username: "Opponent", direction: "incoming", createdAt: 1 }],
     });
     expect(renderToStaticMarkup(<TestI18nProvider><PostGameFriendAction username="Opponent" /></TestI18nProvider>))
-      .toContain("Accept Friend");
+      .toContain("Accept friend");
     Object.assign(mocks.state, {
       friends: [{ username: "Opponent", presence: "online", friendsSince: 1, unreadCount: 0 }],
       friendRequests: [],

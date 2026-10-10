@@ -124,7 +124,7 @@ describe("preparation stage layout", () => {
     const row = html.match(/<div class="prep-bar-row">([\s\S]*?)<\/button><\/div><\/div>/)?.[1];
     expect(row).toContain("prep-ready-opponent-art");
     expect(row).toContain('<p class="prep-sheet-turn">You go <strong>first</strong></p>');
-    expect(row).toContain("Main Deck (");
+    expect(row).toContain("Main deck (");
     expect(row).toContain("Ready");
     expect(row).not.toContain("preparing");
   });

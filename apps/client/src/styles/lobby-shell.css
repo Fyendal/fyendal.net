@@ -387,7 +387,7 @@
   margin: 12px 0;
 }
 .btn-danger { background: #781f1b; border-color: #bc4b40; }
-.btn-danger:hover:not(:disabled) { background: #9e2b25; }
+.btn-danger:hover:not(:disabled) { background: #9e2b25; border-color: #d86a5c; }
 
 .replay-library { min-width: 0; }
 .replay-library-header,
@@ -414,6 +414,9 @@
   clip-path: none;
   background: transparent;
   color: var(--text-secondary);
+  font: 600 14px var(--font-lobby-ui);
+  letter-spacing: normal;
+  text-transform: none;
 }
 .lobby-panel-tabs button.selected {
   border-bottom-color: var(--gold);
@@ -502,6 +505,8 @@
   height: 40px;
   padding: 8px;
   place-items: center;
+  border-radius: 6px;
+  clip-path: none;
 }
 .replay-card-icon-button svg {
   width: 20px;
@@ -628,11 +633,10 @@
   padding: 10px 14px;
   border: 1px solid var(--border-subtle);
   background: var(--surface-control);
+  border-radius: 6px;
   color: var(--text-primary);
-  font: 700 15px var(--font-lobby-ui);
-  letter-spacing: .8px;
+  font: 600 15px var(--font-lobby-ui);
   text-decoration: none;
-  text-transform: uppercase;
 }
 .mobile-more-actions > a:hover,
 .mobile-more-actions > a:focus-visible { border-color: var(--border-strong); color: var(--gold); }
@@ -685,12 +689,9 @@
 
 .play-label {
   display: block;
-  font-family: var(--font-display);
-  font-size: 14px;
-  color: #9c8a6d;
-  text-transform: uppercase;
-  letter-spacing: 2px;
   margin-bottom: 7px;
+  color: #9c8a6d;
+  font: 600 13px var(--font-lobby-ui);
 }
 .deck-import-form select {
   width: 100%;
