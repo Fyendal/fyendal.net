@@ -35,7 +35,9 @@ function isGuardianAttack(ctx: ScriptCtx): boolean {
 }
 
 function applyFearlessConfrontation(ctx: ScriptCtx, attackInstanceId: number): void {
-  const attack = ctx.state.chain.find((link) => link.attackingCard.instanceId === attackInstanceId)?.attackingCard;
+  const attack = ctx.state.chain.find((link) =>
+    link.flags.attackGone !== true && link.attackingCard.instanceId === attackInstanceId
+  )?.attackingCard;
   if (!attack) return;
   ctx.addModifier({
     scope: "chain-link",
@@ -964,10 +966,13 @@ Object.assign(mpg, {
       timing: "instant",
       fromHand: true,
       canActivate(ctx: ScriptCtx) {
-        return ctx.state.chain.length > 0;
+        return ctx.state.chain.some((link) => link.flags.attackGone !== true);
       },
       onActivate(ctx: ScriptCtx) {
-        const attacks = ctx.state.chain.map((link) => link.attackingCard);
+        const attacks = ctx.state.chain
+          .filter((link) => link.flags.attackGone !== true)
+          .map((link) => link.attackingCard);
+        if (attacks.length === 0) return;
         if (attacks.length === 1) applyFearlessConfrontation(ctx, attacks[0]!.instanceId);
         else
           ctx.requestCardChoice(

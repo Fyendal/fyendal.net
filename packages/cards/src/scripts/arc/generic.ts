@@ -199,7 +199,7 @@ function moonWish(): CardScript {
 function pushThePoint(): CardScript {
   return {
     modifyAttack(ctx) {
-      const index = ctx.state.chain.findIndex((link) => link.attackingCard.instanceId === ctx.self.instanceId);
+      const index = ctx.link ? ctx.state.chain.indexOf(ctx.link) : -1;
       return index > 0 && ctx.state.chain[index - 1]?.hit ? 2 : 0;
     },
   };

@@ -756,10 +756,14 @@ export const eleHighRarity: Record<string, CardScript> = {
   "channel lake frigid|3": channel("ice", { additionalCostToOpponents: 1 }),
   "blizzard|3": {
     playTargetOptions(ctx) {
-      return ctx.state.chain.map((link) => link.attackingCard.instanceId);
+      return ctx.state.chain
+        .filter((link) => link.flags.attackGone !== true)
+        .map((link) => link.attackingCard.instanceId);
     },
     onPlay(ctx) {
-      const target = ctx.state.chain.find((link) => link.attackingCard.instanceId === ctx.playTargetInstanceId);
+      const target = ctx.state.chain.find((link) =>
+        link.flags.attackGone !== true && link.attackingCard.instanceId === ctx.playTargetInstanceId
+      );
       if (!target) return;
       if (
         !ctx.requestPayment(

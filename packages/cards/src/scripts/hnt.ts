@@ -1925,7 +1925,14 @@ Object.assign(hnt, {
   },
   "war cry of bellona|2": {
     canPlay: (ctx) => !!ctx.link && ctx.cardData(ctx.link.attackingCard.cardId).name === "Raydn, Duskbane",
-    onPlay: (ctx) => ctx.addModifier({ scope: "chain-link", attack: 2 }),
+    onPlay(ctx) {
+      if (!ctx.link) return;
+      ctx.addModifier({
+        scope: "until-end-of-turn",
+        attack: 2,
+        appliesToInstanceId: ctx.link.attackingCard.instanceId,
+      });
+    },
     activated: {
       cost: 0,
       isAttack: false,

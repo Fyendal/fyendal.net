@@ -133,6 +133,20 @@ export function currentLink(state: GameStateInternal): ChainLinkState | undefine
   return link && !link.resolved ? link : undefined;
 }
 
+/**
+ * The chain link an attacking card instance occupies. A card that left the
+ * chain and was played again keeps its instance id, so the live link wins
+ * over an earlier link whose attack is gone.
+ */
+export function chainLinkForAttack(
+  state: GameStateInternal,
+  instanceId: number,
+): ChainLinkState | undefined {
+  const links = state.chain.filter((link) => link.attackingCard.instanceId === instanceId);
+  const live = links.filter((link) => link.flags.attackGone !== true);
+  return live[live.length - 1] ?? links[links.length - 1];
+}
+
 /** Permanents that can hold activated abilities. */
 export function isPermanentSource(player: PlayerState, instanceId: number): boolean {
   return (

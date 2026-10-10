@@ -477,6 +477,31 @@ describe("HNT — marked heroes and daggers", () => {
     expect(g.state.players[0]!.flags.completedContractThisTurn).toBe(true);
   });
 
+  it("War Cry of Bellona gives Raydn +2{p} for every attack this turn", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          weapons: ["raydn, duskbane|0"],
+          board: ["flurry|0"],
+          hand: ["war cry of bellona|2"],
+          resources: 2,
+        },
+        { hero: "dorinthea" },
+      ],
+    });
+    g.state.players[0]!.actionPoints = 2;
+
+    const openAttackValue = () =>
+      [...projectStateFor(g.state, 0).chain].reverse().find((link) => !link.resolved)!.attackValue;
+
+    g.attackWithWeapon("raydn, duskbane|0").blockWith();
+    const base = openAttackValue();
+    g.react("war cry of bellona|2", { settle: false }).passPriority().passPriority().expectAttackValue(base + 2).settle();
+
+    g.attackWithWeapon("raydn, duskbane|0").expectAttackValue(base + 2);
+  });
+
   it("War Cry of Bellona discards itself as a cost and reflects qualifying weapon damage", () => {
     const g = scenario({
       active: 1,

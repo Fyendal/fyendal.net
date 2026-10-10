@@ -612,6 +612,71 @@ describe("ROS — Lightning and Runeblade", () => {
       .expectAP(0, 1);
   });
 
+  it("Gone in a Flash replayed after returning receives go again from Stormwhirl", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          board: ["embodiment of lightning|0"],
+          hand: ["gone in a flash|1", "sigil of lightning|3", "stormwhirl|3", "sigil of solace|3"],
+        },
+        { hero: "dorinthea" },
+      ],
+    });
+
+    g.play("gone in a flash|1")
+      .blockWith()
+      .passPriority()
+      .passPriority()
+      .react("sigil of lightning|3", { settle: false })
+      .passPriority()
+      .passPriority()
+      .chooseOption("yes")
+      .expectInZone(0, "gone in a flash|1", "hand")
+      .expectAP(0, 1)
+      .play("gone in a flash|1")
+      .blockWith()
+      .react("stormwhirl|3", { pitch: ["sigil of solace|3"], targetCard: "gone in a flash|1", settle: false })
+      .passPriority()
+      .passPriority()
+      .chooseOption("no");
+
+    expect(g.state.chain.at(-1)?.attackingCard.cardId).toBe(g.state.chain[0]?.attackingCard.cardId);
+    expect(g.state.chain.at(-1)?.goAgain).toBe(true);
+  });
+
+  it("Gone in a Flash replayed after returning receives Lightning Press power when the return is declined", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          board: ["embodiment of lightning|0"],
+          hand: ["gone in a flash|1", "sigil of lightning|3", "lightning press|1"],
+        },
+        { hero: "dorinthea" },
+      ],
+    });
+
+    g.play("gone in a flash|1")
+      .blockWith()
+      .passPriority()
+      .passPriority()
+      .expectLife(1, 16)
+      .react("sigil of lightning|3", { settle: false })
+      .passPriority()
+      .passPriority()
+      .chooseOption("yes")
+      .expectInZone(0, "gone in a flash|1", "hand")
+      .play("gone in a flash|1")
+      .blockWith()
+      .react("lightning press|1", { settle: false })
+      .passPriority()
+      .passPriority()
+      .chooseOption("no")
+      .expectLife(1, 9);
+    expect(g.state.chain[0]?.finalAttack).toBe(4);
+  });
+
   it("Gone in a Flash can return again after being replayed on the next chain link", () => {
     const g = scenario({
       seats: [

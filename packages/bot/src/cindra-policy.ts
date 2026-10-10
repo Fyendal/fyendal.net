@@ -262,9 +262,7 @@ function strandedHandAttacks(
 function consecutiveHitsBeforeCurrent(input: BotPolicyInput): number {
   const link = currentLink(input);
   if (!link) return consecutiveHits(input);
-  const index = input.view.chain.findIndex((candidate) =>
-    candidate.attackingCard.instanceId === link.attackingCard.instanceId
-  );
+  const index = input.view.chain.indexOf(link);
   let hits = 0;
   for (let cursor = index - 1; cursor >= 0; cursor--) {
     const previous = input.view.chain[cursor]!;

@@ -36,6 +36,7 @@ import {
 } from "./gameLog.js";
 
 import {
+  chainLinkForAttack,
   currentLink,
   findCard,
   findCardAnywhere,
@@ -482,9 +483,7 @@ export function makeCtx(
       const originData = dataOf(state, origin.cardId);
       const targetLink = m.appliesToInstanceId === undefined
         ? active
-        : state.chain.find((candidate) =>
-            candidate.attackingCard.instanceId === m.appliesToInstanceId
-          );
+        : chainLinkForAttack(state, m.appliesToInstanceId);
       const suppressGain =
         Number(m.attack ?? 0) > 0 &&
         targetLink?.attackCardType === "action" &&
@@ -1044,9 +1043,7 @@ export function makeCtx(
       if (!found) return false;
       const observed = observeReactionAttackPower(state, runtime);
       const active = currentLink(state);
-      const targetLink = state.chain.find(
-        (candidate) => candidate.attackingCard.instanceId === instanceId,
-      );
+      const targetLink = chainLinkForAttack(state, instanceId);
       const suppressGain =
         delta > 0 &&
         active?.attackCardType === "action" &&
@@ -1460,9 +1457,7 @@ export function makeCtx(
     grantGoAgain(targetAttackInstanceId) {
       const target = targetAttackInstanceId === undefined
         ? link
-        : state.chain.find((candidate) =>
-            candidate.attackingCard.instanceId === targetAttackInstanceId
-          );
+        : chainLinkForAttack(state, targetAttackInstanceId);
       if (target && target.flags.attackGone !== true) runtime.events.grantLinkGoAgain(state, target);
     },
     grantChainLinkGoAgain(chainLinkIndex) {
