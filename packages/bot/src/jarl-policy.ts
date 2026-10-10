@@ -23,6 +23,7 @@ import {
   spendsOpeningArsenalReserve,
   visibleOpponentDamageAmount,
   type BotPolicyInput,
+  type ResponseModel,
 } from "./policy.js";
 import type { HeroSolverRules } from "./card-model.js";
 import { guardianPatch } from "./guardian-rules.js";
@@ -120,14 +121,18 @@ function offensiveCards(input: BotPolicyInput): readonly CardView[] {
   return [...me.hand, ...me.arsenal];
 }
 
+const jarlResponse: ResponseModel = {
+  offensiveCards,
+  evaluateResponse: (cards, input) => handResponse(cards, input, jarlSolverRules),
+};
+
 function scoreDefend(
   intent: Extract<GameIntent, { kind: "defend" }>,
   input: BotPolicyInput,
   own: ReadonlyMap<number, CardView>,
 ): number {
   return scoreDefenseIntent(intent, input, own, {
-    offensiveCards,
-    evaluateResponse: (cards, policyInput) => handResponse(cards, policyInput, jarlSolverRules),
+    ...jarlResponse,
     cardOpportunity,
     responseLossWeight: opponentIsGravy(input) ? 0.1 : 1.2,
     equipmentUseIsFree(card, observed) {
@@ -577,6 +582,7 @@ function scorePlay(
 
 function chooseJarlReactiveIntent(input: BotPolicyInput): GameIntent {
   return chooseScoredIntent(input, {
+    response: jarlResponse,
     defend: scoreDefend,
     choose: scoreChoice,
     play: scorePlay,

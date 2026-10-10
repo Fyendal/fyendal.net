@@ -21,6 +21,7 @@ import {
   shouldPreserveOpeningHand,
   spendsOpeningArsenalReserve,
   type BotPolicyInput,
+  type ResponseModel,
 } from "./policy.js";
 import {
   evaluateOpponentResponse,
@@ -239,17 +240,21 @@ function iraSolverRules(input: BotPolicyInput): HeroSolverRules {
   };
 }
 
+const iraResponse: ResponseModel = {
+  offensiveCards: (input) => {
+    const me = input.view.players[input.seat];
+    return [...me.hand, ...me.arsenal];
+  },
+  evaluateResponse: (cards, input) => handResponse(cards, input, iraSolverRules),
+};
+
 function scoreDefend(
   intent: Extract<GameIntent, { kind: "defend" }>,
   input: BotPolicyInput,
   own: ReadonlyMap<number, CardView>,
 ): number {
   return scoreDefenseIntent(intent, input, own, {
-    offensiveCards: (policyInput) => {
-      const me = policyInput.view.players[policyInput.seat];
-      return [...me.hand, ...me.arsenal];
-    },
-    evaluateResponse: (cards, policyInput) => handResponse(cards, policyInput, iraSolverRules),
+    ...iraResponse,
     cardOpportunity,
   });
 }
@@ -296,9 +301,6 @@ function canPlayActionAfterIris(input: BotPolicyInput): boolean {
 function scoreChoice(intent: Extract<GameIntent, { kind: "choose" }>, input: BotPolicyInput): number {
   const decision = input.view.pendingDecision;
   if (!decision) return 0;
-  if (decision.options?.length && decision.options.every((option) => /^pay \d+$/.test(option))) {
-    return Number(/^pay (\d+)$/.exec(intent.optionId)?.[1] ?? -1) * 20;
-  }
   const card = optionCard(intent, input);
   const data = card ? input.cards[card.cardId] : undefined;
   const functional = key(data);
@@ -430,6 +432,7 @@ function scorePlay(
 /** Deterministic, projection-only Ira policy. Equal scores retain engine order. */
 function chooseIraReactiveIntent(input: BotPolicyInput): GameIntent {
   return chooseScoredIntent(withoutEmptyIrisSearch(input), {
+    response: iraResponse,
     defend: scoreDefend,
     choose: scoreChoice,
     play: scorePlay,

@@ -3,6 +3,7 @@ import { createGame, projectStateFor } from "@fyendal/engine";
 import type { CardData, CardView, GameIntent } from "@fyendal/shared";
 import { describe, expect, it } from "vitest";
 import {
+  chooseArcaneBarrierIntent,
   chooseScoredIntent,
   chooseSharedPolicyIntent,
   allyLethalThreshold,
@@ -21,6 +22,11 @@ import {
   type BotPolicyScorers,
 } from "./policy.js";
 import { botDefinitions } from "./registry.js";
+
+const NO_RESPONSE: BotPolicyScorers["response"] = {
+  offensiveCards: () => [],
+  evaluateResponse: () => responseEvaluation({}),
+};
 
 describe("lethal Arcane Barrier", () => {
   for (const bot of botDefinitions) {
@@ -83,6 +89,89 @@ describe("lethal Arcane Barrier", () => {
 
     expect(chooseSharedPolicyIntent(input)).toEqual({ kind: "choose", optionId: "pay 1" });
   });
+});
+
+describe("non-lethal Arcane Barrier", () => {
+  function barrierInput(hand: readonly string[], resources = 0) {
+    const state = createGame({
+      decklists: [decklists.dorinthea, decklists.rhinar],
+      cards: cardData,
+      scripts,
+      seed: 94_150,
+      startPlayer: 1,
+    });
+    state.players[0]!.hand = hand.map((cardId) => ({
+      instanceId: state.nextInstanceId++,
+      cardId,
+      owner: 0,
+    }));
+    const view = projectStateFor(state, 0);
+    view.players[0].resources = resources;
+    view.pendingDecision = {
+      player: 0,
+      kind: "choose-target",
+      prompt: "Arcane Barrier: you would be dealt 2 arcane damage — pay {r} to prevent that much?",
+      promptMessage: { id: "engine.decision.damage.arcane.barrier", values: { amount: 2 } },
+      options: ["pay 0", "pay 1"],
+    };
+    const input: BotPolicyInput = {
+      seat: 0,
+      view,
+      legal: [
+        { kind: "choose", optionId: "pay 0" },
+        { kind: "choose", optionId: "pay 1" },
+      ],
+      cards: cardData,
+    };
+    return input;
+  }
+
+  /** Each listed card is worth its value to next turn's response. */
+  function valuedModel(values: Readonly<Record<string, number>>): BotPolicyScorers["response"] {
+    return {
+      offensiveCards: (input) => input.view.players[input.seat].hand,
+      evaluateResponse: (cards) => responseEvaluation({
+        damageThreatened: cards.reduce((total, card) => total + (values[card.cardId] ?? 0), 0),
+      }),
+    };
+  }
+
+  it("pitches a spare blue card to prevent arcane damage", () => {
+    const input = barrierInput(["DVR009", "DVR027"]);
+    const model = valuedModel({ DVR009: 6 });
+    expect(chooseArcaneBarrierIntent(input, model)).toEqual({ kind: "choose", optionId: "pay 1" });
+
+    const [red, blue] = input.view.players[0].hand;
+    input.view.pendingDecision = {
+      player: 0,
+      kind: "choose-target",
+      prompt: "Pitch cards to pay 1 for Arcane Barrier (1 more needed)",
+      promptMessage: { id: "engine.decision.damage.arcane.barrier.pay", values: { total: 1, need: 1 } },
+      options: [String(red!.instanceId), String(blue!.instanceId)],
+    };
+    input.legal = [red!, blue!].map((card) => ({ kind: "choose", optionId: String(card.instanceId) }));
+    expect(chooseArcaneBarrierIntent(input, model))
+      .toEqual({ kind: "choose", optionId: String(blue!.instanceId) });
+  });
+
+  it("keeps a card worth more next turn than the damage it would prevent", () => {
+    const input = barrierInput(["DVR009", "DVR027"]);
+    expect(chooseArcaneBarrierIntent(input, valuedModel({ DVR009: 6, DVR027: 4 })))
+      .toEqual({ kind: "choose", optionId: "pay 0" });
+  });
+
+  it("pays from floating resources without pitching", () => {
+    const input = barrierInput(["DVR009", "DVR027"], 1);
+    expect(chooseArcaneBarrierIntent(input, valuedModel({ DVR009: 6, DVR027: 4 })))
+      .toEqual({ kind: "choose", optionId: "pay 1" });
+  });
+
+  for (const bot of botDefinitions) {
+    it(`${bot.id} pitches surplus blue cards into Arcane Barrier`, () => {
+      const input = barrierInput(["DVR027", "DVR027", "DVR027", "DVR027"]);
+      expect(bot.chooseIntent(input)).toEqual({ kind: "choose", optionId: "pay 1" });
+    });
+  }
 });
 
 describe("opening-turn defense", () => {
@@ -254,6 +343,7 @@ function defenderPruningChoice(count: number, maxNonBlockDefenders?: number): Ga
   return chooseScoredIntent(input, {
     defend: (intent) => intent.instanceIds.reduce((total, id) => total + id, 0),
     choose: () => 0,
+    response: NO_RESPONSE,
     play: () => 0,
     nextTurnArsenal: () => 0,
   });
@@ -292,6 +382,7 @@ describe("defender candidate bounds", () => {
     expect(chooseScoredIntent({ seat: 0, view, legal, cards: cardData }, {
       defend: (intent) => intent.instanceIds.includes(handCard.instanceId) ? 100 : 0,
       choose: () => 0,
+      response: NO_RESPONSE,
       play: () => 0,
       nextTurnArsenal: () => 0,
     })).toEqual({
@@ -985,6 +1076,7 @@ describe("shared turn-cycle defense value", () => {
       defend: (intent, policyInput, own) =>
         scoreDefenseIntent(intent, policyInput, own, fixture.model),
       choose: () => 0,
+      response: NO_RESPONSE,
       play: () => 0,
       nextTurnArsenal: () => 0,
     };
@@ -1114,6 +1206,7 @@ describe("next-turn arsenal opportunity", () => {
     const scorers: BotPolicyScorers = {
       defend: () => 0,
       choose: () => 0,
+      response: NO_RESPONSE,
       play: () => 0,
       nextTurnArsenal,
     };

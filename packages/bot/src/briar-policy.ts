@@ -2,8 +2,7 @@ import type { CardData, CardView, GameIntent, GameView } from "@fyendal/shared";
 import { planBriarTurn, type BriarTurnPlan } from "./briar-turn-planner.js";
 import { briarSolverRules } from "./briar-rules.js";
 import { briarMatchupForHeroName } from "./briar-strategy.js";
-import { arsenalValuer, handResponse, opportunityValuer, solveHand } from "./hand-value.js";
-import { POINTS_PER_DAMAGE } from "./turn-planner.js";
+import { arsenalValuer, handResponse, opportunityValuer } from "./hand-value.js";
 import {
   chooseScoredIntent,
   committedEffectAmount,
@@ -23,6 +22,7 @@ import {
   shouldPreserveOpeningHand,
   spendsOpeningArsenalReserve,
   type BotPolicyInput,
+  type ResponseModel,
 } from "./policy.js";
 
 const NON_ATTACK_PRIORITIES: Record<string, number> = {
@@ -352,13 +352,17 @@ function arcaneSeedsLifeIsLastSurvivalOption(
 
 const cardOpportunity = opportunityValuer(briarSolverRules);
 
+const briarResponse: ResponseModel = {
+  offensiveCards: (input) => {
+    const me = input.view.players[input.seat];
+    return [...me.hand, ...me.arsenal];
+  },
+  evaluateResponse: (cards, input) => handResponse(cards, input, briarSolverRules),
+};
+
 function scoreDefend(intent: Extract<GameIntent, { kind: "defend" }>, input: BotPolicyInput, own: ReadonlyMap<number, CardView>): number {
   return scoreDefenseIntent(intent, input, own, {
-    offensiveCards: (policyInput) => {
-      const me = policyInput.view.players[policyInput.seat];
-      return [...me.hand, ...me.arsenal];
-    },
-    evaluateResponse: (cards, policyInput) => handResponse(cards, policyInput, briarSolverRules),
+    ...briarResponse,
     // Play style: Briar leans toward keeping its Lightning sequences.
     responseLossWeight: 1.25,
     cardOpportunity,
@@ -405,42 +409,6 @@ function scoreDefend(intent: Extract<GameIntent, { kind: "defend" }>, input: Bot
 function scoreChoice(intent: Extract<GameIntent, { kind: "choose" }>, input: BotPolicyInput): number {
   const decision = input.view.pendingDecision;
   if (!decision) return 0;
-  if (decision.options?.length && decision.options.every((option) => /^pay \d+$/.test(option))) {
-    const paid = /^pay (\d+)$/.exec(intent.optionId)?.[1];
-    if (paid === undefined) return -10;
-    const payment = Number(paid);
-    const incoming = /dealt (\d+) arcane damage/i.exec(decision.prompt)?.[1];
-    if (/arcane barrier/i.test(decision.prompt)) {
-      const damage = Number(incoming ?? 0);
-      const life = input.view.players[input.seat].life;
-      const minimumToSurvive = damage - life + 1;
-      const offered = decision.options.map((option) => Number(/^pay (\d+)$/.exec(option)?.[1]));
-      const survivable = offered.filter((amount) => amount >= minimumToSurvive);
-      // Briar is the aggressor: spending a card to prevent incidental arcane
-      // damage is a larger loss than the life point. Pay only when the packet
-      // is lethal, and then only the smallest offered amount that survives.
-      // This preserves as many resources and pitch cards as possible for the
-      // next proactive turn.
-      const desired = minimumToSurvive > 0 && survivable.length > 0
-        ? Math.min(...survivable)
-        : 0;
-      return payment === desired ? 1_000 : -Math.abs(desired - payment) * 20;
-    }
-    return payment * 20;
-  }
-  if (/pitch cards to pay \d+ for arcane barrier/i.test(decision.prompt)) {
-    const card = optionCard(intent, input);
-    if (!card) return -100;
-    const me = input.view.players[input.seat];
-    const remaining = [...me.hand, ...me.arsenal].filter((candidate) =>
-      candidate.instanceId !== card.instanceId
-    );
-    // Survival has already been established by the payment choice. Among the
-    // legal pitch cards, keep the choice that preserves the strongest next
-    // Briar turn (damage and what it leaves held or arsenaled); card
-    // opportunity breaks ties.
-    return solveHand(remaining, input, briarSolverRules).value * POINTS_PER_DAMAGE - cardOpportunity(card, input);
-  }
   if (decision.kind === "arsenal") {
     return scoreArsenalChoice(intent, input, arsenalValuer(briarSolverRules));
   }
@@ -580,6 +548,7 @@ function scorePlay(intent: GameIntent, input: BotPolicyInput, own: ReadonlyMap<n
 /** Projection-only reactive policy used outside clean action-phase planning. */
 function chooseBriarReactiveIntent(input: BotPolicyInput): GameIntent {
   return chooseScoredIntent(input, {
+    response: briarResponse,
     defend: scoreDefend,
     choose: scoreChoice,
     play: scorePlay,

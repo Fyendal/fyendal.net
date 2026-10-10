@@ -35,6 +35,9 @@ export interface BotPolicyScorers {
   choose(intent: ChooseIntent, input: BotPolicyInput): number;
   play(intent: GameIntent, input: BotPolicyInput, own: ReadonlyMap<number, CardView>): number;
   nextTurnArsenal(card: CardView, input: BotPolicyInput): number;
+  /** The hero's next-turn response model, shared with block valuation. It
+   * prices hand cards spent on prevention outside combat (Arcane Barrier). */
+  response: ResponseModel;
 }
 
 /** `nextTurnArsenal` is in damage equivalents (card-ev.ts); reactive scores
@@ -560,19 +563,8 @@ export function chooseSharedPolicyIntent(input: BotPolicyInput): GameIntent | un
   const decision = input.view.pendingDecision;
   if (!decision) return undefined;
 
-  const semanticAmount = decision.promptMessage?.id === "engine.decision.damage.arcane.barrier"
-    ? decision.promptMessage.values?.amount
-    : undefined;
-  const fallbackAmount = /arcane barrier: you would be dealt (\d+) arcane damage/i
-    .exec(decision.prompt)?.[1];
-  const incoming = typeof semanticAmount === "number"
-    ? semanticAmount
-    : fallbackAmount === undefined
-    ? undefined
-    : Number(fallbackAmount);
-  if (incoming === undefined || !Number.isSafeInteger(incoming) || incoming <= 0) {
-    return undefined;
-  }
+  const incoming = arcaneBarrierIncoming(decision);
+  if (incoming === undefined) return undefined;
 
   const minimumToSurvive = incoming - input.view.players[input.seat].life + 1;
   if (minimumToSurvive <= 0) return undefined;
@@ -588,6 +580,122 @@ export function chooseSharedPolicyIntent(input: BotPolicyInput): GameIntent | un
   return survivable.reduce((best, candidate) =>
     candidate.amount < best.amount ? candidate : best
   ).intent;
+}
+
+function arcaneBarrierIncoming(decision: NonNullable<GameView["pendingDecision"]>): number | undefined {
+  const semanticAmount = decision.promptMessage?.id === "engine.decision.damage.arcane.barrier"
+    ? decision.promptMessage.values?.amount
+    : undefined;
+  const fallbackAmount = /arcane barrier: you would be dealt (\d+) arcane damage/i
+    .exec(decision.prompt)?.[1];
+  const incoming = typeof semanticAmount === "number"
+    ? semanticAmount
+    : fallbackAmount === undefined
+    ? undefined
+    : Number(fallbackAmount);
+  return incoming !== undefined && Number.isSafeInteger(incoming) && incoming > 0 ? incoming : undefined;
+}
+
+function arcaneBarrierPitchNeed(decision: NonNullable<GameView["pendingDecision"]>): number | undefined {
+  const semanticNeed = decision.promptMessage?.id === "engine.decision.damage.arcane.barrier.pay"
+    ? decision.promptMessage.values?.need
+    : undefined;
+  const fallbackNeed = /pitch cards to pay \d+ for arcane barrier \((\d+) more needed\)/i
+    .exec(decision.prompt)?.[1];
+  const need = typeof semanticNeed === "number"
+    ? semanticNeed
+    : fallbackNeed === undefined
+    ? undefined
+    : Number(fallbackNeed);
+  return need !== undefined && Number.isSafeInteger(need) && need > 0 ? need : undefined;
+}
+
+interface BarrierPitch {
+  ids: readonly number[];
+  /** Damage equivalents of next turn's response the pitched cards give up. */
+  loss: number;
+  overpay: number;
+}
+
+/** Cheapest hand pitch covering `need`, priced by the hero's response model:
+ * a pitched card is gone until the next draw, so its cost is what the
+ * remaining hand and arsenal no longer threaten. A blue card whose resources
+ * the next turn does not need is nearly free. */
+function cheapestBarrierPitch(
+  input: BotPolicyInput,
+  model: ResponseModel,
+  candidates: readonly CardView[],
+  need: number,
+): BarrierPitch | undefined {
+  if (need <= 0) return { ids: [], loss: 0, overpay: 0 };
+  const offensive = model.offensiveCards(input);
+  const full = model.evaluateResponse(offensive, input).total;
+  const pitchable = candidates.filter((card) => Number(input.cards[card.cardId]?.pitch ?? 0) > 0);
+  let best: BarrierPitch | undefined;
+  for (let mask = 1; mask < 2 ** pitchable.length; mask++) {
+    const selected = pitchable.filter((_, index) => (mask & (2 ** index)) !== 0);
+    const pitched = selected.reduce((total, card) => total + Number(input.cards[card.cardId]?.pitch ?? 0), 0);
+    if (pitched < need) continue;
+    const spent = new Set(selected.map((card) => card.instanceId));
+    // Larger pitches are only worth examining when every card is needed.
+    if (selected.some((card) => pitched - Number(input.cards[card.cardId]?.pitch ?? 0) >= need)) continue;
+    const remaining = model.evaluateResponse(offensive.filter((card) => !spent.has(card.instanceId)), input).total;
+    const candidate = { ids: [...spent], loss: Math.max(0, full - remaining), overpay: pitched - need };
+    if (!best || candidate.loss < best.loss - 1e-9 ||
+      (Math.abs(candidate.loss - best.loss) <= 1e-9 &&
+        (candidate.ids.length < best.ids.length ||
+          (candidate.ids.length === best.ids.length && candidate.overpay < best.overpay)))) {
+      best = candidate;
+    }
+  }
+  return best;
+}
+
+/** Non-lethal Arcane Barrier: pay when the damage prevented outweighs the
+ * next-turn response lost to the pitch. Floating resources are free, and
+ * spare blue pitch is the classic answer to Wizard arcane. Once an amount is
+ * chosen, each pitch step reselects the cheapest cover for what remains. */
+export function chooseArcaneBarrierIntent(
+  input: BotPolicyInput,
+  model: ResponseModel,
+): GameIntent | undefined {
+  const decision = input.view.pendingDecision;
+  if (!decision) return undefined;
+  const me = input.view.players[input.seat];
+  const need = arcaneBarrierPitchNeed(decision);
+  if (need !== undefined) {
+    const offered = new Set(input.legal.flatMap((intent) =>
+      intent.kind === "choose" ? [intent.optionId] : []
+    ));
+    const candidates = me.hand.filter((card) => offered.has(String(card.instanceId)));
+    const plan = cheapestBarrierPitch(input, model, candidates, need);
+    if (!plan || plan.ids.length === 0) return undefined;
+    const next = [...plan.ids].sort((left, right) => {
+      const pitch = (id: number) => Number(input.cards[me.hand.find((card) => card.instanceId === id)!.cardId]?.pitch ?? 0);
+      return pitch(right) - pitch(left);
+    })[0]!;
+    return input.legal.find((intent) => intent.kind === "choose" && intent.optionId === String(next));
+  }
+
+  const incoming = arcaneBarrierIncoming(decision);
+  if (incoming === undefined) return undefined;
+  const offered = input.legal.flatMap((intent) => {
+    if (intent.kind !== "choose") return [];
+    const match = /^pay (\d+)$/.exec(intent.optionId);
+    return match ? [{ intent, amount: Number(match[1]) }] : [];
+  });
+  const free = me.resources + (me.chi ?? 0);
+  let best: { intent: GameIntent; score: number; amount: number } | undefined;
+  for (const { intent, amount } of offered) {
+    const plan = cheapestBarrierPitch(input, model, me.hand, amount - free);
+    if (!plan) continue;
+    const score = Math.min(amount, incoming) - plan.loss;
+    if (!best || score > best.score + 1e-9 ||
+      (Math.abs(score - best.score) <= 1e-9 && amount < best.amount)) {
+      best = { intent, score, amount };
+    }
+  }
+  return best?.intent;
 }
 
 export interface PlannedPrevention {
@@ -898,9 +1006,12 @@ export interface DefenseCandidateContext {
   onHit: OnHitEvaluation;
 }
 
-export interface HeroCycleModel {
+export interface ResponseModel {
   offensiveCards(input: BotPolicyInput): readonly CardView[];
   evaluateResponse(cards: readonly CardView[], input: BotPolicyInput): ResponseEvaluation;
+}
+
+export interface HeroCycleModel extends ResponseModel {
   cardOpportunity(card: CardView, input: BotPolicyInput): number;
   /** Return the complete planned prevention package, or null when this defense
    * plan spends a card the hero policy must reserve. */
@@ -1788,7 +1899,7 @@ export function enforceSpectraPolicy(input: BotPolicyInput, selected: GameIntent
 /** Deterministic projection-only baseline. Equal scores retain engine order. */
 export function chooseScoredIntent(input: BotPolicyInput, scorers: BotPolicyScorers): GameIntent {
   if (input.legal.length === 0) throw new Error("bot has no legal intents");
-  const shared = chooseSharedPolicyIntent(input);
+  const shared = chooseSharedPolicyIntent(input) ?? chooseArcaneBarrierIntent(input, scorers.response);
   if (shared) return shared;
   const requiredEquipment = requiredEquipmentStageIntent(input);
   if (requiredEquipment) return requiredEquipment;

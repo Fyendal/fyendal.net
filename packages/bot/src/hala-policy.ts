@@ -41,6 +41,7 @@ import {
   visibleOpponentDamageAmount,
   type BotPolicyInput,
   type TargetableAttackIntent,
+  type ResponseModel,
 } from "./policy.js";
 import { BLOCK_USE_RATE, type CardUses } from "./card-ev.js";
 import type { HeroSolverRules } from "./card-model.js";
@@ -1459,28 +1460,32 @@ function openingHandCoversIncomingDamage(input: BotPolicyInput): boolean {
   return hand.reduce((total, card) => total + defenseOf(card), 0) >= defenseNeeded;
 }
 
+const halaResponse: ResponseModel = {
+  offensiveCards: (input) => {
+    const me = input.view.players[input.seat];
+    return [...me.hand, ...me.arsenal, ...me.weapons];
+  },
+  evaluateResponse: (cards, input) => {
+    const damageThreatened = estimateHalaDamage(cards, input);
+    const chum = halaAllyTargets(input).find((target) => target.functional === CHUM);
+    return responseEvaluation({
+      damageThreatened,
+      strategicAdjustment: !chum
+        ? 0
+        : damageThreatened >= chum.life
+        ? 240
+        : -(chum.life - damageThreatened) * 300,
+    });
+  },
+};
+
 function scoreDefend(
   intent: Extract<GameIntent, { kind: "defend" }>,
   input: BotPolicyInput,
   own: ReadonlyMap<number, CardView>,
 ): number {
   return scoreDefenseIntent(intent, input, own, {
-    offensiveCards: (policyInput) => {
-      const me = policyInput.view.players[policyInput.seat];
-      return [...me.hand, ...me.arsenal, ...me.weapons];
-    },
-    evaluateResponse: (cards, policyInput) => {
-      const damageThreatened = estimateHalaDamage(cards, policyInput);
-      const chum = halaAllyTargets(policyInput).find((target) => target.functional === CHUM);
-      return responseEvaluation({
-        damageThreatened,
-        strategicAdjustment: !chum
-          ? 0
-          : damageThreatened >= chum.life
-          ? 240
-          : -(chum.life - damageThreatened) * 300,
-      });
-    },
+    ...halaResponse,
     cardOpportunity: (card, policyInput) => halaCardRoles(card, policyInput).blockCost,
     plannedPrevention(policyInput, _defendIntent, spentIds, reactionPlan) {
       const link = currentLink(policyInput);
@@ -1936,6 +1941,7 @@ function scorePlay(
 /** Deterministic Hala policy. */
 function chooseHalaReactiveIntent(input: BotPolicyInput): GameIntent {
   return chooseScoredIntent(input, {
+    response: halaResponse,
     defend: scoreDefend,
     choose: scoreChoice,
     play: scorePlay,

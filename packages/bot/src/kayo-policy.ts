@@ -16,6 +16,7 @@ import {
   scoreDefenseReaction,
   scoreSpendCardChoice,
   type BotPolicyInput,
+  type ResponseModel,
 } from "./policy.js";
 import { arsenalValuer, handResponse, opportunityValuer } from "./hand-value.js";
 import { kayoSolverRules } from "./kayo-rules.js";
@@ -130,6 +131,13 @@ function scorePlay(intent: GameIntent, input: BotPolicyInput, own: ReadonlyMap<n
   return score;
 }
 
+const kayoResponse: ResponseModel = {
+  offensiveCards: (input) => [
+    ...input.view.players[input.seat].hand, ...input.view.players[input.seat].arsenal,
+  ],
+  evaluateResponse: (cards, input) => handResponse(cards, input, kayoSolverRules),
+};
+
 function chooseReactive(input: BotPolicyInput): GameIntent {
   const hasAgility = input.view.players[input.seat].board.some((token) => named(input.cards[token.cardId], "agility"));
   if (input.view.turn === 1 && !hasAgility) {
@@ -141,12 +149,10 @@ function chooseReactive(input: BotPolicyInput): GameIntent {
   return chooseScoredIntent(input, {
     play: scorePlay,
     nextTurnArsenal: arsenalValuer(kayoSolverRules),
+    response: kayoResponse,
     defend: (intent, observed, own) => scoreDefenseIntent(intent, observed, own, {
       cardOpportunity,
-      offensiveCards: (policy) => [
-        ...policy.view.players[policy.seat].hand, ...policy.view.players[policy.seat].arsenal,
-      ],
-      evaluateResponse: (cards, policy) => handResponse(cards, policy, kayoSolverRules),
+      ...kayoResponse,
       // Play style: Kayo leans toward keeping its large attacks.
       responseLossWeight: 1.3,
     }),

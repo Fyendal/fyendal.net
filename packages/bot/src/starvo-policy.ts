@@ -27,6 +27,7 @@ import {
   targetableAttackIntent,
   type BotPolicyInput,
   type ResponseEvaluation,
+  type ResponseModel,
 } from "./policy.js";
 import {
   chooseTacticalIntentWithTrace,
@@ -304,6 +305,11 @@ function offensiveCards(input: BotPolicyInput): readonly CardView[] {
   return [...me.hand, ...me.arsenal];
 }
 
+const starvoResponse: ResponseModel = {
+  offensiveCards,
+  evaluateResponse: (cards, input) => handResponse(cards, input, starvoSolverRules),
+};
+
 /** Arsenal cards worth protecting with a held reveal (Pulse decisions). */
 function isPremiumArsenal(data: CardData | undefined, input: BotPolicyInput): boolean {
   const functional = key(data);
@@ -318,8 +324,7 @@ function scoreDefend(
   own: ReadonlyMap<number, CardView>,
 ): number {
   return scoreDefenseIntent(intent, input, own, {
-    offensiveCards,
-    evaluateResponse: (cards, policyInput) => handResponse(cards, policyInput, starvoSolverRules),
+    ...starvoResponse,
     cardOpportunity,
     // Play style: Starvo protects its large-attack turns over chip prevention.
     responseLossWeight: 2.25,
@@ -840,6 +845,7 @@ function preferHandOverEquivalentStalagmite(
 
 function chooseStarvoReactiveIntent(input: BotPolicyInput): GameIntent {
   return chooseScoredIntent(input, {
+    response: starvoResponse,
     defend: scoreDefend,
     choose: scoreChoice,
     play: scorePlay,

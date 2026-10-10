@@ -25,6 +25,7 @@ import {
   targetableAttackIntent,
   type BotPolicyInput,
   type TargetableAttackIntent,
+  type ResponseModel,
 } from "./policy.js";
 import {
   chooseTacticalIntentWithTrace,
@@ -1011,17 +1012,21 @@ function flightPathWillBeConsumedNextTurn(input: BotPolicyInput): boolean {
   );
 }
 
+const cindraResponse: ResponseModel = {
+  offensiveCards: (input) => {
+    const me = input.view.players[input.seat];
+    return [...me.hand, ...me.arsenal];
+  },
+  evaluateResponse: (cards, input) => handResponse(cards, input, cindraSolverRules),
+};
+
 function scoreDefend(
   intent: Extract<GameIntent, { kind: "defend" }>,
   input: BotPolicyInput,
   own: ReadonlyMap<number, CardView>,
 ): number {
   return scoreDefenseIntent(intent, input, own, {
-    offensiveCards(policyInput) {
-      const me = policyInput.view.players[policyInput.seat];
-      return [...me.hand, ...me.arsenal];
-    },
-    evaluateResponse: (cards, policyInput) => handResponse(cards, policyInput, cindraSolverRules),
+    ...cindraResponse,
     cardOpportunity,
     // Play style: Cindra races, valuing next turn's damage over prevention.
     responseLossWeight: 2,
@@ -1650,6 +1655,7 @@ function enforceCindraAllyPolicy(input: BotPolicyInput, selected: GameIntent): G
 
 function chooseCindraReactiveIntent(input: BotPolicyInput): GameIntent {
   return chooseScoredIntent(input, {
+    response: cindraResponse,
     defend: scoreDefend,
     choose: scoreChoice,
     play: scorePlay,

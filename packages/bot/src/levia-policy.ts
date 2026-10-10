@@ -20,6 +20,7 @@ import {
   scoreDefenseReaction,
   scoreSpendCardChoice,
   type BotPolicyInput,
+  type ResponseModel,
 } from "./policy.js";
 import { DISRUPTION_HIT_CHANCE } from "./card-ev.js";
 import { probabilityAtLeastOne, totalCount, unseenCounts } from "./deck-knowledge.js";
@@ -555,6 +556,19 @@ function scoreChoice(intent: Extract<GameIntent, { kind: "choose" }>, input: Bot
   return 0;
 }
 
+const leviaResponse: ResponseModel = {
+  offensiveCards: (input) => [
+    ...input.view.players[input.seat].hand, ...input.view.players[input.seat].arsenal,
+  ],
+  evaluateResponse: (cards, input) => {
+    const response = handResponse(cards, input, leviaSolverRules);
+    // Blood debt drains each end phase; keep something to shed it with.
+    return ownBloodDebt(input) > 0 && cards.length === 0
+      ? responseEvaluation({ ...response, strategicAdjustment: response.strategicAdjustment - 4 })
+      : response;
+  },
+};
+
 function scoreDefense(
   intent: Extract<GameIntent, { kind: "defend" }>,
   input: BotPolicyInput,
@@ -566,16 +580,7 @@ function scoreDefense(
       (card.defCounters ?? 0) === 0 && leviaSashEnablesPair(policy,
         [...policy.view.players[policy.seat].hand, ...policy.view.players[policy.seat].arsenal]
           .filter((held) => !intent.instanceIds.includes(held.instanceId)), true),
-    offensiveCards: (policy) => [
-      ...policy.view.players[policy.seat].hand, ...policy.view.players[policy.seat].arsenal,
-    ],
-    evaluateResponse: (cards, policy) => {
-      const response = handResponse(cards, policy, leviaSolverRules);
-      // Blood debt drains each end phase; keep something to shed it with.
-      return ownBloodDebt(policy) > 0 && cards.length === 0
-        ? responseEvaluation({ ...response, strategicAdjustment: response.strategicAdjustment - 4 })
-        : response;
-    },
+    ...leviaResponse,
     // Play style: Levia leans slightly toward keeping her attack pair.
     responseLossWeight: 1.1,
   });
@@ -583,6 +588,7 @@ function scoreDefense(
 
 function chooseReactive(input: BotPolicyInput): GameIntent {
   return chooseScoredIntent(input, {
+    response: leviaResponse,
     play: scorePlay,
     choose: scoreChoice,
     nextTurnArsenal: arsenalValuer(leviaSolverRules),

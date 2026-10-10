@@ -23,6 +23,7 @@ import {
   spendsOpeningArsenalReserve,
   visibleOpponentDamageAmount,
   type BotPolicyInput,
+  type ResponseModel,
 } from "./policy.js";
 import { abilitySource, type HeroSolverRules } from "./card-model.js";
 import { guardianPatch } from "./guardian-rules.js";
@@ -115,6 +116,11 @@ function offensiveCards(input: BotPolicyInput): readonly CardView[] {
   return [...me.hand, ...me.arsenal];
 }
 
+const bravoResponse: ResponseModel = {
+  offensiveCards,
+  evaluateResponse: (cards, input) => handResponse(cards, input, bravoSolverRules),
+};
+
 function committedOasisPrevention(input: BotPolicyInput): number {
   return committedEffectAmount(
     input,
@@ -161,8 +167,7 @@ function scoreDefend(
   own: ReadonlyMap<number, CardView>,
 ): number {
   return scoreDefenseIntent(intent, input, own, {
-    offensiveCards,
-    evaluateResponse: (cards, policyInput) => handResponse(cards, policyInput, bravoSolverRules),
+    ...bravoResponse,
     cardOpportunity,
     responseLossWeight: isWizardFatigueMatchup(input) ? 0.1 : 1,
     defensePermission: (candidate) => {
@@ -196,20 +201,8 @@ function scoreChoice(intent: Extract<GameIntent, { kind: "choose" }>, input: Bot
     const desired = attackSource ?? stackSource;
     return desired !== undefined && intent.optionId === String(desired) ? 100 : -100;
   }
-  if (decision.options?.length && decision.options.every((option) => /^pay \d+$/.test(option))) {
-    return Number(/^pay (\d+)$/.exec(intent.optionId)?.[1] ?? -1) * 10;
-  }
   if (decision.kind === "arsenal") {
     return scoreArsenalChoice(intent, input, arsenalValuer(bravoSolverRules));
-  }
-  if (isWizardFatigueMatchup(input) &&
-    (decision.promptMessage?.id === "engine.decision.damage.arcane.barrier.pay" ||
-      /pitch cards to pay \d+ for arcane barrier/i.test(decision.prompt))) {
-    const card = optionCard(intent, input);
-    const data = card ? input.cards[card.cardId] : undefined;
-    return card && data
-      ? Number(data.pitch ?? 0) * 100 - cardOpportunity(card, input)
-      : -100;
   }
   const card = optionCard(intent, input);
   if (/reveal|clash/i.test(decision.prompt) && card) {
@@ -317,6 +310,7 @@ function chooseBravoReactiveIntent(input: BotPolicyInput): GameIntent {
     }
   }
   return chooseScoredIntent(input, {
+    response: bravoResponse,
     defend: scoreDefend,
     choose: scoreChoice,
     play: scorePlay,
