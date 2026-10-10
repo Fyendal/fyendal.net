@@ -599,6 +599,30 @@ describe("SAR — traps", () => {
     expect(markedCount(s, 0)).toBe(1);
   });
 
+  it("Arakni, Trap-Door's banished trap defends a dominate attack already defended from hand", () => {
+    // seed 9 rolls Trap-Door as the random Agent of Chaos
+    const s = scenario({
+      seed: 9,
+      seats: [
+        arakniSeat({ heroKey: "arakni, marionette|0", hand: [BLUE], deck: ["inertia trap|1"] }),
+        { hero: "rhinar", hand: ["demolition crew|1", "raging onslaught|2"] },
+      ],
+    });
+    mark(s, 1);
+    s.passActionPhase().settle();
+    expect(s.state.pendingDecision?.chooseHook).toBe("trap-door-search");
+    s.chooseCard("inertia trap|1").settle();
+    expect(s.state.turn).toBe(2);
+
+    s.play("demolition crew|1") // dominate
+      .blockWith(BLUE)
+      .passPriority()
+      .react("inertia trap|1")
+      .settle();
+    s.expectZoneSize(0, "banish", 0);
+    expect(s.state.chain[0]!.defendingCards).toHaveLength(2);
+  });
+
   it("Den of the Spider marks an above-base attacker; Inertia Trap tokens it too", () => {
     const s = scenario({
       seats: [

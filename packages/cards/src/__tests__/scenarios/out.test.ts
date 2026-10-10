@@ -455,6 +455,22 @@ describe("OUT — registration and core mechanics", () => {
 });
 
 describe("OUT — rules regression coverage", () => {
+  it("Premeditate creates a Ponder when the next attack action card hits a hero", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", hand: ["premeditate|1", "scar for a scar|1"], deck: [BLUE] },
+        { hero: "dorinthea", hand: [] },
+      ],
+    });
+
+    g.play("premeditate|1")
+      .play("scar for a scar|1")
+      .expectAttackValue(4)
+      .blockWith()
+      .settle()
+      .expectInZone(0, "ponder|0", "board");
+  });
+
   it.each([
     "bonds of ancestry|1",
     "gustwave of the second wind|1",

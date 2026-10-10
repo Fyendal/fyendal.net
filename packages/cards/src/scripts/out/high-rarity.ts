@@ -804,7 +804,17 @@ export const outHighRarity: Record<string, CardScript> = {
   "premeditate|1": {
     onPlay(ctx) {
       buffNextAttack(ctx, { attack: 3, appliesTo: "attack-action", appliesToFromArsenal: true });
-      ctx.setPlayerFlag(ctx.seat, "ponderOnNextAttackHit", true);
+      ctx.setCounter("ponderOnHit", 1);
+      ctx.addModifier({ scope: "until-end-of-turn" });
+    },
+    canTriggerOnHit(ctx) {
+      return (
+        ctx.getCounter("ponderOnHit") > 0 && ctx.link?.targetAllyId === undefined && ctx.link?.attackCardType === "action"
+      );
+    },
+    onHit(ctx) {
+      ctx.setCounter("ponderOnHit", 0);
+      ctx.createToken(PONDER);
     },
   },
 };

@@ -595,6 +595,7 @@ export function playReaction(
     return `${nameOf(state, card.cardId)} cannot be played due to a card-type restriction`;
   }
   const isDefReact = data.cardType === "defense-reaction";
+  const fromHand = !fromZone && source === player.hand;
   const maxNonBlock = attackMaxNonBlockDefenders(state, link);
   if (
     isDefReact &&
@@ -611,14 +612,15 @@ export function playReaction(
   if (isDefReact && fromArsenal && drRestriction.fromArsenal) {
     return "defense reactions can't be played from arsenal this chain link";
   }
-  if (isDefReact && !fromArsenal && drRestriction.fromHand) {
+  if (isDefReact && fromHand && drRestriction.fromHand) {
     return "defense reactions can't be played from hand this chain link";
   }
   // Dominate (8.3.4b / 7.4.2c): once the link is defended from hand, a defense
-  // reaction from hand could not become a defending card, so it cannot be played
+  // reaction from hand could not become a defending card, so it cannot be played.
+  // Granted zones (a banished trap, a graveyard card) are not from hand.
   if (
     isDefReact &&
-    !fromArsenal &&
+    fromHand &&
     attackHasDominate(state, runtime, link) &&
     link.flags.defendedFromHand === true
   ) {
@@ -630,7 +632,7 @@ export function playReaction(
     if (canDefend && !canDefend(runtime.makeCtx(state, seat, card, link))) {
       return `${nameOf(state, card.cardId)} cannot defend this attack`;
     }
-    if (!runtime.dispatchFlow("attackAllowsDefender", state, link, card, !fromZone && source === player.hand)) {
+    if (!runtime.dispatchFlow("attackAllowsDefender", state, link, card, fromHand)) {
       return `${nameOf(state, card.cardId)} cannot defend this attack`;
     }
   }

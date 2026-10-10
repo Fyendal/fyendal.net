@@ -917,14 +917,15 @@ function reactionIntents(
         // an action playable "as though it were an instant" counts as an instant here
         if (!asInstant) continue;
       }
-      if (blockHandDefReacts && !fromArsenal && data.cardType === "defense-reaction") continue;
+      const fromHand = !fromArsenal && !fromZone;
+      if (blockHandDefReacts && fromHand && data.cardType === "defense-reaction") continue;
       if (nonBlockDefenderLimitReached && data.cardType === "defense-reaction") continue;
       // "defense reactions can't be played to this chain link" / "...from arsenal"
       if (!isAttacker && data.cardType === "defense-reaction") {
         if (
           drRestriction.all ||
           (fromArsenal && drRestriction.fromArsenal) ||
-          (!fromArsenal && drRestriction.fromHand)
+          (fromHand && drRestriction.fromHand)
         ) continue;
       }
       if (
@@ -936,7 +937,7 @@ function reactionIntents(
       if (!isAttacker && data.cardType === "defense-reaction") {
         const canDefend = script?.canDefend;
         if (canDefend && !canDefend(runtime.makeCtx(state, player.seat, card, link))) continue;
-        if (!attackAllowsDefender(state, runtime, link, card, !fromArsenal && !fromZone)) continue;
+        if (!attackAllowsDefender(state, runtime, link, card, fromHand)) continue;
       }
       const meldSides: Array<MeldSide | undefined> = script?.meld
         ? (["left", "right", "both"] as MeldSide[]).filter(
