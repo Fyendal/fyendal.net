@@ -465,6 +465,33 @@ export function makeCtx(
       cardOptions: options.map((option) => typeof option === "number" ? option : null),
     });
   };
+  // An action card that is being played, or is resolving as its own stack
+  // layer, gains go again itself rather than the attack on the combat chain.
+  const grantPlayedCardGoAgain = (): boolean => {
+    if (!cardHasType(state, self, "action")) return false;
+    if (link?.attackingCard.instanceId === self.instanceId) return false;
+    const layer = state.stack.find((candidate) => candidate.card?.instanceId === self.instanceId);
+    // A non-attack layer refunds its action point at resolution. Keeping the
+    // grant on the layer prevents it from outliving this play.
+    if (layer && !(dataOf(state, self.cardId).subtypes ?? []).includes("attack")) {
+      layer.goAgain = true;
+      return true;
+    }
+    // Otherwise the card carries the keyword onto its layer or chain link. A
+    // paused play can hold copies both in `resolving` and on its layer, and a
+    // card declaring an additional cost is still in its origin zone.
+    const origin = findCardAnywhere(state, self.instanceId)?.card;
+    const copies = new Set([
+      layer?.card,
+      state.resolving.find((card) => card.instanceId === self.instanceId),
+      Number(origin?.counters?.declaringAdditionalCost ?? 0) === 1 ? origin : undefined,
+    ].filter((card): card is CardInstance => card !== undefined));
+    for (const card of copies) {
+      const granted = (card.grantedKeywords ??= []);
+      if (!granted.includes("go again")) granted.push("go again");
+    }
+    return copies.size > 0;
+  };
   const ctx: ScriptCtx = {
     state,
     seat,
@@ -1455,6 +1482,7 @@ export function makeCtx(
       runtime.commands.resolveIntimidate(state, seat, count, targetSeat);
     },
     grantGoAgain(targetAttackInstanceId) {
+      if (targetAttackInstanceId === undefined && grantPlayedCardGoAgain()) return;
       const target = targetAttackInstanceId === undefined
         ? link
         : chainLinkForAttack(state, targetAttackInstanceId);

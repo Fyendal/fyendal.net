@@ -616,7 +616,6 @@ export const eleHighRarity: Record<string, CardScript> = {
     arcaneDamageEffect: true,
     onPlay(ctx) {
       ctx.dealDamage(opponentSeat(ctx), 1, { arcane: true, sourceInstanceId: ctx.self.instanceId });
-      ctx.grantGoAgain();
     },
   },
   "force of nature|3": {
@@ -734,7 +733,6 @@ export const eleHighRarity: Record<string, CardScript> = {
     onChoose(ctx, hook, option) {
       if (hook === "harvests-bottom" && ctx.putOnDeckBottom(Number(option))) {
         ctx.drawCards(ctx.seat, 3);
-        ctx.grantGoAgain();
       }
     },
   },

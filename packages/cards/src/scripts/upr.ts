@@ -971,7 +971,7 @@ export const upr: Record<string, CardScript> = mergeSetScripts("UPR", uprHighRar
       if (h !== "burn-away" || o === "pass") return;
       if (!ctx.banish(Number(o))) return;
       ctx.addCardTempPower(ctx.self.instanceId, 2);
-      ctx.grantCardKeyword(ctx.self.instanceId, "go again");
+      ctx.grantGoAgain();
     },
   },
   "engulfing flamewave|1": {

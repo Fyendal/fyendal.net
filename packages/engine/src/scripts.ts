@@ -255,9 +255,13 @@ export interface ScriptCtx {
   discardCard(targetSeat: number, instanceId: number): DeepReadonly<CardInstance> | undefined;
   /** Intimidate a hero. Defaults to the opposing hero once. */
   intimidate(targetSeat?: number, count?: number): void;
-  /** Give the current attack, or a specified attack still on the combat
-   * chain, go again. Granting it to an already-resolved link does not resolve
-   * that link again or retroactively grant an action point. */
+  /** Give go again. Without a target, an action card that is being played or
+   * resolving as its own layer gains it itself (a non-attack action refunds
+   * its action point when the layer resolves; an attack paying additional
+   * costs carries it onto its chain link); otherwise the current attack gains
+   * it. A target names an attack still on the combat chain. Granting it to an
+   * already-resolved link does not resolve that link again or retroactively
+   * grant an action point. */
   grantGoAgain(targetAttackInstanceId?: number): void;
   /** Give the attack on an exact combat-chain link go again. Use this for
    * targeted effects because a weapon or ally may attack on multiple links

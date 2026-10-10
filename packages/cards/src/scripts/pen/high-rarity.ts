@@ -691,7 +691,14 @@ export const penHighRarity: Record<string, CardScript> = {
   },
   "embalm|2": bloodDebt({
     staticPlayableFrom: ["banish"],
+    // The card is still in its origin zone while its cost is paid; counters
+    // persist on the card until it resolves.
+    onPlayCostPaid(ctx) {
+      const fromBanish = ctx.player(ctx.seat).banish.some((card) => card.instanceId === ctx.self.instanceId);
+      ctx.setCounter("embalmFromBanish", fromBanish ? 1 : 0);
+    },
     onPlay(ctx) {
+      if (ctx.getCounter("embalmFromBanish") === 1) ctx.grantGoAgain();
       const attack = ctx
         .player(ctx.seat)
         .graveyard.find(
@@ -700,9 +707,6 @@ export const penHighRarity: Record<string, CardScript> = {
             (data(ctx, card).keywords ?? []).some((keyword) => keyword.toLowerCase() === "blood debt"),
         );
       if (attack) ctx.putOnDeckBottom(attack.instanceId);
-    },
-    onAttackDeclared(ctx) {
-      if (ctx.getFlag("link", "fromBanish") === true) ctx.grantGoAgain();
     },
   }),
   "elemental strike|1": {

@@ -216,3 +216,20 @@ describe("WTR Brute — equipment", () => {
       .expectInZone(0, "barkbone strapping|0", "graveyard");
   });
 });
+
+describe("WTR Brute — Bloodrush Bellow", () => {
+  it.each([
+    ["raging onslaught|2", 1], // 6 power: draw 2 and go again
+    ["raging onslaught|3", 0], // 5 power: no go again
+  ] as const)("discarding %s leaves %i action points", (discard, ap) => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", hand: ["bloodrush bellow|2", "wrecker romp|3", discard] },
+        { hero: "rhinar", hand: [] },
+      ],
+    });
+    g.play("bloodrush bellow|2", { pitch: ["wrecker romp|3"] })
+      .expectInZone(0, discard, "graveyard")
+      .expectAP(0, ap);
+  });
+});

@@ -405,7 +405,7 @@ function applyForsakenStrikeModes(ctx: ScriptCtx): void {
   const [gate, power, goAgain] = FORSAKEN_STRIKE_MODES.map((mode) => ctx.getCounter(mode.counter) > 0);
   if (gate) ctx.createToken(GATE);
   if (power) ctx.addCardTempPower(ctx.self.instanceId, 2);
-  if (goAgain) ctx.grantCardKeyword(ctx.self.instanceId, "go again");
+  if (goAgain) ctx.grantGoAgain();
   // Counters survive zone changes; clear them so a later play starts fresh.
   ctx.setCounter("forsakenModesTotal", 0);
   for (const mode of FORSAKEN_STRIKE_MODES) ctx.setCounter(mode.counter, 0);

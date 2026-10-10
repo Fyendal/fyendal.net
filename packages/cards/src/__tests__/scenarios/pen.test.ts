@@ -1680,3 +1680,18 @@ describe("PEN — generalized rules interactions", () => {
     expect(g.state.globalCardIds).not.toContain(printingId("treasure island|0"));
   });
 });
+
+describe("PEN — Embalm", () => {
+  it.each([
+    ["hand", 0],
+    ["banish", 1],
+  ] as const)("played from %s leaves %i action points", (zone, ap) => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", [zone]: ["embalm|2"], equipment: NO_EQUIPMENT },
+        { hero: "dorinthea", equipment: NO_EQUIPMENT },
+      ],
+    });
+    g.play("embalm|2", zone === "banish" ? { fromZone: "banish" } : {}).expectAP(0, ap);
+  });
+});

@@ -244,7 +244,7 @@ function lookingForScrap(): CardScript {
     onChoose(ctx, hook, option) {
       if (hook !== "scrap" || option === "pass" || !ctx.banish(Number(option))) return;
       ctx.addCardTempPower(ctx.self.instanceId, 1);
-      ctx.grantCardKeyword(ctx.self.instanceId, "go again");
+      ctx.grantGoAgain();
     },
   };
 }

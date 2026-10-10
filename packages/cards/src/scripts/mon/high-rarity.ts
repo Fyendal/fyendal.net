@@ -250,7 +250,7 @@ const rouseTheAncients: CardScript = {
     const ids = option.split(":").slice(1).map(Number);
     ctx.revealCards(ids);
     ctx.setCounter("roused", 1);
-    ctx.grantCardKeyword(ctx.self.instanceId, "go again");
+    ctx.grantGoAgain();
   },
 };
 

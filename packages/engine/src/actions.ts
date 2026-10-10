@@ -329,6 +329,8 @@ export function playCard(
     (card.counters ??= {}).enginePlayEventNextId ??= state.nextInstanceId;
   }
   if (!additionalCostDeclared && script?.declareAdditionalCost) {
+    // Marks the card as being played while it is still in its origin zone.
+    (card.counters ??= {}).declaringAdditionalCost = 1;
     script.declareAdditionalCost(runtime.makeCtx(state, seat, card));
     const declarationDecision = state.pendingDecision;
     if (declarationDecision?.chooseHook) {
@@ -352,6 +354,7 @@ export function playCard(
       return undefined;
     }
   }
+  delete card.counters?.declaringAdditionalCost;
   const costErr = payCost(state, runtime, player, effectiveCost, pitchInstanceIds, instanceId, {
     beforePitch: () =>
       logPublic(state, gameLogMessage(
