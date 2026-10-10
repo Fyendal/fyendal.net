@@ -1421,11 +1421,19 @@ describe("IAR cards", () => {
 
     g.chooseOption("Create a Gate to i'Arathael");
     expect(g.state.pendingDecision?.prompt).toBe("Forsaken Strike: choose effect 2 of 3");
+    // A mode cannot be selected twice (CR 1.7.5b); earlier picks are shown as chosen.
+    expect(projectStateFor(g.state, 0).pendingDecision).toMatchObject({
+      options: ["Give Forsaken Strike +2 power", "Give Forsaken Strike go again"],
+      chosenOptions: ["Create a Gate to i'Arathael"],
+      chosenOptionMessages: [{ id: "card.iar.forsaken.option.gate" }],
+    });
+    expect(projectStateFor(g.state, 1).pendingDecision?.chosenOptions).toBeUndefined();
     expect(g.state.stack).toHaveLength(0);
     expect(projectStateFor(g.state, 0).pendingDecision?.preStackSource?.card.instanceId).toBe(strikeId);
 
     g.chooseOption("Give Forsaken Strike +2 power");
     expect(g.state.pendingDecision?.prompt).toBe("Forsaken Strike: choose effect 3 of 3");
+    expect(g.state.pendingDecision?.options).toEqual(["Give Forsaken Strike go again"]);
     expect(g.state.stack).toHaveLength(0);
     expect(projectStateFor(g.state, 0).pendingDecision?.preStackSource?.card.instanceId).toBe(strikeId);
 
@@ -1451,10 +1459,10 @@ describe("IAR cards", () => {
     },
     {
       paid: ["restless cleric|1", "restless corporal|1"],
-      expectedLife: 13,
+      expectedLife: 15,
       modes: [
         "Give Forsaken Strike +2 power",
-        "Give Forsaken Strike +2 power",
+        "Give Forsaken Strike go again",
       ],
     },
   ])("Forsaken Strike may pay with $paid.length zombie(s)", ({ paid, expectedLife, modes }) => {

@@ -447,6 +447,11 @@ export interface PendingDecision {
   /** Parallel localized presentation for literal options. Null entries use a
    * card view or the legacy option/optionLabels presentation. */
   optionMessages?: (GameMessage | null)[];
+  /** Modes already selected earlier in the same multi-mode choice. Display
+   * only: they are no longer in `options`. Values are the English fallback;
+   * `chosenOptionMessages` is parallel localized presentation. */
+  chosenOptions?: string[];
+  chosenOptionMessages?: (GameMessage | null)[];
   /** Parallel count for consolidated trigger-order options. Null entries are
    * ordinary single-source options. */
   optionCounts?: (number | null)[];

@@ -31,6 +31,8 @@ export function scriptPromptParts(
   fallback: string;
   promptMessage?: ScriptDecisionPrompt["message"];
   optionMessages?: (ScriptDecisionPrompt["message"] | null)[];
+  chosenOptions?: string[];
+  chosenOptionMessages?: (ScriptDecisionPrompt["message"] | null)[];
 } {
   if (typeof prompt === "string") return { fallback: prompt };
   const messagesByValue = prompt.optionMessagesByValue;
@@ -41,11 +43,19 @@ export function scriptPromptParts(
           : null
       )
     : undefined;
+  const chosenOptions = prompt.chosenOptions?.length ? [...prompt.chosenOptions] : undefined;
+  const chosenOptionMessages = chosenOptions?.map((option) =>
+    messagesByValue && Object.hasOwn(messagesByValue, option) ? messagesByValue[option] ?? null : null
+  );
   return {
     fallback: prompt.fallback,
     promptMessage: prompt.message,
     ...(optionMessages?.some((message) => message !== null)
       ? { optionMessages }
+      : {}),
+    ...(chosenOptions ? { chosenOptions } : {}),
+    ...(chosenOptionMessages?.some((message) => message !== null)
+      ? { chosenOptionMessages }
       : {}),
   };
 }

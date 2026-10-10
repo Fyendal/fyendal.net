@@ -2337,6 +2337,7 @@
   "game.decision.payAmount": "支付 {amount} 点资源",
   "game.decision.useNamed": "使用{name}",
   "game.decision.pitchProgress": "已选择 {selected}/{required} 点资源",
+  "game.decision.chosen": "已选择",
   "game.decision.chooseUse": "选择如何使用{card}",
   "game.decision.playAs.prompt": "将{card}作为…打出",
   "game.decision.playMethod.action": "作为行动打出（消耗 1 个行动点）",

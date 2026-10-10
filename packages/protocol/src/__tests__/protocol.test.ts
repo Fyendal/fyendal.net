@@ -739,6 +739,21 @@ describe("GameView and server messages", () => {
         optionMessages: [{ id: "common.option.yes" }],
       },
     })).toBeNull();
+    const modeDecision = {
+      player: 0,
+      kind: "choose-target",
+      prompt: "Forsaken Strike: choose effect 2 of 3",
+      options: ["Give Forsaken Strike +2 power"],
+      chosenOptions: ["Create a Gate to i'Arathael"],
+    };
+    expect(decodeGameView({
+      ...gameView(),
+      pendingDecision: { ...modeDecision, chosenOptionMessages: [{ id: "card.iar.forsaken.option.gate" }] },
+    })).not.toBeNull();
+    expect(decodeGameView({
+      ...gameView(),
+      pendingDecision: { ...modeDecision, chosenOptionMessages: [] },
+    })).toBeNull();
     expect(decodeGameView({
       ...gameView(),
       pendingDecision: {

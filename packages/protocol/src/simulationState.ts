@@ -605,7 +605,7 @@ function validateResume(value: unknown, code: string, path: string): void {
 
 function validateDecision(value: unknown, code: string, path: string, depth = 0): void {
   if (depth > 16) fail(code, path, "follow-up decision nesting is too deep");
-  const decision = exact(value, code, path, ["player", "kind", "prompt"], ["promptMessage", "options", "minimumSelections", "maximumSelections", "defaultOption", "optionLabels", "optionMessages", "optionCounts", "sourceInstanceId", "scriptSourceSnapshot", "chooseHook", "followUpDecisions", "tokenCreationCause", "cardOptions", "revealedCardIds", "lookedCardIds", "payment", "resourcePayment", "xPayment", "variablePlayCost", "variableActivationCost", "tokenCreationReplacement", "tokenCreationReplacementOrder", "wagerLossReplacementOrder", "activationCost", "clash", "arcane", "triggerOrder", "deckBottomOrder", "dieRoll", "staged", "resume"]);
+  const decision = exact(value, code, path, ["player", "kind", "prompt"], ["promptMessage", "options", "minimumSelections", "maximumSelections", "defaultOption", "optionLabels", "optionMessages", "chosenOptions", "chosenOptionMessages", "optionCounts", "sourceInstanceId", "scriptSourceSnapshot", "chooseHook", "followUpDecisions", "tokenCreationCause", "cardOptions", "revealedCardIds", "lookedCardIds", "payment", "resourcePayment", "xPayment", "variablePlayCost", "variableActivationCost", "tokenCreationReplacement", "tokenCreationReplacementOrder", "wagerLossReplacementOrder", "activationCost", "clash", "arcane", "triggerOrder", "deckBottomOrder", "dieRoll", "staged", "resume"]);
   integer(decision.player, code, `${path}.player`);
   oneOf(decision.kind, ["defend", "attack-reaction", "defense-reaction", "priority-window", "arsenal", "choose-target", "choose-name", "order-triggers", "optional-effect"] as const, code, `${path}.kind`);
   string(decision.prompt, code, `${path}.prompt`);
@@ -653,6 +653,20 @@ function validateDecision(value: unknown, code: string, path: string, depth = 0)
     decision.options.length !== decision.optionMessages.length
   ) {
     fail(code, `${path}.optionMessages`, "must be parallel to options");
+  }
+  optional(decision, "chosenOptions", (v, p) => validateStringArray(v, code, p), path);
+  optional(decision, "chosenOptionMessages", (v, p) => {
+    array(v, code, p).forEach((message, index) => {
+      if (message !== null) validateGameMessage(message, code, `${p}[${index}]`);
+    });
+  }, path);
+  if (
+    decision.chosenOptionMessages !== undefined &&
+    (!Array.isArray(decision.chosenOptions) ||
+      !Array.isArray(decision.chosenOptionMessages) ||
+      decision.chosenOptions.length !== decision.chosenOptionMessages.length)
+  ) {
+    fail(code, `${path}.chosenOptionMessages`, "must be parallel to chosenOptions");
   }
   optional(decision, "optionCounts", (v, p) => {
     array(v, code, p, MAX_COLLECTION).forEach((count, index) => {

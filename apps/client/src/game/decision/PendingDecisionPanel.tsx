@@ -19,11 +19,27 @@ import {
 import { decisionSpaceOption } from "../passHotkey.js";
 import { ArsenalSkipConfirmation, OptDecisionInstructions } from "./ActionConfirmations.js";
 import { BloodModeDecision } from "./BloodModeDecision.js";
+import {
+  ChoiceButton,
+  ChoiceList,
+  type ChoiceModalChosen,
+  type ChoiceModalOption,
+} from "./ChoiceModal.js";
 import { RevealedChoiceCards } from "./CardChoices.js";
 import { CardRef, cardAffiliation, DecisionPrompt, PitchPaymentProgress } from "./DecisionShared.js";
 import type { PendingDecisionModel } from "./DecisionModels.js";
 import { NameChoiceAutocomplete } from "./NameChoiceAutocomplete.js";
 import { TriggerOrderDecision } from "./TriggerOrderDecision.js";
+
+/** Legacy literal option values that render through shared catalog labels. */
+const LITERAL_OPTION_MESSAGES = {
+  yes: "common.option.yes",
+  no: "common.option.no",
+  pass: "common.option.pass",
+  decline: "common.option.decline",
+  reroll: "common.option.reroll",
+  keep: "common.option.keep",
+} as const;
 
 const localizedOptionResolvers = {
   card: (cardId: string) => cardData[cardId]?.name ?? cardId,
@@ -103,44 +119,6 @@ function BoundedCardChoiceDecision({
         onConfirm={onConfirm}
       />
     </>
-  );
-}
-
-function LocalizedDecisionOptionButton({
-  message,
-  option,
-  spaceDefault,
-  onChoose,
-}: {
-  message: NonNullable<NonNullable<PendingDecisionModel["decision"]>["optionMessages"]>[number];
-  option: string;
-  spaceDefault: boolean;
-  onChoose: () => void;
-}) {
-  const intl = useIntl();
-  if (!message) return null;
-  const label = formatGameMessage(intl, message, localizedOptionResolvers);
-  return (
-    <button
-      key={option}
-      className={spaceDefault ? "btn-primary shortcut-button" : undefined}
-      aria-label={label}
-      onClick={onChoose}
-      {...(spaceDefault
-        ? {
-            title: intl.formatMessage({ id: "common.shortcut.space" }, { label }),
-            "aria-keyshortcuts": "Space",
-          }
-        : {})}
-    >
-      <GameMessageText
-        message={message}
-        resolvers={localizedOptionResolvers}
-      />
-      {spaceDefault ? (
-        <kbd className="shortcut-key" aria-label={intl.formatMessage({ id: "common.spaceKey" })} />
-      ) : null}
-    </button>
   );
 }
 
@@ -365,7 +343,7 @@ export function PendingDecisionPanel({
 
   if (pd.kind === "arsenal" && confirmSkipArsenal) {
     return (
-      <div className="decision decision-options">
+      <div className="decision decision-options decision-choice">
         <ArsenalSkipConfirmation
           onConfirm={onConfirmSkipArsenal}
           onCancel={onCancelSkipArsenal}
@@ -374,10 +352,89 @@ export function PendingDecisionPanel({
     );
   }
 
+  const textOptions: ChoiceModalOption[] = [];
+  if (
+    (pd.kind === "optional-effect" || pd.kind === "choose-target" || pd.kind === "arsenal") &&
+    !bloodAllocation
+  ) {
+    (pd.options ?? []).forEach((option, index) => {
+      if (pd.optionCards?.[index]) return;
+      if (pd.resourcePayment?.options.some((candidate) => candidate.optionId === option)) return;
+      const onChoose = () => onSend({ kind: "choose", optionId: option });
+      const spaceDefault = option === defaultSpaceOption;
+      const optionMessage = pd.optionMessages?.[index];
+      if (optionMessage) {
+        textOptions.push({
+          key: option,
+          label: <GameMessageText message={optionMessage} resolvers={localizedOptionResolvers} />,
+          text: formatGameMessage(intl, optionMessage, localizedOptionResolvers),
+          spaceDefault,
+          onChoose,
+        });
+        return;
+      }
+      const literalMessageId = Object.hasOwn(LITERAL_OPTION_MESSAGES, option)
+        ? LITERAL_OPTION_MESSAGES[option as keyof typeof LITERAL_OPTION_MESSAGES]
+        : undefined;
+      const payAmount = /^pay (\d+)$/.exec(option)?.[1];
+      const optionLabel = payAmount !== undefined
+        ? intl.formatMessage({ id: "game.decision.payAmount" }, { amount: payAmount })
+        : literalMessageId
+          ? intl.formatMessage({ id: literalMessageId })
+          : option;
+      const shortcutLabel = literalMessageId || payAmount !== undefined
+        ? optionLabel
+        : option.length > 0
+          ? `${option[0]!.toUpperCase()}${option.slice(1)}`
+          : option;
+      textOptions.push({
+        key: option,
+        label: optionLabel,
+        text: spaceDefault ? shortcutLabel : undefined,
+        spaceDefault,
+        onChoose,
+      });
+    });
+  }
+  const chosenOptions: ChoiceModalChosen[] = (pd.chosenOptions ?? []).map((option, index) => {
+    const message = pd.chosenOptionMessages?.[index];
+    return {
+      key: `${index}:${option}`,
+      label: message
+        ? <GameMessageText message={message} resolvers={localizedOptionResolvers} />
+        : option,
+    };
+  });
+  if (shouldShowDecisionPass(pd, canPass)) {
+    textOptions.push({
+      key: "__pass",
+      label: intl.formatMessage({ id: "common.option.pass" }),
+      text: intl.formatMessage({ id: "common.option.pass" }),
+      spaceDefault: true,
+      onChoose: onRequestPass,
+    });
+  }
+  // Pure text choices use the shared choice modal; card-driven and payment
+  // decisions keep their wider layouts and list any text options beneath.
+  const choiceModal =
+    textOptions.length > 0 &&
+    !priorityGuidanceDecision &&
+    !optDecision &&
+    !bloodAllocation &&
+    !boundedCardChoice &&
+    !handPickDecision &&
+    !revealedChoice &&
+    !showChoiceGrid &&
+    !pd.resourcePayment &&
+    pd.kind !== "defend" &&
+    pd.kind !== "arsenal" &&
+    pd.kind !== "choose-name" &&
+    pd.kind !== "order-triggers";
+
   return (
     <div className={`decision decision-options${
       priorityGuidanceDecision ? " decision-priority-guidance" : ""
-    }${pd.kind === "choose-name" ? " decision-name-choice" : ""}${
+    }${choiceModal ? " decision-choice" : ""}${pd.kind === "choose-name" ? " decision-name-choice" : ""}${
       pd.kind === "order-triggers" ? " decision-trigger-order" : ""
     }`}>
       <DecisionPrompt
@@ -517,86 +574,19 @@ export function PendingDecisionPanel({
           onChoose={(name) => onSend({ kind: "choose", optionId: name })}
         />
       ) : null}
-      <div className="decision-buttons">
-        {(pd.kind === "optional-effect" || pd.kind === "choose-target" || pd.kind === "arsenal") &&
-          !bloodAllocation &&
-          (pd.options ?? []).map((option, index) => {
-            if (pd.optionCards?.[index]) return null;
-            if (pd.resourcePayment?.options.some((candidate) => candidate.optionId === option)) return null;
-            const spaceDefault = option === defaultSpaceOption;
-            const optionMessage = pd.optionMessages?.[index];
-            if (optionMessage) {
-              return (
-                <LocalizedDecisionOptionButton
-                  key={option}
-                  message={optionMessage}
-                  option={option}
-                  spaceDefault={spaceDefault}
-                  onChoose={() => onSend({ kind: "choose", optionId: option })}
-                />
-              );
-            }
-            const literalMessageId = option === "yes"
-              ? "common.option.yes"
-              : option === "no"
-                ? "common.option.no"
-                : option === "pass"
-                  ? "common.option.pass"
-                  : option === "decline"
-                    ? "common.option.decline"
-                    : option === "reroll"
-                      ? "common.option.reroll"
-                      : option === "keep"
-                        ? "common.option.keep"
-                        : undefined;
-            const payAmount = /^pay (\d+)$/.exec(option)?.[1];
-            const optionLabel = payAmount !== undefined
-              ? intl.formatMessage({ id: "game.decision.payAmount" }, { amount: payAmount })
-              : literalMessageId
-                ? intl.formatMessage({ id: literalMessageId })
-                : option;
-            const shortcutLabel = literalMessageId || payAmount !== undefined
-              ? optionLabel
-              : option.length > 0
-                ? `${option[0]!.toUpperCase()}${option.slice(1)}`
-                : option;
-            return (
-              <button
-                key={option}
-                className={spaceDefault ? "btn-primary shortcut-button" : undefined}
-                onClick={() => onSend({ kind: "choose", optionId: option })}
-                {...(spaceDefault
-                  ? {
-                      title: intl.formatMessage(
-                        { id: "common.shortcut.space" },
-                        { label: shortcutLabel },
-                      ),
-                      "aria-keyshortcuts": "Space",
-                    }
-                  : {})}
-              >
-                {optionLabel}
-                {spaceDefault ? (
-                  <kbd className="shortcut-key" aria-label={intl.formatMessage({ id: "common.spaceKey" })} />
-                ) : null}
-              </button>
-            );
-          })}
-        {shouldShowDecisionPass(pd, canPass) ? (
-          <button
-            className="shortcut-button"
-            onClick={onRequestPass}
-            title={intl.formatMessage(
-              { id: "common.shortcut.space" },
-              { label: intl.formatMessage({ id: "common.option.pass" }) },
-            )}
-            aria-keyshortcuts="Space"
-          >
-            {intl.formatMessage({ id: "common.option.pass" })}
-            <kbd className="shortcut-key" aria-label={intl.formatMessage({ id: "common.spaceKey" })} />
-          </button>
-        ) : null}
-      </div>
+      {pd.resourcePayment ? (
+        <div className="decision-buttons">
+          {textOptions.map((option) => (
+            <ChoiceButton
+              key={option.key}
+              option={option}
+              className={option.spaceDefault ? "btn-primary" : undefined}
+            />
+          ))}
+        </div>
+      ) : (
+        <ChoiceList options={textOptions} chosen={chosenOptions} />
+      )}
     </div>
   );
 }

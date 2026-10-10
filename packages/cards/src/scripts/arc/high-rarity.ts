@@ -305,6 +305,7 @@ const artOfWar: CardScript = {
               "defend from arsenal": decisionMessage("card.arc.art.option.defend"),
               banish: decisionMessage("card.arc.art.option.banish"),
             },
+            chosen: [option],
           }),
           ART_OF_WAR_MODES.filter((mode) => mode !== option),
         );

@@ -376,6 +376,10 @@ export function makeCtx(
       prompt: presentation.fallback,
       ...(presentation.promptMessage ? { promptMessage: presentation.promptMessage } : {}),
       ...(presentation.optionMessages ? { optionMessages: presentation.optionMessages } : {}),
+      ...(presentation.chosenOptions ? { chosenOptions: presentation.chosenOptions } : {}),
+      ...(presentation.chosenOptionMessages
+        ? { chosenOptionMessages: presentation.chosenOptionMessages }
+        : {}),
       options,
       sourceInstanceId: self.instanceId,
       ...(!findCardAnywhere(state, self.instanceId)

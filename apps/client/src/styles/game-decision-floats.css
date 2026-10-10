@@ -114,13 +114,15 @@
 .decision-buttons { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
 .decision-buttons > button { white-space: nowrap; }
 .decision-buttons:empty { display: none; }
-.decision-float:has(.decision-ability) {
+.decision-float:has(.decision-choice) {
   /* The choice panel takes precedence over the mobile hand toggle while open. */
   z-index: 25;
 }
-.decision-ability {
+/* Every text choice shares this modal: prompt, a vertical option list, Cancel. */
+.decision-choice {
   width: min(500px, calc(100vw - var(--rail-w) - 32px));
   max-width: calc(100vw - var(--rail-w) - 32px);
+  box-sizing: border-box;
   align-items: stretch;
   gap: 14px;
   padding: 18px;
@@ -129,18 +131,26 @@
   background: #1e1812f5;
   box-shadow: 0 14px 38px #000a;
 }
-.decision-ability .decision-prompt {
+.decision-choice .decision-prompt {
   color: var(--text-primary);
   font: 600 16px/1.4 var(--font-lobby-ui);
   text-align: left;
 }
-.decision-ability-list {
+.decision-choice .decision-context { text-align: left; }
+.decision-choice .decision-cards { max-width: 100%; }
+.decision-choice-list {
   display: flex;
   flex-direction: column;
   gap: 8px;
+  width: min(100%, 460px);
   min-width: 0;
 }
-.decision-ability-option {
+.decision-choice .decision-choice-list { width: 100%; }
+.decision-choice-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
   width: 100%;
   min-height: 52px;
   padding: 11px 14px;
@@ -155,18 +165,45 @@
   text-transform: none;
   white-space: normal;
 }
-.decision-ability-option:hover {
+.decision-choice-option:hover {
   border-color: #b8933f;
   background: #382c1e;
 }
-.decision-ability-option:focus-visible {
+.decision-choice-option.shortcut-button {
+  display: flex;
+  justify-content: space-between;
+}
+.decision-choice-option.shortcut-button,
+.decision-choice-selected {
+  border-color: #b8933f;
+}
+.decision-choice-selected { background: #382c1e; }
+.decision-choice-option:focus-visible {
   outline: 2px solid var(--focus-ring);
   outline-offset: 2px;
 }
-.decision-ability-option .ico {
+.decision-choice-label { flex: 1 1 auto; min-width: 0; }
+.decision-choice-chosen,
+.decision-choice-chosen:hover {
+  justify-content: flex-start;
+  border-style: dashed;
+  border-color: #5b4b38;
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: default;
+}
+.decision-choice-check { flex: 0 0 auto; color: #b8933f; font-weight: 700; }
+.decision-choice-tag {
+  flex: 0 0 auto;
+  color: var(--text-secondary);
+  font-size: 12px;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+.decision-choice-option .ico {
   vertical-align: -.15em;
 }
-.decision-ability-cancel {
+.decision-choice-cancel {
   align-self: flex-end;
   min-height: 44px;
   padding: 6px 8px;
@@ -179,12 +216,12 @@
   letter-spacing: normal;
   text-transform: none;
 }
-.decision-ability-cancel:hover {
+.decision-choice-cancel:hover {
   border: 0;
   background: #ffffff12;
   color: var(--text-primary);
 }
-.decision-ability-cancel:focus-visible {
+.decision-choice-cancel:focus-visible {
   outline: 2px solid var(--focus-ring);
   outline-offset: 2px;
 }

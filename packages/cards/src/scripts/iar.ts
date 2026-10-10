@@ -372,34 +372,43 @@ function violentGusto(): CardScript {
   };
 }
 
+const FORSAKEN_STRIKE_MODES = [
+  { option: "Create a Gate to i'Arathael", counter: "forsakenGateModes", message: "card.iar.forsaken.option.gate" },
+  { option: "Give Forsaken Strike +2 power", counter: "forsakenPowerModes", message: "card.iar.forsaken.option.power" },
+  { option: "Give Forsaken Strike go again", counter: "forsakenGoAgainModes", message: "card.iar.forsaken.option.goagain" },
+] as const;
+
 function requestForsakenStrikeMode(ctx: ScriptCtx): void {
-  const remaining = ctx.getCounter("forsakenModesRemaining");
-  if (remaining <= 0) {
+  // Each paid zombie chooses a mode, but a mode can be chosen only once
+  // (CR 1.7.5b), so zombies beyond the third add nothing.
+  const total = Math.min(ctx.getCounter("forsakenModesTotal"), FORSAKEN_STRIKE_MODES.length);
+  const chosen = FORSAKEN_STRIKE_MODES.filter((mode) => ctx.getCounter(mode.counter) > 0);
+  if (chosen.length >= total) {
     applyForsakenStrikeModes(ctx);
     return;
   }
-  const total = ctx.getCounter("forsakenModesTotal");
-  const choiceNumber = total - remaining + 1;
+  const choiceNumber = chosen.length + 1;
   ctx.requestChoice(
     "iar-forsaken-strike-mode",
     decisionPrompt(`Forsaken Strike: choose effect ${choiceNumber} of ${total}`, "card.iar.forsaken.mode.choose", {
       values: { index: choiceNumber, total },
-      optionMessages: {
-        "Create a Gate to i'Arathael": decisionMessage("card.iar.forsaken.option.gate"),
-        "Give Forsaken Strike +2 power": decisionMessage("card.iar.forsaken.option.power"),
-        "Give Forsaken Strike go again": decisionMessage("card.iar.forsaken.option.goagain"),
-      },
+      optionMessages: Object.fromEntries(
+        FORSAKEN_STRIKE_MODES.map((mode) => [mode.option, decisionMessage(mode.message)]),
+      ),
+      chosen: chosen.map((mode) => mode.option),
     }),
-    ["Create a Gate to i'Arathael", "Give Forsaken Strike +2 power", "Give Forsaken Strike go again"],
+    FORSAKEN_STRIKE_MODES.filter((mode) => !chosen.includes(mode)).map((mode) => mode.option),
   );
 }
 
 function applyForsakenStrikeModes(ctx: ScriptCtx): void {
-  for (let i = 0; i < ctx.getCounter("forsakenGateModes"); i++) ctx.createToken(GATE);
-  ctx.addCardTempPower(ctx.self.instanceId, 2 * ctx.getCounter("forsakenPowerModes"));
-  if (ctx.getCounter("forsakenGoAgainModes") > 0) {
-    ctx.grantCardKeyword(ctx.self.instanceId, "go again");
-  }
+  const [gate, power, goAgain] = FORSAKEN_STRIKE_MODES.map((mode) => ctx.getCounter(mode.counter) > 0);
+  if (gate) ctx.createToken(GATE);
+  if (power) ctx.addCardTempPower(ctx.self.instanceId, 2);
+  if (goAgain) ctx.grantCardKeyword(ctx.self.instanceId, "go again");
+  // Counters survive zone changes; clear them so a later play starts fresh.
+  ctx.setCounter("forsakenModesTotal", 0);
+  for (const mode of FORSAKEN_STRIKE_MODES) ctx.setCounter(mode.counter, 0);
 }
 
 const forsakenStrike: CardScript = {
@@ -413,21 +422,14 @@ const forsakenStrike: CardScript = {
   },
   onAlternativeCostPaid(ctx, paidCards) {
     ctx.setCounter("forsakenModesTotal", paidCards.length);
-    ctx.setCounter("forsakenModesRemaining", paidCards.length);
   },
   additionalCost(ctx) {
     requestForsakenStrikeMode(ctx);
   },
   onChoose(ctx, hook, option) {
     if (hook !== "iar-forsaken-strike-mode") return;
-    if (option === "Create a Gate to i'Arathael") {
-      ctx.setCounter("forsakenGateModes", ctx.getCounter("forsakenGateModes") + 1);
-    } else if (option === "Give Forsaken Strike +2 power") {
-      ctx.setCounter("forsakenPowerModes", ctx.getCounter("forsakenPowerModes") + 1);
-    } else if (option === "Give Forsaken Strike go again") {
-      ctx.setCounter("forsakenGoAgainModes", ctx.getCounter("forsakenGoAgainModes") + 1);
-    }
-    ctx.setCounter("forsakenModesRemaining", ctx.getCounter("forsakenModesRemaining") - 1);
+    const mode = FORSAKEN_STRIKE_MODES.find((candidate) => candidate.option === option);
+    if (mode) ctx.setCounter(mode.counter, 1);
     requestForsakenStrikeMode(ctx);
   },
 };

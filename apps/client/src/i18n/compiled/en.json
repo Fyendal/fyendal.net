@@ -21148,6 +21148,12 @@
       "value": "card"
     }
   ],
+  "game.decision.chosen": [
+    {
+      "type": 0,
+      "value": "Chosen"
+    }
+  ],
   "game.decision.closeChain.action": [
     {
       "type": 0,

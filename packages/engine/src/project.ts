@@ -1350,6 +1350,10 @@ function projectState(
               : {}),
             ...((revealAll || pd.player === seat) && pd.optionLabels ? { optionLabels: pd.optionLabels } : {}),
             ...(privateDecision && pd.optionMessages ? { optionMessages: pd.optionMessages } : {}),
+            ...(privateDecision && pd.chosenOptions ? { chosenOptions: pd.chosenOptions } : {}),
+            ...(privateDecision && pd.chosenOptionMessages
+              ? { chosenOptionMessages: pd.chosenOptionMessages }
+              : {}),
             ...((revealAll || pd.player === seat) && pd.optionCounts ? { optionCounts: pd.optionCounts } : {}),
             ...((revealAll || pd.player === seat) && pd.cardOptions
               ? {

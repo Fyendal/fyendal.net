@@ -357,6 +357,8 @@ export interface PersistedPendingDecisionV1 {
   defaultOption?: string;
   optionLabels?: string[];
   optionMessages?: (GameMessage | null)[];
+  chosenOptions?: string[];
+  chosenOptionMessages?: (GameMessage | null)[];
   optionCounts?: (number | null)[];
   sourceInstanceId?: number;
   scriptSourceSnapshot?: { seat: number; card: PersistedCardInstanceV1 };

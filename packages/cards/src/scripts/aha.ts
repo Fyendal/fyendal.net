@@ -249,6 +249,11 @@ export const aha: Record<string, CardScript> = {
             "additional attack": decisionMessage("card.aha.option.additionalattack"),
             "activation discount": decisionMessage("card.aha.option.discount"),
           },
+          chosen: [
+            ...(mask & 1 ? ["go again"] : []),
+            ...(mask & 2 ? ["additional attack"] : []),
+            ...(mask & 4 ? ["activation discount"] : []),
+          ],
         }),
         modes,
       );

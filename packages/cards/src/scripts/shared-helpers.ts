@@ -18,6 +18,9 @@ export interface DecisionPromptOptions {
    * entries intentionally fall back to the raw option without affecting the
    * ordering of localized entries. */
   optionMessages?: Readonly<Record<string, GameMessage>>;
+  /** Modes already selected earlier in a multi-mode choice, shown beside the
+   * remaining options. Labels come from `optionMessages`. */
+  chosen?: readonly string[];
 }
 
 const commonDecisionOptionIds = {
@@ -149,6 +152,7 @@ export function decisionPrompt(
     fallback,
     message: decisionMessage(id, options.values),
     ...(options.optionMessages ? { optionMessagesByValue: options.optionMessages } : {}),
+    ...(options.chosen?.length ? { chosenOptions: options.chosen } : {}),
   };
 }
 

@@ -2337,6 +2337,7 @@
   "game.decision.payAmount": "Pay {amount}",
   "game.decision.useNamed": "Use {name}",
   "game.decision.pitchProgress": "{selected} of {required} pitch resources selected",
+  "game.decision.chosen": "Chosen",
   "game.decision.chooseUse": "Choose how to use {card}",
   "game.decision.playAs.prompt": "Play {card} as…",
   "game.decision.playMethod.action": "Play as action (spends 1 AP)",

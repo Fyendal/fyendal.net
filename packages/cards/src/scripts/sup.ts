@@ -145,6 +145,8 @@ function battlefieldBeaconModePrompt(ctx: ScriptCtx, remaining: number) {
       toughness: decisionMessage("card.sup.option.toughness"),
       vigor: decisionMessage("card.sup.option.vigor"),
     },
+    chosen: BATTLEFIELD_BEACON_MODES.flatMap((mode) =>
+      Array<string>(ctx.getCounter(`beacon-mode:${mode}`)).fill(mode)),
   });
 }
 

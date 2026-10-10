@@ -336,6 +336,40 @@ describe("priority guidance help", () => {
     expect(model.decision.options).toEqual(["yes", "no"]);
   });
 
+  it("presents text-only effect choices in the shared choice modal", () => {
+    const model = pendingModel("optional-effect");
+    model.decision = {
+      player: 0,
+      kind: "optional-effect",
+      prompt: "Forsaken Strike: choose effect 1 of 2",
+      options: ["gate", "power", "go again"],
+    };
+    const html = renderLocalized(createElement(PendingDecisionPanel, { model, viewerSeat: 0 }));
+
+    expect(html).toContain('class="decision decision-options decision-choice"');
+    expect(html.match(/class="decision-choice-option"/g)).toHaveLength(3);
+    expect(html).toContain(">Pass</span>");
+    expect(html).not.toContain('class="decision-buttons"');
+  });
+
+  it("lists modes already chosen in a multi-mode choice as inert rows", () => {
+    const model = pendingModel("optional-effect");
+    model.canPass = false;
+    model.decision = {
+      player: 0,
+      kind: "choose-target",
+      prompt: "Forsaken Strike: choose effect 2 of 3",
+      options: ["Give Forsaken Strike +2 power", "Give Forsaken Strike go again"],
+      chosenOptions: ["Create a Gate to i'Arathael"],
+    };
+    const html = renderLocalized(createElement(PendingDecisionPanel, { model, viewerSeat: 0 }));
+
+    expect(html).toContain('class="decision-choice-option decision-choice-chosen"');
+    expect(html).toContain("Create a Gate to i&#x27;Arathael");
+    expect(html).toContain(">Chosen<");
+    expect(html.match(/<button[^>]*class="decision-choice-option"/g)).toHaveLength(2);
+  });
+
   it("localizes the end-phase arsenal prompt while preserving the rules term", () => {
     const model = pendingModel("optional-effect");
     model.decision = {

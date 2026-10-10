@@ -8,6 +8,7 @@ import {
   orderedBoostOptions,
 } from "./ActionConfirmations.js";
 import { ActionTargetCards } from "./CardChoices.js";
+import { ChoiceCancel, ChoiceList } from "./ChoiceModal.js";
 import { CardRef, cardAffiliation, chooseWithoutFocus, handCardPlayLabel, PitchPaymentProgress } from "./DecisionShared.js";
 import type { ActionAnnouncementModel } from "./DecisionModels.js";
 
@@ -78,6 +79,13 @@ export function ActionAnnouncementPanel({
     : "";
   const showPayment = !stagedAdditionalCost || additionalCostConfirmed;
   const attackLabel = intl.formatMessage({ id: "game.chain.stat.attack" });
+  const choiceStep =
+    sel.kind === "choose-hand-action" ||
+    (sel.kind === "activate" && step === "ability") ||
+    (step === "method" && playMethodChoiceRequired) ||
+    step === "boost" ||
+    step === "close-chain" ||
+    step === "confirm";
 
   return (
     <div className={`decision decision-options${
@@ -86,7 +94,7 @@ export function ActionAnnouncementPanel({
       step === "boost" || step === "target" || step === "close-chain" || step === "confirm"
         ? " decision-post-payment" : ""
     }${
-      sel.kind === "activate" && step === "ability" ? " decision-ability" : ""
+      choiceStep ? " decision-choice" : ""
     }`}>
       {sel.kind === "choose-hand-action" ? (
         <>
@@ -96,14 +104,21 @@ export function ActionAnnouncementPanel({
               { card: selCardId ? <CardRef id={selCardId} /> : intl.formatMessage({ id: "game.card" }) },
             )}
           </span>
-          <div className="decision-buttons">
-            <button onClick={() => onChooseHandPlay(sel.instanceId)}>
-              {handCardPlayLabel(intl, selCardId)}
-            </button>
-            <button onClick={() => onChooseHandAbility(sel.instanceId)}>
-              {intl.formatMessage({ id: "game.decision.activateInstant" })}
-            </button>
-          </div>
+          <ChoiceList
+            options={[
+              {
+                key: "play",
+                label: handCardPlayLabel(intl, selCardId),
+                onChoose: () => onChooseHandPlay(sel.instanceId),
+              },
+              {
+                key: "activate",
+                label: intl.formatMessage({ id: "game.decision.activateInstant" }),
+                onChoose: () => onChooseHandAbility(sel.instanceId),
+              },
+            ]}
+          />
+          <ChoiceCancel onCancel={onCancel} />
         </>
       ) : null}
       {sel.kind !== "choose-hand-action" && step === "payment" ? (
@@ -296,32 +311,25 @@ export function ActionAnnouncementPanel({
               { card: selCardId ? <CardRef id={selCardId} /> : intl.formatMessage({ id: "game.card" }) },
             )}
           </span>
-          <div className="decision-ability-list">
-            {abilityChoices.map((choice) => (
-              <button
-                key={choice.index}
-                className="decision-ability-option"
-                aria-label={choice.label.replaceAll("{p}", ` ${attackLabel}`).trim()}
-                onClick={(event) =>
-                  chooseWithoutFocus(event.currentTarget, () => onSelectAbility(choice.index))}
-              >
-                {choice.label.split(/(\{p\})/g).map((part, index) =>
-                  part === "{p}" ? (
-                    <img
-                      key={index}
-                      className="ico"
-                      src="/icons/attack.png"
-                      alt=""
-                      aria-hidden="true"
-                    />
-                  ) : part
-                )}
-              </button>
-            ))}
-          </div>
-          <button className="decision-ability-cancel" onClick={onCancel}>
-            {intl.formatMessage({ id: "common.cancel" })}
-          </button>
+          <ChoiceList
+            options={abilityChoices.map((choice) => ({
+              key: String(choice.index),
+              text: choice.label.replaceAll("{p}", ` ${attackLabel}`).trim(),
+              label: choice.label.split(/(\{p\})/g).map((part, index) =>
+                part === "{p}" ? (
+                  <img
+                    key={index}
+                    className="ico"
+                    src="/icons/attack.png"
+                    alt=""
+                    aria-hidden="true"
+                  />
+                ) : part
+              ),
+              onChoose: () => onSelectAbility(choice.index),
+            }))}
+          />
+          <ChoiceCancel onCancel={onCancel} />
         </>
       ) : null}
       {sel.kind !== "choose-hand-action" && step === "method" && playMethodChoiceRequired ? (
@@ -332,23 +340,23 @@ export function ActionAnnouncementPanel({
               { card: selCardId ? <CardRef id={selCardId} /> : intl.formatMessage({ id: "game.card" }) },
             )}
           </span>
-          <div className="decision-buttons">
-            <button
-              className={playMethod === "instant" ? "btn-primary" : ""}
-              onClick={(event) =>
-                chooseWithoutFocus(event.currentTarget, () => onSelectPlayMethod("instant"))}
-            >
-              {intl.formatMessage({ id: "game.decision.playMethod.instant" })}
-            </button>
-            <button
-              className={playMethod === "action" ? "btn-primary" : ""}
-              onClick={(event) =>
-                chooseWithoutFocus(event.currentTarget, () => onSelectPlayMethod("action"))}
-            >
-              {intl.formatMessage({ id: "game.decision.playMethod.action" })}
-            </button>
-            <button onClick={onCancel}>{intl.formatMessage({ id: "common.cancel" })}</button>
-          </div>
+          <ChoiceList
+            options={[
+              {
+                key: "instant",
+                label: intl.formatMessage({ id: "game.decision.playMethod.instant" }),
+                selected: playMethod === "instant",
+                onChoose: () => onSelectPlayMethod("instant"),
+              },
+              {
+                key: "action",
+                label: intl.formatMessage({ id: "game.decision.playMethod.action" }),
+                selected: playMethod === "action",
+                onChoose: () => onSelectPlayMethod("action"),
+              },
+            ]}
+          />
+          <ChoiceCancel onCancel={onCancel} />
         </>
       ) : null}
       {step === "boost" ? (
@@ -366,36 +374,16 @@ export function ActionAnnouncementPanel({
           <span className="decision-context">
             {intl.formatMessage({ id: "game.decision.boost.context" })}
           </span>
-          <div className="decision-buttons">
-            {presentedBoostOptions.map((count) => {
-              const label = boostOptionLabel(intl, count, offersMultipleBoosts);
-              const spaceDefault = boostCount === null && presentedBoostCount === count;
-              return (
-                <button
-                  key={count}
-                  className={`${presentedBoostCount === count ? "btn-primary" : ""}${
-                    spaceDefault ? " shortcut-button" : ""
-                  }`}
-                  onClick={(event) =>
-                    chooseWithoutFocus(event.currentTarget, () => onSelectBoost(count))}
-                  {...(spaceDefault
-                    ? {
-                        title: intl.formatMessage({ id: "common.shortcut.space" }, { label }),
-                        "aria-keyshortcuts": "Space",
-                      }
-                    : {})}
-                >
-                  {label}
-                  {spaceDefault ? (
-                    <kbd className="shortcut-key" aria-label={intl.formatMessage({ id: "common.spaceKey" })} />
-                  ) : null}
-                </button>
-              );
-            })}
-          </div>
-          <div className="decision-buttons">
-            <button onClick={onCancel}>{intl.formatMessage({ id: "common.cancel" })}</button>
-          </div>
+          <ChoiceList
+            options={presentedBoostOptions.map((count) => ({
+              key: String(count),
+              label: boostOptionLabel(intl, count, offersMultipleBoosts),
+              selected: presentedBoostCount === count,
+              spaceDefault: boostCount === null && presentedBoostCount === count,
+              onChoose: () => onSelectBoost(count),
+            }))}
+          />
+          <ChoiceCancel onCancel={onCancel} />
         </>
       ) : null}
       {step === "close-chain" ? (

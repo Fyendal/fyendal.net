@@ -20374,6 +20374,12 @@
       "value": "card"
     }
   ],
+  "game.decision.chosen": [
+    {
+      "type": 0,
+      "value": "已选择"
+    }
+  ],
   "game.decision.closeChain.action": [
     {
       "type": 0,

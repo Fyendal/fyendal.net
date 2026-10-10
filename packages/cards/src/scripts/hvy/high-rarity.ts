@@ -108,6 +108,7 @@ function requestAnteMode(ctx: ScriptCtx): void {
           vigor: decisionMessage("card.hvy.wager.option.vigor"),
           power: decisionMessage("card.hvy.wager.option.power"),
         },
+        chosen: ANTE_MODES.filter((mode) => ctx.getCounter(`ante-mode:${mode}`) > 0),
       },
     ),
     ANTE_MODES.filter((mode) => ctx.getCounter(`ante-mode:${mode}`) <= 0),

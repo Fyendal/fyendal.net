@@ -1,4 +1,5 @@
 import { useIntl, type IntlShape } from "react-intl";
+import { ChoiceCancel, ChoiceList } from "./ChoiceModal.js";
 import { CardRef } from "./DecisionShared.js";
 
 export function boostOptionLabel(
@@ -44,21 +45,15 @@ export function ChainCloseConfirmation({
           { card: cardId ? <CardRef id={cardId} /> : intl.formatMessage({ id: "game.card.nonAttack" }) },
         )}
       </span>
-      <div className="decision-buttons">
-        <button
-          className="btn-primary shortcut-button"
-          onClick={onConfirm}
-          title={intl.formatMessage(
-            { id: "common.shortcut.space" },
-            { label: intl.formatMessage({ id: "game.decision.closeChain.action" }) },
-          )}
-          aria-keyshortcuts="Space"
-        >
-          {intl.formatMessage({ id: "game.decision.closeChain.action" })}
-          <kbd className="shortcut-key" aria-label={intl.formatMessage({ id: "common.spaceKey" })} />
-        </button>
-        <button onClick={onCancel}>{intl.formatMessage({ id: "common.cancel" })}</button>
-      </div>
+      <ChoiceList
+        options={[{
+          key: "close-chain",
+          label: intl.formatMessage({ id: "game.decision.closeChain.action" }),
+          spaceDefault: true,
+          onChoose: onConfirm,
+        }]}
+      />
+      <ChoiceCancel onCancel={onCancel} />
     </>
   );
 }
@@ -89,18 +84,10 @@ export function ActionConfirmation({
           },
         )}
       </span>
-      <div className="decision-buttons">
-        <button
-          className="btn-primary shortcut-button"
-          onClick={onConfirm}
-          title={intl.formatMessage({ id: "common.shortcut.space" }, { label: verb })}
-          aria-keyshortcuts="Space"
-        >
-          {verb}
-          <kbd className="shortcut-key" aria-label={intl.formatMessage({ id: "common.spaceKey" })} />
-        </button>
-        <button onClick={onCancel}>{intl.formatMessage({ id: "common.cancel" })}</button>
-      </div>
+      <ChoiceList
+        options={[{ key: "confirm", label: verb, spaceDefault: true, onChoose: onConfirm }]}
+      />
+      <ChoiceCancel onCancel={onCancel} />
     </>
   );
 }
@@ -119,12 +106,14 @@ export function ArsenalSkipConfirmation({
       <span className="decision-context">
         {intl.formatMessage({ id: "game.decision.arsenal.context" })}
       </span>
-      <div className="decision-buttons">
-        <button className="btn-primary" onClick={onConfirm}>
-          {intl.formatMessage({ id: "game.decision.arsenal.action" })}
-        </button>
-        <button onClick={onCancel}>{intl.formatMessage({ id: "common.cancel" })}</button>
-      </div>
+      <ChoiceList
+        options={[{
+          key: "skip-arsenal",
+          label: intl.formatMessage({ id: "game.decision.arsenal.action" }),
+          onChoose: onConfirm,
+        }]}
+      />
+      <ChoiceCancel onCancel={onCancel} />
     </>
   );
 }

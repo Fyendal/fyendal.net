@@ -37,6 +37,10 @@ export interface ScriptDecisionPrompt {
    * The engine derives the projected parallel array after the final option
    * order is known, so dynamic and partially localized choices stay aligned. */
   optionMessagesByValue?: Readonly<Record<string, GameMessage>>;
+  /** Modes already selected earlier in the same multi-mode choice, shown to
+   * the player beside the remaining options. Labels come from
+   * `optionMessagesByValue`. */
+  chosenOptions?: readonly string[];
 }
 
 export type ScriptPrompt = string | ScriptDecisionPrompt;

@@ -340,10 +340,11 @@ describe("Boost choices", () => {
       />,
     );
 
-    expect(html.indexOf(">Boost</button>")).toBeLessThan(
-      html.indexOf(">Don&#x27;t Boost</button>"),
+    expect(html).toContain('class="decision decision-options decision-post-payment decision-choice"');
+    expect(html.indexOf(">Boost</span>")).toBeLessThan(
+      html.indexOf(">Don&#x27;t Boost</span>"),
     );
-    expect(html).toContain('class="btn-primary shortcut-button"');
+    expect(html).toContain('class="decision-choice-option decision-choice-selected shortcut-button"');
     expect(html).toContain('title="Boost (Space)"');
     expect(html).toContain('aria-keyshortcuts="Space"');
   });
