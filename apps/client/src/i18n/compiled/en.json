@@ -16719,6 +16719,12 @@
       "value": "Order your triggered abilities"
     }
   ],
+  "engine.decision.unique.keep": [
+    {
+      "type": 0,
+      "value": "Unique: choose which card to keep"
+    }
+  ],
   "engine.decision.wager.next": [
     {
       "type": 0,
@@ -17058,6 +17064,16 @@
     {
       "type": 0,
       "value": " is charged"
+    }
+  ],
+  "engine.log.card.cleared": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " is cleared"
     }
   ],
   "engine.log.card.control.gained": [
@@ -20132,6 +20148,12 @@
     {
       "type": 0,
       "value": "Watery Grave resolves without effect because its source left the graveyard"
+    }
+  ],
+  "engine.option.unique.clear": [
+    {
+      "type": 0,
+      "value": "Clear the Unique card"
     }
   ],
   "engine.term.attack.defended": [

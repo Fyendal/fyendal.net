@@ -790,7 +790,7 @@ export function makeCtx(
       for (const chainLink of state.chain) {
         const card = removeFromArray(chainLink.defendingCards, instanceId);
         if (!card) continue;
-        runtime.commands.moveToGraveyard(state, card, "chain", seat);
+        runtime.commands.moveToGraveyard(state, card, "chain", seat, undefined, true);
         logPublic(state, cardDestroyedLogMessage(state, card.cardId));
         runtime.events.runHook(state, card.owner, card, "onDestroyed", chainLink);
         runtime.events.fireFriendlyDestroyed(state, card.owner, card, seat);

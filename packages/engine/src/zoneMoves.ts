@@ -73,6 +73,7 @@ function enterGraveyard(
   from: string,
   causedBySeat?: number,
   effectSource?: TriggerEventContext["effectSource"],
+  defending = false,
 ): void {
   const owner = state.players[card.owner] as PlayerState;
   if (dataOf(state, card.cardId).cardType === "token") return;
@@ -107,8 +108,13 @@ function enterGraveyard(
       { card: logCardValue(card.cardId) },
     ));
   }
+  // Watery Grave is inactive on a non-permanent defending card, so it does
+  // not trigger when that card leaves the combat chain (High Seas release
+  // notes) unless the card says it functions while defending. Attacking
+  // cards and permanents still trigger it.
   const wateryGrave =
-    (from === "arena" || from === "chain") &&
+    (from === "arena" || (from === "chain" &&
+      (!defending || scriptOf(state, card.cardId, card)?.wateryGraveWhileDefending === true))) &&
     !card.faceDown &&
     !cardAbilitiesSuppressed(state, card) &&
     (dataOf(state, card.cardId).keywords ?? []).some(
@@ -178,10 +184,11 @@ function enterGraveyard(
   }
 }
 
-/** Move a card to its owner's graveyard. */
+/** Move a card to its owner's graveyard. `defending` marks a non-permanent
+ * defending card leaving the combat chain. */
 export function moveToGraveyard(state: GameStateInternal,
   runtime: EngineRuntime, card: CardInstance, from = "chain", causedBySeat?: number,
-  effectSource?: TriggerEventContext["effectSource"]): void {
+  effectSource?: TriggerEventContext["effectSource"], defending = false): void {
   const script = scriptOf(state, card.cardId, card);
   const owner = state.players[card.owner] as PlayerState;
   const source = transitionZoneFromEngineZone(
@@ -235,7 +242,7 @@ export function moveToGraveyard(state: GameStateInternal,
     ceases ? null : transitionZone("graveyard", owner.seat),
     { from: sourcePrivate },
   );
-  enterGraveyard(state, runtime, card, from, causedBySeat, effectSource);
+  enterGraveyard(state, runtime, card, from, causedBySeat, effectSource, defending);
 }
 
 /** Destroy a permanent (equipment/aura/weapon); moves it to graveyard and fires onDestroyed. */
@@ -295,28 +302,13 @@ export function bindPermanent(
   return true;
 }
 
-export function destroyPermanent(state: GameStateInternal,
-  runtime: EngineRuntime, seat: number, card: CardInstance): boolean {
-  const controllerSeat = findPermanent(state, card.instanceId)?.seat ?? seat;
-  if (seat !== controllerSeat) {
-    const protectedBy = hookSources(state, controllerSeat, {
-      board: true,
-      equipment: true,
-      weapons: true,
-    }).find((source) => scriptOf(state, source.cardId, source)?.preventsOpponentDestroyingFriendly?.(
-      runtime.makeCtx(state, controllerSeat, source, currentLink(state)),
-      card,
-    ) === true);
-    if (protectedBy) {
-      logPublic(state, gameLogMessage(
-        `${nameOf(state, card.cardId)} can't be destroyed by the opposing effect`,
-        "engine.log.card.destroy.prevented.opposing.effect",
-        { card: logCardValue(card.cardId) },
-      ));
-      return false;
-    }
-  }
-  const p = state.players[controllerSeat] as PlayerState;
+/** Remove a live permanent from its arena zone and sever chain links that
+ * still represent it. Callers own the destination move and its events. */
+function removePermanentFromArena(
+  state: GameStateInternal,
+  p: PlayerState,
+  card: CardInstance,
+): "equipment" | "weapon" | "board" {
   const sourceKind = Object.values(p.equipment).some((candidate) => candidate?.instanceId === card.instanceId)
     ? "equipment" as const
     : p.weapons.some((candidate) => candidate.instanceId === card.instanceId)
@@ -354,6 +346,31 @@ export function destroyPermanent(state: GameStateInternal,
       link.flags[`equipmentGone:${card.instanceId}`] = true;
     }
   }
+  return sourceKind;
+}
+
+export function destroyPermanent(state: GameStateInternal,
+  runtime: EngineRuntime, seat: number, card: CardInstance): boolean {
+  const controllerSeat = findPermanent(state, card.instanceId)?.seat ?? seat;
+  if (seat !== controllerSeat) {
+    const protectedBy = hookSources(state, controllerSeat, {
+      board: true,
+      equipment: true,
+      weapons: true,
+    }).find((source) => scriptOf(state, source.cardId, source)?.preventsOpponentDestroyingFriendly?.(
+      runtime.makeCtx(state, controllerSeat, source, currentLink(state)),
+      card,
+    ) === true);
+    if (protectedBy) {
+      logPublic(state, gameLogMessage(
+        `${nameOf(state, card.cardId)} can't be destroyed by the opposing effect`,
+        "engine.log.card.destroy.prevented.opposing.effect",
+        { card: logCardValue(card.cardId) },
+      ));
+      return false;
+    }
+  }
+  const sourceKind = removePermanentFromArena(state, state.players[controllerSeat] as PlayerState, card);
   const incarnate =
     !cardAbilitiesSuppressed(state, card) &&
     (dataOf(state, card.cardId).keywords ?? []).some(
@@ -385,6 +402,25 @@ export function destroyPermanent(state: GameStateInternal,
   );
   if (attacking) runtime.events.fireFriendlyAttackLost(state, controllerSeat, card, "ally-died");
   return true;
+}
+
+/** Clear a permanent as a game-state action (CR 3.0.12): it moves to its
+ * owner's graveyard, or a token ceases to exist, without being destroyed. */
+export function clearPermanent(
+  state: GameStateInternal,
+  runtime: EngineRuntime,
+  seat: number,
+  card: CardInstance,
+): void {
+  removePermanentFromArena(state, state.players[seat] as PlayerState, card);
+  const token = cardHasType(state, card, "token");
+  moveToGraveyard(state, runtime, card, "arena", seat);
+  fireLeaveArena(state, runtime, seat, card, token ? "cease-to-exist" : "graveyard");
+  logPublic(state, gameLogMessage(
+    `${nameOf(state, card.cardId)} is cleared`,
+    "engine.log.card.cleared",
+    { card: logCardValue(card.cardId) },
+  ));
 }
 
 /** Destroy a card controlled by `seat` from the arena or combat chain. Chain
@@ -422,7 +458,7 @@ export function destroyControlledCard(
     );
     if (defending) {
       removeFromArray(link.defendingCards, defending.instanceId);
-      moveToGraveyard(state, runtime, defending, "chain", seat);
+      moveToGraveyard(state, runtime, defending, "chain", seat, undefined, true);
       logPublic(state, cardDestroyedLogMessage(state, defending.cardId));
       runtime.events.runHook(state, seat, defending, "onDestroyed", link);
       runtime.events.fireFriendlyDestroyed(state, seat, defending, seat);

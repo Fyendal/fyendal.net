@@ -70,6 +70,7 @@ import {
   resumePendingTokenCreations,
 } from "./tokens.js";
 import { answerDeckBottomOrder, enterBanish } from "./zoneMoves.js";
+import { answerUniqueChoice, UNIQUE_CHOICE_HOOK } from "./unique.js";
 import { lingeringModifierSources } from "./sourceQueries.js";
 import { continueFollowUpDecisions } from "./decisionQueue.js";
 
@@ -1158,6 +1159,9 @@ export function answerChoice(
     if (!attackWithPermanent(state, runtime, seat, srcId, targetAllyId, true)) {
       return "effect-driven attack is no longer legal";
     }
+  } else if (hook === UNIQUE_CHOICE_HOOK) {
+    const err = answerUniqueChoice(state, runtime, seat, optionId);
+    if (err) return err;
   } else if (hook === "engine-look") {
     // look-at acknowledgment: the look already happened (and was logged);
     // "pass" simply dismisses the floated cards

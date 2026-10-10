@@ -1182,7 +1182,7 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
       } else if (hook === "pen-reach-discard") resolveDiscardChoice(ctx, option, ctx.seat);
     },
   },
-  "beneath the surface|2": {},
+  "beneath the surface|2": { wateryGraveWhileDefending: true },
   ...pitches("man overboard", discardAllyAttack),
   ...pitches("tentacular toll", (pitch) => ({
     onPlay(ctx) {

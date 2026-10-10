@@ -2823,5 +2823,8 @@
   "achievements.beatstarvo.description": "Defeat Starvo Bot in a practice game.",
   "connection.update.title": "Update available",
   "connection.update.description": "Refresh this page to reconnect with the latest version.",
-  "connection.update.refresh": "Refresh page"
+  "connection.update.refresh": "Refresh page",
+  "engine.decision.unique.keep": "Unique: choose which card to keep",
+  "engine.option.unique.clear": "Clear the Unique card",
+  "engine.log.card.cleared": "{card} is cleared"
 }

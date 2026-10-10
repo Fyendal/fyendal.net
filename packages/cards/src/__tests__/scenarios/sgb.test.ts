@@ -1030,6 +1030,33 @@ describe("SGB — allies being attacked (CR 8.2.8)", () => {
     });
   });
 
+  it("Watery Grave does not trigger for a non-permanent defending card leaving the chain", () => {
+    const g = scenario({
+      active: 1,
+      seats: [
+        {
+          ...GRAVY,
+          hand: ["chum, friendly first mate|2"],
+          equipment: { head: null, chest: null, arms: null, legs: "base of the mountain|0" },
+        },
+        { hero: "dorinthea", hand: ["head jab|1"] },
+      ],
+    });
+    g.play("head jab|1").blockWith("base of the mountain|0").settle();
+    const chum = g.state.players[0]!.hand.find(
+      (card) => card.cardId === printingId("chum, friendly first mate|2"),
+    )!;
+    g.doRaw({ kind: "choose-many", optionIds: [String(chum.instanceId)] })
+      .expectLog("Chum, Friendly First Mate is added to the chain link as a defending card")
+      .settle()
+      .doRaw({ kind: "close-chain" })
+      .settle()
+      .expectInZone(0, "chum, friendly first mate|2", "graveyard")
+      .expectNoLog("triggers Watery Grave");
+    const grave = g.state.players[0]!.graveyard.find((card) => card.instanceId === chum.instanceId);
+    expect(grave?.faceDown).not.toBe(true);
+  });
+
   it("Oysten's 'when this dies' fires on a damage death: a Gold token is created", () => {
     const g = scenario({
       seats: [

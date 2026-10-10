@@ -1331,6 +1331,10 @@ export interface CardScript {
   additionalArsenalZoneWhileFaceUp?: boolean;
   /** A defending copy settles into its owner's soul when the chain closes. */
   settlesToSoulOnChainClose?: boolean;
+  /** Watery Grave also functions while this is a non-permanent defending
+   *  card ("While this is defending, when it's put into your graveyard from
+   *  the arena, turn it face-down"). */
+  wateryGraveWhileDefending?: boolean;
   /** While this permanent's controller is the turn player, opposing players
    *  cannot play cards or activate abilities. Defending and choices are not
    *  plays or activations and remain legal. */

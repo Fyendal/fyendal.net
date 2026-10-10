@@ -296,7 +296,7 @@ export function closeChain(state: GameStateInternal, runtime: EngineRuntime): vo
       } else if (scriptOf(state, c.cardId, c)?.settlesToSoulOnChainClose) {
         enterSoul(state, runtime, c, false);
       } else {
-        moveToGraveyard(state, runtime, c);
+        moveToGraveyard(state, runtime, c, "chain", undefined, undefined, true);
       }
     }
     for (const c of link.reactions) {

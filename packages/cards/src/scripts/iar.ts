@@ -50,12 +50,14 @@ function isNonAttackAction(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): bo
   return ctx.hasCardType(card, "action") && !hasType(ctx, card, "attack");
 }
 
+/** "When this hits" — any hit, including an attack aimed at an ally. */
+function selfHits(ctx: ScriptCtx): boolean {
+  return ctx.link !== undefined && ctx.link.attackingCard.instanceId === ctx.self.instanceId;
+}
+
+/** "When this hits a hero". */
 function selfHitsHero(ctx: ScriptCtx): boolean {
-  return (
-    ctx.link !== undefined &&
-    ctx.link.targetAllyId === undefined &&
-    ctx.link.attackingCard.instanceId === ctx.self.instanceId
-  );
+  return selfHits(ctx) && ctx.link!.targetAllyId === undefined;
 }
 
 function requestAnyTarget(ctx: ScriptCtx, hook: string, fallback: string, id: string, amount: number): void {
@@ -114,6 +116,18 @@ function firstHeadBangingAttack(ctx: ScriptCtx, card: DeepReadonly<CardInstance>
   const guardianCount = Number(ctx.getFlag("player", "playedAttackActionTypeCount:guardian"));
   const reveredCount = Number(ctx.getFlag("player", "playedAttackActionTypeCount:revered"));
   return guardianCount <= (guardian ? 1 : 0) && reveredCount <= (revered ? 1 : 0);
+}
+
+function grantHeadBangingHit(ctx: ScriptCtx, attackInstanceId: number): void {
+  ctx.addModifier({
+    scope: "until-end-of-turn",
+    appliesToInstanceId: attackInstanceId,
+    onHitScriptHook: {
+      hook: "iar-head-banging-hit",
+      label: "if you have no cards in hand, draw a card",
+      heroOnly: true,
+    },
+  });
 }
 
 function maintainChannelStormgarden(ctx: ScriptCtx): void {
@@ -554,7 +568,7 @@ function shadowbeast(payoff: ShadowbeastPayoff): CardScript {
 
 function rumblingHunger(): CardScript {
   return bloodDebt({
-    canTriggerOnHit: (ctx) => selfHitsHero(ctx) && ctx.getFlag("player", "banishedSixPlusThisTurn") === true,
+    canTriggerOnHit: (ctx) => selfHits(ctx) && ctx.getFlag("player", "banishedSixPlusThisTurn") === true,
     onHit(ctx) {
       ctx.createToken(BLASMOPHET);
       ctx.grantGoAgain();
@@ -687,7 +701,7 @@ function shadowakeGloomblade(): CardScript {
     {
       staticPlayableFrom: ["banish"],
       ...usurp(),
-      canTriggerOnHit: selfHitsHero,
+      canTriggerOnHit: selfHits,
       onHit(ctx) {
         ctx.createToken(GATE);
       },
@@ -1377,7 +1391,7 @@ function countdownToExtinction(): CardScript {
     onAttackDeclared(ctx) {
       ctx.createToken(GATE);
     },
-    canTriggerOnHit: (ctx) => selfHitsHero(ctx) && ctx.canSearchDeck(),
+    canTriggerOnHit: (ctx) => selfHits(ctx) && ctx.canSearchDeck(),
     onHit(ctx) {
       const darkestHours = ctx.player(ctx.seat).deck.filter((card) => named(ctx, card, "Darkest Hour"));
       if (darkestHours.length === 0) {
@@ -1543,7 +1557,7 @@ export const iar: Record<string, CardScript> = {
       const top = ctx.player(ctx.seat).deck[0];
       if (top) ctx.banish(top.instanceId);
     },
-    canTriggerOnHit: selfHitsHero,
+    canTriggerOnHit: selfHits,
     onHit(ctx) {
       ctx.createToken(BLASMOPHET);
     },
@@ -1553,7 +1567,7 @@ export const iar: Record<string, CardScript> = {
       const top = ctx.player(ctx.seat).deck[0];
       if (top) ctx.banish(top.instanceId);
     },
-    canTriggerOnHit: selfHitsHero,
+    canTriggerOnHit: selfHits,
     onHit(ctx) {
       ctx.createToken(BLASMOPHET);
     },
@@ -1563,7 +1577,7 @@ export const iar: Record<string, CardScript> = {
       const top = ctx.player(ctx.seat).deck[0];
       if (top) ctx.banish(top.instanceId);
     },
-    canTriggerOnHit: selfHitsHero,
+    canTriggerOnHit: selfHits,
     onHit(ctx) {
       ctx.createToken(BLASMOPHET);
     },
@@ -2010,7 +2024,7 @@ export const iar: Record<string, CardScript> = {
   }),
 
   "open the gate to i'arathael|1": bloodDebt({
-    canTriggerOnHit: selfHitsHero,
+    canTriggerOnHit: selfHits,
     onHit(ctx) {
       ctx.createToken(GATE);
     },
@@ -2070,7 +2084,7 @@ export const iar: Record<string, CardScript> = {
       ctx.setFlag("link", "iarStokeVengeanceCombo", true);
       ctx.grantGoAgain();
     },
-    canTriggerOnHit: (ctx) => selfHitsHero(ctx) && ctx.getFlag("link", "iarStokeVengeanceCombo") === true,
+    canTriggerOnHit: (ctx) => selfHits(ctx) && ctx.getFlag("link", "iarStokeVengeanceCombo") === true,
     onHit(ctx) {
       buffNextAttack(ctx, { attack: 2, expiresOnChainClose: true });
     },
@@ -2630,25 +2644,33 @@ export const iar: Record<string, CardScript> = {
     onAttackDeclared(ctx) {
       if (ctx.getFlag("player", "chargedThisTurn") === true) ctx.grantGoAgain();
     },
-    canTriggerOnHit: (ctx) => selfHitsHero(ctx) && ctx.getFlag("player", "chargedThisTurn") === true,
+    canTriggerOnHit: (ctx) => selfHits(ctx) && ctx.getFlag("player", "chargedThisTurn") === true,
     onHit(ctx) {
       ctx.createToken(COURAGE);
     },
   },
 
   "head banging chorus|2": {
-    ...suspenseAura(),
+    // Static ability: an attack played before this entered the arena still
+    // gets the hit effect while it remains an unresolved, unhit chain link.
+    ...suspenseAura({
+      onEnter(ctx) {
+        const link = ctx.state.chain.at(-1);
+        if (
+          !link ||
+          link.resolved ||
+          link.hit ||
+          link.attacker !== ctx.seat ||
+          ctx.player(ctx.seat).flags.lastActionPlayedInstanceId !== link.attackingCard.instanceId ||
+          !firstHeadBangingAttack(ctx, link.attackingCard)
+        )
+          return;
+        grantHeadBangingHit(ctx, link.attackingCard.instanceId);
+      },
+    }),
     onFriendlyPlay(ctx, played) {
       if (!firstHeadBangingAttack(ctx, played)) return;
-      ctx.addModifier({
-        scope: "until-end-of-turn",
-        appliesToInstanceId: played.instanceId,
-        onHitScriptHook: {
-          hook: "iar-head-banging-hit",
-          label: "if you have no cards in hand, draw a card",
-          heroOnly: true,
-        },
-      });
+      grantHeadBangingHit(ctx, played.instanceId);
     },
     onGrantedHit(ctx, hook) {
       if (hook === "iar-head-banging-hit" && ctx.player(ctx.seat).hand.length === 0) {

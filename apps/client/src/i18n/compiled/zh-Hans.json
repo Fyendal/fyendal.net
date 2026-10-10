@@ -16113,6 +16113,12 @@
       "value": "排列你的触发能力"
     }
   ],
+  "engine.decision.unique.keep": [
+    {
+      "type": 0,
+      "value": "Unique：选择要保留的卡牌"
+    }
+  ],
   "engine.decision.wager.next": [
     {
       "type": 0,
@@ -16464,6 +16470,16 @@
     {
       "type": 0,
       "value": " 被 charge"
+    }
+  ],
+  "engine.log.card.cleared": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 被移除"
     }
   ],
   "engine.log.card.control.gained": [
@@ -19382,6 +19398,12 @@
     {
       "type": 0,
       "value": "因来源已离开墓地，Watery Grave 结算时不产生效果"
+    }
+  ],
+  "engine.option.unique.clear": [
+    {
+      "type": 0,
+      "value": "移除具有 Unique 的卡牌"
     }
   ],
   "engine.term.attack.defended": [

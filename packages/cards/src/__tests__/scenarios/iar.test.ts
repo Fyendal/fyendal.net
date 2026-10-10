@@ -598,6 +598,20 @@ describe("IAR cards", () => {
     expect(g.state.players[0]!.board.filter((card) => card.cardId === "IAR222")).toHaveLength(2);
   });
 
+  it.each([
+    ["open the gate to i'arathael|1", "IAR222"],
+    ["beckoning hunger|1", "IAR221"],
+  ])("%s creates its token when it hits an ally", (attack, tokenId) => {
+    const g = scenario({ seats: [
+      { hero: "rhinar", hand: [attack], resources: 3, equipment: NO_EQUIPMENT },
+      { hero: "dorinthea", board: ["restless cleric|1"], equipment: NO_EQUIPMENT },
+    ] });
+
+    g.play(attack, { targetAlly: "restless cleric|1" });
+
+    expect(g.state.players[0]!.board.filter((card) => card.cardId === tokenId)).toHaveLength(1);
+  });
+
   it("Become the Shadow Lord banishes from hand only when its layer resolves", () => {
     const g = scenario({ seats: [
       {
@@ -1066,6 +1080,27 @@ describe("IAR cards", () => {
       .expectLife(1, 17);
 
     expect(g.state.players[1]!.board).toHaveLength(0);
+  });
+
+  it("Head Banging Chorus grants its hit trigger to the first Guardian attack already on the chain", () => {
+    const g = scenario({ seats: [
+      {
+        hero: "rhinar",
+        hand: ["crushing headache|1", "head banging chorus|2"],
+        deck: ["nimblism|1"],
+        board: ["timesnap potion|3"],
+        resources: 7,
+        equipment: NO_EQUIPMENT,
+      },
+      { hero: "dorinthea", life: 40, equipment: NO_EQUIPMENT },
+    ] });
+
+    g.activate("timesnap potion|3")
+      .play("crushing headache|1")
+      .blockWith()
+      .react("head banging chorus|2")
+      .settle()
+      .expectHandSize(0, 1);
   });
 
   it("Head Banging Chorus ignores earlier non-Guardian attacks", () => {
