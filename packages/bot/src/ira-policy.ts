@@ -514,7 +514,7 @@ export function chooseIraIntentWithTrace(input: BotPolicyInput): IraIntentDecisi
       const base = evaluateIraTurn(state, observed, root, false);
       const me = observed.view.players[root.seat];
       const remaining = handDamage([...me.hand, ...me.arsenal], observed, iraSolverRules);
-      return { ...base, score: horizonScore(base.score, base.futureValue, remaining), complete: false };
+      return { ...base, score: horizonScore(observed, root, base.score, base.futureValue, remaining), complete: false };
     },
   });
   const intent = enforceAllyTargetPolicy(

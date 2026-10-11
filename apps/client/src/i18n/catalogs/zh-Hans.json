@@ -1494,6 +1494,7 @@
   "card.trigger.common.decay": "衰败 (Decay)",
   "card.trigger.common.deckbottom.owner": "将此牌置于其拥有者的牌库底部",
   "card.trigger.common.defend.add": "将此牌作为防守牌加入当前 chain link",
+  "card.trigger.common.defend.card": "每当有牌防守此牌时",
   "card.trigger.common.defensecounter.minus": "在此牌上放置一个 -{amount} 防御指示物",
   "card.trigger.common.dominate.gain": "获得压制 (dominate)",
   "card.trigger.common.draw.handtop.destroy": "摧毁此牌，抽一张牌，然后将一张手牌置于你的牌库顶部",

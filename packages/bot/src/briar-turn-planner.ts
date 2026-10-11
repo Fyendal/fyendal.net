@@ -194,7 +194,7 @@ export function planBriarTurn(
       const me = observed.view.players[root.seat];
       const remaining = handDamage([...me.hand, ...me.arsenal], observed, config.rules);
       const futureScore = (base.heldValue + base.arsenalValue) * POINTS_PER_DAMAGE;
-      return { ...base, score: horizonScore(base.score, futureScore, remaining), complete: false };
+      return { ...base, score: horizonScore(observed, root, base.score, futureScore, remaining), complete: false };
     },
   });
   if (!plan) return undefined;

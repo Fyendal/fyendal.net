@@ -14001,6 +14001,12 @@
       "value": "Add this to the active chain link as a defending card"
     }
   ],
+  "card.trigger.common.defend.card": [
+    {
+      "type": 0,
+      "value": "Whenever a card defends this"
+    }
+  ],
   "card.trigger.common.defense.gain": [
     {
       "type": 0,

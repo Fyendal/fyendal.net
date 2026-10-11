@@ -508,22 +508,23 @@ function collectDefendEventLayers(
       heroLast: true,
     }).filter((source) => source.instanceId !== link.attackingCard.instanceId),
   ];
+  const eventDefenders = defenders.map(({ card }) => card);
   for (const source of friendlyDefendedSources) {
     const script = scriptOf(state, source.cardId, source);
     if (!script?.onFriendlyDefended) continue;
     const trigger = script.friendlyDefendedTrigger;
-    if (
-      trigger?.condition &&
-      !trigger.condition(
-        runtime.makeCtx(state, link.attacker, source, link),
-        defenders.map(({ card }) => card),
-      )
-    ) continue;
+    const condition = trigger?.condition;
+    const ctx = runtime.makeCtx(state, link.attacker, source, link);
+    const occurrences = trigger?.perDefender
+      ? eventDefenders.filter((card) => !condition || condition(ctx, [card])).length
+      : !condition || condition(ctx, eventDefenders) ? 1 : 0;
+    if (occurrences === 0) continue;
     const label = trigger?.label ?? "When your attack is defended";
     appendTriggerLayer(groups, link.attacker, {
       sourceInstanceId: source.instanceId,
       seat: link.attacker,
       triggerIndex: -5,
+      ...(occurrences > 1 ? { triggerCount: occurrences } : {}),
       label,
       optional: false,
       engineEffect: {

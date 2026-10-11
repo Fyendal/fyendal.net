@@ -72,13 +72,15 @@ export const DEAD_ARSENAL_COST = DEFAULT_DRAW_VALUE;
 export const BLUE_ARSENAL_COST = DEAD_ARSENAL_COST;
 
 /** Offensive value: an attack's damage (a terminal attack competes for the
- * single last slot, so it counts at a discount) or a pump's added power. */
-function offenseValue(uses: CardUses, hitChance: number): number {
+ * single last slot, so it counts at a discount) or a pump's added power.
+ * `offenseRate` is the share of threatened offense expected to land after the
+ * opponent's response; blocking, pitch and prevention values are unaffected. */
+export function offenseValue(uses: CardUses, hitChance: number, offenseRate = 1): number {
   if (uses.kind === "attack") {
     const value = uses.power + uses.onHit * hitChance;
-    return uses.reliableGoAgain || uses.finisher ? value : value * ARSENAL_TERMINAL_FACTOR;
+    return (uses.reliableGoAgain || uses.finisher ? value : value * ARSENAL_TERMINAL_FACTOR) * offenseRate;
   }
-  return uses.pump + (uses.pumpRider ?? 0);
+  return (uses.pump + (uses.pumpRider ?? 0)) * offenseRate;
 }
 
 /** Damage a defense reaction (or, at a lower use rate, a blocker) stops. */
@@ -92,14 +94,19 @@ function blockValue(uses: CardUses): number {
  * disruption discount. A card that cannot be played from arsenal only blocks
  * the slot, and a blue card that cannot defend from there pays
  * BLUE_ARSENAL_COST. */
-export function arsenalValue(uses: CardUses, discount: number, hitChance = DEFAULT_HIT_CHANCE): number {
+export function arsenalValue(
+  uses: CardUses,
+  discount: number,
+  hitChance = DEFAULT_HIT_CHANCE,
+  offenseRate = 1,
+): number {
   let value: number;
   switch (uses.kind) {
     case "attack":
     case "attack-reaction":
     case "action":
     case "instant":
-      value = offenseValue(uses, hitChance) || uses.pitch * 0.25;
+      value = offenseValue(uses, hitChance, offenseRate) || uses.pitch * 0.25;
       if (uses.ambush) value = Math.max(value, blockValue(uses));
       break;
     case "defense-reaction":
@@ -114,15 +121,22 @@ export function arsenalValue(uses: CardUses, discount: number, hitChance = DEFAU
 }
 
 /** Best single use of a card drawn into a fresh hand. */
-export function standaloneValue(uses: CardUses, hitChance = DEFAULT_HIT_CHANCE): number {
+export function standaloneValue(uses: CardUses, hitChance = DEFAULT_HIT_CHANCE, offenseRate = 1): number {
   return Math.max(
-    offenseValue(uses, hitChance), blockValue(uses), uses.pitch * PITCH_FUNDING_RATE, uses.alternative ?? 0,
+    offenseValue(uses, hitChance, offenseRate), blockValue(uses), uses.pitch * PITCH_FUNDING_RATE,
+    uses.alternative ?? 0,
   );
 }
 
-/** A card kept in hand displaces one draw, so it is worth only its margin. */
-export function heldValue(uses: CardUses, averageDraw: number, hitChance = DEFAULT_HIT_CHANCE): number {
-  return Math.max(0, standaloneValue(uses, hitChance) - averageDraw);
+/** A card kept in hand displaces one draw, so it is worth only its margin.
+ * Price `averageDraw` at the same `offenseRate`. */
+export function heldValue(
+  uses: CardUses,
+  averageDraw: number,
+  hitChance = DEFAULT_HIT_CHANCE,
+  offenseRate = 1,
+): number {
+  return Math.max(0, standaloneValue(uses, hitChance, offenseRate) - averageDraw);
 }
 
 const STATIC_GO_AGAIN = /(?:^|[.\n:]\s*)Go again\s*(?:[.\n]|$)/;
@@ -212,12 +226,13 @@ export function disruptionDiscount(input: Pick<BotPolicyInput, "view" | "seat" |
 export function averageDrawValue(
   input: Pick<BotPolicyInput, "view" | "seat" | "cards" | "decklists">,
   usesOf: (data: CardData) => CardUses = (data) => defaultCardUses(data),
+  offenseRate = 1,
 ): number {
   const counts = unseenCounts(input, "own");
   if (!counts) return DEFAULT_DRAW_VALUE;
   return averageOver(counts, (cardId) => {
     const data = input.cards[cardId];
-    return data ? standaloneValue(usesOf(data)) : 0;
+    return data ? standaloneValue(usesOf(data), DEFAULT_HIT_CHANCE, offenseRate) : 0;
   }) ?? DEFAULT_DRAW_VALUE;
 }
 

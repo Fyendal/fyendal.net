@@ -2,8 +2,9 @@ import { cardData, decklists, precon, scripts } from "@fyendal/cards";
 import { applyIntent, createGame, legalIntents, projectStateFor } from "@fyendal/engine";
 import type { CardView, Decklist, GameIntent } from "@fyendal/shared";
 import { describe, expect, it } from "vitest";
+import { decklistsFromState } from "./deck-knowledge.js";
 import { chooseHalaIntent, chooseHalaIntentWithTrace } from "./hala-policy.js";
-import { halaPresentationFor } from "./sideboard.js";
+import { halaPresentationFor, jarlPresentationFor } from "./sideboard.js";
 
 function halaDeck(opponent: Decklist = decklists.dorinthea): Decklist {
   const pool = precon("precon-hala-masterclass")!.pool;
@@ -272,6 +273,47 @@ describe("Hala policy", () => {
       kind: "activate-ability",
       sourceInstanceId: state.players[1]!.hero.instanceId,
     });
+  });
+
+  it("swings into a full opposing hand instead of holding sword reactions every turn", () => {
+    const jarlPool = precon("bot-jarl")!.pool;
+    const jarl: Decklist = { heroId: jarlPool.heroId, ...jarlPresentationFor(halaDeck()) };
+    const state = createGame({
+      decklists: [jarl, halaDeck(jarl)],
+      cards: cardData,
+      scripts,
+      seed: 29,
+      startPlayer: 1,
+    });
+    state.turn = 14;
+    replaceHand(state, 1, ["MPW046", "MPW046", "MPW025"]);
+    const hala = state.players[1]!;
+    hala.arsenal = [{
+      instanceId: state.nextInstanceId++,
+      cardId: "MPW076",
+      owner: 1,
+      faceDown: true,
+      arsenalSlot: 0,
+    }];
+    hala.life = 19;
+    hala.resources = 0;
+    hala.weapons[0]!.counters = { sharpenedTurn: 12 };
+    state.players[0]!.life = 39;
+    expect(state.players[0]!.hand).toHaveLength(4);
+
+    // Jarl refills to four cards before each of Hala's turns, so holding these
+    // reactions for a later swing repeats the same pass indefinitely.
+    const decision = chooseHalaIntentWithTrace({
+      seat: 1,
+      view: projectStateFor(state, 1),
+      legal: legalIntents(state, 1),
+      cards: cardData,
+      state,
+      decklists: decklistsFromState(state, 1),
+    });
+    expect(decision.intent.kind).not.toBe("pass");
+    expect(decision.plan?.evaluation.damage).toBeGreaterThan(0);
+    expect(applyIntent(state, 1, decision.intent).ok).toBe(true);
   });
 
   it.each(["SEA050", "SEA051", "SEA052", "SEA264"])(

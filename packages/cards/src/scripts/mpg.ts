@@ -1,6 +1,7 @@
 import type { CardScript, DeepReadonly, CardInstance, ScriptCtx } from "@fyendal/engine";
 import {
   buffNextAttack,
+  cardDefendsThisTrigger,
   commonOptionMessages,
   decisionPrompt,
   localizedCardLog,
@@ -748,6 +749,7 @@ Object.assign(mpg, {
     },
   },
   "pec perfect|1": {
+    friendlyDefendedTrigger: cardDefendsThisTrigger,
     onFriendlyDefended(ctx: ScriptCtx) {
       ctx.requestClash(opponentSeat(ctx), "pec-clash");
     },

@@ -50,6 +50,7 @@ import { adjustValueBreakdown } from "./value.js";
 import {
   evaluateOpponentResponse,
   evaluateTurnFuture,
+  horizonDamage,
   HORIZON_DAMAGE_POINTS,
   planTurn,
   POINTS_PER_DAMAGE,
@@ -2113,7 +2114,7 @@ function chooseUnfinalizedHalaIntentWithTrace(input: BotPolicyInput): HalaIntent
         ...base,
         // Hala's conversion includes Zenith swings that spend no cards, so
         // it adds to held value rather than replacing it (cf. horizonScore).
-        score: base.score + base.projectedDamage * HORIZON_DAMAGE_POINTS,
+        score: base.score + horizonDamage(observed, root, base.projectedDamage) * HORIZON_DAMAGE_POINTS,
         complete: false,
       };
     },

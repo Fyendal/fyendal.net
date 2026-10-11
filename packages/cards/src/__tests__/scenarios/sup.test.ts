@@ -985,3 +985,39 @@ describe("SUP — tokens and suspense", () => {
     g.play("head jab|1").blockWith().settle().expectLife(0, 18);
   });
 });
+
+describe("SUP — Reckless Stampede", () => {
+  function stampede(defenders: string[]) {
+    const g = scenario({
+      seats: [
+        hero("kayo, strong-arm|0", {
+          hand: ["reckless stampede|1"],
+          resources: 2,
+          deck: ["raging onslaught|1", "raging onslaught|1", "raging onslaught|1"],
+        }),
+        foe({ hand: defenders, deck: ["head jab|3", "head jab|3", "head jab|3"] }),
+      ],
+    });
+    return g.play("reckless stampede|1").blockWith(...defenders).settle();
+  }
+
+  it("clashes once for each card that defends it", () => {
+    const g = stampede(["head jab|1", "head jab|1", "head jab|1"]);
+    for (let clash = 0; clash < 3; clash++) {
+      g.expectLife(1, 20 - clash - 1);
+      g.chooseOption("no").chooseOption("no");
+    }
+    g.expectLife(0, 20).expectLog("Reckless Stampede triggers: Whenever a card defends this");
+  });
+
+  it("lets each hero put their revealed card on the bottom", () => {
+    const g = stampede(["head jab|1"]);
+    expect(g.state.pendingDecision?.player).toBe(0);
+    g.chooseOption("yes");
+    expect(g.state.pendingDecision?.player).toBe(1);
+    g.chooseOption("no");
+    g.expectLife(1, 14) // 1 clash damage, then 7 power into 2 defense
+      .expectDeckBottom(0, "raging onslaught|1")
+      .expectDeckTop(1, "head jab|3");
+  });
+});

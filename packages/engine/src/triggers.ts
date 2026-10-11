@@ -1067,7 +1067,7 @@ function advanceStack(state: GameStateInternal, runtime: EngineRuntime): void {
     layer.engineEffect?.kind === "on-fragment-hook"
   ) {
     runtime.dispatchFlow("resolveDefendEventLayer", state, layer);
-    state.stack.shift();
+    consumeTopTriggerOccurrence(state, layer);
     if (state.pendingDecision?.chooseHook) {
       state.pendingDecision.resume = { kind: "continue-stack", seat: layer.seat };
       return;

@@ -1494,6 +1494,7 @@
   "card.trigger.common.decay": "Decay",
   "card.trigger.common.deckbottom.owner": "Put this on the bottom of its owner's deck",
   "card.trigger.common.defend.add": "Add this to the active chain link as a defending card",
+  "card.trigger.common.defend.card": "Whenever a card defends this",
   "card.trigger.common.defensecounter.minus": "Put a -{amount} defense counter on this",
   "card.trigger.common.dominate.gain": "Gain dominate",
   "card.trigger.common.draw.handtop.destroy": "Destroy this, draw a card, then put a hand card on top of your deck",

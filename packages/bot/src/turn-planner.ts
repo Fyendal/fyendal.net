@@ -2,7 +2,13 @@ import { sha256 } from "@noble/hashes/sha2.js";
 import { bytesToHex, utf8ToBytes } from "@noble/hashes/utils.js";
 import { applyIntent, legalIntents, projectStateFor, type GameState } from "@fyendal/engine";
 import type { GameIntent } from "@fyendal/shared";
-import { arsenalCardValue, equipmentValue, heldCardValue, type HeroRulesFactory } from "./hand-value.js";
+import {
+  arsenalCardValue,
+  equipmentValue,
+  heldCardOffense,
+  heldCardValue,
+  type HeroRulesFactory,
+} from "./hand-value.js";
 import { strategicPitchIntents, type BotPolicyInput } from "./policy.js";
 
 export const DEFAULT_MAX_SEARCH_NODES = 64;
@@ -20,9 +26,17 @@ const DEFAULT_MAX_FORCED_STEPS = 160;
 
 /** Score at a search horizon. The unplayed hand is either played out this
  * turn or kept for later, never both, so it counts as the better of its held
- * value and its remaining damage. */
-export function horizonScore(score: number, futureScore: number, remainingDamage: number): number {
-  return score - futureScore + Math.max(futureScore, remainingDamage * HORIZON_DAMAGE_POINTS);
+ * value and its remaining damage, priced like reached damage (see
+ * `horizonDamage`). */
+export function horizonScore(
+  input: BotPolicyInput,
+  root: TurnPlannerRoot,
+  score: number,
+  futureScore: number,
+  remainingDamage: number,
+): number {
+  return score - futureScore +
+    Math.max(futureScore, horizonDamage(input, root, remainingDamage) * HORIZON_DAMAGE_POINTS);
 }
 
 export interface TurnEvaluation {
@@ -120,6 +134,16 @@ export function evaluateOpponentResponse(
     rawDamage,
     Math.max(0, threatenedThisTurn(input, root.seat) - root.threatenedAtRoot),
   );
+  return opponentResponseTo(root, root.opponentLife, rawDamage, attackThreat, root.turn === 1);
+}
+
+function opponentResponseTo(
+  root: TurnPlannerRoot,
+  opponentLife: number,
+  rawDamage: number,
+  attackThreat: number,
+  firstTurn: boolean,
+): OpponentResponseEvaluation {
   if (attackThreat === 0) {
     return {
       rawDamage,
@@ -130,15 +154,15 @@ export function evaluateOpponentResponse(
     };
   }
 
-  const lethalPressure = rawDamage >= root.opponentLife;
-  const lowLife = root.opponentLife <= 10;
+  const lethalPressure = rawDamage >= opponentLife;
+  const lowLife = opponentLife <= 10;
   const reserveCards = lethalPressure || lowLife ? 0 : 1;
   const efficientCapacity = Math.max(0, root.opponentHandCount - reserveCards) * 3;
   const maximumCapacity = root.opponentHandCount * 3 + root.opponentEquipmentDefense;
   const efficientPrevention = Math.min(attackThreat, efficientCapacity);
   const maximumPrevention = Math.min(attackThreat, maximumCapacity);
-  const efficientWeight = lethalPressure ? 0.3 : root.turn === 1 ? 0.2 : 0.55;
-  const maximumWeight = lethalPressure ? 0.6 : root.turn === 1 ? 0.7 : 0.25;
+  const efficientWeight = lethalPressure ? 0.3 : firstTurn ? 0.2 : 0.55;
+  const maximumWeight = lethalPressure ? 0.6 : firstTurn ? 0.7 : 0.25;
   const expectedPrevention = efficientPrevention * efficientWeight +
     maximumPrevention * maximumWeight;
   const expectedAttackDamage = Math.max(0, attackThreat - expectedPrevention);
@@ -150,6 +174,41 @@ export function evaluateOpponentResponse(
     expectedDamage: directDamage + expectedAttackDamage,
     hitRate: expectedAttackDamage / attackThreat,
   };
+}
+
+/** Damage equivalents of attack damage a horizon line has not dealt yet: its
+ * margin on top of this turn's attacks under the same response weighting as
+ * reached damage, so stopping a search early never outscores the rollout. */
+export function horizonDamage(
+  input: BotPolicyInput,
+  root: TurnPlannerRoot,
+  remainingDamage: number,
+): number {
+  if (remainingDamage <= 0) return 0;
+  const reached = evaluateOpponentResponse(input, root);
+  const extended = opponentResponseTo(
+    root,
+    root.opponentLife,
+    reached.rawDamage + remainingDamage,
+    reached.attackThreat + remainingDamage,
+    root.turn === 1,
+  );
+  return responseWeightedDamage(extended) - responseWeightedDamage(reached);
+}
+
+/** Share of a later turn's attack threat the planner credits: the same
+ * response weighting `responseWeightedDamage` applies to damage dealt this
+ * turn, against the opponent's hand at the root (they refill before the bot's
+ * next turn) and their life after this line. */
+function futureOffenseRate(
+  input: BotPolicyInput,
+  root: TurnPlannerRoot,
+  attackThreat: number,
+): number {
+  if (attackThreat <= 0) return 1;
+  const opponentLife = input.view.players[1 - root.seat]!.life;
+  const response = opponentResponseTo(root, opponentLife, attackThreat, attackThreat, false);
+  return responseWeightedDamage(response) / attackThreat;
 }
 
 export interface TurnFutureValue {
@@ -167,6 +226,9 @@ export interface TurnFutureValue {
  * worth its margin over the draw it displaces, the arsenal card its arsenal
  * value, and with an empty arsenal the best leftover goes there when that
  * beats holding it. Evaluated without advancing cleanup or exposing a draw.
+ * Held offense still has to get past the opponent's blocks, so it is priced
+ * with the same response weighting as damage dealt this turn; otherwise
+ * holding attacks and pumps always outscores spending them into a full hand.
  */
 export function evaluateTurnFuture(
   input: BotPolicyInput,
@@ -174,14 +236,17 @@ export function evaluateTurnFuture(
   rules: HeroRulesFactory,
 ): TurnFutureValue {
   const me = input.view.players[root.seat];
-  const arsenalValue = me.arsenal.reduce((total, card) => total + arsenalCardValue(card, input, rules), 0);
+  const threat = [...me.hand, ...me.arsenal].reduce((total, card) =>
+    total + heldCardOffense(card, input, rules), 0);
+  const rate = futureOffenseRate(input, root, threat);
+  const arsenalValue = me.arsenal.reduce((total, card) => total + arsenalCardValue(card, input, rules, rate), 0);
   let heldValue = 0;
   let bestGain = 0;
   let arsenalCardInstanceId: number | undefined;
   for (const card of me.hand) {
-    const held = heldCardValue(card, input, rules);
+    const held = heldCardValue(card, input, rules, rate);
     heldValue += held;
-    const gain = me.arsenal.length === 0 ? arsenalCardValue(card, input, rules) - held : 0;
+    const gain = me.arsenal.length === 0 ? arsenalCardValue(card, input, rules, rate) - held : 0;
     if (gain > bestGain) {
       bestGain = gain;
       arsenalCardInstanceId = card.instanceId;

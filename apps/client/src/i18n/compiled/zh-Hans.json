@@ -13387,6 +13387,12 @@
       "value": "将此牌作为防守牌加入当前 chain link"
     }
   ],
+  "card.trigger.common.defend.card": [
+    {
+      "type": 0,
+      "value": "每当有牌防守此牌时"
+    }
+  ],
   "card.trigger.common.defense.gain": [
     {
       "type": 0,

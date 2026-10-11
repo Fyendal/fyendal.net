@@ -1,10 +1,17 @@
 import type { CardView } from "@fyendal/shared";
-import { BLOCK_USE_RATE, defaultCardUses, heldValue, standaloneValue } from "./card-ev.js";
+import {
+  arsenalValue,
+  averageDrawValue,
+  BLOCK_USE_RATE,
+  heldValue,
+  offenseValue,
+  standaloneValue,
+} from "./card-ev.js";
 import {
   buildHandSolver,
+  cardUses,
   heldCardUses,
   modelContext,
-  solverCard,
   type HeroSolverRules,
   type ModelContext,
 } from "./card-model.js";
@@ -21,6 +28,8 @@ export type HeroRulesFactory = (input: BotPolicyInput) => HeroSolverRules;
 interface CachedHand {
   readonly context: ModelContext;
   solver?: HandSolver;
+  /** Average draw value by offense rate (rate 1 is `context.averageDraw`). */
+  readonly averageDraws: Map<number, number>;
 }
 
 const CACHE_LIMIT = 16;
@@ -58,7 +67,7 @@ function cachedHand(input: BotPolicyInput, factory: HeroRulesFactory): CachedHan
     cache.set(key, hit);
     return hit;
   }
-  const entry: CachedHand = { context: modelContext(input, factory(input)) };
+  const entry: CachedHand = { context: modelContext(input, factory(input)), averageDraws: new Map() };
   cache.set(key, entry);
   if (cache.size > CACHE_LIMIT) cache.delete(cache.keys().next().value!);
   return entry;
@@ -103,12 +112,31 @@ export function handResponse(
   });
 }
 
+function averageDrawAt(entry: CachedHand, offenseRate: number): number {
+  if (offenseRate === 1) return entry.context.averageDraw;
+  let value = entry.averageDraws.get(offenseRate);
+  if (value === undefined) {
+    const { input } = entry.context;
+    value = averageDrawValue(input, (data) => cardUses(data, input), offenseRate);
+    entry.averageDraws.set(offenseRate, value);
+  }
+  return value;
+}
+
 /** Arsenal value of a card for the bot's next turn (damage equivalents). At
  * the end-of-turn arsenal decision the hand refills either way, so the best
- * card goes to arsenal unless none beats an empty slot (score 0). */
-export function arsenalCardValue(card: CardView, input: BotPolicyInput, factory: HeroRulesFactory): number {
+ * card goes to arsenal unless none beats an empty slot (score 0).
+ * `offenseRate` prices offense at the share expected to land (see
+ * `offenseValue`). */
+export function arsenalCardValue(
+  card: CardView,
+  input: BotPolicyInput,
+  factory: HeroRulesFactory,
+  offenseRate = 1,
+): number {
   const { context } = cachedHand(input, factory);
-  return solverCard(card, "hand", context)?.arsenalValue ?? 0;
+  const uses = heldCardUses(card, context);
+  return uses ? arsenalValue(uses, context.discount, context.hitChance, offenseRate) : 0;
 }
 
 /** `arsenalCardValue` bound to one hero's rules, for arsenal choice scoring. */
@@ -116,13 +144,25 @@ export function arsenalValuer(factory: HeroRulesFactory): (card: CardView, input
   return (card, input) => arsenalCardValue(card, input, factory);
 }
 
-/** Value of keeping a card in hand over the draw it displaces. */
-export function heldCardValue(card: CardView, input: BotPolicyInput, factory: HeroRulesFactory): number {
+/** Value of keeping a card in hand over the draw it displaces, with offense
+ * (and the displaced draw) priced at `offenseRate`. */
+export function heldCardValue(
+  card: CardView,
+  input: BotPolicyInput,
+  factory: HeroRulesFactory,
+  offenseRate = 1,
+): number {
+  const entry = cachedHand(input, factory);
+  const uses = heldCardUses(card, entry.context);
+  return uses ? heldValue(uses, averageDrawAt(entry, offenseRate), entry.context.hitChance, offenseRate) : 0;
+}
+
+/** Offense a held or arsenal card threatens on a later turn, before the
+ * opponent's response. */
+export function heldCardOffense(card: CardView, input: BotPolicyInput, factory: HeroRulesFactory): number {
   const { context } = cachedHand(input, factory);
-  const model = solverCard(card, "hand", context);
-  if (model) return model.heldValue;
-  const data = input.cards[card.cardId];
-  return data ? heldValue(defaultCardUses(data), context.averageDraw, context.hitChance) : 0;
+  const uses = heldCardUses(card, context);
+  return uses ? offenseValue(uses, context.hitChance) : 0;
 }
 
 /** Cost of spending a hand card now (pitching, blocking, discarding): its

@@ -2,6 +2,7 @@ import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal
 import {
   attackAbility,
   buffNextAttack,
+  cardDefendsThisTrigger,
   commonOptionMessages,
   contractWithSilver,
   decisionMessage,
@@ -1552,6 +1553,7 @@ Object.assign(sup, {
           deck.map((card) => card.instanceId),
         );
     },
+    friendlyDefendedTrigger: cardDefendsThisTrigger,
     onFriendlyDefended(ctx: ScriptCtx) {
       ctx.requestClash(opponentSeat(ctx), "fix-clash");
     },
@@ -1633,12 +1635,36 @@ Object.assign(sup, {
     },
   },
   "reckless stampede|1": {
+    friendlyDefendedTrigger: cardDefendsThisTrigger,
     onFriendlyDefended(ctx: ScriptCtx) {
       ctx.requestClash(opponentSeat(ctx), "stampede");
     },
     onClashResult(ctx: ScriptCtx, hook: string, winner: number) {
-      if (hook !== "stampede" || winner < 0) return;
-      for (const player of ctx.state.players) if (player.seat !== winner) ctx.dealDamage(player.seat, 1);
+      if (hook !== "stampede") return;
+      // Capture the revealed cards before damage can trigger anything else.
+      const revealed = [ctx.seat, opponentSeat(ctx)].flatMap((seat) => {
+        const top = ctx.player(seat).deck[0];
+        return top ? [{ seat, instanceId: top.instanceId }] : [];
+      });
+      if (winner >= 0) {
+        for (const player of ctx.state.players) if (player.seat !== winner) ctx.dealDamage(player.seat, 1);
+      }
+      // Each hero chooses in turn order; distinct hooks queue both decisions.
+      for (const { seat, instanceId } of revealed) {
+        ctx.setCounter(`stampedeTop:${seat}`, instanceId);
+        ctx.requestChoice(
+          `stampede-bottom:${seat}`,
+          yesNoPrompt("Put your revealed card on the bottom?", "card.sup.revealed.bottom"),
+          ["yes", "no"],
+          seat,
+        );
+      }
+    },
+    onChoose(ctx: ScriptCtx, hook: string, option: string) {
+      if (!hook.startsWith("stampede-bottom:") || option !== "yes") return;
+      const seat = Number(hook.slice("stampede-bottom:".length));
+      const instanceId = ctx.getCounter(`stampedeTop:${seat}`);
+      if (ctx.player(seat).deck.some((card) => card.instanceId === instanceId)) ctx.putOnDeckBottom(instanceId);
     },
   },
   "show of strength|1": {

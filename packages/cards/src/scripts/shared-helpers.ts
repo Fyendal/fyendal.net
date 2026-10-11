@@ -197,6 +197,13 @@ export function opponentSeat(ctx: ScriptCtx): number {
   return ctx.seat === 0 ? 1 : 0;
 }
 
+/** "Whenever a card defends this": one trigger for each defending card. */
+export const cardDefendsThisTrigger: NonNullable<CardScript["friendlyDefendedTrigger"]> = {
+  label: "Whenever a card defends this",
+  labelMessage: { id: "card.trigger.common.defend.card" },
+  perDefender: true,
+};
+
 /** Shared Suspense lifecycle (CR 8.3.42). Card-specific enter/leave effects
  * remain callbacks so the engine only sees the generic counter behavior. */
 export function suspenseAura(

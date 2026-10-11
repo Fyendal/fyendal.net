@@ -1535,6 +1535,10 @@ export interface CardScript {
     label?: string;
     /** Locale-independent counterpart to `label`. */
     labelMessage?: GameMessage;
+    /** Trigger once for each card that became a defender in this event
+     * ("whenever a card defends this"). `condition` then receives each
+     * defending card individually. */
+    perDefender?: boolean;
   };
   onFriendlyDefended?(ctx: ScriptCtx, defendedFromHand: boolean): void;
   /** This attack's Fragment ability triggered after a 2+ defense card defended it. */
