@@ -330,7 +330,9 @@ export interface ScriptCtx {
   annexFaceUpArsenalThroughNextTurn(targetSeat: number): void;
   /** Announce that a controlled trap's trigger condition was satisfied while
    *  its resolving layer is still on the stack. Matching triggered abilities
-   *  are appended behind that layer and receive an ordinary priority window. */
+   *  are appended behind that layer and receive an ordinary priority window.
+   *  The engine announces every trap's "when this defends" trigger itself;
+   *  call this only for trap triggers outside onDefend (e.g. Cloaked traps). */
   notifyTrapTriggered(): void;
   /** Turn a face-down card (e.g. a mentor in arsenal) face up */
   flipFaceUp(): void;
@@ -434,6 +436,9 @@ export interface ScriptCtx {
     transformedInstanceIds: number[],
     existingPermanentInstanceId?: number,
   ): DeepReadonly<CardInstance> | undefined;
+  /** Unequip a controlled weapon-zone or equipment-zone object: it leaves its
+   * zone but remains in the arena as a board permanent, keeping its state. */
+  unequip(instanceId: number): boolean;
   /** Turn an equipped object into an ally with the supplied base properties
    * until end of turn. */
   becomeAllyUntilEndOfTurn(instanceId: number, power: number, life: number): boolean;

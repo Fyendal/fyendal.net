@@ -218,7 +218,6 @@ function pitfallTrap(): CardScript {
     onDefend(ctx) {
       const attacker = ctx.link?.attacker;
       if (attacker === undefined) return;
-      ctx.notifyTrapTriggered();
       if (
         !ctx.requestPayment(
           "pitfall-pay",
@@ -245,7 +244,6 @@ function rockslideTrap(): CardScript {
     onDefend(ctx) {
       const attacker = ctx.link?.attacker;
       if (attacker === undefined) return;
-      ctx.notifyTrapTriggered();
       if (
         !ctx.requestPayment(
           "rockslide-pay",
@@ -272,7 +270,6 @@ function tripwireTrap(): CardScript {
     onDefend(ctx) {
       const attacker = ctx.link?.attacker;
       if (attacker === undefined) return;
-      ctx.notifyTrapTriggered();
       if (
         !ctx.requestPayment(
           "tripwire-pay",

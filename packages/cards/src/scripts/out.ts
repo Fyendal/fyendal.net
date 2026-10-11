@@ -342,10 +342,7 @@ function toxicity(life: number): CardScript {
 function trap(condition: (ctx: ScriptCtx) => boolean, effect: (ctx: ScriptCtx) => void): CardScript {
   return {
     canTriggerOnDefend: condition,
-    onDefend(ctx) {
-      ctx.notifyTrapTriggered();
-      effect(ctx);
-    },
+    onDefend: effect,
   };
 }
 function seeker(): CardScript {
@@ -740,7 +737,6 @@ export const out: Record<string, CardScript> = mergeSetScripts("OUT", outHighRar
   "boulder trap|2": {
     canTriggerOnDefend: trapPower(),
     onDefend(ctx) {
-      ctx.notifyTrapTriggered();
       const eq = equipmentCards(ctx, ctx.link!.attacker);
       if (eq.length)
         ctx.requestCardChoice(

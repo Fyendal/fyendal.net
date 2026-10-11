@@ -784,3 +784,65 @@ describe("MST — look-at floats", () => {
     expect(g.state.chain.at(-1)?.defendingCards.map((card) => card.instanceId)).toContain(blueId);
   });
 });
+
+describe("Murky Water", () => {
+  const riptide = (graveyard: string[]) =>
+    scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          heroKey: "riptide, lurker of the deep|0",
+          weapons: ["death dealer|0"],
+          arsenal: ["murky water|1"],
+          graveyard,
+          resources: 2,
+        },
+        { hero: "dorinthea" },
+      ],
+    });
+
+  it("banishes 3 chosen graveyard traps face down and arsenals one at random on hit", () => {
+    const g = riptide([
+      "boulder trap|2",
+      "tarpit trap|2",
+      "collapsing trap|3",
+      "tripwire trap|1",
+      "echoing trap|3",
+      "sink below|1",
+    ]);
+    const graveyard = g.state.players[0]!.graveyard;
+    const idOf = (key: string) => graveyard.find((card) => card.cardId === printingId(key))!.instanceId;
+    const chosen = ["boulder trap|2", "tarpit trap|2", "collapsing trap|3"].map(idOf);
+    const tripwire = idOf("tripwire trap|1");
+    // Echoing Trap has no cost, so it is not a trap "with cost 0 or more".
+    const ineligible = ["echoing trap|3", "sink below|1"].map(idOf);
+
+    g.play("murky water|1", { fromArsenal: true }).blockWith().settle().chooseOption("yes");
+    expect(g.state.pendingDecision?.options?.map(Number).sort((a, b) => a - b))
+      .toEqual([...chosen, tripwire].sort((a, b) => a - b));
+    g.doRaw({ kind: "choose-many", optionIds: chosen.map(String) }).settle();
+
+    const player = g.state.players[0]!;
+    expect(player.arsenal).toHaveLength(1);
+    expect(chosen).toContain(player.arsenal[0]!.instanceId);
+    expect(player.arsenal[0]!.faceDown).toBeUndefined();
+    const banished = player.banish.filter((card) => chosen.includes(card.instanceId));
+    expect(banished).toHaveLength(2);
+    expect(banished.every((card) => card.faceDown === true)).toBe(true);
+    for (const instanceId of [tripwire, ...ineligible]) {
+      expect(player.graveyard.some((card) => card.instanceId === instanceId)).toBe(true);
+    }
+  });
+
+  it("may decline, and offers nothing with fewer than 3 traps", () => {
+    const declined = riptide(["boulder trap|2", "tarpit trap|2", "collapsing trap|3"]);
+    declined.play("murky water|1", { fromArsenal: true }).blockWith().settle().chooseOption("no");
+    expect(declined.state.players[0]!.banish).toHaveLength(0);
+    expect(declined.state.players[0]!.arsenal).toHaveLength(0);
+
+    const tooFew = riptide(["boulder trap|2", "tarpit trap|2"]);
+    tooFew.play("murky water|1", { fromArsenal: true }).blockWith().settle();
+    expect(tooFew.state.pendingDecision).toBeNull();
+    tooFew.expectInZone(0, "boulder trap|2", "graveyard");
+  });
+});

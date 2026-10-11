@@ -300,6 +300,20 @@ function topBanishDesire(matches: (ctx: ScriptCtx, card: DeepReadonly<CardInstan
   };
 }
 
+function murkyWaterTraps(ctx: ScriptCtx): DeepReadonly<CardInstance>[] {
+  return ctx
+    .player(ctx.seat)
+    .graveyard.filter((card) => hasType(ctx, card, "trap") && (data(ctx, card).cost ?? -1) >= 0);
+}
+
+function resolveMurkyWater(ctx: ScriptCtx, instanceIds: readonly number[]): void {
+  const legal = new Set(murkyWaterTraps(ctx).map((card) => card.instanceId));
+  if (new Set(instanceIds).size !== 3 || !instanceIds.every((instanceId) => legal.has(instanceId))) return;
+  const banished = instanceIds.filter((instanceId) => ctx.banish(instanceId, { faceDown: true }));
+  if (banished.length !== 3) return;
+  ctx.putIntoArsenal(banished[ctx.randomInt(banished.length)]!, "banish");
+}
+
 function bonds(kind: "pitch" | "name"): CardScript {
   return {
     onBanishedCard(ctx, card) {
@@ -1824,6 +1838,34 @@ Object.assign(mst, {
     modifyAttack: (ctx) => ((ctx.self.counters?.aim ?? 0) > 0 ? 1 : 0),
     onAttackDeclared(ctx) {
       if ((ctx.self.counters?.aim ?? 0) > 0) ctx.grantCardKeyword(ctx.self.instanceId, "dominate");
+    },
+    onHit(ctx) {
+      if (murkyWaterTraps(ctx).length < 3) return;
+      ctx.requestChoice(
+        "murky-water-banish",
+        yesNoPrompt("Banish 3 traps from your graveyard face down?", "card.mst.murky.water.traps.banish"),
+        ["yes", "no"],
+      );
+    },
+    onChoose(ctx, hook, option) {
+      if (hook !== "murky-water-banish" || option !== "yes") return;
+      const traps = murkyWaterTraps(ctx);
+      if (traps.length < 3) return;
+      if (traps.length === 3) {
+        resolveMurkyWater(ctx, traps.map((card) => card.instanceId));
+        return;
+      }
+      ctx.requestCardChoices(
+        "murky-water-traps",
+        decisionPrompt("Choose 3 traps to banish face down", "card.mst.murky.water.traps.choose"),
+        traps.map((card) => card.instanceId),
+        3,
+        3,
+      );
+    },
+    onChooseMany(ctx, hook, options) {
+      if (hook !== "murky-water-traps") return;
+      resolveMurkyWater(ctx, options.map(Number));
     },
   },
   "kindle|1": {

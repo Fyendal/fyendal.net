@@ -47,7 +47,7 @@ import {
 } from "./zoneQueries.js";
 
 import { controlledPermanents, hookSources, observingHookSources } from "./sourceQueries.js";
-import { arsenalCapacity, clearPrivateZonePlacement, hasCrank, resetActivatedAbilityUsage } from "./cardLifecycle.js";
+import { arsenalCapacity, clearPrivateZonePlacement, hasCrank, resetActivatedAbilityUsage, stampEnteringLife } from "./cardLifecycle.js";
 import {
   transitionZone,
   transitionZoneFromEngineZone,
@@ -2113,6 +2113,22 @@ export function makeCtx(
         runtime.commands.fireTransformHook(state, seat, permanent, "from", event.from);
       }
       return permanent;
+    },
+    unequip(instanceId) {
+      const slot = (Object.keys(player.equipment) as EquipmentSlot[]).find(
+        (candidate) => player.equipment[candidate]?.instanceId === instanceId,
+      );
+      const card = removeFromArray(player.weapons, instanceId) ?? (slot ? player.equipment[slot] : undefined);
+      if (!card) return false;
+      if (slot) delete player.equipment[slot];
+      if (card.life === undefined) stampEnteringLife(state, card);
+      player.board.push(card);
+      logPublic(state, gameLogMessage(
+        `${nameOf(state, card.cardId)} is unequipped`,
+        "engine.log.card.unequipped",
+        { card: logCardValue(card.cardId) },
+      ));
+      return true;
     },
     becomeAllyUntilEndOfTurn(instanceId, power, life) {
       const found = findPermanent(state, instanceId);

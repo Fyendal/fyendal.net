@@ -19,10 +19,12 @@ function game() {
   return state;
 }
 
+function cards(state: ReturnType<typeof game>, cardIds: readonly string[]) {
+  return cardIds.map((cardId) => ({ instanceId: state.nextInstanceId++, cardId, owner: 0 }));
+}
+
 function hand(state: ReturnType<typeof game>, cardIds: readonly string[]) {
-  state.players[0]!.hand = cardIds.map((cardId) => ({
-    instanceId: state.nextInstanceId++, cardId, owner: 0,
-  }));
+  state.players[0]!.hand = cards(state, cardIds);
 }
 
 function choice(state: ReturnType<typeof game>): GameIntent {
@@ -663,6 +665,32 @@ describe("Levia Gates policy", () => {
     hand(state, ["PEN322", "MON140", "DTD107", "IAR214"]);
     const hexagore = state.players[0]!.weapons.find((weapon) => weapon.cardId === "MON121")!;
     expect(choice(state)).not.toMatchObject({ kind: "activate-ability", sourceInstanceId: hexagore.instanceId });
+  });
+
+  it("pitches a blue instead of banishing Blood Harvest it can attack with", () => {
+    const state = game();
+    hand(state, ["IAR005", "MST236", "IAR022", "IAR009"]);
+    state.players[0]!.graveyard = cards(state, ["MST236", "WTR007", "SUP165"]);
+    const [, horror, cleave] = state.players[0]!.hand;
+    expect(choice(state)).toMatchObject({
+      kind: "play-card", instanceId: horror!.instanceId, pitchInstanceIds: [cleave!.instanceId],
+    });
+  });
+
+  it("banishes Blood Harvest when it is the only payment for an attack", () => {
+    const state = game();
+    hand(state, ["IAR005", "MST236"]);
+    state.players[0]!.graveyard = cards(state, ["MST236", "WTR007", "SUP165"]);
+    const [harvest] = state.players[0]!.hand;
+    expect(choice(state)).toMatchObject({ kind: "activate-ability", sourceInstanceId: harvest!.instanceId });
+  });
+
+  it("banishes Blood Harvest over a blue pitch to suppress heavy blood debt", () => {
+    const state = game();
+    hand(state, ["IAR005", "HVY146", "MON140"]);
+    state.players[0]!.banish = cards(state, ["IAR009", "IAR010", "IAR021", "IAR022"]);
+    const [harvest] = state.players[0]!.hand;
+    expect(choice(state)).toMatchObject({ kind: "activate-ability", sourceInstanceId: harvest!.instanceId });
   });
 
   it("returns a legal move from an awkward blue hand", () => {

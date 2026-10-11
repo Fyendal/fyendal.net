@@ -101,7 +101,8 @@ function BoundedCardChoiceDecision({
               card={card}
               size="hand"
               selected={selected}
-              highlighted={canSelect}
+              highlighted={canSelect && !selected}
+              dimmed={!canSelect}
               affiliation={cardAffiliation(card, viewerSeat)}
               onClick={canSelect
                 ? () => setSelectedOptionIds((current) =>

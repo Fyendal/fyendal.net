@@ -184,6 +184,12 @@ function targetEquipmentValue(card: CardView, input: BotPolicyInput): number {
   return 70 + (card.defCounters ?? 0) * 5;
 }
 
+/** Engine X options are labelled `X = N`. */
+function declaredX(optionId: string): number | undefined {
+  const match = /^X = (\d+)$/.exec(optionId);
+  return match ? Number(match[1]) : undefined;
+}
+
 function scoreChoice(intent: Extract<GameIntent, { kind: "choose" }>, input: BotPolicyInput): number {
   const decision = input.view.pendingDecision;
   if (!decision) return 0;
@@ -210,9 +216,13 @@ function scoreChoice(intent: Extract<GameIntent, { kind: "choose" }>, input: Bot
     return -100;
   }
   if (prompt === "choose x") {
-    const value = Number(intent.optionId);
-    const desired = opponentIsAggro(input) ? 2 : 0;
-    return Number.isFinite(value) ? 30 - Math.abs(value - desired) * 10 : -100;
+    // Imposing Visage, the deck's only X card, fetches Channel Lake Frigid
+    // (X = 2) into aggro when affordable and Crumble to Eternity (X = 0)
+    // otherwise; an X in between pays for nothing.
+    const value = declaredX(intent.optionId);
+    const offered = (decision.options ?? []).map(declaredX);
+    const desired = opponentIsAggro(input) && offered.includes(2) ? 2 : 0;
+    return value === undefined ? -100 : 30 - Math.abs(value - desired) * 10;
   }
   if (prompt.includes("fuse")) {
     if (intent.optionId.startsWith("both:")) return 100;
@@ -504,7 +514,9 @@ function scorePlay(
       score = -100;
     }
   } else if (functional === "imposing visage|3") {
-    score = opening ? (gravy ? 320 : aggro ? 110 : 100) : aggro ? 62 : 24;
+    // Only an opening-turn aura setup; afterwards Visage is just a blue
+    // pitch and 3-defense blocker.
+    score = opening ? (gravy ? 320 : aggro ? 110 : 100) : -100;
   } else if (functional === "crumble to eternity|3") {
     score = gravy && enemyCompass && !compassIsMarked ? 300 : opening ? (aggro ? 75 : 95) : 18;
   } else if (opening) {

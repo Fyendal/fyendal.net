@@ -38,6 +38,7 @@ import {
 } from "./levia-macros.js";
 import {
   leviaAttackContinues,
+  leviaAttackCost,
   leviaAttackPair,
   leviaAttackPlayable,
   leviaBanishAccess,
@@ -117,8 +118,9 @@ function gateTargetValue(intent: GameIntent, input: BotPolicyInput, own: Readonl
   const remainingPitch = me.hand.filter((card) => !pitched.has(card.instanceId)).reduce((total, card) =>
     total + (input.cards[card.cardId]?.pitch ?? 0), 0
   );
-  const reduction = leviaEffectActive(input, "savage sash") && (targetData.attack ?? 0) >= 6 ? 1 : 0;
-  if (Math.max(0, (targetData.cost ?? 0) - reduction) > afterActivation + remainingPitch) return -500;
+  if (leviaAttackCost(targetData, leviaEffectActive(input, "savage sash")) > afterActivation + remainingPitch) {
+    return -500;
+  }
   const bloodrushActive = leviaEffectActive(input, "bloodrush bellow");
   // Rank targets by the attack they will make, not by their value in hand.
   const power = (targetData.attack ?? 0) + (bloodrushActive && targetData.classes?.includes("brute") ? 2 : 0);
@@ -368,6 +370,65 @@ function heraldPreventionScore(card: CardView, input: BotPolicyInput): number {
   return prevented > lost ? 20 + (prevented - lost) * 4 : -60;
 }
 
+const BLOOD_HARVEST_RESOURCES = 3;
+const PITCH_OPPORTUNITY_WEIGHT = 0.7;
+
+/** Score given up by spending a card as payment. */
+function pitchPenalty(card: CardView, input: BotPolicyInput): number {
+  return cardOpportunity(card, input) * PITCH_OPPORTUNITY_WEIGHT + 1;
+}
+
+/** Blood Harvest's banish is scored as a blue pitch: the best attack it pays
+ * for, charged Blood Harvest's own opportunity in place of the pitch cards it
+ * replaces. Cheaper pitch cards therefore win, keeping the 6{p} attack. Unlike
+ * a pitch card, the banish also enables attacks that are not yet legal and
+ * counts as this turn's 6{p} banish. */
+function bloodHarvestPaymentScore(
+  harvest: CardView,
+  input: BotPolicyInput,
+  own: ReadonlyMap<number, CardView>,
+): number {
+  const me = input.view.players[input.seat];
+  let best = -Infinity;
+  const legalAttackers = new Set<number>();
+  for (const attack of input.legal) {
+    if (attack.kind !== "play-card" && attack.kind !== "play-from-arsenal" && attack.kind !== "play-from-zone") continue;
+    const attacker = intentCard(attack, own);
+    if (!attacker || attacker.instanceId === harvest.instanceId || !isAttack(input.cards[attacker.cardId])) continue;
+    legalAttackers.add(attacker.instanceId);
+    const pitched = attack.pitchInstanceIds;
+    if (pitched.length === 0) continue;
+    // Keep the pitch cards that still cover what Blood Harvest's resources do not.
+    const residual = pitchValue(attack, input, own) - BLOOD_HARVEST_RESOURCES;
+    for (let mask = 0; mask < (1 << pitched.length) - 1; mask++) {
+      const kept = { ...attack, pitchInstanceIds: pitched.filter((_, index) => (mask & (1 << index)) !== 0) };
+      if (pitchValue(kept, input, own) >= residual) best = Math.max(best, scorePlay(kept, input, own));
+    }
+  }
+  // Hand and arsenal attacks the current resources and pitch cannot pay for.
+  const sash = leviaEffectActive(input, "savage sash");
+  for (const attacker of [...me.hand, ...me.arsenal]) {
+    if (attacker.instanceId === harvest.instanceId || legalAttackers.has(attacker.instanceId) ||
+      !leviaAttackPlayable(attacker, input)) continue;
+    let missing = leviaAttackCost(input.cards[attacker.cardId], sash) - me.resources - BLOOD_HARVEST_RESOURCES;
+    const pitchInstanceIds: number[] = [];
+    const spare = me.hand.filter((held) =>
+      held.instanceId !== harvest.instanceId && held.instanceId !== attacker.instanceId &&
+      (input.cards[held.cardId]?.pitch ?? 0) > 0
+    ).sort((left, right) => cardOpportunity(left, input) - cardOpportunity(right, input));
+    for (const held of spare) {
+      if (missing <= 0) break;
+      pitchInstanceIds.push(held.instanceId);
+      missing -= input.cards[held.cardId]?.pitch ?? 0;
+    }
+    if (missing > 0) continue;
+    const kind = me.hand.includes(attacker) ? "play-card" : "play-from-arsenal";
+    best = Math.max(best, scorePlay({ kind, instanceId: attacker.instanceId, pitchInstanceIds }, input, own));
+  }
+  // Its 6{p} banish also suppresses this turn's blood debt, offsetting the card given up.
+  return best - pitchPenalty(harvest, input) + banishGain(harvest, input) * PITCH_OPPORTUNITY_WEIGHT;
+}
+
 function scorePlay(intent: GameIntent, input: BotPolicyInput, own: ReadonlyMap<number, CardView>): number {
   const card = intentCard(intent, own);
   const data = card && input.cards[card.cardId];
@@ -408,7 +469,7 @@ function scorePlay(intent: GameIntent, input: BotPolicyInput, own: ReadonlyMap<n
   } else if (named === "savage sash") {
     score = leviaSashEnablesPair(input, [...me.hand, ...me.arsenal]) ? (bloodrushActive ? 100 : 74) : -60;
   } else if (named === "blood harvest" && intent.kind === "activate-ability") {
-    score = me.resources < 3 && followups() > 0 ? 84 : endOfTurnBanishScore(intent, card, input);
+    score = Math.max(bloodHarvestPaymentScore(card, input, own), endOfTurnBanishScore(intent, card, input));
   } else if (named === "bloodrush bellow") {
     score = followups() > 0 ? 72 + Math.min(followups(), 2) * 8 : -60;
   } else if (named === "call to the grave") {
@@ -453,7 +514,7 @@ function scorePlay(intent: GameIntent, input: BotPolicyInput, own: ReadonlyMap<n
 
   for (const id of pitchIds(intent)) {
     const pitched = own.get(id);
-    if (pitched) score -= cardOpportunity(pitched, input) * 0.7 + 1;
+    if (pitched) score -= pitchPenalty(pitched, input);
   }
   return score;
 }

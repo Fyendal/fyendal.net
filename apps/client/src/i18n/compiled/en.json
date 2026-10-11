@@ -10267,6 +10267,18 @@
       "value": "Put a Mechanologist action on top"
     }
   ],
+  "card.mst.murky.water.traps.banish": [
+    {
+      "type": 0,
+      "value": "Banish 3 traps from your graveyard face down?"
+    }
+  ],
+  "card.mst.murky.water.traps.choose": [
+    {
+      "type": 0,
+      "value": "Choose 3 traps to banish face down"
+    }
+  ],
   "card.mst.option.yourhero": [
     {
       "type": 0,
@@ -18068,6 +18080,16 @@
     {
       "type": 0,
       "value": " is turned face down in its graveyard (Watery Grave)"
+    }
+  ],
+  "engine.log.card.unequipped": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " is unequipped"
     }
   ],
   "engine.log.card.untapped": [

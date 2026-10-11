@@ -904,6 +904,7 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
     triggersWhileFaceDown: true,
     onHeroDealtDamage(ctx) {
       if (ctx.link?.goAgain) {
+        ctx.notifyTrapTriggered();
         ctx.destroySelf();
         create(ctx, FRAILTY, 1, opponentSeat(ctx));
       }
@@ -913,6 +914,7 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
     triggersWhileFaceDown: true,
     onHeroDealtDamage(ctx) {
       if (ctx.link?.flags.playedAttackReaction === true) {
+        ctx.notifyTrapTriggered();
         ctx.destroySelf();
         create(ctx, BLOODROT, 1, opponentSeat(ctx));
       }
@@ -922,6 +924,7 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
     triggersWhileFaceDown: true,
     onHeroDealtDamage(ctx) {
       if (ctx.attackBonusAboveBase() > 0) {
+        ctx.notifyTrapTriggered();
         ctx.destroySelf();
         create(ctx, INERTIA, 1, opponentSeat(ctx));
       }
@@ -976,7 +979,6 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
     },
     canTriggerOnDefend: (ctx) => ctx.link?.goAgain === true,
     onDefend(ctx) {
-      ctx.notifyTrapTriggered();
       const targets = heroesAndAllies(ctx);
       if (targets.length)
         ctx.requestCardChoice(

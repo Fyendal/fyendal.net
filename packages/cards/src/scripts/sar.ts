@@ -598,7 +598,6 @@ export const sar: Record<string, CardScript> = {
     onDefend(ctx) {
       const link = ctx.link;
       if (!link) return;
-      ctx.notifyTrapTriggered();
       markHero(ctx, link.attacker);
     },
   },
@@ -610,7 +609,6 @@ export const sar: Record<string, CardScript> = {
     onDefend(ctx) {
       const link = ctx.link;
       if (!link) return;
-      ctx.notifyTrapTriggered();
       ctx.createToken(FRAILTY, link.attacker);
     },
   },
@@ -622,7 +620,6 @@ export const sar: Record<string, CardScript> = {
     onDefend(ctx) {
       const link = ctx.link;
       if (!link) return;
-      ctx.notifyTrapTriggered();
       ctx.createToken(INERTIA, link.attacker);
     },
   },
@@ -633,7 +630,6 @@ export const sar: Record<string, CardScript> = {
     onDefend(ctx) {
       const link = ctx.link;
       if (!link) return;
-      ctx.notifyTrapTriggered();
       markHero(ctx, link.attacker);
     },
   },

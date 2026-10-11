@@ -81,7 +81,6 @@ export const amo: Record<string, CardScript> = {
     onDefend(ctx) {
       const attackingSeat = ctx.link?.attacker;
       if (attackingSeat === undefined) return;
-      ctx.notifyTrapTriggered();
       ctx.createToken(FRAILTY, attackingSeat);
       ctx.createToken(INERTIA, attackingSeat);
       ctx.createToken(BLOODROT_POX, attackingSeat);

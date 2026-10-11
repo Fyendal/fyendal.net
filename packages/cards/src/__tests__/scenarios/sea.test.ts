@@ -237,6 +237,31 @@ describe("SEA — High Seas heroes and cogs", () => {
     expect(projectStateFor(g.state, 1).pendingDecision?.promptMessage).toBeUndefined();
   });
 
+  it("Sticky Fingers unequips when it attacks and can then be attacked", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", weapons: ["sticky fingers|0"] },
+        { hero: "dorinthea", board: ["gold|0"], deck: ["dodge|3"] },
+      ],
+    });
+    const sticky = g.state.players[0]!.weapons.find(
+      (card) => functionalKeyOf(cardData[card.cardId]!) === "sticky fingers|0",
+    )!;
+    expect(g.state.players[0]!.board.map((card) => card.instanceId)).not.toContain(sticky.instanceId);
+
+    g.activate("sticky fingers|0").expectLog("Sticky Fingers is unequipped");
+    expect(g.state.players[0]!.weapons.map((card) => card.instanceId)).not.toContain(sticky.instanceId);
+    expect(g.state.players[0]!.board.find((card) => card.instanceId === sticky.instanceId))
+      .toMatchObject({ tapped: true, life: 2 });
+    expect(countOnBoard(g, 0, "gold|0")).toBe(1);
+
+    g.blockWith().endTurn();
+    expect(g.state.players[0]!.board.map((card) => card.instanceId)).toContain(sticky.instanceId);
+    expect(legalIntents(g.state, 1).some(
+      (intent) => intent.kind === "activate-ability" && intent.targetAllyId === sticky.instanceId,
+    )).toBe(true);
+  });
+
   it("Polly Cranka's crank does not refund a second action point", () => {
     const g = scenario({
       seats: [

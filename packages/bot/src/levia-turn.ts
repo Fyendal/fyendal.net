@@ -1,4 +1,4 @@
-import type { CardView } from "@fyendal/shared";
+import type { CardData, CardView } from "@fyendal/shared";
 import { isAttack, type BotPolicyInput } from "./policy.js";
 
 export function leviaEffectActive(input: BotPolicyInput, name: string): boolean {
@@ -20,6 +20,11 @@ export function leviaAttackPlayable(card: CardView, input: BotPolicyInput): bool
   if (data?.name === "Soul Harvest") return me.graveyard.length >= 6;
   if (data?.name === "Wrecker Romp") return me.hand.length >= 2;
   return true;
+}
+
+/** Resource cost of a Levia attack; an active Savage Sash discounts 6{p} attacks by 1. */
+export function leviaAttackCost(data: CardData | undefined, sash: boolean): number {
+  return Math.max(0, (data?.cost ?? 0) - (sash && (data?.attack ?? 0) >= 6 ? 1 : 0));
 }
 
 export function leviaAttackContinues(card: CardView, input: BotPolicyInput, future = false): boolean {
@@ -49,10 +54,7 @@ export function leviaAttackPair(
   const attacks = cards.filter((card) => leviaAttackPlayable(card, input));
   const sash = options.sash || (!options.future && leviaEffectActive(input, "savage sash"));
   const grantedGoAgain = options.grantGoAgain || (!options.future && leviaEffectActive(input, "consuming lash"));
-  const cost = (card: CardView) => {
-    const data = input.cards[card.cardId];
-    return Math.max(0, (data?.cost ?? 0) - (sash && (data?.attack ?? 0) >= 6 ? 1 : 0));
-  };
+  const cost = (card: CardView) => leviaAttackCost(input.cards[card.cardId], sash);
   for (const first of attacks) {
     if (!grantedGoAgain && !leviaAttackContinues(first, input, options.future) &&
       (options.future || me.actionPoints < 2)) continue;

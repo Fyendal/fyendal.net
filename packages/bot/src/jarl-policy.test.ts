@@ -25,6 +25,17 @@ function gravyDeck(): Decklist {
   };
 }
 
+/** An aggro-classified Wizard opponent built from the reported Oscilio game. */
+function oscilioDeck(): Decklist {
+  const spells = ["ROS024", "OMN099", "OMN133", "OMN187", "OMN134", "OMN118"];
+  return {
+    heroId: "HER122",
+    weaponIds: ["OMN096"],
+    equipment: { head: "OMN140" },
+    deck: Array.from({ length: 60 }, (_, index) => spells[index % spells.length]!),
+  };
+}
+
 function replaceHand(
   state: ReturnType<typeof createGame>,
   cardIds: readonly string[],
@@ -282,6 +293,69 @@ describe("Jarl policy", () => {
     view.players[1].heroName = "Dorinthea Ironsong";
     expect(chooseJarlIntent({ seat: 0, view, legal, cards: cardData }))
       .toEqual({ kind: "choose", optionId: String(crumble.instanceId) });
+  });
+
+  it("declares X = 2 for Imposing Visage into aggro when affordable and X = 0 otherwise", () => {
+    const state = createGame({
+      decklists: [jarlDeck(), decklists.dorinthea],
+      cards: cardData,
+      scripts,
+      seed: 12_104,
+      startPlayer: 0,
+    });
+    const view = projectStateFor(state, 0);
+    view.priorityPlayer = 0;
+    const chooseX = (options: readonly string[]) => {
+      view.pendingDecision = {
+        player: 0,
+        kind: "choose-target",
+        prompt: "Choose X",
+        promptMessage: { id: "engine.decision.x.choose" },
+        options: [...options],
+      };
+      const legal: GameIntent[] = options.map((optionId) => ({ kind: "choose", optionId }));
+      return chooseJarlIntent({ seat: 0, view, legal, cards: cardData });
+    };
+
+    view.players[1].heroName = "Oscilio, Constella Intelligence";
+    expect(chooseX(["X = 0", "X = 1", "X = 2", "X = 3"])).toEqual({ kind: "choose", optionId: "X = 2" });
+    // X = 1 would pay for nothing; fall back to Crumble.
+    expect(chooseX(["X = 1", "X = 0"])).toEqual({ kind: "choose", optionId: "X = 0" });
+
+    view.players[1].heroName = "Dorinthea Ironsong";
+    expect(chooseX(["X = 2", "X = 1", "X = 0"])).toEqual({ kind: "choose", optionId: "X = 0" });
+  });
+
+  describe("after the opening turn", () => {
+    function laterTurn(hand: readonly string[]) {
+      const oscilio = oscilioDeck();
+      const state = createGame({
+        decklists: [jarlDeck(oscilio), oscilio],
+        cards: cardData,
+        scripts,
+        seed: 12_103,
+        startPlayer: 0,
+      });
+      state.turn = 4;
+      replaceHand(state, hand);
+      return state;
+    }
+
+    it("pitches Imposing Visage to attack instead of spending its red hand on Visage", () => {
+      const state = laterTurn(["EVR022", "PEN319", "SBR020", "SBR021"]);
+      const [imposing, conquer] = state.players[0]!.hand;
+      expect(chooseJarlIntent(inputFor(state))).toMatchObject({
+        kind: "play-card",
+        instanceId: conquer!.instanceId,
+        pitchInstanceIds: [imposing!.instanceId],
+      });
+    });
+
+    it("does not play Imposing Visage even when Channel Lake Frigid is affordable", () => {
+      const state = laterTurn(["EVR022", "ELE146", "AJV020", "ELE147"]);
+      const imposing = state.players[0]!.hand[0]!;
+      expect(chooseJarlIntent(inputFor(state))).not.toMatchObject({ instanceId: imposing.instanceId });
+    });
   });
 
   it("blocks with expendable blues while preserving an Oaken and Pulse two-card line", () => {

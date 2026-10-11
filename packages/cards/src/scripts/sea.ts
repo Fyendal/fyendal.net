@@ -2415,6 +2415,7 @@ Object.assign(sea, {
   "sticky fingers|0": {
     ...attackAbilityForAlly(0),
     onAttackDeclared(ctx: ScriptCtx) {
+      ctx.unequip(ctx.self.instanceId);
       const gold = controlledGold(ctx, opponentSeat(ctx))[0];
       if (ctx.link?.targetAllyId === undefined && gold) ctx.steal(gold.instanceId, { duration: "indefinite" });
     },

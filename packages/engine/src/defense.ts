@@ -741,6 +741,11 @@ export function resolveDefendEventLayer(state: GameStateInternal,
   const effect = layer.engineEffect;
   if (effect?.kind === "on-defend-hook") {
     const source = findCardAnywhere(state, layer.sourceInstanceId)?.card ?? effect.source;
+    // A trap's defend trigger is the trap triggering ("whenever a trap you
+    // control triggers"); announce it for every trap rather than per script.
+    if ((dataOf(state, source.cardId).subtypes ?? []).includes("trap")) {
+      runtime.events.queueTriggeredEvent(state, "trap-triggered", layer.seat);
+    }
     runtime.events.runHook(state, layer.seat, source, "onDefend", link);
     // Defender-side "when this defends, intimidate" (Scowling Flesh Bag) queues
     // on the defending seat; resolve it as the trigger resolves.

@@ -916,7 +916,7 @@
   .decision-name-form { width: 100%; }
   .decision-buttons button,
   .decision-optcard button { min-height: 42px; }
-  .decision-cards { max-width: 100%; max-height: 30dvh; }
+  .decision-cards { max-width: 100%; max-height: 30dvh; gap: 12px; padding: 8px; }
   .trigger-order-list { width: calc(100vw - 40px); max-height: 42dvh; }
   .decision-trigger-order .trigger-order-list { max-height: none; }
   .trigger-order-item {
@@ -932,6 +932,7 @@
   .trigger-order-label { font-size: 12px; }
   .trigger-order-controls button { min-width: 34px; min-height: 34px; padding: 4px 8px; }
   .decision-cards .card-hand { width: 90px; height: 124px; }
+  .decision-cards .card-selected::before { top: 4px; right: 4px; width: 18px; height: 18px; font-size: 11px; }
   .decision-cards > .card-tapped { margin-inline: 17px; }
   /* Targets read like a hand: bare card faces in a dense grid, sized so a
      partial third row shows when the list scrolls. */

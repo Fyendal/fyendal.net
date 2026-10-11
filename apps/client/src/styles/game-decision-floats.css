@@ -377,17 +377,45 @@
   transform: translate(-50%, -50%);
 }
 /* Decision card picks use the same card-hand dimensions as the player's hand.
-   Hover inspection is provided by the table's data-cardid delegation. */
+   Hover inspection is provided by the table's data-cardid delegation. The
+   scroller clips outside its padding box, so the padding reserves room for
+   the selected ring and the playable glow. */
 .decision-cards {
   display: flex;
-  gap: 9px;
+  gap: 16px;
   flex-wrap: wrap;
   justify-content: center;
   max-width: 80vw;
   max-height: 60vh;
   overflow-y: auto;
   margin-top: 5px;
+  padding: 10px;
 }
+/* Picks stay in place: a hand-style lift would clip against the scrolling
+   row. The gold ring plus a corner check marks a chosen card without relying
+   on color alone; cards past the selection limit recede. */
+.decision-cards .card-hand.card-selected { transform: none; }
+.decision-cards .card-selected::before,
+.card-search-overlay .card-selected::before {
+  content: "✓";
+  position: absolute;
+  z-index: 7;
+  top: 6px;
+  right: 6px;
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #e2b75f;
+  box-shadow: 0 0 0 2px #1b1409;
+  color: #1b1409;
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1;
+  pointer-events: none;
+}
+.decision-cards .card-dim::after { background: #0007; }
 /* Rotation does not change a flex item's layout box. Give a tapped standalone
    choice half of the card's width/height difference on each side so its
    landscape silhouette cannot overlap the neighboring choice. */

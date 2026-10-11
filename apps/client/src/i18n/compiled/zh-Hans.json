@@ -9805,6 +9805,18 @@
       "value": "将一张 Mechanologist 行动牌置于牌库顶"
     }
   ],
+  "card.mst.murky.water.traps.banish": [
+    {
+      "type": 0,
+      "value": "从你的墓地将 3 张 trap 牌面朝下放逐？"
+    }
+  ],
+  "card.mst.murky.water.traps.choose": [
+    {
+      "type": 0,
+      "value": "选择 3 张 trap 牌面朝下放逐"
+    }
+  ],
   "card.mst.option.yourhero": [
     {
       "type": 0,
@@ -17432,6 +17444,16 @@
     {
       "type": 0,
       "value": " 在墓地中翻至面朝下（Watery Grave）"
+    }
+  ],
+  "engine.log.card.unequipped": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 被卸下装备"
     }
   ],
   "engine.log.card.untapped": [

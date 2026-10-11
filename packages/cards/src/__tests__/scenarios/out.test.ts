@@ -599,6 +599,21 @@ describe("OUT — rules regression coverage", () => {
     expect(s.state.players[1]!.life).toBe(19);
   });
 
+  it.each(["chain reaction|2", "collapsing trap|3"])(
+    "Riptide, Lurker of the Deep deals damage when %s triggers",
+    (trap) => {
+      const s = scenario({
+        active: 1,
+        seats: [
+          { hero: "rhinar", heroKey: "riptide, lurker of the deep|0", arsenal: [trap] },
+          { hero: "dorinthea", hand: ["head jab|1", BLUE] },
+        ],
+      });
+      s.play("head jab|1").blockWith().passPriority().react(trap).settle();
+      expect(s.state.players[1]!.life).toBe(19);
+    },
+  );
+
   it("Be Like Water's chosen name enables the matching Combo condition", () => {
     const s = scenario({
       seats: [
