@@ -718,6 +718,10 @@ export interface PendingArcane {
   sourceIsAlly?: boolean;
   /** Last-known source identity for the explicit Runechant skip shortcut. */
   sourceIsRunechant?: true;
+  /** Last-known source retained when the source ceased to exist before its
+   * damage was applied (a Runechant destroys itself first), so "when you deal
+   * damage" observers still see the event. Absent while the source is live. */
+  sourceSnapshot?: CardInstance;
   targetSeat: number;
   /** damage before barrier prevention */
   amount: number;

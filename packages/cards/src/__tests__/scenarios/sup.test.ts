@@ -461,6 +461,21 @@ describe("SUP — heroes and the crowd", () => {
       .expectFinalDefense(2);
   });
 
+  it("Overcrowded counts different aura token names, not aura cards", () => {
+    const g = scenario({
+      seats: [
+        foe({ hand: ["command and conquer|1"], resources: 2, board: ["ponder|0", "sigil of brilliance|2"] }),
+        hero("tuffnut, bumbling hulkster|0", {
+          arsenalFaceDown: ["overcrowded|3"],
+          board: ["ponder|0", "toughness|0", "core reaction|1"],
+        }),
+      ],
+    });
+
+    g.play("command and conquer|1", { settle: false });
+    g.blockWith("overcrowded|3").settle().expectFinalDefense(4);
+  });
+
   it("No Hero Stands Alone gains Ambush only after controlling a Toughness this turn", () => {
     const withoutToughness = scenario({
       active: 1,
@@ -879,6 +894,42 @@ describe("SUP — tokens and suspense", () => {
       .blockWith("comeback kid|1", "fight from behind|1")
       .settle()
       .expectFinalDefense(6); // 3 + 2 printed defense, then Toughness gives the first +1
+  });
+
+  it("Disperse counts Toughness bonuses toward its 6-defense arsenal trigger", () => {
+    const g = scenario({
+      seats: [
+        hero("pleiades|0", {
+          board: ["toughness|0", "toughness|0", "toughness|0"],
+          hand: ["disperse|3"],
+        }),
+        foe({ hand: ["head jab|1"], arsenal: ["raging onslaught|3"] }),
+      ],
+    });
+
+    g.endTurn()
+      .play("head jab|1")
+      .blockWith("disperse|3")
+      .settle()
+      .expectFinalDefense(6) // 3 printed + 1 from each destroyed Toughness
+      .expectNotInZone(1, "raging onslaught|3", "arsenal");
+    expect(g.state.players[1]!.deck.at(-1)?.cardId).toBe(printingId("raging onslaught|3"));
+  });
+
+  it("Disperse leaves the arsenal alone below 6 defense", () => {
+    const g = scenario({
+      seats: [
+        hero("pleiades|0", { board: ["toughness|0"], hand: ["disperse|3"] }),
+        foe({ hand: ["head jab|1"], arsenal: ["raging onslaught|3"] }),
+      ],
+    });
+
+    g.endTurn()
+      .play("head jab|1")
+      .blockWith("disperse|3")
+      .settle()
+      .expectFinalDefense(4)
+      .expectInZone(1, "raging onslaught|3", "arsenal");
   });
 
   it("No Hero Stands Alone gets +3 from a Toughness destroyed at the start of the turn", () => {

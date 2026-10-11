@@ -956,6 +956,21 @@ function defendingCardDefense(
   return Math.max(0, defense);
 }
 
+/** Current defense of a card defending `link`, including counters, base
+ * changes, and continuous or one-shot modifiers; 0 when it is not defending. */
+export function defendingDefenseOf(
+  state: GameStateInternal,
+  runtime: EngineRuntime,
+  card: CardInstance,
+  link?: ChainLinkState,
+): number {
+  if (!link) return 0;
+  const equipment = link.defendingEquipment.find((candidate) => candidate.instanceId === card.instanceId);
+  if (equipment) return equipmentDefense(state, runtime, link, equipment);
+  const defending = link.defendingCards.find((candidate) => candidate.instanceId === card.instanceId);
+  return defending ? defendingCardDefense(state, runtime, link, defending) : 0;
+}
+
 /** Observe a card becoming a defender. Some attacking permanents create a
  * delayed self-destruction at that moment; later power/defense changes do not
  * undo or retroactively create it. */

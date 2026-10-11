@@ -189,6 +189,9 @@ export interface ScriptCtx {
   /** Current power while a card is defending, including temporary and
    * opposing continuous modifiers. */
   currentPower(card: number | DeepReadonly<CardInstance>): number;
+  /** Current defense of a card defending the active link, including
+   * counters and continuous modifiers; 0 when it is not defending. */
+  currentDefense(card: number | DeepReadonly<CardInstance>): number;
   /** Full current power of the active attack, including base changes,
    * counters, continuous modifiers, and opposing effects. */
   currentAttackPower(): number;
@@ -846,6 +849,18 @@ export function activatedFlagKey(instanceId: number, abilityIndex: number): stri
   return abilityIndex === 0 ? `activated:${instanceId}` : `activated:${instanceId}:${abilityIndex}`;
 }
 
+/** Validated occurrence count for a trigger whose condition was met. */
+export function triggerOccurrenceCount(
+  trigger: TriggerDef,
+  ctx: ScriptCtx,
+  eventCard?: DeepReadonly<CardInstance>,
+  eventContext?: TriggerEventContext,
+): number {
+  if (!trigger.occurrences) return 1;
+  const count = trigger.occurrences(ctx, eventCard, eventContext);
+  return Number.isSafeInteger(count) && count > 0 ? count : 0;
+}
+
 export const ONCE_PER_TURN_EFFECT_FLAG_PREFIX = "oncePerTurnEffectUsed:";
 
 export function oncePerTurnEffectFlagKey(instanceId: number): string {
@@ -890,8 +905,18 @@ export interface TriggerDef {
   /** Locale-independent counterpart to `publicLog`. The engine adds
    * `triggerSource` and `occurrences` values when announcing it. */
   publicLogMessage?: GameMessage;
-  /** Runs when the trigger condition is met and its layer is created. Use for
-   * consuming trigger limits; resolution effects belong in `effect`. */
+  /** Number of separate triggered abilities this source generates for the
+   * event, for example one per stacked grant of the same ability. They form
+   * one counted layer and each occurrence resolves separately. Defaults to 1;
+   * zero or an invalid count creates no layer. */
+  occurrences?(
+    ctx: ScriptCtx,
+    eventCard?: DeepReadonly<CardInstance>,
+    eventContext?: TriggerEventContext,
+  ): number;
+  /** Runs once per occurrence when the trigger condition is met and its layer
+   * is created. Use for consuming trigger limits; resolution effects belong in
+   * `effect`. */
   onTrigger?(
     ctx: ScriptCtx,
     eventCard?: DeepReadonly<CardInstance>,

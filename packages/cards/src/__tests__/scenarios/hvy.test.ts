@@ -659,6 +659,36 @@ describe("HVY — Heavy Hitters mechanics", () => {
     expect(g.state.chain.at(-1)?.flags.overpower).toBe(true);
   });
 
+  it("each Good Time Chapeau activation grants a separate wager that Betsy can pay for", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          heroKey: "betsy|0",
+          hand: ["wounding blow|1"],
+          board: ["gold|0", "gold|0"],
+          equipment: { head: "good time chapeau|0" },
+          resources: 10,
+        },
+        { hero: "dorinthea" },
+      ],
+    });
+
+    g.activate("good time chapeau|0", { settle: false })
+      .chooseCard("gold|0")
+      .activate("good time chapeau|0", { settle: false })
+      .chooseCard("gold|0")
+      .play("wounding blow|1")
+      .expectLog("Good Time Chapeau triggers: Wager Might and Vigor with the defending hero ×2");
+    expect(g.state.pendingDecision?.chooseHook).toBe("betsy-pay");
+    g.chooseOption("pay 2");
+    expect(g.state.pendingDecision?.chooseHook).toBe("betsy-pay");
+    g.chooseOption("pay 2");
+
+    expect(g.state.chain.at(-1)?.wagers).toHaveLength(2);
+    g.expectAttackValue(6);
+  });
+
   it("Victor draws from the first Gold his effect creates", () => {
     const g = scenario({
       seats: [

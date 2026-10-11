@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { legalIntents, projectStateFor } from "@fyendal/engine";
 import { cardData, isImplemented } from "../../index.js";
 import { printingId, scenario } from "../harness.js";
+import type { Scenario } from "../harness.js";
 
 it("registers every MST printing as implemented", () => {
   const cards = Object.values(cardData).filter((card) => card.set === "MST");
@@ -126,17 +127,84 @@ describe("MST — Mystic heroes and cloaked equipment", () => {
       .expectLife(1, 20);
   });
 
-  it("Essence of Ancestry prevents the matching color event after Ward destroys it", () => {
+  function boardCard(g: Scenario, seat: number, key: string) {
+    const id = printingId(key);
+    const card = g.state.players[seat]!.board.find((candidate) => candidate.cardId === id);
+    if (!card) throw new Error(`${key} is not on seat ${seat}'s board`);
+    return card;
+  }
+
+  function destroyForWard(g: Scenario, seat: number, key: string) {
+    expect(g.state.pendingDecision).toMatchObject({ player: seat, chooseHook: "ward" });
+    return g.doRaw({ kind: "choose", optionId: `destroy ${boardCard(g, seat, key).instanceId}` }).settle();
+  }
+
+  it("Essence of Ancestry prevents the next matching color event, not the Ward event that destroyed it", () => {
     const g = scenario({
       seats: [
-        { hero: "rhinar", hand: ["snatch|1"] },
+        { hero: "rhinar", hand: ["head jab|1", "head jab|1"] },
         { hero: "dorinthea", board: ["essence of ancestry: body|1"] },
       ],
     });
-    g.play("snatch|1").blockWith().settle()
-      .chooseOption("destroy")
+    g.play("head jab|1").blockWith().settle();
+    destroyForWard(g, 1, "essence of ancestry: body|1")
+      .expectLife(1, 19)
+      .expectInZone(1, "essence of ancestry: body|1", "graveyard")
+      .play("head jab|1").blockWith().settle()
+      .expectLife(1, 19);
+  });
+
+  it("Essence of Ancestry checks Illusionist auras after another Ward aura finishes the damage event", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", hand: ["head jab|1", "head jab|1"] },
+        { hero: "dorinthea", board: ["essence of ancestry: body|1", "nebulus cycle|2"] },
+      ],
+    });
+    g.play("head jab|1").blockWith().settle();
+    destroyForWard(g, 1, "essence of ancestry: body|1");
+    destroyForWard(g, 1, "nebulus cycle|2")
       .expectLife(1, 20)
-      .expectInZone(1, "essence of ancestry: body|1", "graveyard");
+      .expectInZone(1, "nebulus cycle|2", "graveyard")
+      .play("head jab|1").blockWith().settle()
+      .expectLife(1, 20);
+  });
+
+  it("Essence of Ancestry does not prevent damage while another Illusionist aura remains", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", hand: ["head jab|1", "head jab|1"] },
+        { hero: "dorinthea", board: ["essence of ancestry: body|1", "ode to wrath|2"] },
+      ],
+    });
+    g.play("head jab|1").blockWith().settle();
+    destroyForWard(g, 1, "essence of ancestry: body|1")
+      .expectLife(1, 19)
+      .play("head jab|1").blockWith().settle()
+      .expectLife(1, 16);
+  });
+
+  it("Haunting Specter's new Spectral Shield gets a counter when no other Illusionist aura remains", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", hand: ["head jab|1"] },
+        { hero: "dorinthea", board: ["haunting specter|3"] },
+      ],
+    });
+    g.play("head jab|1").blockWith().settle();
+    destroyForWard(g, 1, "haunting specter|3").expectLife(1, 19);
+    expect(boardCard(g, 1, "spectral shield|0").counters?.power).toBe(1);
+  });
+
+  it("Spectral Manifestations does not count its own Spectral Shield as another Illusionist aura", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", hand: ["spectral manifestations|2"], resources: 2 },
+        { hero: "dorinthea" },
+      ],
+    });
+    g.play("spectral manifestations|2");
+    expect(boardCard(g, 0, "spectral shield|0").counters?.power).toBe(2);
   });
 
   it("Restless Coalescence moves any number of +1 power counters from controlled auras", () => {

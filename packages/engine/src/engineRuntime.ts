@@ -5,7 +5,7 @@ import { setAttackActivationLimitKey } from "./abilityRules.js";
 import { attackFromDeck, attackWithPermanent, replaceAttackFromBanish, replaceAttackFromHand } from "./attacks.js";
 import { arsenalCapacity, drawCards, entersArena, settlePlayedCard, settlesInArena, stampControlledName, tapPermanent } from "./cardLifecycle.js";
 import { crowdBoo, crowdCheer, requestClash } from "./clash.js";
-import { applyOneShotDefenseModifiers, attackBonusAboveBase, attackHasDominate, attackHasOverpower, basePowerOf, chainLinkNumber, chainLinksControlled, computeAttack, computeDefense, currentPowerOf, hitsThisCombatChain, linkAttackHasType, noteAttackDefendedBy, replaceTemporalPowerGain } from "./combatValues.js";
+import { applyOneShotDefenseModifiers, attackBonusAboveBase, attackHasDominate, attackHasOverpower, basePowerOf, chainLinkNumber, chainLinksControlled, computeAttack, computeDefense, currentPowerOf, defendingDefenseOf, hitsThisCombatChain, linkAttackHasType, noteAttackDefendedBy, replaceTemporalPowerGain } from "./combatValues.js";
 import { boundArcaneCardBonus, dealEffectDamage, effectDamageBonus, gainHeroLife } from "./damageResolution.js";
 import { queueDefendEventLayersAfterCurrent, resolveIntimidate } from "./defense.js";
 import { recordDieResult, recordDieRoll, rollIgnoringLowest } from "./dieRoll.js";
@@ -56,6 +56,7 @@ export function createEngineRuntime(
       crowdCheer: bind(crowdCheer, true),
       currentPowerOf: bind(currentPowerOf, true),
       dealEffectDamage: bind(dealEffectDamage, true),
+      defendingDefenseOf: bind(defendingDefenseOf, true),
       destroyPermanent: bind(destroyPermanent, true),
       discardToGraveyard: bind(discardToGraveyard, true),
       drawCards: bind(drawCards, true),

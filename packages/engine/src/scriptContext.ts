@@ -1321,6 +1321,13 @@ export function makeCtx(
       if (!observed) return 0;
       return runtime.commands.currentPowerOf(state, observed, link);
     },
+    currentDefense(cardOrId) {
+      const observed = typeof cardOrId === "number"
+        ? findCardAnywhere(state, cardOrId)?.card
+        : cardOrId as CardInstance;
+      if (!observed) return 0;
+      return runtime.commands.defendingDefenseOf(state, observed, link);
+    },
     currentAttackPower() {
       return link ? runtime.commands.computeAttack(state, link) : 0;
     },
@@ -1389,6 +1396,7 @@ export function makeCtx(
         sourceSeat: damageSource?.seat ?? seat,
         ...(sourceIsAlly ? { sourceIsAlly: true } : {}),
         ...(sourceIsRunechant ? { sourceIsRunechant: true } : {}),
+        ...(!liveSource && damageSource ? { sourceSnapshot: runtime.commands.snapshotSerializable(damageSource.card) } : {}),
         targetSeat,
         amount: n,
         arcane: opts?.arcane === true,

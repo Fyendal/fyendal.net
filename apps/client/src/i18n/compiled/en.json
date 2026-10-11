@@ -15287,6 +15287,44 @@
       "value": "Turn a banished card face down to create a Corrupted Corpse"
     }
   ],
+  "card.trigger.mst.essence.prevent.blue": [
+    {
+      "type": 0,
+      "value": "If you control no Illusionist auras, prevent the next damage from a blue source this turn"
+    }
+  ],
+  "card.trigger.mst.essence.prevent.red": [
+    {
+      "type": 0,
+      "value": "If you control no Illusionist auras, prevent the next damage from a red source this turn"
+    }
+  ],
+  "card.trigger.mst.essence.prevent.yellow": [
+    {
+      "type": 0,
+      "value": "If you control no Illusionist auras, prevent the next damage from a yellow source this turn"
+    }
+  ],
+  "card.trigger.mst.hauntingspecter.shield": [
+    {
+      "type": 0,
+      "value": "Create a Spectral Shield; if you control no other Illusionist auras, put a +1 power counter on it"
+    }
+  ],
+  "card.trigger.mst.vengefulapparition.instant": [
+    {
+      "type": 0,
+      "value": "If you control no Illusionist auras, you may play your next aura with cost "
+    },
+    {
+      "type": 1,
+      "value": "cost"
+    },
+    {
+      "type": 0,
+      "value": " or less this turn as though it were an instant"
+    }
+  ],
   "card.trigger.pen.themis.facedown": [
     {
       "type": 0,

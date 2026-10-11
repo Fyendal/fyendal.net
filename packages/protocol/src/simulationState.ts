@@ -532,11 +532,12 @@ function validateModifier(value: unknown, code: string, path: string): void {
 
 function validateArcane(value: unknown, code: string, path: string, depth: number): void {
   if (depth > MAX_ARCANE_DEPTH) fail(code, path, "arcane queue nesting is too deep");
-  const arcane = exact(value, code, path, ["sourceInstanceId", "sourceSeat", "targetSeat", "amount", "arcane"], ["sourceIsAlly", "sourceIsRunechant", "countsAsHit", "destroySourceAfterDamage", "targetWasMarked", "targetAllyId", "combat", "combatDamageEquipmentReplacementIds", "unpreventable", "payTotal", "arcaneBarrierResolved", "usedQuellSourceIds", "usedDiscardDamagePreventionModifierIds", "usedSoulDamagePreventionSourceIds", "soulDamagePreventionSourceInstanceId", "lethalDamagePreventionModifierId", "quellSourceInstanceId", "queue"]);
+  const arcane = exact(value, code, path, ["sourceInstanceId", "sourceSeat", "targetSeat", "amount", "arcane"], ["sourceIsAlly", "sourceIsRunechant", "sourceSnapshot", "countsAsHit", "destroySourceAfterDamage", "targetWasMarked", "targetAllyId", "combat", "combatDamageEquipmentReplacementIds", "unpreventable", "payTotal", "arcaneBarrierResolved", "usedQuellSourceIds", "usedDiscardDamagePreventionModifierIds", "usedSoulDamagePreventionSourceIds", "soulDamagePreventionSourceInstanceId", "lethalDamagePreventionModifierId", "quellSourceInstanceId", "queue"]);
   for (const key of ["sourceInstanceId", "sourceSeat", "targetSeat", "amount"] as const) integer(arcane[key], code, `${path}.${key}`);
   bool(arcane.arcane, code, `${path}.arcane`);
   for (const key of ["sourceIsAlly", "sourceIsRunechant", "countsAsHit", "destroySourceAfterDamage", "targetWasMarked", "combat", "unpreventable", "arcaneBarrierResolved"] as const) optional(arcane, key, (v, p) => { bool(v, code, p); }, path);
   for (const key of ["targetAllyId", "payTotal", "soulDamagePreventionSourceInstanceId", "lethalDamagePreventionModifierId", "quellSourceInstanceId"] as const) optional(arcane, key, (v, p) => { integer(v, code, p); }, path);
+  optional(arcane, "sourceSnapshot", (v, p) => { validateCard(v, code, p); }, path);
   optional(arcane, "usedQuellSourceIds", (v, p) => array(v, code, p, 64).forEach((entry, index) => integer(entry, code, `${p}[${index}]`)), path);
   optional(arcane, "usedDiscardDamagePreventionModifierIds", (v, p) => array(v, code, p, 64).forEach((entry, index) => integer(entry, code, `${p}[${index}]`)), path);
   optional(arcane, "usedSoulDamagePreventionSourceIds", (v, p) => array(v, code, p, 64).forEach((entry, index) => integer(entry, code, `${p}[${index}]`)), path);

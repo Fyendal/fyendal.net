@@ -27,6 +27,7 @@ export type ScriptCommandName =
   | "crowdCheer"
   | "currentPowerOf"
   | "dealEffectDamage"
+  | "defendingDefenseOf"
   | "destroyPermanent"
   | "discardToGraveyard"
   | "drawCards"

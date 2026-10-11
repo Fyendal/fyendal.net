@@ -756,6 +756,19 @@ describe("ROS — Lightning and Runeblade", () => {
       .expectZoneSize(0, "board", 3);
   });
 
+  it("Arcane Cussing is destroyed when a Runechant deals damage", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", board: ["arcane cussing|1", "runechant|0"], hand: ["ball lightning|1"] },
+        { hero: "dorinthea", hand: [] },
+      ],
+    });
+    g.play("ball lightning|1")
+      .expectLife(1, 19)
+      .expectInZone(0, "arcane cussing|1", "graveyard")
+      .expectZoneSize(0, "board", 3);
+  });
+
   it("Succumb to Temptation may be played as an instant after Runechant damage", () => {
     const g = scenario({
       seats: [

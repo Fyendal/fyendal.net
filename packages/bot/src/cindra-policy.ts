@@ -914,6 +914,12 @@ function legalThrowDaggerCouldBePlayed(input: BotPolicyInput): boolean {
   });
 }
 
+function ownThrowDaggerIsOnStack(input: BotPolicyInput): boolean {
+  return input.view.stack.some((layer) =>
+    layer.seat === input.seat && key(input.cards[layer.card?.cardId ?? ""]) === CARD.throwDagger
+  );
+}
+
 function flickEnablesCutThrough(input: BotPolicyInput): boolean {
   if (cutThroughLikelyHasGoAgain(input) || !futureAttackCouldBePlayed(input)) return false;
   const attacks = input.view.players[input.seat].hand.filter((card) =>
@@ -941,6 +947,9 @@ function shouldFlickKnives(input: BotPolicyInput): boolean {
   const decision = input.view.pendingDecision;
   const link = currentLink(input);
   if (decision?.kind !== "attack-reaction" || link?.attackingCard.owner !== input.seat) return false;
+  // Flick could destroy the dagger an unresolved Throw Dagger targets and
+  // fizzle it. Let Throw Dagger resolve, then decide again with its outcome.
+  if (ownThrowDaggerIsOnStack(input)) return false;
   // Clearing Ward converts the active attack from a miss into a hit. Always
   // take that payoff before applying the normal last-dagger and Throw Dagger
   // conservation rules.

@@ -653,9 +653,9 @@ export const sup: Record<string, CardScript> = {
     onAttackDeclared(ctx) {
       if (ctx.getFlag("player", "cheeredThisTurn")) ctx.createToken(TOUGHNESS);
     },
-    canTriggerOnDefend: (ctx) => (ctx.data.defense ?? 0) + (ctx.self.tempDefense ?? 0) >= 6,
+    canTriggerOnDefend: (ctx) => ctx.currentDefense(ctx.self) >= 6,
     onDefend(ctx) {
-      if ((ctx.data.defense ?? 0) + (ctx.self.tempDefense ?? 0) < 6) return;
+      if (ctx.currentDefense(ctx.self) < 6) return;
       const hand = ctx.player(opponentSeat(ctx)).hand;
       if (hand.length)
         ctx.requestCardChoice(
@@ -673,9 +673,9 @@ export const sup: Record<string, CardScript> = {
     onAttackDeclared(ctx) {
       if (ctx.getFlag("player", "cheeredThisTurn")) ctx.createToken(TOUGHNESS);
     },
-    canTriggerOnDefend: (ctx) => (ctx.data.defense ?? 0) + (ctx.self.tempDefense ?? 0) >= 6,
+    canTriggerOnDefend: (ctx) => ctx.currentDefense(ctx.self) >= 6,
     onDefend(ctx) {
-      if ((ctx.data.defense ?? 0) + (ctx.self.tempDefense ?? 0) < 6) return;
+      if (ctx.currentDefense(ctx.self) < 6) return;
       const targets = ctx.player(opponentSeat(ctx)).board.filter((card) => aura(ctx, card));
       if (targets.length)
         ctx.requestCardChoice(
@@ -693,9 +693,9 @@ export const sup: Record<string, CardScript> = {
     onAttackDeclared(ctx) {
       if (ctx.getFlag("player", "cheeredThisTurn")) ctx.createToken(TOUGHNESS);
     },
-    canTriggerOnDefend: (ctx) => (ctx.data.defense ?? 0) + (ctx.self.tempDefense ?? 0) >= 6,
+    canTriggerOnDefend: (ctx) => ctx.currentDefense(ctx.self) >= 6,
     onDefend(ctx) {
-      if ((ctx.data.defense ?? 0) + (ctx.self.tempDefense ?? 0) < 6) return;
+      if (ctx.currentDefense(ctx.self) < 6) return;
       const card = ctx.player(opponentSeat(ctx)).arsenal[0];
       if (card) ctx.putOnDeckBottom(card.instanceId);
     },

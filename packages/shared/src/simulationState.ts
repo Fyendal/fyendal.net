@@ -309,6 +309,7 @@ export interface PersistedPendingArcaneV1 {
   sourceSeat: number;
   sourceIsAlly?: boolean;
   sourceIsRunechant?: true;
+  sourceSnapshot?: PersistedCardInstanceV1;
   targetSeat: number;
   amount: number;
   arcane: boolean;

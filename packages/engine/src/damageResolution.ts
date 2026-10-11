@@ -611,6 +611,9 @@ function applyEffectDamage(state: GameStateInternal,
     runtime.events.fireHeroDealtDamage(state, packet.targetSeat, packet.amount, packet.arcane === true);
   }
   if (!found) {
+    if (packet.amount > 0 && packet.sourceSnapshot) {
+      fireFriendlyDamageDealt(state, runtime, packet, packet.sourceSnapshot);
+    }
     destroySourceAfterEffectDamage(state, runtime, packet);
     return;
   }
@@ -655,31 +658,40 @@ function applyEffectDamage(state: GameStateInternal,
       }
     }
   }
-  if (packet.amount > 0) {
-    const active = hookSources(state, packet.sourceSeat, {
-      board: true,
-      arsenal: true,
-      equipment: true,
-      weapons: true,
-    });
-    const sources = [...active, ...lingeringModifierSources(state, packet.sourceSeat).filter(
-      (candidate) => !active.some((source) => source.instanceId === candidate.instanceId),
-    )];
-    for (const source of sources) {
-      if (source.instanceId === found.card.instanceId) continue;
-      scriptOf(state, source.cardId, source)?.onFriendlyDamageDealt?.(
-        runtime.makeCtx(state, packet.sourceSeat, source, currentLink(state)),
-        found.card,
-        packet.targetSeat,
-        packet.amount,
-        packet.arcane === true,
-      );
-    }
-  }
+  if (packet.amount > 0) fireFriendlyDamageDealt(state, runtime, packet, found.card);
   if (packet.amount > 0 && packet.countsAsHit) {
     queueEffectHitTriggers(state, runtime, packet, found.card);
   }
   destroySourceAfterEffectDamage(state, runtime, packet);
+}
+
+/** Notify the source controller's other permanents that they dealt damage.
+ * `source` is the live card or its last-known snapshot. */
+function fireFriendlyDamageDealt(
+  state: GameStateInternal,
+  runtime: EngineRuntime,
+  packet: PendingArcane,
+  source: CardInstance,
+): void {
+  const active = hookSources(state, packet.sourceSeat, {
+    board: true,
+    arsenal: true,
+    equipment: true,
+    weapons: true,
+  });
+  const observers = [...active, ...lingeringModifierSources(state, packet.sourceSeat).filter(
+    (candidate) => !active.some((observer) => observer.instanceId === candidate.instanceId),
+  )];
+  for (const observer of observers) {
+    if (observer.instanceId === source.instanceId) continue;
+    scriptOf(state, observer.cardId, observer)?.onFriendlyDamageDealt?.(
+      runtime.makeCtx(state, packet.sourceSeat, observer, currentLink(state)),
+      source,
+      packet.targetSeat,
+      packet.amount,
+      packet.arcane === true,
+    );
+  }
 }
 
 /** Spellvoid N values of the player's equipped gear and arena permanents

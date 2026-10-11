@@ -1,4 +1,5 @@
-import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
+import type { CardInstance, CardScript, DeepReadonly, ScriptCtx, TriggerDef } from "@fyendal/engine";
+import type { GameMessage } from "@fyendal/shared";
 import {
   ampNextArcane,
   attackAbility,
@@ -83,8 +84,36 @@ function instantEvoEquipment(extra: CardScript = {}): CardScript {
   };
 }
 
-function controlsIllusionistAura(ctx: ScriptCtx): boolean {
-  return ctx.player(ctx.seat).board.some((card) => isIllusionistAura(ctx, card));
+function controlsIllusionistAura(ctx: ScriptCtx, exceptInstanceId?: number): boolean {
+  return ctx
+    .player(ctx.seat)
+    .board.some((card) => card.instanceId !== exceptInstanceId && isIllusionistAura(ctx, card));
+}
+
+/** "When this leaves the arena" is a triggered layer: its "if you control no
+ * Illusionist auras" condition is checked when the layer resolves, after the
+ * event that moved this card (such as a Ward damage event) has finished. */
+function leaveArenaTrigger(
+  label: string,
+  labelMessage: GameMessage,
+  effect: (ctx: ScriptCtx) => void,
+): TriggerDef {
+  return {
+    event: "card-left-arena",
+    sourceZone: "any",
+    label,
+    labelMessage,
+    condition: (ctx, left) => left?.instanceId === ctx.self.instanceId,
+    effect,
+  };
+}
+
+/** Create a Spectral Shield, then add counters only if no other Illusionist
+ * aura is controlled. The newly created shield never counts as "other". */
+function createSoloSpectralShield(ctx: ScriptCtx, counters: number): void {
+  const shield = ctx.createToken(SPECTRAL_SHIELD);
+  if (shield && !controlsIllusionistAura(ctx, shield.instanceId))
+    ctx.addCounter(shield.instanceId, "power", counters);
 }
 
 function supercellDrivers(ctx: ScriptCtx): DeepReadonly<CardInstance>[] {
@@ -400,21 +429,37 @@ function etchings(counters: number): CardScript {
   };
 }
 
-function essence(pitch: number): CardScript {
+const ESSENCE_COLORS = {
+  1: { color: "red", messageId: "card.trigger.mst.essence.prevent.red" },
+  2: { color: "yellow", messageId: "card.trigger.mst.essence.prevent.yellow" },
+  3: { color: "blue", messageId: "card.trigger.mst.essence.prevent.blue" },
+} as const;
+
+function essence(pitch: 1 | 2 | 3): CardScript {
+  const { color, messageId } = ESSENCE_COLORS[pitch];
   return {
-    onLeaveArena(ctx) {
-      if (!controlsIllusionistAura(ctx))
-        ctx.addModifier({ scope: "until-end-of-turn", preventNextDamageFromPitch: pitch });
-    },
+    triggers: [
+      leaveArenaTrigger(
+        `If you control no Illusionist auras, prevent the next damage from a ${color} source this turn`,
+        decisionMessage(messageId),
+        (ctx) => {
+          if (!controlsIllusionistAura(ctx))
+            ctx.addModifier({ scope: "until-end-of-turn", preventNextDamageFromPitch: pitch });
+        },
+      ),
+    ],
   };
 }
 
 function haunting(): CardScript {
   return {
-    onLeaveArena(ctx) {
-      const shield = ctx.createToken(SPECTRAL_SHIELD);
-      if (shield && !controlsIllusionistAura(ctx)) ctx.addCounter(shield.instanceId, "power", 1);
-    },
+    triggers: [
+      leaveArenaTrigger(
+        "Create a Spectral Shield; if you control no other Illusionist auras, put a +1 power counter on it",
+        decisionMessage("card.trigger.mst.hauntingspecter.shield"),
+        (ctx) => createSoloSpectralShield(ctx, 1),
+      ),
+    ],
   };
 }
 
@@ -465,20 +510,24 @@ function solitary(): CardScript {
 function spectralManifestations(counters: number): CardScript {
   return {
     onPlay(ctx) {
-      const shield = ctx.createToken(SPECTRAL_SHIELD);
-      if (shield && !controlsIllusionistAura(ctx)) ctx.addCounter(shield.instanceId, "power", counters);
+      createSoloSpectralShield(ctx, counters);
     },
   };
 }
 
 function vengeful(maxCost: number): CardScript {
   return {
-    onLeaveArena(ctx) {
-      if (!controlsIllusionistAura(ctx)) {
-        ctx.setCounter("vengefulMax", maxCost);
-        ctx.addModifier({ scope: "until-end-of-turn" });
-      }
-    },
+    triggers: [
+      leaveArenaTrigger(
+        `If you control no Illusionist auras, you may play your next aura with cost ${maxCost} or less this turn as though it were an instant`,
+        decisionMessage("card.trigger.mst.vengefulapparition.instant", { cost: maxCost }),
+        (ctx) => {
+          if (controlsIllusionistAura(ctx)) return;
+          ctx.setCounter("vengefulMax", maxCost);
+          ctx.addModifier({ scope: "until-end-of-turn" });
+        },
+      ),
+    ],
     allowsFriendlyCardPlayAsInstant(ctx, card) {
       return isAura(ctx, card) && (data(ctx, card).cost ?? 0) <= ctx.getCounter("vengefulMax");
     },

@@ -2,6 +2,7 @@ import type { EngineRuntime } from "./runtimePorts.js";
 import { recordLifeLost } from "./stats.js";
 import type { GameStateInternal } from "./runtimeState.js";
 import type { GameMessage, MeldSide, PlayableZone } from "@fyendal/shared";
+import { triggerOccurrenceCount } from "./scripts.js";
 import type { CardScript, TriggerEvent, TriggerEventContext } from "./scripts.js";
 import { DEFAULT_CHOOSE_X_PROMPT, scriptPromptParts } from "./scriptPresentation.js";
 import {
@@ -1943,22 +1944,28 @@ function collectCardPlayedTriggerLayers(
     const ctx = runtime.makeCtx(state, subject, card, currentLink(state));
     const eventContext: TriggerEventContext = { causedBySeat: subject, from };
     if (trigger.condition && !trigger.condition(ctx, card, eventContext)) return;
-    trigger.onTrigger?.(ctx, card, eventContext);
+    const occurrences = triggerOccurrenceCount(trigger, ctx, card, eventContext);
+    if (occurrences === 0) return;
+    for (let occurrence = 0; occurrence < occurrences; occurrence++) {
+      trigger.onTrigger?.(ctx, card, eventContext);
+    }
     layers.push({
       sourceInstanceId: card.instanceId,
       seat: subject,
       triggerIndex,
+      ...(occurrences > 1 ? { triggerCount: occurrences } : {}),
       triggerSource: snapshotSerializable(card),
       triggerEventCard: snapshotSerializable(card),
       label: trigger.label,
       optional: trigger.optional ?? false,
       ...(trigger.defaultOption ? { defaultOption: trigger.defaultOption } : {}),
     });
-    const fallback = `${nameOf(state, card.cardId)} triggers: ${trigger.label}`;
+    const fallback = `${nameOf(state, card.cardId)} triggers: ${trigger.label}${occurrences > 1 ? ` ×${occurrences}` : ""}`;
     logPublic(state, triggerLogMessage(
       fallback,
       card.cardId,
       trigger.labelMessage ?? { id: "engine.term.triggered.ability" },
+      occurrences,
     ));
   });
   return layers;

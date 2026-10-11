@@ -555,14 +555,12 @@ export const hvy: Record<string, CardScript> = mergeSetScripts("HVY", hvyHighRar
       {
         event: "attack-declared",
         label: "Wager Might and Vigor with the defending hero",
-        condition(ctx) {
-          return (
-            ctx.link?.targetAllyId === undefined &&
-            ctx.state.modifiers.some(
-              (modifier) => modifier.sourceInstanceId === ctx.self.instanceId && modifier.scope === "chain-link",
-            )
-          );
-        },
+        condition: (ctx) => ctx.link?.targetAllyId === undefined,
+        // Each activation grants a separate "when this attacks" wager.
+        occurrences: (ctx) =>
+          ctx.state.modifiers.filter(
+            (modifier) => modifier.sourceInstanceId === ctx.self.instanceId && modifier.scope === "chain-link",
+          ).length,
         effect: (ctx) => ctx.wager(opponentSeat(ctx), [MIGHT, VIGOR]),
       },
     ],

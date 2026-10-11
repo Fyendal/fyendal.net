@@ -4404,6 +4404,44 @@ describe("Cindra engine-driven behavior scenarios", () => {
     });
   });
 
+  it("does not Flick the dagger its own Throw Dagger is still waiting to throw", () => {
+    let game = state(0);
+    game.turn = 2;
+    replaceHand(game, 0, ["HNT083", "HNT175", "HNT058"]);
+    replaceDeck(game, 0, ["RNR020"]);
+    replaceHand(game, 1, ["RNR020"]);
+    game.players[0]!.equipment.chest = {
+      instanceId: game.nextInstanceId++,
+      cardId: "HNT168",
+      owner: 0,
+    };
+
+    game = playCard(game, 0, "HNT083");
+    game = advanceUntil(game, (candidate) => candidate.pendingDecision?.kind === "defend");
+    game = defendWith(game, 1, [game.players[1]!.hand[0]!.instanceId]);
+    game = advanceUntil(game, (candidate) =>
+      candidate.pendingDecision?.kind === "attack-reaction" &&
+      candidate.pendingDecision.player === 0
+    );
+
+    const throwDagger = cindraIntent(game);
+    expect(throwDagger.kind).toBe("play-card");
+    if (throwDagger.kind !== "play-card") return;
+    expect(game.players[0]!.hand.find((card) => card.instanceId === throwDagger.instanceId)?.cardId)
+      .toBe("HNT175");
+    game = apply(game, 0, throwDagger);
+    expect(game.stack.length).toBeGreaterThan(0);
+    expect(game.pendingDecision?.player ?? game.priorityPlayer).toBe(0);
+
+    const flickId = game.players[0]!.equipment.arms!.instanceId;
+    expect(cindraIntent(game)).not.toMatchObject({ kind: "activate-ability", sourceInstanceId: flickId });
+    const lifeBefore = game.players[1]!.life;
+    game = advanceUntil(game, (candidate) => candidate.stack.length === 0);
+    expect(game.players[1]!.life).toBe(lifeBefore - 1);
+    expect(game.players[0]!.graveyard.some((card) => card.instanceId === throwDagger.targetCardInstanceId))
+      .toBe(true);
+  });
+
   it("rescues the third consecutive link with Flick, recovers the dagger, and completes Mask", () => {
     let game = state(0);
     game.turn = 2;

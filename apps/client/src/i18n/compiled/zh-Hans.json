@@ -14673,6 +14673,44 @@
       "value": "将一张已放逐的牌翻至面朝下，以生成一张 Corrupted Corpse"
     }
   ],
+  "card.trigger.mst.essence.prevent.blue": [
+    {
+      "type": 0,
+      "value": "如果你未控制 Illusionist 灵气 (Aura)，则防止本回合下一次由蓝色来源对你造成的伤害"
+    }
+  ],
+  "card.trigger.mst.essence.prevent.red": [
+    {
+      "type": 0,
+      "value": "如果你未控制 Illusionist 灵气 (Aura)，则防止本回合下一次由红色来源对你造成的伤害"
+    }
+  ],
+  "card.trigger.mst.essence.prevent.yellow": [
+    {
+      "type": 0,
+      "value": "如果你未控制 Illusionist 灵气 (Aura)，则防止本回合下一次由黄色来源对你造成的伤害"
+    }
+  ],
+  "card.trigger.mst.hauntingspecter.shield": [
+    {
+      "type": 0,
+      "value": "创建一个 Spectral Shield；如果你未控制其他 Illusionist 灵气 (Aura)，则在其上放置一个 +1 力量指示物"
+    }
+  ],
+  "card.trigger.mst.vengefulapparition.instant": [
+    {
+      "type": 0,
+      "value": "如果你未控制 Illusionist 灵气 (Aura)，本回合你可以将你的下一张费用为 "
+    },
+    {
+      "type": 1,
+      "value": "cost"
+    },
+    {
+      "type": 0,
+      "value": " 或更低的灵气 (Aura)当作瞬间牌打出"
+    }
+  ],
   "card.trigger.pen.themis.facedown": [
     {
       "type": 0,

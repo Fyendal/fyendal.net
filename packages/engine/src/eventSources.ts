@@ -9,6 +9,7 @@ import {
   nameOf,
   triggerLogMessage,
 } from "./gameLog.js";
+import { triggerOccurrenceCount } from "./scripts.js";
 import type { ScriptCtx, TriggerEvent, TriggerEventContext } from "./scripts.js";
 import type { CardInstance, ChainLinkState, PlayerState, StackLayer } from "./state.js";
 import { tokenCreationCauseForModifier } from "./tokenQueries.js";
@@ -38,7 +39,7 @@ export function collectCardEventTriggerLayers(
   for (const seat of [subject, opponent(subject)]) {
     const player = state.players[seat] as PlayerState;
     const layers: StackLayer[] = [];
-    const announcements: { group?: string; text: string; message?: GameMessage }[] = [];
+    const announcements: { group?: string; text: string; message?: GameMessage; occurrences: number }[] = [];
     const sources = eventTriggerSources(state, player);
     if (
       event !== "card-played" && eventCard?.owner === seat &&
@@ -61,11 +62,16 @@ export function collectCardEventTriggerLayers(
         if ((trigger.whose ?? "subject") === "subject" && seat !== subject) return;
         const ctx = runtime.makeCtx(state, seat, card, currentLink(state));
         if (trigger.condition && !trigger.condition(ctx, eventCard, eventContext)) return;
-        trigger.onTrigger?.(ctx, eventCard, eventContext);
+        const occurrences = triggerOccurrenceCount(trigger, ctx, eventCard, eventContext);
+        if (occurrences === 0) return;
+        for (let occurrence = 0; occurrence < occurrences; occurrence++) {
+          trigger.onTrigger?.(ctx, eventCard, eventContext);
+        }
         layers.push({
           sourceInstanceId: card.instanceId,
           seat,
           triggerIndex,
+          ...(occurrences > 1 ? { triggerCount: occurrences } : {}),
           triggerSource: runtime.commands.snapshotSerializable(card),
           ...(eventCard ? { triggerEventCard: runtime.commands.snapshotSerializable(eventCard) } : {}),
           label: trigger.label,
@@ -101,6 +107,7 @@ export function collectCardEventTriggerLayers(
             : {}),
           text: publicText,
           ...(message ? { message } : {}),
+          occurrences,
         });
       });
     }
@@ -109,7 +116,7 @@ export function collectCardEventTriggerLayers(
       if (announcement.group) {
         groupedCounts.set(
           announcement.group,
-          (groupedCounts.get(announcement.group) ?? 0) + 1,
+          (groupedCounts.get(announcement.group) ?? 0) + announcement.occurrences,
         );
       }
     }
@@ -140,7 +147,7 @@ export function collectCardEventTriggerLayers(
     };
     for (const announcement of announcements) {
       if (!announcement.group) {
-        announce(announcement, 1);
+        announce(announcement, announcement.occurrences);
         continue;
       }
       if (announcedGroups.has(announcement.group)) continue;
