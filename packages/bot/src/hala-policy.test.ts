@@ -1490,6 +1490,57 @@ describe("Hala policy", () => {
     expect(state.players[1]!.board.some((card) => card.instanceId === cleric.instanceId)).toBe(false);
   }, 10_000);
 
+  it("swings in the exact room 83F99F turn instead of ending on unused sharpen counters", () => {
+    const opponent = halaDeck();
+    let state = createGame({
+      decklists: [opponent, halaDeck(opponent)],
+      cards: cardData,
+      scripts,
+      seed: 83_993,
+      startPlayer: 1,
+    });
+    state.turn = 32;
+    state.players[0]!.life = 40;
+    state.players[1]!.life = 9;
+    state.players[1]!.resources = 0;
+    state.players[1]!.equipment = { legs: state.players[1]!.equipment.legs };
+    replaceHand(state, 1, ["MPW103", "PEN056", "HNT117"]);
+    state.players[1]!.arsenal = [{
+      instanceId: state.nextInstanceId++,
+      cardId: "AHA021",
+      owner: 1,
+      faceDown: true,
+    }];
+    const weaponId = state.players[1]!.weapons[0]!.instanceId;
+    let swings = 0;
+
+    for (let step = 0; step < 120 && state.turn === 32; step++) {
+      const actor = (state.pendingDecision?.player ?? state.priorityPlayer) as 0 | 1;
+      const legal = legalIntents(state, actor);
+      const intent = actor === 1
+        ? chooseHalaIntent({
+            seat: 1,
+            view: projectStateFor(state, 1),
+            legal,
+            cards: cardData,
+            state,
+          })
+        : state.pendingDecision?.kind === "defend"
+        ? legal.find((candidate) => candidate.kind === "defend" && candidate.instanceIds.length === 0)
+        : legal.find((candidate) => candidate.kind === "pass");
+      if (!intent) throw new Error(`no exact-room rollout intent for ${state.phase}`);
+      if (actor === 1 && intent.kind === "activate-ability" && intent.sourceInstanceId === weaponId) {
+        swings++;
+      }
+      state = apply(state, actor, intent);
+    }
+
+    // The end phase removes sharpen counters; Cut n' Carve must pay for a
+    // Zenith swing rather than add a third counter that is never used.
+    expect(swings).toBe(2);
+    expect(state.players[0]!.life).toBe(32);
+  }, 10_000);
+
   it("plays free Edict before spending a blue on an existing-Flurry turn", () => {
     const state = createGame({
       decklists: [halaDeck(), decklists.dorinthea],

@@ -1550,9 +1550,9 @@ function scoreDefend(
 
 /** Arsenal worth of Hala's sword-support cards in damage equivalents. Her
  * damage itself comes from estimateHalaConversion; these only price cards
- * held for next turn. A sharpen counter stays on Zenith Blade and is
- * priced at about two swings of +1{p}, a Flurry at roughly one more swing,
- * a drawn card at a card. */
+ * held for next turn. A sharpen adds +1{p} to each Zenith swing that turn
+ * (about two) before the end phase removes it, a Flurry is roughly one more
+ * swing, a drawn card is a card. */
 const SHARPEN_VALUE = 2;
 const FLURRY_VALUE = 4;
 const DRAW_VALUE = 3;
@@ -1981,6 +1981,17 @@ function evaluateHalaTurn(
   const future = evaluateTurnFuture(input, root, halaSolverRules);
   const blade = me.weapons.find((card) => key(root.cards[card.cardId]) === "zenith blade|0");
   const sharpenCounters = Number(blade?.counters?.power ?? 0);
+  // The end phase removes every sharpen counter, so a finished turn gains
+  // nothing from counters it never swung with. A truncated line can stop with
+  // its own attack still on the chain (for example before a simulated draw),
+  // whose damage already includes the counters; otherwise the counters stand
+  // in for the sharpened swings the search did not reach.
+  const link = currentLink(input);
+  const unexploredDamage = complete
+    ? 0
+    : link?.attackingCard.owner === root.seat
+    ? Math.max(0, link.damage)
+    : sharpenCounters * SHARPEN_VALUE;
   const flurry = me.board.some((card) => key(root.cards[card.cardId]) === "flurry|0");
   const remainingCards = [...me.hand, ...me.arsenal, ...me.weapons];
   const conversion = complete
@@ -2003,8 +2014,7 @@ function evaluateHalaTurn(
     + responseWeightedDamage(opponentResponse) * POINTS_PER_DAMAGE
     + allyValue
     + future.score
-    // Sharpen counters outlast the turn.
-    + sharpenCounters * SHARPEN_VALUE * POINTS_PER_DAMAGE
+    + horizonDamage(input, root, unexploredDamage) * HORIZON_DAMAGE_POINTS
     + vigor * 8
     - unusedSetups * 18;
   return {
