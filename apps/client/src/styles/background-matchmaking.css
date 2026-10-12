@@ -42,6 +42,32 @@
 .background-match-copy span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .background-match-actions { display: flex; align-items: center; gap: 8px; flex: none; }
 .background-match-actions button { white-space: nowrap; }
+.background-match-declined {
+  width: min(520px, calc(100vw - 24px));
+  min-height: 40px;
+  padding: 6px 8px 6px 16px;
+}
+.background-match-declined-copy {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.background-match-declined .background-match-skip-hero {
+  flex: none;
+  padding: 4px 8px;
+  border-color: transparent;
+  background: none;
+  color: #e3c27a;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  white-space: nowrap;
+}
+.background-match-declined .background-match-skip-hero:hover {
+  border-color: transparent;
+  background: none;
+  color: #f4d79a;
+}
 .background-match-search-label {
   display: flex;
   min-width: 0;
@@ -124,6 +150,7 @@
     border-color: #b8933f99;
     box-shadow: 0 2px 7px #000a;
   }
+  .background-match-offer.background-match-declined { align-items: center; flex-direction: row; gap: 10px; }
   .background-match-offer .background-match-actions { justify-content: stretch; }
   .background-match-offer .background-match-actions button { flex: 1; }
 }

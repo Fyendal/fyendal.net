@@ -38,6 +38,13 @@ switches to bot practice, the client names the new bot opponent and requires
 acknowledgement before opening prep. This notice survives intermediate search
 updates; voluntarily declining an offer continues directly to bot prep.
 
+While practicing, a background search that declines an offer keeps searching
+and never pairs with that player again during the same search, even if they
+leave and requeue into a new room. Right after a decline the toast offers to
+skip the declined hero as well. Both lists live on the search's
+`matchmaking_entries` row and are checked from either side of a pairing; they
+end with the search and reset when a search starts from another bot room.
+
 The root command `pnpm generate:bot-runtime` generates an ignored runtime
 fingerprint from shared contracts, protocol, engine, cards, bot sources, and
 dependency versions. Package build, test, typecheck, and dev scripts delegate

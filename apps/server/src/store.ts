@@ -51,7 +51,12 @@ import {
   scripts,
   validateArena,
 } from "@fyendal/cards";
-import { decodePresentedArena, MAX_MATCHMAKING_AVOID_ROOM_CODES } from "@fyendal/protocol";
+import {
+  decodePresentedArena,
+  MAX_MATCHMAKING_AVOID_HEROES,
+  MAX_MATCHMAKING_AVOID_ROOM_CODES,
+  MAX_MATCHMAKING_AVOID_USERS,
+} from "@fyendal/protocol";
 import { recordGameCompletion, recordGamePlayers } from "./analytics.js";
 import { awardAchievements } from "./achievements.js";
 import { resolveDeck, validatePresentation } from "./decks.js";
@@ -412,6 +417,28 @@ function dbSafeInteger(value: unknown, code: string, path: string): number {
     throw new CorruptRoomError(code, path, "expected a safe integer");
   }
   return decoded;
+}
+
+/** Opponents one search will not be paired with: players declined during it
+ * and heroes the searcher chose to skip. */
+interface SearchAvoidance {
+  userIds: number[];
+  heroes: string[];
+}
+
+function dbSearchAvoidance(raw: Record<string, unknown>, path: string): SearchAvoidance {
+  const userIds = raw.avoided_user_ids;
+  if (!Array.isArray(userIds) || userIds.length > MAX_MATCHMAKING_AVOID_USERS) {
+    throw new CorruptRoomError("<matchmaking>", `${path}.avoided_user_ids`, "expected bounded user ids");
+  }
+  return {
+    userIds: userIds.map((id, index) => dbSafeInteger(id, "<matchmaking>", `${path}.avoided_user_ids[${index}]`)),
+    heroes: dbStringArray(raw.avoided_heroes, "<matchmaking>", `${path}.avoided_heroes`, MAX_MATCHMAKING_AVOID_HEROES),
+  };
+}
+
+function appendBounded<T>(values: T[], value: T, max: number): T[] {
+  return [...values.filter((candidate) => candidate !== value), value].slice(-max);
 }
 
 const TRANSITION_ZONE_KINDS = new Set([
@@ -1672,7 +1699,7 @@ export class PgRoomStore {
       }
 
       const previousEntry = await db.query(
-        `SELECT mode, source_room_code, avoided_room_codes, joined_at
+        `SELECT mode, source_room_code, avoided_room_codes, avoided_user_ids, avoided_heroes, joined_at
          FROM matchmaking_entries WHERE user_id = $1`,
         [choice.userId],
       );
@@ -1696,11 +1723,19 @@ export class PgRoomStore {
         ?? (previousRaw && Number.isSafeInteger(Number(previousRaw.joined_at))
           ? Number(previousRaw.joined_at)
           : Date.now());
+      // Avoidance belongs to one search; a search from another bot room or
+      // after the entry ended starts clean.
+      const storedSourceRoomCode = mode === "background" ? sourceRoomCode : null;
+      const avoidance: SearchAvoidance = previousRaw
+        && (typeof previousRaw.source_room_code === "string" ? previousRaw.source_room_code : null)
+          === storedSourceRoomCode
+        ? dbSearchAvoidance(previousRaw, "previous entry")
+        : { userIds: [], heroes: [] };
       await db.query(
         `INSERT INTO matchmaking_entries
           (user_id, format, hero, deck_id, deck_name, card_pool_mode, retained_room_code, joined_at,
-           mode, source_room_code, avoided_room_codes)
-         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
+           mode, source_room_code, avoided_room_codes, avoided_user_ids, avoided_heroes)
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)
          ON CONFLICT (user_id) DO UPDATE SET
            format = EXCLUDED.format,
            hero = EXCLUDED.hero,
@@ -1712,7 +1747,9 @@ export class PgRoomStore {
            mode = EXCLUDED.mode,
            source_room_code = EXCLUDED.source_room_code,
            pending_offer_room_code = NULL,
-           avoided_room_codes = EXCLUDED.avoided_room_codes`,
+           avoided_room_codes = EXCLUDED.avoided_room_codes,
+           avoided_user_ids = EXCLUDED.avoided_user_ids,
+           avoided_heroes = EXCLUDED.avoided_heroes`,
         [
           choice.userId,
           format,
@@ -1723,8 +1760,10 @@ export class PgRoomStore {
           choice.retainedRoomCode?.toUpperCase() ?? null,
           joinedAt,
           mode,
-          mode === "background" ? sourceRoomCode : null,
+          storedSourceRoomCode,
           JSON.stringify(avoidRoomCodes),
+          JSON.stringify(avoidance.userIds),
+          JSON.stringify(avoidance.heroes),
         ],
       );
 
@@ -1849,7 +1888,7 @@ export class PgRoomStore {
       const { rows } = await db.query(
         `SELECT q.user_id, u.username, q.hero, q.deck_id, q.deck_name,
                 q.card_pool_mode, q.retained_room_code, q.mode, q.source_room_code,
-                q.avoided_room_codes,
+                q.avoided_room_codes, q.avoided_user_ids, q.avoided_heroes,
                 (opponent_pending.user_id IS NOT NULL) AS pending_bot_start
          FROM matchmaking_entries q
          JOIN users u ON u.id = q.user_id
@@ -1895,16 +1934,26 @@ export class PgRoomStore {
           choice.continuePendingBotStart === true,
         ],
       );
-      const candidateRow = rows.find((candidate) => {
-        if (!choice.retainedRoomCode) return true;
+      let candidateRow: (typeof rows)[number] | undefined;
+      for (const candidate of rows) {
         const candidateRaw = dbObject(candidate, "<matchmaking>", "opponent candidate");
-        return !dbStringArray(
+        if (choice.retainedRoomCode && dbStringArray(
           candidateRaw.avoided_room_codes,
           "<matchmaking>",
           "avoided_room_codes",
           MAX_MATCHMAKING_AVOID_ROOM_CODES,
-        ).includes(choice.retainedRoomCode.toUpperCase());
-      });
+        ).includes(choice.retainedRoomCode.toUpperCase())) continue;
+        const candidateId = dbSafeInteger(candidateRaw.user_id, "<matchmaking>", "opponent candidate.user_id");
+        const candidateAvoidance = dbSearchAvoidance(candidateRaw, "opponent candidate");
+        if (avoidance.userIds.includes(candidateId) || candidateAvoidance.userIds.includes(choice.userId)) continue;
+        if (currentSeat.heroId && candidateAvoidance.heroes.includes(currentSeat.heroId)) continue;
+        if (avoidance.heroes.length > 0 && typeof candidateRaw.deck_id === "string") {
+          const candidateHero = (await resolveDeck(db, candidateRaw.deck_id))?.decklist.heroId;
+          if (candidateHero && avoidance.heroes.includes(candidateHero)) continue;
+        }
+        candidateRow = candidate;
+        break;
+      }
       if (!candidateRow) {
         // Every unmatched new search becomes a visible one-seat opener. A
         // survivor already owns a retained room and simply keeps waiting in it.
@@ -2263,7 +2312,7 @@ export class PgRoomStore {
       // Validate the durable offer before touching membership. A delayed
       // decline must not remove a player from an already accepted match.
       const { rows } = await db.query(
-        `SELECT source_room_code, joined_at, avoided_room_codes
+        `SELECT source_room_code, joined_at, avoided_room_codes, avoided_user_ids, avoided_heroes
          FROM matchmaking_entries
          WHERE user_id = $1 AND mode = 'background' AND pending_offer_room_code = $2`,
         [userId, upper],
@@ -2289,11 +2338,22 @@ export class PgRoomStore {
         MAX_MATCHMAKING_AVOID_ROOM_CODES,
       ).filter((candidate) => candidate !== upper);
       avoided.push(upper);
+      // Leaving and requeueing opens a new room code, so the declined player
+      // is avoided for the rest of this search as well.
+      const { userIds } = dbSearchAvoidance(raw, "declined background entry");
+      const avoidedUserIds = survivor?.userId === undefined
+        ? userIds
+        : appendBounded(userIds, survivor.userId, MAX_MATCHMAKING_AVOID_USERS);
       await db.query(
         `UPDATE matchmaking_entries
-         SET pending_offer_room_code = NULL, retained_room_code = NULL, avoided_room_codes = $2
+         SET pending_offer_room_code = NULL, retained_room_code = NULL, avoided_room_codes = $2,
+             avoided_user_ids = $3
          WHERE user_id = $1`,
-        [userId, JSON.stringify(avoided.slice(-MAX_MATCHMAKING_AVOID_ROOM_CODES))],
+        [
+          userId,
+          JSON.stringify(avoided.slice(-MAX_MATCHMAKING_AVOID_ROOM_CODES)),
+          JSON.stringify(avoidedUserIds),
+        ],
       );
       if (!continueSearching) {
         await db.query("DELETE FROM matchmaking_entries WHERE user_id = $1", [userId]);
@@ -2352,6 +2412,37 @@ export class PgRoomStore {
       await this.advancePendingBotStart(r.result.survivorUserId, userId);
     }
     return { ok: true, version: r.version };
+  }
+
+  /** Skip a hero for the rest of the caller's background search. Only the
+   * caller's own pairing is affected, so the hero needs no offer to prove it. */
+  async avoidBackgroundHero(userId: number, heroId: string): Promise<boolean> {
+    if (cardData[heroId]?.cardType !== "hero") return false;
+    return withTransaction(this.db, async (db) => {
+      const located = await db.query(
+        "SELECT format FROM matchmaking_entries WHERE user_id = $1 AND mode = 'background'",
+        [userId],
+      );
+      if (located.rows.length === 0) return false;
+      // Pairing rewrites this entry under the format lock; read it again after
+      // taking the lock so a concurrent requeue cannot be overwritten.
+      await db.query(
+        "UPDATE matchmaking_locks SET generation = generation + 1 WHERE format = $1",
+        [String(located.rows[0]!.format)],
+      );
+      const { rows } = await db.query(
+        `SELECT avoided_user_ids, avoided_heroes FROM matchmaking_entries
+         WHERE user_id = $1 AND mode = 'background'`,
+        [userId],
+      );
+      if (rows.length === 0) return false;
+      const { heroes } = dbSearchAvoidance(dbObject(rows[0], "<matchmaking>", "background entry"), "background entry");
+      await db.query(
+        "UPDATE matchmaking_entries SET avoided_heroes = $2 WHERE user_id = $1",
+        [userId, JSON.stringify(appendBounded(heroes, heroId, MAX_MATCHMAKING_AVOID_HEROES))],
+      );
+      return true;
+    });
   }
 
   private async recordBotCandidateAttempt(db: Queryable, userId: number, candidateUserId: number): Promise<void> {

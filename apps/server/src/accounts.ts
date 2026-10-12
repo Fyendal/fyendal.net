@@ -4,7 +4,11 @@ import { listDeckPlays, listDecks, type DeckPlay } from "./decks.js";
 import { attachReplayNotes, getReplay, getReplayNotes, listReplays } from "./replays.js";
 import { appendClusterEvent } from "./clusterEvents.js";
 import type { CardPoolMode, PlayerBadge, ReplayFile } from "@fyendal/shared";
-import { MAX_MATCHMAKING_AVOID_ROOM_CODES } from "@fyendal/protocol";
+import {
+  MAX_MATCHMAKING_AVOID_HEROES,
+  MAX_MATCHMAKING_AVOID_ROOM_CODES,
+  MAX_MATCHMAKING_AVOID_USERS,
+} from "@fyendal/protocol";
 import { exportSocialData } from "./social.js";
 import { listUserAchievements } from "./achievements.js";
 
@@ -77,6 +81,8 @@ export interface AccountExport {
     sourceRoomCode: string | null;
     pendingOfferRoomCode: string | null;
     avoidedRoomCodes: string[];
+    avoidedUserIds: number[];
+    avoidedHeroes: string[];
     pendingBotStart: null | {
       format: "cc" | "silver-age";
       deckId: string;
@@ -136,6 +142,24 @@ function exportedAvoidedRoomCodes(value: unknown): string[] {
   return decoded;
 }
 
+function exportedAvoidedUserIds(value: unknown): number[] {
+  const decoded = typeof value === "string" ? JSON.parse(value) as unknown : value;
+  if (!Array.isArray(decoded) || decoded.length > MAX_MATCHMAKING_AVOID_USERS
+    || decoded.some((id) => typeof id !== "number" || !Number.isSafeInteger(id) || id <= 0)) {
+    throw new Error("matchmaking avoided_user_ids is corrupt");
+  }
+  return decoded;
+}
+
+function exportedAvoidedHeroes(value: unknown): string[] {
+  const decoded = typeof value === "string" ? JSON.parse(value) as unknown : value;
+  if (!Array.isArray(decoded) || decoded.length > MAX_MATCHMAKING_AVOID_HEROES
+    || decoded.some((hero) => typeof hero !== "string" || hero.length === 0 || hero.length > 128)) {
+    throw new Error("matchmaking avoided_heroes is corrupt");
+  }
+  return decoded;
+}
+
 export async function exportAccount(db: Queryable, userId: number): Promise<AccountExport | null> {
   const [
     { rows: users },
@@ -161,7 +185,8 @@ export async function exportAccount(db: Queryable, userId: number): Promise<Acco
     ),
     db.query(
       `SELECT format, hero, deck_id, retained_room_code, joined_at, mode,
-              source_room_code, pending_offer_room_code, avoided_room_codes
+              source_room_code, pending_offer_room_code, avoided_room_codes,
+              avoided_user_ids, avoided_heroes
        FROM matchmaking_entries WHERE user_id = $1`,
       [userId],
     ),
@@ -283,6 +308,8 @@ export async function exportAccount(db: Queryable, userId: number): Promise<Acco
             ? queueRows[0].pending_offer_room_code
             : null,
           avoidedRoomCodes: exportedAvoidedRoomCodes(queueRows[0].avoided_room_codes),
+          avoidedUserIds: exportedAvoidedUserIds(queueRows[0].avoided_user_ids),
+          avoidedHeroes: exportedAvoidedHeroes(queueRows[0].avoided_heroes),
           pendingBotStart: pendingBotRows[0]
             ? {
                 format: pendingBotRows[0].format === "cc" ? "cc" : "silver-age",

@@ -47,6 +47,7 @@ export function initialStoreProjection(
     queuedFormat: null,
     matchmakingActive: false,
     backgroundMatchmaking: { state: "inactive" as const },
+    declinedBackgroundHero: null,
     pendingBotStart: false,
     botMatchTransition: null,
     matchAcceptanceRole: null,
@@ -113,6 +114,7 @@ export function clearedRoomProjection(): Pick<
   | "queuedFormat"
   | "matchmakingActive"
   | "backgroundMatchmaking"
+  | "declinedBackgroundHero"
   | "pendingBotStart"
   | "botMatchTransition"
   | "matchAcceptanceRole"
@@ -152,6 +154,7 @@ export function clearedRoomProjection(): Pick<
     queuedFormat: null,
     matchmakingActive: false,
     backgroundMatchmaking: { state: "inactive" },
+    declinedBackgroundHero: null,
     pendingBotStart: false,
     botMatchTransition: null,
     matchAcceptanceRole: null,

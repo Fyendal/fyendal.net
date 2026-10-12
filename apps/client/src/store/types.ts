@@ -204,6 +204,9 @@ export interface StoreState {
   queuedFormat: Format | null;
   matchmakingActive: boolean;
   backgroundMatchmaking: BackgroundMatchmakingStatus;
+  /** The hero of a just-declined background offer, while the player may still
+   * skip that hero for the rest of the search. */
+  declinedBackgroundHero: { heroId: string; heroName: string } | null;
   pendingBotStart: boolean;
   /** Keep an accepted PvP offer distinct from its fallback to bot practice. */
   botMatchTransition: "accepted" | "fallback" | null;
@@ -228,6 +231,8 @@ export interface StoreState {
   stopBackgroundMatchmaking: () => void;
   acceptBackgroundMatch: () => void;
   declineBackgroundMatch: () => void;
+  avoidDeclinedBackgroundHero: () => void;
+  dismissDeclinedBackgroundHero: () => void;
   acceptMatch: () => void;
   declineMatch: () => void;
   presentArena: (arena: PresentedArena) => void;

@@ -1215,6 +1215,8 @@ describe("replays and HTTP responses", () => {
           sourceRoomCode: "BOT123",
           pendingOfferRoomCode: "ABC123",
           avoidedRoomCodes: ["OLD123"],
+          avoidedUserIds: [3],
+          avoidedHeroes: ["ASR001"],
           pendingBotStart: {
             format: "silver-age",
             deckId: "precon-ira",

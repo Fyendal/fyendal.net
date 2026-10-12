@@ -23838,6 +23838,16 @@
       "value": "观战中——等待对局开始"
     }
   ],
+  "matchmaking.background.declined": [
+    {
+      "type": 0,
+      "value": "已拒绝 "
+    },
+    {
+      "type": 1,
+      "value": "hero"
+    }
+  ],
   "matchmaking.background.found": [
     {
       "type": 0,
@@ -23854,6 +23864,12 @@
     {
       "type": 0,
       "value": "正在寻找真人玩家"
+    }
+  ],
+  "matchmaking.background.skipHero": [
+    {
+      "type": 0,
+      "value": "本次寻找中跳过此英雄"
     }
   ],
   "matchmaking.background.stop": [

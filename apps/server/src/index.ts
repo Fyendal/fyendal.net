@@ -1064,6 +1064,15 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
         clusterConsumer?.nudge();
         return;
       }
+      case "background-match-avoid-hero": {
+        if (!ctx.user) {
+          send(ws, { type: "error", message: PLAY_REQUIRES_LOGIN });
+          return;
+        }
+        // A search that already ended has nothing to skip; that is not an error.
+        await rooms.avoidBackgroundHero(ctx.user.id, msg.heroId);
+        return;
+      }
       case "decline-pending-bot-match": {
         if (!ctx.user || !ctx.code || !ctx.token) {
           send(ws, { type: "error", message: "not in a pending bot match" });

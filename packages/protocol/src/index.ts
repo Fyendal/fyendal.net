@@ -230,6 +230,8 @@ export interface AccountExport {
     sourceRoomCode: string | null;
     pendingOfferRoomCode: string | null;
     avoidedRoomCodes: string[];
+    avoidedUserIds: number[];
+    avoidedHeroes: string[];
     pendingBotStart: null | {
       format: "cc" | "silver-age";
       deckId: string;
@@ -295,6 +297,8 @@ const MAX_MESSAGE_VALUE_KEY = 64;
 const MAX_CHAT_TEXT = 1_000;
 const MAX_SOCIAL_ITEMS = 2_000;
 export const MAX_MATCHMAKING_AVOID_ROOM_CODES = 20;
+export const MAX_MATCHMAKING_AVOID_USERS = 50;
+export const MAX_MATCHMAKING_AVOID_HEROES = 50;
 
 const MESSAGE_ID_RE = /^[a-z][a-z0-9]*(?:\.[a-z][a-z0-9]*)+$/;
 const MESSAGE_VALUE_KEY_RE = /^[a-zA-Z][a-zA-Z0-9_]*$/;
@@ -863,6 +867,9 @@ export function decodeClientMessage(value: unknown): ClientMessage | null {
     case "decline-pending-bot-match":
       valid = exactKeys(message, ["type", "roomCode"])
         && typeof message.roomCode === "string" && /^[A-Za-z0-9]{6}$/.test(message.roomCode);
+      break;
+    case "background-match-avoid-hero":
+      valid = exactKeys(message, ["type", "heroId"]) && id(message.heroId);
       break;
     case "leave-room":
       valid = exactKeys(message, ["type", "endGame"], ["type"])
@@ -1923,7 +1930,7 @@ function exportMatchmaking(value: unknown): boolean {
   return !!matchmaking
     && exactKeys(matchmaking, [
       "format", "hero", "deckId", "retainedRoomCode", "joinedAt", "mode", "sourceRoomCode",
-      "pendingOfferRoomCode", "avoidedRoomCodes", "pendingBotStart", "offer",
+      "pendingOfferRoomCode", "avoidedRoomCodes", "avoidedUserIds", "avoidedHeroes", "pendingBotStart", "offer",
     ])
     && FORMATS.has(String(matchmaking.format))
     && (matchmaking.hero === null || string(matchmaking.hero, MAX_SHORT_TEXT, false))
@@ -1934,6 +1941,8 @@ function exportMatchmaking(value: unknown): boolean {
     && (matchmaking.sourceRoomCode === null || string(matchmaking.sourceRoomCode, 6, false))
     && (matchmaking.pendingOfferRoomCode === null || string(matchmaking.pendingOfferRoomCode, 6, false))
     && array(matchmaking.avoidedRoomCodes, roomCode, MAX_MATCHMAKING_AVOID_ROOM_CODES)
+    && array(matchmaking.avoidedUserIds, positiveInteger, MAX_MATCHMAKING_AVOID_USERS)
+    && array(matchmaking.avoidedHeroes, id, MAX_MATCHMAKING_AVOID_HEROES)
     && (matchmaking.pendingBotStart === null || (
       !!pendingBotStart
       && exactKeys(pendingBotStart, [

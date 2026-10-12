@@ -2489,6 +2489,75 @@ describe("PgRoomStore storage", () => {
     expect((await db.query("SELECT room_code FROM matchmaking_offers")).rows).toEqual([]);
   });
 
+  it("avoids declined players and skipped heroes for the rest of a background search", async () => {
+    const users = await db.query(
+      `INSERT INTO users (username, username_lc, pass_hash, created_at)
+       VALUES ('Searcher','searcher','hash',1), ('Requeuer','requeuer','hash',2),
+              ('SameHero','samehero','hash',3), ('LateHero','latehero','hash',4),
+              ('OtherHero','otherhero','hash',5)
+       RETURNING id`,
+    );
+    const [searcherId, requeuerId, sameHeroId, lateHeroId, otherHeroId] =
+      users.rows.map((row) => Number(row.id)) as [number, number, number, number, number];
+    const searcherQueue = await store.queueForMatch("cc", {
+      userId: searcherId,
+      username: "Searcher",
+      deckId: "precon-asb",
+      cardPoolMode: "legal",
+      joinedAt: 10,
+      pendingBotStart: { format: "cc", deckId: "precon-asb", bot: "ira", requestedAt: 10 },
+    });
+    if (!searcherQueue.ok || searcherQueue.kind !== "opened") throw new Error("searcher did not open");
+    const practice = await store.startPendingBotPractice(searcherId);
+    if (!practice) throw new Error("bot practice did not start");
+    await markStoredSeatPresent(practice.code, 0, "searcher-bot");
+    const search = (userId: number, username: string, deckId: string) => store.queueForMatch("cc", {
+      userId, username, deckId, cardPoolMode: "legal",
+    });
+    const avoidance = async () => (await db.query(
+      "SELECT avoided_user_ids, avoided_heroes FROM matchmaking_entries WHERE user_id = $1",
+      [searcherId],
+    )).rows[0];
+
+    const first = await search(requeuerId, "Requeuer", "precon-asr");
+    if (!first.ok || first.kind !== "matched") throw new Error("requeuer was not offered");
+    expect(await store.declineBackgroundMatch(searcherId, first.code)).toMatchObject({ ok: true });
+    expect(await avoidance()).toEqual({ avoided_user_ids: [requeuerId], avoided_heroes: [] });
+
+    // Leaving and searching again opens a new room code, which room-code
+    // avoidance alone does not cover.
+    await store.leaveMatchmaking(requeuerId);
+    expect(await search(requeuerId, "Requeuer", "precon-asr")).toMatchObject({ ok: true, kind: "opened" });
+    expect(await store.backgroundMatchmakingStatus(searcherId)).toEqual({ state: "searching", format: "cc" });
+
+    // A plain decline skips the player, not their hero.
+    const sameHero = await search(sameHeroId, "SameHero", "precon-asr");
+    if (!sameHero.ok || sameHero.kind !== "matched") throw new Error("same hero was not offered");
+    expect(await store.declineBackgroundMatch(searcherId, sameHero.code)).toMatchObject({ ok: true });
+    expect(await store.avoidBackgroundHero(searcherId, "ASR001")).toBe(true);
+    expect(await store.avoidBackgroundHero(searcherId, "not-a-hero")).toBe(false);
+    expect(await avoidance()).toEqual({ avoided_user_ids: [requeuerId, sameHeroId], avoided_heroes: ["ASR001"] });
+
+    expect(await search(lateHeroId, "LateHero", "precon-asr")).toMatchObject({ ok: true, kind: "opened" });
+    expect(await search(otherHeroId, "OtherHero", "precon-asb")).toMatchObject({ ok: true, kind: "matched" });
+    expect(await store.backgroundMatchmakingStatus(searcherId)).toMatchObject({
+      state: "offer",
+      opponent: { username: "OtherHero" },
+    });
+
+    // Avoidance ends with the search.
+    expect(await store.stopBackgroundMatchmaking(searcherId)).toBe(true);
+    expect(await store.avoidBackgroundHero(searcherId, "ASR001")).toBe(false);
+    await store.queueForMatch("cc", {
+      userId: searcherId,
+      username: "Searcher",
+      deckId: "precon-asb",
+      cardPoolMode: "legal",
+      pendingBotStart: { format: "cc", deckId: "precon-asb", bot: "ira", requestedAt: 20 },
+    });
+    expect(await avoidance()).toEqual({ avoided_user_ids: [], avoided_heroes: [] });
+  });
+
   it("holds each participant in at most one durable offer", async () => {
     const offer = await pendingBotOffer();
     const third = await db.query(

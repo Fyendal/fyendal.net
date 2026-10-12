@@ -916,6 +916,8 @@ export type ClientMessage =
   | { type: "background-matchmaking-leave" }
   | { type: "background-match-accept"; roomCode: string }
   | { type: "background-match-decline"; roomCode: string }
+  /** Skip this hero for the rest of the current background search. */
+  | { type: "background-match-avoid-hero"; heroId: string }
   | { type: "decline-pending-bot-match"; roomCode: string }
   /** Matchmade prep room: acknowledge the pairing before sideboarding. */
   | { type: "accept-match" }

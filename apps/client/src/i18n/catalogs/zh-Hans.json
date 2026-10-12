@@ -2603,6 +2603,8 @@
   "matchmaking.background.found": "已找到玩家",
   "matchmaking.background.waiting": "已接受——等待对手",
   "matchmaking.background.keepBot": "继续与机器人对战",
+  "matchmaking.background.declined": "已拒绝 {hero}",
+  "matchmaking.background.skipHero": "本次寻找中跳过此英雄",
   "matchmaking.fallback.practice": "机器人练习",
   "matchmaking.fallback.title": "真人对局未能继续",
   "matchmaking.fallback.description": "你的对手现在是练习机器人 {username}。准备好后，点击继续为这场对局做准备。",

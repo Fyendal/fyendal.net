@@ -57,6 +57,8 @@ describe("account deletion races", () => {
       mode: "foreground",
       pendingOfferRoomCode: candidate.code,
       avoidedRoomCodes: ["OLD123"],
+      avoidedUserIds: [],
+      avoidedHeroes: [],
       pendingBotStart: {
         bot: "ira",
         candidates: [{ candidateUserId: candidateId, ordinal: 0, attempted: false, skipped: false }],

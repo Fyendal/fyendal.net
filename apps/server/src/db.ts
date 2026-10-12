@@ -714,6 +714,15 @@ export const MIGRATIONS: Migration[] = [
       ADD CONSTRAINT pending_bot_starts_bot_check
       CHECK (bot IN ('ira', 'hala', 'cindra', 'jarl', 'briar', 'bravo', 'starvo', 'kayo', 'levia'));`,
   },
+  {
+    version: 45,
+    // A declined offer avoids its room code, but a requeueing opponent opens a
+    // new room. These lists belong to one search and end with its entry.
+    sql: `ALTER TABLE matchmaking_entries
+      ADD COLUMN avoided_user_ids JSONB NOT NULL DEFAULT '[]'::jsonb;
+    ALTER TABLE matchmaking_entries
+      ADD COLUMN avoided_heroes JSONB NOT NULL DEFAULT '[]'::jsonb;`,
+  },
 ];
 
 async function publicTables(db: Queryable): Promise<string[]> {

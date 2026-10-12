@@ -14,12 +14,13 @@ class MemoryStorage implements Storage {
 }
 
 let BackgroundMatchOfferView: typeof import("./BackgroundMatchOffer.js").BackgroundMatchOfferView;
+let BackgroundMatchDeclinedView: typeof import("./BackgroundMatchOffer.js").BackgroundMatchDeclinedView;
 let BackgroundMatchSearch: typeof import("./BackgroundMatchSearch.js").BackgroundMatchSearch;
 
 beforeAll(async () => {
   vi.stubGlobal("localStorage", new MemoryStorage());
   vi.stubGlobal("location", { pathname: "/", search: "", hostname: "localhost" });
-  ({ BackgroundMatchOfferView } = await import("./BackgroundMatchOffer.js"));
+  ({ BackgroundMatchOfferView, BackgroundMatchDeclinedView } = await import("./BackgroundMatchOffer.js"));
   ({ BackgroundMatchSearch } = await import("./BackgroundMatchSearch.js"));
 });
 
@@ -80,5 +81,18 @@ describe("background matchmaking UI", () => {
     expect(html).not.toContain("BravoFan");
     expect(html).toContain("Accept");
     expect(html).toContain("Keep playing against the bot");
+  });
+
+  it("offers to skip a declined hero with a single follow-up action", () => {
+    const html = renderToStaticMarkup(
+      <TestI18nProvider>
+        <BackgroundMatchDeclinedView heroName="Dash I/O" onSkipHero={vi.fn()} />
+      </TestI18nProvider>,
+    );
+
+    expect(html).toContain("background-match-offer background-match-declined");
+    expect(html).toContain("Declined Dash I/O");
+    expect(html).toContain(">Skip this hero for this search</button>");
+    expect(html.match(/<button/g)).toHaveLength(1);
   });
 });

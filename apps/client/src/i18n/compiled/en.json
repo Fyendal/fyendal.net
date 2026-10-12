@@ -24944,6 +24944,16 @@
       "value": "Spectating — waiting for the game to start"
     }
   ],
+  "matchmaking.background.declined": [
+    {
+      "type": 0,
+      "value": "Declined "
+    },
+    {
+      "type": 1,
+      "value": "hero"
+    }
+  ],
   "matchmaking.background.found": [
     {
       "type": 0,
@@ -24960,6 +24970,12 @@
     {
       "type": 0,
       "value": "Searching for a real player"
+    }
+  ],
+  "matchmaking.background.skipHero": [
+    {
+      "type": 0,
+      "value": "Skip this hero for this search"
     }
   ],
   "matchmaking.background.stop": [

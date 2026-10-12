@@ -1476,6 +1476,13 @@ describe("client connection and account race fences", () => {
       roomCode: "PVP123",
     });
     expect(useStore.getState().backgroundMatchmaking).toEqual({ state: "searching", format: "cc" });
+    expect(useStore.getState().declinedBackgroundHero).toEqual({ heroId: "hero-bob", heroName: "Bob Hero" });
+    useStore.getState().avoidDeclinedBackgroundHero();
+    expect(JSON.parse(socket.sent.at(-1)!)).toEqual({
+      type: "background-match-avoid-hero",
+      heroId: "hero-bob",
+    });
+    expect(useStore.getState().declinedBackgroundHero).toBeNull();
     useStore.getState().stopBackgroundMatchmaking();
     expect(JSON.parse(socket.sent.at(-1)!)).toEqual({ type: "background-matchmaking-leave" });
     expect(useStore.getState().backgroundMatchmaking).toEqual({ state: "inactive" });

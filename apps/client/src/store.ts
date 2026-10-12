@@ -1110,11 +1110,14 @@ export const useStore = create<StoreState>((set, get) => {
         set({ queuedFormat: null, matchmakingActive: false });
         launchPendingBotRoom();
         break;
-      case "background-matchmaking":
+      case "background-matchmaking": {
+        // A new offer or an ended search replaces the skip-hero choice.
+        const declinedBackgroundHero = msg.status.state === "searching" ? get().declinedBackgroundHero : null;
         set(msg.status.state === "pending"
-          ? { backgroundMatchmaking: { state: "inactive" }, pendingBotStart: true }
-          : { backgroundMatchmaking: msg.status, pendingBotStart: false });
+          ? { backgroundMatchmaking: { state: "inactive" }, pendingBotStart: true, declinedBackgroundHero }
+          : { backgroundMatchmaking: msg.status, pendingBotStart: false, declinedBackgroundHero });
         break;
+      }
       case "match-timeout":
         forgetRoomSession(get().roomCode, get().spectating);
         history.replaceState(null, "", "/");
@@ -1538,6 +1541,7 @@ export const useStore = create<StoreState>((set, get) => {
         botGame: true,
         matchmakingActive: searchForPlayer,
         backgroundMatchmaking: { state: "inactive" },
+        declinedBackgroundHero: null,
         pendingBotStart: searchForPlayer,
         botMatchTransition: null,
       });
@@ -1666,7 +1670,7 @@ export const useStore = create<StoreState>((set, get) => {
     queueLeave: () => send({ type: "queue-leave" }),
     stopBackgroundMatchmaking: () => {
       send({ type: "background-matchmaking-leave" });
-      set({ backgroundMatchmaking: { state: "inactive" } });
+      set({ backgroundMatchmaking: { state: "inactive" }, declinedBackgroundHero: null });
     },
     acceptBackgroundMatch: () => {
       const status = get().backgroundMatchmaking;
@@ -1688,8 +1692,18 @@ export const useStore = create<StoreState>((set, get) => {
         );
       }
       send({ type: "background-match-decline", roomCode: status.roomCode });
-      set({ backgroundMatchmaking: { state: "searching", format: status.format } });
+      set({
+        backgroundMatchmaking: { state: "searching", format: status.format },
+        declinedBackgroundHero: { heroId: status.opponent.heroId, heroName: status.opponent.heroName },
+      });
     },
+    avoidDeclinedBackgroundHero: () => {
+      const declined = get().declinedBackgroundHero;
+      if (!declined) return;
+      send({ type: "background-match-avoid-hero", heroId: declined.heroId });
+      set({ declinedBackgroundHero: null });
+    },
+    dismissDeclinedBackgroundHero: () => set({ declinedBackgroundHero: null }),
     presentArena: (arena) => {
       get().clearError();
       send({ type: "present-arena", arena });

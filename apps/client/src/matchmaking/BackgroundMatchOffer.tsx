@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { useIntl } from "react-intl";
 import { useShallow } from "zustand/react/shallow";
 import type { BackgroundMatchmakingStatus } from "@fyendal/shared";
@@ -56,17 +57,60 @@ export function BackgroundMatchOfferView({
   );
 }
 
+/** How long a declined offer keeps its skip-hero choice on screen. */
+const DECLINED_HERO_CHOICE_MS = 6_000;
+
+export function BackgroundMatchDeclinedView({
+  heroName,
+  onSkipHero,
+}: {
+  heroName: string;
+  onSkipHero: () => void;
+}) {
+  const intl = useIntl();
+  return (
+    <aside className="background-match-offer background-match-declined" role="status">
+      <span className="background-match-declined-copy">
+        {intl.formatMessage({ id: "matchmaking.background.declined" }, { hero: heroName })}
+      </span>
+      <button type="button" className="background-match-skip-hero" onClick={onSkipHero}>
+        {intl.formatMessage({ id: "matchmaking.background.skipHero" })}
+      </button>
+    </aside>
+  );
+}
+
 export function BackgroundMatchOffer() {
-  const { status, acceptBackgroundMatch, declineBackgroundMatch } = useStore(useShallow((state) => ({
+  const {
+    status,
+    declinedHero,
+    acceptBackgroundMatch,
+    declineBackgroundMatch,
+    avoidDeclinedBackgroundHero,
+    dismissDeclinedBackgroundHero,
+  } = useStore(useShallow((state) => ({
     status: state.backgroundMatchmaking,
+    declinedHero: state.declinedBackgroundHero,
     acceptBackgroundMatch: state.acceptBackgroundMatch,
     declineBackgroundMatch: state.declineBackgroundMatch,
+    avoidDeclinedBackgroundHero: state.avoidDeclinedBackgroundHero,
+    dismissDeclinedBackgroundHero: state.dismissDeclinedBackgroundHero,
   })));
-  return status.state === "offer" ? (
-    <BackgroundMatchOfferView
-      offer={status}
-      onAccept={acceptBackgroundMatch}
-      onDecline={declineBackgroundMatch}
-    />
+  useEffect(() => {
+    if (!declinedHero) return;
+    const timer = setTimeout(dismissDeclinedBackgroundHero, DECLINED_HERO_CHOICE_MS);
+    return () => clearTimeout(timer);
+  }, [declinedHero, dismissDeclinedBackgroundHero]);
+  if (status.state === "offer") {
+    return (
+      <BackgroundMatchOfferView
+        offer={status}
+        onAccept={acceptBackgroundMatch}
+        onDecline={declineBackgroundMatch}
+      />
+    );
+  }
+  return declinedHero && status.state === "searching" ? (
+    <BackgroundMatchDeclinedView heroName={declinedHero.heroName} onSkipHero={avoidDeclinedBackgroundHero} />
   ) : null;
 }

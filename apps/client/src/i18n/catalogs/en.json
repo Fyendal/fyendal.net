@@ -2603,6 +2603,8 @@
   "matchmaking.background.found": "Player found",
   "matchmaking.background.waiting": "Accepted — waiting for opponent",
   "matchmaking.background.keepBot": "Keep playing against the bot",
+  "matchmaking.background.declined": "Declined {hero}",
+  "matchmaking.background.skipHero": "Skip this hero for this search",
   "matchmaking.fallback.practice": "Bot practice",
   "matchmaking.fallback.title": "The PvP match didn't go ahead",
   "matchmaking.fallback.description": "Your opponent is now {username}, a practice bot. Continue when you're ready to prepare for this matchup.",
