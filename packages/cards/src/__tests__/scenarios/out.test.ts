@@ -455,6 +455,26 @@ describe("OUT — registration and core mechanics", () => {
 });
 
 describe("OUT — rules regression coverage", () => {
+  it("Redback Shroud reduces the next attack reaction's cost", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", resources: 3, hand: ["pummel|1"], equipment: { chest: "redback shroud|0" } },
+        { hero: "dorinthea", hand: [] },
+      ],
+    });
+
+    g.attackWithWeapon()
+      .blockWith()
+      .expectNoLegalPlay("pummel|1")
+      .activate("redback shroud|0", { settle: false })
+      .passPriority()
+      .passPriority()
+      .react("pummel|1")
+      .expectResources(0, 0)
+      .expectFinalAttack(8)
+      .expectInZone(0, "redback shroud|0", "graveyard");
+  });
+
   it("Premeditate creates a Ponder when the next attack action card hits a hero", () => {
     const g = scenario({
       seats: [

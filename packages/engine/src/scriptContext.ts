@@ -1888,10 +1888,16 @@ export function makeCtx(
       const copies = [found.card];
       const activeAttack = currentLink(state)?.attackingCard;
       if (activeAttack?.instanceId === instanceId && activeAttack !== found.card) copies.push(activeAttack);
+      // Keep an explicit 0 for the destroy-at-zero marker so state-based
+      // actions see the removal of the last counter.
+      const keepZero = scriptOf(state, found.card.cardId, found.card)?.destroyAtZeroCounter === key;
       for (const copy of copies) {
         const c = (copy.counters ??= {});
         c[key] = (c[key] ?? 0) + delta;
-        if ((c[key] as number) <= 0) delete c[key];
+        if ((c[key] as number) <= 0) {
+          if (keepZero) c[key] = 0;
+          else delete c[key];
+        }
       }
       publishReactionAttackPowerGain(state, runtime, observed);
     },

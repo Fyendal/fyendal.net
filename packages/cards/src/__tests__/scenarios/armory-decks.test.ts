@@ -1220,6 +1220,19 @@ describe("Armory Decks — AHA, AZS, and AOL", () => {
     g.expectFinalAttack(11);
   });
 
+  it("Check-Raise buffs only the next wager, not later wagers that turn", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", weapons: ["golden grail|0"], hand: ["check-raise|1", "money where ya mouth is|1", "donkey|3"], deck: ["alpha instinct|3"], resources: 20, equipment: NO_EQUIPMENT },
+        { hero: "dorinthea", deck: ["head jab|3"], equipment: NO_EQUIPMENT },
+      ],
+    });
+    g.play("check-raise|1").play("money where ya mouth is|1")
+      .attackWithWeapon("golden grail|0").chooseOption("yes").blockWith()
+      .react("donkey|3").settle();
+    g.expectFinalAttack(12);
+  });
+
   it("Check-Raise buffs a weapon that gains its wager from Prized Galea", () => {
     const g = scenario({
       seats: [

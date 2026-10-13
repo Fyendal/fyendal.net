@@ -1849,7 +1849,12 @@ Object.assign(mst, {
     },
   }),
   "evo heartdrive|3": instantEvoEquipment({
-    onEnterArena: (ctx) => ctx.addModifier({ scope: "next-play", playCostReduction: 1, appliesTo: "attack-action" }),
+    onEnterArena: (ctx) => ctx.addModifier({
+      scope: "next-play",
+      playCostReduction: 1,
+      appliesToCardType: "action",
+      appliesToSubtype: "attack",
+    }),
   }),
   "evo shortcircuit|3": instantEvoEquipment({
     onEnterArena(ctx) {

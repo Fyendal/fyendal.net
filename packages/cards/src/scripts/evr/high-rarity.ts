@@ -708,6 +708,7 @@ export const evrHighRarity: Record<string, CardScript> = {
     ],
   },
   "teklo pounder|3": {
+    destroyAtZeroCounter: "steam",
     onEnterArena(ctx) {
       ctx.addCounter(ctx.self.instanceId, "steam", 3);
     },

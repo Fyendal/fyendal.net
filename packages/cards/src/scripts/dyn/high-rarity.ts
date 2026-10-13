@@ -554,6 +554,7 @@ export const dynHighRarity: Record<string, CardScript> = {
     },
   },
   "plasma mainline|1": {
+    destroyAtZeroCounter: "steam",
     onEnterArena(ctx) {
       ctx.addCounter(ctx.self.instanceId, "steam", 5);
     },

@@ -370,6 +370,26 @@ describe("MST — Mechanologist", () => {
     }
   });
 
+  it("Evo Heartdrive reduces the next attack action card, not a non-attack action", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          resources: 5,
+          hand: ["evo heartdrive|3", "sloggism|1", "raging onslaught|1"],
+          equipment: { chest: "cogwerx base chest|0" },
+        },
+        { hero: "dorinthea", hand: [] },
+      ],
+    });
+
+    g.play("evo heartdrive|3", { asInstant: true })
+      .play("sloggism|1")
+      .expectResources(0, 2)
+      .play("raging onslaught|1")
+      .expectResources(0, 0);
+  });
+
   it("Evo Speedslip gives Twin Drive a third Boost ability", () => {
     const g = scenario({
       seats: [

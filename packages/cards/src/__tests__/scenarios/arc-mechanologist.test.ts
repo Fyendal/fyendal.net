@@ -438,4 +438,22 @@ describe("ARC — Mechanologist items", () => {
       .play("zero to sixty|3", { boost: true }).expectAttackValue(2);
     expect(boardCard(g, 0, "teklo pounder|3").counters?.steam).toBe(2);
   });
+  it("Teklo Pounder is destroyed when it spends its last steam counter", () => {
+    const g = scenario({
+      seats: [
+        {
+          ...mech,
+          board: ["teklo pounder|3"],
+          hand: ["zero to sixty|3"],
+          deck: ["zipper hit|3", "zipper hit|3"],
+        },
+        { hero: "dorinthea", weapons: [], hand: [] },
+      ],
+    });
+    boardCard(g, 0, "teklo pounder|3").counters = { steam: 1 };
+
+    g.play("zero to sixty|3", { boost: true })
+      .expectAttackValue(4)
+      .expectInZone(0, "teklo pounder|3", "graveyard");
+  });
 });

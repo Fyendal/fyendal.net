@@ -460,6 +460,27 @@ describe("DYN — rules regression coverage", () => {
     expect(protocol.counters?.steam).toBe(1);
   });
 
+  it("Plasma Mainline is destroyed when it moves its last steam counter", () => {
+    const s = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          board: ["plasma mainline|1"],
+          hand: ["backup protocol: red|1"],
+        },
+        { hero: "dorinthea" },
+      ],
+    });
+    s.state.players[0]!.board[0]!.counters = { steam: 1 };
+
+    s.play("backup protocol: red|1", { settle: false })
+      .passPriority()
+      .passPriority()
+      .chooseOption("no")
+      .chooseOption("yes")
+      .expectInZone(0, "plasma mainline|1", "graveyard");
+  });
+
   it("Emperor attacks directly with the searched Command and Conquer", () => {
     const originalCard = cardData.ARC159;
     const originalScript = scripts.ARC159;

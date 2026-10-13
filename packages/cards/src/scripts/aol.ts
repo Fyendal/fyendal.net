@@ -17,10 +17,15 @@ function attached(ctx: ScriptCtx): boolean {
   );
 }
 
-function consumeArmedSource(ctx: ScriptCtx): boolean {
-  const marker = ctx.state.modifiers.find(
-    (modifier) => modifier.sourceInstanceId === ctx.self.instanceId && modifier.scope === "until-end-of-turn",
+function armedSource(ctx: ScriptCtx) {
+  return ctx.state.modifiers.find(
+    (modifier) =>
+      modifier.sourceInstanceId === ctx.self.instanceId && modifier.scope === "until-end-of-turn" && !modifier.consumed,
   );
+}
+
+function consumeArmedSource(ctx: ScriptCtx): boolean {
+  const marker = armedSource(ctx);
   return marker ? ctx.consumeModifier(marker.id) : false;
 }
 
@@ -219,6 +224,7 @@ export const aol: Record<string, CardScript> = {
       {
         event: "wager-generated",
         label: "The wagering attack gets +4",
+        condition: (ctx) => armedSource(ctx) !== undefined,
         onTrigger: (ctx) => {
           consumeArmedSource(ctx);
         },
@@ -232,6 +238,7 @@ export const aol: Record<string, CardScript> = {
       {
         event: "wager-generated",
         label: "The wagering attack gets +3",
+        condition: (ctx) => armedSource(ctx) !== undefined,
         onTrigger: (ctx) => {
           consumeArmedSource(ctx);
         },
@@ -245,6 +252,7 @@ export const aol: Record<string, CardScript> = {
       {
         event: "wager-generated",
         label: "The wagering attack gets +2",
+        condition: (ctx) => armedSource(ctx) !== undefined,
         onTrigger: (ctx) => {
           consumeArmedSource(ctx);
         },

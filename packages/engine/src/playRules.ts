@@ -982,7 +982,7 @@ export function cardPlayCost(
       : 0;
   for (const modifier of state.modifiers) {
     if (
-      !["combat-chain", "until-end-of-turn"].includes(modifier.scope) ||
+      !["combat-chain", "until-end-of-turn", "next-play"].includes(modifier.scope) ||
       modifier.consumed ||
       modifier.seat !== seat ||
       !modifier.playCostReduction ||
