@@ -5,7 +5,7 @@ import type { AddressInfo } from "node:net";
 import { randomUUID } from "node:crypto";
 import { ClientBotPolicy } from "@fyendal/bot/client-task";
 import type { ClientMessage, PresentedDeck, ServerMessage } from "@fyendal/shared";
-import { cardData, decklists, formatLegalityIssues, precon, silverAgePrecon } from "@fyendal/cards";
+import { cardData, formatLegalityIssues, precon, silverAgePrecon } from "@fyendal/cards";
 import { broadcastCommittedRoom, createGameServer } from "../index.js";
 import { login, register, sessionForToken } from "../auth.js";
 import type { Queryable } from "../db.js";
@@ -92,17 +92,23 @@ async function submitBotDecision(player: Client): Promise<void> {
     .toMatchObject({ status: "applied" });
 }
 
+/** A legal presentation of a precon's whole pool (no equipment). */
+function presentation(deckId: string): PresentedDeck {
+  const pool = precon(deckId)!.pool;
+  return { weaponIds: pool.weaponIds, equipment: {}, deck: pool.deck };
+}
+
 /**
- * Classic-battles prep over ws: the die winner chooses first, then both seats
- * present their fixed box decks. Ends once both see game-started.
+ * Precon prep over ws: the die winner chooses first, then both seats present
+ * their whole precon pools. Ends once both see game-started.
  */
-async function startCbGameOverWs(
+async function startGameOverWs(
   a: Client,
   b: Client,
   knownPrepA?: Extract<ServerMessage, { type: "prep-state" }>,
 ): Promise<void> {
   let prepA = knownPrepA ?? (await a.next(
-    (m) => m.type === "prep-state" && m.prep.seats[m.prep.yourSeat]?.hero != null,
+    (m) => m.type === "prep-state" && m.prep.yourDeckId !== undefined,
   )) as Extract<ServerMessage, { type: "prep-state" }>;
   if (prepA.prep.die === null) {
     prepA = (await a.next(
@@ -120,19 +126,15 @@ async function startCbGameOverWs(
   (prepA.prep.die!.winner === prepA.prep.yourSeat ? a : b).sendMsg({ type: "choose-first", first: true });
   await a.next((m) => m.type === "prep-state" && m.prep.startPlayer !== null);
   for (const [c, prep] of [[a, prepA], [b, prepB]] as const) {
-    const deck = decklists[prep.prep.seats[prep.prep.yourSeat]!.hero!];
+    const deck = presentation(prep.prep.yourDeckId!);
     c.sendMsg({ type: "present-arena", arena: { weaponIds: deck.weaponIds, equipment: deck.equipment } });
   }
   await a.next((m) => m.type === "prep-state" && m.prep.phase === "select-deck");
   const present = async (c: Client, known?: Extract<ServerMessage, { type: "prep-state" }>) => {
     const prep = known ?? (await c.next(
-      (m) => m.type === "prep-state" && m.prep.seats[m.prep.yourSeat]?.hero != null,
+      (m) => m.type === "prep-state" && m.prep.yourDeckId !== undefined,
     )) as Extract<ServerMessage, { type: "prep-state" }>;
-    const dl = decklists[prep.prep.seats[prep.prep.yourSeat]!.hero!];
-    c.sendMsg({
-      type: "present-deck",
-      deck: { weaponIds: dl.weaponIds, equipment: dl.equipment, deck: dl.deck },
-    });
+    c.sendMsg({ type: "present-deck", deck: presentation(prep.prep.yourDeckId!) });
   };
   await present(a, prepA);
   await a.next((m) =>
@@ -161,7 +163,7 @@ async function authedClient(): Promise<AuthedClient> {
 describe("auth gating", () => {
   it("create-room without auth is rejected", async () => {
     const a = await client();
-    a.sendMsg({ type: "create-room", format: "classic-battles", hero: "rhinar" });
+    a.sendMsg({ type: "create-room", format: "cc", deckId: "precon-asb" });
     const err = (await a.next((m) => m.type === "error")) as Extract<
       ServerMessage,
       { type: "error" }
@@ -331,14 +333,14 @@ describe("auth gating", () => {
 
   it("anonymous spectator joins still work", async () => {
     const a = await authedClient();
-    a.sendMsg({ type: "create-room", format: "classic-battles", hero: "rhinar" });
+    a.sendMsg({ type: "create-room", format: "cc", deckId: "precon-asb" });
     const created = (await a.next((m) => m.type === "room-created")) as Extract<
       ServerMessage,
       { type: "room-created" }
     >;
     const b = await authedClient();
-    b.sendMsg({ type: "join-room", code: created.code });
-    await startCbGameOverWs(a, b);
+    b.sendMsg({ type: "join-room", code: created.code, deckId: "precon-asr" });
+    await startGameOverWs(a, b);
 
     // unauthenticated third client → spectator
     const s = await client();
@@ -366,14 +368,14 @@ describe("auth gating", () => {
     const a = await client();
     a.sendMsg({ type: "auth", token: l.token });
     await a.next((m) => m.type === "authed");
-    a.sendMsg({ type: "create-room", format: "classic-battles", hero: "rhinar" });
+    a.sendMsg({ type: "create-room", format: "cc", deckId: "precon-asb" });
     const created = (await a.next((m) => m.type === "room-created")) as Extract<
       ServerMessage,
       { type: "room-created" }
     >;
     const b = await authedClient();
-    b.sendMsg({ type: "join-room", code: created.code });
-    await startCbGameOverWs(a, b);
+    b.sendMsg({ type: "join-room", code: created.code, deckId: "precon-asr" });
+    await startGameOverWs(a, b);
 
     const again = await client();
     again.sendMsg({ type: "auth", token: l.token });
@@ -814,14 +816,14 @@ describe("server rooms over websocket", () => {
   it("reloads and broadcasts the authoritative room after a committed mutation", async () => {
     const a = await authedClient();
     const b = await authedClient();
-    a.sendMsg({ type: "create-room", format: "classic-battles", hero: "rhinar" });
+    a.sendMsg({ type: "create-room", format: "cc", deckId: "precon-asb" });
     const created = (await a.next((m) => m.type === "room-created")) as Extract<
       ServerMessage,
       { type: "room-created" }
     >;
-    b.sendMsg({ type: "join-room", code: created.code });
+    b.sendMsg({ type: "join-room", code: created.code, deckId: "precon-asr" });
     await b.next((m) => m.type === "joined");
-    await startCbGameOverWs(a, b);
+    await startGameOverWs(a, b);
     a.inbox.length = 0;
 
     const nextVersion = Number((await db.query(
@@ -857,14 +859,14 @@ describe("server rooms over websocket", () => {
   it("broadcasts predefined emotes without mutating room state", async () => {
     const a = await authedClient();
     const b = await authedClient();
-    a.sendMsg({ type: "create-room", format: "classic-battles", hero: "rhinar" });
+    a.sendMsg({ type: "create-room", format: "cc", deckId: "precon-asb" });
     const created = (await a.next((message) => message.type === "room-created")) as Extract<
       ServerMessage,
       { type: "room-created" }
     >;
-    b.sendMsg({ type: "join-room", code: created.code });
+    b.sendMsg({ type: "join-room", code: created.code, deckId: "precon-asr" });
     await b.next((message) => message.type === "joined");
-    await startCbGameOverWs(a, b);
+    await startGameOverWs(a, b);
 
     const before = Number((await db.query(
       "SELECT version FROM rooms WHERE code = $1",
@@ -889,7 +891,7 @@ describe("server rooms over websocket", () => {
 
   it("create, join, game starts, states are per-seat filtered", async () => {
     const a = await authedClient();
-    a.sendMsg({ type: "create-room", format: "classic-battles", hero: "dorinthea" });
+    a.sendMsg({ type: "create-room", format: "cc", deckId: "precon-asr" });
     const created = (await a.next((m) => m.type === "room-created")) as Extract<
       ServerMessage,
       { type: "room-created" }
@@ -898,14 +900,14 @@ describe("server rooms over websocket", () => {
     expect(created.seat).toBe(0);
 
     const b = await authedClient();
-    b.sendMsg({ type: "join-room", code: created.code });
+    b.sendMsg({ type: "join-room", code: created.code, deckId: "precon-asr" });
     const joined = (await b.next((m) => m.type === "joined")) as Extract<
       ServerMessage,
       { type: "joined" }
     >;
     expect(joined.seat).toBe(1);
 
-    await startCbGameOverWs(a, b);
+    await startGameOverWs(a, b);
     const stateA = (await a.next((m) => m.type === "state")) as Extract<
       ServerMessage,
       { type: "state" }
@@ -954,14 +956,14 @@ describe("server rooms over websocket", () => {
 
   it("undo reverts the last action for either player", async () => {
     const a = await authedClient();
-    a.sendMsg({ type: "create-room", format: "classic-battles", hero: "rhinar" });
+    a.sendMsg({ type: "create-room", format: "cc", deckId: "precon-asb" });
     const created = (await a.next((m) => m.type === "room-created")) as Extract<
       ServerMessage,
       { type: "room-created" }
     >;
     const b = await authedClient();
-    b.sendMsg({ type: "join-room", code: created.code });
-    await startCbGameOverWs(a, b);
+    b.sendMsg({ type: "join-room", code: created.code, deckId: "precon-asr" });
+    await startGameOverWs(a, b);
     const before = (await a.next((m) => m.type === "state")) as Extract<
       ServerMessage,
       { type: "state" }
@@ -1002,18 +1004,18 @@ describe("server rooms over websocket", () => {
 
   it("reconnect by token restores the seat", async () => {
     const a = await authedClient();
-    a.sendMsg({ type: "create-room", format: "classic-battles", hero: "rhinar" });
+    a.sendMsg({ type: "create-room", format: "cc", deckId: "precon-asb" });
     const created = (await a.next((m) => m.type === "room-created")) as Extract<
       ServerMessage,
       { type: "room-created" }
     >;
     const b = await authedClient();
-    b.sendMsg({ type: "join-room", code: created.code });
+    b.sendMsg({ type: "join-room", code: created.code, deckId: "precon-asr" });
     const bJoined = (await b.next((m) => m.type === "joined")) as Extract<
       ServerMessage,
       { type: "joined" }
     >;
-    await startCbGameOverWs(a, b);
+    await startGameOverWs(a, b);
 
     b.ws.close();
     const disc = (await a.next((m) => m.type === "opponent-disconnected")) as ServerMessage;
@@ -1039,14 +1041,14 @@ describe("server rooms over websocket", () => {
 
   it("third client becomes a spectator with hidden hands", async () => {
     const a = await authedClient();
-    a.sendMsg({ type: "create-room", format: "classic-battles", hero: "dorinthea" });
+    a.sendMsg({ type: "create-room", format: "cc", deckId: "precon-asr" });
     const created = (await a.next((m) => m.type === "room-created")) as Extract<
       ServerMessage,
       { type: "room-created" }
     >;
     const b = await authedClient();
-    b.sendMsg({ type: "join-room", code: created.code });
-    await startCbGameOverWs(a, b);
+    b.sendMsg({ type: "join-room", code: created.code, deckId: "precon-asr" });
+    await startGameOverWs(a, b);
 
     // third connection joins a full room → spectator
     const s = await client();
@@ -1074,7 +1076,7 @@ describe("server rooms over websocket", () => {
     // acquire a player seat elsewhere. Previously, Room A would subsequently
     // use the Room B seat number and disclose one Room A hand to this socket.
     const otherHost = await authedClient();
-    otherHost.sendMsg({ type: "create-room", format: "classic-battles", hero: "rhinar" });
+    otherHost.sendMsg({ type: "create-room", format: "cc", deckId: "precon-asb" });
     const otherRoom = (await otherHost.next((m) => m.type === "room-created")) as Extract<
       ServerMessage,
       { type: "room-created" }
@@ -1135,14 +1137,14 @@ describe("server rooms over websocket", () => {
 
   it("lists named spectators and lets a player remove them", async () => {
     const a = await authedClient();
-    a.sendMsg({ type: "create-room", format: "classic-battles", hero: "dorinthea" });
+    a.sendMsg({ type: "create-room", format: "cc", deckId: "precon-asr" });
     const created = await a.next((message) => message.type === "room-created") as Extract<
       ServerMessage,
       { type: "room-created" }
     >;
     const b = await authedClient();
-    b.sendMsg({ type: "join-room", code: created.code });
-    await startCbGameOverWs(a, b);
+    b.sendMsg({ type: "join-room", code: created.code, deckId: "precon-asr" });
+    await startGameOverWs(a, b);
 
     const spectator = await authedClient();
     spectator.sendMsg({ type: "join-room", code: created.code, spectate: true });
@@ -1169,7 +1171,7 @@ describe("server rooms over websocket", () => {
 
   it("a swept room kicks its local clients with 'room not found'", async () => {
     const a = await authedClient();
-    a.sendMsg({ type: "create-room", format: "classic-battles", hero: "rhinar" });
+    a.sendMsg({ type: "create-room", format: "cc", deckId: "precon-asb" });
     const created = (await a.next((m) => m.type === "room-created")) as Extract<
       ServerMessage,
       { type: "room-created" }
@@ -1200,7 +1202,7 @@ describe("lobby and matchmaking", () => {
     const before = empty.rooms.length;
 
     const a = await authedClient();
-    a.sendMsg({ type: "create-room", format: "classic-battles", hero: "rhinar" });
+    a.sendMsg({ type: "create-room", format: "cc", deckId: "precon-asb" });
     const created = (await a.next((m) => m.type === "room-created")) as Extract<
       ServerMessage,
       { type: "room-created" }
@@ -1210,12 +1212,12 @@ describe("lobby and matchmaking", () => {
       (m) => m.type === "rooms" && m.rooms.length === before + 1,
     )) as Extract<ServerMessage, { type: "rooms" }>;
     const row = update.rooms.find((r) => r.code === created.code)!;
-    expect(row).toMatchObject({ format: "classic-battles", heroes: ["Rhinar", null] });
+    expect(row).toMatchObject({ format: "cc", heroes: [cardData[precon("precon-asb")!.pool.heroId]!.name, null] });
 
     // Filling the room is itself an occupancy transition: the lobby must
     // immediately flip the row to spectate-only, before the game starts.
     const b = await authedClient();
-    b.sendMsg({ type: "join-room", code: created.code });
+    b.sendMsg({ type: "join-room", code: created.code, deckId: "precon-asr" });
     await b.next((m) => m.type === "joined");
     const filled = (await lobby.next(
       (m) => m.type === "rooms" && m.rooms.some((r) => r.code === created.code && r.spectateOnly),
@@ -1226,7 +1228,7 @@ describe("lobby and matchmaking", () => {
     expect(filled.rooms.find((r) => r.code === created.code)).not.toHaveProperty("started");
 
     // The started room remains listed for spectators.
-    await startCbGameOverWs(a, b);
+    await startGameOverWs(a, b);
     const started = (await lobby.next(
       (m) => m.type === "rooms" && m.rooms.some((r) => r.code === created.code && r.started),
     )) as Extract<ServerMessage, { type: "rooms" }>;
@@ -1251,8 +1253,8 @@ describe("lobby and matchmaking", () => {
     const host = await authedClient();
     host.sendMsg({
       type: "create-room",
-      format: "classic-battles",
-      hero: "rhinar",
+      format: "cc",
+      deckId: "precon-asb",
       private: true,
     });
     const created = (await host.next((message) => message.type === "room-created")) as Extract<
@@ -1274,9 +1276,9 @@ describe("lobby and matchmaking", () => {
       ServerMessage,
       { type: "room-info" }
     >;
-    expect(info.room).toEqual({ code: created.code, format: "classic-battles" });
+    expect(info.room).toEqual({ code: created.code, format: "cc" });
 
-    guest.sendMsg({ type: "join-room", code: created.code, hero: "dorinthea" });
+    guest.sendMsg({ type: "join-room", code: created.code, deckId: "precon-asr" });
     const joined = (await guest.next((message) => message.type === "joined")) as Extract<
       ServerMessage,
       { type: "joined" }
@@ -1292,15 +1294,15 @@ describe("lobby and matchmaking", () => {
     const a = await authedClient();
     const b = await authedClient();
 
-    a.sendMsg({ type: "queue-join", format: "classic-battles", hero: "rhinar" });
+    a.sendMsg({ type: "queue-join", format: "cc", deckId: "precon-asb" });
     const queued = (await a.next((m) => m.type === "queued")) as Extract<
       ServerMessage,
       { type: "queued" }
     >;
-    expect(queued.format).toBe("classic-battles");
+    expect(queued.format).toBe("cc");
 
-    // a second Rhinar pairs immediately — mirror matches are fine
-    b.sendMsg({ type: "queue-join", format: "classic-battles", hero: "rhinar" });
+    // a second Boltyn pairs immediately — mirror matches are fine
+    b.sendMsg({ type: "queue-join", format: "cc", deckId: "precon-asb" });
     const created = (await a.next((m) => m.type === "room-created")) as Extract<
       ServerMessage,
       { type: "room-created" }
@@ -1311,20 +1313,21 @@ describe("lobby and matchmaking", () => {
     >;
     expect(joined.code).toBe(created.code);
 
-    // no auto-start: both seats present their box decks, the die winner picks
+    // no auto-start: both seats present their decks, the die winner picks
     // first, then the game starts
+    const heroId = precon("precon-asb")!.pool.heroId;
     const prepA = (await a.next((m) =>
       m.type === "prep-state"
       && m.prep.die !== null
-      && m.prep.seats.every((seat) => seat?.hero === "rhinar")
+      && m.prep.seats.every((seat) => seat?.heroId === heroId)
     )) as Extract<
       ServerMessage,
       { type: "prep-state" }
     >;
-    expect(prepA.prep.seats[0]?.hero).toBe("rhinar");
-    expect(prepA.prep.seats[1]?.hero).toBe("rhinar");
+    expect(prepA.prep.seats[0]?.heroId).toBe(heroId);
+    expect(prepA.prep.seats[1]?.heroId).toBe(heroId);
     expect(prepA.prep.startPlayer).toBeNull();
-    await startCbGameOverWs(a, b, prepA);
+    await startGameOverWs(a, b, prepA);
 
     a.ws.close();
     b.ws.close();
@@ -1332,7 +1335,7 @@ describe("lobby and matchmaking", () => {
 
   it("leaving an unmatched opener removes its matchmaking entry", async () => {
     const a = await authedClient();
-    a.sendMsg({ type: "queue-join", format: "classic-battles", hero: "rhinar" });
+    a.sendMsg({ type: "queue-join", format: "cc", deckId: "precon-asb" });
     await a.next((m) => m.type === "queued");
     await a.next((m) => m.type === "room-created");
     expect((await db.query("SELECT COUNT(*) AS count FROM matchmaking_entries")).rows[0]!.count)
@@ -1368,12 +1371,12 @@ describe("lobby and matchmaking", () => {
 
   it("does not push queue depth changes to sockets already attached to rooms", async () => {
     const host = await authedClient();
-    host.sendMsg({ type: "create-room", format: "classic-battles", hero: "rhinar" });
+    host.sendMsg({ type: "create-room", format: "cc", deckId: "precon-asb" });
     await host.next((m) => m.type === "room-created");
     host.inbox.length = 0;
 
     const queued = await authedClient();
-    queued.sendMsg({ type: "queue-join", format: "classic-battles", hero: "rhinar" });
+    queued.sendMsg({ type: "queue-join", format: "cc", deckId: "precon-asb" });
     await queued.next((m) => m.type === "queued");
     await queued.next((m) => m.type === "room-created");
     expect((await db.query("SELECT COUNT(*) AS count FROM matchmaking_entries")).rows[0]!.count)

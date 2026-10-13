@@ -2,8 +2,7 @@ import { useState } from "react";
 import { useIntl } from "react-intl";
 import { preconsForFormat } from "@fyendal/cards/client";
 import type { DeckSummary } from "@fyendal/protocol";
-import type { CardPoolMode } from "@fyendal/shared";
-import type { ConstructedFormat } from "../domain.js";
+import type { CardPoolMode, Format } from "@fyendal/shared";
 import { useStore } from "../store.js";
 import { preconPrepDeck } from "../prep/prepDeck.js";
 import { formatSelectLabel } from "./FormatBadge.js";
@@ -35,7 +34,7 @@ export function filterAndSortDecks(
 }
 
 /** Shared precons as deck tiles (synthesized, no DB row). */
-export function preconSummaries(format: ConstructedFormat, cardPoolMode: CardPoolMode = "legal"): DeckSummary[] {
+export function preconSummaries(format: Format, cardPoolMode: CardPoolMode = "legal"): DeckSummary[] {
   return preconsForFormat(format, { cardPoolMode }).map((p) => preconPrepDeck(p.id)!);
 }
 
@@ -44,7 +43,7 @@ export function preconSummaries(format: ConstructedFormat, cardPoolMode: CardPoo
  * first, followed by the hardcoded precons (free for everyone, not editable).
  */
 export function deckChoicesFor(
-  format: ConstructedFormat,
+  format: Format,
   decks: DeckSummary[],
   cardPoolMode: CardPoolMode = "legal",
 ): DeckSummary[] {
@@ -152,13 +151,13 @@ export function DeckTile(props: {
 }
 
 export function ImportDeckModal(props: {
-  format: ConstructedFormat;
+  format: Format;
   onClose: () => void;
 }) {
   const intl = useIntl();
   const importDeck = useStore((state) => state.importDeck);
   const [source, setSource] = useState<"url" | "text">("url");
-  const [format, setFormat] = useState<ConstructedFormat>(props.format);
+  const [format, setFormat] = useState<Format>(props.format);
   const [name, setName] = useState("");
   const [url, setUrl] = useState("");
   const [decklist, setDecklist] = useState("");
@@ -228,7 +227,7 @@ export function ImportDeckModal(props: {
         >
           <label>
             <span>{intl.formatMessage({ id: "common.format" })}</span>
-            <select value={format} onChange={(event) => setFormat(event.target.value as ConstructedFormat)}>
+            <select value={format} onChange={(event) => setFormat(event.target.value as Format)}>
               <option value="cc">{formatSelectLabel(intl, "cc")}</option>
               <option value="silver-age">{formatSelectLabel(intl, "silver-age")}</option>
             </select>

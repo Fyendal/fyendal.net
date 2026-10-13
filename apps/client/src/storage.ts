@@ -1,6 +1,5 @@
-import type { CardPoolMode, PriorityWindowMode } from "@fyendal/shared";
+import type { CardPoolMode, PriorityWindowMode, Format } from "@fyendal/shared";
 import { MAX_MATCHMAKING_AVOID_ROOM_CODES } from "@fyendal/protocol";
-import type { ConstructedFormat } from "./domain.js";
 
 export const AUTH_STORAGE_KEY = "fyendal-auth";
 export const ROOM_SESSION_STORAGE_KEY = "fyendal-room-session";
@@ -27,7 +26,7 @@ function homeFormatStorageKey(username: string): string {
 export function loadHomeFormat(
   storage: Pick<Storage, "getItem">,
   username: string | null,
-): ConstructedFormat {
+): Format {
   if (!username) return "silver-age";
   try {
     return storage.getItem(homeFormatStorageKey(username)) === "cc" ? "cc" : "silver-age";
@@ -39,7 +38,7 @@ export function loadHomeFormat(
 export function saveHomeFormat(
   storage: Pick<Storage, "setItem">,
   username: string | null,
-  format: ConstructedFormat,
+  format: Format,
 ): void {
   if (!username) return;
   try {
@@ -260,7 +259,7 @@ export function pruneRejectedMatchRooms(
 
 export interface LobbySettings {
   version: 6;
-  cardPoolModes: Record<ConstructedFormat, CardPoolMode>;
+  cardPoolModes: Record<Format, CardPoolMode>;
 }
 
 export const DEFAULT_LOBBY_SETTINGS: LobbySettings = {
@@ -277,7 +276,7 @@ function decodeLobbySettings(raw: string): LobbySettings {
     const value: unknown = JSON.parse(raw);
     if (!value || typeof value !== "object" || Array.isArray(value)) return DEFAULT_LOBBY_SETTINGS;
     const record = value as Record<string, unknown>;
-    let cardPoolModes: Record<ConstructedFormat, CardPoolMode>;
+    let cardPoolModes: Record<Format, CardPoolMode>;
     if (record.version === 4 || record.version === 5 || record.version === 6) {
       const modes = record.cardPoolModes;
       if (!modes || typeof modes !== "object" || Array.isArray(modes)) return DEFAULT_LOBBY_SETTINGS;

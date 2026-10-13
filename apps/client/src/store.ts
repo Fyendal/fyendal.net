@@ -6,9 +6,9 @@ import type {
   CardPoolMode,
   ClientMessage,
   EmoteMessage,
-  HeroId,
   ReplayFile,
   ServerMessage,
+  Format,
 } from "@fyendal/shared";
 import {
   parseReplayFile,
@@ -59,7 +59,6 @@ import {
   matchmakingChoiceKey,
   roomCodeFromLocation,
 } from "./store/storeHelpers.js";
-import type { ConstructedFormat } from "./domain.js";
 import {
   apiDeck,
   apiLogin,
@@ -121,10 +120,8 @@ import.meta.hot?.dispose(() => {
   orphaned?.close();
 });
 
-/** deck chosen for the current cc/silver-age prep session (queue or hosted room) */
+/** deck chosen for the current prep session (queue or hosted room) */
 let prepDeckId: string | null = null;
-/** hero picked for the current classic-battles prep session (queue or hosted room) */
-let prepHero: HeroId | null = null;
 
 /** store snapshot taken when a replay opens from the game screen; restored on close */
 let preReplay: PreReplaySnapshot | null = null;
@@ -169,7 +166,7 @@ export const useStore = create<StoreState>((set, get) => {
   let reconnectOnActive = false;
   /** A bot-room request waiting for the retained matchmaking room to release
    *  this socket. WebSocket commands stay ordered by waiting for `left`. */
-  let pendingBotRoom: { format: ConstructedFormat; deckId: string; bot?: BotOpponent; searchForPlayer?: boolean } | null = null;
+  let pendingBotRoom: { format: Format; deckId: string; bot?: BotOpponent; searchForPlayer?: boolean } | null = null;
   /** Choice associated with the current/most recent matchmaking request. */
   let activeMatchmakingChoiceKey: string | null = null;
   /** In-memory monotonic race fences for callbacks that outlive the
@@ -289,7 +286,6 @@ export const useStore = create<StoreState>((set, get) => {
     closeCurrentSocket();
     replayRuntime.detach();
     prepDeckId = null;
-    prepHero = null;
     preReplay = null;
     activeReplayNoteServerTarget = null;
     resetRoomVersionState();
@@ -323,7 +319,6 @@ export const useStore = create<StoreState>((set, get) => {
     history.replaceState(null, "", "/");
     replayRuntime.discard();
     prepDeckId = null;
-    prepHero = null;
     preReplay = null;
     activeReplayNoteServerTarget = null;
     resetRoomVersionState();
@@ -351,7 +346,6 @@ export const useStore = create<StoreState>((set, get) => {
     if (!get().pendingFabraryPlay) history.replaceState(null, "", "/");
     replayRuntime.discard();
     prepDeckId = null;
-    prepHero = null;
     preReplay = null;
     resetRoomVersionState();
     for (const timer of friendInviteTimers.values()) clearTimeout(timer);
@@ -378,7 +372,7 @@ export const useStore = create<StoreState>((set, get) => {
       friendInviteTarget: null,
       savedReplays: [],
       replaysLoading: false,
-      queueCounts: { "classic-battles": 0, cc: 0, "silver-age": 0 },
+      queueCounts: { cc: 0, "silver-age": 0 },
       lobbyRail: "home",
       cardPoolModes: { ...DEFAULT_LOBBY_SETTINGS.cardPoolModes },
       deckPlayedAt: {},
@@ -704,13 +698,7 @@ export const useStore = create<StoreState>((set, get) => {
     }
   }
 
-  /** Route to the prep screen with whatever pool this session uses. */
-  function loadClassicPrepDeck(hero: HeroId): void {
-    void import("./prep/prepDeck.js").then(({ classicBattlesPrepDeck }) => {
-      if (prepHero === hero) set({ prepDeck: classicBattlesPrepDeck(hero) });
-    });
-  }
-
+  /** Route to the prep screen with this session's deck. */
   function enterPrep() {
     // A handoff acknowledgement is not yet an authoritative opponent view.
     // Wait for prep-state before exposing the new room's preparation controls.
@@ -718,10 +706,6 @@ export const useStore = create<StoreState>((set, get) => {
     if (prepDeckId) {
       set({ screen });
       void loadPrepDeck(prepDeckId);
-    } else if (prepHero) {
-      const hero = prepHero;
-      set({ screen, prepDeck: null });
-      loadClassicPrepDeck(hero);
     }
   }
 
@@ -905,7 +889,7 @@ export const useStore = create<StoreState>((set, get) => {
           matchAcceptanceRole: fromMatchmaking ? "existing" : null,
         });
         // hosts land on the prep room once the room exists
-        if (prepDeckId || prepHero) {
+        if (prepDeckId) {
           enterPrep();
         } else {
           set({ screen: "waiting" });
@@ -949,7 +933,7 @@ export const useStore = create<StoreState>((set, get) => {
         // Matchmade joiners accept from a focused holding screen. Manual joins
         // can enter prep immediately; prep-state arrives right after either.
         if (fromMatchmaking && !msg.spectator) set({ screen: "waiting" });
-        else if ((prepDeckId || prepHero) && !msg.spectator) enterPrep();
+        else if (prepDeckId && !msg.spectator) enterPrep();
         // a spectator joining before the game starts gets a holding screen;
         // the first state message flips it to the game board
         else if (
@@ -978,7 +962,6 @@ export const useStore = create<StoreState>((set, get) => {
         // a new game in this room — drop any stale recording
         replayRuntime.discard(get().roomCode);
         prepDeckId = null;
-        prepHero = null;
         set({
           screen: "game",
           replayFrames: 0,
@@ -1123,7 +1106,6 @@ export const useStore = create<StoreState>((set, get) => {
         history.replaceState(null, "", "/");
         replayRuntime.discard(get().roomCode);
         prepDeckId = null;
-        prepHero = null;
         resetRoomVersionState();
         set(clearedRoomProjection());
         errors.show("Match cancelled because you missed the pre-game deadline.");
@@ -1136,10 +1118,11 @@ export const useStore = create<StoreState>((set, get) => {
         const current = get();
         const currentSeat = msg.prep.seats[msg.prep.yourSeat];
         if (current.matchmakingActive || msg.prep.deadlinePhase !== undefined) {
-          activeMatchmakingChoiceKey = matchmakingChoiceKey(msg.prep.format, {
-            hero: currentSeat?.hero,
-            deckId: msg.prep.yourDeckId,
-          }, msg.prep.cardPoolMode ?? "legal");
+          activeMatchmakingChoiceKey = matchmakingChoiceKey(
+            msg.prep.format,
+            msg.prep.yourDeckId,
+            msg.prep.cardPoolMode ?? "legal",
+          );
         }
         const accepting = msg.prep.deadlinePhase === "accept";
         const matchAcceptanceRole = accepting
@@ -1170,15 +1153,6 @@ export const useStore = create<StoreState>((set, get) => {
         if (msg.prep.yourDeckId) {
           prepDeckId = msg.prep.yourDeckId;
           void loadPrepDeck(msg.prep.yourDeckId);
-        } else if (msg.prep.format === "classic-battles") {
-          // no saved deck — the pool is the seat's fixed box list
-          const hero = msg.prep.seats[msg.prep.yourSeat]?.hero;
-          if (hero) {
-            prepHero = hero;
-            if (get().prepDeck?.id !== `classic-battles-${hero}`) {
-              loadClassicPrepDeck(hero);
-            }
-          }
         }
         if (get().screen !== "game" && get().screen !== "replay") set({ screen });
         break;
@@ -1194,7 +1168,6 @@ export const useStore = create<StoreState>((set, get) => {
         history.replaceState(null, "", "/");
         replayRuntime.discard(get().roomCode);
         prepDeckId = null;
-        prepHero = null;
         resetRoomVersionState();
         set({ ...clearedRoomProjection(), spectatorKicked: true });
         get().listRooms();
@@ -1270,7 +1243,6 @@ export const useStore = create<StoreState>((set, get) => {
           history.replaceState(null, "", "/");
           replayRuntime.discard();
           prepDeckId = null;
-          prepHero = null;
           // watching a replay of the finished game — let the user keep watching
           if (get().screen === "replay") {
             preReplay = null;
@@ -1330,7 +1302,7 @@ export const useStore = create<StoreState>((set, get) => {
         || (mode === "legal" && deck.futureCards?.length)) return;
       errors.clear();
       set({ pendingFabraryPlay: { ...pending, status: "starting" } });
-      if (choice.kind === "player") get().queueJoin(format, { deckId: deck.id });
+      if (choice.kind === "player") get().queueJoin(format, deck.id);
       else get().createBotRoom(format, deck.id, choice.bot, choice.searchForPlayer);
     },
     setSocialOpen: (socialOpen) => set({ socialOpen }),
@@ -1400,7 +1372,6 @@ export const useStore = create<StoreState>((set, get) => {
         return;
       }
       prepDeckId = deckId;
-      prepHero = null;
       roomEntryPending = false;
       set({
         prep: null,
@@ -1502,23 +1473,19 @@ export const useStore = create<StoreState>((set, get) => {
       clearAuthenticatedState();
       if (token) await apiLogout(token);
     },
-    createRoom: (format, choice, visibility = "private") => {
+    createRoom: (format, deckId, visibility = "private") => {
       roomEntryPending = false;
       pendingBotRoom = null;
       // hosts land on the prep room once the room exists
-      prepDeckId = format === "classic-battles" ? null : (choice.deckId ?? null);
-      prepHero = format === "classic-battles" ? (choice.hero ?? null) : null;
-      if (prepDeckId || prepHero) {
-        set({ prep: null, prepDeck: null, botGame: false, matchmakingActive: false });
-      }
+      prepDeckId = deckId;
+      set({ prep: null, prepDeck: null, botGame: false, matchmakingActive: false });
       connect(() => {
         send({
           type: "create-room",
           format,
-          hero: choice.hero,
-          deckId: choice.deckId,
+          deckId,
           private: visibility === "private",
-          ...(format !== "classic-battles" && get().cardPoolModes[format] !== "legal"
+          ...(get().cardPoolModes[format] !== "legal"
             ? { cardPoolMode: get().cardPoolModes[format] }
             : {}),
         });
@@ -1527,9 +1494,8 @@ export const useStore = create<StoreState>((set, get) => {
     createBotRoom: (format, deckId, bot, searchForPlayer = false) => {
       roomEntryPending = false;
       prepDeckId = deckId;
-      prepHero = null;
       const cardPoolMode = get().cardPoolModes[format];
-      const choiceKey = matchmakingChoiceKey(format, { deckId }, cardPoolMode);
+      const choiceKey = matchmakingChoiceKey(format, deckId, cardPoolMode);
       activeMatchmakingChoiceKey = choiceKey;
       const username = get().authUser;
       const avoidRoomCodes = searchForPlayer && username
@@ -1568,7 +1534,7 @@ export const useStore = create<StoreState>((set, get) => {
         send({ type: "leave-room" });
       }
     },
-    joinRoom: (code, deckId, spectate, hero) => {
+    joinRoom: (code, deckId, spectate) => {
       pendingBotRoom = null;
       const upperCode = code.toUpperCase();
       // App startup effects can run twice in development, and multiple UI
@@ -1581,7 +1547,7 @@ export const useStore = create<StoreState>((set, get) => {
         && (spectate === undefined || spectate === get().spectating)) return;
       disconnectForRoomEntry(upperCode,
         spectate !== undefined && get().spectating !== spectate);
-      const wantsSeat = spectate === false || !!deckId || !!hero;
+      const wantsSeat = spectate === false || !!deckId;
       if (wantsSeat) removeRoomSession(sessionStorage, upperCode);
       const tabSession = loadRoomSession(sessionStorage, upperCode);
       const effectiveSpectate = spectate === true || (!wantsSeat && tabSession !== null);
@@ -1602,7 +1568,7 @@ export const useStore = create<StoreState>((set, get) => {
         }
       }
       set({ botGame: false });
-      // a deck id means a player seat in a cc/silver-age room → prep room;
+      // a deck id means a player seat → prep room;
       // without one (spectate or token reconnect) keep the current session
       if (deckId) {
         prepDeckId = deckId;
@@ -1615,8 +1581,8 @@ export const useStore = create<StoreState>((set, get) => {
           pendingLocalSpectatorToken = currentLocalSession?.token ?? null;
         }
         const currentSession = currentTabSession ?? currentLocalSession;
-        const token = deckId || hero ? undefined : currentSession?.token;
-        send({ type: "join-room", code, token, deckId, hero,
+        const token = deckId ? undefined : currentSession?.token;
+        send({ type: "join-room", code, token, deckId,
           ...(effectiveSpectate ? { spectate: true } : {}) });
       });
     },
@@ -1636,19 +1602,14 @@ export const useStore = create<StoreState>((set, get) => {
         send({ type: "list-rooms" });
       }),
     setConnectionActive,
-    queueJoin: (format, choice) => {
+    queueJoin: (format, deckId) => {
       roomEntryPending = false;
       pendingBotRoom = null;
-      const cardPoolMode: CardPoolMode = format === "classic-battles"
-        ? "legal"
-        : get().cardPoolModes[format];
-      const choiceKey = matchmakingChoiceKey(format, choice, cardPoolMode);
+      const cardPoolMode = get().cardPoolModes[format];
+      const choiceKey = matchmakingChoiceKey(format, deckId, cardPoolMode);
       activeMatchmakingChoiceKey = choiceKey;
-      prepDeckId = format === "classic-battles" ? null : (choice.deckId ?? null);
-      prepHero = format === "classic-battles" ? (choice.hero ?? null) : null;
-      if (prepDeckId || prepHero) {
-        set({ prep: null, prepDeck: null, matchmakingActive: true });
-      }
+      prepDeckId = deckId;
+      set({ prep: null, prepDeck: null, matchmakingActive: true });
       connect(() => {
         if (activeMatchmakingChoiceKey !== choiceKey) return;
         const username = get().authUser;
@@ -1658,8 +1619,7 @@ export const useStore = create<StoreState>((set, get) => {
         send({
           type: "queue-join",
           format,
-          hero: choice.hero,
-          deckId: choice.deckId,
+          deckId,
           ...(avoidRoomCodes.length > 0 ? { avoidRoomCodes } : {}),
           ...(cardPoolMode !== "legal"
             ? { cardPoolMode }
@@ -1727,12 +1687,8 @@ export const useStore = create<StoreState>((set, get) => {
       const code = get().roomCode;
       if (username && code) {
         const prep = get().prep;
-        const currentSeat = prep?.seats[prep.yourSeat];
         const choiceKey = activeMatchmakingChoiceKey ?? (prep
-          ? matchmakingChoiceKey(prep.format, {
-              hero: currentSeat?.hero,
-              deckId: prep.yourDeckId,
-            }, prep.cardPoolMode ?? "legal")
+          ? matchmakingChoiceKey(prep.format, prep.yourDeckId, prep.cardPoolMode ?? "legal")
           : "legacy");
         rememberRejectedMatchRoom(localStorage, username, code, Date.now(), choiceKey);
       }
@@ -1810,7 +1766,6 @@ export const useStore = create<StoreState>((set, get) => {
       forgetRoomSession(get().roomCode, get().spectating);
       history.replaceState(null, "", "/");
       prepDeckId = null;
-      prepHero = null;
       if (serverLeave) {
         // keep the socket: the lobby needs it and "left" is on its way
         set({ queuedFormat: null });

@@ -98,10 +98,10 @@ describe("account deletion races", () => {
     const userId = Number(rows[0].id);
     await db.query("DELETE FROM users WHERE id = $1", [userId]);
     const store = new PgRoomStore(db, "test-ruleset");
-    await expect(store.createRoom("classic-battles", {
+    await expect(store.createRoom("cc", {
       userId,
       username: "Raced",
-      hero: "rhinar",
+      deckId: "precon-asb",
     })).rejects.toThrow();
     expect((await db.query("SELECT 1 FROM room_seats WHERE user_id = $1", [userId])).rows).toHaveLength(0);
   });
@@ -131,10 +131,10 @@ describe("account deletion races", () => {
         : undefined,
     });
     const store = new PgRoomStore(wrap(db), "test-ruleset");
-    const creating = store.createRoom("classic-battles", {
+    const creating = store.createRoom("cc", {
       userId,
       username: "Racing",
-      hero: "rhinar",
+      deckId: "precon-asb",
     });
     await reached;
 

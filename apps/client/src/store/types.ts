@@ -12,7 +12,6 @@ import type {
   GameTransitionView,
   GameView,
   PlayerProfileView,
-  HeroId,
   PresentedDeck,
   PresentedArena,
   PrepView,
@@ -43,7 +42,6 @@ import type {
   LoginResult,
   RegisterResult,
 } from "../auth/auth.js";
-import type { ConstructedFormat } from "../domain.js";
 import type { FabraryPlayRoute } from "../play/route.js";
 
 export interface PendingFabraryPlay {
@@ -141,7 +139,7 @@ export interface StoreState {
   markChatRead: (username: string) => void;
   beginFriendInvite: (username: string) => void;
   cancelFriendInvite: () => void;
-  createFriendRoom: (username: string, format: ConstructedFormat, deckId: string) => void;
+  createFriendRoom: (username: string, format: Format, deckId: string) => void;
   dismissFriendGameInvite: (inviteId: string) => void;
   acceptFriendGameInvite: (inviteId: string) => void;
 
@@ -155,7 +153,7 @@ export interface StoreState {
   refreshDecks: (silent?: boolean) => Promise<void>;
   importDeck: (input: {
     name: string;
-    format: ConstructedFormat;
+    format: Format;
     url?: string;
     text?: string;
   }) => Promise<DeckResult>;
@@ -171,9 +169,9 @@ export interface StoreState {
   screen: Screen;
   lobbyRail: LobbyRail;
   setLobbyRail: (rail: LobbyRail) => void;
-  cardPoolModes: Record<ConstructedFormat, CardPoolMode>;
+  cardPoolModes: Record<Format, CardPoolMode>;
   deckPlayedAt: Record<string, number>;
-  setCardPoolMode: (format: ConstructedFormat, mode: CardPoolMode) => void;
+  setCardPoolMode: (format: Format, mode: CardPoolMode) => void;
   roomCode: string | null;
   yourSeat: number | null;
   spectating: boolean;
@@ -215,18 +213,18 @@ export interface StoreState {
   prep: PrepView | null;
   createRoom: (
     format: Format,
-    choice: { hero?: HeroId; deckId?: string },
+    deckId: string,
     visibility?: "private" | "public",
   ) => void;
-  createBotRoom: (format: ConstructedFormat, deckId: string, bot?: BotOpponent, searchForPlayer?: boolean) => void;
-  playBotFromPrep: (format: ConstructedFormat, deckId: string, bot?: BotOpponent, searchForPlayer?: boolean) => void;
-  joinRoom: (code: string, deckId?: string, spectate?: boolean, hero?: HeroId) => void;
+  createBotRoom: (format: Format, deckId: string, bot?: BotOpponent, searchForPlayer?: boolean) => void;
+  playBotFromPrep: (format: Format, deckId: string, bot?: BotOpponent, searchForPlayer?: boolean) => void;
+  joinRoom: (code: string, deckId?: string, spectate?: boolean) => void;
   inspectRoom: (code: string) => void;
   dismissInvite: (resetUrl?: boolean) => void;
   listRooms: () => void;
   /** Suspend background sockets or establish one fresh active connection. */
   setConnectionActive: (active: boolean) => void;
-  queueJoin: (format: Format, choice: { hero?: HeroId; deckId?: string }) => void;
+  queueJoin: (format: Format, deckId: string) => void;
   queueLeave: () => void;
   stopBackgroundMatchmaking: () => void;
   acceptBackgroundMatch: () => void;

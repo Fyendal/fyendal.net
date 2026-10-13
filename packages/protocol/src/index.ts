@@ -170,10 +170,9 @@ export interface MatchParticipant {
   deckName: string | null;
 }
 /** Match history only records Constructed games. */
-export type MatchFormat = "cc" | "silver-age";
 export interface MatchSummary {
   id: string;
-  format: MatchFormat;
+  format: Format;
   yourSeat: 0 | 1;
   winner: 0 | 1 | null;
   endReason: MatchEndReason | null;
@@ -184,7 +183,7 @@ export interface MatchSummary {
 }
 export interface MatchListFilters {
   opponent?: "all" | "players" | "bots";
-  format?: MatchFormat;
+  format?: Format;
   heroId?: string;
 }
 export const MATCH_OPPONENT_FILTERS = ["all", "players", "bots"] as const;
@@ -193,7 +192,7 @@ export interface MatchesResponse { ok: true; matches: MatchSummary[]; nextCursor
 export interface HeroRecord {
   heroId: string;
   opponentKind: MatchOpponentKind;
-  format: MatchFormat;
+  format: Format;
   games: number;
   wins: number;
   losses: number;
@@ -205,7 +204,7 @@ export interface MatchupRecord {
   heroId: string;
   opponentHeroId: string;
   opponentKind: MatchOpponentKind;
-  format: MatchFormat;
+  format: Format;
   games: number;
   wins: number;
   losses: number;
@@ -278,7 +277,6 @@ export interface AccountExport {
   }>;
   matchmaking: null | {
     format: Format;
-    hero: string | null;
     deckId: string | null;
     retainedRoomCode: string | null;
     joinedAt: number;
@@ -289,7 +287,7 @@ export interface AccountExport {
     avoidedUserIds: number[];
     avoidedHeroes: string[];
     pendingBotStart: null | {
-      format: "cc" | "silver-age";
+      format: Format;
       deckId: string;
       bot: string;
       cardPoolMode: CardPoolMode;
@@ -367,9 +365,8 @@ const GAME_LOG_ZONES = new Set([
   "equipment", "weapon", "stack", "chain", "inventory",
 ]);
 
-const FORMATS = new Set(["classic-battles", "cc", "silver-age"]);
+const FORMATS = new Set(["cc", "silver-age"]);
 const CARD_POOL_MODES = new Set(["legal", "future", "open"]);
-const HEROES = new Set(["dorinthea", "rhinar"]);
 const PHASES = new Set(["start", "action", "layer", "reaction", "defend", "end", "game-over"]);
 const MELD_SIDES = new Set(["left", "right", "both"]);
 const BOT_OPPONENTS = new Set(["bravo", "briar", "kayo", "cindra", "ira", "hala", "jarl", "levia", "starvo"]);
@@ -818,7 +815,7 @@ export function decodeClientMessage(value: unknown): ClientMessage | null {
       break;
     case "create-friend-room":
       valid = exactKeys(message, ["type", "username", "format", "deckId", "cardPoolMode"], ["type", "username", "format", "deckId"])
-        && username(message.username) && (message.format === "cc" || message.format === "silver-age")
+        && username(message.username) && FORMATS.has(String(message.format))
         && id(message.deckId)
         && (message.cardPoolMode === undefined || CARD_POOL_MODES.has(String(message.cardPoolMode)));
       break;
@@ -826,18 +823,16 @@ export function decodeClientMessage(value: unknown): ClientMessage | null {
       valid = exactKeys(message, ["type", "inviteId"]) && requestId(message.inviteId);
       break;
     case "create-room":
-      valid = exactKeys(message, ["type", "format", "hero", "deckId", "private", "cardPoolMode"], ["type", "format"])
+      valid = exactKeys(message, ["type", "format", "deckId", "private", "cardPoolMode"], ["type", "format", "deckId"])
         && FORMATS.has(String(message.format))
-        && (message.hero === undefined || HEROES.has(String(message.hero)))
-        && (message.deckId === undefined || id(message.deckId))
+        && id(message.deckId)
         && (message.private === undefined || typeof message.private === "boolean")
         && (message.cardPoolMode === undefined || CARD_POOL_MODES.has(String(message.cardPoolMode)));
       break;
     case "queue-join":
-      valid = exactKeys(message, ["type", "format", "hero", "deckId", "cardPoolMode", "avoidRoomCodes"], ["type", "format"])
+      valid = exactKeys(message, ["type", "format", "deckId", "cardPoolMode", "avoidRoomCodes"], ["type", "format", "deckId"])
         && FORMATS.has(String(message.format))
-        && (message.hero === undefined || HEROES.has(String(message.hero)))
-        && (message.deckId === undefined || id(message.deckId))
+        && id(message.deckId)
         && (message.cardPoolMode === undefined || CARD_POOL_MODES.has(String(message.cardPoolMode)))
         && (message.avoidRoomCodes === undefined || (
           Array.isArray(message.avoidRoomCodes)
@@ -847,7 +842,7 @@ export function decodeClientMessage(value: unknown): ClientMessage | null {
       break;
     case "create-bot-room":
       valid = exactKeys(message, ["type", "format", "deckId", "bot", "cardPoolMode", "searchForPlayer", "avoidRoomCodes"], ["type", "deckId"])
-        && (message.format === undefined || message.format === "cc" || message.format === "silver-age")
+        && (message.format === undefined || FORMATS.has(String(message.format)))
         && id(message.deckId)
         && (message.bot === undefined || BOT_OPPONENTS.has(String(message.bot)))
         && (message.cardPoolMode === undefined || CARD_POOL_MODES.has(String(message.cardPoolMode)))
@@ -859,11 +854,10 @@ export function decodeClientMessage(value: unknown): ClientMessage | null {
         ));
       break;
     case "join-room":
-      valid = exactKeys(message, ["type", "code", "token", "deckId", "hero", "spectate"], ["type", "code"])
+      valid = exactKeys(message, ["type", "code", "token", "deckId", "spectate"], ["type", "code"])
         && typeof message.code === "string" && /^[A-Za-z0-9]{6}$/.test(message.code)
         && (message.token === undefined || string(message.token, 128, false))
         && (message.deckId === undefined || id(message.deckId))
-        && (message.hero === undefined || HEROES.has(String(message.hero)))
         && (message.spectate === undefined || typeof message.spectate === "boolean");
       break;
     case "inspect-room":
@@ -1377,10 +1371,9 @@ function matchPrepPhase(value: unknown): value is MatchPrepPhase {
 
 function prepSeat(value: unknown): boolean {
   const item = object(value);
-  return !!item && exactKeys(item, ["username", "heroId", "heroName", "hero", "ready", "connected", "accepted", "arenaLocked", "arena"], ["username", "heroId", "heroName", "ready", "connected", "arenaLocked"])
+  return !!item && exactKeys(item, ["username", "heroId", "heroName", "ready", "connected", "accepted", "arenaLocked", "arena"], ["username", "heroId", "heroName", "ready", "connected", "arenaLocked"])
     && string(item.username, MAX_SHORT_TEXT, false) && id(item.heroId)
     && string(item.heroName, MAX_SHORT_TEXT, false)
-    && (item.hero === undefined || HEROES.has(String(item.hero)))
     && typeof item.arenaLocked === "boolean"
     && optional(item.arena, revealedArena)
     && typeof item.ready === "boolean" && typeof item.connected === "boolean"
@@ -1435,7 +1428,7 @@ function backgroundMatchmakingStatus(value: unknown): boolean {
   if (status.state === "inactive") return exactKeys(status, ["state"]);
   if (status.state === "pending" || status.state === "searching") {
     return exactKeys(status, ["state", "format"])
-      && (status.format === "cc" || status.format === "silver-age");
+      && FORMATS.has(String(status.format));
   }
   if (status.state !== "offer") return false;
   const opponent = object(status.opponent);
@@ -1443,7 +1436,7 @@ function backgroundMatchmakingStatus(value: unknown): boolean {
     "state", "format", "roomCode", "deadlineAt", "opponent",
     "acceptedByYou", "opponentAccepted",
   ])
-    && (status.format === "cc" || status.format === "silver-age")
+    && FORMATS.has(String(status.format))
     && typeof status.roomCode === "string" && /^[A-Z0-9]{6}$/.test(status.roomCode)
     && nonNegativeInteger(status.deadlineAt)
     && !!opponent
@@ -1735,7 +1728,6 @@ export const decodeReplaysResponse: Decoder<ReplaysResponse> = (value) => {
 const MAX_MATCHES = 10_000;
 const MAX_HERO_RECORDS = 5_000;
 const MATCH_END_REASONS = new Set(["lethal", "concede", "idle", "draw", "ended"]);
-const MATCH_FORMATS = new Set(["cc", "silver-age"]);
 const MATCH_CURSOR_RE = /^[0-9]{1,16}\.[0-9a-f]{24}$/;
 
 function matchParticipant(value: unknown): value is MatchParticipant {
@@ -1753,7 +1745,7 @@ function matchParticipant(value: unknown): value is MatchParticipant {
 function matchSummary(value: unknown): value is MatchSummary {
   const match = object(value);
   if (!match || !exactKeys(match, ["id", "format", "yourSeat", "winner", "endReason", "finishedAt", "players", "replay"])
-    || !id(match.id) || !MATCH_FORMATS.has(String(match.format)) || !seat(match.yourSeat) || !nullableSeat(match.winner)
+    || !id(match.id) || !FORMATS.has(String(match.format)) || !seat(match.yourSeat) || !nullableSeat(match.winner)
     || !(match.endReason === null || MATCH_END_REASONS.has(String(match.endReason)))
     || !nonNegativeInteger(match.finishedAt)
     || !Array.isArray(match.players) || match.players.length !== 2 || !match.players.every(matchParticipant)) {
@@ -1779,7 +1771,7 @@ function heroRecord(value: unknown): value is HeroRecord {
   return !!row
     && exactKeys(row, ["heroId", "opponentKind", "format", "games", "wins", "losses", "draws", "ended", "lastPlayedAt"])
     && id(row.heroId) && (row.opponentKind === "player" || row.opponentKind === "bot")
-    && MATCH_FORMATS.has(String(row.format))
+    && FORMATS.has(String(row.format))
     && nonNegativeInteger(row.games) && nonNegativeInteger(row.wins) && nonNegativeInteger(row.losses)
     && nonNegativeInteger(row.draws) && nonNegativeInteger(row.ended)
     && row.games === row.wins + row.losses + row.draws + row.ended
@@ -1791,7 +1783,7 @@ function matchupRecord(value: unknown): value is MatchupRecord {
   return !!row
     && exactKeys(row, ["heroId", "opponentHeroId", "opponentKind", "format", "games", "wins", "losses", "draws"])
     && id(row.heroId) && id(row.opponentHeroId) && (row.opponentKind === "player" || row.opponentKind === "bot")
-    && MATCH_FORMATS.has(String(row.format))
+    && FORMATS.has(String(row.format))
     && nonNegativeInteger(row.games) && nonNegativeInteger(row.wins) && nonNegativeInteger(row.losses)
     && nonNegativeInteger(row.draws)
     && row.games === row.wins + row.losses + row.draws;
@@ -2062,11 +2054,10 @@ function exportMatchmaking(value: unknown): boolean {
   const offer = matchmaking ? object(matchmaking.offer) : null;
   return !!matchmaking
     && exactKeys(matchmaking, [
-      "format", "hero", "deckId", "retainedRoomCode", "joinedAt", "mode", "sourceRoomCode",
+      "format", "deckId", "retainedRoomCode", "joinedAt", "mode", "sourceRoomCode",
       "pendingOfferRoomCode", "avoidedRoomCodes", "avoidedUserIds", "avoidedHeroes", "pendingBotStart", "offer",
     ])
     && FORMATS.has(String(matchmaking.format))
-    && (matchmaking.hero === null || string(matchmaking.hero, MAX_SHORT_TEXT, false))
     && (matchmaking.deckId === null || id(matchmaking.deckId))
     && (matchmaking.retainedRoomCode === null || string(matchmaking.retainedRoomCode, 6, false))
     && nonNegativeInteger(matchmaking.joinedAt)
@@ -2081,7 +2072,7 @@ function exportMatchmaking(value: unknown): boolean {
       && exactKeys(pendingBotStart, [
         "format", "deckId", "bot", "cardPoolMode", "requestedAt", "candidates",
       ])
-      && (pendingBotStart.format === "cc" || pendingBotStart.format === "silver-age")
+      && FORMATS.has(String(pendingBotStart.format))
       && id(pendingBotStart.deckId)
       && BOT_OPPONENTS.has(String(pendingBotStart.bot))
       && CARD_POOL_MODES.has(String(pendingBotStart.cardPoolMode))

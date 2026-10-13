@@ -1,5 +1,6 @@
 import type {
   BotOpponent,
+  Format,
   GameIntent,
   PresentedDeck,
   PresentedArena,
@@ -40,7 +41,6 @@ import {
   starvoPresentationFor,
 } from "./sideboard.js";
 
-export type ConstructedBotFormat = "cc" | "silver-age";
 
 export interface BotDecision {
   intent: GameIntent;
@@ -54,7 +54,7 @@ export interface BotDecision {
 
 export interface BotDefinition {
   id: BotOpponent;
-  format: ConstructedBotFormat;
+  format: Format;
   deckId: string;
   username: string;
   deckName: string;

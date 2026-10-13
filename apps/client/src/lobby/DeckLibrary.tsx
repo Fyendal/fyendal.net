@@ -2,7 +2,9 @@ import { useState } from "react";
 import { useIntl } from "react-intl";
 import { useShallow } from "zustand/react/shallow";
 import type { DeckSummary } from "@fyendal/protocol";
-import { CONSTRUCTED_FORMATS, type ConstructedFormat } from "../domain.js";
+import { FORMATS } from "../domain.js";
+import type { Format } from "@fyendal/shared";
+
 import { useStore } from "../store.js";
 import { FormatBadge, formatSelectLabel } from "./FormatBadge.js";
 import { ModalSurface } from "../components/ModalSurface.js";
@@ -15,7 +17,7 @@ import {
   type DeckLegalityFilter,
 } from "./DeckGrid.js";
 
-export type DeckFormatFilter = "all" | ConstructedFormat;
+export type DeckFormatFilter = "all" | Format;
 
 function fabraryDeckHref(value: string | null): string | undefined {
   if (!value) return undefined;
@@ -30,7 +32,7 @@ function fabraryDeckHref(value: string | null): string | undefined {
   }
 }
 
-/** Saved decks from both constructed formats, with management actions only. */
+/** Saved decks from every format, with management actions only. */
 export function DeckLibrary(props: {
   formatFilter: DeckFormatFilter;
   onFormatFilterChange: (format: DeckFormatFilter) => void;
@@ -49,7 +51,7 @@ export function DeckLibrary(props: {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(() => new Set());
   const [bulkDeletingDecks, setBulkDeletingDecks] = useState<DeckSummary[] | null>(null);
 
-  const visibleDecks = CONSTRUCTED_FORMATS
+  const visibleDecks = FORMATS
     .filter((format) => props.formatFilter === "all" || props.formatFilter === format)
     .flatMap((format) => filterAndSortDecks(
       decks.filter((deck) => deck.format === format),
@@ -93,7 +95,7 @@ export function DeckLibrary(props: {
             onChange={(event) => props.onFormatFilterChange(event.target.value as DeckFormatFilter)}
           >
             <option value="all">{intl.formatMessage({ id: "lobby.deck.allFormats" })}</option>
-            {CONSTRUCTED_FORMATS.map((format) => (
+            {FORMATS.map((format) => (
               <option key={format} value={format}>{formatSelectLabel(intl, format)}</option>
             ))}
           </select>

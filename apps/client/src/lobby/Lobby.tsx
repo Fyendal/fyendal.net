@@ -4,7 +4,7 @@ import { useShallow } from "zustand/react/shallow";
 import { useStore } from "../store.js";
 import { apiStats, type StatsOk } from "../auth/auth.js";
 import { Auth } from "../auth/AuthCard.js";
-import type { ConstructedFormat } from "../domain.js";
+import type { Format } from "@fyendal/shared";
 import { SiteFooter } from "../legal/SiteFooter.js";
 import { LobbyHeader } from "./LobbyHeader.js";
 import { ModalSurface } from "../components/ModalSurface.js";
@@ -104,7 +104,7 @@ export function Lobby() {
     unreadMessageCount: state.friends.reduce((total, friend) => total + friend.unreadCount, 0),
     setSocialOpen: state.setSocialOpen,
   })));
-  const [deckFormatFilter, setDeckFormatFilter] = useState<"all" | ConstructedFormat>("all");
+  const [deckFormatFilter, setDeckFormatFilter] = useState<"all" | Format>("all");
   const [stats, setStats] = useState<StatsOk | null>(null);
   const [showMobileMore, setShowMobileMore] = useState(false);
   const rejoinRoomCount = rooms.reduce(
@@ -134,7 +134,7 @@ export function Lobby() {
     };
   }, [authUser]);
 
-  const goToDecks = (format?: ConstructedFormat) => {
+  const goToDecks = (format?: Format) => {
     if (format) setDeckFormatFilter(format);
     setRail("decks");
   };

@@ -36,7 +36,6 @@ import { MatchupPicker } from "./MatchupPicker.js";
 import {
   BOT_PRACTICE_NUDGE_DELAY_MS,
   BotPracticeNudge,
-  botPracticeFormat,
   shouldOfferBotPractice,
 } from "./BotPracticeNudge.js";
 import { PrepPresentation } from "./PrepPresentation.js";
@@ -142,7 +141,6 @@ export function PrepRoom() {
   const opponentPresent = prep
     ? prep.seats[1 - prep.yourSeat] !== null
     : false;
-  const practiceFormat = botPracticeFormat(prepFormat);
   const botNudgeEligible = shouldOfferBotPractice({
     format: prepFormat,
     matchmakingActive,
@@ -634,13 +632,13 @@ export function PrepRoom() {
       {botNudgeKey
         && botNudgeVisibleFor === botNudgeKey
         && botNudgeDismissedFor !== botNudgeKey
-        && practiceFormat ? (
+        && prepFormat ? (
           <BotPracticeNudge
-            format={practiceFormat}
+            format={prepFormat}
             busy={botNudgeBusyFor === botNudgeKey}
             onPlay={(bot, searchForPlayer) => {
               setBotNudgeBusyFor(botNudgeKey);
-              playBotFromPrep(practiceFormat, prepDeck.id, bot, searchForPlayer);
+              playBotFromPrep(prepFormat, prepDeck.id, bot, searchForPlayer);
             }}
             onDismiss={() => setBotNudgeDismissedFor(botNudgeKey)}
           />

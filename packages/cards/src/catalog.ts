@@ -1,4 +1,4 @@
-import type { CardData, Decklist, DeckPool, Format, HeroId, PresentedDeck } from "@fyendal/shared";
+import type { CardData, Decklist, DeckPool, Format, PresentedDeck } from "@fyendal/shared";
 import { decodeCardDataList } from "./cardData.js";
 import { functionalKey, functionalKeyOf } from "./functional.js";
 import cards1HP from "./data/cards/1HP.json" with { type: "json" };
@@ -956,22 +956,9 @@ type Decklists = {
   rhinar: Decklist;
 };
 
+/** The Rhinar and Dorinthea box lists, kept as stable decklist fixtures for
+ * engine, bot, and server tests. They are not offered as a playable format. */
 export const decklists = rawDecklists as Decklists;
-
-/**
- * The fixed Classic Battles box list for a hero in `DeckPool` shape, so the
- * prep room can present it exactly like a registered user deck.
- */
-export function deckPoolForHero(hero: HeroId): DeckPool {
-  const dl = decklists[hero];
-  return {
-    heroId: dl.heroId,
-    weaponIds: [...dl.weaponIds],
-    equipmentPool: Object.values(dl.equipment).filter((id): id is string => !!id),
-    deck: [...dl.deck],
-    sideboard: [],
-  };
-}
 
 /**
  * Hardcoded official precon pools and internal bot lists (see
@@ -982,7 +969,7 @@ export function deckPoolForHero(hero: HeroId): DeckPool {
 export interface Precon {
   id: string;
   name: string;
-  format: "cc" | "silver-age";
+  format: Format;
   pool: DeckPool;
   /** Internal practice-opponent lists resolve like fixed decks but are not
    * offered as free player precons. */
@@ -991,7 +978,7 @@ export interface Precon {
 
 const rawPrecons = rawPreconsJson as unknown as Record<string, {
   name: string;
-  format?: "cc" | "silver-age";
+  format?: Format;
   pool: DeckPool;
   botOnly?: true;
 }>;
@@ -1013,7 +1000,7 @@ export const silverAgePrecons: SilverAgePrecon[] = precons.filter(
 );
 
 export function preconsForFormat(
-  format: "cc" | "silver-age",
+  format: Format,
   options: { cardPoolMode?: import("@fyendal/shared").CardPoolMode } = {},
 ): Precon[] {
   return precons.filter(

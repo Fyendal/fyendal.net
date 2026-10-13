@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { decklists, precon, preconsForFormat, silverAgePrecon } from "@fyendal/cards";
+import { precon, preconsForFormat, silverAgePrecon } from "@fyendal/cards";
 import { legalIntents } from "@fyendal/engine";
 import { decodeServerMessage, replayFileViews } from "@fyendal/protocol";
 import type { PresentedDeck } from "@fyendal/shared";
@@ -38,10 +38,19 @@ async function markStoredSeatPresent(
   );
 }
 
+/** Fixed seat decks for tests that only need a legal two-player room. */
+const SEAT_DECKS = ["precon-asb", "precon-asr"] as const;
+
+/** A legal presentation of a precon's whole pool (no equipment). */
+function presentation(deckId: string): PresentedDeck {
+  const pool = precon(deckId)!.pool;
+  return { weaponIds: pool.weaponIds, equipment: {}, deck: pool.deck };
+}
+
 async function fullRoom(): Promise<{ code: string; tokens: [string, string] }> {
-  const host = await store.createRoom("classic-battles", { hero: "rhinar" });
+  const host = await store.createRoom("cc", { deckId: "precon-asb" });
   await markStoredSeatPresent(host.code, 0);
-  const joined = await store.joinRoom(host.code, undefined, { allowPlayer: true, hero: "dorinthea" });
+  const joined = await store.joinRoom(host.code, undefined, { allowPlayer: true, deckId: "precon-asr" });
   if (!joined.ok || joined.kind !== "player") throw new Error("join failed");
   await db.query("DELETE FROM room_presence WHERE room_code = $1", [host.code]);
   return { code: host.code, tokens: [host.token, joined.token] };
@@ -58,13 +67,13 @@ async function matchedRoom(): Promise<{
      RETURNING id`,
   );
   const userIds = [Number(users.rows[0]!.id), Number(users.rows[1]!.id)] as [number, number];
-  const opened = await store.queueForMatch("classic-battles", {
-    userId: userIds[0], username: "MatchA", hero: "rhinar", cardPoolMode: "legal",
+  const opened = await store.queueForMatch("cc", {
+    userId: userIds[0], username: "MatchA", deckId: "precon-asb", cardPoolMode: "legal",
   });
   if (!opened.ok || opened.kind !== "opened") throw new Error("queue did not open a room");
   await markStoredSeatPresent(opened.code, 0);
-  const matched = await store.queueForMatch("classic-battles", {
-    userId: userIds[1], username: "MatchB", hero: "dorinthea", cardPoolMode: "legal",
+  const matched = await store.queueForMatch("cc", {
+    userId: userIds[1], username: "MatchB", deckId: "precon-asr", cardPoolMode: "legal",
   });
   if (!matched.ok || matched.kind !== "matched") throw new Error("match failed");
   const joinedA = await store.joinRoom(matched.code, undefined, { allowPlayer: true, userId: userIds[0] });
@@ -154,9 +163,9 @@ async function startGame(code: string, tokens: [string, string]): Promise<void> 
   const winner = room!.prep!.dieWinner;
   const chosen = await store.chooseFirst(code, { token: tokens[winner] }, true);
   if (!chosen.ok || chosen.started) throw new Error("turn order was not recorded before ready-up");
-  await lockClassicArenas(code, tokens);
+  await lockArenas(code, tokens);
   for (const seat of [0, 1] as const) {
-    const deck = decklists[room!.seats[seat]!.hero!];
+    const deck = presentation(room!.seats[seat]!.deckId!);
     const result = await store.presentDeck(code, { token: tokens[seat] }, {
       weaponIds: deck.weaponIds,
       equipment: deck.equipment,
@@ -177,10 +186,10 @@ async function chooseBotTurn(
   if (!chosen.ok || chosen.started) throw new Error("bot turn order was not recorded before ready-up");
 }
 
-async function lockClassicArenas(code: string, tokens: readonly [string, string]): Promise<void> {
+async function lockArenas(code: string, tokens: readonly [string, string]): Promise<void> {
   const room = (await store.getRoom(code))!;
   for (const seat of [0, 1] as const) {
-    const deck = decklists[room.seats[seat]!.hero!];
+    const deck = presentation(room.seats[seat]!.deckId!);
     const result = await store.presentArena(code, { token: tokens[seat], userId: room.seats[seat]?.userId }, {
       weaponIds: deck.weaponIds, equipment: deck.equipment,
     });
@@ -211,7 +220,7 @@ function tracedStore(queries: string[]): PgRoomStore {
 
 async function rawSeats(code: string): Promise<Record<string, unknown>[]> {
   return (await db.query(
-    `SELECT seat, user_id, token_hash, username, hero, hero_id, deck_id, deck_name,
+    `SELECT seat, user_id, token_hash, username, hero_id, deck_id, deck_name,
             from_queue, ready, presented, last_action_at, controller
      FROM room_seats WHERE room_code = $1 ORDER BY seat`,
     [code],
@@ -292,8 +301,8 @@ describe("PgRoomStore storage", () => {
        VALUES ('AbsentHost','absenthost','hash',1) RETURNING id`,
     );
     const userId = Number(user.rows[0]!.id);
-    const created = await store.createRoom("classic-battles", {
-      hero: "rhinar",
+    const created = await store.createRoom("cc", {
+      deckId: "precon-asb",
       username: "AbsentHost",
       userId,
     });
@@ -305,7 +314,7 @@ describe("PgRoomStore storage", () => {
     ]);
     await expect(store.joinRoom(created.code, undefined, {
       allowPlayer: true,
-      hero: "dorinthea",
+      deckId: "precon-asr",
     })).resolves.toEqual({ ok: false, error: "room host is disconnected" });
 
     await markStoredSeatPresent(created.code, 0);
@@ -315,7 +324,7 @@ describe("PgRoomStore storage", () => {
     expect(await store.stats()).toMatchObject({ openRooms: 1 });
     await expect(store.joinRoom(created.code, undefined, {
       allowPlayer: true,
-      hero: "dorinthea",
+      deckId: "precon-asr",
     })).resolves.toMatchObject({ ok: true, kind: "player", seat: 1 });
   });
 
@@ -326,11 +335,11 @@ describe("PgRoomStore storage", () => {
     );
     const userId = Number(user.rows[0]!.id);
     const privateRoom = await store.createRoom(
-      "classic-battles",
-      { hero: "rhinar", username: "PrivateHost", userId },
+      "cc",
+      { deckId: "precon-asb", username: "PrivateHost", userId },
       "private",
     );
-    const publicRoom = await store.createRoom("classic-battles", { hero: "rhinar" });
+    const publicRoom = await store.createRoom("cc", { deckId: "precon-asb" });
     await markStoredSeatPresent(privateRoom.code, 0, "private-host");
     await markStoredSeatPresent(publicRoom.code, 0, "public-host");
 
@@ -345,13 +354,13 @@ describe("PgRoomStore storage", () => {
     expect(await store.stats()).toMatchObject({ openRooms: 1 });
     expect(await store.roomInvite(privateRoom.code, userId)).toEqual({
       code: privateRoom.code,
-      format: "classic-battles",
+      format: "cc",
       yours: true,
     });
 
     const joined = await store.joinRoom(privateRoom.code, undefined, {
       allowPlayer: true,
-      hero: "dorinthea",
+      deckId: "precon-asr",
     });
     expect(joined).toMatchObject({ ok: true, kind: "player", seat: 1 });
     expect(await store.roomInvite(privateRoom.code)).toMatchObject({ spectateOnly: true });
@@ -450,8 +459,8 @@ describe("PgRoomStore storage", () => {
     expect(replay ? replayFileViews(replay).at(-1)?.winner : undefined)
       .toBeNull();
 
-    const humanRoom = await store.createRoom("classic-battles", {
-      hero: "rhinar",
+    const humanRoom = await store.createRoom("cc", {
+      deckId: "precon-asb",
       username: "BotOwner",
       userId,
     });
@@ -846,7 +855,7 @@ describe("PgRoomStore storage", () => {
   });
 
   it("loads a room with no relational membership from the same aggregate query", async () => {
-    const created = await store.createRoom("classic-battles", { hero: "rhinar" });
+    const created = await store.createRoom("cc", { deckId: "precon-asb" });
     await db.query("DELETE FROM room_seats WHERE room_code = $1", [created.code]);
     const queries: string[] = [];
 
@@ -883,7 +892,7 @@ describe("PgRoomStore storage", () => {
        VALUES ('WatchingOwner','watchingowner','hash',1) RETURNING id`,
     );
     const userId = Number(user.rows[0]!.id);
-    const created = await store.createRoom("classic-battles", { hero: "rhinar", userId });
+    const created = await store.createRoom("cc", { deckId: "precon-asb", userId });
     const before = await rawSeats(created.code);
 
     expect(await store.joinRoom(created.code, created.token, {
@@ -900,14 +909,14 @@ describe("PgRoomStore storage", () => {
   });
 
   it("inserts and deletes only the affected player seat", async () => {
-    const host = await store.createRoom("classic-battles", { hero: "rhinar" });
+    const host = await store.createRoom("cc", { deckId: "precon-asb" });
     await markStoredSeatPresent(host.code, 0);
     const hostBefore = (await rawSeats(host.code))[0];
     const queries: string[] = [];
     const measured = tracedStore(queries);
     const joined = await measured.joinRoom(host.code, undefined, {
       allowPlayer: true,
-      hero: "dorinthea",
+      deckId: "precon-asr",
     });
     if (!joined.ok || joined.kind !== "player") throw new Error("join failed");
 
@@ -958,8 +967,8 @@ describe("PgRoomStore storage", () => {
       ok: true,
       started: false,
     });
-    await lockClassicArenas(code, tokens);
-    const deck0 = decklists[room!.seats[0]!.hero!];
+    await lockArenas(code, tokens);
+    const deck0 = presentation(room!.seats[0]!.deckId!);
     const queries: string[] = [];
     const measured = tracedStore(queries);
 
@@ -985,7 +994,7 @@ describe("PgRoomStore storage", () => {
       deck: deck0.deck,
     });
     room = await store.getRoom(code);
-    const deck1 = decklists[room!.seats[1]!.hero!];
+    const deck1 = presentation(room!.seats[1]!.deckId!);
     const beforeStart = await rawSeats(code);
     queries.length = 0;
     expect(await measured.presentDeck(code, { token: tokens[1] }, {
@@ -1087,7 +1096,8 @@ describe("PgRoomStore storage", () => {
     const claimed = await store.claimVictory(code, { token: tokens[winner], userId: userIds[winner] }, Date.now() + 10_000_000_000);
     expect(claimed.ok).toBe(true);
     const achievements = await getAchievements(db, userIds[winner]!);
-    expect(achievements.unlocks.map((item) => item.id)).toEqual(["first-pvp-win", "first-victory"]);
+    expect(achievements.unlocks.map((item) => item.id))
+      .toEqual(["first-pvp-win", "first-victory", "healthy-victory"]);
     expect(achievements.percentages.find((item) => item.id === "first-victory")?.percent).toBe(50);
   });
 
@@ -1537,6 +1547,7 @@ describe("PgRoomStore storage", () => {
     const { code, tokens } = await fullRoom();
     await startGame(code, tokens);
     await forceRunechantWindow(code, 0, 2);
+    const lifeBefore = (await store.getRoom(code))!.state!.players[1]!.life;
 
     const first = await store.setRunechantSkipping(code, { token: tokens[0] }, true);
     expect(first).toMatchObject({ ok: true, advanced: true });
@@ -1549,7 +1560,7 @@ describe("PgRoomStore storage", () => {
     expect(second).toMatchObject({ ok: true, advanced: true });
     const completed = await store.getRoom(code);
     expect(completed!.state!.stack).toHaveLength(0);
-    expect(completed!.state!.players[1]!.life).toBe(18);
+    expect(completed!.state!.players[1]!.life).toBe(lifeBefore - 2);
     expect(await store.getHistory(code)).toHaveLength(0);
 
     // A later Runechant is a new sequence. A manual first pass must expose
@@ -1827,7 +1838,7 @@ describe("PgRoomStore storage", () => {
   });
 
   it("rejects malformed persisted JSON instead of guessing another shape", async () => {
-    const created = await store.createRoom("classic-battles", { hero: "rhinar" });
+    const created = await store.createRoom("cc", { deckId: "precon-asb" });
     await db.query("UPDATE rooms SET state = $2 WHERE code = $1", [created.code, JSON.stringify({ turn: 1 })]);
     await expect(store.getRoom(created.code)).rejects.toMatchObject({
       name: "CorruptRoomError",
@@ -1836,7 +1847,7 @@ describe("PgRoomStore storage", () => {
   });
 
   it("rejects malformed nested seat and presence aggregates", async () => {
-    const created = await store.createRoom("classic-battles", { hero: "rhinar" });
+    const created = await store.createRoom("cc", { deckId: "precon-asb" });
     const corruptStore = (field: "seat_rows" | "presence_rows", value: unknown): PgRoomStore => {
       const corruptDb: Queryable = {
         query: async (text, params) => {
@@ -1867,7 +1878,7 @@ describe("PgRoomStore storage", () => {
   });
 
   it("validates stored spectator JSON before presence membership checks", async () => {
-    const created = await store.createRoom("classic-battles", { hero: "rhinar" });
+    const created = await store.createRoom("cc", { deckId: "precon-asb" });
     await db.query("UPDATE rooms SET spectators = $2 WHERE code = $1", [
       created.code,
       JSON.stringify([{ tokenHash: 42 }]),
@@ -1879,7 +1890,7 @@ describe("PgRoomStore storage", () => {
   });
 
   it("uses token-hashed presence leases and expires abandoned rooms", async () => {
-    const created = await store.createRoom("classic-battles", { hero: "rhinar" });
+    const created = await store.createRoom("cc", { deckId: "precon-asb" });
     await store.markPresent(created.code, created.token, "socket", 0);
     const lease = await db.query("SELECT token_hash FROM room_presence WHERE room_code = $1", [created.code]);
     expect(lease.rows).toEqual([{ token_hash: hashReconnectToken(created.token) }]);
@@ -1894,7 +1905,7 @@ describe("PgRoomStore storage", () => {
        VALUES ('Owner','owner','hash',1) RETURNING id`,
     );
     const userId = Number(user.rows[0].id);
-    const created = await store.createRoom("classic-battles", { hero: "rhinar", userId });
+    const created = await store.createRoom("cc", { deckId: "precon-asb", userId });
     expect(await store.listRooms(userId)).toEqual([
       expect.objectContaining({ code: created.code, yours: true }),
     ]);
@@ -1913,25 +1924,24 @@ describe("PgRoomStore storage", () => {
     const secondId = Number(users.rows[1]!.id);
     const otherGateway = new PgRoomStore(db, "rules-a");
 
-    const opened = await store.queueForMatch("classic-battles", {
+    const opened = await store.queueForMatch("cc", {
       userId: firstId,
       username: "QueueA",
-      hero: "rhinar",
+      deckId: "precon-asb",
       cardPoolMode: "legal",
     });
     expect(opened).toMatchObject({ ok: true, kind: "opened", version: 0 });
     if (!opened.ok || opened.kind !== "opened") throw new Error("queue did not open a room");
     await markStoredSeatPresent(opened.code, 0);
     expect(await otherGateway.matchmakingCounts()).toEqual({
-      "classic-battles": 1,
-      cc: 0,
+      cc: 1,
       "silver-age": 0,
     });
 
-    const matched = await otherGateway.queueForMatch("classic-battles", {
+    const matched = await otherGateway.queueForMatch("cc", {
       userId: secondId,
       username: "QueueB",
-      hero: "dorinthea",
+      deckId: "precon-asr",
       cardPoolMode: "legal",
     });
     expect(matched).toMatchObject({ ok: true, kind: "matched", code: opened.code, version: 1 });
@@ -1940,7 +1950,6 @@ describe("PgRoomStore storage", () => {
     expect(room?.seats.map((seat) => seat?.userId)).toEqual([firstId, secondId]);
     expect(room?.seats.every((seat) => seat?.fromQueue)).toBe(true);
     expect(await store.matchmakingCounts()).toEqual({
-      "classic-battles": 0,
       cc: 0,
       "silver-age": 0,
     });
@@ -2285,10 +2294,10 @@ describe("PgRoomStore storage", () => {
       format: "cc",
     });
 
-    const foreground = await store.queueForMatch("classic-battles", {
+    const foreground = await store.queueForMatch("cc", {
       userId: foregroundUserId,
       username: "ReconnectQueue",
-      hero: "rhinar",
+      deckId: "precon-asb",
       cardPoolMode: "legal",
     });
     expect(foreground).toMatchObject({ ok: true, kind: "opened" });
@@ -2305,10 +2314,10 @@ describe("PgRoomStore storage", () => {
        VALUES ('LockOrderQueue','lockorderqueue','hash',1) RETURNING id`,
     );
     const userId = Number(user.rows[0]!.id);
-    await expect(store.queueForMatch("classic-battles", {
+    await expect(store.queueForMatch("cc", {
       userId,
       username: "LockOrderQueue",
-      hero: "rhinar",
+      deckId: "precon-asb",
       cardPoolMode: "legal",
     })).resolves.toMatchObject({ ok: true, kind: "opened" });
 
@@ -2323,7 +2332,7 @@ describe("PgRoomStore storage", () => {
           && sql === "SELECT format FROM matchmaking_entries WHERE user_id = $1 AND mode = 'foreground'"
         ) {
           returnStaleFormat = false;
-          return { rows: [{ format: "cc" }], rowCount: 1 };
+          return { rows: [{ format: "silver-age" }], rowCount: 1 };
         }
         return db.query(text, params);
       },
@@ -2744,18 +2753,18 @@ describe("PgRoomStore storage", () => {
     );
     const absentId = Number(users.rows[0]!.id);
     const liveId = Number(users.rows[1]!.id);
-    const absent = await store.queueForMatch("classic-battles", {
+    const absent = await store.queueForMatch("cc", {
       userId: absentId,
       username: "GoneQueue",
-      hero: "rhinar",
+      deckId: "precon-asb",
       cardPoolMode: "legal",
     });
     if (!absent.ok || absent.kind !== "opened") throw new Error("queue did not open a room");
 
-    const live = await store.queueForMatch("classic-battles", {
+    const live = await store.queueForMatch("cc", {
       userId: liveId,
       username: "LiveQueue",
-      hero: "dorinthea",
+      deckId: "precon-asr",
       cardPoolMode: "legal",
     });
     expect(live).toMatchObject({ ok: true, kind: "opened" });
@@ -2778,10 +2787,10 @@ describe("PgRoomStore storage", () => {
     const joinerId = Number(users.rows[1]!.id);
     const laterId = Number(users.rows[2]!.id);
 
-    const opened = await store.queueForMatch("classic-battles", {
+    const opened = await store.queueForMatch("cc", {
       userId: openerId,
       username: "ManualA",
-      hero: "rhinar",
+      deckId: "precon-asb",
       cardPoolMode: "legal",
     });
     if (!opened.ok || opened.kind !== "opened") throw new Error("queue did not open a room");
@@ -2791,18 +2800,17 @@ describe("PgRoomStore storage", () => {
       allowPlayer: true,
       userId: joinerId,
       username: "ManualB",
-      hero: "dorinthea",
+      deckId: "precon-asr",
     })).resolves.toMatchObject({ ok: true, kind: "player", seat: 1 });
     expect(await store.matchmakingCounts()).toEqual({
-      "classic-battles": 0,
       cc: 0,
       "silver-age": 0,
     });
 
-    const later = await store.queueForMatch("classic-battles", {
+    const later = await store.queueForMatch("cc", {
       userId: laterId,
       username: "ManualC",
-      hero: "dorinthea",
+      deckId: "precon-asr",
       cardPoolMode: "legal",
     });
     expect(later).toMatchObject({ ok: true, kind: "opened" });
@@ -2822,18 +2830,18 @@ describe("PgRoomStore storage", () => {
     expect(declined).toMatchObject({ ok: true, freedSeat: 1 });
     if (!declined.ok || !declined.remaining) throw new Error("match did not retain its opener");
 
-    expect(await store.queueForMatch("classic-battles", {
+    expect(await store.queueForMatch("cc", {
       userId: match.userIds[0],
       username: "MatchA",
-      hero: "rhinar",
+      deckId: "precon-asb",
       retainedRoomCode: declinedCode,
       cardPoolMode: "legal",
     })).toEqual({ ok: true, kind: "queued" });
 
-    const opened = await store.queueForMatch("classic-battles", {
+    const opened = await store.queueForMatch("cc", {
       userId: match.userIds[1],
       username: "MatchB",
-      hero: "dorinthea",
+      deckId: "precon-asr",
       avoidRoomCodes: [declinedCode],
       cardPoolMode: "legal",
     });
@@ -2845,10 +2853,10 @@ describe("PgRoomStore storage", () => {
     expect((await store.getRoom(opened.code))?.seats.map((seat) => seat?.userId ?? null))
       .toEqual([match.userIds[1], null]);
 
-    expect(await store.queueForMatch("classic-battles", {
+    expect(await store.queueForMatch("cc", {
       userId: match.userIds[1],
       username: "MatchB",
-      hero: "dorinthea",
+      deckId: "precon-asr",
       avoidRoomCodes: [declinedCode],
       cardPoolMode: "legal",
     })).toEqual(opened);
@@ -2894,7 +2902,7 @@ describe("PgRoomStore storage", () => {
     }
     expect(await store.unready(match.code, { token: match.tokens[0], userId: match.userIds[0] }))
       .toEqual({ ok: false, error: "the room is not in deck selection" });
-    expect(await store.presentDeck(match.code, { token: match.tokens[0], userId: match.userIds[0] }, decklists.rhinar))
+    expect(await store.presentDeck(match.code, { token: match.tokens[0], userId: match.userIds[0] }, presentation("precon-asb")))
       .toEqual({ ok: false, error: "the match is not in deck preparation" });
   });
 
@@ -2909,14 +2917,14 @@ describe("PgRoomStore storage", () => {
     const room = await store.getRoom(match.code);
     expect(room?.seats.map((seat) => seat?.userId ?? null)).toEqual([match.userIds[0], null]);
     expect(room?.prep).toBeNull();
-    expect(await store.matchmakingCounts()).toMatchObject({ "classic-battles": 1 });
+    expect(await store.matchmakingCounts()).toMatchObject({ cc: 1 });
     expect((await db.query(
       "SELECT subject_user_id FROM cluster_events WHERE event_type = 'match-timeout'",
     )).rows).toEqual([{ subject_user_id: match.userIds[1] }]);
     expect(await store.joinRoom(match.code, match.tokens[1], {
       allowPlayer: true,
       userId: match.userIds[1],
-      hero: "dorinthea",
+      deckId: "precon-asr",
     })).toEqual({ ok: false, error: "room session expired" });
   });
 
@@ -2926,7 +2934,7 @@ describe("PgRoomStore storage", () => {
 
     await store.sweepMatchmadePrep(deadline + 1);
     expect((await store.getRoom(match.code))?.seats).toEqual([null, null]);
-    expect(await store.matchmakingCounts()).toMatchObject({ "classic-battles": 0 });
+    expect(await store.matchmakingCounts()).toMatchObject({ cc: 0 });
     expect((await db.query(
       "SELECT subject_user_id FROM cluster_events WHERE event_type = 'match-timeout' ORDER BY subject_user_id",
     )).rows).toEqual(match.userIds.map((subject_user_id) => ({ subject_user_id })));
@@ -2942,7 +2950,7 @@ describe("PgRoomStore storage", () => {
       token: match.tokens[prep.dieWinner],
       userId: match.userIds[prep.dieWinner],
     }, true);
-    const deck = decklists.rhinar;
+    const deck = presentation("precon-asb");
     await store.presentArena(match.code, { token: match.tokens[0], userId: match.userIds[0] }, {
       weaponIds: deck.weaponIds,
       equipment: deck.equipment,
@@ -2953,7 +2961,7 @@ describe("PgRoomStore storage", () => {
     const room = await store.getRoom(match.code);
     expect(room?.seats.map((seat) => seat?.userId ?? null)).toEqual([match.userIds[0], null]);
     expect(room?.seats[0]?.ready).toBe(false);
-    expect(await store.matchmakingCounts()).toMatchObject({ "classic-battles": 1 });
+    expect(await store.matchmakingCounts()).toMatchObject({ cc: 1 });
   });
 
   it("shares one five-minute start budget across first-player choice, arena reveal, and deck selection", async () => {
@@ -2967,10 +2975,10 @@ describe("PgRoomStore storage", () => {
       .toMatchObject({ ok: true });
     const deadline = (await store.getRoom(match.code))!.prepDeadlineAt!;
     expect(deadline).toBe(initial.prepDeadlineAt! + 270_000);
-    await lockClassicArenas(match.code, match.tokens);
+    await lockArenas(match.code, match.tokens);
     expect((await store.getRoom(match.code))!.prepDeadlineAt).toBe(deadline);
     expect(prepViewFor((await store.getRoom(match.code))!, 0).deadlinePhase).toBe("select-deck");
-    await store.presentDeck(match.code, { token: match.tokens[0], userId: match.userIds[0] }, decklists.rhinar);
+    await store.presentDeck(match.code, { token: match.tokens[0], userId: match.userIds[0] }, presentation("precon-asb"));
     await store.sweepMatchmadePrep(deadline + 1);
     const survivor = (await store.getRoom(match.code))!;
     expect(survivor.seats[1]).toBeNull();
@@ -2992,9 +3000,9 @@ describe("PgRoomStore storage", () => {
     const decided = await store.getRoom(match.code);
     expect(decided?.prep?.startPlayer).toBe(prep?.prep?.dieWinner);
     expect(prepViewFor(decided!, 0).deadlinePhase).toBe("select-arena");
-    await lockClassicArenas(match.code, match.tokens);
+    await lockArenas(match.code, match.tokens);
     for (const seat of [0, 1] as const) {
-      const deck = decklists[seat === 0 ? "rhinar" : "dorinthea"];
+      const deck = presentation(SEAT_DECKS[seat]);
       expect(await store.presentDeck(match.code, { token: match.tokens[seat], userId: match.userIds[seat] }, {
         weaponIds: deck.weaponIds,
         equipment: deck.equipment,

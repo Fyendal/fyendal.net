@@ -1,8 +1,7 @@
 import { useId, useState } from "react";
 import { useIntl } from "react-intl";
 import { useShallow } from "zustand/react/shallow";
-import type { CardPoolMode } from "@fyendal/shared";
-import type { ConstructedFormat } from "../domain.js";
+import type { CardPoolMode, Format } from "@fyendal/shared";
 import { loadHomeFormat, loadHomeGameMode, saveHomeFormat, saveHomeGameMode, type HomeGameMode } from "../storage.js";
 import { useStore } from "../store.js";
 import playPoster from "../../../assets/play-poster.jpg";
@@ -46,7 +45,7 @@ export function Home() {
     refreshDecks: state.refreshDecks,
     setCardPoolMode: state.setCardPoolMode,
   })));
-  const [format, setFormat] = useState<ConstructedFormat>(() =>
+  const [format, setFormat] = useState<Format>(() =>
     typeof localStorage === "undefined"
       ? "silver-age"
       : loadHomeFormat(localStorage, authUser)
@@ -82,9 +81,9 @@ export function Home() {
   const start = () => {
     if (!selectedDeck || queuedFormat !== null) return;
     if (mode === "find-match") {
-      queueJoin(format, { deckId: selectedDeck.id });
+      queueJoin(format, selectedDeck.id);
     } else if (mode === "invite-friend") {
-      createRoom(format, { deckId: selectedDeck.id }, "private");
+      createRoom(format, selectedDeck.id, "private");
     } else {
       setChoosingBot(true);
     }
@@ -130,7 +129,7 @@ export function Home() {
                 value={format}
                 disabled={queuedFormat !== null}
                 onChange={(event) => {
-                  const nextFormat = event.target.value as ConstructedFormat;
+                  const nextFormat = event.target.value as Format;
                   setFormat(nextFormat);
                   setSelectedDeckId("");
                   if (typeof localStorage !== "undefined") {

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import type { Format } from "@fyendal/shared";
 import { useShallow } from "zustand/react/shallow";
 import { useStore } from "../store.js";
 import { FormatBadge, FORMAT_LABELS } from "./FormatBadge.js";
@@ -20,7 +21,7 @@ export function DeckManager() {
     })),
   );
   const [name, setName] = useState("");
-  const [format, setFormat] = useState<"cc" | "silver-age">("cc");
+  const [format, setFormat] = useState<Format>("cc");
   const [url, setUrl] = useState("");
   const [text, setText] = useState("");
   const [busy, setBusy] = useState(false);
@@ -124,7 +125,7 @@ export function DeckManager() {
               placeholder="Deck name"
               className="grow"
             />
-            <select value={format} onChange={(e) => setFormat(e.target.value as "cc" | "silver-age")}>
+            <select value={format} onChange={(e) => setFormat(e.target.value as Format)}>
               <option value="cc">{FORMAT_LABELS.cc}</option>
               <option value="silver-age">{FORMAT_LABELS["silver-age"]}</option>
             </select>

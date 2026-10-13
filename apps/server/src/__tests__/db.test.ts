@@ -414,6 +414,92 @@ describe("initial schema", () => {
     expect(await tables(db)).not.toContain("replay_events");
   });
 
+  it("retires Classic Battles rooms, queue entries, replays, and hero columns", async () => {
+    const db = rawDb();
+    await applyMigrations(db, MIGRATIONS.filter((migration) => migration.version <= 46));
+    const users = [];
+    for (const name of ["classic", "constructed"]) {
+      const { rows } = await db.query(
+        `INSERT INTO users (username, username_lc, pass_hash, created_at)
+         VALUES ($1, $1, 'hash', 1) RETURNING id`,
+        [name],
+      );
+      users.push(Number(rows[0]!.id));
+    }
+    for (const [code, format] of [["CLASSI", "classic-battles"], ["CONSTR", "cc"]] as const) {
+      await db.query(
+        `INSERT INTO rooms (code, format, spectators, ruleset_version, version, created_at, status)
+         VALUES ($1, $2, '[]', 'rules-a', 0, 1, 'open')`,
+        [code, format],
+      );
+      await db.query(
+        `INSERT INTO room_seats (room_code, seat, token_hash, hero, deck_id)
+         VALUES ($1, 0, 'hash', $2, $3)`,
+        [code, format === "cc" ? null : "rhinar", format === "cc" ? "precon-asb" : null],
+      );
+      await db.query(
+        `INSERT INTO replay_games
+          (id, room_code, ruleset_version, format, hero_0_id, hero_1_id, status, created_at)
+         VALUES ($1, $1, 'rules-a', $2, 'H0', 'H1', 'recording', 1)`,
+        [code, format],
+      );
+      await db.query(
+        "INSERT INTO replay_participants (replay_id, user_id, seat) VALUES ($1, $2, 0)",
+        [code, users[format === "cc" ? 1 : 0]],
+      );
+    }
+    await db.query(
+      `INSERT INTO matchmaking_entries (user_id, format, hero, joined_at, retained_room_code)
+       VALUES ($1, 'classic-battles', 'rhinar', 1, 'CLASSI')`,
+      [users[0]],
+    );
+    await db.query(
+      `INSERT INTO matchmaking_entries (user_id, format, deck_id, joined_at, retained_room_code)
+       VALUES ($1, 'cc', 'precon-asb', 1, 'CONSTR')`,
+      [users[1]],
+    );
+    await db.query(
+      `INSERT INTO analytics_events (event_id, event_type, occurred_at, format, game_mode)
+       VALUES ('legacy', 'game_completed', 1, 'classic-battles', 'pvp')`,
+    );
+
+    await applyMigrations(db, MIGRATIONS);
+    await applyMigrations(db, MIGRATIONS);
+
+    expect((await db.query("SELECT code FROM rooms")).rows).toEqual([{ code: "CONSTR" }]);
+    expect((await db.query("SELECT room_code FROM room_seats")).rows).toEqual([{ room_code: "CONSTR" }]);
+    expect((await db.query("SELECT user_id FROM matchmaking_entries")).rows).toEqual([{ user_id: users[1] }]);
+    expect((await db.query("SELECT id FROM replay_games")).rows).toEqual([{ id: "CONSTR" }]);
+    expect((await db.query("SELECT replay_id FROM replay_participants")).rows).toEqual([{ replay_id: "CONSTR" }]);
+    expect((await db.query("SELECT format FROM matchmaking_locks ORDER BY format")).rows)
+      .toEqual([{ format: "cc" }, { format: "silver-age" }]);
+    expect((await db.query("SELECT format FROM analytics_events")).rows).toEqual([{ format: "classic-battles" }]);
+    await expect(db.query("SELECT hero FROM room_seats")).rejects.toThrow();
+    await expect(db.query("SELECT hero FROM matchmaking_entries")).rejects.toThrow();
+
+    await expect(db.query(
+      `INSERT INTO rooms (code, format, spectators, ruleset_version, version, created_at, status)
+       VALUES ('CLASS2', 'classic-battles', '[]', 'rules-a', 0, 1, 'open')`,
+    )).rejects.toThrow();
+    await expect(db.query(
+      `INSERT INTO replay_games
+        (id, room_code, ruleset_version, format, hero_0_id, hero_1_id, status, created_at)
+       VALUES ('CLASS2', 'CLASS2', 'rules-a', 'classic-battles', 'H0', 'H1', 'recording', 1)`,
+    )).rejects.toThrow();
+    await expect(db.query(
+      `INSERT INTO matchmaking_entries (user_id, format, joined_at)
+       VALUES ($1, 'classic-battles', 1)`,
+      [users[0]],
+    )).rejects.toThrow();
+    await expect(db.query("INSERT INTO matchmaking_locks (format) VALUES ('classic-battles')")).rejects.toThrow();
+    // The replaced checks still admit the constructed formats.
+    await db.query(
+      `INSERT INTO matchmaking_entries (user_id, format, deck_id, joined_at)
+       VALUES ($1, 'silver-age', 'precon-sar', 1)`,
+      [users[0]],
+    );
+  });
+
   it("fails with RESET_REQUIRED for unexpected tables or another epoch", async () => {
     const unexpected = rawDb();
     await unexpected.query("CREATE TABLE users (id INTEGER)");

@@ -1,4 +1,4 @@
-/* ── deck-pick modal (joining a constructed room) ── */
+/* ── deck-pick modal (joining a room) ── */
 .modal-backdrop {
   position: fixed;
   inset: 0;
@@ -245,7 +245,6 @@
   border: 1px solid;
   white-space: nowrap;
 }
-.format-cb { color: #ffd479; border-color: #b8933f66; background: #b8933f14; }
 .format-cc { color: #ff9d76; border-color: #a74a2a66; background: #a74a2a14; }
 .format-sa { color: #c8c2b4; border-color: #8a827266; background: #8a827214; }
 
@@ -329,7 +328,6 @@
 .deck-edit-actions { display: flex; justify-content: flex-end; gap: 10px; }
 .invite-room-modal { width: min(736px, calc(100vw - 32px)); }
 .invite-room-modal > p { margin-bottom: 14px; }
-.invite-hero-actions button { flex: 1; padding: 12px 16px; }
 .invite-entry-actions { display: flex; gap: 10px; }
 .invite-entry-actions button { flex: 1; }
 .invite-onboarding,

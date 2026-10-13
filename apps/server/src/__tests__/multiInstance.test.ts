@@ -185,26 +185,30 @@ describe("multi-instance gateways", () => {
   it("fans a room mutation out to the opponent's gateway", async () => {
     const a = await authed(first, "CrossRoomA");
     const b = await authed(second, "CrossRoomB");
-    a.send({ type: "create-room", format: "classic-battles", hero: "rhinar" });
+    a.send({ type: "create-room", format: "cc", deckId: "precon-asb" });
     const created = await a.next((message) => message.type === "room-created") as Extract<ServerMessage, { type: "room-created" }>;
+    // Let the creator's own reload settle first: pg-mem has no transaction
+    // isolation, so a reload racing the join could read a half-written fill.
+    await a.next((message) => message.type === "prep-state");
 
-    b.send({ type: "join-room", code: created.code, hero: "dorinthea" });
+    b.send({ type: "join-room", code: created.code, deckId: "precon-asr" });
     await b.next((message) => message.type === "joined");
+    const heroIds = [precon("precon-asb")!.pool.heroId, precon("precon-asr")!.pool.heroId];
     const prep = await a.next((message) =>
-      message.type === "prep-state" && message.prep.seats[1]?.hero === "dorinthea",
+      message.type === "prep-state" && message.prep.seats[1]?.heroId === heroIds[1],
     ) as Extract<ServerMessage, { type: "prep-state" }>;
 
-    expect(prep.prep.seats.map((seat) => seat?.hero)).toEqual(["rhinar", "dorinthea"]);
+    expect(prep.prep.seats.map((seat) => seat?.heroId)).toEqual(heroIds);
     expect(prep.prep.die).not.toBeNull();
   });
 
   it("pairs queue entries owned by different gateways exactly once", async () => {
     const a = await authed(first, "CrossQueueA");
     const b = await authed(second, "CrossQueueB");
-    a.send({ type: "queue-join", format: "classic-battles", hero: "rhinar" });
+    a.send({ type: "queue-join", format: "cc", deckId: "precon-asb" });
     await a.next((message) => message.type === "queued");
 
-    b.send({ type: "queue-join", format: "classic-battles", hero: "dorinthea" });
+    b.send({ type: "queue-join", format: "cc", deckId: "precon-asr" });
     const [created, joined] = await Promise.all([
       a.next((message) => message.type === "room-created") as Promise<Extract<ServerMessage, { type: "room-created" }>>,
       b.next((message) => message.type === "joined") as Promise<Extract<ServerMessage, { type: "joined" }>>,
@@ -336,9 +340,9 @@ describe("multi-instance gateways", () => {
   it("does not rematch a decliner with the retained room on another gateway", async () => {
     const a = await authed(first, "CrossAvoidA");
     const b = await authed(second, "CrossAvoidB");
-    a.send({ type: "queue-join", format: "classic-battles", hero: "rhinar" });
+    a.send({ type: "queue-join", format: "cc", deckId: "precon-asb" });
     await a.next((message) => message.type === "queued");
-    b.send({ type: "queue-join", format: "classic-battles", hero: "dorinthea" });
+    b.send({ type: "queue-join", format: "cc", deckId: "precon-asr" });
     const created = await a.next((message) => message.type === "room-created") as Extract<ServerMessage, { type: "room-created" }>;
     await b.next((message) => message.type === "joined" && message.code === created.code);
 
@@ -346,8 +350,8 @@ describe("multi-instance gateways", () => {
     await b.next((message) => message.type === "left");
     b.send({
       type: "queue-join",
-      format: "classic-battles",
-      hero: "dorinthea",
+      format: "cc",
+      deckId: "precon-asr",
       avoidRoomCodes: [created.code],
     });
     await b.next((message) => message.type === "queued");

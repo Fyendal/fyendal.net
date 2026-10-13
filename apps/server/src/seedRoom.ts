@@ -34,7 +34,7 @@ function validateFixture(value: unknown): asserts value is ManualRoomFixture {
   if (typeof fixture.title !== "string" || !fixture.title.trim() || fixture.title.length > 80) {
     throw new Error("fixture title must be 1–80 characters");
   }
-  if (!["classic-battles", "cc", "silver-age"].includes(String(fixture.format))) {
+  if (!["cc", "silver-age"].includes(String(fixture.format))) {
     throw new Error("fixture format is invalid");
   }
   if (!Array.isArray(fixture.seats) || fixture.seats.length !== 2 ||

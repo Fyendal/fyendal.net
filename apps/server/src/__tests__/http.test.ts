@@ -3,7 +3,7 @@ import type { Server } from "node:http";
 import type { AddressInfo } from "node:net";
 import { gzipSync } from "node:zlib";
 import { decodeAchievementsResponse, decodeMatchRecordsResponse, decodeMatchesResponse } from "@fyendal/protocol";
-import { cardData, decklists, precon } from "@fyendal/cards";
+import { cardData, precon } from "@fyendal/cards";
 import { createApiServer, createRateLimiter, type ApiDeps } from "../http.js";
 import { login, register, sessionForToken } from "../auth.js";
 import { recordDeckPlay } from "../decks.js";
@@ -611,9 +611,10 @@ describe("replay transport compression", () => {
     ]);
     if (!userA || !userB) throw new Error("session missing");
     const users = [userA, userB] as const;
+    const DECK_IDS = ["precon-asb", "precon-asr"] as const;
     const store = new PgRoomStore(db, "rules-a");
-    const host = await store.createRoom("classic-battles", {
-      hero: "rhinar",
+    const host = await store.createRoom("cc", {
+      deckId: DECK_IDS[0],
       userId: users[0].id,
       username: users[0].username,
     });
@@ -625,7 +626,7 @@ describe("replay transport compression", () => {
     );
     const joined = await store.joinRoom(host.code, undefined, {
       allowPlayer: true,
-      hero: "dorinthea",
+      deckId: DECK_IDS[1],
       userId: users[1].id,
       username: users[1].username,
     });
@@ -639,16 +640,16 @@ describe("replay transport compression", () => {
     );
     if (!chosen.ok || chosen.started) throw new Error("turn order was not recorded");
     for (const seat of [0, 1] as const) {
-      const deck = decklists[seat === 0 ? "rhinar" : "dorinthea"];
-      const locked = await store.presentArena(host.code, { token: roomTokens[seat], userId: users[seat].id }, { weaponIds: deck.weaponIds, equipment: deck.equipment });
+      const pool = precon(DECK_IDS[seat])!.pool;
+      const locked = await store.presentArena(host.code, { token: roomTokens[seat], userId: users[seat].id }, { weaponIds: pool.weaponIds, equipment: {} });
       if (!locked.ok) throw new Error(locked.error);
     }
     for (const seat of [0, 1] as const) {
-      const deck = decklists[seat === 0 ? "rhinar" : "dorinthea"];
+      const pool = precon(DECK_IDS[seat])!.pool;
       const presented = await store.presentDeck(
         host.code,
         { token: roomTokens[seat], userId: users[seat].id },
-        { weaponIds: deck.weaponIds, equipment: deck.equipment, deck: deck.deck },
+        { weaponIds: pool.weaponIds, equipment: {}, deck: pool.deck },
       );
       if (!presented.ok) throw new Error(presented.error);
     }
@@ -877,7 +878,7 @@ describe("account rights", () => {
     await db.query(
       `INSERT INTO rooms
        (code, format, spectators, state, prep, ruleset_version, version, created_at, gc_at, status, winner)
-       VALUES ($1, 'classic-battles', '[]', NULL, NULL, 'test-ruleset', 0, $2, NULL, 'open', NULL)`,
+       VALUES ($1, 'cc', '[]', NULL, NULL, 'test-ruleset', 0, $2, NULL, 'open', NULL)`,
       ["PRIV01", Date.now()],
     );
     await db.query(

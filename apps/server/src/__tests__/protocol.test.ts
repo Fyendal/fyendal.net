@@ -17,8 +17,8 @@ describe("decodeClientMessage", () => {
   it("accepts valid room, prep, and intent messages", () => {
     expect(decodeClientMessage({
       type: "create-room",
-      format: "classic-battles",
-      hero: "rhinar",
+      format: "cc",
+      deckId: "precon-asb",
       private: true,
       cardPoolMode: "open",
     })).not.toBeNull();

@@ -119,14 +119,14 @@ export function parseDecklistText(text: string): ParsedLine[] {
 
 /** Maximum registered pool size (all non-hero cards: weapons + equipment +
  *  deck + sideboard). */
-const MAX_POOL_SIZE: Record<"cc" | "silver-age", number> = {
+const MAX_POOL_SIZE: Record<Format, number> = {
   cc: 80,
   "silver-age": 55,
 };
 /** Weapons a player may present for one game: up to 2 one-hand weapons, or a
  *  single two-hand weapon alone — except that a quiver may accompany a
  *  two-hander bow (CR 8.2.15a; at most one quiver, 8.2.15b). */
-const MAX_COPIES: Record<"cc" | "silver-age", number> = {
+const MAX_COPIES: Record<Format, number> = {
   cc: 3,
   "silver-age": 2,
 };
@@ -222,7 +222,7 @@ export function validateDeck(lines: ParsedLine[], format: Format): ValidationRes
   }
 
   if (!heroId) errors.push("no hero found in the decklist");
-  const maxCopies = MAX_COPIES[format as "cc" | "silver-age"] ?? 3;
+  const maxCopies = MAX_COPIES[format];
   for (const [key, n] of copies) {
     if (n > maxCopies) errors.push(`too many copies of ${key.split("|")[0]} (${n}, max ${maxCopies})`);
   }
@@ -232,7 +232,7 @@ export function validateDeck(lines: ParsedLine[], format: Format): ValidationRes
       `card pool too small (${deck.length + sideboard.length} main-deck cards, ${format} requires at least ${min})`,
     );
   }
-  const max = MAX_POOL_SIZE[format as "cc" | "silver-age"];
+  const max = MAX_POOL_SIZE[format];
   const poolSize = weaponIds.length + equipmentPool.length + inventoryPool.length + deck.length + sideboard.length;
   if (max && poolSize > max) {
     errors.push(`card pool too large (${poolSize} cards, ${format} allows at most ${max})`);
@@ -531,7 +531,7 @@ export async function recordDeckPlay(
 export async function resolveFabraryPlayDeck(
   db: Queryable,
   userId: number,
-  format: "cc" | "silver-age",
+  format: Format,
   url: string,
   fabraryClient: FabraryClient,
 ): Promise<FreshDeckResult> {

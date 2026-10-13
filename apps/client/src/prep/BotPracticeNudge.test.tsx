@@ -3,7 +3,6 @@ import { describe, expect, it, vi } from "vitest";
 import {
   BOT_PRACTICE_NUDGE_DELAY_MS,
   BotPracticeNudge,
-  botPracticeFormat,
   shouldOfferBotPractice,
 } from "./BotPracticeNudge.js";
 import { TestI18nProvider } from "../i18n/TestI18nProvider.js";
@@ -13,7 +12,7 @@ describe("bot practice nudge", () => {
     expect(BOT_PRACTICE_NUDGE_DELAY_MS).toBe(10_000);
   });
 
-  it("only offers a bot to an unmatched constructed player while searching", () => {
+  it("only offers a bot to an unmatched player while searching", () => {
     expect(shouldOfferBotPractice({
       format: "cc",
       matchmakingActive: true,
@@ -35,11 +34,10 @@ describe("bot practice nudge", () => {
       opponentPresent: false,
     })).toBe(true);
     expect(shouldOfferBotPractice({
-      format: "classic-battles",
+      format: undefined,
       matchmakingActive: true,
       opponentPresent: false,
     })).toBe(false);
-    expect(botPracticeFormat("classic-battles")).toBeNull();
   });
 
   it("names the available opponent and lets the player keep waiting", () => {

@@ -29,7 +29,7 @@ beforeEach(async () => {
   await db.query(
     `INSERT INTO rooms
       (code, format, spectators, state, prep, ruleset_version, version, created_at, gc_at, status, winner)
-     VALUES ('ABC123', 'classic-battles', '[]', $1, NULL, 'rules-a', 2, 1, NULL, 'playing', NULL)`,
+     VALUES ('ABC123', 'cc', '[]', $1, NULL, 'rules-a', 2, 1, NULL, 'playing', NULL)`,
     [JSON.stringify(state)],
   );
   await db.query(

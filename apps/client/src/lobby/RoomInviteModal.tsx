@@ -3,11 +3,10 @@ import { useIntl } from "react-intl";
 import { useStore } from "../store.js";
 import { useShallow } from "zustand/react/shallow";
 import { Auth } from "../auth/AuthCard.js";
-import type { ConstructedFormat } from "../domain.js";
 import { DeckTile, deckChoicesFor, deckIsLegalForRoom } from "./DeckGrid.js";
 import { formatLabel } from "./FormatBadge.js";
 
-/** URL-only room entry. Resolve the room first, then collect the deck or hero
+/** URL-only room entry. Resolve the room first, then collect the deck
  *  required to take its open player seat. */
 export function RoomInviteModal() {
   const intl = useIntl();
@@ -23,12 +22,7 @@ export function RoomInviteModal() {
   );
   if (!inviteRoom) return null;
 
-  const joinAsHero = (hero: "rhinar" | "dorinthea") => {
-    joinRoom(inviteRoom.code, undefined, undefined, hero);
-  };
-  const newPlayerChoice = inviteRoom.format === "classic-battles"
-    ? intl.formatMessage({ id: "lobby.invite.choiceHero" })
-    : intl.formatMessage({ id: "lobby.invite.choiceDeck" });
+  const newPlayerChoice = intl.formatMessage({ id: "lobby.invite.choiceDeck" });
 
   let content;
   if (!authUser && inviteRoom.spectateOnly) {
@@ -111,19 +105,9 @@ export function RoomInviteModal() {
         </button>
       </>
     );
-  } else if (inviteRoom.format === "classic-battles") {
-    content = (
-      <>
-        <p className="muted">{intl.formatMessage({ id: "lobby.invite.chooseHero" })}</p>
-        <div className="lobby-row invite-hero-actions">
-          <button onClick={() => joinAsHero("rhinar")}>Rhinar</button>
-          <button onClick={() => joinAsHero("dorinthea")}>Dorinthea</button>
-        </div>
-      </>
-    );
   } else {
     const choices = deckChoicesFor(
-      inviteRoom.format as ConstructedFormat,
+      inviteRoom.format,
       decks,
       inviteRoom.cardPoolMode ?? "legal",
     );

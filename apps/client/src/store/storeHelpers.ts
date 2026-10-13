@@ -1,4 +1,4 @@
-import type { CardPoolMode, Format, HeroId } from "@fyendal/shared";
+import type { CardPoolMode, Format } from "@fyendal/shared";
 import type { StoreState } from "./types.js";
 import type { LobbySettings } from "../storage.js";
 
@@ -43,7 +43,7 @@ export function initialStoreProjection(
     authToken: auth?.token ?? null,
     rooms: [],
     inviteRoom: null,
-    queueCounts: { "classic-battles": 0, cc: 0, "silver-age": 0 },
+    queueCounts: { cc: 0, "silver-age": 0 },
     queuedFormat: null,
     matchmakingActive: false,
     backgroundMatchmaking: { state: "inactive" as const },
@@ -74,12 +74,10 @@ export function initialStoreProjection(
 
 export function matchmakingChoiceKey(
   format: Format,
-  choice: { hero?: HeroId; deckId?: string },
+  deckId: string | undefined,
   cardPoolMode: CardPoolMode = "legal",
 ): string {
-  return format === "classic-battles"
-    ? `${format}:hero:${choice.hero ?? "none"}`
-    : `${format}:${cardPoolMode}:deck:${choice.deckId ?? "none"}`;
+  return `${format}:${cardPoolMode}:deck:${deckId ?? "none"}`;
 }
 
 export function clearedRoomProjection(): Pick<

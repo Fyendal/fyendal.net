@@ -26,7 +26,7 @@ export {
   botDefinitionForDeckId,
   botDefinitions,
 } from "./registry.js";
-export type { BotDecision, BotDefinition, ConstructedBotFormat } from "./registry.js";
+export type { BotDecision, BotDefinition } from "./registry.js";
 export { chooseBravoIntent, chooseBravoIntentWithTrace } from "./bravo-policy.js";
 export type { BravoIntentDecision } from "./bravo-policy.js";
 export {

@@ -19582,12 +19582,6 @@
       "value": "服务条款"
     }
   ],
-  "format.classicBattles": [
-    {
-      "type": 0,
-      "value": "经典对战"
-    }
-  ],
   "format.classicConstructed": [
     {
       "type": 0,
@@ -23510,22 +23504,10 @@
       "value": "选择一副可直接游玩的牌组"
     }
   ],
-  "lobby.invite.choiceHero": [
-    {
-      "type": 0,
-      "value": "选择 Rhinar 或 Dorinthea"
-    }
-  ],
   "lobby.invite.chooseDeck": [
     {
       "type": 0,
       "value": "选择牌组以加入此私人房间。"
-    }
-  ],
-  "lobby.invite.chooseHero": [
-    {
-      "type": 0,
-      "value": "选择英雄以加入此私人房间。"
     }
   ],
   "lobby.invite.createAccount": [
@@ -23780,20 +23762,6 @@
     {
       "type": 0,
       "value": "——选择牌组"
-    }
-  ],
-  "lobby.rooms.pickHero": [
-    {
-      "type": 0,
-      "value": "加入 "
-    },
-    {
-      "type": 1,
-      "value": "code"
-    },
-    {
-      "type": 0,
-      "value": "——选择英雄"
     }
   ],
   "lobby.rooms.started": [

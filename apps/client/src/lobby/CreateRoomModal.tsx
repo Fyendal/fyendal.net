@@ -2,8 +2,7 @@ import { useState } from "react";
 import { useIntl } from "react-intl";
 import { useShallow } from "zustand/react/shallow";
 import type { DeckSummary } from "@fyendal/protocol";
-import type { BotOpponent, CardPoolMode } from "@fyendal/shared";
-import type { ConstructedFormat } from "../domain.js";
+import type { BotOpponent, CardPoolMode, Format } from "@fyendal/shared";
 import { useStore } from "../store.js";
 import { deckChoicesFor, deckIsLegalForRoom, sortDecksForPicker } from "./DeckGrid.js";
 import { FormatName } from "./FormatBadge.js";
@@ -11,8 +10,7 @@ import { heroImageUrl } from "./heroImage.js";
 import { BotOpponentModal } from "./BotOpponentModal.js";
 import { CardPoolModeControl } from "./CardPoolModeControl.js";
 import { ListboxDropdown } from "../components/ListboxDropdown.js";
-
-const ROOM_FORMATS = ["cc", "silver-age"] as const satisfies readonly ConstructedFormat[];
+import { FORMATS } from "../domain.js";
 
 export function CreateRoomModal({ onClose }: { onClose: () => void }) {
   const intl = useIntl();
@@ -33,9 +31,9 @@ export function CreateRoomModal({ onClose }: { onClose: () => void }) {
     refreshDecks: state.refreshDecks,
     setCardPoolMode: state.setCardPoolMode,
   })));
-  const [format, setFormat] = useState<ConstructedFormat>("cc");
+  const [format, setFormat] = useState<Format>("cc");
   const [choosingBot, setChoosingBot] = useState(false);
-  const [deckFor, setDeckFor] = useState<Record<ConstructedFormat, string>>({
+  const [deckFor, setDeckFor] = useState<Record<Format, string>>({
     cc: "",
     "silver-age": "",
   });
@@ -48,7 +46,7 @@ export function CreateRoomModal({ onClose }: { onClose: () => void }) {
 
   const createHostedRoom = (visibility: "public" | "private") => {
     if (!selectionValid) return;
-    createRoom(format, { deckId }, visibility);
+    createRoom(format, deckId, visibility);
     onClose();
   };
 
@@ -77,7 +75,7 @@ export function CreateRoomModal({ onClose }: { onClose: () => void }) {
         <fieldset className="create-room-fieldset">
           <legend>{intl.formatMessage({ id: "common.format" })}</legend>
           <div className="create-room-formats">
-            {ROOM_FORMATS.map((roomFormat) => (
+            {FORMATS.map((roomFormat) => (
               <button
                 type="button"
                 key={roomFormat}

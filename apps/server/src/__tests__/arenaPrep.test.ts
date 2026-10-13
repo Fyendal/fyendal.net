@@ -1,8 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { cardData, decklists, precon } from "@fyendal/cards";
+import { cardData, precon } from "@fyendal/cards";
 import { botDefinition } from "@fyendal/bot";
 import { decodeServerMessage } from "@fyendal/protocol";
-import type { PresentedArena } from "@fyendal/shared";
+import type { PresentedArena, PresentedDeck } from "@fyendal/shared";
 import { PgRoomStore, prepViewFor } from "../store.js";
 import type { Queryable } from "../db.js";
 import { freshDb } from "./testdb.js";
@@ -16,18 +16,23 @@ beforeEach(async () => {
 afterEach(() => vi.restoreAllMocks());
 
 async function pairedRoom() {
-  const host = await store.createRoom("classic-battles", { hero: "rhinar" });
+  const host = await store.createRoom("cc", { deckId: "precon-asb" });
   await store.markPresent(host.code, host.token, "arena-host");
-  const joined = await store.joinRoom(host.code, undefined, { allowPlayer: true, hero: "dorinthea" });
+  const joined = await store.joinRoom(host.code, undefined, { allowPlayer: true, deckId: "precon-asr" });
   if (!joined.ok || joined.kind !== "player") throw new Error("join failed");
   const tokens = [host.token, joined.token] as const;
   const prep = (await store.getRoom(host.code))!.prep!;
   expect(await store.chooseFirst(host.code, { token: tokens[prep.dieWinner] }, true)).toMatchObject({ ok: true });
   return { code: host.code, tokens };
 }
+function presentation(deckId: string): PresentedDeck {
+  const pool = precon(deckId)!.pool;
+  return { weaponIds: pool.weaponIds, equipment: {}, deck: pool.deck };
+}
+const presentations = [presentation("precon-asb"), presentation("precon-asr")] as const;
 const arenas: [PresentedArena, PresentedArena] = [
-  { weaponIds: decklists.rhinar.weaponIds, equipment: decklists.rhinar.equipment },
-  { weaponIds: decklists.dorinthea.weaponIds, equipment: decklists.dorinthea.equipment },
+  { weaponIds: presentations[0].weaponIds, equipment: presentations[0].equipment },
+  { weaponIds: presentations[1].weaponIds, equipment: presentations[1].equipment },
 ];
 
 async function lockBoth(code: string, tokens: readonly [string, string]) {
@@ -88,7 +93,7 @@ describe("arena reveal preparation", () => {
 
   it("keeps the first commitment private, survives gateway reload, then reveals both atomically", async () => {
     const { code, tokens } = await pairedRoom();
-    expect(await store.presentDeck(code, { token: tokens[0] }, decklists.rhinar)).toMatchObject({ ok: false });
+    expect(await store.presentDeck(code, { token: tokens[0] }, presentations[0])).toMatchObject({ ok: false });
     expect(await store.presentArena(code, { token: tokens[0] }, arenas[0])).toMatchObject({ ok: true });
     const reloaded = new PgRoomStore(db, "rules-a");
     let room = (await reloaded.getRoom(code))!;
@@ -139,21 +144,21 @@ describe("arena reveal preparation", () => {
   it("locks arena cards through unready and starts only after both decks are ready", async () => {
     const { code, tokens } = await pairedRoom();
     await lockBoth(code, tokens);
-    expect(await store.presentDeck(code, { token: tokens[0] }, { ...decklists.rhinar, equipment: {} }))
+    expect(await store.presentDeck(code, { token: tokens[0] }, { ...presentations[0], weaponIds: [] }))
       .toEqual({ ok: false, error: "arena cards cannot change after locking" });
-    expect(await store.presentDeck(code, { token: tokens[0] }, decklists.rhinar))
+    expect(await store.presentDeck(code, { token: tokens[0] }, presentations[0]))
       .toMatchObject({ ok: true, started: false });
     let room = (await store.getRoom(code))!;
-    expect(prepViewFor(room, 0).yourPresentedDeck).toEqual(decklists.rhinar.deck);
+    expect(prepViewFor(room, 0).yourPresentedDeck).toEqual(presentations[0].deck);
     expect(prepViewFor(room, 1)).not.toHaveProperty("yourPresentedDeck");
     expect(await store.unready(code, { token: tokens[0] })).toMatchObject({ ok: true });
     expect(await store.presentArena(code, { token: tokens[0] }, { weaponIds: [], equipment: {} }))
       .toMatchObject({ ok: false });
     room = (await store.getRoom(code))!;
     expect(room.prep!.arenas[0]).toEqual(arenas[0]);
-    expect(await store.presentDeck(code, { token: tokens[0] }, decklists.rhinar))
+    expect(await store.presentDeck(code, { token: tokens[0] }, presentations[0]))
       .toMatchObject({ ok: true, started: false });
-    expect(await store.presentDeck(code, { token: tokens[1] }, decklists.dorinthea))
+    expect(await store.presentDeck(code, { token: tokens[1] }, presentations[1]))
       .toMatchObject({ ok: true, started: true });
     expect((await store.getRoom(code))!.state).not.toBeNull();
   });
@@ -161,13 +166,13 @@ describe("arena reveal preparation", () => {
   it("clears commitments and prior readiness when an opponent leaves", async () => {
     const { code, tokens } = await pairedRoom();
     await lockBoth(code, tokens);
-    await store.presentDeck(code, { token: tokens[0] }, decklists.rhinar);
+    await store.presentDeck(code, { token: tokens[0] }, presentations[0]);
     expect(await store.leaveRoom(code, { token: tokens[1] })).toMatchObject({ ok: true });
     let room = (await store.getRoom(code))!;
     expect(room.prep).toBeNull();
     expect(room.seats[0]?.ready).toBe(false);
     expect(room.seats[0]?.presented).toBeUndefined();
-    const joined = await store.joinRoom(code, undefined, { allowPlayer: true, hero: "dorinthea" });
+    const joined = await store.joinRoom(code, undefined, { allowPlayer: true, deckId: "precon-asr" });
     expect(joined).toMatchObject({ ok: true, kind: "player" });
     room = (await store.getRoom(code))!;
     expect(room.prep!.arenas).toEqual([null, null]);

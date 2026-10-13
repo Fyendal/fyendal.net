@@ -363,7 +363,7 @@ describe("client messages", () => {
     { type: "chat-read", username: "Alice_1", throughId: "123" },
     { type: "create-friend-room", username: "Alice_1", format: "cc", deckId: "deck" },
     { type: "friend-game-invite-dismiss", inviteId: "invite-123" },
-    { type: "create-room", format: "classic-battles", hero: "rhinar" },
+    { type: "create-room", format: "cc", deckId: "precon-asr" },
     { type: "create-room", format: "silver-age", deckId: "deck", private: true },
     { type: "create-bot-room", format: "silver-age", deckId: "precon-sba", bot: "briar" },
     { type: "create-bot-room", format: "silver-age", deckId: "precon-ska", bot: "kayo" },
@@ -374,7 +374,7 @@ describe("client messages", () => {
     { type: "create-bot-room", format: "cc", deckId: "precon-asr", bot: "starvo" },
     { type: "create-bot-room", format: "cc", deckId: "precon-asr", bot: "ira", searchForPlayer: true, avoidRoomCodes: ["ABC123"] },
     { type: "create-bot-room", deckId: "precon-sba" },
-    { type: "join-room", code: "ABC123", token: "seat-token", deckId: "deck", hero: "dorinthea", spectate: false },
+    { type: "join-room", code: "ABC123", token: "seat-token", deckId: "deck", spectate: false },
     { type: "inspect-room", code: "ABC123" },
     { type: "list-rooms" },
     { type: "queue-join", format: "cc", deckId: "deck" },
@@ -494,6 +494,10 @@ describe("client messages", () => {
   it("rejects unknown fields, unsafe integers, oversized data, bad nesting, and non-literal Boost", () => {
     expect(decodeClientMessage({ type: "list-rooms", extra: true })).toBeNull();
     expect(decodeClientMessage({ type: "create-bot-room", format: "classic-battles", deckId: "precon-asr" })).toBeNull();
+    expect(decodeClientMessage({ type: "create-room", format: "classic-battles", hero: "rhinar" })).toBeNull();
+    expect(decodeClientMessage({ type: "create-room", format: "cc" })).toBeNull();
+    expect(decodeClientMessage({ type: "queue-join", format: "cc" })).toBeNull();
+    expect(decodeClientMessage({ type: "join-room", code: "ABC123", hero: "rhinar" })).toBeNull();
     expect(decodeClientMessage({ type: "create-bot-room", format: "cc", deckId: "precon-asr", bot: "unknown" })).toBeNull();
     expect(decodeClientMessage({ type: "auth", token: "x".repeat(129) })).toBeNull();
     expect(decodeClientMessage({ type: "friend-request", username: "has space" })).toBeNull();
@@ -948,7 +952,7 @@ describe("GameView and server messages", () => {
       { type: "spectator-kicked" },
       { type: "rooms", rooms: [{ code: "ABC123", format: "cc", heroes: ["A", null], createdAt: 1, spectateOnly: false, yours: true, cardPoolMode: "open" }] },
       { type: "room-info", room: { code: "ABC123", format: "silver-age", spectateOnly: true, yours: false, cardPoolMode: "future" } },
-      { type: "queue-status", counts: { "classic-battles": 0, cc: 1, "silver-age": 2 } },
+      { type: "queue-status", counts: { cc: 1, "silver-age": 2 } },
       { type: "queued", format: "silver-age" }, { type: "queue-left" }, { type: "match-timeout" },
       { type: "background-matchmaking", status: { state: "inactive" } },
       { type: "background-matchmaking", status: { state: "pending", format: "cc" } },
@@ -1209,7 +1213,6 @@ describe("replays and HTTP responses", () => {
         rooms: [{ code: "ABC123", format: "cc", status: "playing", winner: null, createdAt: 1, seat: 0, cardPoolMode: "open" }],
         matchmaking: {
           format: "silver-age",
-          hero: null,
           deckId: "precon-ira",
           retainedRoomCode: "ABC123",
           joinedAt: 2,

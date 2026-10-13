@@ -1,12 +1,9 @@
 import type { ClientBotTask, BotSubmission, BotSubmissionResult } from "./botTasks.js";
 // ── Card static data ────────────────────────────────────────────────────────
 
-/** Heroes the platform supports for the preconstructed Classic Battles format. */
-export type HeroId = "dorinthea" | "rhinar";
-
-/** Play formats. classic-battles uses fixed box decks; cc and silver-age use
- *  either a saved user deck or a shared format-legal preconstructed deck. */
-export type Format = "classic-battles" | "cc" | "silver-age";
+/** Play formats. Each uses either a saved user deck or a shared format-legal
+ *  preconstructed deck. */
+export type Format = "cc" | "silver-age";
 
 /** Constructed card eligibility selected for a room. */
 export type CardPoolMode = "legal" | "future" | "open";
@@ -68,7 +65,7 @@ export interface Decklist {
   weaponIds: string[];
   /** slot -> cardId */
   equipment: Partial<Record<EquipmentSlot, string>>;
-  /** Main-deck card ids, duplicates repeated (40 for classic-battles, 60+ for cc);
+  /** Main-deck card ids, duplicates repeated (60+ for cc, exactly 40 for silver-age);
    *  the mentor is an ordinary deck card */
   deck: string[];
   /** Parsed but not used in-game yet */
@@ -743,8 +740,6 @@ export interface PrepSeatView {
   username: string;
   heroId: string;
   heroName: string;
-  /** classic-battles: which preconstructed hero this seat plays */
-  hero?: HeroId;
   ready: boolean;
   arenaLocked: boolean;
   /** Present only after both players commit their arena cards. */
@@ -817,11 +812,11 @@ export type UndoTarget = "last-action" | "current-turn" | "previous-turn";
 
 export type BackgroundMatchmakingStatus =
   | { state: "inactive" }
-  | { state: "pending"; format: "cc" | "silver-age" }
-  | { state: "searching"; format: "cc" | "silver-age" }
+  | { state: "pending"; format: Format }
+  | { state: "searching"; format: Format }
   | {
       state: "offer";
-      format: "cc" | "silver-age";
+      format: Format;
       roomCode: string;
       deadlineAt: number;
       opponent: { username: string; heroId: string; heroName: string };
@@ -896,21 +891,19 @@ export type ClientMessage =
   | { type: "chat-history"; username: string; beforeId?: string }
   | { type: "chat-send"; username: string; text: string; clientMessageId: string }
   | { type: "chat-read"; username: string; throughId: string }
-  | { type: "create-friend-room"; username: string; format: "cc" | "silver-age"; deckId: string; cardPoolMode?: CardPoolMode }
+  | { type: "create-friend-room"; username: string; format: Format; deckId: string; cardPoolMode?: CardPoolMode }
   | { type: "friend-game-invite-dismiss"; inviteId: string }
-  /** classic-battles: hero; cc/silver-age: deckId of a saved deck */
-  | { type: "create-room"; format: Format; hero?: HeroId; deckId?: string; private?: boolean; cardPoolMode?: CardPoolMode }
+  /** deckId of a saved deck or format precon */
+  | { type: "create-room"; format: Format; deckId: string; private?: boolean; cardPoolMode?: CardPoolMode }
   /** Create a dedicated constructed room with the selected AI opponent. */
-  | { type: "create-bot-room"; format?: "cc" | "silver-age"; deckId: string; bot?: BotOpponent; cardPoolMode?: CardPoolMode; searchForPlayer?: boolean; avoidRoomCodes?: string[] }
-  /** deckId required to take a player seat in cc/silver-age rooms; omit to spectate.
-   *  classic-battles player seats pass hero (mirrors allowed; omitted = the
-   *  opposite of the seated player). spectate forces a spectator slot even
-   *  when a player seat is free */
-  | { type: "join-room"; code: string; token?: string; deckId?: string; hero?: HeroId; spectate?: boolean }
+  | { type: "create-bot-room"; format?: Format; deckId: string; bot?: BotOpponent; cardPoolMode?: CardPoolMode; searchForPlayer?: boolean; avoidRoomCodes?: string[] }
+  /** deckId required to take a player seat; omit to spectate. spectate
+   *  forces a spectator slot even when a player seat is free */
+  | { type: "join-room"; code: string; token?: string; deckId?: string; spectate?: boolean }
   /** Resolve an invite URL before asking the player for a deck or hero. */
   | { type: "inspect-room"; code: string }
   | { type: "list-rooms" }
-  | { type: "queue-join"; format: Format; hero?: HeroId; deckId?: string; cardPoolMode?: CardPoolMode; avoidRoomCodes?: string[] }
+  | { type: "queue-join"; format: Format; deckId: string; cardPoolMode?: CardPoolMode; avoidRoomCodes?: string[] }
   | { type: "queue-leave" }
   | { type: "background-matchmaking-status" }
   | { type: "background-matchmaking-leave" }

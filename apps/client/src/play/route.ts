@@ -1,8 +1,8 @@
-import type { ConstructedFormat } from "../domain.js";
+import type { Format } from "@fyendal/shared";
 
 export interface FabraryPlayRequest {
   url: string;
-  format: ConstructedFormat;
+  format: Format;
 }
 
 export type FabraryPlayRoute =

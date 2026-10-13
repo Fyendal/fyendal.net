@@ -19,7 +19,7 @@ import {
   liveWebSocketUrl,
   replayFileViews,
 } from "../../packages/protocol/src/index.js";
-import { decklists } from "../../packages/cards/src/index.js";
+import { silverAgePrecon } from "../../packages/cards/src/index.js";
 import { createPool } from "../../apps/server/src/db.js";
 import {
   createReplayFinalizationMonitor,
@@ -368,6 +368,16 @@ function prepAfter(client: LoadClient, version: number, label: string) {
   );
 }
 
+/** Shared Silver Age precons need no per-account deck setup. */
+const HOST_DECK_ID = "precon-sba";
+const GUEST_DECK_ID = "precon-sly";
+
+function perfPool(deckId: string) {
+  const pool = silverAgePrecon(deckId)?.pool;
+  if (!pool) throw new Error(`unknown perf precon ${deckId}`);
+  return pool;
+}
+
 async function setupGame(
   index: number,
   hostSeed: SeededSession,
@@ -384,15 +394,15 @@ async function setupGame(
   const hostPrep = prepAfter(host, -1, "initial host prep state");
   const guestPrep = prepAfter(guest, -1, "initial guest prep state");
   if (viaMatchmaking) {
-    const matched = (client: LoadClient, hero: "rhinar" | "dorinthea") => client.request(
-      { type: "queue-join", format: "classic-battles", hero },
+    const matched = (client: LoadClient, deckId: string) => client.request(
+      { type: "queue-join", format: "silver-age", deckId },
       (message): message is Extract<ServerMessage, { type: "room-created" | "joined" }> =>
         message.type === "room-created" || message.type === "joined",
       "durable matchmaking",
     );
     const [hostMatch, guestMatch] = await Promise.all([
-      matched(host, "rhinar"),
-      matched(guest, "dorinthea"),
+      matched(host, HOST_DECK_ID),
+      matched(guest, GUEST_DECK_ID),
     ]);
     if (hostMatch.code !== guestMatch.code) throw new Error(`game ${index} matchmaking produced different rooms`);
     if (hostMatch.seat === null || guestMatch.seat === null || hostMatch.seat === guestMatch.seat) {
@@ -400,12 +410,12 @@ async function setupGame(
     }
   } else {
     const created = await host.request(
-      { type: "create-room", format: "classic-battles", hero: "rhinar" },
+      { type: "create-room", format: "silver-age", deckId: HOST_DECK_ID },
       (message): message is Extract<ServerMessage, { type: "room-created" }> => message.type === "room-created",
       "room creation",
     );
     const joined = await guest.request(
-      { type: "join-room", code: created.code, hero: "dorinthea" },
+      { type: "join-room", code: created.code, deckId: GUEST_DECK_ID },
       (message): message is Extract<ServerMessage, { type: "joined" }> => message.type === "joined",
       "room join",
     );
@@ -439,8 +449,9 @@ async function setupGame(
       message.type === "prep-state" && message.prep.phase === "select-deck",
     `${client.name} arena reveal`,
   ));
-  host.send({ type: "present-arena", arena: { weaponIds: decklists.rhinar.weaponIds, equipment: decklists.rhinar.equipment } });
-  guest.send({ type: "present-arena", arena: { weaponIds: decklists.dorinthea.weaponIds, equipment: decklists.dorinthea.equipment } });
+  for (const [client, deckId] of [[host, HOST_DECK_ID], [guest, GUEST_DECK_ID]] as const) {
+    client.send({ type: "present-arena", arena: { weaponIds: perfPool(deckId).weaponIds.slice(0, 1), equipment: {} } });
+  }
   await Promise.all(revealed);
   const started = [host, guest].map((client) => client.waitFor(
     (message): message is Extract<ServerMessage, { type: "game-started" }> => message.type === "game-started",
@@ -450,9 +461,9 @@ async function setupGame(
     (message): message is StateMessage => message.type === "state",
     `${client.name} initial state`,
   ));
-  for (const [client, hero] of [[host, "rhinar"], [guest, "dorinthea"]] as const) {
-    const deck = decklists[hero];
-    client.send({ type: "present-deck", deck: { weaponIds: deck.weaponIds, equipment: deck.equipment, deck: deck.deck } });
+  for (const [client, deckId] of [[host, HOST_DECK_ID], [guest, GUEST_DECK_ID]] as const) {
+    const pool = perfPool(deckId);
+    client.send({ type: "present-deck", deck: { weaponIds: pool.weaponIds.slice(0, 1), equipment: {}, deck: pool.deck } });
   }
   await Promise.all([...started, ...states]);
   return { index, host, guest, pending: false, lastActor: null };
@@ -498,7 +509,7 @@ async function reconnectGuest(game: GameSession): Promise<void> {
     `${replacement.name} restored state`,
   );
   const joined = await replacement.request(
-    { type: "join-room", code: roomCode, token: roomToken, hero: "dorinthea" },
+    { type: "join-room", code: roomCode, token: roomToken },
     (message): message is Extract<ServerMessage, { type: "joined" }> => message.type === "joined",
     "seat reconnect",
   );

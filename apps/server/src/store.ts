@@ -11,7 +11,6 @@ import {
   type Format,
   type GameLogPayload,
   type GameIntent,
-  type HeroId,
   type MatchPrepPhase,
   type PendingDecision,
   type PresentedDeck,
@@ -44,8 +43,6 @@ import {
 } from "@fyendal/engine";
 import {
   cardData,
-  deckPoolForHero,
-  decklists,
   formatLegalityErrors,
   precon,
   scripts,
@@ -60,7 +57,7 @@ import {
 } from "@fyendal/protocol";
 import { recordGameCompletion, recordGamePlayers } from "./analytics.js";
 import { awardAchievements } from "./achievements.js";
-import { isMatchFormat, matchEndReason, recordMatch, type MatchSeatInput } from "./matches.js";
+import { matchEndReason, recordMatch, type MatchSeatInput } from "./matches.js";
 import { resolveDeck, validatePresentation } from "./decks.js";
 import { appendClusterEvent, type ClusterEvent } from "./clusterEvents.js";
 import { assertActiveRuleset } from "./rulesetFence.js";
@@ -89,9 +86,8 @@ export interface SeatRow {
   tokenHash: string;
   /** Bot seats have no socket or account and are driven after room commits. */
   controller?: "bot";
-  /** classic-battles player seats: which preconstructed hero */
-  hero?: HeroId;
-  /** cc/silver-age player seats: the saved deck this seat plays with */
+  /** the saved deck this seat plays with (absent only on human seats of
+   *  locally seeded manual-test rooms, which start in play) */
   deckId?: string;
   /** display-only snapshot for lobby listings */
   deckName?: string;
@@ -101,7 +97,7 @@ export interface SeatRow {
   badge?: PlayerBadge;
   /** account id, for re-queueing after a pre-game leave */
   userId?: number;
-  /** cc/silver-age: hero of the seat's saved deck (prep-room display) */
+  /** hero of the seat's saved deck (prep-room display, match history) */
   heroId?: string;
   /** the deck presented in the prep room (validated subset of the seat's pool) */
   presented?: Decklist;
@@ -147,7 +143,6 @@ export interface RoomCommand {
 export interface MatchmakingChoice {
   userId: number;
   username: string;
-  hero?: HeroId;
   deckId?: string;
   deckName?: string;
   cardPoolMode: CardPoolMode;
@@ -159,7 +154,7 @@ export interface MatchmakingChoice {
   /** Preserve a survivor's original place when an opponent times out. */
   joinedAt?: number;
   pendingBotStart?: {
-    format: "cc" | "silver-age";
+    format: Format;
     deckId: string;
     bot: BotOpponent;
     requestedAt: number;
@@ -594,7 +589,7 @@ function decodeRawRoomRow(value: unknown): RawRoomRow {
   const row = dbObject(value, "<unknown>", "row");
   const code = typeof row.code === "string" ? row.code : "<unknown>";
   if (!/^[A-Z0-9]{6}$/.test(code)) throw new CorruptRoomError(code, "row.code", "invalid room code");
-  if (!(row.format === "classic-battles" || row.format === "cc" || row.format === "silver-age")) {
+  if (!(row.format === "cc" || row.format === "silver-age")) {
     throw new CorruptRoomError(code, "row.format", "unknown format");
   }
   const spectators = decodeStoredSpectators(row.spectators, code, "row.spectators");
@@ -690,7 +685,6 @@ function decodeSeatRows(values: unknown[], code: string): [SeatRow | null, SeatR
     seats[seat] = {
       tokenHash: row.token_hash,
       ...(row.controller === "bot" ? { controller: "bot" as const } : {}),
-      ...(row.hero === "rhinar" || row.hero === "dorinthea" ? { hero: row.hero } : {}),
       ...(typeof row.deck_id === "string" ? { deckId: row.deck_id } : {}),
       ...(typeof row.deck_name === "string" ? { deckName: row.deck_name } : {}),
       ...(typeof row.username === "string" ? { username: row.username } : {}),
@@ -790,21 +784,16 @@ function lifecycle(room: RoomRow): { status: "open" | "prep" | "active" | "finis
     : { status: "open", winner: null };
 }
 
-function heroIdForSeat(seat: SeatRow): string | undefined {
-  return seat.heroId ?? (seat.hero ? decklists[seat.hero].heroId : undefined);
-}
-
 /** Durable match-history row for a game that just ended, written in the
  * same transaction as the room commit. Missing hero data means the game never
- * reached play, and unsupported formats are not history, so nothing is
- * recorded in either case. */
+ * reached play, so nothing is recorded. */
 async function recordRoomMatch(
   db: Queryable,
   room: RoomRow,
   outcome: { replayId: string | null; winner: 0 | 1 | null; endReason: MatchEndReason; finishedAt: number },
 ): Promise<void> {
   const seats = room.seats.map((seat): MatchSeatInput | null => {
-    const heroId = seat ? heroIdForSeat(seat) : undefined;
+    const heroId = seat?.heroId;
     if (!seat || !heroId) return null;
     return {
       heroId,
@@ -815,7 +804,7 @@ async function recordRoomMatch(
       ...(seat.deckName === undefined ? {} : { deckName: seat.deckName }),
     };
   });
-  if (!seats[0] || !seats[1] || !isMatchFormat(room.format)) return;
+  if (!seats[0] || !seats[1]) return;
   let startedAt = room.createdAt;
   if (outcome.replayId) {
     const { rows } = await db.query("SELECT created_at FROM replay_games WHERE id = $1", [outcome.replayId]);
@@ -834,9 +823,8 @@ async function recordRoomMatch(
   });
 }
 
-function heroNameForSeat(seat: SeatRow | null): string | null {
-  if (!seat) return null;
-  const heroId = heroIdForSeat(seat);
+function heroNameForSeat(seat: Pick<SeatRow, "heroId"> | null): string | null {
+  const heroId = seat?.heroId;
   return heroId ? (cardData[heroId]?.name ?? null) : null;
 }
 
@@ -900,8 +888,7 @@ function gameConfig(
 
 /**
  * Start the game once both seats are ready and the authorized player has
- * picked who goes first. Decklists are the validated presentations (for
- * classic-battles, presentations of the fixed 40-card box lists).
+ * picked who goes first. Decklists are the validated presentations.
  */
 function maybeStart(room: RoomRow): boolean {
   if (room.state) return false;
@@ -1021,7 +1008,6 @@ export class PgRoomStore {
       member.userId ?? null,
       member.tokenHash,
       member.username ?? null,
-      member.hero ?? null,
       member.heroId ?? null,
       member.deckId ?? null,
       member.deckName ?? null,
@@ -1071,9 +1057,9 @@ export class PgRoomStore {
       const result = write.mode === "insert"
         ? await db.query(
             `INSERT INTO room_seats
-              (room_code, seat, user_id, token_hash, username, hero, hero_id, deck_id, deck_name,
+              (room_code, seat, user_id, token_hash, username, hero_id, deck_id, deck_name,
                from_queue, ready, presented, last_action_at, controller, priority_mode, runechant_skip, accepted)
-             VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17)`,
+             VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16)`,
             values,
           )
         : await db.query(
@@ -1081,18 +1067,17 @@ export class PgRoomStore {
                user_id = $3,
                token_hash = $4,
                username = $5,
-               hero = $6,
-               hero_id = $7,
-               deck_id = $8,
-               deck_name = $9,
-               from_queue = $10,
-               ready = $11,
-               presented = $12,
-               last_action_at = $13,
-               controller = $14,
-               priority_mode = $15,
-               runechant_skip = $16,
-               accepted = $17
+               hero_id = $6,
+               deck_id = $7,
+               deck_name = $8,
+               from_queue = $9,
+               ready = $10,
+               presented = $11,
+               last_action_at = $12,
+               controller = $13,
+               priority_mode = $14,
+               runechant_skip = $15,
+               accepted = $16
              WHERE room_code = $1 AND seat = $2`,
             values,
           );
@@ -1385,7 +1370,7 @@ export class PgRoomStore {
         if (out.replay?.kind === "start" && out.room.state) {
           const participants = ([0, 1] as const).map((seat) => {
             const member = out.room.seats[seat];
-            const heroId = member ? heroIdForSeat(member) : undefined;
+            const heroId = member?.heroId;
             if (!member || !heroId) throw new Error("started replay is missing a participant");
             return { seat, userId: member.userId, heroId };
           }) as [
@@ -1454,13 +1439,12 @@ export class PgRoomStore {
     );
   }
 
-  /** What a player seat plays with: a preconstructed hero (classic-battles)
-   *  or a saved deck (cc/silver-age — ownership/format checked by the caller). */
+  /** The creator's seat plays with a saved deck (ownership/format checked by
+   *  the caller). */
   async createRoom(
     format: Format,
     seat: {
-      hero?: HeroId;
-      deckId?: string;
+      deckId: string;
       deckName?: string;
       username?: string;
       userId?: number;
@@ -1470,10 +1454,7 @@ export class PgRoomStore {
     cardPoolMode: CardPoolMode = "legal",
   ): Promise<{ code: string; seat: number; token: string; version: number }> {
     // snapshot the hero for prep-room display (best-effort; caller validated)
-    const heroId =
-      format !== "classic-battles" && seat.deckId
-        ? (await resolveDeck(this.db, seat.deckId))?.decklist.heroId
-        : undefined;
+    const heroId = (await resolveDeck(this.db, seat.deckId))?.decklist.heroId;
     for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
       const code = newCode();
       const token = newToken();
@@ -1491,10 +1472,10 @@ export class PgRoomStore {
           );
           await db.query(
             `INSERT INTO room_seats
-              (room_code, seat, user_id, token_hash, username, hero, hero_id, deck_id, deck_name, from_queue, ready)
-             VALUES ($1,0,$2,$3,$4,$5,$6,$7,$8,$9,FALSE)`,
+              (room_code, seat, user_id, token_hash, username, hero_id, deck_id, deck_name, from_queue, ready)
+             VALUES ($1,0,$2,$3,$4,$5,$6,$7,$8,FALSE)`,
             [code, seat.userId ?? null, hashReconnectToken(token), seat.username ?? null,
-              seat.hero ?? null, heroId ?? null, seat.deckId ?? null, seat.deckName ?? null,
+              heroId ?? null, seat.deckId, seat.deckName ?? null,
               seat.fromQueue ?? false],
           );
           await appendClusterEvent(db, {
@@ -1513,7 +1494,7 @@ export class PgRoomStore {
 
   /** Create a constructed room with its durable, connectionless AI seat. */
   async createBotRoom(
-    format: "cc" | "silver-age",
+    format: Format,
     seat: {
       deckId: string;
       deckName?: string;
@@ -1528,7 +1509,7 @@ export class PgRoomStore {
 
   private async insertBotRoom(
     db: Queryable,
-    format: "cc" | "silver-age",
+    format: Format,
     seat: { deckId: string; deckName?: string; username: string; userId: number },
     cardPoolMode: CardPoolMode,
     bot: BotOpponent,
@@ -1634,19 +1615,6 @@ export class PgRoomStore {
     format: Format,
     choice: MatchmakingChoice,
   ): Promise<SeatRow | null> {
-    if (format === "classic-battles") {
-      if (!(choice.hero === "rhinar" || choice.hero === "dorinthea")) return null;
-      return {
-        tokenHash: hashReconnectToken(newToken()),
-        hero: choice.hero,
-        username: choice.username,
-        userId: choice.userId,
-        fromQueue: true,
-        priorityMode: "always-pause",
-        runechantSkip: false,
-        lastSeenAt: 0,
-      };
-    }
     if (!choice.deckId) return null;
     const deck = await resolveDeck(db, choice.deckId);
     if (!deck || deck.format !== format || (deck.userId !== 0 && deck.userId !== choice.userId)) return null;
@@ -1787,12 +1755,11 @@ export class PgRoomStore {
         : { userIds: [], heroes: [] };
       await db.query(
         `INSERT INTO matchmaking_entries
-          (user_id, format, hero, deck_id, deck_name, card_pool_mode, retained_room_code, joined_at,
+          (user_id, format, deck_id, deck_name, card_pool_mode, retained_room_code, joined_at,
            mode, source_room_code, avoided_room_codes, avoided_user_ids, avoided_heroes)
-         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
          ON CONFLICT (user_id) DO UPDATE SET
            format = EXCLUDED.format,
-           hero = EXCLUDED.hero,
            deck_id = EXCLUDED.deck_id,
            deck_name = EXCLUDED.deck_name,
            card_pool_mode = EXCLUDED.card_pool_mode,
@@ -1807,7 +1774,6 @@ export class PgRoomStore {
         [
           choice.userId,
           format,
-          choice.hero ?? null,
           choice.deckId ?? null,
           choice.deckName ?? null,
           choice.cardPoolMode,
@@ -1940,7 +1906,7 @@ export class PgRoomStore {
         : "";
 
       const { rows } = await db.query(
-        `SELECT q.user_id, u.username, q.hero, q.deck_id, q.deck_name,
+        `SELECT q.user_id, u.username, q.deck_id, q.deck_name,
                 q.card_pool_mode, q.retained_room_code, q.mode, q.source_room_code,
                 q.avoided_room_codes, q.avoided_user_ids, q.avoided_heroes,
                 (opponent_pending.user_id IS NOT NULL) AS pending_bot_start
@@ -2019,7 +1985,6 @@ export class PgRoomStore {
       const opponent: MatchmakingChoice = {
         userId: Number(raw.user_id),
         username: String(raw.username),
-        ...(raw.hero === "rhinar" || raw.hero === "dorinthea" ? { hero: raw.hero } : {}),
         ...(typeof raw.deck_id === "string" ? { deckId: raw.deck_id } : {}),
         ...(typeof raw.deck_name === "string" ? { deckName: raw.deck_name } : {}),
         cardPoolMode: raw.card_pool_mode === "future" || raw.card_pool_mode === "open"
@@ -2212,10 +2177,10 @@ export class PgRoomStore {
     const { rows } = await this.db.query(
       "SELECT format, COUNT(*) AS count FROM matchmaking_entries GROUP BY format",
     );
-    const counts: Record<Format, number> = { "classic-battles": 0, cc: 0, "silver-age": 0 };
+    const counts: Record<Format, number> = { cc: 0, "silver-age": 0 };
     for (const row of rows) {
       const format = String(row.format);
-      if (format === "classic-battles" || format === "cc" || format === "silver-age") {
+      if (format === "cc" || format === "silver-age") {
         counts[format] = Number(row.count);
       }
     }
@@ -2246,7 +2211,7 @@ export class PgRoomStore {
     if (seat !== 0 && seat !== 1) return { state: "searching", format };
     const me = room.seats[seat]!;
     const opponent = room.seats[1 - seat];
-    const opponentHeroId = opponent ? heroIdForSeat(opponent) : undefined;
+    const opponentHeroId = opponent ? opponent.heroId : undefined;
     if (!opponent || !opponentHeroId) return { state: "searching", format };
     return {
       state: "offer",
@@ -2299,7 +2264,7 @@ export class PgRoomStore {
         if (entry.rows.length === 0) return false;
         raw = dbObject(entry.rows[0], "<matchmaking>", "stopped background entry");
         if (sourceRoomCode !== undefined && raw.source_room_code !== sourceRoomCode.toUpperCase()) return false;
-        if (raw.format !== "cc" && raw.format !== "silver-age" && raw.format !== "classic-battles") {
+        if (raw.format !== "cc" && raw.format !== "silver-age") {
           throw new Error("invalid matchmaking format");
         }
         if (lockedFormats.has(raw.format)) break;
@@ -2426,7 +2391,6 @@ export class PgRoomStore {
           choice: {
             userId,
             username: member.username ?? "unknown",
-            hero: member.hero,
             deckId: member.deckId,
             deckName: member.deckName,
             cardPoolMode: room.cardPoolMode,
@@ -2666,7 +2630,6 @@ export class PgRoomStore {
       await this.queueForMatch(format, {
         userId: survivorUserId,
         username: survivor.username ?? "unknown",
-        hero: survivor.hero,
         deckId: survivor.deckId,
         deckName: survivor.deckName,
         retainedRoomCode: upper,
@@ -2808,21 +2771,17 @@ export class PgRoomStore {
   /**
    * Reconnect by token (player seat or spectator), else reclaim a seat owned
    * by this account (covers a lost/overwritten client session token), else
-   * take the free seat, else spectate. Classic-battles: the joiner picks their
-   * box hero via opts.hero (mirrors allowed); without one they default to the
-   * opposite of the seated player. Filling the room only rolls the prep
+   * take the free seat, else spectate. Filling the room only rolls the prep
    * die — the game starts once both seats present decks, ready up, and the
    * authorized player picks who goes first (see presentDeck/chooseFirst).
-   * cc/silver-age rooms require opts.deckId to take a player seat; the deck
-   * must exist and match the room's format.
+   * Taking a player seat requires opts.deckId; the deck must exist and match
+   * the room's format.
    */
   async joinRoom(
     code: string,
     token: string | undefined,
     opts: {
       allowPlayer: boolean;
-      /** classic-battles player seats: the joiner's chosen box hero */
-      hero?: HeroId;
       deckId?: string;
       deckName?: string;
       username?: string;
@@ -2927,43 +2886,29 @@ export class PgRoomStore {
         return { error: "room host is disconnected" };
       }
 
-      // Resolve this seat's deck/hero before mutating anything.
-      let seatRow: SeatRow;
-      if (room.format === "classic-battles") {
-        // the joiner's chosen hero (mirrors allowed); older clients that send
-        // none default to the opposite of the seated player
-        const otherHero = room.seats[1 - freeSeat]?.hero ?? "rhinar";
-        const hero: HeroId =
-          opts.hero === "rhinar" || opts.hero === "dorinthea"
-            ? opts.hero
-            : otherHero === "dorinthea"
-              ? "rhinar"
-              : "dorinthea";
-        seatRow = { tokenHash: "", hero, username: opts.username, userId: opts.userId, fromQueue: opts.fromQueue, lastSeenAt: 0 };
-      } else {
-        if (!opts.deckId) return { error: `choose a ${room.format} deck to take this seat` };
-        const deck = await resolveDeck(this.db, opts.deckId);
-        if (!deck || deck.format !== room.format) {
-          return { error: `choose a ${room.format} deck to take this seat` };
-        }
-        const legality = formatLegalityErrors(cardData, deck.decklist, room.format, {
-          cardPoolMode: opts.controller === "bot"
-            ? "open"
-            : room.cardPoolMode,
-        });
-        if (legality.length > 0) return { error: legality.join("; ") };
-        seatRow = {
-          tokenHash: "",
-          deckId: deck.id,
-          deckName: deck.name,
-          username: opts.username,
-          userId: opts.userId,
-          heroId: deck.decklist.heroId,
-          fromQueue: opts.fromQueue,
-          controller: opts.controller,
-          lastSeenAt: 0,
-        };
+      // Resolve this seat's deck before mutating anything.
+      if (!opts.deckId) return { error: `choose a ${room.format} deck to take this seat` };
+      const deck = await resolveDeck(this.db, opts.deckId);
+      if (!deck || deck.format !== room.format) {
+        return { error: `choose a ${room.format} deck to take this seat` };
       }
+      const legality = formatLegalityErrors(cardData, deck.decklist, room.format, {
+        cardPoolMode: opts.controller === "bot"
+          ? "open"
+          : room.cardPoolMode,
+      });
+      if (legality.length > 0) return { error: legality.join("; ") };
+      const seatRow: SeatRow = {
+        tokenHash: "",
+        deckId: deck.id,
+        deckName: deck.name,
+        username: opts.username,
+        userId: opts.userId,
+        heroId: deck.decklist.heroId,
+        fromQueue: opts.fromQueue,
+        controller: opts.controller,
+        lastSeenAt: 0,
+      };
 
       // filling the room rolls the prep die; the game starts via maybeStart
       const fillsMatchmakingRoom = opts.fromQueue !== true
@@ -3020,11 +2965,9 @@ export class PgRoomStore {
       }
       if (room.prep.arenas[seatIdx]) return { error: "arena cards are already locked" };
       const member = room.seats[seatIdx]!;
-      const pool = room.format === "classic-battles"
-        ? deckPoolForHero(member.hero ?? "rhinar")
-        : (member.deckId ? await resolveDeck(this.db, member.deckId) : null)?.decklist;
+      const pool = (member.deckId ? await resolveDeck(this.db, member.deckId) : null)?.decklist;
       if (!pool) return { error: "your deck is no longer available" };
-      if (pool.heroId !== heroIdForSeat(member)) {
+      if (pool.heroId !== member.heroId) {
         return { error: "your registered hero changed; leave and rejoin the room" };
       }
       const validation = validateArena(pool, arena, room.format, { cardPoolMode: room.cardPoolMode });
@@ -3036,9 +2979,8 @@ export class PgRoomStore {
   }
 
   /**
-   * Prep room: present a deck (validated against the seat's pool — the saved
-   * pool for cc/silver-age, the fixed box list for classic-battles) and lock
-   * in. The first-player pick must already be in; the game starts once both
+   * Prep room: present a deck (validated against the seat's saved pool) and
+   * lock in. The first-player pick must already be in; the game starts once both
    * seats are ready.
    */
   async presentDeck(
@@ -3071,12 +3013,9 @@ export class PgRoomStore {
       const sameEquipment = (["head", "chest", "arms", "legs"] as const)
         .every((slot) => arena.equipment[slot] === presented.equipment[slot]);
       if (!sameWeapons || !sameEquipment) return { error: "arena cards cannot change after locking" };
-      const pool =
-        room.format === "classic-battles"
-          ? deckPoolForHero(seat.hero ?? "rhinar")
-          : (seat.deckId ? await resolveDeck(this.db, seat.deckId) : null)?.decklist;
+      const pool = (seat.deckId ? await resolveDeck(this.db, seat.deckId) : null)?.decklist;
       if (!pool) return { error: "your deck is no longer available" };
-      if (pool.heroId !== heroIdForSeat(seat)) {
+      if (pool.heroId !== seat.heroId) {
         return { error: "your registered hero changed; leave and rejoin the room" };
       }
       const v = validatePresentation(pool, { ...arena, deck: presented.deck }, room.format, {
@@ -3188,7 +3127,7 @@ export class PgRoomStore {
         const human = room.seats[1 - botSeat]!;
         const definition = botDefinitionForDeckId(bot.deckId);
         const registered = bot.deckId ? precon(bot.deckId) : null;
-        const heroId = heroIdForSeat(human);
+        const heroId = human.heroId;
         if (!definition || !registered || !heroId) return { error: "bot deck is not available" };
         const arena = definition.arenaFor(
           { heroId }, room.prep.startPlayer === botSeat ? "first" : "second",
@@ -3303,7 +3242,7 @@ export class PgRoomStore {
       if (Number(raw.prep_deadline_at) > now) continue;
       const code = String(raw.code);
       const offerEntries = await this.db.query(
-        `SELECT q.user_id, q.format, q.hero, q.deck_id, q.deck_name, q.card_pool_mode,
+        `SELECT q.user_id, q.format, q.deck_id, q.deck_name, q.card_pool_mode,
                 q.joined_at, q.mode, q.source_room_code, q.avoided_room_codes,
                 (p.user_id IS NOT NULL) AS pending_bot_start, u.username
          FROM matchmaking_offers o
@@ -3357,7 +3296,6 @@ export class PgRoomStore {
           choice: {
             userId: survivorRow.userId,
             username: survivorRow.username ?? "unknown",
-            hero: survivorRow.hero,
             deckId: survivorRow.deckId,
             deckName: survivorRow.deckName,
             retainedRoomCode: room.code,
@@ -3422,8 +3360,7 @@ export class PgRoomStore {
           if (metadata?.pending_bot_start === true) {
             await this.advancePendingBotStart(survivorUserId, attemptedUserId);
           } else if (metadata && r.result.survivor) {
-            const format = metadata.format === "classic-battles" || metadata.format === "cc"
-              || metadata.format === "silver-age"
+            const format = metadata.format === "cc" || metadata.format === "silver-age"
               ? metadata.format
               : null;
             const sourceRoomCode = typeof metadata.source_room_code === "string"
@@ -3436,9 +3373,6 @@ export class PgRoomStore {
                 username: typeof metadata.username === "string"
                   ? metadata.username
                   : r.result.survivor.choice.username,
-                ...(metadata.hero === "rhinar" || metadata.hero === "dorinthea"
-                  ? { hero: metadata.hero }
-                  : {}),
                 ...(typeof metadata.deck_id === "string" ? { deckId: metadata.deck_id } : {}),
                 ...(typeof metadata.deck_name === "string" ? { deckName: metadata.deck_name } : {}),
                 cardPoolMode: metadata.card_pool_mode === "future" || metadata.card_pool_mode === "open"
@@ -3562,19 +3496,17 @@ export class PgRoomStore {
       hiddenOwnersByRoom.set(entry.retained_room_code, owners);
     }
     const seatRows = codes.length === 0 ? [] : (await this.db.query(
-      `SELECT room_code, seat, user_id, hero, hero_id FROM room_seats
+      `SELECT room_code, seat, user_id, hero_id FROM room_seats
        WHERE room_code IN (${codes.map((_, index) => `$${index + 1}`).join(", ")})`,
       codes,
     )).rows;
-    const seatsByRoom = new Map<string, [SeatRow | null, SeatRow | null]>();
+    type LobbySeat = Pick<SeatRow, "userId" | "heroId">;
+    const seatsByRoom = new Map<string, [LobbySeat | null, LobbySeat | null]>();
     for (const rawSeat of seatRows) {
       const pair = seatsByRoom.get(String(rawSeat.room_code)) ?? [null, null];
       const index = Number(rawSeat.seat);
       pair[index] = {
-        tokenHash: "",
-        lastSeenAt: 0,
         ...(rawSeat.user_id == null ? {} : { userId: Number(rawSeat.user_id) }),
-        ...(typeof rawSeat.hero === "string" ? { hero: rawSeat.hero as HeroId } : {}),
         ...(typeof rawSeat.hero_id === "string" ? { heroId: rawSeat.hero_id } : {}),
       };
       seatsByRoom.set(String(rawSeat.room_code), pair);
@@ -4606,12 +4538,11 @@ export function prepViewFor(room: RoomRow, seat: number): PrepView {
   const now = Date.now();
   const seatView = (s: SeatRow | null, index: 0 | 1): PrepSeatView | null => {
     if (!s) return null;
-    const heroId = heroIdForSeat(s) ?? "";
+    const heroId = s.heroId ?? "";
     return {
       username: s.username ?? "unknown",
       heroId,
       heroName: heroId ? (cardData[heroId]?.name ?? "") : "",
-      hero: s.hero,
       ready: s.ready ?? false,
       arenaLocked: !!room.prep?.arenas[index],
       ...(room.prep?.arenas.every(Boolean)

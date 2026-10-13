@@ -178,7 +178,7 @@ describe("achievements", () => {
     });
     while (state.players[0].hand.length < 6) state.players[0].hand.push(state.players[0].deck.pop()!);
     await startReplay(db, {
-      roomCode: room.code, rulesetVersion: "test", format: "classic-battles", state, roomVersion: 1,
+      roomCode: room.code, rulesetVersion: "test", format: "cc", state, roomVersion: 1,
       participants: [
         { seat: 0, userId, heroId: decklists.rhinar.heroId },
         { seat: 1, heroId: decklists.dorinthea.heroId },
@@ -213,7 +213,7 @@ describe("achievements", () => {
     });
     state.gameStats.turns = [statsTurn(1, 0)];
     await startReplay(db, {
-      roomCode: room.code, rulesetVersion: "test", format: "classic-battles", state, roomVersion: 1,
+      roomCode: room.code, rulesetVersion: "test", format: "cc", state, roomVersion: 1,
       participants: [
         { seat: 0, userId, heroId: decklists.rhinar.heroId },
         { seat: 1, heroId: decklists.dorinthea.heroId },
@@ -310,7 +310,7 @@ describe("achievements", () => {
       };
       if (firstAward === "full-hand") fillHand();
       await startReplay(db, {
-        roomCode: room.code, rulesetVersion: "test", format: "classic-battles", state, roomVersion: 1,
+        roomCode: room.code, rulesetVersion: "test", format: "cc", state, roomVersion: 1,
         participants: [
           { seat: 0, heroId: decklists.rhinar.heroId },
           { seat: 1, userId, heroId: decklists.dorinthea.heroId },

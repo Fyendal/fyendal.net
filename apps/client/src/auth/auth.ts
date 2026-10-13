@@ -40,8 +40,7 @@ import {
   type ReplaysResponse,
   type StatsResponse,
 } from "@fyendal/protocol";
-import type { PlayerBadge } from "@fyendal/shared";
-import type { ConstructedFormat } from "../domain.js";
+import type { PlayerBadge, Format } from "@fyendal/shared";
 
 type RegisterOk = OkResponse;
 type LoginOk = LoginResponse;
@@ -287,7 +286,7 @@ export function apiDeck(
 
 export function apiImportDeck(
   token: string,
-  input: { name: string; format: ConstructedFormat; url?: string; text?: string },
+  input: { name: string; format: Format; url?: string; text?: string },
   signal?: AbortSignal,
 ): Promise<DeckResult> {
   return post<DeckResult>(
@@ -307,7 +306,7 @@ export function apiFabraryDeckPreview(
 
 export function apiFabraryPlayDeck(
   token: string,
-  input: { format: ConstructedFormat; url: string },
+  input: { format: Format; url: string },
   signal?: AbortSignal,
 ): Promise<DeckResult> {
   return post<DeckResult>(

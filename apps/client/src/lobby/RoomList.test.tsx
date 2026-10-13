@@ -37,13 +37,13 @@ describe("RoomList", () => {
       rooms: [
         {
           code: "OPEN01",
-          format: "classic-battles",
+          format: "silver-age",
           heroes: ["Open Hero", null],
           createdAt: 1,
         },
         {
           code: "PREP01",
-          format: "classic-battles",
+          format: "cc",
           heroes: ["Prep Hero", "Opponent"],
           createdAt: 2,
           spectateOnly: true,

@@ -17,8 +17,7 @@
  * Behavior:
  *  - Extracts every card with a printing in <SET_ID> (deduped by printing id;
  *    edition/foiling variants of the same printing collapse to one entry).
- *  - Converts to the CardData shape used by packages/cards (same logic as
- *    generate-cards.mjs).
+ *  - Converts to the CardData shape used by packages/cards (lib/carddata.mjs).
  *  - Classifies each functional key (name|pitch) against the existing data
  *    files and the script registry keys (grep-extracted from
  *    packages/cards/src/scripts/*.ts): reprint (auto-reuses an existing
@@ -72,7 +71,7 @@ if (!existsSync(source)) {
   process.exit(2);
 }
 
-// --- dataset -> CardData (shared with generate-cards.mjs: lib/carddata.mjs) --
+// --- dataset -> CardData (lib/carddata.mjs) ---------------------------------
 function functionalKey(name, pitch) {
   return `${name.trim().toLowerCase().replace(/\s+/g, " ")}|${pitch ?? 0}`;
 }

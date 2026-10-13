@@ -9,7 +9,7 @@ import type {
   MatchSummary,
   MatchupRecord,
 } from "@fyendal/protocol";
-import type { BotOpponent } from "@fyendal/shared";
+import type { BotOpponent, Format } from "@fyendal/shared";
 import type { Queryable } from "./db.js";
 
 /** Newest-first page size for the history list. */
@@ -29,7 +29,7 @@ export interface MatchSeatInput {
 
 export interface MatchRecordInput {
   roomCode: string;
-  format: MatchFormat;
+  format: Format;
   rulesetVersion: string;
   seats: [MatchSeatInput, MatchSeatInput];
   winner: 0 | 1 | null;
@@ -60,13 +60,11 @@ function safeInteger(value: unknown, label: string): number {
   return number;
 }
 
-export type MatchFormat = "cc" | "silver-age";
-
-export function isMatchFormat(value: unknown): value is MatchFormat {
+export function isMatchFormat(value: unknown): value is Format {
   return value === "cc" || value === "silver-age";
 }
 
-function format(value: unknown): MatchFormat {
+function format(value: unknown): Format {
   if (isMatchFormat(value)) return value;
   throw new Error("invalid match format");
 }

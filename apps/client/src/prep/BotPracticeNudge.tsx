@@ -1,27 +1,22 @@
 import { useState } from "react";
 import { useIntl } from "react-intl";
 import type { BotOpponent, Format } from "@fyendal/shared";
-import type { ConstructedFormat } from "../domain.js";
 import { BotOpponentModal } from "../lobby/BotOpponentModal.js";
 
 export const BOT_PRACTICE_NUDGE_DELAY_MS = 10_000;
-
-export function botPracticeFormat(format: Format | undefined): ConstructedFormat | null {
-  return format === "cc" || format === "silver-age" ? format : null;
-}
 
 export function shouldOfferBotPractice(input: {
   format: Format | undefined;
   matchmakingActive: boolean;
   opponentPresent: boolean;
 }): boolean {
-  return botPracticeFormat(input.format) !== null
+  return input.format !== undefined
     && input.matchmakingActive
     && !input.opponentPresent;
 }
 
 export function BotPracticeNudge(props: {
-  format: ConstructedFormat;
+  format: Format;
   busy: boolean;
   onPlay: (bot: BotOpponent, searchForPlayer: boolean) => void;
   onDismiss: () => void;

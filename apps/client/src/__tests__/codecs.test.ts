@@ -54,7 +54,7 @@ describe("server-message runtime codec", () => {
     });
     expect(decodeServerMessage({
       type: "queue-status",
-      counts: { "classic-battles": 1, cc: 0, "silver-age": 2 },
+      counts: { cc: 0, "silver-age": 2 },
     })).not.toBeNull();
     expect(decodeServerMessage({
       type: "error",
@@ -69,7 +69,7 @@ describe("server-message runtime codec", () => {
       type: "rooms",
       rooms: [{
         code: "ABC123",
-        format: "classic-battles",
+        format: "cc",
         heroes: ["Rhinar", "Dorinthea"],
         createdAt: 1,
         spectateOnly: true,

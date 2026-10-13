@@ -2,19 +2,16 @@ import type { Format } from "@fyendal/shared";
 import { useIntl, type IntlShape } from "react-intl";
 
 export const FORMAT_LABELS: Record<Format, string> = {
-  "classic-battles": "Classic Battles",
   cc: "Classic Constructed",
   "silver-age": "Silver Age",
 };
 
 const FORMAT_MESSAGE_IDS: Record<Format, string> = {
-  "classic-battles": "format.classicBattles",
   cc: "format.classicConstructed",
   "silver-age": "format.silverAge",
 };
 
 const FORMAT_ENGLISH_SUBTITLES: Record<Format, string> = {
-  "classic-battles": "Classic Battles",
   cc: "CC",
   "silver-age": "Silver Age",
 };
@@ -60,7 +57,6 @@ export function FormatName({
 }
 
 const BADGE_CLASS: Record<Format, string> = {
-  "classic-battles": "format-badge format-cb",
   cc: "format-badge format-cc",
   "silver-age": "format-badge format-sa",
 };

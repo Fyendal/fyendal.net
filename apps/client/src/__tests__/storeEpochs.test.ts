@@ -515,7 +515,7 @@ describe("client connection and account race fences", () => {
     useStore.getState().listRooms();
     const socket = FakeWebSocket.instances[0]!;
     socket.open();
-    useStore.getState().queueJoin("cc", { deckId: "deck-a" });
+    useStore.getState().queueJoin("cc", "deck-a");
     useStore.setState({
       screen: "waiting",
       roomCode: "ABC123",
@@ -526,7 +526,7 @@ describe("client connection and account race fences", () => {
     useStore.getState().declineMatch();
     expect(socket.sent.map((value) => JSON.parse(value))).toContainEqual({ type: "leave-room" });
 
-    useStore.getState().queueJoin("cc", { deckId: "deck-a" });
+    useStore.getState().queueJoin("cc", "deck-a");
     expect(socket.sent.map((value) => JSON.parse(value))).toContainEqual({
       type: "queue-join",
       format: "cc",
@@ -534,7 +534,7 @@ describe("client connection and account race fences", () => {
       avoidRoomCodes: ["ABC123"],
     });
 
-    useStore.getState().queueJoin("cc", { deckId: "deck-b" });
+    useStore.getState().queueJoin("cc", "deck-b");
     expect(JSON.parse(socket.sent.at(-1)!)).toEqual({
       type: "queue-join",
       format: "cc",
@@ -543,7 +543,7 @@ describe("client connection and account race fences", () => {
 
     useStore.setState({ roomCode: "DEF456", screen: "waiting" });
     useStore.getState().declineMatch();
-    useStore.getState().queueJoin("silver-age", { deckId: "deck-b" });
+    useStore.getState().queueJoin("silver-age", "deck-b");
     expect(JSON.parse(socket.sent.at(-1)!)).toEqual({
       type: "queue-join",
       format: "silver-age",
@@ -1200,7 +1200,7 @@ describe("client connection and account race fences", () => {
       socialOpen: true,
       friendGameInvites: [{
         inviteId: "invite-b", fromUsername: "Bob",
-        room: { code: "BBBBBB", format: "classic-battles" }, sentAt: Date.now(),
+        room: { code: "BBBBBB", format: "cc" }, sentAt: Date.now(),
       }],
     });
 
@@ -1376,7 +1376,7 @@ describe("client connection and account race fences", () => {
     });
     expect(useStore.getState().inviteRoom).toEqual({ code: "ABC123", format: "silver-age" });
 
-    useStore.getState().createRoom("silver-age", { deckId: "precon-sba" });
+    useStore.getState().createRoom("silver-age", "precon-sba");
     expect(socket.sent.map((message) => JSON.parse(message))).toContainEqual({
       type: "create-room",
       format: "silver-age",
@@ -1384,7 +1384,7 @@ describe("client connection and account race fences", () => {
       private: true,
     });
 
-    useStore.getState().createRoom("cc", { deckId: "precon-asb" }, "public");
+    useStore.getState().createRoom("cc", "precon-asb", "public");
     expect(socket.sent.map((message) => JSON.parse(message))).toContainEqual({
       type: "create-room",
       format: "cc",
@@ -1588,7 +1588,7 @@ describe("client connection and account race fences", () => {
     localStorage.setItem("fyendal-auth", JSON.stringify({ token: "token-a", username: "Alice" }));
     const { useStore } = await import("../store.js");
 
-    useStore.getState().queueJoin("cc", { deckId: "precon-asb" });
+    useStore.getState().queueJoin("cc", "precon-asb");
     const socket = FakeWebSocket.instances[0]!;
     socket.open();
     socket.message({ type: "queued", format: "cc" });

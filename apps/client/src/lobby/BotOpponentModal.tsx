@@ -1,8 +1,7 @@
 import { useId, useRef, useState } from "react";
 import { useIntl } from "react-intl";
 import { FUTURE_SET_CODES, cardData, formatLegalityIssues, precon } from "@fyendal/cards/client";
-import type { BotOpponent } from "@fyendal/shared";
-import type { ConstructedFormat } from "../domain.js";
+import type { BotOpponent, Format } from "@fyendal/shared";
 import { heroImageUrl } from "./heroImage.js";
 import { ModalSurface } from "../components/ModalSurface.js";
 import { ViewportTooltip } from "../components/ViewportTooltip.js";
@@ -19,7 +18,7 @@ interface BotOption {
 
 type DeckType = "beginner" | "midrange" | "aggro" | "elemental" | "guardian" | "boss";
 
-const BOTS: Readonly<Record<ConstructedFormat, readonly BotOption[]>> = {
+const BOTS: Readonly<Record<Format, readonly BotOption[]>> = {
   cc: [
     {
       id: "ira",
@@ -125,7 +124,7 @@ const BOT_CARD_WARNINGS = new Map(
 );
 
 export function BotOpponentModal(props: {
-  format: ConstructedFormat;
+  format: Format;
   onSelect: (bot: BotOpponent, searchForPlayer: boolean) => void;
   onClose: () => void;
 }) {

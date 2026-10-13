@@ -1,15 +1,14 @@
 import { useState } from "react";
 import { useIntl } from "react-intl";
 import { useShallow } from "zustand/react/shallow";
-import type { ConstructedFormat } from "../domain.js";
+import type { Format } from "@fyendal/shared";
 import { ModalSurface } from "../components/ModalSurface.js";
 import { useStore } from "../store.js";
 import { CardPoolModeControl } from "../lobby/CardPoolModeControl.js";
 import { DeckDropdown } from "../lobby/CreateRoomModal.js";
 import { deckChoicesFor, deckIsLegalForRoom } from "../lobby/DeckGrid.js";
 import { FormatName } from "../lobby/FormatBadge.js";
-
-const FORMATS = ["cc", "silver-age"] as const;
+import { FORMATS } from "../domain.js";
 
 export function FriendRoomModal() {
   const intl = useIntl();
@@ -36,8 +35,8 @@ export function FriendRoomModal() {
     createFriendRoom: state.createFriendRoom,
     cancelFriendInvite: state.cancelFriendInvite,
   })));
-  const [format, setFormat] = useState<ConstructedFormat>("cc");
-  const [deckFor, setDeckFor] = useState<Record<ConstructedFormat, string>>({ cc: "", "silver-age": "" });
+  const [format, setFormat] = useState<Format>("cc");
+  const [deckFor, setDeckFor] = useState<Record<Format, string>>({ cc: "", "silver-age": "" });
   if (!target) return null;
 
   const cardPoolMode = cardPoolModes[format];

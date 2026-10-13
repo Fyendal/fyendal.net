@@ -3,7 +3,7 @@ import { verifyPassword } from "./auth.js";
 import { listDeckPlays, listDecks, type DeckPlay } from "./decks.js";
 import { attachReplayNotes, getReplay, getReplayNotes, listReplays } from "./replays.js";
 import { appendClusterEvent } from "./clusterEvents.js";
-import type { CardPoolMode, PlayerBadge, ReplayFile } from "@fyendal/shared";
+import type { CardPoolMode, Format, PlayerBadge, ReplayFile } from "@fyendal/shared";
 import {
   MAX_MATCHMAKING_AVOID_HEROES,
   MAX_MATCHMAKING_AVOID_ROOM_CODES,
@@ -79,7 +79,6 @@ export interface AccountExport {
   }>;
   matchmaking: null | {
     format: string;
-    hero: string | null;
     deckId: string | null;
     retainedRoomCode: string | null;
     joinedAt: number;
@@ -90,7 +89,7 @@ export interface AccountExport {
     avoidedUserIds: number[];
     avoidedHeroes: string[];
     pendingBotStart: null | {
-      format: "cc" | "silver-age";
+      format: Format;
       deckId: string;
       bot: string;
       cardPoolMode: CardPoolMode;
@@ -193,7 +192,7 @@ export async function exportAccount(db: Queryable, userId: number): Promise<Acco
       [userId],
     ),
     db.query(
-      `SELECT format, hero, deck_id, retained_room_code, joined_at, mode,
+      `SELECT format, deck_id, retained_room_code, joined_at, mode,
               source_room_code, pending_offer_room_code, avoided_room_codes,
               avoided_user_ids, avoided_heroes
        FROM matchmaking_entries WHERE user_id = $1`,
@@ -309,7 +308,6 @@ export async function exportAccount(db: Queryable, userId: number): Promise<Acco
     matchmaking: queueRows[0]
       ? {
           format: String(queueRows[0].format),
-          hero: typeof queueRows[0].hero === "string" ? queueRows[0].hero : null,
           deckId: typeof queueRows[0].deck_id === "string" ? queueRows[0].deck_id : null,
           retainedRoomCode: typeof queueRows[0].retained_room_code === "string" ? queueRows[0].retained_room_code : null,
           joinedAt: Number(queueRows[0].joined_at),

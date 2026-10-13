@@ -58,7 +58,7 @@ function safeInteger(value: unknown, label: string): number {
 }
 
 function format(value: unknown): Format {
-  if (value === "classic-battles" || value === "cc" || value === "silver-age") return value;
+  if (value === "cc" || value === "silver-age") return value;
   throw new Error("invalid replay format");
 }
 

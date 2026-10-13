@@ -1,8 +1,7 @@
 import { useState } from "react";
 import { useIntl } from "react-intl";
 import { useShallow } from "zustand/react/shallow";
-import type { RoomSummary } from "@fyendal/shared";
-import type { ConstructedFormat } from "../domain.js";
+import type { RoomSummary, Format } from "@fyendal/shared";
 import { useStore } from "../store.js";
 import { formatLabel } from "./FormatBadge.js";
 import {
@@ -15,24 +14,21 @@ import { RoomCard } from "./RoomCard.js";
 
 /**
  * Every live room, grouped into pre-game rooms above started games. Open
- * rooms can be joined (constructed rooms require
- * picking one of your decks of that format first, Classic Battles rooms a
- * box hero — mirror matches allowed — both via a modal); full rooms
+ * rooms can be joined after picking one of your decks of that format in a
+ * modal; full rooms
  * (in prep or mid-game) are spectate-only.
  * Rooms your account still seats offer a Rejoin button (the server reclaims
  * the seat by token or account).
  */
-export function RoomList(props: { onGoToDecks: (format: ConstructedFormat) => void }) {
+export function RoomList(props: { onGoToDecks: (format: Format) => void }) {
   const intl = useIntl();
   const { rooms, joinRoom, decks } = useStore(useShallow((state) => ({
     rooms: state.rooms,
     joinRoom: state.joinRoom,
     decks: state.decks,
   })));
-  /** constructed room awaiting the joiner's deck choice */
+  /** room awaiting the joiner's deck choice */
   const [picker, setPicker] = useState<RoomSummary | null>(null);
-  /** classic-battles room awaiting the joiner's hero choice */
-  const [heroPick, setHeroPick] = useState<RoomSummary | null>(null);
   const [creating, setCreating] = useState(false);
 
   const yourRooms = rooms.filter((room) => room.yours === true);
@@ -40,18 +36,12 @@ export function RoomList(props: { onGoToDecks: (format: ConstructedFormat) => vo
   const openRooms = otherRooms.filter((room) => room.started !== true);
   const startedGames = otherRooms.filter((room) => room.started === true);
 
-  const join = (room: RoomSummary) => {
-    if (room.format === "classic-battles") {
-      setHeroPick(room);
-      return;
-    }
-    setPicker(room);
-  };
+  const join = (room: RoomSummary) => setPicker(room);
   const rejoin = (code: string) => joinRoom(code, undefined, false);
   const spectate = (code: string) => joinRoom(code, undefined, true);
 
   const pickerDecks = picker
-    ? deckChoicesFor(picker.format as ConstructedFormat, decks, picker.cardPoolMode ?? "legal")
+    ? deckChoicesFor(picker.format, decks, picker.cardPoolMode ?? "legal")
     : [];
 
   return (
@@ -130,7 +120,7 @@ export function RoomList(props: { onGoToDecks: (format: ConstructedFormat) => vo
                   className="linklike"
                   onClick={() => {
                     setPicker(null);
-                    props.onGoToDecks(picker.format as ConstructedFormat);
+                    props.onGoToDecks(picker.format);
                   }}
                 >
                   {intl.formatMessage({ id: "lobby.rooms.importOne" })}
@@ -153,37 +143,6 @@ export function RoomList(props: { onGoToDecks: (format: ConstructedFormat) => vo
             )}
             <div className="deck-actions">
               <button onClick={() => setPicker(null)}>{intl.formatMessage({ id: "common.cancel" })}</button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {heroPick && (
-        <div className="modal-backdrop" onClick={() => setHeroPick(null)}>
-          <div className="deck-pick-modal" onClick={(e) => e.stopPropagation()}>
-            <h2 className="panel-title">
-              {intl.formatMessage({ id: "lobby.rooms.pickHero" }, { code: heroPick.code })}
-            </h2>
-            <div className="lobby-row">
-              <button
-                onClick={() => {
-                  joinRoom(heroPick.code, undefined, undefined, "rhinar");
-                  setHeroPick(null);
-                }}
-              >
-                Rhinar
-              </button>
-              <button
-                onClick={() => {
-                  joinRoom(heroPick.code, undefined, undefined, "dorinthea");
-                  setHeroPick(null);
-                }}
-              >
-                Dorinthea
-              </button>
-            </div>
-            <div className="deck-actions">
-              <button onClick={() => setHeroPick(null)}>{intl.formatMessage({ id: "common.cancel" })}</button>
             </div>
           </div>
         </div>

@@ -1,11 +1,10 @@
 /**
- * Shared dataset→CardData conversion for generate-cards.mjs and import-set.mjs
+ * Shared dataset→CardData conversion for the card import scripts
  * (source: the-fab-cube/flesh-and-blood-cards, json/english/card.json).
  *
  * `toCardData(c, printing)` converts one dataset card + chosen printing to the
- * CardData shape used by packages/cards. Callers pick the printing themselves:
- * generate-cards.mjs prefers the Classic Battles box sets (DVR/RNR) and may
- * pass undefined (id then falls back to c.unique_id); import-set.mjs always
+ * CardData shape used by packages/cards. Callers pick the printing themselves;
+ * when it is undefined the id falls back to c.unique_id. import-set.mjs always
  * passes the printing of the set being imported.
  */
 export const CLASS_NAMES = new Set([

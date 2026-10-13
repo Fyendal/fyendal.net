@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { gunzipSync } from "node:zlib";
-import { decklists } from "@fyendal/cards";
+import { precon } from "@fyendal/cards";
 import { legalIntents } from "@fyendal/engine";
 import { decodeGameView, decodeReplayResponse, replayFileViews } from "@fyendal/protocol";
 import type { Queryable } from "../db.js";
@@ -41,10 +41,12 @@ async function user(username: string): Promise<number> {
   return Number(rows[0].id);
 }
 
+const DECK_IDS = ["precon-asb", "precon-asr"] as const;
+
 async function startedGame() {
   const users: [number, number] = [await user("Alice"), await user("Bob")];
-  const host = await store.createRoom("classic-battles", {
-    hero: "rhinar",
+  const host = await store.createRoom("cc", {
+    deckId: DECK_IDS[0],
     userId: users[0],
     username: "Alice",
   });
@@ -56,7 +58,7 @@ async function startedGame() {
   );
   const joined = await store.joinRoom(host.code, undefined, {
     allowPlayer: true,
-    hero: "dorinthea",
+    deckId: DECK_IDS[1],
     userId: users[1],
     username: "Bob",
   });
@@ -71,17 +73,16 @@ async function startedGame() {
   );
   if (!chosen.ok || chosen.started) throw new Error("turn order was not recorded");
   for (const seat of [0, 1] as const) {
-    const deck = decklists[seat === 0 ? "rhinar" : "dorinthea"];
-    const locked = await store.presentArena(host.code, { token: tokens[seat], userId: users[seat] }, { weaponIds: deck.weaponIds, equipment: deck.equipment });
+    const pool = precon(DECK_IDS[seat])!.pool;
+    const locked = await store.presentArena(host.code, { token: tokens[seat], userId: users[seat] }, { weaponIds: pool.weaponIds, equipment: {} });
     if (!locked.ok) throw new Error(locked.error);
   }
   for (const seat of [0, 1] as const) {
-    const hero = seat === 0 ? "rhinar" : "dorinthea";
-    const deck = decklists[hero];
+    const pool = precon(DECK_IDS[seat])!.pool;
     const presented = await store.presentDeck(host.code, { token: tokens[seat], userId: users[seat] }, {
-      weaponIds: deck.weaponIds,
-      equipment: deck.equipment,
-      deck: deck.deck,
+      weaponIds: pool.weaponIds,
+      equipment: {},
+      deck: pool.deck,
     });
     if (!presented.ok) throw new Error(presented.error);
   }
@@ -288,7 +289,7 @@ describe("server replay retention", () => {
     expect(analyticsEvents).toHaveLength(1);
     expect(analyticsEvents[0]).toMatchObject({
       event_type: "game_completed",
-      format: "classic-battles",
+      format: "cc",
       game_mode: "pvp",
     });
     expect(analyticsEvents[0]!.event_id).toMatch(/^game:[a-f0-9]{24}$/);

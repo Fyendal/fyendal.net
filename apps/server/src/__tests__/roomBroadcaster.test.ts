@@ -33,7 +33,7 @@ describe("RoomBroadcaster", () => {
       },
     };
     const store = new PgRoomStore(tracedDb, "test-ruleset");
-    const room = await store.createRoom("classic-battles", { hero: "rhinar" });
+    const room = await store.createRoom("cc", { deckId: "precon-asb" });
     const broadcastLobby = vi.fn(async () => undefined);
     const broadcaster = new RoomBroadcaster<TestClient>({
       rooms: store,

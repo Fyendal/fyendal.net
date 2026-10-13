@@ -131,7 +131,7 @@ function AppContent() {
   useEffect(() => {
     if (!routeRoomCode) return;
     // Known sessions reconnect immediately. New authenticated invitees first
-    // inspect the room so they can choose the matching deck or box hero.
+    // inspect the room so they can choose a matching deck.
     if ((authUser || hasSavedSpectatorSession(routeRoomCode)) && hasSavedRoomSession(routeRoomCode)) {
       joinRoom(routeRoomCode);
     }

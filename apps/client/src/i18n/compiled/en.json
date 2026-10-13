@@ -20332,12 +20332,6 @@
       "value": "Terms of Service"
     }
   ],
-  "format.classicBattles": [
-    {
-      "type": 0,
-      "value": "Classic Battles"
-    }
-  ],
   "format.classicConstructed": [
     {
       "type": 0,
@@ -24616,22 +24610,10 @@
       "value": "choose a ready-to-play deck"
     }
   ],
-  "lobby.invite.choiceHero": [
-    {
-      "type": 0,
-      "value": "choose Rhinar or Dorinthea"
-    }
-  ],
   "lobby.invite.chooseDeck": [
     {
       "type": 0,
       "value": "Choose a deck to join this private room."
-    }
-  ],
-  "lobby.invite.chooseHero": [
-    {
-      "type": 0,
-      "value": "Choose your hero to join this private room."
     }
   ],
   "lobby.invite.createAccount": [
@@ -24886,20 +24868,6 @@
     {
       "type": 0,
       "value": " — pick a deck"
-    }
-  ],
-  "lobby.rooms.pickHero": [
-    {
-      "type": 0,
-      "value": "Join "
-    },
-    {
-      "type": 1,
-      "value": "code"
-    },
-    {
-      "type": 0,
-      "value": " — pick a hero"
     }
   ],
   "lobby.rooms.started": [

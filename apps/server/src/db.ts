@@ -860,6 +860,37 @@ export const MIGRATIONS: Migration[] = [
       }
     },
   },
+  {
+    version: 47,
+    // Retire Classic Battles. Its queue entries, rooms, replays, and lock row
+    // are deleted; room deletion cascades to seats, history, presence,
+    // commands, offers, and entries retaining those rooms. Bug reports,
+    // achievements, cluster events, and anonymous analytics keep their
+    // historical rows. The per-seat box-hero columns are dropped, and format
+    // checks narrow to the constructed formats. Inline checks are named
+    // `<table>_format_check` by PostgreSQL and `<table>_constraint_1` by
+    // pg-mem; dropping both conditionally keeps the schemas in lockstep.
+    sql: `DELETE FROM matchmaking_entries WHERE format = 'classic-battles';
+    DELETE FROM rooms WHERE format = 'classic-battles';
+    DELETE FROM replay_games WHERE format = 'classic-battles';
+    DELETE FROM matchmaking_locks WHERE format = 'classic-battles';
+    ALTER TABLE room_seats DROP COLUMN hero;
+    ALTER TABLE matchmaking_entries DROP COLUMN hero;
+    ALTER TABLE rooms
+      ADD CONSTRAINT rooms_format_check CHECK (format IN ('cc', 'silver-age'));
+    ALTER TABLE replay_games DROP CONSTRAINT IF EXISTS replay_games_format_check;
+    ALTER TABLE replay_games DROP CONSTRAINT IF EXISTS replay_games_constraint_1;
+    ALTER TABLE replay_games
+      ADD CONSTRAINT replay_games_format_check CHECK (format IN ('cc', 'silver-age'));
+    ALTER TABLE matchmaking_locks DROP CONSTRAINT IF EXISTS matchmaking_locks_format_check;
+    ALTER TABLE matchmaking_locks DROP CONSTRAINT IF EXISTS matchmaking_locks_constraint_1;
+    ALTER TABLE matchmaking_locks
+      ADD CONSTRAINT matchmaking_locks_format_check CHECK (format IN ('cc', 'silver-age'));
+    ALTER TABLE matchmaking_entries DROP CONSTRAINT IF EXISTS matchmaking_entries_format_check;
+    ALTER TABLE matchmaking_entries DROP CONSTRAINT IF EXISTS matchmaking_entries_constraint_1;
+    ALTER TABLE matchmaking_entries
+      ADD CONSTRAINT matchmaking_entries_format_check CHECK (format IN ('cc', 'silver-age'));`,
+  },
 ];
 
 async function publicTables(db: Queryable): Promise<string[]> {

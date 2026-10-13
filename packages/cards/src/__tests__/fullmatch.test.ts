@@ -236,7 +236,7 @@ describe("Prism vs Viserai (IAR Silver Age product cards)", () => {
   });
 });
 
-describe("Classic Battles full match (real decks)", () => {
+describe("Rhinar vs Dorinthea box decks full match", () => {
   it("plays seeded random matches to completion without errors", () => {
     for (let game = 0; game < 10; game++) {
       const rand = makeRand(5000 + game);
@@ -309,7 +309,7 @@ describe("Classic Battles full match (real decks)", () => {
   });
 });
 
-describe("Lyath vs Rhinar full match (Silver Age precon vs Classic Battles)", () => {  it("plays seeded random matches to completion without errors", () => {
+describe("Lyath vs Rhinar full match (Silver Age precon vs box deck)", () => {  it("plays seeded random matches to completion without errors", () => {
     for (let game = 0; game < 6; game++) {
       const rand = makeRand(7000 + game);
       let s = createGame({
@@ -348,7 +348,7 @@ describe("Lyath vs Rhinar full match (Silver Age precon vs Classic Battles)", ()
   });
 });
 
-describe("Blaze vs Rhinar full match (Silver Age precon vs Classic Battles)", () => {
+describe("Blaze vs Rhinar full match (Silver Age precon vs box deck)", () => {
   it("plays seeded random matches to completion without errors", () => {
     for (let game = 0; game < 6; game++) {
       const rand = makeRand(9000 + game);
@@ -388,7 +388,7 @@ describe("Blaze vs Rhinar full match (Silver Age precon vs Classic Battles)", ()
   });
 });
 
-describe("Viserai vs Rhinar full match (Silver Age precon vs Classic Battles)", () => {
+describe("Viserai vs Rhinar full match (Silver Age precon vs box deck)", () => {
   it("plays seeded random matches to completion without errors", () => {
     for (let game = 0; game < 4; game++) {
       const rand = makeRand(19000 + game);
@@ -613,7 +613,7 @@ const BOLTYN_DECK: Decklist = {
   ],
 };
 
-describe("Boltyn vs Dorinthea full match (Silver Age precon vs Classic Battles)", () => {
+describe("Boltyn vs Dorinthea full match (Silver Age precon vs box deck)", () => {
   it("plays seeded random matches to completion without errors", () => {
     for (let game = 0; game < 6; game++) {
       const rand = makeRand(11000 + game);

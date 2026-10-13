@@ -1,4 +1,4 @@
-import type { EmoteMessage, FriendGameInvite } from "@fyendal/shared";
+import type { EmoteMessage, Format, FriendGameInvite } from "@fyendal/shared";
 import type { Queryable } from "./db.js";
 import type { RoomBroadcastEvent } from "./roomBroadcaster.js";
 import type { ErrorLogger } from "./logging.js";
@@ -11,7 +11,7 @@ const DEFAULT_RETENTION_MS = 60 * 60 * 1000;
 export type ClusterEvent =
   | { type: "room"; event: RoomBroadcastEvent }
   | { type: "queue-changed" }
-  | { type: "queue-waiting"; userId: number; format: "classic-battles" | "cc" | "silver-age" }
+  | { type: "queue-waiting"; userId: number; format: Format }
   | { type: "session-revoked"; tokenHash: string }
   | { type: "user-sessions-revoked"; userId: number }
   | { type: "match-ready"; userId: number; code: string; created: boolean }
@@ -75,7 +75,7 @@ function decodeRow(value: unknown): { id: number; event: ClusterEvent } | null {
       const userId = safeInteger(row.subject_user_id);
       const format = payload?.format;
       return userId !== null && userId > 0
-        && (format === "classic-battles" || format === "cc" || format === "silver-age")
+        && (format === "cc" || format === "silver-age")
         ? { id, event: { type: "queue-waiting", userId, format } }
         : null;
     }

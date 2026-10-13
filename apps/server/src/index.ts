@@ -3,7 +3,7 @@ import http from "node:http";
 import { randomUUID } from "node:crypto";
 import { WebSocketServer, WebSocket } from "ws";
 import { configuredWebSocketCompression } from "./webSocketCompression.js";
-import type { CardPoolMode, ClientMessage, Format, HeroId, ServerMessage } from "@fyendal/shared";
+import type { CardPoolMode, ClientMessage, Format, ServerMessage } from "@fyendal/shared";
 import { cardData, formatLegalityIssues, precon } from "@fyendal/cards";
 import { botDefinition } from "@fyendal/bot";
 import { deleteExpiredSessions, hashSessionToken, sessionForToken, type AuthUser } from "./auth.js";
@@ -570,20 +570,15 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
     return { token: ctx.token, userId: ctx.user?.id };
   }
 
-  /** Validate a format choice before it can enter a room or matchmaking. */
+  /** Validate a deck choice before it can enter a room or matchmaking. */
   async function resolveChoice(
     user: AuthUser,
     format: Format,
-    hero: HeroId | undefined,
-    deckId: string | undefined,
+    deckId: string,
     cardPoolMode: CardPoolMode = "legal",
   ): Promise<{
-    choice: { hero?: HeroId; deckId?: string; deckName?: string };
+    choice: { deckId: string; deckName: string };
   } | { error: string }> {
-    if (format === "classic-battles") {
-      if (hero !== "dorinthea" && hero !== "rhinar") return { error: "pick a hero" };
-      return { choice: { hero } };
-    }
     if (!deckId) return { error: `choose a ${format} deck` };
     const refreshed = await resolveFreshDeck(deps.db, user.id, deckId, fabraryClient);
     if (!refreshed.ok) return { error: refreshed.error };
@@ -705,7 +700,7 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
         if (!friend) return sendSocialError(ctx, "FRIEND_REQUIRED");
         if (!(await isUserOnline(deps.db, friend.id))) return sendSocialError(ctx, "FRIEND_UNAVAILABLE");
         const cardPoolMode = msg.cardPoolMode ?? "legal";
-        const choice = await resolveChoice(ctx.user, msg.format, undefined, msg.deckId, cardPoolMode);
+        const choice = await resolveChoice(ctx.user, msg.format, msg.deckId, cardPoolMode);
         if ("error" in choice) {
           send(ws, { type: "error", message: choice.error });
           return;
@@ -742,14 +737,8 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
           send(ws, { type: "error", message: PLAY_REQUIRES_LOGIN });
           return;
         }
-        const cardPoolMode = msg.format === "classic-battles" ? "legal" : (msg.cardPoolMode ?? "legal");
-        const choice = await resolveChoice(
-          ctx.user,
-          msg.format,
-          msg.hero,
-          msg.deckId,
-          cardPoolMode,
-        );
+        const cardPoolMode = msg.cardPoolMode ?? "legal";
+        const choice = await resolveChoice(ctx.user, msg.format, msg.deckId, cardPoolMode);
         if ("error" in choice) {
           send(ws, { type: "error", message: choice.error });
           return;
@@ -800,15 +789,9 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
           send(ws, { type: "error", message: botLegality.map((issue) => issue.message).join("; ") });
           return;
         }
-        const choice = await resolveChoice(
-          ctx.user,
-          botFormat,
-          undefined,
-          msg.deckId,
-          msg.cardPoolMode ?? "legal",
-        );
-        if ("error" in choice || !choice.choice.deckId) {
-          send(ws, { type: "error", message: "error" in choice ? choice.error : `choose a ${botFormat} deck` });
+        const choice = await resolveChoice(ctx.user, botFormat, msg.deckId, msg.cardPoolMode ?? "legal");
+        if ("error" in choice) {
+          send(ws, { type: "error", message: choice.error });
           return;
         }
         if (msg.searchForPlayer) {
@@ -893,7 +876,6 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
         }
         const r = await rooms.joinRoom(msg.code, msg.token, {
           allowPlayer: !!ctx.user,
-          hero: msg.hero,
           deckId: msg.deckId,
           deckName,
           username: ctx.user?.username,
@@ -973,13 +955,7 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
           send(ws, { type: "error", message: PLAY_REQUIRES_LOGIN });
           return;
         }
-        const choice = await resolveChoice(
-          ctx.user,
-          msg.format,
-          msg.hero,
-          msg.deckId,
-          msg.cardPoolMode ?? "legal",
-        );
+        const choice = await resolveChoice(ctx.user, msg.format, msg.deckId, msg.cardPoolMode ?? "legal");
         if ("error" in choice) {
           send(ws, { type: "error", message: choice.error });
           return;
@@ -991,7 +967,7 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
           userId: ctx.user.id,
           username: ctx.user.username,
           ...choice.choice,
-          cardPoolMode: msg.format === "classic-battles" ? "legal" : (msg.cardPoolMode ?? "legal"),
+          cardPoolMode: msg.cardPoolMode ?? "legal",
           avoidRoomCodes: msg.avoidRoomCodes,
         });
         if (!result.ok) {
@@ -1228,7 +1204,6 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
               await rooms.queueForMatch(r.format, {
                 userId: r.remaining.userId,
                 username: r.remaining.username ?? "unknown",
-                hero: r.remaining.hero,
                 deckId: r.remaining.deckId,
                 deckName: r.remaining.deckName,
                 retainedRoomCode: code,

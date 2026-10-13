@@ -12,7 +12,6 @@ import { formatLegalityIssues } from "./formatLegality.js";
 import { equipmentFitsSlot, isWeaponZoneCard } from "./equipment.js";
 
 export const MIN_DECK_SIZE: Record<Format, number> = {
-  "classic-battles": 40,
   cc: 60,
   "silver-age": 40,
 };
