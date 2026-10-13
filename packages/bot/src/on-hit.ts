@@ -102,12 +102,19 @@ export interface OnHitValueContext {
   defenderHasArsenal: boolean;
 }
 
+/** Who picks the hand cards an on-hit effect takes. */
+export type HandLossSelector = "defender" | "random" | "attacker";
+
 export interface OnHitEvaluation {
   value: number;
   categories: readonly OnHitCategory[];
   cardDraw: number;
   delayedDamage: number;
   handCardsLost: number;
+  /** The part of `value` that prices `handCardsLost` as generic cards. */
+  handLossValue: number;
+  /** The selector least favorable to the defender among hand-loss effects. */
+  handLossSelector?: HandLossSelector;
   destroysOccupiedArsenal: boolean;
   equipmentDamage: boolean;
   tokenCreation: boolean;
@@ -119,6 +126,7 @@ export const EMPTY_ON_HIT_EVALUATION: OnHitEvaluation = {
   cardDraw: 0,
   delayedDamage: 0,
   handCardsLost: 0,
+  handLossValue: 0,
   destroysOccupiedArsenal: false,
   equipmentDamage: false,
   tokenCreation: false,
@@ -147,13 +155,30 @@ function part(
   return { ...EMPTY_ON_HIT_EVALUATION, ...fields, value, categories: [category] };
 }
 
+const SELECTOR_SEVERITY: Readonly<Record<HandLossSelector, number>> = {
+  defender: 0,
+  random: 1,
+  attacker: 2,
+};
+
+function harsherSelector(
+  left: HandLossSelector | undefined,
+  right: HandLossSelector | undefined,
+): HandLossSelector | undefined {
+  if (!left || !right) return left ?? right;
+  return SELECTOR_SEVERITY[right] > SELECTOR_SEVERITY[left] ? right : left;
+}
+
 function combine(left: OnHitEvaluation, right: OnHitEvaluation): OnHitEvaluation {
+  const handLossSelector = harsherSelector(left.handLossSelector, right.handLossSelector);
   return {
     value: left.value + right.value,
     categories: [...new Set([...left.categories, ...right.categories])],
     cardDraw: left.cardDraw + right.cardDraw,
     delayedDamage: left.delayedDamage + right.delayedDamage,
     handCardsLost: left.handCardsLost + right.handCardsLost,
+    handLossValue: left.handLossValue + right.handLossValue,
+    ...(handLossSelector ? { handLossSelector } : {}),
     destroysOccupiedArsenal: left.destroysOccupiedArsenal || right.destroysOccupiedArsenal,
     equipmentDamage: left.equipmentDamage || right.equipmentDamage,
     tokenCreation: left.tokenCreation || right.tokenCreation,
@@ -171,6 +196,12 @@ function drawn(cards: number, context: OnHitValueContext): OnHitEvaluation {
   return part("card-advantage", cards * (3 + conversion), { cardDraw: cards });
 }
 
+const HAND_LOSS_SELECTOR: Partial<Record<OnHitCategory, HandLossSelector>> = {
+  "informed-disruption": "attacker",
+  "random-disruption": "random",
+  "forced-discard": "defender",
+};
+
 function handLoss(
   category: OnHitCategory,
   cards: number,
@@ -178,7 +209,12 @@ function handLoss(
   context: OnHitValueContext,
 ): OnHitEvaluation {
   const lost = context.defenderHasHand ? cards : 0;
-  return part(category, lost * value, { handCardsLost: lost });
+  const selector = HAND_LOSS_SELECTOR[category];
+  return part(category, lost * value, {
+    handCardsLost: lost,
+    handLossValue: lost * value,
+    ...(lost > 0 && selector ? { handLossSelector: selector } : {}),
+  });
 }
 
 /** At most one reading of what leaves the defender's hand. */

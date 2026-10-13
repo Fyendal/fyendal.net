@@ -91,6 +91,27 @@ describe("on-hit valuation", () => {
     });
   });
 
+  it("reports who selects lost hand cards, keeping the harshest selector", () => {
+    expect(evaluateOnHit({
+      ...base,
+      effects: [{ text: "When this hits a hero, they banish a card from their hand." }],
+    })).toMatchObject({ handCardsLost: 1, handLossValue: 3.25 * 0.75, handLossSelector: "defender" });
+    expect(evaluateOnHit({
+      ...base,
+      effects: [
+        { text: "They banish a card from their hand." },
+        { text: "The defending hero discards a random card from their hand." },
+      ],
+    })).toMatchObject({ handCardsLost: 2, handLossSelector: "random" });
+    const empty = evaluateOnHit({
+      ...base,
+      defenderHasHand: false,
+      effects: [{ text: "They banish a card from their hand." }],
+    });
+    expect(empty).toMatchObject({ handCardsLost: 0, handLossValue: 0 });
+    expect(empty.handLossSelector).toBeUndefined();
+  });
+
   it("falls back to structured impact when the text is not recognized", () => {
     expect(evaluateOnHit({
       ...base,

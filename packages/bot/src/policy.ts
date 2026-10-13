@@ -1179,6 +1179,25 @@ interface ContinuationEvaluation {
   opportunityCost: number;
 }
 
+function averageContinuation(
+  continuations: readonly { continuation: ContinuationEvaluation; weight: number }[],
+): ContinuationEvaluation {
+  if (continuations.length === 1) return continuations[0]!.continuation;
+  const field = (key: "prevention" | "overblock" | "opportunityCost"): number =>
+    continuations.reduce((total, { continuation, weight }) => total + continuation[key] * weight, 0);
+  return {
+    response: averageResponse(continuations.map(({ continuation, weight }) => ({
+      response: continuation.response,
+      weight,
+    }))),
+    // Defender ids are trace-only; report the first scenario's plan.
+    defenderIds: continuations[0]!.continuation.defenderIds,
+    prevention: field("prevention"),
+    overblock: field("overblock"),
+    opportunityCost: field("opportunityCost"),
+  };
+}
+
 function bestContinuationResponse(
   input: BotPolicyInput,
   responseInput: BotPolicyInput,
@@ -1235,6 +1254,78 @@ function bestContinuationResponse(
     }
   }
   return best;
+}
+
+function averageResponse(
+  responses: readonly { response: ResponseEvaluation; weight: number }[],
+): ResponseEvaluation {
+  const field = (key: Exclude<keyof ResponseEvaluation, "total">): number =>
+    responses.reduce((total, { response, weight }) => total + response[key] * weight, 0);
+  return responseEvaluation({
+    damageThreatened: field("damageThreatened"),
+    futureHandValue: field("futureHandValue"),
+    arsenalValue: field("arsenalValue"),
+    boardValue: field("boardValue"),
+    strategicAdjustment: field("strategicAdjustment"),
+  });
+}
+
+interface HandLossScenario {
+  lostIds: ReadonlySet<number>;
+  weight: number;
+}
+
+const NO_HAND_LOSS: readonly HandLossScenario[] = [{ lostIds: new Set(), weight: 1 }];
+/** Bounds the hand subsets examined for one landed on-hit hand loss. */
+const MAX_HAND_LOSS_SUBSETS = 35;
+
+function combinations<T>(items: readonly T[], size: number, limit: number): T[][] {
+  const result: T[][] = [];
+  const pick = (start: number, chosen: T[]): void => {
+    if (result.length >= limit) return;
+    if (chosen.length === size) {
+      result.push(chosen);
+      return;
+    }
+    for (let index = start; index < items.length; index++) pick(index + 1, [...chosen, items[index]!]);
+  };
+  pick(0, []);
+  return result;
+}
+
+/**
+ * Hand cards a landed hit takes, as weighted scenarios. The cards leave the
+ * same hand the response projection reads, so a block that lets the hit
+ * through must not keep them for next turn. The defender gives up its least
+ * useful cards, an informed attacker takes the most useful, and a random loss
+ * averages every subset.
+ */
+function handLossScenarios(
+  input: BotPolicyInput,
+  model: HeroCycleModel,
+  onHit: OnHitEvaluation,
+  offensiveCards: readonly CardView[],
+  consumedIds: ReadonlySet<number>,
+  responseInput: BotPolicyInput,
+): readonly HandLossScenario[] {
+  const selector = onHit.handLossSelector;
+  if (!selector || onHit.handCardsLost <= 0) return NO_HAND_LOSS;
+  const eligible = input.view.players[input.seat].hand.filter((card) => !consumedIds.has(card.instanceId));
+  const size = Math.min(onHit.handCardsLost, eligible.length);
+  if (size === 0) return NO_HAND_LOSS;
+  const subsets = combinations(eligible, size, MAX_HAND_LOSS_SUBSETS)
+    .map((cards) => new Set(cards.map((card) => card.instanceId)));
+  if (selector === "random") return subsets.map((lostIds) => ({ lostIds, weight: 1 / subsets.length }));
+  const remaining = (lostIds: ReadonlySet<number>): number => model.evaluateResponse(
+    offensiveCards.filter((card) => !consumedIds.has(card.instanceId) && !lostIds.has(card.instanceId)),
+    responseInput,
+  ).total;
+  const scored = subsets.map((lostIds) => ({ lostIds, total: remaining(lostIds) }));
+  const chosen = scored.reduce((best, candidate) =>
+    selector === "defender" ? candidate.total > best.total ? candidate : best
+      : candidate.total < best.total ? candidate : best
+  );
+  return [{ lostIds: chosen.lostIds, weight: 1 }];
 }
 
 /**
@@ -1353,8 +1444,11 @@ export function scoreDefenseIntentWithTrace(
   // advantage are.
   const meaningfulOnHit = onHit.value >= SIGNIFICANT_ON_HIT_VALUE;
   const stopsHit = incoming > 0 && defense + plannedPrevention.amount >= incoming;
+  // A landed hand loss is priced through the response projection below, so
+  // stopping the hit no longer earns its flat generic-card estimate.
+  const modelledHandLoss = onHit.handLossSelector ? onHit.handLossValue : 0;
   const stopHitValue = stopsHit
-    ? onHit.value + (link.wagered ? wagerDefenseSwing(link.wagerRewards) : 0)
+    ? onHit.value - modelledHandLoss + (link.wagered ? wagerDefenseSwing(link.wagerRewards) : 0)
     : 0;
   const equipmentIds = new Set(
     Object.values(me.equipment).filter((card): card is CardView => !!card).map((card) => card.instanceId),
@@ -1458,12 +1552,25 @@ export function scoreDefenseIntentWithTrace(
     .filter((card) => !equipmentIds.has(card.instanceId))
     .reduce((total, card) => total + model.cardOpportunity(card, input) * 0.1, 0);
   const fullResponse = model.evaluateResponse(offensiveCards, input);
-  const remainingRawResponse = model.evaluateResponse(
-    offensiveCards.filter((card) => !plannedSpentIds.has(card.instanceId)),
-    responseInput,
-  );
+  const lossScenarios = stopsHit || incoming <= 0
+    ? NO_HAND_LOSS
+    : handLossScenarios(input, model, onHit, offensiveCards, plannedSpentIds, responseInput);
+  const scenarioConsumed = lossScenarios.map(({ lostIds, weight }) => ({
+    consumedIds: new Set([...plannedSpentIds, ...lostIds]),
+    weight,
+  }));
   const responseWeight = model.responseLossWeight ?? 1;
-  const stopResponse = weightedResponse(fullResponse, remainingRawResponse, responseWeight);
+  const stopResponse = averageResponse(scenarioConsumed.map(({ consumedIds, weight }) => ({
+    response: weightedResponse(
+      fullResponse,
+      model.evaluateResponse(
+        offensiveCards.filter((card) => !consumedIds.has(card.instanceId)),
+        responseInput,
+      ),
+      responseWeight,
+    ),
+    weight,
+  })));
   const defaultContinuation = defaultContinuationProfile(input, link);
   const override = model.continuationProfile?.(input, link) ?? {};
   const stopProbability = clamp(
@@ -1476,15 +1583,18 @@ export function scoreDefenseIntentWithTrace(
     override.representativeAttack ?? defaultContinuation.representativeAttack,
   );
   const continuation = representativeAttack > 0 && stopProbability < 1
-    ? bestContinuationResponse(
-      input,
-      responseInput,
-      model,
-      fullResponse,
-      offensiveCards,
-      plannedSpentIds,
-      representativeAttack,
-    )
+    ? averageContinuation(scenarioConsumed.map(({ consumedIds, weight }) => ({
+      continuation: bestContinuationResponse(
+        input,
+        responseInput,
+        model,
+        fullResponse,
+        offensiveCards,
+        consumedIds,
+        representativeAttack,
+      ),
+      weight,
+    })))
     : {
       response: stopResponse,
       defenderIds: [],

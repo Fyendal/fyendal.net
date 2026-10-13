@@ -80,6 +80,35 @@ function defending(state: ReturnType<typeof game>) {
   throw new Error("Attack did not reach defense");
 }
 
+/** Restless Magister attacks Levia, who holds `cardIds`, reaching her defense. */
+function magisterAttack(cardIds: readonly string[]) {
+  let state = game();
+  hand(state, cardIds);
+  state.players[0]!.arsenal = [];
+  state.activePlayer = 1;
+  state.priorityPlayer = 1;
+  state.players[0]!.actionPoints = 0;
+  state.players[1]!.actionPoints = 1;
+  const magister = { instanceId: state.nextInstanceId++, cardId: "IAR064", owner: 1 };
+  state.players[1]!.board.push(magister);
+  // Zombies attack only while their controller wields Vox Necropolis.
+  state.players[1]!.weapons = [{ instanceId: state.nextInstanceId++, cardId: "IAR055", owner: 1 }];
+  const attack = legalIntents(state, 1).find((intent) =>
+    intent.kind === "activate-ability" && intent.sourceInstanceId === magister.instanceId
+  );
+  if (!attack) throw new Error("Restless Magister cannot attack");
+  let applied = applyIntent(state, 1, attack);
+  if (!applied.ok) throw new Error(JSON.stringify(applied));
+  state = applied.state;
+  for (let step = 0; step < 10; step++) {
+    if (state.priorityPlayer === 0 && state.pendingDecision?.kind === "defend") return state;
+    applied = applyIntent(state, state.priorityPlayer, { kind: "pass" });
+    if (!applied.ok) throw new Error(JSON.stringify(applied));
+    state = applied.state;
+  }
+  throw new Error("Restless Magister did not reach defense");
+}
+
 const DIG_FOR_SOULS = "When this hits, destroy this zombie.\"";
 const COMMAND_AND_CONQUER = "When this hits a hero, destroy all cards in their arsenal.";
 
@@ -691,6 +720,37 @@ describe("Levia Gates policy", () => {
     state.players[0]!.banish = cards(state, ["IAR009", "IAR010", "IAR021", "IAR022"]);
     const [harvest] = state.players[0]!.hand;
     expect(choice(state)).toMatchObject({ kind: "activate-ability", sourceInstanceId: harvest!.instanceId });
+  });
+
+  it("blocks Restless Magister with the card its hit would banish anyway", () => {
+    const state = magisterAttack(["IAR026", "IAR037", "IAR026"]);
+    const goremass = state.players[0]!.hand[1]!;
+    // A landed hit takes Goremass as surely as the block does, plus 3 damage.
+    expect(choice(state)).toMatchObject({ kind: "stage-defenders", instanceIds: [goremass.instanceId] });
+  });
+
+  it("takes Restless Magister's hit rather than let a partial block expose Feeding Frenzy", () => {
+    const state = magisterAttack(["IAR020", "IAR026"]);
+    // Cleave's 2 defense cannot stop the hit, which would then banish Frenzy.
+    expect(choice(state)).toEqual({ kind: "defend", instanceIds: [] });
+  });
+
+  it("banishes a spare blue to Restless Magister's hit instead of Feeding Frenzy", () => {
+    let state = magisterAttack(["IAR026", "MON140", "MON140"]);
+    const frenzy = state.players[0]!.hand[0]!;
+    for (let step = 0; step < 12 && state.pendingDecision?.kind !== "choose-target"; step++) {
+      const actor = state.priorityPlayer as 0 | 1;
+      const intent: GameIntent = actor === 0 && state.pendingDecision?.kind === "defend"
+        ? { kind: "defend", instanceIds: [] }
+        : { kind: "pass" };
+      const applied = applyIntent(state, actor, intent);
+      if (!applied.ok) throw new Error(JSON.stringify(applied));
+      state = applied.state;
+    }
+    expect(state.pendingDecision).toMatchObject({ kind: "choose-target", player: 0 });
+    const selected = choice(state);
+    expect(selected).toMatchObject({ kind: "choose" });
+    expect(selected).not.toMatchObject({ optionId: String(frenzy.instanceId) });
   });
 
   it("returns a legal move from an awkward blue hand", () => {

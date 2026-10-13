@@ -572,6 +572,35 @@ function scoreBlasmophetBanish(card: CardView | null | undefined, input: BotPoli
   return kept > lost ? 10 + kept - lost : -20;
 }
 
+/** Life a banished Blood Debt card drains at Levia's next end phase. */
+const BLOOD_DEBT_DRAIN = 1;
+
+/** An opponent's effect makes Levia banish one of her hand cards. */
+function forcedHandBanish(intent: Extract<GameIntent, { kind: "choose" }>, input: BotPolicyInput): CardView | undefined {
+  const decision = input.view.pendingDecision;
+  if (input.view.activePlayer === input.seat || decision?.kind !== "choose-target" ||
+    !/banish/i.test(decision.prompt)) return undefined;
+  const hand = input.view.players[input.seat].hand;
+  const handIds = new Set(hand.map((card) => card.instanceId));
+  if (!(decision.options ?? []).every((option) => handIds.has(Number(option)))) return undefined;
+  return hand.find((card) => card.instanceId === Number(intent.optionId));
+}
+
+/** Give up the card whose loss costs next turn's response least, net of the
+ * Gate access a banished Blood Debt attack keeps and the life it drains. */
+function scoreForcedHandBanish(card: CardView, input: BotPolicyInput): number {
+  const offensive = leviaResponse.offensiveCards(input);
+  const full = leviaResponse.evaluateResponse(offensive, input).total;
+  const rest = leviaResponse.evaluateResponse(
+    offensive.filter((held) => held.instanceId !== card.instanceId),
+    input,
+  ).total;
+  const access = accessValue(leviaBanishAccess(input, true, { banished: [card] }), input) -
+    leviaEngineValue(input);
+  const drain = input.cards[card.cardId]?.keywords?.includes("Blood Debt") ? BLOOD_DEBT_DRAIN : 0;
+  return 20 - (full - rest) + access - drain;
+}
+
 /** Transform into Consumed, except into Marionette without Engulfing Shadows banished. */
 function scoreTransformChoice(optionId: string, input: BotPolicyInput): number | undefined {
   const engulfing = input.view.players[input.seat].banish.some((card) =>
@@ -597,6 +626,8 @@ function scoreChoice(intent: Extract<GameIntent, { kind: "choose" }>, input: Bot
     input.view.players[input.seat].board.some((held) =>
       name(input.cards[held.cardId]) === "blasmophet, the insatiable hunger"
     )) return scoreBlasmophetBanish(optionCard(intent, input), input);
+  const forced = forcedHandBanish(intent, input);
+  if (forced) return scoreForcedHandBanish(forced, input);
   const payment = resourcePaymentPitchIds(intent, input);
   if (payment !== undefined) {
     const own = ownCards(input);
