@@ -23,6 +23,8 @@ import {
   decodeReplayNoteInput,
   decodeReplayNotesResponse,
   decodeReplayResponse,
+  decodeMatchRecordsResponse,
+  decodeMatchesResponse,
   decodeReplaysResponse,
   decodeServerMessage,
   decodeStatsResponse,
@@ -1247,6 +1249,27 @@ describe("replays and HTTP responses", () => {
           favorite: true,
           replay: { version: 1, seat: 0, views: [gameView()] },
         }],
+        matches: [{
+          id: "abcdefabcdefabcdefabcdef",
+          format: "cc",
+          yourSeat: 0,
+          winner: 0,
+          endReason: "concede",
+          finishedAt: 3,
+          players: [
+            { heroId: "H1", controller: "human", username: "alice", bot: null, deckName: "Mine" },
+            { heroId: "H2", controller: "human", username: null, bot: null, deckName: null },
+          ],
+          replay: null,
+        }],
+        heroRecords: [{
+          heroId: "H1", opponentKind: "player", format: "cc",
+          games: 1, wins: 1, losses: 0, draws: 0, ended: 0, lastPlayedAt: 3,
+        }],
+        matchupRecords: [{
+          heroId: "H1", opponentHeroId: "H2", opponentKind: "player", format: "cc",
+          games: 1, wins: 1, losses: 0, draws: 0,
+        }],
         friends: [{ username: "Bob", friendsSince: 1 }],
         friendRequests: [{ username: "Carol", direction: "outgoing", createdAt: 2 }],
         friendMessages: [{ id: "1", friendUsername: "Bob", senderUsername: "alice", text: "hello", sentAt: 3, readAt: null }],
@@ -1323,5 +1346,51 @@ describe("replays and HTTP responses", () => {
         matchups: [{ id: "plan", name: "Plan", preferredTurnOrder: "sometimes" }],
       },
     })).toBeNull();
+  });
+});
+
+describe("match history decoders", () => {
+  const participant = { heroId: "H1", controller: "human", username: "alice", bot: null, deckName: null };
+  const bot = { heroId: "H2", controller: "bot", username: "Bravo Bot", bot: "bravo", deckName: "Flarvo" };
+  const match = {
+    id: "abcdefabcdefabcdefabcdef",
+    format: "silver-age",
+    yourSeat: 0,
+    winner: 1,
+    endReason: "lethal",
+    finishedAt: 1_700_000_000_000,
+    players: [participant, bot],
+    replay: { id: "abcdefabcdefabcdefabcdef", expiresAt: 1_700_600_000_000, favorite: false },
+  };
+
+  const page = { ok: true, matches: [match], nextCursor: null };
+
+  it("accepts a match page and rejects malformed entries", () => {
+    expect(decodeMatchesResponse({ ok: true, matches: [match], nextCursor: null })).not.toBeNull();
+    expect(decodeMatchesResponse({ ok: true, matches: [{ ...match, replay: null, endReason: null }], nextCursor: "17.abcdefabcdefabcdefabcdef" })).not.toBeNull();
+    expect(decodeMatchesResponse({ ok: true, matches: [match], nextCursor: "bad cursor" })).toBeNull();
+    expect(decodeMatchesResponse({ ...page, matches: [{ ...match, endReason: "timeout" }] })).toBeNull();
+    expect(decodeMatchesResponse({ ...page, matches: [{ ...match, format: "classic-battles" }] })).toBeNull();
+    expect(decodeMatchesResponse({ ok: true, matches: [{ ...match, players: [participant] }], nextCursor: null })).toBeNull();
+    expect(decodeMatchesResponse({ ok: true, matches: [{ ...match, players: [{ ...participant, bot: "bravo" }, bot] }], nextCursor: null })).toBeNull();
+    expect(decodeMatchesResponse({ ok: true, matches: [{ ...match, players: [participant, { ...bot, bot: "unknown" }] }], nextCursor: null })).toBeNull();
+    expect(decodeMatchesResponse({ ok: true, matches: [{ ...match, extra: 1 }], nextCursor: null })).toBeNull();
+    expect(decodeMatchesResponse({ ok: true, matches: [match] })).toBeNull();
+  });
+
+  it("accepts counter rows whose totals agree and rejects the rest", () => {
+    const hero = {
+      heroId: "H1", opponentKind: "bot", format: "cc",
+      games: 3, wins: 1, losses: 1, draws: 0, ended: 1, lastPlayedAt: 5,
+    };
+    const matchup = { heroId: "H1", opponentHeroId: "H2", opponentKind: "player", format: "cc", games: 2, wins: 1, losses: 1, draws: 0 };
+    expect(decodeMatchRecordsResponse({ ok: true, heroes: [hero], matchups: [matchup] })).not.toBeNull();
+    expect(decodeMatchRecordsResponse({ ok: true, heroes: [], matchups: [] })).not.toBeNull();
+    expect(decodeMatchRecordsResponse({ ok: true, heroes: [{ ...hero, games: 4 }], matchups: [] })).toBeNull();
+    expect(decodeMatchRecordsResponse({ ok: true, heroes: [{ ...hero, opponentKind: "human" }], matchups: [] })).toBeNull();
+    expect(decodeMatchRecordsResponse({ ok: true, heroes: [{ ...hero, format: "classic-battles" }], matchups: [] })).toBeNull();
+    expect(decodeMatchRecordsResponse({ ok: true, heroes: [], matchups: [{ ...matchup, wins: -1 }] })).toBeNull();
+    expect(decodeMatchRecordsResponse({ ok: true, heroes: [], matchups: [{ ...matchup, games: 3 }] })).toBeNull();
+    expect(decodeMatchRecordsResponse({ ok: true, heroes: [] })).toBeNull();
   });
 });

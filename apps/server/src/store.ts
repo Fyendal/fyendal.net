@@ -56,9 +56,11 @@ import {
   MAX_MATCHMAKING_AVOID_HEROES,
   MAX_MATCHMAKING_AVOID_ROOM_CODES,
   MAX_MATCHMAKING_AVOID_USERS,
+  type MatchEndReason,
 } from "@fyendal/protocol";
 import { recordGameCompletion, recordGamePlayers } from "./analytics.js";
 import { awardAchievements } from "./achievements.js";
+import { isMatchFormat, matchEndReason, recordMatch, type MatchSeatInput } from "./matches.js";
 import { resolveDeck, validatePresentation } from "./decks.js";
 import { appendClusterEvent, type ClusterEvent } from "./clusterEvents.js";
 import { assertActiveRuleset } from "./rulesetFence.js";
@@ -256,6 +258,9 @@ type RoomMutation<T> =
       snapshot?: GameState;
       seatWrites?: readonly SeatWrite[];
       replay?: ReplayWrite;
+      /** The idle-victory path ends a game the final state cannot tell apart
+       * from a concession; it says so for the match record. */
+      claimedIdle?: true;
       events?: readonly ClusterEvent[];
       /** A manual seat fill retires both the room opener's durable queue row
        * and any queue row owned by the joining account in the same commit. */
@@ -789,6 +794,46 @@ function heroIdForSeat(seat: SeatRow): string | undefined {
   return seat.heroId ?? (seat.hero ? decklists[seat.hero].heroId : undefined);
 }
 
+/** Durable match-history row for a game that just ended, written in the
+ * same transaction as the room commit. Missing hero data means the game never
+ * reached play, and unsupported formats are not history, so nothing is
+ * recorded in either case. */
+async function recordRoomMatch(
+  db: Queryable,
+  room: RoomRow,
+  outcome: { replayId: string | null; winner: 0 | 1 | null; endReason: MatchEndReason; finishedAt: number },
+): Promise<void> {
+  const seats = room.seats.map((seat): MatchSeatInput | null => {
+    const heroId = seat ? heroIdForSeat(seat) : undefined;
+    if (!seat || !heroId) return null;
+    return {
+      heroId,
+      controller: seat.controller === "bot" ? "bot" : "human",
+      ...(seat.userId === undefined ? {} : { userId: seat.userId }),
+      ...(seat.username === undefined ? {} : { username: seat.username }),
+      ...(seat.deckId === undefined ? {} : { deckId: seat.deckId }),
+      ...(seat.deckName === undefined ? {} : { deckName: seat.deckName }),
+    };
+  });
+  if (!seats[0] || !seats[1] || !isMatchFormat(room.format)) return;
+  let startedAt = room.createdAt;
+  if (outcome.replayId) {
+    const { rows } = await db.query("SELECT created_at FROM replay_games WHERE id = $1", [outcome.replayId]);
+    if (rows.length) startedAt = Number(rows[0].created_at);
+  }
+  await recordMatch(db, {
+    roomCode: room.code,
+    format: room.format,
+    rulesetVersion: room.rulesetVersion,
+    seats: [seats[0], seats[1]],
+    winner: outcome.winner,
+    endReason: outcome.endReason,
+    startedAt,
+    finishedAt: outcome.finishedAt,
+    replayId: outcome.replayId,
+  });
+}
+
 function heroNameForSeat(seat: SeatRow | null): string | null {
   if (!seat) return null;
   const heroId = heroIdForSeat(seat);
@@ -1315,7 +1360,8 @@ export class PgRoomStore {
         updateGc(out.room);
         if (!(await this.save(out.room, db))) throw VERSION_CONFLICT;
         await this.applySeatWrites(db, out.room, out.seatWrites ?? []);
-        if (!wasGameOver && out.room.state?.phase === "game-over") {
+        const gameJustEnded = !wasGameOver && out.room.state?.phase === "game-over";
+        if (gameJustEnded) {
           await awardAchievements(db, out.room);
         }
         if (out.releaseMatchmaking) {
@@ -1375,6 +1421,14 @@ export class PgRoomStore {
               gameMode: out.room.seats.some((seat) => seat?.controller === "bot") ? "bot" : "pvp",
             });
           }
+        }
+        if (gameJustEnded && out.room.state) {
+          await recordRoomMatch(db, out.room, {
+            replayId: replayFinalizationId ?? null,
+            winner: out.room.state.winner === 0 || out.room.state.winner === 1 ? out.room.state.winner : null,
+            endReason: matchEndReason(out.room.state, out.claimedIdle === true),
+            finishedAt: Date.now(),
+          });
         }
         for (const event of out.events ?? []) await appendClusterEvent(db, event);
         await appendClusterEvent(db, {
@@ -3437,6 +3491,14 @@ export class PgRoomStore {
         const replayFinalizationId = room.state
           ? (await endReplayForRoom(db, upper)) ?? undefined
           : undefined;
+        if (room.state && room.state.phase !== "game-over") {
+          await recordRoomMatch(db, room, {
+            replayId: replayFinalizationId ?? null,
+            winner: null,
+            endReason: "ended",
+            finishedAt: Date.now(),
+          });
+        }
         const { rowCount } = await db.query(
           "DELETE FROM rooms WHERE code = $1 AND version = $2",
           [upper, room.version],
@@ -4013,7 +4075,7 @@ export class PgRoomStore {
         }),
       };
       delete room.state.drawOfferSeat;
-      return { room, result: undefined, snapshot, replay: { kind: "frame" } };
+      return { room, result: undefined, snapshot, replay: { kind: "frame" }, claimedIdle: true };
     }, command ? {
       meta: command,
       credentials,

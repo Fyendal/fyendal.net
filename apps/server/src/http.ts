@@ -3,7 +3,7 @@ import { promisify } from "node:util";
 import { gunzip as gunzipCallback } from "node:zlib";
 import type { DeckPool, Format } from "@fyendal/shared";
 import { cardData, findPrinting, formatLegalityIssues } from "@fyendal/cards";
-import { decodeReplayNoteInput } from "@fyendal/protocol";
+import { decodeReplayNoteInput, MATCH_OPPONENT_FILTERS, type MatchListFilters } from "@fyendal/protocol";
 import type { Queryable } from "./db.js";
 import {
   login,
@@ -33,6 +33,7 @@ import { consoleError } from "./logging.js";
 import { getGlobalNotice } from "./globalNotice.js";
 import { getVersionUpdateNotice } from "./versionUpdateNotice.js";
 import { getAchievements } from "./achievements.js";
+import { isMatchFormat, listMatches, loadMatchRecords, parseMatchCursor } from "./matches.js";
 import { asRecord } from "./validation.js";
 import {
   deleteReplay,
@@ -662,6 +663,39 @@ export function createApiServer(deps: ApiDeps): http.Server {
             decks: decks.map(deckOut),
             plays,
           });
+        })
+        .catch((e) => internalError(res, e));
+      return;
+    }
+    if (req.method === "GET" && url.pathname === "/api/matches/records") {
+      authUser(req)
+        .then(async (user) => {
+          if (!user) return sendJson(res, 401, { ok: false, error: "not logged in" });
+          sendJson(res, 200, { ok: true, ...await loadMatchRecords(deps.db, user.id) });
+        })
+        .catch((e) => internalError(res, e));
+      return;
+    }
+    if (req.method === "GET" && url.pathname === "/api/matches") {
+      const opponent = url.searchParams.get("opponent") ?? "all";
+      const format = url.searchParams.get("format");
+      const heroId = url.searchParams.get("hero");
+      const cursor = parseMatchCursor(url.searchParams.get("cursor"));
+      if (!(MATCH_OPPONENT_FILTERS as readonly string[]).includes(opponent)
+        || (format !== null && !isMatchFormat(format))
+        || (heroId !== null && !/^[A-Za-z0-9_-]{1,128}$/.test(heroId))
+        || cursor === undefined) {
+        return sendJson(res, 400, { ok: false, error: "invalid match filters" });
+      }
+      const filters: MatchListFilters = {
+        opponent: opponent as MatchListFilters["opponent"],
+        ...(format === null ? {} : { format }),
+        ...(heroId === null ? {} : { heroId }),
+      };
+      authUser(req)
+        .then(async (user) => {
+          if (!user) return sendJson(res, 401, { ok: false, error: "not logged in" });
+          sendJson(res, 200, { ok: true, ...await listMatches(deps.db, user.id, filters, { cursor }) });
         })
         .catch((e) => internalError(res, e));
       return;

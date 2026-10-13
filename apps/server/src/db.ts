@@ -723,6 +723,143 @@ export const MIGRATIONS: Migration[] = [
     ALTER TABLE matchmaking_entries
       ADD COLUMN avoided_heroes JSONB NOT NULL DEFAULT '[]'::jsonb;`,
   },
+  {
+    version: 46,
+    // Durable match history. Replays expire and rooms are garbage-collected,
+    // so finished games get their own rows, written in the game-over commit.
+    // Per-hero counters are maintained in that same commit so the history tab
+    // never aggregates match rows on read. Opponent accounts are referenced
+    // with SET NULL so one player's deletion keeps the other's history; the
+    // username snapshot is cleared explicitly on account deletion.
+    sql: `CREATE TABLE matches (
+      id TEXT PRIMARY KEY,
+      room_code TEXT NOT NULL,
+      format TEXT NOT NULL CHECK (format IN ('cc', 'silver-age')),
+      ruleset_version TEXT NOT NULL,
+      mode TEXT NOT NULL CHECK (mode IN ('pvp', 'bot')),
+      winner INTEGER CHECK (winner IS NULL OR winner IN (0, 1)),
+      end_reason TEXT CHECK (end_reason IS NULL OR end_reason IN ('lethal', 'concede', 'idle', 'draw', 'ended')),
+      started_at BIGINT NOT NULL CHECK (started_at >= 0),
+      finished_at BIGINT NOT NULL CHECK (finished_at >= 0),
+      replay_id TEXT REFERENCES replay_games(id) ON DELETE SET NULL,
+      UNIQUE (room_code, started_at)
+    );
+    CREATE INDEX matches_finished_idx ON matches (finished_at, id);
+    CREATE TABLE match_participants (
+      match_id TEXT NOT NULL REFERENCES matches(id) ON DELETE CASCADE,
+      seat INTEGER NOT NULL CHECK (seat IN (0, 1)),
+      controller TEXT NOT NULL CHECK (controller IN ('human', 'bot')),
+      user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+      username TEXT,
+      bot_id TEXT,
+      hero_id TEXT NOT NULL,
+      deck_name TEXT,
+      PRIMARY KEY (match_id, seat)
+    );
+    CREATE INDEX match_participants_user_idx ON match_participants (user_id, match_id);
+    CREATE TABLE hero_records (
+      user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      hero_id TEXT NOT NULL,
+      opponent_kind TEXT NOT NULL CHECK (opponent_kind IN ('player', 'bot')),
+      format TEXT NOT NULL CHECK (format IN ('cc', 'silver-age')),
+      games INTEGER NOT NULL DEFAULT 0 CHECK (games >= 0),
+      wins INTEGER NOT NULL DEFAULT 0 CHECK (wins >= 0),
+      losses INTEGER NOT NULL DEFAULT 0 CHECK (losses >= 0),
+      draws INTEGER NOT NULL DEFAULT 0 CHECK (draws >= 0),
+      ended INTEGER NOT NULL DEFAULT 0 CHECK (ended >= 0),
+      last_played_at BIGINT NOT NULL CHECK (last_played_at >= 0),
+      PRIMARY KEY (user_id, hero_id, opponent_kind, format)
+    );
+    CREATE TABLE matchup_records (
+      user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      hero_id TEXT NOT NULL,
+      opponent_hero_id TEXT NOT NULL,
+      opponent_kind TEXT NOT NULL CHECK (opponent_kind IN ('player', 'bot')),
+      format TEXT NOT NULL CHECK (format IN ('cc', 'silver-age')),
+      games INTEGER NOT NULL DEFAULT 0 CHECK (games >= 0),
+      wins INTEGER NOT NULL DEFAULT 0 CHECK (wins >= 0),
+      losses INTEGER NOT NULL DEFAULT 0 CHECK (losses >= 0),
+      draws INTEGER NOT NULL DEFAULT 0 CHECK (draws >= 0),
+      PRIMARY KEY (user_id, hero_id, opponent_hero_id, opponent_kind, format)
+    );`,
+    // Backfill from Constructed replays still retained at upgrade time so
+    // history is not empty on deploy. A seat without a participant row belonged to a bot
+    // (bot seats have no account); its bot identity is not recorded, so the
+    // seat keeps a null bot id. End reasons are unknown for these games.
+    apply: async (db) => {
+      const { rows: replays } = await db.query(
+        `SELECT id, room_code, ruleset_version, format, hero_0_id, hero_1_id, winner, created_at, finished_at
+         FROM replay_games
+         WHERE status = 'ready' AND finished_at IS NOT NULL AND format IN ('cc', 'silver-age')
+         ORDER BY finished_at, id`,
+      );
+      for (const replay of replays as Array<Record<string, unknown>>) {
+        const replayId = String(replay.id);
+        const { rows: participants } = await db.query(
+          `SELECT p.seat, p.user_id, u.username FROM replay_participants p
+           JOIN users u ON u.id = p.user_id WHERE p.replay_id = $1`,
+          [replayId],
+        );
+        const bySeat = new Map<number, { userId: number; username: string }>();
+        for (const row of participants as Array<Record<string, unknown>>) {
+          bySeat.set(Number(row.seat), { userId: Number(row.user_id), username: String(row.username) });
+        }
+        if (bySeat.size === 0) continue;
+        const winner = replay.winner === null ? null : Number(replay.winner);
+        const mode = bySeat.size === 2 ? "pvp" : "bot";
+        const existing = await db.query(
+          "SELECT id FROM matches WHERE room_code = $1 AND started_at = $2",
+          [String(replay.room_code), Number(replay.created_at)],
+        );
+        if (existing.rows.length) continue;
+        await db.query(
+          `INSERT INTO matches
+             (id, room_code, format, ruleset_version, mode, winner, end_reason, started_at, finished_at, replay_id)
+           VALUES ($1, $2, $3, $4, $5, $6, NULL, $7, $8, $1)`,
+          [
+            replayId, String(replay.room_code), String(replay.format), String(replay.ruleset_version),
+            mode, winner, Number(replay.created_at), Number(replay.finished_at),
+          ],
+        );
+        const heroIds = [String(replay.hero_0_id), String(replay.hero_1_id)] as const;
+        for (const seat of [0, 1] as const) {
+          const human = bySeat.get(seat);
+          await db.query(
+            `INSERT INTO match_participants
+               (match_id, seat, controller, user_id, username, bot_id, hero_id, deck_name)
+             VALUES ($1, $2, $3, $4, $5, NULL, $6, NULL)`,
+            [replayId, seat, human ? "human" : "bot", human?.userId ?? null, human?.username ?? null, heroIds[seat]],
+          );
+        }
+        for (const seat of [0, 1] as const) {
+          const human = bySeat.get(seat);
+          if (!human) continue;
+          const opponentKind = bySeat.has(1 - seat) ? "player" : "bot";
+          const column = winner === null ? "ended" : winner === seat ? "wins" : "losses";
+          await db.query(
+            `INSERT INTO hero_records
+               (user_id, hero_id, opponent_kind, format, games, ${column}, last_played_at)
+             VALUES ($1, $2, $3, $4, 1, 1, $5)
+             ON CONFLICT (user_id, hero_id, opponent_kind, format) DO UPDATE SET
+               games = hero_records.games + 1,
+               ${column} = hero_records.${column} + 1,
+               last_played_at = GREATEST(hero_records.last_played_at, EXCLUDED.last_played_at)`,
+            [human.userId, heroIds[seat], opponentKind, String(replay.format), Number(replay.finished_at)],
+          );
+          if (column === "ended") continue;
+          await db.query(
+            `INSERT INTO matchup_records
+               (user_id, hero_id, opponent_hero_id, opponent_kind, format, games, ${column})
+             VALUES ($1, $2, $3, $4, $5, 1, 1)
+             ON CONFLICT (user_id, hero_id, opponent_hero_id, opponent_kind, format) DO UPDATE SET
+               games = matchup_records.games + 1,
+               ${column} = matchup_records.${column} + 1`,
+            [human.userId, heroIds[seat], heroIds[1 - seat], opponentKind, String(replay.format)],
+          );
+        }
+      }
+    },
+  },
 ];
 
 async function publicTables(db: Queryable): Promise<string[]> {

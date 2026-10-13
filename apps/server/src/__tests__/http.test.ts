@@ -2,12 +2,13 @@ import { afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 import type { Server } from "node:http";
 import type { AddressInfo } from "node:net";
 import { gzipSync } from "node:zlib";
-import { decodeAchievementsResponse } from "@fyendal/protocol";
+import { decodeAchievementsResponse, decodeMatchRecordsResponse, decodeMatchesResponse } from "@fyendal/protocol";
 import { cardData, decklists, precon } from "@fyendal/cards";
 import { createApiServer, createRateLimiter, type ApiDeps } from "../http.js";
 import { login, register, sessionForToken } from "../auth.js";
 import { recordDeckPlay } from "../decks.js";
 import type { Queryable } from "../db.js";
+import { recordMatch } from "../matches.js";
 import { finalizeReplay } from "../replays.js";
 import { PgRoomStore } from "../store.js";
 import { freshDb } from "./testdb.js";
@@ -729,6 +730,59 @@ describe("replay transport compression", () => {
 });
 
 describe("account rights", () => {
+  it("serves only the signed-in account's match history and counters", async () => {
+    await register(db, "HistoryUser", "password1");
+    await register(db, "HistoryRival", "password1");
+    const session = await login(db, "historyuser", "password1");
+    if (!session.ok) throw new Error("login failed");
+    const user = await sessionForToken(db, session.token);
+    const rival = (await db.query("SELECT id FROM users WHERE username_lc = 'historyrival'")).rows[0];
+    if (!user || !rival) throw new Error("accounts missing");
+    for (const [index, winner] of ([0, 1, 0] as const).entries()) {
+      await recordMatch(db, {
+        roomCode: "HIST01", format: "cc", rulesetVersion: "rules-a",
+        seats: [
+          { heroId: "H1", controller: "human", userId: user.id, username: "HistoryUser" },
+          { heroId: "H2", controller: "human", userId: Number(rival.id), username: "HistoryRival" },
+        ],
+        winner, endReason: "lethal", startedAt: index, finishedAt: 100 + index, replayId: null,
+      });
+    }
+    await recordMatch(db, {
+      roomCode: "HIST02", format: "silver-age", rulesetVersion: "rules-a",
+      seats: [
+        { heroId: "H1", controller: "human", userId: user.id, username: "HistoryUser" },
+        { heroId: "H3", controller: "bot", deckId: "bot-bravo-flarvo", username: "Bravo Bot" },
+      ],
+      winner: null, endReason: "ended", startedAt: 9, finishedAt: 200, replayId: null,
+    });
+    const url = await startApi();
+    const headers = { Authorization: `Bearer ${session.token}` };
+    expect((await fetch(`${url}/api/matches`)).status).toBe(401);
+    expect((await fetch(`${url}/api/matches/records`)).status).toBe(401);
+    expect((await fetch(`${url}/api/matches?opponent=friends`, { headers })).status).toBe(400);
+    expect((await fetch(`${url}/api/matches?format=draft`, { headers })).status).toBe(400);
+    expect((await fetch(`${url}/api/matches?cursor=nope`, { headers })).status).toBe(400);
+
+    const records = decodeMatchRecordsResponse(await (await fetch(`${url}/api/matches/records`, { headers })).json());
+    expect(records?.heroes).toEqual(expect.arrayContaining([
+      expect.objectContaining({ heroId: "H1", opponentKind: "player", format: "cc", games: 3, wins: 2, losses: 1 }),
+      expect.objectContaining({ heroId: "H1", opponentKind: "bot", format: "silver-age", games: 1, ended: 1 }),
+    ]));
+    expect(records?.matchups).toEqual([
+      expect.objectContaining({ heroId: "H1", opponentHeroId: "H2", games: 3, wins: 2, losses: 1 }),
+    ]);
+
+    const all = decodeMatchesResponse(await (await fetch(`${url}/api/matches`, { headers })).json());
+    expect(all?.matches.map((match) => match.finishedAt)).toEqual([200, 102, 101, 100]);
+    expect(all?.matches[0]?.players[1]).toEqual({ heroId: "H3", controller: "bot", username: "Bravo Bot", bot: "bravo", deckName: null });
+    const players = decodeMatchesResponse(await (await fetch(`${url}/api/matches?opponent=players&format=cc&hero=H1`, { headers })).json());
+    expect(players?.matches.map((match) => match.winner)).toEqual([0, 1, 0]);
+    expect(players?.matches.every((match) => match.yourSeat === 0)).toBe(true);
+    const bots = decodeMatchesResponse(await (await fetch(`${url}/api/matches?opponent=bots`, { headers })).json());
+    expect(bots?.matches.map((match) => match.endReason)).toEqual(["ended"]);
+  });
+
   it("serves only the signed-in account's achievements and global percentages", async () => {
     await register(db, "AchievementHttpUser", "password1");
     const session = await login(db, "achievementhttpuser", "password1");

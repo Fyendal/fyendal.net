@@ -1,6 +1,7 @@
 import type { ClientBotTask, BotWorkerResponse } from "@fyendal/shared";
 import { decodeSerializedStateEnvelope } from "./simulationState.js";
 import type {
+  BotOpponent,
   CardView,
   CardPoolMode,
   ChatMessage,
@@ -157,6 +158,61 @@ export interface ReplaySummary {
   favorite: boolean;
 }
 export interface ReplaysResponse { ok: true; replays: ReplaySummary[] }
+/** How a recorded game finished. Null for games backfilled from replays. */
+export type MatchEndReason = "lethal" | "concede" | "idle" | "draw" | "ended";
+export type MatchOpponentKind = "player" | "bot";
+export interface MatchParticipant {
+  heroId: string;
+  controller: "human" | "bot";
+  /** Null for a deleted account or a bot whose identity was not recorded. */
+  username: string | null;
+  bot: BotOpponent | null;
+  deckName: string | null;
+}
+/** Match history only records Constructed games. */
+export type MatchFormat = "cc" | "silver-age";
+export interface MatchSummary {
+  id: string;
+  format: MatchFormat;
+  yourSeat: 0 | 1;
+  winner: 0 | 1 | null;
+  endReason: MatchEndReason | null;
+  finishedAt: number;
+  players: [MatchParticipant, MatchParticipant];
+  /** Present while the replay can still be watched by this account. */
+  replay: { id: string; expiresAt: number; favorite: boolean } | null;
+}
+export interface MatchListFilters {
+  opponent?: "all" | "players" | "bots";
+  format?: MatchFormat;
+  heroId?: string;
+}
+export const MATCH_OPPONENT_FILTERS = ["all", "players", "bots"] as const;
+export interface MatchesResponse { ok: true; matches: MatchSummary[]; nextCursor: string | null }
+/** Counters maintained at game over, keyed by the dimensions the history tab filters on. */
+export interface HeroRecord {
+  heroId: string;
+  opponentKind: MatchOpponentKind;
+  format: MatchFormat;
+  games: number;
+  wins: number;
+  losses: number;
+  draws: number;
+  ended: number;
+  lastPlayedAt: number;
+}
+export interface MatchupRecord {
+  heroId: string;
+  opponentHeroId: string;
+  opponentKind: MatchOpponentKind;
+  format: MatchFormat;
+  games: number;
+  wins: number;
+  losses: number;
+  draws: number;
+}
+export interface MatchRecords { heroes: HeroRecord[]; matchups: MatchupRecord[] }
+export interface MatchRecordsResponse extends MatchRecords { ok: true }
 export interface ReplayResponse { ok: true; replay: ReplayFile }
 export interface ReplayServerNote extends ReplayNote {
   /** Present while a replay is still recording/finalizing. */
@@ -272,6 +328,9 @@ export interface AccountExport {
     favorite: boolean;
     replay: ReplayFile;
   }>;
+  matches: MatchSummary[];
+  heroRecords: HeroRecord[];
+  matchupRecords: MatchupRecord[];
   friends: Array<{ username: string; friendsSince: number }>;
   friendRequests: FriendRequestSummary[];
   friendMessages: ChatMessage[];
@@ -1673,6 +1732,80 @@ export const decodeReplaysResponse: Decoder<ReplaysResponse> = (value) => {
     : null;
 };
 
+const MAX_MATCHES = 10_000;
+const MAX_HERO_RECORDS = 5_000;
+const MATCH_END_REASONS = new Set(["lethal", "concede", "idle", "draw", "ended"]);
+const MATCH_FORMATS = new Set(["cc", "silver-age"]);
+const MATCH_CURSOR_RE = /^[0-9]{1,16}\.[0-9a-f]{24}$/;
+
+function matchParticipant(value: unknown): value is MatchParticipant {
+  const participant = object(value);
+  return !!participant
+    && exactKeys(participant, ["heroId", "controller", "username", "bot", "deckName"])
+    && id(participant.heroId)
+    && (participant.controller === "human" || participant.controller === "bot")
+    && (participant.username === null || string(participant.username, MAX_SHORT_TEXT, false))
+    && (participant.bot === null || BOT_OPPONENTS.has(String(participant.bot)))
+    && (participant.controller === "bot" || participant.bot === null)
+    && (participant.deckName === null || string(participant.deckName, MAX_SHORT_TEXT));
+}
+
+function matchSummary(value: unknown): value is MatchSummary {
+  const match = object(value);
+  if (!match || !exactKeys(match, ["id", "format", "yourSeat", "winner", "endReason", "finishedAt", "players", "replay"])
+    || !id(match.id) || !MATCH_FORMATS.has(String(match.format)) || !seat(match.yourSeat) || !nullableSeat(match.winner)
+    || !(match.endReason === null || MATCH_END_REASONS.has(String(match.endReason)))
+    || !nonNegativeInteger(match.finishedAt)
+    || !Array.isArray(match.players) || match.players.length !== 2 || !match.players.every(matchParticipant)) {
+    return false;
+  }
+  if (match.replay === null) return true;
+  const replay = object(match.replay);
+  return !!replay && exactKeys(replay, ["id", "expiresAt", "favorite"])
+    && id(replay.id) && nonNegativeInteger(replay.expiresAt) && typeof replay.favorite === "boolean";
+}
+
+export const decodeMatchesResponse: Decoder<MatchesResponse> = (value) => {
+  const data = object(value);
+  return data && exactKeys(data, ["ok", "matches", "nextCursor"]) && data.ok === true
+    && array(data.matches, matchSummary, MAX_MATCHES)
+    && (data.nextCursor === null || (typeof data.nextCursor === "string" && MATCH_CURSOR_RE.test(data.nextCursor)))
+    ? value as MatchesResponse
+    : null;
+};
+
+function heroRecord(value: unknown): value is HeroRecord {
+  const row = object(value);
+  return !!row
+    && exactKeys(row, ["heroId", "opponentKind", "format", "games", "wins", "losses", "draws", "ended", "lastPlayedAt"])
+    && id(row.heroId) && (row.opponentKind === "player" || row.opponentKind === "bot")
+    && MATCH_FORMATS.has(String(row.format))
+    && nonNegativeInteger(row.games) && nonNegativeInteger(row.wins) && nonNegativeInteger(row.losses)
+    && nonNegativeInteger(row.draws) && nonNegativeInteger(row.ended)
+    && row.games === row.wins + row.losses + row.draws + row.ended
+    && nonNegativeInteger(row.lastPlayedAt);
+}
+
+function matchupRecord(value: unknown): value is MatchupRecord {
+  const row = object(value);
+  return !!row
+    && exactKeys(row, ["heroId", "opponentHeroId", "opponentKind", "format", "games", "wins", "losses", "draws"])
+    && id(row.heroId) && id(row.opponentHeroId) && (row.opponentKind === "player" || row.opponentKind === "bot")
+    && MATCH_FORMATS.has(String(row.format))
+    && nonNegativeInteger(row.games) && nonNegativeInteger(row.wins) && nonNegativeInteger(row.losses)
+    && nonNegativeInteger(row.draws)
+    && row.games === row.wins + row.losses + row.draws;
+}
+
+export const decodeMatchRecordsResponse: Decoder<MatchRecordsResponse> = (value) => {
+  const data = object(value);
+  return data && exactKeys(data, ["ok", "heroes", "matchups"]) && data.ok === true
+    && array(data.heroes, heroRecord, MAX_HERO_RECORDS)
+    && array(data.matchups, matchupRecord, MAX_HERO_RECORDS)
+    ? value as MatchRecordsResponse
+    : null;
+};
+
 export const decodeReplayResponse: Decoder<ReplayResponse> = (value) => {
   const data = object(value);
   if (!data || !exactKeys(data, ["ok", "replay"]) || data.ok !== true) return null;
@@ -1994,7 +2127,8 @@ export const decodeAccountExportResponse: Decoder<AccountExportResponse> = (valu
     && exactKeys(
       exported,
       ["exportedAt", "account", "decks", "deckPlays", "rooms", "matchmaking", "bugReports",
-        "gameDays", "achievements", "replays", "friends", "friendRequests", "friendMessages"],
+        "gameDays", "achievements", "replays", "matches", "heroRecords", "matchupRecords",
+        "friends", "friendRequests", "friendMessages"],
     ) && !!account
     && exactKeys(account, ["username", "createdAt", "earlyTester", "selectedBadge"])
     && string(exported.exportedAt, 64, false) && string(account.username, MAX_SHORT_TEXT, false)
@@ -2013,6 +2147,9 @@ export const decodeAccountExportResponse: Decoder<AccountExportResponse> = (valu
     && array(exported.gameDays, (item): item is number => nonNegativeInteger(item) && item % 86_400_000 === 0, MAX_ROOMS)
     && array(exported.achievements, achievementUnlock, ACHIEVEMENT_IDS.length)
     && array(exported.replays, (item): item is AccountExport["replays"][number] => exportReplay(item), MAX_ROOMS)
+    && array(exported.matches, matchSummary, MAX_MATCHES)
+    && array(exported.heroRecords, heroRecord, MAX_HERO_RECORDS)
+    && array(exported.matchupRecords, matchupRecord, MAX_HERO_RECORDS)
     && array(exported.friends, (item): item is AccountExport["friends"][number] => {
       const friend = object(item);
       return !!friend && exactKeys(friend, ["username", "friendsSince"])

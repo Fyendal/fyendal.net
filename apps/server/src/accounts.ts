@@ -8,9 +8,15 @@ import {
   MAX_MATCHMAKING_AVOID_HEROES,
   MAX_MATCHMAKING_AVOID_ROOM_CODES,
   MAX_MATCHMAKING_AVOID_USERS,
+  type HeroRecord,
+  type MatchSummary,
+  type MatchupRecord,
 } from "@fyendal/protocol";
 import { exportSocialData } from "./social.js";
 import { listUserAchievements } from "./achievements.js";
+import {
+  detachMatchesForUser, listMatches, loadMatchRecords, MAX_EXPORTED_MATCHES, sweepOrphanedMatches,
+} from "./matches.js";
 
 export interface AccountBadgePreferences {
   availableBadges: PlayerBadge[];
@@ -123,6 +129,9 @@ export interface AccountExport {
     favorite: boolean;
     replay: ReplayFile;
   }>;
+  matches: MatchSummary[];
+  heroRecords: HeroRecord[];
+  matchupRecords: MatchupRecord[];
   friends: Array<{ username: string; friendsSince: number }>;
   friendRequests: Array<{ username: string; direction: "incoming" | "outgoing"; createdAt: number }>;
   friendMessages: import("@fyendal/shared").ChatMessage[];
@@ -254,9 +263,11 @@ export async function exportAccount(db: Queryable, userId: number): Promise<Acco
       resolutionMessage: row.resolution_message == null ? null : String(row.resolution_message),
     });
   }
-  const [replaySummaries, achievements] = await Promise.all([
+  const [replaySummaries, achievements, matchPage, matchRecords] = await Promise.all([
     listReplays(db, userId),
     listUserAchievements(db, userId),
+    listMatches(db, userId, {}, { limit: MAX_EXPORTED_MATCHES }),
+    loadMatchRecords(db, userId),
   ]);
   const replays: AccountExport["replays"] = [];
   for (const summary of replaySummaries) {
@@ -340,6 +351,9 @@ export async function exportAccount(db: Queryable, userId: number): Promise<Acco
     bugReports,
     gameDays: gameDayRows.map((row) => Number(row.day_utc)),
     replays,
+    matches: matchPage.matches,
+    heroRecords: matchRecords.heroes,
+    matchupRecords: matchRecords.matchups,
     ...social,
   };
 }
@@ -373,12 +387,14 @@ export async function deleteAccount(
       await tx.query("DELETE FROM rooms WHERE code = $1", [code]);
       deletedRooms.push({ code, version: version + 1 });
     }
+    await detachMatchesForUser(tx, userId);
     const result = await tx.query("DELETE FROM users WHERE id = $1", [userId]);
     if (result.rowCount) {
       await tx.query(
         `DELETE FROM replay_games
          WHERE id NOT IN (SELECT replay_id FROM replay_participants)`,
       );
+      await sweepOrphanedMatches(tx);
       await appendClusterEvent(tx, { type: "user-sessions-revoked", userId });
       for (const room of deletedRooms) {
         await appendClusterEvent(tx, {
