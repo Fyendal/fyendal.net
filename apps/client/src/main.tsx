@@ -12,9 +12,12 @@ async function bootstrap(): Promise<void> {
   let locale = resolveInitialLocale(localStorage, navigator.languages);
   applyDocumentLocale(document.documentElement, locale);
 
-  // Production HTML contains an English prerender for crawlers. Hide it while
-  // a non-English catalog loads so users do not see a language flash.
-  if (locale !== "en") rootElement.replaceChildren();
+  // Production HTML contains an English, logged-out prerender for crawlers.
+  // index.html hides it before first paint when this client renders something
+  // else; clear it so the empty-root splash shows until React mounts.
+  const documentElement = document.documentElement;
+  if (locale !== "en" || documentElement.classList.contains("app-boot")) rootElement.replaceChildren();
+  documentElement.classList.remove("app-boot");
 
   let messages;
   try {

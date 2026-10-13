@@ -1,6 +1,8 @@
 // Anonymous usage counts through Umami Cloud (cookieless). Only the production
 // host loads the tracker, so local development and previews never report.
 // Never pass usernames, room codes, deck contents, or other per-player data.
+// The production CSP lives in the deploy repository's deploy-client-pages.sh;
+// it must allow cloud.umami.is in script-src and gateway.umami.is in connect-src.
 
 import type { LobbyRail } from "./store/types.js";
 

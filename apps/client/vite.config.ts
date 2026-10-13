@@ -128,11 +128,23 @@ function seoPrerender() {
         `<div id="root">${renderPrerenderedLanding()}</div>`,
       );
     },
-    generateBundle(_options: unknown, bundle: Record<string, { type: string; source?: string | Uint8Array }>) {
+    generateBundle(
+      _options: unknown,
+      bundle: Record<string, { type: string; fileName: string; source?: string | Uint8Array; facadeModuleId?: string | null }>,
+    ) {
       const index = bundle["index.html"];
       if (!index || index.type !== "asset" || typeof index.source !== "string") {
         throw new Error("client build did not produce index.html");
       }
+      // Every locale merges over English, which main.tsx imports dynamically
+      // before the first render. Fetch it beside the entry chunk instead.
+      const englishCatalog = Object.values(bundle).find((output) =>
+        output.type === "chunk" && output.facadeModuleId === resolve(compiledCatalogDirectory, "en.json"));
+      if (!englishCatalog) throw new Error("client build did not produce the English catalog chunk");
+      index.source = index.source.replace(
+        "</head>",
+        `  <link rel="modulepreload" crossorigin href="/${englishCatalog.fileName}">\n  </head>`,
+      );
       for (const route of LEGAL_ROUTES) {
         this.emitFile({
           type: "asset",

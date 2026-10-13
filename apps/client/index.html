@@ -4,6 +4,56 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#0d0703" />
+    <!-- The built #root holds an English, logged-out prerender for crawlers.
+         Before first paint, swap it for a boot splash whenever the client will
+         render something else: a non-English locale, a private room/replay
+         route, or a signed-in lobby. Mirrors i18n/locale.ts, storage.ts,
+         store/storeHelpers.ts, and replay/route.ts; main.tsx clears it. -->
+    <script>
+      (function () {
+        try {
+          var stored = JSON.parse(localStorage.getItem("fyendal-locale") || "null");
+          var locale = stored && stored.version === 1 ? stored.locale : null;
+          if (locale !== "en" && locale !== "zh-Hans") {
+            locale = "en";
+            var languages = navigator.languages || [];
+            for (var i = 0; i < languages.length; i++) {
+              var parsed;
+              try { parsed = new Intl.Locale(languages[i]); } catch (e) { continue; }
+              if (parsed.language === "en") break;
+              if (parsed.language !== "zh" || parsed.script === "Hant" ||
+                /^(HK|MO|TW)$/.test(parsed.region || "")) continue;
+              locale = "zh-Hans";
+              break;
+            }
+          }
+          var path = location.pathname;
+          var legal = /^\/(terms|privacy)\/?$/.test(path);
+          var privateRoute = /^\/[0-9A-Za-z]{6}\/?$/.test(path) || /^\/replays\//.test(path);
+          if (locale !== "en" || (!legal && (privateRoute || localStorage.getItem("fyendal-auth")))) {
+            document.documentElement.classList.add("app-boot");
+          }
+        } catch (e) {}
+      })();
+    </script>
+    <style>
+      html.app-boot #root > * { display: none; }
+      html.app-boot #root::before,
+      #root:empty::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        margin: auto;
+        width: 36px;
+        height: 36px;
+        box-sizing: border-box;
+        border: 3px solid rgba(232, 220, 196, 0.15);
+        border-top-color: rgba(232, 220, 196, 0.7);
+        border-radius: 50%;
+        animation: app-boot-spin 0.9s linear infinite;
+      }
+      @keyframes app-boot-spin { to { transform: rotate(360deg); } }
+    </style>
     <meta
       name="description"
       content="Play Flesh and Blood online free in your browser. Practice against matchup-aware bots, find opponents, import Fabrary decks, spectate games, and share replays."
