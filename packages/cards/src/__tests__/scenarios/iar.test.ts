@@ -1933,7 +1933,7 @@ describe("August 29–31 IAR and GEM Pack 6 spoilers", () => {
     g.expectLife(1, 19);
   });
 
-  it("Astral Ambience can destroy a Spectral Shield to get go again", () => {
+  it("Astral Ambience can tap a Spectral Shield to get go again", () => {
     const g = scenario({ seats: [
       {
         hero: "rhinar",
@@ -1951,8 +1951,31 @@ describe("August 29–31 IAR and GEM Pack 6 spoilers", () => {
       .chooseCard("spectral shield|0")
       .settle();
 
-    expect(boardNames(g, 0)).not.toContain("Spectral Shield");
+    expect(boardNames(g, 0)).toContain("Spectral Shield");
+    expect(g.state.players[0]!.board[0]!.tapped).toBe(true);
     g.expectLife(1, 14).expectAP(0, 1);
+  });
+
+  it("Astral Ambience cannot tap an already tapped Spectral Shield", () => {
+    const g = scenario({ seats: [
+      {
+        hero: "rhinar",
+        hand: ["astral ambience|2"],
+        board: ["spectral shield|0"],
+        resources: 2,
+        equipment: NO_EQUIPMENT,
+      },
+      { hero: "dorinthea", life: 20, equipment: NO_EQUIPMENT },
+    ] });
+
+    g.state.players[0]!.board[0]!.tapped = true;
+    g.play("astral ambience|2").blockWith();
+
+    const ambience = g.state.chain.at(-1)!.attackingCard;
+    expect(legalIntents(g.state, 0)).not.toContainEqual(expect.objectContaining({
+      kind: "activate-ability",
+      sourceInstanceId: ambience.instanceId,
+    }));
   });
 
   it("Consuming Appetite grants Blasmophet a zero-cost tap attack with go again", () => {

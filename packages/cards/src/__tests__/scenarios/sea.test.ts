@@ -108,6 +108,7 @@ describe("SEA — High Seas heroes and cogs", () => {
     expect(g.state.pendingDecision?.optionMessages?.every(
       (message) => message?.id === "card.sea.target.card",
     )).toBe(true);
+    expect(g.state.pendingDecision?.defaultOption).toBe("hero:1");
     g.chooseOption("hero:1")
       .expectLog("Burn Bare would deal 7 arcane damage to Dorinthea")
       .expectLife(1, 13);

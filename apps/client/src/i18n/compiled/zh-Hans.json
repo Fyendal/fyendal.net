@@ -1941,10 +1941,10 @@
       "value": "选择 X 张 soul 中的牌放逐"
     }
   ],
-  "card.common.cost.spectralshield.destroy": [
+  "card.common.cost.spectralshield.tap": [
     {
       "type": 0,
-      "value": "摧毁一个 Spectral Shield"
+      "value": "横置一个 Spectral Shield"
     }
   ],
   "card.common.cost.waterygrave.discard": [
@@ -3539,6 +3539,28 @@
     {
       "type": 0,
       "value": "获得防守英雄所操控的一个物品的操控权"
+    }
+  ],
+  "card.evo.emboldened.arsenal.choose": [
+    {
+      "type": 0,
+      "value": "将一张面朝下的 arsenal 牌翻至正面朝上"
+    }
+  ],
+  "card.evo.emboldened.option.arsenal": [
+    {
+      "type": 1,
+      "value": "player"
+    },
+    {
+      "type": 0,
+      "value": " 的 arsenal"
+    }
+  ],
+  "card.evo.emboldened.option.arsenal.own": [
+    {
+      "type": 0,
+      "value": "你的 arsenal"
     }
   ],
   "card.evo.equipment.abilities.disable": [
@@ -20670,6 +20692,18 @@
     {
       "type": 1,
       "value": "card"
+    }
+  ],
+  "game.decision.target.opponent": [
+    {
+      "type": 0,
+      "value": "对手"
+    }
+  ],
+  "game.decision.target.self": [
+    {
+      "type": 0,
+      "value": "你"
     }
   ],
   "game.decision.targetAlreadyPlayable": [

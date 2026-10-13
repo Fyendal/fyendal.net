@@ -131,6 +131,9 @@ function requestHeroTarget(
       optionMessages: commonOptionMessages("opposing hero", "your hero"),
     }),
     ["opposing hero", "your hero"],
+    undefined,
+    undefined,
+    "opposing hero",
   );
 }
 

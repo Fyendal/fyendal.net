@@ -132,6 +132,9 @@ function targetHeroArcaneSpell(damage: number): CardScript {
           },
         ),
         ["opposing hero", "your hero"],
+        undefined,
+        undefined,
+        "opposing hero",
       );
     },
     onChoose(ctx, hook, option) {

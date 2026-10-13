@@ -34,6 +34,14 @@ function isMechAttack(ctx: ScriptCtx, card: DeepReadonly<CardInstance>) {
 function equippedEvos(ctx: ScriptCtx) {
   return ctx.countEquipped("evo");
 }
+function emboldenedBladeReveal(ctx: ScriptCtx, instanceId: number): void {
+  if (!ctx.turnArsenalFaceUp(instanceId)) return;
+  const card = ctx.state.players
+    .flatMap((player) => player.arsenal)
+    .find((candidate) => candidate.instanceId === instanceId);
+  if (card && data(ctx, card).cardType === "defense-reaction" && ctx.moveToGraveyard(instanceId, "arsenal"))
+    buffNextAttack(ctx, { attack: 1, appliesTo: "weapon" });
+}
 const FABRICATE_MODES = ["equip", "defense", "under", "hand"] as const;
 function recordFabricateMode(ctx: ScriptCtx, mode: string) {
   ctx.setCounter(`fabricate-mode:${mode}`, 1);
@@ -1125,20 +1133,40 @@ export const evoHighRarity: Record<string, CardScript> = {
     },
   },
   "emboldened blade|3": {
-    playTargetOptions(ctx) {
-      return ctx.state.players
-        .flatMap((player) => player.arsenal)
-        .filter((card) => card.faceDown)
-        .map((card) => card.instanceId);
-    },
+    // The card does not target: the face-down card is chosen on resolution.
+    // Options name an arsenal position, never the hidden card's instance id.
     onPlay(ctx) {
-      const id = ctx.playTargetInstanceId;
-      if (id === undefined || !ctx.turnArsenalFaceUp(id)) return;
-      const card = ctx.state.players
-        .flatMap((player) => player.arsenal)
-        .find((candidate) => candidate.instanceId === id);
-      if (card && data(ctx, card).cardType === "defense-reaction" && ctx.moveToGraveyard(id, "arsenal"))
-        buffNextAttack(ctx, { attack: 1, appliesTo: "weapon" });
+      const slots = ctx.state.players.flatMap((player) =>
+        player.arsenal.flatMap((card, index) =>
+          card.faceDown ? [{ seat: player.seat, index, card }] : []),
+      );
+      if (slots.length === 0) return;
+      if (slots.length === 1) {
+        emboldenedBladeReveal(ctx, slots[0]!.card.instanceId);
+        return;
+      }
+      const options = slots.map(({ seat, index }) => `${seat}:${index}`);
+      ctx.requestChoice(
+        "emboldened-arsenal",
+        decisionPrompt("Turn a face-down arsenal card face up", "card.evo.emboldened.arsenal.choose", {
+          optionMessages: Object.fromEntries(slots.map(({ seat }, index) => [
+            options[index]!,
+            seat === ctx.seat
+              ? decisionMessage("card.evo.emboldened.option.arsenal.own")
+              : decisionMessage("card.evo.emboldened.option.arsenal", { player: { kind: "player", seat } }),
+          ])),
+        }),
+        options,
+        ctx.seat,
+        // Projection shows another player's face-down card only as a card back.
+        slots.map(({ card }) => card.instanceId),
+      );
+    },
+    onChoose(ctx, hook, option) {
+      if (hook !== "emboldened-arsenal") return;
+      const [seat, index] = option.split(":").map(Number) as [number, number];
+      const card = ctx.player(seat).arsenal[index];
+      if (card?.faceDown) emboldenedBladeReveal(ctx, card.instanceId);
     },
   },
   "intoxicating shot|3": {

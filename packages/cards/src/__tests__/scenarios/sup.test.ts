@@ -1021,3 +1021,27 @@ describe("SUP — Reckless Stampede", () => {
       .expectDeckTop(1, "head jab|3");
   });
 });
+
+describe("SUP — Fix the Match", () => {
+  it("shuffles before putting the searched card on top, so it is revealed in the clash", () => {
+    const g = scenario({
+      seats: [
+        hero("kayo, strong-arm|0", {
+          hand: ["fix the match|2"],
+          deck: [...Array<string>(9).fill("raging onslaught|1"), "sink below|1"],
+        }),
+        foe({ hand: ["head jab|1"], deck: ["head jab|2", "head jab|2", "head jab|2"] }),
+      ],
+    });
+
+    const logStart = g.state.log.length;
+    g.play("fix the match|2").chooseCard("sink below|1").expectDeckTop(0, "sink below|1");
+    const log = g.state.log.slice(logStart).map((entry) => entry.publicText ?? "");
+    const shuffle = log.findIndex((text) => text.includes("shuffles their deck"));
+    expect(shuffle).toBeGreaterThanOrEqual(0);
+    expect(log.findIndex((text) => text.includes("put on the top of the deck"))).toBeGreaterThan(shuffle);
+
+    g.blockWith("head jab|1").settle();
+    expect(g.state.log.some((entry) => entry.publicText?.includes("reveals Sink Below"))).toBe(true);
+  });
+});

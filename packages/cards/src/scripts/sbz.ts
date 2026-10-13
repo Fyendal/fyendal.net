@@ -83,6 +83,7 @@ function requestHeroTarget(ctx: ScriptCtx, damage: number): void {
     options,
     ctx.seat,
     cardOptions,
+    "opposing hero",
   );
 }
 

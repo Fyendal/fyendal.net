@@ -296,6 +296,32 @@ describe("ELE — Fusion and Elemental heroes", () => {
       .expectAttackValue(9);
   });
 
+  it("Pulse of Isenloft buffs defending Earth, Ice and Elemental action cards, not reactions", () => {
+    const defenseAfterPulse = (blockers: string[], reaction?: string): number | undefined => {
+      const g = scenario({
+        seats: [
+          { hero: "dorinthea", hand: ["head jab|1"] },
+          {
+            ...oldhim,
+            resources: 4,
+            hand: ["pulse of isenloft|3", ...blockers, ...(reaction ? [reaction] : [])],
+          },
+        ],
+      });
+      g.play("head jab|1")
+        .blockWith(...blockers)
+        .passPriority()
+        .react("pulse of isenloft|3", { settle: false });
+      if (reaction) g.react(reaction);
+      else g.settle();
+      return projectStateFor(g.state, 1).chain.at(-1)?.defenseValue;
+    };
+
+    expect(defenseAfterPulse([])).toBe(6);
+    expect(defenseAfterPulse([EARTH])).toBe(10);
+    expect(defenseAfterPulse([], "rootbound carapace|1")).toBe(9);
+  });
+
   it("Oaken Old is not fused after revealing only one required element", () => {
     const g = scenario({
       seats: [

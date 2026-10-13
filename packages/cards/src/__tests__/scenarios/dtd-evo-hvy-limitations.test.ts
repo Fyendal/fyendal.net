@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { legalIntents, type CardScript } from "@fyendal/engine";
+import { legalIntents, projectStateFor, type CardScript } from "@fyendal/engine";
 import { scripts } from "../../index.js";
 import { printingId, scenario } from "../harness.js";
 
@@ -346,7 +346,56 @@ describe("DTD, EVO, and HVY rules regression coverage", () => {
       .expectInZone(0, "shriek razors|0", "graveyard");
   });
   it("Already Dead completes Contract", () => expect(script("already dead|1").onFriendlyBanishesOpponentCard).toBeTypeOf("function"));
-  it("Emboldened checks defense reaction", () => expect(script("emboldened blade|3").playTargetOptions).toBeTypeOf("function"));
+  it("Emboldened Blade resolves without a face-down arsenal card", () => {
+    const g = scenario({
+      seats: [{ hero: "dorinthea", hand: ["emboldened blade|3"] }, { hero: "rhinar" }],
+    });
+
+    g.play("emboldened blade|3")
+      .expectInZone(0, "emboldened blade|3", "graveyard")
+      .expectAP(0, 1);
+  });
+  it("Emboldened Blade turns the only face-down arsenal card without a play target", () => {
+    const weaponAttack = (game: ReturnType<typeof scenario>) =>
+      projectStateFor(game.state, 0).chain.at(-1)!.attackValue;
+    const base = weaponAttack(scenario({
+      seats: [{ hero: "dorinthea", resources: 3 }, { hero: "rhinar" }],
+    }).attackWithWeapon());
+    const g = scenario({
+      seats: [
+        { hero: "dorinthea", hand: ["emboldened blade|3"], resources: 3 },
+        { hero: "rhinar", arsenalFaceDown: ["sink below|1"] },
+      ],
+    });
+    const plays = legalIntents(g.state, 0).filter((intent) => intent.kind === "play-card");
+    expect(plays.length).toBeGreaterThan(0);
+    expect(plays.every((intent) => intent.targetCardInstanceId === undefined)).toBe(true);
+
+    g.play("emboldened blade|3")
+      .expectInZone(1, "sink below|1", "graveyard")
+      .attackWithWeapon()
+      .expectAttackValue(base + 1);
+  });
+  it("Emboldened Blade chooses among arsenals on resolution without exposing hidden ids", () => {
+    const g = scenario({
+      seats: [
+        { hero: "dorinthea", hand: ["emboldened blade|3"], arsenalFaceDown: ["sink below|1"] },
+        { hero: "rhinar", arsenalFaceDown: ["sink below|1"] },
+      ],
+    });
+    const opponentCard = g.state.players[1]!.arsenal[0]!.instanceId;
+
+    g.play("emboldened blade|3");
+
+    const decision = projectStateFor(g.state, 0).pendingDecision;
+    expect(decision?.options).toEqual(["0:0", "1:0"]);
+    expect(decision?.optionCards?.[0]).toMatchObject({ cardId: printingId("sink below|1") });
+    expect(decision?.optionCards?.[1]).toMatchObject({ cardId: "", hidden: true, owner: 1 });
+    expect(JSON.stringify(decision)).not.toContain(`${opponentCard}`);
+    g.chooseOption("1:0")
+      .expectInZone(1, "sink below|1", "graveyard")
+      .expectFaceDown(0, "sink below|1", true);
+  });
   it("Contest lowers intellect", () => expect(script("contest the mindfield|3").modifyBaseDefense).toBeTypeOf("function"));
   it("Warband's Banneret charge resumes the attack layer", () => {
     const g = scenario({

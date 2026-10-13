@@ -157,6 +157,9 @@ function requestBrainstormTarget(ctx: ScriptCtx): void {
       ),
     }),
     targets.map(({ option }) => option),
+    undefined,
+    undefined,
+    `hero:${opponentSeat(ctx)}`,
   );
 }
 function advanceWarhorn(ctx: ScriptCtx, afterSeat: number): void {

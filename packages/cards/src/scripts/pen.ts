@@ -209,6 +209,9 @@ function arcaneSpell(
           },
         ),
         ["opponent", "you"],
+        undefined,
+        undefined,
+        "opponent",
       );
     },
     onDamageDealt(ctx, _target, dealt, arcane) {
@@ -1904,8 +1907,9 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
   "look within|3": {
     onPlay(ctx) {
       const chi = ctx.player(ctx.seat).deck.find((card) => hasTag(ctx, card, "chi"));
-      if (chi) ctx.putOnDeckTop(chi.instanceId);
+      if (chi) ctx.revealCards([chi.instanceId]);
       ctx.shuffleDeck();
+      if (chi) ctx.putOnDeckTop(chi.instanceId);
     },
   },
   "spreading mist|3": {

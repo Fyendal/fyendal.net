@@ -55,13 +55,14 @@ function chooseFromDeck(
   fallback: string,
   messageId: string,
   predicate: (card: DeepReadonly<CardInstance>) => boolean,
+  optional = false,
 ): void {
   const cards = ctx.player(ctx.seat).deck.filter(predicate);
   if (cards.length > 0)
     ctx.requestCardChoice(
       hook,
-      decisionPrompt(fallback, messageId),
-      cards.map((card) => card.instanceId),
+      decisionPrompt(fallback, messageId, optional ? { optionMessages: commonOptionMessages("pass") } : undefined),
+      [...(optional ? ["pass"] : []), ...cards.map((card) => card.instanceId)],
     );
 }
 
@@ -206,12 +207,13 @@ const lessonInLava: CardScript = {
       "Lesson in Lava: choose a Wizard card",
       "card.arc.lesson.wizard.choose",
       (card) => isType(ctx, card, "wizard") && (ctx.cardData(card.cardId).cost ?? 0) <= amount,
+      true,
     );
   },
   onChoose(ctx, hook, option) {
-    if (!hook.startsWith("lesson-search:")) return;
-    if (ctx.putOnDeckTop(Number(option))) ctx.shuffleDeck();
-    // Shuffle first, then restore the searched card to the top.
+    if (!hook.startsWith("lesson-search:") || option === "pass") return;
+    ctx.revealCards([Number(option)]);
+    ctx.shuffleDeck();
     ctx.putOnDeckTop(Number(option));
   },
 };
@@ -512,6 +514,9 @@ export const arcHighRarity: Record<string, CardScript> = {
           },
         ),
         ["opposing hero", "your hero"],
+        undefined,
+        undefined,
+        "opposing hero",
       );
     },
     onChoose(ctx, hook, option) {

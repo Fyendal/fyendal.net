@@ -2082,6 +2082,33 @@ describe("viewer projection secrecy", () => {
     }
   });
 
+  it("offers another player's face-down option card as a back unless the decision shows it", () => {
+    const s = makeGame(404);
+    const secret = player(s, 1).deck.shift()!;
+    secret.faceDown = true;
+    player(s, 1).arsenal.push(secret);
+    s.pendingDecision = {
+      player: 0,
+      kind: "choose-target",
+      prompt: "Choose a face-down card",
+      options: ["1:0"],
+      cardOptions: [secret.instanceId],
+      chooseHook: "face-down-choice-test",
+    };
+
+    const hidden = projectStateFor(s, 0).pendingDecision;
+    expect(hidden?.optionCards).toEqual([
+      expect.objectContaining({ instanceId: -1, cardId: "", owner: 1, hidden: true }),
+    ]);
+    expect(JSON.stringify(hidden)).not.toContain(secret.cardId);
+
+    s.pendingDecision = { ...s.pendingDecision, lookedCardIds: [secret.instanceId] };
+    expect(projectStateFor(s, 0).pendingDecision?.optionCards?.[0]).toMatchObject({
+      instanceId: secret.instanceId,
+      cardId: secret.cardId,
+    });
+  });
+
   it("projects a disappeared non-hero permanent target safely", () => {
     let s = makeGame(402);
     const attack = giveCard(s, 0, "ATK4");

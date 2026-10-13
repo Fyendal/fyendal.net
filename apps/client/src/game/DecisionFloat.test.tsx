@@ -40,6 +40,7 @@ import {
   boundedHandCardChoiceOptions,
   cardChoiceLocationLabels,
   handCardChoiceOptions,
+  heroTargetSide,
   optDecisionCards,
   toggleBoundedCardChoice,
 } from "./decisionPresentation.js";
@@ -83,6 +84,57 @@ describe("opponent's announced play", () => {
     expect(html).not.toContain("Modal Action");
     expect(html).not.toContain("ANNOUNCED");
     expect(html).not.toContain("<button");
+  });
+});
+
+describe("hero damage targets", () => {
+  const model: PendingDecisionModel = {
+    decision: {
+      player: 0,
+      kind: "choose-target",
+      prompt: "Choose a target for 7 arcane damage",
+      options: ["hero:0", "hero:1"],
+      optionMessages: [
+        { id: "card.sea.target.card", values: { card: { kind: "card", cardId: "SELF_HERO" } } },
+        { id: "card.sea.target.card", values: { card: { kind: "card", cardId: "OPPONENT_HERO" } } },
+      ],
+      defaultOption: "hero:1",
+    },
+    isMine: true,
+    decidingName: "You",
+    canPass: false,
+    defendPitchIds: new Set(),
+    hand: [],
+    defendSel: [],
+    selectedPitchIds: [],
+    onTogglePitch: () => undefined,
+    resourcePaymentSelected: 0,
+    resourcePaymentRequired: 0,
+    confirmSkipArsenal: false,
+    onRequestPass: () => undefined,
+    onDisableGuidance: () => undefined,
+    onConfirmSkipArsenal: () => undefined,
+    onCancelSkipArsenal: () => undefined,
+    onSend: () => undefined,
+  };
+
+  it("classifies relative and seat-encoded hero options from the viewer's side", () => {
+    expect(heroTargetSide("opposing hero", 0)).toBe("opponent");
+    expect(heroTargetSide("opponent", 1)).toBe("opponent");
+    expect(heroTargetSide("your hero", 0)).toBe("self");
+    expect(heroTargetSide("you", 1)).toBe("self");
+    expect(heroTargetSide("hero:1", 0)).toBe("opponent");
+    expect(heroTargetSide("hero:1", 1)).toBe("self");
+    expect(heroTargetSide("ally:1:42", 0)).toBeNull();
+  });
+
+  it("leads with the opponent as the Space default and tags hero names by side", () => {
+    const html = renderLocalized(<PendingDecisionPanel model={model} viewerSeat={0} />);
+    expect(html.indexOf("OPPONENT_HERO")).toBeLessThan(html.indexOf("SELF_HERO"));
+    expect(html).toMatch(/decision-choice-option decision-choice-opponent shortcut-button/);
+    expect(html).toMatch(/decision-choice-option decision-choice-self"/);
+    expect(html).toContain('aria-label="OPPONENT_HERO, Opponent"');
+    expect(html).toContain('aria-label="SELF_HERO, You"');
   });
 });
 
@@ -594,7 +646,7 @@ describe("scripted card-choice presentation", () => {
     };
     const html = renderLocalized(<PendingDecisionPanel model={model} viewerSeat={0} />);
 
-    expect(html).toContain('class="c-zonelabel">Reveal</div>');
+    expect(html).toContain('aria-hidden="true">Reveal</span>');
     expect(html).toContain('aria-label="Discard Duty Bound Blitz"');
 
     const duplicateCardsHtml = renderLocalized(
@@ -606,8 +658,8 @@ describe("scripted card-choice presentation", () => {
         viewerSeat={0}
       />,
     );
-    expect(duplicateCardsHtml).toContain('class="c-zonelabel">Reveal</div>');
-    expect(duplicateCardsHtml).toContain('class="c-zonelabel">Discard Duty Bound Blitz</div>');
+    expect(duplicateCardsHtml).toContain('aria-hidden="true">Reveal</span>');
+    expect(duplicateCardsHtml).toContain('aria-hidden="true">Discard Duty Bound Blitz</span>');
   });
 
   it("labels hero choices relative to the deciding player", () => {
@@ -661,8 +713,52 @@ describe("scripted card-choice presentation", () => {
 
     expect(html).toContain('aria-label="TST-DAGGER — Left weapon"');
     expect(html).toContain('aria-label="TST-DAGGER — Right weapon"');
-    expect(html).toContain('class="c-zonelabel">Left weapon</div>');
-    expect(html).toContain('class="c-zonelabel">Right weapon</div>');
+    expect(html).toContain('aria-hidden="true">Left weapon</span>');
+    expect(html).toContain('aria-hidden="true">Right weapon</span>');
+  });
+
+  it("offers another player's face-down card as a captioned card back", () => {
+    const own = { instanceId: 41, cardId: "SBL013", owner: 0 };
+    const hidden = { instanceId: -2, cardId: "", owner: 1, faceDown: true, hidden: true };
+    const model: PendingDecisionModel = {
+      decision: {
+        player: 0,
+        kind: "choose-target",
+        prompt: "Turn a face-down arsenal card face up",
+        options: ["0:0", "1:0"],
+        optionCards: [own, hidden],
+        optionMessages: [
+          { id: "card.evo.emboldened.option.arsenal.own" },
+          { id: "card.evo.emboldened.option.arsenal", values: { player: { kind: "player", seat: 1 } } },
+        ],
+      },
+      isMine: true,
+      decidingName: "Hero",
+      playerName: (seat) => (seat === 1 ? "Rhinar" : "Dorinthea"),
+      canPass: false,
+      defendPitchIds: new Set(),
+      hand: [],
+      defendSel: [],
+      selectedPitchIds: [],
+      onTogglePitch: () => undefined,
+      resourcePaymentSelected: 0,
+      resourcePaymentRequired: 0,
+      confirmSkipArsenal: false,
+      onRequestPass: () => undefined,
+      onDisableGuidance: () => undefined,
+      onConfirmSkipArsenal: () => undefined,
+      onCancelSkipArsenal: () => undefined,
+      onSend: () => undefined,
+    };
+
+    const html = renderLocalized(<PendingDecisionPanel model={model} viewerSeat={0} />);
+
+    expect(html).toContain('aria-label="Duty Bound Blitz — Your arsenal"');
+    expect(html).toMatch(/class="[^"]*\bcard-back\b[^"]*\bcard-opponent card-highlight"/);
+    expect(html).toContain('aria-label="Rhinar&#x27;s arsenal"');
+    expect(html).toContain('decision-card-caption-opponent" aria-hidden="true">Rhinar&#x27;s arsenal</span>');
+    expect(html).not.toContain("c-backlabel");
+    expect(html).not.toContain("decision-choice-list");
   });
 
   it("keeps bounded card choices out of the immediate single-card path", () => {

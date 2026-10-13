@@ -110,6 +110,7 @@ function requestAnyTarget(
     options,
     ctx.seat,
     cardOptions,
+    "opposing hero",
   );
 }
 
@@ -538,6 +539,9 @@ function arcaneHero(amount: number, surge?: (ctx: ScriptCtx, target: number, dea
           },
         ),
         ["opposing hero", "your hero"],
+        undefined,
+        undefined,
+        "opposing hero",
       );
     },
     onChoose(ctx, hook, option) {
@@ -586,6 +590,9 @@ function glyphOverlay(base: number): CardScript {
           },
         ),
         ["opposing hero", "your hero"],
+        undefined,
+        undefined,
+        "opposing hero",
       );
     },
     onChoose(ctx, hook, option) {

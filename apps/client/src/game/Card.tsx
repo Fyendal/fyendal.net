@@ -206,6 +206,7 @@ export function CardFace({
   ghost,
   onClick,
   label,
+  accessibleLabel,
   chainSourceLabel,
   explanation,
   motionKey,
@@ -245,6 +246,9 @@ export function CardFace({
   ghost?: boolean;
   onClick?: () => void;
   label?: string;
+  /** Names a clickable card for assistive technology when its description is
+   * shown beside the card rather than over the artwork. */
+  accessibleLabel?: string;
   /** Marks the arena card that supplied the current combat-chain attack. */
   chainSourceLabel?: string;
   /** Availability context shown on hover or keyboard focus. */
@@ -385,7 +389,7 @@ export function CardFace({
         <button
           type="button"
           className="card-action"
-          aria-label={label ? `${name} — ${label}` : name}
+          aria-label={label || accessibleLabel ? `${name} — ${label || accessibleLabel}` : name}
           aria-describedby={explanationId}
           aria-description={handReorderHint}
           aria-keyshortcuts={handReorderHint ? "Alt+ArrowLeft Alt+ArrowRight" : undefined}
@@ -723,8 +727,11 @@ export function CardBack({
   motionKey,
   motionZoneAnchor,
   onClick,
+  ariaLabel,
+  className,
 }: {
   count?: number;
+  /** Visible label over the back; an empty label shows the plain back. */
   label: string;
   size?: "zone" | "hand";
   square?: boolean;
@@ -732,6 +739,10 @@ export function CardBack({
   /** Optional card-sized endpoint for an otherwise broad motion zone. */
   motionZoneAnchor?: string;
   onClick?: () => void;
+  /** Accessible name for a clickable back; defaults to the visible label. */
+  ariaLabel?: string;
+  /** Contextual state classes such as decision highlight and affiliation. */
+  className?: string;
 }) {
   const squarePresentationEnabled = useContext(SquareCardPresentationContext);
   const squareCard = size === "zone" && (square ?? squarePresentationEnabled);
@@ -743,6 +754,7 @@ export function CardBack({
         "card-back",
         squareCard ? "card-back-square" : "",
         onClick ? "card-clickable" : "",
+        className,
       ].filter(Boolean).join(" ")}
       data-motion-card={motionKey}
       data-motion-zone-anchor={motionZoneAnchor}
@@ -751,7 +763,7 @@ export function CardBack({
         <button
           type="button"
           className="card-action"
-          aria-label={label || "Card back"}
+          aria-label={ariaLabel || label || "Card back"}
           onClick={onClick}
         />
       ) : null}

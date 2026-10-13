@@ -78,6 +78,7 @@ function requestAnyTarget(ctx: ScriptCtx, hook: string, prompt: string, amount: 
     options,
     ctx.seat,
     cardOptions,
+    "opposing hero",
   );
 }
 

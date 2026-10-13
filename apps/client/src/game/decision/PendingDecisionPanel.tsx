@@ -4,7 +4,7 @@ import { useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useIntl } from "react-intl";
 import { formatGameMessage, GameMessageText } from "../../i18n/GameMessage.js";
-import { CardFace } from "../Card.js";
+import { CardBack, CardFace } from "../Card.js";
 import {
   isPriorityGuidanceDecision,
   shouldShowDecisionPass,
@@ -13,6 +13,7 @@ import {
   boundedCardChoiceModel,
   bloodModeAllocation,
   handCardChoiceOptions,
+  heroTargetSide,
   optDecisionCards,
   toggleBoundedCardChoice,
 } from "../decisionPresentation.js";
@@ -257,6 +258,7 @@ export function PendingDecisionPanel({
     decision: pd,
     isMine,
     decidingName,
+    playerName,
     optionCardLabels,
     canPass,
     defendPitchIds,
@@ -277,6 +279,9 @@ export function PendingDecisionPanel({
   } = model;
   if (!pd) return null;
   if (isMine && pd.kind === "defend" && defendPitchIds.size === 0) return null;
+  const optionResolvers = playerName
+    ? { ...localizedOptionResolvers, player: playerName }
+    : localizedOptionResolvers;
 
   const optCards = optDecisionCards(pd);
   const optDecision = optCards !== null;
@@ -296,7 +301,7 @@ export function PendingDecisionPanel({
       key: `option:${index}`,
       optionId: pd.options?.[index],
       label: optionCardLabels?.get(card.instanceId) ??
-        (message ? formatGameMessage(intl, message, localizedOptionResolvers) : undefined),
+        (message ? formatGameMessage(intl, message, optionResolvers) : undefined),
     }];
   });
   for (const card of lookedCards) {
@@ -364,12 +369,20 @@ export function PendingDecisionPanel({
       const onChoose = () => onSend({ kind: "choose", optionId: option });
       const spaceDefault = option === defaultSpaceOption;
       const optionMessage = pd.optionMessages?.[index];
+      const side = heroTargetSide(option, viewerSeat) ?? undefined;
+      // Hero-name labels need the side spelled out; relative values already say it.
+      const sideTag = side !== undefined && option.startsWith("hero:");
       if (optionMessage) {
+        const text = formatGameMessage(intl, optionMessage, optionResolvers);
         textOptions.push({
           key: option,
-          label: <GameMessageText message={optionMessage} resolvers={localizedOptionResolvers} />,
-          text: formatGameMessage(intl, optionMessage, localizedOptionResolvers),
+          label: <GameMessageText message={optionMessage} resolvers={optionResolvers} />,
+          text: sideTag
+            ? `${text}, ${intl.formatMessage({ id: `game.decision.target.${side}` })}`
+            : text,
           spaceDefault,
+          side,
+          sideTag,
           onChoose,
         });
         return;
@@ -393,16 +406,20 @@ export function PendingDecisionPanel({
         label: optionLabel,
         text: spaceDefault ? shortcutLabel : undefined,
         spaceDefault,
+        side,
+        sideTag,
         onChoose,
       });
     });
+    // Hero targets list the opponent first; the stable sort keeps other options in order.
+    textOptions.sort((a, b) => Number(a.side !== "opponent") - Number(b.side !== "opponent"));
   }
   const chosenOptions: ChoiceModalChosen[] = (pd.chosenOptions ?? []).map((option, index) => {
     const message = pd.chosenOptionMessages?.[index];
     return {
       key: `${index}:${option}`,
       label: message
-        ? <GameMessageText message={message} resolvers={localizedOptionResolvers} />
+        ? <GameMessageText message={message} resolvers={optionResolvers} />
         : option,
     };
   });
@@ -554,19 +571,39 @@ export function PendingDecisionPanel({
       ) : null}
       {showChoiceGrid ? (
         <div className="decision-cards">
-          {choiceGridCards.map(({ card, key, optionId, label }) => (
-            <CardFace
-              key={key}
-              card={card}
-              size="hand"
-              label={label}
-              highlighted={optionId !== undefined}
-              affiliation={cardAffiliation(card, viewerSeat)}
-              onClick={optionId !== undefined
-                ? () => onSend({ kind: "choose", optionId })
-                : undefined}
-            />
-          ))}
+          {choiceGridCards.map(({ card, key, optionId, label }) => {
+            const onChoose = optionId !== undefined
+              ? () => onSend({ kind: "choose", optionId })
+              : undefined;
+            const affiliation = cardAffiliation(card, viewerSeat);
+            return (
+              <div key={key} className="decision-card-option">
+                {card.hidden ? (
+                  <CardBack
+                    label=""
+                    ariaLabel={label}
+                    size="hand"
+                    className={`card-${affiliation}${onChoose ? " card-highlight" : ""}`}
+                    onClick={onChoose}
+                  />
+                ) : (
+                  <CardFace
+                    card={card}
+                    size="hand"
+                    accessibleLabel={label}
+                    highlighted={onChoose !== undefined}
+                    affiliation={affiliation}
+                    onClick={onChoose}
+                  />
+                )}
+                {label ? (
+                  <span className={`decision-card-caption decision-card-caption-${affiliation}`} aria-hidden="true">
+                    {label}
+                  </span>
+                ) : null}
+              </div>
+            );
+          })}
         </div>
       ) : null}
       {pd.kind === "choose-name" ? (

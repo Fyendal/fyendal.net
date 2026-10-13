@@ -112,6 +112,7 @@ function requestAnyTarget(
     options,
     ctx.seat,
     cardOptions,
+    "opposing hero",
   );
 }
 

@@ -1561,7 +1561,9 @@ Object.assign(sup, {
       if (hook === "fix-clash" && winner >= 0) ctx.createToken(MIGHT, winner);
     },
     onChoose(ctx: ScriptCtx, hook: string, option: string) {
-      if (hook === "fix-top" && ctx.putOnDeckTop(Number(option))) ctx.shuffleDeck(ctx.seat);
+      if (hook !== "fix-top") return;
+      ctx.shuffleDeck(ctx.seat);
+      ctx.putOnDeckTop(Number(option));
     },
   },
   "battered, beaten, and broken|2": {

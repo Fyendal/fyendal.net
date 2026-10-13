@@ -4624,7 +4624,7 @@
     "subtypes": [
       "attack"
     ],
-    "text": "Whenever this fragments, create a Spectral Shield token.\nInstant - Destroy a Spectral Shield you control: This gets go again.\nFragment (Whenever a card with 2 or more {d} defends this, this gets -2{p}.)",
+    "text": "Whenever this fragments, create a Spectral Shield token.\nInstant - {t} a Spectral Shield you control: This gets go again.\nFragment (Whenever a card with 2 or more {d} defends this, this gets -2{p}.)",
     "pitch": 2,
     "cost": 2,
     "attack": 6,

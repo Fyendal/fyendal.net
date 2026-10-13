@@ -75,6 +75,7 @@ function chooseHero(
   fallback: string,
   id: string,
   values?: DecisionPromptOptions["values"],
+  defaultOption?: "opposing hero" | "your hero",
 ): void {
   ctx.requestChoice(
     hook,
@@ -83,6 +84,9 @@ function chooseHero(
       optionMessages: commonOptionMessages("opposing hero", "your hero"),
     }),
     ["opposing hero", "your hero"],
+    undefined,
+    undefined,
+    defaultOption,
   );
 }
 
@@ -337,7 +341,7 @@ function arcaneTargetSpell(amount: number, surge: "go-again" | "opt" | "energy" 
       const preview = ctx.previewArcaneDamage(amount);
       chooseHero(ctx, "arcane-target", `Deal ${preview} arcane damage to a hero`, "card.dyn.arcane.hero.choose", {
         amount: preview,
-      });
+      }, "opposing hero");
     },
     onDamageDealt(ctx, target, dealt, arcane) {
       if (!arcane || dealt <= amount || surge === null) return;

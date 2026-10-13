@@ -221,6 +221,27 @@ function optionCardView(state: GameStateInternal,
     : {});
 }
 
+/** A selectable option card. Another player's face-down card, such as an
+ * opponent's face-down arsenal card, is offered as an opaque card back unless
+ * the decision itself shows it to the decider (a search or a public reveal). */
+function selectableOptionCardView(
+  state: GameStateInternal,
+  runtime: EngineRuntime,
+  pd: PendingDecisionState,
+  instanceId: number,
+  optionIndex: number,
+  revealAll: boolean,
+): CardView | null {
+  const card = findCardAnywhere(state, instanceId)?.card;
+  if (
+    !revealAll && card?.faceDown && card.owner !== pd.player &&
+    !pd.lookedCardIds?.includes(instanceId) && !pd.revealedCardIds?.includes(instanceId)
+  ) {
+    return hiddenView(card, -(optionIndex + 1));
+  }
+  return optionCardView(state, runtime, instanceId);
+}
+
 /** Render a registered card definition that is not a live game object, such
  * as a token hero offered by a transform choice. The synthetic instance id is
  * presentation-only; choosing the card still submits the parallel option id. */
@@ -1368,7 +1389,7 @@ function projectState(
                       ? null
                       : typeof id === "string"
                         ? definitionOptionCardView(state, runtime, id, pd.player, index)
-                        : optionCardView(state, runtime, id),
+                        : selectableOptionCardView(state, runtime, pd, id, index, revealAll),
                   ),
                 }
               : {}),

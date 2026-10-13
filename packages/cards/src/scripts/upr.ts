@@ -541,7 +541,7 @@ function singe(maxAllyTargets: number): CardScript {
   return {
     ...arcaneSpell(1),
     onPlay(ctx) {
-      ctx.requestChoice("singe-hero", arcaneHeroChoicePrompt(ctx, 1), ["opponent", "you"]);
+      ctx.requestChoice("singe-hero", arcaneHeroChoicePrompt(ctx, 1), ["opponent", "you"], undefined, undefined, "opponent");
     },
     onChoose(ctx, hook, option) {
       if (hook === "singe-hero") {

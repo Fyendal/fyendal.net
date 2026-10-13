@@ -687,7 +687,12 @@ export const eleHighRarity: Record<string, CardScript> = {
   },
   "pulse of isenloft|3": {
     onPlay(ctx) {
-      ctx.addModifier({ scope: "until-end-of-turn", defense: 1, appliesToSubtype: ["earth", "ice", "elemental"] });
+      ctx.addModifier({
+        scope: "until-end-of-turn",
+        defense: 1,
+        appliesToCardType: "action",
+        appliesToSubtype: ["earth", "ice", "elemental"],
+      });
     },
   },
   "crown of seeds|0": {

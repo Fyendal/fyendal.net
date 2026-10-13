@@ -1933,10 +1933,10 @@
       "value": "Choose X cards to banish from your soul"
     }
   ],
-  "card.common.cost.spectralshield.destroy": [
+  "card.common.cost.spectralshield.tap": [
     {
       "type": 0,
-      "value": "Destroy a Spectral Shield"
+      "value": "Tap a Spectral Shield"
     }
   ],
   "card.common.cost.waterygrave.discard": [
@@ -3639,6 +3639,28 @@
     {
       "type": 0,
       "value": "Gain control of an item controlled by the defending hero"
+    }
+  ],
+  "card.evo.emboldened.arsenal.choose": [
+    {
+      "type": 0,
+      "value": "Turn a face-down arsenal card face up"
+    }
+  ],
+  "card.evo.emboldened.option.arsenal": [
+    {
+      "type": 1,
+      "value": "player"
+    },
+    {
+      "type": 0,
+      "value": "'s arsenal"
+    }
+  ],
+  "card.evo.emboldened.option.arsenal.own": [
+    {
+      "type": 0,
+      "value": "Your arsenal"
     }
   ],
   "card.evo.equipment.abilities.disable": [
@@ -21436,6 +21458,18 @@
     {
       "type": 1,
       "value": "card"
+    }
+  ],
+  "game.decision.target.opponent": [
+    {
+      "type": 0,
+      "value": "Opponent"
+    }
+  ],
+  "game.decision.target.self": [
+    {
+      "type": 0,
+      "value": "You"
     }
   ],
   "game.decision.targetAlreadyPlayable": [

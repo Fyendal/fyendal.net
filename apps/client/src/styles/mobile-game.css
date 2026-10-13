@@ -933,7 +933,8 @@
   .trigger-order-controls button { min-width: 34px; min-height: 34px; padding: 4px 8px; }
   .decision-cards .card-hand { width: 90px; height: 124px; }
   .decision-cards .card-selected::before { top: 4px; right: 4px; width: 18px; height: 18px; font-size: 11px; }
-  .decision-cards > .card-tapped { margin-inline: 17px; }
+  .decision-cards > .card-tapped,
+  .decision-card-option > .card-tapped { margin-inline: 17px; }
   /* Targets read like a hand: bare card faces in a dense grid, sized so a
      partial third row shows when the list scrolls. */
   .decision-target-cards {

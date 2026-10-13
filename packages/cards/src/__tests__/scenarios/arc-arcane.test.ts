@@ -365,3 +365,35 @@ describe("ARC — functional key coverage", () => {
     expect(printingId("voltic bolt|2")).toBe("ARC148");
   });
 });
+
+describe("ARC — Lesson in Lava", () => {
+  const lesson = () => scenario({
+    seats: [
+      {
+        hero: "rhinar",
+        hand: ["lesson in lava|2"],
+        resources: 1,
+        deck: [...Array<string>(9).fill("raging onslaught|1"), "zap|3"],
+      },
+      { hero: "dorinthea" },
+    ],
+  });
+
+  it("reveals the Wizard card and shuffles before putting it on top", () => {
+    lesson()
+      .play("lesson in lava|2")
+      .expectLife(1, 17)
+      .chooseCard("zap|3")
+      .expectLog("reveals Zap")
+      .expectDeckTop(0, "zap|3");
+  });
+
+  it("may decline the search without shuffling", () => {
+    const g = lesson();
+    const order = g.state.players[0]!.deck.map((card) => card.instanceId);
+
+    g.play("lesson in lava|2").chooseOption("pass");
+
+    expect(g.state.players[0]!.deck.map((card) => card.instanceId)).toEqual(order);
+  });
+});

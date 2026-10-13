@@ -1314,6 +1314,7 @@ export function GameBoard() {
           decision: hidePriorityGuidance || showCardSearchOverlay ? null : pd,
           isMine: myDecision,
           decidingName: pd ? (view.players[pd.player]?.heroName ?? "") : "",
+          playerName: (playerSeat) => view.players[playerSeat]?.heroName ?? "",
           optionCardLabels,
           canPass: derived.canPass,
           defendPitchIds,

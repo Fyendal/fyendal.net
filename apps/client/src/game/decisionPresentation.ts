@@ -212,3 +212,16 @@ export function boundedHandCardChoiceOptions(
   if (!choice.choices.every(({ card }) => handIds.has(card.instanceId))) return null;
   return new Map(choice.choices.map(({ card, optionId }) => [card.instanceId, optionId]));
 }
+
+export type HeroTargetSide = "opponent" | "self";
+
+/** Viewer-relative side of a scripted hero-target option. Scripts encode hero
+ * targets either as fixed values relative to the deciding player or as
+ * `hero:<seat>`; any other option is not a hero target. */
+export function heroTargetSide(option: string, viewerSeat: number): HeroTargetSide | null {
+  if (option === "opposing hero" || option === "opponent") return "opponent";
+  if (option === "your hero" || option === "you") return "self";
+  const seat = /^hero:(\d+)$/.exec(option)?.[1];
+  if (seat === undefined) return null;
+  return Number(seat) === viewerSeat ? "self" : "opponent";
+}

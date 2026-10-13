@@ -1561,6 +1561,9 @@ export const sea: Record<string, CardScript> = {
           ),
         }),
         options,
+        undefined,
+        undefined,
+        `hero:${opponentSeat(ctx)}`,
       );
     },
     onChoose(ctx, hook, option) {
@@ -1854,6 +1857,9 @@ function seaTargets(ctx: ScriptCtx, hook: string, baseAmount: number): void {
       ),
     }),
     targets.map(({ option }) => option),
+    undefined,
+    undefined,
+    `hero:${opponentSeat(ctx)}`,
   );
 }
 

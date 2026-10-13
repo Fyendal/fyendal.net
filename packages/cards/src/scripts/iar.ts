@@ -79,6 +79,7 @@ function requestAnyTarget(ctx: ScriptCtx, hook: string, fallback: string, id: st
     options,
     ctx.seat,
     cardOptions,
+    "opposing hero",
   );
 }
 
@@ -2164,10 +2165,10 @@ export const iar: Record<string, CardScript> = {
       effectCardCosts: [
         {
           zone: "arena",
-          move: "destroy",
+          move: "tap",
           count: 1,
           name: "Spectral Shield",
-          prompt: decisionPrompt("Destroy a Spectral Shield", "card.common.cost.spectralshield.destroy"),
+          prompt: decisionPrompt("Tap a Spectral Shield", "card.common.cost.spectralshield.tap"),
         },
       ],
       canActivate(ctx) {

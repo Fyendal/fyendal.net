@@ -1695,3 +1695,24 @@ describe("PEN — Embalm", () => {
     g.play("embalm|2", zone === "banish" ? { fromZone: "banish" } : {}).expectAP(0, ap);
   });
 });
+
+describe("PEN — Look Within", () => {
+  it("reveals the Chi and shuffles before putting it on top of the deck", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          hand: ["look within|3"],
+          resources: 1,
+          deck: [...Array<string>(9).fill("raging onslaught|1"), "inner chi|3"],
+          equipment: NO_EQUIPMENT,
+        },
+        { hero: "dorinthea", equipment: NO_EQUIPMENT },
+      ],
+    });
+
+    g.play("look within|3")
+      .expectLog("reveals Inner Chi")
+      .expectDeckTop(0, "inner chi|3");
+  });
+});

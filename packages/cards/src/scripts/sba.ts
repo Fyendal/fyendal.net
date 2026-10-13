@@ -66,6 +66,7 @@ function requestAnyTarget(ctx: ScriptCtx, hook: string, amount: number): void {
     options,
     ctx.seat,
     cardOptions,
+    "opposing hero",
   );
 }
 

@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { useIntl } from "react-intl";
+import type { HeroTargetSide } from "../decisionPresentation.js";
 import { chooseWithoutFocus } from "./DecisionShared.js";
 
 export interface ChoiceModalOption {
@@ -12,6 +13,11 @@ export interface ChoiceModalOption {
   spaceDefault?: boolean;
   /** Marks the option currently staged by a local announcement. */
   selected?: boolean;
+  /** Viewer-relative hero this option targets, styled with the same
+   * friendly/opponent affiliation as decision cards. */
+  side?: HeroTargetSide;
+  /** Shows the side as a tag when the label alone (a hero name) does not. */
+  sideTag?: boolean;
   onChoose: () => void;
 }
 
@@ -79,9 +85,16 @@ export function ChoiceList({
         <ChoiceButton
           key={option.key}
           option={option}
-          className={`decision-choice-option${option.selected ? " decision-choice-selected" : ""}`}
+          className={`decision-choice-option${option.selected ? " decision-choice-selected" : ""}${
+            option.side ? ` decision-choice-${option.side}` : ""
+          }`}
         >
           <span className="decision-choice-label">{option.label}</span>
+          {option.side && option.sideTag ? (
+            <span className="decision-choice-side" aria-hidden="true">
+              {intl.formatMessage({ id: `game.decision.target.${option.side}` })}
+            </span>
+          ) : null}
         </ChoiceButton>
       ))}
     </div>
