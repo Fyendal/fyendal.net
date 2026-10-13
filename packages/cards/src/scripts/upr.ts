@@ -5,12 +5,14 @@ import {
   dealArcane,
   decisionMessage,
   decisionPrompt,
+  heroChoiceSeat,
   localizedCardLog,
   mergeSetScripts,
   opponentSeat,
   optN,
   optOnChoose,
   payForDefenseBoost,
+  requestHeroChoice,
   wizardActionAsInstant,
   yesNoPrompt,
 } from "./shared-helpers.js";
@@ -72,6 +74,10 @@ function chooseDamageTarget(ctx: ScriptCtx, hook: string, prompt: string, amount
       },
     }),
     livingTargets(ctx),
+    undefined,
+    undefined,
+    undefined,
+    ctx.player(opponentSeat(ctx)).hero.instanceId,
   );
 }
 
@@ -357,19 +363,16 @@ function fightingSpirit(): CardScript {
 function oasis(amount: number): CardScript {
   return {
     onPlay(ctx) {
-      ctx.requestCardChoice(
-        "oasis-hero",
-        decisionPrompt(`${ctx.data.name}: choose a hero`, "card.upr.hero.choose.named", {
-          values: { card: { kind: "card", cardId: ctx.self.cardId } },
-        }),
-        ctx.state.players.map((player) => player.hero.instanceId),
-      );
+      requestHeroChoice(ctx, "oasis-hero", `${ctx.data.name}: choose a hero`, "card.upr.hero.choose.named", {
+        values: { card: { kind: "card", cardId: ctx.self.cardId } },
+        defaultOption: "your hero",
+      });
     },
     onChoose(ctx, hook, option) {
       if (hook === "oasis-hero") {
-        const target = ctx.state.players.find((player) => player.hero.instanceId === Number(option));
-        if (!target) return;
-        ctx.setCounter("oasisTarget", target.seat);
+        const target = heroChoiceSeat(ctx, option);
+        if (target === undefined) return;
+        ctx.setCounter("oasisTarget", target);
         ctx.requestCardChoice(
           "oasis-source",
           decisionPrompt("Choose a damage source", "card.upr.damage.source.choose"),
@@ -643,6 +646,10 @@ export const upr: Record<string, CardScript> = mergeSetScripts("UPR", uprHighRar
           },
         ),
         ["done", ...livingTargets(ctx)],
+        undefined,
+        undefined,
+        undefined,
+        ctx.player(opponentSeat(ctx)).hero.instanceId,
       );
     },
     onChoose(ctx, hook, option) {
@@ -651,6 +658,7 @@ export const upr: Record<string, CardScript> = mergeSetScripts("UPR", uprHighRar
       const count = ctx.getCounter("azvolaiHits") + 1;
       ctx.setCounter("azvolaiHits", count);
       if (count === 1) ctx.setCounter("azvolaiFirstTarget", Number(option));
+      const opposingHeroId = ctx.player(opponentSeat(ctx)).hero.instanceId;
       if (count < 2)
         ctx.requestCardChoice(
           "azvolai",
@@ -663,6 +671,11 @@ export const upr: Record<string, CardScript> = mergeSetScripts("UPR", uprHighRar
             },
           ),
           ["done", ...livingTargets(ctx).filter((target) => Number(target) !== ctx.getCounter("azvolaiFirstTarget"))],
+          undefined,
+          undefined,
+          undefined,
+          // the opposing hero unless it already took the first point
+          opposingHeroId === ctx.getCounter("azvolaiFirstTarget") ? "done" : opposingHeroId,
         );
     },
   },
@@ -1125,7 +1138,7 @@ export const upr: Record<string, CardScript> = mergeSetScripts("UPR", uprHighRar
   "arctic incarceration|1": {
     playAsInstant: wizardActionAsInstant,
     onPlay(ctx) {
-      ctx.requestChoice("arctic", heroChoicePrompt(), ["opponent", "you"]);
+      ctx.requestChoice("arctic", heroChoicePrompt(), ["opponent", "you"], undefined, undefined, "opponent");
     },
     onChoose(ctx, h, o) {
       if (h === "arctic") createFrostbites(ctx, o === "you" ? ctx.seat : opponentSeat(ctx), 3);
@@ -1134,7 +1147,7 @@ export const upr: Record<string, CardScript> = mergeSetScripts("UPR", uprHighRar
   "arctic incarceration|2": {
     playAsInstant: wizardActionAsInstant,
     onPlay(ctx) {
-      ctx.requestChoice("arctic", heroChoicePrompt(), ["opponent", "you"]);
+      ctx.requestChoice("arctic", heroChoicePrompt(), ["opponent", "you"], undefined, undefined, "opponent");
     },
     onChoose(ctx, h, o) {
       if (h === "arctic") createFrostbites(ctx, o === "you" ? ctx.seat : opponentSeat(ctx), 2);
@@ -1143,7 +1156,7 @@ export const upr: Record<string, CardScript> = mergeSetScripts("UPR", uprHighRar
   "arctic incarceration|3": {
     playAsInstant: wizardActionAsInstant,
     onPlay(ctx) {
-      ctx.requestChoice("arctic", heroChoicePrompt(), ["opponent", "you"]);
+      ctx.requestChoice("arctic", heroChoicePrompt(), ["opponent", "you"], undefined, undefined, "opponent");
     },
     onChoose(ctx, h, o) {
       if (h === "arctic") createFrostbites(ctx, o === "you" ? ctx.seat : opponentSeat(ctx), 1);
@@ -1283,7 +1296,7 @@ export const upr: Record<string, CardScript> = mergeSetScripts("UPR", uprHighRar
   }),
   "isenhowl weathervane|1": {
     onPlay(ctx) {
-      ctx.requestChoice("isenhowl", heroChoicePrompt(), ["opponent", "you"]);
+      ctx.requestChoice("isenhowl", heroChoicePrompt(), ["opponent", "you"], undefined, undefined, "opponent");
     },
     onChoose(ctx, h, o) {
       if (h === "isenhowl") {
@@ -1295,7 +1308,7 @@ export const upr: Record<string, CardScript> = mergeSetScripts("UPR", uprHighRar
   },
   "isenhowl weathervane|2": {
     onPlay(ctx) {
-      ctx.requestChoice("isenhowl", heroChoicePrompt(), ["opponent", "you"]);
+      ctx.requestChoice("isenhowl", heroChoicePrompt(), ["opponent", "you"], undefined, undefined, "opponent");
     },
     onChoose(ctx, h, o) {
       if (h === "isenhowl") {
@@ -1307,7 +1320,7 @@ export const upr: Record<string, CardScript> = mergeSetScripts("UPR", uprHighRar
   },
   "isenhowl weathervane|3": {
     onPlay(ctx) {
-      ctx.requestChoice("isenhowl", heroChoicePrompt(), ["opponent", "you"]);
+      ctx.requestChoice("isenhowl", heroChoicePrompt(), ["opponent", "you"], undefined, undefined, "opponent");
     },
     onChoose(ctx, h, o) {
       if (h === "isenhowl") {
@@ -1321,7 +1334,7 @@ export const upr: Record<string, CardScript> = mergeSetScripts("UPR", uprHighRar
     playAsInstant: wizardActionAsInstant,
     onPlay(ctx) {
       if (ctx.fromArsenal) ctx.drawCards(ctx.seat, 1);
-      ctx.requestChoice("cold-target", heroChoicePrompt(), ["opponent", "you"]);
+      ctx.requestChoice("cold-target", heroChoicePrompt(), ["opponent", "you"], undefined, undefined, "opponent");
     },
     onChoose(ctx, h, o) {
       if (h === "cold-target") {
@@ -1371,7 +1384,7 @@ export const upr: Record<string, CardScript> = mergeSetScripts("UPR", uprHighRar
     playAsInstant: wizardActionAsInstant,
     onPlay(ctx) {
       if (ctx.fromArsenal) ctx.drawCards(ctx.seat, 1);
-      ctx.requestChoice("cold-target", heroChoicePrompt(), ["opponent", "you"]);
+      ctx.requestChoice("cold-target", heroChoicePrompt(), ["opponent", "you"], undefined, undefined, "opponent");
     },
     onChoose(ctx, h, o) {
       if (h === "cold-target") {
@@ -1510,7 +1523,7 @@ export const upr: Record<string, CardScript> = mergeSetScripts("UPR", uprHighRar
       destroySelfCost: true,
       label: "Destroy: freeze arsenal and ally",
       onActivate(ctx) {
-        ctx.requestChoice("horns-target", heroChoicePrompt(), ["opponent", "you"]);
+        ctx.requestChoice("horns-target", heroChoicePrompt(), ["opponent", "you"], undefined, undefined, "opponent");
       },
     },
     onChoose(ctx, h, o) {

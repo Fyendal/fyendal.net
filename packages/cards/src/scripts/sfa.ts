@@ -340,6 +340,10 @@ export const sfa: Record<string, CardScript> = {
           values: { amount: 2 },
         }),
         [...ctx.state.players.map((p) => p.hero.instanceId), ...livingAllyIds(ctx)],
+        undefined,
+        undefined,
+        undefined,
+        ctx.player(opponentSeat(ctx)).hero.instanceId,
       );
     },
     onChoose(ctx, hook, option) {

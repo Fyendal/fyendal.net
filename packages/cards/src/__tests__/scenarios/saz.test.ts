@@ -183,7 +183,7 @@ describe("SAZ — loading the arsenal", () => {
     });
     s.activate(DEATH_DEALER, { pitch: [RED] })
       .chooseCard("entangling shot|1") // the arrow to load
-      .chooseCard("rhinar|0"); // the hero to tap
+      .chooseOption("opposing hero"); // the hero to tap
     expect(s.state.players[1]!.hero.tapped).toBe(true);
   });
 
@@ -460,7 +460,7 @@ describe("SAZ — next-arrow pumps", () => {
       ],
     });
     s.play("scout the periphery|1")
-      .chooseCard("rhinar|0") // look at the top of Rhinar's deck
+      .chooseOption("opposing hero") // look at the top of Rhinar's deck
       .play("searing shot|1", { fromArsenal: true })
       .expectAttackValue(7); // 4 base + 3 (from arsenal)
     // the looked-at card is logged privately to the looking player only

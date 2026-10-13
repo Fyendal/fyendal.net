@@ -2,6 +2,7 @@ import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal
 import {
   commonOptionMessages,
   dealArcane,
+  requestHeroChoice,
   type DecisionPromptOptions,
   decisionMessage,
   decisionPrompt,
@@ -77,14 +78,8 @@ function requestHeroTarget(
   id: string,
   values?: DecisionPromptOptions["values"],
 ): void {
-  ctx.requestChoice(
-    hook,
-    decisionPrompt(fallback, id, {
-      values,
-      optionMessages: commonOptionMessages("opposing hero", "your hero"),
-    }),
-    ["opposing hero", "your hero"],
-  );
+  // every caller freezes, discards, or creates Frostbite: aim at the opponent
+  requestHeroChoice(ctx, hook, fallback, id, { values, defaultOption: "opposing hero" });
 }
 
 function requestAnyTarget(

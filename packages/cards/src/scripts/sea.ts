@@ -1202,6 +1202,9 @@ export const sea: Record<string, CardScript> = {
           ),
         }),
         ctx.state.players.map((player) => `hero:${player.seat}`),
+        undefined,
+        undefined,
+        `hero:${opponentSeat(ctx)}`,
       );
     },
     onChoose(ctx, hook, option) {
@@ -1483,6 +1486,9 @@ export const sea: Record<string, CardScript> = {
           ),
         }),
         ctx.state.players.map((player) => `hero:${player.seat}`),
+        undefined,
+        undefined,
+        `hero:${opponentSeat(ctx)}`,
       );
     },
     onChoose(ctx, hook, option) {

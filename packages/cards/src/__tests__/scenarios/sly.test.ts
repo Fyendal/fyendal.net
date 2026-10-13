@@ -656,11 +656,10 @@ describe("SLY — attacks and defense", () => {
     g.blockWith();
     g.passPriority(); // attacker passes → defense reaction window
     g.react("oasis respite|1", { pitch: ["mocking blow|3"] });
-    expect(projectStateFor(g.state, 0).pendingDecision?.optionCards).toEqual([
-      expect.objectContaining({ name: "Lyath Goldmane" }),
-      expect.objectContaining({ name: "Rhinar" }),
-    ]);
-    g.chooseCard("lyath goldmane|0") // target hero
+    expect(projectStateFor(g.state, 0).pendingDecision?.options).toEqual(["opposing hero", "your hero"]);
+    // Space defaults to protecting the caster's own hero
+    expect(g.state.pendingDecision?.defaultOption).toBe("your hero");
+    g.chooseOption("your hero") // target hero
       .chooseCard("raging onslaught|2") // the source: the attacking card itself
       .expectDamageToPrevent(4, ["oasis respite|1"])
       .chooseOption("yes") // behind on life: gain 1
@@ -680,7 +679,7 @@ describe("SLY — attacks and defense", () => {
     g.blockWith();
     g.passPriority();
     g.react("oasis respite|1", { pitch: ["goon beatdown|3"] });
-    g.chooseCard("lyath goldmane|0");
+    g.chooseOption("your hero");
     expect(projectStateFor(g.state, 0).pendingDecision?.optionCards?.[0]).toMatchObject({
       cardId: printingId("buckling blow|3"),
     });
@@ -697,7 +696,7 @@ describe("SLY — attacks and defense", () => {
       ],
     });
     g.play("oasis respite|1", { pitch: ["goon beatdown|3"] });
-    g.chooseCard("lyath goldmane|0");
+    g.chooseOption("your hero");
     expect(projectStateFor(g.state, 0).pendingDecision?.optionCards).toContainEqual(
       expect.objectContaining({ cardId: printingId("ironrot helm|0") }),
     );
@@ -715,7 +714,7 @@ describe("SLY — attacks and defense", () => {
     g.blockWith();
     g.passPriority(); // → defense reaction window
     g.react("oasis respite|1", { pitch: ["mocking blow|3"] });
-    g.chooseCard("lyath goldmane|0").chooseCard("bone basher|0"); // shield against the weapon, not this attack
+    g.chooseOption("your hero").chooseCard("bone basher|0"); // shield against the weapon, not this attack
     g.settle().expectLife(0, 18); // Head Jab hits for 2 — the shield doesn't cover it
     g.attackWithWeapon("bone basher|0", { pitch: ["raging onslaught|3"] });
     g.blockWith().settle().expectLife(0, 18); // 4 damage, all prevented
@@ -735,9 +734,9 @@ describe("SLY — attacks and defense", () => {
     g.react("oasis respite|1", { pitch: ["mocking blow|3"], settle: false });
     g.react("oasis respite|1", { settle: false });
     g.settle()
-      .chooseCard("lyath goldmane|0")
+      .chooseOption("your hero")
       .chooseCard("raging onslaught|2")
-      .chooseCard("lyath goldmane|0")
+      .chooseOption("your hero")
       .chooseCard("raging onslaught|2")
       .expectLog("is prevented (6)")
       .expectLife(0, 20);
@@ -751,7 +750,7 @@ describe("SLY — attacks and defense", () => {
       ],
     });
     g.play("oasis respite|1", { pitch: ["mocking blow|3"] });
-    g.chooseCard("rhinar|0") // target the opposing hero
+    g.chooseOption("opposing hero") // target the opposing hero
       .chooseCard("bone basher|0")
       .chooseOption("yes") // Rhinar is behind: their controller gains 1
       .expectLife(1, 16);

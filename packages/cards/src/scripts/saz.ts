@@ -4,10 +4,12 @@ import {
   commonOptionMessages,
   decisionMessage,
   decisionPrompt,
+  heroChoiceSeat,
   localizedCardLog,
   opponentSeat,
   optN,
   optOnChoose,
+  requestHeroChoice,
 } from "./shared-helpers.js";
 
 // ── SAZ (Silver Age: Azalea precon, Chapter 2) ──────────────────────────────
@@ -364,17 +366,18 @@ export const saz: Record<string, CardScript> = {
   "entangling shot|1": {
     // "When this is put face-up into your arsenal, you may {t} target hero."
     onEnterArsenal(ctx) {
-      ctx.requestCardChoice(
+      requestHeroChoice(
+        ctx,
         "entangling-shot",
-        decisionPrompt("Entangling Shot: tap target hero?", "card.saz.entangling.hero.choose", {
-          optionMessages: commonOptionMessages("pass"),
-        }),
-        ["pass", ...ctx.state.players.map((p) => p.hero.instanceId)],
+        "Entangling Shot: tap target hero?",
+        "card.saz.entangling.hero.choose",
+        { optional: true, defaultOption: "opposing hero" },
       );
     },
     onChoose(ctx, hook, option) {
-      if (hook !== "entangling-shot" || option === "pass") return;
-      ctx.tap(Number(option));
+      if (hook !== "entangling-shot") return;
+      const seat = heroChoiceSeat(ctx, option);
+      if (seat !== undefined) ctx.tap(ctx.player(seat).hero.instanceId);
     },
   },
 
@@ -552,15 +555,17 @@ export const saz: Record<string, CardScript> = {
     //  card you play from arsenal this turn gains +3{p}." Go again printed.
     onPlay(ctx) {
       buffNextAttack(ctx, { attack: 3, appliesTo: "attack-action", appliesToFromArsenal: true });
-      ctx.requestCardChoice(
+      requestHeroChoice(
+        ctx,
         "scout-the-periphery",
-        decisionPrompt("Scout the Periphery: look at the top card of target hero's deck", "card.saz.scout.hero.choose"),
-        ctx.state.players.map((p) => p.hero.instanceId),
+        "Scout the Periphery: look at the top card of target hero's deck",
+        "card.saz.scout.hero.choose",
       );
     },
     onChoose(ctx, hook, option) {
       if (hook !== "scout-the-periphery") return;
-      const target = ctx.state.players.find((p) => p.hero.instanceId === Number(option));
+      const seat = heroChoiceSeat(ctx, option);
+      const target = seat === undefined ? undefined : ctx.player(seat);
       const top = target?.deck[0];
       if (!target || !top) return;
       ctx.lookAt(top.instanceId);

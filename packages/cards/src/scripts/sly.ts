@@ -3,11 +3,13 @@ import {
   attackAbility,
   buffNextAttack,
   decisionPrompt,
+  heroChoiceSeat,
   isWeaponAttack,
   localizedCardLog,
   opponentSeat,
   payForDefenseBoost,
   queueIntimidate,
+  requestHeroChoice,
   suspenseAura,
   yesNoPrompt,
 } from "./shared-helpers.js";
@@ -296,17 +298,15 @@ export const sly: Record<string, CardScript> = {
     // by a source of your choice" — two chained choices: the hero, then the
     // source (the specific object instance; a later copy is not covered).
     onPlay(ctx) {
-      ctx.requestCardChoice(
-        "target-hero",
-        decisionPrompt("Oasis Respite: target which hero?", "card.sly.oasis.hero.choose"),
-        ctx.state.players.map((player) => player.hero.instanceId),
-      );
+      requestHeroChoice(ctx, "target-hero", "Oasis Respite: target which hero?", "card.sly.oasis.hero.choose", {
+        defaultOption: "your hero",
+      });
     },
     onChoose(ctx, hook, option) {
       if (hook === "target-hero") {
-        const target = ctx.state.players.find((player) => player.hero.instanceId === Number(option));
-        if (!target) return;
-        ctx.setCounter("oasisTarget", target.seat);
+        const target = heroChoiceSeat(ctx, option);
+        if (target === undefined) return;
+        ctx.setCounter("oasisTarget", target);
         ctx.requestCardChoice(
           "source",
           decisionPrompt("Prevent the next 4 damage from which source?", "card.sly.damage.source.choose", {

@@ -197,6 +197,46 @@ export function opponentSeat(ctx: ScriptCtx): number {
   return ctx.seat === 0 ? 1 : 0;
 }
 
+export type HeroChoiceOption = "opposing hero" | "your hero";
+
+/** Ask which hero an effect targets as a plain text choice. Games have two
+ * players, so heroes are named relative to the chooser instead of shown as
+ * cards. Space picks `defaultOption`: "your hero" for protection, "opposing
+ * hero" for damage and other harm. Resolve the answer with `heroChoiceSeat`. */
+export function requestHeroChoice(
+  ctx: ScriptCtx,
+  hook: string,
+  fallback: string,
+  id: string,
+  options: {
+    values?: DecisionPromptOptions["values"];
+    defaultOption?: HeroChoiceOption;
+    /** Seats that may be chosen; both by default. */
+    seats?: readonly number[];
+    /** Offer "pass" first, for "you may" effects. */
+    optional?: boolean;
+  } = {},
+): void {
+  const heroes = (["opposing hero", "your hero"] as const).filter((option) =>
+    !options.seats || options.seats.includes(heroChoiceSeat(ctx, option)!));
+  const choices = [...(options.optional ? (["pass"] as const) : []), ...heroes];
+  ctx.requestChoice(
+    hook,
+    decisionPrompt(fallback, id, { values: options.values, optionMessages: commonOptionMessages(...choices) }),
+    [...choices],
+    undefined,
+    undefined,
+    options.defaultOption,
+  );
+}
+
+/** Seat named by a `requestHeroChoice` answer. */
+export function heroChoiceSeat(ctx: ScriptCtx, option: string): number | undefined {
+  if (option === "your hero") return ctx.seat;
+  if (option === "opposing hero") return opponentSeat(ctx);
+  return undefined;
+}
+
 /** "Whenever a card defends this": one trigger for each defending card. */
 export const cardDefendsThisTrigger: NonNullable<CardScript["friendlyDefendedTrigger"]> = {
   label: "Whenever a card defends this",

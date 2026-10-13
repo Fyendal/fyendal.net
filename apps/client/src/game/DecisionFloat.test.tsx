@@ -7,6 +7,7 @@ import { decisionFloatDragKey } from "./DecisionFloat.js";
 import { BloodModeDecision } from "./decision/BloodModeDecision.js";
 import { ActionTargetCards, RevealedChoiceCards, targetPlayPermissionNote } from "./decision/CardChoices.js";
 import type { PendingDecisionModel } from "./decision/DecisionModels.js";
+import { passHotkeyIntent } from "./passHotkey.js";
 import {
   GuidanceSettingsPopover,
   PendingDecisionPanel,
@@ -715,6 +716,54 @@ describe("scripted card-choice presentation", () => {
     expect(html).toContain('aria-label="TST-DAGGER — Right weapon"');
     expect(html).toContain('aria-hidden="true">Left weapon</span>');
     expect(html).toContain('aria-hidden="true">Right weapon</span>');
+  });
+
+  it("marks the scripted Space default among card choices", () => {
+    const mine = { instanceId: 11, cardId: "TST-HERO-A", owner: 0 };
+    const theirs = { instanceId: 22, cardId: "TST-HERO-B", owner: 1 };
+    const model: PendingDecisionModel = {
+      decision: {
+        player: 0,
+        kind: "choose-target",
+        prompt: "Target which hero?",
+        options: ["11", "22"],
+        optionCards: [mine, theirs],
+        defaultOption: "11",
+      },
+      isMine: true,
+      decidingName: "Hero",
+      optionCardLabels: new Map([
+        [11, "Your Hero"],
+        [22, "Opponent's Hero"],
+      ]),
+      canPass: false,
+      defendPitchIds: new Set(),
+      hand: [],
+      defendSel: [],
+      selectedPitchIds: [],
+      onTogglePitch: () => undefined,
+      resourcePaymentSelected: 0,
+      resourcePaymentRequired: 0,
+      confirmSkipArsenal: false,
+      onRequestPass: () => undefined,
+      onDisableGuidance: () => undefined,
+      onConfirmSkipArsenal: () => undefined,
+      onCancelSkipArsenal: () => undefined,
+      onSend: () => undefined,
+    };
+
+    const html = renderLocalized(
+      <PendingDecisionPanel model={model} viewerSeat={0} />,
+    );
+
+    expect(html).toContain('title="Your Hero (Space)" aria-keyshortcuts="Space"');
+    expect(html).toContain('Your Hero<kbd class="shortcut-key"></kbd></span>');
+    expect(html.match(/shortcut-key/g)).toHaveLength(1);
+    expect(passHotkeyIntent(
+      [{ kind: "choose", optionId: "22" }, { kind: "choose", optionId: "11" }],
+      model.decision,
+      [],
+    )).toEqual({ kind: "choose", optionId: "11" });
   });
 
   it("offers another player's face-down card as a captioned card back", () => {

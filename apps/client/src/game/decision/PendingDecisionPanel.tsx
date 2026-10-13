@@ -576,8 +576,18 @@ export function PendingDecisionPanel({
               ? () => onSend({ kind: "choose", optionId })
               : undefined;
             const affiliation = cardAffiliation(card, viewerSeat);
+            const spaceDefault = optionId !== undefined && optionId === defaultSpaceOption;
             return (
-              <div key={key} className="decision-card-option">
+              <div
+                key={key}
+                className="decision-card-option"
+                {...(spaceDefault
+                  ? {
+                      title: intl.formatMessage({ id: "common.shortcut.space" }, { label: label ?? card.name }),
+                      "aria-keyshortcuts": "Space",
+                    }
+                  : {})}
+              >
                 {card.hidden ? (
                   <CardBack
                     label=""
@@ -596,9 +606,10 @@ export function PendingDecisionPanel({
                     onClick={onChoose}
                   />
                 )}
-                {label ? (
+                {label || spaceDefault ? (
                   <span className={`decision-card-caption decision-card-caption-${affiliation}`} aria-hidden="true">
                     {label}
+                    {spaceDefault ? <kbd className="shortcut-key" /> : null}
                   </span>
                 ) : null}
               </div>

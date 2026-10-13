@@ -6,6 +6,7 @@ import {
   decisionMessage,
   decisionPrompt,
   discardSixPlusPayoff,
+  heroChoiceSeat,
   isCard,
   isWeaponAttack,
   localizedCardLog,
@@ -15,6 +16,7 @@ import {
   optOnChoose,
   previousAttackHasName,
   requestDiscardChoice,
+  requestHeroChoice,
   resolveDiscardChoice,
   wizardActionAsInstant,
   weaponAttackCount,
@@ -513,17 +515,14 @@ function pry(revealCount: number): CardScript {
   return {
     playAsInstant: wizardActionAsInstant,
     onPlay(ctx) {
-      ctx.requestCardChoice(
-        "pry-target",
-        decisionPrompt(`${ctx.data.name}: choose a hero`, "card.evr.hero.choose", {
-          values: { card: { kind: "card", cardId: ctx.self.cardId } },
-        }),
-        ctx.state.players.map((player) => player.hero.instanceId),
-      );
+      requestHeroChoice(ctx, "pry-target", `${ctx.data.name}: choose a hero`, "card.evr.hero.choose", {
+        values: { card: { kind: "card", cardId: ctx.self.cardId } },
+        defaultOption: "opposing hero",
+      });
     },
     onChoose(ctx, hook, option) {
       if (hook === "pry-target") {
-        const target = ctx.state.players.find((player) => player.hero.instanceId === Number(option))?.seat;
+        const target = heroChoiceSeat(ctx, option);
         if (target === undefined) return;
         ctx.setCounter("pryTarget", target);
         ctx.setCounter("pryRevealedCount", 0);
@@ -580,19 +579,20 @@ function timekeepersWhim(amount: number): CardScript {
       if (ctx.state.activePlayer !== ctx.seat) ctx.setCounter("whimOpponentTurn", 1);
     },
     onPlay(ctx) {
-      ctx.requestCardChoice(
+      requestHeroChoice(
+        ctx,
         "whim-target",
-        decisionPrompt(
-          `${ctx.data.name}: deal ${ctx.previewArcaneDamage(amount)} arcane damage to a hero`,
-          "card.evr.arcane.hero.choose",
-          { values: { card: { kind: "card", cardId: ctx.self.cardId }, amount: ctx.previewArcaneDamage(amount) } },
-        ),
-        ctx.state.players.map((player) => player.hero.instanceId),
+        `${ctx.data.name}: deal ${ctx.previewArcaneDamage(amount)} arcane damage to a hero`,
+        "card.evr.arcane.hero.choose",
+        {
+          values: { card: { kind: "card", cardId: ctx.self.cardId }, amount: ctx.previewArcaneDamage(amount) },
+          defaultOption: "opposing hero",
+        },
       );
     },
     onChoose(ctx, hook, option) {
       if (hook !== "whim-target") return;
-      const target = ctx.state.players.find((player) => player.hero.instanceId === Number(option))?.seat;
+      const target = heroChoiceSeat(ctx, option);
       if (target !== undefined) ctx.dealDamage(target, amount, { arcane: true });
       if (ctx.getCounter("whimOpponentTurn")) ctx.putOnDeckBottom(ctx.self.instanceId);
     },
@@ -881,26 +881,30 @@ const amuletEchoes: CardScript = {
       const heroes = ctx.state.players.filter((player) =>
         Object.entries(player.flags).some(([key, value]) => key.startsWith("playedNameCount:") && Number(value) >= 2),
       );
-      ctx.requestCardChoice(
+      requestHeroChoice(
+        ctx,
         "echoes-target",
-        decisionPrompt("Amulet of Echoes: choose a hero to discard 2 cards", "card.evr.echoes.hero.choose", {
+        "Amulet of Echoes: choose a hero to discard 2 cards",
+        "card.evr.echoes.hero.choose",
+        {
           values: { amount: 2 },
-        }),
-        heroes.map((player) => player.hero.instanceId),
+          defaultOption: "opposing hero",
+          seats: heroes.map((player) => player.seat),
+        },
       );
     },
   },
   onChoose(ctx, hook, option) {
     if (hook === "echoes-target") {
-      const target = ctx.state.players.find((player) => player.hero.instanceId === Number(option));
-      if (!target) return;
-      ctx.setCounter("echoes-target-seat", target.seat);
+      const target = heroChoiceSeat(ctx, option);
+      if (target === undefined) return;
+      ctx.setCounter("echoes-target-seat", target);
       ctx.setCounter("echoes-discards-left", 2);
       requestDiscardChoice(
         ctx,
         "echoes-discard",
         decisionPrompt("Choose a card to discard", "card.common.card.discard.choose"),
-        target.seat,
+        target,
       );
       return;
     }
@@ -1026,17 +1030,14 @@ const potionSeeing: CardScript = {
     timing: "instant",
     destroySelfCost: true,
     onActivate(ctx) {
-      ctx.requestCardChoice(
-        "seeing-target",
-        decisionPrompt("Potion of Seeing: choose a hero", "card.evr.seeing.hero.choose"),
-        ctx.state.players.map((player) => player.hero.instanceId),
-      );
+      requestHeroChoice(ctx, "seeing-target", "Potion of Seeing: choose a hero", "card.evr.seeing.hero.choose");
     },
   },
   onChoose(ctx, hook, option) {
     if (hook !== "seeing-target") return;
-    const target = ctx.state.players.find((player) => player.hero.instanceId === Number(option));
-    if (!target) return;
+    const seat = heroChoiceSeat(ctx, option);
+    if (seat === undefined) return;
+    const target = ctx.player(seat);
     target.hand.forEach((card) => ctx.lookAt(card.instanceId));
     ctx.logPrivate(
       ctx.seat,

@@ -5,12 +5,14 @@ import {
   commonOptionMessages,
   decisionMessage,
   decisionPrompt,
+  heroChoiceSeat,
   mergeSetScripts,
   opponentSeat,
   optN,
   optOnChoose,
   previousAttackHasName,
   previousAttackNameContains,
+  requestHeroChoice,
   yesNoPrompt,
 } from "./shared-helpers.js";
 import { outHighRarity, uzuriAbility } from "./out/high-rarity.js";
@@ -171,16 +173,13 @@ function scout(power: number): CardScript {
   return {
     onPlay(ctx) {
       buffNextAttack(ctx, { attack: power, appliesTo: "attack-action", appliesToFromArsenal: true });
-      ctx.requestCardChoice(
-        "scout",
-        decisionPrompt("Look at the top card of target hero's deck", "card.out.scout.hero.choose"),
-        ctx.state.players.map((p) => p.hero.instanceId),
-      );
+      requestHeroChoice(ctx, "scout", "Look at the top card of target hero's deck", "card.out.scout.hero.choose");
     },
     onChoose(ctx, hook, option) {
       if (hook !== "scout") return;
-      const p = ctx.state.players.find((candidate) => candidate.hero.instanceId === Number(option));
-      if (p?.deck[0]) ctx.lookAt(p.deck[0].instanceId);
+      const seat = heroChoiceSeat(ctx, option);
+      const top = seat === undefined ? undefined : ctx.player(seat).deck[0];
+      if (top) ctx.lookAt(top.instanceId);
     },
   };
 }
@@ -721,16 +720,13 @@ export const out: Record<string, CardScript> = mergeSetScripts("OUT", outHighRar
   "riptide|0": riptide(),
   "wayfinder's crest|0": {
     onDefend(ctx) {
-      ctx.requestCardChoice(
-        "wayfinder",
-        decisionPrompt("Look at the top card of target hero's deck", "card.out.scout.hero.choose"),
-        ctx.state.players.map((p) => p.hero.instanceId),
-      );
+      requestHeroChoice(ctx, "wayfinder", "Look at the top card of target hero's deck", "card.out.scout.hero.choose");
     },
     onChoose(ctx, h, o) {
       if (h === "wayfinder") {
-        const p = ctx.state.players.find((x) => x.hero.instanceId === Number(o));
-        if (p?.deck[0]) ctx.lookAt(p.deck[0].instanceId);
+        const seat = heroChoiceSeat(ctx, o);
+        const top = seat === undefined ? undefined : ctx.player(seat).deck[0];
+        if (top) ctx.lookAt(top.instanceId);
       }
     },
   },

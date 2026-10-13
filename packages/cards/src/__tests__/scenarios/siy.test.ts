@@ -49,8 +49,10 @@ describe("SIY — Iyslander and Frostbite", () => {
     s.play("ice eternal|3", { settle: false })
       .chooseOption("X = 3")
       .chooseOption("pitch")
-      .settle()
-      .chooseOption("opposing hero")
+      .settle();
+    // Frostbite defaults to the opposing hero
+    expect(s.state.pendingDecision?.defaultOption).toBe("opposing hero");
+    s.chooseOption("opposing hero")
       .expectZoneSize(1, "board", 3)
       .expectZoneSize(0, "pitch", 2);
   });

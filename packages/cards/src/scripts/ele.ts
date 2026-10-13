@@ -213,6 +213,9 @@ function delayedGuardianAura(type: "earth" | "ice", attack: number, creates?: "f
             optionMessages: commonOptionMessages("opponent", "self"),
           }),
           ["opponent", "self"],
+          undefined,
+          undefined,
+          "opponent",
         );
       }
       if (creates === "seismic") ctx.createToken(SEISMIC_SURGE);
@@ -698,6 +701,9 @@ export const ele: Record<string, CardScript> = mergeSetScripts("ELE", eleHighRar
               optionMessages: commonOptionMessages("opponent", "self"),
             }),
             ["opponent", "self"],
+            undefined,
+            undefined,
+            "opponent",
           );
       } else if (hook === "lexi-ice-target") {
         createFrostbites(ctx, option === "self" ? ctx.seat : opponentSeat(ctx));

@@ -504,6 +504,18 @@ describe("UPR — rules regression coverage", () => {
     expect(opposingPlays).toEqual([]);
   });
 
+  it("Oasis Respite defaults its hero target to the caster's own hero", () => {
+    const s = scenario({
+      seats: [
+        { hero: "rhinar", hand: ["snatch|1"] },
+        { hero: "dorinthea", hand: ["oasis respite|3", BLUE] },
+      ],
+    });
+    s.play("snatch|1").blockWith().passPriority();
+    s.react("oasis respite|3", { pitch: [BLUE] });
+    expect(s.state.pendingDecision?.defaultOption).toBe("your hero");
+  });
+
   it("Nekria triggers from damage dealt to it and keeps its life counter through reset", () => {
     const s = scenario({
       active: 1,

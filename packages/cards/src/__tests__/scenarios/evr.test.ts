@@ -280,10 +280,7 @@ describe("EVR — registration and combat designs", () => {
     });
 
     s.play("pry|3");
-    s.doRaw({
-      kind: "choose",
-      optionId: String(s.state.players[1]!.hero.instanceId),
-    }).settle().chooseCard("raging onslaught|1");
+    s.chooseOption("opposing hero").settle().chooseCard("raging onslaught|1");
     expect(s.state.pendingDecision?.chooseHook).toBe("pry-bottom");
     expect(s.state.pendingDecision?.revealedCardIds).toHaveLength(1);
     expect(projectStateFor(s.state, 0).pendingDecision?.revealedCards).toHaveLength(1);
@@ -557,7 +554,9 @@ describe("EVR — auras, items, and utility", () => {
       ],
     });
     s.play("snatch|1").blockWith().passPriority().react("timekeeper's whim|3", { pitch: [BLUE] });
-    s.doRaw({ kind: "choose", optionId: String(s.state.players[1]!.hero.instanceId) }).settle().endTurn();
+    // arcane damage defaults to the opposing hero
+    expect(s.state.pendingDecision?.defaultOption).toBe("opposing hero");
+    s.chooseOption("opposing hero").settle().endTurn();
     s.expectInZone(0, "timekeeper's whim|3", "deck");
   });
 

@@ -310,7 +310,7 @@ interface ScriptedChoiceDetails {
   lookedCardIds?: number[];
 }
 
-type CardChoiceDetails = Omit<ScriptedChoiceDetails, "cardOptions" | "defaultOption">;
+type CardChoiceDetails = Omit<ScriptedChoiceDetails, "cardOptions">;
 
 export function makeCtx(
   state: GameStateInternal,
@@ -2241,10 +2241,11 @@ export function makeCtx(
     requestChoice(hook, prompt, options, choiceSeat, cardOptions, defaultOption) {
       requestScriptedChoice(hook, prompt, options, choiceSeat, { cardOptions, defaultOption });
     },
-    requestCardChoice(hook, prompt, options, choiceSeat, revealedCardIds, lookedCardIds) {
+    requestCardChoice(hook, prompt, options, choiceSeat, revealedCardIds, lookedCardIds, defaultOption) {
       requestCardDecision(hook, prompt, options, choiceSeat, {
         revealedCardIds,
         lookedCardIds,
+        ...(defaultOption === undefined ? {} : { defaultOption: String(defaultOption) }),
       });
     },
     requestCardChoices(

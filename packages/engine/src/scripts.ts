@@ -513,6 +513,8 @@ export interface ScriptCtx {
     /** Additional cards shown privately to the deciding player as
      * non-selectable context, such as every card in searched hidden zones. */
     lookedCardIds?: number[],
+    /** Option selected by Space in the client; must be present in `options`. */
+    defaultOption?: number | string,
   ): void;
   /** Ask for a bounded subset of card instances, submitted atomically. */
   requestCardChoices(

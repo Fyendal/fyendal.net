@@ -529,6 +529,9 @@ export const arcHighRarity: Record<string, CardScript> = {
             optionMessages: commonOptionMessages("opposing hero", "your hero"),
           }),
           ["opposing hero", "your hero"],
+          undefined,
+          undefined,
+          "opposing hero",
         );
       } else if (hook === "fork-second") {
         dealArcane(ctx, ctx.getCounter("forkFirst"), 2);

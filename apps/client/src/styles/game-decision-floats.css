@@ -187,30 +187,15 @@
   outline-offset: 2px;
 }
 .decision-choice-label { flex: 1 1 auto; min-width: 0; }
-/* Hero targets carry the decision-card affiliation colors: the opponent reads
-   as the hostile, primary choice and your own hero recedes. */
+/* Hero targets mark their side with the decision-card affiliation colors as
+   a quiet edge stripe only. Emphasis stays with the Space default (gold
+   border and keycap), which may be either hero: protection effects default
+   to your own hero, damage and other harm to the opponent. */
 .decision-choice-option.decision-choice-opponent {
-  border-color: #d9796f8c;
-  background: linear-gradient(90deg, #4a2620, #2f201a 62%);
-  box-shadow: inset 4px 0 0 #d9796f;
-}
-.decision-choice-option.decision-choice-opponent:hover,
-.decision-choice-option.decision-choice-opponent.shortcut-button {
-  border-color: #e6887f;
-}
-.decision-choice-option.decision-choice-opponent:hover {
-  background: linear-gradient(90deg, #5a2c24, #3a251d 62%);
+  box-shadow: inset 3px 0 0 #d9796f;
 }
 .decision-choice-option.decision-choice-self {
-  border-color: #4a4a3a;
-  background: #241e18;
   box-shadow: inset 3px 0 0 #76b995;
-  color: var(--text-secondary);
-}
-.decision-choice-option.decision-choice-self:hover {
-  border-color: #76b995;
-  background: #2b2a20;
-  color: var(--text-primary);
 }
 .decision-choice-side {
   flex: 0 0 auto;
@@ -473,6 +458,13 @@
   font: 600 13px/1.3 var(--font-lobby-ui);
   text-align: center;
   overflow-wrap: anywhere;
+}
+/* The Space keycap trails the caption of the default card pick. */
+.decision-card-caption:has(.shortcut-key) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
 }
 .decision-card-caption-friendly { color: #8fc9a7; }
 .decision-card-caption-opponent { color: #f0a098; }
