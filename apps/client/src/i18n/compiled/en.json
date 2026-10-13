@@ -23140,6 +23140,432 @@
       "value": "Right weapon"
     }
   ],
+  "history.filter.anyFormat": [
+    {
+      "type": 0,
+      "value": "All formats"
+    }
+  ],
+  "history.filter.anyHero": [
+    {
+      "type": 0,
+      "value": "All heroes"
+    }
+  ],
+  "history.filter.format": [
+    {
+      "type": 0,
+      "value": "Format"
+    }
+  ],
+  "history.filter.hero": [
+    {
+      "type": 0,
+      "value": "Hero"
+    }
+  ],
+  "history.heroes.games": [
+    {
+      "type": 6,
+      "value": "count",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " game"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " games"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    }
+  ],
+  "history.heroes.lastPlayed": [
+    {
+      "type": 0,
+      "value": "Last played "
+    },
+    {
+      "type": 1,
+      "value": "date"
+    }
+  ],
+  "history.heroes.matchups": [
+    {
+      "type": 0,
+      "value": "Against each hero"
+    }
+  ],
+  "history.heroes.noMatchups": [
+    {
+      "type": 0,
+      "value": "No decided games with this hero yet."
+    }
+  ],
+  "history.match.deletedPlayer": [
+    {
+      "type": 0,
+      "value": "Deleted player"
+    }
+  ],
+  "history.match.matchup": [
+    {
+      "type": 1,
+      "value": "you"
+    },
+    {
+      "type": 0,
+      "value": " versus "
+    },
+    {
+      "type": 1,
+      "value": "opponent"
+    }
+  ],
+  "history.match.practiceBot": [
+    {
+      "type": 0,
+      "value": "Practice bot"
+    }
+  ],
+  "history.match.replayDaysLeft": [
+    {
+      "type": 6,
+      "value": "count",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 0,
+              "value": "Replay: "
+            },
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " day left"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 0,
+              "value": "Replay: "
+            },
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " days left"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    }
+  ],
+  "history.match.replayExpired": [
+    {
+      "type": 0,
+      "value": "Replay expired"
+    }
+  ],
+  "history.match.replayExpiresSoon": [
+    {
+      "type": 6,
+      "value": "count",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 0,
+              "value": "Replay expires in "
+            },
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " day"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 0,
+              "value": "Replay expires in "
+            },
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " days"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    }
+  ],
+  "history.match.replayKept": [
+    {
+      "type": 0,
+      "value": "Favorited, kept"
+    }
+  ],
+  "history.matches.empty": [
+    {
+      "type": 0,
+      "value": "No matches yet. Play against a bot or a player and it will show up here."
+    }
+  ],
+  "history.matches.emptyFiltered": [
+    {
+      "type": 0,
+      "value": "No matches for these filters."
+    }
+  ],
+  "history.matches.loadError": [
+    {
+      "type": 0,
+      "value": "Could not load matches."
+    }
+  ],
+  "history.matches.more": [
+    {
+      "type": 0,
+      "value": "Show older matches"
+    }
+  ],
+  "history.matches.openFile": [
+    {
+      "type": 0,
+      "value": "Open a replay file"
+    }
+  ],
+  "history.matches.recordsError": [
+    {
+      "type": 0,
+      "value": "Could not load your record."
+    }
+  ],
+  "history.matches.retention": [
+    {
+      "type": 0,
+      "value": "Replays stay for 7 days. Favorite one to keep it."
+    }
+  ],
+  "history.matches.retry": [
+    {
+      "type": 0,
+      "value": "Retry"
+    }
+  ],
+  "history.overview.recent": [
+    {
+      "type": 0,
+      "value": "Recent matches"
+    }
+  ],
+  "history.overview.seeAll": [
+    {
+      "type": 0,
+      "value": "See all matches"
+    }
+  ],
+  "history.reason.loss.concede": [
+    {
+      "type": 0,
+      "value": "You conceded"
+    }
+  ],
+  "history.reason.loss.idle": [
+    {
+      "type": 0,
+      "value": "You were idle"
+    }
+  ],
+  "history.reason.loss.lethal": [
+    {
+      "type": 0,
+      "value": "Lost to lethal"
+    }
+  ],
+  "history.reason.win.concede": [
+    {
+      "type": 0,
+      "value": "Opponent conceded"
+    }
+  ],
+  "history.reason.win.idle": [
+    {
+      "type": 0,
+      "value": "Opponent was idle"
+    }
+  ],
+  "history.reason.win.lethal": [
+    {
+      "type": 0,
+      "value": "Won by lethal"
+    }
+  ],
+  "history.record.score": [
+    {
+      "type": 1,
+      "value": "wins"
+    },
+    {
+      "type": 0,
+      "value": "–"
+    },
+    {
+      "type": 1,
+      "value": "losses"
+    }
+  ],
+  "history.result.draw": [
+    {
+      "type": 0,
+      "value": "Draw"
+    }
+  ],
+  "history.result.ended": [
+    {
+      "type": 0,
+      "value": "Ended"
+    }
+  ],
+  "history.result.loss": [
+    {
+      "type": 0,
+      "value": "Defeat"
+    }
+  ],
+  "history.result.win": [
+    {
+      "type": 0,
+      "value": "Victory"
+    }
+  ],
+  "history.stat.allGames": [
+    {
+      "type": 0,
+      "value": "All completed games"
+    }
+  ],
+  "history.stat.games": [
+    {
+      "type": 0,
+      "value": "Games"
+    }
+  ],
+  "history.stat.lossStreak": [
+    {
+      "type": 0,
+      "value": "Loss streak"
+    }
+  ],
+  "history.stat.record": [
+    {
+      "type": 0,
+      "value": "Record"
+    }
+  ],
+  "history.stat.streak": [
+    {
+      "type": 0,
+      "value": "Streak"
+    }
+  ],
+  "history.stat.winRate": [
+    {
+      "type": 0,
+      "value": "Win rate"
+    }
+  ],
+  "history.stat.winRateAll": [
+    {
+      "type": 0,
+      "value": "Against everyone: "
+    },
+    {
+      "type": 1,
+      "value": "rate"
+    }
+  ],
+  "history.stat.winRateBots": [
+    {
+      "type": 0,
+      "value": "Against bots: "
+    },
+    {
+      "type": 1,
+      "value": "rate"
+    }
+  ],
+  "history.stat.winRatePlayers": [
+    {
+      "type": 0,
+      "value": "Against players: "
+    },
+    {
+      "type": 1,
+      "value": "rate"
+    }
+  ],
+  "history.stat.winStreak": [
+    {
+      "type": 0,
+      "value": "Win streak"
+    }
+  ],
+  "history.tab.heroes": [
+    {
+      "type": 0,
+      "value": "Heroes"
+    }
+  ],
+  "history.tab.matches": [
+    {
+      "type": 0,
+      "value": "Matches"
+    }
+  ],
+  "history.tab.overview": [
+    {
+      "type": 0,
+      "value": "Overview"
+    }
+  ],
+  "history.title": [
+    {
+      "type": 0,
+      "value": "Match history"
+    }
+  ],
   "landing.accountAccess": [
     {
       "type": 0,
@@ -23758,38 +24184,6 @@
             {
               "type": 0,
               "value": " to rejoin"
-            }
-          ]
-        }
-      },
-      "offset": 0,
-      "pluralType": "cardinal"
-    }
-  ],
-  "lobby.count.saved": [
-    {
-      "type": 6,
-      "value": "count",
-      "options": {
-        "one": {
-          "value": [
-            {
-              "type": 7
-            },
-            {
-              "type": 0,
-              "value": " saved"
-            }
-          ]
-        },
-        "other": {
-          "value": [
-            {
-              "type": 7
-            },
-            {
-              "type": 0,
-              "value": " saved"
             }
           ]
         }
@@ -24734,6 +25128,18 @@
       "value": "Decks"
     }
   ],
+  "lobby.nav.history": [
+    {
+      "type": 0,
+      "value": "Match history"
+    }
+  ],
+  "lobby.nav.historyShort": [
+    {
+      "type": 0,
+      "value": "History"
+    }
+  ],
   "lobby.nav.home": [
     {
       "type": 0,
@@ -24750,12 +25156,6 @@
     {
       "type": 0,
       "value": "Primary navigation"
-    }
-  ],
-  "lobby.nav.replays": [
-    {
-      "type": 0,
-      "value": "Replays"
     }
   ],
   "lobby.nav.rooms": [
@@ -26227,44 +26627,6 @@
       "value": "Replay"
     }
   ],
-  "replay.daysLeft": [
-    {
-      "type": 6,
-      "value": "count",
-      "options": {
-        "one": {
-          "value": [
-            {
-              "type": 7
-            },
-            {
-              "type": 0,
-              "value": " day left"
-            }
-          ]
-        },
-        "other": {
-          "value": [
-            {
-              "type": 7
-            },
-            {
-              "type": 0,
-              "value": " days left"
-            }
-          ]
-        }
-      },
-      "offset": 0,
-      "pluralType": "cardinal"
-    }
-  ],
-  "replay.defeat": [
-    {
-      "type": 0,
-      "value": "Defeat"
-    }
-  ],
   "replay.delete": [
     {
       "type": 0,
@@ -26275,40 +26637,6 @@
     {
       "type": 0,
       "value": "Deleting replay"
-    }
-  ],
-  "replay.emptyBody": [
-    {
-      "type": 0,
-      "value": "Completed games and manually ended bot games will appear here automatically."
-    }
-  ],
-  "replay.emptyTitle": [
-    {
-      "type": 0,
-      "value": "No saved replays yet"
-    }
-  ],
-  "replay.ended": [
-    {
-      "type": 0,
-      "value": "Ended"
-    }
-  ],
-  "replay.expiresAt": [
-    {
-      "type": 0,
-      "value": "Expires "
-    },
-    {
-      "type": 1,
-      "value": "date"
-    }
-  ],
-  "replay.expiresToday": [
-    {
-      "type": 0,
-      "value": "Expires today"
     }
   ],
   "replay.exportJson": [
@@ -26323,104 +26651,16 @@
       "value": "Favorite replay"
     }
   ],
-  "replay.favoriteEmptyBody": [
-    {
-      "type": 0,
-      "value": "Favorite a replay to keep it indefinitely and find it here."
-    }
-  ],
-  "replay.favoriteEmptyTitle": [
-    {
-      "type": 0,
-      "value": "No favorite replays yet"
-    }
-  ],
   "replay.favoriteLimit": [
     {
       "type": 0,
       "value": "You can favorite up to 20 replays. Remove one from favorites first."
     }
   ],
-  "replay.favoriteRetained": [
-    {
-      "type": 0,
-      "value": "Favorited · kept indefinitely"
-    }
-  ],
   "replay.favoriteSaving": [
     {
       "type": 0,
       "value": "Saving favorite"
-    }
-  ],
-  "replay.filterAll": [
-    {
-      "type": 0,
-      "value": "All"
-    }
-  ],
-  "replay.filterFavorites": [
-    {
-      "type": 0,
-      "value": "Favorites"
-    }
-  ],
-  "replay.filterLabel": [
-    {
-      "type": 0,
-      "value": "Replay lists"
-    }
-  ],
-  "replay.frameCount": [
-    {
-      "type": 6,
-      "value": "count",
-      "options": {
-        "one": {
-          "value": [
-            {
-              "type": 7
-            },
-            {
-              "type": 0,
-              "value": " frame"
-            }
-          ]
-        },
-        "other": {
-          "value": [
-            {
-              "type": 7
-            },
-            {
-              "type": 0,
-              "value": " frames"
-            }
-          ]
-        }
-      },
-      "offset": 0,
-      "pluralType": "cardinal"
-    }
-  ],
-  "replay.loading": [
-    {
-      "type": 0,
-      "value": "Loading replays…"
-    }
-  ],
-  "replay.matchup": [
-    {
-      "type": 1,
-      "value": "firstHero"
-    },
-    {
-      "type": 0,
-      "value": " versus "
-    },
-    {
-      "type": 1,
-      "value": "secondHero"
     }
   ],
   "replay.notes.add": [
@@ -26535,46 +26775,16 @@
       "value": "Marked frames"
     }
   ],
-  "replay.openFile": [
-    {
-      "type": 0,
-      "value": "Open replay file…"
-    }
-  ],
-  "replay.openFileShort": [
-    {
-      "type": 0,
-      "value": "Open file"
-    }
-  ],
   "replay.prepareExport": [
     {
       "type": 0,
       "value": "Preparing replay export"
     }
   ],
-  "replay.retention": [
-    {
-      "type": 0,
-      "value": "Replays are saved for 7 days. Favorite up to 20 to keep them indefinitely."
-    }
-  ],
-  "replay.title": [
-    {
-      "type": 0,
-      "value": "My replays"
-    }
-  ],
   "replay.unfavorite": [
     {
       "type": 0,
       "value": "Remove replay from favorites"
-    }
-  ],
-  "replay.victory": [
-    {
-      "type": 0,
-      "value": "Victory"
     }
   ],
   "replay.watch": [

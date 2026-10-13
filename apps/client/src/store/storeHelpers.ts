@@ -1,6 +1,7 @@
 import type { CardPoolMode, Format } from "@fyendal/shared";
 import type { StoreState } from "./types.js";
 import type { LobbySettings } from "../storage.js";
+import { initialHistoryState } from "./historyActions.js";
 
 export function initialStoreProjection(
   auth: { token: string; username: string } | null,
@@ -36,6 +37,7 @@ export function initialStoreProjection(
     activeSavedReplayId: null,
     savedReplays: [],
     replaysLoading: false,
+    ...initialHistoryState(),
     error: null,
     opponentConnected: true,
     latestEmote: null,

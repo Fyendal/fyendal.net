@@ -22266,6 +22266,358 @@
       "value": "右侧武器"
     }
   ],
+  "history.filter.anyFormat": [
+    {
+      "type": 0,
+      "value": "所有赛制"
+    }
+  ],
+  "history.filter.anyHero": [
+    {
+      "type": 0,
+      "value": "所有英雄"
+    }
+  ],
+  "history.filter.format": [
+    {
+      "type": 0,
+      "value": "赛制"
+    }
+  ],
+  "history.filter.hero": [
+    {
+      "type": 0,
+      "value": "英雄"
+    }
+  ],
+  "history.heroes.games": [
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " 场"
+    }
+  ],
+  "history.heroes.lastPlayed": [
+    {
+      "type": 0,
+      "value": "最近使用 "
+    },
+    {
+      "type": 1,
+      "value": "date"
+    }
+  ],
+  "history.heroes.matchups": [
+    {
+      "type": 0,
+      "value": "对阵各英雄"
+    }
+  ],
+  "history.heroes.noMatchups": [
+    {
+      "type": 0,
+      "value": "该英雄暂无已分胜负的对局。"
+    }
+  ],
+  "history.match.deletedPlayer": [
+    {
+      "type": 0,
+      "value": "已注销玩家"
+    }
+  ],
+  "history.match.matchup": [
+    {
+      "type": 1,
+      "value": "you"
+    },
+    {
+      "type": 0,
+      "value": " 对阵 "
+    },
+    {
+      "type": 1,
+      "value": "opponent"
+    }
+  ],
+  "history.match.practiceBot": [
+    {
+      "type": 0,
+      "value": "练习机器人"
+    }
+  ],
+  "history.match.replayDaysLeft": [
+    {
+      "type": 0,
+      "value": "回放剩余 "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " 天"
+    }
+  ],
+  "history.match.replayExpired": [
+    {
+      "type": 0,
+      "value": "回放已过期"
+    }
+  ],
+  "history.match.replayExpiresSoon": [
+    {
+      "type": 0,
+      "value": "回放将在 "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " 天后过期"
+    }
+  ],
+  "history.match.replayKept": [
+    {
+      "type": 0,
+      "value": "已收藏，永久保留"
+    }
+  ],
+  "history.matches.empty": [
+    {
+      "type": 0,
+      "value": "暂无对局。与机器人或玩家进行一场对局后会显示在这里。"
+    }
+  ],
+  "history.matches.emptyFiltered": [
+    {
+      "type": 0,
+      "value": "没有符合筛选条件的对局。"
+    }
+  ],
+  "history.matches.loadError": [
+    {
+      "type": 0,
+      "value": "无法加载对局。"
+    }
+  ],
+  "history.matches.more": [
+    {
+      "type": 0,
+      "value": "显示更早的对局"
+    }
+  ],
+  "history.matches.openFile": [
+    {
+      "type": 0,
+      "value": "打开回放文件"
+    }
+  ],
+  "history.matches.recordsError": [
+    {
+      "type": 0,
+      "value": "无法加载你的战绩。"
+    }
+  ],
+  "history.matches.retention": [
+    {
+      "type": 0,
+      "value": "回放保留 7 天，收藏后可永久保留。"
+    }
+  ],
+  "history.matches.retry": [
+    {
+      "type": 0,
+      "value": "重试"
+    }
+  ],
+  "history.overview.recent": [
+    {
+      "type": 0,
+      "value": "最近对局"
+    }
+  ],
+  "history.overview.seeAll": [
+    {
+      "type": 0,
+      "value": "查看全部对局"
+    }
+  ],
+  "history.reason.loss.concede": [
+    {
+      "type": 0,
+      "value": "你已认输"
+    }
+  ],
+  "history.reason.loss.idle": [
+    {
+      "type": 0,
+      "value": "你处于挂机状态"
+    }
+  ],
+  "history.reason.loss.lethal": [
+    {
+      "type": 0,
+      "value": "被致命伤害击败"
+    }
+  ],
+  "history.reason.win.concede": [
+    {
+      "type": 0,
+      "value": "对手认输"
+    }
+  ],
+  "history.reason.win.idle": [
+    {
+      "type": 0,
+      "value": "对手挂机"
+    }
+  ],
+  "history.reason.win.lethal": [
+    {
+      "type": 0,
+      "value": "致命伤害获胜"
+    }
+  ],
+  "history.record.score": [
+    {
+      "type": 1,
+      "value": "wins"
+    },
+    {
+      "type": 0,
+      "value": "–"
+    },
+    {
+      "type": 1,
+      "value": "losses"
+    }
+  ],
+  "history.result.draw": [
+    {
+      "type": 0,
+      "value": "平局"
+    }
+  ],
+  "history.result.ended": [
+    {
+      "type": 0,
+      "value": "已结束"
+    }
+  ],
+  "history.result.loss": [
+    {
+      "type": 0,
+      "value": "失败"
+    }
+  ],
+  "history.result.win": [
+    {
+      "type": 0,
+      "value": "胜利"
+    }
+  ],
+  "history.stat.allGames": [
+    {
+      "type": 0,
+      "value": "所有已完成的对局"
+    }
+  ],
+  "history.stat.games": [
+    {
+      "type": 0,
+      "value": "对局数"
+    }
+  ],
+  "history.stat.lossStreak": [
+    {
+      "type": 0,
+      "value": "连败"
+    }
+  ],
+  "history.stat.record": [
+    {
+      "type": 0,
+      "value": "战绩"
+    }
+  ],
+  "history.stat.streak": [
+    {
+      "type": 0,
+      "value": "连胜/连败"
+    }
+  ],
+  "history.stat.winRate": [
+    {
+      "type": 0,
+      "value": "胜率"
+    }
+  ],
+  "history.stat.winRateAll": [
+    {
+      "type": 0,
+      "value": "对所有对手："
+    },
+    {
+      "type": 1,
+      "value": "rate"
+    }
+  ],
+  "history.stat.winRateBots": [
+    {
+      "type": 0,
+      "value": "对机器人："
+    },
+    {
+      "type": 1,
+      "value": "rate"
+    }
+  ],
+  "history.stat.winRatePlayers": [
+    {
+      "type": 0,
+      "value": "对玩家："
+    },
+    {
+      "type": 1,
+      "value": "rate"
+    }
+  ],
+  "history.stat.winStreak": [
+    {
+      "type": 0,
+      "value": "连胜"
+    }
+  ],
+  "history.tab.heroes": [
+    {
+      "type": 0,
+      "value": "英雄"
+    }
+  ],
+  "history.tab.matches": [
+    {
+      "type": 0,
+      "value": "对局"
+    }
+  ],
+  "history.tab.overview": [
+    {
+      "type": 0,
+      "value": "概览"
+    }
+  ],
+  "history.title": [
+    {
+      "type": 0,
+      "value": "对战记录"
+    }
+  ],
   "landing.accountAccess": [
     {
       "type": 0,
@@ -22822,20 +23174,6 @@
     {
       "type": 0,
       "value": " 个可重连"
-    }
-  ],
-  "lobby.count.saved": [
-    {
-      "type": 0,
-      "value": "已保存 "
-    },
-    {
-      "type": 1,
-      "value": "count"
-    },
-    {
-      "type": 0,
-      "value": " 个"
     }
   ],
   "lobby.count.waiting": [
@@ -23628,6 +23966,18 @@
       "value": "牌组"
     }
   ],
+  "lobby.nav.history": [
+    {
+      "type": 0,
+      "value": "对战记录"
+    }
+  ],
+  "lobby.nav.historyShort": [
+    {
+      "type": 0,
+      "value": "记录"
+    }
+  ],
   "lobby.nav.home": [
     {
       "type": 0,
@@ -23644,12 +23994,6 @@
     {
       "type": 0,
       "value": "主导航"
-    }
-  ],
-  "lobby.nav.replays": [
-    {
-      "type": 0,
-      "value": "回放"
     }
   ],
   "lobby.nav.rooms": [
@@ -24975,26 +25319,6 @@
       "value": "回放"
     }
   ],
-  "replay.daysLeft": [
-    {
-      "type": 0,
-      "value": "剩余 "
-    },
-    {
-      "type": 1,
-      "value": "count"
-    },
-    {
-      "type": 0,
-      "value": " 天"
-    }
-  ],
-  "replay.defeat": [
-    {
-      "type": 0,
-      "value": "失败"
-    }
-  ],
   "replay.delete": [
     {
       "type": 0,
@@ -25005,40 +25329,6 @@
     {
       "type": 0,
       "value": "正在删除回放"
-    }
-  ],
-  "replay.emptyBody": [
-    {
-      "type": 0,
-      "value": "已完成的对局和手动结束的机器人对局会自动显示在这里。"
-    }
-  ],
-  "replay.emptyTitle": [
-    {
-      "type": 0,
-      "value": "暂无已保存的回放"
-    }
-  ],
-  "replay.ended": [
-    {
-      "type": 0,
-      "value": "已结束"
-    }
-  ],
-  "replay.expiresAt": [
-    {
-      "type": 0,
-      "value": "到期时间："
-    },
-    {
-      "type": 1,
-      "value": "date"
-    }
-  ],
-  "replay.expiresToday": [
-    {
-      "type": 0,
-      "value": "今天到期"
     }
   ],
   "replay.exportJson": [
@@ -25053,82 +25343,16 @@
       "value": "收藏回放"
     }
   ],
-  "replay.favoriteEmptyBody": [
-    {
-      "type": 0,
-      "value": "收藏回放即可永久保留，并在这里快速找到。"
-    }
-  ],
-  "replay.favoriteEmptyTitle": [
-    {
-      "type": 0,
-      "value": "暂无收藏的回放"
-    }
-  ],
   "replay.favoriteLimit": [
     {
       "type": 0,
       "value": "最多只能收藏 20 个回放。请先取消收藏一个回放。"
     }
   ],
-  "replay.favoriteRetained": [
-    {
-      "type": 0,
-      "value": "已收藏 · 永久保留"
-    }
-  ],
   "replay.favoriteSaving": [
     {
       "type": 0,
       "value": "正在保存收藏"
-    }
-  ],
-  "replay.filterAll": [
-    {
-      "type": 0,
-      "value": "全部"
-    }
-  ],
-  "replay.filterFavorites": [
-    {
-      "type": 0,
-      "value": "收藏"
-    }
-  ],
-  "replay.filterLabel": [
-    {
-      "type": 0,
-      "value": "回放列表"
-    }
-  ],
-  "replay.frameCount": [
-    {
-      "type": 1,
-      "value": "count"
-    },
-    {
-      "type": 0,
-      "value": " 帧"
-    }
-  ],
-  "replay.loading": [
-    {
-      "type": 0,
-      "value": "正在加载回放…"
-    }
-  ],
-  "replay.matchup": [
-    {
-      "type": 1,
-      "value": "firstHero"
-    },
-    {
-      "type": 0,
-      "value": " 对阵 "
-    },
-    {
-      "type": 1,
-      "value": "secondHero"
     }
   ],
   "replay.notes.add": [
@@ -25263,46 +25487,16 @@
       "value": "已标记帧"
     }
   ],
-  "replay.openFile": [
-    {
-      "type": 0,
-      "value": "打开回放文件…"
-    }
-  ],
-  "replay.openFileShort": [
-    {
-      "type": 0,
-      "value": "打开文件"
-    }
-  ],
   "replay.prepareExport": [
     {
       "type": 0,
       "value": "正在准备导出回放"
     }
   ],
-  "replay.retention": [
-    {
-      "type": 0,
-      "value": "回放将保存 7 天。最多可收藏 20 个回放并永久保留。"
-    }
-  ],
-  "replay.title": [
-    {
-      "type": 0,
-      "value": "我的回放"
-    }
-  ],
   "replay.unfavorite": [
     {
       "type": 0,
       "value": "取消收藏回放"
-    }
-  ],
-  "replay.victory": [
-    {
-      "type": 0,
-      "value": "胜利"
     }
   ],
   "replay.watch": [

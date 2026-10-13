@@ -294,7 +294,7 @@
   font-weight: 750;
   letter-spacing: .7px;
 }
-:where(.lobby-page .panel > :is(.deck-panel-heading, .rooms-header, .replay-library-header, .achievements-header)) {
+:where(.lobby-page .panel > :is(.deck-panel-heading, .rooms-header, .history-header, .achievements-header)) {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -303,7 +303,7 @@
   border-bottom: 1px solid #45331f88;
   padding-bottom: 9px;
 }
-:where(.lobby-page .panel > :is(.deck-panel-heading, .rooms-header, .replay-library-header, .achievements-header)) .panel-title {
+:where(.lobby-page .panel > :is(.deck-panel-heading, .rooms-header, .history-header, .achievements-header)) .panel-title {
   border-bottom: 0;
   padding-bottom: 0;
 }
@@ -381,18 +381,11 @@
 .btn-danger { background: #781f1b; border-color: #bc4b40; }
 .btn-danger:hover:not(:disabled) { background: #9e2b25; border-color: #d86a5c; }
 
-.replay-library { min-width: 0; }
-.replay-library-header,
 .achievements-header {
   align-items: flex-start;
 }
-.replay-library-header .panel-title,
 .achievements-header .panel-title { margin-bottom: 7px; }
-.replay-library-header p,
-.achievements-header p,
-.replay-empty p { margin: 0; color: #a99778; line-height: 1.45; }
-.replay-library-import { flex: 0 0 auto; }
-.replay-open-label-mobile { display: none; }
+.achievements-header p { margin: 0; color: #a99778; line-height: 1.45; }
 .lobby-panel-tabs {
   display: flex;
   gap: 8px;
@@ -424,121 +417,16 @@
   border-radius: 999px;
   background: #0006;
 }
-.replay-empty {
-  padding: 42px 18px;
-  text-align: center;
-  border: 1px dashed #45331f;
-  background: #100a05;
-}
-.replay-empty h3 { margin: 0 0 8px; color: #d9c391; }
-.replay-grid { display: grid; gap: 12px; }
-.replay-card {
-  content-visibility: auto;
-  contain-intrinsic-size: 0 92px;
-  display: grid;
-  grid-template-columns: minmax(250px, 1.4fr) minmax(190px, 1fr) auto;
-  align-items: center;
-  gap: 18px;
-  padding: 13px;
-  border: 1px solid #45331f;
-  background: linear-gradient(110deg, #120b06, #1b1108);
-}
-.replay-matchup {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
-  align-items: center;
-  gap: 10px;
-  min-width: 0;
-}
-.replay-hero {
-  display: grid;
-  grid-template-columns: 42px minmax(0, 1fr);
-  align-items: center;
-  gap: 9px;
-  min-width: 0;
-}
-.replay-hero img {
-  width: 42px;
-  height: 58px;
-  object-fit: cover;
-  border-radius: 3px;
-  border: 1px solid #6a512c;
-}
-.replay-hero span {
-  overflow: hidden;
-  color: #e3d2ad;
-  font-weight: 600;
-  text-overflow: ellipsis;
-}
-.replay-vs {
-  padding: 3px 5px;
-  background: #1a1008;
-  color: #9d8457;
-  font: 600 10px var(--font-display);
-  letter-spacing: 1px;
-}
-.replay-card-meta { display: grid; gap: 5px; color: #a99778; font-size: 12px; }
-.replay-card-tags { display: flex; align-items: center; gap: 8px; }
-.replay-win { color: #76c89b; }
-.replay-loss { color: #d17b70; }
-.replay-ended { color: #c7b17e; }
-.replay-expiry { color: #c7b17e; }
-.replay-expiry.urgent { color: #ef9b61; font-weight: 700; }
-.replay-favorite-retained { color: #e0b84f; font-weight: 700; }
-.replay-card-actions { display: flex; flex-direction: column; gap: 8px; min-width: 130px; }
-.replay-card-secondary-actions {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 8px;
-}
-.replay-card-icon-button {
-  display: grid;
-  min-width: 0;
-  height: 40px;
-  padding: 8px;
-  place-items: center;
-  border-radius: 6px;
-  clip-path: none;
-}
-.replay-card-icon-button svg {
-  width: 20px;
-  height: 20px;
-  fill: currentColor;
-}
-.replay-favorite-button.selected {
-  border-color: #c79b31;
-  background: #4a3510;
-  color: #f0c85a;
-}
-
-@media (max-width: 900px) {
-  .replay-card { grid-template-columns: 1fr auto; }
-  .replay-card-meta { grid-column: 1; }
-  .replay-card-actions { grid-column: 2; grid-row: 1 / span 2; }
-}
-
 @media (max-width: 620px) {
-  .replay-library { padding: 14px; }
-  .replay-library-header,
   .achievements-header {
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
     gap: 10px;
   }
-  .replay-library-header .panel-title,
   .achievements-header .panel-title {
     margin-bottom: 5px;
   }
-  .replay-library-header p,
   .achievements-header p { font-size: 13px; line-height: 1.35; }
-  .replay-library-import button {
-    width: auto;
-    min-height: 44px;
-    padding-inline: 12px;
-    white-space: nowrap;
-  }
-  .replay-open-label-desktop { display: none; }
-  .replay-open-label-mobile { display: inline; }
   .lobby-panel-tabs {
     gap: 4px;
     margin-bottom: 10px;
@@ -550,53 +438,6 @@
     font-size: 14px;
     letter-spacing: .6px;
   }
-  .replay-grid { gap: 10px; }
-  .replay-card {
-    contain-intrinsic-size: 0 164px;
-    grid-template-columns: 1fr;
-    gap: 10px;
-    padding: 11px;
-  }
-  .replay-card-meta,
-  .replay-card-actions { grid-column: 1; grid-row: auto; }
-  .replay-matchup { gap: 7px; }
-  .replay-hero {
-    grid-template-columns: 36px minmax(0, 1fr);
-    gap: 7px;
-  }
-  .replay-hero img {
-    width: 36px;
-    height: 49px;
-  }
-  .replay-hero span {
-    overflow: hidden;
-    font-size: 14px;
-    line-height: 1.2;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-  .replay-vs { padding-inline: 3px; }
-  .replay-card-meta {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 5px 9px;
-  }
-  .replay-card-tags { gap: 6px; }
-  .replay-card-tags .replay-ended,
-  .replay-frame-count,
-  .replay-expiry:not(.urgent) { display: none; }
-  .replay-card-actions {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    gap: 7px;
-  }
-  .replay-card-actions > button { min-height: 44px; }
-  .replay-card-secondary-actions {
-    grid-template-columns: repeat(3, 44px);
-    gap: 7px;
-  }
-  .replay-card-icon-button { height: 44px; }
 }
 
 

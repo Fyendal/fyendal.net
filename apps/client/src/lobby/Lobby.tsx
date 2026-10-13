@@ -24,11 +24,11 @@ const RoomInviteModal = lazy(() => import("./RoomInviteModal.js").then((module) 
 const DeckLibrary = lazy(() => import("./DeckLibrary.js").then((module) => ({ default: module.DeckLibrary })));
 const AccountPanel = lazy(() => import("../auth/AccountPanel.js").then((module) => ({ default: module.AccountPanel })));
 const AchievementsPanel = lazy(() => import("../achievements/AchievementsPanel.js").then((module) => ({ default: module.AchievementsPanel })));
-const ReplayLibrary = lazy(() => import("../replay/ReplayLibrary.js").then((module) => ({ default: module.ReplayLibrary })));
+const MatchHistory = lazy(() => import("../history/MatchHistory.js").then((module) => ({ default: module.MatchHistory })));
 const VersionUpdateModal = lazy(() => import("../notices/VersionUpdateModal.js")
   .then((module) => ({ default: module.VersionUpdateModal })));
 
-function MobileLobbyIcon({ kind }: { kind: "home" | "decks" | "rooms" | "replays" | "more" }) {
+function MobileLobbyIcon({ kind }: { kind: "home" | "decks" | "rooms" | "history" | "more" }) {
   const content = kind === "home" ? (
     <>
       <path d="M3.5 10.5 12 3.5l8.5 7" />
@@ -45,11 +45,10 @@ function MobileLobbyIcon({ kind }: { kind: "home" | "decks" | "rooms" | "replays
       <circle cx="17" cy="9" r="2.5" />
       <path d="M3.5 20v-2a5.5 5.5 0 0 1 11 0v2M14 15a4.5 4.5 0 0 1 6.5 4v1" />
     </>
-  ) : kind === "replays" ? (
+  ) : kind === "history" ? (
     <>
-      <path d="M4.5 8V3.5M4.5 3.5H9" />
-      <path d="M5 7a8.5 8.5 0 1 1-1 8" />
-      <path d="m10 9 6 3-6 3Z" />
+      <path d="M4.5 4.5h15v15h-15z" />
+      <path d="M8 9.5h8M8 13h5M8 16.5h6.5" />
     </>
   ) : (
     <>
@@ -208,15 +207,10 @@ export function Lobby() {
                 ) : null}
               </button>
               <button
-                className={`format-card${rail === "replays" ? " selected" : ""}`}
-                onClick={() => setRail("replays")}
+                className={`format-card${rail === "history" ? " selected" : ""}`}
+                onClick={() => setRail("history")}
               >
-                <span className="format-card-name">{intl.formatMessage({ id: "lobby.nav.replays" })}</span>
-                {savedReplays.length > 0 ? (
-                  <span className="format-card-queue">
-                    {intl.formatMessage({ id: "lobby.count.saved" }, { count: savedReplays.length })}
-                  </span>
-                ) : null}
+                <span className="format-card-name">{intl.formatMessage({ id: "lobby.nav.history" })}</span>
               </button>
               <button
                 className={`format-card${rail === "achievements" ? " selected" : ""}`}
@@ -247,7 +241,7 @@ export function Lobby() {
             {rail === "decks" && (
               <DeckLibrary formatFilter={deckFormatFilter} onFormatFilterChange={setDeckFormatFilter} />
             )}
-            {rail === "replays" && <ReplayLibrary />}
+            {rail === "history" && <MatchHistory />}
             {rail === "achievements" && <AchievementsPanel />}
             {rail === "account" && <AccountPanel />}
           </Suspense>
@@ -283,12 +277,12 @@ export function Lobby() {
         </button>
         <button
           type="button"
-          className={mobileLobbyDestinationSelected("replays", rail) ? "selected" : ""}
-          aria-current={mobileLobbyDestinationSelected("replays", rail) ? "page" : undefined}
-          onClick={() => setRail("replays")}
+          className={mobileLobbyDestinationSelected("history", rail) ? "selected" : ""}
+          aria-current={mobileLobbyDestinationSelected("history", rail) ? "page" : undefined}
+          onClick={() => setRail("history")}
         >
-          <MobileLobbyIcon kind="replays" />
-          <span className="mobile-lobby-nav-label">{intl.formatMessage({ id: "lobby.nav.replays" })}</span>
+          <MobileLobbyIcon kind="history" />
+          <span className="mobile-lobby-nav-label">{intl.formatMessage({ id: "lobby.nav.historyShort" })}</span>
         </button>
         <button
           type="button"

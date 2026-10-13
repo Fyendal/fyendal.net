@@ -1,6 +1,6 @@
 import type { LobbyRail } from "../store/types.js";
 
-export type MobileLobbyDestination = "home" | "decks" | "all" | "replays" | "more";
+export type MobileLobbyDestination = "home" | "decks" | "all" | "history" | "more";
 
 export function mobileLobbyDestinationSelected(
   destination: MobileLobbyDestination,

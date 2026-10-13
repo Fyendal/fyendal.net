@@ -15,6 +15,8 @@ import {
   decodeOkResponse,
   decodeReplayResponse,
   decodeReplayNotesResponse,
+  decodeMatchRecordsResponse,
+  decodeMatchesResponse,
   decodeReplaysResponse,
   decodeStatsResponse,
   decodeGlobalNoticeResponse,
@@ -37,6 +39,9 @@ import {
   type ReplayResponse,
   type ReplayNotesResponse,
   type ReplayNoteInput,
+  type MatchListFilters,
+  type MatchRecordsResponse,
+  type MatchesResponse,
   type ReplaysResponse,
   type StatsResponse,
 } from "@fyendal/protocol";
@@ -194,6 +199,27 @@ export type StatsOk = StatsResponse;
 
 export function apiStats(): Promise<StatsOk | ApiError> {
   return get("stats", decodeStatsResponse);
+}
+
+// ── match history ─────────────────────────────────────────────────────────
+
+export function apiMatchRecords(token: string, signal?: AbortSignal): Promise<MatchRecordsResponse | ApiError> {
+  return get("matches/records", decodeMatchRecordsResponse, { token, signal });
+}
+
+export function apiMatches(
+  token: string,
+  filters: MatchListFilters,
+  cursor: string | null,
+  signal?: AbortSignal,
+): Promise<MatchesResponse | ApiError> {
+  const params = new URLSearchParams();
+  if (filters.opponent && filters.opponent !== "all") params.set("opponent", filters.opponent);
+  if (filters.format) params.set("format", filters.format);
+  if (filters.heroId) params.set("hero", filters.heroId);
+  if (cursor) params.set("cursor", cursor);
+  const query = params.toString();
+  return get(`matches${query ? `?${query}` : ""}`, decodeMatchesResponse, { token, signal });
 }
 
 // ── replays ───────────────────────────────────────────────────────────────

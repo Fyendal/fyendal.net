@@ -70,6 +70,7 @@ import {
 } from "./auth/auth.js";
 import { createAccountActions } from "./store/accountActions.js";
 import { createReplayActions } from "./store/replayActions.js";
+import { createHistoryActions, initialHistoryState } from "./store/historyActions.js";
 import { replayViewerProjection, snapshotBeforeReplay } from "./store/replayView.js";
 import { createErrorController } from "./store/errorController.js";
 import { withReplayNotes } from "./replay/replayFileNotes.js";
@@ -372,6 +373,7 @@ export const useStore = create<StoreState>((set, get) => {
       friendInviteTarget: null,
       savedReplays: [],
       replaysLoading: false,
+      ...initialHistoryState(),
       queueCounts: { cc: 0, "silver-age": 0 },
       lobbyRail: "home",
       cardPoolModes: { ...DEFAULT_LOBBY_SETTINGS.cardPoolModes },
@@ -768,6 +770,7 @@ export const useStore = create<StoreState>((set, get) => {
         set({ authUser: msg.username });
         void get().refreshDecks();
         void get().refreshReplays();
+        void get().refreshMatchRecords();
         // logging in while on the lobby: re-list so "Your Games" flags appear
         if (get().screen === "lobby") get().listRooms();
         break;
@@ -1062,6 +1065,8 @@ export const useStore = create<StoreState>((set, get) => {
         if (msg.view.phase === "game-over" && get().authToken) {
           if (code) void syncCompletedReplay(code);
           void get().refreshReplays();
+          void get().refreshMatchRecords();
+          if (get().matchList.loaded) void get().loadMatches(get().matchList.filters);
         }
         break;
       }
@@ -1281,12 +1286,14 @@ export const useStore = create<StoreState>((set, get) => {
     openReplay,
     showError: errors.show,
   });
+  const historyActions = createHistoryActions({ set, get, authRequest, isCurrentAuth });
 
   return {
     ...initialStoreProjection(stored, lobbySettings),
     pendingFabraryPlay: initialPlayRoute ? { route: initialPlayRoute, status: "idle", result: null } : null,
     ...accountActions,
     ...replayActions,
+    ...historyActions,
     dismissFabraryPlay: () => {
       history.replaceState(null, "", "/");
       set({ pendingFabraryPlay: null });

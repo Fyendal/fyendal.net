@@ -1397,7 +1397,7 @@ describe("client connection and account race fences", () => {
     localStorage.setItem("fyendal-auth", JSON.stringify({ token: "token-a", username: "Alice" }));
     const { useStore } = await import("../store.js");
 
-    useStore.getState().setLobbyRail("replays");
+    useStore.getState().setLobbyRail("history");
     useStore.getState().createBotRoom("silver-age", "precon-svi");
     const socket = FakeWebSocket.instances[0]!;
     socket.open();
@@ -1422,7 +1422,7 @@ describe("client connection and account race fences", () => {
     });
     expect(useStore.getState()).toMatchObject({
       screen: "lobby",
-      lobbyRail: "replays",
+      lobbyRail: "history",
       botGame: false,
     });
     expect(socket.readyState).toBe(FakeWebSocket.OPEN);

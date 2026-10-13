@@ -245,7 +245,9 @@ export async function listMatches(
 ): Promise<MatchListPage> {
   const limit = Math.max(1, Math.min(options.limit ?? MATCH_PAGE_SIZE, MAX_EXPORTED_MATCHES));
   const now = options.now ?? Date.now();
-  const params: unknown[] = [userId, now];
+  // Replay availability is resolved in JS below; `now` is deliberately not a
+  // SQL parameter because an unreferenced parameter has no inferable type.
+  const params: unknown[] = [userId];
   const where = ["me.user_id = $1"];
   if (filters.opponent === "players") where.push("m.mode = 'pvp'");
   if (filters.opponent === "bots") where.push("m.mode = 'bot'");

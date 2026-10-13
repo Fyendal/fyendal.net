@@ -30,6 +30,9 @@ import type {
   DeckDetailResponse,
   DeckSummary,
   FabraryDeckPreviewResponse,
+  MatchListFilters,
+  MatchRecords,
+  MatchSummary,
   ReplaySummary,
   ReplayServerNote,
 } from "@fyendal/protocol";
@@ -55,8 +58,17 @@ export interface PendingFabraryPlay {
 }
 
 export type Screen = "lobby" | "room-loading" | "waiting" | "prep" | "game" | "replay";
-export type LobbyRail = "home" | "decks" | "all" | "replays" | "achievements" | "account";
+export type LobbyRail = "home" | "decks" | "all" | "history" | "achievements" | "account";
 export type MatchAcceptanceRole = "existing" | "joining";
+export interface MatchListState {
+  filters: MatchListFilters;
+  matches: MatchSummary[];
+  nextCursor: string | null;
+  loading: boolean;
+  error: string | null;
+  /** True once the first page for the current filters has arrived. */
+  loaded: boolean;
+}
 export interface EmoteEvent {
   id: number;
   seat: number;
@@ -255,6 +267,15 @@ export interface StoreState {
   activeSavedReplayId: string | null;
   savedReplays: ReplaySummary[];
   replaysLoading: boolean;
+  /** Counter rows for the history tab; summed in the client per filter. */
+  matchRecords: MatchRecords | null;
+  matchRecordsLoading: boolean;
+  matchRecordsError: boolean;
+  matchList: MatchListState;
+  refreshMatchRecords: () => Promise<void>;
+  loadMatches: (filters: MatchListFilters, cursor?: string | null) => Promise<void>;
+  setMatchReplayFavorite: (matchId: string, replayId: string, favorite: boolean) => Promise<FavoriteReplayResult>;
+  deleteMatchReplay: (matchId: string, replayId: string) => Promise<DeleteReplayResult>;
   refreshReplays: () => Promise<void>;
   watchSavedReplay: (id: string) => Promise<string | null>;
   exportSavedReplay: (id: string) => Promise<string | null>;
