@@ -89,7 +89,8 @@ const PRIVACY: Section[] = [
   {
     title: "Service providers and sharing",
     body: [
-      "Fyendal has no advertising or third-party analytics and does not track you across other websites. It counts registrations, completed games, and daily active players for its own operations. Fyendal does not sell or share your information with third parties for their own purposes. Because there is no cross-site tracking, browser Do Not Track signals do not change how Fyendal operates.",
+      "Fyendal has no advertising and does not track you across other websites. It counts registrations, completed games, and daily active players for its own operations. Fyendal does not sell or share your information with third parties for their own purposes. Because there is no cross-site tracking, browser Do Not Track signals do not change how Fyendal operates.",
+      "Fyendal uses Umami, a cookieless analytics service, to count visits and which parts of the site are used, such as which tabs are opened. Umami receives standard connection and browser information, but Fyendal does not send your username, account identifiers, room codes, or game content, and Umami does not set cookies or track you across other websites.",
       "Service providers that help operate Fyendal may process information on Fyendal's behalf. They are not permitted to use it for their own purposes.",
       "Card and hero images come from a third-party content provider. Loading those images shares standard connection information with that provider, but Fyendal does not send your account credentials or username with the request.",
     ],
@@ -119,7 +120,7 @@ const PRIVACY: Section[] = [
   {
     title: "Changes and contact",
     body: [
-      `Effective September 4, 2026. This policy may change; the current version is always at /privacy/. Questions: ${CONTACT}.`,
+      `Effective October 12, 2026. This policy may change; the current version is always at /privacy/. Questions: ${CONTACT}.`,
     ],
   },
 ];

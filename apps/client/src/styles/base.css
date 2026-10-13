@@ -1,4 +1,12 @@
 @font-face {
+  font-family: "Alegreya";
+  src: url("/fonts/alegreya-500-latin.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+}
+
+@font-face {
   font-family: "Alegreya SC";
   src: url("/fonts/alegreya-sc-700-latin.woff2") format("woff2");
   font-style: normal;

@@ -1,11 +1,13 @@
 import React from "react";
 import { createRoot } from "react-dom/client";
 import { App } from "./App.js";
+import { initAnalytics } from "./analytics.js";
 import { I18nProvider, loadLocaleMessages } from "./i18n/I18nProvider.js";
 import { applyDocumentLocale, resolveInitialLocale } from "./i18n/locale.js";
 import "./styles.css";
 
 async function bootstrap(): Promise<void> {
+  initAnalytics();
   const rootElement = document.getElementById("root")!;
   let locale = resolveInitialLocale(localStorage, navigator.languages);
   applyDocumentLocale(document.documentElement, locale);

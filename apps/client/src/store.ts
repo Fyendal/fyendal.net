@@ -74,6 +74,7 @@ import { createHistoryActions, initialHistoryState } from "./store/historyAction
 import { replayViewerProjection, snapshotBeforeReplay } from "./store/replayView.js";
 import { createErrorController } from "./store/errorController.js";
 import { withReplayNotes } from "./replay/replayFileNotes.js";
+import { trackLobbyTab } from "./analytics.js";
 
 let disposeBrowserBot: (() => void) | null = null;
 let ws: WebSocket | null = null;
@@ -1415,7 +1416,10 @@ export const useStore = create<StoreState>((set, get) => {
         set({ inviteRoom: invite.room, socialOpen: false });
       }
     },
-    setLobbyRail: (lobbyRail) => set({ lobbyRail }),
+    setLobbyRail: (lobbyRail) => {
+      if (get().lobbyRail !== lobbyRail) trackLobbyTab(lobbyRail);
+      set({ lobbyRail });
+    },
     setCardPoolMode: (format, mode) => {
       const cardPoolModes = { ...get().cardPoolModes, [format]: mode };
       set({ cardPoolModes });
