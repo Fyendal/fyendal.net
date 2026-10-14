@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { legalIntents } from "@fyendal/engine";
+import type { GameIntent } from "@fyendal/shared";
 import { cardData } from "../../index.js";
 import { printingId, scenario } from "../harness.js";
 
@@ -294,6 +295,340 @@ describe("Outbreak heroes", () => {
       expect(legalIntents(game.state, 0)).not.toContainEqual(
         expect.objectContaining({ kind: "activate-ability", sourceInstanceId: azalea }),
       );
+    });
+  });
+});
+
+describe("Outbreak cards", () => {
+  const BOOTLEGGER = "bootlegger bust-up|1";
+  const MAX_TENSION = "max-tension shot|1";
+  const CURE_ALL = "cure-all elixir|0";
+  const PAUPERS_KNIFE = "pauper's knife|0";
+  const PINPOINTER = "one-click pinpointer|0";
+  const DUELING_PISTOL = "cogwerx dueling pistol|0";
+  const INCITE = "incite aggression|1";
+  const EXTINCTION = "extinction level event|1";
+  const SWAP_SPIT = "swap spit|1";
+  const BLUE = "raging onslaught|3";
+  const BLOODROT_POX = "bloodrot pox|0";
+  const FRAILTY = "frailty|0";
+
+  function boardNames(game: ReturnType<typeof scenario>, seat: number): string[] {
+    return game.state.players[seat]!.board.map((card) => cardData[card.cardId]!.name);
+  }
+
+  describe("Bootlegger Bust-Up", () => {
+    const boosted = (deckTop: string) => {
+      const game = scenario({ seats: [
+        { hero: "rhinar", hand: [BOOTLEGGER], deck: [deckTop], resources: 3, weapons: [], equipment: NO_EQUIPMENT },
+        { hero: "dorinthea", weapons: [], equipment: NO_EQUIPMENT },
+      ] });
+      return game.play(BOOTLEGGER, { boost: true });
+    };
+
+    it("gets +2 power when boosting banishes a non-Mechanologist card", () => {
+      boosted(FILLER).expectAttackValue(8).blockWith().settle().expectLife(1, 12).expectAP(0, 0);
+    });
+
+    it("gets go again instead when boosting banishes a Mechanologist card", () => {
+      boosted(ZIPPER_HIT).expectAttackValue(6).blockWith().settle().expectLife(1, 14).expectAP(0, 1);
+    });
+
+    it("gains nothing without boosting", () => {
+      const game = scenario({ seats: [
+        { hero: "rhinar", hand: [BOOTLEGGER], deck: [FILLER], resources: 3, weapons: [], equipment: NO_EQUIPMENT },
+        { hero: "dorinthea", weapons: [], equipment: NO_EQUIPMENT },
+      ] });
+      game.play(BOOTLEGGER, { boostCount: 0 }).expectAttackValue(6);
+      game.expectDeckTop(0, FILLER);
+    });
+  });
+
+  describe("Max-Tension Shot", () => {
+    const shot = (deckTop: string) => {
+      const game = scenario({ seats: [
+        {
+          hero: "rhinar",
+          arsenal: [MAX_TENSION],
+          deck: [deckTop],
+          resources: 1,
+          weapons: [DEATH_DEALER],
+          equipment: NO_EQUIPMENT,
+        },
+        { hero: "dorinthea", weapons: [], equipment: NO_EQUIPMENT },
+      ] });
+      return game.play(MAX_TENSION, { fromArsenal: true }).blockWith().settle();
+    };
+
+    it("gets go again when the revealed top card is red", () => {
+      shot(FILLER).expectLife(1, 15).expectAP(0, 1).expectDeckTop(0, FILLER).expectLog("reveals");
+    });
+
+    it("does not get go again when the revealed top card is not red", () => {
+      shot(BLUE).expectLife(1, 15).expectAP(0, 0).expectDeckTop(0, BLUE);
+    });
+  });
+
+  describe("Cure-All Elixir", () => {
+    const elixir = () => scenario({ seats: [
+      {
+        hero: "rhinar",
+        hand: [CURE_ALL, ZERO_TO_SIXTY],
+        board: [FRAILTY],
+        life: 30,
+        resources: 1,
+        weapons: [],
+        equipment: NO_EQUIPMENT,
+      },
+      { hero: "dorinthea", weapons: [], equipment: NO_EQUIPMENT },
+    ] });
+
+    it("cures a disease you control to gain 1 life, and gives the next attack +3 power", () => {
+      const game = elixir().play(CURE_ALL).chooseCard(FRAILTY);
+
+      expect(game.state.players[0]!.board).toEqual([]);
+      game.expectLife(0, 31).expectAP(0, 1);
+      game.play(ZERO_TO_SIXTY).expectAttackValue(7);
+    });
+
+    it("may decline the cure", () => {
+      const game = elixir().play(CURE_ALL).chooseOption("no");
+
+      expect(boardNames(game, 0)).toEqual(["Frailty"]);
+      game.expectLife(0, 30);
+    });
+  });
+
+  describe("Pauper's Knife", () => {
+    it("taps for a go-again 1 power attack", () => {
+      const game = scenario({ seats: [
+        { hero: "rhinar", resources: 2, weapons: [PAUPERS_KNIFE], equipment: NO_EQUIPMENT },
+        { hero: "dorinthea", weapons: [], equipment: NO_EQUIPMENT },
+      ] });
+
+      game.attackWithWeapon(PAUPERS_KNIFE).expectAttackValue(1).blockWith().settle();
+
+      game.expectLife(1, 19).expectAP(0, 1).expectResources(0, 0);
+      expect(game.state.players[0]!.weapons[0]!.tapped).toBe(true);
+    });
+  });
+
+  describe("Cogwerx Dueling Pistol", () => {
+    it("loads a steam counter with go again, then attacks by removing it on a later turn", () => {
+      const game = scenario({ seats: [
+        { hero: "rhinar", resources: 1, weapons: [DUELING_PISTOL], equipment: NO_EQUIPMENT },
+        { hero: "dorinthea", weapons: [], equipment: NO_EQUIPMENT },
+      ] });
+      const pistol = () => game.state.players[0]!.weapons[0]!;
+      const attackIntents = () => legalIntents(game.state, 0).filter((intent) =>
+        intent.kind === "activate-ability" && intent.sourceInstanceId === pistol().instanceId &&
+        (intent.abilityIndex ?? 0) === 0
+      );
+      expect(attackIntents()).toEqual([]);
+
+      game.activate(DUELING_PISTOL, { ability: 1 });
+      expect(pistol().counters?.steam).toBe(1);
+      expect(pistol().tapped).toBe(true);
+      game.expectAP(0, 1).expectResources(0, 0);
+
+      game.endTurn().endTurn();
+      game.activate(DUELING_PISTOL, { ability: 0 }).expectAttackValue(2).blockWith().settle();
+      game.expectLife(1, 18).expectAP(0, 0);
+      expect(pistol().counters?.steam ?? 0).toBe(0);
+    });
+  });
+
+  describe("One-Click Pinpointer", () => {
+    it("bottoms the arsenal and loads an arrow from hand face-up", () => {
+      const game = scenario({ seats: [
+        {
+          hero: "rhinar",
+          hand: [MAX_TENSION],
+          arsenalFaceDown: [FILLER],
+          deck: [BLUE],
+          weapons: [PINPOINTER],
+          equipment: NO_EQUIPMENT,
+        },
+        { hero: "dorinthea", weapons: [], equipment: NO_EQUIPMENT },
+      ] });
+
+      game.activate(PINPOINTER);
+      game.chooseCard(MAX_TENSION);
+
+      game.expectInZone(0, MAX_TENSION, "arsenal").expectFaceDown(0, MAX_TENSION, false);
+      game.expectDeckBottom(0, FILLER).expectAP(0, 1);
+      expect(game.state.players[0]!.weapons[0]!.tapped).toBe(true);
+    });
+
+    it("lets the controller order several arsenal cards on the bottom", () => {
+      const game = scenario({ seats: [
+        {
+          hero: "rhinar",
+          hand: [MAX_TENSION],
+          arsenal: [FILLER, "raging onslaught|2"],
+          deck: [BLUE],
+          weapons: [PINPOINTER],
+          equipment: NO_EQUIPMENT,
+        },
+        { hero: "dorinthea", weapons: [], equipment: NO_EQUIPMENT },
+      ] });
+
+      game.activate(PINPOINTER).chooseCard(FILLER);
+      game.chooseCard(MAX_TENSION);
+
+      const deck = game.state.players[0]!.deck.map((card) => card.cardId);
+      expect(deck.slice(-2)).toEqual([printingId(FILLER), printingId("raging onslaught|2")]);
+      expect(game.state.players[0]!.arsenal.map((card) => card.cardId)).toEqual([printingId(MAX_TENSION)]);
+    });
+
+    it("costs {r} more while you control another tapped bow", () => {
+      const game = scenario({ seats: [
+        {
+          hero: "rhinar",
+          hand: [MAX_TENSION, MAX_TENSION],
+          weapons: [PINPOINTER, PINPOINTER],
+          equipment: NO_EQUIPMENT,
+        },
+        { hero: "dorinthea", weapons: [], equipment: NO_EQUIPMENT },
+      ] });
+      const weapons = () => game.state.players[0]!.weapons;
+      const untappedBowActivations = () => legalIntents(game.state, 0).filter((intent) =>
+        intent.kind === "activate-ability" &&
+        weapons().some((weapon) => weapon.instanceId === intent.sourceInstanceId && !weapon.tapped)
+      );
+      const pitchCount = (intent: GameIntent) =>
+        ("pitchInstanceIds" in intent ? intent.pitchInstanceIds?.length : 0) ?? 0;
+      // With no tapped bow, the {t}-only cost needs no payment.
+      expect(untappedBowActivations().some((intent) => pitchCount(intent) === 0)).toBe(true);
+
+      game.activate(PINPOINTER);
+      game.chooseCard(MAX_TENSION);
+      expect(weapons().filter((weapon) => weapon.tapped)).toHaveLength(1);
+
+      // The remaining hand card is the only pitch source for the extra {r}.
+      const secondIntents = untappedBowActivations();
+      expect(secondIntents).not.toEqual([]);
+      expect(secondIntents.every((intent) => pitchCount(intent) > 0)).toBe(true);
+    });
+  });
+
+  describe("Incite Aggression", () => {
+    const incite = (myTop: string, theirTop: string) => {
+      const game = scenario({ seats: [
+        {
+          hero: "rhinar",
+          hand: [INCITE, ZERO_TO_SIXTY],
+          deck: [myTop],
+          resources: 1,
+          weapons: [],
+          equipment: NO_EQUIPMENT,
+        },
+        { hero: "dorinthea", deck: [theirTop], weapons: [], equipment: NO_EQUIPMENT },
+      ] });
+      game.play(INCITE);
+      game.expectInZone(0, myTop, "arsenal").expectFaceDown(0, myTop, false);
+      game.expectInZone(1, theirTop, "arsenal").expectFaceDown(1, theirTop, false);
+      return game.play(ZERO_TO_SIXTY).blockWith().settle();
+    };
+
+    it("gives the next attack go again when your red card enters an arsenal", () => {
+      incite(FILLER, BLUE).expectAP(0, 1);
+    });
+
+    it("also counts a red card put into an opponent's arsenal", () => {
+      incite(BLUE, FILLER).expectAP(0, 1);
+    });
+
+    it("gives nothing when no red card enters an arsenal", () => {
+      incite(BLUE, BLUE).expectAP(0, 0);
+    });
+  });
+
+  describe("Extinction Level Event", () => {
+    const extinction = (named: string) => {
+      const game = scenario({ seats: [
+        { hero: "rhinar", hand: [EXTINCTION], board: [BLOODROT_POX], weapons: [], equipment: NO_EQUIPMENT },
+        { hero: "dorinthea", weapons: [], equipment: NO_EQUIPMENT },
+      ] });
+      return game.play(EXTINCTION).chooseOption(named);
+    };
+
+    it("strips abilities from disease tokens with the chosen name", () => {
+      const game = extinction("Bloodrot Pox").expectLog("Bloodrot Pox tokens lose");
+      const life = game.state.players[0]!.life;
+
+      game.endTurn();
+
+      game.expectLife(0, life);
+      expect(boardNames(game, 0)).toEqual(["Bloodrot Pox", "Extinction Level Event"]);
+    });
+
+    it("leaves disease tokens with another name functional", () => {
+      const game = extinction("Frailty");
+      const life = game.state.players[0]!.life;
+
+      game.endTurn();
+
+      game.expectLife(0, life - 2);
+      expect(boardNames(game, 0)).toEqual(["Extinction Level Event"]);
+    });
+
+    const atStartOfTurn = (tokens: number) => {
+      const game = scenario({
+        active: 1,
+        seats: [
+          {
+            hero: "rhinar",
+            board: [EXTINCTION, ...Array<string>(tokens).fill(FRAILTY)],
+            weapons: [],
+            equipment: NO_EQUIPMENT,
+          },
+          { hero: "dorinthea", weapons: [], equipment: NO_EQUIPMENT },
+        ],
+      });
+      return game.endTurn();
+    };
+
+    it("wins the game at the start of your turn with 33 disease tokens in the arena", () => {
+      atStartOfTurn(33).expectWinner(0);
+    });
+
+    it("does not win with fewer than 33 disease tokens", () => {
+      const game = atStartOfTurn(32);
+      expect(game.state.winner).toBeNull();
+    });
+  });
+
+  describe("Swap Spit", () => {
+    it("exchanges a random disease token with the attacking opponent when it defends", () => {
+      const game = scenario({
+        active: 1,
+        seats: [
+          { hero: "rhinar", hand: [SWAP_SPIT], board: [BLOODROT_POX], weapons: [], equipment: NO_EQUIPMENT },
+          { hero: "dorinthea", hand: [PROWL], board: [FRAILTY], weapons: [], equipment: NO_EQUIPMENT },
+        ],
+      });
+
+      game.play(PROWL).blockWith().passPriority().react(SWAP_SPIT);
+
+      expect(boardNames(game, 0)).toEqual(["Frailty"]);
+      expect(boardNames(game, 1)).toEqual(["Bloodrot Pox"]);
+      expect(game.state.players[1]!.board[0]!.owner).toBe(0);
+    });
+
+    it("still gives your disease when the opponent controls none", () => {
+      const game = scenario({
+        active: 1,
+        seats: [
+          { hero: "rhinar", hand: [SWAP_SPIT], board: [BLOODROT_POX], weapons: [], equipment: NO_EQUIPMENT },
+          { hero: "dorinthea", hand: [PROWL], weapons: [], equipment: NO_EQUIPMENT },
+        ],
+      });
+
+      game.play(PROWL).blockWith().passPriority().react(SWAP_SPIT);
+
+      expect(boardNames(game, 0)).toEqual([]);
+      expect(boardNames(game, 1)).toEqual(["Bloodrot Pox"]);
     });
   });
 });

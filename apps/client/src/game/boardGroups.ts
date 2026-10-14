@@ -87,9 +87,12 @@ function boardCardIdentity(card: CardView): string {
 /** Public and interactive state that must match before board cards can share
  * one visual stack. Instance identity is deliberately excluded. */
 function boardCardStatusKey(card: CardView, activatable: boolean): string {
+  // A token ceases to exist when it leaves the arena, so its owner is never
+  // visible; tokens that changed control stack with their controller's copies.
+  const isToken = cardData[card.cardId]?.cardType === "token";
   return JSON.stringify([
     boardCardIdentity(card),
-    card.owner,
+    isToken ? null : card.owner,
     card.attack,
     card.defense,
     card.faceDown ?? false,

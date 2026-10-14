@@ -492,6 +492,11 @@ export function finishPlayCard(
           for (const type of cardTypesOf(state, banished)) {
             player.flags[`boostedSubtype:${type}`] = true;
           }
+          const banishPower = scriptOf(state, card.cardId, card)?.boostBanishPowerBonus?.(
+            runtime.makeCtx(state, seat, card),
+            banished,
+          ) ?? 0;
+          if (banishPower !== 0) card.tempPower = (card.tempPower ?? 0) + banishPower;
         }
         boosted = true;
         boostSucceeded = boostSucceeded || cardTypesOf(state, banished).includes("mechanologist");

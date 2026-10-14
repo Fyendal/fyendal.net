@@ -6841,6 +6841,24 @@
       "value": " gets veil this turn"
     }
   ],
+  "card.log.obk.extinction.named": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": "
+    },
+    {
+      "type": 1,
+      "value": "name"
+    },
+    {
+      "type": 0,
+      "value": " tokens lose and can't gain abilities"
+    }
+  ],
   "card.log.obk.huxley.instant": [
     {
       "type": 1,
@@ -10465,6 +10483,30 @@
     {
       "type": 0,
       "value": "Put a card from your arsenal on the bottom of your deck as a cost"
+    }
+  ],
+  "card.obk.cureall.disease.cure": [
+    {
+      "type": 0,
+      "value": "Cure a disease you control?"
+    }
+  ],
+  "card.obk.extinction.disease.name": [
+    {
+      "type": 0,
+      "value": "Name a disease token"
+    }
+  ],
+  "card.obk.pinpointer.arrow.arsenal": [
+    {
+      "type": 0,
+      "value": "Put an arrow from your hand face-up into your arsenal"
+    }
+  ],
+  "card.obk.pinpointer.arsenal.bottom": [
+    {
+      "type": 0,
+      "value": "Choose the next card to put on the bottom of your deck"
     }
   ],
   "card.omn.action.defender.return": [
@@ -15435,6 +15477,20 @@
     {
       "type": 0,
       "value": " or less this turn as though it were an instant"
+    }
+  ],
+  "card.trigger.obk.extinction.win": [
+    {
+      "type": 0,
+      "value": "Win the game if there are "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " or more disease tokens in the arena"
     }
   ],
   "card.trigger.obk.huxley.instant": [

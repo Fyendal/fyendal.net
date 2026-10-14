@@ -324,9 +324,9 @@ export interface ScriptCtx {
    *  The default duration is the current action phase; `indefinite` persists
    *  until the permanent leaves play or another effect changes control. */
   steal(instanceId: number, opts?: { duration?: "action-phase" | "indefinite" }): boolean;
-  /** Give control of a board permanent this hero controls to another hero.
-   * Ownership does not change. The control change persists until the object
-   * leaves play or another effect changes control. */
+  /** Give control of a board permanent from its current controller to
+   * another hero. Ownership does not change. The control change persists
+   * until the object leaves play or another effect changes control. */
   giveControl(instanceId: number, targetSeat: number): boolean;
   /** Until the end of this hero's next turn, prevent `targetSeat` from playing
    * face-up arsenal cards and let this card's controller play them instead. */
@@ -1415,6 +1415,9 @@ export interface CardScript {
   /** This active source prohibits cards matching its public chosen name from
    * being pitched, played, or used to defend. */
   prohibitsChosenName?: boolean;
+  /** While this board permanent is in the arena, objects with its public
+   * chosen name that match this printed filter lose and can't gain abilities. */
+  chosenNameLosesAbilities?: { cardType?: CardType; subtype?: string };
   /** This active source may be destroyed to replace a die roll with a reroll. */
   dieRollReplacement?: boolean;
   /** Receive the final result from requestDieRoll after replacements. */
@@ -1452,6 +1455,10 @@ export interface CardScript {
   /** A card controlled by this source's controller paid Boost's optional
    *  additional cost. `boosted` is the attack and `banished` is the deck top. */
   onBoosted?(ctx: ScriptCtx, boosted: DeepReadonly<CardInstance>, banished: DeepReadonly<CardInstance>): void;
+  /** Power this attack card gains when one of its own Boost costs banishes
+   * `banished` ("+N for each … card banished from boosting this"). Replaced
+   * Boost movements banish nothing and are not consulted. Must be pure. */
+  boostBanishPowerBonus?(ctx: ScriptCtx, banished: DeepReadonly<CardInstance>): number;
   /** Number of separate Boost abilities printed on this card. Defaults to 1
    * when the card has the Boost keyword. */
   boostCount?: number;

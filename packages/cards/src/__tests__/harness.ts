@@ -945,6 +945,7 @@ export class Scenario {
 
   expectWinner(seat: number): this {
     expect(this.state.winner).toBe(seat);
+    expect(this.state.phase).toBe("game-over");
     return this;
   }
 

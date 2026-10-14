@@ -48,6 +48,20 @@ describe("board card grouping", () => {
     expect(groups[0]).toMatchObject({ count: 2, card: { instanceId: 1, cardId: "ARC112" } });
   });
 
+  it("stacks tokens that changed control with the controller's own copies", () => {
+    const groups = groupBoardCards([
+      card(1, { cardId: "ARC112", counters: {} }),
+      card(2, { cardId: "ARC112", counters: {}, owner: 1 }),
+    ]);
+
+    expect(groups).toHaveLength(1);
+    expect(groups[0]).toMatchObject({ count: 2, instanceIds: [1, 2] });
+  });
+
+  it("keeps differently owned non-token cards separate", () => {
+    expect(groupBoardCards([card(1), card(2, { owner: 1 })])).toHaveLength(2);
+  });
+
   it.each(distinctStatuses)("keeps cards with different %s separate", (_label, status) => {
     expect(groupBoardCards([card(1), card(2, status)])).toHaveLength(2);
   });

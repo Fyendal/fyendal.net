@@ -911,6 +911,9 @@ function askTriggerChoice(state: GameStateInternal, layer: StackLayer): void {
 
 /** Both players passed (or nobody could respond): resolve the top layer. */
 function advanceStack(state: GameStateInternal, runtime: EngineRuntime): void {
+  // A resolving effect may end the game (and clear the stack); never resume
+  // a turn continuation afterwards.
+  if (state.phase === "game-over") return;
   const layer = state.stack[0];
   if (!layer) {
     finishStack(state, runtime);

@@ -6523,6 +6523,24 @@
       "value": " 本回合获得 veil"
     }
   ],
+  "card.log.obk.extinction.named": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "："
+    },
+    {
+      "type": 1,
+      "value": "name"
+    },
+    {
+      "type": 0,
+      "value": " 衍生物失去且无法获得能力"
+    }
+  ],
   "card.log.obk.huxley.instant": [
     {
       "type": 1,
@@ -9977,6 +9995,30 @@
     {
       "type": 0,
       "value": "将你 arsenal 中的一张牌置于牌库底部作为费用"
+    }
+  ],
+  "card.obk.cureall.disease.cure": [
+    {
+      "type": 0,
+      "value": "治愈一个由你操控的疾病？"
+    }
+  ],
+  "card.obk.extinction.disease.name": [
+    {
+      "type": 0,
+      "value": "指定一个疾病衍生物的名称"
+    }
+  ],
+  "card.obk.pinpointer.arrow.arsenal": [
+    {
+      "type": 0,
+      "value": "将手牌中的一张 arrow 正面朝上放入你的 arsenal"
+    }
+  ],
+  "card.obk.pinpointer.arsenal.bottom": [
+    {
+      "type": 0,
+      "value": "选择下一张要放到牌库底部的卡牌"
     }
   ],
   "card.omn.action.defender.return": [
@@ -14817,6 +14859,20 @@
     {
       "type": 0,
       "value": " 或更低的灵气 (Aura)当作瞬间牌打出"
+    }
+  ],
+  "card.trigger.obk.extinction.win": [
+    {
+      "type": 0,
+      "value": "若场上有 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 个或更多疾病衍生物，你赢得本局游戏"
     }
   ],
   "card.trigger.obk.huxley.instant": [

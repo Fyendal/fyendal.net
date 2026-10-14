@@ -113,7 +113,8 @@ current attack, and are cleared if the combat chain closes first.
 
 Boost remains an optional play announcement represented by `boost?: true`.
 When paid, its seeded top-deck banish and any Boost-dependent effects occur
-through engine commands.
+through engine commands. An attack's own `boostBanishPowerBonus` sees each card
+its Boost costs actually banish; replaced Boost movements are not consulted.
 
 Combat proceeds through declaration, defense, reactions, damage, resolution,
 and a possible next link. Resolved links remain on the combat chain until it

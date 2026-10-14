@@ -66,11 +66,37 @@ export function cardAbilitiesSuppressed(
   state: GameStateInternal,
   card: CardInstance,
 ): boolean {
+  return ownAbilitiesSuppressed(state, card) || abilitiesLostToChosenName(state, card);
+}
+
+function ownAbilitiesSuppressed(state: GameStateInternal, card: CardInstance): boolean {
   const owner = state.players[card.owner] as PlayerState | undefined;
   const link = currentLink(state);
   return Number(owner?.hero.counters?.ownedCardAbilitiesDisabledTurn ?? 0) === state.turn ||
     (link?.flags.attackAbilitiesSuppressed === true &&
       link.attackingCard.instanceId === card.instanceId);
+}
+
+/** A board permanent's `chosenNameLosesAbilities` strips matching objects.
+ * Matching reads printed data and granted names only: effective names and
+ * types consult scripts, which would recurse back into this check. */
+function abilitiesLostToChosenName(state: GameStateInternal, card: CardInstance): boolean {
+  let data: CardData | undefined;
+  let names: string[] | undefined;
+  for (const player of state.players) {
+    for (const source of player.board) {
+      const filter = state.scriptsRef[source.cardId]?.chosenNameLosesAbilities;
+      const chosen = source.chosenName?.trim().toLowerCase();
+      if (!filter || !chosen || source.instanceId === card.instanceId) continue;
+      if (ownAbilitiesSuppressed(state, source)) continue;
+      data ??= instanceDataOf(state, card);
+      if (filter.cardType !== undefined && data.cardType !== filter.cardType) continue;
+      if (filter.subtype !== undefined && !(data.subtypes ?? []).includes(filter.subtype)) continue;
+      names ??= [data.name, ...(card.grantedNames ?? [])].map((name) => name.trim().toLowerCase());
+      if (names.includes(chosen)) return true;
+    }
+  }
+  return false;
 }
 
 /** Whether a layer-continuous effect prohibits activating this object's

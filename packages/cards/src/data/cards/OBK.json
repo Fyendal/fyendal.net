@@ -62,6 +62,41 @@
     "set": "OBK"
   },
   {
+    "id": "OBK027",
+    "name": "Extinction Level Event",
+    "cardType": "action",
+    "text": "When this enters the arena, name a disease token. Disease tokens with the chosen name lose and can't gain abilities while this is in the arena.\nAt the start of your turn, if there are 33 or more disease tokens in the arena, you win the game.",
+    "pitch": 1,
+    "cost": 0,
+    "defense": 3,
+    "classes": ["chaos"],
+    "subtypes": ["aura"],
+    "set": "OBK"
+  },
+  {
+    "id": "OBK034",
+    "name": "Swap Spit",
+    "cardType": "defense-reaction",
+    "text": "When this defends, choose a disease token you control at random. Target opponent chooses a disease token they control at random. Give them to each other.",
+    "pitch": 1,
+    "cost": 0,
+    "defense": 3,
+    "classes": ["chaos"],
+    "set": "OBK"
+  },
+  {
+    "id": "OBK037",
+    "name": "Incite Aggression",
+    "cardType": "action",
+    "text": "Each hero puts the top card of their deck face-up into their arsenal. If a red card is put face-up into an arsenal this way, your next attack this turn gets go again.\nGo again",
+    "pitch": 1,
+    "cost": 1,
+    "defense": 3,
+    "classes": ["chaos"],
+    "keywords": ["Go again"],
+    "set": "OBK"
+  },
+  {
     "id": "OBK071",
     "name": "Huxley, Racketeer",
     "cardType": "hero",
@@ -99,6 +134,73 @@
     "classes": ["assassin", "ranger"],
     "life": 19,
     "intellect": 4,
+    "set": "OBK"
+  },
+  {
+    "id": "OBK097",
+    "name": "Pauper's Knife",
+    "cardType": "weapon",
+    "text": "Action - {r}{r}, {t}: Attack. Go again",
+    "attack": 1,
+    "classes": ["assassin"],
+    "subtypes": ["dagger", "1h"],
+    "set": "OBK"
+  },
+  {
+    "id": "OBK136",
+    "name": "Cogwerx Dueling Pistol",
+    "cardType": "weapon",
+    "text": "Action - {t}, remove a steam counter from this: Attack\nAction - {r}, {t}: If this has no steam counters, put a steam counter on it. Go again",
+    "attack": 2,
+    "classes": ["mechanologist"],
+    "subtypes": ["pistol", "1h"],
+    "set": "OBK"
+  },
+  {
+    "id": "OBK150",
+    "name": "Bootlegger Bust-Up",
+    "cardType": "action",
+    "text": "Boost\nThis gets +2{p} for each non-Mechanologist card banished from boosting this.",
+    "pitch": 1,
+    "cost": 3,
+    "attack": 6,
+    "defense": 3,
+    "classes": ["mechanologist"],
+    "subtypes": ["attack"],
+    "keywords": ["Boost"],
+    "set": "OBK"
+  },
+  {
+    "id": "OBK175",
+    "name": "One-Click Pinpointer",
+    "cardType": "weapon",
+    "text": "Action - {t}: Put all cards from your arsenal on the bottom of your deck. Put an arrow from your hand face-up into your arsenal. If you control a tapped bow, this costs {r} more to activate. Go again",
+    "classes": ["ranger"],
+    "subtypes": ["bow", "1h"],
+    "set": "OBK"
+  },
+  {
+    "id": "OBK207",
+    "name": "Max-Tension Shot",
+    "cardType": "action",
+    "text": "(Arrows can only be played from arsenal and only if you control a bow.)\nWhen this attacks, reveal the top card of your deck. If it's red, this gets go again.",
+    "pitch": 1,
+    "cost": 1,
+    "attack": 5,
+    "defense": 3,
+    "classes": ["ranger"],
+    "subtypes": ["arrow", "attack"],
+    "set": "OBK"
+  },
+  {
+    "id": "OBK256",
+    "name": "Cure-All Elixir",
+    "cardType": "action",
+    "text": "Your next attack this turn gets +3{p}.\nYou may cure a disease you control. If you do, gain 1{h}. (Destroy it.)\nGo again",
+    "cost": 1,
+    "defense": 3,
+    "classes": ["generic"],
+    "keywords": ["Cure", "Go again"],
     "set": "OBK"
   }
 ]

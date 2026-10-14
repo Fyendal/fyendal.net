@@ -1703,10 +1703,12 @@ export function makeCtx(
     },
     giveControl(instanceId, targetSeat) {
       const target = state.players[targetSeat] as PlayerState | undefined;
-      if (!target || targetSeat === seat) return false;
-      const idx = player.board.findIndex((card) => card.instanceId === instanceId);
-      if (idx < 0) return false;
-      const card = player.board.splice(idx, 1)[0] as CardInstance;
+      const controller = (state.players as PlayerState[]).find((candidate) =>
+        candidate.board.some((card) => card.instanceId === instanceId)
+      );
+      if (!target || !controller || controller.seat === targetSeat) return false;
+      const idx = controller.board.findIndex((card) => card.instanceId === instanceId);
+      const card = controller.board.splice(idx, 1)[0] as CardInstance;
       target.board.push(card);
       runtime.commands.stampControlledName(state, target, card);
       // A new indefinite control effect supersedes any scheduled action-phase
@@ -1717,10 +1719,10 @@ export function makeCtx(
       logPublic(
         state,
         gameLogMessage(
-          `${nameOf(state, player.heroCardId)} gives control of ${nameOf(state, card.cardId)} to ${nameOf(state, target.heroCardId)}`,
+          `${nameOf(state, controller.heroCardId)} gives control of ${nameOf(state, card.cardId)} to ${nameOf(state, target.heroCardId)}`,
           "engine.log.card.control.given",
           {
-            hero: logCardValue(player.heroCardId),
+            hero: logCardValue(controller.heroCardId),
             card: logCardValue(card.cardId),
             target: logCardValue(target.heroCardId),
           },
