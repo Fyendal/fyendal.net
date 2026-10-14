@@ -122,6 +122,131 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+.player-nameplate:has(.nameplate-actions) { padding-block: 3px; padding-right: 3px; }
+.player-nameplate:has(.nameplate-actions[data-open="true"]) { z-index: 70; }
+
+/* ── opponent actions: studs set into the nameplate, not floating buttons ── */
+.nameplate-actions {
+  position: relative;
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 1px;
+  margin-left: 3px;
+  padding-left: 6px;
+  border-left: 1px solid #73582f80;
+  pointer-events: auto;
+}
+.nameplate-action {
+  position: relative;
+  display: grid;
+  width: 26px;
+  height: 26px;
+  place-items: center;
+  padding: 0;
+  clip-path: none;
+  border: 0;
+  border-radius: 3px;
+  background: transparent;
+  box-shadow: none;
+  color: #d9b866;
+  cursor: pointer;
+  transition: color 120ms ease, background-color 120ms ease;
+}
+.nameplate-action .ui-icon { width: 17px; height: 17px; }
+.nameplate-action:hover { background: #ffd47914; color: var(--gold); }
+.nameplate-action:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 0; }
+/* Report reads red at rest so its purpose is clear before hover. */
+.nameplate-action-report { color: #d47a70; }
+.nameplate-action-report:hover,
+.nameplate-action-report[aria-expanded="true"] { background: #ff7b7214; color: var(--danger); }
+.nameplate-action-friend[data-relation="incoming"] { color: var(--gold); }
+/* An incoming request waits on this player: mark it like an unread badge. */
+.nameplate-action-friend[data-relation="incoming"]::after {
+  position: absolute;
+  top: 4px;
+  right: 3px;
+  width: 6px;
+  height: 6px;
+  border: 1.5px solid #140d07;
+  border-radius: 50%;
+  background: var(--blood-hi);
+  content: "";
+}
+/* Unavailable actions (request pending, already reported) drop their color. */
+.nameplate-action[aria-disabled="true"],
+.nameplate-action[aria-disabled="true"]:hover {
+  background: transparent;
+  color: #8a7a5c;
+  cursor: default;
+}
+
+/* Confirmation tag that unfurls from the plaque after a friendship change. */
+.nameplate-flash {
+  position: absolute;
+  top: 50%;
+  left: calc(100% + 9px);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px 6px 8px;
+  border: 1px solid #73582f99;
+  border-radius: 4px;
+  background: #140d07f2;
+  color: var(--gold);
+  font-family: var(--font-lobby-ui);
+  font-size: 12px;
+  letter-spacing: normal;
+  white-space: nowrap;
+  clip-path: inset(0 0 0 0);
+  transform: translateY(-50%);
+  pointer-events: none;
+  transition: clip-path 220ms cubic-bezier(.2, .7, .2, 1), opacity 220ms ease;
+}
+.nameplate-flash .ui-icon { width: 14px; height: 14px; color: var(--success); }
+.nameplate-flash[data-visible="false"] {
+  clip-path: inset(0 100% 0 0);
+  opacity: 0;
+}
+.nameplate-flash:empty { visibility: hidden; }
+
+/* ── panels anchored under the opponent nameplate ── */
+.nameplate-popover {
+  position: absolute;
+  top: calc(100% + 10px);
+  left: -6px;
+  padding: 14px;
+  border: 1px solid var(--border-strong);
+  border-radius: 4px;
+  background: var(--surface-panel);
+  box-shadow: var(--shadow-raised);
+  color: var(--text-primary);
+  font-family: var(--font-lobby-ui);
+  font-size: 13px;
+  letter-spacing: normal;
+  line-height: 1.4;
+  cursor: auto;
+  animation: nameplate-popover-in 140ms ease-out;
+}
+@keyframes nameplate-popover-in {
+  from { opacity: 0; transform: translateY(-4px); }
+}
+.report-popover {
+  width: 292px;
+  max-height: calc(100dvh - 72px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.friend-popover { width: 256px; }
+.table[data-motion-preference="reduced"] .nameplate-flash,
+.table[data-motion-preference="reduced"] .nameplate-action { transition: none; }
+.table[data-motion-preference="reduced"] .nameplate-popover { animation: none; }
+@media (prefers-reduced-motion: reduce) {
+  .table:not([data-motion-preference="full"]) .nameplate-flash,
+  .table:not([data-motion-preference="full"]) .nameplate-action { transition: none; }
+  .table:not([data-motion-preference="full"]) .nameplate-popover { animation: none; }
+}
+
 .player-nameplate-opponent { top: 12px; left: 12px; }
 .player-nameplate-self { bottom: 12px; left: 12px; }
 .player-nameplate-badge {

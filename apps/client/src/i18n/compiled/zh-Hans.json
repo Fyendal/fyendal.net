@@ -21206,6 +21206,94 @@
       "value": " 帧"
     }
   ],
+  "game.opponent.actions": [
+    {
+      "type": 1,
+      "value": "username"
+    },
+    {
+      "type": 0,
+      "value": " 的操作"
+    }
+  ],
+  "game.opponent.addFriend": [
+    {
+      "type": 0,
+      "value": "添加 "
+    },
+    {
+      "type": 1,
+      "value": "username"
+    },
+    {
+      "type": 0,
+      "value": " 为好友"
+    }
+  ],
+  "game.opponent.nowFriends": [
+    {
+      "type": 0,
+      "value": "你和 "
+    },
+    {
+      "type": 1,
+      "value": "username"
+    },
+    {
+      "type": 0,
+      "value": " 已成为好友"
+    }
+  ],
+  "game.opponent.requestBody": [
+    {
+      "type": 0,
+      "value": "好友之间可以互发消息，并邀请对方对战。"
+    }
+  ],
+  "game.opponent.requestPending": [
+    {
+      "type": 0,
+      "value": "已向 "
+    },
+    {
+      "type": 1,
+      "value": "username"
+    },
+    {
+      "type": 0,
+      "value": " 发送好友请求"
+    }
+  ],
+  "game.opponent.requestSent": [
+    {
+      "type": 0,
+      "value": "好友请求已发送"
+    }
+  ],
+  "game.opponent.requestTitle": [
+    {
+      "type": 1,
+      "value": "username"
+    },
+    {
+      "type": 0,
+      "value": " 向你发送了好友请求"
+    }
+  ],
+  "game.opponent.respondFriend": [
+    {
+      "type": 0,
+      "value": "回应 "
+    },
+    {
+      "type": 1,
+      "value": "username"
+    },
+    {
+      "type": 0,
+      "value": " 的好友请求"
+    }
+  ],
   "game.over.backToBoard": [
     {
       "type": 0,
@@ -21302,6 +21390,174 @@
     {
       "type": 0,
       "value": "展开侧栏"
+    }
+  ],
+  "game.report.detailsLabel": [
+    {
+      "type": 0,
+      "value": "详情"
+    }
+  ],
+  "game.report.detailsOptional": [
+    {
+      "type": 0,
+      "value": "补充详情（可选）"
+    }
+  ],
+  "game.report.detailsRequired": [
+    {
+      "type": 0,
+      "value": "请描述发生了什么"
+    }
+  ],
+  "game.report.failed": [
+    {
+      "type": 0,
+      "value": "举报未发送，请重试。"
+    }
+  ],
+  "game.report.includeChat": [
+    {
+      "type": 0,
+      "value": "附上我们的聊天记录"
+    }
+  ],
+  "game.report.includeChatHint": [
+    {
+      "type": 0,
+      "value": "你与 "
+    },
+    {
+      "type": 1,
+      "value": "username"
+    },
+    {
+      "type": 0,
+      "value": " 的近期消息将提供给我们的团队。"
+    }
+  ],
+  "game.report.open": [
+    {
+      "type": 0,
+      "value": "举报 "
+    },
+    {
+      "type": 1,
+      "value": "username"
+    }
+  ],
+  "game.report.privacy": [
+    {
+      "type": 1,
+      "value": "username"
+    },
+    {
+      "type": 0,
+      "value": " 不会收到举报通知。"
+    }
+  ],
+  "game.report.prompt": [
+    {
+      "type": 0,
+      "value": "这局游戏中发生了什么？"
+    }
+  ],
+  "game.report.promptChat": [
+    {
+      "type": 0,
+      "value": "这段聊天中发生了什么？"
+    }
+  ],
+  "game.report.reason.cheating": [
+    {
+      "type": 0,
+      "value": "作弊或利用漏洞"
+    }
+  ],
+  "game.report.reason.emoteSpam": [
+    {
+      "type": 0,
+      "value": "刷屏表情"
+    }
+  ],
+  "game.report.reason.harassment": [
+    {
+      "type": 0,
+      "value": "骚扰或辱骂消息"
+    }
+  ],
+  "game.report.reason.offensiveName": [
+    {
+      "type": 0,
+      "value": "冒犯性用户名"
+    }
+  ],
+  "game.report.reason.other": [
+    {
+      "type": 0,
+      "value": "其他"
+    }
+  ],
+  "game.report.reason.spam": [
+    {
+      "type": 0,
+      "value": "垃圾信息"
+    }
+  ],
+  "game.report.reason.stalling": [
+    {
+      "type": 0,
+      "value": "拖延或挂机"
+    }
+  ],
+  "game.report.reported": [
+    {
+      "type": 0,
+      "value": "你已举报 "
+    },
+    {
+      "type": 1,
+      "value": "username"
+    }
+  ],
+  "game.report.send": [
+    {
+      "type": 0,
+      "value": "发送举报"
+    }
+  ],
+  "game.report.sending": [
+    {
+      "type": 0,
+      "value": "正在发送…"
+    }
+  ],
+  "game.report.sent": [
+    {
+      "type": 0,
+      "value": "举报已发送"
+    }
+  ],
+  "game.report.sentChatDetail": [
+    {
+      "type": 0,
+      "value": "我们的团队会审核这段对话。"
+    }
+  ],
+  "game.report.sentDetail": [
+    {
+      "type": 0,
+      "value": "我们的团队会审核这局游戏。"
+    }
+  ],
+  "game.report.title": [
+    {
+      "type": 0,
+      "value": "举报 "
+    },
+    {
+      "type": 1,
+      "value": "username"
     }
   ],
   "game.result.defeat": [

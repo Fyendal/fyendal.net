@@ -3,11 +3,12 @@ import { verifyPassword } from "./auth.js";
 import { listDeckPlays, listDecks, type DeckPlay } from "./decks.js";
 import { attachReplayNotes, getReplay, getReplayNotes, listReplays } from "./replays.js";
 import { appendClusterEvent } from "./clusterEvents.js";
-import type { CardPoolMode, Format, PlayerBadge, ReplayFile } from "@fyendal/shared";
+import type { CardPoolMode, Format, PlayerBadge, PlayerReportReason, PlayerReportSource, ReplayFile } from "@fyendal/shared";
 import {
   MAX_MATCHMAKING_AVOID_HEROES,
   MAX_MATCHMAKING_AVOID_ROOM_CODES,
   MAX_MATCHMAKING_AVOID_USERS,
+  isPlayerReportReason,
   type HeroRecord,
   type MatchSummary,
   type MatchupRecord,
@@ -119,6 +120,17 @@ export interface AccountExport {
     dismissedAt: number | null;
     resolutionMessage: string | null;
   }>;
+  playerReports: Array<{
+    id: string;
+    source: PlayerReportSource;
+    roomCode: string | null;
+    roomVersion: number | null;
+    reportedUsername: string;
+    reason: PlayerReportReason;
+    details: string;
+    includesChat: boolean;
+    createdAt: number;
+  }>;
   gameDays: number[];
   achievements: Awaited<ReturnType<typeof listUserAchievements>>;
   replays: Array<{
@@ -179,6 +191,7 @@ export async function exportAccount(db: Queryable, userId: number): Promise<Acco
     { rows: candidateRows },
     { rows: offerRows },
     { rows: reportRows },
+    { rows: playerReportRows },
     { rows: gameDayRows },
     social,
   ] = await Promise.all([
@@ -223,6 +236,15 @@ export async function exportAccount(db: Queryable, userId: number): Promise<Acco
        FROM bug_reports WHERE reporter_user_id = $1 ORDER BY created_at, id`,
       [userId],
     ),
+    // Only reports this account filed. Reports filed against it would
+    // identify their reporters.
+    db.query(
+      `SELECT p.id, p.source, p.room_code, p.room_version, u.username, p.reason, p.details,
+              p.chat_history IS NOT NULL AS includes_chat, p.created_at
+       FROM player_reports p JOIN users u ON u.id = p.reported_user_id
+       WHERE p.reporter_user_id = $1 ORDER BY p.created_at, p.id`,
+      [userId],
+    ),
     db.query("SELECT day_utc FROM daily_game_players WHERE user_id = $1 ORDER BY day_utc", [userId]),
     exportSocialData(db, userId),
   ]);
@@ -260,6 +282,24 @@ export async function exportAccount(db: Queryable, userId: number): Promise<Acco
       closedAt: row.closed_at == null ? null : Number(row.closed_at),
       dismissedAt: row.dismissed_at == null ? null : Number(row.dismissed_at),
       resolutionMessage: row.resolution_message == null ? null : String(row.resolution_message),
+    });
+  }
+  const playerReports: AccountExport["playerReports"] = [];
+  for (const row of playerReportRows as Array<Record<string, unknown>>) {
+    const source = row.source;
+    if ((source !== "game" && source !== "chat") || !isPlayerReportReason(row.reason, source)) {
+      throw new Error("invalid player-report row");
+    }
+    playerReports.push({
+      id: String(row.id),
+      source,
+      roomCode: row.room_code == null ? null : String(row.room_code),
+      roomVersion: row.room_version == null ? null : Number(row.room_version),
+      reportedUsername: String(row.username),
+      reason: row.reason,
+      details: String(row.details),
+      includesChat: row.includes_chat === true,
+      createdAt: Number(row.created_at),
     });
   }
   const [replaySummaries, achievements, matchPage, matchRecords] = await Promise.all([
@@ -347,6 +387,7 @@ export async function exportAccount(db: Queryable, userId: number): Promise<Acco
         }
       : null,
     bugReports,
+    playerReports,
     gameDays: gameDayRows.map((row) => Number(row.day_utc)),
     replays,
     matches: matchPage.matches,

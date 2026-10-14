@@ -29,6 +29,7 @@ import {
   dismissFixedBugReportNotifications,
   listFixedBugReportNotifications,
 } from "./bugReports.js";
+import { createPlayerReport } from "./playerReports.js";
 import { consoleError } from "./logging.js";
 import { getGlobalNotice } from "./globalNotice.js";
 import { getVersionUpdateNotice } from "./versionUpdateNotice.js";
@@ -408,6 +409,28 @@ export function createApiServer(deps: ApiDeps): http.Server {
         return result.error === "invalid description"
           ? { status: 400, body: { ok: false, error: "describe the bug in 10 to 2000 characters" } }
           : { status: 404, body: { ok: false, error: "room not found" } };
+      }
+      return { status: 200, body: { ok: true, reportId: result.reportId } };
+    },
+    "/api/player-reports": async (body, user) => {
+      if (!user) return { status: 401, body: { ok: false, error: "not logged in" } };
+      const source = valueField(body, "source");
+      const common = {
+        reason: valueField(body, "reason"),
+        details: field(body, "details"),
+        includeChat: valueField(body, "includeChat") === true,
+      };
+      const result = source === "chat"
+        ? await createPlayerReport(deps.db, user.id, { source, username: field(body, "username"), ...common })
+        : source === "game"
+          ? await createPlayerReport(deps.db, user.id, { source, roomCode: field(body, "roomCode"), ...common })
+          : { ok: false as const, error: "invalid report" as const };
+      if (!result.ok) {
+        return result.error === "invalid report"
+          ? { status: 400, body: { ok: false, error: "choose a reason and keep details under 500 characters" } }
+          : result.error === "player not reportable"
+            ? { status: 409, body: { ok: false, error: "this player cannot be reported" } }
+            : { status: 404, body: { ok: false, error: "room not found" } };
       }
       return { status: 200, body: { ok: true, reportId: result.reportId } };
     },

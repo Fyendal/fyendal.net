@@ -13,6 +13,7 @@ import {
   decodeFabraryDeckPreviewResponse,
   decodeLoginResponse,
   decodeOkResponse,
+  decodePlayerReportResponse,
   decodeReplayResponse,
   decodeReplayNotesResponse,
   decodeMatchRecordsResponse,
@@ -29,6 +30,7 @@ import {
   type ApiError,
   type BugReportNotificationsResponse,
   type BugReportResponse,
+  type PlayerReportResponse,
   type DeckDetailResponse,
   type DeckInvalidResponse,
   type DeckResponse,
@@ -45,7 +47,7 @@ import {
   type ReplaysResponse,
   type StatsResponse,
 } from "@fyendal/protocol";
-import type { PlayerBadge, Format } from "@fyendal/shared";
+import type { PlayerBadge, PlayerReportReason, Format } from "@fyendal/shared";
 
 type RegisterOk = OkResponse;
 type LoginOk = LoginResponse;
@@ -170,6 +172,18 @@ export function apiSelectAccountBadge(
 }
 
 export type BugReportResult = BugReportResponse | ApiError;
+
+export type PlayerReportResult = PlayerReportResponse | ApiError;
+
+export function apiReportPlayer(
+  token: string,
+  input:
+    | { source: "game"; roomCode: string; reason: PlayerReportReason; details: string; includeChat: boolean }
+    | { source: "chat"; username: string; reason: PlayerReportReason; details: string; includeChat: boolean },
+  signal?: AbortSignal,
+): Promise<PlayerReportResult> {
+  return post("player-reports", input, decodePlayerReportResponse, { token, signal });
+}
 
 export function apiReportBug(
   token: string,

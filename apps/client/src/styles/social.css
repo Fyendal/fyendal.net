@@ -344,9 +344,10 @@
   transform: translateY(0);
   visibility: visible;
 }
-.social-friend-actions .social-icon-action svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.7; }
+.social-friend-actions .ui-icon { width: 18px; height: 18px; }
 .social-message-button .social-row-badge { position: absolute; top: -5px; right: -5px; min-width: 16px; height: 16px; padding-inline: 4px; font-size: 9px; }
-.social-friend-actions .social-remove { padding: 0; color: #d7857e; font-size: 18px; }
+.social-friend-actions .social-remove { color: #d7857e; }
+.social-friend-actions .social-remove:hover:not(:disabled) { border-color: #6b3a32; background: #ff7b7212; color: var(--danger); }
 .social-empty { margin: 14px 5px; color: var(--text-muted); font-size: 13px; line-height: 1.4; }
 
 .post-game-friend-add {
@@ -783,4 +784,214 @@
   #root:has(.mobile-lobby-nav, .mobile-gamebar) .social-panel {
     max-height: min(460px, calc(100dvh - 120px));
   }
+}
+
+/* ── conduct reports and friend prompts: nameplate popovers and chat ── */
+.report-form h2,
+.friend-prompt h2 {
+  margin: 0;
+  font-family: var(--font-lobby-title);
+  font-size: 15px;
+  font-weight: 650;
+  letter-spacing: normal;
+  line-height: 1.35;
+}
+.report-form-title span,
+.friend-prompt h2 span {
+  color: var(--gold);
+}
+.report-form-reasons {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+  margin: 12px 0 10px;
+  padding: 0;
+  border: 0;
+}
+.report-form-reasons legend {
+  margin-bottom: 7px;
+  padding: 0;
+  color: var(--text-secondary);
+}
+.report-reason {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 7px 9px;
+  border: 1px solid var(--border-subtle);
+  border-radius: 3px;
+  background: var(--surface-well);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: border-color 120ms ease, color 120ms ease;
+}
+.report-reason:hover { border-color: var(--border-strong); color: var(--text-primary); }
+.report-reason input {
+  width: 14px;
+  height: 14px;
+  margin: 0;
+  flex: 0 0 auto;
+  accent-color: var(--gold);
+}
+.report-reason[data-selected="true"] {
+  border-color: #c59d4d;
+  background: #ffd4790f;
+  color: var(--text-primary);
+}
+.report-reason:has(input:focus-visible) { outline: 2px solid var(--focus-ring); outline-offset: 1px; }
+.report-reason input:focus-visible { outline: none; }
+.report-form-details {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 62px;
+  padding: 8px 9px;
+  border: 1px solid var(--border-subtle);
+  border-radius: 3px;
+  background: var(--surface-well);
+  color: var(--text-primary);
+  font: inherit;
+  resize: vertical;
+}
+.report-form-details::placeholder { color: var(--text-muted); }
+.report-form-details:focus { border-color: #c59d4d; outline: none; }
+.report-form-note {
+  min-height: 18px;
+  margin: 8px 0 12px;
+  color: var(--text-muted);
+  font-size: 12px;
+}
+.report-form-error { color: var(--danger); }
+.report-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+.report-form-secondary,
+.report-form-submit {
+  min-height: 32px;
+  padding: 0 14px;
+  clip-path: none;
+  border-radius: 3px;
+  box-shadow: none;
+  font-family: var(--font-lobby-ui);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: normal;
+  text-transform: none;
+}
+.report-form-secondary {
+  border: 1px solid var(--border-subtle);
+  background: transparent;
+  color: var(--text-secondary);
+}
+.report-form-secondary:hover:not(:disabled) { border-color: var(--border-strong); color: var(--text-primary); }
+.report-form-submit {
+  border: 1px solid var(--blood-hi);
+  background: var(--blood);
+  color: #fff3e6;
+}
+.report-form-submit:hover:not(:disabled) { background: var(--blood-hi); }
+.report-form-submit:disabled {
+  border-color: var(--border-subtle);
+  background: var(--surface-control);
+  color: var(--text-muted);
+  cursor: not-allowed;
+}
+.report-form-sent {
+  display: grid;
+  justify-items: start;
+  gap: 6px;
+}
+.report-form-sent p { margin: 0 0 8px; color: var(--text-secondary); }
+.report-form-sent-mark {
+  display: grid;
+  width: 30px;
+  height: 30px;
+  place-items: center;
+  margin-bottom: 2px;
+  border: 1px solid #8fd48f55;
+  border-radius: 50%;
+  color: var(--success);
+}
+.report-form-sent-mark .ui-icon { width: 16px; height: 16px; }
+.report-form-chat {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  margin-top: 10px;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+.report-form-chat input {
+  width: 14px;
+  height: 14px;
+  margin: 2px 0 0;
+  flex: 0 0 auto;
+  accent-color: var(--gold);
+}
+.report-form-chat input:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+.report-form-chat > span { display: grid; gap: 2px; }
+.report-form-chat-label { color: var(--text-primary); }
+.report-form-chat-hint { color: var(--text-muted); font-size: 12px; }
+.report-form-chat[data-checked="false"] .report-form-chat-label { color: var(--text-secondary); }
+
+.friend-prompt p {
+  margin: 6px 0 14px;
+  color: var(--text-secondary);
+}
+.friend-prompt-accept {
+  min-height: 32px;
+  padding: 0 16px;
+  clip-path: none;
+  border: 1px solid #c59d4d;
+  border-radius: 3px;
+  background: #ffd4791a;
+  box-shadow: none;
+  color: var(--gold);
+  font-family: var(--font-lobby-ui);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: normal;
+  text-transform: none;
+}
+.friend-prompt-accept:hover { background: #ffd4792e; }
+
+/* Chat: the flag sits beside close; reporting replaces the conversation. */
+.chat-modal .modal-surface-header { padding-right: 88px; }
+.chat-report-toggle {
+  position: absolute;
+  top: 8px;
+  right: 48px;
+  z-index: 3;
+  display: grid;
+  width: 34px;
+  min-width: 34px;
+  height: 34px;
+  place-items: center;
+  padding: 0;
+  clip-path: none;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  box-shadow: none;
+  color: #d47a70;
+}
+.chat-report-toggle .ui-icon { width: 18px; height: 18px; }
+.chat-report-toggle:hover,
+.chat-report-toggle[aria-pressed="true"] { background: #ff7b7212; color: var(--danger); }
+.chat-report-toggle[aria-disabled="true"],
+.chat-report-toggle[aria-disabled="true"]:hover { background: transparent; color: #8a7a5c; cursor: default; }
+.chat-report {
+  max-height: calc(min(600px, 100dvh - 32px) - 54px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  margin: 0 -16px -16px;
+  padding: 18px 16px 16px;
+  background: #100a06;
+  font-size: 13px;
+  line-height: 1.4;
+  scrollbar-color: #6c512c transparent;
+  scrollbar-width: thin;
 }

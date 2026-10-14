@@ -891,6 +891,36 @@ export const MIGRATIONS: Migration[] = [
     ALTER TABLE matchmaking_entries
       ADD CONSTRAINT matchmaking_entries_format_check CHECK (format IN ('cc', 'silver-age'));`,
   },
+  {
+    version: 48,
+    // Operator-only conduct reports, filed against a game opponent or from a
+    // friend chat. A game report's subject is resolved from the room's seats,
+    // never from client input, and is unique per reporter, opponent, and room
+    // so resubmission is idempotent; rooms are garbage-collected, so the code
+    // and version are kept without a key. Chat reports have no room. Friend
+    // messages expire and are deleted with the friendship, so a report the
+    // reporter chose to attach the conversation to keeps its own copy.
+    sql: `CREATE TABLE player_reports (
+      id TEXT PRIMARY KEY,
+      reporter_user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      reported_user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      source TEXT NOT NULL,
+      room_code TEXT,
+      room_version BIGINT,
+      reason TEXT NOT NULL,
+      details VARCHAR(500) NOT NULL DEFAULT '',
+      chat_history JSONB,
+      created_at BIGINT NOT NULL,
+      CONSTRAINT player_reports_once UNIQUE (reporter_user_id, reported_user_id, room_code),
+      CONSTRAINT player_reports_reason_check CHECK (
+        (source = 'game' AND room_code IS NOT NULL AND room_version IS NOT NULL
+          AND reason IN ('stalling', 'emote-spam', 'offensive-name', 'cheating', 'other'))
+        OR (source = 'chat' AND room_code IS NULL AND room_version IS NULL
+          AND reason IN ('harassment', 'spam', 'offensive-name', 'other'))
+      )
+    );
+    CREATE INDEX player_reports_reported_idx ON player_reports (reported_user_id, created_at);`,
+  },
 ];
 
 async function publicTables(db: Queryable): Promise<string[]> {

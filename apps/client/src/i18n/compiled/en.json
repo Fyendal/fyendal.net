@@ -21982,6 +21982,90 @@
       "value": "frame"
     }
   ],
+  "game.opponent.actions": [
+    {
+      "type": 0,
+      "value": "Actions for "
+    },
+    {
+      "type": 1,
+      "value": "username"
+    }
+  ],
+  "game.opponent.addFriend": [
+    {
+      "type": 0,
+      "value": "Add "
+    },
+    {
+      "type": 1,
+      "value": "username"
+    },
+    {
+      "type": 0,
+      "value": " as a friend"
+    }
+  ],
+  "game.opponent.nowFriends": [
+    {
+      "type": 0,
+      "value": "You and "
+    },
+    {
+      "type": 1,
+      "value": "username"
+    },
+    {
+      "type": 0,
+      "value": " are now friends"
+    }
+  ],
+  "game.opponent.requestBody": [
+    {
+      "type": 0,
+      "value": "Friends can message each other and invite each other to games."
+    }
+  ],
+  "game.opponent.requestPending": [
+    {
+      "type": 0,
+      "value": "Friend request sent to "
+    },
+    {
+      "type": 1,
+      "value": "username"
+    }
+  ],
+  "game.opponent.requestSent": [
+    {
+      "type": 0,
+      "value": "Friend request sent"
+    }
+  ],
+  "game.opponent.requestTitle": [
+    {
+      "type": 1,
+      "value": "username"
+    },
+    {
+      "type": 0,
+      "value": " sent you a friend request"
+    }
+  ],
+  "game.opponent.respondFriend": [
+    {
+      "type": 0,
+      "value": "Respond to "
+    },
+    {
+      "type": 1,
+      "value": "username"
+    },
+    {
+      "type": 0,
+      "value": "'s friend request"
+    }
+  ],
   "game.over.backToBoard": [
     {
       "type": 0,
@@ -22078,6 +22162,174 @@
     {
       "type": 0,
       "value": "Expand side rail"
+    }
+  ],
+  "game.report.detailsLabel": [
+    {
+      "type": 0,
+      "value": "Details"
+    }
+  ],
+  "game.report.detailsOptional": [
+    {
+      "type": 0,
+      "value": "Add details (optional)"
+    }
+  ],
+  "game.report.detailsRequired": [
+    {
+      "type": 0,
+      "value": "Tell us what happened"
+    }
+  ],
+  "game.report.failed": [
+    {
+      "type": 0,
+      "value": "The report wasn't sent. Try again."
+    }
+  ],
+  "game.report.includeChat": [
+    {
+      "type": 0,
+      "value": "Include our chat history"
+    }
+  ],
+  "game.report.includeChatHint": [
+    {
+      "type": 0,
+      "value": "Your recent messages with "
+    },
+    {
+      "type": 1,
+      "value": "username"
+    },
+    {
+      "type": 0,
+      "value": " are shared with our team."
+    }
+  ],
+  "game.report.open": [
+    {
+      "type": 0,
+      "value": "Report "
+    },
+    {
+      "type": 1,
+      "value": "username"
+    }
+  ],
+  "game.report.privacy": [
+    {
+      "type": 1,
+      "value": "username"
+    },
+    {
+      "type": 0,
+      "value": " isn't notified about reports."
+    }
+  ],
+  "game.report.prompt": [
+    {
+      "type": 0,
+      "value": "What happened in this game?"
+    }
+  ],
+  "game.report.promptChat": [
+    {
+      "type": 0,
+      "value": "What happened in this chat?"
+    }
+  ],
+  "game.report.reason.cheating": [
+    {
+      "type": 0,
+      "value": "Cheating or exploiting a bug"
+    }
+  ],
+  "game.report.reason.emoteSpam": [
+    {
+      "type": 0,
+      "value": "Spamming emotes"
+    }
+  ],
+  "game.report.reason.harassment": [
+    {
+      "type": 0,
+      "value": "Harassment or abusive messages"
+    }
+  ],
+  "game.report.reason.offensiveName": [
+    {
+      "type": 0,
+      "value": "Offensive username"
+    }
+  ],
+  "game.report.reason.other": [
+    {
+      "type": 0,
+      "value": "Something else"
+    }
+  ],
+  "game.report.reason.spam": [
+    {
+      "type": 0,
+      "value": "Spam"
+    }
+  ],
+  "game.report.reason.stalling": [
+    {
+      "type": 0,
+      "value": "Stalling or idling"
+    }
+  ],
+  "game.report.reported": [
+    {
+      "type": 0,
+      "value": "You reported "
+    },
+    {
+      "type": 1,
+      "value": "username"
+    }
+  ],
+  "game.report.send": [
+    {
+      "type": 0,
+      "value": "Send report"
+    }
+  ],
+  "game.report.sending": [
+    {
+      "type": 0,
+      "value": "Sending…"
+    }
+  ],
+  "game.report.sent": [
+    {
+      "type": 0,
+      "value": "Report sent"
+    }
+  ],
+  "game.report.sentChatDetail": [
+    {
+      "type": 0,
+      "value": "Our team will review this conversation."
+    }
+  ],
+  "game.report.sentDetail": [
+    {
+      "type": 0,
+      "value": "Our team will review this game."
+    }
+  ],
+  "game.report.title": [
+    {
+      "type": 0,
+      "value": "Report "
+    },
+    {
+      "type": 1,
+      "value": "username"
     }
   ],
   "game.result.defeat": [

@@ -1,11 +1,14 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
 import type { CSSProperties } from "react";
 import { useIntl } from "react-intl";
 import { useShallow } from "zustand/react/shallow";
 import { ModalSurface } from "../components/ModalSurface.js";
+import { TooltipButton } from "../components/TooltipButton.js";
+import { UiIcon } from "../components/UiIcon.js";
 import { formatLabel } from "../lobby/FormatBadge.js";
 import { useStore } from "../store.js";
 import { FriendRoomModal } from "./FriendRoomModal.js";
+import { ReportForm, useSentReport } from "./ReportForm.js";
 
 const SOCIAL_DOCK_MARGIN = 8;
 const SOCIAL_DOCK_DRAG_THRESHOLD = 5;
@@ -368,35 +371,34 @@ export function SocialDock() {
                     <div className="social-friend-actions">
                       <button
                         type="button"
-                        className="social-icon-action social-message-button"
+                        className="social-message-button"
                         aria-label={intl.formatMessage({ id: "social.messageNamed" }, { username: friend.username })}
-                        data-tooltip={intl.formatMessage({ id: "social.messageNamed" }, { username: friend.username })}
                         onClick={() => openChat(friend.username)}
                       >
-                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5.5h14v11H9.5L5 19.5v-14Z" /></svg>
+                        <UiIcon name="message" />
                         {friend.unreadCount > 0 ? <span className="social-row-badge">{formatUnreadCount(friend.unreadCount)}</span> : null}
                       </button>
                       {canInviteFriends ? (
                         <button
                           type="button"
-                          className="social-icon-action"
                           aria-label={intl.formatMessage({ id: "social.invite.title" }, { username: friend.username })}
                           data-tooltip={intl.formatMessage({ id: "social.invite.title" }, { username: friend.username })}
                           disabled={friend.presence === "offline"}
                           onClick={() => beginInvite(friend.username)}
                         >
-                          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8.5h8a4 4 0 0 1 3.8 2.8l1 3.2a2.7 2.7 0 0 1-4.7 2.5l-1.3-1.5H9.2L7.9 17a2.7 2.7 0 0 1-4.7-2.5l1-3.2A4 4 0 0 1 8 8.5ZM8 11v4M6 13h4M16.5 12h.01M18.5 14h.01" /></svg>
+                          <UiIcon name="invite-game" />
                         </button>
                       ) : null}
                       <button
                         type="button"
                         className="social-remove"
                         aria-label={intl.formatMessage({ id: "social.removeNamed" }, { username: friend.username })}
-                        data-tooltip={intl.formatMessage({ id: "social.removeNamed" }, { username: friend.username })}
                         onClick={() => {
                           if (window.confirm(intl.formatMessage({ id: "social.removeConfirm" }, { username: friend.username }))) removeFriend(friend.username);
                         }}
-                      >×</button>
+                      >
+                        <UiIcon name="close" />
+                      </button>
                     </div>
                   </div>
                 ))}
@@ -491,6 +493,7 @@ function ChatModal() {
     loadEarlier,
     sendMessage,
     markRead,
+    reportFriend,
   } = useStore(useShallow((state) => ({
     authUser: state.authUser,
     username: state.activeChat,
@@ -501,18 +504,25 @@ function ChatModal() {
     loadEarlier: state.loadEarlierChat,
     sendMessage: state.sendChatMessage,
     markRead: state.markChatRead,
+    reportFriend: state.reportFriend,
   })));
   const [draft, setDraft] = useState("");
+  const [reportingChat, setReportingChat] = useState<string | null>(null);
+  const reportTitleId = useId();
+  const flagRef = useRef<HTMLButtonElement>(null);
   const endRef = useRef<HTMLDivElement>(null);
   const key = username?.toLowerCase() ?? "";
   const messages = messagesByFriend[key] ?? [];
   const latestId = messages.at(-1)?.id;
   const friend = friends.find((candidate) => candidate.username.toLowerCase() === key);
+  const [reported, markReported] = useSentReport(`chat:${key}`);
+  // Reporting belongs to one conversation; switching chats returns to messages.
+  const reporting = reportingChat === key;
 
   useEffect(() => {
     if (!username) return;
     endRef.current?.scrollIntoView({ block: "end" });
-  }, [latestId, username]);
+  }, [latestId, reporting, username]);
 
   useEffect(() => {
     if (!username) return;
@@ -524,6 +534,14 @@ function ChatModal() {
   }, [markRead, username]);
 
   if (!username) return null;
+  const closeReport = () => {
+    setReportingChat(null);
+    flagRef.current?.focus();
+  };
+  const reportLabel = intl.formatMessage(
+    { id: reported ? "game.report.reported" : "game.report.open" },
+    { username },
+  );
   const submit = () => {
     if (!draft.trim()) return;
     sendMessage(username, draft);
@@ -537,51 +555,89 @@ function ChatModal() {
       <div className={`chat-presence social-presence ${friend?.presence ?? "offline"}`}>
         <i aria-hidden="true" />{intl.formatMessage({ id: `social.${friend?.presence ?? "offline"}` })}
       </div>
-      <div className="chat-log" aria-live="polite">
-        {hasMoreByFriend[key] ? (
-          <button type="button" className="chat-load-earlier" onClick={() => loadEarlier(username)}>{intl.formatMessage({ id: "social.chat.loadEarlier" })}</button>
-        ) : null}
-        {messages.length === 0 ? <p className="social-empty">{intl.formatMessage({ id: "social.chat.empty" })}</p> : null}
-        {messages.map((message) => {
-          const own = message.senderUsername.toLowerCase() === authUser?.toLowerCase();
-          return (
-            <div className={`chat-message${own ? " own" : ""}`} key={message.id}>
-              <p>{message.text}</p>
-              <time dateTime={new Date(message.sentAt).toISOString()}>{intl.formatTime(message.sentAt, { hour: "numeric", minute: "2-digit" })}</time>
-            </div>
-          );
-        })}
-        <div ref={endRef} />
-      </div>
-      <div className="chat-compose">
-        <input
-          type="text"
-          value={draft}
-          maxLength={1_000}
-          data-modal-initial-focus
-          aria-label={intl.formatMessage({ id: "social.chat.placeholder" })}
-          placeholder={intl.formatMessage({ id: "social.chat.placeholder" })}
-          onChange={(event) => setDraft(event.target.value)}
+      <TooltipButton
+        ref={flagRef}
+        className="chat-report-toggle"
+        data-reported={reported}
+        tooltip={reportLabel}
+        aria-pressed={reporting}
+        aria-disabled={reported && !reporting}
+        onClick={() => {
+          if (reporting) closeReport();
+          else if (!reported) setReportingChat(key);
+        }}
+      >
+        <UiIcon name={reported ? "flag-filled" : "flag"} />
+      </TooltipButton>
+      {reporting ? (
+        <section
+          className="chat-report"
+          aria-labelledby={reportTitleId}
           onKeyDown={(event) => {
-            if (event.key === "Enter") {
-              event.preventDefault();
-              submit();
+            if (event.key === "Escape") {
+              event.stopPropagation();
+              closeReport();
             }
           }}
-        />
-        <button
-          type="button"
-          className="btn-primary"
-          aria-label={intl.formatMessage({ id: "social.chat.send" })}
-          title={intl.formatMessage({ id: "social.chat.send" })}
-          disabled={!draft.trim()}
-          onClick={submit}
         >
-          <svg viewBox="0 0 20 20" aria-hidden="true">
-            <path d="m3 3 14 7-14 7 2.1-5.4L12 10 5.1 8.4 3 3Z" />
-          </svg>
-        </button>
-      </div>
+          <ReportForm
+            username={username}
+            source="chat"
+            titleId={reportTitleId}
+            chatOption={{ checked: true }}
+            onReport={(reason, details, includeChat) => reportFriend(username, reason, details, includeChat)}
+            onSent={markReported}
+            onClose={closeReport}
+          />
+        </section>
+      ) : (
+        <>
+          <div className="chat-log" aria-live="polite">
+            {hasMoreByFriend[key] ? (
+              <button type="button" className="chat-load-earlier" onClick={() => loadEarlier(username)}>{intl.formatMessage({ id: "social.chat.loadEarlier" })}</button>
+            ) : null}
+            {messages.length === 0 ? <p className="social-empty">{intl.formatMessage({ id: "social.chat.empty" })}</p> : null}
+            {messages.map((message) => {
+              const own = message.senderUsername.toLowerCase() === authUser?.toLowerCase();
+              return (
+                <div className={`chat-message${own ? " own" : ""}`} key={message.id}>
+                  <p>{message.text}</p>
+                  <time dateTime={new Date(message.sentAt).toISOString()}>{intl.formatTime(message.sentAt, { hour: "numeric", minute: "2-digit" })}</time>
+                </div>
+              );
+            })}
+            <div ref={endRef} />
+          </div>
+          <div className="chat-compose">
+            <input
+              type="text"
+              value={draft}
+              maxLength={1_000}
+              data-modal-initial-focus
+              aria-label={intl.formatMessage({ id: "social.chat.placeholder" })}
+              placeholder={intl.formatMessage({ id: "social.chat.placeholder" })}
+              onChange={(event) => setDraft(event.target.value)}
+              onKeyDown={(event) => {
+                if (event.key === "Enter") {
+                  event.preventDefault();
+                  submit();
+                }
+              }}
+            />
+            <TooltipButton
+              className="btn-primary"
+              tooltip={intl.formatMessage({ id: "social.chat.send" })}
+              tooltipSide="above"
+              disabled={!draft.trim()}
+              onClick={submit}
+            >
+              <svg viewBox="0 0 20 20" aria-hidden="true">
+                <path d="m3 3 14 7-14 7 2.1-5.4L12 10 5.1 8.4 3 3Z" />
+              </svg>
+            </TooltipButton>
+          </div>
+        </>
+      )}
     </ModalSurface>
   );
 }

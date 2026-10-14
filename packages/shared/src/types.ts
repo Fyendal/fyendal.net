@@ -725,6 +725,20 @@ export type ReplayFile = ReplayFileV1 | ReplayFileV2 | ReplayFileV3;
  *  enforced server-side (claim validation). */
 export const IDLE_VICTORY_MS = 2 * 60 * 1000;
 
+/** Where a report was filed: against a game opponent, or from a friend chat. */
+export type PlayerReportSource = "game" | "chat";
+
+/** Why a player reports another account's conduct. Game reports use the
+ * gameplay reasons; chat reports use the messaging reasons. */
+export type PlayerReportReason =
+  | "stalling"
+  | "emote-spam"
+  | "cheating"
+  | "harassment"
+  | "spam"
+  | "offensive-name"
+  | "other";
+
 /** Cosmetic badge selected for public display. Entitlements are private
  * account data; this field exposes only the single active choice. */
 export type PlayerBadge = "early-tester";

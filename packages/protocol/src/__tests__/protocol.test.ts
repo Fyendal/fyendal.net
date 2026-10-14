@@ -7,6 +7,7 @@ import {
   decodeAchievementsResponse,
   decodeBugReportNotificationsResponse,
   decodeBugReportResponse,
+  decodePlayerReportResponse,
   decodeApiError,
   decodeClientMessage,
   decodeDeckDetailResponse,
@@ -1109,6 +1110,8 @@ describe("replays and HTTP responses", () => {
     expect(decodeLoginResponse({ ok: true, token: "token", username: "alice" })).not.toBeNull();
     expect(decodeStatsResponse({ ok: true, inGame: 1, openRooms: 2 })).not.toBeNull();
     expect(decodeBugReportResponse({ ok: true, reportId: "report-id" })).not.toBeNull();
+    expect(decodePlayerReportResponse({ ok: true, reportId: "report-id" })).not.toBeNull();
+    expect(decodePlayerReportResponse({ ok: true, reportId: "report-id", reason: "stalling" })).toBeNull();
     expect(decodeBugReportNotificationsResponse({
       ok: true,
       notifications: [{ reportId: "report-id", fixedAt: 123 }],
@@ -1243,6 +1246,27 @@ describe("replays and HTTP responses", () => {
           closedAt: null,
           dismissedAt: null,
         }],
+        playerReports: [{
+          id: "player-report-id",
+          source: "game",
+          roomCode: "ABC123",
+          roomVersion: 2,
+          reportedUsername: "bob",
+          reason: "stalling",
+          details: "",
+          includesChat: false,
+          createdAt: 2,
+        }, {
+          id: "chat-report-id",
+          source: "chat",
+          roomCode: null,
+          roomVersion: null,
+          reportedUsername: "bob",
+          reason: "harassment",
+          details: "",
+          includesChat: true,
+          createdAt: 3,
+        }],
         gameDays: [1_700_006_400_000],
         achievements: [],
         replays: [{
@@ -1324,6 +1348,7 @@ describe("replays and HTTP responses", () => {
           rooms: [],
           matchmaking: null,
           bugReports: [],
+          playerReports: [],
           gameDays: [],
           achievements: [],
           replays: [],

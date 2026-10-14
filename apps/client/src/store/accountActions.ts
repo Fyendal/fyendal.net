@@ -10,6 +10,7 @@ import {
   apiFabraryDeckPreview,
   apiImportDeck,
   apiReportBug,
+  apiReportPlayer,
   apiSelectAccountBadge,
   apiUpdateDeck,
 } from "../auth/auth.js";
@@ -33,6 +34,8 @@ type AccountActionKey =
   | "selectAccountBadge"
   | "deleteAccount"
   | "reportBug"
+  | "reportOpponent"
+  | "reportFriend"
   | "refreshBugReportNotifications"
   | "dismissBugReportNotifications";
 
@@ -184,6 +187,30 @@ export function createAccountActions({
       if (!code) return { ok: false, error: "not in a room" };
       const request = authRequest(token);
       const result = await apiReportBug(token, { roomCode: code, description }, request.signal);
+      return isCurrentAuth(request) ? result : superseded;
+    },
+    reportOpponent: async (reason, details, includeChat) => {
+      const token = get().authToken;
+      const code = get().roomCode;
+      if (!token) return { ok: false, error: "log in to report a player" };
+      if (!code) return { ok: false, error: "not in a room" };
+      const request = authRequest(token);
+      const result = await apiReportPlayer(
+        token,
+        { source: "game", roomCode: code, reason, details, includeChat },
+        request.signal,
+      );
+      return isCurrentAuth(request) ? result : superseded;
+    },
+    reportFriend: async (username, reason, details, includeChat) => {
+      const token = get().authToken;
+      if (!token) return { ok: false, error: "log in to report a player" };
+      const request = authRequest(token);
+      const result = await apiReportPlayer(
+        token,
+        { source: "chat", username, reason, details, includeChat },
+        request.signal,
+      );
       return isCurrentAuth(request) ? result : superseded;
     },
     refreshBugReportNotifications: async () => {

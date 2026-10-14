@@ -17,6 +17,7 @@ import type {
   PrepView,
   PriorityWindowMode,
   PlayerBadge,
+  PlayerReportReason,
   RoomInvite,
   RoomSummary,
   UndoTarget,
@@ -43,6 +44,7 @@ import type {
   FavoriteReplayResult,
   BugReportResult,
   LoginResult,
+  PlayerReportResult,
   RegisterResult,
 } from "../auth/auth.js";
 import type { FabraryPlayRoute } from "../play/route.js";
@@ -123,6 +125,13 @@ export interface StoreState {
   clearError: () => void;
   setError: (message: string) => void;
   reportBug: (description: string) => Promise<BugReportResult>;
+  reportOpponent: (reason: PlayerReportReason, details: string, includeChat: boolean) => Promise<PlayerReportResult>;
+  reportFriend: (
+    username: string,
+    reason: PlayerReportReason,
+    details: string,
+    includeChat: boolean,
+  ) => Promise<PlayerReportResult>;
   bugReportNotifications: FixedBugReportNotification[];
   refreshBugReportNotifications: () => Promise<void>;
   dismissBugReportNotifications: () => Promise<void>;

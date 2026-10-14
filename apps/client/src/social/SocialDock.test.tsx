@@ -28,6 +28,7 @@ const mocks = vi.hoisted(() => ({
     loadEarlierChat: vi.fn(),
     sendChatMessage: vi.fn(),
     markChatRead: vi.fn(),
+    reportFriend: vi.fn(),
     beginFriendInvite: vi.fn(),
     dismissFriendGameInvite: vi.fn(),
     acceptFriendGameInvite: vi.fn(),
@@ -141,6 +142,26 @@ describe("SocialDock", () => {
     expect(html).toContain("social-message-toast");
     expect(html).toContain("&lt;img src=x onerror=&quot;alert(1)&quot;&gt;");
     expect(html).not.toContain('<img src=x onerror="alert(1)">');
+  });
+});
+
+describe("ChatModal", () => {
+  it("offers a report flag beside close in the conversation header", () => {
+    Object.assign(mocks.state, {
+      socialOpen: false,
+      activeChat: "Alice",
+      friends: [{ username: "Alice", presence: "online", friendsSince: 1, unreadCount: 0 }],
+      friendRequests: [],
+      chatMessages: { alice: [] },
+    });
+    const html = render();
+    const flag = html.match(/<button[^>]*class="chat-report-toggle"[^>]*>/)?.[0] ?? "";
+    expect(flag).toContain('aria-label="Report Alice"');
+    expect(flag).toContain('aria-pressed="false"');
+    expect(flag).not.toContain("title=");
+    expect(html).toContain("chat-compose");
+    expect(html).not.toContain("report-form");
+    Object.assign(mocks.state, { activeChat: null, chatMessages: {} });
   });
 });
 

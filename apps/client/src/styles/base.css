@@ -92,6 +92,17 @@ body {
 
 button { touch-action: manipulation; }
 
+/* SVG file from public/icons/ui/ used as a mask over the current text color. */
+.ui-icon {
+  display: inline-block;
+  flex: 0 0 auto;
+  width: 1em;
+  height: 1em;
+  background-color: currentColor;
+  -webkit-mask: var(--ui-icon) center / contain no-repeat;
+  mask: var(--ui-icon) center / contain no-repeat;
+}
+
 button {
   background: linear-gradient(180deg, #2b1e10, #211608);
   color: #e8dcc4;

@@ -59,6 +59,7 @@ import { hoverSurfaceLayout } from "./hoverSurfaceLayout.js";
 import { cardPreviewSurfaceSize } from "./cardPreviewFaces.js";
 import { canSkipRunechant } from "./runechantSkip.js";
 import { PlayerNameplate } from "./PlayerNameplate.js";
+import { OpponentActions } from "../social/OpponentActions.js";
 import { shouldShowIdleVictoryClaim } from "./idleVictory.js";
 import { MobileHandToggle } from "./MobileHandToggle.js";
 import { useMobileCardLongPress } from "./mobileCardLongPress.js";
@@ -94,7 +95,7 @@ const EMPTY_INSTANCE_IDS: ReadonlySet<number> = new Set();
 
 export function GameBoard() {
   const intl = useIntl();
-  const { view: authoritativeView, viewUpdate: authoritativeViewUpdate, playerProfiles, legal, actionCandidates, roomCommandPending, pendingInteraction, pendingDefenderStageIds, yourSeat, spectating, spectatorCount, spectatorUsernames, botGame, sendIntent, sendPriorityMode, sendRunechantSkip, sendEmote, kickSpectator, latestEmote, undo, error, leave, opponentConnected, connected, connectionIssueVisible, roomCode, screen, replayFrames, replayViews, replayStep, replayNotes, setLiveReplayNote, watchReplay, downloadReplay, closeReplay, getRecordedViews, lastActionAt, claimVictory, reportBug, backgroundSearching, stopBackgroundMatchmaking, authUser, authToken, setLobbyRail, unreadMessageCount, setSocialOpen } = useStore(
+  const { view: authoritativeView, viewUpdate: authoritativeViewUpdate, playerProfiles, legal, actionCandidates, roomCommandPending, pendingInteraction, pendingDefenderStageIds, yourSeat, spectating, spectatorCount, spectatorUsernames, botGame, sendIntent, sendPriorityMode, sendRunechantSkip, sendEmote, kickSpectator, latestEmote, undo, error, leave, opponentConnected, connected, connectionIssueVisible, roomCode, screen, replayFrames, replayViews, replayStep, replayNotes, setLiveReplayNote, watchReplay, downloadReplay, closeReplay, getRecordedViews, lastActionAt, claimVictory, reportBug, reportOpponent, backgroundSearching, stopBackgroundMatchmaking, authUser, authToken, setLobbyRail, unreadMessageCount, setSocialOpen } = useStore(
     useShallow((state) => ({
       view: state.view,
       viewUpdate: state.viewUpdate,
@@ -135,6 +136,7 @@ export function GameBoard() {
       lastActionAt: state.lastActionAt,
       claimVictory: state.claimVictory,
       reportBug: state.reportBug,
+      reportOpponent: state.reportOpponent,
       backgroundSearching: state.backgroundMatchmaking.state === "searching",
       stopBackgroundMatchmaking: state.stopBackgroundMatchmaking,
       authUser: state.authUser,
@@ -1092,7 +1094,17 @@ export function GameBoard() {
         <BrowserBotNotice />
         {playerProfiles ? (
           <>
-            <PlayerNameplate placement="opponent" profile={playerProfiles[1 - seat]!} />
+            <PlayerNameplate
+              placement="opponent"
+              profile={playerProfiles[1 - seat]!}
+              actions={authUser && roomCode && !spectating && !botGame && !replaying ? (
+                <OpponentActions
+                  username={playerProfiles[1 - seat]!.username}
+                  roomCode={roomCode}
+                  onReport={reportOpponent}
+                />
+              ) : null}
+            />
             <PlayerNameplate placement="self" profile={playerProfiles[seat]!} />
           </>
         ) : null}

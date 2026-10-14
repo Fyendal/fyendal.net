@@ -28,6 +28,8 @@ import type {
   OnHitImpactView,
   PendingDecision,
   PlayerBadge,
+  PlayerReportReason,
+  PlayerReportSource,
   PlayerView,
   PrepView,
   MatchPrepPhase,
@@ -134,6 +136,30 @@ export interface DeckInvalidResponse {
   error?: string;
 }
 export interface BugReportResponse { ok: true; reportId: string }
+export const GAME_REPORT_REASONS: readonly PlayerReportReason[] = [
+  "stalling",
+  "emote-spam",
+  "offensive-name",
+  "cheating",
+  "other",
+];
+export const CHAT_REPORT_REASONS: readonly PlayerReportReason[] = [
+  "harassment",
+  "spam",
+  "offensive-name",
+  "other",
+];
+export const PLAYER_REPORT_DETAILS_MAX = 500;
+/** Newest friend messages copied into a report when the reporter opts in. */
+export const PLAYER_REPORT_CHAT_MESSAGES = 100;
+export function isPlayerReportReason(
+  value: unknown,
+  source: PlayerReportSource,
+): value is PlayerReportReason {
+  const reasons = source === "game" ? GAME_REPORT_REASONS : CHAT_REPORT_REASONS;
+  return typeof value === "string" && (reasons as readonly string[]).includes(value);
+}
+export interface PlayerReportResponse { ok: true; reportId: string }
 export interface FixedBugReportNotification {
   reportId: string;
   fixedAt: number | null;
@@ -316,6 +342,17 @@ export interface AccountExport {
     closedAt: number | null;
     dismissedAt: number | null;
     resolutionMessage?: string | null;
+  }>;
+  playerReports: Array<{
+    id: string;
+    source: PlayerReportSource;
+    roomCode: string | null;
+    roomVersion: number | null;
+    reportedUsername: string;
+    reason: PlayerReportReason;
+    details: string;
+    includesChat: boolean;
+    createdAt: number;
   }>;
   gameDays: number[];
   achievements: AchievementUnlock[];
@@ -1673,6 +1710,13 @@ export const decodeBugReportResponse: Decoder<BugReportResponse> = (value) => {
     : null;
 };
 
+export const decodePlayerReportResponse: Decoder<PlayerReportResponse> = (value) => {
+  const data = object(value);
+  return data && exactKeys(data, ["ok", "reportId"]) && data.ok === true && id(data.reportId)
+    ? { ok: true, reportId: data.reportId }
+    : null;
+};
+
 export const decodeBugReportNotificationsResponse: Decoder<BugReportNotificationsResponse> = (value) => {
   const data = object(value);
   if (!data || !exactKeys(data, ["ok", "notifications"]) || data.ok !== true
@@ -2047,6 +2091,21 @@ function exportBugReport(value: unknown): boolean {
     && (report.dismissedAt === null || nonNegativeInteger(report.dismissedAt));
 }
 
+function exportPlayerReport(value: unknown): boolean {
+  const report = object(value);
+  if (!report || !exactKeys(report, [
+    "id", "source", "roomCode", "roomVersion", "reportedUsername", "reason", "details", "includesChat", "createdAt",
+  ])) return false;
+  const source = report.source === "game" || report.source === "chat" ? report.source : null;
+  const room = source === "game"
+    ? string(report.roomCode, 6, false) && nonNegativeInteger(report.roomVersion)
+    : report.roomCode === null && report.roomVersion === null;
+  return !!source && room && id(report.id)
+    && string(report.reportedUsername, MAX_SHORT_TEXT, false) && isPlayerReportReason(report.reason, source)
+    && string(report.details, PLAYER_REPORT_DETAILS_MAX, true) && typeof report.includesChat === "boolean"
+    && nonNegativeInteger(report.createdAt);
+}
+
 function exportMatchmaking(value: unknown): boolean {
   if (value === null) return true;
   const matchmaking = object(value);
@@ -2118,7 +2177,7 @@ export const decodeAccountExportResponse: Decoder<AccountExportResponse> = (valu
     && exactKeys(
       exported,
       ["exportedAt", "account", "decks", "deckPlays", "rooms", "matchmaking", "bugReports",
-        "gameDays", "achievements", "replays", "matches", "heroRecords", "matchupRecords",
+        "playerReports", "gameDays", "achievements", "replays", "matches", "heroRecords", "matchupRecords",
         "friends", "friendRequests", "friendMessages"],
     ) && !!account
     && exactKeys(account, ["username", "createdAt", "earlyTester", "selectedBadge"])
@@ -2135,6 +2194,7 @@ export const decodeAccountExportResponse: Decoder<AccountExportResponse> = (valu
     && array(exported.rooms, (item): item is AccountExport["rooms"][number] => exportRoom(item), MAX_ROOMS)
     && exportMatchmaking(exported.matchmaking)
     && array(exported.bugReports, (item): item is AccountExport["bugReports"][number] => exportBugReport(item), MAX_ROOMS)
+    && array(exported.playerReports, (item): item is AccountExport["playerReports"][number] => exportPlayerReport(item), MAX_ROOMS)
     && array(exported.gameDays, (item): item is number => nonNegativeInteger(item) && item % 86_400_000 === 0, MAX_ROOMS)
     && array(exported.achievements, achievementUnlock, ACHIEVEMENT_IDS.length)
     && array(exported.replays, (item): item is AccountExport["replays"][number] => exportReplay(item), MAX_ROOMS)
