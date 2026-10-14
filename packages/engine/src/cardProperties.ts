@@ -1,7 +1,8 @@
 import type { GameStateInternal } from "./runtimeState.js";
 import type { CardColor, CardData, CardType, MeldSide } from "@fyendal/shared";
 import type { CardScript } from "./scripts.js";
-import type { CardInstance, PlayerState } from "./state.js";
+import type { CardInstance, ChainLinkState, PlayerState } from "./state.js";
+import { heroAbilitiesDisabled } from "./stateQueries.js";
 import { currentLink, findCardAnywhere } from "./zoneQueries.js";
 
 // Card data currently stores talent supertypes beside ordinary subtypes.
@@ -23,6 +24,28 @@ export const TALENT_SUPERTYPES = [
   "shadow",
 ] as const;
 const TALENT_SUPERTYPE_SET = new Set<string>(TALENT_SUPERTYPES);
+
+// CR 2.11.6a class supertypes, for effects that stop cards gaining classes.
+const CLASS_SUPERTYPES = [
+  "adjudicator",
+  "assassin",
+  "bard",
+  "brute",
+  "guardian",
+  "illusionist",
+  "mechanologist",
+  "merchant",
+  "necromancer",
+  "ninja",
+  "pirate",
+  "ranger",
+  "runeblade",
+  "shapeshifter",
+  "thief",
+  "warrior",
+  "wizard",
+] as const;
+const CLASS_TALENT_SUPERTYPE_SET = new Set<string>([...CLASS_SUPERTYPES, ...TALENT_SUPERTYPES]);
 
 export function dataOf(state: GameStateInternal, cardId: string): CardData {
   const data = state.cardsRef[cardId];
@@ -209,7 +232,11 @@ function ownedClassTalentTypesSuppressed(
 /** Effective classes/subtypes of a card in its current zone. */
 export function cardTypesOf(state: GameStateInternal, card: CardInstance): string[] {
   const data = instanceDataOf(state, card);
-  const suppressClassTalent = ownedClassTalentTypesSuppressed(state, card);
+  const ownerHero = state.players[card.owner]?.hero;
+  const heroOwnedRules = ownerHero ? scriptOf(state, ownerHero.cardId, ownerHero)?.ownedCardTypes : undefined;
+  const ownedRules = heroOwnedRules && !heroAbilitiesDisabled(state, card.owner) ? heroOwnedRules : undefined;
+  const lockClassTalent = ownedRules?.loseClassTalent === true;
+  const suppressClassTalent = lockClassTalent || ownedClassTalentTypesSuppressed(state, card);
   const allZone = card.faceDown
     ? []
     : (scriptOf(state, card.cardId, card)?.allZoneTypes ?? []);
@@ -232,7 +259,7 @@ export function cardTypesOf(state: GameStateInternal, card: CardInstance): strin
       instanceHasKeyword(state, card, "universal") && controllerHero
     ? (instanceDataOf(state, controllerHero).classes ?? [])
     : [];
-  return [...new Set([
+  const types = [
     ...(!suppressClassTalent ? (data.classes ?? []) : []),
     ...(data.subtypes ?? []).filter(
       (type) => !suppressClassTalent || !TALENT_SUPERTYPE_SET.has(type.toLowerCase()),
@@ -248,12 +275,21 @@ export function cardTypesOf(state: GameStateInternal, card: CardInstance): strin
         ? [modifier.grantsType]
         : [];
     }),
-  ].map((type) => type.toLowerCase()))];
+    ...(ownedRules?.gain ?? []),
+  ].map((type) => type.toLowerCase());
+  return [...new Set(
+    lockClassTalent ? types.filter((type) => !CLASS_TALENT_SUPERTYPE_SET.has(type)) : types,
+  )];
 }
 
 /** Chi-subtype cards pitch for chi points instead of resource points (CR 1.13.5). */
 export function isChiCard(state: GameStateInternal, card: CardInstance): boolean {
   return (instanceDataOf(state, card).subtypes ?? []).includes("chi");
+}
+
+/** An attack action card: playing it creates an attack, not resolution effects. */
+export function isAttackActionData(data: CardData): boolean {
+  return data.cardType === "action" && (data.subtypes ?? []).includes("attack");
 }
 
 /** CR 8.2.6a: arrows can only be played from arsenal while controlling a bow. */
@@ -272,4 +308,23 @@ export function wardValueOf(data: CardData, instance?: CardInstance): number | u
     if (match) value = Math.max(value ?? 0, Number(match[1]));
   }
   return value;
+}
+
+/** Veil: the attack can't be defended by more than 1 card of each color.
+ * Returns whether `card` would be a second defender of its color, counting
+ * current defenders and any cards staged with it. Colorless cards are never
+ * restricted. */
+export function veilBlocksDefender(
+  state: GameStateInternal,
+  link: ChainLinkState,
+  card: CardInstance,
+  staged: readonly CardInstance[] = [],
+): boolean {
+  if (link.flags.attackAbilitiesSuppressed === true) return false;
+  if (!instanceHasKeyword(state, link.attackingCard, "veil")) return false;
+  const color = cardColorOf(state, card);
+  if (color === 0) return false;
+  return [...link.defendingCards, ...link.defendingEquipment, ...staged].some(
+    (defender) => defender.instanceId !== card.instanceId && cardColorOf(state, defender) === color,
+  );
 }

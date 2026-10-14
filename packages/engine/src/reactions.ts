@@ -7,8 +7,10 @@ import {
   cardTypesOf,
   dataOf,
   instanceDataOf,
+  isAttackActionData,
   meldSideHasType,
   scriptOf,
+  veilBlocksDefender,
 } from "./cardProperties.js";
 
 import { activeModifiers } from "./combatModifiers.js";
@@ -56,7 +58,7 @@ import { canPayRequiredHandCardsForAdditionalCost } from "./resources.js";
 import { heroAbilitiesDisabled } from "./stateQueries.js";
 import { actionLimitReached, isFrozen, opposingInstantsProhibited } from "./ruleQueries.js";
 import { defendingHeroCannotRespondBelowPower } from "./combatRestrictions.js";
-import { pushAbilityLayer } from "./stackCore.js";
+import { pushAbilityLayer, pushAttackCardLayer } from "./stackCore.js";
 
 import {
   holdPriorityWindow,
@@ -604,6 +606,9 @@ export function playReaction(
   ) {
     return `this attack can't be defended by more than ${maxNonBlock} non-block cards`;
   }
+  if (isDefReact && veilBlocksDefender(state, link, card)) {
+    return "Veil: this attack can't be defended by more than 1 card of each color";
+  }
   // "defense reactions can't be played (from arsenal) this chain link"
   const drRestriction = defenseReactionRestriction(state, link);
   if (isDefReact && drRestriction.all) {
@@ -819,16 +824,20 @@ export function finishReactionPlay(
   // reactions/instants become the top stack layer: their effects resolve only
   // once both players pass in succession (CR 5.3.2); a defense reaction becomes
   // a defending card when it resolves (7.4.2d)
-  state.stack.unshift({
-    sourceInstanceId: removed.instanceId,
-    seat,
-    triggerIndex: -1,
-    label: nameOf(state, removed.cardId),
-    optional: false,
-    card: removed,
-    fromHand: origin === "hand",
-    ...(goAgain ? { goAgain: true } : {}),
-  });
+  if (isAttackActionData(instanceDataOf(state, removed))) {
+    pushAttackCardLayer(state, seat, removed, origin);
+  } else {
+    state.stack.unshift({
+      sourceInstanceId: removed.instanceId,
+      seat,
+      triggerIndex: -1,
+      label: nameOf(state, removed.cardId),
+      optional: false,
+      card: removed,
+      fromHand: origin === "hand",
+      ...(goAgain ? { goAgain: true } : {}),
+    });
+  }
   state.stack.unshift(...playedTriggers);
   if (dataOf(state, removed.cardId).cardType === "attack-reaction") {
     runtime.dispatchFlow("queueReactionEventTriggers", state, seat);

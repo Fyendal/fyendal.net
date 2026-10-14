@@ -47,7 +47,10 @@ import { weaponAttacksProhibited } from "./combatRestrictions.js";
 import {
   currentLink,
   opponent,
+  removeFromArray,
 } from "./zoneQueries.js";
+import { CARD_PLAY_ORIGINS } from "./stackCore.js";
+import type { CardPlayOrigin } from "./stackCore.js";
 import { transitionZone } from "./transitions.js";
 
 function replacePowerGain(
@@ -447,34 +450,36 @@ export function attackFromDeck(
 const EFFECT_ATTACK_QUEUE_HEAD = "effectAttackQueueHead";
 const EFFECT_ATTACK_QUEUE_TAIL = "effectAttackQueueTail";
 
-function enqueuePermanentAttack(
-  player: PlayerState,
-  instanceId: number,
-  targetAllyId?: number,
-): void {
+type QueuedAttack = { instanceId: number; targetAllyId?: number; cardOrigin?: CardPlayOrigin };
+
+function enqueueAttack(player: PlayerState, entry: QueuedAttack): void {
   const tail = Number(player.flags[EFFECT_ATTACK_QUEUE_TAIL] ?? 0) + 1;
   if (Number(player.flags[EFFECT_ATTACK_QUEUE_HEAD] ?? 0) === 0) {
     player.flags[EFFECT_ATTACK_QUEUE_HEAD] = tail;
   }
   player.flags[EFFECT_ATTACK_QUEUE_TAIL] = tail;
-  player.flags[`effectAttackQueue:${tail}:instance`] = instanceId;
-  if (targetAllyId !== undefined) {
-    player.flags[`effectAttackQueue:${tail}:target`] = targetAllyId;
+  player.flags[`effectAttackQueue:${tail}:instance`] = entry.instanceId;
+  if (entry.targetAllyId !== undefined) {
+    player.flags[`effectAttackQueue:${tail}:target`] = entry.targetAllyId;
+  }
+  if (entry.cardOrigin !== undefined) {
+    player.flags[`effectAttackQueue:${tail}:card`] = CARD_PLAY_ORIGINS.indexOf(entry.cardOrigin) + 1;
   }
 }
 
-function dequeuePermanentAttack(
-  player: PlayerState,
-): { instanceId: number; targetAllyId?: number } | undefined {
+function dequeueAttack(player: PlayerState): QueuedAttack | undefined {
   const head = Number(player.flags[EFFECT_ATTACK_QUEUE_HEAD] ?? 0);
   const tail = Number(player.flags[EFFECT_ATTACK_QUEUE_TAIL] ?? 0);
   if (head <= 0 || tail < head) return undefined;
   const instanceKey = `effectAttackQueue:${head}:instance`;
   const targetKey = `effectAttackQueue:${head}:target`;
+  const cardKey = `effectAttackQueue:${head}:card`;
   const instanceId = Number(player.flags[instanceKey] ?? 0);
   const target = player.flags[targetKey];
+  const cardOrigin = CARD_PLAY_ORIGINS[Number(player.flags[cardKey] ?? 0) - 1];
   delete player.flags[instanceKey];
   delete player.flags[targetKey];
+  delete player.flags[cardKey];
   if (head === tail) {
     delete player.flags[EFFECT_ATTACK_QUEUE_HEAD];
     delete player.flags[EFFECT_ATTACK_QUEUE_TAIL];
@@ -485,19 +490,85 @@ function dequeuePermanentAttack(
   return {
     instanceId,
     ...(typeof target === "number" ? { targetAllyId: target } : {}),
+    ...(cardOrigin !== undefined ? { cardOrigin } : {}),
   };
 }
 
-/** Move the next effect-generated permanent attack from the queue onto the
- * combat chain. Invalid attacks are cleared and the next queued attack is
- * tried, matching CR 7.2.2c. */
-export function startNextQueuedPermanentAttack(
+/** CR 5.3.1a: a resolved attack-card layer moves to the attack queue. The
+ * card waits in the resolving zone and attacks after the current attack, in
+ * queue order with effect-generated permanent attacks. */
+export function queueAttackCard(
+  state: GameStateInternal,
+  seat: number,
+  card: CardInstance,
+  cardOrigin: CardPlayOrigin,
+): void {
+  if (!state.resolving.some((candidate) => candidate.instanceId === card.instanceId)) {
+    state.resolving.push(card);
+  }
+  enqueueAttack(state.players[seat] as PlayerState, { instanceId: card.instanceId, cardOrigin });
+  logPublic(state, gameLogMessage(
+    `${nameOf(state, card.cardId)} is put into the attack queue`,
+    "engine.log.attack.queued",
+    { card: logCardValue(card.cardId) },
+  ));
+}
+
+/** CR 7.7.3: attack cards still queued when the combat chain closes are
+ * cleared to their owners' graveyards. Queued permanent attacks keep their
+ * existing order. */
+export function clearAttackQueue(state: GameStateInternal, runtime: EngineRuntime): void {
+  for (const player of state.players as PlayerState[]) {
+    const kept: QueuedAttack[] = [];
+    for (let queued = dequeueAttack(player); queued; queued = dequeueAttack(player)) {
+      if (queued.cardOrigin === undefined) {
+        kept.push(queued);
+        continue;
+      }
+      const card = state.resolving.find((candidate) => candidate.instanceId === queued.instanceId);
+      if (!card) continue;
+      removeFromArray(state.resolving, card.instanceId);
+      runtime.commands.moveToGraveyard(state, card, "stack");
+    }
+    for (const entry of kept) enqueueAttack(player, entry);
+  }
+}
+
+/** Move the next queued attack onto the combat chain: an effect-generated
+ * permanent attack or an attack card played at instant speed. Invalid
+ * attacks are cleared and the next queued attack is tried, matching CR
+ * 7.2.2c. */
+export function startNextQueuedAttack(
   state: GameStateInternal,
   runtime: EngineRuntime,
   seat: number,
 ): boolean {
   const player = state.players[seat] as PlayerState;
-  for (let queued = dequeuePermanentAttack(player); queued; queued = dequeuePermanentAttack(player)) {
+  for (let queued = dequeueAttack(player); queued; queued = dequeueAttack(player)) {
+    if (queued.cardOrigin !== undefined) {
+      const card = state.resolving.find((candidate) => candidate.instanceId === queued.instanceId);
+      if (!card) continue;
+      removeFromArray(state.resolving, card.instanceId);
+      if (!attackTargetIsLegal(state, runtime, seat, queued.targetAllyId)) {
+        runtime.commands.moveToGraveyard(state, card, "stack");
+        continue;
+      }
+      const origin = queued.cardOrigin;
+      declareAttack(
+        state, runtime,
+        seat,
+        card,
+        "action",
+        false,
+        queued.targetAllyId,
+        origin === "arsenal",
+        false,
+        state.nextInstanceId,
+        origin === "banish",
+        origin !== "hand" && origin !== "arsenal",
+      );
+      return true;
+    }
     const weapon = player.weapons.find((card) => card.instanceId === queued.instanceId);
     const ally = player.board.find((card) =>
       card.instanceId === queued.instanceId && cardTypesOf(state, card).includes("ally")
@@ -573,7 +644,7 @@ export function attackWithPermanent(
 
   if (!attackTargetIsLegal(state, runtime, seat, targetAllyId)) return false;
   if (state.stack.length > 0 || state.resolving.length > 0 || currentLink(state)) {
-    enqueuePermanentAttack(player, instanceId, targetAllyId);
+    enqueueAttack(player, { instanceId, ...(targetAllyId !== undefined ? { targetAllyId } : {}) });
     return true;
   }
   declareAttack(state, runtime, seat, card, weapon ? "weapon" : "ally", false, targetAllyId);

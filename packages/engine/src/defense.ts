@@ -7,6 +7,7 @@ import {
   instanceDataOf,
   instanceHasKeyword,
   scriptOf,
+  veilBlocksDefender,
 } from "./cardProperties.js";
 
 import { activeModifiers } from "./combatModifiers.js";
@@ -280,6 +281,7 @@ export function defenderSelectionError(
   let actionDefenders = [...link.defendingCards, ...link.defendingEquipment].filter(
     (card) => cardHasType(state, card, "action"),
   ).length;
+  const staged: CardInstance[] = [];
 
   for (const id of instanceIds) {
     if (seen.has(id)) return `card ${id} cannot defend twice`;
@@ -289,6 +291,10 @@ export function defenderSelectionError(
     const equipmentCard = equipment.find((card) => card.instanceId === id);
     const card = handCard ?? arsenalCard ?? equipmentCard;
     if (!card) return `card ${id} cannot defend`;
+    if (veilBlocksDefender(state, link, card, staged)) {
+      return "Veil: this attack can't be defended by more than 1 card of each color";
+    }
+    staged.push(card);
 
     const cardType = dataOf(state, card.cardId).cardType;
     if (cardType !== "block") {

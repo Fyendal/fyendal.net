@@ -1,7 +1,7 @@
 import type { FlowStepName } from "./flowTypes.js";
 import type { EngineRuntime } from "./runtimePorts.js";
 import type { GameStateInternal } from "./runtimeState.js";
-import { auraAttackGoAgain, beginAttackStep, startNextQueuedPermanentAttack } from "./attacks.js";
+import { auraAttackGoAgain, beginAttackStep, clearAttackQueue, queueAttackCard, startNextQueuedAttack } from "./attacks.js";
 import { closeChain, finishLinkResolution } from "./combatChain.js";
 import { resolveLink, resumeCombatDamage } from "./damage.js";
 import { beginHeroDamage, dealAllyDamage, gainHeroLife } from "./damageResolution.js";
@@ -22,6 +22,7 @@ const handlers: Readonly<Record<FlowStepName, { fn: FlowHandler; injectRuntime: 
   beginHeroDamage: { fn: beginHeroDamage, injectRuntime: true },
   beginReactionStep: { fn: beginReactionStep, injectRuntime: false },
   cancelEndActionPass: { fn: cancelEndActionPass, injectRuntime: false },
+  clearAttackQueue: { fn: clearAttackQueue, injectRuntime: true },
   closeChain: { fn: closeChain, injectRuntime: true },
   collectEventTriggerLayers: { fn: collectEventTriggerLayers, injectRuntime: true },
   consumeQueuedIntimidate: { fn: consumeQueuedIntimidate, injectRuntime: true },
@@ -39,6 +40,7 @@ const handlers: Readonly<Record<FlowStepName, { fn: FlowHandler; injectRuntime: 
   gainHeroLife: { fn: gainHeroLife, injectRuntime: true },
   holdLayerWindow: { fn: holdLayerWindow, injectRuntime: true },
   proceedWithAttack: { fn: proceedWithAttack, injectRuntime: true },
+  queueAttackCard: { fn: queueAttackCard, injectRuntime: false },
   queueDefendEventLayersAfterCurrent: { fn: queueDefendEventLayersAfterCurrent, injectRuntime: true },
   queueEventTriggers: { fn: queueEventTriggers, injectRuntime: true },
   queueHitTriggers: { fn: queueHitTriggers, injectRuntime: true },
@@ -55,7 +57,7 @@ const handlers: Readonly<Record<FlowStepName, { fn: FlowHandler; injectRuntime: 
   resolveTopStackLayer: { fn: resolveTopStackLayer, injectRuntime: true },
   resolveWagerLayer: { fn: resolveWagerLayer, injectRuntime: true },
   resumeCombatDamage: { fn: resumeCombatDamage, injectRuntime: true },
-  startNextQueuedPermanentAttack: { fn: startNextQueuedPermanentAttack, injectRuntime: true },
+  startNextQueuedAttack: { fn: startNextQueuedAttack, injectRuntime: true },
 });
 
 export function dispatchFlow<T = any>(

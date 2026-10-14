@@ -6805,6 +6805,60 @@
       "value": " and puts it into your hand"
     }
   ],
+  "card.log.obk.azalea.stealth": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": "
+    },
+    {
+      "type": 1,
+      "value": "target"
+    },
+    {
+      "type": 0,
+      "value": " gets +1 power and go again this turn"
+    }
+  ],
+  "card.log.obk.azalea.veil": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": "
+    },
+    {
+      "type": 1,
+      "value": "target"
+    },
+    {
+      "type": 0,
+      "value": " gets veil this turn"
+    }
+  ],
+  "card.log.obk.huxley.instant": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": "
+    },
+    {
+      "type": 1,
+      "value": "target"
+    },
+    {
+      "type": 0,
+      "value": " may be played as though it were an instant this turn"
+    }
+  ],
   "card.log.out.banish.faceup": [
     {
       "type": 1,
@@ -10405,6 +10459,12 @@
     {
       "type": 0,
       "value": "Choose a ward aura"
+    }
+  ],
+  "card.obk.azalea.cost.arsenal.bottom": [
+    {
+      "type": 0,
+      "value": "Put a card from your arsenal on the bottom of your deck as a cost"
     }
   ],
   "card.omn.action.defender.return": [
@@ -15377,6 +15437,18 @@
       "value": " or less this turn as though it were an instant"
     }
   ],
+  "card.trigger.obk.huxley.instant": [
+    {
+      "type": 0,
+      "value": "Tap this hero to play the banished card as though it were an instant this turn"
+    }
+  ],
+  "card.trigger.obk.min.flip": [
+    {
+      "type": 0,
+      "value": "Flip this hero"
+    }
+  ],
   "card.trigger.pen.themis.facedown": [
     {
       "type": 0,
@@ -16973,6 +17045,16 @@
     {
       "type": 0,
       "value": "'s face-up arsenal through their next turn"
+    }
+  ],
+  "engine.log.attack.queued": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " is put into the attack queue"
     }
   ],
   "engine.log.card.activated": [

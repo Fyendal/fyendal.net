@@ -47,6 +47,7 @@ import { mpa } from "./mpa.js";
 import { mpg } from "./mpg.js";
 import { mpw } from "./mpw.js";
 import { mst } from "./mst.js";
+import { obk } from "./obk.js";
 import { omn } from "./omn.js";
 import { out } from "./out.js";
 import { pen } from "./pen.js";
@@ -128,6 +129,7 @@ const setModules: Record<string, Record<string, CardScript>> = {
   MPG: mpg,
   MPW: mpw,
   MST: mst,
+  OBK: obk,
   OMN: omn,
   OUT: out,
   PEN: pen,

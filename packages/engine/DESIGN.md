@@ -104,7 +104,12 @@ A turn follows this sequence:
 Played cards and triggered or activated abilities ride the stack. Effects run
 only when their layer resolves after both players pass. Go again grants its
 action point at resolution. An attack card is a stack layer first; its
-continuation declares the attack after the layer resolves.
+continuation declares the attack after the layer resolves. An attack card
+played as though it were an instant while another attack is pending, or with
+other layers on the stack, resolves into the attack queue instead (CR 5.3.1a).
+Queued attack cards wait in the resolving zone, share the queue with
+effect-generated weapon and ally attacks, become the next chain link after the
+current attack, and are cleared if the combat chain closes first.
 
 Boost remains an optional play announcement represented by `boost?: true`.
 When paid, its seeded top-deck banish and any Boost-dependent effects occur

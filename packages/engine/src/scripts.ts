@@ -976,6 +976,14 @@ export interface CardScript {
   allZoneNames?: string[];
   /** Additional classes/subtypes this face-up object has in every zone. */
   allZoneTypes?: string[];
+  /** Hero static type rules for every card its player owns, applied while
+   * the hero's abilities function. `gain` adds classes or subtypes ("Cards
+   * you own are Mechanologist"); `loseClassTalent` removes printed class and
+   * talent types and blocks every later gain of them ("lose and can't gain"). */
+  ownedCardTypes?: {
+    readonly gain?: readonly string[];
+    readonly loseClassTalent?: boolean;
+  };
   /** Additional classes/subtypes granted to the controller's hero while this
    * equipment is equipped face up and its abilities are functional. */
   equippedHeroTypes?: string[];

@@ -205,7 +205,7 @@ export function finishLinkResolution(state: GameStateInternal,
   }
   state.phase = "action";
   state.priorityPlayer = state.activePlayer;
-  if (!pd?.chooseHook) runtime.dispatchFlow("startNextQueuedPermanentAttack", state, link.attacker);
+  if (!pd?.chooseHook) runtime.dispatchFlow("startNextQueuedAttack", state, link.attacker);
 }
 
 /**
@@ -226,6 +226,7 @@ export function closeChain(state: GameStateInternal, runtime: EngineRuntime): vo
     "The combat chain closes",
     "engine.log.combat.chain.closed",
   ));
+  runtime.dispatchFlow("clearAttackQueue", state);
   // Snapshot every defending close hook before any close effect moves cards.
   // This keeps the event simultaneous across all links and includes equipment,
   // which remains in its arena slot while represented on the chain.

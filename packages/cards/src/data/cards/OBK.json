@@ -1,0 +1,104 @@
+[
+  {
+    "id": "OBK006",
+    "name": "Min, Genius",
+    "cardType": "hero",
+    "text": "Cards you own are Mechanologist.\nAt the beginning of your end phase, flip this.",
+    "classes": ["chaos", "mechanologist"],
+    "life": 40,
+    "intellect": 4,
+    "set": "OBK",
+    "backId": "OBK006B"
+  },
+  {
+    "id": "OBK006B",
+    "name": "Min, Mad",
+    "cardType": "hero",
+    "text": "Cards you own lose and can't gain class and talent types.\nAt the beginning of your end phase, flip this.",
+    "classes": ["chaos", "mechanologist"],
+    "life": 40,
+    "intellect": 4,
+    "set": "OBK"
+  },
+  {
+    "id": "OBK007",
+    "name": "Min, Half-Genius",
+    "cardType": "hero",
+    "text": "Cards you own are Mechanologist.\nAt the beginning of your end phase, flip this.",
+    "classes": ["chaos", "mechanologist"],
+    "life": 20,
+    "intellect": 4,
+    "set": "OBK",
+    "backId": "OBK007B"
+  },
+  {
+    "id": "OBK007B",
+    "name": "Min, Half-Mad",
+    "cardType": "hero",
+    "text": "Cards you own lose and can't gain class and talent types.\nAt the beginning of your end phase, flip this.",
+    "classes": ["chaos", "mechanologist"],
+    "life": 20,
+    "intellect": 4,
+    "set": "OBK"
+  },
+  {
+    "id": "OBK012",
+    "name": "Vyle, Catalyst of Collapse",
+    "cardType": "hero",
+    "text": "Instant - {r}{r}, {t}: Each hero puts the top card of their deck face-up into their arsenal. Activate this only during your turn.\nIf an opponent has a face-up card in their arsenal, your arrow attacks get +1{p}.",
+    "classes": ["chaos", "ranger"],
+    "life": 40,
+    "intellect": 4,
+    "set": "OBK"
+  },
+  {
+    "id": "OBK013",
+    "name": "Vyle",
+    "cardType": "hero",
+    "text": "Instant - {r}{r}, {t}: Each hero puts the top card of their deck face-up into their arsenal. Activate this only during your turn.\nIf an opponent has a face-up card in their arsenal, your arrow attacks get +1{p}.",
+    "classes": ["chaos", "ranger"],
+    "life": 20,
+    "intellect": 4,
+    "set": "OBK"
+  },
+  {
+    "id": "OBK071",
+    "name": "Huxley, Racketeer",
+    "cardType": "hero",
+    "text": "Whenever you banish an action card with stealth from boosting, you may {t} this. If you do, you may play the banished card as though it were an instant this turn.",
+    "classes": ["assassin", "mechanologist"],
+    "life": 38,
+    "intellect": 4,
+    "set": "OBK"
+  },
+  {
+    "id": "OBK072",
+    "name": "Huxley",
+    "cardType": "hero",
+    "text": "Whenever you banish an action card with stealth from boosting, you may {t} this. If you do, you may play the banished card as though it were an instant this turn.",
+    "classes": ["assassin", "mechanologist"],
+    "life": 19,
+    "intellect": 4,
+    "set": "OBK"
+  },
+  {
+    "id": "OBK080",
+    "name": "Azalea, Ace of Spades",
+    "cardType": "hero",
+    "text": "Instant - {t}, put a card from your arsenal on the bottom of your deck: Put the top card of your deck face-up into your arsenal. If it has stealth, it gets +1{p} and go again this turn. If it's an arrow, it gets veil this turn.",
+    "classes": ["assassin", "ranger"],
+    "life": 38,
+    "intellect": 4,
+    "set": "OBK"
+  },
+  {
+    "id": "OBK081",
+    "name": "Azalea, Lone Vigilante",
+    "cardType": "hero",
+    "text": "Instant - {t}, put a card from your arsenal on the bottom of your deck: Put the top card of your deck face-up into your arsenal. If it has stealth, it gets +1{p} and go again this turn. If it's an arrow, it gets veil this turn.",
+    "classes": ["assassin", "ranger"],
+    "life": 19,
+    "intellect": 4,
+    "set": "OBK"
+  }
+]

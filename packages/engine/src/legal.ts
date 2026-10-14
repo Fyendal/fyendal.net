@@ -12,6 +12,7 @@ import {
   isChiCard,
   meldSideHasType,
   scriptOf,
+  veilBlocksDefender,
 } from "./cardProperties.js";
 import { currentLink, findCardAnywhere, heroSoulCards } from "./zoneQueries.js";
 import { enumeratePitchSequences } from "./pitchSequences.js";
@@ -920,6 +921,7 @@ function reactionIntents(
       const fromHand = !fromArsenal && !fromZone;
       if (blockHandDefReacts && fromHand && data.cardType === "defense-reaction") continue;
       if (nonBlockDefenderLimitReached && data.cardType === "defense-reaction") continue;
+      if (data.cardType === "defense-reaction" && veilBlocksDefender(state, link, card)) continue;
       // "defense reactions can't be played to this chain link" / "...from arsenal"
       if (!isAttacker && data.cardType === "defense-reaction") {
         if (

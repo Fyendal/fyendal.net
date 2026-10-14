@@ -6487,6 +6487,56 @@
       "value": " 并将其置入你的手牌"
     }
   ],
+  "card.log.obk.azalea.stealth": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "："
+    },
+    {
+      "type": 1,
+      "value": "target"
+    },
+    {
+      "type": 0,
+      "value": " 本回合获得 +1 力量和 go again"
+    }
+  ],
+  "card.log.obk.azalea.veil": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "："
+    },
+    {
+      "type": 1,
+      "value": "target"
+    },
+    {
+      "type": 0,
+      "value": " 本回合获得 veil"
+    }
+  ],
+  "card.log.obk.huxley.instant": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：本回合可以如同瞬间牌般打出 "
+    },
+    {
+      "type": 1,
+      "value": "target"
+    }
+  ],
   "card.log.out.banish.faceup": [
     {
       "type": 0,
@@ -9921,6 +9971,12 @@
     {
       "type": 0,
       "value": "选择一个守护 (ward) 灵气 (Aura)"
+    }
+  ],
+  "card.obk.azalea.cost.arsenal.bottom": [
+    {
+      "type": 0,
+      "value": "将你 arsenal 中的一张牌置于牌库底部作为费用"
     }
   ],
   "card.omn.action.defender.return": [
@@ -14763,6 +14819,18 @@
       "value": " 或更低的灵气 (Aura)当作瞬间牌打出"
     }
   ],
+  "card.trigger.obk.huxley.instant": [
+    {
+      "type": 0,
+      "value": "横置此英雄，使被放逐的牌本回合可以如同瞬间牌般打出"
+    }
+  ],
+  "card.trigger.obk.min.flip": [
+    {
+      "type": 0,
+      "value": "翻转此英雄"
+    }
+  ],
   "card.trigger.pen.themis.facedown": [
     {
       "type": 0,
@@ -16363,6 +16431,16 @@
     {
       "type": 0,
       "value": " 面朝上的 arsenal，持续至其下回合结束"
+    }
+  ],
+  "engine.log.attack.queued": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 被放入攻击队列"
     }
   ],
   "engine.log.card.activated": [

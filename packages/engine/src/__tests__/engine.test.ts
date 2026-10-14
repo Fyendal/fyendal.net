@@ -2,7 +2,7 @@ import { engineRuntime } from "../engineRuntime.js";
 import { describe, expect, it } from "vitest";
 import type { GameIntent } from "@fyendal/shared";
 import { actionCandidates, applyIntent, legalIntents, projectStateFor, projectStateForReplay, projectTransitionEvents, rngNext } from "../index.js";
-import { declareAttack } from "../attacks.js";
+import { declareAttack, queueAttackCard } from "../attacks.js";
 import { closeChain } from "../combatChain.js";
 import { computeAttack } from "../combatValues.js";
 import { pendingOnHitEffects } from "../hits.js";
@@ -633,6 +633,67 @@ describe("game setup & turn structure", () => {
 
     card.faceDown = true;
     expect(cardTypesOf(s, card)).not.toContain("brute");
+  });
+
+  it("applies a hero's owned-card type rules only to cards its player owns", () => {
+    const s = makeGame(108);
+    const p0 = player(s, 0);
+    const p1 = player(s, 1);
+    const id = giveCard(s, 0, "ATK4");
+    const card = p0.hand.find((candidate) => candidate.instanceId === id)!;
+    s.scriptsRef = {
+      ...s.scriptsRef,
+      HERO_A: { ...s.scriptsRef.HERO_A, ownedCardTypes: { gain: ["mechanologist"] } },
+    };
+
+    expect(cardTypesOf(s, card)).toEqual(expect.arrayContaining(["generic", "mechanologist"]));
+    expect(cardTypesOf(s, p0.hero)).toEqual(expect.arrayContaining(["warrior", "mechanologist"]));
+    expect(cardTypesOf(s, p1.hero)).not.toContain("mechanologist");
+
+    s.scriptsRef = {
+      ...s.scriptsRef,
+      HERO_A: { ...s.scriptsRef.HERO_A, ownedCardTypes: { loseClassTalent: true } },
+    };
+    card.grantedTypes = ["draconic", "wizard", "aura"];
+
+    expect(cardTypesOf(s, card)).toEqual(expect.arrayContaining(["attack", "aura"]));
+    for (const lost of ["generic", "draconic", "wizard"]) {
+      expect(cardTypesOf(s, card)).not.toContain(lost);
+    }
+    expect(cardTypesOf(s, p0.hero)).not.toContain("warrior");
+    expect(cardTypesOf(s, p1.hero)).toContain("brute");
+
+    p0.flags.disableHeroAbilities = true;
+    expect(cardTypesOf(s, card)).toEqual(expect.arrayContaining(["generic", "draconic", "wizard"]));
+  });
+
+  it("clears attack cards still in the attack queue when the combat chain closes", () => {
+    const s = makeGame(109);
+    const p0 = player(s, 0);
+    const id = giveCard(s, 0, "ATK4");
+    const queued = p0.hand.splice(p0.hand.findIndex((card) => card.instanceId === id), 1)[0]!;
+    s.chain.push({
+      attacker: 0,
+      attackingCard: { instanceId: s.nextInstanceId++, cardId: "ATK4", owner: 0 },
+      attackCardType: "action",
+      defendingCards: [],
+      defendingEquipment: [],
+      reactions: [],
+      goAgain: false,
+      damage: 0,
+      hit: false,
+      resolved: true,
+      declaredAtNextId: 0,
+      flags: {},
+    });
+
+    queueAttackCard(s, 0, queued, "banish");
+    expect(s.resolving).toContainEqual(expect.objectContaining({ instanceId: id }));
+    closeChain(s, engineRuntime);
+
+    expect(s.resolving).not.toContainEqual(expect.objectContaining({ instanceId: id }));
+    expect(p0.graveyard).toContainEqual(expect.objectContaining({ instanceId: id }));
+    expect(Object.keys(p0.flags).filter((key) => key.startsWith("effectAttackQueue"))).toEqual([]);
   });
 
   it("applies generic friendly draw, life-gain, and ability-cost replacements", () => {

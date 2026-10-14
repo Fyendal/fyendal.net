@@ -10,9 +10,11 @@ import {
   cardHasType,
   dataOf,
   instanceDataOf,
+  isAttackActionData,
   isChiCard,
   meldSideHasType,
   scriptOf,
+  veilBlocksDefender,
 } from "./cardProperties.js";
 import {
   gameLogMessage,
@@ -52,7 +54,7 @@ import { heroAbilitiesDisabled } from "./stateQueries.js";
 import { consumeFirstActionExtraCost, firstActionExtraCost, goAgainSuppressed, isFrozen, opposingInstantsProhibited, snapshotSerializable } from "./ruleQueries.js";
 import { opposingActionsProhibited } from "./restrictions.js";
 import { defendingHeroCannotRespondBelowPower } from "./combatRestrictions.js";
-import { pushCardLayer } from "./stackCore.js";
+import { pushAttackCardLayer, pushCardLayer, takeAttackLayerOrigin } from "./stackCore.js";
 import { DESTROY_AT_END_PHASE_HOOK, triggerLabelMessage } from "./triggerPresentation.js";
 
 import {
@@ -708,7 +710,11 @@ export function finishWindowInstantPlay(
   const { goAgain, layers: playedTriggers } = announceCardPlayed(state, runtime, seat, card, origin);
   // the instant becomes the top stack layer: its effect resolves only once
   // both players pass in succession (CR 5.3.2)
-  pushCardLayer(state, seat, card, { fromHand: origin === "hand", goAgain });
+  if (isAttackActionData(instanceDataOf(state, card))) {
+    pushAttackCardLayer(state, seat, card, origin);
+  } else {
+    pushCardLayer(state, seat, card, { fromHand: origin === "hand", goAgain });
+  }
   state.stack.unshift(...playedTriggers);
   if (state.pendingDecision?.chooseHook) {
     state.pendingDecision.resume = { kind: "continue-stack", seat };
@@ -1140,6 +1146,15 @@ export function resolveTopStackCard(state: GameStateInternal, runtime: EngineRun
     layer.meldStage = 1;
     card.meldSide = "right";
   }
+  if (layer.meldStage === undefined && isAttackActionData(instanceDataOf(state, card))) {
+    // CR 5.3.1a: a resolving attack card moves to the attack queue and
+    // attacks after the current attack.
+    const origin = takeAttackLayerOrigin(state, seat, card.instanceId);
+    state.stack.splice(state.stack.indexOf(layer), 1);
+    runtime.dispatchFlow("queueAttackCard", state, seat, card, origin);
+    continueStack(state, runtime, state.activePlayer);
+    return;
+  }
   const isDefReact = dataOf(state, card.cardId).cardType === "defense-reaction";
   if (layer.meldStage !== 1 && isDefReact && !link) {
     logPublic(state, gameLogMessage(
@@ -1275,7 +1290,11 @@ export function finishStackCardResolution(
   if (resolvedCard) {
     const link = currentLink(state);
     const cardType = dataOf(state, resolvedCard.cardId).cardType;
-    if (resolvedSuccessfully && link && cardType === "defense-reaction") {
+    if (
+      resolvedSuccessfully && link && cardType === "defense-reaction" &&
+      // CR 7.0.5b: a card that cannot become a defending card stays off the link.
+      !veilBlocksDefender(state, link, resolvedCard)
+    ) {
       // CR 5.3.6b: only after its layer effects and go again are complete does
       // a defense reaction leave the stack and become a defending card.
       link.defendingCards.push(resolvedCard);
@@ -1467,7 +1486,7 @@ export function continueStack(state: GameStateInternal,
   const top = state.stack[0];
   if (!top && !currentLink(state)) {
     const seat = prioritySeat ?? state.activePlayer;
-    if (runtime.dispatchFlow("startNextQueuedPermanentAttack", state, seat)) return;
+    if (runtime.dispatchFlow("startNextQueuedAttack", state, seat)) return;
   }
   // Once the last layer resolves, play normally returns to the pending
   // continuation instead of holding an empty-stack window. Combat steps are

@@ -20,6 +20,7 @@ import {
   cardTypesOf,
   dataOf,
   scriptOf,
+  veilBlocksDefender,
 } from "./cardProperties.js";
 
 import {
@@ -2471,8 +2472,9 @@ export function makeCtx(
         candidate.deck.some((card) => card.instanceId === instanceId),
       ) as PlayerState | undefined;
       if (!owner || owner.seat === current.attacker) return false;
-      const card = removeFromArray(owner.deck, instanceId);
-      if (!card) return false;
+      const card = owner.deck.find((candidate) => candidate.instanceId === instanceId);
+      if (!card || veilBlocksDefender(state, current, card)) return false;
+      removeFromArray(owner.deck, instanceId);
       delete card.faceDown;
       current.defendingCards.push(card);
       runtime.commands.applyOneShotDefenseModifiers(state, current, [card]);
@@ -2499,6 +2501,7 @@ export function makeCtx(
       if (!owner || owner.seat === current.attacker) return false;
       const card = owner.arsenal.find((candidate) => candidate.instanceId === instanceId);
       if (!card || dataOf(state, card.cardId).cardType !== "action") return false;
+      if (veilBlocksDefender(state, current, card)) return false;
       removeFromArray(owner.arsenal, instanceId);
       delete card.faceDown;
       current.defendingCards.push(card);
@@ -2524,8 +2527,9 @@ export function makeCtx(
         candidate.hand.some((card) => card.instanceId === instanceId),
       ) as PlayerState | undefined;
       if (!owner || owner.seat === current.attacker) return false;
-      const card = removeFromArray(owner.hand, instanceId);
-      if (!card) return false;
+      const card = owner.hand.find((candidate) => candidate.instanceId === instanceId);
+      if (!card || veilBlocksDefender(state, current, card)) return false;
+      removeFromArray(owner.hand, instanceId);
       delete card.faceDown;
       current.defendingCards.push(card);
       runtime.commands.applyOneShotDefenseModifiers(state, current, [card]);
@@ -2556,7 +2560,7 @@ export function makeCtx(
         ) as PlayerState | undefined;
         if (!owner || owner.seat === current.attacker) continue;
         const card = owner.banish.find((candidate) => candidate.instanceId === instanceId);
-        if (!card || card.faceDown) continue;
+        if (!card || card.faceDown || veilBlocksDefender(state, current, card)) continue;
         removeFromArray(owner.banish, instanceId);
         runtime.transitions.move(
           card,

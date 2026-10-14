@@ -48,6 +48,7 @@ import cardsMST from "./data/cards/MST.json" with { type: "json" };
 import cardsMPA from "./data/cards/MPA.json" with { type: "json" };
 import cardsMPG from "./data/cards/MPG.json" with { type: "json" };
 import cardsMPW from "./data/cards/MPW.json" with { type: "json" };
+import cardsOBK from "./data/cards/OBK.json" with { type: "json" };
 import cardsOMN from "./data/cards/OMN.json" with { type: "json" };
 import cardsPEN from "./data/cards/PEN.json" with { type: "json" };
 import cardsPSM from "./data/cards/PSM.json" with { type: "json" };
@@ -768,6 +769,7 @@ const rawCardList = decodeCardDataList([
   ...cardsMST,
   ...cardsAMO,
   ...cardsMPA,
+  ...cardsOBK,
   ...cardsMPG,
   ...cardsMPW,
   ...cardsOMN,

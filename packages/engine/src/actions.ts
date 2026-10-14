@@ -1,6 +1,6 @@
 import type { EngineRuntime } from "./runtimePorts.js";
 import type { GameStateInternal } from "./runtimeState.js";
-import type { CardData, MeldSide, PlayableZone } from "@fyendal/shared";
+import type { MeldSide, PlayableZone } from "@fyendal/shared";
 import type { CardInstance, PendingDecisionState, PlayerState } from "./state.js";
 import type { TokenCreationContext } from "./eventTypes.js";
 import { activateFromHandAbility } from "./activation.js";
@@ -11,6 +11,7 @@ import {
   dataOf,
   instanceDataOf,
   isArrowData,
+  isAttackActionData,
   meldSideHasType,
   scriptOf,
 } from "./cardProperties.js";
@@ -85,10 +86,6 @@ import { actionLimitReached, consumeFirstActionExtraCost, controlsBow, firstActi
 import { nonAttackActionCardLimitReached } from "./restrictions.js";
 import { attackActionPlayRestricted, weaponAttacksProhibited } from "./combatRestrictions.js";
 import { pushAbilityLayer, pushCardLayer } from "./stackCore.js";
-
-function isAttackCard(data: CardData): boolean {
-  return data.cardType === "action" && (data.subtypes ?? []).includes("attack");
-}
 
 export function playCard(
   state: GameStateInternal,
@@ -196,7 +193,7 @@ export function playCard(
   ) {
     return "cannot pitch an alternative-cost card";
   }
-  const availableBoosts = isAttackCard(data) ? boostCountForCardPlay(state, seat, card) : 0;
+  const availableBoosts = isAttackActionData(data) ? boostCountForCardPlay(state, seat, card) : 0;
   const canBoost = availableBoosts > 0;
   if (boost && !canBoost) return `${nameOf(state, card.cardId)} cannot boost`;
   if (!boost && boostCount !== undefined) return "cannot declare a Boost count without boosting";
@@ -443,7 +440,7 @@ export function finishPlayCard(
   // A non-attack action can only be played after the resolved combat chain
   // closes. Process close-event effects first so permanents they create can
   // observe this card's subsequent played event.
-  if (!isInstant && !isAttackCard(data)) closeChain(state, runtime);
+  if (!isInstant && !isAttackActionData(data)) closeChain(state, runtime);
   const playEventNextId = card.counters?.enginePlayEventNextId ?? state.nextInstanceId;
   delete card.counters?.enginePlayEventNextId;
   const { goAgain, layers: playedTriggers } = announceCardPlayed(
@@ -455,7 +452,7 @@ export function finishPlayCard(
     playEventNextId,
   );
 
-  if (isAttackCard(data)) {
+  if (isAttackActionData(data)) {
     let boosted = false;
     let boostSucceeded = false;
     if (boost) {

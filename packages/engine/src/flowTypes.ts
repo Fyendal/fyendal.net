@@ -6,6 +6,7 @@ export type FlowStepName =
   | "beginHeroDamage"
   | "beginReactionStep"
   | "cancelEndActionPass"
+  | "clearAttackQueue"
   | "closeChain"
   | "collectEventTriggerLayers"
   | "consumeQueuedIntimidate"
@@ -23,6 +24,7 @@ export type FlowStepName =
   | "gainHeroLife"
   | "holdLayerWindow"
   | "proceedWithAttack"
+  | "queueAttackCard"
   | "queueDefendEventLayersAfterCurrent"
   | "queueEventTriggers"
   | "queueHitTriggers"
@@ -39,7 +41,7 @@ export type FlowStepName =
   | "resolveTopStackLayer"
   | "resolveWagerLayer"
   | "resumeCombatDamage"
-  | "startNextQueuedPermanentAttack";
+  | "startNextQueuedAttack";
 
 /** Ephemeral orchestration request. Persisted pauses continue using StackResume. */
 export interface FlowStep {

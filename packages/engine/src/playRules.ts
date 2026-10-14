@@ -644,8 +644,8 @@ export function cardLayerGoAgain(
   );
 }
 
-/** Whether a card is an instant or a non-attack action currently permitted
- * to be played as though it were an instant. */
+/** Whether a card is an instant, or an action currently permitted to be
+ * played as though it were an instant. */
 export function canPlayAsInstant(
   state: GameStateInternal,
   runtime: EngineRuntime,
@@ -678,7 +678,14 @@ export function canPlayAsInstant(
   if (isInstant && !isAction) return true;
   const playableEquipment =
     data.cardType === "equipment" && scriptOf(state, card.cardId, card)?.playableEquipment === true;
-  if (!playableEquipment && (!isAction || (data.subtypes ?? []).includes("attack"))) return false;
+  if (!playableEquipment && !isAction) return false;
+  if (isAction && (data.subtypes ?? []).includes("attack")) {
+    // CR 8.1.1d: an attack action played as though it were an instant is
+    // still an attack. On an empty stack outside combat steps it is declared
+    // at once; otherwise its layer resolves into the attack queue (CR 5.3.1a)
+    // and it attacks after the current attack. Only the turn player attacks.
+    return card.playableAsInstant === true && seat === state.activePlayer;
+  }
   const player = state.players[seat] as PlayerState;
   if (card.playableAsInstant) return true;
   if (player.flags[`asInstant:${card.instanceId}`] === true) return true;
