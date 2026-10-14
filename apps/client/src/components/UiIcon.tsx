@@ -4,12 +4,14 @@ import type { CSSProperties } from "react";
 export type UiIconName =
   | "check"
   | "close"
+  | "edit"
   | "flag"
   | "flag-filled"
   | "invite-game"
   | "lock"
   | "message"
   | "star"
+  | "trash"
   | "user-add"
   | "user-pending";
 

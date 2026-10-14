@@ -19588,7 +19588,19 @@
       "value": "经典构筑"
     }
   ],
+  "format.classicConstructed.short": [
+    {
+      "type": 0,
+      "value": "经典构筑"
+    }
+  ],
   "format.silverAge": [
+    {
+      "type": 0,
+      "value": "白银时代"
+    }
+  ],
+  "format.silverAge.short": [
     {
       "type": 0,
       "value": "白银时代"
@@ -23532,20 +23544,6 @@
     {
       "type": 0,
       "value": "确认删除"
-    }
-  ],
-  "lobby.deck.countAndSource": [
-    {
-      "type": 1,
-      "value": "count"
-    },
-    {
-      "type": 0,
-      "value": " 张牌 · "
-    },
-    {
-      "type": 1,
-      "value": "source"
     }
   ],
   "lobby.deck.createImport": [

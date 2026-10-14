@@ -1,4 +1,5 @@
 import { renderToStaticMarkup } from "react-dom/server";
+import type { DeckSummary } from "@fyendal/protocol";
 import { describe, expect, it, vi } from "vitest";
 import type { StoreState } from "../store/types.js";
 
@@ -9,6 +10,7 @@ vi.mock("../store.js", () => ({
 
 import { TestI18nProvider } from "../i18n/TestI18nProvider.js";
 import { DeckLibrary } from "./DeckLibrary.js";
+import { DeckTile, preconSummaries } from "./DeckGrid.js";
 
 describe("DeckLibrary", () => {
   it("links Fabrary decks, keeps pasted lists editable, and shows selection controls", () => {
@@ -35,8 +37,11 @@ describe("DeckLibrary", () => {
     expect(html).toContain('aria-label="Select Bravo Deck"');
     expect(html).toContain('aria-label="Select Briar Deck"');
     expect(html.match(/type="checkbox"/g)).toHaveLength(2);
-    expect(html.match(/>Edit deck<\/button>/g)).toHaveLength(2);
-    expect(html.match(/>Delete deck<\/button>/g)).toHaveLength(2);
+    expect(html.match(/>Edit deck<\/span><\/button>/g)).toHaveLength(2);
+    expect(html.match(/>Delete deck<\/span><\/button>/g)).toHaveLength(2);
+    expect(html).toContain('data-format="cc">CC</span>');
+    expect(html).toContain('data-format="silver-age">Silver Age</span>');
+    expect(html).not.toContain("Saved");
     expect(html).toContain("Create / import deck");
     expect(html).not.toContain("Find match");
     expect(html).not.toContain("Play vs bot");
@@ -63,5 +68,20 @@ describe("DeckLibrary", () => {
     );
     expect(html).not.toContain('href="javascript:');
     expect(html).toContain('class="deck-card"');
+  });
+});
+
+describe("DeckTile", () => {
+  it("names the source of picker decks", () => {
+    const precon = preconSummaries("cc")[0]!;
+    const saved: DeckSummary = { id: "mine", name: "Bravo Deck", format: "cc", fabraryUrl: null, heroName: "Bravo", deckSize: 80, updatedAt: 1 };
+    const render = (deck: DeckSummary) => renderToStaticMarkup(
+      <TestI18nProvider>
+        <DeckTile deck={deck} onSelect={() => {}} />
+      </TestI18nProvider>,
+    );
+
+    expect(render(precon)).toContain("Preconstructed");
+    expect(render(saved)).toContain("Saved");
   });
 });

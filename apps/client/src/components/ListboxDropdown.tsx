@@ -25,8 +25,11 @@ export interface ListboxSection<T> {
   key: string;
   /** Visible group heading; omit for an unlabeled group. */
   label?: ReactNode;
-  /** Highlights the whole group, for options the app recommends. */
-  tone?: "suggested";
+  /**
+   * `suggested` highlights options the app recommends; `stock` recesses
+   * built-in options listed after the user's own.
+   */
+  tone?: "suggested" | "stock";
   items: readonly T[];
 }
 

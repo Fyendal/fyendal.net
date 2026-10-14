@@ -731,7 +731,7 @@
 .deck-bulk-delete-list li + li { margin-top: 5px; }
 .deck-library-card > .deck-card {
   width: 100%;
-  min-height: 205px;
+  min-height: 180px;
   border: 0;
   border-radius: 0;
 }
@@ -771,6 +771,10 @@
 .deck-library-card-actions button:hover { background: transparent; color: var(--gold); }
 .deck-library-card-actions .deck-library-delete { color: #e8a39c; }
 .deck-library-card-actions .deck-library-delete:hover { color: #ffc1b9; }
+/* Desktop cards spell out their actions and carry the format badge; the
+   action icons and format chip belong to the mobile rows below. */
+.deck-library-card-actions .ui-icon,
+.deck-card-format { display: none; }
 
 .home-panel {
   padding: 0;
@@ -941,7 +945,112 @@
   .home-play-poster img { position: static; height: auto; }
   .deck-panel-heading { display: flex; align-items: flex-start; flex-wrap: wrap; }
   .deck-library-management-tools { grid-template-columns: 1fr; }
-  .deck-library-card > .deck-card { min-height: 150px; }
+  /* Saved decks become flat list rows, like match history: one hairline per
+     row and the checked state shown as the shared gold selection bar. */
+  .deck-grid-saved { gap: 0; border-top: 1px solid #45331f99; }
+  .deck-library-card {
+    display: grid;
+    grid-template-columns: 34px minmax(0, 1fr) auto;
+    align-items: center;
+    border: 0;
+    border-bottom: 1px solid #45331f99;
+    background: transparent;
+  }
+  .deck-library-card:has(.deck-library-select input:checked) {
+    background: #2a1b0d99;
+    box-shadow: inset 3px 0 0 var(--gold);
+  }
+  .deck-library-select {
+    position: static;
+    width: 34px;
+    height: 44px;
+    justify-content: flex-start;
+    padding-left: 4px;
+  }
+  .deck-library-select input { width: 20px; height: 20px; min-height: 20px; }
+  .deck-library-card > .deck-card {
+    display: grid;
+    min-height: 0;
+    grid-template-columns: 40px minmax(0, 1fr);
+    align-content: center;
+    justify-items: start;
+    gap: 0 10px;
+    padding: 11px 2px;
+    background: transparent;
+    clip-path: none;
+    text-align: left;
+  }
+  .deck-library-card > a.deck-card:hover { background: transparent; }
+  .deck-library-card > .deck-card:focus-visible { outline-offset: -2px; }
+  .deck-library-card .deck-card-img {
+    grid-row: 1 / span 2;
+    align-self: center;
+    width: 40px;
+    height: 40px;
+    box-shadow: none;
+  }
+  .deck-library-card .deck-card:not(.deck-import-card) .deck-card-name {
+    display: block;
+    min-height: 0;
+    overflow: hidden;
+    font-size: 15px;
+    line-height: 1.3;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  /* Second line: the format chip leads, the hero name takes what is left. */
+  .deck-library-card .deck-card-details {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    gap: 7px;
+    margin-top: 3px;
+  }
+  .deck-library-card .deck-card-details > span:first-child {
+    min-width: 0;
+    overflow: hidden;
+    font-size: 13px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .deck-library-card .deck-card-format {
+    display: block;
+    order: -1;
+    flex: 0 0 auto;
+    padding: 1px 6px;
+    border: 1px solid;
+    border-radius: 3px;
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 15px;
+    white-space: nowrap;
+  }
+  .deck-card-format[data-format="cc"] { border-color: #a74a2a80; background: #a74a2a26; color: #ff9d76; }
+  .deck-card-format[data-format="silver-age"] { border-color: #8a827280; background: #8a827226; color: #c8c2b4; }
+  .deck-library-card .deck-legality-hint { grid-column: 2; margin-top: 3px; }
+  .deck-library-card-actions {
+    display: block;
+    padding: 0;
+    border-top: 0;
+  }
+  .deck-library-card-actions > .format-badge { display: none; }
+  .deck-library-card-actions > div { flex-wrap: nowrap; gap: 0; }
+  .deck-library-card-actions button {
+    display: grid;
+    width: 36px;
+    height: 44px;
+    place-items: center;
+    padding: 0;
+  }
+  .deck-library-card-actions .ui-icon { display: inline-block; width: 19px; height: 19px; }
+  .deck-library-action-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
   .home-play-form { grid-template-columns: 1fr; }
   .home-play-primary-fields { grid-column: 1; grid-template-columns: 1fr; }
   .home-play-actions { grid-column: 1; justify-content: center; }

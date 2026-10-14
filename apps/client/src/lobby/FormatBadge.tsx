@@ -20,6 +20,17 @@ export function formatLabel(intl: IntlShape, format: Format): string {
   return intl.formatMessage({ id: FORMAT_MESSAGE_IDS[format] });
 }
 
+const FORMAT_SHORT_MESSAGE_IDS: Record<Format, string> = {
+  cc: "format.classicConstructed.short",
+  "silver-age": "format.silverAge.short",
+};
+
+/** The shortest recognizable format name, for tight rows such as the mobile
+ * deck library. */
+export function shortFormatLabel(intl: IntlShape, format: Format): string {
+  return intl.formatMessage({ id: FORMAT_SHORT_MESSAGE_IDS[format] });
+}
+
 /** A compact plain-text label for controls, such as native select options,
  * that cannot render the visual subtitle used by FormatName. */
 export function formatSelectLabel(intl: IntlShape, format: Format): string {

@@ -93,6 +93,8 @@
   white-space: nowrap;
 }
 .create-room-deck-option-copy > small { color: var(--text-muted); font-size: 11px; }
+/* Stock options take their recessed and active ink from the listbox group. */
+.listbox-group[data-tone="stock"] .create-room-deck-option-copy > span { color: inherit; }
 .create-room-actions {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));

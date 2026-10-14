@@ -20338,7 +20338,19 @@
       "value": "Classic Constructed"
     }
   ],
+  "format.classicConstructed.short": [
+    {
+      "type": 0,
+      "value": "CC"
+    }
+  ],
   "format.silverAge": [
+    {
+      "type": 0,
+      "value": "Silver Age"
+    }
+  ],
+  "format.silverAge.short": [
     {
       "type": 0,
       "value": "Silver Age"
@@ -24566,46 +24578,6 @@
     {
       "type": 0,
       "value": "Confirm delete"
-    }
-  ],
-  "lobby.deck.countAndSource": [
-    {
-      "type": 6,
-      "value": "count",
-      "options": {
-        "one": {
-          "value": [
-            {
-              "type": 7
-            },
-            {
-              "type": 0,
-              "value": " card"
-            }
-          ]
-        },
-        "other": {
-          "value": [
-            {
-              "type": 7
-            },
-            {
-              "type": 0,
-              "value": " cards"
-            }
-          ]
-        }
-      },
-      "offset": 0,
-      "pluralType": "cardinal"
-    },
-    {
-      "type": 0,
-      "value": " · "
-    },
-    {
-      "type": 1,
-      "value": "source"
     }
   ],
   "lobby.deck.createImport": [

@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { useIntl } from "react-intl";
-import { preconsForFormat } from "@fyendal/cards/client";
+import { precon, preconsForFormat } from "@fyendal/cards/client";
 import type { DeckSummary } from "@fyendal/protocol";
 import type { CardPoolMode, Format } from "@fyendal/shared";
 import { useStore } from "../store.js";
 import { preconPrepDeck } from "../prep/prepDeck.js";
-import { formatSelectLabel } from "./FormatBadge.js";
+import { formatSelectLabel, shortFormatLabel } from "./FormatBadge.js";
 import { heroImageUrl } from "./heroImage.js";
 import { deckErrorMessages } from "./deckErrors.js";
 import { ModalSurface } from "../components/ModalSurface.js";
@@ -31,6 +31,11 @@ export function filterAndSortDecks(
     })
     .slice()
     .sort((left, right) => right.updatedAt - left.updatedAt);
+}
+
+/** Built-in precons share the saved-deck shape but have no DB row. */
+export function isPreconDeck(deck: DeckSummary): boolean {
+  return precon(deck.id) !== null;
 }
 
 /** Shared precons as deck tiles (synthesized, no DB row). */
@@ -69,13 +74,16 @@ export function deckIsLegalForRoom(deck: DeckSummary, cardPoolMode: CardPoolMode
 /**
  * One deck tile: hero headshot + deck name. Shared by the deck library
  * and room-join picker. A headshot slug that misses on Fabrary
- * just hides the image — the tile stays usable.
+ * just hides the image — the tile stays usable. Pickers mix saved decks
+ * with built-in precons, so their tiles name the source; the library holds
+ * only saved decks and passes `format` for the chip its mobile rows show in
+ * place of the card's format badge.
  */
 export function DeckTile(props: {
   deck: DeckSummary;
   selected?: boolean;
   blocked?: boolean;
-  source?: "saved" | "preconstructed";
+  format?: Format;
   onSelect: () => void;
   href?: string;
 }) {
@@ -100,19 +108,17 @@ export function DeckTile(props: {
       <span className="deck-card-name">{d.name}</span>
       <span className="deck-card-details">
         <span>{d.heroName}</span>
-        <span>
-          {intl.formatMessage(
-            { id: "lobby.deck.countAndSource" },
-            {
-              count: d.deckSize,
-              source: intl.formatMessage({
-                id: props.source === "preconstructed"
-                  ? "lobby.deck.source.preconstructed"
-                  : "lobby.deck.source.saved",
-              }),
-            },
-          )}
-        </span>
+        {props.format ? (
+          <span className="deck-card-format" data-format={props.format}>
+            {shortFormatLabel(intl, props.format)}
+          </span>
+        ) : (
+          <span>
+            {intl.formatMessage({
+              id: isPreconDeck(d) ? "lobby.deck.source.preconstructed" : "lobby.deck.source.saved",
+            })}
+          </span>
+        )}
       </span>
       {bannedCards.length > 0 ? (
         <span

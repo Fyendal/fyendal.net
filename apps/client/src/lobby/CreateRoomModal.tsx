@@ -4,12 +4,12 @@ import { useShallow } from "zustand/react/shallow";
 import type { DeckSummary } from "@fyendal/protocol";
 import type { BotOpponent, CardPoolMode, Format } from "@fyendal/shared";
 import { useStore } from "../store.js";
-import { deckChoicesFor, deckIsLegalForRoom, sortDecksForPicker } from "./DeckGrid.js";
+import { deckChoicesFor, deckIsLegalForRoom, isPreconDeck, sortDecksForPicker } from "./DeckGrid.js";
 import { FormatName } from "./FormatBadge.js";
 import { heroImageUrl } from "./heroImage.js";
 import { BotOpponentModal } from "./BotOpponentModal.js";
 import { CardPoolModeControl } from "./CardPoolModeControl.js";
-import { ListboxDropdown } from "../components/ListboxDropdown.js";
+import { ListboxDropdown, type ListboxSection } from "../components/ListboxDropdown.js";
 import { FORMATS } from "../domain.js";
 
 export function CreateRoomModal({ onClose }: { onClose: () => void }) {
@@ -154,11 +154,21 @@ export function DeckDropdown({
 }) {
   const intl = useIntl();
   const orderedDecks = sortDecksForPicker(decks, deckPlayedAt);
+  // Saved decks lead; shared precons follow in their own recessed group.
+  const sections: ListboxSection<DeckSummary>[] = [
+    { key: "saved", items: orderedDecks.filter((deck) => !isPreconDeck(deck)) },
+    {
+      key: "precons",
+      tone: "stock",
+      label: intl.formatMessage({ id: "lobby.deck.source.preconstructed" }),
+      items: orderedDecks.filter(isPreconDeck),
+    },
+  ];
 
   return (
     <ListboxDropdown
       ariaLabel={intl.formatMessage({ id: "common.deck" })}
-      sections={[{ key: "decks", items: orderedDecks }]}
+      sections={sections}
       trigger={selected
         ? <DeckOptionContent key={selected.id} deck={selected} />
         : <span className="muted">{intl.formatMessage({ id: "lobby.deck.choose" })}</span>}

@@ -1,0 +1,8 @@
+<!-- Delete: a lidded bin with two ribs. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+  <line x1="4" y1="6.5" x2="20" y2="6.5" />
+  <path d="M9 6.5V4.5h6v2" />
+  <path d="M6.5 6.5 7.5 20h9l1-13.5" />
+  <line x1="10.5" y1="10.5" x2="10.5" y2="16" />
+  <line x1="13.5" y1="10.5" x2="13.5" y2="16" />
+</svg>
