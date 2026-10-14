@@ -1937,8 +1937,16 @@ Object.assign(mst, {
     additionalCost(ctx) {
       let sixPlusBanished = 0;
       const banished: number[] = [];
-      const cards = [...ctx.player(ctx.seat).graveyard].sort(() => ctx.randomInt(3) - 1).slice(0, 3);
-      for (const card of cards) {
+      const graveyard = [...ctx.player(ctx.seat).graveyard];
+      const selected: typeof graveyard = [];
+      for (let picked = 0; picked < 3 && graveyard.length > 0; picked++) {
+        selected.push(graveyard.splice(ctx.randomInt(graveyard.length), 1)[0]!);
+      }
+      // Its controller orders the randomly selected banishes. Banishing cards
+      // that already have 6+ {p} first lets Diabolic Offering count as 6.
+      while (selected.length > 0) {
+        const next = Math.max(0, selected.findIndex((card) => ctx.basePower(card) >= 6));
+        const card = selected.splice(next, 1)[0]!;
         if (!ctx.banish(card.instanceId)) continue;
         banished.push(card.instanceId);
         if (ctx.basePower(card) >= 6) sixPlusBanished++;

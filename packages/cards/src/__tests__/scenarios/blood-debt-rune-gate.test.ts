@@ -299,6 +299,43 @@ describe("Blood Debt and Rune Gate", () => {
     expect(isPlayable("shadowrealm horror|1")).toBe(false);
   });
 
+  it("banishes Shadowrealm Horror's 6-power cards before Diabolic Offering so it counts as 6", () => {
+    // All three cards are always selected; seeds vary only the random pick
+    // order, which must not decide the banish order.
+    for (let seed = 1; seed <= 12; seed++) {
+      const g = scenario({
+        seed,
+        seats: [
+          {
+            hero: "rhinar",
+            hand: ["shadowrealm horror|1"],
+            graveyard: ["diabolic offering|3", "beckoning hunger|1", "devouring doomwake|1"],
+            resources: 10,
+          },
+          { hero: "dorinthea" },
+        ],
+      });
+
+      g.play("shadowrealm horror|1")
+        .expectAttackValue(7)
+        .blockWith()
+        .settle()
+        .expectAP(0, 1)
+        .doRaw({ kind: "close-chain" });
+
+      const banished = g.state.players[0]!.banish;
+      expect(banished).toHaveLength(3);
+      expect(banished[0]!.cardId).not.toBe(printingId("diabolic offering|3"));
+      for (const card of banished) {
+        expect(legalIntents(g.state, 0)).toContainEqual(expect.objectContaining({
+          kind: "play-from-zone",
+          zone: "banish",
+          instanceId: card.instanceId,
+        }));
+      }
+    }
+  });
+
   it("keeps Shadowrealm Horror's play grant when Gate to i'Arathael was used to play it", () => {
     const g = scenario({
       seats: [
