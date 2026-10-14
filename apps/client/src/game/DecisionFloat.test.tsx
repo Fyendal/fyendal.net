@@ -935,6 +935,24 @@ describe("scripted card-choice presentation", () => {
     }, [card])).toBeNull();
   });
 
+  it("picks hand cards in place when the only other option is pass", () => {
+    const arrow = { instanceId: 42, cardId: "TEST-ARROW", owner: 0 };
+    const other = { instanceId: 43, cardId: "TEST-OTHER", owner: 0 };
+    const decision = {
+      player: 0,
+      kind: "choose-target" as const,
+      prompt: "Put an arrow from your hand face up into arsenal?",
+      options: ["pass", "42"],
+      optionCards: [null, arrow],
+    };
+    expect([...handCardChoiceOptions(decision, [arrow, other])!]).toEqual([[42, "42"]]);
+    expect(handCardChoiceOptions({
+      ...decision,
+      options: ["pass"],
+      optionCards: [null],
+    }, [arrow])).toBeNull();
+  });
+
   it("briefly explains ordering when Opt shows multiple cards", () => {
     const html = renderLocalized(createElement(OptDecisionInstructions, { cardCount: 3 }));
 

@@ -192,6 +192,7 @@ export function CardFace({
   goAgain,
   dominate,
   overpower,
+  veil,
   showFaceUp,
   wagered,
   wagerRewards,
@@ -223,6 +224,8 @@ export function CardFace({
   dominate?: boolean;
   /** Effective overpower on this card while it is an attack. */
   overpower?: boolean;
+  /** Effective veil on this card while it is an attack. */
+  veil?: boolean;
   /** Show an explicit face-up status hint for a zone where face-down is the default. */
   showFaceUp?: boolean;
   /** Whether this attack has wagered on its current chain link. */
@@ -330,6 +333,7 @@ export function CardFace({
       goAgain === true ||
       dominate === true ||
       overpower === true ||
+      veil === true ||
       showFaceUp === true ||
       wagered === true ||
       card.intimidated === true ||
@@ -566,6 +570,14 @@ export function CardFace({
               kind="overpower"
               icon="/icons/overpower.svg"
               tooltip="Overpower"
+            />
+          ) : null}
+          {veil ? (
+            <CounterOverlay
+              cardInstanceId={card.instanceId}
+              kind="veil"
+              icon="/icons/veil.png"
+              tooltip="Veil: can't be defended by more than 1 card of each color"
             />
           ) : null}
           {showFaceUp ? (

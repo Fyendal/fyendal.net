@@ -297,6 +297,7 @@ const gameView = () => ({
     wagerRewards: ["Winner creates Gold"],
     dominate: false,
     overpower: true,
+    veil: true,
     maxNonBlockDefenders: 2,
     reactions: [card],
     targetAllyName: "Ally",

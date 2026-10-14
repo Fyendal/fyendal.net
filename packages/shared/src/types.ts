@@ -247,6 +247,8 @@ export interface ChainLinkView {
   wagerRewards?: string[];
   dominate?: boolean;
   overpower?: boolean;
+  /** The attack can't be defended by more than 1 card of each color. */
+  veil?: boolean;
   /** Maximum number of defending cards other than block cards that may be
    * declared for this attack. Omitted when there is no such restriction. */
   maxNonBlockDefenders?: number;

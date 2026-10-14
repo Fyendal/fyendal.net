@@ -128,7 +128,9 @@ export function optDecisionCards(
   return cards.length > 0 ? cards : null;
 }
 
-/** Map a scripted choice whose complete option set is in hand to card clicks. */
+/** Map a scripted choice whose card options are all in hand to card clicks.
+ * A lone "pass" may accompany them and stays a button in the decision panel;
+ * any other text option (such as "no") keeps the whole choice in the popup. */
 export function handCardChoiceOptions(
   decision: PendingDecision | null,
   hand: readonly CardView[],
@@ -146,13 +148,18 @@ export function handCardChoiceOptions(
 
   const handIds = new Set(hand.map((card) => card.instanceId));
   const options = new Map<number, string>();
+  let passOptions = 0;
   for (let index = 0; index < decision.options.length; index += 1) {
     const card = decision.optionCards?.[index];
+    if (!card && decision.options[index] === "pass") {
+      passOptions += 1;
+      continue;
+    }
     if (!card || !handIds.has(card.instanceId)) return null;
     if (options.has(card.instanceId)) return null;
     options.set(card.instanceId, decision.options[index]!);
   }
-  return options;
+  return options.size > 0 && passOptions <= 1 ? options : null;
 }
 
 export interface BoundedCardChoiceModel {

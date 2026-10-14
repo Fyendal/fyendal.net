@@ -373,6 +373,26 @@ describe("combat-chain browsing", () => {
     expect(html).not.toContain("c-zonelabel\">Overpower");
   });
 
+  it("shows veil as a tooltip icon on the attacking card", () => {
+    const link: ChainLinkView = {
+      attackingCard: { instanceId: 42, cardId: "SBA016", owner: 0 },
+      defendingCards: [],
+      reactions: [],
+      attackValue: 3,
+      defenseValue: 0,
+      damage: 3,
+      resolved: false,
+      veil: true,
+    };
+    const html = renderChain({
+      links: [link],
+      onRect: vi.fn(),
+    });
+
+    expect(html).toContain("/icons/veil.png");
+    expect(html).toContain("card-counter-42-veil");
+  });
+
   it("shows a completed wager as a tooltip icon on the attacking card", () => {
     const link: ChainLinkView = {
       attackingCard: { instanceId: 42, cardId: "SBA016", owner: 0 },

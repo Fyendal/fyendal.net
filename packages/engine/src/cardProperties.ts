@@ -336,6 +336,12 @@ export function wardValueOf(data: CardData, instance?: CardInstance): number | u
   return value;
 }
 
+/** Whether the link's attack currently has veil, printed or granted. */
+export function attackHasVeil(state: GameStateInternal, link: ChainLinkState): boolean {
+  return link.flags.attackAbilitiesSuppressed !== true &&
+    instanceHasKeyword(state, link.attackingCard, "veil");
+}
+
 /** Veil: the attack can't be defended by more than 1 card of each color.
  * Returns whether `card` would be a second defender of its color, counting
  * current defenders and any cards staged with it. Colorless cards are never
@@ -346,8 +352,7 @@ export function veilBlocksDefender(
   card: CardInstance,
   staged: readonly CardInstance[] = [],
 ): boolean {
-  if (link.flags.attackAbilitiesSuppressed === true) return false;
-  if (!instanceHasKeyword(state, link.attackingCard, "veil")) return false;
+  if (!attackHasVeil(state, link)) return false;
   const color = cardColorOf(state, card);
   if (color === 0) return false;
   return [...link.defendingCards, ...link.defendingEquipment, ...staged].some(

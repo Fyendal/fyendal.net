@@ -1148,3 +1148,46 @@ export function optOnChoose(ctx: ScriptCtx, hook: string, option: string, onComp
   finish();
   return true;
 }
+
+const SPIRE_SNIPING_FIRST_HOOK = "spire-sniping-first";
+const SPIRE_SNIPING_LAST_HOOK = "spire-sniping-last";
+
+function requestSpireSnipingCard(ctx: ScriptCtx, hook: string, cards: readonly DeepReadonly<CardInstance>[]): void {
+  // Looking at the top cards is not a search, so this bypasses the
+  // deck-search prohibition that requestCardChoice applies to deck cards.
+  ctx.requestChoice(
+    hook,
+    decisionPrompt(
+      "Choose the next card to put back on top of your deck; the last card put back ends on top",
+      "card.saz.spire.order.next",
+    ),
+    cards.map((card) => String(card.instanceId)),
+    undefined,
+    cards.map((card) => card.instanceId),
+  );
+}
+
+/** Spire Sniping: the controller puts the top two cards back one at a time;
+ * the last card put back ends on top. */
+export function spireSnipingScript(): CardScript {
+  return {
+    onEnterArsenal(ctx) {
+      const top = ctx.player(ctx.seat).deck.slice(0, 2);
+      for (const card of top) ctx.lookAt(card.instanceId);
+      if (top.length === 2) requestSpireSnipingCard(ctx, SPIRE_SNIPING_FIRST_HOOK, top);
+    },
+    onChoose(ctx, hook, option) {
+      const deck = ctx.player(ctx.seat).deck;
+      const instanceId = Number(option);
+      if (hook === SPIRE_SNIPING_FIRST_HOOK) {
+        if (!deck.slice(0, 2).some((card) => card.instanceId === instanceId)) return;
+        ctx.putOnDeckTop(instanceId);
+        // The other card now sits directly beneath the one just put back.
+        const last = ctx.player(ctx.seat).deck[1];
+        if (last) requestSpireSnipingCard(ctx, SPIRE_SNIPING_LAST_HOOK, [last]);
+      } else if (hook === SPIRE_SNIPING_LAST_HOOK && deck[1]?.instanceId === instanceId) {
+        ctx.putOnDeckTop(instanceId);
+      }
+    },
+  };
+}

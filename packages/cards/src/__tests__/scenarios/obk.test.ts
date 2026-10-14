@@ -266,6 +266,8 @@ describe("Outbreak heroes", () => {
         return game.play(RUSTY_HARPOON, { fromArsenal: true });
       };
 
+      expect(projectStateFor(setup().state, 1).chain[0]?.veil).toBe(true);
+
       expect(() => setup().blockWith(FILLER, FILLER)).toThrow(/Veil/);
 
       const game = setup().blockWith(FILLER, "raging onslaught|2").passPriority();

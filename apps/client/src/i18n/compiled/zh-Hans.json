@@ -2095,12 +2095,6 @@
       "value": "头部"
     }
   ],
-  "card.common.option.keeporder": [
-    {
-      "type": 0,
-      "value": "保持顺序"
-    }
-  ],
   "card.common.option.legs": [
     {
       "type": 0,
@@ -2131,12 +2125,6 @@
     {
       "type": 0,
       "value": "红色"
-    }
-  ],
-  "card.common.option.swap": [
-    {
-      "type": 0,
-      "value": "交换"
     }
   ],
   "card.common.option.yellow": [
@@ -6921,16 +6909,6 @@
       "value": " 的牌库顶牌"
     }
   ],
-  "card.log.saz.spire.swap": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": "：交换牌库顶部两张牌的位置"
-    }
-  ],
   "card.log.sba.arcane.goagain": [
     {
       "type": 1,
@@ -10639,12 +10617,6 @@
       "value": "放逐一张力量为 1 的牌，使攻击 +1 并获得 go again？"
     }
   ],
-  "card.out.spire.swap": [
-    {
-      "type": 0,
-      "value": "交换牌库顶的两张牌？"
-    }
-  ],
   "card.out.surgingstrike.choose": [
     {
       "type": 0,
@@ -11531,10 +11503,10 @@
       "value": "Scout the Periphery：选择一位英雄，查看其牌库顶牌"
     }
   ],
-  "card.saz.spire.order": [
+  "card.saz.spire.order.next": [
     {
       "type": 0,
-      "value": "Spire Sniping：以任意顺序放回牌库顶的两张牌"
+      "value": "选择下一张放回牌库顶的牌；最后放回的牌位于最上方"
     }
   ],
   "card.sba.crown.attack.top": [

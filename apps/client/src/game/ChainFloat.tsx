@@ -446,6 +446,7 @@ export function ChainFloat({
                         goAgain={chain.goAgain}
                         dominate={chain.dominate}
                         overpower={chain.overpower}
+                        veil={chain.veil}
                         wagered={chain.wagered}
                         wagerRewards={chain.wagerRewards}
                         showTapped={false}

@@ -200,7 +200,7 @@ describe("SAZ — loading the arsenal", () => {
       .expectDeckTop(0, RED);
   });
 
-  it("Spire Sniping looks at and reorders the top 2 when loaded", () => {
+  it("Spire Sniping puts the top 2 back in order, the last one on top", () => {
     const s = scenario({
       seats: [
         azaleaSeat({ hand: ["spire sniping|2", RED], deck: [RONIN_FREE, BLUE, RED] }),
@@ -209,20 +209,24 @@ describe("SAZ — loading the arsenal", () => {
     });
     s.activate(DEATH_DEALER, { pitch: [RED] })
       .chooseCard("spire sniping|2"); // load + draw (Ravenous Rabble)
-    // the looked cards fold into the reorder choice as context images …
+    // the two looked cards are the options, shown only to the looking player
     const top2 = s.state.players[0]!.deck.slice(0, 2).map((card) => card.instanceId);
-    expect(s.state.pendingDecision?.chooseHook).toBe("spire-sniping");
-    expect(s.state.pendingDecision?.lookedCardIds).toEqual(top2);
+    expect(s.state.pendingDecision?.chooseHook).toBe("spire-sniping-first");
+    expect(s.state.pendingDecision?.options).toEqual(top2.map(String));
     const ownView = projectStateFor(s.state, 0);
-    expect(ownView.pendingDecision?.lookedCards).toHaveLength(2);
-    expect(projectStateFor(s.state, 1).pendingDecision?.lookedCards).toBeUndefined();
-    // … and the private log names them for the looking player only
+    expect(ownView.pendingDecision?.optionCards?.map((card) => card?.instanceId)).toEqual(top2);
+    expect(projectStateFor(s.state, 1).pendingDecision?.optionCards).toBeUndefined();
+    // the private log names them for the looking player only
     for (const key of [BLUE, RED]) {
       const name = cardData[printingId(key)]!.name;
       expect(ownView.log.some((line) => line.includes(`You look at ${name}`))).toBe(true);
     }
-    s.chooseOption("swap") // top two: Wrecker Romp / Snatch → swapped
+    s.chooseCard(BLUE); // Wrecker Romp goes back first …
+    expect(s.state.pendingDecision?.chooseHook).toBe("spire-sniping-last");
+    expect(s.state.pendingDecision?.options).toEqual([String(top2[1])]);
+    s.chooseCard(RED) // … then Snatch, which ends on top
       .expectDeckTop(0, RED);
+    expect(s.state.players[0]!.deck[1]!.instanceId).toBe(top2[0]);
   });
 });
 

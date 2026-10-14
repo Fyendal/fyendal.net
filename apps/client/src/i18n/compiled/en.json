@@ -2087,12 +2087,6 @@
       "value": "Head"
     }
   ],
-  "card.common.option.keeporder": [
-    {
-      "type": 0,
-      "value": "Keep order"
-    }
-  ],
   "card.common.option.legs": [
     {
       "type": 0,
@@ -2123,12 +2117,6 @@
     {
       "type": 0,
       "value": "Red"
-    }
-  ],
-  "card.common.option.swap": [
-    {
-      "type": 0,
-      "value": "Swap"
     }
   ],
   "card.common.option.yellow": [
@@ -7258,16 +7246,6 @@
       "value": "'s deck"
     }
   ],
-  "card.log.saz.spire.swap": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": ": the top two cards swap places"
-    }
-  ],
   "card.log.sba.arcane.goagain": [
     {
       "type": 1,
@@ -11162,12 +11140,6 @@
       "value": "Banish a 1 power card for +1 and go again?"
     }
   ],
-  "card.out.spire.swap": [
-    {
-      "type": 0,
-      "value": "Swap the top two cards?"
-    }
-  ],
   "card.out.surgingstrike.choose": [
     {
       "type": 0,
@@ -12074,10 +12046,10 @@
       "value": "Scout the Periphery: look at the top card of target hero's deck"
     }
   ],
-  "card.saz.spire.order": [
+  "card.saz.spire.order.next": [
     {
       "type": 0,
-      "value": "Spire Sniping: put the top 2 cards back in any order"
+      "value": "Choose the next card to put back on top of your deck; the last card put back ends on top"
     }
   ],
   "card.sba.crown.attack.top": [

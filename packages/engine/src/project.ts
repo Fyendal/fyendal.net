@@ -18,7 +18,7 @@ import type {
 } from "@fyendal/shared";
 import type { CardInstance, CombatValueModifier, Modifier, PendingDecisionState, PlayerState } from "./state.js";
 import { arsenalCapacity } from "./cardLifecycle.js";
-import { cardColorOf, cardTypesOf, dataOf, instanceDataOf, scriptOf } from "./cardProperties.js";
+import { attackHasVeil, cardColorOf, cardTypesOf, dataOf, instanceDataOf, scriptOf } from "./cardProperties.js";
 import { pendingOnHitEffects } from "./hits.js";
 import {
   conditionalModifierGrantsGoAgain,
@@ -1229,6 +1229,7 @@ function projectState(
       overpower: link.resolved
         ? link.flags.overpowerAtResolution === true
         : attackHasOverpower(state, link),
+      ...(attackHasVeil(state, link) ? { veil: true } : {}),
       ...(maxNonBlockDefenders !== undefined
         ? { maxNonBlockDefenders }
         : {}),

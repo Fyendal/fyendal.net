@@ -13,6 +13,7 @@ import {
   previousAttackHasName,
   previousAttackNameContains,
   requestHeroChoice,
+  spireSnipingScript,
   yesNoPrompt,
 } from "./shared-helpers.js";
 import { outHighRarity, uzuriAbility } from "./out/high-rarity.js";
@@ -772,52 +773,8 @@ export const out: Record<string, CardScript> = mergeSetScripts("OUT", outHighRar
   "skybound shot|1": aimOnly(),
   "skybound shot|2": aimOnly(),
   "skybound shot|3": aimOnly(),
-  "spire sniping|1": {
-    onEnterArsenal(ctx) {
-      const top = ctx.player(ctx.seat).deck.slice(0, 2);
-      for (const card of top) ctx.lookAt(card.instanceId);
-      if (top.length === 2)
-        ctx.requestChoice(
-          "spire",
-          decisionPrompt("Swap the top two cards?", "card.out.spire.swap", {
-            optionMessages: {
-              keep: decisionMessage("common.option.keep"),
-              swap: decisionMessage("card.common.option.swap"),
-            },
-          }),
-          ["keep", "swap"],
-        );
-    },
-    onChoose(ctx, h, o) {
-      if (h === "spire" && o === "swap") {
-        const second = ctx.player(ctx.seat).deck[1];
-        if (second) ctx.putOnDeckTop(second.instanceId);
-      }
-    },
-  },
-  "spire sniping|3": {
-    onEnterArsenal(ctx) {
-      const top = ctx.player(ctx.seat).deck.slice(0, 2);
-      for (const card of top) ctx.lookAt(card.instanceId);
-      if (top.length === 2)
-        ctx.requestChoice(
-          "spire",
-          decisionPrompt("Swap the top two cards?", "card.out.spire.swap", {
-            optionMessages: {
-              keep: decisionMessage("common.option.keep"),
-              swap: decisionMessage("card.common.option.swap"),
-            },
-          }),
-          ["keep", "swap"],
-        );
-    },
-    onChoose(ctx, h, o) {
-      if (h === "spire" && o === "swap") {
-        const second = ctx.player(ctx.seat).deck[1];
-        if (second) ctx.putOnDeckTop(second.instanceId);
-      }
-    },
-  },
+  "spire sniping|1": spireSnipingScript(),
+  "spire sniping|3": spireSnipingScript(),
   "widowmaker|1": widowmaker(),
   "widowmaker|3": widowmaker(),
   "withering shot|1": aimAttack(FRAILTY),

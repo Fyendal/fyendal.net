@@ -477,6 +477,17 @@ describe("CardFace counter icons", () => {
     expect(html).toContain('tabindex="0"');
   });
 
+  it("renders effective veil as an icon with an accessible tooltip", () => {
+    const html = renderToStaticMarkup(createElement(CardFace, {
+      card: { instanceId: 42, cardId: "SBA016", owner: 0 },
+      veil: true,
+    }));
+
+    expect(html).toContain("/icons/veil.png");
+    expect(html).toContain('role="tooltip">Veil: can&#x27;t be defended');
+    expect(html).toContain("card-counter-42-veil");
+  });
+
   it("uses the standard card overlay placement for visible and hidden intimidated cards", () => {
     const visibleHtml = renderToStaticMarkup(createElement(CardFace, {
       card: { instanceId: 42, cardId: "SBA016", owner: 0, intimidated: true },

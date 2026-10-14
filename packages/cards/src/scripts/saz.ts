@@ -2,7 +2,6 @@ import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal
 import {
   buffNextAttack,
   commonOptionMessages,
-  decisionMessage,
   decisionPrompt,
   heroChoiceSeat,
   localizedCardLog,
@@ -10,6 +9,7 @@ import {
   optN,
   optOnChoose,
   requestHeroChoice,
+  spireSnipingScript,
 } from "./shared-helpers.js";
 
 // ── SAZ (Silver Age: Azalea precon, Chapter 2) ──────────────────────────────
@@ -448,34 +448,7 @@ export const saz: Record<string, CardScript> = {
     },
   },
 
-  "spire sniping|2": {
-    // "When Spire Sniping is put or turned face up in arsenal, look at the
-    //  top 2 cards of your deck, then put them back in any order." (See
-    //  Turning it face up routes through the same generic arsenal hook.
-    onEnterArsenal(ctx) {
-      const p = ctx.player(ctx.seat);
-      const top2 = p.deck.slice(0, 2);
-      for (const c of top2) ctx.lookAt(c.instanceId);
-      if (top2.length < 2) return;
-      ctx.requestChoice(
-        "spire-sniping",
-        decisionPrompt("Spire Sniping: put the top 2 cards back in any order", "card.saz.spire.order", {
-          optionMessages: {
-            "keep order": decisionMessage("card.common.option.keeporder"),
-            swap: decisionMessage("card.common.option.swap"),
-          },
-        }),
-        ["keep order", "swap"],
-      );
-    },
-    onChoose(ctx, hook, option) {
-      if (hook !== "spire-sniping" || option !== "swap") return;
-      const p = ctx.player(ctx.seat);
-      if (p.deck.length < 2) return;
-      ctx.putOnDeckTop(p.deck[1]!.instanceId);
-      ctx.logPublic(localizedCardLog(ctx, "Spire Sniping: the top two cards swap places", "card.log.saz.spire.swap"));
-    },
-  },
+  "spire sniping|2": spireSnipingScript(),
 
   "widowmaker|2": {
     // "Defense reactions can't be played to Widowmaker's chain link."
