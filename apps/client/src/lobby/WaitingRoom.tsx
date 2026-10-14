@@ -78,15 +78,23 @@ export function WaitingRoom() {
         >
           <span className="match-accept-eyebrow">{intl.formatMessage({ id: "lobby.waiting.matchFound" })}</span>
           <h2 className="panel-title" id="joining-match-accept-title">
-            {intl.formatMessage({ id: me?.accepted ? "matchmaking.background.waiting" : "lobby.waiting.ready" })}
+            {intl.formatMessage({
+              id: me?.accepted
+                ? "matchmaking.background.waiting"
+                : opponent?.accepted
+                ? "prep.accept.opponentAccepted"
+                : "lobby.waiting.ready",
+            })}
           </h2>
-          <AcceptHeroMatchup you={me} opponent={opponent} />
+          <AcceptHeroMatchup you={me} opponent={opponent} showAcceptance />
           <p className="muted">
             {me?.accepted
               ? intl.formatMessage({ id: "lobby.waiting.accepted" })
-              : opponent
+              : opponent?.accepted
               ? intl.formatMessage({ id: "lobby.waiting.namedOpponent" }, { username: opponent.username })
-              : intl.formatMessage({ id: "lobby.waiting.opponent" })}
+              : opponent
+              ? intl.formatMessage({ id: "lobby.waiting.namedOpponentDeciding" }, { username: opponent.username })
+              : intl.formatMessage({ id: "lobby.waiting.opponentDeciding" })}
           </p>
           {me?.accepted ? (
             <p><DeadlineCountdown deadlineAt={prep.deadlineAt} /></p>

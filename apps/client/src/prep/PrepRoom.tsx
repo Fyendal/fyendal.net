@@ -658,13 +658,19 @@ export function PrepRoom() {
             </span>
             <h2 className="panel-title" id="prep-match-accept-title">
               {intl.formatMessage({
-                id: me?.accepted ? "prep.accept.waiting" : "prep.accept.ready",
+                id: me?.accepted
+                  ? "prep.accept.waiting"
+                  : opp?.accepted
+                  ? "prep.accept.opponentAccepted"
+                  : "prep.accept.ready",
               })}
             </h2>
-            <AcceptHeroMatchup you={me} opponent={opp} />
+            <AcceptHeroMatchup you={me} opponent={opp} showAcceptance />
             <p className="muted">
               {me?.accepted
                 ? intl.formatMessage({ id: "prep.accept.acceptedDescription" })
+                : opp?.accepted
+                ? intl.formatMessage({ id: "prep.accept.opponentAcceptedDescription" }, { username: opp.username })
                 : intl.formatMessage({ id: "prep.accept.description" })}
             </p>
             {me?.accepted ? (

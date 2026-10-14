@@ -25534,10 +25534,24 @@
       "value": " is waiting for you."
     }
   ],
-  "lobby.waiting.opponent": [
+  "lobby.waiting.namedOpponentDeciding": [
     {
       "type": 0,
-      "value": "Your opponent is waiting for you."
+      "value": "Accept to start preparing against "
+    },
+    {
+      "type": 1,
+      "value": "username"
+    },
+    {
+      "type": 0,
+      "value": "."
+    }
+  ],
+  "lobby.waiting.opponentDeciding": [
+    {
+      "type": 0,
+      "value": "Accept to start preparing against your opponent."
     }
   ],
   "lobby.waiting.playersPreparing": [
@@ -25590,6 +25604,12 @@
     {
       "type": 0,
       "value": "Keep playing against the bot"
+    }
+  ],
+  "matchmaking.background.opponentAccepted": [
+    {
+      "type": 0,
+      "value": "Opponent accepted"
     }
   ],
   "matchmaking.background.searching": [
@@ -25874,6 +25894,12 @@
       "value": "You accepted. The match will open when your opponent accepts."
     }
   ],
+  "prep.accept.deciding": [
+    {
+      "type": 0,
+      "value": "Deciding…"
+    }
+  ],
   "prep.accept.description": [
     {
       "type": 0,
@@ -25884,6 +25910,22 @@
     {
       "type": 0,
       "value": "Match found"
+    }
+  ],
+  "prep.accept.opponentAccepted": [
+    {
+      "type": 0,
+      "value": "Your opponent accepted"
+    }
+  ],
+  "prep.accept.opponentAcceptedDescription": [
+    {
+      "type": 1,
+      "value": "username"
+    },
+    {
+      "type": 0,
+      "value": " is ready. Accept to continue preparing your deck."
     }
   ],
   "prep.accept.ready": [

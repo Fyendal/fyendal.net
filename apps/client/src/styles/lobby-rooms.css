@@ -419,28 +419,85 @@
   align-items: center;
   gap: 3px;
 }
-.accept-hero-side img,
-.accept-hero-fallback {
-  display: grid;
+.accept-hero-portrait {
+  position: relative;
+  display: block;
   width: 76px;
   height: 76px;
   margin-bottom: 5px;
+  border-radius: 50%;
+}
+.accept-hero-portrait img,
+.accept-hero-fallback {
+  display: grid;
+  width: 100%;
+  height: 100%;
   place-items: center;
   border: 2px solid #806334;
   border-radius: 50%;
   background: #181008;
   object-fit: cover;
   box-shadow: 0 4px 14px #000b;
+  transition: border-color .3s ease, box-shadow .3s ease;
 }
 .accept-hero-fallback {
   color: var(--gold);
   font-family: var(--font-display);
   font-size: 34px;
 }
-.accept-hero-side > span:not(.accept-hero-fallback) {
+.accept-hero-label {
   color: #9c8a6d;
   font-size: 12px;
   font-weight: 600;
+}
+/* An accepted seat's portrait turns the same green as the accepted state. */
+.accept-hero-side.is-accepted :is(.accept-hero-portrait img, .accept-hero-fallback) {
+  border-color: var(--success);
+  box-shadow: 0 4px 14px #000b, 0 0 14px #8fd48f40;
+}
+/* Acceptance marks shared by the accept prompts and the background offer: a
+   check seal sized by font-size, and a ring that lights once when a seat
+   accepts (the prompt's single moment of motion). Hosts are position: relative. */
+.accept-seal {
+  position: absolute;
+  right: -2px;
+  bottom: -2px;
+  display: grid;
+  width: 1.6em;
+  height: 1.6em;
+  place-items: center;
+  border: 2px solid #171008;
+  border-radius: 50%;
+  background: var(--success);
+  color: #142414;
+  font-size: 15px;
+}
+.accept-ignite::after {
+  position: absolute;
+  inset: -2px;
+  border: 2px solid var(--success);
+  border-radius: 50%;
+  content: "";
+  opacity: 0;
+  pointer-events: none;
+  animation: accept-ignite .9s ease-out;
+}
+@keyframes accept-ignite {
+  from { opacity: .9; transform: scale(1); }
+  to { opacity: 0; transform: scale(1.35); }
+}
+.accept-hero-status {
+  min-height: 16px;
+  margin-top: 2px;
+  font-size: 12px;
+  font-weight: 700;
+}
+.accept-hero-status.is-accepted { color: var(--success); }
+.accept-hero-status.is-deciding { color: #9c8a6d; font-weight: 600; font-style: italic; }
+@media (prefers-reduced-motion: reduce) {
+  .accept-ignite::after { animation: none; }
+  .accept-hero-portrait img,
+  .accept-hero-fallback { transition: none; }
 }
 .accept-hero-side strong {
   overflow: hidden;

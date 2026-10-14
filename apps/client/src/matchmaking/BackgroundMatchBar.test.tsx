@@ -83,6 +83,33 @@ describe("background matchmaking UI", () => {
     expect(html).toContain("Keep playing against the bot");
   });
 
+  it("marks an offer the opponent already accepted", () => {
+    const html = renderToStaticMarkup(
+      <TestI18nProvider>
+        <BackgroundMatchOfferView
+          offer={{
+            state: "offer",
+            format: "cc",
+            roomCode: "PVP123",
+            deadlineAt: Date.now() + 30_000,
+            opponent: { username: "BravoFan", heroId: "HERO01", heroName: "Bravo" },
+            acceptedByYou: false,
+            opponentAccepted: true,
+          }}
+          onAccept={vi.fn()}
+          onDecline={vi.fn()}
+        />
+      </TestI18nProvider>,
+    );
+
+    expect(html).toContain("background-match-offer is-opponent-accepted");
+    expect(html).toContain("accept-seal");
+    expect(html).toContain("Opponent accepted");
+    expect(html).not.toContain("Player found");
+    expect(html).toContain(">Bravo</span>");
+    expect(html).toContain("Accept");
+  });
+
   it("offers to skip a declined hero with a single follow-up action", () => {
     const html = renderToStaticMarkup(
       <TestI18nProvider>

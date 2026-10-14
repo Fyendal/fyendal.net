@@ -12,7 +12,7 @@ vi.mock("../store.js", () => ({
 }));
 afterEach(() => vi.unstubAllGlobals());
 
-function render({ accepted = false, fallback = false, searching = true } = {}): string {
+function render({ accepted = false, opponentAccepted = false, fallback = false, searching = true } = {}): string {
   vi.stubGlobal("location", { origin: "http://localhost" });
   store.set({
     roomCode: "ABC123", spectating: false, botGame: fallback, pendingBotStart: !fallback,
@@ -22,7 +22,7 @@ function render({ accepted = false, fallback = false, searching = true } = {}): 
       yourSeat: 0, botGame: fallback, deadlinePhase: fallback ? undefined : "accept", deadlineAt: Date.now() + 30_000,
       seats: [
         { username: "Alice", heroName: "Ira", accepted },
-        { username: fallback ? "Ira Bot" : "Bob", heroName: "Ira", accepted: false },
+        { username: fallback ? "Ira Bot" : "Bob", heroName: "Ira", accepted: opponentAccepted },
       ],
     },
     acceptMatch: vi.fn(), declineMatch: vi.fn(), leave: vi.fn(), acknowledgeBotMatchFallback: vi.fn(),
@@ -34,8 +34,20 @@ describe("match acceptance holding screen", () => {
   it("offers acceptance before the player accepts", () => {
     const html = render();
     expect(html).toContain("Ready to play?");
-    expect(html).toContain("Bob is waiting for you.");
+    expect(html).toContain("Accept to start preparing against Bob.");
+    expect(html).toContain("Deciding…");
+    expect(html).not.toContain("Bob is waiting for you.");
     expect(html).toContain("Accept");
+  });
+
+  it("tells the player when the opponent already accepted", () => {
+    const html = render({ opponentAccepted: true });
+    expect(html).toContain("Your opponent accepted");
+    expect(html).toContain("Bob is waiting for you.");
+    expect(html).toContain("accept-hero-side is-accepted");
+    expect(html).toContain("accept-seal");
+    expect(html).not.toContain("Deciding…");
+    expect(html).toContain("match-accept-primary");
   });
 
   it("keeps accepted players waiting for their opponent without another accept button", () => {

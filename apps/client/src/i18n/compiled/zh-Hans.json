@@ -24402,10 +24402,24 @@
       "value": " 正在等你。"
     }
   ],
-  "lobby.waiting.opponent": [
+  "lobby.waiting.namedOpponentDeciding": [
     {
       "type": 0,
-      "value": "你的对手正在等你。"
+      "value": "接受后即可与 "
+    },
+    {
+      "type": 1,
+      "value": "username"
+    },
+    {
+      "type": 0,
+      "value": " 进入准备阶段。"
+    }
+  ],
+  "lobby.waiting.opponentDeciding": [
+    {
+      "type": 0,
+      "value": "接受后即可与对手进入准备阶段。"
     }
   ],
   "lobby.waiting.playersPreparing": [
@@ -24458,6 +24472,12 @@
     {
       "type": 0,
       "value": "继续与机器人对战"
+    }
+  ],
+  "matchmaking.background.opponentAccepted": [
+    {
+      "type": 0,
+      "value": "对手已接受"
     }
   ],
   "matchmaking.background.searching": [
@@ -24698,6 +24718,12 @@
       "value": "你已接受。对手接受后，对局将会开启。"
     }
   ],
+  "prep.accept.deciding": [
+    {
+      "type": 0,
+      "value": "考虑中…"
+    }
+  ],
   "prep.accept.description": [
     {
       "type": 0,
@@ -24708,6 +24734,22 @@
     {
       "type": 0,
       "value": "已找到对局"
+    }
+  ],
+  "prep.accept.opponentAccepted": [
+    {
+      "type": 0,
+      "value": "对手已接受"
+    }
+  ],
+  "prep.accept.opponentAcceptedDescription": [
+    {
+      "type": 1,
+      "value": "username"
+    },
+    {
+      "type": 0,
+      "value": " 已准备就绪。接受对局以继续准备你的牌组。"
     }
   ],
   "prep.accept.ready": [

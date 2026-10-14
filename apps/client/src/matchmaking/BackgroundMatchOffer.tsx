@@ -1,10 +1,11 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useIntl } from "react-intl";
 import { useShallow } from "zustand/react/shallow";
 import type { BackgroundMatchmakingStatus } from "@fyendal/shared";
 import { DeadlineCountdown } from "../prep/DeadlineCountdown.js";
 import { useStore } from "../store.js";
 import { heroImageUrl } from "../lobby/heroImage.js";
+import { UiIcon } from "../components/UiIcon.js";
 
 type MatchOffer = Extract<BackgroundMatchmakingStatus, { state: "offer" }>;
 
@@ -18,22 +19,37 @@ export function BackgroundMatchOfferView({
   onDecline: () => void;
 }) {
   const intl = useIntl();
+  const [imageAvailable, setImageAvailable] = useState(true);
+  const opponentReady = offer.opponentAccepted && !offer.acceptedByYou;
   return (
-    <aside className="background-match-offer" role="alert" aria-live="assertive">
+    <aside
+      className={`background-match-offer${offer.opponentAccepted ? " is-opponent-accepted" : ""}`}
+      role="alert"
+      aria-live="assertive"
+    >
       <div className="background-match-identity">
-        <img
-          className="background-match-hero-image"
-          src={heroImageUrl(offer.opponent.heroName)}
-          alt=""
-          width={52}
-          height={52}
-          aria-hidden="true"
-          onError={(event) => {
-            event.currentTarget.hidden = true;
-          }}
-        />
+        {imageAvailable ? (
+          <span className={`background-match-hero${offer.opponentAccepted ? " accept-ignite" : ""}`}>
+            <img
+              className="background-match-hero-image"
+              src={heroImageUrl(offer.opponent.heroName)}
+              alt=""
+              width={52}
+              height={52}
+              aria-hidden="true"
+              onError={() => setImageAvailable(false)}
+            />
+            {offer.opponentAccepted ? (
+              <span className="accept-seal"><UiIcon name="check" /></span>
+            ) : null}
+          </span>
+        ) : null}
         <div className="background-match-copy">
-          <strong>{intl.formatMessage({ id: "matchmaking.background.found" })}</strong>
+          <strong>
+            {intl.formatMessage({
+              id: opponentReady ? "matchmaking.background.opponentAccepted" : "matchmaking.background.found",
+            })}
+          </strong>
           <span>{offer.opponent.heroName}</span>
         </div>
       </div>
@@ -104,6 +120,7 @@ export function BackgroundMatchOffer() {
   if (status.state === "offer") {
     return (
       <BackgroundMatchOfferView
+        key={status.roomCode}
         offer={status}
         onAccept={acceptBackgroundMatch}
         onDecline={declineBackgroundMatch}

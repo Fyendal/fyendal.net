@@ -38,6 +38,13 @@
   object-position: center top;
   box-shadow: 0 0 0 2px #171008, 0 0 12px #d2a33e55;
 }
+.background-match-hero { position: relative; display: block; flex: 0 0 auto; border-radius: 50%; }
+.background-match-hero .accept-seal { right: -3px; bottom: -3px; font-size: 12px; }
+.is-opponent-accepted .background-match-hero-image {
+  border-color: var(--success);
+  box-shadow: 0 0 0 2px #171008, 0 0 12px #8fd48f55;
+}
+.is-opponent-accepted .background-match-copy strong { color: var(--success); }
 .background-match-copy { display: grid; gap: 2px; min-width: 0; }
 .background-match-copy span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .background-match-actions { display: flex; align-items: center; gap: 8px; flex: none; }
@@ -143,6 +150,7 @@
 
 @media (max-width: 700px) {
   .background-match-offer { align-items: stretch; flex-direction: column; gap: 7px; }
+  .background-match-hero .accept-seal { font-size: 10px; }
   .background-match-hero-image {
     flex-basis: 32px;
     width: 32px;

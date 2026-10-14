@@ -32,7 +32,12 @@ function pairedPrep(phase: PrepView["phase"]): PrepView {
   };
 }
 
-function render(prep: PrepView | null, mobile: boolean, prepDeck: typeof deck = deck): string {
+function render(
+  prep: PrepView | null,
+  mobile: boolean,
+  prepDeck: typeof deck = deck,
+  overrides: Record<string, unknown> = {},
+): string {
   vi.stubGlobal("window", { matchMedia: () => ({ matches: mobile }) });
   vi.stubGlobal("location", { origin: "http://localhost" });
   store.set({
@@ -41,6 +46,7 @@ function render(prep: PrepView | null, mobile: boolean, prepDeck: typeof deck = 
     acceptMatch: vi.fn(), declineMatch: vi.fn(), playBotFromPrep: vi.fn(),
     presentArena: vi.fn(), presentDeck: vi.fn(), prepUnready: vi.fn(),
     chooseFirst: vi.fn(), leave: vi.fn(), selectPrepMatchup: vi.fn(),
+    ...overrides,
   });
   return renderToStaticMarkup(<TestI18nProvider><PrepRoom /></TestI18nProvider>);
 }
@@ -89,6 +95,21 @@ describe("preparation stage layout", () => {
     const choices = html.match(/<button\b[^>]*class="prep-card-choice[^>]*>/g) ?? [];
     expect(choices.length).toBeGreaterThan(0);
     for (const choice of choices) expect(choice).toContain("disabled");
+  });
+
+  it("tells the queue owner when the opponent already accepted the match", () => {
+    const prep = pairedPrep("accept");
+    prep.botGame = false;
+    prep.startPlayer = null;
+    prep.deadlinePhase = "accept";
+    prep.deadlineAt = Date.now() + 30_000;
+    prep.seats = [{ ...prep.seats[0]!, accepted: false }, { ...prep.seats[1]!, accepted: true }];
+    const html = render(prep, false, deck, { matchAcceptanceRole: "existing" });
+    const prompt = html.match(/<section class="panel prep-match-accept-prompt"[\s\S]*?<\/section>/)?.[0] ?? "";
+    expect(prompt).toContain("Your opponent accepted");
+    expect(prompt).toContain("Player 1 is ready. Accept to continue preparing your deck.");
+    expect(prompt.match(/accept-hero-side is-accepted/g)).toHaveLength(1);
+    expect(prompt).toContain("match-accept-primary");
   });
 
   it("puts the desktop arena lock in the match sheet beside both player mats", () => {
