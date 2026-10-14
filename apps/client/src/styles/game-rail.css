@@ -416,23 +416,161 @@
 .game-utilities-actions button { min-height: 46px; }
 .game-confirm-actions { grid-template-columns: 1fr 1fr; }
 .game-confirm-actions button { min-height: 46px; }
-.game-note-sheet { width: min(430px, calc(100vw - 24px)); }
-.game-note-editor {
-  display: grid;
-  gap: 12px;
+/* Game note: the flat social-modal language (friend room, chat), with a gold
+   bookmark ribbon carrying the frame number, echoing the rail's note icon. */
+.game-note-sheet {
+  position: relative;
+  width: min(440px, calc(100vw - 32px));
+  padding: 18px;
+  border-color: #775c31;
+  border-radius: 14px;
+  background: #171008;
+  box-shadow: 0 20px 56px #000e;
+  font-family: var(--font-lobby-ui);
 }
-.game-note-editor textarea {
-  box-sizing: border-box;
+.game-note-sheet .modal-surface-header {
+  top: -18px;
+  min-height: 64px;
+  margin: -18px -18px 16px;
+  padding: 17px 58px 15px 66px;
+  border-bottom-color: #5943238f;
+  background: #1d140d;
+}
+.game-note-sheet .modal-surface-header h2 {
+  overflow: hidden;
+  color: #f5dfad;
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 26px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.game-note-sheet .modal-surface-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 38px;
+  min-width: 38px;
+  height: 38px;
+  border: 0;
+  border-radius: 10px;
+  color: #b9a98f;
+}
+.game-note-sheet .modal-surface-close:hover { background: #ffffff0a; color: #f1e5cc; }
+.game-note-sheet .modal-surface-close svg { width: 17px; height: 17px; }
+.game-note-sheet .modal-surface-description {
+  max-width: 62ch;
+  margin: 0 2px 14px;
+  color: #a99b84;
+  font-size: 14px;
+  line-height: 1.5;
+}
+.game-note-ribbon {
+  position: absolute;
+  top: 0;
+  left: 18px;
+  z-index: 3;
+  min-width: 34px;
+  height: 48px;
+  padding: 12px 5px 0;
+  background: var(--gold);
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 78%, 0 100%);
+  color: #2a1a07;
+  font: 800 14px/1 var(--font-lobby-ui);
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+.game-note-field {
+  position: relative;
+  border: 1px solid #564127;
+  border-radius: 11px;
+  background: #100a06;
+  transition: border-color 120ms ease, box-shadow 120ms ease;
+}
+.game-note-field:hover { border-color: #6c522f; }
+.game-note-field:focus-within {
+  border-color: #ac8343;
+  box-shadow: 0 0 0 2px #b8933f24;
+}
+.game-note-field textarea {
+  display: block;
   width: 100%;
-  min-height: 130px;
+  min-height: 148px;
+  max-height: 50dvh;
+  padding: 12px 14px 26px;
+  border: 0;
+  border-radius: 11px;
+  background: transparent;
+  color: var(--text-primary);
+  font: 15px/1.55 var(--font-lobby-ui);
   resize: vertical;
 }
+.game-note-field textarea:focus,
+.game-note-field textarea:focus-visible { outline: none; }
+.game-note-field textarea::placeholder { color: #796e5d; }
+.game-note-count {
+  position: absolute;
+  right: 12px;
+  bottom: 7px;
+  color: #857966;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  pointer-events: none;
+}
+.game-note-count[data-full] { color: var(--gold); }
 .game-note-actions {
   display: flex;
+  align-items: center;
   justify-content: flex-end;
   gap: 8px;
+  margin-top: 16px;
 }
-.game-note-actions .btn-danger { margin-right: auto; }
+.game-note-actions button {
+  min-height: 40px;
+  padding: 0 16px;
+  border-radius: 9px;
+  box-shadow: none;
+  clip-path: none;
+  font: 600 14px var(--font-lobby-ui);
+  letter-spacing: normal;
+  text-shadow: none;
+  text-transform: none;
+  white-space: nowrap;
+}
+.game-note-actions :is(.game-note-cancel, .game-note-remove) {
+  border-color: transparent;
+  background: transparent;
+  color: #a99b84;
+}
+.game-note-actions .game-note-cancel:hover { background: #ffffff08; color: #eadfc9; }
+.game-note-actions .game-note-remove {
+  margin-right: auto;
+  padding-inline: 10px;
+  color: #e58e84;
+}
+.game-note-actions .game-note-remove:hover { background: #ff7b7214; color: #ffb0a8; }
+.game-note-actions .game-note-save {
+  min-width: 112px;
+  border: 1px solid var(--blood-hi);
+  background: var(--blood);
+  color: #fff3e6;
+}
+.game-note-actions .game-note-save:hover:not(:disabled) { background: var(--blood-hi); }
+.game-note-actions .game-note-save:disabled {
+  border-color: #4a3925;
+  background: #211810;
+  color: #857966;
+  opacity: 1;
+  cursor: not-allowed;
+}
+@media (max-width: 700px) {
+  .game-note-sheet { width: 100%; }
+  .game-note-actions button { min-height: 44px; }
+  .game-note-actions .game-note-save { flex: 1 1 auto; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .game-note-field { transition: none; }
+}
 
 @media (min-width: 701px) {
   .rail-right.rail-collapsed {

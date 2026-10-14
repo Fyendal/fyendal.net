@@ -21183,7 +21183,7 @@
   "game.notes.description": [
     {
       "type": 0,
-      "value": "立即标记此房间状态，之后复盘时可返回查看笔记。"
+      "value": "笔记会附在此刻的对局状态上，复盘回放时可在这一帧查看。"
     }
   ],
   "game.notes.edit": [
@@ -21195,7 +21195,7 @@
   "game.notes.title": [
     {
       "type": 0,
-      "value": "对局笔记 · 回放第 "
+      "value": "回放第 "
     },
     {
       "type": 1,
@@ -21203,7 +21203,7 @@
     },
     {
       "type": 0,
-      "value": " 帧"
+      "value": " 帧笔记"
     }
   ],
   "game.opponent.actions": [

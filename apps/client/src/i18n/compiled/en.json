@@ -21963,7 +21963,7 @@
   "game.notes.description": [
     {
       "type": 0,
-      "value": "Bookmark this room state now and revisit the note when reviewing the replay."
+      "value": "Pinned to this exact moment. It appears on this frame when you review the replay."
     }
   ],
   "game.notes.edit": [
@@ -21975,7 +21975,7 @@
   "game.notes.title": [
     {
       "type": 0,
-      "value": "Game note · Replay frame "
+      "value": "Note on replay frame "
     },
     {
       "type": 1,

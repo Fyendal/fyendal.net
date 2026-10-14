@@ -345,6 +345,11 @@ export function SideRail({
       existed: noteText !== null,
     });
   };
+  const saveFrameNote = () => {
+    if (!editingNote || !onSetFrameNote || editingNote.text.trim().length === 0) return;
+    onSetFrameNote(editingNote.roomVersion, editingNote.frame, editingNote.text);
+    setEditingNote(null);
+  };
   const renderedLog = useMemo(
     () => (logEntries ?? log.map((fallback): GameLogViewEntry => ({ fallback })))
       .slice()
@@ -661,9 +666,13 @@ export function SideRail({
           className="game-note-sheet"
           onClose={() => setEditingNote(null)}
         >
-          <div className="game-note-editor">
+          <span className="game-note-ribbon" aria-hidden="true">
+            {intl.formatNumber(editingNote.frame + 1)}
+          </span>
+          <div className="game-note-field">
             <textarea
               data-modal-initial-focus
+              rows={6}
               maxLength={MAX_REPLAY_NOTE_LENGTH}
               value={editingNote.text}
               placeholder={intl.formatMessage({ id: "replay.notes.placeholder" })}
@@ -675,34 +684,45 @@ export function SideRail({
                 ...editingNote,
                 text: event.target.value,
               })}
+              onKeyDown={(event) => {
+                if (event.key !== "Enter" || !(event.metaKey || event.ctrlKey)) return;
+                event.preventDefault();
+                saveFrameNote();
+              }}
             />
-            <div className="game-note-actions">
-              {editingNote.existed ? (
-                <button
-                  type="button"
-                  className="btn-danger"
-                  onClick={() => {
-                    onSetFrameNote(editingNote.roomVersion, editingNote.frame, "");
-                    setEditingNote(null);
-                  }}
-                >
-                  {intl.formatMessage({ id: "replay.notes.remove" })}
-                </button>
-              ) : null}
-              <button type="button" onClick={() => setEditingNote(null)}>
-                {intl.formatMessage({ id: "common.cancel" })}
-              </button>
+            {editingNote.text.length >= MAX_REPLAY_NOTE_LENGTH * 0.8 ? (
+              <span
+                className="game-note-count"
+                data-full={editingNote.text.length >= MAX_REPLAY_NOTE_LENGTH || undefined}
+              >
+                {intl.formatNumber(editingNote.text.length)}/{intl.formatNumber(MAX_REPLAY_NOTE_LENGTH)}
+              </span>
+            ) : null}
+          </div>
+          <div className="game-note-actions">
+            {editingNote.existed ? (
               <button
                 type="button"
-                disabled={editingNote.text.trim().length === 0}
+                className="game-note-remove"
                 onClick={() => {
-                  onSetFrameNote(editingNote.roomVersion, editingNote.frame, editingNote.text);
+                  onSetFrameNote(editingNote.roomVersion, editingNote.frame, "");
                   setEditingNote(null);
                 }}
               >
-                {intl.formatMessage({ id: "replay.notes.save" })}
+                {intl.formatMessage({ id: "replay.notes.remove" })}
               </button>
-            </div>
+            ) : null}
+            <button type="button" className="game-note-cancel" onClick={() => setEditingNote(null)}>
+              {intl.formatMessage({ id: "common.cancel" })}
+            </button>
+            <button
+              type="button"
+              className="game-note-save"
+              disabled={editingNote.text.trim().length === 0}
+              onClick={saveFrameNote}
+            >
+              {intl.formatMessage({ id: "replay.notes.save" })}
+            </button>
           </div>
         </ModalSurface>
       ) : null}
