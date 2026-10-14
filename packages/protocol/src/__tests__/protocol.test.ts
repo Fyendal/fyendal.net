@@ -386,6 +386,7 @@ describe("client messages", () => {
     { type: "background-match-accept", roomCode: "ABC123" },
     { type: "background-match-decline", roomCode: "ABC123" },
     { type: "decline-pending-bot-match", roomCode: "ABC123" },
+    { type: "decline-match", roomCode: "ABC123" },
     { type: "accept-match" },
     { type: "present-arena", arena: { weaponIds: [], equipment: {} } },
     { type: "present-deck", deck: { weaponIds: [], equipment: {}, deck: [] } },

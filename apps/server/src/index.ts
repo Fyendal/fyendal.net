@@ -137,7 +137,7 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
   /** Socket delivery bindings are local; queue membership and pairing are
    * durable in Postgres and addressed back to users through cluster events. */
   const queuedUsers = new Map<number, ClientCtx>();
-  const pendingBotDeclines = new Map<ClientCtx, string>();
+  const pendingMatchDeclines = new Map<ClientCtx, string>();
   const connections = new ConnectionRegistry();
   const clientsByRoom = connections.byRoom;
   const allClients = connections.all;
@@ -495,7 +495,7 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
         return;
       }
       const previousRoom = await rooms.getRoom(ctx.code);
-      if (previousRoom && pendingBotDeclines.get(ctx) !== ctx.code) return;
+      if (previousRoom && pendingMatchDeclines.get(ctx) !== ctx.code) return;
       connections.detach(ctx);
     }
     const durableMatchmakingStatus = await rooms.backgroundMatchmakingStatus(userId);
@@ -545,7 +545,7 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
   function authorizedProjectionSeat(room: RoomRow, ctx: ClientCtx): number | null | undefined {
     // Leaving an offer intentionally removes this membership before the next
     // room is attached. Its intermediate broadcast is not session theft.
-    if (pendingBotDeclines.get(ctx) === room.code) return undefined;
+    if (pendingMatchDeclines.get(ctx) === room.code) return undefined;
     if (ctx.seat === null) {
       if (ctx.token && room.spectators.some(
         (spectator) => spectator.tokenHash === hashReconnectToken(ctx.token!),
@@ -1031,7 +1031,7 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
           send(ws, { type: "error", message: PLAY_REQUIRES_LOGIN });
           return;
         }
-        const r = await rooms.declineBackgroundMatch(ctx.user.id, msg.roomCode);
+        const r = await rooms.declineMatch(ctx.user.id, msg.roomCode);
         if (!r.ok) {
           send(ws, { type: "error", message: r.error });
           return;
@@ -1049,6 +1049,44 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
         await rooms.avoidBackgroundHero(ctx.user.id, msg.heroId);
         return;
       }
+      case "decline-match": {
+        const code = msg.roomCode.toUpperCase();
+        if (!ctx.user || ctx.code !== code || !ctx.token) {
+          send(ws, { type: "error", message: "not in a match offer" });
+          return;
+        }
+        const credentials = seatCredentials(ctx);
+        if (!credentials) return;
+        const user = ctx.user;
+        const previousQueued = queuedUsers.get(user.id);
+        // Bind delivery before the requeue commits: the next pairing may be
+        // delivered by the event consumer while this decline is finishing.
+        queuedUsers.set(user.id, ctx);
+        pendingMatchDeclines.set(ctx, code);
+        let r: Awaited<ReturnType<PgRoomStore["declineMatch"]>>;
+        try {
+          r = await rooms.declineMatch(user.id, code, { credentials });
+          if (r.ok && ctx.code === code && ctx.token === credentials.token) connections.detach(ctx);
+        } finally {
+          pendingMatchDeclines.delete(ctx);
+        }
+        if (!r.ok) {
+          if (previousQueued) queuedUsers.set(user.id, previousQueued);
+          else if (queuedUsers.get(user.id) === ctx) queuedUsers.delete(user.id);
+          send(ws, { type: "error", message: r.error });
+          return;
+        }
+        const requeued = r.requeued;
+        if (!requeued?.ok) {
+          if (queuedUsers.get(user.id) === ctx) queuedUsers.delete(user.id);
+          send(ws, { type: "queue-left" });
+          if (requeued) send(ws, { type: "error", message: requeued.error });
+        } else if (requeued.kind === "opened") {
+          await deliverMatch(user.id, requeued.code, true, true, r.format);
+        }
+        clusterConsumer?.nudge();
+        return;
+      }
       case "decline-pending-bot-match": {
         if (!ctx.user || !ctx.code || !ctx.token) {
           send(ws, { type: "error", message: "not in a pending bot match" });
@@ -1056,12 +1094,12 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
         }
         const credentials = seatCredentials(ctx);
         if (!credentials) return;
-        pendingBotDeclines.set(ctx, msg.roomCode.toUpperCase());
+        pendingMatchDeclines.set(ctx, msg.roomCode.toUpperCase());
         let r: Awaited<ReturnType<PgRoomStore["declinePendingBotMatch"]>>;
         try {
           r = await rooms.declinePendingBotMatch(ctx.user.id, msg.roomCode, credentials);
         } finally {
-          pendingBotDeclines.delete(ctx);
+          pendingMatchDeclines.delete(ctx);
         }
         if (!r.ok) {
           send(ws, { type: "error", message: r.error });

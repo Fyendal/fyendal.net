@@ -1595,6 +1595,106 @@ describe("cc prep room", () => {
     b.ws.close();
   });
 
+  /** Queue two players into one matchmaking offer without accepting it.
+   *  Earlier tests may leave searches behind, so start from an empty queue. */
+  async function offerViaQueue(a: Client, b: Client): Promise<string> {
+    await db.query("DELETE FROM matchmaking_offers");
+    await db.query("DELETE FROM matchmaking_entries");
+    a.sendMsg({ type: "queue-join", format: "cc", deckId: "precon-asb" });
+    await a.next((m) => m.type === "queued");
+    await a.next((m) => m.type === "room-created");
+    b.sendMsg({ type: "queue-join", format: "cc", deckId: "precon-asr" });
+    const joined = (await b.next((m) => m.type === "joined")) as Extract<ServerMessage, { type: "joined" }>;
+    await b.next((m) => m.type === "prep-state" && m.prep.deadlinePhase === "accept");
+    return joined.code;
+  }
+
+  async function openQueuedRoom(c: Client): Promise<string> {
+    c.sendMsg({ type: "queue-join", format: "cc", deckId: "precon-asb" });
+    await c.next((m) => m.type === "queued");
+    return ((await c.next((m) => m.type === "room-created")) as Extract<ServerMessage, { type: "room-created" }>).code;
+  }
+
+  it("declining a matchup keeps both players searching without re-pairing them", async () => {
+    const a = await authedClient();
+    const b = await authedClient();
+    const code = await offerViaQueue(a, b);
+
+    b.sendMsg({ type: "decline-match", roomCode: code });
+    // The decliner stays in matchmaking with a fresh opener instead of leaving.
+    await b.next((m) => m.type === "queued");
+    const reopened = (await b.next((m) => m.type === "room-created")) as Extract<
+      ServerMessage,
+      { type: "room-created" }
+    >;
+    expect(reopened.code).not.toBe(code);
+    // The declined player keeps the original room and searches again.
+    await a.next((m) => m.type === "prep-state" && m.prep.seats[1] === null);
+    await a.next((m) => m.type === "queued");
+
+    const { rows } = await db.query(
+      `SELECT u.username, q.retained_room_code, q.pending_offer_room_code, q.avoided_user_ids
+       FROM matchmaking_entries q JOIN users u ON u.id = q.user_id
+       WHERE u.username IN ($1, $2) ORDER BY u.id`,
+      [a.username, b.username],
+    );
+    const aId = Number((await db.query("SELECT id FROM users WHERE username = $1", [a.username])).rows[0]!.id);
+    expect(rows).toEqual([
+      { username: a.username, retained_room_code: code, pending_offer_room_code: null, avoided_user_ids: [] },
+      { username: b.username, retained_room_code: reopened.code, pending_offer_room_code: null, avoided_user_ids: [aId] },
+    ]);
+    expect(b.inbox.some((m) => m.type === "left")).toBe(false);
+
+    a.ws.close();
+    b.ws.close();
+  });
+
+  it("pairs the declined player with someone already waiting, in FIFO order", async () => {
+    const a = await authedClient();
+    const b = await authedClient();
+    const code = await offerViaQueue(a, b);
+    const c = await authedClient();
+    const waitingRoom = await openQueuedRoom(c);
+
+    // a queued before b, so the declined a gets the waiting player first and
+    // keeps its room; c's unused opener is removed.
+    b.sendMsg({ type: "decline-match", roomCode: code });
+    const moved = (await c.next((m) => m.type === "joined")) as Extract<ServerMessage, { type: "joined" }>;
+    expect(moved.code).toBe(code);
+    await a.next((m) =>
+      m.type === "prep-state" && m.prep.deadlinePhase === "accept" && m.prep.seats[1]?.username === c.username
+    );
+    expect(await db.query("SELECT 1 FROM rooms WHERE code = $1", [waitingRoom]).then((r) => r.rows)).toEqual([]);
+    // Nobody else is waiting, so the decliner reopens and keeps searching.
+    await b.next((m) => m.type === "room-created" && m.code !== code);
+
+    a.ws.close();
+    b.ws.close();
+    c.ws.close();
+  });
+
+  it("moves an earlier-queued decliner straight to the next waiting player", async () => {
+    const a = await authedClient();
+    const b = await authedClient();
+    const code = await offerViaQueue(a, b);
+    const c = await authedClient();
+    const waitingRoom = await openQueuedRoom(c);
+
+    a.sendMsg({ type: "decline-match", roomCode: code });
+    const next = (await a.next((m) => m.type === "joined")) as Extract<ServerMessage, { type: "joined" }>;
+    expect(next.code).toBe(waitingRoom);
+    await a.next((m) =>
+      m.type === "prep-state" && m.prep.deadlinePhase === "accept" && m.prep.seats[0]?.username === c.username
+    );
+    // b keeps the declined room and waits for someone else.
+    await b.next((m) => m.type === "queued");
+    await b.next((m) => m.type === "prep-state" && m.prep.seats.filter(Boolean).length === 1);
+
+    a.ws.close();
+    b.ws.close();
+    c.ws.close();
+  });
+
   it("a pre-game leave re-queues the other player, who keeps the same room", async () => {
     const { c: a, deckId: aDeck } = await authedClientWithCcDeck();
     const { c: b, deckId: bDeck } = await authedClientWithCcDeck();

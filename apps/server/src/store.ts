@@ -1711,7 +1711,10 @@ export class PgRoomStore {
          LIMIT 1`,
         [choice.userId, format, choice.cardPoolMode],
       );
-      if (!choice.continuePendingBotStart && !choice.pendingBotStart && existingOpening.rows.length > 0) {
+      // A survivor requeue names its retained room explicitly and must pair
+      // with whoever is already waiting instead of only reclaiming the opener.
+      if (!choice.continuePendingBotStart && !choice.pendingBotStart && !choice.retainedRoomCode
+        && existingOpening.rows.length > 0) {
         return {
           ok: true as const,
           kind: "opened" as const,
@@ -1900,7 +1903,7 @@ export class PgRoomStore {
         return { ok: true, kind: "queued" };
       };
 
-      const avoidPlaceholders = avoidRoomCodes.map((_, index) => `$${index + 6}`).join(", ");
+      const avoidPlaceholders = avoidRoomCodes.map((_, index) => `$${index + 5}`).join(", ");
       const avoidClause = avoidRoomCodes.length > 0
         ? `AND (q.retained_room_code IS NULL OR q.retained_room_code NOT IN (${avoidPlaceholders}))`
         : "";
@@ -1924,7 +1927,7 @@ export class PgRoomStore {
              ON p.room_code = live_seat.room_code
             AND p.seat = live_seat.seat
             AND p.token_hash = live_seat.token_hash
-           WHERE p.last_seen_at > $5
+           WHERE p.last_seen_at > $4
          ) live
            ON live.room_code = COALESCE(q.source_room_code, q.retained_room_code)
           AND live.user_id = q.user_id
@@ -1932,7 +1935,6 @@ export class PgRoomStore {
          LEFT JOIN room_seats bot_source
            ON bot_source.room_code = q.source_room_code AND bot_source.controller = 'bot'
          WHERE q.format = $1 AND q.card_pool_mode = $2 AND q.user_id <> $3
-           AND ($4::text IS NULL OR q.retained_room_code IS NULL OR $${6 + avoidRoomCodes.length}::boolean)
            AND q.retained_room_code IS NOT NULL
            AND q.pending_offer_room_code IS NULL
            AND (q.mode = 'foreground' OR (
@@ -1948,10 +1950,8 @@ export class PgRoomStore {
           format,
           choice.cardPoolMode,
           choice.userId,
-          choice.retainedRoomCode ?? null,
           Date.now() - PRESENCE_TIMEOUT_MS,
           ...avoidRoomCodes,
-          choice.continuePendingBotStart === true,
         ],
       );
       let candidateRow: (typeof rows)[number] | undefined;
@@ -2003,20 +2003,13 @@ export class PgRoomStore {
 
       let room: RoomRow | null = null;
       let createdFreshRoom = false;
-      const retainedCode = choice.continuePendingBotStart && choice.retainedRoomCode
-        ? choice.retainedRoomCode
-        : opponent.retainedRoomCode ?? choice.retainedRoomCode;
-      const retainedOwner = retainedCode === choice.retainedRoomCode ? choice : opponent;
-      const incomingSeat = retainedOwner === choice ? opponentSeat : currentSeat;
-      const unusedRetainedCode = choice.continuePendingBotStart
-        && opponent.retainedRoomCode
-        && choice.retainedRoomCode
-        && opponent.retainedRoomCode !== choice.retainedRoomCode
-          ? opponent.retainedRoomCode
-          : null;
-      if (retainedCode) {
-        const retained = await this.loadRoom(db, retainedCode.toUpperCase());
-        const ownerSeat = retained?.seats.findIndex((seat) => seat?.userId === retainedOwner.userId) ?? -1;
+      // The searcher's retained room wins: a survivor's socket is already
+      // attached there, while a waiting opener's socket is bound for delivery
+      // and can move. The other one-seat opener is then disposable.
+      for (const [owner, incomingSeat] of [[choice, opponentSeat], [opponent, currentSeat]] as const) {
+        if (room || !owner.retainedRoomCode) continue;
+        const retained = await this.loadRoom(db, owner.retainedRoomCode.toUpperCase());
+        const ownerSeat = retained?.seats.findIndex((seat) => seat?.userId === owner.userId) ?? -1;
         const freeSeat = retained?.seats[0] === null ? 0 : retained?.seats[1] === null ? 1 : -1;
         if (retained && !retained.state && ownerSeat !== -1 && freeSeat !== -1) {
           retained.seats[freeSeat] = incomingSeat;
@@ -2066,36 +2059,40 @@ export class PgRoomStore {
         ]);
       }
 
-      if (mode === "background" || opponent.mode === "background" || choice.pendingBotStart
-        || choice.continuePendingBotStart || raw.pending_bot_start === true) {
-        await db.query(
-          `UPDATE matchmaking_entries
-           SET pending_offer_room_code = $3, retained_room_code = $3
-           WHERE user_id IN ($1, $2)`,
-          [choice.userId, opponent.userId, room.code],
-        );
-        await db.query(
-          `INSERT INTO matchmaking_offers(room_code, first_user_id, second_user_id, created_at)
-           VALUES ($1,$2,$3,$4)
-           ON CONFLICT (room_code) DO NOTHING`,
-          [room.code, opponent.userId, choice.userId, Date.now()],
-        );
-      } else {
-        await db.query(
-          "DELETE FROM matchmaking_entries WHERE user_id IN ($1, $2)",
-          [choice.userId, opponent.userId],
-        );
-      }
-      if (unusedRetainedCode) {
-        await db.query("DELETE FROM rooms WHERE code = $1", [unusedRetainedCode]);
-        await appendClusterEvent(db, {
-          type: "room",
-          event: { code: unusedRetainedCode, kind: "deleted", version: 1 },
-        });
+      // Every pairing is an offer: both searches, including their avoidance,
+      // last until both players accept, so a decline can keep searching.
+      await db.query(
+        `UPDATE matchmaking_entries
+         SET pending_offer_room_code = $3, retained_room_code = $3
+         WHERE user_id IN ($1, $2)`,
+        [choice.userId, opponent.userId, room.code],
+      );
+      await db.query(
+        `INSERT INTO matchmaking_offers(room_code, first_user_id, second_user_id, created_at)
+         VALUES ($1,$2,$3,$4)
+         ON CONFLICT (room_code) DO NOTHING`,
+        [room.code, opponent.userId, choice.userId, Date.now()],
+      );
+      const deletedOpeners: Array<{ code: string; version: number }> = [];
+      for (const owner of [choice, opponent]) {
+        const code = owner.retainedRoomCode?.toUpperCase();
+        if (!code || code === room.code) continue;
+        const unused = await this.loadRoom(db, code);
+        if (!unused || unused.state || unused.seats.some((seat) => seat && seat.userId !== owner.userId)) continue;
+        await db.query("DELETE FROM rooms WHERE code = $1 AND version = $2", [code, unused.version]);
+        if ((await db.query("SELECT 1 FROM rooms WHERE code = $1", [code])).rows.length > 0) {
+          throw VERSION_CONFLICT;
+        }
+        deletedOpeners.push({ code, version: unused.version + 1 });
       }
       await appendClusterEvent(db, { type: "room", event: { code: room.code, kind: "sync", version: room.version } });
       await appendClusterEvent(db, { type: "match-ready", userId: choice.userId, code: room.code, created: false });
       await appendClusterEvent(db, { type: "match-ready", userId: opponent.userId, code: room.code, created: createdFreshRoom });
+      // Announce deleted openers after delivery has moved their sockets, so
+      // the moved player is not first sent back to the lobby.
+      for (const deleted of deletedOpeners) {
+        await appendClusterEvent(db, { type: "room", event: { code: deleted.code, kind: "deleted", version: deleted.version } });
+      }
       await appendClusterEvent(db, { type: "queue-changed" });
       return { ok: true as const, kind: "matched" as const, code: room.code, version: room.version };
     });
@@ -2175,7 +2172,9 @@ export class PgRoomStore {
 
   async matchmakingCounts(): Promise<Record<Format, number>> {
     const { rows } = await this.db.query(
-      "SELECT format, COUNT(*) AS count FROM matchmaking_entries GROUP BY format",
+      // Players holding an offer are no longer waiting for an opponent.
+      `SELECT format, COUNT(*) AS count FROM matchmaking_entries
+       WHERE pending_offer_room_code IS NULL GROUP BY format`,
     );
     const counts: Record<Format, number> = { cc: 0, "silver-age": 0 };
     for (const row of rows) {
@@ -2299,7 +2298,7 @@ export class PgRoomStore {
       return true;
     }), () => false);
     if (typeof result !== "string") return result;
-    return (await this.declineBackgroundMatch(userId, result, false)).ok;
+    return (await this.declineMatch(userId, result, { continueSearching: false })).ok;
   }
 
   async stopBackgroundMatchmakingForSource(sourceRoomCode: string): Promise<void> {
@@ -2315,65 +2314,83 @@ export class PgRoomStore {
     }
   }
 
-  async declineBackgroundMatch(
+  /** Decline a matchmaking offer and keep searching. The survivor keeps the
+   * offered room and searches again from their original place; the decliner
+   * avoids that room and player for the rest of the search. Background
+   * players are authorized by their durable offer, foreground players by the
+   * seat they hold in the offered room. */
+  async declineMatch(
     userId: number,
     code: string,
-    continueSearching = true,
-  ): Promise<{ ok: true; version: number } | { ok: false; error: string }> {
+    options: { credentials?: SeatCredentials; continueSearching?: boolean } = {},
+  ): Promise<
+    | { ok: true; version: number; format: Format; requeued?: MatchmakingResult }
+    | { ok: false; error: string }
+  > {
     const upper = code.toUpperCase();
+    const continueSearching = options.continueSearching ?? true;
+    type Requeue = { format: Format; choice: MatchmakingChoice };
     const r = await this.withRetry<{
-      choice: MatchmakingChoice;
-      format: Format;
-      sourceRoomCode: string;
-      joinedAt: number;
-      survivorUserId: number | null;
+      decliner: Requeue;
+      survivor: (Requeue & { pendingBotStart: boolean }) | null;
     }>(upper, async (room, db) => {
       // Validate the durable offer before touching membership. A delayed
       // decline must not remove a player from an already accepted match.
       const { rows } = await db.query(
-        `SELECT source_room_code, joined_at, avoided_room_codes, avoided_user_ids, avoided_heroes
+        `SELECT mode, source_room_code, joined_at, avoided_room_codes, avoided_user_ids, avoided_heroes
          FROM matchmaking_entries
-         WHERE user_id = $1 AND mode = 'background' AND pending_offer_room_code = $2`,
+         WHERE user_id = $1 AND pending_offer_room_code = $2`,
         [userId, upper],
       );
-      if (rows.length === 0) return { error: "background matchmaking entry disappeared" };
-      const raw = dbObject(rows[0], "<matchmaking>", "declined background entry");
-      if (typeof raw.source_room_code !== "string") return { error: "background matchmaking entry disappeared" };
+      const raw = rows.length > 0 ? dbObject(rows[0], "<matchmaking>", "declined entry") : null;
+      // A seated foreground player whose entry already ended still declines
+      // into a fresh search; a background offer exists only durably.
+      const mode = raw?.mode === "background" ? "background" as const : "foreground" as const;
+      if (!options.credentials && mode !== "background") return { error: "background matchmaking entry disappeared" };
+      const sourceRoomCode = typeof raw?.source_room_code === "string" ? raw.source_room_code : undefined;
+      if (mode === "background" && !sourceRoomCode) return { error: "background matchmaking entry disappeared" };
       if (room.state || matchPrepPhase(room) !== "accept") {
         return { error: "this room is not awaiting match acceptance" };
       }
-      const seat = room.seats.findIndex((member) => member?.userId === userId);
-      if (seat !== 0 && seat !== 1) return { error: "not a player in this room" };
+      const seat = options.credentials
+        ? seatForCredentials(room, options.credentials)
+        : room.seats.findIndex((member) => member?.userId === userId);
+      if ((seat !== 0 && seat !== 1) || room.seats[seat]?.userId !== userId) {
+        return { error: "not a player in this room" };
+      }
       const member = room.seats[seat]!;
       room.seats[seat] = null;
-      const survivor = room.seats[1 - seat];
+      const survivorSeat = (1 - seat) as SeatIndex;
+      const survivor = room.seats[survivorSeat];
       if (survivor) resetPreparation(survivor);
       room.prep = null;
       room.prepDeadlineAt = null;
-      const avoided = dbStringArray(
-        raw.avoided_room_codes,
-        "<matchmaking>",
-        "avoided_room_codes",
-        MAX_MATCHMAKING_AVOID_ROOM_CODES,
-      ).filter((candidate) => candidate !== upper);
-      avoided.push(upper);
-      // Leaving and requeueing opens a new room code, so the declined player
-      // is avoided for the rest of this search as well.
-      const { userIds } = dbSearchAvoidance(raw, "declined background entry");
-      const avoidedUserIds = survivor?.userId === undefined
-        ? userIds
-        : appendBounded(userIds, survivor.userId, MAX_MATCHMAKING_AVOID_USERS);
-      await db.query(
-        `UPDATE matchmaking_entries
-         SET pending_offer_room_code = NULL, retained_room_code = NULL, avoided_room_codes = $2,
-             avoided_user_ids = $3
-         WHERE user_id = $1`,
-        [
-          userId,
-          JSON.stringify(avoided.slice(-MAX_MATCHMAKING_AVOID_ROOM_CODES)),
-          JSON.stringify(avoidedUserIds),
-        ],
-      );
+      if (raw) {
+        const avoided = dbStringArray(
+          raw.avoided_room_codes,
+          "<matchmaking>",
+          "avoided_room_codes",
+          MAX_MATCHMAKING_AVOID_ROOM_CODES,
+        ).filter((candidate) => candidate !== upper);
+        avoided.push(upper);
+        // Leaving and requeueing opens a new room code, so the declined player
+        // is avoided for the rest of this search as well.
+        const { userIds } = dbSearchAvoidance(raw, "declined entry");
+        const avoidedUserIds = survivor?.userId == null
+          ? userIds
+          : appendBounded(userIds, survivor.userId, MAX_MATCHMAKING_AVOID_USERS);
+        await db.query(
+          `UPDATE matchmaking_entries
+           SET pending_offer_room_code = NULL, retained_room_code = NULL, avoided_room_codes = $2,
+               avoided_user_ids = $3
+           WHERE user_id = $1`,
+          [
+            userId,
+            JSON.stringify(avoided.slice(-MAX_MATCHMAKING_AVOID_ROOM_CODES)),
+            JSON.stringify(avoidedUserIds),
+          ],
+        );
+      }
       if (!continueSearching) {
         await db.query("DELETE FROM matchmaking_entries WHERE user_id = $1", [userId]);
       }
@@ -2384,31 +2401,66 @@ export class PgRoomStore {
         [upper],
       );
       await db.query("DELETE FROM matchmaking_offers WHERE room_code = $1", [upper]);
-      if (survivor?.userId !== undefined) await this.recordBotCandidateAttempt(db, survivor.userId, userId);
+      let survivorRequeue: (Requeue & { pendingBotStart: boolean }) | null = null;
+      if (survivor?.userId != null) {
+        await this.recordBotCandidateAttempt(db, survivor.userId, userId);
+        const entry = await db.query(
+          `SELECT q.mode, q.source_room_code, q.joined_at, (p.user_id IS NOT NULL) AS pending_bot_start
+           FROM matchmaking_entries q
+           LEFT JOIN pending_bot_starts p ON p.user_id = q.user_id
+           WHERE q.user_id = $1 AND q.retained_room_code = $2`,
+          [survivor.userId, upper],
+        );
+        if (entry.rows.length > 0) {
+          const survivorRaw = dbObject(entry.rows[0], "<matchmaking>", "declined offer survivor");
+          const survivorSource = typeof survivorRaw.source_room_code === "string"
+            ? survivorRaw.source_room_code
+            : undefined;
+          survivorRequeue = {
+            format: room.format,
+            pendingBotStart: survivorRaw.pending_bot_start === true,
+            choice: {
+              userId: survivor.userId,
+              username: survivor.username ?? "unknown",
+              deckId: survivor.deckId,
+              deckName: survivor.deckName,
+              cardPoolMode: room.cardPoolMode,
+              retainedRoomCode: upper,
+              joinedAt: dbSafeInteger(survivorRaw.joined_at, "<matchmaking>", "joined_at"),
+              mode: survivorRaw.mode === "background" ? "background" : "foreground",
+              ...(survivorSource ? { sourceRoomCode: survivorSource, continueBackgroundSearch: true } : {}),
+            },
+          };
+        }
+      }
       return {
         room,
         result: {
-          choice: {
-            userId,
-            username: member.username ?? "unknown",
-            deckId: member.deckId,
-            deckName: member.deckName,
-            cardPoolMode: room.cardPoolMode,
+          decliner: {
+            format: room.format,
+            choice: {
+              userId,
+              username: member.username ?? "unknown",
+              deckId: member.deckId,
+              deckName: member.deckName,
+              cardPoolMode: room.cardPoolMode,
+              mode,
+              avoidRoomCodes: [upper],
+              ...(raw ? { joinedAt: dbSafeInteger(raw.joined_at, "<matchmaking>", "joined_at") } : {}),
+              ...(sourceRoomCode ? { sourceRoomCode, continueBackgroundSearch: true } : {}),
+            },
           },
-          format: room.format,
-          sourceRoomCode: raw.source_room_code,
-          joinedAt: dbSafeInteger(raw.joined_at, "<matchmaking>", "joined_at"),
-          survivorUserId: survivor?.userId ?? null,
+          survivor: survivorRequeue,
         },
         seatWrites: [
           { kind: "delete" as const, seat: seat as SeatIndex },
           ...(survivor
-            ? [{ kind: "full" as const, seat: (1 - seat) as SeatIndex, mode: "update" as const }]
+            ? [{ kind: "full" as const, seat: survivorSeat, mode: "update" as const }]
             : []),
         ],
         events: [
           { type: "background-status-changed", userId },
-          ...(survivor?.userId === undefined ? [] : [
+          ...(survivor?.userId == null ? [] : [
             { type: "background-status-changed" as const, userId: survivor.userId },
           ]),
           { type: "queue-changed" },
@@ -2416,20 +2468,21 @@ export class PgRoomStore {
       };
     }, undefined, { lockMatchmaking: () => true });
     if (!r.ok) return { ok: false, error: r.error };
-    if (continueSearching) {
-      await this.queueForMatch(r.result.format, {
-        ...r.result.choice,
-        mode: "background",
-        sourceRoomCode: r.result.sourceRoomCode,
-        joinedAt: r.result.joinedAt,
-        avoidRoomCodes: [upper],
-        continueBackgroundSearch: true,
-      });
-    }
-    if (r.result.survivorUserId !== null) {
-      await this.advancePendingBotStart(r.result.survivorUserId, userId);
-    }
-    return { ok: true, version: r.version };
+    // Both players search again in their original FIFO order; on a tie the
+    // player who was declined goes first.
+    const { decliner, survivor } = r.result;
+    const resumeSurvivor = async () => {
+      if (survivor?.pendingBotStart) await this.advancePendingBotStart(survivor.choice.userId, userId);
+      else if (survivor) await this.queueForMatch(survivor.format, survivor.choice);
+    };
+    const declinerFirst = survivor !== null
+      && (decliner.choice.joinedAt ?? Number.POSITIVE_INFINITY) < (survivor.choice.joinedAt ?? 0);
+    if (!declinerFirst) await resumeSurvivor();
+    const requeued = continueSearching
+      ? await this.queueForMatch(decliner.format, decliner.choice)
+      : undefined;
+    if (declinerFirst) await resumeSurvivor();
+    return { ok: true, version: r.version, format: decliner.format, ...(requeued ? { requeued } : {}) };
   }
 
   /** Skip a hero for the rest of the caller's background search. Only the

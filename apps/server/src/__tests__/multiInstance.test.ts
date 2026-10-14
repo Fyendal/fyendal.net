@@ -216,7 +216,14 @@ describe("multi-instance gateways", () => {
 
     expect(joined.code).toBe(created.code);
     expect((await db.query("SELECT COUNT(*) AS count FROM rooms")).rows[0]!.count).toBe(1);
-    expect((await db.query("SELECT COUNT(*) AS count FROM matchmaking_entries")).rows[0]!.count).toBe(0);
+    // Both searches remain as one offer until both players accept.
+    expect((await db.query(
+      "SELECT pending_offer_room_code FROM matchmaking_entries ORDER BY user_id",
+    )).rows).toEqual([
+      { pending_offer_room_code: created.code },
+      { pending_offer_room_code: created.code },
+    ]);
+    expect((await db.query("SELECT COUNT(*) AS count FROM matchmaking_offers")).rows[0]!.count).toBe(1);
   });
 
   it("delivers pending startup before an offer and enters bot prep after the last rejection", async () => {

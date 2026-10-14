@@ -926,6 +926,8 @@ export type ClientMessage =
   /** Skip this hero for the rest of the current background search. */
   | { type: "background-match-avoid-hero"; heroId: string }
   | { type: "decline-pending-bot-match"; roomCode: string }
+  /** Matchmade prep room: decline this pairing and keep searching. */
+  | { type: "decline-match"; roomCode: string }
   /** Matchmade prep room: acknowledge the pairing before sideboarding. */
   | { type: "accept-match" }
   /** prep room: commit arena cards before either player sees the other selection */

@@ -2481,7 +2481,7 @@ describe("PgRoomStore storage", () => {
       },
     }, "rules-a");
 
-    await expect(measured.declineBackgroundMatch(
+    await expect(measured.declineMatch(
       offer.userIds[0],
       offer.offerCode,
     )).resolves.toMatchObject({ ok: true });
@@ -2530,7 +2530,7 @@ describe("PgRoomStore storage", () => {
 
     const first = await search(requeuerId, "Requeuer", "precon-asr");
     if (!first.ok || first.kind !== "matched") throw new Error("requeuer was not offered");
-    expect(await store.declineBackgroundMatch(searcherId, first.code)).toMatchObject({ ok: true });
+    expect(await store.declineMatch(searcherId, first.code)).toMatchObject({ ok: true });
     expect(await avoidance()).toEqual({ avoided_user_ids: [requeuerId], avoided_heroes: [] });
 
     // Leaving and searching again opens a new room code, which room-code
@@ -2542,7 +2542,7 @@ describe("PgRoomStore storage", () => {
     // A plain decline skips the player, not their hero.
     const sameHero = await search(sameHeroId, "SameHero", "precon-asr");
     if (!sameHero.ok || sameHero.kind !== "matched") throw new Error("same hero was not offered");
-    expect(await store.declineBackgroundMatch(searcherId, sameHero.code)).toMatchObject({ ok: true });
+    expect(await store.declineMatch(searcherId, sameHero.code)).toMatchObject({ ok: true });
     expect(await store.avoidBackgroundHero(searcherId, "ASR001")).toBe(true);
     expect(await store.avoidBackgroundHero(searcherId, "not-a-hero")).toBe(false);
     expect(await avoidance()).toEqual({ avoided_user_ids: [requeuerId, sameHeroId], avoided_heroes: ["ASR001"] });

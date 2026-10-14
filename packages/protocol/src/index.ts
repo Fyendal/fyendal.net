@@ -955,6 +955,7 @@ export function decodeClientMessage(value: unknown): ClientMessage | null {
     case "background-match-accept":
     case "background-match-decline":
     case "decline-pending-bot-match":
+    case "decline-match":
       valid = exactKeys(message, ["type", "roomCode"])
         && typeof message.roomCode === "string" && /^[A-Za-z0-9]{6}$/.test(message.roomCode);
       break;

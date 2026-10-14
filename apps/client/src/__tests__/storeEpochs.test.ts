@@ -1488,6 +1488,54 @@ describe("client connection and account race fences", () => {
     expect(useStore.getState().backgroundMatchmaking).toEqual({ state: "inactive" });
   });
 
+  it("keeps searching after declining a matchmade pairing", async () => {
+    localStorage.setItem("fyendal-auth", JSON.stringify({ token: "token-a", username: "Alice" }));
+    const { useStore } = await import("../store.js");
+    useStore.getState().queueJoin("cc", "precon-asb");
+    const socket = FakeWebSocket.instances[0]!;
+    socket.open();
+    socket.message({ type: "joined", code: "PVP123", seat: 1, token: "pvp-seat", version: 5 });
+    socket.message({ type: "prep-state", prep: matchPrep([false, false], "accept"), version: 5 });
+    expect(useStore.getState().screen).toBe("waiting");
+
+    // A rejected decline returns to the offer instead of leaving the room.
+    useStore.getState().declineMatch();
+    expect(JSON.parse(socket.sent.at(-1)!)).toEqual({ type: "decline-match", roomCode: "PVP123" });
+    expect(useStore.getState().screen).toBe("room-loading");
+    socket.message({ type: "error", code: "CONFLICT", message: "this room is not awaiting match acceptance" });
+    expect(useStore.getState()).toMatchObject({ screen: "waiting", roomCode: "PVP123" });
+
+    useStore.getState().declineMatch();
+    expect(socket.sent.map((value) => JSON.parse(value))).not.toContainEqual({ type: "leave-room" });
+    // The declined offer stays hidden while the next opener arrives.
+    socket.message({ type: "queued", format: "cc" });
+    expect(useStore.getState().screen).toBe("room-loading");
+    socket.message({ type: "room-created", code: "NEW123", seat: 0, token: "new-seat", version: 0 });
+    expect(useStore.getState()).toMatchObject({
+      screen: "prep",
+      roomCode: "NEW123",
+      prep: null,
+      matchmakingActive: true,
+      matchAcceptanceRole: "existing",
+    });
+    const { loadRoomSession } = await import("../store/sessionStorage.js");
+    expect(loadRoomSession(localStorage, "PVP123")).toBeNull();
+    expect(loadRoomSession(localStorage, "NEW123")).toMatchObject({ token: "new-seat" });
+  });
+
+  it("returns to the lobby when a declined search cannot continue", async () => {
+    localStorage.setItem("fyendal-auth", JSON.stringify({ token: "token-a", username: "Alice" }));
+    const { useStore } = await import("../store.js");
+    useStore.getState().queueJoin("cc", "precon-asb");
+    const socket = FakeWebSocket.instances[0]!;
+    socket.open();
+    socket.message({ type: "joined", code: "PVP123", seat: 1, token: "pvp-seat", version: 5 });
+    socket.message({ type: "prep-state", prep: matchPrep([false, false], "accept"), version: 5 });
+    useStore.getState().declineMatch();
+    socket.message({ type: "queue-left" });
+    expect(useStore.getState()).toMatchObject({ screen: "lobby", roomCode: null, matchmakingActive: false });
+  });
+
   it("stays in the bot-start flow through authentication, rejection, and bot prep", async () => {
     localStorage.setItem("fyendal-auth", JSON.stringify({ token: "token-a", username: "Alice" }));
     const { useStore } = await import("../store.js");

@@ -169,6 +169,8 @@ export const useStore = create<StoreState>((set, get) => {
   /** A bot-room request waiting for the retained matchmaking room to release
    *  this socket. WebSocket commands stay ordered by waiting for `left`. */
   let pendingBotRoom: { format: Format; deckId: string; bot?: BotOpponent; searchForPlayer?: boolean } | null = null;
+  /** A declined matchmade room; the next pairing or opener replaces it. */
+  let pendingMatchDecline: string | null = null;
   /** Choice associated with the current/most recent matchmaking request. */
   let activeMatchmakingChoiceKey: string | null = null;
   /** In-memory monotonic race fences for callbacks that outlive the
@@ -701,6 +703,15 @@ export const useStore = create<StoreState>((set, get) => {
     }
   }
 
+  /** Consume a pending decline once another room replaces it. */
+  function takeDeclinedRoom(code: string): boolean {
+    const declined = pendingMatchDecline;
+    if (declined === null || declined === code) return false;
+    pendingMatchDecline = null;
+    removeRoomSession(localStorage, declined);
+    return true;
+  }
+
   /** Route to the prep screen with this session's deck. */
   function enterPrep() {
     // A handoff acknowledgement is not yet an authoritative opponent view.
@@ -873,7 +884,8 @@ export const useStore = create<StoreState>((set, get) => {
       case "room-created": {
         completeFabraryPlay();
         liveBotParticipant = true;
-        const fromMatchmaking = get().queuedFormat !== null || get().matchmakingActive;
+        const declinedRoom = takeDeclinedRoom(msg.code);
+        const fromMatchmaking = get().queuedFormat !== null || get().matchmakingActive || declinedRoom;
         roomEntryPending = false;
         roomEntryRetryable = false;
         joiningRoomCode = null;
@@ -891,6 +903,7 @@ export const useStore = create<StoreState>((set, get) => {
           queuedFormat: null,
           matchmakingActive: fromMatchmaking,
           matchAcceptanceRole: fromMatchmaking ? "existing" : null,
+          ...(declinedRoom ? { prep: null } : {}),
         });
         // hosts land on the prep room once the room exists
         if (prepDeckId) {
@@ -903,7 +916,8 @@ export const useStore = create<StoreState>((set, get) => {
       case "joined": {
         completeFabraryPlay();
         liveBotParticipant = msg.spectator !== true;
-        const fromMatchmaking = get().queuedFormat !== null || get().matchmakingActive;
+        const declinedRoom = takeDeclinedRoom(msg.code);
+        const fromMatchmaking = get().queuedFormat !== null || get().matchmakingActive || declinedRoom;
         if (msg.spectator) {
           // A successful spectator join identifies the old shared credential.
           // Only remove that exact value: another tab may have saved a player
@@ -933,6 +947,7 @@ export const useStore = create<StoreState>((set, get) => {
           queuedFormat: null,
           matchmakingActive: fromMatchmaking,
           matchAcceptanceRole: fromMatchmaking ? "joining" : null,
+          ...(declinedRoom ? { prep: null } : {}),
         });
         // Matchmade joiners accept from a focused holding screen. Manual joins
         // can enter prep immediately; prep-state arrives right after either.
@@ -1092,11 +1107,22 @@ export const useStore = create<StoreState>((set, get) => {
       case "queued":
         completeFabraryPlay();
         set({ queuedFormat: msg.format, matchmakingActive: true });
-        // queueing lives on the prep screen (sideboard while waiting)
-        enterPrep();
+        // queueing lives on the prep screen (sideboard while waiting); after
+        // a decline, wait for the new opener instead of the declined prep
+        if (pendingMatchDecline === null) enterPrep();
         break;
       case "queue-left":
         set({ queuedFormat: null, matchmakingActive: false });
+        if (pendingMatchDecline !== null) {
+          // The decline committed, but the search could not continue.
+          forgetRoomSession(pendingMatchDecline, false);
+          pendingMatchDecline = null;
+          history.replaceState(null, "", "/");
+          prepDeckId = null;
+          resetRoomVersionState();
+          set(clearedRoomProjection());
+          get().listRooms();
+        }
         launchPendingBotRoom();
         break;
       case "background-matchmaking": {
@@ -1194,10 +1220,11 @@ export const useStore = create<StoreState>((set, get) => {
           set({ socialError: msg.code });
           break;
         }
-        if (get().pendingBotStart && get().screen === "room-loading"
+        if ((get().pendingBotStart || pendingMatchDecline !== null) && get().screen === "room-loading"
           && get().prep?.deadlinePhase === "accept") {
-          set({ screen: "waiting" });
+          set({ screen: get().pendingBotStart || get().matchAcceptanceRole === "joining" ? "waiting" : "prep" });
         }
+        pendingMatchDecline = null;
         if (msg.code === "SESSION_REPLACED") {
           // Another tab reclaimed this player seat. Keep its newly saved room
           // credential, but stop this tab before it can automatically reclaim
@@ -1707,6 +1734,12 @@ export const useStore = create<StoreState>((set, get) => {
         if (send({ type: "decline-pending-bot-match", roomCode: code })) {
           set({ screen: "room-loading", botMatchTransition: null });
         }
+      } else if (code && get().prep?.deadlinePhase === "accept") {
+        // Declining keeps searching; the server delivers the next room.
+        if (send({ type: "decline-match", roomCode: code })) {
+          pendingMatchDecline = code;
+          set({ screen: "room-loading" });
+        }
       } else {
         get().leave();
       }
@@ -1760,6 +1793,7 @@ export const useStore = create<StoreState>((set, get) => {
     leave: () => {
       // An explicit Leave click wins over an in-flight practice handoff.
       pendingBotRoom = null;
+      pendingMatchDecline = null;
       cancelReconnect();
       roomEntryPending = false;
       roomEntryRetryable = false;
