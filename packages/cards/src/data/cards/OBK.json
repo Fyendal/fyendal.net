@@ -1,5 +1,15 @@
 [
   {
+    "id": "OBK001",
+    "name": "Mortimer, Living Virus",
+    "cardType": "hero",
+    "text": "Instant - {r}, {t}: Create a token copy of a disease token you control under each opponent's control. Activate this only during your turn.",
+    "classes": ["chaos", "assassin"],
+    "life": 20,
+    "intellect": 4,
+    "set": "OBK"
+  },
+  {
     "id": "OBK006",
     "name": "Min, Genius",
     "cardType": "hero",
@@ -175,6 +185,16 @@
     "cardType": "hero",
     "text": "Instant - {t}, put a card from your arsenal on the bottom of your deck: Put the top card of your deck face-up into your arsenal. If it has stealth, it gets +1{p} and go again this turn. If it's an arrow, it gets veil this turn.",
     "classes": ["assassin", "ranger"],
+    "life": 19,
+    "intellect": 4,
+    "set": "OBK"
+  },
+  {
+    "id": "OBK089",
+    "name": "α-01, First Cogwarden",
+    "cardType": "hero",
+    "text": "Instant - {r}, {t}: Put an arrow you've banished from boosting this turn face-up into your arsenal. If you do, put two +1{p} counters on it.\nInstant - {r}, {t}: The next arrow with a +1{p} counter you play this turn gets go again.",
+    "classes": ["mechanologist", "ranger"],
     "life": 19,
     "intellect": 4,
     "set": "OBK"

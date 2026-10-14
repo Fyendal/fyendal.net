@@ -118,6 +118,9 @@ its Boost costs actually banish; replaced Boost movements are not consulted.
 A deck top's `boostBanishesOtherDeckTops` self-replacement also banishes each
 other hero's deck top for that Boost; each card is banished from boosting, and
 an opponent-owned one sets the booster's `boostBanishedOpponentCard` turn flag.
+Every card banished from boosting also sets the booster's
+`banishedFromBoost:<instanceId>` turn flag; entering the banished zone again
+clears it, because the card is then a new object.
 
 Combat proceeds through declaration, defense, reactions, damage, resolution,
 and a possible next link. Resolved links remain on the combat chain until it

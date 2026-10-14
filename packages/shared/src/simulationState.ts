@@ -295,6 +295,7 @@ export interface PersistedModifierV1 {
   appliesToFromArsenal?: boolean;
   appliesToRuneGated?: boolean;
   appliesToCharged?: boolean;
+  appliesToCounter?: string;
   noDefenseReactionsFromArsenal?: boolean;
   noDefenseReactionsFromHand?: boolean;
   maxNonBlockDefenders?: number;

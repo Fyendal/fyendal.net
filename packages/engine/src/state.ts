@@ -689,6 +689,9 @@ export interface Modifier {
   appliesToRuneGated?: boolean;
   /** Only matches an attack whose play paid Charge's optional additional cost. */
   appliesToCharged?: boolean;
+  /** Only matches a card carrying at least one counter with this key ("the
+   *  next arrow with a +1{p} counter you play"). */
+  appliesToCounter?: string;
   /** while this modifier is on the link, defense reactions can't be played
    *  from the arsenal ("this chain link") */
   noDefenseReactionsFromArsenal?: boolean;

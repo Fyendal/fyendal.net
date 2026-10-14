@@ -507,6 +507,9 @@ export function finishPlayCard(
             player.flags[`boostedSubtype:${type}`] = true;
           }
           if (moved.owner !== seat) player.flags.boostBanishedOpponentCard = true;
+          // Per-object marker for "a card you've banished from boosting this
+          // turn"; enterBanish clears it when the card becomes a new object.
+          player.flags[`banishedFromBoost:${moved.instanceId}`] = true;
           const banishPower = scriptOf(state, card.cardId, card)?.boostBanishPowerBonus?.(
             runtime.makeCtx(state, seat, card),
             moved,

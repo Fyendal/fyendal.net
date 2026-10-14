@@ -177,6 +177,124 @@ const azalea: CardScript = {
   },
 };
 
+const ALPHA_ARROW_HOOK = "obk-alpha-arrow";
+
+// Boost marks each card it banishes with a per-object `banishedFromBoost:<id>`
+// turn flag on the booster; the engine clears it if the card re-enters banish.
+function arrowsBanishedFromBoosting(ctx: ScriptCtx): DeepReadonly<CardInstance>[] {
+  return ctx.player(ctx.seat).banish.filter((card) =>
+    !card.faceDown &&
+    isArrow(ctx, card) &&
+    ctx.getPlayerFlag(ctx.seat, `banishedFromBoost:${card.instanceId}`) === true
+  );
+}
+
+function arsenalBoostedArrow(ctx: ScriptCtx, instanceId: number): void {
+  const arrow = arrowsBanishedFromBoosting(ctx).find((card) => card.instanceId === instanceId);
+  if (!arrow || !ctx.putIntoArsenal(arrow.instanceId, "banish", { faceUp: true })) return;
+  ctx.addCounter(arrow.instanceId, "power", 2);
+  ctx.logPublic(
+    localizedCardLog(
+      ctx,
+      `${ctx.cardData(ctx.self.cardId).name}: ${ctx.cardData(arrow.cardId).name} gets two +1 power counters`,
+      "card.log.obk.alpha.counters",
+      { target: { kind: "card", cardId: arrow.cardId }, amount: 2 },
+    ),
+  );
+}
+
+const alpha01: CardScript = {
+  activated: [
+    {
+      cost: 1,
+      isAttack: false,
+      goAgain: false,
+      timing: "instant",
+      tap: true,
+      label: "Arsenal a boosted arrow with two +1{p} counters",
+      onActivate(ctx) {
+        if (!ctx.hasArsenalSpace()) return;
+        const arrows = arrowsBanishedFromBoosting(ctx);
+        if (arrows.length === 1) {
+          arsenalBoostedArrow(ctx, arrows[0]!.instanceId);
+        } else if (arrows.length > 1) {
+          ctx.requestCardChoice(
+            ALPHA_ARROW_HOOK,
+            decisionPrompt(
+              "Put an arrow you banished from boosting this turn face-up into your arsenal",
+              "card.obk.alpha.arrow.arsenal",
+            ),
+            arrows.map((card) => card.instanceId),
+          );
+        }
+      },
+    },
+    {
+      cost: 1,
+      isAttack: false,
+      goAgain: false,
+      timing: "instant",
+      tap: true,
+      label: "Next arrow with a +1{p} counter gets go again",
+      onActivate(ctx) {
+        ctx.addModifier({
+          scope: "next-play",
+          grantKeyword: "go again",
+          appliesToSubtype: "arrow",
+          appliesToCounter: "power",
+        });
+      },
+    },
+  ],
+  onChoose(ctx, hook, option) {
+    if (hook === ALPHA_ARROW_HOOK) arsenalBoostedArrow(ctx, Number(option));
+  },
+};
+
+const MORTIMER_COPY_HOOK = "obk-mortimer-copy";
+
+function copyDiseaseToOpponents(ctx: ScriptCtx, instanceId: number): void {
+  const disease = ctx.player(ctx.seat).board.find(
+    (card) => card.instanceId === instanceId && isDiseaseToken(ctx, card),
+  );
+  if (!disease) return;
+  for (const player of ctx.state.players) {
+    if (player.seat !== ctx.seat) ctx.createTokenCopyOf(disease, player.seat);
+  }
+}
+
+const mortimer: CardScript = {
+  activated: {
+    cost: 1,
+    isAttack: false,
+    goAgain: false,
+    timing: "instant",
+    tap: true,
+    canActivate: (ctx) => ctx.state.activePlayer === ctx.seat,
+    onActivate(ctx) {
+      // Same-name tokens are interchangeable copy sources; offer one of each.
+      const diseases = ctx.player(ctx.seat).board
+        .filter((card) => isDiseaseToken(ctx, card))
+        .filter((card, index, all) => all.findIndex((other) => other.cardId === card.cardId) === index);
+      if (diseases.length === 1) {
+        copyDiseaseToOpponents(ctx, diseases[0]!.instanceId);
+      } else if (diseases.length > 1) {
+        ctx.requestCardChoice(
+          MORTIMER_COPY_HOOK,
+          decisionPrompt(
+            "Choose a disease token you control to copy under each opponent's control",
+            "card.obk.mortimer.disease.copy",
+          ),
+          diseases.map((card) => card.instanceId),
+        );
+      }
+    },
+  },
+  onChoose(ctx, hook, option) {
+    if (hook === MORTIMER_COPY_HOOK) copyDiseaseToOpponents(ctx, Number(option));
+  },
+};
+
 const EXTINCTION_NAME_HOOK = "obk-extinction-name";
 
 function diseaseTokensInArena(ctx: ScriptCtx): number {
@@ -570,6 +688,8 @@ export const obk: Record<string, CardScript> = {
   "huxley|0": huxley,
   "azalea, ace of spades|0": azalea,
   "azalea, lone vigilante|0": azalea,
+  "α-01, first cogwarden|0": alpha01,
+  "mortimer, living virus|0": mortimer,
   "extinction level event|1": extinctionLevelEvent,
   "swap spit|1": swapSpit,
   "incite aggression|1": inciteAggression,

@@ -193,6 +193,10 @@ export function modifierApplies(
   if (modifier.appliesToCharged === true && !link.attackingCard.counters?.chargedPitch) {
     return false;
   }
+  if (
+    modifier.appliesToCounter !== undefined &&
+    Number(link.attackingCard.counters?.[modifier.appliesToCounter] ?? 0) < 1
+  ) return false;
   return modifierAppliesTo(
     state,
     modifier,

@@ -6,6 +6,7 @@ export function heroImageUrl(heroName: string): string {
   const slug = heroName
     .toLowerCase()
     .replace(/ð/g, "d")
+    .replace(/α/g, "a")
     .replace(/['’.,/!]/g, "")
     .trim()
     .replace(/\s+/g, "-");

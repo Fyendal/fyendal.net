@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { legalIntents, projectStateFor } from "@fyendal/engine";
 import type { GameIntent } from "@fyendal/shared";
 import { cardData } from "../../index.js";
-import { printingId, scenario } from "../harness.js";
+import { printingId, scenario, type SeatSpec } from "../harness.js";
 
 const MIN = "min, genius|0";
 const VYLE = "vyle, catalyst of collapse|0";
@@ -15,6 +15,12 @@ const ZIPPER_HIT = "zipper hit|1";
 const PROWL = "prowl|1";
 const FILLER = "raging onslaught|1";
 const NO_EQUIPMENT = { head: null, chest: null, arms: null, legs: null } as const;
+const BLOODROT_POX = "bloodrot pox|0";
+const FRAILTY = "frailty|0";
+
+function boardNames(game: ReturnType<typeof scenario>, seat: number): string[] {
+  return game.state.players[seat]!.board.map((card) => cardData[card.cardId]!.name);
+}
 
 function heroName(game: ReturnType<typeof scenario>, seat: number): string {
   return cardData[game.state.players[seat]!.heroCardId]!.name;
@@ -297,6 +303,102 @@ describe("Outbreak heroes", () => {
       );
     });
   });
+
+  describe("α-01, First Cogwarden", () => {
+    const ALPHA = "α-01, first cogwarden|0";
+    const alphaGame = (seat: Partial<SeatSpec>) => scenario({ seats: [
+      { hero: "rhinar", heroKey: ALPHA, weapons: [DEATH_DEALER], equipment: NO_EQUIPMENT, ...seat },
+      { hero: "dorinthea", weapons: [], equipment: NO_EQUIPMENT },
+    ] });
+    const arsenalArrow = (game: ReturnType<typeof scenario>) =>
+      game.state.players[0]!.arsenal.find((card) => card.cardId === printingId(RUSTY_HARPOON));
+
+    it("arsenals an arrow banished from boosting with two +1 power counters that later get go again", () => {
+      const game = alphaGame({
+        hand: [ZERO_TO_SIXTY],
+        deck: [RUSTY_HARPOON, FILLER, FILLER, FILLER, FILLER],
+        resources: 1,
+      });
+
+      game.play(ZERO_TO_SIXTY, { boost: true }).blockWith().settle().expectLife(1, 16);
+      game.activate(ALPHA, { ability: 0 });
+
+      game.expectInZone(0, RUSTY_HARPOON, "arsenal").expectFaceDown(0, RUSTY_HARPOON, false);
+      expect(arsenalArrow(game)?.counters?.power).toBe(2);
+      expect(game.state.players[0]!.hero.tapped).toBe(true);
+      expect(game.state.players[0]!.resources).toBe(0);
+      game.expectLog("gets two +1 power counters");
+
+      game.endTurn().endTurn();
+      game.activate(ALPHA, { ability: 1, pitch: [FILLER] });
+      game.play(RUSTY_HARPOON, { fromArsenal: true }).expectAttackValue(3).blockWith().settle();
+
+      game.expectLife(1, 13).expectAP(0, 1);
+    });
+
+    it("ignores an arrow that was not banished from boosting this turn", () => {
+      const game = alphaGame({ banish: [RUSTY_HARPOON], resources: 1 });
+
+      game.activate(ALPHA, { ability: 0 });
+
+      game.expectInZone(0, RUSTY_HARPOON, "banish");
+      expect(game.state.players[0]!.arsenal).toEqual([]);
+    });
+
+    it("does not give go again to an arrow without a +1 power counter", () => {
+      const game = alphaGame({ arsenal: [RUSTY_HARPOON], resources: 1 });
+
+      game.activate(ALPHA, { ability: 1 });
+      game.play(RUSTY_HARPOON, { fromArsenal: true }).expectAttackValue(1).blockWith().settle();
+
+      game.expectLife(1, 19).expectAP(0, 0);
+    });
+  });
+
+  describe("Mortimer, Living Virus", () => {
+    const MORTIMER = "mortimer, living virus|0";
+    const mortimerGame = (board: string[], active: 0 | 1 = 0) => scenario({
+      active,
+      seats: [
+        { hero: "rhinar", heroKey: MORTIMER, board, resources: 1, weapons: [], equipment: NO_EQUIPMENT },
+        { hero: "dorinthea", hand: [PROWL], weapons: [], equipment: NO_EQUIPMENT },
+      ],
+    });
+
+    it("creates a token copy of your disease token under the opponent's control", () => {
+      const game = mortimerGame([FRAILTY]).activate(MORTIMER);
+
+      expect(boardNames(game, 0)).toEqual(["Frailty"]);
+      expect(boardNames(game, 1)).toEqual(["Frailty"]);
+      expect(game.state.players[0]!.hero.tapped).toBe(true);
+      expect(game.state.players[0]!.resources).toBe(0);
+    });
+
+    it("lets you choose which disease token to copy", () => {
+      const game = mortimerGame([FRAILTY, BLOODROT_POX]).activate(MORTIMER).chooseCard(BLOODROT_POX);
+
+      expect(boardNames(game, 0)).toEqual(["Frailty", "Bloodrot Pox"]);
+      expect(boardNames(game, 1)).toEqual(["Bloodrot Pox"]);
+    });
+
+    it("creates nothing without a disease token", () => {
+      const game = mortimerGame([]).activate(MORTIMER);
+
+      expect(boardNames(game, 1)).toEqual([]);
+    });
+
+    it("cannot be activated during an opponent's turn", () => {
+      const game = mortimerGame([FRAILTY], 1);
+
+      game.play(PROWL).blockWith().passPriority();
+
+      expect(game.state.priorityPlayer).toBe(0);
+      const mortimer = game.state.players[0]!.hero.instanceId;
+      expect(legalIntents(game.state, 0)).not.toContainEqual(
+        expect.objectContaining({ kind: "activate-ability", sourceInstanceId: mortimer }),
+      );
+    });
+  });
 });
 
 describe("Outbreak cards", () => {
@@ -310,12 +412,6 @@ describe("Outbreak cards", () => {
   const EXTINCTION = "extinction level event|1";
   const SWAP_SPIT = "swap spit|1";
   const BLUE = "raging onslaught|3";
-  const BLOODROT_POX = "bloodrot pox|0";
-  const FRAILTY = "frailty|0";
-
-  function boardNames(game: ReturnType<typeof scenario>, seat: number): string[] {
-    return game.state.players[seat]!.board.map((card) => cardData[card.cardId]!.name);
-  }
 
   describe("Bootlegger Bust-Up", () => {
     const boosted = (deckTop: string) => {

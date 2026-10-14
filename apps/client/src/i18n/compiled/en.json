@@ -6817,6 +6817,51 @@
       "value": " and puts it into your hand"
     }
   ],
+  "card.log.obk.alpha.counters": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": "
+    },
+    {
+      "type": 1,
+      "value": "target"
+    },
+    {
+      "type": 0,
+      "value": " gets "
+    },
+    {
+      "type": 6,
+      "value": "amount",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 0,
+              "value": "a +1 power counter"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " +1 power counters"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    }
+  ],
   "card.log.obk.azalea.stealth": [
     {
       "type": 1,
@@ -10559,6 +10604,12 @@
       "value": "Choose a ward aura"
     }
   ],
+  "card.obk.alpha.arrow.arsenal": [
+    {
+      "type": 0,
+      "value": "Put an arrow you banished from boosting this turn face-up into your arsenal"
+    }
+  ],
   "card.obk.azalea.cost.arsenal.bottom": [
     {
       "type": 0,
@@ -10621,6 +10672,12 @@
     {
       "type": 0,
       "value": "Name a disease token"
+    }
+  ],
+  "card.obk.mortimer.disease.copy": [
+    {
+      "type": 0,
+      "value": "Choose a disease token you control to copy under each opponent's control"
     }
   ],
   "card.obk.patientzero.disease.give": [

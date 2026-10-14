@@ -612,6 +612,9 @@ export function enterBanish(
   // play from this zone.
   delete card.tapped;
   clearTemporaryObjectEffects(card);
+  // The new object has not been banished from boosting; Boost re-marks the
+  // cards it banishes after this move.
+  for (const player of state.players) delete player.flags[`banishedFromBoost:${card.instanceId}`];
   // CR 5.1.2 / 7.0.2a: announcing an attack puts it on the stack and opens
   // the combat chain before its effect-costs are paid. The engine keeps that
   // announced card in `resolving` until scripted additional costs finish, so

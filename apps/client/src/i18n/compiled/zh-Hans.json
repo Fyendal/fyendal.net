@@ -6499,6 +6499,32 @@
       "value": " 并将其置入你的手牌"
     }
   ],
+  "card.log.obk.alpha.counters": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "："
+    },
+    {
+      "type": 1,
+      "value": "target"
+    },
+    {
+      "type": 0,
+      "value": " 获得 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 个 +1 攻击力指示物"
+    }
+  ],
   "card.log.obk.azalea.stealth": [
     {
       "type": 1,
@@ -10071,6 +10097,12 @@
       "value": "选择一个守护 (ward) 灵气 (Aura)"
     }
   ],
+  "card.obk.alpha.arrow.arsenal": [
+    {
+      "type": 0,
+      "value": "将一张你本回合因 boost 而放逐的 arrow 正面朝上放入你的 arsenal"
+    }
+  ],
   "card.obk.azalea.cost.arsenal.bottom": [
     {
       "type": 0,
@@ -10133,6 +10165,12 @@
     {
       "type": 0,
       "value": "指定一个疾病衍生物的名称"
+    }
+  ],
+  "card.obk.mortimer.disease.copy": [
+    {
+      "type": 0,
+      "value": "选择一个由你操控的疾病衍生物，在每名对手的操控下创造它的衍生物复制"
     }
   ],
   "card.obk.patientzero.disease.give": [

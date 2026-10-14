@@ -304,6 +304,7 @@ function modifierMatchesPlayedCard(
     return false;
   }
   if (mod.excludesSubtype && tags.includes(mod.excludesSubtype.toLowerCase())) return false;
+  if (mod.appliesToCounter !== undefined && Number(card.counters?.[mod.appliesToCounter] ?? 0) < 1) return false;
   return true;
 }
 
