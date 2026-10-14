@@ -296,6 +296,21 @@ describe("public deck-card events", () => {
     }]);
   });
 
+  it("announces a shuffle when a card is shuffled into a deck", () => {
+    expect(detectDeckCardEvents(
+      view({ log: [] }),
+      view({ log: [
+        "Revere the Copper Idol is shuffled into Hero's deck⟦AMG027⟧",
+        "A card is shuffled into Hero's deck",
+      ] }),
+    )).toEqual([{
+      kind: "shuffle",
+      cardIds: [],
+      label: "Hero shuffles their deck",
+      seat: 0,
+    }]);
+  });
+
   it("announces die-roll results from the public log", () => {
     expect(detectDeckCardEvents(
       view({ log: [] }),

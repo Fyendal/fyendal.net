@@ -1,0 +1,38 @@
+[
+  {
+    "id": "AMG002",
+    "name": "Unstable Plasma Pistol",
+    "cardType": "weapon",
+    "text": "Action - {r}{r}: Attack\nIf you've banished a card an opponent owns from boosting this turn, this gets +2{p}.",
+    "attack": 2,
+    "classes": ["chaos", "mechanologist"],
+    "subtypes": ["pistol", "2h"],
+    "set": "AMG"
+  },
+  {
+    "id": "AMG023",
+    "name": "Madness Spiral",
+    "cardType": "action",
+    "text": "Boost\nIf you would banish this from boosting, instead banish it and the top card of each other hero's deck to boost.",
+    "pitch": 3,
+    "cost": 2,
+    "attack": 4,
+    "defense": 3,
+    "classes": ["chaos", "mechanologist"],
+    "subtypes": ["attack"],
+    "keywords": ["Boost"],
+    "set": "AMG"
+  },
+  {
+    "id": "AMG027",
+    "name": "Revere the Copper Idol",
+    "cardType": "instant",
+    "text": "Legendary\nWhen this is banished from boosting, shuffle this into its owner's deck.\nShuffle up to 3 Mechanologist action cards with different names from your banished zone into your deck.",
+    "pitch": 3,
+    "cost": 0,
+    "defense": 3,
+    "classes": ["mechanologist"],
+    "keywords": ["Legendary"],
+    "set": "AMG"
+  }
+]

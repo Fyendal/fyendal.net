@@ -657,6 +657,10 @@ export interface ScriptCtx {
   /** Put a card (by instance id, from any of its owner's zones) on the bottom
    *  of its owner's deck. */
   putOnDeckBottom(instanceId: number): boolean;
+  /** Shuffle cards (by instance id, from any of their owners' zones) into
+   *  their owners' decks: one shuffle per affected deck and a single "shuffled
+   *  into" log entry per card. Returns how many cards moved. */
+  shuffleIntoDeck(instanceIds: readonly number[]): number;
   /** Put several cards on the bottom of their owner's deck in the deciding
    *  player's chosen order. When more than one card is supplied, this opens a
    *  private card-order decision and moves the cards only after the complete
@@ -1508,6 +1512,10 @@ export interface CardScript {
   onFriendlyWagerLossReplacement?(ctx: ScriptCtx): boolean;
   /** This card was banished as the top card paid for a Boost cost. */
   onBanishedForBoost?(ctx: ScriptCtx, boosted: DeepReadonly<CardInstance>): void;
+  /** Self-replacement: if this card would be banished from its owner's deck
+   * top to pay a Boost cost, instead banish it and the top card of each other
+   * hero's deck. Every card banished this way is banished from boosting. */
+  boostBanishesOtherDeckTops?: boolean;
   /** Replace the card movement used to pay a Boost cost. Returning true means
    * the script moved the card and ordinary banishment is skipped. */
   replaceBoostBanish?(ctx: ScriptCtx, boosted: DeepReadonly<CardInstance>, card: DeepReadonly<CardInstance>): boolean;

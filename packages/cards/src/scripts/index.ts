@@ -8,6 +8,7 @@ import { aio } from "./aio.js";
 import { ajv } from "./ajv.js";
 import { ako } from "./ako.js";
 import { ama } from "./ama.js";
+import { amg } from "./amg.js";
 import { amo } from "./amo.js";
 import { amx } from "./amx.js";
 import { aol } from "./aol.js";
@@ -90,6 +91,7 @@ const setModules: Record<string, Record<string, CardScript>> = {
   AJV: ajv,
   AKO: ako,
   AMA: ama,
+  AMG: amg,
   AMO: amo,
   AMX: amx,
   AOL: aol,

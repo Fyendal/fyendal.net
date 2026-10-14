@@ -97,6 +97,29 @@
     "set": "OBK"
   },
   {
+    "id": "OBK039",
+    "name": "Incite Resolve",
+    "cardType": "action",
+    "text": "Each hero puts the top card of their deck face-up into their arsenal. If a blue card is put face-up into an arsenal this way, your next attack this turn gets +2{p}.\nGo again",
+    "pitch": 3,
+    "cost": 1,
+    "defense": 3,
+    "classes": ["chaos"],
+    "keywords": ["Go again"],
+    "set": "OBK"
+  },
+  {
+    "id": "OBK066",
+    "name": "Exertion Bloom",
+    "cardType": "instant",
+    "text": "This costs {r}{r}{r} less to play during your turn.\nCreate an Exertion token under each hero's control.",
+    "pitch": 2,
+    "cost": 3,
+    "defense": 3,
+    "classes": ["chaos"],
+    "set": "OBK"
+  },
+  {
     "id": "OBK071",
     "name": "Huxley, Racketeer",
     "cardType": "hero",
@@ -144,6 +167,20 @@
     "attack": 1,
     "classes": ["assassin"],
     "subtypes": ["dagger", "1h"],
+    "set": "OBK"
+  },
+  {
+    "id": "OBK126",
+    "name": "Patient Zero",
+    "cardType": "action",
+    "text": "Stealth\nWhen this hits a hero, give them a disease token you control.",
+    "pitch": 1,
+    "cost": 0,
+    "attack": 3,
+    "defense": 3,
+    "classes": ["assassin"],
+    "subtypes": ["attack"],
+    "keywords": ["Stealth"],
     "set": "OBK"
   },
   {
@@ -201,6 +238,29 @@
     "defense": 3,
     "classes": ["generic"],
     "keywords": ["Cure", "Go again"],
+    "set": "OBK"
+  },
+  {
+    "id": "FAB529",
+    "name": "Curative Ceremony",
+    "cardType": "action",
+    "text": "As an additional cost to play this, each hero cures a disease they control if able. Choose a mode for each disease cured this way;\n- This gets +2{p}.\n- This gets go again.\n- This gets veil.",
+    "pitch": 1,
+    "cost": 0,
+    "attack": 4,
+    "defense": 3,
+    "classes": ["chaos"],
+    "subtypes": ["attack"],
+    "keywords": ["Cure"],
+    "set": "OBK"
+  },
+  {
+    "id": "SLV035",
+    "name": "Exertion",
+    "cardType": "token",
+    "text": "(You are infected.)\nWhenever you play a card from hand, lose 1{h}.\nAt the beginning of your end phase, destroy this.",
+    "classes": ["generic"],
+    "subtypes": ["disease", "aura"],
     "set": "OBK"
   }
 ]

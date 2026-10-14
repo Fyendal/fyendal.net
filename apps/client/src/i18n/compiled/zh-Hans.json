@@ -1161,6 +1161,18 @@
       "value": "将一个 zombie 放入你的墓地？"
     }
   ],
+  "card.amg.revere.shuffle": [
+    {
+      "type": 0,
+      "value": "将你放逐区中的一张 Mechanologist 行动牌洗入牌库？"
+    }
+  ],
+  "card.amg.revere.shuffle.next": [
+    {
+      "type": 0,
+      "value": "再将一张不同牌名的 Mechanologist 行动牌洗入牌库？"
+    }
+  ],
   "card.amo.mortimer.disease.choose": [
     {
       "type": 0,
@@ -9997,6 +10009,52 @@
       "value": "将你 arsenal 中的一张牌置于牌库底部作为费用"
     }
   ],
+  "card.obk.ceremony.disease.cure": [
+    {
+      "type": 0,
+      "value": "治愈一个由你操控的疾病"
+    }
+  ],
+  "card.obk.ceremony.mode.choose": [
+    {
+      "type": 0,
+      "value": "选择一项模式（剩余 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 次）"
+    }
+  ],
+  "card.obk.ceremony.option.goagain": [
+    {
+      "type": 0,
+      "value": "此牌获得 go again"
+    }
+  ],
+  "card.obk.ceremony.option.power": [
+    {
+      "type": 0,
+      "value": "此牌获得 +"
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 力量"
+    }
+  ],
+  "card.obk.ceremony.option.veil": [
+    {
+      "type": 0,
+      "value": "此牌获得 veil"
+    }
+  ],
   "card.obk.cureall.disease.cure": [
     {
       "type": 0,
@@ -10007,6 +10065,12 @@
     {
       "type": 0,
       "value": "指定一个疾病衍生物的名称"
+    }
+  ],
+  "card.obk.patientzero.disease.give": [
+    {
+      "type": 0,
+      "value": "将一个由你操控的疾病衍生物交给被击中的英雄"
     }
   ],
   "card.obk.pinpointer.arrow.arsenal": [
@@ -12987,6 +13051,12 @@
     {
       "type": 0,
       "value": "Terra：支付 1 点资源以生成一个 Might 衍生物？"
+    }
+  ],
+  "card.trigger.amg.revere.shuffle": [
+    {
+      "type": 0,
+      "value": "将此牌洗入其拥有者的牌库"
     }
   ],
   "card.trigger.common.actionpoint.gain": [
@@ -17612,6 +17682,38 @@
     {
       "type": 0,
       "value": " 返回其拥有者手牌"
+    }
+  ],
+  "engine.log.card.shuffled.into.deck": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 被洗入 "
+    },
+    {
+      "type": 1,
+      "value": "player"
+    },
+    {
+      "type": 0,
+      "value": " 的牌库"
+    }
+  ],
+  "engine.log.card.shuffled.into.deck.hidden": [
+    {
+      "type": 0,
+      "value": "一张牌被洗入 "
+    },
+    {
+      "type": 1,
+      "value": "player"
+    },
+    {
+      "type": 0,
+      "value": " 的牌库"
     }
   ],
   "engine.log.card.tapped": [

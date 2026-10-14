@@ -304,9 +304,11 @@ export function detectDeckCardEvents(previous: GameView, current: GameView): Dec
 
   const shuffledSeats = new Set<number>();
   for (const line of newLogLines) {
-    const automaticLog = /^(.+?) shuffles their deck$/i.exec(line);
-    if (!automaticLog?.[1]) continue;
-    const heroName = automaticLog[1];
+    const untagged = withoutCardPrintingTags(line);
+    // "Hero shuffles their deck", or a card shuffled into a deck as one event.
+    const heroName = /^(.+?) shuffles their deck$/i.exec(untagged)?.[1] ??
+      /^.+? is shuffled into (.+)'s deck$/i.exec(untagged)?.[1];
+    if (!heroName) continue;
     for (const player of current.players) {
       if (player.heroName === heroName) shuffledSeats.add(player.seat);
     }

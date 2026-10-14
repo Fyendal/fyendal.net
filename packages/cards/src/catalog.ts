@@ -17,6 +17,7 @@ import cardsAST from "./data/cards/AST.json" with { type: "json" };
 import cardsAMX from "./data/cards/AMX.json" with { type: "json" };
 import cardsAMA from "./data/cards/AMA.json" with { type: "json" };
 import cardsAMO from "./data/cards/AMO.json" with { type: "json" };
+import cardsAMG from "./data/cards/AMG.json" with { type: "json" };
 import cardsARR from "./data/cards/ARR.json" with { type: "json" };
 import cardsAPS from "./data/cards/APS.json" with { type: "json" };
 import cardsAPR from "./data/cards/APR.json" with { type: "json" };
@@ -768,6 +769,7 @@ const rawCardList = decodeCardDataList([
   ...cardsIAR,
   ...cardsMST,
   ...cardsAMO,
+  ...cardsAMG,
   ...cardsMPA,
   ...cardsOBK,
   ...cardsMPG,

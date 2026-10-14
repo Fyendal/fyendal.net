@@ -1157,6 +1157,18 @@
       "value": "Put a zombie into your graveyard?"
     }
   ],
+  "card.amg.revere.shuffle": [
+    {
+      "type": 0,
+      "value": "Shuffle a Mechanologist action card from your banished zone into your deck?"
+    }
+  ],
+  "card.amg.revere.shuffle.next": [
+    {
+      "type": 0,
+      "value": "Shuffle another differently named Mechanologist action card?"
+    }
+  ],
   "card.amo.mortimer.disease.choose": [
     {
       "type": 0,
@@ -10485,6 +10497,52 @@
       "value": "Put a card from your arsenal on the bottom of your deck as a cost"
     }
   ],
+  "card.obk.ceremony.disease.cure": [
+    {
+      "type": 0,
+      "value": "Cure a disease you control"
+    }
+  ],
+  "card.obk.ceremony.mode.choose": [
+    {
+      "type": 0,
+      "value": "Choose a mode ("
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " remaining)"
+    }
+  ],
+  "card.obk.ceremony.option.goagain": [
+    {
+      "type": 0,
+      "value": "This gets go again"
+    }
+  ],
+  "card.obk.ceremony.option.power": [
+    {
+      "type": 0,
+      "value": "This gets +"
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " power"
+    }
+  ],
+  "card.obk.ceremony.option.veil": [
+    {
+      "type": 0,
+      "value": "This gets veil"
+    }
+  ],
   "card.obk.cureall.disease.cure": [
     {
       "type": 0,
@@ -10495,6 +10553,12 @@
     {
       "type": 0,
       "value": "Name a disease token"
+    }
+  ],
+  "card.obk.patientzero.disease.give": [
+    {
+      "type": 0,
+      "value": "Give a disease token you control to the hit hero"
     }
   ],
   "card.obk.pinpointer.arrow.arsenal": [
@@ -13605,6 +13669,12 @@
     {
       "type": 0,
       "value": "Terra: pay 1 resource to create a Might token?"
+    }
+  ],
+  "card.trigger.amg.revere.shuffle": [
+    {
+      "type": 0,
+      "value": "Shuffle this into its owner's deck"
     }
   ],
   "card.trigger.common.actionpoint.gain": [
@@ -18252,6 +18322,38 @@
     {
       "type": 0,
       "value": " returns to its owner's hand"
+    }
+  ],
+  "engine.log.card.shuffled.into.deck": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " is shuffled into "
+    },
+    {
+      "type": 1,
+      "value": "player"
+    },
+    {
+      "type": 0,
+      "value": "'s deck"
+    }
+  ],
+  "engine.log.card.shuffled.into.deck.hidden": [
+    {
+      "type": 0,
+      "value": "A card is shuffled into "
+    },
+    {
+      "type": 1,
+      "value": "player"
+    },
+    {
+      "type": 0,
+      "value": "'s deck"
     }
   ],
   "engine.log.card.tapped": [

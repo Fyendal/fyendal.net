@@ -115,6 +115,9 @@ Boost remains an optional play announcement represented by `boost?: true`.
 When paid, its seeded top-deck banish and any Boost-dependent effects occur
 through engine commands. An attack's own `boostBanishPowerBonus` sees each card
 its Boost costs actually banish; replaced Boost movements are not consulted.
+A deck top's `boostBanishesOtherDeckTops` self-replacement also banishes each
+other hero's deck top for that Boost; each card is banished from boosting, and
+an opponent-owned one sets the booster's `boostBanishedOpponentCard` turn flag.
 
 Combat proceeds through declaration, defense, reactions, damage, resolution,
 and a possible next link. Resolved links remain on the combat chain until it

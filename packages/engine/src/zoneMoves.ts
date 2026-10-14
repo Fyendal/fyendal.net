@@ -14,10 +14,12 @@ import {
   cardPutOnDeckBottomLogMessage,
   gameLogMessage,
   logCardValue,
+  logPlayerValue,
   logPrivate,
   logPublic,
   nameOf,
 } from "./gameLog.js";
+import { shuffleInPlace } from "./rng.js";
 import type { CardInstance, PlayerState } from "./state.js";
 import type { TriggerEventContext } from "./eventTypes.js";
 import {
@@ -891,13 +893,23 @@ export function putCardIntoSoul(
   return true;
 }
 
-/** Move one card to its owner's deck bottom with hidden-zone-safe logging. */
-export function putCardOnDeckBottom(
+interface DeckEntry {
+  owner: PlayerState;
+  card: CardInstance;
+  /** The card left a zone its owner's opponent cannot see. */
+  privateSource: boolean;
+}
+
+/** Move one card into its owner's deck (appended at the bottom) without
+ * logging. `position` is what the transition discloses: "bottom", or omitted
+ * when a shuffle follows. A token leaving the arena ceases to exist instead. */
+function moveCardIntoOwnerDeck(
   state: GameStateInternal,
   runtime: EngineRuntime,
   instanceId: number,
-  asActivationCost = false,
-): boolean {
+  asActivationCost: boolean,
+  position: "bottom" | undefined,
+): DeckEntry | "ceased" | undefined {
   let found = removeFromOwnerZones(state, instanceId);
   if (!found) {
     const link = state.chain.find((candidate) =>
@@ -917,10 +929,10 @@ export function putCardOnDeckBottom(
       };
     }
   }
-  if (!found) return false;
+  if (!found) return undefined;
   const privateSource = found.fromZone === "hand" || found.fromZone === "deck"
-    || (found.fromZone === "arsenal" && found.card.faceDown)
-    || (found.fromZone === "banish" && found.card.faceDown);
+    || (found.fromZone === "arsenal" && found.card.faceDown === true)
+    || (found.fromZone === "banish" && found.card.faceDown === true);
   const sourceWasFaceDown = found.card.faceDown === true;
   const source = found.fromArena && dataOf(state, found.card.cardId).cardType === "weapon"
     ? transitionZone("weapon", found.owner.seat)
@@ -935,7 +947,7 @@ export function putCardOnDeckBottom(
       "engine.log.card.ceases.to.exist",
       { card: logCardValue(found.card.cardId) },
     ));
-    return true;
+    return "ceased";
   }
   clearPrivateZonePlacement(found.card);
   clearTemporaryObjectEffects(found.card);
@@ -943,7 +955,7 @@ export function putCardOnDeckBottom(
   runtime.transitions.move(
     found.card,
     source,
-    transitionZone("deck", found.owner.seat, "bottom"),
+    transitionZone("deck", found.owner.seat, position),
     {
       from: source !== null && transitionZoneIsPrivate(source.kind, sourceWasFaceDown),
       to: true,
@@ -953,11 +965,24 @@ export function putCardOnDeckBottom(
     runtime.events.fireCardLeavesGraveyard(state, found.owner.seat, found.card, "deck");
   }
   if (found.fromArena) fireLeaveArena(state, runtime, found.owner.seat, found.card, "deck", asActivationCost);
-  const detail = cardPutOnDeckBottomLogMessage(state, found.card.cardId);
-  if (privateSource) {
+  return { owner: found.owner, card: found.card, privateSource };
+}
+
+/** Move one card to its owner's deck bottom with hidden-zone-safe logging. */
+export function putCardOnDeckBottom(
+  state: GameStateInternal,
+  runtime: EngineRuntime,
+  instanceId: number,
+  asActivationCost = false,
+): boolean {
+  const entry = moveCardIntoOwnerDeck(state, runtime, instanceId, asActivationCost, "bottom");
+  if (!entry) return false;
+  if (entry === "ceased") return true;
+  const detail = cardPutOnDeckBottomLogMessage(state, entry.card.cardId);
+  if (entry.privateSource) {
     logPrivate(
       state,
-      found.owner.seat,
+      entry.owner.seat,
       detail,
       gameLogMessage(
         "a card is put on the bottom of the deck",
@@ -968,6 +993,55 @@ export function putCardOnDeckBottom(
     logPublic(state, detail);
   }
   return true;
+}
+
+/** Shuffle cards into their owners' decks as one event: each card moves,
+ * each affected deck is shuffled once, and each card gets a single
+ * hidden-zone-safe "shuffled into" log entry. Returns the cards moved. */
+export function shuffleCardsIntoDeck(
+  state: GameStateInternal,
+  runtime: EngineRuntime,
+  instanceIds: readonly number[],
+): number {
+  const entries: DeckEntry[] = [];
+  let moved = 0;
+  for (const instanceId of new Set(instanceIds)) {
+    const entry = moveCardIntoOwnerDeck(state, runtime, instanceId, false, undefined);
+    if (!entry) continue;
+    moved += 1;
+    if (entry !== "ceased") entries.push(entry);
+  }
+  for (const owner of state.players) {
+    const ownerEntries = entries.filter((entry) => entry.owner === owner);
+    if (ownerEntries.length === 0) continue;
+    shuffleInPlace(state, owner.deck);
+    const hero = nameOf(state, owner.heroCardId);
+    ownerEntries.forEach((entry, index) => {
+      const event = index === ownerEntries.length - 1 ? { kind: "shuffle" as const, seat: owner.seat } : undefined;
+      const detail = gameLogMessage(
+        `${nameOf(state, entry.card.cardId)} is shuffled into ${hero}'s deck`,
+        "engine.log.card.shuffled.into.deck",
+        { card: logCardValue(entry.card.cardId), player: logPlayerValue(owner.seat) },
+        event,
+      );
+      if (!entry.privateSource) {
+        logPublic(state, detail);
+        return;
+      }
+      logPrivate(
+        state,
+        owner.seat,
+        detail,
+        gameLogMessage(
+          `A card is shuffled into ${hero}'s deck`,
+          "engine.log.card.shuffled.into.deck.hidden",
+          { player: logPlayerValue(owner.seat) },
+          event,
+        ),
+      );
+    });
+  }
+  return moved;
 }
 
 /** Answer an engine-owned private deck-bottom ordering decision. */

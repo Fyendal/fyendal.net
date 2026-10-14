@@ -10,7 +10,8 @@ import {
 } from "./shared-helpers.js";
 
 // Disease token names offered when an effect names a disease token.
-const DISEASE_TOKEN_NAMES: readonly string[] = ["Bloodrot Pox", "Frailty", "Inertia"];
+const DISEASE_TOKEN_NAMES: readonly string[] = ["Bloodrot Pox", "Exertion", "Frailty", "Inertia"];
+const EXERTION = "SLV035";
 const EXTINCTION_WIN_THRESHOLD = 33;
 
 function hasKeyword(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, keyword: string): boolean {
@@ -100,11 +101,16 @@ const huxley: CardScript = {
       canAccept: (ctx) => !ctx.self.tapped,
       effect(ctx, banished) {
         if (!banished || !ctx.tap(ctx.self.instanceId)) return;
-        const card = ctx.player(ctx.seat).banish.find(
+        // Boost can banish an opponent's deck top (Madness Spiral); that card
+        // stays in its owner's banished zone.
+        const card = ctx.player(banished.owner).banish.find(
           (candidate) => candidate.instanceId === banished.instanceId && !candidate.faceDown,
         );
         if (!card) return;
-        ctx.allowPlayFrom(card.instanceId, "banish", { asInstant: true });
+        ctx.allowPlayFrom(card.instanceId, "banish", {
+          asInstant: true,
+          ...(card.owner === ctx.seat ? {} : { forSeat: ctx.seat }),
+        });
         ctx.logPublic(
           localizedCardLog(
             ctx,
@@ -231,6 +237,151 @@ const inciteAggression: CardScript = {
   onPlay(ctx) {
     if (eachHeroArsenalsTopCard(ctx).some((card) => ctx.cardColor(card) === 1)) {
       buffNextAttack(ctx, { goAgain: true });
+    }
+  },
+};
+
+const inciteResolve: CardScript = {
+  onPlay(ctx) {
+    if (eachHeroArsenalsTopCard(ctx).some((card) => ctx.cardColor(card) === 3)) {
+      buffNextAttack(ctx, { attack: 2 });
+    }
+  },
+};
+
+const exertionBloom: CardScript = {
+  modifyPlayCost: (ctx, base) => (ctx.state.activePlayer === ctx.seat ? Math.max(0, base - 3) : base),
+  onPlay(ctx) {
+    for (const seat of [ctx.seat, opponentSeat(ctx)]) ctx.createToken(EXERTION, seat);
+  },
+};
+
+const exertion: CardScript = {
+  triggers: [
+    {
+      event: "card-played",
+      label: "Lose 1 life",
+      labelMessage: decisionMessage("card.trigger.common.life.lose", { amount: 1 }),
+      condition: (_ctx, _played, event) => event?.from === "hand",
+      effect: (ctx) => ctx.loseLife(ctx.seat, 1),
+    },
+    {
+      event: "end-of-turn",
+      label: "Destroy this",
+      labelMessage: decisionMessage("card.trigger.common.self.destroy"),
+      effect: (ctx) => ctx.destroySelf(),
+    },
+  ],
+};
+
+const PATIENT_ZERO_HOOK = "obk-patient-zero-give";
+
+const patientZero: CardScript = {
+  canTriggerOnHit: (ctx) => ctx.link?.targetAllyId === undefined,
+  onHit(ctx) {
+    const diseases = ctx.player(ctx.seat).board.filter((card) => isDiseaseToken(ctx, card));
+    if (diseases.length === 1) {
+      ctx.giveControl(diseases[0]!.instanceId, opponentSeat(ctx));
+    } else if (diseases.length > 1) {
+      ctx.requestCardChoice(
+        PATIENT_ZERO_HOOK,
+        decisionPrompt("Give a disease token you control to the hit hero", "card.obk.patientzero.disease.give"),
+        diseases.map((card) => card.instanceId),
+      );
+    }
+  },
+  onChoose(ctx, hook, option) {
+    if (hook !== PATIENT_ZERO_HOOK) return;
+    const disease = ctx.player(ctx.seat).board.find(
+      (card) => card.instanceId === Number(option) && isDiseaseToken(ctx, card),
+    );
+    if (disease) ctx.giveControl(disease.instanceId, opponentSeat(ctx));
+  },
+};
+
+const CEREMONY_CURE_HOOK = "obk-ceremony-cure";
+const CEREMONY_MODE_HOOK = "obk-ceremony-mode";
+const CEREMONY_HERO = "ceremonyHero";
+const CEREMONY_CURED = "ceremonyCured";
+const CEREMONY_MODES = ["power", "go again", "veil"] as const;
+type CeremonyMode = (typeof CEREMONY_MODES)[number];
+
+const ceremonyModeCounter = (mode: CeremonyMode) => `ceremonyMode:${mode}`;
+
+function ceremonyHeroes(ctx: ScriptCtx): number[] {
+  return [ctx.seat, opponentSeat(ctx)];
+}
+
+function controlledDiseases(ctx: ScriptCtx, seat: number): DeepReadonly<CardInstance>[] {
+  return ctx.player(seat).board.filter((card) => isDisease(ctx, card));
+}
+
+function cureForCeremony(ctx: ScriptCtx, seat: number, instanceId: number): void {
+  if (ctx.destroyPermanent(instanceId, seat)) ctx.setCounter(CEREMONY_CURED, ctx.getCounter(CEREMONY_CURED) + 1);
+}
+
+/** Each hero, in turn order, cures a disease they control if able, choosing
+ * among several; then the controller picks one mode per cured disease. */
+function continueCeremony(ctx: ScriptCtx): void {
+  const heroes = ceremonyHeroes(ctx);
+  for (let index = ctx.getCounter(CEREMONY_HERO); index < heroes.length; index++) {
+    const seat = heroes[index]!;
+    const diseases = controlledDiseases(ctx, seat);
+    if (diseases.length > 1) {
+      ctx.setCounter(CEREMONY_HERO, index);
+      ctx.requestCardChoice(
+        CEREMONY_CURE_HOOK,
+        decisionPrompt("Cure a disease you control", "card.obk.ceremony.disease.cure"),
+        diseases.map((card) => card.instanceId),
+        seat,
+      );
+      return;
+    }
+    if (diseases.length === 1) cureForCeremony(ctx, seat, diseases[0]!.instanceId);
+  }
+  // Cures are complete; later mode picks resume here without curing again.
+  ctx.setCounter(CEREMONY_HERO, heroes.length);
+  const chosen = CEREMONY_MODES.filter((mode) => ctx.getCounter(ceremonyModeCounter(mode)) > 0);
+  const remaining = ctx.getCounter(CEREMONY_CURED) - chosen.length;
+  const available = CEREMONY_MODES.filter((mode) => !chosen.includes(mode));
+  if (remaining <= 0 || available.length === 0) return;
+  ctx.requestChoice(
+    CEREMONY_MODE_HOOK,
+    decisionPrompt(`Choose a mode (${remaining} remaining)`, "card.obk.ceremony.mode.choose", {
+      values: { amount: remaining },
+      optionMessages: {
+        power: decisionMessage("card.obk.ceremony.option.power", { amount: 2 }),
+        "go again": decisionMessage("card.obk.ceremony.option.goagain"),
+        veil: decisionMessage("card.obk.ceremony.option.veil"),
+      },
+    }),
+    [...available],
+  );
+}
+
+const curativeCeremony: CardScript = {
+  additionalCost(ctx) {
+    ctx.setCounter(CEREMONY_HERO, 0);
+    ctx.setCounter(CEREMONY_CURED, 0);
+    for (const mode of CEREMONY_MODES) ctx.setCounter(ceremonyModeCounter(mode), 0);
+    continueCeremony(ctx);
+  },
+  onChoose(ctx, hook, option) {
+    if (hook === CEREMONY_CURE_HOOK) {
+      const index = ctx.getCounter(CEREMONY_HERO);
+      const seat = ceremonyHeroes(ctx)[index];
+      if (seat === undefined) return;
+      const disease = controlledDiseases(ctx, seat).find((card) => card.instanceId === Number(option));
+      if (disease) cureForCeremony(ctx, seat, disease.instanceId);
+      ctx.setCounter(CEREMONY_HERO, index + 1);
+      continueCeremony(ctx);
+    } else if (hook === CEREMONY_MODE_HOOK) {
+      const mode = CEREMONY_MODES.find((candidate) => candidate === option);
+      if (!mode || ctx.getCounter(ceremonyModeCounter(mode)) > 0) return;
+      ctx.setCounter(ceremonyModeCounter(mode), 1);
+      if (mode === "power") ctx.addCardTempPower(ctx.self.instanceId, 2);
+      else ctx.grantCardKeyword(ctx.self.instanceId, mode);
+      continueCeremony(ctx);
     }
   },
 };
@@ -369,6 +520,11 @@ export const obk: Record<string, CardScript> = {
   "extinction level event|1": extinctionLevelEvent,
   "swap spit|1": swapSpit,
   "incite aggression|1": inciteAggression,
+  "incite resolve|3": inciteResolve,
+  "exertion bloom|2": exertionBloom,
+  "exertion|0": exertion,
+  "patient zero|1": patientZero,
+  "curative ceremony|1": curativeCeremony,
   "pauper's knife|0": { activated: attackAbility(2, { goAgain: true, oncePerTurn: false, tap: true }) },
   "cogwerx dueling pistol|0": cogwerxDuelingPistol,
   "bootlegger bust-up|1": bootleggerBustUp,

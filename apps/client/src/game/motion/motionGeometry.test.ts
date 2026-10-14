@@ -56,6 +56,44 @@ describe("motion geometry", () => {
       .map((flight) => flight.destinationPresentationKey)).toEqual(["0:hand:10"]);
   });
 
+  it("slides a stacked board group once, after the departing card reaches the graveyard", () => {
+    const departure: GameMotionEvent = {
+      kind: "move", source: { kind: "board", seat: 0 }, destination: { kind: "graveyard", seat: 0 },
+      instanceId: 7, sourcePresentationKey: "0:board:7", destinationPresentationKey: "0:graveyard:7",
+      visual: { kind: "face", card: { instanceId: 7, cardId: "SBA016", owner: 0 } }, count: 1, confidence: "exact",
+    };
+    const reflows = [8, 9].map((instanceId): GameMotionEvent => ({
+      kind: "reflow", source: { kind: "board", seat: 0 }, destination: { kind: "board", seat: 0 },
+      instanceId, sourcePresentationKey: `0:board:${instanceId}`, destinationPresentationKey: `0:board:${instanceId}`,
+      visual: { kind: "face", card: { instanceId, cardId: "OUT235", owner: 0 } }, phase: "movement",
+    }));
+    // Instances 8 and 9 render as one stacked group (aliases share a rect).
+    const previous = anchors({ cards: [
+      ["0:board:7", rect(0, 0)], ["0:board:8", rect(110, 0)], ["0:board:9", rect(110, 0)],
+    ] });
+    const current = anchors({ cards: [
+      ["0:graveyard:7", rect(900, 0)], ["0:board:8", rect(0, 0)], ["0:board:9", rect(0, 0)],
+    ] });
+    const batch = resolveMotionBatch([departure, ...reflows], previous, current, "leave");
+    const [travel, ...slides] = batch!.flights;
+    expect(slides).toHaveLength(1);
+    expect(slides[0]).toEqual(expect.objectContaining({
+      mode: "reflow", count: 2, showCount: true, start: rect(110, 0), end: rect(0, 0),
+      delayMs: travel!.delayMs + 320,
+    }));
+    expect(batch!.durationMs).toBe(travel!.delayMs + 320 + 220);
+
+    // Giving the card to the opponent also vacates its slot first.
+    const given = resolveMotionBatch([
+      { ...departure, destination: { kind: "board", seat: 1 }, destinationPresentationKey: "1:board:7" },
+      ...reflows,
+    ], previous, anchors({ cards: [
+      ["1:board:7", rect(0, -400)], ["0:board:8", rect(0, 0)], ["0:board:9", rect(0, 0)],
+    ] }), "give");
+    const [handOver, slide] = given!.flights;
+    expect(slide!.delayMs).toBe(handOver!.delayMs + 320);
+  });
+
   it.each(["stack-layer", "chain-attack"] as const)("flies a focused play to %s from its enlarged presentation", (kind) => {
     const destination = kind === "stack-layer" ? { kind, index: 0 } : { kind, link: 0 };
     const destinationKey = kind === "stack-layer" ? "stack:layer:7" : "chain:0:attack:7";

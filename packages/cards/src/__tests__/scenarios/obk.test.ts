@@ -631,4 +631,140 @@ describe("Outbreak cards", () => {
       expect(boardNames(game, 1)).toEqual(["Bloodrot Pox"]);
     });
   });
+  describe("Incite Resolve", () => {
+    const INCITE_RESOLVE = "incite resolve|3";
+    const resolve = (myTop: string, theirTop: string) => {
+      const game = scenario({ seats: [
+        {
+          hero: "rhinar",
+          hand: [INCITE_RESOLVE, ZERO_TO_SIXTY],
+          deck: [myTop],
+          resources: 1,
+          weapons: [],
+          equipment: NO_EQUIPMENT,
+        },
+        { hero: "dorinthea", deck: [theirTop], weapons: [], equipment: NO_EQUIPMENT },
+      ] });
+      game.play(INCITE_RESOLVE);
+      game.expectInZone(0, myTop, "arsenal").expectFaceDown(0, myTop, false);
+      game.expectInZone(1, theirTop, "arsenal").expectFaceDown(1, theirTop, false);
+      game.expectAP(0, 1);
+      return game.play(ZERO_TO_SIXTY);
+    };
+
+    it("gives the next attack +2 power when a blue card enters either arsenal", () => {
+      resolve(FILLER, BLUE).expectAttackValue(6);
+      resolve(BLUE, FILLER).expectAttackValue(6);
+    });
+
+    it("gives nothing when no blue card enters an arsenal", () => {
+      resolve(FILLER, FILLER).expectAttackValue(4);
+    });
+  });
+
+  describe("Exertion Bloom and Exertion", () => {
+    const EXERTION_BLOOM = "exertion bloom|2";
+    const EXERTION = "exertion|0";
+
+    it("costs nothing during your turn and gives each hero an Exertion", () => {
+      const game = scenario({ seats: [
+        { hero: "rhinar", hand: [EXERTION_BLOOM], resources: 0, weapons: [], equipment: NO_EQUIPMENT },
+        { hero: "dorinthea", weapons: [], equipment: NO_EQUIPMENT },
+      ] });
+
+      game.play(EXERTION_BLOOM);
+
+      expect(boardNames(game, 0)).toEqual(["Exertion"]);
+      expect(boardNames(game, 1)).toEqual(["Exertion"]);
+      game.expectLife(0, 20).expectLife(1, 20);
+    });
+
+    it("makes its controller lose 1 life per card played from hand, then is destroyed in their end phase", () => {
+      const game = scenario({ seats: [
+        { hero: "rhinar", hand: [ZERO_TO_SIXTY], board: [EXERTION], weapons: [], equipment: NO_EQUIPMENT },
+        { hero: "dorinthea", board: [EXERTION], weapons: [], equipment: NO_EQUIPMENT },
+      ] });
+
+      game.play(ZERO_TO_SIXTY).expectLife(0, 19).expectLife(1, 20);
+      game.blockWith().settle().endTurn();
+
+      expect(boardNames(game, 0)).toEqual([]);
+      expect(boardNames(game, 1)).toEqual(["Exertion"]);
+    });
+
+    it("is a disease token", () => {
+      const game = scenario({ seats: [
+        { hero: "rhinar", hand: [CURE_ALL], board: [EXERTION], resources: 1, weapons: [], equipment: NO_EQUIPMENT },
+        { hero: "dorinthea", weapons: [], equipment: NO_EQUIPMENT },
+      ] });
+
+      game.play(CURE_ALL).chooseCard(EXERTION);
+
+      expect(boardNames(game, 0)).toEqual([]);
+    });
+  });
+
+  describe("Patient Zero", () => {
+    const PATIENT_ZERO = "patient zero|1";
+    const hitWith = (board: string[]) => scenario({ seats: [
+      { hero: "rhinar", hand: [PATIENT_ZERO], board, weapons: [], equipment: NO_EQUIPMENT },
+      { hero: "dorinthea", weapons: [], equipment: NO_EQUIPMENT },
+    ] }).play(PATIENT_ZERO).blockWith().settle();
+
+    it("gives the hit hero your only disease token", () => {
+      const game = hitWith([FRAILTY]);
+
+      game.expectLife(1, 17);
+      expect(boardNames(game, 0)).toEqual([]);
+      expect(boardNames(game, 1)).toEqual(["Frailty"]);
+    });
+
+    it("lets you choose which disease token to give", () => {
+      const game = hitWith([FRAILTY, BLOODROT_POX]).chooseCard(BLOODROT_POX);
+
+      expect(boardNames(game, 0)).toEqual(["Frailty"]);
+      expect(boardNames(game, 1)).toEqual(["Bloodrot Pox"]);
+    });
+
+    it("does nothing on hit without a disease token", () => {
+      hitWith([]).expectLife(1, 17);
+    });
+  });
+
+  describe("Curative Ceremony", () => {
+    const CEREMONY = "curative ceremony|1";
+    const ceremony = (mine: string[], theirs: string[]) => scenario({ seats: [
+      { hero: "rhinar", hand: [CEREMONY], board: mine, weapons: [], equipment: NO_EQUIPMENT },
+      { hero: "dorinthea", board: theirs, weapons: [], equipment: NO_EQUIPMENT },
+    ] });
+
+    it("cures a disease from each hero and grants one distinct mode per cure", () => {
+      const game = ceremony([FRAILTY], [BLOODROT_POX]).play(CEREMONY);
+
+      expect(boardNames(game, 0)).toEqual([]);
+      expect(boardNames(game, 1)).toEqual([]);
+      expect(game.state.pendingDecision?.options).toEqual(["power", "go again", "veil"]);
+      game.chooseOption("power");
+      expect(game.state.pendingDecision?.options).toEqual(["go again", "veil"]);
+      game.chooseOption("go again");
+
+      game.expectAttackValue(6).blockWith().settle().expectLife(1, 14).expectAP(0, 1);
+    });
+
+    it("lets each hero choose which of their diseases to cure", () => {
+      const game = ceremony([], [FRAILTY, BLOODROT_POX]).play(CEREMONY);
+
+      expect(game.state.pendingDecision?.player).toBe(1);
+      game.chooseCard(BLOODROT_POX).chooseOption("veil");
+
+      expect(boardNames(game, 1)).toEqual(["Frailty"]);
+      const attack = game.state.chain[0]!.attackingCard;
+      expect(attack.grantedKeywords).toContain("veil");
+      game.expectAttackValue(4);
+    });
+
+    it("can be played without any diseases to cure", () => {
+      ceremony([], []).play(CEREMONY).expectAttackValue(4).blockWith().settle().expectAP(0, 0);
+    });
+  });
 });

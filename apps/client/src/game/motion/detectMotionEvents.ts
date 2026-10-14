@@ -1,5 +1,6 @@
 import type { CardView, GameView } from "@fyendal/shared";
 import { extractGamePresentations, type GamePresentations } from "./extractPresentations.js";
+import { boardReflows } from "./boardReflow.js";
 import { handReflows } from "./handReflow.js";
 import {
   countedMotionLocation,
@@ -362,5 +363,9 @@ export function detectGameMotionEvents(
   const movements = endPhaseBoundary
     ? events.filter((event) => event.kind !== "move" || event.confidence === "exact")
     : events;
-  return [...movements, ...handReflows(source, destination, movements)];
+  return [
+    ...movements,
+    ...handReflows(source, destination, movements),
+    ...boardReflows(source, destination),
+  ];
 }

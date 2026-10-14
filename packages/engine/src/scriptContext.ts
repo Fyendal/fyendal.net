@@ -2760,6 +2760,9 @@ export function makeCtx(
     putOnDeckBottom(instanceId) {
       return runtime.commands.putCardOnDeckBottom(state, instanceId);
     },
+    shuffleIntoDeck(instanceIds) {
+      return runtime.commands.shuffleCardsIntoDeck(state, instanceIds);
+    },
     putOnDeckBottomInChosenOrder(instanceIds, prompt) {
       const ids = [...new Set(instanceIds)].filter((instanceId) =>
         findCard(player, instanceId) !== undefined,

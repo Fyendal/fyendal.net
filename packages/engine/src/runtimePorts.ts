@@ -63,6 +63,7 @@ export type ScriptCommandName =
   | "setAttackActivationLimitKey"
   | "settlePlayedCard"
   | "settlesInArena"
+  | "shuffleCardsIntoDeck"
   | "snapshotSerializable"
   | "stampControlledName"
   | "tapPermanent";

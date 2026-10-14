@@ -71,6 +71,20 @@ export interface HandReflowMotionEvent {
   phase: "arsenal" | "draw" | "effect-draw" | "effect-discard" | "movement";
 }
 
+/** An arena card that stays in play while another card leaves its seat's
+ * board strip. It holds its old slot until the departure has played, then
+ * slides into the vacated space. */
+export interface BoardReflowMotionEvent {
+  kind: "reflow";
+  source: Extract<MotionLocation, { kind: "board" }>;
+  destination: Extract<MotionLocation, { kind: "board" }>;
+  visual: MotionVisual;
+  instanceId: number;
+  sourcePresentationKey: string;
+  destinationPresentationKey: string;
+  phase: "movement";
+}
+
 export interface AppearMotionEvent {
   kind: "appear";
   destination: MotionLocation;
@@ -113,6 +127,7 @@ export interface DisappearMotionEvent {
 export type GameMotionEvent =
   | MoveMotionEvent
   | HandReflowMotionEvent
+  | BoardReflowMotionEvent
   | AppearMotionEvent
   | SettleMotionEvent
   | ConnectMotionEvent

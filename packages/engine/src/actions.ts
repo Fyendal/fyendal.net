@@ -475,31 +475,49 @@ export function finishPlayCard(
             runtime.makeCtx(state, seat, source), card, banished,
           ) === true,
         );
+        // A source replacement takes over the whole Boost movement. Otherwise
+        // the deck top's own self-replacement may add the top card of each
+        // other hero's deck to the same banishment.
+        const banishedForBoost: CardInstance[] = [];
         if (!replaced) {
-          removeFromArray(state.resolving, banished.instanceId);
-          enterBanish(state, runtime, banished, "deck");
+          banishedForBoost.push(banished);
+          if (scriptOf(state, banished.cardId, banished)?.boostBanishesOtherDeckTops === true) {
+            for (const other of state.players) {
+              if (other.seat === seat) continue;
+              const top = other.deck.shift();
+              if (top) banishedForBoost.push(top);
+            }
+          }
+        }
+        for (const moved of banishedForBoost) {
+          removeFromArray(state.resolving, moved.instanceId);
+          enterBanish(state, runtime, moved, "deck", seat);
           deferEventTriggers(
             state, runtime,
             "card-banished-for-boost",
             seat,
             boostEventNextId,
-            banished,
+            moved,
           );
           // Track the effective types actually banished for Boost. Card
           // scripts use these per-turn markers for conditions such as "if an
           // Evo has been banished from boosting this turn"; replacement
           // effects deliberately do not create the marker.
-          for (const type of cardTypesOf(state, banished)) {
+          for (const type of cardTypesOf(state, moved)) {
             player.flags[`boostedSubtype:${type}`] = true;
           }
+          if (moved.owner !== seat) player.flags.boostBanishedOpponentCard = true;
           const banishPower = scriptOf(state, card.cardId, card)?.boostBanishPowerBonus?.(
             runtime.makeCtx(state, seat, card),
-            banished,
+            moved,
           ) ?? 0;
           if (banishPower !== 0) card.tempPower = (card.tempPower ?? 0) + banishPower;
         }
         boosted = true;
-        boostSucceeded = boostSucceeded || cardTypesOf(state, banished).includes("mechanologist");
+        boostSucceeded = boostSucceeded ||
+          (replaced ? [banished] : banishedForBoost).some((moved) =>
+            cardTypesOf(state, moved).includes("mechanologist")
+          );
         player.flags.boostedThisTurn = true;
         player.flags.boostCountThisTurn = (Number(player.flags.boostCountThisTurn) || 0) + 1;
         player.flags.boostCountThisChain = (Number(player.flags.boostCountThisChain) || 0) + 1;
@@ -520,10 +538,12 @@ export function finishPlayCard(
           }
           boostMod.consumed = true;
         }
-        if (!replaced) scriptOf(state, banished.cardId, banished)?.onBanishedForBoost?.(
-          runtime.makeCtx(state, seat, banished),
-          card,
-        );
+        for (const moved of banishedForBoost) {
+          scriptOf(state, moved.cardId, moved)?.onBanishedForBoost?.(
+            runtime.makeCtx(state, moved.owner, moved),
+            card,
+          );
+        }
         deferEventTriggers(
           state, runtime,
           "card-boosted",

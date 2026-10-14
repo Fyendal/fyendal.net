@@ -1194,6 +1194,53 @@ describe("game motion detection", () => {
     }]);
   });
 
+  it("holds remaining arena cards in place until a departing token has dissolved", () => {
+    const exertion = face(91);
+    const frailty = face(92);
+    const previous = view([player(0, { board: [exertion, frailty] }), player(1, { board: [face(93, 1)] })]);
+    const current = view([player(0, { board: [frailty] }), player(1, { board: [face(93, 1)] })]);
+
+    const events = transitionMotionEvents(previous, current, {
+      fromVersion: 8,
+      kind: "forward",
+      events: [{
+        kind: "move",
+        from: { kind: "board", seat: 0 },
+        to: null,
+        count: 1,
+        instanceId: exertion.instanceId,
+      }],
+    }, "forward");
+
+    expect(events).toEqual([
+      expect.objectContaining({ kind: "disappear", instanceId: exertion.instanceId }),
+      {
+        kind: "reflow",
+        source: { kind: "board", seat: 0 },
+        destination: { kind: "board", seat: 0 },
+        visual: { kind: "face", card: frailty },
+        instanceId: frailty.instanceId,
+        sourcePresentationKey: "0:board:92",
+        destinationPresentationKey: "0:board:92",
+        phase: "movement",
+      },
+    ]);
+    const batch = resolveMotionBatch(events, {
+      cards: new Map([["0:board:91", { left: 0, top: 0, width: 100, height: 100 }],
+        ["0:board:92", { left: 110, top: 0, width: 100, height: 100 }]]),
+      zones: new Map(),
+    }, {
+      cards: new Map([["0:board:92", { left: 0, top: 0, width: 100, height: 100 }]]),
+      zones: new Map(),
+    }, "token");
+    const [dissolve, slide] = batch!.flights;
+    expect(dissolve).toEqual(expect.objectContaining({ mode: "disappear", delayMs: 0 }));
+    expect(slide).toEqual(expect.objectContaining({
+      mode: "reflow", holdAtSource: true, queueHoldSource: true,
+      delayMs: dissolve!.delayMs + motionFlightDurationMs(dissolve!),
+    }));
+  });
+
   it("keeps a pitched card face visible until its deck-bottom flip", () => {
     const pitched = face(91);
     const deckTop = face(92);

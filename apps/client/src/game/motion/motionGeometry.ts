@@ -211,6 +211,10 @@ function sameRect(left: MotionRect, right: MotionRect): boolean {
     && left.width === right.width && left.height === right.height;
 }
 
+function rectKey(rect: MotionRect): string {
+  return `${rect.left}:${rect.top}:${rect.width}:${rect.height}`;
+}
+
 function motionLayerForDestination(
   location: MotionLocation,
 ): MotionFlight["destinationLayer"] {
@@ -279,6 +283,8 @@ export function resolveMotionBatch(
   const effectDiscards: Array<{ event: MoveMotionEvent; flight: MotionFlight }> = [];
   const handDepartures: Array<{ seat: number; flight: MotionFlight }> = [];
   const handReflows: Array<{ seat: number; flight: MotionFlight }> = [];
+  const boardDepartures: Array<{ seat: number; flight: MotionFlight }> = [];
+  const boardReflows = new Map<string, { seat: number; flight: MotionFlight }>();
 
   for (const event of events) {
     if (event.kind === "reflow" && event.instanceId !== undefined &&
@@ -327,7 +333,7 @@ export function resolveMotionBatch(
       const source = endpoint(previous, event.sourcePresentationKey, event.source);
       if (!source || flights.length >= MAX_DETAILED_FLIGHTS) continue;
       const rect = source.exact ? source.rect : cardRectWithinZone(source.rect);
-      flights.push({
+      const flight: MotionFlight = {
         id: `${batchId}:flight:${flights.length}`,
         phase,
         mode: "disappear",
@@ -337,7 +343,9 @@ export function resolveMotionBatch(
         count: 1,
         showCount: false,
         delayMs: 0,
-      });
+      };
+      flights.push(flight);
+      if (event.source.kind === "board") boardDepartures.push({ seat: event.source.seat, flight });
       continue;
     }
     if (event.kind === "appear" || event.kind === "settle") {
@@ -411,6 +419,16 @@ export function resolveMotionBatch(
       ? destination.rect
       : cardRectWithinZone(destination.rect, start);
     if (event.kind === "reflow" && sameRect(start, end)) continue;
+    // Cards stacked in one board group share a presentation; slide it once.
+    const boardReflow = event.kind === "reflow" && event.source.kind === "board"
+      ? { seat: event.source.seat, key: `${event.source.seat}:${rectKey(start)}:${rectKey(end)}` }
+      : undefined;
+    const stackedReflow = boardReflow ? boardReflows.get(boardReflow.key) : undefined;
+    if (stackedReflow) {
+      stackedReflow.flight.count += 1;
+      stackedReflow.flight.showCount = true;
+      continue;
+    }
     const mode = event.kind === "reflow"
       ? "reflow"
       : event.source.kind === "hand" && event.destination.kind === "arsenal"
@@ -443,6 +461,7 @@ export function resolveMotionBatch(
         ? { holdAtSource: true as const }
         : {}),
       ...((sourceRevealPresentationKey !== undefined ||
+        boardReflow !== undefined ||
         (event.source.kind === "hand" && event.visual.kind === "back"
           && ((event.kind === "reflow" && event.destinationPresentationKey !== undefined)
             || (event.kind === "move"
@@ -464,6 +483,11 @@ export function resolveMotionBatch(
     } else if (event.kind === "reflow" && event.source.kind === "hand"
       && event.visual.kind === "back") {
       handReflows.push({ seat: event.source.seat, flight });
+    } else if (boardReflow) {
+      boardReflows.set(boardReflow.key, { seat: boardReflow.seat, flight });
+    } else if (event.kind === "move" && event.source.kind === "board"
+      && (event.destination.kind !== "board" || event.destination.seat !== event.source.seat)) {
+      boardDepartures.push({ seat: event.source.seat, flight });
     }
     if (event.kind === "move" && event.timeline === "effect-draw") {
       effectDraws.push({ event, flight });
@@ -519,8 +543,12 @@ export function resolveMotionBatch(
   }
 
   if (flights.length === 0 && connectors.length === 0) return null;
+  // Board reflows are timed from their seat's departures below. Scheduling
+  // them as a movement phase would push a later disappearance back, leaving
+  // the departed card invisible until its delayed dissolve began.
+  const boardReflowIds = new Set([...boardReflows.values()].map(({ flight }) => flight.id));
   const delayById = scheduleMotionTimeline([
-    ...flights.map((flight) => ({
+    ...flights.filter((flight) => !boardReflowIds.has(flight.id)).map((flight) => ({
       id: flight.id,
       phase: flight.phase,
       durationMs: motionFlightDurationMs(flight),
@@ -546,6 +574,18 @@ export function resolveMotionBatch(
   }
   for (const { seat, flight } of handReflows) {
     flight.delayMs = Math.max(flight.delayMs, handClearTimes.get(seat) ?? 0);
+  }
+  // Arena cards hold their slots until every departure from that board has
+  // played, then close the gap.
+  const boardClearTimes = new Map<number, number>();
+  for (const { seat, flight } of boardDepartures) {
+    boardClearTimes.set(seat, Math.max(
+      boardClearTimes.get(seat) ?? 0,
+      flight.delayMs + motionFlightDurationMs(flight),
+    ));
+  }
+  for (const { seat, flight } of boardReflows.values()) {
+    flight.delayMs = Math.max(flight.delayMs, boardClearTimes.get(seat) ?? 0);
   }
   for (const { draw, successor } of stagedDraws) {
     draw.lingerUntilMs = successor.delayMs;
