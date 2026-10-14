@@ -1,4 +1,10 @@
 {
+  "account.badge.change": [
+    {
+      "type": 0,
+      "value": "更换徽章"
+    }
+  ],
   "account.badge.description": [
     {
       "type": 0,
@@ -43,6 +49,24 @@
     {
       "type": 0,
       "value": "不显示徽章"
+    }
+  ],
+  "account.badge.none.description": [
+    {
+      "type": 0,
+      "value": "你的用户名前不显示徽章。"
+    }
+  ],
+  "account.badge.save": [
+    {
+      "type": 0,
+      "value": "保存徽章"
+    }
+  ],
+  "account.badge.saving": [
+    {
+      "type": 0,
+      "value": "正在保存…"
     }
   ],
   "account.badge.title": [

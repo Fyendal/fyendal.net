@@ -1,4 +1,10 @@
 {
+  "account.badge.change": [
+    {
+      "type": 0,
+      "value": "Change badge"
+    }
+  ],
   "account.badge.description": [
     {
       "type": 0,
@@ -43,6 +49,24 @@
     {
       "type": 0,
       "value": "No badge"
+    }
+  ],
+  "account.badge.none.description": [
+    {
+      "type": 0,
+      "value": "Your username appears without a badge."
+    }
+  ],
+  "account.badge.save": [
+    {
+      "type": 0,
+      "value": "Save badge"
+    }
+  ],
+  "account.badge.saving": [
+    {
+      "type": 0,
+      "value": "Saving…"
     }
   ],
   "account.badge.title": [

@@ -20,6 +20,7 @@ describe("BadgePicker", () => {
     expect(html.match(/checked=""/g)).toHaveLength(1);
     expect(html).toContain("Early Tester");
     expect(html).toContain("Awarded to players who joined Fyendal during early testing.");
-    expect(html).toContain('role="tooltip"');
+    expect(html).toContain("Your username appears without a badge.");
+    expect(html).not.toContain('role="tooltip"');
   });
 });

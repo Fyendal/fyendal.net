@@ -294,7 +294,7 @@
   font-weight: 750;
   letter-spacing: .7px;
 }
-:where(.lobby-page .panel > :is(.deck-panel-heading, .rooms-header, .history-header, .achievements-header)) {
+:where(.lobby-page .panel > :is(.deck-panel-heading, .rooms-header, .history-header, .achievements-header, .account-header)) {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -303,7 +303,7 @@
   border-bottom: 1px solid #45331f88;
   padding-bottom: 9px;
 }
-:where(.lobby-page .panel > :is(.deck-panel-heading, .rooms-header, .history-header, .achievements-header)) .panel-title {
+:where(.lobby-page .panel > :is(.deck-panel-heading, .rooms-header, .history-header, .achievements-header, .account-header)) .panel-title {
   border-bottom: 0;
   padding-bottom: 0;
 }
@@ -323,61 +323,6 @@
   white-space: nowrap;
 }
 
-.account-panel { max-width: 760px; }
-.account-panel section { margin-top: 24px; }
-.account-panel h3 { margin: 0 0 8px; color: #eccc8a; }
-.account-panel p { color: #c8b99d; line-height: 1.5; }
-.account-badge-picker {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
-  gap: 10px;
-  margin: 14px 0 0;
-  padding: 0;
-  border: 0;
-}
-.account-badge-picker legend {
-  grid-column: 1 / -1;
-  margin-bottom: 2px;
-  color: #d8c9aa;
-  font-size: 13px;
-  font-weight: 700;
-}
-.account-badge-option {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  min-height: 52px;
-  padding: 9px 12px;
-  border: 1px solid #5a452b;
-  border-radius: 4px;
-  background: #120c07;
-  color: #dbcbaa;
-  cursor: pointer;
-}
-.account-badge-option:hover,
-.account-badge-option:focus-within,
-.account-badge-option.selected {
-  border-color: #b8933f;
-  background: #211609;
-}
-.account-badge-option input { accent-color: #c9a647; }
-.account-badge-none {
-  display: inline-grid;
-  width: 20px;
-  height: 20px;
-  place-items: center;
-  color: #8e8068;
-  font-size: 18px;
-}
-.account-danger {
-  border-top: 1px solid #71342d;
-  padding-top: 20px;
-}
-.account-danger input {
-  display: block;
-  width: min(360px, 100%);
-  margin: 12px 0;
-}
 .btn-danger { background: #781f1b; border-color: #bc4b40; }
 .btn-danger:hover:not(:disabled) { background: #9e2b25; border-color: #d86a5c; }
 

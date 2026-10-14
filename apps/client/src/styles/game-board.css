@@ -297,11 +297,9 @@
 .player-badge-tooltip strong { margin-bottom: 3px; color: #f0d995; }
 .player-badge-mark:hover .player-badge-tooltip,
 .player-badge-mark:focus .player-badge-tooltip,
-.player-badge-mark:focus-within .player-badge-tooltip,
-.account-badge-option:hover .player-badge-tooltip,
-.account-badge-option:focus-within .player-badge-tooltip { display: block; }
+.player-badge-mark:focus-within .player-badge-tooltip { display: block; }
 .player-nameplate-opponent .player-badge-tooltip,
-.account-badge-option .player-badge-tooltip {
+.account-badge-preview .player-badge-tooltip {
   top: calc(100% + 8px);
   bottom: auto;
 }

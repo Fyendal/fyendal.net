@@ -1,0 +1,138 @@
+/* Account: settings rows in the Achievements rhythm. What a setting does sits
+   on the left, its control on the right, with hairlines between rows. */
+.account-panel { display: grid; min-width: 0; font-family: var(--font-lobby-ui); }
+.account-header { flex-wrap: wrap; }
+.account-header .panel-title { margin-bottom: 0; }
+.account-identity { margin: 0; color: var(--text-muted); font-size: 13px; line-height: 1.4; }
+.account-identity strong { color: var(--text-primary); font-size: 15px; font-weight: 650; }
+
+.account-setting {
+  display: grid;
+  grid-template-columns: minmax(200px, 300px) minmax(0, 1fr);
+  gap: 14px 48px;
+  padding: 28px 0;
+}
+.account-setting:first-of-type { padding-top: 12px; }
+.account-setting + .account-setting { border-top: 1px solid var(--border-subtle); }
+.account-setting-copy h3 { margin: 0 0 6px; color: var(--text-primary); font-size: 15px; font-weight: 650; line-height: 1.3; }
+.account-setting-copy p { max-width: 52ch; margin: 0; color: var(--text-muted); font-size: 13px; line-height: 1.5; }
+.account-setting-control {
+  display: grid;
+  align-content: start;
+  justify-items: start;
+  gap: 10px;
+  min-width: 0;
+  max-width: 600px;
+}
+.account-setting-control > .muted { margin: 0; font-size: 13px; }
+.account-setting-control button { min-height: 40px; padding: 8px 16px; }
+.account-feedback { margin: 0; padding: 0; font-size: 13px; line-height: 1.4; }
+.account-feedback.success { color: var(--success); }
+.account-danger h3 { color: #e07a6f; }
+
+/* Badges: the row previews the displayed badge; Change badge opens a modal
+   whose nameplate previews the pick before it is saved. The radio stays for
+   keyboard and screen readers; the option carries a gold edge and check. */
+.account-badge-art { object-fit: contain; }
+.account-badge-none { display: block; box-sizing: border-box; border: 1px dashed var(--text-muted); border-radius: 50%; }
+.account-badge-copy { display: grid; gap: 2px; min-width: 0; }
+.account-badge-copy strong { color: var(--text-primary); font-size: 14px; font-weight: 650; line-height: 1.3; }
+.account-badge-copy span { color: var(--text-muted); font-size: 13px; font-weight: 400; line-height: 1.45; }
+.account-badge-current {
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  padding: 12px 12px 12px 14px;
+  border: 1px solid var(--border-subtle);
+  border-radius: 6px;
+}
+.account-badge-current .account-badge-art { justify-self: center; }
+
+.account-badge-modal .modal-surface-description { font-size: 14px; }
+.account-badge-preview {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-height: 52px;
+  margin: 0 0 16px;
+  padding: 10px 16px;
+  border: 1px solid var(--border-subtle);
+  border-radius: 6px;
+  background: var(--surface-well);
+  color: var(--text-primary);
+  font-size: 16px;
+  font-weight: 650;
+}
+.account-badge-preview > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.account-badge-picker {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.account-badge-picker legend {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+.account-badge-option {
+  position: relative;
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr) 16px;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 14px;
+  border: 1px solid var(--border-subtle);
+  border-radius: 6px;
+  cursor: pointer;
+}
+.account-badge-option:hover { border-color: var(--border-strong); background: #ffffff08; }
+.account-badge-option.selected { border-color: var(--bronze); background: #ffd4790d; }
+.account-badge-option:has(input:focus-visible) { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+.account-badge-option input { position: absolute; opacity: 0; pointer-events: none; }
+.account-badge-option .account-badge-art { justify-self: center; }
+.account-badge-picker:disabled .account-badge-option { cursor: default; }
+.account-badge-check { color: var(--gold); font-size: 16px; visibility: hidden; }
+.account-badge-option.selected .account-badge-check { visibility: visible; }
+.account-badge-modal .account-feedback { margin-top: 12px; }
+.account-badge-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 20px; }
+.account-badge-actions button { min-height: 40px; padding: 8px 18px; }
+
+.account-delete-form { display: flex; flex-wrap: wrap; gap: 8px; width: 100%; }
+.account-delete-form input {
+  flex: 1 1 220px;
+  max-width: 320px;
+  min-height: 40px;
+  border-color: var(--border-subtle);
+  border-radius: 6px;
+  background: var(--surface-well);
+  font: 14px var(--font-lobby-ui);
+}
+.account-delete-form input:focus { border-color: var(--bronze); outline: 2px solid #b8933f55; outline-offset: 0; }
+.account-panel .btn-danger:disabled {
+  border-color: var(--border-subtle);
+  background: transparent;
+  color: var(--text-muted);
+  opacity: 1;
+}
+
+@media (max-width: 800px) {
+  .account-setting { grid-template-columns: minmax(0, 1fr); padding: 22px 0; }
+  .account-setting-control { max-width: none; }
+}
+@media (max-width: 600px) {
+  .account-panel { padding: 18px 16px; }
+  .account-header { align-items: flex-start; flex-direction: column; gap: 6px; }
+  .account-delete-form input { max-width: none; }
+  .account-delete-form button { flex: 1 1 auto; }
+  .account-badge-current { grid-template-columns: 40px minmax(0, 1fr); }
+  .account-badge-current button { grid-column: 1 / -1; }
+  .account-badge-actions button { flex: 1 1 0; }
+}
