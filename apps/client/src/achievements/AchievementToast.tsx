@@ -1,5 +1,6 @@
 import { useIntl } from "react-intl";
 import type { AchievementId } from "@fyendal/protocol";
+import { UiIcon } from "../components/UiIcon.js";
 import { achievementMessageId } from "./catalog.js";
 import "../styles/achievements.css";
 
@@ -16,9 +17,7 @@ export function AchievementToast({ achievements, percent, exiting, onViewAchieve
   return (
     <div className={`achievement-toast${exiting ? " achievement-toast-exiting" : ""}`} role="status">
       <span className="achievement-toast-icon" aria-hidden="true">
-        <svg viewBox="0 0 24 24" focusable="false">
-          <path d="m12 2 2.9 6.7 7.1.6-5.4 4.8 1.7 7-6.3-3.8-6.3 3.8 1.7-7L2 9.3l7.1-.6L12 2Z" />
-        </svg>
+        <UiIcon name="star" />
       </span>
       <div className="achievement-toast-copy">
         <span className="achievement-toast-label">{intl.formatMessage({ id: "achievements.toast.title" })}</span>

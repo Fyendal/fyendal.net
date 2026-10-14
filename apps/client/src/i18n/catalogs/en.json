@@ -2835,7 +2835,6 @@
   "achievements.intro": "Your wins, standout turns, and opponents defeated in legal card-pool games.",
   "achievements.progress": "{count} of {total} achievements unlocked",
   "achievements.unlocked": "Unlocked",
-  "achievements.earned": "Unlocked",
   "achievements.locked": "Locked",
   "achievements.earnedOn": "Unlocked {date}",
   "achievements.rarity": "{percent}% of players have earned this",

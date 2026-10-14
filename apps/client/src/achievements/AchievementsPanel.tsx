@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useIntl } from "react-intl";
 import { ACTIVE_ACHIEVEMENT_IDS, type AchievementsResponse } from "@fyendal/protocol";
 import { apiAchievements } from "../auth/auth.js";
+import { UiIcon } from "../components/UiIcon.js";
 import { heroImageUrl } from "../lobby/heroImage.js";
 import { useStore } from "../store.js";
 import { ACHIEVEMENT_BOT_HEROES, ACHIEVEMENT_GROUPS, achievementMessageId } from "./catalog.js";
@@ -79,6 +80,7 @@ export function AchievementsPanel() {
           <div className="achievements-group-heading">
             <h3>{intl.formatMessage({ id: group.titleId })}</h3>
             <span aria-label={intl.formatMessage({ id: "achievements.progress" }, { count: groupCount, total: group.ids.length })}>{groupCount} / {group.ids.length}</span>
+            <progress value={groupCount} max={group.ids.length} aria-hidden="true" />
           </div>
           <div className="achievements-list">
             {ids.map((id) => {
@@ -90,28 +92,27 @@ export function AchievementsPanel() {
               const rarityValues = { percent: intl.formatNumber(percent, { maximumFractionDigits: 1 }) };
               return (
                 <article className={`achievement-row${earned ? " is-unlocked" : " is-locked"}`} key={id}>
-                  {botHero ? <span className="achievement-portrait" aria-hidden="true">
+                  {botHero ? <span className="achievement-mark achievement-portrait" aria-hidden="true">
                     <span>{botHero.slice(0, 1)}</span>
                     <img src={heroImageUrl(botHero)} alt="" loading="lazy" onError={(event) => { event.currentTarget.hidden = true; }} />
-                  </span> : <span className="achievement-number" aria-hidden="true">
-                    {String(ids.indexOf(id) + 1).padStart(2, "0")}
+                  </span> : <span className="achievement-mark achievement-seal" aria-hidden="true">
+                    <UiIcon name={earned ? "star" : "lock"} />
                   </span>}
                   <div className="achievement-copy">
                     <h4>{intl.formatMessage({ id: achievementMessageId(id, "name") })}</h4>
                     <p>{intl.formatMessage({ id: achievementMessageId(id, "description") })}</p>
-                  </div>
-                  <div className="achievement-meta">
-                    <span className="achievement-state">{intl.formatMessage({ id: earned ? "achievements.earned" : "achievements.locked" })}</span>
-                    <span className="achievement-rarity" aria-label={rare
-                      ? intl.formatMessage({ id: "achievements.rarityRare" })
-                      : intl.formatMessage({ id: "achievements.rarity" }, rarityValues)}>
-                      {rare
-                        ? intl.formatMessage({ id: "achievements.rarityCompactRare" })
-                        : intl.formatMessage({ id: "achievements.rarityCompact" }, rarityValues)}
-                    </span>
-                    {earned ? <time dateTime={new Date(unlockedAt).toISOString()}>
-                      {intl.formatMessage({ id: "achievements.earnedOn" }, { date: intl.formatDate(unlockedAt, { dateStyle: "medium" }) })}
-                    </time> : null}
+                    <div className="achievement-meta">
+                      {earned ? <time className="achievement-state" dateTime={new Date(unlockedAt).toISOString()}>
+                        {intl.formatMessage({ id: "achievements.earnedOn" }, { date: intl.formatDate(unlockedAt, { dateStyle: "medium" }) })}
+                      </time> : <span className="achievement-state">{intl.formatMessage({ id: "achievements.locked" })}</span>}
+                      <span aria-label={rare
+                        ? intl.formatMessage({ id: "achievements.rarityRare" })
+                        : intl.formatMessage({ id: "achievements.rarity" }, rarityValues)}>
+                        {rare
+                          ? intl.formatMessage({ id: "achievements.rarityCompactRare" })
+                          : intl.formatMessage({ id: "achievements.rarityCompact" }, rarityValues)}
+                      </span>
+                    </div>
                   </div>
                 </article>
               );

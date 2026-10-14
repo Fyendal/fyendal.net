@@ -7,7 +7,9 @@ export type UiIconName =
   | "flag"
   | "flag-filled"
   | "invite-game"
+  | "lock"
   | "message"
+  | "star"
   | "user-add"
   | "user-pending";
 

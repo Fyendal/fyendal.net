@@ -2835,7 +2835,6 @@
   "achievements.intro": "记录你在合法卡池对局中的胜利、精彩回合与击败的对手。",
   "achievements.progress": "已解锁 {count}/{total} 项成就",
   "achievements.unlocked": "已解锁",
-  "achievements.earned": "已解锁",
   "achievements.locked": "未解锁",
   "achievements.earnedOn": "解锁于 {date}",
   "achievements.rarity": "{percent}% 的玩家已解锁",

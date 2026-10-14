@@ -9,48 +9,48 @@
 .achievements-progress-copy > span { color: var(--text-muted); font-size: 13px; font-weight: 600; }
 .achievements-progress-copy strong { color: var(--text-primary); font-size: 19px; font-variant-numeric: tabular-nums; line-height: 1; }
 .achievements-progress-copy strong span { color: var(--text-muted); font-size: 13px; font-weight: 500; }
-.achievements-progress progress { display: block; width: 100%; height: 3px; overflow: hidden; border: 0; background: var(--border-subtle); appearance: none; }
-.achievements-progress progress::-webkit-progress-bar { background: var(--border-subtle); }
-.achievements-progress progress::-webkit-progress-value { background: var(--gold); }
-.achievements-progress progress::-moz-progress-bar { background: var(--gold); }
-.achievements-group { display: grid; grid-template-columns: minmax(145px, 200px) minmax(0, 1fr); gap: 28px; padding: 28px 0 4px; }
+.achievements-panel progress { display: block; width: 100%; height: 3px; overflow: hidden; border: 0; background: var(--border-subtle); appearance: none; }
+.achievements-panel progress::-webkit-progress-bar { background: var(--border-subtle); }
+.achievements-panel progress::-webkit-progress-value { background: var(--gold); }
+.achievements-panel progress::-moz-progress-bar { background: var(--gold); }
+.achievements-group { display: grid; grid-template-columns: minmax(145px, 200px) minmax(0, 1fr); gap: 32px; padding: 32px 0; }
 .achievements-group + .achievements-group { border-top: 1px solid var(--border-subtle); }
-.achievements-group-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; padding-top: 8px; }
-.achievements-group-heading h3 { margin: 0; color: var(--text-secondary); font-size: 14px; font-weight: 650; line-height: 1.3; }
-.achievements-group-heading span { color: var(--text-muted); font-size: 11px; font-variant-numeric: tabular-nums; white-space: nowrap; }
-.achievements-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 22px; }
-.achievement-row { display: grid; grid-template-columns: 42px minmax(0, 1fr) auto; align-items: start; gap: 13px; min-width: 0; min-height: 91px; padding: 9px 0 17px; border-bottom: 1px solid #45331f99; }
-.achievement-row.is-unlocked { border-bottom-color: var(--border-strong); }
-.achievement-number { display: block; padding-top: 4px; color: #8f806b; font-size: 20px; font-variant-numeric: tabular-nums; font-weight: 700; letter-spacing: -.04em; line-height: 1; }
-.is-unlocked .achievement-number { color: var(--gold); }
-.achievement-portrait { position: relative; display: grid; width: 42px; height: 42px; flex: none; place-items: center; overflow: hidden; border: 1px solid var(--border-strong); border-radius: 50%; background: var(--surface-control); color: var(--text-secondary); font-size: 16px; font-weight: 700; }
+.achievements-group-heading { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-content: start; align-items: baseline; gap: 10px 8px; padding-top: 6px; }
+.achievements-group-heading h3 { margin: 0; color: var(--text-primary); font-size: 15px; font-weight: 650; line-height: 1.3; }
+.achievements-group-heading span { color: var(--text-muted); font-size: 12px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.achievements-group-heading progress { grid-column: 1 / -1; height: 2px; }
+.achievements-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 28px 40px; }
+.achievement-row { display: grid; grid-template-columns: 40px minmax(0, 1fr); align-items: start; gap: 16px; min-width: 0; }
+.achievement-mark { position: relative; display: grid; width: 40px; height: 40px; place-items: center; border-radius: 50%; }
+.achievement-seal { border: 1px solid var(--border-subtle); color: var(--text-muted); }
+.achievement-seal .ui-icon { font-size: 17px; }
+.is-unlocked .achievement-seal { border-color: var(--gold); background: var(--gold); color: var(--surface-control); }
+.achievement-portrait { overflow: hidden; border: 1px solid var(--border-subtle); background: var(--surface-control); color: var(--text-secondary); font-size: 16px; font-weight: 700; }
+.is-unlocked .achievement-portrait { border-color: var(--gold); }
 .achievement-portrait img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 .achievement-portrait img[hidden] { display: none; }
-.is-locked .achievement-portrait img { filter: saturate(.45) brightness(.8); }
+.is-locked .achievement-portrait img { filter: grayscale(1) brightness(.6); }
 .achievement-copy { min-width: 0; }
-.achievement-copy h4 { margin: 0 0 4px; color: var(--text-primary); font-size: 14px; font-weight: 700; line-height: 1.3; }
-.achievement-copy p { margin: 0; color: var(--text-muted); font-size: 12px; line-height: 1.45; }
-.achievement-meta { display: grid; justify-items: end; gap: 5px; min-width: 88px; padding-top: 1px; text-align: right; }
-.achievement-state { color: var(--text-muted); font-size: 11px; font-weight: 650; }
-.achievement-state::before { display: inline-block; width: 6px; height: 6px; margin: 0 6px 1px 0; border: 1px solid currentColor; border-radius: 50%; content: ""; }
-.is-unlocked .achievement-state { color: var(--gold); }
-.is-unlocked .achievement-state::before { background: currentColor; }
-.achievement-rarity, .achievement-meta time { color: var(--text-muted); font-size: 11px; font-variant-numeric: tabular-nums; line-height: 1.25; }
-.achievements-footnote { margin: 25px 0 0; padding-top: 15px; border-top: 1px solid var(--border-subtle); color: var(--text-muted); font-size: 11px; line-height: 1.5; }
+.achievement-copy h4 { margin: 0 0 4px; color: var(--text-primary); font-size: 15px; font-weight: 650; line-height: 1.3; }
+.is-locked .achievement-copy h4 { color: var(--text-secondary); }
+.achievement-copy p { max-width: 52ch; margin: 0; color: var(--text-muted); font-size: 13px; line-height: 1.5; }
+.achievement-meta { display: flex; flex-wrap: wrap; gap: 4px 16px; margin-top: 8px; color: var(--text-muted); font-size: 12px; font-variant-numeric: tabular-nums; line-height: 1.3; }
+.is-unlocked .achievement-state { color: var(--gold); font-weight: 600; }
+.achievements-footnote { margin: 0; padding-top: 16px; border-top: 1px solid var(--border-subtle); color: var(--text-muted); font-size: 11px; line-height: 1.5; }
 .achievements-error { padding: 14px 0; color: var(--danger); }
 .achievements-error button { margin-left: .4rem; }
 @media (max-width: 1450px) { .achievements-list { grid-template-columns: 1fr; } }
 @media (max-width: 800px) {
-  .achievements-group { grid-template-columns: 1fr; gap: 8px; padding-top: 21px; }
-  .achievements-group-heading { padding-top: 0; }
+  .achievements-group { grid-template-columns: 1fr; gap: 16px; padding: 24px 0; }
+  .achievements-group-heading { max-width: 320px; padding-top: 0; }
 }
 @media (max-width: 600px) {
   .achievements-panel { padding: 18px 16px; }
   .achievements-progress { width: clamp(110px, 32vw, 160px); }
-  .achievement-row { grid-template-columns: 36px minmax(0, 1fr); gap: 9px 11px; min-height: 0; padding: 11px 0 15px; }
-  .achievement-number { font-size: 18px; }
-  .achievement-portrait { width: 36px; height: 36px; }
-  .achievement-meta { grid-column: 2; display: flex; justify-content: flex-start; gap: 5px 12px; padding-top: 0; text-align: left; }
+  .achievements-list { row-gap: 22px; }
+  .achievement-row { grid-template-columns: 34px minmax(0, 1fr); gap: 12px; }
+  .achievement-mark { width: 34px; height: 34px; }
+  .achievement-seal .ui-icon { font-size: 15px; }
 }
 .achievement-toast {
   --achievement-toast-offset: 18px;
@@ -88,7 +88,7 @@
   box-shadow: inset 0 1px #ffe0a329;
   color: #efc46f;
 }
-.achievement-toast-icon svg { display: block; width: 19px; height: 19px; fill: currentColor; }
+.achievement-toast-icon .ui-icon { font-size: 19px; }
 .achievement-toast-copy { display: flex; flex-direction: column; min-width: 0; gap: 2px; }
 .achievement-toast-label { color: #c6a25e; font: 600 11px/1.2 var(--font-lobby-ui); letter-spacing: .01em; }
 .achievement-toast-detail { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 8px; line-height: 1.2; }
