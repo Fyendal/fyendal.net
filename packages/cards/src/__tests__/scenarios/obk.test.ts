@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { legalIntents } from "@fyendal/engine";
+import { legalIntents, projectStateFor } from "@fyendal/engine";
 import type { GameIntent } from "@fyendal/shared";
 import { cardData } from "../../index.js";
 import { printingId, scenario } from "../harness.js";
@@ -765,6 +765,90 @@ describe("Outbreak cards", () => {
 
     it("can be played without any diseases to cure", () => {
       ceremony([], []).play(CEREMONY).expectAttackValue(4).blockWith().settle().expectAP(0, 0);
+    });
+  });
+
+  describe("Couriers", () => {
+    const COURIERS = [
+      ["bloodrot courier|1", 2, "Bloodrot Pox"],
+      ["exertion courier|2", 3, "Exertion"],
+      ["inertia courier|3", 4, "Inertia"],
+    ] as const;
+    const courierGame = (courier: string, cost: number) => scenario({ seats: [
+      { hero: "rhinar", hand: [courier], resources: cost, weapons: [], equipment: NO_EQUIPMENT },
+      { hero: "dorinthea", hand: [FILLER, FILLER], weapons: [], equipment: NO_EQUIPMENT },
+    ] });
+
+    for (const [courier, cost, token] of COURIERS) {
+      it(`creates ${token} under both heroes' control when ${courier} hits, with go again`, () => {
+        const game = courierGame(courier, cost).play(courier).blockWith().settle();
+
+        game.expectLife(1, 16).expectAP(0, 1);
+        expect(boardNames(game, 0)).toEqual([token]);
+        expect(boardNames(game, 1)).toEqual([token]);
+      });
+    }
+
+    it("creates no tokens when it does not hit", () => {
+      const game = courierGame(COURIERS[0][0], COURIERS[0][1])
+        .play(COURIERS[0][0]).blockWith(FILLER, FILLER).settle()
+        .expectLife(1, 20);
+      expect(boardNames(game, 0)).toEqual([]);
+      expect(boardNames(game, 1)).toEqual([]);
+    });
+  });
+
+  describe("Quiet Streets and Raging Streets", () => {
+    const QUIET_STREETS = "quiet streets|2";
+    const RAGING_STREETS = "raging streets|2";
+    const TUNIC = "fyendal's spring tunic|0";
+
+    // Rhinar's undefended action attack, with `streets` in Rhinar's hand.
+    const actionAttack = (streets: string) => scenario({ seats: [
+      { hero: "rhinar", hand: [FILLER, streets], resources: 3, weapons: [], equipment: NO_EQUIPMENT },
+      { hero: "dorinthea", weapons: [], equipment: NO_EQUIPMENT },
+    ] }).play(FILLER).blockWith();
+
+    // Dawnblade attack defended by a card and equipment; Rhinar holds `streets`
+    // and gets priority after Dorinthea passes.
+    const weaponAttack = (streets: string) => scenario({
+      active: 1,
+      seats: [
+        { hero: "rhinar", hand: [FILLER, streets], weapons: [], equipment: { ...NO_EQUIPMENT, chest: TUNIC } },
+        { hero: "dorinthea", resources: 1, weapons: ["dawnblade|0"], equipment: NO_EQUIPMENT },
+      ],
+    }).attackWithWeapon("dawnblade|0").blockWith(FILLER, TUNIC).passPriority();
+
+    it("gives the only card on the active chain link -3 or +3 power", () => {
+      actionAttack(QUIET_STREETS).expectAttackValue(7).react(QUIET_STREETS)
+        .expectFinalAttack(4).expectLog("Quiet Streets").expectLife(1, 16);
+      actionAttack(RAGING_STREETS).react(RAGING_STREETS)
+        .expectFinalAttack(10).expectLog("Raging Streets").expectLife(1, 10);
+    });
+
+    it("never chooses a weapon attack's proxy or defending equipment", () => {
+      weaponAttack(QUIET_STREETS).react(QUIET_STREETS)
+        .expectFinalAttack(3).expectFinalDefense(1).expectLife(0, 18);
+      weaponAttack(RAGING_STREETS).react(RAGING_STREETS)
+        .expectFinalAttack(3).expectFinalDefense(7).expectLife(0, 20);
+    });
+
+    it("attributes the change to itself in the attack and defense breakdowns", () => {
+      const raging = { sourceCardId: printingId(RAGING_STREETS), amount: 3 };
+      // Resolve Raging Streets but leave its chain link open.
+      const resolveStreets = (game: ReturnType<typeof scenario>) =>
+        projectStateFor(game.react(RAGING_STREETS, { settle: false }).passPriority().passPriority().state, 0)
+          .chain.at(-1);
+
+      expect(resolveStreets(actionAttack(RAGING_STREETS))?.attackModifiers).toEqual([raging]);
+      expect(resolveStreets(weaponAttack(RAGING_STREETS))?.defenseModifiers).toEqual([raging]);
+    });
+
+    it("does nothing without an active chain link", () => {
+      scenario({ seats: [
+        { hero: "rhinar", hand: [QUIET_STREETS], weapons: [], equipment: NO_EQUIPMENT },
+        { hero: "dorinthea", weapons: [], equipment: NO_EQUIPMENT },
+      ] }).play(QUIET_STREETS).expectNoLog("gets -3 power");
     });
   });
 });

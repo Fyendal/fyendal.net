@@ -120,6 +120,26 @@
     "set": "OBK"
   },
   {
+    "id": "OBK069",
+    "name": "Raging Streets",
+    "cardType": "instant",
+    "text": "Choose a random non-equipment card on the active chain link. It gets +3{p} +3{d} this chain link.",
+    "pitch": 2,
+    "cost": 0,
+    "classes": ["chaos"],
+    "set": "OBK"
+  },
+  {
+    "id": "OBK070",
+    "name": "Quiet Streets",
+    "cardType": "instant",
+    "text": "Choose a random non-equipment card on the active chain link. It gets -3{p} -3{d} this chain link.",
+    "pitch": 2,
+    "cost": 0,
+    "classes": ["chaos"],
+    "set": "OBK"
+  },
+  {
     "id": "OBK071",
     "name": "Huxley, Racketeer",
     "cardType": "hero",
@@ -252,6 +272,48 @@
     "classes": ["chaos"],
     "subtypes": ["attack"],
     "keywords": ["Cure"],
+    "set": "OBK"
+  },
+  {
+    "id": "FAB530",
+    "name": "Bloodrot Courier",
+    "cardType": "action",
+    "text": "When this hits a hero, create a Bloodrot Pox token under the attacking and defending heroes' control.\nGo again",
+    "pitch": 1,
+    "cost": 2,
+    "attack": 4,
+    "defense": 3,
+    "classes": ["chaos"],
+    "subtypes": ["attack"],
+    "keywords": ["Go again"],
+    "set": "OBK"
+  },
+  {
+    "id": "FAB531",
+    "name": "Exertion Courier",
+    "cardType": "action",
+    "text": "When this hits a hero, create an Exertion token under the attacking and defending heroes' control.\nGo again",
+    "pitch": 2,
+    "cost": 3,
+    "attack": 4,
+    "defense": 3,
+    "classes": ["chaos"],
+    "subtypes": ["attack"],
+    "keywords": ["Go again"],
+    "set": "OBK"
+  },
+  {
+    "id": "FAB532",
+    "name": "Inertia Courier",
+    "cardType": "action",
+    "text": "When this hits a hero, create an Inertia token under the attacking and defending heroes' control.\nGo again",
+    "pitch": 3,
+    "cost": 4,
+    "attack": 4,
+    "defense": 3,
+    "classes": ["chaos"],
+    "subtypes": ["attack"],
+    "keywords": ["Go again"],
     "set": "OBK"
   },
   {

@@ -12,6 +12,8 @@ import {
 // Disease token names offered when an effect names a disease token.
 const DISEASE_TOKEN_NAMES: readonly string[] = ["Bloodrot Pox", "Exertion", "Frailty", "Inertia"];
 const EXERTION = "SLV035";
+const BLOODROT_POX = "SAZ034";
+const INERTIA = "SAZ036";
 const EXTINCTION_WIN_THRESHOLD = 33;
 
 function hasKeyword(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, keyword: string): boolean {
@@ -506,6 +508,57 @@ const cureAllElixir: CardScript = {
   },
 };
 
+function courier(tokenId: string): CardScript {
+  return {
+    canTriggerOnHit: (ctx) => ctx.link?.targetAllyId === undefined,
+    onHit(ctx) {
+      for (const seat of [ctx.seat, opponentSeat(ctx)]) ctx.createToken(tokenId, seat);
+    },
+  };
+}
+
+// Weapon and ally attacks are attack-proxies, not cards on the chain link.
+function streets(delta: number): CardScript {
+  const sign = delta < 0 ? "-" : "+";
+  const amount = Math.abs(delta);
+  return {
+    onPlay(ctx) {
+      const link = ctx.link;
+      if (!link) return;
+      const cards = [
+        ...(link.attackCardType === "action" && link.flags.attackGone !== true ? [link.attackingCard] : []),
+        ...link.defendingCards,
+      ].filter((card) => !ctx.hasCardType(card, "equipment"));
+      if (!cards.length) return;
+      const chosen = cards[ctx.randomInt(cards.length)]!;
+      // Sourced chain-link modifiers attribute the change to this card in the
+      // attack and defense breakdowns; the stat that cannot be shown for the
+      // chosen card's role stays a temporary value on the card.
+      if (chosen.instanceId === link.attackingCard.instanceId) {
+        ctx.addModifier({ scope: "chain-link", attack: delta, appliesToInstanceId: chosen.instanceId });
+        ctx.addCardTempDefense(chosen.instanceId, delta);
+      } else {
+        ctx.addModifier({
+          scope: "chain-link",
+          defense: delta,
+          seat: chosen.owner,
+          appliesToInstanceId: chosen.instanceId,
+        });
+        ctx.addCardTempPower(chosen.instanceId, delta);
+      }
+      ctx.logPublic(
+        localizedCardLog(
+          ctx,
+          `${ctx.data.name}: ${ctx.cardData(chosen.cardId).name} gets ${sign}${amount} power and ` +
+            `${sign}${amount} defense this chain link`,
+          delta < 0 ? "card.log.obk.quietstreets.reduce" : "card.log.obk.ragingstreets.boost",
+          { target: { kind: "card", cardId: chosen.cardId }, amount },
+        ),
+      );
+    },
+  };
+}
+
 export const obk: Record<string, CardScript> = {
   "min, genius|0": minGenius,
   "min, half-genius|0": minGenius,
@@ -522,6 +575,11 @@ export const obk: Record<string, CardScript> = {
   "incite aggression|1": inciteAggression,
   "incite resolve|3": inciteResolve,
   "exertion bloom|2": exertionBloom,
+  "quiet streets|2": streets(-3),
+  "raging streets|2": streets(3),
+  "bloodrot courier|1": courier(BLOODROT_POX),
+  "exertion courier|2": courier(EXERTION),
+  "inertia courier|3": courier(INERTIA),
   "exertion|0": exertion,
   "patient zero|1": patientZero,
   "curative ceremony|1": curativeCeremony,

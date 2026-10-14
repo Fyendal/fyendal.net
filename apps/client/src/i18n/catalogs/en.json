@@ -1622,6 +1622,8 @@
   "card.log.obk.azalea.stealth": "{card}: {target} gets +1 power and go again this turn",
   "card.log.obk.azalea.veil": "{card}: {target} gets veil this turn",
   "card.log.obk.extinction.named": "{card}: {name} tokens lose and can't gain abilities",
+  "card.log.obk.quietstreets.reduce": "{card}: {target} gets -{amount} power and -{amount} defense this chain link",
+  "card.log.obk.ragingstreets.boost": "{card}: {target} gets +{amount} power and +{amount} defense this chain link",
   "card.log.saz.card.attack.turn": "{card} gets +{amount} attack this turn",
   "card.log.saz.card.goagain.turn": "{card} gets go again this turn",
   "card.log.saz.crowsnest.aim": "{card}: the arrow gets an aim counter",

@@ -1622,6 +1622,8 @@
   "card.log.obk.azalea.stealth": "{card}：{target} 本回合获得 +1 力量和 go again",
   "card.log.obk.azalea.veil": "{card}：{target} 本回合获得 veil",
   "card.log.obk.extinction.named": "{card}：{name} 衍生物失去且无法获得能力",
+  "card.log.obk.quietstreets.reduce": "{card}：{target} 在此 chain link 中获得 -{amount} 力量和 -{amount} 防御",
+  "card.log.obk.ragingstreets.boost": "{card}：{target} 在此 chain link 中获得 +{amount} 力量和 +{amount} 防御",
   "card.log.saz.card.attack.turn": "{card} 本回合获得 +{amount} 力量",
   "card.log.saz.card.goagain.turn": "{card} 本回合获得 go again",
   "card.log.saz.crowsnest.aim": "{card}：该 arrow 获得一个瞄准 (aim) 指示物",
