@@ -317,6 +317,7 @@
   "card.dyn.brainstorm.target.choose": "选择一个目标，造成 {amount} 点奥术伤害",
   "card.dyn.cleave.ally.choose": "对另一个 ally 造成本次命中伤害？",
   "card.dyn.deadeye.discard.choose": "Dead Eye：选择一张牌——对方将其弃置",
+  "card.dyn.buckle.equipment.choose": "Buckle：摧毁一件具有 -1 防御指示物的装备",
   "card.dyn.delivery.item.put": "将一张 Mechanologist 物品放入竞技场",
   "card.dyn.diabolic.ally.choose": "选择一个要摧毁的 ally",
   "card.dyn.diabolic.aura.choose": "选择一个要摧毁的灵气 (Aura)",

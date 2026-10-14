@@ -596,6 +596,53 @@ describe("DYN — granted hit effects", () => {
     // no aim counter: no granted hit effect, so no decision opens
     expect(s.state.pendingDecision).toBeNull();
   });
+
+  function buckleScenario() {
+    return scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          heroKey: "bravo, showstopper|0",
+          weapons: ["anothos|0"],
+          equipment: { head: null, chest: null, arms: null, legs: null },
+          hand: ["buckle|3"],
+          resources: 6,
+        },
+        {
+          hero: "dorinthea",
+          hand: [],
+          equipment: { head: "ironrot helm|0", chest: null, arms: null, legs: "blacktek whisperers|0" },
+        },
+      ],
+    });
+  }
+
+  it("Buckle's Guardian attack destroys the hit hero's only countered equipment", () => {
+    const s = buckleScenario();
+    s.state.players[1]!.equipment.head!.defCounters = 1; // setup stamp
+    s.play("buckle|3").attackWithWeapon("anothos|0").expectAttackValue(5).blockWith().settle();
+    // "When this hits a hero, destroy an equipment they control with a -1{d} counter on it."
+    s.expectNoEquipment(1, "head").expectEquipped(1, "legs", "blacktek whisperers|0");
+  });
+
+  it("Buckle lets the attacker choose among countered equipment", () => {
+    const s = buckleScenario();
+    s.state.players[1]!.equipment.head!.defCounters = 1; // setup stamp
+    s.state.players[1]!.equipment.legs!.defCounters = 1;
+    s.play("buckle|3").attackWithWeapon("anothos|0").blockWith().settle();
+    expect(s.state.pendingDecision?.chooseHook).toBe("buckle-equipment");
+    expect(s.state.pendingDecision?.player).toBe(0);
+    s.chooseCard("blacktek whisperers|0")
+      .expectNoEquipment(1, "legs")
+      .expectEquipped(1, "head", "ironrot helm|0");
+  });
+
+  it("Buckle's hit leaves equipment without -1{d} counters", () => {
+    const s = buckleScenario();
+    s.play("buckle|3").attackWithWeapon("anothos|0").blockWith().settle();
+    expect(s.state.pendingDecision).toBeNull();
+    s.expectEquipped(1, "head", "ironrot helm|0").expectEquipped(1, "legs", "blacktek whisperers|0");
+  });
 });
 
 describe("DYN — Mind Warp", () => {

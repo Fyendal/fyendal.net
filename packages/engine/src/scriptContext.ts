@@ -47,7 +47,7 @@ import {
 } from "./zoneQueries.js";
 
 import { controlledPermanents, hookSources, observingHookSources } from "./sourceQueries.js";
-import { arsenalCapacity, clearPrivateZonePlacement, hasCrank, resetActivatedAbilityUsage, stampEnteringLife } from "./cardLifecycle.js";
+import { arsenalCapacity, clearPrivateZonePlacement, clearTemporaryObjectEffects, hasCrank, resetActivatedAbilityUsage, stampEnteringLife } from "./cardLifecycle.js";
 import {
   transitionZone,
   transitionZoneFromEngineZone,
@@ -962,6 +962,7 @@ export function makeCtx(
         return true;
       }
       clearPrivateZonePlacement(found.card);
+      clearTemporaryObjectEffects(found.card);
       found.owner.hand.push(found.card);
       if (found.fromZone === "graveyard") {
         runtime.events.fireCardLeavesGraveyard(state, found.owner.seat, found.card, "hand");
@@ -1219,6 +1220,7 @@ export function makeCtx(
       if (!card) return false;
       const owner = state.players[card.owner] as PlayerState;
       delete card.playTargetInstanceId;
+      clearTemporaryObjectEffects(card);
       owner.graveyard.push(card);
       logPublic(state, gameLogMessage(
         `${nameOf(state, card.cardId)} is negated`,
@@ -1771,6 +1773,7 @@ export function makeCtx(
       const card = removed?.card ?? chainCard;
       if (!card) return;
       card.flipped = true;
+      clearTemporaryObjectEffects(card);
       owner.hand.push(card);
       owner.flags.transcendedThisTurn = true;
       logPublic(state, gameLogMessage(
@@ -1869,6 +1872,7 @@ export function makeCtx(
       }
       const card = removed?.card ?? attackingCard ?? chainCard;
       if (!card) return false;
+      clearTemporaryObjectEffects(card);
       owner.hand.push(card);
       logPublic(state, gameLogMessage(
         `${nameOf(state, card.cardId)} returns to ${nameOf(state, owner.heroCardId)}'s hand`,
@@ -2651,6 +2655,7 @@ export function makeCtx(
         || (found.fromZone === "banish" && found.card.faceDown);
       const sourceWasFaceDown = found.card.faceDown === true;
       clearPrivateZonePlacement(found.card);
+      clearTemporaryObjectEffects(found.card);
       const toBottom = found.owner.flags.topDeckToBottom === true;
       if (toBottom) found.owner.deck.push(found.card);
       else found.owner.deck.unshift(found.card);
@@ -2699,6 +2704,7 @@ export function makeCtx(
         || (found.fromZone === "banish" && found.card.faceDown);
       const sourceWasFaceDown = found.card.faceDown === true;
       clearPrivateZonePlacement(found.card);
+      clearTemporaryObjectEffects(found.card);
       const index = Math.min(depth - 1, found.owner.deck.length);
       const position = index === 0
         ? "top" as const

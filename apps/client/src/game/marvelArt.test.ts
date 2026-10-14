@@ -16,8 +16,8 @@ describe("internal Marvel artwork selection", () => {
     ["DYN150", "TNP033-MV"], // Blue Cut to the Chase.
     ["UPR007", "UPR007-MV"],
     ["UPR007B", "UPR007-MV_BACK"],
-    ["DTD164", "DTD164-MV_BACK"], // These Marvel faces reverse the ordinary ordering.
-    ["DTD164B", "DTD164-MV"],
+    ["DTD164", "DTD164-MV"],
+    ["DTD164B", "DTD164-MV_BACK"],
     ["MST010B", "MST010-MV_BACK"],
     ["HVY243", "SEA244-TP"], // Marvels do not all use the -MV suffix.
     ["IAR053", "GEM184-MV"], // Adult Malice's Marvel is a GEM promo.

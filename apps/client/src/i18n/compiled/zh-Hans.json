@@ -2753,6 +2753,12 @@
       "value": " 点奥术伤害"
     }
   ],
+  "card.dyn.buckle.equipment.choose": [
+    {
+      "type": 0,
+      "value": "Buckle：摧毁一件具有 -1 防御指示物的装备"
+    }
+  ],
   "card.dyn.cleave.ally.choose": [
     {
       "type": 0,

@@ -61,6 +61,20 @@ export function clearPrivateZonePlacement(card: CardInstance): void {
   delete card.arsenalSlot;
 }
 
+/** A card that changes zones becomes a new object (CR 3.0.9). Effects scoped
+ * to its previous object (this-chain defense, this-turn power, granted or
+ * suppressed keywords and names) do not follow it to hand, deck, graveyard,
+ * banish, or soul, so a card returned and defending again later in the same
+ * chain starts from its printed values. Callers that need last-known
+ * information keep a snapshot of the previous object. */
+export function clearTemporaryObjectEffects(card: CardInstance): void {
+  delete card.tempPower;
+  delete card.tempDefense;
+  delete card.grantedKeywords;
+  delete card.suppressedKeywords;
+  delete card.grantedNames;
+}
+
 /** Move up to `n` cards from the top of the player's deck to their hand. */
 export function drawCards(
   state: GameStateInternal,

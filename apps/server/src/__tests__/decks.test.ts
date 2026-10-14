@@ -572,10 +572,12 @@ describe("validateDeck", () => {
     expect(r).toMatchObject({ ok: true, heroName: "Azalea, Ace in the Hole" });
   });
 
-  it("imports Levia, Redeemed as a fixed inventory card instead of a second hero", () => {
+  it.each(["Levia, Redeemed", "Blasmophet, Levia Consumed"])(
+    "imports %s as the fixed front-face inventory card instead of a second hero",
+    (demiHero) => {
     const text = ccExportText()
       .replace(`Hero: ${hero.name}`, "Hero: Levia, Shadowborn Abomination") +
-      "\nArena cards\n1x Levia, Redeemed";
+      `\nArena cards\n1x ${demiHero}`;
     const r = validateDeck(parseDecklistText(text), "cc");
 
     expect(r).toMatchObject({
@@ -583,7 +585,8 @@ describe("validateDeck", () => {
       heroName: "Levia, Shadowborn Abomination",
       decklist: { inventoryPool: ["DTD164"] },
     });
-  });
+    },
+  );
 
   it("still rejects two ordinary starting heroes", () => {
     const text = ccExportText() + "\nHero: Dorinthea Ironsong";

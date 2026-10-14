@@ -176,8 +176,8 @@ export function validateDeck(lines: ParsedLine[], format: Format): ValidationRes
       // Levia's starting hero, so it must not be mistaken for a second hero.
       if (/\bwhile this is in your inventory\b/i.test(card.text)) {
         // Fabrary may identify the back face of a double-faced inventory card.
-        // Store its front face so transformation hooks see the physical card in
-        // the orientation they expect (Levia, Redeemed -> Blasmophet).
+        // Store its front face so every deck holds the same physical printing
+        // (Blasmophet, Levia Consumed -> Levia, Redeemed).
         const inventoryId = INVENTORY_FRONT_ID_BY_BACK_ID.get(card.id) ?? card.id;
         for (let i = 0; i < line.qty; i++) inventoryPool.push(inventoryId);
         continue;

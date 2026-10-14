@@ -84,7 +84,8 @@ export interface CardInstance {
   /** Red/yellow/blue/purple color granted to this object (1/2/3/4). */
   grantedColor?: CardColor;
   /** Additional names granted to this object (Be Like Water / Mask of Many
-   * Faces). Cleared when the combat chain closes or at end-of-turn cleanup. */
+   * Faces). Cleared when the combat chain closes, at end-of-turn cleanup, or
+   * when the card changes zones. */
   grantedNames?: string[];
   /** Original hero identity and turn boundary for a temporary transformation. */
   temporaryHeroOriginalCardId?: string;
@@ -101,17 +102,19 @@ export interface CardInstance {
   copyOriginalCardId?: string;
   /** Keywords granted to this card until end of turn by an effect ("it gains
    *  dominate until end of turn"); consulted alongside the printed keywords
-   *  for attacks (dominate, go again). Cleared at end of turn. */
+   *  for attacks (dominate, go again). Cleared at end of turn or when the
+   *  card changes zones. */
   grantedKeywords?: string[];
-  /** Keywords suppressed until end of turn; suppression wins over grants. */
+  /** Keywords suppressed until end of turn; suppression wins over grants.
+   *  Cleared like `grantedKeywords`. */
   suppressedKeywords?: string[];
   /** Power granted to this card until end of turn by an effect ("it gets
    *  +2{p} this turn" — per-instance, unlike a +1{p} counter). Cleared at end
-   *  of turn. */
+   *  of turn or when the card changes zones. */
   tempPower?: number;
   /** Defense granted to this card until the combat chain closes ("target
    *  card defending … gets -2{d} this combat chain" — per-instance). Cleared
-   *  when the chain closes and at end of turn. */
+   *  when the chain closes, at end of turn, or when the card changes zones. */
   tempDefense?: number;
   /** An equipment temporarily functioning as an ally until cleanup. */
   temporaryAlly?: { power: number; life: number };

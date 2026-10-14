@@ -245,7 +245,37 @@ export const dynHighRarity: Record<string, CardScript> = {
   },
   "buckle|3": {
     onPlay(ctx) {
-      buffNextAttack(ctx, { attack: 1, dominate: true, appliesToType: ["guardian"] });
+      buffNextAttack(ctx, {
+        attack: 1,
+        dominate: true,
+        appliesToType: ["guardian"],
+        onHitScriptHook: {
+          hook: "buckle-hit",
+          label: "destroy an equipment they control with a -1{d} counter on it",
+          heroOnly: true,
+        },
+      });
+    },
+    onGrantedHit(ctx, hook) {
+      if (hook !== "buckle-hit") return;
+      const player = ctx.player(opponentSeat(ctx));
+      const equipment = [
+        ...Object.values(player.equipment),
+        ...player.weapons.filter((card) => ctx.cardData(card.cardId).cardType === "equipment"),
+      ].filter((card): card is DeepReadonly<CardInstance> => card !== undefined && (card.defCounters ?? 0) > 0);
+      if (equipment.length === 1) ctx.destroyPermanent(equipment[0]!.instanceId);
+      else if (equipment.length > 1)
+        ctx.requestCardChoice(
+          "buckle-equipment",
+          decisionPrompt(
+            "Buckle: destroy an equipment with a -1 defense counter",
+            "card.dyn.buckle.equipment.choose",
+          ),
+          equipment.map((card) => card.instanceId),
+        );
+    },
+    onChoose(ctx, hook, option) {
+      if (hook === "buckle-equipment") ctx.destroyPermanent(Number(option));
     },
   },
   "never yield|3": {

@@ -614,6 +614,35 @@ describe("SEA — High Seas heroes and cogs", () => {
       .expectLife(1, 17);
   });
 
+  it("Golden Skywarden enters the graveyard without its Galvanize defense", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", resources: 3, hand: ["raging onslaught|1"] },
+        {
+          hero: "dorinthea",
+          hand: ["golden skywarden|2"],
+          board: ["golden cog|0"],
+        },
+      ],
+    });
+
+    g.play("raging onslaught|1")
+      .blockWith("golden skywarden|2")
+      .passPriority()
+      .passPriority()
+      .chooseCard("golden cog|0")
+      .chooseCard("gold|0")
+      .settle()
+      .passPriority()
+      .passPriority()
+      .expectInZone(1, "golden skywarden|2", "graveyard");
+
+    const skywarden = g.state.players[1]!.graveyard.find(
+      (card) => cardData[card.cardId]?.name === "Golden Skywarden",
+    );
+    expect(skywarden?.tempDefense).toBeUndefined();
+  });
+
   it("Palantir Aeronought requires an equipment defender when one is able", () => {
     const g = scenario({
       seats: [

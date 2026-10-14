@@ -35,7 +35,11 @@ import type { CardInstance, ChainLinkState, Modifier, PlayerState } from "./stat
 import { controlledPermanents, observingHookSources } from "./sourceQueries.js";
 
 import { activationCostReductionForCard, actionAbilityRestrictedByModifier } from "./abilityRules.js";
-import { consumeNextActionGoAgain, noteActionPlayedOrActivated } from "./cardLifecycle.js";
+import {
+  clearTemporaryObjectEffects,
+  consumeNextActionGoAgain,
+  noteActionPlayedOrActivated,
+} from "./cardLifecycle.js";
 import { attackCostReductionForTarget, consumeAttackCostReductions } from "./playRules.js";
 import { actionLimitReached, consumeFirstActionExtraCost, consumeFirstAttackExtraCost, firstActionExtraCost, firstAttackExtraCost, goAgainSuppressed } from "./ruleQueries.js";
 import { weaponAttacksProhibited } from "./combatRestrictions.js";
@@ -635,6 +639,7 @@ function replaceAttackFromPlayerZone(
   link.attackCardType = "action";
   if (previousCardType === "action") {
     const previousOwner = state.players[previous.owner] as PlayerState;
+    clearTemporaryObjectEffects(previous);
     previousOwner.deck.push(previous);
     runtime.transitions.move(
       previous,

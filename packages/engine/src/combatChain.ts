@@ -2,6 +2,7 @@ import type { EngineRuntime } from "./runtimePorts.js";
 import type { GameStateInternal } from "./runtimeState.js";
 
 import { dataOf, hasKeyword, scriptOf } from "./cardProperties.js";
+import { clearTemporaryObjectEffects } from "./cardLifecycle.js";
 import {
   activeModifiers,
   conditionalModifierGrantsGoAgain,
@@ -153,9 +154,12 @@ export function finishLinkResolution(state: GameStateInternal,
   // when that link resolves (Electromagnetic Somersault). The link keeps its
   // last-known attacking object, while close-chain settlement skips it.
   if (link.attackingCard.counters?.returnToHandAtLinkResolution) {
-    (state.players[link.attackingCard.owner] as PlayerState).hand.push(link.attackingCard);
+    const returning = link.attackingCard;
+    delete returning.counters?.returnToHandAtLinkResolution;
+    link.attackingCard = runtime.commands.snapshotSerializable(returning);
+    clearTemporaryObjectEffects(returning);
+    (state.players[returning.owner] as PlayerState).hand.push(returning);
     link.flags.attackGone = true;
-    delete link.attackingCard.counters.returnToHandAtLinkResolution;
     logPublic(state, gameLogMessage(
       `${nameOf(state, link.attackingCard.cardId)} returns to its owner's hand`,
       "engine.log.card.returns.to.owner.hand",
@@ -167,6 +171,7 @@ export function finishLinkResolution(state: GameStateInternal,
   );
   for (const card of returningDefenders) {
     delete card.counters?.returnToHandAtLinkResolution;
+    clearTemporaryObjectEffects(card);
     (state.players[card.owner] as PlayerState).hand.push(card);
     logPublic(state, gameLogMessage(
       `${nameOf(state, card.cardId)} returns to its owner's hand`,
@@ -261,6 +266,7 @@ export function closeChain(state: GameStateInternal, runtime: EngineRuntime): vo
         enterBanish(state, runtime, link.attackingCard, "chain");
       } else if (link.flags.attackToBottom === true) {
         const owner = state.players[link.attackingCard.owner] as PlayerState;
+        clearTemporaryObjectEffects(link.attackingCard);
         owner.deck.push(link.attackingCard);
         runtime.transitions.move(
           link.attackingCard,

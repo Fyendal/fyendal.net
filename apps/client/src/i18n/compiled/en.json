@@ -2745,6 +2745,12 @@
       "value": " arcane damage"
     }
   ],
+  "card.dyn.buckle.equipment.choose": [
+    {
+      "type": 0,
+      "value": "Buckle: destroy an equipment with a -1 defense counter"
+    }
+  ],
   "card.dyn.cleave.ally.choose": [
     {
       "type": 0,

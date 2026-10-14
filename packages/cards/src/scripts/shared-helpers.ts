@@ -492,10 +492,20 @@ function leviaRemovesBloodDebt(ctx: ScriptCtx, heroName: string): boolean {
   return isOriginalLevia(heroName) && ctx.getFlag("player", "banishedSixPlusThisTurn") === true;
 }
 
-function blasmophetInInventory(ctx: ScriptCtx): DeepReadonly<CardInstance> | undefined {
-  return ctx
-    .player(ctx.seat)
-    .inventory?.find((card) => ctx.cardData(card.cardId).name.toLowerCase() === BLOOD_DEBT.blasmophetName);
+/** Levia's double-faced demi-hero card in inventory, with the printing id of
+ * the requested face. Either face may be registered, so check both. */
+function leviaTwinFace(
+  ctx: ScriptCtx,
+  faceName: string,
+): { card: DeepReadonly<CardInstance>; faceCardId: string } | undefined {
+  for (const card of ctx.player(ctx.seat).inventory ?? []) {
+    const registered = ctx.cardData(card.cardId);
+    if (registered.name.toLowerCase() === faceName) return { card, faceCardId: card.cardId };
+    if (registered.backId && ctx.cardData(registered.backId).name.toLowerCase() === faceName) {
+      return { card, faceCardId: registered.backId };
+    }
+  }
+  return undefined;
 }
 
 /** Levia's visible proxy for the action ability of her private twin-card
@@ -508,7 +518,7 @@ export const leviaRedeemedAbility: ActivatedAbility = {
   label: "Transform into Levia, Redeemed",
   canActivate(ctx) {
     return (
-      blasmophetInInventory(ctx) !== undefined &&
+      leviaTwinFace(ctx, BLOOD_DEBT.redeemedName) !== undefined &&
       ctx
         .player(ctx.seat)
         .banish.filter((card) => !card.faceDown && ctx.cardData(card.cardId).text.includes("Blood Debt")).length >= 13
@@ -520,8 +530,8 @@ export const leviaRedeemedAbility: ActivatedAbility = {
     }
   },
   onActivate(ctx) {
-    const twinCard = blasmophetInInventory(ctx);
-    if (twinCard) ctx.becomeHeroFromInventory(twinCard.instanceId, "DTD164B");
+    const twin = leviaTwinFace(ctx, BLOOD_DEBT.redeemedName);
+    if (twin) ctx.becomeHeroFromInventory(twin.card.instanceId, twin.faceCardId);
   },
 };
 
@@ -542,7 +552,9 @@ export function bloodDebtScript(extra: CardScript = {}, playableFromBanish = fal
     onChoose(ctx, hook, option) {
       if (hook.startsWith(BLOOD_DEBT.transformHookPrefix)) {
         if (option === "yes") {
-          ctx.becomeHeroFromInventory(Number(hook.slice(BLOOD_DEBT.transformHookPrefix.length)));
+          const twin = leviaTwinFace(ctx, BLOOD_DEBT.blasmophetName);
+          const instanceId = Number(hook.slice(BLOOD_DEBT.transformHookPrefix.length));
+          if (twin?.card.instanceId === instanceId) ctx.becomeHeroFromInventory(instanceId, twin.faceCardId);
         }
         return;
       }
@@ -573,10 +585,10 @@ export function bloodDebtScript(extra: CardScript = {}, playableFromBanish = fal
           const previousLife = player.life;
           ctx.loseLife(ctx.seat, 1);
           if (previousLife <= 13 || ctx.player(ctx.seat).life !== 13) return;
-          const transform = blasmophetInInventory(ctx);
+          const transform = leviaTwinFace(ctx, BLOOD_DEBT.blasmophetName);
           if (!transform || !isOriginalLevia(heroName)) return;
           ctx.requestChoice(
-            `${BLOOD_DEBT.transformHookPrefix}${transform.instanceId}`,
+            `${BLOOD_DEBT.transformHookPrefix}${transform.card.instanceId}`,
             yesNoPrompt("Transform into Blasmophet, Levia Consumed?", "card.common.levia.transform"),
             ["yes", "no"],
             undefined,

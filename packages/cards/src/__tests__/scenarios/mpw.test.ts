@@ -232,6 +232,36 @@ describe("MPW — import and Warrior mastery", () => {
     )).toEqual(["snatch|1"]);
   });
 
+  it("Shove Off returns a galvanized defender without its chain defense bonus", () => {
+    const g = scenario({
+      seats: [
+        hala({ resources: 4, hand: ["shove off|3"] }),
+        {
+          hero: "dorinthea",
+          hand: ["golden skywarden|2"],
+          board: ["golden cog|0"],
+          equipment: NO_EQUIPMENT,
+        },
+      ],
+    });
+    g.activate("durendal|0")
+      .blockWith("golden skywarden|2")
+      .passPriority()
+      .passPriority()
+      .chooseCard("golden cog|0");
+    // Choose the created Gold directly; chooseCard would settle past the
+    // reaction window that Shove Off needs.
+    const gold = g.state.players[1]!.board.find((card) => cardData[card.cardId]?.name === "Gold");
+    g.doRaw({ kind: "choose", optionId: String(gold!.instanceId) });
+    const skywarden = () => g.state.players[1]!.hand.concat(
+      g.state.chain.flatMap((link) => link.defendingCards),
+    ).find((card) => functionalKeyOf(cardData[card.cardId]!) === "golden skywarden|2");
+    expect(skywarden()?.tempDefense).toBe(2);
+
+    g.react("shove off|3").expectInZone(1, "golden skywarden|2", "hand");
+    expect(skywarden()?.tempDefense).toBeUndefined();
+  });
+
   it("All In loses the game when its sword attack misses", () => {
     const g = scenario({
       seats: [

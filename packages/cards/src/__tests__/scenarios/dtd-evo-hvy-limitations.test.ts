@@ -17,7 +17,7 @@ describe("DTD, EVO, and HVY rules regression coverage", () => {
         {
           hero: "rhinar",
           heroKey: "levia, shadowborn abomination|0",
-          inventory: ["blasmophet, levia consumed|0"],
+          inventory: ["levia, redeemed|0"],
           banish: Array<string>(13).fill("grim feast|1"),
         },
         { hero: "dorinthea" },
@@ -53,7 +53,7 @@ describe("DTD, EVO, and HVY rules regression coverage", () => {
         {
           hero: "rhinar",
           heroKey: "levia, shadowborn abomination|0",
-          inventory: ["blasmophet, levia consumed|0"],
+          inventory: ["levia, redeemed|0"],
           banish: Array<string>(12).fill("grim feast|1"),
           banishFaceDown: ["grim feast|1"],
         },

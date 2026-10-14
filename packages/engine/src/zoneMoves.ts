@@ -28,7 +28,11 @@ import {
 import { controlledPermanents, hookSources } from "./sourceQueries.js";
 import { snapshotSerializable } from "./ruleQueries.js";
 
-import { clearPrivateZonePlacement, stampControlledName } from "./cardLifecycle.js";
+import {
+  clearPrivateZonePlacement,
+  clearTemporaryObjectEffects,
+  stampControlledName,
+} from "./cardLifecycle.js";
 import { heroAbilitiesDisabled } from "./stateQueries.js";
 import {
   transitionZone,
@@ -89,6 +93,7 @@ function enterGraveyard(
     return;
   }
   clearPlayFromZoneGrant(card);
+  clearTemporaryObjectEffects(card);
   // Rule-facing markers stop applying in an inactive zone. Card scripts also
   // use this map for private delayed-effect state, which must remain available
   // to the resolving layer and lingering modifiers; project.ts never exposes
@@ -202,6 +207,7 @@ export function moveToGraveyard(state: GameStateInternal,
     ? script.graveyardReplacement(runtime.makeCtx(state, card.owner, card, currentLink(state)))
     : script?.graveyardReplacement);
   if (replacement === "bottom-of-deck") {
+    clearTemporaryObjectEffects(card);
     owner.deck.push(card);
     runtime.transitions.move(
       card,
@@ -523,6 +529,7 @@ export function enterSoul(
     if (charged) recordCharge(state, runtime, owner, card);
     return;
   }
+  clearTemporaryObjectEffects(card);
   owner.soul.push(card);
   owner.flags.soulThisTurn = true;
   const color = cardColorOf(state, card);
@@ -598,9 +605,11 @@ export function enterBanish(
 ): void {
   const owner = state.players[card.owner] as PlayerState;
   const causedBy = state.players[causedBySeat] as PlayerState | undefined;
-  // A card in banish is a new object (CR 3.0.9), so arena-only tap state must
-  // not follow a permanent there or survive a later play from this zone.
+  // A card in banish is a new object (CR 3.0.9), so arena-only tap state and
+  // effects on its previous object must not follow it or survive a later
+  // play from this zone.
   delete card.tapped;
+  clearTemporaryObjectEffects(card);
   // CR 5.1.2 / 7.0.2a: announcing an attack puts it on the stack and opens
   // the combat chain before its effect-costs are paid. The engine keeps that
   // announced card in `resolving` until scripted additional costs finish, so
@@ -929,6 +938,7 @@ export function putCardOnDeckBottom(
     return true;
   }
   clearPrivateZonePlacement(found.card);
+  clearTemporaryObjectEffects(found.card);
   found.owner.deck.push(found.card);
   runtime.transitions.move(
     found.card,
