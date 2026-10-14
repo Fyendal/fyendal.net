@@ -24,6 +24,7 @@ import {
   type BotPolicyInput,
   type ResponseModel,
 } from "./policy.js";
+import { threatenedAttackDamage } from "./public-threat.js";
 
 const NON_ATTACK_PRIORITIES: Record<string, number> = {
   "nimblism|1": 27,
@@ -343,7 +344,7 @@ function arcaneSeedsLifeIsLastSurvivalOption(
     link &&
     link.attackingCard.owner !== input.seat
   ) {
-    return incomingAttackDamage(input) === me.life;
+    return threatenedAttackDamage(input) === me.life;
   }
 
   const arcane = opponentArcaneDamageAmountOnStack(input);
@@ -386,11 +387,13 @@ function scoreDefend(intent: Extract<GameIntent, { kind: "defend" }>, input: Bot
       // prevention plus any available defense reactions.
       if (cloudCoverIds.length > 0 && available.length === 0 && committed === 0) return null;
       const incoming = incomingAttackDamage(policyInput);
-      const minimumToSurvive = Math.max(0, incoming - me.life + 1);
+      const threatened = threatenedAttackDamage(policyInput);
+      const minimumToSurvive = Math.max(0, threatened - me.life + 1);
       const planCloudCover = available.length > 0 && (
-        incoming < me.life || reactionPlan.amount < minimumToSurvive
+        threatened < me.life || reactionPlan.amount < minimumToSurvive
       );
-      const uncovered = Math.max(0, incoming - reactionPlan.amount - committed);
+      const covered = threatened >= me.life ? threatened : incoming;
+      const uncovered = Math.max(0, covered - reactionPlan.amount - committed);
       const copies = planCloudCover
         ? Math.min(available.length, Math.ceil(uncovered / 3))
         : 0;
@@ -518,7 +521,9 @@ function scorePlay(intent: GameIntent, input: BotPolicyInput, own: ReadonlyMap<n
     } else if (functional === "cloud cover|1") {
       const link = [...input.view.chain].reverse().find((candidate) => !candidate.resolved);
       const incoming = incomingAttackDamage(input);
-      const alreadySurvivesLethalAttack = !!link && link.attackValue >= me.life && incoming < me.life;
+      const threatened = threatenedAttackDamage(input);
+      const alreadySurvivesLethalAttack = !!link && Math.max(link.attackValue, threatened) >= me.life &&
+        threatened < me.life;
       const usefulCombatWindow = input.view.pendingDecision?.kind === "defense-reaction" &&
         incoming > 0 && !alreadySurvivesLethalAttack;
       score = !myTurn && (usefulCombatWindow || opponentArcaneDamageOnStack(input))

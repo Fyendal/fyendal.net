@@ -43,6 +43,7 @@ import {
   type TargetableAttackIntent,
   type ResponseModel,
 } from "./policy.js";
+import { threatenedAttackDamage } from "./public-threat.js";
 import { BLOCK_USE_RATE, type CardUses } from "./card-ev.js";
 import type { HeroSolverRules } from "./card-model.js";
 import { arsenalValuer, opportunityValuer } from "./hand-value.js";
@@ -1502,8 +1503,10 @@ function scoreDefend(
         return null;
       }
       const incoming = incomingAttackDamage(policyInput);
+      const threatened = threatenedAttackDamage(policyInput);
+      const covered = threatened >= me.life ? threatened : incoming;
       const committed = toeTheLinePreventionCommitted(policyInput);
-      const uncovered = Math.max(0, incoming - reactionPlan.amount - committed);
+      const uncovered = Math.max(0, covered - reactionPlan.amount - committed);
       const copies = Math.min(availableToeIds.length, Math.ceil(uncovered / 2));
       return {
         amount: reactionPlan.amount + committed + copies * 2,

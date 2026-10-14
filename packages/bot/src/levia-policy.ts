@@ -22,6 +22,7 @@ import {
   type BotPolicyInput,
   type ResponseModel,
 } from "./policy.js";
+import { threatenedAttackDamage } from "./public-threat.js";
 import { DISRUPTION_HIT_CHANCE } from "./card-ev.js";
 import { probabilityAtLeastOne, totalCount, unseenCounts } from "./deck-knowledge.js";
 import { solverCard, type HeroSolverRules, type SolverCardPatch } from "./card-model.js";
@@ -364,7 +365,9 @@ function heraldPreventionScore(card: CardView, input: BotPolicyInput): number {
   const incoming = Math.max(0, incomingAttackDamage(input) - (link.damageToPrevent ?? 0));
   const prevented = Math.min(4, incoming);
   if (prevented === 0) return -100;
-  if (incoming >= me.life && incoming - prevented < me.life) return 150;
+  // Survival counts public pumps the attacker can still spend.
+  const threatened = Math.max(0, threatenedAttackDamage(input) - (link.damageToPrevent ?? 0));
+  if (threatened >= me.life && threatened - prevented < me.life) return 150;
   const rest = me.hand.filter((held) => held.instanceId !== card.instanceId);
   const lost = solveHand(me.hand, input, leviaSolverRules).value - solveHand(rest, input, leviaSolverRules).value;
   return prevented > lost ? 20 + (prevented - lost) * 4 : -60;

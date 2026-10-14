@@ -2,6 +2,11 @@ import type { BotDecklists, CardData, CardView, GameIntent, GameView } from "@fy
 import type { GameState } from "@fyendal/engine";
 import { requiredEquipmentStageIntent } from "./defense.js";
 import {
+  publicCombatThreat,
+  threatenedAttackDamage,
+  threatenedCombatDamage,
+} from "./public-threat.js";
+import {
   EMPTY_ON_HIT_EVALUATION,
   evaluateOnHit,
   SIGNIFICANT_ON_HIT_VALUE,
@@ -793,8 +798,10 @@ export function plannedDefenseReactionPlan(
       preventionIds: [],
     });
   }
+  // The attacker can still spend public pumps after the last reaction.
   const incoming = Math.max(0, link.damage);
-  const target = incoming >= me.life ? incoming - me.life + 1 : incoming;
+  const threatened = Math.max(incoming, threatenedAttackDamage(input));
+  const target = threatened >= me.life ? threatened - me.life + 1 : incoming;
   const covering = options.filter((option) => option.amount >= target);
   const ranked = covering.length > 0 ? covering : options;
   return [...ranked].sort((left, right) => {
@@ -829,8 +836,9 @@ export function scoreDefenseReaction(data: CardData, input: BotPolicyInput): num
   if (input.view.pendingDecision?.kind !== "defense-reaction" || incoming === 0) return -100;
   const defense = Math.max(0, data.defense ?? 0);
   const me = input.view.players[input.seat];
-  if (link && link.attackValue >= me.life) {
-    const minimumToSurvive = incoming - me.life + 1;
+  const threatened = Math.max(incoming, threatenedAttackDamage(input) - pendingDefenseReactionValue(input));
+  if (link && Math.max(link.attackValue, threatened) >= me.life) {
+    const minimumToSurvive = threatened - me.life + 1;
     if (minimumToSurvive <= 0) return -100;
     if (defense >= minimumToSurvive) {
       return 100 - (defense - minimumToSurvive) * 1.5;
@@ -1389,13 +1397,19 @@ export function scoreDefenseIntentWithTrace(
   }
   const incoming = Math.max(0, link.damage);
   const me = input.view.players[input.seat];
+  // Survival is planned against every public pump the attacker can still
+  // spend after blocks. Direct damage ignores blocks, so it lowers the life
+  // the combat damage must stay under instead.
+  const threatenedCombat = Math.max(incoming, threatenedCombatDamage(input));
+  const survivableLife = me.life - publicCombatThreat(input).directDamage;
+  const lethal = threatenedCombat >= survivableLife;
   const chosen = intent.instanceIds.flatMap((id) => own.get(id) ?? []);
   if (model.canUseDefender && chosen.some((card) => !model.canUseDefender!(card, input))) {
     return {
       score: -1_000_000,
       value: valueBreakdown({ strategicAdjustment: -1_000_000 }),
       eligible: false,
-      lethal: incoming >= me.life,
+      lethal,
       survives: false,
       stopsHit: false,
       ...traceDefaults(),
@@ -1411,7 +1425,7 @@ export function scoreDefenseIntentWithTrace(
       score: -1_000,
       value: valueBreakdown({ strategicAdjustment: -1_000 }),
       eligible: false,
-      lethal: incoming >= me.life,
+      lethal,
       survives: false,
       stopsHit: false,
       ...traceDefaults(),
@@ -1429,7 +1443,6 @@ export function scoreDefenseIntentWithTrace(
   // reaction can dominate an established efficient block before it is played.
   const prevented = Math.min(incomingAfterPlannedPrevention, defense);
   const overblock = Math.max(0, defense - incomingAfterPlannedPrevention);
-  const lethal = incoming >= me.life;
   const attackText = input.cards[link.attackingCard.cardId]?.text ?? "";
   const attacker = input.view.players[1 - input.seat]!;
   const onHit = evaluateOnHit({
@@ -1462,7 +1475,7 @@ export function scoreDefenseIntentWithTrace(
       : [],
   );
   const plannedSpentIds = new Set([...spentIds, ...plannedPrevention.consumedIds]);
-  const survives = incoming - defense - plannedPrevention.amount < me.life;
+  const survives = Math.max(0, threatenedCombat - defense - plannedPrevention.amount) < survivableLife;
   const candidate: DefenseCandidateContext = {
     input,
     intent,
@@ -1663,8 +1676,8 @@ export function scoreDefenseIntentWithTrace(
   };
 
   if (lethal) {
-    const handDefenseNeeded = Math.max(0, incomingAfterPlannedPrevention - me.life + 1);
-    const survives = defense >= handDefenseNeeded;
+    const handDefenseNeeded = Math.max(0, threatenedCombat - plannedPrevention.amount - survivableLife + 1);
+    const survives = survivableLife > 0 && defense >= handDefenseNeeded;
     // Equipment wear is priced by equipmentCost; opportunity is for hand cards.
     const preservationCost = chosen
       .filter((card) => !equipmentIds.has(card.instanceId))

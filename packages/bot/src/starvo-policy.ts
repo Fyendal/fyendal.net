@@ -29,6 +29,7 @@ import {
   type ResponseEvaluation,
   type ResponseModel,
 } from "./policy.js";
+import { threatenedAttackDamage } from "./public-threat.js";
 import {
   chooseTacticalIntentWithTrace,
   type TacticalIntentConfig,
@@ -378,8 +379,17 @@ function responseAfterDefense(
   );
 }
 
-function bestHandOnlyCoverResponse(input: BotPolicyInput): number | undefined {
+/** Defense an equivalent block must supply: the whole current hit, or more
+ * when that is needed to survive every public pump. */
+function requiredCover(input: BotPolicyInput): number {
   const incoming = incomingAttackDamage(input);
+  const threatened = threatenedAttackDamage(input);
+  const life = input.view.players[input.seat].life;
+  return threatened >= life ? Math.max(incoming, threatened - life + 1) : incoming;
+}
+
+function bestHandOnlyCoverResponse(input: BotPolicyInput): number | undefined {
+  const incoming = requiredCover(input);
   const handIds = new Set(input.view.players[input.seat].hand.map((card) => card.instanceId));
   const responses = input.legal
     .filter((intent): intent is Extract<GameIntent, { kind: "defend" }> =>
@@ -658,7 +668,7 @@ function crownIsWorthUsing(
   const me = input.view.players[input.seat];
   const arsenal = me.arsenal.find((card) => card.faceDown !== false);
   if (!arsenal) return false;
-  const lethal = incomingAttackDamage(input) >= me.life;
+  const lethal = threatenedAttackDamage(input) >= me.life;
   const meaningful = meaningfulIncomingOnHit(input);
   const premiumArsenal = isPremiumArsenal(input.cards[arsenal.cardId], input);
   const spent = new Set(intent.pitchInstanceIds);
@@ -789,7 +799,7 @@ function starvoPriorityOverride(input: BotPolicyInput): GameIntent | undefined {
 function withoutNonlethalTunicDefense(input: BotPolicyInput): BotPolicyInput {
   const link = currentLink(input);
   const me = input.view.players[input.seat];
-  if (!link || link.damage >= me.life) return input;
+  if (!link || Math.max(link.damage, threatenedAttackDamage(input)) >= me.life) return input;
   const tunic = [...ownCards(input).values()].find((card) =>
     key(input.cards[card.cardId]) === TUNIC
   );
@@ -828,7 +838,7 @@ function preferHandOverEquivalentStalagmite(
     return intent;
   }
   const handIds = new Set(input.view.players[input.seat].hand.map((card) => card.instanceId));
-  const incoming = incomingAttackDamage(input);
+  const incoming = requiredCover(input);
   const alternatives = input.legal.filter(
     (candidate): candidate is Extract<GameIntent, { kind: "defend" }> =>
       candidate.kind === "defend" && candidate.instanceIds.length > 0 &&

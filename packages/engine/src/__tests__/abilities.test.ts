@@ -187,6 +187,23 @@ describe("multiple activated abilities per card", () => {
     expect(spent?.usedAbilityIndexes).toEqual([0]);
   });
 
+  it("projects the attacking card's ability usage on the combat chain to both players", () => {
+    const s = makeGame(202);
+    const weapon = player(s, 0).weapons[0]!;
+    player(s, 0).flags[`additionalActivations:${weapon.instanceId}:0`] = 1;
+    const attack = abilityIntents(s, 0, weapon.instanceId)[0];
+    expect(attack).toBeDefined();
+    const attacked = applyIntent(s, 0, attack!);
+    expect(attacked.ok).toBe(true);
+    if (!attacked.ok) throw new Error(attacked.error);
+
+    for (const viewer of [0, 1]) {
+      const attacking = projectStateFor(attacked.state, viewer).chain[0]?.attackingCard;
+      expect(attacking?.instanceId).toBe(weapon.instanceId);
+      expect(attacking?.remainingAbilityActivations).toEqual([1]);
+    }
+  });
+
   it("enumerates each ability with its own index and tracks once-per-turn separately", () => {
     const settled = boardCard(makeGame(21), 0, "GADGET");
     let s = settled.s;

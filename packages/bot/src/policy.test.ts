@@ -1240,3 +1240,102 @@ describe("next-turn arsenal opportunity", () => {
     expect(blocked).toEqual({ kind: "defend", instanceIds: [cut.instanceId] });
   });
 });
+
+describe("public pump lethal", () => {
+  const BLUE_ZEPPELIN = "SEA020";
+  const GOLDEN_COG = "SEA042";
+  const FLICK_KNIVES = "OUT139";
+  const DAGGER = "AAC002";
+
+  /** Blue Cogwerx Zeppelin (4) at 2 life against two 3-defense attackers. */
+  function pumpFixture(options: { cogs?: number; tappedCogs?: boolean; flickKnives?: boolean } = {}) {
+    const fixture = cycleDefenseFixture([
+      { id: "FIRST_BLOCKER", attack: 4, defense: 3 },
+      { id: "SECOND_BLOCKER", attack: 4, defense: 3 },
+    ], { attackValue: 4, life: 2 });
+    const link = fixture.input.view.chain[0]!;
+    link.attackingCard = { instanceId: 95_100, cardId: BLUE_ZEPPELIN, owner: 1 };
+    const attacker = fixture.input.view.players[1];
+    attacker.board = Array.from({ length: options.cogs ?? 0 }, (_, index): CardView => ({
+      instanceId: 95_200 + index,
+      cardId: GOLDEN_COG,
+      owner: 1,
+      ...(options.tappedCogs ? { tapped: true } : {}),
+    }));
+    attacker.weapons = options.flickKnives ? [{ instanceId: 95_300, cardId: DAGGER, owner: 1 }] : [];
+    attacker.equipment = options.flickKnives
+      ? { arms: { instanceId: 95_301, cardId: FLICK_KNIVES, owner: 1 } }
+      : {};
+    attacker.handCount = 0;
+    attacker.resources = 0;
+    return fixture;
+  }
+
+  function stagedBlock(fixture: ReturnType<typeof pumpFixture>): GameIntent {
+    const input: BotPolicyInput = {
+      ...fixture.input,
+      legal: [
+        { kind: "defend", instanceIds: [] },
+        ...fixture.held.map((card) => ({
+          kind: "stage-defenders" as const,
+          instanceIds: [card.instanceId],
+        })),
+      ],
+    };
+    return chooseScoredIntent(input, {
+      defend: (intent, policyInput, own) => scoreDefenseIntent(intent, policyInput, own, fixture.model),
+      choose: () => 0,
+      play: () => 0,
+      nextTurnArsenal: () => 0,
+      response: NO_RESPONSE,
+    });
+  }
+
+  const allIds = (fixture: ReturnType<typeof pumpFixture>) =>
+    fixture.held.map((card) => card.instanceId).sort();
+
+  it("overblocks when untapped cogs can pump the attack into lethal", () => {
+    const fixture = pumpFixture({ cogs: 2 });
+    const [first] = fixture.held;
+    const single = scoreDefenseIntentWithTrace(
+      { kind: "defend", instanceIds: [first!.instanceId] },
+      fixture.input,
+      fixture.own,
+      fixture.model,
+    );
+    expect(single.lethal).toBe(true);
+    expect(single.survives).toBe(false);
+
+    const staged = stagedBlock(fixture);
+    expect(staged.kind).toBe("stage-defenders");
+    expect(staged.kind === "stage-defenders" && [...staged.instanceIds].sort()).toEqual(allIds(fixture));
+  });
+
+  it("keeps a card when the cogs that could pump are already tapped", () => {
+    const staged = stagedBlock(pumpFixture({ cogs: 2, tappedCogs: true }));
+    expect(staged.kind === "stage-defenders" && staged.instanceIds).toHaveLength(1);
+  });
+
+  it("blocks out an unused Flick Knives point on top of the attack", () => {
+    // 4 power at 2 life: one 3-defense block leaves 1, and the dagger adds 1.
+    const fixture = pumpFixture({ flickKnives: true });
+    const staged = stagedBlock(fixture);
+    expect(staged.kind === "stage-defenders" && [...staged.instanceIds].sort()).toEqual(allIds(fixture));
+
+    const used = pumpFixture({ flickKnives: true });
+    used.input.view.players[1].equipment.arms!.usedAbilityIndexes = [0];
+    const usedStage = stagedBlock(used);
+    expect(usedStage.kind === "stage-defenders" && usedStage.instanceIds).toHaveLength(1);
+  });
+
+  it("plans defense reactions against the pumped total", () => {
+    const fixture = pumpFixture({ cogs: 2 });
+    for (const id of ["FIRST_BLOCKER", "SECOND_BLOCKER"]) {
+      fixture.cards[id] = { ...fixture.cards[id]!, cardType: "defense-reaction" };
+    }
+    // One 3-defense reaction survives the printed 4 at 2 life; the pumped 6
+    // needs both.
+    const plan = plannedDefenseReactionPlan(fixture.input, { kind: "defend", instanceIds: [] });
+    expect([...plan.reactionIds!].sort()).toEqual(allIds(fixture));
+  });
+});

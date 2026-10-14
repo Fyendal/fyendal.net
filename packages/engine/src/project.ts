@@ -1171,8 +1171,10 @@ function projectState(
       ? undefined
       : attackMaxNonBlockDefenders(state, link);
     return {
+      // Per-turn usage of the attacking card's own abilities is public combat
+      // information, exactly as it is for permanents in the arena.
       attackingCard: {
-        ...cardView(state, runtime, link.attackingCard),
+        ...cardView(state, runtime, link.attackingCard, { controller: state.players[link.attacker] }),
         attack,
       },
       defendingCards: [

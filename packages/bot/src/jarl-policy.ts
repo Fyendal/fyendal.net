@@ -25,6 +25,7 @@ import {
   type BotPolicyInput,
   type ResponseModel,
 } from "./policy.js";
+import { threatenedAttackDamage } from "./public-threat.js";
 import type { HeroSolverRules } from "./card-model.js";
 import { guardianPatch } from "./guardian-rules.js";
 import { arsenalValuer, handResponse, opportunityValuer } from "./hand-value.js";
@@ -409,7 +410,8 @@ function wastesStackedDefenseReaction(data: CardData, input: BotPolicyInput): bo
 
   const incoming = incomingAttackDamage(input);
   const meaningfulHit = (link.onHitEffects?.length ?? 0) > 0 || link.wagered === true;
-  return !meaningfulHit && incoming > 0 && incoming < input.view.players[input.seat].life &&
+  return !meaningfulHit && incoming > 0 &&
+    threatenedAttackDamage(input) < input.view.players[input.seat].life &&
     Math.max(0, data.defense ?? 0) > incoming;
 }
 
@@ -419,7 +421,7 @@ function shouldSaveDefenseReaction(data: CardData, input: BotPolicyInput): boole
 
   const link = currentLink(input);
   const me = input.view.players[input.seat];
-  return !!link && link.attackValue <= 3 && link.damage < me.life;
+  return !!link && link.attackValue <= 3 && Math.max(link.damage, threatenedAttackDamage(input)) < me.life;
 }
 
 /** A fixed token batch, independent of choices, hidden cards, or future hits.
@@ -503,7 +505,7 @@ function scorePlay(
       const link = currentLink(input);
       const incoming = incomingAttackDamage(input);
       score = input.view.pendingDecision?.kind === "defense-reaction" &&
-        incoming > 0 && incoming <= 2 && (incoming >= me.life ||
+        incoming > 0 && incoming <= 2 && (threatenedAttackDamage(input) >= me.life ||
           (link?.onHitEffects?.length ?? 0) > 0)
         ? 90 : -100;
     } else if (functional === "ripple away|3") {
