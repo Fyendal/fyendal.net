@@ -1160,6 +1160,8 @@ export interface CardScript {
   modifyDefense?(ctx: ScriptCtx): number;
   /** Continuous adjustment to an opposing card's power while it is defending. */
   modifyOpposingPower?(ctx: ScriptCtx, defending: DeepReadonly<CardInstance>): number;
+  /** Continuous adjustment to a friendly card's power while it is defending. */
+  modifyFriendlyPower?(ctx: ScriptCtx, defending: DeepReadonly<CardInstance>): number;
   /** Adjustment to the power property of cards defending this attack (used by
    *  effects such as Herald of Triumph and checked by Phantasm). */
   modifyDefendingPower?(ctx: ScriptCtx, defending: DeepReadonly<CardInstance>): number;

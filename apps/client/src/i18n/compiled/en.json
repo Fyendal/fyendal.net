@@ -11478,6 +11478,20 @@
       "value": "'s graveyard to banish"
     }
   ],
+  "card.pen.haboob.upkeep": [
+    {
+      "type": 0,
+      "value": "Destroy "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " Ash to keep Haboob?"
+    }
+  ],
   "card.pen.hand.card.banish": [
     {
       "type": 0,

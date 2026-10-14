@@ -86,6 +86,18 @@ function named(ctx: ScriptCtx, card: Card | string, name: string): boolean {
     : ctx.cardNames(card).includes(wanted);
 }
 
+function isAttackAction(ctx: ScriptCtx, card: Card): boolean {
+  return ctx.hasCardType(card, "action") && ctx.cardTypes(card).includes("attack");
+}
+
+function haboobPower(ctx: ScriptCtx, card: Card): number {
+  return isAttackAction(ctx, card) ? -1 : 0;
+}
+
+function haboobAsh(ctx: ScriptCtx) {
+  return ctx.player(ctx.seat).board.filter((card) => named(ctx, card, "Ash"));
+}
+
 function hitWithDaggerThisChain(ctx: ScriptCtx): boolean {
   return ctx.state.chain.some(
     (link) =>
@@ -1699,8 +1711,10 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
   },
 
   "haboob|1": {
-    modifyOpposingAttack: () => -1,
-    modifyOpposingPower: () => -1,
+    modifyFriendlyAttack: haboobPower,
+    modifyOpposingAttack: haboobPower,
+    modifyFriendlyPower: haboobPower,
+    modifyOpposingPower: haboobPower,
     triggers: [
       {
         event: "start-of-turn",
@@ -1709,15 +1723,28 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
         effect(ctx) {
           const n = ctx.getCounter("storm") + 1;
           ctx.setCounter("storm", n);
-          const ash = ctx
-            .player(ctx.seat)
-            .board.filter((card) => named(ctx, card, "Ash"))
-            .slice(0, n);
-          if (ash.length < n) ctx.destroySelf();
-          else for (const card of ash) ctx.destroyPermanent(card.instanceId);
+          if (haboobAsh(ctx).length < n) {
+            ctx.destroySelf();
+            return;
+          }
+          ctx.requestChoice(
+            "pen-haboob-upkeep",
+            yesNoPrompt(`Destroy ${n} Ash to keep Haboob?`, "card.pen.haboob.upkeep", { count: n }),
+            ["yes", "no"],
+          );
         },
       },
     ],
+    onChoose(ctx, hook, option) {
+      if (hook !== "pen-haboob-upkeep") return;
+      const n = ctx.getCounter("storm");
+      const ash = haboobAsh(ctx).slice(0, n);
+      if (option !== "yes" || ash.length < n) {
+        ctx.destroySelf();
+        return;
+      }
+      for (const card of ash) ctx.destroyPermanent(card.instanceId);
+    },
   },
   "smoldering steel|1": {
     canPlay: (ctx) => !!ctx.link && hasTag(ctx, ctx.link.attackingCard, "dagger"),

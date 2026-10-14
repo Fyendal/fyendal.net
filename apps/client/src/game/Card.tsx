@@ -40,7 +40,6 @@ const NAMED_COUNTER_KEYS = new Set([
   "lessons",
   "rust",
   "sand",
-  "storm",
 ]);
 export const CARD_IMAGE_ASPECT_RATIO = 546 / 762;
 export const CARD_PREVIEW_HEIGHT = 413;
@@ -322,6 +321,7 @@ export function CardFace({
   const verseCounters = card.counters?.verse ?? 0;
   const flowCounters = card.counters?.flow ?? 0;
   const stainCounters = card.counters?.stain ?? 0;
+  const stormCounters = card.counters?.storm ?? 0;
   const holo = (card.counters?.holo ?? 0) > 0;
   const arcaneModifier = card.counters?.arcaneBonus ?? 0;
   const attacked = (card.counters?.attacked ?? 0) > 0;
@@ -345,6 +345,7 @@ export function CardFace({
       verseCounters > 0 ||
       flowCounters > 0 ||
       stainCounters > 0 ||
+      stormCounters > 0 ||
       holo ||
       arcaneModifier !== 0 ||
       attacked ||
@@ -693,6 +694,15 @@ export function CardFace({
               icon="/icons/stain.png"
               tooltip={counterTooltip(stainCounters, "stain")}
               value={String(stainCounters)}
+            />
+          ) : null}
+          {stormCounters > 0 ? (
+            <CounterOverlay
+              cardInstanceId={card.instanceId}
+              kind="stormc"
+              icon="/icons/storm.png"
+              tooltip={counterTooltip(stormCounters, "storm")}
+              value={String(stormCounters)}
             />
           ) : null}
           {holo ? (

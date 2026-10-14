@@ -10959,6 +10959,20 @@
       "value": " 墓地中的一张牌放逐"
     }
   ],
+  "card.pen.haboob.upkeep": [
+    {
+      "type": 0,
+      "value": "摧毁 "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " 个 Ash 以保留 Haboob？"
+    }
+  ],
   "card.pen.hand.card.banish": [
     {
       "type": 0,

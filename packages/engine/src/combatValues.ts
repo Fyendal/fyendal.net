@@ -734,6 +734,13 @@ export function currentPowerOf(
       card,
     ) ?? 0;
   }
+  const defenderSeat = opponent(link.attacker);
+  for (const source of hookSources(state, defenderSeat, { board: true, equipment: true, weapons: true })) {
+    power += scriptOf(state, source.cardId, source)?.modifyFriendlyPower?.(
+      runtime.makeCtx(state, defenderSeat, source, link),
+      card,
+    ) ?? 0;
+  }
   return power;
 }
 

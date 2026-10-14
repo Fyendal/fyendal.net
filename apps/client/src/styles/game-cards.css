@@ -362,7 +362,8 @@
 /* real card image fills the frame; text layout is the fallback */
 .card-hasimg { padding: 0; overflow: hidden; }
 .card-hasimg.card-explained,
-.card-hasimg.card-countered { overflow: visible; }
+.card-hasimg.card-countered,
+.card-hasimg:has(> .c-chips) { overflow: visible; }
 .c-img {
   display: block;
   width: 100%;
@@ -400,6 +401,13 @@
   transform: none;
   border-radius: 5px;
   font-size: 9px;
+}
+/* Named counters sit on the artwork below the name bar, which would otherwise
+   cover the default top-left overhang. */
+.card-board-square .c-chips {
+  top: calc(var(--board-name-height) + 4px);
+  left: 3px;
+  z-index: 3;
 }
 /* The attacking weapon keeps a yellow frame around its complete silhouette. */
 .card-board-square.card-chain-source {
@@ -771,7 +779,8 @@
   filter: none;
 }
 .c-holo .c-ovl-icon,
-.c-stainc .c-ovl-icon {
+.c-stainc .c-ovl-icon,
+.c-stormc .c-ovl-icon {
   filter: invert(1);
 }
 .c-ovl-num {

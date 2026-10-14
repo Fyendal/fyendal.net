@@ -1610,6 +1610,50 @@ describe("PEN — generalized rules interactions", () => {
     )).toBe(true);
   });
 
+  it("Haboob reduces only attack action cards, including its controller's", () => {
+    const seats = (hand: string[]) =>
+      scenario({
+        seats: [
+          { hero: "rhinar", board: ["haboob|1"], hand, resources: 2, equipment: NO_EQUIPMENT },
+          { hero: "dorinthea", equipment: NO_EQUIPMENT },
+        ],
+      });
+    seats([]).attackWithWeapon(undefined, { settle: false }).expectAttackValue(4);
+    seats(["head jab|1"]).play("head jab|1", { settle: false }).expectAttackValue(2);
+
+    const opposingWeapon = (board: string[]) => {
+      const g = scenario({
+        active: 1,
+        seats: [
+          { hero: "rhinar", board, equipment: NO_EQUIPMENT },
+          { hero: "dorinthea", resources: 1, equipment: NO_EQUIPMENT },
+        ],
+      });
+      g.attackWithWeapon(undefined, { settle: false });
+      return projectStateFor(g.state, 1).chain.at(-1)?.attackValue;
+    };
+    expect(opposingWeapon(["haboob|1"])).toBe(opposingWeapon([]));
+  });
+
+  it.each([
+    { option: "yes", haboob: 1, ash: 0 },
+    { option: "no", haboob: 0, ash: 1 },
+  ])("Haboob upkeep lets its controller answer $option to destroying Ash", ({ option, haboob, ash }) => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", board: ["haboob|1", "ash|0"], equipment: NO_EQUIPMENT },
+        { hero: "dorinthea", equipment: NO_EQUIPMENT },
+      ],
+    });
+    g.endTurn();
+    expect(g.state.pendingDecision?.player).toBe(0);
+    expect(g.state.pendingDecision?.prompt).toContain("Destroy 1 Ash to keep Haboob");
+    g.chooseOption(option);
+    const board = g.state.players[0]!.board.map((card) => functionalKeyOf(cardData[card.cardId]!));
+    expect(board.filter((key) => key === "haboob|1")).toHaveLength(haboob);
+    expect(board.filter((key) => key === "ash|0")).toHaveLength(ash);
+  });
+
   it("Graven equipment returns from graveyard by destroying two Silver", () => {
     const g = scenario({
       seats: [

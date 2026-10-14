@@ -171,11 +171,11 @@ describe("PlayerHalf", () => {
   it("localizes board zone labels in Chinese", () => {
     const html = renderPlayerHalf(player, true, undefined, undefined, "zh-Hans");
 
-    expect(html).toContain('title="牌库"');
-    expect(html).toContain('title="Arsenal"');
-    expect(html).toContain('title="墓地"');
-    expect(html).toContain('title="放逐区"');
-    expect(html).toContain('title="武器"');
+    expect(html).toContain('aria-label="牌库"');
+    expect(html).toContain('aria-label="Arsenal"');
+    expect(html).toContain('aria-label="墓地"');
+    expect(html).toContain('aria-label="放逐区"');
+    expect(html).toContain('aria-label="武器"');
   });
 
   it("distinguishes matching weapon zones and spotlights the active chain weapon", () => {
@@ -188,8 +188,8 @@ describe("PlayerHalf", () => {
       ],
     }, true, undefined, undefined, "en", 42);
 
-    expect(html).toContain('title="Left weapon"');
-    expect(html).toContain('title="Right weapon"');
+    expect(html).toContain('aria-label="Left weapon"');
+    expect(html).toContain('aria-label="Right weapon"');
     expect(html.match(/card-chain-source/g)).toHaveLength(2);
     expect(html).toContain('class="card-chain-source-badge" title="On chain">On chain</div>');
     expect(html).toMatch(/card-chain-source[^>]*data-cardid="TST-DAGGER"/);
@@ -283,8 +283,8 @@ describe("PlayerHalf", () => {
 
     expect(html.match(/zone-card-pile-multiple/g)).toHaveLength(2);
     expect(html.match(/data-stack-depth="2"/g)).toHaveLength(2);
-    expect(html).toMatch(/title="Graveyard".*pitch-top zone-card-pile zone-card-pile-multiple/);
-    expect(html).toMatch(/title="Banished".*pitch-top zone-card-pile"/);
+    expect(html).toMatch(/aria-label="Graveyard".*pitch-top zone-card-pile zone-card-pile-multiple/);
+    expect(html).toMatch(/aria-label="Banished".*pitch-top zone-card-pile"/);
   });
 
   it("anchors every grouped copy to the wrapper that also owns its count badge", () => {

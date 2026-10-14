@@ -900,6 +900,7 @@
   "card.pen.frozen.permanent.destroy": "摧毁一个已冻结的永久物",
   "card.pen.graveyard.blue.pitch": "将墓地中的一张蓝色牌置入扣置区？",
   "card.pen.graveyard.card.banish": "选择英雄 {hero} 墓地中的一张牌放逐",
+  "card.pen.haboob.upkeep": "摧毁 {count} 个 Ash 以保留 Haboob？",
   "card.pen.hand.card.banish": "选择一张手牌放逐",
   "card.pen.hand.fifthfromtop": "将一张手牌置于牌库顶向下第五张",
   "card.pen.heroally.tap": "横置目标英雄或盟友",

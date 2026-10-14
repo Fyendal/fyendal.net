@@ -900,6 +900,7 @@
   "card.pen.frozen.permanent.destroy": "Destroy a frozen permanent",
   "card.pen.graveyard.blue.pitch": "Pitch a blue from graveyard?",
   "card.pen.graveyard.card.banish": "Choose a card from hero {hero}'s graveyard to banish",
+  "card.pen.haboob.upkeep": "Destroy {count} Ash to keep Haboob?",
   "card.pen.hand.card.banish": "Banish a card from your hand",
   "card.pen.hand.fifthfromtop": "Put a card from hand fifth from the top",
   "card.pen.heroally.tap": "Tap target hero or ally",

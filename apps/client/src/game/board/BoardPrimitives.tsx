@@ -31,7 +31,8 @@ export function MatZone({
       style={{ gridArea: area }}
       data-motion-zone={motionZone}
       onClick={onClick}
-      title={label}
+      role="group"
+      aria-label={label}
     >
       {children ?? <span className="mat-zone-label">{label}</span>}
       {count !== undefined && count > 0 ? <span className="mat-count">{count}</span> : null}
