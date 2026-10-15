@@ -399,6 +399,40 @@ describe("SUP — heroes and the crowd", () => {
       .expectAP(0, 1);
   });
 
+  it("Jaws of Victory gets go again from a cheer during the reaction or damage step", () => {
+    const tuffnutWithJaws = () => scenario({
+      seats: [
+        hero("tuffnut|0", {
+          life: 20,
+          hand: ["jaws of victory|1"],
+          deck: ["old leather and vim|1"],
+          resources: 2,
+        }),
+        foe({ life: 10 }),
+      ],
+    });
+
+    const reaction = tuffnutWithJaws();
+    reaction.play("jaws of victory|1")
+      .blockWith()
+      .activate("tuffnut|0")
+      .expectLog("The crowd cheers Tuffnut")
+      .settle()
+      .expectAP(0, 1);
+
+    const damage = tuffnutWithJaws();
+    damage.play("jaws of victory|1")
+      .blockWith()
+      .passPriority()
+      .passPriority()
+      .expectLife(1, 4);
+    expect(damage.state.players[0]!.flags.cheeredThisTurn).not.toBe(true);
+    damage.activate("tuffnut|0")
+      .expectLog("The crowd cheers Tuffnut")
+      .settle()
+      .expectAP(0, 1);
+  });
+
   it("Cries of Encore lets its controller pay to play one suspense aura from graveyard", () => {
     const g = scenario({
       seats: [

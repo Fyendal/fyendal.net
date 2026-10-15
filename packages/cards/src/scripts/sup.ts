@@ -1171,8 +1171,8 @@ Object.assign(sup, {
     onAttackDeclared(ctx: ScriptCtx) {
       if (ctx.link?.targetAllyId === undefined && ctx.compareLife(ctx.seat, opponentSeat(ctx)) < 0)
         ctx.crowdCheer(ctx.seat);
-      if (ctx.getFlag("player", "cheeredThisTurn")) ctx.grantGoAgain();
     },
+    hasConditionalGoAgain: (ctx: ScriptCtx) => ctx.getFlag("player", "cheeredThisTurn") === true,
   },
   "wind up the crowd|3": {
     activated: {

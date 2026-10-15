@@ -1644,6 +1644,14 @@ export function beginHeroDamage(state: GameStateInternal,
 export function dealEffectDamage(state: GameStateInternal,
   runtime: EngineRuntime, packet: PendingArcane): number {
   if (packet.targetAllyId !== undefined) return dealAllyDamage(state, runtime, packet);
+  // A turn-scoped flag on the target hero (cleared with the other per-turn
+  // player flags) forbids preventing arcane damage from one seat's sources.
+  if (
+    packet.arcane &&
+    state.players[packet.targetSeat]?.flags[`cannotPreventArcaneFrom:${packet.sourceSeat}`] === true
+  ) {
+    packet.unpreventable = true;
+  }
   applyBoundArcaneCardBonus(state, packet);
   applyArcaneAmp(state, packet);
   packet.amount += effectDamageBonus(state, packet);

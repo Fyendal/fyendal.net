@@ -1024,6 +1024,54 @@ describe("HNT — marked heroes and daggers", () => {
       .play("demonstrate devotion|1");
   });
 
+  it("Hunt the Hunter marks through an attack trigger after another red card", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          heroKey: "fai, rising rebellion|0",
+          weapons: [],
+          hand: ["ronin renegade|1", "hunt the hunter|1", "sink below|3"],
+        },
+        { hero: "dorinthea" },
+      ],
+    });
+
+    g.play("ronin renegade|1").blockWith().settle()
+      .play("hunt the hunter|1", { settle: false });
+
+    expect(g.state.stack).toEqual([
+      expect.objectContaining({ label: "Mark the defending hero" }),
+    ]);
+    expect(g.state.players[1]!.hero.counters?.marked ?? 0).toBe(0);
+
+    g.passPriority().passPriority();
+
+    expect(g.state.stack).toEqual([]);
+    expect(g.state.pendingDecision?.kind).toBe("defend");
+    expect(g.state.players[1]!.hero.counters?.marked).toBe(1);
+  });
+
+  it("Hunt the Hunter does not trigger without another red card played this turn", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          heroKey: "fai, rising rebellion|0",
+          weapons: [],
+          hand: ["hunt the hunter|1", "sink below|3"],
+        },
+        { hero: "dorinthea" },
+      ],
+    });
+
+    g.play("hunt the hunter|1", { settle: false });
+
+    expect(g.state.stack).toEqual([]);
+    expect(g.state.pendingDecision?.kind).toBe("defend");
+    expect(g.state.players[1]!.hero.counters?.marked ?? 0).toBe(0);
+  });
+
   it("Cindra cannot equip a face-down Draconic dagger from the graveyard", () => {
     const g = scenario({
       seats: [
@@ -1587,6 +1635,400 @@ describe("HNT — rules regression coverage", () => {
       .play("art of the dragon: blood|1");
 
     expect(g.state.chain.at(-1)?.attackingCard.grantedTypes).toContain("draconic");
+  });
+});
+
+describe("HNT — attack triggers use the stack", () => {
+  type Game = ReturnType<typeof scenario>;
+
+  function expectAttackTrigger(g: Game, label: string): void {
+    expect(g.state.stack).toEqual([expect.objectContaining({ label })]);
+  }
+
+  function resolveTrigger(g: Game): Game {
+    g.passPriority().passPriority();
+    expect(g.state.stack).toEqual([]);
+    return g;
+  }
+
+  function named(cards: readonly { cardId: string }[], key: string): number {
+    const name = cardData[printingId(key)]!.name;
+    return cards.filter((card) => cardData[card.cardId]!.name === name).length;
+  }
+
+  function weaponCount(g: Game, seat: number, key: string): number {
+    return named(g.state.players[seat]!.weapons, key);
+  }
+
+  function boardCount(g: Game, seat: number, key: string): number {
+    return named(g.state.players[seat]!.board, key);
+  }
+
+  it.each([
+    { key: "bite|1", hook: "bite-dagger", draconic: false },
+    { key: "throw yourself at them|1", hook: "throw-dagger", draconic: false },
+    { key: "silver talons|1", hook: "silver-talons-dagger", draconic: true },
+  ])("$key offers its dagger damage only when its attack trigger resolves", ({ key, hook, draconic }) => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          resources: 1,
+          weapons: ["graphene chelicera|0"],
+          board: draconic ? ["fealty|0"] : [],
+          hand: [key],
+        },
+        { hero: "dorinthea" },
+      ],
+    });
+
+    if (draconic) g.activate("fealty|0");
+    g.play(key, { settle: false });
+
+    expectAttackTrigger(g, "You may have a dagger deal 1 damage to the defending hero");
+    expect(g.state.pendingDecision?.chooseHook).toBeUndefined();
+
+    resolveTrigger(g);
+    expect(g.state.pendingDecision?.chooseHook).toBe(hook);
+
+    g.chooseCard("graphene chelicera|0").expectLife(1, 19);
+    expect(weaponCount(g, 0, "graphene chelicera|0")).toBe(0);
+  });
+
+  it("Silver Talons does not trigger when it is not Draconic", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", weapons: ["graphene chelicera|0"], hand: ["silver talons|1"] },
+        { hero: "dorinthea" },
+      ],
+    });
+
+    g.play("silver talons|1", { settle: false });
+
+    expect(g.state.stack).toEqual([]);
+    expect(g.state.pendingDecision?.kind).toBe("defend");
+  });
+
+  it("Whittle from Bone equips Graphene Chelicera when its trigger resolves", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", weapons: [], hand: ["whittle from bone|1"] },
+        { hero: "dorinthea" },
+      ],
+    });
+    g.state.players[1]!.hero.counters = { marked: 1 };
+
+    g.play("whittle from bone|1", { settle: false });
+
+    expectAttackTrigger(g, "Equip a Graphene Chelicera token");
+    expect(weaponCount(g, 0, "graphene chelicera|0")).toBe(0);
+
+    resolveTrigger(g);
+    expect(weaponCount(g, 0, "graphene chelicera|0")).toBe(1);
+  });
+
+  it.each(["for the dracai|1", "for the emperor|1", "for the realm|1"])(
+    "%s creates Fealty from an attack trigger against a marked hero",
+    (key) => {
+      const g = scenario({
+        seats: [
+          { hero: "rhinar", resources: 2, hand: [key] },
+          { hero: "dorinthea" },
+        ],
+      });
+      g.state.players[1]!.hero.counters = { marked: 1 };
+
+      g.play(key, { settle: false });
+
+      expectAttackTrigger(g, "Create a Fealty token");
+      expect(boardCount(g, 0, "fealty|0")).toBe(0);
+
+      resolveTrigger(g);
+      expect(boardCount(g, 0, "fealty|0")).toBe(1);
+    },
+  );
+
+  it("For the Dracai does not trigger against an unmarked hero", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", hand: ["for the dracai|1"] },
+        { hero: "dorinthea" },
+      ],
+    });
+
+    g.play("for the dracai|1", { settle: false });
+
+    expect(g.state.stack).toEqual([]);
+    expect(g.state.pendingDecision?.kind).toBe("defend");
+  });
+
+  it("Demonstrate Devotion keeps static go again and creates Fealty through its granted trigger", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", resources: 1, hand: ["hunt to the ends of rathe|1", "demonstrate devotion|1"] },
+        { hero: "dorinthea" },
+      ],
+    });
+
+    g.play("hunt to the ends of rathe|1").blockWith().settle()
+      .play("demonstrate devotion|1", { settle: false });
+
+    expectAttackTrigger(g, "Create a Fealty token");
+    expect(g.state.chain.at(-1)?.goAgain).toBe(true);
+    expect(boardCount(g, 0, "fealty|0")).toBe(0);
+
+    resolveTrigger(g);
+    expect(boardCount(g, 0, "fealty|0")).toBe(1);
+  });
+
+  it("Wrath of Retribution buffs and discounts daggers when its trigger resolves", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          resources: 3,
+          weapons: ["kunai of retribution|0"],
+          hand: ["wrath of retribution|1"],
+        },
+        { hero: "dorinthea" },
+      ],
+    });
+
+    g.play("wrath of retribution|1", { settle: false });
+
+    expectAttackTrigger(g, "Daggers get +1 attack and cost 1 less to activate this combat chain");
+    expect(g.state.modifiers.some((modifier) => modifier.attackActivationCostReduction === 1)).toBe(false);
+
+    resolveTrigger(g).blockWith().settle()
+      .attackWithWeapon("kunai of retribution|0")
+      .expectAttackValue(2)
+      .expectResources(0, 0);
+  });
+
+  it.each([
+    { key: "art of the dragon: claw|1", flag: "hntArtClaw", label: "Gain \"When this hits a hero, destroy all cards in their arsenal\"" },
+    { key: "art of the dragon: scale|1", flag: "hntArtScale", label: "Gain \"When this hits a hero, put a -1 defense counter on an equipment they control\"" },
+  ])("$key gains its hit ability only when its attack trigger resolves", ({ key, flag, label }) => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", resources: 1, board: ["fealty|0"], hand: [key] },
+        { hero: "dorinthea" },
+      ],
+    });
+
+    g.activate("fealty|0").play(key, { settle: false });
+
+    expectAttackTrigger(g, label);
+    expect(g.state.chain.at(-1)?.flags[flag]).toBeUndefined();
+
+    resolveTrigger(g);
+    expect(g.state.chain.at(-1)?.flags[flag]).toBe(true);
+  });
+
+  it("Art of the Dragon: Blood gets go again when its attack trigger resolves", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", board: ["fealty|0"], hand: ["art of the dragon: blood|1"] },
+        { hero: "dorinthea" },
+      ],
+    });
+
+    g.activate("fealty|0").play("art of the dragon: blood|1", { settle: false });
+
+    expectAttackTrigger(g, "Gain go again; the next 3 Draconic cards cost 1 less to play");
+    expect(g.state.chain.at(-1)?.goAgain).toBe(false);
+
+    resolveTrigger(g);
+    expect(g.state.chain.at(-1)?.goAgain).toBe(true);
+  });
+
+  it("Fire Tenet: Strike First buffs the next Draconic attack after its trigger resolves", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", hand: ["fire tenet: strike first|1", "for the dracai|1"] },
+        { hero: "dorinthea" },
+      ],
+    });
+
+    g.play("fire tenet: strike first|1", { settle: false });
+
+    expectAttackTrigger(g, "Your next Draconic attack this combat chain gets +1 attack");
+
+    resolveTrigger(g).expectAttackValue(3).blockWith().settle()
+      .play("for the dracai|1")
+      .expectAttackValue(5);
+  });
+
+  it("Hunt to the Ends of Rathe marks Arakni through its attack trigger", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", hand: ["hunt to the ends of rathe|1"] },
+        { hero: "dorinthea", heroKey: "HNT001" },
+      ],
+    });
+
+    g.play("hunt to the ends of rathe|1", { settle: false });
+
+    expectAttackTrigger(g, "Mark the defending hero");
+    expect(g.state.players[1]!.hero.counters?.marked ?? 0).toBe(0);
+    g.expectAttackValue(2);
+
+    resolveTrigger(g).expectAttackValue(4);
+    expect(g.state.players[1]!.hero.counters?.marked).toBe(1);
+  });
+
+  it("Hunt to the Ends of Rathe does not trigger against a hero other than Arakni", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", hand: ["hunt to the ends of rathe|1"] },
+        { hero: "dorinthea" },
+      ],
+    });
+
+    g.play("hunt to the ends of rathe|1", { settle: false });
+
+    expect(g.state.stack).toEqual([]);
+    expect(g.state.pendingDecision?.kind).toBe("defend");
+  });
+
+  it("Pick Up the Point offers retrieve only when its attack trigger resolves", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          weapons: [],
+          hand: ["pick up the point|1", "wrecker romp|3"],
+          graveyard: ["kunai of retribution|0"],
+        },
+        { hero: "dorinthea" },
+      ],
+    });
+
+    g.play("pick up the point|1", { settle: false });
+
+    expectAttackTrigger(g, "You may retrieve a dagger from your graveyard");
+    expect(g.state.pendingDecision?.chooseHook).toBeUndefined();
+
+    resolveTrigger(g);
+    expect(g.state.pendingDecision?.chooseHook).toBe("pick-point-1");
+
+    g.chooseCard("kunai of retribution|0");
+    const payment = projectStateFor(g.state, 0).pendingDecision?.resourcePayment;
+    g.chooseOption(payment!.options[0]!.optionId);
+    expect(weaponCount(g, 0, "kunai of retribution|0")).toBe(1);
+  });
+
+  it("Sound the Alarm reveals the defending hand only when its attack trigger resolves", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", resources: 1, hand: ["sound the alarm|1"], deck: ["sink below|1"] },
+        { hero: "rhinar", heroKey: "briar|0", hand: ["razor reflex|1"] },
+      ],
+    });
+
+    g.play("sound the alarm|1", { settle: false });
+
+    expectAttackTrigger(g, "The defending hero reveals their hand");
+    g.expectNoLog("Razor Reflex");
+
+    resolveTrigger(g).expectLog("Razor Reflex");
+    expect(g.state.pendingDecision?.chooseHook).toBe("sound-alarm");
+  });
+
+  it("Blood Runs Deep deals dagger damage only when its attack trigger resolves", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          weapons: ["graphene chelicera|0"],
+          hand: ["blood runs deep|1", "wrecker romp|3"],
+        },
+        { hero: "dorinthea" },
+      ],
+    });
+
+    g.play("blood runs deep|1", { pitch: ["wrecker romp|3"], settle: false });
+
+    expectAttackTrigger(g, "Each dagger you control deals 1 damage to the defending hero");
+    g.expectLife(1, 20);
+    expect(weaponCount(g, 0, "graphene chelicera|0")).toBe(1);
+
+    resolveTrigger(g).expectLife(1, 19);
+    expect(weaponCount(g, 0, "graphene chelicera|0")).toBe(0);
+  });
+
+  it("Rotten Remains banishes 1-power cards only when its attack trigger resolves", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", hand: ["rotten remains|3"], graveyard: ["bite|3"] },
+        { hero: "dorinthea", graveyard: ["bite|3"] },
+      ],
+    });
+
+    g.play("rotten remains|3", { settle: false });
+
+    expectAttackTrigger(g, "Banish a card with 1 power from each graveyard to get +1 power");
+    g.expectZoneSize(0, "graveyard", 1).expectZoneSize(1, "graveyard", 1).expectAttackValue(1);
+
+    resolveTrigger(g)
+      .expectInZone(0, "bite|3", "banish")
+      .expectInZone(1, "bite|3", "banish")
+      .expectAttackValue(2);
+  });
+
+  it("Thick Hide Hunter discards at random only when its attack trigger resolves", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", resources: 2, hand: ["thick hide hunter|2", "sink below|3"] },
+        { hero: "dorinthea" },
+      ],
+    });
+
+    g.play("thick hide hunter|2", { settle: false });
+
+    expectAttackTrigger(g, "Discard a random card");
+    g.expectHandSize(0, 1);
+
+    resolveTrigger(g).expectHandSize(0, 0).expectInZone(0, "sink below|3", "graveyard");
+  });
+
+  it("Retrace the Past names a card only when its combo trigger resolves", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          hand: ["surging strike|1", "raging onslaught|3", "whelming gustwave|1", "retrace the past|3"],
+        },
+        { hero: "dorinthea" },
+      ],
+    });
+
+    g.play("surging strike|1", { pitch: ["raging onslaught|3"] }).blockWith().settle()
+      .play("whelming gustwave|1").blockWith().settle()
+      .play("retrace the past|3", { settle: false });
+
+    expectAttackTrigger(g, "Name a card; this gets that name, +2 attack, and go again");
+    expect(g.state.pendingDecision?.kind).not.toBe("choose-name");
+
+    resolveTrigger(g);
+    expect(g.state.pendingDecision).toMatchObject({ kind: "choose-name", chooseHook: "retrace-name" });
+  });
+
+  it("Douse in Runeblood creates Runechants only when its attack trigger resolves", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", resources: 1, hand: ["nimblism|1", "douse in runeblood|1"] },
+        { hero: "dorinthea" },
+      ],
+    });
+
+    g.play("nimblism|1").play("douse in runeblood|1", { settle: false });
+
+    expectAttackTrigger(g, "Create a Runechant for each non-attack action card you've played this turn");
+    expect(boardCount(g, 0, "runechant|0")).toBe(0);
+
+    resolveTrigger(g);
+    expect(boardCount(g, 0, "runechant|0")).toBe(1);
   });
 });
 

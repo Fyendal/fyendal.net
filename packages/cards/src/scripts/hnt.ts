@@ -1,4 +1,5 @@
-import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
+import type { CardInstance, CardScript, DeepReadonly, ScriptCtx, TriggerDef } from "@fyendal/engine";
+import type { GameMessage } from "@fyendal/shared";
 import {
   attackAbility,
   bloodDebtScript as bloodDebt,
@@ -62,6 +63,21 @@ function hasKeyword(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, keyword: s
   return [...(ctx.cardData(card.cardId).keywords ?? []), ...(card.grantedKeywords ?? [])].some(
     (entry) => entry.toLowerCase() === normalized,
   );
+}
+
+function attacksHero(ctx: ScriptCtx): boolean {
+  return ctx.link?.targetAllyId === undefined;
+}
+
+/** "When this attacks …" — a triggered layer above the attack, not an
+ * immediate declaration hook. */
+function attackTrigger(
+  label: string,
+  labelMessage: GameMessage,
+  effect: (ctx: ScriptCtx) => void,
+  condition: (ctx: ScriptCtx) => boolean = () => true,
+): TriggerDef {
+  return { event: "attack-declared", sourceZone: "self", label, labelMessage, condition, effect };
 }
 
 function isMarked(ctx: ScriptCtx, seat: number): boolean {
@@ -267,9 +283,14 @@ function resolveDaggerDamage(ctx: ScriptCtx, hook: string, option: string, expec
 
 function daggerDamageAttack(hook: string, condition: (ctx: ScriptCtx) => boolean = () => true): CardScript {
   return {
-    onAttackDeclared(ctx) {
-      if (condition(ctx)) offerDaggerDamage(ctx, hook);
-    },
+    triggers: [
+      attackTrigger(
+        "You may have a dagger deal 1 damage to the defending hero",
+        decisionMessage("card.trigger.common.dagger.damage.defender", { amount: 1 }),
+        (ctx) => offerDaggerDamage(ctx, hook),
+        (ctx) => attacksHero(ctx) && condition(ctx),
+      ),
+    ],
     onChoose(ctx, choiceHook, option) {
       resolveDaggerDamage(ctx, choiceHook, option, hook);
     },
@@ -329,14 +350,58 @@ function nextDagger(pump: number, opts?: { mark?: boolean; reenable?: boolean })
   };
 }
 
+function createFealtyTrigger(condition: (ctx: ScriptCtx) => boolean): TriggerDef {
+  return attackTrigger(
+    "Create a Fealty token",
+    decisionMessage("card.trigger.common.fealty.create"),
+    (ctx) => ctx.createToken(FEALTY),
+    condition,
+  );
+}
+
+function fireTenetStrikeFirstTrigger(): TriggerDef {
+  return attackTrigger(
+    "Your next Draconic attack this combat chain gets +1 attack",
+    decisionMessage("card.trigger.common.nextattack.draconic.attack", { amount: 1 }),
+    (ctx) => buffNextAttack(ctx, { attack: 1, appliesToSubtype: "draconic", expiresOnChainClose: true }),
+  );
+}
+
+function pickUpThePointTrigger(hook: string): TriggerDef {
+  return attackTrigger(
+    "You may retrieve a dagger from your graveyard",
+    decisionMessage("card.trigger.common.dagger.retrieve"),
+    (ctx) => offerRetrieveDagger(ctx, hook),
+  );
+}
+
+function soundTheAlarm(ctx: ScriptCtx): void {
+  const target = opponentSeat(ctx);
+  const hand = ctx.player(target).hand;
+  if (
+    hand.length > 0 &&
+    !ctx.revealCards(
+      hand.map((card) => card.instanceId),
+      target,
+    )
+  )
+    return;
+  if (!hand.some((card) => ctx.cardData(card.cardId).cardType === "attack-reaction")) return;
+  const reactions = ctx
+    .player(ctx.seat)
+    .deck.filter((card) => ctx.cardData(card.cardId).cardType === "defense-reaction");
+  if (reactions.length)
+    ctx.requestCardChoice(
+      "sound-alarm",
+      decisionPrompt("Search for a defense reaction?", "card.hnt.defensereaction.search", {
+        optionMessages: commonOptionMessages("pass"),
+      }),
+      ["pass", ...reactions.map((card) => card.instanceId)],
+    );
+}
+
 function attackMarkedFealty(): CardScript {
-  return {
-    onAttackDeclared(ctx) {
-      if (ctx.link?.targetAllyId === undefined && isMarked(ctx, opponentSeat(ctx))) {
-        ctx.createToken(FEALTY);
-      }
-    },
-  };
+  return { triggers: [createFealtyTrigger((ctx) => attacksHero(ctx) && isMarked(ctx, opponentSeat(ctx)))] };
 }
 
 function pitchSeries(name: string, factory: (pitch: 1 | 2 | 3) => CardScript): Record<string, CardScript> {
@@ -347,9 +412,14 @@ export const hnt: Record<string, CardScript> = {
   // Assassin / marked
   ...pitchSeries("bite", () => daggerDamageAttack("bite-dagger")),
   ...pitchSeries("whittle from bone", () => ({
-    onAttackDeclared(ctx) {
-      if (ctx.link?.targetAllyId === undefined && isMarked(ctx, opponentSeat(ctx))) ctx.equipToken(GRAPHENE);
-    },
+    triggers: [
+      attackTrigger(
+        "Equip a Graphene Chelicera token",
+        decisionMessage("card.trigger.common.graphenechelicera.equip"),
+        (ctx) => ctx.equipToken(GRAPHENE),
+        (ctx) => attacksHero(ctx) && isMarked(ctx, opponentSeat(ctx)),
+      ),
+    ],
   })),
   "stains of the redback|2": stealthPump(2),
   "stains of the redback|3": stealthPump(1),
@@ -513,18 +583,22 @@ export const hnt: Record<string, CardScript> = {
   },
   "demonstrate devotion|1": {
     onAttackDeclared(ctx) {
-      if (draconicLinks(ctx) >= 2) {
-        ctx.grantGoAgain();
-        if (ctx.link?.targetAllyId === undefined) ctx.createToken(FEALTY);
-      }
+      if (draconicLinks(ctx) >= 2) ctx.grantGoAgain();
     },
+    triggers: [createFealtyTrigger((ctx) => attacksHero(ctx) && draconicLinks(ctx) >= 2)],
   },
   "wrath of retribution|1": {
     modifyPlayCost: (ctx, base) => base - draconicLinks(ctx),
-    onAttackDeclared(ctx) {
-      ctx.addModifier({ scope: "combat-chain", attack: 1, appliesToSubtype: "dagger" });
-      ctx.addModifier({ scope: "combat-chain", attackActivationCostReduction: 1, appliesToSubtype: "dagger" });
-    },
+    triggers: [
+      attackTrigger(
+        "Daggers get +1 attack and cost 1 less to activate this combat chain",
+        decisionMessage("card.trigger.common.dagger.attack.discount", { amount: 1, cost: 1 }),
+        (ctx) => {
+          ctx.addModifier({ scope: "combat-chain", attack: 1, appliesToSubtype: "dagger" });
+          ctx.addModifier({ scope: "combat-chain", attackActivationCostReduction: 1, appliesToSubtype: "dagger" });
+        },
+      ),
+    ],
   },
   "blood drop|1": { modifyPlayCost: (ctx, base) => base - draconicLinks(ctx) },
   "blood line|1": { modifyPlayCost: (ctx, base) => base - draconicLinks(ctx) },
@@ -554,9 +628,14 @@ export const hnt: Record<string, CardScript> = {
     },
   },
   "art of the dragon: claw|1": {
-    onAttackDeclared(ctx) {
-      if (currentAttackDraconic(ctx)) ctx.setFlag("link", "hntArtClaw", true);
-    },
+    triggers: [
+      attackTrigger(
+        "Gain \"When this hits a hero, destroy all cards in their arsenal\"",
+        decisionMessage("card.trigger.common.onhit.arsenal.destroy.gain"),
+        (ctx) => ctx.setFlag("link", "hntArtClaw", true),
+        currentAttackDraconic,
+      ),
+    ],
     canTriggerOnHit(ctx) {
       return ctx.link?.targetAllyId === undefined && ctx.getFlag("link", "hntArtClaw") === true;
     },
@@ -565,9 +644,14 @@ export const hnt: Record<string, CardScript> = {
     },
   },
   "art of the dragon: scale|1": {
-    onAttackDeclared(ctx) {
-      if (currentAttackDraconic(ctx)) ctx.setFlag("link", "hntArtScale", true);
-    },
+    triggers: [
+      attackTrigger(
+        "Gain \"When this hits a hero, put a -1 defense counter on an equipment they control\"",
+        decisionMessage("card.trigger.common.onhit.equipment.defensecounter.gain", { amount: 1 }),
+        (ctx) => ctx.setFlag("link", "hntArtScale", true),
+        currentAttackDraconic,
+      ),
+    ],
     canTriggerOnHit(ctx) {
       return ctx.link?.targetAllyId === undefined && ctx.getFlag("link", "hntArtScale") === true;
     },
@@ -594,14 +678,10 @@ export const hnt: Record<string, CardScript> = {
   "dragon power|2": { modifyAttack: (ctx) => (currentAttackDraconic(ctx) ? 3 : 0) },
   ...pitchSeries("silver talons", () => daggerDamageAttack("silver-talons-dagger", currentAttackDraconic)),
   "fire tenet: strike first|2": {
-    onAttackDeclared(ctx) {
-      buffNextAttack(ctx, { attack: 1, appliesToSubtype: "draconic", expiresOnChainClose: true });
-    },
+    triggers: [fireTenetStrikeFirstTrigger()],
   },
   "fire tenet: strike first|3": {
-    onAttackDeclared(ctx) {
-      buffNextAttack(ctx, { attack: 1, appliesToSubtype: "draconic", expiresOnChainClose: true });
-    },
+    triggers: [fireTenetStrikeFirstTrigger()],
   },
   ...pitchSeries("grow claws", () => ({ modifyAttack: (ctx) => (lastAttackWasDraconic(ctx) ? 1 : 0) })),
   ...pitchSeries("grow wings", () => ({
@@ -839,9 +919,14 @@ export const hnt: Record<string, CardScript> = {
   // Generic Draconic
   "compounding anger|1": { modifyPlayCost: (ctx, base) => base - draconicLinks(ctx) },
   "hunt to the ends of rathe|1": {
-    onAttackDeclared(ctx) {
-      if (heroIsArakni(ctx, opponentSeat(ctx))) markHero(ctx, opponentSeat(ctx));
-    },
+    triggers: [
+      attackTrigger(
+        "Mark the defending hero",
+        decisionMessage("card.trigger.common.defender.mark"),
+        (ctx) => markHero(ctx, opponentSeat(ctx)),
+        (ctx) => attacksHero(ctx) && heroIsArakni(ctx, opponentSeat(ctx)),
+      ),
+    ],
     modifyAttack: (ctx) => (isMarked(ctx, opponentSeat(ctx)) ? 2 : 0),
   },
   "march of loyalty|1": {
@@ -890,9 +975,14 @@ export const hnt: Record<string, CardScript> = {
   "for the emperor|1": attackMarkedFealty(),
   "for the realm|1": attackMarkedFealty(),
   "hunt the hunter|1": {
-    onAttackDeclared(ctx) {
-      if (ctx.link?.targetAllyId === undefined && playedAnotherRed(ctx)) markHero(ctx, opponentSeat(ctx));
-    },
+    triggers: [
+      attackTrigger(
+        "Mark the defending hero",
+        decisionMessage("card.trigger.common.defender.mark"),
+        (ctx) => markHero(ctx, opponentSeat(ctx)),
+        (ctx) => attacksHero(ctx) && playedAnotherRed(ctx),
+      ),
+    ],
   },
   "smoke out|1": {
     canTriggerOnDefend: (ctx) => !!ctx.link && (ctx.cardData(ctx.link.attackingCard.cardId).pitch ?? 0) === 1,
@@ -982,25 +1072,19 @@ export const hnt: Record<string, CardScript> = {
     },
   },
   "pick up the point|1": {
-    onAttackDeclared(ctx) {
-      offerRetrieveDagger(ctx, "pick-point-1");
-    },
+    triggers: [pickUpThePointTrigger("pick-point-1")],
     onChoose(ctx, hook, option) {
       resolveRetrieveDagger(ctx, hook, option, "pick-point-1");
     },
   },
   "pick up the point|2": {
-    onAttackDeclared(ctx) {
-      offerRetrieveDagger(ctx, "pick-point-2");
-    },
+    triggers: [pickUpThePointTrigger("pick-point-2")],
     onChoose(ctx, hook, option) {
       resolveRetrieveDagger(ctx, hook, option, "pick-point-2");
     },
   },
   "pick up the point|3": {
-    onAttackDeclared(ctx) {
-      offerRetrieveDagger(ctx, "pick-point-3");
-    },
+    triggers: [pickUpThePointTrigger("pick-point-3")],
     onChoose(ctx, hook, option) {
       resolveRetrieveDagger(ctx, hook, option, "pick-point-3");
     },
@@ -1084,31 +1168,14 @@ export const hnt: Record<string, CardScript> = {
   "pursue to the edge of oblivion|1": markOnHit(),
   "pursue to the pits of despair|1": markOnHit(),
   "sound the alarm|1": {
-    onAttackDeclared(ctx) {
-      if (ctx.link?.targetAllyId !== undefined) return;
-      const target = opponentSeat(ctx);
-      const hand = ctx.player(target).hand;
-      if (
-        hand.length > 0 &&
-        !ctx.revealCards(
-          hand.map((card) => card.instanceId),
-          target,
-        )
-      )
-        return;
-      if (!hand.some((card) => ctx.cardData(card.cardId).cardType === "attack-reaction")) return;
-      const reactions = ctx
-        .player(ctx.seat)
-        .deck.filter((card) => ctx.cardData(card.cardId).cardType === "defense-reaction");
-      if (reactions.length)
-        ctx.requestCardChoice(
-          "sound-alarm",
-          decisionPrompt("Search for a defense reaction?", "card.hnt.defensereaction.search", {
-            optionMessages: commonOptionMessages("pass"),
-          }),
-          ["pass", ...reactions.map((card) => card.instanceId)],
-        );
-    },
+    triggers: [
+      attackTrigger(
+        "The defending hero reveals their hand",
+        decisionMessage("card.trigger.common.defender.hand.reveal"),
+        soundTheAlarm,
+        attacksHero,
+      ),
+    ],
     onChoose(ctx, hook, option) {
       if (hook !== "sound-alarm" || option === "pass") return;
       const card = ctx.player(ctx.seat).deck.find((candidate) => candidate.instanceId === Number(option));
@@ -1348,13 +1415,20 @@ Object.assign(hnt, {
   },
   "blood runs deep|1": {
     modifyPlayCost: (ctx, base) => base - draconicLinks(ctx),
-    onAttackDeclared(ctx) {
-      for (const dagger of [...ctx.player(ctx.seat).weapons]) {
-        ctx.dealDamage(opponentSeat(ctx), 1, { sourceInstanceId: dagger.instanceId, countsAsHit: true });
-        ctx.destroyPermanent(dagger.instanceId);
-      }
-      ctx.grantGoAgain();
-    },
+    onAttackDeclared: (ctx) => ctx.grantGoAgain(),
+    triggers: [
+      attackTrigger(
+        "Each dagger you control deals 1 damage to the defending hero",
+        decisionMessage("card.trigger.common.daggers.damage.defender", { amount: 1 }),
+        (ctx) => {
+          for (const dagger of ctx.player(ctx.seat).weapons.filter((card) => isDagger(ctx, card))) {
+            ctx.dealDamage(opponentSeat(ctx), 1, { sourceInstanceId: dagger.instanceId, countsAsHit: true });
+            ctx.destroyPermanent(dagger.instanceId);
+          }
+        },
+        attacksHero,
+      ),
+    ],
   },
   "ignite|1": {
     triggers: [
@@ -1376,17 +1450,22 @@ Object.assign(hnt, {
     ],
   },
   "art of the dragon: blood|1": {
-    onAttackDeclared(ctx) {
-      if (currentAttackDraconic(ctx)) {
-        ctx.grantGoAgain();
-        ctx.addModifier({
-          scope: "until-end-of-turn",
-          playCostReduction: 1,
-          appliesToSubtype: "draconic",
-          remainingCostUses: 3,
-        });
-      }
-    },
+    triggers: [
+      attackTrigger(
+        "Gain go again; the next 3 Draconic cards cost 1 less to play",
+        decisionMessage("card.trigger.common.goagain.draconic.discount", { count: 3, amount: 1 }),
+        (ctx) => {
+          ctx.grantGoAgain();
+          ctx.addModifier({
+            scope: "until-end-of-turn",
+            playCostReduction: 1,
+            appliesToSubtype: "draconic",
+            remainingCostUses: 3,
+          });
+        },
+        currentAttackDraconic,
+      ),
+    ],
   },
   "devotion never dies|1": {
     canTriggerOnHit: lastAttackWasDraconic,
@@ -1692,16 +1771,24 @@ Object.assign(hnt, {
     },
   },
   "rotten remains|3": {
-    onAttackDeclared(ctx) {
-      const byOwner = ctx.state.players.every((player) => player.graveyard.some((card) => ctx.basePower(card) === 1));
-      if (byOwner) {
-        for (const player of ctx.state.players) {
-          const card = player.graveyard.find((candidate) => ctx.basePower(candidate) === 1);
-          if (card) ctx.banish(card.instanceId);
-        }
-        ctx.addCardTempPower(ctx.self.instanceId, 1);
-      }
-    },
+    triggers: [
+      attackTrigger(
+        "Banish a card with 1 power from each graveyard to get +1 power",
+        decisionMessage("card.trigger.common.graveyards.power.banish", { power: 1, amount: 1 }),
+        (ctx) => {
+          const byOwner = ctx.state.players.every((player) =>
+            player.graveyard.some((card) => ctx.basePower(card) === 1),
+          );
+          if (byOwner) {
+            for (const player of ctx.state.players) {
+              const card = player.graveyard.find((candidate) => ctx.basePower(candidate) === 1);
+              if (card) ctx.banish(card.instanceId);
+            }
+            ctx.addCardTempPower(ctx.self.instanceId, 1);
+          }
+        },
+      ),
+    ],
   },
   "shelter from the storm|1": {
     activated: {
@@ -1722,7 +1809,11 @@ Object.assign(hnt, {
     },
   },
   "thick hide hunter|2": {
-    onAttackDeclared: (ctx) => ctx.discardRandom(ctx.seat, 1),
+    triggers: [
+      attackTrigger("Discard a random card", decisionMessage("card.trigger.common.card.discard.random"), (ctx) =>
+        ctx.discardRandom(ctx.seat, 1),
+      ),
+    ],
     onDefend: (ctx) => ctx.discardRandom(ctx.seat, 1),
   },
   "tremorshield sabatons|0": {
@@ -1755,15 +1846,20 @@ Object.assign(hnt, {
     },
   },
   "retrace the past|3": {
-    onAttackDeclared(ctx) {
-      if (!previousAttackNameContains(ctx, "gustwave")) return;
-      ctx.requestNameChoice(
-        "retrace-name",
-        decisionPrompt(`${ctx.data.name}: name a card`, "card.hnt.card.name.named", {
-          values: { card: { kind: "card", cardId: ctx.self.cardId } },
-        }),
-      );
-    },
+    triggers: [
+      attackTrigger(
+        "Name a card; this gets that name, +2 attack, and go again",
+        decisionMessage("card.trigger.common.cardname.attack.goagain", { amount: 2 }),
+        (ctx) =>
+          ctx.requestNameChoice(
+            "retrace-name",
+            decisionPrompt(`${ctx.data.name}: name a card`, "card.hnt.card.name.named", {
+              values: { card: { kind: "card", cardId: ctx.self.cardId } },
+            }),
+          ),
+        (ctx) => previousAttackNameContains(ctx, "gustwave"),
+      ),
+    ],
     onChoose(ctx, hook, option) {
       if (hook !== "retrace-name") return;
       ctx.grantCardName(ctx.self.instanceId, option);
@@ -1836,11 +1932,17 @@ Object.assign(hnt, {
     },
   },
   "douse in runeblood|1": {
-    onAttackDeclared(ctx) {
-      const count = Number(ctx.getPlayerFlag(ctx.seat, "nonAttackActionsPlayedThisTurn"));
-      ctx.createTokens("ARC112", count);
-      if (count >= 3) ctx.grantGoAgain();
-    },
+    triggers: [
+      attackTrigger(
+        "Create a Runechant for each non-attack action card you've played this turn",
+        decisionMessage("card.trigger.common.runechants.create.nonattack"),
+        (ctx) => {
+          const count = Number(ctx.getPlayerFlag(ctx.seat, "nonAttackActionsPlayedThisTurn"));
+          ctx.createTokens("ARC112", count);
+          if (count >= 3) ctx.grantGoAgain();
+        },
+      ),
+    ],
   },
   "spur locked|3": {
     // Choices are sequential but secret: the controller's number waits in an

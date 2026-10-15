@@ -569,6 +569,44 @@ describe("EVR — auras, items, and utility", () => {
     });
     s.activate("potion of luck|3").expectHandSize(0, 2).expectZoneSize(0, "arsenal", 0);
   });
+
+  it.each([
+    [0, 3, 0],
+    [1, 3, 1],
+    [2, 4, 1],
+  ])("Swarming Gloomveil with %i aura(s) this turn has %i power and %i action point(s) after resolving", (auras, power, ap) => {
+    const s = scenario({
+      seats: [
+        { hero: "rhinar", hand: ["swarming gloomveil|1"] },
+        { hero: "dorinthea" },
+      ],
+    });
+    s.state.players[0]!.flags["createdSubtypeCount:aura"] = auras;
+
+    s.play("swarming gloomveil|1").expectAttackValue(power).blockWith().settle().expectAP(0, ap);
+  });
+
+  it.each([
+    [2, 0],
+    [3, 1],
+  ])("Swarming Gloomveil with %i auras lets %i arcane damage through prevention after it hits", (auras, dealt) => {
+    const s = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          weapons: ["kraken's aethervein|0"],
+          resources: 3,
+          hand: ["swarming gloomveil|1"],
+        },
+        { hero: "dorinthea", board: ["pyroglyphic protection|3"] },
+      ],
+    });
+    s.state.players[0]!.flags["createdSubtypeCount:aura"] = auras;
+
+    s.play("swarming gloomveil|1").blockWith().settle();
+    const life = s.state.players[1]!.life;
+    s.activate("kraken's aethervein|0").expectLife(1, life - dealt);
+  });
 });
 
 describe("EVR — rules regression coverage", () => {

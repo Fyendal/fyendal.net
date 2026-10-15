@@ -7959,24 +7959,6 @@
       "value": "：本次 combat chain 中你的下一次攻击视为龙族 (Draconic)"
     }
   ],
-  "card.log.sfa.nextdraconic.attack": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": "：本次 combat chain 中你的下一次龙族 (Draconic) 攻击获得 +"
-    },
-    {
-      "type": 1,
-      "value": "amount"
-    },
-    {
-      "type": 0,
-      "value": " 力量"
-    }
-  ],
   "card.log.sfa.paws.tiger.playable": [
     {
       "type": 1,
@@ -13539,10 +13521,30 @@
       "value": "放逐一张牌并生成一个 Runechant"
     }
   ],
+  "card.trigger.common.card.discard.random": [
+    {
+      "type": 0,
+      "value": "随机弃一张牌"
+    }
+  ],
   "card.trigger.common.card.draw": [
     {
       "type": 0,
       "value": "抽一张牌"
+    }
+  ],
+  "card.trigger.common.cardname.attack.goagain": [
+    {
+      "type": 0,
+      "value": "指定一个牌名；此牌获得该牌名、+"
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 力量和 go again"
     }
   ],
   "card.trigger.common.cardname.choose.destroy": [
@@ -13657,16 +13659,72 @@
       "value": " 力量"
     }
   ],
+  "card.trigger.common.dagger.attack.discount": [
+    {
+      "type": 0,
+      "value": "本次战斗链中，匕首获得 +"
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 力量，起动费用减少 "
+    },
+    {
+      "type": 1,
+      "value": "cost"
+    },
+    {
+      "type": 0,
+      "value": " 点"
+    }
+  ],
   "card.trigger.common.dagger.attacks.additional": [
     {
       "type": 0,
       "value": "获得额外的匕首攻击次数"
     }
   ],
+  "card.trigger.common.dagger.damage.defender": [
+    {
+      "type": 0,
+      "value": "你可以让一把匕首对防守英雄造成 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点伤害"
+    }
+  ],
   "card.trigger.common.dagger.goagain": [
     {
       "type": 0,
       "value": "匕首攻击获得 go again"
+    }
+  ],
+  "card.trigger.common.dagger.retrieve": [
+    {
+      "type": 0,
+      "value": "你可以从你的墓地取回 (retrieve) 一把匕首"
+    }
+  ],
+  "card.trigger.common.daggers.damage.defender": [
+    {
+      "type": 0,
+      "value": "你操控的每把匕首对防守英雄造成 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点伤害"
     }
   ],
   "card.trigger.common.damage.attackinghero": [
@@ -13815,6 +13873,18 @@
     {
       "type": 0,
       "value": "防守英雄弃一张牌，然后你抽一张牌"
+    }
+  ],
+  "card.trigger.common.defender.hand.reveal": [
+    {
+      "type": 0,
+      "value": "防守英雄展示其手牌"
+    }
+  ],
+  "card.trigger.common.defender.mark": [
+    {
+      "type": 0,
+      "value": "标记防守英雄"
     }
   ],
   "card.trigger.common.defense.gain": [
@@ -14043,6 +14113,12 @@
       "value": "将此牌翻至正面朝上？"
     }
   ],
+  "card.trigger.common.fealty.create": [
+    {
+      "type": 0,
+      "value": "生成一个 Fealty 衍生物"
+    }
+  ],
   "card.trigger.common.flurry.destroy": [
     {
       "type": 0,
@@ -14107,6 +14183,28 @@
       "value": "摧毁受到伤害的英雄 arsenal 中一张已冻结的牌"
     }
   ],
+  "card.trigger.common.goagain.draconic.discount": [
+    {
+      "type": 0,
+      "value": "获得 go again；接下来 "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " 张龙族 (Draconic) 牌的打出费用减少 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点"
+    }
+  ],
   "card.trigger.common.goagain.gain": [
     {
       "type": 0,
@@ -14145,6 +14243,12 @@
       "value": "生成一个 Goldkiss Rum 衍生物"
     }
   ],
+  "card.trigger.common.graphenechelicera.equip": [
+    {
+      "type": 0,
+      "value": "装备一个 Graphene Chelicera 衍生物"
+    }
+  ],
   "card.trigger.common.graveyard.attack.bottom.optional": [
     {
       "type": 0,
@@ -14161,6 +14265,28 @@
     {
       "type": 0,
       "value": "放逐你墓地中的一张非攻击行动牌，以便本回合使用它？"
+    }
+  ],
+  "card.trigger.common.graveyards.power.banish": [
+    {
+      "type": 0,
+      "value": "从每个墓地放逐一张力量为 "
+    },
+    {
+      "type": 1,
+      "value": "power"
+    },
+    {
+      "type": 0,
+      "value": " 的牌，以获得 +"
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 力量"
     }
   ],
   "card.trigger.common.greatlibrary.intellect": [
@@ -14587,6 +14713,20 @@
       "value": " 力量"
     }
   ],
+  "card.trigger.common.nextattack.draconic.attack": [
+    {
+      "type": 0,
+      "value": "本次战斗链中，你的下一次龙族 (Draconic) 攻击获得 +"
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 力量"
+    }
+  ],
   "card.trigger.common.nextattack.power.destroy": [
     {
       "type": 0,
@@ -14611,6 +14751,26 @@
     {
       "type": 0,
       "value": "移除 Oath of Steel 上的指示物"
+    }
+  ],
+  "card.trigger.common.onhit.arsenal.destroy.gain": [
+    {
+      "type": 0,
+      "value": "获得“当此攻击命中英雄时，摧毁其 arsenal 中的所有牌”"
+    }
+  ],
+  "card.trigger.common.onhit.equipment.defensecounter.gain": [
+    {
+      "type": 0,
+      "value": "获得“当此攻击命中英雄时，在其操控的一件装备上放置一个 -"
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 防御指示物”"
     }
   ],
   "card.trigger.common.opt": [
@@ -14743,6 +14903,12 @@
     {
       "type": 0,
       "value": " 点生命，使下一个 Runechant 的伤害无法被防止？"
+    }
+  ],
+  "card.trigger.common.runechants.create.nonattack": [
+    {
+      "type": 0,
+      "value": "你本回合每打出过一张非攻击行动牌，便生成一个 Runechant"
     }
   ],
   "card.trigger.common.runechants.destroy": [

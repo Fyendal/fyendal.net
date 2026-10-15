@@ -404,23 +404,17 @@ export const sfa: Record<string, CardScript> = {
   },
 
   "fire tenet: strike first|1": {
-    // "When this attacks, your next Draconic attack this combat chain gets
-    //  +1{p}." Go again is printed (native).
-    onAttackDeclared(ctx) {
-      buffNextAttack(ctx, {
-        attack: 1,
-        appliesToSubtype: "draconic",
-        expiresOnChainClose: true,
-      });
-      ctx.logPublic(
-        localizedCardLog(
-          ctx,
-          `${ctx.data.name}: your next Draconic attack this combat chain gets +1{p}`,
-          "card.log.sfa.nextdraconic.attack",
-          { amount: 1 },
-        ),
-      );
-    },
+    triggers: [
+      {
+        event: "attack-declared",
+        sourceZone: "self",
+        label: "Your next Draconic attack this combat chain gets +1 attack",
+        labelMessage: decisionMessage("card.trigger.common.nextattack.draconic.attack", { amount: 1 }),
+        effect(ctx: ScriptCtx) {
+          buffNextAttack(ctx, { attack: 1, appliesToSubtype: "draconic", expiresOnChainClose: true });
+        },
+      },
+    ],
   },
 
   "fire that burns within|1": {

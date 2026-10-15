@@ -8356,24 +8356,6 @@
       "value": ": your next attack this combat chain is Draconic"
     }
   ],
-  "card.log.sfa.nextdraconic.attack": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": ": your next Draconic attack this combat chain gets +"
-    },
-    {
-      "type": 1,
-      "value": "amount"
-    },
-    {
-      "type": 0,
-      "value": " attack"
-    }
-  ],
   "card.log.sfa.paws.tiger.playable": [
     {
       "type": 1,
@@ -14176,10 +14158,30 @@
       "value": "Banish a card and create a Runechant"
     }
   ],
+  "card.trigger.common.card.discard.random": [
+    {
+      "type": 0,
+      "value": "Discard a random card"
+    }
+  ],
   "card.trigger.common.card.draw": [
     {
       "type": 0,
       "value": "Draw a card"
+    }
+  ],
+  "card.trigger.common.cardname.attack.goagain": [
+    {
+      "type": 0,
+      "value": "Name a card; this gets that name, +"
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " attack, and go again"
     }
   ],
   "card.trigger.common.cardname.choose.destroy": [
@@ -14298,16 +14300,72 @@
       "value": " attack"
     }
   ],
+  "card.trigger.common.dagger.attack.discount": [
+    {
+      "type": 0,
+      "value": "Daggers get +"
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " attack and cost "
+    },
+    {
+      "type": 1,
+      "value": "cost"
+    },
+    {
+      "type": 0,
+      "value": " less to activate this combat chain"
+    }
+  ],
   "card.trigger.common.dagger.attacks.additional": [
     {
       "type": 0,
       "value": "Gain additional dagger attacks"
     }
   ],
+  "card.trigger.common.dagger.damage.defender": [
+    {
+      "type": 0,
+      "value": "You may have a dagger deal "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " damage to the defending hero"
+    }
+  ],
   "card.trigger.common.dagger.goagain": [
     {
       "type": 0,
       "value": "Dagger attacks gain go again"
+    }
+  ],
+  "card.trigger.common.dagger.retrieve": [
+    {
+      "type": 0,
+      "value": "You may retrieve a dagger from your graveyard"
+    }
+  ],
+  "card.trigger.common.daggers.damage.defender": [
+    {
+      "type": 0,
+      "value": "Each dagger you control deals "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " damage to the defending hero"
     }
   ],
   "card.trigger.common.damage.attackinghero": [
@@ -14456,6 +14514,18 @@
     {
       "type": 0,
       "value": "The defending hero discards a card and you draw a card"
+    }
+  ],
+  "card.trigger.common.defender.hand.reveal": [
+    {
+      "type": 0,
+      "value": "The defending hero reveals their hand"
+    }
+  ],
+  "card.trigger.common.defender.mark": [
+    {
+      "type": 0,
+      "value": "Mark the defending hero"
     }
   ],
   "card.trigger.common.defense.gain": [
@@ -14684,6 +14754,12 @@
       "value": "Turn this face up?"
     }
   ],
+  "card.trigger.common.fealty.create": [
+    {
+      "type": 0,
+      "value": "Create a Fealty token"
+    }
+  ],
   "card.trigger.common.flurry.destroy": [
     {
       "type": 0,
@@ -14748,6 +14824,28 @@
       "value": "Destroy a frozen card in the damaged hero's arsenal"
     }
   ],
+  "card.trigger.common.goagain.draconic.discount": [
+    {
+      "type": 0,
+      "value": "Gain go again; the next "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " Draconic cards cost "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " less to play"
+    }
+  ],
   "card.trigger.common.goagain.gain": [
     {
       "type": 0,
@@ -14786,6 +14884,12 @@
       "value": "Create a Goldkiss Rum token"
     }
   ],
+  "card.trigger.common.graphenechelicera.equip": [
+    {
+      "type": 0,
+      "value": "Equip a Graphene Chelicera token"
+    }
+  ],
   "card.trigger.common.graveyard.attack.bottom.optional": [
     {
       "type": 0,
@@ -14802,6 +14906,28 @@
     {
       "type": 0,
       "value": "Banish a non-attack action from your graveyard to play it this turn?"
+    }
+  ],
+  "card.trigger.common.graveyards.power.banish": [
+    {
+      "type": 0,
+      "value": "Banish a card with "
+    },
+    {
+      "type": 1,
+      "value": "power"
+    },
+    {
+      "type": 0,
+      "value": " power from each graveyard to get +"
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " power"
     }
   ],
   "card.trigger.common.greatlibrary.intellect": [
@@ -15228,6 +15354,20 @@
       "value": " attack"
     }
   ],
+  "card.trigger.common.nextattack.draconic.attack": [
+    {
+      "type": 0,
+      "value": "Your next Draconic attack this combat chain gets +"
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " attack"
+    }
+  ],
   "card.trigger.common.nextattack.power.destroy": [
     {
       "type": 0,
@@ -15252,6 +15392,26 @@
     {
       "type": 0,
       "value": "Remove Oath of Steel's counters"
+    }
+  ],
+  "card.trigger.common.onhit.arsenal.destroy.gain": [
+    {
+      "type": 0,
+      "value": "Gain \"When this hits a hero, destroy all cards in their arsenal\""
+    }
+  ],
+  "card.trigger.common.onhit.equipment.defensecounter.gain": [
+    {
+      "type": 0,
+      "value": "Gain \"When this hits a hero, put a -"
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " defense counter on an equipment they control\""
     }
   ],
   "card.trigger.common.opt": [
@@ -15384,6 +15544,12 @@
     {
       "type": 0,
       "value": " life to make the next Runechant unpreventable?"
+    }
+  ],
+  "card.trigger.common.runechants.create.nonattack": [
+    {
+      "type": 0,
+      "value": "Create a Runechant for each non-attack action card you've played this turn"
     }
   ],
   "card.trigger.common.runechants.destroy": [

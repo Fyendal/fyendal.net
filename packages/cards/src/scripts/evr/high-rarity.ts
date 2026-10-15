@@ -112,7 +112,12 @@ function named(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, name: string): 
   return ctx.cardNames(card).includes(name.toLowerCase());
 }
 
-const BLOOD_MODES = ["power", "go-again", "extra-attack"] as const;
+function aurasPlayedOrCreated(ctx: ScriptCtx): number {
+  return Number(ctx.getFlag("player", "playedSubtypeCount:aura")) +
+    Number(ctx.getFlag("player", "createdSubtypeCount:aura"));
+}
+
+const BLOOD_MODES =["power", "go-again", "extra-attack"] as const;
 type BloodMode = (typeof BLOOD_MODES)[number];
 
 function bloodWeapons(ctx: ScriptCtx): DeepReadonly<CardInstance>[] {
@@ -814,20 +819,11 @@ export const evrHighRarity: Record<string, CardScript> = {
     },
   },
   "swarming gloomveil|1": {
-    modifyAttack(ctx) {
-      return Number(ctx.getFlag("player", "playedSubtypeCount:aura")) +
-        Number(ctx.getFlag("player", "createdSubtypeCount:aura")) >=
-        2
-        ? 3
-        : 0;
-    },
-    onAttackDeclared(ctx) {
-      if (
-        Number(ctx.getFlag("player", "playedSubtypeCount:aura")) +
-          Number(ctx.getFlag("player", "createdSubtypeCount:aura")) >=
-        2
-      )
-        ctx.grantGoAgain();
+    hasConditionalGoAgain: (ctx) => aurasPlayedOrCreated(ctx) >= 1,
+    modifyAttack: (ctx) => (aurasPlayedOrCreated(ctx) >= 2 ? 1 : 0),
+    canTriggerOnHit: (ctx) => ctx.link?.targetAllyId === undefined && aurasPlayedOrCreated(ctx) >= 3,
+    onHit(ctx) {
+      ctx.setPlayerFlag(opponentSeat(ctx), `cannotPreventArcaneFrom:${ctx.seat}`, true);
     },
   },
   "revel in runeblood|1": {
