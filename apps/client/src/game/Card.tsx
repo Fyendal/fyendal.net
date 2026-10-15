@@ -473,13 +473,15 @@ export function CardFace({
         </div>
       ) : null}
       {marked ? (
-        <div className="c-marked-token" title="Marked">
-          <img
-            src={cardImageUrl(MARKED_TOKEN_ID)}
-            alt="Marked"
-            draggable={false}
-            loading="eager"
-          />
+        <div className="c-marked-token">
+          <span className="c-marked-brand">
+            <img
+              src={cardImageUrl(MARKED_TOKEN_ID)}
+              alt="Marked"
+              draggable={false}
+              loading="eager"
+            />
+          </span>
         </div>
       ) : null}
       {chips.length > 0 && (
