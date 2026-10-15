@@ -1400,3 +1400,121 @@ describe("ROS — Blast to Oblivion", () => {
     expect(s.state.players[1]!.hand).toHaveLength(0);
   });
 });
+
+describe("Channel Lightning Valley", () => {
+  it("draws only for the first attack damage dealt to the opposing hero each turn", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          board: ["channel lightning valley|2"],
+          hand: ["wounding blow|1", "wounding blow|2"],
+          deck: [BLUE, BLUE],
+        },
+        { hero: "dorinthea", hand: [] },
+      ],
+    });
+    g.state.players[0]!.actionPoints = 2;
+
+    g.play("wounding blow|1").blockWith().settle().expectLife(1, 16).expectHandSize(0, 2);
+    g.play("wounding blow|2").blockWith().settle().expectLife(1, 13).expectHandSize(0, 1).expectZoneSize(0, "deck", 1);
+  });
+
+  it("puts its draw on the stack as a triggered layer after combat damage", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", board: ["channel lightning valley|2"], hand: ["wounding blow|1"], deck: [BLUE] },
+        { hero: "dorinthea", hand: [] },
+      ],
+    });
+    const valley = g.state.players[0]!.board[0]!.instanceId;
+    const valleyLayer = () => g.state.stack.some((layer) => layer.sourceInstanceId === valley);
+
+    g.play("wounding blow|1").blockWith();
+    for (let guard = 0; guard < 10 && !valleyLayer(); guard++) g.passPriority();
+    expect(valleyLayer()).toBe(true);
+    g.expectLife(1, 16).expectHandSize(0, 0);
+    g.settle().expectHandSize(0, 1).expectLog("Channel Lightning Valley triggers: Draw a card");
+  });
+
+  it("counts arcane damage as the first damage of the turn", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          board: ["channel lightning valley|2"],
+          hand: ["zap|1", "wounding blow|1"],
+          deck: [BLUE, BLUE],
+        },
+        { hero: "dorinthea", hand: [] },
+      ],
+    });
+    g.state.players[0]!.actionPoints = 2;
+
+    g.play("zap|1").chooseOption("opposing hero").settle().expectLife(1, 17).expectHandSize(0, 2);
+    g.play("wounding blow|1").blockWith().settle().expectLife(1, 13).expectHandSize(0, 1);
+  });
+
+  it("does not trigger when it enters after the turn's first damage", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          hand: ["wounding blow|1", "channel lightning valley|2", "wounding blow|2"],
+          deck: [BLUE],
+        },
+        { hero: "dorinthea", hand: [] },
+      ],
+    });
+    g.state.players[0]!.actionPoints = 2;
+
+    g.play("wounding blow|1").blockWith().settle().expectLife(1, 16);
+    g.play("channel lightning valley|2").expectInZone(0, "channel lightning valley|2", "board");
+    g.play("wounding blow|2").blockWith().settle().expectLife(1, 13).expectHandSize(0, 0);
+  });
+
+  it("ignores damage an ally deals, which the controller does not deal", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          board: ["channel lightning valley|2", "barnacle|2"],
+          hand: ["wounding blow|1"],
+          deck: [BLUE],
+        },
+        { hero: "dorinthea", hand: [] },
+      ],
+    });
+    g.state.players[0]!.actionPoints = 2;
+
+    g.activate("barnacle|2").blockWith().settle().expectHandSize(0, 1);
+    expect(g.state.players[1]!.life).toBeLessThan(20);
+    g.play("wounding blow|1").blockWith().settle().expectHandSize(0, 1).expectZoneSize(0, "deck", 0);
+  });
+
+  it("adds a flow counter and stays when Channel Lightning is paid", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", board: ["channel lightning valley|2"], pitch: ["arc ramp|3"] },
+        { hero: "dorinthea" },
+      ],
+    });
+
+    g.doRaw({ kind: "pass" })
+      .settle()
+      .chooseCard("arc ramp|3")
+      .expectTurn(2)
+      .expectInZone(0, "channel lightning valley|2", "board")
+      .expectZoneSize(0, "pitch", 0);
+    const valley = g.state.players[0]!.board.find((card) => card.cardId === printingId("channel lightning valley|2"));
+    expect(valley?.counters?.flow).toBe(1);
+  });
+
+  it("is destroyed when Channel Lightning cannot be paid", () => {
+    const g = scenario({
+      seats: [{ hero: "rhinar", board: ["channel lightning valley|2"] }, { hero: "dorinthea" }],
+    });
+
+    g.endTurn().expectInZone(0, "channel lightning valley|2", "graveyard");
+  });
+});

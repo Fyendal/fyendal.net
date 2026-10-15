@@ -17,7 +17,7 @@ import type {
   StackLayer,
 } from "./state.js";
 import type { TokenCreationContext, TriggerEvent, TriggerEventContext } from "./eventTypes.js";
-export type { TokenCreationContext, TriggerEvent, TriggerEventContext } from "./eventTypes.js";
+export type { HeroDamageEventContext, TokenCreationContext, TriggerEvent, TriggerEventContext } from "./eventTypes.js";
 
 export type DeepReadonly<T> = T extends (...args: never[]) => unknown
   ? T

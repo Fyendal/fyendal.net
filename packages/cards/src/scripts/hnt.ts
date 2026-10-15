@@ -21,6 +21,11 @@ import {
 // Retrieve (CR 8.5.51), and Draconic chain-link counting are shared mechanics.
 const GRAPHENE = "HNT053";
 const FEALTY = "HNT167";
+const SPUR_NUMBERS = ["1", "2", "3", "4", "5", "6"];
+
+function spurNumberPrompt() {
+  return decisionPrompt("Secretly choose a number between 1 and 6", "card.hnt.spurlocked.number.choose");
+}
 
 function dataTags(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): readonly string[] {
   return ctx.cardTypes(card);
@@ -1839,23 +1844,58 @@ Object.assign(hnt, {
     },
   },
   "spur locked|3": {
+    // Choices are sequential but secret: the controller's number waits in an
+    // unprojected player flag until the opponent answers, then both reveal.
     onPlay(ctx) {
-      const mine = ctx.randomInt(6) + 1;
-      const theirs = ctx.randomInt(6) + 1;
-      if (mine === theirs) return;
-      const loser = mine > theirs ? ctx.seat : opponentSeat(ctx);
-      const amount = Math.max(mine, theirs);
-      ctx.loseLife(loser, amount);
-      const cards = ctx.player(loser).deck.filter((card) => (ctx.cardData(card.cardId).cost ?? 0) <= amount);
-      if (cards.length)
-        ctx.requestCardChoice(
-          "spur-search",
-          decisionPrompt("Choose a card", "card.hnt.card.choose"),
-          cards.map((card) => card.instanceId),
-          loser,
-        );
+      ctx.requestChoice("spur-number", spurNumberPrompt(), SPUR_NUMBERS);
     },
     onChoose(ctx, hook, option) {
+      if (hook === "spur-number") {
+        ctx.setPlayerFlag(ctx.seat, "spurLockedNumber", Number(option));
+        ctx.requestChoice("spur-opponent-number", spurNumberPrompt(), SPUR_NUMBERS, opponentSeat(ctx));
+        return;
+      }
+      if (hook === "spur-opponent-number") {
+        const opponent = opponentSeat(ctx);
+        const mine = Number(ctx.getPlayerFlag(ctx.seat, "spurLockedNumber"));
+        const theirs = Number(option);
+        ctx.setPlayerFlag(ctx.seat, "spurLockedNumber", 0);
+        const heroName = (seat: number) => ctx.cardData(ctx.player(seat).heroCardId).name;
+        ctx.logPublic(
+          localizedCardLog(
+            ctx,
+            `${ctx.data.name}: ${heroName(ctx.seat)} chose ${mine}, ${heroName(opponent)} chose ${theirs}`,
+            "card.log.hnt.spurlocked.revealed",
+            {
+              player: { kind: "player", seat: ctx.seat },
+              number: mine,
+              opponent: { kind: "player", seat: opponent },
+              opponentNumber: theirs,
+            },
+            {
+              kind: "numbers-revealed",
+              sourceCardId: ctx.self.cardId,
+              choices: [
+                { seat: ctx.seat, number: mine },
+                { seat: opponent, number: theirs },
+              ],
+            },
+          ),
+        );
+        if (mine === theirs) return;
+        const loser = mine > theirs ? ctx.seat : opponent;
+        const amount = Math.max(mine, theirs);
+        ctx.loseLife(loser, amount);
+        const cards = ctx.player(loser).deck.filter((card) => (ctx.cardData(card.cardId).cost ?? 0) <= amount);
+        if (cards.length)
+          ctx.requestCardChoice(
+            "spur-search",
+            decisionPrompt("Choose a card", "card.hnt.card.choose"),
+            cards.map((card) => card.instanceId),
+            loser,
+          );
+        return;
+      }
       if (hook === "spur-search") {
         ctx.revealCards([Number(option)]);
         ctx.moveToHand(Number(option));

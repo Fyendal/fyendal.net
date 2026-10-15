@@ -4,6 +4,7 @@ import {
   attackAbility,
   bloodDebtScript as bloodDebt,
   buffNextAttack,
+  channelLightning,
   commonOptionMessages,
   dealArcane,
   decisionMessage,
@@ -129,23 +130,6 @@ function grantHeadBangingHit(ctx: ScriptCtx, attackInstanceId: number): void {
       heroOnly: true,
     },
   });
-}
-
-function maintainChannelStormgarden(ctx: ScriptCtx): void {
-  const remaining = ctx.getCounter("iarStormgardenRemaining");
-  if (remaining <= 0) return;
-  const lightning = ctx.player(ctx.seat).pitch.filter((card) => hasType(ctx, card, "lightning"));
-  if (lightning.length < remaining) {
-    ctx.destroySelf();
-    return;
-  }
-  ctx.requestCardChoice(
-    "iar-stormgarden-bottom",
-    decisionPrompt("Put a Lightning card from pitch on the bottom", "card.ele.pitch.card.bottom", {
-      values: { type: "Lightning" },
-    }),
-    lightning.map((card) => card.instanceId),
-  );
 }
 
 function controlsVox(ctx: ScriptCtx): boolean {
@@ -2695,26 +2679,7 @@ export const iar: Record<string, CardScript> = {
         return;
       ampNextArcane(ctx, 1);
     },
-    triggers: [
-      {
-        event: "end-of-turn",
-        label: "Channel Lightning",
-        labelMessage: { id: "card.trigger.common.channel.lightning" },
-        effect(ctx) {
-          const flow = ctx.getCounter("flow") + 1;
-          ctx.setCounter("flow", flow);
-          ctx.setCounter("iarStormgardenRemaining", flow);
-          maintainChannelStormgarden(ctx);
-        },
-      },
-    ],
-    onChoose(ctx, hook, option) {
-      if (hook !== "iar-stormgarden-bottom") return;
-      if (ctx.putOnDeckBottom(Number(option))) {
-        ctx.setCounter("iarStormgardenRemaining", ctx.getCounter("iarStormgardenRemaining") - 1);
-        maintainChannelStormgarden(ctx);
-      }
-    },
+    ...channelLightning("iarStormgardenRemaining", "iar-stormgarden-bottom"),
   },
 
   "blessing of suraya|2": {

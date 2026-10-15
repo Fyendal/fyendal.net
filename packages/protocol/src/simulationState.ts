@@ -204,6 +204,21 @@ function validateGameLogEvent(value: unknown, code: string, path: string): void 
     }, path);
     return;
   }
+  if (kind === "numbers-revealed") {
+    const revealed = exact(value, code, path, ["kind", "sourceCardId", "choices"]);
+    string(revealed.sourceCardId, code, `${path}.sourceCardId`, 128);
+    const choices = array(revealed.choices, code, `${path}.choices`, 2);
+    if (choices.length === 0) fail(code, `${path}.choices`, "expected at least one choice");
+    choices.forEach((choiceValue, index) => {
+      const choicePath = `${path}.choices[${index}]`;
+      const choice = exact(choiceValue, code, choicePath, ["seat", "number"]);
+      validateSeat(choice.seat, `${choicePath}.seat`);
+      if (integer(choice.number, code, `${choicePath}.number`) < 0) {
+        fail(code, `${choicePath}.number`, "expected a non-negative safe integer");
+      }
+    });
+    return;
+  }
   fail(code, `${path}.kind`, "unknown game log event kind");
 }
 

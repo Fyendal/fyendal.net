@@ -4599,6 +4599,12 @@
       "value": "Provoke：选择一张牌展示"
     }
   ],
+  "card.hnt.spurlocked.number.choose": [
+    {
+      "type": 0,
+      "value": "秘密选择 1 到 6 之间的一个数字"
+    }
+  ],
   "card.hnt.tarantula.mode": [
     {
       "type": 0,
@@ -6431,6 +6437,44 @@
     {
       "type": 0,
       "value": "”"
+    }
+  ],
+  "card.log.hnt.spurlocked.revealed": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "："
+    },
+    {
+      "type": 1,
+      "value": "player"
+    },
+    {
+      "type": 0,
+      "value": " 选择了 "
+    },
+    {
+      "type": 1,
+      "value": "number"
+    },
+    {
+      "type": 0,
+      "value": "，"
+    },
+    {
+      "type": 1,
+      "value": "opponent"
+    },
+    {
+      "type": 0,
+      "value": " 选择了 "
+    },
+    {
+      "type": 1,
+      "value": "opponentNumber"
     }
   ],
   "card.log.mon.minnowism.found": [
@@ -21220,6 +21264,28 @@
     {
       "type": 0,
       "value": "从墓地放逐"
+    }
+  ],
+  "game.deckToast.numbersRevealed": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：数字揭晓"
+    }
+  ],
+  "game.deckToast.numbersTie": [
+    {
+      "type": 0,
+      "value": "平局"
+    }
+  ],
+  "game.deckToast.numbersVersus": [
+    {
+      "type": 0,
+      "value": "vs"
     }
   ],
   "game.deckToast.revealedFromDeck": [

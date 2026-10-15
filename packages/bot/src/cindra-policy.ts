@@ -10,6 +10,7 @@ import {
   isAttack,
   optionCard,
   opponentAllies,
+  opponentDamageEffectOnStack,
   ownCards,
   pitchIds,
   preferredPitchIntents,
@@ -53,6 +54,7 @@ const CARD = {
   lavaBurst: "lava burst|1",
   maskOfMomentum: "mask of momentum|0",
   ravenousRabble: "ravenous rabble|1",
+  shelterFromTheStorm: "shelter from the storm|1",
   snatch: "snatch|1",
   throwDagger: "throw dagger|3",
 } as const;
@@ -1435,8 +1437,13 @@ function scorePlay(
   const card = intentCard(intent, own);
   const data = card ? input.cards[card.cardId] : undefined;
   if (!card || !data) return -100;
-  if (!isCindraTurn(input) && isProactiveInstant(intent, data)) return -10_000;
   const functional = key(data);
+  if (intent.kind === "activate-ability" && functional === CARD.shelterFromTheStorm) {
+    // The discard prevention only answers opponent damage already on the
+    // stack, on either turn, otherwise keep Shelter as a defense reaction.
+    return opponentDamageEffectOnStack(input) ? 80 : -10_000;
+  }
+  if (!isCindraTurn(input) && isProactiveInstant(intent, data)) return -10_000;
   if (shouldPreserveOpeningHand(input) && functional !== CARD.flickKnives) return -10_000;
   if (spendsOpeningArsenalReserve(intent, input, own)) return -10_000;
   const excludedIds = new Set([card.instanceId, ...pitchIds(intent)]);

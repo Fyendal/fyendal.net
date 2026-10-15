@@ -609,6 +609,13 @@ function applyEffectDamage(state: GameStateInternal,
   }
   if (packet.amount > 0) {
     runtime.events.fireHeroDealtDamage(state, packet.targetSeat, packet.amount, packet.arcane === true);
+    runtime.events.queueHeroDamageDealt(state, packet.sourceSeat, found?.card ?? packet.sourceSnapshot, {
+      targetSeat: packet.targetSeat,
+      amount: packet.amount,
+      arcane: packet.arcane === true,
+      combat: packet.combat === true,
+      byController: !effectSourceIsAlly(state, packet, found),
+    });
   }
   if (!found) {
     if (packet.amount > 0 && packet.sourceSnapshot) {

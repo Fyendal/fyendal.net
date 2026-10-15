@@ -193,6 +193,31 @@ describe("semantic game log entries", () => {
       logEntries: [structured, structured],
     })).toBeNull();
   });
+
+  it("decodes revealed secret numbers with bounded seats and values", () => {
+    const numbers = {
+      ...structured,
+      event: {
+        kind: "numbers-revealed",
+        sourceCardId: "HNT255",
+        choices: [{ seat: 0, number: 5 }, { seat: 1, number: 2 }],
+      },
+    } as const;
+    expect(decodeGameLogViewEntry(numbers)).toEqual(numbers);
+    expect(decodeGameLogViewEntry({ ...numbers, event: { ...numbers.event, choices: [] } })).toBeNull();
+    expect(decodeGameLogViewEntry({
+      ...numbers,
+      event: { ...numbers.event, choices: [{ seat: 2, number: 1 }] },
+    })).toBeNull();
+    expect(decodeGameLogViewEntry({
+      ...numbers,
+      event: { ...numbers.event, choices: [{ seat: 0, number: -1 }] },
+    })).toBeNull();
+    expect(decodeGameLogViewEntry({
+      ...numbers,
+      event: { ...numbers.event, choices: [{ seat: 0, number: 1, hidden: true }] },
+    })).toBeNull();
+  });
 });
 
 const player = (seat: 0 | 1) => ({

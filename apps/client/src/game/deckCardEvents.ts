@@ -1,7 +1,7 @@
 import type { CardView, GameView, PlayerView } from "@fyendal/shared";
 import { cardData } from "@fyendal/cards/client";
 
-export type DeckCardEventKind = "banish" | "graveyard" | "reveal" | "shuffle" | "roll";
+export type DeckCardEventKind = "banish" | "graveyard" | "reveal" | "shuffle" | "roll" | "numbers";
 
 export interface DeckCardEvent {
   kind: DeckCardEventKind;
@@ -12,6 +12,8 @@ export interface DeckCardEvent {
   /** Per-card owner seats aligned with `cardIds`; used when one event mixes
    * owners (a clash reveals both heroes' cards in a single toast). */
   cardSeats?: (number | undefined)[];
+  /** Secretly chosen numbers revealed together, keyed by hero seat. */
+  numbers?: { seat: number; heroName: string; number: number }[];
 }
 
 const CARD_ID_BY_NAME = (() => {
@@ -328,6 +330,25 @@ export function detectDeckCardEvents(previous: GameView, current: GameView): Dec
     if (/^.+ rolls \d+$/.test(line) || /^the die is rerolled: \d+$/.test(line)) {
       events.push({ kind: "roll", cardIds: [], label: line });
     }
+  }
+
+  // Revealed secret numbers come from structured log metadata; sequences keep
+  // undo and resync from replaying an earlier reveal.
+  const previousSequence = (previous.logEntries ?? []).reduce((highest, entry) => (
+    "sequence" in entry ? Math.max(highest, entry.sequence) : highest
+  ), 0);
+  for (const entry of previous.logEntries ? current.logEntries ?? [] : []) {
+    if (!("sequence" in entry) || entry.sequence <= previousSequence) continue;
+    if (entry.event?.kind !== "numbers-revealed") continue;
+    events.push({
+      kind: "numbers",
+      cardIds: [],
+      label: cardData[entry.event.sourceCardId]?.name ?? entry.fallback,
+      numbers: entry.event.choices.map((choice) => ({
+        ...choice,
+        heroName: current.players[choice.seat]?.heroName ?? "",
+      })),
+    });
   }
   return events;
 }

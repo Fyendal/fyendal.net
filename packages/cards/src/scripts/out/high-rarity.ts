@@ -731,8 +731,8 @@ export const outHighRarity: Record<string, CardScript> = {
     onPlay(ctx) {
       for (const player of ctx.state.players) {
         const top = player.deck[0];
-        if (top) ctx.putIntoArsenal(top.instanceId, "deck", { faceUp: false });
-        if (top) chooseDiscard(ctx, `codex-discard:${player.seat}`, player.seat);
+        if (top && ctx.putIntoArsenal(top.instanceId, "deck", { faceUp: false }))
+          chooseDiscard(ctx, `codex-discard:${player.seat}`, player.seat);
       }
       ctx.createToken(PONDER);
       ctx.createToken(INERTIA, opponentSeat(ctx));

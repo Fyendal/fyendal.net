@@ -4771,6 +4771,12 @@
       "value": "Provoke: choose a card to reveal"
     }
   ],
+  "card.hnt.spurlocked.number.choose": [
+    {
+      "type": 0,
+      "value": "Secretly choose a number between 1 and 6"
+    }
+  ],
   "card.hnt.tarantula.mode": [
     {
       "type": 0,
@@ -6749,6 +6755,44 @@
     {
       "type": 1,
       "value": "card"
+    }
+  ],
+  "card.log.hnt.spurlocked.revealed": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": "
+    },
+    {
+      "type": 1,
+      "value": "player"
+    },
+    {
+      "type": 0,
+      "value": " chose "
+    },
+    {
+      "type": 1,
+      "value": "number"
+    },
+    {
+      "type": 0,
+      "value": ", "
+    },
+    {
+      "type": 1,
+      "value": "opponent"
+    },
+    {
+      "type": 0,
+      "value": " chose "
+    },
+    {
+      "type": 1,
+      "value": "opponentNumber"
     }
   ],
   "card.log.mon.minnowism.found": [
@@ -22001,6 +22045,28 @@
     {
       "type": 0,
       "value": "Banished from graveyard"
+    }
+  ],
+  "game.deckToast.numbersRevealed": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": numbers revealed"
+    }
+  ],
+  "game.deckToast.numbersTie": [
+    {
+      "type": 0,
+      "value": "Tie"
+    }
+  ],
+  "game.deckToast.numbersVersus": [
+    {
+      "type": 0,
+      "value": "vs"
     }
   ],
   "game.deckToast.revealedFromDeck": [

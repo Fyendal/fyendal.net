@@ -959,6 +959,80 @@
   border-color: #ff5b4d;
   box-shadow: 0 0 0 1px #ff5b4dcc, 0 5px 14px #000b;
 }
+/* Revealed secret numbers: a flat face-off, the viewer's pick on the left.
+   The higher pick is a solid tile in its seat color; fill, not color alone,
+   marks it. A tie leaves both outlined. */
+.deck-card-toast.deck-card-toast-numbers {
+  gap: 12px;
+  padding: 12px 18px 16px;
+  border: 1px solid #ffffff1f;
+  border-radius: 10px;
+  background: #1a1815;
+  box-shadow: 0 10px 28px #0009;
+  backdrop-filter: none;
+}
+.deck-card-toast-numbers .deck-card-toast-heading {
+  color: #efe9dd;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+}
+.deck-card-toast-numbers .deck-card-toast-close {
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.deck-card-toast-numbers .deck-card-toast-close:hover { background: #ffffff14; }
+.deck-card-toast-numbers .deck-card-toast-close:focus-visible { outline: 2px solid #efe9dd; }
+.number-reveal {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+.number-reveal-side {
+  --seat: #ff5b4d;
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  width: 104px;
+}
+.number-reveal-mine { --seat: #4da3ff; }
+.number-reveal-value {
+  display: grid;
+  place-items: center;
+  box-sizing: border-box;
+  width: 100%;
+  height: 72px;
+  border: 2px solid var(--seat);
+  border-radius: 8px;
+  color: #9d9483;
+  font-family: var(--font-display);
+  font-size: 48px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+.number-reveal-highest .number-reveal-value {
+  background: var(--seat);
+  color: #1a1815;
+}
+.number-reveal-hero {
+  max-width: 100%;
+  overflow: hidden;
+  color: #efe9dd;
+  font-size: 13px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+/* as tall as a tile so the divider centers on the numbers, not the names */
+.number-reveal-divider {
+  display: grid;
+  place-items: center;
+  height: 72px;
+  color: #9d9483;
+  font-size: 13px;
+}
 @keyframes deck-card-toast-in {
   from { opacity: 0; transform: translate(-50%, -24px) scale(0.96); }
   to { opacity: 1; transform: translate(-50%, 0) scale(1); }

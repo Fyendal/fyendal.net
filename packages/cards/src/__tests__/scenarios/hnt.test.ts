@@ -1589,3 +1589,59 @@ describe("HNT — rules regression coverage", () => {
     expect(g.state.chain.at(-1)?.attackingCard.grantedTypes).toContain("draconic");
   });
 });
+
+describe("HNT — Spur Locked", () => {
+  const spurScenario = () =>
+    scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          hand: ["spur locked|3"],
+          deck: ["wrecker romp|3", "sink below|1"],
+        },
+        { hero: "rhinar", deck: ["fry|1"] },
+      ],
+    });
+
+  it("lets each hero choose a number, hiding the first choice until both are revealed", () => {
+    const g = spurScenario();
+    const life = g.state.players[0]!.life;
+
+    g.play("spur locked|3");
+    expect(g.state.pendingDecision).toMatchObject({ player: 0, options: ["1", "2", "3", "4", "5", "6"] });
+
+    g.chooseOption("5");
+    expect(g.state.pendingDecision).toMatchObject({ player: 1, options: ["1", "2", "3", "4", "5", "6"] });
+    const opposingView = projectStateFor(g.state, 1);
+    expect(JSON.stringify(opposingView)).not.toContain("spurLockedNumber");
+    expect(opposingView.log.join("\n")).not.toContain("chose 5");
+
+    g.chooseOption("2").expectLog("chose 5").expectLog("chose 2").expectLife(0, life - 5);
+    const reveal = projectStateFor(g.state, 1).logEntries?.at(-1);
+    expect(reveal && "event" in reveal ? reveal.event : undefined).toMatchObject({
+      kind: "numbers-revealed",
+      choices: [{ seat: 0, number: 5 }, { seat: 1, number: 2 }],
+    });
+    expect(g.state.pendingDecision?.player).toBe(0);
+    g.chooseCard("sink below|1");
+    expect(g.state.players[0]!.hand.map((card) => cardData[card.cardId]!.name)).toContain("Sink Below");
+    expect(g.state.players[0]!.flags.spurLockedNumber).toBe(0);
+  });
+
+  it("makes the opponent pay and search when they choose the higher number", () => {
+    const g = spurScenario();
+    const life = g.state.players[1]!.life;
+
+    g.play("spur locked|3").chooseOption("1").chooseOption("3").expectLife(1, life - 3);
+    expect(g.state.pendingDecision?.player).toBe(1);
+  });
+
+  it("does nothing further when both heroes choose the same number", () => {
+    const g = spurScenario();
+    const lives = g.state.players.map((player) => player.life);
+
+    g.play("spur locked|3").chooseOption("4").chooseOption("4");
+    expect(g.state.players.map((player) => player.life)).toEqual(lives);
+    expect(g.state.pendingDecision?.chooseHook).not.toBe("spur-search");
+  });
+});

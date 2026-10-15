@@ -571,6 +571,16 @@ function gameLogEvent(value: unknown): value is GameLogEvent {
       && optional(event.sides, (entry): entry is number => nonNegativeInteger(entry) && entry > 0)
       && (event.sides === undefined || event.result <= event.sides);
   }
+  if (event.kind === "numbers-revealed") {
+    return exactKeys(event, ["kind", "sourceCardId", "choices"])
+      && id(event.sourceCardId)
+      && array(event.choices, (value): value is { seat: number; number: number } => {
+        const choice = object(value);
+        return !!choice && exactKeys(choice, ["seat", "number"])
+          && seat(choice.seat) && nonNegativeInteger(choice.number);
+      }, 2)
+      && event.choices.length > 0;
+  }
   return false;
 }
 

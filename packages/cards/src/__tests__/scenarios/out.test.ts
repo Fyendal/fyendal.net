@@ -227,6 +227,28 @@ describe("OUT — registration and core mechanics", () => {
       .expectInZone(1, NON_ATTACK, "graveyard");
   });
 
+  it("Codex of Inertia makes only heroes whose arsenal took the top card discard", () => {
+    const s = scenario({
+      seats: [
+        { hero: "rhinar", hand: ["codex of inertia|2", NON_ATTACK], deck: ["infect|1"] },
+        {
+          hero: "dorinthea",
+          arsenal: ["head shot|1"],
+          hand: [BLUE],
+          deck: ["the weakest link|1"],
+        },
+      ],
+    });
+
+    s.play("codex of inertia|2")
+      .chooseCard(NON_ATTACK)
+      .expectInZone(0, "infect|1", "arsenal")
+      .expectInZone(0, NON_ATTACK, "graveyard")
+      .expectInZone(1, BLUE, "hand")
+      .expectDeckTop(1, "the weakest link|1");
+    expect(s.state.pendingDecision).toBeNull();
+  });
+
   it("Codex of Frailty fills New Horizon's empty additional arsenal zone", () => {
     const s = scenario({
       seats: [

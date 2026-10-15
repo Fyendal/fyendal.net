@@ -244,6 +244,54 @@ export const cardDefendsThisTrigger: NonNullable<CardScript["friendlyDefendedTri
   perDefender: true,
 };
 
+/** Channel Lightning: at the beginning of the controller's end phase add a
+ * flow counter, then put one Lightning card from pitch on the bottom per flow
+ * counter or destroy this. `remainingKey` tracks unpaid cards across the
+ * resumable `hook` choices. */
+export function channelLightning(
+  remainingKey: string,
+  hook: string,
+): { triggers: TriggerDef[]; onChoose: NonNullable<CardScript["onChoose"]> } {
+  const payNext = (ctx: ScriptCtx): void => {
+    const remaining = ctx.getCounter(remainingKey);
+    if (remaining <= 0) return;
+    const lightning = ctx.player(ctx.seat).pitch.filter((card) => ctx.cardTypes(card).includes("lightning"));
+    if (lightning.length < remaining) {
+      ctx.destroySelf();
+      return;
+    }
+    ctx.requestCardChoice(
+      hook,
+      decisionPrompt("Put a Lightning card from pitch on the bottom", "card.ele.pitch.card.bottom", {
+        values: { type: "Lightning" },
+      }),
+      lightning.map((card) => card.instanceId),
+    );
+  };
+  return {
+    triggers: [
+      {
+        event: "end-of-turn",
+        label: "Channel Lightning",
+        labelMessage: { id: "card.trigger.common.channel.lightning" },
+        effect(ctx) {
+          const flow = ctx.getCounter("flow") + 1;
+          ctx.setCounter("flow", flow);
+          ctx.setCounter(remainingKey, flow);
+          payNext(ctx);
+        },
+      },
+    ],
+    onChoose(ctx, choiceHook, option) {
+      if (choiceHook !== hook) return;
+      if (ctx.putOnDeckBottom(Number(option))) {
+        ctx.setCounter(remainingKey, ctx.getCounter(remainingKey) - 1);
+        payNext(ctx);
+      }
+    },
+  };
+}
+
 /** Shared Suspense lifecycle (CR 8.3.42). Card-specific enter/leave effects
  * remain callbacks so the engine only sees the generic counter behavior. */
 export function suspenseAura(

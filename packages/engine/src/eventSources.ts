@@ -10,7 +10,7 @@ import {
   triggerLogMessage,
 } from "./gameLog.js";
 import { triggerOccurrenceCount } from "./scripts.js";
-import type { ScriptCtx, TriggerEvent, TriggerEventContext } from "./scripts.js";
+import type { HeroDamageEventContext, ScriptCtx, TriggerEvent, TriggerEventContext } from "./scripts.js";
 import type { CardInstance, ChainLinkState, PlayerState, StackLayer } from "./state.js";
 import { tokenCreationCauseForModifier } from "./tokenQueries.js";
 import { currentLink, opponent, removeFromArray } from "./zoneQueries.js";
@@ -182,6 +182,30 @@ export function queueTriggeredEvent(
   )) {
     (state.pendingTriggeredLayers ??= []).push(...group.layers);
   }
+}
+
+/** Raise the "hero-damage-dealt" event for positive damage dealt to a hero
+ * after prevention. Its triggered layers join the pending layers that the
+ * damage step or the resolving layer exposes before the next priority point
+ * (CR 6.6.6). The controller's opposing-hero damage count is per turn, so
+ * ordinal triggers see damage dealt before their source existed (CR 6.6.5d). */
+export function queueHeroDamageDealt(
+  state: GameStateInternal,
+  runtime: EngineRuntime,
+  sourceSeat: number,
+  source: CardInstance | undefined,
+  damage: Omit<HeroDamageEventContext, "opposingHeroOrdinal">,
+): void {
+  if (damage.amount <= 0) return;
+  let opposingHeroOrdinal: number | undefined;
+  if (damage.byController && damage.targetSeat !== sourceSeat) {
+    const dealer = state.players[sourceSeat] as PlayerState;
+    opposingHeroOrdinal = (Number(dealer.flags.opposingHeroDamageEvents) || 0) + 1;
+    dealer.flags.opposingHeroDamageEvents = opposingHeroOrdinal;
+  }
+  queueTriggeredEvent(state, runtime, "hero-damage-dealt", sourceSeat, source, {
+    damage: { ...damage, ...(opposingHeroOrdinal !== undefined ? { opposingHeroOrdinal } : {}) },
+  });
 }
 
 /** Notify active sources after their controller's hero is actually dealt

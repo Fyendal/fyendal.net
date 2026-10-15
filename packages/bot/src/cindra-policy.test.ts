@@ -767,6 +767,36 @@ describe("Cindra Head Jabs policy", () => {
       .toEqual({ kind: "play-card", instanceId: reaction.instanceId, pitchInstanceIds: [] });
   });
 
+  it("keeps Shelter from the Storm while its own attack is on the stack", () => {
+    let game = state(0);
+    game.turn = 2;
+    replaceHand(game, 0, ["CIN020", "PEN321", "PEN321"]);
+    game = applyCindra(game);
+    expect(game.pendingDecision?.kind).toBe("priority-window");
+
+    expect(cindraIntent(game)).toEqual({ kind: "pass" });
+  });
+
+  it("discards Shelter from the Storm to prevent opposing arcane damage on the stack", () => {
+    const game = state(1);
+    replaceHand(game, 0, ["PEN321"]);
+    const shelter = game.players[0]!.hand[0]!;
+    const view = projectStateFor(game, 0);
+    const spell = { instanceId: 93_301, cardId: "CRU174", owner: 1 as const };
+    view.phase = "layer";
+    view.priorityPlayer = 0;
+    view.pendingDecision = { player: 0, kind: "priority-window", prompt: "Play an instant or pass" };
+    view.stack = [{ card: spell, seat: 1, label: "Snapback", optional: false }];
+    const activate: GameIntent = {
+      kind: "activate-ability",
+      sourceInstanceId: shelter.instanceId,
+      pitchInstanceIds: [],
+    };
+
+    expect(chooseCindraIntent({ seat: 0, view, legal: [activate, { kind: "pass" }], cards: cardData }))
+      .toEqual(activate);
+  });
+
   it("does not stack defense reactions after a pending reaction covers the attack", () => {
     const game = state();
     const [pending, sinkBelow, shelter] = ["ANQ034", "ANQ034", "PEN321"].map((cardId) => ({

@@ -91,6 +91,13 @@ function applyHit(
   defender.flags.damageTakenThisTurn = true;
   defender.flags.physicalDamageTakenThisTurn = true;
   runtime.events.fireHeroDealtDamage(state, defender.seat, link.damage, false);
+  runtime.events.queueHeroDamageDealt(state, link.attacker, link.attackingCard, {
+    targetSeat: defender.seat,
+    amount: link.damage,
+    arcane: false,
+    combat: true,
+    byController: link.attackCardType !== "ally",
+  });
   const activeDamageSources = hookSources(state, link.attacker, {
     board: true,
     equipment: true,

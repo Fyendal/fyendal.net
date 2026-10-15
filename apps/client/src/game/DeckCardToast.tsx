@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { Fragment, useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useIntl } from "react-intl";
 import type { GameView } from "@fyendal/shared";
 import { cardData } from "@fyendal/cards/client";
@@ -138,7 +138,13 @@ export function DeckCardToast({
   const localizedLabelId = localizedDeckCardEventLabel(event);
   const label = localizedLabelId
     ? intl.formatMessage({ id: localizedLabelId })
-    : event.label;
+    : event.kind === "numbers"
+      ? intl.formatMessage({ id: "game.deckToast.numbersRevealed" }, { card: event.label })
+      : event.label;
+  const numbers = [...(event.numbers ?? [])].sort((a, b) =>
+    Number(b.seat === viewerSeat) - Number(a.seat === viewerSeat));
+  const tied = new Set(numbers.map((choice) => choice.number)).size < 2;
+  const highest = tied ? undefined : Math.max(...numbers.map((choice) => choice.number));
 
   return (
     <div
@@ -155,6 +161,27 @@ export function DeckCardToast({
         aria-label={intl.formatMessage({ id: "common.dismiss" })}
         onClick={onDismiss}
       />
+      {numbers.length ? (
+        <div className="number-reveal">
+          {numbers.map((choice, index) => (
+            <Fragment key={choice.seat}>
+              {index > 0 ? (
+                <span className="number-reveal-divider">
+                  {intl.formatMessage({ id: tied ? "game.deckToast.numbersTie" : "game.deckToast.numbersVersus" })}
+                </span>
+              ) : null}
+              <div
+                className={`number-reveal-side ${
+                  choice.seat === viewerSeat ? "number-reveal-mine" : "number-reveal-theirs"
+                }${choice.number === highest ? " number-reveal-highest" : ""}`}
+              >
+                <span className="number-reveal-value">{choice.number}</span>
+                <span className="number-reveal-hero">{choice.heroName.split(",")[0]}</span>
+              </div>
+            </Fragment>
+          ))}
+        </div>
+      ) : null}
       {event.cardIds.length > 0 && (
         <div className="deck-card-toast-cards">
           {event.cardIds.map((cardId, index) => {

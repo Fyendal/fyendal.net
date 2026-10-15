@@ -3,6 +3,7 @@ import {
   ampNextArcane,
   attackAbility,
   buffNextAttack,
+  channelLightning,
   commonOptionMessages,
   dealArcane,
   decisionMessage,
@@ -376,6 +377,8 @@ function preventEquipment(amount: number, condition: (ctx: ScriptCtx) => boolean
 function lightningForm(): CardScript {
   return { onHit: (ctx) => ctx.createToken(LIGHTNING) };
 }
+
+const valleyChannel = channelLightning("valleyChannelRemaining", "ros-valley-channel");
 
 function handPrevention(amount: number): CardScript {
   return {
@@ -1390,13 +1393,17 @@ Object.assign(ros, {
     ],
   },
   "channel lightning valley|2": {
-    onFriendlyDamageDealt(ctx: ScriptCtx, _source: DeepReadonly<CardInstance>, target: number, amount: number) {
-      const key = `valley:${ctx.state.turn}`;
-      if (target !== ctx.seat && amount > 0 && !ctx.getCounter(key)) {
-        ctx.setCounter(key, 1);
-        ctx.drawCards(ctx.seat, 1);
-      }
-    },
+    triggers: [
+      {
+        event: "hero-damage-dealt",
+        label: "Draw a card",
+        labelMessage: { id: "card.trigger.common.card.draw" },
+        condition: (_ctx, _eventCard, event) => event?.damage?.opposingHeroOrdinal === 1,
+        effect: (ctx: ScriptCtx) => ctx.drawCards(ctx.seat, 1),
+      },
+      ...valleyChannel.triggers,
+    ],
+    onChoose: valleyChannel.onChoose,
   },
   "high voltage|3": { onPlay: (ctx: ScriptCtx) => ampNextArcane(ctx, 1) },
   "face purgatory|0": {

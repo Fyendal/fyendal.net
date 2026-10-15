@@ -397,7 +397,8 @@ export type GameLogEvent =
     }
   | { kind: "turn-start"; turn: number; activeSeat: number }
   | { kind: "shuffle"; seat: number }
-  | { kind: "roll"; result: number; seat?: number; sides?: number };
+  | { kind: "roll"; result: number; seat?: number; sides?: number }
+  | { kind: "numbers-revealed"; sourceCardId: string; choices: { seat: number; number: number }[] };
 
 /** Locale-independent presentation attached to an audience-safe log entry.
  * The English fallback keeps older clients, replays, exports, and diagnostics

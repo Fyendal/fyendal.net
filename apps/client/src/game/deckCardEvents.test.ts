@@ -321,6 +321,36 @@ describe("public deck-card events", () => {
     ]);
   });
 
+  it("announces revealed secret numbers once from structured log metadata", () => {
+    const spur = Object.values(cardData).find((entry) => entry.name === "Spur Locked")!;
+    const fallback = "Spur Locked: Hero chose 5, Opponent chose 2";
+    const reveal = {
+      fallback,
+      sequence: 2,
+      message: { id: "card.log.hnt.spurlocked.revealed" },
+      event: {
+        kind: "numbers-revealed" as const,
+        sourceCardId: spur.id,
+        choices: [{ seat: 0, number: 5 }, { seat: 1, number: 2 }],
+      },
+    };
+    const played = { fallback: "Hero plays Spur Locked", sequence: 1, message: { id: "engine.log.play" } };
+    const before = { ...view({ log: [played.fallback] }), logEntries: [played] };
+    const after = { ...view({ log: [played.fallback, fallback] }), logEntries: [played, reveal] };
+
+    expect(detectDeckCardEvents(before, after)).toEqual([{
+      kind: "numbers",
+      cardIds: [],
+      label: "Spur Locked",
+      numbers: [
+        { seat: 0, heroName: "Hero", number: 5 },
+        { seat: 1, heroName: "Opponent", number: 2 },
+      ],
+    }]);
+    expect(detectDeckCardEvents(after, before)).toEqual([]);
+    expect(detectDeckCardEvents(after, after)).toEqual([]);
+  });
+
   it("does not treat a played card resolving beside a deck search as a deck departure", () => {
     const spark = Object.values(cardData).find((entry) => entry.name === "Spark of Genius")!;
     const previous = view({ deckCount: 10, hand: [card(20, spark.id)] });
