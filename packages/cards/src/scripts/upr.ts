@@ -6,6 +6,7 @@ import {
   dealtByThis,
   decisionMessage,
   decisionPrompt,
+  entersArenaTrigger,
   heroDamage,
   localizedCardLog,
   mergeSetScripts,
@@ -24,6 +25,21 @@ import { dragonAttack } from "./upr/dragon-attack.js";
 const ASH = "UPR043";
 const AETHER_ASHWING = "UPR042";
 const FROSTBITE = "SIY035";
+
+/** Cromai's attack and leave-arena triggers share one per-turn limit, consumed
+ * as a layer is created (CR 6.6.5e). */
+function cromaiTrigger(event: "attack-declared" | "card-left-arena"): TriggerDef {
+  const usedKey = (ctx: ScriptCtx) => `cromai:${ctx.self.instanceId}`;
+  return {
+    event,
+    sourceZone: "self",
+    label: "Gain 1 action point",
+    labelMessage: decisionMessage("card.trigger.common.actionpoint.gain", { amount: 1 }),
+    condition: (ctx) => ctx.getPlayerFlag(ctx.seat, usedKey(ctx)) !== true,
+    onTrigger: (ctx) => ctx.setPlayerFlag(ctx.seat, usedKey(ctx), true),
+    effect: (ctx) => ctx.gainActionPoint(),
+  };
+}
 
 function data(ctx: ScriptCtx, card: DeepReadonly<CardInstance>) {
   return ctx.cardData(card.cardId);
@@ -672,16 +688,7 @@ export const upr: Record<string, CardScript> = mergeSetScripts("UPR", uprHighRar
   },
   "cromai|0": {
     activated: dragonAttack(),
-    onAttackDeclared(ctx) {
-      if (ctx.getPlayerFlag(ctx.seat, `cromai:${ctx.self.instanceId}`) === true) return;
-      ctx.setPlayerFlag(ctx.seat, `cromai:${ctx.self.instanceId}`, true);
-      ctx.gainActionPoint();
-    },
-    onLeaveArena(ctx) {
-      if (ctx.getPlayerFlag(ctx.seat, `cromai:${ctx.self.instanceId}`) === true) return;
-      ctx.setPlayerFlag(ctx.seat, `cromai:${ctx.self.instanceId}`, true);
-      ctx.gainActionPoint();
-    },
+    triggers: [cromaiTrigger("attack-declared"), cromaiTrigger("card-left-arena")],
   },
   "kyloria|0": {
     activated: dragonAttack(),
@@ -728,10 +735,12 @@ export const upr: Record<string, CardScript> = mergeSetScripts("UPR", uprHighRar
   },
   "ouvia|0": {
     activated: dragonAttack(),
-    onEnterArena(ctx) {
-      requestAsh(ctx, "ouvia", "Ouvia: transform an Ash?", true);
-    },
     triggers: [
+      entersArenaTrigger(
+        "Transform up to one Ash",
+        decisionMessage("card.trigger.common.ash.transform", { amount: 1 }),
+        (ctx) => requestAsh(ctx, "ouvia", "Ouvia: transform an Ash?", true),
+      ),
       {
         event: "start-of-turn",
         whose: "subject",

@@ -7,7 +7,9 @@ import {
   dealArcane,
   decisionMessage,
   decisionPrompt,
+  entersArenaTrigger,
   isSixPlus,
+  leavesArenaTrigger,
   mergeSetScripts,
   opponentSeat,
   optN,
@@ -384,6 +386,14 @@ function gravenEquipment(slot: "head" | "chest" | "arms" | "legs"): CardScript {
       ctx.addCardDefenseCounters(ctx.self.instanceId, 1);
     },
     triggers: [
+      entersArenaTrigger(
+        "Put a -1 defense counter on this",
+        decisionMessage("card.trigger.common.defensecounter.minus", { amount: 1 }),
+        (ctx) => {
+          ctx.addCardDefenseCounters(ctx.self.instanceId, 1);
+        },
+        { condition: (_ctx, _card, event) => event?.from !== "graveyard" },
+      ),
       {
         event: "start-of-turn",
         sourceZone: "graveyard",
@@ -644,17 +654,21 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
     },
   },
   ...pitches("distant rumbling", (pitch) => ({
-    onEnterArena(ctx) {
-      ctx.drawCards(ctx.seat, 1);
-      const hand = ctx.player(ctx.seat).hand;
-      if (hand.length)
-        ctx.requestCardChoice(
-          "pen-rumbling-hand",
-          decisionPrompt("Put a card from hand fifth from the top", "card.pen.hand.fifthfromtop"),
-          hand.map((card) => card.instanceId),
-        );
-    },
     triggers: [
+      entersArenaTrigger(
+        "Draw a card, then put a card from your hand fifth from the top",
+        decisionMessage("card.trigger.pen.distantrumbling.draw.fifth"),
+        (ctx) => {
+          ctx.drawCards(ctx.seat, 1);
+          const hand = ctx.player(ctx.seat).hand;
+          if (hand.length)
+            ctx.requestCardChoice(
+              "pen-rumbling-hand",
+              decisionPrompt("Put a card from hand fifth from the top", "card.pen.hand.fifthfromtop"),
+              hand.map((card) => card.instanceId),
+            );
+        },
+      ),
       {
         event: "start-of-turn",
         label: "Destroy this and create Seismic Surges",
@@ -669,10 +683,12 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
     },
   })),
   ...pitches("rites of earthlore", (pitch) => ({
-    onEnterArena(ctx) {
-      create(ctx, SEISMIC_SURGE);
-    },
     triggers: [
+      entersArenaTrigger(
+        "Create a Seismic Surge token",
+        decisionMessage("card.trigger.common.seismicsurge.create"),
+        (ctx) => create(ctx, SEISMIC_SURGE),
+      ),
       {
         event: "start-of-turn",
         label: "Destroy this and empower the next Guardian attack",
@@ -1047,30 +1063,43 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
   })),
 
   "shroud of the fate watcher|0": {
-    onLeaveArena(ctx) {
-      create(ctx, SIGIL_OF_FATE);
-    },
+    triggers: [
+      leavesArenaTrigger(
+        "Create a Sigil of Fate token",
+        decisionMessage("card.trigger.common.sigiloffate.create"),
+        (ctx) => create(ctx, SIGIL_OF_FATE),
+      ),
+    ],
   },
   "robe of resourcefulness|0": {
-    onLeaveArena(ctx) {
-      ctx.changeResources(ctx.seat, 2);
-    },
+    triggers: [
+      leavesArenaTrigger(
+        "Gain 2 resources",
+        decisionMessage("card.trigger.common.resources.gain", { amount: 2 }),
+        (ctx) => ctx.changeResources(ctx.seat, 2),
+      ),
+    ],
   },
   "gloves of erasure|0": {
-    onLeaveArena(ctx) {
-      const tokens = ctx.state.players
-        .flatMap((player) => player.board)
-        .filter((card) => hasTag(ctx, card, "aura") && hasTag(ctx, card, "token"));
-      if (tokens.length)
-        ctx.requestCardChoice(
-          "pen-erase-aura",
-          decisionPrompt("Destroy an aura token", "card.pen.auratoken.destroy"),
-          tokens.map((card) => card.instanceId),
-        );
-    },
-    onChoose(ctx, hook, option) {
-      if (hook === "pen-erase-aura") ctx.destroyPermanent(Number(option));
-    },
+    triggers: [
+      leavesArenaTrigger(
+        "Destroy target aura token",
+        decisionMessage("card.trigger.common.auratoken.target.destroy"),
+        (ctx) => {
+          if (ctx.playTargetInstanceId !== undefined) ctx.destroyPermanent(ctx.playTargetInstanceId);
+        },
+        {
+          target: {
+            options: (ctx) =>
+              ctx.state.players
+                .flatMap((player) => player.board)
+                .filter((card) => hasTag(ctx, card, "aura") && data(ctx, card).cardType === "token")
+                .map((card) => card.instanceId),
+            prompt: () => decisionPrompt("Destroy an aura token", "card.pen.auratoken.destroy"),
+          },
+        },
+      ),
+    ],
   },
   "glyph power spell|1": arcaneSpell(4, false, {
     amount: 6,
@@ -1087,10 +1116,8 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
   "future sight|2": createSigils(2),
   "future sight|3": createSigils(1),
   "sigil of fate|0": {
-    onLeaveArena(ctx) {
-      optN(ctx, 1);
-    },
     triggers: [
+      leavesArenaTrigger("Opt 1", decisionMessage("card.trigger.common.opt", { amount: 1 }), (ctx) => optN(ctx, 1)),
       {
         event: "begin-action-phase",
         label: "Destroy Sigil of Fate",
@@ -1138,9 +1165,22 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
     },
   })),
   ...pitches("shimmering specter", () => ({
-    onLeaveArena(ctx) {
-      if (ctx.link) create(ctx, SPECTRAL_SHIELD);
-    },
+    triggers: [
+      leavesArenaTrigger(
+        "Create a Spectral Shield token",
+        decisionMessage("card.trigger.common.spectralshield.create"),
+        (ctx) => create(ctx, SPECTRAL_SHIELD),
+        {
+          // Last-known information: the active link still names the object
+          // that left while attacking or defending.
+          condition: (ctx, card) =>
+            !!ctx.link &&
+            !!card &&
+            (ctx.link.attackingCard.instanceId === card.instanceId ||
+              ctx.link.defendingCards.some((defender) => defender.instanceId === card.instanceId)),
+        },
+      ),
+    ],
   })),
 
   "graven cowl|0": gravenEquipment("head"),
@@ -1588,21 +1628,28 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
     },
   },
   "channel galcia's cradle|3": {
-    onEnterArena(ctx) {
-      const cards = ctx.state.players.flatMap((player) => [
-        ...player.board,
-        ...Object.values(player.equipment).filter((card): card is Card => card !== undefined),
-      ]);
-      if (cards.length)
-        ctx.requestCardChoice(
-          "pen-channel-freeze",
-          decisionPrompt("Freeze a permanent", "card.pen.permanent.freeze"),
-          cards.map((card) => card.instanceId),
-        );
-    },
-    onChoose(ctx, hook, option) {
-      if (hook === "pen-channel-freeze") ctx.setCardCounter(Number(option), "frozenUntilTurn", Number.MAX_SAFE_INTEGER);
-    },
+    triggers: [
+      entersArenaTrigger(
+        "Freeze target ally, aura, item, or equipment",
+        decisionMessage("card.trigger.pen.galcia.freeze"),
+        (ctx) => {
+          if (ctx.playTargetInstanceId !== undefined)
+            ctx.setCardCounter(ctx.playTargetInstanceId, "frozenUntilTurn", Number.MAX_SAFE_INTEGER);
+        },
+        {
+          target: {
+            options: (ctx) =>
+              ctx.state.players
+                .flatMap((player) => [
+                  ...player.board.filter((card) => ["ally", "aura", "item"].some((tag) => hasTag(ctx, card, tag))),
+                  ...Object.values(player.equipment).filter((card): card is Card => card !== undefined),
+                ])
+                .map((card) => card.instanceId),
+            prompt: () => decisionPrompt("Freeze a permanent", "card.pen.permanent.freeze"),
+          },
+        },
+      ),
+    ],
   },
   ...pitches("conquer the icy terrain", () => ({
     canTriggerOnHit: (ctx) => ctx.link?.targetAllyId === undefined,
@@ -1658,13 +1705,17 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
 
   "sigil of voltaris|3": {
     arcaneDamageEffect: true,
-    onEnterArena(ctx) {
-      dealArcane(ctx, opponentSeat(ctx), 1);
-    },
-    onLeaveArena(ctx) {
-      dealArcane(ctx, opponentSeat(ctx), 1);
-    },
     triggers: [
+      entersArenaTrigger(
+        "Deal 1 arcane damage to target hero",
+        decisionMessage("card.trigger.common.arcane.target", { amount: 1 }),
+        (ctx) => dealArcane(ctx, opponentSeat(ctx), 1),
+      ),
+      leavesArenaTrigger(
+        "Deal 1 arcane damage to target hero",
+        decisionMessage("card.trigger.common.arcane.target", { amount: 1 }),
+        (ctx) => dealArcane(ctx, opponentSeat(ctx), 1),
+      ),
       {
         event: "begin-action-phase",
         label: "Destroy Sigil of Voltaris",

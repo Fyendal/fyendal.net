@@ -2841,6 +2841,12 @@
       "value": "Return a Hyper Driver to the arena?"
     }
   ],
+  "card.dyn.ironsong.sword.target": [
+    {
+      "type": 0,
+      "value": "Choose target sword you control"
+    }
+  ],
   "card.dyn.nitromechanoid.card.banish": [
     {
       "type": 0,
@@ -13228,6 +13234,12 @@
       "value": "Put an aura on the bottom"
     }
   ],
+  "card.sup.aura.bottom.choose": [
+    {
+      "type": 0,
+      "value": "Put another target aura on the bottom of its owner's deck"
+    }
+  ],
   "card.sup.aura.destroy": [
     {
       "type": 0,
@@ -13854,6 +13866,12 @@
       "value": "Shuffle this into its owner's deck"
     }
   ],
+  "card.trigger.aps.pedestal.attack.top": [
+    {
+      "type": 0,
+      "value": "You may put a Revered or Guardian attack from your graveyard on top of your deck"
+    }
+  ],
   "card.trigger.common.actionpoint.gain": [
     {
       "type": 0,
@@ -13988,6 +14006,20 @@
       "value": " arcane damage"
     }
   ],
+  "card.trigger.common.arcane.prevent.next": [
+    {
+      "type": 0,
+      "value": "Prevent the next "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " arcane damage to you this turn"
+    }
+  ],
   "card.trigger.common.arcane.target": [
     {
       "type": 0,
@@ -14078,6 +14110,26 @@
       "value": " attack and go again"
     }
   ],
+  "card.trigger.common.attack.target.goagain": [
+    {
+      "type": 0,
+      "value": "Up to 1 target attack gets go again"
+    }
+  ],
+  "card.trigger.common.attack.target.power.gain": [
+    {
+      "type": 0,
+      "value": "Up to 1 target attack gets +"
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " power"
+    }
+  ],
   "card.trigger.common.attacks.power.chain": [
     {
       "type": 0,
@@ -14110,10 +14162,22 @@
       "value": "Return an eligible Aura to its owner's hand?"
     }
   ],
+  "card.trigger.common.auratoken.target.destroy": [
+    {
+      "type": 0,
+      "value": "Destroy target aura token"
+    }
+  ],
   "card.trigger.common.balance.remove.destroy": [
     {
       "type": 0,
       "value": "Remove a balance counter, or destroy this"
+    }
+  ],
+  "card.trigger.common.banished.facedown": [
+    {
+      "type": 0,
+      "value": "Turn a banished card face down"
     }
   ],
   "card.trigger.common.biosupdate.arena": [
@@ -14212,6 +14276,12 @@
       "value": " attack, and go again"
     }
   ],
+  "card.trigger.common.cardname.choose": [
+    {
+      "type": 0,
+      "value": "Name a card"
+    }
+  ],
   "card.trigger.common.cardname.choose.destroy": [
     {
       "type": 0,
@@ -14288,6 +14358,12 @@
       "value": "Core Reaction"
     }
   ],
+  "card.trigger.common.courage.create": [
+    {
+      "type": 0,
+      "value": "Create a Courage token"
+    }
+  ],
   "card.trigger.common.courage.destroy": [
     {
       "type": 0,
@@ -14312,6 +14388,18 @@
     {
       "type": 0,
       "value": "Name the Crouching Tiger"
+    }
+  ],
+  "card.trigger.common.crowd.boo": [
+    {
+      "type": 0,
+      "value": "The crowd boos you"
+    }
+  ],
+  "card.trigger.common.crowd.cheer": [
+    {
+      "type": 0,
+      "value": "The crowd cheers you"
     }
   ],
   "card.trigger.common.dagger.attack": [
@@ -14536,6 +14624,20 @@
     {
       "type": 0,
       "value": "Whenever a card defends this"
+    }
+  ],
+  "card.trigger.common.defender.action.defense.target": [
+    {
+      "type": 0,
+      "value": "Target defending action card gets +"
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " defense"
     }
   ],
   "card.trigger.common.defender.discard.draw": [
@@ -14764,6 +14866,20 @@
       "value": "Choose a name for the ephemeral attack"
     }
   ],
+  "card.trigger.common.equipment.defensecounter.optional": [
+    {
+      "type": 0,
+      "value": "You may put a -"
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " defense counter on an equipment"
+    }
+  ],
   "card.trigger.common.equipment.destroy": [
     {
       "type": 0,
@@ -14898,6 +15014,20 @@
     {
       "type": 0,
       "value": "Create a Gold token"
+    }
+  ],
+  "card.trigger.common.gold.create.count": [
+    {
+      "type": 0,
+      "value": "Create "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " Gold tokens"
     }
   ],
   "card.trigger.common.gold.wager.optional": [
@@ -15044,6 +15174,12 @@
       "value": "Banish a card from your hand"
     }
   ],
+  "card.trigger.common.hand.card.banish.draw.optional": [
+    {
+      "type": 0,
+      "value": "You may banish a card from your hand to draw a card"
+    }
+  ],
   "card.trigger.common.hand.card.banish.hunger": [
     {
       "type": 0,
@@ -15070,6 +15206,12 @@
     {
       "type": 0,
       "value": "Destroy Heavy Swing and empower a sword"
+    }
+  ],
+  "card.trigger.common.heroes.draw": [
+    {
+      "type": 0,
+      "value": "Each hero draws a card"
     }
   ],
   "card.trigger.common.heroes.infect.decktop.banish": [
@@ -15368,6 +15510,12 @@
       "value": "Put a -1 life counter on Nekria and create an Ash"
     }
   ],
+  "card.trigger.common.nextattack.dominate": [
+    {
+      "type": 0,
+      "value": "Your next attack this turn gets dominate"
+    }
+  ],
   "card.trigger.common.nextattack.draconic": [
     {
       "type": 0,
@@ -15410,6 +15558,46 @@
       "value": " power"
     }
   ],
+  "card.trigger.common.nextattack.turn.attack": [
+    {
+      "type": 0,
+      "value": "Your next attack this turn gets +"
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " attack"
+    }
+  ],
+  "card.trigger.common.nextattackaction.boost": [
+    {
+      "type": 0,
+      "value": "The next attack action card you play this turn gets boost"
+    }
+  ],
+  "card.trigger.common.nextattackaction.cost.reduce": [
+    {
+      "type": 0,
+      "value": "The next attack action card you play this turn costs "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " less to play"
+    }
+  ],
+  "card.trigger.common.nextnonattack.instant": [
+    {
+      "type": 0,
+      "value": "Play your next non-attack action card this turn as though it were an instant"
+    }
+  ],
   "card.trigger.common.nofear.return": [
     {
       "type": 0,
@@ -15440,6 +15628,26 @@
     {
       "type": 0,
       "value": " defense counter on an equipment they control\""
+    }
+  ],
+  "card.trigger.common.opponent.attackactions.power.reduce": [
+    {
+      "type": 0,
+      "value": "Opposing attack action cards get -"
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " power this turn"
+    }
+  ],
+  "card.trigger.common.opponent.choose": [
+    {
+      "type": 0,
+      "value": "Choose an opponent"
     }
   ],
   "card.trigger.common.opt": [
@@ -15496,6 +15704,43 @@
       "value": " power this turn"
     }
   ],
+  "card.trigger.common.powercounter.add.self": [
+    {
+      "type": 0,
+      "value": "Put "
+    },
+    {
+      "type": 6,
+      "value": "count",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 0,
+              "value": "a +1 power counter"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " +1 power counters"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    },
+    {
+      "type": 0,
+      "value": " on this"
+    }
+  ],
   "card.trigger.common.pyroglyphic.destroy": [
     {
       "type": 0,
@@ -15522,6 +15767,60 @@
       "value": " resource"
     }
   ],
+  "card.trigger.common.resource.gain.amp": [
+    {
+      "type": 0,
+      "value": "Gain "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " resource and amp "
+    },
+    {
+      "type": 1,
+      "value": "amp"
+    }
+  ],
+  "card.trigger.common.resources.gain": [
+    {
+      "type": 0,
+      "value": "Gain "
+    },
+    {
+      "type": 6,
+      "value": "amount",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " resource"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " resources"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    }
+  ],
   "card.trigger.common.restbeforebattle.destroy.draw": [
     {
       "type": 0,
@@ -15538,6 +15837,39 @@
     {
       "type": 0,
       "value": "Create a Runechant"
+    }
+  ],
+  "card.trigger.common.runechant.create.count": [
+    {
+      "type": 6,
+      "value": "count",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 0,
+              "value": "Create a Runechant"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 0,
+              "value": "Create "
+            },
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " Runechants"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
     }
   ],
   "card.trigger.common.runechant.create.destroy": [
@@ -15596,6 +15928,20 @@
     {
       "type": 0,
       "value": "Create a Seismic Surge token"
+    }
+  ],
+  "card.trigger.common.seismicsurge.create.count": [
+    {
+      "type": 0,
+      "value": "Create "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " Seismic Surge tokens"
     }
   ],
   "card.trigger.common.seismicsurge.create.destroy": [
@@ -15666,6 +16012,12 @@
     {
       "type": 0,
       "value": "Destroy Sigil of the Muse and create a Ponder"
+    }
+  ],
+  "card.trigger.common.sigiloffate.create": [
+    {
+      "type": 0,
+      "value": "Create a Sigil of Fate token"
     }
   ],
   "card.trigger.common.sigilprotection.destroy": [
@@ -15748,10 +16100,28 @@
       "value": " into your soul"
     }
   ],
+  "card.trigger.common.spectralshield.create": [
+    {
+      "type": 0,
+      "value": "Create a Spectral Shield token"
+    }
+  ],
+  "card.trigger.common.spellbaneaegis.create": [
+    {
+      "type": 0,
+      "value": "Create a Spellbane Aegis token"
+    }
+  ],
   "card.trigger.common.spellboundcreepers.maintain": [
     {
       "type": 0,
       "value": "Maintain Spellbound Creepers"
+    }
+  ],
+  "card.trigger.common.steam.add.self": [
+    {
+      "type": 0,
+      "value": "Put a steam counter on this"
     }
   ],
   "card.trigger.common.steam.remove": [
@@ -16014,16 +16384,66 @@
       "value": "Create Agility, Might, and Vigor tokens"
     }
   ],
+  "card.trigger.common.yellowaction.graveyard.decktop": [
+    {
+      "type": 0,
+      "value": "Put a yellow action from your graveyard on top of your deck"
+    }
+  ],
   "card.trigger.common.zenstate.maintain": [
     {
       "type": 0,
       "value": "Remove a balance counter, or destroy Zen State"
     }
   ],
+  "card.trigger.dyn.ironsongpride.counter.add": [
+    {
+      "type": 0,
+      "value": "Put a +1 power counter on target sword you control"
+    }
+  ],
+  "card.trigger.dyn.ironsongpride.counters.remove": [
+    {
+      "type": 0,
+      "value": "Remove all +1 power counters from swords you control"
+    }
+  ],
+  "card.trigger.dyn.loomingdoom.runechants.doom": [
+    {
+      "type": 0,
+      "value": "Destroy your Runechants and put that many doom counters on Looming Doom"
+    }
+  ],
+  "card.trigger.dyn.tranquilpassing.banish": [
+    {
+      "type": 0,
+      "value": "Banish an opposing aura with cost "
+    },
+    {
+      "type": 1,
+      "value": "cost"
+    },
+    {
+      "type": 0,
+      "value": " or less until this leaves"
+    }
+  ],
   "card.trigger.energycounter.add": [
     {
       "type": 0,
       "value": "Add an energy counter"
+    }
+  ],
+  "card.trigger.evo.stasiscell.abilities.suppress": [
+    {
+      "type": 0,
+      "value": "Target equipment's activated abilities can't be activated until the end of its controller's next turn"
+    }
+  ],
+  "card.trigger.evr.nervesofsteel.counter.remove": [
+    {
+      "type": 0,
+      "value": "Remove a -1 defense counter from your chest equipment"
     }
   ],
   "card.trigger.hyperdriver.boost": [
@@ -16056,10 +16476,22 @@
       "value": "If you control no Illusionist auras, prevent the next damage from a yellow source this turn"
     }
   ],
+  "card.trigger.mst.evorecall.banished.top": [
+    {
+      "type": 0,
+      "value": "Put up to 1 Mechanologist action card from your banished zone on top of your deck"
+    }
+  ],
   "card.trigger.mst.hauntingspecter.shield": [
     {
       "type": 0,
       "value": "Create a Spectral Shield; if you control no other Illusionist auras, put a +1 power counter on it"
+    }
+  ],
+  "card.trigger.mst.restlesscoalescence.counters.move": [
+    {
+      "type": 0,
+      "value": "Move any number of +1 power counters from auras you control onto this"
     }
   ],
   "card.trigger.mst.vengefulapparition.instant": [
@@ -16074,6 +16506,12 @@
     {
       "type": 0,
       "value": " or less this turn as though it were an instant"
+    }
+  ],
+  "card.trigger.obk.extinction.name": [
+    {
+      "type": 0,
+      "value": "Name a disease token"
     }
   ],
   "card.trigger.obk.extinction.win": [
@@ -16102,6 +16540,18 @@
       "value": "Flip this hero"
     }
   ],
+  "card.trigger.pen.distantrumbling.draw.fifth": [
+    {
+      "type": 0,
+      "value": "Draw a card, then put a card from your hand fifth from the top"
+    }
+  ],
+  "card.trigger.pen.galcia.freeze": [
+    {
+      "type": 0,
+      "value": "Freeze target ally, aura, item, or equipment"
+    }
+  ],
   "card.trigger.pen.themis.facedown": [
     {
       "type": 0,
@@ -16114,10 +16564,40 @@
       "value": "Name a card and turn matching banished cards face-down"
     }
   ],
+  "card.trigger.sea.pirate.tap": [
+    {
+      "type": 0,
+      "value": "Tap target Pirate hero or ally"
+    }
+  ],
   "card.trigger.steam.maintain": [
     {
       "type": 0,
       "value": "Remove a steam counter or destroy this"
+    }
+  ],
+  "card.trigger.sup.turnheads.tap": [
+    {
+      "type": 0,
+      "value": "Tap the Brute hero"
+    }
+  ],
+  "card.trigger.sup.whoblinksfirst.destroy": [
+    {
+      "type": 0,
+      "value": "You may destroy an aura a Guardian hero controls"
+    }
+  ],
+  "card.trigger.svi.silphidae.aura.banish.optional": [
+    {
+      "type": 0,
+      "value": "You may banish another aura from your graveyard"
+    }
+  ],
+  "card.trigger.wtr.showtime.search": [
+    {
+      "type": 0,
+      "value": "Search your deck for a Guardian attack action card"
     }
   ],
   "card.upr.action.bottom": [

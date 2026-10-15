@@ -27,5 +27,9 @@ export function checkStateBased(state: GameStateInternal, runtime: EngineRuntime
   const raised = state.pendingDecision;
   if (priorityWindow && raised !== priorityWindow && raised?.chooseHook) {
     raised.resume ??= { kind: "continue-stack", seat: priorityWindow.player };
+  } else if (raised === priorityWindow && priorityWindow && (state.pendingTriggeredLayers?.length ?? 0) > 0) {
+    // Leave-arena triggers of a permanent destroyed here go on the stack
+    // before anyone receives priority again (CR 6.6.6).
+    runtime.dispatchFlow("flushPendingTriggersAboveStack", state);
   }
 }

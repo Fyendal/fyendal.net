@@ -1,4 +1,5 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
+import type { GameMessage } from "@fyendal/shared";
 import {
   attackAbility,
   bloodDebtScript as bloodDebt,
@@ -6,6 +7,7 @@ import {
   commonOptionMessages,
   decisionMessage,
   decisionPrompt,
+  entersArenaTrigger,
   localizedCardLog,
   opponentSeat,
   queueIntimidate,
@@ -115,8 +117,8 @@ function angel(effect: (ctx: ScriptCtx) => void): CardScript {
     },
   };
 }
-function figment(effect: (ctx: ScriptCtx) => void): CardScript {
-  return { onEnterArena: effect };
+function figment(label: string, labelMessage: GameMessage, effect: (ctx: ScriptCtx) => void): CardScript {
+  return { triggers: [entersArenaTrigger(label, labelMessage, effect)] };
 }
 function duringActionPhase(ctx: ScriptCtx): boolean {
   if (ctx.state.phase === "action" || ctx.state.phase === "defend" || ctx.state.phase === "reaction") return true;
@@ -278,21 +280,25 @@ export const dtdHighRarity: Record<string, CardScript> = {
         ctx.setPlayerFlag(ctx.seat, "empyreanHeroDiscount", false);
     },
   },
-  "figment of erudition|2": figment((ctx) => {
-    ctx.createToken(PONDER);
-  }),
+  "figment of erudition|2": figment("Create a Ponder token", decisionMessage("card.trigger.common.ponder.create"), (ctx) =>
+    ctx.createToken(PONDER),
+  ),
   "suraya, archangel of erudition|0": angel((ctx) => ctx.drawCards(ctx.seat, 2)),
-  "figment of judgment|2": figment((ctx) => {
-    const cards = ctx.state.players.flatMap((player) => player.banish).filter((card) => !card.faceDown);
-    if (cards.length)
-      ctx.requestCardChoice(
-        "figment-down",
-        decisionPrompt("Turn a banished card face down?", "card.dtd.banished.facedown.optional", {
-          optionMessages: commonOptionMessages("no"),
-        }),
-        ["no", ...cards.map((card) => card.instanceId)],
-      );
-  }),
+  "figment of judgment|2": figment(
+    "Turn a banished card face down",
+    decisionMessage("card.trigger.common.banished.facedown"),
+    (ctx) => {
+      const cards = ctx.state.players.flatMap((player) => player.banish).filter((card) => !card.faceDown);
+      if (cards.length)
+        ctx.requestCardChoice(
+          "figment-down",
+          decisionPrompt("Turn a banished card face down?", "card.dtd.banished.facedown.optional", {
+            optionMessages: commonOptionMessages("no"),
+          }),
+          ["no", ...cards.map((card) => card.instanceId)],
+        );
+    },
+  ),
   "themis, archangel of judgment|0": angel((ctx) => {
     const cards = ctx.state.players.flatMap((player) => player.banish).filter((card) => !card.faceDown);
     if (cards.length)
@@ -302,19 +308,27 @@ export const dtdHighRarity: Record<string, CardScript> = {
         cards.map((card) => card.instanceId),
       );
   }),
-  "figment of ravages|2": figment((ctx) => ctx.dealDamage(opponentSeat(ctx), 1, { arcane: true })),
+  "figment of ravages|2": figment(
+    "Deal 1 arcane damage",
+    decisionMessage("card.trigger.common.arcane.deal", { amount: 1 }),
+    (ctx) => ctx.dealDamage(opponentSeat(ctx), 1, { arcane: true }),
+  ),
   "sekem, archangel of ravages|0": angel((ctx) => ctx.dealDamage(opponentSeat(ctx), 2, { arcane: true })),
-  "figment of rebirth|2": figment((ctx) => {
-    const cards = ctx
-      .player(ctx.seat)
-      .graveyard.filter((card) => ctx.hasCardType(card, "action") && ctx.cardColor(card) === 2);
-    if (cards.length)
-      ctx.requestCardChoice(
-        "figment-top",
-        decisionPrompt("Put a yellow action on top", "card.dtd.yellow.action.top"),
-        cards.map((card) => card.instanceId),
-      );
-  }),
+  "figment of rebirth|2": figment(
+    "Put a yellow action from your graveyard on top of your deck",
+    decisionMessage("card.trigger.common.yellowaction.graveyard.decktop"),
+    (ctx) => {
+      const cards = ctx
+        .player(ctx.seat)
+        .graveyard.filter((card) => ctx.hasCardType(card, "action") && ctx.cardColor(card) === 2);
+      if (cards.length)
+        ctx.requestCardChoice(
+          "figment-top",
+          decisionPrompt("Put a yellow action on top", "card.dtd.yellow.action.top"),
+          cards.map((card) => card.instanceId),
+        );
+    },
+  ),
   "avalon, archangel of rebirth|0": angel((ctx) => {
     const cards = ctx.player(ctx.seat).graveyard.filter((card) => ctx.cardColor(card) === 2);
     if (cards.length)
@@ -324,12 +338,19 @@ export const dtdHighRarity: Record<string, CardScript> = {
         cards.map((card) => card.instanceId),
       );
   }),
-  "figment of tenacity|2": figment((ctx) => buffNextAttack(ctx, { dominate: true })),
+  "figment of tenacity|2": figment(
+    "Your next attack this turn gets dominate",
+    decisionMessage("card.trigger.common.nextattack.dominate"),
+    (ctx) => buffNextAttack(ctx, { dominate: true }),
+  ),
   "metis, archangel of tenacity|0": angel((ctx) =>
     ctx.addModifier({ scope: "until-end-of-turn", dominate: true, appliesTo: "attack" }),
   ),
-  "figment of triumph|2": figment((ctx) =>
-    ctx.addModifier({ scope: "until-end-of-turn", seat: opponentSeat(ctx), attack: -1, appliesTo: "attack-action" }),
+  "figment of triumph|2": figment(
+    "Opposing attack action cards get -1 power this turn",
+    decisionMessage("card.trigger.common.opponent.attackactions.power.reduce", { amount: 1 }),
+    (ctx) =>
+      ctx.addModifier({ scope: "until-end-of-turn", seat: opponentSeat(ctx), attack: -1, appliesTo: "attack-action" }),
   ),
   "victoria, archangel of triumph|0": angel((ctx) =>
     ctx.addModifier({
@@ -340,9 +361,9 @@ export const dtdHighRarity: Record<string, CardScript> = {
       expiresAtStartOfSeatTurn: opponentSeat(ctx),
     }),
   ),
-  "figment of war|2": figment((ctx) => {
-    ctx.createToken(COURAGE);
-  }),
+  "figment of war|2": figment("Create a Courage token", decisionMessage("card.trigger.common.courage.create"), (ctx) =>
+    ctx.createToken(COURAGE),
+  ),
   "bellona, archangel of war|0": angel((ctx) => {
     for (const card of ctx.player(ctx.seat).board.filter((candidate) => has(ctx, candidate, "angel")))
       ctx.addCounter(card.instanceId, "power", 1);

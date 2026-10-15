@@ -3,7 +3,9 @@ import {
   buffNextAttack,
   cardDefendsThisTrigger,
   commonOptionMessages,
+  decisionMessage,
   decisionPrompt,
+  entersArenaTrigger,
   localizedCardLog,
   opponentSeat,
 } from "./shared-helpers.js";
@@ -270,9 +272,12 @@ function drawACrowd(): CardScript {
   const delayed = delayedGuardianAura(3);
   return {
     ...delayed,
-    onPlay(ctx) {
-      for (const player of ctx.state.players) ctx.drawCards(player.seat, 1);
-    },
+    triggers: [
+      entersArenaTrigger("Each hero draws a card", decisionMessage("card.trigger.common.heroes.draw"), (ctx) => {
+        for (const player of ctx.state.players) ctx.drawCards(player.seat, 1);
+      }),
+      ...(delayed.triggers ?? []),
+    ],
   };
 }
 
@@ -692,10 +697,12 @@ Object.assign(mpg, {
     },
   },
   "ley line of the old ones|3": {
-    onEnterArena(ctx: ScriptCtx) {
-      ctx.createToken(SEISMIC_SURGE);
-    },
     triggers: [
+      entersArenaTrigger(
+        "Create a Seismic Surge token",
+        decisionMessage("card.trigger.common.seismicsurge.create"),
+        (ctx) => ctx.createToken(SEISMIC_SURGE),
+      ),
       {
         event: "damage-dealt",
         label: "Create a Seismic Surge token",

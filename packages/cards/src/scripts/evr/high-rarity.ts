@@ -4,6 +4,7 @@ import {
   commonOptionMessages,
   decisionMessage,
   decisionPrompt,
+  entersArenaTrigger,
   opponentSeat,
   previousAttackHasName,
   yesNoPrompt,
@@ -492,9 +493,16 @@ export const evrHighRarity: Record<string, CardScript> = {
     },
   },
   "nerves of steel|3": {
-    onEnterArena(ctx) {
-      ctx.addCounter(ctx.self.instanceId, "defense", 1);
-    },
+    triggers: [
+      entersArenaTrigger(
+        "Remove a -1 defense counter from your chest equipment",
+        decisionMessage("card.trigger.evr.nervesofsteel.counter.remove"),
+        (ctx) => {
+          const chest = ctx.player(ctx.seat).equipment.chest;
+          if (chest?.defCounters) ctx.addCardDefenseCounters(chest.instanceId, -1);
+        },
+      ),
+    ],
   },
   "mask of the pouncing lynx|0": {
     canTriggerOnHit(ctx) {

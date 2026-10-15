@@ -1,13 +1,16 @@
-import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
+import type { CardInstance, CardScript, DeepReadonly, ScriptCtx, TriggerDef } from "@fyendal/engine";
 import {
   attackAbility,
   buffNextAttack,
   cardDefendsThisTrigger,
   commonOptionMessages,
   contractWithSilver,
+  crowdTrigger,
   decisionMessage,
   decisionPrompt,
+  entersArenaTrigger,
   isSixPlus,
+  leavesArenaTrigger,
   opponentSeat,
   payForDefenseBoost,
   previousAttackHasName,
@@ -15,6 +18,8 @@ import {
   requestDiscardChoice,
   resolveDiscardChoice,
   suspenseAura as suspenseLifecycle,
+  suspenseNextAttackBuff,
+  type SuspenseTrigger,
   yesNoPrompt,
 } from "./shared-helpers.js";
 
@@ -22,6 +27,7 @@ const CONFIDENCE = "SLY034";
 const MIGHT = "SLY035";
 const TOUGHNESS = "SUP241";
 const VIGOR = "SKA036";
+const CHEER = crowdTrigger("cheer");
 
 type Card = DeepReadonly<CardInstance>;
 
@@ -392,25 +398,62 @@ function defendsTogetherWithCardFromHand(ctx: ScriptCtx): boolean {
   return count > selfWasFromHand;
 }
 
-function suspense(onEnter?: (ctx: ScriptCtx) => void, onLeave?: (ctx: ScriptCtx) => void): CardScript {
-  return suspenseLifecycle({ onEnter, onLeave });
+function suspense(
+  enters?: SuspenseTrigger | readonly SuspenseTrigger[],
+  leaves?: SuspenseTrigger | readonly SuspenseTrigger[],
+): CardScript {
+  return suspenseLifecycle({ enters, leaves });
 }
 
 function suspenseBuff(amount: number): CardScript {
-  return suspense(undefined, (ctx) => buffNextAttack(ctx, { attack: amount }));
+  return suspense(undefined, suspenseNextAttackBuff(amount));
 }
 
+/** The printed target belongs to the enter trigger, so it is declared as
+ * that layer goes on the stack rather than when the aura is played. */
 function dramaticPause(amount: number): CardScript {
-  return {
-    ...suspense((ctx) => {
-      if (ctx.playTargetInstanceId !== undefined) ctx.addCardTempDefense(ctx.playTargetInstanceId, amount);
-    }),
-    playTargetOptions(ctx) {
-      return (ctx.link?.defendingCards ?? [])
-        .filter((card) => ctx.hasCardType(card, "action"))
-        .map((card) => card.instanceId);
+  return suspense({
+    label: `Target defending action card gets +${amount} defense`,
+    labelMessage: decisionMessage("card.trigger.common.defender.action.defense.target", { amount }),
+    target: {
+      options: (ctx) =>
+        (ctx.link?.defendingCards ?? [])
+          .filter((card) => ctx.hasCardType(card, "action"))
+          .map((card) => card.instanceId),
+      prompt: () =>
+        decisionPrompt(`Give a defending action card +${amount} defense`, "card.aps.defender.defense", {
+          values: { amount },
+        }),
     },
-  };
+    effect(ctx) {
+      if (ctx.playTargetInstanceId !== undefined) ctx.addCardTempDefense(ctx.playTargetInstanceId, amount);
+    },
+  });
+}
+
+const DRAW_CARD: SuspenseTrigger = {
+  label: "Draw a card",
+  labelMessage: decisionMessage("card.trigger.common.card.draw"),
+  effect: (ctx) => ctx.drawCards(ctx.seat, 1),
+};
+
+const INTIMIDATE: SuspenseTrigger = {
+  label: "Intimidate",
+  labelMessage: decisionMessage("card.trigger.common.intimidate"),
+  effect: (ctx) => queueIntimidate(ctx),
+};
+
+/** Channel the Tranquil Domain's "another target aura" (any controller). */
+const ANOTHER_AURA_TARGET: NonNullable<TriggerDef["target"]> = {
+  options: (ctx) =>
+    ctx.state.players.flatMap((p) =>
+      p.board.filter((card) => aura(ctx, card) && card.instanceId !== ctx.self.instanceId).map((card) => card.instanceId),
+    ),
+  prompt: () => decisionPrompt("Put another target aura on the bottom of its owner's deck", "card.sup.aura.bottom.choose"),
+};
+
+function bottomTargetAura(ctx: ScriptCtx): void {
+  if (ctx.playTargetInstanceId !== undefined) ctx.putOnDeckBottom(ctx.playTargetInstanceId);
 }
 
 function storyBeats(): CardScript {
@@ -738,13 +781,9 @@ export const sup: Record<string, CardScript> = {
   ...pitches("turn the crowd grateful", () => subtypeOpponentAttack("reviled", 1, "cheer")),
   ...pitches("who's the tough guy?", () => missCreates(TOUGHNESS)),
   "cheers!|3": {
-    onEnterArena(ctx) {
-      ctx.crowdCheer(ctx.seat);
-    },
-    onLeaveArena(ctx) {
-      ctx.crowdCheer(ctx.seat);
-    },
     triggers: [
+      entersArenaTrigger(CHEER.label, CHEER.labelMessage, CHEER.effect),
+      leavesArenaTrigger(CHEER.label, CHEER.labelMessage, CHEER.effect),
       {
         event: "start-of-turn",
         label: "Destroy Cheers!",
@@ -1403,13 +1442,7 @@ Object.assign(sup, {
       ctx.createToken(MIGHT);
     },
   },
-  "leave them hanging|1": suspense(
-    (ctx) => queueIntimidate(ctx),
-    (ctx) => {
-      queueIntimidate(ctx);
-      buffNextAttack(ctx, { attack: 4 });
-    },
-  ),
+  "leave them hanging|1": suspense(INTIMIDATE, [INTIMIDATE, suspenseNextAttackBuff(4)]),
   "two steps ahead|3": {
     triggers: [
       {
@@ -1765,10 +1798,7 @@ Object.assign(sup, {
     },
   },
   "no tall tales|2": tower((ctx) => ctx.suppressOwnedCardAbilitiesNextTurn(opponentSeat(ctx))),
-  "in the palm of your hand|1": suspense(
-    (ctx) => ctx.drawCards(ctx.seat, 1),
-    (ctx) => ctx.drawCards(ctx.seat, 1),
-  ),
+  "in the palm of your hand|1": suspense(DRAW_CARD, DRAW_CARD),
   "cut a long story short|2": tower((ctx) => {
     const target = opponentSeat(ctx);
     for (const card of [...ctx.player(target).hand]) ctx.discardCard(target, card.instanceId);
@@ -1780,14 +1810,26 @@ Object.assign(sup, {
     for (const card of [...ctx.player(opponentSeat(ctx)).board].filter((candidate) => aura(ctx, candidate)))
       ctx.destroyPermanent(card.instanceId);
   }),
-  "hungry for more|1": suspense(undefined, (ctx) => ctx.gainLife(ctx.seat, 3)),
-  "turn heads|3": suspense(undefined, (ctx) => {
-    const hero = ctx.state.players.find((p) => heroHas(ctx, p.seat, "brute"))?.hero;
-    if (hero) ctx.tap(hero.instanceId);
+  "hungry for more|1": suspense(undefined, {
+    label: "Gain 3 life",
+    labelMessage: decisionMessage("card.trigger.common.life.gain", { amount: 3 }),
+    effect: (ctx) => ctx.gainLife(ctx.seat, 3),
   }),
-  "who blinks first?|3": suspense(undefined, (ctx) => {
-    const player = ctx.state.players.find((p) => heroHas(ctx, p.seat, "guardian"));
-    if (player) destroyAuraAtTarget(ctx, player.seat, "blinks-aura");
+  "turn heads|3": suspense(undefined, {
+    label: "Tap the Brute hero",
+    labelMessage: decisionMessage("card.trigger.sup.turnheads.tap"),
+    effect(ctx) {
+      const hero = ctx.state.players.find((p) => heroHas(ctx, p.seat, "brute"))?.hero;
+      if (hero) ctx.tap(hero.instanceId);
+    },
+  }),
+  "who blinks first?|3": suspense(undefined, {
+    label: "You may destroy an aura a Guardian hero controls",
+    labelMessage: decisionMessage("card.trigger.sup.whoblinksfirst.destroy"),
+    effect(ctx) {
+      const player = ctx.state.players.find((p) => heroHas(ctx, p.seat, "guardian"));
+      if (player) destroyAuraAtTarget(ctx, player.seat, "blinks-aura");
+    },
   }),
   "cutting retort|1": {
     onAttackDeclared(ctx: ScriptCtx) {
@@ -2121,22 +2163,19 @@ Object.assign(sup, {
     ],
   },
   "channel the tranquil domain|2": {
-    onEnterArena(ctx: ScriptCtx) {
-      const auras = ctx.state.players.flatMap((p) =>
-        p.board.filter((card) => aura(ctx, card) && card.instanceId !== ctx.self.instanceId),
-      );
-      if (auras[0]) ctx.putOnDeckBottom(auras[0].instanceId);
-    },
     triggers: [
+      entersArenaTrigger(
+        "Put another target aura on the bottom of its owner's deck",
+        decisionMessage("card.trigger.common.aura.bottom.another"),
+        bottomTargetAura,
+        { target: ANOTHER_AURA_TARGET },
+      ),
       {
         event: "begin-action-phase",
-        label: "Bottom another aura",
-        effect(ctx: ScriptCtx) {
-          const auraCard = ctx.state.players.flatMap((p) =>
-            p.board.filter((card) => aura(ctx, card) && card.instanceId !== ctx.self.instanceId),
-          )[0];
-          if (auraCard) ctx.putOnDeckBottom(auraCard.instanceId);
-        },
+        label: "Put another target aura on the bottom of its owner's deck",
+        labelMessage: decisionMessage("card.trigger.common.aura.bottom.another"),
+        target: ANOTHER_AURA_TARGET,
+        effect: bottomTargetAura,
       },
     ],
   },

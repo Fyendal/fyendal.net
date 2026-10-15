@@ -751,6 +751,32 @@ export class Scenario {
     return this;
   }
 
+  /** Labels of the stack layers, top first. */
+  stackLabels(): string[] {
+    return this.state.stack.map((layer) => layer.label);
+  }
+
+  /** Pass priority and reaction windows until a layer labelled `label` is on
+   *  the stack, ordering simultaneous triggers and pitch in their listed order.
+   *  Stops at a real decision (such as a trigger's target declaration) and
+   *  throws if the layer never arrives. */
+  passUntilLayer(label: string): this {
+    for (let guard = 0; guard < 40 && !this.stackLabels().includes(label); guard++) {
+      const pd = this.state.pendingDecision;
+      if (pd?.chooseHook === "trigger-order" || pd?.chooseHook === "engine-end-phase-pitch-order") {
+        this.do({ kind: "choose", optionId: pd.options![0]! });
+        continue;
+      }
+      if (pd && (pd.kind === "defend" || pd.kind === "optional-effect" || pd.kind === "choose-target" ||
+        pd.kind === "choose-name" || pd.kind === "arsenal")) break;
+      this.passPriority();
+    }
+    if (!this.stackLabels().includes(label)) {
+      throw new Error(`no "${label}" layer reached the stack (stack: ${this.stackLabels().join(", ") || "empty"})`);
+    }
+    return this;
+  }
+
   /** Pass only the empty-stack windows needed to leave the action phase.
    *  With a resolved chain, one pair closes combat and a fresh pair ends the
    *  phase. End-phase triggers and choices are left at exactly the state

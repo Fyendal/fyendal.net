@@ -4,8 +4,11 @@ import {
   buffNextAttack,
   commonOptionMessages,
   dealArcane,
+  decisionMessage,
   decisionPrompt,
+  entersArenaTrigger,
   isCard,
+  leavesArenaTrigger,
   localizedCardLog,
   opponentSeat,
 } from "./shared-helpers.js";
@@ -320,9 +323,17 @@ export const svi: Record<string, CardScript> = {
   "read the runes|1": { onPlay: (ctx) => createRunechants(ctx, 3) },
 
   "sigil of silphidae|3": {
-    onEnterArena: sigilOfSilphidaeTrigger,
-    onLeaveArena: sigilOfSilphidaeTrigger,
     triggers: [
+      entersArenaTrigger(
+        "You may banish another aura from your graveyard",
+        decisionMessage("card.trigger.svi.silphidae.aura.banish.optional"),
+        sigilOfSilphidaeTrigger,
+      ),
+      leavesArenaTrigger(
+        "You may banish another aura from your graveyard",
+        decisionMessage("card.trigger.svi.silphidae.aura.banish.optional"),
+        sigilOfSilphidaeTrigger,
+      ),
       {
         event: "begin-action-phase",
         label: "Destroy Sigil of Silphidae",

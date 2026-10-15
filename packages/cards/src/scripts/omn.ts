@@ -7,11 +7,14 @@ import {
   dealtByThis,
   decisionMessage,
   decisionPrompt,
+  entersArenaTrigger,
   heroDamage,
+  leavesArenaTrigger,
   mergeSetScripts,
   opponentSeat,
   optN,
   optOnChoose,
+  upToOneTargetAttack,
   yesNoPrompt,
 } from "./shared-helpers.js";
 import { omnHighRarity } from "./omn/high-rarity.js";
@@ -149,9 +152,10 @@ function createOnStarfall(base: number): CardScript {
   };
 }
 
-function beginningAura(effect?: (ctx: ScriptCtx) => void, leave?: (ctx: ScriptCtx) => void): CardScript {
+function beginningAura(effect?: (ctx: ScriptCtx) => void, extraTriggers: readonly TriggerDef[] = []): CardScript {
   return {
     triggers: [
+      ...extraTriggers,
       {
         event: "begin-action-phase",
         label: "Destroy aura",
@@ -161,7 +165,6 @@ function beginningAura(effect?: (ctx: ScriptCtx) => void, leave?: (ctx: ScriptCt
         },
       },
     ],
-    ...(leave ? { onLeaveArena: leave } : {}),
   };
 }
 
@@ -250,43 +253,38 @@ function auraEnterAttack(opts: {
   fragmentOnly?: boolean;
   holoAttack?: number;
 }): CardScript {
-  const isEligibleAttack = (ctx: ScriptCtx, link: NonNullable<ScriptCtx["link"]>): boolean => {
-    return (
-      !opts.fragmentOnly || (data(ctx, link.attackingCard).keywords ?? []).some((kw) => kw.toLowerCase() === "fragment")
-    );
-  };
-
-  const eligibleAttacks = (ctx: ScriptCtx) =>
-    ctx.state.chain.filter((link) => link.flags.attackGone !== true && isEligibleAttack(ctx, link));
+  const label = opts.goAgain ? "Up to 1 target attack gets go again" : `Up to 1 target attack gets +${opts.attack ?? 0} power`;
+  const labelMessage = opts.goAgain
+    ? decisionMessage("card.trigger.common.attack.target.goagain")
+    : decisionMessage("card.trigger.common.attack.target.power.gain", { amount: opts.attack ?? 0 });
+  const target = upToOneTargetAttack((ctx, attack) =>
+    !opts.fragmentOnly || (data(ctx, attack).keywords ?? []).some((kw) => kw.toLowerCase() === "fragment"),
+  );
 
   return {
-    onEnterArena(ctx) {
-      const attacks = eligibleAttacks(ctx);
-      if (attacks.length === 0) return;
-      ctx.requestCardChoice(
-        "aura-enter-attack-target",
-        decisionPrompt(`${ctx.data.name}: choose up to 1 target attack`, "card.omn.attack.target.upto", {
-          values: { card: { kind: "card", cardId: ctx.self.cardId } },
-          optionMessages: commonOptionMessages("no"),
-        }),
-        ["no", ...attacks.map((link) => link.attackingCard.instanceId)],
-      );
-    },
-    onChoose(ctx, hook, option) {
-      if (hook !== "aura-enter-attack-target" || option === "no") return;
-      const link = eligibleAttacks(ctx).find((candidate) => candidate.attackingCard.instanceId === Number(option));
-      if (!link) return;
-      const attack = ctx.getCounter("holo") > 0 ? (opts.holoAttack ?? opts.attack ?? 0) : (opts.attack ?? 0);
-      if (attack) {
-        ctx.addModifier({
-          scope: "chain-link",
-          attack,
-          appliesToInstanceId: link.attackingCard.instanceId,
-        });
-      }
-      if (opts.goAgain) ctx.grantGoAgain(link.attackingCard.instanceId);
-    },
+    triggers: [
+      entersArenaTrigger(
+        label,
+        labelMessage,
+        (ctx) => {
+          const attackId = ctx.playTargetInstanceId;
+          if (attackId === undefined) return;
+          const attack = ctx.getCounter("holo") > 0 ? (opts.holoAttack ?? opts.attack ?? 0) : (opts.attack ?? 0);
+          if (attack) ctx.addModifier({ scope: "chain-link", attack, appliesToInstanceId: attackId });
+          if (opts.goAgain) ctx.grantGoAgain(attackId);
+        },
+        { target },
+      ),
+    ],
   };
+}
+
+function leavesFlowTrigger(): TriggerDef {
+  return leavesArenaTrigger(
+    "Create a Lightning Flow token",
+    decisionMessage("card.trigger.common.lightningflow.create"),
+    (ctx) => ctx.createToken(FLOW),
+  );
 }
 
 function discardArcaneFlow(): CardScript {
@@ -928,12 +926,32 @@ export const omn: Record<string, CardScript> = mergeSetScripts("OMN", omnHighRar
   ...pitches("shattering flowtide", () => fragment((ctx) => ctx.createToken(FLOW))),
   ...pitches("auric shards", (pitch) => auraEnterAttack({ attack: 1, fragmentOnly: true, holoAttack: 5 - pitch })),
   ...pitches("holo shield", (pitch) => fragmentWard(5 - pitch)),
-  "circular flowtide|2": { onLeaveArena: (ctx) => ctx.createToken(FLOW) },
-  "elliptical conflux|2": { onLeaveArena: (ctx) => ctx.createToken(EMBODIMENT) },
-  "nebulus cycle|2": { onLeaveArena: (ctx) => ctx.createToken(PONDER) },
+  "circular flowtide|2": { triggers: [leavesFlowTrigger()] },
+  "elliptical conflux|2": {
+    triggers: [
+      leavesArenaTrigger(
+        "Create Embodiment of Lightning",
+        decisionMessage("card.trigger.common.embodimentlightning.create"),
+        (ctx) => ctx.createToken(EMBODIMENT),
+      ),
+    ],
+  },
+  "nebulus cycle|2": {
+    triggers: [
+      leavesArenaTrigger("Create a Ponder token", decisionMessage("card.trigger.common.ponder.create"), (ctx) =>
+        ctx.createToken(PONDER),
+      ),
+    ],
+  },
   "crackle from afar|3": auraEnterAttack({ attack: 1 }),
   "fleeing starbreeze|3": auraEnterAttack({ goAgain: true }),
-  "nourishing glow|3": { onEnterArena: (ctx) => ctx.gainLife(ctx.seat, 1) },
+  "nourishing glow|3": {
+    triggers: [
+      entersArenaTrigger("Gain 1 life", decisionMessage("card.trigger.common.life.gain", { amount: 1 }), (ctx) =>
+        ctx.gainLife(ctx.seat, 1),
+      ),
+    ],
+  },
   "fingers of fragmentation|0": {
     activated: {
       cost: 2,
@@ -1177,10 +1195,15 @@ export const omn: Record<string, CardScript> = mergeSetScripts("OMN", omnHighRar
       } else if (hook === "arcane-target") dealToChoice(ctx, option, 3);
     },
   },
-  ...pitches("haven veil", (pitch) => ({
-    ...beginningAura(),
-    onEnterArena: (ctx) => ctx.preventNextArcaneDamage(ctx.seat, 4 - pitch),
-  })),
+  ...pitches("haven veil", (pitch) =>
+    beginningAura(undefined, [
+      entersArenaTrigger(
+        `Prevent the next ${4 - pitch} arcane damage to you this turn`,
+        decisionMessage("card.trigger.common.arcane.prevent.next", { amount: 4 - pitch }),
+        (ctx) => ctx.preventNextArcaneDamage(ctx.seat, 4 - pitch),
+      ),
+    ]),
+  ),
 
   "constella tiara|0": preventEquipment(PONDER),
   "starflow robes|0": preventEquipment(FLOW),
@@ -1345,7 +1368,7 @@ export const omn: Record<string, CardScript> = mergeSetScripts("OMN", omnHighRar
   },
   ...pitches("chromatic refinement", (pitch) => chromatic(pitch)),
   ...pitches("thunderous retort", () => beginningAura((ctx) => buffNextAttack(ctx, { goAgain: true }))),
-  "sigil of astral flow|3": beginningAura(undefined, (ctx) => ctx.createToken(FLOW)),
+  "sigil of astral flow|3": beginningAura(undefined, [leavesFlowTrigger()]),
   "spellbane sigil|3": { ...beginningAura(), arcaneBarrierX: true },
 
   "ominous aggression|1": targetAttack((ctx) => {

@@ -7,6 +7,7 @@ import {
   commonOptionMessages,
   decisionMessage,
   decisionPrompt,
+  entersArenaTrigger,
   markedStealthHeroScript,
   markContractCompleted,
   localizedCardLog,
@@ -1935,12 +1936,14 @@ Object.assign(hnt, {
     prohibitsChosenName: true,
     onEnterArena(ctx) {
       ctx.setCounter("steam", 2);
-      ctx.requestNameChoice("null-name", decisionPrompt("Name a card", "card.hnt.card.name"));
     },
     onChoose(ctx, hook, option) {
       if (hook === "null-name") ctx.setChosenName(option);
     },
     triggers: [
+      entersArenaTrigger("Name a card", decisionMessage("card.trigger.common.cardname.choose"), (ctx) =>
+        ctx.requestNameChoice("null-name", decisionPrompt("Name a card", "card.hnt.card.name")),
+      ),
       {
         event: "start-of-turn",
         label: "Remove a steam counter",

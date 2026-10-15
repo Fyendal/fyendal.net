@@ -4,7 +4,10 @@ import {
   bloodDebtScript as bloodDebt,
   buffNextAttack,
   commonOptionMessages,
+  decisionMessage,
   decisionPrompt,
+  entersArenaTrigger,
+  leavesArenaTrigger,
   opponentSeat,
   previousAttackHasName,
   queueIntimidate,
@@ -20,6 +23,10 @@ const SPELLBANE = "DTD235";
 const VIGOR = "SBR036";
 
 type Card = DeepReadonly<CardInstance>;
+
+function createSkybreakerMight(ctx: ScriptCtx): void {
+  ctx.createTokens(MIGHT, 2);
+}
 
 function data(ctx: ScriptCtx, card: Card) {
   return ctx.cardData(card.cardId);
@@ -437,9 +444,13 @@ export const penHighRarity: Record<string, CardScript> = {
     ],
   },
   "tempest dancers|0": {
-    onLeaveArena(ctx) {
-      ctx.setPlayerFlag(ctx.seat, "nextNonAttackAsInstant", true);
-    },
+    triggers: [
+      leavesArenaTrigger(
+        "Play your next non-attack action card this turn as though it were an instant",
+        decisionMessage("card.trigger.common.nextnonattack.instant"),
+        (ctx) => ctx.setPlayerFlag(ctx.seat, "nextNonAttackAsInstant", true),
+      ),
+    ],
   },
   "glyph destruction nodes|2": {
     arcaneDamageEffect: true,
@@ -746,14 +757,16 @@ export const penHighRarity: Record<string, CardScript> = {
     },
   },
   "channel the skybreaker|2": {
-    onEnterArena: (ctx) => ctx.createTokens(MIGHT, 2),
     triggers: [
+      entersArenaTrigger(
+        "Create 2 Might tokens",
+        decisionMessage("card.trigger.common.might.create.count", { count: 2 }),
+        createSkybreakerMight,
+      ),
       {
         event: "begin-action-phase",
         label: "Create 2 Might",
-        effect: (ctx) => {
-          ctx.createTokens(MIGHT, 2);
-        },
+        effect: createSkybreakerMight,
       },
       {
         event: "end-of-turn",
@@ -924,13 +937,14 @@ export const penHighRarity: Record<string, CardScript> = {
   },
   "leave 'em speechless|3": {
     playAsInstant: (ctx) => ctx.compareLife(ctx.seat, opponentSeat(ctx)) > 0,
-    onEnterArena: (ctx) =>
-      ctx.requestNameChoice("speechless-name", decisionPrompt("Name a card", "card.pen.card.name")),
     onChoose(ctx, hook, option) {
       if (hook === "speechless-name") ctx.setChosenName(option);
     },
     prohibitsChosenName: true,
     triggers: [
+      entersArenaTrigger("Name a card", decisionMessage("card.trigger.common.cardname.choose"), (ctx) =>
+        ctx.requestNameChoice("speechless-name", decisionPrompt("Name a card", "card.pen.card.name")),
+      ),
       { event: "begin-action-phase", label: "Destroy Leave 'Em Speechless", effect: (ctx) => ctx.destroySelf() },
     ],
   },

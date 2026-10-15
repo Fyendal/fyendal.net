@@ -281,12 +281,16 @@ export function fireOnFriendlyPlay(
   if (!alreadyResolving) removeFromArray(state.resolving, played.instanceId);
 }
 
-/** Notify active friendly permanents after another permanent has entered. */
+/** Notify active friendly permanents after another permanent has entered.
+ * `from` names the origin zone when the entering path knows it, so a trigger
+ * such as "when this is equipped from anywhere other than your graveyard" can
+ * read it from the event context. */
 export function fireFriendlyEnterArena(
   state: GameStateInternal,
   runtime: EngineRuntime,
   seat: number,
   entered: CardInstance,
+  from?: "graveyard" | "banish" | "inventory",
 ): void {
   const maxSourceId = state.nextInstanceId;
   for (const source of hookSources(state, seat, {
@@ -305,7 +309,7 @@ export function fireFriendlyEnterArena(
     "card-entered-arena",
     seat,
     entered,
-    { causedBySeat: seat, to: "arena" },
+    { causedBySeat: seat, to: "arena", ...(from ? { from } : {}) },
     maxSourceId,
   );
 }

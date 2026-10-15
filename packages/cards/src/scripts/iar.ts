@@ -9,6 +9,7 @@ import {
   dealArcane,
   decisionMessage,
   decisionPrompt,
+  entersArenaTrigger,
   localizedCardLog,
   optN,
   optOnChoose,
@@ -1425,6 +1426,8 @@ function vexingGloomblade(): CardScript {
   );
 }
 
+const stormgardenChannel = channelLightning("iarStormgardenRemaining", "iar-stormgarden-bottom");
+
 export const iar: Record<string, CardScript> = {
   "soul of existence|4": {
     triggers: [
@@ -2635,7 +2638,7 @@ export const iar: Record<string, CardScript> = {
     // Static ability: an attack played before this entered the arena still
     // gets the hit effect while it remains an unresolved, unhit chain link.
     ...suspenseAura({
-      onEnter(ctx) {
+      onEnterArena(ctx) {
         const link = ctx.state.chain.at(-1);
         if (
           !link ||
@@ -2661,9 +2664,6 @@ export const iar: Record<string, CardScript> = {
   },
 
   "channel stormgarden|2": {
-    onEnterArena(ctx) {
-      ctx.createToken(LIGHTNING_FLOW);
-    },
     onFriendlyDestroyed(ctx, destroyed, destroyingSeat) {
       if (
         destroyingSeat !== ctx.seat ||
@@ -2673,7 +2673,15 @@ export const iar: Record<string, CardScript> = {
         return;
       ampNextArcane(ctx, 1);
     },
-    ...channelLightning("iarStormgardenRemaining", "iar-stormgarden-bottom"),
+    ...stormgardenChannel,
+    triggers: [
+      entersArenaTrigger(
+        "Create a Lightning Flow token",
+        decisionMessage("card.trigger.common.lightningflow.create"),
+        (ctx) => ctx.createToken(LIGHTNING_FLOW),
+      ),
+      ...stormgardenChannel.triggers,
+    ],
   },
 
   "blessing of suraya|2": {

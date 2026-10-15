@@ -1,5 +1,13 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
-import { ampNextArcane, commonOptionMessages, dealArcane, decisionPrompt, opponentSeat } from "./shared-helpers.js";
+import {
+  ampNextArcane,
+  commonOptionMessages,
+  dealArcane,
+  decisionMessage,
+  decisionPrompt,
+  leavesArenaTrigger,
+  opponentSeat,
+} from "./shared-helpers.js";
 
 const FLOW = "OMN203";
 const EMBODIMENT = "ROS026";
@@ -196,10 +204,16 @@ export const azs: Record<string, CardScript> = {
   },
   "stardust spike|1": {
     wardValue: () => 2,
-    onLeaveArena(ctx) {
-      ctx.changeResources(ctx.seat, 1);
-      ampNextArcane(ctx, 1);
-    },
+    triggers: [
+      leavesArenaTrigger(
+        "Gain 1 resource and amp 1",
+        decisionMessage("card.trigger.common.resource.gain.amp", { amount: 1, amp: 1 }),
+        (ctx) => {
+          ctx.changeResources(ctx.seat, 1);
+          ampNextArcane(ctx, 1);
+        },
+      ),
+    ],
   },
   "blur reality|3": {
     canPlay: (ctx) => holoChoices(ctx).length > 0,

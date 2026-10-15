@@ -6,6 +6,7 @@ import {
   dealtByThis,
   decisionMessage,
   decisionPrompt,
+  entersArenaTrigger,
   localizedCardLog,
   mergeSetScripts,
   opponentSeat,
@@ -211,27 +212,65 @@ function entangle(): CardScript {
   };
 }
 
+function controlsAnotherNonTokenAura(ctx: ScriptCtx): boolean {
+  return ctx
+    .player(ctx.seat)
+    .board.some(
+      (card) =>
+        card.instanceId !== ctx.self.instanceId &&
+        ctx.cardData(card.cardId).cardType !== "token" &&
+        hasType(ctx, card, "aura"),
+    );
+}
+
+const emboldenDraw: TriggerDef = entersArenaTrigger(
+  "Draw a card",
+  decisionMessage("card.trigger.common.card.draw"),
+  (ctx) => {
+    if (controlsAnotherNonTokenAura(ctx)) ctx.drawCards(ctx.seat, 1);
+  },
+  { condition: controlsAnotherNonTokenAura },
+);
+
 function delayedGuardianAura(type: "earth" | "ice", attack: number, creates?: "frostbite" | "seismic"): CardScript {
   return {
     additionalCost: fusionAdditionalCost(type),
-    onEnterArena(ctx) {
-      if (!isFused(ctx)) return;
-      if (creates === "frostbite") {
-        ctx.requestChoice(
-          "avalanche-target",
-          decisionPrompt(`${ctx.data.name}: create Frostbite under which hero?`, "card.ele.frostbite.hero.choose", {
-            values: { card: { kind: "card", cardId: ctx.self.cardId } },
-            optionMessages: commonOptionMessages("opponent", "self"),
-          }),
-          ["opponent", "self"],
-          undefined,
-          undefined,
-          "opponent",
-        );
-      }
-      if (creates === "seismic") ctx.createToken(SEISMIC_SURGE);
-    },
     triggers: [
+      ...(creates === "frostbite"
+        ? [
+            entersArenaTrigger(
+              "Create a Frostbite",
+              decisionMessage("card.trigger.common.frostbite.create"),
+              (ctx) =>
+                ctx.requestChoice(
+                  "avalanche-target",
+                  decisionPrompt(
+                    `${ctx.data.name}: create Frostbite under which hero?`,
+                    "card.ele.frostbite.hero.choose",
+                    {
+                      values: { card: { kind: "card", cardId: ctx.self.cardId } },
+                      optionMessages: commonOptionMessages("opponent", "self"),
+                    },
+                  ),
+                  ["opponent", "self"],
+                  undefined,
+                  undefined,
+                  "opponent",
+                ),
+              { condition: isFused },
+            ),
+          ]
+        : []),
+      ...(creates === "seismic"
+        ? [
+            entersArenaTrigger(
+              "Create a Seismic Surge token",
+              decisionMessage("card.trigger.common.seismicsurge.create"),
+              (ctx) => ctx.createToken(SEISMIC_SURGE),
+              { condition: isFused },
+            ),
+          ]
+        : []),
       {
         event: "begin-action-phase",
         label: "Destroy this — next attack action gets +3 power",
@@ -1577,20 +1616,8 @@ export const ele: Record<string, CardScript> = mergeSetScripts("ELE", eleHighRar
 
   // Class and generic equipment / attacks
   "embolden|1": {
-    onEnterArena(ctx) {
-      if (
-        ctx
-          .player(ctx.seat)
-          .board.some(
-            (card) =>
-              card.instanceId !== ctx.self.instanceId &&
-              ctx.cardData(card.cardId).cardType !== "token" &&
-              hasType(ctx, card, "aura"),
-          )
-      )
-        ctx.drawCards(ctx.seat, 1);
-    },
     triggers: [
+      emboldenDraw,
       {
         event: "begin-action-phase",
         label: "Destroy Embolden — next Guardian attack gets +5 power",
@@ -1602,20 +1629,8 @@ export const ele: Record<string, CardScript> = mergeSetScripts("ELE", eleHighRar
     ],
   },
   "embolden|2": {
-    onEnterArena(ctx) {
-      if (
-        ctx
-          .player(ctx.seat)
-          .board.some(
-            (card) =>
-              card.instanceId !== ctx.self.instanceId &&
-              ctx.cardData(card.cardId).cardType !== "token" &&
-              hasType(ctx, card, "aura"),
-          )
-      )
-        ctx.drawCards(ctx.seat, 1);
-    },
     triggers: [
+      emboldenDraw,
       {
         event: "begin-action-phase",
         label: "Destroy Embolden — next Guardian attack gets +4 power",
@@ -1627,20 +1642,8 @@ export const ele: Record<string, CardScript> = mergeSetScripts("ELE", eleHighRar
     ],
   },
   "embolden|3": {
-    onEnterArena(ctx) {
-      if (
-        ctx
-          .player(ctx.seat)
-          .board.some(
-            (card) =>
-              card.instanceId !== ctx.self.instanceId &&
-              ctx.cardData(card.cardId).cardType !== "token" &&
-              hasType(ctx, card, "aura"),
-          )
-      )
-        ctx.drawCards(ctx.seat, 1);
-    },
     triggers: [
+      emboldenDraw,
       {
         event: "begin-action-phase",
         label: "Destroy Embolden — next Guardian attack gets +3 power",

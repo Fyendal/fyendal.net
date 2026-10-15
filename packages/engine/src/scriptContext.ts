@@ -2881,7 +2881,7 @@ export function makeCtx(
           { card: logCardValue(card.cardId) },
         ));
         runtime.events.runHook(state, owner.seat, card, "onEnterArena");
-        runtime.events.fireFriendlyEnterArena(state, owner.seat, card);
+        runtime.events.fireFriendlyEnterArena(state, owner.seat, card, "graveyard");
         return true;
       }
       if (d.cardType === "equipment") {
@@ -2899,7 +2899,7 @@ export function makeCtx(
           { card: logCardValue(card.cardId) },
         ));
         runtime.events.runHook(state, owner.seat, card, "onEnterArena");
-        runtime.events.fireFriendlyEnterArena(state, owner.seat, card);
+        runtime.events.fireFriendlyEnterArena(state, owner.seat, card, "graveyard");
         return true;
       }
       return false;
@@ -2930,7 +2930,7 @@ export function makeCtx(
         { card: logCardValue(card.cardId) },
       ));
       runtime.events.runHook(state, player.seat, card, "onEnterArena");
-      runtime.events.fireFriendlyEnterArena(state, player.seat, card);
+      runtime.events.fireFriendlyEnterArena(state, player.seat, card, "banish");
       return true;
     },
     equipFromInventory(instanceId) {
@@ -2960,7 +2960,7 @@ export function makeCtx(
         { card: logCardValue(card.cardId) },
       ));
       runtime.events.runHook(state, player.seat, card, "onEnterArena");
-      runtime.events.fireFriendlyEnterArena(state, player.seat, card);
+      runtime.events.fireFriendlyEnterArena(state, player.seat, card, "inventory");
       return true;
     },
     equipOpposingEquipment(instanceId) {

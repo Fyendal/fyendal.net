@@ -5,6 +5,7 @@ import {
   commonOptionMessages,
   decisionMessage,
   decisionPrompt,
+  entersArenaTrigger,
   localizedCardLog,
   opponentSeat,
 } from "./shared-helpers.js";
@@ -300,18 +301,22 @@ export const ajv: Record<string, CardScript> = {
     },
   },
   "crumble to eternity|3": {
-    onEnterArena(ctx) {
-      const equipment = allEquipment(ctx);
-      if (equipment.length)
-        ctx.requestCardChoice(
-          "crumble-counter",
-          decisionPrompt("Put a -1 defense counter on an equipment?", "card.ajv.equipment.counter", {
-            optionMessages: commonOptionMessages("none"),
-          }),
-          ["none", ...equipment.map((card) => card.instanceId)],
-        );
-    },
     triggers: [
+      entersArenaTrigger(
+        "You may put a -1 defense counter on an equipment",
+        decisionMessage("card.trigger.common.equipment.defensecounter.optional", { amount: 1 }),
+        (ctx) => {
+          const equipment = allEquipment(ctx);
+          if (equipment.length)
+            ctx.requestCardChoice(
+              "crumble-counter",
+              decisionPrompt("Put a -1 defense counter on an equipment?", "card.ajv.equipment.counter", {
+                optionMessages: commonOptionMessages("none"),
+              }),
+              ["none", ...equipment.map((card) => card.instanceId)],
+            );
+        },
+      ),
       {
         event: "begin-action-phase",
         whose: "subject",

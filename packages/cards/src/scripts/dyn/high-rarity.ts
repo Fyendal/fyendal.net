@@ -8,7 +8,9 @@ import {
   dealtByThis,
   decisionMessage,
   decisionPrompt,
+  entersArenaTrigger,
   heroDamage,
+  leavesArenaTrigger,
   opponentSeat,
   previousAttackHasName,
   yesNoPrompt,
@@ -384,14 +386,33 @@ export const dynHighRarity: Record<string, CardScript> = {
     },
   },
   "ironsong pride|1": {
-    onEnterArena(ctx) {
-      const swords = ctx.player(ctx.seat).weapons.filter((card) => has(ctx, card, "sword"));
-      if (swords.length) ctx.addCounter(swords[0]!.instanceId, "power", 1);
-    },
-    onLeaveArena(ctx) {
-      for (const sword of ctx.player(ctx.seat).weapons.filter((card) => has(ctx, card, "sword")))
-        ctx.setCardCounter(sword.instanceId, "power", 0);
-    },
+    triggers: [
+      entersArenaTrigger(
+        "Put a +1 power counter on target sword you control",
+        decisionMessage("card.trigger.dyn.ironsongpride.counter.add"),
+        (ctx) => {
+          if (ctx.playTargetInstanceId !== undefined) ctx.addCounter(ctx.playTargetInstanceId, "power", 1);
+        },
+        {
+          target: {
+            options: (ctx) =>
+              ctx
+                .player(ctx.seat)
+                .weapons.filter((card) => has(ctx, card, "sword"))
+                .map((card) => card.instanceId),
+            prompt: () => decisionPrompt("Choose target sword you control", "card.dyn.ironsong.sword.target"),
+          },
+        },
+      ),
+      leavesArenaTrigger(
+        "Remove all +1 power counters from swords you control",
+        decisionMessage("card.trigger.dyn.ironsongpride.counters.remove"),
+        (ctx) => {
+          for (const sword of ctx.player(ctx.seat).weapons.filter((card) => has(ctx, card, "sword")))
+            ctx.setCardCounter(sword.instanceId, "power", 0);
+        },
+      ),
+    ],
   },
   "hanabi blaster|0": {
     activated: {
@@ -947,12 +968,16 @@ export const dynHighRarity: Record<string, CardScript> = {
     },
   },
   "looming doom|3": {
-    onEnterArena(ctx) {
-      const runechants = ctx.player(ctx.seat).board.filter((card) => named(ctx, card, "runechant"));
-      for (const card of runechants) ctx.destroyPermanent(card.instanceId);
-      ctx.addCounter(ctx.self.instanceId, "doom", runechants.length);
-    },
     triggers: [
+      entersArenaTrigger(
+        "Destroy your Runechants and put that many doom counters on Looming Doom",
+        decisionMessage("card.trigger.dyn.loomingdoom.runechants.doom"),
+        (ctx) => {
+          const runechants = ctx.player(ctx.seat).board.filter((card) => named(ctx, card, "runechant"));
+          for (const card of runechants) ctx.destroyPermanent(card.instanceId);
+          ctx.addCounter(ctx.self.instanceId, "doom", runechants.length);
+        },
+      ),
       {
         event: "end-of-turn",
         label: "Resolve Looming Doom",

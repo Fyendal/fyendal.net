@@ -3,6 +3,7 @@ import {
   buffNextAttack,
   decisionMessage,
   decisionPrompt,
+  entersArenaTrigger,
   localizedLog,
   opponentSeat,
   payForDefenseBoost,
@@ -46,20 +47,27 @@ function findOpponentEquipment(
 // These non-attack actions have the Aura subtype in the complete WTR data, so
 // the engine settles the played card itself into the arena.
 
+function pitchedCost3(ctx: ScriptCtx): boolean {
+  return ctx.player(ctx.seat).pitch.some((c) => (ctx.cardData(c.cardId).cost ?? 0) >= 3);
+}
+
 function blessingOfDeliverance(topN: number): CardScript {
   return {
-    onPlay(ctx) {
-      const hasCost3 = ctx.state.players[ctx.seat]!.pitch.some((c) => (ctx.cardData(c.cardId).cost ?? 0) >= 3);
-      if (hasCost3) {
-        ctx.drawCards(ctx.seat, 1);
-        ctx.logPublic(
-          localizedLog("Blessing of Deliverance: drew a card", "card.log.common.card.drawn", {
-            card: { kind: "card", cardId: ctx.self.cardId },
-          }),
-        );
-      }
-    },
     triggers: [
+      entersArenaTrigger(
+        "Draw a card",
+        decisionMessage("card.trigger.common.card.draw"),
+        (ctx) => {
+          if (!pitchedCost3(ctx)) return;
+          ctx.drawCards(ctx.seat, 1);
+          ctx.logPublic(
+            localizedLog("Blessing of Deliverance: drew a card", "card.log.common.card.drawn", {
+              card: { kind: "card", cardId: ctx.self.cardId },
+            }),
+          );
+        },
+        { condition: pitchedCost3 },
+      ),
       {
         event: "start-of-turn",
         label: "Destroy Blessing of Deliverance and reveal top cards",

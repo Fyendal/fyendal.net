@@ -1,5 +1,12 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
-import { decisionPrompt, isCard, localizedCardLog, opponentSeat } from "./shared-helpers.js";
+import {
+  decisionMessage,
+  decisionPrompt,
+  isCard,
+  leavesArenaTrigger,
+  localizedCardLog,
+  opponentSeat,
+} from "./shared-helpers.js";
 
 // ── SEN (Silver Age: Enigma precon) ─────────────────────────────────────────
 //
@@ -329,10 +336,17 @@ export const sen: Record<string, CardScript> = {
   // ── Aura instants ─────────────────────────────────────────────────────────
 
   "waning vengeance|1": {
-    // Ward 3 is native. Every arena-to-zone move fires onLeaveArena.
-    onLeaveArena(ctx) {
-      if (pitchedBlue(ctx)) ctx.createToken(SPECTRAL_SHIELD);
-    },
+    // Ward 3 is native.
+    triggers: [
+      leavesArenaTrigger(
+        "Create a Spectral Shield token",
+        decisionMessage("card.trigger.common.spectralshield.create"),
+        (ctx) => {
+          if (pitchedBlue(ctx)) ctx.createToken(SPECTRAL_SHIELD);
+        },
+        { condition: pitchedBlue },
+      ),
+    ],
   },
 
   "waxing specter|1": {

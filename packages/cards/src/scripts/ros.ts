@@ -8,7 +8,9 @@ import {
   dealArcane,
   decisionMessage,
   decisionPrompt,
+  entersArenaTrigger,
   heroDamage,
+  leavesArenaTrigger,
   localizedCardLog,
   opponentSeat,
   previousAttackHasName,
@@ -475,10 +477,13 @@ function arcaneCussing(count: number): CardScript {
           ctx.destroySelf();
         },
       },
+      leavesArenaTrigger(
+        count === 1 ? "Create a Runechant" : `Create ${count} Runechants`,
+        decisionMessage("card.trigger.common.runechant.create.count", { count }),
+        (ctx) => createRunechants(ctx, count),
+        { condition: (ctx) => ctx.state.activePlayer === ctx.seat },
+      ),
     ],
-    onLeaveArena(ctx) {
-      if (ctx.state.activePlayer === ctx.seat) createRunechants(ctx, count);
-    },
   };
 }
 
@@ -836,7 +841,13 @@ export const ros: Record<string, CardScript> = {
   "well grounded|0": preventEquipment(2, fourEarthBanished),
   "sigil of sanctuary|3": {
     optionalDamagePrevention: { amount: 1, moveSource: "destroy", arcaneOnly: true },
-    onLeaveArena: (ctx) => ctx.createToken(EARTH),
+    triggers: [
+      leavesArenaTrigger(
+        "Create Embodiment of Earth",
+        decisionMessage("card.trigger.common.embodimentearth.create"),
+        (ctx) => ctx.createToken(EARTH),
+      ),
+    ],
   },
   "flash of brilliance|0": {
     onDefend(ctx) {
@@ -859,7 +870,13 @@ export const ros: Record<string, CardScript> = {
   "twinkle toes|0": preventEquipment(2, (ctx) => ctx.getFlag("player", "playedCardType:instant") === true),
   "sigil of conductivity|3": {
     optionalDamagePrevention: { amount: 1, moveSource: "destroy", arcaneOnly: true },
-    onLeaveArena: (ctx) => ctx.createToken(LIGHTNING),
+    triggers: [
+      leavesArenaTrigger(
+        "Create Embodiment of Lightning",
+        decisionMessage("card.trigger.common.embodimentlightning.create"),
+        (ctx) => ctx.createToken(LIGHTNING),
+      ),
+    ],
   },
   "bloodtorn bodice|0": {
     activated: {
@@ -1303,8 +1320,17 @@ Object.assign(ros, {
     }),
   },
   "channel the millennium tree|1": {
-    onEnterArena: (ctx: ScriptCtx) => ampNextArcane(ctx, 3),
-    triggers: [{ event: "begin-action-phase", label: "Amp 3", effect: (ctx: ScriptCtx) => ampNextArcane(ctx, 3) }],
+    triggers: [
+      entersArenaTrigger("Amp 3", decisionMessage("card.trigger.common.amp", { amount: 3 }), (ctx) =>
+        ampNextArcane(ctx, 3),
+      ),
+      {
+        event: "begin-action-phase",
+        label: "Amp 3",
+        labelMessage: decisionMessage("card.trigger.common.amp", { amount: 3 }),
+        effect: (ctx: ScriptCtx) => ampNextArcane(ctx, 3),
+      },
+    ],
   },
   "earth's embrace|3": {
     triggers: [
@@ -1619,8 +1645,10 @@ Object.assign(ros, {
       ),
   },
   "truce|3": {
-    onEnterArena: (ctx: ScriptCtx) => ctx.setCounter("opponent", opponentSeat(ctx)),
     triggers: [
+      entersArenaTrigger("Choose an opponent", decisionMessage("card.trigger.common.opponent.choose"), (ctx) =>
+        ctx.setCounter("opponent", opponentSeat(ctx)),
+      ),
       {
         event: "end-of-turn",
         whose: "any",

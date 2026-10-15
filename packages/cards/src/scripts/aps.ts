@@ -3,8 +3,12 @@ import {
   attackAbility,
   buffNextAttack,
   commonOptionMessages,
+  crowdTrigger,
+  decisionMessage,
   decisionPrompt,
   opponentSeat,
+  suspenseAura as suspense,
+  type SuspenseTrigger,
   yesNoPrompt,
 } from "./shared-helpers.js";
 
@@ -50,35 +54,6 @@ function resolveRemoveSuspense(ctx: ScriptCtx, option: string): boolean {
   ctx.setCardCounter(target.instanceId, "suspense", (target.counters?.suspense ?? 0) - 1);
   return true;
 }
-function suspense(onEnter?: (ctx: ScriptCtx) => void, onLeave?: (ctx: ScriptCtx) => void): CardScript {
-  return {
-    destroyAtZeroCounter: "suspense",
-    onEnterArena(ctx) {
-      ctx.setCounter("suspense", 2);
-      onEnter?.(ctx);
-    },
-    onLeaveArena(ctx) {
-      ctx.setFlag(
-        "player",
-        "suspenseAurasLeftThisTurn",
-        Number(ctx.getFlag("player", "suspenseAurasLeftThisTurn")) + 1,
-      );
-      onLeave?.(ctx);
-    },
-    triggers: [
-      {
-        event: "start-of-turn",
-        label: "Remove a suspense counter",
-        effect(ctx) {
-          const next = Math.max(0, ctx.getCounter("suspense") - 1);
-          ctx.setCounter("suspense", next);
-          if (next === 0) ctx.destroySelf();
-        },
-      },
-    ],
-  };
-}
-
 function pleiades(): CardScript {
   return {
     activated: {
@@ -141,6 +116,12 @@ function returnAttackToTop(ctx: ScriptCtx): void {
       ["pass", ...attacks.map((card) => card.instanceId)],
     );
 }
+
+const PEDESTAL: SuspenseTrigger = {
+  label: "You may put a Revered or Guardian attack from your graveyard on top of your deck",
+  labelMessage: decisionMessage("card.trigger.aps.pedestal.attack.top"),
+  effect: returnAttackToTop,
+};
 
 function beginThespianCheer(ctx: ScriptCtx): void {
   ctx.requestChoice("aps-thespian-cheer", yesNoPrompt("Have the crowd cheer you?", "card.aps.crowd.cheer"), [
@@ -278,10 +259,7 @@ export const aps: Record<string, CardScript> = {
       ctx.setCardCounter(target.hero.instanceId, "drawUpToAtEndPhaseTurn", ctx.state.turn);
     },
   },
-  "superstar|3": suspense(
-    (ctx) => ctx.crowdCheer(ctx.seat),
-    (ctx) => ctx.crowdCheer(ctx.seat),
-  ),
+  "superstar|3": suspense({ enters: crowdTrigger("cheer"), leaves: crowdTrigger("cheer") }),
   "tear asunder|3": {
     onPlay(ctx) {
       buffNextAttack(ctx, { attack: 1, dominate: true, appliesToClass: "guardian" });
@@ -357,7 +335,7 @@ export const aps: Record<string, CardScript> = {
     },
   },
   "up on a pedestal|3": {
-    ...suspense(returnAttackToTop, returnAttackToTop),
+    ...suspense({ enters: PEDESTAL, leaves: PEDESTAL }),
     onChoose(ctx, hook, option) {
       if (hook === "aps-pedestal" && option !== "pass") ctx.putOnDeckTop(Number(option));
     },

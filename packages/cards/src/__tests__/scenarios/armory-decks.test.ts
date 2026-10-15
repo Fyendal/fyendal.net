@@ -795,9 +795,9 @@ describe("Armory Decks — AHA, AZS, and AOL", () => {
       .react("blur reality|3")
       .chooseCard("auric shards|1");
 
-    expect(g.state.pendingDecision?.chooseHook).toBe("aura-enter-attack-target");
-    expect(g.state.stack).toHaveLength(0);
-    expect(projectStateFor(g.state, 0).stack).toHaveLength(0);
+    expect(g.state.pendingDecision?.chooseHook).toBe("trigger-target");
+    expect(g.state.stack).toEqual([expect.objectContaining({ label: "Up to 1 target attack gets +1 power" })]);
+    expect(g.state.stack[0]?.card).toBeUndefined();
     g.expectInZone(0, "blur reality|3", "graveyard");
   });
 

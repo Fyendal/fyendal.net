@@ -4,6 +4,7 @@ import {
   commonOptionMessages,
   decisionMessage,
   decisionPrompt,
+  entersArenaTrigger,
   isSixPlus,
   localizedCardLog,
   opponentSeat,
@@ -110,19 +111,22 @@ const sandSketchedPlan: CardScript = {
 };
 
 const showTime: CardScript = {
-  onEnterArena(ctx) {
-    chooseDeckCard(
-      ctx,
-      "show-time-search",
-      "Show Time!: choose a Guardian attack action",
-      "card.wtr.showtime.attack.choose",
-      (card) => isAttackAction(ctx, card) && hasType(ctx, card, "guardian"),
-    );
-  },
   onChoose(ctx, hook, option) {
     if (hook === "show-time-search") finishSearchToHand(ctx, option);
   },
   triggers: [
+    entersArenaTrigger(
+      "Search your deck for a Guardian attack action card",
+      decisionMessage("card.trigger.wtr.showtime.search"),
+      (ctx) =>
+        chooseDeckCard(
+          ctx,
+          "show-time-search",
+          "Show Time!: choose a Guardian attack action",
+          "card.wtr.showtime.attack.choose",
+          (card) => isAttackAction(ctx, card) && hasType(ctx, card, "guardian"),
+        ),
+    ),
     {
       event: "begin-action-phase",
       label: "Destroy Show Time! and draw a card",

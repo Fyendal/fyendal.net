@@ -4,7 +4,9 @@ import {
   bloodDebtScript as bloodDebt,
   buffNextAttack,
   commonOptionMessages,
+  decisionMessage,
   decisionPrompt,
+  entersArenaTrigger,
   leviaRedeemedAbility,
   mergeSetScripts,
   opponentSeat,
@@ -364,9 +366,13 @@ export const dtd: Record<string, CardScript> = mergeSetScripts("DTD", dtdHighRar
     },
   },
   "figment of protection|2": {
-    onEnterArena(ctx) {
-      ctx.createToken(SPECTRAL_SHIELD);
-    },
+    triggers: [
+      entersArenaTrigger(
+        "Create a Spectral Shield token",
+        decisionMessage("card.trigger.common.spectralshield.create"),
+        (ctx) => ctx.createToken(SPECTRAL_SHIELD),
+      ),
+    ],
   },
   "aegis, archangel of protection|0": {
     activated: attackAbility(2),

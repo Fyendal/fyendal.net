@@ -4,12 +4,14 @@ import {
   commonOptionMessages,
   decisionMessage,
   decisionPrompt,
+  entersArenaTrigger,
   hyperDriverCounterFromBoostBanish,
   localizedCardLog,
   mergeSetScripts,
   opponentSeat,
   optN,
   optOnChoose,
+  upToOneTargetAttack,
 } from "./shared-helpers.js";
 import { evoHighRarity } from "./evo/high-rarity.js";
 
@@ -130,11 +132,20 @@ function destroyUnderAbility(effect: (ctx: ScriptCtx) => void): CardScript {
   });
 }
 
+/** Starting equipment never enters mid-game, so its steam counter is placed
+ * at game start; a Cogwerx base equipped later gets it from the trigger. */
 function cogwerxAbility(effect: (ctx: ScriptCtx) => void, label: string): CardScript {
   return {
-    onEnterArena(ctx) {
+    onGameStart(ctx) {
       ctx.setCounter("steam", 1);
     },
+    triggers: [
+      entersArenaTrigger(
+        "Put a steam counter on this",
+        decisionMessage("card.trigger.common.steam.add.self"),
+        (ctx) => ctx.addCounter(ctx.self.instanceId, "steam", 1),
+      ),
+    ],
     activated: {
       cost: 1,
       isAttack: false,
@@ -524,31 +535,55 @@ export const evo: Record<string, CardScript> = mergeSetScripts("EVO", evoHighRar
     ctx.createToken(QUICKEN);
   }),
   "evo zoom call|2": evoEquipment({
-    onEnterArena(ctx) {
-      if (ctx.player(ctx.seat).hand.length)
-        ctx.requestCardChoice(
-          "zoom-call",
-          decisionPrompt("Banish a card from hand to draw a card?", "card.evo.hand.card.banish.draw", {
-            optionMessages: commonOptionMessages("none"),
-          }),
-          ["none", ...ctx.player(ctx.seat).hand.map((card) => card.instanceId)],
-        );
-    },
+    triggers: [
+      entersArenaTrigger(
+        "You may banish a card from your hand to draw a card",
+        decisionMessage("card.trigger.common.hand.card.banish.draw.optional"),
+        (ctx) => {
+          if (ctx.player(ctx.seat).hand.length)
+            ctx.requestCardChoice(
+              "zoom-call",
+              decisionPrompt("Banish a card from hand to draw a card?", "card.evo.hand.card.banish.draw", {
+                optionMessages: commonOptionMessages("none"),
+              }),
+              ["none", ...ctx.player(ctx.seat).hand.map((card) => card.instanceId)],
+            );
+        },
+      ),
+    ],
   }),
   "evo buzz hive|2": evoEquipment({
-    onEnterArena(ctx) {
-      ctx.changeResources(ctx.seat, 1);
-    },
+    triggers: [
+      entersArenaTrigger("Gain 1 resource", decisionMessage("card.trigger.common.resource.gain", { amount: 1 }), (ctx) =>
+        ctx.changeResources(ctx.seat, 1),
+      ),
+    ],
   }),
   "evo whizz bang|2": evoEquipment({
-    onEnterArena(ctx) {
-      if (ctx.link) ctx.addModifier({ scope: "chain-link", attack: 1 });
-    },
+    triggers: [
+      entersArenaTrigger(
+        "Up to 1 target attack gets +1 power",
+        decisionMessage("card.trigger.common.attack.target.power.gain", { amount: 1 }),
+        (ctx) => {
+          const target = ctx.playTargetInstanceId;
+          if (target !== undefined) ctx.addModifier({ scope: "chain-link", attack: 1, appliesToInstanceId: target });
+        },
+        { target: upToOneTargetAttack() },
+      ),
+    ],
   }),
   "evo zip line|2": evoEquipment({
-    onEnterArena(ctx) {
-      if (ctx.link) ctx.grantGoAgain();
-    },
+    triggers: [
+      entersArenaTrigger(
+        "Up to 1 target attack gets go again",
+        decisionMessage("card.trigger.common.attack.target.goagain"),
+        (ctx) => {
+          const target = ctx.playTargetInstanceId;
+          if (target !== undefined) ctx.grantGoAgain(target);
+        },
+        { target: upToOneTargetAttack() },
+      ),
+    ],
   }),
 
   ...pitches("heavy artillery", () => ({

@@ -878,7 +878,7 @@ describe("Jarl policy", () => {
     const play = chooseJarlIntent(inputFor(state));
     expect(play).toMatchObject({ kind: "play-card", instanceId: crumble.instanceId });
     state = apply(state, play);
-    for (let step = 0; step < 4 && state.pendingDecision?.chooseHook !== "crumble-counter"; step++) {
+    for (let step = 0; step < 8 && state.pendingDecision?.chooseHook !== "crumble-counter"; step++) {
       const actor = (state.pendingDecision?.player ?? state.priorityPlayer) as 0 | 1;
       state = apply(state, { kind: "pass" }, actor);
     }

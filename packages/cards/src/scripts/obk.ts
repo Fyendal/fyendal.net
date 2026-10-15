@@ -5,6 +5,7 @@ import {
   commonOptionMessages,
   decisionMessage,
   decisionPrompt,
+  entersArenaTrigger,
   localizedCardLog,
   opponentSeat,
 } from "./shared-helpers.js";
@@ -303,15 +304,6 @@ function diseaseTokensInArena(ctx: ScriptCtx): number {
 
 const extinctionLevelEvent: CardScript = {
   chosenNameLosesAbilities: { cardType: "token", subtype: "disease" },
-  onEnterArena(ctx) {
-    ctx.requestChoice(
-      EXTINCTION_NAME_HOOK,
-      decisionPrompt("Name a disease token", "card.obk.extinction.disease.name"),
-      [...DISEASE_TOKEN_NAMES],
-      undefined,
-      DISEASE_TOKEN_NAMES.map((name) => ctx.cardIdsNamed(name)[0] ?? null),
-    );
-  },
   onChoose(ctx, hook, option) {
     if (hook !== EXTINCTION_NAME_HOOK || !DISEASE_TOKEN_NAMES.includes(option)) return;
     ctx.setChosenName(option);
@@ -325,6 +317,15 @@ const extinctionLevelEvent: CardScript = {
     );
   },
   triggers: [
+    entersArenaTrigger("Name a disease token", decisionMessage("card.trigger.obk.extinction.name"), (ctx) =>
+      ctx.requestChoice(
+        EXTINCTION_NAME_HOOK,
+        decisionPrompt("Name a disease token", "card.obk.extinction.disease.name"),
+        [...DISEASE_TOKEN_NAMES],
+        undefined,
+        DISEASE_TOKEN_NAMES.map((name) => ctx.cardIdsNamed(name)[0] ?? null),
+      ),
+    ),
     {
       event: "start-of-turn",
       label: "Win the game if there are 33 or more disease tokens in the arena",

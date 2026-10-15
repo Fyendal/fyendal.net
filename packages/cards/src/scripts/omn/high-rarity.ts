@@ -7,6 +7,7 @@ import {
   dealtByThis,
   decisionMessage,
   decisionPrompt,
+  entersArenaTrigger,
   heroDamage,
   opponentSeat,
 } from "../shared-helpers.js";
@@ -597,9 +598,13 @@ export const omnHighRarity: Record<string, CardScript> = {
   "arcbane grasp|3": {
     playableEquipment: true,
     playAsInstant: (ctx) => ctx.getPlayerFlag(ctx.seat, "nextEvoAsInstant") === true,
-    onEnterArena(ctx) {
-      ctx.createToken(SPELLBANE);
-    },
+    triggers: [
+      entersArenaTrigger(
+        "Create a Spellbane Aegis token",
+        decisionMessage("card.trigger.common.spellbaneaegis.create"),
+        (ctx) => ctx.createToken(SPELLBANE),
+      ),
+    ],
   },
   "settle the bill|1": {
     onPlay(ctx) {

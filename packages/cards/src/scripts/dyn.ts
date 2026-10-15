@@ -11,6 +11,7 @@ import {
   decisionMessage,
   decisionPrompt,
   discardRandomCost,
+  entersArenaTrigger,
   hyperDriverCounterFromBoostBanish,
   localizedCardLog,
   mergeSetScripts,
@@ -433,25 +434,35 @@ function runicReaping(count: number): CardScript {
 
 function tranquilPassing(maxCost: number): CardScript {
   return {
-    onEnterArena(ctx) {
-      const targets = ctx.player(opponentSeat(ctx)).board.filter((card) => {
-        const d = data(ctx, card);
-        return hasType(ctx, card, "aura") && (d.cost ?? 0) <= maxCost;
-      });
-      if (targets.length)
-        ctx.requestCardChoice(
-          "tranquil",
-          decisionPrompt("Banish an opposing aura until this leaves", "card.dyn.tranquil.aura.banish", {
-            optionMessages: commonOptionMessages("pass"),
-          }),
-          ["pass", ...targets.map((card) => card.instanceId)],
-        );
-    },
-    onChoose(ctx, hook, option) {
-      if (hook !== "tranquil" || option === "pass") return;
-      ctx.setCounter("tranquilTarget", Number(option));
-      ctx.banish(Number(option));
-    },
+    triggers: [
+      entersArenaTrigger(
+        `Banish an opposing aura with cost ${maxCost} or less until this leaves`,
+        decisionMessage("card.trigger.dyn.tranquilpassing.banish", { cost: maxCost }),
+        (ctx) => {
+          const target = ctx.playTargetInstanceId;
+          // The banishment lasts until Tranquil Passing leaves, so a source
+          // that already left banishes nothing.
+          const inArena = ctx.player(ctx.seat).board.some((card) => card.instanceId === ctx.self.instanceId);
+          if (target === undefined || !inArena) return;
+          ctx.setCounter("tranquilTarget", target);
+          ctx.banish(target);
+        },
+        {
+          target: {
+            options: (ctx) =>
+              ctx
+                .player(opponentSeat(ctx))
+                .board.filter((card) => hasType(ctx, card, "aura") && (data(ctx, card).cost ?? 0) <= maxCost)
+                .map((card) => card.instanceId),
+            prompt: () =>
+              decisionPrompt("Banish an opposing aura until this leaves", "card.dyn.tranquil.aura.banish", {
+                optionMessages: commonOptionMessages("pass"),
+              }),
+            optional: true,
+          },
+        },
+      ),
+    ],
     onLeaveArena(ctx) {
       const target = ctx.getCounter("tranquilTarget");
       if (target) ctx.settleCard(target, { allowCrank: false });

@@ -1,5 +1,4 @@
-import type { CardInstance, CardScript, DeepReadonly, ScriptCtx, TriggerDef } from "@fyendal/engine";
-import type { GameMessage } from "@fyendal/shared";
+import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
 import {
   ampNextArcane,
   attackAbility,
@@ -8,7 +7,9 @@ import {
   commonOptionMessages,
   decisionMessage,
   decisionPrompt,
+  entersArenaTrigger,
   isCard,
+  leavesArenaTrigger,
   localizedCardLog,
   opponentSeat,
   previousAttackHasName,
@@ -84,6 +85,22 @@ function instantEvoEquipment(extra: CardScript = {}): CardScript {
   };
 }
 
+function requestEvoRecall(ctx: ScriptCtx): void {
+  const cards = ctx
+    .player(ctx.seat)
+    .banish.filter(
+      (card) => !card.faceDown && hasType(ctx, card, "mechanologist") && ctx.hasCardType(card, "action"),
+    );
+  if (cards.length)
+    ctx.requestCardChoice(
+      "recall-card",
+      decisionPrompt("Put a Mechanologist action on top", "card.mst.mechanologist.action.top", {
+        optionMessages: commonOptionMessages("no"),
+      }),
+      ["no", ...cards.map((card) => card.instanceId)],
+    );
+}
+
 function controlsIllusionistAura(ctx: ScriptCtx, exceptInstanceId?: number): boolean {
   return ctx
     .player(ctx.seat)
@@ -93,21 +110,6 @@ function controlsIllusionistAura(ctx: ScriptCtx, exceptInstanceId?: number): boo
 /** "When this leaves the arena" is a triggered layer: its "if you control no
  * Illusionist auras" condition is checked when the layer resolves, after the
  * event that moved this card (such as a Ward damage event) has finished. */
-function leaveArenaTrigger(
-  label: string,
-  labelMessage: GameMessage,
-  effect: (ctx: ScriptCtx) => void,
-): TriggerDef {
-  return {
-    event: "card-left-arena",
-    sourceZone: "any",
-    label,
-    labelMessage,
-    condition: (ctx, left) => left?.instanceId === ctx.self.instanceId,
-    effect,
-  };
-}
-
 /** Create a Spectral Shield, then add counters only if no other Illusionist
  * aura is controlled. The newly created shield never counts as "other". */
 function createSoloSpectralShield(ctx: ScriptCtx, counters: number): void {
@@ -258,9 +260,16 @@ function hazeShelter(blueWard: number): CardScript {
 
 function waning(): CardScript {
   return {
-    onLeaveArena(ctx) {
-      if (pitchedBlue(ctx)) ctx.createToken(SPECTRAL_SHIELD);
-    },
+    triggers: [
+      leavesArenaTrigger(
+        "Create a Spectral Shield token",
+        decisionMessage("card.trigger.common.spectralshield.create"),
+        (ctx) => {
+          if (pitchedBlue(ctx)) ctx.createToken(SPECTRAL_SHIELD);
+        },
+        { condition: pitchedBlue },
+      ),
+    ],
   };
 }
 
@@ -439,7 +448,7 @@ function essence(pitch: 1 | 2 | 3): CardScript {
   const { color, messageId } = ESSENCE_COLORS[pitch];
   return {
     triggers: [
-      leaveArenaTrigger(
+      leavesArenaTrigger(
         `If you control no Illusionist auras, prevent the next damage from a ${color} source this turn`,
         decisionMessage(messageId),
         (ctx) => {
@@ -454,7 +463,7 @@ function essence(pitch: 1 | 2 | 3): CardScript {
 function haunting(): CardScript {
   return {
     triggers: [
-      leaveArenaTrigger(
+      leavesArenaTrigger(
         "Create a Spectral Shield; if you control no other Illusionist auras, put a +1 power counter on it",
         decisionMessage("card.trigger.mst.hauntingspecter.shield"),
         (ctx) => createSoloSpectralShield(ctx, 1),
@@ -481,29 +490,37 @@ function sigil(): CardScript {
   };
 }
 
+function controlsNoOtherIllusionistAura(ctx: ScriptCtx): boolean {
+  return !controlsIllusionistAura(ctx, ctx.self.instanceId);
+}
+
 function singleMinded(counters: number): CardScript {
   return {
-    onEnterArena(ctx) {
-      if (
-        !ctx
-          .player(ctx.seat)
-          .board.some((card) => card.instanceId !== ctx.self.instanceId && isIllusionistAura(ctx, card))
-      )
-        ctx.addCounter(ctx.self.instanceId, "power", counters);
-    },
+    triggers: [
+      entersArenaTrigger(
+        counters === 1 ? "Put a +1 power counter on this" : `Put ${counters} +1 power counters on this`,
+        decisionMessage("card.trigger.common.powercounter.add.self", { count: counters }),
+        (ctx) => {
+          if (controlsNoOtherIllusionistAura(ctx)) ctx.addCounter(ctx.self.instanceId, "power", counters);
+        },
+        { condition: controlsNoOtherIllusionistAura },
+      ),
+    ],
   };
 }
 
 function solitary(): CardScript {
   return {
-    onEnterArena(ctx) {
-      if (
-        !ctx
-          .player(ctx.seat)
-          .board.some((card) => card.instanceId !== ctx.self.instanceId && isIllusionistAura(ctx, card))
-      )
-        ctx.createToken(SPECTRAL_SHIELD);
-    },
+    triggers: [
+      entersArenaTrigger(
+        "Create a Spectral Shield token",
+        decisionMessage("card.trigger.common.spectralshield.create"),
+        (ctx) => {
+          if (controlsNoOtherIllusionistAura(ctx)) ctx.createToken(SPECTRAL_SHIELD);
+        },
+        { condition: controlsNoOtherIllusionistAura },
+      ),
+    ],
   };
 }
 
@@ -518,7 +535,7 @@ function spectralManifestations(counters: number): CardScript {
 function vengeful(maxCost: number): CardScript {
   return {
     triggers: [
-      leaveArenaTrigger(
+      leavesArenaTrigger(
         `If you control no Illusionist auras, you may play your next aura with cost ${maxCost} or less this turn as though it were an instant`,
         decisionMessage("card.trigger.mst.vengefulapparition.instant", { cost: maxCost }),
         (ctx) => {
@@ -1670,20 +1687,26 @@ Object.assign(mst, {
   },
   "10,000 year reunion|1": { wardValue: () => 10 },
   "rage specter|3": {
-    onEnterArena(ctx) {
-      if (
-        !ctx
-          .player(ctx.seat)
-          .board.some((card) => card.instanceId !== ctx.self.instanceId && isIllusionistAura(ctx, card))
-      )
-        ctx.gainActionPoint();
-    },
+    triggers: [
+      entersArenaTrigger(
+        "Gain 1 action point",
+        decisionMessage("card.trigger.common.actionpoint.gain", { amount: 1 }),
+        (ctx) => {
+          if (controlsNoOtherIllusionistAura(ctx)) ctx.gainActionPoint();
+        },
+        { condition: controlsNoOtherIllusionistAura },
+      ),
+    ],
     wardValue: (ctx) => (ctx.state.activePlayer === ctx.seat ? 6 : 1),
   },
   "restless coalescence|2": {
-    onEnterArena(ctx) {
-      requestRestlessCoalescenceMove(ctx);
-    },
+    triggers: [
+      entersArenaTrigger(
+        "Move any number of +1 power counters from auras you control onto this",
+        decisionMessage("card.trigger.mst.restlesscoalescence.counters.move"),
+        requestRestlessCoalescenceMove,
+      ),
+    ],
     onChoose(ctx, hook, option) {
       if (hook !== "restless-coalescence-move" || option === "done") return;
       const source = restlessCoalescenceSources(ctx).find((card) => card.instanceId === Number(option));
@@ -1829,56 +1852,63 @@ Object.assign(mst, {
     },
   },
   "evo recall|3": instantEvoEquipment({
-    onEnterArena(ctx) {
-      const cards = ctx
-        .player(ctx.seat)
-        .banish.filter(
-          (card) => !card.faceDown && hasType(ctx, card, "mechanologist") && ctx.hasCardType(card, "action"),
-        );
-      if (cards.length)
-        ctx.requestCardChoice(
-          "recall-card",
-          decisionPrompt("Put a Mechanologist action on top", "card.mst.mechanologist.action.top", {
-            optionMessages: commonOptionMessages("no"),
-          }),
-          ["no", ...cards.map((card) => card.instanceId)],
-        );
-    },
+    triggers: [
+      entersArenaTrigger(
+        "Put up to 1 Mechanologist action card from your banished zone on top of your deck",
+        decisionMessage("card.trigger.mst.evorecall.banished.top"),
+        requestEvoRecall,
+      ),
+    ],
     onChoose(ctx, hook, option) {
       if (hook === "recall-card" && option !== "no") ctx.putOnDeckTop(Number(option));
     },
   }),
   "evo heartdrive|3": instantEvoEquipment({
-    onEnterArena: (ctx) => ctx.addModifier({
-      scope: "next-play",
-      playCostReduction: 1,
-      appliesToCardType: "action",
-      appliesToSubtype: "attack",
-    }),
+    triggers: [
+      entersArenaTrigger(
+        "The next attack action card you play this turn costs 1 less to play",
+        decisionMessage("card.trigger.common.nextattackaction.cost.reduce", { amount: 1 }),
+        (ctx) =>
+          ctx.addModifier({
+            scope: "next-play",
+            playCostReduction: 1,
+            appliesToCardType: "action",
+            appliesToSubtype: "attack",
+          }),
+      ),
+    ],
   }),
   "evo shortcircuit|3": instantEvoEquipment({
-    onEnterArena(ctx) {
-      ctx.requestChoice(
-        "shortcircuit-target",
-        decisionPrompt("Deal 1 damage to which hero?", "card.mst.hero.damage.choose", {
-          values: { amount: 1 },
-          optionMessages: {
-            "opposing hero": decisionMessage("common.option.opponent"),
-            "your hero": decisionMessage("card.mst.option.yourhero"),
-          },
-        }),
-        ["opposing hero", "your hero"],
-        undefined,
-        undefined,
-        "opposing hero",
-      );
-    },
+    triggers: [
+      entersArenaTrigger("Deal 1 damage", decisionMessage("card.trigger.common.damage.deal", { amount: 1 }), (ctx) =>
+        ctx.requestChoice(
+          "shortcircuit-target",
+          decisionPrompt("Deal 1 damage to which hero?", "card.mst.hero.damage.choose", {
+            values: { amount: 1 },
+            optionMessages: {
+              "opposing hero": decisionMessage("common.option.opponent"),
+              "your hero": decisionMessage("card.mst.option.yourhero"),
+            },
+          }),
+          ["opposing hero", "your hero"],
+          undefined,
+          undefined,
+          "opposing hero",
+        ),
+      ),
+    ],
     onChoose(ctx, hook, option) {
       if (hook === "shortcircuit-target") ctx.dealDamage(option === "your hero" ? ctx.seat : opponentSeat(ctx), 1);
     },
   }),
   "evo speedslip|3": instantEvoEquipment({
-    onEnterArena: (ctx) => ctx.addModifier({ scope: "next-play", grantKeyword: "boost", appliesTo: "attack-action" }),
+    triggers: [
+      entersArenaTrigger(
+        "The next attack action card you play this turn gets boost",
+        decisionMessage("card.trigger.common.nextattackaction.boost"),
+        (ctx) => ctx.addModifier({ scope: "next-play", grantKeyword: "boost", appliesTo: "attack-action" }),
+      ),
+    ],
   }),
   "longdraw half-glove|0": {
     activated: {

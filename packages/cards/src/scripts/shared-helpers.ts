@@ -55,6 +55,56 @@ export function decisionMessage(id: string, values?: GameMessage["values"]): Gam
   return { id, ...(values === undefined ? {} : { values }) };
 }
 
+/** "When this enters the arena" or "When this is equipped": a triggered layer
+ * added after the object enters (CR 6.6.5), not an immediate hook. Keep
+ * replacement effects such as "enters the arena with counters" in
+ * `onEnterArena`. Starting equipment never enters mid-game; give it an
+ * `onGameStart` when its equip effect must also apply at game start.
+ *
+ * For "When …, if …", pass the "if" as `condition` and check it again in the
+ * effect: it belongs to the generated effect, which is evaluated on
+ * resolution (CR 6.6.1c, 6.1.3). The same applies to `leavesArenaTrigger`. */
+export function entersArenaTrigger(
+  label: string,
+  labelMessage: GameMessage,
+  effect: (ctx: ScriptCtx) => void,
+  extra: Partial<TriggerDef> = {},
+): TriggerDef {
+  return { event: "card-entered-arena", sourceZone: "self", label, labelMessage, effect, ...extra };
+}
+
+/** "When this leaves the arena": a triggered layer added after the object left
+ * (CR 6.6.5). Its effect reads the object's last-known information. Keep
+ * bookkeeping that must happen as it leaves in `onLeaveArena`. */
+export function leavesArenaTrigger(
+  label: string,
+  labelMessage: GameMessage,
+  effect: (ctx: ScriptCtx) => void,
+  extra: Partial<TriggerDef> = {},
+): TriggerDef {
+  return { event: "card-left-arena", sourceZone: "self", label, labelMessage, effect, ...extra };
+}
+
+/** "Up to 1 target attack": any attack on the combat chain that hasn't ceased
+ * to be one, optionally narrowed by `eligible`. The engine rechecks the
+ * declared target on resolution, so effects can use `ctx.playTargetInstanceId`. */
+export function upToOneTargetAttack(
+  eligible: (ctx: ScriptCtx, attack: DeepReadonly<CardInstance>) => boolean = () => true,
+): NonNullable<TriggerDef["target"]> {
+  return {
+    options: (ctx) =>
+      ctx.state.chain
+        .filter((link) => link.flags.attackGone !== true && eligible(ctx, link.attackingCard))
+        .map((link) => link.attackingCard.instanceId),
+    prompt: (ctx) =>
+      decisionPrompt(`${ctx.data.name}: choose up to 1 target attack`, "card.omn.attack.target.upto", {
+        values: { card: { kind: "card", cardId: ctx.self.cardId } },
+        optionMessages: commonOptionMessages("pass"),
+      }),
+    optional: true,
+  };
+}
+
 /** Construct one audience-safe semantic log payload for any card script.
  * Keeping this beside the decision helpers gives every set the same fallback,
  * message-value, and optional machine-event contract without importing engine
@@ -316,20 +366,59 @@ export function channelLightning(
   };
 }
 
-/** Shared Suspense lifecycle (CR 8.3.42). Card-specific enter/leave effects
- * remain callbacks so the engine only sees the generic counter behavior. */
+/** A Suspense aura's own "when this enters/leaves the arena" ability. */
+export type SuspenseTrigger = Pick<TriggerDef, "label" | "condition" | "optional" | "target"> & {
+  labelMessage: GameMessage;
+  effect: (ctx: ScriptCtx) => void;
+};
+
+/** "Your next attack this turn gets +N{p}" as a Suspense leave trigger. */
+export function suspenseNextAttackBuff(amount: number): SuspenseTrigger {
+  return {
+    label: `Your next attack this turn gets +${amount} attack`,
+    labelMessage: decisionMessage("card.trigger.common.nextattack.turn.attack", { amount }),
+    effect: (ctx) => buffNextAttack(ctx, { attack: amount }),
+  };
+}
+
+/** "The crowd cheers/boos you" as an enter or leave trigger. */
+export function crowdTrigger(kind: "cheer" | "boo"): SuspenseTrigger {
+  return kind === "cheer"
+    ? {
+        label: "The crowd cheers you",
+        labelMessage: decisionMessage("card.trigger.common.crowd.cheer"),
+        effect: (ctx) => ctx.crowdCheer(ctx.seat),
+      }
+    : {
+        label: "The crowd boos you",
+        labelMessage: decisionMessage("card.trigger.common.crowd.boo"),
+        effect: (ctx) => ctx.crowdBoo(ctx.seat),
+      };
+}
+
+/** Shared Suspense lifecycle (CR 8.3.42). The suspense counters and the
+ * `suspenseAurasLeftThisTurn` bookkeeping stay in the arena hooks; the card's
+ * printed enter/leave abilities become stack triggers. `onEnterArena` is only
+ * for non-triggered work done as the aura enters (static abilities). */
 export function suspenseAura(
   options: {
-    onEnter?: ((ctx: ScriptCtx) => void) | undefined;
-    onLeave?: ((ctx: ScriptCtx) => void) | undefined;
+    enters?: SuspenseTrigger | readonly SuspenseTrigger[];
+    leaves?: SuspenseTrigger | readonly SuspenseTrigger[];
+    onEnterArena?: (ctx: ScriptCtx) => void;
     logCounterRemoval?: boolean;
   } = {},
 ): CardScript {
+  const list = (value: SuspenseTrigger | readonly SuspenseTrigger[] | undefined): readonly SuspenseTrigger[] =>
+    value === undefined ? [] : "label" in value ? [value as SuspenseTrigger] : (value as readonly SuspenseTrigger[]);
+  const toTrigger = (
+    make: typeof entersArenaTrigger,
+    { label, labelMessage, effect, ...extra }: SuspenseTrigger,
+  ): TriggerDef => make(label, labelMessage, effect, extra);
   return {
     destroyAtZeroCounter: "suspense",
     onEnterArena(ctx) {
       ctx.setCounter("suspense", 2);
-      options.onEnter?.(ctx);
+      options.onEnterArena?.(ctx);
     },
     onLeaveArena(ctx) {
       ctx.setFlag(
@@ -337,12 +426,14 @@ export function suspenseAura(
         "suspenseAurasLeftThisTurn",
         Number(ctx.getFlag("player", "suspenseAurasLeftThisTurn")) + 1,
       );
-      options.onLeave?.(ctx);
     },
     triggers: [
+      ...list(options.enters).map((trigger) => toTrigger(entersArenaTrigger, trigger)),
+      ...list(options.leaves).map((trigger) => toTrigger(leavesArenaTrigger, trigger)),
       {
         event: "start-of-turn",
         label: "Remove a suspense counter",
+        labelMessage: decisionMessage("card.trigger.common.suspense.remove"),
         effect(ctx) {
           const next = Math.max(0, ctx.getCounter("suspense") - 1);
           ctx.setCounter("suspense", next);

@@ -5,6 +5,7 @@ import {
   commonOptionMessages,
   decisionMessage,
   decisionPrompt,
+  entersArenaTrigger,
   localizedCardLog,
   nextAttack,
   opponentSeat,
@@ -1425,24 +1426,28 @@ export const sea: Record<string, CardScript> = {
   },
 
   "clap 'em in irons|3": {
-    onEnterArena(ctx) {
-      const targets = ctx.state.players
-        .flatMap((player) => [player.hero, ...player.board.filter((card) => isAlly(ctx, card))])
-        .filter((card) => isPirate(ctx, card) && !card.tapped);
-      if (targets.length)
-        ctx.requestCardChoice(
-          "clap-tap",
-          decisionPrompt("Tap target Pirate hero or ally", "card.sea.pirate.tap"),
-          targets.map((card) => card.instanceId),
-        );
-    },
-    onChoose(ctx, hook, option) {
-      if (hook === "clap-tap" && ctx.tap(Number(option))) ctx.setCounter("clapTarget", Number(option));
-    },
     preventsUntapOf(ctx, target) {
       return ctx.getCounter("clapTarget") === target.instanceId;
     },
     triggers: [
+      entersArenaTrigger(
+        "Tap target Pirate hero or ally",
+        decisionMessage("card.trigger.sea.pirate.tap"),
+        (ctx) => {
+          const target = ctx.playTargetInstanceId;
+          if (target !== undefined && ctx.tap(target)) ctx.setCounter("clapTarget", target);
+        },
+        {
+          target: {
+            options: (ctx) =>
+              ctx.state.players
+                .flatMap((player) => [player.hero, ...player.board.filter((card) => isAlly(ctx, card))])
+                .filter((card) => isPirate(ctx, card) && !card.tapped)
+                .map((card) => card.instanceId),
+            prompt: () => decisionPrompt("Tap target Pirate hero or ally", "card.sea.pirate.tap"),
+          },
+        },
+      ),
       {
         event: "start-of-turn",
         label: "Destroy this",
@@ -2485,10 +2490,12 @@ Object.assign(sea, {
     },
   },
   "loan shark|2": {
-    onEnterArena(ctx: ScriptCtx) {
-      createGold(ctx, 2);
-    },
     triggers: [
+      entersArenaTrigger(
+        "Create 2 Gold tokens",
+        decisionMessage("card.trigger.common.gold.create.count", { count: 2 }),
+        (ctx) => createGold(ctx, 2),
+      ),
       {
         event: "end-of-turn",
         label: "Pay Loan Shark",
@@ -2628,10 +2635,12 @@ Object.assign(sea, {
     },
   },
   "surface shaking|3": {
-    onEnterArena(ctx: ScriptCtx) {
-      ctx.createTokens("SBR035", 3);
-    },
     triggers: [
+      entersArenaTrigger(
+        "Create 3 Seismic Surge tokens",
+        decisionMessage("card.trigger.common.seismicsurge.create.count", { count: 3 }),
+        (ctx) => ctx.createTokens("SBR035", 3),
+      ),
       {
         event: "begin-action-phase",
         label: "Resolve Surface Shaking",

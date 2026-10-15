@@ -77,8 +77,10 @@ describe("DTD, EVO, and HVY rules regression coverage", () => {
       ],
     });
 
-    g.activate("stasis cell|3").chooseCard("ironrot helm|0");
-    expect(g.state.pendingDecision?.chooseHook).toBe("stasis-abilities");
+    g.activate("stasis cell|3");
+    expect(g.state.pendingDecision?.chooseHook).toBe("trigger-target");
+    g.chooseCard("ironrot helm|0");
+    expect(g.state.pendingDecision?.chooseHook).toBe("stasis-defense");
     g.chooseCard("ironrot helm|0");
     const helm = g.state.players[1]!.equipment.head!;
     expect(g.state.modifiers).toContainEqual(expect.objectContaining({

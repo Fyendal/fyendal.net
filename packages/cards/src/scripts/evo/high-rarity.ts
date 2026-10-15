@@ -1,4 +1,4 @@
-import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
+import type { CardInstance, CardScript, DeepReadonly, ScriptCtx, TriggerDef } from "@fyendal/engine";
 import {
   attackAbility,
   buffNextAttack,
@@ -6,6 +6,8 @@ import {
   contractWithSilver,
   decisionMessage,
   decisionPrompt,
+  entersArenaTrigger,
+  leavesArenaTrigger,
   opponentSeat,
   requestDiscardChoice,
   resolveDiscardChoice,
@@ -106,6 +108,33 @@ function evoEquipment(extra: CardScript = {}): CardScript {
       return ctx.getPlayerFlag(ctx.seat, "nextEvoAsInstant") === true || (extra.playAsInstant?.(ctx) ?? false);
     },
   };
+}
+function allEquipment(ctx: ScriptCtx): DeepReadonly<CardInstance>[] {
+  return ctx.state.players.flatMap((player) =>
+    Object.values(player.equipment).filter((card): card is DeepReadonly<CardInstance> => !!card),
+  );
+}
+function equipmentController(ctx: ScriptCtx, instanceId: number): number | undefined {
+  return ctx.state.players.find((player) =>
+    Object.values(player.equipment).some((card) => card?.instanceId === instanceId),
+  )?.seat;
+}
+const STASIS_EQUIPMENT_TARGET: TriggerDef["target"] = {
+  options: (ctx) => allEquipment(ctx).map((card) => card.instanceId),
+  prompt: () =>
+    decisionPrompt("Choose equipment whose abilities can't be activated", "card.evo.equipment.abilities.disable"),
+};
+function suppressTargetEquipmentAbilities(ctx: ScriptCtx): void {
+  const targetId = ctx.playTargetInstanceId;
+  const owner = targetId === undefined ? undefined : equipmentController(ctx, targetId);
+  if (targetId === undefined || owner === undefined) return;
+  ctx.addModifier({
+    scope: "until-end-of-turn",
+    seat: owner,
+    suppressesActivatedAbilitiesOfInstanceId: targetId,
+    expiresAtEndOfSeatTurn: owner,
+    ongoingLabel: "Chosen equipment's activated abilities are suppressed",
+  });
 }
 function steelSoulTriggerCount(ctx: ScriptCtx, other: DeepReadonly<CardInstance>): number {
   const selfData = ctx.cardData(ctx.self.cardId);
@@ -679,30 +708,20 @@ export const evoHighRarity: Record<string, CardScript> = {
     },
   }),
   "stasis cell|3": {
-    onEnterArena(ctx) {
-      const equipment = ctx.state.players.flatMap((player) =>
-        Object.values(player.equipment).filter((card): card is DeepReadonly<CardInstance> => !!card),
-      );
-      if (equipment.length)
-        ctx.requestCardChoice(
-          "stasis-abilities",
-          decisionPrompt("Choose equipment whose abilities can't be activated", "card.evo.equipment.abilities.disable"),
-          equipment.map((card) => card.instanceId),
-        );
-    },
-    onLeaveArena(ctx) {
-      const equipment = ctx.state.players.flatMap((player) =>
-        Object.values(player.equipment).filter((card): card is DeepReadonly<CardInstance> => !!card),
-      );
-      ctx.setCardCounter(ctx.self.instanceId, "stasis-leave-trigger", 1);
-      if (ctx.leavingArenaAsActivationCost) return;
-      if (equipment.length)
-        ctx.requestCardChoice(
-          "stasis-abilities",
-          decisionPrompt("Choose equipment whose abilities can't be activated", "card.evo.equipment.abilities.disable"),
-          equipment.map((card) => card.instanceId),
-        );
-    },
+    triggers: [
+      entersArenaTrigger(
+        "Target equipment's activated abilities can't be activated until the end of its controller's next turn",
+        decisionMessage("card.trigger.evo.stasiscell.abilities.suppress"),
+        suppressTargetEquipmentAbilities,
+        { target: STASIS_EQUIPMENT_TARGET },
+      ),
+      leavesArenaTrigger(
+        "Target equipment's activated abilities can't be activated until the end of its controller's next turn",
+        decisionMessage("card.trigger.evo.stasiscell.abilities.suppress"),
+        suppressTargetEquipmentAbilities,
+        { target: STASIS_EQUIPMENT_TARGET },
+      ),
+    ],
     activated: {
       cost: 0,
       isAttack: false,
@@ -710,9 +729,7 @@ export const evoHighRarity: Record<string, CardScript> = {
       putSelfOnDeckBottomCost: true,
       label: "Disable equipment defense",
       onActivate(ctx) {
-        const equipment = ctx.state.players.flatMap((player) =>
-          Object.values(player.equipment).filter((card): card is DeepReadonly<CardInstance> => !!card),
-        );
+        const equipment = allEquipment(ctx);
         if (equipment.length)
           ctx.requestCardChoice(
             "stasis-defense",
@@ -723,40 +740,14 @@ export const evoHighRarity: Record<string, CardScript> = {
     },
     onChoose(ctx, hook, option) {
       const targetId = Number(option);
-      const owner = ctx.state.players.find((player) =>
-        Object.values(player.equipment).some((card) => card?.instanceId === targetId),
-      );
-      if (hook === "stasis-defense" && owner) {
+      const owner = equipmentController(ctx, targetId);
+      if (hook === "stasis-defense" && owner !== undefined) {
         ctx.addModifier({
           scope: "until-end-of-turn",
-          seat: owner.seat,
+          seat: owner,
           cannotDefendWithInstanceId: targetId,
           ongoingLabel: "Chosen equipment can't defend this turn",
         });
-        if (ctx.getCounter("stasis-leave-trigger") > 0) {
-          const equipment = ctx.state.players.flatMap((player) =>
-            Object.values(player.equipment).filter((card): card is DeepReadonly<CardInstance> => !!card),
-          );
-          if (equipment.length)
-            ctx.requestCardChoice(
-              "stasis-abilities",
-              decisionPrompt(
-                "Choose equipment whose abilities can't be activated",
-                "card.evo.equipment.abilities.disable",
-              ),
-              equipment.map((card) => card.instanceId),
-            );
-        }
-      }
-      if (hook === "stasis-abilities" && owner) {
-        ctx.addModifier({
-          scope: "until-end-of-turn",
-          seat: owner.seat,
-          suppressesActivatedAbilitiesOfInstanceId: targetId,
-          expiresAtEndOfSeatTurn: owner.seat,
-          ongoingLabel: "Chosen equipment's activated abilities are suppressed",
-        });
-        ctx.setCardCounter(ctx.self.instanceId, "stasis-leave-trigger", 0);
       }
     },
   },

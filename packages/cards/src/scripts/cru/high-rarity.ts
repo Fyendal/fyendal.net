@@ -4,6 +4,7 @@ import {
   dealArcane,
   decisionMessage,
   decisionPrompt,
+  entersArenaTrigger,
   localizedCardLog,
   opponentSeat,
   optN,
@@ -17,6 +18,10 @@ const COPPER = "CRU197";
 const QUICKEN = "CRU196";
 const RUNECHANT = "CRU157";
 const ZEN_STATE = "CRU075";
+
+function stampAuthorityPitched(ctx: ScriptCtx): boolean {
+  return ctx.player(ctx.seat).pitch.filter((card) => (ctx.cardData(card.cardId).cost ?? 0) >= 3).length >= 2;
+}
 
 function types(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): readonly string[] {
   return ctx.cardTypes(card);
@@ -496,13 +501,22 @@ export const cruHighRarity: Record<string, CardScript> = {
     suppressesAttackActionHitEffects: true,
     onEnterArena(ctx) {
       ctx.setPlayerFlag(ctx.seat, "suppressAttackActionHitEffects", true);
-      if (ctx.player(ctx.seat).pitch.filter((card) => (ctx.cardData(card.cardId).cost ?? 0) >= 3).length >= 2)
-        ctx.setPlayerFlag(ctx.seat, "bonusIntellect", Number(ctx.getPlayerFlag(ctx.seat, "bonusIntellect")) + 1);
     },
     onLeaveArena(ctx) {
       ctx.setPlayerFlag(ctx.seat, "suppressAttackActionHitEffects", false);
     },
-    triggers: [{ event: "begin-action-phase", label: "Destroy Stamp Authority", effect: (ctx) => ctx.destroySelf() }],
+    triggers: [
+      entersArenaTrigger(
+        "Gain +1 intellect",
+        decisionMessage("card.trigger.common.greatlibrary.intellect"),
+        (ctx) => {
+          if (stampAuthorityPitched(ctx))
+            ctx.setPlayerFlag(ctx.seat, "bonusIntellect", Number(ctx.getPlayerFlag(ctx.seat, "bonusIntellect")) + 1);
+        },
+        { condition: stampAuthorityPitched },
+      ),
+      { event: "begin-action-phase", label: "Destroy Stamp Authority", effect: (ctx) => ctx.destroySelf() },
+    ],
   },
 
   "breeze rider boots|0": {
@@ -705,10 +719,17 @@ export const cruHighRarity: Record<string, CardScript> = {
   },
   "rattle bones|1": rattleBones,
   "runeblood barrier|2": {
-    onEnterArena(ctx) {
-      ctx.createTokens(RUNECHANT, 4);
-      ctx.setCounter("runechantDamageReplacement", 4);
-    },
+    triggers: [
+      entersArenaTrigger(
+        "Create 4 Runechants",
+        decisionMessage("card.trigger.common.runechant.create.count", { count: 4 }),
+        (ctx) => {
+          ctx.createTokens(RUNECHANT, 4);
+          ctx.setCounter("runechantDamageReplacement", 4);
+        },
+      ),
+      { event: "begin-action-phase", label: "Destroy Runeblood Barrier", effect: (ctx) => ctx.destroySelf() },
+    ],
     replaceDamageToController(ctx, amount) {
       const runechants = ctx.player(ctx.seat).board.filter((card) => ctx.isRunechant(card));
       const prevented = Math.min(amount, runechants.length);
@@ -722,7 +743,6 @@ export const cruHighRarity: Record<string, CardScript> = {
         );
       return amount - prevented;
     },
-    triggers: [{ event: "begin-action-phase", label: "Destroy Runeblood Barrier", effect: (ctx) => ctx.destroySelf() }],
   },
   "metacarpus node|0": metacarpusNode,
   "chain lightning|2": chainLightning,

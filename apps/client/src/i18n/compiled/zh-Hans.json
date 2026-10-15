@@ -2849,6 +2849,12 @@
       "value": "将一张 Hyper Driver 返回竞技场？"
     }
   ],
+  "card.dyn.ironsong.sword.target": [
+    {
+      "type": 0,
+      "value": "选择你控制的一把目标剑"
+    }
+  ],
   "card.dyn.nitromechanoid.card.banish": [
     {
       "type": 0,
@@ -12631,6 +12637,12 @@
       "value": "将一个灵气 (Aura)置于牌库底部"
     }
   ],
+  "card.sup.aura.bottom.choose": [
+    {
+      "type": 0,
+      "value": "将另一个目标灵气 (Aura) 置于其拥有者的牌库底部"
+    }
+  ],
   "card.sup.aura.destroy": [
     {
       "type": 0,
@@ -13217,6 +13229,12 @@
       "value": "将此牌洗入其拥有者的牌库"
     }
   ],
+  "card.trigger.aps.pedestal.attack.top": [
+    {
+      "type": 0,
+      "value": "你可以将墓地中的一张 Revered 或 Guardian 攻击牌置于牌库顶"
+    }
+  ],
   "card.trigger.common.actionpoint.gain": [
     {
       "type": 0,
@@ -13351,6 +13369,20 @@
       "value": " 点奥术伤害"
     }
   ],
+  "card.trigger.common.arcane.prevent.next": [
+    {
+      "type": 0,
+      "value": "防止本回合接下来将对你造成的 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点奥术伤害"
+    }
+  ],
   "card.trigger.common.arcane.target": [
     {
       "type": 0,
@@ -13441,6 +13473,26 @@
       "value": " 力量和 go again"
     }
   ],
+  "card.trigger.common.attack.target.goagain": [
+    {
+      "type": 0,
+      "value": "至多 1 个目标攻击获得 go again"
+    }
+  ],
+  "card.trigger.common.attack.target.power.gain": [
+    {
+      "type": 0,
+      "value": "至多 1 个目标攻击获得 +"
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 力量"
+    }
+  ],
   "card.trigger.common.attacks.power.chain": [
     {
       "type": 0,
@@ -13473,10 +13525,22 @@
       "value": "将一个符合条件的灵气 (Aura) 返回其拥有者手牌？"
     }
   ],
+  "card.trigger.common.auratoken.target.destroy": [
+    {
+      "type": 0,
+      "value": "摧毁目标灵气 (Aura)衍生物"
+    }
+  ],
   "card.trigger.common.balance.remove.destroy": [
     {
       "type": 0,
       "value": "移除一个 balance 指示物，或摧毁此牌"
+    }
+  ],
+  "card.trigger.common.banished.facedown": [
+    {
+      "type": 0,
+      "value": "将一张已放逐的牌翻至面朝下"
     }
   ],
   "card.trigger.common.biosupdate.arena": [
@@ -13575,6 +13639,12 @@
       "value": " 力量和 go again"
     }
   ],
+  "card.trigger.common.cardname.choose": [
+    {
+      "type": 0,
+      "value": "指定一个牌名"
+    }
+  ],
   "card.trigger.common.cardname.choose.destroy": [
     {
       "type": 0,
@@ -13647,6 +13717,12 @@
       "value": "核心反应 (Core Reaction)"
     }
   ],
+  "card.trigger.common.courage.create": [
+    {
+      "type": 0,
+      "value": "生成一个 Courage 衍生物"
+    }
+  ],
   "card.trigger.common.courage.destroy": [
     {
       "type": 0,
@@ -13671,6 +13747,18 @@
     {
       "type": 0,
       "value": "为 Crouching Tiger 指定牌名"
+    }
+  ],
+  "card.trigger.common.crowd.boo": [
+    {
+      "type": 0,
+      "value": "观众向你喝倒彩 (boo)"
+    }
+  ],
+  "card.trigger.common.crowd.cheer": [
+    {
+      "type": 0,
+      "value": "观众为你欢呼 (cheer)"
     }
   ],
   "card.trigger.common.dagger.attack": [
@@ -13895,6 +13983,20 @@
     {
       "type": 0,
       "value": "每当有牌防守此牌时"
+    }
+  ],
+  "card.trigger.common.defender.action.defense.target": [
+    {
+      "type": 0,
+      "value": "目标防守行动牌获得 +"
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 防御"
     }
   ],
   "card.trigger.common.defender.discard.draw": [
@@ -14123,6 +14225,20 @@
       "value": "为该临时攻击指定一个牌名"
     }
   ],
+  "card.trigger.common.equipment.defensecounter.optional": [
+    {
+      "type": 0,
+      "value": "你可以在一件装备上放置一个 -"
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 防御指示物"
+    }
+  ],
   "card.trigger.common.equipment.destroy": [
     {
       "type": 0,
@@ -14257,6 +14373,20 @@
     {
       "type": 0,
       "value": "生成一个 Gold 衍生物"
+    }
+  ],
+  "card.trigger.common.gold.create.count": [
+    {
+      "type": 0,
+      "value": "生成 "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " 个 Gold 衍生物"
     }
   ],
   "card.trigger.common.gold.wager.optional": [
@@ -14403,6 +14533,12 @@
       "value": "放逐一张手牌"
     }
   ],
+  "card.trigger.common.hand.card.banish.draw.optional": [
+    {
+      "type": 0,
+      "value": "你可以放逐一张手牌以抽一张牌"
+    }
+  ],
   "card.trigger.common.hand.card.banish.hunger": [
     {
       "type": 0,
@@ -14429,6 +14565,12 @@
     {
       "type": 0,
       "value": "摧毁 Heavy Swing 并强化一把剑"
+    }
+  ],
+  "card.trigger.common.heroes.draw": [
+    {
+      "type": 0,
+      "value": "每名英雄各抽一张牌"
     }
   ],
   "card.trigger.common.heroes.infect.decktop.banish": [
@@ -14727,6 +14869,12 @@
       "value": "在 Nekria 上放置一个 -1 生命指示物并生成一个 Ash"
     }
   ],
+  "card.trigger.common.nextattack.dominate": [
+    {
+      "type": 0,
+      "value": "你本回合的下一次攻击获得压制 (dominate)"
+    }
+  ],
   "card.trigger.common.nextattack.draconic": [
     {
       "type": 0,
@@ -14769,6 +14917,46 @@
       "value": " 力量"
     }
   ],
+  "card.trigger.common.nextattack.turn.attack": [
+    {
+      "type": 0,
+      "value": "你本回合的下一次攻击获得 +"
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 力量"
+    }
+  ],
+  "card.trigger.common.nextattackaction.boost": [
+    {
+      "type": 0,
+      "value": "本回合你打出的下一张攻击行动牌获得 boost"
+    }
+  ],
+  "card.trigger.common.nextattackaction.cost.reduce": [
+    {
+      "type": 0,
+      "value": "本回合你打出的下一张攻击行动牌的费用减少 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点资源"
+    }
+  ],
+  "card.trigger.common.nextnonattack.instant": [
+    {
+      "type": 0,
+      "value": "本回合你的下一张非攻击行动牌可以当作瞬间牌打出"
+    }
+  ],
   "card.trigger.common.nofear.return": [
     {
       "type": 0,
@@ -14799,6 +14987,26 @@
     {
       "type": 0,
       "value": " 防御指示物”"
+    }
+  ],
+  "card.trigger.common.opponent.attackactions.power.reduce": [
+    {
+      "type": 0,
+      "value": "对手的攻击行动牌本回合获得 -"
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 力量"
+    }
+  ],
+  "card.trigger.common.opponent.choose": [
+    {
+      "type": 0,
+      "value": "选择一名对手"
     }
   ],
   "card.trigger.common.opt": [
@@ -14855,6 +15063,20 @@
       "value": " 力量"
     }
   ],
+  "card.trigger.common.powercounter.add.self": [
+    {
+      "type": 0,
+      "value": "在此牌上放置 "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " 个 +1 力量指示物"
+    }
+  ],
   "card.trigger.common.pyroglyphic.destroy": [
     {
       "type": 0,
@@ -14868,6 +15090,38 @@
     }
   ],
   "card.trigger.common.resource.gain": [
+    {
+      "type": 0,
+      "value": "获得 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点资源"
+    }
+  ],
+  "card.trigger.common.resource.gain.amp": [
+    {
+      "type": 0,
+      "value": "获得 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点资源并增幅 (amp) "
+    },
+    {
+      "type": 1,
+      "value": "amp"
+    }
+  ],
+  "card.trigger.common.resources.gain": [
     {
       "type": 0,
       "value": "获得 "
@@ -14897,6 +15151,20 @@
     {
       "type": 0,
       "value": "生成一个 Runechant"
+    }
+  ],
+  "card.trigger.common.runechant.create.count": [
+    {
+      "type": 0,
+      "value": "生成 "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " 个 Runechant"
     }
   ],
   "card.trigger.common.runechant.create.destroy": [
@@ -14955,6 +15223,20 @@
     {
       "type": 0,
       "value": "生成一个 Seismic Surge 衍生物"
+    }
+  ],
+  "card.trigger.common.seismicsurge.create.count": [
+    {
+      "type": 0,
+      "value": "生成 "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " 个 Seismic Surge 衍生物"
     }
   ],
   "card.trigger.common.seismicsurge.create.destroy": [
@@ -15025,6 +15307,12 @@
     {
       "type": 0,
       "value": "摧毁 Sigil of the Muse 并生成一个 Ponder"
+    }
+  ],
+  "card.trigger.common.sigiloffate.create": [
+    {
+      "type": 0,
+      "value": "生成一个 Sigil of Fate 衍生物"
     }
   ],
   "card.trigger.common.sigilprotection.destroy": [
@@ -15107,10 +15395,28 @@
       "value": " 置入你的 soul"
     }
   ],
+  "card.trigger.common.spectralshield.create": [
+    {
+      "type": 0,
+      "value": "生成一个 Spectral Shield 衍生物"
+    }
+  ],
+  "card.trigger.common.spellbaneaegis.create": [
+    {
+      "type": 0,
+      "value": "生成一个 Spellbane Aegis 衍生物"
+    }
+  ],
   "card.trigger.common.spellboundcreepers.maintain": [
     {
       "type": 0,
       "value": "维持 Spellbound Creepers"
+    }
+  ],
+  "card.trigger.common.steam.add.self": [
+    {
+      "type": 0,
+      "value": "在此牌上放置一个 steam 指示物"
     }
   ],
   "card.trigger.common.steam.remove": [
@@ -15373,16 +15679,66 @@
       "value": "生成 Agility、Might 和 Vigor 衍生物"
     }
   ],
+  "card.trigger.common.yellowaction.graveyard.decktop": [
+    {
+      "type": 0,
+      "value": "将你墓地中的一张黄色行动牌置于牌库顶部"
+    }
+  ],
   "card.trigger.common.zenstate.maintain": [
     {
       "type": 0,
       "value": "移除一个 balance 指示物，或摧毁 Zen State"
     }
   ],
+  "card.trigger.dyn.ironsongpride.counter.add": [
+    {
+      "type": 0,
+      "value": "在你控制的目标剑上放置一个 +1 力量指示物"
+    }
+  ],
+  "card.trigger.dyn.ironsongpride.counters.remove": [
+    {
+      "type": 0,
+      "value": "移除你控制的剑上的所有 +1 力量指示物"
+    }
+  ],
+  "card.trigger.dyn.loomingdoom.runechants.doom": [
+    {
+      "type": 0,
+      "value": "摧毁你的 Runechant，并在 Looming Doom 上放置等量的 doom 指示物"
+    }
+  ],
+  "card.trigger.dyn.tranquilpassing.banish": [
+    {
+      "type": 0,
+      "value": "放逐一个费用不高于 "
+    },
+    {
+      "type": 1,
+      "value": "cost"
+    },
+    {
+      "type": 0,
+      "value": " 的对方灵气 (Aura)，直到此牌离场"
+    }
+  ],
   "card.trigger.energycounter.add": [
     {
       "type": 0,
       "value": "增加一个能量指示物"
+    }
+  ],
+  "card.trigger.evo.stasiscell.abilities.suppress": [
+    {
+      "type": 0,
+      "value": "目标装备的启动能力在其操控者的下一个回合结束前不能被启动"
+    }
+  ],
+  "card.trigger.evr.nervesofsteel.counter.remove": [
+    {
+      "type": 0,
+      "value": "从你的胸部装备上移除一个 -1 防御指示物"
     }
   ],
   "card.trigger.hyperdriver.boost": [
@@ -15415,10 +15771,22 @@
       "value": "如果你未控制 Illusionist 灵气 (Aura)，则防止本回合下一次由黄色来源对你造成的伤害"
     }
   ],
+  "card.trigger.mst.evorecall.banished.top": [
+    {
+      "type": 0,
+      "value": "将你放逐区中至多 1 张 Mechanologist 行动牌置于你的牌库顶"
+    }
+  ],
   "card.trigger.mst.hauntingspecter.shield": [
     {
       "type": 0,
       "value": "创建一个 Spectral Shield；如果你未控制其他 Illusionist 灵气 (Aura)，则在其上放置一个 +1 力量指示物"
+    }
+  ],
+  "card.trigger.mst.restlesscoalescence.counters.move": [
+    {
+      "type": 0,
+      "value": "将你控制的灵气 (Aura) 上任意数量的 +1 力量指示物移到此牌上"
     }
   ],
   "card.trigger.mst.vengefulapparition.instant": [
@@ -15433,6 +15801,12 @@
     {
       "type": 0,
       "value": " 或更低的灵气 (Aura)当作瞬间牌打出"
+    }
+  ],
+  "card.trigger.obk.extinction.name": [
+    {
+      "type": 0,
+      "value": "指定一个疾病衍生物的名称"
     }
   ],
   "card.trigger.obk.extinction.win": [
@@ -15461,6 +15835,18 @@
       "value": "翻转此英雄"
     }
   ],
+  "card.trigger.pen.distantrumbling.draw.fifth": [
+    {
+      "type": 0,
+      "value": "抽一张牌，然后将一张手牌置于牌库顶向下第五张"
+    }
+  ],
+  "card.trigger.pen.galcia.freeze": [
+    {
+      "type": 0,
+      "value": "冻结目标盟友、灵气 (Aura)、物品或装备"
+    }
+  ],
   "card.trigger.pen.themis.facedown": [
     {
       "type": 0,
@@ -15473,10 +15859,40 @@
       "value": "说出一个牌名，并将放逐区中同名的牌翻至牌面朝下"
     }
   ],
+  "card.trigger.sea.pirate.tap": [
+    {
+      "type": 0,
+      "value": "横置目标 Pirate 英雄或 ally"
+    }
+  ],
   "card.trigger.steam.maintain": [
     {
       "type": 0,
       "value": "移除一个 steam 指示物，或摧毁此牌"
+    }
+  ],
+  "card.trigger.sup.turnheads.tap": [
+    {
+      "type": 0,
+      "value": "横置 Brute 英雄"
+    }
+  ],
+  "card.trigger.sup.whoblinksfirst.destroy": [
+    {
+      "type": 0,
+      "value": "你可以摧毁一个由 Guardian 英雄操控的灵气 (Aura)"
+    }
+  ],
+  "card.trigger.svi.silphidae.aura.banish.optional": [
+    {
+      "type": 0,
+      "value": "你可以从你的墓地中放逐另一个灵气 (Aura)"
+    }
+  ],
+  "card.trigger.wtr.showtime.search": [
+    {
+      "type": 0,
+      "value": "从牌库搜寻一张 Guardian 攻击行动牌"
     }
   ],
   "card.upr.action.bottom": [

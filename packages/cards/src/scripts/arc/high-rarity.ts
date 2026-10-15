@@ -5,6 +5,7 @@ import {
   dealArcane,
   decisionMessage,
   decisionPrompt,
+  entersArenaTrigger,
   localizedCardLog,
   opponentSeat,
   optN,
@@ -566,18 +567,18 @@ export const arcHighRarity: Record<string, CardScript> = {
   },
   "chains of eminence|1": {
     prohibitsChosenName: true,
-    onEnterArena(ctx) {
-      ctx.requestNameChoice(
-        "chains-name",
-        decisionPrompt("Chains of Eminence: name a card", "card.arc.chains.card.name"),
-      );
-    },
     onChoose(ctx, hook, option) {
       if (hook === "chains-name") {
         ctx.setChosenName(option);
       }
     },
     triggers: [
+      entersArenaTrigger("Name a card", decisionMessage("card.trigger.common.cardname.choose"), (ctx) =>
+        ctx.requestNameChoice(
+          "chains-name",
+          decisionPrompt("Chains of Eminence: name a card", "card.arc.chains.card.name"),
+        ),
+      ),
       { event: "begin-action-phase", label: "Destroy Chains of Eminence", effect: (ctx) => ctx.destroySelf() },
     ],
   },

@@ -777,7 +777,7 @@ describe("OMN — import and set mechanics", () => {
     const attack = g.state.chain.at(-1)!.attackingCard;
     expect(g.state.pendingDecision).toMatchObject({
       kind: "choose-target",
-      options: ["no", String(attack.instanceId)],
+      options: ["pass", String(attack.instanceId)],
       cardOptions: [null, attack.instanceId],
     });
 
@@ -813,7 +813,7 @@ describe("OMN — import and set mechanics", () => {
     g.play("snatch|1")
       .blockWith()
       .react("crackle from afar|3")
-      .chooseOption("no")
+      .chooseOption("pass")
       .expectFinalAttack(4)
       .expectLife(1, 16);
   });
@@ -863,7 +863,7 @@ describe("OMN — import and set mechanics", () => {
     g.react("AZS027");
     expect(g.state.pendingDecision).toMatchObject({
       kind: "choose-target",
-      options: ["no", String(attack.instanceId)],
+      options: ["pass", String(attack.instanceId)],
       cardOptions: [null, attack.instanceId],
     });
     g.chooseCard("spears of surreality|1");
@@ -914,7 +914,7 @@ describe("OMN — import and set mechanics", () => {
     g.play("snatch|1").blockWith().react("crackle from afar|3");
     const currentAttack = g.state.chain[1]!.attackingCard;
     expect(g.state.pendingDecision).toMatchObject({
-      options: ["no", String(pastAttack.instanceId), String(currentAttack.instanceId)],
+      options: ["pass", String(pastAttack.instanceId), String(currentAttack.instanceId)],
       cardOptions: [null, pastAttack.instanceId, currentAttack.instanceId],
     });
 
@@ -972,7 +972,7 @@ describe("OMN — import and set mechanics", () => {
     g.play("snatch|1").blockWith().react("fleeing starbreeze|3");
     const currentAttack = g.state.chain[1]!.attackingCard;
     expect(g.state.pendingDecision?.options).toEqual([
-      "no",
+      "pass",
       String(pastAttack.instanceId),
       String(currentAttack.instanceId),
     ]);

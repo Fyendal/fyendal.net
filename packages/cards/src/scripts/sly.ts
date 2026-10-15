@@ -10,7 +10,11 @@ import {
   payForDefenseBoost,
   queueIntimidate,
   requestHeroChoice,
+  crowdTrigger,
+  entersArenaTrigger,
+  leavesArenaTrigger,
   suspenseAura,
+  suspenseNextAttackBuff,
   yesNoPrompt,
 } from "./shared-helpers.js";
 
@@ -35,6 +39,7 @@ import {
 
 const CONFIDENCE = "SLY034";
 const MIGHT = "SLY035";
+const BOO = crowdTrigger("boo");
 
 /** ctx.state is typed without the internal side tables; the runtime object has them. */
 
@@ -132,15 +137,14 @@ function aboveBase(ctx: ScriptCtx): boolean {
  * trigger removes one and destroys the aura when it has none. The
  * destroyAtZeroCounter marker adds the state-based "when this has no
  * suspense counters, destroy it" net for counters removed any other way.
- * `onLeave` runs the card's "when this leaves the arena" effect.
  */
-function suspense(onLeave?: (ctx: ScriptCtx) => void): CardScript {
-  return suspenseAura({ onLeave, logCounterRemoval: true });
+function suspense(): CardScript {
+  return suspenseAura({ logCounterRemoval: true });
 }
 
-/** "The next attack this turn gets +N{p} when this leaves the arena." */
+/** Suspense aura whose leave trigger buffs the next attack. */
 function suspenseBuff(n: number): CardScript {
-  return suspense((ctx) => buffNextAttack(ctx, { attack: n }));
+  return suspenseAura({ leaves: suspenseNextAttackBuff(n), logCounterRemoval: true });
 }
 
 /** Mocking Blow cycle: boo on attack while ahead on life; +N if booed this turn. */
@@ -420,13 +424,9 @@ export const sly: Record<string, CardScript> = {
   },
 
   "booze!|3": {
-    onEnterArena(ctx) {
-      ctx.crowdBoo(ctx.seat);
-    },
-    onDestroyed(ctx) {
-      ctx.crowdBoo(ctx.seat);
-    },
     triggers: [
+      entersArenaTrigger(BOO.label, BOO.labelMessage, BOO.effect),
+      leavesArenaTrigger(BOO.label, BOO.labelMessage, BOO.effect),
       {
         event: "start-of-turn",
         label: "Destroy Booze!",
@@ -438,9 +438,6 @@ export const sly: Record<string, CardScript> = {
   },
 
   "concealed object|3": {
-    onEnterArena(ctx) {
-      ctx.crowdBoo(ctx.seat);
-    },
     activated: {
       cost: 0,
       isAttack: false,
@@ -460,6 +457,7 @@ export const sly: Record<string, CardScript> = {
       },
     },
     triggers: [
+      entersArenaTrigger(BOO.label, BOO.labelMessage, BOO.effect),
       {
         event: "end-of-turn",
         label: "Destroy Concealed Object",

@@ -4564,6 +4564,34 @@ describe("trigger stack & priority windows", () => {
   });
 });
 
+describe("arena entry event context", () => {
+  it.each(["graveyard", "banish"] as const)("records equipping from the %s as the origin zone", (zone) => {
+    const s = makeGame(320);
+    const p = player(s, 0);
+    const helmId = giveCard(s, 0, "HELM");
+    const helm = p.hand.splice(p.hand.findIndex((card) => card.instanceId === helmId), 1)[0]!;
+    delete p.equipment.head;
+    p[zone].push(helm);
+    s.scriptsRef = {
+      ...s.scriptsRef,
+      HELM: {
+        triggers: [{
+          event: "card-entered-arena",
+          sourceZone: "self",
+          label: "Record the origin",
+          onTrigger: (ctx, _card, event) => ctx.setPlayerFlag(ctx.seat, `enteredFrom:${event?.from}`, true),
+        }],
+      },
+    };
+
+    const ctx = makeCtx(s, engineRuntime, 0, p.hand[0]!);
+    expect(zone === "graveyard" ? ctx.equipFromGraveyard(helmId) : ctx.equipFromBanish(helmId)).toBe(true);
+
+    expect(player(s, 0).equipment.head?.instanceId).toBe(helmId);
+    expect(p.flags[`enteredFrom:${zone}`]).toBe(true);
+  });
+});
+
 describe("targeted triggered layers", () => {
   function targetingGame(seed: number, opts: { optional?: boolean; noTargets?: boolean } = {}) {
     const s = makeGame(seed);
