@@ -368,17 +368,14 @@ describe("Bravo policy", () => {
         kind: "choose-target",
         prompt: "Oasis Respite: target which hero?",
         promptMessage: { id: "card.sly.oasis.hero.choose" },
-        options: view.players.map((player) => String(player.heroInstanceId)),
+        options: ["opposing hero", "your hero"],
       };
       expect(chooseBravoIntent({
         seat: 0,
         view,
         legal: view.pendingDecision.options!.map((optionId) => ({ kind: "choose", optionId })),
         cards: cardData,
-      })).toEqual({
-        kind: "choose",
-        optionId: String(view.players[0].heroInstanceId),
-      });
+      })).toEqual({ kind: "choose", optionId: "your hero" });
 
       view.pendingDecision = {
         player: 0,

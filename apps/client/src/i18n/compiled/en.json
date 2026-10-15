@@ -16076,12 +16076,6 @@
       "value": "Put a card on the bottom to draw?"
     }
   ],
-  "card.upr.damage.source.choose": [
-    {
-      "type": 0,
-      "value": "Choose a damage source"
-    }
-  ],
   "card.upr.damage.target.choose": [
     {
       "type": 1,
@@ -16180,16 +16174,6 @@
       "value": "Choose a hero"
     }
   ],
-  "card.upr.hero.choose.named": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": ": choose a hero"
-    }
-  ],
   "card.upr.ice.bottom": [
     {
       "type": 0,
@@ -16222,12 +16206,6 @@
     {
       "type": 0,
       "value": "Kyloria: gain control of an item"
-    }
-  ],
-  "card.upr.life.gain": [
-    {
-      "type": 0,
-      "value": "Gain 1 life?"
     }
   ],
   "card.upr.nonattack.negate": [

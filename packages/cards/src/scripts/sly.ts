@@ -73,6 +73,50 @@ function damageSourceCandidates(ctx: ScriptCtx): number[] {
   return [...new Set(ids)];
 }
 
+/** Oasis Respite: two chained choices, the target hero and then the damage
+ * source (the specific object instance; a later copy is not covered). */
+function oasisRespite(amount: number): CardScript {
+  return {
+    onPlay(ctx) {
+      requestHeroChoice(ctx, "target-hero", "Oasis Respite: target which hero?", "card.sly.oasis.hero.choose", {
+        defaultOption: "your hero",
+      });
+    },
+    onChoose(ctx, hook, option) {
+      if (hook === "target-hero") {
+        const target = heroChoiceSeat(ctx, option);
+        if (target === undefined) return;
+        ctx.setCounter("oasisTarget", target);
+        ctx.requestCardChoice(
+          "source",
+          decisionPrompt(`Prevent the next ${amount} damage from which source?`, "card.sly.damage.source.choose", {
+            values: { amount },
+          }),
+          damageSourceCandidates(ctx),
+        );
+        return;
+      }
+      if (hook === "source") {
+        const target = ctx.getCounter("oasisTarget");
+        ctx.preventNextDamage(target, amount, Number(option));
+        // the targeted hero's controller decides the life gain
+        if (ctx.compareLife(target, target === 0 ? 1 : 0) < 0) {
+          ctx.requestChoice(
+            "gain-life",
+            yesNoPrompt("Oasis Respite: gain 1 life?", "card.sly.oasis.life.gain", { amount: 1 }),
+            ["yes", "no"],
+            target,
+          );
+        }
+        return;
+      }
+      if (hook === "gain-life" && option === "yes") {
+        ctx.gainLife(ctx.getCounter("oasisTarget"), 1);
+      }
+    },
+  };
+}
+
 /** "If this has {p} greater than its base" — the attack's current bonus over
  *  base {p}, counting modifier- and script-granted buffs (Mocking Blow's own
  *  +N, ...) but not this card's own conditional bonus: the check must not
@@ -293,49 +337,9 @@ export const sly: Record<string, CardScript> = {
     },
   },
 
-  "oasis respite|1": {
-    // "Prevent the next 4 damage that would be dealt to target hero this turn
-    // by a source of your choice" — two chained choices: the hero, then the
-    // source (the specific object instance; a later copy is not covered).
-    onPlay(ctx) {
-      requestHeroChoice(ctx, "target-hero", "Oasis Respite: target which hero?", "card.sly.oasis.hero.choose", {
-        defaultOption: "your hero",
-      });
-    },
-    onChoose(ctx, hook, option) {
-      if (hook === "target-hero") {
-        const target = heroChoiceSeat(ctx, option);
-        if (target === undefined) return;
-        ctx.setCounter("oasisTarget", target);
-        ctx.requestCardChoice(
-          "source",
-          decisionPrompt("Prevent the next 4 damage from which source?", "card.sly.damage.source.choose", {
-            values: { amount: 4 },
-          }),
-          damageSourceCandidates(ctx),
-        );
-        return;
-      }
-      if (hook === "source") {
-        const target = ctx.getCounter("oasisTarget");
-        ctx.preventNextDamage(target, 4, Number(option));
-        // "If they have less life than each other hero, they may gain 1{h}" —
-        // the targeted hero's controller decides
-        if (ctx.compareLife(target, target === 0 ? 1 : 0) < 0) {
-          ctx.requestChoice(
-            "gain-life",
-            yesNoPrompt("Oasis Respite: gain 1 life?", "card.sly.oasis.life.gain", { amount: 1 }),
-            ["yes", "no"],
-            target,
-          );
-        }
-        return;
-      }
-      if (hook === "gain-life" && option === "yes") {
-        ctx.gainLife(ctx.getCounter("oasisTarget"), 1);
-      }
-    },
-  },
+  "oasis respite|1": oasisRespite(4),
+  "oasis respite|2": oasisRespite(3),
+  "oasis respite|3": oasisRespite(2),
 
   "short shrift|2": shortShrift(),
 

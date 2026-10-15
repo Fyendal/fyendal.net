@@ -189,7 +189,7 @@ function scoreChoice(intent: Extract<GameIntent, { kind: "choose" }>, input: Bot
   const decision = input.view.pendingDecision;
   if (!decision) return 0;
   if (decision.promptMessage?.id === "card.sly.oasis.hero.choose") {
-    return intent.optionId === String(input.view.players[input.seat].heroInstanceId) ? 100 : -100;
+    return intent.optionId === "your hero" ? 100 : -100;
   }
   if (decision.promptMessage?.id === "card.sly.damage.source.choose") {
     const link = currentLink(input);

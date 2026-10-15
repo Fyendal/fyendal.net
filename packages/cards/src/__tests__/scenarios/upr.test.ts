@@ -516,6 +516,21 @@ describe("UPR — rules regression coverage", () => {
     expect(s.state.pendingDecision?.defaultOption).toBe("your hero");
   });
 
+  it("Oasis Respite (blue) can choose the attacking card as its damage source", () => {
+    const s = scenario({
+      seats: [
+        { hero: "rhinar", hand: ["snatch|1"] },
+        { hero: "dorinthea", hand: ["oasis respite|3", BLUE] },
+      ],
+    });
+    s.play("snatch|1").blockWith().passPriority();
+    s.react("oasis respite|3", { pitch: [BLUE] }).chooseOption("your hero");
+    const decision = projectStateFor(s.state, 1).pendingDecision;
+    expect(decision?.promptMessage).toMatchObject({ values: { amount: 2 } });
+    expect(decision?.optionCards?.[0]).toMatchObject({ cardId: printingId("snatch|1") });
+    s.chooseCard("snatch|1").settle().expectLife(1, 18);
+  });
+
   it("Nekria triggers from damage dealt to it and keeps its life counter through reset", () => {
     const s = scenario({
       active: 1,

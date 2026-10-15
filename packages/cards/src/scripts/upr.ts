@@ -6,7 +6,6 @@ import {
   dealtByThis,
   decisionMessage,
   decisionPrompt,
-  heroChoiceSeat,
   heroDamage,
   localizedCardLog,
   mergeSetScripts,
@@ -14,7 +13,6 @@ import {
   optN,
   optOnChoose,
   payForDefenseBoost,
-  requestHeroChoice,
   wizardActionAsInstant,
   yesNoPrompt,
 } from "./shared-helpers.js";
@@ -384,39 +382,6 @@ function fightingSpirit(): CardScript {
     if (ctx.compareLife(ctx.seat, opponentSeat(ctx)) < 0) ctx.gainLife(ctx.seat, 1);
   };
   return { onAttackDeclared: gain, onDefend: gain };
-}
-
-function oasis(amount: number): CardScript {
-  return {
-    onPlay(ctx) {
-      requestHeroChoice(ctx, "oasis-hero", `${ctx.data.name}: choose a hero`, "card.upr.hero.choose.named", {
-        values: { card: { kind: "card", cardId: ctx.self.cardId } },
-        defaultOption: "your hero",
-      });
-    },
-    onChoose(ctx, hook, option) {
-      if (hook === "oasis-hero") {
-        const target = heroChoiceSeat(ctx, option);
-        if (target === undefined) return;
-        ctx.setCounter("oasisTarget", target);
-        ctx.requestCardChoice(
-          "oasis-source",
-          decisionPrompt("Choose a damage source", "card.upr.damage.source.choose"),
-          livingTargets(ctx),
-        );
-        return;
-      }
-      if (hook === "oasis-source") {
-        const target = ctx.getCounter("oasisTarget");
-        ctx.preventNextDamage(target, amount, Number(option));
-        if (ctx.compareLife(target, target === 0 ? 1 : 0) < 0) {
-          ctx.requestChoice("oasis-life", yesNoPrompt("Gain 1 life?", "card.upr.life.gain"), ["yes", "no"], target);
-        }
-        return;
-      }
-      if (hook === "oasis-life" && option === "yes") ctx.gainLife(ctx.getCounter("oasisTarget"), 1);
-    },
-  };
 }
 
 function quelling(): CardScript {
@@ -1709,8 +1674,6 @@ export const upr: Record<string, CardScript> = mergeSetScripts("UPR", uprHighRar
   "sigil of protection|1": sigilProtection(),
   "sigil of protection|2": sigilProtection(),
   "sigil of protection|3": sigilProtection(),
-  "oasis respite|2": oasis(3),
-  "oasis respite|3": oasis(2),
   "sash of sandikai|0": {
     activated: {
       cost: 0,

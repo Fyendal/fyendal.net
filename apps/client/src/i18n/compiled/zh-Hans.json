@@ -15435,12 +15435,6 @@
       "value": "将一张牌置于牌库底部以抽牌？"
     }
   ],
-  "card.upr.damage.source.choose": [
-    {
-      "type": 0,
-      "value": "选择一个伤害来源"
-    }
-  ],
   "card.upr.damage.target.choose": [
     {
       "type": 1,
@@ -15539,16 +15533,6 @@
       "value": "选择一名英雄"
     }
   ],
-  "card.upr.hero.choose.named": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": "：选择一名英雄"
-    }
-  ],
   "card.upr.ice.bottom": [
     {
       "type": 0,
@@ -15581,12 +15565,6 @@
     {
       "type": 0,
       "value": "Kyloria：获得一个物品的操控权"
-    }
-  ],
-  "card.upr.life.gain": [
-    {
-      "type": 0,
-      "value": "获得 1 点生命？"
     }
   ],
   "card.upr.nonattack.negate": [
