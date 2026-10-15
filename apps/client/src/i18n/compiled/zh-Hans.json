@@ -4521,6 +4521,34 @@
       "value": "在一件装备上放置一个 -1 防御指示物"
     }
   ],
+  "card.hnt.graveyard.power.banish.opponent": [
+    {
+      "type": 0,
+      "value": "从对手英雄的墓地放逐一张力量为 "
+    },
+    {
+      "type": 1,
+      "value": "power"
+    },
+    {
+      "type": 0,
+      "value": " 的牌"
+    }
+  ],
+  "card.hnt.graveyard.power.banish.own": [
+    {
+      "type": 0,
+      "value": "从你的墓地放逐一张力量为 "
+    },
+    {
+      "type": 1,
+      "value": "power"
+    },
+    {
+      "type": 0,
+      "value": " 的牌？"
+    }
+  ],
   "card.hnt.hand.card.banish": [
     {
       "type": 0,
@@ -13690,7 +13718,7 @@
   "card.trigger.common.dagger.damage.defender": [
     {
       "type": 0,
-      "value": "你可以让一把匕首对防守英雄造成 "
+      "value": "你可以让目标匕首对防守英雄造成 "
     },
     {
       "type": 1,
@@ -14270,7 +14298,7 @@
   "card.trigger.common.graveyards.power.banish": [
     {
       "type": 0,
-      "value": "从每个墓地放逐一张力量为 "
+      "value": "你可以从每名英雄的墓地各放逐一张力量为 "
     },
     {
       "type": 1,
@@ -14278,7 +14306,7 @@
     },
     {
       "type": 0,
-      "value": " 的牌，以获得 +"
+      "value": " 的牌，使此牌获得 +"
     },
     {
       "type": 1,
@@ -14286,7 +14314,7 @@
     },
     {
       "type": 0,
-      "value": " 力量"
+      "value": " 力量，然后重复此过程"
     }
   ],
   "card.trigger.common.greatlibrary.intellect": [
@@ -20152,6 +20180,44 @@
     {
       "type": 0,
       "value": " 触发 Spectra"
+    }
+  ],
+  "engine.log.trigger.target.declared": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 的触发能力以 "
+    },
+    {
+      "type": 1,
+      "value": "target"
+    },
+    {
+      "type": 0,
+      "value": " 为目标"
+    }
+  ],
+  "engine.log.trigger.target.illegal": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 的触发能力失效（其目标已不合法）"
+    }
+  ],
+  "engine.log.trigger.target.none": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 的触发能力没有合法目标"
     }
   ],
   "engine.log.trigger.watery.grave": [

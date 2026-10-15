@@ -4564,6 +4564,94 @@ describe("trigger stack & priority windows", () => {
   });
 });
 
+describe("targeted triggered layers", () => {
+  function targetingGame(seed: number, opts: { optional?: boolean; noTargets?: boolean } = {}) {
+    const s = makeGame(seed);
+    const p = player(s, 0);
+    s.scriptsRef = {
+      ...s.scriptsRef,
+      HERO_A: {
+        triggers: [{
+          event: "token-created",
+          label: "Mark target weapon",
+          condition: (_ctx, token) => token?.cardId === "TOKEN",
+          target: {
+            options: (ctx) => opts.noTargets ? [] : ctx.player(ctx.seat).weapons.map((card) => card.instanceId),
+            prompt: () => "Choose a weapon",
+            ...(opts.optional ? { optional: true } : {}),
+          },
+          effect(ctx) {
+            ctx.setPlayerFlag(ctx.seat, "targetedWeapon", ctx.playTargetInstanceId ?? 0);
+          },
+        }],
+      },
+    };
+    makeCtx(s, engineRuntime, 0, p.hand[0]!).createToken("TOKEN");
+    continueStack(s, engineRuntime);
+    return s;
+  }
+
+  it("declares the target as the layer is added, before priority", () => {
+    const s = targetingGame(311);
+    const weapon = player(s, 0).weapons[0]!;
+
+    expect(s.stack).toHaveLength(1);
+    expect(s.pendingDecision).toMatchObject({
+      kind: "choose-target",
+      chooseHook: "trigger-target",
+      options: [String(weapon.instanceId)],
+      cardOptions: [weapon.instanceId],
+    });
+    expect(legalIntents(s, 0)).toContainEqual({ kind: "choose", optionId: String(weapon.instanceId) });
+
+    const declared = applyIntent(s, 0, { kind: "choose", optionId: String(weapon.instanceId) });
+    expect(declared.ok).toBe(true);
+    if (!declared.ok) return;
+    expect(declared.state.stack[0]).toMatchObject({ targetCardInstanceId: weapon.instanceId, targetDeclared: true });
+    expect(declared.state.pendingDecision?.kind).toBe("priority-window");
+    expect(player(declared.state, 0).flags.targetedWeapon).toBeUndefined();
+
+    const resolved = passTopLayer(declared.state);
+    expect(player(resolved, 0).flags.targetedWeapon).toBe(weapon.instanceId);
+  });
+
+  it("removes a layer that has no legal target", () => {
+    const s = targetingGame(312, { noTargets: true });
+
+    expect(s.stack).toEqual([]);
+    expect(player(s, 0).flags.targetedWeapon).toBeUndefined();
+    expect(projectStateFor(s, 0).log.at(-1)).toContain("has no legal target");
+  });
+
+  it("lets an optional targeted effect declare no target", () => {
+    const s = targetingGame(313, { optional: true });
+    expect(s.pendingDecision?.options?.[0]).toBe("pass");
+
+    const declined = applyIntent(s, 0, { kind: "choose", optionId: "pass" });
+    expect(declined.ok).toBe(true);
+    if (!declined.ok) return;
+    expect(declined.state.stack[0]).toMatchObject({ targetDeclared: true });
+    expect(declined.state.stack[0]?.targetCardInstanceId).toBeUndefined();
+
+    const resolved = passTopLayer(declined.state);
+    expect(player(resolved, 0).flags.targetedWeapon).toBe(0);
+  });
+
+  it("fails when its declared target is no longer legal at resolution", () => {
+    const s = targetingGame(314);
+    const weapon = player(s, 0).weapons[0]!;
+    const declared = applyIntent(s, 0, { kind: "choose", optionId: String(weapon.instanceId) });
+    expect(declared.ok).toBe(true);
+    if (!declared.ok) return;
+    player(declared.state, 0).weapons.splice(0);
+
+    const resolved = passTopLayer(declared.state);
+    expect(resolved.stack).toEqual([]);
+    expect(player(resolved, 0).flags.targetedWeapon).toBeUndefined();
+    expect(projectStateFor(resolved, 0).log.at(-1)).toContain("fails (its target is no longer legal)");
+  });
+});
+
 describe("ongoing effects", () => {
   it("lingering modifiers are projected with the affected seat and a label", () => {
     let s = makeGame(50);

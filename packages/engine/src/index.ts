@@ -34,6 +34,7 @@ import {
   answerTriggerChoice,
   answerTriggerOrder,
   answerTriggerOrderList,
+  answerTriggerTarget,
   continueStack,
   offerEndActionPriority,
   passWindow,
@@ -451,6 +452,7 @@ function answerScriptedDecision(
   }
   if (pd.chooseHook === "trigger-choice") return answerTriggerChoice(state, runtime, seat, optionId);
   if (pd.chooseHook === "trigger-order") return answerTriggerOrder(state, runtime, seat, optionId);
+  if (pd.chooseHook === "trigger-target") return answerTriggerTarget(state, runtime, seat, optionId);
   if (pd.chooseHook === "engine-end-phase-pitch-order") {
     return answerEndPhasePitchOrder(state, runtime, seat, optionId);
   }

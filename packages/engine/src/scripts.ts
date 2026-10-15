@@ -903,6 +903,21 @@ export interface TriggerDef {
   ): boolean;
   /** If true, the controller chooses yes/no before the ability goes on the stack */
   optional?: boolean;
+  /** A card target declared as the layer is added to the stack (CR 6.6.6a).
+   * Without a legal target the layer ceases to exist; an optional targeted
+   * effect may declare none (CR 1.8.5e). The effect reads the declared target
+   * from `ctx.playTargetInstanceId` and fails when it is no longer one of
+   * `options` (CR 1.8.9). One target is declared per layer, so a targeted
+   * trigger does not combine with `simultaneousKey` or `occurrences`. */
+  target?: {
+    options(
+      ctx: ScriptCtx,
+      eventCard?: DeepReadonly<CardInstance>,
+      eventContext?: TriggerEventContext,
+    ): readonly number[];
+    prompt(ctx: ScriptCtx): ScriptPrompt;
+    optional?: boolean;
+  };
   /** Space-bar default for an optional trigger choice. */
   defaultOption?: "yes" | "no";
   /** Short description shown in the stack window, e.g. "Turn face up?" */

@@ -271,30 +271,44 @@ function offerDaggerDamage(ctx: ScriptCtx, hook: string): void {
 function resolveDaggerDamage(ctx: ScriptCtx, hook: string, option: string, expected: string): boolean {
   if (hook !== expected) return false;
   if (option === "pass") return true;
-  const dagger = ctx.player(ctx.seat).weapons.find((card) => card.instanceId === Number(option));
-  if (!dagger || !isDagger(ctx, dagger)) return true;
+  daggerDealsDamage(ctx, Number(option));
+  return true;
+}
+
+function daggerDealsDamage(ctx: ScriptCtx, instanceId: number): void {
+  const dagger = ctx.player(ctx.seat).weapons.find((card) => card.instanceId === instanceId);
+  if (!dagger || !isDagger(ctx, dagger)) return;
   ctx.dealDamage(opponentSeat(ctx), 1, {
     sourceInstanceId: dagger.instanceId,
     countsAsHit: true,
   });
   ctx.destroyPermanent(dagger.instanceId);
-  return true;
 }
 
-function daggerDamageAttack(hook: string, condition: (ctx: ScriptCtx) => boolean = () => true): CardScript {
-  return {
-    triggers: [
-      attackTrigger(
-        "You may have a dagger deal 1 damage to the defending hero",
-        decisionMessage("card.trigger.common.dagger.damage.defender", { amount: 1 }),
-        (ctx) => offerDaggerDamage(ctx, hook),
-        (ctx) => attacksHero(ctx) && condition(ctx),
-      ),
-    ],
-    onChoose(ctx, choiceHook, option) {
-      resolveDaggerDamage(ctx, choiceHook, option, hook);
+const OPTIONAL_DAGGER_TARGET: TriggerDef["target"] = {
+  options: daggerOptions,
+  prompt: (ctx) =>
+    decisionPrompt(
+      `${ctx.data.name}: choose a dagger to deal 1 damage, then destroy it`,
+      "card.hnt.dagger.damage.destroy",
+      {
+        values: { card: { kind: "card", cardId: ctx.self.cardId }, amount: 1 },
+        optionMessages: commonOptionMessages("pass"),
+      },
+    ),
+  optional: true,
+};
+
+function daggerDamageAttack(condition: (ctx: ScriptCtx) => boolean = () => true): CardScript {
+  const trigger = attackTrigger(
+    "You may have target dagger deal 1 damage to the defending hero",
+    decisionMessage("card.trigger.common.dagger.damage.defender", { amount: 1 }),
+    (ctx) => {
+      if (ctx.playTargetInstanceId !== undefined) daggerDealsDamage(ctx, ctx.playTargetInstanceId);
     },
-  };
+    (ctx) => attacksHero(ctx) && condition(ctx),
+  );
+  return { triggers: [{ ...trigger, target: OPTIONAL_DAGGER_TARGET }] };
 }
 
 function availableDraconicDaggers(ctx: ScriptCtx): number[] {
@@ -400,6 +414,28 @@ function soundTheAlarm(ctx: ScriptCtx): void {
     );
 }
 
+function onePowerGraveyardCards(ctx: ScriptCtx, seat: number): number[] {
+  return ctx
+    .player(seat)
+    .graveyard.filter((card) => ctx.basePower(card) === 1)
+    .map((card) => card.instanceId);
+}
+
+/** Each repetition is optional and banishes one chosen card from each hero's
+ * graveyard; it stops once either graveyard has none left. */
+function offerRottenRemains(ctx: ScriptCtx): void {
+  const own = onePowerGraveyardCards(ctx, ctx.seat);
+  if (own.length === 0 || onePowerGraveyardCards(ctx, opponentSeat(ctx)).length === 0) return;
+  ctx.requestCardChoice(
+    "rotten-own",
+    decisionPrompt("Banish a card with 1 power from your graveyard?", "card.hnt.graveyard.power.banish.own", {
+      values: { power: 1 },
+      optionMessages: commonOptionMessages("pass"),
+    }),
+    ["pass", ...own],
+  );
+}
+
 function attackMarkedFealty(): CardScript {
   return { triggers: [createFealtyTrigger((ctx) => attacksHero(ctx) && isMarked(ctx, opponentSeat(ctx)))] };
 }
@@ -410,7 +446,7 @@ function pitchSeries(name: string, factory: (pitch: 1 | 2 | 3) => CardScript): R
 
 export const hnt: Record<string, CardScript> = {
   // Assassin / marked
-  ...pitchSeries("bite", () => daggerDamageAttack("bite-dagger")),
+  ...pitchSeries("bite", () => daggerDamageAttack()),
   ...pitchSeries("whittle from bone", () => ({
     triggers: [
       attackTrigger(
@@ -676,7 +712,7 @@ export const hnt: Record<string, CardScript> = {
   },
   "dragon power|1": { modifyAttack: (ctx) => (currentAttackDraconic(ctx) ? 3 : 0) },
   "dragon power|2": { modifyAttack: (ctx) => (currentAttackDraconic(ctx) ? 3 : 0) },
-  ...pitchSeries("silver talons", () => daggerDamageAttack("silver-talons-dagger", currentAttackDraconic)),
+  ...pitchSeries("silver talons", () => daggerDamageAttack(currentAttackDraconic)),
   "fire tenet: strike first|2": {
     triggers: [fireTenetStrikeFirstTrigger()],
   },
@@ -1106,7 +1142,7 @@ export const hnt: Record<string, CardScript> = {
       loseLifeAndLog(ctx, targetSeat, 1);
     },
   })),
-  ...pitchSeries("throw yourself at them", () => daggerDamageAttack("throw-dagger")),
+  ...pitchSeries("throw yourself at them", () => daggerDamageAttack()),
   "red alert visor|0": { modifyDefense: (ctx) => (ctx.getFlag("link", "reactionPlayedOrActivated") ? 1 : 0) },
   "red alert vest|0": { modifyDefense: (ctx) => (ctx.getFlag("link", "reactionPlayedOrActivated") ? 1 : 0) },
   "red alert gloves|0": { modifyDefense: (ctx) => (ctx.getFlag("link", "reactionPlayedOrActivated") ? 1 : 0) },
@@ -1773,22 +1809,38 @@ Object.assign(hnt, {
   "rotten remains|3": {
     triggers: [
       attackTrigger(
-        "Banish a card with 1 power from each graveyard to get +1 power",
+        "You may banish a card with 1 power from each hero's graveyard for +1 power, then repeat",
         decisionMessage("card.trigger.common.graveyards.power.banish", { power: 1, amount: 1 }),
-        (ctx) => {
-          const byOwner = ctx.state.players.every((player) =>
-            player.graveyard.some((card) => ctx.basePower(card) === 1),
-          );
-          if (byOwner) {
-            for (const player of ctx.state.players) {
-              const card = player.graveyard.find((candidate) => ctx.basePower(candidate) === 1);
-              if (card) ctx.banish(card.instanceId);
-            }
-            ctx.addCardTempPower(ctx.self.instanceId, 1);
-          }
-        },
+        offerRottenRemains,
       ),
     ],
+    onChoose(ctx, hook, option) {
+      if (hook === "rotten-own") {
+        if (option === "pass") return;
+        ctx.requestCardChoice(
+          `rotten-opponent:${option}`,
+          decisionPrompt(
+            "Banish a card with 1 power from the opposing hero's graveyard",
+            "card.hnt.graveyard.power.banish.opponent",
+            { values: { power: 1 } },
+          ),
+          onePowerGraveyardCards(ctx, opponentSeat(ctx)),
+        );
+        return;
+      }
+      if (!hook.startsWith("rotten-opponent:")) return;
+      const own = Number(hook.slice("rotten-opponent:".length));
+      const theirs = Number(option);
+      if (
+        !onePowerGraveyardCards(ctx, ctx.seat).includes(own) ||
+        !onePowerGraveyardCards(ctx, opponentSeat(ctx)).includes(theirs)
+      )
+        return;
+      ctx.banish(own);
+      ctx.banish(theirs);
+      ctx.addCardTempPower(ctx.self.instanceId, 1);
+      offerRottenRemains(ctx);
+    },
   },
   "shelter from the storm|1": {
     activated: {

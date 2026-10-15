@@ -3,7 +3,7 @@ import { recordLifeLost } from "./stats.js";
 import type { GameStateInternal } from "./runtimeState.js";
 import type { GameMessage, MeldSide, PlayableZone } from "@fyendal/shared";
 import { triggerOccurrenceCount } from "./scripts.js";
-import type { CardScript, TriggerEvent, TriggerEventContext } from "./scripts.js";
+import type { CardScript, ScriptCtx, TriggerDef, TriggerEvent, TriggerEventContext } from "./scripts.js";
 import { DEFAULT_CHOOSE_X_PROMPT, scriptPromptParts } from "./scriptPresentation.js";
 import {
   activatedAbilitiesSuppressed,
@@ -824,21 +824,159 @@ function runTriggerEffect(state: GameStateInternal,
     definitionSource,
   );
   const def = script?.triggers?.[layer.triggerIndex];
-  def?.effect?.(
-    runtime.makeCtx(state, layer.seat, contextSource, currentLink(state)),
-    layer.triggerEventCard,
-    triggerLayerEventContext(layer),
-  );
+  const ctx = triggerEffectCtx(state, runtime, layer, def, contextSource);
+  if (ctx) def?.effect?.(ctx, layer.triggerEventCard, triggerLayerEventContext(layer));
   // An intimidate the trigger produced (a suspense aura leaving at the start
   // of the turn) happens as the trigger resolves, not at the next attack.
   runtime.dispatchFlow("consumeQueuedIntimidate", state, layer.seat);
 }
 
-/** Consume one occurrence from the top counted trigger layer. */
-function consumeTopTriggerOccurrence(state: GameStateInternal, layer: StackLayer): void {
+/** The script trigger behind a triggered layer and the object its effect
+ * reads. Card, ability, and engine-effect layers have none. */
+function layerTrigger(
+  state: GameStateInternal,
+  layer: StackLayer,
+): { def: TriggerDef; contextSource: CardInstance } | undefined {
+  if (layer.triggerIndex < 0 || layer.card || layer.ability || layer.engineEffect) return undefined;
+  const found = findCardAnywhere(state, layer.sourceInstanceId);
+  const definitionSource = layer.triggerSource ?? found?.card;
+  const contextSource = found?.card ?? definitionSource;
+  if (!definitionSource || !contextSource) return undefined;
+  const def = scriptOf(state, definitionSource.cardId, definitionSource)?.triggers?.[layer.triggerIndex];
+  return def ? { def, contextSource } : undefined;
+}
+
+function triggerTargetOptions(
+  state: GameStateInternal,
+  runtime: EngineRuntime,
+  layer: StackLayer,
+  def: TriggerDef,
+  contextSource: CardInstance,
+  ctx: ScriptCtx = runtime.makeCtx(state, layer.seat, contextSource, currentLink(state)),
+): readonly number[] {
+  return def.target?.options(ctx, layer.triggerEventCard, triggerLayerEventContext(layer)) ?? [];
+}
+
+/** Context for a resolving trigger effect, carrying its declared target.
+ * Returns undefined when that target is no longer legal: the targeted effect
+ * fails (CR 1.8.9). */
+function triggerEffectCtx(
+  state: GameStateInternal,
+  runtime: EngineRuntime,
+  layer: StackLayer,
+  def: TriggerDef | undefined,
+  contextSource: CardInstance,
+): ScriptCtx | undefined {
+  const target = layer.targetCardInstanceId;
+  const ctx = runtime.makeCtx(state, layer.seat, contextSource, currentLink(state), undefined, target);
+  if (!def?.target || target === undefined) return ctx;
+  if (triggerTargetOptions(state, runtime, layer, def, contextSource, ctx).includes(target)) return ctx;
+  logPublic(state, gameLogMessage(
+    `${nameOf(state, contextSource.cardId)}'s triggered ability fails (its target is no longer legal)`,
+    "engine.log.trigger.target.illegal",
+    { card: logCardValue(contextSource.cardId) },
+  ));
+  return undefined;
+}
+
+/** The earliest-added triggered layer that has not declared its target. */
+function undeclaredTargetLayer(state: GameStateInternal): {
+  layer: StackLayer;
+  def: TriggerDef;
+  target: NonNullable<TriggerDef["target"]>;
+  contextSource: CardInstance;
+} | undefined {
+  for (let index = state.stack.length - 1; index >= 0; index--) {
+    const layer = state.stack[index]!;
+    if (layer.targetDeclared) continue;
+    const trigger = layerTrigger(state, layer);
+    if (trigger?.def.target) return { layer, target: trigger.def.target, ...trigger };
+  }
+  return undefined;
+}
+
+/** CR 6.6.6a: each targeted triggered layer declares its target as it is
+ * added to the stack, before any player receives priority. A layer without a
+ * legal target ceases to exist. Returns true while a declaration is pending. */
+function declareTriggerTargets(state: GameStateInternal, runtime: EngineRuntime): boolean {
+  for (let pending = undeclaredTargetLayer(state); pending; pending = undeclaredTargetLayer(state)) {
+    const { layer, def, target, contextSource } = pending;
+    const ctx = runtime.makeCtx(state, layer.seat, contextSource, currentLink(state));
+    const targets = triggerTargetOptions(state, runtime, layer, def, contextSource, ctx);
+    if (targets.length === 0) {
+      state.stack.splice(state.stack.indexOf(layer), 1);
+      logPublic(state, gameLogMessage(
+        `${nameOf(state, contextSource.cardId)}'s triggered ability has no legal target`,
+        "engine.log.trigger.target.none",
+        { card: logCardValue(contextSource.cardId) },
+      ));
+      continue;
+    }
+    const optional = target.optional === true;
+    const options = [...(optional ? ["pass"] : []), ...targets.map(String)];
+    const presentation = scriptPromptParts(target.prompt(ctx), options);
+    state.pendingDecision = {
+      player: layer.seat,
+      kind: "choose-target",
+      prompt: presentation.fallback,
+      ...(presentation.promptMessage ? { promptMessage: presentation.promptMessage } : {}),
+      ...(presentation.optionMessages ? { optionMessages: presentation.optionMessages } : {}),
+      options,
+      cardOptions: [...(optional ? [null] : []), ...targets],
+      sourceInstanceId: layer.sourceInstanceId,
+      chooseHook: "trigger-target",
+    };
+    return true;
+  }
+  return false;
+}
+
+/** Answer a "trigger-target" declaration, then declare the next target or
+ * continue to the priority point the declaration interrupted. */
+export function answerTriggerTarget(
+  state: GameStateInternal,
+  runtime: EngineRuntime,
+  seat: number,
+  optionId: string,
+): string | undefined {
+  const pd = state.pendingDecision;
+  if (!pd || pd.chooseHook !== "trigger-target" || pd.player !== seat) return "not your decision";
+  if (!pd.options?.includes(optionId)) return "invalid option";
+  const pending = undeclaredTargetLayer(state);
+  if (!pending || pending.layer.sourceInstanceId !== pd.sourceInstanceId) return "no trigger to target";
+  const resume = pd.resume;
+  state.pendingDecision = null;
+  pending.layer.targetDeclared = true;
+  if (optionId !== "pass") {
+    const targetId = Number(optionId);
+    pending.layer.targetCardInstanceId = targetId;
+    const targetCard = findCardAnywhere(state, targetId)?.card;
+    if (targetCard) {
+      const sourceCardId = pending.contextSource.cardId;
+      logPublic(state, gameLogMessage(
+        `${nameOf(state, sourceCardId)}'s triggered ability targets ${nameOf(state, targetCard.cardId)}`,
+        "engine.log.trigger.target.declared",
+        { card: logCardValue(sourceCardId), target: logCardValue(targetCard.cardId) },
+      ));
+    }
+  }
+  if (declareTriggerTargets(state, runtime)) {
+    if (resume) state.pendingDecision!.resume = resume;
+    return undefined;
+  }
+  if (resume?.kind === "continue-stack") continueStack(state, runtime, resume.seat);
+  else openPlacedTriggers(state, runtime);
+  return undefined;
+}
+
+/** Consume one occurrence from the resolving trigger layer. Its effect may
+ * have added triggered layers above it (an effect that makes a dagger hit),
+ * so the layer is removed by identity rather than from the top. */
+function consumeTriggerOccurrence(state: GameStateInternal, layer: StackLayer): void {
   const count = layer.triggerCount ?? 1;
   if (count <= 1) {
-    state.stack.shift();
+    const index = state.stack.indexOf(layer);
+    if (index >= 0) state.stack.splice(index, 1);
     return;
   }
   // Keep the final occurrence marked as counted. If resolution pauses on a
@@ -1102,7 +1240,7 @@ function advanceStack(state: GameStateInternal, runtime: EngineRuntime): void {
     layer.engineEffect?.kind === "on-fragment-hook"
   ) {
     runtime.dispatchFlow("resolveDefendEventLayer", state, layer);
-    consumeTopTriggerOccurrence(state, layer);
+    consumeTriggerOccurrence(state, layer);
     if (state.pendingDecision?.chooseHook) {
       state.pendingDecision.resume = { kind: "continue-stack", seat: layer.seat };
       return;
@@ -1129,10 +1267,13 @@ function advanceStack(state: GameStateInternal, runtime: EngineRuntime): void {
       : undefined;
     if (
       contextSource &&
-      def?.canAccept &&
-      !def.canAccept(runtime.makeCtx(state, layer.seat, contextSource, currentLink(state)))
+      (
+        !triggerEffectCtx(state, runtime, layer, def, contextSource) ||
+        (def?.canAccept &&
+          !def.canAccept(runtime.makeCtx(state, layer.seat, contextSource, currentLink(state))))
+      )
     ) {
-      consumeTopTriggerOccurrence(state, layer);
+      consumeTriggerOccurrence(state, layer);
       continueStack(state, runtime, layer.seat);
       return;
     }
@@ -1140,7 +1281,7 @@ function advanceStack(state: GameStateInternal, runtime: EngineRuntime): void {
     return;
   }
   runTriggerEffect(state, runtime, layer);
-  consumeTopTriggerOccurrence(state, layer);
+  consumeTriggerOccurrence(state, layer);
   // a scripted choice queued by the trigger effect (Bloodrot Pox's "unless
   // you pay") pauses the stack machine — continue once it is answered
   if (state.pendingDecision?.chooseHook) {
@@ -1419,7 +1560,7 @@ export function answerTriggerChoice(
       def?.canAccept &&
       !def.canAccept(runtime.makeCtx(state, layer.seat, contextSource, currentLink(state)))
     ) {
-      consumeTopTriggerOccurrence(state, layer);
+      consumeTriggerOccurrence(state, layer);
       continueStack(state, runtime, layer.seat);
       return undefined;
     }
@@ -1427,15 +1568,12 @@ export function answerTriggerChoice(
     if (contextSource && def?.onAccept) {
       def.onAccept(runtime.makeCtx(state, layer.seat, contextSource, currentLink(state)));
     }
-    if (contextSource && def?.effect) {
-      def.effect(
-        runtime.makeCtx(state, layer.seat, contextSource, currentLink(state)),
-        layer.triggerEventCard,
-        triggerLayerEventContext(layer),
-      );
+    const ctx = contextSource ? triggerEffectCtx(state, runtime, layer, def, contextSource) : undefined;
+    if (ctx && def?.effect) {
+      def.effect(ctx, layer.triggerEventCard, triggerLayerEventContext(layer));
       runtime.dispatchFlow("consumeQueuedIntimidate", state, layer.seat);
     }
-    consumeTopTriggerOccurrence(state, layer);
+    consumeTriggerOccurrence(state, layer);
     const chained = state.pendingDecision as GameStateInternal["pendingDecision"];
     if (chained?.chooseHook) {
       chained.resume = { kind: "continue-stack", seat: layer.seat };
@@ -1462,7 +1600,7 @@ export function answerTriggerChoice(
         ...(source && !source.faceDown ? { source: logCardValue(source.cardId) } : {}),
       },
     ));
-    consumeTopTriggerOccurrence(state, layer);
+    consumeTriggerOccurrence(state, layer);
   }
   continueStack(state, runtime, layer.seat);
   return undefined;
@@ -1502,6 +1640,15 @@ export function continueStack(state: GameStateInternal,
   if (pendingTriggerGroups.length > 0) {
     const baseStack = state.stack.splice(0);
     placeTriggers(state, runtime, pendingTriggerGroups, baseStack);
+    return;
+  }
+  // Layers added outside trigger placement (card-played and reaction
+  // triggers) declare their targets before the next priority point.
+  if (declareTriggerTargets(state, runtime)) {
+    state.pendingDecision!.resume = {
+      kind: "continue-stack",
+      ...(prioritySeat !== undefined ? { seat: prioritySeat } : {}),
+    };
     return;
   }
   if (
@@ -1718,6 +1865,16 @@ function coalesceInterchangeableLayers(
   return compacted;
 }
 
+/** Adding triggered layers during an interactive phase is not an implicit
+ * pass over the first one. Start- and end-phase layers still use the stack,
+ * but resolve as if all players continuously pass priority (CR 4.2.1–4.2.2
+ * and 4.4.1–4.4.3). Ordering simultaneous layers or declaring their targets
+ * does not make an automatic phase interactive. */
+function openPlacedTriggers(state: GameStateInternal, runtime: EngineRuntime): void {
+  if (state.stack.length > 0 && phaseAllowsPriority(state)) openWindow(state);
+  else continueStack(state, runtime);
+}
+
 /**
  * Place collected simultaneous trigger layers onto the stack, one seat's group
  * at a time. When a seat has multiple DISTINCT triggers, that player picks the
@@ -1733,13 +1890,7 @@ function placeTriggers(
   const [head, ...rest] = groups;
   if (!head) {
     state.stack.push(...baseStack);
-    // Adding triggered layers during an interactive phase is not an implicit
-    // pass over the first one. Start- and end-phase layers still use the stack,
-    // but resolve as if all players continuously pass priority (CR 4.2.1–4.2.2
-    // and 4.4.1–4.4.3). Ordering simultaneous layers does not make an automatic
-    // phase interactive.
-    if (state.stack.length > 0 && phaseAllowsPriority(state)) openWindow(state);
-    else continueStack(state, runtime);
+    if (!declareTriggerTargets(state, runtime)) openPlacedTriggers(state, runtime);
     return;
   }
   const layers = coalesceInterchangeableLayers(state, head.layers);

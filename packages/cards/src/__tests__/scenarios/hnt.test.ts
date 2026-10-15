@@ -1664,11 +1664,21 @@ describe("HNT — attack triggers use the stack", () => {
     return named(g.state.players[seat]!.board, key);
   }
 
+  function declareTarget(g: Game, option: string): Game {
+    expect(g.state.pendingDecision?.chooseHook).toBe("trigger-target");
+    return g.doRaw({ kind: "choose", optionId: option });
+  }
+
+  function weaponId(g: Game, seat: number, key: string): string {
+    const name = cardData[printingId(key)]!.name;
+    return String(g.state.players[seat]!.weapons.find((card) => cardData[card.cardId]!.name === name)!.instanceId);
+  }
+
   it.each([
-    { key: "bite|1", hook: "bite-dagger", draconic: false },
-    { key: "throw yourself at them|1", hook: "throw-dagger", draconic: false },
-    { key: "silver talons|1", hook: "silver-talons-dagger", draconic: true },
-  ])("$key offers its dagger damage only when its attack trigger resolves", ({ key, hook, draconic }) => {
+    { key: "bite|1", draconic: false },
+    { key: "throw yourself at them|1", draconic: false },
+    { key: "silver talons|1", draconic: true },
+  ])("$key declares its target dagger as its attack trigger goes on the stack", ({ key, draconic }) => {
     const g = scenario({
       seats: [
         {
@@ -1685,14 +1695,48 @@ describe("HNT — attack triggers use the stack", () => {
     if (draconic) g.activate("fealty|0");
     g.play(key, { settle: false });
 
-    expectAttackTrigger(g, "You may have a dagger deal 1 damage to the defending hero");
-    expect(g.state.pendingDecision?.chooseHook).toBeUndefined();
+    const dagger = weaponId(g, 0, "graphene chelicera|0");
+    expectAttackTrigger(g, "You may have target dagger deal 1 damage to the defending hero");
+    expect(g.state.pendingDecision?.options).toEqual(["pass", dagger]);
 
-    resolveTrigger(g);
-    expect(g.state.pendingDecision?.chooseHook).toBe(hook);
+    declareTarget(g, dagger);
+    expect(g.state.stack[0]?.targetCardInstanceId).toBe(Number(dagger));
+    expect(g.state.pendingDecision?.kind).toBe("priority-window");
+    g.expectLife(1, 20).expectLog("targets Graphene Chelicera");
 
-    g.chooseCard("graphene chelicera|0").expectLife(1, 19);
+    resolveTrigger(g).expectLife(1, 19);
     expect(weaponCount(g, 0, "graphene chelicera|0")).toBe(0);
+  });
+
+  it("Bite may decline to target a dagger and then deals no damage", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", weapons: ["graphene chelicera|0"], hand: ["bite|1"] },
+        { hero: "dorinthea" },
+      ],
+    });
+
+    g.play("bite|1", { settle: false });
+    declareTarget(g, "pass");
+    expectAttackTrigger(g, "You may have target dagger deal 1 damage to the defending hero");
+
+    resolveTrigger(g).expectLife(1, 20);
+    expect(weaponCount(g, 0, "graphene chelicera|0")).toBe(1);
+  });
+
+  it("Bite's trigger ceases to exist without a dagger to target", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", weapons: [], hand: ["bite|1"] },
+        { hero: "dorinthea" },
+      ],
+    });
+
+    g.play("bite|1", { settle: false });
+
+    expect(g.state.stack).toEqual([]);
+    expect(g.state.pendingDecision?.kind).toBe("defend");
+    g.expectLog("Bite's triggered ability has no legal target");
   });
 
   it("Silver Talons does not trigger when it is not Draconic", () => {
@@ -1957,7 +2001,7 @@ describe("HNT — attack triggers use the stack", () => {
     expect(weaponCount(g, 0, "graphene chelicera|0")).toBe(0);
   });
 
-  it("Rotten Remains banishes 1-power cards only when its attack trigger resolves", () => {
+  it("Rotten Remains offers its optional banish only when its attack trigger resolves", () => {
     const g = scenario({
       seats: [
         { hero: "rhinar", hand: ["rotten remains|3"], graveyard: ["bite|3"] },
@@ -1967,13 +2011,57 @@ describe("HNT — attack triggers use the stack", () => {
 
     g.play("rotten remains|3", { settle: false });
 
-    expectAttackTrigger(g, "Banish a card with 1 power from each graveyard to get +1 power");
-    g.expectZoneSize(0, "graveyard", 1).expectZoneSize(1, "graveyard", 1).expectAttackValue(1);
+    expectAttackTrigger(
+      g,
+      "You may banish a card with 1 power from each hero's graveyard for +1 power, then repeat",
+    );
+    expect(g.state.pendingDecision?.chooseHook).toBeUndefined();
 
-    resolveTrigger(g)
+    resolveTrigger(g);
+    expect(g.state.pendingDecision?.chooseHook).toBe("rotten-own");
+
+    g.chooseCard("bite|3");
+    expect(g.state.pendingDecision?.chooseHook).toMatch(/^rotten-opponent:/);
+    g.chooseCard("bite|3")
       .expectInZone(0, "bite|3", "banish")
       .expectInZone(1, "bite|3", "banish")
       .expectAttackValue(2);
+    expect(g.state.pendingDecision?.kind).toBe("defend");
+  });
+
+  it("Rotten Remains repeats until its controller stops banishing", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          hand: ["rotten remains|3"],
+          graveyard: ["bite|3", "whittle from bone|3", "pick up the point|3"],
+        },
+        { hero: "dorinthea", graveyard: ["bite|3", "whittle from bone|3"] },
+      ],
+    });
+
+    g.play("rotten remains|3")
+      .chooseCard("bite|3").chooseCard("bite|3")
+      .chooseCard("whittle from bone|3").chooseCard("whittle from bone|3")
+      .expectAttackValue(3);
+    // The opposing graveyard has no 1-power card left, so the process stops.
+    expect(g.state.pendingDecision?.kind).toBe("defend");
+    g.expectInZone(0, "pick up the point|3", "graveyard");
+  });
+
+  it("Rotten Remains may stop before banishing", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", hand: ["rotten remains|3"], graveyard: ["bite|3"] },
+        { hero: "dorinthea", graveyard: ["bite|3"] },
+      ],
+    });
+
+    g.play("rotten remains|3").chooseOption("pass")
+      .expectInZone(0, "bite|3", "graveyard")
+      .expectInZone(1, "bite|3", "graveyard")
+      .expectAttackValue(1);
   });
 
   it("Thick Hide Hunter discards at random only when its attack trigger resolves", () => {
@@ -1990,6 +2078,22 @@ describe("HNT — attack triggers use the stack", () => {
     g.expectHandSize(0, 1);
 
     resolveTrigger(g).expectHandSize(0, 0).expectInZone(0, "sink below|3", "graveyard");
+  });
+
+  it("Thick Hide Hunter discards at random from a defend trigger on the stack", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", resources: 3, hand: ["raging onslaught|3"] },
+        { hero: "rhinar", hand: ["thick hide hunter|2", "sink below|3"] },
+      ],
+    });
+
+    g.play("raging onslaught|3").blockWith("thick hide hunter|2");
+
+    expect(g.state.stack).toEqual([expect.objectContaining({ label: "When this defends" })]);
+    g.expectHandSize(1, 1);
+
+    resolveTrigger(g).expectHandSize(1, 0).expectInZone(1, "sink below|3", "graveyard");
   });
 
   it("Retrace the Past names a card only when its combo trigger resolves", () => {

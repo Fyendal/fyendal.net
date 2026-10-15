@@ -4649,6 +4649,34 @@
       "value": "Put a -1 defense counter on equipment"
     }
   ],
+  "card.hnt.graveyard.power.banish.opponent": [
+    {
+      "type": 0,
+      "value": "Banish a card with "
+    },
+    {
+      "type": 1,
+      "value": "power"
+    },
+    {
+      "type": 0,
+      "value": " power from the opposing hero's graveyard"
+    }
+  ],
+  "card.hnt.graveyard.power.banish.own": [
+    {
+      "type": 0,
+      "value": "Banish a card with "
+    },
+    {
+      "type": 1,
+      "value": "power"
+    },
+    {
+      "type": 0,
+      "value": " power from your graveyard?"
+    }
+  ],
   "card.hnt.hand.card.banish": [
     {
       "type": 0,
@@ -14331,7 +14359,7 @@
   "card.trigger.common.dagger.damage.defender": [
     {
       "type": 0,
-      "value": "You may have a dagger deal "
+      "value": "You may have target dagger deal "
     },
     {
       "type": 1,
@@ -14911,7 +14939,7 @@
   "card.trigger.common.graveyards.power.banish": [
     {
       "type": 0,
-      "value": "Banish a card with "
+      "value": "You may banish a card with "
     },
     {
       "type": 1,
@@ -14919,7 +14947,7 @@
     },
     {
       "type": 0,
-      "value": " power from each graveyard to get +"
+      "value": " power from each hero's graveyard for +"
     },
     {
       "type": 1,
@@ -14927,7 +14955,7 @@
     },
     {
       "type": 0,
-      "value": " power"
+      "value": " power, then repeat"
     }
   ],
   "card.trigger.common.greatlibrary.intellect": [
@@ -20933,6 +20961,40 @@
     {
       "type": 0,
       "value": " triggers Spectra"
+    }
+  ],
+  "engine.log.trigger.target.declared": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "'s triggered ability targets "
+    },
+    {
+      "type": 1,
+      "value": "target"
+    }
+  ],
+  "engine.log.trigger.target.illegal": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "'s triggered ability fails (its target is no longer legal)"
+    }
+  ],
+  "engine.log.trigger.target.none": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "'s triggered ability has no legal target"
     }
   ],
   "engine.log.trigger.watery.grave": [

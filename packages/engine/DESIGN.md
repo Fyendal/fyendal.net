@@ -111,6 +111,14 @@ Queued attack cards wait in the resolving zone, share the queue with
 effect-generated weapon and ally attacks, become the next chain link after the
 current attack, and are cleared if the combat chain closes first.
 
+A script trigger with a `target` declares it as its layer is added to the
+stack, before anyone receives priority (CR 6.6.6a): the controller answers a
+`trigger-target` choice, a layer with no legal target ceases to exist, and an
+optional targeted effect may declare none (CR 1.8.5e). The target rides on the
+layer as `targetCardInstanceId`; resolution rechecks it and the effect fails
+when it is no longer legal (CR 1.8.9). Effects that trigger while a layer
+resolves stay above it, so the resolving trigger is removed by identity.
+
 Boost remains an optional play announcement represented by `boost?: true`.
 When paid, its seeded top-deck banish and any Boost-dependent effects occur
 through engine commands. An attack's own `boostBanishPowerBonus` sees each card

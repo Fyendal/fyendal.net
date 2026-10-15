@@ -84,6 +84,7 @@ export interface PersistedStackLayerV1 {
   abilityCard?: PersistedCardInstanceV1;
   abilityIndex?: number;
   targetCardInstanceId?: number;
+  targetDeclared?: true;
   resolvedReactionAbility?: true;
   fromHand?: boolean;
   meldStage?: 1 | 2;
