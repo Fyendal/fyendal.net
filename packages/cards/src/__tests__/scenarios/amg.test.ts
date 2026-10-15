@@ -119,6 +119,19 @@ describe("Min armory deck cards", () => {
       game.play(ZERO_TO_SIXTY, { boost: true }).blockWith().settle();
       game.attackWithWeapon(PLASMA_PISTOL).expectAttackValue(2);
     });
+
+    it("can attack more than once per turn", () => {
+      const game = scenario({ seats: [
+        { hero: "rhinar", weapons: [PLASMA_PISTOL], resources: 4, equipment: NO_EQUIPMENT },
+        { hero: "dorinthea", weapons: [], equipment: NO_EQUIPMENT },
+      ] });
+      game.state.players[0]!.actionPoints = 2;
+
+      game.attackWithWeapon(PLASMA_PISTOL).blockWith().settle();
+      game.attackWithWeapon(PLASMA_PISTOL).blockWith().settle();
+
+      game.expectLife(1, 16);
+    });
   });
 
   describe("Revere the Copper Idol", () => {

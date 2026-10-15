@@ -720,6 +720,38 @@ describe("SLY — attacks and defense", () => {
     g.blockWith().settle().expectLife(0, 18); // 4 damage, all prevented
   });
 
+  it("Oasis Respite's shield prevents before Ward asks for the remainder", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          heroKey: "kayo, armed and dangerous|0",
+          hand: ["wild ride|1"],
+          deck: ["wrecker romp|3", "wrecker romp|3"],
+          resources: 3,
+          life: 18,
+        },
+        {
+          hero: "rhinar",
+          heroKey: "enigma|0",
+          hand: ["oasis respite|1", "haze shelter|3", "haze shelter|2"],
+          life: 20,
+        },
+      ],
+    });
+    g.play("wild ride|1").blockWith().passPriority(); // 6{p}
+    g.react("haze shelter|2", { pitch: ["haze shelter|3"], settle: false }) // blue pitched: Ward 3
+      .passPriority().passPriority().passPriority();
+    g.react("oasis respite|1").chooseOption("your hero").chooseCard("wild ride|1")
+      .expectLog("is prevented (4)")
+      .expectLife(1, 20);
+    expect(g.state.pendingDecision).toMatchObject({
+      player: 1,
+      chooseHook: "ward",
+      promptMessage: { values: { amount: 2 } },
+    });
+  });
+
   it("multiple Oasis Respites stack against the same damage source", () => {
     const g = scenario({
       seats: [

@@ -97,7 +97,7 @@ const revereTheCopperIdol: CardScript = {
 
 export const amg: Record<string, CardScript> = {
   "unstable plasma pistol|0": {
-    activated: attackAbility(2),
+    activated: attackAbility(2, { oncePerTurn: false }),
     modifyAttack: (ctx) => (ctx.getFlag("player", "boostBanishedOpponentCard") === true ? 2 : 0),
   },
   "madness spiral|3": { boostBanishesOtherDeckTops: true },

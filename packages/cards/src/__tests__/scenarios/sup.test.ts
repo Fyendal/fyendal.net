@@ -973,6 +973,22 @@ describe("SUP — tokens and suspense", () => {
       .expectFinalDefense(0);
   });
 
+  it("Leave Them Hanging intimidates as it leaves at the start of its controller's turn", () => {
+    const g = scenario({
+      seats: [
+        foe({ hand: ["head jab|1"] }),
+        hero("pleiades|0", { board: ["leave them hanging|1"] }),
+      ],
+    });
+    g.state.players[1]!.board[0]!.counters = { suspense: 1 };
+
+    g.endTurn()
+      .expectNotInZone(1, "leave them hanging|1", "board")
+      // the intimidate resolves with the trigger, not with the next attack
+      .expectInZone(0, "head jab|1", "banish");
+    expect(g.state.players[1]!.flags.pendingIntimidate ?? 0).toBe(0);
+  });
+
   it("To Be Continued prevents one damage from the first damage event", () => {
     const g = scenario({
       active: 1,

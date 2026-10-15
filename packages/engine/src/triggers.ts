@@ -829,6 +829,9 @@ function runTriggerEffect(state: GameStateInternal,
     layer.triggerEventCard,
     triggerLayerEventContext(layer),
   );
+  // An intimidate the trigger produced (a suspense aura leaving at the start
+  // of the turn) happens as the trigger resolves, not at the next attack.
+  runtime.dispatchFlow("consumeQueuedIntimidate", state, layer.seat);
 }
 
 /** Consume one occurrence from the top counted trigger layer. */
@@ -1413,6 +1416,7 @@ export function answerTriggerChoice(
         layer.triggerEventCard,
         triggerLayerEventContext(layer),
       );
+      runtime.dispatchFlow("consumeQueuedIntimidate", state, layer.seat);
     }
     consumeTopTriggerOccurrence(state, layer);
     const chained = state.pendingDecision as GameStateInternal["pendingDecision"];
