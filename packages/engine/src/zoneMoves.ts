@@ -10,6 +10,7 @@ import {
 } from "./cardProperties.js";
 import { basePowerOf } from "./combatValues.js";
 import {
+  cardCeasesToExistLogMessage,
   cardDestroyedLogMessage,
   cardPutOnDeckBottomLogMessage,
   gameLogMessage,
@@ -232,11 +233,7 @@ export function moveToGraveyard(state: GameStateInternal,
   }
   if (replacement === "cease-to-exist") {
     runtime.transitions.move(card, source, null, { from: sourcePrivate });
-    logPublic(state, gameLogMessage(
-      `${nameOf(state, card.cardId)} ceases to exist`,
-      "engine.log.card.ceases.to.exist",
-      { card: logCardValue(card.cardId) },
-    ));
+    logPublic(state, cardCeasesToExistLogMessage(state, card.cardId));
     return;
   }
   const ceases = dataOf(state, card.cardId).cardType === "token"
@@ -262,6 +259,7 @@ export function fireLeaveArena(
   to: "graveyard" | "banish" | "soul" | "deck" | "hand" | "subcard" | "cease-to-exist",
   asActivationCost = false,
   destroyed = false,
+  combatRole?: TriggerEventContext["combatRole"],
 ): void {
   // Continuous effects sourced by a permanent end as soon as it leaves the
   // arena, regardless of which destination moved it there.
@@ -273,7 +271,7 @@ export function fireLeaveArena(
     "card-left-arena",
     seat,
     card,
-    { from: "arena", to, controllerSeat: seat, destroyed },
+    { from: "arena", to, controllerSeat: seat, destroyed, ...(combatRole ? { combatRole } : {}) },
   );
   delete card.boundToInstanceId;
   const attachments = (state.players as PlayerState[]).flatMap((player) =>
@@ -288,6 +286,32 @@ export function fireLeaveArena(
     runtime.makeCtx(state, seat, card, currentLink(state), undefined, undefined, asActivationCost),
     to,
   );
+}
+
+/** A non-permanent attacking or defending card leaving the combat chain leaves
+ * the arena (CR 3.1.1), and it was attacking or defending until it left
+ * (CR 7.0.5a). Call after the card has moved, so the reported destination
+ * includes any replacement. Permanents that attack or defend stay in their own
+ * arena zone and use `fireLeaveArena` from there. */
+export function fireLeaveCombatChain(
+  state: GameStateInternal,
+  runtime: EngineRuntime,
+  seat: number,
+  card: CardInstance,
+  combatRole: NonNullable<TriggerEventContext["combatRole"]>,
+  destroyed = false,
+): void {
+  const owner = state.players[card.owner] as PlayerState;
+  const zones = [
+    ["graveyard", owner.graveyard],
+    ["banish", owner.banish],
+    ["soul", owner.soul],
+    ["deck", owner.deck],
+    ["hand", owner.hand],
+  ] as const;
+  const to = zones.find(([, cards]) => cards.some((candidate) => candidate.instanceId === card.instanceId))?.[0]
+    ?? "cease-to-exist";
+  fireLeaveArena(state, runtime, seat, card, to, false, destroyed, combatRole);
 }
 
 /** Attach one independent arena permanent to a friendly ally. */
@@ -455,6 +479,7 @@ export function destroyControlledCard(
     ) {
       link.flags.attackGone = true;
       moveToGraveyard(state, runtime, link.attackingCard, "chain", seat);
+      fireLeaveCombatChain(state, runtime, seat, link.attackingCard, "attacking", true);
       logPublic(state, cardDestroyedLogMessage(state, link.attackingCard.cardId));
       runtime.events.runHook(state, seat, link.attackingCard, "onDestroyed", link);
       runtime.events.fireFriendlyDestroyed(state, seat, link.attackingCard, seat);
@@ -467,6 +492,7 @@ export function destroyControlledCard(
     if (defending) {
       removeFromArray(link.defendingCards, defending.instanceId);
       moveToGraveyard(state, runtime, defending, "chain", seat, undefined, true);
+      fireLeaveCombatChain(state, runtime, seat, defending, "defending", true);
       logPublic(state, cardDestroyedLogMessage(state, defending.cardId));
       runtime.events.runHook(state, seat, defending, "onDestroyed", link);
       runtime.events.fireFriendlyDestroyed(state, seat, defending, seat);
@@ -724,13 +750,17 @@ export function banishCard(
     if (!fromAttackingOwnerZone) {
       applyBanishVisibility(card);
       enterBanish(state, runtime, card, "chain", causedBySeat);
+      fireLeaveCombatChain(state, runtime, active.attacker, card, "attacking");
       return true;
     }
   }
   // A resolving instant/reaction is represented on both its stack layer and
   // the combat-chain link. Explicitly moving it must clear both copies.
+  let defendingCard: CardInstance | undefined;
   for (const link of state.chain) {
-    const card = removeFromArray(link.defendingCards, instanceId)
+    const defending = removeFromArray(link.defendingCards, instanceId);
+    defendingCard ??= defending;
+    const card = defending
       ?? removeFromArray(link.defendingEquipment, instanceId)
       ?? removeFromArray(link.reactions, instanceId);
     if (!card) continue;
@@ -757,6 +787,9 @@ export function banishCard(
   if (fromArena) fireLeaveArena(state, runtime, owner.seat, card, "banish");
   applyBanishVisibility(card);
   enterBanish(state, runtime, card, fromZone, causedBySeat);
+  if (fromZone === "chain" && card === defendingCard) {
+    fireLeaveCombatChain(state, runtime, card.owner, card, "defending");
+  }
   if (fromZone === "deck" && !card.faceDown) {
     runtime.events.queueTriggeredEvent(
       state,
@@ -881,6 +914,9 @@ export function putCardIntoSoul(
   delete found.card.faceDown;
   if (found.fromArena) fireLeaveArena(state, runtime, found.owner.seat, found.card, "soul");
   enterSoul(state, runtime, found.card, false, lastKnownObserver);
+  if (found.fromZone === "chain" && link) {
+    fireLeaveCombatChain(state, runtime, link.attacker, found.card, "attacking");
+  }
   if (found.fromZone === "graveyard") {
     runtime.events.fireCardLeavesGraveyard(state, found.owner.seat, found.card, "soul");
   }
@@ -914,6 +950,7 @@ function moveCardIntoOwnerDeck(
   position: "bottom" | undefined,
 ): DeckEntry | "ceased" | undefined {
   let found = removeFromOwnerZones(state, instanceId);
+  let attackerSeat: number | undefined;
   if (!found) {
     const link = state.chain.find((candidate) =>
       candidate.attackCardType === "action" &&
@@ -924,6 +961,7 @@ function moveCardIntoOwnerDeck(
       const card = link.attackingCard;
       link.attackingCard = snapshotSerializable(card);
       link.flags.attackGone = true;
+      attackerSeat = link.attacker;
       found = {
         owner: state.players[card.owner] as PlayerState,
         card,
@@ -945,11 +983,7 @@ function moveCardIntoOwnerDeck(
   if (found.fromArena && cardHasType(state, found.card, "token")) {
     runtime.transitions.move(found.card, source, null, { from: false });
     fireLeaveArena(state, runtime, found.owner.seat, found.card, "cease-to-exist", asActivationCost);
-    logPublic(state, gameLogMessage(
-      `${nameOf(state, found.card.cardId)} ceases to exist`,
-      "engine.log.card.ceases.to.exist",
-      { card: logCardValue(found.card.cardId) },
-    ));
+    logPublic(state, cardCeasesToExistLogMessage(state, found.card.cardId));
     return "ceased";
   }
   clearPrivateZonePlacement(found.card);
@@ -968,6 +1002,7 @@ function moveCardIntoOwnerDeck(
     runtime.events.fireCardLeavesGraveyard(state, found.owner.seat, found.card, "deck");
   }
   if (found.fromArena) fireLeaveArena(state, runtime, found.owner.seat, found.card, "deck", asActivationCost);
+  if (attackerSeat !== undefined) fireLeaveCombatChain(state, runtime, attackerSeat, found.card, "attacking");
   return { owner: found.owner, card: found.card, privateSource };
 }
 

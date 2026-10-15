@@ -11215,10 +11215,10 @@
       "value": "选择一把剑进行强化"
     }
   ],
-  "card.pen.token.counters.remove": [
+  "card.pen.token.aura.counters.remove": [
     {
       "type": 0,
-      "value": "移除一个物品或灵气衍生物上的所有指示物"
+      "value": "移除目标灵气衍生物上的所有指示物"
     }
   ],
   "card.pen.token.destroy.named": [
@@ -11237,6 +11237,12 @@
     {
       "type": 0,
       "value": "？"
+    }
+  ],
+  "card.pen.token.item.counters.remove": [
+    {
+      "type": 0,
+      "value": "移除目标物品衍生物上的所有指示物"
     }
   ],
   "card.pen.wager.discard.win": [
@@ -13089,6 +13095,16 @@
     {
       "type": 0,
       "value": "牌库顶牌是所选颜色吗？"
+    }
+  ],
+  "card.sup.whoblinksfirst.aura.destroy": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：你可以摧毁一个由 Guardian 英雄操控的灵气 (Aura)"
     }
   ],
   "card.svi.beckoning.aura.return": [
@@ -15703,6 +15719,12 @@
       "value": "移除你控制的剑上的所有 +1 力量指示物"
     }
   ],
+  "card.trigger.dyn.ironsongpride.destroy": [
+    {
+      "type": 0,
+      "value": "若本回合没有剑命中过，摧毁此牌"
+    }
+  ],
   "card.trigger.dyn.loomingdoom.runechants.doom": [
     {
       "type": 0,
@@ -18080,6 +18102,16 @@
     {
       "type": 0,
       "value": " 攻击力）"
+    }
+  ],
+  "engine.log.card.frozen": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 被冻结"
     }
   ],
   "engine.log.card.gains.additional.type": [

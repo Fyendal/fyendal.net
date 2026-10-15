@@ -179,10 +179,6 @@ function freeze(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): void {
   }
 }
 
-function frozen(card: DeepReadonly<CardInstance>, turn: number): boolean {
-  return Number(card.counters?.frozenUntilTurn ?? 0) > turn;
-}
-
 function transformAsh(
   ctx: ScriptCtx,
   ashId: number,
@@ -1273,9 +1269,9 @@ export const upr: Record<string, CardScript> = mergeSetScripts("UPR", uprHighRar
       const ally = ctx.state.players
         .flatMap((p) => p.board)
         .find((card) => card.instanceId === ctx.getCounter("target"));
-      if (ally && frozen(ally, ctx.state.turn)) ctx.destroyPermanent(ally.instanceId);
+      if (ally && ctx.isFrozen(ally)) ctx.destroyPermanent(ally.instanceId);
     } else {
-      const card = ctx.player(target).arsenal.find((candidate) => frozen(candidate, ctx.state.turn));
+      const card = ctx.player(target).arsenal.find((candidate) => ctx.isFrozen(candidate));
       if (card) ctx.moveToGraveyard(card.instanceId, "arsenal");
     }
   }),
@@ -1285,9 +1281,9 @@ export const upr: Record<string, CardScript> = mergeSetScripts("UPR", uprHighRar
       const ally = ctx.state.players
         .flatMap((p) => p.board)
         .find((card) => card.instanceId === ctx.getCounter("target"));
-      if (ally && frozen(ally, ctx.state.turn)) ctx.destroyPermanent(ally.instanceId);
+      if (ally && ctx.isFrozen(ally)) ctx.destroyPermanent(ally.instanceId);
     } else {
-      const card = ctx.player(target).arsenal.find((candidate) => frozen(candidate, ctx.state.turn));
+      const card = ctx.player(target).arsenal.find((candidate) => ctx.isFrozen(candidate));
       if (card) ctx.moveToGraveyard(card.instanceId, "arsenal");
     }
   }),
@@ -1297,9 +1293,9 @@ export const upr: Record<string, CardScript> = mergeSetScripts("UPR", uprHighRar
       const ally = ctx.state.players
         .flatMap((p) => p.board)
         .find((card) => card.instanceId === ctx.getCounter("target"));
-      if (ally && frozen(ally, ctx.state.turn)) ctx.destroyPermanent(ally.instanceId);
+      if (ally && ctx.isFrozen(ally)) ctx.destroyPermanent(ally.instanceId);
     } else {
-      const card = ctx.player(target).arsenal.find((candidate) => frozen(candidate, ctx.state.turn));
+      const card = ctx.player(target).arsenal.find((candidate) => ctx.isFrozen(candidate));
       if (card) ctx.moveToGraveyard(card.instanceId, "arsenal");
     }
   }),
@@ -1509,7 +1505,7 @@ export const upr: Record<string, CardScript> = mergeSetScripts("UPR", uprHighRar
         effect(ctx, _eventCard, event) {
           const damage = heroDamage(event);
           if (!damage) return;
-          const card = ctx.player(damage.targetSeat).arsenal.find((candidate) => frozen(candidate, ctx.state.turn));
+          const card = ctx.player(damage.targetSeat).arsenal.find((candidate) => ctx.isFrozen(candidate));
           if (card) ctx.moveToGraveyard(card.instanceId, "arsenal");
         },
       },

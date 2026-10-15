@@ -666,7 +666,7 @@ export const penHighRarity: Record<string, CardScript> = {
         onActivate(ctx) {
           const aura = ctx.state.players
             .flatMap((p) => p.board)
-            .find((card) => has(ctx, card, "aura") && has(ctx, card, "token"));
+            .find((card) => has(ctx, card, "aura") && data(ctx, card).cardType === "token");
           if (aura) ctx.destroyPermanent(aura.instanceId);
         },
       },

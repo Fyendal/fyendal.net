@@ -17,7 +17,7 @@ import type { CardInstance, Modifier, PendingArcane, PlayerState, StackLayer } f
 import { recordAllyAbsorbed, recordEffectThreat, recordHeroDamage, recordLifeGained } from "./stats.js";
 import { tokenCreationCauseForModifier } from "./tokenQueries.js";
 import { createTokenFor, createTokensFor } from "./tokens.js";
-import { destroyPermanent, moveToGraveyard } from "./zoneMoves.js";
+import { destroyPermanent, fireLeaveCombatChain, moveToGraveyard } from "./zoneMoves.js";
 import { currentLink, findCardAnywhere, findPermanent, removeFromArray } from "./zoneQueries.js";
 import { drawCards } from "./cardLifecycle.js";
 import { queuedAttackObjects } from "./attackQueue.js";
@@ -484,6 +484,7 @@ function destroySourceAfterEffectDamage(
   }
   link.flags.attackGone = true;
   moveToGraveyard(state, runtime, link.attackingCard, "chain", packet.sourceSeat);
+  fireLeaveCombatChain(state, runtime, link.attacker, link.attackingCard, "attacking", true);
   logPublic(state, cardDestroyedLogMessage(state, link.attackingCard.cardId));
   runtime.events.runHook(state, link.attacker, link.attackingCard, "onDestroyed", link);
   runtime.events.fireFriendlyDestroyed(state, link.attacker, link.attackingCard, packet.sourceSeat);

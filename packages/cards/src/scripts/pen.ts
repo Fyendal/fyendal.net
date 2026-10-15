@@ -1,4 +1,4 @@
-import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
+import type { CardInstance, CardScript, DeepReadonly, ScriptCtx, TriggerDef } from "@fyendal/engine";
 import {
   buffNextAttack,
   bloodDebtScript as bloodDebt,
@@ -557,7 +557,7 @@ function putOnIce(count: number): CardScript {
       ctx.setCounter("frozen", ctx.getCounter("frozen") + 1);
       const remaining = ctx.state.players
         .flatMap((player) => player.board)
-        .filter((card) => hasTag(ctx, card, "ally") && Number(card.counters?.frozenUntilTurn ?? 0) <= ctx.state.turn);
+        .filter((card) => hasTag(ctx, card, "ally") && !ctx.isFrozen(card));
       if (remaining.length && ctx.getCounter("frozen") < count)
         ctx.requestCardChoice(
           "pen-freeze-ally",
@@ -608,6 +608,53 @@ function elixir(tokenName: string): CardScript {
       if (hook === "pen-elixir" && option !== "no" && ctx.destroyPermanent(Number(option))) ctx.gainLife(ctx.seat, 1);
     },
   };
+}
+
+const GALCIA_FREEZE_TARGET: NonNullable<TriggerDef["target"]> = {
+  options: (ctx) =>
+    ctx.state.players
+      .flatMap((player) => [
+        ...player.board.filter((card) => ["ally", "aura", "item"].some((tag) => hasTag(ctx, card, tag))),
+        ...Object.values(player.equipment).filter((card): card is Card => card !== undefined),
+      ])
+      .map((card) => card.instanceId),
+  prompt: () => decisionPrompt("Freeze a permanent", "card.pen.permanent.freeze"),
+};
+
+function freezeGalciaTarget(ctx: ScriptCtx): void {
+  if (ctx.playTargetInstanceId !== undefined) ctx.freezeWhileInArena(ctx.playTargetInstanceId);
+}
+
+function tendenciesTargets(ctx: ScriptCtx, subtype: "item" | "aura"): Card[] {
+  return ctx.state.players
+    .flatMap((player) => player.board)
+    .filter((card) => hasTag(ctx, card, subtype) && data(ctx, card).cardType === "token");
+}
+
+/** Ask for Destructive Tendencies' aura token; without one, resolve the item. */
+function requestTendenciesAura(ctx: ScriptCtx, itemChosen: boolean): void {
+  const auras = tendenciesTargets(ctx, "aura");
+  if (auras.length === 0) {
+    finishTendencies(ctx);
+    return;
+  }
+  ctx.requestCardChoice(
+    "pen-tendencies-aura",
+    decisionPrompt("Remove all counters from target aura token", "card.pen.token.aura.counters.remove", {
+      optionMessages: commonOptionMessages("pass"),
+    }),
+    [...(itemChosen ? ["pass"] : []), ...auras.map((card) => card.instanceId)],
+  );
+}
+
+/** Remove all counters from the chosen item token and aura token together. */
+function finishTendencies(ctx: ScriptCtx, auraId?: number): void {
+  const itemId = ctx.getCounter("tendenciesItem");
+  ctx.setCounter("tendenciesItem", 0);
+  for (const card of ctx.state.players.flatMap((player) => player.board)) {
+    if (card.instanceId !== itemId && card.instanceId !== auraId) continue;
+    for (const key of Object.keys(card.counters ?? {})) ctx.setCardCounter(card.instanceId, key, 0);
+  }
 }
 
 export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRarity, {
@@ -1170,15 +1217,9 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
         "Create a Spectral Shield token",
         decisionMessage("card.trigger.common.spectralshield.create"),
         (ctx) => create(ctx, SPECTRAL_SHIELD),
-        {
-          // Last-known information: the active link still names the object
-          // that left while attacking or defending.
-          condition: (ctx, card) =>
-            !!ctx.link &&
-            !!card &&
-            (ctx.link.attackingCard.instanceId === card.instanceId ||
-              ctx.link.defendingCards.some((defender) => defender.instanceId === card.instanceId)),
-        },
+        // Leaving the combat chain is leaving the arena; the event records
+        // whether it was attacking or defending as it left.
+        { condition: (_ctx, _card, event) => event?.combatRole !== undefined },
       ),
     ],
   })),
@@ -1590,7 +1631,7 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
           ...player.board,
           ...Object.values(player.equipment).filter((card): card is Card => card !== undefined),
         ])
-        .filter((card) => Number(card.counters?.frozenUntilTurn ?? 0) > ctx.state.turn);
+        .filter((card) => ctx.isFrozen(card));
       if (frozen.length)
         ctx.requestCardChoice(
           "pen-destroy-frozen",
@@ -1611,11 +1652,11 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
       canActivate: (ctx) =>
         ctx.state.players
           .flatMap((player) => player.board)
-          .some((card) => hasTag(ctx, card, "ally") && Number(card.counters?.frozenUntilTurn ?? 0) > ctx.state.turn),
+          .some((card) => hasTag(ctx, card, "ally") && ctx.isFrozen(card)),
       onActivate(ctx) {
         const allies = ctx.state.players
           .flatMap((player) => player.board)
-          .filter((card) => hasTag(ctx, card, "ally") && Number(card.counters?.frozenUntilTurn ?? 0) > ctx.state.turn);
+          .filter((card) => hasTag(ctx, card, "ally") && ctx.isFrozen(card));
         ctx.requestCardChoice(
           "pen-shatter-ally",
           decisionPrompt("Destroy a frozen ally", "card.pen.frozen.ally.destroy"),
@@ -1632,23 +1673,31 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
       entersArenaTrigger(
         "Freeze target ally, aura, item, or equipment",
         decisionMessage("card.trigger.pen.galcia.freeze"),
-        (ctx) => {
-          if (ctx.playTargetInstanceId !== undefined)
-            ctx.setCardCounter(ctx.playTargetInstanceId, "frozenUntilTurn", Number.MAX_SAFE_INTEGER);
-        },
-        {
-          target: {
-            options: (ctx) =>
-              ctx.state.players
-                .flatMap((player) => [
-                  ...player.board.filter((card) => ["ally", "aura", "item"].some((tag) => hasTag(ctx, card, tag))),
-                  ...Object.values(player.equipment).filter((card): card is Card => card !== undefined),
-                ])
-                .map((card) => card.instanceId),
-            prompt: () => decisionPrompt("Freeze a permanent", "card.pen.permanent.freeze"),
-          },
-        },
+        freezeGalciaTarget,
+        { target: GALCIA_FREEZE_TARGET },
       ),
+      {
+        event: "start-of-turn",
+        label: "Freeze target ally, aura, item, or equipment",
+        labelMessage: decisionMessage("card.trigger.pen.galcia.freeze"),
+        target: GALCIA_FREEZE_TARGET,
+        effect: freezeGalciaTarget,
+      },
+      {
+        event: "end-of-turn",
+        label: "Channel Ice",
+        labelMessage: decisionMessage("card.trigger.common.channel.ice"),
+        effect(ctx) {
+          const n = ctx.getCounter("flow") + 1;
+          ctx.setCounter("flow", n);
+          const ice = ctx
+            .player(ctx.seat)
+            .pitch.filter((card) => hasTag(ctx, card, "ice"))
+            .slice(0, n);
+          if (ice.length < n) ctx.destroySelf();
+          else for (const card of ice) ctx.putOnDeckBottom(card.instanceId);
+        },
+      },
     ],
   },
   ...pitches("conquer the icy terrain", () => ({
@@ -1669,7 +1718,7 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
           ...ctx.player(target).arsenal,
           ...ctx.player(target).board,
           ...Object.values(ctx.player(target).equipment).filter((card): card is Card => card !== undefined),
-        ].filter((card) => Number(card.counters?.frozenUntilTurn ?? 0) > ctx.state.turn);
+        ].filter((card) => ctx.isFrozen(card));
         if (frozen.length)
           ctx.requestCardChoice(
             "pen-conquer-destroy",
@@ -1687,7 +1736,7 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
           ...ctx.player(target).arsenal,
           ...ctx.player(target).board,
           ...Object.values(ctx.player(target).equipment).filter((card): card is Card => card !== undefined),
-        ].filter((card) => Number(card.counters?.frozenUntilTurn ?? 0) > ctx.state.turn);
+        ].filter((card) => ctx.isFrozen(card));
         if (frozen.length)
           ctx.requestCardChoice(
             "pen-conquer-destroy",
@@ -2181,23 +2230,33 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
     },
   },
   "destructive tendencies|3": {
+    // Choose 1 or both: a target item token, then a target aura token. Pass
+    // is offered only while the other mode can still be chosen. Counters are
+    // removed from both targets once the choices are made.
     onPlay(ctx) {
-      const tokens = ctx.state.players
-        .flatMap((player) => player.board)
-        .filter((card) => hasTag(ctx, card, "token") && Object.values(card.counters ?? {}).some((n) => Number(n) > 0));
-      if (tokens.length)
-        ctx.requestCardChoice(
-          "pen-remove-counters",
-          decisionPrompt("Remove all counters from an item or aura token", "card.pen.token.counters.remove"),
-          tokens.map((card) => card.instanceId),
-        );
+      ctx.setCounter("tendenciesItem", 0);
+      const items = tendenciesTargets(ctx, "item");
+      if (items.length === 0) {
+        requestTendenciesAura(ctx, false);
+        return;
+      }
+      const canSkip = tendenciesTargets(ctx, "aura").length > 0;
+      ctx.requestCardChoice(
+        "pen-tendencies-item",
+        decisionPrompt("Remove all counters from target item token", "card.pen.token.item.counters.remove", {
+          optionMessages: commonOptionMessages("pass"),
+        }),
+        [...(canSkip ? ["pass"] : []), ...items.map((card) => card.instanceId)],
+      );
     },
     onChoose(ctx, hook, option) {
-      if (hook !== "pen-remove-counters") return;
-      const card = ctx.state.players
-        .flatMap((player) => player.board)
-        .find((candidate) => candidate.instanceId === Number(option));
-      if (card) for (const key of Object.keys(card.counters ?? {})) ctx.setCardCounter(card.instanceId, key, 0);
+      if (hook === "pen-tendencies-item") {
+        const chosen = option !== "pass";
+        if (chosen) ctx.setCounter("tendenciesItem", Number(option));
+        requestTendenciesAura(ctx, chosen);
+        return;
+      }
+      if (hook === "pen-tendencies-aura") finishTendencies(ctx, option === "pass" ? undefined : Number(option));
     },
   },
   "pilfer the tomb|3": {

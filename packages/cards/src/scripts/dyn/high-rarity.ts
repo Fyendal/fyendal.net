@@ -188,6 +188,11 @@ function advanceWarhorn(ctx: ScriptCtx, afterSeat: number): void {
   }
 }
 
+/** The engine records each hit as `hitType:<type>` on the attacking player. */
+function swordHitThisTurn(ctx: ScriptCtx): boolean {
+  return ctx.state.players.some((player) => player.flags["hitType:sword"] === true);
+}
+
 export const dynHighRarity: Record<string, CardScript> = {
   "dust from the golden plains|1": { materialKeywords: ["phantasm"] },
   "dust from the red desert|1": { materialKeywords: ["phantasm"] },
@@ -412,6 +417,15 @@ export const dynHighRarity: Record<string, CardScript> = {
             ctx.setCardCounter(sword.instanceId, "power", 0);
         },
       ),
+      {
+        event: "end-of-turn",
+        label: "Destroy this unless a sword has hit this turn",
+        labelMessage: decisionMessage("card.trigger.dyn.ironsongpride.destroy"),
+        condition: (ctx) => !swordHitThisTurn(ctx),
+        effect(ctx) {
+          if (!swordHitThisTurn(ctx)) ctx.destroySelf();
+        },
+      },
     ],
   },
   "hanabi blaster|0": {

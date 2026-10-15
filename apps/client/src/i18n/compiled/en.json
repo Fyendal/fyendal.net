@@ -11730,10 +11730,10 @@
       "value": "Choose a sword to sharpen"
     }
   ],
-  "card.pen.token.counters.remove": [
+  "card.pen.token.aura.counters.remove": [
     {
       "type": 0,
-      "value": "Remove all counters from an item or aura token"
+      "value": "Remove all counters from target aura token"
     }
   ],
   "card.pen.token.destroy.named": [
@@ -11752,6 +11752,12 @@
     {
       "type": 0,
       "value": "?"
+    }
+  ],
+  "card.pen.token.item.counters.remove": [
+    {
+      "type": 0,
+      "value": "Remove all counters from target item token"
     }
   ],
   "card.pen.wager.discard.win": [
@@ -13726,6 +13732,16 @@
     {
       "type": 0,
       "value": "?"
+    }
+  ],
+  "card.sup.whoblinksfirst.aura.destroy": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": you may destroy an aura a Guardian hero controls"
     }
   ],
   "card.svi.beckoning.aura.return": [
@@ -16408,6 +16424,12 @@
       "value": "Remove all +1 power counters from swords you control"
     }
   ],
+  "card.trigger.dyn.ironsongpride.destroy": [
+    {
+      "type": 0,
+      "value": "Destroy this unless a sword has hit this turn"
+    }
+  ],
   "card.trigger.dyn.loomingdoom.runechants.doom": [
     {
       "type": 0,
@@ -18769,6 +18791,16 @@
     {
       "type": 0,
       "value": " power)"
+    }
+  ],
+  "engine.log.card.frozen": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " is frozen"
     }
   ],
   "engine.log.card.gains.additional.type": [

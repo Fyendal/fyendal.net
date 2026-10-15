@@ -13,7 +13,7 @@ import { notePitch, pitchIntoPool, pitchProhibitedByEffect, pitchValueOfInstance
 import { compareLife, snapshotSerializable } from "./ruleQueries.js";
 import { discardToGraveyard, fireOnDiscard, fireTransformHook } from "./scriptContext.js";
 import { createTokenFor, createTokensFor } from "./tokens.js";
-import { banishCard, bindPermanent, destroyPermanent, enterSoul, fireLeaveArena, moveToGraveyard, putCardIntoSoul, putCardOnDeckBottom, removeFromOwnerZones, removeFromStackResolution, shuffleCardsIntoDeck } from "./zoneMoves.js";
+import { banishCard, bindPermanent, destroyPermanent, enterSoul, fireLeaveArena, fireLeaveCombatChain, moveToGraveyard, putCardIntoSoul, putCardOnDeckBottom, removeFromOwnerZones, removeFromStackResolution, shuffleCardsIntoDeck } from "./zoneMoves.js";
 import { noopTransitionRecorder, type TransitionRecorder } from "./transitions.js";
 
 type RuntimeFunction = (...args: any[]) => any;
@@ -64,6 +64,7 @@ export function createEngineRuntime(
       enterSoul: bind(enterSoul, true),
       entersArena: bind(entersArena, false),
       fireLeaveArena: bind(fireLeaveArena, true),
+      fireLeaveCombatChain: bind(fireLeaveCombatChain, true),
       fireOnDiscard: bind(fireOnDiscard, true),
       fireTransformHook: bind(fireTransformHook, true),
       gainHeroLife: bind(gainHeroLife, true),

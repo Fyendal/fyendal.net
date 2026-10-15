@@ -42,7 +42,7 @@ import {
   opponent,
   removeFromArray,
 } from "./zoneQueries.js";
-import { destroyPermanent, moveToGraveyard } from "./zoneMoves.js";
+import { destroyPermanent, fireLeaveCombatChain, moveToGraveyard } from "./zoneMoves.js";
 import { hookSources } from "./sourceQueries.js";
 
 import { drawCards } from "./cardLifecycle.js";
@@ -617,6 +617,7 @@ function phantasmDestroy(state: GameStateInternal,
     // closeChain must not bury the attack a second time.
     link.flags.attackGone = true;
     moveToGraveyard(state, runtime, link.attackingCard, "chain");
+    fireLeaveCombatChain(state, runtime, link.attacker, link.attackingCard, "attacking", true);
     runtime.events.runHook(state, link.attacker, link.attackingCard, "onDestroyed", link);
     runtime.events.fireFriendlyDestroyed(state, link.attacker, link.attackingCard);
   }

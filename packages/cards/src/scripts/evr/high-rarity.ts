@@ -5,6 +5,7 @@ import {
   decisionMessage,
   decisionPrompt,
   entersArenaTrigger,
+  heroDamage,
   opponentSeat,
   previousAttackHasName,
   yesNoPrompt,
@@ -493,6 +494,7 @@ export const evrHighRarity: Record<string, CardScript> = {
     },
   },
   "nerves of steel|3": {
+    equipmentWearIgnoredUpToPower: 2,
     triggers: [
       entersArenaTrigger(
         "Remove a -1 defense counter from your chest equipment",
@@ -502,6 +504,14 @@ export const evrHighRarity: Record<string, CardScript> = {
           if (chest?.defCounters) ctx.addCardDefenseCounters(chest.instanceId, -1);
         },
       ),
+      {
+        event: "damage-dealt",
+        whose: "any",
+        label: "Destroy this",
+        labelMessage: decisionMessage("card.trigger.common.self.destroy"),
+        condition: (ctx, _eventCard, event) => heroDamage(event)?.targetSeat === ctx.seat,
+        effect: (ctx) => ctx.destroySelf(),
+      },
     ],
   },
   "mask of the pouncing lynx|0": {

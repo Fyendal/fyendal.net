@@ -36,6 +36,9 @@ export interface TriggerEventContext {
   readonly controllerSeat?: number;
   /** True when the arena departure was a destruction event. */
   readonly destroyed?: boolean;
+  /** Last-known combat status of a card that left the arena by leaving the
+   * combat chain while attacking or defending (CR 3.1.1, 7.0.5a). */
+  readonly combatRole?: "attacking" | "defending";
   readonly to?: "arsenal" | "banish" | "soul" | "hand" | "arena" | "graveyard" | "pitch" | "deck" | "subcard" | "cease-to-exist";
   /** A hero or ally was dealt positive damage after prevention. */
   readonly damage?: DamageEventContext;

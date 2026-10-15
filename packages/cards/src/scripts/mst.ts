@@ -107,9 +107,6 @@ function controlsIllusionistAura(ctx: ScriptCtx, exceptInstanceId?: number): boo
     .board.some((card) => card.instanceId !== exceptInstanceId && isIllusionistAura(ctx, card));
 }
 
-/** "When this leaves the arena" is a triggered layer: its "if you control no
- * Illusionist auras" condition is checked when the layer resolves, after the
- * event that moved this card (such as a Ward damage event) has finished. */
 /** Create a Spectral Shield, then add counters only if no other Illusionist
  * aura is controlled. The newly created shield never counts as "other". */
 function createSoloSpectralShield(ctx: ScriptCtx, counters: number): void {

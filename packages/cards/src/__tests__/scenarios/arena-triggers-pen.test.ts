@@ -101,11 +101,13 @@ describe("PEN / WTR / EVR enter and leave arena triggers use the stack", () => {
     expect(g.state.stack).toEqual([
       expect.objectContaining({ label: "Freeze target ally, aura, item, or equipment" }),
     ]);
-    expect(g.state.players[1]!.board[0]!.counters?.frozenUntilTurn).toBeUndefined();
+    const frozenWhileCradle = (): boolean =>
+      Object.keys(g.state.players[1]!.board[0]!.counters ?? {}).some((key) => key.startsWith("frozenWhileInArena:"));
+    expect(frozenWhileCradle()).toBe(false);
 
     g.passPriority().passPriority();
     expect(g.state.stack).toEqual([]);
-    expect(Number(g.state.players[1]!.board[0]!.counters?.frozenUntilTurn)).toBeGreaterThan(g.state.turn);
+    expect(frozenWhileCradle()).toBe(true);
   });
 
   it("Gloves of Erasure destroys its declared aura token target when its leave trigger resolves", () => {

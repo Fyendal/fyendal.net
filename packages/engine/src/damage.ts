@@ -1,6 +1,6 @@
 import type { EngineRuntime } from "./runtimePorts.js";
 import type { GameStateInternal } from "./runtimeState.js";
-import { scriptOf } from "./cardProperties.js";
+import { cardTypesOf, scriptOf } from "./cardProperties.js";
 
 import { activeModifiers, modifierApplies } from "./combatModifiers.js";
 import {
@@ -47,6 +47,15 @@ function dispatchSuppressedHitObservers(state: GameStateInternal,
   }
 }
 
+/** Record that the link's attack hit this turn, as `hitType:<class/subtype>`
+ * flags on the attacking player, so "if a <subtype> has hit this turn" checks
+ * also see hits from before their source entered the arena. */
+function recordAttackHit(state: GameStateInternal, link: ChainLinkState): void {
+  const attacker = state.players[link.attacker] as PlayerState;
+  const live = findCardAnywhere(state, link.attackingCard.instanceId)?.card ?? link.attackingCard;
+  for (const type of cardTypesOf(state, live)) attacker.flags[`hitType:${type}`] = true;
+}
+
 function applyHit(
   state: GameStateInternal,
   runtime: EngineRuntime,
@@ -78,6 +87,7 @@ function applyHit(
       },
     ),
   );
+  if (hitOriginalTarget) recordAttackHit(state, link);
   if (hitOriginalTarget && removeMarkOnOpponentHit(state, link.attacker, defender.seat)) {
     // Hit-triggered effects still observe that their target was marked at the
     // moment of the event even though the condition has already been removed.
@@ -288,6 +298,7 @@ export function resolveLink(state: GameStateInternal, runtime: EngineRuntime): v
       link.damage = dealt;
       link.hit = dealt > 0;
       if (dealt > 0) {
+        recordAttackHit(state, link);
         if (runtime.dispatchFlow("queueHitTriggers", state, link)) return;
       } else {
         logPublic(state, gameLogMessage(

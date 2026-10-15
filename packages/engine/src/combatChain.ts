@@ -24,17 +24,18 @@ import {
   logPublic,
   nameOf,
 } from "./gameLog.js";
-import type { ChainLinkState, PlayerState, StackLayer } from "./state.js";
+import type { CardInstance, ChainLinkState, PlayerState, StackLayer } from "./state.js";
 
 import { findCardAnywhere, removeFromArray } from "./zoneQueries.js";
 import {
   destroyPermanent,
   enterBanish,
   enterSoul,
+  fireLeaveCombatChain,
   moveToGraveyard,
   putCardIntoSoul,
 } from "./zoneMoves.js";
-import { controlledPermanents, lingeringModifierSources } from "./sourceQueries.js";
+import { controlledPermanents, hookSources, lingeringModifierSources } from "./sourceQueries.js";
 import { transitionZone } from "./transitions.js";
 
 import { checkWin } from "./win.js";
@@ -160,6 +161,7 @@ export function finishLinkResolution(state: GameStateInternal,
     clearTemporaryObjectEffects(returning);
     (state.players[returning.owner] as PlayerState).hand.push(returning);
     link.flags.attackGone = true;
+    fireLeaveCombatChain(state, runtime, link.attacker, returning, "attacking");
     logPublic(state, gameLogMessage(
       `${nameOf(state, link.attackingCard.cardId)} returns to its owner's hand`,
       "engine.log.card.returns.to.owner.hand",
@@ -173,6 +175,7 @@ export function finishLinkResolution(state: GameStateInternal,
     delete card.counters?.returnToHandAtLinkResolution;
     clearTemporaryObjectEffects(card);
     (state.players[card.owner] as PlayerState).hand.push(card);
+    fireLeaveCombatChain(state, runtime, card.owner, card, "defending");
     logPublic(state, gameLogMessage(
       `${nameOf(state, card.cardId)} returns to its owner's hand`,
       "engine.log.card.returns.to.owner.hand",
@@ -206,6 +209,23 @@ export function finishLinkResolution(state: GameStateInternal,
   state.phase = "action";
   state.priorityPlayer = state.activePlayer;
   if (!pd?.chooseHook) runtime.dispatchFlow("startNextQueuedAttack", state, link.attacker);
+}
+
+/** Whether a static effect stops this defending equipment's Battleworn or
+ * Temper from triggering, given the power of the attack it defended. */
+function equipmentWearIgnored(
+  state: GameStateInternal,
+  runtime: EngineRuntime,
+  link: ChainLinkState,
+  equipment: CardInstance,
+): boolean {
+  const controller = findCardAnywhere(state, equipment.instanceId)?.seat ?? equipment.owner;
+  const limits = hookSources(state, controller, { board: true, equipment: true, weapons: true })
+    .map((source) => scriptOf(state, source.cardId, source)?.equipmentWearIgnoredUpToPower)
+    .filter((limit): limit is number => limit !== undefined);
+  if (!limits.length) return false;
+  const power = link.finalAttack ?? computeAttack(state, runtime, link);
+  return limits.some((limit) => power <= limit);
 }
 
 /**
@@ -282,6 +302,7 @@ export function closeChain(state: GameStateInternal, runtime: EngineRuntime): vo
       } else {
         moveToGraveyard(state, runtime, link.attackingCard);
       }
+      fireLeaveCombatChain(state, runtime, link.attacker, link.attackingCard, "attacking");
     }
     if (
       link.flags.destroyAttackerOnChainClose === true &&
@@ -305,6 +326,7 @@ export function closeChain(state: GameStateInternal, runtime: EngineRuntime): vo
       } else {
         moveToGraveyard(state, runtime, c, "chain", undefined, undefined, true);
       }
+      fireLeaveCombatChain(state, runtime, c.owner, c, "defending");
     }
     for (const c of link.reactions) {
       moveToGraveyard(state, runtime, c);
@@ -330,7 +352,7 @@ export function closeChain(state: GameStateInternal, runtime: EngineRuntime): vo
       const flagged = link.flags[`destroyOnClose:${c.instanceId}`] === true;
       if (flagged || hasKeyword(state, c, "blade break")) {
         destroyPermanent(state, runtime, c.owner, c);
-      } else if (hasKeyword(state, c, "battleworn")) {
+      } else if (hasKeyword(state, c, "battleworn") && !equipmentWearIgnored(state, runtime, link, c)) {
         // Battleworn (8.3.2): a -1 defense counter, not destruction. Mutate the
         // live equipment object — the link may hold a stale clone of it.
         const live = findCardAnywhere(state, c.instanceId)?.card ?? c;
@@ -352,7 +374,7 @@ export function closeChain(state: GameStateInternal, runtime: EngineRuntime): vo
             { card: logCardValue(c.cardId), count: n, keyword: "Guardwell" },
           ));
         }
-      } else if (hasKeyword(state, c, "temper")) {
+      } else if (hasKeyword(state, c, "temper") && !equipmentWearIgnored(state, runtime, link, c)) {
         // Temper: add a -1 defense counter, then destroy the equipment only
         // if its current defense is 0. Continuous modifiers that still apply
         // during the close step (such as Unity) are part of that value.

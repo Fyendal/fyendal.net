@@ -35,6 +35,7 @@ export type ScriptCommandName =
   | "enterSoul"
   | "entersArena"
   | "fireLeaveArena"
+  | "fireLeaveCombatChain"
   | "fireOnDiscard"
   | "fireTransformHook"
   | "gainHeroLife"

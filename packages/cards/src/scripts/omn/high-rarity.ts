@@ -511,7 +511,7 @@ export const omnHighRarity: Record<string, CardScript> = {
   "tempt over|2": {
     onAttackDeclared(ctx) {
       if (ctx.link?.targetAllyId !== undefined) return;
-      const auras = ctx.player(opponentSeat(ctx)).board.filter((card) => isAura(ctx, card) && has(ctx, card, "token"));
+      const auras = ctx.player(opponentSeat(ctx)).board.filter((card) => isAura(ctx, card) && data(ctx, card).cardType === "token");
       if (auras.length)
         ctx.requestCardChoice(
           "tempt-steal",

@@ -4,7 +4,7 @@ import { controlledPermanents } from "./sourceQueries.js";
 import { gameLogMessage, logCardValue, logPublic, nameOf } from "./gameLog.js";
 import type { GameStateInternal } from "./runtimeState.js";
 import type { CardInstance, Modifier, PlayerState } from "./state.js";
-import { currentLink } from "./zoneQueries.js";
+import { currentLink, findPermanent } from "./zoneQueries.js";
 
 /** Engine objects are JSON-safe; triggered layers retain independent
  * last-known snapshots when their sources leave play before resolution. */
@@ -151,11 +151,25 @@ export function controlsBow(state: GameStateInternal, player: PlayerState): bool
   return player.weapons.some((w) => (dataOf(state, w.cardId).subtypes ?? []).includes("bow"));
 }
 
-/** Freeze is represented by an absolute turn counter on the object. Effects
- * that last until a start of turn use that turn as the expiry, so the object
- * is usable as soon as that turn begins. */
-export function isFrozen(state: GameStateInternal, card: CardInstance): boolean {
+/** Counter key prefix for "freeze … while this is in the arena": the suffix
+ * is the source's instance id, and the freeze ends once that source is no
+ * longer a permanent. Cleared when the frozen object leaves the arena. */
+export const FROZEN_WHILE_SOURCE_IN_ARENA = "frozenWhileInArena:";
+
+/** The object's own freeze: an absolute turn counter, or a freeze lasting
+ * while its source is in the arena. Effects that last until a start of turn
+ * use that turn as the expiry, so the object is usable as soon as that turn
+ * begins. */
+function frozenByEffect(state: GameStateInternal, card: CardInstance): boolean {
   if (Number(card.counters?.frozenUntilTurn || 0) > state.turn) return true;
+  return Object.keys(card.counters ?? {}).some((key) =>
+    key.startsWith(FROZEN_WHILE_SOURCE_IN_ARENA) &&
+    findPermanent(state, Number(key.slice(FROZEN_WHILE_SOURCE_IN_ARENA.length))) !== undefined
+  );
+}
+
+export function isFrozen(state: GameStateInternal, card: CardInstance): boolean {
+  if (frozenByEffect(state, card)) return true;
   const owner = (state.players as PlayerState[]).find((player) =>
     player.arsenal.some((candidate) => candidate.instanceId === card.instanceId)
   );
@@ -163,7 +177,7 @@ export function isFrozen(state: GameStateInternal, card: CardInstance): boolean 
   const hasCondition = controlledPermanents(state, owner.seat, { faceDownEquipment: false }).some(
     (permanent) =>
       nameOf(state, permanent.cardId).trim().toLowerCase() === "frostbite" ||
-      Number(permanent.counters?.frozenUntilTurn ?? 0) > state.turn,
+      frozenByEffect(state, permanent),
   );
   if (!hasCondition) return false;
   return (state.players as PlayerState[]).some((controller) =>

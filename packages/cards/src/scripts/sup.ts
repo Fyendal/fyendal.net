@@ -1827,8 +1827,22 @@ Object.assign(sup, {
     label: "You may destroy an aura a Guardian hero controls",
     labelMessage: decisionMessage("card.trigger.sup.whoblinksfirst.destroy"),
     effect(ctx) {
-      const player = ctx.state.players.find((p) => heroHas(ctx, p.seat, "guardian"));
-      if (player) destroyAuraAtTarget(ctx, player.seat, "blinks-aura");
+      const targets = ctx.state.players
+        .filter((p) => heroHas(ctx, p.seat, "guardian"))
+        .flatMap((p) => p.board.filter((card) => aura(ctx, card)));
+      if (targets.length)
+        ctx.requestCardChoice(
+          "blinks-aura",
+          decisionPrompt(
+            `${ctx.data.name}: you may destroy an aura a Guardian hero controls`,
+            "card.sup.whoblinksfirst.aura.destroy",
+            {
+              values: { card: { kind: "card", cardId: ctx.self.cardId } },
+              optionMessages: commonOptionMessages("pass"),
+            },
+          ),
+          ["pass", ...targets.map((card) => card.instanceId)],
+        );
     },
   }),
   "cutting retort|1": {
@@ -2326,5 +2340,5 @@ Object.assign(sup, {
 } satisfies Record<string, CardScript>);
 
 sup["who blinks first?|3"]!.onChoose = (ctx, hook, option) => {
-  if (hook === "blinks-aura") ctx.destroyPermanent(Number(option));
+  if (hook === "blinks-aura" && option !== "pass") ctx.destroyPermanent(Number(option));
 };

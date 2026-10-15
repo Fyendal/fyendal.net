@@ -51,6 +51,7 @@ function rawPublicLogCalls(path: string): string[] {
   collectDeclarations(sourceFile);
 
   const semanticFactories = new Set([
+    "cardCeasesToExistLogMessage",
     "cardDestroyedLogMessage",
     "cardEntersArenaLogMessage",
     "cardPutOnDeckBottomLogMessage",

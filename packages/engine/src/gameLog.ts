@@ -168,6 +168,17 @@ export function cardDestroyedLogMessage(
   );
 }
 
+export function cardCeasesToExistLogMessage(
+  state: GameStateInternal,
+  cardId: string,
+): GameLogPayload {
+  return gameLogMessage(
+    `${nameOf(state, cardId)} ceases to exist`,
+    "engine.log.card.ceases.to.exist",
+    { card: logCardValue(cardId) },
+  );
+}
+
 export function cardEntersArenaLogMessage(
   state: GameStateInternal,
   cardId: string,

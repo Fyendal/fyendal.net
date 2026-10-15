@@ -2,6 +2,7 @@ import type { EngineRuntime } from "./runtimePorts.js";
 import { cardAbilitiesSuppressed, dataOf, scriptOf } from "./cardProperties.js";
 import { controlledPermanents, hookSources, lingeringModifierSources } from "./sourceQueries.js";
 import { queueDecisionBehindCrank } from "./decisionQueue.js";
+import { FROZEN_WHILE_SOURCE_IN_ARENA } from "./ruleQueries.js";
 
 import {
   cardEntersArenaLogMessage,
@@ -63,7 +64,8 @@ export function clearPrivateZonePlacement(card: CardInstance): void {
 
 /** A card that changes zones becomes a new object (CR 3.0.9). Effects scoped
  * to its previous object (this-chain defense, this-turn power, granted or
- * suppressed keywords and names) do not follow it to hand, deck, graveyard,
+ * suppressed keywords and names, freezes lasting while a source is in the
+ * arena) do not follow it to hand, deck, graveyard,
  * banish, or soul, so a card returned and defending again later in the same
  * chain starts from its printed values. Callers that need last-known
  * information keep a snapshot of the previous object. */
@@ -73,6 +75,11 @@ export function clearTemporaryObjectEffects(card: CardInstance): void {
   delete card.grantedKeywords;
   delete card.suppressedKeywords;
   delete card.grantedNames;
+  const counters = card.counters;
+  if (!counters) return;
+  const sourceFreezes = Object.keys(counters).filter((key) => key.startsWith(FROZEN_WHILE_SOURCE_IN_ARENA));
+  for (const key of sourceFreezes) delete counters[key];
+  if (sourceFreezes.length && Object.keys(counters).length === 0) delete card.counters;
 }
 
 /** Move up to `n` cards from the top of the player's deck to their hand. */

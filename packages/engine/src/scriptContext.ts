@@ -25,6 +25,7 @@ import {
 } from "./cardProperties.js";
 
 import {
+  cardCeasesToExistLogMessage,
   cardDestroyedLogMessage,
   gameLogMessage,
   logCardValue,
@@ -49,6 +50,7 @@ import {
 } from "./zoneQueries.js";
 
 import { controlledPermanents, hookSources, observingHookSources } from "./sourceQueries.js";
+import { FROZEN_WHILE_SOURCE_IN_ARENA, isFrozen } from "./ruleQueries.js";
 import { arsenalCapacity, clearPrivateZonePlacement, clearTemporaryObjectEffects, hasCrank, resetActivatedAbilityUsage, stampEnteringLife } from "./cardLifecycle.js";
 import {
   transitionZone,
@@ -809,6 +811,7 @@ export function makeCtx(
       }
       link.flags.attackGone = true;
       runtime.commands.moveToGraveyard(state, link.attackingCard, "chain", seat);
+      runtime.commands.fireLeaveCombatChain(state, link.attacker, link.attackingCard, "attacking", true);
       logPublic(state, cardDestroyedLogMessage(state, link.attackingCard.cardId));
       runtime.events.runHook(state, link.attacker, link.attackingCard, "onDestroyed", link);
       runtime.events.fireFriendlyDestroyed(state, link.attacker, link.attackingCard, seat);
@@ -826,6 +829,7 @@ export function makeCtx(
         const card = removeFromArray(chainLink.defendingCards, instanceId);
         if (!card) continue;
         runtime.commands.moveToGraveyard(state, card, "chain", seat, undefined, true);
+        runtime.commands.fireLeaveCombatChain(state, card.owner, card, "defending", true);
         logPublic(state, cardDestroyedLogMessage(state, card.cardId));
         runtime.events.runHook(state, card.owner, card, "onDestroyed", chainLink);
         runtime.events.fireFriendlyDestroyed(state, card.owner, card, seat);
@@ -933,9 +937,30 @@ export function makeCtx(
     moveToHand(instanceId) {
       const foundInOwnerZone = runtime.commands.removeFromOwnerZones(state, instanceId);
       let foundOnChain: CardInstance | undefined;
+      let defendingCard: CardInstance | undefined;
+      let attackingCard: CardInstance | undefined;
+      let attackerSeat: number | undefined;
       for (const link of state.chain) {
-        const chainCard = removeFromArray(link.defendingCards, instanceId)
-          ?? removeFromArray(link.reactions, instanceId);
+        // An attack action exists only on the chain; an attacking permanent
+        // was already removed from its own arena zone above. Either way the
+        // attack ceases, and the link keeps last-known information.
+        const isAction = link.attackCardType === "action";
+        if (
+          link.attackingCard.instanceId === instanceId &&
+          link.flags.attackGone !== true &&
+          (isAction ? !foundInOwnerZone : !!foundInOwnerZone)
+        ) {
+          if (isAction) {
+            attackingCard ??= link.attackingCard;
+            attackerSeat ??= link.attacker;
+            foundOnChain ??= link.attackingCard;
+          }
+          link.attackingCard = runtime.commands.snapshotSerializable(link.attackingCard);
+          link.flags.attackGone = true;
+        }
+        const defending = removeFromArray(link.defendingCards, instanceId);
+        defendingCard ??= defending;
+        const chainCard = defending ?? removeFromArray(link.reactions, instanceId);
         foundOnChain ??= chainCard;
         const equipment = removeFromArray(link.defendingEquipment, instanceId);
         if (equipment) {
@@ -953,17 +978,8 @@ export function makeCtx(
         : undefined);
       if (!found) return false;
       if (found.fromArena && dataOf(state, found.card.cardId).cardType === "token") {
-        runtime.commands.fireLeaveArena(
-          state,
-          found.owner.seat,
-          found.card,
-          "cease-to-exist",
-        );
-        logPublic(state, gameLogMessage(
-          `${nameOf(state, found.card.cardId)} ceases to exist`,
-          "engine.log.card.ceases.to.exist",
-          { card: logCardValue(found.card.cardId) },
-        ));
+        runtime.commands.fireLeaveArena(state, found.owner.seat, found.card, "cease-to-exist");
+        logPublic(state, cardCeasesToExistLogMessage(state, found.card.cardId));
         return true;
       }
       clearPrivateZonePlacement(found.card);
@@ -973,6 +989,12 @@ export function makeCtx(
         runtime.events.fireCardLeavesGraveyard(state, found.owner.seat, found.card, "hand");
       }
       if (found.fromArena) runtime.commands.fireLeaveArena(state, found.owner.seat, found.card, "hand");
+      if (!foundInOwnerZone && found.card === defendingCard) {
+        runtime.commands.fireLeaveCombatChain(state, found.owner.seat, found.card, "defending");
+      }
+      if (!foundInOwnerZone && found.card === attackingCard && attackerSeat !== undefined) {
+        runtime.commands.fireLeaveCombatChain(state, attackerSeat, found.card, "attacking");
+      }
       if (found.fromZone === "deck") {
         runtime.events.queueTriggeredEvent(
           state,
@@ -1808,6 +1830,7 @@ export function makeCtx(
       if (!attack) return;
       attack.flags.attackGone = true;
       runtime.commands.moveToGraveyard(state, attack.attackingCard, "chain", seat);
+      runtime.commands.fireLeaveCombatChain(state, attack.attacker, attack.attackingCard, "attacking", true);
       logPublic(state, cardDestroyedLogMessage(state, attack.attackingCard.cardId));
       runtime.events.runHook(state, attack.attacker, attack.attackingCard, "onDestroyed", attack);
       runtime.events.fireFriendlyDestroyed(state, attack.attacker, attack.attackingCard, seat);
@@ -1862,23 +1885,33 @@ export function makeCtx(
       const fromGraveyard = owner.graveyard.some((card) => card.instanceId === self.instanceId);
       const removed = runtime.commands.removeFromOwnerZones(state, self.instanceId);
       let attackingCard: CardInstance | undefined;
+      let attackerSeat: number | undefined;
       for (const link of state.chain) {
         if (
           link.attackingCard.instanceId !== self.instanceId ||
           link.flags.attackGone === true
         ) continue;
         attackingCard ??= link.attackingCard;
+        attackerSeat ??= link.attacker;
         // The physical card changes zones, but the chain link retains last-known
         // information for projection and rules queries until the chain closes.
         link.attackingCard = runtime.commands.snapshotSerializable(link.attackingCard);
         link.flags.attackGone = true;
       }
       let chainCard: CardInstance | undefined;
+      let defendingCard: CardInstance | undefined;
       for (const link of state.chain) {
-        chainCard ??= removeFromArray(link.reactions, self.instanceId);
+        const defending = removeFromArray(link.defendingCards, self.instanceId);
+        defendingCard ??= defending;
+        chainCard ??= defending ?? removeFromArray(link.reactions, self.instanceId);
       }
       const card = removed?.card ?? attackingCard ?? chainCard;
       if (!card) return false;
+      if (removed?.fromArena && dataOf(state, card.cardId).cardType === "token") {
+        runtime.commands.fireLeaveArena(state, removed.owner.seat, card, "cease-to-exist");
+        logPublic(state, cardCeasesToExistLogMessage(state, card.cardId));
+        return true;
+      }
       clearTemporaryObjectEffects(card);
       owner.hand.push(card);
       logPublic(state, gameLogMessage(
@@ -1890,6 +1923,13 @@ export function makeCtx(
         },
       ));
       if (fromGraveyard) runtime.events.fireCardLeavesGraveyard(state, owner.seat, card, "hand");
+      if (removed?.fromArena) runtime.commands.fireLeaveArena(state, removed.owner.seat, card, "hand");
+      if (!removed && card === attackingCard && attackerSeat !== undefined) {
+        runtime.commands.fireLeaveCombatChain(state, attackerSeat, card, "attacking");
+      }
+      if (!removed && card === defendingCard) {
+        runtime.commands.fireLeaveCombatChain(state, card.owner, card, "defending");
+      }
       return true;
     },
     addCounter(instanceId, key, delta) {
@@ -1922,6 +1962,29 @@ export function makeCtx(
         (activeAttack.counters ??= {})[key] = value;
       }
       publishReactionAttackPowerGain(state, runtime, observed);
+    },
+    freezeWhileInArena(instanceId) {
+      const target = findPermanent(state, instanceId);
+      if (!target || !findPermanent(state, self.instanceId)) return false;
+      (target.card.counters ??= {})[`${FROZEN_WHILE_SOURCE_IN_ARENA}${self.instanceId}`] = 1;
+      logPublic(state, gameLogMessage(
+        `${nameOf(state, target.card.cardId)} is frozen`,
+        "engine.log.card.frozen",
+        { card: logCardValue(target.card.cardId) },
+      ));
+      return true;
+    },
+    unfreeze(instanceId) {
+      const found = findCardAnywhere(state, instanceId);
+      const counters = found?.card.counters;
+      if (!counters) return;
+      for (const key of Object.keys(counters)) {
+        if (key === "frozenUntilTurn" || key.startsWith(FROZEN_WHILE_SOURCE_IN_ARENA)) delete counters[key];
+      }
+    },
+    isFrozen(card) {
+      const found = findCardAnywhere(state, card.instanceId)?.card ?? card as CardInstance;
+      return isFrozen(state, found);
     },
     setPermanentLife(instanceId, value) {
       const found = findPermanent(state, instanceId);

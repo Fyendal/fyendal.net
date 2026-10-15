@@ -754,6 +754,7 @@ function replaceAttackFromPlayerZone(
       transitionZone("deck", previousOwner.seat, "bottom"),
       { to: true },
     );
+    runtime.commands.fireLeaveCombatChain(state, seat, previous, "attacking");
   } else {
     runtime.commands.putCardOnDeckBottom(state, previous.instanceId);
   }

@@ -110,12 +110,14 @@ describe("DTD, DYN and CRU arena triggers use the stack", () => {
   it("Ironsong Pride targets a sword as its enter trigger goes on the stack, and clears counters on leaving", () => {
     const g = scenario({
       seats: [
-        { hero: "dorinthea", resources: 1, weapons: ["dawnblade, resplendent|0"], hand: ["ironsong pride|1"] },
+        { hero: "dorinthea", resources: 2, weapons: ["dawnblade, resplendent|0"], hand: ["ironsong pride|1"] },
         { hero: "rhinar", hand: ["tranquil passing|1", "raging onslaught|3"] },
       ],
     });
     const sword = g.state.players[0]!.weapons[0]!;
 
+    // A sword hit keeps Ironsong Pride through its end-phase check.
+    g.attackWithWeapon("dawnblade, resplendent|0").blockWith().settle();
     g.play("ironsong pride|1", { settle: false });
     resolveCardLayers(g);
 

@@ -391,6 +391,14 @@ export interface ScriptCtx {
   /** Set a named counter on any card exactly. Unlike addCounter, zero remains
    *  explicit so state-based "when this has no counters" checks can observe it. */
   setCardCounter(instanceId: number, key: string, value: number): void;
+  /** Freeze a permanent for as long as this source remains in the arena.
+   *  The freeze ends when either object leaves the arena. */
+  freezeWhileInArena(instanceId: number): boolean;
+  /** End every freeze on a card, including freezes lasting while a source is
+   *  in the arena. */
+  unfreeze(instanceId: number): void;
+  /** Whether a card is frozen by any effect, including conditional freezes. */
+  isFrozen(card: DeepReadonly<CardInstance>): boolean;
   /** Set the current life of a living permanent, bounded at zero. */
   setPermanentLife(instanceId: number, value: number): boolean;
   /** Bind this in-arena permanent to a friendly ally permanent. Binding cards
@@ -1300,6 +1308,10 @@ export interface CardScript {
   onSuppressedHit?(ctx: ScriptCtx): void;
   /** While this source is active, attack-action hit effects do not trigger. */
   suppressesAttackActionHitEffects?: boolean;
+  /** While this source is active, Battleworn and Temper on equipment its
+   *  controller controls don't trigger when that equipment defended an attack
+   *  with at most this much power. */
+  equipmentWearIgnoredUpToPower?: number;
   /** Called when a link resolves without a hit. */
   onMiss?(ctx: ScriptCtx): void;
   /** Called once when the current chain link finishes resolving, after its

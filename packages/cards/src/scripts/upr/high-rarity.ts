@@ -280,12 +280,12 @@ export const uprHighRarity: Record<string, CardScript> = {
               (card) =>
                 named(ctx, card, "frostbite") ||
                 (has(ctx, card, "ice") && has(ctx, card, "affliction")) ||
-                Number(card.counters?.frozenUntilTurn ?? 0) > ctx.state.turn,
+                ctx.isFrozen(card),
             ),
-            ...player.arsenal.filter((card) => Number(card.counters?.frozenUntilTurn ?? 0) > ctx.state.turn),
+            ...player.arsenal.filter((card) => ctx.isFrozen(card)),
             ...Object.values(player.equipment).filter(
               (card): card is DeepReadonly<CardInstance> =>
-                !!card && Number(card.counters?.frozenUntilTurn ?? 0) > ctx.state.turn,
+                !!card && ctx.isFrozen(card),
             ),
           ]);
           if (targets.length)
@@ -310,7 +310,7 @@ export const uprHighRarity: Record<string, CardScript> = {
       if (!target || !ctx.banish(ctx.self.instanceId)) return;
       if (named(ctx, target, "frostbite") || (has(ctx, target, "ice") && has(ctx, target, "affliction")))
         ctx.destroyPermanent(id);
-      else ctx.setCardCounter(id, "frozenUntilTurn", 0);
+      else ctx.unfreeze(id);
     },
   },
   "liquefy|1": {
@@ -350,7 +350,7 @@ export const uprHighRarity: Record<string, CardScript> = {
         ...opp.arsenal,
         ...opp.board,
         ...Object.values(opp.equipment).filter((card): card is DeepReadonly<CardInstance> => !!card),
-      ].filter((card) => Number(card.counters?.frozenUntilTurn ?? 0) > ctx.state.turn).length;
+      ].filter((card) => ctx.isFrozen(card)).length;
       const ice = opp.board.filter((card) => has(ctx, card, "ice") && has(ctx, card, "affliction")).length;
       dealArcane(
         ctx,
