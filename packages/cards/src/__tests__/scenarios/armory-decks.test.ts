@@ -82,6 +82,44 @@ describe("Armory Decks — AKO, ASB, and AAZ", () => {
       .play("infecting shot|3", { fromArsenal: true }).blockWith().settle();
     g.expectHandSize(0, 1);
   });
+
+  it("Sharp Shooters loads New Horizon's empty additional arsenal zone", () => {
+    const sharpShooters = (arsenal: { arsenal?: string[]; arsenalFaceDown?: string[] }) =>
+      scenario({
+        seats: [
+          {
+            hero: "rhinar",
+            heroKey: "azalea, ace in the hole|0",
+            weapons: ["death dealer|0"],
+            equipment: { ...NO_EQUIPMENT, head: "new horizon|0", arms: "sharp shooters|0" },
+            hand: ["searing shot|1"],
+            ...arsenal,
+          },
+          { hero: "rhinar", equipment: NO_EQUIPMENT },
+        ],
+      });
+
+    const g = sharpShooters({ arsenal: ["infecting shot|3"] });
+    g.activate("sharp shooters|0")
+      .chooseCard("searing shot|1")
+      .expectNoEquipment(0, "arms")
+      .expectInZone(0, "infecting shot|3", "arsenal")
+      .expectInZone(0, "searing shot|1", "arsenal")
+      .expectFaceDown(0, "searing shot|1", false)
+      .expectAP(0, 1);
+    const loaded = g.state.players[0]!.arsenal.find((card) => card.cardId === printingId("searing shot|1"));
+    expect(loaded?.arsenalSlot).toBe(1);
+    expect(loaded?.counters?.aim).toBe(1);
+
+    // New Horizon grants the extra zone only while a face-up card is in arsenal.
+    const faceDown = sharpShooters({ arsenalFaceDown: ["infecting shot|3"] });
+    const arms = faceDown.state.players[0]!.equipment.arms!.instanceId;
+    expect(
+      legalIntents(faceDown.state, 0).some(
+        (intent) => intent.kind === "activate-ability" && intent.sourceInstanceId === arms,
+      ),
+    ).toBe(false);
+  });
 });
 
 describe("Armory Decks — AIO, AJV, and AST", () => {

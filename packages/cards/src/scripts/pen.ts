@@ -20,6 +20,7 @@ import {
 } from "./shared-helpers.js";
 import { SHARPEN_FOLLOWUP, sharpenSword } from "./aha/warrior-sharpen.js";
 import { penHighRarity } from "./pen/high-rarity.js";
+import { concoctDisorder } from "./sar.js";
 
 // Compendium of Rathe (PEN) — complete set and required tokens.
 
@@ -1958,26 +1959,8 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
       ctx.drawCards(target, 1);
     },
   },
-  "concoct disorder|2": {
-    onAttackDeclared(ctx) {
-      let moved = 0;
-      for (const player of ctx.state.players) {
-        const top = player.deck[0];
-        if (top && player.arsenal.length === 0 && ctx.putIntoArsenal(top.instanceId, "deck")) moved++;
-      }
-      if (moved >= 2) ctx.grantGoAgain();
-    },
-  },
-  "concoct disorder|3": {
-    onAttackDeclared(ctx) {
-      let moved = 0;
-      for (const player of ctx.state.players) {
-        const top = player.deck[0];
-        if (top && player.arsenal.length === 0 && ctx.putIntoArsenal(top.instanceId, "deck")) moved++;
-      }
-      if (moved >= 2) ctx.grantGoAgain();
-    },
-  },
+  "concoct disorder|2": concoctDisorder(),
+  "concoct disorder|3": concoctDisorder(),
   "hyper inflation|2": {
     onAttackDeclared(ctx) {
       ctx.addModifier({ scope: "until-end-of-turn", seat: 0, appliesTo: "any", playCostReduction: -1 });

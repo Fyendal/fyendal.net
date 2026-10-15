@@ -1,4 +1,4 @@
-import { createContext, useContext, useId, useRef, useState, type CSSProperties, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useId, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import type { CardView } from "@fyendal/shared";
 import { cardData } from "@fyendal/cards/client";
 import { ViewportTooltip } from "../components/ViewportTooltip.js";
@@ -9,6 +9,7 @@ import {
   resolveCardImageUrl,
   resolveCardImageUrls,
 } from "./cardImageUrl.js";
+import { MARKED_TOKEN_ID, cardBadges, registerCardBadges } from "./cardBadges.js";
 
 const PITCH_CLASS: Record<number, string> = {
   1: "pitch-red",
@@ -16,7 +17,6 @@ const PITCH_CLASS: Record<number, string> = {
   3: "pitch-blue",
   4: "pitch-purple",
 };
-const MARKED_TOKEN_ID = "HNT244";
 const SquareCardPresentationContext = createContext(false);
 
 export function SquareCardPresentation({ enabled, children }: { enabled: boolean; children?: ReactNode }) {
@@ -26,21 +26,6 @@ export function SquareCardPresentation({ enabled, children }: { enabled: boolean
     </SquareCardPresentationContext.Provider>
   );
 }
-const INTIMIDATED_TOOLTIP = "Intimidated — returns to hand at the beginning of the end phase";
-/** Rules counters that use the generic text-chip presentation. Card scripts
- * also keep implementation state in CardView.counters, so unknown keys must
- * not become player-facing labels. */
-const NAMED_COUNTER_KEYS = new Set([
-  "aim",
-  "balance",
-  "bind",
-  "doom",
-  "frost",
-  "haunt",
-  "lessons",
-  "rust",
-  "sand",
-]);
 export const CARD_IMAGE_ASPECT_RATIO = 546 / 762;
 export const CARD_PREVIEW_HEIGHT = 413;
 export const CARD_PREVIEW_WIDTH = Math.round(CARD_PREVIEW_HEIGHT * CARD_IMAGE_ASPECT_RATIO);
@@ -50,18 +35,6 @@ export const CARD_PREVIEW_WIDTH = Math.round(CARD_PREVIEW_HEIGHT * CARD_IMAGE_AS
 export function cardPreviewSize(viewportHeight: number): { width: number; height: number } {
   const height = Math.max(CARD_PREVIEW_HEIGHT, Math.round(viewportHeight * 0.5));
   return { width: Math.round(height * CARD_IMAGE_ASPECT_RATIO), height };
-}
-
-function signedCounter(value: number): string {
-  return value > 0 ? `+${value}` : `−${Math.abs(value)}`;
-}
-
-function isFuseCounter(key: string): boolean {
-  return key === "fused" || key === "fusedEarth" || key === "fusedIce" || key.startsWith("fused:");
-}
-
-function counterTooltip(count: number, name: string): string {
-  return `${count} ${name} counter${count === 1 ? "" : "s"}`;
 }
 
 function CounterOverlay({
@@ -270,6 +243,14 @@ export function CardFace({
   const squareCard = size === "zone" && (squareArt ?? squarePresentationEnabled);
   // Try temporary Fabrary variants before falling back to the text layout.
   const [imageFailure, setImageFailure] = useState<{ cardId: string; attempts: number } | null>(null);
+  const badges = cardBadges(card, { goAgain, dominate, overpower, veil, showFaceUp, wagered, wagerRewards });
+  const marked = badges.some((badge) => badge.placement === "token");
+  const chips = badges.filter((badge) => badge.placement === "chip");
+  const overlays = badges.flatMap((badge) => badge.placement === "overlay" ? [badge] : []);
+  const rootRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (rootRef.current) registerCardBadges(rootRef.current, badges);
+  });
   // identity is secret to this viewer — render as a card back; the intimidated
   // marker is public, so its standard card overlay shows on the back too
   if (card.hidden) {
@@ -282,12 +263,15 @@ export function CardFace({
         <CardBack label={label ?? "Face down"} size={size === "hand" ? "hand" : "zone"} square={squareCard} />
         {showOverlays && card.intimidated ? (
           <div className="c-ovls">
-            <CounterOverlay
-              cardInstanceId={card.instanceId}
-              kind="intimidated"
-              icon="/icons/intimidated.png"
-              tooltip={INTIMIDATED_TOOLTIP}
-            />
+            {overlays.filter((badge) => badge.kind === "intimidated").map((badge) => (
+              <CounterOverlay
+                key={badge.kind}
+                cardInstanceId={card.instanceId}
+                kind={badge.kind}
+                icon={badge.icon}
+                tooltip={badge.text}
+              />
+            ))}
           </div>
         ) : null}
       </span>
@@ -309,48 +293,7 @@ export function CardFace({
     data?.cardType === "equipment" || data?.cardType === "token";
   const squarePitch = data?.pitch && PITCH_CLASS[data.pitch] ? data.pitch : undefined;
   const printedLife = data?.life;
-  const marked = (card.counters?.marked ?? 0) > 0;
-  const namedCounters = Object.entries(card.counters ?? {}).filter(
-    ([counter, count]) =>
-      NAMED_COUNTER_KEYS.has(counter) &&
-      count !== 0,
-  );
-  const steamCounters = card.counters?.steam ?? 0;
-  const energyCounters = card.counters?.energy ?? 0;
-  const suspenseCounters = card.counters?.suspense ?? 0;
-  const verseCounters = card.counters?.verse ?? 0;
-  const flowCounters = card.counters?.flow ?? 0;
-  const stainCounters = card.counters?.stain ?? 0;
-  const stormCounters = card.counters?.storm ?? 0;
-  const holo = (card.counters?.holo ?? 0) > 0;
-  const arcaneModifier = card.counters?.arcaneBonus ?? 0;
-  const attacked = (card.counters?.attacked ?? 0) > 0;
-  const fused = Object.entries(card.counters ?? {}).some(
-    ([counter, value]) => isFuseCounter(counter) && value > 0,
-  );
-  const hasOverlays = showOverlays && (
-    card.life !== undefined ||
-      goAgain === true ||
-      dominate === true ||
-      overpower === true ||
-      veil === true ||
-      showFaceUp === true ||
-      wagered === true ||
-      card.intimidated === true ||
-      (card.counters?.power ?? 0) > 0 ||
-      !!card.defCounters ||
-      steamCounters > 0 ||
-      energyCounters > 0 ||
-      suspenseCounters > 0 ||
-      verseCounters > 0 ||
-      flowCounters > 0 ||
-      stainCounters > 0 ||
-      stormCounters > 0 ||
-      holo ||
-      arcaneModifier !== 0 ||
-      attacked ||
-      fused
-  );
+  const hasOverlays = showOverlays && overlays.length > 0;
   const cls = [
     "card",
     size === "zone" ? "card-zone" : size === "preview" ? "card-preview-frame" : "card-hand",
@@ -378,6 +321,7 @@ export function CardFace({
   const explanationId = explanation ? `card-explanation-${card.instanceId}` : undefined;
   return (
     <div
+      ref={rootRef}
       className={cls}
       data-cardid={card.cardId}
       data-card-instance-id={card.instanceId}
@@ -538,198 +482,27 @@ export function CardFace({
           />
         </div>
       ) : null}
-      {namedCounters.length > 0 && (
+      {chips.length > 0 && (
         <div className="c-chips">
-          {namedCounters.map(([name, n]) => (
-            <div key={name} className="c-chip">
-              {n} {name}
+          {chips.map((chip) => (
+            <div key={chip.kind} className="c-chip">
+              {chip.text}
             </div>
           ))}
         </div>
       )}
       {hasOverlays && (
         <div className="c-ovls">
-          {goAgain ? (
+          {overlays.map((badge) => (
             <CounterOverlay
+              key={badge.kind}
               cardInstanceId={card.instanceId}
-              kind="goagain"
-              icon="/icons/go-again.png"
-              tooltip="Go again"
+              kind={badge.kind}
+              icon={badge.icon}
+              tooltip={badge.text}
+              value={badge.value}
             />
-          ) : null}
-          {dominate ? (
-            <CounterOverlay
-              cardInstanceId={card.instanceId}
-              kind="dominate"
-              icon="/icons/dominate.png"
-              tooltip="Dominate"
-            />
-          ) : null}
-          {overpower ? (
-            <CounterOverlay
-              cardInstanceId={card.instanceId}
-              kind="overpower"
-              icon="/icons/overpower.svg"
-              tooltip="Overpower"
-            />
-          ) : null}
-          {veil ? (
-            <CounterOverlay
-              cardInstanceId={card.instanceId}
-              kind="veil"
-              icon="/icons/veil.png"
-              tooltip="Veil: can't be defended by more than 1 card of each color"
-            />
-          ) : null}
-          {showFaceUp ? (
-            <CounterOverlay
-              cardInstanceId={card.instanceId}
-              kind="faceup"
-              icon="/icons/face-up.png"
-              tooltip="Face up"
-            />
-          ) : null}
-          {card.intimidated === true ? (
-            <CounterOverlay
-              cardInstanceId={card.instanceId}
-              kind="intimidated"
-              icon="/icons/intimidated.png"
-              tooltip={INTIMIDATED_TOOLTIP}
-            />
-          ) : null}
-          {wagered ? (
-            <CounterOverlay
-              cardInstanceId={card.instanceId}
-              kind="wagered"
-              icon="/icons/wager.png"
-              tooltip={wagerRewards?.length
-                ? `Wagered: ${wagerRewards.join("; ")}`
-                : "Wagered"}
-            />
-          ) : null}
-          {card.life !== undefined ? (
-            <CounterOverlay
-              cardInstanceId={card.instanceId}
-              kind="lifec"
-              icon="/icons/life.png"
-              tooltip={`${card.life} life (resets during the end phase)`}
-              value={String(card.life)}
-            />
-          ) : null}
-          {attacked ? (
-            <CounterOverlay
-              cardInstanceId={card.instanceId}
-              kind="attacked"
-              icon="/icons/sword.svg"
-              tooltip="Has attacked since the start of its controller's last turn"
-            />
-          ) : null}
-          {(card.counters?.power ?? 0) > 0 ? (
-            <CounterOverlay
-              cardInstanceId={card.instanceId}
-              kind="atkc"
-              icon="/icons/attack.png"
-              tooltip={counterTooltip(card.counters?.power ?? 0, "+1 attack")}
-              value={`+${card.counters?.power ?? 0}`}
-            />
-          ) : null}
-          {card.defCounters ? (
-            <CounterOverlay
-              cardInstanceId={card.instanceId}
-              kind="defc"
-              icon="/icons/defence.png"
-              tooltip={counterTooltip(card.defCounters, "−1 defense")}
-              value={`−${card.defCounters}`}
-            />
-          ) : null}
-          {steamCounters > 0 ? (
-            <CounterOverlay
-              cardInstanceId={card.instanceId}
-              kind="steamc"
-              icon="/icons/gear.png"
-              tooltip={counterTooltip(steamCounters, "steam")}
-              value={String(steamCounters)}
-            />
-          ) : null}
-          {energyCounters > 0 ? (
-            <CounterOverlay
-              cardInstanceId={card.instanceId}
-              kind="energyc"
-              icon="/icons/bolt.webp"
-              tooltip={counterTooltip(energyCounters, "energy")}
-              value={String(energyCounters)}
-            />
-          ) : null}
-          {suspenseCounters > 0 ? (
-            <CounterOverlay
-              cardInstanceId={card.instanceId}
-              kind="suspensec"
-              icon="/icons/suspense.png"
-              tooltip={counterTooltip(suspenseCounters, "suspense")}
-              value={String(suspenseCounters)}
-            />
-          ) : null}
-          {verseCounters > 0 ? (
-            <CounterOverlay
-              cardInstanceId={card.instanceId}
-              kind="versec"
-              icon="/icons/verse.png"
-              tooltip={counterTooltip(verseCounters, "verse")}
-              value={String(verseCounters)}
-            />
-          ) : null}
-          {flowCounters > 0 ? (
-            <CounterOverlay
-              cardInstanceId={card.instanceId}
-              kind="flowc"
-              icon="/icons/flow.png"
-              tooltip={counterTooltip(flowCounters, "flow")}
-              value={String(flowCounters)}
-            />
-          ) : null}
-          {stainCounters > 0 ? (
-            <CounterOverlay
-              cardInstanceId={card.instanceId}
-              kind="stainc"
-              icon="/icons/stain.png"
-              tooltip={counterTooltip(stainCounters, "stain")}
-              value={String(stainCounters)}
-            />
-          ) : null}
-          {stormCounters > 0 ? (
-            <CounterOverlay
-              cardInstanceId={card.instanceId}
-              kind="stormc"
-              icon="/icons/storm.png"
-              tooltip={counterTooltip(stormCounters, "storm")}
-              value={String(stormCounters)}
-            />
-          ) : null}
-          {holo ? (
-            <CounterOverlay
-              cardInstanceId={card.instanceId}
-              kind="holo"
-              icon="/icons/holo.png"
-              tooltip="Holo"
-            />
-          ) : null}
-          {arcaneModifier !== 0 ? (
-            <CounterOverlay
-              cardInstanceId={card.instanceId}
-              kind="arcanec"
-              icon="/icons/arcane.png"
-              tooltip={`${signedCounter(arcaneModifier)} arcane damage`}
-              value={signedCounter(arcaneModifier)}
-            />
-          ) : null}
-          {fused ? (
-            <CounterOverlay
-              cardInstanceId={card.instanceId}
-              kind="fusec"
-              icon="/icons/fuse.png"
-              tooltip="Fused"
-            />
-          ) : null}
+          ))}
         </div>
       )}
       {explanation ? (

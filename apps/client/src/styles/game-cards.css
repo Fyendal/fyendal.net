@@ -66,6 +66,76 @@
   pointer-events: none;
 }
 .card-preview-face { flex: 0 0 auto; }
+/* Spells out the hovered card's statuses and counters. Each row repeats the
+   card's own icon badge so the two read as the same object. */
+.card-badge-panel {
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + 8px);
+  left: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+  padding: 6px;
+  list-style: none;
+  border: 1px solid var(--border-subtle);
+  border-radius: 10px;
+  background: var(--surface-panel);
+  box-shadow: var(--shadow-raised);
+  font-family: var(--font-lobby-ui);
+}
+.card-badge-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 36px;
+  padding: 4px 6px;
+}
+.card-badge-row + .card-badge-row {
+  border-top: 1px solid #4d3a2380;
+}
+.card-badge-tile {
+  --counter-icon-size: 18px;
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  box-sizing: border-box;
+  overflow: hidden;
+  border: 1px solid #d2ad32;
+  border-radius: 5px;
+  background: #080705;
+}
+.card-badge-token {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.card-badge-value {
+  color: #ffd84a;
+  font-size: 13px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+.card-badge-text {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 1px;
+}
+.card-badge-title {
+  color: var(--text-primary);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.25;
+}
+.card-badge-detail {
+  color: var(--text-secondary);
+  font-size: 12.5px;
+  line-height: 1.35;
+}
 .card-preview-frame { width: 100%; height: 100%; padding: 14px; }
 .card-preview-frame .c-name { font-size: 20px; }
 .card-preview-frame .c-type {
@@ -780,7 +850,8 @@
 }
 .c-holo .c-ovl-icon,
 .c-stainc .c-ovl-icon,
-.c-stormc .c-ovl-icon {
+.c-stormc .c-ovl-icon,
+.c-aimc .c-ovl-icon {
   filter: invert(1);
 }
 .c-ovl-num {

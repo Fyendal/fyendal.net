@@ -563,7 +563,7 @@ function riptide(): CardScript {
         event: "card-played",
         label: "Put a card from hand face down into arsenal?",
         condition: (ctx, _played, event) =>
-          event?.from === "hand" && ctx.player(ctx.seat).arsenal.length === 0 && ctx.player(ctx.seat).hand.length > 0,
+          event?.from === "hand" && ctx.hasArsenalSpace() && ctx.player(ctx.seat).hand.length > 0,
         effect(ctx) {
           ctx.requestCardChoice(
             "riptide-arsenal",

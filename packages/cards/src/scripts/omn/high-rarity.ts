@@ -604,7 +604,7 @@ export const omnHighRarity: Record<string, CardScript> = {
   "settle the bill|1": {
     onPlay(ctx) {
       const arrows = ctx.player(ctx.seat).hand.filter((card) => has(ctx, card, "arrow"));
-      if (arrows.length && ctx.player(ctx.seat).arsenal.length === 0)
+      if (arrows.length && ctx.hasArsenalSpace())
         ctx.requestCardChoice(
           "settle-arrow",
           decisionPrompt("Put an arrow into arsenal?", "card.omn.arrow.arsenal", {

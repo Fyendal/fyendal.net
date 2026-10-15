@@ -20432,6 +20432,180 @@
       "value": "卡牌"
     }
   ],
+  "game.card.badge.arcane": [
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点奥术伤害"
+    }
+  ],
+  "game.card.badge.attacked": [
+    {
+      "type": 0,
+      "value": "已攻击"
+    }
+  ],
+  "game.card.badge.attacked.detail": [
+    {
+      "type": 0,
+      "value": "自其操控者上个回合开始以来已进行过攻击"
+    }
+  ],
+  "game.card.badge.counter": [
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " 个 "
+    },
+    {
+      "type": 1,
+      "value": "name"
+    },
+    {
+      "type": 0,
+      "value": " 指示物"
+    }
+  ],
+  "game.card.badge.defense": [
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " 个 -1 防御指示物"
+    }
+  ],
+  "game.card.badge.dominate": [
+    {
+      "type": 0,
+      "value": "压制 (dominate)"
+    }
+  ],
+  "game.card.badge.energy": [
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " 个能量指示物"
+    }
+  ],
+  "game.card.badge.faceup": [
+    {
+      "type": 0,
+      "value": "正面朝上"
+    }
+  ],
+  "game.card.badge.fused": [
+    {
+      "type": 0,
+      "value": "已融合 (fusion)"
+    }
+  ],
+  "game.card.badge.goagain": [
+    {
+      "type": 0,
+      "value": "go again"
+    }
+  ],
+  "game.card.badge.holo": [
+    {
+      "type": 0,
+      "value": "holo"
+    }
+  ],
+  "game.card.badge.intimidated": [
+    {
+      "type": 0,
+      "value": "被 intimidate"
+    }
+  ],
+  "game.card.badge.intimidated.detail": [
+    {
+      "type": 0,
+      "value": "在结束阶段开始时返回手牌"
+    }
+  ],
+  "game.card.badge.life": [
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " 点生命"
+    }
+  ],
+  "game.card.badge.life.detail": [
+    {
+      "type": 0,
+      "value": "在结束阶段重置"
+    }
+  ],
+  "game.card.badge.marked": [
+    {
+      "type": 0,
+      "value": "被标记 (marked)"
+    }
+  ],
+  "game.card.badge.overpower": [
+    {
+      "type": 0,
+      "value": "overpower"
+    }
+  ],
+  "game.card.badge.panel": [
+    {
+      "type": 0,
+      "value": "指示物与状态"
+    }
+  ],
+  "game.card.badge.power": [
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " 个 +1 力量指示物"
+    }
+  ],
+  "game.card.badge.steam": [
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " 个蒸汽指示物"
+    }
+  ],
+  "game.card.badge.veil": [
+    {
+      "type": 0,
+      "value": "veil"
+    }
+  ],
+  "game.card.badge.veil.detail": [
+    {
+      "type": 0,
+      "value": "每种颜色至多只能用 1 张牌防御"
+    }
+  ],
+  "game.card.badge.wagered": [
+    {
+      "type": 0,
+      "value": "已进行 wager"
+    }
+  ],
   "game.card.nonAttack": [
     {
       "type": 0,

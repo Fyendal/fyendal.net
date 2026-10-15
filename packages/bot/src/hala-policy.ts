@@ -40,6 +40,7 @@ import {
   targetableAttackIntent,
   visibleOpponentDamageAmount,
   type BotPolicyInput,
+  type PlannedPrevention,
   type TargetableAttackIntent,
   type ResponseModel,
 } from "./policy.js";
@@ -1431,18 +1432,22 @@ function estimateFlurryAttackValue(
   return Math.max(0, withFlurry.damage - withoutFlurry.damage);
 }
 
-function openingHandCoversIncomingDamage(input: BotPolicyInput): boolean {
+function openingHandCoversIncomingDamage(
+  input: BotPolicyInput,
+  prevention: PlannedPrevention,
+): boolean {
   if (!isOpeningTurnDefense(input)) return false;
   const link = currentLink(input);
   if (!link) return false;
-  // This asks whether hand defense can fully block the attack. Source-side
-  // damage increases never apply once attack is completely covered.
-  const defenseNeeded = Math.max(0, link.attackValue - link.defenseValue);
+  // This asks whether hand defense plus planned prevention (Toe the Line) can
+  // fully cover the attack. Source-side damage increases never apply once
+  // attack is completely covered.
+  const defenseNeeded = Math.max(0, link.attackValue - link.defenseValue - prevention.amount);
   const stageableIds = new Set(input.legal.flatMap((intent) =>
     intent.kind === "stage-defenders" ? intent.instanceIds : []
   ));
   const hand = input.view.players[input.seat].hand.filter((card) =>
-    stageableIds.has(card.instanceId)
+    stageableIds.has(card.instanceId) && !prevention.consumedIds.includes(card.instanceId)
   );
   const defenseOf = (card: CardView): number => Math.max(0, card.defense ?? 0);
   if (link.dominate) {
@@ -1534,7 +1539,7 @@ function scoreDefend(
       const selectedDynamo = candidate.chosen.some((card) =>
         key(candidate.input.cards[card.cardId]) === "valiant dynamo|0"
       );
-      return selectedDynamo && openingHandCoversIncomingDamage(candidate.input)
+      return selectedDynamo && openingHandCoversIncomingDamage(candidate.input, candidate.plannedPrevention)
         ? "forbid"
         : "allow";
     },

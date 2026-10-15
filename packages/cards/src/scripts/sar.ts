@@ -177,6 +177,32 @@ function pumpWithRider(target: (ctx: ScriptCtx) => boolean, pump: number, rider:
   };
 }
 
+/** Shared by every Concoct Disorder pitch. A hero without an empty arsenal
+ * zone (New Horizon may supply a second one) puts nothing. Go again is
+ * conditional (KEYWORD_OVERRIDES). */
+export function concoctDisorder(): CardScript {
+  return {
+    onAttackDeclared(ctx) {
+      let puts = 0;
+      for (const p of ctx.state.players) {
+        const top = p.deck[0];
+        if (!top || !ctx.putIntoArsenal(top.instanceId, "deck", { faceUp: false })) continue;
+        puts++;
+        ctx.logPublic(
+          localizedCardLog(
+            ctx,
+            `${ctx.cardData(p.heroCardId).name} puts the top card of their deck face-down into their arsenal`,
+            "card.log.sar.hero.arsenal",
+            { target: { kind: "player", seat: p.seat } },
+            { kind: "card-moved", ownerSeat: p.seat, from: "deck", to: "arsenal", faceDown: true },
+          ),
+        );
+      }
+      if (puts >= 2) ctx.grantGoAgain();
+    },
+  };
+}
+
 export const sar: Record<string, CardScript> = {
   // ── Hero ──────────────────────────────────────────────────────────────────
 
@@ -334,30 +360,7 @@ export const sar: Record<string, CardScript> = {
 
   "art of desire: mind|3": artOfDesire(3),
 
-  "concoct disorder|1": {
-    // "When this attacks, each hero puts the top card of their deck face-down
-    //  into their arsenal. If 2 or more cards are put into arsenals this way,
-    //  this gets go again." (Go again is conditional — KEYWORD_OVERRIDES.)
-    onAttackDeclared(ctx) {
-      let puts = 0;
-      for (const p of ctx.state.players) {
-        const top = p.deck[0];
-        if (!top || p.arsenal.length > 0) continue;
-        ctx.putIntoArsenal(top.instanceId, "deck", { faceUp: false });
-        puts++;
-        ctx.logPublic(
-          localizedCardLog(
-            ctx,
-            `${ctx.cardData(p.heroCardId).name} puts the top card of their deck face-down into their arsenal`,
-            "card.log.sar.hero.arsenal",
-            { target: { kind: "player", seat: p.seat } },
-            { kind: "card-moved", ownerSeat: p.seat, from: "deck", to: "arsenal", faceDown: true },
-          ),
-        );
-      }
-      if (puts >= 2) ctx.grantGoAgain();
-    },
-  },
+  "concoct disorder|1": concoctDisorder(),
 
   "hyper inflation|1": {
     // "When this attacks, cards cost {r} more to play this turn." Go again is

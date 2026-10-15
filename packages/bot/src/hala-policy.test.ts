@@ -2570,6 +2570,62 @@ describe("Hala policy", () => {
     )).toBeGreaterThanOrEqual(4);
   });
 
+  it("blocks an opening on-hit attack with its whole hand before any equipment", () => {
+    const state = createGame({
+      decklists: [halaDeck(), decklists.dorinthea],
+      cards: cardData,
+      scripts,
+      seed: 93162,
+      startPlayer: 1,
+    });
+    replaceHand(state, 0, ["AHA011", "AHA011", "PEN319", "MPW074"]);
+    const view = projectStateFor(state, 0);
+    view.players[1].handCount = 1;
+    view.phase = "defend";
+    view.priorityPlayer = 0;
+    view.pendingDecision = { player: 0, kind: "defend", prompt: "Choose defenders" };
+    view.chain = [{
+      attackingCard: { instanceId: 90_5162, cardId: "AAZ009", owner: 1 },
+      defendingCards: [],
+      attackValue: 11,
+      defenseValue: 0,
+      damage: 11,
+      goAgain: true,
+      onHitEffects: [
+        {
+          sourceCardId: "AAZ017",
+          text: "When this hits a hero, create a Bloodrot Pox token under their control.",
+          impact: { createsToken: true },
+        },
+        {
+          sourceCardId: "AAZ019",
+          text: "When this hits a hero, create an Inertia token under their control.",
+          impact: { createsToken: true },
+        },
+      ],
+      resolved: false,
+      reactions: [],
+    }];
+    const equipment = Object.values(view.players[0].equipment)
+      .filter((card): card is CardView => card !== undefined);
+    const defenders = [...view.players[0].hand, ...equipment]
+      .filter((card) => (card.defense ?? 0) > 0);
+    const legal: GameIntent[] = [
+      { kind: "defend", instanceIds: [] },
+      ...defenders.map((card) => ({
+        kind: "stage-defenders" as const,
+        instanceIds: [card.instanceId],
+      })),
+    ];
+
+    // Three 3-defense cards and Toe the Line's prevention cover all 11.
+    const blockers = view.players[0].hand
+      .filter((card) => cardData[card.cardId]?.name !== "Toe the Line")
+      .map((card) => card.instanceId);
+    expect(chooseHalaIntent({ seat: 0, view, legal, cards: cardData }))
+      .toEqual({ kind: "stage-defenders", instanceIds: blockers });
+  });
+
   it.each([
     ["spends", ["MPW028", "HNT117", "MPW130", "MPW132"], "stage-defenders"],
     ["preserves", ["HNT117", "MPW130", "MPW132", "MPW133"], "defend"],

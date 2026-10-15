@@ -21245,6 +21245,298 @@
       "value": "card"
     }
   ],
+  "game.card.badge.arcane": [
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " arcane damage"
+    }
+  ],
+  "game.card.badge.attacked": [
+    {
+      "type": 0,
+      "value": "Attacked"
+    }
+  ],
+  "game.card.badge.attacked.detail": [
+    {
+      "type": 0,
+      "value": "Has attacked since the start of its controller's last turn"
+    }
+  ],
+  "game.card.badge.counter": [
+    {
+      "type": 6,
+      "value": "count",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " "
+            },
+            {
+              "type": 1,
+              "value": "name"
+            },
+            {
+              "type": 0,
+              "value": " counter"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " "
+            },
+            {
+              "type": 1,
+              "value": "name"
+            },
+            {
+              "type": 0,
+              "value": " counters"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    }
+  ],
+  "game.card.badge.defense": [
+    {
+      "type": 6,
+      "value": "count",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " −1 defense counter"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " −1 defense counters"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    }
+  ],
+  "game.card.badge.dominate": [
+    {
+      "type": 0,
+      "value": "Dominate"
+    }
+  ],
+  "game.card.badge.energy": [
+    {
+      "type": 6,
+      "value": "count",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " energy counter"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " energy counters"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    }
+  ],
+  "game.card.badge.faceup": [
+    {
+      "type": 0,
+      "value": "Face up"
+    }
+  ],
+  "game.card.badge.fused": [
+    {
+      "type": 0,
+      "value": "Fused"
+    }
+  ],
+  "game.card.badge.goagain": [
+    {
+      "type": 0,
+      "value": "Go again"
+    }
+  ],
+  "game.card.badge.holo": [
+    {
+      "type": 0,
+      "value": "Holo"
+    }
+  ],
+  "game.card.badge.intimidated": [
+    {
+      "type": 0,
+      "value": "Intimidated"
+    }
+  ],
+  "game.card.badge.intimidated.detail": [
+    {
+      "type": 0,
+      "value": "Returns to hand at the beginning of the end phase"
+    }
+  ],
+  "game.card.badge.life": [
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " life"
+    }
+  ],
+  "game.card.badge.life.detail": [
+    {
+      "type": 0,
+      "value": "Resets during the end phase"
+    }
+  ],
+  "game.card.badge.marked": [
+    {
+      "type": 0,
+      "value": "Marked"
+    }
+  ],
+  "game.card.badge.overpower": [
+    {
+      "type": 0,
+      "value": "Overpower"
+    }
+  ],
+  "game.card.badge.panel": [
+    {
+      "type": 0,
+      "value": "Counters and statuses"
+    }
+  ],
+  "game.card.badge.power": [
+    {
+      "type": 6,
+      "value": "count",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " +1 attack counter"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " +1 attack counters"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    }
+  ],
+  "game.card.badge.steam": [
+    {
+      "type": 6,
+      "value": "count",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " steam counter"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " steam counters"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    }
+  ],
+  "game.card.badge.veil": [
+    {
+      "type": 0,
+      "value": "Veil"
+    }
+  ],
+  "game.card.badge.veil.detail": [
+    {
+      "type": 0,
+      "value": "Can't be defended by more than 1 card of each color"
+    }
+  ],
+  "game.card.badge.wagered": [
+    {
+      "type": 0,
+      "value": "Wagered"
+    }
+  ],
   "game.card.nonAttack": [
     {
       "type": 0,

@@ -87,6 +87,7 @@ import { useGameMotion } from "./motion/useGameMotion.js";
 import { useGameSounds } from "./sound/useGameSounds.js";
 import { handChoiceDismissal } from "./handChoiceDismissal.js";
 import { hoverPreviewTarget } from "./hoverPreviewTarget.js";
+import { renderedCardBadges } from "./cardBadges.js";
 import { PitchFocus } from "./PitchFocus.js";
 import { postPaymentPitchFocus, usePitchFocus } from "./usePitchFocus.js";
 import { useOpponentPlayPresentation } from "./useOpponentPlayPresentation.js";
@@ -950,10 +951,11 @@ export function GameBoard() {
     const r = el.getBoundingClientRect();
     const cardId = el.dataset.cardid ?? null;
     const effectLabel = el.dataset.effectLabel;
+    const badges = renderedCardBadges(el);
     // Moving within the same card should not rerender the whole board.
     if (
       preview && previewTargetRef.current === el && preview.id === cardId &&
-      preview.effectTooltip?.label === effectLabel
+      preview.effectTooltip?.label === effectLabel && preview.badges === badges
     ) return;
     previewTargetRef.current = el;
     if (!cardId && effectLabel) {
@@ -999,6 +1001,7 @@ export function GameBoard() {
       x: layout.preview.x,
       y: layout.preview.y,
       size: previewSize,
+      ...(badges ? { badges } : {}),
       ...(effectLabel
         ? { effectTooltip: { label: effectLabel, position: layout.tooltip } }
         : {}),

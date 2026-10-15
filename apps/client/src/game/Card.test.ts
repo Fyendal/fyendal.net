@@ -621,6 +621,22 @@ describe("CardFace counter icons", () => {
     expect(html).not.toContain("3 verse</div>");
   });
 
+  it("renders aim counters over the aim icon instead of a text chip", () => {
+    const html = renderToStaticMarkup(createElement(CardFace, {
+      card: {
+        instanceId: 54,
+        cardId: "DYN155",
+        owner: 0,
+        counters: { aim: 1 },
+      },
+    }));
+
+    expect(html).toContain("/icons/aim.png");
+    expect(html).toContain("1 aim counter");
+    expect(html).toContain("card-counter-54-aimc");
+    expect(html).not.toContain("1 aim</div>");
+  });
+
   it("renders flow, stain, and storm counters over their icons instead of text chips", () => {
     const html = renderToStaticMarkup(createElement(CardFace, {
       card: {
@@ -733,7 +749,7 @@ describe("CardFace counter icons", () => {
         cardId: "DYN090",
         owner: 0,
         counters: {
-          aim: 1,
+          rust: 1,
           harpoonX: 2,
           "harpoonReveal:0": 147,
           "harpoonReveal:1": 226,
@@ -741,7 +757,7 @@ describe("CardFace counter icons", () => {
       },
     }));
 
-    expect(html).toContain("1 aim");
+    expect(html).toContain("1 rust");
     expect(html).not.toContain("harpoonX");
     expect(html).not.toContain("harpoonReveal");
     expect(html).not.toContain("147");

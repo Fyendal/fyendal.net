@@ -366,7 +366,7 @@ export const penHighRarity: Record<string, CardScript> = {
       timing: "instant",
       tap: true,
       canActivate: (ctx) =>
-        ctx.player(ctx.seat).hand.some((card) => has(ctx, card, "arrow")) && ctx.player(ctx.seat).arsenal.length === 0,
+        ctx.player(ctx.seat).hand.some((card) => has(ctx, card, "arrow")) && ctx.hasArsenalSpace(),
       onActivate(ctx) {
         const arrows = ctx.player(ctx.seat).hand.filter((card) => has(ctx, card, "arrow"));
         ctx.requestCardChoice(

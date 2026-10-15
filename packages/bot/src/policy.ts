@@ -1365,6 +1365,8 @@ function hasSpareHandBlocker(
     (model.canUseDefender?.(card, input) ?? true)
   );
   if (candidates.length === 0) return false;
+  // The opening hand is replaced after turn one, so every card left is spare.
+  if (isOpeningTurnDefense(input)) return true;
   const remaining = offensiveCards.filter((card) => !spentIds.has(card.instanceId));
   const damage = model.evaluateResponse(remaining, responseInput).damageThreatened;
   return candidates.some((spare) =>

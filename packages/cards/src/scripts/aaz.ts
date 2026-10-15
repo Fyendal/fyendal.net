@@ -84,7 +84,7 @@ export const aaz: Record<string, CardScript> = {
       destroySelfCost: true,
       canActivate(ctx) {
         return (
-          ctx.player(ctx.seat).arsenal.length === 0 && ctx.player(ctx.seat).hand.some((card) => isArrow(ctx, card))
+          ctx.hasArsenalSpace() && ctx.player(ctx.seat).hand.some((card) => isArrow(ctx, card))
         );
       },
       onActivate(ctx) {
