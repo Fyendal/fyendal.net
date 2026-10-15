@@ -121,6 +121,45 @@ describe("SAZ — loading the arsenal", () => {
       .expectInZone(0, "bolt'n' shot|1", "arsenal")
       .expectInZone(0, BLUE, "hand") // drew a card
       .expectAP(0, 1); // go again
+    const arrow = s.state.players[0]!.arsenal[0]!;
+    expect(s.lastEvents).toContainEqual(expect.objectContaining({
+      card: expect.objectContaining({ instanceId: arrow.instanceId }),
+      from: { kind: "hand", seat: 0 },
+      to: { kind: "arsenal", seat: 0 },
+      fromPrivate: true,
+      toPrivate: false,
+    }));
+  });
+
+  it("Death Dealer loads the arrow before drawing, and its trigger sees the new deck top", () => {
+    const s = scenario({
+      seats: [
+        azaleaSeat({ hand: ["scouting shot|1", RED], deck: [BLUE, "snatch|2"] }),
+        { hero: "rhinar", hand: [] },
+      ],
+    });
+    s.activate(DEATH_DEALER, { pitch: [RED] });
+    const logStart = s.state.log.length;
+    const eventStart = s.transitionEvents.length;
+    s.chooseCard("scouting shot|1");
+    const arrow = s.state.players[0]!.arsenal[0]!;
+    const drawn = s.state.players[0]!.hand.find((card) => card.cardId === printingId(BLUE))!;
+    const top = s.state.players[0]!.deck[0]!;
+    expect(top.cardId).toBe(printingId("snatch|2"));
+    expect(s.transitionEvents.slice(eventStart).map((event) => [event.card.instanceId, event.from?.kind, event.to?.kind]))
+      .toEqual([
+        [arrow.instanceId, "hand", "arsenal"],
+        [drawn.instanceId, "deck", "hand"],
+      ]);
+    const log = s.state.log.slice(logStart);
+    const loaded = log.findIndex((entry) => entry.publicText?.includes("is put face up into"));
+    const drew = log.findIndex((entry) => entry.publicText?.includes("draws 1 card"));
+    // Scouting Shot's trigger resolves after Death Dealer's draw, so it looks
+    // at the card beneath the one drawn.
+    const looked = log.findIndex((entry) => entry.seatText?.[0]?.includes(`⟦${top.cardId}⟧`));
+    expect(loaded).toBeGreaterThanOrEqual(0);
+    expect(drew).toBeGreaterThan(loaded);
+    expect(looked).toBeGreaterThan(drew);
   });
 
   it("Bull's Eye Bracers loads an arrow with +1{p} this turn", () => {

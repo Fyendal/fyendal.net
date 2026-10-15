@@ -351,6 +351,54 @@ describe("PlayerHalf", () => {
     );
   });
 
+  it("centers New Horizon's zones and marks the additional one inactive while arsenal is empty", () => {
+    const html = renderPlayerHalf({
+      ...player,
+      arsenal: [],
+      arsenalCount: 0,
+      arsenalCapacity: 1,
+      arsenalZones: 2,
+    });
+
+    expect(html).toMatch(/zone-arsenal zone-arsenal-multiple[^>]*grid-area:3 \/ 4 \/ span 1 \/ span 3/);
+    expect(html).toMatch(/class="arsenal-slot arsenal-slot-empty" data-arsenal-slot="0"/);
+    expect(html).toMatch(
+      /class="arsenal-slot arsenal-slot-empty arsenal-slot-inactive" data-arsenal-slot="1"/,
+    );
+    expect(html).toContain('aria-label="Additional arsenal: needs a face-up card in arsenal"');
+  });
+
+  it("marks New Horizon's additional zone inactive beside a lone face-down card", () => {
+    const html = renderPlayerHalf({
+      ...player,
+      arsenal: [{ instanceId: 30, cardId: "TST-AMBUSH", owner: 0, faceDown: true, arsenalSlot: 0 }],
+      arsenalCount: 1,
+      arsenalCapacity: 1,
+      arsenalZones: 2,
+    });
+
+    expect(html).toMatch(/class="arsenal-slot" data-arsenal-slot="0"/);
+    expect(html).toMatch(
+      /class="arsenal-slot arsenal-slot-empty arsenal-slot-inactive" data-arsenal-slot="1"/,
+    );
+  });
+
+  it("marks an opponent's additional zone inactive beside a hidden arsenal card", () => {
+    const html = renderPlayerHalf({
+      ...player,
+      seat: 1,
+      arsenal: [],
+      arsenalCount: 1,
+      arsenalCapacity: 1,
+      arsenalZones: 2,
+    }, false);
+
+    expect(html).toContain('data-motion-card="1:arsenal:opaque"');
+    expect(html).toMatch(
+      /class="arsenal-slot arsenal-slot-empty arsenal-slot-inactive" data-arsenal-slot="1"/,
+    );
+  });
+
   it("renders an opponent's public and hidden arsenal cards in separate slots", () => {
     const html = renderPlayerHalf({
       ...player,

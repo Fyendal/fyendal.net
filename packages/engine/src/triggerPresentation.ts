@@ -23,6 +23,9 @@ export function triggerLabelMessage(
       },
     };
   }
+  if (layer.engineEffect?.kind === "on-enter-arsenal-hook") {
+    return { id: "engine.term.enter.arsenal" };
+  }
   if (layer.triggerIndex < 0) return undefined;
   const source = findCardAnywhere(state, layer.sourceInstanceId)?.card ?? layer.triggerSource;
   if (!source) return undefined;

@@ -439,7 +439,9 @@ describe("PgRoomStore storage", () => {
       command: { id: "store-bot-command", expectedVersion: room!.version },
     });
     expect(applied.ok).toBe(true);
+    // a bot intent restarts both idle clocks, like a human intent
     expect(seatDml(botQueries)).toEqual([
+      "UPDATE room_seats SET last_action_at = $3 WHERE room_code = $1 AND seat = $2",
       "UPDATE room_seats SET last_action_at = $3 WHERE room_code = $1 AND seat = $2",
     ]);
 

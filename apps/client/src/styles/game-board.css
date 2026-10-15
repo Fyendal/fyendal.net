@@ -576,6 +576,18 @@
   justify-content: center;
   border-radius: 6px;
 }
+/* Two zones span the weapon/hero/weapon tracks and sit as a pair centered
+   under the hero, one column gap apart. */
+.zone-arsenal-multiple .arsenal-slot { flex: 0 0 auto; }
+/* A granted zone that cannot hold a card right now: flat, dashed, and
+   recessive, so the usable zone beside it reads as the only open slot. */
+.mat-half .zone-arsenal .equipment-zone-empty.arsenal-zone-inactive {
+  border: 1px dashed #c2ad7859;
+  background: none;
+  box-shadow: none;
+}
+.arsenal-zone-inactive.hover-hint { border-radius: 6px; }
+.arsenal-zone-inactive .equipment-zone-icon { opacity: .22; }
 /* board-state strip right of the helmet: tokens/auras/items/allies */
 .board-strip {
   display: flex;

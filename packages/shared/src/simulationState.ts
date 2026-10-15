@@ -102,6 +102,12 @@ export interface PersistedStackLayerV1 {
     | { kind: "on-defended-modifier"; modifier: PersistedModifierV1 }
     | { kind: "fragment"; source: PersistedCardInstanceV1 }
     | { kind: "on-fragment-hook"; source: PersistedCardInstanceV1 }
+    | {
+        kind: "on-enter-arsenal-hook";
+        source: PersistedCardInstanceV1;
+        card: PersistedCardInstanceV1;
+        from: "hand" | "deck" | "graveyard" | "banish" | "arsenal";
+      }
     | { kind: "delayed-trigger"; source: PersistedCardInstanceV1; hook: string }
     | { kind: "on-hit-modifier"; modifier: PersistedModifierV1 };
 }

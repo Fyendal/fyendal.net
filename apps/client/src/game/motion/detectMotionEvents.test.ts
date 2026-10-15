@@ -1389,6 +1389,66 @@ describe("game motion detection", () => {
     expect(draw!.lingerUntilMs).toBe(discard!.delayMs);
   });
 
+  it("plays an arsenal move recorded before an effect draw first", () => {
+    const arrow = face(124);
+    const drawn = face(125);
+    const previous = view([
+      player(0, { hand: [arrow], handCount: 1, deckCount: 8 }),
+      player(1),
+    ]);
+    const current = view([
+      player(0, { hand: [drawn], handCount: 1, deckCount: 7, arsenal: [arrow], arsenalCount: 1 }),
+      player(1),
+    ]);
+    // Death Dealer records the arsenal move before its draw.
+    const events = transitionMotionEvents(previous, current, {
+      fromVersion: 14,
+      kind: "forward",
+      events: [
+        { kind: "move", from: { kind: "hand", seat: 0 }, to: { kind: "arsenal", seat: 0 }, count: 1, instanceId: arrow.instanceId },
+        { kind: "move", from: { kind: "deck", seat: 0 }, to: { kind: "hand", seat: 0 }, count: 1, instanceId: drawn.instanceId },
+      ],
+    }, "forward");
+    expect(events.filter((event) => event.kind === "move")).toEqual([
+      expect.objectContaining({ timeline: "effect-arsenal", instanceId: arrow.instanceId }),
+      expect.objectContaining({ timeline: "effect-draw", instanceId: drawn.instanceId }),
+    ]);
+
+    const rect = (left: number) => ({ left, top: 300, width: 100, height: 138 });
+    const batch = resolveMotionBatch(events, {
+      cards: new Map([[`0:hand:${arrow.instanceId}`, rect(100)]]),
+      zones: new Map([["0:deck", rect(400)], ["0:hand", rect(100)], ["0:arsenal", rect(250)]]),
+    }, {
+      cards: new Map([[`0:hand:${drawn.instanceId}`, rect(100)], [`0:arsenal:${arrow.instanceId}`, rect(250)]]),
+      zones: new Map([["0:hand", rect(100)], ["0:arsenal", rect(250)]]),
+    }, "death-dealer");
+    const arsenal = batch?.flights.find((flight) => flight.mode === "arsenal");
+    const draw = batch?.flights.find((flight) => flight.mode === "draw");
+    expect(arsenal).toBeDefined();
+    expect(draw).toBeDefined();
+    expect(draw!.delayMs).toBeGreaterThan(arsenal!.delayMs);
+  });
+
+  it("keeps an arsenal move recorded after an effect draw in its usual phase", () => {
+    const drawn = face(126);
+    const previous = view([player(0, { deckCount: 8 }), player(1)]);
+    const current = view([
+      player(0, { deckCount: 7, arsenal: [drawn], arsenalCount: 1 }),
+      player(1),
+    ]);
+    const events = transitionMotionEvents(previous, current, {
+      fromVersion: 15,
+      kind: "forward",
+      events: [
+        { kind: "move", from: { kind: "deck", seat: 0 }, to: { kind: "hand", seat: 0 }, count: 1, instanceId: drawn.instanceId },
+        { kind: "move", from: { kind: "hand", seat: 0 }, to: { kind: "arsenal", seat: 0 }, count: 1, instanceId: drawn.instanceId },
+      ],
+    }, "forward");
+    const arsenal = events.find((event) => event.kind === "move" && event.destination.kind === "arsenal");
+    expect(arsenal).toBeDefined();
+    expect(arsenal!.kind === "move" && arsenal!.timeline).toBeFalsy();
+  });
+
   it("keeps a drawn card visible when an older hand card is discarded", () => {
     const discarded = face(122);
     const drawn = face(123);

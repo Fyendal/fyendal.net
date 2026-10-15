@@ -20615,6 +20615,16 @@
       "value": " life"
     }
   ],
+  "engine.log.trigger.enter.arsenal": [
+    {
+      "type": 1,
+      "value": "source"
+    },
+    {
+      "type": 0,
+      "value": " triggers: When put face up into arsenal"
+    }
+  ],
   "engine.log.trigger.facedown": [
     {
       "type": 1,
@@ -20891,6 +20901,12 @@
     {
       "type": 0,
       "value": "Delayed effect"
+    }
+  ],
+  "engine.term.enter.arsenal": [
+    {
+      "type": 0,
+      "value": "When put face up into arsenal"
     }
   ],
   "engine.term.triggered.ability": [
@@ -24111,6 +24127,12 @@
     {
       "type": 0,
       "value": "Arsenal"
+    }
+  ],
+  "game.zone.arsenalInactive": [
+    {
+      "type": 0,
+      "value": "Additional arsenal: needs a face-up card in arsenal"
     }
   ],
   "game.zone.arsenalSlot": [

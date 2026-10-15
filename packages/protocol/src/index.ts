@@ -1068,7 +1068,7 @@ function playerView(value: unknown): value is PlayerView {
   if (!player || !exactKeys(player, [
     "seat", "heroCardId", "heroInstanceId", "heroTapped", "heroCounters", "heroDefCounters", "heroSubcards", "heroAbilityLabels", "heroAttackAbilityIndexes", "heroName",
     "life", "actionPoints", "resources", "chi", "hand", "handCount", "deckCount", "deck",
-    "arsenal", "arsenalCount", "arsenalCapacity", "pitch", "pitchCount", "graveyard", "banish", "soul",
+    "arsenal", "arsenalCount", "arsenalCapacity", "arsenalZones", "pitch", "pitchCount", "graveyard", "banish", "soul",
     "visibleDeckTop", "equipment", "weapons", "board",
   ], [
     "seat", "heroCardId", "heroInstanceId", "heroName", "life", "actionPoints", "resources",
@@ -1089,6 +1089,7 @@ function playerView(value: unknown): value is PlayerView {
     && nonNegativeInteger(player.deckCount) && optional(player.deck, cardViews) && cardViews(player.arsenal)
     && nonNegativeInteger(player.arsenalCount)
     && optional(player.arsenalCapacity, (v): v is number => v === 1 || v === 2)
+    && optional(player.arsenalZones, (v): v is number => v === 1 || v === 2)
     && cardViews(player.pitch)
     && nonNegativeInteger(player.pitchCount) && cardViews(player.graveyard) && cardViews(player.banish)
     && cardViews(player.soul)

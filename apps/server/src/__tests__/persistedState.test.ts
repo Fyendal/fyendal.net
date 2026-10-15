@@ -936,6 +936,19 @@ describe("PersistedStateV1", () => {
       {
         sourceInstanceId: topCard.instanceId,
         seat: 0,
+        triggerIndex: -11,
+        label: "When put face up into arsenal",
+        optional: false,
+        engineEffect: {
+          kind: "on-enter-arsenal-hook",
+          source: { instanceId: topCard.instanceId, cardId: topCard.cardId, owner: 0 },
+          card: { instanceId: topCard.instanceId, cardId: topCard.cardId, owner: 0, arsenalSlot: 0 },
+          from: "hand",
+        },
+      },
+      {
+        sourceInstanceId: topCard.instanceId,
+        seat: 0,
         triggerIndex: -2000,
         label: "Resolve wager: Winner creates Gold",
         optional: false,

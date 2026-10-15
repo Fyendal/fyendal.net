@@ -200,11 +200,9 @@ export const saz: Record<string, CardScript> = {
       if (hook !== "death-dealer" || option === "pass") return;
       const card = ctx.player(ctx.seat).hand.find((c) => c.instanceId === Number(option));
       if (!card) return;
-      // the arrow comes from the hand, so drawing first is equivalent — and
-      // the arrow's enter-arsenal trigger then correctly sees the post-draw
-      // deck (a trigger resolves after the ability that caused it)
-      ctx.drawCards(ctx.seat, 1);
-      ctx.putIntoArsenal(card.instanceId, "hand");
+      // The arrow's enter-arsenal trigger resolves after this ability, so it
+      // sees the post-draw deck.
+      if (ctx.putIntoArsenal(card.instanceId, "hand")) ctx.drawCards(ctx.seat, 1);
     },
   },
 
@@ -213,8 +211,8 @@ export const saz: Record<string, CardScript> = {
   "crow's nest|0": {
     // "Whenever an arrow is put face up into your arsenal from your deck, you
     //  may pay {r}. If you do, put an aim counter on it."
-    onEnterArsenal(ctx, card, from) {
-      if (from !== "deck" || !isArrow(ctx, card)) return;
+    canTriggerOnEnterArsenal: (ctx, card, from) => from === "deck" && isArrow(ctx, card),
+    onEnterArsenal(ctx, card) {
       ctx.requestPayment(
         `crows-nest:${card.instanceId}`,
         decisionPrompt("Crow's Nest: pay {r} to put an aim counter on the arrow?", "card.saz.crowsnest.pay", {

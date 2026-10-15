@@ -399,7 +399,7 @@ function validateStackLayer(value: unknown, code: string, path: string): void {
     const effect = object(v, code, p);
     const kind = oneOf(
       effect.kind,
-      ["gain-action-points", "lose-life", "phantasm-destroy", "spectra-destroy", "watery-grave", "wager-result", "on-hit-hook", "on-effect-hit-hook", "on-friendly-effect-hit-hook", "on-defend-hook", "on-friendly-defended-hook", "on-defended-modifier", "fragment", "on-fragment-hook", "delayed-trigger", "on-hit-modifier"] as const,
+      ["gain-action-points", "lose-life", "phantasm-destroy", "spectra-destroy", "watery-grave", "wager-result", "on-hit-hook", "on-effect-hit-hook", "on-friendly-effect-hit-hook", "on-defend-hook", "on-friendly-defended-hook", "on-defended-modifier", "fragment", "on-fragment-hook", "on-enter-arsenal-hook", "delayed-trigger", "on-hit-modifier"] as const,
       code,
       `${p}.kind`,
     );
@@ -422,6 +422,11 @@ function validateStackLayer(value: unknown, code: string, path: string): void {
     } else if (kind === "on-hit-hook" || kind === "on-defend-hook" || kind === "fragment" || kind === "on-fragment-hook") {
       const hit = exact(v, code, p, ["kind", "source"]);
       validateCard(hit.source, code, `${p}.source`);
+    } else if (kind === "on-enter-arsenal-hook") {
+      const entered = exact(v, code, p, ["kind", "source", "card", "from"]);
+      validateCard(entered.source, code, `${p}.source`);
+      validateCard(entered.card, code, `${p}.card`);
+      oneOf(entered.from, ["hand", "deck", "graveyard", "banish", "arsenal"] as const, code, `${p}.from`);
     } else if (kind === "delayed-trigger") {
       const delayed = exact(v, code, p, ["kind", "source", "hook"]);
       validateCard(delayed.source, code, `${p}.source`);

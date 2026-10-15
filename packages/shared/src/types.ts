@@ -320,6 +320,9 @@ export interface PlayerView {
   arsenalCount: number;
   /** Currently usable arsenal zones. Optional for older replay projections. */
   arsenalCapacity?: number;
+  /** Arsenal zones the player has, including an additional zone that is
+   * currently unusable. Optional for older replay projections. */
+  arsenalZones?: number;
   pitch: CardView[]; // own pitch zone; opponent sees count only
   pitchCount: number;
   graveyard: CardView[];

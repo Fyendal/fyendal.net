@@ -7,6 +7,7 @@ import { CardBack, CardFace, InactiveZoneCard } from "../Card.js";
 import { EffectChips } from "../EffectChips.js";
 import { EquipmentStack } from "../EquipmentStack.js";
 import { HeroEmote } from "../HeroEmote.js";
+import { HoverHint } from "../../history/HoverHint.js";
 import { PitchStack } from "../PitchStack.js";
 import {
   motionLocationKey,
@@ -31,6 +32,8 @@ const EMPTY_INSTANCE_IDS: ReadonlySet<number> = new Set();
 interface ArsenalSlotView {
   card?: CardView;
   hidden: boolean;
+  /** An empty zone the player has but cannot currently put a card into. */
+  inactive: boolean;
   opaqueOccurrence?: number;
 }
 
@@ -42,11 +45,11 @@ function arsenalSlotViews(
   const visibleCards = player.arsenal.filter(
     (card) => !card.hidden && !optimisticallyHiddenIds.has(card.instanceId),
   );
-  const capacity = player.arsenalCapacity === 2 || player.arsenalCount > 1 ||
+  const zones = player.arsenalZones === 2 || player.arsenalCapacity === 2 || player.arsenalCount > 1 ||
       visibleCards.some((card) => card.arsenalSlot === 1)
     ? 2
     : 1;
-  const slots = Array.from({ length: capacity }, (): ArsenalSlotView => ({ hidden: false }));
+  const slots = Array.from({ length: zones }, (): ArsenalSlotView => ({ hidden: false, inactive: false }));
 
   for (const card of visibleCards) {
     const requestedSlot = card.arsenalSlot;
@@ -55,16 +58,25 @@ function arsenalSlotViews(
         slots[requestedSlot]?.card === undefined && slots[requestedSlot]?.hidden === false
       ? requestedSlot
       : fallbackSlot;
-    if (slot >= 0) slots[slot] = { card, hidden: false };
+    if (slot >= 0) slots[slot] = { card, hidden: false, inactive: false };
   }
 
   let hiddenCards = mine ? 0 : Math.max(0, player.arsenalCount - visibleCards.length);
   let opaqueOccurrence = visibleCards.length;
   for (let slot = 0; slot < slots.length && hiddenCards > 0; slot++) {
     if (slots[slot]?.card !== undefined) continue;
-    slots[slot] = { hidden: true, opaqueOccurrence };
+    slots[slot] = { hidden: true, inactive: false, opaqueOccurrence };
     hiddenCards--;
     opaqueOccurrence++;
+  }
+
+  // Usable empty zones fill from the first slot; any remaining empty zone is
+  // granted but inactive (an additional zone with no face-up card in arsenal).
+  let openZones = Math.max(0, (player.arsenalCapacity ?? zones) - player.arsenalCount);
+  for (const slot of slots) {
+    if (slot.card !== undefined || slot.hidden) continue;
+    if (openZones > 0) openZones--;
+    else slot.inactive = true;
   }
 
   return slots;
@@ -593,9 +605,12 @@ export function PlayerHalf({
         ) : null}
       </MatZone>
       {equipmentZone("legs", `${row(3)} / 1`)}
-      <EffectChips effects={ongoing} area={`${row(3)} / 2 / span 1 / span 3`} />
+      <EffectChips
+        effects={ongoing}
+        area={`${row(3)} / 2 / span 1 / span ${hasAdditionalArsenal ? 2 : 3}`}
+      />
       <MatZone
-        area={`${row(3)} / 5 / span 1 / span ${arsenalSlots.length}`}
+        area={hasAdditionalArsenal ? `${row(3)} / 4 / span 1 / span 3` : `${row(3)} / 5`}
         label={zoneLabel("arsenal")}
         className={`zone-arsenal${hasAdditionalArsenal ? " zone-arsenal-multiple" : ""}`}
         motionZone={motionLocationKey({ kind: "arsenal", seat: player.seat })}
@@ -614,7 +629,9 @@ export function PlayerHalf({
             return (
               <div
                 key={slotIndex}
-                className={`arsenal-slot${card === undefined && !slot.hidden ? " arsenal-slot-empty" : ""}`}
+                className={`arsenal-slot${card === undefined && !slot.hidden ? " arsenal-slot-empty" : ""}${
+                  slot.inactive ? " arsenal-slot-inactive" : ""
+                }`}
                 data-arsenal-slot={slotIndex}
                 role="group"
                 aria-label={slotLabel}
@@ -651,6 +668,13 @@ export function PlayerHalf({
                       slot.opaqueOccurrence,
                     )}
                   />
+                ) : slot.inactive ? (
+                  <HoverHint
+                    className="card-zone equipment-zone-empty arsenal-zone-inactive"
+                    hint={intl.formatMessage({ id: "game.zone.arsenalInactive" })}
+                  >
+                    <span className="equipment-zone-icon equipment-zone-icon-arsenal" aria-hidden="true" />
+                  </HoverHint>
                 ) : (
                   <span className="card-zone equipment-zone-empty" aria-hidden="true">
                     <span className="equipment-zone-icon equipment-zone-icon-arsenal" />

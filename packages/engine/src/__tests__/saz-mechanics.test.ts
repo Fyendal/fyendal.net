@@ -224,7 +224,7 @@ describe("arrows", () => {
 // ── putIntoArsenal / onEnterArsenal ─────────────────────────────────────────
 
 describe("putIntoArsenal", () => {
-  it("moves the card and fires onEnterArsenal on the card and on permanents", () => {
+  it("moves the card and triggers onEnterArsenal on the card and on permanents", () => {
     const s = makeGame({ weapons: ["LOADER", "SWORD"], deck: ["ARROW_ETB", ...Array.from({ length: 39 }, () => "BLOCK3")] });
     // the quiver lives in a weapon slot — swap it in alongside the loader
     const quiver: CardInstance = { instanceId: s.nextInstanceId++, cardId: "QUIVER", owner: 0 };
@@ -233,8 +233,25 @@ describe("putIntoArsenal", () => {
     let next = apply(s, 0, { kind: "activate-ability", sourceInstanceId: loader.instanceId, pitchInstanceIds: [] });
     next = apply(next, next.priorityPlayer, { kind: "pass" });
     next = apply(next, next.priorityPlayer, { kind: "pass" });
-    const arrow = player(next, 0).arsenal.find((c) => c.cardId === "ARROW_ETB");
+    // Both hooks are simultaneous triggers created by the resolved effect;
+    // neither has applied before its controller orders and resolves them.
+    expect(next.pendingDecision?.kind).toBe("order-triggers");
+    expect(next.pendingDecision?.optionMessages).toEqual([
+      { id: "engine.term.enter.arsenal" },
+      { id: "engine.term.enter.arsenal" },
+    ]);
+    let arrow = player(next, 0).arsenal.find((c) => c.cardId === "ARROW_ETB");
     expect(arrow).toBeTruthy();
+    expect(arrow!.tempPower).toBeUndefined();
+    expect(arrow!.counters?.aim).toBeUndefined();
+    for (let guard = 0; guard < 8 && (next.pendingDecision || next.stack.length > 0); guard++) {
+      const seat = next.pendingDecision?.player ?? next.priorityPlayer;
+      const intent = legalIntents(next, seat).find((candidate) => ["order-triggers", "choose", "pass"].includes(candidate.kind));
+      expect(intent).toBeDefined();
+      next = apply(next, seat, intent!);
+    }
+    expect(next.stack).toHaveLength(0);
+    arrow = player(next, 0).arsenal.find((c) => c.cardId === "ARROW_ETB");
     expect(arrow!.tempPower).toBe(2); // the card's own onEnterArsenal
     expect(arrow!.counters?.aim).toBe(1); // the quiver's onEnterArsenal
     expect(player(next, 0).deck.some((c) => c.cardId === "ARROW_ETB")).toBe(false);

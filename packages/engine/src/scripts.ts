@@ -609,8 +609,9 @@ export interface ScriptCtx {
    *  additional zones granted by active continuous effects. */
   hasArsenalSpace(targetSeat?: number): boolean;
   /** Put one of the controller's cards (from hand, deck, graveyard, or banish, by instance id)
-   *  into their arsenal face up, firing onEnterArsenal hooks (the entering
-   *  card's own and the controller's permanents'). `from` names the source
+   *  into their arsenal face up, triggering onEnterArsenal hooks (the entering
+   *  card's own and the controller's permanents') after the current effect
+   *  finishes. `from` names the source
    *  zone for triggers that care ("from your deck").
    *  Returns false when the card isn't in the named zone or its owner's
    *  arsenal has no empty zone. */
@@ -1609,12 +1610,17 @@ export interface CardScript {
    *  this, you may search your deck …"). */
   onBecomeHero?(ctx: ScriptCtx): void;
   /** A card was put face up into this script's controller's arsenal by an
-   *  effect (`ctx.putIntoArsenal`). Fires for the entering card itself ("when
-   *  this is put face-up into your arsenal") and for the controller's
-   *  permanents ("whenever an arrow is put face up into your arsenal from
-   *  your deck"). `from` names the zone it came from (for example, "hand",
-   *  "deck", or "banish"). */
+   *  effect (`ctx.putIntoArsenal`) or turned face up there. Triggers for the
+   *  entering card itself ("when this is put face-up into your arsenal") and
+   *  for the controller's permanents ("whenever an arrow is put face up into
+   *  your arsenal from your deck"). Each hook is a triggered layer that
+   *  resolves after the effect that moved the card finishes. `from` names the
+   *  zone it came from (for example, "hand", "deck", or "banish"; "arsenal"
+   *  when turned face up). */
   onEnterArsenal?(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, from: string): void;
+  /** Trigger condition for `onEnterArsenal`. When it returns false the
+   *  entering card creates no triggered layer for this source. */
+  canTriggerOnEnterArsenal?(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, from: string): boolean;
   /** This permanent was destroyed. */
   onDestroyed?(ctx: ScriptCtx): void;
   /** This Runechant permanent was usurped by the current attack. The Usurp

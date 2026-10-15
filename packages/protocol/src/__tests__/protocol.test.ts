@@ -615,6 +615,14 @@ describe("GameView and server messages", () => {
     const invalidCapacity = gameView();
     (invalidCapacity.players[0] as unknown as { arsenalCapacity?: number }).arsenalCapacity = 3;
     expect(decodeGameView(invalidCapacity)).toBeNull();
+
+    const inactiveZone = gameView();
+    (inactiveZone.players[0] as unknown as { arsenalZones?: number }).arsenalZones = 2;
+    expect(decodeGameView(inactiveZone)).not.toBeNull();
+
+    const invalidZones = gameView();
+    (invalidZones.players[0] as unknown as { arsenalZones?: number }).arsenalZones = 0;
+    expect(decodeGameView(invalidZones)).toBeNull();
   });
 
   it("accepts server-grouped stack layers with a bounded count", () => {

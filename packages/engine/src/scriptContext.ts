@@ -10,7 +10,7 @@ import type {
 } from "./scripts.js";
 import { scriptPromptParts } from "./scriptPresentation.js";
 import { abilityList, oncePerTurnEffectFlagKey } from "./scripts.js";
-import type { CardInstance, ChainLinkState, PendingArcane, PendingDecisionState, PlayerState } from "./state.js";
+import type { CardInstance, ChainLinkState, EnterArsenalZone, PendingArcane, PendingDecisionState, PlayerState } from "./state.js";
 import { queueDecisionBehindCrank } from "./decisionQueue.js";
 import { rngInt } from "./rng.js";
 import {
@@ -2416,9 +2416,19 @@ export function makeCtx(
         : owner.banish;
       const card = removeFromArray(source, instanceId);
       if (!card) return false;
+      const sourceFaceDown = card.faceDown === true;
       card.faceDown = opts?.faceUp === false ? true : undefined;
       card.arsenalSlot = nextArsenalSlot(owner);
       owner.arsenal.push(card);
+      runtime.transitions.move(
+        card,
+        transitionZone(from, owner.seat),
+        transitionZone("arsenal", owner.seat),
+        {
+          from: transitionZoneIsPrivate(from, sourceFaceDown),
+          to: transitionZoneIsPrivate("arsenal", card.faceDown === true),
+        },
+      );
       if (fromGraveyard) {
         runtime.events.fireCardLeavesGraveyard(state, owner.seat, card, "arsenal");
       }
@@ -2450,7 +2460,7 @@ export function makeCtx(
           },
         ));
       }
-      if (!card.faceDown) fireEnterArsenal(state, runtime, owner.seat, card, from);
+      if (!card.faceDown) queueEnterArsenalTriggers(state, runtime, owner.seat, card, from);
       if (!card.faceDown && from === "deck") {
         runtime.events.queueTriggeredEvent(
           state,
@@ -2650,7 +2660,7 @@ export function makeCtx(
           hero: logCardValue(owner!.heroCardId),
         },
       ));
-      fireEnterArsenal(state, runtime, owner!.seat, card, "arsenal");
+      queueEnterArsenalTriggers(state, runtime, owner!.seat, card, "arsenal");
       return true;
     },
     putOnDeckTop(instanceId) {
@@ -3361,19 +3371,45 @@ export function discardToGraveyard(
   );
 }
 
-/** Fire onEnterArsenal for the entering card itself, then the controller's
- *  other permanents (hero, equipment, the weapon slots, board). */
-function fireEnterArsenal(
+/** Queue onEnterArsenal triggers for the entering card itself, then the
+ *  controller's other permanents (hero, equipment, the weapon slots, board).
+ *  The layers resolve after the effect that moved the card finishes, so its
+ *  remaining instructions (such as "If you do, draw a card") happen first. */
+function queueEnterArsenalTriggers(
   state: GameStateInternal,
   runtime: EngineRuntime,
   seat: number,
   card: CardInstance,
-  from: string,
+  from: EnterArsenalZone,
 ): void {
-  scriptOf(state, card.cardId, card)?.onEnterArsenal?.(runtime.makeCtx(state, seat, card), card, from);
-  for (const src of hookSources(state, seat, { equipment: true, weapons: true, board: true })) {
-    if (src.instanceId === card.instanceId) continue;
-    scriptOf(state, src.cardId, src)?.onEnterArsenal?.(runtime.makeCtx(state, seat, src), card, from);
+  const sources = [
+    card,
+    ...hookSources(state, seat, { equipment: true, weapons: true, board: true })
+      .filter((src) => src.instanceId !== card.instanceId),
+  ];
+  for (const source of sources) {
+    const script = scriptOf(state, source.cardId, source);
+    if (!script?.onEnterArsenal) continue;
+    if (script.canTriggerOnEnterArsenal &&
+      !script.canTriggerOnEnterArsenal(runtime.makeCtx(state, seat, source), card, from)) continue;
+    (state.pendingTriggeredLayers ??= []).push({
+      sourceInstanceId: source.instanceId,
+      seat,
+      triggerIndex: -11,
+      label: "When put face up into arsenal",
+      optional: false,
+      engineEffect: {
+        kind: "on-enter-arsenal-hook",
+        source: runtime.commands.snapshotSerializable(source),
+        card: runtime.commands.snapshotSerializable(card),
+        from,
+      },
+    });
+    logPublic(state, gameLogMessage(
+      `${nameOf(state, source.cardId)} triggers: When put face up into arsenal`,
+      "engine.log.trigger.enter.arsenal",
+      { source: logCardValue(source.cardId) },
+    ));
   }
 }
 

@@ -173,6 +173,9 @@ export interface TokenCreationReplacementBatch extends TokenCreationRequest {
   controllerSeats?: number[];
 }
 
+/** Where a card came from when it was put or turned face up in arsenal. */
+export type EnterArsenalZone = "hand" | "deck" | "graveyard" | "banish" | "arsenal";
+
 /** A triggered ability or a played card (instant / reaction) waiting on the stack. */
 export interface StackLayer {
   sourceInstanceId: number;
@@ -269,6 +272,16 @@ export interface StackLayer {
     | { kind: "fragment"; source: CardInstance }
     /** A card's "whenever this fragments" trigger, generated when Fragment resolves. */
     | { kind: "on-fragment-hook"; source: CardInstance }
+    /** An enter-arsenal script hook. A card put or turned face up in arsenal
+     * triggers its own hook and its controller's permanents' hooks; each
+     * resolves after the effect that moved the card. Snapshots keep the layer
+     * independent if either card changes zones first. */
+    | {
+        kind: "on-enter-arsenal-hook";
+        source: CardInstance;
+        card: CardInstance;
+        from: EnterArsenalZone;
+      }
     /** A script-scheduled event whose source may since have changed zones. */
     | { kind: "delayed-trigger"; source: CardInstance; hook: string }
     /** A granted on-hit effect (for example, "when this hits, draw a card").

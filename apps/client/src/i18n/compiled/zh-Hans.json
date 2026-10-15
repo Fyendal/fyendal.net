@@ -19856,6 +19856,16 @@
       "value": " 点生命"
     }
   ],
+  "engine.log.trigger.enter.arsenal": [
+    {
+      "type": 1,
+      "value": "source"
+    },
+    {
+      "type": 0,
+      "value": " 触发：正面朝上放入 arsenal 时"
+    }
+  ],
   "engine.log.trigger.facedown": [
     {
       "type": 1,
@@ -20114,6 +20124,12 @@
     {
       "type": 0,
       "value": "延迟效果"
+    }
+  ],
+  "engine.term.enter.arsenal": [
+    {
+      "type": 0,
+      "value": "正面朝上放入 arsenal 时"
     }
   ],
   "engine.term.triggered.ability": [
@@ -23136,6 +23152,12 @@
     {
       "type": 0,
       "value": "Arsenal"
+    }
+  ],
+  "game.zone.arsenalInactive": [
+    {
+      "type": 0,
+      "value": "额外 arsenal：需要 arsenal 中有一张正面朝上的牌"
     }
   ],
   "game.zone.arsenalSlot": [

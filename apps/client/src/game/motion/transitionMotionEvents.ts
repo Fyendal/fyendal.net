@@ -164,13 +164,23 @@ export function transitionMotionEvents(
   // Draw-up crosses the turn boundary; draws within a turn belong to the
   // resolving card effect and must precede any discard recorded after them.
   const isEffectDraw = direction === "forward" && sourceView.turn === destinationView.turn;
+  // The timeline otherwise plays hand -> arsenal after effect draws. An effect
+  // that loads arsenal and then draws (Death Dealer) keeps its recorded order.
+  const lastEffectDrawIndex = new Map<number, number>();
+  if (isEffectDraw) {
+    moves.forEach((move, index) => {
+      if (move.from?.kind === "deck" && move.to?.kind === "hand") lastEffectDrawIndex.set(move.to.seat, index);
+    });
+  }
 
-  for (const move of moves) {
+  for (const [moveIndex, move] of moves.entries()) {
     const drawsForEffect = isEffectDraw
       && move.from?.kind === "deck" && move.to?.kind === "hand";
     const discardsAfterDraw = isEffectDraw
       && move.from?.kind === "hand" && move.to?.kind === "graveyard"
       && effectDrawSeats.has(move.from.seat);
+    const arsenalsBeforeDraw = move.from?.kind === "hand" && move.to?.kind === "arsenal"
+      && moveIndex < (lastEffectDrawIndex.get(move.from.seat) ?? -1);
     if (drawsForEffect && move.to) effectDrawSeats.add(move.to.seat);
     const sourcePresentation = presentationFor(source.cards, move.instanceId, move.from);
     const destinationPresentation = presentationFor(destination.cards, move.instanceId, move.to);
@@ -230,6 +240,7 @@ export function transitionMotionEvents(
           count: move.count,
           confidence: move.instanceId === undefined ? "inferred" : "exact",
           ...(drawsForEffect ? { timeline: "effect-draw" as const } : {}),
+          ...(arsenalsBeforeDraw ? { timeline: "effect-arsenal" as const } : {}),
           ...(discardsAfterDraw ? { timeline: "effect-discard" as const } : {}),
           ...(move.instanceId === undefined ? {} : { instanceId: move.instanceId }),
           ...(sourcePresentationKey ? { sourcePresentationKey } : {}),

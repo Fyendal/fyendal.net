@@ -195,14 +195,20 @@ export function drawCards(
   }
 }
 
+/** Number of arsenal zones a player's permanents grant, including an
+ * additional zone that is currently unusable. */
+export function arsenalZoneCount(state: GameStateInternal, seat: number): number {
+  const grantsExtra = controlledPermanents(state, seat, { faceDownEquipment: false })
+    .some((source) => scriptOf(state, source.cardId, source)?.additionalArsenalZoneWhileFaceUp === true);
+  return grantsExtra ? 2 : 1;
+}
+
 /** Number of currently usable arsenal zones for a player. Existing cards do
  * not disappear if a continuous extra-zone effect later turns off. */
 export function arsenalCapacity(state: GameStateInternal, seat: number): number {
   const player = state.players[seat] as PlayerState;
   if (!player.arsenal.some((card) => !card.faceDown)) return 1;
-  const grantsExtra = controlledPermanents(state, seat, { faceDownEquipment: false })
-    .some((source) => scriptOf(state, source.cardId, source)?.additionalArsenalZoneWhileFaceUp === true);
-  return grantsExtra ? 2 : 1;
+  return arsenalZoneCount(state, seat);
 }
 
 /** "if you've controlled a card named X this turn" tracking (per-turn flags,

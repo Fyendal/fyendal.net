@@ -969,6 +969,23 @@ function advanceStack(state: GameStateInternal, runtime: EngineRuntime): void {
     continueStack(state, runtime, layer.seat);
     return;
   }
+  if (layer.engineEffect?.kind === "on-enter-arsenal-hook") {
+    state.stack.shift();
+    const { source: sourceSnapshot, card: cardSnapshot, from } = layer.engineEffect;
+    const source = findCardAnywhere(state, sourceSnapshot.instanceId)?.card ?? sourceSnapshot;
+    const card = findCardAnywhere(state, cardSnapshot.instanceId)?.card ?? cardSnapshot;
+    scriptOf(state, source.cardId, source)?.onEnterArsenal?.(
+      runtime.makeCtx(state, layer.seat, source, currentLink(state)),
+      card,
+      from,
+    );
+    if (state.pendingDecision?.chooseHook) {
+      state.pendingDecision.resume = { kind: "continue-stack", seat: layer.seat };
+      return;
+    }
+    continueStack(state, runtime, layer.seat);
+    return;
+  }
   if (layer.engineEffect?.kind === "delayed-trigger") {
     state.stack.shift();
     const { source, hook } = layer.engineEffect;

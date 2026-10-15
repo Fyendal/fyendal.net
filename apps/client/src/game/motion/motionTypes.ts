@@ -54,7 +54,7 @@ export interface MoveMotionEvent {
   sourcePresentationKey?: string;
   destinationPresentationKey?: string;
   destinationCoverVisual?: MotionVisual;
-  timeline?: "effect-draw" | "effect-discard" | "turn-start";
+  timeline?: "effect-arsenal" | "effect-draw" | "effect-discard" | "turn-start";
 }
 
 /** A card that remains in hand while the authoritative snapshot changes the

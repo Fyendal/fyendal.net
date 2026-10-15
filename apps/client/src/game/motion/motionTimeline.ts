@@ -7,6 +7,7 @@ export type MotionTimelinePhase =
   | "movement"
   | "stack-entry"
   | "resolution"
+  | "effect-arsenal"
   | "effect-draw"
   | "effect-discard"
   | "trigger"
@@ -23,6 +24,7 @@ const PHASE_ORDER: readonly MotionTimelinePhase[] = [
   "movement",
   "stack-entry",
   "resolution",
+  "effect-arsenal",
   "effect-draw",
   "effect-discard",
   "trigger",
@@ -42,14 +44,15 @@ const PHASE_STAGE: Readonly<Record<MotionTimelinePhase, number>> = {
   movement: 2,
   "stack-entry": 3,
   resolution: 4,
-  "effect-draw": 5,
-  "effect-discard": 6,
-  trigger: 7,
-  result: 8,
-  arsenal: 9,
-  cleanup: 10,
-  draw: 11,
-  "turn-start": 12,
+  "effect-arsenal": 5,
+  "effect-draw": 6,
+  "effect-discard": 7,
+  trigger: 8,
+  result: 9,
+  arsenal: 10,
+  cleanup: 11,
+  draw: 12,
+  "turn-start": 13,
 };
 
 export const EFFECT_HAND_PAUSE_MS = 280;
