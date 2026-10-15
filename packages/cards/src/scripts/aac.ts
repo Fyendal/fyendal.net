@@ -97,7 +97,7 @@ export const aac: Record<string, CardScript> = {
       const top = ctx.player(opponentSeat(ctx)).deck[0];
       if (!top) return;
       ctx.banish(top.instanceId);
-      ctx.allowPlayFrom(top.instanceId, "banish", { untilNextTurn: true, forSeat: ctx.seat });
+      ctx.allowPlayFrom(top.instanceId, "banish", { untilEndOfNextTurn: true, forSeat: ctx.seat });
     },
   },
   "inverter's nightcowl|0": {

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { projectStateFor } from "@fyendal/engine";
 import { cardData, scripts } from "../../index.js";
-import { scenario } from "../harness.js";
+import { printingId, scenario } from "../harness.js";
 
 const BLUE = "wrecker romp|3";
 const NON_ATTACK = "nimblism|3";
@@ -477,6 +477,33 @@ describe("OUT — registration and core mechanics", () => {
 });
 
 describe("OUT — rules regression coverage", () => {
+  it("Infiltrate's banished card stays playable until the end of the attacker's next turn", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", hand: ["infiltrate|1"] },
+        { hero: "dorinthea", hand: [], deck: ["cut through|1"] },
+      ],
+    });
+
+    g.play("infiltrate|1").blockWith().settle().expectInZone(1, "cut through|1", "banish");
+    g.endTurn().endTurn().expectTurn(3);
+    g.play("cut through|1", { fromZone: "banish" }).expectNotInZone(1, "cut through|1", "banish");
+    expect(g.state.chain.at(-1)?.attackingCard.cardId).toBe(printingId("cut through|1"));
+  });
+
+  it("Infiltrate's banished card expires after the attacker's next turn", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", hand: ["infiltrate|1"] },
+        { hero: "dorinthea", hand: [], deck: ["cut through|1"] },
+      ],
+    });
+
+    g.play("infiltrate|1").blockWith().settle();
+    g.endTurn().endTurn().endTurn().endTurn().expectTurn(5)
+      .expectNoLegalPlay("cut through|1");
+  });
+
   it("Redback Shroud reduces the next attack reaction's cost", () => {
     const g = scenario({
       seats: [
