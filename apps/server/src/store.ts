@@ -113,8 +113,10 @@ export interface SeatRow {
   runechantSkip?: boolean;
   /** presence: last heartbeat/attach (epoch ms); 0 = absent */
   lastSeenAt: number;
-  /** last game intent this seat applied (epoch ms); stamped at game start —
-   *  the opponent may claim victory after IDLE_VICTORY_MS without one */
+  /** idle-claim baseline (epoch ms): stamped for both seats at game start and
+   *  whenever either seat applies an intent, so a seat's clock only runs while
+   *  the game waits on it — the opponent may claim victory after
+   *  IDLE_VICTORY_MS without another intent */
   lastActionAt?: number;
 }
 
@@ -901,6 +903,20 @@ function maybeStart(room: RoomRow): boolean {
   a.lastActionAt = Date.now();
   b.lastActionAt = a.lastActionAt;
   return true;
+}
+
+/** Any applied intent restarts both seats' idle-claim clocks, so a player who
+ *  stalled cannot claim victory from the time they spent waiting on themself. */
+function stampActivity(room: RoomRow): SeatWrite[] {
+  const lastActionAt = Date.now();
+  const writes: SeatWrite[] = [];
+  for (const seat of [0, 1] as const) {
+    const row = room.seats[seat];
+    if (!row) continue;
+    row.lastActionAt = lastActionAt;
+    writes.push({ kind: "activity", seat, lastActionAt });
+  }
+  return writes;
 }
 
 export class PgRoomStore {
@@ -3818,16 +3834,13 @@ export class PgRoomStore {
       this.applyServerShortcuts(room, events);
       room.lastTransition = { fromVersion: room.version, kind: "forward", events };
       // any applied intent counts as activity (idle-claim timer)
-      const seatRow = room.seats[seat];
-      if (!seatRow) return { error: "not a player in this room" };
-      const lastActionAt = Date.now();
-      seatRow.lastActionAt = lastActionAt;
+      if (!room.seats[seat]) return { error: "not a player in this room" };
       return {
         room,
         result: undefined,
         snapshot,
         replay: { kind: "frame" },
-        seatWrites: [{ kind: "activity", seat, lastActionAt }],
+        seatWrites: stampActivity(room),
       };
     }, command ? {
       meta: command,
@@ -3878,15 +3891,12 @@ export class PgRoomStore {
       const events = [...res.events];
       this.applyServerShortcuts(room, events);
       room.lastTransition = { fromVersion: room.version, kind: "forward", events };
-      const botSeat = seat as SeatIndex;
-      const lastActionAt = Date.now();
-      room.seats[botSeat]!.lastActionAt = lastActionAt;
       return {
         room,
         result: undefined,
         snapshot,
         replay: { kind: "frame" },
-        seatWrites: [{ kind: "activity", seat: botSeat, lastActionAt }],
+        seatWrites: stampActivity(room),
       };
     }, {
       meta: delegation.command,

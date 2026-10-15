@@ -985,11 +985,11 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
         ctx,
         "frail-swingline-discard",
         decisionPrompt("Choose a card to discard", "card.pen.card.discard"),
-        ctx.seat,
+        opponentSeat(ctx),
       );
     },
     onChoose(ctx, hook, option) {
-      if (hook === "frail-swingline-discard") resolveDiscardChoice(ctx, option, ctx.seat);
+      if (hook === "frail-swingline-discard") resolveDiscardChoice(ctx, option, opponentSeat(ctx));
     },
   },
   "quickening sand|3": {

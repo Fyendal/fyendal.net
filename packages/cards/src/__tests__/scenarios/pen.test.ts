@@ -1078,6 +1078,29 @@ describe("PEN — import and set mechanics", () => {
     expect(aboveBase.state.players[0]!.weapons[0]!.counters?.power ?? 0).toBe(0);
   });
 
+  it("Frail Swingline makes the weakened attack's controller discard", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", hand: ["frail swingline|3", "frail swingline|3"], equipment: NO_EQUIPMENT },
+        {
+          hero: "dorinthea",
+          weapons: ["dawnblade|0"],
+          hand: ["head jab|1", "head jab|1"],
+          equipment: NO_EQUIPMENT,
+        },
+      ],
+    });
+
+    g.play("frail swingline|3").endTurn();
+    const defenderHand = g.state.players[0]!.hand.length;
+    g.activate("dawnblade|0").expectAttackValue(2).blockWith("frail swingline|3").settle();
+    expect(g.state.pendingDecision?.chooseHook).toBe("frail-swingline-discard");
+    expect(g.state.pendingDecision?.player).toBe(1);
+    g.chooseCard("head jab|1");
+    expect(g.state.players[1]!.hand).toHaveLength(0);
+    expect(g.state.players[0]!.hand).toHaveLength(defenderHand - 1);
+  });
+
   it("Quickening Sand chooses any hero or ally to tap", () => {
     const g = scenario({
       seats: [

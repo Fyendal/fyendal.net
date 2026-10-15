@@ -1019,9 +1019,11 @@ describe("PgRoomStore storage", () => {
     expect({ ...rows[0], last_action_at: beforeStart[0]!.last_action_at }).toEqual(beforeStart[0]);
   });
 
-  it("updates only actor activity for an intent and performs no seat write for Undo", async () => {
+  it("restarts both idle clocks for an intent and performs no seat write for Undo", async () => {
     const { code, tokens } = await fullRoom();
     await startGame(code, tokens);
+    // both clocks long stale: the actor stalled while the other seat waited
+    await db.query("UPDATE room_seats SET last_action_at = 1 WHERE room_code = $1", [code]);
     const room = await store.getRoom(code);
     const actor = (room!.state!.pendingDecision?.player ?? room!.state!.priorityPlayer) as 0 | 1;
     const intent = legalIntents(room!.state!, actor).find((candidate) => candidate.kind !== "concede");
@@ -1030,17 +1032,22 @@ describe("PgRoomStore storage", () => {
     const queries: string[] = [];
     const measured = tracedStore(queries);
 
+    const startedAt = Date.now();
     expect((await measured.applyIntent(code, { token: tokens[actor] }, intent)).ok).toBe(true);
     const afterIntent = await rawSeats(code);
-    const other = (1 - actor) as 0 | 1;
-    expect(afterIntent[other]).toEqual(before[other]);
-    expect({ ...afterIntent[actor], last_action_at: before[actor]!.last_action_at }).toEqual(before[actor]);
-    expect(Number(afterIntent[actor]!.last_action_at)).toBeGreaterThanOrEqual(
-      Number(before[actor]!.last_action_at),
-    );
+    for (const seat of [0, 1] as const) {
+      expect({ ...afterIntent[seat], last_action_at: before[seat]!.last_action_at }).toEqual(before[seat]);
+      expect(Number(afterIntent[seat]!.last_action_at)).toBeGreaterThanOrEqual(startedAt);
+    }
     expect(seatDml(queries)).toEqual([
       "UPDATE room_seats SET last_action_at = $3 WHERE room_code = $1 AND seat = $2",
+      "UPDATE room_seats SET last_action_at = $3 WHERE room_code = $1 AND seat = $2",
     ]);
+    // the waiting time before the intent no longer counts toward either claim
+    const afterRoom = (await store.getRoom(code))!;
+    const waitingOn = (afterRoom.state!.pendingDecision?.player ?? afterRoom.state!.activePlayer) as 0 | 1;
+    expect(await store.claimVictory(code, { token: tokens[1 - waitingOn]! }, startedAt + 60_000))
+      .toEqual({ ok: false, error: "opponent is still active" });
     expect(replayDml(queries)).toHaveLength(1);
     expect(replayDml(queries)[0]).toContain("SELECT active.id, $2::bigint");
 
