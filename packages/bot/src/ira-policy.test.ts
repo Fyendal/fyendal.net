@@ -464,7 +464,7 @@ describe("Ira policy", () => {
       state.players[0]!.hand.find((card) => card.instanceId === candidate.instanceId)?.cardId === "ASR012"
     )).toBe(true);
     expect(decision.plan?.nodes).toBeLessThanOrEqual(4);
-    expect(decision.plan?.transitions).toBeLessThanOrEqual(8);
+    expect(decision.plan?.transitions).toBeLessThanOrEqual(12);
     expect(decision.plan?.candidateTrace.rootPrepared).toBeLessThanOrEqual(1);
   });
 

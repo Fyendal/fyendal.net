@@ -66,26 +66,23 @@ function staticShock(): CardScript {
 
 export const aur: Record<string, CardScript> = {
   "aether crackers|0": {
-    onFriendlyCombatDamageDealt(ctx, _source, target, amount) {
-      if (amount > 0) {
-        ctx.requestChoice(
-          "aether-crackers",
-          yesNoPrompt(
-            `Aether Crackers: destroy this to deal ${ctx.previewArcaneDamage(1)} ` +
-              "arcane damage to the hero that was hit?",
-            "card.aur.aether.crackers.destroy",
-            { amount: ctx.previewArcaneDamage(1) },
-          ),
-          ["yes", "no"],
-        );
-        ctx.setCounter("hit-target", target);
-      }
+    canTriggerOnHit: (ctx) => ctx.link?.targetAllyId === undefined,
+    onHit(ctx) {
+      ctx.requestChoice(
+        "aether-crackers",
+        yesNoPrompt(
+          `Aether Crackers: destroy this to deal ${ctx.previewArcaneDamage(1)} ` +
+            "arcane damage to the hero that was hit?",
+          "card.aur.aether.crackers.destroy",
+          { amount: ctx.previewArcaneDamage(1) },
+        ),
+        ["yes", "no"],
+      );
     },
     onChoose(ctx, hook, option) {
       if (hook !== "aether-crackers" || option !== "yes") return;
-      const target = ctx.getCounter("hit-target");
       ctx.destroySelf();
-      ctx.dealDamage(target, 1, { arcane: true });
+      ctx.dealDamage(opponentSeat(ctx), 1, { arcane: true });
     },
   },
   "crackling|1": crackling(),

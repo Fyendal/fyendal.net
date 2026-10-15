@@ -91,14 +91,13 @@ export const asr: Record<string, CardScript> = {
   },
 
   "robe of autumn's fall|0": {
-    onFriendlyCombatDamageDealt(ctx, source) {
-      if (normalizedName(ctx, source) === "edge of autumn") {
-        ctx.requestChoice(
-          "robe-autumn",
-          yesNoPrompt("Destroy Robe of Autumn's Fall to gain a resource?", "card.asr.robe.destroy.resource"),
-          ["yes", "no"],
-        );
-      }
+    canTriggerOnHit: (ctx) => !!ctx.link && normalizedName(ctx, ctx.link.attackingCard) === "edge of autumn",
+    onHit(ctx) {
+      ctx.requestChoice(
+        "robe-autumn",
+        yesNoPrompt("Destroy Robe of Autumn's Fall to gain a resource?", "card.asr.robe.destroy.resource"),
+        ["yes", "no"],
+      );
     },
     onChoose(ctx, hook, option) {
       if (hook !== "robe-autumn" || option !== "yes") return;

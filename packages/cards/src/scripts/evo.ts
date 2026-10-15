@@ -629,8 +629,9 @@ export const evo: Record<string, CardScript> = mergeSetScripts("EVO", evoHighRar
     },
   }),
   "autosave script|3": maintenanceItem(1, {
-    onFriendlyCombatDamageDealt(ctx, source) {
-      if (isMechAttack(ctx, source)) ctx.putOnDeckBottom(source.instanceId);
+    canTriggerOnHit: (ctx) => !!ctx.link && isMechAttack(ctx, ctx.link.attackingCard),
+    onHit(ctx) {
+      if (ctx.link) ctx.putOnDeckBottom(ctx.link.attackingCard.instanceId);
     },
   }),
 

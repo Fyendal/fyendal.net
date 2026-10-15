@@ -368,7 +368,11 @@ function scorePlay(
       const alreadyHasBlossom = [...me.hand, ...me.arsenal, ...me.banish].some((candidate) =>
         key(input.cards[candidate.cardId]) === "whirling mist blossom|2"
       );
-      score = alreadyHasBlossom || !canFundBlossomAfterIris(intent, input) ||
+      // Whirling Mist Blossom is played at an action decision, so combat
+      // windows (such as a Damage Step hit trigger) leave the fetch there,
+      // where the plan values the discard.
+      const midCombat = input.view.stack.length > 0 || currentLink(input) !== undefined;
+      score = alreadyHasBlossom || midCombat || !canFundBlossomAfterIris(intent, input) ||
           !canPlayActionAfterIris(input)
         ? -100
         : 12;
@@ -490,7 +494,9 @@ export interface IraIntentDecision {
 }
 
 const IRA_MAX_SEARCH_NODES = 4;
-const IRA_MAX_TRANSITIONS = 8;
+// Robe of Autumn's Fall's hit trigger is a Damage Step layer, so an Edge of
+// Autumn opener spends four simulated priority passes before the next action.
+const IRA_MAX_TRANSITIONS = 12;
 const IRA_MAX_ROOT_CANDIDATES = 1;
 
 export function chooseIraIntentWithTrace(input: BotPolicyInput): IraIntentDecision {

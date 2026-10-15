@@ -2285,16 +2285,10 @@ export const iar: Record<string, CardScript> = {
 
   "shadowrealm harrower|3": bloodDebt({
     modifyAttack: (ctx) => (ctx.getFlag("link", "fromBanish") === true ? 1 : 0),
-    onDealsDamage(ctx, targetSeat, amount, arcane) {
-      if (
-        !arcane &&
-        amount > 0 &&
-        targetSeat !== ctx.seat &&
-        ctx.link?.targetAllyId === undefined &&
-        ctx.getFlag("link", "fromBanish") === true
-      ) {
-        ctx.gainLife(ctx.seat, amount);
-      }
+    canTriggerOnHit: (ctx) => ctx.link?.targetAllyId === undefined && ctx.getFlag("link", "fromBanish") === true,
+    onHit(ctx) {
+      const dealt = ctx.link?.damage ?? 0;
+      if (dealt > 0) ctx.gainLife(ctx.seat, dealt);
     },
   }),
   "shadowrealm harvester|1": fromBanishBonus((ctx) => {

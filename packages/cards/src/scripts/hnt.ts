@@ -1617,9 +1617,8 @@ Object.assign(hnt, {
     onFriendlyEffectHit(ctx) {
       offerBloodSplatteredVest(ctx);
     },
-    onFriendlyCombatDamageDealt(ctx, source, _target, amount) {
-      if (amount > 0 && isDagger(ctx, source)) offerBloodSplatteredVest(ctx);
-    },
+    canTriggerOnHit: (ctx) => !!ctx.link && isDagger(ctx, ctx.link.attackingCard),
+    onHit: offerBloodSplatteredVest,
     onChoose(ctx, hook, option) {
       if (hook === "blood-splattered-vest") resolveBloodSplatteredVest(ctx, option);
     },

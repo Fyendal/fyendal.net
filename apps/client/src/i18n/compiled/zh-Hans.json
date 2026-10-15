@@ -3855,6 +3855,12 @@
       "value": "为你的英雄 soul 充能？"
     }
   ],
+  "card.evo.ticktock.item.destroy": [
+    {
+      "type": 0,
+      "value": "摧毁另一个 item？"
+    }
+  ],
   "card.evo.weapon.attackagain.choose": [
     {
       "type": 0,
@@ -13567,6 +13573,16 @@
     {
       "type": 0,
       "value": "维持 Lightning 的 Channel"
+    }
+  ],
+  "card.trigger.common.concealed.token": [
+    {
+      "type": 0,
+      "value": "摧毁此牌，并在每名对手的操控下生成一个 "
+    },
+    {
+      "type": 1,
+      "value": "token"
     }
   ],
   "card.trigger.common.confidence.destroy": [

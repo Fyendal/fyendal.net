@@ -3955,6 +3955,12 @@
       "value": "Charge your hero's soul?"
     }
   ],
+  "card.evo.ticktock.item.destroy": [
+    {
+      "type": 0,
+      "value": "Destroy another item?"
+    }
+  ],
   "card.evo.weapon.attackagain.choose": [
     {
       "type": 0,
@@ -14204,6 +14210,20 @@
     {
       "type": 0,
       "value": "Channel Lightning"
+    }
+  ],
+  "card.trigger.common.concealed.token": [
+    {
+      "type": 0,
+      "value": "Destroy this and create "
+    },
+    {
+      "type": 1,
+      "value": "token"
+    },
+    {
+      "type": 0,
+      "value": " under each opponent's control"
     }
   ],
   "card.trigger.common.confidence.destroy": [

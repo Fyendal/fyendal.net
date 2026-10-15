@@ -627,14 +627,18 @@ export const dynHighRarity: Record<string, CardScript> = {
     },
   },
   "powder keg|3": {
-    onFriendlyCombatDamageDealt(ctx, source, target, amount) {
+    canTriggerOnHit(ctx) {
+      const source = ctx.link?.attackingCard;
+      if (!source || !ctx.link?.defendingEquipment.length) return false;
       const sourceTypes = ctx.cardTypes(source);
-      const isGun =
+      return (
         has(ctx, source, "gun") ||
         (ctx.cardData(source.cardId).cardType === "weapon" &&
           sourceTypes.includes("mechanologist") &&
-          sourceTypes.includes("pistol"));
-      if (target === ctx.seat || amount <= 0 || !isGun) return;
+          sourceTypes.includes("pistol"))
+      );
+    },
+    onHit(ctx) {
       const equipment = ctx.link?.defendingEquipment ?? [];
       if (equipment.length)
         ctx.requestCardChoice(

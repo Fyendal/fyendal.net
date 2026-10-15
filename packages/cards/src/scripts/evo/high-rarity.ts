@@ -28,6 +28,29 @@ function named(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, name: string) {
 function isItem(ctx: ScriptCtx, card: DeepReadonly<CardInstance>) {
   return has(ctx, card, "item");
 }
+
+const TICK_TOCK_ITEM = "tick-tock-item";
+
+/** Tick Tock Clock: offer up to 2 other items in the arena, then deal damage
+ * equal to the items destroyed, counting the clock itself. */
+function tickTockNextItem(ctx: ScriptCtx): void {
+  const items = ctx.state.players.flatMap((player) =>
+    player.board.filter((card) => card.instanceId !== ctx.self.instanceId && isItem(ctx, card)),
+  );
+  if (ctx.getCounter("tickTockChosen") < 2 && items.length) {
+    ctx.requestCardChoice(
+      TICK_TOCK_ITEM,
+      decisionPrompt("Destroy another item?", "card.evo.ticktock.item.destroy", {
+        optionMessages: commonOptionMessages("done"),
+      }),
+      ["done", ...items.map((card) => card.instanceId)],
+    );
+    return;
+  }
+  const destroyed = ctx.getCounter("tickTockDestroyed");
+  if (destroyed > 0) ctx.dealDamage(opponentSeat(ctx), destroyed);
+}
+
 function isMechAttack(ctx: ScriptCtx, card: DeepReadonly<CardInstance>) {
   return ctx.hasCardType(card, "action") && has(ctx, card, "attack") && has(ctx, card, "mechanologist");
 }
@@ -739,15 +762,27 @@ export const evoHighRarity: Record<string, CardScript> = {
   },
   "tick tock clock|1": crankItem(
     {
-      onFriendlyCombatDamageDealt(ctx, _source, target, amount) {
-        if (amount <= 0) return;
-        const items = ctx
-          .player(ctx.seat)
-          .board.filter((card) => isItem(ctx, card))
-          .slice(0, 3);
-        let destroyed = 0;
-        for (const item of items) if (ctx.destroyPermanent(item.instanceId)) destroyed++;
-        if (destroyed) ctx.dealDamage(target, destroyed);
+      canTriggerOnHit: (ctx) =>
+        !!ctx.link && ctx.link.targetAllyId === undefined && isMechAttack(ctx, ctx.link.attackingCard),
+      onHit(ctx) {
+        const inArena = () => ctx.player(ctx.seat).board.some((card) => card.instanceId === ctx.self.instanceId);
+        const wasInArena = inArena();
+        ctx.destroySelf();
+        ctx.setCounter("tickTockDestroyed", wasInArena && !inArena() ? 1 : 0);
+        ctx.setCounter("tickTockChosen", 0);
+        tickTockNextItem(ctx);
+      },
+      onChoose(ctx, hook, option) {
+        if (hook !== TICK_TOCK_ITEM) return;
+        if (option === "done") {
+          ctx.setCounter("tickTockChosen", 2);
+        } else {
+          ctx.setCounter("tickTockChosen", ctx.getCounter("tickTockChosen") + 1);
+          if (ctx.destroyPermanent(Number(option))) {
+            ctx.setCounter("tickTockDestroyed", ctx.getCounter("tickTockDestroyed") + 1);
+          }
+        }
+        tickTockNextItem(ctx);
       },
     },
     1,

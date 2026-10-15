@@ -794,8 +794,10 @@ export const out: Record<string, CardScript> = mergeSetScripts("OUT", outHighRar
         ctx.addModifier({ scope: "until-end-of-turn" });
       },
     },
-    onFriendlyCombatDamageDealt(ctx, source) {
-      offerDaggerCycle(ctx, source);
+    canTriggerOnHit: (ctx) =>
+      !!ctx.link && ctx.getPlayerFlag(ctx.seat, "maskDaggerCycle") === true && isDagger(ctx, ctx.link.attackingCard),
+    onHit(ctx) {
+      if (ctx.link) offerDaggerCycle(ctx, ctx.link.attackingCard);
     },
     onFriendlyEffectHitCondition(ctx, source) {
       return ctx.getPlayerFlag(ctx.seat, "maskDaggerCycle") === true && isDagger(ctx, source);

@@ -1,15 +1,14 @@
 import type { CardScript, ScriptCtx } from "@fyendal/engine";
 import { buffNextAttack, isSwordAttack, yesNoPrompt } from "./shared-helpers.js";
 
-function swordHit(ctx: ScriptCtx, sourceCardId: string, amount: number): boolean {
-  if (amount <= 0 || !ctx.link || ctx.link.attackingCard.cardId !== sourceCardId) return false;
-  return ctx.link.attackCardType === "weapon" && ctx.cardTypes(ctx.link.attackingCard).includes("sword");
+function swordWeaponAttack(ctx: ScriptCtx): boolean {
+  return ctx.link?.attackCardType === "weapon" && ctx.cardTypes(ctx.link.attackingCard).includes("sword");
 }
 
 export const ddd: Record<string, CardScript> = {
   "squire's bracers|0": {
-    onFriendlyCombatDamageDealt(ctx, source, _target, amount) {
-      if (!swordHit(ctx, source.cardId, amount)) return;
+    canTriggerOnHit: swordWeaponAttack,
+    onHit(ctx) {
       ctx.requestChoice(
         "squires-bracers",
         yesNoPrompt(
@@ -26,8 +25,8 @@ export const ddd: Record<string, CardScript> = {
     },
   },
   "cutting couriers|0": {
-    onFriendlyCombatDamageDealt(ctx, source, _target, amount) {
-      if (!swordHit(ctx, source.cardId, amount)) return;
+    canTriggerOnHit: swordWeaponAttack,
+    onHit(ctx) {
       ctx.requestChoice(
         "cutting-couriers",
         yesNoPrompt("Cutting Couriers: destroy this so the attack gets go again?", "card.ddd.cutting.couriers.destroy"),

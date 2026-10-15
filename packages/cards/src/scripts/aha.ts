@@ -2,7 +2,6 @@ import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal
 import {
   attackAbility,
   buffNextAttack,
-  commonOptionMessages,
   decisionMessage,
   decisionPrompt,
   isSwordAttack,
@@ -109,9 +108,13 @@ export const aha: Record<string, CardScript> = {
     },
   },
   "anticipating gaze|0": {
-    onFriendlyCombatDamageDealt(ctx, source, target, amount) {
-      if (amount <= 0 || target === ctx.seat || !isSword(ctx, source) || Number(source.counters?.power) < 1) return;
-      ctx.setCounter("gazeSword", source.instanceId);
+    canTriggerOnHit(ctx) {
+      const sword = ctx.link?.attackingCard;
+      return !!sword && isSword(ctx, sword) && Number(sword.counters?.power) >= 1;
+    },
+    onHit(ctx) {
+      if (!ctx.link) return;
+      ctx.setCounter("gazeSword", ctx.link.attackingCard.instanceId);
       ctx.requestChoice(
         "gaze-draw",
         yesNoPrompt("Anticipating Gaze: remove a counter, destroy this, and draw?", "card.aha.gaze.counter.draw"),

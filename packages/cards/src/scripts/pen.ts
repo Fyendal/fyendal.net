@@ -16,6 +16,7 @@ import {
   requestDiscardChoice,
   resolveDiscardChoice,
   yesNoPrompt,
+  heroDamage,
 } from "./shared-helpers.js";
 import { SHARPEN_FOLLOWUP, sharpenSword } from "./aha/warrior-sharpen.js";
 import { penHighRarity } from "./pen/high-rarity.js";
@@ -186,6 +187,32 @@ function heroesAndAllies(ctx: ScriptCtx): Card[] {
 
 function create(ctx: ScriptCtx, cardId: string, count = 1, seat = ctx.seat): void {
   ctx.createTokens(cardId, count, seat);
+}
+
+/** Cloaked trap: "While this is equipped face-down, when an attack … hits
+ * you". The attack's combat damage to this hero is the hit; the trigger stays
+ * anonymous while face-down. */
+function concealedHitTrap(token: string, tokenName: string, attackMatches: (ctx: ScriptCtx) => boolean): CardScript {
+  return {
+    triggersWhileFaceDown: true,
+    triggers: [
+      {
+        event: "damage-dealt",
+        whose: "any",
+        label: `Destroy this and create ${tokenName} under each opponent's control`,
+        labelMessage: { id: "card.trigger.common.concealed.token", values: { token: tokenName } },
+        condition: (ctx, _eventCard, event) => {
+          const damage = heroDamage(event);
+          return !!damage?.combat && damage.targetSeat === ctx.seat && ctx.self.faceDown === true && attackMatches(ctx);
+        },
+        effect(ctx) {
+          ctx.notifyTrapTriggered();
+          ctx.destroySelf();
+          create(ctx, token, 1, opponentSeat(ctx));
+        },
+      },
+    ],
+  };
 }
 
 function lowerLife(ctx: ScriptCtx): boolean {
@@ -915,36 +942,13 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
     modifyAttack: (ctx) => (ctx.getFlag("player", "boostedSubtype:evo") === true ? 1 : 0),
   })),
 
-  "concealed nerve gas|0": {
-    triggersWhileFaceDown: true,
-    onHeroDealtDamage(ctx) {
-      if (ctx.link?.goAgain) {
-        ctx.notifyTrapTriggered();
-        ctx.destroySelf();
-        create(ctx, FRAILTY, 1, opponentSeat(ctx));
-      }
-    },
-  },
-  "concealed pathogen|0": {
-    triggersWhileFaceDown: true,
-    onHeroDealtDamage(ctx) {
-      if (ctx.link?.flags.playedAttackReaction === true) {
-        ctx.notifyTrapTriggered();
-        ctx.destroySelf();
-        create(ctx, BLOODROT, 1, opponentSeat(ctx));
-      }
-    },
-  },
-  "concealed sedative|0": {
-    triggersWhileFaceDown: true,
-    onHeroDealtDamage(ctx) {
-      if (ctx.attackBonusAboveBase() > 0) {
-        ctx.notifyTrapTriggered();
-        ctx.destroySelf();
-        create(ctx, INERTIA, 1, opponentSeat(ctx));
-      }
-    },
-  },
+  "concealed nerve gas|0": concealedHitTrap(FRAILTY, "Frailty", (ctx) => ctx.link?.goAgain === true),
+  "concealed pathogen|0": concealedHitTrap(
+    BLOODROT,
+    "Bloodrot Pox",
+    (ctx) => ctx.link?.flags.playedAttackReaction === true,
+  ),
+  "concealed sedative|0": concealedHitTrap(INERTIA, "Inertia", (ctx) => ctx.attackBonusAboveBase() > 0),
   "rainbow goo trap|1": {
     canTriggerOnDefend: (ctx) =>
       ctx.attackBonusAboveBase() > 0 && ctx.currentAttackHasDominate() && ctx.link?.goAgain === true,
