@@ -312,6 +312,43 @@ describe("optimistic interaction projection", () => {
     }));
   });
 
+  it("stacks an instant-speed attack above the pending attack layer", () => {
+    const pendingAttack: CardView = { instanceId: 25, cardId: "ARC026", owner: 0, attack: 3 };
+    const played: CardView = { instanceId: 26, cardId: "HNT012", owner: 0 };
+    const view = {
+      ...game(player(0, { banish: [played] })),
+      phase: "layer" as const,
+      chain: [{
+        attackingCard: pendingAttack,
+        defendingCards: [],
+        attackValue: 3,
+        defenseValue: 0,
+        damage: 3,
+        resolved: false,
+        onStack: true,
+        reactions: [],
+      }],
+    };
+
+    const projection = optimisticInteractionView(view, 0, pending({
+      kind: "play-from-zone",
+      zone: "banish",
+      instanceId: 26,
+      pitchInstanceIds: [],
+      asInstant: true,
+    }));
+
+    expect(projection.view?.chain).toEqual(view.chain);
+    expect(projection.view?.stack.map((layer) => layer.card?.instanceId)).toEqual([26]);
+    const events = detectGameMotionEvents(view, projection.view!);
+    expect(events).toContainEqual(expect.objectContaining({
+      instanceId: 26,
+      source: { kind: "banish", seat: 0 },
+      destination: { kind: "stack-layer", index: 0 },
+    }));
+    expect(events.filter((event) => event.instanceId === 25)).toEqual([]);
+  });
+
   it("dismisses an arsenal choice without splitting its end-turn transition", () => {
     const card: CardView = { instanceId: 30, cardId: "WTR171", owner: 0 };
     const view = game(player(0, { hand: [card], handCount: 1 }), {

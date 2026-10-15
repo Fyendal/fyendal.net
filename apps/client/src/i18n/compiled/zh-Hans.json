@@ -22614,6 +22614,18 @@
       "value": "可选"
     }
   ],
+  "game.stack.queue.hint": [
+    {
+      "type": 0,
+      "value": "按顺序等待攻击"
+    }
+  ],
+  "game.stack.queue.title": [
+    {
+      "type": 0,
+      "value": "攻击队列"
+    }
+  ],
   "game.stack.short": [
     {
       "type": 0,

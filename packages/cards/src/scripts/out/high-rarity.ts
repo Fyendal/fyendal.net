@@ -89,6 +89,12 @@ function flickKnivesDaggers(ctx: ScriptCtx): DeepReadonly<CardInstance>[] {
     ...ctx.state.chain
       .filter((link) => link.attacker === ctx.seat && link.flags.attackGone !== true)
       .map((link) => link.attackingCard),
+    // Cards you played that are still on the stack, and attacks in your
+    // queue, which CR 3.15.7f treats as on the stack for targeting.
+    ...ctx.state.stack
+      .filter((layer) => layer.seat === ctx.seat && layer.ability !== true)
+      .flatMap((layer) => (layer.card ? [layer.card] : [])),
+    ...ctx.queuedAttacks(ctx.seat),
   ];
   return candidates.filter(
     (card, index) =>

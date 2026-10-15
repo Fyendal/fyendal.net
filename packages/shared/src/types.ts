@@ -198,6 +198,13 @@ export interface CardView {
   hidden?: boolean;
 }
 
+/** An attack waiting in the attack queue for its turn on the combat chain. */
+export interface AttackQueueEntryView {
+  card: CardView;
+  /** Controller of the attack */
+  seat: number;
+}
+
 /** A card or ability presented on the stack while awaiting resolution. */
 export interface StackLayerView {
   /** The represented card or source; null if it is unavailable or hidden. */
@@ -562,6 +569,9 @@ export interface GameView {
   stack: StackLayerView[];
   /** Rules context for the visible stack, e.g. Damage Step hit triggers. */
   stackContext?: string;
+  /** Attacks waiting to move onto the combat chain, first attack first.
+   * Omitted when no attack is queued. */
+  attackQueue?: AttackQueueEntryView[];
   /** Lingering effects (next attack / until end of turn) and the seat they affect */
   ongoing: OngoingEffectView[];
   pendingDecision: PendingDecision | null;

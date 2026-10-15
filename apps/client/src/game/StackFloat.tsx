@@ -1,7 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import { useIntl } from "react-intl";
 import { createPortal } from "react-dom";
-import type { StackLayerView } from "@fyendal/shared";
+import type { AttackQueueEntryView, StackLayerView } from "@fyendal/shared";
+import { TooltipButton } from "../components/TooltipButton.js";
+import { UiIcon } from "../components/UiIcon.js";
+import { cardData } from "@fyendal/cards/client";
 import { CardBack, CardFace } from "./Card.js";
 import { BloodDebtTriggerTile, isBloodDebtTrigger } from "./BloodDebtTriggerTile.js";
 import type { FloatVisibilityController } from "./floatVisibility.js";
@@ -12,6 +15,7 @@ import { formatGameMessage } from "../i18n/GameMessage.js";
 
 export function stackActivityRevision(
   layers: readonly StackLayerView[],
+  queue: readonly AttackQueueEntryView[] = [],
 ): string {
   const layerKeys = layers.map((layer, index) => [
     index,
@@ -23,7 +27,8 @@ export function stackActivityRevision(
     layer.optional ? 1 : 0,
     layer.count ?? 1,
   ].join(":"));
-  return layerKeys.join("|");
+  const queueKeys = queue.map((entry) => `queue:${entry.card.instanceId}`);
+  return [...layerKeys, ...queueKeys].join("|");
 }
 
 export function stackActivityShouldReveal(previous: string, current: string): boolean {
@@ -37,12 +42,57 @@ export function stackLayerLabel(label: string): string {
   return /^Heave \d+$/.test(label) ? `${label} opportunity` : label;
 }
 
+/** Attacks waiting their turn on the combat chain, first attack first. Each
+ * is a slim chip, not a full card, so the queue adds one short row instead of
+ * a second card row over the combat chain. */
+function AttackQueueChips({ queue }: { queue: readonly AttackQueueEntryView[] }) {
+  return (
+    <ol className="stack-queue-chips">
+      {queue.map((entry, index) => {
+        const location = { kind: "attack-queue", index } as const;
+        return (
+          <li
+            key={entry.card.instanceId}
+            className="stack-queue-chip"
+            data-motion-zone={motionLocationKey(location)}
+          >
+            <span className="stack-queue-order" aria-hidden="true">{index + 1}</span>
+            <CardFace
+              card={entry.card}
+              size="zone"
+              squareArt={false}
+              motionKey={motionPresentationKey(location, entry.card.instanceId)}
+            />
+            <span className="stack-queue-name">
+              {entry.card.name ?? cardData[entry.card.cardId]?.name ?? entry.card.cardId}
+            </span>
+          </li>
+        );
+      })}
+    </ol>
+  );
+}
+
+function AttackQueueLabel({ withHint }: { withHint: boolean }) {
+  const intl = useIntl();
+  return (
+    <span className="stack-queue-label">
+      <UiIcon name="attack-queue" className="stack-queue-icon" />
+      <span className="stack-queue-title">{intl.formatMessage({ id: "game.stack.queue.title" })}</span>
+      {withHint ? (
+        <span className="stack-queue-hint">{intl.formatMessage({ id: "game.stack.queue.hint" })}</span>
+      ) : null}
+    </span>
+  );
+}
+
 /** Floating stack window: played cards and triggered/activated ability layers
  *  awaiting resolution (index 0 resolves first and appears rightmost). On
  *  desktop this defaults in the open lane between the opponent's arms and
  *  first weapon. */
 export function StackFloat({
   layers,
+  queue = [],
   context,
   miniHost,
   visibility,
@@ -50,6 +100,8 @@ export function StackFloat({
   onSkipRunechants,
 }: {
   layers: StackLayerView[];
+  /** Attacks waiting to move onto the combat chain, first attack first. */
+  queue?: readonly AttackQueueEntryView[];
   /** Keep geometry mounted until the incoming card actually starts moving. */
   motionDeferred?: boolean;
   /** Combat phase/step and reason these layers are waiting. */
@@ -70,30 +122,52 @@ export function StackFloat({
   const layerMotionKeys = layers.map((layer, index) => layer.card
     ? motionPresentationKey({ kind: "stack-layer", index }, layer.card.instanceId)
     : undefined);
-  const stackRevision = stackActivityRevision(layers);
+  const stackRevision = stackActivityRevision(layers, queue);
   const previousStackRevision = useRef("");
   useEffect(() => {
     const shouldReveal = stackActivityShouldReveal(previousStackRevision.current, stackRevision);
     previousStackRevision.current = stackRevision;
     if (shouldReveal) setStackHidden(false);
   }, [setStackHidden, stackRevision]);
-  if (stackSize === 0) return null;
+  if (stackSize === 0 && queue.length === 0) return null;
   if (stackHidden) {
     const minimized = (
-      <button
+      <TooltipButton
         className={`stack-mini${miniHost ? " stack-mini-anchored" : ""}`}
         style={{ ...(miniHost ? {} : stackFloat.style), visibility: motionDeferred ? "hidden" : undefined }}
         onClick={() => setStackHidden(false)}
-        title={intl.formatMessage({ id: "game.stack.show" })}
+        tooltip={intl.formatMessage({ id: "game.stack.show" })}
       >
         <span className="stack-mini-title">
           <span className="mini-title-long">{intl.formatMessage({ id: "game.stack.title" })}</span>
           <span className="mini-title-short">{intl.formatMessage({ id: "game.stack.short" })}</span>
         </span>
-        <span className="stack-mini-count">{stackSize}</span>
-      </button>
+        <span className="stack-mini-count">{stackSize + queue.length}</span>
+      </TooltipButton>
     );
     return miniHost ? createPortal(minimized, miniHost) : minimized;
+  }
+  if (stackSize === 0) {
+    // Between layers only the queue remains. A one-line strip in the stack's
+    // lane keeps the order visible without covering the attack being fought.
+    return (
+      <section
+        className="float stack-float stack-queue-strip"
+        aria-label={intl.formatMessage({ id: "game.stack.queue.title" })}
+        style={{ ...stackFloat.style, visibility: motionDeferred ? "hidden" : undefined }}
+        {...stackFloat.dragProps}
+      >
+        <AttackQueueLabel withHint={false} />
+        <AttackQueueChips queue={queue} />
+        <TooltipButton
+          className="chain-hide stack-hide"
+          tooltip={intl.formatMessage({ id: "game.stack.minimize" })}
+          onClick={() => setStackHidden(true)}
+        >
+          <span className="chain-hide-icon" aria-hidden="true">—</span>
+        </TooltipButton>
+      </section>
+    );
   }
   return (
     <div
@@ -106,23 +180,22 @@ export function StackFloat({
           {intl.formatMessage({ id: "game.stack.title" })}
         </span>
         {onSkipRunechants ? (
-          <button
+          <TooltipButton
             className="stack-skip-runechants"
             onClick={onSkipRunechants}
-            title={intl.formatMessage({ id: "game.stack.skipRunechantsTitle" })}
-            type="button"
+            tooltip={intl.formatMessage({ id: "game.stack.skipRunechantsTitle" })}
+            aria-label={intl.formatMessage({ id: "game.stack.skipRunechants" })}
           >
             {intl.formatMessage({ id: "game.stack.skipRunechants" })}
-          </button>
+          </TooltipButton>
         ) : null}
-        <button
+        <TooltipButton
           className="chain-hide stack-hide"
-          title={intl.formatMessage({ id: "game.stack.minimize" })}
-          aria-label={intl.formatMessage({ id: "game.stack.minimize" })}
+          tooltip={intl.formatMessage({ id: "game.stack.minimize" })}
           onClick={() => setStackHidden(true)}
         >
-          —
-        </button>
+          <span className="chain-hide-icon" aria-hidden="true">—</span>
+        </TooltipButton>
       </div>
       {context ? (
         <div className="stack-context">{localizeTimingLabel(intl, context)}</div>
@@ -176,6 +249,12 @@ export function StackFloat({
           );
         })}
       </div>
+      {queue.length > 0 ? (
+        <section className="stack-queue" aria-label={intl.formatMessage({ id: "game.stack.queue.title" })}>
+          <AttackQueueLabel withHint />
+          <AttackQueueChips queue={queue} />
+        </section>
+      ) : null}
     </div>
   );
 }

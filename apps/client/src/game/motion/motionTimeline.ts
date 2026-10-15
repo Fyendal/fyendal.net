@@ -7,6 +7,7 @@ export type MotionTimelinePhase =
   | "movement"
   | "stack-entry"
   | "resolution"
+  | "queue-advance"
   | "effect-arsenal"
   | "effect-draw"
   | "effect-discard"
@@ -24,6 +25,7 @@ const PHASE_ORDER: readonly MotionTimelinePhase[] = [
   "movement",
   "stack-entry",
   "resolution",
+  "queue-advance",
   "effect-arsenal",
   "effect-draw",
   "effect-discard",
@@ -44,6 +46,9 @@ const PHASE_STAGE: Readonly<Record<MotionTimelinePhase, number>> = {
   movement: 2,
   "stack-entry": 3,
   resolution: 4,
+  // The next queued attack rises only after a resolving attack has joined
+  // the queue behind it.
+  "queue-advance": 4.5,
   "effect-arsenal": 5,
   "effect-draw": 6,
   "effect-discard": 7,
@@ -73,6 +78,7 @@ export function motionTimelinePhase(event: GameMotionEvent): MotionTimelinePhase
     return "cleanup";
   }
   if (event.source.kind === "deck" && event.destination.kind === "hand") return "draw";
+  if (event.source.kind === "attack-queue") return "queue-advance";
   if (event.destination.kind === "stack-layer" || event.destination.kind === "chain-attack") return "stack-entry";
   if (event.source.kind === "stack-layer") return "resolution";
   return "movement";

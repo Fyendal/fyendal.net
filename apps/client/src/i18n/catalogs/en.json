@@ -2467,6 +2467,8 @@
   "game.chain.unblockAll": "Unblock all",
   "game.stack.groupedTriggers": "{count} grouped triggers",
   "game.stack.optional": "may",
+  "game.stack.queue.title": "Attack queue",
+  "game.stack.queue.hint": "Waiting to attack, in order",
   "game.idle.claimPrompt": "{hero} hasn't acted in {minutes} min — claim the win?",
   "game.idle.claim": "Claim victory",
   "game.decision.closeChain.prompt": "Close the combat chain?",

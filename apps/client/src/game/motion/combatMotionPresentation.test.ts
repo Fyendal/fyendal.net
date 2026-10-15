@@ -10,8 +10,8 @@ const link: ChainLinkView = {
   attackValue: 3, defenseValue: 0, damage: 3, resolved: false,
 };
 const stack = [{ card, seat: 0, label: "Attack layer", optional: false }];
-const onStack = { chain: [], stack, context: "LAYER STEP · ATTACK" };
-const current = { chain: [link], stack: [], context: undefined };
+const onStack = { chain: [], stack, queue: [], context: "LAYER STEP · ATTACK" };
+const current = { chain: [link], stack: [], queue: [], context: undefined };
 const none = new Set<string>();
 const rect = (left: number) => ({ left, top: 0, width: 100, height: 138 });
 

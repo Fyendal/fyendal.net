@@ -574,6 +574,13 @@ describe("GameView and server messages", () => {
     Object.assign(malformed.turnFacts.players[0]!, { banishedSixPlusThisTurn: "yes" });
     expect(decodeGameView(malformed)).toBeNull();
   });
+  it("decodes the attack queue and rejects empty or malformed entries", () => {
+    const card = { instanceId: 7, cardId: "HNT012", owner: 0 };
+    expect(decodeGameView({ ...gameView(), attackQueue: [{ card, seat: 0 }] })).not.toBeNull();
+    expect(decodeGameView({ ...gameView(), attackQueue: [] })).toBeNull();
+    expect(decodeGameView({ ...gameView(), attackQueue: [{ card, seat: 2 }] })).toBeNull();
+    expect(decodeGameView({ ...gameView(), attackQueue: [{ card, seat: 0, extra: true }] })).toBeNull();
+  });
   it("decodes a pending draw offer and a completed drawn game", () => {
     expect(decodeGameView({ ...gameView(), drawOfferSeat: 0 })).not.toBeNull();
     expect(decodeGameView({ ...gameView(), drawOfferSeat: 2 })).toBeNull();

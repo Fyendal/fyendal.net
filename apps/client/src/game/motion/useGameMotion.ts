@@ -378,7 +378,7 @@ export function useGameMotion({
   return {
     batch: queue.active,
     combatPresentation: motionCombatPresentation(
-      view ? attackLayerPresentation(view) : { chain: [], stack: [] }, queue, startedFlightIds,
+      view ? attackLayerPresentation(view) : { chain: [], stack: [], queue: [] }, queue, startedFlightIds,
     ),
     queuedSources: queuedSourceFlights(queue),
     turnStartUiReady: !motionQueueBlocksTurnStartUi(queue),

@@ -141,8 +141,9 @@ describe("stack context", () => {
       onSkipRunechants: () => undefined,
     });
 
-    expect(html).toContain("Skip all Runechants");
-    expect(html).toContain("Skip consecutive Runechants in this priority window");
+    // The longer explanation is a hover/focus tooltip rather than a native title.
+    expect(html).toContain('aria-label="Skip all Runechants"');
+    expect(html).not.toContain("title=");
   });
 
   it("shows trigger effect text and optionality without a visible source card", () => {

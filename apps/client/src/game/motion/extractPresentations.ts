@@ -88,6 +88,9 @@ export function extractGamePresentations(view: GameView): GamePresentations {
     // identity stable so ordinary stack compaction is not presented as a move.
     add(layer.card, { kind: "stack-layer", index }, "display");
   });
+  combat.queue.forEach((entry, index) => {
+    add(entry.card, { kind: "attack-queue", index }, "display");
+  });
   combat.chain.forEach((link, linkIndex) => {
     add(
       link.attackingCard,

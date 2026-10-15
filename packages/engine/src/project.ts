@@ -43,6 +43,7 @@ import {
   ONCE_PER_TURN_EFFECT_FLAG_PREFIX,
 } from "./scripts.js";
 import { currentLink, findCardAnywhere } from "./zoneQueries.js";
+import { queuedAttackObjects } from "./attackQueue.js";
 import { controlledPermanents } from "./sourceQueries.js";
 import { activatedAbilityUsage } from "./abilityRules.js";
 import { wardPieces } from "./damageResolution.js";
@@ -1257,6 +1258,13 @@ function projectState(
       };
   });
   const stackContext = projectedStackContext(state);
+  // Queued attacks were played or announced face up, so every viewer sees them.
+  const attackQueue = state.players.flatMap((player) =>
+    queuedAttackObjects(state, player.seat).map((card) => ({
+      card: cardView(state, runtime, card),
+      seat: player.seat,
+    })),
+  );
   const turnFacts: TurnFactsView = {
     players: state.players.map((player) => ({
       attacks: Number(player.flags.attacksDeclaredThisTurn) || 0,
@@ -1302,6 +1310,7 @@ function projectState(
     chain,
     stack: projectedStackLayers(state, runtime, seat, revealAll),
     ...(stackContext ? { stackContext } : {}),
+    ...(attackQueue.length > 0 ? { attackQueue } : {}),
     ongoing: ongoingEffects(state, revealAll ? undefined : seat),
     gameStats: state.gameStats,
     turnFacts,

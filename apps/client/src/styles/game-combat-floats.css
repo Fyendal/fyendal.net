@@ -904,3 +904,108 @@
 }
 .chain-staged-remove-cue::before { transform: translate(-50%, -50%) rotate(45deg); }
 .chain-staged-remove-cue::after { transform: translate(-50%, -50%) rotate(-45deg); }
+
+/* ── attack queue: attacks that resolved off the stack and wait their turn.
+   Slim chips, not cards, so the queue never adds a second card row over the
+   combat chain. ── */
+.stack-queue {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  padding-top: 8px;
+  border-top: 1px solid #b8933f33;
+}
+.stack-queue-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #b7a581;
+  font-family: var(--font-fantasy-meta);
+  font-variant: normal;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+.stack-queue-icon {
+  width: 14px;
+  height: 14px;
+  color: #c9a627;
+}
+.stack-queue-title {
+  color: #e8d9b0;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: .06em;
+}
+.stack-queue-hint {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: .04em;
+}
+.stack-queue-chips {
+  display: flex;
+  gap: 6px;
+  max-width: 100%;
+  margin: 0;
+  padding: 0;
+  overflow-x: auto;
+  list-style: none;
+}
+.stack-queue-chip {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 7px;
+  padding: 3px 10px 3px 4px;
+  border: 1px solid #b8933f44;
+  border-radius: 8px;
+  background: #1c130a;
+}
+.stack-queue-chip .card-zone {
+  width: 30px;
+  height: 42px;
+  flex: 0 0 auto;
+}
+/* Queue position, not a count: a flat gold disc leading each chip. */
+.stack-queue-order {
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #e8bd4a;
+  color: #2a1a04;
+  font-family: var(--font-fantasy-meta);
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1;
+}
+.stack-queue-name {
+  max-width: 116px;
+  overflow: hidden;
+  color: #e8d9b0;
+  font-size: 12px;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+/* With no layer left, the stack window becomes one short line in its lane. */
+.stack-float.stack-queue-strip {
+  flex-direction: row;
+  gap: 10px;
+  padding: 6px 8px 6px 12px;
+}
+.stack-queue-strip > .stack-hide {
+  flex: 0 0 auto;
+  align-self: center;
+}
+@media (max-width: 700px) {
+  .stack-queue-hint { display: none; }
+  .stack-queue-chip .card-zone { width: 26px; height: 36px; }
+  .stack-queue-name { max-width: 88px; font-size: 11px; }
+  .stack-float.stack-queue-strip { max-height: none; padding: 4px 6px 4px 8px; }
+  /* The label is implied by the numbered chips on a phone. */
+  .stack-queue-strip .stack-queue-title { display: none; }
+}

@@ -1,0 +1,6 @@
+<!-- Attack queue: cards waiting one behind another. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+  <rect x="10" y="2.5" width="10" height="13" rx="1.5" />
+  <path d="M7 6v11.5A1.5 1.5 0 0 0 8.5 19H17" />
+  <path d="M4 9.5v11A1.5 1.5 0 0 0 5.5 22H14" />
+</svg>

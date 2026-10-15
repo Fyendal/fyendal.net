@@ -744,6 +744,7 @@
     line-height: 1;
   }
   .chain-float-bar > .chain-hide,
+  .stack-queue-strip > .stack-hide,
   .chain-float > .chain-hide-corner {
     display: inline-flex;
     width: 44px;

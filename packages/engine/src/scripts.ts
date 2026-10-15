@@ -74,6 +74,9 @@ export interface ScriptCtx {
   ): void;
   /** Read one player's state. The result is deeply readonly. */
   player(targetSeat: number): DeepReadonly<PlayerState>;
+  /** Attacks waiting in a player's attack queue, first attack first. CR
+   * 3.15.7f treats them as on the stack when choosing targets. */
+  queuedAttacks(targetSeat: number): readonly DeepReadonly<CardInstance>[];
   /** Add or spend floating resources/chi or action points through bounded commands. */
   changeResources(targetSeat: number, delta: number): void;
   changeChi(targetSeat: number, delta: number): void;

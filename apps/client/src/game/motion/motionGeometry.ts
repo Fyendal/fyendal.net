@@ -218,7 +218,7 @@ function rectKey(rect: MotionRect): string {
 function motionLayerForDestination(
   location: MotionLocation,
 ): MotionFlight["destinationLayer"] {
-  if (location.kind === "stack-layer") return "stack";
+  if (location.kind === "stack-layer" || location.kind === "attack-queue") return "stack";
   return location.kind.startsWith("chain-") ? "chain" : undefined;
 }
 

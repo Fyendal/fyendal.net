@@ -23575,6 +23575,18 @@
       "value": "may"
     }
   ],
+  "game.stack.queue.hint": [
+    {
+      "type": 0,
+      "value": "Waiting to attack, in order"
+    }
+  ],
+  "game.stack.queue.title": [
+    {
+      "type": 0,
+      "value": "Attack queue"
+    }
+  ],
   "game.stack.short": [
     {
       "type": 0,

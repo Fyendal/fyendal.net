@@ -12,6 +12,7 @@ import { scriptPromptParts } from "./scriptPresentation.js";
 import { abilityList, oncePerTurnEffectFlagKey } from "./scripts.js";
 import type { CardInstance, ChainLinkState, EnterArsenalZone, PendingArcane, PendingDecisionState, PlayerState } from "./state.js";
 import { queueDecisionBehindCrank } from "./decisionQueue.js";
+import { queuedAttackObjects } from "./attackQueue.js";
 import { rngInt } from "./rng.js";
 import {
   cardColorOf,
@@ -569,6 +570,9 @@ export function makeCtx(
     },
     player(targetSeat) {
       return state.players[targetSeat] as PlayerState;
+    },
+    queuedAttacks(targetSeat) {
+      return queuedAttackObjects(state, targetSeat);
     },
     hasArsenalSpace(targetSeat = seat) {
       const target = state.players[targetSeat] as PlayerState;

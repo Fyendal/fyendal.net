@@ -2,6 +2,7 @@ import type { CSSProperties } from "react";
 
 /** Interface icons stored as SVG files in `public/icons/ui/`. */
 export type UiIconName =
+  | "attack-queue"
   | "check"
   | "close"
   | "edit"

@@ -403,3 +403,8 @@
   from { opacity: 1; }
   to { opacity: 0; }
 }
+
+/* A queued attack's position disc and name arrive with its card. */
+.stack-queue-chip:has([data-game-motion-destination-hidden]) {
+  visibility: hidden;
+}

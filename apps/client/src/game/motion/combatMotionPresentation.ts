@@ -47,7 +47,7 @@ export function motionCombatPresentation(
   });
   return {
     ...current,
-    ...(waiting ? { stack, context: waiting.context } : {}),
+    ...(waiting ? { stack, queue: waiting.queue, context: waiting.context } : {}),
     deferChain: waiting !== undefined || (chainFlight !== undefined && !startedFlightIds.has(chainFlight.id)),
     deferStack,
   };

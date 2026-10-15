@@ -2467,6 +2467,8 @@
   "game.chain.unblockAll": "取消全部防御",
   "game.stack.groupedTriggers": "{count} 个合并显示的触发效果",
   "game.stack.optional": "可选",
+  "game.stack.queue.title": "攻击队列",
+  "game.stack.queue.hint": "按顺序等待攻击",
   "game.idle.claimPrompt": "{hero} 已有 {minutes} 分钟未行动 — 是否宣告胜利？",
   "game.idle.claim": "宣告胜利",
   "game.decision.closeChain.prompt": "关闭战斗链？",

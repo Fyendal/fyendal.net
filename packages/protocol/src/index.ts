@@ -1,6 +1,7 @@
 import type { ClientBotTask, BotWorkerResponse } from "@fyendal/shared";
 import { decodeSerializedStateEnvelope } from "./simulationState.js";
 import type {
+  AttackQueueEntryView,
   BotOpponent,
   CardView,
   CardPoolMode,
@@ -1158,6 +1159,12 @@ function combatValueModifiers(value: unknown): value is CombatValueModifierView[
   }, MAX_CARDS);
 }
 
+function attackQueueEntry(value: unknown): value is AttackQueueEntryView {
+  const entry = object(value);
+  return !!entry && exactKeys(entry, ["card", "seat"], ["card", "seat"])
+    && cardView(entry.card) && seat(entry.seat);
+}
+
 function stackLayer(value: unknown): boolean {
   const layer = object(value);
   return !!layer && exactKeys(
@@ -1333,7 +1340,8 @@ export function decodeGameView(value: unknown): GameView | null {
   const view = object(value);
   if (!view || !exactKeys(view, [
     "gameId", "turn", "phase", "activePlayer", "priorityPlayer", "endTurnPassPending", "players", "chain", "stack",
-    "stackContext", "ongoing", "pendingDecision", "gameStats", "turnFacts", "winner", "drawOfferSeat", "log", "logEntries",
+    "stackContext", "attackQueue", "ongoing", "pendingDecision", "gameStats", "turnFacts", "winner", "drawOfferSeat",
+    "log", "logEntries",
   ], [
     "gameId", "turn", "phase", "activePlayer", "priorityPlayer", "players", "chain", "stack",
     "ongoing", "pendingDecision", "winner", "log",
@@ -1345,6 +1353,8 @@ export function decodeGameView(value: unknown): GameView | null {
     && Array.isArray(view.chain) && view.chain.length <= MAX_CARDS && view.chain.every(chainLink)
     && Array.isArray(view.stack) && view.stack.length <= MAX_CARDS && view.stack.every(stackLayer)
     && optional(view.stackContext, (v): v is string => string(v, MAX_SHORT_TEXT, false))
+    && optional(view.attackQueue, (v): v is AttackQueueEntryView[] =>
+      array(v, attackQueueEntry, MAX_CARDS) && v.length > 0)
     && Array.isArray(view.ongoing) && view.ongoing.length <= MAX_CARDS && view.ongoing.every(ongoingEffect)
     && (view.pendingDecision === null || pendingDecision(view.pendingDecision))
     && optional(view.gameStats, gameStats)

@@ -20,6 +20,8 @@ import { createTokenFor, createTokensFor } from "./tokens.js";
 import { destroyPermanent, moveToGraveyard } from "./zoneMoves.js";
 import { currentLink, findCardAnywhere, findPermanent, removeFromArray } from "./zoneQueries.js";
 import { drawCards } from "./cardLifecycle.js";
+import { queuedAttackObjects } from "./attackQueue.js";
+import { takeAttackLayerOrigin } from "./stackCore.js";
 import { notePitch, payFromPools, pitchIntoPool, pitchProhibitedByEffect, pitchValueOfInstance } from "./resources.js";
 import { removeMarkOnOpponentHit, snapshotSerializable } from "./ruleQueries.js";
 
@@ -456,7 +458,9 @@ function effectSourceIsAlly(
 
 /** Complete a "source deals damage, then destroy it" effect. Permanents leave
  * the arena normally; attack action cards on an earlier chain link retain
- * last-known link information while the physical card goes to graveyard. */
+ * last-known link information while the physical card goes to graveyard.
+ * An attack card still on the stack or in the attack queue (CR 3.15.7f)
+ * leaves it, so it never becomes a chain link. */
 function destroySourceAfterEffectDamage(
   state: GameStateInternal,
   runtime: EngineRuntime,
@@ -474,12 +478,39 @@ function destroySourceAfterEffectDamage(
     candidate.attackingCard.instanceId === packet.sourceInstanceId &&
     candidate.flags.attackGone !== true
   );
-  if (!link) return;
+  if (!link) {
+    destroyUnresolvedAttackCard(state, runtime, packet.sourceSeat, packet.sourceInstanceId);
+    return;
+  }
   link.flags.attackGone = true;
   moveToGraveyard(state, runtime, link.attackingCard, "chain", packet.sourceSeat);
   logPublic(state, cardDestroyedLogMessage(state, link.attackingCard.cardId));
   runtime.events.runHook(state, link.attacker, link.attackingCard, "onDestroyed", link);
   runtime.events.fireFriendlyDestroyed(state, link.attacker, link.attackingCard, packet.sourceSeat);
+}
+
+function destroyUnresolvedAttackCard(
+  state: GameStateInternal,
+  runtime: EngineRuntime,
+  seat: number,
+  instanceId: number,
+): void {
+  const layerIndex = state.stack.findIndex((layer) =>
+    layer.seat === seat && layer.ability !== true && layer.card?.instanceId === instanceId
+  );
+  let card: CardInstance | undefined;
+  if (layerIndex >= 0) {
+    card = state.stack.splice(layerIndex, 1)[0]!.card;
+    takeAttackLayerOrigin(state, seat, instanceId);
+  } else if (queuedAttackObjects(state, seat).some((queued) => queued.instanceId === instanceId)) {
+    // The queue entry is left behind; the next queued attack skips it.
+    card = removeFromArray(state.resolving, instanceId);
+  }
+  if (!card) return;
+  moveToGraveyard(state, runtime, card, "stack", seat);
+  logPublic(state, cardDestroyedLogMessage(state, card.cardId));
+  runtime.events.runHook(state, seat, card, "onDestroyed");
+  runtime.events.fireFriendlyDestroyed(state, seat, card, seat);
 }
 
 /** Generate respondable triggered layers for an effect that explicitly says

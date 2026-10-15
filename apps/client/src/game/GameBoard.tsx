@@ -1284,6 +1284,7 @@ export function GameBoard() {
       {gameMotion.turnStartUiReady ? <StackFloat
         motionDeferred={combatPresentation.deferStack}
         layers={combatPresentation.stack}
+        queue={combatPresentation.queue}
         context={combatPresentation.context}
         miniHost={splitLineMiniHost}
         visibility={mobileCombatFloatVisibility}

@@ -13,6 +13,7 @@ export type MotionLocation =
   | { kind: "equipment"; seat: number; slot: EquipmentSlot }
   | { kind: "weapon"; seat: number; index: number }
   | { kind: "stack-layer"; index: number }
+  | { kind: "attack-queue"; index: number }
   | { kind: "chain-attack"; link: number }
   | { kind: "chain-staged"; link: number; index: number }
   | { kind: "chain-defender"; link: number; index: number }
@@ -141,6 +142,8 @@ export function motionLocationKey(location: MotionLocation): string {
       return `${location.seat}:weapon:${location.index}`;
     case "stack-layer":
       return `stack:layer:${location.index}`;
+    case "attack-queue":
+      return `stack:queue:${location.index}`;
     case "chain-attack":
       return `chain:${location.link}:attack`;
     case "chain-staged":
@@ -157,7 +160,7 @@ export function motionLocationKey(location: MotionLocation): string {
 }
 
 /** Stable card-presentation key shared by projected-view extraction and DOM
- * anchors. Stack-layer and staged-defender indexes are deliberately excluded
+ * anchors. Stack-layer, attack-queue and staged-defender indexes are deliberately excluded
  * because removing an earlier sibling must not move every remaining card. */
 export function motionPresentationKey(
   location: MotionLocation,
@@ -166,6 +169,8 @@ export function motionPresentationKey(
 ): string {
   const identity = location.kind === "stack-layer"
     ? "stack:layer"
+    : location.kind === "attack-queue"
+      ? "stack:queue"
     : location.kind === "chain-staged"
       ? `chain:${location.link}:staged`
       : motionLocationKey(location);

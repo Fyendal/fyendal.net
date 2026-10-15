@@ -36,9 +36,9 @@ function banishedPlayIntents(game: ReturnType<typeof scenario>, seat: number, ke
 }
 
 // Huxley boosts Zero to Sixty into `deckTop`; the opponent has no blockers.
-function huxleyGame(deckTop: string) {
+function huxleyGame(deckTop: string, equipment: SeatSpec["equipment"] = NO_EQUIPMENT) {
   return scenario({ seats: [
-    { hero: "rhinar", heroKey: HUXLEY, hand: [ZERO_TO_SIXTY], deck: [deckTop], weapons: [], equipment: NO_EQUIPMENT },
+    { hero: "rhinar", heroKey: HUXLEY, hand: [ZERO_TO_SIXTY], deck: [deckTop], weapons: [], equipment },
     { hero: "dorinthea", weapons: [], equipment: NO_EQUIPMENT },
   ] });
 }
@@ -165,13 +165,21 @@ describe("Outbreak heroes", () => {
       game.play(PROWL, { fromZone: "banish", asInstant: true, settle: false });
       game.passPriority().passPriority();
       game.expectLog("Prowl is put into the attack queue");
+      // CR 7.2.2: Prowl left the queue straight into the Attack Step; it does
+      // not wait in a second Layer Step.
+      expect(game.state.chain.map((link) => link.attackingCard.cardId)).toEqual([printingId(PROWL)]);
+      expect(game.state.chain[0]?.flags.attackStepBegan).toBe(true);
+      expect(game.state.stackResume).not.toBe("start-attack-step");
+      const queuedIds = () => projectStateFor(game.state, 1).attackQueue?.map((entry) => entry.card.cardId);
 
       // Prowl resolved into the queue before Zero to Sixty's layer did, so it
       // is the first chain link and Zero to Sixty attacks after it.
       game.settle();
       expect(game.state.chain.map((link) => link.attackingCard.cardId)).toEqual([printingId(PROWL)]);
       game.expectLog("Zero to Sixty is put into the attack queue");
+      expect(queuedIds()).toEqual([printingId(ZERO_TO_SIXTY)]);
       game.blockWith().settle();
+      expect(queuedIds()).toBeUndefined();
       expect(game.state.chain.map((link) => link.attackingCard.cardId)).toEqual([
         printingId(PROWL),
         printingId(ZERO_TO_SIXTY),
@@ -200,6 +208,53 @@ describe("Outbreak heroes", () => {
         printingId(ZERO_TO_SIXTY),
       ]);
       expect(game.state.chain[0]?.hit).toBe(true);
+    });
+  });
+
+  describe("Flick Knives with a queued Kiss of Death", () => {
+    const FLICK_KNIVES = "flick knives|0";
+    const withFlickKnives = { ...NO_EQUIPMENT, arms: FLICK_KNIVES };
+
+    // Zero to Sixty is the active attack in its Reaction Step; Kiss of Death
+    // is played from banish at instant speed and waits on the stack.
+    function kissOnStack() {
+      const game = huxleyGame(KISS_OF_DEATH, withFlickKnives);
+      game.play(ZERO_TO_SIXTY, { boost: true }).chooseOption("yes").blockWith();
+      expect(game.state.phase).toBe("reaction");
+      game.play(KISS_OF_DEATH, { fromZone: "banish", asInstant: true, settle: false });
+      const kiss = game.state.stack.find((layer) => layer.card?.cardId === printingId(KISS_OF_DEATH));
+      expect(kiss).toBeDefined();
+      return { game, kissId: kiss!.card!.instanceId };
+    }
+
+    function flickKiss(game: ReturnType<typeof scenario>, kissId: number) {
+      game.activate(FLICK_KNIVES);
+      expect(game.state.pendingDecision?.options).toContain(String(kissId));
+      game.doRaw({ kind: "choose", optionId: String(kissId) });
+    }
+
+    it("can make a dagger attack that is still on the stack deal damage, then destroys it", () => {
+      const { game, kissId } = kissOnStack();
+
+      flickKiss(game, kissId);
+
+      expect(game.state.stack.some((layer) => layer.card?.instanceId === kissId)).toBe(false);
+      game.expectInZone(0, KISS_OF_DEATH, "graveyard");
+      game.settle();
+      expect(game.state.chain.map((link) => link.attackingCard.cardId)).toEqual([printingId(ZERO_TO_SIXTY)]);
+    });
+
+    it("treats a dagger attack in the attack queue as on the stack (CR 3.15.7f)", () => {
+      const { game, kissId } = kissOnStack();
+      game.passPriority().passPriority();
+      expect(projectStateFor(game.state, 0).attackQueue?.map((entry) => entry.card.instanceId)).toEqual([kissId]);
+
+      flickKiss(game, kissId);
+
+      game.expectInZone(0, KISS_OF_DEATH, "graveyard");
+      expect(projectStateFor(game.state, 0).attackQueue).toBeUndefined();
+      game.settle();
+      expect(game.state.chain.map((link) => link.attackingCard.cardId)).toEqual([printingId(ZERO_TO_SIXTY)]);
     });
   });
 

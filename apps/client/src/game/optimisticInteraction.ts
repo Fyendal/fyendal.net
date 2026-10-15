@@ -143,7 +143,12 @@ function projectCardPlay(
   const playedCard = withoutFaceDown(source);
   const data = cardData[playedCard.cardId];
   const isAttack = data?.cardType === "action" && (data.subtypes ?? []).includes("attack");
-  if (isAttack) return projectPendingAttack(view, players, playedCard);
+  // Only an Action Phase play announces a pending chain link. An attack
+  // played at instant speed in the Layer or Reaction Step is an ordinary card
+  // layer above the current attack until it resolves into the attack queue.
+  if (isAttack && view.phase !== "layer" && view.phase !== "reaction") {
+    return projectPendingAttack(view, players, playedCard);
+  }
   return {
     ...view,
     players,
