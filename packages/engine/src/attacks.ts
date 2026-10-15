@@ -280,6 +280,12 @@ function attackGoAgain(state: GameStateInternal, card: CardInstance, cardType: "
   );
 }
 
+/** The link's attack already passed through the attack queue, so attacks
+ * resolving above its layer queue behind it (CR 7.2.2). */
+const ATTACK_LAYER_QUEUED = "attackLayerQueued";
+/** An attack resolved into the queue above this unresolved attack-layer. */
+const ATTACKS_QUEUED_ABOVE_LAYER = "attacksQueuedAboveLayer";
+
 /**
  * Open a chain link for an attack. Caller has already paid costs/AP and,
  * for action cards, removed the card from its zone (it is passed in `card`).
@@ -300,8 +306,8 @@ export function declareAttack(
   declaredAtNextId = state.nextInstanceId,
   fromBanish = false,
   fromOutsideHandOrArsenal = false,
+  fromAttackQueue = false,
 ): void {
-  const player = state.players[seat] as PlayerState;
   const link: ChainLinkState = {
     attacker: seat,
     attackingCard: card,
@@ -320,6 +326,7 @@ export function declareAttack(
       ...(grantedGoAgain ? { grantedGoAgainAtLayer: true } : {}),
       ...(fromBanish ? { fromBanish: true } : {}),
       ...(fromOutsideHandOrArsenal ? { fromOutsideHandOrArsenal: true } : {}),
+      ...(fromAttackQueue ? { [ATTACK_LAYER_QUEUED]: true } : {}),
     },
     ...(targetAllyId !== undefined ? { targetAllyId } : {}),
   };
@@ -335,6 +342,7 @@ export function declareAttack(
 export function beginAttackStep(state: GameStateInternal, runtime: EngineRuntime): void {
   const link = currentLink(state);
   if (!link || link.flags.attackStepBegan === true) return;
+  if (deferAttackLayerBehindQueue(state, runtime, link)) return;
   link.flags.attackStepBegan = true;
   const seat = link.attacker;
   const card = link.attackingCard;
@@ -449,8 +457,24 @@ export function attackFromDeck(
 
 const EFFECT_ATTACK_QUEUE_HEAD = "effectAttackQueueHead";
 const EFFECT_ATTACK_QUEUE_TAIL = "effectAttackQueueTail";
+const ATTACK_CARD_TYPES: readonly ChainLinkState["attackCardType"][] = ["action", "weapon", "ally"];
 
-type QueuedAttack = { instanceId: number; targetAllyId?: number; cardOrigin?: CardPlayOrigin };
+/** A chain link announced before its attack-layer resolved, held in the
+ * queue with the flags recorded when it was played. */
+type DeferredAttackLayer = {
+  cardType: ChainLinkState["attackCardType"];
+  flags: Record<string, number | boolean>;
+};
+
+type QueuedAttack = {
+  instanceId: number;
+  targetAllyId?: number;
+  cardOrigin?: CardPlayOrigin;
+  layer?: DeferredAttackLayer;
+};
+
+const queueKey = (slot: number, field: string) => `effectAttackQueue:${slot}:${field}`;
+const queueLinkFlagPrefix = (slot: number) => queueKey(slot, "linkFlag:");
 
 function enqueueAttack(player: PlayerState, entry: QueuedAttack): void {
   const tail = Number(player.flags[EFFECT_ATTACK_QUEUE_TAIL] ?? 0) + 1;
@@ -458,12 +482,18 @@ function enqueueAttack(player: PlayerState, entry: QueuedAttack): void {
     player.flags[EFFECT_ATTACK_QUEUE_HEAD] = tail;
   }
   player.flags[EFFECT_ATTACK_QUEUE_TAIL] = tail;
-  player.flags[`effectAttackQueue:${tail}:instance`] = entry.instanceId;
+  player.flags[queueKey(tail, "instance")] = entry.instanceId;
   if (entry.targetAllyId !== undefined) {
-    player.flags[`effectAttackQueue:${tail}:target`] = entry.targetAllyId;
+    player.flags[queueKey(tail, "target")] = entry.targetAllyId;
   }
   if (entry.cardOrigin !== undefined) {
-    player.flags[`effectAttackQueue:${tail}:card`] = CARD_PLAY_ORIGINS.indexOf(entry.cardOrigin) + 1;
+    player.flags[queueKey(tail, "card")] = CARD_PLAY_ORIGINS.indexOf(entry.cardOrigin) + 1;
+  }
+  if (entry.layer) {
+    player.flags[queueKey(tail, "layer")] = ATTACK_CARD_TYPES.indexOf(entry.layer.cardType) + 1;
+    for (const [key, value] of Object.entries(entry.layer.flags)) {
+      player.flags[`${queueLinkFlagPrefix(tail)}${key}`] = value;
+    }
   }
 }
 
@@ -471,15 +501,25 @@ function dequeueAttack(player: PlayerState): QueuedAttack | undefined {
   const head = Number(player.flags[EFFECT_ATTACK_QUEUE_HEAD] ?? 0);
   const tail = Number(player.flags[EFFECT_ATTACK_QUEUE_TAIL] ?? 0);
   if (head <= 0 || tail < head) return undefined;
-  const instanceKey = `effectAttackQueue:${head}:instance`;
-  const targetKey = `effectAttackQueue:${head}:target`;
-  const cardKey = `effectAttackQueue:${head}:card`;
+  const instanceKey = queueKey(head, "instance");
+  const targetKey = queueKey(head, "target");
+  const cardKey = queueKey(head, "card");
+  const layerKey = queueKey(head, "layer");
   const instanceId = Number(player.flags[instanceKey] ?? 0);
   const target = player.flags[targetKey];
   const cardOrigin = CARD_PLAY_ORIGINS[Number(player.flags[cardKey] ?? 0) - 1];
+  const layerType = ATTACK_CARD_TYPES[Number(player.flags[layerKey] ?? 0) - 1];
+  const linkFlags: Record<string, number | boolean> = {};
+  const linkFlagPrefix = queueLinkFlagPrefix(head);
+  for (const key of Object.keys(player.flags)) {
+    if (!key.startsWith(linkFlagPrefix)) continue;
+    linkFlags[key.slice(linkFlagPrefix.length)] = player.flags[key] as number | boolean;
+    delete player.flags[key];
+  }
   delete player.flags[instanceKey];
   delete player.flags[targetKey];
   delete player.flags[cardKey];
+  delete player.flags[layerKey];
   if (head === tail) {
     delete player.flags[EFFECT_ATTACK_QUEUE_HEAD];
     delete player.flags[EFFECT_ATTACK_QUEUE_TAIL];
@@ -491,7 +531,14 @@ function dequeueAttack(player: PlayerState): QueuedAttack | undefined {
     instanceId,
     ...(typeof target === "number" ? { targetAllyId: target } : {}),
     ...(cardOrigin !== undefined ? { cardOrigin } : {}),
+    ...(layerType !== undefined ? { layer: { cardType: layerType, flags: linkFlags } } : {}),
   };
+}
+
+/** Whether a queued entry is an attack card waiting in the resolving zone,
+ * rather than an attack by a weapon or ally that stays in the arena. */
+function queuedAttackIsCard(queued: QueuedAttack): boolean {
+  return queued.layer ? queued.layer.cardType === "action" : queued.cardOrigin !== undefined;
 }
 
 /** CR 5.3.1a: a resolved attack-card layer moves to the attack queue. The
@@ -507,6 +554,22 @@ export function queueAttackCard(
     state.resolving.push(card);
   }
   enqueueAttack(state.players[seat] as PlayerState, { instanceId: card.instanceId, cardOrigin });
+  // The engine announces a played attack as its chain link at once, but its
+  // attack-layer is still beneath every layer played in its Layer Step. An
+  // attack resolving from above it reaches the queue first (CR 7.1.2a).
+  const link = currentLink(state);
+  if (
+    link &&
+    link.attacker === seat &&
+    state.stackResume === "start-attack-step" &&
+    link.flags[ATTACK_LAYER_QUEUED] !== true
+  ) {
+    link.flags[ATTACKS_QUEUED_ABOVE_LAYER] = true;
+  }
+  logAttackQueued(state, card);
+}
+
+function logAttackQueued(state: GameStateInternal, card: CardInstance): void {
   logPublic(state, gameLogMessage(
     `${nameOf(state, card.cardId)} is put into the attack queue`,
     "engine.log.attack.queued",
@@ -514,15 +577,37 @@ export function queueAttackCard(
   ));
 }
 
+/** CR 7.1.2a / 7.2.2: when an attack-layer resolves after attacks played
+ * above it, it joins the attack queue behind them and the queue's first
+ * attack becomes the chain link instead. */
+function deferAttackLayerBehindQueue(
+  state: GameStateInternal,
+  runtime: EngineRuntime,
+  link: ChainLinkState,
+): boolean {
+  if (link.flags[ATTACKS_QUEUED_ABOVE_LAYER] !== true) return false;
+  delete link.flags[ATTACKS_QUEUED_ABOVE_LAYER];
+  state.chain.pop();
+  const card = link.attackingCard;
+  if (link.attackCardType === "action") state.resolving.push(card);
+  enqueueAttack(state.players[link.attacker] as PlayerState, {
+    instanceId: card.instanceId,
+    ...(link.targetAllyId !== undefined ? { targetAllyId: link.targetAllyId } : {}),
+    layer: { cardType: link.attackCardType, flags: { ...link.flags, [ATTACK_LAYER_QUEUED]: true } },
+  });
+  logAttackQueued(state, card);
+  return runtime.dispatchFlow("startNextQueuedAttack", state, link.attacker);
+}
+
 /** CR 7.7.3: attack cards still queued when the combat chain closes are
- * cleared to their owners' graveyards. Queued permanent attacks keep their
- * existing order. */
+ * cleared to their owners' graveyards, as are held-back attack-layers.
+ * Queued effect-generated permanent attacks keep their existing order. */
 export function clearAttackQueue(state: GameStateInternal, runtime: EngineRuntime): void {
   for (const player of state.players as PlayerState[]) {
     const kept: QueuedAttack[] = [];
     for (let queued = dequeueAttack(player); queued; queued = dequeueAttack(player)) {
-      if (queued.cardOrigin === undefined) {
-        kept.push(queued);
+      if (!queuedAttackIsCard(queued)) {
+        if (!queued.layer) kept.push(queued);
         continue;
       }
       const card = state.resolving.find((candidate) => candidate.instanceId === queued.instanceId);
@@ -535,9 +620,9 @@ export function clearAttackQueue(state: GameStateInternal, runtime: EngineRuntim
 }
 
 /** Move the next queued attack onto the combat chain: an effect-generated
- * permanent attack or an attack card played at instant speed. Invalid
- * attacks are cleared and the next queued attack is tried, matching CR
- * 7.2.2c. */
+ * permanent attack, an attack card played at instant speed, or a held-back
+ * attack-layer. Invalid attacks are cleared and the next queued attack is
+ * tried, matching CR 7.2.2c. */
 export function startNextQueuedAttack(
   state: GameStateInternal,
   runtime: EngineRuntime,
@@ -545,13 +630,17 @@ export function startNextQueuedAttack(
 ): boolean {
   const player = state.players[seat] as PlayerState;
   for (let queued = dequeueAttack(player); queued; queued = dequeueAttack(player)) {
-    if (queued.cardOrigin !== undefined) {
+    if (queuedAttackIsCard(queued)) {
       const card = state.resolving.find((candidate) => candidate.instanceId === queued.instanceId);
       if (!card) continue;
       removeFromArray(state.resolving, card.instanceId);
       if (!attackTargetIsLegal(state, runtime, seat, queued.targetAllyId)) {
         runtime.commands.moveToGraveyard(state, card, "stack");
         continue;
+      }
+      if (queued.layer) {
+        openDeferredAttackLayer(state, runtime, seat, card, queued.layer, queued.targetAllyId);
+        return true;
       }
       const origin = queued.cardOrigin;
       declareAttack(
@@ -566,6 +655,7 @@ export function startNextQueuedAttack(
         state.nextInstanceId,
         origin === "banish",
         origin !== "hand" && origin !== "arsenal",
+        true,
       );
       return true;
     }
@@ -580,10 +670,56 @@ export function startNextQueuedAttack(
       (weapon !== undefined && weaponAttacksProhibited(player)) ||
       !attackTargetIsLegal(state, runtime, seat, queued.targetAllyId)
     ) continue;
-    declareAttack(state, runtime, seat, card, weapon ? "weapon" : "ally", false, queued.targetAllyId);
+    if (queued.layer) {
+      openDeferredAttackLayer(state, runtime, seat, card, queued.layer, queued.targetAllyId);
+      return true;
+    }
+    declareAttack(
+      state, runtime,
+      seat,
+      card,
+      weapon ? "weapon" : "ally",
+      false,
+      queued.targetAllyId,
+      false,
+      false,
+      state.nextInstanceId,
+      false,
+      false,
+      true,
+    );
     return true;
   }
   return false;
+}
+
+/** Restore a held-back attack-layer's chain link. Its costs, play-time
+ * effects and target were settled when it was played, so only its Layer Step
+ * window reopens. */
+function openDeferredAttackLayer(
+  state: GameStateInternal,
+  runtime: EngineRuntime,
+  seat: number,
+  card: CardInstance,
+  layer: DeferredAttackLayer,
+  targetAllyId: number | undefined,
+): void {
+  state.chain.push({
+    attacker: seat,
+    attackingCard: card,
+    attackCardType: layer.cardType,
+    defendingCards: [],
+    defendingEquipment: [],
+    reactions: [],
+    goAgain: false,
+    damage: 0,
+    hit: false,
+    resolved: false,
+    declaredAtNextId: state.nextInstanceId,
+    flags: layer.flags,
+    ...(targetAllyId !== undefined ? { targetAllyId } : {}),
+  });
+  runtime.dispatchFlow("enterAttackLayerWindow", state);
 }
 
 /** Generate an effect-driven attack with a controlled weapon or ally. The

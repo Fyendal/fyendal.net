@@ -13,6 +13,7 @@ const RUSTY_HARPOON = "rusty harpoon|3";
 const ZERO_TO_SIXTY = "zero to sixty|1";
 const ZIPPER_HIT = "zipper hit|1";
 const PROWL = "prowl|1";
+const KISS_OF_DEATH = "kiss of death|1";
 const FILLER = "raging onslaught|1";
 const NO_EQUIPMENT = { head: null, chest: null, arms: null, legs: null } as const;
 const BLOODROT_POX = "bloodrot pox|0";
@@ -151,7 +152,7 @@ describe("Outbreak heroes", () => {
       game.expectLife(1, 13).expectAP(0, 0);
     });
 
-    it("queues a stealth attack played while the boosted attack is still a layer behind that attack", () => {
+    it("puts a stealth attack played above the boosted attack-layer on the combat chain first", () => {
       const game = huxleyGame(PROWL);
 
       game.play(ZERO_TO_SIXTY, { boost: true }).doRaw({ kind: "choose", optionId: "yes" });
@@ -163,15 +164,42 @@ describe("Outbreak heroes", () => {
       expect(game.state.chain[0]?.flags.attackStepBegan).not.toBe(true);
       game.play(PROWL, { fromZone: "banish", asInstant: true, settle: false });
       game.passPriority().passPriority();
-      game.expectLog("put into the attack queue");
+      game.expectLog("Prowl is put into the attack queue");
 
-      game.settle().blockWith().settle();
-      expect(game.state.chain.map((link) => link.attackingCard.cardId)).toEqual([
-        printingId(ZERO_TO_SIXTY),
-        printingId(PROWL),
-      ]);
+      // Prowl resolved into the queue before Zero to Sixty's layer did, so it
+      // is the first chain link and Zero to Sixty attacks after it.
+      game.settle();
+      expect(game.state.chain.map((link) => link.attackingCard.cardId)).toEqual([printingId(PROWL)]);
+      game.expectLog("Zero to Sixty is put into the attack queue");
       game.blockWith().settle();
-      game.expectLife(1, 13);
+      expect(game.state.chain.map((link) => link.attackingCard.cardId)).toEqual([
+        printingId(PROWL),
+        printingId(ZERO_TO_SIXTY),
+      ]);
+      // Zero to Sixty keeps the play-time state recorded on its link.
+      expect(game.state.chain[1]?.flags.boosted).toBe(true);
+      game.blockWith().settle();
+      game.expectLife(1, 13).expectAP(0, 0);
+    });
+
+    it("puts Kiss of Death played above a boosted Zero to Sixty on the combat chain first", () => {
+      const game = huxleyGame(KISS_OF_DEATH);
+
+      game.play(ZERO_TO_SIXTY, { boost: true }).doRaw({ kind: "choose", optionId: "yes" });
+      for (let guard = 0; guard < 6 && banishedPlayIntents(game, 0, KISS_OF_DEATH).length === 0; guard++) {
+        game.passPriority();
+      }
+      expect(game.state.phase).toBe("layer");
+      game.play(KISS_OF_DEATH, { fromZone: "banish", asInstant: true, settle: false });
+      game.passPriority().passPriority().settle();
+
+      expect(game.state.chain.map((link) => link.attackingCard.cardId)).toEqual([printingId(KISS_OF_DEATH)]);
+      game.blockWith().settle();
+      expect(game.state.chain.map((link) => link.attackingCard.cardId)).toEqual([
+        printingId(KISS_OF_DEATH),
+        printingId(ZERO_TO_SIXTY),
+      ]);
+      expect(game.state.chain[0]?.hit).toBe(true);
     });
   });
 
