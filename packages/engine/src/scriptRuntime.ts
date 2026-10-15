@@ -11,7 +11,7 @@ import {
   fireOnFriendlyPlay,
   grantLinkGoAgain,
   notifyGoAgainResolved,
-  queueHeroDamageDealt,
+  queueDamageDealt,
   queueTriggeredEvent,
   runHook,
 } from "./eventSources.js";
@@ -41,7 +41,7 @@ export function createScriptRuntime(runtime: EngineRuntime): ScriptRuntimeBindin
       fireOnFriendlyPlay: bindEvent(fireOnFriendlyPlay),
       grantLinkGoAgain: bindEvent(grantLinkGoAgain),
       notifyGoAgainResolved: bindEvent(notifyGoAgainResolved),
-      queueHeroDamageDealt: bindEvent(queueHeroDamageDealt),
+      queueDamageDealt: bindEvent(queueDamageDealt),
       queueTriggeredEvent: bindEvent(queueTriggeredEvent),
       runHook: bindEvent(runHook),
     }),

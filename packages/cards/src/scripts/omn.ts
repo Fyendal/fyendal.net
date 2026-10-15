@@ -1,11 +1,13 @@
-import type { CardInstance, CardScript, DeepReadonly, Modifier, ScriptCtx } from "@fyendal/engine";
+import type { CardInstance, CardScript, DeepReadonly, Modifier, ScriptCtx, TriggerDef } from "@fyendal/engine";
 import {
   ampNextArcane,
   buffNextAttack,
   commonOptionMessages,
   dealArcane,
+  dealtByThis,
   decisionMessage,
   decisionPrompt,
+  heroDamage,
   mergeSetScripts,
   opponentSeat,
   optN,
@@ -327,11 +329,20 @@ function arcaneAndDiscardFlow(amount: number): CardScript {
   };
 }
 
+/** "The first time this deals damage to a hero" on a Quickstrike attack. The
+ * attack lives on one chain link, so a link flag records that ordinal; `to`
+ * narrows which heroes count toward it. */
+interface FirstDamageTrigger extends Required<Pick<TriggerDef, "label" | "labelMessage">> {
+  to?: (ctx: ScriptCtx, targetSeat: number) => boolean;
+  effect: (ctx: ScriptCtx, targetSeat: number) => void;
+}
+
 function quickstrike(opts: {
   attack?: number;
   attackArcane?: boolean;
-  firstDamage?: (ctx: ScriptCtx) => void;
+  firstDamage?: FirstDamageTrigger;
 }): CardScript {
+  const first = opts.firstDamage;
   return {
     modifyAttack: (ctx) => (ctx.link?.goAgain ? (opts.attack ?? 0) : 0),
     onAttackDeclared(ctx) {
@@ -339,11 +350,29 @@ function quickstrike(opts: {
         dealArcane(ctx, opponentSeat(ctx), 1);
       }
     },
-    onDealsDamage(ctx, targetSeat, amount) {
-      if (amount <= 0 || targetSeat === ctx.seat || ctx.getFlag("link", "quickstrikeDamage") === true) return;
-      ctx.setFlag("link", "quickstrikeDamage", true);
-      opts.firstDamage?.(ctx);
-    },
+    ...(first
+      ? {
+          triggers: [
+            {
+              event: "damage-dealt",
+              sourceZone: "self",
+              label: first.label,
+              labelMessage: first.labelMessage,
+              condition(ctx, eventCard, event) {
+                const damage = heroDamage(event);
+                return (
+                  dealtByThis(ctx, eventCard) &&
+                  !!damage &&
+                  ctx.getFlag("link", "quickstrikeDamage") !== true &&
+                  (first.to?.(ctx, damage.targetSeat) ?? true)
+                );
+              },
+              onTrigger: (ctx) => ctx.setFlag("link", "quickstrikeDamage", true),
+              effect: (ctx, _eventCard, event) => first.effect(ctx, heroDamage(event)?.targetSeat ?? opponentSeat(ctx)),
+            },
+          ],
+        }
+      : {}),
   };
 }
 
@@ -389,17 +418,31 @@ function consumeSourceModifier(
   return modifier;
 }
 
+/** The rider marker this source granted to `attackInstanceId`, if live. */
+function riderMarker(ctx: ScriptCtx, attackInstanceId: number | undefined): DeepReadonly<Modifier> | undefined {
+  return ctx.state.modifiers.find(
+    (modifier) =>
+      modifier.sourceInstanceId === ctx.self.instanceId &&
+      modifier.scope === "until-end-of-turn" &&
+      modifier.appliesToInstanceId === attackInstanceId &&
+      !modifier.consumed,
+  );
+}
+
+const LEECH_RIDER_LABELS: Record<"memory" | "renown" | "vitality", Pick<TriggerDef, "label" | "labelMessage">> = {
+  memory: {
+    label: "Put an attack action card from your graveyard on the bottom of your deck?",
+    labelMessage: { id: "card.trigger.common.graveyard.attack.bottom.optional" },
+  },
+  renown: {
+    label: "Destroy an aura token the damaged hero controls",
+    labelMessage: { id: "card.trigger.common.damaged.auratoken.destroy" },
+  },
+  vitality: { label: "Gain 1 life", labelMessage: { id: "card.trigger.common.life.gain", values: { amount: 1 } } },
+};
+
 function nextAttackDamageRider(kind: "memory" | "renown" | "vitality"): CardScript {
-  const damage = (ctx: ScriptCtx, source: Card, targetSeat: number, amount: number) => {
-    if (amount <= 0 || targetSeat === ctx.seat) return;
-    const marker = ctx.state.modifiers.find(
-      (modifier) =>
-        modifier.sourceInstanceId === ctx.self.instanceId &&
-        modifier.scope === "until-end-of-turn" &&
-        modifier.appliesToInstanceId === source.instanceId &&
-        !modifier.consumed,
-    );
-    if (!marker) return;
+  const damage = (ctx: ScriptCtx, targetSeat: number) => {
     if (kind === "vitality") ctx.gainLife(ctx.seat, 1);
     else if (kind === "memory") chooseGraveAttackBottom(ctx, "leech-memory");
     else {
@@ -422,12 +465,17 @@ function nextAttackDamageRider(kind: "memory" | "renown" | "vitality"): CardScri
       if (marker && ctx.link)
         ctx.addModifier({ scope: "until-end-of-turn", appliesToInstanceId: ctx.link.attackingCard.instanceId });
     },
-    onFriendlyDamageDealt(ctx, source, targetSeat, amount) {
-      damage(ctx, source, targetSeat, amount);
-    },
-    onFriendlyCombatDamageDealt(ctx, source, targetSeat, amount) {
-      damage(ctx, source, targetSeat, amount);
-    },
+    triggers: [
+      {
+        event: "damage-dealt",
+        ...LEECH_RIDER_LABELS[kind],
+        condition: (ctx, eventCard, event) => !!heroDamage(event) && !!riderMarker(ctx, eventCard?.instanceId),
+        effect(ctx, _eventCard, event) {
+          const target = heroDamage(event);
+          if (target) damage(ctx, target.targetSeat);
+        },
+      },
+    ],
     onChoose(ctx, hook, option) {
       if (hook === "leech-memory" && option !== "no") ctx.putOnDeckBottom(Number(option));
       if (hook === "leech-renown") ctx.destroyPermanent(Number(option));
@@ -530,17 +578,8 @@ function quickSuccession(count: number): CardScript {
 }
 
 function mercurialSkies(amount: number): CardScript {
-  const dealRider = (ctx: ScriptCtx, source: Card, targetSeat: number, dealt: number) => {
-    if (dealt <= 0 || targetSeat === ctx.seat) return;
-    const marker = ctx.state.modifiers.find(
-      (modifier) =>
-        modifier.sourceInstanceId === ctx.self.instanceId &&
-        modifier.scope === "until-end-of-turn" &&
-        modifier.appliesToInstanceId === source.instanceId &&
-        !modifier.consumed,
-    );
-    if (!marker || flows(ctx).length === 0) return;
-    ctx.consumeModifier(marker.id);
+  const dealRider = (ctx: ScriptCtx) => {
+    if (flows(ctx).length === 0) return;
     const preview = ctx.previewArcaneDamage(amount);
     destroyFlowChoice(
       ctx,
@@ -566,12 +605,20 @@ function mercurialSkies(amount: number): CardScript {
         ctx.addModifier({ scope: "until-end-of-turn", appliesToInstanceId: ctx.link.attackingCard.instanceId });
       }
     },
-    onFriendlyDamageDealt(ctx, source, targetSeat, dealt) {
-      dealRider(ctx, source, targetSeat, dealt);
-    },
-    onFriendlyCombatDamageDealt(ctx, source, targetSeat, dealt) {
-      dealRider(ctx, source, targetSeat, dealt);
-    },
+    triggers: [
+      {
+        event: "damage-dealt",
+        label: `Destroy a Lightning Flow to deal ${amount} arcane damage?`,
+        labelMessage: { id: "card.trigger.common.lightningflow.destroy.arcane.optional", values: { amount } },
+        // "The first time": the granted marker is consumed when it triggers.
+        condition: (ctx, eventCard, event) => !!heroDamage(event) && !!riderMarker(ctx, eventCard?.instanceId),
+        onTrigger(ctx, eventCard) {
+          const marker = riderMarker(ctx, eventCard?.instanceId);
+          if (marker) ctx.consumeModifier(marker.id);
+        },
+        effect: dealRider,
+      },
+    ],
     onChoose(ctx, hook, option) {
       if (hook !== "mercurial-flow" || option === "no" || !ctx.destroyPermanent(Number(option))) return;
       dealArcane(ctx, opponentSeat(ctx), ctx.getCounter("mercurialDamage"));
@@ -935,13 +982,21 @@ export const omn: Record<string, CardScript> = mergeSetScripts("OMN", omnHighRar
   "dashing flashfoot|2": quickstrike({
     attack: 1,
     attackArcane: true,
-    firstDamage: (ctx) => ctx.createToken(EMBODIMENT),
+    firstDamage: {
+      label: "Create Embodiment of Lightning",
+      labelMessage: { id: "card.trigger.common.embodimentlightning.create" },
+      effect: (ctx) => ctx.createToken(EMBODIMENT),
+    },
   }),
   "electryn mindmeld|2": {
     ...quickstrike({
       attack: 1,
       attackArcane: true,
-      firstDamage: (ctx) => chooseGraveInstantBottom(ctx, "mindmeld-bottom"),
+      firstDamage: {
+        label: "Put an instant from your graveyard on the bottom of your deck?",
+        labelMessage: { id: "card.trigger.common.graveyard.instant.bottom.optional" },
+        effect: (ctx) => chooseGraveInstantBottom(ctx, "mindmeld-bottom"),
+      },
     }),
     onChoose(ctx, hook, option) {
       if (hook === "mindmeld-bottom" && option !== "no") ctx.putOnDeckBottom(Number(option));
@@ -950,7 +1005,11 @@ export const omn: Record<string, CardScript> = mergeSetScripts("OMN", omnHighRar
   "prophetic quickstep|2": quickstrike({
     attack: 1,
     attackArcane: true,
-    firstDamage: (ctx) => ctx.createToken(PONDER),
+    firstDamage: {
+      label: "Create a Ponder token",
+      labelMessage: { id: "card.trigger.common.ponder.create" },
+      effect: (ctx) => ctx.createToken(PONDER),
+    },
   }),
   ...pitches("stinging sprite", () => stingingSprite()),
   ...pitches("mercurial skies", (pitch) => mercurialSkies(4 - pitch)),
@@ -963,21 +1022,32 @@ export const omn: Record<string, CardScript> = mergeSetScripts("OMN", omnHighRar
   "rush of power|2": rushOfPower(),
   "rush of power|3": rushOfPower(),
   ...pitches("singeing flowstride", () =>
-    quickstrike({ attackArcane: true, firstDamage: (ctx) => ctx.createToken(FLOW) }),
+    quickstrike({
+      attackArcane: true,
+      firstDamage: {
+        label: "Create a Lightning Flow token",
+        labelMessage: { id: "card.trigger.common.lightningflow.create" },
+        effect: (ctx) => ctx.createToken(FLOW),
+      },
+    }),
   ),
   ...pitches("stunning swipe", () =>
     quickstrike({
       attackArcane: true,
-      firstDamage(ctx) {
-        const enemy = ctx.player(opponentSeat(ctx));
-        if (!hasTag(ctx, enemy.hero, "lightning")) return;
-        const options = [enemy.hero, ...enemy.weapons].filter((card) => !card.tapped);
-        if (options.length)
-          ctx.requestCardChoice(
-            "stunning-tap",
-            decisionPrompt("Tap the Lightning hero or a weapon", "card.omn.lightning.hero.weapon.tap"),
-            options.map((card) => card.instanceId),
-          );
+      firstDamage: {
+        label: "Tap the Lightning hero or a weapon they control",
+        labelMessage: { id: "card.trigger.common.lightninghero.tap" },
+        to: (ctx, targetSeat) => hasTag(ctx, ctx.player(targetSeat).hero, "lightning"),
+        effect(ctx, targetSeat) {
+          const enemy = ctx.player(targetSeat);
+          const options = [enemy.hero, ...enemy.weapons].filter((card) => !card.tapped);
+          if (options.length)
+            ctx.requestCardChoice(
+              "stunning-tap",
+              decisionPrompt("Tap the Lightning hero or a weapon", "card.omn.lightning.hero.weapon.tap"),
+              options.map((card) => card.instanceId),
+            );
+        },
       },
     }),
   ),

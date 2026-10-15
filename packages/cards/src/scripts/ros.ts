@@ -8,6 +8,7 @@ import {
   dealArcane,
   decisionMessage,
   decisionPrompt,
+  heroDamage,
   localizedCardLog,
   opponentSeat,
   previousAttackHasName,
@@ -458,16 +459,23 @@ function maleficIncantation(verses: number): CardScript {
 }
 
 function arcaneCussing(count: number): CardScript {
-  const destroy = (ctx: ScriptCtx, amount: number) => {
-    if (amount > 0) ctx.destroySelf();
-  };
   return {
-    onFriendlyDamageDealt(ctx, _source, _target, amount) {
-      destroy(ctx, amount);
-    },
-    onHeroDealtDamage(ctx, amount) {
-      destroy(ctx, amount);
-    },
+    triggers: [
+      {
+        event: "damage-dealt",
+        whose: "any",
+        label: "Destroy this",
+        labelMessage: { id: "card.trigger.common.self.destroy" },
+        condition(ctx, _eventCard, event) {
+          const damage = event?.damage;
+          if (!damage) return false;
+          return (damage.byController && damage.sourceSeat === ctx.seat) || heroDamage(event)?.targetSeat === ctx.seat;
+        },
+        effect: (ctx) => {
+          ctx.destroySelf();
+        },
+      },
+    ],
     onLeaveArena(ctx) {
       if (ctx.state.activePlayer === ctx.seat) createRunechants(ctx, count);
     },
@@ -764,18 +772,27 @@ export const ros: Record<string, CardScript> = {
       goAgain: true,
       oncePerTurn: true,
       onCostPaid(ctx, paid) {
-        if (paid.some((card) => hasTag(ctx, card, "earth"))) ctx.setCounter("earthPitched", 1);
+        if (paid.some((card) => hasTag(ctx, card, "earth"))) ctx.setCounter("earthPitchedTurn", ctx.state.turn);
       },
       onActivate(ctx) {
         ampNextArcane(ctx, 1);
       },
     },
-    onFriendlyDamageDealt(ctx, _source, _target, amount, arcane) {
-      if (arcane && amount > 0 && ctx.getCounter("earthPitched")) {
-        ctx.setCounter("earthPitched", 0);
-        ctx.createToken(EARTH);
-      }
-    },
+    triggers: [
+      {
+        event: "damage-dealt",
+        label: "Create Embodiment of Earth",
+        labelMessage: { id: "card.trigger.common.embodimentearth.create" },
+        // A delayed "next time … this turn" trigger: the pitch turn marks it
+        // pending and triggering consumes it.
+        condition: (ctx, _eventCard, event) =>
+          event?.damage?.arcane === true &&
+          event.damage.byController &&
+          ctx.getCounter("earthPitchedTurn") === ctx.state.turn,
+        onTrigger: (ctx) => ctx.setCounter("earthPitchedTurn", 0),
+        effect: (ctx) => ctx.createToken(EARTH),
+      },
+    ],
   },
   "pulsing aether // life|1": splitScript({
     leftName: "Pulsing Aether",
@@ -1395,7 +1412,7 @@ Object.assign(ros, {
   "channel lightning valley|2": {
     triggers: [
       {
-        event: "hero-damage-dealt",
+        event: "damage-dealt",
         label: "Draw a card",
         labelMessage: { id: "card.trigger.common.card.draw" },
         condition: (_ctx, _eventCard, event) => event?.damage?.opposingHeroOrdinal === 1,

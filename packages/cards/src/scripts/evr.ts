@@ -20,6 +20,7 @@ import {
   resolveDiscardChoice,
   wizardActionAsInstant,
   weaponAttackCount,
+  opposingHeroDamage,
 } from "./shared-helpers.js";
 
 const COPPER = "EVR194";
@@ -1226,12 +1227,15 @@ function destroyAllArsenals(ctx: ScriptCtx): void {
 }
 
 const talismanWarfare: CardScript = {
-  onFriendlyDamageDealt(ctx, _source, targetSeat, amount) {
-    if (targetSeat !== ctx.seat && amount === 2) destroyAllArsenals(ctx);
-  },
-  onFriendlyCombatDamageDealt(ctx, _source, targetSeat, amount) {
-    if (targetSeat !== ctx.seat && amount === 2) destroyAllArsenals(ctx);
-  },
+  triggers: [
+    {
+      event: "damage-dealt",
+      label: "Destroy Talisman of Warfare and all cards in all arsenals",
+      labelMessage: { id: "card.trigger.common.talismanwarfare.resolve" },
+      condition: (ctx, _eventCard, event) => opposingHeroDamage(ctx, event)?.amount === 2,
+      effect: destroyAllArsenals,
+    },
+  ],
 };
 
 const silver: CardScript = {

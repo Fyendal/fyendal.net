@@ -8,6 +8,7 @@ import {
   localizedCardLog,
   nextAttack,
   opponentSeat,
+  opposingHeroDamage,
   requestDiscardChoice,
   resolveDiscardChoice,
   yesNoPrompt,
@@ -412,13 +413,16 @@ function treasureIsland(): CardScript {
           addTreasureCounter(ctx);
         },
       },
+      {
+        event: "damage-dealt",
+        label: "Remove gold counters equal to the damage and create that many Gold tokens",
+        labelMessage: { id: "card.trigger.common.treasureisland.gold" },
+        condition: (ctx, _eventCard, event) => !!opposingHeroDamage(ctx, event) && treasureCounters(ctx) > 0,
+        effect(ctx, _eventCard, event) {
+          payTreasureGold(ctx, opposingHeroDamage(ctx, event)?.amount ?? 0);
+        },
+      },
     ],
-    onFriendlyDamageDealt(ctx, _source, _target, amount) {
-      payTreasureGold(ctx, amount);
-    },
-    onFriendlyCombatDamageDealt(ctx, _source, _target, amount) {
-      payTreasureGold(ctx, amount);
-    },
   };
 }
 

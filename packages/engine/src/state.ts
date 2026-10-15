@@ -10,7 +10,7 @@ import type {
   PlayFromZoneOwner,
   PlayableZone,
 } from "@fyendal/shared";
-import type { TokenCreationContext } from "./eventTypes.js";
+import type { DamageEventContext, TokenCreationContext } from "./eventTypes.js";
 
 export interface CardInstance {
   instanceId: number;
@@ -192,6 +192,9 @@ export interface StackLayer {
   /** Last-known event object captured for trigger effects that refer to the
    * card which caused the event (for example, Berserk's discarded card). */
   triggerEventCard?: CardInstance;
+  /** Damage facts captured when a "damage-dealt" trigger was generated, for
+   * effects that refer to the amount or the damaged hero. */
+  triggerDamage?: DamageEventContext;
   label: string;
   optional: boolean;
   /** Space default snapshotted from the trigger definition when queued. */

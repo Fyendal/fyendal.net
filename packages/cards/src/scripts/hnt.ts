@@ -1904,13 +1904,15 @@ Object.assign(hnt, {
     },
   },
   "ring of roses|2": {
-    onFriendlyDamageDealt(ctx, _source, target, amount, arcane) {
-      const key = `ring:${ctx.state.turn}`;
-      if (arcane && amount > 0 && target !== ctx.seat && !ctx.getCounter(key)) {
-        ctx.setCounter(key, 1);
-        ctx.gainLife(ctx.seat, 1);
-      }
-    },
+    triggers: [
+      {
+        event: "damage-dealt",
+        label: "Gain 1 life",
+        labelMessage: { id: "card.trigger.common.life.gain", values: { amount: 1 } },
+        condition: (_ctx, _eventCard, event) => event?.damage?.arcaneOrdinal === 1,
+        effect: (ctx) => ctx.gainLife(ctx.seat, 1),
+      },
+    ],
   },
   "war cry of themis|2": {
     onPlay: (ctx) => buffNextAttack(ctx, { attack: 4, appliesToSubtype: "angel" }),

@@ -81,7 +81,7 @@ export type ScriptEventName =
   | "fireOnFriendlyPlay"
   | "grantLinkGoAgain"
   | "notifyGoAgainResolved"
-  | "queueHeroDamageDealt"
+  | "queueDamageDealt"
   | "queueTriggeredEvent"
   | "runHook";
 

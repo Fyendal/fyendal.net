@@ -1,11 +1,13 @@
-import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
+import type { CardInstance, CardScript, DeepReadonly, ScriptCtx, TriggerDef } from "@fyendal/engine";
 import {
   buffNextAttack,
   commonOptionMessages,
   dealArcane,
+  dealtByThis,
   decisionMessage,
   decisionPrompt,
   heroChoiceSeat,
+  heroDamage,
   localizedCardLog,
   mergeSetScripts,
   opponentSeat,
@@ -116,6 +118,30 @@ function dealToTarget(ctx: ScriptCtx, option: string, amount: number, arcane = f
 function createFrostbites(ctx: ScriptCtx, seat: number, count: number): void {
   ctx.createTokens(FROSTBITE, count, seat);
 }
+
+function consumeOwnMarker(ctx: ScriptCtx): void {
+  const marker = ctx.state.modifiers.find((m) => m.sourceInstanceId === ctx.self.instanceId && !m.consumed);
+  if (marker) ctx.consumeModifier(marker.id);
+}
+
+/** Fused Sigil of Permafrost's delayed trigger; triggering consumes it. */
+const permafrostFrostbites: TriggerDef = {
+  event: "damage-dealt",
+  label: "Create that many Frostbites under the damaged hero's control",
+  labelMessage: { id: "card.trigger.common.frostbite.create.damage" },
+  condition(ctx, _eventCard, event) {
+    const damage = heroDamage(event);
+    return ctx.getCounter("sigilFrost") > 0 && !!damage?.arcane && damage.byController;
+  },
+  onTrigger(ctx) {
+    ctx.setCounter("sigilFrost", 0);
+    consumeOwnMarker(ctx);
+  },
+  effect(ctx, _eventCard, event) {
+    const damage = heroDamage(event);
+    if (damage) createFrostbites(ctx, damage.targetSeat, damage.amount);
+  },
+};
 
 function freeze(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): void {
   const expiry = ctx.state.turn + (ctx.state.activePlayer === ctx.seat ? 2 : 1);
@@ -723,8 +749,17 @@ export const upr: Record<string, CardScript> = mergeSetScripts("UPR", uprHighRar
   },
   "nekria|0": {
     activated: dragonAttack(),
-    onDealsDamage: nekriaDamageTrigger,
-    onDealtDamage: nekriaDamageTrigger,
+    triggers: [
+      {
+        event: "damage-dealt",
+        whose: "any",
+        label: "Put a -1 life counter on Nekria and create an Ash",
+        labelMessage: { id: "card.trigger.common.nekria.damage" },
+        condition: (ctx, eventCard, event) =>
+          dealtByThis(ctx, eventCard) || event?.damage?.targetAllyInstanceId === ctx.self.instanceId,
+        effect: nekriaDamageTrigger,
+      },
+    ],
   },
   "ouvia|0": {
     activated: dragonAttack(),
@@ -1438,13 +1473,7 @@ export const upr: Record<string, CardScript> = mergeSetScripts("UPR", uprHighRar
         ctx.addModifier({ scope: "until-end-of-turn" });
       }
     },
-    onFriendlyDamageDealt(ctx, _source, target, amount, arcane) {
-      if (!arcane || amount <= 0 || !ctx.getCounter("sigilFrost")) return;
-      createFrostbites(ctx, target, amount);
-      ctx.setCounter("sigilFrost", 0);
-      const marker = ctx.state.modifiers.find((m) => m.sourceInstanceId === ctx.self.instanceId && !m.consumed);
-      if (marker) ctx.consumeModifier(marker.id);
-    },
+    triggers: [permafrostFrostbites],
     onChoose(ctx, h, o) {
       handleFusion(ctx, h, o);
     },
@@ -1457,13 +1486,7 @@ export const upr: Record<string, CardScript> = mergeSetScripts("UPR", uprHighRar
         ctx.addModifier({ scope: "until-end-of-turn" });
       }
     },
-    onFriendlyDamageDealt(ctx, _source, target, amount, arcane) {
-      if (!arcane || amount <= 0 || !ctx.getCounter("sigilFrost")) return;
-      createFrostbites(ctx, target, amount);
-      ctx.setCounter("sigilFrost", 0);
-      const marker = ctx.state.modifiers.find((m) => m.sourceInstanceId === ctx.self.instanceId && !m.consumed);
-      if (marker) ctx.consumeModifier(marker.id);
-    },
+    triggers: [permafrostFrostbites],
     onChoose(ctx, h, o) {
       handleFusion(ctx, h, o);
     },
@@ -1476,13 +1499,7 @@ export const upr: Record<string, CardScript> = mergeSetScripts("UPR", uprHighRar
         ctx.addModifier({ scope: "until-end-of-turn" });
       }
     },
-    onFriendlyDamageDealt(ctx, _source, target, amount, arcane) {
-      if (!arcane || amount <= 0 || !ctx.getCounter("sigilFrost")) return;
-      createFrostbites(ctx, target, amount);
-      ctx.setCounter("sigilFrost", 0);
-      const marker = ctx.state.modifiers.find((m) => m.sourceInstanceId === ctx.self.instanceId && !m.consumed);
-      if (marker) ctx.consumeModifier(marker.id);
-    },
+    triggers: [permafrostFrostbites],
     onChoose(ctx, h, o) {
       handleFusion(ctx, h, o);
     },
@@ -1507,13 +1524,22 @@ export const upr: Record<string, CardScript> = mergeSetScripts("UPR", uprHighRar
       ctx.setCounter("conduitSource", played.instanceId);
       ctx.setCounter("conduitReady", 0);
     },
-    onFriendlyDamageDealt(ctx, source, target, amount, arcane) {
-      if (!arcane || amount <= 0 || source.instanceId !== ctx.getCounter("conduitSource")) return;
-      const card = ctx.player(target).arsenal.find((candidate) => frozen(candidate, ctx.state.turn));
-      if (card) ctx.moveToGraveyard(card.instanceId, "arsenal");
-      const marker = ctx.state.modifiers.find((m) => m.sourceInstanceId === ctx.self.instanceId && !m.consumed);
-      if (marker) ctx.consumeModifier(marker.id);
-    },
+    triggers: [
+      {
+        event: "damage-dealt",
+        label: "Destroy a frozen card in the damaged hero's arsenal",
+        labelMessage: { id: "card.trigger.common.frozen.arsenal.destroy" },
+        condition: (ctx, eventCard, event) =>
+          heroDamage(event)?.arcane === true && eventCard?.instanceId === ctx.getCounter("conduitSource"),
+        onTrigger: consumeOwnMarker,
+        effect(ctx, _eventCard, event) {
+          const damage = heroDamage(event);
+          if (!damage) return;
+          const card = ctx.player(damage.targetSeat).arsenal.find((candidate) => frozen(candidate, ctx.state.turn));
+          if (card) ctx.moveToGraveyard(card.instanceId, "arsenal");
+        },
+      },
+    ],
   },
   "glacial horns|0": {
     activated: {

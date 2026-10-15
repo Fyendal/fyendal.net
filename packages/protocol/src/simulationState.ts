@@ -347,8 +347,24 @@ function validateCards(value: unknown, code: string, path: string): void {
   array(value, code, path).forEach((card, index) => validateCard(card, code, `${path}[${index}]`));
 }
 
+const DAMAGE_EVENT_REQUIRED = ["sourceSeat", "targetSeat", "amount", "arcane", "combat", "byController"] as const;
+const DAMAGE_EVENT_OPTIONAL = ["targetAllyInstanceId", "opposingHeroOrdinal", "arcaneOrdinal", "fromOpposingHeroOrdinal"] as const;
+function validateDamageEvent(value: unknown, code: string, path: string): void {
+  const damage = exact(value, code, path, DAMAGE_EVENT_REQUIRED, DAMAGE_EVENT_OPTIONAL);
+  const positive = (v: unknown, p: string) => {
+    if (integer(v, code, p) < 1) fail(code, p, "expected a positive integer");
+  };
+  for (const key of ["sourceSeat", "targetSeat"] as const) integer(damage[key], code, `${path}.${key}`);
+  positive(damage.amount, `${path}.amount`);
+  for (const key of ["arcane", "combat", "byController"] as const) bool(damage[key], code, `${path}.${key}`);
+  optional(damage, "targetAllyInstanceId", (v, p) => { integer(v, code, p); }, path);
+  for (const key of ["opposingHeroOrdinal", "arcaneOrdinal", "fromOpposingHeroOrdinal"] as const) {
+    optional(damage, key, positive, path);
+  }
+}
+
 const STACK_REQUIRED = ["sourceInstanceId", "seat", "triggerIndex", "label", "optional"] as const;
-const STACK_OPTIONAL = ["triggerCount", "triggerBatchStarted", "triggerSource", "triggerEventCard", "defaultOption", "accepted", "card", "goAgain", "ability", "abilityCard", "abilityIndex", "targetCardInstanceId", "resolvedReactionAbility", "fromHand", "meldStage", "engineEffect"] as const;
+const STACK_OPTIONAL = ["triggerCount", "triggerBatchStarted", "triggerSource", "triggerEventCard", "triggerDamage", "defaultOption", "accepted", "card", "goAgain", "ability", "abilityCard", "abilityIndex", "targetCardInstanceId", "resolvedReactionAbility", "fromHand", "meldStage", "engineEffect"] as const;
 function validateStackLayer(value: unknown, code: string, path: string): void {
   const layer = exact(value, code, path, STACK_REQUIRED, STACK_OPTIONAL);
   for (const key of ["sourceInstanceId", "seat", "triggerIndex"] as const) integer(layer[key], code, `${path}.${key}`);
@@ -378,6 +394,7 @@ function validateStackLayer(value: unknown, code: string, path: string): void {
   optional(layer, "abilityCard", (v, p) => validateCard(v, code, p), path);
   optional(layer, "triggerSource", (v, p) => validateCard(v, code, p), path);
   optional(layer, "triggerEventCard", (v, p) => validateCard(v, code, p), path);
+  optional(layer, "triggerDamage", (v, p) => validateDamageEvent(v, code, p), path);
   optional(layer, "engineEffect", (v, p) => {
     const effect = object(v, code, p);
     const kind = oneOf(

@@ -2,9 +2,11 @@ import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal
 import {
   buffNextAttack,
   commonOptionMessages,
+  dealtByThis,
   decisionMessage,
   decisionPrompt,
   opponentSeat,
+  opposingHeroDamage,
 } from "../shared-helpers.js";
 
 const FROSTBITE = "SIY035";
@@ -196,6 +198,20 @@ function withFusionChoices(
 }
 
 const fused = (ctx: ScriptCtx) => ctx.getCounter("fused") > 0;
+
+function blossomingBanishChoice(ctx: ScriptCtx): void {
+  const cards = ctx
+    .player(ctx.seat)
+    .graveyard.filter((card) => ctx.hasCardType(card, "action") && !isAttack(ctx, card));
+  if (cards.length)
+    ctx.requestCardChoice(
+      "blossoming-banish",
+      decisionPrompt("Banish a non-attack action from your graveyard?", "card.ele.graveyard.nonattack.banish", {
+        optionMessages: commonOptionMessages("no"),
+      }),
+      ["no", ...cards.map((card) => card.instanceId)],
+    );
+}
 
 function channel(type: "earth" | "ice" | "lightning", extra: CardScript): CardScript {
   function maintain(ctx: ScriptCtx): void {
@@ -592,20 +608,17 @@ export const eleHighRarity: Record<string, CardScript> = {
     onAttackDeclared(ctx) {
       if (fused(ctx)) ctx.dealDamage(opponentSeat(ctx), 1, { arcane: true, sourceInstanceId: ctx.self.instanceId });
     },
-    onDealsDamage(ctx, target, amount) {
-      if (!fused(ctx) || target === ctx.seat || amount <= 0) return;
-      const cards = ctx
-        .player(ctx.seat)
-        .graveyard.filter((card) => ctx.hasCardType(card, "action") && !isAttack(ctx, card));
-      if (cards.length)
-        ctx.requestCardChoice(
-          "blossoming-banish",
-          decisionPrompt("Banish a non-attack action from your graveyard?", "card.ele.graveyard.nonattack.banish", {
-            optionMessages: commonOptionMessages("no"),
-          }),
-          ["no", ...cards.map((card) => card.instanceId)],
-        );
-    },
+    triggers: [
+      {
+        event: "damage-dealt",
+        sourceZone: "self",
+        label: "Banish a non-attack action from your graveyard to play it this turn?",
+        labelMessage: { id: "card.trigger.common.graveyard.nonattack.banish.optional" },
+        condition: (ctx, eventCard, event) =>
+          dealtByThis(ctx, eventCard) && fused(ctx) && !!opposingHeroDamage(ctx, event),
+        effect: blossomingBanishChoice,
+      },
+    ],
     onChoose(ctx, hook, option) {
       if (hook === "blossoming-banish" && option !== "no" && ctx.banish(Number(option)))
         ctx.allowPlayFrom(Number(option), "banish", { asInstant: true, graveyardReplacement: "banish" });

@@ -5,8 +5,10 @@ import {
   commonOptionMessages,
   contractWithSilver,
   dealArcane,
+  dealtByThis,
   decisionMessage,
   decisionPrompt,
+  heroDamage,
   opponentSeat,
   previousAttackHasName,
   yesNoPrompt,
@@ -898,11 +900,25 @@ export const dynHighRarity: Record<string, CardScript> = {
           : 0,
       );
     },
-    onDealsDamage(ctx, target, amount) {
-      if (!ctx.getCounter("mixedPitch") || target === ctx.seat || amount <= 0) return;
-      discardChoice(ctx, "cryptic-discard", target);
-      ctx.drawCards(ctx.seat, 1);
-    },
+    triggers: [
+      {
+        event: "damage-dealt",
+        sourceZone: "self",
+        label: "The defending hero discards a card and you draw a card",
+        labelMessage: { id: "card.trigger.common.defender.discard.draw" },
+        // "The first time": the attack's link records that it triggered.
+        condition: (ctx, eventCard, event) =>
+          dealtByThis(ctx, eventCard) &&
+          ctx.getCounter("mixedPitch") > 0 &&
+          heroDamage(event)?.targetSeat === opponentSeat(ctx) &&
+          ctx.getFlag("link", "crypticDamage") !== true,
+        onTrigger: (ctx) => ctx.setFlag("link", "crypticDamage", true),
+        effect(ctx) {
+          discardChoice(ctx, "cryptic-discard");
+          ctx.drawCards(ctx.seat, 1);
+        },
+      },
+    ],
     onChoose(ctx, hook, option) {
       if (hook === "cryptic-discard") ctx.discardCard(opponentSeat(ctx), Number(option));
     },
@@ -996,9 +1012,18 @@ export const dynHighRarity: Record<string, CardScript> = {
   },
   "suraya, archangel of knowledge|0": {
     activated: { cost: 0, isAttack: true, goAgain: false, oncePerTurn: true },
-    onDealsDamage(ctx, _target, amount) {
-      if (amount > 0) ctx.gainLife(ctx.seat, amount);
-    },
+    triggers: [
+      {
+        event: "damage-dealt",
+        label: "Gain life equal to the damage dealt",
+        labelMessage: { id: "card.trigger.common.life.gain.damage" },
+        condition: (ctx, eventCard) => dealtByThis(ctx, eventCard),
+        effect(ctx, _eventCard, event) {
+          const amount = event?.damage?.amount ?? 0;
+          if (amount > 0) ctx.gainLife(ctx.seat, amount);
+        },
+      },
+    ],
   },
   "celestial kimono|0": {
     onFriendlyDestroyed(ctx, card) {

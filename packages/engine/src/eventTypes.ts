@@ -22,7 +22,7 @@ export type TriggerEvent =
   | "wager-generated"
   | "wager-won"
   | "trap-triggered"
-  | "hero-damage-dealt";
+  | "damage-dealt";
 
 /** Event-specific facts captured when a triggered ability is generated. */
 export interface TriggerEventContext {
@@ -37,24 +37,32 @@ export interface TriggerEventContext {
   /** True when the arena departure was a destruction event. */
   readonly destroyed?: boolean;
   readonly to?: "arsenal" | "banish" | "soul" | "hand" | "arena" | "graveyard" | "pitch" | "deck" | "subcard" | "cease-to-exist";
-  /** A hero was dealt positive damage after prevention. */
-  readonly damage?: HeroDamageEventContext;
+  /** A hero or ally was dealt positive damage after prevention. */
+  readonly damage?: DamageEventContext;
 }
 
-/** Facts of a "hero-damage-dealt" event. The event's subject is the source's
- * controller and its event card is the source. */
-export interface HeroDamageEventContext {
+/** Facts of a "damage-dealt" event. The event's subject is the source's
+ * controller and its event card is the source. Ordinals are 1-based, count
+ * events of the whole turn including those before a trigger's source existed
+ * (CR 6.6.5d), and only count damage the controller deals (`byController`). */
+export interface DamageEventContext {
+  readonly sourceSeat: number;
+  /** The damaged hero, or the controller of the damaged ally. */
   readonly targetSeat: number;
+  /** Present when an ally rather than a hero was dealt the damage. */
+  readonly targetAllyInstanceId?: number;
   readonly amount: number;
   readonly arcane: boolean;
   readonly combat: boolean;
   /** The controller (their hero) counts as dealing this damage. Ally sources
    * deal damage themselves (CR 8.2.8e, 8.5.3a). */
   readonly byController: boolean;
-  /** 1-based ordinal of this event among the damage the controller has dealt
-   * to opposing heroes this turn, counting events before a trigger's source
-   * existed (CR 6.6.5d). Absent unless `byController` and the target opposes. */
+  /** Among the damage the controller dealt to opposing heroes this turn. */
   readonly opposingHeroOrdinal?: number;
+  /** Among the arcane damage the controller dealt to any target this turn. */
+  readonly arcaneOrdinal?: number;
+  /** Among the damage opposing heroes dealt to the target hero this turn. */
+  readonly fromOpposingHeroOrdinal?: number;
 }
 
 /** Why a token batch is being created. */

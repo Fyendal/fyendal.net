@@ -91,7 +91,8 @@ function applyHit(
   defender.flags.damageTakenThisTurn = true;
   defender.flags.physicalDamageTakenThisTurn = true;
   runtime.events.fireHeroDealtDamage(state, defender.seat, link.damage, false);
-  runtime.events.queueHeroDamageDealt(state, link.attacker, link.attackingCard, {
+  runtime.events.queueDamageDealt(state, link.attackingCard, {
+    sourceSeat: link.attacker,
     targetSeat: defender.seat,
     amount: link.damage,
     arcane: false,

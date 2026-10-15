@@ -96,6 +96,40 @@ describe("PersistedStateV1", () => {
     expect(decoded.stack[0]?.targetCardInstanceId).toBe(target.instanceId);
   });
 
+  it("round trips a damage trigger's event facts and rejects malformed ones", () => {
+    const source = game();
+    const hero = source.players[0]!.hero;
+    source.stack = [{
+      sourceInstanceId: hero.instanceId,
+      seat: 0,
+      triggerIndex: 0,
+      label: "Damage trigger",
+      optional: false,
+      triggerDamage: {
+        sourceSeat: 0,
+        targetSeat: 1,
+        amount: 3,
+        arcane: true,
+        combat: false,
+        byController: true,
+        opposingHeroOrdinal: 1,
+        arcaneOrdinal: 2,
+        fromOpposingHeroOrdinal: 1,
+      },
+    }];
+    const encoded = jsonCopy(encodePersistedState(source));
+
+    expect(decodePersistedState(jsonCopy(encoded), "ABC123", cardData, scripts).stack[0]?.triggerDamage)
+      .toEqual(source.stack[0]!.triggerDamage);
+    for (const malformed of [{ amount: 0 }, { arcaneOrdinal: 0 }, { combat: "no" }, { extra: 1 }]) {
+      const corrupt = jsonCopy(encoded) as unknown as {
+        state: { stack: { triggerDamage: Record<string, unknown> }[] };
+      };
+      Object.assign(corrupt.state.stack[0]!.triggerDamage, malformed);
+      expect(() => decodePersistedState(corrupt, "ABC123", cardData, scripts)).toThrow(CorruptRoomError);
+    }
+  });
+
   it("round trips structured audience-aware log payloads", () => {
     const source = game();
     source.log = [];

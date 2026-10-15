@@ -86,7 +86,6 @@ export const friendlyHitSourceKeys: ReadonlySet<string> = new Set([
   "nature's path pilgrimage|1",
   "nature's path pilgrimage|2",
   "nature's path pilgrimage|3",
-  "ode to wrath|2",
   "okana scar wraps|0",
   "outland skirmish|1",
   "outland skirmish|2",

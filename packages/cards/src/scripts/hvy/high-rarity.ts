@@ -6,6 +6,7 @@ import {
   contractCompletionCount,
   decisionMessage,
   decisionPrompt,
+  heroDamage,
   opponentSeat,
 } from "../shared-helpers.js";
 
@@ -83,13 +84,6 @@ function evoEquipment(extra: CardScript = {}): CardScript {
     },
   };
 }
-function talkDamage(ctx: ScriptCtx, targetSeat: number, amount: number, arcane: boolean): void {
-  const threshold = ctx.getCounter("talk-threshold");
-  if (arcane || threshold <= 0 || amount < threshold || targetSeat === ctx.seat) return;
-  ctx.setCounter("talk-threshold", 0);
-  ctx.createTokens(MIGHT, threshold);
-}
-
 const ANTE_MODES = ["agility", "gold", "vigor", "power"] as const;
 type AnteMode = (typeof ANTE_MODES)[number];
 function requestAnteMode(ctx: ScriptCtx): void {
@@ -471,12 +465,25 @@ export const hvyHighRarity: Record<string, CardScript> = {
     onChoose(ctx, hook, option) {
       if (hook === "big-number") ctx.setCounter("talk-threshold", Number(option));
     },
-    onFriendlyDamageDealt(ctx, _source, target, amount, arcane) {
-      talkDamage(ctx, target, amount, arcane);
-    },
-    onFriendlyCombatDamageDealt(ctx, _source, target, amount) {
-      talkDamage(ctx, target, amount, false);
-    },
+    triggers: [
+      {
+        event: "damage-dealt",
+        label: "Create Might tokens equal to the chosen number",
+        labelMessage: { id: "card.trigger.common.might.create.chosen" },
+        // A delayed "next time" trigger: triggering moves the chosen number
+        // from the pending threshold to the amount to create.
+        condition(ctx, _eventCard, event) {
+          const damage = heroDamage(event);
+          const threshold = ctx.getCounter("talk-threshold");
+          return !!damage && damage.byController && !damage.arcane && threshold > 0 && damage.amount >= threshold;
+        },
+        onTrigger(ctx) {
+          ctx.setCounter("talk-might", ctx.getCounter("talk-threshold"));
+          ctx.setCounter("talk-threshold", 0);
+        },
+        effect: (ctx) => ctx.createTokens(MIGHT, ctx.getCounter("talk-might")),
+      },
+    ],
   },
   "runner runner|1": {
     onAttackDeclared(ctx) {

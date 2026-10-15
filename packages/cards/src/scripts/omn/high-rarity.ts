@@ -4,8 +4,10 @@ import {
   attackAbility,
   buffNextAttack,
   commonOptionMessages,
+  dealtByThis,
   decisionMessage,
   decisionPrompt,
+  heroDamage,
   opponentSeat,
 } from "../shared-helpers.js";
 import { SHARPEN_FOLLOWUP, sharpenSword } from "../aha/warrior-sharpen.js";
@@ -177,43 +179,60 @@ export const omnHighRarity: Record<string, CardScript> = {
       if (ctx.link?.goAgain && ctx.link.targetAllyId === undefined)
         ctx.dealDamage(opponentSeat(ctx), 1, { arcane: true });
     },
-    onDealsDamage(ctx, target, amount) {
-      if (amount <= 0 || target === ctx.seat || ctx.getFlag("link", "tempestDiscard") === true) return;
-      ctx.setFlag("link", "tempestDiscard", true);
-      const hand = ctx.player(target).hand;
-      if (hand.length)
-        ctx.requestCardChoice(
-          "tempest-discard",
-          decisionPrompt("Discard a card", "card.omn.card.discard"),
-          hand.map((card) => card.instanceId),
-          target,
-        );
-    },
+    triggers: [
+      {
+        event: "damage-dealt",
+        sourceZone: "self",
+        label: "The damaged hero discards a card",
+        labelMessage: { id: "card.trigger.common.damaged.discard" },
+        // "The first time": the attack's link records that it triggered.
+        condition: (ctx, eventCard, event) =>
+          dealtByThis(ctx, eventCard) && !!heroDamage(event) && ctx.getFlag("link", "tempestDiscard") !== true,
+        onTrigger: (ctx) => ctx.setFlag("link", "tempestDiscard", true),
+        effect(ctx, _eventCard, event) {
+          const target = heroDamage(event)?.targetSeat ?? opponentSeat(ctx);
+          const hand = ctx.player(target).hand;
+          if (hand.length)
+            ctx.requestCardChoice(
+              "tempest-discard",
+              decisionPrompt("Discard a card", "card.omn.card.discard"),
+              hand.map((card) => card.instanceId),
+              target,
+            );
+        },
+      },
+    ],
     onChoose(ctx, hook, option) {
       if (hook === "tempest-discard") ctx.discardCard(opponentSeat(ctx), Number(option));
     },
   },
   "arcanic reproach|3": {
-    onHeroDealtDamage(ctx) {
-      if (ctx.getFlag("player", "arcanicReproachUsed") === true) return;
-      const cards = ctx.player(ctx.seat).hand.filter((card) => has(ctx, card, "lightning"));
-      if (cards.length)
-        ctx.requestCardChoice(
-          "reproach-reveal",
-          decisionPrompt("Reveal a Lightning card?", "card.omn.lightning.card.reveal", {
-            optionMessages: commonOptionMessages("no"),
-          }),
-          ["no", ...cards.map((card) => card.instanceId)],
-        );
-    },
     onChoose(ctx, hook, option) {
       if (hook === "reproach-reveal" && option !== "no") {
         ctx.revealCards([Number(option)], ctx.seat);
-        ctx.setFlag("player", "arcanicReproachUsed", true);
         ctx.dealDamage(opponentSeat(ctx), 1, { arcane: true });
       }
     },
     triggers: [
+      {
+        event: "damage-dealt",
+        whose: "any",
+        label: "Reveal a Lightning card to deal 1 arcane damage?",
+        labelMessage: { id: "card.trigger.common.lightning.reveal.arcane.optional", values: { amount: 1 } },
+        condition: (ctx, _eventCard, event) =>
+          heroDamage(event)?.targetSeat === ctx.seat && event?.damage?.fromOpposingHeroOrdinal === 1,
+        effect(ctx) {
+          const cards = ctx.player(ctx.seat).hand.filter((card) => has(ctx, card, "lightning"));
+          if (cards.length)
+            ctx.requestCardChoice(
+              "reproach-reveal",
+              decisionPrompt("Reveal a Lightning card?", "card.omn.lightning.card.reveal", {
+                optionMessages: commonOptionMessages("no"),
+              }),
+              ["no", ...cards.map((card) => card.instanceId)],
+            );
+        },
+      },
       {
         event: "begin-action-phase",
         label: "Destroy an aura",
@@ -249,10 +268,27 @@ export const omnHighRarity: Record<string, CardScript> = {
     },
   },
   "caress of the reaper|1": {
-    onDealsDamage(ctx, target, amount) {
-      if (amount <= 0 || target === ctx.seat) return;
-      const aura = ctx.player(target).board.find((card) => isAura(ctx, card));
-      if (aura) ctx.destroyPermanent(aura.instanceId);
+    triggers: [
+      {
+        event: "damage-dealt",
+        sourceZone: "self",
+        label: "Destroy target aura the damaged hero controls",
+        labelMessage: { id: "card.trigger.common.damaged.aura.destroy" },
+        condition: (ctx, eventCard, event) => dealtByThis(ctx, eventCard) && !!heroDamage(event),
+        effect(ctx, _eventCard, event) {
+          const target = heroDamage(event)?.targetSeat ?? opponentSeat(ctx);
+          const auras = ctx.player(target).board.filter((card) => isAura(ctx, card));
+          if (auras.length)
+            ctx.requestCardChoice(
+              "caress-aura",
+              decisionPrompt("Destroy an aura", "card.omn.aura.destroy"),
+              auras.map((card) => card.instanceId),
+            );
+        },
+      },
+    ],
+    onChoose(ctx, hook, option) {
+      if (hook === "caress-aura") ctx.destroyPermanent(Number(option));
     },
   },
   "oscilio, forked continuum|0": {

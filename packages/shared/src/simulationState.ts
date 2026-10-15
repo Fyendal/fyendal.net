@@ -52,6 +52,19 @@ export interface PersistedCardInstanceV1 {
   playableAsInstant?: boolean;
 }
 
+export interface PersistedDamageEventV1 {
+  sourceSeat: number;
+  targetSeat: number;
+  targetAllyInstanceId?: number;
+  amount: number;
+  arcane: boolean;
+  combat: boolean;
+  byController: boolean;
+  opposingHeroOrdinal?: number;
+  arcaneOrdinal?: number;
+  fromOpposingHeroOrdinal?: number;
+}
+
 export interface PersistedStackLayerV1 {
   sourceInstanceId: number;
   seat: number;
@@ -60,6 +73,7 @@ export interface PersistedStackLayerV1 {
   triggerBatchStarted?: true;
   triggerSource?: PersistedCardInstanceV1;
   triggerEventCard?: PersistedCardInstanceV1;
+  triggerDamage?: PersistedDamageEventV1;
   label: string;
   optional: boolean;
   defaultOption?: "yes" | "no";

@@ -2,12 +2,14 @@ import type {
   ActivatedAbility,
   CardInstance,
   CardScript,
+  DamageEventContext,
   DeepReadonly,
   Modifier,
   ScriptCtx,
   ScriptDecisionPrompt,
   ScriptPrompt,
   TriggerDef,
+  TriggerEventContext,
 } from "@fyendal/engine";
 import type { GameLogEvent, GameLogPayload, GameMessage } from "@fyendal/shared";
 import { functionalKey, functionalKeyOf } from "../functional.js";
@@ -235,6 +237,28 @@ export function heroChoiceSeat(ctx: ScriptCtx, option: string): number | undefin
   if (option === "your hero") return ctx.seat;
   if (option === "opposing hero") return opponentSeat(ctx);
   return undefined;
+}
+
+/** Damage facts of a "damage-dealt" event when a hero, not an ally, was dealt
+ * the damage. Conditions receive them at trigger time; effects receive the
+ * persisted copy at resolution. */
+export function heroDamage(event: TriggerEventContext | undefined): DamageEventContext | undefined {
+  const damage = event?.damage;
+  return damage && damage.targetAllyInstanceId === undefined ? damage : undefined;
+}
+
+/** Hero damage dealt to a hero other than this trigger controller's. */
+export function opposingHeroDamage(
+  ctx: ScriptCtx,
+  event: TriggerEventContext | undefined,
+): DamageEventContext | undefined {
+  const damage = heroDamage(event);
+  return damage && damage.targetSeat !== ctx.seat ? damage : undefined;
+}
+
+/** The damage-dealt event's source is this trigger's own card. */
+export function dealtByThis(ctx: ScriptCtx, eventCard: DeepReadonly<CardInstance> | undefined): boolean {
+  return eventCard?.instanceId === ctx.self.instanceId;
 }
 
 /** "Whenever a card defends this": one trigger for each defending card. */

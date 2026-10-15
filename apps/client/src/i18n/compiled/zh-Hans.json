@@ -10253,6 +10253,12 @@
       "value": "：选择至多一个目标攻击"
     }
   ],
+  "card.omn.aura.destroy": [
+    {
+      "type": 0,
+      "value": "摧毁一个灵气 (Aura)"
+    }
+  ],
   "card.omn.aura.holo.counter": [
     {
       "type": 1,
@@ -13419,6 +13425,20 @@
       "value": " 力量和 go again"
     }
   ],
+  "card.trigger.common.attacks.power.chain": [
+    {
+      "type": 0,
+      "value": "本次 combat chain 中攻击获得 +"
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 力量"
+    }
+  ],
   "card.trigger.common.aura.bottom.another": [
     {
       "type": 0,
@@ -13661,6 +13681,38 @@
       "value": " 点伤害"
     }
   ],
+  "card.trigger.common.damaged.aura.destroy": [
+    {
+      "type": 0,
+      "value": "摧毁受到伤害的英雄操控的目标灵气 (Aura)"
+    }
+  ],
+  "card.trigger.common.damaged.auratoken.destroy": [
+    {
+      "type": 0,
+      "value": "摧毁受到伤害的英雄操控的一个灵气 (Aura)衍生物"
+    }
+  ],
+  "card.trigger.common.damaged.discard": [
+    {
+      "type": 0,
+      "value": "受到伤害的英雄弃一张牌"
+    }
+  ],
+  "card.trigger.common.damaged.life.lose": [
+    {
+      "type": 0,
+      "value": "受到伤害的英雄失去 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点生命"
+    }
+  ],
   "card.trigger.common.dawnblade.counters.remove": [
     {
       "type": 0,
@@ -13741,6 +13793,12 @@
     {
       "type": 0,
       "value": "每当有牌防守此牌时"
+    }
+  ],
+  "card.trigger.common.defender.discard.draw": [
+    {
+      "type": 0,
+      "value": "防守英雄弃一张牌，然后你抽一张牌"
     }
   ],
   "card.trigger.common.defense.gain": [
@@ -13981,6 +14039,12 @@
       "value": "生成一个 Frostbite"
     }
   ],
+  "card.trigger.common.frostbite.create.damage": [
+    {
+      "type": 0,
+      "value": "在受到伤害的英雄的操控下生成等量的 Frostbite"
+    }
+  ],
   "card.trigger.common.frostbite.destroy": [
     {
       "type": 0,
@@ -14021,6 +14085,12 @@
       "value": " 点奥术伤害"
     }
   ],
+  "card.trigger.common.frozen.arsenal.destroy": [
+    {
+      "type": 0,
+      "value": "摧毁受到伤害的英雄 arsenal 中一张已冻结的牌"
+    }
+  ],
   "card.trigger.common.goagain.gain": [
     {
       "type": 0,
@@ -14057,6 +14127,24 @@
     {
       "type": 0,
       "value": "生成一个 Goldkiss Rum 衍生物"
+    }
+  ],
+  "card.trigger.common.graveyard.attack.bottom.optional": [
+    {
+      "type": 0,
+      "value": "将墓地中的一张攻击行动牌置于你的牌库底？"
+    }
+  ],
+  "card.trigger.common.graveyard.instant.bottom.optional": [
+    {
+      "type": 0,
+      "value": "将墓地中的一张瞬间牌置于你的牌库底？"
+    }
+  ],
+  "card.trigger.common.graveyard.nonattack.banish.optional": [
+    {
+      "type": 0,
+      "value": "放逐你墓地中的一张非攻击行动牌，以便本回合使用它？"
     }
   ],
   "card.trigger.common.greatlibrary.intellect": [
@@ -14275,6 +14363,12 @@
       "value": " 点生命"
     }
   ],
+  "card.trigger.common.life.gain.damage": [
+    {
+      "type": 0,
+      "value": "获得与所造成伤害等量的生命"
+    }
+  ],
   "card.trigger.common.life.lose": [
     {
       "type": 0,
@@ -14301,6 +14395,20 @@
       "value": "因装备区域中的 Frostbite 失去生命"
     }
   ],
+  "card.trigger.common.lightning.reveal.arcane.optional": [
+    {
+      "type": 0,
+      "value": "展示一张 Lightning 牌以造成 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点奥术伤害？"
+    }
+  ],
   "card.trigger.common.lightningembodiment.or.flow": [
     {
       "type": 0,
@@ -14311,6 +14419,26 @@
     {
       "type": 0,
       "value": "生成一个 Lightning Flow 衍生物"
+    }
+  ],
+  "card.trigger.common.lightningflow.destroy.arcane.optional": [
+    {
+      "type": 0,
+      "value": "摧毁一个 Lightning Flow 以造成 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点奥术伤害？"
+    }
+  ],
+  "card.trigger.common.lightninghero.tap": [
+    {
+      "type": 0,
+      "value": "横置该 Lightning 英雄或其操控的一件武器"
     }
   ],
   "card.trigger.common.loanshark.pay": [
@@ -14343,6 +14471,12 @@
     {
       "type": 0,
       "value": "生成一个 Might 衍生物"
+    }
+  ],
+  "card.trigger.common.might.create.chosen": [
+    {
+      "type": 0,
+      "value": "生成与所选数字等量的 Might 衍生物"
     }
   ],
   "card.trigger.common.might.create.count": [
@@ -14417,6 +14551,12 @@
       "value": "target"
     }
   ],
+  "card.trigger.common.nekria.damage": [
+    {
+      "type": 0,
+      "value": "在 Nekria 上放置一个 -1 生命指示物并生成一个 Ash"
+    }
+  ],
   "card.trigger.common.nextattack.draconic": [
     {
       "type": 0,
@@ -14483,6 +14623,12 @@
     {
       "type": 0,
       "value": "将此牌返回其拥有者的手牌？"
+    }
+  ],
+  "card.trigger.common.ponder.create": [
+    {
+      "type": 0,
+      "value": "生成一个 Ponder 衍生物"
     }
   ],
   "card.trigger.common.ponder.destroy.draw": [
@@ -14831,6 +14977,12 @@
       "value": "摧毁 Talisman of Balance，并将你的牌库顶牌置入 arsenal"
     }
   ],
+  "card.trigger.common.talismanwarfare.resolve": [
+    {
+      "type": 0,
+      "value": "摧毁 Talisman of Warfare 以及所有 arsenal 中的所有牌"
+    }
+  ],
   "card.trigger.common.thaw.banish.optional": [
     {
       "type": 0,
@@ -14873,6 +15025,12 @@
     {
       "type": 0,
       "value": "在 Treasure Island 上放置一个 gold 指示物"
+    }
+  ],
+  "card.trigger.common.treasureisland.gold": [
+    {
+      "type": 0,
+      "value": "移除与伤害等量的 gold 指示物，并生成等量的 Gold 衍生物"
     }
   ],
   "card.trigger.common.valdabrightaxe.resolve": [

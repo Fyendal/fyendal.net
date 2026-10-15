@@ -695,13 +695,15 @@ Object.assign(mpg, {
     onEnterArena(ctx: ScriptCtx) {
       ctx.createToken(SEISMIC_SURGE);
     },
-    onFriendlyDamageDealt(ctx: ScriptCtx, _source: DeepReadonly<CardInstance>, _target: number, amount: number) {
-      if (amount > 0) ctx.createToken(SEISMIC_SURGE);
-    },
-    onFriendlyCombatDamageDealt(ctx: ScriptCtx, _source: DeepReadonly<CardInstance>, _target: number, amount: number) {
-      if (amount > 0) ctx.createToken(SEISMIC_SURGE);
-    },
     triggers: [
+      {
+        event: "damage-dealt",
+        label: "Create a Seismic Surge token",
+        labelMessage: { id: "card.trigger.common.seismicsurge.create" },
+        condition: (ctx: ScriptCtx, _eventCard, event) =>
+          event?.damage?.byController === true && event.damage.sourceSeat === ctx.seat,
+        effect: (ctx: ScriptCtx) => ctx.createToken(SEISMIC_SURGE),
+      },
       {
         event: "end-of-turn",
         label: "Destroy Ley Line if you control no Seismic Surges",

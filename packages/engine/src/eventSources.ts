@@ -10,7 +10,7 @@ import {
   triggerLogMessage,
 } from "./gameLog.js";
 import { triggerOccurrenceCount } from "./scripts.js";
-import type { HeroDamageEventContext, ScriptCtx, TriggerEvent, TriggerEventContext } from "./scripts.js";
+import type { DamageEventContext, ScriptCtx, TriggerEvent, TriggerEventContext } from "./scripts.js";
 import type { CardInstance, ChainLinkState, PlayerState, StackLayer } from "./state.js";
 import { tokenCreationCauseForModifier } from "./tokenQueries.js";
 import { currentLink, opponent, removeFromArray } from "./zoneQueries.js";
@@ -74,6 +74,7 @@ export function collectCardEventTriggerLayers(
           ...(occurrences > 1 ? { triggerCount: occurrences } : {}),
           triggerSource: runtime.commands.snapshotSerializable(card),
           ...(eventCard ? { triggerEventCard: runtime.commands.snapshotSerializable(eventCard) } : {}),
+          ...(eventContext?.damage ? { triggerDamage: { ...eventContext.damage } } : {}),
           label: trigger.label,
           optional: trigger.optional ?? false,
           ...(trigger.defaultOption ? { defaultOption: trigger.defaultOption } : {}),
@@ -184,27 +185,35 @@ export function queueTriggeredEvent(
   }
 }
 
-/** Raise the "hero-damage-dealt" event for positive damage dealt to a hero
- * after prevention. Its triggered layers join the pending layers that the
+/** Raise the "damage-dealt" event for positive damage dealt to a hero or an
+ * ally after prevention. Its triggered layers join the pending layers that the
  * damage step or the resolving layer exposes before the next priority point
- * (CR 6.6.6). The controller's opposing-hero damage count is per turn, so
- * ordinal triggers see damage dealt before their source existed (CR 6.6.5d). */
-export function queueHeroDamageDealt(
+ * (CR 6.6.6). Ordinals use turn-scoped player counts, so ordinal triggers see
+ * damage dealt before their source existed (CR 6.6.5d). */
+export function queueDamageDealt(
   state: GameStateInternal,
   runtime: EngineRuntime,
-  sourceSeat: number,
   source: CardInstance | undefined,
-  damage: Omit<HeroDamageEventContext, "opposingHeroOrdinal">,
+  damage: Omit<DamageEventContext, "opposingHeroOrdinal" | "arcaneOrdinal" | "fromOpposingHeroOrdinal">,
 ): void {
   if (damage.amount <= 0) return;
-  let opposingHeroOrdinal: number | undefined;
-  if (damage.byController && damage.targetSeat !== sourceSeat) {
-    const dealer = state.players[sourceSeat] as PlayerState;
-    opposingHeroOrdinal = (Number(dealer.flags.opposingHeroDamageEvents) || 0) + 1;
-    dealer.flags.opposingHeroDamageEvents = opposingHeroOrdinal;
-  }
-  queueTriggeredEvent(state, runtime, "hero-damage-dealt", sourceSeat, source, {
-    damage: { ...damage, ...(opposingHeroOrdinal !== undefined ? { opposingHeroOrdinal } : {}) },
+  const count = (player: PlayerState, flag: string): number => {
+    const next = (Number(player.flags[flag]) || 0) + 1;
+    player.flags[flag] = next;
+    return next;
+  };
+  const dealer = state.players[damage.sourceSeat] as PlayerState;
+  const target = state.players[damage.targetSeat] as PlayerState;
+  const opposingHero = damage.byController &&
+    damage.targetAllyInstanceId === undefined &&
+    damage.targetSeat !== damage.sourceSeat;
+  const ordinals = {
+    ...(opposingHero ? { opposingHeroOrdinal: count(dealer, "opposingHeroDamageEvents") } : {}),
+    ...(damage.byController && damage.arcane ? { arcaneOrdinal: count(dealer, "arcaneDamageEvents") } : {}),
+    ...(opposingHero ? { fromOpposingHeroOrdinal: count(target, "damageEventsFromOpposingHeroes") } : {}),
+  };
+  queueTriggeredEvent(state, runtime, "damage-dealt", damage.sourceSeat, source, {
+    damage: { ...damage, ...ordinals },
   });
 }
 

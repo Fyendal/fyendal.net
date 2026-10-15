@@ -790,9 +790,11 @@ export type {
 export type { GameStateInternal as GameState } from "./runtimeState.js";
 export type {
   CardScript,
+  DamageEventContext,
   DeepReadonly,
   ScriptCtx,
   ScriptDecisionPrompt,
   ScriptPrompt,
   TriggerDef,
+  TriggerEventContext,
 } from "./scripts.js";

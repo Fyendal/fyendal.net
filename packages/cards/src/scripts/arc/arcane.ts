@@ -10,6 +10,7 @@ import {
   optN,
   optOnChoose,
   wizardActionAsInstant,
+  heroDamage,
 } from "../shared-helpers.js";
 
 const RUNECHANT = "SVI034";
@@ -72,9 +73,18 @@ function bloodspillInvocation(count: number): CardScript {
       ctx.destroySelf();
       createRunechants(ctx, count);
     },
-    onHeroDealtDamage(ctx) {
-      ctx.destroySelf();
-    },
+    triggers: [
+      {
+        event: "damage-dealt",
+        whose: "any",
+        label: "Destroy this",
+        labelMessage: { id: "card.trigger.common.self.destroy" },
+        condition: (ctx, _eventCard, event) => heroDamage(event)?.targetSeat === ctx.seat,
+        effect: (ctx) => {
+          ctx.destroySelf();
+        },
+      },
+    ],
   };
 }
 

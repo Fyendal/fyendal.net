@@ -17,6 +17,7 @@ import {
   optOnChoose,
   opponentSeat,
   yesNoPrompt,
+  opposingHeroDamage,
 } from "./shared-helpers.js";
 import { monHighRarity } from "./mon/high-rarity.js";
 
@@ -782,13 +783,18 @@ export const mon: Record<string, CardScript> = mergeSetScripts("MON", monHighRar
         ctx.grantCardKeyword(played.instanceId, "go again");
       }
     },
-    canTriggerOnHit: (ctx) => ctx.link?.targetAllyId === undefined,
-    onHit(ctx) {
-      ctx.loseLife(opponentSeat(ctx), 1);
-    },
-    onFriendlyDamageDealt(ctx, _source, targetSeat, amount) {
-      if (targetSeat !== ctx.seat && amount > 0) ctx.loseLife(targetSeat, 1);
-    },
+    triggers: [
+      {
+        event: "damage-dealt",
+        label: "The damaged hero loses 1 life",
+        labelMessage: { id: "card.trigger.common.damaged.life.lose", values: { amount: 1 } },
+        condition: (ctx, _eventCard, event) => !!opposingHeroDamage(ctx, event),
+        effect(ctx, _eventCard, event) {
+          const damage = opposingHeroDamage(ctx, event);
+          if (damage) ctx.loseLife(damage.targetSeat, 1);
+        },
+      },
+    ],
   },
   "herald of protection|1": putAttackIntoSoulOnHit({
     onHit: (ctx) => {

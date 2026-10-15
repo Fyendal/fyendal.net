@@ -17,7 +17,7 @@ import type {
   StackLayer,
 } from "./state.js";
 import type { TokenCreationContext, TriggerEvent, TriggerEventContext } from "./eventTypes.js";
-export type { HeroDamageEventContext, TokenCreationContext, TriggerEvent, TriggerEventContext } from "./eventTypes.js";
+export type { DamageEventContext, TokenCreationContext, TriggerEvent, TriggerEventContext } from "./eventTypes.js";
 
 export type DeepReadonly<T> = T extends (...args: never[]) => unknown
   ? T
@@ -935,8 +935,13 @@ export interface TriggerDef {
    *  resolving (e.g. turning a mentor face up), before any priority window. */
   onAccept?(ctx: ScriptCtx): void;
   /** Runs when the layer resolves off the stack (after acceptance, when optional).
-   * `eventCard` is last-known information captured when the trigger was made. */
-  effect?(ctx: ScriptCtx, eventCard?: DeepReadonly<CardInstance>): void;
+   * `eventCard` is last-known information captured when the trigger was made.
+   * `eventContext` carries the persisted event facts (currently `damage`). */
+  effect?(
+    ctx: ScriptCtx,
+    eventCard?: DeepReadonly<CardInstance>,
+    eventContext?: TriggerEventContext,
+  ): void;
 }
 
 /** Card-declared alternative or additional effect-costs. They replace the

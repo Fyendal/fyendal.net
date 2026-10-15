@@ -609,7 +609,8 @@ function applyEffectDamage(state: GameStateInternal,
   }
   if (packet.amount > 0) {
     runtime.events.fireHeroDealtDamage(state, packet.targetSeat, packet.amount, packet.arcane === true);
-    runtime.events.queueHeroDamageDealt(state, packet.sourceSeat, found?.card ?? packet.sourceSnapshot, {
+    runtime.events.queueDamageDealt(state, found?.card ?? packet.sourceSnapshot, {
+      sourceSeat: packet.sourceSeat,
       targetSeat: packet.targetSeat,
       amount: packet.amount,
       arcane: packet.arcane === true,
@@ -1281,6 +1282,15 @@ export function dealAllyDamage(state: GameStateInternal,
         },
       ));
   if (dealt > 0) {
+    runtime.events.queueDamageDealt(state, src?.card ?? packet.sourceSnapshot, {
+      sourceSeat: packet.sourceSeat,
+      targetSeat: found.seat,
+      targetAllyInstanceId: ally.instanceId,
+      amount: dealt,
+      arcane: packet.arcane === true,
+      combat: packet.combat === true,
+      byController: !effectSourceIsAlly(state, packet, src),
+    });
     scriptOf(state, ally.cardId, ally)?.onDealtDamage?.(
       runtime.makeCtx(state, found.seat, ally, currentLink(state)),
       dealt,

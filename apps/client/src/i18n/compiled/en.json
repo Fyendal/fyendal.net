@@ -10760,6 +10760,12 @@
       "value": ": choose up to 1 target attack"
     }
   ],
+  "card.omn.aura.destroy": [
+    {
+      "type": 0,
+      "value": "Destroy an aura"
+    }
+  ],
   "card.omn.aura.holo.counter": [
     {
       "type": 1,
@@ -14056,6 +14062,20 @@
       "value": " attack and go again"
     }
   ],
+  "card.trigger.common.attacks.power.chain": [
+    {
+      "type": 0,
+      "value": "Attacks get +"
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " power this combat chain"
+    }
+  ],
   "card.trigger.common.aura.bottom.another": [
     {
       "type": 0,
@@ -14298,6 +14318,38 @@
       "value": " damage"
     }
   ],
+  "card.trigger.common.damaged.aura.destroy": [
+    {
+      "type": 0,
+      "value": "Destroy target aura the damaged hero controls"
+    }
+  ],
+  "card.trigger.common.damaged.auratoken.destroy": [
+    {
+      "type": 0,
+      "value": "Destroy an aura token the damaged hero controls"
+    }
+  ],
+  "card.trigger.common.damaged.discard": [
+    {
+      "type": 0,
+      "value": "The damaged hero discards a card"
+    }
+  ],
+  "card.trigger.common.damaged.life.lose": [
+    {
+      "type": 0,
+      "value": "The damaged hero loses "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " life"
+    }
+  ],
   "card.trigger.common.dawnblade.counters.remove": [
     {
       "type": 0,
@@ -14378,6 +14430,12 @@
     {
       "type": 0,
       "value": "Whenever a card defends this"
+    }
+  ],
+  "card.trigger.common.defender.discard.draw": [
+    {
+      "type": 0,
+      "value": "The defending hero discards a card and you draw a card"
     }
   ],
   "card.trigger.common.defense.gain": [
@@ -14618,6 +14676,12 @@
       "value": "Create a Frostbite"
     }
   ],
+  "card.trigger.common.frostbite.create.damage": [
+    {
+      "type": 0,
+      "value": "Create that many Frostbites under the damaged hero's control"
+    }
+  ],
   "card.trigger.common.frostbite.destroy": [
     {
       "type": 0,
@@ -14658,6 +14722,12 @@
       "value": " arcane damage"
     }
   ],
+  "card.trigger.common.frozen.arsenal.destroy": [
+    {
+      "type": 0,
+      "value": "Destroy a frozen card in the damaged hero's arsenal"
+    }
+  ],
   "card.trigger.common.goagain.gain": [
     {
       "type": 0,
@@ -14694,6 +14764,24 @@
     {
       "type": 0,
       "value": "Create a Goldkiss Rum token"
+    }
+  ],
+  "card.trigger.common.graveyard.attack.bottom.optional": [
+    {
+      "type": 0,
+      "value": "Put an attack action card from your graveyard on the bottom of your deck?"
+    }
+  ],
+  "card.trigger.common.graveyard.instant.bottom.optional": [
+    {
+      "type": 0,
+      "value": "Put an instant from your graveyard on the bottom of your deck?"
+    }
+  ],
+  "card.trigger.common.graveyard.nonattack.banish.optional": [
+    {
+      "type": 0,
+      "value": "Banish a non-attack action from your graveyard to play it this turn?"
     }
   ],
   "card.trigger.common.greatlibrary.intellect": [
@@ -14912,6 +15000,12 @@
       "value": " life if you have less life"
     }
   ],
+  "card.trigger.common.life.gain.damage": [
+    {
+      "type": 0,
+      "value": "Gain life equal to the damage dealt"
+    }
+  ],
   "card.trigger.common.life.lose": [
     {
       "type": 0,
@@ -14938,6 +15032,20 @@
       "value": "Lose life for Frostbites in equipment zones"
     }
   ],
+  "card.trigger.common.lightning.reveal.arcane.optional": [
+    {
+      "type": 0,
+      "value": "Reveal a Lightning card to deal "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " arcane damage?"
+    }
+  ],
   "card.trigger.common.lightningembodiment.or.flow": [
     {
       "type": 0,
@@ -14948,6 +15056,26 @@
     {
       "type": 0,
       "value": "Create a Lightning Flow token"
+    }
+  ],
+  "card.trigger.common.lightningflow.destroy.arcane.optional": [
+    {
+      "type": 0,
+      "value": "Destroy a Lightning Flow to deal "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " arcane damage?"
+    }
+  ],
+  "card.trigger.common.lightninghero.tap": [
+    {
+      "type": 0,
+      "value": "Tap the Lightning hero or a weapon they control"
     }
   ],
   "card.trigger.common.loanshark.pay": [
@@ -14980,6 +15108,12 @@
     {
       "type": 0,
       "value": "Create a Might token"
+    }
+  ],
+  "card.trigger.common.might.create.chosen": [
+    {
+      "type": 0,
+      "value": "Create Might tokens equal to the chosen number"
     }
   ],
   "card.trigger.common.might.create.count": [
@@ -15054,6 +15188,12 @@
       "value": "target"
     }
   ],
+  "card.trigger.common.nekria.damage": [
+    {
+      "type": 0,
+      "value": "Put a -1 life counter on Nekria and create an Ash"
+    }
+  ],
   "card.trigger.common.nextattack.draconic": [
     {
       "type": 0,
@@ -15120,6 +15260,12 @@
     {
       "type": 0,
       "value": "Return this to its owner's hand?"
+    }
+  ],
+  "card.trigger.common.ponder.create": [
+    {
+      "type": 0,
+      "value": "Create a Ponder token"
     }
   ],
   "card.trigger.common.ponder.destroy.draw": [
@@ -15468,6 +15614,12 @@
       "value": "Destroy Talisman of Balance and put the top card of your deck into your arsenal"
     }
   ],
+  "card.trigger.common.talismanwarfare.resolve": [
+    {
+      "type": 0,
+      "value": "Destroy Talisman of Warfare and all cards in all arsenals"
+    }
+  ],
   "card.trigger.common.thaw.banish.optional": [
     {
       "type": 0,
@@ -15510,6 +15662,12 @@
     {
       "type": 0,
       "value": "Put a gold counter on Treasure Island"
+    }
+  ],
+  "card.trigger.common.treasureisland.gold": [
+    {
+      "type": 0,
+      "value": "Remove gold counters equal to the damage and create that many Gold tokens"
     }
   ],
   "card.trigger.common.valdabrightaxe.resolve": [

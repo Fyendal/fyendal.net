@@ -801,6 +801,11 @@ export function announceCardPlayed(
   }
 }
 
+/** Event facts a triggered layer persisted for its resolution effect. */
+function triggerLayerEventContext(layer: StackLayer): TriggerEventContext | undefined {
+  return layer.triggerDamage ? { damage: layer.triggerDamage } : undefined;
+}
+
 function runTriggerEffect(state: GameStateInternal,
   runtime: EngineRuntime, layer: StackLayer): void {
   const found = findCardAnywhere(state, layer.sourceInstanceId);
@@ -822,6 +827,7 @@ function runTriggerEffect(state: GameStateInternal,
   def?.effect?.(
     runtime.makeCtx(state, layer.seat, contextSource, currentLink(state)),
     layer.triggerEventCard,
+    triggerLayerEventContext(layer),
   );
 }
 
@@ -1405,6 +1411,7 @@ export function answerTriggerChoice(
       def.effect(
         runtime.makeCtx(state, layer.seat, contextSource, currentLink(state)),
         layer.triggerEventCard,
+        triggerLayerEventContext(layer),
       );
     }
     consumeTopTriggerOccurrence(state, layer);

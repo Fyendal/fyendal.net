@@ -1,8 +1,9 @@
-import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
+import type { CardInstance, CardScript, DeepReadonly, ScriptCtx, TriggerDef } from "@fyendal/engine";
 import {
   buffNextAttack,
   commonOptionMessages,
   dealArcane,
+  dealtByThis,
   decisionMessage,
   decisionPrompt,
   localizedCardLog,
@@ -32,6 +33,16 @@ function isNonAttackAction(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): bo
 function isFused(ctx: ScriptCtx): boolean {
   return ctx.getCounter("fused") > 0;
 }
+
+/** Fused Explosive Growth: "whenever it deals damage" to any target. */
+const explosiveGrowthDamage: TriggerDef = {
+  event: "damage-dealt",
+  sourceZone: "self",
+  label: "Attacks get +1 power this combat chain",
+  labelMessage: { id: "card.trigger.common.attacks.power.chain", values: { amount: 1 } },
+  condition: (ctx, eventCard) => dealtByThis(ctx, eventCard) && isFused(ctx),
+  effect: (ctx) => ctx.addModifier({ scope: "combat-chain", attack: 1 }),
+};
 
 function fusionAdditionalCost(type: "earth" | "ice" | "lightning") {
   return (ctx: ScriptCtx) => {
@@ -799,13 +810,7 @@ export const ele: Record<string, CardScript> = mergeSetScripts("ELE", eleHighRar
     onAttackDeclared(ctx) {
       dealArcane(ctx, opponentSeat(ctx), 1);
     },
-    onDamageDealt(ctx, _target, amount) {
-      if (amount > 0 && isFused(ctx)) ctx.addModifier({ scope: "combat-chain", attack: 1 });
-    },
-    canTriggerOnHit: isFused,
-    onHit(ctx) {
-      ctx.addModifier({ scope: "combat-chain", attack: 1 });
-    },
+    triggers: [explosiveGrowthDamage],
   },
   "explosive growth|2": {
     arcaneDamageEffect: true,
@@ -813,13 +818,7 @@ export const ele: Record<string, CardScript> = mergeSetScripts("ELE", eleHighRar
     onAttackDeclared(ctx) {
       dealArcane(ctx, opponentSeat(ctx), 1);
     },
-    onDamageDealt(ctx, _target, amount) {
-      if (amount > 0 && isFused(ctx)) ctx.addModifier({ scope: "combat-chain", attack: 1 });
-    },
-    canTriggerOnHit: isFused,
-    onHit(ctx) {
-      ctx.addModifier({ scope: "combat-chain", attack: 1 });
-    },
+    triggers: [explosiveGrowthDamage],
   },
   "explosive growth|3": {
     arcaneDamageEffect: true,
@@ -827,13 +826,7 @@ export const ele: Record<string, CardScript> = mergeSetScripts("ELE", eleHighRar
     onAttackDeclared(ctx) {
       dealArcane(ctx, opponentSeat(ctx), 1);
     },
-    onDamageDealt(ctx, _target, amount) {
-      if (amount > 0 && isFused(ctx)) ctx.addModifier({ scope: "combat-chain", attack: 1 });
-    },
-    canTriggerOnHit: isFused,
-    onHit(ctx) {
-      ctx.addModifier({ scope: "combat-chain", attack: 1 });
-    },
+    triggers: [explosiveGrowthDamage],
   },
   "rites of lightning|1": ritesOfLightning(),
   "rites of lightning|2": ritesOfLightning(),
