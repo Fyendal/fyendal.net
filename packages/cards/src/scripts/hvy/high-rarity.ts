@@ -713,7 +713,7 @@ export const hvyHighRarity: Record<string, CardScript> = {
   }),
   "judge, jury, executioner|1": {
     canTriggerOnHit(ctx) {
-      return ctx.link?.targetAllyId === undefined && (ctx.getCounter("aim") > 0 || ctx.getFlag("link", "aim") === true);
+      return ctx.link?.targetAllyId === undefined && ctx.getCounter("aim") > 0;
     },
     onHit(ctx) {
       const target = opponentSeat(ctx);

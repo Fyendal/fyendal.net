@@ -146,7 +146,7 @@ export const arcMechanologist: Record<string, CardScript> = {
         label: "Remove a steam counter: put the attacking card on deck bottom when it hits",
         canActivate: (ctx) => ctx.getCounter("steam") > 0 && ctx.link?.attackCardType === "action",
         onActivate(ctx) {
-          ctx.setFlag("link", "attackToBottom", true);
+          ctx.addModifier({ scope: "chain-link", onHitBottomDeck: true });
         },
       },
     ],

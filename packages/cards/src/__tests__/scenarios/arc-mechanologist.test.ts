@@ -200,6 +200,27 @@ describe("ARC — Mechanologist attacks and actions", () => {
     expect(boardCard(g, 0, "cognition nodes|3").counters?.steam).toBe(0);
   });
 
+  it("Cognition Nodes leaves a missed attack action card in the graveyard", () => {
+    const g = scenario({
+      seats: [
+        {
+          ...mech,
+          board: ["cognition nodes|3"],
+          hand: ["zero to sixty|1", "pour the mold|3"],
+          deck: ["zipper hit|3"],
+        },
+        { hero: "dorinthea", weapons: [], hand: ["raging onslaught|1", "raging onslaught|2"] },
+      ],
+    });
+    boardCard(g, 0, "cognition nodes|3").counters = { steam: 1 };
+
+    g.play("zero to sixty|1", { boost: true })
+      .blockWith("raging onslaught|1", "raging onslaught|2")
+      .activate("cognition nodes|3", { ability: 1 })
+      .play("pour the mold|3")
+      .expectInZone(0, "zero to sixty|1", "graveyard");
+  });
+
   it("Convection Amplifier spends steam to give the next attack action dominate", () => {
     const g = scenario({
       seats: [

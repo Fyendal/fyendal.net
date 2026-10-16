@@ -565,6 +565,28 @@ describe("ELE — Fusion and Elemental heroes", () => {
   });
 });
 
+describe("ELE — Shock Striker", () => {
+  it("its instant grants a hit that deals 1 damage to the defending hero", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", weapons: [], hand: ["shock striker|1", BLUE] },
+        { hero: "dorinthea", weapons: [], hand: [] },
+      ],
+    });
+
+    g.play("shock striker|1", { pitch: [BLUE] })
+      .blockWith()
+      .activate("shock striker|1", { settle: false })
+      .passPriority()
+      .passPriority();
+    expect(projectStateFor(g.state, 0).chain.at(-1)?.onHitEffects).toContainEqual(expect.objectContaining({
+      sourceCardId: printingId("shock striker|1"),
+      text: "When this hits, deal 1 damage to the defending hero.",
+    }));
+    g.settle().expectLife(1, 14);
+  });
+});
+
 describe("ELE — delayed and replacement effects", () => {
   it("fused Strength of Sequoia enters as an aura and creates Seismic Surge", () => {
     const g = scenario({

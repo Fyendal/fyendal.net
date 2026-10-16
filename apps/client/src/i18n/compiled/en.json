@@ -17092,6 +17092,12 @@
       "value": "Kyloria: gain control of an item"
     }
   ],
+  "card.upr.liquefy.equipment.choose": [
+    {
+      "type": 0,
+      "value": "Liquefy: put a -1 defense counter on an equipment they control"
+    }
+  ],
   "card.upr.nonattack.negate": [
     {
       "type": 0,

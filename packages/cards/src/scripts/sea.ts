@@ -2365,11 +2365,9 @@ Object.assign(sea, {
       },
     },
   },
-  "barbed barrage|1": {
-    onPlayCostPaid(ctx: ScriptCtx, paid: readonly Card[]) {
-      if (paid.length >= 2) ctx.setFlag("link", "additionalTarget", true);
-    },
-  },
+  // FYD-RULE-001: the optional {r}{r}{r} additional cost and the extra
+  // attack target it buys need attacks with more than one target.
+  "barbed barrage|1": {},
   "return fire|1": {
     onDefend(ctx: ScriptCtx) {
       const arrows = ctx.player(ctx.seat).hand.filter((card) => isArrow(ctx, card));

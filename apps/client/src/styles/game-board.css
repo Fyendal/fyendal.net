@@ -9,6 +9,8 @@
   --game-z-prompt: 10;
   --game-z-waiting: 11;
   --game-z-card-drag: 40;
+  /* player-opened rail dialogs sit above prompts, drags and card toasts */
+  --game-z-dialog: 50;
 }
 
 .table {

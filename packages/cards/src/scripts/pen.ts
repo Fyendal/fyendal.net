@@ -1012,7 +1012,7 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
   "concealed pathogen|0": concealedHitTrap(
     BLOODROT,
     "Bloodrot Pox",
-    (ctx) => ctx.link?.flags.playedAttackReaction === true,
+    (ctx) => !!ctx.link && ctx.link.flags[`reactionBySeat:${ctx.link.attacker}`] === true,
   ),
   "concealed sedative|0": concealedHitTrap(INERTIA, "Inertia", (ctx) => ctx.attackBonusAboveBase() > 0),
   "rainbow goo trap|1": {

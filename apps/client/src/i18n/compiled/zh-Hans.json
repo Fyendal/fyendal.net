@@ -16371,6 +16371,12 @@
       "value": "Kyloria：获得一个物品的操控权"
     }
   ],
+  "card.upr.liquefy.equipment.choose": [
+    {
+      "type": 0,
+      "value": "Liquefy：在对方操控的一件装备上放置一个 -1 防御指示物"
+    }
+  ],
   "card.upr.nonattack.negate": [
     {
       "type": 0,

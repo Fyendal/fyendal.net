@@ -8,6 +8,7 @@
   justify-content: center;
   z-index: 10;
 }
+.game-dialog-overlay { z-index: var(--game-z-dialog); }
 .overlay-panel {
   background: #1a120a;
   border: 1px solid #45331f;

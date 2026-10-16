@@ -400,6 +400,11 @@ function grantedOnHitText(state: GameStateInternal, modifier: Modifier): string 
     effects.push("if the defending hero was marked, this may attack an additional time this turn");
   }
   if (modifier.onHitMark) effects.push("mark the defending hero");
+  if (modifier.onHitClearHandAndArsenalAtEndPhase) {
+    effects.push(
+      "at the beginning of the defending hero's end phase, they discard their hand and destroy their arsenal",
+    );
+  }
   if (modifier.onHitScriptHook) effects.push(modifier.onHitScriptHook.label);
   return `When this hits, ${effects.join("; ")}.`;
 }

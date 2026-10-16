@@ -1474,13 +1474,7 @@ export const ele: Record<string, CardScript> = mergeSetScripts("ELE", eleHighRar
       timing: "instant",
       oncePerTurn: true,
       canActivate: (ctx) => ctx.link?.attackingCard.instanceId === ctx.self.instanceId,
-      onActivate: (ctx) => ctx.setFlag("link", "shockStriker", true),
-    },
-    canTriggerOnHit(ctx) {
-      return ctx.link?.targetAllyId === undefined && ctx.getFlag("link", "shockStriker") === true;
-    },
-    onHit(ctx) {
-      ctx.dealDamage(opponentSeat(ctx), 1);
+      onActivate: (ctx) => ctx.addModifier({ scope: "chain-link", onHitDealDamage: 1 }),
     },
   },
   "shock striker|2": {
@@ -1491,13 +1485,7 @@ export const ele: Record<string, CardScript> = mergeSetScripts("ELE", eleHighRar
       timing: "instant",
       oncePerTurn: true,
       canActivate: (ctx) => ctx.link?.attackingCard.instanceId === ctx.self.instanceId,
-      onActivate: (ctx) => ctx.setFlag("link", "shockStriker", true),
-    },
-    canTriggerOnHit(ctx) {
-      return ctx.link?.targetAllyId === undefined && ctx.getFlag("link", "shockStriker") === true;
-    },
-    onHit(ctx) {
-      ctx.dealDamage(opponentSeat(ctx), 1);
+      onActivate: (ctx) => ctx.addModifier({ scope: "chain-link", onHitDealDamage: 1 }),
     },
   },
   "shock striker|3": {
@@ -1508,13 +1496,7 @@ export const ele: Record<string, CardScript> = mergeSetScripts("ELE", eleHighRar
       timing: "instant",
       oncePerTurn: true,
       canActivate: (ctx) => ctx.link?.attackingCard.instanceId === ctx.self.instanceId,
-      onActivate: (ctx) => ctx.setFlag("link", "shockStriker", true),
-    },
-    canTriggerOnHit(ctx) {
-      return ctx.link?.targetAllyId === undefined && ctx.getFlag("link", "shockStriker") === true;
-    },
-    onHit(ctx) {
-      ctx.dealDamage(opponentSeat(ctx), 1);
+      onActivate: (ctx) => ctx.addModifier({ scope: "chain-link", onHitDealDamage: 1 }),
     },
   },
   "electrify|1": {

@@ -858,6 +858,7 @@
   "card.upr.ice.fusion.reveal": "Reveal an Ice card to fuse?",
   "card.upr.ice.fusion.reveal.named": "{card}: reveal an Ice card from your hand to fuse?",
   "card.upr.kyloria.item.control": "Kyloria: gain control of an item",
+  "card.upr.liquefy.equipment.choose": "Liquefy: put a -1 defense counter on an equipment they control",
   "card.upr.nonattack.negate": "Choose a non-attack action to negate",
   "card.upr.opposing.hand.banish": "Choose a card from the opposing hand to banish",
   "card.upr.option.you": "You",

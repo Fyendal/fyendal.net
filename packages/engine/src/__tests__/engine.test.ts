@@ -2823,6 +2823,35 @@ describe("combat", () => {
     ]);
   });
 
+  it("projects a granted end-phase hand and arsenal clear as on-hit text", () => {
+    let s = makeGame(4);
+    const blade = player(s, 0).weapons[0]!;
+    const blue = giveCard(s, 0, "BLUE");
+    const attack = applyIntent(s, 0, {
+      kind: "activate-ability",
+      sourceInstanceId: blade.instanceId,
+      pitchInstanceIds: [blue],
+    });
+    expect(attack.ok).toBe(true);
+    if (!attack.ok) return;
+    s = attack.state;
+
+    const sourceId = giveCard(s, 0, "PUMP");
+    s.modifiers.push({
+      id: s.nextModifierId++,
+      sourceInstanceId: sourceId,
+      seat: 0,
+      scope: "chain-link",
+      onHitClearHandAndArsenalAtEndPhase: true,
+    });
+
+    expect(projectStateFor(s, 1).chain[0]!.onHitEffects).toContainEqual(expect.objectContaining({
+      sourceCardId: "PUMP",
+      text: "When this hits, at the beginning of the defending hero's end phase, " +
+        "they discard their hand and destroy their arsenal.",
+    }));
+  });
+
   it("weapon attack with go again refunds AP and can hit", () => {
     let s = makeGame(5);
     const sword = player(s, 0).weapons[0]!;

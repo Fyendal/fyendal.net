@@ -256,6 +256,52 @@ describe("UPR — registration and heroes", () => {
 });
 
 describe("UPR — rules regression coverage", () => {
+  it("Liquefy at chain link 4 grants a hit that strips and destroys a 1-defense equipment", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          weapons: [],
+          hand: ["head jab|1", "head jab|2", "head jab|3", "wounding blow|1", "liquefy|1", BLUE],
+        },
+        {
+          hero: "dorinthea",
+          hand: [],
+          equipment: { head: null, chest: "fyendal's spring tunic|0", arms: null, legs: null },
+        },
+      ],
+    });
+
+    g.play("head jab|1").blockWith().settle();
+    g.play("head jab|2").blockWith().settle();
+    g.play("head jab|3").blockWith().settle();
+    g.play("wounding blow|1").blockWith().react("liquefy|1", { pitch: [BLUE], settle: false });
+    g.passPriority().passPriority();
+    expect(projectStateFor(g.state, 0).chain.at(-1)?.onHitEffects).toContainEqual(expect.objectContaining({
+      sourceCardId: printingId("liquefy|1"),
+      text: "When this hits, put a -1 defense counter on an equipment they control, " +
+        "then destroy it if it has 0 defense.",
+    }));
+
+    g.settle().chooseCard("fyendal's spring tunic|0").expectNoEquipment(1, "chest");
+  });
+
+  it("Semblance negates a pending Phantasm trigger on its Illusionist attack", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", weapons: [], hand: ["enigma chimera|1", "semblance|3", "raging onslaught|2", BLUE] },
+        { hero: "dorinthea", weapons: [], hand: ["raging onslaught|1"] },
+      ],
+    });
+
+    g.play("enigma chimera|1", { pitch: ["raging onslaught|2"] }).blockWith("raging onslaught|1");
+    expect(g.stackLabels().some((label) => label.includes("Phantasm"))).toBe(true);
+    g.react("semblance|3", { pitch: [BLUE] })
+      .expectLog("Phantasm resolves without effect")
+      .expectLife(1, 15)
+      .expectNotInZone(0, "enigma chimera|1", "graveyard");
+  });
+
   it("Phoenix Form counts Phoenix Flames controlled on the combat chain", () => {
     const noFlames = scenario({
       seats: [

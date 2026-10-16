@@ -858,6 +858,7 @@
   "card.upr.ice.fusion.reveal": "展示一张 Ice 牌以进行 fusion？",
   "card.upr.ice.fusion.reveal.named": "{card}：展示一张手牌中的 Ice 牌以进行 fusion？",
   "card.upr.kyloria.item.control": "Kyloria：获得一个物品的操控权",
+  "card.upr.liquefy.equipment.choose": "Liquefy：在对方操控的一件装备上放置一个 -1 防御指示物",
   "card.upr.nonattack.negate": "选择一个非攻击行动使其失效",
   "card.upr.opposing.hand.banish": "选择对方的一张手牌放逐",
   "card.upr.option.you": "你",

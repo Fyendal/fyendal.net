@@ -77,18 +77,12 @@ const whelmingGustwave = ((): CardScript => ({
   onAttackDeclared(ctx) {
     if (!comboWith(ctx, "surging strike")) return;
     ctx.grantGoAgain();
-    ctx.setFlag("link", "whelmingGustwaveCombo", true);
+    ctx.addModifier({ scope: "chain-link", onHitDraw: 1 });
     ctx.logPublic(
       localizedLog("Whelming Gustwave: +1 attack, go again, draw on hit", "card.log.wtr.whelminggustwave.combo", {
         card: { kind: "card", cardId: ctx.self.cardId },
       }),
     );
-  },
-  canTriggerOnHit(ctx) {
-    return ctx.getFlag("link", "whelmingGustwaveCombo") === true;
-  },
-  onHit(ctx) {
-    ctx.drawCards(ctx.seat, 1);
   },
 }))();
 

@@ -29,6 +29,11 @@ function equipped(player: ReturnType<ScriptCtx["player"]>): DeepReadonly<CardIns
 function isAttackCard(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
   return ctx.hasCardType(card, "action") && has(ctx, card, "attack");
 }
+function ownIllusionistAttack(ctx: ScriptCtx): DeepReadonly<CardInstance> | undefined {
+  const link = ctx.link;
+  if (!link || link.attacker !== ctx.seat || link.flags.attackGone === true) return undefined;
+  return has(ctx, link.attackingCard, "illusionist") ? link.attackingCard : undefined;
+}
 function controlledPhoenixFlames(ctx: ScriptCtx): number {
   return ctx.state.chain.filter((link) => link.attacker === ctx.seat && named(ctx, link.attackingCard, "phoenix flame"))
     .length;
@@ -302,8 +307,39 @@ export const uprHighRarity: Record<string, CardScript> = {
     ],
   },
   "liquefy|1": {
+    canPlay: (ctx) => ctx.link?.attackCardType === "action",
     onPlay(ctx) {
-      if (ctx.currentChainLinkNumber() >= 4) ctx.setFlag("link", "liquefy", true);
+      if (ctx.currentChainLinkNumber() < 4) return;
+      ctx.addModifier({
+        scope: "chain-link",
+        onHitScriptHook: {
+          hook: "upr-liquefy",
+          label: "put a -1 defense counter on an equipment they control, then destroy it if it has 0 defense",
+          heroOnly: true,
+        },
+      });
+    },
+    onGrantedHit(ctx, hook) {
+      if (hook !== "upr-liquefy") return;
+      const equipment = equippedCards(ctx, opponentSeat(ctx));
+      if (equipment.length)
+        ctx.requestCardChoice(
+          "upr-liquefy-equipment",
+          decisionPrompt(
+            "Liquefy: put a -1 defense counter on an equipment they control",
+            "card.upr.liquefy.equipment.choose",
+          ),
+          equipment.map((card) => card.instanceId),
+        );
+    },
+    onChoose(ctx, hook, option) {
+      if (hook !== "upr-liquefy-equipment") return;
+      const equipment = equippedCards(ctx, opponentSeat(ctx)).find((card) => card.instanceId === Number(option));
+      if (!equipment) return;
+      ctx.addCardDefenseCounters(equipment.instanceId, 1);
+      if ((ctx.cardData(equipment.cardId).defense ?? 0) - (equipment.defCounters ?? 0) <= 0) {
+        ctx.destroyPermanent(equipment.instanceId);
+      }
     },
   },
   "uprising|1": {
@@ -502,8 +538,12 @@ export const uprHighRarity: Record<string, CardScript> = {
   },
   "frightmare|1": { canPlay: (ctx) => ctx.getFlag("player", "phantasmDestroyedThisTurn") === true },
   "semblance|3": {
+    canPlay: (ctx) => ownIllusionistAttack(ctx) !== undefined,
+    // Suppressing phantasm covers both clauses: suppression outlasts later
+    // grants, and a pending Phantasm layer fizzles when it rechecks the keyword.
     onPlay(ctx) {
-      ctx.setFlag("link", "suppressPhantasm", true);
+      const attack = ownIllusionistAttack(ctx);
+      if (attack) ctx.suppressCardKeyword(attack.instanceId, "phantasm");
     },
   },
   "tiger stripe shuko|0": {

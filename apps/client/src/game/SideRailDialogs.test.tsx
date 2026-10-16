@@ -61,7 +61,7 @@ describe("game settings dialog", () => {
     expect(html).toContain('style="--volume-progress:35%"');
     expect(html).toContain("35%");
     expect(html).toContain('aria-label="Playable card cue"');
-    expect(html).toContain('class="overlay settings-overlay"');
+    expect(html).toContain('class="overlay game-dialog-overlay settings-overlay"');
     expect(html).toContain('class="settings-control-row settings-choice-row"');
     expect(html).toContain(">Glow</button>");
     expect(html).toContain(">High contrast</button>");

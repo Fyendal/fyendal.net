@@ -139,4 +139,29 @@ describe("Concealed traps trigger when an attack hits you", () => {
     expect(named(g, 1, "Frailty")).toBe(0);
     expect(g.state.players[0]!.equipment.chest?.faceDown).toBe(true);
   });
+
+  function pathogen(hand: string[]): Game {
+    const g = scenario({
+      active: 1,
+      seats: [seat({ equipment: { chest: "concealed pathogen|0" }, hand: [] }), foe({ hand })],
+    });
+    g.state.players[0]!.equipment.chest!.faceDown = true;
+    return g;
+  }
+
+  it("Concealed Pathogen answers a hit after its controller played an attack reaction", () => {
+    const g = pathogen(["wounding blow|1", "razor reflex|1", "raging onslaught|2"]);
+
+    g.play("wounding blow|1").blockWith().react("razor reflex|1", { pitch: ["raging onslaught|2"] }).settle();
+    g.expectLog("face-down card triggers").expectNoEquipment(0, "chest");
+    expect(named(g, 1, "Bloodrot Pox")).toBe(1);
+  });
+
+  it("Concealed Pathogen ignores a hit without an attack reaction", () => {
+    const g = pathogen(["wounding blow|1"]);
+
+    g.play("wounding blow|1").blockWith().settle().expectLife(0, 16);
+    expect(named(g, 1, "Bloodrot Pox")).toBe(0);
+    expect(g.state.players[0]!.equipment.chest?.faceDown).toBe(true);
+  });
 });

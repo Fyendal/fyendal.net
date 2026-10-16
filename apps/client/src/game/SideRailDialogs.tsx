@@ -85,7 +85,7 @@ export function GameSettingsDialog({
   }, [close]);
 
   return (
-    <div className="overlay settings-overlay" onClick={close}>
+    <div className="overlay game-dialog-overlay settings-overlay" onClick={close}>
       <div
         className="overlay-panel settings-panel"
         role="dialog"
@@ -459,7 +459,7 @@ export function BugReportDialog({
   };
 
   return (
-    <div className="overlay" onClick={close}>
+    <div className="overlay game-dialog-overlay" onClick={close}>
       <form
         className="overlay-panel bug-report-panel"
         role="dialog"

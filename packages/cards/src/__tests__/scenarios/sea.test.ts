@@ -1341,6 +1341,28 @@ describe("SEA — pirate and generic attacks", () => {
 });
 
 describe("SEA — rules regression coverage", () => {
+  // FYD-RULE-001
+  it.fails("Barbed Barrage paid with its additional cost attacks the hero and an opposing ally", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          weapons: ["death dealer|0"],
+          resources: 4,
+          hand: [],
+          arsenal: ["barbed barrage|1"],
+        },
+        { hero: "dorinthea", weapons: [], hand: [], board: ["barnacle|2"] },
+      ],
+    });
+
+    g.play("barbed barrage|1", { fromArsenal: true })
+      .blockWith()
+      .settle()
+      .expectLife(1, 15)
+      .expectNotInZone(1, "barnacle|2", "board");
+  });
+
   it("Return Fire loads the banished arrow face up with +3 at the start of its controller's next turn", () => {
     const g = scenario({
       seats: [
