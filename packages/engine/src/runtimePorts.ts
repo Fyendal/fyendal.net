@@ -78,7 +78,6 @@ export type ScriptEventName =
   | "fireFriendlyEnterArena"
   | "fireHeroDealtDamage"
   | "fireOnFriendlyActivate"
-  | "fireOnFriendlyCrank"
   | "fireOnFriendlyPlay"
   | "grantLinkGoAgain"
   | "notifyGoAgainResolved"

@@ -343,6 +343,7 @@ function effectCardCostCandidates(
     ? player.hand
     : cost.zone === "graveyard" ? player.graveyard
     : cost.zone === "arsenal" ? player.arsenal
+    : cost.zone === "hand-or-arsenal" ? [...player.hand, ...player.arsenal]
     : cost.zone === "under" ? (cost.move === "banish" ? source.subcards ?? [] : [])
     : controlledCostCards(state, player).filter((card) => !card.faceDown);
   return cards.filter((card) => {

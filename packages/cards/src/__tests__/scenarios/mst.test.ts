@@ -934,3 +934,46 @@ describe("Murky Water", () => {
     tooFew.expectInZone(0, "boulder trap|2", "graveyard");
   });
 });
+
+describe("Longdraw Half-glove", () => {
+  const ranger = (hand: string[], arsenal: string[]) =>
+    scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          weapons: ["death dealer|0"],
+          equipment: { arms: "longdraw half-glove|0" },
+          hand,
+          arsenal,
+          resources: 2,
+        },
+        { hero: "dorinthea" },
+      ],
+    });
+
+  it("puts 2 cards from hand and/or arsenal on the bottom of the deck as a cost", () => {
+    const g = ranger(["sink below|1", "head shot|1"], ["tarpit trap|2"]);
+
+    g.activate("longdraw half-glove|0");
+    expect(g.state.pendingDecision?.options).toHaveLength(3);
+    g.chooseCard("sink below|1").chooseCard("tarpit trap|2");
+
+    const player = g.state.players[0]!;
+    expect(player.deck.slice(-2).map((card) => cardData[card.cardId]!.name))
+      .toEqual(["Sink Below", "Tarpit Trap"]);
+    expect(player.arsenal).toHaveLength(0);
+    g.expectInZone(0, "longdraw half-glove|0", "graveyard");
+  });
+
+  it("gives the next arrow attack this turn +4{p}", () => {
+    const g = ranger(["sink below|1", "tarpit trap|2"], ["head shot|1"]);
+
+    g.activate("longdraw half-glove|0").chooseCard("sink below|1").chooseCard("tarpit trap|2");
+    g.play("head shot|1", { fromArsenal: true }).expectAttackValue(8);
+  });
+
+  it("can't be activated with fewer than 2 cards in hand and arsenal", () => {
+    const g = ranger(["sink below|1"], []);
+    expect(() => g.activate("longdraw half-glove|0")).toThrow(/no legal intent/);
+  });
+});

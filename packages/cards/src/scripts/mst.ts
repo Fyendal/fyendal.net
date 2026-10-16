@@ -1939,7 +1939,17 @@ Object.assign(mst, {
       goAgain: false,
       timing: "instant",
       destroySelfCost: true,
-      canActivate: (ctx) => ctx.player(ctx.seat).hand.length + ctx.player(ctx.seat).arsenal.length >= 2,
+      effectCardCosts: [
+        {
+          zone: "hand-or-arsenal",
+          move: "put-on-deck-bottom",
+          count: 2,
+          prompt: decisionPrompt(
+            "Put a card from your hand or arsenal on the bottom of your deck",
+            "card.common.cost.handorarsenal.deckbottom",
+          ),
+        },
+      ],
       onActivate: (ctx) => buffNextAttack(ctx, { attack: 4, appliesToSubtype: "arrow" }),
     },
   },

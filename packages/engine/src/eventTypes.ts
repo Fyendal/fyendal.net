@@ -30,7 +30,9 @@ export type TriggerEvent =
   /** A permanent or attack the subject controlled was destroyed. */
   | "card-destroyed"
   /** A card the subject owns left their graveyard. */
-  | "card-left-graveyard";
+  | "card-left-graveyard"
+  /** The subject removed a steam counter from an item they control for Crank. */
+  | "card-cranked";
 
 /** Event-specific facts captured when a triggered ability is generated. */
 export interface TriggerEventContext {
@@ -50,6 +52,8 @@ export interface TriggerEventContext {
   readonly to?: "arsenal" | "banish" | "soul" | "hand" | "arena" | "graveyard" | "pitch" | "deck" | "subcard" | "cease-to-exist";
   /** A hero or ally was dealt positive damage after prevention. */
   readonly damage?: DamageEventContext;
+  /** 1-based count of the subject's cranks this turn, for "card-cranked". */
+  readonly crankOrdinal?: number;
 }
 
 /** Facts of a "damage-dealt" event. The event's subject is the source's

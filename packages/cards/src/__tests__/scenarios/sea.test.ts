@@ -382,6 +382,7 @@ describe("SEA — High Seas heroes and cogs", () => {
           hero: "rhinar",
           heroKey: "puffin|0",
           hand: ["cog in the machine|1", "copper cog|3"],
+          deck: ["rusty harpoon|3"],
         },
         { hero: "dorinthea" },
       ],
@@ -400,9 +401,12 @@ describe("SEA — High Seas heroes and cogs", () => {
     expect(g.state.pendingDecision?.sourceInstanceId).not.toBe(firstCogId);
     g.chooseOption("yes");
 
+    // Puffin's second-crank draw waits until Cog in the Machine resolves.
     expect(g.state.pendingDecision?.chooseHook).toBe("cog-machine");
+    expect(g.state.players[0]!.hand).toHaveLength(0);
     g.chooseCard("golden cog|0")
-      .expectInZone(0, "cog in the machine|1", "deck");
+      .expectInZone(0, "cog in the machine|1", "deck")
+      .expectInZone(0, "rusty harpoon|3", "hand");
     expect(countOnBoard(g, 0, "golden cog|0")).toBe(2);
     expect(g.state.players[0]!.board.filter((card) => card.tapped).length).toBe(1);
     expect(g.state.players[0]!.actionPoints).toBe(2);

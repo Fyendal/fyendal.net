@@ -135,6 +135,7 @@
   "card.common.cost.gold.destroy": "选择一个 Gold 摧毁作为费用",
   "card.common.cost.hand.banishfacedown": "将一张手牌面朝下放逐",
   "card.common.cost.hand.deckbottom": "将一张手牌置于牌库底部",
+  "card.common.cost.handorarsenal.deckbottom": "将一张手牌或 arsenal 中的牌置于牌库底部",
   "card.common.cost.lightningaura.banish": "选择另一个 Lightning 灵气 (Aura)放逐",
   "card.common.cost.lightningflow.destroy": "选择一个 Lightning Flow 摧毁",
   "card.common.cost.offchaindagger.destroy": "摧毁一把不在战斗链上的 dagger",

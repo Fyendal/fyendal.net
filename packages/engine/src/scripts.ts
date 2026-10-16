@@ -716,8 +716,9 @@ export interface ScriptCtx {
 }
 
 export interface ActivatedEffectCardCost {
-  /** `under` selects from the source permanent's public sub-cards. */
-  zone: "hand" | "graveyard" | "arsenal" | "arena" | "under";
+  /** `under` selects from the source permanent's public sub-cards;
+   * `hand-or-arsenal` lets each selected card come from either zone. */
+  zone: "hand" | "graveyard" | "arsenal" | "hand-or-arsenal" | "arena" | "under";
   move: "banish" | "discard" | "destroy" | "put-on-deck-bottom" | "tap" | "untap" | "remove-counter" | "turn-face-up";
   count: number;
   /** Banish the selected card face down, keeping its identity private. */
@@ -1405,8 +1406,6 @@ export interface CardScript {
   onFriendlyDieRollResult?(ctx: ScriptCtx, result: number): void;
   /** Observe one reveal event performed by any hero. */
   onAnyHeroReveals?(ctx: ScriptCtx, revealingSeat: number, cards: readonly DeepReadonly<CardInstance>[]): void;
-  /** Observe a cog/item this source's controller successfully cranked. */
-  onFriendlyCrank?(ctx: ScriptCtx, cranked: DeepReadonly<CardInstance>): void;
   /** Replace resources gained when this source's controller pitches a card. */
   replacePitchResources?(ctx: ScriptCtx, pitched: DeepReadonly<CardInstance>, amount: number): number | undefined;
   /** Replace an opponent's draw count before cards move. */

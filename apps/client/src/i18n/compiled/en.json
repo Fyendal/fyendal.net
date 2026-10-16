@@ -1919,6 +1919,12 @@
       "value": "Put a card from your hand on the bottom of your deck"
     }
   ],
+  "card.common.cost.handorarsenal.deckbottom": [
+    {
+      "type": 0,
+      "value": "Put a card from your hand or arsenal on the bottom of your deck"
+    }
+  ],
   "card.common.cost.lightningaura.banish": [
     {
       "type": 0,

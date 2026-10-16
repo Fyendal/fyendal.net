@@ -667,11 +667,15 @@ export const sea: Record<string, CardScript> = {
       effectCardCostChoiceHook: "puffin-gold-cost",
       onActivate: createGoldenCog,
     },
-    onFriendlyCrank(ctx) {
-      const count = Number(ctx.getFlag("player", "cranksThisTurn")) + 1;
-      ctx.setFlag("player", "cranksThisTurn", count);
-      if (count === 2) ctx.drawCards(ctx.seat, 1);
-    },
+    triggers: [
+      {
+        event: "card-cranked",
+        label: "Draw a card",
+        labelMessage: decisionMessage("card.trigger.common.card.draw"),
+        condition: (_ctx, _cranked, event) => event?.crankOrdinal === 2,
+        effect: (ctx) => ctx.drawCards(ctx.seat, 1),
+      },
+    ],
   },
   "rust belt|0": {
     activated: {

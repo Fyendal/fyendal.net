@@ -135,6 +135,7 @@
   "card.common.cost.gold.destroy": "Choose a Gold to destroy as a cost",
   "card.common.cost.hand.banishfacedown": "Banish a card from hand face down",
   "card.common.cost.hand.deckbottom": "Put a card from your hand on the bottom of your deck",
+  "card.common.cost.handorarsenal.deckbottom": "Put a card from your hand or arsenal on the bottom of your deck",
   "card.common.cost.lightningaura.banish": "Choose another Lightning aura to banish",
   "card.common.cost.lightningflow.destroy": "Choose a Lightning Flow to destroy",
   "card.common.cost.offchaindagger.destroy": "Destroy an off-chain dagger",

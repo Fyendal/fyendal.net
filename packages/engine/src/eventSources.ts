@@ -365,26 +365,6 @@ export function fireOnFriendlyActivate(
   }
 }
 
-/** Fire onFriendlyCrank after a player removes a steam counter for Crank. */
-export function fireOnFriendlyCrank(
-  state: GameStateInternal,
-  runtime: EngineRuntime,
-  seat: number,
-  cranked: CardInstance,
-): void {
-  for (const source of hookSources(state, seat, {
-    board: true,
-    equipment: true,
-    weapons: true,
-    heroLast: true,
-  })) {
-    scriptOf(state, source.cardId, source)?.onFriendlyCrank?.(
-      runtime.makeCtx(state, seat, source, currentLink(state)),
-      cranked,
-    );
-  }
-}
-
 /** Notify the controller's other permanents that their attack was lost. */
 export function fireFriendlyAttackLost(
   state: GameStateInternal,

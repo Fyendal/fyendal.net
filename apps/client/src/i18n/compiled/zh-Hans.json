@@ -1927,6 +1927,12 @@
       "value": "将一张手牌置于牌库底部"
     }
   ],
+  "card.common.cost.handorarsenal.deckbottom": [
+    {
+      "type": 0,
+      "value": "将一张手牌或 arsenal 中的牌置于牌库底部"
+    }
+  ],
   "card.common.cost.lightningaura.banish": [
     {
       "type": 0,

@@ -1210,9 +1210,12 @@ export function answerChoice(
           "engine.log.card.cranked",
           { card: logCardValue(found.card.cardId) },
         ));
-        (state.players[found.seat] as PlayerState).flags.crankedThisTurn = true;
+        const cranker = state.players[found.seat] as PlayerState;
+        cranker.flags.crankedThisTurn = true;
+        const crankOrdinal = (Number(cranker.flags.cranksThisTurn) || 0) + 1;
+        cranker.flags.cranksThisTurn = crankOrdinal;
         runtime.makeCtx(state, found.seat, found.card).gainActionPoint();
-        runtime.events.fireOnFriendlyCrank(state, found.seat, found.card);
+        runtime.events.queueTriggeredEvent(state, "card-cranked", found.seat, found.card, { crankOrdinal });
       }
     }
     if (found) runtime.events.fireFriendlyEnterArena(state, found.seat, found.card);
