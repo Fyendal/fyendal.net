@@ -143,6 +143,40 @@ describe("first-set rules regression coverage", () => {
     expect(g.state.players[1]!.flags.loseLifeOnActionThroughNextTurn).toBe(true);
   });
 
+  it("Remorseless stops arsenal defense reactions only when put face up this turn", () => {
+    const remorselessGame = (arsenal: { arsenal?: string[]; arsenalFaceDown?: string[] }, deck: string[] = []) => scenario({ seats: [
+      {
+        hero: "dorinthea",
+        heroKey: "azalea|0",
+        weapons: ["death dealer|0"],
+        ...arsenal,
+        deck: [...deck, "head jab|1", "head jab|2", "head jab|3", "head jab|1", "head jab|2", "head jab|3"],
+        resources: 20,
+        equipment: { ...NO_EQUIPMENT, chest: "skullbone crosswrap|0" },
+      },
+      { hero: "rhinar", arsenalFaceDown: ["sink below|1"], equipment: NO_EQUIPMENT },
+    ] });
+    const canDefenseReactFromArsenal = (g: ReturnType<typeof remorselessGame>) => {
+      g.play("remorseless|1", { fromArsenal: true }).blockWith().passPriority();
+      expect(g.state.pendingDecision?.kind).toBe("defense-reaction");
+      return legalIntents(g.state, 1).some((intent) => intent.kind === "play-from-arsenal");
+    };
+
+    const putFaceUp = remorselessGame({ arsenal: ["head jab|1"] }, ["remorseless|1"]);
+    putFaceUp.activate("azalea|0").expectInZone(0, "remorseless|1", "arsenal");
+    expect(canDefenseReactFromArsenal(putFaceUp)).toBe(false);
+
+    // Turning a face-down card face up does not put it into the arsenal.
+    const turnedFaceUp = remorselessGame({ arsenalFaceDown: ["remorseless|1"] });
+    turnedFaceUp.activate("skullbone crosswrap|0").chooseOption("pass");
+    expect(turnedFaceUp.state.log.some((entry) => entry.publicText?.includes("When put face up into arsenal"))).toBe(false);
+    expect(canDefenseReactFromArsenal(turnedFaceUp)).toBe(true);
+
+    const putFaceUpEarlier = remorselessGame({ arsenal: ["head jab|1"] }, ["remorseless|1"]);
+    putFaceUpEarlier.activate("azalea|0").endTurn().endTurn();
+    expect(canDefenseReactFromArsenal(putFaceUpEarlier)).toBe(true);
+  });
+
   it("Absorption Dome spends steam to replace damage", () => {
     const g = scenario({ active: 1, seats: [
       { hero: "rhinar", life: 20, board: ["absorption dome|2"], equipment: NO_EQUIPMENT },

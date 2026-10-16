@@ -1,4 +1,4 @@
-import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
+import type { CardInstance, CardScript, DeepReadonly, ScriptCtx, TriggerDef } from "@fyendal/engine";
 import { evrHighRarity } from "./evr/high-rarity.js";
 import {
   buffNextAttack,
@@ -604,19 +604,36 @@ function timekeepersWhim(amount: number): CardScript {
 }
 
 function hazeBending(): CardScript {
-  return {
-    onFriendlyDestroyed(ctx, destroyed) {
-      const data = ctx.cardData(destroyed.cardId);
-      if (
-        ctx.getFlag("player", `hazeBending:${ctx.self.instanceId}`) === true ||
-        data.cardType === "token" ||
-        !hasType(ctx, destroyed, "illusionist") ||
-        !isAura(ctx, destroyed)
-      )
-        return;
-      ctx.setFlag("player", `hazeBending:${ctx.self.instanceId}`, true);
+  // Two definitions share one turn limit: the arena trigger watches other
+  // auras, and the self trigger fires from the graveyard after this is destroyed.
+  const limitKey = (ctx: ScriptCtx) => `hazeBending:${ctx.self.instanceId}`;
+  const trigger = (
+    sourceZone: TriggerDef["sourceZone"],
+    eligible: (ctx: ScriptCtx, destroyed: DeepReadonly<CardInstance>) => boolean,
+  ): TriggerDef => ({
+    event: "card-destroyed",
+    sourceZone,
+    label: "Create a Spectral Shield token",
+    labelMessage: decisionMessage("card.trigger.common.spectralshield.create"),
+    condition: (ctx, destroyed) =>
+      !!destroyed && ctx.getFlag("player", limitKey(ctx)) !== true && eligible(ctx, destroyed),
+    onTrigger: (ctx) => ctx.setFlag("player", limitKey(ctx), true),
+    effect: (ctx) => {
       ctx.createToken(SPECTRAL_SHIELD);
     },
+  });
+  return {
+    triggers: [
+      trigger(
+        undefined,
+        (ctx, destroyed) =>
+          destroyed.instanceId !== ctx.self.instanceId &&
+          ctx.cardData(destroyed.cardId).cardType !== "token" &&
+          hasType(ctx, destroyed, "illusionist") &&
+          isAura(ctx, destroyed),
+      ),
+      trigger("self", (ctx, destroyed) => destroyed.instanceId === ctx.self.instanceId),
+    ],
   };
 }
 

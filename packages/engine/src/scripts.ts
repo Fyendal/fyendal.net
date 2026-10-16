@@ -664,7 +664,8 @@ export interface ScriptCtx {
   /** Atomically bottom the current attack action and replace it with an
    * eligible face-up attack action from banish, without play or attack-declared events. */
   replaceAttackFromBanish(instanceId: number, maximumCost: number): boolean;
-  /** Turn a face-down arsenal card face up and fire its face-up arsenal hooks. */
+  /** Turn a face-down arsenal card face up. This does not put it into the
+   *  arsenal; only `onEnterArsenalWhenTurnedFaceUp` hooks fire. */
   turnArsenalFaceUp(instanceId: number): boolean;
   /** Put a card (by instance id, from any of its owner's zones) on top of its
    *  owner's deck — unless the deck's owner has the per-turn `topDeckToBottom`
@@ -1657,14 +1658,18 @@ export interface CardScript {
    *  this, you may search your deck …"). */
   onBecomeHero?(ctx: ScriptCtx): void;
   /** A card was put face up into this script's controller's arsenal by an
-   *  effect (`ctx.putIntoArsenal`) or turned face up there. Triggers for the
-   *  entering card itself ("when this is put face-up into your arsenal") and
-   *  for the controller's permanents ("whenever an arrow is put face up into
-   *  your arsenal from your deck"). Each hook is a triggered layer that
-   *  resolves after the effect that moved the card finishes. `from` names the
-   *  zone it came from (for example, "hand", "deck", or "banish"; "arsenal"
-   *  when turned face up). */
+   *  effect (`ctx.putIntoArsenal`). Triggers for the entering card itself
+   *  ("when this is put face-up into your arsenal") and for the controller's
+   *  permanents ("whenever an arrow is put face up into your arsenal from your
+   *  deck"). Each hook is a triggered layer that resolves after the effect
+   *  that moved the card finishes. `from` names the zone it came from (for
+   *  example, "hand", "deck", or "banish"). Turning a face-down arsenal card
+   *  face up does not put it into the arsenal; it fires this hook (with
+   *  `from` "arsenal") only for scripts that set `onEnterArsenalWhenTurnedFaceUp`. */
   onEnterArsenal?(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, from: string): void;
+  /** `onEnterArsenal` also fires when a card already in arsenal is turned face
+   *  up ("when this is put or turned face up in arsenal"). */
+  onEnterArsenalWhenTurnedFaceUp?: boolean;
   /** A target declared as this source's enter-arsenal layer is added to the
    * stack, like `onHitTarget`. */
   onEnterArsenalTarget?: TriggerTarget;

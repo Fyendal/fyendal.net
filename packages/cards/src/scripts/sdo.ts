@@ -50,11 +50,6 @@ function targetMyAttack(
     },
     onPlay(ctx) {
       ctx.addModifier({ scope: "chain-link", attack: pump });
-      ctx.logPublic(
-        localizedCardLog(ctx, `${ctx.data.name}: the attack gets +${pump}{p}`, "card.log.common.attack.gained", {
-          amount: pump,
-        }),
-      );
       onPlayExtra?.(ctx);
     },
   };

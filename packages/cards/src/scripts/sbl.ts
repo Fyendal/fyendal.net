@@ -408,11 +408,6 @@ export const sbl: Record<string, CardScript> = {
     onPlay(ctx) {
       if (!chargedThisTurn(ctx)) return;
       ctx.addModifier({ scope: "chain-link", attack: 3 });
-      ctx.logPublic(
-        localizedCardLog(ctx, "Courageous Steelhand: target attack gains +3{p}", "card.log.common.attack.gained", {
-          amount: 3,
-        }),
-      );
     },
   },
 

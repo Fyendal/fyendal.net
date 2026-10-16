@@ -1464,6 +1464,7 @@ function requestSpireSnipingCard(ctx: ScriptCtx, hook: string, cards: readonly D
  * the last card put back ends on top. */
 export function spireSnipingScript(): CardScript {
   return {
+    onEnterArsenalWhenTurnedFaceUp: true,
     onEnterArsenal(ctx) {
       const top = ctx.player(ctx.seat).deck.slice(0, 2);
       for (const card of top) ctx.lookAt(card.instanceId);

@@ -235,72 +235,124 @@ function createCardInBanishFor(
   return card;
 }
 
-interface ObservedReactionAttackPower {
+interface ObservedAttackPower {
   instanceId: number;
   before: number;
+  /** Power gains are replaceable and observable only in the Reaction Step. */
+  reaction: boolean;
 }
 
-function observeReactionAttackPower(
+/** Snapshot the declared attack's power before one mutation command. Changes
+ * before declaration are already reported by the attack log itself. */
+function observeAttackPower(
   state: GameStateInternal,
   runtime: EngineRuntime,
-): ObservedReactionAttackPower | undefined {
+): ObservedAttackPower | undefined {
   const link = currentLink(state);
-  if (!link || state.phase !== "reaction") return undefined;
+  const reaction = state.phase === "reaction";
+  if (!link || (!reaction && link.flags.attackStepBegan !== true)) return undefined;
   return {
     instanceId: link.attackingCard.instanceId,
     before: runtime.commands.computeAttack(state, link),
+    reaction,
   };
 }
 
-/** Publish the gain caused by one mutation command. Comparing immediately
+/** The card whose effect changed an attack's power. */
+type AttackPowerSource = Pick<CardInstance, "instanceId" | "cardId" | "faceDown">;
+
+/** Public sources are named; a face-down or private source stays anonymous. */
+function attackPowerSourceIsPublic(state: GameStateInternal, source: AttackPowerSource): boolean {
+  return source.faceDown !== true && !(state.players as PlayerState[]).some((player) =>
+    player.hand.some((card) => card.instanceId === source.instanceId) ||
+    player.deck.some((card) => card.instanceId === source.instanceId)
+  );
+}
+
+/** Report a change in an attacking card's power with its resulting value, so
+ * pumps that resolve after the attack is declared remain visible. */
+function logAttackPowerChange(
+  state: GameStateInternal,
+  source: AttackPowerSource,
+  link: ChainLinkState,
+  change: number,
+  attack: number,
+): void {
+  if (change === 0) return;
+  const card = link.attackingCard;
+  const amount = Math.abs(change);
+  const sign = change > 0 ? "+" : "-";
+  const named = source.cardId !== card.cardId && attackPowerSourceIsPublic(state, source);
+  const fallback = named
+    ? `${logNameOf(state, source.cardId)} gives ${logNameOf(state, card.cardId)} ${sign}${amount} attack (${attack} attack)`
+    : `${logNameOf(state, card.cardId)} gets ${sign}${amount} attack (${attack} attack)`;
+  const id = named
+    ? change > 0 ? "engine.log.combat.attack.power.gained" : "engine.log.combat.attack.power.lost"
+    : change > 0 ? "engine.log.combat.attack.power.gained.self" : "engine.log.combat.attack.power.lost.self";
+  logPublic(state, gameLogMessage(fallback, id, {
+    ...(named ? { source: logCardValue(source.cardId) } : {}),
+    card: logCardValue(card.cardId),
+    amount,
+    attack,
+  }));
+}
+
+/** Publish the change caused by one mutation command. Comparing immediately
  * before and after that command prevents unrelated aggregate modifiers from
- * masquerading as an exact +1 effect. */
-function publishReactionAttackPowerGain(
+ * masquerading as an exact +1 effect. The change is logged after replacement
+ * and before gain triggers, whose own commands report their own changes. */
+function publishAttackPowerChange(
   state: GameStateInternal,
   runtime: EngineRuntime,
-  observed: ObservedReactionAttackPower | undefined,
+  observed: ObservedAttackPower | undefined,
+  source: AttackPowerSource,
 ): void {
   if (!observed) return;
   const link = currentLink(state);
   if (!link || link.attackingCard.instanceId !== observed.instanceId) return;
-  let gained = runtime.commands.computeAttack(state, link) - observed.before;
-  if (gained <= 0) return;
-  let replaced = scriptOf(state, link.attackingCard.cardId, link.attackingCard)?.replacePowerGain?.(
-    runtime.makeCtx(state, link.attacker, link.attackingCard, link),
-    gained,
-  ) ?? gained;
-  for (const defender of link.defendingEquipment) {
-    const next = scriptOf(state, defender.cardId, defender)?.replacePowerGain?.(
-      runtime.makeCtx(state, opponent(link.attacker), defender, link),
-      replaced,
-    );
-    if (next !== undefined) replaced = next;
+  let changed = runtime.commands.computeAttack(state, link) - observed.before;
+  if (changed === 0) return;
+  const gainObserved = observed.reaction && changed > 0;
+  if (gainObserved) {
+    let replaced = scriptOf(state, link.attackingCard.cardId, link.attackingCard)?.replacePowerGain?.(
+      runtime.makeCtx(state, link.attacker, link.attackingCard, link),
+      changed,
+    ) ?? changed;
+    for (const defender of link.defendingEquipment) {
+      const next = scriptOf(state, defender.cardId, defender)?.replacePowerGain?.(
+        runtime.makeCtx(state, opponent(link.attacker), defender, link),
+        replaced,
+      );
+      if (next !== undefined) replaced = next;
+    }
+    replaced = runtime.commands.replaceTemporalPowerGain(state, link, replaced);
+    if (replaced !== changed) {
+      state.modifiers.push({
+        id: state.nextModifierId++,
+        sourceInstanceId: link.attackingCard.instanceId,
+        seat: link.attacker,
+        scope: "chain-link",
+        attack: replaced - changed,
+      });
+      changed = replaced;
+    }
   }
-  replaced = runtime.commands.replaceTemporalPowerGain(state, link, replaced);
-  if (replaced !== gained) {
-    state.modifiers.push({
-      id: state.nextModifierId++,
-      sourceInstanceId: link.attackingCard.instanceId,
-      seat: link.attacker,
-      scope: "chain-link",
-      attack: replaced - gained,
-    });
-    gained = replaced;
-  }
+  logAttackPowerChange(state, source, link, changed, runtime.commands.computeAttack(state, link));
+  if (!gainObserved) return;
   scriptOf(state, link.attackingCard.cardId, link.attackingCard)?.onFriendlyAttackPowerGained?.(
     runtime.makeCtx(state, link.attacker, link.attackingCard, link),
-    gained,
+    changed,
   );
-  for (const source of hookSources(state, link.attacker, {
+  for (const hookSource of hookSources(state, link.attacker, {
     board: true,
     equipment: true,
     weapons: true,
     heroLast: true,
   })) {
-    if (source.instanceId === link.attackingCard.instanceId) continue;
-    scriptOf(state, source.cardId, source)?.onFriendlyAttackPowerGained?.(
-      runtime.makeCtx(state, link.attacker, source, link),
-      gained,
+    if (hookSource.instanceId === link.attackingCard.instanceId) continue;
+    scriptOf(state, hookSource.cardId, hookSource)?.onFriendlyAttackPowerGained?.(
+      runtime.makeCtx(state, link.attacker, hookSource, link),
+      changed,
     );
   }
 }
@@ -508,7 +560,7 @@ export function makeCtx(
       ? { playTargetInstanceId: playTargetInstanceId ?? self.playTargetInstanceId }
       : {}),
     addModifier(m, source) {
-      const observed = observeReactionAttackPower(state, runtime);
+      const observed = observeAttackPower(state, runtime);
       const active = currentLink(state);
       const origin = source ?? self;
       const originData = dataOf(state, origin.cardId);
@@ -547,8 +599,9 @@ export function makeCtx(
           for (const candidate of state.players as PlayerState[]) {
             candidate.flags.cardEffectResourceLifeOrStatGainThisTurn = true;
           }
+          logAttackPowerChange(state, origin, targetLink, effectiveAttack, Number(targetLink.finalAttack));
         }
-        publishReactionAttackPowerGain(state, runtime, observed);
+        publishAttackPowerChange(state, runtime, observed, origin);
         return;
       }
       state.modifiers.push({
@@ -568,7 +621,7 @@ export function makeCtx(
           candidate.flags.cardEffectResourceLifeOrStatGainThisTurn = true;
         }
       }
-      publishReactionAttackPowerGain(state, runtime, observed);
+      publishAttackPowerChange(state, runtime, observed, origin);
     },
     player(targetSeat) {
       return state.players[targetSeat] as PlayerState;
@@ -1096,7 +1149,7 @@ export function makeCtx(
     addCardTempPower(instanceId, delta) {
       const found = findCardAnywhere(state, instanceId);
       if (!found) return false;
-      const observed = observeReactionAttackPower(state, runtime);
+      const observed = observeAttackPower(state, runtime);
       const active = currentLink(state);
       const targetLink = chainLinkForAttack(state, instanceId);
       const suppressGain =
@@ -1137,8 +1190,9 @@ export function makeCtx(
           sourceCardId: self.cardId,
           amount: adjusted,
         });
+        logAttackPowerChange(state, self, targetLink, adjusted, Number(targetLink.finalAttack));
       }
-      publishReactionAttackPowerGain(state, runtime, observed);
+      publishAttackPowerChange(state, runtime, observed, self);
       return true;
     },
     grantCardName(instanceId, name) {
@@ -1949,7 +2003,7 @@ export function makeCtx(
     addCounter(instanceId, key, delta) {
       const found = findCardAnywhere(state, instanceId);
       if (!found) return;
-      const observed = observeReactionAttackPower(state, runtime);
+      const observed = observeAttackPower(state, runtime);
       const copies = [found.card];
       const activeAttack = currentLink(state)?.attackingCard;
       if (activeAttack?.instanceId === instanceId && activeAttack !== found.card) copies.push(activeAttack);
@@ -1964,18 +2018,18 @@ export function makeCtx(
           else delete c[key];
         }
       }
-      publishReactionAttackPowerGain(state, runtime, observed);
+      publishAttackPowerChange(state, runtime, observed, self);
     },
     setCardCounter(instanceId, key, value) {
       const found = findCardAnywhere(state, instanceId);
       if (!found) return;
-      const observed = observeReactionAttackPower(state, runtime);
+      const observed = observeAttackPower(state, runtime);
       (found.card.counters ??= {})[key] = value;
       const activeAttack = currentLink(state)?.attackingCard;
       if (activeAttack?.instanceId === instanceId && activeAttack !== found.card) {
         (activeAttack.counters ??= {})[key] = value;
       }
-      publishReactionAttackPowerGain(state, runtime, observed);
+      publishAttackPowerChange(state, runtime, observed, self);
     },
     freezeWhileInArena(instanceId) {
       const target = findPermanent(state, instanceId);
@@ -2322,9 +2376,9 @@ export function makeCtx(
       return self.counters?.[key] ?? 0;
     },
     setCounter(key, n) {
-      const observed = observeReactionAttackPower(state, runtime);
+      const observed = observeAttackPower(state, runtime);
       (self.counters ??= {})[key] = n;
-      publishReactionAttackPowerGain(state, runtime, observed);
+      publishAttackPowerChange(state, runtime, observed, self);
     },
     requestChoice(hook, prompt, options, choiceSeat, cardOptions, defaultOption) {
       requestScriptedChoice(hook, prompt, options, choiceSeat, { cardOptions, defaultOption });
@@ -3455,7 +3509,9 @@ export function discardToGraveyard(
 /** Queue onEnterArsenal triggers for the entering card itself, then the
  *  controller's other permanents (hero, equipment, the weapon slots, board).
  *  The layers resolve after the effect that moved the card finishes, so its
- *  remaining instructions (such as "If you do, draw a card") happen first. */
+ *  remaining instructions (such as "If you do, draw a card") happen first.
+ *  A card turned face up in place (`from` "arsenal") was not put into the
+ *  arsenal, so only scripts that also care about turning face up trigger. */
 function queueEnterArsenalTriggers(
   state: GameStateInternal,
   runtime: EngineRuntime,
@@ -3471,6 +3527,7 @@ function queueEnterArsenalTriggers(
   for (const source of sources) {
     const script = scriptOf(state, source.cardId, source);
     if (!script?.onEnterArsenal) continue;
+    if (from === "arsenal" && script.onEnterArsenalWhenTurnedFaceUp !== true) continue;
     if (script.canTriggerOnEnterArsenal &&
       !script.canTriggerOnEnterArsenal(runtime.makeCtx(state, seat, source), card, from)) continue;
     (state.pendingTriggeredLayers ??= []).push({

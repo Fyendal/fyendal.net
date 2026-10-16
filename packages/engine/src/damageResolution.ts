@@ -1008,7 +1008,12 @@ export function wardPieces(state: GameStateInternal,
 function openWardDecision(state: GameStateInternal,
   runtime: EngineRuntime, packet: PendingArcane): boolean {
   const target = state.players[packet.targetSeat] as PlayerState;
-  const pieces = wardPieces(state, runtime, target);
+  // A replacement effect must exist before its event (CR 6.4.3): a Ward
+  // source created while this event is being prevented cannot prevent it.
+  const available = wardPieces(state, runtime, target);
+  packet.wardSourceIds ??= available.map((piece) => piece.id);
+  const eligible = new Set(packet.wardSourceIds);
+  const pieces = available.filter((piece) => eligible.has(piece.id));
   if (packet.amount <= 0 || pieces.length === 0) return false;
   state.pendingDecision = {
     player: packet.targetSeat,

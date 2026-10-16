@@ -267,6 +267,21 @@ describe("SAZ — loading the arsenal", () => {
       .expectDeckTop(0, RED);
     expect(s.state.players[0]!.deck[1]!.instanceId).toBe(top2[0]);
   });
+
+  it("Spire Sniping also triggers when turned face up in arsenal", () => {
+    const s = scenario({
+      seats: [
+        azaleaSeat({
+          arsenalFaceDown: ["spire sniping|2"],
+          deck: [RONIN_FREE, BLUE, RED],
+          equipment: { ...NO_EQUIPMENT, chest: "skullbone crosswrap|0" },
+        }),
+        { hero: "rhinar", hand: [] },
+      ],
+    });
+    s.activate("skullbone crosswrap|0").chooseOption("pass");
+    expect(s.state.pendingDecision?.chooseHook).toBe("spire-sniping-first");
+  });
 });
 
 describe("SAZ — arrows", () => {

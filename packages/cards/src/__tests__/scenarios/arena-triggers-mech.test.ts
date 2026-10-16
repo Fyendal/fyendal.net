@@ -238,4 +238,70 @@ describe("Mechanologist, Evo and Illusionist arena triggers use the stack", () =
     g.passPriority().passPriority();
     expect(boardCount(g, 1, "spectral shield|0")).toBe(1);
   });
+
+  it("Haze Bending and Waning Vengeance shields arrive after the damage that destroyed their sources", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", resources: 3, hand: ["raging onslaught|1"] },
+        {
+          hero: "dorinthea",
+          board: ["haze bending|3", "waxing specter|2", "waning vengeance|1", "waxing specter|3"],
+        },
+      ],
+    });
+    g.state.players[1]!.flags["pitchedPitch:3"] = 1;
+    const wards = g.state.players[1]!.board.slice(1).map((card) => card.instanceId);
+
+    g.play("raging onslaught|1").blockWith().settle();
+    for (const id of wards) {
+      const decision = g.state.pendingDecision!;
+      expect(decision.chooseHook).toBe("ward");
+      expect(decision.cardOptions).toEqual(wards.filter((ward) => ward >= id));
+      g.doRaw({ kind: "choose", optionId: `destroy ${id}` });
+    }
+
+    // 7 damage against Ward 2 + 3 + 1: the last point is dealt.
+    g.expectLife(1, 19);
+    expect(boardCount(g, 1, "spectral shield|0")).toBe(0);
+    expect(g.state.pendingDecision?.kind).toBe("order-triggers");
+    expect(g.state.pendingDecision?.optionLabels).toEqual([
+      "Create a Spectral Shield token",
+      "Create a Spectral Shield token",
+    ]);
+
+    g.settle();
+    // Haze Bending triggers once per turn; Waning Vengeance adds the second.
+    expect(boardCount(g, 1, "spectral shield|0")).toBe(2);
+  });
+
+  it("Haze Bending creates a Spectral Shield when it is destroyed itself", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", hand: ["snatch|1"] },
+        { hero: "dorinthea", board: ["haze bending|3"] },
+      ],
+    });
+
+    g.play("snatch|1", { targetAlly: "haze bending|3" });
+    g.expectInZone(1, "haze bending|3", "graveyard");
+    expect(boardCount(g, 1, "spectral shield|0")).toBe(1);
+  });
+
+  it("a Ward source created while Ward prevents damage cannot prevent that damage", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", resources: 3, hand: ["raging onslaught|1"] },
+        { hero: "dorinthea", equipment: { arms: "wave of reality|0" } },
+      ],
+    });
+    const wave = g.state.players[1]!.equipment.arms!;
+
+    g.play("raging onslaught|1").blockWith().settle();
+    expect(g.state.pendingDecision?.cardOptions).toEqual([wave.instanceId]);
+    g.doRaw({ kind: "choose", optionId: `destroy ${wave.instanceId}` });
+
+    g.settle();
+    g.expectLife(1, 14);
+    expect(boardCount(g, 1, "spectral shield|0")).toBe(1);
+  });
 });

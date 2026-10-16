@@ -355,9 +355,6 @@ export const sbz: Record<string, CardScript> = {
         )
       ) {
         ctx.addModifier({ scope: "chain-link", attack: -1 });
-        ctx.logPublic(
-          localizedCardLog(ctx, `${ctx.data.name} gets -1{p}`, "card.log.common.attack.lost", { amount: 1 }),
-        );
       }
     },
     onChoose(ctx, hook, option) {
@@ -368,9 +365,6 @@ export const sbz: Record<string, CardScript> = {
         );
       } else {
         ctx.addModifier({ scope: "chain-link", attack: -1 });
-        ctx.logPublic(
-          localizedCardLog(ctx, `${ctx.data.name} gets -1{p}`, "card.log.common.attack.lost", { amount: 1 }),
-        );
       }
     },
   },

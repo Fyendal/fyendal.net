@@ -1073,6 +1073,34 @@ describe("PEN — import and set mechanics", () => {
       .expectFinalAttack(9);
   });
 
+  it("Swordmaster's Shine logs its resolved bonus with the attack's new power", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "dorinthea",
+          weapons: ["decimator great axe|0"],
+          hand: ["swordmaster's shine|1"],
+          resources: 6,
+          equipment: NO_EQUIPMENT,
+        },
+        { hero: "rhinar", equipment: NO_EQUIPMENT },
+      ],
+    });
+
+    g.attackWithWeapon("decimator great axe|0")
+      .blockWith()
+      .react("swordmaster's shine|1")
+      .expectLog("Swordmaster's Shine gives Decimator Great Axe +5 attack (9 attack)");
+    const pump = g.state.log.find((entry) =>
+      entry.publicPayload?.message?.id === "engine.log.combat.attack.power.gained");
+    expect(pump?.publicPayload?.message?.values).toEqual({
+      source: { kind: "card", cardId: printingId("swordmaster's shine|1") },
+      card: { kind: "card", cardId: printingId("decimator great axe|0") },
+      amount: 5,
+      attack: 9,
+    });
+  });
+
   it("Swordmaster's Shine does not get cheaper from counters on an axe", () => {
     const g = scenario({
       seats: [

@@ -363,11 +363,6 @@ export const sen: Record<string, CardScript> = {
       const link = ctx.link;
       if (!link) return;
       ctx.addModifier({ scope: "chain-link", attack: -1, seat: link.attacker });
-      ctx.logPublic(
-        localizedCardLog(ctx, `${ctx.data.name}: target attack gets -1{p}`, "card.log.common.attack.lost", {
-          amount: 1,
-        }),
-      );
     },
     {
       canPlay: (ctx) => !!ctx.link && !ctx.link.resolved,

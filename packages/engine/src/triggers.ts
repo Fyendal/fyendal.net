@@ -1145,13 +1145,15 @@ function advanceStack(state: GameStateInternal, runtime: EngineRuntime): void {
     const clearedAttack = runtime.dispatchFlow("resolveSpectraLayer", state, layer.sourceInstanceId);
     if (clearedAttack) {
       state.stackResume = null;
+      // Destroying the Spectra source may have raised triggers of its own.
+      const layersRemain = state.stack.length > 0 || (state.pendingTriggeredLayers?.length ?? 0) > 0;
       if (state.pendingDecision?.chooseHook) {
-        if (state.stack.length > 0) {
+        if (layersRemain) {
           state.pendingDecision.resume = { kind: "continue-stack", seat: layer.seat };
         }
         return;
       }
-      if (state.stack.length > 0) continueStack(state, runtime, layer.seat);
+      if (layersRemain) continueStack(state, runtime, layer.seat);
       return;
     }
     continueStack(state, runtime, layer.seat);

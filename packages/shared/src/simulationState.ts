@@ -347,6 +347,7 @@ export interface PersistedPendingArcaneV1 {
   payTotal?: number;
   arcaneBarrierResolved?: true;
   usedQuellSourceIds?: number[];
+  wardSourceIds?: number[];
   usedDiscardDamagePreventionModifierIds?: number[];
   usedSoulDamagePreventionSourceIds?: number[];
   soulDamagePreventionSourceInstanceId?: number;

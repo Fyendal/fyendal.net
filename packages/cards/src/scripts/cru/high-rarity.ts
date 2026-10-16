@@ -297,10 +297,10 @@ const plasmaPurifier: CardScript = {
 
 const remorseless: CardScript = {
   onEnterArsenal(ctx) {
-    if (!ctx.self.faceDown) ctx.setCounter("faceUpLoaded", 1);
+    if (!ctx.self.faceDown) ctx.setCounter("faceUpLoadedTurn", ctx.state.turn);
   },
   onAttackDeclared(ctx) {
-    if (ctx.getCounter("faceUpLoaded")) ctx.addModifier({ scope: "chain-link", noDefenseReactionsFromArsenal: true });
+    if (ctx.getCounter("faceUpLoadedTurn") === ctx.state.turn) ctx.addModifier({ scope: "chain-link", noDefenseReactionsFromArsenal: true });
   },
   onHit(ctx) {
     const target = ctx.player(opponentSeat(ctx));

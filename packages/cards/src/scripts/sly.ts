@@ -298,9 +298,6 @@ export const sly: Record<string, CardScript> = {
   "drag down|1": {
     onDefend(ctx) {
       ctx.addModifier({ scope: "chain-link", attack: -3, seat: opponentSeat(ctx) });
-      ctx.logPublic(
-        localizedCardLog(ctx, `${ctx.data.name}: the attack gets -3{p}`, "card.log.common.attack.lost", { amount: 3 }),
-      );
     },
   },
 
@@ -449,11 +446,6 @@ export const sly: Record<string, CardScript> = {
         const link = ctx.link;
         if (!link) return;
         ctx.addModifier({ scope: "chain-link", attack: 1, seat: link.attacker });
-        ctx.logPublic(
-          localizedCardLog(ctx, `${ctx.data.name}: target attack gets +1{p}`, "card.log.common.attack.gained", {
-            amount: 1,
-          }),
-        );
       },
     },
     triggers: [

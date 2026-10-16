@@ -130,11 +130,6 @@ function broodReaction(target: (ctx: ScriptCtx) => boolean, label: string): Acti
     canActivate: (ctx) => myAttack(ctx) && target(ctx),
     onActivate(ctx) {
       ctx.addModifier({ scope: "chain-link", attack: 3 });
-      ctx.logPublic(
-        localizedCardLog(ctx, `${ctx.data.name}: the attack gets +3{p}`, "card.log.common.attack.gained", {
-          amount: 3,
-        }),
-      );
     },
   };
 }

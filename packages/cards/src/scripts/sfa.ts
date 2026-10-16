@@ -586,11 +586,6 @@ export const sfa: Record<string, CardScript> = {
     },
     onPlay(ctx) {
       ctx.addModifier({ scope: "chain-link", attack: 1 });
-      ctx.logPublic(
-        localizedCardLog(ctx, `${ctx.data.name}: the attack gets +1{p}`, "card.log.common.attack.gained", {
-          amount: 1,
-        }),
-      );
     },
   },
 

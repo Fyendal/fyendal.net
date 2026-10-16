@@ -783,6 +783,10 @@ export interface PendingArcane {
   arcaneBarrierResolved?: true;
   /** Quell sources already paid for during this damage event. */
   usedQuellSourceIds?: number[];
+  /** Ward sources present when this event first offered Ward (CR 6.4.3).
+   * Wards created while the event is being prevented apply only to later
+   * damage events. */
+  wardSourceIds?: number[];
   /** Discard-prevention modifiers already applied during this damage event. */
   usedDiscardDamagePreventionModifierIds?: number[];
   /** Soul-banish prevention sources already applied to this original event. */

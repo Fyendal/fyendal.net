@@ -704,11 +704,6 @@ export const sba: Record<string, CardScript> = {
         appliesToInstanceId: ctx.playTargetInstanceId,
         maxCost: 1,
       });
-      ctx.logPublic(
-        localizedCardLog(ctx, `${ctx.data.name}: the attack gains +3{p}`, "card.log.common.attack.gained", {
-          amount: 3,
-        }),
-      );
     },
   },
 

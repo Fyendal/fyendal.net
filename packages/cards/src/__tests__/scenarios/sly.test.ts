@@ -577,7 +577,8 @@ describe("SLY — attacks and defense", () => {
     g.passPriority().passPriority();
     g.expectAttackValue(6);
     expect(g.state.stack[0]?.engineEffect?.kind).toBe("on-defend-hook");
-    g.settle().expectFinalAttack(3);
+    g.settle().expectFinalAttack(3)
+      .expectLog("Drag Down gives Raging Onslaught -3 attack (3 attack)");
   });
 
   it("Brothers in Arms pays {r} for +2{d}", () => {
