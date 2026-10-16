@@ -1,4 +1,5 @@
 import type { GameIntent, PendingDecision } from "@fyendal/shared";
+import { explicitDeclineOption } from "./decisionPass.js";
 
 type KeyboardTarget = {
   closest?: (selectors: string) => unknown;
@@ -8,8 +9,8 @@ function sameIds(actual: readonly number[], selected: readonly number[]): boolea
   return actual.length === selected.length && actual.every((id) => selected.includes(id));
 }
 
-/** Resolve the script-provided Space default. Legacy optional decisions retain
- * the established No default until their scripts opt into another choice. */
+/** Resolve the script-provided Space default. Other optional decisions default
+ * to their own No or Decline option. */
 export function decisionSpaceOption(
   decision: PendingDecision | null,
 ): string | null {
@@ -19,8 +20,7 @@ export function decisionSpaceOption(
     return decision.defaultOption;
   }
   if (decision.kind !== "optional-effect") return null;
-  const no = options.find((option) => option.trim().toLowerCase() === "no") ?? null;
-  return no;
+  return explicitDeclineOption(decision);
 }
 
 /** Resolve Space to the exact legal completion for the current context. */

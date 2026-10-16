@@ -6,7 +6,11 @@ import type { CardInstance } from "../state.js";
 import { makeGame, player } from "./fixtures.js";
 
 /** Give `cardId` a self leave-arena trigger whose condition records each event. */
-function recordLeaves(s: GameStateInternal, cardId: string): (TriggerEventContext | undefined)[] {
+function recordLeaves(
+  s: GameStateInternal,
+  cardId: string,
+  whileDefending = true,
+): (TriggerEventContext | undefined)[] {
   const events: (TriggerEventContext | undefined)[] = [];
   s.scriptsRef = {
     ...s.scriptsRef,
@@ -14,6 +18,7 @@ function recordLeaves(s: GameStateInternal, cardId: string): (TriggerEventContex
       triggers: [{
         event: "card-left-arena",
         sourceZone: "self",
+        whileDefending,
         label: "Left the arena",
         condition: (_ctx, _card, event) => {
           events.push(event);
@@ -97,5 +102,18 @@ describe("cards returned to hand leave the arena", () => {
     expect(s.chain[0]!.defendingCards).toEqual([]);
     expect(player(s, 1).hand.some((card) => card.instanceId === blocker.instanceId)).toBe(true);
     expect(events).toEqual([expect.objectContaining({ to: "hand", combatRole: "defending" })]);
+  });
+
+  it("a defending card's own leave-arena trigger is non-functional unless it names defending", () => {
+    const s = makeGame();
+    const events = recordLeaves(s, "BLOCK3", false);
+    attackWith(s, 0, "ATK4");
+    const blocker: CardInstance = { instanceId: s.nextInstanceId++, cardId: "BLOCK3", owner: 1 };
+    s.chain[0]!.defendingCards.push(blocker);
+
+    expect(engineRuntime.makeCtx(s, 1, blocker).returnSelfToHand()).toBe(true);
+
+    expect(player(s, 1).hand.some((card) => card.instanceId === blocker.instanceId)).toBe(true);
+    expect(events).toEqual([]);
   });
 });

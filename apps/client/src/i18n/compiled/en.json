@@ -18608,6 +18608,20 @@
       "value": "Put on top"
     }
   ],
+  "common.option.usecost": [
+    {
+      "type": 0,
+      "value": "Use (pay "
+    },
+    {
+      "type": 1,
+      "value": "cost"
+    },
+    {
+      "type": 0,
+      "value": ")"
+    }
+  ],
   "common.option.yes": [
     {
       "type": 0,

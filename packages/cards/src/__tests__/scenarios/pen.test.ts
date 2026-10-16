@@ -1288,6 +1288,24 @@ describe("PEN — import and set mechanics", () => {
     expect(g.state.players[0]!.board.find((card) => cardData[card.cardId]?.name === "Aether Ashwing")?.tapped).toBe(true);
   });
 
+  it("Quickening Sand creates Quicken under the chosen hero's control", () => {
+    const quickens = (g: ReturnType<typeof scenario>, seat: number) =>
+      g.state.players[seat]!.board.filter((card) => cardData[card.cardId]?.name === "Quicken").length;
+    for (const [option, seat] of [["your hero", 0], ["opposing hero", 1]] as const) {
+      const g = scenario({
+        seats: [
+          { hero: "rhinar", hand: ["quickening sand|3"], equipment: NO_EQUIPMENT },
+          { hero: "dorinthea", equipment: NO_EQUIPMENT },
+        ],
+      });
+      g.play("quickening sand|3");
+      expect(g.state.pendingDecision?.defaultOption).toBe("your hero");
+      g.chooseOption(option);
+      expect(quickens(g, seat)).toBe(1);
+      expect(quickens(g, 1 - seat)).toBe(0);
+    }
+  });
+
   it("Quickening Sand triggers Riptide when defending a weapon attack with go again", () => {
     const g = scenario({
       active: 1,

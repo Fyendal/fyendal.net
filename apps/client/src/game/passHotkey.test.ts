@@ -92,6 +92,17 @@ describe("pass hotkey", () => {
       .toBe(pass);
   });
 
+  it("puts Space on Decline for engine use-or-decline offers", () => {
+    const decision: PendingDecision = {
+      player: 0,
+      kind: "optional-effect",
+      prompt: "Quell?",
+      options: ["use 38", "decline"],
+    };
+
+    expect(decisionSpaceOption(decision)).toBe("decline");
+  });
+
   it("submits an explicit No default from a card script", () => {
     const decision: PendingDecision = {
       player: 0,

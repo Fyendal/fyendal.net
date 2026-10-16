@@ -816,7 +816,10 @@ function openQuellDecision(state: GameStateInternal, packet: PendingArcane): boo
       values: { amount: packet.amount },
     },
     options: [...pieces.map((piece) => `use ${piece.id}`), "decline"],
-    optionMessages: [...pieces.map(() => null), { id: "common.option.decline" }],
+    optionMessages: [
+      ...pieces.map((piece) => ({ id: "common.option.usecost", values: { cost: piece.cost } })),
+      { id: "common.option.decline" },
+    ],
     cardOptions: [...pieces.map((piece) => piece.id as number | null), null],
     sourceInstanceId: packet.sourceInstanceId,
     chooseHook: "quell",

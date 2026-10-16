@@ -30,5 +30,13 @@ export function shouldShowDecisionPass(
   if (isPriorityGuidanceDecision(decision)) return false;
   if (decision?.kind === "arsenal") return false;
   if (decision?.kind !== "optional-effect") return true;
-  return !(decision.options ?? []).some((option) => option.trim().toLowerCase() === "no");
+  return explicitDeclineOption(decision) === null;
+}
+
+/** The optional decision's own decline button ("no" for yes/no choices,
+ * "decline" for engine use-or-decline offers), which a separate Pass would
+ * duplicate. */
+export function explicitDeclineOption(decision: PendingDecision): string | null {
+  return (decision.options ?? []).find((option) =>
+    ["no", "decline"].includes(option.trim().toLowerCase())) ?? null;
 }

@@ -59,6 +59,9 @@ export function collectCardEventTriggerLayers(
           (!eventTriggerIsActive(source, trigger) &&
             !(isEventCard && trigger.sourceZone === "self"))
         ) return;
+        if (
+          isEventCard && eventContext?.combatRole === "defending" && trigger.whileDefending !== true
+        ) return;
         if ((trigger.whose ?? "subject") === "subject" && seat !== subject) return;
         const ctx = runtime.makeCtx(state, seat, card, currentLink(state));
         if (trigger.condition && !trigger.condition(ctx, eventCard, eventContext)) return;

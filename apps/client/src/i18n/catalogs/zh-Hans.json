@@ -1952,6 +1952,7 @@
   "common.option.pass": "让过",
   "common.option.decline": "拒绝",
   "common.option.pay": "支付 {amount}",
+  "common.option.usecost": "使用（支付 {cost}）",
   "common.option.reroll": "重新掷骰",
   "common.option.keep": "保留结果",
   "common.option.bottom": "置于牌库底部",

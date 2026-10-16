@@ -244,6 +244,16 @@ function dispatchPlay(
   );
 }
 
+/** Pass answers a scripted decision with its own decline option: "no" for
+ * yes/no choices, "decline" for engine use-or-decline offers (Quell, Ward,
+ * optional prevention), "pass" for look-at acknowledgments, opt, and ordering
+ * choices. */
+const DECLINE_OPTIONS = ["no", "decline", "pass"] as const;
+
+function declineOption(options: readonly string[] | undefined): string {
+  return DECLINE_OPTIONS.find((option) => options?.includes(option)) ?? "no";
+}
+
 /**
  * Answer a pending scripted decision (trigger choice, arsenal, or a
  * choose-target/optional-effect choice). Returns null when the pending
@@ -648,10 +658,11 @@ export function applyIntent(
       if (pd?.kind === "priority-window") {
         err = passWindow(next, runtime, seat);
       } else if (pd?.kind === "optional-effect" || pd?.kind === "arsenal") {
-        // scripted yes/no (and arsenal) decisions decline on pass — in ANY
-        // phase; the phase-based reaction pass below only applies when no
-        // scripted decision is open
-        const res = answerScriptedDecision(next, runtime, seat, pd.kind === "arsenal" ? "pass" : "no");
+        // scripted (and arsenal) decisions decline on pass — in ANY phase;
+        // the phase-based reaction pass below only applies when no scripted
+        // decision is open
+        const decline = pd.kind === "arsenal" ? "pass" : declineOption(pd.options);
+        const res = answerScriptedDecision(next, runtime, seat, decline);
         err = res === null ? "cannot pass now" : res;
       } else if (next.phase === "reaction") {
         err = passReaction(next, runtime, seat);
@@ -663,12 +674,7 @@ export function applyIntent(
       ) {
         offerEndActionPriority(next, seat);
       } else {
-        // scripted decisions decline on "no"; a decision without "no" but with
-        // an explicit "pass" option (look-at acknowledgments, opt, ordering
-        // choices) declines on "pass" instead
-        const options = next.pendingDecision?.options;
-        const decline = options && !options.includes("no") && options.includes("pass") ? "pass" : "no";
-        const res = answerScriptedDecision(next, runtime, seat, decline);
+        const res = answerScriptedDecision(next, runtime, seat, declineOption(next.pendingDecision?.options));
         err = res === null ? "cannot pass now" : res;
       }
       break;

@@ -23,6 +23,11 @@ describe("decision pass button", () => {
       .toBe(false);
   });
 
+  it("hides Pass for use-or-decline offers such as Quell", () => {
+    expect(shouldShowDecisionPass(decision("optional-effect", ["use 38", "decline"]), true))
+      .toBe(false);
+  });
+
   it("keeps distinct Pass controls and respects legality", () => {
     expect(shouldShowDecisionPass(decision("arsenal", ["1"]), true)).toBe(false);
     expect(shouldShowDecisionPass(decision("optional-effect", ["yes", "no"]), false))

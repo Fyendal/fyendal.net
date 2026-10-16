@@ -17868,6 +17868,20 @@
       "value": "置于牌库顶部"
     }
   ],
+  "common.option.usecost": [
+    {
+      "type": 0,
+      "value": "使用（支付 "
+    },
+    {
+      "type": 1,
+      "value": "cost"
+    },
+    {
+      "type": 0,
+      "value": "）"
+    }
+  ],
   "common.option.yes": [
     {
       "type": 0,

@@ -282,6 +282,9 @@ export function fireLeaveArena(
   for (const attachment of attachments) {
     destroyPermanent(state, runtime, attachment.seat, attachment.card);
   }
+  // A non-permanent defending card's own abilities are non-functional
+  // (CR 1.7.4a), so an aura that defended runs no permanent leave hook.
+  if (combatRole === "defending") return;
   scriptOf(state, card.cardId, card)?.onLeaveArena?.(
     runtime.makeCtx(state, seat, card, currentLink(state), undefined, undefined, asActivationCost),
     to,

@@ -1952,6 +1952,7 @@
   "common.option.pass": "Pass",
   "common.option.decline": "Decline",
   "common.option.pay": "Pay {amount}",
+  "common.option.usecost": "Use (pay {cost})",
   "common.option.reroll": "Reroll",
   "common.option.keep": "Keep",
   "common.option.bottom": "Put on bottom",

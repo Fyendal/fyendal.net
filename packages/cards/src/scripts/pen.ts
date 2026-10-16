@@ -9,7 +9,9 @@ import {
   decisionMessage,
   decisionPrompt,
   entersArenaTrigger,
+  heroChoiceSeat,
   heroTarget,
+  requestHeroChoice,
   isSixPlus,
   leavesArenaTrigger,
   mergeSetScripts,
@@ -1058,7 +1060,18 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
   },
   "quickening sand|3": {
     onPlay(ctx) {
-      create(ctx, "DVR028", 1, opponentSeat(ctx));
+      requestHeroChoice(
+        ctx,
+        "quickening-sand-hero",
+        `${ctx.data.name}: choose target hero`,
+        "card.common.target.hero.choose",
+        { values: { card: { kind: "card", cardId: ctx.self.cardId } }, defaultOption: "your hero" },
+      );
+    },
+    onChoose(ctx, hook, option) {
+      if (hook !== "quickening-sand-hero") return;
+      const seat = heroChoiceSeat(ctx, option);
+      if (seat !== undefined) create(ctx, "DVR028", 1, seat);
     },
     canTriggerOnDefend: (ctx) => ctx.link?.goAgain === true,
     onDefendTarget: {
@@ -1214,7 +1227,7 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
         (ctx) => create(ctx, SPECTRAL_SHIELD),
         // Leaving the combat chain is leaving the arena; the event records
         // whether it was attacking or defending as it left.
-        { condition: (_ctx, _card, event) => event?.combatRole !== undefined },
+        { whileDefending: true, condition: (_ctx, _card, event) => event?.combatRole !== undefined },
       ),
     ],
   })),

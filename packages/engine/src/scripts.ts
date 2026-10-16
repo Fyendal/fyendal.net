@@ -922,6 +922,11 @@ export interface TriggerDef {
    *  destination zone. Defaults to an arena permanent (including
    *  face-up/mentor arsenal where applicable). */
   sourceZone?: "arena" | "hand" | "banish" | "graveyard" | "pitch" | "self" | "any";
+  /** The trigger condition includes this card defending, so the ability stays
+   * functional while it is a non-permanent defending card (CR 1.7.4a).
+   * Otherwise a defending card leaving the combat chain raises none of its own
+   * triggers. */
+  whileDefending?: boolean;
   /** Extra condition (e.g. "while face down in arsenal"). Card-played
    * triggers also receive the card that caused the event. */
   condition?(

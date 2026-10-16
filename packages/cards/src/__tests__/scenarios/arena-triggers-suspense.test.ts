@@ -133,3 +133,42 @@ describe("suspense and crowd auras trigger through the stack", () => {
     expect(g.stackLabels()).toContain("Draw a card");
   });
 });
+
+describe("suspense auras used to defend", () => {
+  // CR 1.7.4a: a non-permanent defending card's abilities are non-functional
+  // unless the trigger condition includes it defending.
+  it("does not raise the aura's leave-the-arena trigger when it leaves the combat chain", () => {
+    const g = scenario({
+      seats: [
+        seat("rhinar", { resources: 3, hand: ["wounded bull|1"] }),
+        seat("dorinthea", { hand: ["edge of their seats|1"] }),
+      ],
+    });
+
+    g.play("wounded bull|1").blockWith("edge of their seats|1").settle();
+    // The attacker passes in the action phase: the chain closes, same turn.
+    g.doRaw({ kind: "pass" }).doRaw({ kind: "pass" });
+    expect(g.state.chain).toEqual([]);
+    expect(g.state.turn).toBe(1);
+
+    g.expectInZone(1, "edge of their seats|1", "graveyard");
+    g.expectNoLog("Edge of Their Seats triggers");
+    expect(g.stackLabels()).not.toContain("Your next attack this turn gets +5 power");
+    expect(g.state.players[1]!.flags.suspenseAurasLeftThisTurn).toBeFalsy();
+  });
+
+  it("does not raise Up on a Pedestal's graveyard-to-deck trigger when it leaves the combat chain", () => {
+    const g = scenario({
+      seats: [
+        seat("rhinar", { resources: 3, hand: ["wounded bull|1"] }),
+        seat("dorinthea", { hand: ["up on a pedestal|3"], graveyard: ["thump|1"] }),
+      ],
+    });
+
+    g.play("wounded bull|1").blockWith("up on a pedestal|3").settle().passActionPhase();
+
+    g.expectInZone(1, "up on a pedestal|3", "graveyard")
+      .expectInZone(1, "thump|1", "graveyard")
+      .expectNoLog("Up on a Pedestal triggers");
+  });
+});

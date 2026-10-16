@@ -453,6 +453,11 @@ describe("UPR — rules regression coverage", () => {
     expect(s.state.pendingDecision).toEqual(expect.objectContaining({
       player: 0,
       chooseHook: "quell",
+      options: [`use ${slippers.instanceId}`, "decline"],
+      optionMessages: [
+        { id: "common.option.usecost", values: { cost: 1 } },
+        { id: "common.option.decline" },
+      ],
     }));
     s.chooseOption(`use ${slippers.instanceId}`);
     expect(s.state.pendingDecision).toMatchObject({
@@ -461,6 +466,23 @@ describe("UPR — rules regression coverage", () => {
     });
     s.chooseCard(BLUE).expectLife(0, 17);
     expect(s.state.pendingDestructions).toContainEqual({ seat: 0, instanceId: slippers.instanceId });
+  });
+
+  it("passing a Quell offer declines it", () => {
+    const s = scenario({
+      active: 1,
+      seats: [
+        { hero: "rhinar", hand: [BLUE], equipment: { legs: "quelling slippers|0" } },
+        { hero: "dorinthea", hand: ["snatch|1"] },
+      ],
+    });
+    s.play("snatch|1").blockWith().passPriority().passPriority();
+    expect(s.state.pendingDecision?.chooseHook).toBe("quell");
+    expect(legalIntents(s.state, 0)).toContainEqual({ kind: "pass" });
+    s.passPriority();
+    expect(s.state.pendingDecision?.chooseHook).not.toBe("quell");
+    s.expectLife(0, 16);
+    expect(s.state.players[0]!.equipment.legs?.cardId).toBe("UPR186");
   });
 
   it.each([
