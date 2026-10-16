@@ -2,6 +2,7 @@ import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal
 import {
   decisionMessage,
   decisionPrompt,
+  destroyedTrigger,
   isCard,
   leavesArenaTrigger,
   localizedCardLog,
@@ -267,10 +268,14 @@ export const sen: Record<string, CardScript> = {
   },
 
   "phantasmal haze|3": {
-    // Phantasm is native; the engine fires onDestroyed on the phantasm pop.
-    onDestroyed(ctx) {
-      ctx.createToken(SPECTRAL_SHIELD);
-    },
+    // Phantasm is native; the phantasm pop raises the card-destroyed trigger.
+    triggers: [
+      destroyedTrigger(
+        "Create a Spectral Shield token",
+        decisionMessage("card.trigger.common.spectralshield.create"),
+        (ctx) => ctx.createToken(SPECTRAL_SHIELD),
+      ),
+    ],
   },
 
   "second tenet of chi: wind|3": {

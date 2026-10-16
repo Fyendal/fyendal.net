@@ -5,6 +5,7 @@ import {
   commonOptionMessages,
   decisionMessage,
   decisionPrompt,
+  destroyedTrigger,
   discardSixPlusPayoff,
   heroChoiceSeat,
   isCard,
@@ -668,7 +669,15 @@ function coalescenceMirage(): CardScript {
 }
 
 function phantasmalHaze(): CardScript {
-  return { onDestroyed: (ctx) => ctx.createToken(SPECTRAL_SHIELD) };
+  return {
+    triggers: [
+      destroyedTrigger(
+        "Create a Spectral Shield token",
+        decisionMessage("card.trigger.common.spectralshield.create"),
+        (ctx) => ctx.createToken(SPECTRAL_SHIELD),
+      ),
+    ],
+  };
 }
 
 function veiledIntentions(amount: number): CardScript {

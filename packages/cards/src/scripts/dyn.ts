@@ -12,6 +12,7 @@ import {
   type DecisionPromptOptions,
   decisionMessage,
   decisionPrompt,
+  destroyedTrigger,
   discardRandomCost,
   entersArenaTrigger,
   heroTarget,
@@ -1410,9 +1411,13 @@ export const dyn: Record<string, CardScript> = mergeSetScripts("DYN", dynHighRar
     },
   },
   "wave of reality|0": {
-    onDestroyed(ctx) {
-      ctx.createToken(SPECTRAL_SHIELD);
-    },
+    triggers: [
+      destroyedTrigger(
+        "Create a Spectral Shield token",
+        decisionMessage("card.trigger.common.spectralshield.create"),
+        (ctx) => ctx.createToken(SPECTRAL_SHIELD),
+      ),
+    ],
   },
 
   // Generic

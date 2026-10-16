@@ -304,4 +304,70 @@ describe("Mechanologist, Evo and Illusionist arena triggers use the stack", () =
     g.expectLife(1, 14);
     expect(boardCount(g, 1, "spectral shield|0")).toBe(1);
   });
+
+  it("Wave of Reality's Spectral Shield arrives through a layer after Ward destroys it", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", resources: 3, hand: ["raging onslaught|1"] },
+        { hero: "dorinthea", equipment: { arms: "wave of reality|0" } },
+      ],
+    });
+    const wave = g.state.players[1]!.equipment.arms!;
+
+    g.play("raging onslaught|1").blockWith().settle();
+    g.doRaw({ kind: "choose", optionId: `destroy ${wave.instanceId}` });
+    g.passUntilLayer("Create a Spectral Shield token");
+    g.expectInZone(1, "wave of reality|0", "graveyard");
+    expect(boardCount(g, 1, "spectral shield|0")).toBe(0);
+
+    g.passPriority().passPriority();
+    expect(boardCount(g, 1, "spectral shield|0")).toBe(1);
+  });
+
+  for (const haze of ["phantasmal haze|1", "phantasmal haze|3"]) {
+    it(`${haze}'s Spectral Shield arrives through a layer after Phantasm destroys it`, () => {
+      const g = scenario({
+        seats: [
+          { hero: "rhinar", resources: 3, hand: [haze] },
+          { hero: "dorinthea", hand: ["raging onslaught|1"] },
+        ],
+      });
+
+      g.play(haze).blockWith("raging onslaught|1");
+      g.passUntilLayer("Create a Spectral Shield token");
+      g.expectInZone(0, haze, "graveyard");
+      expect(g.state.chain).toHaveLength(0);
+      expect(boardCount(g, 0, "spectral shield|0")).toBe(0);
+
+      g.passPriority().passPriority();
+      expect(g.state.stack).toEqual([]);
+      expect(boardCount(g, 0, "spectral shield|0")).toBe(1);
+    });
+  }
+
+  it("Phantasmal Haze's layer survives a choice raised by the same Phantasm pop", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          resources: 6,
+          equipment: { legs: "silent stilettos|0" },
+          hand: ["phantasmal haze|3"],
+        },
+        { hero: "dorinthea", hand: ["raging onslaught|1"] },
+      ],
+    });
+
+    g.play("phantasmal haze|3").blockWith("raging onslaught|1");
+    g.passPriority().passPriority();
+    // Silent Stilettos' payment offer opens while the Haze trigger is pending.
+    expect(g.state.pendingDecision?.chooseHook).toBe("stilettos-pay");
+    g.doRaw({ kind: "choose", optionId: "pay 3" });
+    g.expectInZone(0, "silent stilettos|0", "graveyard");
+    g.passUntilLayer("Create a Spectral Shield token");
+    expect(boardCount(g, 0, "spectral shield|0")).toBe(0);
+
+    g.passPriority().passPriority();
+    expect(boardCount(g, 0, "spectral shield|0")).toBe(1);
+  });
 });

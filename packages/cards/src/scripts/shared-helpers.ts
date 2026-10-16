@@ -86,6 +86,23 @@ export function leavesArenaTrigger(
   return { event: "card-left-arena", sourceZone: "self", label, labelMessage, effect, ...extra };
 }
 
+/** "When this is destroyed, ...": a triggered layer raised by this card's own
+ * destruction, added before the next player receives priority (CR 6.6.6). */
+export function destroyedTrigger(
+  label: string,
+  labelMessage: GameMessage,
+  effect: (ctx: ScriptCtx) => void,
+): TriggerDef {
+  return {
+    event: "card-destroyed",
+    sourceZone: "self",
+    label,
+    labelMessage,
+    condition: (ctx, destroyed) => destroyed?.instanceId === ctx.self.instanceId,
+    effect,
+  };
+}
+
 /** "Up to 1 target attack": any attack on the combat chain that hasn't ceased
  * to be one, optionally narrowed by `eligible`. The engine rechecks the
  * declared target on resolution, so effects can use `ctx.playTargetInstanceId`. */
