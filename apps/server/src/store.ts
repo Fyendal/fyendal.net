@@ -35,6 +35,7 @@ import {
   applyIntent as engineApplyIntent,
   createGame,
   legalIntents,
+  onlyIdleResourceSources,
   projectStateFor,
   projectTransitionEvents,
   runechantSequenceActive,
@@ -307,27 +308,37 @@ const AUTO_PASS_WINDOW_KINDS: ReadonlySet<PendingDecision["kind"]> = new Set([
   "defense-reaction",
 ]);
 
+/** Pass, concede, and draw actions never block auto-pass. */
+function isPassiveIntent(candidate: GameIntent): boolean {
+  return candidate.kind === "pass" || candidate.kind === "concede" || candidate.kind.endsWith("-draw");
+}
+
+/** Nothing worth stopping for: besides passive actions, only resource-only
+ *  activations (Fyendal's Spring Tunic, Blood Harvest) that would unlock no
+ *  other play are legal. */
+function onlyPassOrIdleResources(state: GameState, seat: number): boolean {
+  const legal = legalIntents(state, seat);
+  return legal.some((candidate) => candidate.kind === "pass") &&
+    onlyIdleResourceSources(state, seat, legal, isPassiveIntent);
+}
+
 /** The auto-pass condition, verified server-side: the seat holds a
- *  priority/reaction window in which nothing but pass, concede, and draw
- *  actions is legal. These actions never block auto-pass. */
+ *  priority/reaction window that offers nothing worth stopping for. */
 function isEmptyPriorityWindow(state: GameState, seat: number): boolean {
   const decision = state.pendingDecision;
   if (!decision || decision.player !== seat || !AUTO_PASS_WINDOW_KINDS.has(decision.kind)) {
     return false;
   }
-  const legal = legalIntents(state, seat);
-  return legal.some((candidate) => candidate.kind === "pass") &&
-    legal.every((candidate) => candidate.kind === "pass" || candidate.kind === "concede" || candidate.kind.endsWith("-draw"));
+  return onlyPassOrIdleResources(state, seat);
 }
 
-/** A bot with no action or instant available has no choice to compute. Passing
- * offers the opponent the normal end-of-action priority window. */
+/** A bot with nothing to do but idle resource activations has no choice to
+ * compute. Passing offers the opponent the normal end-of-action priority
+ * window. */
 function isEmptyBotActionWindow(state: GameState, seat: number): boolean {
   if (state.phase !== "action" || state.pendingDecision !== null ||
     state.activePlayer !== seat || state.priorityPlayer !== seat) return false;
-  const legal = legalIntents(state, seat);
-  return legal.some((candidate) => candidate.kind === "pass") &&
-    legal.every((candidate) => candidate.kind === "pass" || candidate.kind === "concede" || candidate.kind.endsWith("-draw"));
+  return onlyPassOrIdleResources(state, seat);
 }
 /** Spectator slots per room — anonymous joins must not grow a room unboundedly. */
 const MAX_SPECTATORS = 20;

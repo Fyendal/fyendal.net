@@ -11,6 +11,7 @@ import {
   opponentSeat,
   optN,
   optOnChoose,
+  resourceAbility,
   upToOneTargetAttack,
 } from "./shared-helpers.js";
 import { evoHighRarity } from "./evo/high-rarity.js";
@@ -596,16 +597,13 @@ export const evo: Record<string, CardScript> = mergeSetScripts("EVO", evoHighRar
   ...pitches("mechanical strength", () => ({ modifyAttack: equippedEvos })),
 
   "fuel injector|3": {
-    activated: {
+    activated: resourceAbility(1, {
       cost: 0,
       isAttack: false,
       goAgain: false,
       timing: "instant",
       putSelfOnDeckBottomCost: true,
-      onActivate(ctx) {
-        ctx.changeResources(ctx.seat, 1);
-      },
-    },
+    }),
   },
   "medkit|3": {
     activated: {

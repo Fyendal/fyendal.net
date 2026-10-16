@@ -1555,3 +1555,77 @@ export function actionCandidates(state: GameStateInternal,
   }
   return [...candidates.values()];
 }
+
+/** Resources gained by activating a resource-only ability
+ * (`ActivatedAbility.resourceSource`), or 0 for any other ability. */
+function resourceSourceAmount(
+  state: GameStateInternal,
+  seat: number,
+  intent: Extract<GameIntent, { kind: "activate-ability" }>,
+): number {
+  const found = findCardAnywhere(state, intent.sourceInstanceId);
+  if (!found) return 0;
+  const ability = effectiveAbilityList(state, seat, found.card)[intent.abilityIndex ?? 0];
+  return ability?.resourceSource ?? 0;
+}
+
+/** `state` with `gained` extra resources for `seat`, as if the resource-only
+ * activations of `spentSourceIds` had resolved. From-hand sources leave the
+ * hand and can't be pitched. */
+function withSpentResourceSources(
+  state: GameStateInternal,
+  seat: number,
+  gained: number,
+  spentSourceIds: ReadonlySet<number>,
+): GameStateInternal {
+  const player = state.players[seat] as PlayerState;
+  const players = [...state.players] as GameStateInternal["players"];
+  players[seat] = {
+    ...player,
+    resources: player.resources + gained,
+    hand: player.hand.filter((card) => !spentSourceIds.has(card.instanceId)),
+  };
+  return { ...state, players };
+}
+
+/** True when the only intents in `legal` that `isPassive` doesn't excuse are
+ * resource-only activations, and spending all of them still unlocks nothing
+ * else. Such a window offers no real choice, so auto-pass may skip it. A card
+ * affordable only through those resources does count: it makes the window
+ * worth stopping for even though the plain legality check can't see it.
+ * Spending runs to a fixed point because one source can enable another
+ * (a from-hand source can empty the hand another source requires); each
+ * source is counted once, so the loop ends. Activation costs other than
+ * leaving the hand are ignored, which can only make the check stop more
+ * often, never skip a usable window. */
+export function onlyIdleResourceSources(
+  state: GameStateInternal,
+  runtime: EngineRuntime,
+  seat: number,
+  legal: readonly GameIntent[],
+  isPassive: (intent: GameIntent) => boolean,
+): boolean {
+  const counted = new Set<string>();
+  let funded = state;
+  let intents = legal;
+  for (;;) {
+    let gained = 0;
+    const spent = new Set<number>();
+    for (const intent of intents) {
+      if (isPassive(intent)) continue;
+      if (intent.kind !== "activate-ability") return false;
+      const amount = resourceSourceAmount(funded, seat, intent);
+      if (amount <= 0) return false;
+      // Pitch variants of one activation, and a permanent source that is
+      // still legal after an earlier round, add nothing new.
+      const key = `${intent.sourceInstanceId}:${intent.abilityIndex ?? 0}`;
+      if (counted.has(key)) continue;
+      counted.add(key);
+      gained += amount;
+      spent.add(intent.sourceInstanceId);
+    }
+    if (gained === 0) return true;
+    funded = withSpentResourceSources(funded, seat, gained, spent);
+    intents = legalIntents(funded, runtime, seat);
+  }
+}

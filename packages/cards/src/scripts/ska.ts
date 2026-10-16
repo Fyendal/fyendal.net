@@ -7,6 +7,7 @@ import {
   isSixPlus,
   localizedCardLog,
   opponentSeat,
+  resourceAbility,
   yesNoPrompt,
 } from "./shared-helpers.js";
 
@@ -201,7 +202,7 @@ export const ska: Record<string, CardScript> = {
   },
 
   "predatory plating|0": {
-    activated: {
+    activated: resourceAbility(1, {
       cost: 0,
       isAttack: false,
       goAgain: false,
@@ -222,13 +223,11 @@ export const ska: Record<string, CardScript> = {
           (current?.attacker === ctx.seat && ctx.currentAttackPower() >= 6)
         );
       },
-      onActivate(ctx) {
-        ctx.changeResources(ctx.seat, 1);
-        ctx.logPublic(
-          localizedCardLog(ctx, "Predatory Plating gains {r}", "card.log.common.resources.gained", { amount: 1 }),
-        );
-      },
-    },
+    }, (ctx, amount) => {
+      ctx.logPublic(
+        localizedCardLog(ctx, "Predatory Plating gains {r}", "card.log.common.resources.gained", { amount }),
+      );
+    }),
   },
 
   "beaten trackers|0": {

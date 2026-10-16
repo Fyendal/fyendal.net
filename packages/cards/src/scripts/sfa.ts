@@ -10,6 +10,7 @@ import {
   isCard,
   localizedCardLog,
   opponentSeat,
+  resourceAbility,
   yesNoPrompt,
 } from "./shared-helpers.js";
 
@@ -69,7 +70,7 @@ function playedAnotherRed(ctx: ScriptCtx): boolean {
  *  Strap). Destruction is an activation cost; gaining the resource resolves. */
 function destroyGainResource(canActivate: (ctx: ScriptCtx) => boolean, label: string): CardScript {
   return {
-    activated: {
+    activated: resourceAbility(1, {
       cost: 0,
       isAttack: false,
       goAgain: false,
@@ -77,19 +78,17 @@ function destroyGainResource(canActivate: (ctx: ScriptCtx) => boolean, label: st
       destroySelfCost: true,
       label,
       canActivate,
-      onActivate(ctx) {
-        ctx.changeResources(ctx.seat, 1);
-        ctx.logPublic(
-          localizedCardLog(
-            ctx,
-            `${ctx.data.name} is destroyed: gain {r}`,
-            "card.log.common.destroyed.resources",
-            { amount: 1 },
-            { kind: "card-moved", cardId: ctx.self.cardId, ownerSeat: ctx.seat, from: "equipment", to: "graveyard" },
-          ),
-        );
-      },
-    },
+    }, (ctx, amount) => {
+      ctx.logPublic(
+        localizedCardLog(
+          ctx,
+          `${ctx.data.name} is destroyed: gain {r}`,
+          "card.log.common.destroyed.resources",
+          { amount },
+          { kind: "card-moved", cardId: ctx.self.cardId, ownerSeat: ctx.seat, from: "equipment", to: "graveyard" },
+        ),
+      );
+    }),
   };
 }
 

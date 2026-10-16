@@ -1421,6 +1421,36 @@ describe("PgRoomStore storage", () => {
     expect(await store.getHistory(code)).toHaveLength(0);
   });
 
+  it("auto-passes a window whose only option is a resource-only activation", async () => {
+    const { code, tokens } = await fullRoom();
+    await startGame(code, tokens);
+    const room = await store.getRoom(code);
+    const first = room!.state!.activePlayer as 0 | 1;
+    const second = (1 - first) as 0 | 1;
+    await forceEmptyPriorityWindow(code, first);
+    const charged = await store.getRoom(code);
+    const state = charged!.state!;
+    // A charged Fyendal's Spring Tunic with nothing to spend its resource on.
+    state.players[first]!.equipment.chest = {
+      instanceId: state.nextInstanceId++,
+      cardId: "WTR150",
+      owner: first,
+      counters: { energy: 3 },
+    };
+    await db.query("UPDATE rooms SET state = $2 WHERE code = $1", [
+      code,
+      JSON.stringify(dehydrateState(state, "rules-a")),
+    ]);
+    expect(legalIntents(state, first)).toContainEqual(expect.objectContaining({ kind: "activate-ability" }));
+
+    const opted = await store.setPriorityMode(code, { token: tokens[first] }, "auto-pass");
+    expect(opted).toMatchObject({ ok: true, autoPassed: true });
+    const current = await store.getRoom(code);
+    expect(current!.state!.pendingDecision).toMatchObject({ player: second, kind: "priority-window" });
+    // Passing left the Tunic charged.
+    expect(current!.state!.players[first]!.equipment.chest?.counters?.energy).toBe(3);
+  });
+
   it("honors priority preferences at the final action-phase window", async () => {
     const { code, tokens } = await fullRoom();
     await startGame(code, tokens);

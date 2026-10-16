@@ -21,6 +21,7 @@ import {
   yesNoPrompt,
   opposingHeroDamage,
   ongoingLabel,
+  resourceAbility,
 } from "./shared-helpers.js";
 import { monHighRarity } from "./mon/high-rarity.js";
 
@@ -1670,7 +1671,7 @@ export const mon: Record<string, CardScript> = mergeSetScripts("MON", monHighRar
   "arcanic crackle|2": arcanicAttack(1),
   "arcanic crackle|3": arcanicAttack(1),
   "blood drop brocade|0": {
-    activated: {
+    activated: resourceAbility(1, {
       cost: 0,
       destroySelfCost: true,
       isAttack: false,
@@ -1680,10 +1681,7 @@ export const mon: Record<string, CardScript> = mergeSetScripts("MON", monHighRar
         ctx.getFlag("player", "physicalDamageDealtThisTurn") === true ||
         ctx.getFlag("player", "physicalDamageTakenThisTurn") === true,
       label: "Destroy after dealing or being dealt physical damage: gain 1 resource",
-      onActivate(ctx) {
-        ctx.changeResources(ctx.seat, 1);
-      },
-    },
+    }),
   },
   "stubby hammerers|0": {
     activated: {

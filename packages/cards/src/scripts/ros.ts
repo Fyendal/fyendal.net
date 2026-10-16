@@ -20,6 +20,7 @@ import {
   previousAttackHasName,
   requestDiscardChoice,
   resolveDiscardChoice,
+  resourceAbility,
 } from "./shared-helpers.js";
 
 // Rosetta (ROS) — commons, rares, young heroes, and their required tokens.
@@ -932,15 +933,14 @@ export const ros: Record<string, CardScript> = {
     },
   },
   "ink-lined cloak|0": {
-    activated: {
+    activated: resourceAbility(1, {
       cost: 0,
       isAttack: false,
       goAgain: false,
       timing: "instant",
       destroySelfCost: true,
       canActivate: (ctx) => sigils(ctx).length > 0,
-      onActivate: (ctx) => ctx.changeResources(ctx.seat, 1),
-    },
+    }),
   },
   "hold focus|0": {
     activated: {

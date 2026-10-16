@@ -16,6 +16,7 @@ import {
   opposingHeroDamage,
   requestDiscardChoice,
   resolveDiscardChoice,
+  resourceAbility,
   yesNoPrompt,
 } from "./shared-helpers.js";
 
@@ -678,7 +679,7 @@ export const sea: Record<string, CardScript> = {
     ],
   },
   "rust belt|0": {
-    activated: {
+    activated: resourceAbility(1, {
       cost: 0,
       isAttack: false,
       goAgain: false,
@@ -694,10 +695,7 @@ export const sea: Record<string, CardScript> = {
         },
       ],
       effectCardCostChoiceHook: "rust-belt-cog-cost",
-      onActivate(ctx) {
-        ctx.changeResources(ctx.seat, 1);
-      },
-    },
+    }),
   },
   "unicycle|0": {
     activated: {
@@ -1418,7 +1416,7 @@ export const sea: Record<string, CardScript> = {
     },
   },
   "old knocker|0": {
-    activated: {
+    activated: resourceAbility(1, {
       cost: 0,
       isAttack: false,
       goAgain: false,
@@ -1426,10 +1424,7 @@ export const sea: Record<string, CardScript> = {
       destroySelfCost: true,
       tapHeroCost: true,
       canActivate: (ctx) => !ctx.player(ctx.seat).hero.tapped,
-      onActivate(ctx) {
-        ctx.changeResources(ctx.seat, 1);
-      },
-    },
+    }),
   },
   "light fingers|0": {
     canTriggerOnDefend: isThief,
@@ -2288,17 +2283,14 @@ Object.assign(sea, {
   },
   "wailer humperdinck|2": attackAbilityForAlly(6),
   "dead threads|0": {
-    activated: {
+    activated: resourceAbility(1, {
       cost: 0,
       isAttack: false,
       goAgain: false,
       timing: "instant",
       tap: true,
       canActivate: (ctx: ScriptCtx) => ctx.getFlag("player", "graveSubtype:ally") === true,
-      onActivate(ctx: ScriptCtx) {
-        ctx.changeResources(ctx.seat, 1);
-      },
-    },
+    }),
   },
   "marlynn, treasure hunter|0": sea["marlynn|0"]!,
   "hammerhead, harpoon cannon|0": {

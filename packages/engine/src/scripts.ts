@@ -788,6 +788,13 @@ export interface ActivatedAbility {
   returnSelfToHandCost?: boolean;
   /** Destroy the top public sub-card retained under this source as part of the cost. */
   destroySubcardCost?: boolean;
+  /** The most resources this ability can gain, set only when gaining them is
+   *  its only effect. Such an activation is never worth stopping for on its
+   *  own: auto-pass skips a window that offers nothing else unless this many
+   *  resources would make another play affordable. An upper bound is safe for
+   *  a variable gain, since it can only make auto-pass stop more often.
+   *  `onActivate` still performs the gain. */
+  resourceSource?: number;
   /** Remove named counters from this source as part of the activation cost. */
   removeCounterCost?: { key: string; amount: number };
   /** Remove named counters from the current attacking card as part of this

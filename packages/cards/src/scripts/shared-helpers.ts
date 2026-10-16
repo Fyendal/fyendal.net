@@ -1522,3 +1522,22 @@ export function spireSnipingScript(): CardScript {
     },
   };
 }
+
+/** An activated ability whose only effect is gaining `amount` resources. The
+ * same amount sets `resourceSource`, so auto-pass and the gain can't drift
+ * apart. `afterGain` receives the amount and is for logging only; an ability
+ * with any other effect must not use this helper. */
+export function resourceAbility(
+  amount: number,
+  ability: Omit<ActivatedAbility, "onActivate" | "resourceSource">,
+  afterGain?: (ctx: ScriptCtx, amount: number) => void,
+): ActivatedAbility {
+  return {
+    ...ability,
+    resourceSource: amount,
+    onActivate(ctx) {
+      ctx.changeResources(ctx.seat, amount);
+      afterGain?.(ctx, amount);
+    },
+  };
+}

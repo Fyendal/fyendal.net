@@ -17,6 +17,7 @@ import {
   optN,
   optOnChoose,
   payForDefenseBoost,
+  resourceAbility,
   wizardActionAsInstant,
   yesNoPrompt,
 } from "./shared-helpers.js";
@@ -1707,7 +1708,7 @@ export const upr: Record<string, CardScript> = mergeSetScripts("UPR", uprHighRar
   "sigil of protection|2": sigilProtection(),
   "sigil of protection|3": sigilProtection(),
   "sash of sandikai|0": {
-    activated: {
+    activated: resourceAbility(1, {
       cost: 0,
       isAttack: false,
       goAgain: false,
@@ -1715,10 +1716,7 @@ export const upr: Record<string, CardScript> = mergeSetScripts("UPR", uprHighRar
       destroySelfCost: true,
       label: "Destroy: gain 1 resource",
       canActivate: (ctx) => Number(ctx.getFlag("player", "playedPitch:1")) > 0,
-      onActivate(ctx) {
-        ctx.changeResources(ctx.seat, 1);
-      },
-    },
+    }),
   },
   "singe|1": singe(3),
   "singe|2": singe(2),

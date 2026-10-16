@@ -9,6 +9,7 @@ import {
   opponentSeat,
   requestDiscardChoice,
   resolveDiscardChoice,
+  resourceAbility,
 } from "../shared-helpers.js";
 
 // ── WTR generic class cards ─────────────────────────────────────────────────
@@ -141,22 +142,20 @@ const crazyBrewScript = (): CardScript => ({
 
 const energyPotionScript = (): CardScript => ({
   // item: enters the board when played; destroy at instant speed for {r}{r}
-  activated: {
+  activated: resourceAbility(2, {
     cost: 0,
     isAttack: false,
     goAgain: false,
     timing: "instant",
     destroySelfCost: true,
-    onActivate(ctx) {
-      ctx.changeResources(ctx.seat, 2);
-      ctx.logPublic(
-        localizedLog(`${ctx.data.name}: gained {r}{r}`, "card.log.common.resources.gained", {
-          card: { kind: "card", cardId: ctx.self.cardId },
-          amount: 2,
-        }),
-      );
-    },
-  },
+  }, (ctx, amount) => {
+    ctx.logPublic(
+      localizedLog(`${ctx.data.name}: gained {r}{r}`, "card.log.common.resources.gained", {
+        card: { kind: "card", cardId: ctx.self.cardId },
+        amount,
+      }),
+    );
+  }),
 });
 
 // ── Flock of the Feather Walkers ────────────────────────────────────────────

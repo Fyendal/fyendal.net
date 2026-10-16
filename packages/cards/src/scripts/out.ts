@@ -15,6 +15,7 @@ import {
   previousAttackHasName,
   previousAttackNameContains,
   requestHeroChoice,
+  resourceAbility,
   spireSnipingScript,
   targetHeroSeat,
   yesNoPrompt,
@@ -966,7 +967,7 @@ export const out: Record<string, CardScript> = mergeSetScripts("OUT", outHighRar
     },
   },
   "threadbare tunic|0": {
-    activated: {
+    activated: resourceAbility(1, {
       cost: 0,
       isAttack: false,
       goAgain: false,
@@ -974,10 +975,7 @@ export const out: Record<string, CardScript> = mergeSetScripts("OUT", outHighRar
       destroySelfCost: true,
       label: "Gain 1 resource",
       canActivate: (ctx) => ctx.player(ctx.seat).hand.length === 0,
-      onActivate(ctx) {
-        ctx.changeResources(ctx.seat, 1);
-      },
-    },
+    }),
   },
   "fisticuffs|0": {
     activated: {

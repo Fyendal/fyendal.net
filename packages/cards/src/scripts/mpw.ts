@@ -7,6 +7,7 @@ import {
   decisionPrompt,
   ongoingLabel,
   opponentSeat,
+  resourceAbility,
   yesNoPrompt,
 } from "./shared-helpers.js";
 import { addNextSharpenBonus, SHARPEN_FOLLOWUP, sharpenSword } from "./aha/warrior-sharpen.js";
@@ -241,15 +242,14 @@ export const mpw: Record<string, CardScript> = {
     },
   },
   "edge laden plate|0": {
-    activated: {
+    activated: resourceAbility(1, {
       cost: 0,
       isAttack: false,
       goAgain: false,
       timing: "instant",
       destroySelfCost: true,
       canActivate: (ctx) => swords(ctx).some((sword) => Number(sword.counters?.sharpenedTurn) === ctx.state.turn),
-      onActivate: (ctx) => ctx.changeResources(ctx.seat, 1),
-    },
+    }),
   },
   "duelist gauntlets|0": {
     activated: {

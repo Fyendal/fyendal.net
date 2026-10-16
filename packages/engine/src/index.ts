@@ -24,6 +24,7 @@ import {
 import {
   actionCandidates as actionCandidatesImpl,
   legalIntents as legalIntentsImpl,
+  onlyIdleResourceSources as onlyIdleResourceSourcesImpl,
 } from "./legal.js";
 import { skipRunechantStep } from "./runechantSkip.js";
 import {
@@ -742,6 +743,17 @@ export type { EngineTransitionMove };
 
 export function legalIntents(state: GameStateInternal, seat: number) {
   return legalIntentsImpl(state, engineRuntime, seat);
+}
+
+/** See legal.ts: true when `legal` offers only resource-only activations
+ *  (beyond what `isPassive` excuses) that would unlock no other play. */
+export function onlyIdleResourceSources(
+  state: GameStateInternal,
+  seat: number,
+  legal: readonly GameIntent[],
+  isPassive: (intent: GameIntent) => boolean,
+) {
+  return onlyIdleResourceSourcesImpl(state, engineRuntime, seat, legal, isPassive);
 }
 
 export function actionCandidates(state: GameStateInternal, seat: number) {

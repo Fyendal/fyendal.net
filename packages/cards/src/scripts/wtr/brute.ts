@@ -139,6 +139,8 @@ export const brute: Record<string, CardScript> = {
       isAttack: false,
       goAgain: false,
       timing: "instant",
+      // The roll gains 0-3; auto-pass only needs the most it could gain.
+      resourceSource: 3,
       destroySelfCost: true,
       onActivate(ctx) {
         ctx.requestDieRoll("barkbone", 6);

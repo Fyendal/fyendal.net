@@ -9,6 +9,7 @@ import {
   opponentSeat,
   optN,
   optOnChoose,
+  resourceAbility,
   wizardActionAsInstant,
   yesNoPrompt,
 } from "./shared-helpers.js";
@@ -285,7 +286,7 @@ export const sbz: Record<string, CardScript> = {
   // Spellfire Cloak — "Instant — Destroy: Gain {r}. Only during an opponent's
   // turn." (Arcane Barrier 1 is native.)
   "spellfire cloak|0": {
-    activated: {
+    activated: resourceAbility(1, {
       cost: 0,
       isAttack: false,
       goAgain: false,
@@ -293,13 +294,11 @@ export const sbz: Record<string, CardScript> = {
       destroySelfCost: true,
       label: "Destroy: Gain {r}",
       canActivate: (ctx) => ctx.state.activePlayer !== ctx.seat,
-      onActivate(ctx) {
-        ctx.changeResources(ctx.seat, 1);
-        ctx.logPublic(
-          localizedCardLog(ctx, `${ctx.data.name}: gained {r}`, "card.log.common.resources.gained", { amount: 1 }),
-        );
-      },
-    },
+    }, (ctx, amount) => {
+      ctx.logPublic(
+        localizedCardLog(ctx, `${ctx.data.name}: gained {r}`, "card.log.common.resources.gained", { amount }),
+      );
+    }),
   },
 
   // Seeker's Mitts — "Instant — {r}, destroy: prevent the next 1 damage to

@@ -10,6 +10,7 @@ import {
   opponentSeat,
   previousAttackHasName,
   reprise,
+  resourceAbility,
 } from "../shared-helpers.js";
 
 const SEISMIC_SURGE = "WTR075B";
@@ -449,16 +450,13 @@ export const wtrHighRarity: Record<string, CardScript> = {
         },
       },
     ],
-    activated: {
+    activated: resourceAbility(1, {
       cost: 0,
       isAttack: false,
       goAgain: false,
       timing: "instant",
       removeCounterCost: { key: "energy", amount: 3 },
-      onActivate(ctx) {
-        ctx.changeResources(ctx.seat, 1);
-      },
-    },
+    }),
   },
   "enlightened strike|1": {
     requiredHandCardsForAdditionalCost: 1,

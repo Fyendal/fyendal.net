@@ -22,6 +22,7 @@ import {
   suspenseAura,
   hitHookLabel,
   ongoingLabel,
+  resourceAbility,
 } from "./shared-helpers.js";
 
 const RUNECHANT = "SBA036";
@@ -1427,17 +1428,14 @@ export const iar: Record<string, CardScript> = {
   "hex gauntlet|0": bloodDebt(repentanceEquipment("banish")),
 
   "blood harvest|0": bloodDebt({
-    activated: {
+    activated: resourceAbility(3, {
       cost: 0,
       isAttack: false,
       goAgain: false,
       timing: "instant",
       fromHand: true,
       fromHandMove: "banish",
-      onActivate(ctx) {
-        ctx.changeResources(ctx.seat, 3);
-      },
-    },
+    }),
   }),
 
   "apex buster|2": {

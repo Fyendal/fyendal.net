@@ -6,6 +6,7 @@ import {
   decisionPrompt,
   isSwordAttack,
   localizedCardLog,
+  resourceAbility,
   yesNoPrompt,
 } from "./shared-helpers.js";
 import { addNextSharpenBonus, resolveSharpenFollowup, SHARPEN_FOLLOWUP, sharpenSword } from "./aha/warrior-sharpen.js";
@@ -130,7 +131,7 @@ export const aha: Record<string, CardScript> = {
     },
   },
   "paragon plate|0": {
-    activated: {
+    activated: resourceAbility(1, {
       cost: 0,
       isAttack: false,
       goAgain: false,
@@ -138,10 +139,7 @@ export const aha: Record<string, CardScript> = {
       tap: true,
       removeAttackCounterCost: { key: "power", amount: 1 },
       canActivate: (ctx) => isSwordAttack(ctx) && Number(ctx.link?.attackingCard.counters?.power) > 0,
-      onActivate(ctx) {
-        ctx.changeResources(ctx.seat, 1);
-      },
-    },
+    }),
   },
   "reverent rerebrace|0": {
     onChoose(ctx, hook, option) {
