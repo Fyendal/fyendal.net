@@ -333,8 +333,12 @@ export function boostCountForCardPlay(
   return printedCount + grantedCount + pendingCount;
 }
 
+/** Scopes whose play and activation discounts apply until the modifier
+ *  expires. "This chain link" discounts use the chain-link scope (CR 7.0.3d). */
 export function costModifierScopeApplies(modifier: Modifier): boolean {
-  return modifier.scope === "combat-chain" || modifier.scope === "until-end-of-turn";
+  return modifier.scope === "chain-link" ||
+    modifier.scope === "combat-chain" ||
+    modifier.scope === "until-end-of-turn";
 }
 
 function consumeCostModifierUse(modifier: Modifier): void {
@@ -990,7 +994,7 @@ export function cardPlayCost(
       : 0;
   for (const modifier of state.modifiers) {
     if (
-      !["combat-chain", "until-end-of-turn", "next-play"].includes(modifier.scope) ||
+      (modifier.scope !== "next-play" && !costModifierScopeApplies(modifier)) ||
       modifier.consumed ||
       modifier.seat !== seat ||
       !modifier.playCostReduction ||

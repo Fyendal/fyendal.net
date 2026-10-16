@@ -1343,20 +1343,50 @@ describe("OMN — import and set mechanics", () => {
       .blockWith();
     expect(projectStateFor(g.state, 0).ongoing).toEqual(expect.arrayContaining([
       expect.objectContaining({
-        label: "play costs 1 less · next instant card this combat chain",
+        label: "play costs 1 less · next instant card this chain link",
         lifetime: "once",
         durationMessage: {
-          id: "engine.effect.duration.next.card.this.chain",
+          id: "engine.effect.duration.next.card.this.link",
           values: { subtype: "any", cardType: "instant" },
         },
       }),
     ]));
     g.react("flash bolt|1")
       .chooseOption("opposing hero")
-      .expectLife(1, 13);
+      .expectLife(1, 13)
+      .expectResources(0, 0);
     expect(g.state.modifiers.find((modifier) =>
       modifier.appliesToCardType === "instant" && modifier.playCostReduction === 1
-    )?.consumed).toBe(true);
+    )).toBeUndefined();
+  });
+
+  it("Beckoning Brilliance's unused discount expires when its chain link resolves", () => {
+    const g = scenario({
+      seats: [
+        hero("aurora, emissary of lightning|0", {
+          hand: ["beckoning brilliance|1", "fry|1", "flash bolt|1"],
+          board: ["embodiment of lightning|0"],
+          resources: 1,
+        }),
+        foe(),
+      ],
+    });
+    const discount = () => g.state.modifiers.find((modifier) =>
+      modifier.appliesToCardType === "instant" && modifier.playCostReduction === 1
+    );
+    const discountShown = () => projectStateFor(g.state, 0).ongoing.some((effect) =>
+      effect.durationMessage?.id === "engine.effect.duration.next.card.this.link"
+    );
+
+    g.play("beckoning brilliance|1").blockWith();
+    expect(discount()).toBeDefined();
+    expect(discountShown()).toBe(true);
+
+    g.settle().play("fry|1").blockWith();
+    expect(g.state.chain).toHaveLength(2);
+    expect(discount()).toBeUndefined();
+    expect(discountShown()).toBe(false);
+    g.expectNoLegalPlay("flash bolt|1");
   });
 
   it("Step Between prohibits opposing instants while it is attacking", () => {

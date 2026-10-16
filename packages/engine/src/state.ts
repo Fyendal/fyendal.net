@@ -415,9 +415,11 @@ export interface Modifier {
    *  controller for an instance-targeted attack modifier, otherwise to the
    *  source card's controller. Debuffs like Debilitate set this explicitly. */
   seat: number;
-  /** "combat-chain": applies to matching attacks while the combat chain is
-   *  open (cleared by closeChain). "next-play": consumed by the next card the
-   *  seat player plays this turn (cleared at end of turn). */
+  /** "chain-link": expires when the active chain link resolves or the combat
+   *  chain closes. "combat-chain": applies to
+   *  matching attacks while the combat chain is open (cleared by closeChain).
+   *  "next-play": consumed by the next card the seat player plays this turn
+   *  (cleared at end of turn). */
   scope: "chain-link" | "next-attack" | "until-end-of-turn" | "static" | "combat-chain" | "next-play";
   /** Keep an until-end-of-turn modifier through intervening cleanups, then
    * remove it before start-of-turn triggers on this turn number. */

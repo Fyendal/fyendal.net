@@ -134,10 +134,27 @@ function nextPlayDuration(m: Modifier): EffectDuration {
   );
 }
 
-/** A combat-chain discount names the cards it applies to. A single-use one
- *  applies to the next matching card played or activated before the chain
- *  closes; otherwise every matching card does until then. */
-function chainCardDuration(m: Modifier): EffectDuration {
+const CHAIN_SPANS = {
+  "combat-chain": {
+    text: "this combat chain",
+    whole: "engine.effect.duration.this.combat.chain",
+    next: "engine.effect.duration.next.card.this.chain",
+    every: "engine.effect.duration.cards.this.chain",
+  },
+  "chain-link": {
+    text: "this chain link",
+    whole: "engine.effect.duration.this.chain.link",
+    next: "engine.effect.duration.next.card.this.link",
+    every: "engine.effect.duration.cards.this.link",
+  },
+} as const;
+
+type ChainSpan = (typeof CHAIN_SPANS)[keyof typeof CHAIN_SPANS];
+
+/** A combat-chain or chain-link discount names the cards it applies to. A
+ *  single-use one applies to the next matching card played or activated before
+ *  its span ends; otherwise every matching card does until then. */
+function chainCardDuration(m: Modifier, span: ChainSpan): EffectDuration {
   const subtypes = m.appliesToSubtype === undefined
     ? []
     : Array.isArray(m.appliesToSubtype) ? m.appliesToSubtype : [m.appliesToSubtype];
@@ -148,18 +165,9 @@ function chainCardDuration(m: Modifier): EffectDuration {
     subtype === undefined ? undefined : `${subtype.charAt(0).toUpperCase()}${subtype.slice(1)}`,
     cardType,
   ].filter((value): value is string => value !== undefined).map((value) => `${value} `).join("");
-  if (m.once) {
-    return duration(
-      "once",
-      `next ${qualifier}card this combat chain`,
-      "engine.effect.duration.next.card.this.chain",
-      values,
-    );
-  }
-  if (!qualifier) {
-    return duration("chain", "this combat chain", "engine.effect.duration.this.combat.chain");
-  }
-  return duration("chain", `${qualifier}cards this combat chain`, "engine.effect.duration.cards.this.chain", values);
+  if (m.once) return duration("once", `next ${qualifier}card ${span.text}`, span.next, values);
+  if (!qualifier) return duration("chain", span.text, span.whole);
+  return duration("chain", `${qualifier}cards ${span.text}`, span.every, values);
 }
 
 function modifierDuration(state: GameStateInternal, m: Modifier): EffectDuration {
@@ -174,7 +182,7 @@ function modifierDuration(state: GameStateInternal, m: Modifier): EffectDuration
       : duration("once", "next attack", "engine.effect.duration.next.attack");
   }
   if (m.scope === "next-play") return nextPlayDuration(m);
-  if (m.scope === "combat-chain") return chainCardDuration(m);
+  if (m.scope === "combat-chain" || m.scope === "chain-link") return chainCardDuration(m, CHAIN_SPANS[m.scope]);
   if (
     m.expiresAtEndOfSeatTurn !== undefined &&
     !(m.expiresAtEndOfSeatTurn === state.activePlayer && Number(m.createdTurn ?? -1) < state.turn)
@@ -248,9 +256,9 @@ export function projectOngoingEffects(
 
   for (const m of state.modifiers) {
     if (m.consumed) continue;
-    const surfacedCombatChainCost = m.scope === "combat-chain" &&
+    const surfacedChainCost = (m.scope === "combat-chain" || m.scope === "chain-link") &&
       (m.playCostReduction !== undefined || m.activationCostReduction !== undefined);
-    if (!surfacedCombatChainCost &&
+    if (!surfacedChainCost &&
       m.scope !== "next-attack" && m.scope !== "next-play" && m.scope !== "until-end-of-turn") continue;
     const src = findCardAnywhere(state, m.sourceInstanceId);
     add(`${m.sourceInstanceId}:${m.seat}:${m.scope}`, {

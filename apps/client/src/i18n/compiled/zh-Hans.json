@@ -17655,6 +17655,58 @@
       "value": "牌"
     }
   ],
+  "engine.effect.duration.cards.this.link": [
+    {
+      "type": 0,
+      "value": "本次战斗链环中的"
+    },
+    {
+      "type": 5,
+      "value": "subtype",
+      "options": {
+        "draconic": {
+          "value": [
+            {
+              "type": 0,
+              "value": "龙族 (Draconic) "
+            }
+          ]
+        },
+        "other": {
+          "value": []
+        }
+      }
+    },
+    {
+      "type": 5,
+      "value": "cardType",
+      "options": {
+        "action": {
+          "value": [
+            {
+              "type": 0,
+              "value": "行动"
+            }
+          ]
+        },
+        "instant": {
+          "value": [
+            {
+              "type": 0,
+              "value": "瞬间"
+            }
+          ]
+        },
+        "other": {
+          "value": []
+        }
+      }
+    },
+    {
+      "type": 0,
+      "value": "牌"
+    }
+  ],
   "engine.effect.duration.each.end.phase": [
     {
       "type": 0,
@@ -17707,6 +17759,58 @@
     {
       "type": 0,
       "value": "本次战斗链中的下一张"
+    },
+    {
+      "type": 5,
+      "value": "subtype",
+      "options": {
+        "draconic": {
+          "value": [
+            {
+              "type": 0,
+              "value": "龙族 (Draconic) "
+            }
+          ]
+        },
+        "other": {
+          "value": []
+        }
+      }
+    },
+    {
+      "type": 5,
+      "value": "cardType",
+      "options": {
+        "action": {
+          "value": [
+            {
+              "type": 0,
+              "value": "行动"
+            }
+          ]
+        },
+        "instant": {
+          "value": [
+            {
+              "type": 0,
+              "value": "瞬间"
+            }
+          ]
+        },
+        "other": {
+          "value": []
+        }
+      }
+    },
+    {
+      "type": 0,
+      "value": "牌"
+    }
+  ],
+  "engine.effect.duration.next.card.this.link": [
+    {
+      "type": 0,
+      "value": "本次战斗链环中的下一张"
     },
     {
       "type": 5,
@@ -17878,6 +17982,12 @@
     {
       "type": 0,
       "value": "本行动阶段"
+    }
+  ],
+  "engine.effect.duration.this.chain.link": [
+    {
+      "type": 0,
+      "value": "本次战斗链环"
     }
   ],
   "engine.effect.duration.this.combat.chain": [

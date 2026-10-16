@@ -18368,6 +18368,54 @@
       "value": "cards this combat chain"
     }
   ],
+  "engine.effect.duration.cards.this.link": [
+    {
+      "type": 5,
+      "value": "subtype",
+      "options": {
+        "draconic": {
+          "value": [
+            {
+              "type": 0,
+              "value": "Draconic "
+            }
+          ]
+        },
+        "other": {
+          "value": []
+        }
+      }
+    },
+    {
+      "type": 5,
+      "value": "cardType",
+      "options": {
+        "action": {
+          "value": [
+            {
+              "type": 0,
+              "value": "action "
+            }
+          ]
+        },
+        "instant": {
+          "value": [
+            {
+              "type": 0,
+              "value": "instant "
+            }
+          ]
+        },
+        "other": {
+          "value": []
+        }
+      }
+    },
+    {
+      "type": 0,
+      "value": "cards this chain link"
+    }
+  ],
   "engine.effect.duration.each.end.phase": [
     {
       "type": 0,
@@ -18466,6 +18514,58 @@
     {
       "type": 0,
       "value": "card this combat chain"
+    }
+  ],
+  "engine.effect.duration.next.card.this.link": [
+    {
+      "type": 0,
+      "value": "next "
+    },
+    {
+      "type": 5,
+      "value": "subtype",
+      "options": {
+        "draconic": {
+          "value": [
+            {
+              "type": 0,
+              "value": "Draconic "
+            }
+          ]
+        },
+        "other": {
+          "value": []
+        }
+      }
+    },
+    {
+      "type": 5,
+      "value": "cardType",
+      "options": {
+        "action": {
+          "value": [
+            {
+              "type": 0,
+              "value": "action "
+            }
+          ]
+        },
+        "instant": {
+          "value": [
+            {
+              "type": 0,
+              "value": "instant "
+            }
+          ]
+        },
+        "other": {
+          "value": []
+        }
+      }
+    },
+    {
+      "type": 0,
+      "value": "card this chain link"
     }
   ],
   "engine.effect.duration.next.play": [
@@ -18591,6 +18691,12 @@
     {
       "type": 0,
       "value": "this action phase"
+    }
+  ],
+  "engine.effect.duration.this.chain.link": [
+    {
+      "type": 0,
+      "value": "this chain link"
     }
   ],
   "engine.effect.duration.this.combat.chain": [

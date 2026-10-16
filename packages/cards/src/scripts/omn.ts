@@ -1206,7 +1206,7 @@ export const omn: Record<string, CardScript> = mergeSetScripts("OMN", omnHighRar
 
   "beckoning brilliance|1": {
     onAttackDeclared(ctx) {
-      ctx.addModifier({ scope: "combat-chain", playCostReduction: 1, appliesToCardType: "instant", once: true });
+      ctx.addModifier({ scope: "chain-link", playCostReduction: 1, appliesToCardType: "instant", once: true });
     },
   },
   "flowshard elemental|1": {
