@@ -1083,6 +1083,32 @@ describe("SUP — intimidating attacks", () => {
       .expectPendingReturn(1, 0)
       .expectInZone(1, "head jab|1", "graveyard");
   });
+
+  it("Battered, Beaten, and Broken checks auras on hit after a reaction-step aura", () => {
+    const g = scenario({
+      seats: [
+        hero("lyath goldmane, vile savant|0", {
+          hand: ["battered, beaten, and broken|2"],
+          board: ["toughness|0", "toughness|0"],
+          resources: 2,
+        }),
+        foe({ hand: ["head jab|1", "head jab|1"] }),
+      ],
+    });
+
+    g.play("battered, beaten, and broken|2")
+      .expectAttackValue(1)
+      .blockWith()
+      .activate("lyath goldmane, vile savant|0", { settle: false })
+      .passPriority()
+      .passPriority()
+      .expectInZone(0, "might|0", "board")
+      .expectAttackValue(4)
+      .settle()
+      .chooseCard("head jab|1")
+      .expectPendingReturn(1, 0)
+      .expectInZone(1, "head jab|1", "graveyard");
+  });
 });
 
 describe("SUP — Reckless Stampede", () => {

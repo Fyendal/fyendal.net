@@ -163,6 +163,30 @@ function attackInReserve(
   );
 }
 
+/** Whether a reserved attack can still be paid for from floating resources
+ * and the rest of the hand, so a granted action point would be used. */
+function affordableAttackInReserve(
+  intent: GameIntent,
+  input: BotPolicyInput,
+  own: ReadonlyMap<number, CardView>,
+): boolean {
+  const used = intentCard(intent, own);
+  const consumed = new Set([used?.instanceId, ...pitchIds(intent)]);
+  const me = input.view.players[input.seat];
+  const pitchable = me.hand.filter((card) => !consumed.has(card.instanceId));
+  const floating = me.resources + (me.chi ?? 0);
+  return [...me.hand, ...me.arsenal, ...me.banish].some((card) => {
+    const data = input.cards[card.cardId];
+    if (consumed.has(card.instanceId) || !isAttack(data)) return false;
+    const pitch = pitchable.reduce((total, candidate) =>
+      candidate.instanceId === card.instanceId
+        ? total
+        : total + Number(input.cards[candidate.cardId]?.pitch ?? 0),
+    0);
+    return floating + pitch >= Number(data?.cost ?? 0);
+  });
+}
+
 const cardOpportunity = opportunityValuer(iraSolverRules);
 
 /** Damage equivalents of Ira's non-damage on-hit riders. */
@@ -354,7 +378,8 @@ function scorePlay(
       score = furtherAttack ? 30 : 7;
       if (attacksThisTurn(input) === 0) score += 8;
     } else if (functional === "snapdragon scalers|0") {
-      score = currentAttackIsOurs(input) && !currentAttackHasOrWillGetGoAgain(input) && reservedAttack
+      score = currentAttackIsOurs(input) && !currentAttackHasOrWillGetGoAgain(input) &&
+          affordableAttackInReserve(intent, input, own)
         ? 28
         : -100;
     } else if (functional === "okana scar wraps|0") {

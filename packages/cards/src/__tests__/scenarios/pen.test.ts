@@ -363,6 +363,24 @@ describe("PEN — import and set mechanics", () => {
     expect(drivers.some((card) => card.counters?.steam === 2)).toBe(true);
   });
 
+  it("Serpent's Kiss labels its Fang Strike and Slither options with card names", () => {
+    const g = scenario({ seats: [
+      { hero: "rhinar", hand: ["serpent's kiss|3"], equipment: NO_EQUIPMENT },
+      { hero: "dorinthea", equipment: NO_EQUIPMENT },
+    ] });
+
+    g.play("serpent's kiss|3");
+    const decision = projectStateFor(g.state, 0).pendingDecision;
+    expect(decision?.options).toEqual(["MST023", "MST024"]);
+    expect(decision?.optionMessages).toEqual(["MST023", "MST024"].map((cardId) => ({
+      id: "card.common.target.card",
+      values: { card: { kind: "card", cardId } },
+    })));
+
+    g.chooseOption("MST024");
+    expect(g.state.players[0]!.hand.map((card) => card.cardId)).toEqual(["MST024"]);
+  });
+
   it("blue Cut n' Carve does not grant dominate with only two +1 counters", () => {
     const g = scenario({ seats: [
       {

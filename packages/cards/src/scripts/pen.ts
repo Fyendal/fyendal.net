@@ -1891,7 +1891,14 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
       } else
         ctx.requestChoice(
           "pen-serpent-token",
-          decisionPrompt("Create Fang Strike or Slither", "card.pen.serpent.token.create"),
+          decisionPrompt("Create Fang Strike or Slither", "card.pen.serpent.token.create", {
+            optionMessages: Object.fromEntries(
+              [FANG_STRIKE, SLITHER].map((cardId) => [
+                cardId,
+                decisionMessage("card.common.target.card", { card: { kind: "card", cardId } }),
+              ]),
+            ),
+          }),
           [FANG_STRIKE, SLITHER],
         );
     },

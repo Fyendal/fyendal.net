@@ -610,6 +610,53 @@ describe("Ira policy", () => {
     expect(intent).toEqual({ kind: "pass" });
   });
 
+  it("preserves Snapdragon Scalers on a blocked attack when the reserved attack is unaffordable", () => {
+    let state = createGame({
+      decklists: [iraDeck(), decklists.dorinthea],
+      cards: cardData,
+      scripts,
+      seed: 9111,
+      startPlayer: 0,
+    });
+    state.turn = 2;
+    replaceHand(state, 0, ["ASR015", "ASR008", "ASR009"]);
+    replaceHand(state, 1, ["ASR012", "ASR012"]);
+    const torrent = state.players[0]!.hand.find((card) => card.cardId === "ASR015")!;
+    const pitch = state.players[0]!.hand.find((card) => card.cardId === "ASR008")!;
+    state = apply(state, 0, {
+      kind: "play-card",
+      instanceId: torrent.instanceId,
+      pitchInstanceIds: [pitch.instanceId],
+    });
+    state = advanceUntil(state, (candidate) => candidate.pendingDecision?.kind === "defend");
+    state = apply(state, 1, {
+      kind: "defend",
+      instanceIds: state.players[1]!.hand.map((card) => card.instanceId),
+    });
+    state = advanceUntil(state, (candidate) =>
+      candidate.pendingDecision?.kind === "attack-reaction" &&
+      candidate.pendingDecision.player === 0
+    );
+
+    const view = projectStateFor(state, 0);
+    const link = view.chain.at(-1)!;
+    expect(link.defenseValue).toBeGreaterThanOrEqual(link.attackValue);
+    expect(view.players[0].resources).toBe(0);
+    expect(view.players[0].hand.map((card) => card.cardId)).toEqual(["ASR009"]);
+    expect(legalIntents(state, 0).some((intent) =>
+      intent.kind === "activate-ability" &&
+      intent.sourceInstanceId === state.players[0]!.equipment.legs?.instanceId
+    )).toBe(true);
+
+    const intent = chooseIraIntent({
+      seat: 0,
+      view,
+      legal: legalIntents(state, 0),
+      cards: cardData,
+    });
+    expect(intent).toEqual({ kind: "pass" });
+  });
+
   it("does not add Razor Reflex after committing Snapdragon Scalers to a lethal ally attack", () => {
     let state = createGame({
       decklists: [iraDeck(), decklists.dorinthea],
