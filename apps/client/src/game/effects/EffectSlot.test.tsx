@@ -55,15 +55,18 @@ const slot = (effects: OngoingEffectView[], compact = false) => render(createEle
 }));
 
 describe("EffectSlot", () => {
-  it("renders desktop chips with localized text, lifetime glyph, and a stack count", () => {
+  it("renders desktop chips with localized text, a written lifetime, and a stack count", () => {
     const html = slot([nextAttack, nextAttack, restriction]);
 
     expect(html).toContain('aria-label="Azalea: 3 lingering effects. Show effects."');
     expect(html).toContain('data-cardid="WTR160"');
-    expect(html).toContain('data-effect-label="+1 attack · next attack ×2"');
+    expect(html).toContain('data-effect-label="+1 attack\nNext attack ×2"');
     expect(html).toContain("×2");
     expect(html).toContain("Can&#x27;t draw cards");
-    expect(html).toContain("/icons/ui/effect-once.svg");
+    // The written lifetime needs no glyph beside it.
+    expect(html).toContain('<span class="effect-life">Next attack</span>');
+    expect(html).not.toContain("/icons/ui/effect-once.svg");
+    // Without a source card the glyph stands in for the art.
     expect(html).toContain("/icons/ui/effect-later.svg");
     expect(html).toMatch(/class="effect-chip effect-imposed"/);
   });
@@ -182,8 +185,11 @@ describe("EffectLedger", () => {
     expect(html).toContain('aria-selected="true"');
     expect(html).toContain('<span class="effect-ledger-tab-count">3</span>');
     expect(html).toContain('data-cardid="WTR160"');
-    // A face-down source still needs the imposer spelled out.
-    expect(html).toContain("Face-down card");
+    expect(html).toContain('<span class="effect-ledger-source">Tome of Fyendal</span>');
+    expect(html).toContain('<span class="effect-ledger-duration">Next attack</span>');
+    // A face-down source still needs the imposer spelled out, and is not
+    // styled as a card name.
+    expect(html).toContain('<span class="effect-ledger-source effect-ledger-source-generic">Face-down card</span>');
     expect(html.match(/Imposed by Cindra/g)).toHaveLength(1);
   });
 
@@ -195,6 +201,19 @@ describe("EffectLedger", () => {
     expect(html).toContain('<span class="effect-ledger-source">Cindra</span>');
     expect(html).not.toContain("Imposed by");
     expect(html).not.toContain("Hero effect");
+  });
+
+  it("omits a duration that only repeats its section heading", () => {
+    const thisTurn: OngoingEffectView = {
+      ...nextAttack,
+      lifetime: "turn",
+      duration: "this turn",
+      durationMessage: { id: "engine.effect.duration.this.turn" },
+    };
+    const html = ledger({ effects: [thisTurn], target: { seat: 0 } });
+
+    expect(html).toContain(">This turn</h3>");
+    expect(html).not.toContain("effect-ledger-duration");
   });
 
   it("explains an empty hero", () => {

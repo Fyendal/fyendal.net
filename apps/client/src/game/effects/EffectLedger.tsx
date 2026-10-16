@@ -16,7 +16,7 @@ import {
   stackOngoingEffects,
 } from "./effectModel.js";
 import { effectSourceHero, useEffectHeroes } from "./effectHeroes.js";
-import { EffectArt, EffectLifetimeLine } from "./EffectSlot.js";
+import { EffectArt } from "./EffectSlot.js";
 
 export interface EffectLedgerTarget {
   seat: number;
@@ -79,7 +79,9 @@ export function EffectLedger({
           <p className="effect-ledger-empty">
             {intl.formatMessage({ id: "game.effects.empty" }, { hero: heroName(seat) })}
           </p>
-        ) : sections.map(({ lifetime, rows }) => (
+        ) : sections.map(({ lifetime, rows }) => {
+          const heading = intl.formatMessage({ id: `game.effects.lifetime.${lifetime}` });
+          return (
           <section
             key={lifetime}
             className="effect-ledger-section"
@@ -90,7 +92,7 @@ export function EffectLedger({
           >
             <h3 className="effect-ledger-heading">
               <span className="effect-ledger-node"><UiIcon name={lifetimeIcon(lifetime)} /></span>
-              {intl.formatMessage({ id: `game.effects.lifetime.${lifetime}` })}
+              {heading}
             </h3>
             <ul>
               {rows.map(({ effect, count }) => {
@@ -119,16 +121,22 @@ export function EffectLedger({
                       <span className="effect-ledger-art"><EffectArt effect={effect} /></span>
                     )}
                     <span className="effect-ledger-text">
-                      <span className="effect-summary">{sentenceCase(text.summary)}</span>
-                      <span className="effect-ledger-meta">
-                        <EffectLifetimeLine effect={effect} text={text.duration} />
-                        <span className="effect-ledger-source">{source}</span>
+                      <span className="effect-ledger-byline">
+                        <span
+                          className={artCardId ? "effect-ledger-source" : "effect-ledger-source effect-ledger-source-generic"}
+                        >
+                          {source}
+                        </span>
                         {imposed && !sourceHero && effect.sourceSeat !== undefined ? (
                           <span className="effect-ledger-imposed">
                             {intl.formatMessage({ id: "game.effects.imposed" }, { hero: heroName(effect.sourceSeat) })}
                           </span>
                         ) : null}
                       </span>
+                      <span className="effect-summary">{sentenceCase(text.summary)}</span>
+                      {text.duration.toLocaleLowerCase() === heading.toLocaleLowerCase() ? null : (
+                        <span className="effect-ledger-duration">{sentenceCase(text.duration)}</span>
+                      )}
                     </span>
                     {count > 1 ? (
                       <span
@@ -143,7 +151,8 @@ export function EffectLedger({
               })}
             </ul>
           </section>
-        ))}
+          );
+        })}
       </div>
     </ModalSurface>
   );

@@ -17603,6 +17603,58 @@
       "value": "选择 X"
     }
   ],
+  "engine.effect.duration.cards.this.chain": [
+    {
+      "type": 0,
+      "value": "本次战斗链中的"
+    },
+    {
+      "type": 5,
+      "value": "subtype",
+      "options": {
+        "draconic": {
+          "value": [
+            {
+              "type": 0,
+              "value": "龙族 (Draconic) "
+            }
+          ]
+        },
+        "other": {
+          "value": []
+        }
+      }
+    },
+    {
+      "type": 5,
+      "value": "cardType",
+      "options": {
+        "action": {
+          "value": [
+            {
+              "type": 0,
+              "value": "行动"
+            }
+          ]
+        },
+        "instant": {
+          "value": [
+            {
+              "type": 0,
+              "value": "瞬间"
+            }
+          ]
+        },
+        "other": {
+          "value": []
+        }
+      }
+    },
+    {
+      "type": 0,
+      "value": "牌"
+    }
+  ],
   "engine.effect.duration.each.end.phase": [
     {
       "type": 0,
@@ -17649,6 +17701,58 @@
     {
       "type": 0,
       "value": "下一次攻击"
+    }
+  ],
+  "engine.effect.duration.next.card.this.chain": [
+    {
+      "type": 0,
+      "value": "本次战斗链中的下一张"
+    },
+    {
+      "type": 5,
+      "value": "subtype",
+      "options": {
+        "draconic": {
+          "value": [
+            {
+              "type": 0,
+              "value": "龙族 (Draconic) "
+            }
+          ]
+        },
+        "other": {
+          "value": []
+        }
+      }
+    },
+    {
+      "type": 5,
+      "value": "cardType",
+      "options": {
+        "action": {
+          "value": [
+            {
+              "type": 0,
+              "value": "行动"
+            }
+          ]
+        },
+        "instant": {
+          "value": [
+            {
+              "type": 0,
+              "value": "瞬间"
+            }
+          ]
+        },
+        "other": {
+          "value": []
+        }
+      }
+    },
+    {
+      "type": 0,
+      "value": "牌"
     }
   ],
   "engine.effect.duration.next.play": [

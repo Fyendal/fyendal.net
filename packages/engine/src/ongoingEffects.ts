@@ -15,8 +15,12 @@ function modifierEffectLabel(state: GameStateInternal, m: Modifier): string {
   if (m.attackCostReduction) {
     parts.push(`attack costs ${m.attackCostReduction} less`);
   }
-  if (m.playCostReduction) parts.push(`play costs ${m.playCostReduction} less`);
-  if (m.activationCostReduction) parts.push(`activation costs ${m.activationCostReduction} less`);
+  if (m.playCostReduction && m.playCostReduction === m.activationCostReduction) {
+    parts.push(`costs ${m.playCostReduction} less to play or activate`);
+  } else {
+    if (m.playCostReduction) parts.push(`play costs ${m.playCostReduction} less`);
+    if (m.activationCostReduction) parts.push(`activation costs ${m.activationCostReduction} less`);
+  }
   if (m.minimumAttackBasePower !== undefined) {
     parts.push(`only attacks with base attack ${m.minimumAttackBasePower}+`);
   }
@@ -130,6 +134,34 @@ function nextPlayDuration(m: Modifier): EffectDuration {
   );
 }
 
+/** A combat-chain discount names the cards it applies to. A single-use one
+ *  applies to the next matching card played or activated before the chain
+ *  closes; otherwise every matching card does until then. */
+function chainCardDuration(m: Modifier): EffectDuration {
+  const subtypes = m.appliesToSubtype === undefined
+    ? []
+    : Array.isArray(m.appliesToSubtype) ? m.appliesToSubtype : [m.appliesToSubtype];
+  const subtype = subtypes.length === 1 ? subtypes[0]! : undefined;
+  const cardType = m.appliesToCardType;
+  const values = { subtype: subtype ?? "any", cardType: cardType ?? "any" };
+  const qualifier = [
+    subtype === undefined ? undefined : `${subtype.charAt(0).toUpperCase()}${subtype.slice(1)}`,
+    cardType,
+  ].filter((value): value is string => value !== undefined).map((value) => `${value} `).join("");
+  if (m.once) {
+    return duration(
+      "once",
+      `next ${qualifier}card this combat chain`,
+      "engine.effect.duration.next.card.this.chain",
+      values,
+    );
+  }
+  if (!qualifier) {
+    return duration("chain", "this combat chain", "engine.effect.duration.this.combat.chain");
+  }
+  return duration("chain", `${qualifier}cards this combat chain`, "engine.effect.duration.cards.this.chain", values);
+}
+
 function modifierDuration(state: GameStateInternal, m: Modifier): EffectDuration {
   if (m.suppressesHeroAbilitiesDuringActionPhase) {
     return m.seat === state.activePlayer && ["action", "layer", "reaction", "defend"].includes(state.phase)
@@ -142,7 +174,7 @@ function modifierDuration(state: GameStateInternal, m: Modifier): EffectDuration
       : duration("once", "next attack", "engine.effect.duration.next.attack");
   }
   if (m.scope === "next-play") return nextPlayDuration(m);
-  if (m.scope === "combat-chain") return duration("chain", "this combat chain", "engine.effect.duration.this.combat.chain");
+  if (m.scope === "combat-chain") return chainCardDuration(m);
   if (
     m.expiresAtEndOfSeatTurn !== undefined &&
     !(m.expiresAtEndOfSeatTurn === state.activePlayer && Number(m.createdTurn ?? -1) < state.turn)

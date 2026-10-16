@@ -1019,6 +1019,16 @@ describe("HNT — marked heroes and daggers", () => {
       modifier.appliesToSubtype === "draconic"
     );
     expect(igniteReduction?.consumed).not.toBe(true);
+    expect(projectStateFor(g.state, 0).ongoing).toEqual(expect.arrayContaining([
+      expect.objectContaining({
+        label: "costs 1 less to play or activate · next Draconic card this combat chain",
+        lifetime: "once",
+        durationMessage: {
+          id: "engine.effect.duration.next.card.this.chain",
+          values: { subtype: "draconic", cardType: "any" },
+        },
+      }),
+    ]));
 
     g.blockWith().settle()
       .play("demonstrate devotion|1");

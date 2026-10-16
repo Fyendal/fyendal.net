@@ -62,15 +62,6 @@ export function EffectArt({ effect }: { effect: OngoingEffectView }) {
   );
 }
 
-export function EffectLifetimeLine({ effect, text }: { effect: OngoingEffectView; text: string }) {
-  return (
-    <span className="effect-life">
-      <UiIcon name={effectIcon(effect)} className="effect-life-icon" />
-      <span className="effect-life-text">{sentenceCase(text)}</span>
-    </span>
-  );
-}
-
 const stackKey = ({ effect }: OngoingEffectStack) =>
   JSON.stringify([effect.seat, effect.cardId, effect.label, effect.sourceSeat ?? null]);
 
@@ -256,13 +247,13 @@ export function EffectSlot({
               effectImposed(effect) ? "effect-imposed" : "",
               arrivals.has(key) ? "effect-arrive" : "",
             ].filter(Boolean).join(" ")}
-            data-effect-label={`${sentenceCase(text.summary)} · ${text.duration}${count > 1 ? ` ×${count}` : ""}`}
+            data-effect-label={`${sentenceCase(text.summary)}\n${sentenceCase(text.duration)}${count > 1 ? ` ×${count}` : ""}`}
             {...(previewCardId ? { "data-cardid": previewCardId } : {})}
           >
             <EffectArt effect={effect} />
             <span className="effect-text">
               <span className="effect-summary">{sentenceCase(text.summary)}</span>
-              <EffectLifetimeLine effect={effect} text={text.duration} />
+              <span className="effect-life">{sentenceCase(text.duration)}</span>
             </span>
             {count > 1 ? <span className="effect-count">×{count}</span> : null}
             {last && hidden > 0 ? <span className="effect-more">+{hidden}</span> : null}

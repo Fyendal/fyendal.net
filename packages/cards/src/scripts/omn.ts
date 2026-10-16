@@ -1206,18 +1206,7 @@ export const omn: Record<string, CardScript> = mergeSetScripts("OMN", omnHighRar
 
   "beckoning brilliance|1": {
     onAttackDeclared(ctx) {
-      ctx.addModifier({ scope: "combat-chain", playCostReduction: 1, appliesToCardType: "instant" });
-    },
-    onFriendlyPlay(ctx, played) {
-      if (!ctx.hasCardType(played, "instant")) return;
-      const marker = ctx.state.modifiers.find(
-        (modifier) =>
-          modifier.sourceInstanceId === ctx.self.instanceId &&
-          modifier.scope === "combat-chain" &&
-          modifier.playCostReduction === 1 &&
-          !modifier.consumed,
-      );
-      if (marker) ctx.consumeModifier(marker.id);
+      ctx.addModifier({ scope: "combat-chain", playCostReduction: 1, appliesToCardType: "instant", once: true });
     },
   },
   "flowshard elemental|1": {

@@ -3106,6 +3106,8 @@
   "engine.effect.duration.next.attack": "next attack",
   "engine.effect.duration.next.rune.gated.attack": "next rune-gated attack",
   "engine.effect.duration.next.play": "next {color, select, red {red } yellow {yellow } blue {blue } other {}}{cardType, select, action {action card} instant {instant card} reaction {reaction card} other {{color, select, any {matching play} other {card}}}}",
+  "engine.effect.duration.next.card.this.chain": "next {subtype, select, draconic {Draconic } other {}}{cardType, select, action {action } instant {instant } other {}}card this combat chain",
+  "engine.effect.duration.cards.this.chain": "{subtype, select, draconic {Draconic } other {}}{cardType, select, action {action } instant {instant } other {}}cards this combat chain",
   "engine.effect.duration.next.action": "next action",
   "engine.effect.duration.next.arcane.damage": "next arcane damage event",
   "engine.effect.duration.next.arcane.card": "next arcane damage card",

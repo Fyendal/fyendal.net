@@ -33,6 +33,8 @@
   --font-display: "Arial Narrow", "Segoe UI", system-ui, sans-serif;
   --font-fantasy-title: "Alegreya SC", Georgia, "Times New Roman", serif;
   --font-fantasy-meta: "Alegreya Sans SC", "Segoe UI", system-ui, sans-serif;
+  /* card names, as printed on the mat's name plates */
+  --font-card-name: Alegreya, Palatino, "Palatino Linotype", "Book Antiqua", Georgia, serif;
   /* Keep the old-world display voice exclusive to the product wordmark in the
      lobby. Application headings and controls use a quieter system face. */
   --font-brand: "Tiller", "Alegreya SC", Georgia, "Times New Roman", serif;

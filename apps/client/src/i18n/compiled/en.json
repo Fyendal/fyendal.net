@@ -18320,6 +18320,54 @@
       "value": "Choose X"
     }
   ],
+  "engine.effect.duration.cards.this.chain": [
+    {
+      "type": 5,
+      "value": "subtype",
+      "options": {
+        "draconic": {
+          "value": [
+            {
+              "type": 0,
+              "value": "Draconic "
+            }
+          ]
+        },
+        "other": {
+          "value": []
+        }
+      }
+    },
+    {
+      "type": 5,
+      "value": "cardType",
+      "options": {
+        "action": {
+          "value": [
+            {
+              "type": 0,
+              "value": "action "
+            }
+          ]
+        },
+        "instant": {
+          "value": [
+            {
+              "type": 0,
+              "value": "instant "
+            }
+          ]
+        },
+        "other": {
+          "value": []
+        }
+      }
+    },
+    {
+      "type": 0,
+      "value": "cards this combat chain"
+    }
+  ],
   "engine.effect.duration.each.end.phase": [
     {
       "type": 0,
@@ -18366,6 +18414,58 @@
     {
       "type": 0,
       "value": "next attack"
+    }
+  ],
+  "engine.effect.duration.next.card.this.chain": [
+    {
+      "type": 0,
+      "value": "next "
+    },
+    {
+      "type": 5,
+      "value": "subtype",
+      "options": {
+        "draconic": {
+          "value": [
+            {
+              "type": 0,
+              "value": "Draconic "
+            }
+          ]
+        },
+        "other": {
+          "value": []
+        }
+      }
+    },
+    {
+      "type": 5,
+      "value": "cardType",
+      "options": {
+        "action": {
+          "value": [
+            {
+              "type": 0,
+              "value": "action "
+            }
+          ]
+        },
+        "instant": {
+          "value": [
+            {
+              "type": 0,
+              "value": "instant "
+            }
+          ]
+        },
+        "other": {
+          "value": []
+        }
+      }
+    },
+    {
+      "type": 0,
+      "value": "card this combat chain"
     }
   ],
   "engine.effect.duration.next.play": [

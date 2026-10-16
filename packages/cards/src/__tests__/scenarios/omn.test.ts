@@ -1340,10 +1340,23 @@ describe("OMN — import and set mechanics", () => {
     });
 
     g.play("beckoning brilliance|1")
-      .blockWith()
-      .react("flash bolt|1")
+      .blockWith();
+    expect(projectStateFor(g.state, 0).ongoing).toEqual(expect.arrayContaining([
+      expect.objectContaining({
+        label: "play costs 1 less · next instant card this combat chain",
+        lifetime: "once",
+        durationMessage: {
+          id: "engine.effect.duration.next.card.this.chain",
+          values: { subtype: "any", cardType: "instant" },
+        },
+      }),
+    ]));
+    g.react("flash bolt|1")
       .chooseOption("opposing hero")
       .expectLife(1, 13);
+    expect(g.state.modifiers.find((modifier) =>
+      modifier.appliesToCardType === "instant" && modifier.playCostReduction === 1
+    )?.consumed).toBe(true);
   });
 
   it("Step Between prohibits opposing instants while it is attacking", () => {

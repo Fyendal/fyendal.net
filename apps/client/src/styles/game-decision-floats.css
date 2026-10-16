@@ -793,7 +793,7 @@
   color: #cbb894;
   font-size: 13px;
   line-height: 1.35;
-  white-space: normal;
+  white-space: pre-line; /* effect summary, then its duration */
   overflow-wrap: anywhere;
   overflow-y: auto;
   z-index: 47; /* above the hover card preview (z-index 46) */

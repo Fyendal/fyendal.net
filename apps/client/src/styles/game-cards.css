@@ -609,7 +609,7 @@
   height: var(--board-name-height);
   border-radius: 999px;
   color: #211f1b;
-  font-family: Alegreya, Palatino, "Palatino Linotype", "Book Antiqua", Georgia, serif;
+  font-family: var(--font-card-name);
   font-size: clamp(7px, 7cqi, 12px);
   font-weight: 500;
   letter-spacing: normal;
