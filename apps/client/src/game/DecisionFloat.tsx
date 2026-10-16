@@ -8,6 +8,7 @@ import type {
   PendingDecisionModel,
 } from "./decision/DecisionModels.js";
 import { PendingDecisionPanel } from "./decision/PendingDecisionPanel.js";
+import { ChoiceHotkeysEnabled } from "./decision/choiceHotkeys.js";
 
 export type { ActionAnnouncementModel, PendingDecisionModel } from "./decision/DecisionModels.js";
 
@@ -47,11 +48,13 @@ export function DecisionFloat({
   action,
   viewerSeat,
   pitchFocused = false,
+  optionHotkeys = false,
 }: {
   pending: PendingDecisionModel;
   action: ActionAnnouncementModel;
   viewerSeat: number;
   pitchFocused?: boolean;
+  optionHotkeys?: boolean;
 }) {
   const decisionFloat = useFloatDrag({
     resetKey: decisionFloatDragKey(
@@ -70,8 +73,10 @@ export function DecisionFloat({
       style={pitchFocused ? undefined : decisionFloat.style}
       {...(pitchFocused ? {} : decisionFloat.dragProps)}
     >
-      <PendingDecisionPanel model={pending} viewerSeat={viewerSeat} />
-      <ActionAnnouncementPanel model={action} viewerSeat={viewerSeat} />
+      <ChoiceHotkeysEnabled.Provider value={optionHotkeys}>
+        <PendingDecisionPanel model={pending} viewerSeat={viewerSeat} />
+        <ActionAnnouncementPanel model={action} viewerSeat={viewerSeat} />
+      </ChoiceHotkeysEnabled.Provider>
     </div>
   );
 }

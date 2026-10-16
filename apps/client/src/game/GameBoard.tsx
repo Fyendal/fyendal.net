@@ -222,6 +222,7 @@ export function GameBoard() {
     playabilityCuePreference,
     priorityWindowMode,
     skipPlayConfirmation,
+    optionHotkeys,
     soundEffectsEnabled,
     soundEffectsVolume,
     updatePriorityWindowMode,
@@ -230,6 +231,7 @@ export function GameBoard() {
     updateMotionPreference,
     updatePlayabilityCuePreference,
     updateSkipPlayConfirmation,
+    updateOptionHotkeys,
     updateSoundEffectsEnabled,
     updateSoundEffectsVolume,
   } = useGameSettings({
@@ -1352,6 +1354,7 @@ export function GameBoard() {
       {/* ── floating decision window: prompts, choices, pitch selection ── */}
       {gameMotion.turnStartUiReady ? <DecisionFloat
         viewerSeat={seat}
+        optionHotkeys={optionHotkeys}
         pitchFocused={choosingPitch || pitchSource !== null}
         pending={{
           decision: hidePriorityGuidance || showCardSearchOverlay ? null : pd,
@@ -1499,6 +1502,8 @@ export function GameBoard() {
         onLessGuidanceChange={updateLessGuidance}
         skipPlayConfirmation={skipPlayConfirmation}
         onSkipPlayConfirmationChange={updateSkipPlayConfirmation}
+        optionHotkeys={optionHotkeys}
+        onOptionHotkeysChange={updateOptionHotkeys}
         motionPreference={motionPreference}
         onMotionPreferenceChange={updateMotionPreference}
         cardDisplayPreference={cardDisplayPreference}

@@ -9,6 +9,11 @@ import { ActionTargetCards, RevealedChoiceCards, targetPlayPermissionNote } from
 import type { PendingDecisionModel } from "./decision/DecisionModels.js";
 import { passHotkeyIntent } from "./passHotkey.js";
 import {
+  assignChoiceHotkeys,
+  ChoiceHotkeysEnabled,
+  rememberChoiceHotkeys,
+} from "./decision/choiceHotkeys.js";
+import {
   GuidanceSettingsPopover,
   PendingDecisionPanel,
 } from "./decision/PendingDecisionPanel.js";
@@ -421,6 +426,59 @@ describe("priority guidance help", () => {
     expect(html).toContain("Create a Gate to i&#x27;Arathael");
     expect(html).toContain(">Chosen<");
     expect(html.match(/<button[^>]*class="decision-choice-option"/g)).toHaveLength(2);
+  });
+
+  it("shows option letters only when Option hotkeys is enabled", () => {
+    const model = pendingModel("optional-effect");
+    model.canPass = false;
+    model.decision = { player: 0, kind: "choose-target", prompt: "Pick", options: ["first", "second"] };
+    const off = renderLocalized(<PendingDecisionPanel model={model} viewerSeat={0} />);
+    const on = renderLocalized(
+      <ChoiceHotkeysEnabled.Provider value>
+        <PendingDecisionPanel model={model} viewerSeat={0} />
+      </ChoiceHotkeysEnabled.Provider>,
+    );
+
+    expect(off).not.toContain("choice-hotkey");
+    expect(off).not.toMatch(/aria-keyshortcuts="[QW]"/);
+    expect(on.match(/class="choice-hotkey"/g)).toHaveLength(2);
+    expect(on).toContain('aria-keyshortcuts="W"');
+  });
+
+  it("keeps every mode's row and letter in place after an out-of-order pick", () => {
+    const model = pendingModel("optional-effect");
+    model.canPass = false;
+    const modes = ["mode-alpha", "mode-bravo", "mode-charlie"];
+    const render = (decision: NonNullable<PendingDecisionModel["decision"]>) => {
+      model.decision = decision;
+      const html = renderLocalized(
+        <ChoiceHotkeysEnabled.Provider value>
+          <PendingDecisionPanel model={model} viewerSeat={0} />
+        </ChoiceHotkeysEnabled.Provider>,
+      );
+      const row = /(✓<\/span>|aria-hidden="true">([A-Z])<\/kbd>)<span class="decision-choice-label">([^<]+)/g;
+      return [...html.matchAll(row)]
+        .map((match) => `${match[2] ?? "✓"} ${match[3]}`);
+    };
+
+    expect(render({ player: 0, kind: "choose-target", prompt: "Pick", options: modes }))
+      .toEqual(["Q mode-alpha", "W mode-bravo", "E mode-charlie"]);
+    // Static rendering runs no effects; record the first prompt as the list would.
+    rememberChoiceHotkeys(assignChoiceHotkeys(modes, [], []));
+    expect(render({
+      player: 0,
+      kind: "choose-target",
+      prompt: "Pick",
+      options: ["mode-alpha", "mode-bravo"],
+      chosenOptions: ["mode-charlie"],
+    })).toEqual(["Q mode-alpha", "W mode-bravo", "✓ mode-charlie"]);
+    expect(render({
+      player: 0,
+      kind: "choose-target",
+      prompt: "Pick",
+      options: ["mode-bravo"],
+      chosenOptions: ["mode-charlie", "mode-alpha"],
+    })).toEqual(["✓ mode-alpha", "W mode-bravo", "✓ mode-charlie"]);
   });
 
   it("localizes the end-phase arsenal prompt while preserving the rules term", () => {

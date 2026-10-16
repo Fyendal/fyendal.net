@@ -43,6 +43,13 @@ export function useGameSettings({
       return next;
     });
   };
+  const updateOptionHotkeys = (optionHotkeys: boolean) => {
+    setSettings((current) => {
+      const next = { ...current, optionHotkeys };
+      saveGameSettings(localStorage, next);
+      return next;
+    });
+  };
   const updateCardDisplayPreference = (cardDisplayPreference: CardDisplayPreference) => {
     setSettings((current) => {
       const next = { ...current, cardDisplayPreference };
@@ -86,6 +93,7 @@ export function useGameSettings({
     updatePriorityWindowMode,
     updateLessGuidance,
     updateSkipPlayConfirmation,
+    updateOptionHotkeys,
     updateCardDisplayPreference,
     updateMotionPreference,
     updatePlayabilityCuePreference,

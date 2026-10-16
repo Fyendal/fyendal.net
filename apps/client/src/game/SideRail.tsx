@@ -227,6 +227,8 @@ export function SideRail({
   onLessGuidanceChange,
   skipPlayConfirmation,
   onSkipPlayConfirmationChange,
+  optionHotkeys,
+  onOptionHotkeysChange,
   cardDisplayPreference,
   onCardDisplayPreferenceChange,
   motionPreference,
@@ -292,6 +294,8 @@ export function SideRail({
   onLessGuidanceChange: (enabled: boolean) => void;
   skipPlayConfirmation: boolean;
   onSkipPlayConfirmationChange: (enabled: boolean) => void;
+  optionHotkeys: boolean;
+  onOptionHotkeysChange: (enabled: boolean) => void;
   cardDisplayPreference: CardDisplayPreference;
   onCardDisplayPreferenceChange: (preference: CardDisplayPreference) => void;
   motionPreference: MotionPreference;
@@ -634,6 +638,8 @@ export function SideRail({
           onLessGuidanceChange={onLessGuidanceChange}
           skipPlayConfirmation={skipPlayConfirmation}
           onSkipPlayConfirmationChange={onSkipPlayConfirmationChange}
+          optionHotkeys={optionHotkeys}
+          onOptionHotkeysChange={onOptionHotkeysChange}
           cardDisplayPreference={cardDisplayPreference}
           onCardDisplayPreferenceChange={onCardDisplayPreferenceChange}
           motionPreference={motionPreference}

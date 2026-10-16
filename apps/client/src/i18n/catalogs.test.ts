@@ -177,4 +177,18 @@ describe("locale catalogs", () => {
       { card: "Regurgitating Slog" },
     )).toBe("Regurgitating Slog 获得压制 (dominate)");
   });
+
+  it("separates Chinese text from interpolated names with a space", () => {
+    const tight = /[一-鿿]\{(?:card|source|player|name|hero)\}|\{(?:card|source|player|name|hero)\}[一-鿿]/;
+    const source: unknown = JSON.parse(
+      readFileSync(new URL("./catalogs/zh-Hans.json", import.meta.url), "utf8"),
+    );
+    expect(Object.entries(source as Record<string, unknown>)
+      .filter(([, message]) => typeof message !== "string" || tight.test(message)))
+      .toEqual([]);
+    expect(createTestIntl("zh-Hans").formatMessage(
+      { id: "game.decision.boost.prompt" },
+      { card: "Zipper Hit" },
+    )).toBe("推进 Zipper Hit？");
+  });
 });

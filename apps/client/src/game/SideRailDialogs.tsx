@@ -34,6 +34,8 @@ export function GameSettingsDialog({
   onLessGuidanceChange,
   skipPlayConfirmation,
   onSkipPlayConfirmationChange,
+  optionHotkeys,
+  onOptionHotkeysChange,
   cardDisplayPreference,
   onCardDisplayPreferenceChange,
   motionPreference,
@@ -59,6 +61,8 @@ export function GameSettingsDialog({
   onLessGuidanceChange: (enabled: boolean) => void;
   skipPlayConfirmation: boolean;
   onSkipPlayConfirmationChange: (enabled: boolean) => void;
+  optionHotkeys: boolean;
+  onOptionHotkeysChange: (enabled: boolean) => void;
   cardDisplayPreference: CardDisplayPreference;
   onCardDisplayPreferenceChange: (preference: CardDisplayPreference) => void;
   motionPreference: MotionPreference;
@@ -174,6 +178,26 @@ export function GameSettingsDialog({
                   role="switch"
                   checked={!lessGuidance}
                   onChange={(event) => onLessGuidanceChange(!event.target.checked)}
+                />
+                <span className="switch-track" aria-hidden="true" />
+              </label>
+              <label className="toggle-switch settings-control-row">
+                <span className="settings-control-name">
+                  {intl.formatMessage({ id: "settings.optionHotkeys" })}
+                  <span
+                    className="settings-info-tooltip"
+                    data-tooltip={intl.formatMessage({ id: "settings.optionHotkeys.tooltip" })}
+                    aria-hidden="true"
+                  >
+                    i
+                  </span>
+                </span>
+                <input
+                  type="checkbox"
+                  role="switch"
+                  aria-label={intl.formatMessage({ id: "settings.optionHotkeys.aria" })}
+                  checked={optionHotkeys}
+                  onChange={(event) => onOptionHotkeysChange(event.target.checked)}
                 />
                 <span className="switch-track" aria-hidden="true" />
               </label>

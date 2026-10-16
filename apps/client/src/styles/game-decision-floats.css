@@ -187,6 +187,34 @@
   outline-offset: 2px;
 }
 .decision-choice-label { flex: 1 1 auto; min-width: 0; }
+/* Letter hotkeys lead each row as a flat, quiet column: no bevel, no fill,
+   just a hairline chip that brightens with the row it chooses. */
+.choice-hotkey {
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  box-sizing: border-box;
+  border: 1px solid #e1d5be2e;
+  border-radius: 4px;
+  color: var(--text-muted);
+  font: 600 11px/1 var(--font-lobby-ui);
+  transition: color 120ms ease, border-color 120ms ease;
+}
+.decision-choice-option:hover .choice-hotkey,
+.decision-choice-option:focus-visible .choice-hotkey,
+.decision-choice-selected .choice-hotkey {
+  border-color: #b8933f99;
+  color: var(--text-primary);
+}
+/* Touch devices have no letter keys to press. */
+@media (hover: none) and (pointer: coarse) {
+  .choice-hotkey { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .choice-hotkey { transition: none; }
+}
 /* Hero targets mark their side with the decision-card affiliation colors as
    a quiet edge stripe only. Emphasis stays with the Space default (gold
    border and keycap), which may be either hero: protection effects default
@@ -213,7 +241,13 @@
   color: var(--text-secondary);
   cursor: default;
 }
-.decision-choice-check { flex: 0 0 auto; color: #b8933f; font-weight: 700; }
+.decision-choice-check {
+  /* Same width as the letter keycap so picked and open labels align. */
+  flex: 0 0 22px;
+  color: #b8933f;
+  font-weight: 700;
+  text-align: center;
+}
 .decision-choice-tag {
   flex: 0 0 auto;
   color: var(--text-secondary);

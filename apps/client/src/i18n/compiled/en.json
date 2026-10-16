@@ -33441,6 +33441,24 @@
       "value": "Reduced: hide card travel and connections; keep local card fades"
     }
   ],
+  "settings.optionHotkeys": [
+    {
+      "type": 0,
+      "value": "Option hotkeys"
+    }
+  ],
+  "settings.optionHotkeys.aria": [
+    {
+      "type": 0,
+      "value": "Choose prompt options with Q W E R A S D F"
+    }
+  ],
+  "settings.optionHotkeys.tooltip": [
+    {
+      "type": 0,
+      "value": "Press Q W E R A S D F to choose options in prompts."
+    }
+  ],
   "settings.playableCards": [
     {
       "type": 0,

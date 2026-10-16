@@ -422,6 +422,7 @@ export function PendingDecisionPanel({
     const message = pd.chosenOptionMessages?.[index];
     return {
       key: `${index}:${option}`,
+      option,
       label: message
         ? <GameMessageText message={message} resolvers={optionResolvers} />
         : option,

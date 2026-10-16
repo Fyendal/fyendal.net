@@ -47,6 +47,8 @@ function sideRailProps(
     lessGuidance: false,
     onLessGuidanceChange: vi.fn(),
     skipPlayConfirmation: false,
+    optionHotkeys: false,
+    onOptionHotkeysChange: vi.fn(),
     onSkipPlayConfirmationChange: vi.fn(),
     motionPreference: "system",
     onMotionPreferenceChange: vi.fn(),

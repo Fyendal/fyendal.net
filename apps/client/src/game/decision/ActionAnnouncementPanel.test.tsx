@@ -347,5 +347,6 @@ describe("Boost choices", () => {
     expect(html).toContain('class="decision-choice-option decision-choice-selected shortcut-button"');
     expect(html).toContain('title="Boost (Space)"');
     expect(html).toContain('aria-keyshortcuts="Space"');
+    expect(html).not.toContain("choice-hotkey");
   });
 });

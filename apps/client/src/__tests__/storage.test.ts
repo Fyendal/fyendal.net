@@ -2,6 +2,9 @@ import { describe, expect, it } from "vitest";
 import {
   AUTH_STORAGE_KEY,
   BOT_MATCHMAKING_PREFERENCE_STORAGE_KEY,
+  CHOICE_HOTKEYS_STORAGE_KEY,
+  loadChoiceHotkeys,
+  saveChoiceHotkeys,
   DEFAULT_GAME_SETTINGS,
   DEFAULT_LOBBY_SETTINGS,
   GAME_SETTINGS_STORAGE_KEY,
@@ -107,6 +110,18 @@ describe("client storage keys", () => {
     expect(loadHomeFormat(storage, "Alice")).toBe("silver-age");
   });
 
+  it("keeps recent option hotkeys and rejects malformed entries", () => {
+    const storage = memoryStorage();
+    expect(loadChoiceHotkeys(storage)).toEqual([]);
+    const modes: Array<[string, number]> = [["power", 0], ["go again", 1], ["arsenal", 2], ["banish", 3]];
+    saveChoiceHotkeys(storage, [[["yes", 0], ["no", 1]], modes]);
+    expect(loadChoiceHotkeys(storage)).toEqual([[["yes", 0], ["no", 1]], modes]);
+    for (const malformed of ["{", "{}", "[[[\"yes\", 8]]]", "[[[\"yes\", 0.5]]]", "[[[1, 0]]]"]) {
+      storage.setItem(CHOICE_HOTKEYS_STORAGE_KEY, malformed);
+      expect(loadChoiceHotkeys(storage)).toEqual([]);
+    }
+  });
+
   it("round-trips the versioned game settings", () => {
     let stored: string | null = null;
     const storage = {
@@ -126,6 +141,7 @@ describe("client storage keys", () => {
       playabilityCuePreference: "glow",
       soundEffectsEnabled: true,
       soundEffectsVolume: 35,
+      optionHotkeys: false,
     });
     saveGameSettings(storage, {
       version: 7,
@@ -137,6 +153,7 @@ describe("client storage keys", () => {
       playabilityCuePreference: "high-contrast",
       soundEffectsEnabled: false,
       soundEffectsVolume: 60,
+      optionHotkeys: true,
     });
     expect(loadGameSettings(storage)).toEqual({
       version: 7,
@@ -148,6 +165,7 @@ describe("client storage keys", () => {
       playabilityCuePreference: "high-contrast",
       soundEffectsEnabled: false,
       soundEffectsVolume: 60,
+      optionHotkeys: true,
     });
   });
 
@@ -169,6 +187,7 @@ describe("client storage keys", () => {
       playabilityCuePreference: "glow",
       soundEffectsEnabled: true,
       soundEffectsVolume: 35,
+      optionHotkeys: false,
     });
   });
 
@@ -191,6 +210,7 @@ describe("client storage keys", () => {
       playabilityCuePreference: "glow",
       soundEffectsEnabled: true,
       soundEffectsVolume: 35,
+      optionHotkeys: false,
     });
   });
 
@@ -215,6 +235,7 @@ describe("client storage keys", () => {
       playabilityCuePreference: "glow",
       soundEffectsEnabled: false,
       soundEffectsVolume: 60,
+      optionHotkeys: false,
     });
   });
 
@@ -257,6 +278,20 @@ describe("client storage keys", () => {
     })).toEqual(DEFAULT_GAME_SETTINGS);
   });
 
+  it("leaves option hotkeys off for version 7 settings saved before the toggle", () => {
+    const { optionHotkeys: _absent, ...previous } = {
+      ...DEFAULT_GAME_SETTINGS,
+      priorityWindowMode: "auto-pass" as const,
+    };
+    expect(loadGameSettings({ getItem: () => JSON.stringify(previous) })).toEqual({
+      ...previous,
+      optionHotkeys: false,
+    });
+    expect(loadGameSettings({
+      getItem: () => JSON.stringify({ ...previous, optionHotkeys: "yes" }),
+    }).optionHotkeys).toBe(false);
+  });
+
   it("adds square cards to version 6 settings without resetting existing choices", () => {
     const previous = {
       version: 6,
@@ -272,6 +307,7 @@ describe("client storage keys", () => {
       ...previous,
       version: 7,
       cardDisplayPreference: "square",
+      optionHotkeys: false,
     });
   });
 

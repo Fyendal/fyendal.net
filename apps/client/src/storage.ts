@@ -370,6 +370,7 @@ export interface GameSettings {
   playabilityCuePreference: PlayabilityCuePreference;
   soundEffectsEnabled: boolean;
   soundEffectsVolume: number;
+  optionHotkeys: boolean;
 }
 
 export const DEFAULT_GAME_SETTINGS: GameSettings = {
@@ -382,6 +383,7 @@ export const DEFAULT_GAME_SETTINGS: GameSettings = {
   playabilityCuePreference: "glow",
   soundEffectsEnabled: true,
   soundEffectsVolume: 35,
+  optionHotkeys: false,
 };
 
 export function replayStorageKey(code: string): string {
@@ -469,6 +471,7 @@ export function loadGameSettings(storage: Pick<Storage, "getItem">): GameSetting
       soundEffectsVolume: record.version === 4 || record.version === 5 || record.version === 6 || record.version === 7
         ? record.soundEffectsVolume as number
         : 35,
+      optionHotkeys: typeof record.optionHotkeys === "boolean" ? record.optionHotkeys : false,
     };
   } catch {
     return DEFAULT_GAME_SETTINGS;
@@ -484,5 +487,54 @@ export function saveGameSettings(
   } catch {
     // A blocked/full localStorage should not make the game settings unusable
     // for the current page lifetime.
+  }
+}
+
+export const CHOICE_HOTKEYS_STORAGE_KEY = "fyendal-choice-hotkeys";
+
+/** Recent option-to-letter assignments, newest last, as `[optionKey, slot]`
+ * pairs. Session storage keeps a multi-step choice stable across a reload. */
+export type StoredChoiceHotkeys = Array<Array<[string, number]>>;
+
+const MAX_STORED_CHOICE_HOTKEYS = 4;
+const MAX_CHOICE_HOTKEY_SLOTS = 8;
+
+export function loadChoiceHotkeys(storage: Pick<Storage, "getItem">): StoredChoiceHotkeys {
+  try {
+    const raw = storage.getItem(CHOICE_HOTKEYS_STORAGE_KEY);
+    if (!raw) return [];
+    const parsed: unknown = JSON.parse(raw);
+    if (!Array.isArray(parsed) || parsed.length > MAX_STORED_CHOICE_HOTKEYS) return [];
+    const assignments: StoredChoiceHotkeys = [];
+    for (const entry of parsed) {
+      if (!Array.isArray(entry) || entry.length > MAX_CHOICE_HOTKEY_SLOTS) return [];
+      const pairs: Array<[string, number]> = [];
+      for (const pair of entry) {
+        if (
+          !Array.isArray(pair) || pair.length !== 2 ||
+          typeof pair[0] !== "string" || pair[0].length > 200 ||
+          !Number.isSafeInteger(pair[1]) || pair[1] < 0 || pair[1] >= MAX_CHOICE_HOTKEY_SLOTS
+        ) return [];
+        pairs.push([pair[0], pair[1]]);
+      }
+      assignments.push(pairs);
+    }
+    return assignments;
+  } catch {
+    return [];
+  }
+}
+
+export function saveChoiceHotkeys(
+  storage: Pick<Storage, "setItem">,
+  assignments: StoredChoiceHotkeys,
+): void {
+  try {
+    storage.setItem(
+      CHOICE_HOTKEYS_STORAGE_KEY,
+      JSON.stringify(assignments.slice(-MAX_STORED_CHOICE_HOTKEYS)),
+    );
+  } catch {
+    // Without storage the letters still hold until the page reloads.
   }
 }

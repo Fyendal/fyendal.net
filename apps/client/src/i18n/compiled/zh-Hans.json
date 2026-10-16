@@ -36,7 +36,7 @@
     },
     {
       "type": 0,
-      "value": "徽章"
+      "value": " 徽章"
     }
   ],
   "account.badge.loading": [
@@ -26363,7 +26363,7 @@
   "game.decision.boost.prompt": [
     {
       "type": 0,
-      "value": "推进"
+      "value": "推进 "
     },
     {
       "type": 1,
@@ -26397,7 +26397,7 @@
   "game.decision.cardCost.chooseExact": [
     {
       "type": 0,
-      "value": "选择"
+      "value": "选择 "
     },
     {
       "type": 1,
@@ -26405,7 +26405,7 @@
     },
     {
       "type": 0,
-      "value": "以支付此费用"
+      "value": " 以支付此费用"
     }
   ],
   "game.decision.cardCost.chooseUpTo": [
@@ -26419,7 +26419,7 @@
     },
     {
       "type": 0,
-      "value": " 张"
+      "value": " 张 "
     },
     {
       "type": 1,
@@ -26427,7 +26427,7 @@
     },
     {
       "type": 0,
-      "value": "以支付此费用"
+      "value": " 以支付此费用"
     }
   ],
   "game.decision.cardCost.label.allies": [
@@ -26451,7 +26451,7 @@
   "game.decision.chooseCard": [
     {
       "type": 0,
-      "value": "选择"
+      "value": "选择 "
     },
     {
       "type": 1,
@@ -26479,7 +26479,7 @@
   "game.decision.chooseUse": [
     {
       "type": 0,
-      "value": "选择如何使用"
+      "value": "选择如何使用 "
     },
     {
       "type": 1,
@@ -26501,7 +26501,7 @@
   "game.decision.closeChain.context": [
     {
       "type": 0,
-      "value": "打出"
+      "value": "打出 "
     },
     {
       "type": 1,
@@ -26509,7 +26509,7 @@
     },
     {
       "type": 0,
-      "value": "将关闭当前战斗链。"
+      "value": " 将关闭当前战斗链。"
     }
   ],
   "game.decision.closeChain.prompt": [
@@ -26521,7 +26521,7 @@
   "game.decision.confirmNamed": [
     {
       "type": 0,
-      "value": "确认"
+      "value": "确认 "
     },
     {
       "type": 1,
@@ -26669,7 +26669,7 @@
   "game.decision.playAs.prompt": [
     {
       "type": 0,
-      "value": "将"
+      "value": "将 "
     },
     {
       "type": 1,
@@ -26677,7 +26677,7 @@
     },
     {
       "type": 0,
-      "value": "作为…打出"
+      "value": " 作为…打出"
     }
   ],
   "game.decision.playCard": [
@@ -26711,7 +26711,7 @@
   "game.decision.removeCard": [
     {
       "type": 0,
-      "value": "移除"
+      "value": "移除 "
     },
     {
       "type": 1,
@@ -26739,7 +26739,7 @@
   "game.decision.targetAlreadyPlayableVia": [
     {
       "type": 0,
-      "value": "已可通过"
+      "value": "已可通过 "
     },
     {
       "type": 1,
@@ -26747,7 +26747,7 @@
     },
     {
       "type": 0,
-      "value": "打出"
+      "value": " 打出"
     }
   ],
   "game.decision.targetNamed": [
@@ -26809,7 +26809,7 @@
   "game.decision.triggerOrder.moveEarlier": [
     {
       "type": 0,
-      "value": "将"
+      "value": "将 "
     },
     {
       "type": 1,
@@ -26831,7 +26831,7 @@
   "game.decision.triggerOrder.moveLater": [
     {
       "type": 0,
-      "value": "将"
+      "value": "将 "
     },
     {
       "type": 1,
@@ -26859,7 +26859,7 @@
   "game.decision.useCard": [
     {
       "type": 0,
-      "value": "使用"
+      "value": "使用 "
     },
     {
       "type": 1,
@@ -26869,7 +26869,7 @@
   "game.decision.useNamed": [
     {
       "type": 0,
-      "value": "使用"
+      "value": "使用 "
     },
     {
       "type": 1,
@@ -29704,7 +29704,7 @@
     },
     {
       "type": 0,
-      "value": "操作"
+      "value": " 操作"
     }
   ],
   "lobby.deck.allFormats": [
@@ -29754,7 +29754,7 @@
   "lobby.deck.closeActions": [
     {
       "type": 0,
-      "value": "关闭"
+      "value": "关闭 "
     },
     {
       "type": 1,
@@ -29762,7 +29762,7 @@
     },
     {
       "type": 0,
-      "value": "操作"
+      "value": " 操作"
     }
   ],
   "lobby.deck.confirmDelete": [
@@ -29798,7 +29798,7 @@
   "lobby.deck.deletePrompt": [
     {
       "type": 0,
-      "value": "删除"
+      "value": "删除 "
     },
     {
       "type": 1,
@@ -30060,7 +30060,7 @@
   "lobby.deck.playWith": [
     {
       "type": 0,
-      "value": "使用"
+      "value": "使用 "
     },
     {
       "type": 1,
@@ -30068,7 +30068,7 @@
     },
     {
       "type": 0,
-      "value": "游玩"
+      "value": " 游玩"
     }
   ],
   "lobby.deck.playable": [
@@ -30128,7 +30128,7 @@
   "lobby.deck.selectNamed": [
     {
       "type": 0,
-      "value": "选择"
+      "value": "选择 "
     },
     {
       "type": 1,
@@ -30176,7 +30176,7 @@
   "lobby.deck.viewOnFabrary": [
     {
       "type": 0,
-      "value": "在 Fabrary 查看"
+      "value": "在 Fabrary 查看 "
     },
     {
       "type": 1,
@@ -31392,7 +31392,7 @@
   "prep.presentation.moveCopy": [
     {
       "type": 0,
-      "value": "将一张"
+      "value": "将一张 "
     },
     {
       "type": 1,
@@ -31400,7 +31400,7 @@
     },
     {
       "type": 0,
-      "value": "移至"
+      "value": " 移至"
     },
     {
       "type": 1,
@@ -31428,7 +31428,7 @@
   "prep.presentation.removeCard": [
     {
       "type": 0,
-      "value": "移除"
+      "value": "移除 "
     },
     {
       "type": 1,
@@ -31446,7 +31446,7 @@
     },
     {
       "type": 0,
-      "value": "移除"
+      "value": "移除 "
     },
     {
       "type": 1,
@@ -31456,7 +31456,7 @@
   "prep.presentation.selectCard": [
     {
       "type": 0,
-      "value": "选择"
+      "value": "选择 "
     },
     {
       "type": 1,
@@ -31474,7 +31474,7 @@
     },
     {
       "type": 0,
-      "value": "选择"
+      "value": "选择 "
     },
     {
       "type": 1,
@@ -31687,7 +31687,7 @@
     },
     {
       "type": 0,
-      "value": "需要双手。请先移除一件武器。"
+      "value": " 需要双手。请先移除一件武器。"
     }
   ],
   "prep.weaponIssue.not-weapon-zone": [
@@ -31697,7 +31697,7 @@
     },
     {
       "type": 0,
-      "value": "不能放入武器区。"
+      "value": " 不能放入武器区。"
     }
   ],
   "prep.weaponIssue.single-weapon-zone": [
@@ -31707,7 +31707,7 @@
     },
     {
       "type": 0,
-      "value": "只有一个武器区。请先移除已选武器。"
+      "value": " 只有一个武器区。请先移除已选武器。"
     }
   ],
   "prep.weaponIssue.too-many": [
@@ -31723,7 +31723,7 @@
     },
     {
       "type": 0,
-      "value": "需要双手。请先移除一件武器。"
+      "value": " 需要双手。请先移除一件武器。"
     }
   ],
   "prep.you": [
@@ -32314,6 +32314,24 @@
     {
       "type": 0,
       "value": "减少：隐藏卡牌移动和连线，仅保留局部淡入淡出"
+    }
+  ],
+  "settings.optionHotkeys": [
+    {
+      "type": 0,
+      "value": "选项快捷键"
+    }
+  ],
+  "settings.optionHotkeys.aria": [
+    {
+      "type": 0,
+      "value": "使用 Q W E R A S D F 选择提示选项"
+    }
+  ],
+  "settings.optionHotkeys.tooltip": [
+    {
+      "type": 0,
+      "value": "按 Q W E R A S D F 选择提示中的选项。"
     }
   ],
   "settings.playableCards": [
