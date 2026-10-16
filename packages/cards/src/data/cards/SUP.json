@@ -1234,7 +1234,7 @@
   "id": "SUP074",
   "name": "Leave Them Hanging",
   "cardType": "instant",
-  "text": "Suspense\nWhen this enters or leaves the arena, intimidate target hero.\nWhen this leaves the arena, your next attack this turn gets +4{p}.",
+  "text": "Suspense\nWhen this enters the arena, intimidate target hero.\nWhen this leaves the arena, your next attack this turn gets +4{p}.",
   "pitch": 1,
   "cost": 3,
   "defense": 3,

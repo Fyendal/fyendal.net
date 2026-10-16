@@ -1007,7 +1007,7 @@ describe("SUP — tokens and suspense", () => {
       .expectFinalDefense(0);
   });
 
-  it("Leave Them Hanging intimidates as it leaves at the start of its controller's turn", () => {
+  it("Leave Them Hanging does not intimidate as it leaves at the start of its controller's turn", () => {
     const g = scenario({
       seats: [
         foe({ hand: ["head jab|1"] }),
@@ -1017,10 +1017,8 @@ describe("SUP — tokens and suspense", () => {
     g.state.players[1]!.board[0]!.counters = { suspense: 1 };
 
     g.endTurn()
-      .declareTarget(0)
       .expectNotInZone(1, "leave them hanging|1", "board")
-      // the intimidate resolves with the trigger, not with the next attack
-      .expectInZone(0, "head jab|1", "banish");
+      .expectInZone(0, "head jab|1", "hand");
     expect(g.state.players[1]!.flags.pendingIntimidate ?? 0).toBe(0);
   });
 
@@ -1034,6 +1032,56 @@ describe("SUP — tokens and suspense", () => {
     });
 
     g.play("head jab|1").blockWith().settle().expectLife(0, 18);
+  });
+});
+
+describe("SUP — intimidating attacks", () => {
+  it.each([
+    { card: "battered, beaten, and broken|2", intimidates: 1 },
+    { card: "instill fear|1", intimidates: 1 },
+    { card: "show no mercy|1", intimidates: 1 },
+    { card: "tear down the idols|1", intimidates: 0 },
+  ])("$card intimidates a non-Revered hero $intimidates time(s)", ({ card, intimidates }) => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", weapons: [], hand: [card], resources: 3 },
+        foe({ hand: ["head jab|1", "head jab|1", "head jab|1"] }),
+      ],
+    });
+
+    g.play(card).expectPendingReturn(1, intimidates);
+  });
+
+  it("Bully Tactics intimidates only as many times as was paid", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", weapons: [], hand: ["bully tactics|1"], resources: 3 },
+        foe({ hand: ["head jab|1", "head jab|1", "head jab|1"] }),
+      ],
+    });
+
+    g.play("bully tactics|1").chooseOption("X = 0").expectPendingReturn(1, 0);
+  });
+
+  it("Battered, Beaten, and Broken destroys an intimidated card on hit with 3 auras", () => {
+    const g = scenario({
+      seats: [
+        hero("pleiades|0", {
+          hand: ["battered, beaten, and broken|2"],
+          board: ["toughness|0", "toughness|0", "toughness|0"],
+        }),
+        foe({ hand: ["head jab|1", "head jab|1"] }),
+      ],
+    });
+
+    g.play("battered, beaten, and broken|2")
+      .expectAttackValue(4)
+      .expectPendingReturn(1, 1)
+      .blockWith()
+      .settle()
+      .chooseCard("head jab|1")
+      .expectPendingReturn(1, 0)
+      .expectInZone(1, "head jab|1", "graveyard");
   });
 });
 

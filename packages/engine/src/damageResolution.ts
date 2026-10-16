@@ -1364,6 +1364,7 @@ export function effectDamageBonus(state: GameStateInternal, packet: PendingArcan
     if (
       !mod.damage ||
       mod.consumed ||
+      (mod.damageArcaneOnly && !packet.arcane) ||
       mod.seat !== packet.sourceSeat ||
       (mod.appliesToInstanceId !== undefined && mod.appliesToInstanceId !== source.instanceId) ||
       !["chain-link", "combat-chain", "until-end-of-turn", "static"].includes(mod.scope)

@@ -13412,6 +13412,12 @@
       "value": " to intimidate"
     }
   ],
+  "card.sup.intimidated.card.destroy": [
+    {
+      "type": 0,
+      "value": "Destroy an intimidated card"
+    }
+  ],
   "card.sup.ironsong.modes.choose": [
     {
       "type": 0,

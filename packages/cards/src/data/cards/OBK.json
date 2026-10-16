@@ -248,6 +248,34 @@
     "set": "OBK"
   },
   {
+    "id": "OBK151",
+    "name": "Bootlegger Bust-Up",
+    "cardType": "action",
+    "text": "Boost\nThis gets +2{p} for each non-Mechanologist card banished from boosting this.",
+    "pitch": 2,
+    "cost": 3,
+    "attack": 5,
+    "defense": 3,
+    "classes": ["mechanologist"],
+    "subtypes": ["attack"],
+    "keywords": ["Boost"],
+    "set": "OBK"
+  },
+  {
+    "id": "OBK152",
+    "name": "Bootlegger Bust-Up",
+    "cardType": "action",
+    "text": "Boost\nThis gets +2{p} for each non-Mechanologist card banished from boosting this.",
+    "pitch": 3,
+    "cost": 3,
+    "attack": 4,
+    "defense": 3,
+    "classes": ["mechanologist"],
+    "subtypes": ["attack"],
+    "keywords": ["Boost"],
+    "set": "OBK"
+  },
+  {
     "id": "OBK175",
     "name": "One-Click Pinpointer",
     "cardType": "weapon",

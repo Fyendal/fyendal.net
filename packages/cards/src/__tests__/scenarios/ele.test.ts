@@ -847,4 +847,51 @@ describe("ELE — Thump", () => {
     expect(projectStateFor(g.state, 0).chain.at(-1)?.dominate).toBe(true);
     g.settle().chooseCard("head jab|1").expectInZone(1, "head jab|1", "graveyard");
   });
+
+  it("fused Flicker Wisp adds 1 to its own arcane damage", () => {
+    const g = scenario({
+      seats: [
+        { ...briar, hand: ["flicker wisp|2", LIGHTNING] },
+        { hero: "dorinthea", hand: [] },
+      ],
+    });
+
+    g.play("flicker wisp|2").chooseCard(LIGHTNING).settle().expectLife(1, 18);
+  });
+
+  it("unfused Flicker Wisp deals only its printed arcane damage", () => {
+    const g = scenario({
+      seats: [
+        { ...briar, hand: ["flicker wisp|2"] },
+        { hero: "dorinthea", hand: [] },
+      ],
+    });
+
+    g.play("flicker wisp|2").settle().expectLife(1, 19);
+  });
+
+  it("Ball Lightning buffs the arcane damage Sting of Sorcery grants it", () => {
+    const g = scenario({
+      seats: [
+        { ...briar, hand: ["sting of sorcery|3", "ball lightning|1"] },
+        { hero: "dorinthea", hand: [] },
+      ],
+    });
+
+    g.play("sting of sorcery|3").play("ball lightning|1").declareTarget(1).settle().expectLife(1, 18);
+    g.blockWith().settle().expectLife(1, 14);
+  });
+
+  it("fused Flicker Wisp buffs later action-card arcane damage but not combat damage", () => {
+    const g = scenario({
+      seats: [
+        { ...briar, hand: ["flicker wisp|2", LIGHTNING, "sting of sorcery|3", "ball lightning|1"] },
+        { hero: "dorinthea", hand: [] },
+      ],
+    });
+
+    g.play("flicker wisp|2").chooseCard(LIGHTNING).settle().expectLife(1, 18);
+    g.play("sting of sorcery|3").play("ball lightning|1").declareTarget(1).settle().expectLife(1, 15);
+    g.blockWith().settle().expectLife(1, 11);
+  });
 });

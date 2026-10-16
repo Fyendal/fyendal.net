@@ -12815,6 +12815,12 @@
       "value": " 点资源进行 intimidate"
     }
   ],
+  "card.sup.intimidated.card.destroy": [
+    {
+      "type": 0,
+      "value": "摧毁一张被 intimidate 的牌"
+    }
+  ],
   "card.sup.ironsong.modes.choose": [
     {
       "type": 0,

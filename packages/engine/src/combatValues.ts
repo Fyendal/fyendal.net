@@ -905,7 +905,7 @@ export function computeCombatDamage(
     state,
     link,
     ["chain-link", "combat-chain", "until-end-of-turn", "static"],
-  ).reduce((sum, modifier) => sum + Number(modifier.damage || 0), 0);
+  ).reduce((sum, modifier) => sum + (modifier.damageArcaneOnly ? 0 : Number(modifier.damage || 0)), 0);
   const damage = baseDamage + damageBonus;
   const damageScript = scriptOf(state, link.attackingCard.cardId, link.attackingCard);
   return Math.max(0, Math.floor(damageScript?.modifyCombatDamage?.(

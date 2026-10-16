@@ -206,6 +206,7 @@ export interface PersistedModifierV1 {
   appliesToEquipment?: boolean;
   appliesToFirstDefenderOnly?: boolean;
   damage?: number;
+  damageArcaneOnly?: boolean;
   damageUnpreventable?: boolean;
   goAgain?: boolean;
   dominate?: boolean;

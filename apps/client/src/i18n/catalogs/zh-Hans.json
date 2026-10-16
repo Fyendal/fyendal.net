@@ -512,6 +512,7 @@
   "card.sup.hand.bottom": "将一张手牌置于牌库底部",
   "card.sup.hero.abilities.discard": "弃置一张牌以保留你的英雄能力？",
   "card.sup.intimidate.pay": "支付至多 {amount} 点资源进行 intimidate",
+  "card.sup.intimidated.card.destroy": "摧毁一张被 intimidate 的牌",
   "card.sup.ironsong.modes.choose": "Beat of the Ironsong：选择 {amount} 项模式",
   "card.sup.ironsong.modes.more": "Beat of the Ironsong：再选择 {amount} 项模式",
   "card.sup.looked.bottom": "将查看的牌置于牌库底部？",

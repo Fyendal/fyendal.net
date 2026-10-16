@@ -67,28 +67,14 @@ describe("suspense and crowd auras trigger through the stack", () => {
     g.play("head jab|1").expectAttackValue(5);
   });
 
-  it("Leave Them Hanging puts each of its leave abilities on the stack", () => {
+  it("Leave Them Hanging leaves with only its attack buff, not another intimidate", () => {
     const g = pleiadesRemovesLastCounter("leave them hanging|1", [], ["head jab|1"]);
 
-    // Two distinct leave abilities: their controller orders them.
-    expect(g.state.pendingDecision?.chooseHook).toBe("trigger-order");
-    expect(g.state.pendingDecision?.optionLabels).toEqual([
-      "Intimidate target hero",
-      "Your next attack this turn gets +4 attack",
-    ]);
-    while (g.state.pendingDecision?.chooseHook === "trigger-order") {
-      g.doRaw({ kind: "choose", optionId: g.state.pendingDecision.options![0]! });
-    }
-    expect(g.stackLabels()).toEqual([
-      "Intimidate target hero",
-      "Your next attack this turn gets +4 attack",
-      "Pleiades, Superstar",
-    ]);
-    g.declareTargetRaw(1);
-    g.expectInZone(1, "head jab|1", "hand");
+    expect(g.state.pendingDecision?.chooseHook).not.toBe("trigger-order");
+    expect(g.stackLabels()).toEqual(["Your next attack this turn gets +4 attack", "Pleiades, Superstar"]);
 
     g.passPriority().passPriority();
-    g.expectInZone(1, "head jab|1", "banish");
+    g.expectInZone(1, "head jab|1", "hand");
   });
 
   it("Dramatic Pause declares its defending target as the enter trigger goes on the stack", () => {

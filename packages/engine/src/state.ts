@@ -456,6 +456,8 @@ export interface Modifier {
   /** Replacement bonus applied when a matching action card would deal a
    * positive amount of combat or effect damage. Multiple bonuses stack. */
   damage?: number;
+  /** The `damage` bonus applies only to arcane damage. */
+  damageArcaneOnly?: boolean;
   /** Matching damage dealt by the affected attack cannot be prevented. */
   damageUnpreventable?: boolean;
   goAgain?: boolean;

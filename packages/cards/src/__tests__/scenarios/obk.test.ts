@@ -523,6 +523,17 @@ describe("Outbreak cards", () => {
       game.play(BOOTLEGGER, { boostCount: 0 }).expectAttackValue(6);
       game.expectDeckTop(0, FILLER);
     });
+
+    it.each([
+      ["bootlegger bust-up|2", 7],
+      ["bootlegger bust-up|3", 6],
+    ])("%s gets +2 power from a non-Mechanologist boost", (card, power) => {
+      const game = scenario({ seats: [
+        { hero: "rhinar", hand: [card], deck: [FILLER], resources: 3, weapons: [], equipment: NO_EQUIPMENT },
+        { hero: "dorinthea", weapons: [], equipment: NO_EQUIPMENT },
+      ] });
+      game.play(card, { boost: true }).expectAttackValue(power);
+    });
   });
 
   describe("Max-Tension Shot", () => {

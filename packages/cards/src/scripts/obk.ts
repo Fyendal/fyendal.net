@@ -707,6 +707,8 @@ export const obk: Record<string, CardScript> = {
   "pauper's knife|0": { activated: attackAbility(2, { goAgain: true, oncePerTurn: false, tap: true }) },
   "cogwerx dueling pistol|0": cogwerxDuelingPistol,
   "bootlegger bust-up|1": bootleggerBustUp,
+  "bootlegger bust-up|2": bootleggerBustUp,
+  "bootlegger bust-up|3": bootleggerBustUp,
   "one-click pinpointer|0": oneClickPinpointer,
   "max-tension shot|1": maxTensionShot,
   "cure-all elixir|0": cureAllElixir,

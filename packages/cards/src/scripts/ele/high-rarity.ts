@@ -629,6 +629,9 @@ export const eleHighRarity: Record<string, CardScript> = {
     ...fusion("lightning"),
     arcaneDamageEffect: true,
     onPlay(ctx) {
+      // The fused replacement starts before this card's own damage, so it applies to it.
+      if (fused(ctx))
+        ctx.addModifier({ scope: "until-end-of-turn", damage: 1, damageArcaneOnly: true, appliesToCardType: "action" });
       ctx.dealDamage(opponentSeat(ctx), 1, { arcane: true, sourceInstanceId: ctx.self.instanceId });
     },
   },
@@ -944,7 +947,9 @@ export const eleHighRarity: Record<string, CardScript> = {
         target: heroTarget(),
         effect(ctx) {
           const seat = targetHeroSeat(ctx);
-          if (seat !== undefined) ctx.dealDamage(seat, 1, { arcane: true, sourceInstanceId: ctx.self.instanceId });
+          // The granted ability belongs to the attack card, so that card is the damage source.
+          const sourceInstanceId = ctx.link?.attackingCard.instanceId ?? ctx.self.instanceId;
+          if (seat !== undefined) ctx.dealDamage(seat, 1, { arcane: true, sourceInstanceId });
         },
       },
       { event: "end-of-turn", label: "Destroy Sting of Sorcery", effect: (ctx) => ctx.destroySelf() },

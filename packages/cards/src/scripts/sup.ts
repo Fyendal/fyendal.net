@@ -905,7 +905,7 @@ export const sup: Record<string, CardScript> = {
   },
   ...pitches("instill fear", () => ({
     onAttackDeclared(ctx) {
-      queueIntimidate(ctx);
+      if (ctx.link?.targetAllyId === undefined) queueIntimidate(ctx);
     },
   })),
   "low blow|1": { modifyAttack: (ctx) => (ctx.getFlag("player", "booedThisTurn") ? 3 : 0) },
@@ -1448,7 +1448,7 @@ Object.assign(sup, {
       ctx.createToken(MIGHT);
     },
   },
-  "leave them hanging|1": suspense(INTIMIDATE_TARGET_HERO, [INTIMIDATE_TARGET_HERO, suspenseNextAttackBuff(4)]),
+  "leave them hanging|1": suspense(INTIMIDATE_TARGET_HERO, suspenseNextAttackBuff(4)),
   "two steps ahead|3": {
     triggers: [
       {
@@ -1610,6 +1610,19 @@ Object.assign(sup, {
       if (ctx.link?.targetAllyId === undefined) queueIntimidate(ctx);
     },
     modifyAttack: (ctx: ScriptCtx) => (countAuras(ctx) >= 3 ? 3 : 0),
+    canTriggerOnHit: (ctx: ScriptCtx) => ctx.link?.targetAllyId === undefined && countAuras(ctx) >= 3,
+    onHit(ctx: ScriptCtx) {
+      const cards = ctx.player(opponentSeat(ctx)).banish.filter((card) => card.intimidated === true);
+      if (cards.length)
+        ctx.requestCardChoice(
+          "battered-destroy",
+          decisionPrompt("Destroy an intimidated card", "card.sup.intimidated.card.destroy"),
+          cards.map((card) => card.instanceId),
+        );
+    },
+    onChoose(ctx: ScriptCtx, hook: string, option: string) {
+      if (hook === "battered-destroy") ctx.moveToGraveyard(Number(option), "banish");
+    },
   },
   "escalate violence|3": {
     onAttackDeclared(ctx: ScriptCtx) {
