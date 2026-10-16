@@ -474,6 +474,9 @@ function array<T>(value: unknown, decode: (item: unknown) => item is T, max: num
 
 const shortStrings = (value: unknown, max = MAX_CARDS): value is string[] =>
   array(value, (item): item is string => string(item, MAX_SHORT_TEXT), max);
+/** Zero-based indexes into a source's activated abilities. */
+const abilityIndexes = (value: unknown): value is number[] =>
+  array(value, (index): index is number => nonNegativeInteger(index) && index <= 32, 33);
 const instanceId = (value: unknown): value is number => nonNegativeInteger(value);
 const instanceIds = (value: unknown): value is number[] => array(value, instanceId, MAX_INPUT_CARDS);
 const username = (value: unknown): value is string =>
@@ -1006,14 +1009,12 @@ function cardView(value: unknown, depth = 0): value is CardView {
     && optional(card.intimidated, (v): v is boolean => typeof v === "boolean")
     && optional(card.tapped, (v): v is boolean => typeof v === "boolean")
     && optional(card.defCounters, nonNegativeInteger) && optional(card.counters, numberRecord)
-    && optional(card.usedAbilityIndexes, (v): v is number[] =>
-      array(v, (index): index is number => nonNegativeInteger(index) && index <= 32, 33))
+    && optional(card.usedAbilityIndexes, abilityIndexes)
     && optional(card.remainingAbilityActivations, (v): v is number[] =>
       array(v, (count): count is number => nonNegativeInteger(count) && count <= 32, 33))
     && optional(card.activatedAbilityLabels, (v): v is string[] =>
       array(v, (label): label is string => string(label, MAX_SHORT_TEXT, false), 33))
-    && optional(card.attackAbilityIndexes, (v): v is number[] =>
-      array(v, (index): index is number => nonNegativeInteger(index) && index <= 32, 33))
+    && optional(card.attackAbilityIndexes, abilityIndexes)
     && optional(card.subcards, (v): v is CardView[] => array(v, (entry) => cardView(entry, depth + 1), 16))
     && optional(card.grantedNames, (v): v is string[] => array(v, (entry): entry is string => string(entry, MAX_ID), 16))
     && optional(card.chosenName, (v): v is string => string(v, MAX_SHORT_TEXT, false))
@@ -1068,7 +1069,8 @@ const cardViews = (value: unknown): value is CardView[] => array(value, cardView
 function playerView(value: unknown): value is PlayerView {
   const player = object(value);
   if (!player || !exactKeys(player, [
-    "seat", "heroCardId", "heroInstanceId", "heroTapped", "heroCounters", "heroDefCounters", "heroSubcards", "heroAbilityLabels", "heroAttackAbilityIndexes", "heroName",
+    "seat", "heroCardId", "heroInstanceId", "heroTapped", "heroCounters", "heroDefCounters", "heroSubcards",
+    "heroAbilityLabels", "heroAttackAbilityIndexes", "heroUsedAbilityIndexes", "heroName",
     "life", "actionPoints", "resources", "chi", "hand", "handCount", "deckCount", "deck",
     "arsenal", "arsenalCount", "arsenalCapacity", "arsenalZones", "pitch", "pitchCount", "graveyard", "banish", "soul",
     "visibleDeckTop", "equipment", "weapons", "board",
@@ -1084,8 +1086,8 @@ function playerView(value: unknown): value is PlayerView {
     && string(player.heroName, MAX_SHORT_TEXT, false)
     && optional(player.heroAbilityLabels, (v): v is string[] =>
       array(v, (label): label is string => string(label, MAX_SHORT_TEXT, false), 33))
-    && optional(player.heroAttackAbilityIndexes, (v): v is number[] =>
-      array(v, (index): index is number => nonNegativeInteger(index) && index <= 32, 33))
+    && optional(player.heroAttackAbilityIndexes, abilityIndexes)
+    && optional(player.heroUsedAbilityIndexes, abilityIndexes)
     && finite(player.life) && finite(player.actionPoints) && finite(player.resources)
     && optional(player.chi, finite) && cardViews(player.hand) && nonNegativeInteger(player.handCount)
     && nonNegativeInteger(player.deckCount) && optional(player.deck, cardViews) && cardViews(player.arsenal)

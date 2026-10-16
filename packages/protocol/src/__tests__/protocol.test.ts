@@ -702,6 +702,18 @@ describe("GameView and server messages", () => {
     expect(decodeGameView(withEffect({ ...structured, sourceHidden: true }))).toBeNull();
   });
 
+  it("decodes the hero's used once-per-turn ability indexes", () => {
+    const withHeroUsage = (heroUsedAbilityIndexes: unknown) => {
+      const view = gameView();
+      return { ...view, players: [{ ...view.players[0], heroUsedAbilityIndexes }, view.players[1]] };
+    };
+
+    expect(decodeGameView(withHeroUsage([0, 1]))?.players[0].heroUsedAbilityIndexes).toEqual([0, 1]);
+    expect(decodeGameView(withHeroUsage([-1]))).toBeNull();
+    expect(decodeGameView(withHeroUsage([33]))).toBeNull();
+    expect(decodeGameView(withHeroUsage("0"))).toBeNull();
+  });
+
   it("decodes the rules facts of a modifier-backed effect", () => {
     const effect = {
       seat: 0,

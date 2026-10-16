@@ -972,6 +972,29 @@ describe("HNT — marked heroes and daggers", () => {
       .expectNoLegalPlay("demonstrate devotion|1");
   });
 
+  it("projects Cindra's spent recovery until the turn ends", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          heroKey: "cindra|0",
+          weapons: [],
+          resources: 3,
+          graveyard: ["kunai of retribution|0"],
+        },
+        { hero: "dorinthea" },
+      ],
+    });
+    expect(projectStateFor(g.state, 0).players[0]!.heroUsedAbilityIndexes).toBeUndefined();
+
+    g.activate("cindra|0").chooseCard("kunai of retribution|0").settle();
+
+    expect(projectStateFor(g.state, 0).players[0]!.heroUsedAbilityIndexes).toEqual([0]);
+    expect(projectStateFor(g.state, 1).players[0]!.heroUsedAbilityIndexes).toEqual([0]);
+    g.endTurn();
+    expect(projectStateFor(g.state, 0).players[0]!.heroUsedAbilityIndexes).toBeUndefined();
+  });
+
   it("Ignite grants its reduction only after its attack trigger resolves", () => {
     const g = scenario({
       seats: [

@@ -1020,9 +1020,14 @@ describe("Cindra Head Jabs policy", () => {
       .toEqual({ kind: "pass" });
   });
 
-  it("Flicks the last Kunai on a blocked second Draconic link when Vest pays its recovery", () => {
+  it.each([
+    ["Flicks", false],
+    ["holds Flick once recovery is spent", true],
+  ] as const)("%s on the last Kunai of a blocked second Draconic link at high life", (_name, recoveryUsed) => {
     // Report 45bc84bc: Kunai hit, then Sink Below fully blocked Blaze Headlong
-    // at 37 life with Hot on Their Heels and Cut Through still in hand.
+    // at 37 life with Hot on Their Heels and Cut Through still in hand. Vest's
+    // resource pays the recovery that re-equips the flicked dagger, unless
+    // Cindra already used it this turn.
     const game = state();
     replaceHand(game, 0, ["HNT067", "GEM027"]);
     game.players[0].resources = 0;
@@ -1036,6 +1041,7 @@ describe("Cindra Head Jabs policy", () => {
     const flick = view.players[0].equipment.arms!;
     const doomedKunai = view.players[0].weapons[0]!;
     doomedKunai.usedAbilityIndexes = [0];
+    if (recoveryUsed) view.players[0].heroUsedAbilityIndexes = [0];
     view.priorityPlayer = 0;
     view.activePlayer = 0;
     view.turn = 2;
@@ -1060,7 +1066,8 @@ describe("Cindra Head Jabs policy", () => {
     };
     const legal: GameIntent[] = [flickIntent, { kind: "pass" }, { kind: "concede" }];
 
-    expect(chooseCindraIntent({ seat: 0, view, legal, cards: cardData })).toEqual(flickIntent);
+    expect(chooseCindraIntent({ seat: 0, view, legal, cards: cardData }))
+      .toEqual(recoveryUsed ? { kind: "pass" } : flickIntent);
   });
 
   it("holds Flick when the current link already hits and another attack is playable", () => {

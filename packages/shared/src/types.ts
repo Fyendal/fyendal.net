@@ -342,6 +342,9 @@ export interface PlayerView {
   heroAbilityLabels?: string[];
   /** Attack ability indexes for the hero's arena presentation. */
   heroAttackAbilityIndexes?: number[];
+  /** Zero-based indexes of the hero's limited activated abilities with no
+   * activation left this turn, like `CardView.usedAbilityIndexes`. */
+  heroUsedAbilityIndexes?: number[];
   equipment: Partial<Record<EquipmentSlot, CardView>>;
   weapons: CardView[];
   /** Board-state cards in play: tokens/auras (e.g. Quicken), items, allies */

@@ -284,6 +284,8 @@ function playerView(
   const heroAbilityLabels = projectedAbilityLabels(heroAbilities);
   const heroAttackAbilityIndexes = heroAbilities.flatMap((ability, index) =>
     ability.isAttack ? [index] : []);
+  const heroUsedAbilityIndexes = heroAbilities.flatMap((ability, index) =>
+    activatedAbilityUsage(p, p.hero.instanceId, index, ability)?.remaining === 0 ? [index] : []);
   const heroSubcards = cardView(state, runtime, p.hero).subcards;
   return {
     seat: p.seat,
@@ -297,6 +299,7 @@ function playerView(
     ...(heroSubcards ? { heroSubcards } : {}),
     ...(heroAbilityLabels ? { heroAbilityLabels } : {}),
     ...(heroAttackAbilityIndexes.length > 0 ? { heroAttackAbilityIndexes } : {}),
+    ...(heroUsedAbilityIndexes.length > 0 ? { heroUsedAbilityIndexes } : {}),
     heroName: dataOf(state, p.heroCardId).name,
     life: p.life,
     actionPoints: p.actionPoints,

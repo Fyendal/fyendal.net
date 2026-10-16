@@ -677,6 +677,16 @@ function hasRecoverableDagger(input: BotPolicyInput): boolean {
   });
 }
 
+/** Cindra's once-per-turn dagger recovery (her only activated ability). */
+function cindraRecoveryUsed(input: BotPolicyInput): boolean {
+  return input.view.players[input.seat].heroUsedAbilityIndexes?.includes(0) === true;
+}
+
+/** A graveyard dagger Cindra can still equip this turn. */
+function canRecoverDaggerThisTurn(input: BotPolicyInput): boolean {
+  return hasRecoverableDagger(input) && !cindraRecoveryUsed(input);
+}
+
 function isCutThrough(data: CardData | undefined): boolean {
   return key(data).startsWith("cut through|");
 }
@@ -706,7 +716,7 @@ function benefitsFromBecomingDraconic(card: CardView, input: BotPolicyInput): bo
 }
 
 function fealtyEnablesRecovery(card: CardView, input: BotPolicyInput): boolean {
-  if (!hasRecoverableDagger(input)) return false;
+  if (!canRecoverDaggerThisTurn(input)) return false;
   // Forecast the Draconic attacks still held instead of looking only at the
   // current chain. Preserve Fealty when the natural cards already reach three;
   // otherwise it supplies one of the links that reduces Cindra's activation.
@@ -782,7 +792,8 @@ function pendingDaggerSpendCouldBePlayed(input: BotPolicyInput): boolean {
 }
 
 function dracoKunaiLineNeedsRecovery(input: BotPolicyInput): boolean {
-  if (!hasCleanActionPriority(input) || !attackSequenceCanContinue(input) || availableKunai(input)) return false;
+  if (!hasCleanActionPriority(input) || !attackSequenceCanContinue(input) || availableKunai(input) ||
+    cindraRecoveryUsed(input)) return false;
   const me = input.view.players[input.seat];
   const dracoFire = me.hand.find((card) => key(input.cards[card.cardId]) === CARD.dracoFire);
   if (!dracoFire || !me.graveyard.some((card) =>
@@ -797,7 +808,7 @@ function dracoKunaiLineNeedsRecovery(input: BotPolicyInput): boolean {
 }
 
 function shouldBuyDaggersNow(input: BotPolicyInput): boolean {
-  if (!hasRecoverableDagger(input)) return false;
+  if (!canRecoverDaggerThisTurn(input)) return false;
   const remainingDaggers = daggersExpectedToRemain(input);
   const recoveryIsFree = cindraRecoveryCost(input) === 0;
   // One equipped dagger is enough to keep attacking. Never spend cards or
@@ -947,11 +958,11 @@ function legalFlickKnivesCouldBePlayed(input: BotPolicyInput): boolean {
 
 function flickedDaggerRecoveryIsFunded(input: BotPolicyInput): boolean {
   // Flick puts its dagger into the graveyard and, through Blood Splattered
-  // Vest, pays a resource. When that resource plus the floating pool already
-  // covers Cindra's discounted activation, the flicked dagger comes back this
-  // turn, so Flick does not cost the last dagger.
+  // Vest, pays a resource. When Cindra's recovery is still unused this turn
+  // and that resource plus the floating pool covers its discounted cost, the
+  // flicked dagger comes back this turn, so Flick does not cost the last dagger.
   const me = input.view.players[input.seat];
-  return /^cindra\b/.test(key(input.cards[me.heroCardId])) &&
+  return /^cindra\b/.test(key(input.cards[me.heroCardId])) && !cindraRecoveryUsed(input) &&
     equipmentHasKey(input, "chest", CARD.bloodSplatteredVest) &&
     cindraRecoveryCost(input) <= me.resources + 1;
 }
@@ -1111,7 +1122,7 @@ function vestResourceFundsHandCard(input: BotPolicyInput): boolean {
 }
 
 function vestResourceFundsDaggerRecovery(input: BotPolicyInput): boolean {
-  if (!hasRecoverableDagger(input) || daggersExpectedToRemain(input) > 0) {
+  if (!canRecoverDaggerThisTurn(input) || daggersExpectedToRemain(input) > 0) {
     return false;
   }
   // The Vest decision often occurs before the remaining attacks are played,
@@ -1383,7 +1394,7 @@ function attackResourceScore(
   let score = 0;
   if (data.cost === 1 && pitchIds(intent).length === 0 && isDraconicCard(card, input) &&
     draconicCostReductionAvailable(input, "play")) score += 120;
-  if (draconicLinks === 2 && hasRecoverableDagger(input) && isDraconicAttack(card, input)) score += 160;
+  if (draconicLinks === 2 && canRecoverDaggerThisTurn(input) && isDraconicAttack(card, input)) score += 160;
   if (hasPendingFealty(input) && shouldSpendFealtyOn(card, input)) score += 900;
   if (intent.kind === "play-from-arsenal") score += 15;
   return score;
@@ -1699,7 +1710,7 @@ function recoveryBeforeClosingChain(
     !isCindraTurn(input) || input.view.phase !== "action" ||
     input.view.stack.length !== 0 || input.view.pendingDecision !== null ||
     input.view.chain.length === 0 || currentLink(input) !== undefined ||
-    daggersExpectedToRemain(input) !== 1 || !hasRecoverableDagger(input) ||
+    daggersExpectedToRemain(input) !== 1 || !canRecoverDaggerThisTurn(input) ||
     cindraRecoveryCost(input) !== 0) {
     return undefined;
   }
