@@ -262,3 +262,62 @@ describe("whole-turn riders beside a next-attack buff", () => {
     ]);
   });
 });
+
+describe("structured effect facts", () => {
+  it("reports Draco Fire's power and both cost reductions for the next attack", () => {
+    const g = scenario({
+      seats: [{ hero: "rhinar", hand: ["draco fire|1"] }, { hero: "dorinthea" }],
+    });
+    g.play("draco fire|1");
+
+    expect(ongoing(g, "draco fire|1")).toEqual([
+      expect.objectContaining({
+        label: "+2 power, costs 1 less to play or activate · next Draconic attack",
+        facts: { power: 2, playCostReduction: 1, activationCostReduction: 1, nextAttack: true },
+      }),
+    ]);
+  });
+
+  it("reports a typed next-attack bonus", () => {
+    const g = scenario({ seats: [{ hero: "rhinar", hand: ["sizzle|1"] }, { hero: "dorinthea" }] });
+    g.play("sizzle|1");
+
+    expect(ongoing(g, "sizzle|1")).toEqual([
+      expect.objectContaining({
+        label: "+3 power · next Lightning or Elemental attack",
+        facts: { power: 3, nextAttack: true },
+      }),
+    ]);
+  });
+
+  it("reports Toe the Line's pending prevention", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", hand: ["snatch|1"] },
+        { hero: "dorinthea", hand: ["toe the line|1"] },
+      ],
+    });
+    g.play("snatch|1", { settle: false })
+      .passPriority().passPriority().passPriority().passPriority()
+      .blockWith()
+      .passPriority()
+      .react("toe the line|1", { settle: false })
+      .passPriority().passPriority();
+
+    expect(projectStateFor(g.state, 1).ongoing.filter((effect) =>
+      effect.cardId === printingId("toe the line|1")
+    ).map((effect) => effect.facts)).toEqual([{ preventDamage: 2 }]);
+  });
+
+  it("keeps a whole-turn rider out of the next-attack facts", () => {
+    const g = scenario({
+      seats: [{ hero: "dorinthea", hand: ["glistening steelblade|2"], resources: 3 }, { hero: "rhinar" }],
+    });
+    g.play("glistening steelblade|2");
+
+    expect(ongoing(g, "glistening steelblade|2").map((effect) => effect.facts)).toEqual([
+      { goAgain: true, nextAttack: true },
+      {},
+    ]);
+  });
+});

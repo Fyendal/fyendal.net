@@ -133,7 +133,7 @@ function canDecompose(input: BotPolicyInput): boolean {
 function starvoBonusActive(input: BotPolicyInput): boolean {
   return input.view.ongoing.some((effect) =>
     effect.seat === input.seat && key(input.cards[effect.cardId]) === STARVO &&
-    /dominate/i.test(effect.label) && /go again/i.test(effect.label)
+    effect.facts?.dominate === true && effect.facts.goAgain === true
   );
 }
 

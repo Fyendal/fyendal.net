@@ -702,6 +702,30 @@ describe("GameView and server messages", () => {
     expect(decodeGameView(withEffect({ ...structured, sourceHidden: true }))).toBeNull();
   });
 
+  it("decodes the rules facts of a modifier-backed effect", () => {
+    const effect = {
+      seat: 0,
+      cardId: "OMN245",
+      label: "+2 power, costs 1 less to play or activate · next Draconic attack",
+      facts: {
+        power: 2, playCostReduction: 1, activationCostReduction: 1, goAgain: true, dominate: true,
+        onHitDraw: 1, preventDamage: 3, nextAttack: true,
+      },
+    };
+    const withEffect = (value: Record<string, unknown>) => ({ ...gameView(), ongoing: [value] });
+
+    expect(decodeGameView(withEffect(effect))?.ongoing).toEqual([effect]);
+    expect(decodeGameView(withEffect({ ...effect, facts: {} }))).not.toBeNull();
+    expect(decodeGameView(withEffect({ ...effect, facts: { playCostReduction: -1 } }))).not.toBeNull();
+    expect(decodeGameView(withEffect({ ...effect, facts: { power: 1.5 } }))).toBeNull();
+    expect(decodeGameView(withEffect({ ...effect, facts: { goAgain: false } }))).toBeNull();
+    expect(decodeGameView(withEffect({ ...effect, facts: { preventDamage: 0 } }))).toBeNull();
+    expect(decodeGameView(withEffect({ ...effect, facts: { onHitDraw: -1 } }))).toBeNull();
+    expect(decodeGameView(withEffect({ ...effect, facts: { nextAttack: "yes" } }))).toBeNull();
+    expect(decodeGameView(withEffect({ ...effect, facts: { overpower: true } }))).toBeNull();
+    expect(decodeGameView(withEffect({ ...effect, facts: null }))).toBeNull();
+  });
+
   it("does not treat a card's zone index as its nested-subcard depth", () => {
     const view = gameView();
     (view.players[1] as unknown as { graveyard: unknown[] }).graveyard = Array.from({ length: 10 }, (_, index) => ({

@@ -669,6 +669,29 @@ export interface OngoingEffectView {
   durationMessage?: GameMessage;
   /** A rest-of-game effect that triggers repeatedly. */
   recurring?: true;
+  /** Rules values of a modifier-backed effect, summed over the modifiers it
+   * groups, for consumers that must not parse English (practice bots).
+   * Present on every modifier-backed effect, even when empty; absent on
+   * trigger and counter effects and in views that predate it. */
+  facts?: OngoingEffectFacts;
+}
+
+export interface OngoingEffectFacts {
+  /** Power granted, including a conditional bonus. */
+  power?: number;
+  /** Reduction to the cost of playing a matching card; negative costs more. */
+  playCostReduction?: number;
+  /** Reduction to the cost of activating a matching ability. */
+  activationCostReduction?: number;
+  /** Unconditional go again; conditional grants appear only in the summary. */
+  goAgain?: true;
+  dominate?: true;
+  /** Cards drawn when the affected attack hits. */
+  onHitDraw?: number;
+  /** Damage the effect prevents from the next matching damage. */
+  preventDamage?: number;
+  /** Consumed by the next matching attack. */
+  nextAttack?: true;
 }
 
 // ── Player intents (client -> server, validated against legal actions) ──────

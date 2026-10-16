@@ -4773,6 +4773,7 @@ describe("ongoing effects", () => {
           subject: { kind: "term", id: "engine.effect.subject.one" },
         },
       },
+      facts: { power: 2, nextAttack: true },
     });
     // the effect is public: the opponent sees it too
     const theirs = projectStateFor(s, 1).ongoing;

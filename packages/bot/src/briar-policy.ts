@@ -211,7 +211,7 @@ function prepareBriarCandidates(
 
 function pendingAttackSetups(input: BotPolicyInput): Set<string> {
   return new Set(input.view.ongoing.flatMap((effect) => {
-    if (effect.seat !== input.seat || !effect.label.includes("next attack")) return [];
+    if (effect.seat !== input.seat || effect.facts?.nextAttack !== true) return [];
     const functional = key(input.cards[effect.cardId]);
     return functional ? [functional] : [];
   }));
@@ -378,7 +378,7 @@ function scoreDefend(intent: Extract<GameIntent, { kind: "defend" }>, input: Bot
         policyInput,
         "cloud cover|1",
         3,
-        (label) => Number(/prevent next (\d+) damage/i.exec(label)?.[1] ?? 3),
+        (effect) => effect.facts?.preventDamage ?? 3,
       );
       const available = cloudCoverIds.filter((id) =>
         !spentIds.has(id) && !reactionPlan.consumedIds.includes(id)

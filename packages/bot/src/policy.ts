@@ -1,4 +1,4 @@
-import type { BotDecklists, CardData, CardView, GameIntent, GameView } from "@fyendal/shared";
+import type { BotDecklists, CardData, CardView, GameIntent, GameView, OngoingEffectView } from "@fyendal/shared";
 import type { GameState } from "@fyendal/engine";
 import { requiredEquipmentStageIntent } from "./defense.js";
 import {
@@ -502,17 +502,17 @@ export function visibleOpponentDamageAmount(input: BotPolicyInput): number | und
 }
 
 /** Sum public copies of one functional effect that are already resolving or
- * active. Ongoing labels may expose a remaining numeric pool; stack copies use
- * the card's full contribution. */
+ * active. An ongoing effect may expose a remaining numeric pool; stack copies
+ * use the card's full contribution. */
 export function committedEffectAmount(
   input: BotPolicyInput,
   functional: string,
   amountPerStack: number,
-  ongoingAmount: (label: string) => number = () => amountPerStack,
+  ongoingAmount: (effect: OngoingEffectView) => number = () => amountPerStack,
 ): number {
   const ongoing = input.view.ongoing.reduce((total, effect) =>
     effect.seat === input.seat && functionalKey(input.cards[effect.cardId]) === functional
-      ? total + ongoingAmount(effect.label)
+      ? total + ongoingAmount(effect)
       : total,
   0);
   const stackCopies = input.view.stack.filter((layer) =>
@@ -1833,7 +1833,7 @@ export function allyLethalThreshold(ally: CardView, input: BotPolicyInput): numb
   const sawbonesPrevention = functionalKey(input.cards[ally.cardId]) === SAWBONES_KEY && (
     ally.tapped !== true || input.view.ongoing.some((effect) =>
       functionalKey(input.cards[effect.cardId]) === SAWBONES_KEY &&
-      /prevent(?: the next)? 1 damage/i.test(effect.label)
+      (effect.facts?.preventDamage ?? 0) > 0
     )
   );
   return sawbonesPrevention

@@ -1,4 +1,10 @@
-import type { EffectLifetime, GameMessage, GameMessageValue, OngoingEffectView } from "@fyendal/shared";
+import type {
+  EffectLifetime,
+  GameMessage,
+  GameMessageValue,
+  OngoingEffectFacts,
+  OngoingEffectView,
+} from "@fyendal/shared";
 import type { GameStateInternal } from "./runtimeState.js";
 import type { CardInstance, Modifier, PlayerState } from "./state.js";
 import { dataOf, isClassOrTalentSupertype } from "./cardProperties.js";
@@ -46,6 +52,20 @@ const subtypesOf = (m: Modifier): readonly string[] =>
 
 const phraseText = (phrases: readonly Phrase[]): string => phrases.map((part) => part.text).join(", ");
 
+/** A modifier's play and activation cost reductions; negative costs more. */
+function costReductions(m: Modifier): { play: number; activate: number } {
+  if (m.attackCostReduction) {
+    return {
+      play: m.attackCostReduction,
+      activate: m.appliesTo === "attack-action" ? 0 : m.attackCostReduction,
+    };
+  }
+  return {
+    play: m.playCostReduction ?? 0,
+    activate: (m.activationCostReduction ?? 0) || (m.attackActivationCostReduction ?? 0),
+  };
+}
+
 function costPhrases(m: Modifier): Phrase[] {
   const cost = (amount: number, action: "play" | "activate" | "both"): Phrase => {
     const change = amount < 0 ? "more" : "less";
@@ -56,11 +76,7 @@ function costPhrases(m: Modifier): Phrase[] {
       { cost: Math.abs(amount), costChange: change, costAction: action },
     );
   };
-  if (m.attackCostReduction) {
-    return [cost(m.attackCostReduction, m.appliesTo === "attack-action" ? "play" : "both")];
-  }
-  const play = m.playCostReduction ?? 0;
-  const activate = (m.activationCostReduction ?? 0) || (m.attackActivationCostReduction ?? 0);
+  const { play, activate } = costReductions(m);
   if (play && play === activate) return [cost(play, "both")];
   return [
     ...(play ? [cost(play, "play")] : []),
@@ -651,7 +667,12 @@ interface EffectDuration {
   lifetime: EffectLifetime;
   text: string;
   message: GameMessage;
+  /** The effect waits for the next matching attack. */
+  nextAttack?: true;
 }
+
+const awaitingNextAttack = (effectDuration: EffectDuration): EffectDuration =>
+  ({ ...effectDuration, nextAttack: true });
 
 const duration = (
   lifetime: EffectLifetime,
@@ -677,6 +698,11 @@ const subjectDuration = (
 
 /** "Next" modifiers: the next matching attack or played card. */
 function nextDuration(state: GameStateInternal, m: Modifier, base: "attack" | "card"): EffectDuration {
+  const effectDuration = nextSubjectDuration(state, m, base);
+  return base === "attack" ? awaitingNextAttack(effectDuration) : effectDuration;
+}
+
+function nextSubjectDuration(state: GameStateInternal, m: Modifier, base: "attack" | "card"): EffectDuration {
   const subject = describeSubject(state, m, base, { next: true });
   if (m.expiresOnChainClose) {
     return subjectDuration(
@@ -703,7 +729,8 @@ function lingeringSubjectDuration(state: GameStateInternal, m: Modifier): Effect
   const defending = Boolean(m.defense) && !m.attack;
   const cardDiscount = Boolean(m.playCostReduction || m.activationCostReduction) && !m.attack && !m.goAgain;
   const next = m.once === true || m.suppressHitEffects === true || m.remainingCostUses === 1;
-  const subject = describeSubject(state, m, defending || cardDiscount ? "card" : "attack", { defending, next });
+  const base = defending || cardDiscount ? "card" : "attack";
+  const subject = describeSubject(state, m, base, { defending, next });
   if (!subject.qualified) return undefined;
   const chain = m.expiresOnChainClose === true;
   const span = chain ? "this combat chain" : "this turn";
@@ -718,13 +745,14 @@ function lingeringSubjectDuration(state: GameStateInternal, m: Modifier): Effect
     );
   }
   if (next) {
-    return subjectDuration(
+    const effectDuration = subjectDuration(
       "once",
       `next ${subject.one} ${span}`,
       chain ? "engine.effect.duration.next.subject.this.chain" : "engine.effect.duration.next.subject.this.turn",
       subject,
       "one",
     );
+    return base === "attack" ? awaitingNextAttack(effectDuration) : effectDuration;
   }
   return subjectDuration(
     chain ? "chain" : "turn",
@@ -820,6 +848,45 @@ interface ProjectedEffect {
   phrases: Phrase[];
   duration: EffectDuration;
   recurring?: true;
+  facts?: OngoingEffectFacts;
+}
+
+function modifierFacts(m: Modifier, effectDuration: EffectDuration): OngoingEffectFacts {
+  const { play, activate } = costReductions(m);
+  // Only "prevent next N damage" has an amount. A size cap ("the next damage
+  // of N or less") prevents a whole event of unknown size, so it adds none.
+  const preventDamage = (m.preventNextDamagePool ?? 0) +
+    (m.maxDamageEventAmount === undefined ? m.preventNextDamageAmount ?? 0 : 0);
+  return {
+    ...(m.attack ? { power: m.attack } : {}),
+    ...(play ? { playCostReduction: play } : {}),
+    ...(activate ? { activationCostReduction: activate } : {}),
+    ...(m.goAgain ? { goAgain: true as const } : {}),
+    ...(m.dominate ? { dominate: true as const } : {}),
+    ...(m.onHitDraw ? { onHitDraw: m.onHitDraw } : {}),
+    ...(preventDamage ? { preventDamage } : {}),
+    ...(effectDuration.nextAttack ? { nextAttack: true as const } : {}),
+  };
+}
+
+/** Facts of two modifiers merged into one effect. */
+function mergeFacts(a: OngoingEffectFacts, b: OngoingEffectFacts): OngoingEffectFacts {
+  const sum = (
+    key: "power" | "playCostReduction" | "activationCostReduction" | "onHitDraw" | "preventDamage",
+  ) => {
+    const total = (a[key] ?? 0) + (b[key] ?? 0);
+    return total ? { [key]: total } : {};
+  };
+  return {
+    ...sum("power"),
+    ...sum("playCostReduction"),
+    ...sum("activationCostReduction"),
+    ...sum("onHitDraw"),
+    ...sum("preventDamage"),
+    ...(a.goAgain || b.goAgain ? { goAgain: true as const } : {}),
+    ...(a.dominate || b.dominate ? { dominate: true as const } : {}),
+    ...(a.nextAttack || b.nextAttack ? { nextAttack: true as const } : {}),
+  };
 }
 
 const MAX_LIST_PHRASES = 4;
@@ -865,6 +932,7 @@ function effectView(effect: ProjectedEffect): OngoingEffectView {
     duration: effect.duration.text,
     durationMessage: effect.duration.message,
     ...(effect.recurring ? { recurring: true as const } : {}),
+    ...(effect.facts ? { facts: effect.facts } : {}),
   };
 }
 
@@ -887,6 +955,7 @@ export function projectOngoingEffects(
       byKey.set(`${key}#${copy}`, effect);
     } else {
       entry.phrases.push(...effect.phrases);
+      if (entry.facts && effect.facts) entry.facts = mergeFacts(entry.facts, effect.facts);
     }
   };
   const sourceIdentity = (card: CardInstance): Pick<ProjectedEffect, "cardId" | "sourceHidden"> =>
@@ -920,6 +989,7 @@ export function projectOngoingEffects(
       ...(src ? { ...sourceIdentity(src.card), sourceSeat: src.seat } : { cardId: m.sourceCardId ?? "" }),
       phrases: phrases.length > 0 ? phrases : [phrase("ongoing effect", "engine.effect.summary.ongoing")],
       duration: effectDuration,
+      facts: modifierFacts(m, effectDuration),
     });
   }
 

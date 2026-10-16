@@ -75,7 +75,7 @@ function evaluateBriarTurn(
   const future = evaluateTurnFuture(input, root, config.rules);
   const equipmentSpent = spentEquipmentValue(input, root);
   const unusedSetups = input.view.ongoing.filter((effect) =>
-    effect.seat === root.seat && effect.label.includes("next attack")
+    effect.seat === root.seat && effect.facts?.nextAttack === true
   ).length;
   const runechants = me.board.filter((card) =>
     root.cards[card.cardId]?.name.trim().toLowerCase() === "runechant"

@@ -37,10 +37,10 @@ function tokenEffects(input: BotPolicyInput, nextTurn: boolean): PendingEffect[]
     return effects;
   }
   input.view.ongoing.forEach((effect, index) => {
-    if (effect.seat !== input.seat) return;
-    if (/next attack.*go again/i.test(effect.label)) {
+    if (effect.seat !== input.seat || effect.facts?.nextAttack !== true) return;
+    if (effect.facts.goAgain) {
       effects.push({ key: `ongoing-agility.${index}`, uses: 1, grantsGoAgain: true });
-    } else if (/\+1.*next attack|next attack.*\+1/i.test(effect.label)) {
+    } else if (effect.facts.power === 1) {
       effects.push({ key: `ongoing-might.${index}`, uses: 1, power: 1 });
     }
   });

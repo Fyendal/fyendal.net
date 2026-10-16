@@ -1182,13 +1182,33 @@ function stackLayer(value: unknown): boolean {
 
 const EFFECT_LIFETIMES = new Set<unknown>(["once", "chain", "turn", "later", "game"] satisfies EffectLifetime[]);
 
+function ongoingEffectFacts(value: unknown): boolean {
+  const facts = object(value);
+  return !!facts && exactKeys(
+    facts,
+    [
+      "power", "playCostReduction", "activationCostReduction", "goAgain", "dominate", "onHitDraw",
+      "preventDamage", "nextAttack",
+    ],
+    [],
+  )
+    && optional(facts.power, integer)
+    && optional(facts.playCostReduction, integer)
+    && optional(facts.activationCostReduction, integer)
+    && optional(facts.onHitDraw, positiveInteger)
+    && optional(facts.preventDamage, positiveInteger)
+    && (facts.goAgain === undefined || facts.goAgain === true)
+    && (facts.dominate === undefined || facts.dominate === true)
+    && (facts.nextAttack === undefined || facts.nextAttack === true);
+}
+
 function ongoingEffect(value: unknown): boolean {
   const effect = object(value);
   return !!effect && exactKeys(
     effect,
     [
       "seat", "cardId", "label", "sourceHidden", "sourceSeat", "summary", "summaryMessage",
-      "lifetime", "duration", "durationMessage", "recurring",
+      "lifetime", "duration", "durationMessage", "recurring", "facts",
     ],
     ["seat", "cardId", "label"],
   )
@@ -1200,7 +1220,8 @@ function ongoingEffect(value: unknown): boolean {
     && (effect.lifetime === undefined || EFFECT_LIFETIMES.has(effect.lifetime))
     && (effect.duration === undefined || string(effect.duration, MAX_SHORT_TEXT))
     && (effect.durationMessage === undefined || decodeGameMessage(effect.durationMessage) !== null)
-    && (effect.recurring === undefined || effect.recurring === true);
+    && (effect.recurring === undefined || effect.recurring === true)
+    && (effect.facts === undefined || ongoingEffectFacts(effect.facts));
 }
 
 function seatCounters(value: unknown): value is [number, number] {

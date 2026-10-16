@@ -33,7 +33,9 @@ function sixPlus(card: CardView, input: BotPolicyInput): boolean {
 }
 
 function agilityReady(input: BotPolicyInput): boolean {
-  return input.view.ongoing.some((effect) => effect.seat === input.seat && /next attack.*go again/i.test(effect.label));
+  return input.view.ongoing.some((effect) =>
+    effect.seat === input.seat && effect.facts?.nextAttack === true && effect.facts.goAgain === true
+  );
 }
 
 function pitchHasSix(intent: GameIntent, input: BotPolicyInput): boolean {

@@ -126,7 +126,7 @@ function committedOasisPrevention(input: BotPolicyInput): number {
     input,
     "oasis respite|1",
     4,
-    (label) => Number(/prevent next (\d+) damage/i.exec(label)?.[1] ?? 4),
+    (effect) => effect.facts?.preventDamage ?? 4,
   );
 }
 

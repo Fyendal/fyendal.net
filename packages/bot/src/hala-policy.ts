@@ -219,7 +219,7 @@ function toeTheLinePreventionCommitted(input: BotPolicyInput): number {
     input,
     "toe the line|1",
     2,
-    (label) => Number(/prevent next (\d+) damage/i.exec(label)?.[1] ?? 2),
+    (effect) => effect.facts?.preventDamage ?? 2,
   );
 }
 
@@ -409,7 +409,7 @@ function drawnAfterBrimmingIntent(input: BotPolicyInput): GameIntent | undefined
 function drawnOnHitReady(input: BotPolicyInput): boolean {
   return input.view.ongoing.some((effect) =>
     effect.seat === input.seat && key(input.cards[effect.cardId]) === "drawn to the blade|2" &&
-    /\bdraw\b/i.test(effect.label)
+    (effect.facts?.onHitDraw ?? 0) > 0
   );
 }
 
@@ -1101,10 +1101,10 @@ function projectedAttackDamage(
   ));
   for (const effect of input.view.ongoing) {
     if (!includeNextAttackEffects) continue;
-    if (effect.seat !== input.seat || !effect.label.toLowerCase().includes("next attack")) continue;
+    if (effect.seat !== input.seat || effect.facts?.nextAttack !== true) continue;
     const source = input.cards[effect.cardId];
     if (key(source).startsWith("swordmaster's path|") && !subtypes.has("sword")) continue;
-    damage += Number(/\+(\d+) attack/i.exec(effect.label)?.[1] ?? 0);
+    damage += Math.max(0, effect.facts.power ?? 0);
   }
   return damage;
 }
@@ -2010,7 +2010,7 @@ function evaluateHalaTurn(
     : estimateFlurryAttackValue(remainingCards, input, conversion);
   const vigor = me.board.filter((card) => key(root.cards[card.cardId]) === "vigor|0").length;
   const unusedSetups = input.view.ongoing.filter((effect) =>
-    effect.seat === root.seat && effect.label.includes("next attack")
+    effect.seat === root.seat && effect.facts?.nextAttack === true
   ).length;
   const winnerScore = state.winner === root.seat
     ? 1_000_000

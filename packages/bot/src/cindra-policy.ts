@@ -151,8 +151,8 @@ function draconicCostReduction(input: BotPolicyInput, kind: "play" | "activation
       !["ignite|1", CARD.artOfTheDragonBlood].includes(key(input.cards[effect.cardId]))) {
       return total;
     }
-    const match = effect.label.match(new RegExp(`${kind} costs (\\d+) less`));
-    return total + Number(match?.[1] ?? 0);
+    const reduction = kind === "play" ? effect.facts?.playCostReduction : effect.facts?.activationCostReduction;
+    return total + (reduction ?? 0);
   }, 0);
 }
 
@@ -160,7 +160,7 @@ function dracoFireDiscountAvailable(input: BotPolicyInput): boolean {
   return input.view.ongoing.some((effect) =>
     effect.seat === input.seat &&
     key(input.cards[effect.cardId]) === CARD.dracoFire &&
-    /attack costs [1-9]\d* less/i.test(effect.label)
+    (effect.facts?.activationCostReduction ?? 0) > 0
   );
 }
 
@@ -945,6 +945,17 @@ function legalFlickKnivesCouldBePlayed(input: BotPolicyInput): boolean {
   );
 }
 
+function flickedDaggerRecoveryIsFunded(input: BotPolicyInput): boolean {
+  // Flick puts its dagger into the graveyard and, through Blood Splattered
+  // Vest, pays a resource. When that resource plus the floating pool already
+  // covers Cindra's discounted activation, the flicked dagger comes back this
+  // turn, so Flick does not cost the last dagger.
+  const me = input.view.players[input.seat];
+  return /^cindra\b/.test(key(input.cards[me.heroCardId])) &&
+    equipmentHasKey(input, "chest", CARD.bloodSplatteredVest) &&
+    cindraRecoveryCost(input) <= me.resources + 1;
+}
+
 function shouldFlickKnives(input: BotPolicyInput): boolean {
   const decision = input.view.pendingDecision;
   const link = currentLink(input);
@@ -972,7 +983,8 @@ function shouldFlickKnives(input: BotPolicyInput): boolean {
   // is about to destroy. Otherwise retain the normal last-dagger guard.
   const flickBeforeRecoveryAvailable = legalFlickKnivesCouldBePlayed(input) &&
     legalCindraRecoveryCouldBePlayed(input);
-  if (daggersExpectedToRemain(input) <= 1 && !flickBeforeRecoveryAvailable) {
+  if (daggersExpectedToRemain(input) <= 1 && !flickBeforeRecoveryAvailable &&
+    !flickedDaggerRecoveryIsFunded(input)) {
     const opponentLife = input.view.players[1 - input.seat]!.life;
     const priorHits = consecutiveHitsBeforeCurrent(input);
     if (opponentLife >= 10 || priorHits < 1 || priorHits > 2) return false;

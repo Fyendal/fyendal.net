@@ -998,6 +998,7 @@ describe("Hala policy", () => {
       seat: 0,
       cardId: "SBL022",
       label: "prevent next 4 damage, create Flurry when damage is prevented · this turn",
+      facts: { preventDamage: 4 },
     }];
     expect(chooseHalaIntent({ seat: 0, view, legal, cards: cardData })).toEqual({ kind: "pass" });
 
@@ -2885,7 +2886,8 @@ describe("Hala policy", () => {
     view.ongoing.push({
       seat: 0,
       cardId: "MPW130",
-      label: "+3 attack · next attack",
+      label: "+3 power · next attack",
+      facts: { power: 3, nextAttack: true },
     });
 
     const first = chooseHalaIntent({
@@ -2992,7 +2994,8 @@ describe("Hala policy", () => {
     view.ongoing.push({
       seat: 0,
       cardId: "MPW130",
-      label: "+3 attack · next attack",
+      label: "+3 power · next attack",
+      facts: { power: 3, nextAttack: true },
     });
 
     const larger = chooseHalaIntent({

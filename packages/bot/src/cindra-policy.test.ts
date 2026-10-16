@@ -1020,6 +1020,49 @@ describe("Cindra Head Jabs policy", () => {
       .toEqual({ kind: "pass" });
   });
 
+  it("Flicks the last Kunai on a blocked second Draconic link when Vest pays its recovery", () => {
+    // Report 45bc84bc: Kunai hit, then Sink Below fully blocked Blaze Headlong
+    // at 37 life with Hot on Their Heels and Cut Through still in hand.
+    const game = state();
+    replaceHand(game, 0, ["HNT067", "GEM027"]);
+    game.players[0].resources = 0;
+    game.players[1].life = 37;
+    game.players[0].equipment.chest = {
+      instanceId: game.nextInstanceId++,
+      cardId: "HNT168",
+      owner: 0,
+    };
+    const view = projectStateFor(game, 0);
+    const flick = view.players[0].equipment.arms!;
+    const doomedKunai = view.players[0].weapons[0]!;
+    doomedKunai.usedAbilityIndexes = [0];
+    view.priorityPlayer = 0;
+    view.activePlayer = 0;
+    view.turn = 2;
+    view.phase = "reaction";
+    view.pendingDecision = { player: 0, kind: "attack-reaction", prompt: "Attack reactions" };
+    view.chain = [
+      {
+        attackingCard: doomedKunai,
+        defendingCards: [], attackValue: 3, defenseValue: 0, damage: 3,
+        resolved: true, hit: true, goAgain: true, reactions: [],
+      },
+      {
+        attackingCard: { instanceId: 90_124, cardId: "HNT157", owner: 0 },
+        defendingCards: [], attackValue: 4, defenseValue: 4, damage: 0,
+        resolved: false, hit: false, goAgain: true, reactions: [],
+      },
+    ];
+    const flickIntent: GameIntent = {
+      kind: "activate-ability",
+      sourceInstanceId: flick.instanceId,
+      pitchInstanceIds: [],
+    };
+    const legal: GameIntent[] = [flickIntent, { kind: "pass" }, { kind: "concede" }];
+
+    expect(chooseCindraIntent({ seat: 0, view, legal, cards: cardData })).toEqual(flickIntent);
+  });
+
   it("holds Flick when the current link already hits and another attack is playable", () => {
     const game = state();
     const followup = {
@@ -1078,7 +1121,8 @@ describe("Cindra Head Jabs policy", () => {
     view.ongoing.push({
       seat: 0,
       cardId: "HNT058",
-      label: "play costs 1 less · activation costs 1 less",
+      label: "costs 1 less to play or activate · next Draconic card this combat chain",
+      facts: { playCostReduction: 1, activationCostReduction: 1 },
     });
     const legal: GameIntent[] = [
       { kind: "activate-ability", sourceInstanceId: flick.instanceId, pitchInstanceIds: [] },
@@ -1852,7 +1896,8 @@ describe("Cindra Head Jabs policy", () => {
     view.ongoing.push({
       seat: 0,
       cardId: "HNT058",
-      label: "play costs 1 less · activation costs 1 less",
+      label: "costs 1 less to play or activate · next Draconic card this combat chain",
+      facts: { playCostReduction: 1, activationCostReduction: 1 },
     });
     const freeDagger: GameIntent = {
       kind: "activate-ability",
@@ -2861,7 +2906,8 @@ describe("Cindra Head Jabs policy", () => {
     view.ongoing.push({
       seat: 0,
       cardId: "HNT058",
-      label: "play costs 1 less · activation costs 1 less",
+      label: "costs 1 less to play or activate · next Draconic card this combat chain",
+      facts: { playCostReduction: 1, activationCostReduction: 1 },
     });
     expect(chooseCindraIntent({ seat: 0, view, legal, cards: cardData }))
       .toEqual({ kind: "choose", optionId: "no" });
@@ -3022,7 +3068,7 @@ describe("Cindra engine-driven behavior scenarios", () => {
     expect(projectStateFor(game, 0).chain.at(-1)?.attackValue).toBe(7);
   });
 
-  it("preserves the last dagger after the third consecutive-hit window", () => {
+  it("Flicks then re-equips the last dagger after the third consecutive-hit window", () => {
     let game = state(0);
     game.turn = 2;
     replaceHand(game, 0, ["ANQ029", "UPR075", "PEN250", "OMN245", "UPR093"]);
@@ -3112,7 +3158,32 @@ describe("Cindra engine-driven behavior scenarios", () => {
       candidate.pendingDecision?.kind === "attack-reaction" && candidate.pendingDecision.player === 0
     );
 
-    expect(cindraIntent(game)).toEqual({ kind: "pass" });
+    // The chain has made Cindra's recovery free, so it re-equips whatever
+    // Flick destroys and the last dagger survives Flick's extra hit.
+    const flick = cindraIntent(game);
+    expect(flick).toEqual({
+      kind: "activate-ability",
+      sourceInstanceId: game.players[0]!.equipment.arms!.instanceId,
+      pitchInstanceIds: [],
+      pitchRequired: 0,
+    });
+    game = apply(game, 0, flick);
+    const heroId = game.players[0]!.hero.instanceId;
+    let recovered = false;
+    for (let step = 0; step < 12 && !recovered; step++) {
+      const actor = (game.pendingDecision?.player ?? game.priorityPlayer) as Seat;
+      const intent = actor === 0
+        ? cindraIntent(game)
+        : legalIntent(game, 1, (candidate) => candidate.kind === "pass", "opponent pass");
+      recovered = intent.kind === "activate-ability" && intent.sourceInstanceId === heroId;
+      game = apply(game, actor, intent);
+    }
+    expect(recovered).toBe(true);
+    game = advanceUntil(game, (candidate) => candidate.pendingDecision?.kind === "choose-target");
+    game = applyCindra(game);
+    // The attacking Kunai stays equipped until the chain closes, so two Kunai
+    // means the flicked one came back.
+    expect(game.players[0]!.weapons.filter((weapon) => weapon.cardId === "GEM003")).toHaveLength(2);
   });
 
   it("banks a Flick Knives hit to play Draco, Kunai, and Breaking Point", () => {
