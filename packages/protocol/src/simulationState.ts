@@ -978,7 +978,7 @@ function validateState(value: unknown, code: string): PersistedGameStateV1 {
         code,
         entryPath,
         ["source", "seat", "subjectSeat", "event", "turn", "hook", "label"],
-        ["labelMessage"],
+        ["labelMessage", "recurring"],
       );
       validateCard(entry.source, code, `${entryPath}.source`);
       for (const key of ["seat", "subjectSeat", "turn"] as const) integer(entry[key], code, `${entryPath}.${key}`);
@@ -987,6 +987,9 @@ function validateState(value: unknown, code: string): PersistedGameStateV1 {
       string(entry.label, code, `${entryPath}.label`, 512);
       optional(entry, "labelMessage", (message, messagePath) => {
         validateGameMessage(message, code, messagePath);
+      }, entryPath);
+      optional(entry, "recurring", (flag, flagPath) => {
+        if (flag !== true) fail(code, flagPath, "expected true");
       }, entryPath);
     });
   }, path);

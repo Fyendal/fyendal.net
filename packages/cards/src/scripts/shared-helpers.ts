@@ -407,6 +407,18 @@ export function heroChoiceSeat(ctx: ScriptCtx, option: string): number | undefin
   return undefined;
 }
 
+/** "card-moved-from-deck-by-effect" condition for "when an activated ability
+ * or action card effect puts this face-up into a zone from your deck". The
+ * engine reports only face-up deck moves. */
+export function effectPutSelfFaceUpFromDeck(
+  ctx: ScriptCtx,
+  card: DeepReadonly<CardInstance> | undefined,
+  event: TriggerEventContext | undefined,
+): boolean {
+  return card?.instanceId === ctx.self.instanceId &&
+    (event?.effectSource === "action-card" || event?.effectSource === "activated-ability");
+}
+
 /** Damage facts of a "damage-dealt" event when a hero, not an ally, was dealt
  * the damage. Conditions receive them at trigger time; effects receive the
  * persisted copy at resolution. */

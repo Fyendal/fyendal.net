@@ -1603,6 +1603,20 @@ export function makeCtx(
         ...(presentation.promptMessage ? { labelMessage: presentation.promptMessage } : {}),
       });
     },
+    scheduleRecurringEndOfTurnTrigger(hook, label, subjectSeat = seat) {
+      const presentation = scriptPromptParts(label);
+      state.delayedTriggers.push({
+        source: runtime.commands.snapshotSerializable(self),
+        seat,
+        subjectSeat,
+        event: "end-of-turn",
+        turn: state.turn,
+        hook,
+        label: presentation.fallback,
+        ...(presentation.promptMessage ? { labelMessage: presentation.promptMessage } : {}),
+        recurring: true,
+      });
+    },
     scheduleStartOfNextTurnTrigger(hook, label, subjectSeat = seat) {
       const presentation = scriptPromptParts(label);
       state.delayedTriggers.push({

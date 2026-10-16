@@ -7016,6 +7016,32 @@
       "value": " may be played as though it were an instant this turn"
     }
   ],
+  "card.log.obk.incubator.infected": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": for the rest of the game, at the beginning of "
+    },
+    {
+      "type": 1,
+      "value": "target"
+    },
+    {
+      "type": 0,
+      "value": "'s end phase, create "
+    },
+    {
+      "type": 1,
+      "value": "token"
+    },
+    {
+      "type": 0,
+      "value": " under their control"
+    }
+  ],
   "card.log.obk.quietstreets.reduce": [
     {
       "type": 1,
@@ -10668,6 +10694,24 @@
     {
       "type": 0,
       "value": "Put a card from your arsenal on the bottom of your deck as a cost"
+    }
+  ],
+  "card.obk.backalley.hero.choose": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": create "
+    },
+    {
+      "type": 1,
+      "value": "token"
+    },
+    {
+      "type": 0,
+      "value": " under which hero's control?"
     }
   ],
   "card.obk.ceremony.disease.cure": [
@@ -16622,6 +16666,20 @@
       "value": " or less this turn as though it were an instant"
     }
   ],
+  "card.trigger.obk.backalley.token": [
+    {
+      "type": 0,
+      "value": "Create "
+    },
+    {
+      "type": 1,
+      "value": "token"
+    },
+    {
+      "type": 0,
+      "value": " under a hero's control"
+    }
+  ],
   "card.trigger.obk.extinction.name": [
     {
       "type": 0,
@@ -16646,6 +16704,20 @@
     {
       "type": 0,
       "value": "Tap this hero to play the banished card as though it were an instant this turn"
+    }
+  ],
+  "card.trigger.obk.incubator.pox": [
+    {
+      "type": 0,
+      "value": "Create "
+    },
+    {
+      "type": 1,
+      "value": "token"
+    },
+    {
+      "type": 0,
+      "value": " under the hit hero's control"
     }
   ],
   "card.trigger.obk.min.flip": [

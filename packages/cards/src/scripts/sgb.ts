@@ -5,6 +5,7 @@ import {
   commonOptionMessages,
   decisionMessage,
   decisionPrompt,
+  effectPutSelfFaceUpFromDeck,
   localizedCardLog,
   nextAttack,
   opponentSeat,
@@ -527,9 +528,7 @@ export const sgb: Record<string, CardScript> = {
         event: "card-moved-from-deck-by-effect",
         sourceZone: "any",
         label: "Gain 1 action point",
-        condition: (ctx, card, eventContext) =>
-          card?.instanceId === ctx.self.instanceId &&
-          (eventContext?.effectSource === "action-card" || eventContext?.effectSource === "activated-ability"),
+        condition: effectPutSelfFaceUpFromDeck,
         effect: (ctx) => ctx.gainActionPoint(),
       },
     ],

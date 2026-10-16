@@ -5,9 +5,12 @@ import {
   commonOptionMessages,
   decisionMessage,
   decisionPrompt,
+  effectPutSelfFaceUpFromDeck,
   entersArenaTrigger,
+  heroChoiceSeat,
   localizedCardLog,
   opponentSeat,
+  requestHeroChoice,
 } from "./shared-helpers.js";
 
 // Disease token names offered when an effect names a disease token.
@@ -636,6 +639,77 @@ function courier(tokenId: string): CardScript {
   };
 }
 
+const BACK_ALLEY_HOOK = "obk-back-alley-token";
+
+function backAlleyBank(tokenId: string, tokenName: string): CardScript {
+  const token = { kind: "card", cardId: tokenId } as const;
+  return {
+    triggers: [
+      {
+        event: "card-moved-from-deck-by-effect",
+        sourceZone: "any",
+        label: `Create ${tokenName} under a hero's control`,
+        labelMessage: decisionMessage("card.trigger.obk.backalley.token", { token }),
+        condition: effectPutSelfFaceUpFromDeck,
+        effect(ctx) {
+          requestHeroChoice(
+            ctx,
+            BACK_ALLEY_HOOK,
+            `${ctx.data.name}: create ${tokenName} under which hero's control?`,
+            "card.obk.backalley.hero.choose",
+            { values: { card: { kind: "card", cardId: ctx.self.cardId }, token }, defaultOption: "opposing hero" },
+          );
+        },
+      },
+    ],
+    onChoose(ctx, hook, option) {
+      const seat = hook === BACK_ALLEY_HOOK ? heroChoiceSeat(ctx, option) : undefined;
+      if (seat !== undefined) ctx.createToken(tokenId, seat);
+    },
+  };
+}
+
+const INCUBATOR_INFECTED = "incubatorInfected";
+const INCUBATOR_POX_HOOK = "obk-incubator-pox";
+
+function infectedWithBloodrotPox(ctx: ScriptCtx, seat: number): boolean {
+  return ctx.player(seat).board.some((card) => isDisease(ctx, card) && ctx.cardNames(card).includes("bloodrot pox"));
+}
+
+const incubatorImplanter: CardScript = {
+  // "When this attacks a hero, if …" grants the hit ability only when the
+  // defending hero is infected as the attack is declared.
+  onAttackDeclared(ctx) {
+    if (ctx.link?.targetAllyId === undefined && infectedWithBloodrotPox(ctx, opponentSeat(ctx))) {
+      ctx.setFlag("link", INCUBATOR_INFECTED, true);
+    }
+  },
+  canTriggerOnHit: (ctx) => ctx.link?.targetAllyId === undefined && ctx.getFlag("link", INCUBATOR_INFECTED) === true,
+  onHit(ctx) {
+    const seat = opponentSeat(ctx);
+    ctx.scheduleRecurringEndOfTurnTrigger(
+      INCUBATOR_POX_HOOK,
+      decisionPrompt("Create a Bloodrot Pox token under the hit hero's control", "card.trigger.obk.incubator.pox", {
+        values: { token: { kind: "card", cardId: BLOODROT_POX } },
+      }),
+      seat,
+    );
+    ctx.logPublic(
+      localizedCardLog(
+        ctx,
+        `${ctx.data.name}: for the rest of the game, at the beginning of ` +
+          `${ctx.cardData(ctx.player(seat).heroCardId).name}'s end phase, ` +
+          "create a Bloodrot Pox token under their control",
+        "card.log.obk.incubator.infected",
+        { target: { kind: "player", seat }, token: { kind: "card", cardId: BLOODROT_POX } },
+      ),
+    );
+  },
+  onDelayedTrigger(ctx, hook) {
+    if (hook === INCUBATOR_POX_HOOK) ctx.createToken(BLOODROT_POX, opponentSeat(ctx));
+  },
+};
+
 // Weapon and ally attacks are attack-proxies, not cards on the chain link.
 function streets(delta: number): CardScript {
   const sign = delta < 0 ? "-" : "+";
@@ -701,6 +775,10 @@ export const obk: Record<string, CardScript> = {
   "bloodrot courier|1": courier(BLOODROT_POX),
   "exertion courier|2": courier(EXERTION),
   "inertia courier|3": courier(INERTIA),
+  "back alley bloodbank|1": backAlleyBank(BLOODROT_POX, "Bloodrot Pox"),
+  "back alley bilebank|2": backAlleyBank(EXERTION, "Exertion"),
+  "back alley plasmabank|3": backAlleyBank(INERTIA, "Inertia"),
+  "incubator implanter|1": incubatorImplanter,
   "exertion|0": exertion,
   "patient zero|1": patientZero,
   "curative ceremony|1": curativeCeremony,

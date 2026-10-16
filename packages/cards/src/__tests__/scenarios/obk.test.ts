@@ -990,6 +990,110 @@ describe("Outbreak cards", () => {
     });
   });
 
+  describe("Back Alley banks", () => {
+    const BANKS = [
+      ["back alley bloodbank|1", "Bloodrot Pox"],
+      ["back alley bilebank|2", "Exertion"],
+      ["back alley plasmabank|3", "Inertia"],
+    ] as const;
+    const incited = (bank: string) => scenario({ seats: [
+      { hero: "rhinar", hand: [INCITE], deck: [bank], resources: 1, weapons: [], equipment: NO_EQUIPMENT },
+      { hero: "dorinthea", deck: [BLUE], weapons: [], equipment: NO_EQUIPMENT },
+    ] }).play(INCITE);
+
+    for (const [bank, token] of BANKS) {
+      it(`creates ${token} under the chosen hero's control when an action card arsenals ${bank}`, () => {
+        const game = incited(bank).expectInZone(0, bank, "arsenal").chooseOption("opposing hero");
+
+        expect(boardNames(game, 0)).toEqual([]);
+        expect(boardNames(game, 1)).toEqual([token]);
+      });
+    }
+
+    it("may create the token under its controller's own hero", () => {
+      const game = incited(BANKS[0][0]).chooseOption("your hero");
+
+      expect(boardNames(game, 0)).toEqual(["Bloodrot Pox"]);
+      expect(boardNames(game, 1)).toEqual([]);
+    });
+
+    it("does not trigger when a triggered hero ability banishes it from the deck", () => {
+      const bank = BANKS[0][0];
+      const game = scenario({ seats: [
+        {
+          hero: "rhinar",
+          heroKey: "viserai, the forsaken|0",
+          hand: ["runic reaving|1"],
+          deck: [bank],
+          weapons: [],
+          equipment: NO_EQUIPMENT,
+        },
+        { hero: "dorinthea", hand: [] },
+      ] });
+      game.activate("runic reaving|1", { settle: false })
+        .passPriority()
+        .passPriority()
+        .passPriority()
+        .passPriority()
+        .expectInZone(0, bank, "banish")
+        .expectNoLog("Back Alley Bloodbank triggers");
+      expect(boardNames(game, 0)).not.toContain("Bloodrot Pox");
+      expect(boardNames(game, 1)).toEqual([]);
+    });
+  });
+
+  describe("Incubator Implanter", () => {
+    const IMPLANTER = "incubator implanter|1";
+    const implanted = (defenderBoard: string[]) => scenario({ seats: [
+      {
+        hero: "rhinar",
+        arsenal: [IMPLANTER],
+        deck: Array<string>(8).fill(FILLER),
+        resources: 1,
+        weapons: [DEATH_DEALER],
+        equipment: NO_EQUIPMENT,
+      },
+      {
+        hero: "dorinthea",
+        board: defenderBoard,
+        deck: Array<string>(8).fill(BLUE),
+        weapons: [],
+        equipment: NO_EQUIPMENT,
+      },
+    ] }).play(IMPLANTER, { fromArsenal: true }).blockWith().settle();
+
+    it("creates Bloodrot Pox at each of the infected hero's end phases for the rest of the game", () => {
+      const game = implanted([BLOODROT_POX]).expectLife(1, 17).expectLog("for the rest of the game");
+
+      // Not at the attacker's own end phase.
+      game.endTurn().expectNoLog("under the hit hero's control");
+      expect(boardNames(game, 1)).toEqual(["Bloodrot Pox"]);
+
+      // Their Bloodrot Pox is destroyed and deals 2; Implanter's effect leaves a new one.
+      const endInfectedTurn = () => {
+        const turn = game.state.turn;
+        game.passActionPhase().settle().chooseOption("no").expectTurn(turn + 1);
+      };
+      endInfectedTurn();
+      game.expectLog("under the hit hero's control").expectLife(1, 15);
+      expect(boardNames(game, 1)).toEqual(["Bloodrot Pox"]);
+
+      game.endTurn();
+      expect(boardNames(game, 1)).toEqual(["Bloodrot Pox"]);
+      endInfectedTurn();
+      game.expectLife(1, 13);
+      expect(boardNames(game, 1)).toEqual(["Bloodrot Pox"]);
+      expect(game.state.delayedTriggers).toHaveLength(1);
+    });
+
+    it("gets nothing when the defending hero is not infected with Bloodrot Pox", () => {
+      const game = implanted([FRAILTY]).expectLife(1, 17).expectNoLog("for the rest of the game");
+
+      game.endTurn().endTurn().expectNoLog("under the hit hero's control");
+      expect(game.state.delayedTriggers).toEqual([]);
+    });
+  });
+
   describe("Quiet Streets and Raging Streets", () => {
     const QUIET_STREETS = "quiet streets|2";
     const RAGING_STREETS = "raging streets|2";

@@ -119,6 +119,45 @@
     "set": "OBK"
   },
   {
+    "id": "OBK040",
+    "name": "Back Alley Bloodbank",
+    "cardType": "action",
+    "text": "When an activated ability or action card effect puts this face-up into a zone from your deck, create a Bloodrot Pox token under a hero's control.",
+    "pitch": 1,
+    "cost": 1,
+    "attack": 5,
+    "defense": 3,
+    "classes": ["chaos"],
+    "subtypes": ["attack"],
+    "set": "OBK"
+  },
+  {
+    "id": "OBK041",
+    "name": "Back Alley Bilebank",
+    "cardType": "action",
+    "text": "When an activated ability or action card effect puts this face-up into a zone from your deck, create an Exertion token under a hero's control.",
+    "pitch": 2,
+    "cost": 1,
+    "attack": 4,
+    "defense": 3,
+    "classes": ["chaos"],
+    "subtypes": ["attack"],
+    "set": "OBK"
+  },
+  {
+    "id": "OBK042",
+    "name": "Back Alley Plasmabank",
+    "cardType": "action",
+    "text": "When an activated ability or action card effect puts this face-up into a zone from your deck, create an Inertia token under a hero's control.",
+    "pitch": 3,
+    "cost": 1,
+    "attack": 3,
+    "defense": 3,
+    "classes": ["chaos"],
+    "subtypes": ["attack"],
+    "set": "OBK"
+  },
+  {
     "id": "OBK066",
     "name": "Exertion Bloom",
     "cardType": "instant",
@@ -282,6 +321,19 @@
     "text": "Action - {t}: Put all cards from your arsenal on the bottom of your deck. Put an arrow from your hand face-up into your arsenal. If you control a tapped bow, this costs {r} more to activate. Go again",
     "classes": ["ranger"],
     "subtypes": ["bow", "1h"],
+    "set": "OBK"
+  },
+  {
+    "id": "OBK177",
+    "name": "Incubator Implanter",
+    "cardType": "action",
+    "text": "(Arrows can only be played from arsenal and only if you control a bow.)\nWhen this attacks a hero, if they are infected with Bloodrot Pox, this gets \"When this hits a hero, for the rest of the game, at the beginning of their end phase, create a Bloodrot Pox token under their control.\"",
+    "pitch": 1,
+    "cost": 1,
+    "attack": 3,
+    "defense": 3,
+    "classes": ["ranger"],
+    "subtypes": ["arrow", "attack"],
     "set": "OBK"
   },
   {

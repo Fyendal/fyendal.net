@@ -2057,16 +2057,11 @@ export function collectEventTriggerLayers(
     }
   }
   const dueDelayed = state.delayedTriggers.filter(
-    (delayed) =>
-      delayed.event === event &&
-      (delayed.event === "start-of-turn"
-        ? delayed.turn < state.turn
-        : delayed.turn === state.turn) &&
-      delayed.subjectSeat === subject,
+    (delayed) => delayed.event === event && delayed.subjectSeat === subject && delayedTurnIsDue(state, delayed),
   );
   if (dueDelayed.length > 0) {
-    const due = new Set(dueDelayed);
-    state.delayedTriggers = state.delayedTriggers.filter((delayed) => !due.has(delayed));
+    const spent = new Set(dueDelayed.filter((delayed) => !delayed.recurring));
+    state.delayedTriggers = state.delayedTriggers.filter((delayed) => !spent.has(delayed));
     for (const delayed of dueDelayed) {
       let group = groups.find((candidate) => candidate.seat === delayed.seat);
       if (!group) {
@@ -2097,6 +2092,11 @@ export function collectEventTriggerLayers(
     groups.sort((a, b) => seatOrder.indexOf(a.seat) - seatOrder.indexOf(b.seat));
   }
   return groups;
+}
+
+function delayedTurnIsDue(state: GameStateInternal, delayed: GameStateInternal["delayedTriggers"][number]): boolean {
+  if (delayed.recurring) return delayed.turn <= state.turn;
+  return delayed.event === "start-of-turn" ? delayed.turn < state.turn : delayed.turn === state.turn;
 }
 
 /** Card-played triggers join the played card's pending layers. They are

@@ -1055,4 +1055,7 @@ interface DelayedTrigger {
   hook: string;
   label: string;
   labelMessage?: GameMessage;
+  /** "For the rest of the game": stays scheduled and triggers at every
+   * matching event of the subject on or after `turn`. */
+  recurring?: true;
 }

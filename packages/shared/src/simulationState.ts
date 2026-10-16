@@ -122,6 +122,7 @@ export interface PersistedDelayedTriggerV1 {
   hook: string;
   label: string;
   labelMessage?: GameMessage;
+  recurring?: true;
 }
 
 export interface PersistedPlayerV1 {

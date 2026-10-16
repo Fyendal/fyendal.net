@@ -3,6 +3,7 @@ import {
   buffNextAttack,
   commonOptionMessages,
   decisionPrompt,
+  effectPutSelfFaceUpFromDeck,
   localizedCardLog,
   optN,
   optOnChoose,
@@ -118,9 +119,7 @@ function backAlleyBreakline(): CardScript {
         event: "card-moved-from-deck-by-effect",
         sourceZone: "any",
         label: "Gain 1 action point",
-        condition: (ctx, card, eventContext) =>
-          card?.instanceId === ctx.self.instanceId &&
-          (eventContext?.effectSource === "action-card" || eventContext?.effectSource === "activated-ability"),
+        condition: effectPutSelfFaceUpFromDeck,
         effect: (ctx) => ctx.gainActionPoint(),
       },
     ],

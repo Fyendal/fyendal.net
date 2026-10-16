@@ -6675,6 +6675,28 @@
       "value": "target"
     }
   ],
+  "card.log.obk.incubator.infected": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：在本局游戏剩余时间内，于 "
+    },
+    {
+      "type": 1,
+      "value": "target"
+    },
+    {
+      "type": 0,
+      "value": " 的结束阶段开始时，在其操控下生成 "
+    },
+    {
+      "type": 1,
+      "value": "token"
+    }
+  ],
   "card.log.obk.quietstreets.reduce": [
     {
       "type": 1,
@@ -10161,6 +10183,24 @@
     {
       "type": 0,
       "value": "将你 arsenal 中的一张牌置于牌库底部作为费用"
+    }
+  ],
+  "card.obk.backalley.hero.choose": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：在哪位英雄的操控下生成 "
+    },
+    {
+      "type": 1,
+      "value": "token"
+    },
+    {
+      "type": 0,
+      "value": "？"
     }
   ],
   "card.obk.ceremony.disease.cure": [
@@ -15913,6 +15953,16 @@
       "value": " 或更低的灵气 (Aura)当作瞬间牌打出"
     }
   ],
+  "card.trigger.obk.backalley.token": [
+    {
+      "type": 0,
+      "value": "在一位英雄的操控下生成 "
+    },
+    {
+      "type": 1,
+      "value": "token"
+    }
+  ],
   "card.trigger.obk.extinction.name": [
     {
       "type": 0,
@@ -15937,6 +15987,16 @@
     {
       "type": 0,
       "value": "横置此英雄，使被放逐的牌本回合可以如同瞬间牌般打出"
+    }
+  ],
+  "card.trigger.obk.incubator.pox": [
+    {
+      "type": 0,
+      "value": "在被击中的英雄的操控下生成 "
+    },
+    {
+      "type": 1,
+      "value": "token"
     }
   ],
   "card.trigger.obk.min.flip": [

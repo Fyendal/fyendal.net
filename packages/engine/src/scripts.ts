@@ -310,6 +310,14 @@ export interface ScriptCtx {
     label: string | ScriptPrompt,
     subjectSeat?: number,
   ): void;
+  /** For the rest of the game, trigger one of this script's delayed hooks at
+   * the beginning of each of the chosen hero's end phases, starting with the
+   * current turn's. The source is snapshotted. */
+  scheduleRecurringEndOfTurnTrigger(
+    hook: string,
+    label: string | ScriptPrompt,
+    subjectSeat?: number,
+  ): void;
   /** Schedule one of this script's delayed hooks for the start of the chosen
    * hero's next turn. The source is snapshotted, so moving it later does not
    * cancel the effect. */
