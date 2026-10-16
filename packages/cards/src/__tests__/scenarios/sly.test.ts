@@ -216,11 +216,11 @@ describe("SLY — Lyath hero abilities", () => {
     g.endTurn() // opponent's turn
       .endTurn() // back to Lyath: Might's start-of-turn trigger resolves
       .expectNotInZone(0, "might|0", "board");
-    expect(projectStateFor(g.state, 0).ongoing).toContainEqual({
+    expect(projectStateFor(g.state, 0).ongoing).toContainEqual(expect.objectContaining({
       seat: 0,
       cardId: printingId("might|0"),
       label: "+1 attack · next attack",
-    });
+    }));
     g.play("short shrift|2").expectAttackValue(4); // 2 + 1 (Might) + 1 (above base)
   });
 
@@ -532,11 +532,11 @@ describe("SLY — equipment", () => {
       ],
     });
     g.endTurn().endTurn(); // Confidence's start-of-turn trigger resolves
-    expect(projectStateFor(g.state, 0).ongoing).toContainEqual({
+    expect(projectStateFor(g.state, 0).ongoing).toContainEqual(expect.objectContaining({
       seat: 0,
       cardId: printingId("confidence|0"),
       label: "max 2 non-block defenders · next attack",
-    });
+    }));
     g.play("short shrift|2");
     // 2 hand cards + 1 equipment = 3 non-block defenders: illegal
     expect(() =>
@@ -786,11 +786,11 @@ describe("SLY — attacks and defense", () => {
       .chooseCard("bone basher|0")
       .chooseOption("yes") // Rhinar is behind: their controller gains 1
       .expectLife(1, 16);
-    expect(projectStateFor(g.state, 0).ongoing).toContainEqual({
+    expect(projectStateFor(g.state, 0).ongoing).toContainEqual(expect.objectContaining({
       seat: 1,
       cardId: printingId("oasis respite|1"),
       label: "prevent next 4 damage from Bone Basher · this turn",
-    });
+    }));
   });
 
   it("Concealed Object pumps an attack by 1 and is destroyed at end of turn", () => {

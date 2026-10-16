@@ -9,6 +9,7 @@ import type {
   CombatValueModifierView,
   ClientMessage,
   DeckPool,
+  EffectLifetime,
   Format,
   GameIntent,
   GameLogEvent,
@@ -1179,10 +1180,27 @@ function stackLayer(value: unknown): boolean {
       || (integer(layer.count) && layer.count >= 2 && layer.count <= MAX_CARDS));
 }
 
+const EFFECT_LIFETIMES = new Set<unknown>(["once", "chain", "turn", "later", "game"] satisfies EffectLifetime[]);
+
 function ongoingEffect(value: unknown): boolean {
   const effect = object(value);
-  return !!effect && exactKeys(effect, ["seat", "cardId", "label"])
-    && seat(effect.seat) && string(effect.cardId, MAX_ID) && string(effect.label, MAX_SHORT_TEXT);
+  return !!effect && exactKeys(
+    effect,
+    [
+      "seat", "cardId", "label", "sourceHidden", "sourceSeat", "summary", "summaryMessage",
+      "lifetime", "duration", "durationMessage", "recurring",
+    ],
+    ["seat", "cardId", "label"],
+  )
+    && seat(effect.seat) && string(effect.cardId, MAX_ID) && string(effect.label, MAX_SHORT_TEXT)
+    && (effect.sourceHidden === undefined || (effect.sourceHidden === true && effect.cardId === ""))
+    && (effect.sourceSeat === undefined || seat(effect.sourceSeat))
+    && (effect.summary === undefined || string(effect.summary, MAX_SHORT_TEXT))
+    && (effect.summaryMessage === undefined || decodeGameMessage(effect.summaryMessage) !== null)
+    && (effect.lifetime === undefined || EFFECT_LIFETIMES.has(effect.lifetime))
+    && (effect.duration === undefined || string(effect.duration, MAX_SHORT_TEXT))
+    && (effect.durationMessage === undefined || decodeGameMessage(effect.durationMessage) !== null)
+    && (effect.recurring === undefined || effect.recurring === true);
 }
 
 function seatCounters(value: unknown): value is [number, number] {

@@ -675,6 +675,33 @@ describe("GameView and server messages", () => {
     expect(decodeGameView(malformedHiddenBack)).toBeNull();
   });
 
+  it("decodes structured lingering-effect metadata and keeps legacy effects valid", () => {
+    const structured = {
+      seat: 1,
+      cardId: "OBK001",
+      label: "Create a token · each of their end phases",
+      sourceSeat: 0,
+      summary: "Create a token",
+      summaryMessage: { id: "card.trigger.example" },
+      lifetime: "game",
+      duration: "each of their end phases",
+      durationMessage: { id: "engine.effect.duration.each.end.phase" },
+      recurring: true,
+    };
+    const withEffect = (effect: Record<string, unknown>) => ({ ...gameView(), ongoing: [effect] });
+
+    expect(decodeGameView(withEffect(structured))?.ongoing).toEqual([structured]);
+    expect(decodeGameView(withEffect({ seat: 0, cardId: "", label: "+1 · next attack" }))).not.toBeNull();
+    expect(decodeGameView(withEffect({ ...structured, lifetime: "forever" }))).toBeNull();
+    expect(decodeGameView(withEffect({ ...structured, recurring: false }))).toBeNull();
+    expect(decodeGameView(withEffect({ ...structured, sourceSeat: 2 }))).toBeNull();
+    expect(decodeGameView(withEffect({ ...structured, durationMessage: { id: 7 } }))).toBeNull();
+    expect(decodeGameView(withEffect({ ...structured, owner: 0 }))).toBeNull();
+    expect(decodeGameView(withEffect({ ...structured, cardId: "", sourceHidden: true }))).not.toBeNull();
+    // A hidden source must not also disclose its identity.
+    expect(decodeGameView(withEffect({ ...structured, sourceHidden: true }))).toBeNull();
+  });
+
   it("does not treat a card's zone index as its nested-subcard depth", () => {
     const view = gameView();
     (view.players[1] as unknown as { graveyard: unknown[] }).graveyard = Array.from({ length: 10 }, (_, index) => ({

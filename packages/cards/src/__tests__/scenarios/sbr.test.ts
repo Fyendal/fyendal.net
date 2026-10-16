@@ -281,11 +281,11 @@ describe("SBR — defensive and token effects", () => {
     });
 
     g.endTurn().expectNotInZone(0, "seismic surge|0", "board");
-    expect(projectStateFor(g.state, 0).ongoing).toContainEqual({
+    expect(projectStateFor(g.state, 0).ongoing).toContainEqual(expect.objectContaining({
       seat: 0,
       cardId: printingId("seismic surge|0"),
       label: "attack costs 1 less · next attack",
-    });
+    }));
     g.play("boulder drop|1", { pitch: ["thunder quake|3"] })
       .expectResources(0, 1);
     expect(projectStateFor(g.state, 0).ongoing).not.toContainEqual(

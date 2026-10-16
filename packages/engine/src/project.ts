@@ -9,7 +9,6 @@ import type {
   GameMessage,
   GameView,
   OnHitEffectView,
-  OngoingEffectView,
   PendingDecision,
   PlayableZone,
   PlayerView,
@@ -50,7 +49,7 @@ import { wardPieces } from "./damageResolution.js";
 import { playFromSourceCardId } from "./playRules.js";
 import { windowPrompt, windowPromptMessage } from "./triggers.js";
 import { triggerLabelMessage } from "./triggerPresentation.js";
-import { firstActionExtraCost } from "./ruleQueries.js";
+import { projectOngoingEffects } from "./ongoingEffects.js";
 
 function projectedLog(
   state: GameStateInternal,
@@ -346,100 +345,6 @@ function playerView(
     weapons: p.weapons.map((c) => cardView(state, runtime, c, { controller: p })),
     board: p.board.map((c) => cardView(state, runtime, c, { controller: p })),
   };
-}
-
-/** Short human-readable summary of a lingering modifier's effect. */
-function modifierEffectLabel(state: GameStateInternal, m: Modifier): string {
-  const parts: string[] = [];
-  if (m.ongoingLabel) parts.push(m.ongoingLabel);
-  if (m.attack) parts.push(`${m.attack > 0 ? "+" : ""}${m.attack} attack`);
-  if (m.piercing) parts.push(`piercing ${m.piercing}`);
-  if (m.defense) parts.push(`${m.defense > 0 ? "+" : ""}${m.defense} defense`);
-  if (m.attackCostReduction) {
-    parts.push(`attack costs ${m.attackCostReduction} less`);
-  }
-  if (m.playCostReduction) parts.push(`play costs ${m.playCostReduction} less`);
-  if (m.activationCostReduction) parts.push(`activation costs ${m.activationCostReduction} less`);
-  if (m.minimumAttackBasePower !== undefined) {
-    parts.push(`only attacks with base attack ${m.minimumAttackBasePower}+`);
-  }
-  if (m.grantKeyword) parts.push(m.grantKeyword.toLowerCase());
-  if (m.goAgain) parts.push("go again");
-  if (m.onHitGoAgain) parts.push("go again on hit");
-  if (m.goAgainIfPlayedOrCreatedSubtype) {
-    parts.push(`go again if a ${m.goAgainIfPlayedOrCreatedSubtype} was played or created`);
-  }
-  if (m.goAgainIfAttackPowerAtLeast !== undefined) {
-    parts.push(`go again with ${m.goAgainIfAttackPowerAtLeast} or more attack`);
-  }
-  if (m.onHitGainLife) parts.push(`gain ${m.onHitGainLife} life on next hit`);
-  if (m.onHitDraw) parts.push(`draw ${m.onHitDraw} on next hit`);
-  if (m.onHitDestroyTopDeckCards) {
-    const { count, minimumDamage } = m.onHitDestroyTopDeckCards;
-    parts.push(`destroy the top ${count} deck cards after dealing ${minimumDamage}+ damage`);
-  }
-  if (m.goAgainIfDefendedByAttackAction) parts.push("go again if defended by an attack action");
-  if (m.onDefendedDealDamage) {
-    parts.push(`deal ${m.onDefendedDealDamage} damage when defended by 1 or more cards`);
-  }
-  if (m.onHitCreateToken) {
-    const { count } = m.onHitCreateToken;
-    parts.push(`create ${count} token${count === 1 ? "" : "s"} on hit`);
-  }
-  if (m.dominate) parts.push("dominate");
-  if (m.intimidate) parts.push(m.intimidate > 1 ? `intimidate ${m.intimidate}` : "intimidate");
-  if (m.maxNonBlockDefenders !== undefined) {
-    parts.push(`max ${m.maxNonBlockDefenders} non-block defenders`);
-  }
-  if (m.preventNextDamagePool) {
-    const chosenSource = m.appliesToInstanceId === undefined
-      ? undefined
-      : findCardAnywhere(state, m.appliesToInstanceId)?.card;
-    parts.push(
-      `prevent next ${m.preventNextDamagePool} damage` +
-      (chosenSource ? ` from ${dataOf(state, chosenSource.cardId).name}` : ""),
-    );
-  }
-  if (m.preventDamagePerEvent && m.preventDamageEventsRemaining) {
-    parts.push(
-      `prevent ${m.preventDamagePerEvent} damage from each of the next ` +
-      `${m.preventDamageEventsRemaining} damage events`,
-    );
-  }
-  if (m.preventNextDamageAmount) {
-    const sourceType = m.appliesToDamageSourceType
-      ? ` from a ${m.appliesToDamageSourceType} source`
-      : "";
-    const eventLimit = m.maxDamageEventAmount !== undefined
-      ? ` when the event is ${m.maxDamageEventAmount} or less`
-      : "";
-    parts.push(`prevent next ${m.preventNextDamageAmount} damage${sourceType}${eventLimit}`);
-  }
-  if (m.preventNextDamageFromPitch !== undefined) {
-    parts.push(`prevent the next damage event from a pitch ${m.preventNextDamageFromPitch} source`);
-  }
-  if (m.preventAllDamageFromSource) {
-    const chosenSource = m.appliesToInstanceId === undefined
-      ? undefined
-      : findCardAnywhere(state, m.appliesToInstanceId)?.card;
-    parts.push(
-      `prevent all damage${chosenSource ? ` from ${dataOf(state, chosenSource.cardId).name}` : " from the chosen source"}`,
-    );
-  }
-  if (m.discardDamagePreventionAmount && m.discardDamagePreventionCardType) {
-    parts.push(
-      `discard a ${m.discardDamagePreventionCardType} to prevent ` +
-      `${m.discardDamagePreventionAmount} damage`,
-    );
-  }
-  if (m.onPreventCreateToken) {
-    parts.push(`create ${dataOf(state, m.onPreventCreateToken).name} when damage is prevented`);
-  }
-  if (m.suppressesHeroAbilities) parts.push("hero abilities disabled");
-  if (m.suppressesHeroAbilitiesDuringActionPhase) {
-    parts.push("hero abilities disabled during action phase");
-  }
-  return parts.join(", ") || "ongoing effect";
 }
 
 /** Keep the relevant printed paragraph(s) for a scripted hit trigger. Card
@@ -738,212 +643,6 @@ function projectedStackContext(state: GameStateInternal): string | undefined {
   if (state.stackResume === "begin-action-phase") return "START PHASE · START-OF-TURN TRIGGERS";
   if (state.stackResume === "grant-turn-action") return "ACTION PHASE · BEGINNING TRIGGERS";
   return "ACTION PHASE · EFFECTS";
-}
-
-function nextPlayDurationLabel(m: Modifier): string {
-  const colors: Record<number, string> = { 1: "red", 2: "yellow", 3: "blue" };
-  const qualifiers = [
-    m.appliesToPitch === undefined ? undefined : colors[m.appliesToPitch],
-    m.appliesToCardType,
-  ].filter((value): value is string => value !== undefined);
-  return qualifiers.length > 0
-    ? `next ${qualifiers.join(" ")} card`
-    : "next matching play";
-}
-
-/** Lingering (invisible) effects worth surfacing on the mat, grouped by source
- *  card. The source's identity follows the usual face-down secrecy rules. */
-function ongoingEffects(state: GameStateInternal, viewer: number | null | undefined): OngoingEffectView[] {
-  const byKey = new Map<string, OngoingEffectView>();
-  const add = (key: string, effect: OngoingEffectView): void => {
-    const entry = byKey.get(key);
-    if (entry) entry.label += `, ${effect.label}`;
-    else byKey.set(key, effect);
-  };
-  for (const m of state.modifiers) {
-    if (m.consumed) continue;
-    const surfacedCombatChainCost = m.scope === "combat-chain" &&
-      (m.playCostReduction !== undefined || m.activationCostReduction !== undefined);
-    if (!surfacedCombatChainCost &&
-      m.scope !== "next-attack" && m.scope !== "next-play" && m.scope !== "until-end-of-turn") continue;
-    const src = findCardAnywhere(state, m.sourceInstanceId);
-    const secret = viewer !== undefined && !!src?.card.faceDown && src.card.owner !== viewer;
-    const cardId = src
-      ? (secret ? "" : src.card.cardId)
-      : (m.sourceCardId ?? "");
-    const key = `${m.sourceInstanceId}:${m.seat}:${m.scope}`;
-    const duration = m.suppressesHeroAbilitiesDuringActionPhase
-      ? (m.seat === state.activePlayer &&
-          ["action", "layer", "reaction", "defend"].includes(state.phase)
-          ? "this action phase"
-          : "next action phase")
-      : m.scope === "next-attack"
-      ? (m.appliesToRuneGated ? "next rune-gated attack" : "next attack")
-      : m.scope === "next-play"
-        ? nextPlayDurationLabel(m)
-        : m.scope === "combat-chain"
-          ? "this combat chain"
-        : m.expiresAtEndOfSeatTurn !== undefined
-          ? (m.expiresAtEndOfSeatTurn === state.activePlayer && Number(m.createdTurn ?? -1) < state.turn
-              ? "this turn"
-              : "next turn")
-          : "this turn";
-    const label = `${modifierEffectLabel(state, m)} · ${duration}`;
-    add(key, { seat: m.seat, cardId, label });
-  }
-
-  // Several delayed Crush effects are rules state on the affected hero rather
-  // than modifiers. Surface those on that hero's mat as public, source-neutral
-  // chips so an opponent's restriction is not incorrectly shown as the
-  // attacker's buff. The counter remains the rules authority and controls the
-  // lifetime; this projection adds no new mutable state.
-  for (const player of state.players as PlayerState[]) {
-    const counters = player.hero.counters;
-    const heroKey = `hero:${player.hero.instanceId}`;
-    const addHeroEffect = (key: string, label: string): void =>
-      add(`${heroKey}:${key}`, { seat: player.seat, cardId: "", label });
-    const addArcaneBonusPool = (
-      flagKey: string,
-      sourcePrefix: string,
-      effectKey: string,
-      labelSuffix: string,
-    ): void => {
-      let untrackedArcaneBonus = Number(player.flags[flagKey] ?? 0);
-      if (untrackedArcaneBonus <= 0) return;
-      for (const [key, value] of Object.entries(player.flags)) {
-        if (!key.startsWith(sourcePrefix) || typeof value !== "number" || value <= 0) continue;
-        const amount = Math.min(value, untrackedArcaneBonus);
-        if (amount <= 0) continue;
-        const sourceInstanceId = Number(key.slice(sourcePrefix.length));
-        const source = Number.isSafeInteger(sourceInstanceId)
-          ? findCardAnywhere(state, sourceInstanceId)
-          : undefined;
-        const secret = viewer !== undefined && !!source?.card.faceDown && source.card.owner !== viewer;
-        add(`${effectKey}:${sourceInstanceId}:${player.seat}`, {
-          seat: player.seat,
-          cardId: source ? (secret ? "" : source.card.cardId) : "",
-          label: `amp ${amount} · ${labelSuffix}`,
-        });
-        untrackedArcaneBonus -= amount;
-      }
-      if (untrackedArcaneBonus > 0) {
-        addHeroEffect(
-          effectKey,
-          `amp ${untrackedArcaneBonus} · ${labelSuffix}`,
-        );
-      }
-    };
-    addArcaneBonusPool(
-      "nextArcaneBonus",
-      "nextArcaneBonusSource:",
-      "next-arcane-bonus",
-      "next arcane damage event",
-    );
-    addArcaneBonusPool(
-      "nextArcaneCardBonus",
-      "nextArcaneCardBonusSource:",
-      "next-arcane-card-bonus",
-      "next arcane damage card",
-    );
-    if (Number(counters?.halveBaseAttackActionUntil ?? 0) >= state.turn) {
-      addHeroEffect("halve-base", "attack action base attack and defense are halved · through next turn");
-    }
-    if (Number(counters?.attackActionBasePowerLimitUntilTurn ?? 0) >= state.turn) {
-      const limit = Number(counters?.attackActionBasePowerLimit ?? 0);
-      addHeroEffect("base-power-limit", `can't play attack actions with base attack ${limit} or less · next action phase`);
-    }
-    if (Number(counters?.attackActionNoPowerGainUntilTurn ?? 0) >= state.turn) {
-      addHeroEffect("no-power-gain", "attack action cards can't gain attack · next action phase");
-    }
-    if (Number(counters?.cannotDrawActionTurn ?? 0) >= state.turn) {
-      addHeroEffect("cannot-draw", "can't draw cards · next action phase");
-    }
-    const nextActionExtraCost = firstActionExtraCost(state, player);
-    if (nextActionExtraCost > 0) {
-      addHeroEffect("next-action-cost", `next action costs +${nextActionExtraCost} resource`);
-    }
-    const trackedGenericPrevention = state.modifiers.reduce(
-      (total, modifier) => total + (
-        !modifier.consumed &&
-        modifier.seat === player.seat &&
-        modifier.scope === "until-end-of-turn" &&
-        modifier.appliesToInstanceId === undefined
-          ? Number(modifier.preventNextDamagePool ?? 0)
-          : 0
-      ),
-      0,
-    );
-    const untrackedGenericPrevention = Math.max(
-      0,
-      Number(player.flags.preventNextDamage ?? 0) - trackedGenericPrevention,
-    );
-    if (untrackedGenericPrevention > 0) {
-      addHeroEffect(
-        "prevent-next-damage",
-        `prevent next ${untrackedGenericPrevention} damage · this turn`,
-      );
-    }
-    const arcanePrevention = Number(player.flags.preventNextArcaneDamage ?? 0);
-    if (arcanePrevention > 0) {
-      addHeroEffect("prevent-next-arcane", `prevent next ${arcanePrevention} arcane damage · this turn`);
-    }
-    const physicalPrevention = Number(player.flags.preventNextPhysicalDamage ?? 0);
-    if (physicalPrevention > 0) {
-      addHeroEffect("prevent-next-physical", `prevent next ${physicalPrevention} physical damage · this turn`);
-    }
-  }
-
-  // Backward-compatible projection for source-filtered prevention created by
-  // older persisted states, before source-aware modifier records were added.
-  const seenSources = new Set<number>();
-  const sourceCards = [
-    ...state.players.flatMap((player) => [
-      player.hero,
-      ...player.hand,
-      ...player.deck,
-      ...player.arsenal,
-      ...player.pitch,
-      ...player.graveyard,
-      ...player.banish,
-      ...player.soul,
-      ...(player.inventory ?? []),
-      ...player.board,
-      ...player.weapons,
-      ...Object.values(player.equipment).filter((card): card is CardInstance => card !== undefined),
-    ]),
-    ...state.chain.flatMap((link) => [
-      link.attackingCard,
-      ...link.defendingCards,
-      ...link.defendingEquipment,
-      ...link.reactions,
-    ]),
-    ...state.resolving,
-    ...state.stack.flatMap((layer) => [layer.card, layer.abilityCard].filter(
-      (card): card is CardInstance => card !== undefined,
-    )),
-  ];
-  for (const source of sourceCards) {
-    if (seenSources.has(source.instanceId)) continue;
-    seenSources.add(source.instanceId);
-    const prevention = source.damagePrevented;
-    if (!prevention || prevention.amount <= 0) continue;
-    const tracked = state.modifiers.some((modifier) =>
-      !modifier.consumed &&
-      modifier.seat === prevention.targetSeat &&
-      modifier.appliesToInstanceId === source.instanceId &&
-      Number(modifier.preventNextDamagePool ?? 0) > 0
-    );
-    if (tracked) continue;
-    add(
-      `legacy-source-prevention:${source.instanceId}:${prevention.targetSeat}`,
-      {
-        seat: prevention.targetSeat,
-        cardId: "",
-        label: `prevent next ${prevention.amount} damage from ${dataOf(state, source.cardId).name} · this turn`,
-      },
-    );
-  }
-  return [...byKey.values()];
 }
 
 /** Per-player projection: full info for own zones, hidden info as counts.
@@ -1311,7 +1010,7 @@ function projectState(
     stack: projectedStackLayers(state, runtime, seat, revealAll),
     ...(stackContext ? { stackContext } : {}),
     ...(attackQueue.length > 0 ? { attackQueue } : {}),
-    ongoing: ongoingEffects(state, revealAll ? undefined : seat),
+    ongoing: projectOngoingEffects(state, revealAll ? undefined : seat),
     gameStats: state.gameStats,
     turnFacts,
     pendingDecision: state.pendingDecision

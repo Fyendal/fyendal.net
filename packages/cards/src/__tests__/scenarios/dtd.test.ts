@@ -633,16 +633,16 @@ describe("DTD — registration and core mechanics", () => {
     }
 
     expect(projectStateFor(s.state, 0).ongoing).toEqual(expect.arrayContaining([
-      {
+      expect.objectContaining({
         seat: 1,
         cardId: printingId("warmonger's diplomacy|3"),
         label: "War · next turn",
-      },
-      {
+      }),
+      expect.objectContaining({
         seat: 0,
         cardId: printingId("warmonger's diplomacy|3"),
         label: "Peace · next turn",
-      },
+      }),
     ]));
   });
 

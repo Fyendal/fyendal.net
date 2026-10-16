@@ -386,18 +386,6 @@
     padding: 0 4px;
     font-size: 11px;
   }
-  .effects-row {
-    justify-content: flex-start;
-    overflow-x: auto;
-    overflow-y: hidden;
-    padding: 7px 8px;
-    overscroll-behavior-inline: contain;
-    scrollbar-width: none;
-    touch-action: pan-x pan-y;
-    -webkit-overflow-scrolling: touch;
-  }
-  .effects-row::-webkit-scrollbar { display: none; }
-  .effect-mini > .card { width: 43px; height: 59px; }
   .effect-tip { display: none !important; }
   .chain-on-hit-tip { display: none !important; }
   .chain-on-hit-mobile-backdrop {

@@ -138,7 +138,7 @@ describe("locale catalogs", () => {
     const referencedIds = new Set([...scriptFiles(engineSourceDirectory), serverStoreFile].flatMap((path) =>
       Array.from(
         readFileSync(path, "utf8").matchAll(
-          /["']((?:engine\.(?:log|term)|server\.log)\.[a-zA-Z0-9.]+)["']/g,
+          /["']((?:engine\.(?:log|term|effect)|server\.log)\.[a-zA-Z0-9.]+)["']/g,
         ),
         (match) => match[1]!,
       )

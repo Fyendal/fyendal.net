@@ -1,0 +1,451 @@
+/* ── lingering effects ──
+   The slot beside the legs is one button that opens the effect ledger. Desktop
+   shows text chips (source art, effect, lifetime); phones show mat-sized card
+   tiles. Rest-of-game effects are pinned to the hero card. Edge color says who
+   created the effect: bronze for the hero's own side, red when the opponent
+   imposed it. Lifetime glyphs are files in public/icons/ui/effect-*.svg. */
+.table {
+  --effect-edge: var(--border-strong);
+  --effect-imposed-edge: var(--blood-hi);
+  --effect-imposed-text: #ff8a7a;
+}
+.effect-imposed { --effect-edge: var(--effect-imposed-edge); }
+.effects-row {
+  min-width: 0;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  clip-path: none;
+  color: inherit;
+  font: inherit;
+  letter-spacing: normal;
+  text-align: left;
+  text-transform: none;
+  cursor: pointer;
+}
+.effects-row:hover { background: none; }
+.effects-row:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 3px;
+}
+
+/* Source art: the art window of each printed layout, as the square-card
+   presentation finds it (Card.tsx, game-cards.css), fitted to a full square.
+   The image is 160% of the square wide; each top offset places the window
+   just below the title bar and above the rules box. Percentages are of the
+   square, so horizontal and vertical offsets share one unit. */
+.effect-art {
+  position: relative;
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  width: var(--effect-art-size, 34px);
+  height: var(--effect-art-size, 34px);
+  overflow: hidden;
+  background: #111518;
+  color: var(--text-secondary);
+  font-size: calc(var(--effect-art-size, 34px) * 0.46);
+}
+.effect-art > img {
+  position: absolute;
+  top: -29.1%;
+  left: -30%;
+  width: 160%;
+  max-width: none;
+  height: auto;
+}
+.effect-art[data-frame="standard-legacy"] > img { top: -34.4%; }
+.effect-art[data-frame="arena"] > img { top: -27%; }
+.effect-art[data-frame="arena-legacy"] > img { top: -31.5%; }
+.effect-art[data-frame="marvel"] > img {
+  top: -4%;
+  left: -21.65%;
+  width: 143.3%;
+}
+.effect-art-neutral {
+  background: var(--surface-control);
+  box-shadow: inset 0 0 0 1px var(--border-subtle);
+}
+.effect-art-hidden {
+  background: repeating-linear-gradient(45deg, #3a2412 0 4px, #24170b 4px 8px);
+  box-shadow: inset 0 0 0 1px var(--border-subtle);
+}
+
+.effect-text {
+  display: grid;
+  min-width: 0;
+  align-content: center;
+  gap: 1px;
+}
+.effect-summary {
+  overflow: hidden;
+  color: var(--text-primary);
+  font: 600 12.5px/1.15 var(--font-lobby-ui);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.effect-life {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 4px;
+  color: var(--text-muted);
+  font: 500 11.5px/1.15 var(--font-fantasy-meta);
+}
+.effect-life-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.effect-life-icon {
+  color: var(--bronze);
+  font-size: 10px;
+}
+.effect-imposed .effect-life-icon { color: var(--effect-imposed-text); }
+
+.effect-count {
+  flex: 0 0 auto;
+  align-self: center;
+  padding: 1px 5px;
+  border: 1px solid var(--effect-edge);
+  color: var(--gold);
+  font: 700 11px/1.25 var(--font-fantasy-meta);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── desktop chips ── */
+.effect-chips {
+  display: grid;
+  align-self: stretch;
+  justify-self: stretch;
+  grid-auto-flow: column;
+  align-content: center;
+  justify-content: start;
+  gap: 5px 7px;
+  overflow: hidden;
+  padding-left: 12px;
+}
+.effect-chip {
+  --effect-art-size: 32px;
+  position: relative;
+  display: flex;
+  min-width: 0;
+  height: 32px;
+  align-items: stretch;
+  gap: 8px;
+  padding-right: 7px;
+  background: var(--surface-panel);
+  /* Card-like corners: chips sit on the mat beside cards, not among buttons. */
+  border-radius: 4px;
+  overflow: hidden;
+}
+/* The edge is drawn above the art so the thumbnail sits inside the frame. */
+.effect-chip::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: inset 0 0 0 1px var(--effect-edge);
+  pointer-events: none;
+}
+.effect-chip > .effect-art { border-right: 1px solid var(--effect-edge); }
+.effect-chip > .effect-text { flex: 1; }
+/* Effects that did not fit, attached to the last visible chip. */
+.effect-more {
+  flex: 0 0 auto;
+  align-self: stretch;
+  display: grid;
+  place-items: center;
+  margin-right: -7px;
+  padding: 0 9px;
+  border-left: 1px solid var(--effect-edge);
+  background: var(--surface-control);
+  color: var(--gold);
+  font: 700 12.5px/1 var(--font-fantasy-meta);
+  font-variant-numeric: tabular-nums;
+}
+.effect-chips:hover .effect-chip { background: var(--surface-raised); }
+
+/* ── phone tiles ──
+   Effects at the mat's own card size: the full source card face, a lifetime
+   badge on its bottom edge, and an explicit pile for whatever does not fit. */
+.effect-cards {
+  display: flex;
+  align-self: center;
+  justify-self: start;
+  width: 100%;
+  min-width: 0;
+  gap: 5px;
+  padding: 0 0 6px;
+  overflow: visible;
+}
+.effect-card {
+  position: relative;
+  flex: 0 0 auto;
+  display: block;
+}
+.effect-card > .card,
+.effect-card > .card-zone {
+  box-shadow: 0 0 0 1px var(--effect-edge);
+}
+.effect-card.effect-imposed > .card,
+.effect-card.effect-imposed > .card-zone { box-shadow: 0 0 0 1.5px var(--effect-imposed-edge); }
+.effect-card-stacked > .card,
+.effect-card-stacked > .card-zone {
+  box-shadow: 0 0 0 1px var(--effect-edge), 3px 3px 0 #20150d, 4px 4px 0 var(--effect-edge);
+}
+.effect-card-neutral {
+  display: grid;
+  box-sizing: border-box;
+  place-items: center;
+  overflow: hidden;
+  padding: 4px 4px 10px;
+  background: var(--surface-panel);
+}
+.effect-card-neutral-text {
+  display: -webkit-box;
+  overflow: hidden;
+  color: var(--text-secondary);
+  font: 500 9px/1.2 var(--font-lobby-ui);
+  text-align: center;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 4;
+}
+.effect-card-life {
+  position: absolute;
+  z-index: 2;
+  bottom: -7px;
+  left: 50%;
+  display: grid;
+  width: 18px;
+  height: 18px;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--surface-panel);
+  box-shadow: 0 0 0 1px var(--effect-edge);
+  color: var(--bronze);
+  font-size: 11px;
+  transform: translateX(-50%);
+}
+.effect-imposed > .effect-card-life { color: var(--effect-imposed-text); }
+.effect-card-count {
+  position: absolute;
+  z-index: 2;
+  top: -6px;
+  right: -6px;
+  padding: 1px 4px;
+  border: 1px solid var(--effect-edge);
+  border-radius: 999px;
+  background: var(--surface-panel);
+  color: var(--gold);
+  font: 700 10px/1.2 var(--font-fantasy-meta);
+}
+.effect-card-more {
+  display: grid;
+  box-sizing: border-box;
+  flex: 0 0 auto;
+  align-content: center;
+  justify-items: center;
+  gap: 1px;
+  border: 1px dashed var(--border-strong);
+  border-radius: 4px;
+  color: var(--gold);
+}
+.effect-card-more-count { font: 700 17px/1 var(--font-fantasy-meta); }
+.effect-card-more-label {
+  color: var(--text-muted);
+  font: 500 10px/1 var(--font-fantasy-meta);
+}
+
+/* ── hero pins ── */
+.mat-hero { position: relative; } /* anchors the pins */
+/* A column down the left edge, starting below the name banner: the frame
+   there carries no information, unlike the hero name across the top. */
+.effect-pins {
+  position: absolute;
+  z-index: 13;
+  top: 16%;
+  left: -9px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.effect-pin {
+  position: relative;
+  display: grid;
+  width: 24px;
+  min-width: 0;
+  height: 22px;
+  min-height: 0;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 4px;
+  background: var(--surface-panel);
+  box-shadow: inset 0 0 0 1px var(--effect-edge);
+  clip-path: none;
+  color: var(--bronze);
+  font: 700 11px/1 var(--font-fantasy-meta);
+  letter-spacing: normal;
+}
+.effect-pin .ui-icon { font-size: 14px; }
+.effect-pin.effect-imposed { color: var(--effect-imposed-text); }
+.effect-pin:hover { background: var(--surface-raised); }
+
+/* Phone heroes are short; smaller pins keep three inside the card. */
+@media (max-width: 700px) {
+  .effect-pins { top: 12%; gap: 2px; }
+  .effect-pin { width: 20px; height: 17px; }
+  .effect-pin .ui-icon { font-size: 12px; }
+}
+
+/* A new effect's edge flashes gold once, replacing a perpetual blink. */
+.effect-arrive:not(.effect-chip),
+.effect-chip.effect-arrive::after { animation: effect-arrive 700ms ease-out 1; }
+@keyframes effect-arrive {
+  0%, 35% { box-shadow: inset 0 0 0 2px var(--gold); }
+}
+
+/* ── ledger ── */
+/* Hovering a source card in the ledger previews it above the modal. */
+.table:has(.effect-ledger) .card-preview { z-index: 101; }
+@media (min-width: 701px) {
+  .effect-ledger { width: min(460px, calc(100vw - 40px)); }
+}
+.effect-ledger-tabs {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+.effect-ledger-tabs button {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px 10px;
+  color: var(--text-secondary);
+  letter-spacing: normal;
+  text-transform: none;
+}
+.effect-ledger-tabs button.selected {
+  border-color: var(--bronze);
+  color: var(--text-primary);
+}
+.effect-ledger-tab-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.effect-ledger-tab-count {
+  color: var(--gold);
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+}
+/* Sections form a timeline: a rail with one glyph node per lifetime. */
+.effect-ledger-section {
+  position: relative;
+  padding: 12px 0 0 26px;
+}
+.effect-ledger-section::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 7px;
+  width: 1px;
+  background: var(--border-subtle);
+}
+.effect-ledger-section:first-child::before { top: 21px; }
+.effect-ledger-section:last-child::before { bottom: auto; height: 21px; }
+.effect-ledger-section:only-child::before { display: none; }
+.effect-ledger-heading {
+  position: relative;
+  display: flex;
+  align-items: center;
+  margin: 0 0 4px;
+  color: var(--text-primary);
+  font: 700 14px/1.3 var(--font-fantasy-meta);
+}
+.effect-ledger-node {
+  position: absolute;
+  left: -26px;
+  display: grid;
+  width: 15px;
+  height: 15px;
+  place-items: center;
+  background: var(--surface-panel);
+  color: var(--bronze);
+  font-size: 13px;
+}
+.effect-ledger-section ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.effect-ledger-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 8px 0;
+  border-top: 1px solid #4d3a2366;
+}
+.effect-ledger-row:first-child { border-top: 0; }
+.effect-ledger-art {
+  --effect-art-size: 40px;
+  position: relative;
+  display: block;
+  flex: 0 0 auto;
+  padding: 0;
+  border: 0;
+  background: none;
+  border-radius: 4px;
+  overflow: hidden;
+  clip-path: none;
+}
+.effect-ledger-art:is(button) { cursor: zoom-in; }
+/* Same frame as the chips, drawn above the art; red when imposed. */
+.effect-ledger-art::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: inset 0 0 0 1px var(--effect-edge);
+  pointer-events: none;
+}
+.effect-ledger-art > .effect-art { box-shadow: none; }
+.effect-ledger-text {
+  display: grid;
+  min-width: 0;
+  flex: 1;
+  gap: 3px;
+}
+.effect-ledger-text .effect-summary {
+  font-size: 14.5px;
+  line-height: 1.3;
+  white-space: normal;
+}
+.effect-ledger-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px 10px;
+  color: var(--text-muted);
+  font: 500 12.5px/1.25 var(--font-fantasy-meta);
+}
+.effect-ledger-meta .effect-life { font-size: 12.5px; }
+.effect-ledger-imposed { color: var(--effect-imposed-text); }
+.effect-ledger-empty {
+  margin: 0;
+  padding: 24px 0;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .effect-arrive,
+  .effect-chip.effect-arrive::after { animation: none; }
+}

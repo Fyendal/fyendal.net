@@ -63,6 +63,8 @@ import { OpponentActions } from "../social/OpponentActions.js";
 import { shouldShowIdleVictoryClaim } from "./idleVictory.js";
 import { MobileHandToggle } from "./MobileHandToggle.js";
 import { useMobileCardLongPress } from "./mobileCardLongPress.js";
+import { EffectLedger, type EffectLedgerTarget } from "./effects/EffectLedger.js";
+import { EffectHeroesContext, effectHeroes } from "./effects/effectHeroes.js";
 import { abilityLabelForSource, deriveBoardLegalState } from "./board/boardModel.js";
 import { useGameSettings } from "./board/useGameSettings.js";
 import { useGameViewport } from "./board/useGameViewport.js";
@@ -159,6 +161,7 @@ export function GameBoard() {
   const fullscreen = useFullscreen();
   const [overlay, setOverlay] = useState<BoardOverlay | null>(null);
   const [inspectedCardId, setInspectedCardId] = useState<string | null>(null);
+  const [effectLedger, setEffectLedger] = useState<EffectLedgerTarget | null>(null);
   const cardLongPressHandlers = useMobileCardLongPress((cardId, target) => {
     if (!view) return;
     const cardStackId = Number(
@@ -194,6 +197,12 @@ export function GameBoard() {
   });
   const [preview, setPreview] = useState<BoardPreview | null>(null);
   const previewTargetRef = useRef<HTMLElement | null>(null);
+  // The preview sits above the ledger, so drop the chip preview that was
+  // showing when the slot was clicked.
+  const openEffectLedger = (target: EffectLedgerTarget) => {
+    setPreview(null);
+    setEffectLedger(target);
+  };
 
   const {
     railCollapsed,
@@ -987,8 +996,11 @@ export function GameBoard() {
     }
     const previewSize = cardPreviewSize(window.innerHeight);
     const previewSurfaceSize = cardPreviewSurfaceSize(cardId, previewSize);
+    // A ledger row previews its source beside the ledger rather than over it.
+    const ledger = el.closest<HTMLElement>(".effect-ledger")?.getBoundingClientRect();
+    const anchor = ledger ? new DOMRect(ledger.left, r.top, ledger.width, r.height) : r;
     const layout = hoverSurfaceLayout(
-      r,
+      anchor,
       { width: window.innerWidth, height: window.innerHeight },
       previewSurfaceSize,
       240, // keep the card preview clear of the side panel when space permits
@@ -1045,6 +1057,12 @@ export function GameBoard() {
     else undoAndDismissAnnouncement("last-action");
   };
 
+  const effectHeroList = effectHeroes(
+    intl,
+    view.players,
+    view.players.map((player) => playerProfiles?.[player.seat]?.username),
+  );
+
   const playerHalfInteraction = {
     legal: boardActionState,
     selection: sel,
@@ -1062,6 +1080,7 @@ export function GameBoard() {
   };
 
   return (
+    <EffectHeroesContext.Provider value={effectHeroList}>
     <SquareCardPresentation enabled={squareCardsEnabled}>
     <div
       ref={tableRef}
@@ -1069,7 +1088,13 @@ export function GameBoard() {
       data-playability-cue={playabilityCuePreference}
       data-motion-preference={motionPreference}
       onMouseMove={onHoverCard}
-      onMouseOut={() => setPreview(null)}
+      onMouseOut={(event) => {
+        // mouseout also fires between children of one hovered target, such as
+        // an effect chip's art and text. Keep the preview instead of flashing it.
+        const next = event.relatedTarget;
+        if (next instanceof Node && previewTargetRef.current?.contains(next)) return;
+        setPreview(null);
+      }}
       onMouseLeave={() => setPreview(null)}
       {...cardLongPressHandlers}
       onClickCapture={onTableClickCapture}
@@ -1162,6 +1187,7 @@ export function GameBoard() {
           activeChainAttackerInstanceId={activeChainAttackerInstanceId}
           onSendEmote={sendEmote}
           onOpenOverlay={setOverlay}
+          onOpenEffects={openEffectLedger}
         />
 
         {/* center divider: a brass-inlay strip marking the seam */}
@@ -1199,6 +1225,7 @@ export function GameBoard() {
           activeChainAttackerInstanceId={activeChainAttackerInstanceId}
           onSendEmote={sendEmote}
           onOpenOverlay={setOverlay}
+          onOpenEffects={openEffectLedger}
         />
 
         <PlayerHand
@@ -1509,6 +1536,18 @@ export function GameBoard() {
         />
       ) : null}
 
+      {effectLedger ? (
+        <EffectLedger
+          effects={view.ongoing}
+          target={effectLedger}
+          onClose={() => setEffectLedger(null)}
+          onInspectCard={(cardId) => {
+            setPreview(null);
+            setInspectedCardId(cardId);
+          }}
+        />
+      ) : null}
+
       <BoardOverlays
         preview={pitchSource && preview?.id === pitchSource.card.cardId ? null : preview}
         overlay={showCardSearchOverlay ? null : overlay}
@@ -1557,5 +1596,6 @@ export function GameBoard() {
       />
     </div>
     </SquareCardPresentation>
+    </EffectHeroesContext.Provider>
   );
 }

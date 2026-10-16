@@ -197,11 +197,11 @@ describe("CRU — Wizard", () => {
     s.play("rousing aether|3", { pitch: [BLUE] })
       .chooseOption("opposing hero")
       .expectLife(1, 18);
-    expect(projectStateFor(s.state, 0).ongoing).toContainEqual({
+    expect(projectStateFor(s.state, 0).ongoing).toContainEqual(expect.objectContaining({
       seat: 0,
       cardId: printingId("rousing aether|3"),
       label: "amp 1 · next arcane damage card",
-    });
+    }));
     s.play("snapback|3")
       .chooseOption("opposing hero")
       .expectLife(1, 16);

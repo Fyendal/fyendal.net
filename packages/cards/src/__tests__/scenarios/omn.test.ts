@@ -579,11 +579,11 @@ describe("OMN — import and set mechanics", () => {
 
     g.activate("boots of omnis ward|0");
 
-    expect(projectStateFor(g.state, 0).ongoing).toContainEqual({
+    expect(projectStateFor(g.state, 0).ongoing).toContainEqual(expect.objectContaining({
       seat: 0,
       cardId: printingId("boots of omnis ward|0"),
       label: "prevent next 1 damage · this turn",
-    });
+    }));
   });
 
   it("Starfall sees an instant put into the graveyard earlier this turn", () => {

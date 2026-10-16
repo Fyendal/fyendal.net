@@ -83,6 +83,7 @@ function renderPlayerHalf(
       activeChainAttackerInstanceId={activeChainAttackerInstanceId}
       onSendEmote={() => undefined}
       onOpenOverlay={() => undefined}
+      onOpenEffects={() => undefined}
       />
     </TestI18nProvider>,
   );
@@ -504,6 +505,7 @@ describe("PlayerHalf", () => {
           activeChainAttackerInstanceId={null}
           onSendEmote={() => undefined}
           onOpenOverlay={() => undefined}
+          onOpenEffects={() => undefined}
         />
       </TestI18nProvider>,
     );

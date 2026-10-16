@@ -397,7 +397,6 @@
     width: var(--compact-card-height);
     height: var(--compact-card-width);
   }
-  .mat-half.mat-compact-board .effects-row { gap: 5px; padding-left: 0; }
 }
 
 /* Full-size tapped arena cards need a landscape-width grid track. Only the

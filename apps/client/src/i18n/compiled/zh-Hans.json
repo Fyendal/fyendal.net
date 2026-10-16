@@ -17525,6 +17525,323 @@
       "value": "选择 X"
     }
   ],
+  "engine.effect.duration.each.end.phase": [
+    {
+      "type": 0,
+      "value": "其每个结束阶段"
+    }
+  ],
+  "engine.effect.duration.each.turn.start": [
+    {
+      "type": 0,
+      "value": "其每个回合开始时"
+    }
+  ],
+  "engine.effect.duration.end.of.turn": [
+    {
+      "type": 0,
+      "value": "本回合结束时"
+    }
+  ],
+  "engine.effect.duration.next.action": [
+    {
+      "type": 0,
+      "value": "下一个行动"
+    }
+  ],
+  "engine.effect.duration.next.action.phase": [
+    {
+      "type": 0,
+      "value": "下一个行动阶段"
+    }
+  ],
+  "engine.effect.duration.next.arcane.card": [
+    {
+      "type": 0,
+      "value": "下一张造成奥术伤害的牌"
+    }
+  ],
+  "engine.effect.duration.next.arcane.damage": [
+    {
+      "type": 0,
+      "value": "下一次奥术伤害事件"
+    }
+  ],
+  "engine.effect.duration.next.attack": [
+    {
+      "type": 0,
+      "value": "下一次攻击"
+    }
+  ],
+  "engine.effect.duration.next.play": [
+    {
+      "type": 0,
+      "value": "下一张"
+    },
+    {
+      "type": 5,
+      "value": "color",
+      "options": {
+        "red": {
+          "value": [
+            {
+              "type": 0,
+              "value": "红色"
+            }
+          ]
+        },
+        "yellow": {
+          "value": [
+            {
+              "type": 0,
+              "value": "黄色"
+            }
+          ]
+        },
+        "blue": {
+          "value": [
+            {
+              "type": 0,
+              "value": "蓝色"
+            }
+          ]
+        },
+        "other": {
+          "value": []
+        }
+      }
+    },
+    {
+      "type": 5,
+      "value": "cardType",
+      "options": {
+        "action": {
+          "value": [
+            {
+              "type": 0,
+              "value": "行动牌"
+            }
+          ]
+        },
+        "instant": {
+          "value": [
+            {
+              "type": 0,
+              "value": "瞬间牌"
+            }
+          ]
+        },
+        "reaction": {
+          "value": [
+            {
+              "type": 0,
+              "value": "反应牌"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 5,
+              "value": "color",
+              "options": {
+                "any": {
+                  "value": [
+                    {
+                      "type": 0,
+                      "value": "符合条件的牌"
+                    }
+                  ]
+                },
+                "other": {
+                  "value": [
+                    {
+                      "type": 0,
+                      "value": "牌"
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "engine.effect.duration.next.rune.gated.attack": [
+    {
+      "type": 0,
+      "value": "下一次符文门控攻击"
+    }
+  ],
+  "engine.effect.duration.next.turn": [
+    {
+      "type": 0,
+      "value": "下回合"
+    }
+  ],
+  "engine.effect.duration.rest.of.game": [
+    {
+      "type": 0,
+      "value": "本局游戏剩余时间"
+    }
+  ],
+  "engine.effect.duration.start.of.next.turn": [
+    {
+      "type": 0,
+      "value": "其下回合开始时"
+    }
+  ],
+  "engine.effect.duration.this.action.phase": [
+    {
+      "type": 0,
+      "value": "本行动阶段"
+    }
+  ],
+  "engine.effect.duration.this.combat.chain": [
+    {
+      "type": 0,
+      "value": "本次战斗链"
+    }
+  ],
+  "engine.effect.duration.this.turn": [
+    {
+      "type": 0,
+      "value": "本回合"
+    }
+  ],
+  "engine.effect.duration.through.next.turn": [
+    {
+      "type": 0,
+      "value": "持续到下回合结束"
+    }
+  ],
+  "engine.effect.summary.amp": [
+    {
+      "type": 0,
+      "value": "amp "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    }
+  ],
+  "engine.effect.summary.base.power.limit": [
+    {
+      "type": 0,
+      "value": "不能打出基础力量不超过 "
+    },
+    {
+      "type": 1,
+      "value": "limit"
+    },
+    {
+      "type": 0,
+      "value": " 的攻击行动牌"
+    }
+  ],
+  "engine.effect.summary.cannot.draw": [
+    {
+      "type": 0,
+      "value": "不能抽牌"
+    }
+  ],
+  "engine.effect.summary.halve.base": [
+    {
+      "type": 0,
+      "value": "攻击行动牌的基础力量和防御减半"
+    }
+  ],
+  "engine.effect.summary.loses.all.abilities": [
+    {
+      "type": 0,
+      "value": "英雄失去所有能力"
+    }
+  ],
+  "engine.effect.summary.next.action.cost": [
+    {
+      "type": 0,
+      "value": "下一个行动额外花费 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点资源"
+    }
+  ],
+  "engine.effect.summary.no.power.gain": [
+    {
+      "type": 0,
+      "value": "攻击行动牌不能获得力量"
+    }
+  ],
+  "engine.effect.summary.prevent.arcane": [
+    {
+      "type": 0,
+      "value": "防止接下来的 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点奥术伤害"
+    }
+  ],
+  "engine.effect.summary.prevent.damage": [
+    {
+      "type": 0,
+      "value": "防止接下来的 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点伤害"
+    }
+  ],
+  "engine.effect.summary.prevent.damage.from": [
+    {
+      "type": 0,
+      "value": "防止 "
+    },
+    {
+      "type": 1,
+      "value": "source"
+    },
+    {
+      "type": 0,
+      "value": " 接下来造成的 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点伤害"
+    }
+  ],
+  "engine.effect.summary.prevent.physical": [
+    {
+      "type": 0,
+      "value": "防止接下来的 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点物理伤害"
+    }
+  ],
   "engine.log.ability.fizzles.source.gone": [
     {
       "type": 0,
@@ -22476,6 +22793,34 @@
       "value": "从牌库置入墓地"
     }
   ],
+  "game.effects.empty": [
+    {
+      "type": 1,
+      "value": "hero"
+    },
+    {
+      "type": 0,
+      "value": " 没有持续效果。"
+    }
+  ],
+  "game.effects.heroOfPlayer": [
+    {
+      "type": 1,
+      "value": "hero"
+    },
+    {
+      "type": 0,
+      "value": "（"
+    },
+    {
+      "type": 1,
+      "value": "player"
+    },
+    {
+      "type": 0,
+      "value": "）"
+    }
+  ],
   "game.effects.identical": [
     {
       "type": 1,
@@ -22486,10 +22831,149 @@
       "value": " 个相同效果"
     }
   ],
+  "game.effects.imposed": [
+    {
+      "type": 0,
+      "value": "由 "
+    },
+    {
+      "type": 1,
+      "value": "hero"
+    },
+    {
+      "type": 0,
+      "value": " 施加"
+    }
+  ],
+  "game.effects.lifetime.chain": [
+    {
+      "type": 0,
+      "value": "本次战斗链"
+    }
+  ],
+  "game.effects.lifetime.game": [
+    {
+      "type": 0,
+      "value": "本局剩余时间"
+    }
+  ],
+  "game.effects.lifetime.later": [
+    {
+      "type": 0,
+      "value": "即将生效"
+    }
+  ],
+  "game.effects.lifetime.once": [
+    {
+      "type": 0,
+      "value": "下一次使用"
+    }
+  ],
+  "game.effects.lifetime.turn": [
+    {
+      "type": 0,
+      "value": "本回合"
+    }
+  ],
   "game.effects.lingering": [
     {
       "type": 0,
       "value": "持续效果"
+    }
+  ],
+  "game.effects.more": [
+    {
+      "type": 0,
+      "value": "另有 "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " 个"
+    }
+  ],
+  "game.effects.moreLabel": [
+    {
+      "type": 0,
+      "value": "更多"
+    }
+  ],
+  "game.effects.open": [
+    {
+      "type": 1,
+      "value": "hero"
+    },
+    {
+      "type": 0,
+      "value": "："
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " 个持续效果。查看效果。"
+    }
+  ],
+  "game.effects.pin": [
+    {
+      "type": 1,
+      "value": "summary"
+    },
+    {
+      "type": 0,
+      "value": "，"
+    },
+    {
+      "type": 1,
+      "value": "duration"
+    },
+    {
+      "type": 5,
+      "value": "more",
+      "options": {
+        "0": {
+          "value": []
+        },
+        "other": {
+          "value": [
+            {
+              "type": 0,
+              "value": " +"
+            },
+            {
+              "type": 1,
+              "value": "more"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "game.effects.seatPlayer": [
+    {
+      "type": 0,
+      "value": "玩家 "
+    },
+    {
+      "type": 1,
+      "value": "seat"
+    }
+  ],
+  "game.effects.source.hero": [
+    {
+      "type": 0,
+      "value": "英雄效果"
+    }
+  ],
+  "game.effects.source.hidden": [
+    {
+      "type": 0,
+      "value": "面朝下的牌"
     }
   ],
   "game.emote.choose": [

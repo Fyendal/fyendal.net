@@ -4691,7 +4691,16 @@ describe("ongoing effects", () => {
     s = passTopLayer(s);
     const mine = projectStateFor(s, 0).ongoing;
     expect(mine).toHaveLength(1);
-    expect(mine[0]).toEqual({ seat: 0, cardId: "PUMP", label: "+2 attack · next attack" });
+    expect(mine[0]).toEqual({
+      seat: 0,
+      cardId: "PUMP",
+      label: "+2 attack · next attack",
+      sourceSeat: 0,
+      summary: "+2 attack",
+      lifetime: "once",
+      duration: "next attack",
+      durationMessage: { id: "engine.effect.duration.next.attack" },
+    });
     // the effect is public: the opponent sees it too
     const theirs = projectStateFor(s, 1).ongoing;
     expect(theirs).toHaveLength(1);
@@ -4752,7 +4761,62 @@ describe("ongoing effects", () => {
         expect.stringContaining("can't gain attack"),
         expect.stringContaining("next action costs +1 resource"),
       ]));
+      expect(effects.every((effect) => effect.sourceSeat === 0)).toBe(true);
+      expect(effects.every((effect) => effect.lifetime === "later" || effect.lifetime === "once")).toBe(true);
     }
+  });
+
+  it("projects permanent ability loss as a rest-of-game effect imposed by the opponent", () => {
+    const s = makeGame(52);
+    player(s, 1).hero.counters = { abilitiesDisabledPermanently: 1 };
+
+    expect(projectStateFor(s, 0).ongoing).toEqual([{
+      seat: 1,
+      cardId: "",
+      label: "hero loses all abilities · rest of the game",
+      sourceSeat: 0,
+      summary: "hero loses all abilities",
+      summaryMessage: { id: "engine.effect.summary.loses.all.abilities" },
+      lifetime: "game",
+      duration: "rest of the game",
+      durationMessage: { id: "engine.effect.duration.rest.of.game" },
+    }]);
+  });
+
+  it("projects scheduled triggers with their lifetime and hides face-down sources", () => {
+    const s = makeGame(53);
+    const source = giveCard(s, 0, "PUMP");
+    const card = player(s, 0).hand.find((c) => c.instanceId === source)!;
+    const label = "Create a token";
+    const labelMessage = { id: "card.trigger.example" };
+    s.delayedTriggers.push(
+      { source: { ...card }, seat: 0, subjectSeat: 1, event: "end-of-turn", turn: s.turn, hook: "a", label, labelMessage, recurring: true },
+      { source: { ...card, faceDown: true }, seat: 0, subjectSeat: 1, event: "start-of-turn", turn: s.turn, hook: "b", label },
+    );
+
+    const forOpponent = projectStateFor(s, 1).ongoing;
+    expect(forOpponent).toEqual([
+      expect.objectContaining({
+        seat: 1,
+        sourceSeat: 0,
+        cardId: "PUMP",
+        summary: label,
+        summaryMessage: labelMessage,
+        lifetime: "game",
+        recurring: true,
+        durationMessage: { id: "engine.effect.duration.each.end.phase" },
+      }),
+      expect.objectContaining({
+        seat: 1,
+        cardId: "",
+        sourceHidden: true,
+        lifetime: "later",
+        duration: "start of their next turn",
+      }),
+    ]);
+    expect(forOpponent[1]).not.toHaveProperty("recurring");
+    expect(projectStateFor(s, 0).ongoing[1]).toMatchObject({ cardId: "PUMP" });
+    expect(projectStateFor(s, 0).ongoing[1]).not.toHaveProperty("sourceHidden");
   });
 });
 

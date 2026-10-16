@@ -513,11 +513,11 @@ describe("Blood Debt and Rune Gate", () => {
     });
 
     g.play("putrid stirrings|1", { fromZone: "banish" });
-    expect(projectStateFor(g.state, 0).ongoing).toContainEqual({
+    expect(projectStateFor(g.state, 0).ongoing).toContainEqual(expect.objectContaining({
       seat: 0,
       cardId: printingId("putrid stirrings|1"),
       label: "+5 attack · next rune-gated attack",
-    });
+    }));
 
     g.play("head jab|1")
       .expectAttackValue(3)
@@ -579,11 +579,11 @@ describe("Blood Debt and Rune Gate", () => {
     });
 
     g.play("fasting carcass|1").expectAP(0, 1);
-    expect(projectStateFor(g.state, 0).ongoing).toContainEqual({
+    expect(projectStateFor(g.state, 0).ongoing).toContainEqual(expect.objectContaining({
       seat: 0,
       cardId: printingId("fasting carcass|1"),
       label: "go again · next red action card",
-    });
+    }));
 
     g.play("eloquent eulogy|1", { fromZone: "banish" })
       .blockWith()

@@ -1,10 +1,11 @@
-import type { CardView, EmoteMessage, PlayerView } from "@fyendal/shared";
+import type { CardView, EmoteMessage, OngoingEffectView, PlayerView } from "@fyendal/shared";
 import { useIntl } from "react-intl";
 import type { CardDisplayPreference } from "../../storage.js";
 import type { EmoteEvent } from "../../store/types.js";
 import { BloodDebtCounter } from "../BloodDebtCounter.js";
 import { CardBack, CardFace, InactiveZoneCard } from "../Card.js";
-import { EffectChips } from "../EffectChips.js";
+import type { EffectLedgerTarget } from "../effects/EffectLedger.js";
+import { EffectPins, EffectSlot } from "../effects/EffectSlot.js";
 import { EquipmentStack } from "../EquipmentStack.js";
 import { HeroEmote } from "../HeroEmote.js";
 import { HoverHint } from "../../history/HoverHint.js";
@@ -117,11 +118,12 @@ export function PlayerHalf({
   activeChainAttackerInstanceId,
   onSendEmote,
   onOpenOverlay,
+  onOpenEffects,
 }: {
   player: PlayerView;
   mine: boolean;
   mirrored: boolean;
-  ongoing: Parameters<typeof EffectChips>[0]["effects"];
+  ongoing: readonly OngoingEffectView[];
   gameOver: boolean;
   replaying: boolean;
   visibleDeckTop?: CardView;
@@ -136,6 +138,7 @@ export function PlayerHalf({
   activeChainAttackerInstanceId: number | null;
   onSendEmote: (message: EmoteMessage) => void;
   onOpenOverlay: (overlay: BoardOverlay) => void;
+  onOpenEffects: (target: EffectLedgerTarget) => void;
 }) {
   const intl = useIntl();
   const row = (value: number) => (mirrored ? 4 - value : value);
@@ -504,6 +507,10 @@ export function PlayerHalf({
                   : undefined}
             />
           </HeroEmote>
+          <EffectPins
+            effects={ongoing}
+            onOpen={() => onOpenEffects({ seat: player.seat, lifetime: "game" })}
+          />
         </div>
       </MatZone>
       {weaponZone(1, "2 / 6")}
@@ -605,9 +612,13 @@ export function PlayerHalf({
         ) : null}
       </MatZone>
       {equipmentZone("legs", `${row(3)} / 1`)}
-      <EffectChips
+      <EffectSlot
         effects={ongoing}
         area={`${row(3)} / 2 / span 1 / span ${hasAdditionalArsenal ? 2 : 3}`}
+        heroName={player.heroName}
+        compact={mobileFloatViewport || mobileLandscapeViewport}
+        avoidHand={!mirrored}
+        onOpen={() => onOpenEffects({ seat: player.seat })}
       />
       <MatZone
         area={hasAdditionalArsenal ? `${row(3)} / 4 / span 1 / span 3` : `${row(3)} / 5`}

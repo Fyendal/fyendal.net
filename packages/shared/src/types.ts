@@ -636,13 +636,36 @@ export interface GameTransitionView {
   events: GameTransitionMove[];
 }
 
+/** When a lingering effect ends, ordered from soonest to never:
+ * consumed by the next matching event, the combat chain closing, the end of
+ * this turn or action phase, a later turn, or never (rest of the game). */
+export type EffectLifetime = "once" | "chain" | "turn" | "later" | "game";
+
 export interface OngoingEffectView {
   /** Seat the effect applies to */
   seat: number;
-  /** Source card id; "" when its identity is secret to the viewer */
+  /** Source card id; "" when its identity is secret to the viewer or the
+   * effect has no source card */
   cardId: string;
-  /** Short effect summary, e.g. "+2 attack · next attack" */
+  /** English fallback combining summary and duration, e.g.
+   * "+2 attack · next attack". Retained for clients and replays that predate
+   * the structured fields below. */
   label: string;
+  /** The source card exists but is face down to this viewer. Without it, an
+   * empty `cardId` means the effect has no source card. */
+  sourceHidden?: true;
+  /** Seat controlling the source, when known. Differs from `seat` when the
+   * effect was imposed by the opponent. */
+  sourceSeat?: number;
+  /** English effect text without its duration, e.g. "+2 attack". */
+  summary?: string;
+  summaryMessage?: GameMessage;
+  lifetime?: EffectLifetime;
+  /** English duration, e.g. "next attack" or "each of their end phases". */
+  duration?: string;
+  durationMessage?: GameMessage;
+  /** A rest-of-game effect that triggers repeatedly. */
+  recurring?: true;
 }
 
 // ── Player intents (client -> server, validated against legal actions) ──────

@@ -1086,6 +1086,21 @@ describe("Outbreak cards", () => {
       expect(game.state.delayedTriggers).toHaveLength(1);
     });
 
+    it("shows the infection as a recurring rest-of-game effect on the hit hero", () => {
+      const game = implanted([BLOODROT_POX]);
+      for (const viewer of [0, 1]) {
+        expect(projectStateFor(game.state, viewer).ongoing).toContainEqual(expect.objectContaining({
+          seat: 1,
+          sourceSeat: 0,
+          cardId: printingId(IMPLANTER),
+          lifetime: "game",
+          recurring: true,
+          duration: "each of their end phases",
+          summaryMessage: expect.objectContaining({ id: "card.trigger.obk.incubator.pox" }),
+        }));
+      }
+    });
+
     it("gets nothing when the defending hero is not infected with Bloodrot Pox", () => {
       const game = implanted([FRAILTY]).expectLife(1, 17).expectNoLog("for the rest of the game");
 

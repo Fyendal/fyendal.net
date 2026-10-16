@@ -18238,6 +18238,319 @@
       "value": "Choose X"
     }
   ],
+  "engine.effect.duration.each.end.phase": [
+    {
+      "type": 0,
+      "value": "each of their end phases"
+    }
+  ],
+  "engine.effect.duration.each.turn.start": [
+    {
+      "type": 0,
+      "value": "the start of each of their turns"
+    }
+  ],
+  "engine.effect.duration.end.of.turn": [
+    {
+      "type": 0,
+      "value": "end of this turn"
+    }
+  ],
+  "engine.effect.duration.next.action": [
+    {
+      "type": 0,
+      "value": "next action"
+    }
+  ],
+  "engine.effect.duration.next.action.phase": [
+    {
+      "type": 0,
+      "value": "next action phase"
+    }
+  ],
+  "engine.effect.duration.next.arcane.card": [
+    {
+      "type": 0,
+      "value": "next arcane damage card"
+    }
+  ],
+  "engine.effect.duration.next.arcane.damage": [
+    {
+      "type": 0,
+      "value": "next arcane damage event"
+    }
+  ],
+  "engine.effect.duration.next.attack": [
+    {
+      "type": 0,
+      "value": "next attack"
+    }
+  ],
+  "engine.effect.duration.next.play": [
+    {
+      "type": 0,
+      "value": "next "
+    },
+    {
+      "type": 5,
+      "value": "color",
+      "options": {
+        "red": {
+          "value": [
+            {
+              "type": 0,
+              "value": "red "
+            }
+          ]
+        },
+        "yellow": {
+          "value": [
+            {
+              "type": 0,
+              "value": "yellow "
+            }
+          ]
+        },
+        "blue": {
+          "value": [
+            {
+              "type": 0,
+              "value": "blue "
+            }
+          ]
+        },
+        "other": {
+          "value": []
+        }
+      }
+    },
+    {
+      "type": 5,
+      "value": "cardType",
+      "options": {
+        "action": {
+          "value": [
+            {
+              "type": 0,
+              "value": "action card"
+            }
+          ]
+        },
+        "instant": {
+          "value": [
+            {
+              "type": 0,
+              "value": "instant card"
+            }
+          ]
+        },
+        "reaction": {
+          "value": [
+            {
+              "type": 0,
+              "value": "reaction card"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 5,
+              "value": "color",
+              "options": {
+                "any": {
+                  "value": [
+                    {
+                      "type": 0,
+                      "value": "matching play"
+                    }
+                  ]
+                },
+                "other": {
+                  "value": [
+                    {
+                      "type": 0,
+                      "value": "card"
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "engine.effect.duration.next.rune.gated.attack": [
+    {
+      "type": 0,
+      "value": "next rune-gated attack"
+    }
+  ],
+  "engine.effect.duration.next.turn": [
+    {
+      "type": 0,
+      "value": "next turn"
+    }
+  ],
+  "engine.effect.duration.rest.of.game": [
+    {
+      "type": 0,
+      "value": "rest of the game"
+    }
+  ],
+  "engine.effect.duration.start.of.next.turn": [
+    {
+      "type": 0,
+      "value": "start of their next turn"
+    }
+  ],
+  "engine.effect.duration.this.action.phase": [
+    {
+      "type": 0,
+      "value": "this action phase"
+    }
+  ],
+  "engine.effect.duration.this.combat.chain": [
+    {
+      "type": 0,
+      "value": "this combat chain"
+    }
+  ],
+  "engine.effect.duration.this.turn": [
+    {
+      "type": 0,
+      "value": "this turn"
+    }
+  ],
+  "engine.effect.duration.through.next.turn": [
+    {
+      "type": 0,
+      "value": "through next turn"
+    }
+  ],
+  "engine.effect.summary.amp": [
+    {
+      "type": 0,
+      "value": "amp "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    }
+  ],
+  "engine.effect.summary.base.power.limit": [
+    {
+      "type": 0,
+      "value": "can't play attack actions with base attack "
+    },
+    {
+      "type": 1,
+      "value": "limit"
+    },
+    {
+      "type": 0,
+      "value": " or less"
+    }
+  ],
+  "engine.effect.summary.cannot.draw": [
+    {
+      "type": 0,
+      "value": "can't draw cards"
+    }
+  ],
+  "engine.effect.summary.halve.base": [
+    {
+      "type": 0,
+      "value": "attack action base attack and defense are halved"
+    }
+  ],
+  "engine.effect.summary.loses.all.abilities": [
+    {
+      "type": 0,
+      "value": "hero loses all abilities"
+    }
+  ],
+  "engine.effect.summary.next.action.cost": [
+    {
+      "type": 0,
+      "value": "next action costs +"
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " resource"
+    }
+  ],
+  "engine.effect.summary.no.power.gain": [
+    {
+      "type": 0,
+      "value": "attack action cards can't gain attack"
+    }
+  ],
+  "engine.effect.summary.prevent.arcane": [
+    {
+      "type": 0,
+      "value": "prevent next "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " arcane damage"
+    }
+  ],
+  "engine.effect.summary.prevent.damage": [
+    {
+      "type": 0,
+      "value": "prevent next "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " damage"
+    }
+  ],
+  "engine.effect.summary.prevent.damage.from": [
+    {
+      "type": 0,
+      "value": "prevent next "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " damage from "
+    },
+    {
+      "type": 1,
+      "value": "source"
+    }
+  ],
+  "engine.effect.summary.prevent.physical": [
+    {
+      "type": 0,
+      "value": "prevent next "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " physical damage"
+    }
+  ],
   "engine.log.ability.fizzles.source.gone": [
     {
       "type": 0,
@@ -23455,6 +23768,38 @@
       "value": "Sent from deck to graveyard"
     }
   ],
+  "game.effects.empty": [
+    {
+      "type": 0,
+      "value": "No lingering effects on "
+    },
+    {
+      "type": 1,
+      "value": "hero"
+    },
+    {
+      "type": 0,
+      "value": "."
+    }
+  ],
+  "game.effects.heroOfPlayer": [
+    {
+      "type": 1,
+      "value": "hero"
+    },
+    {
+      "type": 0,
+      "value": " ("
+    },
+    {
+      "type": 1,
+      "value": "player"
+    },
+    {
+      "type": 0,
+      "value": ")"
+    }
+  ],
   "game.effects.identical": [
     {
       "type": 1,
@@ -23465,10 +23810,171 @@
       "value": " identical effects"
     }
   ],
+  "game.effects.imposed": [
+    {
+      "type": 0,
+      "value": "Imposed by "
+    },
+    {
+      "type": 1,
+      "value": "hero"
+    }
+  ],
+  "game.effects.lifetime.chain": [
+    {
+      "type": 0,
+      "value": "This combat chain"
+    }
+  ],
+  "game.effects.lifetime.game": [
+    {
+      "type": 0,
+      "value": "Rest of game"
+    }
+  ],
+  "game.effects.lifetime.later": [
+    {
+      "type": 0,
+      "value": "Coming up"
+    }
+  ],
+  "game.effects.lifetime.once": [
+    {
+      "type": 0,
+      "value": "Next use"
+    }
+  ],
+  "game.effects.lifetime.turn": [
+    {
+      "type": 0,
+      "value": "This turn"
+    }
+  ],
   "game.effects.lingering": [
     {
       "type": 0,
       "value": "Lingering effects"
+    }
+  ],
+  "game.effects.more": [
+    {
+      "type": 0,
+      "value": "+"
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " more"
+    }
+  ],
+  "game.effects.moreLabel": [
+    {
+      "type": 0,
+      "value": "more"
+    }
+  ],
+  "game.effects.open": [
+    {
+      "type": 1,
+      "value": "hero"
+    },
+    {
+      "type": 0,
+      "value": ": "
+    },
+    {
+      "type": 6,
+      "value": "count",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " lingering effect"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " lingering effects"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    },
+    {
+      "type": 0,
+      "value": ". Show effects."
+    }
+  ],
+  "game.effects.pin": [
+    {
+      "type": 1,
+      "value": "summary"
+    },
+    {
+      "type": 0,
+      "value": ", "
+    },
+    {
+      "type": 1,
+      "value": "duration"
+    },
+    {
+      "type": 5,
+      "value": "more",
+      "options": {
+        "0": {
+          "value": []
+        },
+        "other": {
+          "value": [
+            {
+              "type": 0,
+              "value": " +"
+            },
+            {
+              "type": 1,
+              "value": "more"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "game.effects.seatPlayer": [
+    {
+      "type": 0,
+      "value": "Player "
+    },
+    {
+      "type": 1,
+      "value": "seat"
+    }
+  ],
+  "game.effects.source.hero": [
+    {
+      "type": 0,
+      "value": "Hero effect"
+    }
+  ],
+  "game.effects.source.hidden": [
+    {
+      "type": 0,
+      "value": "Face-down card"
     }
   ],
   "game.emote.choose": [

@@ -1376,11 +1376,11 @@ describe("HNT — marked heroes and daggers", () => {
 
     g.activate("shelter from the storm|1");
 
-    expect(projectStateFor(g.state, 0).ongoing).toContainEqual({
+    expect(projectStateFor(g.state, 0).ongoing).toContainEqual(expect.objectContaining({
       seat: 0,
       cardId: printingId("shelter from the storm|1"),
       label: "prevent 1 damage from each of the next 3 damage events · this turn",
-    });
+    }));
   });
 });
 

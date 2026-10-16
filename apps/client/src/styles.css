@@ -9,6 +9,7 @@
 @import "./styles/game-board.css";
 @import "./styles/game-combat-floats.css";
 @import "./styles/game-decision-floats.css";
+@import "./styles/game-effects.css";
 @import "./styles/game-rail.css";
 @import "./styles/game-cards.css";
 @import "./styles/game-motion.css";

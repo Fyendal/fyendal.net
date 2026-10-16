@@ -56,6 +56,9 @@ function CounterOverlay({
   const overlayRef = useRef<HTMLSpanElement>(null);
   const [hovered, setHovered] = useState(false);
   const [focused, setFocused] = useState(false);
+  // A tap on a touch screen both enters and focuses the overlay, and that tap
+  // usually opens the card preview, so touch never opens this tooltip.
+  const touchFocusRef = useRef(false);
   const tooltipActive = hovered || focused;
 
   return (
@@ -65,9 +68,13 @@ function CounterOverlay({
         className={`c-ovl c-${kind}`}
         tabIndex={0}
         aria-describedby={tooltipId}
-        onMouseEnter={() => setHovered(true)}
-        onMouseLeave={() => setHovered(false)}
-        onFocus={() => setFocused(true)}
+        onPointerDown={(event) => { touchFocusRef.current = event.pointerType === "touch"; }}
+        onPointerEnter={(event) => { if (event.pointerType !== "touch") setHovered(true); }}
+        onPointerLeave={() => setHovered(false)}
+        onFocus={() => {
+          if (!touchFocusRef.current) setFocused(true);
+          touchFocusRef.current = false;
+        }}
         onBlur={() => setFocused(false)}
       >
         <img className="c-ovl-icon" src={icon} alt="" aria-hidden="true" />

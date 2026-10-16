@@ -1,0 +1,4 @@
+<!-- Lingering effect lifetime, rest of the game: an infinity loop. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.4" stroke-linejoin="round">
+  <path d="M12 12c-2-3.6-8-4-8 0s6 3.6 8 0 8-3.6 8 0-6 4-8 0z" />
+</svg>

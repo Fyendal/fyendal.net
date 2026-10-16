@@ -814,11 +814,11 @@ describe("Armory Decks — AHA, AZS, and AOL", () => {
 
     expect(g.state.players[0]!.resources).toBe(1);
     expect(g.state.players[0]!.flags.nextArcaneBonus).toBe(1);
-    expect(projectStateFor(g.state, 0).ongoing).toContainEqual({
+    expect(projectStateFor(g.state, 0).ongoing).toContainEqual(expect.objectContaining({
       seat: 0,
       cardId: printingId("stardust spike|1"),
       label: "amp 1 · next arcane damage event",
-    });
+    }));
   });
 
   it("Blitz Kicks asks for Arcane Barrier payment against a Runechant", () => {
@@ -1913,11 +1913,11 @@ describe("Armory Decks — rules regression coverage", () => {
     expect(g.state.pendingDecision?.prompt).toContain("Reverent Rerebrace");
     g.chooseOption("no");
 
-    expect(projectStateFor(g.state, 0).ongoing).toContainEqual({
+    expect(projectStateFor(g.state, 0).ongoing).toContainEqual(expect.objectContaining({
       seat: 0,
       cardId: printingId("drawn to the blade|2"),
       label: "draw 1 on next hit · this turn",
-    });
+    }));
   });
 
   it("Reverent Rerebrace replaces Sharpening Sparks and Zenith Blade gains go again", () => {
