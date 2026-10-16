@@ -810,16 +810,47 @@ describe("game setup & turn structure", () => {
     expect(s.pendingDecision).toMatchObject({
       player: 0,
       chooseHook: "engine-token-replacement-order",
-      options: [`global:${sourceId}`, `optional-friendly:${sourceId}`],
+      options: [`global:${sourceId}`, `optional-friendly:${sourceId}`, "none"],
+      cardOptions: [sourceId, sourceId, null],
+      optionMessages: [null, null, { id: "engine.decision.token.option.skipoptional" }],
     });
-    expect(projectStateFor(s, 0).pendingDecision?.promptMessage).toEqual({
+    const projected = projectStateFor(s, 0).pendingDecision;
+    expect(projected?.promptMessage).toEqual({
       id: "engine.decision.token.next",
+      values: { card: { kind: "card", cardId: "TOKEN" } },
     });
+    expect(projected?.optionLayout).toBe("effect-list");
+    expect(projectStateFor(s, 1).pendingDecision?.optionLayout).toBeUndefined();
+    // Picking the optional replacement accepts it without a follow-up yes/no.
     expect(answerTokenReplacementOrder(s, engineRuntime, 0, `optional-friendly:${sourceId}`)).toBeUndefined();
-    expect(s.pendingDecision?.chooseHook).toBe("engine-token-creation-replacement");
-    expect(answerTokenCreationReplacement(s, engineRuntime, 0, "yes")).toBeUndefined();
+    expect(s.pendingDecision).toBeNull();
     expect(p.flags.optionalReplacementUsed).toBe(true);
     expect(p.board.some((card) => card.cardId === "TOKEN")).toBe(false);
+  });
+
+  it("skipping optional token replacements still applies mandatory ones", () => {
+    const s = makeGame(102);
+    const p = player(s, 0);
+    s.scriptsRef = {
+      ...s.scriptsRef,
+      HERO_A: {
+        globalTokenCreationReplacement: {
+          label: "Create one more token",
+          replace: (_ctx, _seat, _cardId, count) => count + 1,
+        },
+        optionalFriendlyTokenCreationReplacement: {
+          label: "Use the optional replacement?",
+          condition: (_ctx, cardId, count) => cardId === "TOKEN" && count > 0,
+          effect: (ctx) => ctx.setPlayerFlag(ctx.seat, "optionalReplacementUsed", true),
+        },
+      },
+    };
+
+    makeCtx(s, engineRuntime, 0, p.hand[0]!).createToken("TOKEN");
+    expect(answerTokenReplacementOrder(s, engineRuntime, 0, "none")).toBeUndefined();
+    expect(s.pendingDecision).toBeNull();
+    expect(p.flags.optionalReplacementUsed).toBeUndefined();
+    expect(p.board.filter((card) => card.cardId === "TOKEN")).toHaveLength(2);
   });
 
   it("preserves a token's initial counters through a replacement decision", () => {

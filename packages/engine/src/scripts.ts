@@ -1525,6 +1525,8 @@ export interface CardScript {
    * same replacement-order protocol as friendly replacements. Must be pure. */
   globalTokenCreationReplacement?: {
     label: string;
+    /** Localized presentation of `label` in replacement choices. */
+    labelMessage?: GameMessage;
     replace(
       ctx: ScriptCtx,
       creatingSeat: number,
@@ -1541,6 +1543,8 @@ export interface CardScript {
     sourceZone?: "arena" | "graveyard";
     condition(ctx: ScriptCtx, cardId: string, count: number): boolean;
     label: string;
+    /** Localized presentation of `label` in replacement choices. */
+    labelMessage?: GameMessage;
     effect(ctx: ScriptCtx): void;
   };
   /** Replace a positive life-gain event for any hero. The source may return

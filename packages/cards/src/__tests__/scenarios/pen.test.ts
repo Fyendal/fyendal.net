@@ -946,6 +946,100 @@ describe("PEN — import and set mechanics", () => {
       .expectNotInZone(0, "frostbite|0", "board");
   });
 
+  it("two Smoldering Steels ask once, and declining declines both copies", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          hand: ["head jab|1"],
+          graveyard: ["smoldering steel|1", "smoldering steel|1"],
+          equipment: NO_EQUIPMENT,
+        },
+        {
+          hero: "dorinthea",
+          equipment: { ...NO_EQUIPMENT, head: "stalagmite, bastion of isenloft|0" },
+        },
+      ],
+    });
+
+    g.play("head jab|1").blockWith("stalagmite, bastion of isenloft|0").settle();
+    expect(g.state.pendingDecision).toMatchObject({
+      kind: "optional-effect",
+      chooseHook: "engine-token-creation-replacement",
+    });
+
+    g.chooseOption("no").expectInZone(0, "frostbite|0", "board");
+    expect(g.state.pendingDecision).toBeNull();
+    expect(g.state.players[0]!.graveyard.filter(
+      (card) => functionalKeyOf(cardData[card.cardId]!) === "smoldering steel|1",
+    )).toHaveLength(2);
+  });
+
+  it.each([
+    ["smoldering steel|1", "banish"],
+    ["smoldering scales|0", "graveyard"],
+  ] as const)("picking %s from the replacement choice applies it without a yes/no", (key, zone) => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          hand: ["head jab|1"],
+          graveyard: ["smoldering steel|1"],
+          equipment: { ...NO_EQUIPMENT, chest: "smoldering scales|0" },
+        },
+        {
+          hero: "dorinthea",
+          equipment: { ...NO_EQUIPMENT, head: "stalagmite, bastion of isenloft|0" },
+        },
+      ],
+    });
+
+    g.play("head jab|1").blockWith("stalagmite, bastion of isenloft|0").settle();
+    const pending = g.state.pendingDecision;
+    expect(pending).toMatchObject({
+      kind: "choose-target",
+      chooseHook: "engine-token-replacement-order",
+      promptMessage: { id: "engine.decision.token.choose" },
+    });
+    expect(pending?.options?.at(-1)).toBe("none");
+    expect(pending?.optionMessages).toEqual([
+      { id: "card.pen.smolderingscales.replacement" },
+      { id: "card.pen.smolderingsteel.replacement" },
+      expect.objectContaining({ id: "engine.decision.token.option.none" }),
+    ]);
+    const player = g.state.players[0]!;
+    const source = [...player.graveyard, ...Object.values(player.equipment)]
+      .find((card) => card && functionalKeyOf(cardData[card.cardId]!) === key)!;
+    const index = pending!.cardOptions!.indexOf(source.instanceId);
+    g.doRaw({ kind: "choose", optionId: pending!.options![index]! }).settle();
+
+    expect(g.state.pendingDecision?.chooseHook).toBeUndefined();
+    g.expectInZone(0, key, zone).expectNotInZone(0, "frostbite|0", "board");
+  });
+
+  it("creating Frostbite normally declines every optional replacement at once", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          hand: ["head jab|1"],
+          graveyard: ["smoldering steel|1"],
+          equipment: { ...NO_EQUIPMENT, chest: "smoldering scales|0" },
+        },
+        {
+          hero: "dorinthea",
+          equipment: { ...NO_EQUIPMENT, head: "stalagmite, bastion of isenloft|0" },
+        },
+      ],
+    });
+
+    g.play("head jab|1").blockWith("stalagmite, bastion of isenloft|0").settle()
+      .chooseOption("none")
+      .expectInZone(0, "frostbite|0", "board")
+      .expectInZone(0, "smoldering steel|1", "graveyard");
+    expect(g.state.players[0]!.equipment.chest).toBeDefined();
+  });
+
   it("Savage Claw gets +1 when a six-power card pays for its attack", () => {
     const g = scenario({
       seats: [

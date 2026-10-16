@@ -485,7 +485,7 @@ describe("HVY — Heavy Hitters mechanics", () => {
     expect(tokenCount(g, 0, "gold|0")).toBe(expectedGold);
   });
 
-  it("lets each controller order their own token replacements", () => {
+  it("applies the chosen controller's identical token replacements without an order prompt", () => {
     const g = scenario({ seats: [
       {
         hero: "rhinar",
@@ -509,14 +509,10 @@ describe("HVY — Heavy Hitters mechanics", () => {
       options: ["0", "1"],
     });
     g.chooseOption("1");
-    const rippleIds = g.state.players[1]!.graveyard
-      .filter((card) => functionalKeyOf(cardData[card.cardId]!) === "ripple away|3")
-      .map((card) => `global:${card.instanceId}`);
-    expect(g.state.pendingDecision).toMatchObject({
-      player: 1,
-      chooseHook: "engine-token-replacement-order",
-      options: rippleIds,
-    });
+    // Two copies of Ripple Away are interchangeable, so seat 1 is not asked to
+    // order them.
+    expect(g.state.pendingDecision).toBeNull();
+    expect(tokenCount(g, 0, "gold|0")).toBe(0);
   });
 
   it("Raise an Army asks once for a Gold count capped at the total controlled", () => {

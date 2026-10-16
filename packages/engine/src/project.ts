@@ -786,8 +786,11 @@ function projectedDecisionPromptMessage(
   if (decision.chooseHook === "engine-token-replacement-player-order") {
     return { id: "engine.decision.token.playerorder" };
   }
-  if (decision.chooseHook === "engine-token-replacement-order") {
-    return { id: "engine.decision.token.next" };
+  if (decision.chooseHook === "engine-token-replacement-order" && decision.tokenCreationReplacementOrder) {
+    return {
+      id: "engine.decision.token.next",
+      values: { card: { kind: "card", cardId: decision.tokenCreationReplacementOrder.cardId } },
+    };
   }
   if (decision.chooseHook === "engine-wager-loss-replacement-order") {
     return { id: "engine.decision.wager.next" };
@@ -1133,6 +1136,9 @@ function projectState(
                 }
               : {}),
             ...(preStackSource ? { preStackSource } : {}),
+            ...(privateDecision && pd.chooseHook === "engine-token-replacement-order"
+              ? { optionLayout: "effect-list" as const }
+              : {}),
             ...staged,
           };
         })()

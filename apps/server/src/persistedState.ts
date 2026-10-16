@@ -49,6 +49,7 @@ type PersistedEngineDecision = Omit<
   | "stagedHandCount"
   | "stagedDefense"
   | "preStackSource"
+  | "optionLayout"
 >;
 type PersistedEngineState = Omit<
   GameState,

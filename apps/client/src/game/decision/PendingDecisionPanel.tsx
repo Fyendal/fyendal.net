@@ -30,6 +30,7 @@ import { RevealedChoiceCards } from "./CardChoices.js";
 import { CardRef, cardAffiliation, DecisionPrompt, PitchPaymentProgress } from "./DecisionShared.js";
 import type { PendingDecisionModel } from "./DecisionModels.js";
 import { NameChoiceAutocomplete } from "./NameChoiceAutocomplete.js";
+import { EffectChoiceDecision } from "./EffectChoiceDecision.js";
 import { TriggerOrderDecision } from "./TriggerOrderDecision.js";
 
 /** Legacy literal option values that render through shared catalog labels. */
@@ -313,7 +314,9 @@ export function PendingDecisionPanel({
       label: optionCardLabels?.get(card.instanceId),
     });
   }
+  const effectList = pd.optionLayout === "effect-list" && pd.kind === "choose-target";
   const showChoiceGrid =
+    !effectList &&
     !optDecision &&
     !bloodAllocation &&
     !boundedCardChoice &&
@@ -361,7 +364,8 @@ export function PendingDecisionPanel({
   const textOptions: ChoiceModalOption[] = [];
   if (
     (pd.kind === "optional-effect" || pd.kind === "choose-target" || pd.kind === "arsenal") &&
-    !bloodAllocation
+    !bloodAllocation &&
+    !effectList
   ) {
     (pd.options ?? []).forEach((option, index) => {
       if (pd.optionCards?.[index]) return;
@@ -447,14 +451,15 @@ export function PendingDecisionPanel({
     pd.kind !== "defend" &&
     pd.kind !== "arsenal" &&
     pd.kind !== "choose-name" &&
-    pd.kind !== "order-triggers";
+    pd.kind !== "order-triggers" &&
+    !effectList;
 
   return (
     <div className={`decision decision-options${
       priorityGuidanceDecision ? " decision-priority-guidance" : ""
     }${choiceModal ? " decision-choice" : ""}${pd.kind === "choose-name" ? " decision-name-choice" : ""}${
-      pd.kind === "order-triggers" ? " decision-trigger-order" : ""
-    }`}>
+      pd.kind === "order-triggers" || effectList ? " decision-trigger-order" : ""
+    }${effectList ? " decision-effect-list" : ""}`}>
       <DecisionPrompt
         prompt={pd.kind === "arsenal"
           ? intl.formatMessage({ id: "game.decision.arsenal.choosePrompt" })
@@ -489,6 +494,16 @@ export function PendingDecisionPanel({
           cards={pd.optionCards ?? []}
           viewerSeat={viewerSeat}
           onConfirm={(optionIds) => onSend({ kind: "order-triggers", optionIds })}
+        />
+      ) : null}
+      {effectList ? (
+        <EffectChoiceDecision
+          options={pd.options ?? []}
+          labels={pd.optionLabels ?? []}
+          messages={pd.optionMessages ?? []}
+          cards={pd.optionCards ?? []}
+          viewerSeat={viewerSeat}
+          onChoose={(optionId) => onSend({ kind: "choose", optionId })}
         />
       ) : null}
       {revealedChoice ? (

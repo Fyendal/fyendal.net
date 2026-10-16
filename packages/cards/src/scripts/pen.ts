@@ -1855,6 +1855,7 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
     optionalFriendlyTokenCreationReplacement: {
       sourceZone: "graveyard",
       label: "Banish Smoldering Steel instead of creating Frostbite?",
+      labelMessage: decisionMessage("card.pen.smolderingsteel.replacement"),
       condition(ctx, cardId, count) {
         return count > 0 && named(ctx, cardId, "Frostbite");
       },
@@ -1866,6 +1867,7 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
   "smoldering scales|0": {
     optionalFriendlyTokenCreationReplacement: {
       label: "Destroy Smoldering Scales instead of creating Frostbite?",
+      labelMessage: decisionMessage("card.pen.smolderingscales.replacement"),
       condition(ctx, cardId, count) {
         return count > 0 && named(ctx, cardId, "Frostbite");
       },

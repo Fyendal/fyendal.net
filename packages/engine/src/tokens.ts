@@ -1,3 +1,4 @@
+import type { GameMessage } from "@fyendal/shared";
 import type { EngineRuntime } from "./runtimePorts.js";
 import type { GameStateInternal } from "./runtimeState.js";
 import { dataOf, scriptOf } from "./cardProperties.js";
@@ -112,11 +113,90 @@ type ApplicableTokenCreationReplacement = {
   ref: TokenCreationReplacementRef;
   controllerSeat: number;
   label: string;
+  labelMessage?: GameMessage;
   next?: number;
 };
 
+/** Choice option that declines every optional replacement still on offer. */
+const DECLINE_OPTIONAL_REPLACEMENTS = "none";
+
 function replacementRefId(ref: TokenCreationReplacementRef): string {
   return `${ref.kind}:${ref.instanceId}`;
+}
+
+/** Copies of one functional card in the same zone produce identical results
+ * in any order, so asking the controller to order them is noise. */
+function interchangeableReplacements(
+  state: GameStateInternal,
+  candidates: readonly ApplicableTokenCreationReplacement[],
+): boolean {
+  const signature = (candidate: ApplicableTokenCreationReplacement) => {
+    const source = replacementSourceSignature(state, candidate.ref);
+    return source && {
+      script: source.script,
+      key: `${source.key}|${candidate.label}|${candidate.next ?? ""}`,
+    };
+  };
+  const first = signature(candidates[0]!);
+  if (!first?.script) return false;
+  return candidates.every((candidate) => {
+    const other = signature(candidate);
+    return other !== undefined && other.script === first.script && other.key === first.key;
+  });
+}
+
+function replacementSourceSignature(
+  state: GameStateInternal,
+  ref: TokenCreationReplacementRef,
+): { script: ReturnType<typeof scriptOf>; key: string } | undefined {
+  const found = findCardAnywhere(state, ref.instanceId);
+  if (!found) return undefined;
+  const inGraveyard = state.players[found.seat]?.graveyard
+    .some((card) => card.instanceId === found.card.instanceId) === true;
+  return {
+    script: scriptOf(state, found.card.cardId, found.card),
+    key: `${ref.kind}|${found.seat}|${inGraveyard}`,
+  };
+}
+
+/** Declining one optional replacement declines its interchangeable copies:
+ * accepting a copy later would produce the same result as accepting now. */
+function withoutDeclinedCopies(
+  state: GameStateInternal,
+  declinedInstanceId: number | undefined,
+  refs: TokenCreationReplacementRef[],
+): TokenCreationReplacementRef[] {
+  if (declinedInstanceId === undefined) return refs;
+  const declined = replacementSourceSignature(state, {
+    instanceId: declinedInstanceId,
+    kind: "optional-friendly",
+  });
+  if (!declined?.script) return refs;
+  return refs.filter((ref) => {
+    const other = replacementSourceSignature(state, ref);
+    return !(other && other.script === declined.script && other.key === declined.key);
+  });
+}
+
+/** Perform an accepted optional replacement, which replaces the whole batch. */
+function applyOptionalTokenReplacement(
+  state: GameStateInternal,
+  runtime: EngineRuntime,
+  sourceInstanceId: number | undefined,
+): void {
+  const found = sourceInstanceId === undefined
+    ? undefined
+    : findCardAnywhere(state, sourceInstanceId);
+  const replacement = found
+    ? scriptOf(state, found.card.cardId, found.card)?.optionalFriendlyTokenCreationReplacement
+    : undefined;
+  const sourceIsFunctional = found && replacement && (
+    replacement.sourceZone !== "graveyard" ||
+    state.players[found.seat]?.graveyard.some((card) => card.instanceId === found.card.instanceId)
+  );
+  if (sourceIsFunctional) {
+    replacement.effect(runtime.makeCtx(state, found.seat, found.card, currentLink(state)));
+  }
 }
 
 /** Stable snapshot of every replacement effect that may apply to this batch. */
@@ -193,6 +273,7 @@ function applicableTokenCreationReplacements(
           ref,
           controllerSeat: found.seat,
           label: replacement.label,
+          ...(replacement.labelMessage ? { labelMessage: replacement.labelMessage } : {}),
           next: Math.max(0, Math.floor(next)),
         }];
       }
@@ -209,6 +290,7 @@ function applicableTokenCreationReplacements(
             ref,
             controllerSeat: found.seat,
             label: `${nameOf(state, found.card.cardId)} changes the number created`,
+            labelMessage: { id: "engine.decision.token.option.count", values: { count: normalizedNext } },
             next: normalizedNext,
           }];
     }
@@ -218,7 +300,12 @@ function applicableTokenCreationReplacements(
       !state.players[found.seat]?.graveyard.some((card) => card.instanceId === found.card.instanceId)
     ) return [];
     return normalizedCount > 0 && optional?.condition(ctx, cardId, normalizedCount)
-      ? [{ ref, controllerSeat: found.seat, label: optional.label }]
+      ? [{
+          ref,
+          controllerSeat: found.seat,
+          label: optional.label,
+          ...(optional.labelMessage ? { labelMessage: optional.labelMessage } : {}),
+        }]
       : [];
   });
 }
@@ -287,15 +374,43 @@ function continueTokenCreation(
   const controlledApplicable = applicable.filter(
     (candidate) => candidate.controllerSeat === currentController,
   );
-  if (controlledApplicable.length > 1) {
+  if (controlledApplicable.length > 1 && !interchangeableReplacements(state, controlledApplicable)) {
+    // Picking an optional replacement accepts it; the extra option declines
+    // every optional one, so no follow-up yes/no is needed.
+    const optionalCount = controlledApplicable.filter(({ ref }) => ref.kind === "optional-friendly").length;
+    const allOptional = optionalCount === controlledApplicable.length;
+    const tokenName = nameOf(state, cardId);
+    const tokenValue = { card: { kind: "card" as const, cardId } };
+    const choices: { option: string; label: string; message: GameMessage | null; card: number | null }[] = [
+      ...controlledApplicable.map(({ ref, label, labelMessage }) => ({
+        option: replacementRefId(ref),
+        label,
+        message: labelMessage ?? null,
+        card: ref.instanceId,
+      })),
+      ...(optionalCount === 0 ? [] : [{
+        option: DECLINE_OPTIONAL_REPLACEMENTS,
+        label: allOptional ? `Create ${tokenName} normally` : "Skip optional replacement effects",
+        message: allOptional
+          ? { id: "engine.decision.token.option.none", values: tokenValue }
+          : { id: "engine.decision.token.option.skipoptional" },
+        card: null,
+      }]),
+    ];
     state.pendingDecision = {
       player: currentController,
       kind: "choose-target",
-      prompt: "Choose the next token creation replacement to apply",
-      promptMessage: { id: "engine.decision.token.next" },
-      options: controlledApplicable.map(({ ref }) => replacementRefId(ref)),
-      optionLabels: controlledApplicable.map(({ label }) => label),
-      cardOptions: controlledApplicable.map(({ ref }) => ref.instanceId),
+      prompt: allOptional
+        ? `Choose a replacement effect, or create ${tokenName} normally`
+        : `Choose which replacement effect applies first to creating ${tokenName}`,
+      promptMessage: {
+        id: allOptional ? "engine.decision.token.choose" : "engine.decision.token.next",
+        values: tokenValue,
+      },
+      options: choices.map(({ option }) => option),
+      optionLabels: choices.map(({ label }) => label),
+      optionMessages: choices.map(({ message }) => message),
+      cardOptions: choices.map(({ card }) => card),
       chooseHook: "engine-token-replacement-order",
       tokenCreationReplacementOrder: {
         seat: player.seat,
@@ -483,6 +598,23 @@ export function answerTokenReplacementOrder(
   if (!pending || pending.player !== seat || pending.chooseHook !== "engine-token-replacement-order" || !batch) {
     return "not your decision";
   }
+  if (optionId === DECLINE_OPTIONAL_REPLACEMENTS) {
+    if (!pending.options?.includes(DECLINE_OPTIONAL_REPLACEMENTS)) return "invalid replacement";
+    state.pendingDecision = null;
+    const player = state.players[batch.seat] as PlayerState | undefined;
+    if (!player) return "token recipient no longer exists";
+    continueTokenCreation(
+      state, runtime,
+      player,
+      batch.cardId,
+      batch.count,
+      batch.cause,
+      batch.remainingReplacements.filter((candidate) => candidate.kind !== "optional-friendly"),
+      batch.controllerSeats,
+      batch.initialCounters,
+    );
+    return undefined;
+  }
   const ref = batch.remainingReplacements.find(
     (candidate) => replacementRefId(candidate) === optionId,
   );
@@ -506,31 +638,7 @@ export function answerTokenReplacementOrder(
     (candidate) => replacementRefId(candidate) !== optionId,
   );
   if (chosen.ref.kind === "optional-friendly") {
-    const source = findCardAnywhere(state, chosen.ref.instanceId);
-    state.pendingDecision = {
-      player: batch.seat,
-      kind: "optional-effect",
-      prompt: chosen.label,
-      promptMessage: source
-        ? {
-            id: "engine.decision.token.optional.card",
-            values: { card: { kind: "card", cardId: source.card.cardId } },
-          }
-        : { id: "engine.decision.token.optional" },
-      options: ["yes", "no"],
-      optionMessages: [{ id: "common.option.yes" }, { id: "common.option.no" }],
-      sourceInstanceId: chosen.ref.instanceId,
-      chooseHook: "engine-token-creation-replacement",
-      tokenCreationReplacement: {
-        seat: batch.seat,
-        cardId: batch.cardId,
-        count: batch.count,
-        cause: batch.cause,
-        ...(batch.initialCounters ? { initialCounters: { ...batch.initialCounters } } : {}),
-        remainingReplacements: remaining,
-        controllerSeats: batch.controllerSeats,
-      },
-    };
+    applyOptionalTokenReplacement(state, runtime, chosen.ref.instanceId);
     return undefined;
   }
   continueTokenCreation(
@@ -612,19 +720,7 @@ export function answerTokenCreationReplacement(
   const sourceInstanceId = pending.sourceInstanceId;
   state.pendingDecision = null;
   if (optionId === "yes") {
-    const found = sourceInstanceId === undefined
-      ? undefined
-      : findCardAnywhere(state, sourceInstanceId);
-    const replacement = found
-      ? scriptOf(state, found.card.cardId, found.card)?.optionalFriendlyTokenCreationReplacement
-      : undefined;
-    const sourceIsFunctional = found && replacement && (
-      replacement.sourceZone !== "graveyard" ||
-      state.players[found.seat]?.graveyard.some((card) => card.instanceId === found.card.instanceId)
-    );
-    if (sourceIsFunctional) {
-      replacement.effect(runtime.makeCtx(state, found.seat, found.card, currentLink(state)));
-    }
+    applyOptionalTokenReplacement(state, runtime, sourceInstanceId);
     return undefined;
   }
   const player = state.players[batch.seat] as PlayerState | undefined;
@@ -635,7 +731,7 @@ export function answerTokenCreationReplacement(
     batch.cardId,
     batch.count,
     batch.cause,
-    batch.remainingReplacements,
+    withoutDeclinedCopies(state, sourceInstanceId, batch.remainingReplacements),
     batch.controllerSeats,
     batch.initialCounters,
   );

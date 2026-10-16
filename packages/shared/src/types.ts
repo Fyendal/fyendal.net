@@ -470,6 +470,9 @@ export interface PendingDecision {
    * transform token choices). Null entries are plain literal options. Live
    * cards secret to the viewer are projected hidden. */
   optionCards?: (CardView | null)[];
+  /** Present a single-pick choose-target as rows of source card plus effect
+   * label (replacement-effect choices) instead of the card grid. */
+  optionLayout?: "effect-list";
   /** Public cards revealed for this decision. Unlike `optionCards`, this is
    *  the complete presented group; only cards whose instance ids also appear
    *  in `options` are selectable. */

@@ -921,6 +921,22 @@ describe("GameView and server messages", () => {
       },
     };
     expect(decodeGameView(triggerOrder)).not.toBeNull();
+    const effectList = {
+      ...gameView(),
+      pendingDecision: {
+        player: 0,
+        kind: "choose-target",
+        prompt: "Choose a replacement effect",
+        options: ["optional-friendly:41", "none"],
+        optionCards: [card, null],
+        optionLayout: "effect-list",
+      },
+    };
+    expect(decodeGameView(effectList)).not.toBeNull();
+    expect(decodeGameView({
+      ...effectList,
+      pendingDecision: { ...effectList.pendingDecision, optionLayout: "grid" },
+    })).toBeNull();
     expect(decodeGameView({
       ...triggerOrder,
       pendingDecision: {

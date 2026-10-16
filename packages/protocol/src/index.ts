@@ -1284,7 +1284,7 @@ function pendingDecision(value: unknown): boolean {
   const decision = object(value);
   return !!decision && exactKeys(decision, [
     "player", "kind", "prompt", "promptMessage", "options", "minimumSelections", "maximumSelections", "defaultOption", "optionLabels", "optionMessages", "chosenOptions", "chosenOptionMessages", "optionCounts", "optionCards", "revealedCards", "lookedCards", "stagedCards", "stagedHandCount", "stagedDefense",
-    "resourcePayment", "preStackSource",
+    "resourcePayment", "preStackSource", "optionLayout",
   ], ["player", "kind", "prompt"])
     && seat(decision.player) && DECISION_KINDS.has(String(decision.kind))
     && string(decision.prompt, MAX_TEXT)
@@ -1310,6 +1310,7 @@ function pendingDecision(value: unknown): boolean {
     && optional(decision.stagedHandCount, (value): value is number =>
       nonNegativeInteger(value) && value <= MAX_CARDS)
     && optional(decision.stagedDefense, finite)
+    && optional(decision.optionLayout, (value): value is "effect-list" => value === "effect-list")
     && optional(decision.resourcePayment, (value): value is PendingDecision["resourcePayment"] => {
       const payment = object(value);
       return !!payment && exactKeys(payment, ["cost", "options", "sourceInstanceId"], ["cost", "options"])

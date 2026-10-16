@@ -4933,6 +4933,12 @@
       "value": "Choose the top card"
     }
   ],
+  "card.hvy.doubledown.replacement": [
+    {
+      "type": 0,
+      "value": "Add one of each wager token"
+    }
+  ],
   "card.hvy.equipment.destroy": [
     {
       "type": 0,
@@ -4981,6 +4987,12 @@
     {
       "type": 0,
       "value": "Choose a number"
+    }
+  ],
+  "card.hvy.rippleaway.replacement": [
+    {
+      "type": 0,
+      "value": "Remove one of each token"
     }
   ],
   "card.hvy.runeblade.aura.choose": [
@@ -11778,6 +11790,18 @@
       "value": "Destroy a Sigil aura?"
     }
   ],
+  "card.pen.smolderingscales.replacement": [
+    {
+      "type": 0,
+      "value": "Destroy this instead of creating Frostbite"
+    }
+  ],
+  "card.pen.smolderingsteel.replacement": [
+    {
+      "type": 0,
+      "value": "Banish this from your graveyard instead of creating Frostbite"
+    }
+  ],
   "card.pen.sword.sharpen": [
     {
       "type": 0,
@@ -18170,10 +18194,62 @@
       "value": " to banish as a cost"
     }
   ],
+  "engine.decision.token.choose": [
+    {
+      "type": 0,
+      "value": "Choose a replacement effect, or create "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " normally"
+    }
+  ],
   "engine.decision.token.next": [
     {
       "type": 0,
-      "value": "Choose the next token creation replacement to apply"
+      "value": "Choose which replacement effect applies first to creating "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    }
+  ],
+  "engine.decision.token.option.count": [
+    {
+      "type": 0,
+      "value": "Create "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " instead"
+    }
+  ],
+  "engine.decision.token.option.none": [
+    {
+      "type": 0,
+      "value": "Create "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " normally"
+    }
+  ],
+  "engine.decision.token.option.skipoptional": [
+    {
+      "type": 0,
+      "value": "Skip optional replacement effects"
     }
   ],
   "engine.decision.token.optional": [
@@ -23424,6 +23500,36 @@
     {
       "type": 0,
       "value": "Pitch to pay this defense cost:"
+    }
+  ],
+  "game.decision.effectChoice.apply": [
+    {
+      "type": 0,
+      "value": "Apply"
+    }
+  ],
+  "game.decision.effectChoice.applyNamed": [
+    {
+      "type": 0,
+      "value": "Apply "
+    },
+    {
+      "type": 1,
+      "value": "source"
+    },
+    {
+      "type": 0,
+      "value": ": "
+    },
+    {
+      "type": 1,
+      "value": "label"
+    }
+  ],
+  "game.decision.effectChoice.instructions": [
+    {
+      "type": 0,
+      "value": "Apply one replacement effect. Any that still apply afterward are offered next."
     }
   ],
   "game.decision.name.choose": [

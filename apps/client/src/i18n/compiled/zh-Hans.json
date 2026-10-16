@@ -4761,6 +4761,12 @@
       "value": "选择牌库顶牌"
     }
   ],
+  "card.hvy.doubledown.replacement": [
+    {
+      "type": 0,
+      "value": "每种赌注衍生物多生成一个"
+    }
+  ],
   "card.hvy.equipment.destroy": [
     {
       "type": 0,
@@ -4809,6 +4815,12 @@
     {
       "type": 0,
       "value": "选择一个数字"
+    }
+  ],
+  "card.hvy.rippleaway.replacement": [
+    {
+      "type": 0,
+      "value": "每种衍生物少生成一个"
     }
   ],
   "card.hvy.runeblade.aura.choose": [
@@ -11259,6 +11271,18 @@
       "value": "摧毁一个 Sigil 灵气？"
     }
   ],
+  "card.pen.smolderingscales.replacement": [
+    {
+      "type": 0,
+      "value": "摧毁此牌，代替生成 Frostbite"
+    }
+  ],
+  "card.pen.smolderingsteel.replacement": [
+    {
+      "type": 0,
+      "value": "将此牌从你的墓地放逐，代替生成 Frostbite"
+    }
+  ],
   "card.pen.sword.sharpen": [
     {
       "type": 0,
@@ -17457,10 +17481,58 @@
       "value": " 张 soul 中的牌"
     }
   ],
+  "engine.decision.token.choose": [
+    {
+      "type": 0,
+      "value": "选择一个替代效果，或正常生成 "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    }
+  ],
   "engine.decision.token.next": [
     {
       "type": 0,
-      "value": "选择下一个要应用的衍生物生成替代效果"
+      "value": "选择先对生成 "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 应用哪个替代效果"
+    }
+  ],
+  "engine.decision.token.option.count": [
+    {
+      "type": 0,
+      "value": "改为生成 "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " 个"
+    }
+  ],
+  "engine.decision.token.option.none": [
+    {
+      "type": 0,
+      "value": "正常生成 "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    }
+  ],
+  "engine.decision.token.option.skipoptional": [
+    {
+      "type": 0,
+      "value": "跳过可选替代效果"
     }
   ],
   "engine.decision.token.optional": [
@@ -22433,6 +22505,36 @@
     {
       "type": 0,
       "value": "扣置卡牌以支付此次防御费用："
+    }
+  ],
+  "game.decision.effectChoice.apply": [
+    {
+      "type": 0,
+      "value": "应用"
+    }
+  ],
+  "game.decision.effectChoice.applyNamed": [
+    {
+      "type": 0,
+      "value": "应用 "
+    },
+    {
+      "type": 1,
+      "value": "source"
+    },
+    {
+      "type": 0,
+      "value": "："
+    },
+    {
+      "type": 1,
+      "value": "label"
+    }
+  ],
+  "game.decision.effectChoice.instructions": [
+    {
+      "type": 0,
+      "value": "应用一个替代效果。之后仍适用的效果会继续提供选择。"
     }
   ],
   "game.decision.name.choose": [

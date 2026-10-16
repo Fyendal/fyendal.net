@@ -914,6 +914,8 @@
     min-height: 76px;
     padding: 5px;
   }
+  .trigger-order-item.effect-choice-item { grid-template-columns: 52px minmax(80px, 1fr) auto; }
+  .decision-effect-list .trigger-order-list { width: 100%; }
   .trigger-order-item .card-zone,
   .trigger-order-item .blood-debt-stack-tile { width: 48px; height: 66px; }
   .trigger-order-item .blood-debt-stack-title { font-size: 9px; }

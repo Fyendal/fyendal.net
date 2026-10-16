@@ -1113,3 +1113,8 @@
   color: #ffe39a;
   border-bottom-color: #e6c96a;
 }
+.decision-effect-list .trigger-order-list { width: min(560px, 100%); }
+.trigger-order-item.effect-choice-item {
+  grid-template-columns: 68px minmax(120px, 1fr) auto;
+  cursor: default;
+}
