@@ -1,6 +1,7 @@
 import type { OngoingEffectView } from "@fyendal/shared";
 import { describe, expect, it } from "vitest";
-import { effectLifetime, effectImposed, splitByPlacement, stackOngoingEffects } from "./effectModel.js";
+import { createTestIntl } from "../../i18n/TestI18nProvider.js";
+import { effectLifetime, effectImposed, effectText, splitByPlacement, stackOngoingEffects } from "./effectModel.js";
 
 const effect = (overrides: Partial<OngoingEffectView>): OngoingEffectView => ({
   seat: 0,
@@ -57,5 +58,74 @@ describe("effect placement", () => {
     expect(pins.map((stack) => stack.effect)).toEqual([game]);
     expect(effectImposed(game)).toBe(true);
     expect(effectImposed(once)).toBe(false);
+  });
+});
+
+describe("effectText", () => {
+  const draconicDiscount = effect({
+    label: "+2 attack, costs 1 less to play or activate · next Draconic attack this combat chain",
+    summaryMessage: {
+      id: "engine.effect.summary.list.two",
+      values: {
+        attack: "+2",
+        cost: 1,
+        costChange: "less",
+        costAction: "both",
+        part0: { kind: "term", id: "engine.effect.part.attack" },
+        part1: { kind: "term", id: "engine.effect.part.cost" },
+      },
+    },
+    durationMessage: {
+      id: "engine.effect.duration.next.subject.this.chain",
+      values: {
+        noun: "attack",
+        typeCount: 1,
+        type1: "Draconic",
+        color: "any",
+        via: "none",
+        keyword: "none",
+        limit: "none",
+        target: "none",
+        subject: { kind: "term", id: "engine.effect.subject.one" },
+      },
+    },
+  });
+
+  it("renders composed summaries and qualified durations in English", () => {
+    expect(effectText(createTestIntl("en"), draconicDiscount)).toEqual({
+      summary: "+2 attack, costs 1 less to play or activate",
+      duration: "next Draconic attack this combat chain",
+    });
+  });
+
+  it("renders them in Chinese with the established terminology", () => {
+    expect(effectText(createTestIntl("zh-Hans"), draconicDiscount)).toEqual({
+      summary: "+2 力量，打出或启动费用减少 1 点",
+      duration: "本次战斗链中下一次 龙族 (Draconic) 攻击",
+    });
+  });
+
+  it("renders a plural subject with every qualifier in card-text order", () => {
+    const stealthBlades = effect({
+      durationMessage: {
+        id: "engine.effect.duration.subject.this.turn",
+        values: {
+          noun: "attack",
+          typeCount: 2,
+          type1: "sword",
+          type2: "dagger",
+          color: "red",
+          via: "none",
+          keyword: "stealth",
+          limit: "costMax",
+          limitValue: 2,
+          target: "none",
+          subject: { kind: "term", id: "engine.effect.subject.other" },
+        },
+      },
+    });
+
+    expect(effectText(createTestIntl("en"), stealthBlades).duration)
+      .toBe("red sword or dagger attacks with stealth with cost 2 or less this turn");
   });
 });

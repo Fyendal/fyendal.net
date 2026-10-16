@@ -323,7 +323,7 @@ export const sbr: Record<string, CardScript> = {
           // discounted Guardian attack is declared.
           ctx.addModifier({
             scope: "next-attack",
-            ongoingLabel: "attack costs 1 less",
+            ongoingLabel: "costs 1 less to play",
             appliesTo: "attack-action",
             appliesToClass: "guardian",
           });

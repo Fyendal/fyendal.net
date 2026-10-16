@@ -887,7 +887,8 @@ describe("ROS — Lightning and Runeblade", () => {
     expect(projectStateFor(g.state, 0).ongoing).toContainEqual(expect.objectContaining({
       seat: 0,
       cardId: printingId("succumb to temptation|2"),
-      label: expect.stringMatching(/next Runeblade attack-action hit/i),
+      label: "when it hits a hero: look at their hand and choose a card for them to discard · " +
+        "next Runeblade attack action card this turn",
     }));
     expect(projectStateFor(g.state, 0).chain.at(-1)?.onHitEffects).toContainEqual({
       sourceCardId: printingId("succumb to temptation|2"),

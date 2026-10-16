@@ -4754,12 +4754,25 @@ describe("ongoing effects", () => {
     expect(mine[0]).toEqual({
       seat: 0,
       cardId: "PUMP",
-      label: "+2 attack · next attack",
+      label: "+2 attack · next attack action card",
       sourceSeat: 0,
       summary: "+2 attack",
+      summaryMessage: { id: "engine.effect.part.attack", values: { attack: "+2" } },
       lifetime: "once",
-      duration: "next attack",
-      durationMessage: { id: "engine.effect.duration.next.attack" },
+      duration: "next attack action card",
+      durationMessage: {
+        id: "engine.effect.duration.next.subject",
+        values: {
+          noun: "attackAction",
+          typeCount: 0,
+          color: "any",
+          via: "none",
+          keyword: "none",
+          limit: "none",
+          target: "none",
+          subject: { kind: "term", id: "engine.effect.subject.one" },
+        },
+      },
     });
     // the effect is public: the opponent sees it too
     const theirs = projectStateFor(s, 1).ongoing;

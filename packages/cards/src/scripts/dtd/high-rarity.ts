@@ -837,7 +837,6 @@ export const dtdHighRarity: Record<string, CardScript> = {
       ctx.addModifier({
         scope: "until-end-of-turn",
         preventLethalDamageByBanishingNamedCard: "Minerva Themis",
-        ongoingLabel: "The next lethal damage may be prevented by banishing Minerva Themis",
       });
     },
   },
@@ -1035,7 +1034,6 @@ export const dtdHighRarity: Record<string, CardScript> = {
         ...(option === "war"
           ? { restrictActionsToWeaponOrAttack: true }
           : { restrictActionsToNonWeaponNonAttack: true }),
-        ongoingLabel: option === "war" ? "War" : "Peace",
         expiresAtEndOfSeatTurn: target,
       });
       if (hook === "diplomacy-opponent") {

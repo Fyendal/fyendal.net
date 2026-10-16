@@ -2120,7 +2120,6 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
         appliesToCardType: "action",
         appliesToSubtype: "attack",
         basePower: 6,
-        ongoingLabel: "next attack action card has 6 base attack",
       });
     },
   },

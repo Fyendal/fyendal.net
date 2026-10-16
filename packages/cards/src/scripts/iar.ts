@@ -1899,7 +1899,7 @@ export const iar: Record<string, CardScript> = {
         grantsPlayFromZoneOwner: "own",
         grantsPlayFromNameContains: "runechant",
         appliesToSubtype: "aura",
-        ongoingLabel: "You may play an aura with Runechant in its name from banish",
+        ongoingLabel: "may play an aura with Runechant in its name from your banished zone",
       });
     },
   },

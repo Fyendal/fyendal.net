@@ -133,7 +133,6 @@ function suppressTargetEquipmentAbilities(ctx: ScriptCtx): void {
     seat: owner,
     suppressesActivatedAbilitiesOfInstanceId: targetId,
     expiresAtEndOfSeatTurn: owner,
-    ongoingLabel: "Chosen equipment's activated abilities are suppressed",
   });
 }
 function steelSoulTriggerCount(ctx: ScriptCtx, other: DeepReadonly<CardInstance>): number {
@@ -746,7 +745,6 @@ export const evoHighRarity: Record<string, CardScript> = {
           scope: "until-end-of-turn",
           seat: owner,
           cannotDefendWithInstanceId: targetId,
-          ongoingLabel: "Chosen equipment can't defend this turn",
         });
       }
     },

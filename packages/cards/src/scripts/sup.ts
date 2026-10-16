@@ -1280,7 +1280,7 @@ Object.assign(sup, {
         appliesToSubtype: "aura",
         appliesToKeyword: "suspense",
         once: true,
-        ongoingLabel: "You may play an aura of suspense from your graveyard",
+        ongoingLabel: "may play an aura of suspense from your graveyard",
       });
     },
   },

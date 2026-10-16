@@ -70,7 +70,7 @@ describe("DTD — registration and core mechanics", () => {
     )).toBe(false);
     expect(projectStateFor(s.state, 1).ongoing).toContainEqual(expect.objectContaining({
       seat: 1,
-      label: expect.stringContaining("only attacks with base attack 11+ · this turn"),
+      label: "can only play or activate attacks with 11 or more base attack · this turn",
     }));
 
     s.endTurn();
@@ -636,12 +636,12 @@ describe("DTD — registration and core mechanics", () => {
       expect.objectContaining({
         seat: 1,
         cardId: printingId("warmonger's diplomacy|3"),
-        label: "War · next turn",
+        label: "can only play or activate weapon and attack actions · next turn",
       }),
       expect.objectContaining({
         seat: 0,
         cardId: printingId("warmonger's diplomacy|3"),
-        label: "Peace · next turn",
+        label: "can only play or activate non-weapon, non-attack actions · next turn",
       }),
     ]));
   });

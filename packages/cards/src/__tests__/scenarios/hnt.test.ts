@@ -1025,7 +1025,7 @@ describe("HNT — marked heroes and daggers", () => {
         lifetime: "once",
         durationMessage: {
           id: "engine.effect.duration.next.card.this.chain",
-          values: { subtype: "draconic", cardType: "any" },
+          values: { subtype: "draconic", cardType: "any", noun: "card" },
         },
       }),
     ]));
@@ -1389,7 +1389,7 @@ describe("HNT — marked heroes and daggers", () => {
     expect(projectStateFor(g.state, 0).ongoing).toContainEqual(expect.objectContaining({
       seat: 0,
       cardId: printingId("shelter from the storm|1"),
-      label: "prevent 1 damage from each of the next 3 damage events · this turn",
+      label: "prevent 1 damage the next 3 times you would be dealt damage · this turn",
     }));
   });
 });

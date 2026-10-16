@@ -1522,7 +1522,6 @@ Object.assign(ros, {
         appliesTo: "attack-action",
         appliesToClass: "runeblade",
         once: true,
-        ongoingLabel: "next Runeblade attack-action hit: look at their hand and discard a card",
         onHitScriptHook: {
           hook: "succumb-hit",
           label: "look at their hand and choose a card for them to discard",

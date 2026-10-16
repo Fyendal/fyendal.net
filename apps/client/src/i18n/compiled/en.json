@@ -16733,7 +16733,7 @@
   "card.trigger.obk.incubator.pox": [
     {
       "type": 0,
-      "value": "Create "
+      "value": "Create a "
     },
     {
       "type": 1,
@@ -16741,7 +16741,7 @@
     },
     {
       "type": 0,
-      "value": " under the hit hero's control"
+      "value": " token under the hit hero's control"
     }
   ],
   "card.trigger.obk.min.flip": [
@@ -18333,6 +18333,14 @@
             }
           ]
         },
+        "dagger": {
+          "value": [
+            {
+              "type": 0,
+              "value": "dagger "
+            }
+          ]
+        },
         "other": {
           "value": []
         }
@@ -18364,8 +18372,30 @@
       }
     },
     {
+      "type": 5,
+      "value": "noun",
+      "options": {
+        "weapon": {
+          "value": [
+            {
+              "type": 0,
+              "value": "weapons"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 0,
+              "value": "cards"
+            }
+          ]
+        }
+      }
+    },
+    {
       "type": 0,
-      "value": "cards this combat chain"
+      "value": " this combat chain"
     }
   ],
   "engine.effect.duration.cards.this.link": [
@@ -18381,6 +18411,14 @@
             }
           ]
         },
+        "dagger": {
+          "value": [
+            {
+              "type": 0,
+              "value": "dagger "
+            }
+          ]
+        },
         "other": {
           "value": []
         }
@@ -18412,8 +18450,30 @@
       }
     },
     {
+      "type": 5,
+      "value": "noun",
+      "options": {
+        "weapon": {
+          "value": [
+            {
+              "type": 0,
+              "value": "weapons"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 0,
+              "value": "cards"
+            }
+          ]
+        }
+      }
+    },
+    {
       "type": 0,
-      "value": "cards this chain link"
+      "value": " this chain link"
     }
   ],
   "engine.effect.duration.each.end.phase": [
@@ -18464,6 +18524,12 @@
       "value": "next attack"
     }
   ],
+  "engine.effect.duration.next.card": [
+    {
+      "type": 0,
+      "value": "next card"
+    }
+  ],
   "engine.effect.duration.next.card.this.chain": [
     {
       "type": 0,
@@ -18478,6 +18544,14 @@
             {
               "type": 0,
               "value": "Draconic "
+            }
+          ]
+        },
+        "dagger": {
+          "value": [
+            {
+              "type": 0,
+              "value": "dagger "
             }
           ]
         },
@@ -18512,8 +18586,30 @@
       }
     },
     {
+      "type": 5,
+      "value": "noun",
+      "options": {
+        "weapon": {
+          "value": [
+            {
+              "type": 0,
+              "value": "weapon"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 0,
+              "value": "card"
+            }
+          ]
+        }
+      }
+    },
+    {
       "type": 0,
-      "value": "card this combat chain"
+      "value": " this combat chain"
     }
   ],
   "engine.effect.duration.next.card.this.link": [
@@ -18533,6 +18629,14 @@
             }
           ]
         },
+        "dagger": {
+          "value": [
+            {
+              "type": 0,
+              "value": "dagger "
+            }
+          ]
+        },
         "other": {
           "value": []
         }
@@ -18564,8 +18668,30 @@
       }
     },
     {
+      "type": 5,
+      "value": "noun",
+      "options": {
+        "weapon": {
+          "value": [
+            {
+              "type": 0,
+              "value": "weapon"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 0,
+              "value": "card"
+            }
+          ]
+        }
+      }
+    },
+    {
       "type": 0,
-      "value": "card this chain link"
+      "value": " this chain link"
     }
   ],
   "engine.effect.duration.next.play": [
@@ -18669,10 +18795,70 @@
       "value": "next rune-gated attack"
     }
   ],
+  "engine.effect.duration.next.subject": [
+    {
+      "type": 0,
+      "value": "next "
+    },
+    {
+      "type": 1,
+      "value": "subject"
+    }
+  ],
+  "engine.effect.duration.next.subject.this.chain": [
+    {
+      "type": 0,
+      "value": "next "
+    },
+    {
+      "type": 1,
+      "value": "subject"
+    },
+    {
+      "type": 0,
+      "value": " this combat chain"
+    }
+  ],
+  "engine.effect.duration.next.subject.this.turn": [
+    {
+      "type": 0,
+      "value": "next "
+    },
+    {
+      "type": 1,
+      "value": "subject"
+    },
+    {
+      "type": 0,
+      "value": " this turn"
+    }
+  ],
   "engine.effect.duration.next.turn": [
     {
       "type": 0,
       "value": "next turn"
+    }
+  ],
+  "engine.effect.duration.next.uses.subject.this.turn": [
+    {
+      "type": 0,
+      "value": "next "
+    },
+    {
+      "type": 1,
+      "value": "uses"
+    },
+    {
+      "type": 0,
+      "value": " "
+    },
+    {
+      "type": 1,
+      "value": "subject"
+    },
+    {
+      "type": 0,
+      "value": " this turn"
     }
   ],
   "engine.effect.duration.rest.of.game": [
@@ -18685,6 +18871,26 @@
     {
       "type": 0,
       "value": "start of their next turn"
+    }
+  ],
+  "engine.effect.duration.subject.this.chain": [
+    {
+      "type": 1,
+      "value": "subject"
+    },
+    {
+      "type": 0,
+      "value": " this combat chain"
+    }
+  ],
+  "engine.effect.duration.subject.this.turn": [
+    {
+      "type": 1,
+      "value": "subject"
+    },
+    {
+      "type": 0,
+      "value": " this turn"
     }
   ],
   "engine.effect.duration.this.action.phase": [
@@ -18715,6 +18921,1918 @@
     {
       "type": 0,
       "value": "through next turn"
+    }
+  ],
+  "engine.effect.part.action.played.gain.action.points": [
+    {
+      "type": 0,
+      "value": "gain "
+    },
+    {
+      "type": 6,
+      "value": "actionPoints",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 0,
+              "value": "an action point"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " action points"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    },
+    {
+      "type": 0,
+      "value": " the next time you play an action card with cost "
+    },
+    {
+      "type": 1,
+      "value": "actionMinCost"
+    },
+    {
+      "type": 0,
+      "value": " or more"
+    }
+  ],
+  "engine.effect.part.activate.create.token": [
+    {
+      "type": 0,
+      "value": "create "
+    },
+    {
+      "type": 1,
+      "value": "activateTokenArticle"
+    },
+    {
+      "type": 0,
+      "value": " "
+    },
+    {
+      "type": 1,
+      "value": "activateToken"
+    },
+    {
+      "type": 0,
+      "value": " token whenever they activate an ability"
+    }
+  ],
+  "engine.effect.part.activated.abilities.locked": [
+    {
+      "type": 1,
+      "value": "lockedCard"
+    },
+    {
+      "type": 0,
+      "value": "'s activated abilities can't be activated"
+    }
+  ],
+  "engine.effect.part.attack": [
+    {
+      "type": 1,
+      "value": "attack"
+    },
+    {
+      "type": 0,
+      "value": " attack"
+    }
+  ],
+  "engine.effect.part.attack.gain.bonus": [
+    {
+      "type": 0,
+      "value": "the next time an attack would gain attack, it gains "
+    },
+    {
+      "type": 1,
+      "value": "gainBonus"
+    },
+    {
+      "type": 0,
+      "value": " more"
+    }
+  ],
+  "engine.effect.part.attack.lightly.defended": [
+    {
+      "type": 1,
+      "value": "attack"
+    },
+    {
+      "type": 0,
+      "value": " attack while defended by fewer than "
+    },
+    {
+      "type": 1,
+      "value": "defenders"
+    },
+    {
+      "type": 0,
+      "value": " non-equipment cards"
+    }
+  ],
+  "engine.effect.part.banish.play.create.token": [
+    {
+      "type": 0,
+      "value": "create "
+    },
+    {
+      "type": 6,
+      "value": "banishTokenCount",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 1,
+              "value": "banishTokenArticle"
+            },
+            {
+              "type": 0,
+              "value": " "
+            },
+            {
+              "type": 1,
+              "value": "banishToken"
+            },
+            {
+              "type": 0,
+              "value": " token"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " "
+            },
+            {
+              "type": 1,
+              "value": "banishToken"
+            },
+            {
+              "type": 0,
+              "value": " tokens"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    },
+    {
+      "type": 0,
+      "value": " when you play an attack action card from banish"
+    }
+  ],
+  "engine.effect.part.base.attack": [
+    {
+      "type": 1,
+      "value": "basePower"
+    },
+    {
+      "type": 0,
+      "value": " base attack"
+    }
+  ],
+  "engine.effect.part.cannot.defend": [
+    {
+      "type": 1,
+      "value": "benchedCard"
+    },
+    {
+      "type": 0,
+      "value": " can't defend"
+    }
+  ],
+  "engine.effect.part.cost": [
+    {
+      "type": 0,
+      "value": "costs "
+    },
+    {
+      "type": 1,
+      "value": "cost"
+    },
+    {
+      "type": 0,
+      "value": " "
+    },
+    {
+      "type": 5,
+      "value": "costChange",
+      "options": {
+        "more": {
+          "value": [
+            {
+              "type": 0,
+              "value": "more"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 0,
+              "value": "less"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "type": 0,
+      "value": " to "
+    },
+    {
+      "type": 5,
+      "value": "costAction",
+      "options": {
+        "activate": {
+          "value": [
+            {
+              "type": 0,
+              "value": "activate"
+            }
+          ]
+        },
+        "both": {
+          "value": [
+            {
+              "type": 0,
+              "value": "play or activate"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 0,
+              "value": "play"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "engine.effect.part.crush.destroy.deck": [
+    {
+      "type": 0,
+      "value": "destroy the top "
+    },
+    {
+      "type": 1,
+      "value": "destroyCount"
+    },
+    {
+      "type": 0,
+      "value": " cards of their deck when it deals "
+    },
+    {
+      "type": 1,
+      "value": "minimumDamage"
+    },
+    {
+      "type": 0,
+      "value": " or more damage to a hero"
+    }
+  ],
+  "engine.effect.part.damage": [
+    {
+      "type": 1,
+      "value": "damageBonus"
+    },
+    {
+      "type": 0,
+      "value": " "
+    },
+    {
+      "type": 5,
+      "value": "damageKind",
+      "options": {
+        "arcane": {
+          "value": [
+            {
+              "type": 0,
+              "value": "arcane damage"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 0,
+              "value": "damage"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "engine.effect.part.damage.unpreventable": [
+    {
+      "type": 0,
+      "value": "its damage can't be prevented"
+    }
+  ],
+  "engine.effect.part.defense": [
+    {
+      "type": 1,
+      "value": "defense"
+    },
+    {
+      "type": 0,
+      "value": " defense"
+    }
+  ],
+  "engine.effect.part.destroy.defending.equipment": [
+    {
+      "type": 0,
+      "value": "may destroy a defending equipment instead of dealing damage"
+    }
+  ],
+  "engine.effect.part.discard.prevent": [
+    {
+      "type": 0,
+      "value": "discard "
+    },
+    {
+      "type": 1,
+      "value": "discardArticle"
+    },
+    {
+      "type": 0,
+      "value": " "
+    },
+    {
+      "type": 1,
+      "value": "discardType"
+    },
+    {
+      "type": 0,
+      "value": " card to prevent "
+    },
+    {
+      "type": 1,
+      "value": "discardPrevent"
+    },
+    {
+      "type": 0,
+      "value": " damage"
+    },
+    {
+      "type": 6,
+      "value": "discardDraw",
+      "options": {
+        "=0": {
+          "value": []
+        },
+        "one": {
+          "value": [
+            {
+              "type": 0,
+              "value": " and draw a card"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 0,
+              "value": " and draw "
+            },
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " cards"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    }
+  ],
+  "engine.effect.part.dominate": [
+    {
+      "type": 0,
+      "value": "dominate"
+    }
+  ],
+  "engine.effect.part.extra.dice": [
+    {
+      "type": 0,
+      "value": "roll "
+    },
+    {
+      "type": 1,
+      "value": "extraDice"
+    },
+    {
+      "type": 0,
+      "value": " more "
+    },
+    {
+      "type": 6,
+      "value": "extraDice",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 0,
+              "value": "die"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 0,
+              "value": "dice"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    },
+    {
+      "type": 0,
+      "value": " and ignore the lowest"
+    }
+  ],
+  "engine.effect.part.go.again": [
+    {
+      "type": 0,
+      "value": "go again"
+    }
+  ],
+  "engine.effect.part.go.again.if.attack": [
+    {
+      "type": 0,
+      "value": "go again while it has "
+    },
+    {
+      "type": 1,
+      "value": "goAgainAttack"
+    },
+    {
+      "type": 0,
+      "value": " or more attack"
+    }
+  ],
+  "engine.effect.part.go.again.if.defended.by.attack.action": [
+    {
+      "type": 0,
+      "value": "go again if defended by an attack action card"
+    }
+  ],
+  "engine.effect.part.go.again.if.played.or.created": [
+    {
+      "type": 0,
+      "value": "go again if you've played or created "
+    },
+    {
+      "type": 1,
+      "value": "createdArticle"
+    },
+    {
+      "type": 0,
+      "value": " "
+    },
+    {
+      "type": 1,
+      "value": "createdType"
+    },
+    {
+      "type": 0,
+      "value": " this turn"
+    }
+  ],
+  "engine.effect.part.go.again.on.hit": [
+    {
+      "type": 0,
+      "value": "go again when it hits"
+    }
+  ],
+  "engine.effect.part.grant.name": [
+    {
+      "type": 0,
+      "value": "is named "
+    },
+    {
+      "type": 1,
+      "value": "grantedName"
+    }
+  ],
+  "engine.effect.part.grant.type": [
+    {
+      "type": 0,
+      "value": "is also "
+    },
+    {
+      "type": 1,
+      "value": "grantedType"
+    }
+  ],
+  "engine.effect.part.hit.effects.suppressed": [
+    {
+      "type": 0,
+      "value": "its hit effects don't trigger"
+    }
+  ],
+  "engine.effect.part.intimidate": [
+    {
+      "type": 6,
+      "value": "intimidate",
+      "options": {
+        "=1": {
+          "value": [
+            {
+              "type": 0,
+              "value": "intimidate"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 0,
+              "value": "intimidate "
+            },
+            {
+              "type": 7
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    }
+  ],
+  "engine.effect.part.keyword": [
+    {
+      "type": 1,
+      "value": "keyword"
+    }
+  ],
+  "engine.effect.part.keyword.lost": [
+    {
+      "type": 0,
+      "value": "loses "
+    },
+    {
+      "type": 1,
+      "value": "lostKeyword"
+    }
+  ],
+  "engine.effect.part.lose.class.talent.types": [
+    {
+      "type": 0,
+      "value": "cards they own lose all class and talent types"
+    }
+  ],
+  "engine.effect.part.max.non.block.defenders": [
+    {
+      "type": 0,
+      "value": "can't be defended by more than "
+    },
+    {
+      "type": 1,
+      "value": "maxDefenders"
+    },
+    {
+      "type": 0,
+      "value": " non-block cards"
+    }
+  ],
+  "engine.effect.part.minimum.base.attack": [
+    {
+      "type": 0,
+      "value": "can only play or activate attacks with "
+    },
+    {
+      "type": 1,
+      "value": "minimumAttack"
+    },
+    {
+      "type": 0,
+      "value": " or more base attack"
+    }
+  ],
+  "engine.effect.part.name.gains.type": [
+    {
+      "type": 0,
+      "value": "cards named "
+    },
+    {
+      "type": 1,
+      "value": "typedName"
+    },
+    {
+      "type": 0,
+      "value": " are "
+    },
+    {
+      "type": 1,
+      "value": "namedType"
+    }
+  ],
+  "engine.effect.part.on.boost.attack": [
+    {
+      "type": 0,
+      "value": "the next attack you boost gets "
+    },
+    {
+      "type": 1,
+      "value": "boostAttack"
+    },
+    {
+      "type": 0,
+      "value": " attack"
+    }
+  ],
+  "engine.effect.part.on.boost.dominate": [
+    {
+      "type": 0,
+      "value": "the next attack you boost gets dominate"
+    }
+  ],
+  "engine.effect.part.on.defended.deal.damage": [
+    {
+      "type": 0,
+      "value": "deal "
+    },
+    {
+      "type": 1,
+      "value": "defendedDamage"
+    },
+    {
+      "type": 0,
+      "value": " damage to the defending hero when defended"
+    }
+  ],
+  "engine.effect.part.on.hit.create.token": [
+    {
+      "type": 0,
+      "value": "create "
+    },
+    {
+      "type": 6,
+      "value": "tokenCount",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 1,
+              "value": "tokenArticle"
+            },
+            {
+              "type": 0,
+              "value": " "
+            },
+            {
+              "type": 1,
+              "value": "token"
+            },
+            {
+              "type": 0,
+              "value": " token"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " "
+            },
+            {
+              "type": 1,
+              "value": "token"
+            },
+            {
+              "type": 0,
+              "value": " tokens"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    },
+    {
+      "type": 0,
+      "value": " when it hits"
+    }
+  ],
+  "engine.effect.part.on.hit.deal.damage": [
+    {
+      "type": 0,
+      "value": "deal "
+    },
+    {
+      "type": 1,
+      "value": "hitDamage"
+    },
+    {
+      "type": 0,
+      "value": " damage when it hits"
+    }
+  ],
+  "engine.effect.part.on.hit.draw": [
+    {
+      "type": 0,
+      "value": "draw "
+    },
+    {
+      "type": 6,
+      "value": "draw",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 0,
+              "value": "a card"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " cards"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    },
+    {
+      "type": 0,
+      "value": " when it hits"
+    }
+  ],
+  "engine.effect.part.on.hit.gain.life": [
+    {
+      "type": 0,
+      "value": "gain "
+    },
+    {
+      "type": 1,
+      "value": "life"
+    },
+    {
+      "type": 0,
+      "value": " life the next time you hit"
+    }
+  ],
+  "engine.effect.part.on.hit.gain.resources": [
+    {
+      "type": 0,
+      "value": "gain "
+    },
+    {
+      "type": 1,
+      "value": "resources"
+    },
+    {
+      "type": 0,
+      "value": " "
+    },
+    {
+      "type": 6,
+      "value": "resources",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 0,
+              "value": "resource"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 0,
+              "value": "resources"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    },
+    {
+      "type": 0,
+      "value": " the next time you hit"
+    }
+  ],
+  "engine.effect.part.on.hit.lose.life": [
+    {
+      "type": 0,
+      "value": "when it hits a hero, they lose "
+    },
+    {
+      "type": 1,
+      "value": "lifeLoss"
+    },
+    {
+      "type": 0,
+      "value": " life"
+    }
+  ],
+  "engine.effect.part.on.hit.mark": [
+    {
+      "type": 0,
+      "value": "mark the hero when it hits"
+    }
+  ],
+  "engine.effect.part.on.prevent.create.token": [
+    {
+      "type": 0,
+      "value": "create "
+    },
+    {
+      "type": 1,
+      "value": "preventTokenArticle"
+    },
+    {
+      "type": 0,
+      "value": " "
+    },
+    {
+      "type": 1,
+      "value": "preventToken"
+    },
+    {
+      "type": 0,
+      "value": " token when it prevents damage"
+    }
+  ],
+  "engine.effect.part.only.non.weapon.attack.actions": [
+    {
+      "type": 0,
+      "value": "can only play or activate non-weapon, non-attack actions"
+    }
+  ],
+  "engine.effect.part.only.play.type": [
+    {
+      "type": 0,
+      "value": "can only play "
+    },
+    {
+      "type": 1,
+      "value": "playType"
+    },
+    {
+      "type": 0,
+      "value": " cards"
+    }
+  ],
+  "engine.effect.part.only.weapon.attack.actions": [
+    {
+      "type": 0,
+      "value": "can only play or activate weapon and attack actions"
+    }
+  ],
+  "engine.effect.part.overpower": [
+    {
+      "type": 0,
+      "value": "overpower"
+    }
+  ],
+  "engine.effect.part.piercing": [
+    {
+      "type": 0,
+      "value": "piercing "
+    },
+    {
+      "type": 1,
+      "value": "piercing"
+    }
+  ],
+  "engine.effect.part.prevent.all.damage.chosen": [
+    {
+      "type": 0,
+      "value": "prevent all damage from the chosen source"
+    }
+  ],
+  "engine.effect.part.prevent.all.damage.from": [
+    {
+      "type": 0,
+      "value": "prevent all damage from "
+    },
+    {
+      "type": 1,
+      "value": "source"
+    }
+  ],
+  "engine.effect.part.prevent.damage.color": [
+    {
+      "type": 0,
+      "value": "prevent the next damage from a "
+    },
+    {
+      "type": 1,
+      "value": "sourceColor"
+    },
+    {
+      "type": 0,
+      "value": " source"
+    }
+  ],
+  "engine.effect.part.prevent.damage.source.type": [
+    {
+      "type": 0,
+      "value": "prevent next "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " damage from "
+    },
+    {
+      "type": 1,
+      "value": "sourceTypeArticle"
+    },
+    {
+      "type": 0,
+      "value": " "
+    },
+    {
+      "type": 1,
+      "value": "sourceType"
+    },
+    {
+      "type": 0,
+      "value": " source"
+    }
+  ],
+  "engine.effect.part.prevent.each.event": [
+    {
+      "type": 0,
+      "value": "prevent "
+    },
+    {
+      "type": 1,
+      "value": "perEvent"
+    },
+    {
+      "type": 0,
+      "value": " damage the next "
+    },
+    {
+      "type": 6,
+      "value": "events",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 0,
+              "value": "time"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " times"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    },
+    {
+      "type": 0,
+      "value": " you would be dealt damage"
+    }
+  ],
+  "engine.effect.part.prevent.lethal.banish": [
+    {
+      "type": 0,
+      "value": "may banish "
+    },
+    {
+      "type": 1,
+      "value": "lethalCard"
+    },
+    {
+      "type": 0,
+      "value": " from hand or arsenal to prevent the next lethal damage"
+    }
+  ],
+  "engine.effect.part.prevent.small.damage": [
+    {
+      "type": 0,
+      "value": "prevent the next damage of "
+    },
+    {
+      "type": 1,
+      "value": "maxEvent"
+    },
+    {
+      "type": 0,
+      "value": " or less"
+    }
+  ],
+  "engine.effect.subject.one": [
+    {
+      "type": 5,
+      "value": "via",
+      "options": {
+        "defending": {
+          "value": [
+            {
+              "type": 0,
+              "value": "defending "
+            }
+          ]
+        },
+        "runeGate": {
+          "value": [
+            {
+              "type": 0,
+              "value": "rune-gated "
+            }
+          ]
+        },
+        "charge": {
+          "value": [
+            {
+              "type": 0,
+              "value": "charged "
+            }
+          ]
+        },
+        "other": {
+          "value": []
+        }
+      }
+    },
+    {
+      "type": 5,
+      "value": "color",
+      "options": {
+        "red": {
+          "value": [
+            {
+              "type": 0,
+              "value": "red "
+            }
+          ]
+        },
+        "yellow": {
+          "value": [
+            {
+              "type": 0,
+              "value": "yellow "
+            }
+          ]
+        },
+        "blue": {
+          "value": [
+            {
+              "type": 0,
+              "value": "blue "
+            }
+          ]
+        },
+        "other": {
+          "value": []
+        }
+      }
+    },
+    {
+      "type": 6,
+      "value": "typeCount",
+      "options": {
+        "=0": {
+          "value": []
+        },
+        "=1": {
+          "value": [
+            {
+              "type": 1,
+              "value": "type1"
+            },
+            {
+              "type": 0,
+              "value": " "
+            }
+          ]
+        },
+        "=2": {
+          "value": [
+            {
+              "type": 1,
+              "value": "type1"
+            },
+            {
+              "type": 0,
+              "value": " or "
+            },
+            {
+              "type": 1,
+              "value": "type2"
+            },
+            {
+              "type": 0,
+              "value": " "
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 1,
+              "value": "type1"
+            },
+            {
+              "type": 0,
+              "value": ", "
+            },
+            {
+              "type": 1,
+              "value": "type2"
+            },
+            {
+              "type": 0,
+              "value": ", or "
+            },
+            {
+              "type": 1,
+              "value": "type3"
+            },
+            {
+              "type": 0,
+              "value": " "
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    },
+    {
+      "type": 5,
+      "value": "noun",
+      "options": {
+        "attack": {
+          "value": [
+            {
+              "type": 0,
+              "value": "attack"
+            }
+          ]
+        },
+        "attackAction": {
+          "value": [
+            {
+              "type": 0,
+              "value": "attack action card"
+            }
+          ]
+        },
+        "weaponAttack": {
+          "value": [
+            {
+              "type": 0,
+              "value": "weapon attack"
+            }
+          ]
+        },
+        "attackWith": {
+          "value": [
+            {
+              "type": 0,
+              "value": "attack with "
+            },
+            {
+              "type": 1,
+              "value": "name"
+            }
+          ]
+        },
+        "instance": {
+          "value": [
+            {
+              "type": 1,
+              "value": "name"
+            }
+          ]
+        },
+        "named": {
+          "value": [
+            {
+              "type": 1,
+              "value": "name"
+            }
+          ]
+        },
+        "actionCard": {
+          "value": [
+            {
+              "type": 0,
+              "value": "action card"
+            }
+          ]
+        },
+        "nonAttackActionCard": {
+          "value": [
+            {
+              "type": 0,
+              "value": "non-attack action card"
+            }
+          ]
+        },
+        "instantCard": {
+          "value": [
+            {
+              "type": 0,
+              "value": "instant card"
+            }
+          ]
+        },
+        "reactionCard": {
+          "value": [
+            {
+              "type": 0,
+              "value": "reaction card"
+            }
+          ]
+        },
+        "attackReactionCard": {
+          "value": [
+            {
+              "type": 0,
+              "value": "attack reaction card"
+            }
+          ]
+        },
+        "defenseReactionCard": {
+          "value": [
+            {
+              "type": 0,
+              "value": "defense reaction card"
+            }
+          ]
+        },
+        "equipment": {
+          "value": [
+            {
+              "type": 0,
+              "value": "equipment"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 0,
+              "value": "card"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "type": 5,
+      "value": "keyword",
+      "options": {
+        "none": {
+          "value": []
+        },
+        "powerCounter": {
+          "value": [
+            {
+              "type": 0,
+              "value": " with a +1 attack counter"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 0,
+              "value": " with "
+            },
+            {
+              "type": 1,
+              "value": "keyword"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "type": 5,
+      "value": "limit",
+      "options": {
+        "costMax": {
+          "value": [
+            {
+              "type": 0,
+              "value": " with cost "
+            },
+            {
+              "type": 1,
+              "value": "limitValue"
+            },
+            {
+              "type": 0,
+              "value": " or less"
+            }
+          ]
+        },
+        "costMin": {
+          "value": [
+            {
+              "type": 0,
+              "value": " with cost "
+            },
+            {
+              "type": 1,
+              "value": "limitValue"
+            },
+            {
+              "type": 0,
+              "value": " or more"
+            }
+          ]
+        },
+        "powerMax": {
+          "value": [
+            {
+              "type": 0,
+              "value": " with "
+            },
+            {
+              "type": 1,
+              "value": "limitValue"
+            },
+            {
+              "type": 0,
+              "value": " or less base attack"
+            }
+          ]
+        },
+        "powerMin": {
+          "value": [
+            {
+              "type": 0,
+              "value": " with "
+            },
+            {
+              "type": 1,
+              "value": "limitValue"
+            },
+            {
+              "type": 0,
+              "value": " or more base attack"
+            }
+          ]
+        },
+        "other": {
+          "value": []
+        }
+      }
+    },
+    {
+      "type": 5,
+      "value": "via",
+      "options": {
+        "arsenal": {
+          "value": [
+            {
+              "type": 0,
+              "value": " from arsenal"
+            }
+          ]
+        },
+        "other": {
+          "value": []
+        }
+      }
+    },
+    {
+      "type": 5,
+      "value": "target",
+      "options": {
+        "type": {
+          "value": [
+            {
+              "type": 0,
+              "value": " targeting "
+            },
+            {
+              "type": 1,
+              "value": "targetArticle"
+            },
+            {
+              "type": 0,
+              "value": " "
+            },
+            {
+              "type": 1,
+              "value": "targetName"
+            },
+            {
+              "type": 0,
+              "value": " hero"
+            }
+          ]
+        },
+        "name": {
+          "value": [
+            {
+              "type": 0,
+              "value": " targeting "
+            },
+            {
+              "type": 1,
+              "value": "targetName"
+            }
+          ]
+        },
+        "marked": {
+          "value": [
+            {
+              "type": 0,
+              "value": " targeting a marked hero"
+            }
+          ]
+        },
+        "other": {
+          "value": []
+        }
+      }
+    }
+  ],
+  "engine.effect.subject.other": [
+    {
+      "type": 5,
+      "value": "via",
+      "options": {
+        "defending": {
+          "value": [
+            {
+              "type": 0,
+              "value": "defending "
+            }
+          ]
+        },
+        "runeGate": {
+          "value": [
+            {
+              "type": 0,
+              "value": "rune-gated "
+            }
+          ]
+        },
+        "charge": {
+          "value": [
+            {
+              "type": 0,
+              "value": "charged "
+            }
+          ]
+        },
+        "other": {
+          "value": []
+        }
+      }
+    },
+    {
+      "type": 5,
+      "value": "color",
+      "options": {
+        "red": {
+          "value": [
+            {
+              "type": 0,
+              "value": "red "
+            }
+          ]
+        },
+        "yellow": {
+          "value": [
+            {
+              "type": 0,
+              "value": "yellow "
+            }
+          ]
+        },
+        "blue": {
+          "value": [
+            {
+              "type": 0,
+              "value": "blue "
+            }
+          ]
+        },
+        "other": {
+          "value": []
+        }
+      }
+    },
+    {
+      "type": 6,
+      "value": "typeCount",
+      "options": {
+        "=0": {
+          "value": []
+        },
+        "=1": {
+          "value": [
+            {
+              "type": 1,
+              "value": "type1"
+            },
+            {
+              "type": 0,
+              "value": " "
+            }
+          ]
+        },
+        "=2": {
+          "value": [
+            {
+              "type": 1,
+              "value": "type1"
+            },
+            {
+              "type": 0,
+              "value": " or "
+            },
+            {
+              "type": 1,
+              "value": "type2"
+            },
+            {
+              "type": 0,
+              "value": " "
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 1,
+              "value": "type1"
+            },
+            {
+              "type": 0,
+              "value": ", "
+            },
+            {
+              "type": 1,
+              "value": "type2"
+            },
+            {
+              "type": 0,
+              "value": ", or "
+            },
+            {
+              "type": 1,
+              "value": "type3"
+            },
+            {
+              "type": 0,
+              "value": " "
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    },
+    {
+      "type": 5,
+      "value": "noun",
+      "options": {
+        "attack": {
+          "value": [
+            {
+              "type": 0,
+              "value": "attacks"
+            }
+          ]
+        },
+        "attackAction": {
+          "value": [
+            {
+              "type": 0,
+              "value": "attack action cards"
+            }
+          ]
+        },
+        "weaponAttack": {
+          "value": [
+            {
+              "type": 0,
+              "value": "weapon attacks"
+            }
+          ]
+        },
+        "attackWith": {
+          "value": [
+            {
+              "type": 0,
+              "value": "attacks with "
+            },
+            {
+              "type": 1,
+              "value": "name"
+            }
+          ]
+        },
+        "instance": {
+          "value": [
+            {
+              "type": 1,
+              "value": "name"
+            }
+          ]
+        },
+        "named": {
+          "value": [
+            {
+              "type": 1,
+              "value": "name"
+            }
+          ]
+        },
+        "actionCard": {
+          "value": [
+            {
+              "type": 0,
+              "value": "action cards"
+            }
+          ]
+        },
+        "nonAttackActionCard": {
+          "value": [
+            {
+              "type": 0,
+              "value": "non-attack action cards"
+            }
+          ]
+        },
+        "instantCard": {
+          "value": [
+            {
+              "type": 0,
+              "value": "instant cards"
+            }
+          ]
+        },
+        "reactionCard": {
+          "value": [
+            {
+              "type": 0,
+              "value": "reaction cards"
+            }
+          ]
+        },
+        "attackReactionCard": {
+          "value": [
+            {
+              "type": 0,
+              "value": "attack reaction cards"
+            }
+          ]
+        },
+        "defenseReactionCard": {
+          "value": [
+            {
+              "type": 0,
+              "value": "defense reaction cards"
+            }
+          ]
+        },
+        "equipment": {
+          "value": [
+            {
+              "type": 0,
+              "value": "equipment"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 0,
+              "value": "cards"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "type": 5,
+      "value": "keyword",
+      "options": {
+        "none": {
+          "value": []
+        },
+        "powerCounter": {
+          "value": [
+            {
+              "type": 0,
+              "value": " with a +1 attack counter"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 0,
+              "value": " with "
+            },
+            {
+              "type": 1,
+              "value": "keyword"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "type": 5,
+      "value": "limit",
+      "options": {
+        "costMax": {
+          "value": [
+            {
+              "type": 0,
+              "value": " with cost "
+            },
+            {
+              "type": 1,
+              "value": "limitValue"
+            },
+            {
+              "type": 0,
+              "value": " or less"
+            }
+          ]
+        },
+        "costMin": {
+          "value": [
+            {
+              "type": 0,
+              "value": " with cost "
+            },
+            {
+              "type": 1,
+              "value": "limitValue"
+            },
+            {
+              "type": 0,
+              "value": " or more"
+            }
+          ]
+        },
+        "powerMax": {
+          "value": [
+            {
+              "type": 0,
+              "value": " with "
+            },
+            {
+              "type": 1,
+              "value": "limitValue"
+            },
+            {
+              "type": 0,
+              "value": " or less base attack"
+            }
+          ]
+        },
+        "powerMin": {
+          "value": [
+            {
+              "type": 0,
+              "value": " with "
+            },
+            {
+              "type": 1,
+              "value": "limitValue"
+            },
+            {
+              "type": 0,
+              "value": " or more base attack"
+            }
+          ]
+        },
+        "other": {
+          "value": []
+        }
+      }
+    },
+    {
+      "type": 5,
+      "value": "via",
+      "options": {
+        "arsenal": {
+          "value": [
+            {
+              "type": 0,
+              "value": " from arsenal"
+            }
+          ]
+        },
+        "other": {
+          "value": []
+        }
+      }
+    },
+    {
+      "type": 5,
+      "value": "target",
+      "options": {
+        "type": {
+          "value": [
+            {
+              "type": 0,
+              "value": " targeting "
+            },
+            {
+              "type": 1,
+              "value": "targetArticle"
+            },
+            {
+              "type": 0,
+              "value": " "
+            },
+            {
+              "type": 1,
+              "value": "targetName"
+            },
+            {
+              "type": 0,
+              "value": " hero"
+            }
+          ]
+        },
+        "name": {
+          "value": [
+            {
+              "type": 0,
+              "value": " targeting "
+            },
+            {
+              "type": 1,
+              "value": "targetName"
+            }
+          ]
+        },
+        "marked": {
+          "value": [
+            {
+              "type": 0,
+              "value": " targeting a marked hero"
+            }
+          ]
+        },
+        "other": {
+          "value": []
+        }
+      }
     }
   ],
   "engine.effect.summary.amp": [
@@ -18753,6 +20871,72 @@
       "value": "attack action base attack and defense are halved"
     }
   ],
+  "engine.effect.summary.list.four": [
+    {
+      "type": 1,
+      "value": "part0"
+    },
+    {
+      "type": 0,
+      "value": ", "
+    },
+    {
+      "type": 1,
+      "value": "part1"
+    },
+    {
+      "type": 0,
+      "value": ", "
+    },
+    {
+      "type": 1,
+      "value": "part2"
+    },
+    {
+      "type": 0,
+      "value": ", "
+    },
+    {
+      "type": 1,
+      "value": "part3"
+    }
+  ],
+  "engine.effect.summary.list.three": [
+    {
+      "type": 1,
+      "value": "part0"
+    },
+    {
+      "type": 0,
+      "value": ", "
+    },
+    {
+      "type": 1,
+      "value": "part1"
+    },
+    {
+      "type": 0,
+      "value": ", "
+    },
+    {
+      "type": 1,
+      "value": "part2"
+    }
+  ],
+  "engine.effect.summary.list.two": [
+    {
+      "type": 1,
+      "value": "part0"
+    },
+    {
+      "type": 0,
+      "value": ", "
+    },
+    {
+      "type": 1,
+      "value": "part1"
+    }
+  ],
   "engine.effect.summary.loses.all.abilities": [
     {
       "type": 0,
@@ -18777,6 +20961,12 @@
     {
       "type": 0,
       "value": "attack action cards can't gain attack"
+    }
+  ],
+  "engine.effect.summary.ongoing": [
+    {
+      "type": 0,
+      "value": "ongoing effect"
     }
   ],
   "engine.effect.summary.prevent.arcane": [

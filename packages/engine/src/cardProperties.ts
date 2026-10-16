@@ -47,6 +47,12 @@ const CLASS_SUPERTYPES = [
 ] as const;
 const CLASS_TALENT_SUPERTYPE_SET = new Set<string>([...CLASS_SUPERTYPES, ...TALENT_SUPERTYPES]);
 
+/** Whether a lowercase type tag is a class or talent supertype, which card
+ * text capitalizes ("Brute", "Draconic") unlike true subtypes ("sword"). */
+export function isClassOrTalentSupertype(tag: string): boolean {
+  return CLASS_TALENT_SUPERTYPE_SET.has(tag);
+}
+
 export function dataOf(state: GameStateInternal, cardId: string): CardData {
   const data = state.cardsRef[cardId];
   if (!data) throw new Error(`unknown card id: ${cardId}`);

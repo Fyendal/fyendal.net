@@ -16016,11 +16016,15 @@
   "card.trigger.obk.incubator.pox": [
     {
       "type": 0,
-      "value": "在被击中的英雄的操控下生成 "
+      "value": "在被命中的英雄的操控下生成一个 "
     },
     {
       "type": 1,
       "value": "token"
+    },
+    {
+      "type": 0,
+      "value": " 衍生物"
     }
   ],
   "card.trigger.obk.min.flip": [
@@ -17620,6 +17624,14 @@
             }
           ]
         },
+        "dagger": {
+          "value": [
+            {
+              "type": 0,
+              "value": "dagger "
+            }
+          ]
+        },
         "other": {
           "value": []
         }
@@ -17651,8 +17663,26 @@
       }
     },
     {
-      "type": 0,
-      "value": "牌"
+      "type": 5,
+      "value": "noun",
+      "options": {
+        "weapon": {
+          "value": [
+            {
+              "type": 0,
+              "value": "武器"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 0,
+              "value": "牌"
+            }
+          ]
+        }
+      }
     }
   ],
   "engine.effect.duration.cards.this.link": [
@@ -17672,6 +17702,14 @@
             }
           ]
         },
+        "dagger": {
+          "value": [
+            {
+              "type": 0,
+              "value": "dagger "
+            }
+          ]
+        },
         "other": {
           "value": []
         }
@@ -17703,8 +17741,26 @@
       }
     },
     {
-      "type": 0,
-      "value": "牌"
+      "type": 5,
+      "value": "noun",
+      "options": {
+        "weapon": {
+          "value": [
+            {
+              "type": 0,
+              "value": "武器"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 0,
+              "value": "牌"
+            }
+          ]
+        }
+      }
     }
   ],
   "engine.effect.duration.each.end.phase": [
@@ -17755,10 +17811,38 @@
       "value": "下一次攻击"
     }
   ],
+  "engine.effect.duration.next.card": [
+    {
+      "type": 0,
+      "value": "下一张牌"
+    }
+  ],
   "engine.effect.duration.next.card.this.chain": [
     {
       "type": 0,
-      "value": "本次战斗链中的下一张"
+      "value": "本次战斗链中的下一"
+    },
+    {
+      "type": 5,
+      "value": "noun",
+      "options": {
+        "weapon": {
+          "value": [
+            {
+              "type": 0,
+              "value": "把"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 0,
+              "value": "张"
+            }
+          ]
+        }
+      }
     },
     {
       "type": 5,
@@ -17769,6 +17853,14 @@
             {
               "type": 0,
               "value": "龙族 (Draconic) "
+            }
+          ]
+        },
+        "dagger": {
+          "value": [
+            {
+              "type": 0,
+              "value": "dagger "
             }
           ]
         },
@@ -17803,14 +17895,54 @@
       }
     },
     {
-      "type": 0,
-      "value": "牌"
+      "type": 5,
+      "value": "noun",
+      "options": {
+        "weapon": {
+          "value": [
+            {
+              "type": 0,
+              "value": "武器"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 0,
+              "value": "牌"
+            }
+          ]
+        }
+      }
     }
   ],
   "engine.effect.duration.next.card.this.link": [
     {
       "type": 0,
-      "value": "本次战斗链环中的下一张"
+      "value": "本次战斗链环中的下一"
+    },
+    {
+      "type": 5,
+      "value": "noun",
+      "options": {
+        "weapon": {
+          "value": [
+            {
+              "type": 0,
+              "value": "把"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 0,
+              "value": "张"
+            }
+          ]
+        }
+      }
     },
     {
       "type": 5,
@@ -17821,6 +17953,14 @@
             {
               "type": 0,
               "value": "龙族 (Draconic) "
+            }
+          ]
+        },
+        "dagger": {
+          "value": [
+            {
+              "type": 0,
+              "value": "dagger "
             }
           ]
         },
@@ -17855,8 +17995,26 @@
       }
     },
     {
-      "type": 0,
-      "value": "牌"
+      "type": 5,
+      "value": "noun",
+      "options": {
+        "weapon": {
+          "value": [
+            {
+              "type": 0,
+              "value": "武器"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 0,
+              "value": "牌"
+            }
+          ]
+        }
+      }
     }
   ],
   "engine.effect.duration.next.play": [
@@ -17960,10 +18118,192 @@
       "value": "下一次符文门控攻击"
     }
   ],
+  "engine.effect.duration.next.subject": [
+    {
+      "type": 5,
+      "value": "noun",
+      "options": {
+        "attack": {
+          "value": [
+            {
+              "type": 0,
+              "value": "下一次"
+            }
+          ]
+        },
+        "weaponAttack": {
+          "value": [
+            {
+              "type": 0,
+              "value": "下一次"
+            }
+          ]
+        },
+        "attackWith": {
+          "value": [
+            {
+              "type": 0,
+              "value": "下一次"
+            }
+          ]
+        },
+        "instance": {
+          "value": [
+            {
+              "type": 0,
+              "value": "下一次"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 0,
+              "value": "下一张"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "type": 1,
+      "value": "subject"
+    }
+  ],
+  "engine.effect.duration.next.subject.this.chain": [
+    {
+      "type": 0,
+      "value": "本次战斗链中"
+    },
+    {
+      "type": 5,
+      "value": "noun",
+      "options": {
+        "attack": {
+          "value": [
+            {
+              "type": 0,
+              "value": "下一次"
+            }
+          ]
+        },
+        "weaponAttack": {
+          "value": [
+            {
+              "type": 0,
+              "value": "下一次"
+            }
+          ]
+        },
+        "attackWith": {
+          "value": [
+            {
+              "type": 0,
+              "value": "下一次"
+            }
+          ]
+        },
+        "instance": {
+          "value": [
+            {
+              "type": 0,
+              "value": "下一次"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 0,
+              "value": "下一张"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "type": 1,
+      "value": "subject"
+    }
+  ],
+  "engine.effect.duration.next.subject.this.turn": [
+    {
+      "type": 0,
+      "value": "本回合"
+    },
+    {
+      "type": 5,
+      "value": "noun",
+      "options": {
+        "attack": {
+          "value": [
+            {
+              "type": 0,
+              "value": "下一次"
+            }
+          ]
+        },
+        "weaponAttack": {
+          "value": [
+            {
+              "type": 0,
+              "value": "下一次"
+            }
+          ]
+        },
+        "attackWith": {
+          "value": [
+            {
+              "type": 0,
+              "value": "下一次"
+            }
+          ]
+        },
+        "instance": {
+          "value": [
+            {
+              "type": 0,
+              "value": "下一次"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 0,
+              "value": "下一张"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "type": 1,
+      "value": "subject"
+    }
+  ],
   "engine.effect.duration.next.turn": [
     {
       "type": 0,
       "value": "下回合"
+    }
+  ],
+  "engine.effect.duration.next.uses.subject.this.turn": [
+    {
+      "type": 0,
+      "value": "本回合接下来的 "
+    },
+    {
+      "type": 1,
+      "value": "uses"
+    },
+    {
+      "type": 0,
+      "value": " 张"
+    },
+    {
+      "type": 1,
+      "value": "subject"
     }
   ],
   "engine.effect.duration.rest.of.game": [
@@ -17976,6 +18316,26 @@
     {
       "type": 0,
       "value": "其下回合开始时"
+    }
+  ],
+  "engine.effect.duration.subject.this.chain": [
+    {
+      "type": 0,
+      "value": "本次战斗链中的"
+    },
+    {
+      "type": 1,
+      "value": "subject"
+    }
+  ],
+  "engine.effect.duration.subject.this.turn": [
+    {
+      "type": 0,
+      "value": "本回合的"
+    },
+    {
+      "type": 1,
+      "value": "subject"
     }
   ],
   "engine.effect.duration.this.action.phase": [
@@ -18006,6 +18366,2084 @@
     {
       "type": 0,
       "value": "持续到下回合结束"
+    }
+  ],
+  "engine.effect.part.action.played.gain.action.points": [
+    {
+      "type": 0,
+      "value": "下一次打出费用不低于 "
+    },
+    {
+      "type": 1,
+      "value": "actionMinCost"
+    },
+    {
+      "type": 0,
+      "value": " 的行动牌时，获得 "
+    },
+    {
+      "type": 1,
+      "value": "actionPoints"
+    },
+    {
+      "type": 0,
+      "value": " 个行动点"
+    }
+  ],
+  "engine.effect.part.activate.create.token": [
+    {
+      "type": 0,
+      "value": "每当其启动能力时，生成一个 "
+    },
+    {
+      "type": 1,
+      "value": "activateToken"
+    },
+    {
+      "type": 0,
+      "value": " 衍生物"
+    }
+  ],
+  "engine.effect.part.activated.abilities.locked": [
+    {
+      "type": 1,
+      "value": "lockedCard"
+    },
+    {
+      "type": 0,
+      "value": " 的启动能力不能被启动"
+    }
+  ],
+  "engine.effect.part.attack": [
+    {
+      "type": 1,
+      "value": "attack"
+    },
+    {
+      "type": 0,
+      "value": " 力量"
+    }
+  ],
+  "engine.effect.part.attack.gain.bonus": [
+    {
+      "type": 0,
+      "value": "下一次攻击获得力量时，额外获得 "
+    },
+    {
+      "type": 1,
+      "value": "gainBonus"
+    },
+    {
+      "type": 0,
+      "value": " 点"
+    }
+  ],
+  "engine.effect.part.attack.lightly.defended": [
+    {
+      "type": 0,
+      "value": "被少于 "
+    },
+    {
+      "type": 1,
+      "value": "defenders"
+    },
+    {
+      "type": 0,
+      "value": " 张非装备牌防御时 "
+    },
+    {
+      "type": 1,
+      "value": "attack"
+    },
+    {
+      "type": 0,
+      "value": " 力量"
+    }
+  ],
+  "engine.effect.part.banish.play.create.token": [
+    {
+      "type": 0,
+      "value": "从放逐区打出攻击行动牌时，生成 "
+    },
+    {
+      "type": 1,
+      "value": "banishTokenCount"
+    },
+    {
+      "type": 0,
+      "value": " 个 "
+    },
+    {
+      "type": 1,
+      "value": "banishToken"
+    },
+    {
+      "type": 0,
+      "value": " 衍生物"
+    }
+  ],
+  "engine.effect.part.base.attack": [
+    {
+      "type": 0,
+      "value": "基础力量为 "
+    },
+    {
+      "type": 1,
+      "value": "basePower"
+    }
+  ],
+  "engine.effect.part.cannot.defend": [
+    {
+      "type": 1,
+      "value": "benchedCard"
+    },
+    {
+      "type": 0,
+      "value": " 不能防御"
+    }
+  ],
+  "engine.effect.part.cost": [
+    {
+      "type": 5,
+      "value": "costAction",
+      "options": {
+        "activate": {
+          "value": [
+            {
+              "type": 0,
+              "value": "启动"
+            }
+          ]
+        },
+        "both": {
+          "value": [
+            {
+              "type": 0,
+              "value": "打出或启动"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 0,
+              "value": "打出"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "type": 0,
+      "value": "费用"
+    },
+    {
+      "type": 5,
+      "value": "costChange",
+      "options": {
+        "more": {
+          "value": [
+            {
+              "type": 0,
+              "value": "增加"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 0,
+              "value": "减少"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "type": 0,
+      "value": " "
+    },
+    {
+      "type": 1,
+      "value": "cost"
+    },
+    {
+      "type": 0,
+      "value": " 点"
+    }
+  ],
+  "engine.effect.part.crush.destroy.deck": [
+    {
+      "type": 0,
+      "value": "对英雄造成至少 "
+    },
+    {
+      "type": 1,
+      "value": "minimumDamage"
+    },
+    {
+      "type": 0,
+      "value": " 点伤害时，摧毁其牌库顶的 "
+    },
+    {
+      "type": 1,
+      "value": "destroyCount"
+    },
+    {
+      "type": 0,
+      "value": " 张牌"
+    }
+  ],
+  "engine.effect.part.damage": [
+    {
+      "type": 1,
+      "value": "damageBonus"
+    },
+    {
+      "type": 0,
+      "value": " 点"
+    },
+    {
+      "type": 5,
+      "value": "damageKind",
+      "options": {
+        "arcane": {
+          "value": [
+            {
+              "type": 0,
+              "value": "奥术伤害"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 0,
+              "value": "伤害"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "engine.effect.part.damage.unpreventable": [
+    {
+      "type": 0,
+      "value": "其伤害不能被防止"
+    }
+  ],
+  "engine.effect.part.defense": [
+    {
+      "type": 1,
+      "value": "defense"
+    },
+    {
+      "type": 0,
+      "value": " 防御"
+    }
+  ],
+  "engine.effect.part.destroy.defending.equipment": [
+    {
+      "type": 0,
+      "value": "可以改为摧毁一件防御中的装备，而不造成伤害"
+    }
+  ],
+  "engine.effect.part.discard.prevent": [
+    {
+      "type": 0,
+      "value": "弃一张"
+    },
+    {
+      "type": 5,
+      "value": "discardType",
+      "options": {
+        "instant": {
+          "value": [
+            {
+              "type": 0,
+              "value": "瞬间牌"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 0,
+              "value": " "
+            },
+            {
+              "type": 1,
+              "value": "discardType"
+            },
+            {
+              "type": 0,
+              "value": " 牌"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "type": 0,
+      "value": "以防止 "
+    },
+    {
+      "type": 1,
+      "value": "discardPrevent"
+    },
+    {
+      "type": 0,
+      "value": " 点伤害"
+    },
+    {
+      "type": 6,
+      "value": "discardDraw",
+      "options": {
+        "=0": {
+          "value": []
+        },
+        "other": {
+          "value": [
+            {
+              "type": 0,
+              "value": "，并抽 "
+            },
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " 张牌"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    }
+  ],
+  "engine.effect.part.dominate": [
+    {
+      "type": 0,
+      "value": "压制 (dominate)"
+    }
+  ],
+  "engine.effect.part.extra.dice": [
+    {
+      "type": 0,
+      "value": "额外掷 "
+    },
+    {
+      "type": 1,
+      "value": "extraDice"
+    },
+    {
+      "type": 0,
+      "value": " 颗骰子并忽略最低点数"
+    }
+  ],
+  "engine.effect.part.go.again": [
+    {
+      "type": 0,
+      "value": "go again"
+    }
+  ],
+  "engine.effect.part.go.again.if.attack": [
+    {
+      "type": 0,
+      "value": "力量不低于 "
+    },
+    {
+      "type": 1,
+      "value": "goAgainAttack"
+    },
+    {
+      "type": 0,
+      "value": " 时获得 go again"
+    }
+  ],
+  "engine.effect.part.go.again.if.defended.by.attack.action": [
+    {
+      "type": 0,
+      "value": "被攻击行动牌防御时获得 go again"
+    }
+  ],
+  "engine.effect.part.go.again.if.played.or.created": [
+    {
+      "type": 0,
+      "value": "若你本回合打出或生成过"
+    },
+    {
+      "type": 5,
+      "value": "createdType",
+      "options": {
+        "aura": {
+          "value": [
+            {
+              "type": 0,
+              "value": "灵气 (Aura)"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 0,
+              "value": " "
+            },
+            {
+              "type": 1,
+              "value": "createdType"
+            },
+            {
+              "type": 0,
+              "value": " "
+            }
+          ]
+        }
+      }
+    },
+    {
+      "type": 0,
+      "value": "，则获得 go again"
+    }
+  ],
+  "engine.effect.part.go.again.on.hit": [
+    {
+      "type": 0,
+      "value": "命中时获得 go again"
+    }
+  ],
+  "engine.effect.part.grant.name": [
+    {
+      "type": 0,
+      "value": "名称视为 "
+    },
+    {
+      "type": 1,
+      "value": "grantedName"
+    }
+  ],
+  "engine.effect.part.grant.type": [
+    {
+      "type": 0,
+      "value": "额外视为"
+    },
+    {
+      "type": 5,
+      "value": "grantedType",
+      "options": {
+        "Draconic": {
+          "value": [
+            {
+              "type": 0,
+              "value": "龙族 (Draconic)"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 0,
+              "value": " "
+            },
+            {
+              "type": 1,
+              "value": "grantedType"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "engine.effect.part.hit.effects.suppressed": [
+    {
+      "type": 0,
+      "value": "其命中效果不会触发"
+    }
+  ],
+  "engine.effect.part.intimidate": [
+    {
+      "type": 6,
+      "value": "intimidate",
+      "options": {
+        "=1": {
+          "value": [
+            {
+              "type": 0,
+              "value": "intimidate"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 0,
+              "value": "intimidate "
+            },
+            {
+              "type": 7
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    }
+  ],
+  "engine.effect.part.keyword": [
+    {
+      "type": 5,
+      "value": "keyword",
+      "options": {
+        "dominate": {
+          "value": [
+            {
+              "type": 0,
+              "value": "压制 (dominate)"
+            }
+          ]
+        },
+        "piercing": {
+          "value": [
+            {
+              "type": 0,
+              "value": "穿透 (piercing)"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 1,
+              "value": "keyword"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "engine.effect.part.keyword.lost": [
+    {
+      "type": 0,
+      "value": "失去 "
+    },
+    {
+      "type": 1,
+      "value": "lostKeyword"
+    }
+  ],
+  "engine.effect.part.lose.class.talent.types": [
+    {
+      "type": 0,
+      "value": "其拥有的牌失去所有职业和天赋类型"
+    }
+  ],
+  "engine.effect.part.max.non.block.defenders": [
+    {
+      "type": 0,
+      "value": "不能被超过 "
+    },
+    {
+      "type": 1,
+      "value": "maxDefenders"
+    },
+    {
+      "type": 0,
+      "value": " 张非格挡牌防御"
+    }
+  ],
+  "engine.effect.part.minimum.base.attack": [
+    {
+      "type": 0,
+      "value": "只能打出或启动基础力量不低于 "
+    },
+    {
+      "type": 1,
+      "value": "minimumAttack"
+    },
+    {
+      "type": 0,
+      "value": " 的攻击"
+    }
+  ],
+  "engine.effect.part.name.gains.type": [
+    {
+      "type": 0,
+      "value": "名为 "
+    },
+    {
+      "type": 1,
+      "value": "typedName"
+    },
+    {
+      "type": 0,
+      "value": " 的牌视为 "
+    },
+    {
+      "type": 1,
+      "value": "namedType"
+    }
+  ],
+  "engine.effect.part.on.boost.attack": [
+    {
+      "type": 0,
+      "value": "你的下一次完成 boost 的攻击获得 "
+    },
+    {
+      "type": 1,
+      "value": "boostAttack"
+    },
+    {
+      "type": 0,
+      "value": " 力量"
+    }
+  ],
+  "engine.effect.part.on.boost.dominate": [
+    {
+      "type": 0,
+      "value": "你的下一次完成 boost 的攻击获得压制 (dominate)"
+    }
+  ],
+  "engine.effect.part.on.defended.deal.damage": [
+    {
+      "type": 0,
+      "value": "被防御时对防御英雄造成 "
+    },
+    {
+      "type": 1,
+      "value": "defendedDamage"
+    },
+    {
+      "type": 0,
+      "value": " 点伤害"
+    }
+  ],
+  "engine.effect.part.on.hit.create.token": [
+    {
+      "type": 0,
+      "value": "命中时生成 "
+    },
+    {
+      "type": 1,
+      "value": "tokenCount"
+    },
+    {
+      "type": 0,
+      "value": " 个 "
+    },
+    {
+      "type": 1,
+      "value": "token"
+    },
+    {
+      "type": 0,
+      "value": " 衍生物"
+    }
+  ],
+  "engine.effect.part.on.hit.deal.damage": [
+    {
+      "type": 0,
+      "value": "命中时造成 "
+    },
+    {
+      "type": 1,
+      "value": "hitDamage"
+    },
+    {
+      "type": 0,
+      "value": " 点伤害"
+    }
+  ],
+  "engine.effect.part.on.hit.draw": [
+    {
+      "type": 0,
+      "value": "命中时抽 "
+    },
+    {
+      "type": 1,
+      "value": "draw"
+    },
+    {
+      "type": 0,
+      "value": " 张牌"
+    }
+  ],
+  "engine.effect.part.on.hit.gain.life": [
+    {
+      "type": 0,
+      "value": "下次命中时获得 "
+    },
+    {
+      "type": 1,
+      "value": "life"
+    },
+    {
+      "type": 0,
+      "value": " 点生命"
+    }
+  ],
+  "engine.effect.part.on.hit.gain.resources": [
+    {
+      "type": 0,
+      "value": "下次命中时获得 "
+    },
+    {
+      "type": 1,
+      "value": "resources"
+    },
+    {
+      "type": 0,
+      "value": " 点资源"
+    }
+  ],
+  "engine.effect.part.on.hit.lose.life": [
+    {
+      "type": 0,
+      "value": "命中英雄时，该英雄失去 "
+    },
+    {
+      "type": 1,
+      "value": "lifeLoss"
+    },
+    {
+      "type": 0,
+      "value": " 点生命"
+    }
+  ],
+  "engine.effect.part.on.hit.mark": [
+    {
+      "type": 0,
+      "value": "命中时标记该英雄"
+    }
+  ],
+  "engine.effect.part.on.prevent.create.token": [
+    {
+      "type": 0,
+      "value": "防止伤害时生成一个 "
+    },
+    {
+      "type": 1,
+      "value": "preventToken"
+    },
+    {
+      "type": 0,
+      "value": " 衍生物"
+    }
+  ],
+  "engine.effect.part.only.non.weapon.attack.actions": [
+    {
+      "type": 0,
+      "value": "只能打出或启动非武器、非攻击行动"
+    }
+  ],
+  "engine.effect.part.only.play.type": [
+    {
+      "type": 0,
+      "value": "只能打出"
+    },
+    {
+      "type": 5,
+      "value": "playType",
+      "options": {
+        "Draconic": {
+          "value": [
+            {
+              "type": 0,
+              "value": "龙族 (Draconic) "
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 0,
+              "value": " "
+            },
+            {
+              "type": 1,
+              "value": "playType"
+            },
+            {
+              "type": 0,
+              "value": " "
+            }
+          ]
+        }
+      }
+    },
+    {
+      "type": 0,
+      "value": "牌"
+    }
+  ],
+  "engine.effect.part.only.weapon.attack.actions": [
+    {
+      "type": 0,
+      "value": "只能打出或启动武器行动和攻击行动"
+    }
+  ],
+  "engine.effect.part.overpower": [
+    {
+      "type": 0,
+      "value": "overpower"
+    }
+  ],
+  "engine.effect.part.piercing": [
+    {
+      "type": 0,
+      "value": "穿透 (piercing) "
+    },
+    {
+      "type": 1,
+      "value": "piercing"
+    }
+  ],
+  "engine.effect.part.prevent.all.damage.chosen": [
+    {
+      "type": 0,
+      "value": "防止所选来源造成的所有伤害"
+    }
+  ],
+  "engine.effect.part.prevent.all.damage.from": [
+    {
+      "type": 0,
+      "value": "防止 "
+    },
+    {
+      "type": 1,
+      "value": "source"
+    },
+    {
+      "type": 0,
+      "value": " 造成的所有伤害"
+    }
+  ],
+  "engine.effect.part.prevent.damage.color": [
+    {
+      "type": 0,
+      "value": "防止下一次来自"
+    },
+    {
+      "type": 5,
+      "value": "sourceColor",
+      "options": {
+        "red": {
+          "value": [
+            {
+              "type": 0,
+              "value": "红色"
+            }
+          ]
+        },
+        "yellow": {
+          "value": [
+            {
+              "type": 0,
+              "value": "黄色"
+            }
+          ]
+        },
+        "blue": {
+          "value": [
+            {
+              "type": 0,
+              "value": "蓝色"
+            }
+          ]
+        },
+        "other": {
+          "value": []
+        }
+      }
+    },
+    {
+      "type": 0,
+      "value": "来源的伤害"
+    }
+  ],
+  "engine.effect.part.prevent.damage.source.type": [
+    {
+      "type": 0,
+      "value": "防止接下来来自 "
+    },
+    {
+      "type": 1,
+      "value": "sourceType"
+    },
+    {
+      "type": 0,
+      "value": " 来源的 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点伤害"
+    }
+  ],
+  "engine.effect.part.prevent.each.event": [
+    {
+      "type": 0,
+      "value": "接下来 "
+    },
+    {
+      "type": 1,
+      "value": "events"
+    },
+    {
+      "type": 0,
+      "value": " 次受到伤害时，各防止 "
+    },
+    {
+      "type": 1,
+      "value": "perEvent"
+    },
+    {
+      "type": 0,
+      "value": " 点"
+    }
+  ],
+  "engine.effect.part.prevent.lethal.banish": [
+    {
+      "type": 0,
+      "value": "可以从手牌或 arsenal 放逐 "
+    },
+    {
+      "type": 1,
+      "value": "lethalCard"
+    },
+    {
+      "type": 0,
+      "value": " 以防止下一次致命伤害"
+    }
+  ],
+  "engine.effect.part.prevent.small.damage": [
+    {
+      "type": 0,
+      "value": "防止下一次不超过 "
+    },
+    {
+      "type": 1,
+      "value": "maxEvent"
+    },
+    {
+      "type": 0,
+      "value": " 点的伤害"
+    }
+  ],
+  "engine.effect.subject.one": [
+    {
+      "type": 5,
+      "value": "keyword",
+      "options": {
+        "none": {
+          "value": []
+        },
+        "powerCounter": {
+          "value": [
+            {
+              "type": 0,
+              "value": "带有 +1 力量指示物的"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 0,
+              "value": "具有 "
+            },
+            {
+              "type": 1,
+              "value": "keyword"
+            },
+            {
+              "type": 0,
+              "value": " 的"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "type": 5,
+      "value": "limit",
+      "options": {
+        "costMax": {
+          "value": [
+            {
+              "type": 0,
+              "value": "费用不高于 "
+            },
+            {
+              "type": 1,
+              "value": "limitValue"
+            },
+            {
+              "type": 0,
+              "value": " 的"
+            }
+          ]
+        },
+        "costMin": {
+          "value": [
+            {
+              "type": 0,
+              "value": "费用不低于 "
+            },
+            {
+              "type": 1,
+              "value": "limitValue"
+            },
+            {
+              "type": 0,
+              "value": " 的"
+            }
+          ]
+        },
+        "powerMax": {
+          "value": [
+            {
+              "type": 0,
+              "value": "基础力量不高于 "
+            },
+            {
+              "type": 1,
+              "value": "limitValue"
+            },
+            {
+              "type": 0,
+              "value": " 的"
+            }
+          ]
+        },
+        "powerMin": {
+          "value": [
+            {
+              "type": 0,
+              "value": "基础力量不低于 "
+            },
+            {
+              "type": 1,
+              "value": "limitValue"
+            },
+            {
+              "type": 0,
+              "value": " 的"
+            }
+          ]
+        },
+        "other": {
+          "value": []
+        }
+      }
+    },
+    {
+      "type": 5,
+      "value": "target",
+      "options": {
+        "type": {
+          "value": [
+            {
+              "type": 0,
+              "value": "攻击 "
+            },
+            {
+              "type": 1,
+              "value": "targetName"
+            },
+            {
+              "type": 0,
+              "value": " 英雄的"
+            }
+          ]
+        },
+        "name": {
+          "value": [
+            {
+              "type": 0,
+              "value": "攻击 "
+            },
+            {
+              "type": 1,
+              "value": "targetName"
+            },
+            {
+              "type": 0,
+              "value": " 的"
+            }
+          ]
+        },
+        "marked": {
+          "value": [
+            {
+              "type": 0,
+              "value": "攻击被标记英雄的"
+            }
+          ]
+        },
+        "other": {
+          "value": []
+        }
+      }
+    },
+    {
+      "type": 5,
+      "value": "via",
+      "options": {
+        "defending": {
+          "value": [
+            {
+              "type": 0,
+              "value": "防御中的"
+            }
+          ]
+        },
+        "runeGate": {
+          "value": [
+            {
+              "type": 0,
+              "value": "经 rune gate 打出的"
+            }
+          ]
+        },
+        "charge": {
+          "value": [
+            {
+              "type": 0,
+              "value": "进行 charge 的"
+            }
+          ]
+        },
+        "arsenal": {
+          "value": [
+            {
+              "type": 0,
+              "value": "从 arsenal 打出的"
+            }
+          ]
+        },
+        "other": {
+          "value": []
+        }
+      }
+    },
+    {
+      "type": 5,
+      "value": "color",
+      "options": {
+        "red": {
+          "value": [
+            {
+              "type": 0,
+              "value": "红色"
+            }
+          ]
+        },
+        "yellow": {
+          "value": [
+            {
+              "type": 0,
+              "value": "黄色"
+            }
+          ]
+        },
+        "blue": {
+          "value": [
+            {
+              "type": 0,
+              "value": "蓝色"
+            }
+          ]
+        },
+        "other": {
+          "value": []
+        }
+      }
+    },
+    {
+      "type": 6,
+      "value": "typeCount",
+      "options": {
+        "=0": {
+          "value": []
+        },
+        "=1": {
+          "value": [
+            {
+              "type": 0,
+              "value": " "
+            },
+            {
+              "type": 5,
+              "value": "type1",
+              "options": {
+                "Draconic": {
+                  "value": [
+                    {
+                      "type": 0,
+                      "value": "龙族 (Draconic)"
+                    }
+                  ]
+                },
+                "other": {
+                  "value": [
+                    {
+                      "type": 1,
+                      "value": "type1"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "type": 0,
+              "value": " "
+            }
+          ]
+        },
+        "=2": {
+          "value": [
+            {
+              "type": 0,
+              "value": " "
+            },
+            {
+              "type": 5,
+              "value": "type1",
+              "options": {
+                "Draconic": {
+                  "value": [
+                    {
+                      "type": 0,
+                      "value": "龙族 (Draconic)"
+                    }
+                  ]
+                },
+                "other": {
+                  "value": [
+                    {
+                      "type": 1,
+                      "value": "type1"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "type": 0,
+              "value": " 或 "
+            },
+            {
+              "type": 5,
+              "value": "type2",
+              "options": {
+                "Draconic": {
+                  "value": [
+                    {
+                      "type": 0,
+                      "value": "龙族 (Draconic)"
+                    }
+                  ]
+                },
+                "other": {
+                  "value": [
+                    {
+                      "type": 1,
+                      "value": "type2"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "type": 0,
+              "value": " "
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 0,
+              "value": " "
+            },
+            {
+              "type": 5,
+              "value": "type1",
+              "options": {
+                "Draconic": {
+                  "value": [
+                    {
+                      "type": 0,
+                      "value": "龙族 (Draconic)"
+                    }
+                  ]
+                },
+                "other": {
+                  "value": [
+                    {
+                      "type": 1,
+                      "value": "type1"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "type": 0,
+              "value": "、"
+            },
+            {
+              "type": 5,
+              "value": "type2",
+              "options": {
+                "Draconic": {
+                  "value": [
+                    {
+                      "type": 0,
+                      "value": "龙族 (Draconic)"
+                    }
+                  ]
+                },
+                "other": {
+                  "value": [
+                    {
+                      "type": 1,
+                      "value": "type2"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "type": 0,
+              "value": " 或 "
+            },
+            {
+              "type": 5,
+              "value": "type3",
+              "options": {
+                "Draconic": {
+                  "value": [
+                    {
+                      "type": 0,
+                      "value": "龙族 (Draconic)"
+                    }
+                  ]
+                },
+                "other": {
+                  "value": [
+                    {
+                      "type": 1,
+                      "value": "type3"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "type": 0,
+              "value": " "
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    },
+    {
+      "type": 5,
+      "value": "noun",
+      "options": {
+        "attack": {
+          "value": [
+            {
+              "type": 0,
+              "value": "攻击"
+            }
+          ]
+        },
+        "attackAction": {
+          "value": [
+            {
+              "type": 0,
+              "value": "攻击行动牌"
+            }
+          ]
+        },
+        "weaponAttack": {
+          "value": [
+            {
+              "type": 0,
+              "value": "武器攻击"
+            }
+          ]
+        },
+        "attackWith": {
+          "value": [
+            {
+              "type": 0,
+              "value": " "
+            },
+            {
+              "type": 1,
+              "value": "name"
+            },
+            {
+              "type": 0,
+              "value": " 的攻击"
+            }
+          ]
+        },
+        "instance": {
+          "value": [
+            {
+              "type": 0,
+              "value": " "
+            },
+            {
+              "type": 1,
+              "value": "name"
+            }
+          ]
+        },
+        "named": {
+          "value": [
+            {
+              "type": 0,
+              "value": " "
+            },
+            {
+              "type": 1,
+              "value": "name"
+            }
+          ]
+        },
+        "actionCard": {
+          "value": [
+            {
+              "type": 0,
+              "value": "行动牌"
+            }
+          ]
+        },
+        "nonAttackActionCard": {
+          "value": [
+            {
+              "type": 0,
+              "value": "非攻击行动牌"
+            }
+          ]
+        },
+        "instantCard": {
+          "value": [
+            {
+              "type": 0,
+              "value": "瞬间牌"
+            }
+          ]
+        },
+        "reactionCard": {
+          "value": [
+            {
+              "type": 0,
+              "value": "反应牌"
+            }
+          ]
+        },
+        "attackReactionCard": {
+          "value": [
+            {
+              "type": 0,
+              "value": "攻击反应牌"
+            }
+          ]
+        },
+        "defenseReactionCard": {
+          "value": [
+            {
+              "type": 0,
+              "value": "防御反应牌"
+            }
+          ]
+        },
+        "equipment": {
+          "value": [
+            {
+              "type": 0,
+              "value": "装备"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 0,
+              "value": "牌"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "engine.effect.subject.other": [
+    {
+      "type": 5,
+      "value": "keyword",
+      "options": {
+        "none": {
+          "value": []
+        },
+        "powerCounter": {
+          "value": [
+            {
+              "type": 0,
+              "value": "带有 +1 力量指示物的"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 0,
+              "value": "具有 "
+            },
+            {
+              "type": 1,
+              "value": "keyword"
+            },
+            {
+              "type": 0,
+              "value": " 的"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "type": 5,
+      "value": "limit",
+      "options": {
+        "costMax": {
+          "value": [
+            {
+              "type": 0,
+              "value": "费用不高于 "
+            },
+            {
+              "type": 1,
+              "value": "limitValue"
+            },
+            {
+              "type": 0,
+              "value": " 的"
+            }
+          ]
+        },
+        "costMin": {
+          "value": [
+            {
+              "type": 0,
+              "value": "费用不低于 "
+            },
+            {
+              "type": 1,
+              "value": "limitValue"
+            },
+            {
+              "type": 0,
+              "value": " 的"
+            }
+          ]
+        },
+        "powerMax": {
+          "value": [
+            {
+              "type": 0,
+              "value": "基础力量不高于 "
+            },
+            {
+              "type": 1,
+              "value": "limitValue"
+            },
+            {
+              "type": 0,
+              "value": " 的"
+            }
+          ]
+        },
+        "powerMin": {
+          "value": [
+            {
+              "type": 0,
+              "value": "基础力量不低于 "
+            },
+            {
+              "type": 1,
+              "value": "limitValue"
+            },
+            {
+              "type": 0,
+              "value": " 的"
+            }
+          ]
+        },
+        "other": {
+          "value": []
+        }
+      }
+    },
+    {
+      "type": 5,
+      "value": "target",
+      "options": {
+        "type": {
+          "value": [
+            {
+              "type": 0,
+              "value": "攻击 "
+            },
+            {
+              "type": 1,
+              "value": "targetName"
+            },
+            {
+              "type": 0,
+              "value": " 英雄的"
+            }
+          ]
+        },
+        "name": {
+          "value": [
+            {
+              "type": 0,
+              "value": "攻击 "
+            },
+            {
+              "type": 1,
+              "value": "targetName"
+            },
+            {
+              "type": 0,
+              "value": " 的"
+            }
+          ]
+        },
+        "marked": {
+          "value": [
+            {
+              "type": 0,
+              "value": "攻击被标记英雄的"
+            }
+          ]
+        },
+        "other": {
+          "value": []
+        }
+      }
+    },
+    {
+      "type": 5,
+      "value": "via",
+      "options": {
+        "defending": {
+          "value": [
+            {
+              "type": 0,
+              "value": "防御中的"
+            }
+          ]
+        },
+        "runeGate": {
+          "value": [
+            {
+              "type": 0,
+              "value": "经 rune gate 打出的"
+            }
+          ]
+        },
+        "charge": {
+          "value": [
+            {
+              "type": 0,
+              "value": "进行 charge 的"
+            }
+          ]
+        },
+        "arsenal": {
+          "value": [
+            {
+              "type": 0,
+              "value": "从 arsenal 打出的"
+            }
+          ]
+        },
+        "other": {
+          "value": []
+        }
+      }
+    },
+    {
+      "type": 5,
+      "value": "color",
+      "options": {
+        "red": {
+          "value": [
+            {
+              "type": 0,
+              "value": "红色"
+            }
+          ]
+        },
+        "yellow": {
+          "value": [
+            {
+              "type": 0,
+              "value": "黄色"
+            }
+          ]
+        },
+        "blue": {
+          "value": [
+            {
+              "type": 0,
+              "value": "蓝色"
+            }
+          ]
+        },
+        "other": {
+          "value": []
+        }
+      }
+    },
+    {
+      "type": 6,
+      "value": "typeCount",
+      "options": {
+        "=0": {
+          "value": []
+        },
+        "=1": {
+          "value": [
+            {
+              "type": 0,
+              "value": " "
+            },
+            {
+              "type": 5,
+              "value": "type1",
+              "options": {
+                "Draconic": {
+                  "value": [
+                    {
+                      "type": 0,
+                      "value": "龙族 (Draconic)"
+                    }
+                  ]
+                },
+                "other": {
+                  "value": [
+                    {
+                      "type": 1,
+                      "value": "type1"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "type": 0,
+              "value": " "
+            }
+          ]
+        },
+        "=2": {
+          "value": [
+            {
+              "type": 0,
+              "value": " "
+            },
+            {
+              "type": 5,
+              "value": "type1",
+              "options": {
+                "Draconic": {
+                  "value": [
+                    {
+                      "type": 0,
+                      "value": "龙族 (Draconic)"
+                    }
+                  ]
+                },
+                "other": {
+                  "value": [
+                    {
+                      "type": 1,
+                      "value": "type1"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "type": 0,
+              "value": " 或 "
+            },
+            {
+              "type": 5,
+              "value": "type2",
+              "options": {
+                "Draconic": {
+                  "value": [
+                    {
+                      "type": 0,
+                      "value": "龙族 (Draconic)"
+                    }
+                  ]
+                },
+                "other": {
+                  "value": [
+                    {
+                      "type": 1,
+                      "value": "type2"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "type": 0,
+              "value": " "
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 0,
+              "value": " "
+            },
+            {
+              "type": 5,
+              "value": "type1",
+              "options": {
+                "Draconic": {
+                  "value": [
+                    {
+                      "type": 0,
+                      "value": "龙族 (Draconic)"
+                    }
+                  ]
+                },
+                "other": {
+                  "value": [
+                    {
+                      "type": 1,
+                      "value": "type1"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "type": 0,
+              "value": "、"
+            },
+            {
+              "type": 5,
+              "value": "type2",
+              "options": {
+                "Draconic": {
+                  "value": [
+                    {
+                      "type": 0,
+                      "value": "龙族 (Draconic)"
+                    }
+                  ]
+                },
+                "other": {
+                  "value": [
+                    {
+                      "type": 1,
+                      "value": "type2"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "type": 0,
+              "value": " 或 "
+            },
+            {
+              "type": 5,
+              "value": "type3",
+              "options": {
+                "Draconic": {
+                  "value": [
+                    {
+                      "type": 0,
+                      "value": "龙族 (Draconic)"
+                    }
+                  ]
+                },
+                "other": {
+                  "value": [
+                    {
+                      "type": 1,
+                      "value": "type3"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "type": 0,
+              "value": " "
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    },
+    {
+      "type": 5,
+      "value": "noun",
+      "options": {
+        "attack": {
+          "value": [
+            {
+              "type": 0,
+              "value": "攻击"
+            }
+          ]
+        },
+        "attackAction": {
+          "value": [
+            {
+              "type": 0,
+              "value": "攻击行动牌"
+            }
+          ]
+        },
+        "weaponAttack": {
+          "value": [
+            {
+              "type": 0,
+              "value": "武器攻击"
+            }
+          ]
+        },
+        "attackWith": {
+          "value": [
+            {
+              "type": 0,
+              "value": " "
+            },
+            {
+              "type": 1,
+              "value": "name"
+            },
+            {
+              "type": 0,
+              "value": " 的攻击"
+            }
+          ]
+        },
+        "instance": {
+          "value": [
+            {
+              "type": 0,
+              "value": " "
+            },
+            {
+              "type": 1,
+              "value": "name"
+            }
+          ]
+        },
+        "named": {
+          "value": [
+            {
+              "type": 0,
+              "value": " "
+            },
+            {
+              "type": 1,
+              "value": "name"
+            }
+          ]
+        },
+        "actionCard": {
+          "value": [
+            {
+              "type": 0,
+              "value": "行动牌"
+            }
+          ]
+        },
+        "nonAttackActionCard": {
+          "value": [
+            {
+              "type": 0,
+              "value": "非攻击行动牌"
+            }
+          ]
+        },
+        "instantCard": {
+          "value": [
+            {
+              "type": 0,
+              "value": "瞬间牌"
+            }
+          ]
+        },
+        "reactionCard": {
+          "value": [
+            {
+              "type": 0,
+              "value": "反应牌"
+            }
+          ]
+        },
+        "attackReactionCard": {
+          "value": [
+            {
+              "type": 0,
+              "value": "攻击反应牌"
+            }
+          ]
+        },
+        "defenseReactionCard": {
+          "value": [
+            {
+              "type": 0,
+              "value": "防御反应牌"
+            }
+          ]
+        },
+        "equipment": {
+          "value": [
+            {
+              "type": 0,
+              "value": "装备"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 0,
+              "value": "牌"
+            }
+          ]
+        }
+      }
     }
   ],
   "engine.effect.summary.amp": [
@@ -18044,6 +20482,72 @@
       "value": "攻击行动牌的基础力量和防御减半"
     }
   ],
+  "engine.effect.summary.list.four": [
+    {
+      "type": 1,
+      "value": "part0"
+    },
+    {
+      "type": 0,
+      "value": "，"
+    },
+    {
+      "type": 1,
+      "value": "part1"
+    },
+    {
+      "type": 0,
+      "value": "，"
+    },
+    {
+      "type": 1,
+      "value": "part2"
+    },
+    {
+      "type": 0,
+      "value": "，"
+    },
+    {
+      "type": 1,
+      "value": "part3"
+    }
+  ],
+  "engine.effect.summary.list.three": [
+    {
+      "type": 1,
+      "value": "part0"
+    },
+    {
+      "type": 0,
+      "value": "，"
+    },
+    {
+      "type": 1,
+      "value": "part1"
+    },
+    {
+      "type": 0,
+      "value": "，"
+    },
+    {
+      "type": 1,
+      "value": "part2"
+    }
+  ],
+  "engine.effect.summary.list.two": [
+    {
+      "type": 1,
+      "value": "part0"
+    },
+    {
+      "type": 0,
+      "value": "，"
+    },
+    {
+      "type": 1,
+      "value": "part1"
+    }
+  ],
   "engine.effect.summary.loses.all.abilities": [
     {
       "type": 0,
@@ -18068,6 +20572,12 @@
     {
       "type": 0,
       "value": "攻击行动牌不能获得力量"
+    }
+  ],
+  "engine.effect.summary.ongoing": [
+    {
+      "type": 0,
+      "value": "持续效果"
     }
   ],
   "engine.effect.summary.prevent.arcane": [

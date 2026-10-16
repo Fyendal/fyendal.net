@@ -535,7 +535,7 @@ describe("SLY — equipment", () => {
     expect(projectStateFor(g.state, 0).ongoing).toContainEqual(expect.objectContaining({
       seat: 0,
       cardId: printingId("confidence|0"),
-      label: "max 2 non-block defenders · next attack",
+      label: "can't be defended by more than 2 non-block cards · next attack",
     }));
     g.play("short shrift|2");
     // 2 hand cards + 1 equipment = 3 non-block defenders: illegal

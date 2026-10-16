@@ -1916,7 +1916,7 @@ describe("Armory Decks — rules regression coverage", () => {
     expect(projectStateFor(g.state, 0).ongoing).toContainEqual(expect.objectContaining({
       seat: 0,
       cardId: printingId("drawn to the blade|2"),
-      label: "draw 1 on next hit · this turn",
+      label: "draw a card when it hits · next attack with Zenith Blade this turn",
     }));
   });
 

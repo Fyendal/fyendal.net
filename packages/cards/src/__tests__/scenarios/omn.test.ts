@@ -1343,11 +1343,11 @@ describe("OMN — import and set mechanics", () => {
       .blockWith();
     expect(projectStateFor(g.state, 0).ongoing).toEqual(expect.arrayContaining([
       expect.objectContaining({
-        label: "play costs 1 less · next instant card this chain link",
+        label: "costs 1 less to play · next instant card this chain link",
         lifetime: "once",
         durationMessage: {
           id: "engine.effect.duration.next.card.this.link",
-          values: { subtype: "any", cardType: "instant" },
+          values: { subtype: "any", cardType: "instant", noun: "card" },
         },
       }),
     ]));
