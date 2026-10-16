@@ -165,6 +165,12 @@ export const scripts: Record<string, CardScript> = {
       ctx.setFlag("player", "tapOk", ctx.tap(opp.hero.instanceId));
     },
   },
+  INTIM: {
+    onAttackDeclared(ctx) {
+      const n = Number(ctx.getFlag("player", "pendingIntimidate")) || 0;
+      ctx.setFlag("player", "pendingIntimidate", n + 1);
+    },
+  },
   BELLOW: {
     onPlay(ctx) {
       const n = Number(ctx.getFlag("player", "pendingIntimidate")) || 0;

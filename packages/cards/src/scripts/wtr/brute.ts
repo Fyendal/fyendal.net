@@ -1,5 +1,5 @@
 import type { CardScript, ScriptCtx } from "@fyendal/engine";
-import { isSixPlus, localizedLog, nextAttack, queueIntimidate } from "../shared-helpers.js";
+import { attackIntimidateTrigger, isSixPlus, localizedLog, nextAttack, queueIntimidate } from "../shared-helpers.js";
 
 /** Store whether the random discard paid for this card had 6+ {p}. */
 function rememberDiscardedSixPlus(ctx: ScriptCtx): void {
@@ -75,7 +75,16 @@ const savageFeast: CardScript = {
   },
 };
 
+const intimidateOnAttack: CardScript = { triggers: [attackIntimidateTrigger()] };
+
 export const brute: Record<string, CardScript> = {
+  "pack hunt|1": intimidateOnAttack,
+  "pack hunt|2": intimidateOnAttack,
+  "pack hunt|3": intimidateOnAttack,
+  "smash instinct|1": intimidateOnAttack,
+  "smash instinct|2": intimidateOnAttack,
+  "smash instinct|3": intimidateOnAttack,
+
   // Awakening Bellow (yellow / blue) — next Brute attack action +X, intimidate, go again
   "awakening bellow|2": awakeningBellow(2),
   "awakening bellow|3": awakeningBellow(1),

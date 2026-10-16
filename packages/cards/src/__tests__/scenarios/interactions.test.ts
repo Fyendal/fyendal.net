@@ -82,6 +82,21 @@ describe("interactions — intimidate timing", () => {
       .expectPendingReturn(0, 0)
       .expectHandSize(0, 2); // back before the end-of-turn triggers/arsenal step
   });
+
+  it("an attack's intimidate is a stack layer the defender can respond to", () => {
+    const g = scenario({
+      seats: [
+        { hero: "dorinthea", hand: ["dodge|3", "dodge|3", "dodge|3"] },
+        { hero: "rhinar", hand: ["pack hunt|1"], resources: 3 },
+      ],
+      active: 1,
+    });
+    g.play("pack hunt|1", { settle: false })
+      .passUntilLayer("Intimidate")
+      .expectPendingReturn(0, 0)
+      .settle()
+      .expectPendingReturn(0, 1);
+  });
 });
 
 describe("interactions — choice option projection", () => {

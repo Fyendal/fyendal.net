@@ -1,5 +1,6 @@
 import type { CardScript, ScriptCtx } from "@fyendal/engine";
 import {
+  attackIntimidateTrigger,
   buffNextAttack,
   commonOptionMessages,
   decisionPrompt,
@@ -172,12 +173,11 @@ export const arr: Record<string, CardScript> = {
     },
   },
   "massacre|1": {
-    onAttackDeclared(ctx) {
-      if (ctx.getFlag("player", "discardedSixPlusThisTurn") !== true) return;
-      ctx.addModifier({ scope: "chain-link", attack: 2 });
-      queueIntimidate(ctx);
-    },
     triggers: [
+      attackIntimidateTrigger({
+        condition: (ctx) => ctx.getFlag("player", "discardedSixPlusThisTurn") === true,
+        effect: (ctx) => ctx.addModifier({ scope: "chain-link", attack: 2 }),
+      }),
       {
         event: "card-discarded",
         sourceZone: "graveyard",
@@ -190,9 +190,7 @@ export const arr: Record<string, CardScript> = {
     ],
   },
   "show no mercy|1": {
-    onAttackDeclared(ctx) {
-      if (ctx.link?.targetAllyId === undefined) queueIntimidate(ctx);
-    },
+    triggers: [attackIntimidateTrigger({ hero: true })],
     modifyAttack(ctx) {
       return ctx.link?.targetAllyId === undefined && ctx.player(opponentSeat(ctx)).hand.length === 0 ? 3 : 0;
     },

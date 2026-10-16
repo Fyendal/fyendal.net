@@ -1052,6 +1052,20 @@ describe("SUP — intimidating attacks", () => {
     g.play(card).expectPendingReturn(1, intimidates);
   });
 
+  it.each([
+    { card: "pack hunt|1", intimidates: 1 },
+    { card: "instill fear|1", intimidates: 0 },
+  ])("$card attacking an ally intimidates $intimidates time(s)", ({ card, intimidates }) => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", weapons: [], hand: [card], resources: 3 },
+        foe({ hand: ["head jab|1", "head jab|1", "head jab|1"], board: ["barnacle|2"] }),
+      ],
+    });
+
+    g.play(card, { targetAlly: "barnacle|2" }).expectPendingReturn(1, intimidates);
+  });
+
   it("Bully Tactics intimidates only as many times as was paid", () => {
     const g = scenario({
       seats: [

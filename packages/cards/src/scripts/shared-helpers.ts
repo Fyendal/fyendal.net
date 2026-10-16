@@ -155,6 +155,34 @@ export function attackArcaneHeroTrigger(amount = 1, condition?: (ctx: ScriptCtx)
   };
 }
 
+/** "When this attacks[ a hero][, if …], intimidate[ them]." Intimidate is an
+ * effect keyword (CR 8.5.10): the printed keyword grants nothing, so every
+ * attack that intimidates declares this trigger. `hero` limits it to attacks
+ * on a hero; `effect` runs any further payoff of the same ability. The "if" is
+ * checked again on resolution (CR 6.6.1c). */
+export function attackIntimidateTrigger(
+  opts: {
+    hero?: boolean;
+    condition?: (ctx: ScriptCtx) => boolean;
+    effect?: (ctx: ScriptCtx) => void;
+  } = {},
+): TriggerDef {
+  const applies = (ctx: ScriptCtx) =>
+    (!opts.hero || ctx.link?.targetAllyId === undefined) && (!opts.condition || opts.condition(ctx));
+  return {
+    event: "attack-declared",
+    sourceZone: "self",
+    label: "Intimidate",
+    labelMessage: decisionMessage("card.trigger.common.intimidate"),
+    condition: applies,
+    effect(ctx) {
+      if (!applies(ctx)) return;
+      opts.effect?.(ctx);
+      ctx.intimidate();
+    },
+  };
+}
+
 /** "Any target" for damage: each hero and each ally, as the card instance ids
  * a trigger declares. `opposing` keeps only those the opponent controls. */
 export function anyTargetIds(ctx: ScriptCtx, opts: { opposing?: boolean } = {}): number[] {

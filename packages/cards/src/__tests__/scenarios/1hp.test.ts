@@ -6,7 +6,7 @@ import { scenario } from "../harness.js";
 describe("1HP — Alpha Rampage", () => {
   // the discard cost is paid after Alpha Rampage leaves the hand (see the
   // Wrecker Romp tests in rnr.test.ts), so Raging Onslaught is always discarded
-  it("discard cost plus Rhinar's trigger: keyword + hero intimidate banish 2", () => {
+  it("discard cost plus Rhinar's trigger: attack + hero intimidate banish 2", () => {
     const g = scenario({
       seats: [
         { hero: "dorinthea", hand: ["dodge|3", "dodge|3"] },
@@ -19,7 +19,7 @@ describe("1HP — Alpha Rampage", () => {
       .expectLog("Raging Onslaught at random")
       .expectLog("Rhinar's ability triggers")
       .expectAttackValue(9)
-      // Alpha Rampage's own Intimidate keyword + the queued hero trigger
+      // Alpha Rampage's own attack trigger + Rhinar's hero trigger
       .expectPendingReturn(0, 2)
       .blockWith()
       .settle()

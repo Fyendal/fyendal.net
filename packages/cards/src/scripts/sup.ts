@@ -1,6 +1,7 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx, TriggerDef } from "@fyendal/engine";
 import {
   attackAbility,
+  attackIntimidateTrigger,
   buffNextAttack,
   cardDefendsThisTrigger,
   commonOptionMessages,
@@ -903,11 +904,7 @@ export const sup: Record<string, CardScript> = {
       ctx.tap(ctx.player(opponentSeat(ctx)).hero.instanceId);
     },
   },
-  ...pitches("instill fear", () => ({
-    onAttackDeclared(ctx) {
-      if (ctx.link?.targetAllyId === undefined) queueIntimidate(ctx);
-    },
-  })),
+  ...pitches("instill fear", () => ({ triggers: [attackIntimidateTrigger({ hero: true })] })),
   "low blow|1": { modifyAttack: (ctx) => (ctx.getFlag("player", "booedThisTurn") ? 3 : 0) },
   ...pitches("take that!", () => missCreates(MIGHT)),
   ...pitches("turn the crowd hateful", () => subtypeOpponentAttack("revered", 3, "boo")),
@@ -1571,6 +1568,7 @@ Object.assign(sup, {
   },
   "bully tactics|1": {
     onAttackDeclared(ctx: ScriptCtx) {
+      if (ctx.link?.targetAllyId !== undefined) return;
       ctx.requestXPayment(
         "bully-x",
         decisionPrompt("Pay up to 3 to intimidate", "card.sup.intimidate.pay", { values: { amount: 3 } }),
@@ -1606,9 +1604,7 @@ Object.assign(sup, {
     },
   },
   "battered, beaten, and broken|2": {
-    onAttackDeclared(ctx: ScriptCtx) {
-      if (ctx.link?.targetAllyId === undefined) queueIntimidate(ctx);
-    },
+    triggers: [attackIntimidateTrigger({ hero: true })],
     modifyAttack: (ctx: ScriptCtx) => (countAuras(ctx) >= 3 ? 3 : 0),
     canTriggerOnHit: (ctx: ScriptCtx) => ctx.link?.targetAllyId === undefined && countAuras(ctx) >= 3,
     onHit(ctx: ScriptCtx) {
@@ -1645,9 +1641,9 @@ Object.assign(sup, {
     },
   },
   "tear down the idols|1": {
-    onAttackDeclared(ctx: ScriptCtx) {
-      if (heroHas(ctx, opponentSeat(ctx), "revered")) queueIntimidate(ctx);
-    },
+    triggers: [
+      attackIntimidateTrigger({ hero: true, condition: (ctx) => heroHas(ctx, opponentSeat(ctx), "revered") }),
+    ],
     canTriggerOnHit(ctx: ScriptCtx) {
       return ctx.link?.targetAllyId === undefined && heroHas(ctx, opponentSeat(ctx), "revered");
     },

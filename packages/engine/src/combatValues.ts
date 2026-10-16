@@ -164,19 +164,16 @@ export function attackHasOverpower(
     );
 }
 
+/** Intimidate granted to this attack by effects. Intimidate is an effect
+ * keyword (CR 8.5.10), so a printed keyword grants nothing by itself: cards
+ * that intimidate as they attack declare that as a scripted trigger. */
 export function attackIntimidateCount(
   state: GameStateInternal,
   link: ChainLinkState,
 ): number {
   if (link.flags.attackAbilitiesSuppressed === true) return 0;
-  let count = instanceHasKeyword(state, link.attackingCard, "intimidate") ? 1 : 0;
-  for (const modifier of activeModifiers(state, link, [
-    "chain-link",
-    "until-end-of-turn",
-  ])) {
-    if (modifier.intimidate) count += modifier.intimidate;
-  }
-  return count;
+  return activeModifiers(state, link, ["chain-link", "until-end-of-turn"])
+    .reduce((count, modifier) => count + (modifier.intimidate ?? 0), 0);
 }
 
 /** Strictest live limit on non-block defenders, if one exists. */

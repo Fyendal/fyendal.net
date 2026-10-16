@@ -222,10 +222,6 @@ const KEYWORD_OVERRIDES: Record<string, string[]> = {
   "flex speed|3": [],
   // Pulping's dominate and go again are both conditional
   "pulping|1": [],
-  // Wrecking Ball only intimidates if a 6+ card is discarded
-  "wrecking ball|1": [],
-  // Massacre gains intimidate only after a 6+ discard; its script handles that attack trigger.
-  "massacre|1": [],
   // Breakneck Battery only GAINS go again if the discarded random card has 6+ {p}
   "breakneck battery|1": [],
   "breakneck battery|2": [],
@@ -611,16 +607,6 @@ const KEYWORD_OVERRIDES: Record<string, string[]> = {
   "rising speed|1": [],
   "rising speed|2": [],
   "rising speed|3": [],
-  "rawhide rumble|1": ["Beat Chest"],
-  "rawhide rumble|2": ["Beat Chest"],
-  "rawhide rumble|3": ["Beat Chest"],
-  "show no mercy|1": ["Rhinar Specialization"],
-  "instill fear|1": [],
-  "instill fear|2": [],
-  "instill fear|3": [],
-  "bully tactics|1": [],
-  "battered, beaten, and broken|2": [],
-  "tear down the idols|1": [],
   // Jaws of Victory only GAINS go again after its controller has been cheered
   // during the current turn.
   "jaws of victory|1": ["The Crowd Cheers"],

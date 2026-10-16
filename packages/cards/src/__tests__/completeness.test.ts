@@ -67,6 +67,24 @@ describe("script completeness", () => {
     expect(missing).toEqual([]);
   });
 
+  it("attacks with printed Intimidate declare it as a scripted attack trigger", () => {
+    // Intimidate is an effect keyword: the engine grants nothing for the
+    // printed keyword, so each attack declares when (and whether) it intimidates.
+    const intimidateFromOtherEffects = new Set([
+      // Grants the attack intimidate only when its random discard has 6+ {p}.
+      "wrecking ball|1",
+      // Intimidates once for each resource paid as it attacks.
+      "bully tactics|1",
+    ]);
+    const missing = keysWithKeyword("Intimidate")
+      .filter((key) => functionalCards.get(key)!.subtypes?.some((subtype) => subtype.toLowerCase() === "attack"))
+      .filter((key) => !intimidateFromOtherEffects.has(key))
+      .filter((key) => registry[key]?.triggers?.some(
+        (trigger) => trigger.event === "attack-declared" && trigger.sourceZone === "self",
+      ) !== true);
+    expect(missing).toEqual([]);
+  });
+
   it("vanilla entries carry no functional text beyond their keyword lines", () => {
     const offenders: string[] = [];
     for (const key of vanillaKeys) {

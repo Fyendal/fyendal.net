@@ -1,6 +1,7 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
 import {
   attackAbility,
+  attackIntimidateTrigger,
   buffNextAttack,
   commonOptionMessages,
   decisionPrompt,
@@ -8,7 +9,6 @@ import {
   localizedCardLog,
   mergeSetScripts,
   opponentSeat,
-  queueIntimidate,
   revealTopSixPlusStays,
 } from "./shared-helpers.js";
 import { hvyHighRarity } from "./hvy/high-rarity.js";
@@ -424,10 +424,12 @@ export const hvy: Record<string, CardScript> = mergeSetScripts("HVY", hvyHighRar
   "pack call|3": { onDefend: revealTopSixPlusStays },
   ...pitches("rawhide rumble", () =>
     beatChest({
-      onAttackDeclared(ctx) {
-        if (ctx.getFlag("player", "beatenChestThisTurn") === true && ctx.link?.targetAllyId === undefined)
-          queueIntimidate(ctx);
-      },
+      triggers: [
+        attackIntimidateTrigger({
+          hero: true,
+          condition: (ctx) => ctx.getFlag("player", "beatenChestThisTurn") === true,
+        }),
+      ],
     }),
   ),
   ...pitches("assault and battery", () =>
