@@ -799,4 +799,5 @@ export type {
   ScriptPrompt,
   TriggerDef,
   TriggerEventContext,
+  TriggerTarget,
 } from "./scripts.js";

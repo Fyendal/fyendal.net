@@ -97,9 +97,11 @@ describe("elemental and assorted enter/leave arena triggers use the stack", () =
 
     g.play("emerging avalanche|2", { pitch: [ICE], settle: false });
     chooseRaw(g, ICE);
-    g.passUntilLayer("Create a Frostbite").expectNotInZone(1, "frostbite|0", "board");
+    g.passUntilTargetDeclaration();
+    expect(g.stackLabels()[0]).toBe("Create a Frostbite");
+    g.declareTargetRaw(1).expectNotInZone(1, "frostbite|0", "board");
     resolveTop(g);
-    chooseFragment(g, "opponent").settle().expectInZone(1, "frostbite|0", "board");
+    g.settle().expectInZone(1, "frostbite|0", "board");
   });
 
   it("Chains of Eminence names a card when its enter trigger resolves", () => {

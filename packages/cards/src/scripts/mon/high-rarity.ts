@@ -6,7 +6,9 @@ import {
   dealArcane,
   decisionMessage,
   decisionPrompt,
+  heroTarget,
   opponentSeat,
+  targetHeroSeat,
   weaponAttackCount,
 } from "../shared-helpers.js";
 
@@ -542,7 +544,9 @@ export const monHighRarity: Record<string, CardScript> = {
     triggers: [
       {
         event: "card-played",
-        label: "Deal 1 arcane damage",
+        label: "Deal 1 arcane damage to target hero",
+        labelMessage: decisionMessage("card.trigger.common.arcane.target", { amount: 1 }),
+        target: heroTarget(),
         condition(ctx, played, event) {
           if (!played || event?.from !== "banish" || !ctx.hasCardType(played, "action")) return false;
           const kind = ctx.cardTypes(played).includes("attack") ? "attack" : "nonattack";
@@ -554,7 +558,8 @@ export const monHighRarity: Record<string, CardScript> = {
           ctx.setCounter(`crossroads:${kind}`, 1);
         },
         effect(ctx) {
-          ctx.dealDamage(opponentSeat(ctx), 1, { arcane: true, sourceInstanceId: ctx.self.instanceId });
+          const seat = targetHeroSeat(ctx);
+          if (seat !== undefined) ctx.dealDamage(seat, 1, { arcane: true, sourceInstanceId: ctx.self.instanceId });
         },
       },
     ],

@@ -763,9 +763,8 @@ describe("SFA — Phoenix Flame support", () => {
     });
     s.play("brand with cinderclaw|1").blockWith().settle()
       .play("art of the dragon: fire|1", { pitch: [RED] });
-    // damage defaults to the opposing hero
-    expect(s.state.pendingDecision?.defaultOption).toBe(String(s.state.players[1]!.hero.instanceId));
-    s.chooseCard("rhinar|0") // deal 2 to the opposing hero
+    expect(s.stackLabels()).toEqual(["Deal 2 damage to any target"]);
+    s.declareTarget(1) // deal 2 to the opposing hero
       .expectLife(1, 15) // 20 − 3 (Brand's hit) − 2
       .expectAttackValue(5);
   });

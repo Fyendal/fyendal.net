@@ -1,5 +1,10 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
-import { attackAbility, commonOptionMessages, decisionMessage, decisionPrompt } from "./shared-helpers.js";
+import {
+  attackAbility,
+  commonOptionMessages,
+  decisionMessage,
+  decisionPrompt,
+} from "./shared-helpers.js";
 
 const HYPER_DRIVER = "AMX028";
 const BANK_BREAKER = "AMX022B";
@@ -144,19 +149,21 @@ export const amx: Record<string, CardScript> = {
   },
 
   "fist pump|0": {
-    onBoosted(ctx, _boosted, banished) {
-      if (!named(ctx, banished, "Hyper Driver")) return;
-      const choices = wrenches(ctx);
-      if (choices.length)
-        ctx.requestCardChoice(
-          "fist-pump",
-          decisionPrompt("Target a wrench to get +1 power this turn", "card.amx.wrench.power"),
-          choices.map((card) => card.instanceId),
-        );
-    },
-    onChoose(ctx, hook, option) {
-      if (hook === "fist-pump") ctx.addCardTempPower(Number(option), 1);
-    },
+    triggers: [
+      {
+        event: "card-banished-for-boost",
+        label: "Target wrench you control gets +1 power this turn",
+        labelMessage: decisionMessage("card.trigger.common.wrench.power.target", { amount: 1 }),
+        condition: (ctx, banished) => !!banished && named(ctx, banished, "Hyper Driver"),
+        target: {
+          options: (ctx) => wrenches(ctx).map((card) => card.instanceId),
+          prompt: () => decisionPrompt("Target a wrench to get +1 power this turn", "card.amx.wrench.power"),
+        },
+        effect(ctx) {
+          if (ctx.playTargetInstanceId !== undefined) ctx.addCardTempPower(ctx.playTargetInstanceId, 1);
+        },
+      },
+    ],
   },
 
   "drive brake|0": {

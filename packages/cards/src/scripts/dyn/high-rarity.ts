@@ -1,11 +1,13 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
 import {
+  anyDamageTarget,
   bottomOrKeepPrompt,
   buffNextAttack,
   commonOptionMessages,
   contractWithSilver,
   dealArcane,
   dealtByThis,
+  dealToAnyTarget,
   decisionMessage,
   decisionPrompt,
   entersArenaTrigger,
@@ -138,33 +140,6 @@ function finishHarpoonReveal(ctx: ScriptCtx): void {
       ids,
     );
   }
-}
-function requestBrainstormTarget(ctx: ScriptCtx): void {
-  const targets = ctx.state.players.flatMap((player) => [
-    { option: `hero:${player.seat}`, cardId: player.hero.cardId },
-    ...player.board
-      .filter((card) => has(ctx, card, "ally"))
-      .map((card) => ({ option: `ally:${card.instanceId}`, cardId: card.cardId })),
-  ]);
-  const amount = ctx.previewArcaneDamage(1);
-  ctx.requestChoice(
-    "brainstorm-target",
-    decisionPrompt(`Choose a target for ${amount} arcane damage`, "card.dyn.brainstorm.target.choose", {
-      values: { amount },
-      optionMessages: Object.fromEntries(
-        targets.map(({ option, cardId }) => [
-          option,
-          decisionMessage("card.common.target.card", {
-            card: { kind: "card", cardId },
-          }),
-        ]),
-      ),
-    }),
-    targets.map(({ option }) => option),
-    undefined,
-    undefined,
-    `hero:${opponentSeat(ctx)}`,
-  );
 }
 function advanceWarhorn(ctx: ScriptCtx, afterSeat: number): void {
   const next = [0, 1].find(
@@ -1025,19 +1000,21 @@ export const dynHighRarity: Record<string, CardScript> = {
     onPlay(ctx) {
       ctx.addModifier({ scope: "until-end-of-turn" });
     },
-    onFriendlyDraws(ctx, count) {
-      if (ctx.state.phase !== "action" && ctx.state.phase !== "layer" && ctx.state.phase !== "reaction") return;
-      ctx.setCounter("brainstormPackets", ctx.getCounter("brainstormPackets") + count);
-      requestBrainstormTarget(ctx);
-    },
-    onChoose(ctx, hook, option) {
-      if (hook !== "brainstorm-target") return;
-      if (option.startsWith("ally:"))
-        ctx.dealDamage(ctx.seat, 1, { arcane: true, targetAllyId: Number(option.split(":")[1]) });
-      else ctx.dealDamage(Number(option.split(":")[1]), 1, { arcane: true });
-      ctx.setCounter("brainstormPackets", ctx.getCounter("brainstormPackets") - 1);
-      if (ctx.getCounter("brainstormPackets") > 0) requestBrainstormTarget(ctx);
-    },
+    triggers: [
+      {
+        event: "card-drawn",
+        label: "Deal 1 arcane damage to any target",
+        labelMessage: decisionMessage("card.trigger.common.arcane.anytarget", { amount: 1 }),
+        condition: (ctx) => ["action", "layer", "reaction"].includes(ctx.state.phase),
+        target: anyDamageTarget((ctx) => {
+          const amount = ctx.previewArcaneDamage(1);
+          return decisionPrompt(`Choose a target for ${amount} arcane damage`, "card.dyn.brainstorm.target.choose", {
+            values: { amount },
+          });
+        }),
+        effect: (ctx) => dealToAnyTarget(ctx, ctx.playTargetInstanceId, 1, { arcane: true }),
+      },
+    ],
   },
   "invoke suraya|2": {
     onPlay(ctx) {

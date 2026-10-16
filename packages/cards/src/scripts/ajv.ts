@@ -224,17 +224,15 @@ export const ajv: Record<string, CardScript> = {
     canTriggerOnHit(ctx) {
       return ctx.link?.targetAllyId === undefined && (ctx.link?.damage ?? 0) >= 4;
     },
-    onHit(ctx) {
-      const equipment = allEquipment(ctx, opponentSeat(ctx)).filter((card) => (card.defCounters ?? 0) > 0);
-      if (equipment.length)
-        ctx.requestCardChoice(
-          "mangle-equipment",
-          decisionPrompt("Destroy equipment with a -1 defense counter", "card.ajv.equipment.destroy"),
-          equipment.map((card) => card.instanceId),
-        );
+    onHitTarget: {
+      options: (ctx) =>
+        allEquipment(ctx, opponentSeat(ctx))
+          .filter((card) => (card.defCounters ?? 0) > 0)
+          .map((card) => card.instanceId),
+      prompt: () => decisionPrompt("Destroy equipment with a -1 defense counter", "card.ajv.equipment.destroy"),
     },
-    onChoose(ctx, hook, option) {
-      if (hook === "mangle-equipment") ctx.destroyPermanent(Number(option));
+    onHit(ctx) {
+      if (ctx.playTargetInstanceId !== undefined) ctx.destroyPermanent(ctx.playTargetInstanceId);
     },
   },
   "channel mount isen|3": {

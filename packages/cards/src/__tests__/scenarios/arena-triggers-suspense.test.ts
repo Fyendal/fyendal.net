@@ -73,13 +73,18 @@ describe("suspense and crowd auras trigger through the stack", () => {
     // Two distinct leave abilities: their controller orders them.
     expect(g.state.pendingDecision?.chooseHook).toBe("trigger-order");
     expect(g.state.pendingDecision?.optionLabels).toEqual([
-      "Intimidate",
+      "Intimidate target hero",
       "Your next attack this turn gets +4 attack",
     ]);
     while (g.state.pendingDecision?.chooseHook === "trigger-order") {
       g.doRaw({ kind: "choose", optionId: g.state.pendingDecision.options![0]! });
     }
-    expect(g.stackLabels()).toEqual(["Intimidate", "Your next attack this turn gets +4 attack", "Pleiades, Superstar"]);
+    expect(g.stackLabels()).toEqual([
+      "Intimidate target hero",
+      "Your next attack this turn gets +4 attack",
+      "Pleiades, Superstar",
+    ]);
+    g.declareTargetRaw(1);
     g.expectInZone(1, "head jab|1", "hand");
 
     g.passPriority().passPriority();

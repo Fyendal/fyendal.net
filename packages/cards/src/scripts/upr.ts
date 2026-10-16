@@ -1,9 +1,11 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx, TriggerDef } from "@fyendal/engine";
 import {
+  anyDamageTarget,
   buffNextAttack,
   commonOptionMessages,
   dealArcane,
   dealtByThis,
+  dealToAnyTarget,
   decisionMessage,
   decisionPrompt,
   entersArenaTrigger,
@@ -1109,13 +1111,21 @@ export const upr: Record<string, CardScript> = mergeSetScripts("UPR", uprHighRar
     },
   },
   "searing touch|1": {
-    onAttackDeclared(ctx) {
-      if (ctx.currentChainLinkNumber() >= 4)
-        chooseDamageTarget(ctx, "searing", "Deal 2 damage to any target", 2, false);
-    },
-    onChoose(ctx, h, o) {
-      if (h === "searing") dealToTarget(ctx, o, 2);
-    },
+    triggers: [
+      {
+        event: "attack-declared",
+        sourceZone: "self",
+        label: "Deal 2 damage to any target",
+        labelMessage: decisionMessage("card.trigger.common.damage.anytarget", { amount: 2 }),
+        condition: (ctx) => ctx.currentChainLinkNumber() >= 4,
+        target: anyDamageTarget((ctx) =>
+          decisionPrompt("Deal 2 damage to any target", "card.upr.damage.target.choose", {
+            values: { card: { kind: "card", cardId: ctx.self.cardId }, amount: 2 },
+          }),
+        ),
+        effect: (ctx) => dealToAnyTarget(ctx, ctx.playTargetInstanceId, 2),
+      },
+    ],
   },
   "stoke the flames|1": {
     onHit(ctx) {

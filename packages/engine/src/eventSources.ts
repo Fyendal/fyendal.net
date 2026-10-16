@@ -425,6 +425,7 @@ export function fireFriendlyDestroyed(
   for (const subtype of destroyedData.subtypes ?? []) {
     (state.players[seat] as PlayerState).flags[`destroyedSubtype:${subtype.toLowerCase()}`] = true;
   }
+  runtime.events.queueTriggeredEvent(state, "card-destroyed", seat, destroyed);
   scriptOf(state, destroyed.cardId, destroyed)?.onFriendlyDestroyed?.(
     runtime.makeCtx(state, seat, destroyed, currentLink(state)),
     destroyed,
@@ -474,6 +475,7 @@ export function fireCardLeavesGraveyard(
   card: CardInstance,
   to: string,
 ): void {
+  runtime.events.queueTriggeredEvent(state, "card-left-graveyard", seat, card);
   for (const src of hookSources(state, seat, {
     board: true,
     equipment: true,
@@ -496,7 +498,6 @@ export function runHook<K extends
   | "onAttackDeclaredTriggersResolved"
   | "onFriendlyAttackDeclared"
   | "onGainGoAgain"
-  | "onGoAgainResolved"
   | "onHit"
   | "onSuppressedHit"
   | "onMiss"
@@ -513,6 +514,7 @@ export function runHook<K extends
   hook: K,
   link?: ChainLinkState,
   fromArsenal?: boolean,
+  playTargetInstanceId?: number,
 ): void {
   const script = scriptOf(state, card.cardId, card);
   const fn = script?.[hook];
@@ -520,7 +522,7 @@ export function runHook<K extends
     card.instanceId === state.players[seat]?.hero.instanceId &&
     heroAbilitiesDisabled(state, seat)
   ) return;
-  const ctx = runtime.makeCtx(state, seat, card, link, fromArsenal);
+  const ctx = runtime.makeCtx(state, seat, card, link, fromArsenal, playTargetInstanceId);
   if (fn) (fn as (c: ScriptCtx) => void)(ctx);
   const inheritedIds = [
     ...(card.grantedBaseAbilitiesCardId ? [card.grantedBaseAbilitiesCardId] : []),
@@ -571,19 +573,10 @@ export function grantLinkGoAgain(state: GameStateInternal,
   notifyGoAgain(state, runtime, link);
 }
 
-/** Notify active and lingering sources when go again resolves and grants their
- * controller an action point. */
+/** Raise "go-again-resolved" when go again grants its controller an action
+ * point. Its triggered layers join the pending layers placed before the next
+ * priority point. */
 export function notifyGoAgainResolved(state: GameStateInternal,
-  runtime: EngineRuntime, seat: number, link?: ChainLinkState): void {
-  const active = hookSources(state, seat, {
-    board: true,
-    equipment: true,
-    weapons: true,
-  });
-  const sources = [...active, ...lingeringModifierSources(state, seat).filter(
-    (candidate) => !active.some((source) => source.instanceId === candidate.instanceId),
-  )];
-  for (const source of sources) {
-    runtime.events.runHook(state, seat, source, "onGoAgainResolved", link);
-  }
+  runtime: EngineRuntime, seat: number): void {
+  runtime.events.queueTriggeredEvent(state, "go-again-resolved", seat);
 }

@@ -1,8 +1,10 @@
 import type { CardScript, ScriptCtx } from "@fyendal/engine";
 import {
+  anyDamageTarget,
   attackAbility,
   buffNextAttack,
   commonOptionMessages,
+  dealToAnyTarget,
   decisionMessage,
   decisionPrompt,
   isCard,
@@ -55,16 +57,6 @@ function currentAttackIsDraconic(ctx: ScriptCtx): boolean {
 
 function isPhoenixFlame(ctx: ScriptCtx, cardId: string): boolean {
   return isCard(ctx, cardId, "Phoenix Flame", 1);
-}
-
-/** Living ally permanents on either board (ally subtype + life property) —
- *  valid "any target" choices alongside the heroes. */
-function livingAllyIds(ctx: ScriptCtx): number[] {
-  return ctx.state.players.flatMap((p) =>
-    p.board
-      .filter((c) => ctx.cardTypes(c).includes("ally") && ctx.cardData(c.cardId).life !== undefined)
-      .map((c) => c.instanceId),
-  );
 }
 
 /** "If you've played another red card this turn" — the resolving card is red
@@ -330,33 +322,23 @@ export const sfa: Record<string, CardScript> = {
   // ── Attacks ───────────────────────────────────────────────────────────────
 
   "art of the dragon: fire|1": {
-    // "When this attacks, if it is Draconic, deal 2 damage to any target."
-    //  Any target = any hero or any living ally, either player's.
-    onAttackDeclared(ctx) {
-      if (!currentAttackIsDraconic(ctx)) return;
-      ctx.requestCardChoice(
-        "art-of-the-dragon",
-        decisionPrompt("Art of the Dragon: Fire — deal 2 damage to any target", "card.sfa.dragonfire.target", {
-          values: { amount: 2 },
-        }),
-        [...ctx.state.players.map((p) => p.hero.instanceId), ...livingAllyIds(ctx)],
-        undefined,
-        undefined,
-        undefined,
-        ctx.player(opponentSeat(ctx)).hero.instanceId,
-      );
-    },
-    onChoose(ctx, hook, option) {
-      if (hook !== "art-of-the-dragon") return;
-      const id = Number(option);
-      const hero = ctx.state.players.find((p) => p.hero.instanceId === id);
-      if (hero) {
-        ctx.dealDamage(hero.seat, 2);
-        return;
-      }
-      const ally = ctx.state.players.flatMap((p) => p.board).find((c) => c.instanceId === id);
-      if (ally) ctx.dealDamage(ally.owner, 2, { targetAllyId: id });
-    },
+    triggers: [
+      {
+        event: "attack-declared",
+        sourceZone: "self",
+        label: "Deal 2 damage to any target",
+        labelMessage: decisionMessage("card.trigger.common.damage.anytarget", { amount: 2 }),
+        condition: currentAttackIsDraconic,
+        target: anyDamageTarget(() =>
+          decisionPrompt("Art of the Dragon: Fire — deal 2 damage to any target", "card.sfa.dragonfire.target", {
+            values: { amount: 2 },
+          }),
+        ),
+        effect(ctx) {
+          if (currentAttackIsDraconic(ctx)) dealToAnyTarget(ctx, ctx.playTargetInstanceId, 2);
+        },
+      },
+    ],
   },
 
   "blaze headlong|1": {

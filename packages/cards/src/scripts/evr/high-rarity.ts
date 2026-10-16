@@ -25,10 +25,6 @@ function hasType(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, type: string)
   return ctx.cardTypes(card).includes(type.toLowerCase());
 }
 
-function weapon(cost: number, extra: CardScript = {}): CardScript {
-  return { ...extra, activated: { cost, isAttack: true, goAgain: false, oncePerTurn: true } };
-}
-
 function elementalRevealOptions(ctx: ScriptCtx): string[] {
   const hand = ctx.player(ctx.seat).hand;
   const earth = hand.filter((card) => hasType(ctx, card, "earth"));
@@ -823,17 +819,15 @@ export const evrHighRarity: Record<string, CardScript> = {
   },
   "runic reclamation|1": {
     canTriggerOnHit: (ctx) => ctx.link?.targetAllyId === undefined,
-    onHit(ctx) {
-      const auras = ctx.player(opponentSeat(ctx)).board.filter((card) => hasType(ctx, card, "aura"));
-      if (auras.length)
-        ctx.requestCardChoice(
-          "reclamation-aura",
-          decisionPrompt("Choose an aura to destroy", "card.evr.aura.destroy"),
-          auras.map((card) => card.instanceId),
-        );
+    onHitTarget: {
+      options: (ctx) =>
+        ctx.player(opponentSeat(ctx)).board.filter((card) => hasType(ctx, card, "aura")).map((card) => card.instanceId),
+      prompt: () => decisionPrompt("Choose an aura to destroy", "card.evr.aura.destroy"),
     },
-    onChoose(ctx, hook, option) {
-      if (hook === "reclamation-aura" && ctx.destroyPermanent(Number(option))) ctx.createToken(RUNECHANT);
+    onHit(ctx) {
+      if (ctx.playTargetInstanceId !== undefined && ctx.destroyPermanent(ctx.playTargetInstanceId)) {
+        ctx.createToken(RUNECHANT);
+      }
     },
   },
   "swarming gloomveil|1": {

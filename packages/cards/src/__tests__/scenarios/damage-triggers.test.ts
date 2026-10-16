@@ -243,14 +243,15 @@ describe("damage-dealt triggers use the stack", () => {
     });
 
     g.play("explosive growth|1", { pitch: [BLUE] }).chooseCard("sow tomorrow|3");
-    g.expectLife(1, 19).expectAttackValue(4);
+    expect(g.stackLabels()[0]).toBe("Deal 1 arcane damage to target hero");
+    g.declareTarget(1).expectLife(1, 19).expectAttackValue(4);
     g.blockWith().settle().expectLife(1, 15);
   });
 
   it("unfused Explosive Growth does not trigger", () => {
     const g = scenario({ seats: [seat({ hand: ["explosive growth|1", BLUE] }), foe()] });
 
-    g.play("explosive growth|1", { pitch: [BLUE] }).expectLife(1, 19).expectAttackValue(3);
+    g.play("explosive growth|1", { pitch: [BLUE] }).declareTarget(1).expectLife(1, 19).expectAttackValue(3);
   });
 
   it("Staff of Verdant Shoots creates Embodiment of Earth on the next arcane damage", () => {

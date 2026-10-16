@@ -1,12 +1,13 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx, TriggerDef } from "@fyendal/engine";
 import {
   ampNextArcane,
+  anyDamageTarget,
   attackAbility,
   bloodDebtScript as bloodDebt,
   buffNextAttack,
   channelLightning,
   commonOptionMessages,
-  dealArcane,
+  dealToAnyTarget,
   decisionMessage,
   decisionPrompt,
   entersArenaTrigger,
@@ -60,38 +61,6 @@ function selfHits(ctx: ScriptCtx): boolean {
 /** "When this hits a hero". */
 function selfHitsHero(ctx: ScriptCtx): boolean {
   return selfHits(ctx) && ctx.link!.targetAllyId === undefined;
-}
-
-function requestAnyTarget(ctx: ScriptCtx, hook: string, fallback: string, id: string, amount: number): void {
-  const options = ["opposing hero", "your hero"];
-  const cardOptions: (number | null)[] = [null, null];
-  for (const player of ctx.state.players) {
-    for (const card of player.board) {
-      if (!hasType(ctx, card, "ally")) continue;
-      options.push(`ally:${player.seat}:${card.instanceId}`);
-      cardOptions.push(card.instanceId);
-    }
-  }
-  ctx.requestChoice(
-    hook,
-    decisionPrompt(fallback, id, {
-      values: { amount },
-      optionMessages: commonOptionMessages("opposing hero", "your hero"),
-    }),
-    options,
-    ctx.seat,
-    cardOptions,
-    "opposing hero",
-  );
-}
-
-function dealArcaneToTarget(ctx: ScriptCtx, option: string, amount: number): void {
-  const ally = /^ally:(\d+):(\d+)$/.exec(option);
-  if (ally) {
-    dealArcane(ctx, Number(ally[1]), amount, Number(ally[2]));
-    return;
-  }
-  dealArcane(ctx, option === "your hero" ? ctx.seat : opponentSeat(ctx), amount);
 }
 
 function exposedEquipmentSlots(ctx: ScriptCtx, seat: number): readonly string[] {
@@ -1408,19 +1377,15 @@ function vexingGloomblade(): CardScript {
       ...usurp(),
       arcaneDamageEffect: true,
       canTriggerOnHit: selfHitsHero,
-      onHit(ctx) {
-        requestAnyTarget(
-          ctx,
-          "iar-vexing-target",
+      onHitTarget: anyDamageTarget((ctx) =>
+        decisionPrompt(
           `Choose a target to deal ${ctx.previewArcaneDamage(2)} arcane damage to`,
           "card.iar.vexing.target.choose",
-          ctx.previewArcaneDamage(2),
-        );
-      },
-      onChoose(ctx, hook, option) {
-        if (resolveUsurp(ctx, hook, option)) return;
-        if (hook === "iar-vexing-target") dealArcaneToTarget(ctx, option, 2);
-      },
+          { values: { amount: ctx.previewArcaneDamage(2) } },
+        ),
+      ),
+      onHit: (ctx) => dealToAnyTarget(ctx, ctx.playTargetInstanceId, 2, { arcane: true }),
+      onChoose: resolveUsurp,
     },
     true,
   );
@@ -1842,30 +1807,20 @@ export const iar: Record<string, CardScript> = {
   "bloodsong gloomblade|1": bloodDebt(
     {
       ...usurp(),
-      canTriggerOnHit: (ctx) =>
-        selfHitsHero(ctx) && ctx.player(opponentSeat(ctx)).board.some((card) => hasType(ctx, card, "aura")),
+      canTriggerOnHit: selfHitsHero,
+      onHitTarget: {
+        options: (ctx) =>
+          ctx.player(opponentSeat(ctx)).board.filter((card) => hasType(ctx, card, "aura")).map((card) => card.instanceId),
+        prompt: () =>
+          decisionPrompt("Banish an aura permanent they control?", "card.iar.bloodsong.aura.banish", {
+            optionMessages: commonOptionMessages("pass"),
+          }),
+        optional: true,
+      },
       onHit(ctx) {
-        const target = opponentSeat(ctx);
-        const auras = ctx.player(target).board.filter((card) => hasType(ctx, card, "aura"));
-        if (auras.length > 0) {
-          ctx.requestCardChoice(
-            "iar-bloodsong-aura",
-            decisionPrompt("Banish an aura permanent they control?", "card.iar.bloodsong.aura.banish", {
-              optionMessages: commonOptionMessages("no"),
-            }),
-            ["no", ...auras.map((card) => card.instanceId)],
-          );
-        }
+        if (ctx.playTargetInstanceId !== undefined) ctx.banish(ctx.playTargetInstanceId);
       },
-      onChoose(ctx, hook, option) {
-        if (resolveUsurp(ctx, hook, option)) return;
-        if (hook !== "iar-bloodsong-aura" || option === "no") return;
-        const target = opponentSeat(ctx);
-        const aura = ctx
-          .player(target)
-          .board.find((card) => card.instanceId === Number(option) && hasType(ctx, card, "aura"));
-        if (aura) ctx.banish(aura.instanceId);
-      },
+      onChoose: resolveUsurp,
     },
     true,
   ),

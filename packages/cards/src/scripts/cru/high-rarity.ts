@@ -601,34 +601,30 @@ export const cruHighRarity: Record<string, CardScript> = {
       {
         event: "begin-action-phase",
         label: "Copy a hero with Shiyana",
+        target: {
+          options: (ctx) =>
+            ctx.state.players.filter((player) => player.seat !== ctx.seat).map((player) => player.hero.instanceId),
+          prompt: () => decisionPrompt("Shiyana: choose a hero to copy", "card.cru.shiyana.hero.choose"),
+        },
         effect(ctx) {
           const previousClass = ctx.self.chosenName;
           if (previousClass) {
             for (const card of ownedCards(ctx)) ctx.removeCardType(card.instanceId, previousClass);
           }
-          const heroes = ctx.state.players
-            .filter((player) => player.seat !== ctx.seat)
-            .map((player) => player.hero.instanceId);
-          ctx.requestCardChoice(
-            "shiyana-hero",
-            decisionPrompt("Shiyana: choose a hero to copy", "card.cru.shiyana.hero.choose"),
-            heroes,
+          const target = ctx.state.players.map((player) => player.hero).find(
+            (hero) => hero.instanceId === ctx.playTargetInstanceId,
           );
+          if (!target) return;
+          const heroData = ctx.cardData(target.cardId);
+          const heroClass = heroData.classes?.[0];
+          if (heroClass) {
+            ctx.setChosenName(heroClass);
+            for (const card of ownedCards(ctx)) ctx.grantCardType(card.instanceId, heroClass);
+          }
+          ctx.becomeHeroUntilNextTurn(target.cardId);
         },
       },
     ],
-    onChoose(ctx, hook, option) {
-      if (hook !== "shiyana-hero") return;
-      const target = ctx.state.players.map((player) => player.hero).find((hero) => hero.instanceId === Number(option));
-      if (!target) return;
-      const heroData = ctx.cardData(target.cardId);
-      const heroClass = heroData.classes?.[0];
-      if (heroClass) {
-        ctx.setChosenName(heroClass);
-        for (const card of ownedCards(ctx)) ctx.grantCardType(card.instanceId, heroClass);
-      }
-      ctx.becomeHeroUntilNextTurn(target.cardId);
-    },
   },
   "viziertronic model i|0": viziertronic,
   "meganetic shockwave|3": {

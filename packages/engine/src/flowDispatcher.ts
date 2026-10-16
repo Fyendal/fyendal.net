@@ -8,7 +8,7 @@ import { beginHeroDamage, dealAllyDamage, gainHeroLife } from "./damageResolutio
 import { attackAllowsDefender, consumeQueuedIntimidate, proceedWithAttack, queueDefendEventLayersAfterCurrent, resolveDefendEventLayer, resolvePhantasmLayer, resolveSpectraLayer } from "./defense.js";
 import { queueHitTriggers, resolveOnHitLayer } from "./hits.js";
 import { beginReactionStep, reopenReactionWindow } from "./reactions.js";
-import { announceCardPlayed, cancelEndActionPass, collectEventTriggerLayers, continueStack, deferEventTriggers, enterAttackLayerWindow, enterAttackWindow, finishDamageStep, finishStackCardResolution, flushPendingTriggersAboveStack, holdLayerWindow, queueEventTriggers, queueReactionEventTriggers, queueTriggeredLayers, resolveAbilityLayer, resolveTopStackCard, resolveTopStackLayer } from "./triggers.js";
+import { announceCardPlayed, cancelEndActionPass, collectEventTriggerLayers, continueStack, declarePlayedTriggerTargets, deferEventTriggers, enterAttackLayerWindow, enterAttackWindow, finishDamageStep, finishStackCardResolution, flushPendingTriggersAboveStack, holdLayerWindow, queueEventTriggers, queueReactionEventTriggers, queueTriggeredLayers, resolveAbilityLayer, resolveTopStackCard, resolveTopStackLayer } from "./triggers.js";
 import { continueEndPhase, endTurn } from "./turn.js";
 import { resolveWagerLayer } from "./wagers.js";
 
@@ -29,6 +29,7 @@ const handlers: Readonly<Record<FlowStepName, { fn: FlowHandler; injectRuntime: 
   continueEndPhase: { fn: continueEndPhase, injectRuntime: true },
   continueStack: { fn: continueStack, injectRuntime: true },
   dealAllyDamage: { fn: dealAllyDamage, injectRuntime: true },
+  declarePlayedTriggerTargets: { fn: declarePlayedTriggerTargets, injectRuntime: true },
   deferEventTriggers: { fn: deferEventTriggers, injectRuntime: true },
   endTurn: { fn: endTurn, injectRuntime: true },
   enterAttackLayerWindow: { fn: enterAttackLayerWindow, injectRuntime: true },

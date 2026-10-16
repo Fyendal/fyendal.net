@@ -631,7 +631,7 @@ describe("OMN — import and set mechanics", () => {
       .expectInZone(0, "echoflash|2", "graveyard");
     expect(g.state.stack[0]?.label).toBe("Your hero deals 1 arcane damage");
 
-    g.passPriority().passPriority().expectLife(1, 19);
+    g.declareTargetRaw(1).passPriority().passPriority().expectLife(1, 19);
   });
 
   it("Oscilio, Scion discards on resolution and triggers Echoflash", () => {
@@ -658,7 +658,7 @@ describe("OMN — import and set mechanics", () => {
     const echoflash = g.state.players[0]!.hand[0]!;
     g.doRaw({ kind: "choose", optionId: String(echoflash.instanceId) });
     expect(g.state.stack[0]?.label).toBe("Your hero deals 1 arcane damage");
-    g.passPriority().passPriority().expectLife(1, 19);
+    g.declareTargetRaw(1).passPriority().passPriority().expectLife(1, 19);
   });
 
   it("Quickstrike turns on when Quick Succession grants go again", () => {
@@ -747,7 +747,7 @@ describe("OMN — import and set mechanics", () => {
 
     g.play("quick succession|1")
       .play("stinging sprite|1")
-      .chooseOption("opposing hero")
+      .declareTarget(1)
       .chooseOption("0")
       .blockWith()
       .settle()
@@ -1117,9 +1117,10 @@ describe("OMN — import and set mechanics", () => {
       optional: false,
     });
     g.expectLife(1, 20)
+      .declareTargetRaw(1)
       .passPriority()
       .passPriority()
-      .chooseOption("opposing hero")
+      .settle()
       .expectLife(1, 19)
       .expectInZone(0, "corrosive space dust|1", "board");
   });
@@ -1140,7 +1141,7 @@ describe("OMN — import and set mechanics", () => {
       .activate("zyggy|0")
       .chooseCard("lightning flow|0")
       .chooseCard("corrosive space dust|1")
-      .chooseOption("opposing hero")
+      .declareTarget(1)
       .expectLife(1, 19)
       .expectInZone(0, "corrosive space dust|1", "board");
   });
@@ -1193,7 +1194,7 @@ describe("OMN — import and set mechanics", () => {
     expect(g.state.pendingDecision?.options).not.toContain(String(starbreeze!.instanceId));
 
     g.chooseCard("corrosive space dust|1")
-      .chooseOption("opposing hero")
+      .declareTarget(1)
       .expectInZone(0, "corrosive space dust|1", "board")
       .expectLife(1, 19);
     const returnedSpaceDust = g.state.players[0]!.board.find(

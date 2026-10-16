@@ -6,6 +6,7 @@ import {
   decisionMessage,
   decisionPrompt,
   heroChoiceSeat,
+  heroTarget,
   mergeSetScripts,
   opponentSeat,
   optN,
@@ -14,6 +15,7 @@ import {
   previousAttackNameContains,
   requestHeroChoice,
   spireSnipingScript,
+  targetHeroSeat,
   yesNoPrompt,
 } from "./shared-helpers.js";
 import { outHighRarity, uzuriAbility } from "./out/high-rarity.js";
@@ -507,6 +509,9 @@ function bleedOut(): CardScript {
     },
   };
 }
+function hurlDaggers(ctx: ScriptCtx): DeepReadonly<CardInstance>[] {
+  return [...ctx.player(ctx.seat).weapons, ...ctx.player(ctx.seat).board].filter((card) => isDagger(ctx, card));
+}
 function hurl(): CardScript {
   return {
     additionalCost(ctx) {
@@ -516,29 +521,29 @@ function hurl(): CardScript {
         1,
       );
     },
-    onAttackDeclared(ctx) {
-      if (ctx.getCounter("hurlPaid") !== 1) return;
-      const daggers = [...ctx.player(ctx.seat).weapons, ...ctx.player(ctx.seat).board].filter((card) =>
-        isDagger(ctx, card),
-      );
-      if (daggers.length)
-        ctx.requestCardChoice(
-          "hurl-dagger",
-          decisionPrompt("Choose a dagger to deal 1 damage", "card.out.hurl.dagger.choose"),
-          daggers.map((card) => card.instanceId),
-        );
-    },
+    triggers: [
+      {
+        event: "attack-declared",
+        sourceZone: "self",
+        label: "Target dagger you control deals 1 damage to the opposing hero, then destroy it",
+        labelMessage: decisionMessage("card.trigger.common.dagger.damage.hero", { amount: 1 }),
+        condition: (ctx) => ctx.getCounter("hurlPaid") === 1,
+        // Two heroes play, so "target hero" is the opposing hero; only the
+        // dagger is a real choice.
+        target: {
+          options: (ctx) => hurlDaggers(ctx).map((card) => card.instanceId),
+          prompt: () => decisionPrompt("Choose a dagger to deal 1 damage", "card.out.hurl.dagger.choose"),
+        },
+        effect(ctx) {
+          const dagger = hurlDaggers(ctx).find((card) => card.instanceId === ctx.playTargetInstanceId);
+          if (!dagger) return;
+          ctx.dealDamage(opponentSeat(ctx), 1, { countsAsHit: true, sourceInstanceId: dagger.instanceId });
+          ctx.destroyPermanent(dagger.instanceId);
+        },
+      },
+    ],
     onChoose(ctx, hook, option) {
-      if (hook === "hurl-pay" && option === "paid") {
-        ctx.setCounter("hurlPaid", 1);
-      } else if (hook === "hurl-dagger") {
-        const dagger = [...ctx.player(ctx.seat).weapons, ...ctx.player(ctx.seat).board].find(
-          (card) => card.instanceId === Number(option),
-        );
-        if (!dagger) return;
-        ctx.dealDamage(opponentSeat(ctx), 1, { countsAsHit: true, sourceInstanceId: dagger.instanceId });
-        ctx.destroyPermanent(dagger.instanceId);
-      }
+      if (hook === "hurl-pay" && option === "paid") ctx.setCounter("hurlPaid", 1);
     },
   };
 }
@@ -720,15 +725,14 @@ export const out: Record<string, CardScript> = mergeSetScripts("OUT", outHighRar
 
   "riptide|0": riptide(),
   "wayfinder's crest|0": {
-    onDefend(ctx) {
-      requestHeroChoice(ctx, "wayfinder", "Look at the top card of target hero's deck", "card.out.scout.hero.choose");
+    onDefendTarget: {
+      ...heroTarget(),
+      prompt: () => decisionPrompt("Look at the top card of target hero's deck", "card.out.scout.hero.choose"),
     },
-    onChoose(ctx, h, o) {
-      if (h === "wayfinder") {
-        const seat = heroChoiceSeat(ctx, o);
-        const top = seat === undefined ? undefined : ctx.player(seat).deck[0];
-        if (top) ctx.lookAt(top.instanceId);
-      }
+    onDefend(ctx) {
+      const seat = targetHeroSeat(ctx);
+      const top = seat === undefined ? undefined : ctx.player(seat).deck[0];
+      if (top) ctx.lookAt(top.instanceId);
     },
   },
   "boulder trap|2": {

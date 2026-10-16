@@ -943,10 +943,10 @@ describe("DTD — Prism and Figments", () => {
       ],
     });
 
-    s.play(heraldKey)
-      .blockWith()
-      .settle()
-      .expectInZone(0, heraldKey, "soul");
+    s.play(heraldKey).blockWith().settle();
+    // Herald of Ravages declares its arcane damage's target hero.
+    if (s.state.pendingDecision?.chooseHook === "trigger-target") s.declareTarget(1);
+    s.expectInZone(0, heraldKey, "soul");
 
     expect(s.state.pendingDecision?.chooseHook).toBe("prism-figment");
     const figment = s.state.players[0]!.deck.find(

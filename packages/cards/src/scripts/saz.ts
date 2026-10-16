@@ -4,6 +4,7 @@ import {
   commonOptionMessages,
   decisionPrompt,
   heroChoiceSeat,
+  heroTarget,
   localizedCardLog,
   opponentSeat,
   optN,
@@ -362,20 +363,15 @@ export const saz: Record<string, CardScript> = {
   },
 
   "entangling shot|1": {
-    // "When this is put face-up into your arsenal, you may {t} target hero."
-    onEnterArsenal(ctx) {
-      requestHeroChoice(
-        ctx,
-        "entangling-shot",
-        "Entangling Shot: tap target hero?",
-        "card.saz.entangling.hero.choose",
-        { optional: true, defaultOption: "opposing hero" },
-      );
+    onEnterArsenalTarget: {
+      ...heroTarget({ optional: true }),
+      prompt: () =>
+        decisionPrompt("Entangling Shot: tap target hero?", "card.saz.entangling.hero.choose", {
+          optionMessages: commonOptionMessages("pass"),
+        }),
     },
-    onChoose(ctx, hook, option) {
-      if (hook !== "entangling-shot") return;
-      const seat = heroChoiceSeat(ctx, option);
-      if (seat !== undefined) ctx.tap(ctx.player(seat).hero.instanceId);
+    onEnterArsenal(ctx) {
+      if (ctx.playTargetInstanceId !== undefined) ctx.tap(ctx.playTargetInstanceId);
     },
   },
 

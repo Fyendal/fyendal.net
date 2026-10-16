@@ -2178,10 +2178,5 @@ export function gainHeroLife(state: GameStateInternal,
       life: player.life,
     },
   ));
-  for (const source of controlledPermanents(state, targetSeat, { faceDownEquipment: false })) {
-    scriptOf(state, source.cardId, source)?.onHeroGainedLife?.(
-      runtime.makeCtx(state, targetSeat, source, currentLink(state)),
-      amount,
-    );
-  }
+  runtime.events.queueTriggeredEvent(state, "life-gained", targetSeat);
 }

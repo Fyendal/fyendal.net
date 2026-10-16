@@ -1,5 +1,6 @@
-import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
+import type { CardInstance, CardScript, DeepReadonly, ScriptCtx, TriggerDef } from "@fyendal/engine";
 import {
+  anyDamageTarget,
   attackAbility,
   bottomOrKeepPrompt,
   buffNextArcaneDamageCard,
@@ -7,11 +8,13 @@ import {
   commonOptionMessages,
   contractWithSilver,
   dealArcane,
+  dealToAnyTarget,
   type DecisionPromptOptions,
   decisionMessage,
   decisionPrompt,
   discardRandomCost,
   entersArenaTrigger,
+  heroTarget,
   hyperDriverCounterFromBoostBanish,
   localizedCardLog,
   mergeSetScripts,
@@ -19,6 +22,7 @@ import {
   optN,
   optOnChoose,
   previousAttackHasName,
+  targetHeroSeat,
 } from "./shared-helpers.js";
 import { dynHighRarity } from "./dyn/high-rarity.js";
 
@@ -95,36 +99,14 @@ function heroSeat(ctx: ScriptCtx, option: string): number {
   return option === "your hero" ? ctx.seat : opponentSeat(ctx);
 }
 
-function anyTargets(ctx: ScriptCtx): number[] {
-  return [
-    ...ctx.state.players.map((player) => player.hero.instanceId),
-    ...ctx.state.players.flatMap((player) =>
-      player.board.filter((card) => hasType(ctx, card, "ally")).map((card) => card.instanceId),
-    ),
-  ];
-}
-
-function dealToAnyTarget(ctx: ScriptCtx, option: string, amount: number, arcane = false): void {
-  const id = Number(option);
-  const hero = ctx.state.players.find((player) => player.hero.instanceId === id);
-  if (hero) {
-    if (arcane) dealArcane(ctx, hero.seat, amount);
-    else ctx.dealDamage(hero.seat, amount);
-    return;
-  }
-  const owner = ctx.state.players.find((player) => player.board.some((card) => card.instanceId === id));
-  if (!owner) return;
-  if (arcane) dealArcane(ctx, owner.seat, amount, id);
-  else ctx.dealDamage(owner.seat, amount, { targetAllyId: id });
-}
-
-function blessing(effect: (ctx: ScriptCtx) => void): CardScript {
+function blessing(effect: (ctx: ScriptCtx) => void, extra: Partial<TriggerDef> = {}): CardScript {
   return {
     triggers: [
       {
         event: "start-of-turn",
         whose: "subject",
         label: "Destroy this Blessing",
+        ...extra,
         effect(ctx) {
           ctx.destroySelf();
           effect(ctx);
@@ -132,6 +114,22 @@ function blessing(effect: (ctx: ScriptCtx) => void): CardScript {
       },
     ],
   };
+}
+
+function blessingOfPatience(amount: number): CardScript {
+  return blessing(
+    (ctx) => {
+      const seat = targetHeroSeat(ctx);
+      if (seat !== undefined) ctx.gainLife(seat, amount);
+    },
+    {
+      target: {
+        ...heroTarget(),
+        prompt: () =>
+          decisionPrompt(`Choose a hero to gain ${amount} life`, "card.dyn.patience.hero.choose", { values: { amount } }),
+      },
+    },
+  );
 }
 
 function randomDiscardAttack(reward: "go-again" | "power"): CardScript {
@@ -385,21 +383,22 @@ function aetherSlash(): CardScript {
     onPlayCostPaid(ctx, paid) {
       ctx.setCounter("nonAttackPitched", paid.some((card) => isNonAttackAction(ctx, card)) ? 1 : 0);
     },
-    onAttackDeclared(ctx) {
-      if (ctx.getCounter("nonAttackPitched")) {
-        const amount = ctx.previewArcaneDamage(1);
-        ctx.requestCardChoice(
-          "slash-target",
-          decisionPrompt(`Deal ${amount} arcane damage to any target`, "card.dyn.aetherslash.target.choose", {
+    triggers: [
+      {
+        event: "attack-declared",
+        sourceZone: "self",
+        label: "Deal 1 arcane damage to any target",
+        labelMessage: decisionMessage("card.trigger.common.arcane.anytarget", { amount: 1 }),
+        condition: (ctx) => ctx.getCounter("nonAttackPitched") > 0,
+        target: anyDamageTarget((ctx) => {
+          const amount = ctx.previewArcaneDamage(1);
+          return decisionPrompt(`Deal ${amount} arcane damage to any target`, "card.dyn.aetherslash.target.choose", {
             values: { amount },
-          }),
-          anyTargets(ctx),
-        );
-      }
-    },
-    onChoose(ctx, hook, option) {
-      if (hook === "slash-target") dealToAnyTarget(ctx, option, 1, true);
-    },
+          });
+        }),
+        effect: (ctx) => dealToAnyTarget(ctx, ctx.playTargetInstanceId, 1, { arcane: true }),
+      },
+    ],
   };
 }
 
@@ -592,30 +591,9 @@ export const dyn: Record<string, CardScript> = mergeSetScripts("DYN", dynHighRar
   "blessing of savagery|3": blessing((ctx) => buffNextAttack(ctx, { appliesTo: "attack", minBasePower: 6, attack: 1 })),
 
   // Guardian
-  "blessing of patience|1": {
-    ...blessing((ctx) =>
-      chooseHero(ctx, "patience", "Choose a hero to gain 3 life", "card.dyn.patience.hero.choose", { amount: 3 }),
-    ),
-    onChoose(ctx, h, o) {
-      if (h === "patience") ctx.gainLife(heroSeat(ctx, o), 3);
-    },
-  },
-  "blessing of patience|2": {
-    ...blessing((ctx) =>
-      chooseHero(ctx, "patience", "Choose a hero to gain 2 life", "card.dyn.patience.hero.choose", { amount: 2 }),
-    ),
-    onChoose(ctx, h, o) {
-      if (h === "patience") ctx.gainLife(heroSeat(ctx, o), 2);
-    },
-  },
-  "blessing of patience|3": {
-    ...blessing((ctx) =>
-      chooseHero(ctx, "patience", "Choose a hero to gain 1 life", "card.dyn.patience.hero.choose", { amount: 1 }),
-    ),
-    onChoose(ctx, h, o) {
-      if (h === "patience") ctx.gainLife(heroSeat(ctx, o), 1);
-    },
-  },
+  "blessing of patience|1": blessingOfPatience(3),
+  "blessing of patience|2": blessingOfPatience(2),
+  "blessing of patience|3": blessingOfPatience(1),
   "shield bash|1": {
     onPlay(ctx) {
       const offhand = ctx.link?.defendingEquipment.some((card) => hasType(ctx, card, "off-hand"));
@@ -1235,7 +1213,7 @@ export const dyn: Record<string, CardScript> = mergeSetScripts("DYN", dynHighRar
       } else ctx.putOnDeckBottom(top.instanceId);
     },
     onChoose(ctx, h, o) {
-      if (h === "hornet") dealToAnyTarget(ctx, o, 1);
+      if (h === "hornet") dealToAnyTarget(ctx, Number(o), 1);
     },
   },
 

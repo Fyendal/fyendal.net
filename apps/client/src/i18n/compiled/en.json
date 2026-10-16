@@ -1825,6 +1825,16 @@
       "value": "Put an arrow from your hand face up into your arsenal?"
     }
   ],
+  "card.common.attack.target.choose": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": choose target attack"
+    }
+  ],
   "card.common.bonus.choose": [
     {
       "type": 0,
@@ -2165,6 +2175,16 @@
     {
       "type": 1,
       "value": "card"
+    }
+  ],
+  "card.common.target.hero.choose": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": choose target hero"
     }
   ],
   "card.common.ward.x.choose": [
@@ -3129,16 +3149,6 @@
     {
       "type": 0,
       "value": " or the attack gains dominate"
-    }
-  ],
-  "card.ele.frostbite.hero.choose": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": ": create Frostbite under which hero?"
     }
   ],
   "card.ele.fusion.multiple": [
@@ -13958,6 +13968,34 @@
       "value": "amount"
     }
   ],
+  "card.trigger.common.arcane.anytarget": [
+    {
+      "type": 0,
+      "value": "Deal "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " arcane damage to any target"
+    }
+  ],
+  "card.trigger.common.arcane.anytarget.opposing.optional": [
+    {
+      "type": 0,
+      "value": "You may deal "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " arcane damage to any opposing target"
+    }
+  ],
   "card.trigger.common.arcane.deal": [
     {
       "type": 0,
@@ -14474,6 +14512,20 @@
       "value": " damage to the defending hero"
     }
   ],
+  "card.trigger.common.dagger.damage.hero": [
+    {
+      "type": 0,
+      "value": "Target dagger you control deals "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " damage to the opposing hero, then destroy it"
+    }
+  ],
   "card.trigger.common.dagger.goagain": [
     {
       "type": 0,
@@ -14498,6 +14550,20 @@
     {
       "type": 0,
       "value": " damage to the defending hero"
+    }
+  ],
+  "card.trigger.common.damage.anytarget": [
+    {
+      "type": 0,
+      "value": "Deal "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " damage to any target"
     }
   ],
   "card.trigger.common.damage.attackinghero": [
@@ -15272,6 +15338,12 @@
     {
       "type": 0,
       "value": "Intimidate"
+    }
+  ],
+  "card.trigger.common.intimidate.target": [
+    {
+      "type": 0,
+      "value": "Intimidate target hero"
     }
   ],
   "card.trigger.common.item.crank.steam.optional": [
@@ -16398,6 +16470,20 @@
     {
       "type": 0,
       "value": "Create Agility, Might, and Vigor tokens"
+    }
+  ],
+  "card.trigger.common.wrench.power.target": [
+    {
+      "type": 0,
+      "value": "Target wrench you control gets +"
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " power this turn"
     }
   ],
   "card.trigger.common.yellowaction.graveyard.decktop": [

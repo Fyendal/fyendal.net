@@ -1,8 +1,10 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
 import {
+  anyDamageTarget,
   buffNextAttack,
   commonOptionMessages,
   dealArcane,
+  dealToAnyTarget,
   decisionMessage,
   decisionPrompt,
   localizedCardLog,
@@ -53,35 +55,6 @@ function revealInstantEquipment(effect: (ctx: ScriptCtx) => void): CardScript {
       effect(ctx);
     },
   };
-}
-
-function requestAnyTarget(ctx: ScriptCtx, hook: string, prompt: string): void {
-  const options = ["opposing hero", "your hero"];
-  const cardOptions: (number | null)[] = [null, null];
-  for (const player of ctx.state.players) {
-    for (const card of player.board) {
-      if (!hasType(ctx, card, "ally")) continue;
-      options.push(`ally:${player.seat}:${card.instanceId}`);
-      cardOptions.push(card.instanceId);
-    }
-  }
-  ctx.requestChoice(
-    hook,
-    decisionPrompt(prompt, "card.ast.arcane.target.choose", {
-      values: { amount: ctx.previewArcaneDamage(1) },
-      optionMessages: commonOptionMessages("opposing hero", "your hero"),
-    }),
-    options,
-    ctx.seat,
-    cardOptions,
-    "opposing hero",
-  );
-}
-
-function dealToChoice(ctx: ScriptCtx, option: string): void {
-  const ally = /^ally:(\d+):(\d+)$/.exec(option);
-  if (ally) dealArcane(ctx, Number(ally[1]), 1, Number(ally[2]));
-  else dealArcane(ctx, option === "your hero" ? ctx.seat : opponentSeat(ctx), 1);
 }
 
 function applySerenadeChoices(ctx: ScriptCtx, choices: number[]): void {
@@ -166,16 +139,21 @@ export const ast: Record<string, CardScript> = {
       );
       if (marker) ctx.consumeModifier(marker.id);
     },
-    onGoAgainResolved(ctx) {
-      requestAnyTarget(
-        ctx,
-        "arc-lightning-target",
-        `Arc Lightning: deal ${ctx.previewArcaneDamage(1)} arcane damage to any target`,
-      );
-    },
-    onChoose(ctx, hook, option) {
-      if (hook === "arc-lightning-target") dealToChoice(ctx, option);
-    },
+    triggers: [
+      {
+        event: "go-again-resolved",
+        label: "Deal 1 arcane damage to any target",
+        labelMessage: decisionMessage("card.trigger.common.arcane.anytarget", { amount: 1 }),
+        target: anyDamageTarget((ctx) =>
+          decisionPrompt(
+            `Arc Lightning: deal ${ctx.previewArcaneDamage(1)} arcane damage to any target`,
+            "card.ast.arcane.target.choose",
+            { values: { amount: ctx.previewArcaneDamage(1) } },
+          ),
+        ),
+        effect: (ctx) => dealToAnyTarget(ctx, ctx.playTargetInstanceId, 1, { arcane: true }),
+      },
+    ],
   },
   "skyward serenade|2": {
     additionalCost(ctx) {

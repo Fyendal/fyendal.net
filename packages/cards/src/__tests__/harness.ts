@@ -687,6 +687,39 @@ export class Scenario {
     return this.settle();
   }
 
+  /** Pass priority until a triggered layer is declaring its target. */
+  passUntilTargetDeclaration(): this {
+    for (let guard = 0; guard < 30 && this.state.pendingDecision?.chooseHook !== "trigger-target"; guard++) {
+      this.do({ kind: "pass" });
+    }
+    if (this.state.pendingDecision?.chooseHook !== "trigger-target") throw new Error("no trigger target declaration");
+    return this;
+  }
+
+  /** Answer an open trigger target declaration without settling afterwards.
+   *  `target` is a hero's seat or an exact option id ("pass" declares none). */
+  declareTargetRaw(target: number | string): this {
+    const pd = this.state.pendingDecision;
+    if (pd?.chooseHook !== "trigger-target") {
+      throw new Error(`no trigger target declaration open (pending: ${pd?.chooseHook ?? pd?.kind ?? "none"})`);
+    }
+    const option = typeof target === "number" ? String(this.state.players[target]!.hero.instanceId) : target;
+    this.do({ kind: "choose", optionId: option });
+    return this;
+  }
+
+  /** Declare a triggered layer's target as it is added to the stack, before
+   *  any player receives priority (CR 6.6.6a), then settle. `target` is a
+   *  hero's seat, an exact option id ("pass" declares none), or a card key
+   *  matched like `chooseCard`. */
+  declareTarget(target: number | string): this {
+    const pd = this.state.pendingDecision;
+    if (typeof target === "string" && pd?.chooseHook === "trigger-target" && !pd.options?.includes(target)) {
+      return this.chooseCard(target);
+    }
+    return this.declareTargetRaw(target).settle();
+  }
+
   /** Submit a registered card name for an open free-form name choice. */
   chooseName(name: string): this {
     const pd = this.state.pendingDecision;

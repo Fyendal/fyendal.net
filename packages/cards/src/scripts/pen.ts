@@ -5,9 +5,11 @@ import {
   commonOptionMessages,
   contractWithSilver,
   dealArcane,
+  dealArcaneToTargetHero,
   decisionMessage,
   decisionPrompt,
   entersArenaTrigger,
+  heroTarget,
   isSixPlus,
   leavesArenaTrigger,
   mergeSetScripts,
@@ -1026,17 +1028,13 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
       create(ctx, COURAGE, 1, opponentSeat(ctx));
     },
     canTriggerOnDefend: (ctx) => ctx.attackBonusAboveBase() > 0,
-    onDefend(ctx) {
-      const cards = allPermanents(ctx).filter((card) => Number(card.counters?.power ?? 0) > 0);
-      if (cards.length)
-        ctx.requestCardChoice(
-          "pen-remove-power",
-          decisionPrompt("Remove a +1 power counter", "card.pen.powercounter.remove"),
-          cards.map((card) => card.instanceId),
-        );
+    onDefendTarget: {
+      options: (ctx) =>
+        allPermanents(ctx).filter((card) => Number(card.counters?.power ?? 0) > 0).map((card) => card.instanceId),
+      prompt: () => decisionPrompt("Remove a +1 power counter", "card.pen.powercounter.remove"),
     },
-    onChoose(ctx, hook, option) {
-      if (hook === "pen-remove-power") ctx.addCounter(Number(option), "power", -1);
+    onDefend(ctx) {
+      if (ctx.playTargetInstanceId !== undefined) ctx.addCounter(ctx.playTargetInstanceId, "power", -1);
     },
   },
   "frail swingline|3": {
@@ -1061,17 +1059,12 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
       create(ctx, "DVR028", 1, opponentSeat(ctx));
     },
     canTriggerOnDefend: (ctx) => ctx.link?.goAgain === true,
-    onDefend(ctx) {
-      const targets = heroesAndAllies(ctx);
-      if (targets.length)
-        ctx.requestCardChoice(
-          "pen-quickening-tap",
-          decisionPrompt("Tap target hero or ally", "card.pen.heroally.tap"),
-          targets.map((card) => card.instanceId),
-        );
+    onDefendTarget: {
+      options: (ctx) => heroesAndAllies(ctx).map((card) => card.instanceId),
+      prompt: () => decisionPrompt("Tap target hero or ally", "card.pen.heroally.tap"),
     },
-    onChoose(ctx, hook, option) {
-      if (hook === "pen-quickening-tap") ctx.tap(Number(option));
+    onDefend(ctx) {
+      if (ctx.playTargetInstanceId !== undefined) ctx.tap(ctx.playTargetInstanceId);
     },
   },
   ...pitches("spellbane trap", (pitch) => ({
@@ -1758,12 +1751,14 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
       entersArenaTrigger(
         "Deal 1 arcane damage to target hero",
         decisionMessage("card.trigger.common.arcane.target", { amount: 1 }),
-        (ctx) => dealArcane(ctx, opponentSeat(ctx), 1),
+        dealArcaneToTargetHero,
+        { target: heroTarget() },
       ),
       leavesArenaTrigger(
         "Deal 1 arcane damage to target hero",
         decisionMessage("card.trigger.common.arcane.target", { amount: 1 }),
-        (ctx) => dealArcane(ctx, opponentSeat(ctx), 1),
+        dealArcaneToTargetHero,
+        { target: heroTarget() },
       ),
       {
         event: "begin-action-phase",

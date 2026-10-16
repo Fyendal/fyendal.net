@@ -5,8 +5,10 @@ import {
   buffNextAttack,
   commonOptionMessages,
   dealArcane,
+  dealArcaneToTargetHero,
   decisionMessage,
   decisionPrompt,
+  heroTarget,
   ironhideScript,
   isCard,
   isSixPlus,
@@ -461,6 +463,14 @@ function ripThroughReality(): CardScript {
   );
 }
 
+/** Seeds of Agony's unconsumed grant to the next cheap attack action. */
+function seedsGrant(ctx: ScriptCtx) {
+  return ctx.state.modifiers.find(
+    (candidate) =>
+      candidate.sourceInstanceId === ctx.self.instanceId && candidate.scope === "until-end-of-turn" && !candidate.consumed,
+  );
+}
+
 function seedsOfAgony(maxCost: number): CardScript {
   return bloodDebt(
     {
@@ -471,20 +481,24 @@ function seedsOfAgony(maxCost: number): CardScript {
           maxCost,
         });
       },
-      onFriendlyAttackDeclared(ctx) {
-        const link = ctx.link;
-        if (!link || link.attackCardType !== "action") return;
-        if ((ctx.cardData(link.attackingCard.cardId).cost ?? 0) > maxCost) return;
-        const modifier = ctx.state.modifiers.find(
-          (candidate) =>
-            candidate.sourceInstanceId === ctx.self.instanceId &&
-            candidate.scope === "until-end-of-turn" &&
-            !candidate.consumed,
-        );
-        if (!modifier) return;
-        ctx.consumeModifier(modifier.id);
-        dealArcane(ctx, opponentSeat(ctx), 1);
-      },
+      triggers: [
+        {
+          event: "attack-declared",
+          label: "Deal 1 arcane damage to target hero",
+          labelMessage: decisionMessage("card.trigger.common.arcane.target", { amount: 1 }),
+          condition: (ctx) =>
+            ctx.link?.attacker === ctx.seat &&
+            ctx.link.attackCardType === "action" &&
+            (ctx.cardData(ctx.link.attackingCard.cardId).cost ?? 0) <= maxCost &&
+            !!seedsGrant(ctx),
+          onTrigger(ctx) {
+            const grant = seedsGrant(ctx);
+            if (grant) ctx.consumeModifier(grant.id);
+          },
+          target: heroTarget(),
+          effect: dealArcaneToTargetHero,
+        },
+      ],
     },
     true,
   );
@@ -767,15 +781,24 @@ export const mon: Record<string, CardScript> = mergeSetScripts("MON", monHighRar
     },
   },
   "merciful retribution|2": {
-    onFriendlyDestroyed(ctx, destroyed) {
-      const data = ctx.cardData(destroyed.cardId);
-      const aura = hasType(ctx, destroyed, "aura");
-      if (!aura && !isAttackAction(ctx, destroyed)) return;
-      dealArcane(ctx, opponentSeat(ctx), 1);
-      if (data.cardType !== "token" && hasType(ctx, destroyed, "light")) {
-        ctx.putIntoSoul(destroyed.instanceId);
-      }
-    },
+    triggers: [
+      {
+        event: "card-destroyed",
+        label: "Deal 1 arcane damage to target hero",
+        labelMessage: decisionMessage("card.trigger.common.arcane.target", { amount: 1 }),
+        condition: (ctx, destroyed) =>
+          !!destroyed &&
+          destroyed.instanceId !== ctx.self.instanceId &&
+          (hasType(ctx, destroyed, "aura") || isAttackAction(ctx, destroyed)),
+        target: heroTarget(),
+        effect(ctx, destroyed) {
+          dealArcaneToTargetHero(ctx);
+          if (destroyed && ctx.cardData(destroyed.cardId).cardType !== "token" && hasType(ctx, destroyed, "light")) {
+            ctx.putIntoSoul(destroyed.instanceId);
+          }
+        },
+      },
+    ],
   },
   "ode to wrath|2": {
     onFriendlyPlay(ctx, played) {
@@ -812,19 +835,16 @@ export const mon: Record<string, CardScript> = mergeSetScripts("MON", monHighRar
     },
   }),
   "herald of ravages|1": putAttackIntoSoulOnHit({
-    onHit: (ctx) => {
-      dealArcane(ctx, opponentSeat(ctx), 1);
-    },
+    onHitTarget: heroTarget(),
+    onHit: dealArcaneToTargetHero,
   }),
   "herald of ravages|2": putAttackIntoSoulOnHit({
-    onHit: (ctx) => {
-      dealArcane(ctx, opponentSeat(ctx), 1);
-    },
+    onHitTarget: heroTarget(),
+    onHit: dealArcaneToTargetHero,
   }),
   "herald of ravages|3": putAttackIntoSoulOnHit({
-    onHit: (ctx) => {
-      dealArcane(ctx, opponentSeat(ctx), 1);
-    },
+    onHitTarget: heroTarget(),
+    onHit: dealArcaneToTargetHero,
   }),
   "herald of rebirth|1": putAttackIntoSoulOnHit({
     onHit(ctx) {

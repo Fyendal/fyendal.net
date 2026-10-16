@@ -1,5 +1,6 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx, TriggerDef } from "@fyendal/engine";
 import {
+  attackArcaneHeroTrigger,
   buffNextAttack,
   commonOptionMessages,
   dealArcane,
@@ -7,9 +8,11 @@ import {
   decisionMessage,
   decisionPrompt,
   entersArenaTrigger,
+  heroTarget,
   localizedCardLog,
   mergeSetScripts,
   opponentSeat,
+  targetHeroSeat,
 } from "./shared-helpers.js";
 import { eleHighRarity } from "./ele/high-rarity.js";
 
@@ -241,23 +244,11 @@ function delayedGuardianAura(type: "earth" | "ice", attack: number, creates?: "f
             entersArenaTrigger(
               "Create a Frostbite",
               decisionMessage("card.trigger.common.frostbite.create"),
-              (ctx) =>
-                ctx.requestChoice(
-                  "avalanche-target",
-                  decisionPrompt(
-                    `${ctx.data.name}: create Frostbite under which hero?`,
-                    "card.ele.frostbite.hero.choose",
-                    {
-                      values: { card: { kind: "card", cardId: ctx.self.cardId } },
-                      optionMessages: commonOptionMessages("opponent", "self"),
-                    },
-                  ),
-                  ["opponent", "self"],
-                  undefined,
-                  undefined,
-                  "opponent",
-                ),
-              { condition: isFused },
+              (ctx) => {
+                const seat = targetHeroSeat(ctx);
+                if (seat !== undefined && isFused(ctx)) createFrostbites(ctx, seat);
+              },
+              { condition: isFused, target: heroTarget() },
             ),
           ]
         : []),
@@ -281,10 +272,6 @@ function delayedGuardianAura(type: "earth" | "ice", attack: number, creates?: "f
       },
     ],
     onChoose(ctx, hook, option) {
-      if (hook === "avalanche-target") {
-        createFrostbites(ctx, option === "self" ? ctx.seat : opponentSeat(ctx));
-        return;
-      }
       fusionOnChoose(ctx, hook, option, type);
     },
   };
@@ -315,9 +302,7 @@ function arcanicShockwave(): CardScript {
   return {
     arcaneDamageEffect: true,
     additionalCost: fusionAdditionalCost("lightning"),
-    onAttackDeclared(ctx) {
-      if (isFused(ctx)) dealArcane(ctx, opponentSeat(ctx), 1);
-    },
+    triggers: [attackArcaneHeroTrigger(1, isFused)],
     onChoose(ctx, hook, option) {
       fusionOnChoose(ctx, hook, option, "lightning");
     },
@@ -328,8 +313,8 @@ function ritesOfLightning(): CardScript {
   return {
     arcaneDamageEffect: true,
     additionalCost: fusionAdditionalCost("lightning"),
+    triggers: [attackArcaneHeroTrigger(1, isFused)],
     onAttackDeclared(ctx) {
-      if (isFused(ctx)) dealArcane(ctx, opponentSeat(ctx), 1);
       if (ctx.getFlag("player", "arcaneDamageDealtThisTurn") === true) ctx.grantGoAgain();
     },
     onDamageDealt(ctx, _target, amount, arcane) {
@@ -394,15 +379,25 @@ function brambleSpark(attack: number): CardScript {
       ctx.setCounter("brambleArmed", 1);
       ctx.addModifier({ scope: "until-end-of-turn" });
     },
-    onFriendlyAttackDeclared(ctx) {
-      if (!ctx.getCounter("brambleArmed") || ctx.link?.attackCardType !== "action") return;
-      ctx.setCounter("brambleArmed", 0);
-      if (isFused(ctx)) ctx.addModifier({ scope: "chain-link", attack, appliesTo: "attack-action" });
-      ctx.dealDamage(opponentSeat(ctx), 1, {
-        arcane: true,
-        sourceInstanceId: ctx.link.attackingCard.instanceId,
-      });
-    },
+    triggers: [
+      {
+        event: "attack-declared",
+        label: "Deal 1 arcane damage to target hero",
+        labelMessage: decisionMessage("card.trigger.common.arcane.target", { amount: 1 }),
+        condition: (ctx) =>
+          ctx.getCounter("brambleArmed") > 0 && ctx.link?.attacker === ctx.seat && ctx.link.attackCardType === "action",
+        onTrigger(ctx) {
+          ctx.setCounter("brambleArmed", 0);
+          if (isFused(ctx)) ctx.addModifier({ scope: "chain-link", attack, appliesTo: "attack-action" });
+        },
+        target: heroTarget(),
+        effect(ctx) {
+          const seat = targetHeroSeat(ctx);
+          if (seat === undefined || !ctx.link) return;
+          ctx.dealDamage(seat, 1, { arcane: true, sourceInstanceId: ctx.link.attackingCard.instanceId });
+        },
+      },
+    ],
     onChoose(ctx, hook, option) {
       fusionOnChoose(ctx, hook, option, "earth");
     },
@@ -846,26 +841,17 @@ export const ele: Record<string, CardScript> = mergeSetScripts("ELE", eleHighRar
   "explosive growth|1": {
     arcaneDamageEffect: true,
     ...fusionOnly("earth"),
-    onAttackDeclared(ctx) {
-      dealArcane(ctx, opponentSeat(ctx), 1);
-    },
-    triggers: [explosiveGrowthDamage],
+    triggers: [attackArcaneHeroTrigger(), explosiveGrowthDamage],
   },
   "explosive growth|2": {
     arcaneDamageEffect: true,
     ...fusionOnly("earth"),
-    onAttackDeclared(ctx) {
-      dealArcane(ctx, opponentSeat(ctx), 1);
-    },
-    triggers: [explosiveGrowthDamage],
+    triggers: [attackArcaneHeroTrigger(), explosiveGrowthDamage],
   },
   "explosive growth|3": {
     arcaneDamageEffect: true,
     ...fusionOnly("earth"),
-    onAttackDeclared(ctx) {
-      dealArcane(ctx, opponentSeat(ctx), 1);
-    },
-    triggers: [explosiveGrowthDamage],
+    triggers: [attackArcaneHeroTrigger(), explosiveGrowthDamage],
   },
   "rites of lightning|1": ritesOfLightning(),
   "rites of lightning|2": ritesOfLightning(),
@@ -1725,21 +1711,15 @@ export const ele: Record<string, CardScript> = mergeSetScripts("ELE", eleHighRar
   "sigil of suffering|3": sigilOfSuffering(),
   "singeing steelblade|1": {
     arcaneDamageEffect: true,
-    onAttackDeclared: (ctx) => {
-      dealArcane(ctx, opponentSeat(ctx), 1);
-    },
+    triggers: [attackArcaneHeroTrigger()],
   },
   "singeing steelblade|2": {
     arcaneDamageEffect: true,
-    onAttackDeclared: (ctx) => {
-      dealArcane(ctx, opponentSeat(ctx), 1);
-    },
+    triggers: [attackArcaneHeroTrigger()],
   },
   "singeing steelblade|3": {
     arcaneDamageEffect: true,
-    onAttackDeclared: (ctx) => {
-      dealArcane(ctx, opponentSeat(ctx), 1);
-    },
+    triggers: [attackArcaneHeroTrigger()],
   },
   "ragamuffin's hat|0": {
     activated: {

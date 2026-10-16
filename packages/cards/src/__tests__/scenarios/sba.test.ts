@@ -314,6 +314,7 @@ describe("SBA — Fusion", () => {
     });
     g.play("arcanic shockwave|1")
       .chooseCard("fry|1") // reveal a Lightning card to fuse
+      .declareTarget(1)
       .expectLog("fused")
       .blockWith()
       .settle()
@@ -379,7 +380,7 @@ describe("SBA — Fusion", () => {
     });
     g.play("weave lightning|1").expectAP(0, 1);
     expect(projectStateFor(g.state, 0).ongoing).not.toEqual([]);
-    g.play("arcanic shockwave|1").chooseCard("fry|1");
+    g.play("arcanic shockwave|1").chooseCard("fry|1").declareTarget(1);
     // Both the next-attack pump and the fused-go-again watcher are spent as
     // soon as the eligible attack is declared; no blank this-turn chip leaks.
     expect(projectStateFor(g.state, 0).ongoing).toEqual([]);

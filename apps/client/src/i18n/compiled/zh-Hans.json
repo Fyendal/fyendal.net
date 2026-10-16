@@ -1833,6 +1833,16 @@
       "value": "将一张 arrow 从手牌面朝上放入你的 arsenal？"
     }
   ],
+  "card.common.attack.target.choose": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：选择目标攻击"
+    }
+  ],
   "card.common.bonus.choose": [
     {
       "type": 0,
@@ -2173,6 +2183,16 @@
     {
       "type": 1,
       "value": "card"
+    }
+  ],
+  "card.common.target.hero.choose": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：选择目标英雄"
     }
   ],
   "card.common.ward.x.choose": [
@@ -3113,16 +3133,6 @@
     {
       "type": 0,
       "value": " 点资源，否则该次攻击获得压制 (dominate)"
-    }
-  ],
-  "card.ele.frostbite.hero.choose": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": "：选择由哪位英雄操控 Frostbite？"
     }
   ],
   "card.ele.fusion.multiple": [
@@ -13321,6 +13331,34 @@
       "value": "amount"
     }
   ],
+  "card.trigger.common.arcane.anytarget": [
+    {
+      "type": 0,
+      "value": "对任意目标造成 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点奥术伤害"
+    }
+  ],
+  "card.trigger.common.arcane.anytarget.opposing.optional": [
+    {
+      "type": 0,
+      "value": "你可以对任意对方目标造成 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点奥术伤害"
+    }
+  ],
   "card.trigger.common.arcane.deal": [
     {
       "type": 0,
@@ -13833,6 +13871,20 @@
       "value": " 点伤害"
     }
   ],
+  "card.trigger.common.dagger.damage.hero": [
+    {
+      "type": 0,
+      "value": "你操控的目标匕首对对方英雄造成 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点伤害，然后将其摧毁"
+    }
+  ],
   "card.trigger.common.dagger.goagain": [
     {
       "type": 0,
@@ -13849,6 +13901,20 @@
     {
       "type": 0,
       "value": "你操控的每把匕首对防守英雄造成 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点伤害"
+    }
+  ],
+  "card.trigger.common.damage.anytarget": [
+    {
+      "type": 0,
+      "value": "对任意目标造成 "
     },
     {
       "type": 1,
@@ -14631,6 +14697,12 @@
     {
       "type": 0,
       "value": "intimidate"
+    }
+  ],
+  "card.trigger.common.intimidate.target": [
+    {
+      "type": 0,
+      "value": "对目标英雄 intimidate"
     }
   ],
   "card.trigger.common.item.crank.steam.optional": [
@@ -15693,6 +15765,16 @@
     {
       "type": 0,
       "value": "生成 Agility、Might 和 Vigor 衍生物"
+    }
+  ],
+  "card.trigger.common.wrench.power.target": [
+    {
+      "type": 0,
+      "value": "你操控的目标扳手本回合力量 +"
+    },
+    {
+      "type": 1,
+      "value": "amount"
     }
   ],
   "card.trigger.common.yellowaction.graveyard.decktop": [

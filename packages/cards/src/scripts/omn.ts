@@ -1,14 +1,19 @@
 import type { CardInstance, CardScript, DeepReadonly, Modifier, ScriptCtx, TriggerDef } from "@fyendal/engine";
 import {
   ampNextArcane,
+  anyDamageTarget,
+  attackArcaneHeroTrigger,
   buffNextAttack,
   commonOptionMessages,
   dealArcane,
+  dealArcaneToTargetHero,
   dealtByThis,
+  dealToAnyTarget,
   decisionMessage,
   decisionPrompt,
   entersArenaTrigger,
   heroDamage,
+  heroTarget,
   leavesArenaTrigger,
   mergeSetScripts,
   opponentSeat,
@@ -227,21 +232,10 @@ function fragmentWard(amount: number, leaveDamage = false): CardScript {
               sourceZone: "any",
               label: "Deal 1 arcane damage to target hero",
               condition: (ctx: ScriptCtx, left: Card | undefined) => left?.instanceId === ctx.self.instanceId,
-              effect(ctx: ScriptCtx) {
-                const preview = ctx.previewArcaneDamage(1);
-                requestAnyTarget(
-                  ctx,
-                  "space-dust-target",
-                  `${ctx.data.name}: deal ${preview} arcane damage to a hero`,
-                  preview,
-                  true,
-                );
-              },
+              target: heroTarget(),
+              effect: dealArcaneToTargetHero,
             },
           ],
-          onChoose(ctx: ScriptCtx, hook: string, option: string) {
-            if (hook === "space-dust-target") dealToChoice(ctx, option, 1);
-          },
         }
       : {}),
   };
@@ -683,16 +677,10 @@ function playedInstantBonus(amount: number, goAgain = false): CardScript {
 }
 
 function stingingSprite(): CardScript {
-  const trigger = (ctx: ScriptCtx) => {
-    const preview = ctx.previewArcaneDamage(1);
-    requestAnyTarget(ctx, "sprite-target", `${ctx.data.name}: deal ${preview} arcane damage to a hero`, preview, true);
-  };
   return {
-    onAttackDeclared: trigger,
-    onDefend: trigger,
-    onChoose(ctx, hook, option) {
-      if (hook === "sprite-target") dealToChoice(ctx, option, 1);
-    },
+    triggers: [attackArcaneHeroTrigger()],
+    onDefendTarget: heroTarget(),
+    onDefend: dealArcaneToTargetHero,
   };
 }
 
@@ -1135,18 +1123,21 @@ export const omn: Record<string, CardScript> = mergeSetScripts("OMN", omnHighRar
       {
         event: "begin-action-phase",
         label: "Core Reaction",
+        target: anyDamageTarget((ctx) => {
+          const preview = ctx.previewArcaneDamage(5 - pitch);
+          return decisionPrompt(
+            `${ctx.data.name}: deal ${preview} arcane damage to a target`,
+            "card.omn.arcane.target.choose",
+            { values: { card: { kind: "card", cardId: ctx.self.cardId }, amount: preview } },
+          );
+        }),
         effect(ctx) {
           ctx.destroySelf();
-          const amount = 5 - pitch;
-          const preview = ctx.previewArcaneDamage(amount);
-          requestAnyTarget(ctx, "core-target", `${ctx.data.name}: deal ${preview} arcane damage to a target`, preview);
+          dealToAnyTarget(ctx, ctx.playTargetInstanceId, 5 - pitch, { arcane: true });
         },
       },
     ],
     arcaneDamageEffect: true,
-    onChoose(ctx, hook, option) {
-      if (hook === "core-target") dealToChoice(ctx, option, 5 - pitch);
-    },
   })),
   ...pitches("flash bolt", (pitch) => arcaneHero(4 - pitch)),
   ...pitches("comet collision", (pitch) => starfallAny(4 - pitch, 1)),

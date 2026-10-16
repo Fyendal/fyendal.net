@@ -47,6 +47,7 @@ import { hookSources } from "./sourceQueries.js";
 
 import { drawCards } from "./cardLifecycle.js";
 import { snapshotSerializable } from "./ruleQueries.js";
+import { declaredLayerTargetLegal } from "./layerTargets.js";
 import { cardProhibitedByChosenName } from "./restrictions.js";
 import { transitionZone } from "./transitions.js";
 
@@ -629,6 +630,9 @@ function phantasmDestroy(state: GameStateInternal,
   if (!state.pendingDecision?.chooseHook) state.pendingDecision = null;
   state.phase = "action";
   state.priorityPlayer = state.activePlayer;
+  // Triggers from the destruction (CR 6.6.6) go on the stack before the turn
+  // player regains priority in the Action Phase.
+  if (!state.pendingDecision?.chooseHook) runtime.dispatchFlow("flushPendingTriggersAboveStack", state);
 }
 
 export function assignDefenders(
@@ -754,7 +758,8 @@ export function resolveDefendEventLayer(state: GameStateInternal,
     if ((dataOf(state, source.cardId).subtypes ?? []).includes("trap")) {
       runtime.events.queueTriggeredEvent(state, "trap-triggered", layer.seat);
     }
-    runtime.events.runHook(state, layer.seat, source, "onDefend", link);
+    if (!declaredLayerTargetLegal(state, runtime, layer)) return;
+    runtime.events.runHook(state, layer.seat, source, "onDefend", link, undefined, layer.targetCardInstanceId);
     // Defender-side "when this defends, intimidate" (Scowling Flesh Bag) queues
     // on the defending seat; resolve it as the trigger resolves.
     consumeQueuedIntimidate(state, runtime, layer.seat);

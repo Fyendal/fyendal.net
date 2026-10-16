@@ -1017,6 +1017,7 @@ describe("SUP — tokens and suspense", () => {
     g.state.players[1]!.board[0]!.counters = { suspense: 1 };
 
     g.endTurn()
+      .declareTarget(0)
       .expectNotInZone(1, "leave them hanging|1", "board")
       // the intimidate resolves with the trigger, not with the next attack
       .expectInZone(0, "head jab|1", "banish");

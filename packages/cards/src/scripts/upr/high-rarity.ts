@@ -20,6 +20,12 @@ function named(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, name: string): 
 function has(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, type: string): boolean {
   return ctx.cardTypes(card).includes(type);
 }
+function isIceAffliction(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
+  return named(ctx, card, "frostbite") || (has(ctx, card, "ice") && has(ctx, card, "affliction"));
+}
+function equipped(player: ReturnType<ScriptCtx["player"]>): DeepReadonly<CardInstance>[] {
+  return Object.values(player.equipment).filter((card): card is DeepReadonly<CardInstance> => !!card);
+}
 function isAttackCard(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
   return ctx.hasCardType(card, "action") && has(ctx, card, "attack");
 }
@@ -274,44 +280,26 @@ export const uprHighRarity: Record<string, CardScript> = {
         sourceZone: "graveyard",
         optional: true,
         label: "Banish Thaw to destroy or unfreeze a card?",
+        target: {
+          options: (ctx) =>
+            ctx.state.players.flatMap((player) => [
+              ...player.board.filter((card) => isIceAffliction(ctx, card) || ctx.isFrozen(card)),
+              ...[...player.weapons, ...player.arsenal, ...equipped(player)].filter((card) => ctx.isFrozen(card)),
+            ]).map((card) => card.instanceId),
+          prompt: () => decisionPrompt("Choose a frozen card or Ice permanent", "card.upr.frozen.ice.choose"),
+        },
         effect(ctx) {
-          const targets = ctx.state.players.flatMap((player) => [
-            ...player.board.filter(
-              (card) =>
-                named(ctx, card, "frostbite") ||
-                (has(ctx, card, "ice") && has(ctx, card, "affliction")) ||
-                ctx.isFrozen(card),
-            ),
-            ...player.arsenal.filter((card) => ctx.isFrozen(card)),
-            ...Object.values(player.equipment).filter(
-              (card): card is DeepReadonly<CardInstance> =>
-                !!card && ctx.isFrozen(card),
-            ),
-          ]);
-          if (targets.length)
-            ctx.requestCardChoice(
-              "thaw-target",
-              decisionPrompt("Choose a frozen card or Ice permanent", "card.upr.frozen.ice.choose"),
-              targets.map((card) => card.instanceId),
-            );
+          const id = ctx.playTargetInstanceId;
+          if (id === undefined) return;
+          const target = ctx.state.players
+            .flatMap((player) => [...player.board, ...player.weapons, ...player.arsenal, ...equipped(player)])
+            .find((card) => card.instanceId === id);
+          if (!target || !ctx.banish(ctx.self.instanceId)) return;
+          if (isIceAffliction(ctx, target)) ctx.destroyPermanent(id);
+          else ctx.unfreeze(id);
         },
       },
     ],
-    onChoose(ctx, hook, option) {
-      if (hook !== "thaw-target") return;
-      const id = Number(option);
-      const target = ctx.state.players
-        .flatMap((player) => [
-          ...player.board,
-          ...player.arsenal,
-          ...Object.values(player.equipment).filter((card): card is DeepReadonly<CardInstance> => !!card),
-        ])
-        .find((card) => card.instanceId === id);
-      if (!target || !ctx.banish(ctx.self.instanceId)) return;
-      if (named(ctx, target, "frostbite") || (has(ctx, target, "ice") && has(ctx, target, "affliction")))
-        ctx.destroyPermanent(id);
-      else ctx.unfreeze(id);
-    },
   },
   "liquefy|1": {
     onPlay(ctx) {

@@ -150,7 +150,9 @@ describe("MON — Light Illusionist", () => {
 
     s.play("wartune herald|1", { pitch: [BLUE] })
       .blockWith(SEVEN)
-      .settle()
+      .settle();
+    expect(s.stackLabels()[0]).toBe("Deal 1 arcane damage to target hero");
+    s.declareTarget(1)
       .expectInZone(0, "wartune herald|1", "soul")
       .expectLife(1, 19);
   });

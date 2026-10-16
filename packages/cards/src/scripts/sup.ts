@@ -9,6 +9,7 @@ import {
   decisionMessage,
   decisionPrompt,
   entersArenaTrigger,
+  heroTarget,
   isSixPlus,
   leavesArenaTrigger,
   opponentSeat,
@@ -20,6 +21,7 @@ import {
   suspenseAura as suspenseLifecycle,
   suspenseNextAttackBuff,
   type SuspenseTrigger,
+  targetHeroSeat,
   yesNoPrompt,
 } from "./shared-helpers.js";
 
@@ -437,10 +439,14 @@ const DRAW_CARD: SuspenseTrigger = {
   effect: (ctx) => ctx.drawCards(ctx.seat, 1),
 };
 
-const INTIMIDATE: SuspenseTrigger = {
-  label: "Intimidate",
-  labelMessage: decisionMessage("card.trigger.common.intimidate"),
-  effect: (ctx) => queueIntimidate(ctx),
+const INTIMIDATE_TARGET_HERO: SuspenseTrigger = {
+  label: "Intimidate target hero",
+  labelMessage: decisionMessage("card.trigger.common.intimidate.target"),
+  target: heroTarget(),
+  effect(ctx) {
+    const seat = targetHeroSeat(ctx);
+    if (seat !== undefined) ctx.intimidate(seat);
+  },
 };
 
 /** Channel the Tranquil Domain's "another target aura" (any controller). */
@@ -1442,7 +1448,7 @@ Object.assign(sup, {
       ctx.createToken(MIGHT);
     },
   },
-  "leave them hanging|1": suspense(INTIMIDATE, [INTIMIDATE, suspenseNextAttackBuff(4)]),
+  "leave them hanging|1": suspense(INTIMIDATE_TARGET_HERO, [INTIMIDATE_TARGET_HERO, suspenseNextAttackBuff(4)]),
   "two steps ahead|3": {
     triggers: [
       {
@@ -1818,9 +1824,9 @@ Object.assign(sup, {
   "turn heads|3": suspense(undefined, {
     label: "Tap the Brute hero",
     labelMessage: decisionMessage("card.trigger.sup.turnheads.tap"),
+    target: heroTarget({ eligible: (ctx, seat) => heroHas(ctx, seat, "brute") }),
     effect(ctx) {
-      const hero = ctx.state.players.find((p) => heroHas(ctx, p.seat, "brute"))?.hero;
-      if (hero) ctx.tap(hero.instanceId);
+      if (ctx.playTargetInstanceId !== undefined) ctx.tap(ctx.playTargetInstanceId);
     },
   }),
   "who blinks first?|3": suspense(undefined, {

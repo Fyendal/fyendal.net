@@ -1,4 +1,4 @@
-import type { CardInstance, CardScript, DeepReadonly, ScriptCtx, TriggerDef } from "@fyendal/engine";
+import type { CardInstance, CardScript, DeepReadonly, ScriptCtx, TriggerDef, TriggerTarget } from "@fyendal/engine";
 import type { GameMessage } from "@fyendal/shared";
 import {
   attackAbility,
@@ -251,31 +251,6 @@ function offLinkDaggerOptions(ctx: ScriptCtx): number[] {
   return daggerOptions(ctx).filter((instanceId) => instanceId !== activeAttackId);
 }
 
-function offerDaggerDamage(ctx: ScriptCtx, hook: string): void {
-  if (ctx.link?.targetAllyId !== undefined) return;
-  const options = daggerOptions(ctx);
-  if (options.length === 0) return;
-  ctx.requestCardChoice(
-    hook,
-    decisionPrompt(
-      `${ctx.data.name}: choose a dagger to deal 1 damage, then destroy it`,
-      "card.hnt.dagger.damage.destroy",
-      {
-        values: { card: { kind: "card", cardId: ctx.self.cardId }, amount: 1 },
-        optionMessages: commonOptionMessages("pass"),
-      },
-    ),
-    ["pass", ...options],
-  );
-}
-
-function resolveDaggerDamage(ctx: ScriptCtx, hook: string, option: string, expected: string): boolean {
-  if (hook !== expected) return false;
-  if (option === "pass") return true;
-  daggerDealsDamage(ctx, Number(option));
-  return true;
-}
-
 function daggerDealsDamage(ctx: ScriptCtx, instanceId: number): void {
   const dagger = ctx.player(ctx.seat).weapons.find((card) => card.instanceId === instanceId);
   if (!dagger || !isDagger(ctx, dagger)) return;
@@ -286,7 +261,7 @@ function daggerDealsDamage(ctx: ScriptCtx, instanceId: number): void {
   ctx.destroyPermanent(dagger.instanceId);
 }
 
-const OPTIONAL_DAGGER_TARGET: TriggerDef["target"] = {
+const OPTIONAL_DAGGER_TARGET: TriggerTarget = {
   options: daggerOptions,
   prompt: (ctx) =>
     decisionPrompt(
@@ -646,11 +621,9 @@ export const hnt: Record<string, CardScript> = {
     canTriggerOnHit(ctx) {
       return ctx.link?.targetAllyId === undefined && draconicLinks(ctx) >= 2;
     },
+    onHitTarget: OPTIONAL_DAGGER_TARGET,
     onHit(ctx) {
-      offerDaggerDamage(ctx, "burning-blade-dagger");
-    },
-    onChoose(ctx, hook, option) {
-      resolveDaggerDamage(ctx, hook, option, "burning-blade-dagger");
+      if (ctx.playTargetInstanceId !== undefined) daggerDealsDamage(ctx, ctx.playTargetInstanceId);
     },
   },
   "mark with magma|1": {
@@ -1305,16 +1278,6 @@ hnt["fang, dracai of blades|0"] = hnt["fang|0"]!;
 
 const AGENTS = ["HNT003", "HNT004", "HNT005", "HNT006", "HNT007", "HNT008"] as const;
 const randomAgent = (ctx: ScriptCtx) => ctx.becomeHero(AGENTS[ctx.randomInt(AGENTS.length)]!);
-const dealWithDagger = (ctx: ScriptCtx) => {
-  const daggers = daggerOptions(ctx);
-  if (daggers.length)
-    ctx.requestCardChoice(
-      "deal-dagger",
-      decisionPrompt("Choose a dagger", "card.hnt.dagger.choose"),
-      daggers,
-    );
-};
-
 Object.assign(hnt, {
   "schism of chaos|3": {
     triggers: [
@@ -1741,10 +1704,13 @@ Object.assign(hnt, {
   },
   "pain in the backside|1": {
     canTriggerOnHit: (ctx) => ctx.link?.targetAllyId === undefined,
-    onHit: (ctx) => dealWithDagger(ctx),
-    onChoose(ctx, hook, option) {
-      if (hook === "deal-dagger")
-        ctx.dealDamage(opponentSeat(ctx), 1, { sourceInstanceId: Number(option), countsAsHit: true });
+    onHitTarget: {
+      options: daggerOptions,
+      prompt: () => decisionPrompt("Choose a dagger", "card.hnt.dagger.choose"),
+    },
+    onHit(ctx) {
+      if (ctx.playTargetInstanceId === undefined) return;
+      ctx.dealDamage(opponentSeat(ctx), 1, { sourceInstanceId: ctx.playTargetInstanceId, countsAsHit: true });
     },
   },
   "throw dagger|3": {

@@ -497,6 +497,8 @@ describe("CRU — Ranger traps", () => {
     });
 
     g.play("wounded bull|1", { pitch: [BLUE] }).blockWith().passPriority();
-    g.react("rockslide trap|3").expectFinalAttack(5).expectLife(1, 17);
+    g.react("rockslide trap|3");
+    expect(g.stackLabels()[0]).toBe("When this defends");
+    g.declareTarget("wounded bull|1").expectFinalAttack(5).expectLife(1, 17);
   });
 });

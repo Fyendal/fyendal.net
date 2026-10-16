@@ -194,10 +194,49 @@ describe("ROS — Earth heroes and Decompose", () => {
         { hero: "dorinthea" },
       ],
     });
-    g.play("fertile ground|1", { pitch: [BLUE] })
-      .chooseOption("opposing hero")
+    g.play("fertile ground|1", { pitch: [BLUE] });
+    expect(g.stackLabels()).toEqual(["You may deal 1 arcane damage to any opposing target"]);
+    expect(g.state.pendingDecision?.options).toEqual(["pass", String(g.state.players[1]!.hero.instanceId)]);
+    g.declareTarget(1)
       .expectLife(0, 15)
       .expectLife(1, 19);
+  });
+
+  it("Verdance may decline the opposing target and needs 8 Earth cards as Thorn of the Rose", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          heroKey: "verdance|0",
+          weapons: [],
+          life: 10,
+          hand: ["fertile ground|1", BLUE],
+          banish: ["autumn's touch|1", "autumn's touch|2", "autumn's touch|3", "earth form|3"],
+        },
+        { hero: "dorinthea" },
+      ],
+    });
+    g.play("fertile ground|1", { pitch: [BLUE] })
+      .declareTarget("pass")
+      .expectLife(0, 15)
+      .expectLife(1, 20);
+
+    const adult = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          heroKey: "verdance, thorn of the rose|0",
+          weapons: [],
+          life: 10,
+          hand: ["fertile ground|1", BLUE],
+          banish: ["autumn's touch|1", "autumn's touch|2", "autumn's touch|3", "earth form|3"],
+        },
+        { hero: "dorinthea" },
+      ],
+    });
+    adult.play("fertile ground|1", { pitch: [BLUE] });
+    expect(adult.state.stack).toEqual([]);
+    adult.expectLife(1, 20);
   });
 
   it("Sigil of Sanctuary destroys itself for Arcane Shelter and creates an Earth embodiment", () => {
@@ -270,15 +309,15 @@ describe("ROS — Lightning and Runeblade", () => {
       });
 
       g.play("arc lightning|2")
-        .chooseOption("opposing hero")
+        .declareTarget(1)
         .play(rushOfPower)
         .blockWith()
         .settle()
-        .chooseOption("opposing hero")
+        .declareTarget(1)
         .play("current funnel|3")
         .blockWith()
         .settle()
-        .chooseOption("opposing hero")
+        .declareTarget(1)
         .expectAP(0, 1);
     },
   );
@@ -1072,7 +1111,7 @@ describe("ROS — Wizard and generic", () => {
     expect(g.state.stack[0]?.label).toBe("Your hero deals 1 arcane damage");
     expect(g.state.stack[1]?.ability).toBe(true);
 
-    g.passPriority().passPriority().expectLife(0, 19).expectHandSize(1, 0);
+    g.declareTargetRaw(0).passPriority().passPriority().expectLife(0, 19).expectHandSize(1, 0);
     g.passPriority().passPriority().expectHandSize(1, 1);
   });
 
@@ -1097,6 +1136,7 @@ describe("ROS — Wizard and generic", () => {
     g.activate("oscilio, constella intelligence|0", { settle: false });
     const echoflash = g.state.players[0]!.hand[0]!;
     g.doRaw({ kind: "choose", optionId: String(echoflash.instanceId) })
+      .declareTargetRaw(1)
       .activate("volzar, meteor storm|0", { settle: false })
       .passPriority()
       .passPriority();
@@ -1378,9 +1418,10 @@ describe("ROS — Blast to Oblivion", () => {
   it("returns an aura the next time you play an instant this chain link, and only that time", () => {
     const s = scenario({ seats: seats(["blast to oblivion|1", "sigil of solace|1", "sigil of solace|1"]) });
     s.play("blast to oblivion|1").blockWith()
-      .react("sigil of solace|1", { settle: false })
-      .passPriority().passPriority() // Resolve the Blast to Oblivion trigger.
-      .chooseCard("sigil of aether|3")
+      .react("sigil of solace|1", { settle: false });
+    expect(s.stackLabels()[0]).toBe("Return an eligible aura to its owner's hand?");
+    expect(s.state.pendingDecision?.options?.[0]).toBe("pass");
+    s.declareTarget("sigil of aether|3")
       .doRaw({ kind: "choose", optionId: "opposing hero" }) // Sigil of Aether's leave-the-arena damage.
       .passPriority().passPriority(); // Resolve it and Sigil of Solace.
     s.expectInZone(1, "sigil of aether|3", "hand");

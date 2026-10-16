@@ -885,6 +885,9 @@ export function oncePerTurnEffectFlagKey(instanceId: number): string {
   return `${ONCE_PER_TURN_EFFECT_FLAG_PREFIX}${instanceId}`;
 }
 
+/** A card target a triggered layer declares as it is added to the stack. */
+export type TriggerTarget = NonNullable<TriggerDef["target"]>;
+
 /** A triggered ability definition on a card script. */
 export interface TriggerDef {
   /** Which event queues this trigger */
@@ -1163,9 +1166,6 @@ export interface CardScript {
   /** The current link's attack gained go again — at declaration or later
    *  (e.g. granted on hit). Called for the attacking card and the hero. */
   onGainGoAgain?(ctx: ScriptCtx): void;
-  /** The controller actually went again: a resolving non-attack layer or an
-   * attack at the beginning of its Resolution Step granted its action point. */
-  onGoAgainResolved?(ctx: ScriptCtx): void;
   /** Conditional attack bonus, re-evaluated at resolution. On an attacking
    * object (including a weapon), this modifies only that object's attack;
    * observer effects belong on explicit friendly-attack/modifier hooks. */
@@ -1297,6 +1297,10 @@ export interface CardScript {
   /** Called when a link resolves as a hit. Unqualified "hits" include ally
    *  targets; scripts whose text says "hits a hero" must check targetAllyId. */
   onHit?(ctx: ScriptCtx): void;
+  /** A target declared as this card's on-hit layer is added to the stack
+   * (CR 6.6.6a), with `TriggerDef.target` semantics. `onHit` reads it from
+   * `ctx.playTargetInstanceId`; an illegal target makes the layer fail. */
+  onHitTarget?: TriggerTarget;
   /** Runs when a granted on-hit script hook (an `onHitScriptHook` modifier
    *  this card created earlier, e.g. "your next attack gains 'when this hits,
    *  …'") resolves. The hook key disambiguates multiple grants; ctx.self is
@@ -1531,8 +1535,6 @@ export interface CardScript {
     label: string;
     effect(ctx: ScriptCtx): void;
   };
-  /** This source's controller gained life. */
-  onHeroGainedLife?(ctx: ScriptCtx, amount: number): void;
   /** Replace a positive life-gain event for any hero. The source may return
    * zero after performing a corresponding life-loss effect. */
   replaceHeroLifeGain?(ctx: ScriptCtx, gainingSeat: number, amount: number): number | undefined;
@@ -1586,6 +1588,9 @@ export interface CardScript {
   canTriggerOnDefend?(ctx: ScriptCtx): boolean;
   /** This card was chosen as a defender (hand cards and equipment). */
   onDefend?(ctx: ScriptCtx): void;
+  /** A target declared as this card's defend layer is added to the stack,
+   * like `onHitTarget`. */
+  onDefendTarget?: TriggerTarget;
   /** An attack controlled by this source's controller became defended. */
   friendlyDefendedTrigger?: {
     /** Optional event-time guard. Receives only the cards that became
@@ -1648,6 +1653,9 @@ export interface CardScript {
    *  zone it came from (for example, "hand", "deck", or "banish"; "arsenal"
    *  when turned face up). */
   onEnterArsenal?(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, from: string): void;
+  /** A target declared as this source's enter-arsenal layer is added to the
+   * stack, like `onHitTarget`. */
+  onEnterArsenalTarget?: TriggerTarget;
   /** Trigger condition for `onEnterArsenal`. When it returns false the
    *  entering card creates no triggered layer for this source. */
   canTriggerOnEnterArsenal?(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, from: string): boolean;

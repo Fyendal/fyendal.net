@@ -1,6 +1,7 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
 import {
   attackAbility,
+  attackArcaneHeroTrigger,
   commonOptionMessages,
   dealArcane,
   decisionPrompt,
@@ -358,10 +359,7 @@ export const sba: Record<string, CardScript> = {
   "arcanic shockwave|1": {
     additionalCost: fusionAdditionalCost("lightning"),
     onChoose: fusionOnChoose,
-    onAttackDeclared(ctx) {
-      if (!isFused(ctx)) return;
-      dealArcane(ctx, opponentSeat(ctx), 1);
-    },
+    triggers: [attackArcaneHeroTrigger(1, isFused)],
   },
 
   // Entwine Lightning — fused: gains go again (keyword pruned in index.ts)

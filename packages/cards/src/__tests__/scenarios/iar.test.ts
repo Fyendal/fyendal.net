@@ -955,9 +955,9 @@ describe("IAR cards", () => {
 
     g.play(vexing)
       .blockWith()
-      .settle()
-      .chooseOption("opposing hero")
-      .expectLife(1, expectedLife);
+      .settle();
+    expect(g.stackLabels()).toEqual(["On hit"]);
+    g.declareTarget(1).expectLife(1, expectedLife);
   });
 
   it("Embrace Sin grants dynamic Runechant-aura play access from banish", () => {

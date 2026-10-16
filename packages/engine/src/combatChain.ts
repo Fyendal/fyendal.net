@@ -83,7 +83,7 @@ function beginLinkResolutionStep(state: GameStateInternal,
       "engine.log.combat.go.again",
       { card: logCardValue(link.attackingCard.cardId) },
     ));
-    runtime.events.notifyGoAgainResolved(state, link.attacker, link);
+    runtime.events.notifyGoAgainResolved(state, link.attacker);
   }
 }
 

@@ -1,12 +1,15 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
 import {
+  attackArcaneHeroTrigger,
   buffNextAttack,
   commonOptionMessages,
   dealtByThis,
   decisionMessage,
   decisionPrompt,
+  heroTarget,
   opponentSeat,
   opposingHeroDamage,
+  targetHeroSeat,
 } from "../shared-helpers.js";
 
 const FROSTBITE = "SIY035";
@@ -605,10 +608,8 @@ export const eleHighRarity: Record<string, CardScript> = {
   },
   "briar, warden of thorns|0": briar,
   "blossoming spellblade|1": withFusionChoices(elementalFusion("earth", "lightning"), {
-    onAttackDeclared(ctx) {
-      if (fused(ctx)) ctx.dealDamage(opponentSeat(ctx), 1, { arcane: true, sourceInstanceId: ctx.self.instanceId });
-    },
     triggers: [
+      attackArcaneHeroTrigger(1, fused),
       {
         event: "damage-dealt",
         sourceZone: "self",
@@ -937,10 +938,13 @@ export const eleHighRarity: Record<string, CardScript> = {
     triggers: [
       {
         event: "attack-declared",
-        label: "Deal 1 arcane damage",
+        label: "Deal 1 arcane damage to target hero",
+        labelMessage: decisionMessage("card.trigger.common.arcane.target", { amount: 1 }),
         condition: (ctx) => ctx.link?.attacker === ctx.seat && ctx.link.attackCardType === "action",
+        target: heroTarget(),
         effect(ctx) {
-          ctx.dealDamage(opponentSeat(ctx), 1, { arcane: true, sourceInstanceId: ctx.self.instanceId });
+          const seat = targetHeroSeat(ctx);
+          if (seat !== undefined) ctx.dealDamage(seat, 1, { arcane: true, sourceInstanceId: ctx.self.instanceId });
         },
       },
       { event: "end-of-turn", label: "Destroy Sting of Sorcery", effect: (ctx) => ctx.destroySelf() },

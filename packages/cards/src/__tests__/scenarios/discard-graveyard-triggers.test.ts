@@ -159,7 +159,7 @@ describe("graveyard-entry trigger timing audit", () => {
   it("Echoflash waits on the stack before its hero deals arcane damage", () => {
     const g = discardWithWrecker("echoflash|2").expectLife(1, 20);
     expect(g.state.stack[0]?.label).toBe("Your hero deals 1 arcane damage");
-    g.passPriority().passPriority().expectLife(1, 19);
+    g.declareTargetRaw(1).passPriority().passPriority().expectLife(1, 19);
   });
 
   it.each([

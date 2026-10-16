@@ -241,9 +241,17 @@ function pitfallTrap(): CardScript {
 
 function rockslideTrap(): CardScript {
   return trapOnlyFromArsenal({
+    onDefendTarget: {
+      options: (ctx) =>
+        ctx.link && ctx.link.flags.attackGone !== true ? [ctx.link.attackingCard.instanceId] : [],
+      prompt: (ctx) =>
+        decisionPrompt(`${ctx.data.name}: choose target attack`, "card.common.attack.target.choose", {
+          values: { card: { kind: "card", cardId: ctx.self.cardId } },
+        }),
+    },
     onDefend(ctx) {
       const attacker = ctx.link?.attacker;
-      if (attacker === undefined) return;
+      if (attacker === undefined || ctx.playTargetInstanceId === undefined) return;
       if (
         !ctx.requestPayment(
           "rockslide-pay",

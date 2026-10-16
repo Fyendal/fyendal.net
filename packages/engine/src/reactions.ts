@@ -813,7 +813,6 @@ export function finishReactionPlay(
   removed: CardInstance,
   origin: "hand" | "arsenal" | PlayableZone,
 ): void {
-  const player = state.players[seat] as PlayerState;
   const link = currentLink(state);
   if (link && dataOf(state, removed.cardId).cardType === "attack-reaction") {
     link.flags.reactionPlayedOrActivated = true;
@@ -842,6 +841,7 @@ export function finishReactionPlay(
   if (dataOf(state, removed.cardId).cardType === "attack-reaction") {
     runtime.dispatchFlow("queueReactionEventTriggers", state, seat);
   }
+  if (runtime.dispatchFlow("declarePlayedTriggerTargets", state, seat)) return;
   // the priority holder keeps priority and may play more reactions/instants;
   // priority only passes when they pass
   holdPriorityWindow(state, seat, reactionWindow(runtime));

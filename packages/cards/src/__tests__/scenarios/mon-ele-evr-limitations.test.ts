@@ -414,7 +414,7 @@ describe("Monarch, Tales of Aria, and Everfest rules regression coverage", () =>
       { hero: "rhinar", hand: ["blossoming spellblade|1", "pulse of candlehold|2", "blink|3"], graveyard: ["nimblism|1"], resources: 3, equipment: NO_EQUIPMENT },
       { hero: "dorinthea", equipment: NO_EQUIPMENT },
     ] });
-    g.play("blossoming spellblade|1").chooseOption("both").chooseCard("nimblism|1");
+    g.play("blossoming spellblade|1").chooseOption("both").declareTarget(1).chooseCard("nimblism|1");
     expect(g.state.players[0]!.banish).toEqual(expect.arrayContaining([
       expect.objectContaining({ playableAsInstant: true, temporaryGraveyardReplacement: "banish" }),
     ]));

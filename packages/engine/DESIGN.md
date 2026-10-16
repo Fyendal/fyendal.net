@@ -116,7 +116,12 @@ stack, before anyone receives priority (CR 6.6.6a): the controller answers a
 `trigger-target` choice, a layer with no legal target ceases to exist, and an
 optional targeted effect may declare none (CR 1.8.5e). The target rides on the
 layer as `targetCardInstanceId`; resolution rechecks it and the effect fails
-when it is no longer legal (CR 1.8.9). Effects that trigger while a layer
+when it is no longer legal (CR 1.8.9). Engine hit, defend, and
+enter-arsenal hook layers declare targets the same way from the script's
+`onHitTarget`, `onDefendTarget`, or `onEnterArsenalTarget`; `layerTargets.ts`
+owns target lookup and the resolution recheck. Card-played triggers that join the
+stack directly above a played instant or reaction declare their targets before
+that player keeps priority. Effects that trigger while a layer
 resolves stay above it, so the resolving trigger is removed by identity.
 
 Boost remains an optional play announcement represented by `boost?: true`.

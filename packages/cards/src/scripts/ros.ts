@@ -1,11 +1,13 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
 import {
   ampNextArcane,
+  anyDamageTarget,
   attackAbility,
   buffNextAttack,
   channelLightning,
   commonOptionMessages,
   dealArcane,
+  dealToAnyTarget,
   decisionMessage,
   decisionPrompt,
   entersArenaTrigger,
@@ -64,8 +66,38 @@ function isNonAttackAction(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): bo
   return ctx.hasCardType(card, "action") && !hasTag(ctx, card, "attack");
 }
 
+function earthBanished(ctx: ScriptCtx): number {
+  return ctx.player(ctx.seat).banish.filter((card) => !card.faceDown && hasTag(ctx, card, "earth")).length;
+}
+
 function fourEarthBanished(ctx: ScriptCtx): boolean {
-  return ctx.player(ctx.seat).banish.filter((card) => !card.faceDown && hasTag(ctx, card, "earth")).length >= 4;
+  return earthBanished(ctx) >= 4;
+}
+
+function verdance(earthCards: number): CardScript {
+  return {
+    triggers: [
+      {
+        event: "life-gained",
+        label: "You may deal 1 arcane damage to any opposing target",
+        labelMessage: decisionMessage("card.trigger.common.arcane.anytarget.opposing.optional", { amount: 1 }),
+        condition: (ctx) => ctx.state.activePlayer === ctx.seat && earthBanished(ctx) >= earthCards,
+        target: anyDamageTarget(
+          (ctx) =>
+            decisionPrompt(
+              `Verdance: deal ${ctx.previewArcaneDamage(1)} arcane damage to an opposing target?`,
+              "card.ros.arcane.target.choose",
+              {
+                values: { card: { kind: "card", cardId: ctx.self.cardId }, amount: ctx.previewArcaneDamage(1) },
+                optionMessages: commonOptionMessages("pass"),
+              },
+            ),
+          { opposing: true, optional: true },
+        ),
+        effect: (ctx) => dealToAnyTarget(ctx, ctx.playTargetInstanceId, 1, { arcane: true }),
+      },
+    ],
+  };
 }
 
 function playedOrCreatedAura(ctx: ScriptCtx): boolean {
@@ -754,22 +786,7 @@ export const ros: Record<string, CardScript> = {
       onActivate: (ctx) => ctx.createToken(LIGHTNING),
     },
   },
-  "verdance|0": {
-    onHeroGainedLife(ctx) {
-      if (ctx.state.activePlayer !== ctx.seat || !fourEarthBanished(ctx)) return;
-      requestAnyTarget(
-        ctx,
-        "verdance-target",
-        `Verdance: deal ${ctx.previewArcaneDamage(1)} arcane damage to an opposing target?`,
-        1,
-        true,
-        true,
-      );
-    },
-    onChoose(ctx, hook, option) {
-      if (hook === "verdance-target") dealToChoice(ctx, option, 1);
-    },
-  },
+  "verdance|0": verdance(4),
   "staff of verdant shoots|0": {
     activated: {
       cost: 3,
@@ -1101,26 +1118,26 @@ for (const pitch of [1, 2, 3]) {
         label: "Return an eligible aura to its owner's hand?",
         condition: (ctx, played) => ctx.getCounter("blastArmed") > 0 && !!played && ctx.hasCardType(played, "instant"),
         onTrigger: (ctx) => ctx.setCounter("blastArmed", 0),
+        target: {
+          options: (ctx) =>
+            ctx.state.players
+              .flatMap((player) => player.board)
+              .filter(
+                (card) =>
+                  isAura(ctx, card) && ((data(ctx, card).cost ?? 0) <= 1 || data(ctx, card).cardType === "token"),
+              )
+              .map((card) => card.instanceId),
+          prompt: () =>
+            decisionPrompt("Return an eligible aura to its owner's hand?", "card.ros.aura.return.eligible", {
+              optionMessages: commonOptionMessages("pass"),
+            }),
+          optional: true,
+        },
         effect(ctx) {
-          const auras = ctx.state.players
-            .flatMap((player) => player.board)
-            .filter(
-              (card) => isAura(ctx, card) && ((data(ctx, card).cost ?? 0) <= 1 || data(ctx, card).cardType === "token"),
-            );
-          if (auras.length)
-            ctx.requestCardChoice(
-              "blast-aura",
-              decisionPrompt("Return an eligible aura to its owner's hand?", "card.ros.aura.return.eligible", {
-                optionMessages: commonOptionMessages("no"),
-              }),
-              ["no", ...auras.map((card) => card.instanceId)],
-            );
+          if (ctx.playTargetInstanceId !== undefined) ctx.moveToHand(ctx.playTargetInstanceId);
         },
       },
     ],
-    onChoose(ctx, hook, option) {
-      if (hook === "blast-aura" && option !== "no") ctx.moveToHand(Number(option));
-    },
   };
 }
 
@@ -1175,7 +1192,7 @@ for (const [pitch, minimum] of [
 
 // Adult heroes and high-rarity cards from the complete ROS release.
 ros["florian, rotwood harbinger|0"] = ros["florian|0"]!;
-ros["verdance, thorn of the rose|0"] = ros["verdance|0"]!;
+ros["verdance, thorn of the rose|0"] = verdance(8);
 ros["oscilio, constella intelligence|0"] = ros["oscilio|0"]!;
 
 Object.assign(ros, {

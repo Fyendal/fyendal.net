@@ -25,6 +25,7 @@ import { hookSources } from "./sourceQueries.js";
 import { drawCards } from "./cardLifecycle.js";
 
 import { snapshotSerializable } from "./ruleQueries.js";
+import { declaredLayerTargetLegal } from "./layerTargets.js";
 
 /** Resolve one granted on-hit effect after its triggered layer has received
  * priority. The modifier was snapshotted when the hit-event occurred; only
@@ -374,7 +375,8 @@ export function resolveOnHitLayer(state: GameStateInternal,
   const effect = layer.engineEffect;
   if (effect?.kind === "on-hit-hook") {
     const source = findCardAnywhere(state, layer.sourceInstanceId)?.card ?? effect.source;
-    runtime.events.runHook(state, layer.seat, source, "onHit", link);
+    if (!declaredLayerTargetLegal(state, runtime, layer)) return;
+    runtime.events.runHook(state, layer.seat, source, "onHit", link, undefined, layer.targetCardInstanceId);
     return;
   }
   if (effect?.kind === "on-hit-modifier") {

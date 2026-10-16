@@ -9,7 +9,9 @@ import {
   decisionPrompt,
   entersArenaTrigger,
   heroDamage,
+  heroTarget,
   opponentSeat,
+  targetHeroSeat,
 } from "../shared-helpers.js";
 import { SHARPEN_FOLLOWUP, sharpenSword } from "../aha/warrior-sharpen.js";
 
@@ -276,21 +278,19 @@ export const omnHighRarity: Record<string, CardScript> = {
         label: "Destroy target aura the damaged hero controls",
         labelMessage: { id: "card.trigger.common.damaged.aura.destroy" },
         condition: (ctx, eventCard, event) => dealtByThis(ctx, eventCard) && !!heroDamage(event),
-        effect(ctx, _eventCard, event) {
-          const target = heroDamage(event)?.targetSeat ?? opponentSeat(ctx);
-          const auras = ctx.player(target).board.filter((card) => isAura(ctx, card));
-          if (auras.length)
-            ctx.requestCardChoice(
-              "caress-aura",
-              decisionPrompt("Destroy an aura", "card.omn.aura.destroy"),
-              auras.map((card) => card.instanceId),
-            );
+        target: {
+          options(ctx, _eventCard, event) {
+            const damaged = heroDamage(event)?.targetSeat;
+            if (damaged === undefined) return [];
+            return ctx.player(damaged).board.filter((card) => isAura(ctx, card)).map((card) => card.instanceId);
+          },
+          prompt: () => decisionPrompt("Destroy an aura", "card.omn.aura.destroy"),
+        },
+        effect(ctx) {
+          if (ctx.playTargetInstanceId !== undefined) ctx.destroyPermanent(ctx.playTargetInstanceId);
         },
       },
     ],
-    onChoose(ctx, hook, option) {
-      if (hook === "caress-aura") ctx.destroyPermanent(Number(option));
-    },
   },
   "oscilio, forked continuum|0": {
     activated: {
@@ -360,11 +360,12 @@ export const omnHighRarity: Record<string, CardScript> = {
         sourceZone: "graveyard",
         label: "Your hero deals 1 arcane damage",
         condition: (ctx, card) => card?.instanceId === ctx.self.instanceId,
-        effect: (ctx) =>
-          ctx.dealDamage(opponentSeat(ctx), 1, {
-            arcane: true,
-            sourceInstanceId: ctx.player(ctx.seat).hero.instanceId,
-          }),
+        target: heroTarget(),
+        effect(ctx) {
+          const seat = targetHeroSeat(ctx);
+          if (seat === undefined) return;
+          ctx.dealDamage(seat, 1, { arcane: true, sourceInstanceId: ctx.player(ctx.seat).hero.instanceId });
+        },
       },
     ],
   },

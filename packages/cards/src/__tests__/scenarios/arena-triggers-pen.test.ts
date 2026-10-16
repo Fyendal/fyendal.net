@@ -75,7 +75,7 @@ describe("PEN / WTR / EVR enter and leave arena triggers use the stack", () => {
     const life = g.state.players[1]!.life;
 
     g.play("sigil of voltaris|3", { settle: false });
-    g.passUntilLayer("Deal 1 arcane damage to target hero");
+    g.passUntilTargetDeclaration().declareTargetRaw(1);
     expect(g.state.stack).toEqual([expect.objectContaining({ label: "Deal 1 arcane damage to target hero" })]);
     g.expectLife(1, life);
 

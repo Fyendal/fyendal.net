@@ -47,7 +47,9 @@ describe("Uprising, Dynasty, and Outsiders rules regression coverage", () => {
       { hero: "rhinar", graveyard: ["thaw|1"], board: ["frostbite|0"] },
       { hero: "dorinthea" },
     ] });
-    g.endTurn().chooseOption("yes").chooseCard("frostbite|0");
+    g.endTurn();
+    expect(g.stackLabels()).toEqual(["Banish Thaw to destroy or unfreeze a card?"]);
+    g.declareTarget("frostbite|0").chooseOption("yes");
     g.expectInZone(0, "thaw|1", "banish").expectNotInZone(0, "frostbite|0", "board");
   });
   it("Frost Hex grants triggers to opposing Frostbites", () => {
@@ -204,7 +206,16 @@ describe("Uprising, Dynasty, and Outsiders rules regression coverage", () => {
   it("Heat Seeker resolves at a future end phase", () => implementation("heat seeker|1", (script) => !!script.onHit && !!script.triggers?.some((trigger) => trigger.event === "end-of-turn")));
   it("Amethyst Tiara grants spellvoid to Runechants", () => implementation("amethyst tiara|0", (script) => script.grantsSpellvoidToRunechants === true && !!script.activated));
   it("Diabolic Ultimatum makes simultaneous choices", () => implementation("diabolic ultimatum|1", (script) => !!script.onPlayCostPaid && !!script.onChoose));
-  it("Brainstorm observes every action-phase draw", () => implementation("brainstorm|3", (script) => !!script.onFriendlyDraws));
+  it("Brainstorm observes every action-phase draw", () => {
+    const g = scenario({ seats: [
+      { hero: "rhinar", resources: 5, hand: ["brainstorm|3", "tome of fyendal|2"], deck: ["sink below|3", "sink below|3"] },
+      { hero: "dorinthea" },
+    ] });
+    g.state.players[0]!.actionPoints = 2;
+    g.play("brainstorm|3").play("tome of fyendal|2");
+    expect(g.stackLabels()).toEqual(["Deal 1 arcane damage to any target", "Deal 1 arcane damage to any target"]);
+    g.declareTarget(1).declareTarget(0).expectLife(1, 19).expectLife(0, 19);
+  });
   it("Phantasmal Symbiosis rewrites arbitrary named cards", () => implementation("phantasmal symbiosis|2", (script) => !!script.onAttackDeclared && !!script.onChoose));
   it("Imperial Edict prohibits an arbitrary named card", () => implementation("imperial edict|1", (script) => !!script.activated && !!script.onChoose));
   it("Imperial Warhorn coordinates per-hero choices", () => implementation("imperial warhorn|1", (script) => !!script.activated && !!script.onChoose));

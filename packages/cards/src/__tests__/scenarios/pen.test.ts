@@ -1073,8 +1073,8 @@ describe("PEN — import and set mechanics", () => {
       ],
     });
     aboveBase.activate("hala|0").activate("durendal|0").blockWith("courageous crossing|3").settle();
-    expect(aboveBase.state.pendingDecision?.chooseHook).toBe("pen-remove-power");
-    aboveBase.chooseCard("durendal|0");
+    expect(aboveBase.stackLabels()[0]).toBe("When this defends");
+    aboveBase.declareTarget("durendal|0");
     expect(aboveBase.state.players[0]!.weapons[0]!.counters?.power ?? 0).toBe(0);
   });
 
@@ -1110,8 +1110,8 @@ describe("PEN — import and set mechanics", () => {
     });
 
     g.play("head jab|1").blockWith("quickening sand|3").settle();
-    expect(g.state.pendingDecision?.chooseHook).toBe("pen-quickening-tap");
-    g.chooseCard("aether ashwing|0");
+    expect(g.stackLabels()[0]).toBe("When this defends");
+    g.declareTarget("aether ashwing|0");
     expect(g.state.players[0]!.board.find((card) => cardData[card.cardId]?.name === "Aether Ashwing")?.tapped).toBe(true);
   });
 
@@ -1401,6 +1401,7 @@ describe("PEN — generalized rules interactions", () => {
     expect(g.state.pendingDecision?.options).toEqual(["X = 1"]);
     g.chooseOption("X = 1")
       .chooseCard("sigil of gravespawning|3")
+      .declareTarget(1)
       .expectLife(1, 19);
   });
 

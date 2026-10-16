@@ -13,6 +13,7 @@ export type FlowStepName =
   | "continueEndPhase"
   | "continueStack"
   | "dealAllyDamage"
+  | "declarePlayedTriggerTargets"
   | "deferEventTriggers"
   | "endTurn"
   | "enterAttackLayerWindow"

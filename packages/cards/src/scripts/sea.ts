@@ -1,8 +1,10 @@
 import type { CardInstance, CardScript, DeepReadonly, Modifier, ScriptCtx } from "@fyendal/engine";
 import {
+  anyDamageTarget,
   attackAbility,
   buffNextAttack,
   commonOptionMessages,
+  dealToAnyTarget,
   decisionMessage,
   decisionPrompt,
   entersArenaTrigger,
@@ -1036,21 +1038,19 @@ export const sea: Record<string, CardScript> = {
   "line|3": topArrowSetup("go-again"),
   "sinker|3": topArrowSetup("overpower"),
   "nettling shot|1": {
-    onEnterArsenal(ctx) {
-      const allies = ctx.state.players.flatMap((player) =>
-        player.board.filter((card) => isAlly(ctx, card) && !card.tapped),
-      );
-      if (allies.length)
-        ctx.requestCardChoice(
-          "nettling",
-          decisionPrompt("Tap target ally?", "card.sea.ally.tap.optional", {
-            optionMessages: commonOptionMessages("pass"),
-          }),
-          ["pass", ...allies.map((card) => card.instanceId)],
-        );
+    onEnterArsenalTarget: {
+      options: (ctx) =>
+        ctx.state.players.flatMap((player) =>
+          player.board.filter((card) => isAlly(ctx, card) && !card.tapped).map((card) => card.instanceId),
+        ),
+      prompt: () =>
+        decisionPrompt("Tap target ally?", "card.sea.ally.tap.optional", {
+          optionMessages: commonOptionMessages("pass"),
+        }),
+      optional: true,
     },
-    onChoose(ctx, hook, option) {
-      if (hook === "nettling" && option !== "pass") ctx.tap(Number(option));
+    onEnterArsenal(ctx) {
+      if (ctx.playTargetInstanceId !== undefined) ctx.tap(ctx.playTargetInstanceId);
     },
   },
   "scouting shot|1": {
@@ -1548,45 +1548,8 @@ export const sea: Record<string, CardScript> = {
         },
       },
     ],
-    onHit(ctx) {
-      const options = ctx.state.players.flatMap((player) => [
-        `hero:${player.seat}`,
-        ...player.board.filter((card) => isAlly(ctx, card)).map((card) => `ally:${card.instanceId}`),
-      ]);
-      ctx.requestChoice(
-        "blow-target",
-        decisionPrompt("Deal 1 damage to any target", "card.sea.damage.target.choose", {
-          optionMessages: Object.fromEntries(
-            ctx.state.players.flatMap((player) => [
-              [
-                `hero:${player.seat}`,
-                decisionMessage("card.common.target.card", {
-                  card: { kind: "card", cardId: player.heroCardId },
-                }),
-              ],
-              ...player.board
-                .filter((card) => isAlly(ctx, card))
-                .map((card) => [
-                  `ally:${card.instanceId}`,
-                  decisionMessage("card.common.target.card", {
-                    card: { kind: "card", cardId: card.cardId },
-                  }),
-                ]),
-            ]),
-          ),
-        }),
-        options,
-        undefined,
-        undefined,
-        `hero:${opponentSeat(ctx)}`,
-      );
-    },
-    onChoose(ctx, hook, option) {
-      if (hook !== "blow-target") return;
-      const [kind, raw] = option.split(":");
-      if (kind === "hero") ctx.dealDamage(Number(raw), 1);
-      else ctx.dealDamage(0, 1, { targetAllyId: Number(raw) });
-    },
+    onHitTarget: anyDamageTarget(() => decisionPrompt("Deal 1 damage to any target", "card.sea.damage.target.choose")),
+    onHit: (ctx) => dealToAnyTarget(ctx, ctx.playTargetInstanceId, 1),
   },
   "rally the coast guard|1": rallyDefense(),
   "rally the coast guard|2": rallyDefense(),

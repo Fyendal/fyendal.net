@@ -394,13 +394,14 @@ describe("Armory Decks — AIO, AJV, and AST", () => {
       ],
     });
     g.play("arc lightning|2");
-    g.chooseOption("opposing hero");
+    expect(g.stackLabels()).toEqual(["Deal 1 arcane damage to any target"]);
+    g.declareTarget(1);
     g.play("skyzyk|1");
     expect(g.state.pendingDecision?.kind).toBe("defend");
+    g.blockWith().settle();
+    expect(g.stackLabels()).toEqual(["Deal 1 arcane damage to any target"]);
     g
-      .blockWith()
-      .settle()
-      .chooseOption("opposing hero")
+      .declareTarget(1)
       .expectLife(1, 14)
       .expectFinalAttack(4);
   });

@@ -10,6 +10,7 @@ import type {
   ScriptPrompt,
   TriggerDef,
   TriggerEventContext,
+  TriggerTarget,
 } from "@fyendal/engine";
 import type { GameLogEvent, GameLogPayload, GameMessage } from "@fyendal/shared";
 import { functionalKey, functionalKeyOf } from "../functional.js";
@@ -103,6 +104,95 @@ export function upToOneTargetAttack(
       }),
     optional: true,
   };
+}
+
+/** "Target hero" declared by a trigger: each eligible hero's instance id.
+ * Two players play, so the choice is the opposing hero or your own. Read the
+ * declared hero with `targetHeroSeat`. */
+export function heroTarget(
+  opts: { optional?: boolean; eligible?: (ctx: ScriptCtx, seat: number) => boolean } = {},
+): TriggerTarget {
+  return {
+    options: (ctx) =>
+      ctx.state.players
+        .filter((player) => !opts.eligible || opts.eligible(ctx, player.seat))
+        .map((player) => player.hero.instanceId),
+    prompt: (ctx) =>
+      decisionPrompt(`${ctx.data.name}: choose target hero`, "card.common.target.hero.choose", {
+        values: { card: { kind: "card", cardId: ctx.self.cardId } },
+        ...(opts.optional ? { optionMessages: commonOptionMessages("pass") } : {}),
+      }),
+    ...(opts.optional ? { optional: true } : {}),
+  };
+}
+
+/** Seat of the hero a resolving layer declared with `heroTarget`. */
+export function targetHeroSeat(ctx: ScriptCtx): number | undefined {
+  const id = ctx.playTargetInstanceId;
+  return id === undefined ? undefined : ctx.state.players.find((player) => player.hero.instanceId === id)?.seat;
+}
+
+/** Deal 1 arcane damage to the hero a resolving layer declared. */
+export function dealArcaneToTargetHero(ctx: ScriptCtx): void {
+  const seat = targetHeroSeat(ctx);
+  if (seat !== undefined) dealArcane(ctx, seat, 1);
+}
+
+/** "When you attack with this[, if …], deal N arcane damage to target hero."
+ * The "if" is checked again on resolution (CR 6.6.1c). */
+export function attackArcaneHeroTrigger(amount = 1, condition?: (ctx: ScriptCtx) => boolean): TriggerDef {
+  return {
+    event: "attack-declared",
+    sourceZone: "self",
+    label: `Deal ${amount} arcane damage to target hero`,
+    labelMessage: decisionMessage("card.trigger.common.arcane.target", { amount }),
+    ...(condition ? { condition } : {}),
+    target: heroTarget(),
+    effect(ctx) {
+      const seat = targetHeroSeat(ctx);
+      if (seat !== undefined && (!condition || condition(ctx))) dealArcane(ctx, seat, amount);
+    },
+  };
+}
+
+/** "Any target" for damage: each hero and each ally, as the card instance ids
+ * a trigger declares. `opposing` keeps only those the opponent controls. */
+export function anyTargetIds(ctx: ScriptCtx, opts: { opposing?: boolean } = {}): number[] {
+  return ctx.state.players
+    .filter((player) => !opts.opposing || player.seat !== ctx.seat)
+    .flatMap((player) => [
+      player.hero.instanceId,
+      ...player.board.filter((card) => ctx.cardTypes(card).includes("ally")).map((card) => card.instanceId),
+    ]);
+}
+
+/** A trigger's "any target" damage declaration over `anyTargetIds`. Pair it
+ * with `dealToAnyTarget(ctx, ctx.playTargetInstanceId, …)` in the effect. */
+export function anyDamageTarget(
+  prompt: (ctx: ScriptCtx) => ScriptPrompt,
+  opts: { opposing?: boolean; optional?: boolean } = {},
+): TriggerTarget {
+  return {
+    options: (ctx) => anyTargetIds(ctx, opts),
+    prompt,
+    ...(opts.optional ? { optional: true } : {}),
+  };
+}
+
+/** Deal damage to a hero or ally named by its instance id. Returns the damage
+ * dealt, or 0 when nothing is named or the ally has left the arena. */
+export function dealToAnyTarget(
+  ctx: ScriptCtx,
+  instanceId: number | undefined,
+  amount: number,
+  opts: { arcane?: boolean; sourceInstanceId?: number } = {},
+): number {
+  if (instanceId === undefined) return 0;
+  const hero = ctx.state.players.find((player) => player.hero.instanceId === instanceId);
+  if (hero) return ctx.dealDamage(hero.seat, amount, opts);
+  const controller = ctx.state.players.find((player) => player.board.some((card) => card.instanceId === instanceId));
+  if (!controller) return 0;
+  return ctx.dealDamage(controller.seat, amount, { ...opts, targetAllyId: instanceId });
 }
 
 /** Construct one audience-safe semantic log payload for any card script.

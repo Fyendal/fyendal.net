@@ -222,7 +222,7 @@ describe("SAZ — loading the arsenal", () => {
     });
     s.activate(DEATH_DEALER, { pitch: [RED] })
       .chooseCard("entangling shot|1") // the arrow to load
-      .chooseOption("opposing hero"); // the hero to tap
+      .declareTarget(1); // the hero to tap
     expect(s.state.players[1]!.hero.tapped).toBe(true);
   });
 

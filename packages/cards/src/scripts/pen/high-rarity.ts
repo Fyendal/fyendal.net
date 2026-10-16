@@ -7,10 +7,12 @@ import {
   decisionMessage,
   decisionPrompt,
   entersArenaTrigger,
+  heroTarget,
   leavesArenaTrigger,
   opponentSeat,
   previousAttackHasName,
   queueIntimidate,
+  targetHeroSeat,
 } from "../shared-helpers.js";
 
 const COURAGE = "DTD232";
@@ -436,10 +438,18 @@ export const penHighRarity: Record<string, CardScript> = {
     ],
   },
   "sigil of gravespawning|3": {
-    onCardLeavesGraveyard(ctx, card) {
-      if (has(ctx, card, "aura")) ctx.dealDamage(opponentSeat(ctx), 1, { arcane: true });
-    },
     triggers: [
+      {
+        event: "card-left-graveyard",
+        label: "Deal 1 arcane damage to target hero",
+        labelMessage: decisionMessage("card.trigger.common.arcane.target", { amount: 1 }),
+        condition: (ctx, card) => !!card && has(ctx, card, "aura"),
+        target: heroTarget(),
+        effect(ctx) {
+          const seat = targetHeroSeat(ctx);
+          if (seat !== undefined) ctx.dealDamage(seat, 1, { arcane: true });
+        },
+      },
       { event: "begin-action-phase", label: "Destroy Sigil of Gravespawning", effect: (ctx) => ctx.destroySelf() },
     ],
   },

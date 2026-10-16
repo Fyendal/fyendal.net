@@ -22,7 +22,15 @@ export type TriggerEvent =
   | "wager-generated"
   | "wager-won"
   | "trap-triggered"
-  | "damage-dealt";
+  | "damage-dealt"
+  /** A resolving layer or attack granted its controller go again's action point. */
+  | "go-again-resolved"
+  /** The subject hero gained life. */
+  | "life-gained"
+  /** A permanent or attack the subject controlled was destroyed. */
+  | "card-destroyed"
+  /** A card the subject owns left their graveyard. */
+  | "card-left-graveyard";
 
 /** Event-specific facts captured when a triggered ability is generated. */
 export interface TriggerEventContext {
