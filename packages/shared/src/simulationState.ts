@@ -278,6 +278,7 @@ export interface PersistedModifierV1 {
   onHitScriptHook?: {
     hook: string;
     label: string;
+    labelMessage?: GameMessage;
     heroOnly?: boolean;
     requiresAttackCounter?: string;
     requiresAttackNameContains?: string;
@@ -306,6 +307,7 @@ export interface PersistedModifierV1 {
   appliesToCardType?: string;
   restrictCardPlaysToType?: string;
   ongoingLabel?: string;
+  ongoingLabelMessage?: GameMessage;
   grantsPlayFromZone?: "banish" | "graveyard" | "deck";
   grantsPlayFromZoneOwner?: PlayFromZoneOwner;
   playBaseCostOverride?: number;

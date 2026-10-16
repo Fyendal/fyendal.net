@@ -8,7 +8,7 @@ import { findCardAnywhere, opponent } from "./zoneQueries.js";
 type MessageValues = Record<string, GameMessageValue>;
 
 /** One effect phrase: its English fallback and, unless the text is a
- *  script-supplied label, the semantic catalog message that renders it. */
+ *  script-supplied label without one, the catalog message that renders it. */
 interface Phrase {
   text: string;
   message?: GameMessage;
@@ -83,16 +83,15 @@ function modifierPhrases(state: GameStateInternal, m: Modifier): Phrase[] {
     return count === 1 ? `${article(name)} ${name} token` : `${count} ${name} tokens`;
   };
 
-  if (m.ongoingLabel) parts.push({ text: m.ongoingLabel });
   if (m.basePower !== undefined) {
-    parts.push(phrase(`${m.basePower} base attack`, "engine.effect.part.base.attack", { basePower: m.basePower }));
+    parts.push(phrase(`${m.basePower} base power`, "engine.effect.part.base.attack", { basePower: m.basePower }));
   }
   if (m.attack) {
     const attack = signed(m.attack);
     parts.push(m.defendedLessThanNonEquip === undefined
-      ? phrase(`${attack} attack`, "engine.effect.part.attack", { attack })
+      ? phrase(`${attack} power`, "engine.effect.part.attack", { attack })
       : phrase(
-        `${attack} attack while defended by fewer than ${m.defendedLessThanNonEquip} non-equipment cards`,
+        `${attack} power while defended by fewer than ${m.defendedLessThanNonEquip} non-equipment cards`,
         "engine.effect.part.attack.lightly.defended",
         { attack, defenders: m.defendedLessThanNonEquip },
       ));
@@ -105,7 +104,7 @@ function modifierPhrases(state: GameStateInternal, m: Modifier): Phrase[] {
   parts.push(...costPhrases(m));
   if (m.minimumAttackBasePower !== undefined) {
     parts.push(phrase(
-      `can only play or activate attacks with ${m.minimumAttackBasePower} or more base attack`,
+      `can only play or activate attacks with ${m.minimumAttackBasePower} or more base power`,
       "engine.effect.part.minimum.base.attack",
       { minimumAttack: m.minimumAttackBasePower },
     ));
@@ -151,7 +150,7 @@ function modifierPhrases(state: GameStateInternal, m: Modifier): Phrase[] {
   }
   if (m.goAgainIfAttackPowerAtLeast !== undefined) {
     parts.push(phrase(
-      `go again while it has ${m.goAgainIfAttackPowerAtLeast} or more attack`,
+      `go again while it has ${m.goAgainIfAttackPowerAtLeast} or more power`,
       "engine.effect.part.go.again.if.attack",
       { goAgainAttack: m.goAgainIfAttackPowerAtLeast },
     ));
@@ -191,7 +190,7 @@ function modifierPhrases(state: GameStateInternal, m: Modifier): Phrase[] {
   }
   if (m.powerGainBonus) {
     parts.push(phrase(
-      `the next time an attack would gain attack, it gains ${m.powerGainBonus} more`,
+      `the next time an attack would gain power, it gains ${m.powerGainBonus} more`,
       "engine.effect.part.attack.gain.bonus",
       { gainBonus: m.powerGainBonus },
     ));
@@ -250,8 +249,25 @@ function modifierPhrases(state: GameStateInternal, m: Modifier): Phrase[] {
     ));
   }
   if (m.onHitScriptHook) {
-    // Script-supplied text; it has no catalog message.
-    parts.push({ text: `when it hits${m.onHitScriptHook.heroOnly ? " a hero" : ""}: ${m.onHitScriptHook.label}` });
+    const { heroOnly, label, labelMessage } = m.onHitScriptHook;
+    const text = `when it hits${heroOnly ? " a hero" : ""}: ${label}`;
+    // The script's message is a term inside the phrase, so its values join
+    // the phrase's; the term precedes the phrase so it resolves first.
+    parts.push(labelMessage
+      ? phrase(text, "engine.effect.part.on.hit.script", {
+        ...labelMessage.values,
+        hitTarget: heroOnly ? "hero" : "any",
+        hitEffect: { kind: "term", id: labelMessage.id },
+      })
+      : { text });
+  }
+  if (m.onDamageDealtCreateTokenPerPoint) {
+    const cardId = m.onDamageDealtCreateTokenPerPoint;
+    parts.push(phrase(
+      `whenever it deals damage to a hero, create that many ${nameOf(cardId)} tokens under their control`,
+      "engine.effect.part.damage.create.tokens",
+      { damageToken: cardValue(cardId) },
+    ));
   }
   if (m.onDefendedDealDamage) {
     parts.push(phrase(
@@ -266,7 +282,7 @@ function modifierPhrases(state: GameStateInternal, m: Modifier): Phrase[] {
   if (m.onBoostAttack) {
     const boostAttack = signed(m.onBoostAttack);
     parts.push(phrase(
-      `the next attack you boost gets ${boostAttack} attack`,
+      `the next attack you boost gets ${boostAttack} power`,
       "engine.effect.part.on.boost.attack",
       { boostAttack },
     ));
@@ -371,6 +387,14 @@ function modifierPhrases(state: GameStateInternal, m: Modifier): Phrase[] {
         "engine.effect.part.prevent.small.damage",
         { maxEvent: m.maxDamageEventAmount },
       ));
+    } else if (m.appliesToDamageRecipientType) {
+      const recipientType = typeWord(m.appliesToDamageRecipientType);
+      parts.push(phrase(
+        `prevent next ${m.preventNextDamageAmount} damage to you ` +
+          `or ${article(recipientType)} ${recipientType} you control`,
+        "engine.effect.part.prevent.damage.recipient.type",
+        { amount: m.preventNextDamageAmount, recipientType, recipientTypeArticle: article(recipientType) },
+      ));
     } else if (m.appliesToDamageSourceType) {
       const sourceType = typeWord(m.appliesToDamageSourceType);
       parts.push(phrase(
@@ -437,7 +461,11 @@ function modifierPhrases(state: GameStateInternal, m: Modifier): Phrase[] {
   if (m.suppressesHeroAbilities || m.suppressesHeroAbilitiesDuringActionPhase) {
     parts.push(phrase("hero loses all abilities", "engine.effect.summary.loses.all.abilities"));
   }
-  return parts.length > 0 ? parts : [phrase("ongoing effect", "engine.effect.summary.ongoing")];
+  // A script's label describes riders its fields can't, so it follows them.
+  if (m.ongoingLabel) {
+    parts.push({ text: m.ongoingLabel, ...(m.ongoingLabelMessage ? { message: m.ongoingLabelMessage } : {}) });
+  }
+  return parts;
 }
 
 /** Modifiers whose effect lands on matching attacks, cards, or defenders, so
@@ -454,6 +482,7 @@ function affectsObjects(m: Modifier): boolean {
     m.grantKeyword || m.suppressKeyword || m.grantType || m.grantName || m.basePower !== undefined ||
     m.onHitGoAgain || m.onHitDraw || m.onHitCreateToken || m.onHitLoseLife || m.onHitDealDamage ||
     m.onHitMark || m.onHitScriptHook || m.onHitDestroyTopDeckCards || m.onDefendedDealDamage ||
+    m.onDamageDealtCreateTokenPerPoint ||
     m.suppressHitEffects || m.damage || m.damageUnpreventable || m.goAgainIfPlayedOrCreatedSubtype ||
     m.goAgainIfAttackPowerAtLeast !== undefined || m.goAgainIfDefendedByAttackAction ||
     m.maxNonBlockDefenders !== undefined || m.replaceCombatDamageWithDefendingEquipment ||
@@ -465,7 +494,7 @@ function affectsObjects(m: Modifier): boolean {
 type SubjectNoun =
   | "attack" | "attackAction" | "weaponAttack" | "attackWith" | "instance" | "named"
   | "card" | "actionCard" | "nonAttackActionCard" | "instantCard" | "reactionCard"
-  | "attackReactionCard" | "defenseReactionCard" | "equipment";
+  | "attackReactionCard" | "defenseReactionCard" | "equipment" | "weapon";
 
 const SUBJECT_NOUNS: Record<Exclude<SubjectNoun, "attackWith" | "instance" | "named">, [string, string]> = {
   attack: ["attack", "attacks"],
@@ -479,6 +508,7 @@ const SUBJECT_NOUNS: Record<Exclude<SubjectNoun, "attackWith" | "instance" | "na
   attackReactionCard: ["attack reaction card", "attack reaction cards"],
   defenseReactionCard: ["defense reaction card", "defense reaction cards"],
   equipment: ["equipment", "equipment"],
+  weapon: ["weapon", "weapons"],
 };
 
 /** The attacks or cards a modifier matches, as a singular and plural English
@@ -495,7 +525,7 @@ function describeSubject(
   state: GameStateInternal,
   m: Modifier,
   base: "attack" | "card",
-  options: { defending?: boolean; next?: boolean } = {},
+  options: { defending?: boolean; next?: boolean; weapon?: boolean } = {},
 ): Subject {
   const values: MessageValues = {};
   const subtypes = subtypesOf(m);
@@ -531,6 +561,8 @@ function describeSubject(
     noun = "attackAction";
   } else if (m.appliesTo === "weapon") {
     noun = "weaponAttack";
+  } else if (options.weapon) {
+    noun = "weapon";
   } else {
     noun = base;
   }
@@ -590,12 +622,12 @@ function describeSubject(
     typeText || undefined,
   ].filter((word): word is string => word !== undefined).join(" ");
   const suffix = [
-    keyword === "none" ? "" : keyword === "powerCounter" ? " with a +1 attack counter" : ` with ${keyword}`,
+    keyword === "none" ? "" : keyword === "powerCounter" ? " with a +1 power counter" : ` with ${keyword}`,
     limit === undefined ? ""
       : limit[0] === "costMax" ? ` with cost ${limit[1]} or less`
       : limit[0] === "costMin" ? ` with cost ${limit[1]} or more`
-      : limit[0] === "powerMax" ? ` with ${limit[1]} or less base attack`
-      : ` with ${limit[1]} or more base attack`,
+      : limit[0] === "powerMax" ? ` with ${limit[1]} or less base power`
+      : ` with ${limit[1]} or more base power`,
     via === "arsenal" ? " from arsenal" : "",
     target === "type" ? ` targeting ${targetArticle} ${targetName} hero`
       : target === "name" ? ` targeting ${targetName}`
@@ -703,18 +735,20 @@ function lingeringSubjectDuration(state: GameStateInternal, m: Modifier): Effect
   );
 }
 
+// Stored replays still carry the earlier engine.effect.duration.next.card.* and
+// cards.* durations, so the catalogs keep those keys.
 const CHAIN_SPANS = {
   "combat-chain": {
     text: "this combat chain",
     whole: "engine.effect.duration.this.combat.chain",
-    next: "engine.effect.duration.next.card.this.chain",
-    every: "engine.effect.duration.cards.this.chain",
+    next: "engine.effect.duration.next.subject.this.chain",
+    every: "engine.effect.duration.subject.this.chain",
   },
   "chain-link": {
     text: "this chain link",
     whole: "engine.effect.duration.this.chain.link",
-    next: "engine.effect.duration.next.card.this.link",
-    every: "engine.effect.duration.cards.this.link",
+    next: "engine.effect.duration.next.subject.this.link",
+    every: "engine.effect.duration.subject.this.link",
   },
 } as const;
 
@@ -724,17 +758,14 @@ type ChainSpan = (typeof CHAIN_SPANS)[keyof typeof CHAIN_SPANS];
  *  single-use one applies to the next matching card played or activated before
  *  its span ends; otherwise every matching card does until then. A weapon
  *  attack activation discount names weapons instead of cards. */
-function chainCardDuration(m: Modifier, span: ChainSpan): EffectDuration {
-  const subtypes = subtypesOf(m);
-  const subtype = subtypes.length === 1 ? subtypes[0]!.toLowerCase() : undefined;
-  const cardType = m.appliesToCardType;
-  const noun = m.attackActivationCostReduction ? "weapon" : "card";
-  const values = { subtype: subtype ?? "any", cardType: cardType ?? "any", noun };
-  const qualifier = [subtype === undefined ? undefined : typeWord(subtype), cardType]
-    .filter((value): value is string => value !== undefined).map((value) => `${value} `).join("");
-  if (m.once) return duration("once", `next ${qualifier}${noun} ${span.text}`, span.next, values);
-  if (!qualifier && noun === "card") return duration("chain", span.text, span.whole);
-  return duration("chain", `${qualifier}${noun}s ${span.text}`, span.every, values);
+function chainCardDuration(state: GameStateInternal, m: Modifier, span: ChainSpan): EffectDuration {
+  const subject = describeSubject(state, m, "card", {
+    next: m.once === true,
+    weapon: Boolean(m.attackActivationCostReduction),
+  });
+  if (m.once) return subjectDuration("once", `next ${subject.one} ${span.text}`, span.next, subject, "one");
+  if (!subject.qualified) return duration("chain", span.text, span.whole);
+  return subjectDuration("chain", `${subject.other} ${span.text}`, span.every, subject, "other");
 }
 
 function modifierDuration(state: GameStateInternal, m: Modifier): EffectDuration {
@@ -745,12 +776,20 @@ function modifierDuration(state: GameStateInternal, m: Modifier): EffectDuration
   }
   if (m.scope === "next-attack") return nextDuration(state, m, "attack");
   if (m.scope === "next-play") return nextDuration(state, m, "card");
-  if (m.scope === "combat-chain" || m.scope === "chain-link") return chainCardDuration(m, CHAIN_SPANS[m.scope]);
+  if (m.scope === "combat-chain" || m.scope === "chain-link") return chainCardDuration(state, m, CHAIN_SPANS[m.scope]);
   // An end-of-seat-turn effect lasts through the current turn only once that
   // seat's turn has begun since the effect was created.
   const endsThisTurn = m.expiresAtEndOfSeatTurn === state.activePlayer && (m.createdTurn ?? -1) < state.turn;
   if (m.expiresAtEndOfSeatTurn !== undefined && !endsThisTurn) {
     return duration("later", "next turn", "engine.effect.duration.next.turn");
+  }
+  // "Until the start of your next turn": turns alternate, so an absolute
+  // expiry turn names the controller's next turn when its parity matches.
+  const turnsLeft = (m.expiresAtStartOfTurn ?? 0) - state.turn;
+  const untilOwnTurn = m.expiresAtStartOfSeatTurn === m.seat ||
+    (turnsLeft > 0 && turnsLeft % 2 === (m.seat === state.activePlayer ? 0 : 1));
+  if (untilOwnTurn) {
+    return duration("later", "until the start of your next turn", "engine.effect.duration.until.your.next.turn");
   }
   const subject = lingeringSubjectDuration(state, m);
   if (subject) return subject;
@@ -842,7 +881,7 @@ export function projectOngoingEffects(
       byKey.set(key, effect);
     } else if (phraseText(entry.phrases) === phraseText(effect.phrases)) {
       // Repeated identical effects stay separate so the client stacks them
-      // ("+1 attack ×3") instead of reading "+1 attack, +1 attack, +1 attack".
+      // ("+1 power ×3") instead of reading "+1 power, +1 power, +1 power".
       let copy = 2;
       while (byKey.has(`${key}#${copy}`)) copy += 1;
       byKey.set(`${key}#${copy}`, effect);
@@ -855,12 +894,23 @@ export function projectOngoingEffects(
       ? { cardId: "", sourceHidden: true }
       : { cardId: card.cardId };
 
+  const phrasesOf = new Map(state.modifiers.map((m) => [m, modifierPhrases(state, m)] as const));
+  // A bare marker only keeps its source's script observable. When the source
+  // owns a described modifier, even a consumed one, that modifier carries the
+  // effect's label.
+  const describedSources = new Set(
+    state.modifiers
+      .filter((m) => phrasesOf.get(m)!.length > 0)
+      .map((m) => `${m.sourceInstanceId}:${m.seat}`),
+  );
   for (const m of state.modifiers) {
     if (m.consumed) continue;
     const surfacedChainCost = (m.scope === "combat-chain" || m.scope === "chain-link") &&
       Boolean(m.playCostReduction || m.activationCostReduction || m.attackActivationCostReduction);
     if (!surfacedChainCost &&
       m.scope !== "next-attack" && m.scope !== "next-play" && m.scope !== "until-end-of-turn") continue;
+    const phrases = phrasesOf.get(m)!;
+    if (phrases.length === 0 && describedSources.has(`${m.sourceInstanceId}:${m.seat}`)) continue;
     const src = findCardAnywhere(state, m.sourceInstanceId);
     const effectDuration = modifierDuration(state, m);
     // One source's modifiers merge only when they share a duration, so each
@@ -868,7 +918,7 @@ export function projectOngoingEffects(
     add(`${m.sourceInstanceId}:${m.seat}:${m.scope}:${effectDuration.text}`, {
       seat: m.seat,
       ...(src ? { ...sourceIdentity(src.card), sourceSeat: src.seat } : { cardId: m.sourceCardId ?? "" }),
-      phrases: modifierPhrases(state, m),
+      phrases: phrases.length > 0 ? phrases : [phrase("ongoing effect", "engine.effect.summary.ongoing")],
       duration: effectDuration,
     });
   }
@@ -971,7 +1021,7 @@ export function projectOngoingEffects(
     if ((counters?.halveBaseAttackActionUntil ?? 0) >= state.turn) {
       addHeroEffect(
         "halve-base",
-        "attack action base attack and defense are halved",
+        "base power and defense of attack action cards are halved",
         message("engine.effect.summary.halve.base"),
         duration("later", "through next turn", "engine.effect.duration.through.next.turn"),
         opponentSeat,
@@ -981,7 +1031,7 @@ export function projectOngoingEffects(
       const limit = counters?.attackActionBasePowerLimit ?? 0;
       addHeroEffect(
         "base-power-limit",
-        `can't play attack actions with base attack ${limit} or less`,
+        `can't play attack action cards with base power ${limit} or less`,
         message("engine.effect.summary.base.power.limit", { limit }),
         duration("later", "next action phase", "engine.effect.duration.next.action.phase"),
         opponentSeat,
@@ -990,7 +1040,7 @@ export function projectOngoingEffects(
     if ((counters?.attackActionNoPowerGainUntilTurn ?? 0) >= state.turn) {
       addHeroEffect(
         "no-power-gain",
-        "attack action cards can't gain attack",
+        "attack action cards can't gain power",
         message("engine.effect.summary.no.power.gain"),
         duration("later", "next action phase", "engine.effect.duration.next.action.phase"),
         opponentSeat,
@@ -1005,13 +1055,15 @@ export function projectOngoingEffects(
         opponentSeat,
       );
     }
-    const nextActionExtraCost = firstActionExtraCost(state, player);
-    if (nextActionExtraCost > 0) {
+    // Stored replays still carry engine.effect.summary.next.action.cost and
+    // engine.effect.duration.next.action, so the catalogs keep those keys.
+    const firstActionCost = firstActionExtraCost(state, player);
+    if (firstActionCost > 0) {
       addHeroEffect(
         "next-action-cost",
-        `next action costs +${nextActionExtraCost} resource`,
-        message("engine.effect.summary.next.action.cost", { amount: nextActionExtraCost }),
-        duration("once", "next action", "engine.effect.duration.next.action"),
+        `costs ${firstActionCost} more to play or activate`,
+        message("engine.effect.part.cost", { cost: firstActionCost, costChange: "more", costAction: "both" }),
+        duration("once", "first action this turn", "engine.effect.duration.first.action.this.turn"),
         opponentSeat,
       );
     }

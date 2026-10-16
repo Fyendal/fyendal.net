@@ -57,7 +57,7 @@ describe("suspense and crowd auras trigger through the stack", () => {
     const g = pleiadesRemovesLastCounter("tension in the air|3", ["head jab|1"]);
 
     // The leave trigger goes above the Pleiades ability before priority.
-    expect(g.stackLabels()).toEqual(["Your next attack this turn gets +2 attack", "Pleiades, Superstar"]);
+    expect(g.stackLabels()).toEqual(["Your next attack this turn gets +2 power", "Pleiades, Superstar"]);
     g.expectInZone(0, "tension in the air|3", "graveyard");
     expect(g.state.players[0]!.flags.suspenseAurasLeftThisTurn).toBe(1);
 
@@ -71,7 +71,7 @@ describe("suspense and crowd auras trigger through the stack", () => {
     const g = pleiadesRemovesLastCounter("leave them hanging|1", [], ["head jab|1"]);
 
     expect(g.state.pendingDecision?.chooseHook).not.toBe("trigger-order");
-    expect(g.stackLabels()).toEqual(["Your next attack this turn gets +4 attack", "Pleiades, Superstar"]);
+    expect(g.stackLabels()).toEqual(["Your next attack this turn gets +4 power", "Pleiades, Superstar"]);
 
     g.passPriority().passPriority();
     g.expectInZone(1, "head jab|1", "hand");

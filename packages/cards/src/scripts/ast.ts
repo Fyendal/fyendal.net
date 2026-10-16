@@ -8,6 +8,7 @@ import {
   decisionMessage,
   decisionPrompt,
   localizedCardLog,
+  ongoingLabel,
   opponentSeat,
 } from "./shared-helpers.js";
 
@@ -127,8 +128,13 @@ export const ast: Record<string, CardScript> = {
   },
   "arc lightning|2": {
     onPlay(ctx) {
-      ctx.addModifier({ scope: "until-end-of-turn" });
-      ctx.addModifier({ scope: "next-attack", goAgain: true });
+      ctx.addModifier({
+        scope: "until-end-of-turn",
+        ...ongoingLabel("deal 1 arcane damage to any target whenever you go again", "card.effect.ast.arclightning"),
+      });
+      // The flag grants the go again; this modifier shows it and only an
+      // attack action card may consume it, never a weapon attack.
+      ctx.addModifier({ scope: "next-attack", goAgain: true, appliesToCardType: "action" });
       ctx.setFlag("player", "nextActionCardGoAgain", true);
     },
     onFriendlyPlay(ctx, played) {

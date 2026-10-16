@@ -7,6 +7,7 @@ import {
   decisionMessage,
   decisionPrompt,
   heroTarget,
+  hitHookLabel,
   opponentSeat,
   targetHeroSeat,
   weaponAttackCount,
@@ -661,7 +662,7 @@ export const monHighRarity: Record<string, CardScript> = {
         // banish it." — routed to onGrantedHit below when the buffed attack hits
         onHitScriptHook: {
           hook: "shadow-puppetry-hit",
-          label: "look at the top card of your deck and you may banish it",
+          ...hitHookLabel("look at the top card of your deck and you may banish it", "card.effect.mon.shadowpuppetry"),
         },
       });
     },

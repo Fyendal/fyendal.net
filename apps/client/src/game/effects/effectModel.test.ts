@@ -93,7 +93,7 @@ describe("effectText", () => {
 
   it("renders composed summaries and qualified durations in English", () => {
     expect(effectText(createTestIntl("en"), draconicDiscount)).toEqual({
-      summary: "+2 attack, costs 1 less to play or activate",
+      summary: "+2 power, costs 1 less to play or activate",
       duration: "next Draconic attack this combat chain",
     });
   });

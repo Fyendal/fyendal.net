@@ -2999,6 +2999,998 @@
       "value": "Choose a Guardian off-hand"
     }
   ],
+  "card.effect.aac.invertersnightcowl": [
+    {
+      "type": 0,
+      "value": "gain 1 resource whenever you play a card with stealth"
+    }
+  ],
+  "card.effect.aaz.targettotalizer": [
+    {
+      "type": 0,
+      "value": "draw a card whenever an arrow with an aim counter hits"
+    }
+  ],
+  "card.effect.aio.heavyindustrypowerplant": [
+    {
+      "type": 0,
+      "value": "gain 1 resource whenever you boost"
+    }
+  ],
+  "card.effect.ama.dropdeadbodice": [
+    {
+      "type": 0,
+      "value": "gain 1 resource whenever a zombie is put into your graveyard"
+    }
+  ],
+  "card.effect.ama.zombiedestroy": [
+    {
+      "type": 0,
+      "value": "destroy the attacking zombie when it hits"
+    }
+  ],
+  "card.effect.aol.bellybuster": [
+    {
+      "type": 0,
+      "value": "when it attacks a hero, you may wager with them"
+    }
+  ],
+  "card.effect.aol.checkraise": [
+    {
+      "type": 0,
+      "value": "the next attack you control that wagers gets +"
+    },
+    {
+      "type": 1,
+      "value": "wagerAttack"
+    },
+    {
+      "type": 0,
+      "value": " power"
+    }
+  ],
+  "card.effect.aol.headsup": [
+    {
+      "type": 0,
+      "value": "dominate if it wagers"
+    }
+  ],
+  "card.effect.arc.highoctane": [
+    {
+      "type": 0,
+      "value": "gain 1 action point whenever you boost"
+    }
+  ],
+  "card.effect.arc.mordredtide": [
+    {
+      "type": 0,
+      "value": "create 1 more Runechant token whenever you create Runechant tokens"
+    }
+  ],
+  "card.effect.arc.plunderrun": [
+    {
+      "type": 0,
+      "value": "draw a card the next time an attack action card you control hits"
+    }
+  ],
+  "card.effect.ast.arclightning": [
+    {
+      "type": 0,
+      "value": "deal 1 arcane damage to any target whenever you go again"
+    }
+  ],
+  "card.effect.common.attack.if.color": [
+    {
+      "type": 0,
+      "value": "+1 power if it's "
+    },
+    {
+      "type": 5,
+      "value": "attackColor",
+      "options": {
+        "red": {
+          "value": [
+            {
+              "type": 0,
+              "value": "red"
+            }
+          ]
+        },
+        "yellow": {
+          "value": [
+            {
+              "type": 0,
+              "value": "yellow"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 0,
+              "value": "blue"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "card.effect.common.bloodrot.create.hit.hero": [
+    {
+      "type": 0,
+      "value": "when it hits a hero, create a Bloodrot Pox token under their control"
+    }
+  ],
+  "card.effect.common.corruptedcorpse.create": [
+    {
+      "type": 0,
+      "value": "create a Corrupted Corpse in your banished zone"
+    }
+  ],
+  "card.effect.common.frailty.create.hit.hero": [
+    {
+      "type": 0,
+      "value": "when it hits a hero, create a Frailty token under their control"
+    }
+  ],
+  "card.effect.common.frostbite.onhit": [
+    {
+      "type": 0,
+      "value": "whenever an attack hits a hero, create a Frostbite token under their control"
+    }
+  ],
+  "card.effect.common.gold.create": [
+    {
+      "type": 0,
+      "value": "create a Gold token"
+    }
+  ],
+  "card.effect.common.gold.create.hit.hero": [
+    {
+      "type": 0,
+      "value": "create a Gold token when it hits a hero"
+    }
+  ],
+  "card.effect.common.hand.discard.choose": [
+    {
+      "type": 0,
+      "value": "look at their hand and choose a card for them to discard"
+    }
+  ],
+  "card.effect.common.inertia.create.hit.hero": [
+    {
+      "type": 0,
+      "value": "when it hits a hero, create an Inertia token under their control"
+    }
+  ],
+  "card.effect.common.mark.attack.hit": [
+    {
+      "type": 0,
+      "value": "when the attack hits a hero, mark them"
+    }
+  ],
+  "card.effect.common.wager.agility": [
+    {
+      "type": 0,
+      "value": "when it attacks a hero, you may wager an Agility token with them"
+    }
+  ],
+  "card.effect.common.wager.attack": [
+    {
+      "type": 0,
+      "value": "wager with the defending hero when it attacks"
+    }
+  ],
+  "card.effect.common.wager.gold": [
+    {
+      "type": 0,
+      "value": "when it attacks a hero, you may wager a Gold token with them"
+    }
+  ],
+  "card.effect.common.wager.might": [
+    {
+      "type": 0,
+      "value": "when it attacks a hero, you may wager a Might token with them"
+    }
+  ],
+  "card.effect.common.wager.vigor": [
+    {
+      "type": 0,
+      "value": "when it attacks a hero, you may wager a Vigor token with them"
+    }
+  ],
+  "card.effect.cru.poisonthetips": [
+    {
+      "type": 0,
+      "value": "whenever an arrow you control hits a hero, they discard a card"
+    }
+  ],
+  "card.effect.cru.spoilsofwar": [
+    {
+      "type": 0,
+      "value": "create 2 Copper tokens whenever a weapon you control hits"
+    }
+  ],
+  "card.effect.cru.viziertronicmodeli": [
+    {
+      "type": 0,
+      "value": "whenever you boost, draw a card then put a card from your hand on top of your deck"
+    }
+  ],
+  "card.effect.dtd.censor": [
+    {
+      "type": 0,
+      "value": "can't play cards named "
+    },
+    {
+      "type": 1,
+      "value": "name"
+    }
+  ],
+  "card.effect.dtd.hacktoreality": [
+    {
+      "type": 0,
+      "value": "when it hits a hero, destroy a non-token aura they own with cost no greater than the damage dealt"
+    }
+  ],
+  "card.effect.dtd.poisonthewell": [
+    {
+      "type": 0,
+      "value": "the next time a hero would gain life, they lose that much life instead"
+    }
+  ],
+  "card.effect.dvr.glisteningsteelblade": [
+    {
+      "type": 0,
+      "value": "whenever Dawnblade hits a hero, put a +1 power counter on it"
+    }
+  ],
+  "card.effect.dyn.amethysttiara": [
+    {
+      "type": 0,
+      "value": "Runechants you control have spellvoid 1"
+    }
+  ],
+  "card.effect.dyn.berserk": [
+    {
+      "type": 0,
+      "value": "whenever a card with 6 or more power is discarded at random, banish it and reveal the top card of your deck; draw if it has 6 or more power"
+    }
+  ],
+  "card.effect.dyn.biosupdate": [
+    {
+      "type": 0,
+      "value": "put the next Mechanologist item with cost 2 or less banished to pay a boost cost into the arena"
+    }
+  ],
+  "card.effect.dyn.brainstorm": [
+    {
+      "type": 0,
+      "value": "deal 1 arcane damage to any target whenever you draw a card during the action phase"
+    }
+  ],
+  "card.effect.dyn.buckle": [
+    {
+      "type": 0,
+      "value": "destroy an equipment they control with a -1 defense counter on it"
+    }
+  ],
+  "card.effect.dyn.immobilizingshot": [
+    {
+      "type": 0,
+      "value": "can't play more than 1 attack action card and 1 non-attack action card"
+    }
+  ],
+  "card.effect.dyn.imperialedict": [
+    {
+      "type": 1,
+      "value": "name"
+    },
+    {
+      "type": 0,
+      "value": " can't be played"
+    }
+  ],
+  "card.effect.dyn.tempestaurora": [
+    {
+      "type": 0,
+      "value": "the next card you play with cost "
+    },
+    {
+      "type": 1,
+      "value": "cost"
+    },
+    {
+      "type": 0,
+      "value": " or less and an arcane damage effect deals 1 more arcane damage"
+    }
+  ],
+  "card.effect.ele.bramblespark": [
+    {
+      "type": 0,
+      "value": "the next attack action card you play deals 1 arcane damage to target hero when it attacks"
+    }
+  ],
+  "card.effect.ele.bramblespark.fused": [
+    {
+      "type": 0,
+      "value": "the next attack action card you play gets +"
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " power and deals 1 arcane damage to target hero when it attacks"
+    }
+  ],
+  "card.effect.ele.buzzbolt": [
+    {
+      "type": 0,
+      "value": "whenever an attack hits a hero, it deals 1 damage to them"
+    }
+  ],
+  "card.effect.ele.chillingicevein": [
+    {
+      "type": 0,
+      "value": "whenever an attack hits a hero, they discard a card unless they pay 1 resource"
+    }
+  ],
+  "card.effect.ele.chilltothebone": [
+    {
+      "type": 0,
+      "value": "the next time an Ice or Elemental attack hits a hero, create "
+    },
+    {
+      "type": 6,
+      "value": "amount",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 0,
+              "value": "a Frostbite token"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " Frostbite tokens"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    },
+    {
+      "type": 0,
+      "value": " under their control"
+    }
+  ],
+  "card.effect.ele.electrify": [
+    {
+      "type": 0,
+      "value": "the next time an attack action card hits a hero, it deals "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " damage to them"
+    }
+  ],
+  "card.effect.ele.invigorate": [
+    {
+      "type": 0,
+      "value": "the next attack you fuse gets +"
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " power"
+    }
+  ],
+  "card.effect.ele.weaveearth": [
+    {
+      "type": 0,
+      "value": "the next Earth or Elemental attack action card you play gets +"
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " power, +"
+    },
+    {
+      "type": 1,
+      "value": "fusedAmount"
+    },
+    {
+      "type": 0,
+      "value": " if it's fused"
+    }
+  ],
+  "card.effect.ele.weaveice": [
+    {
+      "type": 0,
+      "value": "the next Ice or Elemental attack action card you play gets +"
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " power, and dominate if it's fused"
+    }
+  ],
+  "card.effect.ele.weavelightning": [
+    {
+      "type": 0,
+      "value": "go again if it's fused"
+    }
+  ],
+  "card.effect.evo.warbandofbellona": [
+    {
+      "type": 0,
+      "value": "the next time you attack, you may charge your hero's soul, and draw a card if a yellow card is charged"
+    }
+  ],
+  "card.effect.evr.amuletofassertiveness": [
+    {
+      "type": 0,
+      "value": "when the target attack hits, banish the top card of your deck; you may play it if it's an attack action card"
+    }
+  ],
+  "card.effect.evr.highstriker": [
+    {
+      "type": 0,
+      "value": "create "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " Copper tokens the next time an attack you control hits"
+    }
+  ],
+  "card.effect.evr.outlandskirmish": [
+    {
+      "type": 0,
+      "value": "create a Copper token the next time a weapon hits"
+    }
+  ],
+  "card.effect.evr.sliceanddice": [
+    {
+      "type": 0,
+      "value": "your first sword or dagger weapon attack gets +1 power and your second gets +"
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " power"
+    }
+  ],
+  "card.effect.evr.smashinggoodtime": [
+    {
+      "type": 0,
+      "value": "the next time an attack action card hits a hero, you may destroy an item with cost 2 or less they control"
+    }
+  ],
+  "card.effect.evr.thisroundsonme": [
+    {
+      "type": 0,
+      "value": "attacks that target you get -1 power"
+    }
+  ],
+  "card.effect.hnt.imperialsealofcommand": [
+    {
+      "type": 0,
+      "value": "destroy all cards in their arsenal the next time you hit a hero"
+    }
+  ],
+  "card.effect.hnt.poisonedblade": [
+    {
+      "type": 0,
+      "value": "whenever a dagger you own hits a hero, they lose 1 life"
+    }
+  ],
+  "card.effect.hvy.doubledown": [
+    {
+      "type": 0,
+      "value": "the next attack that wagers gets +3 power and overpower, wagers create 1 more of each token"
+    }
+  ],
+  "card.effect.hvy.goodtimechapeau": [
+    {
+      "type": 0,
+      "value": "when it attacks a hero, wager a Might and a Vigor token with them"
+    }
+  ],
+  "card.effect.hvy.rippleaway": [
+    {
+      "type": 0,
+      "value": "action card effects create 1 fewer of each token"
+    }
+  ],
+  "card.effect.hvy.talkabiggame": [
+    {
+      "type": 0,
+      "value": "the next time you deal at least the chosen amount of damage to a hero, create that many Might tokens"
+    }
+  ],
+  "card.effect.iar.embracesin": [
+    {
+      "type": 0,
+      "value": "may play an aura with Runechant in its name from your banished zone"
+    }
+  ],
+  "card.effect.iar.exorcism": [
+    {
+      "type": 0,
+      "value": "turn all cards in the hit hero's banished zone face-down"
+    }
+  ],
+  "card.effect.iar.freshfromtheforge": [
+    {
+      "type": 0,
+      "value": "remove a +1 power counter to mark the hit hero"
+    }
+  ],
+  "card.effect.iar.headbangingchorus": [
+    {
+      "type": 0,
+      "value": "if you have no cards in hand, draw a card"
+    }
+  ],
+  "card.effect.iar.stepthroughrealms": [
+    {
+      "type": 0,
+      "value": "create a Gate to i'Arathael"
+    }
+  ],
+  "card.effect.mon.eclipseexistence": [
+    {
+      "type": 0,
+      "value": "whenever an attack hits a Light hero, you may banish a card from their soul and they lose 1 life"
+    }
+  ],
+  "card.effect.mon.seedsofagony": [
+    {
+      "type": 0,
+      "value": "your next attack action card with cost "
+    },
+    {
+      "type": 1,
+      "value": "cost"
+    },
+    {
+      "type": 0,
+      "value": " or less deals 1 arcane damage to target hero when it attacks"
+    }
+  ],
+  "card.effect.mon.shadowpuppetry": [
+    {
+      "type": 0,
+      "value": "look at the top card of your deck and you may banish it"
+    }
+  ],
+  "card.effect.mpa.outbreak": [
+    {
+      "type": 0,
+      "value": "create a Frailty, Inertia, and Bloodrot Pox token under the hit hero's control"
+    }
+  ],
+  "card.effect.mpa.prolongedillness": [
+    {
+      "type": 0,
+      "value": "whenever a disease token is destroyed, if it's the first with that name, create a copy of it under the same hero's control"
+    }
+  ],
+  "card.effect.mpw.allin": [
+    {
+      "type": 0,
+      "value": "your next sword attack destroys all your Gold for +2 power each, and you lose the game if it doesn't hit"
+    }
+  ],
+  "card.effect.mpw.belowthebelt": [
+    {
+      "type": 0,
+      "value": "when it hits a Warrior hero, destroy a card in their arsenal"
+    }
+  ],
+  "card.effect.mpw.bladerush": [
+    {
+      "type": 0,
+      "value": "your first sword attack gets go again and your second sword attack gets +1 power"
+    }
+  ],
+  "card.effect.mpw.crimsonwaltz": [
+    {
+      "type": 0,
+      "value": "when it attacks, draw a card, then put a card from your hand on top of your deck"
+    }
+  ],
+  "card.effect.mpw.engagesteel": [
+    {
+      "type": 0,
+      "value": "+1 power if defended by a Warrior card"
+    }
+  ],
+  "card.effect.mpw.shattertheweakpoint": [
+    {
+      "type": 0,
+      "value": "when it hits a Warrior hero, destroy an equipment they control with 0 defense"
+    }
+  ],
+  "card.effect.mpw.steeltothedome": [
+    {
+      "type": 0,
+      "value": "when it hits a Warrior hero, they discard a card"
+    }
+  ],
+  "card.effect.mpw.termsofcombat": [
+    {
+      "type": 0,
+      "value": "draw a card whenever a defense reaction is played or activated against it"
+    }
+  ],
+  "card.effect.mst.firsttenetofchimoon": [
+    {
+      "type": 0,
+      "value": "draw a card the next time you attack with a blue card"
+    }
+  ],
+  "card.effect.mst.justanick": [
+    {
+      "type": 0,
+      "value": "banish the top card of the defending hero's deck"
+    }
+  ],
+  "card.effect.mst.nuu": [
+    {
+      "type": 0,
+      "value": "may play blue cards from the opposing hero's banished zone without paying their resource cost"
+    }
+  ],
+  "card.effect.mst.shiftingwindsofthemysticbeast": [
+    {
+      "type": 0,
+      "value": "name a card whenever you play a Crouching Tiger; it gets that name"
+    }
+  ],
+  "card.effect.mst.vengefulapparition": [
+    {
+      "type": 0,
+      "value": "may play your next aura with cost "
+    },
+    {
+      "type": 1,
+      "value": "cost"
+    },
+    {
+      "type": 0,
+      "value": " or less as though it were an instant, with a +1 power counter"
+    }
+  ],
+  "card.effect.omn.abitofftheside": [
+    {
+      "type": 0,
+      "value": "whenever an axe you control hits a hero, they discard a card"
+    }
+  ],
+  "card.effect.omn.gauntletofswordandsorcery": [
+    {
+      "type": 0,
+      "value": "when it attacks, deal 1 arcane damage to the opposing hero; if damage is dealt, it gets +1 power"
+    }
+  ],
+  "card.effect.omn.leechmemory": [
+    {
+      "type": 0,
+      "value": "may put an attack action card from your graveyard on the bottom of your deck whenever it damages a hero"
+    }
+  ],
+  "card.effect.omn.leechrenown": [
+    {
+      "type": 0,
+      "value": "destroy an aura token they control whenever it damages a hero"
+    }
+  ],
+  "card.effect.omn.leechvitality": [
+    {
+      "type": 0,
+      "value": "gain 1 life whenever it damages a hero"
+    }
+  ],
+  "card.effect.omn.livewirepress": [
+    {
+      "type": 0,
+      "value": "deal 4 damage to them when it hits a hero"
+    }
+  ],
+  "card.effect.omn.mercurialskies": [
+    {
+      "type": 0,
+      "value": "may destroy a Lightning Flow to deal "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " arcane damage the first time it damages a hero"
+    }
+  ],
+  "card.effect.omn.quicksuccession": [
+    {
+      "type": 6,
+      "value": "count",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 0,
+              "value": "your next attack gets +1 power while it has go again"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 0,
+              "value": "your next "
+            },
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " attacks get +1 power while they have go again"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    }
+  ],
+  "card.effect.omn.settlethebill": [
+    {
+      "type": 0,
+      "value": "the arrow destroys a card in their arsenal when it hits a hero"
+    }
+  ],
+  "card.effect.out.amnesia": [
+    {
+      "type": 0,
+      "value": "cards and tokens they own lose and can't gain names"
+    }
+  ],
+  "card.effect.out.burdensofthepast": [
+    {
+      "type": 0,
+      "value": "can't play defense reaction cards with the same name as a card in their graveyard"
+    }
+  ],
+  "card.effect.out.maskofshiftingperspectives": [
+    {
+      "type": 0,
+      "value": "whenever a dagger hits, may put a card from your hand on the bottom of your deck to draw a card"
+    }
+  ],
+  "card.effect.out.premeditate": [
+    {
+      "type": 0,
+      "value": "the next time an attack action card hits a hero, create a Ponder token"
+    }
+  ],
+  "card.effect.out.toxictips": [
+    {
+      "type": 0,
+      "value": "create a Frailty, Inertia, or Bloodrot Pox token under their control when it hits a hero"
+    }
+  ],
+  "card.effect.pen.cheatingscoundrel.wager": [
+    {
+      "type": 0,
+      "value": "the next time you would lose a wager, you may discard a card to win it instead"
+    }
+  ],
+  "card.effect.pen.rendflesh": [
+    {
+      "type": 0,
+      "value": "remove a +1 power counter for the hit hero to lose 2 life"
+    }
+  ],
+  "card.effect.pen.senseweakness": [
+    {
+      "type": 0,
+      "value": "when it hits a hero, deal damage equal to the damage dealt to each ally they control"
+    }
+  ],
+  "card.effect.pen.verdanttide": [
+    {
+      "type": 0,
+      "value": "create 1 more of each Elemental or Runeblade aura token you create"
+    }
+  ],
+  "card.effect.ros.aetherbindingsofthethirdage": [
+    {
+      "type": 0,
+      "value": "amp 1 whenever an aura you control with Sigil in its name leaves the arena"
+    }
+  ],
+  "card.effect.ros.unsheathed": [
+    {
+      "type": 0,
+      "value": "go again when it attacks if its power is more than twice its base power"
+    }
+  ],
+  "card.effect.sar.spikewithbloodrot": [
+    {
+      "type": 0,
+      "value": "when the attack hits a hero, create a Bloodrot Pox token under their control"
+    }
+  ],
+  "card.effect.saz.droptheanchor": [
+    {
+      "type": 0,
+      "value": "when it hits a hero, tap them and all allies they control"
+    }
+  ],
+  "card.effect.sba.burnup": [
+    {
+      "type": 0,
+      "value": "the next time an attack you control hits a hero, deal 4 arcane damage to them"
+    }
+  ],
+  "card.effect.sbr.seismicsurge": [
+    {
+      "type": 0,
+      "value": "costs 1 less to play"
+    }
+  ],
+  "card.effect.sea.chartacourse": [
+    {
+      "type": 0,
+      "value": "your "
+    },
+    {
+      "type": 5,
+      "value": "attackOrdinal",
+      "options": {
+        "1": {
+          "value": [
+            {
+              "type": 0,
+              "value": "first"
+            }
+          ]
+        },
+        "2": {
+          "value": [
+            {
+              "type": 0,
+              "value": "second"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 0,
+              "value": "third"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "type": 0,
+      "value": " attack gets +3 power"
+    }
+  ],
+  "card.effect.sea.goldbaitedhook": [
+    {
+      "type": 0,
+      "value": "steal a Gold token they control, otherwise create a Gold token"
+    }
+  ],
+  "card.effect.sea.notsofast": [
+    {
+      "type": 0,
+      "value": "the next time an opponent would draw a card from a Gold token, you draw it instead"
+    }
+  ],
+  "card.effect.sea.regaincomposure": [
+    {
+      "type": 0,
+      "value": "untap your hero when it hits"
+    }
+  ],
+  "card.effect.sgb.loothold": [
+    {
+      "type": 0,
+      "value": "when it hits a hero, they discard a card, and if they do, create a Gold token"
+    }
+  ],
+  "card.effect.sgb.lootthearsenal": [
+    {
+      "type": 0,
+      "value": "when it hits a hero, destroy a card in their arsenal, and if you do, create a Gold token"
+    }
+  ],
+  "card.effect.sup.criesofencore": [
+    {
+      "type": 0,
+      "value": "may play an aura of suspense from your graveyard"
+    }
+  ],
+  "card.effect.upr.conduitoffrostburn": [
+    {
+      "type": 0,
+      "value": "the next card you play that deals arcane damage gains: when it deals arcane damage to a hero, destroy a frozen card in their arsenal"
+    }
+  ],
+  "card.effect.upr.liquefy": [
+    {
+      "type": 0,
+      "value": "put a -1 defense counter on an equipment they control, then destroy it if it has 0 defense"
+    }
+  ],
+  "card.effect.upr.sigilofpermafrost": [
+    {
+      "type": 0,
+      "value": "the next time you deal arcane damage to a hero, create that many Frostbite tokens under their control"
+    }
+  ],
+  "card.effect.upr.spreadingflames": [
+    {
+      "type": 0,
+      "value": "Draconic attacks you control get +1 power while their base power is less than the number of Draconic chain links you control"
+    }
+  ],
+  "card.effect.upr.strategicplanning": [
+    {
+      "type": 0,
+      "value": "draw a card at the beginning of the end phase"
+    }
+  ],
+  "card.effect.upr.transmogrify": [
+    {
+      "type": 0,
+      "value": "has "
+    },
+    {
+      "type": 1,
+      "value": "basePower"
+    },
+    {
+      "type": 0,
+      "value": " base power"
+    }
+  ],
   "card.ele.action.top": [
     {
       "type": 0,
@@ -4806,7 +5798,7 @@
   "card.hnt.longwhisker.option.attack": [
     {
       "type": 0,
-      "value": "Target dagger attack gets +2 attack"
+      "value": "Target dagger attack gets +2 power"
     }
   ],
   "card.hnt.longwhisker.option.mark": [
@@ -4836,7 +5828,7 @@
   "card.hnt.tarantula.option.attack": [
     {
       "type": 0,
-      "value": "+3 attack"
+      "value": "+3 power"
     }
   ],
   "card.hnt.tarantula.option.defense": [
@@ -5660,7 +6652,7 @@
     },
     {
       "type": 0,
-      "value": " attack"
+      "value": " power"
     }
   ],
   "card.log.common.attack.goagain.gained": [
@@ -5688,7 +6680,7 @@
     },
     {
       "type": 0,
-      "value": " attack"
+      "value": " power"
     }
   ],
   "card.log.common.attack.piercing.gained": [
@@ -6210,7 +7202,7 @@
     },
     {
       "type": 0,
-      "value": " attack"
+      "value": " power"
     }
   ],
   "card.log.common.resources.gained": [
@@ -6504,7 +7496,7 @@
     },
     {
       "type": 0,
-      "value": "'s base attack is doubled"
+      "value": "'s base power is doubled"
     }
   ],
   "card.log.cru.knucklehead.halved": [
@@ -6530,7 +7522,7 @@
     },
     {
       "type": 0,
-      "value": "'s base attack is halved"
+      "value": "'s base power is halved"
     }
   ],
   "card.log.cru.riled.attack": [
@@ -6548,7 +7540,7 @@
     },
     {
       "type": 0,
-      "value": " attack"
+      "value": " power"
     }
   ],
   "card.log.cru.riled.attack.dominate": [
@@ -6566,7 +7558,7 @@
     },
     {
       "type": 0,
-      "value": " attack and dominate"
+      "value": " power and dominate"
     }
   ],
   "card.log.dtd.diplomacy.mode.chosen": [
@@ -6606,7 +7598,7 @@
     },
     {
       "type": 0,
-      "value": " attack counter"
+      "value": " power counter"
     }
   ],
   "card.log.dvr.dawnblade.turn.attack": [
@@ -6624,7 +7616,7 @@
     },
     {
       "type": 0,
-      "value": " attack until end of turn"
+      "value": " power until end of turn"
     }
   ],
   "card.log.dvr.dorinthea.additionalattack": [
@@ -6652,7 +7644,7 @@
     },
     {
       "type": 0,
-      "value": " attack this turn"
+      "value": " power this turn"
     }
   ],
   "card.log.dvr.outforblood.reprise": [
@@ -7293,7 +8285,7 @@
     },
     {
       "type": 0,
-      "value": " attack this turn"
+      "value": " power this turn"
     }
   ],
   "card.log.saz.card.attack.turn": [
@@ -7311,7 +8303,7 @@
     },
     {
       "type": 0,
-      "value": " attack this turn"
+      "value": " power this turn"
     }
   ],
   "card.log.saz.card.goagain.turn": [
@@ -7449,7 +8441,7 @@
     },
     {
       "type": 0,
-      "value": " attack and go again"
+      "value": " power and go again"
     }
   ],
   "card.log.sba.rabble.revealed": [
@@ -7475,7 +8467,7 @@
     },
     {
       "type": 0,
-      "value": " attack)"
+      "value": " power)"
     }
   ],
   "card.log.sba.secondstrike.damage": [
@@ -7493,7 +8485,7 @@
     },
     {
       "type": 0,
-      "value": " attack and go again (dealt damage this turn)"
+      "value": " power and go again (dealt damage this turn)"
     }
   ],
   "card.log.sba.starfall.lightning": [
@@ -7511,7 +8503,7 @@
     },
     {
       "type": 0,
-      "value": " attack and go again (played a Lightning card this turn)"
+      "value": " power and go again (played a Lightning card this turn)"
     }
   ],
   "card.log.sbl.banneret.life": [
@@ -7555,7 +8547,7 @@
     },
     {
       "type": 0,
-      "value": " +1 attack counters"
+      "value": " +1 power counters"
     }
   ],
   "card.log.sbl.flurry.additionalattack": [
@@ -7575,7 +8567,7 @@
     },
     {
       "type": 0,
-      "value": ": remove all +1 attack counters from your weapons at the beginning of your end phase"
+      "value": ": remove all +1 power counters from your weapons at the beginning of your end phase"
     }
   ],
   "card.log.sbl.halo.none": [
@@ -7603,7 +8595,7 @@
     },
     {
       "type": 0,
-      "value": " attack"
+      "value": " power"
     }
   ],
   "card.log.sbr.bravo.crush": [
@@ -7629,7 +8621,7 @@
     },
     {
       "type": 0,
-      "value": " attack and dominate"
+      "value": " power and dominate"
     }
   ],
   "card.log.sbr.carapace.surge": [
@@ -7661,7 +8653,7 @@
     },
     {
       "type": 0,
-      "value": ": opposing attack action cards can't gain attack during their next action phase"
+      "value": ": opposing attack action cards can't gain power during their next action phase"
     }
   ],
   "card.log.sbr.crash.revealed": [
@@ -7697,7 +8689,7 @@
     },
     {
       "type": 0,
-      "value": " or less base attack next action phase"
+      "value": " or less base power next action phase"
     }
   ],
   "card.log.sbr.faultline.bottom.private": [
@@ -7945,7 +8937,7 @@
     },
     {
       "type": 0,
-      "value": " attack"
+      "value": " power"
     }
   ],
   "card.log.sda.steam.counter": [
@@ -8003,7 +8995,7 @@
     },
     {
       "type": 0,
-      "value": " attack"
+      "value": " power"
     }
   ],
   "card.log.sdo.dawnblade.counter.gained": [
@@ -8021,7 +9013,7 @@
     },
     {
       "type": 0,
-      "value": " attack counter"
+      "value": " power counter"
     }
   ],
   "card.log.sdo.dawnblade.counters.removed": [
@@ -8031,7 +9023,7 @@
     },
     {
       "type": 0,
-      "value": "'s +1 attack counters are removed ("
+      "value": "'s +1 power counters are removed ("
     },
     {
       "type": 1,
@@ -8057,7 +9049,7 @@
     },
     {
       "type": 0,
-      "value": " attack"
+      "value": " power"
     }
   ],
   "card.log.sdo.trotalong.goagain": [
@@ -8075,7 +9067,7 @@
     },
     {
       "type": 0,
-      "value": " or less base attack this turn gets go again"
+      "value": " or less base power this turn gets go again"
     }
   ],
   "card.log.sdo.vigor.resources": [
@@ -8295,7 +9287,7 @@
     },
     {
       "type": 0,
-      "value": " +1 attack counters on "
+      "value": " +1 power counters on "
     },
     {
       "type": 1,
@@ -8361,7 +9353,7 @@
     },
     {
       "type": 0,
-      "value": " attack — you may play it this turn"
+      "value": " power — you may play it this turn"
     }
   ],
   "card.log.sfa.draw.attack": [
@@ -8379,7 +9371,7 @@
     },
     {
       "type": 0,
-      "value": " attack"
+      "value": " power"
     }
   ],
   "card.log.sfa.fai.flame.start": [
@@ -8471,7 +9463,7 @@
     },
     {
       "type": 0,
-      "value": " attack"
+      "value": " power"
     }
   ],
   "card.log.sgb.arsenal.destroyed": [
@@ -8507,7 +9499,7 @@
     },
     {
       "type": 0,
-      "value": " attack"
+      "value": " power"
     }
   ],
   "card.log.sgb.compass.goagain": [
@@ -8667,7 +9659,7 @@
     },
     {
       "type": 0,
-      "value": " attack"
+      "value": " power"
     }
   ],
   "card.log.sgb.rabble.revealed": [
@@ -8693,7 +9685,7 @@
     },
     {
       "type": 0,
-      "value": " attack)"
+      "value": " power)"
     }
   ],
   "card.log.sgb.revealed.prevent": [
@@ -8853,7 +9845,7 @@
     },
     {
       "type": 0,
-      "value": " attack"
+      "value": " power"
     }
   ],
   "card.log.ska.knucklehead.roll": [
@@ -8951,7 +9943,7 @@
     },
     {
       "type": 0,
-      "value": ": the opponent's attack action cards' base attack and defense are halved until end of their next turn"
+      "value": ": the opponent's attack action cards' base power and defense are halved until end of their next turn"
     }
   ],
   "card.log.svi.aura.returned": [
@@ -9085,7 +10077,7 @@
     },
     {
       "type": 0,
-      "value": " attack"
+      "value": " power"
     }
   ],
   "card.log.wtr.blessing.life": [
@@ -9131,7 +10123,7 @@
     },
     {
       "type": 0,
-      "value": " attack"
+      "value": " power"
     }
   ],
   "card.log.wtr.bucklingblow.counter": [
@@ -9245,7 +10237,7 @@
     },
     {
       "type": 0,
-      "value": " attack"
+      "value": " power"
     }
   ],
   "card.log.wtr.disable.arsenal.bottom": [
@@ -9291,7 +10283,7 @@
     },
     {
       "type": 0,
-      "value": " attack"
+      "value": " power"
     }
   ],
   "card.log.wtr.estrike.mode.chosen": [
@@ -9357,7 +10349,7 @@
     },
     {
       "type": 0,
-      "value": " attack"
+      "value": " power"
     }
   ],
   "card.log.wtr.helm.intellect": [
@@ -9521,7 +10513,7 @@
     },
     {
       "type": 0,
-      "value": ": +1 attack, go again, dominate"
+      "value": ": +1 power, go again, dominate"
     }
   ],
   "card.log.wtr.pummel.action.attack": [
@@ -9539,7 +10531,7 @@
     },
     {
       "type": 0,
-      "value": " attack and ‘when this hits, discard’"
+      "value": " power and ‘when this hits, discard’"
     }
   ],
   "card.log.wtr.pummel.weapon.attack": [
@@ -9557,7 +10549,7 @@
     },
     {
       "type": 0,
-      "value": " attack"
+      "value": " power"
     }
   ],
   "card.log.wtr.razor.action.attack": [
@@ -9575,7 +10567,7 @@
     },
     {
       "type": 0,
-      "value": " attack and on-hit go again"
+      "value": " power and on-hit go again"
     }
   ],
   "card.log.wtr.razor.weapon.attack": [
@@ -9593,7 +10585,7 @@
     },
     {
       "type": 0,
-      "value": " attack"
+      "value": " power"
     }
   ],
   "card.log.wtr.refractionbolters.goagain": [
@@ -9629,7 +10621,7 @@
     },
     {
       "type": 0,
-      "value": " attack"
+      "value": " power"
     }
   ],
   "card.log.wtr.risingkneethrust.combo": [
@@ -9639,7 +10631,7 @@
     },
     {
       "type": 0,
-      "value": ": +2 attack and go again"
+      "value": ": +2 power and go again"
     }
   ],
   "card.log.wtr.scar.goagain": [
@@ -9757,7 +10749,7 @@
     },
     {
       "type": 0,
-      "value": ": +1 attack, go again, draw on hit"
+      "value": ": +1 power, go again, draw on hit"
     }
   ],
   "card.lss.drinking.buddy.search": [
@@ -10587,7 +11579,7 @@
   "card.mst.justanick.option.power": [
     {
       "type": 0,
-      "value": "The attack action card gets +5 attack"
+      "value": "The attack action card gets +5 power"
     }
   ],
   "card.mst.matchingcolor.card.banish": [
@@ -12789,7 +13781,7 @@
   "card.sea.spitfire.cog.tap": [
     {
       "type": 0,
-      "value": "Tap a cog for +1 attack?"
+      "value": "Tap a cog for +1 power?"
     }
   ],
   "card.sea.target.card": [
@@ -13607,7 +14599,7 @@
   "card.sup.option.attackone": [
     {
       "type": 0,
-      "value": "+1 attack"
+      "value": "+1 power"
     }
   ],
   "card.sup.option.boo": [
@@ -14207,7 +15199,7 @@
     },
     {
       "type": 0,
-      "value": " attack"
+      "value": " power"
     }
   ],
   "card.trigger.common.attack.gain.destroy.optional": [
@@ -14221,7 +15213,7 @@
     },
     {
       "type": 0,
-      "value": " attack?"
+      "value": " power?"
     }
   ],
   "card.trigger.common.attack.goagain.gain": [
@@ -14235,7 +15227,7 @@
     },
     {
       "type": 0,
-      "value": " attack and go again"
+      "value": " power and go again"
     }
   ],
   "card.trigger.common.attack.target.goagain": [
@@ -14401,7 +15393,7 @@
     },
     {
       "type": 0,
-      "value": " attack, and go again"
+      "value": " power, and go again"
     }
   ],
   "card.trigger.common.cardname.choose": [
@@ -14503,7 +15495,7 @@
     },
     {
       "type": 0,
-      "value": " attack"
+      "value": " power"
     }
   ],
   "card.trigger.common.crouchingtiger.create": [
@@ -14541,7 +15533,7 @@
     },
     {
       "type": 0,
-      "value": " attack"
+      "value": " power"
     }
   ],
   "card.trigger.common.dagger.attack.discount": [
@@ -14555,7 +15547,7 @@
     },
     {
       "type": 0,
-      "value": " attack and cost "
+      "value": " power and cost "
     },
     {
       "type": 1,
@@ -14703,7 +15695,7 @@
   "card.trigger.common.dawnblade.counters.remove": [
     {
       "type": 0,
-      "value": "Dawnblade hasn't hit this turn; remove all +1 attack counters"
+      "value": "Dawnblade hasn't hit this turn; remove all +1 power counters"
     }
   ],
   "card.trigger.common.decay": [
@@ -15261,7 +16253,7 @@
     },
     {
       "type": 0,
-      "value": " attack"
+      "value": " power"
     }
   ],
   "card.trigger.common.guardian.attack.named.destroy": [
@@ -15283,7 +16275,7 @@
     },
     {
       "type": 0,
-      "value": " attack"
+      "value": " power"
     }
   ],
   "card.trigger.common.guardian.attack.wager.destroy": [
@@ -15297,7 +16289,7 @@
     },
     {
       "type": 0,
-      "value": " attack and may wager"
+      "value": " power and may wager"
     }
   ],
   "card.trigger.common.guardian.empower.destroy": [
@@ -15647,7 +16639,7 @@
     },
     {
       "type": 0,
-      "value": " attack"
+      "value": " power"
     }
   ],
   "card.trigger.common.mistcloakgully.check": [
@@ -15689,7 +16681,7 @@
     },
     {
       "type": 0,
-      "value": " attack"
+      "value": " power"
     }
   ],
   "card.trigger.common.nextattack.draconic.attack": [
@@ -15703,7 +16695,7 @@
     },
     {
       "type": 0,
-      "value": " attack"
+      "value": " power"
     }
   ],
   "card.trigger.common.nextattack.power.destroy": [
@@ -15731,7 +16723,7 @@
     },
     {
       "type": 0,
-      "value": " attack"
+      "value": " power"
     }
   ],
   "card.trigger.common.nextattackaction.boost": [
@@ -16471,7 +17463,7 @@
     },
     {
       "type": 0,
-      "value": " attack"
+      "value": " power"
     }
   ],
   "card.trigger.common.wager.attack.overpower.gain": [
@@ -16485,7 +17477,7 @@
     },
     {
       "type": 0,
-      "value": " attack and overpower"
+      "value": " power and overpower"
     }
   ],
   "card.trigger.common.wager.attack.overpower.pay.optional": [
@@ -16507,7 +17499,7 @@
     },
     {
       "type": 0,
-      "value": " attack and overpower?"
+      "value": " power and overpower?"
     }
   ],
   "card.trigger.common.wager.defender": [
@@ -17981,7 +18973,7 @@
     },
     {
       "type": 0,
-      "value": " attack)"
+      "value": " power)"
     }
   ],
   "engine.decision.die.reroll": [
@@ -18494,6 +19486,12 @@
       "value": "end of this turn"
     }
   ],
+  "engine.effect.duration.first.action.this.turn": [
+    {
+      "type": 0,
+      "value": "first action this turn"
+    }
+  ],
   "engine.effect.duration.next.action": [
     {
       "type": 0,
@@ -18819,6 +19817,20 @@
       "value": " this combat chain"
     }
   ],
+  "engine.effect.duration.next.subject.this.link": [
+    {
+      "type": 0,
+      "value": "next "
+    },
+    {
+      "type": 1,
+      "value": "subject"
+    },
+    {
+      "type": 0,
+      "value": " this chain link"
+    }
+  ],
   "engine.effect.duration.next.subject.this.turn": [
     {
       "type": 0,
@@ -18883,6 +19895,16 @@
       "value": " this combat chain"
     }
   ],
+  "engine.effect.duration.subject.this.link": [
+    {
+      "type": 1,
+      "value": "subject"
+    },
+    {
+      "type": 0,
+      "value": " this chain link"
+    }
+  ],
   "engine.effect.duration.subject.this.turn": [
     {
       "type": 1,
@@ -18921,6 +19943,12 @@
     {
       "type": 0,
       "value": "through next turn"
+    }
+  ],
+  "engine.effect.duration.until.your.next.turn": [
+    {
+      "type": 0,
+      "value": "until the start of your next turn"
     }
   ],
   "engine.effect.part.action.played.gain.action.points": [
@@ -19007,13 +20035,13 @@
     },
     {
       "type": 0,
-      "value": " attack"
+      "value": " power"
     }
   ],
   "engine.effect.part.attack.gain.bonus": [
     {
       "type": 0,
-      "value": "the next time an attack would gain attack, it gains "
+      "value": "the next time an attack would gain power, it gains "
     },
     {
       "type": 1,
@@ -19031,7 +20059,7 @@
     },
     {
       "type": 0,
-      "value": " attack while defended by fewer than "
+      "value": " power while defended by fewer than "
     },
     {
       "type": 1,
@@ -19106,7 +20134,7 @@
     },
     {
       "type": 0,
-      "value": " base attack"
+      "value": " base power"
     }
   ],
   "engine.effect.part.cannot.defend": [
@@ -19241,6 +20269,20 @@
           ]
         }
       }
+    }
+  ],
+  "engine.effect.part.damage.create.tokens": [
+    {
+      "type": 0,
+      "value": "whenever it deals damage to a hero, create that many "
+    },
+    {
+      "type": 1,
+      "value": "damageToken"
+    },
+    {
+      "type": 0,
+      "value": " tokens under their control"
     }
   ],
   "engine.effect.part.damage.unpreventable": [
@@ -19394,7 +20436,7 @@
     },
     {
       "type": 0,
-      "value": " or more attack"
+      "value": " or more power"
     }
   ],
   "engine.effect.part.go.again.if.defended.by.attack.action": [
@@ -19533,7 +20575,7 @@
     },
     {
       "type": 0,
-      "value": " or more base attack"
+      "value": " or more base power"
     }
   ],
   "engine.effect.part.name.gains.type": [
@@ -19565,7 +20607,7 @@
     },
     {
       "type": 0,
-      "value": " attack"
+      "value": " power"
     }
   ],
   "engine.effect.part.on.boost.dominate": [
@@ -19772,6 +20814,37 @@
       "value": "mark the hero when it hits"
     }
   ],
+  "engine.effect.part.on.hit.script": [
+    {
+      "type": 0,
+      "value": "when it hits"
+    },
+    {
+      "type": 5,
+      "value": "hitTarget",
+      "options": {
+        "hero": {
+          "value": [
+            {
+              "type": 0,
+              "value": " a hero"
+            }
+          ]
+        },
+        "other": {
+          "value": []
+        }
+      }
+    },
+    {
+      "type": 0,
+      "value": ": "
+    },
+    {
+      "type": 1,
+      "value": "hitEffect"
+    }
+  ],
   "engine.effect.part.on.prevent.create.token": [
     {
       "type": 0,
@@ -19864,6 +20937,36 @@
     {
       "type": 0,
       "value": " source"
+    }
+  ],
+  "engine.effect.part.prevent.damage.recipient.type": [
+    {
+      "type": 0,
+      "value": "prevent next "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " damage to you or "
+    },
+    {
+      "type": 1,
+      "value": "recipientTypeArticle"
+    },
+    {
+      "type": 0,
+      "value": " "
+    },
+    {
+      "type": 1,
+      "value": "recipientType"
+    },
+    {
+      "type": 0,
+      "value": " you control"
     }
   ],
   "engine.effect.part.prevent.damage.source.type": [
@@ -20219,6 +21322,14 @@
             }
           ]
         },
+        "weapon": {
+          "value": [
+            {
+              "type": 0,
+              "value": "weapon"
+            }
+          ]
+        },
         "other": {
           "value": [
             {
@@ -20240,7 +21351,7 @@
           "value": [
             {
               "type": 0,
-              "value": " with a +1 attack counter"
+              "value": " with a +1 power counter"
             }
           ]
         },
@@ -20306,7 +21417,7 @@
             },
             {
               "type": 0,
-              "value": " or less base attack"
+              "value": " or less base power"
             }
           ]
         },
@@ -20322,7 +21433,7 @@
             },
             {
               "type": 0,
-              "value": " or more base attack"
+              "value": " or more base power"
             }
           ]
         },
@@ -20652,6 +21763,14 @@
             }
           ]
         },
+        "weapon": {
+          "value": [
+            {
+              "type": 0,
+              "value": "weapons"
+            }
+          ]
+        },
         "other": {
           "value": [
             {
@@ -20673,7 +21792,7 @@
           "value": [
             {
               "type": 0,
-              "value": " with a +1 attack counter"
+              "value": " with a +1 power counter"
             }
           ]
         },
@@ -20739,7 +21858,7 @@
             },
             {
               "type": 0,
-              "value": " or less base attack"
+              "value": " or less base power"
             }
           ]
         },
@@ -20755,7 +21874,7 @@
             },
             {
               "type": 0,
-              "value": " or more base attack"
+              "value": " or more base power"
             }
           ]
         },
@@ -20848,7 +21967,7 @@
   "engine.effect.summary.base.power.limit": [
     {
       "type": 0,
-      "value": "can't play attack actions with base attack "
+      "value": "can't play attack action cards with base power "
     },
     {
       "type": 1,
@@ -20868,7 +21987,7 @@
   "engine.effect.summary.halve.base": [
     {
       "type": 0,
-      "value": "attack action base attack and defense are halved"
+      "value": "base power and defense of attack action cards are halved"
     }
   ],
   "engine.effect.summary.list.four": [
@@ -20960,7 +22079,7 @@
   "engine.effect.summary.no.power.gain": [
     {
       "type": 0,
-      "value": "attack action cards can't gain attack"
+      "value": "attack action cards can't gain power"
     }
   ],
   "engine.effect.summary.ongoing": [
@@ -22555,7 +23674,7 @@
     },
     {
       "type": 0,
-      "value": " attack ("
+      "value": " power ("
     },
     {
       "type": 1,
@@ -22563,7 +23682,7 @@
     },
     {
       "type": 0,
-      "value": " attack)"
+      "value": " power)"
     }
   ],
   "engine.log.combat.attack.power.gained.self": [
@@ -22581,7 +23700,7 @@
     },
     {
       "type": 0,
-      "value": " attack ("
+      "value": " power ("
     },
     {
       "type": 1,
@@ -22589,7 +23708,7 @@
     },
     {
       "type": 0,
-      "value": " attack)"
+      "value": " power)"
     }
   ],
   "engine.log.combat.attack.power.lost": [
@@ -22615,7 +23734,7 @@
     },
     {
       "type": 0,
-      "value": " attack ("
+      "value": " power ("
     },
     {
       "type": 1,
@@ -22623,7 +23742,7 @@
     },
     {
       "type": 0,
-      "value": " attack)"
+      "value": " power)"
     }
   ],
   "engine.log.combat.attack.power.lost.self": [
@@ -22641,7 +23760,7 @@
     },
     {
       "type": 0,
-      "value": " attack ("
+      "value": " power ("
     },
     {
       "type": 1,
@@ -22649,7 +23768,7 @@
     },
     {
       "type": 0,
-      "value": " attack)"
+      "value": " power)"
     }
   ],
   "engine.log.combat.attacker.replaced": [
@@ -22693,7 +23812,7 @@
     },
     {
       "type": 0,
-      "value": " attack)"
+      "value": " power)"
     }
   ],
   "engine.log.combat.attacks.targeting": [
@@ -22719,7 +23838,7 @@
     },
     {
       "type": 0,
-      "value": " attack), targeting "
+      "value": " power), targeting "
     },
     {
       "type": 1,
@@ -25276,7 +26395,7 @@
             },
             {
               "type": 0,
-              "value": " +1 attack counter"
+              "value": " +1 power counter"
             }
           ]
         },
@@ -25287,7 +26406,7 @@
             },
             {
               "type": 0,
-              "value": " +1 attack counters"
+              "value": " +1 power counters"
             }
           ]
         }
@@ -25561,7 +26680,7 @@
   "game.chain.stat.attack": [
     {
       "type": 0,
-      "value": "Attack"
+      "value": "Power"
     }
   ],
   "game.chain.stat.defense": [

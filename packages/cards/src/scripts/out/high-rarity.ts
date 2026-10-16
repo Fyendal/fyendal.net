@@ -5,6 +5,7 @@ import {
   decisionMessage,
   decisionPrompt,
   localizedLog,
+  ongoingLabel,
   opponentSeat,
   previousAttackHasName,
   yesNoPrompt,
@@ -782,6 +783,7 @@ export const outHighRarity: Record<string, CardScript> = {
         seat: opponentSeat(ctx),
         suppressesOwnedNames: true,
         expiresAtStartOfSeatTurn: ctx.seat,
+        ...ongoingLabel("cards and tokens they own lose and can't gain names", "card.effect.out.amnesia"),
       });
     },
   },
@@ -800,7 +802,15 @@ export const outHighRarity: Record<string, CardScript> = {
   "burdens of the past|3": {
     onPlay(ctx) {
       const target = opponentSeat(ctx);
-      ctx.addModifier({ scope: "until-end-of-turn", seat: target, prohibitsDefenseReactionNamesInGraveyard: true });
+      ctx.addModifier({
+        scope: "until-end-of-turn",
+        seat: target,
+        prohibitsDefenseReactionNamesInGraveyard: true,
+        ...ongoingLabel(
+          "can't play defense reaction cards with the same name as a card in their graveyard",
+          "card.effect.out.burdensofthepast",
+        ),
+      });
       const count = ctx
         .player(target)
         .graveyard.filter((card) => ctx.cardData(card.cardId).cardType === "defense-reaction").length;
@@ -811,7 +821,13 @@ export const outHighRarity: Record<string, CardScript> = {
     onPlay(ctx) {
       buffNextAttack(ctx, { attack: 3, appliesTo: "attack-action", appliesToFromArsenal: true });
       ctx.setCounter("ponderOnHit", 1);
-      ctx.addModifier({ scope: "until-end-of-turn" });
+      ctx.addModifier({
+        scope: "until-end-of-turn",
+        ...ongoingLabel(
+          "the next time an attack action card hits a hero, create a Ponder token",
+          "card.effect.out.premeditate",
+        ),
+      });
     },
     canTriggerOnHit(ctx) {
       return (

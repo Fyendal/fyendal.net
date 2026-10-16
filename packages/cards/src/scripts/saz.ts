@@ -6,6 +6,7 @@ import {
   heroChoiceSeat,
   heroTarget,
   localizedCardLog,
+  ongoingLabel,
   opponentSeat,
   optN,
   optOnChoose,
@@ -108,10 +109,10 @@ function requestArrowToArsenal(ctx: ScriptCtx, hook: string, fallback: string): 
 /** "Your next arrow attack this turn gets +3{p} and <on-hit rider>" (Lace
  *  with X / Drop the Anchor): the +3 rides a next-attack modifier; the rider
  *  is dispatched from the card's onHit via a until-end-of-turn marker. */
-function nextArrowPlusRider(rider: (ctx: ScriptCtx) => void): CardScript {
+function nextArrowPlusRider(label: ReturnType<typeof ongoingLabel>, rider: (ctx: ScriptCtx) => void): CardScript {
   return {
     onPlay(ctx) {
-      buffNextAttack(ctx, { attack: 3, appliesToSubtype: "arrow" });
+      buffNextAttack(ctx, { attack: 3, appliesToSubtype: "arrow", ...label });
       ctx.addModifier({ scope: "until-end-of-turn" }); // marker: source of the lingering onHit
     },
     canTriggerOnHit(ctx) {
@@ -476,27 +477,47 @@ export const saz: Record<string, CardScript> = {
     },
   },
 
-  "drop the anchor|1": nextArrowPlusRider((ctx) => {
-    // "When this hits a hero, {t} them and all allies they control."
-    const opp = ctx.player(opponentSeat(ctx));
-    ctx.tap(opp.hero.instanceId);
-    for (const c of opp.board) {
-      const d = ctx.cardData(c.cardId);
-      if (ctx.cardTypes(c).includes("ally") && d.life !== undefined) ctx.tap(c.instanceId);
-    }
-  }),
+  "drop the anchor|1": nextArrowPlusRider(
+    ongoingLabel("when it hits a hero, tap them and all allies they control", "card.effect.saz.droptheanchor"),
+    (ctx) => {
+      const opp = ctx.player(opponentSeat(ctx));
+      ctx.tap(opp.hero.instanceId);
+      for (const c of opp.board) {
+        const d = ctx.cardData(c.cardId);
+        if (ctx.cardTypes(c).includes("ally") && d.life !== undefined) ctx.tap(c.instanceId);
+      }
+    },
+  ),
 
-  "lace with bloodrot|1": nextArrowPlusRider((ctx) => {
-    ctx.createToken(BLOODROT_POX, opponentSeat(ctx));
-  }),
+  "lace with bloodrot|1": nextArrowPlusRider(
+    ongoingLabel(
+      "when it hits a hero, create a Bloodrot Pox token under their control",
+      "card.effect.common.bloodrot.create.hit.hero",
+    ),
+    (ctx) => {
+      ctx.createToken(BLOODROT_POX, opponentSeat(ctx));
+    },
+  ),
 
-  "lace with frailty|1": nextArrowPlusRider((ctx) => {
-    ctx.createToken(FRAILTY, opponentSeat(ctx));
-  }),
+  "lace with frailty|1": nextArrowPlusRider(
+    ongoingLabel(
+      "when it hits a hero, create a Frailty token under their control",
+      "card.effect.common.frailty.create.hit.hero",
+    ),
+    (ctx) => {
+      ctx.createToken(FRAILTY, opponentSeat(ctx));
+    },
+  ),
 
-  "lace with inertia|1": nextArrowPlusRider((ctx) => {
-    ctx.createToken(INERTIA, opponentSeat(ctx));
-  }),
+  "lace with inertia|1": nextArrowPlusRider(
+    ongoingLabel(
+      "when it hits a hero, create an Inertia token under their control",
+      "card.effect.common.inertia.create.hit.hero",
+    ),
+    (ctx) => {
+      ctx.createToken(INERTIA, opponentSeat(ctx));
+    },
+  ),
 
   "read the glide path|1": {
     // "Your next arrow attack this turn gains +3{p}. Opt 1." Go again printed.

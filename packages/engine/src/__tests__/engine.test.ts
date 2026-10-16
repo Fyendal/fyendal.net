@@ -4754,9 +4754,9 @@ describe("ongoing effects", () => {
     expect(mine[0]).toEqual({
       seat: 0,
       cardId: "PUMP",
-      label: "+2 attack · next attack action card",
+      label: "+2 power · next attack action card",
       sourceSeat: 0,
-      summary: "+2 attack",
+      summary: "+2 power",
       summaryMessage: { id: "engine.effect.part.attack", values: { attack: "+2" } },
       lifetime: "once",
       duration: "next attack action card",
@@ -4830,10 +4830,18 @@ describe("ongoing effects", () => {
       expect(effects.every((effect) => effect.seat === 1)).toBe(true);
       expect(effects.every((effect) => effect.cardId === "")).toBe(true);
       expect(effects.map((effect) => effect.label)).toEqual(expect.arrayContaining([
-        expect.stringContaining("base attack 3 or less"),
-        expect.stringContaining("can't gain attack"),
-        expect.stringContaining("next action costs +1 resource"),
+        "base power and defense of attack action cards are halved · through next turn",
+        "can't play attack action cards with base power 3 or less · next action phase",
+        "attack action cards can't gain power · next action phase",
+        "costs 1 more to play or activate · first action this turn",
       ]));
+      expect(effects).toContainEqual(expect.objectContaining({
+        summaryMessage: {
+          id: "engine.effect.part.cost",
+          values: { cost: 1, costChange: "more", costAction: "both" },
+        },
+        durationMessage: { id: "engine.effect.duration.first.action.this.turn" },
+      }));
       expect(effects.every((effect) => effect.sourceSeat === 0)).toBe(true);
       expect(effects.every((effect) => effect.lifetime === "later" || effect.lifetime === "once")).toBe(true);
     }

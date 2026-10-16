@@ -599,7 +599,7 @@ describe("priority guidance help", () => {
       <PendingDecisionPanel model={model} viewerSeat={0} />,
     );
 
-    expect(html).toContain('aria-label="+1 Attack"');
+    expect(html).toContain('aria-label="+1 Power"');
     expect(html).toContain('src="/icons/attack.png"');
     expect(html).not.toContain("{p}");
   });

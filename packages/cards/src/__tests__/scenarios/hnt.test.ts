@@ -603,7 +603,7 @@ describe("HNT — marked heroes and daggers", () => {
     expect(g.state.players[0]!.weapons).toHaveLength(0);
   });
 
-  it("Cut Through gains +1 attack and go again when Flick Knives makes a dagger hit", () => {
+  it("Cut Through gains +1 power and go again when Flick Knives makes a dagger hit", () => {
     const g = scenario({
       seats: [
         {
@@ -1024,8 +1024,18 @@ describe("HNT — marked heroes and daggers", () => {
         label: "costs 1 less to play or activate · next Draconic card this combat chain",
         lifetime: "once",
         durationMessage: {
-          id: "engine.effect.duration.next.card.this.chain",
-          values: { subtype: "draconic", cardType: "any", noun: "card" },
+          id: "engine.effect.duration.next.subject.this.chain",
+          values: {
+            noun: "card",
+            typeCount: 1,
+            type1: "Draconic",
+            color: "any",
+            via: "none",
+            keyword: "none",
+            limit: "none",
+            target: "none",
+            subject: { kind: "term", id: "engine.effect.subject.one" },
+          },
         },
       }),
     ]));
@@ -1850,7 +1860,7 @@ describe("HNT — attack triggers use the stack", () => {
 
     g.play("wrath of retribution|1", { settle: false });
 
-    expectAttackTrigger(g, "Daggers get +1 attack and cost 1 less to activate this combat chain");
+    expectAttackTrigger(g, "Daggers get +1 power and cost 1 less to activate this combat chain");
     expect(g.state.modifiers.some((modifier) => modifier.attackActivationCostReduction === 1)).toBe(false);
 
     resolveTrigger(g).blockWith().settle()
@@ -1906,7 +1916,7 @@ describe("HNT — attack triggers use the stack", () => {
 
     g.play("fire tenet: strike first|1", { settle: false });
 
-    expectAttackTrigger(g, "Your next Draconic attack this combat chain gets +1 attack");
+    expectAttackTrigger(g, "Your next Draconic attack this combat chain gets +1 power");
 
     resolveTrigger(g).expectAttackValue(3).blockWith().settle()
       .play("for the dracai|1")
@@ -2121,7 +2131,7 @@ describe("HNT — attack triggers use the stack", () => {
       .play("whelming gustwave|1").blockWith().settle()
       .play("retrace the past|3", { settle: false });
 
-    expectAttackTrigger(g, "Name a card; this gets that name, +2 attack, and go again");
+    expectAttackTrigger(g, "Name a card; this gets that name, +2 power, and go again");
     expect(g.state.pendingDecision?.kind).not.toBe("choose-name");
 
     resolveTrigger(g);

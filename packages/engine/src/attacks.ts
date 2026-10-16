@@ -393,7 +393,7 @@ export function beginAttackStep(state: GameStateInternal, runtime: EngineRuntime
   }
   const target = findAttackTargetAlly(state, seat, targetAllyId);
   const attack = computeAttack(state, runtime, link);
-  const attackFallback = `${nameOf(state, player.heroCardId)} attacks with ${logNameOf(state, card.cardId)} (${attack} attack)${target ? `, targeting ${nameOf(state, target.cardId)}` : ""}`;
+  const attackFallback = `${nameOf(state, player.heroCardId)} attacks with ${logNameOf(state, card.cardId)} (${attack} power)${target ? `, targeting ${nameOf(state, target.cardId)}` : ""}`;
   logPublic(state, gameLogMessage(
     attackFallback,
     target ? "engine.log.combat.attacks.targeting" : "engine.log.combat.attacks",

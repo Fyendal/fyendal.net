@@ -12,8 +12,10 @@ import {
   decisionPrompt,
   entersArenaTrigger,
   heroDamage,
+  hitHookLabel,
   leavesArenaTrigger,
   localizedCardLog,
+  ongoingLabel,
   opponentSeat,
   previousAttackHasName,
   requestDiscardChoice,
@@ -1524,7 +1526,10 @@ Object.assign(ros, {
         once: true,
         onHitScriptHook: {
           hook: "succumb-hit",
-          label: "look at their hand and choose a card for them to discard",
+          ...hitHookLabel(
+            "look at their hand and choose a card for them to discard",
+            "card.effect.common.hand.discard.choose",
+          ),
           heroOnly: true,
         },
       });
@@ -1565,7 +1570,14 @@ Object.assign(ros, {
       goAgain: false,
       timing: "instant",
       destroySelfCost: true,
-      onActivate: (ctx: ScriptCtx) => ctx.addModifier({ scope: "until-end-of-turn" }),
+      onActivate: (ctx: ScriptCtx) =>
+        ctx.addModifier({
+          scope: "until-end-of-turn",
+          ...ongoingLabel(
+            "amp 1 whenever an aura you control with Sigil in its name leaves the arena",
+            "card.effect.ros.aetherbindingsofthethirdage",
+          ),
+        }),
     },
     triggers: [
       {
@@ -1787,7 +1799,14 @@ Object.assign(ros, {
   },
   "unsheathed|1": {
     onPlay(ctx: ScriptCtx) {
-      buffNextAttack(ctx, { attack: 3, appliesToSubtype: "sword" });
+      buffNextAttack(ctx, {
+        attack: 3,
+        appliesToSubtype: "sword",
+        ...ongoingLabel(
+          "go again when it attacks if its power is more than twice its base power",
+          "card.effect.ros.unsheathed",
+        ),
+      });
       // Keep the resolved card observable until its next-attack modifier binds
       // so the ability it grants can trigger with that attack.
       ctx.addModifier({ scope: "until-end-of-turn" });

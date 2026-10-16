@@ -4,6 +4,7 @@ import {
   commonOptionMessages,
   decisionPrompt,
   localizedCardLog,
+  ongoingLabel,
   opponentSeat,
 } from "./shared-helpers.js";
 
@@ -323,7 +324,7 @@ export const sbr: Record<string, CardScript> = {
           // discounted Guardian attack is declared.
           ctx.addModifier({
             scope: "next-attack",
-            ongoingLabel: "costs 1 less to play",
+            ...ongoingLabel("costs 1 less to play", "card.effect.sbr.seismicsurge"),
             appliesTo: "attack-action",
             appliesToClass: "guardian",
           });

@@ -1346,8 +1346,17 @@ describe("OMN — import and set mechanics", () => {
         label: "costs 1 less to play · next instant card this chain link",
         lifetime: "once",
         durationMessage: {
-          id: "engine.effect.duration.next.card.this.link",
-          values: { subtype: "any", cardType: "instant", noun: "card" },
+          id: "engine.effect.duration.next.subject.this.link",
+          values: {
+            noun: "instantCard",
+            typeCount: 0,
+            color: "any",
+            via: "none",
+            keyword: "none",
+            limit: "none",
+            target: "none",
+            subject: { kind: "term", id: "engine.effect.subject.one" },
+          },
         },
       }),
     ]));
@@ -1375,7 +1384,7 @@ describe("OMN — import and set mechanics", () => {
       modifier.appliesToCardType === "instant" && modifier.playCostReduction === 1
     );
     const discountShown = () => projectStateFor(g.state, 0).ongoing.some((effect) =>
-      effect.durationMessage?.id === "engine.effect.duration.next.card.this.link"
+      effect.durationMessage?.id === "engine.effect.duration.next.subject.this.link"
     );
 
     g.play("beckoning brilliance|1").blockWith();

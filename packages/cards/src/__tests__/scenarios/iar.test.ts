@@ -2510,7 +2510,7 @@ describe("September 3 IAR spoilers", () => {
     expect(Object.keys(expected).every((id) => isImplemented(cardData[id]!))).toBe(true);
   });
 
-  it("Mark of Pathstone binds to an ally, gives it +1 attack, and gains life on hit", () => {
+  it("Mark of Pathstone binds to an ally, gives it +1 power, and gains life on hit", () => {
     const g = scenario({ seats: [
       {
         hero: "rhinar",
@@ -2538,7 +2538,7 @@ describe("September 3 IAR spoilers", () => {
       .expectLife(1, 16);
   });
 
-  it("a Mark played during reactions immediately gives its bound attacking ally +1 attack", () => {
+  it("a Mark played during reactions immediately gives its bound attacking ally +1 power", () => {
     const g = scenario({ seats: [
       {
         hero: "rhinar",

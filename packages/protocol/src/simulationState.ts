@@ -506,7 +506,7 @@ const MODIFIER_REQUIRED = ["id", "sourceInstanceId", "seat", "scope"] as const;
 const MODIFIER_NUMBERS = ["expiresAtStartOfTurn", "expiresAtEndOfTurn", "expiresAtStartOfSeatTurn", "expiresAtEndOfSeatTurn", "createdTurn", "basePower", "attack", "powerGainBonus", "attackActivationCostReduction", "activationCostReduction", "attackCostReduction", "piercing", "defense", "damage", "intimidate", "preventNextDamageAmount", "preventNextDamagePool", "preventDamagePerEvent", "preventDamageEventsRemaining", "discardDamagePreventionAmount", "discardDamagePreventionDraw", "preventNextDamageFromPitch", "maxDamageEventAmount", "reflectPreventedDamageToSeat", "redirectDamageFromSeat", "redirectDamageToSeat", "redirectDamagePrevent", "onHitGainLife", "onHitGainResources", "onHitDraw", "attackActionCardCap", "nonAttackActionCardCap", "goAgainIfAttackPowerAtLeast", "onDefendedDealDamage", "onHitLoseLife", "onDestroyedDraw", "onBoostAttack", "onActionPlayedGainActionPoints", "extraDiceIgnoreLowest", "onHitDealDamage", "defendedLessThanNonEquip", "minCost", "maxCost", "maxBasePower", "minBasePower", "minimumAttackBasePower", "appliesToInstanceId", "suppressesActivatedAbilitiesOfInstanceId", "cannotDefendWithInstanceId", "appliesToPitch", "playCostReduction", "playBaseCostOverride", "remainingCostUses", "maxNonBlockDefenders", "onDefendedByAttackActionPowerCounters"] as const satisfies readonly (keyof Modifier)[];
 const MODIFIER_BOOLEANS = ["appliesToEquipment", "appliesToFirstDefenderOnly", "damageArcaneOnly", "damageUnpreventable", "goAgain", "dominate", "overpower", "preventAllDamageFromSource", "reflectPreventedDamageUnpreventable", "onHitGoAgain", "suppressesHeroAbilities", "suppressesHeroAbilitiesDuringActionPhase", "suppressesOwnedNames", "suppressesOwnedClassTalentTypes", "restrictActionsToWeaponOrAttack", "restrictActionsToNonWeaponNonAttack", "prohibitsDefenseReactionNamesInGraveyard", "goAgainIfDefendedByAttackAction", "suppressHitEffects", "onHitToSoul", "onHitBottomDeck", "onHitReenableAttacker", "onHitReenableAttackerIfMarked", "onHitMark", "onBoostDominate", "onHitClearHandAndArsenalAtEndPhase", "replaceCombatDamageWithDefendingEquipment", "appliesToMarkedHero", "appliesToFromArsenal", "appliesToRuneGated", "appliesToCharged", "noDefenseReactionsFromArsenal", "noDefenseReactionsFromHand", "once", "expiresOnChainClose", "consumed"] as const satisfies readonly (keyof Modifier)[];
 const MODIFIER_STRINGS = ["sourceCardId", "grantType", "grantName", "discardDamagePreventionCardType", "preventLethalDamageByBanishingNamedCard", "banishPreventedDamageSourceFaceDownIfType", "appliesToDamageSourceType", "appliesToDamageRecipientType", "grantKeyword", "suppressKeyword", "prohibitsName", "grantsTypeToName", "grantsType", "onFriendlyActivateCreateToken", "onDamageDealtCreateTokenPerPoint", "onPreventCreateToken", "appliesToClass", "appliesToKeyword", "appliesToName", "appliesToTargetType", "appliesToTargetNamePrefix", "excludesSubtype", "appliesToCardType", "restrictCardPlaysToType", "ongoingLabel", "grantsPlayFromNameContains", "goAgainIfPlayedOrCreatedSubtype", "overpowerIfNameContains", "appliesToCounter"] as const satisfies readonly (keyof Modifier)[];
-const MODIFIER_OBJECTS = ["onHitCreateToken", "onAttackActionPlayedFromBanishCreateToken", "onHitDestroyTopDeckCards", "onHitScriptHook", "defendingPitchDefenseAdjustment", "appliesTo", "appliesToSubtype", "appliesToType", "grantsPlayFromZone", "grantsPlayFromZoneOwner"] as const satisfies readonly (keyof Modifier)[];
+const MODIFIER_OBJECTS = ["onHitCreateToken", "onAttackActionPlayedFromBanishCreateToken", "onHitDestroyTopDeckCards", "onHitScriptHook", "ongoingLabelMessage", "defendingPitchDefenseAdjustment", "appliesTo", "appliesToSubtype", "appliesToType", "grantsPlayFromZone", "grantsPlayFromZoneOwner"] as const satisfies readonly (keyof Modifier)[];
 type _ModifierValidatorIsExhaustive = Assert<
   SameKeys<
     Modifier,
@@ -549,14 +549,16 @@ function validateModifier(value: unknown, code: string, path: string): void {
       code,
       p,
       ["hook", "label"],
-      ["heroOnly", "requiresAttackCounter", "requiresAttackNameContains"],
+      ["labelMessage", "heroOnly", "requiresAttackCounter", "requiresAttackNameContains"],
     );
     string(effect.hook, code, `${p}.hook`, 256);
     string(effect.label, code, `${p}.label`, 256);
+    optional(effect, "labelMessage", (entry, entryPath) => { validateGameMessage(entry, code, entryPath); }, p);
     optional(effect, "heroOnly", (entry, entryPath) => { bool(entry, code, entryPath); }, p);
     optional(effect, "requiresAttackCounter", (entry, entryPath) => { string(entry, code, entryPath, 128); }, p);
     optional(effect, "requiresAttackNameContains", (entry, entryPath) => { string(entry, code, entryPath, 128); }, p);
   }, path);
+  optional(modifier, "ongoingLabelMessage", (v, p) => { validateGameMessage(v, code, p); }, path);
   optional(modifier, "defendingPitchDefenseAdjustment", (v, p) => {
     const adjustment = exact(v, code, p, ["pitch", "amount"], ["requiresAimCounter"]);
     integer(adjustment.pitch, code, `${p}.pitch`);

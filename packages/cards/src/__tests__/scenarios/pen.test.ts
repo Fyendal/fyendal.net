@@ -1123,7 +1123,7 @@ describe("PEN — import and set mechanics", () => {
     g.attackWithWeapon("decimator great axe|0")
       .blockWith()
       .react("swordmaster's shine|1")
-      .expectLog("Swordmaster's Shine gives Decimator Great Axe +5 attack (9 attack)");
+      .expectLog("Swordmaster's Shine gives Decimator Great Axe +5 power (9 power)");
     const pump = g.state.log.find((entry) =>
       entry.publicPayload?.message?.id === "engine.log.combat.attack.power.gained");
     expect(pump?.publicPayload?.message?.values).toEqual({

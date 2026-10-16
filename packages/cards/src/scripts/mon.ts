@@ -20,6 +20,7 @@ import {
   opponentSeat,
   yesNoPrompt,
   opposingHeroDamage,
+  ongoingLabel,
 } from "./shared-helpers.js";
 import { monHighRarity } from "./mon/high-rarity.js";
 
@@ -38,7 +39,7 @@ function lessLifePlayTrigger(effect: { attack?: number; keyword?: string }): Car
       {
         event: "card-played",
         sourceZone: "self",
-        label: effect.attack ? `Gain +${effect.attack} attack` : `Gain ${effect.keyword}`,
+        label: effect.attack ? `Gain +${effect.attack} power` : `Gain ${effect.keyword}`,
         condition: (ctx) => ctx.compareLife(ctx.seat, opponentSeat(ctx)) < 0,
         effect(ctx, played) {
           if (!played) return;
@@ -479,6 +480,12 @@ function seedsOfAgony(maxCost: number): CardScript {
           scope: "until-end-of-turn",
           appliesTo: "attack-action",
           maxCost,
+          ...ongoingLabel(
+            `your next attack action card with cost ${maxCost} or less ` +
+              `deals 1 arcane damage to target hero when it attacks`,
+            "card.effect.mon.seedsofagony",
+            { cost: maxCost },
+          ),
         });
       },
       triggers: [
@@ -1585,7 +1592,13 @@ export const mon: Record<string, CardScript> = mergeSetScripts("MON", monHighRar
   "blood tribute|3": bloodTribute(1),
   "eclipse existence|3": {
     onPlay(ctx) {
-      ctx.addModifier({ scope: "until-end-of-turn" });
+      ctx.addModifier({
+        scope: "until-end-of-turn",
+        ...ongoingLabel(
+          "whenever an attack hits a Light hero, you may banish a card from their soul and they lose 1 life",
+          "card.effect.mon.eclipseexistence",
+        ),
+      });
       if (ctx.compareLife(ctx.seat, opponentSeat(ctx)) > 0) {
         const actions = ctx.player(ctx.seat).graveyard.filter((card) => ctx.hasCardType(card, "action"));
         if (actions.length > 0)

@@ -17,6 +17,7 @@ import {
   resolveRetrieveDagger,
   retrievableDaggerIds,
   yesNoPrompt,
+  ongoingLabel,
 } from "./shared-helpers.js";
 
 // HNT — The Hunted. Mark/Contract (CR 8.4.7, 8.5.39, 8.5.50, 9.3),
@@ -351,7 +352,7 @@ function createFealtyTrigger(condition: (ctx: ScriptCtx) => boolean): TriggerDef
 
 function fireTenetStrikeFirstTrigger(): TriggerDef {
   return attackTrigger(
-    "Your next Draconic attack this combat chain gets +1 attack",
+    "Your next Draconic attack this combat chain gets +1 power",
     decisionMessage("card.trigger.common.nextattack.draconic.attack", { amount: 1 }),
     (ctx) => buffNextAttack(ctx, { attack: 1, appliesToSubtype: "draconic", expiresOnChainClose: true }),
   );
@@ -603,7 +604,7 @@ export const hnt: Record<string, CardScript> = {
     modifyPlayCost: (ctx, base) => base - draconicLinks(ctx),
     triggers: [
       attackTrigger(
-        "Daggers get +1 attack and cost 1 less to activate this combat chain",
+        "Daggers get +1 power and cost 1 less to activate this combat chain",
         decisionMessage("card.trigger.common.dagger.attack.discount", { amount: 1, cost: 1 }),
         (ctx) => {
           ctx.addModifier({ scope: "combat-chain", attack: 1, appliesToSubtype: "dagger" });
@@ -1101,7 +1102,11 @@ export const hnt: Record<string, CardScript> = {
   },
   ...pitchSeries("poisoned blade", () => ({
     onAttackDeclared(ctx) {
-      ctx.addModifier({ scope: "until-end-of-turn", expiresOnChainClose: true });
+      ctx.addModifier({
+        scope: "until-end-of-turn",
+        expiresOnChainClose: true,
+        ...ongoingLabel("whenever a dagger you own hits a hero, they lose 1 life", "card.effect.hnt.poisonedblade"),
+      });
     },
     canTriggerOnHit(ctx) {
       return !!ctx.link && isDagger(ctx, ctx.link.attackingCard);
@@ -1211,7 +1216,14 @@ export const hnt: Record<string, CardScript> = {
       destroySelfCost: true,
       onActivate(ctx) {
         ctx.setPlayerFlag(ctx.seat, "noDefenseReactionsThisTurn", true);
-        if (dataTags(ctx, ctx.player(ctx.seat).hero).includes("royal")) ctx.addModifier({ scope: "until-end-of-turn" });
+        if (dataTags(ctx, ctx.player(ctx.seat).hero).includes("royal"))
+          ctx.addModifier({
+            scope: "until-end-of-turn",
+            ...ongoingLabel(
+              "destroy all cards in their arsenal the next time you hit a hero",
+              "card.effect.hnt.imperialsealofcommand",
+            ),
+          });
       },
     },
     canTriggerOnHit(ctx) {
@@ -1867,7 +1879,7 @@ Object.assign(hnt, {
   "retrace the past|3": {
     triggers: [
       attackTrigger(
-        "Name a card; this gets that name, +2 attack, and go again",
+        "Name a card; this gets that name, +2 power, and go again",
         decisionMessage("card.trigger.common.cardname.attack.goagain", { amount: 2 }),
         (ctx) =>
           ctx.requestNameChoice(

@@ -21,6 +21,8 @@ import {
   resolveDiscardChoice,
   yesNoPrompt,
   heroDamage,
+  hitHookLabel,
+  ongoingLabel,
 } from "./shared-helpers.js";
 import { SHARPEN_FOLLOWUP, sharpenSword } from "./aha/warrior-sharpen.js";
 import { penHighRarity } from "./pen/high-rarity.js";
@@ -857,7 +859,7 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
         appliesTo: "sword",
         onHitScriptHook: {
           hook: "pen-rend-flesh",
-          label: "remove a +1 power counter for the hit hero to lose 2 life",
+          ...hitHookLabel("remove a +1 power counter for the hit hero to lose 2 life", "card.effect.pen.rendflesh"),
           heroOnly: true,
         },
       });
@@ -1549,7 +1551,13 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
   "verdant tide|1": {
     ...bond("earth", (ctx) => create(ctx, EARTH)),
     onPlay(ctx) {
-      ctx.addModifier({ scope: "until-end-of-turn" });
+      ctx.addModifier({
+        scope: "until-end-of-turn",
+        ...ongoingLabel(
+          "create 1 more of each Elemental or Runeblade aura token you create",
+          "card.effect.pen.verdanttide",
+        ),
+      });
       if (ctx.getCounter("bonded")) create(ctx, EARTH);
     },
     replaceFriendlyTokenCreation(ctx, cardId, count) {

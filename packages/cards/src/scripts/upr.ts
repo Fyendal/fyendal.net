@@ -12,6 +12,7 @@ import {
   heroDamage,
   localizedCardLog,
   mergeSetScripts,
+  ongoingLabel,
   opponentSeat,
   optN,
   optOnChoose,
@@ -489,7 +490,10 @@ function strategicPlanning(maxCost: number): CardScript {
           choices.map((card) => card.instanceId),
         );
       }
-      ctx.addModifier({ scope: "until-end-of-turn" });
+      ctx.addModifier({
+        scope: "until-end-of-turn",
+        ...ongoingLabel("draw a card at the beginning of the end phase", "card.effect.upr.strategicplanning"),
+      });
     },
     onChoose(ctx, hook, option) {
       if (hook === "strategic") ctx.putOnDeckBottom(Number(option));
@@ -575,6 +579,7 @@ function transmogrify(power: number): CardScript {
         appliesTo: "attack-action",
         grantType: "illusionist",
         grantKeyword: "phantasm",
+        ...ongoingLabel(`has ${power} base power`, "card.effect.upr.transmogrify", { basePower: power }),
       });
       ctx.setPlayerFlag(ctx.seat, "transmogrifyPower", power);
       ctx.setPlayerFlag(ctx.seat, "transmogrifyPending", true);
@@ -597,6 +602,11 @@ function transmogrify(power: number): CardScript {
     },
   };
 }
+
+const SIGIL_OF_PERMAFROST_LABEL = ongoingLabel(
+  "the next time you deal arcane damage to a hero, create that many Frostbite tokens under their control",
+  "card.effect.upr.sigilofpermafrost",
+);
 
 export const upr: Record<string, CardScript> = mergeSetScripts("UPR", uprHighRarity, {
   "ash|0": { materialKeywords: ["phantasm"] },
@@ -1450,7 +1460,7 @@ export const upr: Record<string, CardScript> = mergeSetScripts("UPR", uprHighRar
     onPlay(ctx) {
       if (fused(ctx)) {
         ctx.setCounter("sigilFrost", 1);
-        ctx.addModifier({ scope: "until-end-of-turn" });
+        ctx.addModifier({ scope: "until-end-of-turn", ...SIGIL_OF_PERMAFROST_LABEL });
       }
     },
     triggers: [permafrostFrostbites],
@@ -1463,7 +1473,7 @@ export const upr: Record<string, CardScript> = mergeSetScripts("UPR", uprHighRar
     onPlay(ctx) {
       if (fused(ctx)) {
         ctx.setCounter("sigilFrost", 1);
-        ctx.addModifier({ scope: "until-end-of-turn" });
+        ctx.addModifier({ scope: "until-end-of-turn", ...SIGIL_OF_PERMAFROST_LABEL });
       }
     },
     triggers: [permafrostFrostbites],
@@ -1476,7 +1486,7 @@ export const upr: Record<string, CardScript> = mergeSetScripts("UPR", uprHighRar
     onPlay(ctx) {
       if (fused(ctx)) {
         ctx.setCounter("sigilFrost", 1);
-        ctx.addModifier({ scope: "until-end-of-turn" });
+        ctx.addModifier({ scope: "until-end-of-turn", ...SIGIL_OF_PERMAFROST_LABEL });
       }
     },
     triggers: [permafrostFrostbites],
@@ -1494,7 +1504,14 @@ export const upr: Record<string, CardScript> = mergeSetScripts("UPR", uprHighRar
       label: "Destroy: empower next arcane card",
       onActivate(ctx) {
         ctx.setCounter("conduitReady", 1);
-        ctx.addModifier({ scope: "until-end-of-turn" });
+        ctx.addModifier({
+          scope: "until-end-of-turn",
+          ...ongoingLabel(
+            "the next card you play that deals arcane damage gains: when it deals arcane damage to a hero, " +
+              "destroy a frozen card in their arsenal",
+            "card.effect.upr.conduitoffrostburn",
+          ),
+        });
       },
     },
     quell: { amount: 1, cost: 1 },

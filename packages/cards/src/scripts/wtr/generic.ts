@@ -208,7 +208,7 @@ const goliathGauntletScript = (): CardScript => ({
       buffNextAttack(ctx, { attack: 2, appliesTo: "attack-action", minCost: 2 });
       ctx.logPublic(
         localizedLog(
-          `${ctx.data.name}: next attack action with cost 2 or greater gains +2 attack`,
+          `${ctx.data.name}: next attack action with cost 2 or greater gains +2 power`,
           "card.log.wtr.goliathgauntlet.attack",
           { card: { kind: "card", cardId: ctx.self.cardId }, cost: 2, amount: 2 },
         ),
@@ -438,7 +438,7 @@ const pummelScript = (buff: number): CardScript => ({
 function applyPummelClubHammer(ctx: ScriptCtx, buff: number): void {
   ctx.addModifier({ scope: "chain-link", attack: buff });
   ctx.logPublic(
-    localizedLog(`${ctx.data.name}: club/hammer weapon gains +${buff} attack`, "card.log.wtr.pummel.weapon.attack", {
+    localizedLog(`${ctx.data.name}: club/hammer weapon gains +${buff} power`, "card.log.wtr.pummel.weapon.attack", {
       card: { kind: "card", cardId: ctx.self.cardId },
       amount: buff,
     }),
@@ -454,7 +454,7 @@ function applyPummelDiscard(ctx: ScriptCtx, buff: number): void {
   ctx.setFlag("link", "pummelDiscardMode", true);
   ctx.logPublic(
     localizedLog(
-      `${ctx.data.name}: attack action gains +${buff} attack and "when this hits, discard"`,
+      `${ctx.data.name}: attack action gains +${buff} power and "when this hits, discard"`,
       "card.log.wtr.pummel.action.attack",
       { card: { kind: "card", cardId: ctx.self.cardId }, amount: buff },
     ),
@@ -507,7 +507,7 @@ const razorReflexScript = (buff: number): CardScript => ({
 function applyRazorWeapon(ctx: ScriptCtx, buff: number): void {
   ctx.addModifier({ scope: "chain-link", attack: buff });
   ctx.logPublic(
-    localizedLog(`${ctx.data.name}: dagger/sword weapon gains +${buff} attack`, "card.log.wtr.razor.weapon.attack", {
+    localizedLog(`${ctx.data.name}: dagger/sword weapon gains +${buff} power`, "card.log.wtr.razor.weapon.attack", {
       card: { kind: "card", cardId: ctx.self.cardId },
       amount: buff,
     }),
@@ -518,7 +518,7 @@ function applyRazorGoAgain(ctx: ScriptCtx, buff: number): void {
   ctx.addModifier({ scope: "chain-link", attack: buff, onHitGoAgain: true, appliesTo: "attack-action" });
   ctx.logPublic(
     localizedLog(
-      `${ctx.data.name}: cheap attack action gains +${buff} attack and on-hit go again`,
+      `${ctx.data.name}: cheap attack action gains +${buff} power and on-hit go again`,
       "card.log.wtr.razor.action.attack",
       { card: { kind: "card", cardId: ctx.self.cardId }, amount: buff },
     ),
@@ -744,7 +744,7 @@ const woundedBullScript = (): CardScript => ({
     {
       event: "card-played",
       sourceZone: "self",
-      label: "Gain +1 attack",
+      label: "Gain +1 power",
       condition: (ctx) => ctx.player(ctx.seat).life < ctx.player(opponentSeat(ctx)).life,
       effect(ctx, played) {
         if (played) ctx.addCardTempPower(played.instanceId, 1);

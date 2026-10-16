@@ -56,6 +56,26 @@ export function decisionMessage(id: string, values?: GameMessage["values"]): Gam
   return { id, ...(values === undefined ? {} : { values }) };
 }
 
+/** A lingering modifier's projected effect text, for rules state the
+ * ongoing-effects projection cannot describe (such as a bare marker that keeps
+ * a resolved card's script observable). Lowercase, without the duration. */
+export function ongoingLabel(
+  fallback: string,
+  id: string,
+  values?: GameMessage["values"],
+): Pick<Modifier, "ongoingLabel" | "ongoingLabelMessage"> {
+  return { ongoingLabel: fallback, ongoingLabelMessage: decisionMessage(id, values) };
+}
+
+/** The projected text of a granted on-hit script hook, after "when it hits:". */
+export function hitHookLabel(
+  fallback: string,
+  id: string,
+  values?: GameMessage["values"],
+): { label: string; labelMessage: GameMessage } {
+  return { label: fallback, labelMessage: decisionMessage(id, values) };
+}
+
 /** "When this enters the arena" or "When this is equipped": a triggered layer
  * added after the object enters (CR 6.6.5), not an immediate hook. Keep
  * replacement effects such as "enters the arena with counters" in
@@ -522,7 +542,7 @@ export type SuspenseTrigger = Pick<TriggerDef, "label" | "condition" | "optional
 /** "Your next attack this turn gets +N{p}" as a Suspense leave trigger. */
 export function suspenseNextAttackBuff(amount: number): SuspenseTrigger {
   return {
-    label: `Your next attack this turn gets +${amount} attack`,
+    label: `Your next attack this turn gets +${amount} power`,
     labelMessage: decisionMessage("card.trigger.common.nextattack.turn.attack", { amount }),
     effect: (ctx) => buffNextAttack(ctx, { attack: amount }),
   };

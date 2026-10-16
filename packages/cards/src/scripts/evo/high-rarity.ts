@@ -8,6 +8,7 @@ import {
   decisionPrompt,
   entersArenaTrigger,
   leavesArenaTrigger,
+  ongoingLabel,
   opponentSeat,
   requestDiscardChoice,
   resolveDiscardChoice,
@@ -1286,7 +1287,13 @@ export const evoHighRarity: Record<string, CardScript> = {
       destroySelfCost: true,
       label: "Charge on next attack",
       onActivate(ctx) {
-        ctx.addModifier({ scope: "until-end-of-turn" });
+        ctx.addModifier({
+          scope: "until-end-of-turn",
+          ...ongoingLabel(
+            "the next time you attack, you may charge your hero's soul, and draw a card if a yellow card is charged",
+            "card.effect.evo.warbandofbellona",
+          ),
+        });
         ctx.setPlayerFlag(ctx.seat, "warbandCharge", true);
       },
     },

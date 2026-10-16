@@ -8,9 +8,11 @@ import {
   decisionMessage,
   decisionPrompt,
   entersArenaTrigger,
+  hitHookLabel,
   isCard,
   leavesArenaTrigger,
   localizedCardLog,
+  ongoingLabel,
   opponentSeat,
   previousAttackHasName,
   requestDiscardChoice,
@@ -538,7 +540,15 @@ function vengeful(maxCost: number): CardScript {
         (ctx) => {
           if (controlsIllusionistAura(ctx)) return;
           ctx.setCounter("vengefulMax", maxCost);
-          ctx.addModifier({ scope: "until-end-of-turn" });
+          ctx.addModifier({
+            scope: "until-end-of-turn",
+            ...ongoingLabel(
+              `may play your next aura with cost ${maxCost} or less ` +
+                `as though it were an instant, with a +1 power counter`,
+              "card.effect.mst.vengefulapparition",
+              { cost: maxCost },
+            ),
+          });
         },
       ),
     ],
@@ -709,6 +719,10 @@ export const mst: Record<string, CardScript> = {
           grantsPlayFromZoneOwner: "opponent",
           appliesToPitch: 3,
           playBaseCostOverride: 0,
+          ...ongoingLabel(
+            "may play blue cards from the opposing hero's banished zone without paying their resource cost",
+            "card.effect.mst.nuu",
+          ),
         });
         const top = ctx.player(opponentSeat(ctx)).deck[0];
         if (!top) return;
@@ -1176,7 +1190,12 @@ function koiKimono(): CardScript {
 function firstTenetMoon(): CardScript {
   return {
     onPlay(ctx) {
-      ctx.addModifier({ scope: "until-end-of-turn", appliesToPitch: 3, appliesTo: "attack" });
+      ctx.addModifier({
+        scope: "until-end-of-turn",
+        appliesToPitch: 3,
+        appliesTo: "attack",
+        ...ongoingLabel("draw a card the next time you attack with a blue card", "card.effect.mst.firsttenetofchimoon"),
+      });
     },
     onFriendlyAttackDeclared(ctx) {
       const marker = ctx.state.modifiers.find(
@@ -1474,7 +1493,13 @@ Object.assign(mst, {
   },
   "shifting winds of the mystic beast|3": {
     onPlay(ctx) {
-      ctx.addModifier({ scope: "until-end-of-turn" });
+      ctx.addModifier({
+        scope: "until-end-of-turn",
+        ...ongoingLabel(
+          "name a card whenever you play a Crouching Tiger; it gets that name",
+          "card.effect.mst.shiftingwindsofthemysticbeast",
+        ),
+      });
       if (pitchedBlue(ctx)) {
         createInHand(ctx, CROUCHING_TIGER);
         createInHand(ctx, CROUCHING_TIGER);
@@ -1666,7 +1691,7 @@ Object.assign(mst, {
           scope: "chain-link",
           onHitScriptHook: {
             hook: "just-a-nick-hit",
-            label: "banish the top card of the defending hero's deck",
+            ...hitHookLabel("banish the top card of the defending hero's deck", "card.effect.mst.justanick"),
             heroOnly: true,
           },
         });

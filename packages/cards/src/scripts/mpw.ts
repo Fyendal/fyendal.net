@@ -5,6 +5,7 @@ import {
   commonOptionMessages,
   decisionMessage,
   decisionPrompt,
+  ongoingLabel,
   opponentSeat,
   yesNoPrompt,
 } from "./shared-helpers.js";
@@ -92,7 +93,11 @@ function alternativeGold(): CardScript["alternativePlayCost"] {
 function nextWager(power: number, rewardLabel: string, reward: (ctx: ScriptCtx, winner: number) => void): CardScript {
   return {
     onPlay(ctx) {
-      buffNextAttack(ctx, { attack: power, appliesToSubtype: "sword" });
+      buffNextAttack(ctx, {
+        attack: power,
+        appliesToSubtype: "sword",
+        ...ongoingLabel("wager with the defending hero when it attacks", "card.effect.common.wager.attack"),
+      });
       ctx.addModifier({ scope: "until-end-of-turn" });
     },
     triggers: [
@@ -359,7 +364,14 @@ export const mpw: Record<string, CardScript> = {
     },
   },
   "all in|1": {
-    onPlay: (ctx) => ctx.addModifier({ scope: "until-end-of-turn" }),
+    onPlay: (ctx) =>
+      ctx.addModifier({
+        scope: "until-end-of-turn",
+        ...ongoingLabel(
+          "your next sword attack destroys all your Gold for +2 power each, and you lose the game if it doesn't hit",
+          "card.effect.mpw.allin",
+        ),
+      }),
     onFriendlyAttackDeclared(ctx) {
       const marker = ctx.state.modifiers.find(
         (modifier) =>
@@ -453,7 +465,14 @@ export const mpw: Record<string, CardScript> = {
   },
   "terms of combat|1": {
     onPlay(ctx) {
-      buffNextAttack(ctx, { attack: 4, appliesTo: "weapon" });
+      buffNextAttack(ctx, {
+        attack: 4,
+        appliesTo: "weapon",
+        ...ongoingLabel(
+          "draw a card whenever a defense reaction is played or activated against it",
+          "card.effect.mpw.termsofcombat",
+        ),
+      });
       ctx.addModifier({ scope: "until-end-of-turn" });
     },
     triggers: [
@@ -561,7 +580,11 @@ export const mpw: Record<string, CardScript> = {
   "golden company|2": { alternativePlayCost: alternativeGold() },
   "below the belt|1": {
     onPlay(ctx) {
-      buffNextAttack(ctx, { attack: 4, appliesToSubtype: "sword" });
+      buffNextAttack(ctx, {
+        attack: 4,
+        appliesToSubtype: "sword",
+        ...ongoingLabel("when it hits a Warrior hero, destroy a card in their arsenal", "card.effect.mpw.belowthebelt"),
+      });
       ctx.addModifier({ scope: "until-end-of-turn" });
     },
     canTriggerOnHit(ctx) {
@@ -584,7 +607,14 @@ export const mpw: Record<string, CardScript> = {
     if (winner >= 0) ctx.drawCards(winner, 1);
   }),
   "blade rush|2": {
-    onPlay: (ctx) => ctx.addModifier({ scope: "until-end-of-turn" }),
+    onPlay: (ctx) =>
+      ctx.addModifier({
+        scope: "until-end-of-turn",
+        ...ongoingLabel(
+          "your first sword attack gets go again and your second sword attack gets +1 power",
+          "card.effect.mpw.bladerush",
+        ),
+      }),
     onFriendlyAttackDeclared(ctx) {
       if (!isSwordAttack(ctx)) return;
       const count = Number(ctx.getFlag("player", "weaponAttackCount"));
@@ -594,7 +624,14 @@ export const mpw: Record<string, CardScript> = {
   },
   "crimson waltz|2": {
     onPlay(ctx) {
-      buffNextAttack(ctx, { attack: 4, appliesToSubtype: "sword" });
+      buffNextAttack(ctx, {
+        attack: 4,
+        appliesToSubtype: "sword",
+        ...ongoingLabel(
+          "when it attacks, draw a card, then put a card from your hand on top of your deck",
+          "card.effect.mpw.crimsonwaltz",
+        ),
+      });
       ctx.addModifier({ scope: "until-end-of-turn" });
     },
     onFriendlyAttackDeclared(ctx) {
@@ -667,7 +704,14 @@ export const mpw: Record<string, CardScript> = {
   },
   "shatter the weakpoint|1": {
     onPlay(ctx) {
-      buffNextAttack(ctx, { attack: 4, appliesToSubtype: "sword" });
+      buffNextAttack(ctx, {
+        attack: 4,
+        appliesToSubtype: "sword",
+        ...ongoingLabel(
+          "when it hits a Warrior hero, destroy an equipment they control with 0 defense",
+          "card.effect.mpw.shattertheweakpoint",
+        ),
+      });
       ctx.addModifier({ scope: "until-end-of-turn" });
     },
     canTriggerOnHit(ctx) {
@@ -696,7 +740,11 @@ export const mpw: Record<string, CardScript> = {
   },
   "steel to the dome|1": {
     onPlay(ctx) {
-      buffNextAttack(ctx, { attack: 4, appliesToSubtype: "sword" });
+      buffNextAttack(ctx, {
+        attack: 4,
+        appliesToSubtype: "sword",
+        ...ongoingLabel("when it hits a Warrior hero, they discard a card", "card.effect.mpw.steeltothedome"),
+      });
       ctx.addModifier({ scope: "until-end-of-turn" });
     },
     canTriggerOnHit(ctx) {
@@ -774,7 +822,11 @@ export const mpw: Record<string, CardScript> = {
   "steel on steel|3": { modifyDefense: (ctx) => (isWeaponAttack(ctx) ? 1 : 0) },
   "engage steel|1": {
     onPlay(ctx) {
-      buffNextAttack(ctx, { attack: 3, appliesToSubtype: "sword" });
+      buffNextAttack(ctx, {
+        attack: 3,
+        appliesToSubtype: "sword",
+        ...ongoingLabel("+1 power if defended by a Warrior card", "card.effect.mpw.engagesteel"),
+      });
       ctx.addModifier({ scope: "until-end-of-turn" });
     },
     modifyAttack(ctx) {
@@ -783,7 +835,11 @@ export const mpw: Record<string, CardScript> = {
   },
   "engage steel|2": {
     onPlay(ctx) {
-      buffNextAttack(ctx, { attack: 2, appliesToSubtype: "sword" });
+      buffNextAttack(ctx, {
+        attack: 2,
+        appliesToSubtype: "sword",
+        ...ongoingLabel("+1 power if defended by a Warrior card", "card.effect.mpw.engagesteel"),
+      });
       ctx.addModifier({ scope: "until-end-of-turn" });
     },
     modifyAttack(ctx) {
@@ -792,7 +848,11 @@ export const mpw: Record<string, CardScript> = {
   },
   "engage steel|3": {
     onPlay(ctx) {
-      buffNextAttack(ctx, { attack: 1, appliesToSubtype: "sword" });
+      buffNextAttack(ctx, {
+        attack: 1,
+        appliesToSubtype: "sword",
+        ...ongoingLabel("+1 power if defended by a Warrior card", "card.effect.mpw.engagesteel"),
+      });
       ctx.addModifier({ scope: "until-end-of-turn" });
     },
     modifyAttack(ctx) {

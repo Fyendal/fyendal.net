@@ -55,7 +55,7 @@ function playFromZone(
 }
 
 describe("WTR Ninja — combo attacks", () => {
-  it("Blackout Kick gains +3 attack after Rising Knee Thrust", () => {
+  it("Blackout Kick gains +3 power after Rising Knee Thrust", () => {
     const g = scenario({
       seats: [
         {
@@ -101,7 +101,7 @@ describe("WTR Ninja — combo attacks", () => {
       .expectLife(1, 14); // 3 + 3
   });
 
-  it("Rising Knee Thrust gains +2 attack and go again after Leg Tap", () => {
+  it("Rising Knee Thrust gains +2 power and go again after Leg Tap", () => {
     const g = scenario({
       seats: [
         { hero: "dorinthea", hand: ["leg tap|1", "rising knee thrust|1", "raging onslaught|2"] },
@@ -283,7 +283,7 @@ describe("WTR Ninja — Breaking Scales", () => {
     g.play("rising knee thrust|1", { settle: false }) // combo attack, 3 attack
       .blockWith()
       .activate("breaking scales|0") // attack-reaction window, attacker's priority
-      .expectLog("Breaking Scales: target combo attack gains +1 attack")
+      .expectLog("Breaking Scales: target combo attack gains +1 power")
       .settle()
       .expectNoEquipment(0, "arms")
       .expectLife(1, 16); // 3 + 1

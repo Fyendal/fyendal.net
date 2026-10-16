@@ -8,6 +8,7 @@ import {
   heroChoiceSeat,
   heroTarget,
   mergeSetScripts,
+  ongoingLabel,
   opponentSeat,
   optN,
   optOnChoose,
@@ -337,7 +338,12 @@ function virulentTouch(): CardScript {
 function toxicity(life: number): CardScript {
   return {
     onPlay(ctx) {
-      ctx.addModifier({ scope: "next-attack", appliesToType: ["assassin", "ranger"], onHitLoseLife: life });
+      ctx.addModifier({
+        scope: "next-attack",
+        appliesTo: "attack-action",
+        appliesToType: ["assassin", "ranger"],
+        onHitLoseLife: life,
+      });
     },
   };
 }
@@ -795,7 +801,13 @@ export const out: Record<string, CardScript> = mergeSetScripts("OUT", outHighRar
       label: "Cycle after dagger hits",
       onActivate(ctx) {
         ctx.setPlayerFlag(ctx.seat, "maskDaggerCycle", true);
-        ctx.addModifier({ scope: "until-end-of-turn" });
+        ctx.addModifier({
+          scope: "until-end-of-turn",
+          ...ongoingLabel(
+            "whenever a dagger hits, may put a card from your hand on the bottom of your deck to draw a card",
+            "card.effect.out.maskofshiftingperspectives",
+          ),
+        });
       },
     },
     canTriggerOnHit: (ctx) =>
@@ -882,7 +894,14 @@ export const out: Record<string, CardScript> = mergeSetScripts("OUT", outHighRar
       destroySelfCost: true,
       label: "Next attack creates an affliction",
       onActivate(ctx) {
-        ctx.addModifier({ scope: "next-attack", appliesTo: "attack-action" });
+        ctx.addModifier({
+          scope: "next-attack",
+          appliesTo: "attack-action",
+          ...ongoingLabel(
+            "create a Frailty, Inertia, or Bloodrot Pox token under their control when it hits a hero",
+            "card.effect.out.toxictips",
+          ),
+        });
         ctx.addModifier({ scope: "until-end-of-turn" });
       },
     },

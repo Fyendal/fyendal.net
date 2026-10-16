@@ -7,6 +7,7 @@ import {
   decisionPrompt,
   entersArenaTrigger,
   localizedCardLog,
+  ongoingLabel,
   opponentSeat,
   optN,
   optOnChoose,
@@ -355,7 +356,10 @@ export const arcHighRarity: Record<string, CardScript> = {
   "high octane|1": {
     onPlay(ctx) {
       ctx.drawCards(ctx.seat, 1);
-      ctx.addModifier({ scope: "until-end-of-turn" });
+      ctx.addModifier({
+        scope: "until-end-of-turn",
+        ...ongoingLabel("gain 1 action point whenever you boost", "card.effect.arc.highoctane"),
+      });
     },
     onBoosted(ctx) {
       ctx.changeActionPoints(ctx.seat, 1);
@@ -449,7 +453,13 @@ export const arcHighRarity: Record<string, CardScript> = {
   },
   "mordred tide|1": {
     onPlay(ctx) {
-      ctx.addModifier({ scope: "until-end-of-turn" });
+      ctx.addModifier({
+        scope: "until-end-of-turn",
+        ...ongoingLabel(
+          "create 1 more Runechant token whenever you create Runechant tokens",
+          "card.effect.arc.mordredtide",
+        ),
+      });
     },
     replaceFriendlyTokenCreation: (ctx, cardId, count) =>
       ctx.cardData(cardId).name === "Runechant" ? count + 1 : undefined,

@@ -8,6 +8,7 @@ import {
   isWeaponAttack,
   localizedCardLog,
   nextAttack,
+  ongoingLabel,
   opponentSeat,
 } from "./shared-helpers.js";
 
@@ -581,7 +582,14 @@ export const sba: Record<string, CardScript> = {
       leftName: "Burn Up",
       rightName: "Shock",
       left(ctx) {
-        ctx.addModifier({ scope: "until-end-of-turn" }); // marker: source of the lingering onHit
+        // marker: source of the lingering onHit
+        ctx.addModifier({
+          scope: "until-end-of-turn",
+          ...ongoingLabel(
+            "the next time an attack you control hits a hero, deal 4 arcane damage to them",
+            "card.effect.sba.burnup",
+          ),
+        });
         ctx.setFlag("player", "burnUpArmed", true);
       },
       right(ctx) {
@@ -628,6 +636,7 @@ export const sba: Record<string, CardScript> = {
         attack: 3,
         appliesTo: "attack-action",
         appliesToSubtype: ["lightning", "elemental"],
+        ...ongoingLabel("go again if it's fused", "card.effect.ele.weavelightning"),
       })(ctx);
       ctx.addModifier({ scope: "until-end-of-turn" }); // marker: keeps the resolved source observable
       ctx.setFlag("player", "weaveGoAgain", true);

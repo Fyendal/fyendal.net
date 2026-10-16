@@ -1,5 +1,12 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
-import { buffNextAttack, commonOptionMessages, decisionPrompt, opponentSeat, yesNoPrompt } from "./shared-helpers.js";
+import {
+  buffNextAttack,
+  commonOptionMessages,
+  decisionPrompt,
+  ongoingLabel,
+  opponentSeat,
+  yesNoPrompt,
+} from "./shared-helpers.js";
 
 const COURAGE = "SBL035";
 const VIGOR = "SDO036";
@@ -50,6 +57,9 @@ function nextWager(
       buffNextAttack(ctx, {
         attack: power,
         ...(appliesTo === "sword" ? { appliesToSubtype: "sword" } : { appliesToClass: "warrior" }),
+        ...(optional
+          ? ongoingLabel("when it attacks a hero, you may wager with them", "card.effect.aol.bellybuster")
+          : ongoingLabel("wager with the defending hero when it attacks", "card.effect.common.wager.attack")),
       });
       ctx.addModifier({ scope: "until-end-of-turn" });
     },
@@ -125,6 +135,13 @@ function prizeworn(token: string): CardScript {
 function alternativeGold(): CardScript["alternativePlayCost"] {
   return { kind: "destroy-controlled-named", options: [{ name: "Gold", count: 1 }] };
 }
+
+const checkRaiseLabel = (wagerAttack: number) =>
+  ongoingLabel(
+    `the next attack you control that wagers gets +${wagerAttack} power`,
+    "card.effect.aol.checkraise",
+    { wagerAttack },
+  );
 
 export const aol: Record<string, CardScript> = {
   "olympia, prized fighter|0": {
@@ -219,7 +236,7 @@ export const aol: Record<string, CardScript> = {
     if (winner >= 0) ctx.drawCards(winner, 1);
   }),
   "check-raise|1": {
-    onPlay: (ctx) => ctx.addModifier({ scope: "until-end-of-turn" }),
+    onPlay: (ctx) => ctx.addModifier({ scope: "until-end-of-turn", ...checkRaiseLabel(4) }),
     triggers: [
       {
         event: "wager-generated",
@@ -233,7 +250,7 @@ export const aol: Record<string, CardScript> = {
     ],
   },
   "check-raise|2": {
-    onPlay: (ctx) => ctx.addModifier({ scope: "until-end-of-turn" }),
+    onPlay: (ctx) => ctx.addModifier({ scope: "until-end-of-turn", ...checkRaiseLabel(3) }),
     triggers: [
       {
         event: "wager-generated",
@@ -247,7 +264,7 @@ export const aol: Record<string, CardScript> = {
     ],
   },
   "check-raise|3": {
-    onPlay: (ctx) => ctx.addModifier({ scope: "until-end-of-turn" }),
+    onPlay: (ctx) => ctx.addModifier({ scope: "until-end-of-turn", ...checkRaiseLabel(2) }),
     triggers: [
       {
         event: "wager-generated",
@@ -262,7 +279,11 @@ export const aol: Record<string, CardScript> = {
   },
   "heads up|1": {
     onPlay(ctx) {
-      buffNextAttack(ctx, { attack: 3, appliesToSubtype: "sword" });
+      buffNextAttack(ctx, {
+        attack: 3,
+        appliesToSubtype: "sword",
+        ...ongoingLabel("dominate if it wagers", "card.effect.aol.headsup"),
+      });
       ctx.addModifier({ scope: "until-end-of-turn" });
     },
     triggers: [

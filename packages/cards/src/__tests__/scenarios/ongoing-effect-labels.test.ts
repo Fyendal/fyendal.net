@@ -25,7 +25,7 @@ describe("lingering effect labels", () => {
 
     expect(ongoing(g, "bonebreaker bellow|2")).toEqual([
       expect.objectContaining({
-        label: "+2 attack · next Brute attack",
+        label: "+2 power · next Brute attack",
         lifetime: "once",
         summaryMessage: { id: "engine.effect.part.attack", values: { attack: "+2" } },
         durationMessage: {
@@ -47,9 +47,9 @@ describe("lingering effect labels", () => {
     g.play("prismatic leyline|2");
 
     expect(ongoing(g, "prismatic leyline|2").map((effect) => effect.label)).toEqual([
-      "+1 attack · next red attack",
-      "+2 attack · next yellow attack",
-      "+3 attack · next blue attack",
+      "+1 power · next red attack",
+      "+2 power · next yellow attack",
+      "+3 power · next blue attack",
     ]);
   });
 
@@ -60,7 +60,7 @@ describe("lingering effect labels", () => {
     g.play("sprout strength|1");
 
     expect(ongoing(g, "sprout strength|1").map((effect) => effect.label))
-      .toEqual(Array(3).fill("+1 attack · next attack"));
+      .toEqual(Array(3).fill("+1 power · next attack"));
   });
 
   it("composes a localizable list of several phrases for one attack", () => {
@@ -71,7 +71,7 @@ describe("lingering effect labels", () => {
 
     expect(ongoing(g, "driving blade|1")).toEqual([
       expect.objectContaining({
-        label: "+3 attack, go again · next weapon attack",
+        label: "+3 power, go again · next weapon attack",
         summaryMessage: {
           id: "engine.effect.summary.list.two",
           values: {
@@ -99,7 +99,7 @@ describe("lingering effect labels", () => {
 
     expect(ongoing(g, "bloodrush bellow|2")).toEqual([
       expect.objectContaining({
-        label: "+2 attack · Brute attacks this turn",
+        label: "+2 power · Brute attacks this turn",
         lifetime: "turn",
         durationMessage: {
           id: "engine.effect.duration.subject.this.turn",
@@ -120,7 +120,7 @@ describe("lingering effect labels", () => {
     g.play("nimblism|1");
 
     expect(ongoing(g, "nimblism|1")).toEqual([
-      expect.objectContaining({ label: "+3 attack · next attack action card with cost 1 or less" }),
+      expect.objectContaining({ label: "+3 power · next attack action card with cost 1 or less" }),
     ]);
   });
   it("names the weapons a combat-chain activation discount applies to", () => {
@@ -137,10 +137,128 @@ describe("lingering effect labels", () => {
         label: "costs 1 less to activate · dagger weapons this combat chain",
         lifetime: "chain",
         durationMessage: {
-          id: "engine.effect.duration.cards.this.chain",
-          values: { subtype: "dagger", cardType: "any", noun: "weapon" },
+          id: "engine.effect.duration.subject.this.chain",
+          values: subjectValues({
+            noun: "weapon",
+            typeCount: 1,
+            type1: "dagger",
+            subject: { kind: "term", id: "engine.effect.subject.other" },
+          }),
         },
       }),
+    ]);
+  });
+});
+
+describe("script-supplied lingering effect labels", () => {
+  it("localizes a granted on-hit rider through a composed term", () => {
+    const g = scenario({
+      seats: [{ hero: "rhinar", hand: ["shadow puppetry|1"], resources: 3 }, { hero: "dorinthea" }],
+    });
+    g.play("shadow puppetry|1");
+
+    expect(ongoing(g, "shadow puppetry|1")).toEqual([
+      expect.objectContaining({
+        label: "+1 power, go again, when it hits: look at the top card of your deck and you may banish it · next attack",
+        summaryMessage: {
+          id: "engine.effect.summary.list.three",
+          values: {
+            attack: "+1",
+            part0: { kind: "term", id: "engine.effect.part.attack" },
+            part1: { kind: "term", id: "engine.effect.part.go.again" },
+            hitTarget: "any",
+            hitEffect: { kind: "term", id: "card.effect.mon.shadowpuppetry" },
+            part2: { kind: "term", id: "engine.effect.part.on.hit.script" },
+          },
+        },
+      }),
+    ]);
+  });
+
+  it("says a granted on-hit rider needs a hero to be hit", () => {
+    const g = scenario({
+      seats: [{ hero: "dorinthea", hand: ["rend flesh|3"], resources: 3 }, { hero: "rhinar" }],
+    });
+    g.play("rend flesh|3");
+
+    expect(ongoing(g, "rend flesh|3")).toEqual([
+      expect.objectContaining({
+        label: "when it hits a hero: remove a +1 power counter for the hit hero to lose 2 life · sword attacks this turn",
+        summaryMessage: {
+          id: "engine.effect.part.on.hit.script",
+          values: { hitTarget: "hero", hitEffect: { kind: "term", id: "card.effect.pen.rendflesh" } },
+        },
+      }),
+    ]);
+  });
+
+  it("localizes a script's ongoing label", () => {
+    const g = scenario({
+      seats: [{ hero: "rhinar", hand: ["embrace sin|2"], resources: 3 }, { hero: "dorinthea" }],
+    });
+    g.play("embrace sin|2");
+
+    expect(ongoing(g, "embrace sin|2")).toEqual(expect.arrayContaining([
+      expect.objectContaining({
+        label: "may play an aura with Runechant in its name from your banished zone · this turn",
+        summaryMessage: { id: "card.effect.iar.embracesin" },
+      }),
+    ]));
+  });
+});
+
+describe("prevention shields", () => {
+  it("names the Pirates a Sawbones shield also covers", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", heroKey: "gravy bones|0", board: ["sawbones, dock hand|2"] },
+        { hero: "rhinar" },
+      ],
+    });
+    g.activate("sawbones, dock hand|2", { ability: 1 });
+
+    expect(ongoing(g, "sawbones, dock hand|2")).toEqual([
+      expect.objectContaining({
+        label: "prevent next 1 damage to you or a Pirate you control · this turn",
+        summaryMessage: {
+          id: "engine.effect.part.prevent.damage.recipient.type",
+          values: { amount: 1, recipientType: "Pirate", recipientTypeArticle: "a" },
+        },
+      }),
+    ]);
+  });
+});
+
+describe("effects that outlast the turn", () => {
+  it("says an effect lasts until the start of its controller's next turn", () => {
+    const g = scenario({
+      seats: [{ hero: "rhinar", hand: ["this round's on me|3"], resources: 3 }, { hero: "dorinthea" }],
+    });
+    g.play("this round's on me|3");
+
+    expect(ongoing(g, "this round's on me|3")).toEqual([
+      expect.objectContaining({
+        label: "attacks that target you get -1 power · until the start of your next turn",
+        lifetime: "later",
+        durationMessage: { id: "engine.effect.duration.until.your.next.turn" },
+      }),
+    ]);
+    g.endTurn();
+    expect(ongoing(g, "this round's on me|3").map((effect) => effect.label))
+      .toEqual(["attacks that target you get -1 power · until the start of your next turn"]);
+  });
+});
+
+describe("whole-turn riders beside a next-attack buff", () => {
+  it("keeps Glistening Steelblade's Dawnblade counter rider as its own effect", () => {
+    const g = scenario({
+      seats: [{ hero: "dorinthea", hand: ["glistening steelblade|2"], resources: 3 }, { hero: "rhinar" }],
+    });
+    g.play("glistening steelblade|2");
+
+    expect(ongoing(g, "glistening steelblade|2").map((effect) => effect.label)).toEqual([
+      "go again · next weapon attack",
+      "whenever Dawnblade hits a hero, put a +1 power counter on it · this turn",
     ]);
   });
 });

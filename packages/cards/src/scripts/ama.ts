@@ -1,5 +1,12 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
-import { attackAbility, buffNextAttack, commonOptionMessages, decisionPrompt } from "./shared-helpers.js";
+import {
+  attackAbility,
+  buffNextAttack,
+  commonOptionMessages,
+  decisionPrompt,
+  hitHookLabel,
+  ongoingLabel,
+} from "./shared-helpers.js";
 
 const CORRUPTED_CORPSE = "IAR090";
 const GATE = "IAR222";
@@ -17,7 +24,11 @@ function controlsVox(ctx: ScriptCtx): boolean {
 }
 
 function grantDestroyingZombieAttack(ctx: ScriptCtx, power: number, marker: string): void {
-  buffNextAttack(ctx, { attack: power, appliesToSubtype: "zombie" });
+  buffNextAttack(ctx, {
+    attack: power,
+    appliesToSubtype: "zombie",
+    ...ongoingLabel("destroy the attacking zombie when it hits", "card.effect.ama.zombiedestroy"),
+  });
   ctx.addModifier({ scope: "until-end-of-turn" });
   ctx.setFlag("player", marker, (Number(ctx.getFlag("player", marker)) || 0) + 1);
 }
@@ -165,7 +176,13 @@ export const ama: Record<string, CardScript> = {
       destroySelfCost: true,
       label: "Destroy: gain a resource when a zombie enters your graveyard",
       onActivate(ctx) {
-        ctx.addModifier({ scope: "until-end-of-turn" });
+        ctx.addModifier({
+          scope: "until-end-of-turn",
+          ...ongoingLabel(
+            "gain 1 resource whenever a zombie is put into your graveyard",
+            "card.effect.ama.dropdeadbodice",
+          ),
+        });
       },
     },
     triggers: [
@@ -218,7 +235,10 @@ export const ama: Record<string, CardScript> = {
         attack: 3,
         onHitScriptHook: {
           hook: "ama-commit-corruption",
-          label: "create a Corrupted Corpse in your banished zone",
+          ...hitHookLabel(
+            "create a Corrupted Corpse in your banished zone",
+            "card.effect.common.corruptedcorpse.create",
+          ),
         },
       });
     },

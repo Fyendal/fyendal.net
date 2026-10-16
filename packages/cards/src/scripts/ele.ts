@@ -11,6 +11,7 @@ import {
   heroTarget,
   localizedCardLog,
   mergeSetScripts,
+  ongoingLabel,
   opponentSeat,
   targetHeroSeat,
 } from "./shared-helpers.js";
@@ -277,13 +278,50 @@ function delayedGuardianAura(type: "earth" | "ice", attack: number, creates?: "f
   };
 }
 
-function fusedAttackWatcher(type: "ice" | "lightning", key: string, onHit: (ctx: ScriptCtx) => void): CardScript {
+const FROSTBITE_ON_HIT = ongoingLabel(
+  "whenever an attack hits a hero, create a Frostbite token under their control",
+  "card.effect.common.frostbite.onhit",
+);
+const BUZZ_BOLT_ON_HIT = ongoingLabel(
+  "whenever an attack hits a hero, it deals 1 damage to them",
+  "card.effect.ele.buzzbolt",
+);
+const CHILLING_ICEVEIN_ON_HIT = ongoingLabel(
+  "whenever an attack hits a hero, they discard a card unless they pay 1 resource",
+  "card.effect.ele.chillingicevein",
+);
+
+const invigorateLabel = (amount: number) =>
+  ongoingLabel(`the next attack you fuse gets +${amount} power`, "card.effect.ele.invigorate", { amount });
+
+const chillToTheBoneLabel = (amount: number) =>
+  ongoingLabel(
+    `the next time an Ice or Elemental attack hits a hero, create ${
+      amount === 1 ? "a Frostbite token" : `${amount} Frostbite tokens`
+    } under their control`,
+    "card.effect.ele.chilltothebone",
+    { amount },
+  );
+
+const electrifyLabel = (amount: number) =>
+  ongoingLabel(
+    `the next time an attack action card hits a hero, it deals ${amount} damage to them`,
+    "card.effect.ele.electrify",
+    { amount },
+  );
+
+function fusedAttackWatcher(
+  type: "ice" | "lightning",
+  key: string,
+  label: ReturnType<typeof ongoingLabel>,
+  onHit: (ctx: ScriptCtx) => void,
+): CardScript {
   return {
     additionalCost: fusionAdditionalCost(type),
     onAttackDeclared(ctx) {
       if (!isFused(ctx)) return;
       ctx.setCounter(key, 1);
-      ctx.addModifier({ scope: "until-end-of-turn" });
+      ctx.addModifier({ scope: "until-end-of-turn", ...label });
     },
     canTriggerOnHit(ctx) {
       return ctx.getCounter(key) > 0 && ctx.link?.targetAllyId === undefined;
@@ -377,7 +415,20 @@ function brambleSpark(attack: number): CardScript {
     additionalCost: fusionAdditionalCost("earth"),
     onPlay(ctx) {
       ctx.setCounter("brambleArmed", 1);
-      ctx.addModifier({ scope: "until-end-of-turn" });
+      ctx.addModifier({
+        scope: "until-end-of-turn",
+        ...(isFused(ctx)
+          ? ongoingLabel(
+            `the next attack action card you play gets +${attack} power ` +
+              `and deals 1 arcane damage to target hero when it attacks`,
+            "card.effect.ele.bramblespark.fused",
+            { amount: attack },
+          )
+          : ongoingLabel(
+            "the next attack action card you play deals 1 arcane damage to target hero when it attacks",
+            "card.effect.ele.bramblespark",
+          )),
+      });
     },
     triggers: [
       {
@@ -408,7 +459,21 @@ function weave(type: "earth" | "ice", attack: number): CardScript {
   return {
     onPlay(ctx) {
       ctx.setCounter("weaveArmed", 1);
-      ctx.addModifier({ scope: "until-end-of-turn" });
+      ctx.addModifier({
+        scope: "until-end-of-turn",
+        ...(type === "earth"
+          ? ongoingLabel(
+            `the next Earth or Elemental attack action card you play ` +
+              `gets +${attack} power, +${attack + 1} if it's fused`,
+            "card.effect.ele.weaveearth",
+            { amount: attack, fusedAmount: attack + 1 },
+          )
+          : ongoingLabel(
+            `the next Ice or Elemental attack action card you play gets +${attack} power, and dominate if it's fused`,
+            "card.effect.ele.weaveice",
+            { amount: attack },
+          )),
+      });
     },
     onFriendlyAttackDeclared(ctx) {
       if (!ctx.getCounter("weaveArmed") || ctx.link?.attackCardType !== "action") return;
@@ -433,6 +498,7 @@ function weaveLightning(attack: number): CardScript {
         attack,
         appliesTo: "attack-action",
         appliesToSubtype: ["lightning", "elemental"],
+        ...ongoingLabel("go again if it's fused", "card.effect.ele.weavelightning"),
       });
       ctx.setCounter("weaveLightningArmed", 1);
       ctx.addModifier({ scope: "until-end-of-turn" });
@@ -791,25 +857,31 @@ export const ele: Record<string, CardScript> = mergeSetScripts("ELE", eleHighRar
   "snap shot|1": snapShot(),
   "snap shot|2": snapShot(),
   "snap shot|3": snapShot(),
-  "blizzard bolt|1": fusedAttackWatcher("ice", "blizzard", (ctx) => createFrostbites(ctx, opponentSeat(ctx))),
-  "blizzard bolt|2": fusedAttackWatcher("ice", "blizzard", (ctx) => createFrostbites(ctx, opponentSeat(ctx))),
-  "blizzard bolt|3": fusedAttackWatcher("ice", "blizzard", (ctx) => createFrostbites(ctx, opponentSeat(ctx))),
-  "buzz bolt|1": fusedAttackWatcher("lightning", "buzz", (ctx) =>
+  "blizzard bolt|1": fusedAttackWatcher("ice", "blizzard", FROSTBITE_ON_HIT, (ctx) =>
+    createFrostbites(ctx, opponentSeat(ctx)),
+  ),
+  "blizzard bolt|2": fusedAttackWatcher("ice", "blizzard", FROSTBITE_ON_HIT, (ctx) =>
+    createFrostbites(ctx, opponentSeat(ctx)),
+  ),
+  "blizzard bolt|3": fusedAttackWatcher("ice", "blizzard", FROSTBITE_ON_HIT, (ctx) =>
+    createFrostbites(ctx, opponentSeat(ctx)),
+  ),
+  "buzz bolt|1": fusedAttackWatcher("lightning", "buzz", BUZZ_BOLT_ON_HIT, (ctx) =>
     ctx.dealDamage(opponentSeat(ctx), 1, { sourceInstanceId: ctx.link!.attackingCard.instanceId }),
   ),
-  "buzz bolt|2": fusedAttackWatcher("lightning", "buzz", (ctx) =>
+  "buzz bolt|2": fusedAttackWatcher("lightning", "buzz", BUZZ_BOLT_ON_HIT, (ctx) =>
     ctx.dealDamage(opponentSeat(ctx), 1, { sourceInstanceId: ctx.link!.attackingCard.instanceId }),
   ),
-  "buzz bolt|3": fusedAttackWatcher("lightning", "buzz", (ctx) =>
+  "buzz bolt|3": fusedAttackWatcher("lightning", "buzz", BUZZ_BOLT_ON_HIT, (ctx) =>
     ctx.dealDamage(opponentSeat(ctx), 1, { sourceInstanceId: ctx.link!.attackingCard.instanceId }),
   ),
-  "chilling icevein|1": fusedAttackWatcher("ice", "icevein", (ctx) =>
+  "chilling icevein|1": fusedAttackWatcher("ice", "icevein", CHILLING_ICEVEIN_ON_HIT, (ctx) =>
     discardUnlessPay(ctx, opponentSeat(ctx), 1, "icevein"),
   ),
-  "chilling icevein|2": fusedAttackWatcher("ice", "icevein", (ctx) =>
+  "chilling icevein|2": fusedAttackWatcher("ice", "icevein", CHILLING_ICEVEIN_ON_HIT, (ctx) =>
     discardUnlessPay(ctx, opponentSeat(ctx), 1, "icevein"),
   ),
-  "chilling icevein|3": fusedAttackWatcher("ice", "icevein", (ctx) =>
+  "chilling icevein|3": fusedAttackWatcher("ice", "icevein", CHILLING_ICEVEIN_ON_HIT, (ctx) =>
     discardUnlessPay(ctx, opponentSeat(ctx), 1, "icevein"),
   ),
   "dazzling crescendo|1": fusedGoAgain("lightning"),
@@ -940,7 +1012,7 @@ export const ele: Record<string, CardScript> = mergeSetScripts("ELE", eleHighRar
   "invigorate|1": {
     onPlay(ctx) {
       ctx.setCounter("invigorateArmed", 1);
-      ctx.addModifier({ scope: "until-end-of-turn" });
+      ctx.addModifier({ scope: "until-end-of-turn", ...invigorateLabel(4) });
     },
     onFriendlyAttackDeclared(ctx) {
       if (!ctx.getCounter("invigorateArmed") || !(ctx.link?.attackingCard.counters?.fused ?? 0)) return;
@@ -951,7 +1023,7 @@ export const ele: Record<string, CardScript> = mergeSetScripts("ELE", eleHighRar
   "invigorate|2": {
     onPlay(ctx) {
       ctx.setCounter("invigorateArmed", 1);
-      ctx.addModifier({ scope: "until-end-of-turn" });
+      ctx.addModifier({ scope: "until-end-of-turn", ...invigorateLabel(3) });
     },
     onFriendlyAttackDeclared(ctx) {
       if (!ctx.getCounter("invigorateArmed") || !(ctx.link?.attackingCard.counters?.fused ?? 0)) return;
@@ -962,7 +1034,7 @@ export const ele: Record<string, CardScript> = mergeSetScripts("ELE", eleHighRar
   "invigorate|3": {
     onPlay(ctx) {
       ctx.setCounter("invigorateArmed", 1);
-      ctx.addModifier({ scope: "until-end-of-turn" });
+      ctx.addModifier({ scope: "until-end-of-turn", ...invigorateLabel(2) });
     },
     onFriendlyAttackDeclared(ctx) {
       if (!ctx.getCounter("invigorateArmed") || !(ctx.link?.attackingCard.counters?.fused ?? 0)) return;
@@ -1202,7 +1274,7 @@ export const ele: Record<string, CardScript> = mergeSetScripts("ELE", eleHighRar
     onPlay(ctx) {
       buffNextAttack(ctx, { attack: 3 });
       ctx.setCounter("iceQuake", 1);
-      ctx.addModifier({ scope: "until-end-of-turn" });
+      ctx.addModifier({ scope: "until-end-of-turn", ...FROSTBITE_ON_HIT });
     },
     canTriggerOnHit(ctx) {
       return ctx.getCounter("iceQuake") > 0 && ctx.link?.targetAllyId === undefined;
@@ -1215,7 +1287,7 @@ export const ele: Record<string, CardScript> = mergeSetScripts("ELE", eleHighRar
     onPlay(ctx) {
       buffNextAttack(ctx, { attack: 2 });
       ctx.setCounter("iceQuake", 1);
-      ctx.addModifier({ scope: "until-end-of-turn" });
+      ctx.addModifier({ scope: "until-end-of-turn", ...FROSTBITE_ON_HIT });
     },
     canTriggerOnHit(ctx) {
       return ctx.getCounter("iceQuake") > 0 && ctx.link?.targetAllyId === undefined;
@@ -1228,7 +1300,7 @@ export const ele: Record<string, CardScript> = mergeSetScripts("ELE", eleHighRar
     onPlay(ctx) {
       buffNextAttack(ctx, { attack: 1 });
       ctx.setCounter("iceQuake", 1);
-      ctx.addModifier({ scope: "until-end-of-turn" });
+      ctx.addModifier({ scope: "until-end-of-turn", ...FROSTBITE_ON_HIT });
     },
     canTriggerOnHit(ctx) {
       return ctx.getCounter("iceQuake") > 0 && ctx.link?.targetAllyId === undefined;
@@ -1261,7 +1333,7 @@ export const ele: Record<string, CardScript> = mergeSetScripts("ELE", eleHighRar
   "chill to the bone|1": {
     onPlay(ctx) {
       ctx.setCounter("chill", 1);
-      ctx.addModifier({ scope: "until-end-of-turn" });
+      ctx.addModifier({ scope: "until-end-of-turn", ...chillToTheBoneLabel(3) });
     },
     canTriggerOnHit(ctx) {
       return (
@@ -1278,7 +1350,7 @@ export const ele: Record<string, CardScript> = mergeSetScripts("ELE", eleHighRar
   "chill to the bone|2": {
     onPlay(ctx) {
       ctx.setCounter("chill", 1);
-      ctx.addModifier({ scope: "until-end-of-turn" });
+      ctx.addModifier({ scope: "until-end-of-turn", ...chillToTheBoneLabel(2) });
     },
     canTriggerOnHit(ctx) {
       return (
@@ -1295,7 +1367,7 @@ export const ele: Record<string, CardScript> = mergeSetScripts("ELE", eleHighRar
   "chill to the bone|3": {
     onPlay(ctx) {
       ctx.setCounter("chill", 1);
-      ctx.addModifier({ scope: "until-end-of-turn" });
+      ctx.addModifier({ scope: "until-end-of-turn", ...chillToTheBoneLabel(1) });
     },
     canTriggerOnHit(ctx) {
       return (
@@ -1503,7 +1575,7 @@ export const ele: Record<string, CardScript> = mergeSetScripts("ELE", eleHighRar
     onPlay(ctx) {
       if (ctx.fromArsenal) ctx.drawCards(ctx.seat, 1);
       ctx.setCounter("electrify", 1);
-      ctx.addModifier({ scope: "until-end-of-turn" });
+      ctx.addModifier({ scope: "until-end-of-turn", ...electrifyLabel(3) });
     },
     canTriggerOnHit(ctx) {
       return (
@@ -1519,7 +1591,7 @@ export const ele: Record<string, CardScript> = mergeSetScripts("ELE", eleHighRar
     onPlay(ctx) {
       if (ctx.fromArsenal) ctx.drawCards(ctx.seat, 1);
       ctx.setCounter("electrify", 1);
-      ctx.addModifier({ scope: "until-end-of-turn" });
+      ctx.addModifier({ scope: "until-end-of-turn", ...electrifyLabel(2) });
     },
     canTriggerOnHit(ctx) {
       return (
@@ -1535,7 +1607,7 @@ export const ele: Record<string, CardScript> = mergeSetScripts("ELE", eleHighRar
     onPlay(ctx) {
       if (ctx.fromArsenal) ctx.drawCards(ctx.seat, 1);
       ctx.setCounter("electrify", 1);
-      ctx.addModifier({ scope: "until-end-of-turn" });
+      ctx.addModifier({ scope: "until-end-of-turn", ...electrifyLabel(1) });
     },
     canTriggerOnHit(ctx) {
       return (

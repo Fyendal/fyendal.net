@@ -132,7 +132,7 @@ function strongestSurvive(): CardScript {
 
 const bareFangs = discardSixPlusPayoff((ctx) => {
   ctx.addModifier({ scope: "chain-link", attack: 2 });
-  ctx.logPublic(localizedCardLog(ctx, "Bare Fangs gains +2 attack", "card.log.ska.barefangs.attack", { amount: 2 }));
+  ctx.logPublic(localizedCardLog(ctx, "Bare Fangs gains +2 power", "card.log.ska.barefangs.attack", { amount: 2 }));
 });
 
 const wildRide = discardSixPlusPayoff((ctx) => {

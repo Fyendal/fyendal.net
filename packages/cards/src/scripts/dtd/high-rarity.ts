@@ -9,6 +9,7 @@ import {
   decisionPrompt,
   entersArenaTrigger,
   localizedCardLog,
+  ongoingLabel,
   opponentSeat,
   queueIntimidate,
   yesNoPrompt,
@@ -602,7 +603,7 @@ export const dtdHighRarity: Record<string, CardScript> = {
         ctx.banish(card.instanceId);
       }
       ctx.drawCards(ctx.seat, bloodDebtCards);
-      ctx.addModifier({ scope: "until-end-of-turn", attack: sixes, appliesToType: ["brute", "shadow"] });
+      if (sixes > 0) ctx.addModifier({ scope: "until-end-of-turn", attack: sixes, appliesToType: ["brute", "shadow"] });
     },
   },
   "vynnset, iron maiden|0": {
@@ -842,10 +843,8 @@ export const dtdHighRarity: Record<string, CardScript> = {
   },
   "bequest the vast beyond|1": {
     onPlay(ctx) {
-      buffNextAttack(ctx, {
-        attackCostReduction: ctx.player(ctx.seat).board.filter((card) => named(ctx, card, "runechant")).length,
-        appliesToType: ["runeblade"],
-      });
+      const runechants = ctx.player(ctx.seat).board.filter((card) => named(ctx, card, "runechant")).length;
+      if (runechants > 0) buffNextAttack(ctx, { attackCostReduction: runechants, appliesToType: ["runeblade"] });
     },
   },
   "runic reckoning|1": {
@@ -939,6 +938,7 @@ export const dtdHighRarity: Record<string, CardScript> = {
           scope: "until-end-of-turn",
           seat: opponentSeat(ctx),
           prohibitsName: option.toLowerCase(),
+          ...ongoingLabel(`can't play cards named ${option}`, "card.effect.dtd.censor", { name: option }),
           expiresAtEndOfSeatTurn: opponentSeat(ctx),
         });
     },
@@ -970,7 +970,13 @@ export const dtdHighRarity: Record<string, CardScript> = {
   },
   "hack to reality|2": {
     onPlay(ctx) {
-      buffNextAttack(ctx, { attack: 2 });
+      buffNextAttack(ctx, {
+        attack: 2,
+        ...ongoingLabel(
+          "when it hits a hero, destroy a non-token aura they own with cost no greater than the damage dealt",
+          "card.effect.dtd.hacktoreality",
+        ),
+      });
       ctx.addModifier({ scope: "until-end-of-turn" });
     },
     canTriggerOnHit(ctx) {
@@ -1052,7 +1058,13 @@ export const dtdHighRarity: Record<string, CardScript> = {
   },
   "poison the well|3": {
     onPlay(ctx) {
-      ctx.addModifier({ scope: "until-end-of-turn" });
+      ctx.addModifier({
+        scope: "until-end-of-turn",
+        ...ongoingLabel(
+          "the next time a hero would gain life, they lose that much life instead",
+          "card.effect.dtd.poisonthewell",
+        ),
+      });
     },
     replaceHeroLifeGain(ctx, gainingSeat, amount) {
       if (amount <= 0 || ctx.getCounter("used") > 0) return amount;

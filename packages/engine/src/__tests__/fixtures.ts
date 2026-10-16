@@ -17,7 +17,7 @@ export const cards: Record<string, CardData> = {
   DOM: { id: "DOM", name: "Dominator", cardType: "action", subtypes: ["attack"], classes: ["brute"], pitch: 1, cost: 0, attack: 6, defense: 2, keywords: ["Dominate"], text: "Dominate" },
   INTIM: { id: "INTIM", name: "Intimidator", cardType: "action", subtypes: ["attack"], classes: ["brute"], pitch: 1, cost: 0, attack: 5, defense: 2, keywords: ["Intimidate"], text: "Intimidate" },
   BLOCK3: { id: "BLOCK3", name: "Blocker", cardType: "action", subtypes: [], classes: ["generic"], pitch: 3, cost: 0, attack: 0, defense: 3, text: "" },
-  REACT: { id: "REACT", name: "Pump Up", cardType: "attack-reaction", classes: ["warrior"], pitch: 1, cost: 0, defense: 3, text: "The attack gains +2 attack" },
+  REACT: { id: "REACT", name: "Pump Up", cardType: "attack-reaction", classes: ["warrior"], pitch: 1, cost: 0, defense: 3, text: "The attack gains +2 power" },
   DREACT: { id: "DREACT", name: "Sinker", cardType: "defense-reaction", classes: ["generic"], pitch: 3, cost: 0, defense: 3, text: "Draw a card" },
   HELM: { id: "HELM", name: "Test Helm", cardType: "equipment", subtypes: ["head"], defense: 1, keywords: ["Blade Break"], text: "Blade Break" },
   BW: { id: "BW", name: "Test Battleworn", cardType: "equipment", subtypes: ["chest"], defense: 2, keywords: ["Battleworn"], text: "Battleworn" },

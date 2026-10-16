@@ -20,6 +20,8 @@ import {
   revealTopSixPlusStays,
   resolveDiscardChoice,
   suspenseAura,
+  hitHookLabel,
+  ongoingLabel,
 } from "./shared-helpers.js";
 
 const RUNECHANT = "SBA036";
@@ -96,7 +98,7 @@ function grantHeadBangingHit(ctx: ScriptCtx, attackInstanceId: number): void {
     appliesToInstanceId: attackInstanceId,
     onHitScriptHook: {
       hook: "iar-head-banging-hit",
-      label: "if you have no cards in hand, draw a card",
+      ...hitHookLabel("if you have no cards in hand, draw a card", "card.effect.iar.headbangingchorus"),
       heroOnly: true,
     },
   });
@@ -592,7 +594,10 @@ function commitToCorruption(attack: number): CardScript {
         attack,
         onHitScriptHook: {
           hook: "iar-commit-corruption",
-          label: "create a Corrupted Corpse in your banished zone",
+          ...hitHookLabel(
+            "create a Corrupted Corpse in your banished zone",
+            "card.effect.common.corruptedcorpse.create",
+          ),
         },
       });
     },
@@ -752,7 +757,7 @@ function stepThroughRealms(attack: number): CardScript {
         appliesToType: ["shadow"],
         onHitScriptHook: {
           hook: "iar-step-through-realms",
-          label: "create a Gate to i'Arathael",
+          ...hitHookLabel("create a Gate to i'Arathael", "card.effect.iar.stepthroughrealms"),
         },
       });
     },
@@ -864,7 +869,7 @@ function freshFromTheForge(): CardScript {
         once: true,
         onHitScriptHook: {
           hook: "iar-fresh-forge-mark",
-          label: "remove a +1 power counter to mark the hit hero",
+          ...hitHookLabel("remove a +1 power counter to mark the hit hero", "card.effect.iar.freshfromtheforge"),
           heroOnly: true,
         },
       });
@@ -1899,7 +1904,10 @@ export const iar: Record<string, CardScript> = {
         grantsPlayFromZoneOwner: "own",
         grantsPlayFromNameContains: "runechant",
         appliesToSubtype: "aura",
-        ongoingLabel: "may play an aura with Runechant in its name from your banished zone",
+        ...ongoingLabel(
+          "may play an aura with Runechant in its name from your banished zone",
+          "card.effect.iar.embracesin",
+        ),
       });
     },
   },
@@ -2549,7 +2557,7 @@ export const iar: Record<string, CardScript> = {
         attack: 3,
         onHitScriptHook: {
           hook: "iar-exorcism-hit",
-          label: "turn all cards in the hit hero's banished zone face-down",
+          ...hitHookLabel("turn all cards in the hit hero's banished zone face-down", "card.effect.iar.exorcism"),
           heroOnly: true,
         },
       });

@@ -514,7 +514,7 @@ describe("combat-chain browsing", () => {
     });
 
     expect(html).toContain("tabindex=\"0\"");
-    expect(html).toContain("Attack modifiers");
+    expect(html).toContain("Power modifiers");
     expect(html).toContain("chain-base-value");
     expect(html).toContain("<strong>3</strong>");
     expect(html).toContain("+2");

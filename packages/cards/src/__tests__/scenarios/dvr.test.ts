@@ -85,7 +85,7 @@ describe("DVR — Dawnblade / Dorinthea hero", () => {
       .expectAttackValue(2)
       .blockWith()
       .settle() // hit: Glistening puts a +1 counter on Dawnblade
-      .expectLog("Dawnblade, Resplendent gets a +1 attack counter")
+      .expectLog("Dawnblade, Resplendent gets a +1 power counter")
       .expectAP(0, 1)
       .attackWithWeapon() // legal only because Dorinthea reset the once-per-turn flag
       .expectAttackValue(4) // 2 + 1 (second attack this turn) + 1 (counter)
@@ -112,7 +112,7 @@ describe("DVR — Dawnblade / Dorinthea hero", () => {
       .blockWith()
       .settle()
       .expectLog("Glistening Steelblade triggers: On hit")
-      .expectLog("Dawnblade gets a +1 attack counter")
+      .expectLog("Dawnblade gets a +1 power counter")
       .expectAP(0, 1)
       .attackWithWeapon()
       .expectAttackValue(4)
@@ -196,7 +196,7 @@ describe("DVR — attack reactions", () => {
       .attackWithWeapon()
       .blockWith("raging onslaught|2")
       .react("ironsong response|1")
-      .expectLog("Ironsong Response (Reprise): +3 attack")
+      .expectLog("Ironsong Response (Reprise): +3 power")
       .expectFinalAttack(5)
       .expectLife(1, 18);
 

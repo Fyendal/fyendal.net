@@ -6,6 +6,7 @@ import {
   decisionPrompt,
   entersArenaTrigger,
   heroDamage,
+  ongoingLabel,
   opponentSeat,
   previousAttackHasName,
   yesNoPrompt,
@@ -987,7 +988,11 @@ export const evrHighRarity: Record<string, CardScript> = {
     },
     onPlay(ctx) {
       for (const player of ctx.state.players) ctx.drawCards(player.seat, 1);
-      ctx.addModifier({ scope: "until-end-of-turn", expiresAtStartOfTurn: ctx.state.turn + 2 });
+      ctx.addModifier({
+        scope: "until-end-of-turn",
+        expiresAtStartOfTurn: ctx.state.turn + 2,
+        ...ongoingLabel("attacks that target you get -1 power", "card.effect.evr.thisroundsonme"),
+      });
     },
   },
 };

@@ -525,7 +525,7 @@ export const wtrHighRarity: Record<string, CardScript> = {
       {
         event: "card-played",
         sourceZone: "self",
-        label: "Gain +4 attack and go again",
+        label: "Gain +4 power and go again",
         condition: (ctx) => ctx.player(ctx.seat).deck.length === 0,
         effect(ctx, played) {
           if (!played) return;

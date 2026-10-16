@@ -618,10 +618,11 @@ export interface Modifier {
    *  "hits a hero" wording; `requiresAttackCounter` requires the attacking
    *  card to carry the named counter (Dead Eye's aim condition), and
    *  `requiresAttackNameContains` requires one of its effective names to
-   *  contain the normalized fragment. */
+   *  contain the normalized fragment. `labelMessage` localizes `label`. */
   onHitScriptHook?: {
     hook: string;
     label: string;
+    labelMessage?: GameMessage;
     heroOnly?: boolean;
     requiresAttackCounter?: string;
     requiresAttackNameContains?: string;
@@ -681,6 +682,8 @@ export interface Modifier {
   /** Public summary for a lingering modifier whose rules state is otherwise
    * not self-describing in the ongoing-effects projection. */
   ongoingLabel?: string;
+  /** Catalog message that renders `ongoingLabel`. */
+  ongoingLabelMessage?: GameMessage;
   /** While active, matching cards may be played from this otherwise
    * unavailable zone. This is a card-classifying permission, so it also
    * applies to matching objects that enter the zone later in the duration. */

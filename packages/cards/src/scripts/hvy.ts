@@ -8,6 +8,7 @@ import {
   isSixPlus,
   localizedCardLog,
   mergeSetScripts,
+  ongoingLabel,
   opponentSeat,
   revealTopSixPlusStays,
 } from "./shared-helpers.js";
@@ -170,13 +171,26 @@ function wagerAttack(rewards: readonly string[]): CardScript {
   };
 }
 
-function nextAttackWager(power: number, rewards: readonly string[], appliesToType?: string[]): CardScript {
+const wagerLabel = (token: string, id: string) =>
+  ongoingLabel(`when it attacks a hero, you may wager ${token} token with them`, id);
+const WAGER_AGILITY_LABEL = wagerLabel("an Agility", "card.effect.common.wager.agility");
+const WAGER_GOLD_LABEL = wagerLabel("a Gold", "card.effect.common.wager.gold");
+const WAGER_MIGHT_LABEL = wagerLabel("a Might", "card.effect.common.wager.might");
+const WAGER_VIGOR_LABEL = wagerLabel("a Vigor", "card.effect.common.wager.vigor");
+
+function nextAttackWager(
+  power: number,
+  rewards: readonly string[],
+  label: ReturnType<typeof ongoingLabel>,
+  appliesToType?: string[],
+): CardScript {
   return {
     onPlay(ctx) {
       buffNextAttack(ctx, {
         attack: power,
         appliesTo: "attack",
         ...(appliesToType ? { appliesToType } : {}),
+        ...label,
       });
       // Keep the resolved action available as the delayed wager source.
       ctx.addModifier({ scope: "until-end-of-turn" });
@@ -308,7 +322,7 @@ function downButNotOut(): CardScript {
   };
 }
 
-function auraStart(power: number, token: string): CardScript {
+function auraStart(power: number, token: string, label: ReturnType<typeof ongoingLabel>): CardScript {
   return {
     triggers: [
       {
@@ -317,7 +331,7 @@ function auraStart(power: number, token: string): CardScript {
         label: `Destroy this: next Guardian attack +${power} and may wager`,
         effect(ctx) {
           ctx.destroySelf();
-          buffNextAttack(ctx, { attack: power, appliesTo: "attack", appliesToClass: "guardian" });
+          buffNextAttack(ctx, { attack: power, appliesTo: "attack", appliesToClass: "guardian", ...label });
           ctx.addModifier({ scope: "until-end-of-turn" });
         },
       },
@@ -549,7 +563,14 @@ export const hvy: Record<string, CardScript> = mergeSetScripts("HVY", hvyHighRar
       effectCardCostChoiceHook: "chapeau-cost",
       label: "Destroy a Gold: next attack wagers Might and Vigor",
       onActivate(ctx) {
-        ctx.addModifier({ scope: "next-attack", appliesTo: "attack" });
+        ctx.addModifier({
+          scope: "next-attack",
+          appliesTo: "attack",
+          ...ongoingLabel(
+            "when it attacks a hero, wager a Might and a Vigor token with them",
+            "card.effect.hvy.goodtimechapeau",
+          ),
+        });
         ctx.addModifier({ scope: "until-end-of-turn" });
       },
     },
@@ -644,8 +665,8 @@ export const hvy: Record<string, CardScript> = mergeSetScripts("HVY", hvyHighRar
       if (won) ctx.createToken(VIGOR);
     },
   })),
-  ...pitches("big bop", (pitch) => auraStart(6 - pitch, VIGOR)),
-  ...pitches("bigger than big", (pitch) => auraStart(6 - pitch, MIGHT)),
+  ...pitches("big bop", (pitch) => auraStart(6 - pitch, VIGOR, WAGER_VIGOR_LABEL)),
+  ...pitches("bigger than big", (pitch) => auraStart(6 - pitch, MIGHT, WAGER_MIGHT_LABEL)),
   "pint of strong and stout|3": {
     onPlay(ctx) {
       ctx.createToken(MIGHT);
@@ -832,7 +853,7 @@ export const hvy: Record<string, CardScript> = mergeSetScripts("HVY", hvyHighRar
       ctx.drawCards(ctx.seat, 1);
     },
   })),
-  ...pitches("edge ahead", (pitch) => nextAttackWager(4 - pitch, [AGILITY], ["warrior"])),
+  ...pitches("edge ahead", (pitch) => nextAttackWager(4 - pitch, [AGILITY], WAGER_AGILITY_LABEL, ["warrior"])),
   ...pitches("engaged swiftblade", (pitch) => ({
     onPlay(ctx) {
       buffNextAttack(ctx, {
@@ -843,7 +864,7 @@ export const hvy: Record<string, CardScript> = mergeSetScripts("HVY", hvyHighRar
       });
     },
   })),
-  ...pitches("hold 'em", (pitch) => nextAttackWager(4 - pitch, [VIGOR], ["warrior"])),
+  ...pitches("hold 'em", (pitch) => nextAttackWager(4 - pitch, [VIGOR], WAGER_VIGOR_LABEL, ["warrior"])),
 
   // Shared class cycles
   "gauntlet of might|0": tokenAction(MIGHT),
@@ -966,7 +987,7 @@ export const hvy: Record<string, CardScript> = mergeSetScripts("HVY", hvyHighRar
       ctx.createToken(GOLD);
     },
   })),
-  ...pitches("money where ya mouth is", (pitch) => nextAttackWager(4 - pitch, [GOLD])),
+  ...pitches("money where ya mouth is", (pitch) => nextAttackWager(4 - pitch, [GOLD], WAGER_GOLD_LABEL)),
   "starting stake|2": {
     onPlay(ctx) {
       if (!controls(ctx, "Gold")) ctx.createToken(GOLD);

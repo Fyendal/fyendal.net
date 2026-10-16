@@ -8,8 +8,10 @@ import {
   decisionMessage,
   decisionPrompt,
   entersArenaTrigger,
+  hitHookLabel,
   localizedCardLog,
   nextAttack,
+  ongoingLabel,
   opponentSeat,
   opposingHeroDamage,
   requestDiscardChoice,
@@ -553,11 +555,18 @@ function goldHunter(kind: "go-again" | "power" | "overpower" | "discount"): Card
   };
 }
 
+const PITCH_COLORS: Record<number, string> = { 1: "red", 2: "yellow", 3: "blue" };
+
 function flyingHigh(pitch: number): CardScript {
   const flag = `seaFlyingHigh:${pitch}`;
   return {
     onPlay(ctx) {
-      buffNextAttack(ctx, { goAgain: true });
+      buffNextAttack(ctx, {
+        goAgain: true,
+        ...ongoingLabel(`+1 power if it's ${PITCH_COLORS[pitch]}`, "card.effect.common.attack.if.color", {
+          attackColor: PITCH_COLORS[pitch]!,
+        }),
+      });
       ctx.addModifier({ scope: "until-end-of-turn" });
       ctx.setFlag("player", flag, true);
     },
@@ -825,7 +834,14 @@ export const sea: Record<string, CardScript> = {
         ctx.addModifier({ scope: "chain-link", defense: 1 });
     },
   },
-  "heave ho!|3": nextAllyAttack("heaveHo", { overpower: true }, createGold),
+  "heave ho!|3": nextAllyAttack(
+    "heaveHo",
+    {
+      overpower: true,
+      ...ongoingLabel("create a Gold token when it hits a hero", "card.effect.common.gold.create.hit.hero"),
+    },
+    createGold,
+  ),
   "kelpie, tangled mess|2": {
     activated: [
       ...attackAbility(0, { tap: true, oncePerTurn: false }),
@@ -1242,7 +1258,13 @@ export const sea: Record<string, CardScript> = {
   },
   "not so fast|2": {
     onPlay(ctx) {
-      ctx.addModifier({ scope: "until-end-of-turn" });
+      ctx.addModifier({
+        scope: "until-end-of-turn",
+        ...ongoingLabel(
+          "the next time an opponent would draw a card from a Gold token, you draw it instead",
+          "card.effect.sea.notsofast",
+        ),
+      });
       ctx.setCounter("ready", 1);
     },
     replaceOpponentDraw(ctx, drawingSeat, count) {
@@ -1459,7 +1481,10 @@ export const sea: Record<string, CardScript> = {
   },
   "regain composure|3": {
     onPlay(ctx) {
-      buffNextAttack(ctx, { attack: 1 });
+      buffNextAttack(ctx, {
+        attack: 1,
+        ...ongoingLabel("untap your hero when it hits", "card.effect.sea.regaincomposure"),
+      });
       ctx.addModifier({ scope: "until-end-of-turn" });
       ctx.setCounter("ready", 1);
     },
@@ -1661,7 +1686,14 @@ Object.assign(
       {
         onPlay(ctx: ScriptCtx) {
           ctx.setCounter("chartOrdinal", pitch);
-          ctx.addModifier({ scope: "until-end-of-turn" });
+          ctx.addModifier({
+            scope: "until-end-of-turn",
+            ...ongoingLabel(
+              `your ${["first", "second", "third"][pitch - 1]} attack gets +3 power`,
+              "card.effect.sea.chartacourse",
+              { attackOrdinal: pitch },
+            ),
+          });
           ctx.requestChoice(
             "chart-treasure",
             yesNoPrompt("Put a gold counter on Treasure Island?", "card.sea.treasure.counter.add"),
@@ -2024,7 +2056,7 @@ Object.assign(sea, {
       ],
     },
     onAttackDeclared(ctx: ScriptCtx) {
-      tapChoice(ctx, "spitfire", "Tap a cog for +1 attack?", "card.sea.spitfire.cog.tap", controlledCogs(ctx, false));
+      tapChoice(ctx, "spitfire", "Tap a cog for +1 power?", "card.sea.spitfire.cog.tap", controlledCogs(ctx, false));
     },
     onChoose(ctx: ScriptCtx, hook: string, option: string) {
       if (hook === "spitfire" && option !== "pass" && ctx.tap(Number(option)))
@@ -2290,7 +2322,7 @@ Object.assign(sea, {
         appliesToSubtype: "arrow",
         onHitScriptHook: {
           hook: "big-game-trophy-shot-hit",
-          label: "create a Gold token",
+          ...hitHookLabel("create a Gold token", "card.effect.common.gold.create"),
           heroOnly: true,
           requiresAttackNameContains: "harpoon",
         },
@@ -2414,7 +2446,10 @@ Object.assign(sea, {
           appliesToClass: "pirate",
           onHitScriptHook: {
             hook: "gold-baited-hook-hit",
-            label: "steal a Gold token they control, otherwise create a Gold token",
+            ...hitHookLabel(
+              "steal a Gold token they control, otherwise create a Gold token",
+              "card.effect.sea.goldbaitedhook",
+            ),
             heroOnly: true,
           },
         });

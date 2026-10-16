@@ -48,7 +48,7 @@ const openTheCenter = ((): CardScript => ({
     ctx.grantGoAgain();
     ctx.addModifier({ scope: "chain-link", dominate: true });
     ctx.logPublic(
-      localizedLog("Open the Center: +1 attack, go again, dominate", "card.log.wtr.openthecenter.combo", {
+      localizedLog("Open the Center: +1 power, go again, dominate", "card.log.wtr.openthecenter.combo", {
         card: { kind: "card", cardId: ctx.self.cardId },
       }),
     );
@@ -63,7 +63,7 @@ const risingKneeThrust = ((): CardScript => ({
     if (!comboWith(ctx, "leg tap")) return;
     ctx.grantGoAgain();
     ctx.logPublic(
-      localizedLog("Rising Knee Thrust: +2 attack and go again", "card.log.wtr.risingkneethrust.combo", {
+      localizedLog("Rising Knee Thrust: +2 power and go again", "card.log.wtr.risingkneethrust.combo", {
         card: { kind: "card", cardId: ctx.self.cardId },
       }),
     );
@@ -79,7 +79,7 @@ const whelmingGustwave = ((): CardScript => ({
     ctx.grantGoAgain();
     ctx.addModifier({ scope: "chain-link", onHitDraw: 1 });
     ctx.logPublic(
-      localizedLog("Whelming Gustwave: +1 attack, go again, draw on hit", "card.log.wtr.whelminggustwave.combo", {
+      localizedLog("Whelming Gustwave: +1 power, go again, draw on hit", "card.log.wtr.whelminggustwave.combo", {
         card: { kind: "card", cardId: ctx.self.cardId },
       }),
     );
@@ -104,7 +104,7 @@ const breakingScales: CardScript = {
     onActivate(ctx) {
       ctx.addModifier({ scope: "chain-link", attack: 1 });
       ctx.logPublic(
-        localizedLog("Breaking Scales: target combo attack gains +1 attack", "card.log.wtr.breakingscales.attack", {
+        localizedLog("Breaking Scales: target combo attack gains +1 power", "card.log.wtr.breakingscales.attack", {
           card: { kind: "card", cardId: ctx.self.cardId },
           amount: 1,
         }),

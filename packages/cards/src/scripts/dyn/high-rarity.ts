@@ -12,7 +12,9 @@ import {
   decisionPrompt,
   entersArenaTrigger,
   heroDamage,
+  hitHookLabel,
   leavesArenaTrigger,
+  ongoingLabel,
   opponentSeat,
   previousAttackHasName,
   yesNoPrompt,
@@ -198,7 +200,14 @@ export const dynHighRarity: Record<string, CardScript> = {
   },
   "berserk|2": {
     onPlay(ctx) {
-      ctx.addModifier({ scope: "until-end-of-turn" });
+      ctx.addModifier({
+        scope: "until-end-of-turn",
+        ...ongoingLabel(
+          "whenever a card with 6 or more power is discarded at random, banish it " +
+            "and reveal the top card of your deck; draw if it has 6 or more power",
+          "card.effect.dyn.berserk",
+        ),
+      });
     },
     triggers: [
       {
@@ -235,7 +244,10 @@ export const dynHighRarity: Record<string, CardScript> = {
         appliesToType: ["guardian"],
         onHitScriptHook: {
           hook: "buckle-hit",
-          label: "destroy an equipment they control with a -1{d} counter on it",
+          ...hitHookLabel(
+            "destroy an equipment they control with a -1 defense counter on it",
+            "card.effect.dyn.buckle",
+          ),
           heroOnly: true,
         },
       });
@@ -474,8 +486,14 @@ export const dynHighRarity: Record<string, CardScript> = {
   },
   "bios update|1": {
     onPlay(ctx) {
-      buffNextAttack(ctx, { attack: 3, appliesToType: ["mechanologist"] });
-      ctx.addModifier({ scope: "until-end-of-turn" });
+      ctx.addModifier({ scope: "until-end-of-turn", onBoostAttack: 3 });
+      ctx.addModifier({
+        scope: "until-end-of-turn",
+        ...ongoingLabel(
+          "put the next Mechanologist item with cost 2 or less banished to pay a boost cost into the arena",
+          "card.effect.dyn.biosupdate",
+        ),
+      });
     },
     triggers: [
       {
@@ -486,6 +504,7 @@ export const dynHighRarity: Record<string, CardScript> = {
             (modifier) =>
               modifier.sourceInstanceId === ctx.self.instanceId &&
               modifier.scope === "until-end-of-turn" &&
+              modifier.onBoostAttack === undefined &&
               !modifier.consumed,
           );
           return (
@@ -501,6 +520,7 @@ export const dynHighRarity: Record<string, CardScript> = {
             (modifier) =>
               modifier.sourceInstanceId === ctx.self.instanceId &&
               modifier.scope === "until-end-of-turn" &&
+              modifier.onBoostAttack === undefined &&
               !modifier.consumed,
           );
           if (marker) ctx.consumeModifier(marker.id);
@@ -858,6 +878,10 @@ export const dynHighRarity: Record<string, CardScript> = {
         attackActionCardCap: 1,
         nonAttackActionCardCap: 1,
         expiresAtEndOfSeatTurn: target,
+        ...ongoingLabel(
+          "can't play more than 1 attack action card and 1 non-attack action card",
+          "card.effect.dyn.immobilizingshot",
+        ),
       });
     },
   },
@@ -870,7 +894,10 @@ export const dynHighRarity: Record<string, CardScript> = {
         // their hand and choose a card. They discard it.'"
         onHitScriptHook: {
           hook: "dead-eye-hit",
-          label: "look at their hand and choose a card for them to discard",
+          ...hitHookLabel(
+            "look at their hand and choose a card for them to discard",
+            "card.effect.common.hand.discard.choose",
+          ),
           heroOnly: true,
           requiresAttackCounter: "aim",
         },
@@ -900,7 +927,10 @@ export const dynHighRarity: Record<string, CardScript> = {
       timing: "instant",
       destroySelfCost: true,
       onActivate(ctx) {
-        ctx.addModifier({ scope: "until-end-of-turn" });
+        ctx.addModifier({
+          scope: "until-end-of-turn",
+          ...ongoingLabel("Runechants you control have spellvoid 1", "card.effect.dyn.amethysttiara"),
+        });
       },
     },
   },
@@ -998,7 +1028,13 @@ export const dynHighRarity: Record<string, CardScript> = {
   }),
   "brainstorm|3": {
     onPlay(ctx) {
-      ctx.addModifier({ scope: "until-end-of-turn" });
+      ctx.addModifier({
+        scope: "until-end-of-turn",
+        ...ongoingLabel(
+          "deal 1 arcane damage to any target whenever you draw a card during the action phase",
+          "card.effect.dyn.brainstorm",
+        ),
+      });
     },
     triggers: [
       {
@@ -1111,6 +1147,7 @@ export const dynHighRarity: Record<string, CardScript> = {
           scope: "until-end-of-turn",
           prohibitsName: option.toLowerCase(),
           expiresAtStartOfSeatTurn: ctx.seat,
+          ...ongoingLabel(`${option} can't be played`, "card.effect.dyn.imperialedict", { name: option }),
         });
     },
   },

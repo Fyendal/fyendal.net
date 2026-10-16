@@ -3,6 +3,8 @@ import {
   commonOptionMessages,
   dealArcane,
   decisionPrompt,
+  hitHookLabel,
+  ongoingLabel,
   opponentSeat,
   requestDiscardChoice,
   resolveDiscardChoice,
@@ -241,7 +243,15 @@ export const uprHighRarity: Record<string, CardScript> = {
   },
   "spreading flames|1": {
     onAttackDeclared(ctx) {
-      ctx.addModifier({ scope: "until-end-of-turn", expiresOnChainClose: true });
+      ctx.addModifier({
+        scope: "until-end-of-turn",
+        expiresOnChainClose: true,
+        ...ongoingLabel(
+          "Draconic attacks you control get +1 power while their base power " +
+            "is less than the number of Draconic chain links you control",
+          "card.effect.upr.spreadingflames",
+        ),
+      });
     },
     modifyAttack(ctx) {
       const attacking = ctx.link?.attackingCard;
@@ -314,7 +324,10 @@ export const uprHighRarity: Record<string, CardScript> = {
         scope: "chain-link",
         onHitScriptHook: {
           hook: "upr-liquefy",
-          label: "put a -1 defense counter on an equipment they control, then destroy it if it has 0 defense",
+          ...hitHookLabel(
+            "put a -1 defense counter on an equipment they control, then destroy it if it has 0 defense",
+            "card.effect.upr.liquefy",
+          ),
           heroOnly: true,
         },
       });

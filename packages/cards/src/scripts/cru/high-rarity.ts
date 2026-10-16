@@ -6,6 +6,7 @@ import {
   decisionPrompt,
   entersArenaTrigger,
   localizedCardLog,
+  ongoingLabel,
   opponentSeat,
   optN,
   optOnChoose,
@@ -212,7 +213,13 @@ const viziertronic: CardScript = {
     goAgain: true,
     destroySelfCost: true,
     onActivate(ctx) {
-      ctx.addModifier({ scope: "until-end-of-turn" });
+      ctx.addModifier({
+        scope: "until-end-of-turn",
+        ...ongoingLabel(
+          "whenever you boost, draw a card then put a card from your hand on top of your deck",
+          "card.effect.cru.viziertronicmodeli",
+        ),
+      });
     },
   },
   onBoosted(ctx) {
@@ -312,7 +319,13 @@ const remorseless: CardScript = {
 
 const poisonTheTips: CardScript = {
   onPlay(ctx) {
-    ctx.addModifier({ scope: "until-end-of-turn" });
+    ctx.addModifier({
+      scope: "until-end-of-turn",
+      ...ongoingLabel(
+        "whenever an arrow you control hits a hero, they discard a card",
+        "card.effect.cru.poisonthetips",
+      ),
+    });
     reload(ctx);
   },
   canTriggerOnHit(ctx) {
@@ -586,7 +599,10 @@ export const cruHighRarity: Record<string, CardScript> = {
   "spoils of war|1": {
     onPlay(ctx) {
       ctx.addModifier({ scope: "next-attack", attack: 2, goAgain: true, appliesTo: "weapon" });
-      ctx.addModifier({ scope: "until-end-of-turn" });
+      ctx.addModifier({
+        scope: "until-end-of-turn",
+        ...ongoingLabel("create 2 Copper tokens whenever a weapon you control hits", "card.effect.cru.spoilsofwar"),
+      });
     },
     canTriggerOnHit(ctx) {
       return ctx.link?.attackCardType === "weapon";

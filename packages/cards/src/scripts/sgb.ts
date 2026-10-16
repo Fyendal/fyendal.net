@@ -8,6 +8,7 @@ import {
   effectPutSelfFaceUpFromDeck,
   localizedCardLog,
   nextAttack,
+  ongoingLabel,
   opponentSeat,
 } from "./shared-helpers.js";
 
@@ -67,6 +68,11 @@ function destroyDeckTop(ctx: ScriptCtx): { readonly instanceId: number; readonly
 function allyAttack(cost: number, goAgain = false): CardScript {
   return { activated: attackAbility(cost, { goAgain, tap: true, oncePerTurn: false }) };
 }
+
+const goldOnHeroHit = ongoingLabel(
+  "create a Gold token when it hits a hero",
+  "card.effect.common.gold.create.hit.hero",
+);
 
 type NextAllyMod = Omit<Modifier, "id" | "sourceInstanceId" | "scope" | "defense" | "seat">;
 
@@ -581,7 +587,7 @@ export const sgb: Record<string, CardScript> = {
   },
 
   // Avast Ye! — next ally attack: go again and "on hit: create a Gold"
-  "avast ye!|3": nextAllyAttack("avastYe", { goAgain: true }, (ctx) => {
+  "avast ye!|3": nextAllyAttack("avastYe", { goAgain: true, ...goldOnHeroHit }, (ctx) => {
     createGold(ctx);
     ctx.logPublic(
       localizedCardLog(ctx, `${ctx.data.name}: created a Gold token on hit`, "card.log.sgb.gold.created.hit", {
@@ -591,7 +597,7 @@ export const sgb: Record<string, CardScript> = {
   }),
 
   // Yo Ho Ho! — next ally attack: +1{p} and "on hit: create a Gold"
-  "yo ho ho!|3": nextAllyAttack("yoHoHo", { attack: 1 }, (ctx) => {
+  "yo ho ho!|3": nextAllyAttack("yoHoHo", { attack: 1, ...goldOnHeroHit }, (ctx) => {
     createGold(ctx);
     ctx.logPublic(
       localizedCardLog(ctx, `${ctx.data.name}: created a Gold token on hit`, "card.log.sgb.gold.created.hit", {
@@ -602,36 +608,50 @@ export const sgb: Record<string, CardScript> = {
 
   // Loot the Arsenal — next ally attack: "on hit: destroy a card in their
   // arsenal; if you do, create a Gold"
-  "loot the arsenal|3": nextAllyAttack("lootArsenal", {}, (ctx) => {
-    const opp = ctx.player(opponentSeat(ctx));
-    const card = opp.arsenal[0];
-    if (!card) return;
-    ctx.moveToGraveyard(card.instanceId, "arsenal");
-    ctx.logPublic(
-      localizedCardLog(
-        ctx,
-        `${ctx.data.name} destroys a card in the opposing arsenal`,
-        "card.log.sgb.arsenal.destroyed",
-        { target: { kind: "player", seat: opponentSeat(ctx) } },
-        { kind: "card-moved", ownerSeat: opponentSeat(ctx), from: "arsenal", to: "graveyard" },
-      ),
-    );
-    createGold(ctx);
-  }),
+  "loot the arsenal|3": nextAllyAttack(
+    "lootArsenal",
+    ongoingLabel(
+      "when it hits a hero, destroy a card in their arsenal, and if you do, create a Gold token",
+      "card.effect.sgb.lootthearsenal",
+    ),
+    (ctx) => {
+      const opp = ctx.player(opponentSeat(ctx));
+      const card = opp.arsenal[0];
+      if (!card) return;
+      ctx.moveToGraveyard(card.instanceId, "arsenal");
+      ctx.logPublic(
+        localizedCardLog(
+          ctx,
+          `${ctx.data.name} destroys a card in the opposing arsenal`,
+          "card.log.sgb.arsenal.destroyed",
+          { target: { kind: "player", seat: opponentSeat(ctx) } },
+          { kind: "card-moved", ownerSeat: opponentSeat(ctx), from: "arsenal", to: "graveyard" },
+        ),
+      );
+      createGold(ctx);
+    },
+  ),
 
   // Loot the Hold — next ally attack: "on hit: they discard a card; if they
   // do, create a Gold"
   "loot the hold|3": {
-    ...nextAllyAttack("lootHold", {}, (ctx) => {
-      const opp = ctx.player(opponentSeat(ctx));
-      if (opp.hand.length === 0) return;
-      ctx.requestCardChoice(
-        "loot-hold-discard",
-        decisionPrompt("Loot the Hold: discard a card", "card.sgb.loot.discard.choose"),
-        opp.hand.map((c) => c.instanceId),
-        opponentSeat(ctx),
-      );
-    }),
+    ...nextAllyAttack(
+      "lootHold",
+      ongoingLabel(
+        "when it hits a hero, they discard a card, and if they do, create a Gold token",
+        "card.effect.sgb.loothold",
+      ),
+      (ctx) => {
+        const opp = ctx.player(opponentSeat(ctx));
+        if (opp.hand.length === 0) return;
+        ctx.requestCardChoice(
+          "loot-hold-discard",
+          decisionPrompt("Loot the Hold: discard a card", "card.sgb.loot.discard.choose"),
+          opp.hand.map((c) => c.instanceId),
+          opponentSeat(ctx),
+        );
+      },
+    ),
     onChoose(ctx, hook, option) {
       if (hook !== "loot-hold-discard") return;
       const discarded = ctx.discardCard(opponentSeat(ctx), Number(option));
@@ -642,7 +662,10 @@ export const sgb: Record<string, CardScript> = {
   // Flying High — your next attack gets go again; +1{p} if it's blue
   "flying high|3": {
     onPlay(ctx) {
-      nextAttack({ goAgain: true })(ctx);
+      nextAttack({
+        goAgain: true,
+        ...ongoingLabel("+1 power if it's blue", "card.effect.common.attack.if.color", { attackColor: "blue" }),
+      })(ctx);
       ctx.addModifier({ scope: "until-end-of-turn" }); // marker: lingering dispatch source
       ctx.setFlag("player", "flyingHigh", true);
     },

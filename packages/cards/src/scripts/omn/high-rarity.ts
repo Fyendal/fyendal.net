@@ -10,6 +10,7 @@ import {
   entersArenaTrigger,
   heroDamage,
   heroTarget,
+  ongoingLabel,
   opponentSeat,
   targetHeroSeat,
 } from "../shared-helpers.js";
@@ -254,7 +255,13 @@ export const omnHighRarity: Record<string, CardScript> = {
       tap: true,
       tapHeroCost: true,
       onActivate(ctx) {
-        buffNextAttack(ctx, { appliesTo: "attack-action" });
+        buffNextAttack(ctx, {
+          appliesTo: "attack-action",
+          ...ongoingLabel(
+            "when it attacks, deal 1 arcane damage to the opposing hero; if damage is dealt, it gets +1 power",
+            "card.effect.omn.gauntletofswordandsorcery",
+          ),
+        });
         ctx.addModifier({ scope: "until-end-of-turn" });
       },
     },
@@ -622,7 +629,14 @@ export const omnHighRarity: Record<string, CardScript> = {
     onChoose(ctx, hook, option) {
       if (hook === "settle-arrow" && option !== "no" && ctx.putIntoArsenal(Number(option), "hand", { faceUp: true })) {
         ctx.addCardTempPower(Number(option), 3);
-        ctx.addModifier({ scope: "until-end-of-turn", appliesToInstanceId: Number(option) });
+        ctx.addModifier({
+          scope: "until-end-of-turn",
+          appliesToInstanceId: Number(option),
+          ...ongoingLabel(
+            "the arrow destroys a card in their arsenal when it hits a hero",
+            "card.effect.omn.settlethebill",
+          ),
+        });
       }
     },
     canTriggerOnHit(ctx) {
@@ -742,7 +756,15 @@ export const omnHighRarity: Record<string, CardScript> = {
     },
   },
   "a bit off the side|1": {
-    onPlay: (ctx) => ctx.addModifier({ scope: "until-end-of-turn", appliesToSubtype: "axe" }),
+    onPlay: (ctx) =>
+      ctx.addModifier({
+        scope: "until-end-of-turn",
+        appliesToSubtype: "axe",
+        ...ongoingLabel(
+          "whenever an axe you control hits a hero, they discard a card",
+          "card.effect.omn.abitofftheside",
+        ),
+      }),
     canTriggerOnHit(ctx) {
       return (
         ctx.link?.targetAllyId === undefined &&

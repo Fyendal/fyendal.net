@@ -24,6 +24,7 @@ import {
   optOnChoose,
   previousAttackHasName,
   targetHeroSeat,
+  ongoingLabel,
 } from "./shared-helpers.js";
 import { dynHighRarity } from "./dyn/high-rarity.js";
 
@@ -469,6 +470,13 @@ function tranquilPassing(maxCost: number): CardScript {
     },
   };
 }
+
+const tempestAuroraLabel = (cost: number) =>
+  ongoingLabel(
+    `the next card you play with cost ${cost} or less and an arcane damage effect deals 1 more arcane damage`,
+    "card.effect.dyn.tempestaurora",
+    { cost },
+  );
 
 export const dyn: Record<string, CardScript> = mergeSetScripts("DYN", dynHighRarity, {
   // Its Construct target is outside this C/R import; keeping Material here
@@ -1292,7 +1300,7 @@ export const dyn: Record<string, CardScript> = mergeSetScripts("DYN", dynHighRar
   "tempest aurora|1": {
     onPlay(ctx) {
       ctx.setCounter("auroraMax", 2);
-      ctx.addModifier({ scope: "until-end-of-turn" });
+      ctx.addModifier({ scope: "until-end-of-turn", ...tempestAuroraLabel(2) });
     },
     onFriendlyPlay(ctx, played) {
       if (
@@ -1312,7 +1320,7 @@ export const dyn: Record<string, CardScript> = mergeSetScripts("DYN", dynHighRar
   "tempest aurora|2": {
     onPlay(ctx) {
       ctx.setCounter("auroraMax", 1);
-      ctx.addModifier({ scope: "until-end-of-turn" });
+      ctx.addModifier({ scope: "until-end-of-turn", ...tempestAuroraLabel(1) });
     },
     onFriendlyPlay(ctx, played) {
       if (
@@ -1332,7 +1340,7 @@ export const dyn: Record<string, CardScript> = mergeSetScripts("DYN", dynHighRar
   "tempest aurora|3": {
     onPlay(ctx) {
       ctx.setCounter("auroraMax", 0);
-      ctx.addModifier({ scope: "until-end-of-turn" });
+      ctx.addModifier({ scope: "until-end-of-turn", ...tempestAuroraLabel(0) });
     },
     onFriendlyPlay(ctx, played) {
       if (

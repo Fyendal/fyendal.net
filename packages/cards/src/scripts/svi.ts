@@ -199,7 +199,7 @@ export const svi: Record<string, CardScript> = {
         const rune = ctx.player(ctx.seat).board.find((card) => ctx.isRunechant(card));
         if (!rune) return;
         ctx.destroyPermanent(rune.instanceId);
-        ctx.preventNextDamage(ctx.seat, 1);
+        ctx.preventNextArcaneDamage(ctx.seat, 1);
       },
     },
   },

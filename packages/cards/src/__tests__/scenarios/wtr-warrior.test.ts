@@ -201,7 +201,7 @@ describe("WTR — attack reactions", () => {
     g.attackWithWeapon(undefined, { pitch: ["titanium bauble|3"] })
       .blockWith("raging onslaught|2")
       .react("biting blade|1")
-      .expectLog("Biting Blade (Reprise): weapons you control gain +1 attack")
+      .expectLog("Biting Blade (Reprise): weapons you control gain +1 power")
       .expectFinalAttack(6) // 2 + 3 + 1 (Reprise weapon buff applies to this weapon attack)
       .settle()
       .expectAP(0, 1)
@@ -224,7 +224,7 @@ describe("WTR — attack reactions", () => {
       .attackWithWeapon(undefined, { pitch: ["titanium bauble|3"] })
       .blockWith("raging onslaught|2")
       .react("ironsong response|2")
-      .expectLog("Ironsong Response (Reprise): +2 attack")
+      .expectLog("Ironsong Response (Reprise): +2 power")
       .expectFinalAttack(4) // 2 + 2
       .expectLife(1, 19); // 4 - 3 defense
 
@@ -254,7 +254,7 @@ describe("WTR — attack reactions", () => {
       .attackWithWeapon(undefined, { pitch: ["titanium bauble|3"] })
       .blockWith("raging onslaught|2")
       .react("overpower|1")
-      .expectLog("Overpower (Reprise): +6 attack")
+      .expectLog("Overpower (Reprise): +6 power")
       .expectFinalAttack(8) // 2 + 6
       .expectLife(1, 15); // 8 - 3 defense = 5
 

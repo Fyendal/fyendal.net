@@ -174,7 +174,7 @@ export const warrior: Record<string, CardScript> = {
         ctx.addModifier({ scope: "until-end-of-turn", attack: 1, appliesTo: "weapon" });
         ctx.logPublic(
           localizedLog(
-            "Biting Blade (Reprise): weapons you control gain +1 attack",
+            "Biting Blade (Reprise): weapons you control gain +1 power",
             "card.log.wtr.bitingblade.reprise",
             { card: { kind: "card", cardId: ctx.self.cardId }, amount: 1 },
           ),
@@ -190,7 +190,7 @@ export const warrior: Record<string, CardScript> = {
         ctx.addModifier({ scope: "until-end-of-turn", attack: 1, appliesTo: "weapon" });
         ctx.logPublic(
           localizedLog(
-            "Biting Blade (Reprise): weapons you control gain +1 attack",
+            "Biting Blade (Reprise): weapons you control gain +1 power",
             "card.log.wtr.bitingblade.reprise",
             { card: { kind: "card", cardId: ctx.self.cardId }, amount: 1 },
           ),
@@ -206,7 +206,7 @@ export const warrior: Record<string, CardScript> = {
         ctx.addModifier({ scope: "until-end-of-turn", attack: 1, appliesTo: "weapon" });
         ctx.logPublic(
           localizedLog(
-            "Biting Blade (Reprise): weapons you control gain +1 attack",
+            "Biting Blade (Reprise): weapons you control gain +1 power",
             "card.log.wtr.bitingblade.reprise",
             { card: { kind: "card", cardId: ctx.self.cardId }, amount: 1 },
           ),
@@ -222,7 +222,7 @@ export const warrior: Record<string, CardScript> = {
       ctx.addModifier({ scope: "chain-link", attack: bonus });
       if (reprise(ctx))
         ctx.logPublic(
-          localizedLog("Overpower (Reprise): +6 attack", "card.log.wtr.reprise.attack", {
+          localizedLog("Overpower (Reprise): +6 power", "card.log.wtr.reprise.attack", {
             card: { kind: "card", cardId: ctx.self.cardId },
             amount: 6,
           }),
@@ -236,7 +236,7 @@ export const warrior: Record<string, CardScript> = {
       ctx.addModifier({ scope: "chain-link", attack: bonus });
       if (reprise(ctx))
         ctx.logPublic(
-          localizedLog("Overpower (Reprise): +5 attack", "card.log.wtr.reprise.attack", {
+          localizedLog("Overpower (Reprise): +5 power", "card.log.wtr.reprise.attack", {
             card: { kind: "card", cardId: ctx.self.cardId },
             amount: 5,
           }),
@@ -250,7 +250,7 @@ export const warrior: Record<string, CardScript> = {
       ctx.addModifier({ scope: "chain-link", attack: bonus });
       if (reprise(ctx))
         ctx.logPublic(
-          localizedLog("Overpower (Reprise): +4 attack", "card.log.wtr.reprise.attack", {
+          localizedLog("Overpower (Reprise): +4 power", "card.log.wtr.reprise.attack", {
             card: { kind: "card", cardId: ctx.self.cardId },
             amount: 4,
           }),
@@ -264,7 +264,7 @@ export const warrior: Record<string, CardScript> = {
       if (reprise(ctx)) {
         ctx.addModifier({ scope: "chain-link", attack: 2 });
         ctx.logPublic(
-          localizedLog("Ironsong Response (Reprise): +2 attack", "card.log.wtr.reprise.attack", {
+          localizedLog("Ironsong Response (Reprise): +2 power", "card.log.wtr.reprise.attack", {
             card: { kind: "card", cardId: ctx.self.cardId },
             amount: 2,
           }),
@@ -278,7 +278,7 @@ export const warrior: Record<string, CardScript> = {
       if (reprise(ctx)) {
         ctx.addModifier({ scope: "chain-link", attack: 1 });
         ctx.logPublic(
-          localizedLog("Ironsong Response (Reprise): +1 attack", "card.log.wtr.reprise.attack", {
+          localizedLog("Ironsong Response (Reprise): +1 power", "card.log.wtr.reprise.attack", {
             card: { kind: "card", cardId: ctx.self.cardId },
             amount: 1,
           }),

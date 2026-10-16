@@ -219,7 +219,7 @@ describe("SLY — Lyath hero abilities", () => {
     expect(projectStateFor(g.state, 0).ongoing).toContainEqual(expect.objectContaining({
       seat: 0,
       cardId: printingId("might|0"),
-      label: "+1 attack · next attack",
+      label: "+1 power · next attack",
     }));
     g.play("short shrift|2").expectAttackValue(4); // 2 + 1 (Might) + 1 (above base)
   });
@@ -578,7 +578,7 @@ describe("SLY — attacks and defense", () => {
     g.expectAttackValue(6);
     expect(g.state.stack[0]?.engineEffect?.kind).toBe("on-defend-hook");
     g.settle().expectFinalAttack(3)
-      .expectLog("Drag Down gives Raging Onslaught -3 attack (3 attack)");
+      .expectLog("Drag Down gives Raging Onslaught -3 power (3 power)");
   });
 
   it("Brothers in Arms pays {r} for +2{d}", () => {

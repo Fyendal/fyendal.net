@@ -3007,6 +3007,975 @@
       "value": "选择一件 Guardian 副手装备"
     }
   ],
+  "card.effect.aac.invertersnightcowl": [
+    {
+      "type": 0,
+      "value": "每当你打出一张具有 stealth 的牌时，获得 1 点资源"
+    }
+  ],
+  "card.effect.aaz.targettotalizer": [
+    {
+      "type": 0,
+      "value": "每当一支带有 aim 指示物的箭命中时，抽一张牌"
+    }
+  ],
+  "card.effect.aio.heavyindustrypowerplant": [
+    {
+      "type": 0,
+      "value": "每当你进行 boost 时，获得 1 点资源"
+    }
+  ],
+  "card.effect.ama.dropdeadbodice": [
+    {
+      "type": 0,
+      "value": "每当一个 zombie 被置入你的墓地时，获得 1 点资源"
+    }
+  ],
+  "card.effect.ama.zombiedestroy": [
+    {
+      "type": 0,
+      "value": "命中时摧毁该进行攻击的 zombie"
+    }
+  ],
+  "card.effect.aol.bellybuster": [
+    {
+      "type": 0,
+      "value": "攻击英雄时，你可以与其进行 wager"
+    }
+  ],
+  "card.effect.aol.checkraise": [
+    {
+      "type": 0,
+      "value": "你操控的下一次进行 wager 的攻击 +"
+    },
+    {
+      "type": 1,
+      "value": "wagerAttack"
+    },
+    {
+      "type": 0,
+      "value": " 力量"
+    }
+  ],
+  "card.effect.aol.headsup": [
+    {
+      "type": 0,
+      "value": "若其进行了 wager，则获得压制 (dominate)"
+    }
+  ],
+  "card.effect.arc.highoctane": [
+    {
+      "type": 0,
+      "value": "每当你进行 boost 时，获得 1 个行动点"
+    }
+  ],
+  "card.effect.arc.mordredtide": [
+    {
+      "type": 0,
+      "value": "你生成 Runechant 衍生物时，额外生成一个"
+    }
+  ],
+  "card.effect.arc.plunderrun": [
+    {
+      "type": 0,
+      "value": "下一次你操控的攻击行动牌命中时，抽一张牌"
+    }
+  ],
+  "card.effect.ast.arclightning": [
+    {
+      "type": 0,
+      "value": "每当你 go again 时，对任意目标造成 1 点奥术伤害"
+    }
+  ],
+  "card.effect.common.attack.if.color": [
+    {
+      "type": 0,
+      "value": "若其为"
+    },
+    {
+      "type": 5,
+      "value": "attackColor",
+      "options": {
+        "red": {
+          "value": [
+            {
+              "type": 0,
+              "value": "红色"
+            }
+          ]
+        },
+        "yellow": {
+          "value": [
+            {
+              "type": 0,
+              "value": "黄色"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 0,
+              "value": "蓝色"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "type": 0,
+      "value": "，则 +1 力量"
+    }
+  ],
+  "card.effect.common.bloodrot.create.hit.hero": [
+    {
+      "type": 0,
+      "value": "命中英雄时，在其操控下生成一个 Bloodrot Pox 衍生物"
+    }
+  ],
+  "card.effect.common.corruptedcorpse.create": [
+    {
+      "type": 0,
+      "value": "在你的放逐区生成一张 Corrupted Corpse"
+    }
+  ],
+  "card.effect.common.frailty.create.hit.hero": [
+    {
+      "type": 0,
+      "value": "命中英雄时，在其操控下生成一个 Frailty 衍生物"
+    }
+  ],
+  "card.effect.common.frostbite.onhit": [
+    {
+      "type": 0,
+      "value": "每当攻击命中英雄时，在其操控下生成一个 Frostbite 衍生物"
+    }
+  ],
+  "card.effect.common.gold.create": [
+    {
+      "type": 0,
+      "value": "生成一个 Gold 衍生物"
+    }
+  ],
+  "card.effect.common.gold.create.hit.hero": [
+    {
+      "type": 0,
+      "value": "命中英雄时生成一个 Gold 衍生物"
+    }
+  ],
+  "card.effect.common.hand.discard.choose": [
+    {
+      "type": 0,
+      "value": "查看其手牌并选择一张牌，由其弃掉"
+    }
+  ],
+  "card.effect.common.inertia.create.hit.hero": [
+    {
+      "type": 0,
+      "value": "命中英雄时，在其操控下生成一个 Inertia 衍生物"
+    }
+  ],
+  "card.effect.common.mark.attack.hit": [
+    {
+      "type": 0,
+      "value": "该攻击命中英雄时，标记该英雄"
+    }
+  ],
+  "card.effect.common.wager.agility": [
+    {
+      "type": 0,
+      "value": "攻击英雄时，你可以与其以一个 Agility 衍生物进行 wager"
+    }
+  ],
+  "card.effect.common.wager.attack": [
+    {
+      "type": 0,
+      "value": "攻击时与防御英雄进行 wager"
+    }
+  ],
+  "card.effect.common.wager.gold": [
+    {
+      "type": 0,
+      "value": "攻击英雄时，你可以与其以一个 Gold 衍生物进行 wager"
+    }
+  ],
+  "card.effect.common.wager.might": [
+    {
+      "type": 0,
+      "value": "攻击英雄时，你可以与其以一个 Might 衍生物进行 wager"
+    }
+  ],
+  "card.effect.common.wager.vigor": [
+    {
+      "type": 0,
+      "value": "攻击英雄时，你可以与其以一个 Vigor 衍生物进行 wager"
+    }
+  ],
+  "card.effect.cru.poisonthetips": [
+    {
+      "type": 0,
+      "value": "每当你操控的 arrow 命中英雄时，该英雄弃一张牌"
+    }
+  ],
+  "card.effect.cru.spoilsofwar": [
+    {
+      "type": 0,
+      "value": "每当你操控的武器命中时，生成 2 个 Copper 衍生物"
+    }
+  ],
+  "card.effect.cru.viziertronicmodeli": [
+    {
+      "type": 0,
+      "value": "每当你进行 boost 时，抽一张牌，然后将一张手牌置于你的牌库顶"
+    }
+  ],
+  "card.effect.dtd.censor": [
+    {
+      "type": 0,
+      "value": "不能打出名为 "
+    },
+    {
+      "type": 1,
+      "value": "name"
+    },
+    {
+      "type": 0,
+      "value": " 的牌"
+    }
+  ],
+  "card.effect.dtd.hacktoreality": [
+    {
+      "type": 0,
+      "value": "命中英雄时，摧毁其拥有的一个费用不高于此次所造成伤害的非衍生物灵气 (Aura)"
+    }
+  ],
+  "card.effect.dtd.poisonthewell": [
+    {
+      "type": 0,
+      "value": "下一次英雄将获得生命时，改为失去等量生命"
+    }
+  ],
+  "card.effect.dvr.glisteningsteelblade": [
+    {
+      "type": 0,
+      "value": "每当 Dawnblade 命中英雄时，在其上放置一个 +1 力量指示物"
+    }
+  ],
+  "card.effect.dyn.amethysttiara": [
+    {
+      "type": 0,
+      "value": "你操控的 Runechant 具有 spellvoid 1"
+    }
+  ],
+  "card.effect.dyn.berserk": [
+    {
+      "type": 0,
+      "value": "每当一张力量不低于 6 的牌被随机弃掉时，将其放逐并展示你的牌库顶牌；若该牌力量不低于 6，抽一张牌"
+    }
+  ],
+  "card.effect.dyn.biosupdate": [
+    {
+      "type": 0,
+      "value": "将下一张因支付 boost 费用而被放逐、费用不高于 2 的 Mechanologist 物品放入竞技场"
+    }
+  ],
+  "card.effect.dyn.brainstorm": [
+    {
+      "type": 0,
+      "value": "每当你在行动阶段抽一张牌时，对任意目标造成 1 点奥术伤害"
+    }
+  ],
+  "card.effect.dyn.buckle": [
+    {
+      "type": 0,
+      "value": "摧毁其操控的一件具有 -1 防御指示物的装备"
+    }
+  ],
+  "card.effect.dyn.immobilizingshot": [
+    {
+      "type": 0,
+      "value": "不能打出超过 1 张攻击行动牌和 1 张非攻击行动牌"
+    }
+  ],
+  "card.effect.dyn.imperialedict": [
+    {
+      "type": 1,
+      "value": "name"
+    },
+    {
+      "type": 0,
+      "value": " 不能被打出"
+    }
+  ],
+  "card.effect.dyn.tempestaurora": [
+    {
+      "type": 0,
+      "value": "你打出的下一张费用不高于 "
+    },
+    {
+      "type": 1,
+      "value": "cost"
+    },
+    {
+      "type": 0,
+      "value": " 且具有奥术伤害效果的牌额外造成 1 点奥术伤害"
+    }
+  ],
+  "card.effect.ele.bramblespark": [
+    {
+      "type": 0,
+      "value": "你打出的下一张攻击行动牌在攻击时对目标英雄造成 1 点奥术伤害"
+    }
+  ],
+  "card.effect.ele.bramblespark.fused": [
+    {
+      "type": 0,
+      "value": "你打出的下一张攻击行动牌 +"
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 力量，并在攻击时对目标英雄造成 1 点奥术伤害"
+    }
+  ],
+  "card.effect.ele.buzzbolt": [
+    {
+      "type": 0,
+      "value": "每当攻击命中英雄时，对其造成 1 点伤害"
+    }
+  ],
+  "card.effect.ele.chillingicevein": [
+    {
+      "type": 0,
+      "value": "每当攻击命中英雄时，该英雄弃置一张牌，除非其支付 1 点资源"
+    }
+  ],
+  "card.effect.ele.chilltothebone": [
+    {
+      "type": 0,
+      "value": "下次 Ice 或 Elemental 攻击命中英雄时，在其操控下生成 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 个 Frostbite 衍生物"
+    }
+  ],
+  "card.effect.ele.electrify": [
+    {
+      "type": 0,
+      "value": "下次攻击行动牌命中英雄时，对其造成 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点伤害"
+    }
+  ],
+  "card.effect.ele.invigorate": [
+    {
+      "type": 0,
+      "value": "你下一次融合的攻击 +"
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 力量"
+    }
+  ],
+  "card.effect.ele.weaveearth": [
+    {
+      "type": 0,
+      "value": "你打出的下一张 Earth 或 Elemental 攻击行动牌 +"
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 力量，若其已融合则改为 +"
+    },
+    {
+      "type": 1,
+      "value": "fusedAmount"
+    }
+  ],
+  "card.effect.ele.weaveice": [
+    {
+      "type": 0,
+      "value": "你打出的下一张 Ice 或 Elemental 攻击行动牌 +"
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 力量，若其已融合则获得压制 (dominate)"
+    }
+  ],
+  "card.effect.ele.weavelightning": [
+    {
+      "type": 0,
+      "value": "若其已融合则获得 go again"
+    }
+  ],
+  "card.effect.evo.warbandofbellona": [
+    {
+      "type": 0,
+      "value": "你下次攻击时，可以为你的英雄 soul 充能；若充能的是黄色牌，抽一张牌"
+    }
+  ],
+  "card.effect.evr.amuletofassertiveness": [
+    {
+      "type": 0,
+      "value": "目标攻击命中时，放逐你的牌库顶牌；若其为攻击行动牌，你可以打出它"
+    }
+  ],
+  "card.effect.evr.highstriker": [
+    {
+      "type": 0,
+      "value": "下一次你操控的攻击命中时，生成 "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " 个 Copper 衍生物"
+    }
+  ],
+  "card.effect.evr.outlandskirmish": [
+    {
+      "type": 0,
+      "value": "下一次武器命中时，生成一个 Copper 衍生物"
+    }
+  ],
+  "card.effect.evr.sliceanddice": [
+    {
+      "type": 0,
+      "value": "你的第一次剑或 dagger 武器攻击获得 +1 力量，第二次获得 +"
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 力量"
+    }
+  ],
+  "card.effect.evr.smashinggoodtime": [
+    {
+      "type": 0,
+      "value": "下一次攻击行动牌命中英雄时，你可以摧毁其操控的一个费用不高于 2 的物品"
+    }
+  ],
+  "card.effect.evr.thisroundsonme": [
+    {
+      "type": 0,
+      "value": "以你为目标的攻击获得 -1 力量"
+    }
+  ],
+  "card.effect.hnt.imperialsealofcommand": [
+    {
+      "type": 0,
+      "value": "下一次你命中英雄时，摧毁其 arsenal 中的所有牌"
+    }
+  ],
+  "card.effect.hnt.poisonedblade": [
+    {
+      "type": 0,
+      "value": "每当你拥有的 dagger 命中英雄时，该英雄失去 1 点生命"
+    }
+  ],
+  "card.effect.hvy.doubledown": [
+    {
+      "type": 0,
+      "value": "下一次进行 wager 的攻击 +3 力量并获得 overpower，wager 生成的每种衍生物多一个"
+    }
+  ],
+  "card.effect.hvy.goodtimechapeau": [
+    {
+      "type": 0,
+      "value": "攻击英雄时，与其以一个 Might 和一个 Vigor 衍生物进行 wager"
+    }
+  ],
+  "card.effect.hvy.rippleaway": [
+    {
+      "type": 0,
+      "value": "行动牌效果生成的每种衍生物少一个"
+    }
+  ],
+  "card.effect.hvy.talkabiggame": [
+    {
+      "type": 0,
+      "value": "下次你对英雄造成不少于所选数字的伤害时，生成该数量的 Might 衍生物"
+    }
+  ],
+  "card.effect.iar.embracesin": [
+    {
+      "type": 0,
+      "value": "可以从你的放逐区打出一个牌名中含有 Runechant 的灵气 (Aura)"
+    }
+  ],
+  "card.effect.iar.exorcism": [
+    {
+      "type": 0,
+      "value": "将被命中英雄放逐区中的所有牌翻至面朝下"
+    }
+  ],
+  "card.effect.iar.freshfromtheforge": [
+    {
+      "type": 0,
+      "value": "移除一个 +1 力量指示物以标记被命中的英雄"
+    }
+  ],
+  "card.effect.iar.headbangingchorus": [
+    {
+      "type": 0,
+      "value": "若你没有手牌，抽一张牌"
+    }
+  ],
+  "card.effect.iar.stepthroughrealms": [
+    {
+      "type": 0,
+      "value": "生成一个 Gate to i'Arathael"
+    }
+  ],
+  "card.effect.mon.eclipseexistence": [
+    {
+      "type": 0,
+      "value": "每当攻击命中 Light 英雄时，你可以放逐其 soul 中的一张牌，然后该英雄失去 1 点生命"
+    }
+  ],
+  "card.effect.mon.seedsofagony": [
+    {
+      "type": 0,
+      "value": "你的下一张费用不高于 "
+    },
+    {
+      "type": 1,
+      "value": "cost"
+    },
+    {
+      "type": 0,
+      "value": " 的攻击行动牌攻击时，对目标英雄造成 1 点奥术伤害"
+    }
+  ],
+  "card.effect.mon.shadowpuppetry": [
+    {
+      "type": 0,
+      "value": "查看你的牌库顶牌，你可以将其放逐"
+    }
+  ],
+  "card.effect.mpa.outbreak": [
+    {
+      "type": 0,
+      "value": "在被命中英雄的操控下生成 Frailty、Inertia 和 Bloodrot Pox 衍生物各一个"
+    }
+  ],
+  "card.effect.mpa.prolongedillness": [
+    {
+      "type": 0,
+      "value": "每当一个疾病衍生物被摧毁时，若它是该名称第一个被摧毁的，在同一英雄的操控下生成它的一个复制"
+    }
+  ],
+  "card.effect.mpw.allin": [
+    {
+      "type": 0,
+      "value": "你的下一次剑攻击摧毁你的所有 Gold，每摧毁一个 +2 力量；若未命中，你输掉游戏"
+    }
+  ],
+  "card.effect.mpw.belowthebelt": [
+    {
+      "type": 0,
+      "value": "命中 Warrior 英雄时，摧毁其 arsenal 中的一张牌"
+    }
+  ],
+  "card.effect.mpw.bladerush": [
+    {
+      "type": 0,
+      "value": "你的第一次剑攻击获得 go again，第二次剑攻击 +1 力量"
+    }
+  ],
+  "card.effect.mpw.crimsonwaltz": [
+    {
+      "type": 0,
+      "value": "攻击时抽一张牌，然后将一张手牌置于你的牌库顶"
+    }
+  ],
+  "card.effect.mpw.engagesteel": [
+    {
+      "type": 0,
+      "value": "若被 Warrior 牌防御，则 +1 力量"
+    }
+  ],
+  "card.effect.mpw.shattertheweakpoint": [
+    {
+      "type": 0,
+      "value": "命中 Warrior 英雄时，摧毁其操控的一件防御为 0 的装备"
+    }
+  ],
+  "card.effect.mpw.steeltothedome": [
+    {
+      "type": 0,
+      "value": "命中 Warrior 英雄时，该英雄弃一张牌"
+    }
+  ],
+  "card.effect.mpw.termsofcombat": [
+    {
+      "type": 0,
+      "value": "每当有防御反应针对其被打出或启动时，抽一张牌"
+    }
+  ],
+  "card.effect.mst.firsttenetofchimoon": [
+    {
+      "type": 0,
+      "value": "下一次你以蓝色牌攻击时，抽一张牌"
+    }
+  ],
+  "card.effect.mst.justanick": [
+    {
+      "type": 0,
+      "value": "放逐防御英雄的牌库顶牌"
+    }
+  ],
+  "card.effect.mst.nuu": [
+    {
+      "type": 0,
+      "value": "可以从对手英雄的放逐区打出蓝色牌，无需支付其资源费用"
+    }
+  ],
+  "card.effect.mst.shiftingwindsofthemysticbeast": [
+    {
+      "type": 0,
+      "value": "每当你打出一张 Crouching Tiger 时，命名一张牌；它获得该名称"
+    }
+  ],
+  "card.effect.mst.vengefulapparition": [
+    {
+      "type": 0,
+      "value": "可以将你的下一个费用不高于 "
+    },
+    {
+      "type": 1,
+      "value": "cost"
+    },
+    {
+      "type": 0,
+      "value": " 的灵气 (Aura) 视为瞬间牌打出，其进场时带有一个 +1 力量指示物"
+    }
+  ],
+  "card.effect.omn.abitofftheside": [
+    {
+      "type": 0,
+      "value": "每当你操控的 axe 命中英雄时，该英雄弃一张牌"
+    }
+  ],
+  "card.effect.omn.gauntletofswordandsorcery": [
+    {
+      "type": 0,
+      "value": "攻击时，对对手英雄造成 1 点奥术伤害；若造成了伤害，其获得 +1 力量"
+    }
+  ],
+  "card.effect.omn.leechmemory": [
+    {
+      "type": 0,
+      "value": "每当其对英雄造成伤害时，可以将你墓地中的一张攻击行动牌置于你的牌库底"
+    }
+  ],
+  "card.effect.omn.leechrenown": [
+    {
+      "type": 0,
+      "value": "每当其对英雄造成伤害时，摧毁该英雄操控的一个灵气 (Aura) 衍生物"
+    }
+  ],
+  "card.effect.omn.leechvitality": [
+    {
+      "type": 0,
+      "value": "每当其对英雄造成伤害时，获得 1 点生命"
+    }
+  ],
+  "card.effect.omn.livewirepress": [
+    {
+      "type": 0,
+      "value": "其命中英雄时，对该英雄造成 4 点伤害"
+    }
+  ],
+  "card.effect.omn.mercurialskies": [
+    {
+      "type": 0,
+      "value": "其首次对英雄造成伤害时，可以摧毁一个 Lightning Flow，对其造成 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点奥术伤害"
+    }
+  ],
+  "card.effect.omn.quicksuccession": [
+    {
+      "type": 6,
+      "value": "count",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 0,
+              "value": "你的下一次攻击在具有 go again 时力量 +1"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 0,
+              "value": "你的接下来 "
+            },
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " 次攻击在具有 go again 时力量 +1"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    }
+  ],
+  "card.effect.omn.settlethebill": [
+    {
+      "type": 0,
+      "value": "该 arrow 命中英雄时，摧毁其 arsenal 中的一张牌"
+    }
+  ],
+  "card.effect.out.amnesia": [
+    {
+      "type": 0,
+      "value": "其拥有的牌和衍生物失去名称且不能获得名称"
+    }
+  ],
+  "card.effect.out.burdensofthepast": [
+    {
+      "type": 0,
+      "value": "不能打出与其墓地中某张牌同名的防御反应牌"
+    }
+  ],
+  "card.effect.out.maskofshiftingperspectives": [
+    {
+      "type": 0,
+      "value": "每当一把 dagger 命中时，可以将一张手牌置于你的牌库底，然后抽一张牌"
+    }
+  ],
+  "card.effect.out.premeditate": [
+    {
+      "type": 0,
+      "value": "下次攻击行动牌命中英雄时，生成一个 Ponder 衍生物"
+    }
+  ],
+  "card.effect.out.toxictips": [
+    {
+      "type": 0,
+      "value": "其命中英雄时，在该英雄的操控下生成一个 Frailty、Inertia 或 Bloodrot Pox 衍生物"
+    }
+  ],
+  "card.effect.pen.cheatingscoundrel.wager": [
+    {
+      "type": 0,
+      "value": "下一次你将输掉 wager 时，你可以改为弃一张牌以赢得该 wager"
+    }
+  ],
+  "card.effect.pen.rendflesh": [
+    {
+      "type": 0,
+      "value": "移除一个 +1 力量指示物，使被命中的英雄失去 2 点生命"
+    }
+  ],
+  "card.effect.pen.senseweakness": [
+    {
+      "type": 0,
+      "value": "命中英雄时，对其操控的每个盟友造成等同于此次所造成伤害的伤害"
+    }
+  ],
+  "card.effect.pen.verdanttide": [
+    {
+      "type": 0,
+      "value": "你生成 Elemental 或 Runeblade 灵气 (Aura) 衍生物时，每种额外生成一个"
+    }
+  ],
+  "card.effect.ros.aetherbindingsofthethirdage": [
+    {
+      "type": 0,
+      "value": "每当你操控的一个牌名中含有 Sigil 的灵气 (Aura) 离场时，增幅 (amp) 1"
+    }
+  ],
+  "card.effect.ros.unsheathed": [
+    {
+      "type": 0,
+      "value": "攻击时，若其力量大于基础力量的两倍，则获得 go again"
+    }
+  ],
+  "card.effect.sar.spikewithbloodrot": [
+    {
+      "type": 0,
+      "value": "该攻击命中英雄时，在其操控下生成一个 Bloodrot Pox 衍生物"
+    }
+  ],
+  "card.effect.saz.droptheanchor": [
+    {
+      "type": 0,
+      "value": "命中英雄时，横置该英雄及其操控的所有 ally"
+    }
+  ],
+  "card.effect.sba.burnup": [
+    {
+      "type": 0,
+      "value": "你操控的攻击下一次命中英雄时，对其造成 4 点奥术伤害"
+    }
+  ],
+  "card.effect.sbr.seismicsurge": [
+    {
+      "type": 0,
+      "value": "打出费用减少 1 点"
+    }
+  ],
+  "card.effect.sea.chartacourse": [
+    {
+      "type": 0,
+      "value": "你的"
+    },
+    {
+      "type": 5,
+      "value": "attackOrdinal",
+      "options": {
+        "1": {
+          "value": [
+            {
+              "type": 0,
+              "value": "第一次"
+            }
+          ]
+        },
+        "2": {
+          "value": [
+            {
+              "type": 0,
+              "value": "第二次"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 0,
+              "value": "第三次"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "type": 0,
+      "value": "攻击 +3 力量"
+    }
+  ],
+  "card.effect.sea.goldbaitedhook": [
+    {
+      "type": 0,
+      "value": "夺取其操控的一个 Gold 衍生物，否则生成一个 Gold 衍生物"
+    }
+  ],
+  "card.effect.sea.notsofast": [
+    {
+      "type": 0,
+      "value": "对手下一次将因 Gold 衍生物的效果抽牌时，改为由你抽这张牌"
+    }
+  ],
+  "card.effect.sea.regaincomposure": [
+    {
+      "type": 0,
+      "value": "命中时重置你的英雄"
+    }
+  ],
+  "card.effect.sgb.loothold": [
+    {
+      "type": 0,
+      "value": "命中英雄时，该英雄弃一张牌；若其弃牌，则生成一个 Gold 衍生物"
+    }
+  ],
+  "card.effect.sgb.lootthearsenal": [
+    {
+      "type": 0,
+      "value": "命中英雄时，摧毁其 arsenal 中的一张牌；若你如此做，则生成一个 Gold 衍生物"
+    }
+  ],
+  "card.effect.sup.criesofencore": [
+    {
+      "type": 0,
+      "value": "可以从你的墓地打出一个具有 suspense 的灵气 (Aura)"
+    }
+  ],
+  "card.effect.upr.conduitoffrostburn": [
+    {
+      "type": 0,
+      "value": "你打出的下一张造成奥术伤害的牌获得：当其对英雄造成奥术伤害时，摧毁该英雄 arsenal 中一张已冻结的牌"
+    }
+  ],
+  "card.effect.upr.liquefy": [
+    {
+      "type": 0,
+      "value": "在其操控的一件装备上放置一个 -1 防御指示物，若该装备防御为 0 则将其摧毁"
+    }
+  ],
+  "card.effect.upr.sigilofpermafrost": [
+    {
+      "type": 0,
+      "value": "下次你对英雄造成奥术伤害时，在其操控下生成等量的 Frostbite 衍生物"
+    }
+  ],
+  "card.effect.upr.spreadingflames": [
+    {
+      "type": 0,
+      "value": "你操控的龙族 (Draconic) 攻击的基础力量低于你操控的龙族 (Draconic) 战斗链环数量时，获得 +1 力量"
+    }
+  ],
+  "card.effect.upr.strategicplanning": [
+    {
+      "type": 0,
+      "value": "在结束阶段开始时抽一张牌"
+    }
+  ],
+  "card.effect.upr.transmogrify": [
+    {
+      "type": 0,
+      "value": "基础力量为 "
+    },
+    {
+      "type": 1,
+      "value": "basePower"
+    }
+  ],
   "card.ele.action.top": [
     {
       "type": 0,
@@ -17781,6 +18750,12 @@
       "value": "本回合结束时"
     }
   ],
+  "engine.effect.duration.first.action.this.turn": [
+    {
+      "type": 0,
+      "value": "本回合第一个行动"
+    }
+  ],
   "engine.effect.duration.next.action": [
     {
       "type": 0,
@@ -18155,6 +19130,14 @@
             }
           ]
         },
+        "weapon": {
+          "value": [
+            {
+              "type": 0,
+              "value": "下一把"
+            }
+          ]
+        },
         "other": {
           "value": [
             {
@@ -18211,6 +19194,78 @@
             }
           ]
         },
+        "weapon": {
+          "value": [
+            {
+              "type": 0,
+              "value": "下一把"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 0,
+              "value": "下一张"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "type": 1,
+      "value": "subject"
+    }
+  ],
+  "engine.effect.duration.next.subject.this.link": [
+    {
+      "type": 0,
+      "value": "本次战斗链环中"
+    },
+    {
+      "type": 5,
+      "value": "noun",
+      "options": {
+        "attack": {
+          "value": [
+            {
+              "type": 0,
+              "value": "下一次"
+            }
+          ]
+        },
+        "weaponAttack": {
+          "value": [
+            {
+              "type": 0,
+              "value": "下一次"
+            }
+          ]
+        },
+        "attackWith": {
+          "value": [
+            {
+              "type": 0,
+              "value": "下一次"
+            }
+          ]
+        },
+        "instance": {
+          "value": [
+            {
+              "type": 0,
+              "value": "下一次"
+            }
+          ]
+        },
+        "weapon": {
+          "value": [
+            {
+              "type": 0,
+              "value": "下一把"
+            }
+          ]
+        },
         "other": {
           "value": [
             {
@@ -18264,6 +19319,14 @@
             {
               "type": 0,
               "value": "下一次"
+            }
+          ]
+        },
+        "weapon": {
+          "value": [
+            {
+              "type": 0,
+              "value": "下一把"
             }
           ]
         },
@@ -18328,6 +19391,16 @@
       "value": "subject"
     }
   ],
+  "engine.effect.duration.subject.this.link": [
+    {
+      "type": 0,
+      "value": "本次战斗链环中的"
+    },
+    {
+      "type": 1,
+      "value": "subject"
+    }
+  ],
   "engine.effect.duration.subject.this.turn": [
     {
       "type": 0,
@@ -18366,6 +19439,12 @@
     {
       "type": 0,
       "value": "持续到下回合结束"
+    }
+  ],
+  "engine.effect.duration.until.your.next.turn": [
+    {
+      "type": 0,
+      "value": "直到你的下回合开始"
     }
   ],
   "engine.effect.part.action.played.gain.action.points": [
@@ -18624,6 +19703,20 @@
           ]
         }
       }
+    }
+  ],
+  "engine.effect.part.damage.create.tokens": [
+    {
+      "type": 0,
+      "value": "每当其对英雄造成伤害时，在该英雄的控制下生成等量的 "
+    },
+    {
+      "type": 1,
+      "value": "damageToken"
+    },
+    {
+      "type": 0,
+      "value": " 衍生物"
     }
   ],
   "engine.effect.part.damage.unpreventable": [
@@ -19117,6 +20210,38 @@
       "value": "命中时标记该英雄"
     }
   ],
+  "engine.effect.part.on.hit.script": [
+    {
+      "type": 5,
+      "value": "hitTarget",
+      "options": {
+        "hero": {
+          "value": [
+            {
+              "type": 0,
+              "value": "命中英雄时"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 0,
+              "value": "命中时"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "type": 0,
+      "value": "："
+    },
+    {
+      "type": 1,
+      "value": "hitEffect"
+    }
+  ],
   "engine.effect.part.on.prevent.create.token": [
     {
       "type": 0,
@@ -19260,6 +20385,28 @@
     {
       "type": 0,
       "value": "来源的伤害"
+    }
+  ],
+  "engine.effect.part.prevent.damage.recipient.type": [
+    {
+      "type": 0,
+      "value": "防止你或你控制的一个 "
+    },
+    {
+      "type": 1,
+      "value": "recipientType"
+    },
+    {
+      "type": 0,
+      "value": " 接下来受到的 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点伤害"
     }
   ],
   "engine.effect.part.prevent.damage.source.type": [
@@ -19879,6 +21026,14 @@
             }
           ]
         },
+        "weapon": {
+          "value": [
+            {
+              "type": 0,
+              "value": "武器"
+            }
+          ]
+        },
         "other": {
           "value": [
             {
@@ -20432,6 +21587,14 @@
             {
               "type": 0,
               "value": "装备"
+            }
+          ]
+        },
+        "weapon": {
+          "value": [
+            {
+              "type": 0,
+              "value": "武器"
             }
           ]
         },
@@ -24886,7 +26049,7 @@
   "game.chain.stat.attack": [
     {
       "type": 0,
-      "value": "攻击"
+      "value": "力量"
     }
   ],
   "game.chain.stat.defense": [

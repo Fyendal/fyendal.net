@@ -7,6 +7,8 @@ import {
   decisionMessage,
   decisionPrompt,
   heroDamage,
+  hitHookLabel,
+  ongoingLabel,
   opponentSeat,
 } from "../shared-helpers.js";
 
@@ -348,7 +350,11 @@ export const hvyHighRarity: Record<string, CardScript> = {
         ctx.addModifier({
           scope: "until-end-of-turn",
           appliesTo: "weapon",
-          onHitScriptHook: { hook: "kassai-gold", label: "create a Gold token", heroOnly: true },
+          onHitScriptHook: {
+            hook: "kassai-gold",
+            ...hitHookLabel("create a Gold token", "card.effect.common.gold.create"),
+            heroOnly: true,
+          },
           once: true,
         });
       },
@@ -452,7 +458,13 @@ export const hvyHighRarity: Record<string, CardScript> = {
   },
   "talk a big game|3": {
     onPlay(ctx) {
-      ctx.addModifier({ scope: "until-end-of-turn" });
+      ctx.addModifier({
+        scope: "until-end-of-turn",
+        ...ongoingLabel(
+          "the next time you deal at least the chosen amount of damage to a hero, create that many Might tokens",
+          "card.effect.hvy.talkabiggame",
+        ),
+      });
       ctx.requestChoice("big-number", decisionPrompt("Choose a number", "card.hvy.number.choose"), [
         "1",
         "2",
@@ -493,7 +505,13 @@ export const hvyHighRarity: Record<string, CardScript> = {
   "double down|1": {
     alternativePlayCost: { kind: "destroy-controlled-named", options: [{ name: "Gold", count: 1 }] },
     onPlay(ctx) {
-      ctx.addModifier({ scope: "until-end-of-turn" });
+      ctx.addModifier({
+        scope: "until-end-of-turn",
+        ...ongoingLabel(
+          "the next attack that wagers gets +3 power and overpower, wagers create 1 more of each token",
+          "card.effect.hvy.doubledown",
+        ),
+      });
       ctx.setCounter("double-attack-ready", 1);
     },
     triggers: [
@@ -569,7 +587,10 @@ export const hvyHighRarity: Record<string, CardScript> = {
       fromHand: true,
       label: "Reduce action-card token creation",
       onActivate(ctx) {
-        ctx.addModifier({ scope: "until-end-of-turn" });
+        ctx.addModifier({
+          scope: "until-end-of-turn",
+          ...ongoingLabel("action card effects create 1 fewer of each token", "card.effect.hvy.rippleaway"),
+        });
       },
     },
     globalTokenCreationReplacement: {

@@ -11,6 +11,7 @@ import {
   mentorFlipTrigger,
   mentorPayoff,
   nextAttack,
+  ongoingLabel,
   reprise,
   weaponAttackCount,
 } from "./shared-helpers.js";
@@ -55,7 +56,7 @@ export const dvr: Record<string, CardScript> = {
         ctx.logPublic(
           localizedCardLog(
             ctx,
-            "Dawnblade, Resplendent gains +1 attack until end of turn",
+            "Dawnblade, Resplendent gains +1 power until end of turn",
             "card.log.dvr.dawnblade.turn.attack",
             { amount: 1 },
           ),
@@ -90,7 +91,7 @@ export const dvr: Record<string, CardScript> = {
         ctx.logPublic(
           localizedCardLog(
             ctx,
-            "Gallantry Gold: weapon attacks gain +1 attack this turn",
+            "Gallantry Gold: weapon attacks gain +1 power this turn",
             "card.log.dvr.gallantry.weapon.attack",
             { amount: 1 },
           ),
@@ -188,7 +189,7 @@ export const dvr: Record<string, CardScript> = {
       if (reprise(ctx)) {
         ctx.addModifier({ scope: "chain-link", attack: 3 });
         ctx.logPublic(
-          localizedCardLog(ctx, "Ironsong Response (Reprise): +3 attack", "card.log.common.reprise.attack", {
+          localizedCardLog(ctx, "Ironsong Response (Reprise): +3 power", "card.log.common.reprise.attack", {
             amount: 3,
           }),
         );
@@ -230,7 +231,14 @@ export const dvr: Record<string, CardScript> = {
     // whenever Dawnblade hits a hero this turn, put a +1{p} counter on it
     onPlay(ctx) {
       nextAttack({ appliesTo: "weapon", goAgain: true })(ctx);
-      ctx.addModifier({ scope: "until-end-of-turn", appliesTo: "sword" }); // marker
+      ctx.addModifier({
+        scope: "until-end-of-turn",
+        appliesTo: "sword",
+        ...ongoingLabel(
+          "whenever Dawnblade hits a hero, put a +1 power counter on it",
+          "card.effect.dvr.glisteningsteelblade",
+        ),
+      });
     },
     canTriggerOnHit(ctx) {
       const link = ctx.link;
@@ -241,7 +249,7 @@ export const dvr: Record<string, CardScript> = {
       ctx.addCounter(dawnblade.instanceId, "power", 1);
       ctx.logPublic(
         localizedLog(
-          `${ctx.cardData(dawnblade.cardId).name} gets a +1 attack counter`,
+          `${ctx.cardData(dawnblade.cardId).name} gets a +1 power counter`,
           "card.log.dvr.dawnblade.counter",
           { card: { kind: "card", cardId: dawnblade.cardId }, amount: 1 },
         ),
@@ -283,7 +291,15 @@ export const dvr: Record<string, CardScript> = {
   "slice and dice|2": {
     // Slice and Dice (yellow) — first sword/dagger attack +1, second +2
     onPlay(ctx) {
-      ctx.addModifier({ scope: "until-end-of-turn", appliesTo: "sword" }); // marker
+      ctx.addModifier({
+        scope: "until-end-of-turn",
+        appliesTo: "sword",
+        ...ongoingLabel(
+          "your first sword or dagger weapon attack gets +1 power and your second gets +2 power",
+          "card.effect.evr.sliceanddice",
+          { amount: 2 },
+        ),
+      });
     },
     modifyAttack(ctx) {
       if (

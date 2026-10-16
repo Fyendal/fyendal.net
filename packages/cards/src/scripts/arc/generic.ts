@@ -9,6 +9,7 @@ import {
   optOnChoose,
   opponentSeat,
   yesNoPrompt,
+  ongoingLabel,
 } from "../shared-helpers.js";
 
 function vestOfTheFirstFist(): CardScript {
@@ -78,7 +79,13 @@ function plunderRun(attack: number): CardScript {
   return {
     onPlay(ctx) {
       ctx.setCounter("drawOnHit", 1);
-      ctx.addModifier({ scope: "until-end-of-turn" });
+      ctx.addModifier({
+        scope: "until-end-of-turn",
+        ...ongoingLabel(
+          "draw a card the next time an attack action card you control hits",
+          "card.effect.arc.plunderrun",
+        ),
+      });
       if (ctx.fromArsenal) buffNextAttack(ctx, { attack, appliesTo: "attack-action" });
     },
     canTriggerOnHit(ctx) {

@@ -16,6 +16,7 @@ import {
   heroTarget,
   leavesArenaTrigger,
   mergeSetScripts,
+  ongoingLabel,
   opponentSeat,
   optN,
   optOnChoose,
@@ -433,6 +434,15 @@ const LEECH_RIDER_LABELS: Record<"memory" | "renown" | "vitality", Pick<TriggerD
   vitality: { label: "Gain 1 life", labelMessage: { id: "card.trigger.common.life.gain", values: { amount: 1 } } },
 };
 
+const LEECH_RIDER_EFFECTS = {
+  memory: ongoingLabel(
+    "may put an attack action card from your graveyard on the bottom of your deck whenever it damages a hero",
+    "card.effect.omn.leechmemory",
+  ),
+  renown: ongoingLabel("destroy an aura token they control whenever it damages a hero", "card.effect.omn.leechrenown"),
+  vitality: ongoingLabel("gain 1 life whenever it damages a hero", "card.effect.omn.leechvitality"),
+};
+
 function nextAttackDamageRider(kind: "memory" | "renown" | "vitality"): CardScript {
   const damage = (ctx: ScriptCtx, targetSeat: number) => {
     if (kind === "vitality") ctx.gainLife(ctx.seat, 1);
@@ -449,7 +459,7 @@ function nextAttackDamageRider(kind: "memory" | "renown" | "vitality"): CardScri
   };
   return {
     onPlay(ctx) {
-      buffNextAttack(ctx, { attack: 3, appliesTo: "attack-action" });
+      buffNextAttack(ctx, { attack: 3, appliesTo: "attack-action", ...LEECH_RIDER_EFFECTS[kind] });
       ctx.addModifier({ scope: "until-end-of-turn" });
     },
     onFriendlyAttackDeclared(ctx) {
@@ -555,7 +565,16 @@ function quickSuccession(count: number): CardScript {
     onPlay(ctx) {
       buffNextAttack(ctx, { goAgain: true, appliesToType: ["runeblade", "lightning"] });
       ctx.setCounter("quickRemaining", count);
-      ctx.addModifier({ scope: "until-end-of-turn" });
+      ctx.addModifier({
+        scope: "until-end-of-turn",
+        ...ongoingLabel(
+          count === 1
+            ? "your next attack gets +1 power while it has go again"
+            : `your next ${count} attacks get +1 power while they have go again`,
+          "card.effect.omn.quicksuccession",
+          { count },
+        ),
+      });
     },
     onFriendlyAttackDeclared(ctx) {
       const remaining = ctx.getCounter("quickRemaining");
@@ -584,14 +603,30 @@ function mercurialSkies(amount: number): CardScript {
   return {
     onPlay(ctx) {
       ctx.setCounter("mercurialDamage", amount);
+      // `once` only phrases the label as the next matching card; the script
+      // consumes this modifier when a matching attack action card attacks.
       ctx.addModifier({
         scope: "until-end-of-turn",
         goAgain: true,
-        appliesToCardType: "action",
+        once: true,
+        appliesTo: "attack-action",
         appliesToSubtype: ["runeblade", "lightning"],
+        ...ongoingLabel(
+          `may destroy a Lightning Flow to deal ${amount} arcane damage the first time it damages a hero`,
+          "card.effect.omn.mercurialskies",
+          { amount },
+        ),
       });
     },
     onFriendlyAttackDeclared(ctx) {
+      const attack = ctx.link?.attackingCard;
+      if (
+        !attack ||
+        ctx.link?.attackCardType !== "action" ||
+        !hasTag(ctx, attack, "attack") ||
+        !(hasTag(ctx, attack, "runeblade") || hasTag(ctx, attack, "lightning"))
+      )
+        return;
       const marker = consumeSourceModifier(ctx, (modifier) => modifier.goAgain === true);
       if (marker && ctx.link) {
         ctx.addModifier({ scope: "until-end-of-turn", appliesToInstanceId: ctx.link.attackingCard.instanceId });
@@ -829,20 +864,32 @@ function chromatic(pitch: number): CardScript {
     );
   };
   return {
-    ...beginningAura((ctx) =>
+    ...beginningAura((ctx) => {
       ctx.addModifier({
         scope: "until-end-of-turn",
         playCostReduction: 1,
         appliesToPitch: pitch,
-      }),
-    ),
+        once: true,
+      });
+      // The engine consumes the single-use discount when the matching card's
+      // cost is paid; this marker keeps the source observing that play.
+      ctx.addModifier({ scope: "until-end-of-turn" });
+    }),
     onFriendlyPlay(ctx, played) {
       if (ctx.cardColor(played) !== pitch) return;
-      const marker = consumeSourceModifier(
-        ctx,
+      const sourceModifiers = ctx.state.modifiers.filter(
+        (modifier) => modifier.sourceInstanceId === ctx.self.instanceId && modifier.scope === "until-end-of-turn",
+      );
+      const discount = sourceModifiers.find(
         (modifier) => modifier.playCostReduction === 1 && modifier.appliesToPitch === pitch,
       );
-      if (marker) ctx.addModifier({ scope: "until-end-of-turn", damage: 1, appliesToInstanceId: played.instanceId });
+      if (!discount || sourceModifiers.some((modifier) => modifier.damage === 1)) return;
+      if (!discount.consumed) ctx.consumeModifier(discount.id);
+      const marker = sourceModifiers.find(
+        (modifier) => !modifier.consumed && modifier.playCostReduction === undefined && modifier.damage === undefined,
+      );
+      if (marker) ctx.consumeModifier(marker.id);
+      ctx.addModifier({ scope: "until-end-of-turn", damage: 1, appliesToInstanceId: played.instanceId });
     },
     onFriendlyDamageDealt(ctx, source, _target, amount) {
       consumeDamage(ctx, source, amount);
@@ -1266,7 +1313,11 @@ export const omn: Record<string, CardScript> = mergeSetScripts("OMN", omnHighRar
   "livewire press|1": {
     ...targetAttack((ctx) => {
       if (ctx.playTargetInstanceId !== undefined)
-        ctx.addModifier({ scope: "until-end-of-turn", appliesToInstanceId: ctx.playTargetInstanceId });
+        ctx.addModifier({
+          scope: "until-end-of-turn",
+          appliesToInstanceId: ctx.playTargetInstanceId,
+          ...ongoingLabel("deal 4 damage to them when it hits a hero", "card.effect.omn.livewirepress"),
+        });
     }, "lightning"),
     canTriggerOnHit(ctx) {
       return (

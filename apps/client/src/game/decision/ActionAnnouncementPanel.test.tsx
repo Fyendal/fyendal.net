@@ -298,7 +298,7 @@ describe("activated ability mode choices", () => {
     );
 
     expect(html).toContain("Choose how to use");
-    expect(html).toContain('aria-label="+1 Attack"');
+    expect(html).toContain('aria-label="+1 Power"');
     expect(html).toContain('src="/icons/attack.png"');
     expect(html).not.toContain("{p}");
     expect(html).toContain("Go again");

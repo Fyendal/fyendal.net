@@ -516,7 +516,7 @@ describe("Blood Debt and Rune Gate", () => {
     expect(projectStateFor(g.state, 0).ongoing).toContainEqual(expect.objectContaining({
       seat: 0,
       cardId: printingId("putrid stirrings|1"),
-      label: "+5 attack · next rune-gated attack action card",
+      label: "+5 power · next rune-gated attack action card",
     }));
 
     g.play("head jab|1")

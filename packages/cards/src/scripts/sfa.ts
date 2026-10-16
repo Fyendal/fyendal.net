@@ -390,7 +390,7 @@ export const sfa: Record<string, CardScript> = {
       {
         event: "attack-declared",
         sourceZone: "self",
-        label: "Your next Draconic attack this combat chain gets +1 attack",
+        label: "Your next Draconic attack this combat chain gets +1 power",
         labelMessage: decisionMessage("card.trigger.common.nextattack.draconic.attack", { amount: 1 }),
         effect(ctx: ScriptCtx) {
           buffNextAttack(ctx, { attack: 1, appliesToSubtype: "draconic", expiresOnChainClose: true });

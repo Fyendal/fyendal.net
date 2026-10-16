@@ -70,7 +70,7 @@ describe("DTD — registration and core mechanics", () => {
     )).toBe(false);
     expect(projectStateFor(s.state, 1).ongoing).toContainEqual(expect.objectContaining({
       seat: 1,
-      label: "can only play or activate attacks with 11 or more base attack · this turn",
+      label: "can only play or activate attacks with 11 or more base power · this turn",
     }));
 
     s.endTurn();

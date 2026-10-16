@@ -56,11 +56,11 @@ describe("localized card logs", () => {
   it("adds the script source card without repeating it at every producer", () => {
     expect(localizedCardLog(
       { self: { cardId: "SOURCE" } } as Parameters<typeof localizedCardLog>[0],
-      "Test Card gets +2 attack",
+      "Test Card gets +2 power",
       "card.log.test.attack",
       { amount: 2 },
     )).toEqual({
-      fallback: "Test Card gets +2 attack",
+      fallback: "Test Card gets +2 power",
       message: {
         id: "card.log.test.attack",
         values: {

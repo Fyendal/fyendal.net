@@ -100,7 +100,7 @@ export const ako: Record<string, CardScript> = {
   // Bare Fangs (red)
   "bare fangs|1": discardSixPlusPayoff((ctx) => {
     ctx.addModifier({ scope: "chain-link", attack: 2 });
-    ctx.logPublic(localizedCardLog(ctx, "Bare Fangs gains +2 attack", "card.log.ska.barefangs.attack", { amount: 2 }));
+    ctx.logPublic(localizedCardLog(ctx, "Bare Fangs gains +2 power", "card.log.ska.barefangs.attack", { amount: 2 }));
   }),
   // Wild Ride (red)
   "wild ride|1": discardSixPlusPayoff((ctx) => {

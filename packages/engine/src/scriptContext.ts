@@ -284,8 +284,8 @@ function logAttackPowerChange(
   const sign = change > 0 ? "+" : "-";
   const named = source.cardId !== card.cardId && attackPowerSourceIsPublic(state, source);
   const fallback = named
-    ? `${logNameOf(state, source.cardId)} gives ${logNameOf(state, card.cardId)} ${sign}${amount} attack (${attack} attack)`
-    : `${logNameOf(state, card.cardId)} gets ${sign}${amount} attack (${attack} attack)`;
+    ? `${logNameOf(state, source.cardId)} gives ${logNameOf(state, card.cardId)} ${sign}${amount} power (${attack} power)`
+    : `${logNameOf(state, card.cardId)} gets ${sign}${amount} power (${attack} power)`;
   const id = named
     ? change > 0 ? "engine.log.combat.attack.power.gained" : "engine.log.combat.attack.power.lost"
     : change > 0 ? "engine.log.combat.attack.power.gained.self" : "engine.log.combat.attack.power.lost.self";

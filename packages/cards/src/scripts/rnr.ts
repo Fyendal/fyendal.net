@@ -40,7 +40,7 @@ export const rnr: Record<string, CardScript> = {
       {
         event: "card-played",
         sourceZone: "self",
-        label: "Gain +1 attack",
+        label: "Gain +1 power",
         condition(ctx) {
           const me = ctx.state.players[ctx.seat]!;
           const opp = ctx.state.players[ctx.seat === 0 ? 1 : 0]!;

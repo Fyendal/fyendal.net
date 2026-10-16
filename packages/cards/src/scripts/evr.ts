@@ -22,6 +22,7 @@ import {
   wizardActionAsInstant,
   weaponAttackCount,
   opposingHeroDamage,
+  ongoingLabel,
 } from "./shared-helpers.js";
 
 const COPPER = "EVR194";
@@ -242,7 +243,15 @@ function waxOn(): CardScript {
 function sliceAndDice(second: number): CardScript {
   return {
     onPlay(ctx) {
-      ctx.addModifier({ scope: "until-end-of-turn", appliesTo: "weapon" });
+      ctx.addModifier({
+        scope: "until-end-of-turn",
+        appliesTo: "weapon",
+        ...ongoingLabel(
+          `your first sword or dagger weapon attack gets +1 power and your second gets +${second} power`,
+          "card.effect.evr.sliceanddice",
+          { amount: second },
+        ),
+      });
     },
     modifyAttack(ctx) {
       if (!currentWeaponIsSwordOrDagger(ctx)) return 0;
@@ -276,7 +285,11 @@ function outlandSkirmish(amount: number): CardScript {
     onPlay(ctx) {
       buffNextAttack(ctx, { attack: amount, appliesTo: "weapon", appliesToSubtype: "1h" });
       ctx.setCounter("outlandCopper", 1);
-      ctx.addModifier({ scope: "until-end-of-turn", appliesTo: "weapon" });
+      ctx.addModifier({
+        scope: "until-end-of-turn",
+        appliesTo: "weapon",
+        ...ongoingLabel("create a Copper token the next time a weapon hits", "card.effect.evr.outlandskirmish"),
+      });
     },
     canTriggerOnHit(ctx) {
       return ctx.getCounter("outlandCopper") > 0 && isWeaponAttack(ctx);
@@ -741,7 +754,14 @@ function highStriker(count: number): CardScript {
   return {
     onPlay(ctx) {
       ctx.setCounter("highStriker", count);
-      ctx.addModifier({ scope: "until-end-of-turn" });
+      ctx.addModifier({
+        scope: "until-end-of-turn",
+        ...ongoingLabel(
+          `create ${count} Copper tokens the next time an attack you control hits`,
+          "card.effect.evr.highstriker",
+          { count },
+        ),
+      });
     },
     canTriggerOnHit(ctx) {
       return ctx.getCounter("highStriker") > 0;
@@ -796,7 +816,13 @@ function smashingGoodTime(amount: number): CardScript {
   return {
     onPlay(ctx) {
       ctx.setCounter("smashingReady", 1);
-      ctx.addModifier({ scope: "until-end-of-turn" });
+      ctx.addModifier({
+        scope: "until-end-of-turn",
+        ...ongoingLabel(
+          "the next time an attack action card hits a hero, you may destroy an item with cost 2 or less they control",
+          "card.effect.evr.smashinggoodtime",
+        ),
+      });
       if (ctx.fromArsenal) {
         buffNextAttack(ctx, { attack: amount, appliesTo: "attack-action" });
       }
@@ -878,6 +904,11 @@ const amuletAssertiveness: CardScript = {
       ctx.addModifier({
         scope: "until-end-of-turn",
         appliesToInstanceId: ctx.link.attackingCard.instanceId,
+        ...ongoingLabel(
+          "when the target attack hits, banish the top card of your " +
+            "deck; you may play it if it's an attack action card",
+          "card.effect.evr.amuletofassertiveness",
+        ),
       });
     },
   },

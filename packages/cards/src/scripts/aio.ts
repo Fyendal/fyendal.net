@@ -4,6 +4,7 @@ import {
   decisionMessage,
   decisionPrompt,
   localizedCardLog,
+  ongoingLabel,
   yesNoPrompt,
 } from "./shared-helpers.js";
 
@@ -169,7 +170,10 @@ export const aio: Record<string, CardScript> = {
       goAgain: true,
       destroySelfCost: true,
       onActivate(ctx) {
-        ctx.addModifier({ scope: "until-end-of-turn" });
+        ctx.addModifier({
+          scope: "until-end-of-turn",
+          ...ongoingLabel("gain 1 resource whenever you boost", "card.effect.aio.heavyindustrypowerplant"),
+        });
       },
     },
     onBoosted(ctx) {

@@ -7,6 +7,7 @@ import {
   decisionPrompt,
   localizedCardLog,
   markedStealthHeroScript,
+  ongoingLabel,
   opponentSeat,
   yesNoPrompt,
 } from "./shared-helpers.js";
@@ -154,14 +155,21 @@ function artOfDesire(pitchValue: number): CardScript {
   };
 }
 
+const markOnHitLabel = ongoingLabel("when the attack hits a hero, mark them", "card.effect.common.mark.attack.hit");
+
 /** Attack-reaction pump on the controller's attack with an armed on-hit
  *  rider (Scar Tissue / Spike with Bloodrot). */
-function pumpWithRider(target: (ctx: ScriptCtx) => boolean, pump: number, rider: (ctx: ScriptCtx) => void): CardScript {
+function pumpWithRider(
+  target: (ctx: ScriptCtx) => boolean,
+  pump: number,
+  label: ReturnType<typeof ongoingLabel>,
+  rider: (ctx: ScriptCtx) => void,
+): CardScript {
   return {
     canPlay: (ctx) => myAttack(ctx) && target(ctx),
     onPlay(ctx) {
       ctx.addModifier({ scope: "chain-link", attack: pump });
-      ctx.addModifier({ scope: "until-end-of-turn" }); // marker: source of the lingering onHit
+      ctx.addModifier({ scope: "until-end-of-turn", ...label }); // marker: source of the lingering onHit
     },
     canTriggerOnHit(ctx) {
       return ctx.link?.targetAllyId === undefined && armedBySelf(ctx);
@@ -463,12 +471,17 @@ export const sar: Record<string, CardScript> = {
   "scar tissue|1": pumpWithRider(
     (ctx) => isDagger(ctx, ctx.link!.attackingCard),
     3,
+    markOnHitLabel,
     (ctx) => markHero(ctx, opponentSeat(ctx)),
   ),
 
   "spike with bloodrot|1": pumpWithRider(
     (ctx) => ctx.link!.attackCardType === "action" && hasStealth(ctx, ctx.link!.attackingCard.cardId),
     3,
+    ongoingLabel(
+      "when the attack hits a hero, create a Bloodrot Pox token under their control",
+      "card.effect.sar.spikewithbloodrot",
+    ),
     (ctx) => ctx.createToken(BLOODROT_POX, opponentSeat(ctx)),
   ),
 
@@ -515,7 +528,7 @@ export const sar: Record<string, CardScript> = {
       const selectedStealth = ctx.getCounter("twoSidesMode") === 2;
       ctx.addModifier({ scope: "chain-link", attack: 3 });
       if (stealthAction && (!dagger || selectedStealth)) {
-        ctx.addModifier({ scope: "until-end-of-turn" }); // marker for the mark rider
+        ctx.addModifier({ scope: "until-end-of-turn", ...markOnHitLabel }); // marker for the mark rider
       }
     },
     canTriggerOnHit(ctx) {

@@ -1,5 +1,5 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
-import { contractWithSilver, decisionPrompt, opponentSeat } from "./shared-helpers.js";
+import { contractWithSilver, decisionPrompt, hitHookLabel, ongoingLabel, opponentSeat } from "./shared-helpers.js";
 
 const BLOODROT_POX = "OUT234";
 const FRAILTY = "OUT235";
@@ -45,7 +45,10 @@ export const mpa: Record<string, CardScript> = {
         appliesToInstanceId: ctx.playTargetInstanceId,
         onHitScriptHook: {
           hook: "mpa-outbreak-hit",
-          label: "create a Frailty, Inertia, and Bloodrot Pox token under the hit hero's control",
+          ...hitHookLabel(
+            "create a Frailty, Inertia, and Bloodrot Pox token under the hit hero's control",
+            "card.effect.mpa.outbreak",
+          ),
           heroOnly: true,
         },
       });
@@ -60,7 +63,14 @@ export const mpa: Record<string, CardScript> = {
 
   "prolonged illness|3": {
     onPlay(ctx) {
-      ctx.addModifier({ scope: "until-end-of-turn" });
+      ctx.addModifier({
+        scope: "until-end-of-turn",
+        ...ongoingLabel(
+          "whenever a disease token is destroyed, if it's the first with " +
+            "that name, create a copy of it under the same hero's control",
+          "card.effect.mpa.prolongedillness",
+        ),
+      });
     },
     triggers: [
       {

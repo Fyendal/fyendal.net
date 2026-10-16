@@ -5,6 +5,7 @@ import {
   commonOptionMessages,
   decisionPrompt,
   localizedCardLog,
+  ongoingLabel,
   opponentSeat,
 } from "./shared-helpers.js";
 
@@ -108,7 +109,13 @@ export const aac: Record<string, CardScript> = {
       destroySelfCost: true,
       label: "Stealth attacks gain {r} this turn",
       onActivate(ctx) {
-        ctx.addModifier({ scope: "until-end-of-turn" });
+        ctx.addModifier({
+          scope: "until-end-of-turn",
+          ...ongoingLabel(
+            "gain 1 resource whenever you play a card with stealth",
+            "card.effect.aac.invertersnightcowl",
+          ),
+        });
       },
     },
     triggers: [

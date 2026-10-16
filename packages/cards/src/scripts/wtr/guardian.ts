@@ -105,7 +105,7 @@ function emergingPower(bonus: number): CardScript {
           buffNextAttack(ctx, { attack: bonus, appliesTo: "attack-action", appliesToClass: "guardian" });
           ctx.logPublic(
             localizedLog(
-              `Emerging Power: next Guardian attack action gets +${bonus} attack`,
+              `Emerging Power: next Guardian attack action gets +${bonus} power`,
               "card.log.wtr.emergingpower.attack",
               { card: { kind: "card", cardId: ctx.self.cardId }, amount: bonus },
             ),

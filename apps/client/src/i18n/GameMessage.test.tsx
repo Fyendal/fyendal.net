@@ -6,8 +6,8 @@ import { formatGameMessage, GameMessageText } from "./GameMessage.js";
 
 describe("localized game-message symbols", () => {
   it.each([
-    ["en", "Attack"],
-    ["zh-Hans", "攻击"],
+    ["en", "Power"],
+    ["zh-Hans", "力量"],
   ] as const)("renders {p} as the power icon in %s", (locale, attackLabel) => {
     const message = { id: "card.common.option.power.one" };
     const html = renderToStaticMarkup(

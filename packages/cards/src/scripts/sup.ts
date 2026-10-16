@@ -24,6 +24,7 @@ import {
   type SuspenseTrigger,
   targetHeroSeat,
   yesNoPrompt,
+  ongoingLabel,
 } from "./shared-helpers.js";
 
 const CONFIDENCE = "SLY034";
@@ -1280,7 +1281,7 @@ Object.assign(sup, {
         appliesToSubtype: "aura",
         appliesToKeyword: "suspense",
         once: true,
-        ongoingLabel: "may play an aura of suspense from your graveyard",
+        ...ongoingLabel("may play an aura of suspense from your graveyard", "card.effect.sup.criesofencore"),
       });
     },
   },
@@ -1777,7 +1778,8 @@ Object.assign(sup, {
       const top = ctx.player(ctx.seat).deck.slice(0, 4);
       const ids = top.map((card) => card.instanceId);
       ctx.revealCards(ids);
-      buffNextAttack(ctx, { attack: top.filter((card) => isSixPlus(ctx, card)).length });
+      const attack = top.filter((card) => isSixPlus(ctx, card)).length;
+      if (attack > 0) buffNextAttack(ctx, { attack });
       requestSongOfSinewOrder(ctx, ids);
     },
     onChoose(ctx: ScriptCtx, hook: string, option: string) {

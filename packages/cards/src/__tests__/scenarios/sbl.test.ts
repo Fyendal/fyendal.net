@@ -251,7 +251,7 @@ describe("SBL — Boltyn", () => {
     s.expectFinalAttack(3);
   });
 
-  it("reaction: banish a soul card to give an above-base attack go again", () => {
+  it("reaction: banish a soul card to give an above-base power go again", () => {
     const s = scenario({
       seats: [
         boltynSeat({ hand: ["beaming bravado|1", YELLOW] }),

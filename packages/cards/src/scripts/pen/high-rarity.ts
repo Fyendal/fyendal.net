@@ -9,6 +9,7 @@ import {
   entersArenaTrigger,
   heroTarget,
   leavesArenaTrigger,
+  ongoingLabel,
   opponentSeat,
   previousAttackHasName,
   queueIntimidate,
@@ -69,8 +70,18 @@ function weapon(cost: number, extra: CardScript = {}): CardScript {
 function nextWager(power: number): CardScript {
   return {
     onPlay(ctx) {
-      buffNextAttack(ctx, { attack: power, appliesTo: "attack-action" });
-      ctx.addModifier({ scope: "until-end-of-turn" });
+      buffNextAttack(ctx, {
+        attack: power,
+        appliesTo: "attack-action",
+        ...ongoingLabel("wager with the defending hero when it attacks", "card.effect.common.wager.attack"),
+      });
+      ctx.addModifier({
+        scope: "until-end-of-turn",
+        ...ongoingLabel(
+          "the next time you would lose a wager, you may discard a card to win it instead",
+          "card.effect.pen.cheatingscoundrel.wager",
+        ),
+      });
       ctx.setCounter("cheat-loss-ready", 1);
     },
     triggers: [
@@ -204,7 +215,15 @@ export const penHighRarity: Record<string, CardScript> = {
   },
   "sense weakness|3": {
     onPlay(ctx) {
-      buffNextAttack(ctx, { attack: 1, dominate: true, appliesToClass: "guardian" });
+      buffNextAttack(ctx, {
+        attack: 1,
+        dominate: true,
+        appliesToClass: "guardian",
+        ...ongoingLabel(
+          "when it hits a hero, deal damage equal to the damage dealt to each ally they control",
+          "card.effect.pen.senseweakness",
+        ),
+      });
       ctx.addModifier({ scope: "until-end-of-turn" });
     },
     canTriggerOnHit(ctx) {

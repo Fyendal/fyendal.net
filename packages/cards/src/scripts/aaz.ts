@@ -5,6 +5,7 @@ import {
   decisionMessage,
   decisionPrompt,
   localizedCardLog,
+  ongoingLabel,
   opponentSeat,
   yesNoPrompt,
 } from "./shared-helpers.js";
@@ -38,7 +39,10 @@ export const aaz: Record<string, CardScript> = {
       goAgain: true,
       destroySelfCost: true,
       onActivate(ctx) {
-        ctx.addModifier({ scope: "until-end-of-turn" });
+        ctx.addModifier({
+          scope: "until-end-of-turn",
+          ...ongoingLabel("draw a card whenever an arrow with an aim counter hits", "card.effect.aaz.targettotalizer"),
+        });
       },
     },
     canTriggerOnHit(ctx) {
