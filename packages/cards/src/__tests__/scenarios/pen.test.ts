@@ -946,6 +946,39 @@ describe("PEN — import and set mechanics", () => {
       .expectNotInZone(0, "frostbite|0", "board");
   });
 
+  it("Smoldering Steel makes its dagger attack deal 1 more damage when it hits a hero", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "dorinthea",
+          heroKey: "fang|0",
+          weapons: ["obsidian fire vein|0"],
+          resources: 1,
+          hand: ["smoldering steel|1"],
+        },
+        { hero: "rhinar" },
+      ],
+    });
+    const life = g.state.players[1]!.life;
+
+    g.attackWithWeapon("obsidian fire vein|0")
+      .blockWith()
+      .react("smoldering steel|1", { settle: false })
+      .passPriority()
+      .passPriority()
+      .expectAttackValue(3);
+    expect(projectStateFor(g.state, 0).chain.at(-1)?.onHitEffects).toEqual([
+      expect.objectContaining({
+        sourceCardId: printingId("smoldering steel|1"),
+        text: "When this hits, deal 1 damage to the defending hero.",
+      }),
+    ]);
+
+    g.settle()
+      .expectLog("hits for 3")
+      .expectLife(1, life - 4);
+  });
+
   it("two Smoldering Steels ask once, and declining declines both copies", () => {
     const g = scenario({
       seats: [

@@ -1849,8 +1849,7 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
   "smoldering steel|1": {
     canPlay: (ctx) => !!ctx.link && hasTag(ctx, ctx.link.attackingCard, "dagger"),
     onPlay(ctx) {
-      ctx.addModifier({ scope: "chain-link", attack: 1 });
-      ctx.setFlag("link", "penSmolderingSteel", true);
+      ctx.addModifier({ scope: "chain-link", attack: 1, onHitDealDamage: 1 });
     },
     optionalFriendlyTokenCreationReplacement: {
       sourceZone: "graveyard",

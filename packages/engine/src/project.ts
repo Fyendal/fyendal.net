@@ -386,6 +386,9 @@ function grantedOnHitText(state: GameStateInternal, modifier: Modifier): string 
     const amount = modifier.onHitLoseLife;
     effects.push(`the defending hero loses ${amount} life`);
   }
+  if (modifier.onHitDealDamage) {
+    effects.push(`deal ${modifier.onHitDealDamage} damage to the defending hero`);
+  }
   if (modifier.onHitDestroyTopDeckCards) {
     const { count, minimumDamage } = modifier.onHitDestroyTopDeckCards;
     effects.push(`if this deals ${minimumDamage} or more damage, destroy the top ${count} cards of the defending hero's deck`);
