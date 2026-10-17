@@ -1507,4 +1507,17 @@ describe("SEA — rules regression coverage", () => {
     big.play("call in the big guns|2").chooseCard("swift shot|1").expectInZone(0, "swift shot|1", "arsenal");
     expect(big.state.players[0]!.arsenal).toHaveLength(2);
   });
+
+  it("Deny Redemption's discard ability stops heroes gaining life this turn", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", life: 10, hand: ["deny redemption|1", "sigil of solace|1"], resources: 2 },
+        { hero: "dorinthea" },
+      ],
+    });
+    g.activate("deny redemption|1")
+      .expectInZone(0, "deny redemption|1", "graveyard")
+      .play("sigil of solace|1")
+      .expectLife(0, 10);
+  });
 });

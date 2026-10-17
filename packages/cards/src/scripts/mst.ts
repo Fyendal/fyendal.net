@@ -1585,7 +1585,8 @@ Object.assign(mst, {
   "dense blue mist|3": {
     onPlay(ctx) {
       ctx.addModifier({ scope: "until-end-of-turn", attack: -1, seat: opponentSeat(ctx) });
-      if (pitchedBlue(ctx)) ctx.setPlayerFlag(ctx.seat, "suppressHitEffectsThisTurn", true);
+      // FYD-RULE-002: the Chi rider needs a turn-long hit-effect suppression
+      // for attacks hitting this hero; the engine's suppression is one-shot.
     },
   },
   "orihon of mystic tenets|3": {

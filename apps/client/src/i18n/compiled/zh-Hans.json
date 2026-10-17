@@ -3393,6 +3393,12 @@
       "value": " 点伤害"
     }
   ],
+  "card.effect.ele.forceofnature": [
+    {
+      "type": 0,
+      "value": "每当你控制的力量高于其基础力量的攻击行动牌命中时，抓一张牌"
+    }
+  ],
   "card.effect.ele.invigorate": [
     {
       "type": 0,
@@ -3521,10 +3527,16 @@
       "value": "你的 Warrior 攻击获得“当此攻击被 1 张或更多攻击行动牌防御时，摧毁防御英雄 arsenal 中的一张牌”"
     }
   ],
-  "card.effect.hvy.doubledown": [
+  "card.effect.hvy.doubledown.attack": [
     {
       "type": 0,
-      "value": "下一次进行 wager 的攻击 +3 力量并获得 overpower，wager 生成的每种衍生物多一个"
+      "value": "下一次进行 wager 的攻击 +3 力量并获得 overpower"
+    }
+  ],
+  "card.effect.hvy.doubledown.tokens": [
+    {
+      "type": 0,
+      "value": "wager 生成的每种衍生物多一个"
     }
   ],
   "card.effect.hvy.goodtimechapeau": [
@@ -3916,6 +3928,12 @@
     {
       "type": 0,
       "value": "攻击 +3 力量"
+    }
+  ],
+  "card.effect.sea.denyredemption": [
+    {
+      "type": 0,
+      "value": "英雄无法恢复生命"
     }
   ],
   "card.effect.sea.goldbaitedhook": [

@@ -1,8 +1,10 @@
-import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
+import type { CardInstance, CardScript, DeepReadonly, Modifier, ScriptCtx } from "@fyendal/engine";
 import {
+  armDelayedEffect,
   attackAbility,
   buffNextAttack,
   commonOptionMessages,
+  consumeDelayedEffect,
   contractCompletionCount,
   decisionMessage,
   decisionPrompt,
@@ -10,6 +12,7 @@ import {
   hitHookLabel,
   ongoingLabel,
   opponentSeat,
+  pendingDelayedEffect,
 } from "../shared-helpers.js";
 
 const AGILITY = "HVY240";
@@ -18,6 +21,10 @@ const GOLD = "HVY243";
 const MIGHT = "HVY241";
 const PONDER = "DYN244";
 const VIGOR = "HVY242";
+
+const DOUBLE_DOWN_ATTACK = "card.effect.hvy.doubledown.attack";
+const isDoubleDownAttack = (modifier: DeepReadonly<Modifier>) =>
+  modifier.ongoingLabelMessage?.id === DOUBLE_DOWN_ATTACK;
 
 function data(ctx: ScriptCtx, card: DeepReadonly<CardInstance>) {
   return ctx.cardData(card.cardId);
@@ -538,21 +545,23 @@ export const hvyHighRarity: Record<string, CardScript> = {
   "double down|1": {
     alternativePlayCost: { kind: "destroy-controlled-named", options: [{ name: "Gold", count: 1 }] },
     onPlay(ctx) {
+      // Two markers: the consumable one is the pending wagering-attack bonus;
+      // the persistent one keeps the token replacement observable all turn.
+      armDelayedEffect(
+        ctx,
+        ongoingLabel("the next attack that wagers gets +3 power and overpower", DOUBLE_DOWN_ATTACK),
+      );
       ctx.addModifier({
         scope: "until-end-of-turn",
-        ...ongoingLabel(
-          "the next attack that wagers gets +3 power and overpower, wagers create 1 more of each token",
-          "card.effect.hvy.doubledown",
-        ),
+        ...ongoingLabel("wagers create 1 more of each token", "card.effect.hvy.doubledown.tokens"),
       });
-      ctx.setCounter("double-attack-ready", 1);
     },
     triggers: [
       {
         event: "wager-generated",
         label: "The wagering attack gets +3 and overpower",
-        condition: (ctx) => ctx.getCounter("double-attack-ready") > 0,
-        onTrigger: (ctx) => ctx.setCounter("double-attack-ready", 0),
+        condition: (ctx) => !!pendingDelayedEffect(ctx, { match: isDoubleDownAttack }),
+        onTrigger: (ctx) => consumeDelayedEffect(ctx, { match: isDoubleDownAttack }),
         effect(ctx) {
           ctx.addModifier({ scope: "chain-link", attack: 3, overpower: true });
         },

@@ -7,6 +7,7 @@ import {
   decisionMessage,
   decisionPrompt,
   heroTarget,
+  ongoingLabel,
   opponentSeat,
   opposingHeroDamage,
   targetHeroSeat,
@@ -639,7 +640,25 @@ export const eleHighRarity: Record<string, CardScript> = {
     ...fusion("earth"),
     onPlay(ctx) {
       if (fused(ctx)) buffNextAttack(ctx, { attack: 1 });
-      ctx.setPlayerFlag(ctx.seat, "drawOnBoostedAttackHit", true);
+      ctx.addModifier({
+        scope: "until-end-of-turn",
+        ...ongoingLabel(
+          "draw a card whenever an attack action card you control with power greater than its base power hits",
+          "card.effect.ele.forceofnature",
+        ),
+      });
+    },
+    canTriggerOnHit(ctx) {
+      const link = ctx.link;
+      return (
+        !!link &&
+        link.attacker === ctx.seat &&
+        link.attackCardType === "action" &&
+        ctx.currentAttackPower() > ctx.basePower(link.attackingCard)
+      );
+    },
+    onHit(ctx) {
+      ctx.drawCards(ctx.seat, 1);
     },
   },
   "fulminate|2": {

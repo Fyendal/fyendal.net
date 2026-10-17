@@ -3400,6 +3400,12 @@
       "value": " damage to them"
     }
   ],
+  "card.effect.ele.forceofnature": [
+    {
+      "type": 0,
+      "value": "draw a card whenever an attack action card you control with power greater than its base power hits"
+    }
+  ],
   "card.effect.ele.invigorate": [
     {
       "type": 0,
@@ -3532,10 +3538,16 @@
       "value": "your Warrior attacks get \"When this is defended by 1 or more attack action cards, destroy a card in the defending hero's arsenal\""
     }
   ],
-  "card.effect.hvy.doubledown": [
+  "card.effect.hvy.doubledown.attack": [
     {
       "type": 0,
-      "value": "the next attack that wagers gets +3 power and overpower, wagers create 1 more of each token"
+      "value": "the next attack that wagers gets +3 power and overpower"
+    }
+  ],
+  "card.effect.hvy.doubledown.tokens": [
+    {
+      "type": 0,
+      "value": "wagers create 1 more of each token"
     }
   ],
   "card.effect.hvy.goodtimechapeau": [
@@ -3927,6 +3939,12 @@
     {
       "type": 0,
       "value": " attack gets +3 power"
+    }
+  ],
+  "card.effect.sea.denyredemption": [
+    {
+      "type": 0,
+      "value": "heroes can't gain life"
     }
   ],
   "card.effect.sea.goldbaitedhook": [

@@ -1034,8 +1034,9 @@ export const dynHighRarity: Record<string, CardScript> = {
       goAgain: true,
       oncePerTurn: true,
       onActivate(ctx) {
+        // FYD-RULE-003: the static bonus to the first arcane damage card
+        // played each turn needs per-turn arcane-card tracking.
         dealArcane(ctx, opponentSeat(ctx), 1);
-        ctx.setPlayerFlag(ctx.seat, "surgentDamage", 1);
       },
     },
   },

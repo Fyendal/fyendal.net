@@ -3411,6 +3411,12 @@
       "value": " de dano a esse herói"
     }
   ],
+  "card.effect.ele.forceofnature": [
+    {
+      "type": 0,
+      "value": "compre uma carta sempre que uma carta de attack action que você controla com poder maior que o poder base acertar"
+    }
+  ],
   "card.effect.ele.invigorate": [
     {
       "type": 0,
@@ -3543,10 +3549,16 @@
       "value": "seus ataques Warrior recebem \"Quando este ataque for bloqueado por 1 ou mais cartas de attack action, destrua uma carta no arsenal do herói defensor\""
     }
   ],
-  "card.effect.hvy.doubledown": [
+  "card.effect.hvy.doubledown.attack": [
     {
       "type": 0,
-      "value": "o próximo ataque que fizer wager recebe +3 de poder e overpower; wagers criam 1 a mais de cada token"
+      "value": "o próximo ataque que fizer wager recebe +3 de poder e overpower"
+    }
+  ],
+  "card.effect.hvy.doubledown.tokens": [
+    {
+      "type": 0,
+      "value": "wagers criam 1 a mais de cada token"
     }
   ],
   "card.effect.hvy.goodtimechapeau": [
@@ -3953,6 +3965,12 @@
     {
       "type": 0,
       "value": " ataque recebe +3 de poder"
+    }
+  ],
+  "card.effect.sea.denyredemption": [
+    {
+      "type": 0,
+      "value": "heróis não podem ganhar vida"
     }
   ],
   "card.effect.sea.goldbaitedhook": [

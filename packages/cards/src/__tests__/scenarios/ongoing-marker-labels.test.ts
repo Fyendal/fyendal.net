@@ -79,6 +79,17 @@ describe("folded wager riders", () => {
     ]);
   });
 
+  it("clears Double Down's wagering-attack label on use and keeps its token replacement label", () => {
+    const g = scenario({ seats: [hero({ hand: ["double down|1", "wage gold|1"], resources: 20 }), foe()] });
+    g.play("double down|1");
+    expect(labels(g, "double down|1")).toEqual([
+      "the next attack that wagers gets +3 power and overpower, wagers create 1 more of each token · this turn",
+    ]);
+
+    g.play("wage gold|1").chooseOption("yes");
+    expect(labels(g, "double down|1")).toEqual(["wagers create 1 more of each token · this turn"]);
+  });
+
   it("labels Check-Raise's bonus for the next wagering attack", () => {
     expect(ongoing(playing("check-raise|1"), "check-raise|1")).toEqual([
       labelled("the next attack you control that wagers gets +4 power · this turn", "card.effect.aol.checkraise", {

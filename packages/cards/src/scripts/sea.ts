@@ -16,6 +16,7 @@ import {
   ongoingLabel,
   opponentSeat,
   opposingHeroDamage,
+  pendingDelayedEffect,
   requestDiscardChoice,
   resolveDiscardChoice,
   resourceAbility,
@@ -2659,8 +2660,15 @@ Object.assign(sea, {
       timing: "instant",
       fromHand: true,
       onActivate(ctx: ScriptCtx) {
-        ctx.setFlag("player", "heroesCannotGainLife", true);
+        ctx.addModifier({
+          scope: "until-end-of-turn",
+          ...ongoingLabel("heroes can't gain life", "card.effect.sea.denyredemption"),
+        });
       },
+    },
+    // The lock is this card's only until-end-of-turn modifier.
+    replaceHeroLifeGain(ctx: ScriptCtx) {
+      return pendingDelayedEffect(ctx) ? 0 : undefined;
     },
   },
   "burn bare|0": {

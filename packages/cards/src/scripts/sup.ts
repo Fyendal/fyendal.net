@@ -1667,9 +1667,9 @@ Object.assign(sup, {
       goAgain: false,
       timing: "instant",
       fromHand: true,
-      onActivate(ctx: ScriptCtx) {
-        ctx.setFlag("player", "reverseNextClash", true);
-      },
+      // FYD-RULE-004: swapping the decks revealed by the next clash needs a
+      // clash replacement hook.
+      onActivate() {},
     },
   },
   "rip up their virtues|3": convertTokens("Toughness", MIGHT),

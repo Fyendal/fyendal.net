@@ -976,4 +976,21 @@ describe("Longdraw Half-glove", () => {
     const g = ranger(["sink below|1"], []);
     expect(() => g.activate("longdraw half-glove|0")).toThrow(/no legal intent/);
   });
+
+  // FYD-RULE-002
+  it.fails("Dense Blue Mist paid with a Chi stops hit effects of attacks that hit you this turn", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", hand: ["snatch|1"], deck: ["raging onslaught|3"] },
+        { hero: "dorinthea", hand: ["dense blue mist|3", "inner chi|3"] },
+      ],
+    });
+    g.play("snatch|1", { settle: false })
+      .passPriority()
+      .react("dense blue mist|3", { pitch: ["inner chi|3"] })
+      .blockWith()
+      .settle()
+      .expectLife(1, 17)
+      .expectHandSize(0, 0);
+  });
 });

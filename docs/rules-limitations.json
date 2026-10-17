@@ -6,5 +6,29 @@
     "source": "packages/cards/src/scripts/sea.ts",
     "testFile": "packages/cards/src/__tests__/scenarios/sea.test.ts",
     "testName": "Barbed Barrage paid with its additional cost attacks the hero and an opposing ally"
+  },
+  {
+    "expected": "When Dense Blue Mist is played with a Chi pitched, effects don't trigger when an attack hits its controller for the rest of the turn, so an opposing Snatch that hits does not draw a card.",
+    "id": "FYD-RULE-002",
+    "implemented": false,
+    "source": "packages/cards/src/scripts/mst.ts",
+    "testFile": "packages/cards/src/__tests__/scenarios/mst.test.ts",
+    "testName": "Dense Blue Mist paid with a Chi stops hit effects of attacks that hit you this turn"
+  },
+  {
+    "expected": "After Surgent Aethertide deals 1 arcane damage, the first card its controller plays that turn with an arcane damage effect deals that much plus 1, so Swell Tidings deals 6.",
+    "id": "FYD-RULE-003",
+    "implemented": false,
+    "source": "packages/cards/src/scripts/dyn/high-rarity.ts",
+    "testFile": "packages/cards/src/__tests__/scenarios/dyn.test.ts",
+    "testName": "Surgent Aethertide adds its damage to the first arcane damage card played that turn"
+  },
+  {
+    "expected": "After The Old Switcheroo is activated targeting a hero, the controller's next clash with that hero that turn instead reveals the top card of that hero's deck for the controller and the controller's top card for them; if the controller wins, that hero discards a card.",
+    "id": "FYD-RULE-004",
+    "implemented": false,
+    "source": "packages/cards/src/scripts/sup.ts",
+    "testFile": "packages/cards/src/__tests__/scenarios/sup.test.ts",
+    "testName": "The Old Switcheroo swaps the revealed decks for its controller's next clash"
   }
 ]

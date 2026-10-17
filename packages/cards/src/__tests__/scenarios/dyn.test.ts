@@ -717,4 +717,22 @@ describe("DYN — Sandscour Greatbow", () => {
     s.activate(BOW).chooseCard(ARROW).expectInZone(0, ARROW, "arsenal");
     expect(s.state.players[0]!.arsenal[0]!.counters?.aim).toBeUndefined();
   });
+
+  // FYD-RULE-003
+  it.fails("Surgent Aethertide adds its damage to the first arcane damage card played that turn", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          heroKey: "kano|0",
+          weapons: ["surgent aethertide|0"],
+          hand: ["swell tidings|1"],
+          resources: 10,
+        },
+        { hero: "dorinthea" },
+      ],
+    });
+    g.activate("surgent aethertide|0").settle().expectLife(1, 19);
+    g.play("swell tidings|1").settle().expectLife(1, 13);
+  });
 });

@@ -1183,4 +1183,26 @@ describe("SUP — Fix the Match", () => {
     g.blockWith("head jab|1").settle();
     expect(g.state.log.some((entry) => entry.publicText?.includes("reveals Sink Below"))).toBe(true);
   });
+
+  // FYD-RULE-004
+  it.fails("The Old Switcheroo swaps the revealed decks for its controller's next clash", () => {
+    const g = scenario({
+      active: 1,
+      seats: [
+        hero("levia|0", {
+          hand: ["the old switcheroo|3", "vigorous smashup|3"],
+          deck: ["inner chi|3"],
+        }),
+        foe({ hand: ["head jab|1", "snatch|1"], deck: ["raging onslaught|1"] }),
+      ],
+    });
+    g.play("head jab|1", { settle: false })
+      .passPriority()
+      .activate("the old switcheroo|3")
+      .blockWith("vigorous smashup|3")
+      .settle()
+      .chooseOption("no")
+      .expectZoneSize(0, "board", 1)
+      .expectHandSize(1, 0);
+  });
 });
