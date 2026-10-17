@@ -44,6 +44,7 @@ export interface PersistedCardInstanceV1 {
   tempDefense?: number;
   temporaryAlly?: { power: number; life: number };
   meldSide?: "left" | "right" | "both";
+  attackTargetIds?: number[];
   life?: number;
   damagePrevented?: { targetSeat: number; amount: number };
   flipped?: boolean;
@@ -95,7 +96,7 @@ export interface PersistedStackLayerV1 {
     | { kind: "spectra-destroy" }
     | { kind: "watery-grave" }
     | { kind: "wager-result"; wagerIndex: number }
-    | { kind: "on-hit-hook"; source: PersistedCardInstanceV1 }
+    | { kind: "on-hit-hook"; source: PersistedCardInstanceV1; hitTarget?: PersistedAdditionalTargetHitV1 }
     | { kind: "on-effect-hit-hook"; source: PersistedCardInstanceV1; targetSeat: number }
     | { kind: "on-friendly-effect-hit-hook"; source: PersistedCardInstanceV1; hitSource: PersistedCardInstanceV1; targetSeat: number; targetWasMarked: boolean }
     | { kind: "on-defend-hook"; source: PersistedCardInstanceV1 }
@@ -110,7 +111,12 @@ export interface PersistedStackLayerV1 {
         from: "hand" | "deck" | "graveyard" | "banish" | "arsenal";
       }
     | { kind: "delayed-trigger"; source: PersistedCardInstanceV1; hook: string }
-    | { kind: "on-hit-modifier"; modifier: PersistedModifierV1 };
+    | { kind: "on-hit-modifier"; modifier: PersistedModifierV1; hitTarget?: PersistedAdditionalTargetHitV1 };
+}
+
+export interface PersistedAdditionalTargetHitV1 {
+  targetAllyId: number;
+  damage: number;
 }
 
 export interface PersistedDelayedTriggerV1 {
@@ -165,6 +171,8 @@ export interface PersistedChainLinkV1 {
   finalAttackModifiers?: PersistedCombatValueModifierV1[];
   finalDefenseModifiers?: PersistedCombatValueModifierV1[];
   targetAllyId?: number;
+  additionalTargetAllyIds?: number[];
+  additionalTargetHits?: PersistedAdditionalTargetHitV1[];
   declaredAtNextId?: number;
   wagerRewards?: string[];
   wagers?: PersistedWagerV1[];

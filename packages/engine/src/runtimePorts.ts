@@ -5,6 +5,7 @@ import type { FlowStepName } from "./flowTypes.js";
 import type { TransitionRecorder } from "./transitions.js";
 
 export type ScriptCommandName =
+  | "additionalAttackTargetOptions"
   | "applyOneShotDefenseModifiers"
   | "arsenalCapacity"
   | "attackBonusAboveBase"
@@ -27,6 +28,7 @@ export type ScriptCommandName =
   | "crowdCheer"
   | "currentPowerOf"
   | "dealEffectDamage"
+  | "declareAdditionalAttackTarget"
   | "defendingDefenseOf"
   | "destroyPermanent"
   | "discardToGraveyard"

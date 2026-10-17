@@ -2366,9 +2366,33 @@ Object.assign(sea, {
       },
     },
   },
-  // FYD-RULE-001: the optional {r}{r}{r} additional cost and the extra
-  // attack target it buys need attacks with more than one target.
-  "barbed barrage|1": {},
+  "barbed barrage|1": {
+    additionalCost(ctx: ScriptCtx) {
+      if (ctx.additionalAttackTargetOptions().length === 0) return;
+      ctx.requestPayment(
+        "barbed-barrage-pay",
+        decisionPrompt("Pay 3 to attack an additional target?", "card.sea.barbedbarrage.pay", {
+          optionMessages: commonOptionMessages("no"),
+        }),
+        3,
+      );
+    },
+    onChoose(ctx: ScriptCtx, hook: string, option: string) {
+      if (hook === "barbed-barrage-target") {
+        ctx.declareAdditionalAttackTarget(Number(option));
+        return;
+      }
+      if (hook !== "barbed-barrage-pay" || option !== "paid") return;
+      const targets = ctx.additionalAttackTargetOptions();
+      if (targets.length === 1) ctx.declareAdditionalAttackTarget(targets[0]!);
+      else if (targets.length > 1)
+        ctx.requestCardChoice(
+          "barbed-barrage-target",
+          decisionPrompt("Choose an additional attack target", "card.sea.barbedbarrage.target"),
+          targets,
+        );
+    },
+  },
   "return fire|1": {
     onDefend(ctx: ScriptCtx) {
       const arrows = ctx.player(ctx.seat).hand.filter((card) => isArrow(ctx, card));

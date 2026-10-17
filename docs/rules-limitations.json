@@ -1,10 +1,1 @@
-[
-  {
-    "expected": "Barbed Barrage offers its optional {r}{r}{r} additional cost; when it is paid, the attack has an additional target, so with no defenders it deals 5 damage to the opposing hero and destroys an opposing 3-life ally.",
-    "id": "FYD-RULE-001",
-    "implemented": false,
-    "source": "packages/cards/src/scripts/sea.ts",
-    "testFile": "packages/cards/src/__tests__/scenarios/sea.test.ts",
-    "testName": "Barbed Barrage paid with its additional cost attacks the hero and an opposing ally"
-  }
-]
+[]

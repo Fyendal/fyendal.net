@@ -53,7 +53,7 @@ import { heroAbilitiesDisabled } from "./stateQueries.js";
 import { consumeFirstActionExtraCost, firstActionExtraCost, goAgainSuppressed, isFrozen, opposingInstantsProhibited, snapshotSerializable } from "./ruleQueries.js";
 import { opposingActionsProhibited } from "./restrictions.js";
 import { defendingHeroCannotRespondBelowPower } from "./combatRestrictions.js";
-import { pushAttackCardLayer, pushCardLayer, takeAttackLayerOrigin } from "./stackCore.js";
+import { pushAttackCardLayer, pushCardLayer, recordAnnouncedAttackTarget, takeAttackLayerOrigin } from "./stackCore.js";
 import { DESTROY_AT_END_PHASE_HOOK, triggerLabelMessage } from "./triggerPresentation.js";
 import { declaredLayerTargetLegal, layerTargetOptions, layerTargetSpec, triggerLayerEventContext } from "./layerTargets.js";
 
@@ -695,13 +695,21 @@ export function playWindowInstant(
   removeFromArray(source, card.instanceId);
   delete card.faceDown;
   const origin = fromZone ?? (fromArsenal ? "arsenal" : source === player.banish ? "banish" : "hand");
+  // An attack card being played waits in the resolving zone, where effects
+  // paid while playing it can add attack-targets.
+  const attackAction = isAttackActionData(instanceDataOf(state, card));
+  if (attackAction) {
+    recordAnnouncedAttackTarget(state, seat, card);
+    state.resolving.push(card);
+  }
   script?.additionalCost?.(runtime.makeCtx(state, seat, card, link, fromArsenal));
   const pdCost = state.pendingDecision;
   if (pdCost?.chooseHook) {
     pdCost.resume = { kind: "finish-window-instant", seat, card, from: origin };
-    state.resolving.push(card);
+    if (!attackAction) state.resolving.push(card);
     return undefined;
   }
+  if (attackAction) removeFromArray(state.resolving, card.instanceId);
   finishWindowInstantPlay(state, runtime, seat, card, origin);
   return undefined;
 }

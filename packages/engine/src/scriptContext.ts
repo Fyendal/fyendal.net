@@ -2788,6 +2788,12 @@ export function makeCtx(
     attackWithPermanent(instanceId) {
       return runtime.commands.attackWithPermanent(state, seat, instanceId);
     },
+    additionalAttackTargetOptions() {
+      return runtime.commands.additionalAttackTargetOptions(state, seat, self.instanceId);
+    },
+    declareAdditionalAttackTarget(targetInstanceId) {
+      return runtime.commands.declareAdditionalAttackTarget(state, seat, self.instanceId, targetInstanceId);
+    },
     replaceAttackFromHand(instanceId, maximumCost) {
       return runtime.commands.replaceAttackFromHand(state, seat, instanceId, maximumCost);
     },

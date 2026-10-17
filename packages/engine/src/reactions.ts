@@ -58,7 +58,7 @@ import { canPayRequiredHandCardsForAdditionalCost } from "./resources.js";
 import { heroAbilitiesDisabled } from "./stateQueries.js";
 import { actionLimitReached, isFrozen, opposingInstantsProhibited } from "./ruleQueries.js";
 import { defendingHeroCannotRespondBelowPower } from "./combatRestrictions.js";
-import { pushAbilityLayer, pushAttackCardLayer } from "./stackCore.js";
+import { pushAbilityLayer, pushAttackCardLayer, recordAnnouncedAttackTarget } from "./stackCore.js";
 
 import {
   holdPriorityWindow,
@@ -798,13 +798,21 @@ export function playReaction(
   const removed = removeFromArray(source, card.instanceId) as CardInstance;
   delete removed.faceDown; // a card is played openly, even out of the banished zone
   const origin = fromZone ?? (fromArsenal ? "arsenal" : source === player.banish ? "banish" : "hand");
+  // An attack card being played waits in the resolving zone, where effects
+  // paid while playing it can add attack-targets.
+  const attackAction = isAttackActionData(instanceDataOf(state, removed));
+  if (attackAction) {
+    recordAnnouncedAttackTarget(state, seat, removed);
+    state.resolving.push(removed);
+  }
   script?.additionalCost?.(runtime.makeCtx(state, seat, removed, link, fromArsenal));
   const pdCost = state.pendingDecision;
   if (pdCost?.chooseHook) {
     pdCost.resume = { kind: "finish-reaction", seat, card: removed, from: origin };
-    state.resolving.push(removed);
+    if (!attackAction) state.resolving.push(removed);
     return undefined;
   }
+  if (attackAction) removeFromArray(state.resolving, removed.instanceId);
   finishReactionPlay(state, runtime, seat, removed, origin);
   return undefined;
 }

@@ -13522,6 +13522,18 @@
       "value": "Put a blue graveyard card on the bottom of your deck"
     }
   ],
+  "card.sea.barbedbarrage.pay": [
+    {
+      "type": 0,
+      "value": "Pay 3 to attack an additional target?"
+    }
+  ],
+  "card.sea.barbedbarrage.target": [
+    {
+      "type": 0,
+      "value": "Choose an additional attack target"
+    }
+  ],
   "card.sea.bloodwater.choose": [
     {
       "type": 0,
@@ -23731,6 +23743,20 @@
     {
       "type": 0,
       "value": " wins the clash"
+    }
+  ],
+  "engine.log.combat.additional.target": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " attacks an additional target: "
+    },
+    {
+      "type": 1,
+      "value": "target"
     }
   ],
   "engine.log.combat.attack.power.gained": [

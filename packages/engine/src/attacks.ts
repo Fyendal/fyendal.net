@@ -323,7 +323,7 @@ export function declareAttack(
       ...(fromBanish ? { fromBanish: true } : {}),
       ...(fromOutsideHandOrArsenal ? { fromOutsideHandOrArsenal: true } : {}),
     },
-    ...(targetAllyId !== undefined ? { targetAllyId } : {}),
+    ...takeDeclaredAttackTargets(state, seat, card, targetAllyId),
   };
   state.chain.push(link);
   // The attack-layer exists now, but the object does not become attacking
@@ -504,6 +504,13 @@ function deferAttackLayerBehindQueue(
   state.chain.pop();
   const card = link.attackingCard;
   if (link.attackCardType === "action") state.resolving.push(card);
+  // The queue keeps only the primary target; the card carries the rest.
+  if (link.additionalTargetAllyIds) {
+    card.attackTargetIds = [
+      link.targetAllyId ?? (state.players[opponent(link.attacker)] as PlayerState).hero.instanceId,
+      ...link.additionalTargetAllyIds,
+    ];
+  }
   enqueueAttack(state.players[link.attacker] as PlayerState, {
     instanceId: card.instanceId,
     ...(link.targetAllyId !== undefined ? { targetAllyId: link.targetAllyId } : {}),
@@ -527,6 +534,7 @@ export function clearAttackQueue(state: GameStateInternal, runtime: EngineRuntim
       const card = state.resolving.find((candidate) => candidate.instanceId === queued.instanceId);
       if (!card) continue;
       removeFromArray(state.resolving, card.instanceId);
+      delete card.attackTargetIds;
       runtime.commands.moveToGraveyard(state, card, "stack");
     }
     for (const entry of kept) enqueueAttack(player, entry);
@@ -549,6 +557,7 @@ export function startNextQueuedAttack(
       if (!card) continue;
       removeFromArray(state.resolving, card.instanceId);
       if (!attackTargetIsLegal(state, runtime, seat, queued.targetAllyId)) {
+        delete card.attackTargetIds;
         runtime.commands.moveToGraveyard(state, card, "stack");
         continue;
       }
@@ -611,7 +620,7 @@ function startQueuedAttack(
     resolved: false,
     declaredAtNextId: state.nextInstanceId,
     flags: layer.flags,
-    ...(targetAllyId !== undefined ? { targetAllyId } : {}),
+    ...takeDeclaredAttackTargets(state, seat, card, targetAllyId),
   });
   queueSpectraLayer(state);
   // Enter the Attack Step exactly as a resolved attack-layer does: the open
@@ -837,13 +846,90 @@ function findAttackTargetAlly(
   );
 }
 
+/** Consume the targets declared while the card was played (CR 1.4.5c) as
+ *  chain-link fields. A hero among them is the primary target, so defenders
+ *  keep answering that hero. */
+function takeDeclaredAttackTargets(
+  state: GameStateInternal,
+  seat: number,
+  card: CardInstance,
+  targetAllyId: number | undefined,
+): Pick<ChainLinkState, "targetAllyId" | "additionalTargetAllyIds"> {
+  const declared = card.attackTargetIds;
+  delete card.attackTargetIds;
+  if (!declared || declared.length < 2) return targetAllyId === undefined ? {} : { targetAllyId };
+  const heroId = (state.players[opponent(seat)] as PlayerState).hero.instanceId;
+  const allies = declared.filter((id) => id !== heroId);
+  const primary = declared.includes(heroId) ? undefined : allies.shift();
+  return {
+    ...(primary === undefined ? {} : { targetAllyId: primary }),
+    ...(allies.length > 0 ? { additionalTargetAllyIds: allies } : {}),
+  };
+}
+
+/** The attack action card with this instance id while it is being played. */
+function cardBeingPlayed(state: GameStateInternal, instanceId: number): CardInstance | undefined {
+  return state.resolving.find((card) =>
+    card.instanceId === instanceId && card.attackTargetIds !== undefined
+  );
+}
+
+/** Objects that may become an additional attack-target of the attack action
+ *  card being played: each must be separate from the targets already
+ *  declared and legal to declare (CR 1.4.5c). Hero targets are hero ids. */
+export function additionalAttackTargetOptions(
+  state: GameStateInternal,
+  seat: number,
+  instanceId: number,
+): number[] {
+  const declared = cardBeingPlayed(state, instanceId)?.attackTargetIds;
+  if (!declared) return [];
+  const defender = state.players[opponent(seat)] as PlayerState;
+  return [defender.hero, ...attackablePermanents(state, defender.seat)]
+    .map((card) => card.instanceId)
+    .filter((id) => !declared.includes(id));
+}
+
+/** Declare an additional attack-target for the attack action card being
+ *  played. Returns false when the target is not a legal additional target. */
+export function declareAdditionalAttackTarget(
+  state: GameStateInternal,
+  seat: number,
+  instanceId: number,
+  targetInstanceId: number,
+): boolean {
+  const card = cardBeingPlayed(state, instanceId);
+  if (!card || !additionalAttackTargetOptions(state, seat, instanceId).includes(targetInstanceId)) {
+    return false;
+  }
+  card.attackTargetIds!.push(targetInstanceId);
+  const defender = state.players[opponent(seat)] as PlayerState;
+  const target = defender.hero.instanceId === targetInstanceId
+    ? defender.hero
+    : defender.board.find((candidate) => candidate.instanceId === targetInstanceId)!;
+  logPublic(state, gameLogMessage(
+    `${logNameOf(state, card.cardId)} attacks an additional target: ${nameOf(state, target.cardId)}`,
+    "engine.log.combat.additional.target",
+    { card: logCardValue(card.cardId), target: logCardValue(target.cardId) },
+  ));
+  return true;
+}
+
 /** Spectra (8.3.14): becoming an attack target creates a mandatory triggered
  *  layer. It is queued before the generic attack-declared layers so all of
  *  them resolve before the attack can advance to the attack step. */
 function queueSpectraLayer(state: GameStateInternal): void {
   const link = currentLink(state);
-  if (!link || link.targetAllyId === undefined) return;
-  const target = findAttackTargetAlly(state, link.attacker, link.targetAllyId);
+  if (!link) return;
+  const targetIds = [
+    ...(link.targetAllyId === undefined ? [] : [link.targetAllyId]),
+    ...(link.additionalTargetAllyIds ?? []),
+  ];
+  for (const targetId of targetIds) queueSpectraLayerFor(state, link, targetId);
+}
+
+function queueSpectraLayerFor(state: GameStateInternal, link: ChainLinkState, targetId: number): void {
+  const target = findAttackTargetAlly(state, link.attacker, targetId);
   if (!target || !instanceHasKeyword(state, target, "spectra")) return;
   state.stack.push({
     sourceInstanceId: target.instanceId,

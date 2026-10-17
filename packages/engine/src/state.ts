@@ -122,6 +122,11 @@ export interface CardInstance {
    *  (client-side choice riding the play intent); read by the script's onPlay.
    *  Persists on the card as last-known info once it leaves play. */
   meldSide?: MeldSide;
+  /** Attack-targets declared while this attack action card is being played,
+   *  as instance ids (a hero target is its hero's instance id). The first entry is
+   *  the announced target; effects that add targets append to it. The engine
+   *  moves them onto the chain link when the attack is declared. */
+  attackTargetIds?: number[];
   /** Current life of a living permanent (allies — CR 8.2.8): stamped with the
    *  card's base life when it enters the arena, reduced by damage dealt to
    *  it, reset to base during the end phase; the ally dies at 0. */
@@ -256,7 +261,7 @@ export interface StackLayer {
     /** A hit-triggered script hook. The source is snapshotted when the hit
      * event occurs so the triggered layer remains independent if its source
      * leaves the arena before resolution. */
-    | { kind: "on-hit-hook"; source: CardInstance }
+    | { kind: "on-hit-hook"; source: CardInstance; hitTarget?: AdditionalTargetHit }
     /** A non-combat effect explicitly made its source hit a hero. */
     | { kind: "on-effect-hit-hook"; source: CardInstance; targetSeat: number }
     /** An arena source observed another controlled object hit via an effect. */
@@ -291,7 +296,14 @@ export interface StackLayer {
     /** A granted on-hit effect (for example, "when this hits, draw a card").
      * Snapshotting the modifier preserves the generated effect after its
      * source or the live modifier leaves play. */
-    | { kind: "on-hit-modifier"; modifier: Modifier };
+    | { kind: "on-hit-modifier"; modifier: Modifier; hitTarget?: AdditionalTargetHit };
+}
+
+/** One hit-event dealt to an additional attack-target (CR 7.5.2c). On-hit
+ * layers it generates carry it so they observe that target and damage. */
+export interface AdditionalTargetHit {
+  targetAllyId: number;
+  damage: number;
 }
 
 /** What to do once the stack is empty and both players have passed. */
@@ -376,6 +388,13 @@ export interface ChainLinkState {
    *  may be declared and no defense reactions played; damage is dealt to the
    *  ally, not the hero. Absent = the attack targets the hero. */
   targetAllyId?: number;
+  /** Further non-hero attack-targets (CR 1.4.5c). When a hero is among an
+   *  attack's targets it is always the primary target, so defending cards
+   *  and defense reactions keep answering the hero; these targets cannot be
+   *  defended and each is dealt damage separately (CR 7.5.2c). */
+  additionalTargetAllyIds?: number[];
+  /** Hit-events dealt to `additionalTargetAllyIds` during combat damage. */
+  additionalTargetHits?: AdditionalTargetHit[];
   /** nextInstanceId stamped at declaration: permanents created by on-declare
    *  hooks (Flock of the Feather Walkers' Quicken token) did not exist when
    *  the attack was declared, so their attack-declared triggers must not fire

@@ -13873,6 +13873,18 @@
       "value": "Coloque uma carta azul do cemitério no fundo do seu deck"
     }
   ],
+  "card.sea.barbedbarrage.pay": [
+    {
+      "type": 0,
+      "value": "Pagar 3 para atacar um alvo adicional?"
+    }
+  ],
+  "card.sea.barbedbarrage.target": [
+    {
+      "type": 0,
+      "value": "Escolha um alvo de ataque adicional"
+    }
+  ],
   "card.sea.bloodwater.choose": [
     {
       "type": 0,
@@ -24812,6 +24824,20 @@
     {
       "type": 0,
       "value": " vence o clash"
+    }
+  ],
+  "engine.log.combat.additional.target": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " ataca um alvo adicional: "
+    },
+    {
+      "type": 1,
+      "value": "target"
     }
   ],
   "engine.log.combat.attack.power.gained": [

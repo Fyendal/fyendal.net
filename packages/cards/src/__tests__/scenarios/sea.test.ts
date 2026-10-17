@@ -1345,26 +1345,78 @@ describe("SEA — pirate and generic attacks", () => {
 });
 
 describe("SEA — rules regression coverage", () => {
-  // FYD-RULE-001
-  it.fails("Barbed Barrage paid with its additional cost attacks the hero and an opposing ally", () => {
-    const g = scenario({
+  const barbedBarrage = (opts: { resources?: number; hand?: string[]; board?: string[] } = {}) =>
+    scenario({
       seats: [
         {
           hero: "rhinar",
           weapons: ["death dealer|0"],
-          resources: 4,
+          resources: opts.resources ?? 4,
           hand: [],
           arsenal: ["barbed barrage|1"],
         },
-        { hero: "dorinthea", weapons: [], hand: [], board: ["barnacle|2"] },
+        { hero: "dorinthea", weapons: [], hand: opts.hand ?? [], board: opts.board ?? ["barnacle|2"] },
       ],
     });
 
-    g.play("barbed barrage|1", { fromArsenal: true })
+  it("Barbed Barrage paid with its additional cost attacks the hero and an opposing ally", () => {
+    const g = barbedBarrage();
+
+    g.play("barbed barrage|1", { fromArsenal: true, settle: false })
+      .chooseOption("pay")
+      .expectLog("attacks an additional target: Barnacle")
+      .expectResources(0, 0)
       .blockWith()
       .settle()
       .expectLife(1, 15)
       .expectNotInZone(1, "barnacle|2", "board");
+  });
+
+  it("Barbed Barrage attacks only its announced target when its additional cost is declined", () => {
+    const g = barbedBarrage();
+
+    g.play("barbed barrage|1", { fromArsenal: true, settle: false })
+      .chooseOption("no")
+      .expectResources(0, 3)
+      .blockWith()
+      .settle()
+      .expectLife(1, 15)
+      .expectInZone(1, "barnacle|2", "board");
+  });
+
+  it("Barbed Barrage defenders only defend the hero target", () => {
+    const g = barbedBarrage({ hand: ["wounding blow|1"] });
+
+    g.play("barbed barrage|1", { fromArsenal: true, settle: false })
+      .chooseOption("pay")
+      .blockWith("wounding blow|1")
+      .settle()
+      .expectLife(1, 18)
+      .expectNotInZone(1, "barnacle|2", "board");
+  });
+
+  it("Barbed Barrage announced at an ally adds the hero, who may still defend", () => {
+    const g = barbedBarrage({ hand: ["wounding blow|1"] });
+
+    g.play("barbed barrage|1", { fromArsenal: true, targetAlly: "barnacle|2", settle: false })
+      .chooseOption("pay");
+    expect(g.state.chain[0]?.targetAllyId).toBeUndefined();
+    g.blockWith("wounding blow|1")
+      .settle()
+      .expectLife(1, 18)
+      .expectNotInZone(1, "barnacle|2", "board");
+  });
+
+  it("Barbed Barrage chooses its additional target among several opposing allies", () => {
+    const g = barbedBarrage({ board: ["barnacle|2", "barnacle|2"] });
+
+    g.play("barbed barrage|1", { fromArsenal: true, settle: false })
+      .chooseOption("pay")
+      .chooseCard("barnacle|2")
+      .blockWith()
+      .settle()
+      .expectLife(1, 15);
+    expect(g.state.players[1]!.board).toHaveLength(1);
   });
 
   it("Return Fire loads the banished arrow face up with +3 at the start of its controller's next turn", () => {

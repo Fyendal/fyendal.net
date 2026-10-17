@@ -18,7 +18,7 @@ import {
 } from "./gameLog.js";
 
 import { recordAttackStats, recordHeroDamage } from "./stats.js";
-import type { ChainLinkState, PendingArcane, PlayerState } from "./state.js";
+import type { AdditionalTargetHit, ChainLinkState, PendingArcane, PlayerState } from "./state.js";
 
 import { tokenCreationCauseForModifier } from "./tokenQueries.js";
 import { createTokensFor } from "./tokens.js";
@@ -149,23 +149,33 @@ function applyHit(
   if (damageSource.life !== undefined && damageSource.life <= 0) {
     destroyPermanent(state, runtime, link.attacker, damageSource);
   }
-  const delayedSuppression = hitOriginalTarget ? state.modifiers.find(
+  if (!hitOriginalTarget) return missPrimaryTarget(state, runtime, link);
+  return queueAttackHitEffects(state, runtime, link);
+}
+
+/** Queue the attack's hit triggers unless its hit effects are suppressed.
+ * `primaryHit` is false when only additional targets were hit. */
+function queueAttackHitEffects(
+  state: GameStateInternal,
+  runtime: EngineRuntime,
+  link: ChainLinkState,
+  primaryHit = true,
+): boolean {
+  const delayedSuppression = state.modifiers.find(
     (modifier) =>
       modifier.scope === "until-end-of-turn" &&
       modifier.suppressHitEffects === true &&
       !modifier.consumed &&
       modifierApplies(state, modifier, link),
-  ) : undefined;
+  );
   if (delayedSuppression) delayedSuppression.consumed = true;
-  const turnSuppression = hitOriginalTarget && state.modifiers.some(
+  const turnSuppression = state.modifiers.some(
     (modifier) =>
       modifier.scope === "until-end-of-turn" &&
       modifier.suppressHitEffectsThisTurn === true &&
       modifierApplies(state, modifier, link),
   );
-  if (!hitOriginalTarget) {
-    runtime.events.runHook(state, link.attacker, link.attackingCard, "onMiss", link);
-  } else if (
+  if (
     link.flags.suppressHitEffects === true ||
     delayedSuppression ||
     turnSuppression ||
@@ -181,9 +191,73 @@ function applyHit(
       { card: logCardValue(link.attackingCard.cardId) },
     ));
   } else {
-    return runtime.dispatchFlow("queueHitTriggers", state, link);
+    return runtime.dispatchFlow("queueHitTriggers", state, link, primaryHit);
   }
   return false;
+}
+
+/** The primary attack-target was not hit. The attack has still hit when an
+ * additional target was (CR 7.5.5), so its hit triggers replace on-miss. */
+function missPrimaryTarget(
+  state: GameStateInternal,
+  runtime: EngineRuntime,
+  link: ChainLinkState,
+): boolean {
+  if ((link.additionalTargetHits?.length ?? 0) > 0) {
+    return queueAttackHitEffects(state, runtime, link, false);
+  }
+  runtime.events.runHook(state, link.attacker, link.attackingCard, "onMiss", link);
+  return false;
+}
+
+/** Deal combat damage to each additional attack-target before the primary
+ * target, separately (CR 7.5.2c). They cannot be defended, and one that has
+ * ceased to exist is dealt nothing (CR 7.5.2b). Their hit-events are kept
+ * for the hit triggers queued with the primary target's. */
+function dealAdditionalTargetDamage(
+  state: GameStateInternal,
+  runtime: EngineRuntime,
+  link: ChainLinkState,
+  attack: number,
+): void {
+  const defenderPlayer = state.players[opponent(link.attacker)] as PlayerState;
+  const hits: AdditionalTargetHit[] = [];
+  for (const targetAllyId of link.additionalTargetAllyIds ?? []) {
+    const target = defenderPlayer.board.find((card) => card.instanceId === targetAllyId);
+    if (!target) {
+      logPublic(state, gameLogMessage(
+        `${nameOf(state, link.attackingCard.cardId)} finds no target (the ally is gone)`,
+        "engine.log.combat.no.target.ally.gone",
+        { card: logCardValue(link.attackingCard.cardId) },
+      ));
+      continue;
+    }
+    const dealt = runtime.dispatchFlow<number>("dealAllyDamage", state, {
+      sourceInstanceId: link.attackingCard.instanceId,
+      sourceSeat: link.attacker,
+      sourceIsAlly: link.attackCardType === "ally" || undefined,
+      targetSeat: defenderPlayer.seat,
+      targetAllyId,
+      amount: computeCombatDamage(state, runtime, link, attack, 0),
+      arcane: false,
+      combat: true,
+    });
+    if (dealt > 0) {
+      hits.push({ targetAllyId, damage: dealt });
+      link.hit = true;
+      recordAttackHit(state, link);
+    } else {
+      logPublic(state, gameLogMessage(
+        `${nameOf(state, link.attackingCard.cardId)} deals no damage to ${nameOf(state, target.cardId)}`,
+        "engine.log.damage.none.to.ally",
+        {
+          source: logCardValue(link.attackingCard.cardId),
+          target: logCardValue(target.cardId),
+        },
+      ));
+    }
+  }
+  if (hits.length > 0) link.additionalTargetHits = hits;
 }
 
 /** Deal the link's remaining combat damage to the defending hero: hit hooks
@@ -208,7 +282,7 @@ function applyCombatDamage(
       "engine.log.combat.fully.defended",
       { card: logCardValue(link.attackingCard.cardId) },
     ));
-    runtime.events.runHook(state, link.attacker, link.attackingCard, "onMiss", link);
+    return missPrimaryTarget(state, runtime, link);
   }
   return false;
 }
@@ -276,6 +350,7 @@ export function resolveLink(state: GameStateInternal, runtime: EngineRuntime): v
   const defense = computeDefense(state, runtime, link);
   const damageScript = scriptOf(state, link.attackingCard.cardId, link.attackingCard);
   const damage = computeCombatDamage(state, runtime, link, attack, defense);
+  dealAdditionalTargetDamage(state, runtime, link, attack);
   if (link.targetAllyId !== undefined) {
     // Ally target (CR 8.2.8d/e/f): the attack could not be defended, damage
     // is dealt to the ally (the hero's prevention shields do not soak it, the
@@ -290,7 +365,10 @@ export function resolveLink(state: GameStateInternal, runtime: EngineRuntime): v
         { card: logCardValue(link.attackingCard.cardId) },
       ));
       link.damage = 0;
-      link.hit = false;
+      if ((link.additionalTargetHits?.length ?? 0) > 0) {
+        link.hit = true;
+        if (queueAttackHitEffects(state, runtime, link, false)) return;
+      }
     } else {
       const dealt = runtime.dispatchFlow("dealAllyDamage", state, {
         sourceInstanceId: link.attackingCard.instanceId,
@@ -303,7 +381,7 @@ export function resolveLink(state: GameStateInternal, runtime: EngineRuntime): v
         combat: true,
       });
       link.damage = dealt;
-      link.hit = dealt > 0;
+      link.hit = dealt > 0 || (link.additionalTargetHits?.length ?? 0) > 0;
       if (dealt > 0) {
         recordAttackHit(state, link);
         if (runtime.dispatchFlow("queueHitTriggers", state, link)) return;
@@ -316,7 +394,7 @@ export function resolveLink(state: GameStateInternal, runtime: EngineRuntime): v
             target: logCardValue(targetAlly.cardId),
           },
         ));
-        runtime.events.runHook(state, link.attacker, link.attackingCard, "onMiss", link);
+        if (missPrimaryTarget(state, runtime, link)) return;
       }
     }
   } else {

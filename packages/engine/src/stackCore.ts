@@ -2,6 +2,7 @@ import type { PlayableZone } from "@fyendal/shared";
 import { nameOf } from "./gameLog.js";
 import type { GameStateInternal } from "./runtimeState.js";
 import type { CardInstance, PlayerState } from "./state.js";
+import { opponent } from "./zoneQueries.js";
 
 export type CardPlayOrigin = "hand" | "arsenal" | PlayableZone;
 /** Stable numeric codes for play origins kept in JSON-safe player flags. */
@@ -56,6 +57,20 @@ export function pushAbilityLayer(
       ? { targetCardInstanceId: opts.targetCardInstanceId }
       : {}),
   });
+}
+
+/** Record the announced attack-target of an attack action card while it is
+ * played (CR 1.4.5), so effects paid while playing it can add further
+ * targets. A hero target is its hero's instance id. */
+export function recordAnnouncedAttackTarget(
+  state: GameStateInternal,
+  seat: number,
+  card: CardInstance,
+  targetAllyId?: number,
+): void {
+  card.attackTargetIds = [
+    targetAllyId ?? (state.players[opponent(seat)] as PlayerState).hero.instanceId,
+  ];
 }
 
 /** Push an attack card played at instant speed. Its layer has no go again of

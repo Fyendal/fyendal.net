@@ -12952,6 +12952,18 @@
       "value": "将墓地中的一张蓝色牌置于你的牌库底部"
     }
   ],
+  "card.sea.barbedbarrage.pay": [
+    {
+      "type": 0,
+      "value": "支付 3 点资源以攻击一个额外目标？"
+    }
+  ],
+  "card.sea.barbedbarrage.target": [
+    {
+      "type": 0,
+      "value": "选择一个额外的攻击目标"
+    }
+  ],
   "card.sea.bloodwater.choose": [
     {
       "type": 0,
@@ -23334,6 +23346,20 @@
     {
       "type": 0,
       "value": " 赢得 clash"
+    }
+  ],
+  "engine.log.combat.additional.target": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 额外攻击一个目标："
+    },
+    {
+      "type": 1,
+      "value": "target"
     }
   ],
   "engine.log.combat.attack.power.gained": [

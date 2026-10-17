@@ -670,6 +670,15 @@ export interface ScriptCtx {
    * target is chosen when the effect generates the attack, and attacks made
    * during combat wait in FIFO order for the current chain link to resolve. */
   attackWithPermanent(instanceId: number): boolean;
+  /** While this attack action card is being played: the instance ids that
+   *  may become an additional attack-target (CR 1.4.5c), each separate from
+   *  its declared targets. The opposing hero appears as its hero's instance id. */
+  additionalAttackTargetOptions(): number[];
+  /** While this attack action card is being played, declare one of
+   *  `additionalAttackTargetOptions()` as an additional attack-target. It
+   *  cannot be defended unless it is a hero, and the attack deals damage to
+   *  each target separately. Returns false for an illegal target. */
+  declareAdditionalAttackTarget(targetInstanceId: number): boolean;
   /** Atomically bottom the current attack action and replace it with an
    * eligible attack action from hand, without play or attack-declared events. */
   replaceAttackFromHand(instanceId: number, maximumCost: number): boolean;

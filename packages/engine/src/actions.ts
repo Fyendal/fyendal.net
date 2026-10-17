@@ -85,7 +85,7 @@ import { heroAbilitiesDisabled } from "./stateQueries.js";
 import { actionLimitReached, consumeFirstActionExtraCost, controlsBow, firstActionExtraCost, firstAttackExtraCost, consumeFirstAttackExtraCost, isFrozen, opposingInstantsProhibited } from "./ruleQueries.js";
 import { nonAttackActionCardLimitReached } from "./restrictions.js";
 import { attackActionPlayRestricted, weaponAttacksProhibited } from "./combatRestrictions.js";
-import { pushAbilityLayer, pushCardLayer } from "./stackCore.js";
+import { recordAnnouncedAttackTarget, pushAbilityLayer, pushCardLayer } from "./stackCore.js";
 
 export function playCard(
   state: GameStateInternal,
@@ -394,6 +394,7 @@ export function playCard(
   // additional costs (discard random, reveal, ...) run as part of playing the card
   (card.counters ??= {}).payingAdditionalCost = 1;
   state.resolving.push(card);
+  if (isAttackAction) recordAnnouncedAttackTarget(state, seat, card, targetAllyId);
   script?.additionalCost?.(runtime.makeCtx(state, seat, card));
   const pdCost = state.pendingDecision;
   if (pdCost?.chooseHook) {

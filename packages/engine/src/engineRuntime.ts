@@ -2,7 +2,7 @@ import type { EngineRuntime } from "./runtimePorts.js";
 import { dispatchFlow } from "./flowDispatcher.js";
 import { createScriptRuntime } from "./scriptRuntime.js";
 import { setAttackActivationLimitKey } from "./abilityRules.js";
-import { attackFromDeck, attackWithPermanent, replaceAttackFromBanish, replaceAttackFromHand } from "./attacks.js";
+import { additionalAttackTargetOptions, attackFromDeck, attackWithPermanent, declareAdditionalAttackTarget, replaceAttackFromBanish, replaceAttackFromHand } from "./attacks.js";
 import { arsenalCapacity, drawCards, entersArena, settlePlayedCard, settlesInArena, stampControlledName, tapPermanent } from "./cardLifecycle.js";
 import { crowdBoo, crowdCheer, requestClash } from "./clash.js";
 import { applyOneShotDefenseModifiers, attackBonusAboveBase, attackHasDominate, attackHasOverpower, basePowerOf, chainLinkNumber, chainLinksControlled, computeAttack, computeDefense, currentPowerOf, defendingDefenseOf, hitsThisCombatChain, linkAttackHasType, noteAttackDefendedBy, replaceTemporalPowerGain } from "./combatValues.js";
@@ -34,6 +34,7 @@ export function createEngineRuntime(
     transitions,
     dispatchFlow: runtimeDispatch,
     commands: Object.freeze({
+      additionalAttackTargetOptions: bind(additionalAttackTargetOptions, false),
       applyOneShotDefenseModifiers: bind(applyOneShotDefenseModifiers, false),
       arsenalCapacity: bind(arsenalCapacity, false),
       attackBonusAboveBase: bind(attackBonusAboveBase, true),
@@ -56,6 +57,7 @@ export function createEngineRuntime(
       crowdCheer: bind(crowdCheer, true),
       currentPowerOf: bind(currentPowerOf, true),
       dealEffectDamage: bind(dealEffectDamage, true),
+      declareAdditionalAttackTarget: bind(declareAdditionalAttackTarget, false),
       defendingDefenseOf: bind(defendingDefenseOf, true),
       destroyPermanent: bind(destroyPermanent, true),
       discardToGraveyard: bind(discardToGraveyard, true),

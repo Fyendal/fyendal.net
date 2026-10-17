@@ -294,7 +294,7 @@ function validateFlags(value: unknown, code: string, path: string, numbersOnly =
 }
 
 const CARD_REQUIRED = ["instanceId", "cardId", "owner"] as const satisfies readonly (keyof CardInstance)[];
-const CARD_OPTIONAL = ["subcards", "pitchCount", "faceDown", "intimidated", "returnToHandAtTurn", "tapped", "defCounters", "counters", "chosenName", "playableFrom", "playableFromSourceCardId", "playableFromSingleUseGroup", "playableBySeat", "playableFromExpiry", "playableFromEndTurnExpiry", "playableFromUntilStartOfSeatTurn", "playableFromUntilEndOfSeatTurn", "playableFromGrantedTurn", "playableFromUntilChainClose", "playCostReduction", "playCostReductionSeat", "playTargetInstanceId", "boundToInstanceId", "grantedTypes", "grantedColor", "grantedNames", "originalHeroCardId", "temporaryHeroOriginalCardId", "temporaryHeroUntilTurn", "grantedBaseAbilitiesCardId", "grantedBaseAbilitiesCardIds", "copyOriginalCardId", "grantedKeywords", "suppressedKeywords", "tempPower", "tempDefense", "temporaryAlly", "meldSide", "life", "damagePrevented", "flipped", "arsenalSlot", "temporaryGraveyardReplacement", "playableAsInstant"] as const satisfies readonly (keyof CardInstance)[];
+const CARD_OPTIONAL = ["subcards", "pitchCount", "faceDown", "intimidated", "returnToHandAtTurn", "tapped", "defCounters", "counters", "chosenName", "playableFrom", "playableFromSourceCardId", "playableFromSingleUseGroup", "playableBySeat", "playableFromExpiry", "playableFromEndTurnExpiry", "playableFromUntilStartOfSeatTurn", "playableFromUntilEndOfSeatTurn", "playableFromGrantedTurn", "playableFromUntilChainClose", "playCostReduction", "playCostReductionSeat", "playTargetInstanceId", "boundToInstanceId", "grantedTypes", "grantedColor", "grantedNames", "originalHeroCardId", "temporaryHeroOriginalCardId", "temporaryHeroUntilTurn", "grantedBaseAbilitiesCardId", "grantedBaseAbilitiesCardIds", "copyOriginalCardId", "grantedKeywords", "suppressedKeywords", "tempPower", "tempDefense", "temporaryAlly", "meldSide", "attackTargetIds", "life", "damagePrevented", "flipped", "arsenalSlot", "temporaryGraveyardReplacement", "playableAsInstant"] as const satisfies readonly (keyof CardInstance)[];
 type _CardValidatorIsExhaustive = Assert<
   SameKeys<CardInstance, Record<(typeof CARD_REQUIRED)[number] | (typeof CARD_OPTIONAL)[number], unknown>>
 >;
@@ -331,6 +331,7 @@ function validateCard(value: unknown, code: string, path: string, depth = 0): vo
   optional(card, "grantedKeywords", (v, p) => validateStringArray(v, code, p), path);
   optional(card, "suppressedKeywords", (v, p) => validateStringArray(v, code, p), path);
   optional(card, "meldSide", (v, p) => { oneOf(v, ["left", "right", "both"] as const, code, p); }, path);
+  optional(card, "attackTargetIds", (v, p) => validateIntegerArray(v, code, p), path);
   optional(card, "temporaryAlly", (v, p) => {
     const ally = exact(v, code, p, ["power", "life"]);
     integer(ally.power, code, `${p}.power`);
@@ -422,7 +423,11 @@ function validateStackLayer(value: unknown, code: string, path: string): void {
       validateCard(hit.hitSource, code, `${p}.hitSource`);
       integer(hit.targetSeat, code, `${p}.targetSeat`);
       bool(hit.targetWasMarked, code, `${p}.targetWasMarked`);
-    } else if (kind === "on-hit-hook" || kind === "on-defend-hook" || kind === "fragment" || kind === "on-fragment-hook") {
+    } else if (kind === "on-hit-hook") {
+      const hit = exact(v, code, p, ["kind", "source"], ["hitTarget"]);
+      validateCard(hit.source, code, `${p}.source`);
+      optional(hit, "hitTarget", (target, targetPath) => validateAdditionalTargetHit(target, code, targetPath), p);
+    } else if (kind === "on-defend-hook" || kind === "fragment" || kind === "on-fragment-hook") {
       const hit = exact(v, code, p, ["kind", "source"]);
       validateCard(hit.source, code, `${p}.source`);
     } else if (kind === "on-enter-arsenal-hook") {
@@ -438,7 +443,11 @@ function validateStackLayer(value: unknown, code: string, path: string): void {
       const defended = exact(v, code, p, ["kind", "source", "defendedFromHand"]);
       validateCard(defended.source, code, `${p}.source`);
       bool(defended.defendedFromHand, code, `${p}.defendedFromHand`);
-    } else if (kind === "on-hit-modifier" || kind === "on-defended-modifier") {
+    } else if (kind === "on-hit-modifier") {
+      const hit = exact(v, code, p, ["kind", "modifier"], ["hitTarget"]);
+      validateModifier(hit.modifier, code, `${p}.modifier`);
+      optional(hit, "hitTarget", (target, targetPath) => validateAdditionalTargetHit(target, code, targetPath), p);
+    } else if (kind === "on-defended-modifier") {
       const hit = exact(v, code, p, ["kind", "modifier"]);
       validateModifier(hit.modifier, code, `${p}.modifier`);
     } else {
@@ -465,9 +474,15 @@ function validatePlayer(value: unknown, code: string, path: string, expectedSeat
   validateFlags(player.flags, code, `${path}.flags`);
 }
 
+function validateAdditionalTargetHit(value: unknown, code: string, path: string): void {
+  const hit = exact(value, code, path, ["targetAllyId", "damage"]);
+  integer(hit.targetAllyId, code, `${path}.targetAllyId`);
+  integer(hit.damage, code, `${path}.damage`);
+}
+
 function validateChainLink(value: unknown, code: string, path: string): void {
   const required = ["attacker", "attackingCard", "attackCardType", "defendingCards", "defendingEquipment", "reactions", "goAgain", "damage", "hit", "resolved", "flags"] as const;
-  const link = exact(value, code, path, required, ["resolvedReactionAbilitySources", "finalAttack", "finalDefense", "finalAttackModifiers", "finalDefenseModifiers", "targetAllyId", "declaredAtNextId", "wagerRewards", "wagers"]);
+  const link = exact(value, code, path, required, ["resolvedReactionAbilitySources", "finalAttack", "finalDefense", "finalAttackModifiers", "finalDefenseModifiers", "targetAllyId", "additionalTargetAllyIds", "additionalTargetHits", "declaredAtNextId", "wagerRewards", "wagers"]);
   integer(link.attacker, code, `${path}.attacker`);
   validateCard(link.attackingCard, code, `${path}.attackingCard`);
   oneOf(link.attackCardType, ["action", "weapon", "ally"] as const, code, `${path}.attackCardType`);
@@ -476,6 +491,10 @@ function validateChainLink(value: unknown, code: string, path: string): void {
   for (const key of ["goAgain", "hit", "resolved"] as const) bool(link[key], code, `${path}.${key}`);
   integer(link.damage, code, `${path}.damage`);
   for (const key of ["finalAttack", "finalDefense", "targetAllyId", "declaredAtNextId"] as const) optional(link, key, (v, p) => { integer(v, code, p); }, path);
+  optional(link, "additionalTargetAllyIds", (v, p) => validateIntegerArray(v, code, p), path);
+  optional(link, "additionalTargetHits", (v, p) => {
+    array(v, code, p, 128).forEach((entry, index) => validateAdditionalTargetHit(entry, code, `${p}[${index}]`));
+  }, path);
   optional(link, "wagerRewards", (v, p) => { validateStringArray(v, code, p); }, path);
   optional(link, "wagers", (v, p) => {
     array(v, code, p, 128).forEach((entryValue, index) => {
