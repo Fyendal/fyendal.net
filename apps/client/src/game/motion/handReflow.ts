@@ -59,6 +59,11 @@ export function handReflows(
     });
   }
   for (const [seat, phase] of phases) {
+    // Identified hand cards already slid above. Anonymous slots exist only in
+    // a hand rendered as backs; a visible hand has no opaque DOM keys.
+    if ([...previous.cards, ...current.cards].some((card) => (
+      card.location.kind === "hand" && card.location.seat === seat
+    ))) continue;
     const hand = { kind: "hand" as const, seat };
     const count = (presentations: GamePresentations) => presentations.counts.find((entry) =>
       entry.location.kind === "hand" && entry.location.seat === seat)?.count ?? 0;

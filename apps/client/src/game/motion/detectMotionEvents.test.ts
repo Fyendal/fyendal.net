@@ -119,13 +119,16 @@ describe("game motion detection", () => {
     const game = view([player(0, { hand: [face(1), face(2), face(3)], handCount: 3 }), player(1)]);
     const presentations = extractGamePresentations(game);
     const events = focusHandReflows(presentations, presentations, [], [2]);
+    // A visible hand has no anonymous slots to slide as card backs.
+    expect(events.some((event) => event.visual.kind === "back")).toBe(false);
     const rect = (left: number, width = 100) => ({ left, top: 600, width, height: 138 });
+    const handZone = { left: 0, top: 560, width: 800, height: 200 };
     const batch = resolveMotionBatch(events, {
       cards: new Map([["0:hand:1", rect(100)], ["0:hand:2", rect(210)], ["0:hand:3", rect(320)]]),
-      zones: new Map(), focusSources: new Map(),
+      zones: new Map([["0:hand", handZone]]), focusSources: new Map(),
     }, {
       cards: new Map([["0:hand:1", rect(155)], ["0:hand:3", rect(265)]]),
-      zones: new Map(), focusSources: new Map([[2, rect(360, 260)]]),
+      zones: new Map([["0:hand", handZone]]), focusSources: new Map([[2, rect(360, 260)]]),
     }, "focus-gap");
     expect(batch?.flights.map((flight) => flight.destinationPresentationKey)).toEqual(["0:hand:1", "0:hand:3"]);
     expect(batch?.flights.every((flight) => flight.mode === "reflow" && flight.delayMs === 0)).toBe(true);
@@ -1374,19 +1377,54 @@ describe("game motion detection", () => {
     const rect = (left: number) => ({ left, top: 300, width: 100, height: 138 });
     const batch = resolveMotionBatch(events, {
       cards: new Map([[`0:hand:${kept.instanceId}`, rect(100)]]),
-      zones: new Map([["0:deck", rect(400)], ["0:hand", rect(100)]]),
+      zones: new Map([["0:deck", rect(400)], ["0:hand", { ...rect(100), width: 150 }]]),
     }, {
       cards: new Map([[`0:hand:${kept.instanceId}`, rect(100)], [`0:graveyard:${discarded.instanceId}`, rect(700)]]),
-      zones: new Map([["0:hand", rect(100)], ["0:graveyard", rect(700)]]),
+      zones: new Map([["0:hand", { ...rect(100), width: 150 }], ["0:graveyard", rect(700)]]),
     }, "attack-draw-discard");
     const draw = batch?.flights.find((flight) => flight.mode === "draw");
     const discard = batch?.flights.find((flight) => flight.phase === "effect-discard" && flight.mode === "move");
     expect(draw).toBeDefined();
     expect(discard).toBeDefined();
     expect(discard!.delayMs).toBeGreaterThanOrEqual(draw!.delayMs + 320);
-    expect(draw!.end).not.toEqual(rect(100));
+    // A full tray overlaps the row's trailing edge rather than hovering above it.
+    expect(draw!.end).toEqual(rect(150));
     expect(discard!.start).toEqual(draw!.end);
     expect(draw!.lingerUntilMs).toBe(discard!.delayMs);
+  });
+
+  it("draws a full card into an empty hand before discarding it", () => {
+    const discarded = face(127);
+    const previous = view([player(0, { deckCount: 8 }), player(1)]);
+    const current = view([player(0, { deckCount: 7, graveyard: [discarded] }), player(1)]);
+    const events = transitionMotionEvents(previous, current, {
+      fromVersion: 16,
+      kind: "forward",
+      events: [
+        { kind: "move", from: { kind: "deck", seat: 0 }, to: { kind: "hand", seat: 0 }, count: 1, instanceId: discarded.instanceId },
+        { kind: "move", from: { kind: "hand", seat: 0 }, to: { kind: "graveyard", seat: 0 }, count: 1, instanceId: discarded.instanceId },
+      ],
+    }, "forward");
+    const square = { left: 400, top: 100, width: 100, height: 100 };
+    const hand = { left: 0, top: 300, width: 1000, height: 200 };
+    const batch = resolveMotionBatch(events, {
+      cards: new Map([[`0:deck:${discarded.instanceId}`, square]]),
+      zones: new Map([["0:deck", square], ["0:hand", hand]]),
+    }, {
+      cards: new Map([[`0:graveyard:${discarded.instanceId}`, square]]),
+      zones: new Map([["0:hand", hand], ["0:graveyard", square]]),
+    }, "empty-hand-draw-discard");
+    const draw = batch?.flights.find((flight) => flight.mode === "draw");
+    expect(draw).toBeDefined();
+    expect(draw!.visual).toEqual({ kind: "face", card: discarded });
+    expect(batch?.flights.filter((flight) => flight.mode === "reflow")).toEqual([]);
+    const discard = batch?.flights.find((flight) => flight.phase === "effect-discard" && flight.mode === "move");
+    expect(discard!.visual).toEqual({ kind: "face", card: discarded });
+    expect(discard!.start).toEqual(draw!.end);
+    expect(draw!.lingerUntilMs).toBe(discard!.delayMs);
+    expect(draw!.end.width / draw!.end.height).toBeCloseTo(300 / 413);
+    expect(draw!.end.top).toBeGreaterThanOrEqual(hand.top);
+    expect(draw!.end.top + draw!.end.height).toBeLessThanOrEqual(hand.top + hand.height);
   });
 
   it("plays an arsenal move recorded before an effect draw first", () => {

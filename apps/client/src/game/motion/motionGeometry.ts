@@ -235,16 +235,45 @@ function exposedSourceTopKey(
   return [...current.cards.keys()].find((key) => key.startsWith(prefix) && key !== sourceKey);
 }
 
+function measuredHandCards(
+  previous: MotionAnchorSnapshot,
+  current: MotionAnchorSnapshot,
+  seat: number,
+): MotionRect[] {
+  const prefix = `${seat}:hand:`;
+  return [...previous.cards, ...current.cards]
+    .filter(([key]) => key.startsWith(prefix))
+    .map(([, card]) => card);
+}
+
+/** A card bound for hand always arrives as a full card. Without a measured
+ * hand card, keep the source width at full-card proportions rather than the
+ * source's shape, which may be a compact square deck card. */
+function handCardWithinZone(
+  zone: MotionRect,
+  source: MotionRect,
+  reference?: MotionRect,
+): MotionRect {
+  const aspect = 300 / 413;
+  const fitted = reference ?? { width: source.width, height: source.width / aspect };
+  const scale = Math.min(1, zone.width / fitted.width, zone.height / fitted.height);
+  const width = fitted.width * scale;
+  const height = fitted.height * scale;
+  return {
+    left: zone.left + (zone.width - width) / 2,
+    top: zone.top + (zone.height - height) / 2,
+    width,
+    height,
+  };
+}
+
 function temporaryHandSlot(
   previous: MotionAnchorSnapshot,
   current: MotionAnchorSnapshot,
   seat: number,
   fallback: MotionRect,
 ): MotionRect {
-  const prefix = `${seat}:hand:`;
-  const cards = [...previous.cards, ...current.cards]
-    .filter(([key]) => key.startsWith(prefix))
-    .map(([, card]) => card);
+  const cards = measuredHandCards(previous, current, seat);
   if (cards.length === 0) return fallback;
   const width = cards[0]!.width;
   const height = cards[0]!.height;
@@ -259,11 +288,11 @@ function temporaryHandSlot(
   if (left - gap - width >= zone.left) {
     return { left: left - gap - width, top, width, height };
   }
-  // On a narrow mobile tray, keep the fourth card fully visible above the
-  // row rather than landing it on top of one of the three final hand cards.
+  // A full tray has no free slot. Keep the drawn card in the hand row,
+  // overlapping its trailing edge, instead of hovering it over the board.
   return {
-    left: Math.min(Math.max(right - width, zone.left), zone.left + zone.width - width),
-    top: top - height - gap,
+    left: Math.max(zone.left, Math.min(right - width / 2, zone.left + zone.width - width)),
+    top,
     width,
     height,
   };
@@ -417,7 +446,13 @@ export function resolveMotionBatch(
       : cardRectWithinZone(source.rect, destination.exact ? destination.rect : undefined);
     const end = destination.exact
       ? destination.rect
-      : cardRectWithinZone(destination.rect, start);
+      : event.kind === "move" && event.destination.kind === "hand"
+        ? handCardWithinZone(
+          destination.rect,
+          start,
+          measuredHandCards(previous, current, event.destination.seat)[0],
+        )
+        : cardRectWithinZone(destination.rect, start);
     if (event.kind === "reflow" && sameRect(start, end)) continue;
     // Cards stacked in one board group share a presentation; slide it once.
     const boardReflow = event.kind === "reflow" && event.source.kind === "board"
@@ -512,15 +547,18 @@ export function resolveMotionBatch(
       previous, current, seat, draw.end,
     );
     const finalEnd = draw.end;
-    const finalKey = drawEvent.instanceId === undefined
+    const drawnIsDiscarded = (drawEvent.instanceId !== undefined
+      && drawEvent.instanceId === discardEvent.instanceId)
+      || (drawEvent.instanceId === undefined && discardEvent.instanceId === undefined);
+    // Only a drawn card that stays in hand settles into its final slot. The
+    // discarded card leaves from the temporary slot; settling it as well left
+    // a copy in hand until the batch ended.
+    const finalKey = drawEvent.instanceId === undefined || drawnIsDiscarded
       ? undefined
       : draw.destinationPresentationKey;
     draw.end = intermediate;
     draw.destinationPresentationKey = undefined;
-    if ((drawEvent.instanceId !== undefined && drawEvent.instanceId === discardEvent.instanceId)
-      || (drawEvent.instanceId === undefined && discardEvent.instanceId === undefined)) {
-      discard.start = intermediate;
-    }
+    if (drawnIsDiscarded) discard.start = intermediate;
     let successor = discard;
     if (finalKey) {
       const settle: MotionFlight = {

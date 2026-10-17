@@ -375,6 +375,15 @@ export function PlayerHand({
             highlighted
           />
         ))}
+        {player.handCount === 0 ? (
+          // An empty hand still needs a real resting slot so an effect draw
+          // that is discarded at once lands in hand like any other draw.
+          <div
+            className="card card-hand hand-slot-probe"
+            aria-hidden="true"
+            data-motion-zone-anchor={motionLocationKey(handMotionLocation)}
+          />
+        ) : null}
       </div>
       {scrollAvailability.left ? (
         <button

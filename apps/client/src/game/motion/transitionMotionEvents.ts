@@ -80,6 +80,18 @@ function visualFor(
     : { kind: "back-reveal", card: destination.card };
 }
 
+/** The server identifies a deck-to-hand draw only to a viewer entitled to
+ * see it. A card drawn and discarded in one update has no hand presentation,
+ * so find its visible identity wherever it ended up. */
+function visibleCardAnywhere(
+  presentations: ReturnType<typeof extractGamePresentations>,
+  instanceId: number | undefined,
+): CardView | undefined {
+  if (instanceId === undefined) return undefined;
+  const card = presentations.cards.find((candidate) => candidate.instanceId === instanceId)?.card;
+  return card && cardVisible(card) ? card : undefined;
+}
+
 function reversedMove(event: GameTransitionMove): GameTransitionMove {
   return { ...event, from: event.to, to: event.from };
 }
@@ -161,6 +173,8 @@ export function transitionMotionEvents(
   const anonymousSourceOffsets = new Map<string, number>();
   const semantic: GameMotionEvent[] = [];
   const effectDrawSeats = new Set<number>();
+  // A card drawn face-up and discarded in the same update stays face-up.
+  const faceUpDraws = new Map<number, CardView>();
   // Draw-up crosses the turn boundary; draws within a turn belong to the
   // resolving card effect and must precede any discard recorded after them.
   const isEffectDraw = direction === "forward" && sourceView.turn === destinationView.turn;
@@ -227,6 +241,12 @@ export function transitionMotionEvents(
           Math.max(0, finalCount - total) + offset,
         );
       }
+      const drawnCard = drawsForEffect && destinationPresentation === null
+        ? visibleCardAnywhere(destination, move.instanceId)
+        : discardsAfterDraw && sourcePresentation === null && move.instanceId !== undefined
+          ? faceUpDraws.get(move.instanceId)
+          : undefined;
+      if (drawsForEffect && drawnCard) faceUpDraws.set(drawnCard.instanceId, drawnCard);
       // An optimistic projection may already have shown the first part of an
       // authoritative edge (such as hand -> stack). Omit only that
       // exact movement; later cleanup and draw events on the same edge still
@@ -236,7 +256,9 @@ export function transitionMotionEvents(
           kind: "move",
           source: sourceLocation,
           destination: destinationLocation,
-          visual: visualFor(sourcePresentation, destinationPresentation),
+          visual: drawnCard
+            ? { kind: "face", card: drawnCard }
+            : visualFor(sourcePresentation, destinationPresentation),
           count: move.count,
           confidence: move.instanceId === undefined ? "inferred" : "exact",
           ...(drawsForEffect ? { timeline: "effect-draw" as const } : {}),

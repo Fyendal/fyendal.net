@@ -1074,6 +1074,10 @@
   }
 }
 .hand .card-hand:hover { transform: none; }
+.hand .card-hand.hand-slot-probe {
+  visibility: hidden;
+  pointer-events: none;
+}
 .hand .card-hand.card-selected,
 .hand .card-hand.card-selected:hover { transform: translateY(calc(-1 * var(--hand-selected-lift))); }
 .hand .card-hand.card-pitched,
