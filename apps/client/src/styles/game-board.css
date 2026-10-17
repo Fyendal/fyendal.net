@@ -30,8 +30,9 @@
 .table.rail-is-collapsed { --rail-w: 40px; }
 /* Square rows are sized from one vertical budget: the opponent's hand band,
    six rows with both halves' padding and gaps, the divider, and the resting
-   hand. Short windows shrink the arena instead of hiding the bottom row
-   (arsenal) under the hand. */
+   hand. The resting hand may cover at most the lower half of our bottom row
+   (arsenal), so that row counts as half a square; short windows shrink the
+   arena rather than hiding more of it. */
 .table:has(.mat-square-board) {
   --arena-square-pad: clamp(14px, 2.1vh, 22px);
   --arena-square-gap: clamp(14px, 1.9vh, 20px);
@@ -40,8 +41,8 @@
     (
       var(--table-height) - 7px - 2 * var(--arena-square-pad) - 4 * var(--arena-square-gap)
       - var(--opp-hand-band) - (var(--hand-card-height) - var(--hand-rest-offset))
-      - 2 * var(--arena-band-clearance)
-    ) / 6
+      - var(--arena-band-clearance)
+    ) / 5.5
   );
   --arena-square-cap: min(12vh, 165px);
   --arena-square-size: max(48px, min(var(--arena-square-cap), var(--arena-square-fit)));
