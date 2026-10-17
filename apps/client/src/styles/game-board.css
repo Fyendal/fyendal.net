@@ -18,12 +18,33 @@
   --mat-column-gap: clamp(4px, .55vh, 7px);
   display: grid;
   grid-template-columns: 1fr var(--rail-w);
-  height: 100vh;
+  --table-height: 100vh;
+  /* Hand geometry lives on the table so the mat can reserve the resting hand. */
+  --hand-card-height: clamp(180px, 27vh, 330px);
+  --hand-rest-offset: clamp(90px, 13.5vh, 165px);
+  --hand-selected-lift: clamp(18px, 2.4vh, 27px);
+  --opp-hand-band: clamp(48px, 6.9vh, 90px);
+  height: var(--table-height);
   background: #0d0703;
 }
 .table.rail-is-collapsed { --rail-w: 40px; }
+/* Square rows are sized from one vertical budget: the opponent's hand band,
+   six rows with both halves' padding and gaps, the divider, and the resting
+   hand. Short windows shrink the arena instead of hiding the bottom row
+   (arsenal) under the hand. */
 .table:has(.mat-square-board) {
-  --arena-square-size: clamp(84px, 12vh, 165px);
+  --arena-square-pad: clamp(14px, 2.1vh, 22px);
+  --arena-square-gap: clamp(14px, 1.9vh, 20px);
+  --arena-band-clearance: 6px;
+  --arena-square-fit: calc(
+    (
+      var(--table-height) - 7px - 2 * var(--arena-square-pad) - 4 * var(--arena-square-gap)
+      - var(--opp-hand-band) - (var(--hand-card-height) - var(--hand-rest-offset))
+      - 2 * var(--arena-band-clearance)
+    ) / 6
+  );
+  --arena-square-cap: min(12vh, 165px);
+  --arena-square-size: max(48px, min(var(--arena-square-cap), var(--arena-square-fit)));
 }
 
 /* leather playmat */
@@ -347,7 +368,7 @@
   --mat-weapon-0-col: var(--arena-square-size);
   --mat-hero-col: var(--arena-square-size);
   --mat-weapon-1-col: var(--arena-square-size);
-  row-gap: clamp(14px, 1.9vh, 20px);
+  row-gap: var(--arena-square-gap);
   grid-template-rows: repeat(3, var(--arena-square-size));
   grid-template-columns:
     var(--mat-outer-col)
@@ -431,8 +452,14 @@
     padding-bottom: clamp(10px, 1.8vh, 22px);
   }
 }
-.mat-half.mat-square-board { padding-top: clamp(14px, 2.1vh, 22px); padding-bottom: 0; }
-.mat-half.mat-square-board.mat-opp { padding-top: 0; padding-bottom: clamp(14px, 2.1vh, 22px); }
+.mat-half.mat-square-board { padding-top: var(--arena-square-pad); padding-bottom: 0; }
+/* The opponent half takes only its rows plus the hand-back band above them;
+   our half receives the remaining height, which includes the resting hand. */
+.mat-half.mat-square-board.mat-opp {
+  flex: none;
+  padding-top: calc(var(--opp-hand-band) + var(--arena-band-clearance));
+  padding-bottom: var(--arena-square-pad);
+}
 
 /* center divider between the two mat halves: a brass-inlay strip — hard
    gradient edges, no blur, so the seam stays crisp (both halves keep the
@@ -525,8 +552,8 @@
   box-shadow: inset 0 0 0 1px #0004, inset 0 0 14px #0004;
 }
 .mat-half.mat-square-board .zone-arsenal .equipment-zone-empty {
-  width: clamp(63px, 9.49vh, 124px);
-  height: clamp(86px, 13vh, 170px);
+  width: calc(var(--arena-square-size) * .73);
+  height: var(--arena-square-size);
 }
 .mat-half.mat-square-board .zone-pile-empty {
   width: var(--mat-zone-col);
@@ -976,9 +1003,6 @@
 }
 
 .hand {
-  --hand-card-height: clamp(180px, 27vh, 330px);
-  --hand-rest-offset: clamp(90px, 13.5vh, 165px);
-  --hand-selected-lift: clamp(18px, 2.4vh, 27px);
   --hand-outline-clearance: 5px;
   position: absolute;
   left: 0;
@@ -1135,13 +1159,9 @@
     grid-template-rows: repeat(3, var(--large-zone-card-height));
   }
   .table:has(.mat-square-board) {
-    --arena-square-size: min(12vh, 10.05vw);
+    --arena-square-cap: min(12vh, 10.05vw);
   }
   .mat-half .card-zone {
-    width: var(--large-zone-card-width);
-    height: var(--large-zone-card-height);
-  }
-  .mat-half.mat-square-board .zone-arsenal .equipment-zone-empty {
     width: var(--large-zone-card-width);
     height: var(--large-zone-card-height);
   }
@@ -1161,10 +1181,11 @@
   .opp-hand-revealed .card-hand + .card-hand {
     margin-left: -4.73vh;
   }
-  .hand {
+  .table {
     --hand-card-height: 27vh;
     --hand-rest-offset: 13.5vh;
     --hand-selected-lift: 2.4vh;
+    --opp-hand-band: 6.9vh;
   }
   .hand .card-hand {
     width: 19.35vh;

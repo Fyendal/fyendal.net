@@ -589,7 +589,14 @@
    breakpoint while still having very little vertical room. Keep the desktop
    board topology, but shrink its cards and floating chrome to fit the height. */
 @media (min-width: 701px) and (max-height: 700px) and (orientation: landscape) {
-  .table { height: 100dvh; }
+  .table {
+    --table-height: 100dvh;
+    --hand-card-height: 149px;
+    --hand-rest-offset: 77px;
+    --hand-selected-lift: 12px;
+    /* The status float occupies the top edge; the hand backs sit below it. */
+    --opp-hand-band: 96px;
+  }
   .board { padding-inline: 10px; }
   .mat-half {
     --mat-outer-col: minmax(50px, 1fr);
@@ -646,12 +653,7 @@
   .opp-hand .card-back + .card-back,
   .opp-hand-revealed .card-hand + .card-hand { margin-left: -29px; }
   .opp-hand .muted { padding-top: 5px; }
-  .hand {
-    --hand-card-height: 149px;
-    --hand-rest-offset: 77px;
-    --hand-selected-lift: 12px;
-    gap: 8px;
-  }
+  .hand { gap: 8px; }
   .hand .card-hand { width: 108px; height: 149px; }
   .decision-cards .card-hand { width: 72px; height: 99px; }
   .decision-cards { gap: 12px; padding: 8px; }
