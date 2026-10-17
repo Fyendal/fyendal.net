@@ -172,24 +172,96 @@
 .match-side-caption { overflow: hidden; color: var(--text-muted); font-size: 12px; text-overflow: ellipsis; white-space: nowrap; }
 .match-vs { color: var(--text-muted); font-size: 12px; }
 .match-format { color: var(--text-muted); font-size: 12px; white-space: nowrap; }
-.match-actions { display: grid; grid-template-columns: auto repeat(4, 34px); align-items: center; justify-content: end; gap: 6px; min-width: 252px; }
+.match-actions {
+  display: grid;
+  grid-template-columns: auto 34px 34px;
+  align-items: center;
+  justify-content: end;
+  gap: 4px;
+  min-width: 172px;
+}
 .match-replay-soon { grid-column: 1 / -1; color: #ef9b61; font-size: 11px; font-weight: 650; text-align: right; white-space: nowrap; }
-.match-replay-gone { grid-column: 1 / -1; }
-.match-watch { min-height: 34px; padding: 6px 12px; font-size: 13px; }
+.match-replay-gone { grid-column: 1 / -1; color: var(--text-muted); font-size: 12px; text-align: right; }
+/* Row actions are flat: only Watch carries an outline, so the one action used
+   every time leads and the rest stay quiet until hovered. */
+.match-actions button {
+  clip-path: none;
+  font-family: var(--font-lobby-ui);
+  letter-spacing: 0;
+  text-transform: none;
+}
+.match-watch {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 34px;
+  margin-right: 6px;
+  padding: 0 14px 0 11px;
+  border: 1px solid var(--border-strong);
+  border-radius: 3px;
+  background: transparent;
+  color: var(--gold);
+  font-size: 13px;
+  font-weight: 600;
+}
+.match-watch .ui-icon { width: 11px; height: 11px; }
+.match-watch:hover:not(:disabled) { border-color: var(--bronze); background: #ffd4790f; }
 .match-icon-button {
   display: grid;
   width: 34px;
-  height: 32px;
+  height: 34px;
   padding: 0;
   place-items: center;
+  border: 0;
+  border-radius: 3px;
+  background: transparent;
+  color: var(--text-muted);
+}
+.match-icon-button .ui-icon { width: 17px; height: 17px; }
+.match-icon-button:hover:not(:disabled),
+.match-icon-button.is-open { background: #ffffff0d; color: var(--text-primary); }
+.match-favorite.is-kept,
+.match-favorite.is-kept:hover:not(:disabled) { color: var(--gold); }
+/* The base button:hover would otherwise repaint disabled flat controls. */
+.match-watch:disabled { border-color: var(--border-strong); background: transparent; }
+.match-icon-button:disabled { background: transparent; }
+.match-actions button:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 1px; }
+
+/* Overflow menu, portaled to the body so list scrolling never clips it. */
+.replay-menu {
+  position: fixed;
+  z-index: 60;
+  display: grid;
+  min-width: 200px;
+  padding: 4px;
+  border: 1px solid var(--border-subtle);
+  border-radius: 4px;
+  background: var(--surface-raised);
+  box-shadow: var(--shadow-raised);
+  font-family: var(--font-lobby-ui);
+}
+.replay-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 36px;
+  padding: 0 12px 0 10px;
+  border: 0;
   border-radius: 3px;
   clip-path: none;
+  background: transparent;
+  color: var(--text-primary);
+  font: 500 13px var(--font-lobby-ui);
+  letter-spacing: 0;
+  text-align: left;
+  text-transform: none;
 }
-.match-icon-button .ui-icon { width: 16px; height: 16px; }
-.match-icon-button.selected { border-color: #c79b31; background: #4a3510; color: #f0c85a; }
-.match-icon-button.is-danger { background: #781f1b; border-color: #bc4b40; }
-.match-icon-button.is-danger:hover:not(:disabled) { background: #9e2b25; border-color: #d86a5c; }
-.match-replay-gone { color: var(--text-muted); font-size: 12px; }
+.replay-menu-item .ui-icon { width: 16px; height: 16px; color: var(--text-muted); }
+.replay-menu-item:hover { background: #ffffff0f; }
+.replay-menu-item:focus-visible { background: #ffffff0f; outline: none; box-shadow: inset 0 0 0 1px var(--focus-ring); }
+.replay-menu-item.is-danger { color: var(--danger); }
+.replay-menu-separator { height: 1px; margin: 4px 2px; background: var(--border-subtle); }
+.replay-menu-item.is-danger .ui-icon { color: currentColor; }
 
 /* Share replay dialog */
 .share-replay-modal { width: min(520px, calc(100vw - 32px)); }
@@ -261,6 +333,7 @@
   .match-row { grid-template-columns: 84px minmax(0, 1fr); row-gap: 10px; }
   .match-format { grid-column: 1; }
   .match-actions { grid-column: 2; justify-content: flex-start; min-width: 0; }
+  .match-replay-soon, .match-replay-gone { text-align: left; }
   .heroes-split { grid-template-columns: 1fr; gap: 20px; }
 }
 
@@ -277,7 +350,8 @@
   .match-row { grid-template-columns: minmax(0, 1fr); gap: 8px; padding: 10px 0 12px 12px; }
   .match-result { grid-auto-flow: column; justify-content: start; gap: 10px; align-items: baseline; }
   .match-format, .match-actions { grid-column: 1; }
-  .match-actions { grid-template-columns: minmax(0, 1fr) repeat(4, 44px); justify-content: stretch; }
+  .match-actions { grid-template-columns: minmax(0, 1fr) 44px 44px; justify-content: stretch; }
+  .match-watch { justify-content: center; margin-right: 4px; }
   .match-replay-soon { grid-column: 1 / -1; text-align: left; }
   .history-open-file { margin-left: 0; width: 100%; }
   .match-watch { min-height: 44px; }

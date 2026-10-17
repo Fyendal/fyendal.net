@@ -123,7 +123,8 @@ describe("MatchHistory", () => {
     expect(html).toContain('aria-label="Favorite replay"');
     expect(html).toContain('aria-pressed="true"');
     expect(html).not.toContain('title="Replay: 2 days left"');
-    expect(html).toContain('aria-label="Share replay"');
+    expect(html).toMatch(/aria-label="More replay actions"[^>]*aria-haspopup="menu"/);
+    expect(html).not.toContain("Share replay");
     expect(html).not.toContain("<svg");
     expect(html).toContain("Replay expires in 2 days");
     expect(html).toContain("Replay expired");

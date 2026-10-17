@@ -1,0 +1,4 @@
+<!-- Watch a replay: a play triangle. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#000" stroke="#000" stroke-width="1.6" stroke-linejoin="round">
+  <polygon points="7.5 4.8, 19 12, 7.5 19.2" />
+</svg>

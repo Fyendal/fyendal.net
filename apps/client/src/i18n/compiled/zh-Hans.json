@@ -32050,6 +32050,12 @@
       "value": "正在保存收藏"
     }
   ],
+  "replay.moreActions": [
+    {
+      "type": 0,
+      "value": "更多回放操作"
+    }
+  ],
   "replay.notes.add": [
     {
       "type": 0,
@@ -32359,7 +32365,7 @@
   "replay.watch": [
     {
       "type": 0,
-      "value": "▶ 观看"
+      "value": "观看"
     }
   ],
   "replay.watchLoading": [

@@ -34752,6 +34752,12 @@
       "value": "Salvando favorito"
     }
   ],
+  "replay.moreActions": [
+    {
+      "type": 0,
+      "value": "Mais ações do replay"
+    }
+  ],
   "replay.notes.add": [
     {
       "type": 0,
@@ -35071,7 +35077,7 @@
   "replay.watch": [
     {
       "type": 0,
-      "value": "▶ Assistir"
+      "value": "Assistir"
     }
   ],
   "replay.watchLoading": [

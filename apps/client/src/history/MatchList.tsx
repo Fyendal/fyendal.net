@@ -8,6 +8,7 @@ import { cardImageUrl } from "../game/Card.js";
 import { formatLabel } from "../lobby/FormatBadge.js";
 import { useStore } from "../store.js";
 import { heroName } from "./HeroPortrait.js";
+import { ReplayActionsMenu } from "./ReplayActionsMenu.js";
 import { ShareReplayDialog } from "./ShareReplayDialog.js";
 import { matchOutcome } from "./summarizeRecords.js";
 
@@ -173,10 +174,11 @@ export function MatchList({
                       aria-label={intl.formatMessage({ id: "replay.watch" })}
                       onClick={() => void run(replay.id, "watch")}
                     >
+                      <UiIcon name="play" />
                       {intl.formatMessage({ id: busy === `watch:${replay.id}` ? "replay.watchLoading" : "replay.watch" })}
                     </TooltipButton>
                     <TooltipButton
-                      className={`match-icon-button${replay.favorite ? " selected" : ""}`}
+                      className={`match-icon-button match-favorite${replay.favorite ? " is-kept" : ""}`}
                       disabled={busy !== null || atLimit}
                       onClick={() => void toggleFavorite(match.id, replay.id, !replay.favorite)}
                       aria-pressed={replay.favorite}
@@ -186,36 +188,37 @@ export function MatchList({
                           : atLimit ? "replay.favoriteLimit" : replay.favorite ? "replay.unfavorite" : "replay.favorite",
                       })}
                     >
-                      <UiIcon name="star" />
+                      <UiIcon name={replay.favorite ? "star" : "star-outline"} />
                     </TooltipButton>
-                    <TooltipButton
-                      className={`match-icon-button${shared ? " selected" : ""}`}
+                    <ReplayActionsMenu
                       disabled={busy !== null}
-                      onClick={() => setSharing({ replayId: replay.id, expiresInDays: daysLeft })}
-                      tooltip={intl.formatMessage({ id: shared ? "replay.share.manage" : "replay.share.open" })}
-                    >
-                      <UiIcon name="share" />
-                    </TooltipButton>
-                    <TooltipButton
-                      className="match-icon-button"
-                      disabled={busy !== null}
-                      onClick={() => void run(replay.id, "export")}
-                      tooltip={intl.formatMessage({
-                        id: busy === `export:${replay.id}` ? "replay.prepareExport" : "replay.exportJson",
+                      label={intl.formatMessage({
+                        id: busy === `export:${replay.id}`
+                          ? "replay.prepareExport"
+                          : busy === `delete:${replay.id}` ? "replay.deleting" : "replay.moreActions",
                       })}
-                    >
-                      <UiIcon name="download" />
-                    </TooltipButton>
-                    <TooltipButton
-                      className="match-icon-button is-danger"
-                      disabled={busy !== null}
-                      onClick={() => void remove(match.id, replay.id)}
-                      tooltip={intl.formatMessage({
-                        id: busy === `delete:${replay.id}` ? "replay.deleting" : "replay.delete",
-                      })}
-                    >
-                      <UiIcon name="trash" />
-                    </TooltipButton>
+                      items={[
+                        {
+                          key: "share",
+                          icon: "share",
+                          label: intl.formatMessage({ id: shared ? "replay.share.manage" : "replay.share.open" }),
+                          onSelect: () => setSharing({ replayId: replay.id, expiresInDays: daysLeft }),
+                        },
+                        {
+                          key: "export",
+                          icon: "download",
+                          label: intl.formatMessage({ id: "replay.exportJson" }),
+                          onSelect: () => void run(replay.id, "export"),
+                        },
+                        {
+                          key: "delete",
+                          icon: "trash",
+                          label: intl.formatMessage({ id: "replay.delete" }),
+                          onSelect: () => void remove(match.id, replay.id),
+                          danger: true,
+                        },
+                      ]}
+                    />
                     {daysLeft !== null && daysLeft <= EXPIRY_WARNING_DAYS ? (
                       <span className="match-replay-soon">
                         {intl.formatMessage({ id: "history.match.replayExpiresSoon" }, { count: daysLeft })}

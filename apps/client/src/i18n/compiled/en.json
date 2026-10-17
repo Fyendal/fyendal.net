@@ -33241,6 +33241,12 @@
       "value": "Saving favorite"
     }
   ],
+  "replay.moreActions": [
+    {
+      "type": 0,
+      "value": "More replay actions"
+    }
+  ],
   "replay.notes.add": [
     {
       "type": 0,
@@ -33556,7 +33562,7 @@
   "replay.watch": [
     {
       "type": 0,
-      "value": "▶ Watch"
+      "value": "Watch"
     }
   ],
   "replay.watchLoading": [

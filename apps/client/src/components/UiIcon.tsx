@@ -18,8 +18,11 @@ export type UiIconName =
   | "invite-game"
   | "lock"
   | "message"
+  | "more"
+  | "play"
   | "share"
   | "star"
+  | "star-outline"
   | "trash"
   | "user-add"
   | "user-pending";
