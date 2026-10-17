@@ -7,26 +7,12 @@ export type HoverAnchorRect = {
   height: number;
 };
 
-export type HoverSurfaceLayout = {
-  preview: { x: number; y: number; side: "left" | "right" };
-  tooltip: {
-    left?: number;
-    right?: number;
-    top?: number;
-    bottom?: number;
-    maxWidth: number;
-    maxHeight: number;
-  };
-};
+export type HoverSurfaceLayout = { x: number; y: number; side: "left" | "right" };
 
 const VIEWPORT_PADDING = 8;
 const PREVIEW_GAP = 12;
-const TOOLTIP_GAP = 8;
-const TOOLTIP_MAX_WIDTH = 360;
 
-/** Place a card preview beside its anchor and reserve the entire opposite
- * horizontal corridor for a wrapping effect tooltip. Both surfaces stay
- * inside the viewport and can never overlap each other. */
+/** Place a card preview beside its anchor, inside the viewport. */
 export function hoverSurfaceLayout(
   anchor: HoverAnchorRect,
   viewport: { width: number; height: number },
@@ -56,36 +42,5 @@ export function hoverSurfaceLayout(
     maximumY,
   );
 
-  const above = anchor.top >= viewport.height - anchor.bottom;
-  const vertical = above
-    ? {
-        bottom: viewport.height - anchor.top + TOOLTIP_GAP,
-        maxHeight: Math.max(0, anchor.top - TOOLTIP_GAP - VIEWPORT_PADDING),
-      }
-    : {
-        top: anchor.bottom + TOOLTIP_GAP,
-        maxHeight: Math.max(0, viewport.height - anchor.bottom - TOOLTIP_GAP - VIEWPORT_PADDING),
-      };
-  const tooltip = side === "right"
-    ? {
-        right: viewport.width - (x - TOOLTIP_GAP),
-        maxWidth: Math.min(
-          TOOLTIP_MAX_WIDTH,
-          Math.max(0, x - TOOLTIP_GAP - VIEWPORT_PADDING),
-        ),
-        ...vertical,
-      }
-    : {
-        left: x + previewSize.width + TOOLTIP_GAP,
-        maxWidth: Math.min(
-          TOOLTIP_MAX_WIDTH,
-          Math.max(
-            0,
-            viewport.width - VIEWPORT_PADDING - (x + previewSize.width + TOOLTIP_GAP),
-          ),
-        ),
-        ...vertical,
-      };
-
-  return { preview: { x, y, side }, tooltip };
+  return { x, y, side };
 }

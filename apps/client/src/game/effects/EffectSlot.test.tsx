@@ -60,7 +60,7 @@ describe("EffectSlot", () => {
 
     expect(html).toContain('aria-label="Azalea: 3 lingering effects. Show effects."');
     expect(html).toContain('data-cardid="WTR160"');
-    expect(html).toContain('data-effect-label="+1 attack\nNext attack ×2"');
+    expect(html).toContain('data-effect-summary="+1 attack" data-effect-duration="Next attack" data-effect-icon="effect-once" data-effect-count="2"');
     expect(html).toContain("×2");
     expect(html).toContain("Can&#x27;t draw cards");
     // The written lifetime needs no glyph beside it.

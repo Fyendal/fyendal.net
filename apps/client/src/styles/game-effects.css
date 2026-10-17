@@ -470,3 +470,75 @@
   .effect-arrive,
   .effect-chip.effect-arrive::after { animation: none; }
 }
+
+/* ── hover hint ──
+   A hovered chip spelled out above its source preview (or by the chip when
+   there is none). When the effect lasts is a flat tag carrying the chip's
+   lifetime glyph, so it never reads as part of the effect sentence below. */
+.effect-hint {
+  display: grid;
+  gap: 7px;
+  box-sizing: border-box;
+  padding: 10px 12px 11px;
+  border: 1px solid var(--border-subtle);
+  border-radius: 10px;
+  background: var(--surface-panel);
+  box-shadow: var(--shadow-raised);
+  font-family: var(--font-lobby-ui);
+  pointer-events: none;
+}
+.effect-hint-floating {
+  position: fixed;
+  z-index: 47; /* above the hover card preview (z-index 46) */
+  width: max-content;
+}
+.effect-hint.effect-imposed { border-color: var(--effect-imposed-edge); }
+.effect-hint-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 10px;
+}
+.effect-hint-life {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 8px 2px 6px;
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--bronze) 16%, transparent);
+  color: var(--bronze);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 18px;
+}
+.effect-hint-life .ui-icon { font-size: 13px; }
+.effect-imposed .effect-hint-life {
+  background: color-mix(in srgb, var(--effect-imposed-edge) 18%, transparent);
+  color: var(--effect-imposed-text);
+}
+.effect-hint-imposed {
+  color: var(--effect-imposed-text);
+  font-size: 12.5px;
+  font-weight: 500;
+}
+.effect-hint-count {
+  margin-left: auto;
+  color: var(--gold);
+  font: 700 12px/1 var(--font-fantasy-meta);
+  font-variant-numeric: tabular-nums;
+}
+.effect-hint-summary {
+  margin: 0;
+  color: var(--text-primary);
+  font-size: 14.5px;
+  font-weight: 500;
+  line-height: 1.4;
+  text-wrap: pretty;
+}
+/* No longer applies: the tag (which carries the reason) stays readable. */
+.effect-hint.effect-inactive { border-style: dashed; }
+.effect-hint.effect-inactive .effect-hint-summary {
+  color: var(--text-muted);
+  text-decoration: line-through;
+  text-decoration-color: color-mix(in srgb, currentColor 60%, transparent);
+}

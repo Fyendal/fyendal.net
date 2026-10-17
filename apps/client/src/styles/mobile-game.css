@@ -386,7 +386,7 @@
     padding: 0 4px;
     font-size: 11px;
   }
-  .effect-tip { display: none !important; }
+  .effect-hint-floating { display: none !important; }
   .chain-on-hit-tip { display: none !important; }
   .chain-on-hit-mobile-backdrop {
     position: fixed;

@@ -1,4 +1,4 @@
-import { useLayoutEffect, useRef, useState, type Ref } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import { useIntl } from "react-intl";
 import {
   CARD_PREVIEW_HEIGHT,
@@ -11,14 +11,26 @@ import {
   cardPreviewSurfaceSize,
 } from "./cardPreviewFaces.js";
 import { MARKED_TOKEN_ID, type CardBadge } from "./cardBadges.js";
-import type { HoverSurfaceLayout } from "./hoverSurfaceLayout.js";
+import { EffectHintPanel } from "./effects/EffectHintPanel.js";
+import type { EffectHint } from "./effects/effectHint.js";
+
+/** Where a card-less effect hint floats beside its chip. */
+export interface FloatingHintPosition {
+  left: number;
+  top?: number;
+  bottom?: number;
+  maxWidth: number;
+}
 
 export interface BoardPreview {
   id: string | null;
   x: number;
   y: number;
   size?: { width: number; height: number };
-  effectTooltip?: { label: string; position: HoverSurfaceLayout["tooltip"] };
+  /** A hovered effect chip, spelled out above its source preview. */
+  effect?: EffectHint;
+  /** Set when the effect has no source card to dock against. */
+  effectPosition?: FloatingHintPosition;
   /** Statuses and counters shown on the hovered card, spelled out above it. */
   badges?: readonly CardBadge[];
 }
@@ -26,17 +38,10 @@ export interface BoardPreview {
 const VIEWPORT_PADDING = 8;
 const PANEL_GAP = 8;
 
-function CardBadgePanel({
-  badges,
-  panelRef,
-}: {
-  badges: readonly CardBadge[];
-  panelRef: Ref<HTMLUListElement>;
-}) {
+function CardBadgePanel({ badges }: { badges: readonly CardBadge[] }) {
   const intl = useIntl();
   return (
     <ul
-      ref={panelRef}
       className="card-badge-panel"
       aria-label={intl.formatMessage({ id: "game.card.badge.panel" })}
     >
@@ -80,13 +85,17 @@ export function HoverCardPreview({
   preview: BoardPreview;
   owner: number;
 }) {
-  const panelRef = useRef<HTMLUListElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
   const [panelHeight, setPanelHeight] = useState(0);
   const badges = preview.badges ?? [];
   useLayoutEffect(() => {
     setPanelHeight(panelRef.current?.offsetHeight ?? 0);
-  }, [preview.badges, preview.size?.width]);
-  if (!preview.id) return null;
+  }, [preview.badges, preview.effect, preview.size?.width]);
+  if (!preview.id) {
+    return preview.effect && preview.effectPosition ? (
+      <EffectHintPanel hint={preview.effect} style={preview.effectPosition} floating />
+    ) : null;
+  }
   const faceIds = cardPreviewFaceIds(preview.id);
   if (faceIds.length === 0) return null;
   const faceSize = preview.size ?? {
@@ -94,8 +103,8 @@ export function HoverCardPreview({
     height: CARD_PREVIEW_HEIGHT,
   };
   const surfaceSize = cardPreviewSurfaceSize(preview.id, faceSize);
-  // The panel hangs above the card; push the card down only as far as the
-  // panel needs to stay on screen.
+  // The panels hang above the card; push the card down only as far as they
+  // need to stay on screen.
   const top = panelHeight > 0
     ? Math.min(
         Math.max(preview.y, VIEWPORT_PADDING + panelHeight + PANEL_GAP),
@@ -112,7 +121,12 @@ export function HoverCardPreview({
         height: surfaceSize.height,
       }}
     >
-      {badges.length > 0 ? <CardBadgePanel badges={badges} panelRef={panelRef} /> : null}
+      {preview.effect || badges.length > 0 ? (
+        <div className="card-preview-header" ref={panelRef}>
+          {preview.effect ? <EffectHintPanel hint={preview.effect} /> : null}
+          {badges.length > 0 ? <CardBadgePanel badges={badges} /> : null}
+        </div>
+      ) : null}
       {faceIds.map((cardId, index) => (
         <div
           className="card-preview-face"

@@ -16,6 +16,7 @@ import {
   type OngoingEffectStack,
 } from "./effectModel.js";
 import { effectSourceHero, useEffectHeroes } from "./effectHeroes.js";
+import { effectHint, effectHintAttributes } from "./effectHint.js";
 
 const ARENA_FRAME_TYPES = new Set(["hero", "weapon", "equipment", "token"]);
 
@@ -236,7 +237,7 @@ export function EffectSlot({
       {visible.map((stack, index) => {
         const { effect, count } = stack;
         const last = index === visible.length - 1;
-        const text = effectText(intl, effect);
+        const hint = effectHint(intl, stack, heroes);
         const key = stackKey(stack);
         const previewCardId = effect.cardId || effectSourceHero(effect, heroes)?.heroCardId;
         return (
@@ -248,13 +249,13 @@ export function EffectSlot({
               effect.inactive ? "effect-inactive" : "",
               arrivals.has(key) ? "effect-arrive" : "",
             ].filter(Boolean).join(" ")}
-            data-effect-label={`${sentenceCase(text.summary)}\n${sentenceCase(text.duration)}${count > 1 ? ` ×${count}` : ""}`}
+            {...effectHintAttributes(hint)}
             {...(previewCardId ? { "data-cardid": previewCardId } : {})}
           >
             <EffectArt effect={effect} />
             <span className="effect-text">
-              <span className="effect-summary">{sentenceCase(text.summary)}</span>
-              <span className="effect-life">{sentenceCase(text.duration)}</span>
+              <span className="effect-summary">{hint.summary}</span>
+              <span className="effect-life">{hint.duration}</span>
             </span>
             {count > 1 ? <span className="effect-count">×{count}</span> : null}
             {last && hidden > 0 ? <span className="effect-more">+{hidden}</span> : null}

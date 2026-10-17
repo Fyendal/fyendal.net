@@ -66,13 +66,20 @@
   pointer-events: none;
 }
 .card-preview-face { flex: 0 0 auto; }
-/* Spells out the hovered card's statuses and counters. Each row repeats the
-   card's own icon badge so the two read as the same object. */
-.card-badge-panel {
+/* Explanations hang above the preview: a hovered effect, then the card's
+   statuses and counters. */
+.card-preview-header {
   position: absolute;
   right: 0;
   bottom: calc(100% + 8px);
   left: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+/* Each row repeats the card's own icon badge so the two read as the same
+   object. */
+.card-badge-panel {
   display: flex;
   flex-direction: column;
   gap: 2px;

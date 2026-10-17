@@ -56,6 +56,7 @@ import {
 } from "./decisionPresentation.js";
 import { shouldHidePriorityGuidance } from "./decisionPass.js";
 import { hoverSurfaceLayout } from "./hoverSurfaceLayout.js";
+import { readEffectHint, sameEffectHint } from "./effects/effectHint.js";
 import { cardPreviewSurfaceSize } from "./cardPreviewFaces.js";
 import { canSkipRunechant } from "./runechantSkip.js";
 import { PlayerNameplate } from "./PlayerNameplate.js";
@@ -961,33 +962,29 @@ export function GameBoard() {
     }
     const r = el.getBoundingClientRect();
     const cardId = el.dataset.cardid ?? null;
-    const effectLabel = el.dataset.effectLabel;
+    const effect = readEffectHint(el.dataset);
     const badges = renderedCardBadges(el);
     // Moving within the same card should not rerender the whole board.
     if (
       preview && previewTargetRef.current === el && preview.id === cardId &&
-      preview.effectTooltip?.label === effectLabel && preview.badges === badges
+      sameEffectHint(preview.effect, effect) && preview.badges === badges
     ) return;
     previewTargetRef.current = el;
-    if (!cardId && effectLabel) {
+    if (!cardId && effect) {
+      // No source card: the hint floats over the chip, on its roomier side.
       const above = r.top >= window.innerHeight - r.bottom;
-      const maxWidth = Math.min(360, window.innerWidth - 16);
+      const maxWidth = Math.min(340, window.innerWidth - 16);
       setPreview({
         id: null,
         x: 0,
         y: 0,
-        effectTooltip: {
-          label: effectLabel,
-          position: {
-            left: Math.min(Math.max(r.left, 8), window.innerWidth - maxWidth - 8),
-            maxWidth,
-            maxHeight: above
-              ? Math.max(0, r.top - 16)
-              : Math.max(0, window.innerHeight - r.bottom - 16),
-            ...(above
-              ? { bottom: window.innerHeight - r.top + 8 }
-              : { top: r.bottom + 8 }),
-          },
+        effect,
+        effectPosition: {
+          left: Math.min(Math.max(r.left, 8), window.innerWidth - maxWidth - 8),
+          maxWidth,
+          ...(above
+            ? { bottom: window.innerHeight - r.top + 8 }
+            : { top: r.bottom + 8 }),
         },
       });
       return;
@@ -1007,18 +1004,15 @@ export function GameBoard() {
       previewSurfaceSize,
       240, // keep the card preview clear of the side panel when space permits
     );
-    // Contextual card explanations use the preview side; effect chips also
-    // receive a viewport-level tooltip in the opposite horizontal corridor.
-    el.dataset.previewSide = layout.preview.side;
+    // Contextual card explanations use the preview side.
+    el.dataset.previewSide = layout.side;
     setPreview({
       id: cardId,
-      x: layout.preview.x,
-      y: layout.preview.y,
+      x: layout.x,
+      y: layout.y,
       size: previewSize,
       ...(badges ? { badges } : {}),
-      ...(effectLabel
-        ? { effectTooltip: { label: effectLabel, position: layout.tooltip } }
-        : {}),
+      ...(effect ? { effect } : {}),
     });
   };
 

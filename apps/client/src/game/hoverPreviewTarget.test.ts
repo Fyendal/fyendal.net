@@ -16,15 +16,15 @@ describe("hoverPreviewTarget", () => {
     expect(boundLayer.querySelector).toHaveBeenCalledWith("[data-cardid]");
   });
 
-  it("keeps the effect tooltip when hovering the nested card image", () => {
+  it("keeps the effect hint when hovering the nested card image", () => {
     const effect = {
-      dataset: { cardid: "DTD230", effectLabel: "War · next turn" },
+      dataset: { cardid: "DTD230", effectSummary: "War" },
     } as unknown as HTMLElement;
     const nestedCard = { dataset: { cardid: "DTD230" } } as unknown as HTMLElement;
     const target = {
       closest: vi.fn((selector: string) => {
-        if (selector === "[data-effect-label]") return effect;
-        if (selector === "[data-cardid]" || selector === "[data-cardid], [data-effect-label]") return nestedCard;
+        if (selector === "[data-effect-summary]") return effect;
+        if (selector === "[data-cardid]" || selector === "[data-cardid], [data-effect-summary]") return nestedCard;
         return null;
       }),
     } as unknown as HTMLElement;

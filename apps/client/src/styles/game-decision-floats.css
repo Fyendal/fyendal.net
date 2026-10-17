@@ -816,24 +816,6 @@
   text-align: center;
 }
 
-.effect-tip {
-  position: fixed;
-  width: max-content;
-  box-sizing: border-box;
-  background: #140d07f2;
-  border: 1px solid #b8933f66;
-  border-radius: 5px;
-  padding: 3px 9px;
-  color: #cbb894;
-  font-size: 13px;
-  line-height: 1.35;
-  white-space: pre-line; /* effect summary, then its duration */
-  overflow-wrap: anywhere;
-  overflow-y: auto;
-  z-index: 47; /* above the hover card preview (z-index 46) */
-  pointer-events: none;
-}
-
 /* Public cards leaving or being revealed from a deck briefly slide over the
    mat. This is presentation-only: identities come from the projected public
    zones and log, never from a private deck. */

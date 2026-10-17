@@ -79,15 +79,6 @@ export function BoardOverlays({
   return (
     <>
       {preview ? <HoverCardPreview preview={preview} owner={seat} /> : null}
-      {preview?.effectTooltip ? (
-        <div
-          className="effect-tip effect-tip-floating"
-          style={preview.effectTooltip.position}
-          role="tooltip"
-        >
-          {preview.effectTooltip.label}
-        </div>
-      ) : null}
       {overlay ? (
         <ZoneOverlay
           overlay={overlay}
