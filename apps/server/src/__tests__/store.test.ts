@@ -2071,6 +2071,48 @@ describe("PgRoomStore storage", () => {
     ]);
   });
 
+  it("requeues an accepted cross-pool survivor in its own pool", async () => {
+    const [openId, legalId] = await poolSearchers();
+    const opened = await store.queueForMatch("cc", {
+      userId: openId, username: "OpenPool", deckId: "precon-asb", cardPoolMode: "open",
+    });
+    if (!opened.ok || opened.kind !== "opened") throw new Error("queue did not open a room");
+    await markStoredSeatPresent(opened.code, 0);
+    const matched = await store.queueForMatch("cc", {
+      userId: legalId, username: "LegalPool", deckId: "precon-asr", cardPoolMode: "legal",
+    });
+    if (!matched.ok || matched.kind !== "matched") throw new Error("match failed");
+    const tokens = [] as string[];
+    for (const userId of [openId, legalId]) {
+      const joined = await store.joinRoom(matched.code, undefined, { allowPlayer: true, userId });
+      if (!joined.ok || joined.kind !== "player") throw new Error("match reclaim failed");
+      tokens.push(joined.token);
+      await store.acceptMatch(matched.code, { token: joined.token, userId });
+    }
+    expect((await store.getRoom(matched.code))?.seats.map((seat) => seat?.queueCardPoolMode))
+      .toEqual(["open", "legal"]);
+    // Acceptance ends both searches; only the seat still knows the chosen pool.
+    expect((await db.query("SELECT user_id FROM matchmaking_entries")).rows).toEqual([]);
+
+    const prep = (await store.getRoom(matched.code))!.prep!;
+    await store.chooseFirst(matched.code, {
+      token: tokens[prep.dieWinner]!,
+      userId: [openId, legalId][prep.dieWinner]!,
+    }, true);
+    const deck = presentation("precon-asb");
+    await store.presentArena(matched.code, { token: tokens[0]!, userId: openId }, {
+      weaponIds: deck.weaponIds,
+      equipment: deck.equipment,
+    });
+    await store.sweepMatchmadePrep((await store.getRoom(matched.code))!.prepDeadlineAt! + 1);
+
+    const room = await store.getRoom(matched.code);
+    expect(room?.seats.map((seat) => seat?.userId ?? null)).toEqual([openId, null]);
+    expect(room?.cardPoolMode).toBe("open");
+    expect((await db.query("SELECT user_id, card_pool_mode FROM matchmaking_entries")).rows)
+      .toEqual([{ user_id: openId, card_pool_mode: "open" }]);
+  });
+
   it("offers an opted-in bot player to the next opted-in bot starter", async () => {
     const users = await db.query(
       `INSERT INTO users (username, username_lc, pass_hash, created_at)

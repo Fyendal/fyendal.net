@@ -1245,7 +1245,9 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
                 deckId: r.remaining.deckId,
                 deckName: r.remaining.deckName,
                 retainedRoomCode: code,
-                cardPoolMode: r.cardPoolMode,
+                // The room may play a pairing's stricter pool; resume the
+                // survivor's own search.
+                cardPoolMode: r.remaining.queueCardPoolMode ?? r.cardPoolMode,
               });
             }
             clusterConsumer?.nudge();

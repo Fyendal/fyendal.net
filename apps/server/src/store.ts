@@ -108,6 +108,8 @@ export interface SeatRow {
   accepted?: boolean;
   /** seat taken via matchmaking (re-queue on a pre-game opponent leave) */
   fromQueue?: boolean;
+  /** The pool this seat's search chose; the room may play a stricter one. */
+  queueCardPoolMode?: CardPoolMode;
   /** Server-owned empty priority-window behavior; durable across gateways. */
   priorityMode?: PriorityWindowMode;
   /** One-shot shortcut for the current consecutive Runechant sequence. */
@@ -701,6 +703,10 @@ function decodeSeatRows(values: unknown[], code: string): [SeatRow | null, SeatR
     if (typeof row.accepted !== "boolean") {
       throw new CorruptRoomError(code, `seats[${index}].accepted`, "expected a boolean");
     }
+    if (!(row.queue_card_pool_mode == null || row.queue_card_pool_mode === "legal"
+      || row.queue_card_pool_mode === "future" || row.queue_card_pool_mode === "open")) {
+      throw new CorruptRoomError(code, `seats[${index}].queue_card_pool_mode`, "expected a card-pool mode or null");
+    }
     if (!(row.selected_badge === null || row.selected_badge === "early-tester")) {
       throw new CorruptRoomError(code, `seats[${index}].selected_badge`, "expected a known badge or null");
     }
@@ -720,6 +726,7 @@ function decodeSeatRows(values: unknown[], code: string): [SeatRow | null, SeatR
       ready: row.ready === true,
       accepted: row.accepted,
       fromQueue: row.from_queue === true,
+      ...(row.queue_card_pool_mode == null ? {} : { queueCardPoolMode: row.queue_card_pool_mode }),
       priorityMode: row.priority_mode,
       runechantSkip: row.runechant_skip,
       lastSeenAt: 0,
@@ -1058,6 +1065,7 @@ export class PgRoomStore {
       member.priorityMode ?? "always-pause",
       member.runechantSkip ?? false,
       member.accepted ?? false,
+      member.queueCardPoolMode ?? null,
     ];
   }
 
@@ -1097,8 +1105,9 @@ export class PgRoomStore {
         ? await db.query(
             `INSERT INTO room_seats
               (room_code, seat, user_id, token_hash, username, hero_id, deck_id, deck_name,
-               from_queue, ready, presented, last_action_at, controller, priority_mode, runechant_skip, accepted)
-             VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16)`,
+               from_queue, ready, presented, last_action_at, controller, priority_mode, runechant_skip, accepted,
+               queue_card_pool_mode)
+             VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17)`,
             values,
           )
         : await db.query(
@@ -1116,7 +1125,8 @@ export class PgRoomStore {
                controller = $13,
                priority_mode = $14,
                runechant_skip = $15,
-               accepted = $16
+               accepted = $16,
+               queue_card_pool_mode = $17
              WHERE room_code = $1 AND seat = $2`,
             values,
           );
@@ -1653,12 +1663,13 @@ export class PgRoomStore {
     db: Queryable,
     format: Format,
     choice: MatchmakingChoice,
+    roomPool: CardPoolMode = choice.cardPoolMode,
   ): Promise<SeatRow | null> {
     if (!choice.deckId) return null;
     const deck = await resolveDeck(db, choice.deckId);
     if (!deck || deck.format !== format || (deck.userId !== 0 && deck.userId !== choice.userId)) return null;
     if (formatLegalityErrors(cardData, deck.decklist, format, {
-      cardPoolMode: choice.cardPoolMode,
+      cardPoolMode: roomPool,
     }).length > 0) return null;
     return {
       tokenHash: hashReconnectToken(newToken()),
@@ -1668,6 +1679,7 @@ export class PgRoomStore {
       username: choice.username,
       userId: choice.userId,
       fromQueue: true,
+      queueCardPoolMode: choice.cardPoolMode,
       priorityMode: "always-pause",
       runechantSkip: false,
       lastSeenAt: 0,
@@ -2078,12 +2090,12 @@ export class PgRoomStore {
         username: String(raw.username),
         ...(typeof raw.deck_id === "string" ? { deckId: raw.deck_id } : {}),
         ...(typeof raw.deck_name === "string" ? { deckName: raw.deck_name } : {}),
-        cardPoolMode: pairPool,
+        cardPoolMode: dbCardPoolMode(raw.card_pool_mode, "opponent.card_pool_mode"),
         ...(typeof raw.retained_room_code === "string" ? { retainedRoomCode: raw.retained_room_code } : {}),
         ...(raw.mode === "background" ? { mode: "background" as const } : {}),
         ...(typeof raw.source_room_code === "string" ? { sourceRoomCode: raw.source_room_code } : {}),
       };
-      const opponentSeat = await this.matchmakingSeat(db, format, opponent);
+      const opponentSeat = await this.matchmakingSeat(db, format, opponent, pairPool);
       if (!opponentSeat) {
         await db.query("DELETE FROM matchmaking_entries WHERE user_id = $1", [opponent.userId]);
         if (!choice.retainedRoomCode) return openMatchmakingRoom();
@@ -2783,7 +2795,7 @@ export class PgRoomStore {
         deckId: survivor.deckId,
         deckName: survivor.deckName,
         retainedRoomCode: upper,
-        cardPoolMode,
+        cardPoolMode: survivor.queueCardPoolMode ?? cardPoolMode,
       });
     }
     return true;
@@ -3449,7 +3461,7 @@ export class PgRoomStore {
             deckId: survivorRow.deckId,
             deckName: survivorRow.deckName,
             retainedRoomCode: room.code,
-            cardPoolMode: room.cardPoolMode,
+            cardPoolMode: survivorRow.queueCardPoolMode ?? room.cardPoolMode,
             joinedAt: room.createdAt,
           },
         };

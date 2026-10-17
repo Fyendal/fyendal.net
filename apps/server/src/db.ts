@@ -921,6 +921,15 @@ export const MIGRATIONS: Migration[] = [
     );
     CREATE INDEX player_reports_reported_idx ON player_reports (reported_user_id, created_at);`,
   },
+  {
+    version: 49,
+    // Matchmaking pairs searches in the stricter of their card pools, so a
+    // queued seat remembers the pool its player chose. A survivor requeued
+    // after its opponent leaves resumes that search. NULL marks seats taken
+    // outside matchmaking, which keep the room's pool.
+    sql: `ALTER TABLE room_seats ADD COLUMN queue_card_pool_mode TEXT
+      CHECK (queue_card_pool_mode IS NULL OR queue_card_pool_mode IN ('legal', 'future', 'open'));`,
+  },
 ];
 
 async function publicTables(db: Queryable): Promise<string[]> {
