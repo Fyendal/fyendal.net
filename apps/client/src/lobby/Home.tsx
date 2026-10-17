@@ -11,6 +11,16 @@ import { RoomCard } from "./RoomCard.js";
 import { BotOpponentModal } from "./BotOpponentModal.js";
 import { formatSelectLabel } from "./FormatBadge.js";
 
+/** Live matchmaking searchers in a format, excluding this account's own
+ * search. Counts include players searching in the background of a bot game. */
+export function otherSearchers(
+  counts: Record<Format, number>,
+  format: Format,
+  queuedFormat: Format | null,
+): number {
+  return Math.max(0, counts[format] - (queuedFormat === format ? 1 : 0));
+}
+
 /** Play setup and rooms the account can reclaim. */
 export function Home() {
   const intl = useIntl();
@@ -25,6 +35,7 @@ export function Home() {
     joinRoom,
     queuedFormat,
     queueJoin,
+    queueCounts,
     queueLeave,
     rooms,
     refreshDecks,
@@ -40,6 +51,7 @@ export function Home() {
     joinRoom: state.joinRoom,
     queuedFormat: state.queuedFormat,
     queueJoin: state.queueJoin,
+    queueCounts: state.queueCounts,
     queueLeave: state.queueLeave,
     rooms: state.rooms,
     refreshDecks: state.refreshDecks,
@@ -70,6 +82,9 @@ export function Home() {
     deck.id === selectedDeckId && deckIsLegalForRoom(deck, cardPoolMode)
   ) ?? sortDecksForPicker(choices, deckPlayedAt).find((deck) => deckIsLegalForRoom(deck, cardPoolMode));
   const rejoinRooms = rooms.filter((room) => room.yours === true);
+  const searchingIn = (optionFormat: Format) =>
+    otherSearchers(queueCounts, optionFormat, queuedFormat);
+  const searching = searchingIn(format);
 
   const selectMode = (nextMode: HomeGameMode) => {
     setMode(nextMode);
@@ -137,8 +152,14 @@ export function Home() {
                   }
                 }}
               >
-                <option value="silver-age">{formatSelectLabel(intl, "silver-age")}</option>
-                <option value="cc">{formatSelectLabel(intl, "cc")}</option>
+                {(["silver-age", "cc"] as const).map((optionFormat) => (
+                  <option key={optionFormat} value={optionFormat}>
+                    {intl.formatMessage(
+                      { id: "lobby.home.formatSearching" },
+                      { format: formatSelectLabel(intl, optionFormat), count: searchingIn(optionFormat) },
+                    )}
+                  </option>
+                ))}
               </select>
             </label>
 
@@ -210,6 +231,15 @@ export function Home() {
           </div>
 
           <div className="home-play-actions">
+            {searching > 0 ? (
+              <p className="home-play-live">
+                <span className="home-play-live-dot" aria-hidden="true" />
+                {intl.formatMessage(
+                  { id: queuedFormat === format ? "lobby.home.othersSearchingNow" : "lobby.home.searchingNow" },
+                  { count: searching },
+                )}
+              </p>
+            ) : null}
             {queuedFormat !== null ? (
               <button type="button" className="btn-primary" onClick={queueLeave}>
                 {intl.formatMessage({ id: "lobby.action.cancelSearch" })}

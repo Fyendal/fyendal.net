@@ -65,6 +65,7 @@ describe("RoomList", () => {
       deckPlayedAt: {},
       cardPoolModes: { cc: "legal", "silver-age": "legal" },
       queuedFormat: null,
+      queueCounts: { cc: 0, "silver-age": 0 },
       queueJoin: roomListStore.queueJoin,
       queueLeave: roomListStore.queueLeave,
       createRoom: roomListStore.createRoom,

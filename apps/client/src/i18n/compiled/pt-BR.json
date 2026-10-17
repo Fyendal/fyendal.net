@@ -32910,6 +32910,62 @@
       "value": "Escolha um formato, um deck e um modo de jogo para começar."
     }
   ],
+  "lobby.home.formatSearching": [
+    {
+      "type": 6,
+      "value": "count",
+      "options": {
+        "=0": {
+          "value": [
+            {
+              "type": 1,
+              "value": "format"
+            }
+          ]
+        },
+        "one": {
+          "value": [
+            {
+              "type": 1,
+              "value": "format"
+            },
+            {
+              "type": 0,
+              "value": " · "
+            },
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " buscando"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 1,
+              "value": "format"
+            },
+            {
+              "type": 0,
+              "value": " · "
+            },
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " buscando"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    }
+  ],
   "lobby.home.gameMode": [
     {
       "type": 0,
@@ -32934,6 +32990,46 @@
       "value": "Gerenciar decks"
     }
   ],
+  "lobby.home.othersSearchingNow": [
+    {
+      "type": 6,
+      "value": "count",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 0,
+              "value": "Mais "
+            },
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " pessoa buscando partida"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 0,
+              "value": "Mais "
+            },
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " pessoas buscando partida"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    }
+  ],
   "lobby.home.playCc": [
     {
       "type": 0,
@@ -32950,6 +33046,38 @@
     {
       "type": 0,
       "value": "Voltar às salas"
+    }
+  ],
+  "lobby.home.searchingNow": [
+    {
+      "type": 6,
+      "value": "count",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " pessoa buscando partida agora"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " pessoas buscando partida agora"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
     }
   ],
   "lobby.home.start": [

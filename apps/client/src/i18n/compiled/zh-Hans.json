@@ -30399,6 +30399,43 @@
       "value": "选择赛制、牌组和游戏模式后开始游戏。"
     }
   ],
+  "lobby.home.formatSearching": [
+    {
+      "type": 6,
+      "value": "count",
+      "options": {
+        "=0": {
+          "value": [
+            {
+              "type": 1,
+              "value": "format"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 1,
+              "value": "format"
+            },
+            {
+              "type": 0,
+              "value": " · "
+            },
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " 人正在寻找对局"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    }
+  ],
   "lobby.home.gameMode": [
     {
       "type": 0,
@@ -30423,6 +30460,20 @@
       "value": "管理牌组"
     }
   ],
+  "lobby.home.othersSearchingNow": [
+    {
+      "type": 0,
+      "value": "另有 "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " 名玩家正在寻找对局"
+    }
+  ],
   "lobby.home.playCc": [
     {
       "type": 0,
@@ -30439,6 +30490,16 @@
     {
       "type": 0,
       "value": "重新加入房间"
+    }
+  ],
+  "lobby.home.searchingNow": [
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " 名玩家正在寻找对局"
     }
   ],
   "lobby.home.start": [

@@ -946,6 +946,10 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
       case "list-rooms": {
         lobbyClients.add(ctx);
         send(ws, { type: "rooms", rooms: await rooms.listRooms(ctx.user?.id) });
+        // Queue depth is pushed only to sockets outside rooms, so a client
+        // returning to the lobby would otherwise show counts from before it
+        // entered a room.
+        send(ws, { type: "queue-status", counts: await rooms.matchmakingCounts() });
         return;
       }
       case "queue-join": {

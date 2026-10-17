@@ -31444,6 +31444,43 @@
       "value": "Choose a format, deck, and game mode to start playing."
     }
   ],
+  "lobby.home.formatSearching": [
+    {
+      "type": 6,
+      "value": "count",
+      "options": {
+        "=0": {
+          "value": [
+            {
+              "type": 1,
+              "value": "format"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 1,
+              "value": "format"
+            },
+            {
+              "type": 0,
+              "value": " · "
+            },
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " searching"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    }
+  ],
   "lobby.home.gameMode": [
     {
       "type": 0,
@@ -31468,6 +31505,38 @@
       "value": "Manage decks"
     }
   ],
+  "lobby.home.othersSearchingNow": [
+    {
+      "type": 6,
+      "value": "count",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " other player searching"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " other players searching"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    }
+  ],
   "lobby.home.playCc": [
     {
       "type": 0,
@@ -31484,6 +31553,38 @@
     {
       "type": 0,
       "value": "Rejoin rooms"
+    }
+  ],
+  "lobby.home.searchingNow": [
+    {
+      "type": 6,
+      "value": "count",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " player searching now"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " players searching now"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
     }
   ],
   "lobby.home.start": [

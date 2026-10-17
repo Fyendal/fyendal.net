@@ -1384,6 +1384,17 @@ describe("lobby and matchmaking", () => {
     await new Promise((resolve) => setTimeout(resolve, 30));
     expect(host.inbox.some((message) => message.type === "queue-status")).toBe(false);
 
+    // Returning to the lobby refreshes the counts missed while in a room.
+    host.sendMsg({ type: "leave-room" });
+    await host.next((m) => m.type === "left");
+    await new Promise((resolve) => setTimeout(resolve, 30));
+    host.inbox.length = 0;
+    host.sendMsg({ type: "list-rooms" });
+    expect(await host.next((m) => m.type === "queue-status")).toEqual({
+      type: "queue-status",
+      counts: { cc: 1, "silver-age": 0 },
+    });
+
     queued.sendMsg({ type: "leave-room" });
     await queued.next((m) => m.type === "left");
     host.ws.close();
