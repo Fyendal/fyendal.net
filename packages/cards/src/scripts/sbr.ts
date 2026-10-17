@@ -275,11 +275,11 @@ export const sbr: Record<string, CardScript> = {
         sourceZone: "hand",
         label: "Heave 3",
         condition(ctx) {
-          return ctx.player(ctx.seat).arsenal.length === 0;
+          return ctx.hasArsenalSpace();
         },
         effect(ctx) {
           const player = ctx.player(ctx.seat);
-          if (player.arsenal.length > 0 || !player.hand.some((card) => card.instanceId === ctx.self.instanceId)) return;
+          if (!ctx.hasArsenalSpace() || !player.hand.some((card) => card.instanceId === ctx.self.instanceId)) return;
           ctx.requestPayment(
             "thunder-quake-heave",
             decisionPrompt(

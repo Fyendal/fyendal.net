@@ -61,4 +61,23 @@ describe("Heave", () => {
       expect(game.state.players[0]!.arsenal[0]?.faceDown).not.toBe(true);
     },
   );
+
+  it.each(HEAVE_CASES)("$card heaves into an empty additional arsenal zone", ({ card }) => {
+    const game = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          heroKey: "lexi, livewire|0",
+          equipment: { head: "new horizon|0" },
+          arsenal: ["head shot|1"],
+          hand: [card, "wrecker romp|3"],
+        },
+        { hero: "dorinthea", hand: [] },
+      ],
+    });
+
+    game.settle().doRaw({ kind: "pass" }).settle();
+    game.chooseOption("pitch Wrecker Romp").expectInZone(0, card, "arsenal");
+    expect(game.state.players[0]!.arsenal).toHaveLength(2);
+  });
 });

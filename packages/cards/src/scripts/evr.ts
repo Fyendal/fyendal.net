@@ -110,10 +110,10 @@ function heaveThree(): CardScript {
         event: "end-of-turn",
         sourceZone: "hand",
         label: "Heave 3",
-        condition: (ctx) => ctx.player(ctx.seat).arsenal.length === 0,
+        condition: (ctx) => ctx.hasArsenalSpace(),
         effect(ctx) {
           const player = ctx.player(ctx.seat);
-          if (player.arsenal.length > 0 || !player.hand.some((card) => card.instanceId === ctx.self.instanceId)) return;
+          if (!ctx.hasArsenalSpace() || !player.hand.some((card) => card.instanceId === ctx.self.instanceId)) return;
           ctx.requestPayment(
             "heave-three",
             decisionPrompt(`${ctx.data.name}: pay {r}{r}{r} to put it face up into arsenal?`, "card.evr.heave.pay", {
@@ -1188,7 +1188,10 @@ const talismanBalance: CardScript = {
       label: "Talisman of Balance",
       condition(ctx) {
         const own = ctx.player(ctx.seat).arsenal.length;
-        return own === 0 && ctx.state.players.some((player) => player.seat !== ctx.seat && player.arsenal.length > own);
+        return (
+          ctx.hasArsenalSpace() &&
+          ctx.state.players.some((player) => player.seat !== ctx.seat && player.arsenal.length > own)
+        );
       },
       effect(ctx) {
         const top = ctx.player(ctx.seat).deck[0];

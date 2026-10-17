@@ -461,10 +461,10 @@ function heave(amount: number, extra: CardScript = {}): CardScript {
         event: "end-of-turn",
         sourceZone: "hand",
         label: `Heave ${amount}`,
-        condition: (ctx) => ctx.player(ctx.seat).arsenal.length === 0,
+        condition: (ctx) => ctx.hasArsenalSpace(),
         effect(ctx) {
           const player = ctx.player(ctx.seat);
-          if (player.arsenal.length > 0 || !player.hand.some((card) => card.instanceId === ctx.self.instanceId)) return;
+          if (!ctx.hasArsenalSpace() || !player.hand.some((card) => card.instanceId === ctx.self.instanceId)) return;
           ctx.requestPayment(
             `heave-${amount}`,
             decisionPrompt(

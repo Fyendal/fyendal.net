@@ -610,6 +610,24 @@ describe("EVR — auras, items, and utility", () => {
 });
 
 describe("EVR — rules regression coverage", () => {
+  it("Talisman of Balance fills an empty additional arsenal zone when behind on arsenal cards", () => {
+    const lexi = {
+      hero: "rhinar",
+      heroKey: "lexi, livewire|0",
+      equipment: { head: "new horizon|0" },
+    } as const;
+    const s = scenario({
+      seats: [
+        { ...lexi, arsenal: ["head shot|1"], board: ["talisman of balance|3"], deck: ["swift shot|1"] },
+        { ...lexi, arsenal: ["head shot|1", "swift shot|1"], hand: [] },
+      ],
+    });
+    s.settle().doRaw({ kind: "pass" }).settle()
+      .expectNotInZone(0, "talisman of balance|3", "board")
+      .expectInZone(0, "swift shot|1", "arsenal");
+    expect(s.state.players[0]!.arsenal).toHaveLength(2);
+  });
+
   it("Life of the Party can destroy Crazy Brew instead of paying and gets all modes", () => {
     const s = scenario({
       seats: [
