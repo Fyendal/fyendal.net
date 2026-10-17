@@ -450,6 +450,18 @@ function dbSearchAvoidance(raw: Record<string, unknown>, path: string): SearchAv
   };
 }
 
+function dbCardPoolMode(value: unknown, path: string): CardPoolMode {
+  if (value === "legal" || value === "future" || value === "open") return value;
+  throw new CorruptRoomError("<matchmaking>", path, "expected a card-pool mode");
+}
+
+const CARD_POOL_STRICTNESS: Record<CardPoolMode, number> = { legal: 0, future: 1, open: 2 };
+
+/** Card pools nest (legal ⊂ future ⊂ open); a pairing plays in the stricter. */
+function stricterCardPool(a: CardPoolMode, b: CardPoolMode): CardPoolMode {
+  return CARD_POOL_STRICTNESS[a] <= CARD_POOL_STRICTNESS[b] ? a : b;
+}
+
 function appendBounded<T>(values: T[], value: T, max: number): T[] {
   return [...values.filter((candidate) => candidate !== value), value].slice(-max);
 }
@@ -1662,6 +1674,25 @@ export class PgRoomStore {
     };
   }
 
+  /** The pool two searches would share, or null when either deck is illegal
+   * there. Searches in different pools pair so that small queues do not split. */
+  private async matchmakingPairPool(
+    db: Queryable,
+    format: Format,
+    searches: ReadonlyArray<{ deckId?: unknown; cardPoolMode: CardPoolMode }>,
+  ): Promise<CardPoolMode | null> {
+    const pool = searches.map((search) => search.cardPoolMode).reduce(stricterCardPool);
+    for (const search of searches) {
+      if (search.cardPoolMode === pool) continue;
+      if (typeof search.deckId !== "string") return null;
+      const deck = await resolveDeck(db, search.deckId);
+      if (!deck || formatLegalityErrors(cardData, deck.decklist, format, { cardPoolMode: pool }).length > 0) {
+        return null;
+      }
+    }
+    return pool;
+  }
+
   /** Durable FIFO matchmaking. Updating one format lock row serializes pairing
    * transactions in PostgreSQL without coupling a queue to any gateway. */
   async queueForMatch(format: Format, choice: MatchmakingChoice): Promise<MatchmakingResult> {
@@ -1751,11 +1782,20 @@ export class PgRoomStore {
       }
 
       const previousEntry = await db.query(
-        `SELECT mode, source_room_code, avoided_room_codes, avoided_user_ids, avoided_heroes, joined_at
+        `SELECT mode, source_room_code, avoided_room_codes, avoided_user_ids, avoided_heroes, joined_at,
+                card_pool_mode
          FROM matchmaking_entries WHERE user_id = $1`,
         [choice.userId],
       );
       const previousRaw = previousEntry.rows[0] as Record<string, unknown> | undefined;
+      // A survivor is requeued with its offer room's pool, which may be stricter
+      // than its own search; the surviving entry keeps the pool the player chose.
+      if (choice.retainedRoomCode && previousRaw) {
+        const ownPool = dbCardPoolMode(previousRaw.card_pool_mode, "previous entry.card_pool_mode");
+        if (stricterCardPool(ownPool, choice.cardPoolMode) === choice.cardPoolMode) {
+          choice = { ...choice, cardPoolMode: ownPool };
+        }
+      }
       const persistedAvoided = previousRaw
         ? dbStringArray(previousRaw.avoided_room_codes, "<matchmaking>", "avoided_room_codes", MAX_MATCHMAKING_AVOID_ROOM_CODES)
         : [];
@@ -1833,7 +1873,7 @@ export class PgRoomStore {
           ],
         );
         const candidates = await db.query(
-          `SELECT q.user_id, q.retained_room_code, q.avoided_room_codes
+          `SELECT q.user_id, q.retained_room_code, q.avoided_room_codes, q.deck_id, q.card_pool_mode
            FROM matchmaking_entries q
            JOIN rooms live_room ON live_room.code = COALESCE(q.source_room_code, q.retained_room_code)
            LEFT JOIN room_seats bot_source
@@ -1845,31 +1885,39 @@ export class PgRoomStore {
                ON p.room_code = live_seat.room_code
               AND p.seat = live_seat.seat
               AND p.token_hash = live_seat.token_hash
-             WHERE p.last_seen_at > $4
+             WHERE p.last_seen_at > $3
            ) live
              ON live.room_code = COALESCE(q.source_room_code, q.retained_room_code)
             AND live.user_id = q.user_id
-           WHERE q.user_id <> $1 AND q.format = $2 AND q.card_pool_mode = $3
+           WHERE q.user_id <> $1 AND q.format = $2
              AND q.retained_room_code IS NOT NULL
              AND q.pending_offer_room_code IS NULL
              AND (q.mode = 'foreground' OR (
                live_room.status IN ('prep', 'active') AND bot_source.room_code IS NOT NULL
              ))
            ORDER BY q.joined_at, q.user_id`,
-          [choice.userId, format, choice.cardPoolMode, Date.now() - PRESENCE_TIMEOUT_MS],
+          [choice.userId, format, Date.now() - PRESENCE_TIMEOUT_MS],
         );
-        const compatibleCandidates = candidates.rows.filter((candidate) => {
+        const compatibleCandidates: typeof candidates.rows = [];
+        for (const candidate of candidates.rows) {
           const candidateRaw = dbObject(candidate, "<matchmaking>", "bot-start snapshot candidate");
           if (typeof candidateRaw.retained_room_code !== "string"
-            || avoidRoomCodes.includes(candidateRaw.retained_room_code)) return false;
-          if (!choice.retainedRoomCode) return true;
-          return !dbStringArray(
+            || avoidRoomCodes.includes(candidateRaw.retained_room_code)) continue;
+          if (choice.retainedRoomCode && dbStringArray(
             candidateRaw.avoided_room_codes,
             "<matchmaking>",
             "avoided_room_codes",
             MAX_MATCHMAKING_AVOID_ROOM_CODES,
-          ).includes(choice.retainedRoomCode.toUpperCase());
-        });
+          ).includes(choice.retainedRoomCode.toUpperCase())) continue;
+          if (!(await this.matchmakingPairPool(db, format, [
+            choice,
+            {
+              deckId: candidateRaw.deck_id,
+              cardPoolMode: dbCardPoolMode(candidateRaw.card_pool_mode, "bot-start snapshot candidate.card_pool_mode"),
+            },
+          ]))) continue;
+          compatibleCandidates.push(candidate);
+        }
         for (const [ordinal, candidate] of compatibleCandidates.entries()) {
           await db.query(
             `INSERT INTO pending_bot_start_candidates
@@ -1925,12 +1973,19 @@ export class PgRoomStore {
       };
 
       const waitForOpponent = async (): Promise<Extract<MatchmakingResult, { kind: "queued" }>> => {
+        // The retained room may still carry a previous pairing's stricter pool.
+        if (choice.retainedRoomCode) {
+          await db.query(
+            "UPDATE rooms SET card_pool_mode = $2 WHERE code = $1 AND state IS NULL",
+            [choice.retainedRoomCode.toUpperCase(), choice.cardPoolMode],
+          );
+        }
         await appendClusterEvent(db, { type: "queue-waiting", userId: choice.userId, format });
         await appendClusterEvent(db, { type: "queue-changed" });
         return { ok: true, kind: "queued" };
       };
 
-      const avoidPlaceholders = avoidRoomCodes.map((_, index) => `$${index + 5}`).join(", ");
+      const avoidPlaceholders = avoidRoomCodes.map((_, index) => `$${index + 4}`).join(", ");
       const avoidClause = avoidRoomCodes.length > 0
         ? `AND (q.retained_room_code IS NULL OR q.retained_room_code NOT IN (${avoidPlaceholders}))`
         : "";
@@ -1943,9 +1998,9 @@ export class PgRoomStore {
          FROM matchmaking_entries q
          JOIN users u ON u.id = q.user_id
          LEFT JOIN pending_bot_starts opponent_pending ON opponent_pending.user_id = q.user_id
-         LEFT JOIN pending_bot_starts current_pending ON current_pending.user_id = $3
+         LEFT JOIN pending_bot_starts current_pending ON current_pending.user_id = $2
          LEFT JOIN pending_bot_start_candidates current_candidate
-           ON current_candidate.starter_user_id = $3
+           ON current_candidate.starter_user_id = $2
           AND current_candidate.candidate_user_id = q.user_id
          JOIN (
            SELECT DISTINCT live_seat.room_code, live_seat.user_id
@@ -1954,14 +2009,14 @@ export class PgRoomStore {
              ON p.room_code = live_seat.room_code
             AND p.seat = live_seat.seat
             AND p.token_hash = live_seat.token_hash
-           WHERE p.last_seen_at > $4
+           WHERE p.last_seen_at > $3
          ) live
            ON live.room_code = COALESCE(q.source_room_code, q.retained_room_code)
           AND live.user_id = q.user_id
          JOIN rooms live_room ON live_room.code = COALESCE(q.source_room_code, q.retained_room_code)
          LEFT JOIN room_seats bot_source
            ON bot_source.room_code = q.source_room_code AND bot_source.controller = 'bot'
-         WHERE q.format = $1 AND q.card_pool_mode = $2 AND q.user_id <> $3
+         WHERE q.format = $1 AND q.user_id <> $2
            AND q.retained_room_code IS NOT NULL
            AND q.pending_offer_room_code IS NULL
            AND (q.mode = 'foreground' OR (
@@ -1975,13 +2030,13 @@ export class PgRoomStore {
          ORDER BY q.joined_at, q.user_id`,
         [
           format,
-          choice.cardPoolMode,
           choice.userId,
           Date.now() - PRESENCE_TIMEOUT_MS,
           ...avoidRoomCodes,
         ],
       );
       let candidateRow: (typeof rows)[number] | undefined;
+      let pairPool: CardPoolMode = choice.cardPoolMode;
       for (const candidate of rows) {
         const candidateRaw = dbObject(candidate, "<matchmaking>", "opponent candidate");
         if (choice.retainedRoomCode && dbStringArray(
@@ -1998,6 +2053,15 @@ export class PgRoomStore {
           const candidateHero = (await resolveDeck(db, candidateRaw.deck_id))?.decklist.heroId;
           if (candidateHero && avoidance.heroes.includes(candidateHero)) continue;
         }
+        const sharedPool = await this.matchmakingPairPool(db, format, [
+          choice,
+          {
+            deckId: candidateRaw.deck_id,
+            cardPoolMode: dbCardPoolMode(candidateRaw.card_pool_mode, "opponent candidate.card_pool_mode"),
+          },
+        ]);
+        if (!sharedPool) continue;
+        pairPool = sharedPool;
         candidateRow = candidate;
         break;
       }
@@ -2014,9 +2078,7 @@ export class PgRoomStore {
         username: String(raw.username),
         ...(typeof raw.deck_id === "string" ? { deckId: raw.deck_id } : {}),
         ...(typeof raw.deck_name === "string" ? { deckName: raw.deck_name } : {}),
-        cardPoolMode: raw.card_pool_mode === "future" || raw.card_pool_mode === "open"
-          ? raw.card_pool_mode
-          : "legal",
+        cardPoolMode: pairPool,
         ...(typeof raw.retained_room_code === "string" ? { retainedRoomCode: raw.retained_room_code } : {}),
         ...(raw.mode === "background" ? { mode: "background" as const } : {}),
         ...(typeof raw.source_room_code === "string" ? { sourceRoomCode: raw.source_room_code } : {}),
@@ -2043,8 +2105,10 @@ export class PgRoomStore {
           for (const member of retained.seats) if (member) resetPreparation(member);
           retained.prep = rollDice();
           retained.prepDeadlineAt = Date.now() + MATCH_ACCEPT_MS;
+          retained.cardPoolMode = pairPool;
           updateGc(retained);
           if (!(await this.save(retained, db))) throw VERSION_CONFLICT;
+          await db.query("UPDATE rooms SET card_pool_mode = $2 WHERE code = $1", [retained.code, pairPool]);
           await this.applySeatWrites(db, retained, [
             { kind: "full", seat: ownerSeat as SeatIndex, mode: "update" },
             { kind: "full", seat: freeSeat as SeatIndex, mode: "insert" },
@@ -2070,7 +2134,7 @@ export class PgRoomStore {
           prepDeadlineAt: now + MATCH_ACCEPT_MS,
           rulesetVersion: this.rulesetVersion,
           isPrivate: false,
-          cardPoolMode: choice.cardPoolMode,
+          cardPoolMode: pairPool,
           lastTransition: null,
         };
         await db.query(
@@ -2078,7 +2142,7 @@ export class PgRoomStore {
             (code, format, spectators, state, prep, ruleset_version, version, created_at, gc_at,
              status, winner, is_private, card_pool_mode, prep_deadline_at)
            VALUES ($1,$2,'[]',NULL,$3,$4,0,$5,$6,'prep',NULL,FALSE,$7,$8)`,
-          [code, format, JSON.stringify(room.prep), this.rulesetVersion, now, room.gcAt, choice.cardPoolMode, room.prepDeadlineAt],
+          [code, format, JSON.stringify(room.prep), this.rulesetVersion, now, room.gcAt, pairPool, room.prepDeadlineAt],
         );
         await this.applySeatWrites(db, room, [
           { kind: "full", seat: 0, mode: "insert" },
@@ -2364,7 +2428,8 @@ export class PgRoomStore {
       // Validate the durable offer before touching membership. A delayed
       // decline must not remove a player from an already accepted match.
       const { rows } = await db.query(
-        `SELECT mode, source_room_code, joined_at, avoided_room_codes, avoided_user_ids, avoided_heroes
+        `SELECT mode, source_room_code, joined_at, avoided_room_codes, avoided_user_ids, avoided_heroes,
+                card_pool_mode
          FROM matchmaking_entries
          WHERE user_id = $1 AND pending_offer_room_code = $2`,
         [userId, upper],
@@ -2432,7 +2497,8 @@ export class PgRoomStore {
       if (survivor?.userId != null) {
         await this.recordBotCandidateAttempt(db, survivor.userId, userId);
         const entry = await db.query(
-          `SELECT q.mode, q.source_room_code, q.joined_at, (p.user_id IS NOT NULL) AS pending_bot_start
+          `SELECT q.mode, q.source_room_code, q.joined_at, q.card_pool_mode,
+                  (p.user_id IS NOT NULL) AS pending_bot_start
            FROM matchmaking_entries q
            LEFT JOIN pending_bot_starts p ON p.user_id = q.user_id
            WHERE q.user_id = $1 AND q.retained_room_code = $2`,
@@ -2451,7 +2517,9 @@ export class PgRoomStore {
               username: survivor.username ?? "unknown",
               deckId: survivor.deckId,
               deckName: survivor.deckName,
-              cardPoolMode: room.cardPoolMode,
+              // The offer room plays in the pairing's shared pool; each search
+              // resumes in the pool its player chose.
+              cardPoolMode: dbCardPoolMode(survivorRaw.card_pool_mode, "declined offer survivor.card_pool_mode"),
               retainedRoomCode: upper,
               joinedAt: dbSafeInteger(survivorRaw.joined_at, "<matchmaking>", "joined_at"),
               mode: survivorRaw.mode === "background" ? "background" : "foreground",
@@ -2470,7 +2538,9 @@ export class PgRoomStore {
               username: member.username ?? "unknown",
               deckId: member.deckId,
               deckName: member.deckName,
-              cardPoolMode: room.cardPoolMode,
+              cardPoolMode: raw
+                ? dbCardPoolMode(raw.card_pool_mode, "declined entry.card_pool_mode")
+                : room.cardPoolMode,
               mode,
               avoidRoomCodes: [upper],
               ...(raw ? { joinedAt: dbSafeInteger(raw.joined_at, "<matchmaking>", "joined_at") } : {}),

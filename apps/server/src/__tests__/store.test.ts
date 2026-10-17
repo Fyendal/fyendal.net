@@ -2000,6 +2000,77 @@ describe("PgRoomStore storage", () => {
     ]);
   });
 
+  async function poolSearchers(): Promise<[number, number]> {
+    const users = await db.query(
+      `INSERT INTO users (username, username_lc, pass_hash, created_at)
+       VALUES ('OpenPool','openpool','hash',1), ('LegalPool','legalpool','hash',2)
+       RETURNING id`,
+    );
+    return [Number(users.rows[0]!.id), Number(users.rows[1]!.id)];
+  }
+
+  it("pairs searches across card pools in the stricter shared pool", async () => {
+    const [openId, legalId] = await poolSearchers();
+    const opened = await store.queueForMatch("cc", {
+      userId: openId, username: "OpenPool", deckId: "precon-asb", cardPoolMode: "open",
+    });
+    if (!opened.ok || opened.kind !== "opened") throw new Error("queue did not open a room");
+    await markStoredSeatPresent(opened.code, 0);
+
+    const matched = await store.queueForMatch("cc", {
+      userId: legalId, username: "LegalPool", deckId: "precon-asr", cardPoolMode: "legal",
+    });
+
+    expect(matched).toMatchObject({ ok: true, kind: "matched", code: opened.code });
+    expect((await store.getRoom(opened.code))?.cardPoolMode).toBe("legal");
+    expect((await db.query("SELECT card_pool_mode FROM rooms WHERE code = $1", [opened.code])).rows)
+      .toEqual([{ card_pool_mode: "legal" }]);
+  });
+
+  it("does not pair a deck into a stricter pool where it is illegal", async () => {
+    const [openId, legalId] = await poolSearchers();
+    const opened = await store.queueForMatch("cc", {
+      userId: openId, username: "OpenPool", deckId: "precon-aaz", cardPoolMode: "open",
+    });
+    if (!opened.ok || opened.kind !== "opened") throw new Error("queue did not open a room");
+    await markStoredSeatPresent(opened.code, 0);
+
+    const legal = await store.queueForMatch("cc", {
+      userId: legalId, username: "LegalPool", deckId: "precon-asr", cardPoolMode: "legal",
+    });
+
+    expect(legal).toMatchObject({ ok: true, kind: "opened" });
+    expect(legal.ok && legal.kind === "opened" && legal.code).not.toBe(opened.code);
+    expect((await store.getRoom(opened.code))?.cardPoolMode).toBe("open");
+  });
+
+  it("resumes each search in its own pool after a cross-pool offer is declined", async () => {
+    const [openId, legalId] = await poolSearchers();
+    const opened = await store.queueForMatch("cc", {
+      userId: openId, username: "OpenPool", deckId: "precon-asb", cardPoolMode: "open",
+    });
+    if (!opened.ok || opened.kind !== "opened") throw new Error("queue did not open a room");
+    await markStoredSeatPresent(opened.code, 0);
+    const matched = await store.queueForMatch("cc", {
+      userId: legalId, username: "LegalPool", deckId: "precon-asr", cardPoolMode: "legal",
+    });
+    if (!matched.ok || matched.kind !== "matched") throw new Error("match failed");
+    const joined = await store.joinRoom(matched.code, undefined, { allowPlayer: true, userId: legalId });
+    if (!joined.ok || joined.kind !== "player") throw new Error("match reclaim failed");
+
+    expect(await store.declineMatch(legalId, matched.code, {
+      credentials: { token: joined.token, userId: legalId },
+    })).toMatchObject({ ok: true });
+
+    expect((await store.getRoom(opened.code))?.cardPoolMode).toBe("open");
+    expect((await db.query(
+      "SELECT user_id, card_pool_mode FROM matchmaking_entries ORDER BY user_id",
+    )).rows).toEqual([
+      { user_id: openId, card_pool_mode: "open" },
+      { user_id: legalId, card_pool_mode: "legal" },
+    ]);
+  });
+
   it("offers an opted-in bot player to the next opted-in bot starter", async () => {
     const users = await db.query(
       `INSERT INTO users (username, username_lc, pass_hash, created_at)
