@@ -98,7 +98,7 @@ function reloadOnChoose(ctx: ScriptCtx, hook: string, option: string): boolean {
 function requestArrowToArsenal(ctx: ScriptCtx, hook: string, fallback: string): void {
   const p = ctx.player(ctx.seat);
   const arrows = p.hand.filter((c) => isArrow(ctx, c));
-  if (p.arsenal.length > 0 || arrows.length === 0) return;
+  if (!ctx.hasArsenalSpace() || arrows.length === 0) return;
   ctx.requestCardChoice(
     hook,
     decisionPrompt(fallback, "card.common.arrow.arsenal", { optionMessages: commonOptionMessages("pass") }),

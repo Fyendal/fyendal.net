@@ -1490,22 +1490,24 @@ describe("SEA — rules regression coverage", () => {
       .expectInZone(0, "swift shot|1", "arsenal");
     expect(g.state.players[0]!.arsenal[1]?.arsenalSlot).toBe(1);
 
-    const big = scenario({
-      seats: [
-        {
-          hero: "rhinar",
-          heroKey: "lexi, livewire|0",
-          equipment: { head: "new horizon|0" },
-          arsenal: ["head shot|1"],
-          hand: ["call in the big guns|2", "swift shot|1"],
-          resources: 1,
-        },
-        { hero: "dorinthea" },
-      ],
-    });
+    for (const bigGuns of ["call in the big guns|1", "call in the big guns|2"]) {
+      const big = scenario({
+        seats: [
+          {
+            hero: "rhinar",
+            heroKey: "lexi, livewire|0",
+            equipment: { head: "new horizon|0" },
+            arsenal: ["head shot|1"],
+            hand: [bigGuns, "swift shot|1"],
+            resources: 1,
+          },
+          { hero: "dorinthea" },
+        ],
+      });
 
-    big.play("call in the big guns|2").chooseCard("swift shot|1").expectInZone(0, "swift shot|1", "arsenal");
-    expect(big.state.players[0]!.arsenal).toHaveLength(2);
+      big.play(bigGuns).chooseCard("swift shot|1").expectInZone(0, "swift shot|1", "arsenal");
+      expect(big.state.players[0]!.arsenal).toHaveLength(2);
+    }
   });
 
   it("Deny Redemption's discard ability stops heroes gaining life this turn", () => {
