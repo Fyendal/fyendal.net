@@ -52,7 +52,7 @@
 }
 .rail-actions {
   display: flex;
-  gap: 7px;
+  gap: 5px;
   margin-top: 5px;
 }
 .rail-actions button {
@@ -71,15 +71,26 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  width: 30px;
+  height: 30px;
   font-size: 17px;
   line-height: 1;
-  padding: 2px 9px;
+  padding: 0;
 }
 .rail-actions .rail-note-active {
   border-color: #ffbd18;
   color: #ffcf55;
 }
-.rail-actions .rail-exit { border-left-color: #806334; }
+.rail-actions .rail-exit {
+  min-width: 0;
+  min-height: 30px;
+  padding: 3px 6px;
+  border-left-color: #806334;
+  font-size: 12px;
+  letter-spacing: 0.5px;
+  line-height: 1.1;
+  text-align: center;
+}
 .rail-actions .rail-exit-danger {
   border-color: #8f3d34;
   color: #ffaaa2;
