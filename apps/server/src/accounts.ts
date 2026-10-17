@@ -138,6 +138,7 @@ export interface AccountExport {
     finishedAt: number;
     expiresAt: number;
     favorite: boolean;
+    share: { visibility: "public" | "friends"; includeNotes: boolean } | null;
     replay: ReplayFile;
   }>;
   matches: MatchSummary[];
@@ -320,6 +321,11 @@ export async function exportAccount(db: Queryable, userId: number): Promise<Acco
         finishedAt: summary.finishedAt,
         expiresAt: summary.expiresAt,
         favorite: summary.favorite,
+        // The link token is a bearer capability; the export records the
+        // setting without carrying a working link.
+        share: summary.share
+          ? { visibility: summary.share.visibility, includeNotes: summary.share.includeNotes }
+          : null,
         replay: attachReplayNotes(replay, notes ?? []),
       });
     }

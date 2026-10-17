@@ -32188,6 +32188,168 @@
       "value": "正在准备导出回放"
     }
   ],
+  "replay.share.audience": [
+    {
+      "type": 0,
+      "value": "谁可以打开链接"
+    }
+  ],
+  "replay.share.confirmReset": [
+    {
+      "type": 0,
+      "value": "要重置此链接吗？已发送的链接将失效。"
+    }
+  ],
+  "replay.share.copied": [
+    {
+      "type": 0,
+      "value": "已复制"
+    }
+  ],
+  "replay.share.copy": [
+    {
+      "type": 0,
+      "value": "复制链接"
+    }
+  ],
+  "replay.share.create": [
+    {
+      "type": 0,
+      "value": "创建链接"
+    }
+  ],
+  "replay.share.expires": [
+    {
+      "type": 0,
+      "value": "此回放将在 "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " 天后过期。收藏后链接将持续有效。"
+    }
+  ],
+  "replay.share.includeNotes": [
+    {
+      "type": 0,
+      "value": "包含我的笔记"
+    }
+  ],
+  "replay.share.includeNotes.hint": [
+    {
+      "type": 0,
+      "value": "观看者可以看到你的笔记，但无法修改。"
+    }
+  ],
+  "replay.share.link": [
+    {
+      "type": 0,
+      "value": "分享链接"
+    }
+  ],
+  "replay.share.manage": [
+    {
+      "type": 0,
+      "value": "管理分享链接"
+    }
+  ],
+  "replay.share.open": [
+    {
+      "type": 0,
+      "value": "分享回放"
+    }
+  ],
+  "replay.share.perspective": [
+    {
+      "type": 0,
+      "value": "观看者将以你的座位视角观看整局对局，双方手牌均会公开。"
+    }
+  ],
+  "replay.share.reset": [
+    {
+      "type": 0,
+      "value": "重置链接"
+    }
+  ],
+  "replay.share.stop": [
+    {
+      "type": 0,
+      "value": "停止分享"
+    }
+  ],
+  "replay.share.title": [
+    {
+      "type": 0,
+      "value": "分享回放"
+    }
+  ],
+  "replay.share.visibility.friends": [
+    {
+      "type": 0,
+      "value": "仅好友"
+    }
+  ],
+  "replay.share.visibility.friends.hint": [
+    {
+      "type": 0,
+      "value": "观看者需要登录，并且在你的好友列表中。"
+    }
+  ],
+  "replay.share.visibility.public": [
+    {
+      "type": 0,
+      "value": "任何拥有链接的人"
+    }
+  ],
+  "replay.share.visibility.public.hint": [
+    {
+      "type": 0,
+      "value": "无需账号。"
+    }
+  ],
+  "replay.shared.friendsOnly": [
+    {
+      "type": 0,
+      "value": "此回放仅分享给所有者的好友。"
+    }
+  ],
+  "replay.shared.gateTitle": [
+    {
+      "type": 0,
+      "value": "分享的回放"
+    }
+  ],
+  "replay.shared.goHome": [
+    {
+      "type": 0,
+      "value": "返回首页"
+    }
+  ],
+  "replay.shared.signInRequired": [
+    {
+      "type": 0,
+      "value": "此回放仅分享给好友。请登录后观看。"
+    }
+  ],
+  "replay.shared.title": [
+    {
+      "type": 1,
+      "value": "owner"
+    },
+    {
+      "type": 0,
+      "value": " 的回放"
+    }
+  ],
+  "replay.shared.unavailable": [
+    {
+      "type": 0,
+      "value": "此回放链接已过期或已被移除。"
+    }
+  ],
   "replay.unfavorite": [
     {
       "type": 0,

@@ -1,9 +1,15 @@
 import http from "node:http";
 import { promisify } from "node:util";
-import { gunzip as gunzipCallback } from "node:zlib";
+import { gunzip as gunzipCallback, gzip as gzipCallback } from "node:zlib";
 import type { DeckPool, Format } from "@fyendal/shared";
 import { cardData, findPrinting, formatLegalityIssues } from "@fyendal/cards";
-import { decodeReplayNoteInput, MATCH_OPPONENT_FILTERS, type MatchListFilters } from "@fyendal/protocol";
+import {
+  decodeReplayNoteInput,
+  decodeReplayShareInput,
+  MATCH_OPPONENT_FILTERS,
+  REPLAY_SHARE_TOKEN_RE,
+  type MatchListFilters,
+} from "@fyendal/protocol";
 import type { Queryable } from "./db.js";
 import {
   login,
@@ -45,12 +51,14 @@ import {
   setReplayFavorite,
   waitForReplayPayloadForRoom,
 } from "./replays.js";
+import { readSharedReplay, removeReplayShare, resetReplayShare, setReplayShare } from "./replayShares.js";
 import { createFabraryClient, parseFabraryDeckUrl, type FabraryClient } from "./fabrary.js";
 
 const BODY_LIMIT = 16 * 1024; // 16kb cap on JSON bodies (decklist exports)
 const RATE_WINDOW_MS = 10 * 60 * 1000; // 10 minutes
 const RATE_MAX = 10; // requests per window per (IP, endpoint)
 const gunzip = promisify(gunzipCallback);
+const gzip = promisify(gzipCallback);
 
 export interface RateLimiter {
   /** true when the request may proceed; false when the limit is hit */
@@ -122,6 +130,10 @@ export interface ApiDeps {
   accountRateLimiter?: RateLimiter;
   /** separate throttle for GET /api/stats (defaults: 60 per 10 min per IP) */
   statsRateLimiter?: RateLimiter;
+  /** Owners adjust a link's audience and notes several times while sharing. */
+  replayShareRateLimiter?: RateLimiter;
+  /** Shared replay links open without an account, so reads are throttled per IP. */
+  sharedReplayRateLimiter?: RateLimiter;
   /** Public Home notice reads permit several browsers behind a shared IP. */
   noticeRateLimiter?: RateLimiter;
   /** live lobby stats for the logged-out landing view (queue depth is held by
@@ -317,6 +329,8 @@ export function createApiServer(deps: ApiDeps): http.Server {
   const accountLimiter = deps.accountRateLimiter ?? createRateLimiter();
   const fabraryClient = deps.fabraryClient ?? createFabraryClient();
   const noticeLimiter = deps.noticeRateLimiter ?? createRateLimiter(600);
+  const replayShareLimiter = deps.replayShareRateLimiter ?? createRateLimiter(120);
+  const sharedReplayLimiter = deps.sharedReplayRateLimiter ?? createRateLimiter(120);
   // /api/stats is public and hits the DB — throttle it separately from the
   // auth limiter (the logged-out landing polls it every 30s, so the budget
   // is generous). /api/health stays unlimited: Cloud Run probes depend on it.
@@ -575,6 +589,27 @@ export function createApiServer(deps: ApiDeps): http.Server {
         ? { status: 409, body: { ok: false, error: "favorite replay limit reached" } }
         : { status: 404, body: { ok: false, error: "replay not found" } };
     },
+    "/api/replays/share": async (body, user) => {
+      if (!user) return { status: 401, body: { ok: false, error: "not logged in" } };
+      const input = decodeReplayShareInput(body);
+      if (!input) return { status: 400, body: { ok: false, error: "invalid replay share" } };
+      const share = await setReplayShare(deps.db, user.id, input);
+      return share
+        ? { status: 200, body: { ok: true, share } }
+        : { status: 404, body: { ok: false, error: "replay not found" } };
+    },
+    "/api/replays/share/reset": async (body, user) => {
+      if (!user) return { status: 401, body: { ok: false, error: "not logged in" } };
+      const share = await resetReplayShare(deps.db, user.id, field(body, "id"));
+      return share
+        ? { status: 200, body: { ok: true, share } }
+        : { status: 404, body: { ok: false, error: "replay not found" } };
+    },
+    "/api/replays/unshare": async (body, user) => {
+      if (!user) return { status: 401, body: { ok: false, error: "not logged in" } };
+      await removeReplayShare(deps.db, user.id, field(body, "id"));
+      return { status: 200, body: { ok: true } };
+    },
     "/api/replay-notes": async (body, user) => {
       if (!user) return { status: 401, body: { ok: false, error: "not logged in" } };
       const input = decodeReplayNoteInput(body);
@@ -766,6 +801,35 @@ export function createApiServer(deps: ApiDeps): http.Server {
         .catch((e) => internalError(res, e));
       return;
     }
+    const sharedReplayMatch = req.method === "GET"
+      ? /^\/api\/shared-replays\/([^/]+)$/.exec(url.pathname)
+      : null;
+    if (sharedReplayMatch) {
+      const token = sharedReplayMatch[1]!;
+      if (!REPLAY_SHARE_TOKEN_RE.test(token)) {
+        sendJson(res, 404, { ok: false, error: "replay not found" });
+        return;
+      }
+      const ip = clientIp(req.headers, req.socket.remoteAddress, trustedProxyHops);
+      Promise.resolve(sharedReplayLimiter.allow(ip, "/api/shared-replays"))
+        .then(async (allowed) => {
+          if (!allowed) return sendJson(res, 429, { ok: false, error: "too many attempts, try again later" });
+          const user = await authUser(req);
+          const shared = await readSharedReplay(deps.db, token, user?.id ?? null);
+          if (shared.kind === "not-found") return sendJson(res, 404, { ok: false, error: "replay not found" });
+          if (shared.kind === "denied") {
+            return shared.code === "AUTH_REQUIRED"
+              ? sendJson(res, 401, { ok: false, error: "sign in to watch this replay", code: shared.code })
+              : sendJson(res, 403, { ok: false, error: "only the owner's friends can watch this replay", code: shared.code });
+          }
+          appendVary(res, "Accept-Encoding");
+          return acceptsGzip(req.headers["accept-encoding"])
+            ? sendJsonBytes(res, 200, await gzip(shared.body), "gzip")
+            : sendJsonBytes(res, 200, shared.body);
+        })
+        .catch((e) => internalError(res, e));
+      return;
+    }
     const roomReplayMatch = req.method === "GET"
       ? /^\/api\/replays\/room\/([A-Za-z0-9]+)$/.exec(url.pathname)
       : null;
@@ -842,7 +906,11 @@ export function createApiServer(deps: ApiDeps): http.Server {
       return;
     }
     const ip = clientIp(req.headers, req.socket.remoteAddress, trustedProxyHops);
-    const routeLimiter = url.pathname === "/api/decks/delete" ? deckDeleteLimiter : limiter;
+    const routeLimiter = url.pathname === "/api/decks/delete"
+      ? deckDeleteLimiter
+      : url.pathname.startsWith("/api/replays/share") || url.pathname === "/api/replays/unshare"
+        ? replayShareLimiter
+        : limiter;
     Promise.resolve(routeLimiter.allow(ip, url.pathname))
       .then(async (allowed) => {
         if (!allowed) return { status: 429, body: { ok: false, error: "too many attempts, try again later" } };

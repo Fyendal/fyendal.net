@@ -597,6 +597,136 @@ describe("replay transport compression", () => {
     });
   });
 
+  it("shares one owner's copy publicly or with friends only", async () => {
+    const accounts = await Promise.all(["ShareOwner", "ShareFriend", "ShareStranger", "ShareRival"].map(async (name) => {
+      await register(db, name, "password1");
+      const session = await login(db, name.toLowerCase(), "password1");
+      if (!session.ok) throw new Error("login failed");
+      const user = await sessionForToken(db, session.token);
+      if (!user) throw new Error("session missing");
+      return { id: user.id, authorization: `Bearer ${session.token}` };
+    }));
+    const [owner, friend, stranger, rival] = accounts as [
+      typeof accounts[number], typeof accounts[number], typeof accounts[number], typeof accounts[number],
+    ];
+    const id = "aabbccddeeff00112233aaaa";
+    const body = { ok: true, replay: { version: 1, seat: 0, views: [] } };
+    const payload = gzipSync(Buffer.from(JSON.stringify(body)));
+    await db.query(
+      `INSERT INTO replay_games
+        (id, room_code, ruleset_version, format, hero_0_id, hero_1_id,
+         winner, status, created_at, finished_at, expires_at, frame_count)
+       VALUES ($1,'SHR001','rules-a','cc','HERO0','HERO1',0,'ready',$2,$2,$3,1)`,
+      [id, Date.now(), Date.now() + 60_000],
+    );
+    for (const [participant, seat] of [[owner, 0], [rival, 1]] as const) {
+      await db.query(
+        `INSERT INTO replay_participants (replay_id, user_id, seat, payload, payload_bytes)
+         VALUES ($1,$2,$3,$4,$5)`,
+        [id, participant.id, seat, payload, payload.length],
+      );
+    }
+    await db.query(
+      "INSERT INTO replay_notes (replay_id, user_id, room_version, frame_index, note) VALUES ($1,$2,NULL,0,'owner note')",
+      [id, owner.id],
+    );
+    const [low, high] = [owner.id, friend.id].sort((a, b) => a - b);
+    await db.query(
+      "INSERT INTO friendships (user_low_id, user_high_id, created_at) VALUES ($1,$2,1)",
+      [low, high],
+    );
+    const url = await startApi();
+    const post = (path: string, authorization: string, payloadBody: unknown) => fetch(`${url}${path}`, {
+      method: "POST",
+      headers: { Authorization: authorization, "Content-Type": "application/json" },
+      body: JSON.stringify(payloadBody),
+    });
+    const open = (token: string, authorization?: string, encoding = "gzip") =>
+      fetch(`${url}/api/shared-replays/${token}`, {
+        headers: { "Accept-Encoding": encoding, ...(authorization ? { Authorization: authorization } : {}) },
+      });
+
+    expect((await post("/api/replays/share", stranger.authorization, {
+      replayId: id, visibility: "public", includeNotes: false,
+    })).status).toBe(404);
+    expect((await post("/api/replays/share", owner.authorization, {
+      replayId: id, visibility: "everyone", includeNotes: false,
+    })).status).toBe(400);
+    const created = await post("/api/replays/share", owner.authorization, {
+      replayId: id, visibility: "public", includeNotes: false,
+    });
+    const { share } = await created.json() as { share: { token: string } };
+    expect(share).toEqual({ token: expect.stringMatching(/^[A-Za-z0-9_-]{22}$/), visibility: "public", includeNotes: false });
+    const expected = (visibility: string, notes: unknown[] = []) => ({
+      ...body,
+      shared: { ownerUsername: "ShareOwner", visibility, notes },
+    });
+
+    const anonymous = await open(share.token);
+    expect(anonymous.status).toBe(200);
+    expect(anonymous.headers.get("content-encoding")).toBe("gzip");
+    expect(anonymous.headers.get("cache-control")).toBe("no-store");
+    expect(await anonymous.json()).toEqual(expected("public"));
+    const identity = await open(share.token, undefined, "identity");
+    expect(identity.headers.get("content-encoding")).toBeNull();
+    expect(await identity.json()).toEqual(expected("public"));
+    expect((await fetch(`${url}/api/replays`, { headers: { Authorization: rival.authorization } })
+      .then((response) => response.json()))).toEqual({
+      ok: true,
+      replays: [expect.objectContaining({ id, share: null })],
+    });
+
+    const restricted = await post("/api/replays/share", owner.authorization, {
+      replayId: id, visibility: "friends", includeNotes: true,
+    });
+    expect(await restricted.json()).toEqual({
+      ok: true,
+      share: { token: share.token, visibility: "friends", includeNotes: true },
+    });
+    const signedOut = await open(share.token);
+    expect(signedOut.status).toBe(401);
+    expect(await signedOut.json()).toMatchObject({ code: "AUTH_REQUIRED" });
+    const notFriend = await open(share.token, stranger.authorization);
+    expect(notFriend.status).toBe(403);
+    expect(await notFriend.json()).toMatchObject({ code: "FRIEND_REQUIRED" });
+    const friendView = await open(share.token, friend.authorization);
+    expect(await friendView.json()).toEqual(expected("friends", [{ frame: 0, text: "owner note" }]));
+    expect((await open(share.token, owner.authorization)).status).toBe(200);
+    expect((await fetch(`${url}/api/replays`, { headers: { Authorization: owner.authorization } })
+      .then((response) => response.json()))).toEqual({
+      ok: true,
+      replays: [expect.objectContaining({ id, share: { token: share.token, visibility: "friends", includeNotes: true } })],
+    });
+    await db.query("DELETE FROM friendships WHERE user_low_id=$1 AND user_high_id=$2", [low, high]);
+    expect((await open(share.token, friend.authorization)).status).toBe(403);
+
+    const reset = await post("/api/replays/share/reset", owner.authorization, { id });
+    const { share: rotated } = await reset.json() as { share: { token: string } };
+    expect(rotated.token).not.toBe(share.token);
+    expect((await open(share.token, owner.authorization)).status).toBe(404);
+    expect((await open(rotated.token, owner.authorization)).status).toBe(200);
+
+    await db.query("UPDATE replay_games SET expires_at=1 WHERE id=$1", [id]);
+    expect((await open(rotated.token, owner.authorization)).status).toBe(404);
+    await db.query("UPDATE replay_participants SET favorite=TRUE WHERE replay_id=$1 AND user_id=$2", [id, owner.id]);
+    expect((await open(rotated.token, owner.authorization)).status).toBe(200);
+
+    expect((await post("/api/replays/unshare", owner.authorization, { id })).status).toBe(200);
+    expect((await open(rotated.token, owner.authorization)).status).toBe(404);
+    expect((await open("not-a-token")).status).toBe(404);
+
+    await post("/api/replays/share", owner.authorization, { replayId: id, visibility: "public", includeNotes: false });
+    await db.query("DELETE FROM replay_participants WHERE replay_id=$1 AND user_id=$2", [id, owner.id]);
+    expect((await db.query("SELECT 1 FROM replay_shares WHERE replay_id=$1", [id])).rows).toEqual([]);
+  });
+
+  it("throttles shared replay reads", async () => {
+    const url = await startApi({ sharedReplayRateLimiter: createRateLimiter(1, 60_000) });
+    const token = "A".repeat(22);
+    expect((await fetch(`${url}/api/shared-replays/${token}`)).status).toBe(404);
+    expect((await fetch(`${url}/api/shared-replays/${token}`)).status).toBe(429);
+  });
+
   it("exposes full-information room replays only after finalization", async () => {
     await register(db, "ReplayActiveA", "password1");
     await register(db, "ReplayActiveB", "password1");

@@ -202,12 +202,17 @@ export async function friendByUsername(
 ): Promise<{ id: number; username: string } | null> {
   const target = await targetByUsername(db, username);
   if (!target || target.id === userId) return null;
-  const [low, high] = pair(userId, target.id);
+  return await areFriends(db, userId, target.id) ? target : null;
+}
+
+export async function areFriends(db: Queryable, userId: number, otherUserId: number): Promise<boolean> {
+  if (userId === otherUserId) return false;
+  const [low, high] = pair(userId, otherUserId);
   const { rows } = await db.query(
     "SELECT 1 FROM friendships WHERE user_low_id = $1 AND user_high_id = $2",
     [low, high],
   );
-  return rows.length > 0 ? target : null;
+  return rows.length > 0;
 }
 
 function chatMessageFromRow(raw: Record<string, unknown>, viewerId: number): ChatMessage {

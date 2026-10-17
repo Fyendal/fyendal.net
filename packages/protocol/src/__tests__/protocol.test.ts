@@ -27,6 +27,10 @@ import {
   decodeMatchRecordsResponse,
   decodeMatchesResponse,
   decodeReplaysResponse,
+  decodeReplayShareInput,
+  decodeReplayShareResponse,
+  decodeSharedReplayDenialResponse,
+  decodeSharedReplayResponse,
   decodeServerMessage,
   decodeStatsResponse,
 } from "../index.js";
@@ -1418,6 +1422,7 @@ describe("replays and HTTP responses", () => {
           finishedAt: 3,
           expiresAt: 4,
           favorite: true,
+          share: { visibility: "friends", includeNotes: false },
           replay: { version: 1, seat: 0, views: [gameView()] },
         }],
         matches: [{
@@ -1456,8 +1461,36 @@ describe("replays and HTTP responses", () => {
       expiresAt: 4,
       frameCount: 2,
       favorite: false,
+      share: null,
     };
     expect(decodeReplaysResponse({ ok: true, replays: [replaySummary] })).not.toBeNull();
+    const share = { token: "AbCdEfGhIjKlMnOpQr_-12", visibility: "public", includeNotes: true };
+    expect(decodeReplaysResponse({ ok: true, replays: [{ ...replaySummary, share }] })).not.toBeNull();
+    expect(decodeReplaysResponse({
+      ok: true,
+      replays: [{ ...replaySummary, share: { ...share, token: "short" } }],
+    })).toBeNull();
+    expect(decodeReplaysResponse({
+      ok: true,
+      replays: [{ ...replaySummary, share: { ...share, visibility: "everyone" } }],
+    })).toBeNull();
+    expect(decodeReplayShareInput({ replayId: "aabbccddeeff001122334455", visibility: "friends", includeNotes: false }))
+      .toEqual({ replayId: "aabbccddeeff001122334455", visibility: "friends", includeNotes: false });
+    expect(decodeReplayShareInput({ replayId: "../x", visibility: "friends", includeNotes: false })).toBeNull();
+    expect(decodeReplayShareInput({ replayId: "aabbccddeeff001122334455", visibility: "friends" })).toBeNull();
+    const shared = {
+      ok: true,
+      replay: { version: 1, seat: 0, views: [gameView()] },
+      shared: { ownerUsername: "alice", visibility: "friends", notes: [{ frame: 0, text: "look" }] },
+    };
+    expect(decodeSharedReplayResponse(shared)?.shared.notes).toEqual([{ frame: 0, text: "look" }]);
+    expect(decodeSharedReplayResponse({
+      ...shared,
+      shared: { ...shared.shared, notes: [{ frame: 0, text: "live", roomVersion: 3 }] },
+    })).toBeNull();
+    expect(decodeSharedReplayDenialResponse({ ok: false, error: "sign in", code: "AUTH_REQUIRED" }))
+      .toEqual({ ok: false, error: "sign in", code: "AUTH_REQUIRED" });
+    expect(decodeSharedReplayDenialResponse({ ok: false, error: "no", code: "FORBIDDEN" })).toBeNull();
     expect(decodeReplaysResponse({
       ok: true,
       replays: [{ ...replaySummary, winner: null }],
@@ -1502,6 +1535,8 @@ describe("replays and HTTP responses", () => {
         },
       }],
       [decodeReplaysResponse, { ok: true, replays: [replaySummary] }],
+      [decodeReplayShareResponse, { ok: true, share }],
+      [decodeSharedReplayResponse, shared],
       [decodeReplayResponse, { ok: true, replay: { version: 1, seat: 0, views: [gameView()] } }],
     ] as const;
     for (const [decode, response] of exactResponseCases) {

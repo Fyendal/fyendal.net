@@ -19,6 +19,9 @@ import {
   decodeMatchRecordsResponse,
   decodeMatchesResponse,
   decodeReplaysResponse,
+  decodeReplayShareResponse,
+  decodeSharedReplayDenialResponse,
+  decodeSharedReplayResponse,
   decodeStatsResponse,
   decodeGlobalNoticeResponse,
   decodeVersionUpdateNoticeResponse,
@@ -45,6 +48,10 @@ import {
   type MatchRecordsResponse,
   type MatchesResponse,
   type ReplaysResponse,
+  type ReplayShareInput,
+  type ReplayShareResponse,
+  type SharedReplayDenialResponse,
+  type SharedReplayResponse,
   type StatsResponse,
 } from "@fyendal/protocol";
 import type { PlayerBadge, PlayerReportReason, Format } from "@fyendal/shared";
@@ -278,6 +285,8 @@ export function apiSaveReplayNote(
 }
 
 export type DeleteReplayResult = OkResponse | ApiError;
+export type ReplayShareResult = ReplayShareResponse | ApiError;
+export type SharedReplayOpenResult = { ok: true } | SharedReplayDenialResponse | ApiError;
 export type FavoriteReplayResult = OkResponse | ApiError;
 
 export function apiSetReplayFavorite(
@@ -287,6 +296,43 @@ export function apiSetReplayFavorite(
   signal?: AbortSignal,
 ): Promise<FavoriteReplayResult> {
   return post("replays/favorite", { id, favorite }, okOnly, { token, signal });
+}
+
+export function apiSetReplayShare(
+  token: string,
+  input: ReplayShareInput,
+  signal?: AbortSignal,
+): Promise<ReplayShareResponse | ApiError> {
+  return post("replays/share", input, decodeReplayShareResponse, { token, signal });
+}
+
+export function apiResetReplayShare(
+  token: string,
+  id: string,
+  signal?: AbortSignal,
+): Promise<ReplayShareResponse | ApiError> {
+  return post("replays/share/reset", { id }, decodeReplayShareResponse, { token, signal });
+}
+
+export function apiRemoveReplayShare(
+  token: string,
+  id: string,
+  signal?: AbortSignal,
+): Promise<OkResponse | ApiError> {
+  return post("replays/unshare", { id }, okOnly, { token, signal });
+}
+
+/** Open a share link. The session token is optional: public links work signed out. */
+export function apiSharedReplay(
+  shareToken: string,
+  token: string | null,
+  signal?: AbortSignal,
+): Promise<SharedReplayResponse | SharedReplayDenialResponse | ApiError> {
+  return get(
+    `shared-replays/${shareToken}`,
+    (value) => decodeSharedReplayResponse(value) ?? decodeSharedReplayDenialResponse(value),
+    { ...(token ? { token } : {}), signal },
+  );
 }
 
 export function apiDeleteReplay(

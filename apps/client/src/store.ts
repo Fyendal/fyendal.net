@@ -14,7 +14,7 @@ import {
   parseReplayFile,
   removeUnsupportedLocalReplays,
 } from "./replay/recorder.js";
-import { savedReplayIdFromPath } from "./replay/route.js";
+import { savedReplayIdFromPath, sharedReplayTokenFromPath } from "./replay/route.js";
 import { fabraryPlayRoute } from "./play/route.js";
 import { RoomVersionGate } from "./versionGate.js";
 import {
@@ -1967,6 +1967,7 @@ export const useStore = create<StoreState>((set, get) => {
     closeReplay: () => {
       const snap = preReplay;
       const savedReplayId = get().activeSavedReplayId;
+      const sharedReplayToken = get().activeSharedReplay?.token ?? null;
       const replayNotes = get().replayNotes;
       preReplay = null;
       activeReplayNoteServerTarget = null;
@@ -1976,8 +1977,12 @@ export const useStore = create<StoreState>((set, get) => {
         replayStep: 0,
         replayNotes: [],
         activeSavedReplayId: null,
+        activeSharedReplay: null,
       };
-      if (savedReplayIdFromPath(location.pathname) === savedReplayId) {
+      if (
+        savedReplayIdFromPath(location.pathname) === savedReplayId
+        || (sharedReplayToken !== null && sharedReplayTokenFromPath(location.pathname) === sharedReplayToken)
+      ) {
         history.replaceState(null, "", "/");
       }
       // back to the live game if the room is still there, else to the lobby

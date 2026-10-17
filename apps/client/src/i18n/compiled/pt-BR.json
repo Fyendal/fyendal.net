@@ -34866,6 +34866,202 @@
       "value": "Preparando exportação do replay"
     }
   ],
+  "replay.share.audience": [
+    {
+      "type": 0,
+      "value": "Quem pode abrir o link"
+    }
+  ],
+  "replay.share.confirmReset": [
+    {
+      "type": 0,
+      "value": "Redefinir este link? Os links que você já enviou deixarão de funcionar."
+    }
+  ],
+  "replay.share.copied": [
+    {
+      "type": 0,
+      "value": "Copiado"
+    }
+  ],
+  "replay.share.copy": [
+    {
+      "type": 0,
+      "value": "Copiar link"
+    }
+  ],
+  "replay.share.create": [
+    {
+      "type": 0,
+      "value": "Criar link"
+    }
+  ],
+  "replay.share.expires": [
+    {
+      "type": 6,
+      "value": "count",
+      "options": {
+        "=0": {
+          "value": [
+            {
+              "type": 0,
+              "value": "Este replay expira hoje. Favorite-o para manter o link funcionando."
+            }
+          ]
+        },
+        "one": {
+          "value": [
+            {
+              "type": 0,
+              "value": "Este replay expira em "
+            },
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " dia. Favorite-o para manter o link funcionando."
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 0,
+              "value": "Este replay expira em "
+            },
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " dias. Favorite-o para manter o link funcionando."
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    }
+  ],
+  "replay.share.includeNotes": [
+    {
+      "type": 0,
+      "value": "Incluir minhas notas"
+    }
+  ],
+  "replay.share.includeNotes.hint": [
+    {
+      "type": 0,
+      "value": "Quem assistir vê suas notas, mas não pode alterá-las."
+    }
+  ],
+  "replay.share.link": [
+    {
+      "type": 0,
+      "value": "Link de compartilhamento"
+    }
+  ],
+  "replay.share.manage": [
+    {
+      "type": 0,
+      "value": "Gerenciar link de compartilhamento"
+    }
+  ],
+  "replay.share.open": [
+    {
+      "type": 0,
+      "value": "Compartilhar replay"
+    }
+  ],
+  "replay.share.perspective": [
+    {
+      "type": 0,
+      "value": "Quem assistir verá a partida inteira pelo seu assento, com a mão dos dois jogadores revelada."
+    }
+  ],
+  "replay.share.reset": [
+    {
+      "type": 0,
+      "value": "Redefinir link"
+    }
+  ],
+  "replay.share.stop": [
+    {
+      "type": 0,
+      "value": "Parar de compartilhar"
+    }
+  ],
+  "replay.share.title": [
+    {
+      "type": 0,
+      "value": "Compartilhar replay"
+    }
+  ],
+  "replay.share.visibility.friends": [
+    {
+      "type": 0,
+      "value": "Somente amigos"
+    }
+  ],
+  "replay.share.visibility.friends.hint": [
+    {
+      "type": 0,
+      "value": "Quem assistir precisa entrar na conta e estar na sua lista de amigos."
+    }
+  ],
+  "replay.share.visibility.public": [
+    {
+      "type": 0,
+      "value": "Qualquer pessoa com o link"
+    }
+  ],
+  "replay.share.visibility.public.hint": [
+    {
+      "type": 0,
+      "value": "Não precisa de conta."
+    }
+  ],
+  "replay.shared.friendsOnly": [
+    {
+      "type": 0,
+      "value": "Este replay está compartilhado só com os amigos de quem o publicou."
+    }
+  ],
+  "replay.shared.gateTitle": [
+    {
+      "type": 0,
+      "value": "Replay compartilhado"
+    }
+  ],
+  "replay.shared.goHome": [
+    {
+      "type": 0,
+      "value": "Ir para o início"
+    }
+  ],
+  "replay.shared.signInRequired": [
+    {
+      "type": 0,
+      "value": "Este replay está compartilhado só com amigos. Entre na sua conta para assistir."
+    }
+  ],
+  "replay.shared.title": [
+    {
+      "type": 0,
+      "value": "Replay de "
+    },
+    {
+      "type": 1,
+      "value": "owner"
+    }
+  ],
+  "replay.shared.unavailable": [
+    {
+      "type": 0,
+      "value": "Este link de replay expirou ou foi removido."
+    }
+  ],
   "replay.unfavorite": [
     {
       "type": 0,

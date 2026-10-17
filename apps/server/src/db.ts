@@ -930,6 +930,25 @@ export const MIGRATIONS: Migration[] = [
     sql: `ALTER TABLE room_seats ADD COLUMN queue_card_pool_mode TEXT
       CHECK (queue_card_pool_mode IS NULL OR queue_card_pool_mode IN ('legal', 'future', 'open'));`,
   },
+  {
+    version: 50,
+    // A participant may share their own seat-perspective replay copy through
+    // an unguessable link. The token is a read-only capability for one copy,
+    // kept raw so the owner can copy the link again. Friends-only links also
+    // require a live friendship at read time. The share belongs to the copy:
+    // deletion, expiry sweeps, and account deletion cascade through it.
+    sql: `CREATE TABLE replay_shares (
+      replay_id TEXT NOT NULL,
+      owner_user_id INTEGER NOT NULL,
+      token TEXT NOT NULL UNIQUE,
+      visibility TEXT NOT NULL CHECK (visibility IN ('public', 'friends')),
+      include_notes BOOLEAN NOT NULL DEFAULT FALSE,
+      created_at BIGINT NOT NULL,
+      PRIMARY KEY (replay_id, owner_user_id),
+      FOREIGN KEY (replay_id, owner_user_id)
+        REFERENCES replay_participants(replay_id, user_id) ON DELETE CASCADE
+    );`,
+  },
 ];
 
 async function publicTables(db: Queryable): Promise<string[]> {

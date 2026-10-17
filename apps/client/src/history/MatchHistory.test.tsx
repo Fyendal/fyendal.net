@@ -122,7 +122,9 @@ describe("MatchHistory", () => {
     expect(html).toContain('class="match-row is-ended"');
     expect(html).toContain('aria-label="Favorite replay"');
     expect(html).toContain('aria-pressed="true"');
-    expect(html).toContain('title="Replay: 2 days left"');
+    expect(html).not.toContain('title="Replay: 2 days left"');
+    expect(html).toContain('aria-label="Share replay"');
+    expect(html).not.toContain("<svg");
     expect(html).toContain("Replay expires in 2 days");
     expect(html).toContain("Replay expired");
     expect(html).not.toContain("Show older matches");

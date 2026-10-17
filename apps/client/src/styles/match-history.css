@@ -172,7 +172,7 @@
 .match-side-caption { overflow: hidden; color: var(--text-muted); font-size: 12px; text-overflow: ellipsis; white-space: nowrap; }
 .match-vs { color: var(--text-muted); font-size: 12px; }
 .match-format { color: var(--text-muted); font-size: 12px; white-space: nowrap; }
-.match-actions { display: grid; grid-template-columns: auto repeat(3, 34px); align-items: center; justify-content: end; gap: 6px; min-width: 212px; }
+.match-actions { display: grid; grid-template-columns: auto repeat(4, 34px); align-items: center; justify-content: end; gap: 6px; min-width: 252px; }
 .match-replay-soon { grid-column: 1 / -1; color: #ef9b61; font-size: 11px; font-weight: 650; text-align: right; white-space: nowrap; }
 .match-replay-gone { grid-column: 1 / -1; }
 .match-watch { min-height: 34px; padding: 6px 12px; font-size: 13px; }
@@ -185,11 +185,26 @@
   border-radius: 3px;
   clip-path: none;
 }
-.match-icon-button svg { width: 16px; height: 16px; fill: currentColor; }
+.match-icon-button .ui-icon { width: 16px; height: 16px; }
 .match-icon-button.selected { border-color: #c79b31; background: #4a3510; color: #f0c85a; }
 .match-icon-button.is-danger { background: #781f1b; border-color: #bc4b40; }
 .match-icon-button.is-danger:hover:not(:disabled) { background: #9e2b25; border-color: #d86a5c; }
 .match-replay-gone { color: var(--text-muted); font-size: 12px; }
+
+/* Share replay dialog */
+.share-replay-modal { width: min(520px, calc(100vw - 32px)); }
+.share-replay-modal > .muted { margin-bottom: 14px; }
+.share-replay-fieldset { display: grid; gap: 10px; min-width: 0; margin: 0 0 14px; padding: 0; border: 0; }
+.share-replay-fieldset legend { margin-bottom: 8px; color: #b9aa92; font: 600 13px var(--font-lobby-ui); }
+.share-replay-option { display: flex; align-items: flex-start; gap: 10px; cursor: pointer; }
+.share-replay-option input { margin-top: 3px; }
+.share-replay-option > span { display: grid; gap: 2px; }
+.share-replay-option .muted { font-size: 12px; }
+.share-replay-expiry { margin: 0 0 14px; color: #ef9b61; font-size: 12px; }
+.share-replay-link { display: flex; gap: 8px; margin-bottom: 14px; }
+.share-replay-link input { flex: 1 1 auto; min-width: 0; font-family: var(--font-mono, monospace); font-size: 13px; }
+.shared-replay-gate { width: min(480px, calc(100vw - 32px)); }
+.shared-replay-gate > .muted { margin-bottom: 14px; }
 .history-more { margin-top: 14px; width: 100%; font-family: var(--font-lobby-ui); font-size: 14px; letter-spacing: .3px; text-transform: none; }
 
 /* Heroes tab */
@@ -262,7 +277,7 @@
   .match-row { grid-template-columns: minmax(0, 1fr); gap: 8px; padding: 10px 0 12px 12px; }
   .match-result { grid-auto-flow: column; justify-content: start; gap: 10px; align-items: baseline; }
   .match-format, .match-actions { grid-column: 1; }
-  .match-actions { grid-template-columns: minmax(0, 1fr) repeat(3, 44px); justify-content: stretch; }
+  .match-actions { grid-template-columns: minmax(0, 1fr) repeat(4, 44px); justify-content: stretch; }
   .match-replay-soon { grid-column: 1 / -1; text-align: left; }
   .history-open-file { margin-left: 0; width: 100%; }
   .match-watch { min-height: 44px; }

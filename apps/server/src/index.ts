@@ -182,6 +182,8 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
     deckDeleteRateLimiter: new PgRateLimiter(deps.db, "deck-delete-ip", 120, 10 * 60 * 1000),
     accountRateLimiter: new PgRateLimiter(deps.db, "login-account", 10, 10 * 60 * 1000),
     noticeRateLimiter: new PgRateLimiter(deps.db, "notice-ip", 600, 10 * 60 * 1000),
+    replayShareRateLimiter: new PgRateLimiter(deps.db, "replay-share-ip", 120, 10 * 60 * 1000),
+    sharedReplayRateLimiter: new PgRateLimiter(deps.db, "shared-replay-ip", 120, 10 * 60 * 1000),
     statsRateLimiter: new PgRateLimiter(
       deps.db,
       "stats-ip",

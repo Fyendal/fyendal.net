@@ -185,8 +185,41 @@ export interface ReplaySummary {
   expiresAt: number;
   frameCount: number;
   favorite: boolean;
+  share: ReplayShare | null;
 }
 export interface ReplaysResponse { ok: true; replays: ReplaySummary[] }
+/** "public" opens for anyone holding the link, signed in or not; "friends"
+ * also requires the viewer to be the owner's friend at read time. */
+export const REPLAY_SHARE_VISIBILITIES = ["public", "friends"] as const;
+export type ReplayShareVisibility = typeof REPLAY_SHARE_VISIBILITIES[number];
+/** 16 random bytes as unpadded base64url. */
+export const REPLAY_SHARE_TOKEN_RE = /^[A-Za-z0-9_-]{22}$/;
+export interface ReplayShare {
+  token: string;
+  visibility: ReplayShareVisibility;
+  includeNotes: boolean;
+}
+export interface ReplayShareInput {
+  replayId: string;
+  visibility: ReplayShareVisibility;
+  includeNotes: boolean;
+}
+export interface ReplayShareResponse { ok: true; share: ReplayShare }
+/** A shared copy is always the owner's seat perspective. Notes are present
+ * only when the owner chose to include them. */
+export interface SharedReplayResponse {
+  ok: true;
+  replay: ReplayFile;
+  shared: {
+    ownerUsername: string;
+    visibility: ReplayShareVisibility;
+    notes: ReplayServerNote[];
+  };
+}
+/** Why a valid share link refused this viewer. Unknown, revoked, and expired
+ * links are plain 404s. */
+export type SharedReplayDenial = "AUTH_REQUIRED" | "FRIEND_REQUIRED";
+export interface SharedReplayDenialResponse { ok: false; error: string; code: SharedReplayDenial }
 /** How a recorded game finished. Null for games backfilled from replays. */
 export type MatchEndReason = "lethal" | "concede" | "idle" | "draw" | "ended";
 export type MatchOpponentKind = "player" | "bot";
@@ -364,6 +397,7 @@ export interface AccountExport {
     finishedAt: number;
     expiresAt: number;
     favorite: boolean;
+    share: { visibility: ReplayShareVisibility; includeNotes: boolean } | null;
     replay: ReplayFile;
   }>;
   matches: MatchSummary[];
@@ -1820,10 +1854,39 @@ export const decodeBugReportNotificationsResponse: Decoder<BugReportNotification
     : null;
 };
 
+function replayShareVisibility(value: unknown): value is ReplayShareVisibility {
+  return value === "public" || value === "friends";
+}
+
+function replayShare(value: unknown): value is ReplayShare {
+  const share = object(value);
+  return !!share && exactKeys(share, ["token", "visibility", "includeNotes"])
+    && typeof share.token === "string" && REPLAY_SHARE_TOKEN_RE.test(share.token)
+    && replayShareVisibility(share.visibility)
+    && typeof share.includeNotes === "boolean";
+}
+
+export const decodeReplayShareInput: Decoder<ReplayShareInput> = (value) => {
+  const input = object(value);
+  return input && exactKeys(input, ["replayId", "visibility", "includeNotes"])
+    && typeof input.replayId === "string" && /^[a-f0-9]{24}$/.test(input.replayId)
+    && replayShareVisibility(input.visibility)
+    && typeof input.includeNotes === "boolean"
+    ? { replayId: input.replayId, visibility: input.visibility, includeNotes: input.includeNotes }
+    : null;
+};
+
+export const decodeReplayShareResponse: Decoder<ReplayShareResponse> = (value) => {
+  const data = object(value);
+  return data && exactKeys(data, ["ok", "share"]) && data.ok === true && replayShare(data.share)
+    ? { ok: true, share: { ...data.share } }
+    : null;
+};
+
 function decodeReplaySummary(value: unknown): ReplaySummary | null {
   const replay = object(value);
   return replay
-    && exactKeys(replay, ["id", "format", "heroIds", "yourSeat", "winner", "finishedAt", "expiresAt", "frameCount", "favorite"])
+    && exactKeys(replay, ["id", "format", "heroIds", "yourSeat", "winner", "finishedAt", "expiresAt", "frameCount", "favorite", "share"])
     && id(replay.id)
     && FORMATS.has(String(replay.format))
     && Array.isArray(replay.heroIds) && replay.heroIds.length === 2 && replay.heroIds.every(id)
@@ -1831,6 +1894,7 @@ function decodeReplaySummary(value: unknown): ReplaySummary | null {
     && nonNegativeInteger(replay.finishedAt) && nonNegativeInteger(replay.expiresAt)
     && nonNegativeInteger(replay.frameCount)
     && typeof replay.favorite === "boolean"
+    && (replay.share === null || replayShare(replay.share))
     ? value as ReplaySummary
     : null;
 }
@@ -1947,6 +2011,34 @@ export const decodeReplayNotesResponse: Decoder<ReplayNotesResponse> = (value) =
     : `version:${note.roomVersion}`));
   return targets.size === notes.length
     ? { ok: true, notes }
+    : null;
+};
+
+export const decodeSharedReplayResponse: Decoder<SharedReplayResponse> = (value) => {
+  const data = object(value);
+  if (!data || !exactKeys(data, ["ok", "replay", "shared"]) || data.ok !== true) return null;
+  const shared = object(data.shared);
+  if (!shared || !exactKeys(shared, ["ownerUsername", "visibility", "notes"])
+    || !string(shared.ownerUsername, MAX_SHORT_TEXT, false)
+    || !replayShareVisibility(shared.visibility)) return null;
+  const notes = decodeReplayNotesResponse({ ok: true, notes: shared.notes });
+  if (!notes || notes.notes.some((note) => note.roomVersion !== undefined)) return null;
+  const replay = decodeReplayFile(data.replay);
+  return replay
+    ? {
+        ok: true,
+        replay,
+        shared: { ownerUsername: shared.ownerUsername, visibility: shared.visibility, notes: notes.notes },
+      }
+    : null;
+};
+
+export const decodeSharedReplayDenialResponse: Decoder<SharedReplayDenialResponse> = (value) => {
+  const data = object(value);
+  return data && exactKeys(data, ["ok", "error", "code"]) && data.ok === false
+    && string(data.error, MAX_TEXT)
+    && (data.code === "AUTH_REQUIRED" || data.code === "FRIEND_REQUIRED")
+    ? { ok: false, error: data.error, code: data.code }
     : null;
 };
 
@@ -2236,12 +2328,19 @@ function exportMatchmaking(value: unknown): boolean {
     ));
 }
 
+function exportReplayShare(value: unknown): boolean {
+  const share = object(value);
+  return !!share && exactKeys(share, ["visibility", "includeNotes"])
+    && replayShareVisibility(share.visibility) && typeof share.includeNotes === "boolean";
+}
+
 function exportReplay(value: unknown): boolean {
   const replay = object(value);
   return !!replay
-    && exactKeys(replay, ["id", "finishedAt", "expiresAt", "favorite", "replay"])
+    && exactKeys(replay, ["id", "finishedAt", "expiresAt", "favorite", "share", "replay"])
     && id(replay.id) && nonNegativeInteger(replay.finishedAt) && nonNegativeInteger(replay.expiresAt)
     && typeof replay.favorite === "boolean"
+    && (replay.share === null || exportReplayShare(replay.share))
     && decodeReplayFile(replay.replay) !== null;
 }
 

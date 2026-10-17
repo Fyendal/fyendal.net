@@ -603,9 +603,12 @@ export async function listReplays(
 ): Promise<ReplaySummary[]> {
   const { rows } = await db.query(
     `SELECT g.id, g.format, g.hero_0_id, g.hero_1_id, p.seat, g.winner,
-            g.finished_at, g.expires_at, g.frame_count, p.favorite
+            g.finished_at, g.expires_at, g.frame_count, p.favorite,
+            s.token AS share_token, s.visibility AS share_visibility,
+            s.include_notes AS share_include_notes
      FROM replay_games g
      JOIN replay_participants p ON p.replay_id = g.id
+     LEFT JOIN replay_shares s ON s.replay_id = p.replay_id AND s.owner_user_id = p.user_id
      WHERE p.user_id = $1 AND g.status = 'ready'
        AND (p.favorite = TRUE OR g.expires_at > $2)
      ORDER BY g.finished_at DESC, g.id DESC`,
@@ -628,8 +631,20 @@ export async function listReplays(
       expiresAt: safeInteger(row.expires_at, "replay expiry"),
       frameCount: safeInteger(row.frame_count, "replay frame count"),
       favorite: row.favorite === true,
+      share: replayShareFromRow(row),
     };
   });
+}
+
+function replayShareFromRow(row: Record<string, unknown>): ReplaySummary["share"] {
+  if (row.share_token === null || row.share_token === undefined) return null;
+  const visibility = row.share_visibility;
+  if (visibility !== "public" && visibility !== "friends") throw new Error("invalid replay share visibility");
+  return {
+    token: String(row.share_token),
+    visibility,
+    includeNotes: row.share_include_notes === true,
+  };
 }
 
 export async function getReplay(

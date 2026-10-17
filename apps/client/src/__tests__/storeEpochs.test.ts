@@ -1721,6 +1721,7 @@ describe("client connection and account race fences", () => {
       expiresAt: 2,
       frameCount: 3,
       favorite: false,
+      share: null,
     };
     useStore.setState({ savedReplays: [replay] });
 
@@ -1749,6 +1750,7 @@ describe("client connection and account race fences", () => {
       expiresAt: Date.now() + 1_000,
       frameCount: 3,
       favorite: false,
+      share: null,
     };
     useStore.setState({ savedReplays: [replay] });
 
@@ -1816,6 +1818,84 @@ describe("client connection and account race fences", () => {
     ]);
     expect(serverNotes).toEqual([{ frame: 0, text: "Review this opening hand." }]);
     expect(history.pushState).toHaveBeenCalledTimes(2);
+  });
+
+  it("opens share links signed out and keeps the viewer's notes local", async () => {
+    const token = "AbCdEfGhIjKlMnOpQr_-12";
+    const fetchMock = vi.fn((input: string | URL | Request, init?: RequestInit) => {
+      expect(String(input)).toBe(`http://localhost:8080/api/shared-replays/${token}`);
+      expect(new Headers(init?.headers).get("authorization")).toBeNull();
+      return Promise.resolve(jsonResponse({
+        ok: true,
+        replay: { version: 1, seat: 1, views: [staleState.view] },
+        shared: { ownerUsername: "Bob", visibility: "public", notes: [{ frame: 0, text: "Bob's read" }] },
+      }));
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    const { useStore } = await import("../store.js");
+
+    await expect(useStore.getState().watchSharedReplay(token)).resolves.toEqual({ ok: true });
+    expect(history.pushState).toHaveBeenCalledWith(null, "", `/r/${token}`);
+    expect(useStore.getState()).toMatchObject({
+      screen: "replay",
+      yourSeat: 1,
+      activeSavedReplayId: null,
+      activeSharedReplay: { token, ownerUsername: "Bob" },
+      replayNotes: [{ frame: 0, text: "Bob's read" }],
+    });
+    useStore.getState().setReplayNote(0, "My take");
+    expect(fetchMock).toHaveBeenCalledOnce();
+
+    useStore.getState().closeReplay();
+    expect(useStore.getState()).toMatchObject({ screen: "lobby", activeSharedReplay: null });
+  });
+
+  it("reports why a share link refused the viewer", async () => {
+    vi.stubGlobal("fetch", vi.fn(() => Promise.resolve(jsonResponse({
+      ok: false,
+      error: "sign in to watch this replay",
+      code: "AUTH_REQUIRED",
+    }))));
+    const { useStore } = await import("../store.js");
+
+    await expect(useStore.getState().watchSharedReplay("AbCdEfGhIjKlMnOpQr_-12")).resolves.toEqual({
+      ok: false,
+      error: "sign in to watch this replay",
+      code: "AUTH_REQUIRED",
+    });
+    expect(useStore.getState().screen).toBe("lobby");
+  });
+
+  it("records a saved replay's share link after the server accepts it", async () => {
+    localStorage.setItem("fyendal-auth", JSON.stringify({ token: "token-a", username: "Alice" }));
+    const share = { token: "AbCdEfGhIjKlMnOpQr_-12", visibility: "friends", includeNotes: true };
+    const fetchMock = vi.fn((input: string | URL | Request, init?: RequestInit) => {
+      const url = String(input);
+      if (url.endsWith("/api/replays/unshare")) return Promise.resolve(jsonResponse({ ok: true }));
+      expect(url).toBe("http://localhost:8080/api/replays/share");
+      expect(JSON.parse(String(init?.body))).toEqual({ replayId: "replay-1", visibility: "friends", includeNotes: true });
+      return Promise.resolve(jsonResponse({ ok: true, share }));
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    const { useStore } = await import("../store.js");
+    const replay = {
+      id: "replay-1",
+      format: "cc" as const,
+      heroIds: ["HERO0", "HERO1"] as [string, string],
+      yourSeat: 0 as const,
+      winner: 0 as const,
+      finishedAt: 1,
+      expiresAt: 2,
+      frameCount: 3,
+      favorite: false,
+      share: null,
+    };
+    useStore.setState({ savedReplays: [replay] });
+
+    await expect(useStore.getState().setReplayShare(replay.id, "friends", true)).resolves.toEqual({ ok: true, share });
+    expect(useStore.getState().savedReplays).toEqual([{ ...replay, share }]);
+    await expect(useStore.getState().removeReplayShare(replay.id)).resolves.toEqual({ ok: true });
+    expect(useStore.getState().savedReplays).toEqual([replay]);
   });
 
   it("waits for authoritative game-over frames before opening an immediate replay", async () => {

@@ -28,6 +28,7 @@ export function replayViewerProjection(
     replayStep: 0,
     replayNotes: replayFileNotes(file),
     activeSavedReplayId: savedReplayId,
+    activeSharedReplay: null,
     view: views[0]!,
     legal: [],
     actionCandidates: [],

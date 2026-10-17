@@ -2,7 +2,12 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { gunzipSync } from "node:zlib";
 import { precon } from "@fyendal/cards";
 import { legalIntents } from "@fyendal/engine";
-import { decodeGameView, decodeReplayResponse, replayFileViews } from "@fyendal/protocol";
+import {
+  decodeGameView,
+  decodeReplayResponse,
+  decodeSharedReplayResponse,
+  replayFileViews,
+} from "@fyendal/protocol";
 import type { Queryable } from "../db.js";
 import {
   deleteReplay,
@@ -22,6 +27,7 @@ import {
 } from "../replays.js";
 import { dehydrateState, PgRoomStore, stateMessage } from "../store.js";
 import { exportAccount } from "../accounts.js";
+import { readSharedReplay, setReplayShare } from "../replayShares.js";
 import { freshDb } from "./testdb.js";
 
 let db: Queryable;
@@ -630,5 +636,48 @@ describe("server replay retention", () => {
     await startedGame();
     expect(await discardUnfinishedReplaysOtherRulesets(db, "rules-b")).toBe(1);
     expect((await db.query("SELECT 1 FROM replay_games")).rows).toEqual([]);
+  });
+
+  it("serves a finalized copy through its share link from the owner's seat", async () => {
+    const game = await startedGame();
+    await store.applyIntent(
+      game.code,
+      { token: game.tokens[0], userId: game.users[0] },
+      { kind: "concede" },
+    );
+    await finalizeReplayForRoom(db, game.code);
+    const replay = (await listReplays(db, game.users[1]))[0]!;
+    expect(await saveReplayNote(db, game.users[1], { replayId: replay.id, frame: 0, text: "Bob note" })).toBe(true);
+    const share = await setReplayShare(db, game.users[1], {
+      replayId: replay.id,
+      visibility: "public",
+      includeNotes: true,
+    });
+    if (!share) throw new Error("share failed");
+
+    const served = await readSharedReplay(db, share.token, null);
+    if (served.kind !== "ready") throw new Error(`share was ${served.kind}`);
+    const decoded = decodeSharedReplayResponse(JSON.parse(served.body.toString("utf8")));
+    expect(decoded?.shared).toEqual({
+      ownerUsername: "Bob",
+      visibility: "public",
+      notes: [{ frame: 0, text: "Bob note" }],
+    });
+    expect(decoded?.replay).toEqual(await getReplay(db, game.users[1], replay.id));
+    expect(decoded?.replay.seat).toBe(1);
+
+    expect((await exportAccount(db, game.users[1]))?.replays[0]?.share)
+      .toEqual({ visibility: "public", includeNotes: true });
+    expect(await setReplayShare(db, game.users[1], {
+      replayId: replay.id,
+      visibility: "public",
+      includeNotes: false,
+    }, replay.expiresAt)).toBeNull();
+
+    // Account deletion removes account-bound rooms, then the user row cascades.
+    await db.query("DELETE FROM rooms WHERE code=$1", [game.code]);
+    await db.query("DELETE FROM users WHERE id=$1", [game.users[1]]);
+    expect(await readSharedReplay(db, share.token, null)).toEqual({ kind: "not-found" });
+    expect((await db.query("SELECT 1 FROM replay_shares")).rows).toEqual([]);
   });
 });

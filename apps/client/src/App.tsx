@@ -4,7 +4,7 @@ import { hasSavedRoomSession, hasSavedSpectatorSession, roomCodeFromUrl, useStor
 import { Lobby } from "./lobby/Lobby.js";
 import { ClientUpdateRequired } from "./lobby/ClientUpdateRequired.js";
 import { RoomLoading } from "./lobby/RoomLoading.js";
-import { savedReplayIdFromPath } from "./replay/route.js";
+import { savedReplayIdFromPath, sharedReplayTokenFromPath } from "./replay/route.js";
 import { BackgroundMatchOffer } from "./matchmaking/BackgroundMatchOffer.js";
 
 const WaitingRoom = lazy(() => import("./lobby/WaitingRoom.js").then((module) => ({ default: module.WaitingRoom })));
@@ -12,6 +12,8 @@ const PrepRoom = lazy(() => import("./prep/PrepRoom.js").then((module) => ({ def
 const GameBoard = lazy(() => import("./game/GameBoard.js").then((module) => ({ default: module.GameBoard })));
 const ReplayBar = lazy(() => import("./replay/ReplayBar.js").then((module) => ({ default: module.ReplayBar })));
 const LegalPage = lazy(() => import("./legal/LegalPage.js").then((module) => ({ default: module.LegalPage })));
+const SharedReplayGate = lazy(() => import("./replay/SharedReplayGate.js")
+  .then((module) => ({ default: module.SharedReplayGate })));
 const SocialDock = lazy(() => import("./social/SocialDock.js").then((module) => ({ default: module.SocialDock })));
 const FabraryPlayPage = lazy(() => import("./play/FabraryPlayPage.js")
   .then((module) => ({ default: module.FabraryPlayPage })));
@@ -92,16 +94,21 @@ function AppContent() {
   const inspectRoom = useStore((state) => state.inspectRoom);
   const joinRoom = useStore((state) => state.joinRoom);
   const watchSavedReplay = useStore((state) => state.watchSavedReplay);
+  const activeSharedReplayToken = useStore((state) => state.activeSharedReplay?.token ?? null);
+  const watchSharedReplay = useStore((state) => state.watchSharedReplay);
   const setError = useStore((state) => state.setError);
   const setConnectionActive = useStore((state) => state.setConnectionActive);
   const replayLoadRef = useRef<string | null>(null);
   const [, setReplayRouteFailure] = useState<string | null>(null);
+  const sharedLoadRef = useRef<string | null>(null);
+  const [sharedGate, setSharedGate] = useState<{ token: string; reason: "sign-in" | "friends-only" } | null>(null);
   const path = location.pathname;
   const routeRoomCode = roomCodeFromUrl();
   const savedReplayId = savedReplayIdFromPath(path);
+  const sharedReplayToken = sharedReplayTokenFromPath(path);
   useRouteMetadata(
     path,
-    routeRoomCode !== null || savedReplayId !== null || pendingFabraryPlay !== null,
+    routeRoomCode !== null || savedReplayId !== null || sharedReplayToken !== null || pendingFabraryPlay !== null,
     intl.formatMessage({ id: "meta.home.title" }),
     intl.formatMessage({ id: "meta.home.description" }),
   );
@@ -158,6 +165,35 @@ function AppContent() {
     });
   }, [activeSavedReplayId, authToken, savedReplayId, screen, setError, watchSavedReplay]);
 
+  // Share links open for signed-out viewers too. A friends-only refusal keeps
+  // the link so signing in (authToken changes) retries it.
+  useEffect(() => {
+    if (
+      !sharedReplayToken ||
+      (screen === "replay" && activeSharedReplayToken === sharedReplayToken) ||
+      sharedLoadRef.current === sharedReplayToken
+    ) return;
+    sharedLoadRef.current = sharedReplayToken;
+    setSharedGate(null);
+    void watchSharedReplay(sharedReplayToken).then((result) => {
+      if (sharedLoadRef.current !== sharedReplayToken) return;
+      sharedLoadRef.current = null;
+      if (result.ok) return;
+      if ("code" in result) {
+        setSharedGate({
+          token: sharedReplayToken,
+          reason: result.code === "AUTH_REQUIRED" ? "sign-in" : "friends-only",
+        });
+        return;
+      }
+      history.replaceState(null, "", "/");
+      setError(result.error === "replay not found"
+        ? intl.formatMessage({ id: "replay.shared.unavailable" })
+        : result.error);
+      setReplayRouteFailure(sharedReplayToken);
+    });
+  }, [activeSharedReplayToken, authToken, intl, screen, setError, sharedReplayToken, watchSharedReplay]);
+
   // legal pages are full-page loads (plain <a href> in the footer); neither
   // path collides with the 6-char room-code pattern
   if (path === "/terms" || path === "/terms/" || path === "/privacy" || path === "/privacy/") {
@@ -170,6 +206,20 @@ function AppContent() {
 
   if (clientUpdateRequired) return <ClientUpdateRequired />;
   if (savedReplayId && authToken && screen !== "replay") return <ScreenFallback />;
+  if (sharedReplayToken && screen !== "replay") {
+    if (sharedGate?.token !== sharedReplayToken) return <ScreenFallback />;
+    return (
+      <Suspense fallback={<ScreenFallback />}>
+        <SharedReplayGate
+          reason={sharedGate.reason}
+          onLeave={() => {
+            history.replaceState(null, "", "/");
+            setSharedGate(null);
+          }}
+        />
+      </Suspense>
+    );
+  }
 
   let content: React.ReactNode;
   if (screen === "game") content = <GameBoard />;

@@ -33359,6 +33359,194 @@
       "value": "Preparing replay export"
     }
   ],
+  "replay.share.audience": [
+    {
+      "type": 0,
+      "value": "Who can open the link"
+    }
+  ],
+  "replay.share.confirmReset": [
+    {
+      "type": 0,
+      "value": "Reset this link? Links you already sent will stop working."
+    }
+  ],
+  "replay.share.copied": [
+    {
+      "type": 0,
+      "value": "Copied"
+    }
+  ],
+  "replay.share.copy": [
+    {
+      "type": 0,
+      "value": "Copy link"
+    }
+  ],
+  "replay.share.create": [
+    {
+      "type": 0,
+      "value": "Create link"
+    }
+  ],
+  "replay.share.expires": [
+    {
+      "type": 6,
+      "value": "count",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 0,
+              "value": "This replay expires in "
+            },
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " day. Favorite it to keep the link working."
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 0,
+              "value": "This replay expires in "
+            },
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " days. Favorite it to keep the link working."
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    }
+  ],
+  "replay.share.includeNotes": [
+    {
+      "type": 0,
+      "value": "Include my notes"
+    }
+  ],
+  "replay.share.includeNotes.hint": [
+    {
+      "type": 0,
+      "value": "Viewers see your notes but can’t change them."
+    }
+  ],
+  "replay.share.link": [
+    {
+      "type": 0,
+      "value": "Share link"
+    }
+  ],
+  "replay.share.manage": [
+    {
+      "type": 0,
+      "value": "Manage share link"
+    }
+  ],
+  "replay.share.open": [
+    {
+      "type": 0,
+      "value": "Share replay"
+    }
+  ],
+  "replay.share.perspective": [
+    {
+      "type": 0,
+      "value": "Viewers watch the whole game from your seat, with both players’ hands revealed."
+    }
+  ],
+  "replay.share.reset": [
+    {
+      "type": 0,
+      "value": "Reset link"
+    }
+  ],
+  "replay.share.stop": [
+    {
+      "type": 0,
+      "value": "Stop sharing"
+    }
+  ],
+  "replay.share.title": [
+    {
+      "type": 0,
+      "value": "Share replay"
+    }
+  ],
+  "replay.share.visibility.friends": [
+    {
+      "type": 0,
+      "value": "Friends only"
+    }
+  ],
+  "replay.share.visibility.friends.hint": [
+    {
+      "type": 0,
+      "value": "Viewers must be signed in and on your friends list."
+    }
+  ],
+  "replay.share.visibility.public": [
+    {
+      "type": 0,
+      "value": "Anyone with the link"
+    }
+  ],
+  "replay.share.visibility.public.hint": [
+    {
+      "type": 0,
+      "value": "No account needed."
+    }
+  ],
+  "replay.shared.friendsOnly": [
+    {
+      "type": 0,
+      "value": "This replay is shared with the owner’s friends only."
+    }
+  ],
+  "replay.shared.gateTitle": [
+    {
+      "type": 0,
+      "value": "Shared replay"
+    }
+  ],
+  "replay.shared.goHome": [
+    {
+      "type": 0,
+      "value": "Go to home"
+    }
+  ],
+  "replay.shared.signInRequired": [
+    {
+      "type": 0,
+      "value": "This replay is shared with friends only. Sign in to watch it."
+    }
+  ],
+  "replay.shared.title": [
+    {
+      "type": 1,
+      "value": "owner"
+    },
+    {
+      "type": 0,
+      "value": "’s replay"
+    }
+  ],
+  "replay.shared.unavailable": [
+    {
+      "type": 0,
+      "value": "This replay link has expired or was removed."
+    }
+  ],
   "replay.unfavorite": [
     {
       "type": 0,

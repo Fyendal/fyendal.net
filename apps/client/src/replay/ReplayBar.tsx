@@ -122,6 +122,7 @@ export function ReplayBar() {
     setReplayNote,
     closeReplay,
     downloadReplay,
+    sharedOwner,
   } = useStore(
     useShallow((state) => ({
       replayViews: state.replayViews,
@@ -131,6 +132,7 @@ export function ReplayBar() {
       setReplayNote: state.setReplayNote,
       closeReplay: state.closeReplay,
       downloadReplay: state.downloadReplay,
+      sharedOwner: state.activeSharedReplay?.ownerUsername ?? null,
     })),
   );
   const [collapsed, setCollapsed] = useState(replayStartsCollapsed);
@@ -298,7 +300,11 @@ export function ReplayBar() {
         />
       ) : (
         <>
-          <span className="replay-title">{intl.formatMessage({ id: "replay.controls.title" })}</span>
+          <span className="replay-title">
+            {sharedOwner
+              ? intl.formatMessage({ id: "replay.shared.title" }, { owner: sharedOwner })
+              : intl.formatMessage({ id: "replay.controls.title" })}
+          </span>
           <button
             type="button"
             className="replay-collapse-toggle"

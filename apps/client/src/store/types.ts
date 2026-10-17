@@ -36,12 +36,15 @@ import type {
   MatchSummary,
   ReplaySummary,
   ReplayServerNote,
+  ReplayShareVisibility,
 } from "@fyendal/protocol";
 import type {
   DeckResult,
   DeleteDeckResult,
   DeleteReplayResult,
   FavoriteReplayResult,
+  ReplayShareResult,
+  SharedReplayOpenResult,
   BugReportResult,
   LoginResult,
   PlayerReportResult,
@@ -274,6 +277,8 @@ export interface StoreState {
   replayStep: number;
   replayNotes: ReplayServerNote[];
   activeSavedReplayId: string | null;
+  /** Set while watching someone's replay through a share link. */
+  activeSharedReplay: { token: string; ownerUsername: string } | null;
   savedReplays: ReplaySummary[];
   replaysLoading: boolean;
   /** Counter rows for the history tab; summed in the client per filter. */
@@ -290,6 +295,14 @@ export interface StoreState {
   exportSavedReplay: (id: string) => Promise<string | null>;
   setSavedReplayFavorite: (id: string, favorite: boolean) => Promise<FavoriteReplayResult>;
   deleteSavedReplay: (id: string) => Promise<DeleteReplayResult>;
+  setReplayShare: (
+    replayId: string,
+    visibility: ReplayShareVisibility,
+    includeNotes: boolean,
+  ) => Promise<ReplayShareResult>;
+  resetReplayShare: (replayId: string) => Promise<ReplayShareResult>;
+  removeReplayShare: (replayId: string) => Promise<DeleteReplayResult>;
+  watchSharedReplay: (token: string) => Promise<SharedReplayOpenResult>;
   watchReplay: () => Promise<void>;
   downloadReplay: () => void;
   getRecordedViews: () => GameView[];

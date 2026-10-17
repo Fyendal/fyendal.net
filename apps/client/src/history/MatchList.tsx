@@ -2,10 +2,13 @@ import { useState } from "react";
 import { MAX_FAVORITE_REPLAYS, type MatchSummary } from "@fyendal/protocol";
 import { useIntl, type IntlShape } from "react-intl";
 import { useShallow } from "zustand/react/shallow";
+import { TooltipButton } from "../components/TooltipButton.js";
+import { UiIcon } from "../components/UiIcon.js";
 import { cardImageUrl } from "../game/Card.js";
 import { formatLabel } from "../lobby/FormatBadge.js";
 import { useStore } from "../store.js";
 import { heroName } from "./HeroPortrait.js";
+import { ShareReplayDialog } from "./ShareReplayDialog.js";
 import { matchOutcome } from "./summarizeRecords.js";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -43,10 +46,6 @@ function Side({ heroId, caption }: { heroId: string; caption: string | null }) {
   );
 }
 
-const STAR = "m12 2.4 2.95 5.98 6.6.96-4.78 4.66 1.13 6.57L12 17.47l-5.9 3.1L7.23 14 2.45 9.34l6.6-.96L12 2.4Z";
-const DOWNLOAD = "M11 3h2v10.17l3.59-3.58L18 11l-6 6-6-6 1.41-1.41L11 13.17V3ZM5 19h14v2H5v-2Z";
-const TRASH = "M8 3h8l1 2h4v2H3V5h4l1-2Zm-2 6h12l-1 12H7L6 9Zm3 2v8h2v-8H9Zm4 0v8h2v-8h-2Z";
-
 /** Newest-first rows of finished games with replay actions on each row.
  * Used by the Matches tab (full, paged) and the Overview (recent few). */
 export function MatchList({
@@ -70,12 +69,14 @@ export function MatchList({
 }) {
   const intl = useIntl();
   const {
+    savedReplays,
     favoriteCount,
     watchSavedReplay,
     exportSavedReplay,
     setMatchReplayFavorite,
     deleteMatchReplay,
   } = useStore(useShallow((state) => ({
+    savedReplays: state.savedReplays,
     favoriteCount: state.savedReplays.reduce((count, replay) => count + (replay.favorite ? 1 : 0), 0),
     watchSavedReplay: state.watchSavedReplay,
     exportSavedReplay: state.exportSavedReplay,
@@ -84,6 +85,7 @@ export function MatchList({
   })));
   const [busy, setBusy] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
+  const [sharing, setSharing] = useState<{ replayId: string; expiresInDays: number | null } | null>(null);
 
   const run = async (replayId: string, action: "watch" | "export") => {
     setBusy(`${action}:${replayId}`);
@@ -134,6 +136,8 @@ export function MatchList({
             ? Math.max(1, Math.ceil((replay.expiresAt - Date.now()) / DAY_MS))
             : null;
           const atLimit = replay !== null && !replay.favorite && favoriteCount >= MAX_FAVORITE_REPLAYS;
+          const shared = replay !== null
+            && savedReplays.some((saved) => saved.id === replay.id && saved.share !== null);
           const watchTitle = replay
             ? replay.favorite
               ? intl.formatMessage({ id: "history.match.replayKept" })
@@ -162,56 +166,56 @@ export function MatchList({
               <span className="match-actions">
                 {replay ? (
                   <>
-                    <button
-                      type="button"
+                    <TooltipButton
                       className="match-watch"
                       disabled={busy !== null}
-                      title={watchTitle}
+                      tooltip={watchTitle ?? ""}
+                      aria-label={intl.formatMessage({ id: "replay.watch" })}
                       onClick={() => void run(replay.id, "watch")}
                     >
                       {intl.formatMessage({ id: busy === `watch:${replay.id}` ? "replay.watchLoading" : "replay.watch" })}
-                    </button>
-                    <button
-                      type="button"
+                    </TooltipButton>
+                    <TooltipButton
                       className={`match-icon-button${replay.favorite ? " selected" : ""}`}
                       disabled={busy !== null || atLimit}
                       onClick={() => void toggleFavorite(match.id, replay.id, !replay.favorite)}
                       aria-pressed={replay.favorite}
-                      aria-label={intl.formatMessage({
+                      tooltip={intl.formatMessage({
                         id: busy === `favorite:${replay.id}`
                           ? "replay.favoriteSaving"
-                          : replay.favorite ? "replay.unfavorite" : "replay.favorite",
-                      })}
-                      title={intl.formatMessage({
-                        id: atLimit ? "replay.favoriteLimit" : replay.favorite ? "replay.unfavorite" : "replay.favorite",
+                          : atLimit ? "replay.favoriteLimit" : replay.favorite ? "replay.unfavorite" : "replay.favorite",
                       })}
                     >
-                      <svg viewBox="0 0 24 24" aria-hidden="true"><path d={STAR} /></svg>
-                    </button>
-                    <button
-                      type="button"
+                      <UiIcon name="star" />
+                    </TooltipButton>
+                    <TooltipButton
+                      className={`match-icon-button${shared ? " selected" : ""}`}
+                      disabled={busy !== null}
+                      onClick={() => setSharing({ replayId: replay.id, expiresInDays: daysLeft })}
+                      tooltip={intl.formatMessage({ id: shared ? "replay.share.manage" : "replay.share.open" })}
+                    >
+                      <UiIcon name="share" />
+                    </TooltipButton>
+                    <TooltipButton
                       className="match-icon-button"
                       disabled={busy !== null}
                       onClick={() => void run(replay.id, "export")}
-                      aria-label={intl.formatMessage({
+                      tooltip={intl.formatMessage({
                         id: busy === `export:${replay.id}` ? "replay.prepareExport" : "replay.exportJson",
                       })}
-                      title={intl.formatMessage({ id: "replay.exportJson" })}
                     >
-                      <svg viewBox="0 0 24 24" aria-hidden="true"><path d={DOWNLOAD} /></svg>
-                    </button>
-                    <button
-                      type="button"
+                      <UiIcon name="download" />
+                    </TooltipButton>
+                    <TooltipButton
                       className="match-icon-button is-danger"
                       disabled={busy !== null}
                       onClick={() => void remove(match.id, replay.id)}
-                      aria-label={intl.formatMessage({
+                      tooltip={intl.formatMessage({
                         id: busy === `delete:${replay.id}` ? "replay.deleting" : "replay.delete",
                       })}
-                      title={intl.formatMessage({ id: "replay.delete" })}
                     >
-                      <svg viewBox="0 0 24 24" aria-hidden="true"><path d={TRASH} /></svg>
-                    </button>
+                      <UiIcon name="trash" />
+                    </TooltipButton>
                     {daysLeft !== null && daysLeft <= EXPIRY_WARNING_DAYS ? (
                       <span className="match-replay-soon">
                         {intl.formatMessage({ id: "history.match.replayExpiresSoon" }, { count: daysLeft })}
@@ -233,6 +237,13 @@ export function MatchList({
         </button>
       ) : null}
       {actionError ? <p className="error" role="alert">{actionError}</p> : null}
+      {sharing ? (
+        <ShareReplayDialog
+          replayId={sharing.replayId}
+          expiresInDays={sharing.expiresInDays}
+          onClose={() => setSharing(null)}
+        />
+      ) : null}
     </div>
   );
 }
