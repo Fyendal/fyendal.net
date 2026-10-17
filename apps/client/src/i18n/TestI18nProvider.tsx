@@ -5,10 +5,12 @@ import { I18nProvider } from "./I18nProvider.js";
 import type { SupportedLocale } from "./locale.js";
 import englishMessages from "./compiled/en.json";
 import chineseMessages from "./compiled/zh-Hans.json";
+import portugueseMessages from "./compiled/pt-BR.json";
 
 const TEST_MESSAGES: Record<SupportedLocale, LocaleMessages> = {
   en: englishMessages as LocaleMessages,
   "zh-Hans": chineseMessages as LocaleMessages,
+  "pt-BR": portugueseMessages as LocaleMessages,
 };
 
 const testIntlCache = createIntlCache();

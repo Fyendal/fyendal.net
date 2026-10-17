@@ -1,4 +1,4 @@
-export const SUPPORTED_LOCALES = ["en", "zh-Hans"] as const;
+export const SUPPORTED_LOCALES = ["en", "zh-Hans", "pt-BR"] as const;
 export type SupportedLocale = (typeof SUPPORTED_LOCALES)[number];
 
 /** Language choices are autonyms so they remain recognizable before and
@@ -6,6 +6,7 @@ export type SupportedLocale = (typeof SUPPORTED_LOCALES)[number];
 export const LOCALE_AUTONYMS: Readonly<Record<SupportedLocale, string>> = {
   en: "English",
   "zh-Hans": "简体中文",
+  "pt-BR": "Português (Brasil)",
 };
 
 export const LOCALE_STORAGE_KEY = "fyendal-locale";
@@ -16,11 +17,13 @@ interface StoredLocale {
 }
 
 export function isSupportedLocale(value: unknown): value is SupportedLocale {
-  return value === "en" || value === "zh-Hans";
+  return typeof value === "string" &&
+    (SUPPORTED_LOCALES as readonly string[]).includes(value);
 }
 
 /** Match browser BCP-47 preferences without mapping Traditional Chinese to
- * Simplified Chinese. Explicit user choices are already canonical. */
+ * Simplified Chinese. Every Portuguese variant uses Brazilian Portuguese.
+ * Explicit user choices are already canonical. */
 export function matchSupportedLocale(languages: readonly string[]): SupportedLocale {
   for (const language of languages) {
     let locale: Intl.Locale;
@@ -30,6 +33,7 @@ export function matchSupportedLocale(languages: readonly string[]): SupportedLoc
       continue;
     }
     if (locale.language === "en") return "en";
+    if (locale.language === "pt") return "pt-BR";
     if (locale.language !== "zh") continue;
     if (locale.script === "Hant" || locale.region === "HK" || locale.region === "MO" || locale.region === "TW") {
       continue;

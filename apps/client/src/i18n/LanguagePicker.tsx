@@ -1,6 +1,6 @@
 import { useIntl } from "react-intl";
 import { useLocale } from "./I18nProvider.js";
-import { LOCALE_AUTONYMS, isSupportedLocale } from "./locale.js";
+import { LOCALE_AUTONYMS, SUPPORTED_LOCALES, isSupportedLocale } from "./locale.js";
 
 export function LanguagePicker() {
   const intl = useIntl();
@@ -18,8 +18,9 @@ export function LanguagePicker() {
           if (isSupportedLocale(event.target.value)) void setLocale(event.target.value);
         }}
       >
-        <option value="en">{LOCALE_AUTONYMS.en}</option>
-        <option value="zh-Hans">{LOCALE_AUTONYMS["zh-Hans"]}</option>
+        {SUPPORTED_LOCALES.map((option) => (
+          <option key={option} value={option}>{LOCALE_AUTONYMS[option]}</option>
+        ))}
       </select>
     </label>
   );

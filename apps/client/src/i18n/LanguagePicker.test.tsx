@@ -12,6 +12,7 @@ describe("LanguagePicker", () => {
     expect(html).toContain('aria-label="Language"');
     expect(html).toContain('<option value="en" selected="">English</option>');
     expect(html).toContain('<option value="zh-Hans">简体中文</option>');
+    expect(html).toContain('<option value="pt-BR">Português (Brasil)</option>');
   });
 
   it("renders the selected Simplified Chinese locale from its catalog", () => {
@@ -21,5 +22,13 @@ describe("LanguagePicker", () => {
 
     expect(html).toContain('aria-label="语言"');
     expect(html).toContain('<option value="zh-Hans" selected="">简体中文</option>');
+  });
+
+  it("renders the selected Brazilian Portuguese locale", () => {
+    const html = renderToStaticMarkup(
+      <TestI18nProvider locale="pt-BR"><LanguagePicker /></TestI18nProvider>,
+    );
+
+    expect(html).toContain('<option value="pt-BR" selected="">Português (Brasil)</option>');
   });
 });

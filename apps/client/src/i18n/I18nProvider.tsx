@@ -25,12 +25,20 @@ export type LocaleMessages = NonNullable<IntlConfig["messages"]>;
 
 const intlCache = createIntlCache();
 
+const LOCALIZED_CATALOGS: Record<
+  Exclude<SupportedLocale, "en">,
+  () => Promise<{ default: unknown }>
+> = {
+  "zh-Hans": () => import("./compiled/zh-Hans.json"),
+  "pt-BR": () => import("./compiled/pt-BR.json"),
+};
+
 export async function loadLocaleMessages(locale: SupportedLocale): Promise<LocaleMessages> {
   const englishCatalog = import("./compiled/en.json");
   if (locale === "en") return (await englishCatalog).default as LocaleMessages;
   const [english, selected] = await Promise.all([
     englishCatalog,
-    import("./compiled/zh-Hans.json"),
+    LOCALIZED_CATALOGS[locale](),
   ]);
   return Object.assign(
     {},

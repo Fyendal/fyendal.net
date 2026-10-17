@@ -3,6 +3,7 @@ import { fileURLToPath } from "node:url";
 import ts from "typescript";
 import { describe, expect, it } from "vitest";
 import englishMessages from "./compiled/en.json";
+import portugueseMessages from "./compiled/pt-BR.json";
 import chineseMessages from "./compiled/zh-Hans.json";
 import { createTestIntl } from "./TestI18nProvider.js";
 
@@ -105,9 +106,48 @@ function rawPublicLogCalls(path: string): string[] {
   return violations;
 }
 
+/** Every ICU argument name a compiled message references, including those
+ * nested inside select, plural, and tag branches. */
+function messageArguments(node: unknown, names = new Set<string>()): Set<string> {
+  if (Array.isArray(node)) {
+    for (const child of node) messageArguments(child, names);
+    return names;
+  }
+  if (!node || typeof node !== "object") return names;
+  const element = node as Record<string, unknown>;
+  if (element.type !== 0 && typeof element.value === "string") names.add(element.value);
+  if (Array.isArray(element.children)) messageArguments(element.children, names);
+  if (element.options && typeof element.options === "object") {
+    for (const option of Object.values(element.options)) {
+      messageArguments((option as Record<string, unknown>).value, names);
+    }
+  }
+  return names;
+}
+
+/** Values producers pass for grammar English does not mark, such as noun
+ * classes for measure words or gender agreement. */
+const GRAMMATICAL_ARGUMENTS = new Set(["noun"]);
+
+const LOCALIZED_CATALOGS: ReadonlyArray<readonly [string, Record<string, unknown>]> = [
+  ["zh-Hans", chineseMessages],
+  ["pt-BR", portugueseMessages],
+];
+
 describe("locale catalogs", () => {
-  it("keeps Simplified Chinese complete with the English source catalog", () => {
-    expect(Object.keys(chineseMessages).sort()).toEqual(Object.keys(englishMessages).sort());
+  it.each(LOCALIZED_CATALOGS)("keeps %s complete with the English source catalog", (_, messages) => {
+    expect(Object.keys(messages).sort()).toEqual(Object.keys(englishMessages).sort());
+  });
+
+  it.each(LOCALIZED_CATALOGS)("keeps %s message arguments consistent with English", (_, messages) => {
+    const english: Record<string, unknown> = englishMessages;
+    expect(Object.entries(messages).flatMap(([id, message]) => {
+      const expected = [...messageArguments(english[id])].sort();
+      const actual = [...messageArguments(message)].sort();
+      return actual.some((name) => !expected.includes(name) && !GRAMMATICAL_ARGUMENTS.has(name))
+        ? [`${id}: ${actual.join(",")} not in ${expected.join(",")}`]
+        : [];
+    })).toEqual([]);
   });
 
   it("keeps wire-projected engine and card message IDs protocol-safe", () => {

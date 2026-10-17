@@ -28,9 +28,18 @@ describe("locale preference", () => {
     expect(matchSupportedLocale(["zh-Hant-HK"])).toBe("en");
   });
 
+  it("matches every Portuguese variant to Brazilian Portuguese", () => {
+    expect(matchSupportedLocale(["pt"])).toBe("pt-BR");
+    expect(matchSupportedLocale(["pt-BR"])).toBe("pt-BR");
+    expect(matchSupportedLocale(["pt-PT"])).toBe("pt-BR");
+    expect(matchSupportedLocale(["pt-AO"])).toBe("pt-BR");
+  });
+
   it("uses browser preference order and ignores malformed tags", () => {
     expect(matchSupportedLocale(["not_a_locale", "zh-CN", "en-US"])).toBe("zh-Hans");
     expect(matchSupportedLocale(["en-GB", "zh-CN"])).toBe("en");
+    expect(matchSupportedLocale(["fr-FR", "pt-PT", "en-US"])).toBe("pt-BR");
+    expect(matchSupportedLocale(["en-US", "pt-BR"])).toBe("en");
   });
 
   it("round-trips only the exact versioned storage shape", () => {
@@ -45,6 +54,10 @@ describe("locale preference", () => {
       extra: true,
     })))).toBeNull();
     expect(loadLocalePreference(memoryStorage("not json"))).toBeNull();
+    expect(loadLocalePreference(memoryStorage(JSON.stringify({
+      version: 1,
+      locale: "pt",
+    })))).toBeNull();
   });
 
   it("prefers an explicit saved locale over browser detection", () => {
