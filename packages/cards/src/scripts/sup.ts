@@ -1667,9 +1667,30 @@ Object.assign(sup, {
       goAgain: false,
       timing: "instant",
       fromHand: true,
-      // FYD-RULE-004: swapping the decks revealed by the next clash needs a
-      // clash replacement hook.
-      onActivate() {},
+      // Two heroes are needed to clash (CR 8.5.45d), so the opponent is the
+      // only meaningful target.
+      onActivate(ctx: ScriptCtx) {
+        ctx.addModifier({
+          scope: "until-end-of-turn",
+          swapsNextClashWithSeat: opponentSeat(ctx),
+          ...ongoingLabel(
+            "the next time you would clash with an opponent, each of you reveals from the other's deck",
+            "card.effect.sup.oldswitcheroo",
+          ),
+        });
+      },
+    },
+    onSwappedClashResolved(ctx: ScriptCtx, won: boolean, opposingSeat: number) {
+      if (won)
+        requestDiscardChoice(
+          ctx,
+          "switcheroo-discard",
+          decisionPrompt("Choose a card to discard", "card.common.card.discard.choose"),
+          opposingSeat,
+        );
+    },
+    onChoose(ctx, hook, option) {
+      if (hook === "switcheroo-discard") resolveDiscardChoice(ctx, option, opponentSeat(ctx));
     },
   },
   "rip up their virtues|3": convertTokens("Toughness", MIGHT),

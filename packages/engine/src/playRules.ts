@@ -527,6 +527,11 @@ export function noteCardPlayed(
       if (key.startsWith("nextArcaneCardBonusSource:")) delete player.flags[key];
     }
   }
+  // "the first card you play each turn with an arcane damage effect"
+  if (scriptOf(state, cardId, card)?.arcaneDamageEffect) {
+    player.flags.arcaneDamageCardsPlayedThisTurn =
+      Number(player.flags.arcaneDamageCardsPlayedThisTurn || 0) + 1;
+  }
   // `playedPitch:<n>` counts — "if you've played another blue card this turn"
   const color = cardColorOf(state, card);
   player.flags[`playedPitch:${color}`] = (Number(player.flags[`playedPitch:${color}`]) || 0) + 1;

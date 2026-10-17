@@ -4009,6 +4009,12 @@
       "value": "pode jogar uma aura of suspense do seu cemitério"
     }
   ],
+  "card.effect.sup.oldswitcheroo": [
+    {
+      "type": 0,
+      "value": "da próxima vez que você fosse fazer clash com um oponente, cada um revela do deck do outro"
+    }
+  ],
   "card.effect.upr.conduitoffrostburn": [
     {
       "type": 0,

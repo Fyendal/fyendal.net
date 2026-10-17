@@ -3972,6 +3972,12 @@
       "value": "可以从你的墓地打出一个具有 suspense 的灵气 (Aura)"
     }
   ],
+  "card.effect.sup.oldswitcheroo": [
+    {
+      "type": 0,
+      "value": "你下一次将与对手 clash 时，改为各自展示对方牌库顶的牌"
+    }
+  ],
   "card.effect.upr.conduitoffrostburn": [
     {
       "type": 0,

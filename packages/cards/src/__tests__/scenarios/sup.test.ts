@@ -1183,9 +1183,10 @@ describe("SUP — Fix the Match", () => {
     g.blockWith("head jab|1").settle();
     expect(g.state.log.some((entry) => entry.publicText?.includes("reveals Sink Below"))).toBe(true);
   });
+});
 
-  // FYD-RULE-004
-  it.fails("The Old Switcheroo swaps the revealed decks for its controller's next clash", () => {
+describe("SUP — The Old Switcheroo", () => {
+  it("The Old Switcheroo swaps the revealed decks for its controller's next clash and makes a loser discard", () => {
     const g = scenario({
       active: 1,
       seats: [
@@ -1201,8 +1202,34 @@ describe("SUP — Fix the Match", () => {
       .activate("the old switcheroo|3")
       .blockWith("vigorous smashup|3")
       .settle()
+      .expectLog("Levia reveals Raging Onslaught")
+      .chooseCard("snatch|1")
       .chooseOption("no")
       .expectZoneSize(0, "board", 1)
-      .expectHandSize(1, 0);
+      .expectInZone(1, "snatch|1", "graveyard")
+      .expectDeckTop(1, "raging onslaught|1");
+  });
+
+  it("The Old Switcheroo swap is consumed by one clash and does not discard on a loss", () => {
+    const g = scenario({
+      active: 1,
+      seats: [
+        hero("levia|0", {
+          hand: ["the old switcheroo|3", "vigorous smashup|3"],
+          deck: ["raging onslaught|1"],
+        }),
+        foe({ hand: ["head jab|1", "snatch|1"], deck: ["inner chi|3"] }),
+      ],
+    });
+    g.play("head jab|1", { settle: false })
+      .passPriority()
+      .activate("the old switcheroo|3")
+      .blockWith("vigorous smashup|3")
+      .settle()
+      .chooseOption("no")
+      .expectZoneSize(0, "board", 0)
+      .expectHandSize(1, 1);
+    expect(g.state.modifiers.some((modifier) => modifier.swapsNextClashWithSeat !== undefined && !modifier.consumed))
+      .toBe(false);
   });
 });

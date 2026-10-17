@@ -37,6 +37,22 @@ function pitchedBlue(ctx: ScriptCtx): boolean {
   return Number(ctx.getFlag("player", "pitchedPitch:3")) > 0;
 }
 
+function pitchedChiThisTurn(ctx: ScriptCtx): boolean {
+  return Number(ctx.getFlag("player", "pitchedChiCount")) > 0;
+}
+
+/** Record the Chi pitched to pay for this card, for "if a Chi was pitched to
+ * play this"; a Chi pitched earlier in the turn does not count. */
+const recordsChiPitched: Pick<CardScript, "onPlayCostPaid"> = {
+  onPlayCostPaid(ctx, paid) {
+    ctx.setCounter("chiPitched", paid.filter((card) => hasType(ctx, card, "chi")).length);
+  },
+};
+
+function chiPitched(ctx: ScriptCtx): number {
+  return ctx.getCounter("chiPitched");
+}
+
 function playedAnotherBlue(ctx: ScriptCtx): boolean {
   return Number(ctx.getFlag("player", "playedPitch:3")) >= 2;
 }
@@ -1377,12 +1393,13 @@ Object.assign(mst, {
     },
   },
   "gorgon's gaze|2": {
+    ...recordsChiPitched,
     canPlay: (ctx) => !!ctx.link && ctx.link.attacker === ctx.seat,
     onPlay(ctx) {
       createInHand(ctx, SLITHER);
       if (!ctx.link) return;
       for (const card of ctx.link.defendingCards.filter((candidate) => isAttackAction(ctx, candidate))) {
-        if (ctx.banish(card.instanceId) && pitchedBlue(ctx))
+        if (ctx.banish(card.instanceId) && chiPitched(ctx) > 0)
           ctx.allowPlayFrom(card.instanceId, "banish", {
             costReduction: data(ctx, card).cost ?? 0,
             untilChainClose: true,
@@ -1445,11 +1462,12 @@ Object.assign(mst, {
       timing: "instant",
       onActivate: (ctx) => ctx.setPlayerFlag(ctx.seat, "aurasAsInstantThisTurn", true),
     },
-    wardValue: (ctx) => (pitchedBlue(ctx) ? 3 : 0),
+    wardValue: (ctx) => (pitchedChiThisTurn(ctx) ? 3 : 0),
   },
   "manifestation of miragai|3": {
+    ...recordsChiPitched,
     onEnterArena(ctx) {
-      ctx.setCounter("power", pitchedBlue(ctx) ? 4 : 2);
+      ctx.setCounter("power", chiPitched(ctx) > 0 ? 4 : 2);
     },
     wardValue: (ctx) => ctx.getCounter("power"),
   },
@@ -1487,6 +1505,7 @@ Object.assign(mst, {
     },
   },
   "shifting winds of the mystic beast|3": {
+    ...recordsChiPitched,
     onPlay(ctx) {
       ctx.addModifier({
         scope: "until-end-of-turn",
@@ -1495,7 +1514,7 @@ Object.assign(mst, {
           "card.effect.mst.shiftingwindsofthemysticbeast",
         ),
       });
-      if (pitchedBlue(ctx)) {
+      if (chiPitched(ctx) > 0) {
         createInHand(ctx, CROUCHING_TIGER);
         createInHand(ctx, CROUCHING_TIGER);
       }
@@ -1564,8 +1583,9 @@ Object.assign(mst, {
     },
   },
   "cosmic awakening|3": {
+    ...recordsChiPitched,
     modifyAttack(ctx) {
-      const chi = Number(ctx.getFlag("player", "pitchedChiCount"));
+      const chi = chiPitched(ctx);
       return chi >= 3 ? 20 : chi === 2 ? 15 : chi === 1 ? 10 : 0;
     },
   },
@@ -1578,20 +1598,26 @@ Object.assign(mst, {
     },
   },
   "unravel aggression|3": {
+    ...recordsChiPitched,
     onPlay(ctx) {
-      if (pitchedBlue(ctx)) ctx.drawCards(ctx.seat, 1);
+      if (chiPitched(ctx) > 0) ctx.drawCards(ctx.seat, 1);
     },
   },
   "dense blue mist|3": {
+    ...recordsChiPitched,
     onPlay(ctx) {
-      ctx.addModifier({ scope: "until-end-of-turn", attack: -1, seat: opponentSeat(ctx) });
-      // FYD-RULE-002: the Chi rider needs a turn-long hit-effect suppression
-      // for attacks hitting this hero; the engine's suppression is one-shot.
+      ctx.addModifier({
+        scope: "until-end-of-turn",
+        attack: -1,
+        seat: opponentSeat(ctx),
+        ...(chiPitched(ctx) > 0 ? { suppressHitEffectsThisTurn: true } : {}),
+      });
     },
   },
   "orihon of mystic tenets|3": {
+    ...recordsChiPitched,
     onPlay(ctx) {
-      ctx.drawCards(ctx.seat, pitchedBlue(ctx) ? 3 : 2);
+      ctx.drawCards(ctx.seat, chiPitched(ctx) > 0 ? 3 : 2);
     },
   },
   "bonds of agony|3": {

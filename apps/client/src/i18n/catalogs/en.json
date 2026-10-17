@@ -1871,6 +1871,7 @@
   "card.effect.sea.denyredemption": "heroes can't gain life",
   "card.effect.sea.regaincomposure": "untap your hero when it hits",
   "card.effect.sup.criesofencore": "may play an aura of suspense from your graveyard",
+  "card.effect.sup.oldswitcheroo": "the next time you would clash with an opponent, each of you reveals from the other's deck",
   "card.effect.upr.liquefy": "put a -1 defense counter on an equipment they control, then destroy it if it has 0 defense",
   "card.effect.upr.strategicplanning": "draw a card at the beginning of the end phase",
   "card.effect.upr.transmogrify": "has {basePower} base power",

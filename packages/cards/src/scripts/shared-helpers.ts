@@ -1345,6 +1345,17 @@ export function buffNextArcaneDamageCard(ctx: ScriptCtx, n: number): void {
   );
 }
 
+/** Remove this source's unbound share of the next-arcane-card pool, for a
+ * static source whose bonus ends when it leaves the arena. */
+export function withdrawNextArcaneDamageCard(ctx: ScriptCtx): void {
+  const sourceKey = `nextArcaneCardBonusSource:${ctx.self.instanceId}`;
+  const own = Number(ctx.getPlayerFlag(ctx.seat, sourceKey));
+  if (own <= 0) return;
+  const pool = Number(ctx.getPlayerFlag(ctx.seat, "nextArcaneCardBonus"));
+  ctx.setPlayerFlag(ctx.seat, "nextArcaneCardBonus", Math.max(0, pool - own));
+  ctx.setPlayerFlag(ctx.seat, sourceKey, 0);
+}
+
 /** Add to the controller's Amp pool: the next positive arcane-damage event
  *  they control this turn deals that much plus N. */
 export function ampNextArcane(ctx: ScriptCtx, n: number): void {

@@ -1871,6 +1871,7 @@
   "card.effect.sea.denyredemption": "英雄无法恢复生命",
   "card.effect.sea.regaincomposure": "命中时重置你的英雄",
   "card.effect.sup.criesofencore": "可以从你的墓地打出一个具有 suspense 的灵气 (Aura)",
+  "card.effect.sup.oldswitcheroo": "你下一次将与对手 clash 时，改为各自展示对方牌库顶的牌",
   "card.effect.upr.liquefy": "在其操控的一件装备上放置一个 -1 防御指示物，若该装备防御为 0 则将其摧毁",
   "card.effect.upr.strategicplanning": "在结束阶段开始时抽一张牌",
   "card.effect.upr.transmogrify": "基础力量为 {basePower}",

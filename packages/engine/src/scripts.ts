@@ -1772,6 +1772,9 @@ export interface CardScript {
   /** When a clash has no winner, this hero's controller chooses which
    * participating hero wins. */
   choosesFailedClashWinner?: boolean;
+  /** A clash whose decks this source's `swapsNextClashWithSeat` effect
+   * swapped has finished. `won` is whether its controller won. */
+  onSwappedClashResolved?(ctx: ScriptCtx, won: boolean, opposingSeat: number): void;
   /** Result of a clash requested by this source. `winner` is -1 for no winner. */
   onClashResult?(ctx: ScriptCtx, resultHook: string, winner: number): void;
   /** Declarative first-failed-clash replacement supplied by a hero script. */

@@ -574,6 +574,13 @@ export interface Modifier {
   /** suppress the next matching attack-action hit's triggered effects; a miss
    * does not consume this until-end-of-turn modifier */
   suppressHitEffects?: boolean;
+  /** suppress the triggered effects of every matching hit this turn; never
+   * consumed */
+  suppressHitEffectsThisTurn?: boolean;
+  /** The next clash this turn between this modifier's seat and this seat
+   * swaps decks: each hero reveals the top card of the other's deck.
+   * Consumed by that clash; its source's `onSwappedClashResolved` follows. */
+  swapsNextClashWithSeat?: number;
   /** defense adjustment to defending cards of one pitch value */
   defendingPitchDefenseAdjustment?: { pitch: number; amount: number; requiresAimCounter?: boolean };
   /** granted: draw this many cards if the affected attack is destroyed. */
@@ -911,7 +918,11 @@ export interface PendingDecisionState extends PendingDecision {
     };
     attempt: {
       winner: number;
+      /** Each revealed card with its owner's seat, which differs from the
+       * revealing hero's after a deck swap. */
       revealed: { seat: number; instanceId: number }[];
+      /** The source whose effect swapped the decks for this attempt. */
+      swapSourceInstanceId?: number;
     };
     replacementSeats: number[];
     replacementIndex: number;

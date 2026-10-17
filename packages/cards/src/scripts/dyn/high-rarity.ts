@@ -2,6 +2,7 @@ import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal
 import {
   anyDamageTarget,
   bottomOrKeepPrompt,
+  buffNextArcaneDamageCard,
   buffNextAttack,
   commonOptionMessages,
   consumeDelayedEffect,
@@ -19,6 +20,7 @@ import {
   opponentSeat,
   pendingDelayedEffect,
   previousAttackHasName,
+  withdrawNextArcaneDamageCard,
   yesNoPrompt,
 } from "../shared-helpers.js";
 
@@ -1034,11 +1036,16 @@ export const dynHighRarity: Record<string, CardScript> = {
       goAgain: true,
       oncePerTurn: true,
       onActivate(ctx) {
-        // FYD-RULE-003: the static bonus to the first arcane damage card
-        // played each turn needs per-turn arcane-card tracking.
         dealArcane(ctx, opponentSeat(ctx), 1);
       },
     },
+    // Until the first arcane damage card of the turn is played, it is the
+    // next one, so the damage dealt joins the engine's next-card pool.
+    onDamageDealt(ctx, _targetSeat, amount, arcane) {
+      if (arcane && amount > 0 && !Number(ctx.getFlag("player", "arcaneDamageCardsPlayedThisTurn")))
+        buffNextArcaneDamageCard(ctx, amount);
+    },
+    onLeaveArena: withdrawNextArcaneDamageCard,
   },
   "swell tidings|1": arcane(5, (ctx, dealt) => {
     if (dealt > 5) ctx.createToken(PONDER);

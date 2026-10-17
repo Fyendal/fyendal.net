@@ -717,22 +717,42 @@ describe("DYN — Sandscour Greatbow", () => {
     s.activate(BOW).chooseCard(ARROW).expectInZone(0, ARROW, "arsenal");
     expect(s.state.players[0]!.arsenal[0]!.counters?.aim).toBeUndefined();
   });
+});
 
-  // FYD-RULE-003
-  it.fails("Surgent Aethertide adds its damage to the first arcane damage card played that turn", () => {
+describe("DYN — Surgent Aethertide", () => {
+  it("Surgent Aethertide adds its damage to the first arcane damage card played that turn", () => {
     const g = scenario({
       seats: [
         {
           hero: "rhinar",
           heroKey: "kano|0",
           weapons: ["surgent aethertide|0"],
-          hand: ["swell tidings|1"],
-          resources: 10,
+          hand: ["swell tidings|1", "flash bolt|1"],
+          resources: 20,
         },
         { hero: "dorinthea" },
       ],
     });
     g.activate("surgent aethertide|0").settle().expectLife(1, 19);
     g.play("swell tidings|1").settle().expectLife(1, 13);
+    g.play("flash bolt|1").chooseOption("opposing hero").settle().expectLife(1, 10);
+  });
+
+  it("Surgent Aethertide adds nothing once an arcane damage card was played that turn", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          heroKey: "kano|0",
+          weapons: ["surgent aethertide|0"],
+          hand: ["flash bolt|1", "swell tidings|1"],
+          resources: 20,
+        },
+        { hero: "dorinthea" },
+      ],
+    });
+    g.play("flash bolt|1").chooseOption("opposing hero").settle().expectLife(1, 17);
+    g.activate("surgent aethertide|0").settle().expectLife(1, 16);
+    g.play("swell tidings|1").settle().expectLife(1, 11);
   });
 });

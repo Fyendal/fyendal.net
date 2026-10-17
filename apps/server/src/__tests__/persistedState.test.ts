@@ -1031,6 +1031,8 @@ describe("PersistedStateV1", () => {
       goAgainIfPlayedOrCreatedSubtype: "aura",
       goAgainIfAttackPowerAtLeast: 6,
       suppressHitEffects: true,
+      suppressHitEffectsThisTurn: true,
+      swapsNextClashWithSeat: 1,
       defendingPitchDefenseAdjustment: { pitch: 2, amount: -1, requiresAimCounter: true },
       onDestroyedDraw: 1,
       onBoostDominate: true,
@@ -1284,6 +1286,7 @@ describe("PersistedStateV1", () => {
         attempt: {
           winner: -1,
           revealed: [{ seat: 0, instanceId: revealed.instanceId }],
+          swapSourceInstanceId: sourceCard.instanceId,
         },
         replacementSeats: [0],
         replacementIndex: 0,

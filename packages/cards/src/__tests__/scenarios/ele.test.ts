@@ -841,6 +841,30 @@ describe("ELE — delayed and replacement effects", () => {
       .endTurn()
       .expectNoEquipment(0, "legs");
   });
+
+  it("Force of Nature draws whenever a boosted attack action card hits this turn", () => {
+    const g = scenario({
+      seats: [
+        { ...briar, hand: ["force of nature|3", EARTH, "head jab|1"], deck: [BLUE], resources: 5 },
+        { hero: "dorinthea" },
+      ],
+    });
+    g.play("force of nature|3").chooseCard(EARTH)
+      .play("head jab|1").blockWith().settle()
+      .expectHandSize(0, 2);
+  });
+
+  it("Force of Nature does not draw when the attack's power is not above its base", () => {
+    const g = scenario({
+      seats: [
+        { ...briar, hand: ["force of nature|3", "head jab|1"], deck: [BLUE], resources: 5 },
+        { hero: "dorinthea" },
+      ],
+    });
+    g.play("force of nature|3")
+      .play("head jab|1").blockWith().settle()
+      .expectHandSize(0, 0);
+  });
 });
 
 describe("ELE — data registration", () => {
@@ -915,29 +939,5 @@ describe("ELE — Thump", () => {
     g.play("flicker wisp|2").chooseCard(LIGHTNING).settle().expectLife(1, 18);
     g.play("sting of sorcery|3").play("ball lightning|1").declareTarget(1).settle().expectLife(1, 15);
     g.blockWith().settle().expectLife(1, 11);
-  });
-
-  it("Force of Nature draws whenever a boosted attack action card hits this turn", () => {
-    const g = scenario({
-      seats: [
-        { ...briar, hand: ["force of nature|3", EARTH, "head jab|1"], deck: [BLUE], resources: 5 },
-        { hero: "dorinthea" },
-      ],
-    });
-    g.play("force of nature|3").chooseCard(EARTH)
-      .play("head jab|1").blockWith().settle()
-      .expectHandSize(0, 2);
-  });
-
-  it("Force of Nature does not draw when the attack's power is not above its base", () => {
-    const g = scenario({
-      seats: [
-        { ...briar, hand: ["force of nature|3", "head jab|1"], deck: [BLUE], resources: 5 },
-        { hero: "dorinthea" },
-      ],
-    });
-    g.play("force of nature|3")
-      .play("head jab|1").blockWith().settle()
-      .expectHandSize(0, 0);
   });
 });

@@ -9,7 +9,7 @@ import {
   logPublic,
   nameOf,
 } from "./gameLog.js";
-import type { CardInstance, PendingDecisionState, PlayerState } from "./state.js";
+import type { CardInstance, Modifier, PendingDecisionState, PlayerState } from "./state.js";
 import { currentLink, findCardAnywhere, opponent } from "./zoneQueries.js";
 import { destroyPermanent } from "./zoneMoves.js";
 import { controlledPermanents, hookSources } from "./sourceQueries.js";
@@ -61,13 +61,17 @@ type ClashAttempt = ClashState["attempt"];
  * split lets a replacement effect replace the would-be result while keeping
  * both revealed cards on top until its decision is complete. */
 function revealClash(state: GameStateInternal,
-  runtime: EngineRuntime, aSeat: number, bSeat: number): ClashAttempt {
+  runtime: EngineRuntime, aSeat: number, bSeat: number, swapped = false): ClashAttempt {
   const a = state.players[aSeat] as PlayerState;
   const b = state.players[bSeat] as PlayerState;
-  const topA = a.deck[0];
-  const topB = b.deck[0];
-  const powA = topA ? basePowerOf(state, runtime, aSeat, topA, dataOf(state, topA.cardId).attack ?? 0) : -1;
-  const powB = topB ? basePowerOf(state, runtime, bSeat, topB, dataOf(state, topB.cardId).attack ?? 0) : -1;
+  // The revealing player wins by the card they reveal (CR 8.5.45a), even
+  // when a swap has them reveal it from the other hero's deck.
+  const ownerA = swapped ? bSeat : aSeat;
+  const ownerB = swapped ? aSeat : bSeat;
+  const topA = (state.players[ownerA] as PlayerState).deck[0];
+  const topB = (state.players[ownerB] as PlayerState).deck[0];
+  const powA = topA ? basePowerOf(state, runtime, ownerA, topA, dataOf(state, topA.cardId).attack ?? 0) : -1;
+  const powB = topB ? basePowerOf(state, runtime, ownerB, topB, dataOf(state, topB.cardId).attack ?? 0) : -1;
   if (topA) logPublic(state, gameLogMessage(
     `${nameOf(state, a.heroCardId)} reveals ${logNameOf(state, topA.cardId)} (${powA} power)`,
     "engine.log.clash.reveals",
@@ -98,8 +102,8 @@ function revealClash(state: GameStateInternal,
   return {
     winner,
     revealed: [
-      ...(topA ? [{ seat: aSeat, instanceId: topA.instanceId }] : []),
-      ...(topB ? [{ seat: bSeat, instanceId: topB.instanceId }] : []),
+      ...(topA ? [{ seat: ownerA, instanceId: topA.instanceId }] : []),
+      ...(topB ? [{ seat: ownerB, instanceId: topB.instanceId }] : []),
     ],
   };
 }
@@ -133,6 +137,17 @@ function finishClashAttempt(
       runtime.makeCtx(state, revealed.seat, found.card),
       attempt.winner === revealed.seat,
       opposingSeat,
+    );
+  }
+  const swapSource = attempt.swapSourceInstanceId === undefined
+    ? undefined
+    : findCardAnywhere(state, attempt.swapSourceInstanceId);
+  if (swapSource) {
+    const swapSeat = swapSource.seat;
+    scriptOf(state, swapSource.card.cardId, swapSource.card)?.onSwappedClashResolved?.(
+      runtime.makeCtx(state, swapSeat, swapSource.card, currentLink(state)),
+      attempt.winner === swapSeat,
+      swapSeat === request.sourceSeat ? request.opposingSeat : request.sourceSeat,
     );
   }
   const source = findCardAnywhere(state, request.sourceInstanceId);
@@ -240,13 +255,28 @@ function finishClashOrOfferWinnerChoice(
   };
 }
 
+/** Consume the first pending deck swap between the two clashing seats. */
+function takeClashSwap(state: GameStateInternal, aSeat: number, bSeat: number): Modifier | undefined {
+  const swap = state.modifiers.find((modifier) =>
+    modifier.scope === "until-end-of-turn" &&
+    !modifier.consumed &&
+    modifier.swapsNextClashWithSeat !== undefined &&
+    ((modifier.seat === aSeat && modifier.swapsNextClashWithSeat === bSeat) ||
+      (modifier.seat === bSeat && modifier.swapsNextClashWithSeat === aSeat))
+  );
+  if (swap) swap.consumed = true;
+  return swap;
+}
+
 function resolveClashRequest(
   state: GameStateInternal,
   runtime: EngineRuntime,
   request: ClashRequest,
   queue: ClashRequest[] = [],
 ): void {
-  const attempt = revealClash(state, runtime, request.sourceSeat, request.opposingSeat);
+  const swap = takeClashSwap(state, request.sourceSeat, request.opposingSeat);
+  const attempt = revealClash(state, runtime, request.sourceSeat, request.opposingSeat, swap !== undefined);
+  if (swap) attempt.swapSourceInstanceId = swap.sourceInstanceId;
   const orderedSeats = [state.activePlayer, state.activePlayer === 0 ? 1 : 0]
     .filter((seat) => seat === request.sourceSeat || seat === request.opposingSeat);
   const replacementSeats: number[] = [];

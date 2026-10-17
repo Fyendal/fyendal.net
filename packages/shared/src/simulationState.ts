@@ -260,6 +260,8 @@ export interface PersistedModifierV1 {
   onDefendedDealDamage?: number;
   onHitLoseLife?: number;
   suppressHitEffects?: boolean;
+  suppressHitEffectsThisTurn?: boolean;
+  swapsNextClashWithSeat?: number;
   defendingPitchDefenseAdjustment?: { pitch: number; amount: number; requiresAimCounter?: boolean };
   onDestroyedDraw?: number;
   onHitToSoul?: boolean;
@@ -463,7 +465,7 @@ export interface PersistedPendingDecisionV1 {
   };
   clash?: {
     request: { sourceSeat: number; sourceInstanceId: number; opposingSeat: number; resultHook: string };
-    attempt: { winner: number; revealed: { seat: number; instanceId: number }[] };
+    attempt: { winner: number; revealed: { seat: number; instanceId: number }[]; swapSourceInstanceId?: number };
     replacementSeats: number[];
     replacementIndex: number;
     stage: "offer" | "bottom" | "winner-choice";

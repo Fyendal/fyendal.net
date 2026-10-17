@@ -294,7 +294,7 @@ function modifierPhrases(state: GameStateInternal, m: Modifier): Phrase[] {
       { defendedDamage: m.onDefendedDealDamage },
     ));
   }
-  if (m.suppressHitEffects) {
+  if (m.suppressHitEffects || m.suppressHitEffectsThisTurn) {
     parts.push(phrase("its hit effects don't trigger", "engine.effect.part.hit.effects.suppressed"));
   }
   if (m.onBoostAttack) {
@@ -501,7 +501,7 @@ function affectsObjects(m: Modifier): boolean {
     m.onHitGoAgain || m.onHitDraw || m.onHitCreateToken || m.onHitLoseLife || m.onHitDealDamage ||
     m.onHitMark || m.onHitScriptHook || m.onHitDestroyTopDeckCards || m.onDefendedDealDamage ||
     m.onDamageDealtCreateTokenPerPoint ||
-    m.suppressHitEffects || m.damage || m.damageUnpreventable || m.goAgainIfPlayedOrCreatedSubtype ||
+    m.suppressHitEffects || m.suppressHitEffectsThisTurn || m.damage || m.damageUnpreventable || m.goAgainIfPlayedOrCreatedSubtype ||
     m.goAgainIfAttackPowerAtLeast !== undefined || m.goAgainIfDefendedByAttackAction ||
     m.maxNonBlockDefenders !== undefined || m.replaceCombatDamageWithDefendingEquipment ||
     m.attackCostReduction || m.playCostReduction || m.activationCostReduction ||

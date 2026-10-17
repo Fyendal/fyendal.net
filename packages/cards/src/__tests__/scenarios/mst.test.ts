@@ -733,11 +733,6 @@ describe("MST — Assassin", () => {
 });
 
 describe("MST — Ninja and generic", () => {
-  it("Orihon draws three cards when a blue card paid for it", () => {
-    const g = scenario({ seats: [{ hero: "rhinar", resources: 1, hand: ["orihon of mystic tenets|3", "wrecker romp|3"], deck: ["wounding blow|1", "wounding blow|2", "wounding blow|3"] }, { hero: "dorinthea" }] });
-    g.play("orihon of mystic tenets|3", { pitch: ["wrecker romp|3"] }).expectHandSize(0, 3);
-  });
-
   it("Prismatic Leyline buffs only the next attack of each color", () => {
     const g = scenario({
       seats: [
@@ -976,21 +971,64 @@ describe("Longdraw Half-glove", () => {
     const g = ranger(["sink below|1"], []);
     expect(() => g.activate("longdraw half-glove|0")).toThrow(/no legal intent/);
   });
+});
 
-  // FYD-RULE-002
-  it.fails("Dense Blue Mist paid with a Chi stops hit effects of attacks that hit you this turn", () => {
+describe("MST — Chi pitched to play", () => {
+  it.each([
+    ["inner chi|3", 3],
+    ["wrecker romp|3", 2],
+  ] as const)("Orihon paid by pitching %s draws %i cards", (pitched, drawn) => {
+    const g = scenario({ seats: [{ hero: "rhinar", resources: 1, hand: ["orihon of mystic tenets|3", pitched], deck: ["wounding blow|1", "wounding blow|2", "wounding blow|3"] }, { hero: "dorinthea" }] });
+    g.play("orihon of mystic tenets|3", { pitch: [pitched] }).expectHandSize(0, drawn);
+  });
+
+  it.each([
+    ["inner chi|3", 4],
+    ["wrecker romp|3", 2],
+  ] as const)("Manifestation of Miragai paid by pitching %s enters with %i power counters", (pitched, power) => {
+    const g = scenario({
+      seats: [{ hero: "rhinar", hand: ["manifestation of miragai|3", pitched] }, { hero: "dorinthea" }],
+    });
+    g.play("manifestation of miragai|3", { pitch: [pitched] }).settle();
+    const miragai = g.state.players[0]!.board.find((card) => card.cardId === printingId("manifestation of miragai|3"));
+    expect(miragai?.counters?.power).toBe(power);
+  });
+
+  it("Orihon ignores a Chi pitched earlier in the turn", () => {
     const g = scenario({
       seats: [
-        { hero: "rhinar", hand: ["snatch|1"], deck: ["raging onslaught|3"] },
-        { hero: "dorinthea", hand: ["dense blue mist|3", "inner chi|3"] },
+        {
+          hero: "rhinar",
+          hand: ["dense blue mist|3", "inner chi|3", "orihon of mystic tenets|3", "wrecker romp|3"],
+          deck: ["wounding blow|1", "wounding blow|2", "wounding blow|3"],
+        },
+        { hero: "dorinthea" },
       ],
     });
-    g.play("snatch|1", { settle: false })
+    g.play("dense blue mist|3", { pitch: ["inner chi|3"] })
+      .play("orihon of mystic tenets|3", { pitch: ["wrecker romp|3"] })
+      .expectHandSize(0, 2);
+  });
+
+  it.each([
+    ["inner chi|3", 0],
+    ["wrecker romp|3", 1],
+  ] as const)("Dense Blue Mist paid by pitching %s leaves %i Snatch draws after two hits", (pitched, draws) => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", hand: ["head jab|1", "snatch|1"], deck: ["raging onslaught|3"] },
+        { hero: "dorinthea", hand: ["dense blue mist|3", pitched] },
+      ],
+    });
+    g.play("head jab|1", { settle: false })
       .passPriority()
-      .react("dense blue mist|3", { pitch: ["inner chi|3"] })
+      .react("dense blue mist|3", { pitch: [pitched] })
       .blockWith()
       .settle()
-      .expectLife(1, 17)
-      .expectHandSize(0, 0);
+      .play("snatch|1")
+      .blockWith()
+      .settle()
+      .expectLife(1, 15)
+      .expectHandSize(0, draws);
   });
 });

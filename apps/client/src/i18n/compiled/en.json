@@ -3983,6 +3983,12 @@
       "value": "may play an aura of suspense from your graveyard"
     }
   ],
+  "card.effect.sup.oldswitcheroo": [
+    {
+      "type": 0,
+      "value": "the next time you would clash with an opponent, each of you reveals from the other's deck"
+    }
+  ],
   "card.effect.upr.conduitoffrostburn": [
     {
       "type": 0,

@@ -157,11 +157,18 @@ function applyHit(
       modifierApplies(state, modifier, link),
   ) : undefined;
   if (delayedSuppression) delayedSuppression.consumed = true;
+  const turnSuppression = hitOriginalTarget && state.modifiers.some(
+    (modifier) =>
+      modifier.scope === "until-end-of-turn" &&
+      modifier.suppressHitEffectsThisTurn === true &&
+      modifierApplies(state, modifier, link),
+  );
   if (!hitOriginalTarget) {
     runtime.events.runHook(state, link.attacker, link.attackingCard, "onMiss", link);
   } else if (
     link.flags.suppressHitEffects === true ||
     delayedSuppression ||
+    turnSuppression ||
     (link.attackCardType === "action" && state.players.some((player) =>
       hookSources(state, player.seat, { board: true, equipment: true, weapons: true, heroLast: true })
         .some((source) => scriptOf(state, source.cardId, source)?.suppressesAttackActionHitEffects === true)
