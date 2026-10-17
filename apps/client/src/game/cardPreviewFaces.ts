@@ -10,6 +10,11 @@ for (const card of Object.values(cardData)) {
   if (!current || isMatchingCollectorNumber) frontByBackId.set(card.backId, card.id);
 }
 
+/** Return the front face of a back-face card id, if it has one. */
+export function cardFrontFaceId(cardId: string): string | undefined {
+  return frontByBackId.get(cardId);
+}
+
 /** Return a physical card's faces front-first, regardless of which face is active. */
 export function cardPreviewFaceIds(cardId: string): readonly string[] {
   const card = cardData[cardId];

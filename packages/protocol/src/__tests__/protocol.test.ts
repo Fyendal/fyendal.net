@@ -694,6 +694,8 @@ describe("GameView and server messages", () => {
     expect(decodeGameView(withEffect({ seat: 0, cardId: "", label: "+1 · next attack" }))).not.toBeNull();
     expect(decodeGameView(withEffect({ ...structured, lifetime: "forever" }))).toBeNull();
     expect(decodeGameView(withEffect({ ...structured, recurring: false }))).toBeNull();
+    expect(decodeGameView(withEffect({ ...structured, inactive: true }))).not.toBeNull();
+    expect(decodeGameView(withEffect({ ...structured, inactive: false }))).toBeNull();
     expect(decodeGameView(withEffect({ ...structured, sourceSeat: 2 }))).toBeNull();
     expect(decodeGameView(withEffect({ ...structured, durationMessage: { id: 7 } }))).toBeNull();
     expect(decodeGameView(withEffect({ ...structured, owner: 0 }))).toBeNull();

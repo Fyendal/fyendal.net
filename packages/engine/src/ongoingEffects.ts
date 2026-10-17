@@ -5,11 +5,13 @@ import type {
   OngoingEffectFacts,
   OngoingEffectView,
 } from "@fyendal/shared";
+import type { EngineRuntime } from "./runtimePorts.js";
 import type { GameStateInternal } from "./runtimeState.js";
 import type { CardInstance, Modifier, PlayerState } from "./state.js";
-import { dataOf, isClassOrTalentSupertype } from "./cardProperties.js";
+import { dataOf, isClassOrTalentSupertype, scriptOf } from "./cardProperties.js";
 import { firstActionExtraCost } from "./ruleQueries.js";
-import { findCardAnywhere, opponent } from "./zoneQueries.js";
+import { controlledPermanents } from "./sourceQueries.js";
+import { currentLink, findCardAnywhere, opponent } from "./zoneQueries.js";
 
 type MessageValues = Record<string, GameMessageValue>;
 
@@ -848,6 +850,7 @@ interface ProjectedEffect {
   phrases: Phrase[];
   duration: EffectDuration;
   recurring?: true;
+  inactive?: true;
   facts?: OngoingEffectFacts;
 }
 
@@ -932,6 +935,7 @@ function effectView(effect: ProjectedEffect): OngoingEffectView {
     duration: effect.duration.text,
     durationMessage: effect.duration.message,
     ...(effect.recurring ? { recurring: true as const } : {}),
+    ...(effect.inactive ? { inactive: true as const } : {}),
     ...(effect.facts ? { facts: effect.facts } : {}),
   };
 }
@@ -940,6 +944,7 @@ function effectView(effect: ProjectedEffect): OngoingEffectView {
  *  card. The source's identity follows the usual face-down secrecy rules. */
 export function projectOngoingEffects(
   state: GameStateInternal,
+  runtime: EngineRuntime,
   viewer: number | null | undefined,
 ): OngoingEffectView[] {
   const byKey = new Map<string, ProjectedEffect>();
@@ -1181,6 +1186,35 @@ export function projectOngoingEffects(
         thisTurn,
         player.seat,
       );
+    }
+
+    // A static "first time you would be dealt damage each turn" prevention
+    // is easy to misread once that first damage has passed. While its
+    // condition holds, show it armed; after an unprevented first damage
+    // event, show it inactive for the rest of the turn.
+    const damageEvents = Number(player.flags.damageEventsThisTurn ?? 0);
+    for (const source of controlledPermanents(state, player.seat, { faceDownEquipment: false })) {
+      const fixed = scriptOf(state, source.cardId, source)?.fixedDamagePrevention;
+      if (!fixed?.firstDamageEventEachTurn || fixed.amount <= 0) continue;
+      if (Number(source.counters?.fixedPreventionUsedTurn ?? -1) === state.turn) continue;
+      if (fixed.condition && !fixed.condition(
+        runtime.makeCtx(state, player.seat, source, currentLink(state)),
+      )) continue;
+      const spent = damageEvents > 0;
+      add(`first-damage-prevention:${source.instanceId}`, {
+        seat: player.seat,
+        ...sourceIdentity(source),
+        sourceSeat: player.seat,
+        phrases: [phrase(
+          `prevent ${fixed.amount} of the first damage`,
+          "engine.effect.summary.prevent.first.damage",
+          { amount: fixed.amount },
+        )],
+        duration: spent
+          ? duration("turn", "already dealt damage this turn", "engine.effect.duration.first.damage.passed")
+          : thisTurn,
+        ...(spent ? { inactive: true as const } : {}),
+      });
     }
   }
 

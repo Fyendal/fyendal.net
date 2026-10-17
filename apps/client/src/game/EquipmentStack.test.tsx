@@ -5,7 +5,7 @@ import type { CardView } from "@fyendal/shared";
 import { EquipmentStack } from "./EquipmentStack.js";
 
 describe("EquipmentStack", () => {
-  it("renders every nested public card for transformed heroes and constructs", () => {
+  it("hides a transformed back face's pieces behind its front-face pitch strip", () => {
     const card: CardView = {
       instanceId: 3,
       cardId: "DYN092B",
@@ -21,13 +21,15 @@ describe("EquipmentStack", () => {
     const html = renderToStaticMarkup(createElement(EquipmentStack, {
       card,
       underCardCountLabel: "2 cards underneath",
+      squareArt: true,
     }));
 
     expect(html).toContain('data-card-stack-id="3"');
-    expect(html.match(/class="equipment-stack-card"/g)).toHaveLength(3);
-    expect(html).toContain('data-cardid="EVO022"');
-    expect(html).toContain('data-cardid="EVO018"');
+    expect(html.match(/class="equipment-stack-card"/g)).toHaveLength(1);
+    expect(html).not.toContain('data-cardid="EVO022"');
+    expect(html).not.toContain('data-cardid="EVO018"');
     expect(html).toContain('data-cardid="DYN092B"');
+    expect(html).toContain('data-pitch="2"');
     expect(html).toContain(
       'class="pip pile-pip equipment-stack-pip under-pip" role="img" aria-label="2 cards underneath" title="2 cards underneath"',
     );

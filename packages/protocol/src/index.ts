@@ -1210,7 +1210,7 @@ function ongoingEffect(value: unknown): boolean {
     effect,
     [
       "seat", "cardId", "label", "sourceHidden", "sourceSeat", "summary", "summaryMessage",
-      "lifetime", "duration", "durationMessage", "recurring", "facts",
+      "lifetime", "duration", "durationMessage", "recurring", "inactive", "facts",
     ],
     ["seat", "cardId", "label"],
   )
@@ -1223,6 +1223,7 @@ function ongoingEffect(value: unknown): boolean {
     && (effect.duration === undefined || string(effect.duration, MAX_SHORT_TEXT))
     && (effect.durationMessage === undefined || decodeGameMessage(effect.durationMessage) !== null)
     && (effect.recurring === undefined || effect.recurring === true)
+    && (effect.inactive === undefined || effect.inactive === true)
     && (effect.facts === undefined || ongoingEffectFacts(effect.facts));
 }
 

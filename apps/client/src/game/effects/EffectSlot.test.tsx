@@ -71,6 +71,22 @@ describe("EffectSlot", () => {
     expect(html).toMatch(/class="effect-chip effect-imposed"/);
   });
 
+  it("marks an effect that no longer applies, keeping its reason readable", () => {
+    const html = slot([{
+      seat: 0,
+      cardId: "DTD047",
+      label: "prevent 1 of the first damage · already dealt damage this turn",
+      sourceSeat: 0,
+      summaryMessage: { id: "engine.effect.summary.prevent.first.damage", values: { amount: 1 } },
+      lifetime: "turn",
+      durationMessage: { id: "engine.effect.duration.first.damage.passed" },
+      inactive: true,
+    }]);
+
+    expect(html).toMatch(/class="effect-chip effect-inactive"/);
+    expect(html).toContain('<span class="effect-life">Already dealt damage this turn</span>');
+  });
+
   it("fills every cell with an effect and attaches the hidden count to the last chip", () => {
     const many = Array.from({ length: 8 }, (_, index) => ({ ...nextAttack, label: `+${index} · next attack` }));
     const html = slot(many);

@@ -1024,7 +1024,7 @@ function projectState(
     stack: projectedStackLayers(state, runtime, seat, revealAll),
     ...(stackContext ? { stackContext } : {}),
     ...(attackQueue.length > 0 ? { attackQueue } : {}),
-    ongoing: projectOngoingEffects(state, revealAll ? undefined : seat),
+    ongoing: projectOngoingEffects(state, runtime, revealAll ? undefined : seat),
     gameStats: state.gameStats,
     turnFacts,
     pendingDecision: state.pendingDecision

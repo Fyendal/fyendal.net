@@ -158,6 +158,20 @@
   font-variant-numeric: tabular-nums;
 }
 .effect-chips:hover .effect-chip { background: var(--surface-raised); }
+/* An effect that will not apply this turn, kept in view so the player knows
+   why: a dashed edge, drained art and a struck summary; the duration line
+   carries the reason and stays readable. */
+.effect-chip.effect-inactive::after { box-shadow: none; border: 1px dashed var(--effect-edge); }
+.effect-chip.effect-inactive { background: transparent; }
+.effect-inactive .effect-art { filter: grayscale(1) brightness(0.7); }
+.effect-inactive .effect-summary {
+  color: var(--text-muted);
+  text-decoration: line-through;
+  text-decoration-color: color-mix(in srgb, currentColor 60%, transparent);
+}
+.effect-inactive :is(.effect-life, .effect-ledger-duration) { color: var(--text-secondary); }
+.effect-card.effect-inactive > .card,
+.effect-card.effect-inactive > .card-zone { filter: grayscale(1) brightness(0.7); }
 
 /* ── phone tiles ──
    Effects at the mat's own card size: the full source card face, a lifetime

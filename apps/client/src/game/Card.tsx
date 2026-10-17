@@ -9,6 +9,7 @@ import {
   resolveCardImageUrl,
   resolveCardImageUrls,
 } from "./cardImageUrl.js";
+import { cardFrontFaceId } from "./cardPreviewFaces.js";
 import { MARKED_TOKEN_ID, cardBadges, registerCardBadges } from "./cardBadges.js";
 
 const PITCH_CLASS: Record<number, string> = {
@@ -298,7 +299,10 @@ export function CardFace({
   const squareHero = data?.cardType === "hero";
   const printedArenaFrame = squareHero || data?.cardType === "weapon" ||
     data?.cardType === "equipment" || data?.cardType === "token";
-  const squarePitch = data?.pitch && PITCH_CLASS[data.pitch] ? data.pitch : undefined;
+  // A transformed back face (Nitro Mechanoid) has no pitch; show its front's.
+  const frontFaceId = cardFrontFaceId(card.cardId);
+  const stripPitch = data?.pitch ?? (frontFaceId ? cardData[frontFaceId]?.pitch : undefined);
+  const squarePitch = stripPitch && PITCH_CLASS[stripPitch] ? stripPitch : undefined;
   const printedLife = data?.life;
   const hasOverlays = showOverlays && overlays.length > 0;
   const cls = [

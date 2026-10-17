@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { engineRuntime } from "../engineRuntime.js";
+import { projectOngoingEffects } from "../ongoingEffects.js";
 import { makeGame, player } from "./fixtures.js";
 
 function setup() {
@@ -62,5 +63,38 @@ describe("conditional first damage event prevention", () => {
     damage(0);
     damage(2);
     expect(target.life).toBe(19);
+  });
+
+  describe("lingering effect", () => {
+    const shown = (state: ReturnType<typeof setup>["state"]) =>
+      projectOngoingEffects(state, engineRuntime, 0).filter(
+        (effect) => effect.summaryMessage?.id === "engine.effect.summary.prevent.first.damage",
+      );
+
+    it("appears only while the condition holds", () => {
+      const { state, target } = setup();
+      expect(shown(state)).toEqual([]);
+      target.flags.preventionEnabled = true;
+      expect(shown(state)).toEqual([expect.objectContaining({ seat: 1, cardId: "HERO_B", duration: "this turn" })]);
+      expect(shown(state)[0]!.inactive).toBeUndefined();
+    });
+
+    it("turns inactive when the condition is met after an unprevented first event", () => {
+      const { state, target, damage } = setup();
+      damage(1);
+      target.flags.preventionEnabled = true;
+      expect(shown(state)).toEqual([expect.objectContaining({
+        inactive: true,
+        duration: "already dealt damage this turn",
+        durationMessage: { id: "engine.effect.duration.first.damage.passed" },
+      })]);
+    });
+
+    it("disappears once it has prevented damage", () => {
+      const { state, target, damage } = setup();
+      target.flags.preventionEnabled = true;
+      damage(2);
+      expect(shown(state)).toEqual([]);
+    });
   });
 });

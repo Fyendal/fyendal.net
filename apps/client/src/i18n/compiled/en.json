@@ -19530,6 +19530,12 @@
       "value": "first action this turn"
     }
   ],
+  "engine.effect.duration.first.damage.passed": [
+    {
+      "type": 0,
+      "value": "already dealt damage this turn"
+    }
+  ],
   "engine.effect.duration.next.action": [
     {
       "type": 0,
@@ -22170,6 +22176,20 @@
     {
       "type": 1,
       "value": "source"
+    }
+  ],
+  "engine.effect.summary.prevent.first.damage": [
+    {
+      "type": 0,
+      "value": "prevent "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " of the first damage"
     }
   ],
   "engine.effect.summary.prevent.physical": [

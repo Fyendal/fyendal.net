@@ -245,6 +245,7 @@ export function EffectSlot({
             className={[
               "effect-chip",
               effectImposed(effect) ? "effect-imposed" : "",
+              effect.inactive ? "effect-inactive" : "",
               arrivals.has(key) ? "effect-arrive" : "",
             ].filter(Boolean).join(" ")}
             data-effect-label={`${sentenceCase(text.summary)}\n${sentenceCase(text.duration)}${count > 1 ? ` ×${count}` : ""}`}
@@ -296,6 +297,7 @@ function EffectCardTile({ stack, arriving }: { stack: OngoingEffectStack; arrivi
       className={[
         "effect-card",
         effectImposed(effect) ? "effect-imposed" : "",
+        effect.inactive ? "effect-inactive" : "",
         count > 1 ? "effect-card-stacked" : "",
         arriving ? "effect-arrive" : "",
       ].filter(Boolean).join(" ")}

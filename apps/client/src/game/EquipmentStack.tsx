@@ -2,6 +2,7 @@ import type { CSSProperties } from "react";
 import type { CardView } from "@fyendal/shared";
 import { CardFace } from "./Card.js";
 import { equipmentStackCards } from "./boardGroups.js";
+import { cardFrontFaceId } from "./cardPreviewFaces.js";
 import { motionPresentationKey, type MotionLocation } from "./motion/motionTypes.js";
 import { cardStackStep, squareCardStackOffset } from "./stackLayout.js";
 
@@ -48,9 +49,12 @@ export function EquipmentStack({
   /** Square presentation for cards in the desktop arena. */
   squareArt?: boolean;
 }) {
-  const cards = [...underCards, ...equipmentStackCards(card)];
+  const stackCards = equipmentStackCards(card);
+  // The pieces a back face transformed from stay hidden beneath it; peeking
+  // their name strips would misstate the permanent's own pitch.
+  const cards = [...underCards, ...(cardFrontFaceId(card.cardId) ? [card] : stackCards)];
   const step = cardStackStep(cards.length);
-  const underCardCount = cards.length - 1;
+  const underCardCount = underCards.length + stackCards.length - 1;
   const visibleSoulCount = soulCount !== undefined && soulCount > 0 ? soulCount : null;
   const visibleBoundCount = boundCount !== undefined && boundCount > 0 ? boundCount : null;
   const explicitUnderCardIds = new Set(underCards.map((underCard) => underCard.instanceId));

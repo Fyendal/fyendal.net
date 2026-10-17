@@ -105,7 +105,7 @@ export function EffectLedger({
                 return (
                   <li
                     key={JSON.stringify([effect.cardId, effect.label, effect.sourceSeat ?? null])}
-                    className={`effect-ledger-row${imposed ? " effect-imposed" : ""}`}
+                    className={`effect-ledger-row${imposed ? " effect-imposed" : ""}${effect.inactive ? " effect-inactive" : ""}`}
                   >
                     {artCardId ? (
                       <button

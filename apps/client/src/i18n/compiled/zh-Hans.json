@@ -18794,6 +18794,12 @@
       "value": "本回合第一个行动"
     }
   ],
+  "engine.effect.duration.first.damage.passed": [
+    {
+      "type": 0,
+      "value": "本回合已受到过伤害"
+    }
+  ],
   "engine.effect.duration.next.action": [
     {
       "type": 0,
@@ -21829,6 +21835,20 @@
     {
       "type": 0,
       "value": " 点伤害"
+    }
+  ],
+  "engine.effect.summary.prevent.first.damage": [
+    {
+      "type": 0,
+      "value": "防止首次伤害中的 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点"
     }
   ],
   "engine.effect.summary.prevent.physical": [

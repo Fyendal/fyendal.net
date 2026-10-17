@@ -672,6 +672,9 @@ export interface OngoingEffectView {
   durationMessage?: GameMessage;
   /** A rest-of-game effect that triggers repeatedly. */
   recurring?: true;
+  /** Still listed for clarity, but it will not apply this turn, e.g. a
+   * first-damage prevention after the hero was already dealt damage. */
+  inactive?: true;
   /** Rules values of a modifier-backed effect, summed over the modifiers it
    * groups, for consumers that must not parse English (practice bots).
    * Present on every modifier-backed effect, even when empty; absent on
