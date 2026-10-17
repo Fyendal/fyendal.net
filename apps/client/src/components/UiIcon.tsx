@@ -4,6 +4,10 @@ import type { CSSProperties } from "react";
 export type UiIconName =
   | "attack-queue"
   | "check"
+  | "chevron-down"
+  | "chevron-left"
+  | "chevron-right"
+  | "chevron-up"
   | "close"
   | "download"
   | "edit"
@@ -19,6 +23,7 @@ export type UiIconName =
   | "lock"
   | "message"
   | "more"
+  | "note"
   | "play"
   | "share"
   | "star"

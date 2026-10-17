@@ -31,7 +31,8 @@ import {
   paginateReplayNotes,
   replayStartsCollapsed,
   replayStepTarget,
-  shouldAdvanceReplayOnSpace,
+  replayTurnBoundaries,
+  replayKeyDirection,
 } from "./ReplayBar.js";
 import { TestI18nProvider } from "../i18n/TestI18nProvider.js";
 
@@ -63,18 +64,19 @@ describe("replay controls", () => {
     expect(html).toContain('aria-label="Minimize replay controls"');
     expect(html).toContain('aria-label="Previous 1 replay frame"');
     expect(html).toContain('aria-label="Next 1 replay frame"');
-    expect(html).toContain('aria-keyshortcuts="Space"');
-    expect(html).toContain('class="replay-step-button replay-next-button shortcut-button"');
+    expect(html).toContain('aria-keyshortcuts="Space ArrowRight"');
+    expect(html).toContain('class="replay-control replay-next-button"');
     expect(html).toContain('<kbd class="shortcut-key replay-next-shortcut" aria-label="Space key"></kbd>');
-    expect(html).toContain('aria-label="Replay step size: 1 frame"');
-    expect(html).toContain('class="replay-action-icon" aria-label="Export replay"');
+    expect(html).toContain('aria-label="Frames per step"');
+    expect(html).toContain('aria-pressed="true" aria-label="Replay step size: 1 frame"');
+    expect(html).toContain('aria-pressed="false" aria-label="Replay step size: 5 frames"');
+    expect(html).toContain('aria-label="Export replay" class="replay-control replay-export"');
     expect(html).toContain('aria-label="Add a note to frame 2"');
-    expect(html).toContain('class="replay-action-icon" aria-label="Exit replay"');
-    expect(html).not.toContain('>Export replay</button>');
-    expect(html).not.toContain('>Exit replay</button>');
+    expect(html).toContain('aria-label="Exit replay" class="replay-control replay-exit"');
+    expect(html).not.toContain(" title=");
+    expect(html).not.toContain("<svg");
     expect(html).toContain("2 / 2");
     expect(html).not.toContain("Play replay");
-    expect(html).toContain("1×");
     expect(html).not.toContain("replay-bar-collapsed");
   });
 
@@ -89,10 +91,10 @@ describe("replay controls", () => {
       createElement(TestI18nProvider, null, createElement(ReplayBar)),
     );
 
-    expect(html).toContain('class="replay-action-icon replay-note-button active"');
+    expect(html).toContain('class="replay-control replay-note-button active"');
     expect(html).toContain('aria-label="Edit the note on frame 2"');
     expect(html).toContain('aria-label="Open note on frame 2"');
-    expect(html).toContain('title="Pitch differently here."');
+    expect(html).not.toContain('title="Pitch differently here."');
   });
 
   it("reduces the minimized transport to back, next, and maximize", () => {
@@ -112,10 +114,33 @@ describe("replay controls", () => {
     expect(html).toContain('aria-label="Previous 5 replay frames"');
     expect(html).toContain('aria-label="Next 5 replay frames"');
     expect(html).toContain('aria-label="Maximize replay controls"');
-    expect(html).toContain('aria-keyshortcuts="Space"');
-    expect(html).toContain('class="replay-step-button replay-next-button shortcut-button"');
-    expect(html).toContain("←");
-    expect(html).toContain("→");
+    expect(html).toContain('aria-keyshortcuts="Space ArrowRight"');
+    expect(html).toContain('class="replay-control replay-next-button"');
+    expect(html).toContain("/icons/ui/chevron-left.svg");
+    expect(html).toContain("/icons/ui/chevron-right.svg");
+  });
+
+  it("marks where each new turn begins on the scrubber", () => {
+    expect(replayTurnBoundaries([])).toEqual([]);
+    expect(replayTurnBoundaries([1])).toEqual([]);
+    expect(replayTurnBoundaries([0, 1, 1, 1, 2])).toEqual([25, 100]);
+  });
+
+  it("names the current turn and falls back before turn one", () => {
+    Object.assign(replayStore.state, {
+      replayViews: [{ turn: 0 }, { turn: 1 }, { turn: 2 }],
+      replayStep: 0,
+    });
+    const render = () => renderToStaticMarkup(
+      createElement(TestI18nProvider, null, createElement(ReplayBar)),
+    );
+
+    expect(render()).toContain(">Game start</strong>");
+    replayStore.state.replayStep = 2;
+    const html = render();
+    expect(html).toContain(">Turn 2</strong>");
+    expect(html).toContain("3 / 3");
+    expect(html.match(/<span style="left:/g)).toHaveLength(2);
   });
 
   it("steps by the selected amount and clamps at replay boundaries", () => {
@@ -140,30 +165,60 @@ describe("replay controls", () => {
     });
   });
 
-  it("uses unmodified Space outside interactive controls", () => {
-    const event = {
-      code: "Space",
-      repeat: false,
-      altKey: false,
-      ctrlKey: false,
-      metaKey: false,
-      shiftKey: false,
-      target: null,
-    } as KeyboardEvent;
+  const keyEvent = {
+    code: "Space",
+    repeat: false,
+    altKey: false,
+    ctrlKey: false,
+    metaKey: false,
+    shiftKey: false,
+    target: null,
+  };
+  const focusedInside = (...matches: string[]) => ({
+    closest: (selector: string) => matches.some((match) => selector.includes(match)) ? {} : null,
+  }) as unknown as EventTarget;
 
-    expect(shouldAdvanceReplayOnSpace(event)).toBe(true);
-    expect(shouldAdvanceReplayOnSpace({ ...event, repeat: true })).toBe(false);
-    expect(shouldAdvanceReplayOnSpace({ ...event, ctrlKey: true })).toBe(false);
-    expect(shouldAdvanceReplayOnSpace({
-      ...event,
-      target: { closest: () => ({}) } as unknown as EventTarget,
-    })).toBe(false);
+  it("maps unmodified Space and arrows to replay steps", () => {
+    expect(replayKeyDirection(keyEvent)).toBe("next");
+    expect(replayKeyDirection({ ...keyEvent, code: "ArrowRight" })).toBe("next");
+    expect(replayKeyDirection({ ...keyEvent, code: "ArrowLeft" })).toBe("previous");
+    expect(replayKeyDirection({ ...keyEvent, code: "KeyA" })).toBeNull();
+    expect(replayKeyDirection({ ...keyEvent, repeat: true })).toBeNull();
+    expect(replayKeyDirection({ ...keyEvent, code: "ArrowLeft", repeat: true })).toBe("previous");
+    expect(replayKeyDirection({ ...keyEvent, ctrlKey: true })).toBeNull();
+    expect(replayKeyDirection({ ...keyEvent, code: "ArrowLeft", altKey: true })).toBeNull();
+  });
+
+  it("keeps the shortcuts on the transport after a bar control takes focus", () => {
+    for (const code of ["Space", "ArrowLeft", "ArrowRight"]) {
+      const event = { ...keyEvent, code };
+      expect(replayKeyDirection({ ...event, target: focusedInside(".replay-bar", "button") }))
+        .not.toBeNull();
+      expect(replayKeyDirection({ ...event, target: focusedInside(".replay-bar", "input") }))
+        .not.toBeNull();
+      expect(replayKeyDirection({
+        ...event,
+        target: focusedInside(".replay-bar", ".replay-notes-panel", "textarea"),
+      })).toBeNull();
+    }
+  });
+
+  it("leaves keys to focused controls outside the replay bar", () => {
+    expect(replayKeyDirection({ ...keyEvent, target: focusedInside("button") })).toBeNull();
+    expect(replayKeyDirection({ ...keyEvent, code: "ArrowRight", target: focusedInside("button") }))
+      .toBe("next");
+    expect(replayKeyDirection({ ...keyEvent, code: "ArrowLeft", target: focusedInside("input") }))
+      .toBeNull();
+    expect(replayKeyDirection({ ...keyEvent, code: "ArrowLeft", target: focusedInside("textarea") }))
+      .toBeNull();
+    expect(replayKeyDirection({ ...keyEvent, code: "ArrowLeft", target: focusedInside("[role='tab']") }))
+      .toBeNull();
   });
 
   it("renders transport accessibility labels in Simplified Chinese", () => {
     Object.assign(replayStore.state, {
-      replayViews: [{}, {}],
-      replayStep: 0,
+      replayViews: [{ turn: 0 }, { turn: 1 }],
+      replayStep: 1,
     });
 
     const html = renderToStaticMarkup(
@@ -172,7 +227,8 @@ describe("replay controls", () => {
       </TestI18nProvider>,
     );
 
-    expect(html).toContain(">回放</span>");
+    expect(html).toContain(">第 1 回合</strong>");
+    expect(html).toContain(">下一步</span>");
     expect(html).toContain('aria-label="收起回放控制栏"');
     expect(html).toContain('aria-label="导出回放"');
     expect(html).toContain('aria-label="退出回放"');

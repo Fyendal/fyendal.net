@@ -2,6 +2,8 @@ import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import { MAX_REPLAY_NOTE_LENGTH } from "@fyendal/protocol";
 import { useIntl } from "react-intl";
 import { useShallow } from "zustand/react/shallow";
+import { TooltipButton } from "../components/TooltipButton.js";
+import { UiIcon } from "../components/UiIcon.js";
 import { useStore } from "../store.js";
 
 type ReplayStepSize = 1 | 5;
@@ -36,30 +38,104 @@ export function replayStepTarget(
   return Math.max(0, Math.min(current + delta, total - 1));
 }
 
-export function shouldAdvanceReplayOnSpace(
-  event: Pick<KeyboardEvent, "code" | "repeat" | "altKey" | "ctrlKey" | "metaKey" | "shiftKey" | "target">,
-): boolean {
-  if (
-    event.code !== "Space" ||
-    event.repeat ||
-    event.altKey ||
-    event.ctrlKey ||
-    event.metaKey ||
-    event.shiftKey
-  ) return false;
+type ReplayKeyEvent = Pick<
+  KeyboardEvent,
+  "code" | "repeat" | "altKey" | "ctrlKey" | "metaKey" | "shiftKey" | "target"
+>;
+
+/** The replay step a keypress requests, or null when the key belongs to the
+ * focused element. Space and → step forward, ← steps back. */
+export function replayKeyDirection(event: ReplayKeyEvent): "previous" | "next" | null {
+  if (event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return null;
+  const direction = event.code === "ArrowLeft"
+    ? "previous"
+    : event.code === "ArrowRight" || event.code === "Space"
+      ? "next"
+      : null;
+  if (!direction) return null;
+  // Holding an arrow scrubs; a held Space would race through the game.
+  if (event.repeat && event.code === "Space") return null;
 
   const target = event.target as KeyboardTarget | null;
-  return !target?.closest?.(
-    "input, textarea, select, button, a, [contenteditable='true'], [role='button']",
-  );
+  // Text entry and the notes panel keep their own keyboard behavior.
+  if (target?.closest?.(
+    "textarea, select, [contenteditable='true'], .replay-notes-panel",
+  )) return null;
+  // Focus left on a transport control by a click must not swallow the
+  // shortcut: stepping wins over pressing that control again, and the
+  // scrubber steps by the chosen size instead of a single frame.
+  if (target?.closest?.(".replay-bar")) return direction;
+  if (event.code === "Space") {
+    return target?.closest?.(
+      "input, button, a, [role='button']",
+    ) ? null : direction;
+  }
+  // Buttons and links ignore arrows; other inputs and composite widgets use them.
+  return target?.closest?.(
+    "input, [role='slider'], [role='tab'], [role='menu'], [role='menuitem'], " +
+      "[role='listbox'], [role='option'], [role='radiogroup'], [role='grid']",
+  ) ? null : direction;
 }
 
-export function CollapsedReplayControls({
+/** Back and Next. The full bar labels Next and shows its Space key. */
+function ReplayStepButtons({
   replayStep,
   total,
   stepSize,
   setReplayStep,
+  labeled = false,
+}: {
+  replayStep: number;
+  total: number;
+  stepSize: ReplayStepSize;
+  setReplayStep: (step: number) => void;
+  labeled?: boolean;
+}) {
+  const intl = useIntl();
+  const nextLabel = intl.formatMessage({ id: "replay.controls.next" }, { count: stepSize });
+  const step = (direction: "previous" | "next") =>
+    setReplayStep(replayStepTarget(replayStep, total, direction, stepSize));
+  return (
+    <>
+      <TooltipButton
+        className="replay-control"
+        tooltip={intl.formatMessage({ id: "replay.controls.previous" }, { count: stepSize })}
+        tooltipSide="above"
+        aria-keyshortcuts="ArrowLeft"
+        disabled={replayStep <= 0}
+        onClick={() => step("previous")}
+      >
+        <UiIcon name="chevron-left" />
+      </TooltipButton>
+      <TooltipButton
+        className="replay-control replay-next-button"
+        tooltip={intl.formatMessage({ id: "common.shortcut.space" }, { label: nextLabel })}
+        tooltipSide="above"
+        aria-label={nextLabel}
+        aria-keyshortcuts="Space ArrowRight"
+        disabled={replayStep >= total - 1}
+        onClick={() => step("next")}
+      >
+        {labeled ? (
+          <span className="replay-next-label">
+            {intl.formatMessage({ id: "replay.controls.nextShort" })}
+          </span>
+        ) : null}
+        <UiIcon name="chevron-right" />
+        {labeled ? (
+          <kbd
+            className="shortcut-key replay-next-shortcut"
+            aria-label={intl.formatMessage({ id: "common.spaceKey" })}
+          />
+        ) : null}
+      </TooltipButton>
+    </>
+  );
+}
+
+export function CollapsedReplayControls({
   onExpand,
+  ...steps
 }: {
   replayStep: number;
   total: number;
@@ -68,47 +144,32 @@ export function CollapsedReplayControls({
   onExpand: () => void;
 }) {
   const intl = useIntl();
-  const previousLabel = intl.formatMessage({ id: "replay.controls.previous" }, { count: stepSize });
-  const nextLabel = intl.formatMessage({ id: "replay.controls.next" }, { count: stepSize });
   return (
     <>
-      <button
-        type="button"
-        className="replay-step-button"
-        aria-label={previousLabel}
-        title={previousLabel}
-        disabled={replayStep <= 0}
-        onClick={() => setReplayStep(replayStepTarget(replayStep, total, "previous", stepSize))}
-      >
-        <span aria-hidden="true">←</span>
-      </button>
-      <button
-        type="button"
-        className="replay-step-button replay-next-button shortcut-button"
-        aria-label={nextLabel}
-        aria-keyshortcuts="Space"
-        title={intl.formatMessage({ id: "common.shortcut.space" }, { label: nextLabel })}
-        disabled={replayStep >= total - 1}
-        onClick={() => setReplayStep(replayStepTarget(replayStep, total, "next", stepSize))}
-      >
-        <span aria-hidden="true">→</span>
-        <kbd
-          className="shortcut-key replay-next-shortcut"
-          aria-label={intl.formatMessage({ id: "common.spaceKey" })}
-        />
-      </button>
-      <button
-        type="button"
-        className="replay-maximize"
-        aria-label={intl.formatMessage({ id: "replay.controls.maximize" })}
-        title={intl.formatMessage({ id: "replay.controls.maximize" })}
+      <ReplayStepButtons {...steps} />
+      <TooltipButton
+        className="replay-control"
+        tooltip={intl.formatMessage({ id: "replay.controls.maximize" })}
+        tooltipSide="above"
         aria-expanded="false"
         onClick={onExpand}
       >
-        <span aria-hidden="true">⌃</span>
-      </button>
+        <UiIcon name="chevron-up" />
+      </TooltipButton>
     </>
   );
+}
+
+/** Frame positions, as track percentages, where a new turn begins. */
+export function replayTurnBoundaries(turns: readonly number[]): number[] {
+  if (turns.length <= 1) return [];
+  const boundaries: number[] = [];
+  for (let frame = 1; frame < turns.length; frame++) {
+    if (turns[frame] !== turns[frame - 1]) {
+      boundaries.push((frame / (turns.length - 1)) * 100);
+    }
+  }
+  return boundaries;
 }
 
 /** Transport controls overlaid at the bottom of the board during replay. */
@@ -143,6 +204,10 @@ export function ReplayBar() {
 
   const total = replayViews?.length ?? 0;
   const progress = total <= 1 ? 0 : (replayStep / (total - 1)) * 100;
+  const turnBoundaries = useMemo(
+    () => replayTurnBoundaries(replayViews?.map((view) => view.turn) ?? []),
+    [replayViews],
+  );
   const replayNotesByFrame = useMemo(
     () => new Map(replayNotes.map((note) => [note.frame, note])),
     [replayNotes],
@@ -155,18 +220,19 @@ export function ReplayBar() {
   }, [currentNote?.text, notePanelOpen, replayStep]);
 
   useEffect(() => {
-    const advanceOnSpace = (event: KeyboardEvent) => {
-      if (!shouldAdvanceReplayOnSpace(event)) return;
+    const stepOnKey = (event: KeyboardEvent) => {
+      const direction = replayKeyDirection(event);
+      if (!direction) return;
       const current = useStore.getState();
       const currentTotal = current.replayViews?.length ?? 0;
-      if (currentTotal === 0 || current.replayStep >= currentTotal - 1) return;
+      if (currentTotal === 0) return;
+      // Also cancels Space activating a focused bar control at either end.
       event.preventDefault();
-      current.setReplayStep(
-        replayStepTarget(current.replayStep, currentTotal, "next", stepSize),
-      );
+      const target = replayStepTarget(current.replayStep, currentTotal, direction, stepSize);
+      if (target !== current.replayStep) current.setReplayStep(target);
     };
-    window.addEventListener("keydown", advanceOnSpace);
-    return () => window.removeEventListener("keydown", advanceOnSpace);
+    window.addEventListener("keydown", stepOnKey);
+    return () => window.removeEventListener("keydown", stepOnKey);
   }, [stepSize]);
 
   if (!replayViews || total === 0) return null;
@@ -184,6 +250,12 @@ export function ReplayBar() {
     setNoteDraft("");
   };
 
+  const turn = replayViews[replayStep]?.turn ?? 0;
+  const noteLabel = intl.formatMessage(
+    { id: currentNote ? "replay.notes.edit" : "replay.notes.add" },
+    { frame: replayStep + 1 },
+  );
+
   return (
     <div className={`replay-bar${collapsed ? " replay-bar-collapsed" : ""}`}>
       {!collapsed && notePanelOpen ? (
@@ -196,15 +268,13 @@ export function ReplayBar() {
               { id: "replay.notes.frameTitle" },
               { frame: replayStep + 1 },
             )}</strong>
-            <button
-              type="button"
-              className="replay-note-close"
-              aria-label={intl.formatMessage({ id: "replay.notes.close" })}
-              title={intl.formatMessage({ id: "replay.notes.close" })}
+            <TooltipButton
+              className="replay-control replay-note-close"
+              tooltip={intl.formatMessage({ id: "replay.notes.close" })}
               onClick={closeNote}
             >
-              <span aria-hidden="true">×</span>
-            </button>
+              <UiIcon name="close" />
+            </TooltipButton>
           </div>
           <textarea
             autoFocus
@@ -235,6 +305,7 @@ export function ReplayBar() {
             </button>
             <button
               type="button"
+              className="replay-note-save"
               disabled={noteDraft.trim().length === 0}
               onClick={() => {
                 setReplayNote(replayStep, noteDraft);
@@ -250,25 +321,23 @@ export function ReplayBar() {
                 <span>{intl.formatMessage({ id: "replay.notes.saved" })}</span>
                 {paginatedNotes.pageCount > 1 ? (
                   <div className="replay-note-pagination">
-                    <button
-                      type="button"
-                      aria-label={intl.formatMessage({ id: "replay.notes.previousPage" })}
-                      title={intl.formatMessage({ id: "replay.notes.previousPage" })}
+                    <TooltipButton
+                      className="replay-control"
+                      tooltip={intl.formatMessage({ id: "replay.notes.previousPage" })}
                       disabled={paginatedNotes.page === 0}
                       onClick={() => setNotesPage(paginatedNotes.page - 1)}
                     >
-                      <span aria-hidden="true">‹</span>
-                    </button>
+                      <UiIcon name="chevron-left" />
+                    </TooltipButton>
                     <span>{paginatedNotes.page + 1} / {paginatedNotes.pageCount}</span>
-                    <button
-                      type="button"
-                      aria-label={intl.formatMessage({ id: "replay.notes.nextPage" })}
-                      title={intl.formatMessage({ id: "replay.notes.nextPage" })}
+                    <TooltipButton
+                      className="replay-control"
+                      tooltip={intl.formatMessage({ id: "replay.notes.nextPage" })}
                       disabled={paginatedNotes.page === paginatedNotes.pageCount - 1}
                       onClick={() => setNotesPage(paginatedNotes.page + 1)}
                     >
-                      <span aria-hidden="true">›</span>
-                    </button>
+                      <UiIcon name="chevron-right" />
+                    </TooltipButton>
                   </div>
                 ) : null}
               </div>
@@ -300,69 +369,37 @@ export function ReplayBar() {
         />
       ) : (
         <>
-          <span className="replay-title">
-            {sharedOwner
-              ? intl.formatMessage({ id: "replay.shared.title" }, { owner: sharedOwner })
-              : intl.formatMessage({ id: "replay.controls.title" })}
-          </span>
-          <button
-            type="button"
-            className="replay-collapse-toggle"
-            aria-label={intl.formatMessage({ id: "replay.controls.minimize" })}
-            title={intl.formatMessage({ id: "replay.controls.minimize" })}
-            aria-expanded="true"
-            onClick={() => setCollapsed(true)}
-          >
-            <span aria-hidden="true">—</span>
-          </button>
-          <button
-            className="replay-step-button"
-            aria-label={intl.formatMessage(
-              { id: "replay.controls.previous" },
-              { count: stepSize },
-            )}
-            title={intl.formatMessage(
-              { id: "replay.controls.previous" },
-              { count: stepSize },
-            )}
-            onClick={() => setReplayStep(
-              replayStepTarget(replayStep, total, "previous", stepSize),
-            )}
-            disabled={replayStep <= 0}
-          >
-            <span aria-hidden="true">←</span>
-          </button>
-          <button
-            className="replay-step-button replay-next-button shortcut-button"
-            aria-label={intl.formatMessage(
-              { id: "replay.controls.next" },
-              { count: stepSize },
-            )}
-            aria-keyshortcuts="Space"
-            title={intl.formatMessage(
-              { id: "common.shortcut.space" },
-              {
-                label: intl.formatMessage(
-                  { id: "replay.controls.next" },
-                  { count: stepSize },
-                ),
-              },
-            )}
-            onClick={() => setReplayStep(
-              replayStepTarget(replayStep, total, "next", stepSize),
-            )}
-            disabled={replayStep >= total - 1}
-          >
-            <span aria-hidden="true">→</span>
-            <kbd
-              className="shortcut-key replay-next-shortcut"
-              aria-label={intl.formatMessage({ id: "common.spaceKey" })}
+          <div className="replay-position">
+            {sharedOwner ? (
+              <span className="replay-owner">
+                {intl.formatMessage({ id: "replay.shared.title" }, { owner: sharedOwner })}
+              </span>
+            ) : null}
+            <strong className="replay-turn">
+              {turn >= 1
+                ? intl.formatMessage({ id: "replay.controls.turn" }, { turn })
+                : intl.formatMessage({ id: "replay.controls.gameStart" })}
+            </strong>
+            <span className="replay-pos">{replayStep + 1} / {total}</span>
+          </div>
+          <div className="replay-transport">
+            <ReplayStepButtons
+              replayStep={replayStep}
+              total={total}
+              stepSize={stepSize}
+              setReplayStep={setReplayStep}
+              labeled
             />
-          </button>
+          </div>
           <div
             className="replay-scrubber"
             style={{ "--replay-progress": `${progress}%` } as CSSProperties}
           >
+            <div className="replay-turn-marks" aria-hidden="true">
+              {turnBoundaries.map((position) => (
+                <span key={position} style={{ left: `${position}%` }} />
+              ))}
+            </div>
             <input
               aria-label={intl.formatMessage({ id: "replay.controls.frame" })}
               type="range"
@@ -375,75 +412,84 @@ export function ReplayBar() {
             />
             <div className="replay-note-markers">
               {replayNotes.map((note) => (
-                <button
-                  type="button"
+                <TooltipButton
                   className={note.frame === replayStep ? "active" : undefined}
                   key={note.frame}
                   style={{ left: `${total <= 1 ? 0 : (note.frame / (total - 1)) * 100}%` }}
+                  tooltip={note.text}
+                  tooltipSide="above"
                   aria-label={intl.formatMessage(
                     { id: "replay.notes.openFrame" },
                     { frame: note.frame + 1 },
                   )}
-                  title={note.text}
                   onClick={() => openNote(note.frame)}
                 />
               ))}
             </div>
           </div>
-          <span className="replay-pos">{replayStep + 1} / {total}</span>
-          <button
-            type="button"
+          <div
             className="replay-step-size"
-            aria-label={intl.formatMessage(
-              { id: "replay.controls.stepSize" },
-              { count: stepSize },
-            )}
-            title={intl.formatMessage(
-              { id: "replay.controls.stepSize" },
-              { count: stepSize },
-            )}
-            onClick={() => setStepSize((current) => current === 1 ? 5 : 1)}
+            role="group"
+            aria-label={intl.formatMessage({ id: "replay.controls.stepGroup" })}
           >
-            {stepSize}×
-          </button>
-          <button
-            type="button"
-            className={`replay-action-icon replay-note-button${currentNote ? " active" : ""}`}
-            aria-label={intl.formatMessage({
-              id: currentNote ? "replay.notes.edit" : "replay.notes.add",
-            }, { frame: replayStep + 1 })}
-            title={intl.formatMessage({
-              id: currentNote ? "replay.notes.edit" : "replay.notes.add",
-            }, { frame: replayStep + 1 })}
-            aria-expanded={notePanelOpen}
-            onClick={() => notePanelOpen ? closeNote() : openNote()}
-          >
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <path d="M5 3h14v18l-7-4-7 4V3Zm2 2v12.55l5-2.86 5 2.86V5H7Z" />
-            </svg>
-          </button>
-          <button
-            type="button"
-            className="replay-action-icon"
-            aria-label={intl.formatMessage({ id: "replay.controls.export" })}
-            title={intl.formatMessage({ id: "replay.controls.export" })}
-            onClick={downloadReplay}
-          >
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <path d="M11 3h2v10.17l3.59-3.58L18 11l-6 6-6-6 1.41-1.41L11 13.17V3ZM5 19h14v2H5v-2Z" />
-            </svg>
-          </button>
-          <button
-            type="button"
-            className="replay-action-icon"
-            aria-label={intl.formatMessage({ id: "replay.controls.exit" })}
-            title={intl.formatMessage({ id: "replay.controls.exit" })}
-            onClick={closeReplay}
-          >
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <path d="m6.4 5-1.4 1.4 5.6 5.6L5 17.6 6.4 19l5.6-5.6 5.6 5.6 1.4-1.4-5.6-5.6L19 6.4 17.6 5 12 10.6 6.4 5Z" />
-            </svg>
-          </button>
+            <span className="replay-step-size-label" aria-hidden="true">
+              {intl.formatMessage({ id: "replay.controls.step" })}
+            </span>
+            {([1, 5] as const).map((size) => (
+              <button
+                type="button"
+                key={size}
+                className={size === stepSize ? "active" : undefined}
+                aria-pressed={size === stepSize}
+                aria-label={intl.formatMessage(
+                  { id: "replay.controls.stepSize" },
+                  { count: size },
+                )}
+                onClick={() => setStepSize(size)}
+              >
+                {size}
+              </button>
+            ))}
+          </div>
+          <div className="replay-tools">
+            <TooltipButton
+              className={`replay-control replay-note-button${currentNote ? " active" : ""}`}
+              tooltip={noteLabel}
+              tooltipSide="above"
+              aria-expanded={notePanelOpen}
+              onClick={() => notePanelOpen ? closeNote() : openNote()}
+            >
+              <UiIcon name="note" />
+            </TooltipButton>
+            <TooltipButton
+              className="replay-control replay-export"
+              tooltip={intl.formatMessage({ id: "replay.controls.export" })}
+              tooltipSide="above"
+              onClick={downloadReplay}
+            >
+              <UiIcon name="download" />
+            </TooltipButton>
+            <TooltipButton
+              className="replay-control replay-collapse-toggle"
+              tooltip={intl.formatMessage({ id: "replay.controls.minimize" })}
+              tooltipSide="above"
+              aria-expanded="true"
+              onClick={() => setCollapsed(true)}
+            >
+              <UiIcon name="chevron-down" />
+            </TooltipButton>
+            <TooltipButton
+              className="replay-control replay-exit"
+              tooltip={intl.formatMessage({ id: "replay.controls.exit" })}
+              tooltipSide="above"
+              onClick={closeReplay}
+            >
+              <UiIcon name="close" />
+              <span className="replay-exit-label">
+                {intl.formatMessage({ id: "replay.controls.exitShort" })}
+              </span>
+            </TooltipButton>
+          </div>
         </>
       )}
     </div>

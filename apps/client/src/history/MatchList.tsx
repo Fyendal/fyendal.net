@@ -9,10 +9,9 @@ import { formatLabel } from "../lobby/FormatBadge.js";
 import { useStore } from "../store.js";
 import { heroName } from "./HeroPortrait.js";
 import { ReplayActionsMenu } from "./ReplayActionsMenu.js";
-import { ShareReplayDialog } from "./ShareReplayDialog.js";
+import { ShareReplayDialog, savedReplayDaysLeft } from "./ShareReplayDialog.js";
 import { matchOutcome } from "./summarizeRecords.js";
 
-const DAY_MS = 24 * 60 * 60 * 1000;
 /** Rows warn only inside this window; the retention rule itself is stated once above the list. */
 const EXPIRY_WARNING_DAYS = 2;
 
@@ -133,9 +132,7 @@ export function MatchList({
           const opponent = match.players[match.yourSeat === 0 ? 1 : 0];
           const replay = match.replay;
           const reasonId = reasonMessageId(match);
-          const daysLeft = replay && !replay.favorite
-            ? Math.max(1, Math.ceil((replay.expiresAt - Date.now()) / DAY_MS))
-            : null;
+          const daysLeft = replay ? savedReplayDaysLeft(replay) : null;
           const atLimit = replay !== null && !replay.favorite && favoriteCount >= MAX_FAVORITE_REPLAYS;
           const shared = replay !== null
             && savedReplays.some((saved) => saved.id === replay.id && saved.share !== null);

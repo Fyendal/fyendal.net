@@ -34577,6 +34577,12 @@
       "value": "Sair do replay"
     }
   ],
+  "replay.controls.exitShort": [
+    {
+      "type": 0,
+      "value": "Sair"
+    }
+  ],
   "replay.controls.export": [
     {
       "type": 0,
@@ -34587,6 +34593,12 @@
     {
       "type": 0,
       "value": "Quadro do replay"
+    }
+  ],
+  "replay.controls.gameStart": [
+    {
+      "type": 0,
+      "value": "Início da partida"
     }
   ],
   "replay.controls.maximize": [
@@ -34634,6 +34646,12 @@
       "pluralType": "cardinal"
     }
   ],
+  "replay.controls.nextShort": [
+    {
+      "type": 0,
+      "value": "Avançar"
+    }
+  ],
   "replay.controls.previous": [
     {
       "type": 6,
@@ -34661,6 +34679,18 @@
       },
       "offset": 0,
       "pluralType": "cardinal"
+    }
+  ],
+  "replay.controls.step": [
+    {
+      "type": 0,
+      "value": "Passo"
+    }
+  ],
+  "replay.controls.stepGroup": [
+    {
+      "type": 0,
+      "value": "Quadros por passo"
     }
   ],
   "replay.controls.stepSize": [
@@ -34710,10 +34740,14 @@
       "pluralType": "cardinal"
     }
   ],
-  "replay.controls.title": [
+  "replay.controls.turn": [
     {
       "type": 0,
-      "value": "Replay"
+      "value": "Turno "
+    },
+    {
+      "type": 1,
+      "value": "turn"
     }
   ],
   "replay.delete": [

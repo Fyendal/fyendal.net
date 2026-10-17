@@ -26,6 +26,7 @@ import {
 } from "./decision/CardSearchOverlay.js";
 import { useDeckCardFeedback } from "./DeckCardToast.js";
 import { SideRail } from "./SideRail.js";
+import { ShareReplayDialog, savedReplayDaysLeft } from "../history/ShareReplayDialog.js";
 import {
   canAddPaymentCard,
   canAddResourcePaymentPitch,
@@ -150,6 +151,20 @@ export function GameBoard() {
       setSocialOpen: state.setSocialOpen,
     })),
   );
+  // Only a saved copy the account owns can be shared; replays opened from a
+  // file, another player's link, or straight from the room have no saved id.
+  const savedReplayShare = useStore(useShallow((state) => {
+    const replayId = state.screen === "replay" && !state.activeSharedReplay
+      ? state.activeSavedReplayId
+      : null;
+    const saved = replayId ? state.savedReplays.find((replay) => replay.id === replayId) : undefined;
+    return {
+      replayId,
+      expiresInDays: saved ? savedReplayDaysLeft(saved) : null,
+      shared: saved?.share != null,
+    };
+  }));
+  const [replayShareOpen, setReplayShareOpen] = useState(false);
   const { view, update: viewUpdate } = useOpponentPlayPresentation({
     view: authoritativeView,
     update: authoritativeViewUpdate,
@@ -1479,6 +1494,8 @@ export function GameBoard() {
         emoteSeat={mobileFloatViewport && canSendEmote ? seat : null}
         onSendEmote={mobileFloatViewport && canSendEmote ? sendEmote : null}
         onReportBug={!spectating && !replaying ? reportBug : null}
+        onShareReplay={savedReplayShare.replayId ? () => setReplayShareOpen(true) : null}
+        replayShared={savedReplayShare.shared}
         noteFrame={liveNoteFrame}
         noteRoomVersion={liveNoteRoomVersion}
         noteText={liveNoteText}
@@ -1521,6 +1538,13 @@ export function GameBoard() {
         backgroundSearching={backgroundSearching}
         onStopBackgroundSearch={stopBackgroundMatchmaking}
       />
+      {replayShareOpen && savedReplayShare.replayId ? (
+        <ShareReplayDialog
+          replayId={savedReplayShare.replayId}
+          expiresInDays={savedReplayShare.expiresInDays}
+          onClose={() => setReplayShareOpen(false)}
+        />
+      ) : null}
 
       {showCardSearchOverlay ? (
         <CardSearchOverlay

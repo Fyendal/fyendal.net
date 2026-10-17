@@ -159,6 +159,24 @@ describe("game control icons", () => {
     expect(html).toContain('aria-pressed="false"');
   });
 
+  it("offers sharing beside Leave only for an owned saved replay", () => {
+    const replay = { replaying: true, onUndo: null, onConcede: null, onReportBug: null };
+    expect(renderSideRail(sideRailProps(replay))).not.toContain("/icons/ui/share.svg");
+
+    const html = renderSideRail(sideRailProps({
+      ...replay,
+      onShareReplay: vi.fn(),
+    }));
+    expect(html).toContain('aria-label="Share replay" class="rail-icon" aria-haspopup="dialog"');
+    expect(html.indexOf("/icons/ui/share.svg")).toBeLessThan(html.indexOf('class="rail-exit"'));
+
+    expect(renderSideRail(sideRailProps({
+      ...replay,
+      onShareReplay: vi.fn(),
+      replayShared: true,
+    }))).toContain('aria-label="Manage share link" class="rail-icon" aria-haspopup="dialog"');
+  });
+
   it("omits the mobile action slot when there is no contextual action", () => {
     const html = renderSideRail(sideRailProps({
       mobilePrimaryAction: null,

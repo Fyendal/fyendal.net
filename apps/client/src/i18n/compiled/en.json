@@ -33067,6 +33067,12 @@
       "value": "Exit replay"
     }
   ],
+  "replay.controls.exitShort": [
+    {
+      "type": 0,
+      "value": "Exit"
+    }
+  ],
   "replay.controls.export": [
     {
       "type": 0,
@@ -33077,6 +33083,12 @@
     {
       "type": 0,
       "value": "Replay frame"
+    }
+  ],
+  "replay.controls.gameStart": [
+    {
+      "type": 0,
+      "value": "Game start"
     }
   ],
   "replay.controls.maximize": [
@@ -33127,6 +33139,12 @@
       "pluralType": "cardinal"
     }
   ],
+  "replay.controls.nextShort": [
+    {
+      "type": 0,
+      "value": "Next"
+    }
+  ],
   "replay.controls.previous": [
     {
       "type": 0,
@@ -33161,6 +33179,18 @@
       },
       "offset": 0,
       "pluralType": "cardinal"
+    }
+  ],
+  "replay.controls.step": [
+    {
+      "type": 0,
+      "value": "Step"
+    }
+  ],
+  "replay.controls.stepGroup": [
+    {
+      "type": 0,
+      "value": "Frames per step"
     }
   ],
   "replay.controls.stepSize": [
@@ -33199,10 +33229,14 @@
       "pluralType": "cardinal"
     }
   ],
-  "replay.controls.title": [
+  "replay.controls.turn": [
     {
       "type": 0,
-      "value": "Replay"
+      "value": "Turn "
+    },
+    {
+      "type": 1,
+      "value": "turn"
     }
   ],
   "replay.delete": [

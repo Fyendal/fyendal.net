@@ -31942,6 +31942,12 @@
       "value": "退出回放"
     }
   ],
+  "replay.controls.exitShort": [
+    {
+      "type": 0,
+      "value": "退出"
+    }
+  ],
   "replay.controls.export": [
     {
       "type": 0,
@@ -31952,6 +31958,12 @@
     {
       "type": 0,
       "value": "回放帧"
+    }
+  ],
+  "replay.controls.gameStart": [
+    {
+      "type": 0,
+      "value": "对局开始"
     }
   ],
   "replay.controls.maximize": [
@@ -31980,6 +31992,12 @@
       "value": " 帧"
     }
   ],
+  "replay.controls.nextShort": [
+    {
+      "type": 0,
+      "value": "下一步"
+    }
+  ],
   "replay.controls.previous": [
     {
       "type": 0,
@@ -31992,6 +32010,18 @@
     {
       "type": 0,
       "value": " 帧"
+    }
+  ],
+  "replay.controls.step": [
+    {
+      "type": 0,
+      "value": "步长"
+    }
+  ],
+  "replay.controls.stepGroup": [
+    {
+      "type": 0,
+      "value": "每步帧数"
     }
   ],
   "replay.controls.stepSize": [
@@ -32008,10 +32038,18 @@
       "value": " 帧"
     }
   ],
-  "replay.controls.title": [
+  "replay.controls.turn": [
     {
       "type": 0,
-      "value": "回放"
+      "value": "第 "
+    },
+    {
+      "type": 1,
+      "value": "turn"
+    },
+    {
+      "type": 0,
+      "value": " 回合"
     }
   ],
   "replay.delete": [

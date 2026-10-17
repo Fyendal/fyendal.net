@@ -5,6 +5,16 @@ import { useShallow } from "zustand/react/shallow";
 import { sharedReplayUrl } from "../replay/route.js";
 import { useStore } from "../store.js";
 
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+/** Whole days left before an unfavorited replay expires; null once favorited. */
+export function savedReplayDaysLeft(
+  replay: { favorite: boolean; expiresAt: number },
+  now = Date.now(),
+): number | null {
+  return replay.favorite ? null : Math.max(1, Math.ceil((replay.expiresAt - now) / DAY_MS));
+}
+
 /** Owner controls for one replay copy's share link. Changing who it opens for
  * keeps the link; only Reset link invalidates copies already sent. */
 export function ShareReplayDialog({

@@ -1149,13 +1149,34 @@
     left: 8px;
     right: 8px;
     bottom: 70px;
+    width: auto;
     transform: none;
     flex-wrap: wrap;
-    justify-content: center;
-    padding: 8px;
+    row-gap: 4px;
+    column-gap: 6px;
+    padding: 4px;
   }
-  .replay-bar .replay-scrubber { order: 3; width: 100%; }
-  .replay-bar .replay-title { display: none; }
+  .replay-bar .replay-position {
+    display: flex;
+    min-width: 0;
+    align-items: baseline;
+    gap: 8px;
+    padding-inline: 6px 0;
+  }
+  .replay-bar .replay-owner { display: none; }
+  .replay-bar .replay-scrubber { order: 1; flex-basis: 50%; height: 30px; }
+  .replay-bar .replay-scrubber input[type="range"] { height: 30px; }
+  .replay-bar .replay-transport,
+  .replay-bar .replay-step-size,
+  .replay-bar .replay-tools { order: 2; }
+  .replay-bar .replay-tools { margin-left: auto; }
+  .replay-bar .replay-control { width: 44px; height: 44px; }
+  .replay-bar .replay-step-size { height: 44px; }
+  .replay-bar .replay-step-size button { width: 34px; height: 36px; }
+  /* The narrow-bar container queries already drop the Next and Exit labels. */
+  .replay-bar .replay-step-size-label,
+  .replay-bar .replay-export { display: none; }
+  .replay-bar .replay-collapse-toggle { margin-left: 0; }
   .replay-notes-panel {
     right: 0;
     left: 0;
@@ -1174,11 +1195,11 @@
     border: 0;
     border-radius: 0;
     background: transparent;
+    box-shadow: none;
   }
-  .replay-bar-collapsed > button {
+  .replay-bar.replay-bar-collapsed .replay-control {
     width: 100%;
-    min-height: 43px;
-    padding-block: 4px;
+    height: 44px;
   }
   #root:has(.replay-bar-collapsed) .mobile-gamebar-actions {
     display: grid;

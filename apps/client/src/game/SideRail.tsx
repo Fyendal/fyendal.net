@@ -17,6 +17,8 @@ import {
 import { HeroEmote } from "./HeroEmote.js";
 import { BugReportDialog, GameSettingsDialog } from "./SideRailDialogs.js";
 import { ModalSurface } from "../components/ModalSurface.js";
+import { TooltipButton } from "../components/TooltipButton.js";
+import { UiIcon } from "../components/UiIcon.js";
 import { PrimaryActionButton, type PrimaryAction } from "./StatusFloat.js";
 import { GameMessageText } from "../i18n/GameMessage.js";
 import { BackgroundMatchSearch } from "../matchmaking/BackgroundMatchSearch.js";
@@ -216,6 +218,8 @@ export function SideRail({
   emoteSeat,
   onSendEmote,
   onReportBug,
+  onShareReplay = null,
+  replayShared = false,
   noteFrame,
   noteRoomVersion,
   noteText,
@@ -283,6 +287,9 @@ export function SideRail({
   onReportBug: ((description: string) => Promise<
     { ok: true; reportId: string } | { ok: false; error: string }
   >) | null;
+  /** Opens share settings when the watched replay is an owned saved copy. */
+  onShareReplay?: (() => void) | null;
+  replayShared?: boolean;
   noteFrame: number | null;
   noteRoomVersion: number | null;
   noteText: string | null;
@@ -333,6 +340,9 @@ export function SideRail({
     existed: boolean;
   } | null>(null);
   const [confirmingAction, setConfirmingAction] = useState<"leave" | "concede" | null>(null);
+  const replayShareLabel = intl.formatMessage({
+    id: replayShared ? "replay.share.manage" : "replay.share.open",
+  });
   const leaveLabel = intl.formatMessage({
     id: leaveAction === "end-game" ? "common.endGame" : "common.leave",
   });
@@ -520,6 +530,16 @@ export function SideRail({
             <ControlIcon kind="settings" />
           </button>
         )}
+        {onShareReplay ? (
+          <TooltipButton
+            className="rail-icon"
+            tooltip={replayShareLabel}
+            aria-haspopup="dialog"
+            onClick={onShareReplay}
+          >
+            <UiIcon name="share" />
+          </TooltipButton>
+        ) : null}
         <button
           className={leaveAction === "end-game" ? "rail-exit rail-exit-danger" : "rail-exit"}
           onClick={() => {
@@ -785,6 +805,16 @@ export function SideRail({
                 }}
               >
                 {intl.formatMessage({ id: "game.bug.report" })}
+              </button>
+            ) : null}
+            {onShareReplay ? (
+              <button
+                onClick={() => {
+                  setShowUtilities(false);
+                  onShareReplay();
+                }}
+              >
+                {replayShareLabel}
               </button>
             ) : null}
             {onConcede ? (

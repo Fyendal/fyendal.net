@@ -1,0 +1,7 @@
+<!-- Note: a sheet with a folded corner and two lines of writing. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+  <polygon points="5.5 3.5, 14.5 3.5, 18.5 7.5, 18.5 20.5, 5.5 20.5" />
+  <polyline points="14 3.5, 14 8, 18.5 8" />
+  <line x1="8.5" y1="12.5" x2="15.5" y2="12.5" />
+  <line x1="8.5" y1="16" x2="13.5" y2="16" />
+</svg>
