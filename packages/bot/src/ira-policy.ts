@@ -185,6 +185,17 @@ function alternativeAttackNow(
   );
 }
 
+/** Cards Ira could still play this turn: hand, arsenal, and only those
+ * banished cards an effect currently lets her play. */
+function reserveCards(input: BotPolicyInput): CardView[] {
+  const me = input.view.players[input.seat];
+  return [
+    ...me.hand,
+    ...me.arsenal,
+    ...me.banish.filter((card) => card.playableFromSourceCardId !== undefined),
+  ];
+}
+
 function attackInReserve(
   intent: GameIntent,
   input: BotPolicyInput,
@@ -192,8 +203,7 @@ function attackInReserve(
 ): boolean {
   const used = intentCard(intent, own);
   const consumed = new Set([used?.instanceId, ...pitchIds(intent)]);
-  const me = input.view.players[input.seat];
-  return [...me.hand, ...me.arsenal, ...me.banish].some((card) =>
+  return reserveCards(input).some((card) =>
     !consumed.has(card.instanceId) && isAttack(input.cards[card.cardId])
   );
 }
@@ -210,7 +220,7 @@ function affordableAttackInReserve(
   const me = input.view.players[input.seat];
   const pitchable = me.hand.filter((card) => !consumed.has(card.instanceId));
   const floating = me.resources + (me.chi ?? 0);
-  return [...me.hand, ...me.arsenal, ...me.banish].some((card) => {
+  return reserveCards(input).some((card) => {
     const data = input.cards[card.cardId];
     if (consumed.has(card.instanceId) || !isAttack(data)) return false;
     const pitch = pitchable.reduce((total, candidate) =>

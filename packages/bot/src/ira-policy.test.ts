@@ -718,6 +718,51 @@ describe("Ira policy", () => {
     expect(intent).toEqual({ kind: "pass" });
   });
 
+  it("preserves Snapdragon Scalers when its only reserved attack is unplayable in banish", () => {
+    let state = createGame({
+      decklists: [iraDeck(), decklists.dorinthea],
+      cards: cardData,
+      scripts,
+      seed: 9112,
+      startPlayer: 0,
+    });
+    state.turn = 2;
+    replaceHand(state, 0, ["ASR013"]);
+    replaceHand(state, 1, ["ASR012", "ASR012"]);
+    // Banished from the deck by an opponent's effect, so it cannot be played.
+    state.players[0]!.banish = [{ instanceId: state.nextInstanceId++, cardId: "ASR014", owner: 0 }];
+    const snatch = state.players[0]!.hand[0]!;
+    state = apply(state, 0, { kind: "play-card", instanceId: snatch.instanceId, pitchInstanceIds: [] });
+    state = advanceUntil(state, (candidate) => candidate.pendingDecision?.kind === "defend");
+    state = apply(state, 1, {
+      kind: "defend",
+      instanceIds: state.players[1]!.hand.map((card) => card.instanceId),
+    });
+    state = advanceUntil(state, (candidate) =>
+      candidate.pendingDecision?.kind === "attack-reaction" &&
+      candidate.pendingDecision.player === 0
+    );
+
+    const view = projectStateFor(state, 0);
+    expect(view.players[0].hand).toHaveLength(0);
+    expect(view.players[0].resources).toBe(0);
+    expect(legalIntents(state, 0).some((intent) =>
+      intent.kind === "activate-ability" &&
+      intent.sourceInstanceId === state.players[0]!.equipment.legs?.instanceId
+    )).toBe(true);
+
+    for (const simulation of [undefined, state]) {
+      const intent = chooseIraIntent({
+        seat: 0,
+        view,
+        legal: legalIntents(state, 0),
+        cards: cardData,
+        ...(simulation ? { state: simulation } : {}),
+      });
+      expect(intent).toEqual({ kind: "pass" });
+    }
+  });
+
   it("does not add Razor Reflex after committing Snapdragon Scalers to a lethal ally attack", () => {
     let state = createGame({
       decklists: [iraDeck(), decklists.dorinthea],
