@@ -869,6 +869,32 @@ describe("deck storage", () => {
     expect(stored.decklist.sideboard ?? []).toHaveLength(0);
   });
 
+  it("falls back to the saved default list when Fabrary is unavailable", async () => {
+    const { db, userId } = await freshUser();
+    const imported = await importDeck(db, userId, {
+      name: "Linked",
+      format: "cc",
+      fabraryUrl: "https://fabrary.net/decks/01G76G1DP5VVB050BT3YV9TQ7K",
+      text: ccExportText(),
+    });
+    if (!imported.ok) throw new Error("import failed");
+    let status: 404 | 429 | 502 | 503 = 429;
+    const fabraryClient = {
+      fetchDeck: async () => ({ ok: false as const, status, error: "Fabrary is down" }),
+    };
+
+    for (status of [429, 502, 503] as const) {
+      expect(await resolveFreshDeck(db, userId, imported.deck.id, fabraryClient))
+        .toEqual({ ok: true, deck: imported.deck, matchups: [] });
+      expect(await resolveFreshDeck(db, userId, imported.deck.id, fabraryClient, "bravo-plan"))
+        .toEqual({ ok: false, status, error: "Fabrary is down" });
+    }
+    status = 404;
+    expect(await resolveFreshDeck(db, userId, imported.deck.id, fabraryClient))
+      .toEqual({ ok: false, status: 404, error: "Fabrary is down" });
+    expect((await listDecks(db, userId))[0]).toEqual(imported.deck);
+  });
+
   it("does not let users touch other users' decks", async () => {
     const { db, userId: aId } = await freshUser();
     const r = await register(db, "otheruser", "password1");

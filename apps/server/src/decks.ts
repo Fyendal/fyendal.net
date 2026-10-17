@@ -408,6 +408,9 @@ export type FreshDeckResult =
     unimplemented?: string[];
   };
 
+/** Provider failures (rate limit, unreachable, unconfigured) that keep the saved list playable. */
+const STALE_FALLBACK_STATUSES: ReadonlySet<number> = new Set([429, 502, 503]);
+
 function fabraryFailure(result: Exclude<FabraryDeckResult, { ok: true }>): FreshDeckResult {
   return { ok: false, status: result.status, error: result.error };
 }
@@ -440,7 +443,15 @@ export async function resolveFreshDeck(
   }
 
   const fetched = await fabraryClient.fetchDeck(existing.fabraryUrl, matchupId);
-  if (!fetched.ok) return fabraryFailure(fetched);
+  if (!fetched.ok) {
+    // A Fabrary outage or quota exhaustion must not block play: the default
+    // list falls back to the last successfully saved pool. Matchup variants
+    // have no saved copy, and a 404 means the source deck is gone or private.
+    if (matchupId === undefined && STALE_FALLBACK_STATUSES.has(fetched.status)) {
+      return { ok: true, deck: existing, matchups: [] };
+    }
+    return fabraryFailure(fetched);
+  }
   const validation = validateDeck(parseDecklistText(fetched.deck.text), existing.format);
   if (!validation.ok) {
     return {
@@ -525,6 +536,12 @@ export async function recordDeckPlay(
   );
 }
 
+function findLinkedDeck(decks: DeckRow[], format: Format, canonicalUrl: string): DeckRow | undefined {
+  return decks.find((deck) =>
+    deck.format === format && deck.fabraryUrl !== null
+    && parseFabraryDeckUrl(deck.fabraryUrl)?.canonicalUrl === canonicalUrl);
+}
+
 /** A play link refreshes the account's linked deck, or creates it once. Fetch
  * before taking the account lock so provider latency never holds a DB lock.
  * The account row serializes concurrent links across gateway instances. */
@@ -538,7 +555,13 @@ export async function resolveFabraryPlayDeck(
   const source = parseFabraryDeckUrl(url);
   if (!source) return { ok: false, status: 400, error: "enter a valid https://fabrary.net/decks/... URL" };
   const fetched = await fabraryClient.fetchDeck(source.canonicalUrl);
-  if (!fetched.ok) return fabraryFailure(fetched);
+  if (!fetched.ok) {
+    // As in resolveFreshDeck, a provider outage replays the saved link.
+    const saved = STALE_FALLBACK_STATUSES.has(fetched.status)
+      ? findLinkedDeck(await listDecks(db, userId), format, source.canonicalUrl)
+      : undefined;
+    return saved ? { ok: true, deck: saved, matchups: [] } : fabraryFailure(fetched);
+  }
   const validation = validateDeck(parseDecklistText(fetched.deck.text), format);
   if (!validation.ok) {
     return {
@@ -549,9 +572,7 @@ export async function resolveFabraryPlayDeck(
   return withTransaction(db, async (tx) => {
     const account = await tx.query("SELECT id FROM users WHERE id=$1 FOR UPDATE", [userId]);
     if (!account.rows.length) return { ok: false, status: 404, error: "account not found" };
-    const existing = (await listDecks(tx, userId)).find((deck) =>
-      deck.format === format && deck.fabraryUrl !== null
-      && parseFabraryDeckUrl(deck.fabraryUrl)?.canonicalUrl === source.canonicalUrl);
+    const existing = findLinkedDeck(await listDecks(tx, userId), format, source.canonicalUrl);
     const result = existing
       ? await updateDeck(tx, userId, existing.id, { fabraryUrl: source.canonicalUrl, text: fetched.deck.text })
       : await importDeck(tx, userId, {

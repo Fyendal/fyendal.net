@@ -139,13 +139,27 @@ describe("Fabrary play deck resolution", () => {
     expect(client.fetchDeck).not.toHaveBeenCalled();
   });
 
-  it("leaves the existing deck intact when the provider or latest deck fails", async () => {
-    const id = await importedId();
-    const saved = await getDeck(db, id);
+  it("fails a first link while Fabrary is unavailable", async () => {
     vi.mocked(client.fetchDeck).mockResolvedValueOnce({
       ok: false, status: 429, error: "Fabrary is busy; try again shortly",
     });
     expect((await play()).status).toBe(429);
+    expect(await listDecks(db, userId)).toHaveLength(0);
+  });
+
+  it("leaves the existing deck intact when the provider or latest deck fails", async () => {
+    const id = await importedId();
+    const saved = await getDeck(db, id);
+    for (const status of [429, 502, 503] as const) {
+      vi.mocked(client.fetchDeck).mockResolvedValueOnce({ ok: false, status, error: "Fabrary is down" });
+      const stale = await play();
+      expect(stale.status).toBe(200);
+      expect(decodeDeckResponse(await stale.json())?.deck.id).toBe(id);
+    }
+    vi.mocked(client.fetchDeck).mockResolvedValueOnce({
+      ok: false, status: 404, error: "Fabrary deck not found; make sure it is public",
+    });
+    expect((await play()).status).toBe(404);
     latestText = text.replace(line(pool.deck[0]!), "1x Unknown Future Card (1)");
     const response = await play();
     expect(response.status).toBe(422);
