@@ -313,7 +313,6 @@ export function canUntapPermanent(
   if (Number(target.counters?.cannotUntapUntilTurn ?? 0) >= state.turn) return false;
   for (const controller of state.players as PlayerState[]) {
     for (const source of controlledPermanents(state, controller.seat, { faceDownEquipment: false })) {
-      if (source.instanceId === target.instanceId) continue;
       if (scriptOf(state, source.cardId, source)?.preventsUntapOf?.(
         runtime.makeCtx(state, controller.seat, source, currentLink(state)),
         target,

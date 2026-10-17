@@ -249,6 +249,26 @@ describe("PEN — import and set mechanics", () => {
     expect(g.state.players[0]!.equipment.legs).toBeUndefined();
   });
 
+  it("Havoc Wrap stays tapped through the end phase and destroys itself at the start of its controller's turn", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", equipment: { ...NO_EQUIPMENT, chest: "havoc wrap|0" } },
+        { hero: "dorinthea", equipment: NO_EQUIPMENT },
+      ],
+    });
+
+    g.activate("havoc wrap|0").settle();
+    expect(g.state.players[0]!.equipment.chest?.tapped).toBe(true);
+
+    g.endTurn();
+    expect(g.state.players[0]!.equipment.chest?.tapped).toBe(true);
+
+    g.endTurn();
+    expect(g.state.players[0]!.equipment.chest).toBeUndefined();
+    expect(g.state.players[0]!.graveyard.map((card) => functionalKeyOf(cardData[card.cardId]!)))
+      .toContain("havoc wrap|0");
+  });
+
   it("Knife Through gets go again when Flick Knives makes a dagger hit during reactions", () => {
     const g = scenario({
       seats: [
