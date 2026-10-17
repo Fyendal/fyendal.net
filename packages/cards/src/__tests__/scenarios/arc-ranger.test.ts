@@ -95,6 +95,20 @@ describe("ARC Ranger — arsenal setup", () => {
       .expectAttackValue(5); // 3 base +2 from Take Aim; no face-up-entry bonus
   });
 
+  it("Rapid Fire has go again after reloading", () => {
+    const s = scenario({
+      seats: [
+        azaleaSeat({ hand: ["rapid fire|2", "head shot|2"] }),
+        { hero: "rhinar", hand: [] },
+      ],
+    });
+
+    s.play("rapid fire|2")
+      .chooseCard("head shot|2")
+      .expectFaceDown(0, "head shot|2", true)
+      .expectAP(0, 1);
+  });
+
   it("Ridge Rider Shot opts when put face up into the arsenal", () => {
     const s = scenario({
       seats: [

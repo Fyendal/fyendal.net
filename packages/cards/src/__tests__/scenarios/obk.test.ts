@@ -110,6 +110,27 @@ describe("Outbreak heroes", () => {
       ] });
       faceDown.play(RUSTY_HARPOON, { fromArsenal: true }).expectAttackValue(1);
     });
+
+    it("gives Bolt'n' Shot go again when its reaction-step bonus lifts it above base", () => {
+      const game = scenario({ seats: [
+        {
+          hero: "rhinar",
+          heroKey: VYLE,
+          arsenal: ["bolt'n' shot|1"],
+          deck: [RUSTY_HARPOON],
+          weapons: [DEATH_DEALER],
+          resources: 2,
+          equipment: NO_EQUIPMENT,
+        },
+        { hero: "dorinthea", deck: [PROWL], weapons: [], equipment: NO_EQUIPMENT },
+      ] });
+
+      game.play("bolt'n' shot|1", { fromArsenal: true }).expectAttackValue(4).blockWith();
+      expect(game.state.phase).toBe("reaction");
+      game.activate(VYLE); // opponent's top card goes face up into arsenal: +1{p}
+
+      game.expectLife(1, 15).expectAP(0, 1);
+    });
   });
 
   describe("Huxley, Racketeer", () => {

@@ -40,7 +40,7 @@ import { windowInstantPlays } from "./triggers.js";
 import { runechantSkipStep } from "./runechantSkip.js";
 import { controlledPermanents } from "./sourceQueries.js";
 import { abilitiesAsInstantForCard, abilityResourceCost, actionAbilityRestrictedByModifier, activatedAbilityAvailable, activatedAbilityTargetOptions, activatedEffectCardCostOptions, canPayAbilityLifeCost, canPayActivatedEffectCardCosts, discardCostOptions, effectiveAbilityList } from "./abilityRules.js";
-import { alternativePlayCostOptions, boostCountForCardPlay, canPlayAsInstant, canRuneGate, cardPlayCost, cardPlayReductionForSeat, cardPlayRestrictedByModifier, cardsPlayableFromArsenal, cardsPlayableFromZone, playFromZoneRequiresInstant, playTargetOptions } from "./playRules.js";
+import { alternativePlayCostOptions, boostCountForCardPlay, canPlayAsInstant, canRuneGate, cardPlayCost, cardPlayReductionForSeat, cardPlayRestrictedByModifier, playOriginRestricted, cardsPlayableFromArsenal, cardsPlayableFromZone, playFromZoneRequiresInstant, playTargetOptions } from "./playRules.js";
 import { canPayRequiredHandCardsForAdditionalCost, pitchProhibitedByEffect, pitchValueOfInstance } from "./resources.js";
 import { resolveVariableAbilityCost, variableResourceChoices } from "./costs.js";
 import { heroAbilitiesDisabled } from "./stateQueries.js";
@@ -357,7 +357,7 @@ function playIntentsForCard(
   from: "hand" | "arsenal" | PlayableZone,
   includeUnaffordable = false,
 ): GameIntent[] {
-  if (player.flags.playsRestrictedToArsenal === true && from !== "arsenal") return [];
+  if (playOriginRestricted(player, from)) return [];
   if (card.faceDown && from !== "arsenal") return [];
   if (isFrozen(state, card)) return [];
   const data = instanceDataOf(state, card);
@@ -914,6 +914,7 @@ function reactionIntents(
       if (card.faceDown && fromZone !== "banish" && !fromArsenal) continue;
       if (isFrozen(state, card)) continue;
       if (cardPlayRestrictedByModifier(state, player.seat, card)) continue;
+      if (playOriginRestricted(player, fromZone ?? (fromArsenal ? "arsenal" : "hand"))) continue;
       if (!wanted.includes(data.cardType)) {
         // an action playable "as though it were an instant" counts as an instant here
         if (!asInstant) continue;

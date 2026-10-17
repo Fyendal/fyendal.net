@@ -79,7 +79,7 @@ import { abilitiesAsInstantForCard, abilityResourceCost, actionAbilityRestricted
 import { consumeNextActionGoAgain, noteActionPlayedOrActivated } from "./cardLifecycle.js";
 import { answerArcaneBarrier } from "./damageResolution.js";
 import { answerDieRollReplacement } from "./dieRoll.js";
-import { boostCountForCardPlay, cardPlayRestrictedByModifier, cardPlayCost, cardPlayReductionForSeat, payAlternativePlayCost, preparePlayTarget, canPlayAsInstant, canRuneGate, consumeAttackCostReductions, mayPlayFromArsenal, mayPlayFromZone, playFromZoneRequiresInstant } from "./playRules.js";
+import { boostCountForCardPlay, cardPlayRestrictedByModifier, playOriginRestricted, cardPlayCost, cardPlayReductionForSeat, payAlternativePlayCost, preparePlayTarget, canPlayAsInstant, canRuneGate, consumeAttackCostReductions, mayPlayFromArsenal, mayPlayFromZone, playFromZoneRequiresInstant } from "./playRules.js";
 import { canPayRequiredHandCardsForAdditionalCost, scriptedPaymentOptions } from "./resources.js";
 import { heroAbilitiesDisabled } from "./stateQueries.js";
 import { actionLimitReached, consumeFirstActionExtraCost, controlsBow, firstActionExtraCost, firstAttackExtraCost, consumeFirstAttackExtraCost, isFrozen, opposingInstantsProhibited } from "./ruleQueries.js";
@@ -118,7 +118,7 @@ export function playCard(
       )?.[from] ?? player[from]);
   const card = source.find((c) => c.instanceId === instanceId);
   if (!card) return `card not in ${from}`;
-  if (player.flags.playsRestrictedToArsenal === true && from !== "arsenal") {
+  if (playOriginRestricted(player, from)) {
     return "cards can only be played from arsenal this turn";
   }
   if (from === "arsenal" && !mayPlayFromArsenal(state, card, seat)) {

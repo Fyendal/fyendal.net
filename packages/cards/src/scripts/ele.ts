@@ -566,15 +566,12 @@ function reloadOnChoose(ctx: ScriptCtx, hook: string, option: string, wanted = "
 }
 
 function boltNShot(): CardScript {
+  // The above-base condition is continuous: a buff gained after declaration
+  // (e.g. Vyle in the reaction step) still grants go again and the reload.
+  const aboveBase = (ctx: ScriptCtx) => ctx.attackBonusAboveBase(ctx.self.instanceId) > 0;
   return {
-    onAttackDeclared(ctx) {
-      if (ctx.attackBonusAboveBase(ctx.self.instanceId) <= 0) return;
-      ctx.grantGoAgain();
-      ctx.setFlag("link", "reloadOnHit", true);
-    },
-    canTriggerOnHit(ctx) {
-      return ctx.getFlag("link", "reloadOnHit") === true;
-    },
+    hasConditionalGoAgain: aboveBase,
+    canTriggerOnHit: aboveBase,
     onHit(ctx) {
       reload(ctx);
     },

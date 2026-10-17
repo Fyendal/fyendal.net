@@ -295,17 +295,10 @@ export const saz: Record<string, CardScript> = {
   "bolt'n' shot|1": {
     // "If Bolt'n' Shot's {p} is greater than its base {p}, it has go again
     //  and 'If this hits, reload.'" (Go again / Reload are conditional —
-    //  KEYWORD_OVERRIDES strips the printed keywords.)
-    onAttackDeclared(ctx) {
-      const link = ctx.link;
-      if (!link) return;
-      if (ctx.attackBonusAboveBase(ctx.self.instanceId) <= 0) return;
-      ctx.grantGoAgain();
-      ctx.setFlag("link", "reloadOnHit", true);
-    },
-    canTriggerOnHit(ctx) {
-      return ctx.getFlag("link", "reloadOnHit") === true;
-    },
+    //  KEYWORD_OVERRIDES strips the printed keywords.) The condition is
+    //  continuous, so a buff gained in the reaction step still applies.
+    hasConditionalGoAgain: (ctx) => ctx.attackBonusAboveBase(ctx.self.instanceId) > 0,
+    canTriggerOnHit: (ctx) => ctx.attackBonusAboveBase(ctx.self.instanceId) > 0,
     onHit(ctx) {
       reload(ctx);
     },

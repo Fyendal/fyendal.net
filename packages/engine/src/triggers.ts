@@ -47,7 +47,7 @@ import {
 
 import { abilityResourceCost, activatedAbilityAvailable, canPayAbilityLifeCost, canPayActivatedEffectCardCosts, discardCostOptions, effectiveAbilityList } from "./abilityRules.js";
 import { settlesInArena, settlePlayedCard } from "./cardLifecycle.js";
-import { alternativePlayCostOptions, canPlayAsInstant, cardPlayCost, cardPlayReductionForSeat, cardPlayRestrictedByModifier, cardsPlayableFromArsenal, cardsPlayableFromZone, cardLayerGoAgain, consumeSingleUsePlayFromGroup, mayPlayFromArsenal, mayPlayFromZone, modifierMatchesPlayedCard, noteCardPlayed, payAlternativePlayCost, playFromZoneOwnerMatches, playTargetOptions, preparePlayTarget } from "./playRules.js";
+import { alternativePlayCostOptions, canPlayAsInstant, cardPlayCost, cardPlayReductionForSeat, cardPlayRestrictedByModifier, playOriginRestricted, cardsPlayableFromArsenal, cardsPlayableFromZone, cardLayerGoAgain, consumeSingleUsePlayFromGroup, mayPlayFromArsenal, mayPlayFromZone, modifierMatchesPlayedCard, noteCardPlayed, payAlternativePlayCost, playFromZoneOwnerMatches, playTargetOptions, preparePlayTarget } from "./playRules.js";
 import { canPayRequiredHandCardsForAdditionalCost, pitchValueOfInstance } from "./resources.js";
 import { heroAbilitiesDisabled } from "./stateQueries.js";
 import { consumeFirstActionExtraCost, firstActionExtraCost, goAgainSuppressed, isFrozen, opposingInstantsProhibited, snapshotSerializable } from "./ruleQueries.js";
@@ -132,6 +132,7 @@ export function windowInstantPlays(
       if (card.faceDown && !fromArsenal && fromZone !== "banish") continue;
       if (isFrozen(state, card)) continue;
       if (cardPlayRestrictedByModifier(state, seat, card)) continue;
+      if (playOriginRestricted(player, fromZone ?? (fromArsenal ? "arsenal" : "hand"))) continue;
       if (
         script?.canPlay &&
         !script.canPlay(runtime.makeCtx(state, seat, card, link, fromArsenal))
@@ -561,6 +562,9 @@ export function playWindowInstant(
     return "face-down cards cannot be played";
   }
   if (isFrozen(state, card)) return `${nameOf(state, card.cardId)} is frozen`;
+  if (playOriginRestricted(player, fromZone ?? (fromArsenal ? "arsenal" : "hand"))) {
+    return "cards can only be played from arsenal this turn";
+  }
   if (cardPlayRestrictedByModifier(state, seat, card)) {
     return `${nameOf(state, card.cardId)} cannot be played due to a card-type restriction`;
   }

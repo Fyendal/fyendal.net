@@ -82,6 +82,23 @@ describe("first-set rules regression coverage", () => {
     expect(g.state.players[0]!.flags.playsRestrictedToArsenal).toBe(true);
   });
 
+  it("Three of a Kind keeps instants in hand unplayable in priority windows", () => {
+    const g = scenario({ seats: [
+      { hero: "rhinar", hand: ["three of a kind|1", "rain razors|2"], arsenal: ["rain razors|2"], resources: 20, equipment: NO_EQUIPMENT },
+      { hero: "dorinthea", equipment: NO_EQUIPMENT },
+    ] });
+    g.play("three of a kind|1");
+    const handRazors = g.state.players[0]!.hand.find((card) => cardData[card.cardId]!.name === "Rain Razors")!;
+    const playsHandRazors = () => legalIntents(g.state, 0).some((intent) =>
+      "instanceId" in intent && intent.instanceId === handRazors.instanceId);
+    expect(playsHandRazors()).toBe(false);
+    g.play("rain razors|2", { fromArsenal: true, settle: false });
+    expect(g.state.players[0]!.arsenal).toHaveLength(0);
+    expect(g.state.pendingDecision?.kind).toBe("priority-window");
+    expect(playsHandRazors()).toBe(false);
+    expect(() => g.doRaw({ kind: "play-card", instanceId: handRazors.instanceId, pitchInstanceIds: [] })).toThrow();
+  });
+
   it("Arcanite Skullcap conditionally has Arcane Barrier 3", () => {
     const g = scenario({ active: 1, seats: [
       { hero: "rhinar", heroKey: "briar|0", life: 10, resources: 3, equipment: { ...NO_EQUIPMENT, head: "arcanite skullcap|0" } },

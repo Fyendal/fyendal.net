@@ -863,6 +863,16 @@ function announcedCardTypes(
   return tags;
 }
 
+/** Whether a "you may only play cards from arsenal" restriction (Three of a
+ * Kind) forbids playing a card from `from`. Applies to every play path,
+ * including instants and reactions. */
+export function playOriginRestricted(
+  player: PlayerState,
+  from: "hand" | "arsenal" | PlayableZone,
+): boolean {
+  return player.flags.playsRestrictedToArsenal === true && from !== "arsenal";
+}
+
 /** Whether a turn-long modifier prohibits this player from playing the card.
  * The card may still be pitched, discarded, or used to pay an ability cost. */
 export function cardPlayRestrictedByModifier(

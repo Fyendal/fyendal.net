@@ -53,7 +53,7 @@ import {
 } from "./zoneQueries.js";
 import { abilitiesAsInstantForCard, abilityResourceCost, actionAbilityRestrictedByModifier, payActivatedAbilityCost, prepareActivatedAbilityTarget, prepareActivatedDiscardCost, prepareActivatedEffectCardCosts } from "./abilityRules.js";
 import { consumeNextActionGoAgain, noteActionPlayedOrActivated } from "./cardLifecycle.js";
-import { canPlayAsInstant, cardPlayCost, cardPlayReductionForSeat, cardPlayRestrictedByModifier, mayPlayFromArsenal, mayPlayFromZone, payAlternativePlayCost, preparePlayTarget } from "./playRules.js";
+import { canPlayAsInstant, cardPlayCost, cardPlayReductionForSeat, cardPlayRestrictedByModifier, playOriginRestricted, mayPlayFromArsenal, mayPlayFromZone, payAlternativePlayCost, preparePlayTarget } from "./playRules.js";
 import { canPayRequiredHandCardsForAdditionalCost } from "./resources.js";
 import { heroAbilitiesDisabled } from "./stateQueries.js";
 import { actionLimitReached, isFrozen, opposingInstantsProhibited } from "./ruleQueries.js";
@@ -593,6 +593,9 @@ export function playReaction(
     return "face-down cards cannot be played";
   }
   if (isFrozen(state, card)) return `${nameOf(state, card.cardId)} is frozen`;
+  if (playOriginRestricted(player, fromZone ?? (fromArsenal ? "arsenal" : "hand"))) {
+    return "cards can only be played from arsenal this turn";
+  }
   if (cardPlayRestrictedByModifier(state, seat, card)) {
     return `${nameOf(state, card.cardId)} cannot be played due to a card-type restriction`;
   }
