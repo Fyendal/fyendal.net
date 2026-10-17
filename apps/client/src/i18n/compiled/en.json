@@ -18804,6 +18804,18 @@
       "value": ": choose which hero wins the clash"
     }
   ],
+  "engine.decision.combat.damage.order.first": [
+    {
+      "type": 0,
+      "value": "Choose the attack-target to deal combat damage to first"
+    }
+  ],
+  "engine.decision.combat.damage.order.next": [
+    {
+      "type": 0,
+      "value": "Choose the next attack-target to deal combat damage to"
+    }
+  ],
   "engine.decision.crank": [
     {
       "type": 1,

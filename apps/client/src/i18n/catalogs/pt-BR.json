@@ -112,6 +112,8 @@
   "engine.decision.damage.spellvoid": "Spellvoid: você receberia {amount} de dano arcane — destruir um equipamento com Spellvoid para prevenir parte dele?",
   "engine.decision.damage.lethalprevent": "Você receberia {amount} de dano letal — fazer banish de {card} da mão ou do arsenal para preveni-lo?",
   "engine.decision.damage.combatequipment": "Substituir o dano de combate destruindo um equipamento que está defendendo?",
+  "engine.decision.combat.damage.order.first": "Escolha o alvo do ataque que recebe o dano de combate primeiro",
+  "engine.decision.combat.damage.order.next": "Escolha o próximo alvo do ataque que recebe o dano de combate",
   "engine.decision.damage.quellpay": "Faça pitch de cartas para pagar {cost} pelo Quell",
   "engine.decision.damage.ward": "Ward: você receberia {amount} de dano — destrua uma carta com Ward para prevenir parte dele",
   "engine.decision.damage.ward.unpreventable": "Ward: você receberia {amount} de dano que não pode ser prevenido — o Ward ainda é destruído",

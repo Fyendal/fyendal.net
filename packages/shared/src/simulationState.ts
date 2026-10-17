@@ -173,6 +173,7 @@ export interface PersistedChainLinkV1 {
   targetAllyId?: number;
   additionalTargetAllyIds?: number[];
   additionalTargetHits?: PersistedAdditionalTargetHitV1[];
+  attackTargetDamageOrder?: number[];
   declaredAtNextId?: number;
   wagerRewards?: string[];
   wagers?: PersistedWagerV1[];

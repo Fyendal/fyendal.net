@@ -133,6 +133,29 @@ export function currentLink(state: GameStateInternal): ChainLinkState | undefine
   return link && !link.resolved ? link : undefined;
 }
 
+/** Every attack-target of the link in the order combat damage is dealt to
+ * them (CR 7.5.2c): those the attacker has ordered, then the rest with the
+ * primary target first. A hero target is its hero's instance id. */
+export function orderedAttackTargetIds(state: GameStateInternal, link: ChainLinkState): number[] {
+  const targets = [primaryAttackTargetId(state, link), ...(link.additionalTargetAllyIds ?? [])];
+  const ordered = (link.attackTargetDamageOrder ?? []).filter((id) => targets.includes(id));
+  return [...ordered, ...targets.filter((id) => !ordered.includes(id))];
+}
+
+/** The additional attack-targets damaged before and after the primary one. */
+export function additionalTargetsAroundPrimary(
+  state: GameStateInternal,
+  link: ChainLinkState,
+): { before: number[]; after: number[] } {
+  const order = orderedAttackTargetIds(state, link);
+  const index = order.indexOf(primaryAttackTargetId(state, link));
+  return { before: order.slice(0, index), after: order.slice(index + 1) };
+}
+
+function primaryAttackTargetId(state: GameStateInternal, link: ChainLinkState): number {
+  return link.targetAllyId ?? (state.players[opponent(link.attacker)] as PlayerState).hero.instanceId;
+}
+
 /**
  * The chain link an attacking card instance occupies. A card that left the
  * chain and was played again keeps its instance id, so the live link wins

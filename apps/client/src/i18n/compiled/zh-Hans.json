@@ -18068,6 +18068,18 @@
       "value": "：选择哪位英雄赢得 clash"
     }
   ],
+  "engine.decision.combat.damage.order.first": [
+    {
+      "type": 0,
+      "value": "选择最先受到战斗伤害的攻击目标"
+    }
+  ],
+  "engine.decision.combat.damage.order.next": [
+    {
+      "type": 0,
+      "value": "选择下一个受到战斗伤害的攻击目标"
+    }
+  ],
   "engine.decision.crank": [
     {
       "type": 1,

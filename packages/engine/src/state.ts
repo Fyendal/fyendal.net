@@ -395,6 +395,9 @@ export interface ChainLinkState {
   additionalTargetAllyIds?: number[];
   /** Hit-events dealt to `additionalTargetAllyIds` during combat damage. */
   additionalTargetHits?: AdditionalTargetHit[];
+  /** Attack-targets the attacker has ordered for combat damage so far (CR
+   *  7.5.2c), as instance ids; a hero target is its hero's instance id. */
+  attackTargetDamageOrder?: number[];
   /** nextInstanceId stamped at declaration: permanents created by on-declare
    *  hooks (Flock of the Feather Walkers' Quicken token) did not exist when
    *  the attack was declared, so their attack-declared triggers must not fire

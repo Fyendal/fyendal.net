@@ -639,6 +639,20 @@ export function ChainFloat({
                         <span className="chain-target muted">{chain.targetAllyName}</span>
                       </>
                     ) : null}
+                    {chain.targetAllyName && (chain.damageToPrevent ?? 0) > 0 ? (
+                      <>
+                        {chain.targetAlly ? (
+                          <span className="chain-sep">vs</span>
+                        ) : (
+                          <span className="chain-prevent-plus" aria-hidden="true">+</span>
+                        )}
+                        <ChainStat
+                          kind="prevention"
+                          value={chain.damageToPrevent ?? 0}
+                          modifiers={chain.preventionModifiers ?? []}
+                        />
+                      </>
+                    ) : null}
                     {chain.additionalTargets?.length ? (
                       <AdditionalTargetsBadge
                         attackInstanceId={chain.attackingCard.instanceId}

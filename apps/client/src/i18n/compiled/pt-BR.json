@@ -19223,6 +19223,18 @@
       "value": ": escolha qual herói vence o clash"
     }
   ],
+  "engine.decision.combat.damage.order.first": [
+    {
+      "type": 0,
+      "value": "Escolha o alvo do ataque que recebe o dano de combate primeiro"
+    }
+  ],
+  "engine.decision.combat.damage.order.next": [
+    {
+      "type": 0,
+      "value": "Escolha o próximo alvo do ataque que recebe o dano de combate"
+    }
+  ],
   "engine.decision.crank": [
     {
       "type": 1,

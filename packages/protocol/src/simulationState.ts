@@ -482,7 +482,7 @@ function validateAdditionalTargetHit(value: unknown, code: string, path: string)
 
 function validateChainLink(value: unknown, code: string, path: string): void {
   const required = ["attacker", "attackingCard", "attackCardType", "defendingCards", "defendingEquipment", "reactions", "goAgain", "damage", "hit", "resolved", "flags"] as const;
-  const link = exact(value, code, path, required, ["resolvedReactionAbilitySources", "finalAttack", "finalDefense", "finalAttackModifiers", "finalDefenseModifiers", "targetAllyId", "additionalTargetAllyIds", "additionalTargetHits", "declaredAtNextId", "wagerRewards", "wagers"]);
+  const link = exact(value, code, path, required, ["resolvedReactionAbilitySources", "finalAttack", "finalDefense", "finalAttackModifiers", "finalDefenseModifiers", "targetAllyId", "additionalTargetAllyIds", "additionalTargetHits", "attackTargetDamageOrder", "declaredAtNextId", "wagerRewards", "wagers"]);
   integer(link.attacker, code, `${path}.attacker`);
   validateCard(link.attackingCard, code, `${path}.attackingCard`);
   oneOf(link.attackCardType, ["action", "weapon", "ally"] as const, code, `${path}.attackCardType`);
@@ -492,6 +492,7 @@ function validateChainLink(value: unknown, code: string, path: string): void {
   integer(link.damage, code, `${path}.damage`);
   for (const key of ["finalAttack", "finalDefense", "targetAllyId", "declaredAtNextId"] as const) optional(link, key, (v, p) => { integer(v, code, p); }, path);
   optional(link, "additionalTargetAllyIds", (v, p) => validateIntegerArray(v, code, p), path);
+  optional(link, "attackTargetDamageOrder", (v, p) => validateIntegerArray(v, code, p), path);
   optional(link, "additionalTargetHits", (v, p) => {
     array(v, code, p, 128).forEach((entry, index) => validateAdditionalTargetHit(entry, code, `${p}[${index}]`));
   }, path);

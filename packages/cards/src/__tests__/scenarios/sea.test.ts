@@ -1368,6 +1368,7 @@ describe("SEA — rules regression coverage", () => {
       .expectResources(0, 0)
       .blockWith()
       .settle()
+      .chooseCard("barnacle|2")
       .expectLife(1, 15)
       .expectNotInZone(1, "barnacle|2", "board");
   });
@@ -1391,6 +1392,7 @@ describe("SEA — rules regression coverage", () => {
       .chooseOption("pay")
       .blockWith("wounding blow|1")
       .settle()
+      .chooseCard("barnacle|2")
       .expectLife(1, 18)
       .expectNotInZone(1, "barnacle|2", "board");
   });
@@ -1403,6 +1405,7 @@ describe("SEA — rules regression coverage", () => {
     expect(g.state.chain[0]?.targetAllyId).toBeUndefined();
     g.blockWith("wounding blow|1")
       .settle()
+      .chooseCard("barnacle|2")
       .expectLife(1, 18)
       .expectNotInZone(1, "barnacle|2", "board");
   });
@@ -1414,9 +1417,65 @@ describe("SEA — rules regression coverage", () => {
       .chooseOption("pay")
       .chooseCard("barnacle|2")
       .blockWith()
-      .settle()
+      .settle();
+    expect(g.state.pendingDecision?.options).toHaveLength(2);
+    g.chooseCard(g.state.players[1]!.hero.cardId)
       .expectLife(1, 15);
     expect(g.state.players[1]!.board).toHaveLength(1);
+  });
+
+  describe("Barbed Barrage combat damage order against a single-use Sawbones shield", () => {
+    const shielded = () => {
+      const g = barbedBarrage({ board: ["barnacle|2", "sawbones, dock hand|2"] });
+      const [barnacle, sawbones] = g.state.players[1]!.board;
+      barnacle!.life = 10;
+      g.state.modifiers.push({
+        id: g.state.nextModifierId++,
+        sourceInstanceId: sawbones!.instanceId,
+        sourceCardId: sawbones!.cardId,
+        seat: 1,
+        scope: "until-end-of-turn",
+        preventNextDamageAmount: 1,
+        appliesToDamageRecipientType: "pirate",
+      });
+      g.play("barbed barrage|1", { fromArsenal: true, settle: false })
+        .chooseOption("pay")
+        .chooseCard("barnacle|2")
+        .blockWith()
+        .settle();
+      expect(g.state.pendingDecision?.chooseHook).toBe("engine-combat-damage-order");
+      expect(g.state.pendingDecision?.player).toBe(0);
+      return { g, barnacle: () => g.state.players[1]!.board.find((card) => card.instanceId === barnacle!.instanceId) };
+    };
+
+    it("the attacker damages the hero first, so the shield prevents 1 to the hero and none to Barnacle", () => {
+      const { g, barnacle } = shielded();
+      const view = projectStateFor(g.state, 0).chain[0]!;
+      expect(view.damageToPrevent).toBe(1);
+      expect(view.additionalTargets?.[0]?.damageToPrevent).toBeUndefined();
+
+      g.chooseCard(g.state.players[1]!.hero.cardId)
+        .expectLife(1, 16);
+      expect(barnacle()?.life).toBe(5);
+      expect(g.state.modifiers.filter((modifier) => modifier.preventNextDamageAmount === 1 && !modifier.consumed))
+        .toHaveLength(0);
+    });
+
+    it("the attacker damages Barnacle first, so the shield prevents 1 to Barnacle and none to the hero", () => {
+      const { g, barnacle } = shielded();
+      g.chooseCard("barnacle|2");
+      g.expectLife(1, 15);
+      expect(barnacle()?.life).toBe(6);
+    });
+
+    it("projects the chosen order once Barnacle is ordered first", () => {
+      const { g } = shielded();
+      const barnacleId = g.state.players[1]!.board[0]!.instanceId;
+      g.state.chain[0]!.attackTargetDamageOrder = [barnacleId];
+      const view = projectStateFor(g.state, 0).chain[0]!;
+      expect(view.additionalTargets?.[0]?.damageToPrevent).toBe(1);
+      expect(view.damageToPrevent).toBeUndefined();
+    });
   });
 
   it("Return Fire loads the banished arrow face up with +3 at the start of its controller's next turn", () => {

@@ -23,10 +23,12 @@ import type { AdditionalTargetHit, ChainLinkState, PendingArcane, PlayerState } 
 import { tokenCreationCauseForModifier } from "./tokenQueries.js";
 import { createTokensFor } from "./tokens.js";
 import {
+  additionalTargetsAroundPrimary,
   currentLink,
   findCardAnywhere,
   isPermanentSource,
   opponent,
+  orderedAttackTargetIds,
 } from "./zoneQueries.js";
 import { destroyPermanent } from "./zoneMoves.js";
 import { hookSources, lingeringModifierSources } from "./sourceQueries.js";
@@ -146,6 +148,7 @@ function applyHit(
       tokenCreationCauseForModifier(state, modifier),
     );
   }
+  dealAdditionalTargetDamageAfterPrimary(state, runtime, link);
   if (damageSource.life !== undefined && damageSource.life <= 0) {
     destroyPermanent(state, runtime, link.attacker, damageSource);
   }
@@ -210,19 +213,78 @@ function missPrimaryTarget(
   return false;
 }
 
-/** Deal combat damage to each additional attack-target before the primary
- * target, separately (CR 7.5.2c). They cannot be defended, and one that has
- * ceased to exist is dealt nothing (CR 7.5.2b). Their hit-events are kept
- * for the hit triggers queued with the primary target's. */
+/** Attack-targets still in the arena that the attacker has not yet ordered
+ * for combat damage. */
+function unorderedLiveAttackTargets(state: GameStateInternal, link: ChainLinkState): number[] {
+  const defender = state.players[opponent(link.attacker)] as PlayerState;
+  const ordered = link.attackTargetDamageOrder ?? [];
+  return orderedAttackTargetIds(state, link).filter((id) =>
+    !ordered.includes(id) &&
+    (id === defender.hero.instanceId || defender.board.some((card) => card.instanceId === id))
+  );
+}
+
+/** Damage is dealt separately to each attack-target, and the controller of
+ * the attack orders targets controlled by the same player (CR 7.5.2c). Ask
+ * for the next target while two or more remain unordered. */
+function openAttackTargetOrderDecision(state: GameStateInternal, link: ChainLinkState): boolean {
+  const remaining = unorderedLiveAttackTargets(state, link);
+  if (remaining.length < 2) return false;
+  const first = (link.attackTargetDamageOrder?.length ?? 0) === 0;
+  state.pendingDecision = {
+    player: link.attacker,
+    kind: "choose-target",
+    prompt: first
+      ? "Choose the attack-target to deal combat damage to first"
+      : "Choose the next attack-target to deal combat damage to",
+    promptMessage: {
+      id: first ? "engine.decision.combat.damage.order.first" : "engine.decision.combat.damage.order.next",
+    },
+    options: remaining.map(String),
+    cardOptions: remaining,
+    defaultOption: String(remaining[0]),
+    chooseHook: "engine-combat-damage-order",
+  };
+  return true;
+}
+
+export function answerAttackTargetDamageOrder(
+  state: GameStateInternal,
+  runtime: EngineRuntime,
+  seat: number,
+  optionId: string,
+): string | undefined {
+  const pending = state.pendingDecision;
+  const link = currentLink(state);
+  if (
+    !pending ||
+    !link ||
+    pending.player !== seat ||
+    pending.chooseHook !== "engine-combat-damage-order"
+  ) return "not your decision";
+  const targetId = Number(optionId);
+  if (!pending.options?.includes(optionId) || !Number.isSafeInteger(targetId)) return "invalid option";
+  link.attackTargetDamageOrder = [...(link.attackTargetDamageOrder ?? []), targetId];
+  state.pendingDecision = null;
+  resolveLink(state, runtime);
+  return undefined;
+}
+
+/** Deal combat damage to these additional attack-targets, in order and
+ * separately (CR 7.5.2c). They cannot be defended, and one that has ceased to
+ * exist is dealt nothing (CR 7.5.2b). Their hit-events are kept for the hit
+ * triggers queued with the primary target's. */
 function dealAdditionalTargetDamage(
   state: GameStateInternal,
   runtime: EngineRuntime,
   link: ChainLinkState,
-  attack: number,
+  targetAllyIds: readonly number[],
 ): void {
+  if (targetAllyIds.length === 0) return;
   const defenderPlayer = state.players[opponent(link.attacker)] as PlayerState;
+  const attack = computeAttack(state, runtime, link);
   const hits: AdditionalTargetHit[] = [];
-  for (const targetAllyId of link.additionalTargetAllyIds ?? []) {
+  for (const targetAllyId of targetAllyIds) {
     const target = defenderPlayer.board.find((card) => card.instanceId === targetAllyId);
     if (!target) {
       logPublic(state, gameLogMessage(
@@ -257,7 +319,17 @@ function dealAdditionalTargetDamage(
       ));
     }
   }
-  if (hits.length > 0) link.additionalTargetHits = hits;
+  if (hits.length > 0) link.additionalTargetHits = [...(link.additionalTargetHits ?? []), ...hits];
+}
+
+/** Deal damage to the additional attack-targets ordered after the primary
+ * target, once the primary target's damage has been dealt. */
+function dealAdditionalTargetDamageAfterPrimary(
+  state: GameStateInternal,
+  runtime: EngineRuntime,
+  link: ChainLinkState,
+): void {
+  dealAdditionalTargetDamage(state, runtime, link, additionalTargetsAroundPrimary(state, link).after);
 }
 
 /** Deal the link's remaining combat damage to the defending hero: hit hooks
@@ -282,9 +354,9 @@ function applyCombatDamage(
       "engine.log.combat.fully.defended",
       { card: logCardValue(link.attackingCard.cardId) },
     ));
+    dealAdditionalTargetDamageAfterPrimary(state, runtime, link);
     return missPrimaryTarget(state, runtime, link);
   }
-  return false;
 }
 
 /** Ward answers for a combat-damage packet are done (util.ts damage flow):
@@ -341,6 +413,7 @@ export function resolveLink(state: GameStateInternal, runtime: EngineRuntime): v
     runtime.dispatchFlow("finishLinkResolution", state, link);
     return;
   }
+  if (openAttackTargetOrderDecision(state, link)) return;
   // Once combat damage is being calculated, CR 7.7.2c no longer closes the
   // chain merely because the active attack later ceases to exist. This also
   // distinguishes the Damage Step priority point from pre-damage windows.
@@ -350,7 +423,8 @@ export function resolveLink(state: GameStateInternal, runtime: EngineRuntime): v
   const defense = computeDefense(state, runtime, link);
   const damageScript = scriptOf(state, link.attackingCard.cardId, link.attackingCard);
   const damage = computeCombatDamage(state, runtime, link, attack, defense);
-  dealAdditionalTargetDamage(state, runtime, link, attack);
+  const { before, after } = additionalTargetsAroundPrimary(state, link);
+  dealAdditionalTargetDamage(state, runtime, link, before);
   if (link.targetAllyId !== undefined) {
     // Ally target (CR 8.2.8d/e/f): the attack could not be defended, damage
     // is dealt to the ally (the hero's prevention shields do not soak it, the
@@ -365,6 +439,7 @@ export function resolveLink(state: GameStateInternal, runtime: EngineRuntime): v
         { card: logCardValue(link.attackingCard.cardId) },
       ));
       link.damage = 0;
+      dealAdditionalTargetDamage(state, runtime, link, after);
       if ((link.additionalTargetHits?.length ?? 0) > 0) {
         link.hit = true;
         if (queueAttackHitEffects(state, runtime, link, false)) return;
@@ -381,6 +456,7 @@ export function resolveLink(state: GameStateInternal, runtime: EngineRuntime): v
         combat: true,
       });
       link.damage = dealt;
+      dealAdditionalTargetDamage(state, runtime, link, after);
       link.hit = dealt > 0 || (link.additionalTargetHits?.length ?? 0) > 0;
       if (dealt > 0) {
         recordAttackHit(state, link);

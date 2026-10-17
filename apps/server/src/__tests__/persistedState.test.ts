@@ -756,6 +756,9 @@ describe("PersistedStateV1", () => {
         amount: 2,
       }],
       finalDefenseModifiers: [],
+      additionalTargetAllyIds: [77],
+      additionalTargetHits: [{ targetAllyId: 77, damage: 4 }],
+      attackTargetDamageOrder: [source.players[1]!.hero.instanceId, 77],
       wagerRewards: ["Winner creates Gold"],
       wagers: [{
         source: {

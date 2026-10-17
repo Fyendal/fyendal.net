@@ -44,13 +44,24 @@ function apply(state: GameStateInternal, seat: number, intent: Parameters<typeof
   return result.state as GameStateInternal;
 }
 
-/** Pass priority and answer defend or ordering decisions until the chain closes. */
-function resolveCombat(start: GameStateInternal, defenders: number[] = []): GameStateInternal {
+/** Pass priority and answer defend or ordering decisions until the chain
+ * closes. Attack-targets are damaged in `damageOrder`, else as offered. */
+function resolveCombat(
+  start: GameStateInternal,
+  defenders: number[] = [],
+  damageOrder: number[] = [],
+): GameStateInternal {
   let state = start;
   for (let guard = 0; guard < 40 && state.chain.length > 0; guard++) {
     const decision = state.pendingDecision;
     if (decision?.kind === "defend") {
       state = apply(state, decision.player, { kind: "defend", instanceIds: defenders });
+      continue;
+    }
+    if (decision?.chooseHook === "engine-combat-damage-order") {
+      const optionId = decision.options!.find((option) => damageOrder.includes(Number(option))) ??
+        decision.options![0]!;
+      state = apply(state, decision.player, { kind: "choose", optionId });
       continue;
     }
     const seat = decision?.player ?? state.priorityPlayer;
@@ -94,6 +105,38 @@ describe("attacks with additional targets", () => {
     expect(player(state, 1).life).toBe(20);
     expect(player(state, 0).flags).toMatchObject({ hits: 1, [`hit:${allyId}`]: 4 });
     expect(player(state, 0).flags["hit:hero"]).toBeUndefined();
+  });
+
+  it("lets the attacker order damage among attack-targets the same player controls", () => {
+    for (const heroFirst of [true, false]) {
+      const { state: initial, attackId, allyId } = multiTargetGame(615);
+      let state = apply(initial, 0, { kind: "play-card", instanceId: attackId, pitchInstanceIds: [] });
+      const heroId = player(state, 1).hero.instanceId;
+      for (let guard = 0; guard < 20 && state.pendingDecision?.chooseHook !== "engine-combat-damage-order"; guard++) {
+        const decision = state.pendingDecision;
+        state = decision?.kind === "defend"
+          ? apply(state, decision.player, { kind: "defend", instanceIds: [] })
+          : apply(state, state.priorityPlayer, { kind: "pass" });
+      }
+      const decision = state.pendingDecision!;
+      expect(decision).toMatchObject({
+        player: 0,
+        kind: "choose-target",
+        options: [String(heroId), String(allyId)],
+        cardOptions: [heroId, allyId],
+      });
+      expect(legalIntents(state, 1)).not.toContainEqual({ kind: "choose", optionId: String(heroId) });
+      const logStart = state.log.length;
+      state = resolveCombat(state, [], [heroFirst ? heroId : allyId]);
+
+      const damageLogs = state.log.slice(logStart)
+        .map((entry) => entry.publicText ?? "")
+        .filter((text) => text.includes(" hits "));
+      expect(damageLogs).toHaveLength(2);
+      expect(damageLogs[0]!.includes("Test Ally")).toBe(!heroFirst);
+      expect(player(state, 1).life).toBe(16);
+      expect(player(state, 0).flags).toMatchObject({ hits: 2 });
+    }
   });
 
   it("keeps additional targets when its attack-layer is held behind the attack queue", () => {

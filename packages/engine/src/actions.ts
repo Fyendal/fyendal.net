@@ -78,6 +78,7 @@ import { continueFollowUpDecisions } from "./decisionQueue.js";
 import { abilitiesAsInstantForCard, abilityResourceCost, actionAbilityRestrictedByModifier, payActivatedAbilityCost, prepareActivatedAbilityTarget, prepareActivatedDiscardCost, prepareActivatedEffectCardCosts } from "./abilityRules.js";
 import { consumeNextActionGoAgain, noteActionPlayedOrActivated } from "./cardLifecycle.js";
 import { answerArcaneBarrier } from "./damageResolution.js";
+import { answerAttackTargetDamageOrder } from "./damage.js";
 import { answerDieRollReplacement } from "./dieRoll.js";
 import { boostCountForCardPlay, cardPlayRestrictedByModifier, playOriginRestricted, cardPlayCost, cardPlayReductionForSeat, payAlternativePlayCost, preparePlayTarget, canPlayAsInstant, canRuneGate, consumeAttackCostReductions, mayPlayFromArsenal, mayPlayFromZone, playFromZoneRequiresInstant } from "./playRules.js";
 import { canPayRequiredHandCardsForAdditionalCost, scriptedPaymentOptions } from "./resources.js";
@@ -1189,6 +1190,9 @@ export function answerChoice(
     if (err) return err;
   } else if (hook === "engine-wager-loss-replacement-order") {
     const err = answerWagerLossReplacementOrder(state, runtime, seat, optionId);
+    if (err) return err;
+  } else if (hook === "engine-combat-damage-order") {
+    const err = answerAttackTargetDamageOrder(state, runtime, seat, optionId);
     if (err) return err;
   } else if (hook === "engine-effect-attack-target") {
     if (srcId === undefined) return "effect-driven attack has no source";

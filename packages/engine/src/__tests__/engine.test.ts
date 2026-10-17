@@ -2265,9 +2265,16 @@ describe("viewer projection secrecy", () => {
     expect(beforeTargets.damageToPrevent).toBe(2);
     s.chain[0]!.additionalTargetAllyIds = [shielded.instanceId, s.nextInstanceId++, exposed.instanceId];
 
+    // Until the attacker orders them, the primary target is damaged first
+    // and spends the shield.
+    const heroFirst = projectStateFor(s, 0).chain[0]!;
+    expect(heroFirst.damageToPrevent).toBe(2);
+    expect(heroFirst.additionalTargets?.map((target) => target.damageToPrevent)).toEqual([undefined, undefined]);
+
+    // Allies ordered before the hero spend it, so the hero can't reuse it.
+    s.chain[0]!.attackTargetDamageOrder = [shielded.instanceId];
     const link = projectStateFor(s, 0).chain[0]!;
     expect(link.targetAllyName).toBeUndefined();
-    // Additional targets are dealt damage first, so the hero can't reuse the shield.
     expect(link.damageToPrevent).toBeUndefined();
     expect(link.additionalTargets).toEqual([
       {
@@ -2287,6 +2294,38 @@ describe("viewer projection secrecy", () => {
     expect(projectStateFor(s, 0).chain[0]!.additionalTargets).toEqual([
       { ally: expect.objectContaining({ instanceId: exposed.instanceId }), damage: 4 },
     ]);
+  });
+
+  it("projects a shared recipient shield on an ally primary target damaged first", () => {
+    let s = makeGame(407);
+    const attack = giveCard(s, 0, "ATK4");
+    const result = applyIntent(s, 0, { kind: "play-card", instanceId: attack, pitchInstanceIds: [] });
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    s = result.state;
+    const primary = { instanceId: s.nextInstanceId++, cardId: "TOKEN", owner: 1, life: 5 };
+    const additional = { instanceId: s.nextInstanceId++, cardId: "TOKEN", owner: 1, life: 5 };
+    player(s, 1).board.push(primary, additional);
+    s.modifiers.push({
+      id: s.nextModifierId++,
+      sourceInstanceId: player(s, 1).hero.instanceId,
+      sourceCardId: player(s, 1).hero.cardId,
+      seat: 1,
+      scope: "until-end-of-turn",
+      preventNextDamageAmount: 1,
+      appliesToDamageRecipientType: "generic",
+    });
+    s.chain[0]!.targetAllyId = primary.instanceId;
+    s.chain[0]!.additionalTargetAllyIds = [additional.instanceId];
+
+    const primaryFirst = projectStateFor(s, 0).chain[0]!;
+    expect(primaryFirst.damageToPrevent).toBe(1);
+    expect(primaryFirst.additionalTargets?.[0]?.damageToPrevent).toBeUndefined();
+
+    s.chain[0]!.attackTargetDamageOrder = [additional.instanceId];
+    const additionalFirst = projectStateFor(s, 0).chain[0]!;
+    expect(additionalFirst.damageToPrevent).toBeUndefined();
+    expect(additionalFirst.additionalTargets?.[0]?.damageToPrevent).toBe(1);
   });
 
   it("projects whether the current attack has wagered", () => {

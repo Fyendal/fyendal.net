@@ -112,6 +112,8 @@
   "engine.decision.damage.spellvoid": "Spellvoid：你将受到 {amount} 点奥术伤害——摧毁一件具有 Spellvoid 的装备以防止部分伤害？",
   "engine.decision.damage.lethalprevent": "你将受到 {amount} 点致命伤害——从手牌或 arsenal 放逐 {card} 以防止该伤害？",
   "engine.decision.damage.combatequipment": "摧毁一件正在防守的装备以替代战斗伤害？",
+  "engine.decision.combat.damage.order.first": "选择最先受到战斗伤害的攻击目标",
+  "engine.decision.combat.damage.order.next": "选择下一个受到战斗伤害的攻击目标",
   "engine.decision.damage.quellpay": "Pitch 卡牌以为 Quell 支付 {cost} 点资源",
   "engine.decision.damage.ward": "Ward：你将受到 {amount} 点伤害——摧毁一张具有 Ward 的牌以防止部分伤害",
   "engine.decision.damage.ward.unpreventable": "Ward：你将受到 {amount} 点无法防止的伤害——Ward 仍会被摧毁",

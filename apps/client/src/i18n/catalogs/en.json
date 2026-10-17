@@ -112,6 +112,8 @@
   "engine.decision.damage.spellvoid": "Spellvoid: you would be dealt {amount} arcane damage — destroy an equipment with Spellvoid to prevent some of it?",
   "engine.decision.damage.lethalprevent": "You would be dealt {amount} lethal damage — banish {card} from hand or arsenal to prevent it?",
   "engine.decision.damage.combatequipment": "Replace combat damage by destroying defending equipment?",
+  "engine.decision.combat.damage.order.first": "Choose the attack-target to deal combat damage to first",
+  "engine.decision.combat.damage.order.next": "Choose the next attack-target to deal combat damage to",
   "engine.decision.damage.quellpay": "Pitch cards to pay {cost} for Quell",
   "engine.decision.damage.ward": "Ward: you would be dealt {amount} damage — destroy a card with Ward to prevent some of it",
   "engine.decision.damage.ward.unpreventable": "Ward: you would be dealt {amount} damage that can't be prevented — Ward is still destroyed",
