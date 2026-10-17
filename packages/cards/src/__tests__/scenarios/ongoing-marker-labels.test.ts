@@ -127,6 +127,18 @@ describe("folded next-attack riders", () => {
     expect(ongoing(playing(key), key)).toEqual([folded(label, id, "engine.effect.part.attack")]);
   });
 
+  it("leaves no Lace with Inertia chip once its arrow attack resolves", () => {
+    const g = scenario({
+      seats: [
+        foe({ heroKey: "azalea|0", weapons: ["death dealer|0"], hand: ["lace with inertia|1"], arsenal: ["searing shot|1"] }),
+        hero(),
+      ],
+    });
+    g.play("lace with inertia|1").play("searing shot|1", { fromArsenal: true }).blockWith().settle()
+      .expectInZone(1, "inertia|0", "board");
+    expect(ongoing(g, "lace with inertia|1")).toEqual([]);
+  });
+
   it("names Flying High's colour through a message value", () => {
     expect(ongoing(playing("flying high|1"), "flying high|1")).toEqual([
       expect.objectContaining({

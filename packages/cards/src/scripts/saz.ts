@@ -107,13 +107,13 @@ function requestArrowToArsenal(ctx: ScriptCtx, hook: string, fallback: string): 
 }
 
 /** "Your next arrow attack this turn gets +3{p} and <on-hit rider>" (Lace
- *  with X / Drop the Anchor): the +3 rides a next-attack modifier; the rider
- *  is dispatched from the card's onHit via a until-end-of-turn marker. */
+ *  with X / Drop the Anchor): the +3 rides a next-attack modifier; once it
+ *  attaches as a chain-link modifier, that modifier keeps the card's onHit
+ *  observable for exactly the armed link. */
 function nextArrowPlusRider(label: ReturnType<typeof ongoingLabel>, rider: (ctx: ScriptCtx) => void): CardScript {
   return {
     onPlay(ctx) {
       buffNextAttack(ctx, { attack: 3, appliesToSubtype: "arrow", ...label });
-      ctx.addModifier({ scope: "until-end-of-turn" }); // marker: source of the lingering onHit
     },
     canTriggerOnHit(ctx) {
       return ctx.link?.targetAllyId === undefined && armedBySelf(ctx);
