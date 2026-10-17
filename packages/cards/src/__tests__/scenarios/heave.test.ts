@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { projectStateFor } from "@fyendal/engine";
 import { cardData, scripts } from "../../index.js";
 import { functionalKeyOf } from "../../functional.js";
 import { scenario } from "../harness.js";
@@ -59,6 +60,27 @@ describe("Heave", () => {
         .expectInZone(0, card, "arsenal")
         .expectZoneSize(0, "board", amount);
       expect(game.state.players[0]!.arsenal[0]?.faceDown).not.toBe(true);
+    },
+  );
+
+  it.each(HEAVE_CASES)(
+    "$card logs publicly when its Heave $amount cost can't be paid",
+    ({ card, amount }) => {
+      const game = scenario({
+        seats: [
+          { hero: "rhinar", hand: [card] },
+          { hero: "dorinthea", hand: [] },
+        ],
+      });
+
+      game.settle().doRaw({ kind: "pass" }).settle().expectTurn(2);
+      expect(game.state.players[0]!.arsenal).toHaveLength(0);
+      const logs = (projectStateFor(game.state, 1).logEntries ?? []).filter((entry) =>
+        "message" in entry && entry.message.id === "card.log.common.heave.unaffordable"
+      );
+      expect(logs.map((entry) => "message" in entry ? entry.message.values : undefined)).toEqual([
+        { amount, card: { kind: "card", cardId: game.state.players[0]!.hand[0]!.cardId } },
+      ]);
     },
   );
 

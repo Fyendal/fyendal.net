@@ -386,6 +386,24 @@ describe("EVR — auras, items, and utility", () => {
     });
   });
 
+  it("Imposing Visage counts its declared X cost for What Happens Next?", () => {
+    const s = scenario({
+      seats: [
+        { hero: "rhinar", board: ["what happens next?|3"], hand: ["imposing visage|3", BLUE, BLUE] },
+        { hero: "dorinthea" },
+      ],
+    });
+    const whatNext = s.state.players[0]!.board[0]!;
+
+    s.play("imposing visage|3", { settle: false }).chooseOption("X = 2");
+    expect(s.state.pendingDecision).toMatchObject({
+      chooseHook: "engine-variable-play-payment",
+      prompt: "Pay 4 resources",
+    });
+    s.chooseOption("pay 4").expectResources(0, 2);
+    expect(s.state.players[0]!.flags[`whatNextUsed:${whatNext.instanceId}`]).toBe(true);
+  });
+
   it("Revel in Runeblood creates Runechants after an attack and another non-attack action", () => {
     const s = scenario({
       seats: [

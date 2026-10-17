@@ -1036,13 +1036,13 @@ export const sup: Record<string, CardScript> = {
   "to be continued...|3": { ...suspense(), fixedDamagePrevention: { amount: 1, oncePerTurn: true } },
   "what happens next?|3": {
     ...suspense(),
-    modifyFriendlyCardPlayCost(ctx, card, _zone, baseCost) {
-      return (data(ctx, card).cost ?? 0) >= 1 && !ctx.getFlag("player", `whatNextUsed:${ctx.self.instanceId}`)
+    modifyFriendlyCardPlayCost(ctx, _card, _zone, baseCost, cardCost) {
+      return cardCost >= 1 && !ctx.getFlag("player", `whatNextUsed:${ctx.self.instanceId}`)
         ? baseCost - 1
         : baseCost;
     },
     onFriendlyPlay(ctx, played) {
-      if ((data(ctx, played).cost ?? 0) >= 1) ctx.setFlag("player", `whatNextUsed:${ctx.self.instanceId}`, true);
+      if ((ctx.cardCost(played) ?? 0) >= 1) ctx.setFlag("player", `whatNextUsed:${ctx.self.instanceId}`, true);
     },
   },
   "sit!|1": {

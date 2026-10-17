@@ -7256,6 +7256,24 @@
       "value": ": colocou uma carta no fundo e comprou uma carta"
     }
   ],
+  "card.log.common.heave.unaffordable": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": não é possível pagar "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " recursos para fazer heave dela"
+    }
+  ],
   "card.log.common.hero.life.lost": [
     {
       "type": 1,

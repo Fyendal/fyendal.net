@@ -7,6 +7,7 @@ import {
   decisionPrompt,
   entersArenaTrigger,
   localizedCardLog,
+  logHeaveUnaffordable,
   opponentSeat,
 } from "./shared-helpers.js";
 
@@ -465,7 +466,7 @@ function heave(amount: number, extra: CardScript = {}): CardScript {
         effect(ctx) {
           const player = ctx.player(ctx.seat);
           if (!ctx.hasArsenalSpace() || !player.hand.some((card) => card.instanceId === ctx.self.instanceId)) return;
-          ctx.requestPayment(
+          if (!ctx.requestPayment(
             `heave-${amount}`,
             decisionPrompt(
               `${ctx.data.name}: pay ${Array(amount).fill("{r}").join("")} to heave it?`,
@@ -477,7 +478,7 @@ function heave(amount: number, extra: CardScript = {}): CardScript {
             amount,
             undefined,
             [ctx.self.instanceId],
-          );
+          )) logHeaveUnaffordable(ctx, amount);
         },
       },
     ],

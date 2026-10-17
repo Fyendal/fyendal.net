@@ -6772,6 +6772,24 @@
       "value": "：将一张手牌置于牌库底部，然后抽一张牌"
     }
   ],
+  "card.log.common.heave.unaffordable": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：无法支付 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点资源进行 heave"
+    }
+  ],
   "card.log.common.hero.life.lost": [
     {
       "type": 1,

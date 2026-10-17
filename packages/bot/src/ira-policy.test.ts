@@ -505,6 +505,67 @@ describe("Ira policy", () => {
       .toBe("ASR012");
   });
 
+  it.each([
+    ["Snatch", "ASR013", "play-card"],
+    ["Vengeance Never Rests from banish", "ASR009", "play-from-zone"],
+  ] as const)(
+    "does not spend the last action point on Edge of Autumn when %s hits harder",
+    (_name, thirdCardId, expectedKind) => {
+      let state = createGame({
+        decklists: [iraDeck(), decklists.dorinthea],
+        cards: cardData,
+        scripts,
+        seed: 9104,
+        startPlayer: 0,
+      });
+      state.turn = 2;
+      replaceHand(state, 0, ["ASR016", "ASR025", thirdCardId]);
+      state.players[1]!.hand = [];
+      const cardIdOf = (instanceId: number) =>
+        [
+          ...state.players[0]!.hand,
+          ...state.players[0]!.banish,
+          ...state.players[0]!.weapons,
+          ...Object.values(state.players[0]!.equipment),
+        ].find((card) => card.instanceId === instanceId)?.cardId;
+      const sourceOf = (intent: GameIntent) =>
+        intent.kind === "activate-ability" ? cardIdOf(intent.sourceInstanceId)
+        : intent.kind === "play-card" || intent.kind === "play-from-zone" ? cardIdOf(intent.instanceId)
+        : undefined;
+      // Replay the reported line: Edge (pitching Razor Reflex), Vengeance
+      // Never Rests paid by Robe of Autumn's Fall, Okana Scar Wraps re-equips
+      // Edge, and Vengeance Never Rests is banished with go again.
+      const forced: Array<(intent: GameIntent) => boolean> = [
+        (intent) => intent.kind === "activate-ability" && sourceOf(intent) === "ASR002" &&
+          cardIdOf(intent.pitchInstanceIds[0]!) === "ASR016",
+        (intent) => intent.kind === "play-card" && sourceOf(intent) === "ASR025",
+        (intent) => intent.kind === "activate-ability" && sourceOf(intent) === "ASR005",
+      ];
+      for (let step = 0; step < 60; step++) {
+        const actor = (state.pendingDecision?.player ?? state.priorityPlayer) as 0 | 1;
+        const legal = legalIntents(state, actor);
+        if (actor === 0 && legal.some((intent) => intent.kind === "play-from-zone")) break;
+        let intent: GameIntent | undefined;
+        if (actor === 0) {
+          intent = forced.length ? legal.find(forced[0]!) : undefined;
+          if (intent) forced.shift();
+          else intent = chooseIraIntent({ seat: 0, view: projectStateFor(state, 0), legal, cards: cardData, state });
+        } else {
+          intent = legal.find((candidate) => candidate.kind === "defend" && candidate.instanceIds.length === 0) ??
+            legal.find((candidate) => candidate.kind === "pass");
+        }
+        state = apply(state, actor, intent!);
+      }
+      expect(forced).toHaveLength(0);
+      const legal = legalIntents(state, 0);
+      expect(legal.some((intent) => sourceOf(intent) === "ASR002")).toBe(true);
+
+      const intent = chooseIraIntent({ seat: 0, view: projectStateFor(state, 0), legal, cards: cardData, state });
+      expect(intent.kind).toBe(expectedKind);
+      expect(sourceOf(intent)).toBe(expectedKind === "play-card" ? "ASR013" : "ASR025");
+    },
+  );
+
   it("uses Razor Reflex in its attack-reaction window", () => {
     let state = createGame({
       decklists: [iraDeck(), decklists.dorinthea],

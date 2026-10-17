@@ -18,6 +18,7 @@ import { arcaneDamageCardsPlayedThisTurn, pitchedThisTurn, playedThisTurn } from
 import { heroAbilitiesDisabled } from "./stateQueries.js";
 import {
   cardColorOf,
+  cardCostOf,
   cardHasType,
   cardNamesOf,
   cardTypesOf,
@@ -2305,6 +2306,10 @@ export function makeCtx(
     printedCost(cardId) {
       const variableCost = scriptOf(state, cardId)?.variablePlayCost;
       return variableCost?.base ?? dataOf(state, cardId).cost;
+    },
+    cardCost(card) {
+      const found = findCardAnywhere(state, card.instanceId)?.card;
+      return cardCostOf(state, found ?? card as CardInstance);
     },
     arcaneDamageEffectAmounts(cardId) {
       return scriptOf(state, cardId)?.arcaneDamageEffectAmounts ?? [];

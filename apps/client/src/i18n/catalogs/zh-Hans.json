@@ -1311,6 +1311,7 @@
   "card.log.common.hero.life.lost": "{target} 失去 {amount} 点生命（剩余 {life} 点生命）",
   "card.log.common.hero.marked": "{target} 被标记 (marked)",
   "card.log.common.life.gained": "{card}：获得 {amount} 点生命",
+  "card.log.common.heave.unaffordable": "{card}：无法支付 {amount} 点资源进行 heave",
   "card.log.common.intimidate": "{card}：intimidate",
   "card.log.common.lesson.counter.gained": "{card} 获得一个 lesson 指示物（当前 {count} 个）",
   "card.log.common.mentor.search.private": "将 {result} 从牌库搜寻并置入 arsenal",

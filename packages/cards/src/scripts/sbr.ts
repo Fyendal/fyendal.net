@@ -4,6 +4,7 @@ import {
   commonOptionMessages,
   decisionPrompt,
   localizedCardLog,
+  logHeaveUnaffordable,
   ongoingLabel,
   opponentSeat,
 } from "./shared-helpers.js";
@@ -280,7 +281,7 @@ export const sbr: Record<string, CardScript> = {
         effect(ctx) {
           const player = ctx.player(ctx.seat);
           if (!ctx.hasArsenalSpace() || !player.hand.some((card) => card.instanceId === ctx.self.instanceId)) return;
-          ctx.requestPayment(
+          if (!ctx.requestPayment(
             "thunder-quake-heave",
             decisionPrompt(
               "Thunder Quake: pay {r}{r}{r} to heave it face up into your arsenal?",
@@ -289,7 +290,7 @@ export const sbr: Record<string, CardScript> = {
             3,
             undefined,
             [ctx.self.instanceId],
-          );
+          )) logHeaveUnaffordable(ctx, 3);
         },
       },
     ],

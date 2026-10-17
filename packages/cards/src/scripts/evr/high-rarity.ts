@@ -6,6 +6,7 @@ import {
   decisionPrompt,
   entersArenaTrigger,
   heroDamage,
+  logHeaveUnaffordable,
   ongoingLabel,
   opponentSeat,
   previousAttackHasName,
@@ -438,7 +439,7 @@ export const evrHighRarity: Record<string, CardScript> = {
         effect(ctx) {
           const player = ctx.player(ctx.seat);
           if (!ctx.hasArsenalSpace() || !player.hand.some((card) => card.instanceId === ctx.self.instanceId)) return;
-          ctx.requestPayment(
+          if (!ctx.requestPayment(
             "pulverize-heave",
             decisionPrompt("Pulverize: pay {r}{r}{r} to heave it?", "card.evr.pulverize.pay", {
               values: { amount: 3 },
@@ -447,7 +448,7 @@ export const evrHighRarity: Record<string, CardScript> = {
             3,
             undefined,
             [ctx.self.instanceId],
-          );
+          )) logHeaveUnaffordable(ctx, 3);
         },
       },
     ],

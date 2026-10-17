@@ -128,6 +128,17 @@ export function scriptOf(
   return state.scriptsRef[cardId];
 }
 
+/** A card's current cost. A printed X takes its declared value while the card
+ * is being played or on the stack, and is 0 everywhere else. */
+export function cardCostOf(state: GameStateInternal, card: CardInstance): number | undefined {
+  const variableCost = state.scriptsRef[card.cardId]?.variablePlayCost;
+  if (!variableCost) return instanceDataOf(state, card).cost;
+  const beingPlayed = state.resolving.some((candidate) => candidate.instanceId === card.instanceId) ||
+    state.stack.some((layer) => layer.card?.instanceId === card.instanceId);
+  const x = beingPlayed ? Math.max(0, Math.floor(Number(card.counters?.[variableCost.counterKey] ?? 0))) : 0;
+  return variableCost.base + x * Math.max(0, Math.floor(variableCost.resourcesPerX ?? 1));
+}
+
 export function hasKeyword(
   state: GameStateInternal,
   cardOrId: CardInstance | string,

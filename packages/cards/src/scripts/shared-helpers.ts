@@ -338,6 +338,19 @@ export function localizedCardLog(
   );
 }
 
+/** Log that a resolving Heave trigger offered no prompt because its cost
+ * could not be paid. The trigger itself already named the card publicly. */
+export function logHeaveUnaffordable(ctx: ScriptCtx, amount: number): void {
+  ctx.logPublic(
+    localizedCardLog(
+      ctx,
+      `${ctx.data.name}: can't pay ${amount} to heave it`,
+      "card.log.common.heave.unaffordable",
+      { amount },
+    ),
+  );
+}
+
 const HYPER_DRIVER_STEAM_FROM_BOOST_HOOK = "common-hyper-driver-steam-from-boost";
 
 /** Shared "banished from boosting" effect used by Crankshaft and Big Bertha.

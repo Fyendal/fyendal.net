@@ -7081,6 +7081,24 @@
       "value": ": put a card on the bottom and drew a card"
     }
   ],
+  "card.log.common.heave.unaffordable": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": can't pay "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " resources to heave it"
+    }
+  ],
   "card.log.common.hero.life.lost": [
     {
       "type": 1,

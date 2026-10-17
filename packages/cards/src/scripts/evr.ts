@@ -23,6 +23,7 @@ import {
   weaponAttackCount,
   opposingHeroDamage,
   ongoingLabel,
+  logHeaveUnaffordable,
 } from "./shared-helpers.js";
 
 const COPPER = "EVR194";
@@ -114,7 +115,7 @@ function heaveThree(): CardScript {
         effect(ctx) {
           const player = ctx.player(ctx.seat);
           if (!ctx.hasArsenalSpace() || !player.hand.some((card) => card.instanceId === ctx.self.instanceId)) return;
-          ctx.requestPayment(
+          if (!ctx.requestPayment(
             "heave-three",
             decisionPrompt(`${ctx.data.name}: pay {r}{r}{r} to put it face up into arsenal?`, "card.evr.heave.pay", {
               values: { card: { kind: "card", cardId: ctx.self.cardId }, amount: 3 },
@@ -123,7 +124,7 @@ function heaveThree(): CardScript {
             3,
             undefined,
             [ctx.self.instanceId],
-          );
+          )) logHeaveUnaffordable(ctx, 3);
         },
       },
     ],

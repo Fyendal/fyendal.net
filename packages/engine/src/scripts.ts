@@ -473,6 +473,9 @@ export interface ScriptCtx {
   /** Evaluate a card's printed cost outside the stack. An undefined X is 0,
    * so an X+3 cost evaluates to 3 while a plain X cost evaluates to 0. */
   printedCost(cardId: string): number | undefined;
+  /** A card's current cost: a printed X uses its declared value while the
+   * card is being played or on the stack, and is 0 elsewhere. */
+  cardCost(card: DeepReadonly<CardInstance>): number | undefined;
   /** Printed amounts of the registered card's direct arcane-damage effects.
    * Values are read in non-layer zones before conditional replacements or
    * damage modifiers; an undetermined X is 0. */
@@ -1099,11 +1102,14 @@ export interface CardScript {
     card: DeepReadonly<CardInstance>,
     zone: PlayableZone,
   ): boolean;
+  /** Adjust the running resource cost of a friendly card being played.
+   * `cardCost` is that card's own cost as played, including a declared X. */
   modifyFriendlyCardPlayCost?(
     ctx: ScriptCtx,
     card: DeepReadonly<CardInstance>,
     zone: "hand" | "arsenal" | PlayableZone,
     baseCost: number,
+    cardCost: number,
   ): number;
   allowsFriendlyCardPlayAsInstant?(
     ctx: ScriptCtx,

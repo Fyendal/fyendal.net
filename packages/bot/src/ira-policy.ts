@@ -13,6 +13,7 @@ import {
   optionCard,
   ownCards,
   pitchIds,
+  pitchValue,
   scoreArsenalChoice,
   scoreBinaryChoice,
   scoreDefenseIntent,
@@ -34,7 +35,7 @@ import {
   type TurnPlan,
   type TurnPlannerRoot,
 } from "./turn-planner.js";
-import type { HeroSolverRules, SolverCardPatch } from "./card-model.js";
+import { weaponCost, type HeroSolverRules, type SolverCardPatch } from "./card-model.js";
 import type { PendingEffect, SolverCard } from "./hand-solver.js";
 import { arsenalValuer, handDamage, handResponse, opportunityValuer } from "./hand-value.js";
 import { iraPresentation } from "./sideboard.js";
@@ -131,6 +132,23 @@ function likelyGoAgain(functional: string, data: CardData, previous: string, inp
   return false;
 }
 
+function resourceCost(data: CardData | undefined): number {
+  if (!data) return 0;
+  return data.cardType === "weapon" ? weaponCost(data) : Math.max(0, data.cost ?? 0);
+}
+
+function isAttackSource(candidate: GameIntent, own: ReadonlyMap<number, CardView>, input: BotPolicyInput): boolean {
+  if (
+    candidate.kind !== "play-card" && candidate.kind !== "play-from-arsenal" &&
+    candidate.kind !== "play-from-zone" && candidate.kind !== "activate-ability"
+  ) return false;
+  const data = input.cards[intentCard(candidate, own)?.cardId ?? ""];
+  return isAttack(data) || data?.cardType === "weapon";
+}
+
+/** Whether another attack stays legal and affordable once this intent spends
+ * its source, its pitched cards and its cost, so a granted action point would
+ * be used. */
 function remainingAttackAfter(
   intent: GameIntent,
   input: BotPolicyInput,
@@ -138,16 +156,33 @@ function remainingAttackAfter(
 ): boolean {
   const used = intentCard(intent, own);
   const consumed = new Set([used?.instanceId, ...pitchIds(intent)]);
+  const me = input.view.players[input.seat];
+  const floating = Math.max(
+    0,
+    me.resources + (me.chi ?? 0) + pitchValue(intent, input, own) - resourceCost(input.cards[used?.cardId ?? ""]),
+  );
+  const pitchable = me.hand.filter((card) => !consumed.has(card.instanceId));
   return input.legal.some((candidate) => {
-    if (
-      candidate.kind !== "play-card" && candidate.kind !== "play-from-arsenal" &&
-      candidate.kind !== "play-from-zone" && candidate.kind !== "activate-ability"
-    ) return false;
+    if (!isAttackSource(candidate, own, input)) return false;
     const card = intentCard(candidate, own);
     if (!card || consumed.has(card.instanceId)) return false;
-    const data = input.cards[card.cardId];
-    return isAttack(data) || data?.cardType === "weapon";
+    const pitch = pitchable.reduce((total, other) =>
+      other.instanceId === card.instanceId ? total : total + Number(input.cards[other.cardId]?.pitch ?? 0),
+    0);
+    return floating + pitch >= resourceCost(input.cards[card.cardId]);
   });
+}
+
+/** Whether a different attack is legal now, competing for this action point. */
+function alternativeAttackNow(
+  intent: GameIntent,
+  input: BotPolicyInput,
+  own: ReadonlyMap<number, CardView>,
+): boolean {
+  const used = intentCard(intent, own)?.instanceId;
+  return input.legal.some((candidate) =>
+    isAttackSource(candidate, own, input) && intentCard(candidate, own)?.instanceId !== used
+  );
 }
 
 function attackInReserve(
@@ -375,8 +410,10 @@ function scorePlay(
 
   if (intent.kind === "activate-ability") {
     if (data.cardType === "weapon") {
-      score = furtherAttack ? 30 : 7;
-      if (attacksThisTurn(input) === 0) score += 8;
+      // A weapon swing that cannot continue the chain is only a fallback;
+      // a competing attack for the last action point is scored on power.
+      score = furtherAttack ? 30 : alternativeAttackNow(intent, input, own) ? data.attack ?? 0 : 7;
+      if (furtherAttack && attacksThisTurn(input) === 0) score += 8;
     } else if (functional === "snapdragon scalers|0") {
       score = currentAttackIsOurs(input) && !currentAttackHasOrWillGetGoAgain(input) &&
           affordableAttackInReserve(intent, input, own)

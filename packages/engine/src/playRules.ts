@@ -1,5 +1,5 @@
 import type { EngineRuntime } from "./runtimePorts.js";
-import { cardAbilitiesSuppressed, cardColorOf, cardHasName, cardHasType, cardNamesOf, cardTypesOf, dataOf, hasKeyword, instanceDataOf, meldSideHasType, scriptOf } from "./cardProperties.js";
+import { cardAbilitiesSuppressed, cardColorOf, cardCostOf, cardHasName, cardHasType, cardNamesOf, cardTypesOf, dataOf, hasKeyword, instanceDataOf, meldSideHasType, scriptOf } from "./cardProperties.js";
 import { controlledPermanents, lingeringModifierSources } from "./sourceQueries.js";
 import {
   gameLogMessage,
@@ -467,7 +467,7 @@ export function noteCardPlayed(
       (Number(player.flags[`playedKeywordCount:${normalizedKeyword}`]) || 0) + 1;
   }
   if (isAction) {
-    const printedCost = d.cost ?? 0;
+    const printedCost = cardCostOf(state, card) ?? 0;
     for (const mod of state.modifiers) {
       const amount = Number(mod.onActionPlayedGainActionPoints ?? 0);
       if (
@@ -953,7 +953,10 @@ export function cardPlayCost(
   const banishGrant = owner.banish.some(
     (candidate) => candidate.instanceId === card.instanceId,
   ) ? modifierGrantingPlayFromZone(state, card, "banish", seat) : undefined;
-  const baseCost = banishGrant?.playBaseCostOverride ?? opts?.baseCostOverride ?? data.cost ?? 0;
+  // The card's own cost as played, including a declared X, independent of any
+  // replacement payment such as a banish grant's base cost.
+  const playedCardCost = opts?.baseCostOverride ?? cardCostOf(state, card) ?? 0;
+  const baseCost = banishGrant?.playBaseCostOverride ?? playedCardCost;
   if (script?.unmodifiableCharacteristics?.includes("cost")) {
     return Math.max(0, baseCost);
   }
@@ -996,7 +999,9 @@ export function cardPlayCost(
   {
     for (const source of controlledPermanents(state, seat, { faceDownEquipment: false })) {
       const adjust = scriptOf(state, source.cardId, source)?.modifyFriendlyCardPlayCost;
-      if (adjust) cost = Math.max(0, adjust(runtime.makeCtx(state, seat, source, link), card, origin, cost));
+      if (adjust) {
+        cost = Math.max(0, adjust(runtime.makeCtx(state, seat, source, link), card, origin, cost, playedCardCost));
+      }
     }
   }
   const attackReduction =
