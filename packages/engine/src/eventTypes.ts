@@ -54,6 +54,10 @@ export interface TriggerEventContext {
   readonly damage?: DamageEventContext;
   /** 1-based count of the subject's cranks this turn, for "card-cranked". */
   readonly crankOrdinal?: number;
+  /** Cards that became defenders in this "attack-defended" event, excluding
+   * defenders already present on the chain link. Trigger-time only: it is not
+   * persisted for `effect`. */
+  readonly defenderInstanceIds?: readonly number[];
 }
 
 /** Facts of a "damage-dealt" event. The event's subject is the source's

@@ -320,7 +320,7 @@ describe("transformed permanent stacks", () => {
 
     expect(g.state.pendingDecision).toMatchObject({
       kind: "choose-target",
-      chooseHook: "nitro-mechanoid-drivers",
+      chooseHook: expect.stringMatching(/^nitro-mechanoid-drivers:/),
       minimumSelections: 3,
       maximumSelections: 3,
     });
@@ -341,6 +341,40 @@ describe("transformed permanent stacks", () => {
         selected.map((card) => expect.objectContaining({ cardId: card.cardId })),
       ),
     );
+  });
+
+  it("chooses which Mechanologist weapon transforms into Nitro Mechanoid", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          resources: 4,
+          hand: ["construct nitro mechanoid|2"],
+          weapons: ["cogwerx dueling pistol|0", "cogwerx dueling pistol|0"],
+          equipment: {
+            head: "teklo base head|0",
+            chest: "teklo base chest|0",
+            arms: "teklo base arms|0",
+            legs: "teklo base legs|0",
+          },
+          board: ["hyper driver|0", "hyper driver|0", "hyper driver|0"],
+        },
+        { hero: "dorinthea" },
+      ],
+    });
+    const [kept, chosen] = g.state.players[0]!.weapons;
+
+    g.play("construct nitro mechanoid|2", { settle: false }).settle();
+
+    expect(g.state.pendingDecision).toMatchObject({ kind: "choose-target", chooseHook: "nitro-mechanoid-weapon" });
+    expect(projectStateFor(g.state, 0).pendingDecision?.optionCards).toHaveLength(2);
+    g.doRaw({ kind: "choose", optionId: String(chosen!.instanceId) }).settle();
+
+    expect(g.state.players[0]!.weapons.map((card) => card.instanceId)).toEqual([kept!.instanceId]);
+    const nitro = g.state.players[0]!.board.find(
+      (card) => card.cardId === printingId("nitro mechanoid|0"),
+    );
+    expect(nitro?.subcards).toHaveLength(8);
   });
 
   it("allows Nitro Mechanoid to defend from the arena", () => {

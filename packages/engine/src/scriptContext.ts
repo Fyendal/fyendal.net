@@ -14,6 +14,7 @@ import type { CardInstance, ChainLinkState, EnterArsenalZone, PendingArcane, Pen
 import { queueDecisionBehindCrank } from "./decisionQueue.js";
 import { queuedAttackObjects } from "./attackQueue.js";
 import { rngInt } from "./rng.js";
+import { heroAbilitiesDisabled } from "./stateQueries.js";
 import {
   cardColorOf,
   cardHasType,
@@ -706,6 +707,9 @@ export function makeCtx(
         "engine.log.hero.loses.all.abilities",
         { hero: logCardValue(target.heroCardId) },
       ));
+    },
+    heroAbilitiesDisabled(targetSeat = seat) {
+      return heroAbilitiesDisabled(state, targetSeat);
     },
     loseGame(targetSeat) {
       if (!state.players[targetSeat] || state.phase === "game-over") return;

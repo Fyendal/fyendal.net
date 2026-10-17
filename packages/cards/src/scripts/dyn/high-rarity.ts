@@ -539,23 +539,26 @@ export const dynHighRarity: Record<string, CardScript> = {
       },
     ],
   },
-  "construct nitro mechanoid|2": {
-    onPlay(ctx) {
-      const equipment = ["head", "chest", "arms", "legs"].flatMap((slot) => {
-        const card = ctx.player(ctx.seat).equipment[slot as "head" | "chest" | "arms" | "legs"];
+  "construct nitro mechanoid|2": (() => {
+    const mechanologistEquipment = (ctx: ScriptCtx) =>
+      (["head", "chest", "arms", "legs"] as const).flatMap((slot) => {
+        const card = ctx.player(ctx.seat).equipment[slot];
         return card && has(ctx, card, "mechanologist") ? [card] : [];
       });
-      const weaponCard = ctx.player(ctx.seat).weapons.find((card) => has(ctx, card, "mechanologist"));
-      const drivers = ctx.player(ctx.seat).board.filter((card) => named(ctx, card, "hyper driver"));
-      if (equipment.length !== 4 || !weaponCard || drivers.length < 3) return;
-      if (drivers.length === 3) {
-        ctx.transformInto(
-          "DYN092B",
-          [...equipment, weaponCard, ...drivers].map((card) => card.instanceId),
-        );
-      } else {
+    const mechanologistWeapons = (ctx: ScriptCtx) =>
+      ctx.player(ctx.seat).weapons.filter((card) => has(ctx, card, "mechanologist"));
+    const hyperDrivers = (ctx: ScriptCtx) =>
+      ctx.player(ctx.seat).board.filter((card) => named(ctx, card, "hyper driver"));
+    // The chosen weapon rides in the driver hook suffix so the resumable
+    // driver choice transforms that weapon rather than the first one.
+    const transform = (ctx: ScriptCtx, weaponId: number, driverIds?: readonly number[]) => {
+      const equipment = mechanologistEquipment(ctx);
+      const weapon = mechanologistWeapons(ctx).find((card) => card.instanceId === weaponId);
+      const drivers = hyperDrivers(ctx);
+      if (equipment.length !== 4 || !weapon || drivers.length < 3) return;
+      if (!driverIds && drivers.length > 3) {
         ctx.requestCardChoices(
-          "nitro-mechanoid-drivers",
+          `nitro-mechanoid-drivers:${weaponId}`,
           decisionPrompt(
             "Choose 3 Hyper Drivers to transform",
             "card.dyn.nitromechanoid.hyperdrivers.transform",
@@ -564,35 +567,54 @@ export const dynHighRarity: Record<string, CardScript> = {
           3,
           3,
         );
+        return;
       }
-    },
-    onChooseMany(ctx, hook, options) {
-      if (hook !== "nitro-mechanoid-drivers") return;
-      const chosenIds = options.map(Number);
-      const equipment = ["head", "chest", "arms", "legs"].flatMap((slot) => {
-        const card = ctx.player(ctx.seat).equipment[slot as "head" | "chest" | "arms" | "legs"];
-        return card && has(ctx, card, "mechanologist") ? [card] : [];
-      });
-      const weaponCard = ctx.player(ctx.seat).weapons.find((card) => has(ctx, card, "mechanologist"));
-      const driverIds = new Set(
-        ctx.player(ctx.seat).board
-          .filter((card) => named(ctx, card, "hyper driver"))
-          .map((card) => card.instanceId),
-      );
+      const available = new Set(drivers.map((card) => card.instanceId));
+      const chosen = driverIds ?? [...available];
       if (
-        equipment.length === 4 &&
-        weaponCard &&
-        chosenIds.length === 3 &&
-        new Set(chosenIds).size === 3 &&
-        chosenIds.every((instanceId) => driverIds.has(instanceId))
+        chosen.length !== 3 ||
+        new Set(chosen).size !== 3 ||
+        !chosen.every((instanceId) => available.has(instanceId))
       )
-        ctx.transformInto("DYN092B", [
-          ...equipment.map((card) => card.instanceId),
-          weaponCard.instanceId,
-          ...chosenIds,
-        ]);
-    },
-  },
+        return;
+      ctx.transformInto("DYN092B", [
+        ...equipment.map((card) => card.instanceId),
+        weapon.instanceId,
+        ...chosen,
+      ]);
+    };
+    return {
+      onPlay(ctx) {
+        const weapons = mechanologistWeapons(ctx);
+        if (mechanologistEquipment(ctx).length !== 4 || weapons.length === 0 || hyperDrivers(ctx).length < 3)
+          return;
+        if (weapons.length === 1) {
+          transform(ctx, weapons[0]!.instanceId);
+          return;
+        }
+        ctx.requestCardChoice(
+          "nitro-mechanoid-weapon",
+          decisionPrompt(
+            "Choose a weapon to transform",
+            "card.dyn.nitromechanoid.weapon.transform",
+          ),
+          weapons.map((card) => card.instanceId),
+        );
+      },
+      onChoose(ctx, hook, option) {
+        if (hook === "nitro-mechanoid-weapon") transform(ctx, Number(option));
+      },
+      onChooseMany(ctx, hook, options) {
+        const prefix = "nitro-mechanoid-drivers:";
+        // Decisions persisted before the weapon choice existed carry no
+        // suffix and transformed the first Mechanologist weapon.
+        const weaponId = hook === "nitro-mechanoid-drivers"
+          ? mechanologistWeapons(ctx)[0]?.instanceId
+          : hook.startsWith(prefix) ? Number(hook.slice(prefix.length)) : undefined;
+        if (weaponId !== undefined) transform(ctx, weaponId, options.map(Number));
+      },
+    };
+  })(),
   "nitro mechanoid|0": {
     additionalCardTypes: ["equipment"],
     activated: {
@@ -843,8 +865,14 @@ export const dynHighRarity: Record<string, CardScript> = {
     onChoose(ctx, hook, option) {
       if (hook !== "sandscour-load" || option === "no") return;
       const from = ctx.player(ctx.seat).hand.some((card) => card.instanceId === Number(option)) ? "hand" : "deck";
-      if (ctx.putIntoArsenal(Number(option), from, { faceUp: true }) && from === "deck")
-        ctx.addCounter(Number(option), "aim", 1);
+      ctx.putIntoArsenal(Number(option), from, { faceUp: true });
+    },
+    // A separate trigger, so arrows any effect loads from the deck qualify.
+    // It resolves after the loading effect; skip an arrow that has since left.
+    canTriggerOnEnterArsenal: (ctx, card, from) => from === "deck" && has(ctx, card, "arrow"),
+    onEnterArsenal(ctx, card) {
+      if (ctx.player(ctx.seat).arsenal.some((held) => held.instanceId === card.instanceId && !held.faceDown))
+        ctx.addCounter(card.instanceId, "aim", 1);
     },
   },
   "heat seeker|1": {

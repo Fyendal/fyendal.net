@@ -836,6 +836,19 @@ describe("SGB — Back Alley Breakline", () => {
       .expectAP(0, 2); // 1 from Breakline, then 1 from Pull from Beyond's go again
   });
 
+  it("gains an action point when boost banishes it from the deck", () => {
+    const g = scenario({
+      seats: [
+        { ...GRAVY, resources: 3, hand: ["zero to sixty|1"], deck: ["back alley breakline|3"] },
+        { hero: "dorinthea", hand: [] },
+      ],
+    });
+    g.play("zero to sixty|1", { boost: true })
+      .expectInZone(0, "back alley breakline|3", "banish")
+      .expectLog("Back Alley Breakline triggers: Gain 1 action point")
+      .expectAP(0, 1); // boost banished a non-Mechanologist, so only Breakline's point
+  });
+
   it("gains an action point when Call to the Grave moves it from deck to graveyard", () => {
     const g = scenario({
       seats: [

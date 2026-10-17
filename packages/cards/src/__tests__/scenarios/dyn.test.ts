@@ -695,3 +695,26 @@ describe("DYN — Mind Warp", () => {
       .expectHandSize(1, payment === "pay 0" ? 3 : 4);
   });
 });
+
+describe("DYN — Sandscour Greatbow", () => {
+  const BOW = "sandscour greatbow|0";
+  const ARROW = "drill shot|1";
+
+  it("gives an arrow loaded from the deck an aim counter", () => {
+    const s = scenario({ seats: [
+      { hero: "rhinar", deck: [ARROW], weapons: [BOW], resources: 1 },
+      { hero: "dorinthea", weapons: [] },
+    ] });
+    s.activate(BOW).chooseCard(ARROW).expectInZone(0, ARROW, "arsenal");
+    expect(s.state.players[0]!.arsenal[0]!.counters?.aim).toBe(1);
+  });
+
+  it("gives no aim counter to an arrow loaded from hand", () => {
+    const s = scenario({ seats: [
+      { hero: "rhinar", hand: [ARROW], deck: [BLUE], weapons: [BOW], resources: 1 },
+      { hero: "dorinthea", weapons: [] },
+    ] });
+    s.activate(BOW).chooseCard(ARROW).expectInZone(0, ARROW, "arsenal");
+    expect(s.state.players[0]!.arsenal[0]!.counters?.aim).toBeUndefined();
+  });
+});

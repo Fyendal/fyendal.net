@@ -423,11 +423,44 @@ export const hvyHighRarity: Record<string, CardScript> = {
   "commanding performance|1": {
     onPlay(ctx) {
       buffNextAttack(ctx, { attack: 3, appliesToType: ["warrior"] });
+      // The lingering modifier keeps this card's defended trigger live after
+      // it leaves the arena.
       ctx.addModifier({
         scope: "until-end-of-turn",
-        appliesToType: ["warrior"],
-        onHitClearHandAndArsenalAtEndPhase: true,
+        ...ongoingLabel(
+          "your Warrior attacks get \"When this is defended by 1 or more attack action cards, destroy a card in the defending hero's arsenal\"",
+          "card.effect.hvy.commandingperformance",
+        ),
       });
+    },
+    triggers: [
+      {
+        event: "attack-defended",
+        label: "Destroy a card in the defending hero's arsenal",
+        labelMessage: { id: "card.trigger.common.defended.arsenal.destroy" },
+        condition(ctx, _eventCard, event) {
+          const link = ctx.link;
+          if (!link || link.attacker !== ctx.seat || !ctx.currentAttackHasType("warrior")) return false;
+          const added = new Set(event?.defenderInstanceIds ?? []);
+          return link.defendingCards.some((card) => added.has(card.instanceId) && isAttack(ctx, card));
+        },
+        effect(ctx) {
+          const arsenal = ctx.player(opponentSeat(ctx)).arsenal;
+          if (arsenal.length === 1) ctx.moveToGraveyard(arsenal[0]!.instanceId, "arsenal");
+          else if (arsenal.length > 1)
+            ctx.requestCardChoice(
+              "commanding-arsenal",
+              decisionPrompt("Choose an arsenal card to destroy", "card.aol.arsenal.card.destroy"),
+              arsenal.map((card) => card.instanceId),
+            );
+        },
+      },
+    ],
+    onChoose(ctx, hook, option) {
+      if (hook !== "commanding-arsenal") return;
+      const id = Number(option);
+      if (ctx.player(opponentSeat(ctx)).arsenal.some((card) => card.instanceId === id))
+        ctx.moveToGraveyard(id, "arsenal");
     },
   },
   "raise an army|2": {

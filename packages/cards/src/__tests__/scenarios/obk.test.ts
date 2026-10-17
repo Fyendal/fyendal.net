@@ -59,6 +59,25 @@ describe("Outbreak heroes", () => {
       expect(game.state.players[0]!.resources).toBe(0);
     });
 
+    it("triggers Sandscour Greatbow's aim counter on an arrow Vyle puts into arsenal", () => {
+      const game = scenario({ seats: [
+        {
+          hero: "rhinar",
+          heroKey: VYLE,
+          deck: ["drill shot|1"],
+          weapons: ["sandscour greatbow|0"],
+          resources: 2,
+          equipment: NO_EQUIPMENT,
+        },
+        { hero: "dorinthea", deck: [PROWL], weapons: [], equipment: NO_EQUIPMENT },
+      ] });
+
+      game.activate(VYLE);
+
+      game.expectInZone(0, "drill shot|1", "arsenal");
+      expect(game.state.players[0]!.arsenal[0]!.counters?.aim).toBe(1);
+    });
+
     it("cannot be activated during an opponent's turn", () => {
       const game = scenario({
         active: 1,

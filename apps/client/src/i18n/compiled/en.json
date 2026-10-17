@@ -2885,6 +2885,12 @@
       "value": "Choose 3 Hyper Drivers to transform"
     }
   ],
+  "card.dyn.nitromechanoid.weapon.transform": [
+    {
+      "type": 0,
+      "value": "Choose a weapon to transform"
+    }
+  ],
   "card.dyn.patience.hero.choose": [
     {
       "type": 0,
@@ -3518,6 +3524,12 @@
     {
       "type": 0,
       "value": "whenever a dagger you own hits a hero, they lose 1 life"
+    }
+  ],
+  "card.effect.hvy.commandingperformance": [
+    {
+      "type": 0,
+      "value": "your Warrior attacks get \"When this is defended by 1 or more attack action cards, destroy a card in the defending hero's arsenal\""
     }
   ],
   "card.effect.hvy.doubledown": [
@@ -15778,6 +15790,12 @@
     {
       "type": 0,
       "value": "Whenever a card defends this"
+    }
+  ],
+  "card.trigger.common.defended.arsenal.destroy": [
+    {
+      "type": 0,
+      "value": "Destroy a card in the defending hero's arsenal"
     }
   ],
   "card.trigger.common.defender.action.defense.target": [

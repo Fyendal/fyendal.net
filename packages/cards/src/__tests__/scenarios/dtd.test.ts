@@ -553,6 +553,24 @@ describe("DTD — registration and core mechanics", () => {
     expect(replacements.every((card) => card.faceDown === true)).toBe(true);
   });
 
+  it("Blasmophet loses life from Blood Debt while its hero abilities are lost", () => {
+    const s = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          heroKey: "blasmophet, levia consumed|0",
+          life: 13,
+          deck: [BLUE, "raging onslaught|2"],
+          banish: ["grim feast|1", "ghostly visit|1"],
+        },
+        { hero: "dorinthea" },
+      ],
+    });
+    s.state.players[0]!.hero.counters = { abilitiesDisabledPermanently: 1 };
+
+    s.endTurn().expectLife(0, 11).expectTurn(2).expectZoneSize(0, "banish", 2);
+  });
+
   it("Figment of Erudition creates Ponder when it enters the arena", () => {
     const s = scenario({
       seats: [

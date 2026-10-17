@@ -499,6 +499,18 @@ export function finishPlayCard(
             boostEventNextId,
             moved,
           );
+          // Boost's banish is an effect-cost of the action card (CR 1.14.1,
+          // 8.3.9), so it counts as an action card effect moving the card.
+          if (!moved.faceDown) {
+            deferEventTriggers(
+              state, runtime,
+              "card-moved-from-deck-by-effect",
+              moved.owner,
+              boostEventNextId,
+              moved,
+              { from: "deck", to: "banish", causedBySeat: seat, effectSource: "action-card" },
+            );
+          }
           // Track the effective types actually banished for Boost. Card
           // scripts use these per-turn markers for conditions such as "if an
           // Evo has been banished from boosting this turn"; replacement

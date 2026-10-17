@@ -509,6 +509,31 @@ describe("MON — Shadow Brute and Blood Debt", () => {
       .toBe(false);
   });
 
+  it("Levia does not suppress Blood Debt while her hero abilities are lost", () => {
+    const s = scenario({
+      seats: [
+        { hero: "rhinar", hand: ["crush confidence|3", "titanium bauble|3"] },
+        leviaSeat({
+          life: 20,
+          hand: ["boneyard marauder|1", BLUE],
+          graveyard: [SEVEN, "ghostly visit|1", "void wraith|1"],
+        }),
+      ],
+    });
+
+    s.play("crush confidence|3")
+      .blockWith()
+      .settle()
+      .expectLog("Crush Confidence: opponent loses hero abilities until end of next turn")
+      .expectLife(1, 15)
+      .endTurn()
+      .play("boneyard marauder|1", { pitch: [BLUE] })
+      .blockWith()
+      .settle()
+      .endTurn()
+      .expectLife(1, 13);
+  });
+
   it("Hooves of the Shadowbeast can destroy itself after a 6-power card is banished", () => {
     const s = scenario({
       seats: [

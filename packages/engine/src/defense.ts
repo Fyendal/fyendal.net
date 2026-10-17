@@ -456,7 +456,15 @@ function collectDefendEventLayers(
   defenders: DefendEventCard[],
   defendedFromHand: boolean,
 ): { seat: number; layers: StackLayer[] }[] {
-  const groups = runtime.dispatchFlow("collectEventTriggerLayers", state, "attack-defended", link.attacker);
+  const groups = runtime.dispatchFlow(
+    "collectEventTriggerLayers",
+    state,
+    "attack-defended",
+    link.attacker,
+    undefined,
+    undefined,
+    { defenderInstanceIds: defenders.map(({ card }) => card.instanceId) },
+  );
   for (const { card } of defenders) {
     const script = scriptOf(state, card.cardId, card);
     if (!script?.onDefend) continue;

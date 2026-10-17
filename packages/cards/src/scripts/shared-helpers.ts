@@ -900,6 +900,9 @@ export function bloodDebtScript(extra: CardScript = {}, playableFromBanish = fal
         publicLog: BLOOD_DEBT.publicLog,
         publicLogMessage: BLOOD_DEBT.publicLogMessage,
         condition(ctx) {
+          // Hero exceptions live in the hero's text box, so they stop while
+          // its abilities are suppressed (e.g. Crush Confidence, Dishonor).
+          if (ctx.heroAbilitiesDisabled()) return true;
           const heroName = activeHeroName(ctx);
           if (heroName === BLOOD_DEBT.redeemedName) return false;
           return !leviaRemovesBloodDebt(ctx, heroName);
@@ -907,7 +910,7 @@ export function bloodDebtScript(extra: CardScript = {}, playableFromBanish = fal
         effect(ctx) {
           const player = ctx.player(ctx.seat);
           const heroName = activeHeroName(ctx);
-          if (heroName === BLOOD_DEBT.blasmophetName) {
+          if (heroName === BLOOD_DEBT.blasmophetName && !ctx.heroAbilitiesDisabled()) {
             const top = player.deck[0];
             if (top) ctx.banish(top.instanceId);
             return;

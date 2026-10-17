@@ -100,6 +100,9 @@ export interface ScriptCtx {
   suppressHeroAbilitiesThroughNextTurn(targetSeat: number): void;
   /** Permanently treat a hero's text box as empty. */
   suppressHeroAbilitiesPermanently(targetSeat: number): void;
+  /** Whether a hero's text box is currently treated as empty. Defaults to
+   * this script's controller. */
+  heroAbilitiesDisabled(targetSeat?: number): boolean;
   /** End the game with the opposing hero as winner. */
   loseGame(targetSeat: number): void;
   /** Schedule the chosen seat to take an extra turn after the current turn. */

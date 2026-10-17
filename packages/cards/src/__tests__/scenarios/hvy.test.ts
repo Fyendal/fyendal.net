@@ -935,3 +935,32 @@ describe("HVY — look-at floats", () => {
     expect(g.state.phase).toBe("action");
   });
 });
+
+describe("HVY — Commanding Performance", () => {
+  function commandingAttack(defender: string) {
+    const g = scenario({
+      seats: [
+        { hero: "dorinthea", hand: ["commanding performance|1"], resources: 2 },
+        { hero: "rhinar", hand: [defender], arsenal: ["sink below|1"] },
+      ],
+    });
+    return g.play("commanding performance|1").attackWithWeapon();
+  }
+
+  it("destroys a defending arsenal card when a Warrior attack is defended by an attack action card", () => {
+    commandingAttack("raging onslaught|3")
+      .expectAttackValue(5)
+      .blockWith("raging onslaught|3")
+      .expectLog("Commanding Performance triggers: Destroy a card in the defending hero's arsenal")
+      .settle()
+      .expectNotInZone(1, "sink below|1", "arsenal")
+      .expectInZone(1, "sink below|1", "graveyard");
+  });
+
+  it("does not trigger when the attack is defended only by a non-attack card", () => {
+    commandingAttack("clearing bellow|3").blockWith("clearing bellow|3")
+      .expectNoLog("Commanding Performance triggers")
+      .settle()
+      .expectInZone(1, "sink below|1", "arsenal");
+  });
+});

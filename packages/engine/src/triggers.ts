@@ -2180,6 +2180,7 @@ export function deferEventTriggers(
   subject: number,
   maxSourceId?: number,
   eventCard?: CardInstance,
+  eventContext?: TriggerEventContext,
 ): void {
   const layers = collectEventTriggerLayers(
     state, runtime,
@@ -2187,6 +2188,7 @@ export function deferEventTriggers(
     subject,
     maxSourceId,
     eventCard,
+    eventContext,
   ).flatMap((group) => group.layers);
   if (layers.length > 0) (state.pendingTriggeredLayers ??= []).push(...layers);
 }
