@@ -6,6 +6,7 @@ import {
   buffNextAttack,
   channelLightning,
   commonOptionMessages,
+  consumeDelayedEffect,
   dealArcane,
   dealToAnyTarget,
   decisionMessage,
@@ -17,6 +18,7 @@ import {
   localizedCardLog,
   ongoingLabel,
   opponentSeat,
+  pendingDelayedEffect,
   previousAttackHasName,
   requestDiscardChoice,
   resolveDiscardChoice,
@@ -1407,20 +1409,11 @@ Object.assign(ros, {
     allowsFriendlyCardPlayAsInstant(ctx, card) {
       return ctx.link?.attackingCard.instanceId === ctx.self.instanceId &&
         isNonAttackAction(ctx, card) &&
-        ctx.state.modifiers.some((modifier) =>
-          modifier.sourceInstanceId === ctx.self.instanceId &&
-          modifier.scope === "combat-chain" &&
-          !modifier.consumed
-        );
+        !!pendingDelayedEffect(ctx, { scope: "combat-chain" });
     },
     onFriendlyPlay(ctx, played) {
       if (ctx.link?.attackingCard.instanceId !== ctx.self.instanceId || !isNonAttackAction(ctx, played)) return;
-      const marker = ctx.state.modifiers.find((modifier) =>
-        modifier.sourceInstanceId === ctx.self.instanceId &&
-        modifier.scope === "combat-chain" &&
-        !modifier.consumed
-      );
-      if (marker) ctx.consumeModifier(marker.id);
+      consumeDelayedEffect(ctx, { scope: "combat-chain" });
     },
   },
   "gone in a flash|1": {

@@ -1,9 +1,11 @@
 import type { CardInstance, CardScript, DeepReadonly, Modifier, ScriptCtx } from "@fyendal/engine";
 import {
   anyDamageTarget,
+  armDelayedEffect,
   attackAbility,
   buffNextAttack,
   commonOptionMessages,
+  consumeDelayedEffect,
   dealToAnyTarget,
   decisionMessage,
   decisionPrompt,
@@ -155,22 +157,12 @@ function nextAllyAttack(flag: string, mod: NextAttackMod, onHit: (ctx: ScriptCtx
   return {
     onPlay(ctx) {
       buffNextAttack(ctx, { appliesToSubtype: "ally", appliesToClass: "pirate", ...mod });
-      ctx.addModifier({ scope: "until-end-of-turn" });
-      ctx.setFlag("player", flag, (Number(ctx.getFlag("player", flag)) || 0) + 1);
+      armDelayedEffect(ctx);
     },
     onFriendlyAttackDeclared(ctx) {
       if (!ctx.link || !isAlly(ctx, ctx.link.attackingCard) || !isPirate(ctx, ctx.link.attackingCard)) return;
-      const count = Number(ctx.getFlag("player", flag)) || 0;
-      if (count <= 0) return;
-      ctx.setFlag("player", flag, count - 1);
+      if (!consumeDelayedEffect(ctx)) return;
       ctx.setFlag("link", flag, (Number(ctx.getFlag("link", flag)) || 0) + 1);
-      const marker = ctx.state.modifiers.find(
-        (modifier) =>
-          modifier.sourceInstanceId === ctx.self.instanceId &&
-          modifier.scope === "until-end-of-turn" &&
-          !modifier.consumed,
-      );
-      if (marker) ctx.consumeModifier(marker.id);
     },
     canTriggerOnHit(ctx) {
       return (Number(ctx.getFlag("link", flag)) || 0) > 0 && ctx.link?.targetAllyId === undefined;
@@ -559,7 +551,6 @@ function goldHunter(kind: "go-again" | "power" | "overpower" | "discount"): Card
 const PITCH_COLORS: Record<number, string> = { 1: "red", 2: "yellow", 3: "blue" };
 
 function flyingHigh(pitch: number): CardScript {
-  const flag = `seaFlyingHigh:${pitch}`;
   return {
     onPlay(ctx) {
       buffNextAttack(ctx, {
@@ -568,12 +559,10 @@ function flyingHigh(pitch: number): CardScript {
           attackColor: PITCH_COLORS[pitch]!,
         }),
       });
-      ctx.addModifier({ scope: "until-end-of-turn" });
-      ctx.setFlag("player", flag, true);
+      armDelayedEffect(ctx);
     },
     onFriendlyAttackDeclared(ctx) {
-      if (!ctx.getFlag("player", flag) || !ctx.link) return;
-      ctx.setFlag("player", flag, false);
+      if (!ctx.link || !consumeDelayedEffect(ctx)) return;
       if (ctx.cardColor(ctx.link.attackingCard) === pitch) ctx.addModifier({ scope: "chain-link", attack: 1 });
     },
   };
@@ -1260,19 +1249,17 @@ export const sea: Record<string, CardScript> = {
   },
   "not so fast|2": {
     onPlay(ctx) {
-      ctx.addModifier({
-        scope: "until-end-of-turn",
-        ...ongoingLabel(
+      armDelayedEffect(
+        ctx,
+        ongoingLabel(
           "the next time an opponent would draw a card from a Gold token, you draw it instead",
           "card.effect.sea.notsofast",
         ),
-      });
-      ctx.setCounter("ready", 1);
+      );
     },
     replaceOpponentDraw(ctx, drawingSeat, count) {
-      if (!ctx.getCounter("ready") || ctx.getPlayerFlag(drawingSeat, "goldDrawEffect") !== true || count <= 0)
-        return count;
-      ctx.setCounter("ready", 0);
+      if (ctx.getPlayerFlag(drawingSeat, "goldDrawEffect") !== true || count <= 0) return count;
+      if (!consumeDelayedEffect(ctx)) return count;
       ctx.drawCards(ctx.seat, 1);
       return count - 1;
     },
@@ -1484,20 +1471,11 @@ export const sea: Record<string, CardScript> = {
         attack: 1,
         ...ongoingLabel("untap your hero when it hits", "card.effect.sea.regaincomposure"),
       });
-      ctx.addModifier({ scope: "until-end-of-turn" });
-      ctx.setCounter("ready", 1);
+      armDelayedEffect(ctx);
     },
     onFriendlyAttackDeclared(ctx) {
-      if (!ctx.getCounter("ready")) return;
-      ctx.setCounter("ready", 0);
+      if (!consumeDelayedEffect(ctx)) return;
       ctx.setFlag("link", "regainComposure", true);
-      const marker = ctx.state.modifiers.find(
-        (modifier) =>
-          modifier.sourceInstanceId === ctx.self.instanceId &&
-          modifier.scope === "until-end-of-turn" &&
-          !modifier.consumed,
-      );
-      if (marker) ctx.consumeModifier(marker.id);
     },
     canTriggerOnHit: (ctx) => ctx.getFlag("link", "regainComposure") === true,
     onHit(ctx) {
@@ -1702,13 +1680,7 @@ Object.assign(
         onFriendlyAttackDeclared(ctx: ScriptCtx) {
           if (Number(ctx.getFlag("player", "attacksDeclaredThisTurn")) !== ctx.getCounter("chartOrdinal")) return;
           ctx.addModifier({ scope: "chain-link", attack: 3 });
-          const marker = ctx.state.modifiers.find(
-            (modifier) =>
-              modifier.sourceInstanceId === ctx.self.instanceId &&
-              modifier.scope === "until-end-of-turn" &&
-              !modifier.consumed,
-          );
-          if (marker) ctx.consumeModifier(marker.id);
+          consumeDelayedEffect(ctx);
         },
         onChoose(ctx: ScriptCtx, hook: string, option: string) {
           if (hook === "chart-treasure" && option === "yes") addTreasureCounter(ctx);

@@ -1,8 +1,10 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
 import {
+  armDelayedEffect,
   attackAbility,
   buffNextAttack,
   commonOptionMessages,
+  consumeDelayedEffect,
   decisionPrompt,
   hitHookLabel,
   ongoingLabel,
@@ -23,14 +25,13 @@ function controlsVox(ctx: ScriptCtx): boolean {
   return ctx.player(ctx.seat).weapons.some((card) => ctx.cardData(card.cardId).name === "Vox Necropolis");
 }
 
-function grantDestroyingZombieAttack(ctx: ScriptCtx, power: number, marker: string): void {
+function grantDestroyingZombieAttack(ctx: ScriptCtx, power: number): void {
   buffNextAttack(ctx, {
     attack: power,
     appliesToSubtype: "zombie",
     ...ongoingLabel("destroy the attacking zombie when it hits", "card.effect.ama.zombiedestroy"),
   });
-  ctx.addModifier({ scope: "until-end-of-turn" });
-  ctx.setFlag("player", marker, (Number(ctx.getFlag("player", marker)) || 0) + 1);
+  armDelayedEffect(ctx);
 }
 
 function destroyingZombieAttack(
@@ -39,17 +40,9 @@ function destroyingZombieAttack(
   return {
     onFriendlyAttackDeclared(ctx) {
       const link = ctx.link;
-      const remaining = Number(ctx.getFlag("player", marker)) || 0;
-      if (!link || link.attacker !== ctx.seat || remaining <= 0 || !hasType(ctx, link.attackingCard, "zombie")) return;
-      ctx.setFlag("player", marker, remaining - 1);
+      if (!link || link.attacker !== ctx.seat || !hasType(ctx, link.attackingCard, "zombie")) return;
+      if (!consumeDelayedEffect(ctx)) return;
       ctx.setFlag("link", marker, (Number(ctx.getFlag("link", marker)) || 0) + 1);
-      const modifier = ctx.state.modifiers.find(
-        (candidate) =>
-          candidate.sourceInstanceId === ctx.self.instanceId &&
-          candidate.scope === "until-end-of-turn" &&
-          !candidate.consumed,
-      );
-      if (modifier) ctx.consumeModifier(modifier.id);
     },
     canTriggerOnHit(ctx) {
       return (Number(ctx.getFlag("link", marker)) || 0) > 0;
@@ -223,7 +216,7 @@ export const ama: Record<string, CardScript> = {
         },
       ],
       onActivate(ctx) {
-        grantDestroyingZombieAttack(ctx, 3, "amaUndeadGrasp");
+        grantDestroyingZombieAttack(ctx, 3);
       },
     },
     ...undeadGraspAttack,
@@ -274,7 +267,7 @@ export const ama: Record<string, CardScript> = {
         rest.map((card) => card.instanceId),
         "Order the remaining cards",
       );
-      grantDestroyingZombieAttack(ctx, 4, "amaDigForSouls");
+      grantDestroyingZombieAttack(ctx, 4);
     },
     ...digForSoulsAttack,
   },

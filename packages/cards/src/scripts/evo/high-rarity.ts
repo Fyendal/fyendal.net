@@ -1,8 +1,10 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx, TriggerDef } from "@fyendal/engine";
 import {
+  armDelayedEffect,
   attackAbility,
   buffNextAttack,
   commonOptionMessages,
+  consumeDelayedEffect,
   contractWithSilver,
   decisionMessage,
   decisionPrompt,
@@ -1287,23 +1289,17 @@ export const evoHighRarity: Record<string, CardScript> = {
       destroySelfCost: true,
       label: "Charge on next attack",
       onActivate(ctx) {
-        ctx.addModifier({
-          scope: "until-end-of-turn",
-          ...ongoingLabel(
+        armDelayedEffect(
+          ctx,
+          ongoingLabel(
             "the next time you attack, you may charge your hero's soul, and draw a card if a yellow card is charged",
             "card.effect.evo.warbandofbellona",
           ),
-        });
+        );
       },
     },
-    // The unconsumed modifier is the pending charge: it keeps this destroyed
-    // card's hooks observable, and consuming it ends both effect and label.
     onFriendlyAttackDeclared(ctx) {
-      const marker = ctx.state.modifiers.find(
-        (modifier) => modifier.sourceInstanceId === ctx.self.instanceId && !modifier.consumed,
-      );
-      if (!marker) return;
-      ctx.consumeModifier(marker.id);
+      if (!consumeDelayedEffect(ctx)) return;
       const hand = ctx.player(ctx.seat).hand;
       if (hand.length) {
         ctx.requestCardChoice(

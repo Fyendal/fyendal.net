@@ -5,6 +5,7 @@ import {
   attackArcaneHeroTrigger,
   buffNextAttack,
   commonOptionMessages,
+  consumeDelayedEffect,
   dealArcane,
   dealArcaneToTargetHero,
   dealtByThis,
@@ -396,20 +397,6 @@ function chooseGraveAttackBottom(ctx: ScriptCtx, hook: string): void {
   }
 }
 
-function consumeSourceModifier(
-  ctx: ScriptCtx,
-  predicate?: (mod: DeepReadonly<Modifier>) => boolean,
-): DeepReadonly<Modifier> | undefined {
-  const modifier = ctx.state.modifiers.find(
-    (candidate) =>
-      candidate.sourceInstanceId === ctx.self.instanceId &&
-      candidate.scope === "until-end-of-turn" &&
-      !candidate.consumed &&
-      (predicate?.(candidate) ?? true),
-  );
-  if (modifier) ctx.consumeModifier(modifier.id);
-  return modifier;
-}
 
 /** The rider marker this source granted to `attackInstanceId`, if live. */
 function riderMarker(ctx: ScriptCtx, attackInstanceId: number | undefined): DeepReadonly<Modifier> | undefined {
@@ -463,8 +450,8 @@ function nextAttackDamageRider(kind: "memory" | "renown" | "vitality"): CardScri
       ctx.addModifier({ scope: "until-end-of-turn" });
     },
     onFriendlyAttackDeclared(ctx) {
-      const marker = consumeSourceModifier(ctx, (modifier) => modifier.appliesToInstanceId === undefined);
-      if (marker && ctx.link)
+      const consumed = consumeDelayedEffect(ctx, { match: (modifier) => modifier.appliesToInstanceId === undefined });
+      if (consumed && ctx.link)
         ctx.addModifier({ scope: "until-end-of-turn", appliesToInstanceId: ctx.link.attackingCard.instanceId });
     },
     triggers: [
@@ -627,8 +614,8 @@ function mercurialSkies(amount: number): CardScript {
         !(hasTag(ctx, attack, "runeblade") || hasTag(ctx, attack, "lightning"))
       )
         return;
-      const marker = consumeSourceModifier(ctx, (modifier) => modifier.goAgain === true);
-      if (marker && ctx.link) {
+      const consumed = consumeDelayedEffect(ctx, { match: (modifier) => modifier.goAgain === true });
+      if (consumed && ctx.link) {
         ctx.addModifier({ scope: "until-end-of-turn", appliesToInstanceId: ctx.link.attackingCard.instanceId });
       }
     },
@@ -858,10 +845,9 @@ function constellaStarfall(token?: string): CardScript {
 function chromatic(pitch: number): CardScript {
   const consumeDamage = (ctx: ScriptCtx, source: Card, amount: number) => {
     if (amount <= 0) return;
-    consumeSourceModifier(
-      ctx,
-      (modifier) => modifier.damage === 1 && modifier.appliesToInstanceId === source.instanceId,
-    );
+    consumeDelayedEffect(ctx, {
+      match: (modifier) => modifier.damage === 1 && modifier.appliesToInstanceId === source.instanceId,
+    });
   };
   return {
     ...beginningAura((ctx) => {
@@ -1330,7 +1316,9 @@ export const omn: Record<string, CardScript> = mergeSetScripts("OMN", omnHighRar
       );
     },
     onHit(ctx) {
-      consumeSourceModifier(ctx, (modifier) => modifier.appliesToInstanceId === ctx.link?.attackingCard.instanceId);
+      consumeDelayedEffect(ctx, {
+        match: (modifier) => modifier.appliesToInstanceId === ctx.link?.attackingCard.instanceId,
+      });
       ctx.dealDamage(opponentSeat(ctx), 4);
     },
   },

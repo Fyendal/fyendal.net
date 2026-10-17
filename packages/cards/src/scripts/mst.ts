@@ -1,10 +1,12 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
 import {
   ampNextArcane,
+  armDelayedEffect,
   attackAbility,
   bloodDebtScript as bloodDebt,
   buffNextAttack,
   commonOptionMessages,
+  consumeDelayedEffect,
   decisionMessage,
   decisionPrompt,
   entersArenaTrigger,
@@ -540,15 +542,15 @@ function vengeful(maxCost: number): CardScript {
         (ctx) => {
           if (controlsIllusionistAura(ctx)) return;
           ctx.setCounter("vengefulMax", maxCost);
-          ctx.addModifier({
-            scope: "until-end-of-turn",
-            ...ongoingLabel(
+          armDelayedEffect(
+            ctx,
+            ongoingLabel(
               `may play your next aura with cost ${maxCost} or less ` +
                 `as though it were an instant, with a +1 power counter`,
               "card.effect.mst.vengefulapparition",
               { cost: maxCost },
             ),
-          });
+          );
         },
       ),
     ],
@@ -556,12 +558,9 @@ function vengeful(maxCost: number): CardScript {
       return isAura(ctx, card) && (data(ctx, card).cost ?? 0) <= ctx.getCounter("vengefulMax");
     },
     onFriendlyPlay(ctx, played) {
-      const marker = ctx.state.modifiers.find(
-        (modifier) => modifier.sourceInstanceId === ctx.self.instanceId && !modifier.consumed,
-      );
-      if (!marker || !isAura(ctx, played) || (data(ctx, played).cost ?? 0) > ctx.getCounter("vengefulMax")) return;
+      if (!isAura(ctx, played) || (data(ctx, played).cost ?? 0) > ctx.getCounter("vengefulMax")) return;
+      if (!consumeDelayedEffect(ctx)) return;
       ctx.addCounter(played.instanceId, "power", 1);
-      ctx.consumeModifier(marker.id);
     },
   };
 }
@@ -1198,13 +1197,9 @@ function firstTenetMoon(): CardScript {
       });
     },
     onFriendlyAttackDeclared(ctx) {
-      const marker = ctx.state.modifiers.find(
-        (modifier) =>
-          modifier.sourceInstanceId === ctx.self.instanceId && !modifier.consumed && modifier.appliesToPitch === 3,
-      );
-      if (!marker || !ctx.link || ctx.cardColor(ctx.link.attackingCard) !== 3) return;
+      if (!ctx.link || ctx.cardColor(ctx.link.attackingCard) !== 3) return;
+      if (!consumeDelayedEffect(ctx, { match: (modifier) => modifier.appliesToPitch === 3 })) return;
       ctx.drawCards(ctx.seat, 1);
-      ctx.consumeModifier(marker.id);
     },
   };
 }

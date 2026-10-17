@@ -1,10 +1,12 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx, TriggerDef, TriggerTarget } from "@fyendal/engine";
 import type { GameMessage } from "@fyendal/shared";
 import {
+  armDelayedEffect,
   attackAbility,
   bloodDebtScript as bloodDebt,
   buffNextAttack,
   commonOptionMessages,
+  consumeDelayedEffect,
   decisionMessage,
   decisionPrompt,
   entersArenaTrigger,
@@ -13,6 +15,7 @@ import {
   localizedCardLog,
   offerRetrieveDagger,
   opponentSeat,
+  pendingDelayedEffect,
   previousAttackNameContains,
   resolveRetrieveDagger,
   retrievableDaggerIds,
@@ -1217,35 +1220,21 @@ export const hnt: Record<string, CardScript> = {
       onActivate(ctx) {
         ctx.setPlayerFlag(ctx.seat, "noDefenseReactionsThisTurn", true);
         if (dataTags(ctx, ctx.player(ctx.seat).hero).includes("royal"))
-          ctx.addModifier({
-            scope: "until-end-of-turn",
-            ...ongoingLabel(
+          armDelayedEffect(
+            ctx,
+            ongoingLabel(
               "destroy all cards in their arsenal the next time you hit a hero",
               "card.effect.hnt.imperialsealofcommand",
             ),
-          });
+          );
       },
     },
     canTriggerOnHit(ctx) {
-      return (
-        ctx.link?.targetAllyId === undefined &&
-        ctx.state.modifiers.some(
-          (modifier) =>
-            modifier.scope === "until-end-of-turn" &&
-            modifier.sourceInstanceId === ctx.self.instanceId &&
-            !modifier.consumed,
-        )
-      );
+      return ctx.link?.targetAllyId === undefined && !!pendingDelayedEffect(ctx);
     },
     onHit(ctx) {
       for (const card of [...ctx.player(opponentSeat(ctx)).arsenal]) ctx.banish(card.instanceId);
-      const mod = ctx.state.modifiers.find(
-        (modifier) =>
-          modifier.scope === "until-end-of-turn" &&
-          modifier.sourceInstanceId === ctx.self.instanceId &&
-          !modifier.consumed,
-      )!;
-      ctx.consumeModifier(mod.id);
+      consumeDelayedEffect(ctx);
     },
   },
   "relentless pursuit|3": {
@@ -1762,14 +1751,7 @@ Object.assign(hnt, {
       return targetWasMarked && isDagger(ctx, source);
     },
     onFriendlyEffectHit(ctx) {
-      const delayedDraw = ctx.state.modifiers.find(
-        (modifier) =>
-          modifier.sourceInstanceId === ctx.self.instanceId &&
-          modifier.scope === "until-end-of-turn" &&
-          modifier.onHitDraw === 1 &&
-          !modifier.consumed,
-      );
-      if (delayedDraw && ctx.consumeModifier(delayedDraw.id)) ctx.drawCards(ctx.seat, 1);
+      if (consumeDelayedEffect(ctx, { match: (modifier) => modifier.onHitDraw === 1 })) ctx.drawCards(ctx.seat, 1);
     },
   },
   "quickdodge flexors|0": {

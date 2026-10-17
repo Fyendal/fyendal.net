@@ -67,6 +67,46 @@ export function ongoingLabel(
   return { ongoingLabel: fallback, ongoingLabelMessage: decisionMessage(id, values) };
 }
 
+export interface DelayedEffectFilter {
+  /** Modifier scope to match; "any" matches every scope. Defaults to
+   * "until-end-of-turn". */
+  scope?: Modifier["scope"] | "any";
+  match?: (modifier: DeepReadonly<Modifier>) => boolean;
+}
+
+/** Arm a delayed effect of this card ("the next time …" this turn). The
+ * unconsumed modifier is the effect's whole pending state: it keeps a resolved
+ * or destroyed source's hooks observable and shows its label until the hook
+ * that fires the effect consumes it. Each copy arms its own modifier, so two
+ * copies never share state. */
+export function armDelayedEffect(
+  ctx: ScriptCtx,
+  label?: Pick<Modifier, "ongoingLabel" | "ongoingLabelMessage">,
+): void {
+  ctx.addModifier({ scope: "until-end-of-turn", ...label });
+}
+
+/** This card's first unconsumed modifier matching the filter. */
+export function pendingDelayedEffect(
+  ctx: ScriptCtx,
+  { scope = "until-end-of-turn", match }: DelayedEffectFilter = {},
+): DeepReadonly<Modifier> | undefined {
+  return ctx.state.modifiers.find(
+    (modifier) =>
+      modifier.sourceInstanceId === ctx.self.instanceId &&
+      (scope === "any" || modifier.scope === scope) &&
+      !modifier.consumed &&
+      (match?.(modifier) ?? true),
+  );
+}
+
+/** Consume this card's pending delayed effect, returning whether one was
+ * pending. Call it when the effect fires so its label disappears with it. */
+export function consumeDelayedEffect(ctx: ScriptCtx, filter?: DelayedEffectFilter): boolean {
+  const pending = pendingDelayedEffect(ctx, filter);
+  return pending ? ctx.consumeModifier(pending.id) : false;
+}
+
 /** The projected text of a granted on-hit script hook, after "when it hits:". */
 export function hitHookLabel(
   fallback: string,

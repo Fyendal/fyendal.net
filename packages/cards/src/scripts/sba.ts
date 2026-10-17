@@ -1,8 +1,10 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
 import {
+  armDelayedEffect,
   attackAbility,
   attackArcaneHeroTrigger,
   commonOptionMessages,
+  consumeDelayedEffect,
   dealArcane,
   decisionPrompt,
   isWeaponAttack,
@@ -10,6 +12,7 @@ import {
   nextAttack,
   ongoingLabel,
   opponentSeat,
+  pendingDelayedEffect,
 } from "./shared-helpers.js";
 
 // ── SBA (Silver Age: Briar precon) ──────────────────────────────────────────
@@ -582,15 +585,13 @@ export const sba: Record<string, CardScript> = {
       leftName: "Burn Up",
       rightName: "Shock",
       left(ctx) {
-        // marker: source of the lingering onHit
-        ctx.addModifier({
-          scope: "until-end-of-turn",
-          ...ongoingLabel(
+        armDelayedEffect(
+          ctx,
+          ongoingLabel(
             "the next time an attack you control hits a hero, deal 4 arcane damage to them",
             "card.effect.sba.burnup",
           ),
-        });
-        ctx.setFlag("player", "burnUpArmed", true);
+        );
       },
       right(ctx) {
         requestAnyTarget(ctx, "burn-up-shock-target", 1);
@@ -605,11 +606,11 @@ export const sba: Record<string, CardScript> = {
       return (
         ctx.link?.targetAllyId === undefined &&
         ctx.link?.attacker === ctx.seat &&
-        ctx.getFlag("player", "burnUpArmed") === true
+        !!pendingDelayedEffect(ctx)
       );
     },
     onHit(ctx) {
-      ctx.setFlag("player", "burnUpArmed", false);
+      consumeDelayedEffect(ctx);
       dealArcane(ctx, opponentSeat(ctx), 4);
     },
   },
@@ -638,23 +639,14 @@ export const sba: Record<string, CardScript> = {
         appliesToSubtype: ["lightning", "elemental"],
         ...ongoingLabel("go again if it's fused", "card.effect.ele.weavelightning"),
       })(ctx);
-      ctx.addModifier({ scope: "until-end-of-turn" }); // marker: keeps the resolved source observable
-      ctx.setFlag("player", "weaveGoAgain", true);
+      armDelayedEffect(ctx);
     },
     onFriendlyAttackDeclared(ctx) {
       const link = ctx.link;
       if (!link || link.attacker !== ctx.seat || link.attackCardType !== "action") return;
-      if (ctx.getFlag("player", "weaveGoAgain") !== true) return;
       const subs = ctx.cardTypes(link.attackingCard);
       if (!subs.includes("lightning") && !subs.includes("elemental")) return;
-      ctx.setFlag("player", "weaveGoAgain", false);
-      const marker = ctx.state.modifiers.find(
-        (modifier) =>
-          modifier.sourceInstanceId === ctx.self.instanceId &&
-          modifier.scope === "until-end-of-turn" &&
-          !modifier.consumed,
-      );
-      if (marker) ctx.consumeModifier(marker.id);
+      if (!consumeDelayedEffect(ctx)) return;
       if ((link.attackingCard.counters?.fused ?? 0) > 0) {
         ctx.grantGoAgain();
         ctx.logPublic(

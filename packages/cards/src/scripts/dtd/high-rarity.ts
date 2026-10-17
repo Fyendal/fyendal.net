@@ -1,10 +1,12 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
 import type { GameMessage } from "@fyendal/shared";
 import {
+  armDelayedEffect,
   attackAbility,
   bloodDebtScript as bloodDebt,
   buffNextAttack,
   commonOptionMessages,
+  consumeDelayedEffect,
   decisionMessage,
   decisionPrompt,
   entersArenaTrigger,
@@ -1058,17 +1060,16 @@ export const dtdHighRarity: Record<string, CardScript> = {
   },
   "poison the well|3": {
     onPlay(ctx) {
-      ctx.addModifier({
-        scope: "until-end-of-turn",
-        ...ongoingLabel(
+      armDelayedEffect(
+        ctx,
+        ongoingLabel(
           "the next time a hero would gain life, they lose that much life instead",
           "card.effect.dtd.poisonthewell",
         ),
-      });
+      );
     },
     replaceHeroLifeGain(ctx, gainingSeat, amount) {
-      if (amount <= 0 || ctx.getCounter("used") > 0) return amount;
-      ctx.setCounter("used", 1);
+      if (amount <= 0 || !consumeDelayedEffect(ctx)) return amount;
       ctx.loseLife(gainingSeat, amount);
       return 0;
     },

@@ -4,6 +4,7 @@ import {
   bottomOrKeepPrompt,
   buffNextAttack,
   commonOptionMessages,
+  consumeDelayedEffect,
   contractWithSilver,
   dealArcane,
   dealtByThis,
@@ -16,6 +17,7 @@ import {
   leavesArenaTrigger,
   ongoingLabel,
   opponentSeat,
+  pendingDelayedEffect,
   previousAttackHasName,
   yesNoPrompt,
 } from "../shared-helpers.js";
@@ -500,15 +502,8 @@ export const dynHighRarity: Record<string, CardScript> = {
         event: "card-banished-for-boost",
         label: "Bios Update — put the banished item into the arena",
         condition(ctx, card) {
-          const marker = ctx.state.modifiers.find(
-            (modifier) =>
-              modifier.sourceInstanceId === ctx.self.instanceId &&
-              modifier.scope === "until-end-of-turn" &&
-              modifier.onBoostAttack === undefined &&
-              !modifier.consumed,
-          );
           return (
-            !!marker &&
+            !!pendingDelayedEffect(ctx, { match: (modifier) => modifier.onBoostAttack === undefined }) &&
             !!card &&
             has(ctx, card, "mechanologist") &&
             has(ctx, card, "item") &&
@@ -516,14 +511,7 @@ export const dynHighRarity: Record<string, CardScript> = {
           );
         },
         onTrigger(ctx) {
-          const marker = ctx.state.modifiers.find(
-            (modifier) =>
-              modifier.sourceInstanceId === ctx.self.instanceId &&
-              modifier.scope === "until-end-of-turn" &&
-              modifier.onBoostAttack === undefined &&
-              !modifier.consumed,
-          );
-          if (marker) ctx.consumeModifier(marker.id);
+          consumeDelayedEffect(ctx, { match: (modifier) => modifier.onBoostAttack === undefined });
         },
         effect(ctx, triggeredCard) {
           const item =

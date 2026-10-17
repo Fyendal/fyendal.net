@@ -1,9 +1,11 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
 import {
+  armDelayedEffect,
   attackAbility,
   attackIntimidateTrigger,
   buffNextAttack,
   commonOptionMessages,
+  consumeDelayedEffect,
   decisionPrompt,
   isSixPlus,
   localizedCardLog,
@@ -193,7 +195,7 @@ function nextAttackWager(
         ...label,
       });
       // Keep the resolved action available as the delayed wager source.
-      ctx.addModifier({ scope: "until-end-of-turn" });
+      armDelayedEffect(ctx);
     },
     onFriendlyAttackDeclared(ctx) {
       if (ctx.link?.targetAllyId === undefined) return;
@@ -201,13 +203,7 @@ function nextAttackWager(
         (modifier) => modifier.sourceInstanceId === ctx.self.instanceId && modifier.scope === "chain-link",
       );
       if (!attached) return;
-      const sourceMarker = ctx.state.modifiers.find(
-        (modifier) =>
-          modifier.sourceInstanceId === ctx.self.instanceId &&
-          modifier.scope === "until-end-of-turn" &&
-          !modifier.consumed,
-      );
-      if (sourceMarker) ctx.consumeModifier(sourceMarker.id);
+      consumeDelayedEffect(ctx);
     },
     triggers: [
       {
@@ -223,13 +219,7 @@ function nextAttackWager(
           );
         },
         onTrigger(ctx) {
-          const sourceMarker = ctx.state.modifiers.find(
-            (modifier) =>
-              modifier.sourceInstanceId === ctx.self.instanceId &&
-              modifier.scope === "until-end-of-turn" &&
-              !modifier.consumed,
-          );
-          if (sourceMarker) ctx.consumeModifier(sourceMarker.id);
+          consumeDelayedEffect(ctx);
         },
         effect(ctx) {
           ctx.wager(opponentSeat(ctx), rewards);

@@ -650,3 +650,107 @@ describe("lingering marker labels (AST, OMN, SVI, OUT, DYN)", () => {
     ]);
   });
 });
+
+describe("delayed effects consume their own marker", () => {
+  const pendingMarkers = (g: ReturnType<typeof scenario>, cardKey: string) =>
+    g.state.modifiers.filter(
+      (modifier) =>
+        modifier.sourceCardId === printingId(cardKey) && modifier.scope === "until-end-of-turn" && !modifier.consumed,
+    );
+
+  it("clears Burn Up's label on the hit, and two copies both deal their arcane damage", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", hand: ["burn up // shock|1", "burn up // shock|1", "raging onslaught|1"], resources: 3 },
+        { hero: "dorinthea", hand: [] },
+      ],
+    });
+    g.play("burn up // shock|1", { meldSide: "left" }).play("burn up // shock|1", { meldSide: "left" });
+    expect(labels(g, "burn up // shock|1")).toHaveLength(2);
+
+    g.play("raging onslaught|1").blockWith().settle().expectLife(1, 20 - 7 - 4 - 4);
+    expect(labels(g, "burn up // shock|1")).toEqual([]);
+    expect(pendingMarkers(g, "burn up // shock|1")).toEqual([]);
+  });
+
+  it("applies two Flying Highs to the next blue attack and clears both", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", hand: ["flying high|3", "flying high|3", "back alley breakline|3"], resources: 1 },
+        { hero: "dorinthea", hand: [] },
+      ],
+    });
+    g.play("flying high|3").play("flying high|3").play("back alley breakline|3").expectAttackValue(3 + 1 + 1);
+    expect(labels(g, "flying high|3")).toEqual([]);
+    expect(pendingMarkers(g, "flying high|3")).toEqual([]);
+  });
+
+  it("applies two coloured Flying Highs to the next matching attack and clears both", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", hand: ["flying high|1", "flying high|1", "raging onslaught|1"], resources: 5 },
+        { hero: "dorinthea", hand: [] },
+      ],
+    });
+    g.play("flying high|1").play("flying high|1").play("raging onslaught|1").expectAttackValue(7 + 1 + 1);
+    expect(labels(g, "flying high|1")).toEqual([]);
+    expect(pendingMarkers(g, "flying high|1")).toEqual([]);
+  });
+
+  it("clears Weave Lightning's watcher once the eligible attack is declared", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", heroKey: "briar|0", weapons: [], hand: ["weave lightning|1", "arcanic shockwave|1", "fry|1"] },
+        { hero: "rhinar", hand: [] },
+      ],
+    });
+    g.play("weave lightning|1").play("arcanic shockwave|1").chooseCard("fry|1").declareTarget(1);
+    expect(pendingMarkers(g, "weave lightning|1")).toEqual([]);
+  });
+
+  it("clears Not So Fast's label once it steals a Gold draw", () => {
+    const g = scenario({
+      active: 1,
+      seats: [
+        { hero: "rhinar", heroKey: "scurv, stowaway|0", hand: ["not so fast|2"], deck: ["rusty harpoon|3"] },
+        { hero: "dorinthea", hand: ["nimblism|3"], board: ["gold|0"], resources: 2, deck: ["nimblism|2"] },
+      ],
+    });
+    g.play("nimblism|3", { settle: false }).passPriority().react("not so fast|2");
+    expect(labels(g, "not so fast|2")).toHaveLength(1);
+
+    g.activate("gold|0").expectInZone(0, "rusty harpoon|3", "hand");
+    expect(labels(g, "not so fast|2")).toEqual([]);
+  });
+
+  it("clears Poison the Well's label on use, and a second copy waits for the next gain", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          life: 10,
+          hand: ["poison the well|3", "poison the well|3", "sigil of solace|1"],
+          resources: 2,
+        },
+        { hero: "dorinthea" },
+      ],
+    });
+    g.play("poison the well|3").play("poison the well|3");
+    expect(labels(g, "poison the well|3")).toHaveLength(2);
+
+    g.play("sigil of solace|1").expectLife(0, 7);
+    expect(labels(g, "poison the well|3")).toHaveLength(1);
+  });
+
+  it("clears Cheating Scoundrel's wager replacement label once it replaces a lost wager", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", hand: ["cheating scoundrel|1", "head jab|1", "wrecker romp|3"], equipment: NO_EQUIPMENT },
+        { hero: "dorinthea", hand: ["raging onslaught|1", "raging onslaught|2"], equipment: NO_EQUIPMENT },
+      ],
+    });
+    g.play("cheating scoundrel|1").play("head jab|1").blockWith("raging onslaught|1", "raging onslaught|2").settle();
+    g.chooseCard("wrecker romp|3").expectLog("Rhinar wins the wager");
+    expect(labels(g, "cheating scoundrel|1")).toEqual([]);
+  });
+});

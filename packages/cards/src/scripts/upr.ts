@@ -3,6 +3,7 @@ import {
   anyDamageTarget,
   buffNextAttack,
   commonOptionMessages,
+  consumeDelayedEffect,
   dealArcane,
   dealtByThis,
   dealToAnyTarget,
@@ -138,8 +139,7 @@ function createFrostbites(ctx: ScriptCtx, seat: number, count: number): void {
 }
 
 function consumeOwnMarker(ctx: ScriptCtx): void {
-  const marker = ctx.state.modifiers.find((m) => m.sourceInstanceId === ctx.self.instanceId && !m.consumed);
-  if (marker) ctx.consumeModifier(marker.id);
+  consumeDelayedEffect(ctx, { scope: "any" });
 }
 
 /** Fused Sigil of Permafrost's delayed trigger; triggering consumes it. */
@@ -506,13 +506,7 @@ function strategicPlanning(maxCost: number): CardScript {
         label: "Draw a card",
         effect(ctx) {
           ctx.drawCards(ctx.seat, 1);
-          const marker = ctx.state.modifiers.find(
-            (modifier) =>
-              modifier.sourceInstanceId === ctx.self.instanceId &&
-              modifier.scope === "until-end-of-turn" &&
-              !modifier.consumed,
-          );
-          if (marker) ctx.consumeModifier(marker.id);
+          consumeDelayedEffect(ctx);
         },
       },
     ],
@@ -593,13 +587,7 @@ function transmogrify(power: number): CardScript {
       const target = Number(ctx.getPlayerFlag(ctx.seat, "transmogrifyPower"));
       ctx.addModifier({ scope: "chain-link", attack: target - ctx.basePower(ctx.link.attackingCard) });
       ctx.setPlayerFlag(ctx.seat, "transmogrifyPending", false);
-      const marker = ctx.state.modifiers.find(
-        (modifier) =>
-          modifier.sourceInstanceId === ctx.self.instanceId &&
-          modifier.scope === "until-end-of-turn" &&
-          !modifier.consumed,
-      );
-      if (marker) ctx.consumeModifier(marker.id);
+      consumeDelayedEffect(ctx);
     },
   };
 }

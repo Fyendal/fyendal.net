@@ -4,6 +4,7 @@ import {
   attackAbility,
   buffNextAttack,
   commonOptionMessages,
+  consumeDelayedEffect,
   dealtByThis,
   decisionMessage,
   decisionPrompt,
@@ -44,16 +45,6 @@ function isFlickerBlinkTarget(ctx: ScriptCtx, card: Card): boolean {
 }
 function isInstant(ctx: ScriptCtx, card: Card): boolean {
   return ctx.hasCardType(card, "instant");
-}
-function consumeMarker(
-  ctx: ScriptCtx,
-  scope: "until-end-of-turn" | "chain-link" | "combat-chain" = "until-end-of-turn",
-) {
-  const marker = ctx.state.modifiers.find(
-    (modifier) => modifier.sourceInstanceId === ctx.self.instanceId && modifier.scope === scope && !modifier.consumed,
-  );
-  if (marker) ctx.consumeModifier(marker.id);
-  return marker;
 }
 function swordAttack(ctx: ScriptCtx): boolean {
   return ctx.link?.attackCardType === "weapon" && !!ctx.link && has(ctx, ctx.link.attackingCard, "sword");
@@ -668,7 +659,7 @@ export const omnHighRarity: Record<string, CardScript> = {
       );
     },
     onHit(ctx) {
-      consumeMarker(ctx, "chain-link");
+      consumeDelayedEffect(ctx, { scope: "chain-link" });
       const attacker = ctx.link!.attackingCard;
       sharpenSword(ctx, attacker.instanceId, 1, {
         threshold: 3,

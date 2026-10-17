@@ -4,6 +4,7 @@ import {
   bloodDebtScript as bloodDebt,
   buffNextAttack,
   commonOptionMessages,
+  consumeDelayedEffect,
   dealArcane,
   dealArcaneToTargetHero,
   decisionMessage,
@@ -18,6 +19,7 @@ import {
   optN,
   optOnChoose,
   opponentSeat,
+  pendingDelayedEffect,
   yesNoPrompt,
   opposingHeroDamage,
   ongoingLabel,
@@ -466,13 +468,6 @@ function ripThroughReality(): CardScript {
 }
 
 /** Seeds of Agony's unconsumed grant to the next cheap attack action. */
-function seedsGrant(ctx: ScriptCtx) {
-  return ctx.state.modifiers.find(
-    (candidate) =>
-      candidate.sourceInstanceId === ctx.self.instanceId && candidate.scope === "until-end-of-turn" && !candidate.consumed,
-  );
-}
-
 function seedsOfAgony(maxCost: number): CardScript {
   return bloodDebt(
     {
@@ -498,10 +493,9 @@ function seedsOfAgony(maxCost: number): CardScript {
             ctx.link?.attacker === ctx.seat &&
             ctx.link.attackCardType === "action" &&
             (ctx.cardData(ctx.link.attackingCard.cardId).cost ?? 0) <= maxCost &&
-            !!seedsGrant(ctx),
+            !!pendingDelayedEffect(ctx),
           onTrigger(ctx) {
-            const grant = seedsGrant(ctx);
-            if (grant) ctx.consumeModifier(grant.id);
+            consumeDelayedEffect(ctx);
           },
           target: heroTarget(),
           effect: dealArcaneToTargetHero,

@@ -1,8 +1,10 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx, TriggerDef } from "@fyendal/engine";
 import {
+  armDelayedEffect,
   attackArcaneHeroTrigger,
   buffNextAttack,
   commonOptionMessages,
+  consumeDelayedEffect,
   dealArcane,
   dealtByThis,
   decisionMessage,
@@ -500,21 +502,13 @@ function weaveLightning(attack: number): CardScript {
         appliesToSubtype: ["lightning", "elemental"],
         ...ongoingLabel("go again if it's fused", "card.effect.ele.weavelightning"),
       });
-      ctx.setCounter("weaveLightningArmed", 1);
-      ctx.addModifier({ scope: "until-end-of-turn" });
+      armDelayedEffect(ctx);
     },
     onFriendlyAttackDeclared(ctx) {
-      if (!ctx.getCounter("weaveLightningArmed") || ctx.link?.attackCardType !== "action") return;
+      if (ctx.link?.attackCardType !== "action") return;
       const card = ctx.link.attackingCard;
       if (!hasType(ctx, card, "lightning") && !hasType(ctx, card, "elemental")) return;
-      ctx.setCounter("weaveLightningArmed", 0);
-      const marker = ctx.state.modifiers.find(
-        (modifier) =>
-          modifier.sourceInstanceId === ctx.self.instanceId &&
-          modifier.scope === "until-end-of-turn" &&
-          !modifier.consumed,
-      );
-      if (marker) ctx.consumeModifier(marker.id);
+      if (!consumeDelayedEffect(ctx)) return;
       if ((card.counters?.fused ?? 0) > 0) ctx.grantGoAgain();
     },
   };

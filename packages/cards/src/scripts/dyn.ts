@@ -6,6 +6,7 @@ import {
   buffNextArcaneDamageCard,
   buffNextAttack,
   commonOptionMessages,
+  consumeDelayedEffect,
   contractWithSilver,
   dealArcane,
   dealToAnyTarget,
@@ -1311,10 +1312,7 @@ export const dyn: Record<string, CardScript> = mergeSetScripts("DYN", dynHighRar
         return;
       ctx.addCounter(played.instanceId, "arcaneBonus", 1);
       ctx.setCounter("auroraMax", -1);
-      const marker = ctx.state.modifiers.find(
-        (modifier) => modifier.sourceInstanceId === ctx.self.instanceId && !modifier.consumed,
-      );
-      if (marker) ctx.consumeModifier(marker.id);
+      consumeDelayedEffect(ctx);
     },
   },
   "tempest aurora|2": {
@@ -1331,10 +1329,7 @@ export const dyn: Record<string, CardScript> = mergeSetScripts("DYN", dynHighRar
         return;
       ctx.addCounter(played.instanceId, "arcaneBonus", 1);
       ctx.setCounter("auroraMax", -1);
-      const marker = ctx.state.modifiers.find(
-        (modifier) => modifier.sourceInstanceId === ctx.self.instanceId && !modifier.consumed,
-      );
-      if (marker) ctx.consumeModifier(marker.id);
+      consumeDelayedEffect(ctx);
     },
   },
   "tempest aurora|3": {
@@ -1351,10 +1346,7 @@ export const dyn: Record<string, CardScript> = mergeSetScripts("DYN", dynHighRar
         return;
       ctx.addCounter(played.instanceId, "arcaneBonus", 1);
       ctx.setCounter("auroraMax", -1);
-      const marker = ctx.state.modifiers.find(
-        (modifier) => modifier.sourceInstanceId === ctx.self.instanceId && !modifier.consumed,
-      );
-      if (marker) ctx.consumeModifier(marker.id);
+      consumeDelayedEffect(ctx);
     },
   },
   "seerstone|0": {

@@ -1,8 +1,10 @@
 import type { CardInstance, CardScript, DeepReadonly, Modifier, ScriptCtx } from "@fyendal/engine";
 import {
+  armDelayedEffect,
   attackAbility,
   buffNextAttack,
   commonOptionMessages,
+  consumeDelayedEffect,
   decisionMessage,
   decisionPrompt,
   effectPutSelfFaceUpFromDeck,
@@ -79,7 +81,8 @@ type NextAllyMod = Omit<Modifier, "id" | "sourceInstanceId" | "scope" | "defense
 /** "Your next Pirate ally attack this turn gets <mod> and 'When this hits a
  *  hero, <onHitEffect>'" — the buff rides a next-attack modifier; the granted
  *  on-hit effect is dispatched via an until-end-of-turn marker (lingering
- *  onAttackDeclared/onHit), counted so two copies stack. */
+ *  onAttackDeclared/onHit); each copy consumes its own marker, so two copies
+ *  stack. */
 function nextAllyAttack(key: string, mod: NextAllyMod, onHitEffect: (ctx: ScriptCtx) => void): CardScript {
   return {
     onPlay(ctx) {
@@ -88,24 +91,16 @@ function nextAllyAttack(key: string, mod: NextAllyMod, onHitEffect: (ctx: Script
         appliesToClass: "pirate",
         ...mod,
       });
-      ctx.addModifier({ scope: "until-end-of-turn" }); // marker: lingering dispatch source
-      ctx.setFlag("player", key, (Number(ctx.getFlag("player", key)) || 0) + 1);
+      armDelayedEffect(ctx);
     },
     onFriendlyAttackDeclared(ctx) {
       const link = ctx.link;
       if (!link || link.attacker !== ctx.seat) return;
-      const n = Number(ctx.getFlag("player", key)) || 0;
-      if (n <= 0) return;
       if (!isAlly(ctx, link.attackingCard) || !isPirate(ctx, link.attackingCard)) return;
-      ctx.setFlag("player", key, n - 1);
+      // The on-hit dispatch below reads the link flag, not the consumed
+      // marker, so it still fires.
+      if (!consumeDelayedEffect(ctx)) return;
       ctx.setFlag("link", key, (Number(ctx.getFlag("link", key)) || 0) + 1);
-      // the effect is spent: retire the lingering marker so its effect chip
-      // disappears from the mat (the on-hit dispatch below reads the link
-      // flag, not the marker, so it still fires)
-      const marker = ctx.state.modifiers.find(
-        (m) => m.scope === "until-end-of-turn" && m.sourceInstanceId === ctx.self.instanceId && !m.consumed,
-      );
-      if (marker) ctx.consumeModifier(marker.id);
     },
     canTriggerOnHit(ctx) {
       const link = ctx.link;
@@ -666,14 +661,11 @@ export const sgb: Record<string, CardScript> = {
         goAgain: true,
         ...ongoingLabel("+1 power if it's blue", "card.effect.common.attack.if.color", { attackColor: "blue" }),
       })(ctx);
-      ctx.addModifier({ scope: "until-end-of-turn" }); // marker: lingering dispatch source
-      ctx.setFlag("player", "flyingHigh", true);
+      armDelayedEffect(ctx);
     },
     onFriendlyAttackDeclared(ctx) {
       const link = ctx.link;
-      if (!link || link.attacker !== ctx.seat) return;
-      if (ctx.getFlag("player", "flyingHigh") !== true) return;
-      ctx.setFlag("player", "flyingHigh", false);
+      if (!link || link.attacker !== ctx.seat || !consumeDelayedEffect(ctx)) return;
       if (ctx.cardColor(link.attackingCard) === 3) {
         ctx.addModifier({ scope: "chain-link", attack: 1 });
         ctx.logPublic(

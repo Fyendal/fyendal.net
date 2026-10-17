@@ -3,6 +3,7 @@ import {
   attackAbility,
   buffNextAttack,
   commonOptionMessages,
+  consumeDelayedEffect,
   decisionMessage,
   decisionPrompt,
   ongoingLabel,
@@ -79,13 +80,6 @@ function swordReaction(power: number, effect?: (ctx: ScriptCtx, weapon: Card) =>
   return { ...base, canPlay: (ctx) => ctx.link?.attacker === ctx.seat && isSwordAttack(ctx) };
 }
 
-function consumeMarker(ctx: ScriptCtx, scope: "until-end-of-turn" | "chain-link" = "until-end-of-turn") {
-  const marker = ctx.state.modifiers.find(
-    (modifier) => modifier.sourceInstanceId === ctx.self.instanceId && modifier.scope === scope && !modifier.consumed,
-  );
-  if (marker) ctx.consumeModifier(marker.id);
-  return marker;
-}
 
 function alternativeGold(): CardScript["alternativePlayCost"] {
   return { kind: "destroy-controlled-named", options: [{ name: "Gold", count: 1 }] };
@@ -189,7 +183,7 @@ function onHitRemoveCounter(effect: (ctx: ScriptCtx, target: number) => void): C
       );
     },
     onHit(ctx) {
-      consumeMarker(ctx, "chain-link");
+      consumeDelayedEffect(ctx, { scope: "chain-link" });
       ctx.addCounter(ctx.link!.attackingCard.instanceId, "power", -1);
       effect(ctx, opponentSeat(ctx));
     },
@@ -359,7 +353,7 @@ export const mpw: Record<string, CardScript> = {
       );
     },
     onHit(ctx) {
-      consumeMarker(ctx, "chain-link");
+      consumeDelayedEffect(ctx, { scope: "chain-link" });
       sharpenSword(ctx, ctx.link!.attackingCard.instanceId);
     },
   },
@@ -389,7 +383,7 @@ export const mpw: Record<string, CardScript> = {
     onAttackResolved(ctx) {
       if (ctx.link?.flags.mpwAllIn !== true) return;
       if (!ctx.link.hit) ctx.loseGame(ctx.seat);
-      consumeMarker(ctx);
+      consumeDelayedEffect(ctx);
     },
   },
   "and again...|3": {
@@ -635,7 +629,7 @@ export const mpw: Record<string, CardScript> = {
       ctx.addModifier({ scope: "until-end-of-turn" });
     },
     onFriendlyAttackDeclared(ctx) {
-      if (!isSwordAttack(ctx) || !consumeMarker(ctx)) return;
+      if (!isSwordAttack(ctx) || !consumeDelayedEffect(ctx)) return;
       ctx.drawCards(ctx.seat, 1);
       const hand = ctx.player(ctx.seat).hand;
       if (hand.length)

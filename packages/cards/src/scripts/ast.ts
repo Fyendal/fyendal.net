@@ -3,6 +3,7 @@ import {
   anyDamageTarget,
   buffNextAttack,
   commonOptionMessages,
+  consumeDelayedEffect,
   dealArcane,
   dealToAnyTarget,
   decisionMessage,
@@ -139,11 +140,7 @@ export const ast: Record<string, CardScript> = {
     },
     onFriendlyPlay(ctx, played) {
       if (!ctx.hasCardType(played, "action") || hasType(ctx, played, "attack")) return;
-      const marker = ctx.state.modifiers.find(
-        (modifier) =>
-          modifier.sourceInstanceId === ctx.self.instanceId && modifier.scope === "next-attack" && !modifier.consumed,
-      );
-      if (marker) ctx.consumeModifier(marker.id);
+      consumeDelayedEffect(ctx, { scope: "next-attack" });
     },
     triggers: [
       {

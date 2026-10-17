@@ -2,9 +2,11 @@ import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal
 import {
   buffNextAttack,
   commonOptionMessages,
+  consumeDelayedEffect,
   decisionPrompt,
   ongoingLabel,
   opponentSeat,
+  pendingDelayedEffect,
   yesNoPrompt,
 } from "./shared-helpers.js";
 
@@ -22,18 +24,6 @@ function attached(ctx: ScriptCtx): boolean {
   return ctx.state.modifiers.some(
     (modifier) => modifier.sourceInstanceId === ctx.self.instanceId && modifier.scope === "chain-link",
   );
-}
-
-function armedSource(ctx: ScriptCtx) {
-  return ctx.state.modifiers.find(
-    (modifier) =>
-      modifier.sourceInstanceId === ctx.self.instanceId && modifier.scope === "until-end-of-turn" && !modifier.consumed,
-  );
-}
-
-function consumeArmedSource(ctx: ScriptCtx): boolean {
-  const marker = armedSource(ctx);
-  return marker ? ctx.consumeModifier(marker.id) : false;
 }
 
 function controlledPermanents(ctx: ScriptCtx): Card[] {
@@ -64,7 +54,7 @@ function nextWager(
       ctx.addModifier({ scope: "until-end-of-turn" });
     },
     onFriendlyAttackDeclared(ctx) {
-      if (optional && ctx.link?.targetAllyId !== undefined && attached(ctx)) consumeArmedSource(ctx);
+      if (optional && ctx.link?.targetAllyId !== undefined && attached(ctx)) consumeDelayedEffect(ctx);
     },
     triggers: [
       {
@@ -73,7 +63,7 @@ function nextWager(
         label: optional ? "Wager with the defending hero?" : "Wager with the defending hero",
         condition: (ctx) => (!optional || ctx.link?.targetAllyId === undefined) && attached(ctx),
         onTrigger: (ctx) => {
-          consumeArmedSource(ctx);
+          consumeDelayedEffect(ctx);
         },
         effect: (ctx) => {
           ctx.wager(opponentSeat(ctx), [], rewardLabel);
@@ -241,9 +231,9 @@ export const aol: Record<string, CardScript> = {
       {
         event: "wager-generated",
         label: "The wagering attack gets +4",
-        condition: (ctx) => armedSource(ctx) !== undefined,
+        condition: (ctx) => pendingDelayedEffect(ctx) !== undefined,
         onTrigger: (ctx) => {
-          consumeArmedSource(ctx);
+          consumeDelayedEffect(ctx);
         },
         effect: (ctx) => ctx.addModifier({ scope: "chain-link", attack: 4 }),
       },
@@ -255,9 +245,9 @@ export const aol: Record<string, CardScript> = {
       {
         event: "wager-generated",
         label: "The wagering attack gets +3",
-        condition: (ctx) => armedSource(ctx) !== undefined,
+        condition: (ctx) => pendingDelayedEffect(ctx) !== undefined,
         onTrigger: (ctx) => {
-          consumeArmedSource(ctx);
+          consumeDelayedEffect(ctx);
         },
         effect: (ctx) => ctx.addModifier({ scope: "chain-link", attack: 3 }),
       },
@@ -269,9 +259,9 @@ export const aol: Record<string, CardScript> = {
       {
         event: "wager-generated",
         label: "The wagering attack gets +2",
-        condition: (ctx) => armedSource(ctx) !== undefined,
+        condition: (ctx) => pendingDelayedEffect(ctx) !== undefined,
         onTrigger: (ctx) => {
-          consumeArmedSource(ctx);
+          consumeDelayedEffect(ctx);
         },
         effect: (ctx) => ctx.addModifier({ scope: "chain-link", attack: 2 }),
       },

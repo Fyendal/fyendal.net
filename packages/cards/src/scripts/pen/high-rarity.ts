@@ -1,9 +1,11 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
 import {
+  armDelayedEffect,
   attackAbility,
   bloodDebtScript as bloodDebt,
   buffNextAttack,
   commonOptionMessages,
+  consumeDelayedEffect,
   decisionMessage,
   decisionPrompt,
   entersArenaTrigger,
@@ -75,14 +77,13 @@ function nextWager(power: number): CardScript {
         appliesTo: "attack-action",
         ...ongoingLabel("wager with the defending hero when it attacks", "card.effect.common.wager.attack"),
       });
-      ctx.addModifier({
-        scope: "until-end-of-turn",
-        ...ongoingLabel(
+      armDelayedEffect(
+        ctx,
+        ongoingLabel(
           "the next time you would lose a wager, you may discard a card to win it instead",
           "card.effect.pen.cheatingscoundrel.wager",
         ),
-      });
-      ctx.setCounter("cheat-loss-ready", 1);
+      );
     },
     triggers: [
       {
@@ -96,8 +97,7 @@ function nextWager(power: number): CardScript {
       },
     ],
     onFriendlyWagerLossReplacement(ctx) {
-      if (ctx.getCounter("cheat-loss-ready") <= 0 || ctx.player(ctx.seat).hand.length === 0) return false;
-      ctx.setCounter("cheat-loss-ready", 0);
+      if (ctx.player(ctx.seat).hand.length === 0 || !consumeDelayedEffect(ctx)) return false;
       ctx.requestCardChoice(
         "cheat-wager",
         decisionPrompt("Discard a card to win the wager instead?", "card.pen.wager.discard.win", {
