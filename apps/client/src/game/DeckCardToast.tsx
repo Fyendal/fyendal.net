@@ -6,9 +6,49 @@ import { cardImageUrl } from "./Card.js";
 import { detectDeckCardEvents, type DeckCardEvent } from "./deckCardEvents.js";
 
 const DISPLAY_MS = 2_600;
+// a die lingers a little longer: its result only shows once it lands
+const ROLL_DISPLAY_MS = 3_200;
 const EXIT_MS = 220;
 const SHUFFLE_DISPLAY_MS = 900;
 const useClientLayoutEffect = typeof window === "undefined" ? useEffect : useLayoutEffect;
+
+// Pip cells on a 3×3 grid, numbered row by row from the top left.
+const PIP_CELLS: Record<number, readonly number[]> = {
+  1: [4],
+  2: [0, 8],
+  3: [0, 4, 8],
+  4: [0, 2, 6, 8],
+  5: [0, 2, 4, 6, 8],
+  6: [0, 2, 3, 5, 6, 8],
+};
+
+function DieFace({ value }: { value: number }) {
+  return (
+    <span className={`die-face die-face-${value}`}>
+      {PIP_CELLS[value]?.map((cell) => <span key={cell} className={`die-pip die-pip-${cell}`} />)}
+    </span>
+  );
+}
+
+/** A d6 that drops, tumbles, and lands showing `result`. Other die sizes keep
+ * the same motion on a single numbered face. */
+function RollingDie({ result, sides, label }: { result: number; sides: number; label: string }) {
+  const pips = sides === 6 && result >= 1 && result <= 6;
+  return (
+    <div className="die-roll" role="img" aria-label={label}>
+      <span className="die-ground" />
+      <span className="die-drop">
+        {pips ? (
+          <span className={`die-cube die-show-${result}`}>
+            {[1, 2, 3, 4, 5, 6].map((value) => <DieFace key={value} value={value} />)}
+          </span>
+        ) : (
+          <span className="die-cube die-numeral">{result}</span>
+        )}
+      </span>
+    </div>
+  );
+}
 
 function localizedDeckCardEventLabel(event: DeckCardEvent): string | null {
   if (event.kind === "banish" && event.sourceZone === "deck") {
@@ -89,7 +129,10 @@ export function useDeckCardFeedback(view: GameView | null, enabled: boolean): {
   // hovering the toast pins it — the user is reading the revealed cards
   useEffect(() => {
     if (!active || hovered || exiting) return;
-    const timeout = window.setTimeout(() => setExiting(true), DISPLAY_MS);
+    const timeout = window.setTimeout(
+      () => setExiting(true),
+      active.kind === "roll" ? ROLL_DISPLAY_MS : DISPLAY_MS,
+    );
     return () => window.clearTimeout(timeout);
   }, [active, hovered, exiting]);
 
@@ -140,7 +183,14 @@ export function DeckCardToast({
     ? intl.formatMessage({ id: localizedLabelId })
     : event.kind === "numbers"
       ? intl.formatMessage({ id: "game.deckToast.numbersRevealed" }, { card: event.label })
-      : event.label;
+      : event.roll
+        ? event.roll.reroll
+          ? intl.formatMessage({ id: "game.deckToast.roll.rerolled" })
+          : intl.formatMessage(
+            { id: "game.deckToast.roll.heading" },
+            { hero: event.roll.heroName?.split(",")[0] ?? "" },
+          )
+        : event.label;
   const numbers = [...(event.numbers ?? [])].sort((a, b) =>
     Number(b.seat === viewerSeat) - Number(a.seat === viewerSeat));
   const tied = new Set(numbers.map((choice) => choice.number)).size < 2;
@@ -148,7 +198,9 @@ export function DeckCardToast({
 
   return (
     <div
-      className={`deck-card-toast deck-card-toast-${event.kind}${exiting ? " deck-card-toast-exiting" : ""}`}
+      className={`deck-card-toast deck-card-toast-${event.kind}${
+        event.roll?.seat === undefined ? "" : event.roll.seat === viewerSeat ? " die-roll-mine" : " die-roll-theirs"
+      }${exiting ? " deck-card-toast-exiting" : ""}`}
       role="status"
       aria-live="polite"
       onMouseEnter={onMouseEnter}
@@ -161,6 +213,13 @@ export function DeckCardToast({
         aria-label={intl.formatMessage({ id: "common.dismiss" })}
         onClick={onDismiss}
       />
+      {event.roll ? (
+        <RollingDie
+          result={event.roll.result}
+          sides={event.roll.sides}
+          label={intl.formatMessage({ id: "game.deckToast.roll.result" }, { result: event.roll.result })}
+        />
+      ) : null}
       {numbers.length ? (
         <div className="number-reveal">
           {numbers.map((choice, index) => (

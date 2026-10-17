@@ -316,9 +316,56 @@ describe("public deck-card events", () => {
       view({ log: [] }),
       view({ log: ["Hero rolls 4", "the die is rerolled: 2"] }),
     )).toEqual([
-      { kind: "roll", cardIds: [], label: "Hero rolls 4" },
-      { kind: "roll", cardIds: [], label: "the die is rerolled: 2" },
+      {
+        kind: "roll",
+        cardIds: [],
+        label: "Hero rolls 4",
+        roll: { result: 4, sides: 6, seat: 0, heroName: "Hero", reroll: false },
+      },
+      {
+        kind: "roll",
+        cardIds: [],
+        label: "the die is rerolled: 2",
+        roll: { result: 2, sides: 6, seat: undefined, heroName: undefined, reroll: true },
+      },
     ]);
+  });
+
+  it("animates die rolls once from structured log metadata", () => {
+    const rolled = {
+      fallback: "Hero rolls 3",
+      sequence: 1,
+      message: { id: "engine.log.die.rolled", values: { player: { kind: "player" as const, seat: 0 }, result: 3 } },
+      event: { kind: "roll" as const, result: 3, seat: 0, sides: 6 },
+    };
+    const rerolled = {
+      fallback: "the die is rerolled: 5",
+      sequence: 3,
+      message: { id: "engine.log.die.rerolled", values: { result: 5 } },
+      event: { kind: "roll" as const, result: 5, seat: 0, sides: 6 },
+    };
+    const restated = {
+      fallback: "Bad Beats: rolled 3",
+      sequence: 2,
+      message: { id: "card.log.common.die.rolled", values: { result: 3 } },
+      event: { kind: "roll" as const, result: 3, seat: 0, sides: 6 },
+    };
+    const before = { ...view({ log: [] }), logEntries: [] };
+    const middle = { ...view({ log: [rolled.fallback, restated.fallback] }), logEntries: [rolled, restated] };
+    const after = {
+      ...view({ log: [rolled.fallback, restated.fallback, rerolled.fallback] }),
+      logEntries: [rolled, restated, rerolled],
+    };
+    expect(detectDeckCardEvents(before, middle)).toEqual([{
+      kind: "roll",
+      cardIds: [],
+      label: "Hero rolls 3",
+      roll: { result: 3, sides: 6, seat: 0, heroName: "Hero", reroll: false },
+    }]);
+    expect(detectDeckCardEvents(middle, after).map((event) => event.roll)).toEqual([
+      { result: 5, sides: 6, seat: 0, heroName: "Hero", reroll: true },
+    ]);
+    expect(detectDeckCardEvents(after, middle)).toEqual([]);
   });
 
   it("announces revealed secret numbers once from structured log metadata", () => {

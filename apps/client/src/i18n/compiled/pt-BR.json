@@ -28875,6 +28875,32 @@
       "value": "Revelada da mão"
     }
   ],
+  "game.deckToast.roll.heading": [
+    {
+      "type": 1,
+      "value": "hero"
+    },
+    {
+      "type": 0,
+      "value": " rola um dado"
+    }
+  ],
+  "game.deckToast.roll.rerolled": [
+    {
+      "type": 0,
+      "value": "O dado é rolado novamente"
+    }
+  ],
+  "game.deckToast.roll.result": [
+    {
+      "type": 0,
+      "value": "Resultado: "
+    },
+    {
+      "type": 1,
+      "value": "result"
+    }
+  ],
   "game.deckToast.sentFromDeckToGraveyard": [
     {
       "type": 0,

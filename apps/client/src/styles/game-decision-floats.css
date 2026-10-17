@@ -986,6 +986,136 @@
   color: #9d9483;
   font-size: 13px;
 }
+/* A public die roll: an ivory d6 drops onto the toast, tumbles, and settles
+   with the rolled face up. The view looks down onto the table, so the result
+   reads on the top face as it would on a real die. The ground shadow carries
+   the roller's seat color. */
+.deck-card-toast.deck-card-toast-roll {
+  gap: 4px;
+  padding: 12px 22px 10px;
+}
+.die-roll {
+  --die: 76px;
+  --seat-glow: #b8933f;
+  position: relative;
+  width: 160px;
+  height: 128px;
+  perspective: 600px;
+}
+.die-roll-mine .die-roll { --seat-glow: #4da3ff; }
+.die-roll-theirs .die-roll { --seat-glow: #ff5b4d; }
+.die-ground {
+  position: absolute;
+  left: 50%;
+  bottom: 6px;
+  width: 96px;
+  height: 16px;
+  margin-left: -48px;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, color-mix(in srgb, var(--seat-glow) 55%, #000), transparent);
+  opacity: .75;
+  animation: die-ground 900ms cubic-bezier(.3, .6, .3, 1) both;
+}
+.die-drop {
+  position: absolute;
+  left: 50%;
+  bottom: 16px;
+  width: var(--die);
+  height: var(--die);
+  margin-left: calc(var(--die) / -2);
+  transform-style: preserve-3d;
+  animation: die-drop 900ms cubic-bezier(.3, .6, .3, 1) both;
+}
+.die-cube {
+  --rx: 0deg;
+  --ry: 0deg;
+  /* look down at the table, turn the die a little, then tip its front face up */
+  --pose: rotateX(-52deg) rotateY(24deg) rotateX(90deg);
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+  transform: var(--pose) rotateX(var(--rx)) rotateY(var(--ry));
+  animation: die-tumble 900ms cubic-bezier(.2, .7, .25, 1) both;
+}
+/* each value's rotation brings its face to the front before --pose tips it up */
+.die-show-2 { --ry: -90deg; }
+.die-show-3 { --rx: -90deg; }
+.die-show-4 { --rx: 90deg; }
+.die-show-5 { --ry: 90deg; }
+.die-show-6 { --ry: 180deg; }
+.die-face,
+.die-numeral {
+  border-radius: 12px;
+  background: radial-gradient(circle at 30% 25%, #fffaf0, #e9dcc0 70%, #cdb98f);
+  box-shadow: inset 0 0 0 1px #a8915f66, inset 0 -3px 6px #8a703f55;
+}
+.die-face {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template: repeat(3, 1fr) / repeat(3, 1fr);
+  box-sizing: border-box;
+  padding: 11px;
+  backface-visibility: hidden;
+}
+.die-face-1 { transform: translateZ(calc(var(--die) / 2)); }
+.die-face-2 { transform: rotateY(90deg) translateZ(calc(var(--die) / 2)); }
+.die-face-3 { transform: rotateX(90deg) translateZ(calc(var(--die) / 2)); }
+.die-face-4 { transform: rotateX(-90deg) translateZ(calc(var(--die) / 2)); }
+.die-face-5 { transform: rotateY(-90deg) translateZ(calc(var(--die) / 2)); }
+.die-face-6 { transform: rotateY(180deg) translateZ(calc(var(--die) / 2)); }
+.die-pip {
+  align-self: center;
+  justify-self: center;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 40% 35%, #4a3520, #1c1209);
+  box-shadow: inset 0 1px 2px #000c, 0 1px 0 #fff8;
+}
+/* the ace is a single blood-red pip, larger than the rest */
+.die-face-1 .die-pip {
+  width: 22px;
+  height: 22px;
+  background: radial-gradient(circle at 40% 35%, #b3262a, #5e0b10);
+}
+.die-pip-0 { grid-area: 1 / 1; }
+.die-pip-2 { grid-area: 1 / 3; }
+.die-pip-3 { grid-area: 2 / 1; }
+.die-pip-4 { grid-area: 2 / 2; }
+.die-pip-5 { grid-area: 2 / 3; }
+.die-pip-6 { grid-area: 3 / 1; }
+.die-pip-8 { grid-area: 3 / 3; }
+.die-numeral {
+  display: grid;
+  place-items: center;
+  color: #1c1209;
+  font-family: var(--font-display);
+  font-size: 40px;
+  font-weight: 700;
+}
+@keyframes die-drop {
+  0% { transform: translateY(-40px); }
+  45% { transform: translateY(0); }
+  62% { transform: translateY(-12px); }
+  78% { transform: translateY(0); }
+  88% { transform: translateY(-3px); }
+  100% { transform: translateY(0); }
+}
+@keyframes die-tumble {
+  from {
+    transform: var(--pose) rotateX(calc(var(--rx) + 630deg)) rotateY(calc(var(--ry) - 450deg));
+  }
+  to {
+    transform: var(--pose) rotateX(var(--rx)) rotateY(var(--ry));
+  }
+}
+@keyframes die-ground {
+  0% { transform: scale(.45); opacity: .25; }
+  45% { transform: scale(1); opacity: .75; }
+  62% { transform: scale(.8); opacity: .55; }
+  78%, 100% { transform: scale(1); opacity: .75; }
+}
 @keyframes deck-card-toast-in {
   from { opacity: 0; transform: translate(-50%, -24px) scale(0.96); }
   to { opacity: 1; transform: translate(-50%, 0) scale(1); }

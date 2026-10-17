@@ -26960,6 +26960,32 @@
       "value": "从手牌展示"
     }
   ],
+  "game.deckToast.roll.heading": [
+    {
+      "type": 1,
+      "value": "hero"
+    },
+    {
+      "type": 0,
+      "value": " 掷骰"
+    }
+  ],
+  "game.deckToast.roll.rerolled": [
+    {
+      "type": 0,
+      "value": "重掷骰子"
+    }
+  ],
+  "game.deckToast.roll.result": [
+    {
+      "type": 0,
+      "value": "掷出 "
+    },
+    {
+      "type": 1,
+      "value": "result"
+    }
+  ],
   "game.deckToast.sentFromDeckToGraveyard": [
     {
       "type": 0,

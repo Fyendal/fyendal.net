@@ -27567,6 +27567,32 @@
       "value": "Revealed from hand"
     }
   ],
+  "game.deckToast.roll.heading": [
+    {
+      "type": 1,
+      "value": "hero"
+    },
+    {
+      "type": 0,
+      "value": " rolls a die"
+    }
+  ],
+  "game.deckToast.roll.rerolled": [
+    {
+      "type": 0,
+      "value": "The die is rerolled"
+    }
+  ],
+  "game.deckToast.roll.result": [
+    {
+      "type": 0,
+      "value": "Rolled "
+    },
+    {
+      "type": 1,
+      "value": "result"
+    }
+  ],
   "game.deckToast.sentFromDeckToGraveyard": [
     {
       "type": 0,

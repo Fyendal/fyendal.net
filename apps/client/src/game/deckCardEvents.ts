@@ -14,6 +14,8 @@ export interface DeckCardEvent {
   cardSeats?: (number | undefined)[];
   /** Secretly chosen numbers revealed together, keyed by hero seat. */
   numbers?: { seat: number; heroName: string; number: number }[];
+  /** A public die roll; `reroll` marks a replacement reroll of the same die. */
+  roll?: { result: number; sides: number; seat?: number; heroName?: string; reroll: boolean };
 }
 
 const CARD_ID_BY_NAME = (() => {
@@ -26,6 +28,8 @@ const CARD_ID_BY_NAME = (() => {
     .map(([name, cardId]) => ({ name, cardId }))
     .sort((a, b) => b.name.length - a.name.length);
 })();
+
+const ROLL_MESSAGE_IDS = new Set(["engine.log.die.rolled", "engine.log.die.rerolled"]);
 
 const CARD_PRINTING_TAG = /⟦([A-Z0-9]+)⟧/g;
 
@@ -324,21 +328,50 @@ export function detectDeckCardEvents(previous: GameView, current: GameView): Dec
     });
   }
 
-  // Die rolls are public information announced in the log ("Rhinar rolls 4",
-  // "the die is rerolled: 2"); surface the outcome as a toast.
-  for (const line of newLogLines) {
-    if (/^.+ rolls \d+$/.test(line) || /^the die is rerolled: \d+$/.test(line)) {
-      events.push({ kind: "roll", cardIds: [], label: line });
+  // Die rolls are public information. Structured entries carry the result,
+  // seat, and sides; legacy views fall back to the English log line.
+  if (!current.logEntries) {
+    for (const line of newLogLines) {
+      const rolled = /^(.+) rolls (\d+)$/.exec(line);
+      const rerolled = /^the die is rerolled: (\d+)$/.exec(line);
+      if (!rolled && !rerolled) continue;
+      const result = Number(rolled?.[2] ?? rerolled?.[1]);
+      const seat = current.players.find((player) => player.heroName === rolled?.[1])?.seat;
+      events.push({
+        kind: "roll",
+        cardIds: [],
+        label: line,
+        roll: { result, sides: 6, seat, heroName: rolled?.[1], reroll: !rolled },
+      });
     }
   }
 
-  // Revealed secret numbers come from structured log metadata; sequences keep
-  // undo and resync from replaying an earlier reveal.
+  // Revealed secret numbers and die rolls come from structured log metadata;
+  // sequences keep undo and resync from replaying an earlier reveal.
   const previousSequence = (previous.logEntries ?? []).reduce((highest, entry) => (
     "sequence" in entry ? Math.max(highest, entry.sequence) : highest
   ), 0);
   for (const entry of previous.logEntries ? current.logEntries ?? [] : []) {
     if (!("sequence" in entry) || entry.sequence <= previousSequence) continue;
+    // Card logs restate an engine roll ("Bad Beats: rolled 5"); only the
+    // engine's own roll and reroll entries mark a physical die being thrown.
+    if (entry.event?.kind === "roll") {
+      if (!ROLL_MESSAGE_IDS.has(entry.message.id)) continue;
+      const seat = entry.event.seat;
+      events.push({
+        kind: "roll",
+        cardIds: [],
+        label: entry.fallback,
+        roll: {
+          result: entry.event.result,
+          sides: entry.event.sides ?? 6,
+          seat,
+          heroName: seat === undefined ? undefined : current.players[seat]?.heroName,
+          reroll: entry.message.id === "engine.log.die.rerolled",
+        },
+      });
+      continue;
+    }
     if (entry.event?.kind !== "numbers-revealed") continue;
     events.push({
       kind: "numbers",
