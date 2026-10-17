@@ -229,6 +229,21 @@ describe("locale catalogs", () => {
       { id: "lobby.deck.heroAndCount" },
       { hero: "Bravo", count: 0 },
     )).toBe("Bravo · 0 cartas");
+    expect(intl.formatMessage({ id: "game.chain.onHit" })).toBe("On hit");
+    expect(intl.formatMessage({ id: "game.chain.linksShort" })).toBe("Links");
+    expect(intl.formatMessage({ id: "game.chain.title" })).toBe("Combat Chain");
+    expect(intl.formatMessage({ id: "game.timing.actionPhase" })).toBe("ACTION PHASE");
+    expect(intl.formatMessage({ id: "game.timing.layerStep" })).toBe("LAYER STEP");
+    expect(intl.formatMessage({ id: "game.timing.damageStep" })).toBe("DAMAGE STEP");
+    expect(intl.formatMessage({ id: "game.zone.graveyard" })).toBe("Cemitério");
+    expect(intl.formatMessage({ id: "game.zone.arsenal" })).toBe("Arsenal");
+    expect(intl.formatMessage({ id: "game.decision.bloodMode.goAgain" }))
+      .toBe("Ataques recebem go again");
+    expect(intl.formatMessage({ id: "engine.effect.part.dominate" })).toBe("dominate");
+    expect(intl.formatMessage(
+      { id: "engine.log.card.destroyed" },
+      { card: "Nimble Strike" },
+    )).toBe("A carta Nimble Strike é destruída");
   });
 
   it("separates Chinese text from interpolated names with a space", () => {

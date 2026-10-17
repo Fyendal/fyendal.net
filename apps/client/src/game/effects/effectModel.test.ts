@@ -105,6 +105,28 @@ describe("effectText", () => {
     });
   });
 
+  it("renders them in Brazilian Portuguese with gender agreement", () => {
+    expect(effectText(createTestIntl("pt-BR"), draconicDiscount)).toEqual({
+      summary: "+2 de poder, custa 1 a menos para jogar ou ativar",
+      duration: "próximo ataque Draconic nesta combat chain",
+    });
+    expect(effectText(createTestIntl("pt-BR"), effect({
+      durationMessage: {
+        id: "engine.effect.duration.next.subject",
+        values: {
+          noun: "actionCard",
+          typeCount: 0,
+          color: "red",
+          via: "arsenal",
+          keyword: "none",
+          limit: "none",
+          target: "none",
+          subject: { kind: "term", id: "engine.effect.subject.one" },
+        },
+      },
+    })).duration).toBe("próxima carta de action vermelha do arsenal");
+  });
+
   it("renders a plural subject with every qualifier in card-text order", () => {
     const stealthBlades = effect({
       durationMessage: {
@@ -127,5 +149,7 @@ describe("effectText", () => {
 
     expect(effectText(createTestIntl("en"), stealthBlades).duration)
       .toBe("red sword or dagger attacks with stealth with cost 2 or less this turn");
+    expect(effectText(createTestIntl("pt-BR"), stealthBlades).duration)
+      .toBe("ataques sword ou dagger vermelhos com stealth com custo 2 ou menos neste turno");
   });
 });
