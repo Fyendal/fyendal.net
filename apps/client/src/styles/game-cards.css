@@ -434,6 +434,20 @@
   width: 9px;
   height: auto;
 }
+.mat-half .card {
+  transition:
+    transform 240ms cubic-bezier(.45, 0, .25, 1),
+    filter 160ms ease-out;
+}
+.mat-half .card-tapped {
+  transition:
+    transform 340ms cubic-bezier(.5, 0, .25, 1.3),
+    filter 200ms ease-in 220ms;
+}
+.table[data-motion-preference="reduced"] .mat-half .card { transition: none; }
+@media (prefers-reduced-motion: reduce) {
+  .table:not([data-motion-preference="full"]) .mat-half .card { transition: none; }
+}
 /* Playable from another zone (banish/graveyard), shown in hand faded. Fade
    the card contents rather than the frame so its hover tooltip stays crisp. */
 .card-ghost > :not(.card-explanation) { opacity: 0.6; }
