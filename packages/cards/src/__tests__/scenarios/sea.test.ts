@@ -1469,4 +1469,42 @@ describe("SEA — rules regression coverage", () => {
       .settle();
     expect(countOnBoard(g, 0, "gold|0")).toBe(2);
   });
+  it("Hook and Call in the Big Guns fill New Horizon's empty additional arsenal zone", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          heroKey: "lexi, livewire|0",
+          equipment: { head: "new horizon|0" },
+          arsenal: ["head shot|1"],
+          hand: ["hook|3"],
+          deck: ["swift shot|1"],
+        },
+        { hero: "dorinthea" },
+      ],
+    });
+
+    g.play("hook|3")
+      .chooseCard("swift shot|1")
+      .expectInZone(0, "head shot|1", "arsenal")
+      .expectInZone(0, "swift shot|1", "arsenal");
+    expect(g.state.players[0]!.arsenal[1]?.arsenalSlot).toBe(1);
+
+    const big = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          heroKey: "lexi, livewire|0",
+          equipment: { head: "new horizon|0" },
+          arsenal: ["head shot|1"],
+          hand: ["call in the big guns|2", "swift shot|1"],
+          resources: 1,
+        },
+        { hero: "dorinthea" },
+      ],
+    });
+
+    big.play("call in the big guns|2").chooseCard("swift shot|1").expectInZone(0, "swift shot|1", "arsenal");
+    expect(big.state.players[0]!.arsenal).toHaveLength(2);
+  });
 });

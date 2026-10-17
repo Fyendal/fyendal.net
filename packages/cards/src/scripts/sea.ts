@@ -502,7 +502,7 @@ function topArrowSetup(grant: "power" | "go-again" | "overpower"): CardScript {
       const top = ctx.player(ctx.seat).deck[0];
       if (!top) return;
       ctx.lookAt(top.instanceId);
-      if (!isArrow(ctx, top) || ctx.player(ctx.seat).arsenal.length) return;
+      if (!isArrow(ctx, top) || !ctx.hasArsenalSpace()) return;
       ctx.requestCardChoice(
         `top-arrow:${grant}`,
         decisionPrompt(`${ctx.data.name}: put the arrow face-up into your arsenal?`, "card.sea.arrow.top.arsenal", {
@@ -527,7 +527,7 @@ function callBigGuns(power: number): CardScript {
     onPlay(ctx) {
       buffNextAttack(ctx, { attack: power, appliesToSubtype: "arrow" });
       const arrows = ctx.player(ctx.seat).hand.filter((card) => isArrow(ctx, card));
-      if (!ctx.player(ctx.seat).arsenal.length && arrows.length) {
+      if (ctx.hasArsenalSpace() && arrows.length) {
         ctx.requestCardChoice(
           "call-big-guns",
           decisionPrompt("Put an arrow from your hand face-up into your arsenal?", "card.sea.arrow.hand.arsenal", {
@@ -1015,7 +1015,7 @@ export const sea: Record<string, CardScript> = {
       goAgain: true,
       destroySelfCost: true,
       canActivate: (ctx) =>
-        !ctx.player(ctx.seat).arsenal.length && ctx.player(ctx.seat).hand.some((card) => isArrow(ctx, card)),
+        ctx.hasArsenalSpace() && ctx.player(ctx.seat).hand.some((card) => isArrow(ctx, card)),
       onActivate(ctx) {
         const arrows = ctx.player(ctx.seat).hand.filter((card) => isArrow(ctx, card));
         ctx.requestCardChoice(
@@ -2354,7 +2354,7 @@ Object.assign(sea, {
       goAgain: true,
       tap: true,
       canActivate: (ctx: ScriptCtx) =>
-        !ctx.player(ctx.seat).arsenal.length && ctx.player(ctx.seat).hand.some((card) => isArrow(ctx, card)),
+        ctx.hasArsenalSpace() && ctx.player(ctx.seat).hand.some((card) => isArrow(ctx, card)),
       onActivate(ctx: ScriptCtx) {
         const arrows = ctx.player(ctx.seat).hand.filter((card) => isArrow(ctx, card));
         ctx.requestCardChoice(
