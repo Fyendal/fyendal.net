@@ -182,6 +182,29 @@ describe("triggered abilities declare their targets before priority", () => {
     g.declareTarget("spider's bite|0").expectLife(1, life - 1);
   });
 
+  it("Pain in the Backside may declare a dagger attack card on an earlier chain link", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          weapons: ["spider's bite|0"],
+          equipment: NO_EQUIPMENT,
+          hand: ["kiss of death|1", "pain in the backside|1"],
+        },
+        { hero: "dorinthea", weapons: [], hand: [], equipment: NO_EQUIPMENT },
+      ],
+    });
+    g.state.players[0]!.actionPoints = 2;
+
+    g.play("kiss of death|1").blockWith().settle();
+    const kissId = g.state.chain[0]!.attackingCard.instanceId;
+    g.play("pain in the backside|1").blockWith().settle();
+    expectDeclaring(g, "On hit", [...instanceIds(g, 0, "weapons", "spider's bite|0"), kissId]);
+    const life = g.state.players[1]!.life;
+    // One damage from Kiss of Death, which has hit and makes the hero lose 1{h}.
+    g.declareTarget(String(kissId)).settle().expectLife(1, life - 2);
+  });
+
   it("Runic Reclamation declares an aura the hit hero controls", () => {
     const g = scenario({
       seats: [

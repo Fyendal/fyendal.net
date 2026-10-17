@@ -250,6 +250,23 @@ function daggerOptions(ctx: ScriptCtx): number[] {
     .map((card) => card.instanceId);
 }
 
+/** Every dagger you control: weapons, dagger permanents, and dagger attack
+ * cards still on the combat chain. */
+function controlledDaggerOptions(ctx: ScriptCtx): number[] {
+  const player = ctx.player(ctx.seat);
+  const candidates = [
+    ...player.weapons,
+    ...player.board,
+    ...ctx.state.chain
+      .filter((link) => link.attacker === ctx.seat && link.flags.attackGone !== true)
+      .map((link) => link.attackingCard),
+  ];
+  return candidates
+    .filter((card) => isDagger(ctx, card))
+    .map((card) => card.instanceId)
+    .filter((instanceId, index, ids) => ids.indexOf(instanceId) === index);
+}
+
 function offLinkDaggerOptions(ctx: ScriptCtx): number[] {
   const activeAttackId = ctx.link?.attackingCard.instanceId;
   return daggerOptions(ctx).filter((instanceId) => instanceId !== activeAttackId);
@@ -1706,12 +1723,13 @@ Object.assign(hnt, {
   "pain in the backside|1": {
     canTriggerOnHit: (ctx) => ctx.link?.targetAllyId === undefined,
     onHitTarget: {
-      options: daggerOptions,
+      options: controlledDaggerOptions,
       prompt: () => decisionPrompt("Choose a dagger", "card.hnt.dagger.choose"),
     },
     onHit(ctx) {
-      if (ctx.playTargetInstanceId === undefined) return;
-      ctx.dealDamage(opponentSeat(ctx), 1, { sourceInstanceId: ctx.playTargetInstanceId, countsAsHit: true });
+      const id = ctx.playTargetInstanceId;
+      if (id === undefined || !controlledDaggerOptions(ctx).includes(id)) return;
+      ctx.dealDamage(opponentSeat(ctx), 1, { sourceInstanceId: id, countsAsHit: true });
     },
   },
   "throw dagger|3": {
