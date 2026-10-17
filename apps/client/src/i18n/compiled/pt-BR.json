@@ -2,155 +2,155 @@
   "account.badge.change": [
     {
       "type": 0,
-      "value": "Change badge"
+      "value": "Trocar emblema"
     }
   ],
   "account.badge.description": [
     {
       "type": 0,
-      "value": "Choose one earned badge to display before your username, or hide badges."
+      "value": "Escolha um emblema conquistado para exibir antes do seu nome de usuário, ou oculte os emblemas."
     }
   ],
   "account.badge.displayed": [
     {
       "type": 0,
-      "value": "Displayed badge"
+      "value": "Emblema exibido"
     }
   ],
   "account.badge.earlyTester.description": [
     {
       "type": 0,
-      "value": "Awarded to players who joined Fyendal during early testing."
+      "value": "Concedido a jogadores que entraram no Fyendal durante os testes iniciais."
     }
   ],
   "account.badge.earlyTester.name": [
     {
       "type": 0,
-      "value": "Early Tester"
+      "value": "Testes Iniciais"
     }
   ],
   "account.badge.imageAlt": [
     {
-      "type": 1,
-      "value": "name"
+      "type": 0,
+      "value": "Emblema "
     },
     {
-      "type": 0,
-      "value": " badge"
+      "type": 1,
+      "value": "name"
     }
   ],
   "account.badge.loading": [
     {
       "type": 0,
-      "value": "Loading badges…"
+      "value": "Carregando emblemas…"
     }
   ],
   "account.badge.none": [
     {
       "type": 0,
-      "value": "No badge"
+      "value": "Sem emblema"
     }
   ],
   "account.badge.none.description": [
     {
       "type": 0,
-      "value": "Your username appears without a badge."
+      "value": "Seu nome de usuário aparece sem emblema."
     }
   ],
   "account.badge.save": [
     {
       "type": 0,
-      "value": "Save badge"
+      "value": "Salvar emblema"
     }
   ],
   "account.badge.saving": [
     {
       "type": 0,
-      "value": "Saving…"
+      "value": "Salvando…"
     }
   ],
   "account.badge.title": [
     {
       "type": 0,
-      "value": "Player badge"
+      "value": "Emblema de jogador"
     }
   ],
   "account.badge.updated": [
     {
       "type": 0,
-      "value": "Displayed badge updated."
+      "value": "Emblema exibido atualizado."
     }
   ],
   "account.currentPassword": [
     {
       "type": 0,
-      "value": "Current password"
+      "value": "Senha atual"
     }
   ],
   "account.currentPasswordPlaceholder": [
     {
       "type": 0,
-      "value": "Current password"
+      "value": "Senha atual"
     }
   ],
   "account.delete.action": [
     {
       "type": 0,
-      "value": "Delete account"
+      "value": "Excluir conta"
     }
   ],
   "account.delete.confirm": [
     {
       "type": 0,
-      "value": "Delete your Fyendal account, saved decks, retained replays, bug reports, sessions, and active rooms from the active service? This cannot be undone."
+      "value": "Excluir do serviço ativo sua conta do Fyendal, decks salvos, replays mantidos, relatos de bug, sessões e salas ativas? Isso não pode ser desfeito."
     }
   ],
   "account.delete.deleting": [
     {
       "type": 0,
-      "value": "Deleting…"
+      "value": "Excluindo…"
     }
   ],
   "account.delete.description": [
     {
       "type": 0,
-      "value": "This permanently removes your account, sessions, saved decks, retained replays, bug reports, and active rooms. Backup copies expire according to the retention policy."
+      "value": "Isso remove permanentemente sua conta, sessões, decks salvos, replays mantidos, relatos de bug e salas ativas. As cópias de backup expiram de acordo com a política de retenção."
     }
   ],
   "account.delete.title": [
     {
       "type": 0,
-      "value": "Delete account"
+      "value": "Excluir conta"
     }
   ],
   "account.export.description": [
     {
       "type": 0,
-      "value": "Download your account details, saved decklists, room membership records, retained replays, and bug-report references as JSON."
+      "value": "Baixe os dados da sua conta, listas de deck salvas, registros de participação em salas, replays mantidos e referências de relatos de bug em JSON."
     }
   ],
   "account.export.download": [
     {
       "type": 0,
-      "value": "Download account data"
+      "value": "Baixar dados da conta"
     }
   ],
   "account.export.preparing": [
     {
       "type": 0,
-      "value": "Preparing…"
+      "value": "Preparando…"
     }
   ],
   "account.export.title": [
     {
       "type": 0,
-      "value": "Export your data"
+      "value": "Exportar seus dados"
     }
   ],
   "account.signedInAs": [
     {
       "type": 0,
-      "value": "Signed in as "
+      "value": "Sessão iniciada como "
     },
     {
       "type": 8,
@@ -170,145 +170,145 @@
   "account.title": [
     {
       "type": 0,
-      "value": "Account"
+      "value": "Conta"
     }
   ],
   "achievements.againsttheodds.description": [
     {
       "type": 0,
-      "value": "Win after trailing by at least 15 life once both players have completed a turn after the opening turn."
+      "value": "Vença depois de estar pelo menos 15 de vida atrás, quando ambos os jogadores já tiverem completado um turno após o turno de abertura."
     }
   ],
   "achievements.againsttheodds.name": [
     {
       "type": 0,
-      "value": "Against the Odds"
+      "value": "Contra Todas as Probabilidades"
     }
   ],
   "achievements.beatbravo.description": [
     {
       "type": 0,
-      "value": "Defeat Bravo Bot in a practice game."
+      "value": "Derrote o Bravo Bot em um jogo de treino."
     }
   ],
   "achievements.beatbravo.name": [
     {
       "type": 0,
-      "value": "Beat Bravo Bot"
+      "value": "Derrote o Bravo Bot"
     }
   ],
   "achievements.beatbriar.description": [
     {
       "type": 0,
-      "value": "Defeat Briar Bot in a practice game."
+      "value": "Derrote o Briar Bot em um jogo de treino."
     }
   ],
   "achievements.beatbriar.name": [
     {
       "type": 0,
-      "value": "Beat Briar Bot"
+      "value": "Derrote o Briar Bot"
     }
   ],
   "achievements.beatcindra.description": [
     {
       "type": 0,
-      "value": "Defeat Cindra Bot in a practice game."
+      "value": "Derrote o Cindra Bot em um jogo de treino."
     }
   ],
   "achievements.beatcindra.name": [
     {
       "type": 0,
-      "value": "Beat Cindra Bot"
+      "value": "Derrote o Cindra Bot"
     }
   ],
   "achievements.beathala.description": [
     {
       "type": 0,
-      "value": "Defeat Hala Bot in a practice game."
+      "value": "Derrote o Hala Bot em um jogo de treino."
     }
   ],
   "achievements.beathala.name": [
     {
       "type": 0,
-      "value": "Beat Hala Bot"
+      "value": "Derrote o Hala Bot"
     }
   ],
   "achievements.beatira.description": [
     {
       "type": 0,
-      "value": "Defeat Ira Bot in a practice game."
+      "value": "Derrote o Ira Bot em um jogo de treino."
     }
   ],
   "achievements.beatira.name": [
     {
       "type": 0,
-      "value": "Beat Ira Bot"
+      "value": "Derrote o Ira Bot"
     }
   ],
   "achievements.beatjarl.description": [
     {
       "type": 0,
-      "value": "Defeat Jarl Bot in a practice game."
+      "value": "Derrote o Jarl Bot em um jogo de treino."
     }
   ],
   "achievements.beatjarl.name": [
     {
       "type": 0,
-      "value": "Beat Jarl Bot"
+      "value": "Derrote o Jarl Bot"
     }
   ],
   "achievements.beatkayo.description": [
     {
       "type": 0,
-      "value": "Defeat Kayo Bot in a practice game."
+      "value": "Derrote o Kayo Bot em um jogo de treino."
     }
   ],
   "achievements.beatkayo.name": [
     {
       "type": 0,
-      "value": "Beat Kayo Bot"
+      "value": "Derrote o Kayo Bot"
     }
   ],
   "achievements.beatlevia.description": [
     {
       "type": 0,
-      "value": "Defeat Levia Bot in a practice game."
+      "value": "Derrote o Levia Bot em um jogo de treino."
     }
   ],
   "achievements.beatlevia.name": [
     {
       "type": 0,
-      "value": "Beat Levia Bot"
+      "value": "Derrote o Levia Bot"
     }
   ],
   "achievements.beatstarvo.description": [
     {
       "type": 0,
-      "value": "Defeat Starvo Bot in a practice game."
+      "value": "Derrote o Starvo Bot em um jogo de treino."
     }
   ],
   "achievements.beatstarvo.name": [
     {
       "type": 0,
-      "value": "Beat Starvo Bot"
+      "value": "Derrote o Starvo Bot"
     }
   ],
   "achievements.bigturn.description": [
     {
       "type": 0,
-      "value": "Deal more than 25 damage to the opposing hero during one of your turns in a completed game."
+      "value": "Cause mais de 25 de dano ao herói oponente em um dos seus turnos em um jogo concluído."
     }
   ],
   "achievements.bigturn.name": [
     {
       "type": 0,
-      "value": "Big Turn"
+      "value": "Turno Gigante"
     }
   ],
   "achievements.earnedOn": [
     {
       "type": 0,
-      "value": "Unlocked "
+      "value": "Desbloqueada em "
     },
     {
       "type": 1,
@@ -318,211 +318,211 @@
   "achievements.emptytank.description": [
     {
       "type": 0,
-      "value": "Win with no cards left in your deck."
+      "value": "Vença sem nenhuma carta restante no seu deck."
     }
   ],
   "achievements.emptytank.name": [
     {
       "type": 0,
-      "value": "Empty Tank"
+      "value": "Tanque Vazio"
     }
   ],
   "achievements.filter.all": [
     {
       "type": 0,
-      "value": "All"
+      "value": "Todas"
     }
   ],
   "achievements.filter.empty": [
     {
       "type": 0,
-      "value": "No achievements in this view."
+      "value": "Nenhuma conquista nesta visualização."
     }
   ],
   "achievements.filter.label": [
     {
       "type": 0,
-      "value": "Filter achievements"
+      "value": "Filtrar conquistas"
     }
   ],
   "achievements.filter.locked": [
     {
       "type": 0,
-      "value": "Locked"
+      "value": "Bloqueadas"
     }
   ],
   "achievements.filter.unlocked": [
     {
       "type": 0,
-      "value": "Unlocked"
+      "value": "Desbloqueadas"
     }
   ],
   "achievements.firstbotwin.description": [
     {
       "type": 0,
-      "value": "Win a practice game against any bot."
+      "value": "Vença um jogo de treino contra qualquer bot."
     }
   ],
   "achievements.firstbotwin.name": [
     {
       "type": 0,
-      "value": "First Bot Win"
+      "value": "Primeira Vitória contra Bot"
     }
   ],
   "achievements.firstpvpwin.description": [
     {
       "type": 0,
-      "value": "Win a game against another player."
+      "value": "Vença um jogo contra outro jogador."
     }
   ],
   "achievements.firstpvpwin.name": [
     {
       "type": 0,
-      "value": "First PvP Win"
+      "value": "Primeira Vitória PvP"
     }
   ],
   "achievements.firstvictory.description": [
     {
       "type": 0,
-      "value": "Win your first game."
+      "value": "Vença seu primeiro jogo."
     }
   ],
   "achievements.firstvictory.name": [
     {
       "type": 0,
-      "value": "First Victory"
+      "value": "Primeira Vitória"
     }
   ],
   "achievements.fivestriketurn.description": [
     {
       "type": 0,
-      "value": "Make at least 5 attacks during one of your turns in a completed game."
+      "value": "Faça pelo menos 5 ataques em um dos seus turnos em um jogo concluído."
     }
   ],
   "achievements.fivestriketurn.name": [
     {
       "type": 0,
-      "value": "Five-Strike Turn"
+      "value": "Turno de Cinco Golpes"
     }
   ],
   "achievements.footnote": [
     {
       "type": 0,
-      "value": "Percentages compare players who have played a game. Achievements begin with games completed after launch."
+      "value": "As porcentagens comparam jogadores que já jogaram uma partida. As conquistas contam a partir de jogos concluídos após o lançamento."
     }
   ],
   "achievements.fullhand.description": [
     {
       "type": 0,
-      "value": "Have at least 6 cards in hand at once during a completed game."
+      "value": "Tenha pelo menos 6 cartas na mão ao mesmo tempo em um jogo concluído."
     }
   ],
   "achievements.fullhand.name": [
     {
       "type": 0,
-      "value": "Full Hand"
+      "value": "Mão Cheia"
     }
   ],
   "achievements.group.bots": [
     {
       "type": 0,
-      "value": "Bot opponents"
+      "value": "Oponentes bot"
     }
   ],
   "achievements.group.challenges": [
     {
       "type": 0,
-      "value": "Challenges"
+      "value": "Desafios"
     }
   ],
   "achievements.group.first": [
     {
       "type": 0,
-      "value": "First steps"
+      "value": "Primeiros passos"
     }
   ],
   "achievements.healthyvictory.description": [
     {
       "type": 0,
-      "value": "Win a game with more than 20 life remaining."
+      "value": "Vença um jogo com mais de 20 de vida restante."
     }
   ],
   "achievements.healthyvictory.name": [
     {
       "type": 0,
-      "value": "Fit for Another Round"
+      "value": "Em Forma para Outra"
     }
   ],
   "achievements.intro": [
     {
       "type": 0,
-      "value": "Your wins, standout turns, and opponents defeated in legal card-pool games."
+      "value": "Suas vitórias, turnos marcantes e oponentes derrotados em jogos com pool de cartas legal."
     }
   ],
   "achievements.ironwall.description": [
     {
       "type": 0,
-      "value": "Block at least 20 damage during one opponent turn in a completed game."
+      "value": "Bloqueie pelo menos 20 de dano em um turno do oponente em um jogo concluído."
     }
   ],
   "achievements.ironwall.name": [
     {
       "type": 0,
-      "value": "Iron Wall"
+      "value": "Muralha de Ferro"
     }
   ],
   "achievements.lastlife.description": [
     {
       "type": 0,
-      "value": "Win a game with exactly 1 life remaining."
+      "value": "Vença um jogo com exatamente 1 de vida restante."
     }
   ],
   "achievements.lastlife.name": [
     {
       "type": 0,
-      "value": "By a Thread"
+      "value": "Por um Fio"
     }
   ],
   "achievements.loadError": [
     {
       "type": 0,
-      "value": "Could not load achievements."
+      "value": "Não foi possível carregar as conquistas."
     }
   ],
   "achievements.locked": [
     {
       "type": 0,
-      "value": "Locked"
+      "value": "Bloqueada"
     }
   ],
   "achievements.longgame.description": [
     {
       "type": 0,
-      "value": "Win on turn 15 or later."
+      "value": "Vença no turno 15 ou depois."
     }
   ],
   "achievements.longgame.name": [
     {
       "type": 0,
-      "value": "The Long Game"
+      "value": "O Jogo Longo"
     }
   ],
   "achievements.matchEarned": [
     {
       "type": 0,
-      "value": "Achievements earned this match"
+      "value": "Conquistas obtidas nesta partida"
     }
   ],
   "achievements.overkill.description": [
     {
       "type": 0,
-      "value": "Win a game with your opponent at −10 life or lower."
+      "value": "Vença um jogo com seu oponente com −10 de vida ou menos."
     }
   ],
   "achievements.overkill.name": [
     {
       "type": 0,
-      "value": "Overkill"
+      "value": "Exagero"
     }
   ],
   "achievements.progress": [
@@ -532,7 +532,7 @@
     },
     {
       "type": 0,
-      "value": " of "
+      "value": " de "
     },
     {
       "type": 1,
@@ -540,7 +540,7 @@
     },
     {
       "type": 0,
-      "value": " achievements unlocked"
+      "value": " conquistas desbloqueadas"
     }
   ],
   "achievements.rarity": [
@@ -550,7 +550,7 @@
     },
     {
       "type": 0,
-      "value": "% of players have earned this"
+      "value": "% dos jogadores conquistaram isto"
     }
   ],
   "achievements.rarityCompact": [
@@ -560,61 +560,61 @@
     },
     {
       "type": 0,
-      "value": "% of players"
+      "value": "% dos jogadores"
     }
   ],
   "achievements.rarityCompactRare": [
     {
       "type": 0,
-      "value": "<0.1% of players"
+      "value": "<0,1% dos jogadores"
     }
   ],
   "achievements.rarityRare": [
     {
       "type": 0,
-      "value": "Less than 0.1% of players have earned this"
+      "value": "Menos de 0,1% dos jogadores conquistaram isto"
     }
   ],
   "achievements.relentlessvictory.description": [
     {
       "type": 0,
-      "value": "Win a game while averaging more than 16 damage to the opposing hero per post-opening turn."
+      "value": "Vença um jogo com média de mais de 16 de dano ao herói oponente por turno após a abertura."
     }
   ],
   "achievements.relentlessvictory.name": [
     {
       "type": 0,
-      "value": "Relentless Victory"
+      "value": "Vitória Implacável"
     }
   ],
   "achievements.retry": [
     {
       "type": 0,
-      "value": "Retry"
+      "value": "Tentar novamente"
     }
   ],
   "achievements.secondwind.description": [
     {
       "type": 0,
-      "value": "Gain at least 10 life during a game and win."
+      "value": "Ganhe pelo menos 10 de vida durante um jogo e vença."
     }
   ],
   "achievements.secondwind.name": [
     {
       "type": 0,
-      "value": "Second Wind"
+      "value": "Segundo Fôlego"
     }
   ],
   "achievements.title": [
     {
       "type": 0,
-      "value": "Achievements"
+      "value": "Conquistas"
     }
   ],
   "achievements.toast.dismiss": [
     {
       "type": 0,
-      "value": "Dismiss achievement notification"
+      "value": "Dispensar notificação de conquista"
     }
   ],
   "achievements.toast.more": [
@@ -628,37 +628,37 @@
     },
     {
       "type": 0,
-      "value": " more"
+      "value": " outras"
     }
   ],
   "achievements.toast.title": [
     {
       "type": 0,
-      "value": "Achievement unlocked"
+      "value": "Conquista desbloqueada"
     }
   ],
   "achievements.toast.viewAll": [
     {
       "type": 0,
-      "value": "View all"
+      "value": "Ver todas"
     }
   ],
   "achievements.unlocked": [
     {
       "type": 0,
-      "value": "Unlocked"
+      "value": "Desbloqueada"
     }
   ],
   "achievements.viewAll": [
     {
       "type": 0,
-      "value": "View all achievements"
+      "value": "Ver todas as conquistas"
     }
   ],
   "auth.consent": [
     {
       "type": 0,
-      "value": "I agree to the "
+      "value": "Concordo com os "
     },
     {
       "type": 8,
@@ -666,13 +666,13 @@
       "children": [
         {
           "type": 0,
-          "value": "Terms"
+          "value": "Termos"
         }
       ]
     },
     {
       "type": 0,
-      "value": " and acknowledge the "
+      "value": " e reconheço a "
     },
     {
       "type": 8,
@@ -680,7 +680,7 @@
       "children": [
         {
           "type": 0,
-          "value": "Privacy Policy"
+          "value": "Política de Privacidade"
         }
       ]
     },
@@ -692,91 +692,91 @@
   "auth.createAccount": [
     {
       "type": 0,
-      "value": "Create account"
+      "value": "Criar conta"
     }
   ],
   "auth.creatingAccount": [
     {
       "type": 0,
-      "value": "Creating account…"
+      "value": "Criando conta…"
     }
   ],
   "auth.error.invalidUsername": [
     {
       "type": 0,
-      "value": "Username must be 3–20 characters using letters, numbers, or _"
+      "value": "O nome de usuário deve ter de 3 a 20 caracteres, usando letras, números ou _"
     }
   ],
   "auth.error.missingPassword": [
     {
       "type": 0,
-      "value": "Enter your password"
+      "value": "Digite sua senha"
     }
   ],
   "auth.error.missingUsername": [
     {
       "type": 0,
-      "value": "Enter your username"
+      "value": "Digite seu nome de usuário"
     }
   ],
   "auth.error.shortPassword": [
     {
       "type": 0,
-      "value": "Password must be at least 8 characters"
+      "value": "A senha deve ter pelo menos 8 caracteres"
     }
   ],
   "auth.error.termsRequired": [
     {
       "type": 0,
-      "value": "Agree to the Terms of Service to create an account."
+      "value": "Concorde com os Termos de Serviço para criar uma conta."
     }
   ],
   "auth.loggingIn": [
     {
       "type": 0,
-      "value": "Logging in…"
+      "value": "Entrando…"
     }
   ],
   "auth.login": [
     {
       "type": 0,
-      "value": "Log in"
+      "value": "Entrar"
     }
   ],
   "auth.password": [
     {
       "type": 0,
-      "value": "Password"
+      "value": "Senha"
     }
   ],
   "auth.passwordLoginPlaceholder": [
     {
       "type": 0,
-      "value": "Your password"
+      "value": "Sua senha"
     }
   ],
   "auth.passwordRegisterPlaceholder": [
     {
       "type": 0,
-      "value": "8 or more characters"
+      "value": "8 caracteres ou mais"
     }
   ],
   "auth.register": [
     {
       "type": 0,
-      "value": "Register"
+      "value": "Cadastrar"
     }
   ],
   "auth.username": [
     {
       "type": 0,
-      "value": "Username"
+      "value": "Nome de usuário"
     }
   ],
   "auth.usernameHint": [
     {
       "type": 0,
-      "value": "3–20 letters, numbers, or underscores"
+      "value": "3 a 20 letras, números ou sublinhados"
     }
   ],
   "brand.subtitle": [
@@ -18399,31 +18399,31 @@
   "common.all": [
     {
       "type": 0,
-      "value": "All"
+      "value": "Todos"
     }
   ],
   "common.back": [
     {
       "type": 0,
-      "value": "Back"
+      "value": "Voltar"
     }
   ],
   "common.cancel": [
     {
       "type": 0,
-      "value": "Cancel"
+      "value": "Cancelar"
     }
   ],
   "common.close": [
     {
       "type": 0,
-      "value": "Close"
+      "value": "Fechar"
     }
   ],
   "common.closeNamed": [
     {
       "type": 0,
-      "value": "Close "
+      "value": "Fechar "
     },
     {
       "type": 1,
@@ -18433,19 +18433,19 @@
   "common.connection.connected": [
     {
       "type": 0,
-      "value": "Connected"
+      "value": "Conectado"
     }
   ],
   "common.connection.disconnected": [
     {
       "type": 0,
-      "value": "Not connected"
+      "value": "Sem conexão"
     }
   ],
   "common.connection.reconnecting": [
     {
       "type": 0,
-      "value": "Reconnecting…"
+      "value": "Reconectando…"
     }
   ],
   "common.deck": [
@@ -18457,139 +18457,139 @@
   "common.dismiss": [
     {
       "type": 0,
-      "value": "Dismiss"
+      "value": "Dispensar"
     }
   ],
   "common.done": [
     {
       "type": 0,
-      "value": "Done"
+      "value": "Concluir"
     }
   ],
   "common.endGame": [
     {
       "type": 0,
-      "value": "End game"
+      "value": "Encerrar jogo"
     }
   ],
   "common.format": [
     {
       "type": 0,
-      "value": "Format"
+      "value": "Formato"
     }
   ],
   "common.fullscreen.enter": [
     {
       "type": 0,
-      "value": "Enter full screen"
+      "value": "Entrar em tela cheia"
     }
   ],
   "common.fullscreen.exit": [
     {
       "type": 0,
-      "value": "Exit full screen"
+      "value": "Sair da tela cheia"
     }
   ],
   "common.import": [
     {
       "type": 0,
-      "value": "Import"
+      "value": "Importar"
     }
   ],
   "common.leave": [
     {
       "type": 0,
-      "value": "Leave"
+      "value": "Sair"
     }
   ],
   "common.loading": [
     {
       "type": 0,
-      "value": "Loading…"
+      "value": "Carregando…"
     }
   ],
   "common.logOut": [
     {
       "type": 0,
-      "value": "Log out"
+      "value": "Sair"
     }
   ],
   "common.option.both": [
     {
       "type": 0,
-      "value": "Both"
+      "value": "Ambos"
     }
   ],
   "common.option.bottom": [
     {
       "type": 0,
-      "value": "Put on bottom"
+      "value": "Colocar no fundo"
     }
   ],
   "common.option.close": [
     {
       "type": 0,
-      "value": "Close"
+      "value": "Fechar"
     }
   ],
   "common.option.decline": [
     {
       "type": 0,
-      "value": "Decline"
+      "value": "Recusar"
     }
   ],
   "common.option.destroy": [
     {
       "type": 0,
-      "value": "Destroy"
+      "value": "Destruir"
     }
   ],
   "common.option.done": [
     {
       "type": 0,
-      "value": "Done"
+      "value": "Concluir"
     }
   ],
   "common.option.keep": [
     {
       "type": 0,
-      "value": "Keep"
+      "value": "Manter"
     }
   ],
   "common.option.no": [
     {
       "type": 0,
-      "value": "No"
+      "value": "Não"
     }
   ],
   "common.option.none": [
     {
       "type": 0,
-      "value": "None"
+      "value": "Nenhum"
     }
   ],
   "common.option.opponent": [
     {
       "type": 0,
-      "value": "Opponent"
+      "value": "Oponente"
     }
   ],
   "common.option.opposinghero": [
     {
       "type": 0,
-      "value": "Opposing hero"
+      "value": "Herói oponente"
     }
   ],
   "common.option.pass": [
     {
       "type": 0,
-      "value": "Pass"
+      "value": "Passar"
     }
   ],
   "common.option.pay": [
     {
       "type": 0,
-      "value": "Pay "
+      "value": "Pagar "
     },
     {
       "type": 1,
@@ -18599,37 +18599,37 @@
   "common.option.remove": [
     {
       "type": 0,
-      "value": "Remove"
+      "value": "Remover"
     }
   ],
   "common.option.reroll": [
     {
       "type": 0,
-      "value": "Reroll"
+      "value": "Rolar novamente"
     }
   ],
   "common.option.self": [
     {
       "type": 0,
-      "value": "Yourself"
+      "value": "Você"
     }
   ],
   "common.option.takedamage": [
     {
       "type": 0,
-      "value": "Take damage"
+      "value": "Receber dano"
     }
   ],
   "common.option.top": [
     {
       "type": 0,
-      "value": "Put on top"
+      "value": "Colocar no topo"
     }
   ],
   "common.option.usecost": [
     {
       "type": 0,
-      "value": "Use (pay "
+      "value": "Usar (pagar "
     },
     {
       "type": 1,
@@ -18643,13 +18643,13 @@
   "common.option.yes": [
     {
       "type": 0,
-      "value": "Yes"
+      "value": "Sim"
     }
   ],
   "common.option.yourhero": [
     {
       "type": 0,
-      "value": "Your hero"
+      "value": "Seu herói"
     }
   ],
   "common.shortcut.space": [
@@ -18659,13 +18659,13 @@
     },
     {
       "type": 0,
-      "value": " (Space)"
+      "value": " (Espaço)"
     }
   ],
   "common.spaceKey": [
     {
       "type": 0,
-      "value": "Space key"
+      "value": "Tecla Espaço"
     }
   ],
   "common.versusShort": [
@@ -18677,31 +18677,31 @@
   "connection.update.description": [
     {
       "type": 0,
-      "value": "Refresh this page to reconnect with the latest version."
+      "value": "Atualize esta página para reconectar com a versão mais recente."
     }
   ],
   "connection.update.refresh": [
     {
       "type": 0,
-      "value": "Refresh page"
+      "value": "Atualizar página"
     }
   ],
   "connection.update.title": [
     {
       "type": 0,
-      "value": "Update available"
+      "value": "Atualização disponível"
     }
   ],
   "discord.label": [
     {
       "type": 0,
-      "value": "Join the Fyendal Discord community (opens in a new tab)"
+      "value": "Entre na comunidade do Fyendal no Discord (abre em uma nova aba)"
     }
   ],
   "discord.title": [
     {
       "type": 0,
-      "value": "Join the Fyendal Discord"
+      "value": "Entre no Discord do Fyendal"
     }
   ],
   "engine.decision.activation.discard": [
@@ -25900,19 +25900,19 @@
   "footer.legal": [
     {
       "type": 0,
-      "value": "Fyendal is in no way affiliated with Legend Story Studios. Legend Story Studios®, Flesh and Blood™, and set names are trademarks of Legend Story Studios. Flesh and Blood characters, cards, logos, and art are property of Legend Story Studios. © Legend Story Studios."
+      "value": "O Fyendal não tem nenhuma afiliação com a Legend Story Studios. Legend Story Studios®, Flesh and Blood™ e os nomes das coleções são marcas registradas da Legend Story Studios. Personagens, cartas, logotipos e artes de Flesh and Blood são propriedade da Legend Story Studios. © Legend Story Studios."
     }
   ],
   "footer.privacy": [
     {
       "type": 0,
-      "value": "Privacy Policy"
+      "value": "Política de Privacidade"
     }
   ],
   "footer.terms": [
     {
       "type": 0,
-      "value": "Terms of Service"
+      "value": "Termos de Serviço"
     }
   ],
   "format.classicConstructed": [
@@ -29545,25 +29545,25 @@
   "history.filter.anyFormat": [
     {
       "type": 0,
-      "value": "All formats"
+      "value": "Todos os formatos"
     }
   ],
   "history.filter.anyHero": [
     {
       "type": 0,
-      "value": "All heroes"
+      "value": "Todos os heróis"
     }
   ],
   "history.filter.format": [
     {
       "type": 0,
-      "value": "Format"
+      "value": "Formato"
     }
   ],
   "history.filter.hero": [
     {
       "type": 0,
-      "value": "Hero"
+      "value": "Herói"
     }
   ],
   "history.heroes.games": [
@@ -29571,6 +29571,17 @@
       "type": 6,
       "value": "count",
       "options": {
+        "=0": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " jogos"
+            }
+          ]
+        },
         "one": {
           "value": [
             {
@@ -29578,7 +29589,7 @@
             },
             {
               "type": 0,
-              "value": " game"
+              "value": " jogo"
             }
           ]
         },
@@ -29589,7 +29600,7 @@
             },
             {
               "type": 0,
-              "value": " games"
+              "value": " jogos"
             }
           ]
         }
@@ -29601,7 +29612,7 @@
   "history.heroes.lastPlayed": [
     {
       "type": 0,
-      "value": "Last played "
+      "value": "Última partida em "
     },
     {
       "type": 1,
@@ -29611,19 +29622,19 @@
   "history.heroes.matchups": [
     {
       "type": 0,
-      "value": "Against each hero"
+      "value": "Contra cada herói"
     }
   ],
   "history.heroes.noMatchups": [
     {
       "type": 0,
-      "value": "No decided games with this hero yet."
+      "value": "Ainda não há jogos decididos com este herói."
     }
   ],
   "history.match.deletedPlayer": [
     {
       "type": 0,
-      "value": "Deleted player"
+      "value": "Jogador excluído"
     }
   ],
   "history.match.matchup": [
@@ -29633,7 +29644,7 @@
     },
     {
       "type": 0,
-      "value": " versus "
+      "value": " contra "
     },
     {
       "type": 1,
@@ -29643,7 +29654,7 @@
   "history.match.practiceBot": [
     {
       "type": 0,
-      "value": "Practice bot"
+      "value": "Bot de treino"
     }
   ],
   "history.match.replayDaysLeft": [
@@ -29651,18 +29662,26 @@
       "type": 6,
       "value": "count",
       "options": {
+        "=0": {
+          "value": [
+            {
+              "type": 0,
+              "value": "Replay: expira hoje"
+            }
+          ]
+        },
         "one": {
           "value": [
             {
               "type": 0,
-              "value": "Replay: "
+              "value": "Replay: resta "
             },
             {
               "type": 7
             },
             {
               "type": 0,
-              "value": " day left"
+              "value": " dia"
             }
           ]
         },
@@ -29670,14 +29689,14 @@
           "value": [
             {
               "type": 0,
-              "value": "Replay: "
+              "value": "Replay: restam "
             },
             {
               "type": 7
             },
             {
               "type": 0,
-              "value": " days left"
+              "value": " dias"
             }
           ]
         }
@@ -29689,7 +29708,7 @@
   "history.match.replayExpired": [
     {
       "type": 0,
-      "value": "Replay expired"
+      "value": "Replay expirado"
     }
   ],
   "history.match.replayExpiresSoon": [
@@ -29697,18 +29716,26 @@
       "type": 6,
       "value": "count",
       "options": {
+        "=0": {
+          "value": [
+            {
+              "type": 0,
+              "value": "Replay expira hoje"
+            }
+          ]
+        },
         "one": {
           "value": [
             {
               "type": 0,
-              "value": "Replay expires in "
+              "value": "Replay expira em "
             },
             {
               "type": 7
             },
             {
               "type": 0,
-              "value": " day"
+              "value": " dia"
             }
           ]
         },
@@ -29716,14 +29743,14 @@
           "value": [
             {
               "type": 0,
-              "value": "Replay expires in "
+              "value": "Replay expira em "
             },
             {
               "type": 7
             },
             {
               "type": 0,
-              "value": " days"
+              "value": " dias"
             }
           ]
         }
@@ -29735,103 +29762,103 @@
   "history.match.replayKept": [
     {
       "type": 0,
-      "value": "Favorited, kept"
+      "value": "Favoritado, mantido"
     }
   ],
   "history.matches.empty": [
     {
       "type": 0,
-      "value": "No matches yet. Play against a bot or a player and it will show up here."
+      "value": "Nenhuma partida ainda. Jogue contra um bot ou um jogador e ela aparecerá aqui."
     }
   ],
   "history.matches.emptyFiltered": [
     {
       "type": 0,
-      "value": "No matches for these filters."
+      "value": "Nenhuma partida para estes filtros."
     }
   ],
   "history.matches.loadError": [
     {
       "type": 0,
-      "value": "Could not load matches."
+      "value": "Não foi possível carregar as partidas."
     }
   ],
   "history.matches.more": [
     {
       "type": 0,
-      "value": "Show older matches"
+      "value": "Mostrar partidas mais antigas"
     }
   ],
   "history.matches.openFile": [
     {
       "type": 0,
-      "value": "Open a replay file"
+      "value": "Abrir um arquivo de replay"
     }
   ],
   "history.matches.recordsError": [
     {
       "type": 0,
-      "value": "Could not load your record."
+      "value": "Não foi possível carregar seu retrospecto."
     }
   ],
   "history.matches.retention": [
     {
       "type": 0,
-      "value": "Replays stay for 7 days. Favorite one to keep it."
+      "value": "Os replays ficam disponíveis por 7 dias. Favorite um para mantê-lo."
     }
   ],
   "history.matches.retry": [
     {
       "type": 0,
-      "value": "Retry"
+      "value": "Tentar novamente"
     }
   ],
   "history.overview.recent": [
     {
       "type": 0,
-      "value": "Recent matches"
+      "value": "Partidas recentes"
     }
   ],
   "history.overview.seeAll": [
     {
       "type": 0,
-      "value": "See all matches"
+      "value": "Ver todas as partidas"
     }
   ],
   "history.reason.loss.concede": [
     {
       "type": 0,
-      "value": "You conceded"
+      "value": "Você desistiu"
     }
   ],
   "history.reason.loss.idle": [
     {
       "type": 0,
-      "value": "You were idle"
+      "value": "Derrota por inatividade"
     }
   ],
   "history.reason.loss.lethal": [
     {
       "type": 0,
-      "value": "Lost to lethal"
+      "value": "Derrota por dano letal"
     }
   ],
   "history.reason.win.concede": [
     {
       "type": 0,
-      "value": "Opponent conceded"
+      "value": "O oponente desistiu"
     }
   ],
   "history.reason.win.idle": [
     {
       "type": 0,
-      "value": "Opponent was idle"
+      "value": "Vitória por inatividade do oponente"
     }
   ],
   "history.reason.win.lethal": [
     {
       "type": 0,
-      "value": "Won by lethal"
+      "value": "Vitória por dano letal"
     }
   ],
   "history.record.score": [
@@ -29851,67 +29878,67 @@
   "history.result.draw": [
     {
       "type": 0,
-      "value": "Draw"
+      "value": "Empate"
     }
   ],
   "history.result.ended": [
     {
       "type": 0,
-      "value": "Ended"
+      "value": "Encerrada"
     }
   ],
   "history.result.loss": [
     {
       "type": 0,
-      "value": "Defeat"
+      "value": "Derrota"
     }
   ],
   "history.result.win": [
     {
       "type": 0,
-      "value": "Victory"
+      "value": "Vitória"
     }
   ],
   "history.stat.allGames": [
     {
       "type": 0,
-      "value": "All completed games"
+      "value": "Todos os jogos concluídos"
     }
   ],
   "history.stat.games": [
     {
       "type": 0,
-      "value": "Games"
+      "value": "Jogos"
     }
   ],
   "history.stat.lossStreak": [
     {
       "type": 0,
-      "value": "Loss streak"
+      "value": "Sequência de derrotas"
     }
   ],
   "history.stat.record": [
     {
       "type": 0,
-      "value": "Record"
+      "value": "Retrospecto"
     }
   ],
   "history.stat.streak": [
     {
       "type": 0,
-      "value": "Streak"
+      "value": "Sequência"
     }
   ],
   "history.stat.winRate": [
     {
       "type": 0,
-      "value": "Win rate"
+      "value": "Taxa de vitórias"
     }
   ],
   "history.stat.winRateAll": [
     {
       "type": 0,
-      "value": "Against everyone: "
+      "value": "Contra todos: "
     },
     {
       "type": 1,
@@ -29921,7 +29948,7 @@
   "history.stat.winRateBots": [
     {
       "type": 0,
-      "value": "Against bots: "
+      "value": "Contra bots: "
     },
     {
       "type": 1,
@@ -29931,7 +29958,7 @@
   "history.stat.winRatePlayers": [
     {
       "type": 0,
-      "value": "Against players: "
+      "value": "Contra jogadores: "
     },
     {
       "type": 1,
@@ -29941,67 +29968,67 @@
   "history.stat.winStreak": [
     {
       "type": 0,
-      "value": "Win streak"
+      "value": "Sequência de vitórias"
     }
   ],
   "history.tab.heroes": [
     {
       "type": 0,
-      "value": "Heroes"
+      "value": "Heróis"
     }
   ],
   "history.tab.matches": [
     {
       "type": 0,
-      "value": "Matches"
+      "value": "Partidas"
     }
   ],
   "history.tab.overview": [
     {
       "type": 0,
-      "value": "Overview"
+      "value": "Visão geral"
     }
   ],
   "history.title": [
     {
       "type": 0,
-      "value": "Match history"
+      "value": "Histórico de partidas"
     }
   ],
   "landing.accountAccess": [
     {
       "type": 0,
-      "value": "Account access"
+      "value": "Acesso à conta"
     }
   ],
   "landing.activityLabel": [
     {
       "type": 0,
-      "value": "Current activity"
+      "value": "Atividade atual"
     }
   ],
   "landing.bots.body": [
     {
       "type": 0,
-      "value": "Test decks against hero-specific bots with distinct strategies."
+      "value": "Teste decks contra bots específicos para cada herói, com estratégias distintas."
     }
   ],
   "landing.bots.title": [
     {
       "type": 0,
-      "value": "Challenge competitive bots"
+      "value": "Desafie bots competitivos"
     }
   ],
   "landing.demoAlt": [
     {
       "type": 0,
-      "value": "A Fyendal match between Dash I/O and Cindra Bot"
+      "value": "Uma partida no Fyendal entre Dash I/O e Cindra Bot"
     }
   ],
   "landing.faq.contribute.answer": [
     {
       "type": 0,
-      "value": "Fyendal is open source. Explore the "
+      "value": "O Fyendal é de código aberto. Explore o "
     },
     {
       "type": 8,
@@ -30009,13 +30036,13 @@
       "children": [
         {
           "type": 0,
-          "value": "GitHub repository"
+          "value": "repositório no GitHub"
         }
       ]
     },
     {
       "type": 0,
-      "value": ", then join the "
+      "value": " e depois entre no "
     },
     {
       "type": 8,
@@ -30023,49 +30050,49 @@
       "children": [
         {
           "type": 0,
-          "value": "Fyendal Discord"
+          "value": "Discord do Fyendal"
         }
       ]
     },
     {
       "type": 0,
-      "value": " to discuss where you would like to help."
+      "value": " para conversar sobre como você gostaria de ajudar."
     }
   ],
   "landing.faq.contribute.question": [
     {
       "type": 0,
-      "value": "How can I become a contributor?"
+      "value": "Como posso contribuir?"
     }
   ],
   "landing.faq.download.answer": [
     {
       "type": 0,
-      "value": "No. Fyendal runs in a modern web browser, so there is nothing to install."
+      "value": "Não. O Fyendal roda em qualquer navegador moderno, então não há nada para instalar."
     }
   ],
   "landing.faq.download.question": [
     {
       "type": 0,
-      "value": "Do I need to download anything?"
+      "value": "Preciso baixar alguma coisa?"
     }
   ],
   "landing.faq.free.answer": [
     {
       "type": 0,
-      "value": "Yes. Fyendal is a free, open-source, non-commercial community project."
+      "value": "Sim. O Fyendal é um projeto comunitário gratuito, de código aberto e sem fins comerciais."
     }
   ],
   "landing.faq.free.question": [
     {
       "type": 0,
-      "value": "Is Fyendal free to play?"
+      "value": "O Fyendal é gratuito?"
     }
   ],
   "landing.faq.inPerson.answer": [
     {
       "type": 0,
-      "value": "Use the official "
+      "value": "Use o "
     },
     {
       "type": 8,
@@ -30073,55 +30100,55 @@
       "children": [
         {
           "type": 0,
-          "value": "Flesh and Blood event locator"
+          "value": "localizador oficial de eventos de Flesh and Blood"
         }
       ]
     },
     {
       "type": 0,
-      "value": " to find Armory events, local game stores, and other organized play near you."
+      "value": " para encontrar Armory events, lojas de jogos e outros eventos organizados perto de você."
     }
   ],
   "landing.faq.inPerson.question": [
     {
       "type": 0,
-      "value": "Where can I play in person?"
+      "value": "Onde posso jogar presencialmente?"
     }
   ],
   "landing.faq.kicker": [
     {
       "type": 0,
-      "value": "Common questions"
+      "value": "Perguntas frequentes"
     }
   ],
   "landing.faq.official.answer": [
     {
       "type": 0,
-      "value": "No. Fyendal is a fan-made project and is not affiliated with or endorsed by Legend Story Studios. For authoritative rulings, use the official rules or ask a judge."
+      "value": "Não. O Fyendal é um projeto feito por fãs e não é afiliado nem endossado pela Legend Story Studios. Para decisões de regras oficiais, consulte as regras oficiais ou pergunte a um juiz."
     }
   ],
   "landing.faq.official.question": [
     {
       "type": 0,
-      "value": "Is this an official Flesh & Blood platform?"
+      "value": "Esta é uma plataforma oficial de Flesh & Blood?"
     }
   ],
   "landing.faq.offline.answer": [
     {
       "type": 0,
-      "value": "No. The hosted game requires an internet connection because matches and hidden information are managed securely by the server."
+      "value": "Não. O jogo hospedado exige conexão com a internet, porque as partidas e as informações ocultas são gerenciadas com segurança pelo servidor."
     }
   ],
   "landing.faq.offline.question": [
     {
       "type": 0,
-      "value": "Can I play offline?"
+      "value": "Posso jogar offline?"
     }
   ],
   "landing.faq.support.answer": [
     {
       "type": 0,
-      "value": "Use the bug button during a game to send a report with useful match context. For suggestions or general feedback, join the "
+      "value": "Use o botão de bug durante um jogo para enviar um relato com o contexto da partida. Para sugestões ou feedback geral, entre no "
     },
     {
       "type": 8,
@@ -30129,7 +30156,7 @@
       "children": [
         {
           "type": 0,
-          "value": "Fyendal Discord"
+          "value": "Discord do Fyendal"
         }
       ]
     },
@@ -30141,13 +30168,13 @@
   "landing.faq.support.question": [
     {
       "type": 0,
-      "value": "What if I find a bug or have a suggestion?"
+      "value": "E se eu encontrar um bug ou tiver uma sugestão?"
     }
   ],
   "landing.faq.title": [
     {
       "type": 0,
-      "value": "About Playing on Fyendal"
+      "value": "Sobre jogar no Fyendal"
     }
   ],
   "landing.inGame": [
@@ -30163,19 +30190,19 @@
     },
     {
       "type": 0,
-      "value": " in game"
+      "value": " em jogo"
     }
   ],
   "landing.matches.body": [
     {
       "type": 0,
-      "value": "Queue, join an open room, or invite a friend to a private game."
+      "value": "Entre na fila, participe de uma sala aberta ou convide um amigo para um jogo privado."
     }
   ],
   "landing.matches.title": [
     {
       "type": 0,
-      "value": "Find or host a match"
+      "value": "Encontre ou crie uma partida"
     }
   ],
   "landing.openRooms": [
@@ -30197,11 +30224,19 @@
       "type": 6,
       "value": "count",
       "options": {
+        "=0": {
+          "value": [
+            {
+              "type": 0,
+              "value": "salas abertas"
+            }
+          ]
+        },
         "one": {
           "value": [
             {
               "type": 0,
-              "value": "open room"
+              "value": "sala aberta"
             }
           ]
         },
@@ -30209,7 +30244,7 @@
           "value": [
             {
               "type": 0,
-              "value": "open rooms"
+              "value": "salas abertas"
             }
           ]
         }
@@ -30221,193 +30256,193 @@
   "landing.replays.body": [
     {
       "type": 0,
-      "value": "Watch games through a room link, then review or export saved replays."
+      "value": "Assista a jogos pelo link da sala e depois analise ou exporte os replays salvos."
     }
   ],
   "landing.replays.title": [
     {
       "type": 0,
-      "value": "Spectate and review"
+      "value": "Assista e analise"
     }
   ],
   "landing.startPlayingBody": [
     {
       "type": 0,
-      "value": "Create a free account to play matches and challenge competitive bots."
+      "value": "Crie uma conta gratuita para jogar partidas e desafiar bots competitivos."
     }
   ],
   "landing.startPlayingLabel": [
     {
       "type": 0,
-      "value": "Start playing"
+      "value": "Comece a jogar"
     }
   ],
   "landing.startPlayingTitle": [
     {
       "type": 0,
-      "value": "Start playing"
+      "value": "Comece a jogar"
     }
   ],
   "landing.subtitle": [
     {
       "type": 0,
-      "value": "Free, open source, and built by the community. Play in your browser against other players or competitive, hero-specific bots with your Fabrary decks."
+      "value": "Gratuito, de código aberto e feito pela comunidade. Jogue no navegador contra outros jogadores ou contra bots competitivos, específicos para cada herói, com seus decks do Fabrary."
     }
   ],
   "landing.title": [
     {
       "type": 0,
-      "value": "Play Flesh and Blood Online"
+      "value": "Jogue Flesh and Blood online"
     }
   ],
   "landing.ways.kicker": [
     {
       "type": 0,
-      "value": "Play your way"
+      "value": "Jogue do seu jeito"
     }
   ],
   "landing.ways.title": [
     {
       "type": 0,
-      "value": "Online Matches and Focused Practice"
+      "value": "Partidas online e treino focado"
     }
   ],
   "language.label": [
     {
       "type": 0,
-      "value": "Language"
+      "value": "Idioma"
     }
   ],
   "lobby.action.accept": [
     {
       "type": 0,
-      "value": "Accept"
+      "value": "Aceitar"
     }
   ],
   "lobby.action.cancelSearch": [
     {
       "type": 0,
-      "value": "Cancel match search"
+      "value": "Cancelar busca de partida"
     }
   ],
   "lobby.action.decline": [
     {
       "type": 0,
-      "value": "Decline"
+      "value": "Recusar"
     }
   ],
   "lobby.action.findMatch": [
     {
       "type": 0,
-      "value": "Find match"
+      "value": "Buscar partida"
     }
   ],
   "lobby.action.inviteFriend": [
     {
       "type": 0,
-      "value": "Invite friend"
+      "value": "Convidar amigo"
     }
   ],
   "lobby.action.join": [
     {
       "type": 0,
-      "value": "Join"
+      "value": "Entrar"
     }
   ],
   "lobby.action.playBot": [
     {
       "type": 0,
-      "value": "Play vs bot"
+      "value": "Jogar contra bot"
     }
   ],
   "lobby.action.rejoin": [
     {
       "type": 0,
-      "value": "Rejoin"
+      "value": "Voltar"
     }
   ],
   "lobby.action.rejoinRoom": [
     {
       "type": 0,
-      "value": "Rejoin room"
+      "value": "Voltar à sala"
     }
   ],
   "lobby.action.spectate": [
     {
       "type": 0,
-      "value": "Spectate"
+      "value": "Assistir"
     }
   ],
   "lobby.bot.bravo.description": [
     {
       "type": 0,
-      "value": "A defensive deck that sets up powerful, disruptive attacks."
+      "value": "Um deck defensivo que prepara ataques poderosos e disruptivos."
     }
   ],
   "lobby.bot.briar.description": [
     {
       "type": 0,
-      "value": "An aggressive deck that chains elemental attacks together."
+      "value": "Um deck agressivo que encadeia ataques elementais."
     }
   ],
   "lobby.bot.chooseOpponent": [
     {
       "type": 0,
-      "value": "Choose your opponent"
+      "value": "Escolha seu oponente"
     }
   ],
   "lobby.bot.cindra.description": [
     {
       "type": 0,
-      "value": "A fast redline deck built to keep the pressure on."
+      "value": "Um deck rápido de redline feito para manter a pressão."
     }
   ],
   "lobby.bot.hala.description": [
     {
       "type": 0,
-      "value": "A flexible value deck that balances offense and defense."
+      "value": "Um deck de valor flexível que equilibra ataque e defesa."
     }
   ],
   "lobby.bot.ira.description": [
     {
       "type": 0,
-      "value": "A straightforward Armory Deck that's great for beginners."
+      "value": "Um Armory Deck direto ao ponto, ótimo para iniciantes."
     }
   ],
   "lobby.bot.jarl.description": [
     {
       "type": 0,
-      "value": "A fatigue deck that blocks efficiently and wins the long game."
+      "value": "Um deck de fatigue que bloqueia com eficiência e vence o jogo longo."
     }
   ],
   "lobby.bot.kayo.description": [
     {
       "type": 0,
-      "value": "An aggressive deck that pressures early and finishes with big attacks."
+      "value": "Um deck agressivo que pressiona cedo e finaliza com ataques grandes."
     }
   ],
   "lobby.bot.levia.description": [
     {
       "type": 0,
-      "value": "An aggressive deck that builds Gates for explosive Bloodrush turns."
+      "value": "Um deck agressivo que monta Gates para turnos explosivos de Bloodrush."
     }
   ],
   "lobby.bot.searchForPlayer": [
     {
       "type": 0,
-      "value": "Keep searching for a real player"
+      "value": "Continuar buscando um jogador real"
     }
   ],
   "lobby.bot.searchForPlayer.description": [
     {
       "type": 0,
-      "value": "Play against this bot while Fyendal looks for another player."
+      "value": "Jogue contra este bot enquanto o Fyendal procura outro jogador."
     }
   ],
   "lobby.bot.starvo.description": [
     {
       "type": 0,
-      "value": "Challenge the best deck in FAB history."
+      "value": "Desafie o melhor deck da história de FAB."
     }
   ],
   "lobby.bot.type.aggro": [
@@ -30419,13 +30454,13 @@
   "lobby.bot.type.beginner": [
     {
       "type": 0,
-      "value": "Beginner"
+      "value": "Iniciante"
     }
   ],
   "lobby.bot.type.boss": [
     {
       "type": 0,
-      "value": "Boss"
+      "value": "Chefe"
     }
   ],
   "lobby.bot.type.elemental": [
@@ -30437,7 +30472,7 @@
   "lobby.bot.type.guardian": [
     {
       "type": 0,
-      "value": "Defensive"
+      "value": "Defensivo"
     }
   ],
   "lobby.bot.type.midrange": [
@@ -30449,55 +30484,55 @@
   "lobby.bugFixed.body": [
     {
       "type": 0,
-      "value": "A bug you reported has been fixed. Thanks for helping us improve Fyendal!"
+      "value": "Um bug que você relatou foi corrigido. Obrigado por ajudar a melhorar o Fyendal!"
     }
   ],
   "lobby.bugFixed.dismiss": [
     {
       "type": 0,
-      "value": "Dismiss bug fixed notification"
+      "value": "Dispensar notificação de bug corrigido"
     }
   ],
   "lobby.bugFixed.title": [
     {
       "type": 0,
-      "value": "Bug fixed"
+      "value": "Bug corrigido"
     }
   ],
   "lobby.bugreport.dismiss": [
     {
       "type": 0,
-      "value": "Dismiss bug report notifications"
+      "value": "Dispensar notificações de relatos de bug"
     }
   ],
   "lobby.bugreport.reviewed": [
     {
       "type": 0,
-      "value": "We reviewed a bug you reported. Thanks for helping us improve Fyendal!"
+      "value": "Analisamos um bug que você relatou. Obrigado por ajudar a melhorar o Fyendal!"
     }
   ],
   "lobby.bugreport.updated": [
     {
       "type": 0,
-      "value": "Bug report update"
+      "value": "Atualização do relato de bug"
     }
   ],
   "lobby.cardPool.future": [
     {
       "type": 0,
-      "value": "Future"
+      "value": "Futuro"
     }
   ],
   "lobby.cardPool.futureDescription": [
     {
       "type": 0,
-      "value": "Tournament-legal and implemented future cards."
+      "value": "Cartas legais em torneios e cartas futuras já implementadas."
     }
   ],
   "lobby.cardPool.help": [
     {
       "type": 0,
-      "value": "About card pool modes"
+      "value": "Sobre os modos de pool de cartas"
     }
   ],
   "lobby.cardPool.legal": [
@@ -30509,25 +30544,25 @@
   "lobby.cardPool.legalDescription": [
     {
       "type": 0,
-      "value": "Tournament-legal cards only."
+      "value": "Somente cartas legais em torneios."
     }
   ],
   "lobby.cardPool.open": [
     {
       "type": 0,
-      "value": "Open"
+      "value": "Aberto"
     }
   ],
   "lobby.cardPool.openDescription": [
     {
       "type": 0,
-      "value": "All implemented cards, including banned cards and Living Legend heroes."
+      "value": "Todas as cartas implementadas, incluindo cartas banidas e heróis Living Legend."
     }
   ],
   "lobby.cardPool.title": [
     {
       "type": 0,
-      "value": "Card pool"
+      "value": "Pool de cartas"
     }
   ],
   "lobby.count.live": [
@@ -30542,7 +30577,7 @@
             },
             {
               "type": 0,
-              "value": " live"
+              "value": " ao vivo"
             }
           ]
         },
@@ -30553,7 +30588,7 @@
             },
             {
               "type": 0,
-              "value": " live"
+              "value": " ao vivo"
             }
           ]
         }
@@ -30574,7 +30609,7 @@
             },
             {
               "type": 0,
-              "value": " to rejoin"
+              "value": " para voltar"
             }
           ]
         },
@@ -30585,7 +30620,7 @@
             },
             {
               "type": 0,
-              "value": " to rejoin"
+              "value": " para voltar"
             }
           ]
         }
@@ -30606,7 +30641,7 @@
             },
             {
               "type": 0,
-              "value": " waiting"
+              "value": " aguardando"
             }
           ]
         },
@@ -30617,7 +30652,7 @@
             },
             {
               "type": 0,
-              "value": " waiting"
+              "value": " aguardando"
             }
           ]
         }
@@ -30629,41 +30664,41 @@
   "lobby.createRoom.open": [
     {
       "type": 0,
-      "value": "Open room"
+      "value": "Sala aberta"
     }
   ],
   "lobby.createRoom.private": [
     {
       "type": 0,
-      "value": "Private room"
+      "value": "Sala privada"
     }
   ],
   "lobby.createRoom.title": [
     {
       "type": 0,
-      "value": "Create a room"
+      "value": "Criar uma sala"
     }
   ],
   "lobby.deck.actions": [
     {
-      "type": 1,
-      "value": "name"
+      "type": 0,
+      "value": "Ações de "
     },
     {
-      "type": 0,
-      "value": " actions"
+      "type": 1,
+      "value": "name"
     }
   ],
   "lobby.deck.allFormats": [
     {
       "type": 0,
-      "value": "All formats"
+      "value": "Todos os formatos"
     }
   ],
   "lobby.deck.bannedList": [
     {
       "type": 0,
-      "value": "Banned cards:\n"
+      "value": "Cartas banidas:\n"
     },
     {
       "type": 1,
@@ -30677,57 +30712,53 @@
     },
     {
       "type": 0,
-      "value": ". Update the deck or card-pool setting to play it."
+      "value": ". Atualize o deck ou a configuração do pool de cartas para jogar com ele."
     }
   ],
   "lobby.deck.catalog": [
     {
       "type": 0,
-      "value": "Deck catalog"
+      "value": "Catálogo de decks"
     }
   ],
   "lobby.deck.choose": [
     {
       "type": 0,
-      "value": "Choose a deck"
+      "value": "Escolha um deck"
     }
   ],
   "lobby.deck.clearSelection": [
     {
       "type": 0,
-      "value": "Clear selection"
+      "value": "Limpar seleção"
     }
   ],
   "lobby.deck.closeActions": [
     {
       "type": 0,
-      "value": "Close "
+      "value": "Fechar ações de "
     },
     {
       "type": 1,
       "value": "name"
-    },
-    {
-      "type": 0,
-      "value": " actions"
     }
   ],
   "lobby.deck.confirmDelete": [
     {
       "type": 0,
-      "value": "Confirm delete"
+      "value": "Confirmar exclusão"
     }
   ],
   "lobby.deck.createImport": [
     {
       "type": 0,
-      "value": "Create / import deck"
+      "value": "Criar / importar deck"
     }
   ],
   "lobby.deck.deckList": [
     {
       "type": 0,
-      "value": "Deck list"
+      "value": "Lista do deck"
     }
   ],
   "lobby.deck.deckListPlaceholder": [
@@ -30739,13 +30770,13 @@
   "lobby.deck.delete": [
     {
       "type": 0,
-      "value": "Delete deck"
+      "value": "Excluir deck"
     }
   ],
   "lobby.deck.deletePrompt": [
     {
       "type": 0,
-      "value": "Delete "
+      "value": "Excluir "
     },
     {
       "type": 1,
@@ -30753,19 +30784,19 @@
     },
     {
       "type": 0,
-      "value": "? This cannot be undone."
+      "value": "? Isso não pode ser desfeito."
     }
   ],
   "lobby.deck.deleteSelected": [
     {
       "type": 0,
-      "value": "Delete selected"
+      "value": "Excluir selecionados"
     }
   ],
   "lobby.deck.deleteSelectedPrompt": [
     {
       "type": 0,
-      "value": "Delete "
+      "value": "Excluir "
     },
     {
       "type": 6,
@@ -30778,7 +30809,7 @@
             },
             {
               "type": 0,
-              "value": " selected deck"
+              "value": " deck selecionado"
             }
           ]
         },
@@ -30789,7 +30820,7 @@
             },
             {
               "type": 0,
-              "value": " selected decks"
+              "value": " decks selecionados"
             }
           ]
         }
@@ -30799,55 +30830,55 @@
     },
     {
       "type": 0,
-      "value": "? This cannot be undone."
+      "value": "? Isso não pode ser desfeito."
     }
   ],
   "lobby.deck.deleting": [
     {
       "type": 0,
-      "value": "Deleting…"
+      "value": "Excluindo…"
     }
   ],
   "lobby.deck.edit": [
     {
       "type": 0,
-      "value": "Edit deck"
+      "value": "Editar deck"
     }
   ],
   "lobby.deck.emptyFiltered": [
     {
       "type": 0,
-      "value": "No decks match these filters"
+      "value": "Nenhum deck corresponde a estes filtros"
     }
   ],
   "lobby.deck.emptyFilteredBody": [
     {
       "type": 0,
-      "value": "Clear the search or choose a different legality filter."
+      "value": "Limpe a busca ou escolha outro filtro de legalidade."
     }
   ],
   "lobby.deck.emptySaved": [
     {
       "type": 0,
-      "value": "No saved decks yet"
+      "value": "Nenhum deck salvo ainda"
     }
   ],
   "lobby.deck.emptySavedBody": [
     {
       "type": 0,
-      "value": "Import a Fabrary link or full deck list to start playing."
+      "value": "Importe um link do Fabrary ou uma lista de deck completa para começar a jogar."
     }
   ],
   "lobby.deck.error.importFailed": [
     {
       "type": 0,
-      "value": "Import failed"
+      "value": "Falha na importação"
     }
   ],
   "lobby.deck.error.unimplementedCards": [
     {
       "type": 0,
-      "value": "Not implemented yet: "
+      "value": "Ainda não implementadas: "
     },
     {
       "type": 1,
@@ -30857,7 +30888,7 @@
   "lobby.deck.error.unknownCards": [
     {
       "type": 0,
-      "value": "Unknown cards: "
+      "value": "Cartas desconhecidas: "
     },
     {
       "type": 1,
@@ -30867,47 +30898,47 @@
   "lobby.deck.error.updateFailed": [
     {
       "type": 0,
-      "value": "Update failed"
+      "value": "Falha na atualização"
     }
   ],
   "lobby.deck.fabraryLink": [
     {
       "type": 0,
-      "value": "Fabrary link"
+      "value": "Link do Fabrary"
     }
   ],
   "lobby.deck.fabraryUrl": [
     {
       "type": 0,
-      "value": "Fabrary deck URL"
+      "value": "URL do deck no Fabrary"
     }
   ],
   "lobby.deck.fabraryUrlHint": [
     {
       "type": 0,
-      "value": "Changing this URL reimports and revalidates the Fabrary deck."
+      "value": "Alterar esta URL reimporta e revalida o deck do Fabrary."
     }
   ],
   "lobby.deck.format": [
     {
       "type": 0,
-      "value": "Deck format"
+      "value": "Formato do deck"
     }
   ],
   "lobby.deck.formatDecks": [
     {
-      "type": 1,
-      "value": "format"
+      "type": 0,
+      "value": "Decks de "
     },
     {
-      "type": 0,
-      "value": " Decks"
+      "type": 1,
+      "value": "format"
     }
   ],
   "lobby.deck.futureList": [
     {
       "type": 0,
-      "value": "Future cards:\n"
+      "value": "Cartas futuras:\n"
     },
     {
       "type": 1,
@@ -30927,6 +30958,17 @@
       "type": 6,
       "value": "count",
       "options": {
+        "=0": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " cartas"
+            }
+          ]
+        },
         "one": {
           "value": [
             {
@@ -30934,7 +30976,7 @@
             },
             {
               "type": 0,
-              "value": " card"
+              "value": " carta"
             }
           ]
         },
@@ -30945,7 +30987,7 @@
             },
             {
               "type": 0,
-              "value": " cards"
+              "value": " cartas"
             }
           ]
         }
@@ -30957,7 +30999,7 @@
   "lobby.deck.illegalCards": [
     {
       "type": 0,
-      "value": "Illegal cards: "
+      "value": "Cartas ilegais: "
     },
     {
       "type": 1,
@@ -30967,25 +31009,25 @@
   "lobby.deck.import": [
     {
       "type": 0,
-      "value": "Import deck"
+      "value": "Importar deck"
     }
   ],
   "lobby.deck.importFirst": [
     {
       "type": 0,
-      "value": "Import your first deck"
+      "value": "Importe seu primeiro deck"
     }
   ],
   "lobby.deck.importing": [
     {
       "type": 0,
-      "value": "Importing…"
+      "value": "Importando…"
     }
   ],
   "lobby.deck.includesBanned": [
     {
       "type": 0,
-      "value": "Includes banned "
+      "value": "Inclui "
     },
     {
       "type": 6,
@@ -30995,7 +31037,7 @@
           "value": [
             {
               "type": 0,
-              "value": "card"
+              "value": "carta banida"
             }
           ]
         },
@@ -31003,7 +31045,7 @@
           "value": [
             {
               "type": 0,
-              "value": "cards"
+              "value": "cartas banidas"
             }
           ]
         }
@@ -31015,7 +31057,7 @@
   "lobby.deck.includesFuture": [
     {
       "type": 0,
-      "value": "Includes future "
+      "value": "Inclui "
     },
     {
       "type": 6,
@@ -31025,7 +31067,7 @@
           "value": [
             {
               "type": 0,
-              "value": "card"
+              "value": "carta futura"
             }
           ]
         },
@@ -31033,7 +31075,7 @@
           "value": [
             {
               "type": 0,
-              "value": "cards"
+              "value": "cartas futuras"
             }
           ]
         }
@@ -31045,49 +31087,49 @@
   "lobby.deck.keep": [
     {
       "type": 0,
-      "value": "Keep deck"
+      "value": "Manter deck"
     }
   ],
   "lobby.deck.legality": [
     {
       "type": 0,
-      "value": "Legality"
+      "value": "Legalidade"
     }
   ],
   "lobby.deck.mine": [
     {
       "type": 0,
-      "value": "My decks"
+      "value": "Meus decks"
     }
   ],
   "lobby.deck.name": [
     {
       "type": 0,
-      "value": "Deck name"
+      "value": "Nome do deck"
     }
   ],
   "lobby.deck.needsAttention": [
     {
       "type": 0,
-      "value": "Needs attention"
+      "value": "Requer atenção"
     }
   ],
   "lobby.deck.optionalName": [
     {
       "type": 0,
-      "value": "Name (optional)"
+      "value": "Nome (opcional)"
     }
   ],
   "lobby.deck.pasteList": [
     {
       "type": 0,
-      "value": "Paste deck list"
+      "value": "Colar lista do deck"
     }
   ],
   "lobby.deck.playWith": [
     {
       "type": 0,
-      "value": "Play with "
+      "value": "Jogar com "
     },
     {
       "type": 1,
@@ -31097,61 +31139,61 @@
   "lobby.deck.playable": [
     {
       "type": 0,
-      "value": "Playable"
+      "value": "Jogável"
     }
   ],
   "lobby.deck.preconstructed": [
     {
       "type": 0,
-      "value": "Preconstructed"
+      "value": "Pré-construídos"
     }
   ],
   "lobby.deck.replacementList": [
     {
       "type": 0,
-      "value": "Replacement decklist"
+      "value": "Lista de substituição"
     }
   ],
   "lobby.deck.replacementPlaceholder": [
     {
       "type": 0,
-      "value": "Leave blank to keep the current card list"
+      "value": "Deixe em branco para manter a lista de cartas atual"
     }
   ],
   "lobby.deck.saveChanges": [
     {
       "type": 0,
-      "value": "Save changes"
+      "value": "Salvar alterações"
     }
   ],
   "lobby.deck.saving": [
     {
       "type": 0,
-      "value": "Saving…"
+      "value": "Salvando…"
     }
   ],
   "lobby.deck.search": [
     {
       "type": 0,
-      "value": "Search decks"
+      "value": "Buscar decks"
     }
   ],
   "lobby.deck.searchOptions": [
     {
       "type": 0,
-      "value": "Search & options"
+      "value": "Busca e opções"
     }
   ],
   "lobby.deck.searchPlaceholder": [
     {
       "type": 0,
-      "value": "Deck or hero name…"
+      "value": "Nome do deck ou do herói…"
     }
   ],
   "lobby.deck.selectNamed": [
     {
       "type": 0,
-      "value": "Select "
+      "value": "Selecionar "
     },
     {
       "type": 1,
@@ -31163,6 +31205,17 @@
       "type": 6,
       "value": "count",
       "options": {
+        "=0": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " decks selecionados"
+            }
+          ]
+        },
         "one": {
           "value": [
             {
@@ -31170,7 +31223,7 @@
             },
             {
               "type": 0,
-              "value": " deck selected"
+              "value": " deck selecionado"
             }
           ]
         },
@@ -31181,7 +31234,7 @@
             },
             {
               "type": 0,
-              "value": " decks selected"
+              "value": " decks selecionados"
             }
           ]
         }
@@ -31193,31 +31246,31 @@
   "lobby.deck.selectionActions": [
     {
       "type": 0,
-      "value": "Selected deck actions"
+      "value": "Ações dos decks selecionados"
     }
   ],
   "lobby.deck.source": [
     {
       "type": 0,
-      "value": "Deck source"
+      "value": "Origem do deck"
     }
   ],
   "lobby.deck.source.preconstructed": [
     {
       "type": 0,
-      "value": "Preconstructed"
+      "value": "Pré-construído"
     }
   ],
   "lobby.deck.source.saved": [
     {
       "type": 0,
-      "value": "Saved"
+      "value": "Salvo"
     }
   ],
   "lobby.deck.viewOnFabrary": [
     {
       "type": 0,
-      "value": "View "
+      "value": "Ver "
     },
     {
       "type": 1,
@@ -31225,91 +31278,91 @@
     },
     {
       "type": 0,
-      "value": " on Fabrary"
+      "value": " no Fabrary"
     }
   ],
   "lobby.discordCommunity": [
     {
       "type": 0,
-      "value": "Discord Community"
+      "value": "Comunidade no Discord"
     }
   ],
   "lobby.futureCardsNote": [
     {
       "type": 0,
-      "value": "This room allows implemented future cards."
+      "value": "Esta sala permite cartas futuras já implementadas."
     }
   ],
   "lobby.home.bringDeck": [
     {
       "type": 0,
-      "value": "Bring your own deck"
+      "value": "Traga seu próprio deck"
     }
   ],
   "lobby.home.chooseStart": [
     {
       "type": 0,
-      "value": "Choose a format, deck, and game mode to start playing."
+      "value": "Escolha um formato, um deck e um modo de jogo para começar."
     }
   ],
   "lobby.home.gameMode": [
     {
       "type": 0,
-      "value": "Game mode"
+      "value": "Modo de jogo"
     }
   ],
   "lobby.home.importCc": [
     {
       "type": 0,
-      "value": "Import your CC deck"
+      "value": "Importe seu deck de CC"
     }
   ],
   "lobby.home.importSilverAge": [
     {
       "type": 0,
-      "value": "Import your Silver Age deck"
+      "value": "Importe seu deck de Silver Age"
     }
   ],
   "lobby.home.manageDecks": [
     {
       "type": 0,
-      "value": "Manage decks"
+      "value": "Gerenciar decks"
     }
   ],
   "lobby.home.playCc": [
     {
       "type": 0,
-      "value": "Play CC"
+      "value": "Jogar CC"
     }
   ],
   "lobby.home.playSilverAge": [
     {
       "type": 0,
-      "value": "Play Silver Age"
+      "value": "Jogar Silver Age"
     }
   ],
   "lobby.home.rejoinRooms": [
     {
       "type": 0,
-      "value": "Rejoin rooms"
+      "value": "Voltar às salas"
     }
   ],
   "lobby.home.start": [
     {
       "type": 0,
-      "value": "Start"
+      "value": "Começar"
     }
   ],
   "lobby.home.tryPrecon": [
     {
       "type": 0,
-      "value": "Try with a precon"
+      "value": "Experimente com um pré-construído"
     }
   ],
   "lobby.home.welcome": [
     {
       "type": 0,
-      "value": "Welcome to Fyendal, "
+      "value": "Boas-vindas ao Fyendal, "
     },
     {
       "type": 1,
@@ -31323,7 +31376,7 @@
   "lobby.home.welcomeBack": [
     {
       "type": 0,
-      "value": "Welcome back, "
+      "value": "Que bom ter você de volta, "
     },
     {
       "type": 1,
@@ -31337,7 +31390,7 @@
   "lobby.invite.afterCreate": [
     {
       "type": 0,
-      "value": "You’ll "
+      "value": "Você poderá "
     },
     {
       "type": 1,
@@ -31345,49 +31398,49 @@
     },
     {
       "type": 0,
-      "value": " as soon as your account is ready."
+      "value": " assim que sua conta estiver pronta."
     }
   ],
   "lobby.invite.afterSignIn": [
     {
       "type": 0,
-      "value": "This invitation will still be here after you sign in."
+      "value": "Este convite continuará aqui depois que você entrar."
     }
   ],
   "lobby.invite.alreadySeated": [
     {
       "type": 0,
-      "value": "You already have a seat in this room."
+      "value": "Você já tem um lugar nesta sala."
     }
   ],
   "lobby.invite.choiceDeck": [
     {
       "type": 0,
-      "value": "choose a ready-to-play deck"
+      "value": "escolher um deck pronto para jogar"
     }
   ],
   "lobby.invite.chooseDeck": [
     {
       "type": 0,
-      "value": "Choose a deck to join this private room."
+      "value": "Escolha um deck para entrar nesta sala privada."
     }
   ],
   "lobby.invite.createAccount": [
     {
       "type": 0,
-      "value": "Create player account"
+      "value": "Criar conta de jogador"
     }
   ],
   "lobby.invite.createAccountTitle": [
     {
       "type": 0,
-      "value": "Create your player account"
+      "value": "Crie sua conta de jogador"
     }
   ],
   "lobby.invite.createThenJoin": [
     {
       "type": 0,
-      "value": "Create a free player account, "
+      "value": "Crie uma conta de jogador gratuita para "
     },
     {
       "type": 1,
@@ -31395,31 +31448,31 @@
     },
     {
       "type": 0,
-      "value": ", and join your friend."
+      "value": " e jogar com seu amigo."
     }
   ],
   "lobby.invite.full": [
     {
       "type": 0,
-      "value": "This room already has two players, but you can watch the match."
+      "value": "Esta sala já tem dois jogadores, mas você pode assistir à partida."
     }
   ],
   "lobby.invite.fullGuest": [
     {
       "type": 0,
-      "value": "This room already has two players, but you can watch the match without an account."
+      "value": "Esta sala já tem dois jogadores, mas você pode assistir à partida sem uma conta."
     }
   ],
   "lobby.invite.haveAccount": [
     {
       "type": 0,
-      "value": "I have an account"
+      "value": "Já tenho uma conta"
     }
   ],
   "lobby.invite.invited": [
     {
       "type": 0,
-      "value": "You’ve been invited to play "
+      "value": "Você recebeu um convite para jogar "
     },
     {
       "type": 1,
@@ -31433,7 +31486,7 @@
   "lobby.invite.needDeck": [
     {
       "type": 0,
-      "value": "You need a "
+      "value": "Você precisa de um deck de "
     },
     {
       "type": 1,
@@ -31441,25 +31494,25 @@
     },
     {
       "type": 0,
-      "value": " deck before opening this invite."
+      "value": " antes de abrir este convite."
     }
   ],
   "lobby.invite.signInTitle": [
     {
       "type": 0,
-      "value": "Sign in to join your friend"
+      "value": "Entre para jogar com seu amigo"
     }
   ],
   "lobby.invite.spectateGuest": [
     {
       "type": 0,
-      "value": "Just spectate without an account"
+      "value": "Só assistir, sem conta"
     }
   ],
   "lobby.invite.title": [
     {
       "type": 0,
-      "value": "Room invitation · "
+      "value": "Convite para sala · "
     },
     {
       "type": 1,
@@ -31469,19 +31522,19 @@
   "lobby.loadingDecks": [
     {
       "type": 0,
-      "value": "Loading your decks…"
+      "value": "Carregando seus decks…"
     }
   ],
   "lobby.nav.account": [
     {
       "type": 0,
-      "value": "Account"
+      "value": "Conta"
     }
   ],
   "lobby.nav.allRooms": [
     {
       "type": 0,
-      "value": "All rooms"
+      "value": "Todas as salas"
     }
   ],
   "lobby.nav.decks": [
@@ -31493,115 +31546,115 @@
   "lobby.nav.history": [
     {
       "type": 0,
-      "value": "Match history"
+      "value": "Histórico de partidas"
     }
   ],
   "lobby.nav.historyShort": [
     {
       "type": 0,
-      "value": "History"
+      "value": "Histórico"
     }
   ],
   "lobby.nav.home": [
     {
       "type": 0,
-      "value": "Home"
+      "value": "Início"
     }
   ],
   "lobby.nav.more": [
     {
       "type": 0,
-      "value": "More"
+      "value": "Mais"
     }
   ],
   "lobby.nav.primary": [
     {
       "type": 0,
-      "value": "Primary navigation"
+      "value": "Navegação principal"
     }
   ],
   "lobby.nav.rooms": [
     {
       "type": 0,
-      "value": "Rooms"
+      "value": "Salas"
     }
   ],
   "lobby.openCardPoolNote": [
     {
       "type": 0,
-      "value": "This room allows all implemented cards, including banned cards and Living Legend heroes."
+      "value": "Esta sala permite todas as cartas implementadas, incluindo cartas banidas e heróis Living Legend."
     }
   ],
   "lobby.room.fullHint": [
     {
       "type": 0,
-      "value": "Room is full — spectate to watch"
+      "value": "A sala está cheia — assista à partida"
     }
   ],
   "lobby.room.loadingState": [
     {
       "type": 0,
-      "value": "Loading the latest room state."
+      "value": "Carregando o estado mais recente da sala."
     }
   ],
   "lobby.room.restoring": [
     {
       "type": 0,
-      "value": "Restoring game…"
+      "value": "Restaurando o jogo…"
     }
   ],
   "lobby.room.status.full": [
     {
       "type": 0,
-      "value": "Full"
+      "value": "Cheia"
     }
   ],
   "lobby.room.status.open": [
     {
       "type": 0,
-      "value": "Open"
+      "value": "Aberta"
     }
   ],
   "lobby.room.status.started": [
     {
       "type": 0,
-      "value": "Started"
+      "value": "Iniciada"
     }
   ],
   "lobby.room.status.yours": [
     {
       "type": 0,
-      "value": "Your room"
+      "value": "Sua sala"
     }
   ],
   "lobby.rooms.all": [
     {
       "type": 0,
-      "value": "All rooms"
+      "value": "Todas as salas"
     }
   ],
   "lobby.rooms.create": [
     {
       "type": 0,
-      "value": "Create room"
+      "value": "Criar sala"
     }
   ],
   "lobby.rooms.empty": [
     {
       "type": 0,
-      "value": "No public games to spectate right now."
+      "value": "Nenhum jogo público para assistir no momento."
     }
   ],
   "lobby.rooms.importOne": [
     {
       "type": 0,
-      "value": "import one"
+      "value": "importe um"
     }
   ],
   "lobby.rooms.noFormatDecks": [
     {
       "type": 0,
-      "value": "No "
+      "value": "Nenhum deck de "
     },
     {
       "type": 1,
@@ -31609,19 +31662,19 @@
     },
     {
       "type": 0,
-      "value": " decks yet —"
+      "value": " ainda —"
     }
   ],
   "lobby.rooms.open": [
     {
       "type": 0,
-      "value": "Open rooms"
+      "value": "Salas abertas"
     }
   ],
   "lobby.rooms.pickDeck": [
     {
       "type": 0,
-      "value": "Join "
+      "value": "Entrar em "
     },
     {
       "type": 1,
@@ -31629,37 +31682,37 @@
     },
     {
       "type": 0,
-      "value": " — pick a deck"
+      "value": " — escolha um deck"
     }
   ],
   "lobby.rooms.started": [
     {
       "type": 0,
-      "value": "Started games"
+      "value": "Jogos em andamento"
     }
   ],
   "lobby.rooms.yours": [
     {
       "type": 0,
-      "value": "Your rooms"
+      "value": "Suas salas"
     }
   ],
   "lobby.waiting.accepted": [
     {
       "type": 0,
-      "value": "You have accepted. Preparation will open once your opponent accepts too."
+      "value": "Você aceitou. A preparação começa assim que seu oponente também aceitar."
     }
   ],
   "lobby.waiting.forOpponent": [
     {
       "type": 0,
-      "value": "Waiting for opponent…"
+      "value": "Aguardando oponente…"
     }
   ],
   "lobby.waiting.matchFound": [
     {
       "type": 0,
-      "value": "Match found"
+      "value": "Partida encontrada"
     }
   ],
   "lobby.waiting.namedOpponent": [
@@ -31669,13 +31722,13 @@
     },
     {
       "type": 0,
-      "value": " is waiting for you."
+      "value": " está esperando por você."
     }
   ],
   "lobby.waiting.namedOpponentDeciding": [
     {
       "type": 0,
-      "value": "Accept to start preparing against "
+      "value": "Aceite para começar a preparação contra "
     },
     {
       "type": 1,
@@ -31689,43 +31742,43 @@
   "lobby.waiting.opponentDeciding": [
     {
       "type": 0,
-      "value": "Accept to start preparing against your opponent."
+      "value": "Aceite para começar a preparação contra seu oponente."
     }
   ],
   "lobby.waiting.playersPreparing": [
     {
       "type": 0,
-      "value": "The players are still getting ready; the game board appears here once the match begins."
+      "value": "Os jogadores ainda estão se preparando; o tabuleiro aparece aqui quando a partida começar."
     }
   ],
   "lobby.waiting.ready": [
     {
       "type": 0,
-      "value": "Ready to play?"
+      "value": "Tudo pronto para jogar?"
     }
   ],
   "lobby.waiting.shareHint": [
     {
       "type": 0,
-      "value": "Friends who open the link can choose a deck or hero and join."
+      "value": "Amigos que abrirem o link podem escolher um deck ou herói e entrar."
     }
   ],
   "lobby.waiting.shareLink": [
     {
       "type": 0,
-      "value": "Share this link:"
+      "value": "Compartilhe este link:"
     }
   ],
   "lobby.waiting.spectating": [
     {
       "type": 0,
-      "value": "Spectating — waiting for the game to start"
+      "value": "Assistindo — aguardando o início do jogo"
     }
   ],
   "matchmaking.background.declined": [
     {
       "type": 0,
-      "value": "Declined "
+      "value": "Recusou "
     },
     {
       "type": 1,
@@ -31735,61 +31788,61 @@
   "matchmaking.background.found": [
     {
       "type": 0,
-      "value": "Player found"
+      "value": "Jogador encontrado"
     }
   ],
   "matchmaking.background.keepBot": [
     {
       "type": 0,
-      "value": "Keep playing against the bot"
+      "value": "Continuar jogando contra o bot"
     }
   ],
   "matchmaking.background.opponentAccepted": [
     {
       "type": 0,
-      "value": "Opponent accepted"
+      "value": "O oponente aceitou"
     }
   ],
   "matchmaking.background.searching": [
     {
       "type": 0,
-      "value": "Searching for a real player"
+      "value": "Buscando um jogador real"
     }
   ],
   "matchmaking.background.skipHero": [
     {
       "type": 0,
-      "value": "Skip this hero for this search"
+      "value": "Pular este herói nesta busca"
     }
   ],
   "matchmaking.background.stop": [
     {
       "type": 0,
-      "value": "Stop searching"
+      "value": "Parar de buscar"
     }
   ],
   "matchmaking.background.stopShort": [
     {
       "type": 0,
-      "value": "Stop"
+      "value": "Parar"
     }
   ],
   "matchmaking.background.waiting": [
     {
       "type": 0,
-      "value": "Accepted — waiting for opponent"
+      "value": "Aceito — aguardando o oponente"
     }
   ],
   "matchmaking.fallback.continue": [
     {
       "type": 0,
-      "value": "Continue to bot prep"
+      "value": "Continuar para a preparação contra o bot"
     }
   ],
   "matchmaking.fallback.description": [
     {
       "type": 0,
-      "value": "Your opponent is now "
+      "value": "Seu oponente agora é "
     },
     {
       "type": 1,
@@ -31797,67 +31850,67 @@
     },
     {
       "type": 0,
-      "value": ", a practice bot. Continue when you're ready to prepare for this matchup."
+      "value": ", um bot de treino. Continue quando estiver tudo pronto para se preparar para este confronto."
     }
   ],
   "matchmaking.fallback.practice": [
     {
       "type": 0,
-      "value": "Bot practice"
+      "value": "Treino contra bot"
     }
   ],
   "matchmaking.fallback.searching": [
     {
       "type": 0,
-      "value": "We're still looking for a real player in the background."
+      "value": "Continuamos procurando um jogador real em segundo plano."
     }
   ],
   "matchmaking.fallback.title": [
     {
       "type": 0,
-      "value": "The PvP match didn't go ahead"
+      "value": "A partida PvP não aconteceu"
     }
   ],
   "meta.home.description": [
     {
       "type": 0,
-      "value": "Play Flesh and Blood online for free. Find opponents, challenge competitive hero-specific bots, import Fabrary decks, spectate games, and review replays."
+      "value": "Jogue Flesh and Blood online de graça. Encontre oponentes, desafie bots competitivos específicos para cada herói, importe decks do Fabrary, assista a jogos e analise replays."
     }
   ],
   "meta.home.title": [
     {
       "type": 0,
-      "value": "Play Flesh and Blood Online Free | Fyendal"
+      "value": "Jogue Flesh and Blood online grátis | Fyendal"
     }
   ],
   "notice.dismiss": [
     {
       "type": 0,
-      "value": "Dismiss notice"
+      "value": "Dispensar aviso"
     }
   ],
   "notice.label": [
     {
       "type": 0,
-      "value": "Notice"
+      "value": "Aviso"
     }
   ],
   "play.back": [
     {
       "type": 0,
-      "value": "Back to lobby"
+      "value": "Voltar ao lobby"
     }
   ],
   "play.banned": [
     {
       "type": 0,
-      "value": "Choose Open to play."
+      "value": "Escolha Aberto para jogar."
     }
   ],
   "play.bot": [
     {
       "type": 0,
-      "value": "Play vs bot"
+      "value": "Jogar contra bot"
     }
   ],
   "play.cards.banned": [
@@ -31865,6 +31918,17 @@
       "type": 6,
       "value": "count",
       "options": {
+        "=0": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " cartas banidas"
+            }
+          ]
+        },
         "one": {
           "value": [
             {
@@ -31872,7 +31936,7 @@
             },
             {
               "type": 0,
-              "value": " banned card"
+              "value": " carta banida"
             }
           ]
         },
@@ -31883,7 +31947,7 @@
             },
             {
               "type": 0,
-              "value": " banned cards"
+              "value": " cartas banidas"
             }
           ]
         }
@@ -31897,6 +31961,17 @@
       "type": 6,
       "value": "count",
       "options": {
+        "=0": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " cartas futuras"
+            }
+          ]
+        },
         "one": {
           "value": [
             {
@@ -31904,7 +31979,7 @@
             },
             {
               "type": 0,
-              "value": " future card"
+              "value": " carta futura"
             }
           ]
         },
@@ -31915,7 +31990,7 @@
             },
             {
               "type": 0,
-              "value": " future cards"
+              "value": " cartas futuras"
             }
           ]
         }
@@ -31927,133 +32002,133 @@
   "play.error.format": [
     {
       "type": 0,
-      "value": "This format is not supported. Fabrary play links support Classic Constructed and Silver Age."
+      "value": "Este formato não é compatível. Os links de jogo do Fabrary aceitam Classic Constructed e Silver Age."
     }
   ],
   "play.error.import": [
     {
       "type": 0,
-      "value": "The deck could not be imported. Check that it is public and try again."
+      "value": "Não foi possível importar o deck. Verifique se ele é público e tente novamente."
     }
   ],
   "play.error.link": [
     {
       "type": 0,
-      "value": "This play link is invalid. It needs a public Fabrary deck URL and a supported format."
+      "value": "Este link de jogo é inválido. Ele precisa de uma URL pública de deck do Fabrary e de um formato compatível."
     }
   ],
   "play.find.player": [
     {
       "type": 0,
-      "value": "Find a player"
+      "value": "Buscar um jogador"
     }
   ],
   "play.future": [
     {
       "type": 0,
-      "value": "Choose Future or Open to play."
+      "value": "Escolha Futuro ou Aberto para jogar."
     }
   ],
   "play.importing": [
     {
       "type": 0,
-      "value": "Loading your latest Fabrary deck…"
+      "value": "Carregando seu deck mais recente do Fabrary…"
     }
   ],
   "play.intro.body": [
     {
       "type": 0,
-      "value": "Bring your Fabrary deck to face other players or challenge a competitive bot."
+      "value": "Traga seu deck do Fabrary para enfrentar outros jogadores ou desafiar um bot competitivo."
     }
   ],
   "play.intro.kicker": [
     {
       "type": 0,
-      "value": "Free · Open source · Community driven"
+      "value": "Gratuito · Código aberto · Feito pela comunidade"
     }
   ],
   "play.intro.title": [
     {
       "type": 0,
-      "value": "Play Flesh and Blood online"
+      "value": "Jogue Flesh and Blood online"
     }
   ],
   "play.preview.loading": [
     {
       "type": 0,
-      "value": "Loading deck preview…"
+      "value": "Carregando prévia do deck…"
     }
   ],
   "play.refresh": [
     {
       "type": 0,
-      "value": "Reload deck"
+      "value": "Recarregar deck"
     }
   ],
   "play.retry": [
     {
       "type": 0,
-      "value": "Try again"
+      "value": "Tentar novamente"
     }
   ],
   "play.source": [
     {
       "type": 0,
-      "value": "From Fabrary"
+      "value": "Do Fabrary"
     }
   ],
   "play.starting": [
     {
       "type": 0,
-      "value": "Starting your game…"
+      "value": "Iniciando seu jogo…"
     }
   ],
   "play.title": [
     {
       "type": 0,
-      "value": "Play your Fabrary deck"
+      "value": "Jogue com seu deck do Fabrary"
     }
   ],
   "play.view.deck": [
     {
       "type": 0,
-      "value": "View on Fabrary"
+      "value": "Ver no Fabrary"
     }
   ],
   "prep.accept.accepted": [
     {
       "type": 0,
-      "value": "Accepted"
+      "value": "Aceito"
     }
   ],
   "prep.accept.acceptedDescription": [
     {
       "type": 0,
-      "value": "You accepted. The match will open when your opponent accepts."
+      "value": "Você aceitou. A partida abrirá quando seu oponente aceitar."
     }
   ],
   "prep.accept.deciding": [
     {
       "type": 0,
-      "value": "Deciding…"
+      "value": "Decidindo…"
     }
   ],
   "prep.accept.description": [
     {
       "type": 0,
-      "value": "Accept the match to continue preparing your deck."
+      "value": "Aceite a partida para continuar preparando seu deck."
     }
   ],
   "prep.accept.matchFound": [
     {
       "type": 0,
-      "value": "Match found"
+      "value": "Partida encontrada"
     }
   ],
   "prep.accept.opponentAccepted": [
     {
       "type": 0,
-      "value": "Your opponent accepted"
+      "value": "Seu oponente aceitou"
     }
   ],
   "prep.accept.opponentAcceptedDescription": [
@@ -32063,133 +32138,133 @@
     },
     {
       "type": 0,
-      "value": " is ready. Accept to continue preparing your deck."
+      "value": " já aceitou. Aceite para continuar preparando seu deck."
     }
   ],
   "prep.accept.ready": [
     {
       "type": 0,
-      "value": "Ready to play?"
+      "value": "Tudo pronto para jogar?"
     }
   ],
   "prep.accept.waiting": [
     {
       "type": 0,
-      "value": "Waiting for your opponent"
+      "value": "Aguardando seu oponente"
     }
   ],
   "prep.arena.afterTurnOrder": [
     {
       "type": 0,
-      "value": "Arena cards open once turn order is decided."
+      "value": "As cartas de arena são liberadas quando a ordem dos turnos for decidida."
     }
   ],
   "prep.arena.cloaked": [
     {
       "type": 0,
-      "value": "Face-down equipment"
+      "value": "Equipamento virado para baixo"
     }
   ],
   "prep.arena.lock": [
     {
       "type": 0,
-      "value": "Lock arena cards"
+      "value": "Travar cartas de arena"
     }
   ],
   "prep.arena.locked": [
     {
       "type": 0,
-      "value": "Arena cards locked"
+      "value": "Cartas de arena travadas"
     }
   ],
   "prep.arena.opponent": [
     {
       "type": 0,
-      "value": "Opponent’s arena cards"
+      "value": "Cartas de arena do oponente"
     }
   ],
   "prep.arena.revealed": [
     {
       "type": 0,
-      "value": "Arena cards revealed"
+      "value": "Cartas de arena reveladas"
     }
   ],
   "prep.arena.select": [
     {
       "type": 0,
-      "value": "Select arena cards"
+      "value": "Selecione as cartas de arena"
     }
   ],
   "prep.arena.waiting": [
     {
       "type": 0,
-      "value": "Your arena cards are locked. Waiting for your opponent to lock theirs."
+      "value": "Suas cartas de arena estão travadas. Aguardando seu oponente travar as dele."
     }
   ],
   "prep.arena.yours": [
     {
       "type": 0,
-      "value": "Your arena cards"
+      "value": "Suas cartas de arena"
     }
   ],
   "prep.botNudge.description": [
     {
       "type": 0,
-      "value": "Challenge a competitive, hero-specific bot now. You can keep searching for a player while you play."
+      "value": "Desafie agora um bot competitivo, específico para o herói. Você pode continuar buscando um jogador enquanto joga."
     }
   ],
   "prep.botNudge.keepWaiting": [
     {
       "type": 0,
-      "value": "Keep waiting"
+      "value": "Continuar esperando"
     }
   ],
   "prep.botNudge.searching": [
     {
       "type": 0,
-      "value": "Still searching"
+      "value": "Ainda buscando"
     }
   ],
   "prep.botNudge.starting": [
     {
       "type": 0,
-      "value": "Starting bot game…"
+      "value": "Iniciando jogo contra o bot…"
     }
   ],
   "prep.botNudge.title": [
     {
       "type": 0,
-      "value": "No match yet"
+      "value": "Nenhuma partida ainda"
     }
   ],
   "prep.copied": [
     {
       "type": 0,
-      "value": "Copied!"
+      "value": "Copiado!"
     }
   ],
   "prep.copyInviteTitle": [
     {
       "type": 0,
-      "value": "Copy room invite URL"
+      "value": "Copiar URL de convite da sala"
     }
   ],
   "prep.copyUrl": [
     {
       "type": 0,
-      "value": "Copy URL"
+      "value": "Copiar URL"
     }
   ],
   "prep.defaultDeck": [
     {
       "type": 0,
-      "value": "Default deck"
+      "value": "Deck padrão"
     }
   ],
   "prep.dieRoll": [
     {
       "type": 0,
-      "value": "Die roll: "
+      "value": "Rolagem de dado: "
     },
     {
       "type": 1,
@@ -32223,84 +32298,95 @@
   "prep.firstPlayer.choose": [
     {
       "type": 0,
-      "value": "Choose who goes first"
+      "value": "Escolha quem começa"
     }
   ],
   "prep.firstPlayer.goFirst": [
     {
       "type": 0,
-      "value": "Go first"
+      "value": "Começar"
     }
   ],
   "prep.firstPlayer.goSecond": [
     {
       "type": 0,
-      "value": "Go second"
+      "value": "Jogar em segundo"
     }
   ],
   "prep.firstPlayer.status.opponent-decided-first": [
     {
       "type": 0,
-      "value": "Opponent decided: You go first"
+      "value": "O oponente decidiu: você começa"
     }
   ],
   "prep.firstPlayer.status.opponent-decided-second": [
     {
       "type": 0,
-      "value": "Opponent decided: You go second"
+      "value": "O oponente decidiu: você joga em segundo"
     }
   ],
   "prep.firstPlayer.status.opponent-deciding": [
     {
       "type": 0,
-      "value": "Opponent is deciding"
+      "value": "O oponente está decidindo"
     }
   ],
   "prep.firstPlayer.status.waiting-opponent": [
     {
       "type": 0,
-      "value": "Waiting for an opponent"
+      "value": "Aguardando um oponente"
     }
   ],
   "prep.firstPlayer.status.waiting-roll": [
     {
       "type": 0,
-      "value": "Waiting for the first-player roll"
+      "value": "Aguardando a rolagem do primeiro jogador"
     }
   ],
   "prep.firstPlayer.status.you-decided-first": [
     {
       "type": 0,
-      "value": "You decided: You go first"
+      "value": "Você decidiu: você começa"
     }
   ],
   "prep.firstPlayer.status.you-decided-second": [
     {
       "type": 0,
-      "value": "You decided: You go second"
+      "value": "Você decidiu: você joga em segundo"
     }
   ],
   "prep.loadingDeck": [
     {
       "type": 0,
-      "value": "Loading your deck…"
+      "value": "Carregando seu deck…"
     }
   ],
   "prep.loadingPlan": [
     {
       "type": 0,
-      "value": "Loading plan…"
+      "value": "Carregando plano…"
     }
   ],
   "prep.mainDeckAria": [
     {
       "type": 0,
-      "value": "Main deck: "
+      "value": "Deck principal: "
     },
     {
       "type": 6,
       "value": "count",
       "options": {
+        "=0": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " cartas"
+            }
+          ]
+        },
         "one": {
           "value": [
             {
@@ -32308,7 +32394,7 @@
             },
             {
               "type": 0,
-              "value": " card"
+              "value": " carta"
             }
           ]
         },
@@ -32319,7 +32405,7 @@
             },
             {
               "type": 0,
-              "value": " cards"
+              "value": " cartas"
             }
           ]
         }
@@ -32339,7 +32425,7 @@
   "prep.matchup": [
     {
       "type": 0,
-      "value": "Matchup"
+      "value": "Confronto"
     }
   ],
   "prep.matchupAria": [
@@ -32349,7 +32435,7 @@
     },
     {
       "type": 0,
-      "value": " versus "
+      "value": " contra "
     },
     {
       "type": 1,
@@ -32359,19 +32445,19 @@
   "prep.matchupPlan": [
     {
       "type": 0,
-      "value": "Fabrary matchup plan"
+      "value": "Plano de confronto do Fabrary"
     }
   ],
   "prep.opponent": [
     {
       "type": 0,
-      "value": "Opponent"
+      "value": "Oponente"
     }
   ],
   "prep.opponentHeroAria": [
     {
       "type": 0,
-      "value": "Opponent hero: "
+      "value": "Herói do oponente: "
     },
     {
       "type": 1,
@@ -32381,25 +32467,25 @@
   "prep.opponentState.arena-locked": [
     {
       "type": 0,
-      "value": "Arena cards locked"
+      "value": "Cartas de arena travadas"
     }
   ],
   "prep.opponentState.disconnected": [
     {
       "type": 0,
-      "value": "Disconnected"
+      "value": "Desconectado"
     }
   ],
   "prep.opponentState.ready": [
     {
       "type": 0,
-      "value": "Ready"
+      "value": "Tudo pronto"
     }
   ],
   "prep.otherMatchups": [
     {
       "type": 0,
-      "value": "All matchups"
+      "value": "Todos os confrontos"
     }
   ],
   "prep.othersInQueue": [
@@ -32407,6 +32493,17 @@
       "type": 6,
       "value": "count",
       "options": {
+        "=0": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " outros na fila"
+            }
+          ]
+        },
         "one": {
           "value": [
             {
@@ -32414,7 +32511,7 @@
             },
             {
               "type": 0,
-              "value": " other in queue"
+              "value": " outro na fila"
             }
           ]
         },
@@ -32425,7 +32522,7 @@
             },
             {
               "type": 0,
-              "value": " others in queue"
+              "value": " outros na fila"
             }
           ]
         }
@@ -32437,13 +32534,13 @@
   "prep.practiceChooseFirst": [
     {
       "type": 0,
-      "value": "Practice match: You decide who goes first."
+      "value": "Partida de treino: você decide quem começa."
     }
   ],
   "prep.prefersTurnOrder": [
     {
       "type": 0,
-      "value": "Prefers going "
+      "value": "Prefere jogar "
     },
     {
       "type": 1,
@@ -32453,29 +32550,29 @@
   "prep.presentation.emptyInventory": [
     {
       "type": 0,
-      "value": "No cards in inventory."
+      "value": "Nenhuma carta no inventário."
     }
   ],
   "prep.presentation.exact": [
     {
-      "type": 1,
-      "value": "count"
+      "type": 0,
+      "value": "exatamente "
     },
     {
-      "type": 0,
-      "value": " exact"
+      "type": 1,
+      "value": "count"
     }
   ],
   "prep.presentation.hero": [
     {
       "type": 0,
-      "value": "Hero"
+      "value": "Herói"
     }
   ],
   "prep.presentation.inventoryCount": [
     {
       "type": 0,
-      "value": "Inventory ("
+      "value": "Inventário ("
     },
     {
       "type": 1,
@@ -32489,7 +32586,7 @@
   "prep.presentation.mainCount": [
     {
       "type": 0,
-      "value": "Main deck ("
+      "value": "Deck principal ("
     },
     {
       "type": 1,
@@ -32510,18 +32607,18 @@
   ],
   "prep.presentation.minimum": [
     {
-      "type": 1,
-      "value": "count"
+      "type": 0,
+      "value": "mín. "
     },
     {
-      "type": 0,
-      "value": " min"
+      "type": 1,
+      "value": "count"
     }
   ],
   "prep.presentation.moveCopy": [
     {
       "type": 0,
-      "value": "Move one copy of "
+      "value": "Mover uma cópia de "
     },
     {
       "type": 1,
@@ -32529,7 +32626,7 @@
     },
     {
       "type": 0,
-      "value": " to "
+      "value": " para "
     },
     {
       "type": 1,
@@ -32539,25 +32636,25 @@
   "prep.presentation.moveToInventoryHint": [
     {
       "type": 0,
-      "value": "Click a card to move one copy to Inventory."
+      "value": "Clique em uma carta para mover uma cópia para o Inventário."
     }
   ],
   "prep.presentation.moveToMainHint": [
     {
       "type": 0,
-      "value": "Click a card to move one copy to the main deck."
+      "value": "Clique em uma carta para mover uma cópia para o deck principal."
     }
   ],
   "prep.presentation.noneRegistered": [
     {
       "type": 0,
-      "value": "none registered"
+      "value": "nenhuma registrada"
     }
   ],
   "prep.presentation.removeCard": [
     {
       "type": 0,
-      "value": "Remove "
+      "value": "Remover "
     },
     {
       "type": 1,
@@ -32567,7 +32664,7 @@
   "prep.presentation.removeEquipment": [
     {
       "type": 0,
-      "value": "Remove "
+      "value": "Remover "
     },
     {
       "type": 1,
@@ -32575,7 +32672,7 @@
     },
     {
       "type": 0,
-      "value": " from "
+      "value": " de "
     },
     {
       "type": 1,
@@ -32585,7 +32682,7 @@
   "prep.presentation.selectCard": [
     {
       "type": 0,
-      "value": "Select "
+      "value": "Selecionar "
     },
     {
       "type": 1,
@@ -32595,7 +32692,7 @@
   "prep.presentation.selectEquipment": [
     {
       "type": 0,
-      "value": "Select "
+      "value": "Selecionar "
     },
     {
       "type": 1,
@@ -32603,7 +32700,7 @@
     },
     {
       "type": 0,
-      "value": " for "
+      "value": " para "
     },
     {
       "type": 1,
@@ -32613,13 +32710,13 @@
   "prep.presentation.title": [
     {
       "type": 0,
-      "value": "Your presentation"
+      "value": "Sua apresentação"
     }
   ],
   "prep.presentation.weapons": [
     {
       "type": 0,
-      "value": "Weapons ("
+      "value": "Armas ("
     },
     {
       "type": 1,
@@ -32633,49 +32730,49 @@
   "prep.rollWonYou": [
     {
       "type": 0,
-      "value": "You won the roll and decide who goes first."
+      "value": "Você venceu a rolagem e decide quem começa."
     }
   ],
   "prep.slot.arms": [
     {
       "type": 0,
-      "value": "arms"
+      "value": "braços"
     }
   ],
   "prep.slot.chest": [
     {
       "type": 0,
-      "value": "chest"
+      "value": "peito"
     }
   ],
   "prep.slot.head": [
     {
       "type": 0,
-      "value": "head"
+      "value": "cabeça"
     }
   ],
   "prep.slot.legs": [
     {
       "type": 0,
-      "value": "legs"
+      "value": "pernas"
     }
   ],
   "prep.slot.weapon": [
     {
       "type": 0,
-      "value": "weapon"
+      "value": "arma"
     }
   ],
   "prep.status.ready": [
     {
       "type": 0,
-      "value": "Ready"
+      "value": "Tudo pronto"
     }
   ],
   "prep.suggestedAgainst": [
     {
       "type": 0,
-      "value": "Suggested against "
+      "value": "Sugerido contra "
     },
     {
       "type": 1,
@@ -32685,7 +32782,7 @@
   "prep.suggestedTag": [
     {
       "type": 0,
-      "value": "Suggested"
+      "value": "Sugerido"
     }
   ],
   "prep.suggestionHint": [
@@ -32697,7 +32794,7 @@
           "value": [
             {
               "type": 0,
-              "value": "Suggested: "
+              "value": "Sugerido: "
             },
             {
               "type": 1,
@@ -32712,7 +32809,7 @@
             },
             {
               "type": 0,
-              "value": " suggested"
+              "value": " sugeridos"
             }
           ]
         }
@@ -32728,25 +32825,25 @@
     },
     {
       "type": 0,
-      "value": " — Prepare"
+      "value": " — Preparação"
     }
   ],
   "prep.turnOrder.first": [
     {
       "type": 0,
-      "value": "first"
+      "value": "primeiro"
     }
   ],
   "prep.turnOrder.second": [
     {
       "type": 0,
-      "value": "second"
+      "value": "em segundo"
     }
   ],
   "prep.turnOrder.youFirst": [
     {
       "type": 0,
-      "value": "You go "
+      "value": "Você joga "
     },
     {
       "type": 8,
@@ -32754,7 +32851,7 @@
       "children": [
         {
           "type": 0,
-          "value": "first"
+          "value": "primeiro"
         }
       ]
     }
@@ -32762,7 +32859,7 @@
   "prep.turnOrder.youSecond": [
     {
       "type": 0,
-      "value": "You go "
+      "value": "Você joga "
     },
     {
       "type": 8,
@@ -32770,7 +32867,7 @@
       "children": [
         {
           "type": 0,
-          "value": "second"
+          "value": "em segundo"
         }
       ]
     }
@@ -32778,31 +32875,31 @@
   "prep.unknownHero": [
     {
       "type": 0,
-      "value": "Unknown hero"
+      "value": "Herói desconhecido"
     }
   ],
   "prep.waitingOpponent": [
     {
       "type": 0,
-      "value": "Waiting for an opponent…"
+      "value": "Aguardando um oponente…"
     }
   ],
   "prep.waitingOpponentNoEllipsis": [
     {
       "type": 0,
-      "value": "Waiting for opponent"
+      "value": "Aguardando oponente"
     }
   ],
   "prep.weaponIssue.multiple-off-hands": [
     {
       "type": 0,
-      "value": "You can only bring one off-hand."
+      "value": "Você só pode levar um off-hand."
     }
   ],
   "prep.weaponIssue.multiple-quivers": [
     {
       "type": 0,
-      "value": "You can only bring one quiver."
+      "value": "Você só pode levar uma aljava."
     }
   ],
   "prep.weaponIssue.multiple-two-handers": [
@@ -32812,7 +32909,7 @@
     },
     {
       "type": 0,
-      "value": " needs both hands. Remove a weapon first."
+      "value": " precisa das duas mãos. Remova uma arma primeiro."
     }
   ],
   "prep.weaponIssue.not-weapon-zone": [
@@ -32822,7 +32919,7 @@
     },
     {
       "type": 0,
-      "value": " can't go in a weapon zone."
+      "value": " não pode ir em uma zona de arma."
     }
   ],
   "prep.weaponIssue.single-weapon-zone": [
@@ -32832,13 +32929,13 @@
     },
     {
       "type": 0,
-      "value": " has only one weapon zone. Remove your weapon first."
+      "value": " tem só uma zona de arma. Remova sua arma primeiro."
     }
   ],
   "prep.weaponIssue.too-many": [
     {
       "type": 0,
-      "value": "Both hands are full. Remove a weapon first."
+      "value": "As duas mãos estão ocupadas. Remova uma arma primeiro."
     }
   ],
   "prep.weaponIssue.two-hander-pairing": [
@@ -32848,80 +32945,76 @@
     },
     {
       "type": 0,
-      "value": " needs both hands. Remove a weapon first."
+      "value": " precisa das duas mãos. Remova uma arma primeiro."
     }
   ],
   "prep.you": [
     {
       "type": 0,
-      "value": "You"
+      "value": "Você"
     }
   ],
   "prep.youLower": [
     {
       "type": 0,
-      "value": "you"
+      "value": "você"
     }
   ],
   "prep.yourHero": [
     {
       "type": 0,
-      "value": "Your hero"
+      "value": "Seu herói"
     }
   ],
   "prep.zone.inventory": [
     {
       "type": 0,
-      "value": "Inventory"
+      "value": "Inventário"
     }
   ],
   "prep.zone.main": [
     {
       "type": 0,
-      "value": "Main deck"
+      "value": "Deck principal"
     }
   ],
   "replay.confirmDelete": [
     {
       "type": 0,
-      "value": "Delete this saved replay? This cannot be undone."
+      "value": "Excluir este replay salvo? Isso não pode ser desfeito."
     }
   ],
   "replay.controls.exit": [
     {
       "type": 0,
-      "value": "Exit replay"
+      "value": "Sair do replay"
     }
   ],
   "replay.controls.export": [
     {
       "type": 0,
-      "value": "Export replay"
+      "value": "Exportar replay"
     }
   ],
   "replay.controls.frame": [
     {
       "type": 0,
-      "value": "Replay frame"
+      "value": "Quadro do replay"
     }
   ],
   "replay.controls.maximize": [
     {
       "type": 0,
-      "value": "Maximize replay controls"
+      "value": "Maximizar controles do replay"
     }
   ],
   "replay.controls.minimize": [
     {
       "type": 0,
-      "value": "Minimize replay controls"
+      "value": "Minimizar controles do replay"
     }
   ],
   "replay.controls.next": [
-    {
-      "type": 0,
-      "value": "Next "
-    },
     {
       "type": 6,
       "value": "count",
@@ -32929,22 +33022,23 @@
         "one": {
           "value": [
             {
-              "type": 7
-            },
-            {
               "type": 0,
-              "value": " replay frame"
+              "value": "Próximo quadro do replay"
             }
           ]
         },
         "other": {
           "value": [
             {
+              "type": 0,
+              "value": "Próximos "
+            },
+            {
               "type": 7
             },
             {
               "type": 0,
-              "value": " replay frames"
+              "value": " quadros do replay"
             }
           ]
         }
@@ -32955,21 +33049,14 @@
   ],
   "replay.controls.previous": [
     {
-      "type": 0,
-      "value": "Previous "
-    },
-    {
       "type": 6,
       "value": "count",
       "options": {
         "one": {
           "value": [
             {
-              "type": 7
-            },
-            {
               "type": 0,
-              "value": " replay frame"
+              "value": "Quadro anterior do replay"
             }
           ]
         },
@@ -32980,7 +33067,7 @@
             },
             {
               "type": 0,
-              "value": " replay frames"
+              "value": " quadros anteriores do replay"
             }
           ]
         }
@@ -32992,12 +33079,23 @@
   "replay.controls.stepSize": [
     {
       "type": 0,
-      "value": "Replay step size: "
+      "value": "Tamanho do passo do replay: "
     },
     {
       "type": 6,
       "value": "count",
       "options": {
+        "=0": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " quadros"
+            }
+          ]
+        },
         "one": {
           "value": [
             {
@@ -33005,7 +33103,7 @@
             },
             {
               "type": 0,
-              "value": " frame"
+              "value": " quadro"
             }
           ]
         },
@@ -33016,7 +33114,7 @@
             },
             {
               "type": 0,
-              "value": " frames"
+              "value": " quadros"
             }
           ]
         }
@@ -33034,43 +33132,43 @@
   "replay.delete": [
     {
       "type": 0,
-      "value": "Delete replay"
+      "value": "Excluir replay"
     }
   ],
   "replay.deleting": [
     {
       "type": 0,
-      "value": "Deleting replay"
+      "value": "Excluindo replay"
     }
   ],
   "replay.exportJson": [
     {
       "type": 0,
-      "value": "Export replay JSON"
+      "value": "Exportar replay em JSON"
     }
   ],
   "replay.favorite": [
     {
       "type": 0,
-      "value": "Favorite replay"
+      "value": "Favoritar replay"
     }
   ],
   "replay.favoriteLimit": [
     {
       "type": 0,
-      "value": "You can favorite up to 20 replays. Remove one from favorites first."
+      "value": "Você pode favoritar até 20 replays. Remova um dos favoritos primeiro."
     }
   ],
   "replay.favoriteSaving": [
     {
       "type": 0,
-      "value": "Saving favorite"
+      "value": "Salvando favorito"
     }
   ],
   "replay.notes.add": [
     {
       "type": 0,
-      "value": "Add a note to frame "
+      "value": "Adicionar uma nota ao quadro "
     },
     {
       "type": 1,
@@ -33080,13 +33178,13 @@
   "replay.notes.close": [
     {
       "type": 0,
-      "value": "Close replay notes"
+      "value": "Fechar notas do replay"
     }
   ],
   "replay.notes.edit": [
     {
       "type": 0,
-      "value": "Edit the note on frame "
+      "value": "Editar a nota do quadro "
     },
     {
       "type": 1,
@@ -33096,7 +33194,7 @@
   "replay.notes.frame": [
     {
       "type": 0,
-      "value": "Frame "
+      "value": "Quadro "
     },
     {
       "type": 1,
@@ -33106,21 +33204,17 @@
   "replay.notes.frameTitle": [
     {
       "type": 0,
-      "value": "Frame "
+      "value": "Nota do quadro "
     },
     {
       "type": 1,
       "value": "frame"
-    },
-    {
-      "type": 0,
-      "value": " note"
     }
   ],
   "replay.notes.input": [
     {
       "type": 0,
-      "value": "Note for frame "
+      "value": "Nota para o quadro "
     },
     {
       "type": 1,
@@ -33130,13 +33224,13 @@
   "replay.notes.nextPage": [
     {
       "type": 0,
-      "value": "Next marked frames"
+      "value": "Próximos quadros marcados"
     }
   ],
   "replay.notes.openFrame": [
     {
       "type": 0,
-      "value": "Open note on frame "
+      "value": "Abrir a nota do quadro "
     },
     {
       "type": 1,
@@ -33146,73 +33240,73 @@
   "replay.notes.panel": [
     {
       "type": 0,
-      "value": "Replay notes"
+      "value": "Notas do replay"
     }
   ],
   "replay.notes.placeholder": [
     {
       "type": 0,
-      "value": "What stood out here? Record a decision, mistake, or idea to revisit."
+      "value": "O que chamou atenção aqui? Registre uma decisão, um erro ou uma ideia para rever."
     }
   ],
   "replay.notes.previousPage": [
     {
       "type": 0,
-      "value": "Previous marked frames"
+      "value": "Quadros marcados anteriores"
     }
   ],
   "replay.notes.remove": [
     {
       "type": 0,
-      "value": "Remove note"
+      "value": "Remover nota"
     }
   ],
   "replay.notes.save": [
     {
       "type": 0,
-      "value": "Save note"
+      "value": "Salvar nota"
     }
   ],
   "replay.notes.saved": [
     {
       "type": 0,
-      "value": "Marked frames"
+      "value": "Quadros marcados"
     }
   ],
   "replay.prepareExport": [
     {
       "type": 0,
-      "value": "Preparing replay export"
+      "value": "Preparando exportação do replay"
     }
   ],
   "replay.unfavorite": [
     {
       "type": 0,
-      "value": "Remove replay from favorites"
+      "value": "Remover replay dos favoritos"
     }
   ],
   "replay.watch": [
     {
       "type": 0,
-      "value": "▶ Watch"
+      "value": "▶ Assistir"
     }
   ],
   "replay.watchLoading": [
     {
       "type": 0,
-      "value": "Loading…"
+      "value": "Carregando…"
     }
   ],
   "server.log.undo.last.action": [
     {
       "type": 0,
-      "value": "⤺ the last action was undone"
+      "value": "⤺ a última ação foi desfeita"
     }
   ],
   "server.log.undo.turn.start": [
     {
       "type": 0,
-      "value": "⤺ returned to the beginning of turn "
+      "value": "⤺ voltou ao início do turno "
     },
     {
       "type": 1,
@@ -33230,193 +33324,193 @@
     },
     {
       "type": 0,
-      "value": " claims victory — the opponent was idle"
+      "value": " reivindica a vitória — o oponente ficou inativo"
     }
   ],
   "settings.animations": [
     {
       "type": 0,
-      "value": "Animations"
+      "value": "Animações"
     }
   ],
   "settings.animations.preference": [
     {
       "type": 0,
-      "value": "Animation preference"
+      "value": "Preferência de animação"
     }
   ],
   "settings.animations.tooltip": [
     {
       "type": 0,
-      "value": "Default follows your operating system's reduced-motion setting."
+      "value": "O padrão segue a configuração de movimento reduzido do seu sistema operacional."
     }
   ],
   "settings.audioVisuals": [
     {
       "type": 0,
-      "value": "Audio & visuals"
+      "value": "Áudio e visual"
     }
   ],
   "settings.cardDisplay": [
     {
       "type": 0,
-      "value": "Card display"
+      "value": "Exibição das cartas"
     }
   ],
   "settings.cardDisplay.full": [
     {
       "type": 0,
-      "value": "Full card"
+      "value": "Carta inteira"
     }
   ],
   "settings.cardDisplay.square": [
     {
       "type": 0,
-      "value": "Square"
+      "value": "Quadrada"
     }
   ],
   "settings.close": [
     {
       "type": 0,
-      "value": "Close settings"
+      "value": "Fechar configurações"
     }
   ],
   "settings.concede.action": [
     {
       "type": 0,
-      "value": "Concede game"
+      "value": "Desistir do jogo"
     }
   ],
   "settings.concede.confirm": [
     {
       "type": 0,
-      "value": "Concede the game?"
+      "value": "Desistir do jogo?"
     }
   ],
   "settings.concede.yes": [
     {
       "type": 0,
-      "value": "Yes, concede"
+      "value": "Sim, desistir"
     }
   ],
   "settings.confirmActions": [
     {
       "type": 0,
-      "value": "Confirm actions"
+      "value": "Confirmar ações"
     }
   ],
   "settings.confirmActions.aria": [
     {
       "type": 0,
-      "value": "Confirm actions when playing cards or activating abilities"
+      "value": "Confirmar ações ao jogar cartas ou ativar habilidades"
     }
   ],
   "settings.confirmActions.tooltip": [
     {
       "type": 0,
-      "value": "Requires confirmation when playing cards or activating abilities."
+      "value": "Pede confirmação ao jogar cartas ou ativar habilidades."
     }
   ],
   "settings.danger": [
     {
       "type": 0,
-      "value": "Danger zone"
+      "value": "Zona de perigo"
     }
   ],
   "settings.draw.accept": [
     {
       "type": 0,
-      "value": "Accept draw"
+      "value": "Aceitar empate"
     }
   ],
   "settings.draw.decline": [
     {
       "type": 0,
-      "value": "Decline draw"
+      "value": "Recusar empate"
     }
   ],
   "settings.draw.offer": [
     {
       "type": 0,
-      "value": "Offer a draw"
+      "value": "Oferecer empate"
     }
   ],
   "settings.draw.received": [
     {
       "type": 0,
-      "value": "Your opponent offers a draw"
+      "value": "Seu oponente oferece um empate"
     }
   ],
   "settings.draw.title": [
     {
       "type": 0,
-      "value": "Draw"
+      "value": "Empate"
     }
   ],
   "settings.draw.waiting": [
     {
       "type": 0,
-      "value": "Waiting for your opponent to accept the draw"
+      "value": "Aguardando seu oponente aceitar o empate"
     }
   ],
   "settings.draw.withdraw": [
     {
       "type": 0,
-      "value": "Withdraw offer"
+      "value": "Retirar oferta"
     }
   ],
   "settings.gameplay": [
     {
       "type": 0,
-      "value": "Gameplay"
+      "value": "Jogabilidade"
     }
   ],
   "settings.guidance.disableHint": [
     {
       "type": 0,
-      "value": "Uncheck Show guidance in Settings, or"
+      "value": "Desmarque Mostrar orientações nas Configurações ou"
     }
   ],
   "settings.guidance.disableNow": [
     {
       "type": 0,
-      "value": "disable now"
+      "value": "desative agora"
     }
   ],
   "settings.guidance.title": [
     {
       "type": 0,
-      "value": "Guidance settings"
+      "value": "Configurações de orientação"
     }
   ],
   "settings.guidance.tooltip": [
     {
       "type": 0,
-      "value": "Uncheck Show guidance in Settings, or select Disable now."
+      "value": "Desmarque Mostrar orientações nas Configurações ou selecione Desativar agora."
     }
   ],
   "settings.history": [
     {
       "type": 0,
-      "value": "Game history"
+      "value": "Histórico do jogo"
     }
   ],
   "settings.history.previousTurnStart": [
     {
       "type": 0,
-      "value": "Beginning of previous turn"
+      "value": "Início do turno anterior"
     }
   ],
   "settings.history.restore": [
     {
       "type": 0,
-      "value": "Restore turn"
+      "value": "Restaurar turno"
     }
   ],
   "settings.history.restoreConfirm": [
     {
       "type": 0,
-      "value": "Restore the beginning of turn "
+      "value": "Restaurar o início do turno "
     },
     {
       "type": 1,
@@ -33424,13 +33518,13 @@
     },
     {
       "type": 0,
-      "value": "? Later actions will be discarded."
+      "value": "? As ações posteriores serão descartadas."
     }
   ],
   "settings.history.turnStart": [
     {
       "type": 0,
-      "value": "Beginning of turn "
+      "value": "Início do turno "
     },
     {
       "type": 1,
@@ -33440,151 +33534,151 @@
   "settings.history.undoLast": [
     {
       "type": 0,
-      "value": "Undo last action"
+      "value": "Desfazer última ação"
     }
   ],
   "settings.motion.default": [
     {
       "type": 0,
-      "value": "Default"
+      "value": "Padrão"
     }
   ],
   "settings.motion.defaultDescription": [
     {
       "type": 0,
-      "value": "Default: follow your operating system's reduced-motion setting"
+      "value": "Padrão: segue a configuração de movimento reduzido do seu sistema operacional"
     }
   ],
   "settings.motion.full": [
     {
       "type": 0,
-      "value": "Full"
+      "value": "Completa"
     }
   ],
   "settings.motion.fullDescription": [
     {
       "type": 0,
-      "value": "Full: show card travel and connection animations"
+      "value": "Completa: mostra o deslocamento das cartas e as animações de conexão"
     }
   ],
   "settings.motion.reduced": [
     {
       "type": 0,
-      "value": "Reduced"
+      "value": "Reduzida"
     }
   ],
   "settings.motion.reducedDescription": [
     {
       "type": 0,
-      "value": "Reduced: hide card travel and connections; keep local card fades"
+      "value": "Reduzida: oculta o deslocamento das cartas e as conexões; mantém os esmaecimentos locais das cartas"
     }
   ],
   "settings.optionHotkeys": [
     {
       "type": 0,
-      "value": "Option hotkeys"
+      "value": "Atalhos de opções"
     }
   ],
   "settings.optionHotkeys.aria": [
     {
       "type": 0,
-      "value": "Choose prompt options with Q W E R A S D F"
+      "value": "Escolher opções dos avisos com Q W E R A S D F"
     }
   ],
   "settings.optionHotkeys.tooltip": [
     {
       "type": 0,
-      "value": "Press Q W E R A S D F to choose options in prompts."
+      "value": "Pressione Q W E R A S D F para escolher opções nos avisos."
     }
   ],
   "settings.playableCards": [
     {
       "type": 0,
-      "value": "Playable cards"
+      "value": "Cartas jogáveis"
     }
   ],
   "settings.playableCards.cue": [
     {
       "type": 0,
-      "value": "Playable card cue"
+      "value": "Destaque de cartas jogáveis"
     }
   ],
   "settings.playableCards.glow": [
     {
       "type": 0,
-      "value": "Glow"
+      "value": "Brilho"
     }
   ],
   "settings.playableCards.highContrast": [
     {
       "type": 0,
-      "value": "High contrast"
+      "value": "Alto contraste"
     }
   ],
   "settings.playableCards.tooltip": [
     {
       "type": 0,
-      "value": "Glow adds a restrained green halo. High contrast uses a crisp outline."
+      "value": "Brilho adiciona um halo verde discreto. Alto contraste usa um contorno nítido."
     }
   ],
   "settings.priority": [
     {
       "type": 0,
-      "value": "Priority"
+      "value": "Prioridade"
     }
   ],
   "settings.priority.alwaysPause": [
     {
       "type": 0,
-      "value": "Always pause"
+      "value": "Sempre pausar"
     }
   ],
   "settings.priority.autoPass": [
     {
       "type": 0,
-      "value": "Auto-pass"
+      "value": "Passar automaticamente"
     }
   ],
   "settings.priority.autoPassDescription": [
     {
       "type": 0,
-      "value": "Auto-pass: immediately pass priority when no instant, reaction, or board ability can be played"
+      "value": "Passar automaticamente: passa a prioridade imediatamente quando nenhum instant, reaction ou habilidade do tabuleiro puder ser usado"
     }
   ],
   "settings.priority.behavior": [
     {
       "type": 0,
-      "value": "Priority behavior"
+      "value": "Comportamento de prioridade"
     }
   ],
   "settings.showGuidance": [
     {
       "type": 0,
-      "value": "Show guidance"
+      "value": "Mostrar orientações"
     }
   ],
   "settings.showGuidance.tooltip": [
     {
       "type": 0,
-      "value": "Shows priority and reaction window prompts."
+      "value": "Mostra avisos das janelas de prioridade e de reaction."
     }
   ],
   "settings.soundEffects": [
     {
       "type": 0,
-      "value": "Sound effects"
+      "value": "Efeitos sonoros"
     }
   ],
   "settings.soundEffects.tooltip": [
     {
       "type": 0,
-      "value": "Plays subtle card sounds and alerts you when priority returns while the game is out of focus."
+      "value": "Toca sons sutis das cartas e avisa quando a prioridade voltar para você enquanto o jogo estiver fora de foco."
     }
   ],
   "settings.title": [
     {
       "type": 0,
-      "value": "Settings"
+      "value": "Configurações"
     }
   ],
   "settings.volume": [
@@ -33596,49 +33690,49 @@
   "settings.volume.aria": [
     {
       "type": 0,
-      "value": "Sound effects volume"
+      "value": "Volume dos efeitos sonoros"
     }
   ],
   "social.accept": [
     {
       "type": 0,
-      "value": "Accept"
+      "value": "Aceitar"
     }
   ],
   "social.acceptFriend": [
     {
       "type": 0,
-      "value": "Accept friend"
+      "value": "Aceitar amizade"
     }
   ],
   "social.addFriend": [
     {
       "type": 0,
-      "value": "Add friend"
+      "value": "Adicionar amigo"
     }
   ],
   "social.cancelRequest": [
     {
       "type": 0,
-      "value": "Cancel"
+      "value": "Cancelar"
     }
   ],
   "social.chat.empty": [
     {
       "type": 0,
-      "value": "No messages yet. Say hello."
+      "value": "Nenhuma mensagem ainda. Diga oi."
     }
   ],
   "social.chat.loadEarlier": [
     {
       "type": 0,
-      "value": "Load earlier"
+      "value": "Carregar anteriores"
     }
   ],
   "social.chat.newMessageFrom": [
     {
       "type": 0,
-      "value": "New message from "
+      "value": "Nova mensagem de "
     },
     {
       "type": 1,
@@ -33656,67 +33750,67 @@
   "social.chat.placeholder": [
     {
       "type": 0,
-      "value": "Write a message"
+      "value": "Escreva uma mensagem"
     }
   ],
   "social.chat.send": [
     {
       "type": 0,
-      "value": "Send"
+      "value": "Enviar"
     }
   ],
   "social.decline": [
     {
       "type": 0,
-      "value": "Decline"
+      "value": "Recusar"
     }
   ],
   "social.empty": [
     {
       "type": 0,
-      "value": "Add a player by username, or add an opponent after a game."
+      "value": "Adicione um jogador pelo nome de usuário ou adicione um oponente depois de um jogo."
     }
   ],
   "social.error.conflict": [
     {
       "type": 0,
-      "value": "That request does not match the current friendship state."
+      "value": "Esse pedido não corresponde ao estado atual da amizade."
     }
   ],
   "social.error.friendRequired": [
     {
       "type": 0,
-      "value": "You must be friends to do that."
+      "value": "Vocês precisam ser amigos para fazer isso."
     }
   ],
   "social.error.messageBounds": [
     {
       "type": 0,
-      "value": "Messages must contain 1 to 1,000 characters."
+      "value": "As mensagens devem ter de 1 a 1.000 caracteres."
     }
   ],
   "social.error.rateLimited": [
     {
       "type": 0,
-      "value": "Too many social actions. Try again later."
+      "value": "Muitas ações sociais. Tente novamente mais tarde."
     }
   ],
   "social.error.self": [
     {
       "type": 0,
-      "value": "You cannot add yourself."
+      "value": "Você não pode adicionar sua própria conta."
     }
   ],
   "social.error.unavailable": [
     {
       "type": 0,
-      "value": "That friend is offline."
+      "value": "Esse contato está offline."
     }
   ],
   "social.error.userNotFound": [
     {
       "type": 0,
-      "value": "No player has that username."
+      "value": "Nenhum jogador tem esse nome de usuário."
     }
   ],
   "social.friendCount": [
@@ -33724,6 +33818,17 @@
       "type": 6,
       "value": "count",
       "options": {
+        "=0": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " amigos"
+            }
+          ]
+        },
         "one": {
           "value": [
             {
@@ -33731,7 +33836,7 @@
             },
             {
               "type": 0,
-              "value": " friend"
+              "value": " amigo"
             }
           ]
         },
@@ -33742,7 +33847,7 @@
             },
             {
               "type": 0,
-              "value": " friends"
+              "value": " amigos"
             }
           ]
         }
@@ -33754,25 +33859,25 @@
   "social.friends": [
     {
       "type": 0,
-      "value": "Friends"
+      "value": "Amigos"
     }
   ],
   "social.gameInvites": [
     {
       "type": 0,
-      "value": "Game invitations"
+      "value": "Convites para jogos"
     }
   ],
   "social.invite.action": [
     {
       "type": 0,
-      "value": "Invite to game"
+      "value": "Convidar para jogo"
     }
   ],
   "social.invite.modalTitle": [
     {
       "type": 0,
-      "value": "Invite "
+      "value": "Convidar "
     },
     {
       "type": 1,
@@ -33782,19 +33887,19 @@
   "social.invite.noDeck": [
     {
       "type": 0,
-      "value": "Import a deck for this format before creating the room."
+      "value": "Importe um deck deste formato antes de criar a sala."
     }
   ],
   "social.invite.send": [
     {
       "type": 0,
-      "value": "Send invite"
+      "value": "Enviar convite"
     }
   ],
   "social.invite.title": [
     {
       "type": 0,
-      "value": "Invite "
+      "value": "Convidar "
     },
     {
       "type": 1,
@@ -33802,19 +33907,19 @@
     },
     {
       "type": 0,
-      "value": " to a game"
+      "value": " para um jogo"
     }
   ],
   "social.message": [
     {
       "type": 0,
-      "value": "Message"
+      "value": "Mensagem"
     }
   ],
   "social.messageNamed": [
     {
       "type": 0,
-      "value": "Message "
+      "value": "Enviar mensagem para "
     },
     {
       "type": 1,
@@ -33842,13 +33947,13 @@
   "social.pending": [
     {
       "type": 0,
-      "value": "Pending"
+      "value": "Pendente"
     }
   ],
   "social.removeConfirm": [
     {
       "type": 0,
-      "value": "Remove "
+      "value": "Remover "
     },
     {
       "type": 1,
@@ -33856,13 +33961,13 @@
     },
     {
       "type": 0,
-      "value": " and delete this conversation?"
+      "value": " e excluir esta conversa?"
     }
   ],
   "social.removeNamed": [
     {
       "type": 0,
-      "value": "Remove "
+      "value": "Remover "
     },
     {
       "type": 1,
@@ -33872,19 +33977,19 @@
   "social.requestSent": [
     {
       "type": 0,
-      "value": "Request sent"
+      "value": "Pedido enviado"
     }
   ],
   "social.requests.incoming": [
     {
       "type": 0,
-      "value": "Friend requests"
+      "value": "Pedidos de amizade"
     }
   ],
   "social.requests.outgoing": [
     {
       "type": 0,
-      "value": "Sent requests"
+      "value": "Pedidos enviados"
     }
   ],
   "social.unreadMessages": [
@@ -33892,6 +33997,17 @@
       "type": 6,
       "value": "count",
       "options": {
+        "=0": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " mensagens não lidas"
+            }
+          ]
+        },
         "one": {
           "value": [
             {
@@ -33899,7 +34015,7 @@
             },
             {
               "type": 0,
-              "value": " unread message"
+              "value": " mensagem não lida"
             }
           ]
         },
@@ -33910,7 +34026,7 @@
             },
             {
               "type": 0,
-              "value": " unread messages"
+              "value": " mensagens não lidas"
             }
           ]
         }
@@ -33922,19 +34038,19 @@
   "social.username": [
     {
       "type": 0,
-      "value": "Username"
+      "value": "Nome de usuário"
     }
   ],
   "versionUpdate.dismiss": [
     {
       "type": 0,
-      "value": "Got it"
+      "value": "Entendi"
     }
   ],
   "versionUpdate.kicker": [
     {
       "type": 0,
-      "value": "Version update"
+      "value": "Atualização de versão"
     }
   ],
   "versionUpdate.title": [
@@ -33950,7 +34066,7 @@
   "versionUpdate.updatedAt": [
     {
       "type": 0,
-      "value": "Updated "
+      "value": "Atualizado em "
     },
     {
       "type": 1,

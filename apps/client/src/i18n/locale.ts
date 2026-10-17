@@ -6,7 +6,7 @@ export type SupportedLocale = (typeof SUPPORTED_LOCALES)[number];
 export const LOCALE_AUTONYMS: Readonly<Record<SupportedLocale, string>> = {
   en: "English",
   "zh-Hans": "简体中文",
-  "pt-BR": "Português (Brasil)",
+  "pt-BR": "Português",
 };
 
 export const LOCALE_STORAGE_KEY = "fyendal-locale";

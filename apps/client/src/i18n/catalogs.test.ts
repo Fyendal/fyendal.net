@@ -218,6 +218,19 @@ describe("locale catalogs", () => {
     )).toBe("Regurgitating Slog 获得压制 (dominate)");
   });
 
+  it("keeps Flesh and Blood terms in English for Brazilian Portuguese", () => {
+    const intl = createTestIntl("pt-BR");
+
+    expect(intl.formatMessage({ id: "format.classicConstructed" })).toBe("Classic Constructed");
+    expect(intl.formatMessage({ id: "format.silverAge" })).toBe("Silver Age");
+    expect(intl.formatMessage({ id: "settings.priority.autoPassDescription" }))
+      .toBe("Passar automaticamente: passa a prioridade imediatamente quando nenhum instant, reaction ou habilidade do tabuleiro puder ser usado");
+    expect(intl.formatMessage(
+      { id: "lobby.deck.heroAndCount" },
+      { hero: "Bravo", count: 0 },
+    )).toBe("Bravo · 0 cartas");
+  });
+
   it("separates Chinese text from interpolated names with a space", () => {
     const tight = /[一-鿿]\{(?:card|source|player|name|hero)\}|\{(?:card|source|player|name|hero)\}[一-鿿]/;
     const source: unknown = JSON.parse(
