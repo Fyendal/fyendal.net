@@ -2,6 +2,7 @@ import type { EngineRuntime } from "./runtimePorts.js";
 import type { GameStateInternal } from "./runtimeState.js";
 import type {
   CardView,
+  ChainAdditionalTargetView,
   ChainLinkView,
   CombatValueModifierView,
   EquipmentSlot,
@@ -509,6 +510,8 @@ function projectedCombatPrevention(
   runtime: EngineRuntime,
   link: GameStateInternal["chain"][number],
   calculatedDamage: number,
+  // Shields that additional attack-targets, damaged first, will spend.
+  spentShields: ReadonlySet<Modifier> = new Set(),
 ): { amount: number; modifiers: CombatValueModifier[] } | undefined {
   if (link.resolved || link.targetAllyId !== undefined) return undefined;
   const pendingPacket = state.pendingDecision?.arcane?.combat === true &&
@@ -522,6 +525,7 @@ function projectedCombatPrevention(
   const source = findCardAnywhere(state, link.attackingCard.instanceId)?.card ?? link.attackingCard;
   const activeModifiers = state.modifiers.filter((modifier) =>
     !modifier.consumed &&
+    !spentShields.has(modifier) &&
     modifier.scope === "until-end-of-turn" &&
     modifier.seat === targetSeat
   );
@@ -624,6 +628,62 @@ function projectedCombatPrevention(
     amount -= 1;
   }
   return amount > 0 ? { amount, modifiers: contributions } : undefined;
+}
+
+/** Additional attack-targets still in the arena, with the damage each would
+ * be dealt (or was dealt, once the link resolved). Mirrors damage.ts, which
+ * damages them in order before the primary target: only a recipient-type
+ * shield of the ally's controller applies, and each shield is spent once.
+ * Spent shields are recorded so the primary target does not count them. */
+function projectedAdditionalTargets(
+  state: GameStateInternal,
+  runtime: EngineRuntime,
+  link: GameStateInternal["chain"][number],
+  attack: number,
+  seat: number | null,
+  revealAll: boolean,
+  spentShields: Set<Modifier>,
+): ChainAdditionalTargetView[] {
+  const ids = link.additionalTargetAllyIds ?? [];
+  if (ids.length === 0) return [];
+  const targetSeat = link.attacker === 0 ? 1 : 0;
+  const damage = link.resolved ? 0 : computeCombatDamage(state, runtime, link, attack, 0);
+  return ids.flatMap((id): ChainAdditionalTargetView[] => {
+    // Only allies still in the arena: one that left may now be a hidden card.
+    const ally = (state.players[targetSeat] as PlayerState).board.find((card) => card.instanceId === id);
+    if (!ally) return [];
+    if (link.resolved) {
+      const dealt = link.additionalTargetHits?.find((hit) => hit.targetAllyId === id)?.damage ?? 0;
+      return [{ ally: cardView(state, runtime, ally), damage: dealt }];
+    }
+    const view: ChainAdditionalTargetView = { ally: cardView(state, runtime, ally), damage };
+    if (damage <= 0 || link.flags.unpreventable === true) return [view];
+    const recipientTypes = cardTypesOf(state, ally);
+    const shield = state.modifiers.find((modifier) =>
+      !modifier.consumed &&
+      !spentShields.has(modifier) &&
+      modifier.seat === targetSeat &&
+      modifier.scope === "until-end-of-turn" &&
+      Number(modifier.preventNextDamageAmount ?? 0) > 0 &&
+      modifier.appliesToDamageRecipientType !== undefined &&
+      recipientTypes.includes(modifier.appliesToDamageRecipientType.toLowerCase())
+    );
+    if (!shield) return [view];
+    spentShields.add(shield);
+    const amount = Math.min(damage, Number(shield.preventNextDamageAmount));
+    const sourceCardId = shield.sourceCardId ??
+      findCardAnywhere(state, shield.sourceInstanceId)?.card.cardId ?? "";
+    return [{
+      ...view,
+      damageToPrevent: amount,
+      preventionModifiers: projectedCombatValueModifiers(
+        state,
+        [{ sourceInstanceId: shield.sourceInstanceId, sourceCardId, amount }],
+        seat,
+        revealAll,
+      ),
+    }];
+  });
 }
 
 function projectedStackContext(state: GameStateInternal): string | undefined {
@@ -879,8 +939,12 @@ function projectState(
     const damage = link.resolved
       ? link.damage
       : computeCombatDamage(state, runtime, link, attack, defense);
+    const spentShields = new Set<Modifier>();
+    const additionalTargets = projectedAdditionalTargets(
+      state, runtime, link, attack, seat, revealAll, spentShields,
+    );
     const prevention = i === lastLink
-      ? projectedCombatPrevention(state, runtime, link, damage)
+      ? projectedCombatPrevention(state, runtime, link, damage, spentShields)
       : undefined;
     const maxNonBlockDefenders = link.resolved
       ? undefined
@@ -968,6 +1032,7 @@ function projectState(
               : { targetAllyName: "a permanent" };
           })()
         : {}),
+      ...(additionalTargets.length > 0 ? { additionalTargets } : {}),
       };
   });
   const stackContext = projectedStackContext(state);

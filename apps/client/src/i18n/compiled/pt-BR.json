@@ -27917,6 +27917,122 @@
       "value": "Instant"
     }
   ],
+  "game.chain.additionalTargets": [
+    {
+      "type": 0,
+      "value": "+ "
+    },
+    {
+      "type": 6,
+      "value": "count",
+      "options": {
+        "=0": {
+          "value": [
+            {
+              "type": 0,
+              "value": "nenhum alvo ally"
+            }
+          ]
+        },
+        "one": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " alvo ally"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " alvos ally"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    }
+  ],
+  "game.chain.additionalTargets.close": [
+    {
+      "type": 0,
+      "value": "Fechar alvos adicionais"
+    }
+  ],
+  "game.chain.additionalTargets.damage": [
+    {
+      "type": 0,
+      "value": "Dano"
+    }
+  ],
+  "game.chain.additionalTargets.lethal": [
+    {
+      "type": 0,
+      "value": "Letal"
+    }
+  ],
+  "game.chain.additionalTargets.lifeLeft": [
+    {
+      "type": 0,
+      "value": "Restam "
+    },
+    {
+      "type": 1,
+      "value": "life"
+    },
+    {
+      "type": 0,
+      "value": " de vida"
+    }
+  ],
+  "game.chain.additionalTargets.title": [
+    {
+      "type": 6,
+      "value": "count",
+      "options": {
+        "=0": {
+          "value": [
+            {
+              "type": 0,
+              "value": "Nenhum alvo adicional"
+            }
+          ]
+        },
+        "one": {
+          "value": [
+            {
+              "type": 0,
+              "value": "Alvo adicional"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 0,
+              "value": "Alvos adicionais"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    }
+  ],
+  "game.chain.additionalTargets.undefendable": [
+    {
+      "type": 0,
+      "value": "Os defensores só protegem o herói."
+    }
+  ],
   "game.chain.base": [
     {
       "type": 0,
@@ -29378,16 +29494,6 @@
     {
       "type": 0,
       "value": "Continuar jogando"
-    }
-  ],
-  "game.life.amount": [
-    {
-      "type": 1,
-      "value": "life"
-    },
-    {
-      "type": 0,
-      "value": " de vida"
     }
   ],
   "game.life.damage": [

@@ -331,6 +331,36 @@ describe("combat-chain browsing", () => {
     expect(html).toContain('data-motion-card="chain:0:target:85"');
   });
 
+  it("keeps additional attack-targets out of the defender row and details them on hover", () => {
+    const link: ChainLinkView = {
+      attackingCard: { instanceId: 42, cardId: "SBA016", owner: 0 },
+      defendingCards: [],
+      additionalTargets: [
+        {
+          ally: { instanceId: 85, cardId: "TST-ALLY", owner: 1, life: 3 },
+          damage: 5,
+          damageToPrevent: 1,
+          preventionModifiers: [{ sourceCardId: "TST-SHIELD", amount: 1 }],
+        },
+        { ally: { instanceId: 86, cardId: "TST-ALLY", owner: 1, life: 9 }, damage: 5 },
+      ],
+      reactions: [],
+      attackValue: 5,
+      defenseValue: 0,
+      damage: 5,
+      resolved: false,
+    };
+    const html = renderChain({ links: [link], onRect: vi.fn() });
+
+    expect(html).toContain("+ 2 ally targets");
+    expect(html).toContain("Defenders only protect the hero.");
+    expect(html).toContain("−1");
+    expect(html).toContain("Lethal");
+    expect(html).toContain("4 life left");
+    expect(html).toContain("chain-blocker-placeholder");
+    expect(html).not.toContain('data-motion-card="chain:0:target:85"');
+  });
+
   it("shows dominate as a tooltip icon instead of a text label", () => {
     const link: ChainLinkView = {
       attackingCard: { instanceId: 42, cardId: "SBA016", owner: 0 },

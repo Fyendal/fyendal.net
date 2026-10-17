@@ -1150,7 +1150,6 @@ describe("attack target choices", () => {
       choices: [{
         id: 42,
         label: "Test Ally",
-        life: 3,
         card: {
           instanceId: 42,
           cardId: "TEST-CARD",
@@ -1196,7 +1195,8 @@ describe("attack target choices", () => {
     }));
     expect(html.match(/decision-target-granted/g)).toHaveLength(1);
     expect(html.match(/decision-target-band/g)).toHaveLength(1);
-    expect(html).toContain("title=\"Already playable via Gate to i&#x27;Arathael\"");
+    expect(html).toContain("aria-description=\"Already playable via Gate to i&#x27;Arathael\"");
+    expect(html).not.toContain("title=");
   });
 });
 

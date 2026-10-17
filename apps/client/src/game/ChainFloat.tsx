@@ -3,6 +3,7 @@ import { createPortal } from "react-dom";
 import { useIntl } from "react-intl";
 import type {
   CardView,
+  ChainAdditionalTargetView,
   ChainLinkView,
   CombatValueModifierView,
   OnHitEffectView,
@@ -83,6 +84,20 @@ function ChainMinimizeButton({
   );
 }
 
+/** Phone-width chain badges open a dialog instead of a hover panel. */
+function useMobileChainDialog(): [boolean, (open: boolean) => void] {
+  const [open, setOpen] = useState(false);
+  useEffect(() => {
+    if (!open) return;
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setOpen(false);
+    };
+    window.addEventListener("keydown", closeOnEscape);
+    return () => window.removeEventListener("keydown", closeOnEscape);
+  }, [open]);
+  return [open, setOpen];
+}
+
 function OnHitBadge({
   attackInstanceId,
   effects,
@@ -93,15 +108,7 @@ function OnHitBadge({
   const intl = useIntl();
   const tooltipId = `chain-on-hit-${attackInstanceId}`;
   const mobileDialogTitleId = `${tooltipId}-mobile-title`;
-  const [mobileOpen, setMobileOpen] = useState(false);
-  useEffect(() => {
-    if (!mobileOpen) return;
-    const closeOnEscape = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setMobileOpen(false);
-    };
-    window.addEventListener("keydown", closeOnEscape);
-    return () => window.removeEventListener("keydown", closeOnEscape);
-  }, [mobileOpen]);
+  const [mobileOpen, setMobileOpen] = useMobileChainDialog();
   const effectList = effects.map((effect, index) => (
     <span
       className="chain-on-hit-effect"
@@ -163,6 +170,117 @@ function OnHitBadge({
         )
         : null}
     </>
+  );
+}
+
+/** Additional attack-targets can't be defended, so they stay out of the
+ *  defender row; the badge reveals each ally with its projected damage. */
+function AdditionalTargetsBadge({
+  attackInstanceId,
+  targets,
+  resolved,
+}: {
+  attackInstanceId: number;
+  targets: readonly ChainAdditionalTargetView[];
+  resolved: boolean;
+}) {
+  const intl = useIntl();
+  const tooltipId = `chain-extra-targets-${attackInstanceId}`;
+  const mobileDialogTitleId = `${tooltipId}-mobile-title`;
+  const [mobileOpen, setMobileOpen] = useMobileChainDialog();
+  const title = intl.formatMessage({ id: "game.chain.additionalTargets.title" }, { count: targets.length });
+  const details = (
+    <>
+      <span className="chain-extra-targets-note">
+        {intl.formatMessage({ id: "game.chain.additionalTargets.undefendable" })}
+      </span>
+      {targets.map(({ ally, damage, damageToPrevent = 0, preventionModifiers = [] }) => {
+        const dealt = Math.max(0, damage - damageToPrevent);
+        const lethal = !resolved && ally.life !== undefined && dealt >= ally.life;
+        return (
+          <span className="chain-extra-target" key={ally.instanceId}>
+            <CardFace card={ally} size="zone" squareArt={false} showTapped={false} />
+            <span className="chain-extra-target-ledger">
+              <span className="card-ref" data-cardid={ally.cardId}>
+                {cardData[ally.cardId]?.name ?? intl.formatMessage({ id: "game.card" })}
+              </span>
+              <span className="chain-modifier">
+                <span>{intl.formatMessage({ id: "game.chain.additionalTargets.damage" })}</span>
+                <strong className="chain-extra-target-damage">{damage}</strong>
+              </span>
+              {preventionModifiers.map((modifier, index) => (
+                <span className="chain-modifier" key={`${modifier.sourceCardId}:${index}`}>
+                  {modifier.sourceCardId ? (
+                    <span className="card-ref" data-cardid={modifier.sourceCardId}>
+                      {cardData[modifier.sourceCardId]?.name ?? intl.formatMessage({ id: "game.card" })}
+                    </span>
+                  ) : (
+                    <span>{intl.formatMessage({ id: "game.chain.hiddenEffect" })}</span>
+                  )}
+                  <strong className="chain-extra-target-prevent">−{modifier.amount}</strong>
+                </span>
+              ))}
+              {!resolved && ally.life !== undefined ? (
+                <span className={`chain-extra-target-outcome${lethal ? " chain-extra-target-lethal" : ""}`}>
+                  {lethal
+                    ? intl.formatMessage({ id: "game.chain.additionalTargets.lethal" })
+                    : intl.formatMessage(
+                      { id: "game.chain.additionalTargets.lifeLeft" },
+                      { life: ally.life - dealt },
+                    )}
+                </span>
+              ) : null}
+            </span>
+          </span>
+        );
+      })}
+    </>
+  );
+  return (
+    <span className="chain-extra-targets">
+      <button
+        type="button"
+        className="chain-extra-targets-label"
+        aria-describedby={tooltipId}
+        aria-haspopup="dialog"
+        aria-expanded={mobileOpen}
+        onClick={() => {
+          if (window.matchMedia("(max-width: 700px)").matches) setMobileOpen(true);
+        }}
+      >
+        {intl.formatMessage({ id: "game.chain.additionalTargets" }, { count: targets.length })}
+      </button>
+      <span className="chain-extra-targets-tip" id={tooltipId} role="tooltip">
+        <strong>{title}</strong>
+        {details}
+      </span>
+      {mobileOpen && typeof document !== "undefined"
+        ? createPortal(
+          <div className="chain-on-hit-mobile-backdrop" onClick={() => setMobileOpen(false)}>
+            <section
+              className="chain-on-hit-mobile-tip"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby={mobileDialogTitleId}
+              onClick={(event) => event.stopPropagation()}
+            >
+              <header>
+                <strong id={mobileDialogTitleId}>{title}</strong>
+                <button
+                  type="button"
+                  aria-label={intl.formatMessage({ id: "game.chain.additionalTargets.close" })}
+                  onClick={() => setMobileOpen(false)}
+                >
+                  ×
+                </button>
+              </header>
+              {details}
+            </section>
+          </div>,
+          document.body,
+        )
+        : null}
+    </span>
   );
 }
 
@@ -520,6 +638,13 @@ export function ChainFloat({
                         <span className="chain-sep">vs</span>
                         <span className="chain-target muted">{chain.targetAllyName}</span>
                       </>
+                    ) : null}
+                    {chain.additionalTargets?.length ? (
+                      <AdditionalTargetsBadge
+                        attackInstanceId={chain.attackingCard.instanceId}
+                        targets={chain.additionalTargets}
+                        resolved={chain.resolved}
+                      />
                     ) : null}
                   </div>
                   <div className="chain-blockers">

@@ -268,6 +268,21 @@ export interface ChainLinkView {
   /** Public targeted ally state, rendered in the defender position. Omitted if
    *  the target left the game before this link was projected. */
   targetAlly?: CardView;
+  /** Opposing allies this attack also targets beyond its primary target.
+   *  They cannot be defended. Targets that left the arena are omitted; the
+   *  field is omitted when none remain. */
+  additionalTargets?: ChainAdditionalTargetView[];
+}
+
+export interface ChainAdditionalTargetView {
+  /** Public state of the targeted ally. */
+  ally: CardView;
+  /** Combat damage this target would be dealt before prevention, or the
+   *  damage it was dealt once the link resolved. */
+  damage: number;
+  /** Damage currently set to be prevented for this target, omitted when none. */
+  damageToPrevent?: number;
+  preventionModifiers?: CombatValueModifierView[];
 }
 
 export interface OnHitEffectView {

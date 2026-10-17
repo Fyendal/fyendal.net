@@ -388,6 +388,8 @@
   }
   .effect-hint-floating { display: none !important; }
   .chain-on-hit-tip { display: none !important; }
+  .chain-extra-targets-tip { display: none !important; }
+  .chain-extra-targets-label { font-size: 15px; }
   .chain-on-hit-mobile-backdrop {
     position: fixed;
     inset: 0;

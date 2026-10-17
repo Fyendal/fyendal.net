@@ -793,7 +793,7 @@ export function GameBoard() {
     if (allyIds.size === 0) return [];
     return [
       ...(heroOffered
-        ? [{ id: null as number | null, label: opp.heroName, card: heroCard(opp), life: opp.life }]
+        ? [{ id: null as number | null, label: opp.heroName, card: heroCard(opp) }]
         : []),
       ...[...allyIds].flatMap((id) => {
         const card = opp.board.find((candidate) => candidate.instanceId === id);

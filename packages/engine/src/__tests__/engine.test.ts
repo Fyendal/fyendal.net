@@ -2240,6 +2240,55 @@ describe("viewer projection secrecy", () => {
     });
   });
 
+  it("projects additional attack-targets in the arena with damage and one shared recipient shield", () => {
+    let s = makeGame(406);
+    const attack = giveCard(s, 0, "ATK4");
+    const result = applyIntent(s, 0, { kind: "play-card", instanceId: attack, pitchInstanceIds: [] });
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    s = result.state;
+    expect(projectStateFor(s, 0).chain[0]).not.toHaveProperty("additionalTargets");
+    const shielded = { instanceId: s.nextInstanceId++, cardId: "TOKEN", owner: 1, life: 2 };
+    const exposed = { instanceId: s.nextInstanceId++, cardId: "TOKEN", owner: 1, life: 5 };
+    player(s, 1).board.push(shielded, exposed);
+    const shieldSource = player(s, 1).hero;
+    s.modifiers.push({
+      id: s.nextModifierId++,
+      sourceInstanceId: shieldSource.instanceId,
+      sourceCardId: shieldSource.cardId,
+      seat: 1,
+      scope: "until-end-of-turn",
+      preventNextDamageAmount: 2,
+      appliesToDamageRecipientType: "generic",
+    });
+    const beforeTargets = projectStateFor(s, 0).chain[0]!;
+    expect(beforeTargets.damageToPrevent).toBe(2);
+    s.chain[0]!.additionalTargetAllyIds = [shielded.instanceId, s.nextInstanceId++, exposed.instanceId];
+
+    const link = projectStateFor(s, 0).chain[0]!;
+    expect(link.targetAllyName).toBeUndefined();
+    // Additional targets are dealt damage first, so the hero can't reuse the shield.
+    expect(link.damageToPrevent).toBeUndefined();
+    expect(link.additionalTargets).toEqual([
+      {
+        ally: expect.objectContaining({ instanceId: shielded.instanceId, cardId: "TOKEN", life: 2 }),
+        damage: 4,
+        damageToPrevent: 2,
+        preventionModifiers: [{ sourceCardId: shieldSource.cardId, amount: 2 }],
+      },
+      { ally: expect.objectContaining({ instanceId: exposed.instanceId, life: 5 }), damage: 4 },
+    ]);
+
+    // After damage, a destroyed target may sit face down in a graveyard.
+    const [destroyed] = player(s, 1).board.splice(0, 1);
+    player(s, 1).graveyard.push({ ...destroyed!, faceDown: true });
+    s.chain[0]!.resolved = true;
+    s.chain[0]!.additionalTargetHits = [{ targetAllyId: exposed.instanceId, damage: 4 }];
+    expect(projectStateFor(s, 0).chain[0]!.additionalTargets).toEqual([
+      { ally: expect.objectContaining({ instanceId: exposed.instanceId }), damage: 4 },
+    ]);
+  });
+
   it("projects whether the current attack has wagered", () => {
     let s = makeGame(405);
     const attack = giveCard(s, 0, "ATK4");

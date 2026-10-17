@@ -25974,6 +25974,64 @@
       "value": "瞬间"
     }
   ],
+  "game.chain.additionalTargets": [
+    {
+      "type": 0,
+      "value": "+ "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " 个盟友目标"
+    }
+  ],
+  "game.chain.additionalTargets.close": [
+    {
+      "type": 0,
+      "value": "关闭额外目标"
+    }
+  ],
+  "game.chain.additionalTargets.damage": [
+    {
+      "type": 0,
+      "value": "伤害"
+    }
+  ],
+  "game.chain.additionalTargets.lethal": [
+    {
+      "type": 0,
+      "value": "致命"
+    }
+  ],
+  "game.chain.additionalTargets.lifeLeft": [
+    {
+      "type": 0,
+      "value": "剩余 "
+    },
+    {
+      "type": 1,
+      "value": "life"
+    },
+    {
+      "type": 0,
+      "value": " 点生命"
+    }
+  ],
+  "game.chain.additionalTargets.title": [
+    {
+      "type": 0,
+      "value": "额外目标"
+    }
+  ],
+  "game.chain.additionalTargets.undefendable": [
+    {
+      "type": 0,
+      "value": "防御牌只保护英雄。"
+    }
+  ],
   "game.chain.base": [
     {
       "type": 0,
@@ -27393,16 +27451,6 @@
     {
       "type": 0,
       "value": "继续游戏"
-    }
-  ],
-  "game.life.amount": [
-    {
-      "type": 1,
-      "value": "life"
-    },
-    {
-      "type": 0,
-      "value": " 点生命"
     }
   ],
   "game.life.damage": [

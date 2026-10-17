@@ -3,8 +3,9 @@ import { decodeSerializedStateEnvelope } from "./simulationState.js";
 import type {
   AttackQueueEntryView,
   BotOpponent,
-  CardView,
   CardPoolMode,
+  CardView,
+  ChainAdditionalTargetView,
   ChatMessage,
   CombatValueModifierView,
   ClientMessage,
@@ -1105,7 +1106,7 @@ function chainLink(value: unknown): boolean {
   const link = object(value);
   return !!link && exactKeys(link, [
     "attackingCard", "defendingCards", "attackValue", "defenseValue", "damage", "resolved",
-    "attackModifiers", "defenseModifiers", "onHitEffects", "damageToPrevent", "preventionModifiers", "onStack", "hit", "goAgain", "wagered", "wagerRewards", "dominate", "overpower", "veil", "maxNonBlockDefenders", "reactions", "targetAllyName", "targetAlly",
+    "attackModifiers", "defenseModifiers", "onHitEffects", "damageToPrevent", "preventionModifiers", "onStack", "hit", "goAgain", "wagered", "wagerRewards", "dominate", "overpower", "veil", "maxNonBlockDefenders", "reactions", "targetAllyName", "targetAlly", "additionalTargets",
   ], ["attackingCard", "defendingCards", "attackValue", "defenseValue", "damage", "resolved", "reactions"])
     && cardView(link.attackingCard) && cardViews(link.defendingCards) && finite(link.attackValue)
     && finite(link.defenseValue) && finite(link.damage) && typeof link.resolved === "boolean"
@@ -1125,7 +1126,16 @@ function chainLink(value: unknown): boolean {
     && optional(link.maxNonBlockDefenders, nonNegativeInteger)
     && cardViews(link.reactions)
     && optional(link.targetAllyName, (v): v is string => string(v, MAX_SHORT_TEXT, false))
-    && optional(link.targetAlly, cardView);
+    && optional(link.targetAlly, cardView)
+    && optional(link.additionalTargets, (v): v is ChainAdditionalTargetView[] => array(v, chainAdditionalTarget, MAX_CARDS));
+}
+
+function chainAdditionalTarget(value: unknown): value is ChainAdditionalTargetView {
+  const target = object(value);
+  return !!target && exactKeys(target, ["ally", "damage", "damageToPrevent", "preventionModifiers"], ["ally", "damage"])
+    && cardView(target.ally) && nonNegativeInteger(target.damage)
+    && optional(target.damageToPrevent, nonNegativeInteger)
+    && optional(target.preventionModifiers, combatValueModifiers);
 }
 
 function onHitEffects(value: unknown): value is OnHitEffectView[] {

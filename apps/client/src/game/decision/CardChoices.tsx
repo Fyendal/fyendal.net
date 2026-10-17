@@ -1,6 +1,8 @@
 import { cardData } from "@fyendal/cards/client";
 import type { CardView } from "@fyendal/shared";
+import { useRef, useState } from "react";
 import { type IntlShape, useIntl } from "react-intl";
+import { ViewportTooltip } from "../../components/ViewportTooltip.js";
 import { CardFace } from "../Card.js";
 import { cardAffiliation, chooseWithoutFocus } from "./DecisionShared.js";
 
@@ -8,7 +10,6 @@ export interface ActionTargetChoice {
   id: number | null;
   label: string;
   card: CardView;
-  life?: number;
   /** Set when an effect already lets this player play the card from its
    *  zone; the full sentence naming that effect. */
   playPermission?: string;
@@ -68,52 +69,77 @@ export function ActionTargetCards({
   selectionMade: boolean;
   onSelect: (id: number | null) => void;
 }) {
-  const intl = useIntl();
   return (
     <div className="decision-target-cards">
-      {choices.map((choice) => {
-        const selected = selectionMade && choice.id === selectedId;
-        return (
-          <button
-            key={choice.id ?? "hero"}
-            className={[
-              "decision-target-card",
-              selected ? "decision-target-selected" : "",
-              choice.playPermission !== undefined ? "decision-target-granted" : "",
-            ].filter(Boolean).join(" ")}
-            aria-label={intl.formatMessage(
-              { id: "game.decision.targetNamed" },
-              { target: choice.label },
-            )}
-            aria-description={choice.playPermission}
-            title={choice.playPermission}
-            aria-pressed={selected}
-            // The face ignores the pointer so the whole button is the hit
-            // target; this routes the board's hover preview to that face.
-            data-bound-preview-card="true"
-            onClick={(event) =>
-              chooseWithoutFocus(event.currentTarget, () => onSelect(choice.id))}
-          >
-            <span className="decision-target-face">
-              <CardFace
-                card={choice.card}
-                size="hand"
-                affiliation={cardAffiliation(choice.card, viewerSeat)}
-              />
-              {choice.playPermission !== undefined && (
-                <span className="decision-target-band" aria-hidden="true">
-                  {intl.formatMessage({ id: "game.decision.targetAlreadyPlayable" })}
-                </span>
-              )}
-            </span>
-            <span className="decision-target-name">{choice.label}</span>
-            {/* A card that tracks its own life shows it as a face counter. */}
-            {choice.life !== undefined && choice.card.life === undefined && (
-              <small>{intl.formatMessage({ id: "game.life.amount" }, { life: choice.life })}</small>
-            )}
-          </button>
-        );
-      })}
+      {choices.map((choice) => (
+        <ActionTargetCard
+          key={choice.id ?? "hero"}
+          choice={choice}
+          viewerSeat={viewerSeat}
+          selected={selectionMade && choice.id === selectedId}
+          onSelect={onSelect}
+        />
+      ))}
     </div>
+  );
+}
+
+function ActionTargetCard({
+  choice,
+  viewerSeat,
+  selected,
+  onSelect,
+}: {
+  choice: ActionTargetChoice;
+  viewerSeat: number;
+  selected: boolean;
+  onSelect: (id: number | null) => void;
+}) {
+  const intl = useIntl();
+  const ref = useRef<HTMLButtonElement>(null);
+  const [hinted, setHinted] = useState(false);
+  return (
+    <>
+      <button
+        ref={ref}
+        className={[
+          "decision-target-card",
+          selected ? "decision-target-selected" : "",
+          choice.playPermission !== undefined ? "decision-target-granted" : "",
+        ].filter(Boolean).join(" ")}
+        aria-label={intl.formatMessage(
+          { id: "game.decision.targetNamed" },
+          { target: choice.label },
+        )}
+        aria-description={choice.playPermission}
+        aria-pressed={selected}
+        // The face ignores the pointer so the whole button is the hit
+        // target; this routes the board's hover preview to that face.
+        data-bound-preview-card="true"
+        onPointerEnter={() => setHinted(true)}
+        onPointerLeave={() => setHinted(false)}
+        onFocus={() => setHinted(true)}
+        onBlur={() => setHinted(false)}
+        onClick={(event) =>
+          chooseWithoutFocus(event.currentTarget, () => onSelect(choice.id))}
+      >
+        <span className="decision-target-face">
+          <CardFace
+            card={choice.card}
+            size="hand"
+            affiliation={cardAffiliation(choice.card, viewerSeat)}
+          />
+          {choice.playPermission !== undefined && (
+            <span className="decision-target-band" aria-hidden="true">
+              {intl.formatMessage({ id: "game.decision.targetAlreadyPlayable" })}
+            </span>
+          )}
+        </span>
+        <span className="decision-target-name">{choice.label}</span>
+      </button>
+      {hinted && choice.playPermission !== undefined ? (
+        <ViewportTooltip anchor={ref.current} content={choice.playPermission} gap={8} />
+      ) : null}
+    </>
   );
 }

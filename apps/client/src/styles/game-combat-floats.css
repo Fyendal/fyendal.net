@@ -608,6 +608,94 @@
 }
 .chain-on-hit-effect .card-ref { color: #e2c66e; font-weight: 700; }
 .chain-on-hit-mobile-backdrop { display: none; }
+/* Additional attack-targets: a quiet chip beside the hero's defense whose
+   panel lists each undefendable ally with its projected damage. */
+.chain-extra-targets { position: relative; display: inline-flex; }
+.chain-extra-targets-label {
+  padding: 2px 6px;
+  clip-path: none;
+  border: 1px solid transparent;
+  border-radius: 3px;
+  background: transparent;
+  color: #cbbd9d;
+  font-family: inherit;
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: normal;
+  text-transform: none;
+  white-space: nowrap;
+  text-decoration: underline dotted #b8933f99;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 5px;
+  cursor: help;
+}
+.chain-extra-targets:hover .chain-extra-targets-label,
+.chain-extra-targets-label:focus-visible {
+  border-color: #b8933f66;
+  background: #0004;
+  outline: none;
+}
+.chain-extra-targets-tip {
+  position: absolute;
+  z-index: 5;
+  top: calc(100% + 8px);
+  right: 0;
+  width: min(300px, 72vw);
+  display: none;
+  flex-direction: column;
+  gap: 9px;
+  padding: 11px 13px;
+  border: 1px solid #b8933f77;
+  border-radius: 3px;
+  background: #120d09fa;
+  box-shadow: 0 8px 22px #000c;
+  color: #cbbd9d;
+  font-size: 12px;
+  line-height: 1.35;
+  text-align: left;
+}
+.chain-extra-targets-tip::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -9px;
+  height: 9px;
+}
+.chain-extra-targets:hover .chain-extra-targets-tip,
+.chain-extra-targets:focus-within .chain-extra-targets-tip {
+  display: flex;
+}
+.chain-extra-targets-note { color: #a89878; }
+.chain-extra-target {
+  display: flex;
+  align-items: flex-start;
+  gap: 11px;
+  padding-top: 9px;
+  border-top: 1px solid #b8933f2e;
+}
+.chain-extra-target .card-zone {
+  width: 58px;
+  height: 80px;
+}
+.chain-extra-target-ledger {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-direction: column;
+  gap: 4px;
+}
+.chain-extra-target-ledger > .card-ref { color: #e2c66e; font-weight: 700; }
+.chain-extra-target-damage { color: #ff9d76; }
+.chain-extra-target-prevent { color: #80d66b; }
+.chain-extra-target-outcome {
+  margin-top: 2px;
+  padding-top: 4px;
+  border-top: 1px dashed #b8933f3a;
+  color: #d9c9a4;
+  font-weight: 600;
+}
+.chain-extra-target-lethal { color: #ff8a6b; }
 .chain-atk { font-size: 30px; font-weight: 800; color: #ff9d76; }
 .chain-def { font-size: 30px; font-weight: 800; color: #7bc8ff; }
 .chain-prevent { font-size: 30px; font-weight: 800; color: #80d66b; }

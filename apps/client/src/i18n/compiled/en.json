@@ -26609,6 +26609,102 @@
       "value": "Instant"
     }
   ],
+  "game.chain.additionalTargets": [
+    {
+      "type": 0,
+      "value": "+ "
+    },
+    {
+      "type": 6,
+      "value": "count",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " ally target"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " ally targets"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    }
+  ],
+  "game.chain.additionalTargets.close": [
+    {
+      "type": 0,
+      "value": "Close additional targets"
+    }
+  ],
+  "game.chain.additionalTargets.damage": [
+    {
+      "type": 0,
+      "value": "Damage"
+    }
+  ],
+  "game.chain.additionalTargets.lethal": [
+    {
+      "type": 0,
+      "value": "Lethal"
+    }
+  ],
+  "game.chain.additionalTargets.lifeLeft": [
+    {
+      "type": 1,
+      "value": "life"
+    },
+    {
+      "type": 0,
+      "value": " life left"
+    }
+  ],
+  "game.chain.additionalTargets.title": [
+    {
+      "type": 6,
+      "value": "count",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 0,
+              "value": "Additional target"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 0,
+              "value": "Additional targets"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    }
+  ],
+  "game.chain.additionalTargets.undefendable": [
+    {
+      "type": 0,
+      "value": "Defenders only protect the hero."
+    }
+  ],
   "game.chain.base": [
     {
       "type": 0,
@@ -28048,16 +28144,6 @@
     {
       "type": 0,
       "value": "Keep playing"
-    }
-  ],
-  "game.life.amount": [
-    {
-      "type": 1,
-      "value": "life"
-    },
-    {
-      "type": 0,
-      "value": " life"
     }
   ],
   "game.life.damage": [

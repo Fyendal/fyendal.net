@@ -327,6 +327,12 @@ const gameView = () => ({
     reactions: [card],
     targetAllyName: "Ally",
     targetAlly: card,
+    additionalTargets: [{
+      ally: card,
+      damage: 5,
+      damageToPrevent: 1,
+      preventionModifiers: [{ sourceCardId: "AGB015", amount: 1 }],
+    }],
   }],
   stack: [{
     card,
@@ -765,6 +771,21 @@ describe("GameView and server messages", () => {
 
     expect(decodeGameView(atLimit)).not.toBeNull();
     expect(decodeGameView(overLimit)).toBeNull();
+  });
+
+  it("validates additional attack-targets with their damage and prevention", () => {
+    const link = gameView().chain[0]!;
+    const withTargets = (additionalTargets: unknown) =>
+      decodeGameView({ ...gameView(), chain: [{ ...link, additionalTargets }] });
+    expect(withTargets([{ ally: card, damage: 0 }])).not.toBeNull();
+    expect(withTargets([])).not.toBeNull();
+    expect(withTargets({ ally: card, damage: 1 })).toBeNull();
+    expect(withTargets([{ ally: card }])).toBeNull();
+    expect(withTargets([{ ally: card, damage: -1 }])).toBeNull();
+    expect(withTargets([{ ally: card, damage: 1, extra: true }])).toBeNull();
+    expect(withTargets([{ ally: { ...card, poison: true }, damage: 1 }])).toBeNull();
+    expect(withTargets([{ ally: card, damage: 1, preventionModifiers: [{ sourceCardId: "X", amount: "1" }] }])).toBeNull();
+    expect(decodeGameView({ ...gameView(), chain: [{ ...link, additionalTargetAllies: [card] }] })).toBeNull();
   });
 
   it("validates the complete nested view and rejects unknown or malformed nested fields", () => {
