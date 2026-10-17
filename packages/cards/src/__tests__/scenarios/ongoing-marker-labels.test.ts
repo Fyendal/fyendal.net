@@ -347,6 +347,18 @@ describe("labelled lingering markers (ELE, UPR, HVY, EVO, OUT)", () => {
     ]);
   });
 
+  it("clears Warband of Bellona's label once the next attack uses it", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", hand: [], resources: 4, equipment: { head: "warband of bellona|0" } },
+        { hero: "dorinthea" },
+      ],
+    });
+    g.activate("warband of bellona|0").attackWithWeapon();
+
+    expect(labels(g, "warband of bellona|0")).toEqual([]);
+  });
+
   it("shows Premeditate's Ponder rider beside its arsenal bonus", () => {
     const g = scenario({
       seats: [{ hero: "rhinar", hand: ["premeditate|1"], resources: 3 }, { hero: "dorinthea" }],

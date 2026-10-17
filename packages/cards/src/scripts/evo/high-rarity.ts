@@ -1294,12 +1294,16 @@ export const evoHighRarity: Record<string, CardScript> = {
             "card.effect.evo.warbandofbellona",
           ),
         });
-        ctx.setPlayerFlag(ctx.seat, "warbandCharge", true);
       },
     },
+    // The unconsumed modifier is the pending charge: it keeps this destroyed
+    // card's hooks observable, and consuming it ends both effect and label.
     onFriendlyAttackDeclared(ctx) {
-      if (ctx.getPlayerFlag(ctx.seat, "warbandCharge") !== true) return;
-      ctx.setPlayerFlag(ctx.seat, "warbandCharge", false);
+      const marker = ctx.state.modifiers.find(
+        (modifier) => modifier.sourceInstanceId === ctx.self.instanceId && !modifier.consumed,
+      );
+      if (!marker) return;
+      ctx.consumeModifier(marker.id);
       const hand = ctx.player(ctx.seat).hand;
       if (hand.length) {
         ctx.requestCardChoice(
