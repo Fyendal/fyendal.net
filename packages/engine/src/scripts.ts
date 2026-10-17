@@ -17,6 +17,7 @@ import type {
   StackLayer,
 } from "./state.js";
 import type { TokenCreationContext, TriggerEvent, TriggerEventContext } from "./eventTypes.js";
+import type { CardColorName, PitchedFilter } from "./turnRecords.js";
 export type { DamageEventContext, TokenCreationContext, TriggerEvent, TriggerEventContext } from "./eventTypes.js";
 
 export type DeepReadonly<T> = T extends (...args: never[]) => unknown
@@ -498,6 +499,14 @@ export interface ScriptCtx {
   cardColor(card: DeepReadonly<CardInstance>): number;
   /** Whether this card has an X value for its printed play cost. */
   hasVariablePlayCost(card: DeepReadonly<CardInstance>): boolean;
+  /** Cards of one color, or with the chi subtype, the controller pitched this
+   * turn. */
+  pitchedThisTurn(filter: PitchedFilter): number;
+  /** Cards of this color the controller played this turn, counting the card
+   * being played once its play is recorded. */
+  playedThisTurn(color: CardColorName): number;
+  /** Cards with an arcane damage effect the controller played this turn. */
+  arcaneDamageCardsPlayedThisTurn(): number;
   getFlag(scope: "player" | "link", key: string): number | boolean;
   setFlag(scope: "player" | "link", key: string, value: number | boolean): void;
   /** Whether this source's public once-per-turn triggered effect has already

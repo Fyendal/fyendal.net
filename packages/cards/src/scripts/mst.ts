@@ -34,11 +34,11 @@ function data(ctx: ScriptCtx, card: DeepReadonly<CardInstance>) {
 }
 
 function pitchedBlue(ctx: ScriptCtx): boolean {
-  return Number(ctx.getFlag("player", "pitchedPitch:3")) > 0;
+  return ctx.pitchedThisTurn({ color: "blue" }) > 0;
 }
 
 function pitchedChiThisTurn(ctx: ScriptCtx): boolean {
-  return Number(ctx.getFlag("player", "pitchedChiCount")) > 0;
+  return ctx.pitchedThisTurn({ subtype: "chi" }) > 0;
 }
 
 /** Record the Chi pitched to pay for this card, for "if a Chi was pitched to
@@ -54,7 +54,7 @@ function chiPitched(ctx: ScriptCtx): number {
 }
 
 function playedAnotherBlue(ctx: ScriptCtx): boolean {
-  return Number(ctx.getFlag("player", "playedPitch:3")) >= 2;
+  return ctx.playedThisTurn("blue") >= 2;
 }
 
 function transcended(ctx: ScriptCtx): boolean {
@@ -908,11 +908,11 @@ export const mst: Record<string, CardScript> = {
     },
   },
   "second tenet of chi: tide|3": { modifyAttack: (ctx) => (transcended(ctx) ? 2 : 0) },
-  "deep blue sea|3": { modifyAttack: (ctx) => Number(ctx.getFlag("player", "pitchedPitch:3")) },
+  "deep blue sea|3": { modifyAttack: (ctx) => ctx.pitchedThisTurn({ color: "blue" }) },
   "wide blue yonder|3": {
     canPlay: (ctx) => !!ctx.link && ctx.link.attacker === ctx.seat,
     onPlay(ctx) {
-      ctx.addModifier({ scope: "chain-link", attack: Number(ctx.getFlag("player", "pitchedPitch:3")) });
+      ctx.addModifier({ scope: "chain-link", attack: ctx.pitchedThisTurn({ color: "blue" }) });
     },
   },
   "droplet|3": blueAttackBonus(2),
@@ -1358,8 +1358,8 @@ Object.assign(mst, {
         whose: "any",
         label: "Check Mistcloak Gully",
         effect(ctx) {
-          const pitched = Number(ctx.getFlag("player", "pitchedPitch:3")) > 0;
-          const played = Number(ctx.getFlag("player", "playedPitch:3")) > 0;
+          const pitched = ctx.pitchedThisTurn({ color: "blue" }) > 0;
+          const played = ctx.playedThisTurn("blue") > 0;
           const defended = Number(ctx.getFlag("player", "defendedPitch:3")) > 0;
           if (pitched && played && defended) ctx.transcend();
           else if (!(pitched || played || defended)) ctx.destroySelf();
@@ -1481,7 +1481,7 @@ Object.assign(mst, {
       ctx.transcend();
     },
   },
-  "three visits|1": { wardValue: (ctx) => Number(ctx.getFlag("player", "pitchedPitch:3")) * 3 },
+  "three visits|1": { wardValue: (ctx) => ctx.pitchedThisTurn({ color: "blue" }) * 3 },
   "twelve petal kāṣāya|0": {
     onFriendlyPlay(ctx, played) {
       if (data(ctx, played).name === "Inner Chi") ctx.changeResources(ctx.seat, 1);
@@ -1591,7 +1591,7 @@ Object.assign(mst, {
   },
   "levels of enlightenment|3": {
     onAttackDeclared(ctx) {
-      const count = Number(ctx.getFlag("player", "pitchedPitch:3"));
+      const count = ctx.pitchedThisTurn({ color: "blue" });
       if (count > 0) ctx.drawCards(ctx.seat, 1);
       if (count > 1) ctx.addCardTempPower(ctx.self.instanceId, 2);
       if (count > 2) ctx.grantGoAgain();

@@ -240,7 +240,7 @@ function lastAttackWasDraconic(ctx: ScriptCtx): boolean {
 }
 
 function playedAnotherRed(ctx: ScriptCtx): boolean {
-  return Number(ctx.getFlag("player", "playedPitch:1")) >= 2;
+  return ctx.playedThisTurn("red") >= 2;
 }
 
 function daggerOptions(ctx: ScriptCtx): number[] {

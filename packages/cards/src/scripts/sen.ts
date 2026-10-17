@@ -16,8 +16,9 @@ import {
 //  only chi-subtype pitches pay it, spent from the floating chi pool).
 // - Transcend instants: on resolution the card returns to hand flipped as
 //   Inner Chi (engine: ctx.transcend + the `transcendedThisTurn` flag) when
-//   another blue card was played this turn (`playedPitch:3` — the card itself
-//   is counted by noteCardPlayed before onPlay, so >= 2 means another blue).
+//   another blue card was played this turn (`ctx.playedThisTurn("blue")` —
+//   the card itself is counted by noteCardPlayed before onPlay, so >= 2
+//   means another blue).
 // - Ward (engine-native destroy-to-prevent for equipment AND board cards) on
 //   the Spectral Shield token and the Waning/Waxing aura-instants (the aura
 //   subtype comes from SUBTYPE_OVERRIDES in ../index.ts).
@@ -59,14 +60,14 @@ function createdThisTurn(ctx: ScriptCtx): boolean {
 }
 
 function pitchedBlue(ctx: ScriptCtx): boolean {
-  return (Number(ctx.getFlag("player", "pitchedPitch:3")) || 0) > 0;
+  return ctx.pitchedThisTurn({ color: "blue" }) > 0;
 }
 
 /** "If you've played another blue card this turn, transcend." The resolving
  *  card is blue and noteCardPlayed has already counted it, so >= 2 means
  *  another blue card was played this turn. */
 function transcendIfBlue(ctx: ScriptCtx): void {
-  if ((Number(ctx.getFlag("player", "playedPitch:3")) || 0) >= 2) ctx.transcend();
+  if (ctx.playedThisTurn("blue") >= 2) ctx.transcend();
 }
 
 /** A transcend instant: the printed effect, then the conditional transcend.
@@ -327,7 +328,7 @@ export const sen: Record<string, CardScript> = {
   },
 
   "big blue sky|3": {
-    modifyDefense: (ctx) => Number(ctx.getFlag("player", "pitchedPitch:3")) || 0,
+    modifyDefense: (ctx) => ctx.pitchedThisTurn({ color: "blue" }),
   },
 
   "put in context|3": {

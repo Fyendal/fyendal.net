@@ -19,6 +19,7 @@ import {
   actionKindRestrictionApplies, actionLimitReached, firstActionExtraCost, goAgainSuppressed,
 } from "./ruleQueries.js";
 import { cardProhibitedByChosenName } from "./restrictions.js";
+import { recordPlayed } from "./turnRecords.js";
 
 export /** Static taxes imposed by opposing arena objects. */
 function opposingStaticCostIncrease(state: GameStateInternal, seat: number): number {
@@ -527,14 +528,9 @@ export function noteCardPlayed(
       if (key.startsWith("nextArcaneCardBonusSource:")) delete player.flags[key];
     }
   }
-  // "the first card you play each turn with an arcane damage effect"
-  if (scriptOf(state, cardId, card)?.arcaneDamageEffect) {
-    player.flags.arcaneDamageCardsPlayedThisTurn =
-      Number(player.flags.arcaneDamageCardsPlayedThisTurn || 0) + 1;
-  }
-  // `playedPitch:<n>` counts — "if you've played another blue card this turn"
-  const color = cardColorOf(state, card);
-  player.flags[`playedPitch:${color}`] = (Number(player.flags[`playedPitch:${color}`]) || 0) + 1;
+  // "if you've played another blue card this turn", "the first card you play
+  // each turn with an arcane damage effect"
+  recordPlayed(player, cardColorOf(state, card), !!scriptOf(state, cardId, card)?.arcaneDamageEffect);
   // "the next matching card you play this turn is <type> / gets <keyword>"
   const consumedNextPlay = new Set<number>();
   for (const mod of state.modifiers) {

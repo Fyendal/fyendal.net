@@ -63,7 +63,7 @@ function isPhoenixFlame(ctx: ScriptCtx, cardId: string): boolean {
 /** "If you've played another red card this turn" — the resolving card is red
  *  and noteCardPlayed has already counted it, so >= 2 means another red. */
 function playedAnotherRed(ctx: ScriptCtx): boolean {
-  return (Number(ctx.getFlag("player", "playedPitch:1")) || 0) >= 2;
+  return ctx.playedThisTurn("red") >= 2;
 }
 
 /** Instant — Destroy this equipment: gain {r} (Blood Scent / Double Cross

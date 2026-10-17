@@ -1042,7 +1042,7 @@ export const dynHighRarity: Record<string, CardScript> = {
     // Until the first arcane damage card of the turn is played, it is the
     // next one, so the damage dealt joins the engine's next-card pool.
     onDamageDealt(ctx, _targetSeat, amount, arcane) {
-      if (arcane && amount > 0 && !Number(ctx.getFlag("player", "arcaneDamageCardsPlayedThisTurn")))
+      if (arcane && amount > 0 && ctx.arcaneDamageCardsPlayedThisTurn() === 0)
         buffNextArcaneDamageCard(ctx, amount);
     },
     onLeaveArena: withdrawNextArcaneDamageCard,

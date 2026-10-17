@@ -11,6 +11,7 @@ import {
   nameOf,
 } from "./gameLog.js";
 import { enumeratePitchSequences } from "./pitchSequences.js";
+import { recordPitched } from "./turnRecords.js";
 import type { GameStateInternal } from "./runtimeState.js";
 
 import type { CardInstance, PlayerState } from "./state.js";
@@ -38,15 +39,11 @@ export function pitchProhibitedByEffect(
     (prohibitedColors & (1 << (color - 1))) !== 0;
 }
 
-/** Record a pitch in the pitcher's per-turn flags: `pitchedPitch:<n>` counts
- *  (pitch 3 = blue, for "if you've pitched a blue card this turn"). */
+/** Record a pitch in the pitcher's per-turn tallies ("if you've pitched a
+ *  blue card this turn"). */
 export function notePitch(state: GameStateInternal, player: PlayerState, card: CardInstance): void {
   card.pitchCount = (card.pitchCount ?? 0) + 1;
-  const color = cardColorOf(state, card);
-  player.flags[`pitchedPitch:${color}`] = (Number(player.flags[`pitchedPitch:${color}`]) || 0) + 1;
-  if (isChiCard(state, card)) {
-    player.flags.pitchedChiCount = (Number(player.flags.pitchedChiCount) || 0) + 1;
-  }
+  recordPitched(player, cardColorOf(state, card), isChiCard(state, card));
 }
 
 /** Add a pitched card's value to the right floating pool: chi-subtype cards

@@ -91,7 +91,7 @@ const dromai: CardScript = {
     return amount;
   },
   onFriendlyActivate(ctx, activated) {
-    if (has(ctx, activated, "dragon") && Number(ctx.getFlag("player", "playedPitch:1")) > 0) ctx.grantGoAgain();
+    if (has(ctx, activated, "dragon") && ctx.playedThisTurn("red") > 0) ctx.grantGoAgain();
   },
 };
 const fai: CardScript = {
@@ -278,7 +278,7 @@ export const uprHighRarity: Record<string, CardScript> = {
       goAgain: false,
       timing: "instant",
       oncePerTurn: true,
-      canActivate: (ctx) => Number(ctx.getFlag("player", "playedPitch:1")) > 0,
+      canActivate: (ctx) => ctx.playedThisTurn("red") > 0,
       onActivate(ctx) {
         ctx.changeResources(
           ctx.seat,

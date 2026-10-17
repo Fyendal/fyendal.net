@@ -71,7 +71,7 @@ function draconicLinks(ctx: ScriptCtx): number {
 }
 
 function playedAnotherRed(ctx: ScriptCtx): boolean {
-  return Number(ctx.getFlag("player", "playedPitch:1")) >= 2;
+  return ctx.playedThisTurn("red") >= 2;
 }
 
 function livingTargets(ctx: ScriptCtx): number[] {
@@ -614,7 +614,7 @@ export const upr: Record<string, CardScript> = mergeSetScripts("UPR", uprHighRar
       if (
         ctx.link &&
         hasSubtype(ctx, ctx.link.attackingCard, "dragon") &&
-        Number(ctx.getFlag("player", "playedPitch:1")) > 0
+        ctx.playedThisTurn("red") > 0
       )
         ctx.grantGoAgain();
     },
@@ -1703,7 +1703,7 @@ export const upr: Record<string, CardScript> = mergeSetScripts("UPR", uprHighRar
       timing: "instant",
       destroySelfCost: true,
       label: "Destroy: gain 1 resource",
-      canActivate: (ctx) => Number(ctx.getFlag("player", "playedPitch:1")) > 0,
+      canActivate: (ctx) => ctx.playedThisTurn("red") > 0,
     }),
   },
   "singe|1": singe(3),

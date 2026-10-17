@@ -14,6 +14,7 @@ import type { CardInstance, ChainLinkState, EnterArsenalZone, PendingArcane, Pen
 import { queueDecisionBehindCrank } from "./decisionQueue.js";
 import { queuedAttackObjects } from "./attackQueue.js";
 import { rngInt } from "./rng.js";
+import { arcaneDamageCardsPlayedThisTurn, pitchedThisTurn, playedThisTurn } from "./turnRecords.js";
 import { heroAbilitiesDisabled } from "./stateQueries.js";
 import {
   cardColorOf,
@@ -2361,6 +2362,15 @@ export function makeCtx(
       const found = findCardAnywhere(state, card.instanceId)?.card;
       const source = found ?? card as CardInstance;
       return scriptOf(state, source.cardId, source)?.variablePlayCost !== undefined;
+    },
+    pitchedThisTurn(filter) {
+      return pitchedThisTurn(player, filter);
+    },
+    playedThisTurn(color) {
+      return playedThisTurn(player, color);
+    },
+    arcaneDamageCardsPlayedThisTurn() {
+      return arcaneDamageCardsPlayedThisTurn(player);
     },
     getFlag(scope, key) {
       const flags = scope === "player" ? player.flags : (link?.flags ?? {});
