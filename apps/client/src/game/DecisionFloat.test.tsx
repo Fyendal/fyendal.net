@@ -67,7 +67,6 @@ describe("opponent's announced play", () => {
       },
     },
     isMine: false,
-    decidingName: "Opponent",
     canPass: false,
     defendPitchIds: new Set(),
     hand: [],
@@ -84,12 +83,9 @@ describe("opponent's announced play", () => {
     onSend: () => undefined,
   };
 
-  it("shows only a waiting message during the opponent's payment and mode choices", () => {
+  it("leaves the opponent's payment and mode choices to the tinted mat half", () => {
     const html = renderLocalized(<PendingDecisionPanel model={model} viewerSeat={0} />);
-    expect(html).toContain("Opponent is deciding…");
-    expect(html).not.toContain("Modal Action");
-    expect(html).not.toContain("ANNOUNCED");
-    expect(html).not.toContain("<button");
+    expect(html).toBe("");
   });
 });
 
@@ -107,7 +103,6 @@ describe("hero damage targets", () => {
       defaultOption: "hero:1",
     },
     isMine: true,
-    decidingName: "You",
     canPass: false,
     defendPitchIds: new Set(),
     hand: [],
@@ -217,7 +212,6 @@ describe("card-name autocomplete", () => {
     const model: PendingDecisionModel = {
       decision: { player: 0, kind: "choose-name", prompt: "Name a card" },
       isMine: true,
-      decidingName: "Hero",
       canPass: false,
       defendPitchIds: new Set(),
       hand: [],
@@ -308,7 +302,6 @@ describe("priority guidance help", () => {
     return {
       decision: { player: 0, kind, prompt: "Defense reaction window — play a reaction or pass" },
       isMine: true,
-      decidingName: "Hero",
       canPass: true,
       defendPitchIds: new Set(),
       hand: [],
@@ -687,7 +680,6 @@ describe("scripted card-choice presentation", () => {
         ],
       },
       isMine: true,
-      decidingName: "Hero",
       canPass: false,
       defendPitchIds: new Set(),
       hand: [blitz],
@@ -745,7 +737,6 @@ describe("scripted card-choice presentation", () => {
         optionCards: [first, second],
       },
       isMine: true,
-      decidingName: "Hero",
       optionCardLabels: new Map([
         [41, "Left weapon"],
         [42, "Right weapon"],
@@ -789,7 +780,6 @@ describe("scripted card-choice presentation", () => {
         defaultOption: "11",
       },
       isMine: true,
-      decidingName: "Hero",
       optionCardLabels: new Map([
         [11, "Your Hero"],
         [22, "Opponent's Hero"],
@@ -840,7 +830,6 @@ describe("scripted card-choice presentation", () => {
         ],
       },
       isMine: true,
-      decidingName: "Hero",
       playerName: (seat) => (seat === 1 ? "Rhinar" : "Dorinthea"),
       canPass: false,
       defendPitchIds: new Set(),
@@ -915,7 +904,6 @@ describe("scripted card-choice presentation", () => {
         maximumSelections: 2,
       },
       isMine: true,
-      decidingName: "Hero",
       canPass: false,
       defendPitchIds: new Set(),
       hand: [],

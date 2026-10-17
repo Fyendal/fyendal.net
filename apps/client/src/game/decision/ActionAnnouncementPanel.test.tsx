@@ -65,7 +65,6 @@ describe("post-payment mode focus", () => {
     const pending: PendingDecisionModel = {
       decision: null,
       isMine: false,
-      decidingName: "",
       canPass: false,
       defendPitchIds: new Set(),
       hand: [],

@@ -33,7 +33,6 @@
     );
   }
   .table.mobile-hand-is-hidden::after { display: none; }
-  .has-own-priority .board::after,
   .own-priority-arrival {
     bottom: calc(64px + env(safe-area-inset-bottom));
   }

@@ -71,19 +71,6 @@
     repeating-linear-gradient(115deg, #ffffff05 0 2px, transparent 2px 7px),
     repeating-linear-gradient(25deg, #00000012 0 3px, transparent 3px 10px);
 }
-.has-own-priority .board::after {
-  content: "";
-  position: fixed;
-  z-index: var(--game-z-prompt);
-  inset: 0 var(--rail-w) 0 0;
-  box-shadow:
-    inset 0 0 12px 2px #f4ce6352,
-    inset 0 0 34px #e8bd4a42,
-    inset 0 0 78px #b56f1c1f;
-  opacity: .2;
-  pointer-events: none;
-  animation: own-priority-breathe 3.6s ease-in-out infinite;
-}
 .own-priority-arrival {
   position: fixed;
   z-index: var(--game-z-prompt);
@@ -102,20 +89,8 @@
   42% { opacity: .48; }
   100% { opacity: 0; }
 }
-@keyframes own-priority-breathe {
-  0%, 100% { opacity: .2; }
-  50% { opacity: .56; }
-}
 @media (prefers-reduced-motion: reduce) {
-  .has-own-priority .board::after {
-    animation: none;
-    opacity: .38;
-  }
   .own-priority-arrival { animation: none; }
-}
-.table[data-motion-preference="reduced"].has-own-priority .board::after {
-  animation: none;
-  opacity: .38;
 }
 .table[data-motion-preference="reduced"] .own-priority-arrival {
   animation: none;
@@ -357,6 +332,59 @@
   row-gap: clamp(9px, 1.2vh, 14px);
 }
 .mat-half.mat-opp { align-content: end; }
+
+/* ── priority tint: the half the game waits on takes a flat brass hue that
+   runs to the board edges and fades out toward the player's outer edge.
+   It is painted as a filled border image so it bleeds past the card grid
+   without changing layout or stacking. A registered property lets the hue
+   cross the seam when priority changes hands. ── */
+@property --mat-light {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 0;
+}
+.mat-half {
+  --mat-tint: rgb(232 189 74 / calc(var(--mat-light) * .13));
+  border-image-source: linear-gradient(
+    to bottom,
+    var(--mat-tint) 0%,
+    var(--mat-tint) 55%,
+    rgb(232 189 74 / 0) 100%
+  );
+  border-image-slice: 0 fill;
+  border-image-outset: 0 18px;
+  transition: --mat-light .34s ease-out;
+}
+.mat-half.mat-opp {
+  border-image-source: linear-gradient(
+    to top,
+    var(--mat-tint) 0%,
+    var(--mat-tint) 55%,
+    rgb(232 189 74 / 0) 100%
+  );
+}
+.mat-half.mat-priority-holder { --mat-light: 1; }
+.mat-half.mat-priority-pulse {
+  animation: mat-priority-breathe 3.6s ease-in-out infinite;
+}
+@keyframes mat-priority-breathe {
+  0%, 100% { --mat-light: 1; }
+  50% { --mat-light: 1.45; }
+}
+.mat-priority-status {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+@media (prefers-reduced-motion: reduce) {
+  .mat-half { transition: none; }
+  .mat-half.mat-priority-pulse { animation: none; }
+}
+.table[data-motion-preference="reduced"] .mat-half { transition: none; }
+.table[data-motion-preference="reduced"] .mat-half.mat-priority-pulse { animation: none; }
 
 /* Arena cards, backs, and empty zones fit within square grid rows. Keep
    the equipment/hero cluster together and reserve the flexible runway for

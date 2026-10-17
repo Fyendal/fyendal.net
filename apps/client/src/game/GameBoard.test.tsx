@@ -401,7 +401,7 @@ describe("GameBoard pending interactions", () => {
     expect(spectatorHtml).not.toContain("decision-float-pitch");
   });
 
-  it("shows a waiting message without the opponent's pre-stack card", () => {
+  it("lights the waiting-on player's mat half without the opponent's pre-stack card", () => {
     vi.stubGlobal("localStorage", { getItem: () => null });
     const view = interactiveView();
     view.activePlayer = 1;
@@ -415,7 +415,9 @@ describe("GameBoard pending interactions", () => {
     };
     gameStore.state = { ...liveState(false), view, legal: [], actionCandidates: [] };
     const html = renderToStaticMarkup(<TestI18nProvider><GameBoard /></TestI18nProvider>);
-    expect(html).toContain("Hero 1 is deciding…");
+    expect(html).toMatch(/class="mat-half mat-opp[^"]* mat-priority-holder"/);
+    expect(html.match(/mat-priority-holder/g)).toHaveLength(1);
+    expect(html).not.toContain("decision-float");
     expect(html).not.toContain("OPPONENT-ANNOUNCED");
     expect(html).not.toContain('class="pitch-focus-card"');
   });

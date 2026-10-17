@@ -247,6 +247,14 @@ function GuidanceSettingsInfo({
   );
 }
 
+/** The tinted mat half shows who is deciding, so another player's decision needs
+ * a panel only to show the cards it reveals. */
+export function pendingDecisionPanelShown(model: PendingDecisionModel): boolean {
+  const decision = model.decision;
+  if (!decision) return false;
+  return model.isMine || (decision.revealedCards?.length ?? 0) > 0;
+}
+
 export function PendingDecisionPanel({
   model,
   viewerSeat,
@@ -258,7 +266,6 @@ export function PendingDecisionPanel({
   const {
     decision: pd,
     isMine,
-    decidingName,
     playerName,
     optionCardLabels,
     canPass,
@@ -278,7 +285,7 @@ export function PendingDecisionPanel({
     onConfirmBoundedChoice,
     onSend,
   } = model;
-  if (!pd) return null;
+  if (!pd || !pendingDecisionPanelShown(model)) return null;
   if (isMine && pd.kind === "defend" && defendPitchIds.size === 0) return null;
   const optionResolvers = playerName
     ? { ...localizedOptionResolvers, player: playerName }
@@ -335,17 +342,12 @@ export function PendingDecisionPanel({
 
   if (!isMine) {
     return (
-      <div className={`decision decision-passive${revealedChoice ? " decision-options" : ""}`}>
-        <span className="decision-prompt muted">
-          {intl.formatMessage({ id: "game.decision.playerDeciding" }, { player: decidingName })}
-        </span>
-        {revealedChoice ? (
-          <RevealedChoiceCards
-            cards={revealedCards}
-            selectableIds={revealedSelectableIds}
-            viewerSeat={viewerSeat}
-          />
-        ) : null}
+      <div className="decision decision-passive decision-options">
+        <RevealedChoiceCards
+          cards={revealedCards}
+          selectableIds={revealedSelectableIds}
+          viewerSeat={viewerSeat}
+        />
       </div>
     );
   }

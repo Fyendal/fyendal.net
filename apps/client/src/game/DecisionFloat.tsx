@@ -7,7 +7,7 @@ import type {
   ActionAnnouncementModel,
   PendingDecisionModel,
 } from "./decision/DecisionModels.js";
-import { PendingDecisionPanel } from "./decision/PendingDecisionPanel.js";
+import { PendingDecisionPanel, pendingDecisionPanelShown } from "./decision/PendingDecisionPanel.js";
 import { ChoiceHotkeysEnabled } from "./decision/choiceHotkeys.js";
 
 export type { ActionAnnouncementModel, PendingDecisionModel } from "./decision/DecisionModels.js";
@@ -63,7 +63,7 @@ export function DecisionFloat({
       action.autoCommitPending,
     ),
   });
-  if (pending.decision === null && (action.sel.kind === "none" || action.autoCommitPending)) {
+  if (!pendingDecisionPanelShown(pending) && (action.sel.kind === "none" || action.autoCommitPending)) {
     return null;
   }
 

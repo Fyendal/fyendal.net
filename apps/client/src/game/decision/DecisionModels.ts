@@ -5,7 +5,6 @@ import type { ActionTargetChoice } from "./CardChoices.js";
 export interface PendingDecisionModel {
   decision: PendingDecision | null;
   isMine: boolean;
-  decidingName: string;
   /** Viewer-facing hero name for player references in option messages. */
   playerName?: (seat: number) => string;
   /** Viewer-local zone labels for live card choices whose artwork/name alone

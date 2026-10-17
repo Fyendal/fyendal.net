@@ -556,6 +556,16 @@ export function GameBoard() {
   );
   const showPriorityFloat = !spectating && !replaying && gameHasPriority(view);
   const hasOwnPriority = showPriorityFloat && view.priorityPlayer === seat;
+  /** Seat the game is waiting on — the pending decider, else the priority
+   * holder. Its half of the mat is tinted for players, spectators, and replays. */
+  const priorityHolder = presentedView.phase === "game-over"
+    ? null
+    : pd !== null
+      ? pd.player
+      : gameHasPriority(presentedView) ? presentedView.priorityPlayer : null;
+  const priorityHolderName = priorityHolder === null
+    ? ""
+    : (presentedView.players[priorityHolder]?.heroName ?? "");
   const priorityLabel = view.priorityPlayer === seat ? "YOUR PRIORITY" : "OPPONENT'S PRIORITY";
   const priorityTimingLabel = gameTimingLabel(view);
   const showEndTurnPassToast =
@@ -1095,7 +1105,7 @@ export function GameBoard() {
     <SquareCardPresentation enabled={squareCardsEnabled}>
     <div
       ref={tableRef}
-      className={`table${railCollapsed ? " rail-is-collapsed" : ""}${view.phase === "game-over" ? " game-is-over" : ""}${hasActiveCombatChain ? " has-active-combat-chain" : ""}${mobileHandIsHidden ? " mobile-hand-is-hidden" : ""}${hasOwnPriority ? " has-own-priority" : ""}`}
+      className={`table${railCollapsed ? " rail-is-collapsed" : ""}${view.phase === "game-over" ? " game-is-over" : ""}${hasActiveCombatChain ? " has-active-combat-chain" : ""}${mobileHandIsHidden ? " mobile-hand-is-hidden" : ""}`}
       data-playability-cue={playabilityCuePreference}
       data-motion-preference={motionPreference}
       onMouseMove={onHoverCard}
@@ -1184,6 +1194,7 @@ export function GameBoard() {
           player={opp}
           mine={false}
           mirrored
+          holdsPriority={priorityHolder === opp.seat}
           ongoing={view.ongoing.filter((effect) => effect.seat === opp.seat)}
           gameOver={view.phase === "game-over"}
           replaying={replaying}
@@ -1203,6 +1214,11 @@ export function GameBoard() {
 
         {/* center divider: a brass-inlay strip marking the seam */}
         <div className="mat-divider">
+          {priorityHolder !== null ? (
+            <span className="mat-priority-status" role="status">
+              {intl.formatMessage({ id: "game.decision.playerDeciding" }, { player: priorityHolderName })}
+            </span>
+          ) : null}
           <div className="mat-divider-center">
             {showEndTurnPassToast && !mobileFloatViewport
               ? <EndTurnPassToast placement="divider" />
@@ -1221,6 +1237,8 @@ export function GameBoard() {
           // their recorded player perspective while exposing replay data.
           mine={!spectating || replaying}
           mirrored={false}
+          holdsPriority={priorityHolder === me.seat}
+          priorityPulse={hasOwnPriority}
           ongoing={view.ongoing.filter((effect) => effect.seat === me.seat)}
           gameOver={view.phase === "game-over"}
           replaying={replaying}
@@ -1368,7 +1386,6 @@ export function GameBoard() {
         pending={{
           decision: hidePriorityGuidance || showCardSearchOverlay ? null : pd,
           isMine: myDecision,
-          decidingName: pd ? (view.players[pd.player]?.heroName ?? "") : "",
           playerName: (playerSeat) => view.players[playerSeat]?.heroName ?? "",
           optionCardLabels,
           canPass: derived.canPass,

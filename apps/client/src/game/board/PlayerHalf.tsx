@@ -103,6 +103,8 @@ export function PlayerHalf({
   player,
   mine,
   mirrored,
+  holdsPriority = false,
+  priorityPulse = false,
   ongoing,
   gameOver,
   replaying,
@@ -123,6 +125,10 @@ export function PlayerHalf({
   player: PlayerView;
   mine: boolean;
   mirrored: boolean;
+  /** The game is waiting on this half's player. */
+  holdsPriority?: boolean;
+  /** Live attention cue: the viewer's own priority breathes. */
+  priorityPulse?: boolean;
   ongoing: readonly OngoingEffectView[];
   gameOver: boolean;
   replaying: boolean;
@@ -364,7 +370,7 @@ export function PlayerHalf({
   };
 
   return (
-    <div className={`mat-half ${mirrored ? "mat-opp" : ""}${squareBoard ? " mat-square-board" : ""}${compactBoard ? " mat-compact-board" : ""}`}>
+    <div className={`mat-half ${mirrored ? "mat-opp" : ""}${squareBoard ? " mat-square-board" : ""}${compactBoard ? " mat-compact-board" : ""}${holdsPriority ? " mat-priority-holder" : ""}${holdsPriority && priorityPulse ? " mat-priority-pulse" : ""}`}>
       {equipmentZone("head", `${row(1)} / 1`)}
       <MatZone
         area={`${row(1)} / 2 / span 1 / span 7`}
