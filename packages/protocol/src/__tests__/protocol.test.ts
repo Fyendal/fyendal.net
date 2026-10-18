@@ -432,6 +432,7 @@ describe("client messages", () => {
     { type: "priority-mode", mode: "always-pause" },
     { type: "runechant-skip", enabled: true },
     { type: "runechant-skip", enabled: false },
+    { type: "seismic-surge-skip", enabled: true },
     { type: "leave-room" },
     { type: "leave-room", endGame: true },
     { type: "undo" },
@@ -484,6 +485,7 @@ describe("client messages", () => {
     { kind: "choose-many", optionIds: ["11", "12", "13"] },
     { kind: "order-triggers", optionIds: ["41:0", "42:0"] },
     { kind: "skip-runechant" },
+    { kind: "skip-seismic-surge" },
     { kind: "close-chain" },
     { kind: "concede" },
     { kind: "offer-draw" },
@@ -557,6 +559,7 @@ describe("client messages", () => {
     expect(decodeClientMessage({ type: "priority-mode", mode: "sometimes" })).toBeNull();
     expect(decodeClientMessage({ type: "runechant-skip" })).toBeNull();
     expect(decodeClientMessage({ type: "runechant-skip", enabled: "yes" })).toBeNull();
+    expect(decodeClientMessage({ type: "seismic-surge-skip" })).toBeNull();
     expect(decodeClientMessage({ type: "undo", target: "entire-game" })).toBeNull();
     expect(decodeClientMessage({ type: "emote", message: "custom text" })).toBeNull();
     expect(decodeClientMessage({ type: "emote", message: "Well played!" })).toBeNull();

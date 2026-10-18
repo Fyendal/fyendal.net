@@ -744,6 +744,9 @@ export interface CardCostSelection {
   }>;
 }
 
+/** Token runs whose consecutive priority windows a seat may skip at once. */
+export type TokenSkipKind = "runechant" | "seismic-surge";
+
 export type GameIntent =
   | { kind: "play-card"; instanceId: number; pitchInstanceIds: number[]; pitchRequired?: number; meldSide?: MeldSide; targetAllyId?: number; targetCardInstanceId?: number; boost?: true; boostCount?: number; asInstant?: true; alternativeCostCardInstanceIds?: number[]; cardCostSelection?: CardCostSelection; /** Presentation hint: this announcement may pause on a pre-stack choice. */ deferPlayPresentation?: true }
   | { kind: "play-from-arsenal"; instanceId: number; pitchInstanceIds: number[]; pitchRequired?: number; meldSide?: MeldSide; targetAllyId?: number; targetCardInstanceId?: number; boost?: true; boostCount?: number; asInstant?: true; alternativeCostCardInstanceIds?: number[]; cardCostSelection?: CardCostSelection; deferPlayPresentation?: true }
@@ -756,6 +759,7 @@ export type GameIntent =
   | { kind: "choose-many"; optionIds: string[] }
   | { kind: "order-triggers"; optionIds: string[] }
   | { kind: "skip-runechant" }
+  | { kind: "skip-seismic-surge" }
   | { kind: "close-chain" }
   | { kind: "concede" }
   | { kind: "offer-draw" }
@@ -1040,6 +1044,8 @@ export type ClientMessage =
   /** Temporary per-seat shortcut for only the current consecutive Runechant
    *  resolution. The server expires it at the first non-Runechant boundary. */
   | { type: "runechant-skip"; enabled: boolean; commandId?: string; expectedVersion?: number }
+  /** The same one-shot shortcut for a consecutive Seismic Surge resolution. */
+  | { type: "seismic-surge-skip"; enabled: boolean; commandId?: string; expectedVersion?: number }
   | { type: "undo"; target?: UndoTarget; commandId?: string; expectedVersion?: number }
   /** Broadcast a predefined, ephemeral message to the current room. */
   | { type: "emote"; message: EmoteMessage }

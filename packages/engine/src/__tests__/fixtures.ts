@@ -41,6 +41,7 @@ export const cards: Record<string, CardData> = {
   SPLIT: { id: "SPLIT", name: "Test Split // Test Half", cardType: "instant", classes: ["generic"], pitch: 3, cost: 2, keywords: ["Meld"], text: "Meld" },
   RUNE_GATE: { id: "RUNE_GATE", name: "Test Rune Gate", cardType: "action", classes: ["runeblade"], subtypes: ["shadow", "attack"], pitch: 1, cost: 2, attack: 5, defense: 3, keywords: ["Rune Gate"], text: "Rune Gate" },
   RUNECHANT: { id: "RUNECHANT", name: "Test Runechant", cardType: "token", classes: ["runeblade"], subtypes: ["aura"], text: "" },
+  SURGE: { id: "SURGE", name: "Test Surge", cardType: "token", classes: ["guardian"], subtypes: ["aura"], text: "" },
 };
 
 export const scripts: Record<string, CardScript> = {
@@ -214,6 +215,7 @@ export const scripts: Record<string, CardScript> = {
   },
   RUNE_GATE: { runeGate: true },
   RUNECHANT: { runechantToken: true },
+  SURGE: { seismicSurgeToken: true },
   AURA: {
     destroyAtZeroCounter: "charge",
     onEnterArena(ctx) {

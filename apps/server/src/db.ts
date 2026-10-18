@@ -949,6 +949,22 @@ export const MIGRATIONS: Migration[] = [
         REFERENCES replay_participants(replay_id, user_id) ON DELETE CASCADE
     );`,
   },
+  {
+    version: 51,
+    // Only one token run can be on top of the stack, so a seat's one-shot
+    // skip latch is a single nullable token kind instead of a boolean per
+    // token; an armed Runechant latch carries over. The statements run
+    // separately because pg-mem cannot add an inline column CHECK to a
+    // table that already holds rows.
+    sql: "",
+    apply: async (db) => {
+      await db.query("ALTER TABLE room_seats ADD COLUMN token_skip TEXT");
+      await db.query("UPDATE room_seats SET token_skip = 'runechant' WHERE runechant_skip");
+      await db.query("ALTER TABLE room_seats DROP COLUMN runechant_skip");
+      await db.query(`ALTER TABLE room_seats ADD CONSTRAINT room_seats_token_skip_check
+        CHECK (token_skip IS NULL OR token_skip IN ('runechant', 'seismic-surge'))`);
+    },
+  },
 ];
 
 async function publicTables(db: Queryable): Promise<string[]> {

@@ -17,6 +17,7 @@ import type {
   PresentedArena,
   PrepView,
   PriorityWindowMode,
+  TokenSkipKind,
   PlayerBadge,
   PlayerReportReason,
   RoomInvite,
@@ -265,7 +266,7 @@ export interface StoreState {
   /** True when the command was sent or intentionally queued. */
   sendIntent: (intent: GameIntent) => boolean;
   sendPriorityMode: (mode: PriorityWindowMode) => void;
-  sendRunechantSkip: (enabled: boolean) => void;
+  sendTokenSkip: (kind: TokenSkipKind, enabled: boolean) => void;
   sendEmote: (message: EmoteMessage) => void;
   kickSpectator: (username: string) => void;
   undo: (target?: UndoTarget) => void;

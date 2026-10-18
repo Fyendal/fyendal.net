@@ -2190,12 +2190,14 @@ describe("client connection and account race fences", () => {
     socket.sent = [];
 
     useStore.getState().sendPriorityMode("always-pause");
-    useStore.getState().sendRunechantSkip(false);
+    useStore.getState().sendTokenSkip("runechant", false);
+    useStore.getState().sendTokenSkip("seismic-surge", false);
     useStore.getState().sendIntent({ kind: "pass" });
 
     expect(socket.sent.map((value) => JSON.parse(value))).toEqual([
       expect.objectContaining({ type: "priority-mode", mode: "always-pause", expectedVersion: 2 }),
       expect.objectContaining({ type: "runechant-skip", enabled: false, expectedVersion: 2 }),
+      expect.objectContaining({ type: "seismic-surge-skip", enabled: false, expectedVersion: 2 }),
       expect.objectContaining({ type: "intent", intent: { kind: "pass" }, expectedVersion: 2 }),
     ]);
     useStore.getState().leave();

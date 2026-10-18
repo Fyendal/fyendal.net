@@ -37,7 +37,7 @@ import {
 import { abilityList } from "./scripts.js";
 import type { ActivatedAbility } from "./scripts.js";
 import { windowInstantPlays } from "./triggers.js";
-import { runechantSkipStep } from "./runechantSkip.js";
+import { TOKEN_SKIP_INTENTS, currentTokenSkip } from "./tokenSkip.js";
 import { controlledPermanents } from "./sourceQueries.js";
 import { abilitiesAsInstantForCard, abilityResourceCost, actionAbilityRestrictedByModifier, activatedAbilityAvailable, activatedAbilityTargetOptions, activatedEffectCardCostOptions, canPayAbilityLifeCost, canPayActivatedEffectCardCosts, discardCostOptions, effectiveAbilityList } from "./abilityRules.js";
 import { alternativePlayCostOptions, boostCountForCardPlay, canPlayAsInstant, canRuneGate, cardPlayCost, cardPlayReductionForSeat, cardPlayRestrictedByModifier, playOriginRestricted, cardsPlayableFromArsenal, cardsPlayableFromZone, playFromZoneRequiresInstant, playTargetOptions } from "./playRules.js";
@@ -1305,7 +1305,8 @@ function enumerateIntents(
 
   if (pd) {
     if (pd.player !== seat) return intents;
-    if (runechantSkipStep(state, seat) !== null) intents.unshift({ kind: "skip-runechant" });
+    const tokenSkip = currentTokenSkip(state, seat);
+    if (tokenSkip) intents.unshift({ kind: TOKEN_SKIP_INTENTS[tokenSkip.kind] });
     switch (pd.kind) {
       case "defend": {
         const defenders = legalDefenderCards(state, runtime, seat);

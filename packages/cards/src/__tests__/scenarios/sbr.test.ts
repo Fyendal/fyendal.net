@@ -338,6 +338,36 @@ describe("SBR — defensive and token effects", () => {
     g.expectNotInZone(0, "seismic surge|0", "board").expectAP(0, 1);
   });
 
+  it("both players can skip a run of Seismic Surges at the action phase", () => {
+    const g = scenario({
+      active: 1,
+      seats: [
+        { ...bravo, board: ["seismic surge|0", "seismic surge|0", "seismic surge|0"], hand: ["sigil of solace|1"] },
+        { hero: "dorinthea", hand: ["sigil of solace|1"] },
+      ],
+    });
+    const skip = (seat: number): void => {
+      const legal = legalIntents(g.state, seat);
+      expect(legal).toContainEqual({ kind: "skip-seismic-surge" });
+      expect(legal).not.toContainEqual({ kind: "skip-runechant" });
+      g.doRaw({ kind: "skip-seismic-surge" });
+    };
+
+    g.doRaw({ kind: "pass" });
+    if (g.state.stackResume === "end-action-phase") g.passPriority();
+    if (g.state.pendingDecision?.kind === "arsenal") g.doRaw({ kind: "choose", optionId: "pass" });
+
+    expect(g.state.stack[0]?.label).toContain("Destroy Seismic Surge");
+    // Each Surge is its own layer; both players pass on every one of them.
+    for (let layer = 0; layer < 3; layer++) {
+      skip(0);
+      skip(1);
+    }
+    g.expectZoneSize(0, "board", 0);
+    expect(g.state.stack).toHaveLength(0);
+    expect(legalIntents(g.state, 0)).not.toContainEqual({ kind: "skip-seismic-surge" });
+  });
+
   it("does not reset action points gained while a beginning trigger is pending", () => {
     const g = scenario({
       active: 1,

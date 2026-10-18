@@ -1755,7 +1755,8 @@ function scoreIntent(
     case "choose": score = scorers.choose(intent, input); break;
     case "choose-many": score = 0; break;
     case "order-triggers": score = 0; break;
-    case "skip-runechant": score = 0; break;
+    case "skip-runechant":
+    case "skip-seismic-surge": score = 0; break;
     case "play-card":
     case "play-from-arsenal":
     case "play-from-zone":

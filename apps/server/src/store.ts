@@ -25,6 +25,7 @@ import {
   type RoomInvite,
   type RoomSummary,
   type ServerMessage,
+  type TokenSkipKind,
   type UndoTarget,
 } from "@fyendal/shared";
 import {
@@ -39,7 +40,8 @@ import {
   onlyIdleResourceSources,
   projectStateFor,
   projectTransitionEvents,
-  runechantSequenceActive,
+  TOKEN_SKIP_INTENTS,
+  tokenSkipSequenceActive,
   type EngineTransitionMove,
   type GameState,
 } from "@fyendal/engine";
@@ -113,8 +115,8 @@ export interface SeatRow {
   queueCardPoolMode?: CardPoolMode;
   /** Server-owned empty priority-window behavior; durable across gateways. */
   priorityMode?: PriorityWindowMode;
-  /** One-shot shortcut for the current consecutive Runechant sequence. */
-  runechantSkip?: boolean;
+  /** One-shot shortcut for the current consecutive run of this token. */
+  tokenSkip?: TokenSkipKind;
   /** presence: last heartbeat/attach (epoch ms); 0 = absent */
   lastSeenAt: number;
   /** idle-claim baseline (epoch ms): stamped for both seats at game start and
@@ -295,6 +297,11 @@ export const MATCH_PREP_MS = 5 * 60 * 1000 - MATCH_FIRST_PICK_MS;
 function isPresent(lastSeenAt: number | undefined, now: number): boolean {
   return !!lastSeenAt && now - lastSeenAt < PRESENCE_TIMEOUT_MS;
 }
+
+const TOKEN_SKIP_COMMANDS = {
+  runechant: "runechant-skip",
+  "seismic-surge": "seismic-surge-skip",
+} as const satisfies Record<TokenSkipKind, string>;
 
 function seatForCredentials(room: RoomRow, credentials: SeatCredentials): SeatIndex | null {
   const tokenHash = hashReconnectToken(credentials.token);
@@ -716,8 +723,8 @@ function decodeSeatRows(values: unknown[], code: string): [SeatRow | null, SeatR
     if (!(row.priority_mode === "always-pause" || row.priority_mode === "auto-pass")) {
       throw new CorruptRoomError(code, `seats[${index}].priority_mode`, "expected always-pause or auto-pass");
     }
-    if (typeof row.runechant_skip !== "boolean") {
-      throw new CorruptRoomError(code, `seats[${index}].runechant_skip`, "expected a boolean");
+    if (!(row.token_skip == null || row.token_skip === "runechant" || row.token_skip === "seismic-surge")) {
+      throw new CorruptRoomError(code, `seats[${index}].token_skip`, "expected a token kind or null");
     }
     if (typeof row.accepted !== "boolean") {
       throw new CorruptRoomError(code, `seats[${index}].accepted`, "expected a boolean");
@@ -747,7 +754,7 @@ function decodeSeatRows(values: unknown[], code: string): [SeatRow | null, SeatR
       fromQueue: row.from_queue === true,
       ...(row.queue_card_pool_mode == null ? {} : { queueCardPoolMode: row.queue_card_pool_mode }),
       priorityMode: row.priority_mode,
-      runechantSkip: row.runechant_skip,
+      ...(row.token_skip == null ? {} : { tokenSkip: row.token_skip }),
       lastSeenAt: 0,
       ...(row.last_action_at == null ? {} : { lastActionAt: Number(row.last_action_at) }),
     };
@@ -1082,7 +1089,7 @@ export class PgRoomStore {
       member.lastActionAt ?? null,
       member.controller ?? "human",
       member.priorityMode ?? "always-pause",
-      member.runechantSkip ?? false,
+      member.tokenSkip ?? null,
       member.accepted ?? false,
       member.queueCardPoolMode ?? null,
     ];
@@ -1124,7 +1131,7 @@ export class PgRoomStore {
         ? await db.query(
             `INSERT INTO room_seats
               (room_code, seat, user_id, token_hash, username, hero_id, deck_id, deck_name,
-               from_queue, ready, presented, last_action_at, controller, priority_mode, runechant_skip, accepted,
+               from_queue, ready, presented, last_action_at, controller, priority_mode, token_skip, accepted,
                queue_card_pool_mode)
              VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17)`,
             values,
@@ -1143,7 +1150,7 @@ export class PgRoomStore {
                last_action_at = $12,
                controller = $13,
                priority_mode = $14,
-               runechant_skip = $15,
+               token_skip = $15,
                accepted = $16,
                queue_card_pool_mode = $17
              WHERE room_code = $1 AND seat = $2`,
@@ -1162,9 +1169,9 @@ export class PgRoomStore {
       const member = room.seats[seat];
       if (!member) continue;
       const { rowCount } = await db.query(
-        `UPDATE room_seats SET priority_mode = $3, runechant_skip = $4
+        `UPDATE room_seats SET priority_mode = $3, token_skip = $4
          WHERE room_code = $1 AND seat = $2`,
-        [room.code, seat, member.priorityMode ?? "always-pause", member.runechantSkip ?? false],
+        [room.code, seat, member.priorityMode ?? "always-pause", member.tokenSkip ?? null],
       );
       if (rowCount !== 1) throw VERSION_CONFLICT;
     }
@@ -1386,7 +1393,7 @@ export class PgRoomStore {
           }
         }
         const preferencesBefore = room.seats.map((seat) => seat
-          ? [seat.priorityMode ?? "always-pause", seat.runechantSkip ?? false] as const
+          ? [seat.priorityMode ?? "always-pause", seat.tokenSkip ?? null] as const
           : null);
         const wasGameOver = room.state?.phase === "game-over";
         const out = await fn(room, db);
@@ -1400,7 +1407,8 @@ export class PgRoomStore {
           const before = preferencesBefore[seat];
           const after = out.room.seats[seat];
           return before != null && after !== null && !fullSeatWrites.has(seat)
-            && (before[0] !== (after.priorityMode ?? "always-pause") || before[1] !== (after.runechantSkip ?? false));
+            && (before[0] !== (after.priorityMode ?? "always-pause")
+              || before[1] !== (after.tokenSkip ?? null));
         });
         await this.persistSeatPreferences(db, out.room, preferenceSeats);
         if (out.versionNeutral) {
@@ -1700,7 +1708,6 @@ export class PgRoomStore {
       fromQueue: true,
       queueCardPoolMode: choice.cardPoolMode,
       priorityMode: "always-pause",
-      runechantSkip: false,
       lastSeenAt: 0,
     };
   }
@@ -3794,43 +3801,43 @@ export class PgRoomStore {
   }
 
   /** Fold server-owned shortcuts into the current commit, so intermediate
-   *  states are never persisted or broadcast. Runechant skipping is checked
-   *  first because it can deliberately decline optional prevention; it is
-   *  expired before auto-pass is considered at any non-Runechant boundary.
-   *  Bot seats always auto-pass empty windows. Automatic steps write no undo
-   *  snapshots. */
+   *  states are never persisted or broadcast. Token skipping is checked
+   *  first because a Runechant skip can deliberately decline optional
+   *  prevention; each token shortcut is expired before auto-pass is
+   *  considered at any boundary outside its own run. Bot seats always
+   *  auto-pass empty windows. Automatic steps write no undo snapshots. */
   private applyServerShortcuts(
     room: RoomRow,
     transitionEvents?: EngineTransitionMove[],
   ): void {
     const autoPasses = (seat: number): boolean =>
       room.seats[seat]?.controller === "bot" || room.seats[seat]?.priorityMode === "auto-pass";
-    const hasRunechantSkip = (): boolean => room.seats.some((seat) => seat?.runechantSkip === true);
-    if (!autoPasses(0) && !autoPasses(1) && !hasRunechantSkip()) return;
+    if (!autoPasses(0) && !autoPasses(1) && !room.seats.some((seat) => seat?.tokenSkip)) return;
     // Each shortcut strictly advances the game; the bound is insurance only.
     for (let guard = 0; guard < 64; guard++) {
       const state = room.state;
       if (!state || state.phase === "game-over") {
-        for (const member of room.seats) if (member) member.runechantSkip = false;
+        for (const member of room.seats) if (member) delete member.tokenSkip;
         return;
       }
-      const inRunechantSequence = runechantSequenceActive(state);
-      if (!inRunechantSequence && hasRunechantSkip()) {
-        // This must happen before auto-pass can traverse a non-Runechant layer:
-        // a later Runechant is a new sequence and requires a new click.
-        for (const member of room.seats) if (member) member.runechantSkip = false;
+      // This must happen before auto-pass can traverse another layer: a later
+      // run of the same token is a new sequence and requires a new click.
+      for (const member of room.seats) {
+        if (member?.tokenSkip && !tokenSkipSequenceActive(state, member.tokenSkip)) delete member.tokenSkip;
       }
       const seat = state.pendingDecision?.player ??
         (state.phase === "action" ? state.priorityPlayer : undefined);
       if (seat === undefined) return;
-      const skipRunechant =
-        inRunechantSequence &&
-        room.seats[seat]?.runechantSkip === true &&
-        legalIntents(state, seat).some((candidate) => candidate.kind === "skip-runechant");
-      const intent: GameIntent | null = skipRunechant
-        ? { kind: "skip-runechant" }
+      const member = room.seats[seat];
+      const armed = member?.tokenSkip;
+      const skipKind = armed &&
+        legalIntents(state, seat).some((candidate) => candidate.kind === TOKEN_SKIP_INTENTS[armed])
+        ? armed
+        : undefined;
+      const intent: GameIntent | null = skipKind
+        ? { kind: TOKEN_SKIP_INTENTS[skipKind] }
         : autoPasses(seat) && (isEmptyPriorityWindow(state, seat) ||
-          (room.seats[seat]?.controller === "bot" && isEmptyBotActionWindow(state, seat)))
+          (member?.controller === "bot" && isEmptyBotActionWindow(state, seat)))
           ? { kind: "pass" }
           : null;
       if (!intent) return;
@@ -3875,12 +3882,13 @@ export class PgRoomStore {
       : { ok: false, error: r.error };
   }
 
-  /** Enable or cancel the one-shot shortcut for the continuous Runechant run
+  /** Enable or cancel the one-shot shortcut for the continuous token run
    *  presented in this seat's current priority window. A seat cannot arm the
    *  shortcut before its legal choice is visible. */
-  async setRunechantSkipping(
+  async setTokenSkipping(
     code: string,
     credentials: SeatCredentials,
+    kind: TokenSkipKind,
     enabled: boolean,
     command?: RoomCommand,
   ): Promise<{ ok: true; version: number; advanced: boolean; replayFinalizationId?: string } | { ok: false; error: string }> {
@@ -3889,16 +3897,16 @@ export class PgRoomStore {
       const seat = seatForCredentials(room, credentials);
       if (seat === null) return { error: "not a player in this room" };
       if (!enabled) {
-        room.seats[seat]!.runechantSkip = false;
+        if (room.seats[seat]!.tokenSkip === kind) delete room.seats[seat]!.tokenSkip;
         return { room, result: { advanced: false }, versionNeutral: true };
       }
       const choicePresented = !!room.state
         && room.state.phase !== "game-over"
         && room.state.pendingDecision?.player === seat
-        && runechantSequenceActive(room.state)
-        && legalIntents(room.state, seat).some((candidate) => candidate.kind === "skip-runechant");
+        && tokenSkipSequenceActive(room.state, kind)
+        && legalIntents(room.state, seat).some((candidate) => candidate.kind === TOKEN_SKIP_INTENTS[kind]);
       if (!choicePresented) return { room, result: { advanced: false }, versionNeutral: true };
-      room.seats[seat]!.runechantSkip = true;
+      room.seats[seat]!.tokenSkip = kind;
       const events: EngineTransitionMove[] = [];
       this.applyServerShortcuts(room, events);
       room.lastTransition = { fromVersion: room.version, kind: "forward", events };
@@ -3906,7 +3914,7 @@ export class PgRoomStore {
     }, command ? {
       meta: command,
       credentials,
-      type: "runechant-skip",
+      type: TOKEN_SKIP_COMMANDS[kind],
       duplicateResult: () => ({ advanced: false }),
     } : undefined);
     return r.ok
@@ -4109,6 +4117,12 @@ export class PgRoomStore {
           ...prev,
           ...appendSemanticGameLog(prev, undoPayload),
         };
+        // A token-skip latch belongs to the run it was armed in. Undo can
+        // land back inside that run, where a surviving latch would skip
+        // straight past the choice the player just asked to revisit.
+        const latchedSeats = ([0, 1] as const).filter((seat) => room.seats[seat]?.tokenSkip);
+        for (const seat of latchedSeats) delete room.seats[seat]!.tokenSkip;
+        await this.persistSeatPreferences(db, room, latchedSeats);
         // The restored snapshot can hold an empty window for a seat that
         // opted into auto-pass after the snapshot was written; pass it out
         // in this commit rather than stranding the seat until a resend.

@@ -749,6 +749,13 @@
     touch-action: manipulation;
     -webkit-tap-highlight-color: #c9a62722;
   }
+  .chain-float-bar > .stack-token-skip {
+    min-height: 44px;
+    padding: 0 12px 0 10px;
+    border-radius: 4px;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
   .chain-hide-icon {
     display: block;
     color: #d7ad48;

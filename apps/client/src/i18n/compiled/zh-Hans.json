@@ -28258,13 +28258,25 @@
   "game.stack.skipRunechants": [
     {
       "type": 0,
-      "value": "跳过所有符文吟唱"
+      "value": "跳过符文吟唱"
     }
   ],
   "game.stack.skipRunechantsTitle": [
     {
       "type": 0,
-      "value": "跳过此优先权窗口中连续的符文吟唱"
+      "value": "持续让过优先权，直到这些符文吟唱结算完毕，且不支付费用来防止其伤害"
+    }
+  ],
+  "game.stack.skipSeismicSurges": [
+    {
+      "type": 0,
+      "value": "跳过 Seismic Surge"
+    }
+  ],
+  "game.stack.skipSeismicSurgesTitle": [
+    {
+      "type": 0,
+      "value": "持续让过优先权，直到这些 Seismic Surge 结算完毕"
     }
   ],
   "game.stack.title": [

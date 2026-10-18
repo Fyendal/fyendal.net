@@ -1365,6 +1365,10 @@ describe("PgRoomStore storage", () => {
     code: string,
     player: 0 | 1,
     count = 1,
+    token: { cardId: string; label: string } = {
+      cardId: "ARC112",
+      label: "Destroy Runechant: 1 arcane damage to the opposing hero",
+    },
   ): Promise<void> {
     const room = await store.getRoom(code);
     const state = room!.state!;
@@ -1378,7 +1382,7 @@ describe("PgRoomStore storage", () => {
     }
     const runechants = Array.from({ length: count }, () => ({
       instanceId: state.nextInstanceId++,
-      cardId: "ARC112",
+      cardId: token.cardId,
       owner: 0,
     }));
     state.players[0]!.board.push(...runechants);
@@ -1390,13 +1394,13 @@ describe("PgRoomStore storage", () => {
       sourceInstanceId: runechant.instanceId,
       seat: 0,
       triggerIndex: 0,
-      label: "Destroy Runechant: 1 arcane damage to the opposing hero",
+      label: token.label,
       optional: false,
     }));
     state.pendingDecision = {
       player,
       kind: "priority-window",
-      prompt: "Runechant triggers — play an instant or pass",
+      prompt: "Triggers — play an instant or pass",
     };
     await db.query("UPDATE rooms SET state = $2 WHERE code = $1", [
       code,
@@ -1557,9 +1561,10 @@ describe("PgRoomStore storage", () => {
       "always-pause",
       { id: "preference-sync-priority", expectedVersion },
     );
-    const runechants = await store.setRunechantSkipping(
+    const runechants = await store.setTokenSkipping(
       code,
       credentials,
+      "runechant",
       false,
       { id: "preference-sync-runechants", expectedVersion },
     );
@@ -1595,14 +1600,14 @@ describe("PgRoomStore storage", () => {
     await forceRunechantWindow(code, 0, 2);
     const lifeBefore = (await store.getRoom(code))!.state!.players[1]!.life;
 
-    const first = await store.setRunechantSkipping(code, { token: tokens[0] }, true);
+    const first = await store.setTokenSkipping(code, { token: tokens[0] }, "runechant", true);
     expect(first).toMatchObject({ ok: true, advanced: true });
     expect((await store.getRoom(code))!.state!.pendingDecision).toMatchObject({
       player: 1,
       kind: "priority-window",
     });
 
-    const second = await store.setRunechantSkipping(code, { token: tokens[1] }, true);
+    const second = await store.setTokenSkipping(code, { token: tokens[1] }, "runechant", true);
     expect(second).toMatchObject({ ok: true, advanced: true });
     const completed = await store.getRoom(code);
     expect(completed!.state!.stack).toHaveLength(0);
@@ -1621,6 +1626,56 @@ describe("PgRoomStore storage", () => {
     });
   });
 
+  it("undo clears an armed token skip so the restored choice is presented again", async () => {
+    const { code, tokens } = await fullRoom();
+    await startGame(code, tokens);
+    await forceRunechantWindow(code, 0, 2);
+
+    // Seat 0 arms the skip; seat 1 passes manually, so the latch carries seat
+    // 0 past the second Runechant and leaves seat 1 deciding again.
+    expect(await store.setTokenSkipping(code, { token: tokens[0] }, "runechant", true))
+      .toMatchObject({ ok: true, advanced: true });
+    expect((await store.applyIntent(code, { token: tokens[1] }, { kind: "pass" })).ok).toBe(true);
+    expect((await store.getRoom(code))!.state!.pendingDecision).toMatchObject({ player: 1 });
+    expect((await store.getRoom(code))!.seats[0]!.tokenSkip).toBe("runechant");
+
+    expect((await store.undo(code, { token: tokens[1] })).ok).toBe(true);
+    expect((await store.getRoom(code))!.seats[0]!.tokenSkip).toBeUndefined();
+
+    // Replaying the manual pass now stops on seat 0's second Runechant choice.
+    expect((await store.applyIntent(code, { token: tokens[1] }, { kind: "pass" })).ok).toBe(true);
+    const replayed = await store.getRoom(code);
+    expect(replayed!.state!.stack[0]?.label).toContain("Destroy Runechant");
+    expect(replayed!.state!.pendingDecision).toMatchObject({ player: 0, kind: "priority-window" });
+  });
+
+  it("server-skips the current Seismic Surge sequence independently of Runechants", async () => {
+    const { code, tokens } = await fullRoom();
+    await startGame(code, tokens);
+    await forceRunechantWindow(code, 0, 2, {
+      cardId: "SBR035",
+      label: "Destroy Seismic Surge — next Guardian attack costs {r} less",
+    });
+
+    // A Runechant latch cannot be armed over a Seismic Surge choice.
+    expect(await store.setTokenSkipping(code, { token: tokens[0] }, "runechant", true))
+      .toMatchObject({ ok: true, advanced: false });
+    expect(await store.setTokenSkipping(code, { token: tokens[0] }, "seismic-surge", true))
+      .toMatchObject({ ok: true, advanced: true });
+    expect((await store.getRoom(code))!.state!.pendingDecision).toMatchObject({
+      player: 1,
+      kind: "priority-window",
+    });
+
+    expect(await store.setTokenSkipping(code, { token: tokens[1] }, "seismic-surge", true))
+      .toMatchObject({ ok: true, advanced: true });
+    const completed = await store.getRoom(code);
+    expect(completed!.state!.stack).toHaveLength(0);
+    expect(completed!.state!.players[0]!.board).toHaveLength(0);
+    expect(completed!.seats.map((seat) => seat?.tokenSkip)).toEqual([undefined, undefined]);
+    expect(await store.getHistory(code)).toHaveLength(0);
+  });
+
   it("does not arm Runechant skipping before the seat is presented the choice", async () => {
     const { code, tokens } = await fullRoom();
     await startGame(code, tokens);
@@ -1628,12 +1683,12 @@ describe("PgRoomStore storage", () => {
     const versionBefore = (await store.getRoom(code))!.version;
 
     // Seat 0 cannot pre-arm the shortcut while seat 1 owns the choice.
-    expect(await store.setRunechantSkipping(code, { token: tokens[0] }, true)).toMatchObject({
+    expect(await store.setTokenSkipping(code, { token: tokens[0] }, "runechant", true)).toMatchObject({
       ok: true,
       advanced: false,
       version: versionBefore,
     });
-    expect((await store.getRoom(code))!.seats[0]!.runechantSkip).toBe(false);
+    expect((await store.getRoom(code))!.seats[0]!.tokenSkip).toBeUndefined();
 
     // Passing priority presents the Runechant choice to seat 0; the rejected
     // pre-arm must not consume it automatically.
@@ -1651,7 +1706,7 @@ describe("PgRoomStore storage", () => {
 
     // Arm only from seat 0's visible Runechant choice. This passes that
     // window and leaves seat 1 with priority on the same Runechant.
-    expect(await store.setRunechantSkipping(code, { token: tokens[0] }, true)).toMatchObject({
+    expect(await store.setTokenSkipping(code, { token: tokens[0] }, "runechant", true)).toMatchObject({
       ok: true,
       advanced: true,
     });

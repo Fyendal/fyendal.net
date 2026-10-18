@@ -1124,6 +1124,8 @@ export interface CardScript {
   runeGate?: boolean;
   /** Identifies a permanent as a Runechant for the generic Rune Gate count. */
   runechantToken?: boolean;
+  /** Identifies a permanent as a Seismic Surge for the skip shortcut. */
+  seismicSurgeToken?: boolean;
   /** This active source stops all heroes revealing cards. */
   prohibitsReveals?: boolean;
   /** This active source stops cards being drawn by resolving effects. */

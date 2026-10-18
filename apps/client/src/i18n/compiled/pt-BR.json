@@ -30371,13 +30371,25 @@
   "game.stack.skipRunechants": [
     {
       "type": 0,
-      "value": "Pular todos os Runechants"
+      "value": "Pular Runechants"
     }
   ],
   "game.stack.skipRunechantsTitle": [
     {
       "type": 0,
-      "value": "Pular Runechants consecutivos nesta janela de prioridade"
+      "value": "Passar a prioridade até estes Runechants resolverem, sem pagar para prevenir o dano"
+    }
+  ],
+  "game.stack.skipSeismicSurges": [
+    {
+      "type": 0,
+      "value": "Pular Seismic Surges"
+    }
+  ],
+  "game.stack.skipSeismicSurgesTitle": [
+    {
+      "type": 0,
+      "value": "Passar a prioridade até estes Seismic Surges resolverem"
     }
   ],
   "game.stack.title": [

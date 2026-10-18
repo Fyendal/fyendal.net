@@ -226,6 +226,32 @@ describe("initial schema", () => {
       .toEqual([{ version: MIGRATIONS.at(-1)!.version }]);
   });
 
+  it("folds the Runechant skip boolean into one token_skip latch", async () => {
+    const db = rawDb();
+    await applyMigrations(db, MIGRATIONS.filter((migration) => migration.version <= 50));
+    for (const [code, runechant] of [["RUNE01", true], ["NONE01", false]] as const) {
+      await db.query(
+        `INSERT INTO rooms (code, format, spectators, ruleset_version, version, created_at, status)
+         VALUES ($1, 'cc', '[]', 'rules-a', 0, 1, 'open')`,
+        [code],
+      );
+      await db.query(
+        `INSERT INTO room_seats (room_code, seat, token_hash, runechant_skip)
+         VALUES ($1, 0, 'hash', $2)`,
+        [code, runechant],
+      );
+    }
+
+    await applyMigrations(db, MIGRATIONS);
+
+    expect((await db.query("SELECT room_code, token_skip FROM room_seats ORDER BY room_code")).rows).toEqual([
+      { room_code: "NONE01", token_skip: null },
+      { room_code: "RUNE01", token_skip: "runechant" },
+    ]);
+    await expect(db.query("SELECT runechant_skip FROM room_seats")).rejects.toThrow();
+    await expect(db.query("UPDATE room_seats SET token_skip = 'aura'")).rejects.toThrow();
+  });
+
   it("adds candidate skip state to an already-applied version 26 database", async () => {
     const db = rawDb();
     await applyMigrations(db, MIGRATIONS.filter((migration) => migration.version <= 26));

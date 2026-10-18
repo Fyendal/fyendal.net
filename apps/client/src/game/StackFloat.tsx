@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useIntl } from "react-intl";
 import { createPortal } from "react-dom";
-import type { AttackQueueEntryView, StackLayerView } from "@fyendal/shared";
+import type { AttackQueueEntryView, StackLayerView, TokenSkipKind } from "@fyendal/shared";
 import { TooltipButton } from "../components/TooltipButton.js";
 import { UiIcon } from "../components/UiIcon.js";
 import { cardData } from "@fyendal/cards/client";
@@ -73,6 +73,31 @@ function AttackQueueChips({ queue }: { queue: readonly AttackQueueEntryView[] })
   );
 }
 
+const TOKEN_SKIP_MESSAGES = {
+  runechant: { label: "game.stack.skipRunechants", tooltip: "game.stack.skipRunechantsTitle" },
+  "seismic-surge": { label: "game.stack.skipSeismicSurges", tooltip: "game.stack.skipSeismicSurgesTitle" },
+} as const satisfies Record<TokenSkipKind, { label: string; tooltip: string }>;
+
+/** One-shot shortcut through the token run on top of the stack. The token
+ * kind tints the control so it reads as belonging to the layer below it. */
+function TokenSkipButton({ kind, onSkip }: { kind: TokenSkipKind; onSkip: () => void }) {
+  const intl = useIntl();
+  const messages = TOKEN_SKIP_MESSAGES[kind];
+  const label = intl.formatMessage({ id: messages.label });
+  return (
+    <TooltipButton
+      className="stack-token-skip"
+      data-token={kind}
+      onClick={onSkip}
+      tooltip={intl.formatMessage({ id: messages.tooltip })}
+      aria-label={label}
+    >
+      <UiIcon name="skip-forward" className="stack-token-skip-icon" />
+      {label}
+    </TooltipButton>
+  );
+}
+
 function AttackQueueLabel({ withHint }: { withHint: boolean }) {
   const intl = useIntl();
   return (
@@ -97,7 +122,7 @@ export function StackFloat({
   miniHost,
   visibility,
   motionDeferred = false,
-  onSkipRunechants,
+  tokenSkip,
 }: {
   layers: StackLayerView[];
   /** Attacks waiting to move onto the combat chain, first attack first. */
@@ -110,8 +135,9 @@ export function StackFloat({
   miniHost?: HTMLElement | null;
   /** Optional controller shared with sibling floats on compact layouts. */
   visibility?: FloatVisibilityController;
-  /** One-shot shortcut offered only during the viewer's Runechant choice. */
-  onSkipRunechants?: () => void;
+  /** One-shot shortcut offered only during the viewer's Runechant or
+   *  Seismic Surge choice. */
+  tokenSkip?: { kind: TokenSkipKind; onSkip: () => void };
 }) {
   const intl = useIntl();
   const [localHidden, setLocalHidden] = useState(false);
@@ -179,16 +205,7 @@ export function StackFloat({
         <span className="chain-float-title stack-title">
           {intl.formatMessage({ id: "game.stack.title" })}
         </span>
-        {onSkipRunechants ? (
-          <TooltipButton
-            className="stack-skip-runechants"
-            onClick={onSkipRunechants}
-            tooltip={intl.formatMessage({ id: "game.stack.skipRunechantsTitle" })}
-            aria-label={intl.formatMessage({ id: "game.stack.skipRunechants" })}
-          >
-            {intl.formatMessage({ id: "game.stack.skipRunechants" })}
-          </TooltipButton>
-        ) : null}
+        {tokenSkip ? <TokenSkipButton kind={tokenSkip.kind} onSkip={tokenSkip.onSkip} /> : null}
         <TooltipButton
           className="chain-hide stack-hide"
           tooltip={intl.formatMessage({ id: "game.stack.minimize" })}

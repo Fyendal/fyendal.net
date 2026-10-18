@@ -138,12 +138,27 @@ describe("stack context", () => {
         label: "Destroy Runechant: 1 arcane damage",
         optional: false,
       }],
-      onSkipRunechants: () => undefined,
+      tokenSkip: { kind: "runechant", onSkip: () => undefined },
     });
 
     // The longer explanation is a hover/focus tooltip rather than a native title.
-    expect(html).toContain('aria-label="Skip all Runechants"');
+    expect(html).toContain('aria-label="Skip Runechants"');
     expect(html).not.toContain("title=");
+  });
+
+  it("tints the shortcut by the token run it skips", () => {
+    const html = renderStack({
+      layers: [{
+        card: { instanceId: 43, cardId: "SBR035", owner: 0 },
+        seat: 0,
+        label: "Destroy Seismic Surge — next Guardian attack costs {r} less",
+        optional: false,
+      }],
+      tokenSkip: { kind: "seismic-surge", onSkip: () => undefined },
+    });
+
+    expect(html).toContain('aria-label="Skip Seismic Surges"');
+    expect(html).toContain('data-token="seismic-surge"');
   });
 
   it("shows trigger effect text and optionality without a visible source card", () => {

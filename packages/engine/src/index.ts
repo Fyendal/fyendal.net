@@ -26,7 +26,7 @@ import {
   legalIntents as legalIntentsImpl,
   onlyIdleResourceSources as onlyIdleResourceSourcesImpl,
 } from "./legal.js";
-import { skipRunechantStep } from "./runechantSkip.js";
+import { skipTokenStep } from "./tokenSkip.js";
 import {
   projectStateFor as projectStateForImpl,
   projectStateForReplay as projectStateForReplayImpl,
@@ -733,7 +733,11 @@ export function applyIntent(
       break;
     }
     case "skip-runechant": {
-      err = skipRunechantStep(next, runtime, seat);
+      err = skipTokenStep(next, runtime, seat, "runechant");
+      break;
+    }
+    case "skip-seismic-surge": {
+      err = skipTokenStep(next, runtime, seat, "seismic-surge");
       break;
     }
   }
@@ -777,7 +781,7 @@ export function projectStateFor(
 export function projectStateForReplay(state: GameStateInternal, publicGameId?: string) {
   return projectStateForReplayImpl(state, engineRuntime, publicGameId);
 }
-export { runechantSequenceActive } from "./runechantSkip.js";
+export { TOKEN_SKIP_INTENTS, tokenSkipSequenceActive } from "./tokenSkip.js";
 export { rngNext } from "./rng.js";
 export {
   chainLinkNumber,

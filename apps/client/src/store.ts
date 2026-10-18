@@ -1776,8 +1776,8 @@ export const useStore = create<StoreState>((set, get) => {
       // acknowledgement, so they must not occupy the state-command gate.
       send({ type: "priority-mode", mode, ...roomCommand() });
     },
-    sendRunechantSkip: (enabled) => {
-      send({ type: "runechant-skip", enabled, ...roomCommand() });
+    sendTokenSkip: (kind, enabled) => {
+      send({ type: kind === "runechant" ? "runechant-skip" : "seismic-surge-skip", enabled, ...roomCommand() });
     },
     sendEmote: (message: EmoteMessage) => send({ type: "emote", message }),
     kickSpectator: (username) => send({ type: "kick-spectator", username }),

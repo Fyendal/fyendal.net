@@ -482,7 +482,7 @@ function opponentRolloutIntent(state: GameState): GameIntent | undefined {
   if (close) return close;
   const order = legal.find((intent) => intent.kind === "order-triggers");
   if (order) return order;
-  return legal.find((intent) => intent.kind === "skip-runechant");
+  return legal.find((intent) => intent.kind === "skip-runechant" || intent.kind === "skip-seismic-surge");
 }
 
 function advanceForced<Evaluation extends TurnEvaluation>(
@@ -535,7 +535,8 @@ function genericCandidatePriority(intent: GameIntent, input: BotPolicyInput): nu
   if (intent.kind === "close-chain") return -500;
   if (
     intent.kind === "choose" || intent.kind === "choose-many" ||
-    intent.kind === "order-triggers" || intent.kind === "skip-runechant"
+    intent.kind === "order-triggers" || intent.kind === "skip-runechant" ||
+    intent.kind === "skip-seismic-surge"
   ) {
     return 0;
   }

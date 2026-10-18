@@ -28987,13 +28987,25 @@
   "game.stack.skipRunechants": [
     {
       "type": 0,
-      "value": "Skip all Runechants"
+      "value": "Skip Runechants"
     }
   ],
   "game.stack.skipRunechantsTitle": [
     {
       "type": 0,
-      "value": "Skip consecutive Runechants in this priority window"
+      "value": "Pass priority until these Runechants resolve, without paying to prevent their damage"
+    }
+  ],
+  "game.stack.skipSeismicSurges": [
+    {
+      "type": 0,
+      "value": "Skip Seismic Surges"
+    }
+  ],
+  "game.stack.skipSeismicSurgesTitle": [
+    {
+      "type": 0,
+      "value": "Pass priority until these Seismic Surges resolve"
     }
   ],
   "game.stack.title": [

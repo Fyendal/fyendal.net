@@ -784,6 +784,7 @@ function decodeGameIntentValue(value: unknown): value is GameIntent {
       return exactKeys(intent, ["kind", "optionIds"])
         && array(intent.optionIds, (v): v is string => string(v, MAX_SHORT_TEXT, false), MAX_CARDS);
     case "skip-runechant":
+    case "skip-seismic-surge":
     case "pass":
     case "close-chain":
     case "concede":
@@ -972,6 +973,7 @@ export function decodeClientMessage(value: unknown): ClientMessage | null {
         && commandFields(message);
       break;
     case "runechant-skip":
+    case "seismic-surge-skip":
       valid = exactKeys(message, ["type", "enabled", "commandId", "expectedVersion"], ["type", "enabled"])
         && typeof message.enabled === "boolean"
         && commandFields(message);

@@ -308,6 +308,7 @@ export const sbr: Record<string, CardScript> = {
   },
 
   "seismic surge|0": {
+    seismicSurgeToken: true,
     triggers: [
       {
         event: "begin-action-phase",

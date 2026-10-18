@@ -59,7 +59,7 @@ import { shouldHidePriorityGuidance } from "./decisionPass.js";
 import { hoverSurfaceLayout } from "./hoverSurfaceLayout.js";
 import { readEffectHint, sameEffectHint } from "./effects/effectHint.js";
 import { cardPreviewSurfaceSize } from "./cardPreviewFaces.js";
-import { canSkipRunechant } from "./runechantSkip.js";
+import { skippableTokenRun } from "./tokenSkip.js";
 import { PlayerNameplate } from "./PlayerNameplate.js";
 import { OpponentActions } from "../social/OpponentActions.js";
 import { shouldShowIdleVictoryClaim } from "./idleVictory.js";
@@ -100,7 +100,7 @@ const EMPTY_INSTANCE_IDS: ReadonlySet<number> = new Set();
 
 export function GameBoard() {
   const intl = useIntl();
-  const { view: authoritativeView, viewUpdate: authoritativeViewUpdate, playerProfiles, legal, actionCandidates, roomCommandPending, pendingInteraction, pendingDefenderStageIds, yourSeat, spectating, spectatorCount, spectatorUsernames, botGame, sendIntent, sendPriorityMode, sendRunechantSkip, sendEmote, kickSpectator, latestEmote, undo, error, leave, opponentConnected, connected, connectionIssueVisible, roomCode, screen, replayFrames, replayViews, replayStep, replayNotes, setLiveReplayNote, watchReplay, downloadReplay, closeReplay, getRecordedViews, lastActionAt, claimVictory, reportBug, reportOpponent, backgroundSearching, stopBackgroundMatchmaking, authUser, authToken, setLobbyRail, unreadMessageCount, setSocialOpen } = useStore(
+  const { view: authoritativeView, viewUpdate: authoritativeViewUpdate, playerProfiles, legal, actionCandidates, roomCommandPending, pendingInteraction, pendingDefenderStageIds, yourSeat, spectating, spectatorCount, spectatorUsernames, botGame, sendIntent, sendPriorityMode, sendTokenSkip, sendEmote, kickSpectator, latestEmote, undo, error, leave, opponentConnected, connected, connectionIssueVisible, roomCode, screen, replayFrames, replayViews, replayStep, replayNotes, setLiveReplayNote, watchReplay, downloadReplay, closeReplay, getRecordedViews, lastActionAt, claimVictory, reportBug, reportOpponent, backgroundSearching, stopBackgroundMatchmaking, authUser, authToken, setLobbyRail, unreadMessageCount, setSocialOpen } = useStore(
     useShallow((state) => ({
       view: state.view,
       viewUpdate: state.viewUpdate,
@@ -117,7 +117,7 @@ export function GameBoard() {
       botGame: state.botGame,
       sendIntent: state.sendIntent,
       sendPriorityMode: state.sendPriorityMode,
-      sendRunechantSkip: state.sendRunechantSkip,
+      sendTokenSkip: state.sendTokenSkip,
       sendEmote: state.sendEmote,
       kickSpectator: state.kickSpectator,
       latestEmote: state.latestEmote,
@@ -425,7 +425,7 @@ export function GameBoard() {
       (actionStep === "boost" && defaultBoostCount !== null)
     );
 
-  const canSkipCurrentRunechant = canSkipRunechant(legal);
+  const skippableRun = skippableTokenRun(legal);
 
   const hotkeyIntent = sel.kind === "none"
     ? passHotkeyIntent(legal, view?.pendingDecision ?? null, pitchSel)
@@ -1344,8 +1344,8 @@ export function GameBoard() {
         context={combatPresentation.context}
         miniHost={splitLineMiniHost}
         visibility={mobileCombatFloatVisibility}
-        onSkipRunechants={connected && !spectating && !replaying && canSkipCurrentRunechant
-          ? () => sendRunechantSkip(true)
+        tokenSkip={connected && !spectating && !replaying && skippableRun
+          ? { kind: skippableRun, onSkip: () => sendTokenSkip(skippableRun, true) }
           : undefined}
       /> : null}
 

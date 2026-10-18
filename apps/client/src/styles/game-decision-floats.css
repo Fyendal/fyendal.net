@@ -1213,18 +1213,44 @@
   text-align: center;
 }
 .stack-title { letter-spacing: .12em; }
-.stack-skip-runechants {
-  min-height: 30px;
-  padding: 5px 10px;
-  border-color: #8155a6;
-  background: #24152f;
-  color: #e8d6f5;
-  font-size: 12px;
+/* Token-run shortcut: a flat chip tinted by the token it skips, so the
+   control reads as belonging to the layer beneath it. */
+.stack-token-skip {
+  --token-accent: var(--bronze);
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 28px;
+  padding: 0 11px 0 9px;
+  border: 1px solid color-mix(in srgb, var(--token-accent) 42%, transparent);
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--token-accent) 9%, transparent);
   clip-path: none;
+  color: #e8d9b0;
+  font-family: var(--font-fantasy-meta);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: .04em;
+  line-height: 1;
+  text-transform: none;
+  white-space: nowrap;
+  transition: background-color 120ms ease, border-color 120ms ease, color 120ms ease;
 }
-.stack-skip-runechants:hover {
-  border-color: #b985df;
-  background: #3b2050;
+.stack-token-skip[data-token="runechant"] { --token-accent: #b993e8; }
+.stack-token-skip[data-token="seismic-surge"] { --token-accent: #ff9152; }
+.stack-token-skip:hover {
+  border-color: color-mix(in srgb, var(--token-accent) 75%, transparent);
+  background: color-mix(in srgb, var(--token-accent) 18%, transparent);
+  color: #fff3d6;
+}
+.stack-token-skip:active { background: color-mix(in srgb, var(--token-accent) 26%, transparent); }
+.stack-token-skip-icon {
+  width: 14px;
+  height: 14px;
+  color: var(--token-accent);
+}
+@media (prefers-reduced-motion: reduce) {
+  .stack-token-skip { transition: none; }
 }
 .stack-context {
   margin-top: -8px;
