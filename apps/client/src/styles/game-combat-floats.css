@@ -29,11 +29,20 @@
 /* On laptop/desktop, center the stack in the flexible lane between the
    opponent's arms and first weapon. With the default seven equal card columns
    this expression is the exact midpoint of that lane; compact layouts replace
-   it with their bounded sheet position. */
+   it with their bounded sheet position. The clamp keeps a wide stack on the
+   mat. */
 .stack-float {
-  left: calc((100vw - var(--rail-w) + var(--mat-zone-col)) / 4 + 9px);
+  --stack-float-x: calc((100vw - var(--rail-w) + var(--mat-zone-col)) / 4 + 9px);
+  left: var(--stack-float-x);
   top: 28%;
-  transform: translate(-50%, -50%);
+  transform: translate(
+    clamp(
+      8px - var(--stack-float-x),
+      -50%,
+      100vw - var(--rail-w) - 8px - var(--stack-float-x) - 100%
+    ),
+    -50%
+  );
   z-index: var(--game-z-stack-float);
 }
 .chain-float:active,
