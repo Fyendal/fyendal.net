@@ -34439,6 +34439,12 @@
       "value": "Version update"
     }
   ],
+  "versionUpdate.openImage": [
+    {
+      "type": 0,
+      "value": "Open full-size image"
+    }
+  ],
   "versionUpdate.title": [
     {
       "type": 0,

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useIntl } from "react-intl";
 import ReactMarkdown from "react-markdown";
+import { decodeVersionUpdateImageSource } from "@fyendal/protocol";
 import type { VersionUpdateNotice } from "@fyendal/shared";
 import { apiVersionUpdateNotice } from "../auth/auth.js";
 import { DiscordIcon } from "../components/DiscordIcon.js";
@@ -26,11 +27,51 @@ export function seenUpdate(username: string, id: string): boolean {
   catch { return false; }
 }
 
+/** Markdown images render inside paragraphs, so the figure is built from
+ * spans. Sources outside the protocol allowlist, and images without alt text,
+ * are dropped. A failed load falls back to the caption or alt text. */
+function VersionUpdateImageFigure({ src, alt, title }: { src: unknown; alt?: string; title?: string }) {
+  const intl = useIntl();
+  const [failed, setFailed] = useState(false);
+  const image = decodeVersionUpdateImageSource(src);
+  const label = alt?.trim();
+  if (!image || !label) return null;
+  const caption = title?.trim();
+  if (failed) {
+    return <span className="version-update-figure-fallback">{caption || label}</span>;
+  }
+  const img = (
+    <img
+      className="version-update-image"
+      src={image.src}
+      alt={label}
+      width={image.width}
+      height={image.height}
+      loading="lazy"
+      decoding="async"
+      onError={() => setFailed(true)}
+    />
+  );
+  return (
+    <span className={`version-update-figure version-update-figure-${image.kind}`}>
+      {image.kind === "screenshot" ? (
+        <a className="version-update-image-link" href={image.src} target="_blank" rel="noopener noreferrer">
+          {img}
+          <span className="version-update-visually-hidden">
+            {intl.formatMessage({ id: "versionUpdate.openImage" })}
+          </span>
+        </a>
+      ) : img}
+      {caption ? <span className="version-update-figure-caption">{caption}</span> : null}
+    </span>
+  );
+}
+
 export function VersionUpdateBody({ markdown }: { markdown: string }) {
   return (
     <div className="version-update-markdown">
       <ReactMarkdown skipHtml components={{
-        img: () => null,
+        img: ({ src, alt, title }) => <VersionUpdateImageFigure src={src} alt={alt} title={title} />,
         a: ({ href, children }) => {
           const discord = isDiscordLink(href);
           return (

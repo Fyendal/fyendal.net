@@ -82,6 +82,38 @@ export function decodeVersionUpdateNoticeResponse(value: unknown): VersionUpdate
   const notice = decodeVersionUpdateNotice(data.notice);
   return notice ? { ok: true, notice } : null;
 }
+
+/** An image a version update notice may display. Screenshots ship with the
+ * client under `/updates/` and encode their intrinsic size in the file name so
+ * the notice can reserve layout space before they load. */
+export interface VersionUpdateImage {
+  kind: "screenshot" | "card";
+  src: string;
+  width: number;
+  height: number;
+}
+
+const VERSION_UPDATE_SCREENSHOT =
+  /^\/updates\/[a-z0-9]+(?:-[a-z0-9]+)*\/[a-z0-9]+(?:-[a-z0-9]+)*\.([1-9]\d{1,3})x([1-9]\d{1,3})\.(?:webp|png|jpg|avif)$/;
+const VERSION_UPDATE_CARD = /^https:\/\/content\.fabrary\.net\/cards\/[A-Z0-9]{3,12}(?:[-_][A-Z0-9]{1,8})?\.webp$/;
+const MAX_VERSION_UPDATE_IMAGE_SIDE = 4096;
+/** Fabrary card objects are 450x628. */
+const CARD_IMAGE_WIDTH = 450;
+const CARD_IMAGE_HEIGHT = 628;
+
+export function decodeVersionUpdateImageSource(value: unknown): VersionUpdateImage | null {
+  if (!string(value, 300, false)) return null;
+  if (VERSION_UPDATE_CARD.test(value)) {
+    return { kind: "card", src: value, width: CARD_IMAGE_WIDTH, height: CARD_IMAGE_HEIGHT };
+  }
+  const screenshot = VERSION_UPDATE_SCREENSHOT.exec(value);
+  if (!screenshot) return null;
+  const width = Number(screenshot[1]);
+  const height = Number(screenshot[2]);
+  if (width > MAX_VERSION_UPDATE_IMAGE_SIDE || height > MAX_VERSION_UPDATE_IMAGE_SIDE) return null;
+  return { kind: "screenshot", src: value, width, height };
+}
+
 export const MAX_GLOBAL_NOTICE_LENGTH = 1_000;
 
 export function decodeGlobalNotice(value: unknown): GlobalNotice | null {

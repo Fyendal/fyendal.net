@@ -134,3 +134,49 @@
   .version-update-markdown { max-height: none; }
   .version-update-confirm { width: 100%; }
 }
+/* Image-only paragraphs already supply the block spacing. */
+.version-update-figure { display: block; }
+.version-update-figure + .version-update-figure { margin-top: 14px; }
+.version-update-figure-screenshot .version-update-image {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 1px solid #4d3a23;
+  border-radius: 6px;
+  background: #00000040;
+}
+.version-update-figure-card .version-update-image {
+  display: block;
+  width: min(180px, 60%);
+  height: auto;
+  border-radius: 4.5%;
+}
+.version-update-markdown a.version-update-image-link {
+  position: relative;
+  display: block;
+  border-radius: 6px;
+}
+.version-update-markdown a.version-update-image-link:hover .version-update-image { border-color: #8a6a3c; }
+.version-update-figure-caption {
+  display: block;
+  margin-top: 6px;
+  color: #bbaa8d;
+  font-size: 13px;
+  line-height: 1.45;
+}
+.version-update-figure-fallback {
+  display: block;
+  padding: 10px 12px;
+  border: 1px dashed #4d3a23;
+  border-radius: 6px;
+  color: #bbaa8d;
+  font-size: 13px;
+}
+.version-update-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}

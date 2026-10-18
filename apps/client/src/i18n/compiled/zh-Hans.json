@@ -33170,6 +33170,12 @@
       "value": "版本更新"
     }
   ],
+  "versionUpdate.openImage": [
+    {
+      "type": 0,
+      "value": "查看原尺寸图片"
+    }
+  ],
   "versionUpdate.title": [
     {
       "type": 0,

@@ -35984,6 +35984,12 @@
       "value": "Atualização de versão"
     }
   ],
+  "versionUpdate.openImage": [
+    {
+      "type": 0,
+      "value": "Abrir imagem em tamanho original"
+    }
+  ],
   "versionUpdate.title": [
     {
       "type": 0,
