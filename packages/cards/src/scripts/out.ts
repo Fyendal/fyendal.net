@@ -13,6 +13,7 @@ import {
   optOnChoose,
   previousAttackHasName,
   previousAttackNameContains,
+  requestDiseaseTokenChoice,
   requestHeroChoice,
   resourceAbility,
   sharesName,
@@ -306,21 +307,10 @@ function deathTouch(): CardScript {
       return ctx.link?.targetAllyId === undefined;
     },
     onHit(ctx) {
-      ctx.requestChoice(
-        "affliction",
-        decisionPrompt("Choose an affliction token", "card.out.affliction.choose", {
-          optionMessages: Object.fromEntries(
-            [BLOODROT, FRAILTY, INERTIA].map((cardId) => [
-              cardId,
-              decisionMessage("card.common.target.card", { card: { kind: "card", cardId } }),
-            ]),
-          ),
-        }),
-        [BLOODROT, FRAILTY, INERTIA],
-      );
+      requestDiseaseTokenChoice(ctx, "disease", [BLOODROT, FRAILTY, INERTIA]);
     },
     onChoose(ctx, hook, option) {
-      if (hook === "affliction") ctx.createToken(option, opponentSeat(ctx));
+      if (hook === "disease") ctx.createToken(option, opponentSeat(ctx));
     },
   };
 }
@@ -890,7 +880,7 @@ export const out: Record<string, CardScript> = mergeSetScripts("OUT", outHighRar
       isAttack: false,
       goAgain: true,
       destroySelfCost: true,
-      label: "Next attack creates an affliction",
+      label: "Next attack creates a disease",
       onActivate(ctx) {
         ctx.addModifier({
           scope: "next-attack",
@@ -914,21 +904,10 @@ export const out: Record<string, CardScript> = mergeSetScripts("OUT", outHighRar
         (m) => m.sourceInstanceId === ctx.self.instanceId && m.scope === "chain-link",
       )!;
       ctx.consumeModifier(linked.id);
-      ctx.requestChoice(
-        "affliction",
-        decisionPrompt("Choose an affliction token", "card.out.affliction.choose", {
-          optionMessages: Object.fromEntries(
-            [BLOODROT, FRAILTY, INERTIA].map((cardId) => [
-              cardId,
-              decisionMessage("card.common.target.card", { card: { kind: "card", cardId } }),
-            ]),
-          ),
-        }),
-        [BLOODROT, FRAILTY, INERTIA],
-      );
+      requestDiseaseTokenChoice(ctx, "disease", [BLOODROT, FRAILTY, INERTIA]);
     },
     onChoose(ctx, h, o) {
-      if (h === "affliction") ctx.createToken(o, opponentSeat(ctx));
+      if (h === "disease") ctx.createToken(o, opponentSeat(ctx));
     },
   },
   "death touch|1": deathTouch(),

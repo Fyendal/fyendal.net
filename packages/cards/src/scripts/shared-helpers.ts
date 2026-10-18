@@ -425,6 +425,20 @@ export function yesNoPrompt(fallback: string, id: string, values?: GameMessage["
   });
 }
 
+/** Ask the controller which of the given disease token printings to create.
+ * The chosen token id is delivered to `onChoose` under `hook`. */
+export function requestDiseaseTokenChoice(ctx: ScriptCtx, hook: string, tokenIds: readonly string[]): void {
+  ctx.requestChoice(
+    hook,
+    decisionPrompt("Choose a disease token", "card.common.disease.token.choose", {
+      optionMessages: Object.fromEntries(
+        tokenIds.map((cardId) => [cardId, decisionMessage("card.common.target.card", { card: { kind: "card", cardId } })]),
+      ),
+    }),
+    [...tokenIds],
+  );
+}
+
 /** Shared presentation for effects that inspect a deck top and either keep it
  * there or move it to the bottom. */
 export function bottomOrKeepPrompt(fallback = "Put the looked-at card on the bottom?"): ScriptDecisionPrompt {

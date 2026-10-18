@@ -11,6 +11,15 @@
     "set": "MPA"
   },
   {
+    "id": "MPA006",
+    "name": "Phial of Calamity",
+    "cardType": "equipment",
+    "text": "While this is in your graveyard, at the start of your turn, you may destroy 2 Silver you control. If you do, equip this.\nAttack Reaction - {r}, destroy this: Until end of turn, target dagger gets \"When this hits a hero, create a Frailty, Inertia, or Bloodrot Pox token under their control.\"",
+    "classes": ["assassin"],
+    "subtypes": ["off-hand"],
+    "set": "MPA"
+  },
+  {
     "id": "MPA022",
     "name": "Mutually Assured Destruction",
     "cardType": "action",

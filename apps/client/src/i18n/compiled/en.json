@@ -2015,6 +2015,12 @@
       "value": "Discard a zombie"
     }
   ],
+  "card.common.disease.token.choose": [
+    {
+      "type": 0,
+      "value": "Choose a disease token"
+    }
+  ],
   "card.common.hyperdriver.steam.add": [
     {
       "type": 0,
@@ -3628,6 +3634,12 @@
     {
       "type": 0,
       "value": "create a Frailty, Inertia, and Bloodrot Pox token under the hit hero's control"
+    }
+  ],
+  "card.effect.mpa.phial": [
+    {
+      "type": 0,
+      "value": "create a Frailty, Inertia, or Bloodrot Pox token under the hit hero's control"
     }
   ],
   "card.effect.mpa.prolongedillness": [
@@ -12162,12 +12174,6 @@
     {
       "type": 0,
       "value": "Choose a token"
-    }
-  ],
-  "card.out.affliction.choose": [
-    {
-      "type": 0,
-      "value": "Choose an affliction token"
     }
   ],
   "card.out.arsenal.attack.choose": [

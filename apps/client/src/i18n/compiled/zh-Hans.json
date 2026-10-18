@@ -2023,6 +2023,12 @@
       "value": "弃置一个 zombie"
     }
   ],
+  "card.common.disease.token.choose": [
+    {
+      "type": 0,
+      "value": "选择一个疾病衍生物"
+    }
+  ],
   "card.common.hyperdriver.steam.add": [
     {
       "type": 0,
@@ -3617,6 +3623,12 @@
     {
       "type": 0,
       "value": "在被命中英雄的操控下生成 Frailty、Inertia 和 Bloodrot Pox 衍生物各一个"
+    }
+  ],
+  "card.effect.mpa.phial": [
+    {
+      "type": 0,
+      "value": "在被命中英雄的操控下生成一个 Frailty、Inertia 或 Bloodrot Pox 衍生物"
     }
   ],
   "card.effect.mpa.prolongedillness": [
@@ -11628,12 +11640,6 @@
     {
       "type": 0,
       "value": "选择一个衍生物"
-    }
-  ],
-  "card.out.affliction.choose": [
-    {
-      "type": 0,
-      "value": "选择一种 affliction 衍生物"
     }
   ],
   "card.out.arsenal.attack.choose": [

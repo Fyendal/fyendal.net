@@ -3057,9 +3057,12 @@ export function makeCtx(
       const card = owner?.graveyard.find((candidate) => candidate.instanceId === instanceId);
       if (!owner || !card) return false;
       const d = dataOf(state, card.cardId);
-      if (d.cardType === "weapon") {
+      // Off-hands are equipment permanents equipped in a weapon zone.
+      if (d.cardType === "weapon" || (d.cardType === "equipment" && (d.subtypes ?? []).includes("off-hand"))) {
         const hands = (d.subtypes ?? []).includes("2h") ? 2 : 1;
-        if (owner.weapons.length + hands > 2) return false;
+        const occupied = owner.weapons.reduce((total, weapon) =>
+          total + ((dataOf(state, weapon.cardId).subtypes ?? []).includes("2h") ? 2 : 1), 0);
+        if (occupied + hands > 2) return false;
         removeFromArray(owner.graveyard, instanceId);
         owner.weapons.push(card);
         resetActivatedAbilityUsage(owner, card.instanceId);

@@ -13,6 +13,11 @@ const VIRAL_DIFFUSION = "viral diffusion|1";
 const WIDESPREAD_RUIN = "widespread ruin|1";
 const NO_EQUIPMENT = { head: null, chest: null, arms: null, legs: null } as const;
 const OUTBREAK = "outbreak|1";
+const PHIAL = "phial of calamity|0";
+const KUNAI = "kunai of retribution|0";
+const KISS_OF_DEATH = "kiss of death|1";
+const FRAILTY_TOKEN = "OUT235";
+const INERTIA_TOKEN = "OUT236";
 
 function boardNames(game: ReturnType<typeof scenario>, seat: number): string[] {
   return game.state.players[seat]!.board.map((card) => cardData[card.cardId]!.name);
@@ -442,5 +447,112 @@ describe("Armory Deck Mortimer and Mastery Pack Assassin spoilers", () => {
       zone: "banish",
       instanceId: ruin.instanceId,
     }));
+  });
+
+  it("Phial of Calamity destroys 2 Silver at the start of its controller's turn to equip from graveyard", () => {
+    const game = scenario({
+      active: 1,
+      seats: [
+        {
+          hero: "rhinar",
+          graveyard: [PHIAL],
+          board: ["silver|0", "silver|0", "silver|0"],
+          weapons: [],
+          equipment: NO_EQUIPMENT,
+        },
+        { hero: "dorinthea", weapons: [], equipment: NO_EQUIPMENT },
+      ],
+    });
+
+    game.endTurn().chooseOption("yes");
+
+    game.expectInZone(0, PHIAL, "weapons").expectNotInZone(0, PHIAL, "graveyard");
+    expect(boardNames(game, 0)).toEqual(["Silver"]);
+  });
+
+  it("Phial of Calamity stays in the graveyard without 2 Silver or a free weapon zone", () => {
+    const game = scenario({
+      active: 1,
+      seats: [
+        {
+          hero: "rhinar",
+          graveyard: [PHIAL],
+          board: ["silver|0", "silver|0"],
+          weapons: [KUNAI, KUNAI],
+          equipment: NO_EQUIPMENT,
+        },
+        { hero: "dorinthea", weapons: [], equipment: NO_EQUIPMENT },
+      ],
+    });
+
+    game.endTurn();
+
+    game.expectInZone(0, PHIAL, "graveyard");
+    expect(boardNames(game, 0)).toEqual(["Silver", "Silver"]);
+  });
+
+  it("Phial of Calamity gives a dagger attack a chosen disease on hit", () => {
+    const game = scenario({ seats: [
+      {
+        hero: "rhinar",
+        weapons: [KUNAI, PHIAL],
+        resources: 2,
+        equipment: NO_EQUIPMENT,
+      },
+      { hero: "dorinthea", weapons: [], equipment: NO_EQUIPMENT },
+    ] });
+
+    game.attackWithWeapon(KUNAI).blockWith()
+      .activate(PHIAL, { targetCard: KUNAI })
+      .expectInZone(0, PHIAL, "graveyard")
+      .chooseOption(INERTIA_TOKEN);
+
+    expect(boardNames(game, 1)).toEqual(["Inertia"]);
+    expect(boardNames(game, 0)).toEqual([]);
+  });
+
+  it("Phial of Calamity can target a dagger attack action card", () => {
+    const game = scenario({ seats: [
+      {
+        hero: "rhinar",
+        weapons: [PHIAL],
+        hand: [KISS_OF_DEATH],
+        resources: 1,
+        equipment: NO_EQUIPMENT,
+      },
+      { hero: "dorinthea", weapons: [], equipment: NO_EQUIPMENT },
+    ] });
+
+    game.play(KISS_OF_DEATH).blockWith()
+      .activate(PHIAL, { targetCard: KISS_OF_DEATH })
+      .chooseOption(INERTIA_TOKEN);
+
+    game.expectLife(1, 16);
+    expect(boardNames(game, 1)).toEqual(["Inertia"]);
+  });
+
+  it("Phial of Calamity's granted ability fires when the dagger is thrown", () => {
+    const game = scenario({ seats: [
+      {
+        hero: "rhinar",
+        weapons: [KUNAI, PHIAL],
+        hand: [PREY, "throw dagger|3"],
+        resources: 1,
+        equipment: NO_EQUIPMENT,
+      },
+      { hero: "dorinthea", weapons: [], equipment: NO_EQUIPMENT },
+    ] });
+
+    game.play(PREY).blockWith()
+      .activate(PHIAL, { targetCard: KUNAI, settle: false })
+      // Resolve the Phial before throwing, without closing the reaction step.
+      .passPriority()
+      .passPriority()
+      .react("throw dagger|3")
+      .chooseOption(FRAILTY_TOKEN);
+
+    game.expectInZone(0, KUNAI, "graveyard");
+    expect(boardNames(game, 1)).toEqual(["Frailty"]);
+    expect(boardNames(game, 0)).toEqual([]);
   });
 });

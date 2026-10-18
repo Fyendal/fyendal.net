@@ -602,7 +602,7 @@ describe("lingering marker labels (AST, OMN, SVI, OUT, DYN)", () => {
     expect(labels(g, "livewire press|1")).toEqual([]);
   });
 
-  it("folds Toxic Tips' marker onto its next attack action card affliction", () => {
+  it("folds Toxic Tips' disease marker onto its next attack action card", () => {
     const g = scenario({ seats: [hero({ equipment: { legs: "toxic tips|0" } }), foe()] });
     g.activate("toxic tips|0");
 

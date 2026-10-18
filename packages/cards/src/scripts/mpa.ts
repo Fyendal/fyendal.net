@@ -1,5 +1,13 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
-import { contractWithSilver, decisionPrompt, hitHookLabel, ongoingLabel, opponentSeat } from "./shared-helpers.js";
+import {
+  contractWithSilver,
+  decisionMessage,
+  decisionPrompt,
+  hitHookLabel,
+  ongoingLabel,
+  opponentSeat,
+  requestDiseaseTokenChoice,
+} from "./shared-helpers.js";
 
 const BLOODROT_POX = "OUT234";
 const FRAILTY = "OUT235";
@@ -17,11 +25,122 @@ function isReaction(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
   return ctx.hasCardType(card, "attack-reaction") || ctx.hasCardType(card, "defense-reaction");
 }
 
+function isSilver(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
+  return ctx.cardData(card.cardId).name === "Silver";
+}
+
+function isDagger(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
+  return ctx.cardTypes(card).includes("dagger");
+}
+
+/** Every dagger in play: weapons, dagger permanents, and dagger attack cards
+ * still on the combat chain. */
+function daggerTargets(ctx: ScriptCtx): number[] {
+  const candidates = [
+    ...ctx.state.players.flatMap((player) => [...player.weapons, ...player.board]),
+    ...ctx.state.chain.filter((link) => link.flags.attackGone !== true).map((link) => link.attackingCard),
+  ];
+  return candidates
+    .filter((card) => isDagger(ctx, card))
+    .map((card) => card.instanceId)
+    .filter((instanceId, index, ids) => ids.indexOf(instanceId) === index);
+}
+
+function chooseDisease(ctx: ScriptCtx): void {
+  requestDiseaseTokenChoice(ctx, "mpa-phial-disease", [FRAILTY, INERTIA, BLOODROT_POX]);
+}
+
+function hasFreeWeaponZone(ctx: ScriptCtx): boolean {
+  const occupied = ctx
+    .player(ctx.seat)
+    .weapons.reduce((total, card) => total + (ctx.cardTypes(card).includes("2h") ? 2 : 1), 0);
+  return occupied < 2;
+}
+
 function isInfected(ctx: ScriptCtx, seat: number): boolean {
   return ctx.player(seat).board.some((card) => ctx.cardTypes(card).includes("disease"));
 }
 
 export const mpa: Record<string, CardScript> = {
+  "phial of calamity|0": {
+    triggers: [
+      {
+        event: "start-of-turn",
+        sourceZone: "graveyard",
+        optional: true,
+        label: "Destroy 2 Silver to equip this",
+        labelMessage: decisionMessage("card.trigger.common.silver.equip", { amount: 2 }),
+        condition(ctx) {
+          return (
+            hasFreeWeaponZone(ctx) && ctx.player(ctx.seat).board.filter((card) => isSilver(ctx, card)).length >= 2
+          );
+        },
+        effect(ctx) {
+          const silver = ctx
+            .player(ctx.seat)
+            .board.filter((card) => isSilver(ctx, card))
+            .slice(0, 2);
+          if (
+            silver.length === 2 &&
+            ctx.destroyPermanent(silver[0]!.instanceId) &&
+            ctx.destroyPermanent(silver[1]!.instanceId)
+          ) {
+            ctx.equipFromGraveyard(ctx.self.instanceId);
+          }
+        },
+      },
+    ],
+    activated: {
+      cost: 1,
+      isAttack: false,
+      goAgain: false,
+      timing: "attack-reaction",
+      destroySelfCost: true,
+      targetCardOptions: daggerTargets,
+      onActivate(ctx) {
+        const dagger = ctx.playTargetInstanceId;
+        if (dagger === undefined) return;
+        ctx.addModifier({
+          scope: "until-end-of-turn",
+          appliesToInstanceId: dagger,
+          onHitScriptHook: {
+            hook: "mpa-phial-hit",
+            ...hitHookLabel(
+              "create a Frailty, Inertia, or Bloodrot Pox token under the hit hero's control",
+              "card.effect.mpa.phial",
+            ),
+            heroOnly: true,
+          },
+        });
+      },
+    },
+    onGrantedHit(ctx, hook) {
+      if (hook === "mpa-phial-hit") chooseDisease(ctx);
+    },
+    // A thrown dagger hits through effect damage, which never reaches the
+    // combat on-hit hook, so its live grant is matched here instead.
+    onFriendlyEffectHitCondition(ctx, source, targetSeat) {
+      return (
+        targetSeat !== ctx.seat &&
+        ctx.state.modifiers.some(
+          (modifier) =>
+            modifier.sourceInstanceId === ctx.self.instanceId &&
+            modifier.appliesToInstanceId === source.instanceId &&
+            modifier.onHitScriptHook?.hook === "mpa-phial-hit",
+        )
+      );
+    },
+    onFriendlyEffectHit(ctx) {
+      chooseDisease(ctx);
+    },
+    onChoose(ctx, hook, option) {
+      if (hook !== "mpa-phial-disease") return;
+      if (option === FRAILTY || option === INERTIA || option === BLOODROT_POX) {
+        ctx.createToken(option, opponentSeat(ctx));
+      }
+    },
+  },
+
   "seed bloodrot|3": seedDisease(BLOODROT_POX),
   "seed frailty|3": seedDisease(FRAILTY),
   "seed inertia|3": seedDisease(INERTIA),
