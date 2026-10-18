@@ -1,4 +1,4 @@
-import type { CardView, GameView, PlayerView } from "@fyendal/shared";
+import type { CardView, DefenderDefenseView, GameView, PlayerView } from "@fyendal/shared";
 import { cardData } from "@fyendal/cards/client";
 import { heroCard } from "./board/heroCard.js";
 
@@ -27,18 +27,23 @@ function optimisticStagedDefense(
   authoritativeCards: readonly CardView[],
   authoritativeDefense: number | undefined,
   stagedCards: readonly CardView[],
+  defenderDefense: readonly DefenderDefenseView[] | undefined,
 ): number {
   if (stagedCards.length === 0) return 0;
   const authoritativeIds = new Set(authoritativeCards.map((card) => card.instanceId));
   const stagedIds = new Set(stagedCards.map((card) => card.instanceId));
+  // The engine's per-card shares include delayed defend-event effects that
+  // card defense omits.
+  const projected = new Map(defenderDefense?.map((entry) => [entry.instanceId, entry.defense]));
+  const defenseOf = (card: CardView) => projected.get(card.instanceId) ?? visibleDefense(card);
   let defense = authoritativeDefense
     ?? authoritativeCards.reduce((total, card) => total + visibleDefense(card), 0);
 
   for (const card of authoritativeCards) {
-    if (!stagedIds.has(card.instanceId)) defense -= visibleDefense(card);
+    if (!stagedIds.has(card.instanceId)) defense -= defenseOf(card);
   }
   for (const card of stagedCards) {
-    if (!authoritativeIds.has(card.instanceId)) defense += visibleDefense(card);
+    if (!authoritativeIds.has(card.instanceId)) defense += defenseOf(card);
   }
   return Math.max(0, defense);
 }
@@ -73,6 +78,7 @@ export function optimisticDefenderView(
         authoritativeCards,
         decision.stagedDefense,
         stagedCards,
+        decision.defenderDefense,
       ),
     },
   };

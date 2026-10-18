@@ -216,8 +216,14 @@ describe("DYN — registration and heroes", () => {
       .play("infect|1");
 
     const firstBlock = s.state.players[1]!.hand[0]!;
+    const blockers = s.state.players[1]!.hand.map((card) => card.instanceId);
+    const handDefense = () => projectStateFor(s.state, 1).pendingDecision?.defenderDefense
+      ?.filter((entry) => blockers.includes(entry.instanceId));
+    expect(handDefense()).toEqual(blockers.map((instanceId) => ({ instanceId, defense: 2 })));
+    expect(projectStateFor(s.state, 0).pendingDecision?.defenderDefense).toBeUndefined();
     s.doRaw({ kind: "stage-defenders", instanceIds: [firstBlock.instanceId] });
     expect(projectStateFor(s.state, 1).pendingDecision?.stagedDefense).toBe(2);
+    expect(handDefense()).toEqual(blockers.map((instanceId) => ({ instanceId, defense: 2 })));
 
     s.blockWith("raging onslaught|1");
     expect(s.state.stack).toHaveLength(0);

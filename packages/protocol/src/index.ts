@@ -10,6 +10,7 @@ import type {
   CombatValueModifierView,
   ClientMessage,
   DeckPool,
+  DefenderDefenseView,
   EffectLifetime,
   Format,
   GameIntent,
@@ -1385,7 +1386,7 @@ function turnFacts(value: unknown): value is TurnFactsView {
 function pendingDecision(value: unknown): boolean {
   const decision = object(value);
   return !!decision && exactKeys(decision, [
-    "player", "kind", "prompt", "promptMessage", "options", "minimumSelections", "maximumSelections", "defaultOption", "optionLabels", "optionMessages", "chosenOptions", "chosenOptionMessages", "optionCounts", "optionCards", "revealedCards", "lookedCards", "stagedCards", "stagedHandCount", "stagedDefense",
+    "player", "kind", "prompt", "promptMessage", "options", "minimumSelections", "maximumSelections", "defaultOption", "optionLabels", "optionMessages", "chosenOptions", "chosenOptionMessages", "optionCounts", "optionCards", "revealedCards", "lookedCards", "stagedCards", "stagedHandCount", "stagedDefense", "defenderDefense",
     "resourcePayment", "preStackSource", "optionLayout",
   ], ["player", "kind", "prompt"])
     && seat(decision.player) && DECISION_KINDS.has(String(decision.kind))
@@ -1412,6 +1413,12 @@ function pendingDecision(value: unknown): boolean {
     && optional(decision.stagedHandCount, (value): value is number =>
       nonNegativeInteger(value) && value <= MAX_CARDS)
     && optional(decision.stagedDefense, finite)
+    && optional(decision.defenderDefense, (value): value is DefenderDefenseView[] =>
+      array(value, (entry): entry is DefenderDefenseView => {
+        const item = object(entry);
+        return !!item && exactKeys(item, ["instanceId", "defense"])
+          && instanceId(item.instanceId) && nonNegativeInteger(item.defense);
+      }, MAX_CARDS))
     && optional(decision.optionLayout, (value): value is "effect-list" => value === "effect-list")
     && optional(decision.resourcePayment, (value): value is PendingDecision["resourcePayment"] => {
       const payment = object(value);

@@ -939,7 +939,16 @@ function isBladeBeckoner(card: CardView, input: BotPolicyInput): boolean {
   return input.cards[card.cardId]?.name.trim().toLowerCase().startsWith("blade beckoner ") === true;
 }
 
-function defenderDefense(card: CardView, input: BotPolicyInput): number {
+/** Defense a card would contribute if it defended the current attack. */
+export function defenderDefense(card: CardView, input: BotPolicyInput): number {
+  // The engine's projection includes delayed defend-event effects, such as
+  // Spider's Bite's -1 defense on the next attack action defenders, which
+  // the card's own defense value cannot show.
+  const decision = input.view.pendingDecision;
+  const projected = decision?.kind === "defend" && decision.player === input.seat
+    ? decision.defenderDefense?.find((entry) => entry.instanceId === card.instanceId)
+    : undefined;
+  if (projected) return projected.defense;
   const link = currentLink(input);
   const data = input.cards[card.cardId];
   if (

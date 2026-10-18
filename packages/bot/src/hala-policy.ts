@@ -12,6 +12,7 @@ import {
   chooseScoredIntent,
   committedEffectAmount,
   currentLink,
+  defenderDefense,
   effectIsCommitted,
   enforceSpectraPolicy,
   functionalKey as key,
@@ -1449,7 +1450,7 @@ function openingHandCoversIncomingDamage(
   const hand = input.view.players[input.seat].hand.filter((card) =>
     stageableIds.has(card.instanceId) && !prevention.consumedIds.includes(card.instanceId)
   );
-  const defenseOf = (card: CardView): number => Math.max(0, card.defense ?? 0);
+  const defenseOf = (card: CardView): number => defenderDefense(card, input);
   if (link.dominate) {
     return hand.reduce((best, card) => Math.max(best, defenseOf(card)), 0) >= defenseNeeded;
   }

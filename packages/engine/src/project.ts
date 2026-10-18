@@ -5,6 +5,7 @@ import type {
   ChainAdditionalTargetView,
   ChainLinkView,
   CombatValueModifierView,
+  DefenderDefenseView,
   EquipmentSlot,
   GameLogViewEntry,
   GameMessage,
@@ -46,6 +47,7 @@ import { additionalTargetsAroundPrimary, currentLink, findCardAnywhere } from ".
 import { queuedAttackObjects } from "./attackQueue.js";
 import { controlledPermanents } from "./sourceQueries.js";
 import { activatedAbilityUsage } from "./abilityRules.js";
+import { legalDefenderCards } from "./defense.js";
 import { wardPieces } from "./damageResolution.js";
 import { playFromSourceCardId } from "./playRules.js";
 import { windowPrompt, windowPromptMessage } from "./triggers.js";
@@ -1146,11 +1148,11 @@ function projectState(
             stagedHandCount: number;
             stagedDefense: number;
           } | undefined;
+          const stagedInstances: CardInstance[] = [];
           if (pd.kind === "defend" && pd.staged && pd.staged.length > 0) {
             const defender = state.players[pd.player] as PlayerState;
             const mine = revealAll || pd.player === seat;
             const cards: CardView[] = [];
-            const stagedInstances: CardInstance[] = [];
             let stagedHandCount = 0;
             for (const id of pd.staged) {
               const hc = defender.hand.find((c) => c.instanceId === id);
@@ -1174,6 +1176,9 @@ function projectState(
             const total = mine && link ? stagedDefenseTotal(state, runtime, link, stagedInstances) : 0;
             staged = { stagedCards: cards, stagedHandCount, stagedDefense: mine ? total : 0 };
           }
+          const defenderDefense = pd.kind === "defend" && (revealAll || pd.player === seat)
+            ? projectedDefenderDefense(state, runtime, pd.player, stagedInstances)
+            : [];
           const privateDecision = revealAll || pd.player === seat;
           const promptMessage = projectedDecisionPromptMessage(
             state,
@@ -1236,6 +1241,7 @@ function projectState(
                   }),
                 }
               : {}),
+            ...(defenderDefense.length > 0 ? { defenderDefense } : {}),
             ...(pd.revealedCardIds
               ? {
                   // These identities were explicitly made public by the
@@ -1266,4 +1272,28 @@ function projectState(
     ...(state.drawOfferSeat === undefined ? {} : { drawOfferSeat: state.drawOfferSeat }),
     ...projectedGameLog,
   };
+}
+
+/** Marginal defense of each legal defender relative to the staged set (for a
+ * staged card, the defense unstaging it removes), measured exactly as the
+ * staged total so delayed one-shot defense effects are included. */
+function projectedDefenderDefense(
+  state: GameStateInternal,
+  runtime: EngineRuntime,
+  defenderSeat: number,
+  staged: readonly CardInstance[],
+): DefenderDefenseView[] {
+  const link = currentLink(state);
+  if (!link) return [];
+  const total = (cards: CardInstance[]) =>
+    cards.length > 0 ? stagedDefenseTotal(state, runtime, link, cards) : 0;
+  const base = total([...staged]);
+  const stagedIds = new Set(staged.map((card) => card.instanceId));
+  const { hand, arsenal, equipment } = legalDefenderCards(state, runtime, defenderSeat);
+  return [...hand, ...arsenal, ...equipment].map((card) => ({
+    instanceId: card.instanceId,
+    defense: Math.max(0, stagedIds.has(card.instanceId)
+      ? base - total(staged.filter((other) => other.instanceId !== card.instanceId))
+      : total([...staged, card]) - base),
+  }));
 }

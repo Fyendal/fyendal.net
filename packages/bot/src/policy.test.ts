@@ -1098,6 +1098,27 @@ describe("shared turn-cycle defense value", () => {
   });
 });
 
+describe("projected defender defense", () => {
+  it("blocks with the engine's defense after delayed penalties such as Spider's Bite", () => {
+    const fixture = cycleDefenseFixture([
+      { id: "BITTEN_BLOCKER_A", attack: 1, defense: 2 },
+      { id: "BITTEN_BLOCKER_B", attack: 1, defense: 2 },
+    ], { attackValue: 4, life: 2 });
+    const ids = fixture.held.map((card) => card.instanceId);
+    const score = () => scoreDefenseIntentWithTrace(
+      { kind: "defend", instanceIds: ids },
+      fixture.input,
+      fixture.own,
+      fixture.model,
+    );
+    expect(score()).toMatchObject({ survives: true, stopsHit: true });
+
+    fixture.input.view.pendingDecision!.defenderDefense =
+      ids.map((instanceId) => ({ instanceId, defense: 1 }));
+    expect(score()).toMatchObject({ lethal: true, survives: false, stopsHit: false });
+  });
+});
+
 describe("planned prevention", () => {
   it("accounts for pitching a hand card to play a defense reaction", () => {
     const state = createGame({

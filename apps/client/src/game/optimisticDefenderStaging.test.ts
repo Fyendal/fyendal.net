@@ -114,6 +114,25 @@ describe("optimistic defender staging", () => {
     expect(reconciled.pendingDecision.stagedDefense).toBe(8);
   });
 
+  it("uses the engine's per-card defense for cards it adds or removes", () => {
+    const staged: CardView = { instanceId: 11, cardId: "STAGED", owner: 0, defense: 3 };
+    const added: CardView = { instanceId: 12, cardId: "ADDED", owner: 0, defense: 3 };
+    const view = defendView(player(0, { hand: [staged, added], handCount: 2 }));
+    if (view.pendingDecision?.kind !== "defend") throw new Error("expected defend decision");
+    view.pendingDecision.stagedCards = [staged];
+    // A delayed -1 (Spider's Bite) applies to each attack action defender.
+    view.pendingDecision.stagedDefense = 2;
+    view.pendingDecision.defenderDefense = [
+      { instanceId: 11, defense: 2 },
+      { instanceId: 12, defense: 2 },
+    ];
+
+    const both = optimisticDefenderView(view, 0, [11, 12]);
+    expect(both?.pendingDecision?.kind === "defend" && both.pendingDecision.stagedDefense).toBe(4);
+    const swapped = optimisticDefenderView(view, 0, [12]);
+    expect(swapped?.pendingDecision?.kind === "defend" && swapped.pendingDecision.stagedDefense).toBe(2);
+  });
+
   it("returns the authoritative object when no optimistic set applies", () => {
     const view = defendView(player(0));
     expect(optimisticDefenderView(view, 0, null)).toBe(view);

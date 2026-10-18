@@ -544,6 +544,11 @@ export interface PendingDecision {
   /** Combined defense of the staged cards — projected as 0 to anyone but the
    *  defender so face-down hand cards leak nothing before the commit */
   stagedDefense?: number;
+  /** Defend decisions, projected only to the defender: the defense each legal
+   *  defender adds to the staged set (for a staged card, the defense unstaging
+   *  it removes). Unlike `CardView.defense`, it includes delayed "next time
+   *  they defend" effects applied at the defend event (Spider's Bite). */
+  defenderDefense?: DefenderDefenseView[];
   /** A declared resource cost waiting for ordinary hand-card pitching. Only
    *  projected to the paying player. Option ids remain engine-owned; clients
    *  select cards and submit the matching option unchanged. */
@@ -696,6 +701,11 @@ export interface GameTransitionView {
  * consumed by the next matching event, the combat chain closing, the end of
  * this turn or action phase, a later turn, or never (rest of the game). */
 export type EffectLifetime = "once" | "chain" | "turn" | "later" | "game";
+
+export interface DefenderDefenseView {
+  instanceId: number;
+  defense: number;
+}
 
 export interface OngoingEffectView {
   /** Seat the effect applies to */

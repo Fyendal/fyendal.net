@@ -6,6 +6,7 @@ import {
   chooseScoredIntent,
   currentAttackIsOurs,
   currentLink,
+  defenderDefense,
   enforceSpectraPolicy,
   functionalKey,
   incomingAttackDamage,
@@ -363,7 +364,7 @@ function defenseValue(intent: Extract<GameIntent, { kind: "defend" }>, input: Bo
   const own = ownCards(input);
   return intent.instanceIds.reduce((total, id) => {
     const card = own.get(id);
-    return total + Math.max(0, card?.defense ?? input.cards[card?.cardId ?? ""]?.defense ?? 0);
+    return total + (card ? defenderDefense(card, input) : 0);
   }, 0);
 }
 
