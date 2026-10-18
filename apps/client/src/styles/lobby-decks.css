@@ -786,10 +786,8 @@
   content: "";
   pointer-events: none;
 }
-/* The hero card's art window lights the right of the banner and fades out
-   under the name. The card is scaled so its frame sides fall outside the
-   slot and shifted up past the title bar. Without card art, the headshot
-   takes the same place. */
+/* The hero card's art fades in from under the name, cropped inside the
+   card frame. Without card art, the headshot takes the same place. */
 .deck-library-card .deck-card-art,
 .deck-library-card .deck-card-img {
   position: absolute;
@@ -797,18 +795,18 @@
   right: 0;
   width: 58%;
   height: 100%;
-  -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 55%);
-  mask-image: linear-gradient(90deg, transparent 0%, #000 55%);
+  -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 38%);
+  mask-image: linear-gradient(90deg, transparent 0%, #000 38%);
 }
 .deck-library-card .deck-card-art { overflow: hidden; }
 .deck-library-card .deck-card-art img {
   position: absolute;
   top: 0;
-  left: 50%;
-  width: 175%;
+  left: 54%;
+  width: 165%;
   max-width: none;
   height: auto;
-  transform: translate(-50%, -13%);
+  transform: translate(-50%, -15%);
   transform-origin: 50% 25%;
 }
 .deck-library-card .deck-card.has-art .deck-card-img { display: none; }
