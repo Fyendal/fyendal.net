@@ -1960,6 +1960,27 @@ describe("PgRoomStore storage", () => {
     expect((await store.listRooms(7))[0]).not.toHaveProperty("yours");
   });
 
+  it("counts searchers by queued pool and their saved deck's strictest legal pool", async () => {
+    const users = await db.query(
+      `INSERT INTO users (username, username_lc, pass_hash, created_at)
+       VALUES ('PoolA','poola','hash',1) RETURNING id`,
+    );
+    const openUser = Number(users.rows[0]!.id);
+    await db.query(
+      `INSERT INTO decks (id, user_id, name, format, fabrary_url, decklist, hero_name, created_at, updated_at)
+       VALUES ('saved-open', $1, 'Saved', 'cc', NULL, $2, 'Hero', 1, 1)`,
+      [openUser, JSON.stringify(precon("precon-asb")!.pool)],
+    );
+    await store.queueForMatch("cc", {
+      userId: openUser, username: "PoolA", deckId: "saved-open", cardPoolMode: "open",
+    });
+    expect((await store.matchmakingCounts()).cc).toEqual({
+      legal: { legal: 0, future: 0, open: 0 },
+      future: { legal: 0, future: 0, open: 0 },
+      open: { legal: 1, future: 0, open: 0 },
+    });
+  });
+
   it("pairs durable FIFO entries submitted through different store instances", async () => {
     const users = await db.query(
       `INSERT INTO users (username, username_lc, pass_hash, created_at)

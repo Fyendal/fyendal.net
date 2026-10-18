@@ -289,7 +289,7 @@ function dbStringArray(value: unknown, path: string, max = 100): string[] {
   return value.map((item, index) => dbString(item, `${path}[${index}]`));
 }
 
-function decodeDeckPool(value: unknown): DeckPool {
+export function decodeDeckPool(value: unknown): DeckPool {
   const pool = dbObject(value, "decklist");
   const allowed = new Set(["heroId", "weaponIds", "equipmentPool", "inventoryPool", "deck", "sideboard"]);
   if (Object.keys(pool).some((key) => !allowed.has(key))) {

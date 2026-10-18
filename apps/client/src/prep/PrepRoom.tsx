@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { useIntl } from "react-intl";
-import { deckCardPool, pairableSearchers } from "../matchmaking/pairableSearchers.js";
 import { useShallow } from "zustand/react/shallow";
 import type { EquipmentSlot } from "@fyendal/shared";
 import {
@@ -11,6 +10,7 @@ import {
   validatePresentation,
   validateArena,
 } from "@fyendal/cards/client";
+import { deckCardPool, pairableSearchers } from "../matchmaking/pairableSearchers.js";
 import { useStore } from "../store.js";
 import {
   CARD_PREVIEW_HEIGHT,

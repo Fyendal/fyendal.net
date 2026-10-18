@@ -1375,8 +1375,7 @@ describe("lobby and matchmaking", () => {
     queued.sendMsg({ type: "queue-join", format: "cc", deckId: "precon-asb", cardPoolMode: "open" });
     await queued.next((m) => m.type === "queued");
     lobby.sendMsg({ type: "list-rooms" });
-    const status = await lobby.next((m) => m.type === "queue-status"
-      && (m as { counts: { cc: { open: { legal: number } } } }).counts.cc.open.legal === 1);
+    const status = await lobby.next((m) => m.type === "queue-status" && m.counts.cc.open.legal === 1);
     expect(status).toMatchObject({ counts: { cc: { open: { legal: 1, future: 0, open: 0 } } } });
     queued.sendMsg({ type: "queue-leave" });
     await queued.next((m) => m.type === "queue-left");

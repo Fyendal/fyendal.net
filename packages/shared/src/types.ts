@@ -7,6 +7,7 @@ export type Format = "cc" | "silver-age";
 
 /** Constructed card eligibility selected for a room. */
 export type CardPoolMode = "legal" | "future" | "open";
+
 /** Waiting searchers in one format, keyed by the card pool each queued under
  * and then by the strictest pool its deck is legal in. A pairing plays in the
  * stricter of both queued pools, and both decks must be legal there. */
