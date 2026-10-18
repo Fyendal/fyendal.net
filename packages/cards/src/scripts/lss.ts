@@ -1,9 +1,8 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
-import { decisionMessage, decisionPrompt, opponentSeat, yesNoPrompt } from "./shared-helpers.js";
+import { cardNameContains, decisionMessage, decisionPrompt, opponentSeat, yesNoPrompt } from "./shared-helpers.js";
 
 function isPotionOrBrew(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
-  const data = ctx.cardData(card.cardId);
-  return ctx.cardTypes(card).includes("item") && /potion|brew/i.test(data.name);
+  return ctx.cardTypes(card).includes("item") && cardNameContains(ctx, card, "potion", "brew");
 }
 
 function continueBuddySearch(ctx: ScriptCtx): void {

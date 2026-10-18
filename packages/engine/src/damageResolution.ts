@@ -1,5 +1,5 @@
 import type { EngineRuntime } from "./runtimePorts.js";
-import { cardAbilitiesSuppressed, cardColorOf, cardTypesOf, dataOf, instanceDataOf, scriptOf, wardValueOf } from "./cardProperties.js";
+import { cardAbilitiesSuppressed, cardColorOf, cardHasName, cardTypesOf, dataOf, instanceDataOf, scriptOf, wardValueOf } from "./cardProperties.js";
 
 import { controlledPermanents, hookSources, lingeringModifierSources } from "./sourceQueries.js";
 
@@ -1123,10 +1123,7 @@ function lethalDamagePreventionCards(
   player: PlayerState,
   cardName: string,
 ): CardInstance[] {
-  const normalized = cardName.trim().toLowerCase();
-  return [...player.hand, ...player.arsenal].filter(
-    (card) => dataOf(state, card.cardId).name.trim().toLowerCase() === normalized,
-  );
+  return [...player.hand, ...player.arsenal].filter((card) => cardHasName(state, card, cardName));
 }
 
 /** Offer a one-shot optional replacement for the final damage event. Effects

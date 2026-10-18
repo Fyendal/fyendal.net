@@ -358,7 +358,7 @@ const HYPER_DRIVER_STEAM_FROM_BOOST_HOOK = "common-hyper-driver-steam-from-boost
  * to choose the one that receives the counter. */
 export function hyperDriverCounterFromBoostBanish(): CardScript {
   const hyperDrivers = (ctx: ScriptCtx) =>
-    ctx.player(ctx.seat).board.filter((card) => ctx.cardData(card.cardId).name === "Hyper Driver");
+    ctx.player(ctx.seat).board.filter((card) => cardNamed(ctx, card, "Hyper Driver"));
   const addCounter = (ctx: ScriptCtx, instanceId: number) => {
     const driver = hyperDrivers(ctx).find((card) => card.instanceId === instanceId);
     if (!driver) return;
@@ -747,8 +747,33 @@ export function previousAttackHasName(ctx: ScriptCtx, ...names: readonly string[
  * required by the name-property rules, across every effective name. */
 export function previousAttackNameContains(ctx: ScriptCtx, ...parts: readonly string[]): boolean {
   const previous = previousAttack(ctx);
-  if (!previous) return false;
-  return ctx.cardNames(previous).some((name) => {
+  return !!previous && cardNameContains(ctx, previous, ...parts);
+}
+
+/** Whether a card currently has a name: printed, gained from an effect, or
+ * held in all zones. Cards whose names are suppressed have no name. */
+export function cardNamed(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, name: string): boolean {
+  return ctx.cardNames(card).includes(name.trim().toLowerCase());
+}
+
+/** Whether two cards share at least one effective name. */
+export function sharesName(
+  ctx: ScriptCtx,
+  card: DeepReadonly<CardInstance>,
+  other: DeepReadonly<CardInstance>,
+): boolean {
+  const names = ctx.cardNames(other);
+  return ctx.cardNames(card).some((name) => names.includes(name));
+}
+
+/** Match "with WORDS in its name" using whole words across every effective
+ * name, including names gained from effects. */
+export function cardNameContains(
+  ctx: ScriptCtx,
+  card: DeepReadonly<CardInstance>,
+  ...parts: readonly string[]
+): boolean {
+  return ctx.cardNames(card).some((name) => {
     const words = name.split(/\s+/);
     return parts.some((part) => {
       const wanted = part.trim().toLowerCase().split(/\s+/);

@@ -1,6 +1,7 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
 import {
   buffNextAttack,
+  cardNamed,
   commonOptionMessages,
   decisionMessage,
   decisionPrompt,
@@ -8,6 +9,7 @@ import {
   ongoingLabel,
   opponentSeat,
   previousAttackHasName,
+  sharesName,
   yesNoPrompt,
 } from "../shared-helpers.js";
 
@@ -64,13 +66,13 @@ function graveyardChest(extra: CardScript = {}): CardScript {
         sourceZone: "graveyard",
         optional: true,
         condition(ctx) {
-          return ctx.player(ctx.seat).board.filter((card) => ctx.cardData(card.cardId).name === "Silver").length >= 2;
+          return ctx.player(ctx.seat).board.filter((card) => cardNamed(ctx, card, "Silver")).length >= 2;
         },
         label: "Destroy 2 Silvers to equip this?",
         effect(ctx) {
           const silvers = ctx
             .player(ctx.seat)
-            .board.filter((card) => ctx.cardData(card.cardId).name === "Silver")
+            .board.filter((card) => cardNamed(ctx, card, "Silver"))
             .slice(0, 2);
           if (silvers.length === 2 && silvers.every((card) => ctx.destroyPermanent(card.instanceId)))
             ctx.equipFromGraveyard(ctx.self.instanceId);
@@ -553,7 +555,7 @@ export const outHighRarity: Record<string, CardScript> = {
         for (const card of arrows
           .filter(
             (card, index) =>
-              arrows.findIndex((other) => ctx.cardData(other.cardId).name === ctx.cardData(card.cardId).name) === index,
+              arrows.findIndex((other) => sharesName(ctx, other, card)) === index,
           )
           .slice(0, 3))
           ctx.putOnDeckBottom(card.instanceId);
@@ -625,8 +627,7 @@ export const outHighRarity: Record<string, CardScript> = {
       const top = ctx.player(seat).deck[0];
       if (!top) return;
       ctx.moveToGraveyard(top.instanceId, "deck");
-      const name = ctx.cardData(top.cardId).name;
-      ctx.loseLife(seat, ctx.player(seat).graveyard.filter((card) => ctx.cardData(card.cardId).name === name).length);
+      ctx.loseLife(seat, ctx.player(seat).graveyard.filter((card) => sharesName(ctx, card, top)).length);
     },
   },
   "melting point|1": {

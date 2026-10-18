@@ -1,5 +1,5 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
-import { opponentSeat } from "./shared-helpers.js";
+import { cardNamed, opponentSeat } from "./shared-helpers.js";
 
 function hasType(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, type: string): boolean {
   return ctx.cardTypes(card).some((candidate) => candidate.toLowerCase() === type);
@@ -59,7 +59,7 @@ export const ark: Record<string, CardScript> = {
         whose: "subject",
         label: "Destroy a Silver or put this on the bottom and draw",
         effect(ctx) {
-          const silver = ctx.player(ctx.seat).board.find((card) => ctx.cardData(card.cardId).name === "Silver");
+          const silver = ctx.player(ctx.seat).board.find((card) => cardNamed(ctx, card, "Silver"));
           if (silver) ctx.destroyPermanent(silver.instanceId);
           else {
             ctx.putOnDeckBottom(ctx.self.instanceId);

@@ -1,6 +1,7 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
 import {
   attackAbility,
+  cardNamed,
   commonOptionMessages,
   decisionPrompt,
   localizedCardLog,
@@ -28,10 +29,6 @@ function isAura(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
     ctx.cardTypes(card).includes("aura") ||
     (data.keywords ?? []).some((keyword) => keyword.toLowerCase() === "suspense")
   );
-}
-
-function isNamed(ctx: ScriptCtx, card: { readonly cardId: string }, name: string): boolean {
-  return ctx.cardData(card.cardId).name.toLowerCase() === name.toLowerCase();
 }
 
 function crushTriggered(ctx: ScriptCtx): boolean {
@@ -153,7 +150,7 @@ export const sbr: Record<string, CardScript> = {
 
   "basalt boots|0": {
     modifyDefense(ctx) {
-      return ctx.player(ctx.seat).board.some((card) => isNamed(ctx, card, "Seismic Surge")) ? 1 : 0;
+      return ctx.player(ctx.seat).board.some((card) => cardNamed(ctx, card, "Seismic Surge")) ? 1 : 0;
     },
   },
 
@@ -264,7 +261,7 @@ export const sbr: Record<string, CardScript> = {
     canTriggerOnHit: crushTriggered,
     onHit(ctx) {
       const opponent = ctx.player(opponentSeat(ctx));
-      const token = opponent.board.find((card) => isNamed(ctx, card, "Seismic Surge"));
+      const token = opponent.board.find((card) => cardNamed(ctx, card, "Seismic Surge"));
       if (token) ctx.destroyPermanent(token.instanceId);
     },
   },

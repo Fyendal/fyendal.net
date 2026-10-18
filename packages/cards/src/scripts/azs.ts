@@ -1,6 +1,7 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
 import {
   ampNextArcane,
+  cardNamed,
   commonOptionMessages,
   dealArcane,
   decisionMessage,
@@ -152,9 +153,9 @@ export const azs: Record<string, CardScript> = {
       timing: "instant",
       destroySelfCost: true,
       canActivate: (ctx) =>
-        ctx.player(ctx.seat).weapons.some((card) => ctx.cardData(card.cardId).name === "Aphrodias" && card.tapped),
+        ctx.player(ctx.seat).weapons.some((card) => cardNamed(ctx, card, "Aphrodias") && card.tapped),
       onActivate(ctx) {
-        const weapon = ctx.player(ctx.seat).weapons.find((card) => ctx.cardData(card.cardId).name === "Aphrodias");
+        const weapon = ctx.player(ctx.seat).weapons.find((card) => cardNamed(ctx, card, "Aphrodias"));
         if (weapon) ctx.untap(weapon.instanceId);
       },
     },

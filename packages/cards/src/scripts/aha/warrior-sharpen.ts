@@ -1,5 +1,5 @@
 import type { CardInstance, DeepReadonly, ScriptCtx } from "@fyendal/engine";
-import { buffNextAttack, commonOptionMessages, decisionPrompt, localizedLog } from "../shared-helpers.js";
+import { buffNextAttack, cardNamed, commonOptionMessages, decisionPrompt, localizedLog } from "../shared-helpers.js";
 
 type Card = DeepReadonly<CardInstance>;
 
@@ -130,7 +130,7 @@ export function sharpenSword(ctx: ScriptCtx, instanceId: number, count = 1, foll
     }),
   );
 
-  const isZenithBlade = ctx.cardData(sword.cardId).name === "Zenith Blade";
+  const isZenithBlade = cardNamed(ctx, sword, "Zenith Blade");
   if (
     isZenithBlade &&
     ctx.link?.attackingCard.instanceId === instanceId &&
@@ -141,7 +141,7 @@ export function sharpenSword(ctx: ScriptCtx, instanceId: number, count = 1, foll
 
   const rerebrace = isZenithBlade
     ? Object.values(ctx.player(ctx.seat).equipment).find(
-        (card) => card && ctx.cardData(card.cardId).name === "Reverent Rerebrace",
+        (card) => card && cardNamed(ctx, card, "Reverent Rerebrace"),
       )
     : undefined;
   if (rerebrace) {

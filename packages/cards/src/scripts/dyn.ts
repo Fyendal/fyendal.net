@@ -5,6 +5,7 @@ import {
   bottomOrKeepPrompt,
   buffNextArcaneDamageCard,
   buffNextAttack,
+  cardNamed,
   commonOptionMessages,
   consumeDelayedEffect,
   contractWithSilver,
@@ -70,7 +71,7 @@ function isNonAttackAction(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): bo
 }
 
 function controlsNamed(ctx: ScriptCtx, name: string): boolean {
-  return ctx.player(ctx.seat).board.some((card) => data(ctx, card).name === name);
+  return ctx.player(ctx.seat).board.some((card) => cardNamed(ctx, card, name));
 }
 
 function createTokens(ctx: ScriptCtx, id: string, count: number): void {
@@ -168,7 +169,7 @@ function blessingFocus(amount: number): CardScript {
 function blessingIngenuity(count: number): CardScript {
   const offer = (ctx: ScriptCtx) => {
     const candidates = [...ctx.player(ctx.seat).graveyard, ...ctx.player(ctx.seat).banish].filter(
-      (card) => data(ctx, card).name === "Hyper Driver",
+      (card) => cardNamed(ctx, card, "Hyper Driver"),
     );
     if (ctx.getCounter("ingenuityRemaining") <= 0 || candidates.length === 0) return;
     ctx.requestCardChoice(
@@ -515,7 +516,7 @@ export const dyn: Record<string, CardScript> = mergeSetScripts("DYN", dynHighRar
       goAgain: false,
       label: "Search for Command and Conquer",
       onActivate(ctx) {
-        const card = ctx.player(ctx.seat).deck.find((candidate) => data(ctx, candidate).name === "Command and Conquer");
+        const card = ctx.player(ctx.seat).deck.find((candidate) => cardNamed(ctx, candidate, "Command and Conquer"));
         if (card) {
           ctx.logPrivate(
             ctx.seat,

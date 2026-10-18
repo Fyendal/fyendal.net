@@ -2,6 +2,7 @@ import type { CardScript, DeepReadonly, CardInstance, ScriptCtx } from "@fyendal
 import {
   buffNextAttack,
   cardDefendsThisTrigger,
+  cardNamed,
   commonOptionMessages,
   decisionMessage,
   decisionPrompt,
@@ -9,6 +10,7 @@ import {
   localizedCardLog,
   logHeaveUnaffordable,
   opponentSeat,
+  sharesName,
 } from "./shared-helpers.js";
 
 const SEISMIC_SURGE = "SBR035";
@@ -19,10 +21,6 @@ function data(ctx: ScriptCtx, card: DeepReadonly<CardInstance>) {
 
 function hasType(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, type: string): boolean {
   return ctx.cardTypes(card).includes(type.toLowerCase());
-}
-
-function isNamed(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, name: string): boolean {
-  return data(ctx, card).name.toLowerCase() === name.toLowerCase();
 }
 
 function isAura(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
@@ -60,11 +58,11 @@ function guardianCrushTriggered(ctx: ScriptCtx): boolean {
 }
 
 function controlsSeismicSurge(ctx: ScriptCtx, seat = ctx.seat): boolean {
-  return ctx.player(seat).board.some((card) => isNamed(ctx, card, "Seismic Surge"));
+  return ctx.player(seat).board.some((card) => cardNamed(ctx, card, "Seismic Surge"));
 }
 
 function seismicSurges(ctx: ScriptCtx, seat = ctx.seat): readonly DeepReadonly<CardInstance>[] {
-  return ctx.player(seat).board.filter((card) => isNamed(ctx, card, "Seismic Surge"));
+  return ctx.player(seat).board.filter((card) => cardNamed(ctx, card, "Seismic Surge"));
 }
 
 function equipmentCards(ctx: ScriptCtx, seat: number): DeepReadonly<CardInstance>[] {
@@ -921,7 +919,7 @@ Object.assign(mpg, {
       const attacks = ctx
         .player(ctx.seat)
         .graveyard.filter((card) => ctx.hasCardType(card, "action") && hasType(ctx, card, "attack"));
-      if (new Set(attacks.map((card) => data(ctx, card).name)).size >= 2)
+      if (attacks.some((card) => attacks.some((other) => !sharesName(ctx, card, other))))
         ctx.requestCardChoice(
           "backup-first",
           decisionPrompt("Call for Backup: choose the first attack action card", "card.mpg.backup.first"),
@@ -938,7 +936,7 @@ Object.assign(mpg, {
         ctx.requestCardChoice(
           `backup-second:${first.instanceId}`,
           decisionPrompt("Call for Backup: choose an attack action card with a different name", "card.mpg.backup.second"),
-          attacks.filter((card) => data(ctx, card).name !== data(ctx, first).name)
+          attacks.filter((card) => !sharesName(ctx, card, first))
             .map((card) => card.instanceId),
         );
         return;
@@ -946,7 +944,7 @@ Object.assign(mpg, {
       if (hook.startsWith("backup-second:")) {
         const first = attacks.find((card) => card.instanceId === Number(hook.slice("backup-second:".length)));
         const second = attacks.find((card) => card.instanceId === Number(option));
-        if (!first || !second || data(ctx, first).name === data(ctx, second).name) return;
+        if (!first || !second || sharesName(ctx, first, second)) return;
         ctx.requestCardChoice(
           `backup-banish:${first.instanceId}:${second.instanceId}`,
           decisionPrompt("Call for Backup: choose an attack action card to banish", "card.mpg.backup.banish"),

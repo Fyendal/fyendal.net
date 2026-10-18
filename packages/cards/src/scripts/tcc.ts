@@ -2,6 +2,7 @@ import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal
 import {
   attackAbility,
   buffNextAttack,
+  cardNamed,
   decisionMessage,
   decisionPrompt,
   opponentSeat,
@@ -14,10 +15,6 @@ const CROUCHING_TIGER = "TCC104";
 const MIGHT = "TCC105";
 const QUICKEN = "TCC106";
 const VIGOR = "TCC107";
-
-function data(ctx: ScriptCtx, card: DeepReadonly<CardInstance>) {
-  return ctx.cardData(card.cardId);
-}
 
 function hasType(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, type: string): boolean {
   return ctx.cardTypes(card).some((candidate) => candidate.toLowerCase() === type);
@@ -171,7 +168,7 @@ export const tcc: Record<string, CardScript> = {
   "hammer of havenhold|0": {
     activated: attackAbility(3),
     onAttackDeclared(ctx) {
-      if (ctx.player(ctx.seat).pitch.some((card) => data(ctx, card).name === "Chivalry")) {
+      if (ctx.player(ctx.seat).pitch.some((card) => cardNamed(ctx, card, "Chivalry"))) {
         ctx.addModifier({ scope: "chain-link", attack: 1 });
       }
     },

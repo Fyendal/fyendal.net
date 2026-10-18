@@ -1,6 +1,7 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
 import {
   buffNextAttack,
+  cardNamed,
   commonOptionMessages,
   consumeDelayedEffect,
   decisionPrompt,
@@ -382,7 +383,7 @@ export const aol: Record<string, CardScript> = {
     onPlay(ctx) {
       const gold = controlledPermanents(ctx).filter((card) => ctx.cardNames(card).includes("gold"));
       const galea = (ctx.player(ctx.seat).inventory ?? []).find(
-        (card) => ctx.cardData(card.cardId).name === "Prized Galea",
+        (card) => cardNamed(ctx, card, "Prized Galea"),
       );
       if (gold.length > 0 && galea) {
         ctx.setCounter("prizedGalea", galea.instanceId);

@@ -1,5 +1,5 @@
 import type { EngineRuntime } from "./runtimePorts.js";
-import { cardAbilitiesSuppressed, dataOf, scriptOf } from "./cardProperties.js";
+import { cardAbilitiesSuppressed, cardNameKeysOf, dataOf, scriptOf } from "./cardProperties.js";
 import { controlledPermanents, hookSources, lingeringModifierSources } from "./sourceQueries.js";
 import { queueDecisionBehindCrank } from "./decisionQueue.js";
 import { FROZEN_WHILE_SOURCE_IN_ARENA } from "./ruleQueries.js";
@@ -227,8 +227,9 @@ export function stampControlledName(
   player: PlayerState,
   card: CardInstance,
 ): void {
-  const controlledName = nameOf(state, card.cardId).trim().toLowerCase().replace(/\s+/g, " ");
-  player.flags[`controlledName:${controlledName}`] = true;
+  for (const controlledName of cardNameKeysOf(state, card)) {
+    player.flags[`controlledName:${controlledName}`] = true;
+  }
 }
 
 export function hasCrank(

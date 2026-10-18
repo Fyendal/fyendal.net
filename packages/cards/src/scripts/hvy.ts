@@ -4,6 +4,7 @@ import {
   attackAbility,
   attackIntimidateTrigger,
   buffNextAttack,
+  cardNamed,
   commonOptionMessages,
   consumeDelayedEffect,
   decisionPrompt,
@@ -499,7 +500,7 @@ export const hvy: Record<string, CardScript> = mergeSetScripts("HVY", hvyHighRar
       choiceHook: "victor-reclash",
     },
     onFriendlyTokenCreated(ctx, token) {
-      if (data(ctx, token).name !== "Gold" || ctx.getFlag("player", "victorGoldDraw") === true) return;
+      if (!cardNamed(ctx, token, "Gold") || ctx.getFlag("player", "victorGoldDraw") === true) return;
       ctx.setFlag("player", "victorGoldDraw", true);
       ctx.drawCards(ctx.seat, 1);
     },

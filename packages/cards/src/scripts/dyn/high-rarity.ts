@@ -4,6 +4,7 @@ import {
   bottomOrKeepPrompt,
   buffNextArcaneDamageCard,
   buffNextAttack,
+  cardNamed,
   commonOptionMessages,
   consumeDelayedEffect,
   contractWithSilver,
@@ -30,9 +31,6 @@ const PONDER = "DYN244";
 
 function has(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, type: string): boolean {
   return ctx.cardTypes(card).includes(type);
-}
-function named(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, name: string): boolean {
-  return ctx.cardData(card.cardId).name.toLowerCase() === name;
 }
 function isAttack(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
   return ctx.hasCardType(card, "action") && has(ctx, card, "attack");
@@ -75,13 +73,13 @@ function graveyardAssassinEquipment(extra: CardScript = {}): CardScript {
         sourceZone: "graveyard",
         optional: true,
         condition(ctx) {
-          return ctx.player(ctx.seat).board.filter((card) => named(ctx, card, "silver")).length >= 2;
+          return ctx.player(ctx.seat).board.filter((card) => cardNamed(ctx, card, "silver")).length >= 2;
         },
         label: "Destroy 2 Silvers to equip this?",
         effect(ctx) {
           const silvers = ctx
             .player(ctx.seat)
-            .board.filter((card) => named(ctx, card, "silver"))
+            .board.filter((card) => cardNamed(ctx, card, "silver"))
             .slice(0, 2);
           if (silvers.length === 2 && silvers.every((card) => ctx.destroyPermanent(card.instanceId)))
             ctx.equipFromGraveyard(ctx.self.instanceId);
@@ -306,7 +304,7 @@ export const dynHighRarity: Record<string, CardScript> = {
       return previousAttackHasName(ctx, "crouching tiger");
     },
     onHit(ctx) {
-      const count = ctx.player(ctx.seat).board.filter((card) => named(ctx, card, "crouching tiger")).length;
+      const count = ctx.player(ctx.seat).board.filter((card) => cardNamed(ctx, card, "crouching tiger")).length;
       for (let i = 0; i < count; i++) {
         const tiger = ctx.createToken(CROUCHING_TIGER);
         if (tiger) ctx.banish(tiger.instanceId);
@@ -335,13 +333,13 @@ export const dynHighRarity: Record<string, CardScript> = {
   "spirit of eirina|2": {
     replacesSoulMoveWithArena: true,
     allowsFriendlyCardPlayAsInstant(ctx, card) {
-      return named(ctx, card, "lumina ascension");
+      return cardNamed(ctx, card, "lumina ascension");
     },
   },
   "jubeel, spellbane|0": weapon(1, {
     canTriggerOnHit: (ctx) =>
       ctx.link?.targetAllyId === undefined &&
-      !ctx.player(ctx.seat).board.some((card) => named(ctx, card, "spellbane aegis")),
+      !ctx.player(ctx.seat).board.some((card) => cardNamed(ctx, card, "spellbane aegis")),
     onHit(ctx) {
       ctx.createToken("DYN246");
     },
@@ -538,7 +536,7 @@ export const dynHighRarity: Record<string, CardScript> = {
     const mechanologistWeapons = (ctx: ScriptCtx) =>
       ctx.player(ctx.seat).weapons.filter((card) => has(ctx, card, "mechanologist"));
     const hyperDrivers = (ctx: ScriptCtx) =>
-      ctx.player(ctx.seat).board.filter((card) => named(ctx, card, "hyper driver"));
+      ctx.player(ctx.seat).board.filter((card) => cardNamed(ctx, card, "hyper driver"));
     // The chosen weapon rides in the driver hook suffix so the resumable
     // driver choice transforms that weapon rather than the first one.
     const transform = (ctx: ScriptCtx, weaponId: number, driverIds?: readonly number[]) => {
@@ -1010,7 +1008,7 @@ export const dynHighRarity: Record<string, CardScript> = {
         "Destroy your Runechants and put that many doom counters on Looming Doom",
         decisionMessage("card.trigger.dyn.loomingdoom.runechants.doom"),
         (ctx) => {
-          const runechants = ctx.player(ctx.seat).board.filter((card) => named(ctx, card, "runechant"));
+          const runechants = ctx.player(ctx.seat).board.filter((card) => cardNamed(ctx, card, "runechant"));
           for (const card of runechants) ctx.destroyPermanent(card.instanceId);
           ctx.addCounter(ctx.self.instanceId, "doom", runechants.length);
         },
@@ -1078,7 +1076,7 @@ export const dynHighRarity: Record<string, CardScript> = {
   },
   "invoke suraya|2": {
     onPlay(ctx) {
-      const shields = ctx.player(ctx.seat).board.filter((card) => named(ctx, card, "spectral shield"));
+      const shields = ctx.player(ctx.seat).board.filter((card) => cardNamed(ctx, card, "spectral shield"));
       if (shields.length)
         ctx.requestCardChoice(
           "suraya-transform",
@@ -1126,7 +1124,7 @@ export const dynHighRarity: Record<string, CardScript> = {
   "spectral procession|1": {
     modifyAttack(ctx) {
       return (
-        ctx.player(ctx.seat).board.filter((card) => named(ctx, card, "spectral shield")).length - (ctx.data.attack ?? 0)
+        ctx.player(ctx.seat).board.filter((card) => cardNamed(ctx, card, "spectral shield")).length - (ctx.data.attack ?? 0)
       );
     },
   },

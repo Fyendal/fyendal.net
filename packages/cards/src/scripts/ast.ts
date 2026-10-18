@@ -2,6 +2,7 @@ import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal
 import {
   anyDamageTarget,
   buffNextAttack,
+  cardNamed,
   commonOptionMessages,
   consumeDelayedEffect,
   dealArcane,
@@ -63,7 +64,7 @@ function applySerenadeChoices(ctx: ScriptCtx, choices: number[]): void {
   if (choices.includes(1)) ctx.createToken(LIGHTNING);
   if (choices.includes(3)) buffNextAttack(ctx, { attack: 1 });
   if (!choices.includes(2)) return;
-  const skyzyks = ctx.player(ctx.seat).deck.filter((card) => data(ctx, card).name.toLowerCase() === "skyzyk");
+  const skyzyks = ctx.player(ctx.seat).deck.filter((card) => cardNamed(ctx, card, "skyzyk"));
   if (skyzyks.length)
     ctx.requestCardChoice(
       "serenade-skyzyk",

@@ -3,6 +3,7 @@ import {
   armDelayedEffect,
   attackAbility,
   buffNextAttack,
+  cardNameContains,
   commonOptionMessages,
   consumeDelayedEffect,
   contractCompletionCount,
@@ -876,7 +877,7 @@ export const hvyHighRarity: Record<string, CardScript> = {
   "luminaris, angel's glow|0": {
     onFriendlyPlay(ctx, card) {
       if (!isAttack(ctx, card) || !ctx.player(ctx.seat).pitch.some((pitch) => ctx.cardColor(pitch) === 2)) return;
-      if (data(ctx, card).name.includes("Herald") && ctx.getPlayerFlag(ctx.seat, "luminarisHerald") !== true) {
+      if (cardNameContains(ctx, card, "Herald") && ctx.getPlayerFlag(ctx.seat, "luminarisHerald") !== true) {
         ctx.setPlayerFlag(ctx.seat, "luminarisHerald", true);
         ctx.grantCardKeyword(card.instanceId, "go again");
       }

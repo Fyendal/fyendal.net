@@ -1,4 +1,4 @@
-import { dataOf, scriptOf } from "./cardProperties.js";
+import { cardHasName, dataOf, scriptOf } from "./cardProperties.js";
 
 import { controlledPermanents } from "./sourceQueries.js";
 import { gameLogMessage, logCardValue, logPublic, nameOf } from "./gameLog.js";
@@ -176,7 +176,7 @@ export function isFrozen(state: GameStateInternal, card: CardInstance): boolean 
   if (!owner) return false;
   const hasCondition = controlledPermanents(state, owner.seat, { faceDownEquipment: false }).some(
     (permanent) =>
-      nameOf(state, permanent.cardId).trim().toLowerCase() === "frostbite" ||
+      cardHasName(state, permanent, "frostbite") ||
       frozenByEffect(state, permanent),
   );
   if (!hasCondition) return false;

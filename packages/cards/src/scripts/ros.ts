@@ -4,6 +4,8 @@ import {
   anyDamageTarget,
   attackAbility,
   buffNextAttack,
+  cardNameContains,
+  cardNamed,
   channelLightning,
   commonOptionMessages,
   consumeDelayedEffect,
@@ -112,7 +114,7 @@ function playedOrCreatedAura(ctx: ScriptCtx): boolean {
 function sigils(ctx: ScriptCtx, seat = ctx.seat): DeepReadonly<CardInstance>[] {
   return ctx
     .player(seat)
-    .board.filter((card) => isAura(ctx, card) && data(ctx, card).name.toLowerCase().includes("sigil"));
+    .board.filter((card) => isAura(ctx, card) && cardNameContains(ctx, card, "sigil"));
 }
 
 function createRunechants(ctx: ScriptCtx, count: number): void {
@@ -725,7 +727,7 @@ function etchings(amount: number): CardScript {
   const base = arcaneHero(amount, (ctx) => {
     const choices = ctx
       .player(ctx.seat)
-      .graveyard.filter((card) => isAura(ctx, card) && data(ctx, card).name.toLowerCase().includes("sigil"));
+      .graveyard.filter((card) => isAura(ctx, card) && cardNameContains(ctx, card, "sigil"));
     if (choices.length)
       ctx.requestCardChoice(
         "etching-sigil",
@@ -1045,7 +1047,7 @@ for (const pitch of [1, 2, 3]) {
     onPlay(ctx) {
       const copies = ctx
         .player(ctx.seat)
-        .graveyard.filter((card) => data(ctx, card).name === "Count Your Blessings").length;
+        .graveyard.filter((card) => cardNamed(ctx, card, "Count Your Blessings")).length;
       ctx.gainLife(ctx.seat, 4 - pitch + copies);
     },
   };
@@ -1585,7 +1587,7 @@ Object.assign(ros, {
           ) &&
           !!left &&
           isAura(ctx, left) &&
-          data(ctx, left).name.toLowerCase().includes("sigil"),
+          cardNameContains(ctx, left, "sigil"),
         effect: (ctx: ScriptCtx) => ampNextArcane(ctx, 1),
       },
     ],
@@ -1630,10 +1632,10 @@ Object.assign(ros, {
   },
   "arcanite fortress|0": {
     modifyDefense: (ctx: ScriptCtx) =>
-      Object.values(ctx.player(ctx.seat).equipment).filter((card) => card && data(ctx, card).name.includes("Arcanite"))
+      Object.values(ctx.player(ctx.seat).equipment).filter((card) => card && cardNameContains(ctx, card, "Arcanite"))
         .length,
     wardValue: (ctx: ScriptCtx) =>
-      Object.values(ctx.player(ctx.seat).equipment).filter((card) => card && data(ctx, card).name.includes("Arcanite"))
+      Object.values(ctx.player(ctx.seat).equipment).filter((card) => card && cardNameContains(ctx, card, "Arcanite"))
         .length,
   },
   "cut through the facade|1": {

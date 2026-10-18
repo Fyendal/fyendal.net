@@ -2,6 +2,7 @@ import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal
 import {
   attackAbility,
   buffNextAttack,
+  cardNamed,
   commonOptionMessages,
   decisionMessage,
   decisionPrompt,
@@ -452,7 +453,7 @@ export const ajv: Record<string, CardScript> = {
     onDefend(ctx) {
       const attacker = ctx.link?.attacker;
       if (attacker === undefined || !allEquipment(ctx, attacker).some((card) => (card.defCounters ?? 0) > 0)) return;
-      const mangles = ctx.player(ctx.seat).deck.filter((card) => data(ctx, card).name.toLowerCase() === "mangle");
+      const mangles = ctx.player(ctx.seat).deck.filter((card) => cardNamed(ctx, card, "mangle"));
       if (mangles.length)
         ctx.requestCardChoice(
           "unforgetting-mangle",

@@ -1,5 +1,6 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
 import {
+  cardNamed,
   commonOptionMessages,
   dealArcane,
   decisionPrompt,
@@ -16,14 +17,11 @@ import { dragonAttack } from "./dragon-attack.js";
 const ASH = "UPR043";
 const FROSTBITE = "SIY035";
 
-function named(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, name: string): boolean {
-  return ctx.cardData(card.cardId).name.toLowerCase() === name;
-}
 function has(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, type: string): boolean {
   return ctx.cardTypes(card).includes(type);
 }
 function isIceAffliction(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
-  return named(ctx, card, "frostbite") || (has(ctx, card, "ice") && has(ctx, card, "affliction"));
+  return cardNamed(ctx, card, "frostbite") || (has(ctx, card, "ice") && has(ctx, card, "affliction"));
 }
 function equipped(player: ReturnType<ScriptCtx["player"]>): DeepReadonly<CardInstance>[] {
   return Object.values(player.equipment).filter((card): card is DeepReadonly<CardInstance> => !!card);
@@ -37,11 +35,11 @@ function ownIllusionistAttack(ctx: ScriptCtx): DeepReadonly<CardInstance> | unde
   return has(ctx, link.attackingCard, "illusionist") ? link.attackingCard : undefined;
 }
 function controlledPhoenixFlames(ctx: ScriptCtx): number {
-  return ctx.state.chain.filter((link) => link.attacker === ctx.seat && named(ctx, link.attackingCard, "phoenix flame"))
+  return ctx.state.chain.filter((link) => link.attacker === ctx.seat && cardNamed(ctx, link.attackingCard, "phoenix flame"))
     .length;
 }
 function ashes(ctx: ScriptCtx) {
-  return ctx.player(ctx.seat).board.filter((card) => named(ctx, card, "ash"));
+  return ctx.player(ctx.seat).board.filter((card) => cardNamed(ctx, card, "ash"));
 }
 function invoke(backId: string): CardScript {
   return {
@@ -96,7 +94,7 @@ const dromai: CardScript = {
 };
 const fai: CardScript = {
   onGameStart(ctx) {
-    const flame = ctx.player(ctx.seat).deck.find((card) => named(ctx, card, "phoenix flame"));
+    const flame = ctx.player(ctx.seat).deck.find((card) => cardNamed(ctx, card, "phoenix flame"));
     if (flame) {
       ctx.requestChoice(
         "fai-start-flame",
@@ -110,7 +108,7 @@ const fai: CardScript = {
   },
   onChoose(ctx, hook, option) {
     if (hook !== "fai-start-flame" || option !== "yes") return;
-    const flame = ctx.player(ctx.seat).deck.find((card) => named(ctx, card, "phoenix flame"));
+    const flame = ctx.player(ctx.seat).deck.find((card) => cardNamed(ctx, card, "phoenix flame"));
     if (flame) ctx.moveToGraveyard(flame.instanceId, "deck");
   },
   activated: {
@@ -119,10 +117,10 @@ const fai: CardScript = {
     goAgain: false,
     timing: "instant",
     oncePerTurn: true,
-    canActivate: (ctx) => ctx.player(ctx.seat).graveyard.some((card) => named(ctx, card, "phoenix flame")),
+    canActivate: (ctx) => ctx.player(ctx.seat).graveyard.some((card) => cardNamed(ctx, card, "phoenix flame")),
     modifyCost: (ctx, base) => Math.max(0, base - ctx.chainLinksControlled(ctx.seat, "draconic")),
     onActivate(ctx) {
-      const flame = ctx.player(ctx.seat).graveyard.find((card) => named(ctx, card, "phoenix flame"));
+      const flame = ctx.player(ctx.seat).graveyard.find((card) => cardNamed(ctx, card, "phoenix flame"));
       if (flame) ctx.moveToHand(flame.instanceId);
     },
   },
@@ -394,7 +392,7 @@ export const uprHighRarity: Record<string, CardScript> = {
         opp.seat,
         5 +
           (ctx.getCounter("fused")
-            ? frozen + ice + opp.board.filter((card) => named(ctx, card, "frostbite")).length
+            ? frozen + ice + opp.board.filter((card) => cardNamed(ctx, card, "frostbite")).length
             : 0),
       );
     },

@@ -2,6 +2,7 @@ import type { ActivatedAbility, CardInstance, CardScript, DeepReadonly, ScriptCt
 import {
   attackAbility,
   buffNextAttack,
+  cardNamed,
   commonOptionMessages,
   decisionMessage,
   decisionPrompt,
@@ -704,7 +705,7 @@ export const sar: Record<string, CardScript> = {
   "arakni, orb-weaver|0": {
     // "Graphene Chelicerae cost you {r} less to activate."
     modifyAttackActivationCost(ctx, attacker, baseCost) {
-      if (ctx.cardData(attacker.cardId).name !== "Graphene Chelicera") return baseCost;
+      if (!cardNamed(ctx, attacker, "Graphene Chelicera")) return baseCost;
       return baseCost - 1;
     },
     // "Once per Turn Instant — Discard an Assassin card: Equip a Graphene

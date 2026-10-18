@@ -1,8 +1,8 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
-import { decisionPrompt, opponentSeat } from "./shared-helpers.js";
+import { cardNameContains, decisionPrompt, opponentSeat } from "./shared-helpers.js";
 
 function isTome(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
-  return ctx.cardData(card.cardId).name.toLowerCase().includes("tome");
+  return cardNameContains(ctx, card, "tome");
 }
 
 function nonHeroPermanents(ctx: ScriptCtx, seat: number): DeepReadonly<CardInstance>[] {

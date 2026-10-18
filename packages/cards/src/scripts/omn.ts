@@ -4,6 +4,7 @@ import {
   anyDamageTarget,
   attackArcaneHeroTrigger,
   buffNextAttack,
+  cardNamed,
   commonOptionMessages,
   consumeDelayedEffect,
   dealArcane,
@@ -50,14 +51,11 @@ function isInstant(ctx: ScriptCtx, card: Card): boolean {
 function isAttackAction(ctx: ScriptCtx, card: Card): boolean {
   return ctx.hasCardType(card, "action") && hasTag(ctx, card, "attack");
 }
-function isNamed(ctx: ScriptCtx, card: Card, name: string): boolean {
-  return data(ctx, card).name.trim().toLowerCase() === name.toLowerCase();
-}
 function isTokenAura(ctx: ScriptCtx, card: Card): boolean {
   return data(ctx, card).cardType === "token" && isAura(ctx, card);
 }
 function flows(ctx: ScriptCtx, seat = ctx.seat): Card[] {
-  return ctx.player(seat).board.filter((card) => isNamed(ctx, card, "Lightning Flow"));
+  return ctx.player(seat).board.filter((card) => cardNamed(ctx, card, "Lightning Flow"));
 }
 function starfall(ctx: ScriptCtx): boolean {
   return ctx.getFlag("player", "graveCardType:instant") === true;

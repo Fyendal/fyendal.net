@@ -20,6 +20,7 @@ import {
   cardColorOf,
   cardCostOf,
   cardHasType,
+  cardNameKeysOf,
   cardNamesOf,
   cardTypesOf,
   dataOf,
@@ -187,10 +188,11 @@ function createCardInHandFor(
   };
   player.hand.push(card);
   player.flags.createdThisTurn = (Number(player.flags.createdThisTurn) || 0) + 1;
-  const createdName = nameOf(state, cardId).trim().toLowerCase().replace(/\s+/g, " ");
-  player.flags[`createdName:${createdName}`] = true;
-  player.flags[`createdNameCount:${createdName}`] =
-    (Number(player.flags[`createdNameCount:${createdName}`]) || 0) + 1;
+  for (const createdName of cardNameKeysOf(state, card)) {
+    player.flags[`createdName:${createdName}`] = true;
+    player.flags[`createdNameCount:${createdName}`] =
+      (Number(player.flags[`createdNameCount:${createdName}`]) || 0) + 1;
+  }
   logPublic(state, gameLogMessage(
     `${nameOf(state, player.heroCardId)} creates ${nameOf(state, cardId)} in their hand`,
     "engine.log.card.created.in.hand",
@@ -215,10 +217,11 @@ function createCardInBanishFor(
   };
   player.banish.push(card);
   player.flags.createdThisTurn = (Number(player.flags.createdThisTurn) || 0) + 1;
-  const createdName = nameOf(state, cardId).trim().toLowerCase().replace(/\s+/g, " ");
-  player.flags[`createdName:${createdName}`] = true;
-  player.flags[`createdNameCount:${createdName}`] =
-    (Number(player.flags[`createdNameCount:${createdName}`]) || 0) + 1;
+  for (const createdName of cardNameKeysOf(state, card)) {
+    player.flags[`createdName:${createdName}`] = true;
+    player.flags[`createdNameCount:${createdName}`] =
+      (Number(player.flags[`createdNameCount:${createdName}`]) || 0) + 1;
+  }
   for (const subtype of dataOf(state, cardId).subtypes ?? []) {
     player.flags[`createdSubtype:${subtype.toLowerCase()}`] = true;
     player.flags[`createdSubtypeCount:${subtype.toLowerCase()}`] =

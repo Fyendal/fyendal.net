@@ -2,6 +2,7 @@ import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal
 import {
   attackAbility,
   buffNextAttack,
+  cardNamed,
   commonOptionMessages,
   consumeDelayedEffect,
   decisionMessage,
@@ -517,13 +518,15 @@ export const mpw: Record<string, CardScript> = {
         Array.from({ length: count + 1 }, (_, index) => {
           const id = ctx.getCounter(`lessonsCard:${index}`);
           const card = ctx.player(ctx.seat).deck.find((candidate) => candidate.instanceId === id);
-          return card ? data(ctx, card).name : "";
-        }),
+          return card ? ctx.cardNames(card) : [];
+        }).flat(),
       );
       const remaining = ctx
         .player(ctx.seat)
         .graveyard.filter(
-          (card) => data(ctx, card).cardType === "attack-reaction" && !chosenNames.has(data(ctx, card).name),
+          (card) =>
+            data(ctx, card).cardType === "attack-reaction" &&
+            !ctx.cardNames(card).some((name) => chosenNames.has(name)),
         );
       if (remaining.length)
         ctx.requestCardChoice(
@@ -645,10 +648,9 @@ export const mpw: Record<string, CardScript> = {
   },
   "off beat|3": {
     onPlay(ctx) {
-      const tokens = ctx
-        .player(ctx.seat)
-        .board.filter((card) => ["Blade Dance", "Flurry"].includes(data(ctx, card).name));
-      const names = [...new Set(tokens.map((token) => data(ctx, token).name))];
+      const names = ["Blade Dance", "Flurry"].filter((name) =>
+        ctx.player(ctx.seat).board.some((card) => cardNamed(ctx, card, name)),
+      );
       const options = ["none", ...names, ...(names.length === 2 ? ["both"] : [])];
       ctx.requestChoice(
         "off-beat-tokens",
@@ -673,7 +675,7 @@ export const mpw: Record<string, CardScript> = {
         const wanted = option === "both" ? ["Blade Dance", "Flurry"] : [option];
         let count = 0;
         for (const name of wanted) {
-          const token = ctx.player(ctx.seat).board.find((card) => data(ctx, card).name === name);
+          const token = ctx.player(ctx.seat).board.find((card) => cardNamed(ctx, card, name));
           if (token && ctx.destroyPermanent(token.instanceId)) count++;
         }
         ctx.setCounter("offBeatCount", count);

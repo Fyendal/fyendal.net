@@ -2,6 +2,7 @@ import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal
 import {
   attackAbility,
   buffNextAttack,
+  cardNamed,
   decisionMessage,
   decisionPrompt,
   isSwordAttack,
@@ -172,7 +173,7 @@ export const aha: Record<string, CardScript> = {
   },
   "silverstride dodgers|0": {
     modifyDefense(ctx) {
-      return ctx.player(ctx.seat).board.some((card) => ctx.cardData(card.cardId).name === "Flurry") ? 1 : 0;
+      return ctx.player(ctx.seat).board.some((card) => cardNamed(ctx, card, "Flurry")) ? 1 : 0;
     },
   },
   "deadly display|1": weaponReaction(3, (ctx, weapon) => {
@@ -290,7 +291,7 @@ export const aha: Record<string, CardScript> = {
   "swordmaster's path|3": swordPath(1),
   "flurry foot dance|2": {
     modifyDefense(ctx) {
-      return ctx.player(ctx.seat).board.some((card) => ctx.cardData(card.cardId).name === "Flurry") ? 2 : 0;
+      return ctx.player(ctx.seat).board.some((card) => cardNamed(ctx, card, "Flurry")) ? 2 : 0;
     },
   },
   "backside of the blade|3": weaponReaction(1, (ctx, weapon) => {

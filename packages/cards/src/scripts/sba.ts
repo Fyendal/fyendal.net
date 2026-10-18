@@ -3,6 +3,7 @@ import {
   armDelayedEffect,
   attackAbility,
   attackArcaneHeroTrigger,
+  cardNamed,
   commonOptionMessages,
   consumeDelayedEffect,
   dealArcane,
@@ -41,10 +42,6 @@ function isFused(ctx: ScriptCtx): boolean {
 }
 
 /** Name-only identity check (any pitch variant — "a Nimblism"). */
-function isNamed(ctx: ScriptCtx, cardId: string, name: string): boolean {
-  return ctx.cardData(cardId).name.trim().toLowerCase() === name.toLowerCase();
-}
-
 function requestAnyTarget(ctx: ScriptCtx, hook: string, amount: number): void {
   const options = ["opposing hero", "your hero"];
   const cardOptions: (number | null)[] = [null, null];
@@ -380,7 +377,7 @@ export const sba: Record<string, CardScript> = {
   // Jack Be Quick — may banish a Nimblism from graveyard for +1{p} and go again
   "jack be quick|1": {
     onAttackDeclared(ctx) {
-      const nimblisms = ctx.player(ctx.seat).graveyard.filter((c) => isNamed(ctx, c.cardId, "Nimblism"));
+      const nimblisms = ctx.player(ctx.seat).graveyard.filter((c) => cardNamed(ctx, c, "Nimblism"));
       if (nimblisms.length === 0) return;
       ctx.requestCardChoice(
         "jack-banish",

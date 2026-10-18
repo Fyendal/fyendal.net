@@ -4,6 +4,7 @@ import {
   cardAbilitiesSuppressed,
   cardColorOf,
   cardHasType,
+  cardNameKeysOf,
   cardTypesOf,
   dataOf,
   scriptOf,
@@ -151,7 +152,7 @@ function enterGraveyard(
   delete card.faceDown;
   owner.flags.graveThisTurn = true;
   const d = dataOf(state, card.cardId);
-  owner.flags[`graveName:${d.name.trim().toLowerCase().replace(/\s+/g, " ")}`] = true;
+  for (const name of cardNameKeysOf(state, card)) owner.flags[`graveName:${name}`] = true;
   owner.flags[`graveCardType:${d.cardType.toLowerCase()}`] = true;
   for (const s of d.subtypes ?? []) {
     owner.flags[`graveSubtype:${s.toLowerCase()}`] = true;

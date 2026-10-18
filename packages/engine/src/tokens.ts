@@ -1,7 +1,7 @@
 import type { GameMessage } from "@fyendal/shared";
 import type { EngineRuntime } from "./runtimePorts.js";
 import type { GameStateInternal } from "./runtimeState.js";
-import { dataOf, scriptOf } from "./cardProperties.js";
+import { cardHasName, cardNameKeysOf, dataOf, scriptOf } from "./cardProperties.js";
 import {
   gameLogMessage,
   logCardValue,
@@ -37,10 +37,11 @@ function createTokenRaw(
   stampControlledName(state, player, token);
   // "if you've created a card this turn" tracking (per-turn flags, auto-wiped)
   player.flags.createdThisTurn = (Number(player.flags.createdThisTurn) || 0) + 1;
-  const createdName = nameOf(state, cardId).trim().toLowerCase().replace(/\s+/g, " ");
-  player.flags[`createdName:${createdName}`] = true;
-  player.flags[`createdNameCount:${createdName}`] =
-    (Number(player.flags[`createdNameCount:${createdName}`]) || 0) + 1;
+  for (const createdName of cardNameKeysOf(state, token)) {
+    player.flags[`createdName:${createdName}`] = true;
+    player.flags[`createdNameCount:${createdName}`] =
+      (Number(player.flags[`createdNameCount:${createdName}`]) || 0) + 1;
+  }
   if (scriptOf(state, cardId, token)?.runechantToken === true) {
     player.flags.createdRunechantCount =
       (Number(player.flags.createdRunechantCount) || 0) + 1;
@@ -90,7 +91,7 @@ function createTokenBatchRaw(
   const data = dataOf(state, cardId);
   const unique = (data.keywords ?? []).some((keyword) => keyword.trim().toLowerCase() === "unique");
   const alreadyControlled = unique && player.board.some((card) =>
-    nameOf(state, card.cardId).trim().toLowerCase() === data.name.trim().toLowerCase()
+    cardHasName(state, card, data.name)
   );
   const allowedCount = unique ? (alreadyControlled ? 0 : Math.min(1, count)) : count;
   const tokens = Array.from(

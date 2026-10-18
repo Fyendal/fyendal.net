@@ -1,6 +1,7 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
 import {
   buffNextAttack,
+  cardNamed,
   commonOptionMessages,
   decisionMessage,
   decisionPrompt,
@@ -44,11 +45,11 @@ function isEvo(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
 }
 
 function controlsNamed(ctx: ScriptCtx, name: string): boolean {
-  return ctx.player(ctx.seat).board.some((card) => data(ctx, card).name === name);
+  return ctx.player(ctx.seat).board.some((card) => cardNamed(ctx, card, name));
 }
 
 function hyperDrivers(ctx: ScriptCtx): readonly DeepReadonly<CardInstance>[] {
-  return ctx.player(ctx.seat).board.filter((card) => data(ctx, card).name === "Hyper Driver");
+  return ctx.player(ctx.seat).board.filter((card) => cardNamed(ctx, card, "Hyper Driver"));
 }
 
 function equippedEvos(ctx: ScriptCtx): number {
@@ -61,7 +62,7 @@ function boostedCount(ctx: ScriptCtx): number {
 
 function initializeCogwerx(ctx: ScriptCtx): void {
   for (const equipment of Object.values(ctx.player(ctx.seat).equipment)) {
-    if (equipment && data(ctx, equipment).name.startsWith("Cogwerx Base ")) {
+    if (equipment && ctx.cardNames(equipment).some((name) => name.startsWith("cogwerx base "))) {
       ctx.setCardCounter(equipment.instanceId, "steam", 1);
     }
   }
@@ -357,7 +358,7 @@ function nextBoostBuff(amount: number, addDriver = false): CardScript {
       if (!addDriver) return;
       const drivers = ctx
         .player(ctx.seat)
-        .banish.filter((card) => !card.faceDown && data(ctx, card).name === "Hyper Driver");
+        .banish.filter((card) => !card.faceDown && cardNamed(ctx, card, "Hyper Driver"));
       if (drivers.length)
         ctx.requestCardChoice(
           "gas-up-driver",
@@ -409,7 +410,7 @@ const dashDatabase: CardScript = {
 const maxxNitro: CardScript = {
   onGameStart: initializeCogwerx,
   grantsCrankToFriendly(ctx, card) {
-    return data(ctx, card).name.toLowerCase() === "hyper driver";
+    return cardNamed(ctx, card, "hyper driver");
   },
   activated: {
     cost: 2,
@@ -498,14 +499,14 @@ export const evo: Record<string, CardScript> = mergeSetScripts("EVO", evoHighRar
   "evo tekloscope|3": evoEquipment(),
   "evo energy matrix|3": evoEquipment({
     modifyAttackActivationCost: (ctx, attacker, base) =>
-      data(ctx, attacker).name === "Teklo Blaster" ? Math.max(0, base - 1) : base,
+      cardNamed(ctx, attacker, "Teklo Blaster") ? Math.max(0, base - 1) : base,
   }),
   "evo scatter shot|3": evoEquipment({
-    modifyAttack: (ctx) => (ctx.link && data(ctx, ctx.link.attackingCard).name === "Teklo Blaster" ? 1 : 0),
+    modifyAttack: (ctx) => (ctx.link && cardNamed(ctx, ctx.link.attackingCard, "Teklo Blaster") ? 1 : 0),
   }),
   "evo rapid fire|3": evoEquipment({
     onFriendlyAttackDeclared(ctx) {
-      if (ctx.link && data(ctx, ctx.link.attackingCard).name === "Teklo Blaster") ctx.grantGoAgain();
+      if (ctx.link && cardNamed(ctx, ctx.link.attackingCard, "Teklo Blaster")) ctx.grantGoAgain();
     },
   }),
   "evo sentry base head|1": evoEquipment(),

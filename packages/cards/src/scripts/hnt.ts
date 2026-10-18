@@ -5,6 +5,7 @@ import {
   attackAbility,
   bloodDebtScript as bloodDebt,
   buffNextAttack,
+  cardNamed,
   commonOptionMessages,
   consumeDelayedEffect,
   decisionMessage,
@@ -736,7 +737,7 @@ export const hnt: Record<string, CardScript> = {
       ctx.createToken(FEALTY);
     },
     modifyAttackActivationCost(ctx, attacker, base) {
-      const fealty = ctx.player(ctx.seat).board.filter((card) => ctx.cardData(card.cardId).name === "Fealty").length;
+      const fealty = ctx.player(ctx.seat).board.filter((card) => cardNamed(ctx, card, "Fealty")).length;
       return fealty >= 3 && isDagger(ctx, attacker) ? base - 1 : base;
     },
   },
@@ -1509,7 +1510,7 @@ Object.assign(hnt, {
   },
   "hunt's end|1": {
     canPlay: (ctx) =>
-      ctx.player(ctx.seat).board.filter((card) => ctx.cardData(card.cardId).name === "Fealty").length >= 3 &&
+      ctx.player(ctx.seat).board.filter((card) => cardNamed(ctx, card, "Fealty")).length >= 3 &&
       currentDaggerAttack(ctx),
     onPlay: (ctx) => ctx.addModifier({ scope: "chain-link", attack: 4 }),
   },
@@ -1694,12 +1695,12 @@ Object.assign(hnt, {
         optional: true,
         label: "Banish two Loyalty Beyond the Grave to draw",
         condition: (ctx) =>
-          ctx.player(ctx.seat).graveyard.filter((card) => ctx.cardData(card.cardId).name === "Loyalty Beyond the Grave")
+          ctx.player(ctx.seat).graveyard.filter((card) => cardNamed(ctx, card, "Loyalty Beyond the Grave"))
             .length >= 2,
         effect(ctx) {
           for (const card of ctx
             .player(ctx.seat)
-            .graveyard.filter((card) => ctx.cardData(card.cardId).name === "Loyalty Beyond the Grave")
+            .graveyard.filter((card) => cardNamed(ctx, card, "Loyalty Beyond the Grave"))
             .slice(0, 2))
             ctx.banish(card.instanceId);
           ctx.drawCards(ctx.seat, 1);
@@ -2100,7 +2101,7 @@ Object.assign(hnt, {
     },
   },
   "war cry of bellona|2": {
-    canPlay: (ctx) => !!ctx.link && ctx.cardData(ctx.link.attackingCard.cardId).name === "Raydn, Duskbane",
+    canPlay: (ctx) => !!ctx.link && cardNamed(ctx, ctx.link.attackingCard, "Raydn, Duskbane"),
     onPlay(ctx) {
       if (!ctx.link) return;
       ctx.addModifier({

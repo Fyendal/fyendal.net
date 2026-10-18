@@ -1,5 +1,6 @@
-import type { CardScript, ScriptCtx } from "@fyendal/engine";
+import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
 import {
+  cardNamed,
   decisionMessage,
   decisionPrompt,
   hyperDriverCounterFromBoostBanish,
@@ -13,8 +14,8 @@ import {
 // Dash's setup ability pauses game creation on a card-backed choice. Crank is
 // engine-native: as an item enters, its controller may remove steam for 1 AP.
 
-function isHyperDriver(ctx: ScriptCtx, card: { readonly cardId: string }): boolean {
-  return ctx.cardData(card.cardId).name === "Hyper Driver";
+function isHyperDriver(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
+  return cardNamed(ctx, card, "Hyper Driver");
 }
 
 function firstHyperDriver(ctx: ScriptCtx) {

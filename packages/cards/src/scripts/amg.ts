@@ -16,9 +16,7 @@ function revereCandidates(ctx: ScriptCtx): DeepReadonly<CardInstance>[] {
   const banish = ctx.player(ctx.seat).banish;
   const chosen = revereChosen(ctx);
   const chosenNames = new Set(
-    banish
-      .filter((card) => chosen.includes(card.instanceId))
-      .map((card) => ctx.cardData(card.cardId).name),
+    banish.filter((card) => chosen.includes(card.instanceId)).flatMap((card) => ctx.cardNames(card)),
   );
   return banish.filter(
     (card) =>
@@ -26,7 +24,7 @@ function revereCandidates(ctx: ScriptCtx): DeepReadonly<CardInstance>[] {
       !chosen.includes(card.instanceId) &&
       ctx.hasCardType(card, "action") &&
       ctx.cardTypes(card).includes("mechanologist") &&
-      !chosenNames.has(ctx.cardData(card.cardId).name),
+      !ctx.cardNames(card).some((name) => chosenNames.has(name)),
   );
 }
 

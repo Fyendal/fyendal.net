@@ -3,6 +3,7 @@ import {
   armDelayedEffect,
   attackAbility,
   buffNextAttack,
+  cardNamed,
   commonOptionMessages,
   consumeDelayedEffect,
   decisionPrompt,
@@ -22,7 +23,7 @@ function zombies(ctx: ScriptCtx, zone: readonly DeepReadonly<CardInstance>[]) {
 }
 
 function controlsVox(ctx: ScriptCtx): boolean {
-  return ctx.player(ctx.seat).weapons.some((card) => ctx.cardData(card.cardId).name === "Vox Necropolis");
+  return ctx.player(ctx.seat).weapons.some((card) => cardNamed(ctx, card, "Vox Necropolis"));
 }
 
 function grantDestroyingZombieAttack(ctx: ScriptCtx, power: number): void {

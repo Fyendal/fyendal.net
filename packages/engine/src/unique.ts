@@ -1,7 +1,6 @@
 import type { EngineRuntime } from "./runtimePorts.js";
 import type { GameStateInternal } from "./runtimeState.js";
-import { cardAbilitiesSuppressed, dataOf } from "./cardProperties.js";
-import { nameOf } from "./gameLog.js";
+import { cardAbilitiesSuppressed, cardNamesOf, dataOf } from "./cardProperties.js";
 import type { CardInstance, PendingDecisionState, PlayerState } from "./state.js";
 import { findPermanent } from "./zoneQueries.js";
 import { clearPermanent } from "./zoneMoves.js";
@@ -13,9 +12,10 @@ const CLEAR_UNIQUE_OPTION = "clear-unique";
 /** Name and moniker identities (CR 2.7.3). A suffix written after a comma is
  * not part of the moniker: "Blasmophet, the Soul Harvester" is a Blasmophet. */
 function identities(state: GameStateInternal, card: CardInstance): string[] {
-  const name = nameOf(state, card.cardId).trim().toLowerCase();
-  const comma = name.indexOf(",");
-  return comma > 0 ? [name, name.slice(0, comma).trim()] : [name];
+  return [...new Set(cardNamesOf(state, card).flatMap((name) => {
+    const comma = name.indexOf(",");
+    return comma > 0 ? [name, name.slice(0, comma).trim()] : [name];
+  }))];
 }
 
 function isUnique(state: GameStateInternal, card: CardInstance): boolean {

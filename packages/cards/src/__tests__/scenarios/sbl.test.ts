@@ -89,6 +89,21 @@ describe("SBL — Charge as an additional cost", () => {
     s.expectAP(0, 1); // go again granted on hit
   });
 
+  it("Light the Way gets go again when a partially blocked attack still hits", () => {
+    const s = scenario({
+      seats: [
+        boltynSeat({ hand: ["light the way|1", "duty bound blitz|2"] }),
+        { hero: "dorinthea", hand: ["duty bound blitz|1"] },
+      ],
+    });
+    s.play("light the way|1");
+    s.chooseCard("duty bound blitz|2"); // charges a yellow
+    s.expectAP(0, 0); // no go again until the hit
+    s.blockWith("duty bound blitz|1").settle(); // 2{d} against 3{p}
+    s.expectAP(0, 1);
+    s.expectLog("Light the Way has Go again");
+  });
+
   it("V of the Vanguard: charge any number of times, +1{p} per Light card charged", () => {
     const s = scenario({
       seats: [

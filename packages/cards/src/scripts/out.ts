@@ -1,5 +1,4 @@
 import type { CardScript, DeepReadonly, CardInstance, ScriptCtx } from "@fyendal/engine";
-import { functionalKeyOf } from "../functional.js";
 import {
   buffNextAttack,
   commonOptionMessages,
@@ -16,6 +15,7 @@ import {
   previousAttackNameContains,
   requestHeroChoice,
   resourceAbility,
+  sharesName,
   spireSnipingScript,
   targetHeroSeat,
   yesNoPrompt,
@@ -467,10 +467,7 @@ function bonds(pitch: number): CardScript {
       if (!hook.startsWith("bonds-grave") || option === "pass") return;
       const chosen = ctx.player(ctx.seat).graveyard.find((card) => card.instanceId === Number(option));
       if (!chosen || !ctx.banish(chosen.instanceId)) return;
-      const key = functionalKeyOf(data(ctx, chosen));
-      const matches = ctx
-        .player(ctx.seat)
-        .deck.filter((card) => functionalKeyOf(data(ctx, card)).split("|")[0] === key.split("|")[0]);
+      const matches = ctx.player(ctx.seat).deck.filter((card) => sharesName(ctx, card, chosen));
       if (matches.length)
         ctx.requestCardChoice(
           "bonds-search",

@@ -1,6 +1,7 @@
 import type { CardScript, ScriptCtx } from "@fyendal/engine";
 import {
   buffNextAttack,
+  cardNamed,
   commonOptionMessages,
   decisionMessage,
   decisionPrompt,
@@ -23,7 +24,7 @@ function cardInGraveyard(
   ctx: ScriptCtx,
   name: string,
 ): { readonly instanceId: number; readonly cardId: string } | undefined {
-  return ctx.player(ctx.seat).graveyard.find((c) => ctx.cardData(c.cardId).name.toLowerCase() === name.toLowerCase());
+  return ctx.player(ctx.seat).graveyard.find((c) => cardNamed(ctx, c, name));
 }
 
 function currentLinkData(ctx: ScriptCtx) {

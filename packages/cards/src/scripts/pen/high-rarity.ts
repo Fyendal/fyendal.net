@@ -4,6 +4,7 @@ import {
   attackAbility,
   bloodDebtScript as bloodDebt,
   buffNextAttack,
+  cardNameContains,
   commonOptionMessages,
   consumeDelayedEffect,
   decisionMessage,
@@ -487,7 +488,7 @@ export const penHighRarity: Record<string, CardScript> = {
     onPlay(ctx) {
       const count = ctx
         .player(ctx.seat)
-        .board.filter((card) => has(ctx, card, "aura") && data(ctx, card).name.includes("Sigil")).length;
+        .board.filter((card) => has(ctx, card, "aura") && cardNameContains(ctx, card, "Sigil")).length;
       if (count > 0) ctx.dealDamage(opponentSeat(ctx), 3, { arcane: true });
       for (const ally of ctx
         .player(opponentSeat(ctx))
@@ -500,7 +501,7 @@ export const penHighRarity: Record<string, CardScript> = {
     playTargetOptions(ctx) {
       const sigils = ctx
         .player(ctx.seat)
-        .board.filter((card) => has(ctx, card, "aura") && data(ctx, card).name.includes("Sigil")).length;
+        .board.filter((card) => has(ctx, card, "aura") && cardNameContains(ctx, card, "Sigil")).length;
       return ctx.state.stack
         .flatMap((layer) => (layer.card ? [layer.card] : []))
         .filter(
@@ -576,7 +577,7 @@ export const penHighRarity: Record<string, CardScript> = {
   },
   "lobotomy|1": {
     onAttackDeclared(ctx) {
-      const orbit = (ctx.player(ctx.seat).inventory ?? []).find((card) => data(ctx, card).name.includes("Orbitoclast"));
+      const orbit = (ctx.player(ctx.seat).inventory ?? []).find((card) => cardNameContains(ctx, card, "Orbitoclast"));
       if (orbit)
         ctx.requestCardChoice(
           "lobotomy-equip",

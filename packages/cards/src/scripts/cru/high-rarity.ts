@@ -1,5 +1,6 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
 import {
+  cardNamed,
   commonOptionMessages,
   dealArcane,
   decisionMessage,
@@ -11,6 +12,7 @@ import {
   optN,
   optOnChoose,
   previousAttackHasName,
+  sharesName,
   wizardActionAsInstant,
   yesNoPrompt,
 } from "../shared-helpers.js";
@@ -112,10 +114,9 @@ const righteousCleansing: CardScript = {
       const ids = choose[1]!.split(",").map(Number);
       const selected = ctx.player(opponentSeat(ctx)).deck.find((card) => card.instanceId === Number(option));
       if (!selected) return;
-      const name = ctx.cardData(selected.cardId).name;
       const matching = ctx
         .player(opponentSeat(ctx))
-        .deck.filter((card) => ids.includes(card.instanceId) && ctx.cardData(card.cardId).name === name);
+        .deck.filter((card) => ids.includes(card.instanceId) && sharesName(ctx, card, selected));
       for (const card of matching) ctx.banish(card.instanceId);
       orderOnTop(
         ctx,
@@ -786,7 +787,7 @@ export const cruHighRarity: Record<string, CardScript> = {
     onPlay(ctx) {
       const copies = ctx.state.players
         .flatMap((player) => player.graveyard)
-        .filter((card) => ctx.cardData(card.cardId).name === "Gorganian Tome").length;
+        .filter((card) => cardNamed(ctx, card, "Gorganian Tome")).length;
       ctx.drawCards(ctx.seat, 1 + copies);
     },
   },

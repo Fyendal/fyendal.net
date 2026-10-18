@@ -5,6 +5,7 @@ import {
   attackAbility,
   bloodDebtScript as bloodDebt,
   buffNextAttack,
+  cardNamed,
   commonOptionMessages,
   consumeDelayedEffect,
   decisionMessage,
@@ -19,6 +20,7 @@ import {
   previousAttackHasName,
   requestDiscardChoice,
   resolveDiscardChoice,
+  sharesName,
   yesNoPrompt,
 } from "./shared-helpers.js";
 
@@ -63,10 +65,6 @@ function transcended(ctx: ScriptCtx): boolean {
 
 function hasType(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, type: string): boolean {
   return ctx.cardTypes(card).includes(type.toLowerCase());
-}
-
-function named(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, name: string): boolean {
-  return data(ctx, card).name.trim().toLowerCase() === name.toLowerCase();
 }
 
 function hasKeyword(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, keyword: string): boolean {
@@ -136,7 +134,7 @@ function createSoloSpectralShield(ctx: ScriptCtx, counters: number): void {
 }
 
 function supercellDrivers(ctx: ScriptCtx): DeepReadonly<CardInstance>[] {
-  return ctx.player(ctx.seat).board.filter((card) => named(ctx, card, "Hyper Driver"));
+  return ctx.player(ctx.seat).board.filter((card) => cardNamed(ctx, card, "Hyper Driver"));
 }
 
 function finishSupercell(ctx: ScriptCtx): void {
@@ -146,7 +144,7 @@ function finishSupercell(ctx: ScriptCtx): void {
   if (x < 3) return;
   const constructs = ctx
     .player(ctx.seat)
-    .banish.filter((card) => !card.faceDown && named(ctx, card, "Construct Nitro Mechanoid"));
+    .banish.filter((card) => !card.faceDown && cardNamed(ctx, card, "Construct Nitro Mechanoid"));
   if (constructs.length) {
     ctx.requestCardChoice(
       "supercell-construct",
@@ -372,11 +370,10 @@ function resolveMurkyWater(ctx: ScriptCtx, instanceIds: readonly number[]): void
 function bonds(kind: "pitch" | "name"): CardScript {
   return {
     onBanishedCard(ctx, card) {
-      const value = kind === "pitch" ? ctx.cardColor(card) : data(ctx, card).name;
-      if (kind === "pitch" && value === 0) return;
-      const key = `bonds:${ctx.self.instanceId}:${kind}:${value}`;
-      if (ctx.getFlag("link", key) === true) ctx.gainLife(ctx.seat, 1);
-      ctx.setFlag("link", key, true);
+      const values = kind === "pitch" ? [ctx.cardColor(card)].filter((color) => color !== 0) : ctx.cardNames(card);
+      const keys = values.map((value) => `bonds:${ctx.self.instanceId}:${kind}:${value}`);
+      if (keys.some((key) => ctx.getFlag("link", key) === true)) ctx.gainLife(ctx.seat, 1);
+      for (const key of keys) ctx.setFlag("link", key, true);
     },
     canTriggerOnHit(ctx) {
       return ctx.link?.targetAllyId === undefined;
@@ -438,7 +435,7 @@ function etchings(counters: number): CardScript {
         (card) =>
           isAura(ctx, card) &&
           ((data(ctx, card).keywords ?? []).some((keyword) => /^ward /i.test(keyword)) ||
-            data(ctx, card).name === "Haze Shelter"),
+            cardNamed(ctx, card, "Haze Shelter")),
       );
   return {
     playAsInstant: (ctx) => ctx.player(ctx.seat).board.some((card) => isCard(ctx, card.cardId, "Spectral Shield")),
@@ -1172,7 +1169,7 @@ function koiKimono(): CardScript {
         },
         effect(ctx) {
           ctx.destroySelf();
-          const chi = ctx.player(ctx.seat).deck.filter((card) => data(ctx, card).name === "Inner Chi");
+          const chi = ctx.player(ctx.seat).deck.filter((card) => cardNamed(ctx, card, "Inner Chi"));
           if (chi.length)
             ctx.requestCardChoice(
               "koi-chi",
@@ -1435,7 +1432,7 @@ Object.assign(mst, {
   },
   "enigma, ledger of ancestry|0": {
     modifyAttackActivationCost(ctx, attacker, base) {
-      return data(ctx, attacker).name === "Spectral Shield" &&
+      return cardNamed(ctx, attacker, "Spectral Shield") &&
         Number(ctx.getPlayerFlag(ctx.seat, "attackedNameCount:spectral shield")) === 0
         ? base - 1
         : base;
@@ -1484,7 +1481,7 @@ Object.assign(mst, {
   "three visits|1": { wardValue: (ctx) => ctx.pitchedThisTurn({ color: "blue" }) * 3 },
   "twelve petal kāṣāya|0": {
     onFriendlyPlay(ctx, played) {
-      if (data(ctx, played).name === "Inner Chi") ctx.changeResources(ctx.seat, 1);
+      if (cardNamed(ctx, played, "Inner Chi")) ctx.changeResources(ctx.seat, 1);
     },
     activated: {
       cost: 0,
@@ -1498,7 +1495,7 @@ Object.assign(mst, {
   },
   "tooth and claw|1": {
     onAttackDeclared(ctx) {
-      const count = ctx.player(ctx.seat).hand.filter((card) => data(ctx, card).name === "Crouching Tiger").length;
+      const count = ctx.player(ctx.seat).hand.filter((card) => cardNamed(ctx, card, "Crouching Tiger")).length;
       if (count > 0) ctx.grantGoAgain();
       if (count > 1) ctx.addCardTempPower(ctx.self.instanceId, 1);
       if (count > 2) ctx.drawCards(ctx.seat, 1);
@@ -1523,7 +1520,7 @@ Object.assign(mst, {
       {
         event: "card-played",
         label: "Name the Crouching Tiger",
-        condition: (ctx, played) => !!played && data(ctx, played).name === "Crouching Tiger",
+        condition: (ctx, played) => !!played && cardNamed(ctx, played, "Crouching Tiger"),
         effect(ctx, played) {
           if (!played) return;
           ctx.setCounter("shiftingTarget", played.instanceId);
@@ -1548,7 +1545,7 @@ Object.assign(mst, {
   },
   "traverse the universe|0": {
     onDefend(ctx) {
-      const chi = ctx.player(ctx.seat).deck.filter((card) => data(ctx, card).name === "Inner Chi");
+      const chi = ctx.player(ctx.seat).deck.filter((card) => cardNamed(ctx, card, "Inner Chi"));
       if (chi.length)
         ctx.requestCardChoice(
           "traverse-chi",
@@ -1641,9 +1638,8 @@ Object.assign(mst, {
       const target = opponentSeat(ctx);
       const chosen = ctx.player(target).hand.find((card) => card.instanceId === Number(option));
       if (!chosen) return;
-      const name = data(ctx, chosen).name;
       for (const card of [...ctx.player(target).hand, ...ctx.player(target).deck, ...ctx.player(target).graveyard]
-        .filter((card) => data(ctx, card).name === name)
+        .filter((card) => sharesName(ctx, card, chosen))
         .slice(0, 3))
         ctx.banish(card.instanceId);
       ctx.shuffleDeck(target);
@@ -1890,7 +1886,7 @@ Object.assign(mst, {
         .player(ctx.seat)
         .banish.find(
           (card) =>
-            card.instanceId === Number(option) && !card.faceDown && named(ctx, card, "Construct Nitro Mechanoid"),
+            card.instanceId === Number(option) && !card.faceDown && cardNamed(ctx, card, "Construct Nitro Mechanoid"),
         );
       if (construct && ctx.putOnDeckBottom(construct.instanceId)) ctx.shuffleDeck();
     },

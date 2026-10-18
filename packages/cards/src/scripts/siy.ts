@@ -1,5 +1,6 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
 import {
+  cardNamed,
   commonOptionMessages,
   dealArcane,
   requestHeroChoice,
@@ -469,7 +470,7 @@ export const siy: Record<string, CardScript> = {
         condition(ctx) {
           return ctx
             .player(ctx.seat)
-            .board.some((card) => ctx.cardData(card.cardId).name.toLowerCase() === "frost hex");
+            .board.some((card) => cardNamed(ctx, card, "frost hex"));
         },
         label: "Frost Hex deals 1 arcane damage",
         effect(ctx) {
@@ -521,7 +522,7 @@ export const siy: Record<string, CardScript> = {
       ctx.createTokens(FROSTBITE, ctx.getCounter("x"), target);
       if (!isFused(ctx)) return;
       const frostbites = ctx.state.players[target]!.board.filter(
-        (card) => ctx.cardData(card.cardId).name === "Frostbite",
+        (card) => cardNamed(ctx, card, "Frostbite"),
       ).length;
       dealArcane(ctx, target, frostbites);
     },

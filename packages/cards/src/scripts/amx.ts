@@ -1,6 +1,7 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
 import {
   attackAbility,
+  cardNamed,
   commonOptionMessages,
   decisionMessage,
   decisionPrompt,
@@ -13,16 +14,12 @@ function data(ctx: ScriptCtx, card: DeepReadonly<CardInstance>) {
   return ctx.cardData(card.cardId);
 }
 
-function named(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, name: string): boolean {
-  return data(ctx, card).name.trim().toLowerCase() === name.toLowerCase();
-}
-
 function hasSubtype(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, subtype: string): boolean {
   return ctx.cardTypes(card).includes(subtype.toLowerCase());
 }
 
 function hyperDrivers(ctx: ScriptCtx) {
-  return ctx.player(ctx.seat).board.filter((card) => named(ctx, card, "Hyper Driver"));
+  return ctx.player(ctx.seat).board.filter((card) => cardNamed(ctx, card, "Hyper Driver"));
 }
 
 function wrenches(ctx: ScriptCtx) {
@@ -78,7 +75,7 @@ function requestConstructDriver(ctx: ScriptCtx): void {
 export const amx: Record<string, CardScript> = {
   "maxx 'the hype' nitro|0": {
     grantsCrankToFriendly(ctx, card) {
-      return named(ctx, card, "Hyper Driver");
+      return cardNamed(ctx, card, "Hyper Driver");
     },
     activated: {
       cost: 2,
@@ -105,7 +102,7 @@ export const amx: Record<string, CardScript> = {
         .board.filter(
           (card) =>
             hasSubtype(ctx, card, "item") &&
-            (named(ctx, card, "Hyper Driver") ||
+            (cardNamed(ctx, card, "Hyper Driver") ||
               (data(ctx, card).keywords ?? []).some((keyword) => keyword.toLowerCase() === "crank")),
         );
       if (items.length)
@@ -122,7 +119,7 @@ export const amx: Record<string, CardScript> = {
 
   "breaker helm protos|0": {
     onDefend(ctx) {
-      const choices = ctx.player(ctx.seat).hand.filter((card) => named(ctx, card, "Hyper Driver"));
+      const choices = ctx.player(ctx.seat).hand.filter((card) => cardNamed(ctx, card, "Hyper Driver"));
       if (choices.length)
         ctx.requestCardChoice(
           "breaker-helm",
@@ -142,7 +139,7 @@ export const amx: Record<string, CardScript> = {
 
   "puffer jacket|0": {
     onFriendlyEnterArena(ctx, entered) {
-      if (data(ctx, entered).cardType !== "token" && named(ctx, entered, "Hyper Driver")) {
+      if (data(ctx, entered).cardType !== "token" && cardNamed(ctx, entered, "Hyper Driver")) {
         ctx.addCounter(entered.instanceId, "steam", 1);
       }
     },
@@ -154,7 +151,7 @@ export const amx: Record<string, CardScript> = {
         event: "card-banished-for-boost",
         label: "Target wrench you control gets +1 power this turn",
         labelMessage: decisionMessage("card.trigger.common.wrench.power.target", { amount: 1 }),
-        condition: (ctx, banished) => !!banished && named(ctx, banished, "Hyper Driver"),
+        condition: (ctx, banished) => !!banished && cardNamed(ctx, banished, "Hyper Driver"),
         target: {
           options: (ctx) => wrenches(ctx).map((card) => card.instanceId),
           prompt: () => decisionPrompt("Target a wrench to get +1 power this turn", "card.amx.wrench.power"),
@@ -168,7 +165,7 @@ export const amx: Record<string, CardScript> = {
 
   "drive brake|0": {
     onBoosted(ctx, _boosted, banished) {
-      if (named(ctx, banished, "Hyper Driver") && (ctx.self.defCounters ?? 0) > 0) {
+      if (cardNamed(ctx, banished, "Hyper Driver") && (ctx.self.defCounters ?? 0) > 0) {
         ctx.addCardDefenseCounters(ctx.self.instanceId, -1);
       }
     },
@@ -203,7 +200,7 @@ export const amx: Record<string, CardScript> = {
   "twintek charging station|1": {
     onPlay(ctx) {
       ctx.addModifier({ scope: "until-end-of-turn", onBoostAttack: 3 });
-      const choices = ctx.player(ctx.seat).graveyard.filter((card) => named(ctx, card, "Hyper Driver"));
+      const choices = ctx.player(ctx.seat).graveyard.filter((card) => cardNamed(ctx, card, "Hyper Driver"));
       if (choices.length)
         ctx.requestCardChoice(
           "twintek-driver",

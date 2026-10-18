@@ -2,6 +2,7 @@ import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal
 import {
   attackAbility,
   buffNextAttack,
+  cardNamed,
   commonOptionMessages,
   crowdTrigger,
   decisionMessage,
@@ -21,9 +22,6 @@ function data(ctx: ScriptCtx, card: Card) {
 }
 function hasTag(ctx: ScriptCtx, card: Card, tag: string): boolean {
   return ctx.cardTypes(card).some((value) => value.toLowerCase() === tag.toLowerCase());
-}
-function named(ctx: ScriptCtx, card: Card, name: string): boolean {
-  return data(ctx, card).name.toLowerCase() === name.toLowerCase();
 }
 function suspenseAura(ctx: ScriptCtx, card: Card): boolean {
   return (
@@ -302,7 +300,7 @@ export const aps: Record<string, CardScript> = {
     onPlay(ctx) {
       const tokens = ctx.state.players
         .flatMap((player) => player.board)
-        .filter((card) => named(ctx, card, "Might") || named(ctx, card, "Vigor"));
+        .filter((card) => cardNamed(ctx, card, "Might") || cardNamed(ctx, card, "Vigor"));
       if (tokens.length)
         ctx.requestCardChoice(
           "aps-thespian-token",

@@ -2,6 +2,7 @@ import type { CardInstance, CardScript, DeepReadonly, ScriptCtx, TriggerDef } fr
 import { evrHighRarity } from "./evr/high-rarity.js";
 import {
   buffNextAttack,
+  cardNamed,
   commonOptionMessages,
   decisionMessage,
   decisionPrompt,
@@ -39,10 +40,6 @@ function hasType(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, type: string)
 
 function isAttackAction(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
   return ctx.hasCardType(card, "action") && hasType(ctx, card, "attack");
-}
-
-function isNamed(ctx: ScriptCtx, cardId: string, name: string): boolean {
-  return ctx.cardData(cardId).name.toLowerCase() === name.toLowerCase();
 }
 
 function isAura(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
@@ -807,7 +804,7 @@ function pickACard(repeats: number): CardScript {
             { kind: "cards-revealed", cards: [{ cardId: card.cardId, ownerSeat: ctx.seat }], sourceZone: "hand" },
           ),
         );
-        if (name === option) ctx.createToken(SILVER);
+        if (cardNamed(ctx, card, option)) ctx.createToken(SILVER);
       }
     },
   };
@@ -994,11 +991,11 @@ const amuletHavencall: CardScript = {
         !!ctx.link &&
         ctx.link.attacker !== ctx.seat &&
         ctx.player(ctx.seat).hand.length === 0 &&
-        ctx.player(ctx.seat).deck.some((card) => isNamed(ctx, card.cardId, "Rally the Rearguard"))
+        ctx.player(ctx.seat).deck.some((card) => cardNamed(ctx, card, "Rally the Rearguard"))
       );
     },
     onActivate(ctx) {
-      const rally = ctx.player(ctx.seat).deck.find((card) => isNamed(ctx, card.cardId, "Rally the Rearguard"));
+      const rally = ctx.player(ctx.seat).deck.find((card) => cardNamed(ctx, card, "Rally the Rearguard"));
       if (rally) ctx.addDefenderFromDeck(rally.instanceId);
       ctx.shuffleDeck();
     },
@@ -1232,7 +1229,7 @@ const talismanCremation: CardScript = {
     for (const player of ctx.state.players) {
       if (player.seat === ctx.seat) continue;
       for (const card of [...player.graveyard]) {
-        if (ctx.cardData(card.cardId).name === option) ctx.banish(card.instanceId);
+        if (cardNamed(ctx, card, option)) ctx.banish(card.instanceId);
       }
     }
   },

@@ -108,6 +108,37 @@ describe("ASR — Okana Scar Wraps", () => {
     g.expectInZone(0, "become the bottle|1", "banish");
   });
 
+  it("treats a name gained from Become the Bottle as a Vengeance attack", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          heroKey: "ira, scarlet revenger|0",
+          weapons: ["edge of autumn|0"],
+          hand: ["seek vengeance|1", "become the bottle|1"],
+          resources: 5,
+          equipment: { ...NO_EQUIPMENT, arms: "okana scar wraps|0" },
+        },
+        { hero: "dorinthea", hand: [], equipment: NO_EQUIPMENT },
+      ],
+    });
+
+    g.attackWithWeapon("edge of autumn|0")
+      .blockWith()
+      .settle()
+      .play("seek vengeance|1")
+      .blockWith()
+      .settle()
+      .play("become the bottle|1")
+      .chooseCard("seek vengeance|1")
+      .blockWith()
+      .activate("okana scar wraps|0")
+      .chooseCard("edge of autumn|0");
+
+    expect(g.state.pendingDecision?.chooseHook).toBe("okana-equip");
+    g.chooseCard("edge of autumn|0").expectInZone(0, "edge of autumn|0", "weapons");
+  });
+
   it("equips a banished Edge of Autumn when a Vengeance attack hits", () => {
     const g = scenario({
       seats: [
@@ -210,6 +241,34 @@ describe("ASR — Okana Scar Wraps", () => {
     g.chooseCard("edge of autumn|0")
       .expectInZone(0, "edge of autumn|0", "weapons")
       .expectInZone(1, "nimblism|1", "graveyard");
+  });
+});
+
+describe("ASR — Robe of Autumn's Fall", () => {
+  it("lets Robe of Autumn's Fall see a Become the Bottle named Edge of Autumn", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          heroKey: "ira, scarlet revenger|0",
+          weapons: ["edge of autumn|0"],
+          hand: ["become the bottle|1"],
+          resources: 1,
+          equipment: { ...NO_EQUIPMENT, chest: "robe of autumn's fall|0" },
+        },
+        { hero: "dorinthea", hand: [], equipment: NO_EQUIPMENT },
+      ],
+    });
+
+    g.attackWithWeapon("edge of autumn|0").blockWith().settle();
+    expect(g.state.pendingDecision?.chooseHook).toBe("robe-autumn");
+    g.chooseOption("no")
+      .play("become the bottle|1")
+      .chooseCard("edge of autumn|0")
+      .blockWith()
+      .settle();
+
+    expect(g.state.pendingDecision?.chooseHook).toBe("robe-autumn");
   });
 });
 

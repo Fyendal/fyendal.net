@@ -5,6 +5,7 @@ import {
   attackAbility,
   bloodDebtScript as bloodDebt,
   buffNextAttack,
+  cardNameContains,
   commonOptionMessages,
   consumeDelayedEffect,
   decisionMessage,
@@ -143,7 +144,7 @@ function awakenFigment(ctx: ScriptCtx) {
 function prismAdult(): CardScript {
   return {
     onCardPutIntoSoul(ctx, card) {
-      if (!duringActionPhase(ctx) || !data(ctx, card).name.toLowerCase().includes("herald")) return;
+      if (!duringActionPhase(ctx) || !cardNameContains(ctx, card, "herald")) return;
       const figments = ctx.player(ctx.seat).deck.filter((candidate) => has(ctx, candidate, "figment"));
       if (figments.length)
         ctx.requestCardChoice(
@@ -262,7 +263,7 @@ export const dtdHighRarity: Record<string, CardScript> = {
       },
     },
     onCardPutIntoSoul(ctx, card) {
-      if (duringActionPhase(ctx) && data(ctx, card).name.toLowerCase().includes("herald")) {
+      if (duringActionPhase(ctx) && cardNameContains(ctx, card, "herald")) {
         ctx.setPlayerFlag(ctx.seat, "empyreanHeroDiscount", true);
       }
     },

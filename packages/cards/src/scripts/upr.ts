@@ -2,6 +2,7 @@ import type { CardInstance, CardScript, DeepReadonly, ScriptCtx, TriggerDef } fr
 import {
   anyDamageTarget,
   buffNextAttack,
+  cardNamed,
   commonOptionMessages,
   consumeDelayedEffect,
   dealArcane,
@@ -54,16 +55,12 @@ function hasSubtype(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, subtype: s
   return ctx.cardTypes(card).includes(subtype.toLowerCase());
 }
 
-function isNamed(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, name: string): boolean {
-  return data(ctx, card).name === name;
-}
-
 function ashCards(ctx: ScriptCtx): readonly DeepReadonly<CardInstance>[] {
-  return ctx.player(ctx.seat).board.filter((card) => isNamed(ctx, card, "Ash"));
+  return ctx.player(ctx.seat).board.filter((card) => cardNamed(ctx, card, "Ash"));
 }
 
 function phoenixFlames(ctx: ScriptCtx, zone: "hand" | "graveyard" = "graveyard") {
-  return ctx.player(ctx.seat)[zone].filter((card) => isNamed(ctx, card, "Phoenix Flame"));
+  return ctx.player(ctx.seat)[zone].filter((card) => cardNamed(ctx, card, "Phoenix Flame"));
 }
 
 function draconicLinks(ctx: ScriptCtx): number {
@@ -1073,7 +1070,7 @@ export const upr: Record<string, CardScript> = mergeSetScripts("UPR", uprHighRar
     modifyAttack(ctx) {
       if (ctx.currentChainLinkNumber() < 4) return 0;
       return (
-        ctx.state.chain.filter((link) => ctx.cardData(link.attackingCard.cardId).name === "Phoenix Flame").length * 2
+        ctx.state.chain.filter((link) => cardNamed(ctx, link.attackingCard, "Phoenix Flame")).length * 2
       );
     },
     onAttackDeclared(ctx) {

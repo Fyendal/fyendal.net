@@ -1,5 +1,7 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
 import {
+  cardNameContains,
+  cardNamed,
   commonOptionMessages,
   decisionPrompt,
   opponentSeat,
@@ -11,10 +13,6 @@ import { bitteringThorns, cruNinjaWarrior } from "./cru/ninja-warrior.js";
 
 function data(ctx: ScriptCtx, card: DeepReadonly<CardInstance>) {
   return ctx.cardData(card.cardId);
-}
-
-function normalizedName(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): string {
-  return data(ctx, card).name.trim().toLowerCase();
 }
 
 function previousWasEdge(ctx: ScriptCtx): boolean {
@@ -72,7 +70,7 @@ export const asr: Record<string, CardScript> = {
       onActivate(ctx) {
         const choices = ctx
           .player(ctx.seat)
-          .deck.filter((card) => normalizedName(ctx, card) === "whirling mist blossom");
+          .deck.filter((card) => cardNamed(ctx, card, "whirling mist blossom"));
         if (choices.length)
           ctx.requestCardChoice(
             "iris-blossom",
@@ -91,7 +89,7 @@ export const asr: Record<string, CardScript> = {
   },
 
   "robe of autumn's fall|0": {
-    canTriggerOnHit: (ctx) => !!ctx.link && normalizedName(ctx, ctx.link.attackingCard) === "edge of autumn",
+    canTriggerOnHit: (ctx) => !!ctx.link && cardNamed(ctx, ctx.link.attackingCard, "edge of autumn"),
     onHit(ctx) {
       ctx.requestChoice(
         "robe-autumn",
@@ -128,12 +126,12 @@ export const asr: Record<string, CardScript> = {
       },
     },
     canTriggerOnHit(ctx) {
-      return !!ctx.link && normalizedName(ctx, ctx.link.attackingCard).includes("vengeance");
+      return !!ctx.link && cardNameContains(ctx, ctx.link.attackingCard, "vengeance");
     },
     onHit(ctx) {
       const choices = ctx
         .player(ctx.seat)
-        .banish.filter((card) => !card.faceDown && normalizedName(ctx, card) === "edge of autumn");
+        .banish.filter((card) => !card.faceDown && cardNamed(ctx, card, "edge of autumn"));
       if (choices.length)
         ctx.requestCardChoice(
           "okana-equip",

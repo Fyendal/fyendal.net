@@ -3,6 +3,7 @@ import {
   attackAbility,
   bloodDebtScript as bloodDebt,
   buffNextAttack,
+  cardNameContains,
   commonOptionMessages,
   decisionMessage,
   decisionPrompt,
@@ -36,7 +37,7 @@ function isNonAttack(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean 
   return ctx.hasCardType(card, "action") && !has(ctx, card, "attack");
 }
 function isHerald(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
-  return isAttack(ctx, card) && data(ctx, card).name.toLowerCase().includes("herald");
+  return isAttack(ctx, card) && cardNameContains(ctx, card, "herald");
 }
 function duringActionPhase(ctx: ScriptCtx): boolean {
   if (ctx.state.phase === "action" || ctx.state.phase === "defend" || ctx.state.phase === "reaction") return true;
@@ -306,7 +307,7 @@ function frontline(): CardScript {
 export const dtd: Record<string, CardScript> = mergeSetScripts("DTD", dtdHighRarity, {
   "prism, advent of thrones|0": {
     onCardPutIntoSoul(ctx, card) {
-      if (!duringActionPhase(ctx) || !data(ctx, card).name.toLowerCase().includes("herald")) return;
+      if (!duringActionPhase(ctx) || !cardNameContains(ctx, card, "herald")) return;
       const figments = ctx
         .player(ctx.seat)
         .deck.filter((candidate) => has(ctx, candidate, "figment"));

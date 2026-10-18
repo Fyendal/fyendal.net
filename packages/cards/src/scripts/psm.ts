@@ -1,5 +1,6 @@
 import type { CardScript } from "@fyendal/engine";
 import {
+  cardNamed,
   lessonCounter,
   mentorFlipTrigger,
   mentorSpecializationPayoff,
@@ -14,7 +15,7 @@ export const psm: Record<string, CardScript> = {
     triggers: [mentorFlipTrigger()],
     onFriendlyTokenCreated(ctx, token) {
       if (
-        ctx.cardData(token.cardId).name !== "Spectral Shield" ||
+        !cardNamed(ctx, token, "Spectral Shield") ||
         ctx.getPlayerFlag(ctx.seat, "librarianTriggeredThisTurn") === true
       )
         return;

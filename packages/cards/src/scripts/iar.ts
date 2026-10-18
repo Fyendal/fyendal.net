@@ -5,6 +5,8 @@ import {
   attackAbility,
   bloodDebtScript as bloodDebt,
   buffNextAttack,
+  cardNameContains,
+  cardNamed,
   channelLightning,
   commonOptionMessages,
   dealToAnyTarget,
@@ -42,10 +44,6 @@ const EQUIPMENT_SLOTS = ["head", "chest", "arms", "legs"] as const;
 
 function hasType(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, type: string): boolean {
   return ctx.cardTypes(card).includes(type.toLowerCase());
-}
-
-function named(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, name: string): boolean {
-  return ctx.cardData(card.cardId).name.toLowerCase() === name.toLowerCase();
 }
 
 function isAttackAction(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
@@ -106,11 +104,11 @@ function grantHeadBangingHit(ctx: ScriptCtx, attackInstanceId: number): void {
 }
 
 function controlsVox(ctx: ScriptCtx): boolean {
-  return ctx.player(ctx.seat).weapons.some((card) => named(ctx, card, "Vox Necropolis"));
+  return ctx.player(ctx.seat).weapons.some((card) => cardNamed(ctx, card, "Vox Necropolis"));
 }
 
 function controlsBlasmophet(ctx: ScriptCtx): boolean {
-  return ctx.player(ctx.seat).board.some((card) => named(ctx, card, "Blasmophet, the Insatiable Hunger"));
+  return ctx.player(ctx.seat).board.some((card) => cardNamed(ctx, card, "Blasmophet, the Insatiable Hunger"));
 }
 
 function decay(): Pick<CardScript, "triggers"> {
@@ -1356,7 +1354,7 @@ function countdownToExtinction(): CardScript {
     },
     canTriggerOnHit: (ctx) => selfHits(ctx) && ctx.canSearchDeck(),
     onHit(ctx) {
-      const darkestHours = ctx.player(ctx.seat).deck.filter((card) => named(ctx, card, "Darkest Hour"));
+      const darkestHours = ctx.player(ctx.seat).deck.filter((card) => cardNamed(ctx, card, "Darkest Hour"));
       if (darkestHours.length === 0) {
         ctx.shuffleDeck();
         return;
@@ -1917,8 +1915,7 @@ export const iar: Record<string, CardScript> = {
         if (ctx.getFlag("link", "fromBanish") !== true) return;
         if (!ctx.canSearchDeck()) return;
         const auras = ctx.player(ctx.seat).deck.filter((card) => {
-          const data = ctx.cardData(card.cardId);
-          return data.name.toLowerCase().includes("runechant") && hasType(ctx, card, "aura");
+          return cardNameContains(ctx, card, "runechant") && hasType(ctx, card, "aura");
         });
         if (auras.length === 0) {
           ctx.shuffleDeck();
@@ -2135,7 +2132,7 @@ export const iar: Record<string, CardScript> = {
     onAttackDeclared(ctx) {
       const ponders = ctx
         .player(ctx.seat)
-        .board.filter((card) => named(ctx, card, "Ponder") && ctx.cardData(card.cardId).cardType === "token");
+        .board.filter((card) => cardNamed(ctx, card, "Ponder") && ctx.cardData(card.cardId).cardType === "token");
       if (ponders.length > 0) {
         ctx.requestCardChoice(
           "iar-rush-ponder",
@@ -2153,7 +2150,7 @@ export const iar: Record<string, CardScript> = {
         .board.find(
           (card) =>
             card.instanceId === Number(option) &&
-            named(ctx, card, "Ponder") &&
+            cardNamed(ctx, card, "Ponder") &&
             ctx.cardData(card.cardId).cardType === "token",
         );
       if (!target || !ctx.destroyPermanent(target.instanceId)) return;
@@ -2628,7 +2625,7 @@ export const iar: Record<string, CardScript> = {
     onFriendlyDestroyed(ctx, destroyed, destroyingSeat) {
       if (
         destroyingSeat !== ctx.seat ||
-        !named(ctx, destroyed, "Lightning Flow") ||
+        !cardNamed(ctx, destroyed, "Lightning Flow") ||
         Number(ctx.getFlag("player", "destroyedNameCount:lightning flow")) !== 1
       )
         return;

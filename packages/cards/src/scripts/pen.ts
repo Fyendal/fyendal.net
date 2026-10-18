@@ -2,6 +2,7 @@ import type { CardInstance, CardScript, DeepReadonly, ScriptCtx, TriggerDef } fr
 import {
   buffNextAttack,
   bloodDebtScript as bloodDebt,
+  cardNameContains,
   commonOptionMessages,
   contractWithSilver,
   dealArcane,
@@ -1898,7 +1899,7 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
   },
   "four feathers one crown|1": {
     modifyAttack: (ctx) =>
-      ctx.player(ctx.seat).graveyard.filter((card) => data(ctx, card).name.includes("Phoenix Bannerman")).length,
+      ctx.player(ctx.seat).graveyard.filter((card) => cardNameContains(ctx, card, "Phoenix Bannerman")).length,
   },
   "phoenix bannerman: head|1": phoenixBannerman(PONDER),
   "phoenix bannerman: chest|1": phoenixBannerman(VIGOR),
@@ -2303,7 +2304,7 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
       ctx.preventNextArcaneDamage(ctx.seat, 1);
       const sigils = ctx.state.players
         .flatMap((player) => player.board)
-        .filter((card) => hasTag(ctx, card, "aura") && data(ctx, card).name.includes("Sigil"));
+        .filter((card) => hasTag(ctx, card, "aura") && cardNameContains(ctx, card, "Sigil"));
       if (sigils.length)
         ctx.requestCardChoice(
           "pen-shatter-sigil",

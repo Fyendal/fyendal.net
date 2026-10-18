@@ -251,6 +251,12 @@ export function cardNamesOf(state: GameStateInternal, card: CardInstance): strin
   ].map((name) => name.trim().toLowerCase()))];
 }
 
+/** Effective names in the whitespace-collapsed form used by per-turn
+ * `<event>Name:<name>` history flags. */
+export function cardNameKeysOf(state: GameStateInternal, card: CardInstance): string[] {
+  return [...new Set(cardNamesOf(state, card).map((name) => name.replace(/\s+/g, " ")))];
+}
+
 export function cardHasName(
   state: GameStateInternal,
   card: CardInstance,

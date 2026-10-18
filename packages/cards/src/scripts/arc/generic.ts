@@ -1,6 +1,7 @@
 import type { CardScript } from "@fyendal/engine";
 import {
   buffNextAttack,
+  cardNamed,
   commonOptionMessages,
   decisionPrompt,
   effectPutSelfFaceUpFromDeck,
@@ -173,7 +174,7 @@ function moonWish(): CardScript {
   return {
     alternativePlayCost: { kind: "put-hand-card-on-deck-top" },
     onHit(ctx) {
-      const kisses = ctx.player(ctx.seat).deck.filter((card) => ctx.cardData(card.cardId).name === "Sun Kiss");
+      const kisses = ctx.player(ctx.seat).deck.filter((card) => cardNamed(ctx, card, "Sun Kiss"));
       if (kisses.length === 0) return;
       ctx.requestCardChoice(
         "moon-wish-search",

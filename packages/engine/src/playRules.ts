@@ -1,5 +1,5 @@
 import type { EngineRuntime } from "./runtimePorts.js";
-import { cardAbilitiesSuppressed, cardColorOf, cardCostOf, cardHasName, cardHasType, cardNamesOf, cardTypesOf, dataOf, hasKeyword, instanceDataOf, meldSideHasType, scriptOf } from "./cardProperties.js";
+import { cardAbilitiesSuppressed, cardColorOf, cardCostOf, cardHasName, cardHasType, cardNameKeysOf, cardNamesOf, cardTypesOf, dataOf, hasKeyword, instanceDataOf, meldSideHasType, scriptOf } from "./cardProperties.js";
 import { controlledPermanents, lingeringModifierSources } from "./sourceQueries.js";
 import {
   gameLogMessage,
@@ -290,7 +290,7 @@ function modifierMatchesPlayedCard(
   if (mod.appliesToPitch !== undefined && color !== mod.appliesToPitch) return false;
   if (mod.minCost !== undefined && cost < mod.minCost) return false;
   if (mod.maxCost !== undefined && cost > mod.maxCost) return false;
-  if (mod.appliesToName && data.name.trim().toLowerCase() !== mod.appliesToName.toLowerCase()) return false;
+  if (mod.appliesToName && !cardHasName(state, card, mod.appliesToName)) return false;
   if (
     mod.appliesToKeyword &&
     !(data.keywords ?? []).some((keyword) => keyword.toLowerCase() === mod.appliesToKeyword!.toLowerCase())
@@ -401,10 +401,11 @@ export function noteCardPlayed(
   const d = dataOf(state, cardId);
   const isAction = cardHasType(state, card, "action");
   const isInstant = cardHasType(state, card, "instant");
-  const normalizedName = d.name.trim().toLowerCase().replace(/\s+/g, " ");
-  player.flags[`playedName:${normalizedName}`] = true;
-  player.flags[`playedNameCount:${normalizedName}`] =
-    (Number(player.flags[`playedNameCount:${normalizedName}`]) || 0) + 1;
+  for (const playedName of cardNameKeysOf(state, card)) {
+    player.flags[`playedName:${playedName}`] = true;
+    player.flags[`playedNameCount:${playedName}`] =
+      (Number(player.flags[`playedNameCount:${playedName}`]) || 0) + 1;
+  }
   player.flags.playedCardThisTurn = true;
   if (cardTypesOf(state, card).includes("evo")) {
     player.flags.nextEvoAsInstant = false;
@@ -782,7 +783,6 @@ function modifierMatchesAttackTarget(
 ): boolean {
   const target = attackTargetCard(state, attackingSeat, targetAllyId);
   if (!target) return false;
-  const data = dataOf(state, target.cardId);
   if (modifier.appliesToTargetType) {
     if (targetAllyId !== undefined) return false;
     const wanted = modifier.appliesToTargetType.toLowerCase();
@@ -791,7 +791,8 @@ function modifierMatchesAttackTarget(
   }
   if (modifier.appliesToTargetNamePrefix) {
     if (targetAllyId !== undefined) return false;
-    if (!data.name.toLowerCase().startsWith(modifier.appliesToTargetNamePrefix.toLowerCase())) {
+    const prefix = modifier.appliesToTargetNamePrefix.trim().toLowerCase();
+    if (!cardNamesOf(state, target).some((name) => name.startsWith(prefix))) {
       return false;
     }
   }

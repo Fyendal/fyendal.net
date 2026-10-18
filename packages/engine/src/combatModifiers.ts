@@ -4,6 +4,7 @@ import type { CardData } from "@fyendal/shared";
 import {
   cardAbilitiesSuppressed,
   cardColorOf,
+  cardNamesOf,
   cardTypesOf,
   dataOf,
   scriptOf,
@@ -23,7 +24,7 @@ function modifierMatches(
   cardType: "action" | "weapon" | "ally" | "defense",
   color: number,
   granted: (tag: string) => boolean = () => false,
-  grantedNames: readonly string[] = [],
+  names: readonly string[],
   keywordAbilitiesActive = true,
   effectiveCardTypes: readonly string[] = [data.cardType],
   effectiveTags: readonly string[] = [
@@ -65,9 +66,7 @@ function modifierMatches(
   ) return false;
   if (
     modifier.appliesToName &&
-    ![data.name, ...grantedNames].some(
-      (name) => name.trim().toLowerCase() === modifier.appliesToName!.toLowerCase(),
-    )
+    !names.includes(modifier.appliesToName.trim().toLowerCase())
   ) return false;
   if (
     modifier.excludesSubtype &&
@@ -116,7 +115,6 @@ export function modifierAppliesTo(
   color: number,
   card: CardInstance,
   granted?: (tag: string) => boolean,
-  grantedNames?: readonly string[],
 ): boolean {
   return modifierMatches(
     modifier,
@@ -124,7 +122,7 @@ export function modifierAppliesTo(
     cardType,
     color,
     granted,
-    grantedNames,
+    cardNamesOf(state, card),
     !cardAbilitiesSuppressed(state, card),
     [data.cardType],
     cardTypesOf(state, card),
@@ -154,7 +152,7 @@ export function modifierAppliesToDefense(
     "action",
     color,
     undefined,
-    undefined,
+    cardNamesOf(state, card),
     !cardAbilitiesSuppressed(state, card),
     effectiveCardTypes,
     cardTypesOf(state, card),
@@ -205,7 +203,6 @@ export function modifierApplies(
     cardColorOf(state, link.attackingCard),
     link.attackingCard,
     (tag) => attackGrantedType(link, tag),
-    link.attackingCard.grantedNames,
   );
 }
 

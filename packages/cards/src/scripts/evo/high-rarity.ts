@@ -3,6 +3,7 @@ import {
   armDelayedEffect,
   attackAbility,
   buffNextAttack,
+  cardNameContains,
   commonOptionMessages,
   consumeDelayedEffect,
   contractWithSilver,
@@ -14,6 +15,7 @@ import {
   opponentSeat,
   requestDiscardChoice,
   resolveDiscardChoice,
+  sharesName,
   yesNoPrompt,
 } from "../shared-helpers.js";
 
@@ -139,11 +141,9 @@ function suppressTargetEquipmentAbilities(ctx: ScriptCtx): void {
   });
 }
 function steelSoulTriggerCount(ctx: ScriptCtx, other: DeepReadonly<CardInstance>): number {
-  const selfData = ctx.cardData(ctx.self.cardId);
-  const otherData = ctx.cardData(other.cardId);
   if (!ctx.cardTypes(other).some((type) => type.toLowerCase() === "evo")) return 0;
-  if (otherData.name.toLowerCase() === selfData.name.toLowerCase()) return 0;
-  return otherData.cardType === "hero" ? 2 : 1;
+  if (sharesName(ctx, other, ctx.self)) return 0;
+  return ctx.cardData(other.cardId).cardType === "hero" ? 2 : 1;
 }
 function steelControllerTargets(ctx: ScriptCtx) {
   return ctx
@@ -1034,7 +1034,7 @@ export const evoHighRarity: Record<string, CardScript> = {
       if (ctx.getCounter("fabricate-mode:equip") > 0) {
         const base = ctx
           .player(ctx.seat)
-          .inventory?.find((card) => has(ctx, card, "base") && data(ctx, card).name.includes("Proto"));
+          .inventory?.find((card) => has(ctx, card, "base") && cardNameContains(ctx, card, "Proto"));
         if (base) ctx.equipFromInventory(base.instanceId);
       }
       if (ctx.getCounter("fabricate-mode:defense") > 0) {

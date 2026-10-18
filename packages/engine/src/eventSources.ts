@@ -1,7 +1,7 @@
 import type { EngineRuntime } from "./runtimePorts.js";
 import type { GameStateInternal } from "./runtimeState.js";
 import type { GameMessage } from "@fyendal/shared";
-import { dataOf, scriptOf } from "./cardProperties.js";
+import { cardNameKeysOf, dataOf, scriptOf } from "./cardProperties.js";
 import {
   gameLogMessage,
   logCardValue,
@@ -401,12 +401,13 @@ export function fireFriendlyDestroyed(
   destroyingSeat?: number,
 ): void {
   const destroyedData = dataOf(state, destroyed.cardId);
-  const destroyedName = destroyedData.name.trim().toLowerCase().replace(/\s+/g, " ");
-  (state.players[seat] as PlayerState).flags[`destroyedName:${destroyedName}`] = true;
-  (state.players[seat] as PlayerState).flags[`destroyedNameCount:${destroyedName}`] =
-    Number((state.players[seat] as PlayerState).flags[`destroyedNameCount:${destroyedName}`] ?? 0) + 1;
+  const flags = (state.players[seat] as PlayerState).flags;
+  for (const destroyedName of cardNameKeysOf(state, destroyed)) {
+    flags[`destroyedName:${destroyedName}`] = true;
+    flags[`destroyedNameCount:${destroyedName}`] = Number(flags[`destroyedNameCount:${destroyedName}`] ?? 0) + 1;
+  }
   for (const subtype of destroyedData.subtypes ?? []) {
-    (state.players[seat] as PlayerState).flags[`destroyedSubtype:${subtype.toLowerCase()}`] = true;
+    flags[`destroyedSubtype:${subtype.toLowerCase()}`] = true;
   }
   runtime.events.queueTriggeredEvent(state, "card-destroyed", seat, destroyed);
   scriptOf(state, destroyed.cardId, destroyed)?.onFriendlyDestroyed?.(

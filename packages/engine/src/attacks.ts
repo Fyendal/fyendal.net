@@ -3,6 +3,7 @@ import type { GameStateInternal } from "./runtimeState.js";
 import {
   cardColorOf,
   cardHasType,
+  cardNameKeysOf,
   cardTypesOf,
   dataOf,
   instanceHasKeyword,
@@ -348,10 +349,11 @@ export function beginAttackStep(state: GameStateInternal, runtime: EngineRuntime
   const player = state.players[seat] as PlayerState;
   player.flags.attacksDeclaredThisTurn =
     (Number(player.flags.attacksDeclaredThisTurn) || 0) + 1;
-  const attackName = nameOf(state, card.cardId).trim().toLowerCase().replace(/\s+/g, " ");
-  player.flags[`attackedName:${attackName}`] = true;
-  player.flags[`attackedNameCount:${attackName}`] =
-    (Number(player.flags[`attackedNameCount:${attackName}`]) || 0) + 1;
+  for (const attackName of cardNameKeysOf(state, card)) {
+    player.flags[`attackedName:${attackName}`] = true;
+    player.flags[`attackedNameCount:${attackName}`] =
+      (Number(player.flags[`attackedNameCount:${attackName}`]) || 0) + 1;
+  }
   player.flags[`attackedInstance:${card.instanceId}`] =
     (Number(player.flags[`attackedInstance:${card.instanceId}`]) || 0) + 1;
   if (targetAllyId === undefined) player.flags.attackedHeroThisTurn = true;

@@ -2,6 +2,7 @@ import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal
 import {
   bloodDebtScript as bloodDebt,
   buffNextAttack,
+  cardNamed,
   commonOptionMessages,
   dealArcane,
   decisionMessage,
@@ -59,11 +60,10 @@ function hatchet(otherCode: 1 | 2): CardScript {
     onFriendlyAttackDeclared(ctx) {
       const attack = ctx.link?.attackingCard;
       if (!attack) return;
-      const name = ctx.cardData(attack.cardId).name.trim().toLowerCase();
       ctx.setPlayerFlag(
         ctx.seat,
         "lastHatchetObservedAttack",
-        name === "hatchet of body" ? 1 : name === "hatchet of mind" ? 2 : 0,
+        cardNamed(ctx, attack, "hatchet of body") ? 1 : cardNamed(ctx, attack, "hatchet of mind") ? 2 : 0,
       );
     },
     modifyAttack(ctx) {

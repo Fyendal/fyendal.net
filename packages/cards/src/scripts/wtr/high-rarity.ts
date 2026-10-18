@@ -1,6 +1,6 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
-import { functionalKeyOf } from "../../functional.js";
 import {
+  cardNamed,
   commonOptionMessages,
   decisionMessage,
   decisionPrompt,
@@ -15,8 +15,8 @@ import {
 
 const SEISMIC_SURGE = "WTR075B";
 
-function nameOf(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): string {
-  return functionalKeyOf(ctx.cardData(card.cardId)).split("|")[0]!;
+function namedAny(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, names: readonly string[]): boolean {
+  return names.some((name) => cardNamed(ctx, card, name));
 }
 
 function isAttackAction(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
@@ -174,7 +174,7 @@ const lordOfWind: CardScript = {
       const eligible = ctx
         .player(ctx.seat)
         .graveyard.filter((card) =>
-          ["surging strike", "whelming gustwave", "mugenshi: release"].includes(nameOf(ctx, card)),
+          namedAny(ctx, card, ["surging strike", "whelming gustwave", "mugenshi: release"]),
         );
       if (amount > 0 && eligible.length > 0) {
         ctx.requestCardChoice(
@@ -198,7 +198,7 @@ const lordOfWind: CardScript = {
     const eligible = ctx
       .player(ctx.seat)
       .graveyard.filter((card) =>
-        ["surging strike", "whelming gustwave", "mugenshi: release"].includes(nameOf(ctx, card)),
+        namedAny(ctx, card, ["surging strike", "whelming gustwave", "mugenshi: release"]),
       );
     if (remaining > 0 && eligible.length > 0) {
       ctx.requestCardChoice(
@@ -215,7 +215,7 @@ const lordOfWind: CardScript = {
 };
 
 const mugenshiRelease = comboAttack("whelming gustwave", 1, (ctx) => {
-  const cards = ctx.player(ctx.seat).deck.filter((card) => nameOf(ctx, card) === "lord of wind");
+  const cards = ctx.player(ctx.seat).deck.filter((card) => cardNamed(ctx, card, "lord of wind"));
   for (const card of cards) ctx.moveToHand(card.instanceId);
   ctx.shuffleDeck();
 });

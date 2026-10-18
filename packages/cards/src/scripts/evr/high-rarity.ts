@@ -1,6 +1,7 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
 import {
   buffNextAttack,
+  cardNameContains,
   commonOptionMessages,
   decisionMessage,
   decisionPrompt,
@@ -282,10 +283,7 @@ function knickMoney(ctx: ScriptCtx): DeepReadonly<CardInstance>[] {
 }
 
 function knickTargets(ctx: ScriptCtx): DeepReadonly<CardInstance>[] {
-  return ctx.player(ctx.seat).deck.filter((card) => {
-    const name = ctx.cardData(card.cardId).name.toLowerCase();
-    return name.includes("amulet") || name.includes("potion") || name.includes("talisman");
-  });
+  return ctx.player(ctx.seat).deck.filter((card) => cardNameContains(ctx, card, "amulet", "potion", "talisman"));
 }
 
 function requestKnickSearch(ctx: ScriptCtx): void {
