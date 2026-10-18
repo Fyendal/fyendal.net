@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useIntl } from "react-intl";
 import { useShallow } from "zustand/react/shallow";
-import type { EquipmentSlot } from "@fyendal/shared";
+import type { DeckPool, EquipmentSlot, RevealedArena } from "@fyendal/shared";
 import {
   arenaWeaponIssue,
   cardData,
@@ -44,8 +44,34 @@ import { PrepArenaCards } from "./PrepArenaCards.js";
 import { opponentPrepState, PrepMatchSheet } from "./PrepMatchSheet.js";
 import { nextPrepStep, useStepNudge } from "./nextStepNudge.js";
 import { FullscreenButton } from "../components/FullscreenButton.js";
+import {
+  canPreloadCardImages,
+  preloadCardImage,
+  useCardImagePreload,
+} from "../game/cardImagePreload.js";
+import { PrepImageLoading } from "./PrepImageLoading.js";
 
 const WEAPON_TOAST_MS = 3_500;
+/** Card art gates entry to the room, but a slow CDN must not eat the deadlines. */
+const DECK_IMAGE_TIMEOUT_MS = 12_000;
+/** A revealed opponent arena waits briefly so it appears with its art. */
+const OPPONENT_ARENA_IMAGE_TIMEOUT_MS = 4_000;
+
+function deckPoolCardIds(pool: DeckPool): string[] {
+  return [
+    pool.heroId,
+    ...pool.weaponIds,
+    ...pool.equipmentPool,
+    ...(pool.inventoryPool ?? []),
+    ...pool.deck,
+    ...(pool.sideboard ?? []),
+  ];
+}
+
+function revealedArenaCardIds(arena: RevealedArena): string[] {
+  return [...arena.weaponIds, ...Object.values(arena.equipment)]
+    .filter((id): id is string => typeof id === "string");
+}
 
 function heroKey(value: string): string {
   return value.toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_|_$/g, "");
@@ -138,6 +164,7 @@ export function PrepRoom() {
   const [botNudgeVisibleFor, setBotNudgeVisibleFor] = useState<string | null>(null);
   const [botNudgeDismissedFor, setBotNudgeDismissedFor] = useState<string | null>(null);
   const [botNudgeBusyFor, setBotNudgeBusyFor] = useState<string | null>(null);
+  const [imageWaitSkippedFor, setImageWaitSkippedFor] = useState<string | null>(null);
   const prepFormat = prep?.format ?? prepDeck?.format;
   const opponentPresent = prep
     ? prep.seats[1 - prep.yourSeat] !== null
@@ -153,9 +180,30 @@ export function PrepRoom() {
   const nextStep = nextPrepStep(prep);
   const nudgeActive = useStepNudge(nextStep ? `${roomCode ?? "queue"}:${nextStep}` : null);
   const nudge = nudgeActive ? nextStep : null;
+  // One gate per room and deck: matchup changes later reuse the cache rather
+  // than sending the player back to the loading screen.
+  const deckImageKey = prepDeck ? `${roomCode ?? "queue"}:${prepDeck.id}` : null;
+  const deckImages = useCardImagePreload(
+    deckImageKey,
+    prepDeck ? deckPoolCardIds(prepDeck.decklist) : [],
+    DECK_IMAGE_TIMEOUT_MS,
+  );
+  const opponentSeat = prep ? prep.seats[1 - prep.yourSeat] : null;
+  const opponentArenaIds = opponentSeat?.arena ? revealedArenaCardIds(opponentSeat.arena) : [];
+  const opponentArenaImages = useCardImagePreload(
+    opponentSeat?.arena ? `${roomCode ?? "queue"}:${opponentArenaIds.join(",")}` : null,
+    opponentArenaIds,
+    OPPONENT_ARENA_IMAGE_TIMEOUT_MS,
+  );
+  const opponentHeroId = opponentSeat?.heroId ?? null;
   const otherPlayersInQueue = prepFormat
     ? pairableSearchers(queueCounts[prepFormat], prep?.cardPoolMode ?? "legal", deckCardPool(prepDeck), matchmakingActive)
     : 0;
+
+  // The opponent's hero is visible from pairing onward; warm it without a gate.
+  useEffect(() => {
+    if (opponentHeroId && canPreloadCardImages()) void preloadCardImage(opponentHeroId);
+  }, [opponentHeroId]);
 
   useEffect(() => {
     const query = window.matchMedia("(max-width: 700px)");
@@ -193,6 +241,21 @@ export function PrepRoom() {
       </div>
     );
   }
+  // The match-accept dialog lives in this room, so never hide it behind loading.
+  if (
+    !deckImages.done
+    && imageWaitSkippedFor !== deckImageKey
+    && prep?.phase !== "accept"
+  ) {
+    return (
+      <PrepImageLoading
+        heroId={prepDeck.decklist.heroId}
+        progress={deckImages}
+        onSkip={() => setImageWaitSkippedFor(deckImageKey)}
+        onCancel={leave}
+      />
+    );
+  }
   // adjust state during render when the pool (re)loads — React-sanctioned pattern
   const roomSelectionKey = `${roomCode ?? "queue"}:${prepDeck.id}`;
   const selectionKey = `${roomSelectionKey}:${prepDeck.updatedAt}:${prepDeck.selectedMatchupId ?? "default"}`;
@@ -214,6 +277,7 @@ export function PrepRoom() {
   const yourSeat = prep?.yourSeat ?? 0;
   const me = prep?.seats[yourSeat] ?? null;
   const opp = prep?.seats[1 - yourSeat] ?? null;
+  const shownOpponentArena = opponentArenaImages.done ? opp?.arena : undefined;
   const ready = me?.ready ?? false;
   const accepting = prep?.phase === "accept";
   const deckStage = prep?.phase === "select-deck";
@@ -594,7 +658,7 @@ export function PrepRoom() {
             yourHeroName={cardData[pool.heroId]?.name ?? intl.formatMessage({ id: "prep.yourHero" })}
             opponent={opp}
             yourArena={prep.yourArena ?? draftArena}
-            opponentArena={opp.arena}
+            opponentArena={shownOpponentArena}
             notice={pickPending ? dieNotice : null}
             action={sheetAction}
           />
@@ -621,7 +685,9 @@ export function PrepRoom() {
             </h3>
             {arenaNote ? <p className="muted">{intl.formatMessage({ id: arenaNote })}</p> : null}
             {mobilePrepLayout && prep?.yourArena ? <PrepArenaCards arena={prep.yourArena} owner="you" /> : null}
-            {mobilePrepLayout && opp?.arena ? <PrepArenaCards arena={opp.arena} owner="opponent" /> : null}
+            {mobilePrepLayout && shownOpponentArena
+              ? <PrepArenaCards arena={shownOpponentArena} owner="opponent" />
+              : null}
             {!deckStage && (!me?.arenaLocked || !mobilePrepLayout) ? presentation : null}
             {!floatingFooter && !opp ? prepErrors : null}
           </section> : null}

@@ -673,15 +673,32 @@
   line-height: 1.4;
   text-align: center;
 }
+/* The turn-order pair sits side by side while both labels fit on one line;
+   otherwise each takes a full row rather than breaking a label. */
 .prep-pick {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  display: flex;
+  flex-wrap: wrap;
   gap: 8px;
 }
-.prep-pick button,
+.prep-pick button { flex: 1 0 auto; min-height: 44px; white-space: nowrap; }
 .prep-sheet-lock button { width: 100%; min-height: 44px; white-space: normal; }
+/* Both turn-order answers share the primary's quieter mixed-case face, which
+   also keeps longer translations compact. */
+.prep-pick button,
+.prep-float-pick button {
+  padding-inline: 10px;
+  font-family: var(--font-lobby-ui);
+  font-weight: 600;
+  text-transform: none;
+  letter-spacing: 0.1px;
+  line-height: 1.2;
+}
 .prep-sheet .prep-decision-status { text-align: center; }
 .prep-sheet-ready { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+/* Longer translations of the count wrap beside the button, never under it. */
+.prep-sheet-ready .prep-main-count { flex: 1 1 auto; }
+.prep-sheet-ready .prep-main-count strong { white-space: normal; }
+.prep-sheet-ready .prep-ready-controls { flex: none; }
 
 /* Stacked tablet layout: the sheet scrolls away above the deck, so its action
    floats where the deck footer used to be. */
@@ -728,4 +745,88 @@
 }
 @media (prefers-reduced-motion: reduce) {
   .prep-toast { animation: none; }
+}
+
+/* Card-art loading gate before the prep room. The hero card is drawn twice:
+   a dim grayscale base and a full-color copy revealed from the bottom up as
+   the deck's images arrive, with a gold seam marking the fill line. */
+.prep-image-loading-page {
+  display: grid;
+  min-height: 100dvh;
+  place-items: center;
+  padding: 18px 16px;
+}
+.prep-image-loading {
+  width: min(340px, 100%);
+  padding: 28px 24px 22px;
+  text-align: center;
+}
+.prep-image-loading-hero {
+  --prep-load-ratio: 0;
+  position: relative;
+  width: 168px;
+  aspect-ratio: 5 / 7;
+  margin: 0 auto 22px;
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: var(--shadow-raised);
+}
+.prep-image-loading-hero .card-artwork {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.prep-image-loading-base { filter: grayscale(1) brightness(.42); }
+.prep-image-loading-fill {
+  clip-path: inset(calc((1 - var(--prep-load-ratio)) * 100%) 0 0 0);
+  transition: clip-path .45s ease-out;
+}
+.prep-image-loading-hero::after {
+  content: "";
+  position: absolute;
+  z-index: 3;
+  right: 0;
+  bottom: calc(var(--prep-load-ratio) * 100%);
+  left: 0;
+  height: 2px;
+  background: var(--gold);
+  box-shadow: 0 0 10px 1px #ffd47999;
+  opacity: calc(1 - var(--prep-load-ratio));
+  transition: bottom .45s ease-out, opacity .45s ease-out;
+}
+.prep-image-loading .panel-title { margin-bottom: 4px; }
+.prep-image-loading-hero-name {
+  margin: 0 0 18px;
+  color: var(--text-secondary);
+  font: 400 15px var(--font-card-name);
+}
+.prep-image-loading-meter {
+  height: 3px;
+  overflow: hidden;
+  background: var(--surface-well);
+  border-radius: 2px;
+}
+.prep-image-loading-meter > span {
+  display: block;
+  height: 100%;
+  background: var(--bronze);
+  transform-origin: left center;
+  transition: transform .45s ease-out;
+}
+.prep-image-loading-count {
+  margin: 8px 0 20px;
+  font-variant-numeric: tabular-nums;
+}
+.prep-image-loading-actions {
+  display: flex;
+  gap: 9px;
+  justify-content: center;
+}
+.prep-image-loading-actions > button { min-width: 108px; min-height: 40px; }
+@media (prefers-reduced-motion: reduce) {
+  .prep-image-loading-fill,
+  .prep-image-loading-hero::after,
+  .prep-image-loading-meter > span { transition: none; }
 }

@@ -32554,6 +32554,62 @@
       "value": "You decided: You go second"
     }
   ],
+  "prep.imageLoading.progress": [
+    {
+      "type": 1,
+      "value": "settled"
+    },
+    {
+      "type": 0,
+      "value": " of "
+    },
+    {
+      "type": 6,
+      "value": "total",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " card"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " cards"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    },
+    {
+      "type": 0,
+      "value": " ready"
+    }
+  ],
+  "prep.imageLoading.skip": [
+    {
+      "type": 0,
+      "value": "Skip"
+    }
+  ],
+  "prep.imageLoading.title": [
+    {
+      "type": 0,
+      "value": "Loading card art"
+    }
+  ],
   "prep.loadingDeck": [
     {
       "type": 0,

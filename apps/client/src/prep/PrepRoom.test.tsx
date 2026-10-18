@@ -211,4 +211,23 @@ describe("preparation stage layout", () => {
     const html = render(null, true);
     expect(html).not.toContain("prep-ready-float");
   });
+
+  it("waits for uncached card art before opening the room", () => {
+    vi.stubGlobal("Image", class {});
+    const html = render(pairedPrep("select-arena"), false);
+    expect(html).toContain("Loading card art");
+    expect(html).toMatch(/0 of \d+ cards ready/);
+    expect(html).not.toContain("prep-columns");
+  });
+
+  it("never hides the match-accept dialog behind the art loading screen", () => {
+    vi.stubGlobal("Image", class {});
+    const prep = pairedPrep("accept");
+    prep.startPlayer = null;
+    prep.deadlinePhase = "accept";
+    prep.deadlineAt = Date.now() + 30_000;
+    const html = render(prep, false, deck, { matchAcceptanceRole: "existing" });
+    expect(html).not.toContain("Loading card art");
+    expect(html).toContain("prep-match-accept-prompt");
+  });
 });

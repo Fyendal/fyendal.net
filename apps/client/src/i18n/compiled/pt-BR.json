@@ -33999,13 +33999,13 @@
   "prep.firstPlayer.goFirst": [
     {
       "type": 0,
-      "value": "Começar"
+      "value": "Jogar primeiro"
     }
   ],
   "prep.firstPlayer.goSecond": [
     {
       "type": 0,
-      "value": "Jogar em segundo"
+      "value": "Jogar segundo"
     }
   ],
   "prep.firstPlayer.status.opponent-decided-first": [
@@ -34048,6 +34048,36 @@
     {
       "type": 0,
       "value": "Você decidiu: você joga em segundo"
+    }
+  ],
+  "prep.imageLoading.progress": [
+    {
+      "type": 0,
+      "value": "Cartas prontas: "
+    },
+    {
+      "type": 1,
+      "value": "settled"
+    },
+    {
+      "type": 0,
+      "value": " de "
+    },
+    {
+      "type": 1,
+      "value": "total"
+    }
+  ],
+  "prep.imageLoading.skip": [
+    {
+      "type": 0,
+      "value": "Pular"
+    }
+  ],
+  "prep.imageLoading.title": [
+    {
+      "type": 0,
+      "value": "Carregando imagens das cartas"
     }
   ],
   "prep.loadingDeck": [
@@ -34250,12 +34280,12 @@
   ],
   "prep.presentation.exact": [
     {
-      "type": 0,
-      "value": "exatamente "
-    },
-    {
       "type": 1,
       "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " exatas"
     }
   ],
   "prep.presentation.hero": [
