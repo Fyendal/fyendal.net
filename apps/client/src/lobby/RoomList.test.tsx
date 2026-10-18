@@ -1,4 +1,5 @@
 import { renderToStaticMarkup } from "react-dom/server";
+import { emptyQueueCounts } from "../matchmaking/pairableSearchers.js";
 import type { ReactNode } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { StoreState } from "../store/types.js";
@@ -65,7 +66,7 @@ describe("RoomList", () => {
       deckPlayedAt: {},
       cardPoolModes: { cc: "legal", "silver-age": "legal" },
       queuedFormat: null,
-      queueCounts: { cc: 0, "silver-age": 0 },
+      queueCounts: emptyQueueCounts(),
       queueJoin: roomListStore.queueJoin,
       queueLeave: roomListStore.queueLeave,
       createRoom: roomListStore.createRoom,

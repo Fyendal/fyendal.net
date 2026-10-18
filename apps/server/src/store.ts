@@ -21,6 +21,7 @@ import {
   type PrepSeatView,
   type PrepView,
   type PriorityWindowMode,
+  type QueuePoolCounts,
   type RoomInvite,
   type RoomSummary,
   type ServerMessage,
@@ -458,6 +459,11 @@ function dbCardPoolMode(value: unknown, path: string): CardPoolMode {
 }
 
 const CARD_POOL_STRICTNESS: Record<CardPoolMode, number> = { legal: 0, future: 1, open: 2 };
+
+function emptyQueuePoolCounts(): QueuePoolCounts {
+  const row = () => ({ legal: 0, future: 0, open: 0 });
+  return { legal: row(), future: row(), open: row() };
+}
 
 /** Card pools nest (legal ⊂ future ⊂ open); a pairing plays in the stricter. */
 function stricterCardPool(a: CardPoolMode, b: CardPoolMode): CardPoolMode {
@@ -2273,20 +2279,34 @@ export class PgRoomStore {
     return rows.length > 0;
   }
 
-  async matchmakingCounts(): Promise<Record<Format, number>> {
+  async matchmakingCounts(): Promise<Record<Format, QueuePoolCounts>> {
     const { rows } = await this.db.query(
       // Players holding an offer are no longer waiting for an opponent.
-      `SELECT format, COUNT(*) AS count FROM matchmaking_entries
-       WHERE pending_offer_room_code IS NULL GROUP BY format`,
+      `SELECT format, card_pool_mode, deck_id FROM matchmaking_entries
+       WHERE pending_offer_room_code IS NULL`,
     );
-    const counts: Record<Format, number> = { cc: 0, "silver-age": 0 };
-    for (const row of rows) {
+    const counts: Record<Format, QueuePoolCounts> = { cc: emptyQueuePoolCounts(), "silver-age": emptyQueuePoolCounts() };
+    for (const value of rows) {
+      const row = dbObject(value, "<matchmaking>", "queue count");
       const format = String(row.format);
-      if (format === "cc" || format === "silver-age") {
-        counts[format] = Number(row.count);
-      }
+      if (format !== "cc" && format !== "silver-age") continue;
+      const queued = dbCardPoolMode(row.card_pool_mode, "card_pool_mode");
+      const deckPool = await this.strictestDeckPool(format, queued, row.deck_id);
+      counts[format][queued][deckPool] += 1;
     }
     return counts;
+  }
+
+  /** The strictest pool, no looser than the queued one, that the deck is legal in. */
+  private async strictestDeckPool(format: Format, queued: CardPoolMode, deckId: unknown): Promise<CardPoolMode> {
+    if (queued === "legal" || typeof deckId !== "string") return queued;
+    const deck = await resolveDeck(this.db, deckId);
+    if (!deck) return queued;
+    for (const pool of ["legal", "future"] as const) {
+      if (pool === queued) break;
+      if (formatLegalityErrors(cardData, deck.decklist, format, { cardPoolMode: pool }).length === 0) return pool;
+    }
+    return queued;
   }
 
   async backgroundMatchmakingStatus(userId: number): Promise<BackgroundMatchmakingStatus> {

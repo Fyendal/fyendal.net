@@ -32910,62 +32910,6 @@
       "value": "Escolha um formato, um deck e um modo de jogo para começar."
     }
   ],
-  "lobby.home.formatSearching": [
-    {
-      "type": 6,
-      "value": "count",
-      "options": {
-        "=0": {
-          "value": [
-            {
-              "type": 1,
-              "value": "format"
-            }
-          ]
-        },
-        "one": {
-          "value": [
-            {
-              "type": 1,
-              "value": "format"
-            },
-            {
-              "type": 0,
-              "value": " · "
-            },
-            {
-              "type": 7
-            },
-            {
-              "type": 0,
-              "value": " buscando"
-            }
-          ]
-        },
-        "other": {
-          "value": [
-            {
-              "type": 1,
-              "value": "format"
-            },
-            {
-              "type": 0,
-              "value": " · "
-            },
-            {
-              "type": 7
-            },
-            {
-              "type": 0,
-              "value": " buscando"
-            }
-          ]
-        }
-      },
-      "offset": 0,
-      "pluralType": "cardinal"
-    }
-  ],
   "lobby.home.gameMode": [
     {
       "type": 0,

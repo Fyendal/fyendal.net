@@ -2880,7 +2880,6 @@
   "lobby.home.chooseStart": "Escolha um formato, um deck e um modo de jogo para começar.",
   "lobby.home.gameMode": "Modo de jogo",
   "lobby.home.start": "Começar",
-  "lobby.home.formatSearching": "{count, plural, =0 {{format}} one {{format} · # buscando} other {{format} · # buscando}}",
   "lobby.home.searchingNow": "{count, plural, one {# pessoa buscando partida agora} other {# pessoas buscando partida agora}}",
   "lobby.home.othersSearchingNow": "{count, plural, one {Mais # pessoa buscando partida} other {Mais # pessoas buscando partida}}",
   "lobby.home.manageDecks": "Gerenciar decks",

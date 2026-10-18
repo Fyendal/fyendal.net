@@ -441,6 +441,15 @@ const GAME_LOG_ZONES = new Set([
 
 const FORMATS = new Set(["cc", "silver-age"]);
 const CARD_POOL_MODES = new Set(["legal", "future", "open"]);
+
+/** Queued pool → deck pool → searchers; every cell present and non-negative. */
+function queuePoolCounts(value: unknown): boolean {
+  const byQueued = object(value);
+  return !!byQueued && exactKeys(byQueued, [...CARD_POOL_MODES]) && Object.values(byQueued).every((byDeck) => {
+    const cells = object(byDeck);
+    return !!cells && exactKeys(cells, [...CARD_POOL_MODES]) && Object.values(cells).every(nonNegativeInteger);
+  });
+}
 const PHASES = new Set(["start", "action", "layer", "reaction", "defend", "end", "game-over"]);
 const MELD_SIDES = new Set(["left", "right", "both"]);
 const BOT_OPPONENTS = new Set(["bravo", "briar", "kayo", "cindra", "ira", "hala", "jarl", "levia", "starvo"]);
@@ -1713,7 +1722,7 @@ function decodeServerEvent(value: unknown): Exclude<ServerMessage, StateMessage>
     case "queue-status": {
       const counts = object(message.counts);
       valid = exactKeys(message, ["type", "counts"]) && !!counts
-        && exactKeys(counts, [...FORMATS]) && Object.values(counts).every(nonNegativeInteger);
+        && exactKeys(counts, [...FORMATS]) && Object.values(counts).every(queuePoolCounts);
       break;
     }
     case "queued":

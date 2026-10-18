@@ -1101,7 +1101,10 @@ describe("GameView and server messages", () => {
       { type: "spectator-kicked" },
       { type: "rooms", rooms: [{ code: "ABC123", format: "cc", heroes: ["A", null], createdAt: 1, spectateOnly: false, yours: true, cardPoolMode: "open" }] },
       { type: "room-info", room: { code: "ABC123", format: "silver-age", spectateOnly: true, yours: false, cardPoolMode: "future" } },
-      { type: "queue-status", counts: { cc: 1, "silver-age": 2 } },
+      { type: "queue-status", counts: {
+        cc: { legal: { legal: 1, future: 0, open: 0 }, future: { legal: 0, future: 2, open: 0 }, open: { legal: 0, future: 0, open: 1 } },
+        "silver-age": { legal: { legal: 0, future: 0, open: 0 }, future: { legal: 0, future: 0, open: 0 }, open: { legal: 0, future: 0, open: 0 } },
+      } },
       { type: "queued", format: "silver-age" }, { type: "queue-left" }, { type: "match-timeout" },
       { type: "background-matchmaking", status: { state: "inactive" } },
       { type: "background-matchmaking", status: { state: "pending", format: "cc" } },

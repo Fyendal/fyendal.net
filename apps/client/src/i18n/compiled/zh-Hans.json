@@ -30399,43 +30399,6 @@
       "value": "选择赛制、牌组和游戏模式后开始游戏。"
     }
   ],
-  "lobby.home.formatSearching": [
-    {
-      "type": 6,
-      "value": "count",
-      "options": {
-        "=0": {
-          "value": [
-            {
-              "type": 1,
-              "value": "format"
-            }
-          ]
-        },
-        "other": {
-          "value": [
-            {
-              "type": 1,
-              "value": "format"
-            },
-            {
-              "type": 0,
-              "value": " · "
-            },
-            {
-              "type": 7
-            },
-            {
-              "type": 0,
-              "value": " 人正在寻找对局"
-            }
-          ]
-        }
-      },
-      "offset": 0,
-      "pluralType": "cardinal"
-    }
-  ],
   "lobby.home.gameMode": [
     {
       "type": 0,

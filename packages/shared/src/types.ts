@@ -7,6 +7,10 @@ export type Format = "cc" | "silver-age";
 
 /** Constructed card eligibility selected for a room. */
 export type CardPoolMode = "legal" | "future" | "open";
+/** Waiting searchers in one format, keyed by the card pool each queued under
+ * and then by the strictest pool its deck is legal in. A pairing plays in the
+ * stricter of both queued pools, and both decks must be legal there. */
+export type QueuePoolCounts = Record<CardPoolMode, Record<CardPoolMode, number>>;
 
 /** Stable identities for the supported practice opponents. */
 export type BotOpponent = "bravo" | "briar" | "kayo" | "cindra" | "ira" | "hala" | "jarl" | "levia" | "starvo";
@@ -1070,7 +1074,7 @@ export type ServerMessage =
   | { type: "emote"; seat: number; message: EmoteMessage }
   | { type: "spectator-kicked" }
   | { type: "rooms"; rooms: RoomSummary[] }
-  | { type: "queue-status"; counts: Record<Format, number> }
+  | { type: "queue-status"; counts: Record<Format, QueuePoolCounts> }
   | { type: "queued"; format: Format }
   | { type: "queue-left" }
   | { type: "background-matchmaking"; status: BackgroundMatchmakingStatus }

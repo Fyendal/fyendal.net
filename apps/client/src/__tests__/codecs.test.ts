@@ -52,10 +52,24 @@ describe("server-message runtime codec", () => {
       type: "authed",
       username: "alice",
     });
+    const pools = (legal: number) => ({
+      legal: { legal, future: 0, open: 0 },
+      future: { legal: 0, future: 0, open: 0 },
+      open: { legal: 0, future: 0, open: 0 },
+    });
+    expect(decodeServerMessage({
+      type: "queue-status",
+      counts: { cc: pools(0), "silver-age": pools(2) },
+    })).not.toBeNull();
+    // Per-format totals no longer carry enough to filter by card pool.
     expect(decodeServerMessage({
       type: "queue-status",
       counts: { cc: 0, "silver-age": 2 },
-    })).not.toBeNull();
+    })).toBeNull();
+    expect(decodeServerMessage({
+      type: "queue-status",
+      counts: { cc: pools(-1), "silver-age": pools(0) },
+    })).toBeNull();
     expect(decodeServerMessage({
       type: "error",
       code: "ROOM_NOT_FOUND",

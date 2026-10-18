@@ -1,6 +1,7 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
-import { Home, otherSearchers } from "./Home.js";
+import { Home } from "./Home.js";
+import { emptyQueueCounts } from "../matchmaking/pairableSearchers.js";
 import { TestI18nProvider } from "../i18n/TestI18nProvider.js";
 
 const store = vi.hoisted(() => {
@@ -18,26 +19,26 @@ function render(overrides: Record<string, unknown> = {}): string {
     createBotRoom: vi.fn(), createRoom: vi.fn(), joinRoom: vi.fn(),
     decks: [], decksLoading: false, deckPlayedAt: {},
     queuedFormat: null, queueJoin: vi.fn(), queueLeave: vi.fn(),
-    queueCounts: { cc: 0, "silver-age": 0 },
+    queueCounts: emptyQueueCounts(),
     rooms: [], refreshDecks: vi.fn(), setCardPoolMode: vi.fn(),
     ...overrides,
   });
   return renderToStaticMarkup(<TestI18nProvider><Home /></TestI18nProvider>);
 }
 
-describe("Home live searchers", () => {
-  it("excludes only this account's own search in that format", () => {
-    const counts = { cc: 3, "silver-age": 1 };
-    expect(otherSearchers(counts, "cc", null)).toBe(3);
-    expect(otherSearchers(counts, "cc", "cc")).toBe(2);
-    expect(otherSearchers(counts, "silver-age", "cc")).toBe(1);
-    expect(otherSearchers({ cc: 0, "silver-age": 0 }, "cc", "cc")).toBe(0);
-  });
+/** Legal-pool searchers with legal decks per format. */
+function legalSearchers(cc: number, silverAge: number) {
+  const counts = emptyQueueCounts();
+  counts.cc.legal.legal = cc;
+  counts["silver-age"].legal.legal = silverAge;
+  return counts;
+}
 
-  it("shows searchers per format and for the selected format", () => {
-    const html = render({ queueCounts: { cc: 2, "silver-age": 1 } });
-    expect(html).toContain("Classic Constructed · 2 searching</option>");
-    expect(html).toContain("Silver Age · 1 searching</option>");
+describe("Home live searchers", () => {
+  it("shows searchers for the selected format only, outside the format options", () => {
+    const html = render({ queueCounts: legalSearchers(2, 1) });
+    expect(html).toContain(">Classic Constructed</option>");
+    expect(html).toContain(">Silver Age</option>");
     expect(html).toMatch(/class="home-play-live">.*1 player searching now/);
   });
 
@@ -45,12 +46,12 @@ describe("Home live searchers", () => {
     const html = render();
     expect(html).toContain(">Classic Constructed</option>");
     expect(html).not.toContain("home-play-live");
-    expect(render({ queuedFormat: "cc", queueCounts: { cc: 1, "silver-age": 0 } }))
+    expect(render({ queuedFormat: "cc", queueCounts: legalSearchers(1, 0) }))
       .not.toContain("home-play-live");
   });
 
   it("counts other players while this account is searching", () => {
-    const html = render({ queuedFormat: "silver-age", queueCounts: { cc: 0, "silver-age": 3 } });
+    const html = render({ queuedFormat: "silver-age", queueCounts: legalSearchers(0, 3) });
     expect(html).toContain("2 other players searching");
   });
 });

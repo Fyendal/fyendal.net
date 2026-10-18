@@ -17,6 +17,7 @@ import {
 import { savedReplayIdFromPath, sharedReplayTokenFromPath } from "./replay/route.js";
 import { fabraryPlayRoute } from "./play/route.js";
 import { RoomVersionGate } from "./versionGate.js";
+import { emptyQueueCounts } from "./matchmaking/pairableSearchers.js";
 import {
   LiveServerMessageDecoder,
   StateStreamError,
@@ -377,7 +378,7 @@ export const useStore = create<StoreState>((set, get) => {
       savedReplays: [],
       replaysLoading: false,
       ...initialHistoryState(),
-      queueCounts: { cc: 0, "silver-age": 0 },
+      queueCounts: emptyQueueCounts(),
       lobbyRail: "home",
       cardPoolModes: { ...DEFAULT_LOBBY_SETTINGS.cardPoolModes },
       deckPlayedAt: {},

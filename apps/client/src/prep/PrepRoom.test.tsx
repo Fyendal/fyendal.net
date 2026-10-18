@@ -1,4 +1,5 @@
 import { renderToStaticMarkup } from "react-dom/server";
+import { emptyQueueCounts } from "../matchmaking/pairableSearchers.js";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { PrepSeatView, PrepView } from "@fyendal/shared";
 import { PrepRoom } from "./PrepRoom.js";
@@ -41,7 +42,7 @@ function render(
   vi.stubGlobal("window", { matchMedia: () => ({ matches: mobile }) });
   vi.stubGlobal("location", { origin: "http://localhost" });
   store.set({
-    prepDeck, prep, roomCode: "ABC123", queueCounts: {},
+    prepDeck, prep, roomCode: "ABC123", queueCounts: emptyQueueCounts(),
     matchmakingActive: false, matchAcceptanceRole: null,
     acceptMatch: vi.fn(), declineMatch: vi.fn(), playBotFromPrep: vi.fn(),
     presentArena: vi.fn(), presentDeck: vi.fn(), prepUnready: vi.fn(),

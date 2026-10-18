@@ -17,7 +17,10 @@ export function PitchFocus({ source, seat, motionPreference, getStackFocusOrigin
   const focusRef = useRef<HTMLDivElement>(null);
   const reducedMotion = useMotionPreference(motionPreference);
   const { instanceId } = source.card;
-  const { fromHand } = source;
+  // Fly in from where the card was when this focus opened. Submitting the play
+  // moves the source onto the presented stack before focus closes; flying in
+  // again from there briefly showed the card at the stack's position.
+  const openedFrom = useRef({ fromHand: source.fromHand, seat, getStackFocusOrigin, getHandFocusOrigin }).current;
 
   useLayoutEffect(() => {
     const focusPosition = positionRef.current;
@@ -51,7 +54,7 @@ export function PitchFocus({ source, seat, motionPreference, getStackFocusOrigin
       `[data-card-instance-id="${instanceId}"][data-motion-card]`,
     )];
     const stackElement = candidates.find((element) => element.closest(".stack-float"));
-    const sourceElement = (fromHand
+    const sourceElement = (openedFrom.fromHand
       ? candidates.find((element) => element.closest("#player-hand"))
       : stackElement)
       ?? table.querySelector<HTMLElement>(`[data-card-stack-id="${instanceId}"]`)
@@ -60,11 +63,11 @@ export function PitchFocus({ source, seat, motionPreference, getStackFocusOrigin
     const sourceRect = sourceBounds && sourceBounds.width > 0 && sourceBounds.height > 0
       ? sourceBounds : undefined;
     const start = pitchFocusOrigin(
-      fromHand,
+      openedFrom.fromHand,
       sourceRect,
       stackElement?.getBoundingClientRect(),
-      getStackFocusOrigin(instanceId),
-      getHandFocusOrigin(seat, instanceId),
+      openedFrom.getStackFocusOrigin(instanceId),
+      openedFrom.getHandFocusOrigin(openedFrom.seat, instanceId),
     );
     if (!start) return;
     const end = focus.getBoundingClientRect();
@@ -79,7 +82,7 @@ export function PitchFocus({ source, seat, motionPreference, getStackFocusOrigin
     return () => {
       animation?.cancel();
     };
-  }, [instanceId, source.card.cardId, fromHand, seat, reducedMotion, getStackFocusOrigin, getHandFocusOrigin]);
+  }, [instanceId, reducedMotion]);
 
   return (
     <div className="pitch-focus">

@@ -1369,6 +1369,21 @@ describe("lobby and matchmaking", () => {
     a.ws.close();
   });
 
+  it("counts a looser-pool searcher under the strictest pool their deck is legal in", async () => {
+    const lobby = await authedClient();
+    const queued = await authedClient();
+    queued.sendMsg({ type: "queue-join", format: "cc", deckId: "precon-asb", cardPoolMode: "open" });
+    await queued.next((m) => m.type === "queued");
+    lobby.sendMsg({ type: "list-rooms" });
+    const status = await lobby.next((m) => m.type === "queue-status"
+      && (m as { counts: { cc: { open: { legal: number } } } }).counts.cc.open.legal === 1);
+    expect(status).toMatchObject({ counts: { cc: { open: { legal: 1, future: 0, open: 0 } } } });
+    queued.sendMsg({ type: "queue-leave" });
+    await queued.next((m) => m.type === "queue-left");
+    lobby.ws.close();
+    queued.ws.close();
+  });
+
   it("does not push queue depth changes to sockets already attached to rooms", async () => {
     const host = await authedClient();
     host.sendMsg({ type: "create-room", format: "cc", deckId: "precon-asb" });
@@ -1390,9 +1405,13 @@ describe("lobby and matchmaking", () => {
     await new Promise((resolve) => setTimeout(resolve, 30));
     host.inbox.length = 0;
     host.sendMsg({ type: "list-rooms" });
+    const empty = () => ({ legal: 0, future: 0, open: 0 });
     expect(await host.next((m) => m.type === "queue-status")).toEqual({
       type: "queue-status",
-      counts: { cc: 1, "silver-age": 0 },
+      counts: {
+        cc: { legal: { ...empty(), legal: 1 }, future: empty(), open: empty() },
+        "silver-age": { legal: empty(), future: empty(), open: empty() },
+      },
     });
 
     queued.sendMsg({ type: "leave-room" });

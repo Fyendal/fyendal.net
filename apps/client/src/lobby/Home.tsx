@@ -10,16 +10,7 @@ import { DeckDropdown } from "./CreateRoomModal.js";
 import { RoomCard } from "./RoomCard.js";
 import { BotOpponentModal } from "./BotOpponentModal.js";
 import { formatSelectLabel } from "./FormatBadge.js";
-
-/** Live matchmaking searchers in a format, excluding this account's own
- * search. Counts include players searching in the background of a bot game. */
-export function otherSearchers(
-  counts: Record<Format, number>,
-  format: Format,
-  queuedFormat: Format | null,
-): number {
-  return Math.max(0, counts[format] - (queuedFormat === format ? 1 : 0));
-}
+import { deckCardPool, pairableSearchers } from "../matchmaking/pairableSearchers.js";
 
 /** Play setup and rooms the account can reclaim. */
 export function Home() {
@@ -82,9 +73,11 @@ export function Home() {
     deck.id === selectedDeckId && deckIsLegalForRoom(deck, cardPoolMode)
   ) ?? sortDecksForPicker(choices, deckPlayedAt).find((deck) => deckIsLegalForRoom(deck, cardPoolMode));
   const rejoinRooms = rooms.filter((room) => room.yours === true);
-  const searchingIn = (optionFormat: Format) =>
-    otherSearchers(queueCounts, optionFormat, queuedFormat);
-  const searching = searchingIn(format);
+  // Live searchers this choice could pair with, including players searching
+  // in the background of a bot game.
+  const searching = pairableSearchers(
+    queueCounts[format], cardPoolMode, deckCardPool(selectedDeck), queuedFormat === format,
+  );
 
   const selectMode = (nextMode: HomeGameMode) => {
     setMode(nextMode);
@@ -152,14 +145,8 @@ export function Home() {
                   }
                 }}
               >
-                {(["silver-age", "cc"] as const).map((optionFormat) => (
-                  <option key={optionFormat} value={optionFormat}>
-                    {intl.formatMessage(
-                      { id: "lobby.home.formatSearching" },
-                      { format: formatSelectLabel(intl, optionFormat), count: searchingIn(optionFormat) },
-                    )}
-                  </option>
-                ))}
+                <option value="silver-age">{formatSelectLabel(intl, "silver-age")}</option>
+                <option value="cc">{formatSelectLabel(intl, "cc")}</option>
               </select>
             </label>
 

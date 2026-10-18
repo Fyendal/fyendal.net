@@ -2880,7 +2880,6 @@
   "lobby.home.chooseStart": "选择赛制、牌组和游戏模式后开始游戏。",
   "lobby.home.gameMode": "游戏模式",
   "lobby.home.start": "开始",
-  "lobby.home.formatSearching": "{count, plural, =0 {{format}} other {{format} · # 人正在寻找对局}}",
   "lobby.home.searchingNow": "{count} 名玩家正在寻找对局",
   "lobby.home.othersSearchingNow": "另有 {count} 名玩家正在寻找对局",
   "lobby.home.manageDecks": "管理牌组",

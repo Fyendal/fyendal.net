@@ -31444,43 +31444,6 @@
       "value": "Choose a format, deck, and game mode to start playing."
     }
   ],
-  "lobby.home.formatSearching": [
-    {
-      "type": 6,
-      "value": "count",
-      "options": {
-        "=0": {
-          "value": [
-            {
-              "type": 1,
-              "value": "format"
-            }
-          ]
-        },
-        "other": {
-          "value": [
-            {
-              "type": 1,
-              "value": "format"
-            },
-            {
-              "type": 0,
-              "value": " · "
-            },
-            {
-              "type": 7
-            },
-            {
-              "type": 0,
-              "value": " searching"
-            }
-          ]
-        }
-      },
-      "offset": 0,
-      "pluralType": "cardinal"
-    }
-  ],
   "lobby.home.gameMode": [
     {
       "type": 0,

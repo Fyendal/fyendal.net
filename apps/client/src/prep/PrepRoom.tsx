@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useIntl } from "react-intl";
+import { deckCardPool, pairableSearchers } from "../matchmaking/pairableSearchers.js";
 import { useShallow } from "zustand/react/shallow";
 import type { EquipmentSlot } from "@fyendal/shared";
 import {
@@ -152,9 +153,9 @@ export function PrepRoom() {
   const nextStep = nextPrepStep(prep);
   const nudgeActive = useStepNudge(nextStep ? `${roomCode ?? "queue"}:${nextStep}` : null);
   const nudge = nudgeActive ? nextStep : null;
-  const otherPlayersInQueue = matchmakingActive
-    ? Math.max(0, (prepFormat ? queueCounts[prepFormat] : 0) - 1)
-    : (prepFormat ? queueCounts[prepFormat] : 0);
+  const otherPlayersInQueue = prepFormat
+    ? pairableSearchers(queueCounts[prepFormat], prep?.cardPoolMode ?? "legal", deckCardPool(prepDeck), matchmakingActive)
+    : 0;
 
   useEffect(() => {
     const query = window.matchMedia("(max-width: 700px)");

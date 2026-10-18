@@ -2,6 +2,7 @@ import type { CardPoolMode, Format } from "@fyendal/shared";
 import type { StoreState } from "./types.js";
 import type { LobbySettings } from "../storage.js";
 import { initialHistoryState } from "./historyActions.js";
+import { emptyQueueCounts } from "../matchmaking/pairableSearchers.js";
 
 export function initialStoreProjection(
   auth: { token: string; username: string } | null,
@@ -46,7 +47,7 @@ export function initialStoreProjection(
     authToken: auth?.token ?? null,
     rooms: [],
     inviteRoom: null,
-    queueCounts: { cc: 0, "silver-age": 0 },
+    queueCounts: emptyQueueCounts(),
     queuedFormat: null,
     matchmakingActive: false,
     backgroundMatchmaking: { state: "inactive" as const },

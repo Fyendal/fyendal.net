@@ -5,6 +5,7 @@ import type {
   ChatMessage,
   ErrorCode,
   Format,
+  QueuePoolCounts,
   FriendGameInvite,
   FriendRequestSummary,
   FriendSummary,
@@ -222,7 +223,7 @@ export interface StoreState {
   latestEmote: EmoteEvent | null;
   rooms: RoomSummary[];
   inviteRoom: RoomInvite | null;
-  queueCounts: Record<Format, number>;
+  queueCounts: Record<Format, QueuePoolCounts>;
   queuedFormat: Format | null;
   matchmakingActive: boolean;
   backgroundMatchmaking: BackgroundMatchmakingStatus;

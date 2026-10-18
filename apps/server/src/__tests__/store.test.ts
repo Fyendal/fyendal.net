@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it } from "vitest";
 import { precon, preconsForFormat, silverAgePrecon } from "@fyendal/cards";
 import { legalIntents } from "@fyendal/engine";
 import { decodeServerMessage, replayFileViews } from "@fyendal/protocol";
-import type { PresentedDeck } from "@fyendal/shared";
+import type { Format, PresentedDeck, QueuePoolCounts } from "@fyendal/shared";
 import type { SeatCredentials } from "../store.js";
 import type { Queryable } from "../db.js";
 import { finalizeReplay, getReplay, listReplays } from "../replays.js";
@@ -16,6 +16,13 @@ import {
 } from "../store.js";
 import { freshDb } from "./testdb.js";
 import { getAchievements } from "../achievements.js";
+
+/** Per-format searcher totals across every queued and deck card pool. */
+function queueTotals(counts: Record<Format, QueuePoolCounts>): Record<Format, number> {
+  const total = (pools: QueuePoolCounts) => Object.values(pools)
+    .reduce((sum, byDeck) => sum + Object.values(byDeck).reduce((a, b) => a + b, 0), 0);
+  return { cc: total(counts.cc), "silver-age": total(counts["silver-age"]) };
+}
 
 let db: Queryable;
 let store: PgRoomStore;
@@ -1972,7 +1979,7 @@ describe("PgRoomStore storage", () => {
     expect(opened).toMatchObject({ ok: true, kind: "opened", version: 0 });
     if (!opened.ok || opened.kind !== "opened") throw new Error("queue did not open a room");
     await markStoredSeatPresent(opened.code, 0);
-    expect(await otherGateway.matchmakingCounts()).toEqual({
+    expect(queueTotals(await otherGateway.matchmakingCounts())).toEqual({
       cc: 1,
       "silver-age": 0,
     });
@@ -1988,7 +1995,7 @@ describe("PgRoomStore storage", () => {
     const room = await store.getRoom(matched.code);
     expect(room?.seats.map((seat) => seat?.userId)).toEqual([firstId, secondId]);
     expect(room?.seats.every((seat) => seat?.fromQueue)).toBe(true);
-    expect(await store.matchmakingCounts()).toEqual({
+    expect(queueTotals(await store.matchmakingCounts())).toEqual({
       cc: 0,
       "silver-age": 0,
     });
@@ -2954,7 +2961,7 @@ describe("PgRoomStore storage", () => {
       username: "ManualB",
       deckId: "precon-asr",
     })).resolves.toMatchObject({ ok: true, kind: "player", seat: 1 });
-    expect(await store.matchmakingCounts()).toEqual({
+    expect(queueTotals(await store.matchmakingCounts())).toEqual({
       cc: 0,
       "silver-age": 0,
     });
@@ -3069,7 +3076,7 @@ describe("PgRoomStore storage", () => {
     const room = await store.getRoom(match.code);
     expect(room?.seats.map((seat) => seat?.userId ?? null)).toEqual([match.userIds[0], null]);
     expect(room?.prep).toBeNull();
-    expect(await store.matchmakingCounts()).toMatchObject({ cc: 1 });
+    expect(queueTotals(await store.matchmakingCounts())).toMatchObject({ cc: 1 });
     expect((await db.query(
       "SELECT subject_user_id FROM cluster_events WHERE event_type = 'match-timeout'",
     )).rows).toEqual([{ subject_user_id: match.userIds[1] }]);
@@ -3086,7 +3093,7 @@ describe("PgRoomStore storage", () => {
 
     await store.sweepMatchmadePrep(deadline + 1);
     expect((await store.getRoom(match.code))?.seats).toEqual([null, null]);
-    expect(await store.matchmakingCounts()).toMatchObject({ cc: 0 });
+    expect(queueTotals(await store.matchmakingCounts())).toMatchObject({ cc: 0 });
     expect((await db.query(
       "SELECT subject_user_id FROM cluster_events WHERE event_type = 'match-timeout' ORDER BY subject_user_id",
     )).rows).toEqual(match.userIds.map((subject_user_id) => ({ subject_user_id })));
@@ -3113,7 +3120,7 @@ describe("PgRoomStore storage", () => {
     const room = await store.getRoom(match.code);
     expect(room?.seats.map((seat) => seat?.userId ?? null)).toEqual([match.userIds[0], null]);
     expect(room?.seats[0]?.ready).toBe(false);
-    expect(await store.matchmakingCounts()).toMatchObject({ cc: 1 });
+    expect(queueTotals(await store.matchmakingCounts())).toMatchObject({ cc: 1 });
   });
 
   it("shares one five-minute start budget across first-player choice, arena reveal, and deck selection", async () => {
