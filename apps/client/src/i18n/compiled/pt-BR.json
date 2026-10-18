@@ -32957,6 +32957,14 @@
       "type": 6,
       "value": "count",
       "options": {
+        "=0": {
+          "value": [
+            {
+              "type": 0,
+              "value": "Mais ninguém na fila"
+            }
+          ]
+        },
         "one": {
           "value": [
             {
@@ -32968,7 +32976,7 @@
             },
             {
               "type": 0,
-              "value": " pessoa buscando partida"
+              "value": " pessoa na fila"
             }
           ]
         },
@@ -32983,7 +32991,7 @@
             },
             {
               "type": 0,
-              "value": " pessoas buscando partida"
+              "value": " pessoas na fila"
             }
           ]
         }
@@ -33015,6 +33023,14 @@
       "type": 6,
       "value": "count",
       "options": {
+        "=0": {
+          "value": [
+            {
+              "type": 0,
+              "value": "Ninguém na fila"
+            }
+          ]
+        },
         "one": {
           "value": [
             {
@@ -33022,7 +33038,7 @@
             },
             {
               "type": 0,
-              "value": " pessoa buscando partida agora"
+              "value": " pessoa na fila"
             }
           ]
         },
@@ -33033,7 +33049,7 @@
             },
             {
               "type": 0,
-              "value": " pessoas buscando partida agora"
+              "value": " pessoas na fila"
             }
           ]
         }
