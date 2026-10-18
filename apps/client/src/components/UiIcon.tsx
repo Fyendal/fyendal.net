@@ -19,6 +19,7 @@ export type UiIconName =
   | "effect-turn"
   | "flag"
   | "flag-filled"
+  | "grip"
   | "invite-game"
   | "lock"
   | "message"

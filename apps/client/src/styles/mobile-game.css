@@ -909,27 +909,28 @@
   .stack-layers { max-width: 100%; overflow-x: auto; }
   .decision { width: 100%; max-width: none; padding: 9px; }
   .decision.decision-passive { width: auto; max-width: calc(100vw - 24px); padding-inline: 13px; }
-  .decision-trigger-order { max-height: 43dvh; }
+  .decision-trigger-order { width: 100%; max-width: none; max-height: 43dvh; padding: 12px; gap: 10px; }
   .decision-name-form { width: 100%; }
   .decision-buttons button,
   .decision-optcard button { min-height: 42px; }
   .decision-cards { max-width: 100%; max-height: 30dvh; gap: 12px; padding: 8px; }
-  .trigger-order-list { width: calc(100vw - 40px); max-height: 42dvh; }
+  .trigger-order-list { max-height: 42dvh; }
   .decision-trigger-order .trigger-order-list { max-height: none; }
   .trigger-order-item {
-    grid-template-columns: 18px 40px 52px minmax(80px, 1fr) auto;
-    gap: 6px;
-    min-height: 76px;
-    padding: 5px;
+    grid-template-columns: 40px minmax(0, 1fr) auto;
+    gap: 8px;
+    padding: 6px;
   }
-  .trigger-order-item.effect-choice-item { grid-template-columns: 52px minmax(80px, 1fr) auto; }
-  .decision-effect-list .trigger-order-list { width: 100%; }
+  .trigger-order-grip { display: none; }
+  .trigger-order-item.effect-choice-item { grid-template-columns: 40px minmax(0, 1fr) auto; }
   .trigger-order-item .card-zone,
-  .trigger-order-item .blood-debt-stack-tile { width: 48px; height: 66px; }
-  .trigger-order-item .blood-debt-stack-title { font-size: 9px; }
-  .trigger-order-item .blood-debt-stack-amount { font-size: 25px; }
-  .trigger-order-label { font-size: 12px; }
+  .trigger-order-thumb-empty,
+  .trigger-order-item .blood-debt-stack-tile { width: 40px; height: 56px; }
+  .trigger-order-item .blood-debt-stack-title { font-size: 8px; }
+  .trigger-order-item .blood-debt-stack-amount { font-size: 20px; }
+  .trigger-order-label { font-size: 13px; }
   .trigger-order-controls button { min-width: 34px; min-height: 34px; padding: 4px 8px; }
+  .trigger-order-move button { width: 40px; min-height: 0; height: 32px; padding: 0; }
   .decision-cards .card-hand { width: 90px; height: 124px; }
   .decision-cards .card-selected::before { top: 4px; right: 4px; width: 18px; height: 18px; font-size: 11px; }
   .decision-cards > .card-tapped,

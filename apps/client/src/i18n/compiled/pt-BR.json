@@ -29005,12 +29005,6 @@
       "value": " para depois"
     }
   ],
-  "game.decision.triggerOrder.then": [
-    {
-      "type": 0,
-      "value": "depois"
-    }
-  ],
   "game.decision.useCard": [
     {
       "type": 0,

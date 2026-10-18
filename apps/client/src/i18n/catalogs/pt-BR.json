@@ -2821,7 +2821,6 @@
   "game.decision.triggerOrder.label": "Ordem de resolução dos triggers",
   "game.decision.triggerOrder.first": "resolve primeiro",
   "game.decision.triggerOrder.last": "resolve por último",
-  "game.decision.triggerOrder.then": "depois",
   "game.decision.triggerOrder.moveEarlier": "Mover {source}: {label} para antes",
   "game.decision.triggerOrder.moveLater": "Mover {source}: {label} para depois",
   "game.decision.triggerOrder.earlier": "Mover para antes",

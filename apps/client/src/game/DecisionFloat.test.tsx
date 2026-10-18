@@ -1235,7 +1235,7 @@ describe("simultaneous trigger ordering", () => {
     expect(html).toContain(">Uncatalogued IAR Trigger<");
     expect(html).toContain("Move SECOND: Draw a card earlier");
     expect(html).toContain("Confirm order");
-    expect(html).toContain("Confirm order (Space)");
+    expect(html).toContain('aria-label="Confirm order"');
     expect(html).toContain('aria-keyshortcuts="Space"');
     expect(html).not.toContain("card-board-square");
   });

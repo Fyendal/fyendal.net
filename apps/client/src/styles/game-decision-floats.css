@@ -98,11 +98,24 @@
 .decision-priority-guidance {
   width: min(420px, calc(100vw - var(--rail-w) - 32px));
 }
+/* Trigger ordering and effect lists share the text-choice panel: left-aligned
+   prompt and help, rows that fill the panel instead of overflowing it. */
 .decision-trigger-order {
+  width: min(560px, calc(100vw - var(--rail-w) - 32px));
+  max-width: calc(100vw - var(--rail-w) - 32px);
   max-height: calc(100dvh - clamp(132px, 19vh, 222px) - 12px);
   box-sizing: border-box;
   overflow: hidden;
+  align-items: stretch;
+  gap: 12px;
+  padding: 18px;
 }
+.decision-trigger-order .decision-prompt {
+  color: var(--text-primary);
+  font: 600 16px/1.4 var(--font-lobby-ui);
+  text-align: left;
+}
+.decision-trigger-order .decision-context { text-align: left; }
 .decision-trigger-order .trigger-order-list {
   min-height: 0;
   flex: 1 1 auto;
@@ -320,63 +333,79 @@
 .trigger-order-list {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  width: min(620px, 78vw);
+  gap: 6px;
+  width: 100%;
+  min-width: 0;
   max-height: 58vh;
+  margin: 0;
+  padding: 0;
   overflow-y: auto;
-  padding: 4px;
+  list-style: none;
 }
 .trigger-order-item {
   display: grid;
-  grid-template-columns: 24px 54px 68px minmax(120px, 1fr) auto;
+  grid-template-columns: 14px 46px minmax(0, 1fr) auto;
   align-items: center;
   gap: 10px;
-  min-height: 92px;
-  padding: 7px 9px;
-  border: 1px solid #725a3299;
+  padding: 8px 8px 8px 10px;
+  border: 1px solid #5b4b38;
   border-radius: 6px;
-  background: #0d0906cc;
+  background: #2b231b;
   cursor: grab;
+  transition: border-color 120ms ease, background-color 120ms ease, opacity 120ms ease;
 }
+.trigger-order-item:hover { border-color: #b8933f; background: #33291f; }
 .trigger-order-item:active { cursor: grabbing; }
-.trigger-order-item:hover { border-color: #c59b48cc; }
+.trigger-order-item.is-dragging { opacity: .45; }
+.trigger-order-item.is-drop-target {
+  border-color: #e6c96a;
+  box-shadow: 0 0 0 1px #e6c96a55;
+}
 .trigger-order-grip {
-  color: #a99f8a;
-  font-size: 22px;
-  line-height: 1;
+  color: #9f927c88;
+  font-size: 16px;
 }
-.trigger-order-position {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  color: #e7c873;
-  font: 700 20px/1 var(--font-display);
+.trigger-order-item:hover .trigger-order-grip { color: var(--text-muted); }
+.trigger-order-item .card-zone,
+.trigger-order-thumb-empty {
+  width: 46px;
+  height: 64px;
 }
-.trigger-order-position small {
-  color: #a99f8a;
-  font: 500 10px/1.15 system-ui, sans-serif;
-  text-align: center;
-}
-.trigger-order-item .card-zone {
-  width: 58px;
-  height: 80px;
+.trigger-order-thumb-empty {
+  box-sizing: border-box;
+  border: 1px dashed #5b4b38;
+  border-radius: 4px;
 }
 .trigger-order-item .blood-debt-stack-tile {
-  width: 58px;
-  height: 80px;
-  gap: 5px;
+  width: 46px;
+  height: 64px;
+  gap: 3px;
 }
-.trigger-order-item .blood-debt-stack-title { font-size: 10px; }
-.trigger-order-item .blood-debt-stack-amount { font-size: 30px; }
+.trigger-order-item .blood-debt-stack-title { font-size: 9px; }
+.trigger-order-item .blood-debt-stack-amount { font-size: 24px; }
 .trigger-order-label {
   display: flex;
   flex-direction: column;
-  gap: 3px;
-  color: #e6dcc6;
-  font-size: 14px;
-  line-height: 1.3;
+  gap: 2px;
+  min-width: 0;
+  color: var(--text-primary);
+  font: 400 14px/1.35 var(--font-lobby-ui);
 }
-.trigger-order-label strong { color: #e7c873; font-size: 15px; }
+.trigger-order-label > strong { color: #e6c96a; font-size: 14px; font-weight: 600; }
+.trigger-order-source {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 8px;
+  font-weight: 600;
+}
+.trigger-order-source:empty { display: none; }
+.trigger-order-edge {
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 400;
+}
+.trigger-order-effect { overflow-wrap: anywhere; }
 .trigger-order-controls {
   display: flex;
   flex-direction: column;
@@ -385,6 +414,39 @@
 .trigger-order-controls button {
   min-width: 34px;
   padding: 5px 9px;
+}
+/* Move buttons form one flat segmented pair. */
+.trigger-order-move { gap: 0; }
+.trigger-order-move button {
+  display: grid;
+  min-width: 0;
+  width: 32px;
+  height: 28px;
+  padding: 0;
+  place-items: center;
+  border: 1px solid #5b4b38;
+  border-radius: 0;
+  background: transparent;
+  clip-path: none;
+  color: var(--text-primary);
+  font-size: 16px;
+  letter-spacing: normal;
+}
+.trigger-order-move button:first-child { border-radius: 5px 5px 0 0; }
+.trigger-order-move button:last-of-type { margin-top: -1px; border-radius: 0 0 5px 5px; }
+.trigger-order-move button:hover:not(:disabled) {
+  position: relative;
+  border-color: #b8933f;
+  background: #3e3122;
+}
+.trigger-order-move button:disabled { opacity: 1; color: #9f927c55; }
+.trigger-order-move button:focus-visible {
+  position: relative;
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 1px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .trigger-order-item { transition: none; }
 }
 .shortcut-button {
   display: inline-flex;
@@ -1275,8 +1337,7 @@
   color: #ffe39a;
   border-bottom-color: #e6c96a;
 }
-.decision-effect-list .trigger-order-list { width: min(560px, 100%); }
 .trigger-order-item.effect-choice-item {
-  grid-template-columns: 68px minmax(120px, 1fr) auto;
+  grid-template-columns: 46px minmax(0, 1fr) auto;
   cursor: default;
 }

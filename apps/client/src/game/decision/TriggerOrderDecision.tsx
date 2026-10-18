@@ -4,6 +4,8 @@ import { cardData } from "@fyendal/cards/client";
 import type { CardView, GameMessage } from "@fyendal/shared";
 import { BloodDebtTriggerTile, isBloodDebtTrigger } from "../BloodDebtTriggerTile.js";
 import { CardFace } from "../Card.js";
+import { TooltipButton } from "../../components/TooltipButton.js";
+import { UiIcon } from "../../components/UiIcon.js";
 import { shouldPassOnSpace } from "../passHotkey.js";
 import { CardRef, cardAffiliation, cardDisplayName } from "./DecisionShared.js";
 import { formatGameMessage } from "../../i18n/GameMessage.js";
@@ -73,8 +75,14 @@ export function TriggerOrderDecision({
       };
     }),
   );
+  const [draggingKey, setDraggingKey] = useState<string | null>(null);
+  const [dropIndex, setDropIndex] = useState<number | null>(null);
   const move = (from: number, to: number) =>
     setItems((current) => moveTriggerOrder(current, from, to));
+  const endDrag = () => {
+    setDraggingKey(null);
+    setDropIndex(null);
+  };
   const localizedLabel = (item: TriggerOrderItem) => item.message
     ? formatGameMessage(intl, item.message, {
         card: (cardId) => item.card?.cardId === cardId
@@ -90,51 +98,59 @@ export function TriggerOrderDecision({
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [items, onConfirm]);
 
+  const confirmLabel = intl.formatMessage({ id: "game.decision.triggerOrder.confirm" });
+
   return (
     <>
       <span className="decision-context" id="trigger-order-help">
         {intl.formatMessage({ id: "game.decision.triggerOrder.instructions" })}
       </span>
-      <div
+      <ol
         className="trigger-order-list"
-        role="list"
         aria-label={intl.formatMessage({ id: "game.decision.triggerOrder.label" })}
         aria-describedby="trigger-order-help"
       >
         {items.map((item, index) => {
           const label = localizedLabel(item);
-          return <div
-            className="trigger-order-item"
+          const effect = item.bloodDebt && item.count !== null
+            ? intl.formatMessage({ id: "game.bloodDebt.loseLife" }, { count: item.count })
+            : label || intl.formatMessage({ id: "game.triggeredAbility" });
+          const source = item.bloodDebt
+            ? intl.formatMessage({ id: "game.bloodDebt" })
+            : item.card
+              ? cardDisplayName(item.card)
+              : intl.formatMessage({ id: "game.trigger" });
+          const edge = index === 0
+            ? "game.decision.triggerOrder.first"
+            : index === items.length - 1
+              ? "game.decision.triggerOrder.last"
+              : null;
+          const dropping = dropIndex === index && draggingKey !== null && draggingKey !== item.key;
+          return <li
+            className={`trigger-order-item${draggingKey === item.key ? " is-dragging" : ""}${dropping ? " is-drop-target" : ""}`}
             draggable
             key={item.key}
-            role="listitem"
             onPointerDown={(event) => event.stopPropagation()}
             onDragStart={(event) => {
               event.dataTransfer.effectAllowed = "move";
               event.dataTransfer.setData("application/x-fyendal-trigger", item.key);
+              setDraggingKey(item.key);
             }}
+            onDragEnd={endDrag}
             onDragOver={(event) => {
               event.preventDefault();
               event.dataTransfer.dropEffect = "move";
+              if (dropIndex !== index) setDropIndex(index);
             }}
             onDrop={(event) => {
               event.preventDefault();
               const draggedKey = event.dataTransfer.getData("application/x-fyendal-trigger");
               const from = items.findIndex((candidate) => candidate.key === draggedKey);
               move(from, index);
+              endDrag();
             }}
           >
-            <span className="trigger-order-grip" aria-hidden="true">⠿</span>
-            <span className="trigger-order-position">
-              {index + 1}
-              <small>{intl.formatMessage({
-                id: index === 0
-                  ? "game.decision.triggerOrder.first"
-                  : index === items.length - 1
-                    ? "game.decision.triggerOrder.last"
-                    : "game.decision.triggerOrder.then",
-              })}</small>
-            </span>
+            <UiIcon name="grip" className="trigger-order-grip" />
             {item.count !== null && item.bloodDebt ? (
               <BloodDebtTriggerTile count={item.count} />
             ) : item.card ? (
@@ -144,74 +160,54 @@ export function TriggerOrderDecision({
                 squareArt={false}
                 affiliation={cardAffiliation(item.card, viewerSeat)}
               />
-            ) : null}
+            ) : <span className="trigger-order-thumb-empty" aria-hidden="true" />}
             <span className="trigger-order-label">
-              {item.card ? <strong><CardRef id={item.card.cardId} name={item.card.name} /></strong> : null}
-              <span>{item.bloodDebt && item.count !== null
-                ? intl.formatMessage({ id: "game.bloodDebt.loseLife" }, { count: item.count })
-                : label || intl.formatMessage({ id: "game.triggeredAbility" })}</span>
+              <span className="trigger-order-source">
+                {item.card ? <CardRef id={item.card.cardId} name={item.card.name} /> : null}
+                {edge ? <span className="trigger-order-edge">{intl.formatMessage({ id: edge })}</span> : null}
+              </span>
+              <span className="trigger-order-effect">{effect}</span>
             </span>
-            <span className="trigger-order-controls">
-              <button
+            <span className="trigger-order-controls trigger-order-move">
+              <TooltipButton
+                tooltip={intl.formatMessage({ id: "game.decision.triggerOrder.earlier" })}
+                tooltipSide="above"
                 aria-label={intl.formatMessage(
                   { id: "game.decision.triggerOrder.moveEarlier" },
-                  {
-                    source: item.bloodDebt
-                      ? intl.formatMessage({ id: "game.bloodDebt" })
-                      : item.card
-                        ? cardDisplayName(item.card)
-                        : intl.formatMessage({ id: "game.trigger" }),
-                    label: item.bloodDebt && item.count !== null
-                      ? intl.formatMessage({ id: "game.bloodDebt.loseLife" }, { count: item.count })
-                      : label || intl.formatMessage({ id: "game.triggeredAbility" }),
-                  },
+                  { source, label: effect },
                 )}
                 disabled={index === 0}
                 onClick={() => move(index, index - 1)}
-                title={intl.formatMessage({ id: "game.decision.triggerOrder.earlier" })}
-                type="button"
               >
-                ↑
-              </button>
-              <button
+                <UiIcon name="chevron-up" />
+              </TooltipButton>
+              <TooltipButton
+                tooltip={intl.formatMessage({ id: "game.decision.triggerOrder.later" })}
                 aria-label={intl.formatMessage(
                   { id: "game.decision.triggerOrder.moveLater" },
-                  {
-                    source: item.bloodDebt
-                      ? intl.formatMessage({ id: "game.bloodDebt" })
-                      : item.card
-                        ? cardDisplayName(item.card)
-                        : intl.formatMessage({ id: "game.trigger" }),
-                    label: item.bloodDebt && item.count !== null
-                      ? intl.formatMessage({ id: "game.bloodDebt.loseLife" }, { count: item.count })
-                      : label || intl.formatMessage({ id: "game.triggeredAbility" }),
-                  },
+                  { source, label: effect },
                 )}
                 disabled={index === items.length - 1}
                 onClick={() => move(index, index + 1)}
-                title={intl.formatMessage({ id: "game.decision.triggerOrder.later" })}
-                type="button"
               >
-                ↓
-              </button>
+                <UiIcon name="chevron-down" />
+              </TooltipButton>
             </span>
-          </div>;
+          </li>;
         })}
-      </div>
+      </ol>
       <div className="decision-buttons">
-        <button
+        <TooltipButton
           className="btn-primary shortcut-button"
           onClick={() => onConfirm(items.map((item) => item.optionId))}
-          title={intl.formatMessage(
-            { id: "common.shortcut.space" },
-            { label: intl.formatMessage({ id: "game.decision.triggerOrder.confirm" }) },
-          )}
+          tooltip={intl.formatMessage({ id: "common.shortcut.space" }, { label: confirmLabel })}
+          tooltipSide="above"
+          aria-label={confirmLabel}
           aria-keyshortcuts="Space"
-          type="button"
         >
-          {intl.formatMessage({ id: "game.decision.triggerOrder.confirm" })}
+          {confirmLabel}
           <kbd className="shortcut-key" aria-label={intl.formatMessage({ id: "common.spaceKey" })} />
-        </button>
+        </TooltipButton>
       </div>
     </>
   );

@@ -2821,7 +2821,6 @@
   "game.decision.triggerOrder.label": "触发效果结算顺序",
   "game.decision.triggerOrder.first": "最先结算",
   "game.decision.triggerOrder.last": "最后结算",
-  "game.decision.triggerOrder.then": "然后",
   "game.decision.triggerOrder.moveEarlier": "将 {source}：{label}提前",
   "game.decision.triggerOrder.moveLater": "将 {source}：{label}延后",
   "game.decision.triggerOrder.earlier": "提前",

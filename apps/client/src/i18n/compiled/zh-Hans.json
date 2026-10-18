@@ -27032,12 +27032,6 @@
       "value": "延后"
     }
   ],
-  "game.decision.triggerOrder.then": [
-    {
-      "type": 0,
-      "value": "然后"
-    }
-  ],
   "game.decision.useCard": [
     {
       "type": 0,

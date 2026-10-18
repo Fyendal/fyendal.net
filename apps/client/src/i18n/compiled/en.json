@@ -27677,12 +27677,6 @@
       "value": " later"
     }
   ],
-  "game.decision.triggerOrder.then": [
-    {
-      "type": 0,
-      "value": "then"
-    }
-  ],
   "game.decision.useCard": [
     {
       "type": 0,
