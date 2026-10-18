@@ -83,10 +83,10 @@ export const azs: Record<string, CardScript> = {
         const aura = paid.find((card) =>
           ctx.player(ctx.seat).banish.some((candidate) => candidate.instanceId === card.instanceId),
         );
-        if (aura) ctx.setCounter("zyggyAura", aura.instanceId);
+        if (aura) ctx.setState("zyggyAura", aura.instanceId);
       },
       onActivate(ctx) {
-        const id = ctx.getCounter("zyggyAura");
+        const id = ctx.getState("zyggyAura");
         if (id) {
           ctx.setCardCounter(id, "holo", 1);
           ctx.settleCard(id);
@@ -217,7 +217,6 @@ export const azs: Record<string, CardScript> = {
     ],
   },
   "blur reality|3": {
-    canPlay: (ctx) => holoChoices(ctx).length > 0,
     onPlay(ctx) {
       const choices = holoChoices(ctx);
       if (choices.length === 1) {

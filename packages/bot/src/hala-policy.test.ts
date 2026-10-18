@@ -165,7 +165,8 @@ describe("Hala policy", () => {
     state.players[0]!.resources = 0;
     state.players[0]!.hero.tapped = true;
     const blade = state.players[0]!.weapons[0]!;
-    blade.counters = { power: 1, sharpenedTurn: state.turn };
+    blade.counters = { power: 1 };
+    blade.scriptState = { sharpenedTurn: state.turn };
     state.players[1]!.board.push({
       instanceId: state.nextInstanceId++,
       cardId: "MST133",
@@ -297,7 +298,7 @@ describe("Hala policy", () => {
     }];
     hala.life = 19;
     hala.resources = 0;
-    hala.weapons[0]!.counters = { sharpenedTurn: 12 };
+    hala.weapons[0]!.scriptState = { sharpenedTurn: 12 };
     state.players[0]!.life = 39;
     expect(state.players[0]!.hand).toHaveLength(4);
 
@@ -1356,7 +1357,7 @@ describe("Hala policy", () => {
       cardId: "IAR084",
       owner: 0 as const,
       life: 2,
-      counters: { lifePenalty: 1 },
+      scriptState: { lifePenalty: 1 },
     };
     state.players[0]!.board.push(cleric);
     const edictId = state.players[1]!.hand.find((card) => card.cardId === "MPW105")!.instanceId;
@@ -1970,7 +1971,8 @@ describe("Hala policy", () => {
     });
     state.turn = 2;
     state.players[0]!.resources = 1;
-    state.players[0]!.weapons[0]!.counters = { power: 2, sharpenedTurn: 2 };
+    state.players[0]!.weapons[0]!.counters = { power: 2 };
+    state.players[0]!.weapons[0]!.scriptState = { sharpenedTurn: 2 };
     replaceHand(state, 0, ["OMN238", "PEN048", "MPW046", "HNT117"]);
     const weaponId = state.players[0]!.weapons[0]!.instanceId;
     const attack = legalIntents(state, 0).find((candidate) =>
@@ -2006,7 +2008,8 @@ describe("Hala policy", () => {
     });
     state.turn = 2;
     state.players[0]!.resources = 1;
-    state.players[0]!.weapons[0]!.counters = { power: 2, sharpenedTurn: 2 };
+    state.players[0]!.weapons[0]!.counters = { power: 2 };
+    state.players[0]!.weapons[0]!.scriptState = { sharpenedTurn: 2 };
     replaceHand(state, 0, ["OMN238", "PEN056"]);
     replaceHand(state, 1, ["PEN056", "PEN056"]);
     const weaponId = state.players[0]!.weapons[0]!.instanceId;
@@ -2049,7 +2052,8 @@ describe("Hala policy", () => {
     replaceHand(state, 0, ["PEN048"]);
     const cleric = addOpponentAlly(state, "IAR084");
     const weapon = state.players[0]!.weapons[0]!;
-    weapon.counters = { power: 2, sharpenedTurn: state.turn };
+    weapon.counters = { power: 2 };
+    weapon.scriptState = { sharpenedTurn: state.turn };
     const attack = legalIntents(state, 0).find((candidate) =>
       candidate.kind === "activate-ability" && candidate.sourceInstanceId === weapon.instanceId &&
       candidate.targetAllyId === cleric.instanceId && candidate.pitchInstanceIds.length === 0
@@ -2848,7 +2852,8 @@ describe("Hala policy", () => {
     replaceHand(state, 0, []);
     const ally = addOpponentAlly(state, allyCardId);
     if (counters > 0) {
-      state.players[0]!.weapons[0]!.counters = { power: counters, sharpenedTurn: state.turn };
+      state.players[0]!.weapons[0]!.counters = { power: counters };
+      state.players[0]!.weapons[0]!.scriptState = { sharpenedTurn: state.turn };
     }
 
     const intent = chooseHalaIntent({
@@ -2876,7 +2881,8 @@ describe("Hala policy", () => {
     state.players[0]!.resources = 2;
     replaceHand(state, 0, []);
     const ally = addOpponentAlly(state, "SEA052", 6);
-    state.players[0]!.weapons[0]!.counters = { power: 3, sharpenedTurn: state.turn };
+    state.players[0]!.weapons[0]!.counters = { power: 3 };
+    state.players[0]!.weapons[0]!.scriptState = { sharpenedTurn: state.turn };
     state.players[0]!.board.push({
       instanceId: state.nextInstanceId++,
       cardId: "AHA027",
@@ -2930,7 +2936,8 @@ describe("Hala policy", () => {
     replaceHand(state, 0, []);
     const chum = addOpponentAlly(state, "SEA050");
     addOpponentAlly(state, "SEA264");
-    state.players[0]!.weapons[0]!.counters = { power: 3, sharpenedTurn: state.turn };
+    state.players[0]!.weapons[0]!.counters = { power: 3 };
+    state.players[0]!.weapons[0]!.scriptState = { sharpenedTurn: state.turn };
 
     const intent = chooseHalaIntent({
       seat: 0,
@@ -2956,7 +2963,7 @@ describe("Hala policy", () => {
     replaceHand(state, 0, []);
     addOpponentAlly(state, "SEA051");
     const sawbones = addOpponentAlly(state, "SEA264");
-    state.players[0]!.weapons[0]!.counters = { sharpenedTurn: state.turn };
+    state.players[0]!.weapons[0]!.scriptState = { sharpenedTurn: state.turn };
 
     const intent = chooseHalaIntent({
       seat: 0,
@@ -2984,7 +2991,7 @@ describe("Hala policy", () => {
     state.players[0]!.resources = 2;
     replaceHand(state, 0, []);
     const sawbones = addOpponentAlly(state, "SEA264");
-    state.players[0]!.weapons[0]!.counters = { sharpenedTurn: state.turn };
+    state.players[0]!.weapons[0]!.scriptState = { sharpenedTurn: state.turn };
     state.players[0]!.board.push({
       instanceId: state.nextInstanceId++,
       cardId: "AHA027",
@@ -3062,7 +3069,7 @@ describe("Hala policy", () => {
     state.players[0]!.resources = 1;
     replaceHand(state, 0, []);
     addOpponentAlly(state, "SEA050");
-    state.players[0]!.weapons[0]!.counters = { sharpenedTurn: state.turn };
+    state.players[0]!.weapons[0]!.scriptState = { sharpenedTurn: state.turn };
 
     const intent = chooseHalaIntent({
       seat: 0,
@@ -3092,7 +3099,8 @@ describe("Hala policy", () => {
     replaceHand(state, 0, []);
     addOpponentAlly(state, "SEA051");
     const exact = addOpponentAlly(state, "SEA052", 4);
-    state.players[0]!.weapons[0]!.counters = { power: 1, sharpenedTurn: state.turn };
+    state.players[0]!.weapons[0]!.counters = { power: 1 };
+    state.players[0]!.weapons[0]!.scriptState = { sharpenedTurn: state.turn };
 
     const intent = chooseHalaIntent({
       seat: 0,
@@ -3120,7 +3128,7 @@ describe("Hala policy", () => {
     state.players[0]!.resources = 2;
     replaceHand(state, 0, []);
     const chum = addOpponentAlly(state, "SEA050");
-    state.players[0]!.weapons[0]!.counters = { sharpenedTurn: state.turn };
+    state.players[0]!.weapons[0]!.scriptState = { sharpenedTurn: state.turn };
     state.players[0]!.board.push({
       instanceId: state.nextInstanceId++,
       cardId: "AHA027",

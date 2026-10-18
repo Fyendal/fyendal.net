@@ -38,7 +38,7 @@ function isNonAttackAction(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): bo
 }
 
 function isFused(ctx: ScriptCtx): boolean {
-  return ctx.getCounter("fused") > 0;
+  return ctx.getState("fused") > 0;
 }
 
 /** Fused Explosive Growth: "whenever it deals damage" to any target. */
@@ -75,7 +75,7 @@ function fusionOnChoose(ctx: ScriptCtx, hook: string, option: string, type: "ear
   if (option === "no") return true;
   const card = ctx.player(ctx.seat).hand.find((candidate) => candidate.instanceId === Number(option));
   if (!card) return true;
-  ctx.setCounter("fused", 1);
+  ctx.setState("fused", 1);
   ctx.setFlag("player", "fusedThisTurn", true);
   ctx.setFlag("player", `${type}FusedThisTurn`, true);
   ctx.logPublic(
@@ -212,8 +212,8 @@ function entangle(): CardScript {
     },
     onHit(ctx) {
       const hero = ctx.player(opponentSeat(ctx)).hero;
-      ctx.setCardCounter(hero.instanceId, "nextAttackPowerPenalty", 2);
-      ctx.setCardCounter(hero.instanceId, "nextAttackPowerPenaltyUntilTurn", ctx.state.turn + 1);
+      ctx.setCardState(hero.instanceId, "nextAttackPowerPenalty", 2);
+      ctx.setCardState(hero.instanceId, "nextAttackPowerPenaltyUntilTurn", ctx.state.turn + 1);
     },
   };
 }
@@ -322,11 +322,11 @@ function fusedAttackWatcher(
     additionalCost: fusionAdditionalCost(type),
     onAttackDeclared(ctx) {
       if (!isFused(ctx)) return;
-      ctx.setCounter(key, 1);
+      ctx.setState(key, 1);
       ctx.addModifier({ scope: "until-end-of-turn", ...label });
     },
     canTriggerOnHit(ctx) {
-      return ctx.getCounter(key) > 0 && ctx.link?.targetAllyId === undefined;
+      return ctx.getState(key) > 0 && ctx.link?.targetAllyId === undefined;
     },
     onHit(ctx) {
       onHit(ctx);
@@ -367,7 +367,7 @@ function ritesOfLightning(): CardScript {
 }
 
 function requestRitesAttack(ctx: ScriptCtx): void {
-  if (!ctx.getCounter("ritesAttack")) return;
+  if (!ctx.getState("ritesAttack")) return;
   const attacks = ctx.player(ctx.seat).graveyard.filter((card) => isAttack(ctx, card));
   if (attacks.length > 0) {
     ctx.requestCardChoice(
@@ -385,7 +385,7 @@ function ritesOfReplenishment(): CardScript {
   return {
     additionalCost: fusionAdditionalCost("earth"),
     onAttackDeclared(ctx) {
-      ctx.setCounter("ritesAttack", isFused(ctx) ? 1 : 0);
+      ctx.setState("ritesAttack", isFused(ctx) ? 1 : 0);
       const nonAttacks = ctx.player(ctx.seat).graveyard.filter((card) => isNonAttackAction(ctx, card));
       if (ctx.getFlag("player", "arcaneDamageDealtThisTurn") === true && nonAttacks.length > 0) {
         ctx.requestCardChoice(
@@ -416,7 +416,7 @@ function brambleSpark(attack: number): CardScript {
   return {
     additionalCost: fusionAdditionalCost("earth"),
     onPlay(ctx) {
-      ctx.setCounter("brambleArmed", 1);
+      ctx.setState("brambleArmed", 1);
       ctx.addModifier({
         scope: "until-end-of-turn",
         ...(isFused(ctx)
@@ -438,9 +438,9 @@ function brambleSpark(attack: number): CardScript {
         label: "Deal 1 arcane damage to target hero",
         labelMessage: decisionMessage("card.trigger.common.arcane.target", { amount: 1 }),
         condition: (ctx) =>
-          ctx.getCounter("brambleArmed") > 0 && ctx.link?.attacker === ctx.seat && ctx.link.attackCardType === "action",
+          ctx.getState("brambleArmed") > 0 && ctx.link?.attacker === ctx.seat && ctx.link.attackCardType === "action",
         onTrigger(ctx) {
-          ctx.setCounter("brambleArmed", 0);
+          ctx.setState("brambleArmed", 0);
           if (isFused(ctx)) ctx.addModifier({ scope: "chain-link", attack, appliesTo: "attack-action" });
         },
         target: heroTarget(),
@@ -460,7 +460,7 @@ function brambleSpark(attack: number): CardScript {
 function weave(type: "earth" | "ice", attack: number): CardScript {
   return {
     onPlay(ctx) {
-      ctx.setCounter("weaveArmed", 1);
+      ctx.setState("weaveArmed", 1);
       ctx.addModifier({
         scope: "until-end-of-turn",
         ...(type === "earth"
@@ -478,15 +478,15 @@ function weave(type: "earth" | "ice", attack: number): CardScript {
       });
     },
     onFriendlyAttackDeclared(ctx) {
-      if (!ctx.getCounter("weaveArmed") || ctx.link?.attackCardType !== "action") return;
+      if (!ctx.getState("weaveArmed") || ctx.link?.attackCardType !== "action") return;
       const attackCard = ctx.link.attackingCard;
       if (!hasType(ctx, attackCard, type) && !hasType(ctx, attackCard, "elemental")) return;
-      ctx.setCounter("weaveArmed", 0);
+      ctx.setState("weaveArmed", 0);
       ctx.addModifier({ scope: "chain-link", attack, appliesTo: "attack-action" });
-      if (type === "earth" && (attackCard.counters?.fused ?? 0) > 0) {
+      if (type === "earth" && (attackCard.scriptState?.fused ?? 0) > 0) {
         ctx.addModifier({ scope: "chain-link", attack: 1, appliesTo: "attack-action" });
       }
-      if (type === "ice" && (attackCard.counters?.fused ?? 0) > 0) {
+      if (type === "ice" && (attackCard.scriptState?.fused ?? 0) > 0) {
         ctx.addModifier({ scope: "chain-link", dominate: true, appliesTo: "attack-action" });
       }
     },
@@ -509,7 +509,7 @@ function weaveLightning(attack: number): CardScript {
       const card = ctx.link.attackingCard;
       if (!hasType(ctx, card, "lightning") && !hasType(ctx, card, "elemental")) return;
       if (!consumeDelayedEffect(ctx)) return;
-      if ((card.counters?.fused ?? 0) > 0) ctx.grantGoAgain();
+      if ((card.scriptState?.fused ?? 0) > 0) ctx.grantGoAgain();
     },
   };
 }
@@ -668,12 +668,12 @@ export const ele: Record<string, CardScript> = mergeSetScripts("ELE", eleHighRar
       timing: "defense-reaction",
       oncePerTurn: true,
       onCostPaid(ctx, cards) {
-        ctx.setCounter("oldhimEarth", cards.some((card) => hasType(ctx, card, "earth")) ? 1 : 0);
-        ctx.setCounter("oldhimIce", cards.some((card) => hasType(ctx, card, "ice")) ? 1 : 0);
+        ctx.setState("oldhimEarth", cards.some((card) => hasType(ctx, card, "earth")) ? 1 : 0);
+        ctx.setState("oldhimIce", cards.some((card) => hasType(ctx, card, "ice")) ? 1 : 0);
       },
       onActivate(ctx) {
-        if (ctx.getCounter("oldhimEarth")) ctx.preventNextDamage(ctx.seat, 2);
-        if (!ctx.getCounter("oldhimIce") || !ctx.link) return;
+        if (ctx.getState("oldhimEarth")) ctx.preventNextDamage(ctx.seat, 2);
+        if (!ctx.getState("oldhimIce") || !ctx.link) return;
         const attacker = ctx.link.attacker;
         const hand = ctx.player(attacker).hand;
         if (hand.length > 0) {
@@ -1002,34 +1002,34 @@ export const ele: Record<string, CardScript> = mergeSetScripts("ELE", eleHighRar
   "entwine lightning|3": fusedGoAgain("lightning"),
   "invigorate|1": {
     onPlay(ctx) {
-      ctx.setCounter("invigorateArmed", 1);
+      ctx.setState("invigorateArmed", 1);
       ctx.addModifier({ scope: "until-end-of-turn", ...invigorateLabel(4) });
     },
     onFriendlyAttackDeclared(ctx) {
-      if (!ctx.getCounter("invigorateArmed") || !(ctx.link?.attackingCard.counters?.fused ?? 0)) return;
-      ctx.setCounter("invigorateArmed", 0);
+      if (!ctx.getState("invigorateArmed") || !(ctx.link?.attackingCard.scriptState?.fused ?? 0)) return;
+      ctx.setState("invigorateArmed", 0);
       ctx.addModifier({ scope: "chain-link", attack: 4 });
     },
   },
   "invigorate|2": {
     onPlay(ctx) {
-      ctx.setCounter("invigorateArmed", 1);
+      ctx.setState("invigorateArmed", 1);
       ctx.addModifier({ scope: "until-end-of-turn", ...invigorateLabel(3) });
     },
     onFriendlyAttackDeclared(ctx) {
-      if (!ctx.getCounter("invigorateArmed") || !(ctx.link?.attackingCard.counters?.fused ?? 0)) return;
-      ctx.setCounter("invigorateArmed", 0);
+      if (!ctx.getState("invigorateArmed") || !(ctx.link?.attackingCard.scriptState?.fused ?? 0)) return;
+      ctx.setState("invigorateArmed", 0);
       ctx.addModifier({ scope: "chain-link", attack: 3 });
     },
   },
   "invigorate|3": {
     onPlay(ctx) {
-      ctx.setCounter("invigorateArmed", 1);
+      ctx.setState("invigorateArmed", 1);
       ctx.addModifier({ scope: "until-end-of-turn", ...invigorateLabel(2) });
     },
     onFriendlyAttackDeclared(ctx) {
-      if (!ctx.getCounter("invigorateArmed") || !(ctx.link?.attackingCard.counters?.fused ?? 0)) return;
-      ctx.setCounter("invigorateArmed", 0);
+      if (!ctx.getState("invigorateArmed") || !(ctx.link?.attackingCard.scriptState?.fused ?? 0)) return;
+      ctx.setState("invigorateArmed", 0);
       ctx.addModifier({ scope: "chain-link", attack: 2 });
     },
   },
@@ -1074,21 +1074,21 @@ export const ele: Record<string, CardScript> = mergeSetScripts("ELE", eleHighRar
   },
   "evergreen|1": {
     onAttackDeclared(ctx) {
-      ctx.setCounter("evergreenArsenal", ctx.getFlag("link", "fromArsenal") === true ? 1 : 0);
+      ctx.setState("evergreenArsenal", ctx.getFlag("link", "fromArsenal") === true ? 1 : 0);
     },
-    graveyardReplacement: (ctx) => (ctx.getCounter("evergreenArsenal") ? "bottom-of-deck" : undefined),
+    graveyardReplacement: (ctx) => (ctx.getState("evergreenArsenal") ? "bottom-of-deck" : undefined),
   },
   "evergreen|2": {
     onAttackDeclared(ctx) {
-      ctx.setCounter("evergreenArsenal", ctx.getFlag("link", "fromArsenal") === true ? 1 : 0);
+      ctx.setState("evergreenArsenal", ctx.getFlag("link", "fromArsenal") === true ? 1 : 0);
     },
-    graveyardReplacement: (ctx) => (ctx.getCounter("evergreenArsenal") ? "bottom-of-deck" : undefined),
+    graveyardReplacement: (ctx) => (ctx.getState("evergreenArsenal") ? "bottom-of-deck" : undefined),
   },
   "evergreen|3": {
     onAttackDeclared(ctx) {
-      ctx.setCounter("evergreenArsenal", ctx.getFlag("link", "fromArsenal") === true ? 1 : 0);
+      ctx.setState("evergreenArsenal", ctx.getFlag("link", "fromArsenal") === true ? 1 : 0);
     },
-    graveyardReplacement: (ctx) => (ctx.getCounter("evergreenArsenal") ? "bottom-of-deck" : undefined),
+    graveyardReplacement: (ctx) => (ctx.getState("evergreenArsenal") ? "bottom-of-deck" : undefined),
   },
   "weave earth|1": weave("earth", 3),
   "weave earth|2": weave("earth", 2),
@@ -1264,11 +1264,11 @@ export const ele: Record<string, CardScript> = mergeSetScripts("ELE", eleHighRar
   "ice quake|1": {
     onPlay(ctx) {
       buffNextAttack(ctx, { attack: 3 });
-      ctx.setCounter("iceQuake", 1);
+      ctx.setState("iceQuake", 1);
       ctx.addModifier({ scope: "until-end-of-turn", ...FROSTBITE_ON_HIT });
     },
     canTriggerOnHit(ctx) {
-      return ctx.getCounter("iceQuake") > 0 && ctx.link?.targetAllyId === undefined;
+      return ctx.getState("iceQuake") > 0 && ctx.link?.targetAllyId === undefined;
     },
     onHit(ctx) {
       createFrostbites(ctx, opponentSeat(ctx));
@@ -1277,11 +1277,11 @@ export const ele: Record<string, CardScript> = mergeSetScripts("ELE", eleHighRar
   "ice quake|2": {
     onPlay(ctx) {
       buffNextAttack(ctx, { attack: 2 });
-      ctx.setCounter("iceQuake", 1);
+      ctx.setState("iceQuake", 1);
       ctx.addModifier({ scope: "until-end-of-turn", ...FROSTBITE_ON_HIT });
     },
     canTriggerOnHit(ctx) {
-      return ctx.getCounter("iceQuake") > 0 && ctx.link?.targetAllyId === undefined;
+      return ctx.getState("iceQuake") > 0 && ctx.link?.targetAllyId === undefined;
     },
     onHit(ctx) {
       createFrostbites(ctx, opponentSeat(ctx));
@@ -1290,11 +1290,11 @@ export const ele: Record<string, CardScript> = mergeSetScripts("ELE", eleHighRar
   "ice quake|3": {
     onPlay(ctx) {
       buffNextAttack(ctx, { attack: 1 });
-      ctx.setCounter("iceQuake", 1);
+      ctx.setState("iceQuake", 1);
       ctx.addModifier({ scope: "until-end-of-turn", ...FROSTBITE_ON_HIT });
     },
     canTriggerOnHit(ctx) {
-      return ctx.getCounter("iceQuake") > 0 && ctx.link?.targetAllyId === undefined;
+      return ctx.getState("iceQuake") > 0 && ctx.link?.targetAllyId === undefined;
     },
     onHit(ctx) {
       createFrostbites(ctx, opponentSeat(ctx));
@@ -1323,52 +1323,52 @@ export const ele: Record<string, CardScript> = mergeSetScripts("ELE", eleHighRar
   },
   "chill to the bone|1": {
     onPlay(ctx) {
-      ctx.setCounter("chill", 1);
+      ctx.setState("chill", 1);
       ctx.addModifier({ scope: "until-end-of-turn", ...chillToTheBoneLabel(3) });
     },
     canTriggerOnHit(ctx) {
       return (
-        ctx.getCounter("chill") > 0 &&
+        ctx.getState("chill") > 0 &&
         ctx.link?.targetAllyId === undefined &&
         (ctx.currentAttackHasType("ice") || ctx.currentAttackHasType("elemental"))
       );
     },
     onHit(ctx) {
-      ctx.setCounter("chill", 0);
+      ctx.setState("chill", 0);
       createFrostbites(ctx, opponentSeat(ctx), 3);
     },
   },
   "chill to the bone|2": {
     onPlay(ctx) {
-      ctx.setCounter("chill", 1);
+      ctx.setState("chill", 1);
       ctx.addModifier({ scope: "until-end-of-turn", ...chillToTheBoneLabel(2) });
     },
     canTriggerOnHit(ctx) {
       return (
-        ctx.getCounter("chill") > 0 &&
+        ctx.getState("chill") > 0 &&
         ctx.link?.targetAllyId === undefined &&
         (ctx.currentAttackHasType("ice") || ctx.currentAttackHasType("elemental"))
       );
     },
     onHit(ctx) {
-      ctx.setCounter("chill", 0);
+      ctx.setState("chill", 0);
       createFrostbites(ctx, opponentSeat(ctx), 2);
     },
   },
   "chill to the bone|3": {
     onPlay(ctx) {
-      ctx.setCounter("chill", 1);
+      ctx.setState("chill", 1);
       ctx.addModifier({ scope: "until-end-of-turn", ...chillToTheBoneLabel(1) });
     },
     canTriggerOnHit(ctx) {
       return (
-        ctx.getCounter("chill") > 0 &&
+        ctx.getState("chill") > 0 &&
         ctx.link?.targetAllyId === undefined &&
         (ctx.currentAttackHasType("ice") || ctx.currentAttackHasType("elemental"))
       );
     },
     onHit(ctx) {
-      ctx.setCounter("chill", 0);
+      ctx.setState("chill", 0);
       createFrostbites(ctx, opponentSeat(ctx), 1);
     },
   },
@@ -1565,48 +1565,48 @@ export const ele: Record<string, CardScript> = mergeSetScripts("ELE", eleHighRar
   "electrify|1": {
     onPlay(ctx) {
       if (ctx.fromArsenal) ctx.drawCards(ctx.seat, 1);
-      ctx.setCounter("electrify", 1);
+      ctx.setState("electrify", 1);
       ctx.addModifier({ scope: "until-end-of-turn", ...electrifyLabel(3) });
     },
     canTriggerOnHit(ctx) {
       return (
-        ctx.getCounter("electrify") > 0 && ctx.link?.targetAllyId === undefined && ctx.link?.attackCardType === "action"
+        ctx.getState("electrify") > 0 && ctx.link?.targetAllyId === undefined && ctx.link?.attackCardType === "action"
       );
     },
     onHit(ctx) {
-      ctx.setCounter("electrify", 0);
+      ctx.setState("electrify", 0);
       ctx.dealDamage(opponentSeat(ctx), 3, { sourceInstanceId: ctx.link!.attackingCard.instanceId });
     },
   },
   "electrify|2": {
     onPlay(ctx) {
       if (ctx.fromArsenal) ctx.drawCards(ctx.seat, 1);
-      ctx.setCounter("electrify", 1);
+      ctx.setState("electrify", 1);
       ctx.addModifier({ scope: "until-end-of-turn", ...electrifyLabel(2) });
     },
     canTriggerOnHit(ctx) {
       return (
-        ctx.getCounter("electrify") > 0 && ctx.link?.targetAllyId === undefined && ctx.link?.attackCardType === "action"
+        ctx.getState("electrify") > 0 && ctx.link?.targetAllyId === undefined && ctx.link?.attackCardType === "action"
       );
     },
     onHit(ctx) {
-      ctx.setCounter("electrify", 0);
+      ctx.setState("electrify", 0);
       ctx.dealDamage(opponentSeat(ctx), 2, { sourceInstanceId: ctx.link!.attackingCard.instanceId });
     },
   },
   "electrify|3": {
     onPlay(ctx) {
       if (ctx.fromArsenal) ctx.drawCards(ctx.seat, 1);
-      ctx.setCounter("electrify", 1);
+      ctx.setState("electrify", 1);
       ctx.addModifier({ scope: "until-end-of-turn", ...electrifyLabel(1) });
     },
     canTriggerOnHit(ctx) {
       return (
-        ctx.getCounter("electrify") > 0 && ctx.link?.targetAllyId === undefined && ctx.link?.attackCardType === "action"
+        ctx.getState("electrify") > 0 && ctx.link?.targetAllyId === undefined && ctx.link?.attackCardType === "action"
       );
     },
     onHit(ctx) {
-      ctx.setCounter("electrify", 0);
+      ctx.setState("electrify", 0);
       ctx.dealDamage(opponentSeat(ctx), 1, { sourceInstanceId: ctx.link!.attackingCard.instanceId });
     },
   },

@@ -98,17 +98,6 @@ function enterGraveyard(
   }
   clearPlayFromZoneGrant(card);
   clearTemporaryObjectEffects(card);
-  // Rule-facing markers stop applying in an inactive zone. Card scripts also
-  // use this map for private delayed-effect state, which must remain available
-  // to the resolving layer and lingering modifiers; project.ts never exposes
-  // that implementation state for graveyard/banish cards.
-  const inactiveCounterKeys = [
-    "aim", "attacked", "balance", "bind", "defense", "doom", "flow", "frost", "frozenUntilTurn",
-    "haunt", "holo", "lessons", "marked", "power", "rust", "sand", "stain", "storm",
-  ];
-  for (const key of inactiveCounterKeys) delete card.counters?.[key];
-  if (card.counters && Object.keys(card.counters).length === 0) delete card.counters;
-  delete card.defCounters;
   owner.graveyard.push(card);
   if (from === "deck") {
     logPublic(state, gameLogMessage(
@@ -653,7 +642,7 @@ export function enterBanish(
     (resolving) => {
       if (
         resolving.owner !== causedBySeat ||
-        Number(resolving.counters?.payingAdditionalCost ?? 0) !== 1
+        Number(resolving.scriptState?.payingAdditionalCost ?? 0) !== 1
       ) return false;
       const resolvingData = dataOf(state, resolving.cardId);
       return resolvingData.cardType === "action" &&
@@ -747,6 +736,7 @@ export function banishCard(
     active.attackingCard = {
       ...card,
       ...(card.counters ? { counters: { ...card.counters } } : {}),
+      ...(card.scriptState ? { scriptState: { ...card.scriptState } } : {}),
       ...(card.grantedTypes ? { grantedTypes: [...card.grantedTypes] } : {}),
       ...(card.grantedKeywords ? { grantedKeywords: [...card.grantedKeywords] } : {}),
     };

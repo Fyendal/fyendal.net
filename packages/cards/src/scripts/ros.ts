@@ -160,7 +160,7 @@ function requestAnyTarget(
 function dealToChoice(ctx: ScriptCtx, option: string, amount: number): void {
   if (option === "no") return;
   const ally = /^ally:(\d+):(\d+)$/.exec(option);
-  ctx.setCounter("lastTargetWasAlly", ally ? 1 : 0);
+  ctx.setState("lastTargetWasAlly", ally ? 1 : 0);
   if (ally) {
     dealArcane(ctx, Number(ally[1]), amount, Number(ally[2]));
   } else {
@@ -232,7 +232,7 @@ function decompose(trigger: "attack" | "play", payoff: DecomposePayoff): CardScr
         if (option === "no") return;
         const first = ctx.player(ctx.seat).graveyard.find((card) => card.instanceId === Number(option));
         if (!first || !hasTag(ctx, first, "earth")) return;
-        ctx.setCounter("decomposeEarth1", first.instanceId);
+        ctx.setState("decomposeEarth1", first.instanceId);
         const secondEarth = ctx
           .player(ctx.seat)
           .graveyard.filter(
@@ -260,10 +260,10 @@ function decompose(trigger: "attack" | "play", payoff: DecomposePayoff): CardScr
         return;
       }
       if (hook === "decompose-earth-2") {
-        const firstId = ctx.getCounter("decomposeEarth1");
+        const firstId = ctx.getState("decomposeEarth1");
         const second = ctx.player(ctx.seat).graveyard.find((card) => card.instanceId === Number(option));
         if (!second || second.instanceId === firstId || !hasTag(ctx, second, "earth")) return;
-        ctx.setCounter("decomposeEarth2", second.instanceId);
+        ctx.setState("decomposeEarth2", second.instanceId);
         const actions = ctx
           .player(ctx.seat)
           .graveyard.filter(
@@ -280,7 +280,7 @@ function decompose(trigger: "attack" | "play", payoff: DecomposePayoff): CardScr
         return;
       }
       if (hook !== "decompose-action") return;
-      const ids = [ctx.getCounter("decomposeEarth1"), ctx.getCounter("decomposeEarth2"), Number(option)];
+      const ids = [ctx.getState("decomposeEarth1"), ctx.getState("decomposeEarth2"), Number(option)];
       if (new Set(ids).size !== 3) return;
       const grave = ctx.player(ctx.seat).graveyard;
       const chosen = ids.map((id) => grave.find((card) => card.instanceId === id));
@@ -668,7 +668,7 @@ function glyphOverlay(base: number): CardScript {
 function popBubble(amount: number): CardScript {
   const base = arcaneAnyTarget(amount, {
     onDamageDealt(ctx, target, dealt, arcane) {
-      if (!arcane || dealt <= amount || ctx.getCounter("lastTargetWasAlly")) return;
+      if (!arcane || dealt <= amount || ctx.getState("lastTargetWasAlly")) return;
       const auras = ctx.player(target).board.filter((card) => isAura(ctx, card));
       if (auras.length)
         ctx.requestCardChoice(
@@ -689,7 +689,7 @@ function popBubble(amount: number): CardScript {
 
 function saveThought(max: number): CardScript {
   const finish = (ctx: ScriptCtx) => {
-    if (ctx.getCounter("saveMoved")) ctx.shuffleDeck();
+    if (ctx.getState("saveMoved")) ctx.shuffleDeck();
     ctx.createToken(PONDER);
   };
   const offer = (ctx: ScriptCtx, remaining: number) => {
@@ -716,7 +716,7 @@ function saveThought(max: number): CardScript {
         return;
       }
       if (ctx.putOnDeckBottom(Number(option))) {
-        ctx.setCounter("saveMoved", 1);
+        ctx.setState("saveMoved", 1);
         offer(ctx, Number(match[1]) - 1);
       }
     },
@@ -801,7 +801,7 @@ export const ros: Record<string, CardScript> = {
       goAgain: true,
       oncePerTurn: true,
       onCostPaid(ctx, paid) {
-        if (paid.some((card) => hasTag(ctx, card, "earth"))) ctx.setCounter("earthPitchedTurn", ctx.state.turn);
+        if (paid.some((card) => hasTag(ctx, card, "earth"))) ctx.setState("earthPitchedTurn", ctx.state.turn);
       },
       onActivate(ctx) {
         ampNextArcane(ctx, 1);
@@ -817,8 +817,8 @@ export const ros: Record<string, CardScript> = {
         condition: (ctx, _eventCard, event) =>
           event?.damage?.arcane === true &&
           event.damage.byController &&
-          ctx.getCounter("earthPitchedTurn") === ctx.state.turn,
-        onTrigger: (ctx) => ctx.setCounter("earthPitchedTurn", 0),
+          ctx.getState("earthPitchedTurn") === ctx.state.turn,
+        onTrigger: (ctx) => ctx.setState("earthPitchedTurn", 0),
         effect: (ctx) => ctx.createToken(EARTH),
       },
     ],
@@ -1036,10 +1036,10 @@ for (const pitch of [1, 2, 3]) {
   ros[`etchings of arcana|${pitch}`] = etchings(4 - pitch);
   ros[`exploding aether|${pitch}`] = { onPlay: (ctx) => ampNextArcane(ctx, 4 - pitch) };
   if (pitch !== 3) ros[`open the flood gates|${pitch}`] = arcaneHero(4 - pitch, (ctx) => ctx.drawCards(ctx.seat, 2));
-  const bloom = arcaneHero(4 - pitch, (ctx) => ctx.setCounter("surged", 1));
+  const bloom = arcaneHero(4 - pitch, (ctx) => ctx.setState("surged", 1));
   ros[`perennial aetherbloom|${pitch}`] = {
     ...bloom,
-    graveyardReplacement: (ctx) => (ctx.getCounter("surged") ? "bottom-of-deck" : undefined),
+    graveyardReplacement: (ctx) => (ctx.getState("surged") ? "bottom-of-deck" : undefined),
   };
   ros[`overflow the aetherwell|${pitch}`] = arcaneHero(4 - pitch, (ctx) => ctx.changeResources(ctx.seat, 2));
   ros[`trailblazing aether|${pitch}`] = arcaneHero(4 - pitch, (ctx) => ctx.gainActionPoint());
@@ -1115,15 +1115,15 @@ ros["malefic incantation|3"] = maleficIncantation(1);
 for (const pitch of [1, 2, 3]) {
   ros[`blast to oblivion|${pitch}`] = {
     onAttackDeclared(ctx) {
-      ctx.setCounter("blastArmed", 1);
+      ctx.setState("blastArmed", 1);
       ctx.addModifier({ scope: "chain-link" });
     },
     triggers: [
       {
         event: "card-played",
         label: "Return an eligible aura to its owner's hand?",
-        condition: (ctx, played) => ctx.getCounter("blastArmed") > 0 && !!played && ctx.hasCardType(played, "instant"),
-        onTrigger: (ctx) => ctx.setCounter("blastArmed", 0),
+        condition: (ctx, played) => ctx.getState("blastArmed") > 0 && !!played && ctx.hasCardType(played, "instant"),
+        onTrigger: (ctx) => ctx.setState("blastArmed", 0),
         target: {
           options: (ctx) =>
             ctx.state.players
@@ -1174,7 +1174,7 @@ for (const [pitch, minimum] of [
       const match = /^somersault:(\d+)$/.exec(hook);
       if (!match || option === "done") return;
       const id = Number(option);
-      ctx.setCardCounter(id, "returnToHandAtLinkResolution", 1);
+      ctx.setCardState(id, "returnToHandAtLinkResolution", 1);
       const remaining = Number(match[1]) - 1;
       if (remaining <= 0 || !ctx.link) return;
       const cards = [ctx.link.attackingCard, ...ctx.link.defendingCards].filter(
@@ -1182,7 +1182,7 @@ for (const [pitch, minimum] of [
           card.instanceId !== id &&
           isAttackAction(ctx, card) &&
           (data(ctx, card).cost ?? 0) >= minimum &&
-          !card.counters?.returnToHandAtLinkResolution,
+          !card.scriptState?.returnToHandAtLinkResolution,
       );
       if (cards.length)
         ctx.requestCardChoice(
@@ -1217,12 +1217,12 @@ Object.assign(ros, {
     variablePlayCost: {
       base: 0,
       resourcesPerX: 2,
-      counterKey: "germinateX",
+      stateKey: "germinateX",
       prompt: decisionPrompt("Choose X", "engine.decision.x.choose"),
     },
     onPlay(ctx: ScriptCtx) {
-      const count = ctx.getCounter("germinateX") + 1;
-      ctx.setCounter("germinateRemaining", count);
+      const count = ctx.getState("germinateX") + 1;
+      ctx.setState("germinateRemaining", count);
       ctx.requestChoice(
         "germinate-token",
         decisionPrompt("Create which token?", "card.ros.token.create", {
@@ -1420,7 +1420,7 @@ Object.assign(ros, {
   },
   "gone in a flash|1": {
     onAttackDeclared(ctx: ScriptCtx) {
-      ctx.setCounter("goneInAFlashReady", 1);
+      ctx.setState("goneInAFlashReady", 1);
       // Keep this attack observable as a card-play trigger source while it is
       // on the combat chain rather than in a player's permanent zone.
       ctx.addModifier({ scope: "combat-chain" });
@@ -1434,14 +1434,14 @@ Object.assign(ros, {
         condition(ctx: ScriptCtx, played?: DeepReadonly<CardInstance>) {
           return (
             !!played &&
-            ctx.getCounter("goneInAFlashReady") > 0 &&
+            ctx.getState("goneInAFlashReady") > 0 &&
             ctx.link?.attackingCard.instanceId === ctx.self.instanceId &&
             ctx.link.flags.resolutionStepBegan !== true &&
             ctx.hasCardType(played, "instant")
           );
         },
         onTrigger(ctx: ScriptCtx) {
-          ctx.setCounter("goneInAFlashReady", 0);
+          ctx.setState("goneInAFlashReady", 0);
         },
         effect(ctx: ScriptCtx) {
           ctx.returnSelfToHand();
@@ -1670,12 +1670,12 @@ Object.assign(ros, {
   "truce|3": {
     triggers: [
       entersArenaTrigger("Choose an opponent", decisionMessage("card.trigger.common.opponent.choose"), (ctx) =>
-        ctx.setCounter("opponent", opponentSeat(ctx)),
+        ctx.setState("opponent", opponentSeat(ctx)),
       ),
       {
         event: "end-of-turn",
         whose: "any",
-        condition: (ctx: ScriptCtx) => ctx.state.activePlayer === ctx.getCounter("opponent"),
+        condition: (ctx: ScriptCtx) => ctx.state.activePlayer === ctx.getState("opponent"),
         label: "Both heroes gain 3 life",
         effect(ctx: ScriptCtx) {
           ctx.destroySelf();
@@ -1686,7 +1686,7 @@ Object.assign(ros, {
       {
         event: "attack-declared",
         whose: "any",
-        condition: (ctx: ScriptCtx) => ctx.link?.attacker === ctx.getCounter("opponent"),
+        condition: (ctx: ScriptCtx) => ctx.link?.attacker === ctx.getState("opponent"),
         label: "Destroy this and draw a card",
         labelMessage: decisionMessage("card.trigger.common.self.destroy.draw"),
         effect(ctx: ScriptCtx) {
@@ -1730,7 +1730,7 @@ Object.assign(ros, {
     onWagerResolved(ctx: ScriptCtx, winner: number) {
       ctx.drawCards(winner, 1);
       const loser = winner === ctx.seat ? opponentSeat(ctx) : ctx.seat;
-      ctx.setCounter("drink-loser", loser);
+      ctx.setState("drink-loser", loser);
       requestDiscardChoice(
         ctx,
         "drink-discard",
@@ -1739,7 +1739,7 @@ Object.assign(ros, {
       );
     },
     onChoose(ctx: ScriptCtx, hook: string, option: string) {
-      if (hook === "drink-discard") resolveDiscardChoice(ctx, option, ctx.getCounter("drink-loser"));
+      if (hook === "drink-discard") resolveDiscardChoice(ctx, option, ctx.getState("drink-loser"));
     },
   },
   "gustwave of the second wind|1": {
@@ -1755,7 +1755,7 @@ Object.assign(ros, {
       // "At the beginning of their next end phase, they discard all cards in
       // their hand and destroy all cards in their arsenal." — the shared
       // end-phase wipe consumed in endTurn()
-      ctx.setCardCounter(target.hero.instanceId, "clearHandAndArsenalAtEndPhaseTurn", ctx.state.turn + 1);
+      ctx.setCardState(target.hero.instanceId, "clearHandAndArsenalAtEndPhaseTurn", ctx.state.turn + 1);
       const deck = ctx.player(ctx.seat).deck;
       const traps = ctx.canSearchDeck() ? deck.filter((card) => hasTag(ctx, card, "trap")) : [];
       if (traps.length) {
@@ -1878,8 +1878,8 @@ Object.assign(ros, {
 ros["germinate|3"]!.onChoose = (ctx, hook, option) => {
   if (hook === "germinate-token") {
     ctx.createToken(option === "Runechant" ? RUNECHANT : EARTH);
-    const remaining = ctx.getCounter("germinateRemaining") - 1;
-    ctx.setCounter("germinateRemaining", remaining);
+    const remaining = ctx.getState("germinateRemaining") - 1;
+    ctx.setState("germinateRemaining", remaining);
     if (remaining > 0)
       ctx.requestChoice(
         "germinate-token",
@@ -1891,7 +1891,7 @@ ros["germinate|3"]!.onChoose = (ctx, hook, option) => {
         }),
         ["Runechant", "Embodiment of Earth"],
       );
-    else ctx.gainLife(ctx.seat, Number(ctx.getCounter("germinateX")) + 1);
+    else ctx.gainLife(ctx.seat, Number(ctx.getState("germinateX")) + 1);
     return;
   }
 };

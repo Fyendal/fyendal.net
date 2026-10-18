@@ -160,11 +160,11 @@ function steadfast(amount: number): CardScript {
         }),
         options.map((card) => card.instanceId),
       );
-      ctx.setCounter("steadfastAmount", amount);
+      ctx.setState("steadfastAmount", amount);
     },
     onChoose(ctx, hook, option) {
       if (hook === "steadfast-source") {
-        ctx.preventNextDamage(ctx.seat, ctx.getCounter("steadfastAmount"), Number(option));
+        ctx.preventNextDamage(ctx.seat, ctx.getState("steadfastAmount"), Number(option));
       }
     },
   };
@@ -218,10 +218,10 @@ function twinTwisters(): CardScript {
     onChoose(ctx, hook, option) {
       if (hook !== "twin-mode") return;
       if (option === "+1") ctx.addModifier({ scope: "chain-link", attack: 1 });
-      else ctx.setCounter("twinOnHit", 1);
+      else ctx.setState("twinOnHit", 1);
     },
     canTriggerOnHit(ctx) {
-      return ctx.getCounter("twinOnHit") > 0;
+      return ctx.getState("twinOnHit") > 0;
     },
     onHit(ctx) {
       ctx.addModifier({ scope: "next-attack", attack: 1, expiresOnChainClose: true });
@@ -282,7 +282,7 @@ function outlandSkirmish(amount: number): CardScript {
   return {
     onPlay(ctx) {
       buffNextAttack(ctx, { attack: amount, appliesTo: "weapon", appliesToSubtype: "1h" });
-      ctx.setCounter("outlandCopper", 1);
+      ctx.setState("outlandCopper", 1);
       ctx.addModifier({
         scope: "until-end-of-turn",
         appliesTo: "weapon",
@@ -290,10 +290,10 @@ function outlandSkirmish(amount: number): CardScript {
       });
     },
     canTriggerOnHit(ctx) {
-      return ctx.getCounter("outlandCopper") > 0 && isWeaponAttack(ctx);
+      return ctx.getState("outlandCopper") > 0 && isWeaponAttack(ctx);
     },
     onHit(ctx) {
-      ctx.setCounter("outlandCopper", 0);
+      ctx.setState("outlandCopper", 0);
       ctx.createToken(COPPER);
     },
   };
@@ -399,7 +399,7 @@ function fatigueShot(): CardScript {
     canTriggerOnHit: (ctx) => ctx.link?.targetAllyId === undefined,
     onHit(ctx) {
       const hero = ctx.player(opponentSeat(ctx)).hero;
-      ctx.setCardCounter(hero.instanceId, "halveNextAttackActionOnTurn", ctx.state.turn + 1);
+      ctx.setCardState(hero.instanceId, "halveNextAttackActionOnTurn", ctx.state.turn + 1);
     },
   };
 }
@@ -409,7 +409,7 @@ function timidityPoint(): CardScript {
     canTriggerOnHit: (ctx) => ctx.link?.targetAllyId === undefined,
     onHit(ctx) {
       const hero = ctx.player(opponentSeat(ctx)).hero;
-      ctx.setCardCounter(hero.instanceId, "suppressDominateUntilTurn", ctx.state.turn + 1);
+      ctx.setCardState(hero.instanceId, "suppressDominateUntilTurn", ctx.state.turn + 1);
     },
   };
 }
@@ -502,20 +502,20 @@ function pry(revealCount: number): CardScript {
       undefined,
       ids,
     );
-    ctx.setCounter("pryTarget", target);
-    ids.forEach((id, index) => ctx.setCounter(`pryRevealed:${index}`, id));
-    ctx.setCounter("pryRevealedCount", ids.length);
+    ctx.setState("pryTarget", target);
+    ids.forEach((id, index) => ctx.setState(`pryRevealed:${index}`, id));
+    ctx.setState("pryRevealedCount", ids.length);
   };
   const revealNext = (ctx: ScriptCtx, target: number, remaining: number) => {
-    const already = Array.from({ length: ctx.getCounter("pryRevealedCount") }, (_, index) =>
-      ctx.getCounter(`pryRevealed:${index}`),
+    const already = Array.from({ length: ctx.getState("pryRevealedCount") }, (_, index) =>
+      ctx.getState(`pryRevealed:${index}`),
     );
     const hand = ctx.player(target).hand.filter((card) => !already.includes(card.instanceId));
     if (remaining <= 0 || hand.length === 0) {
       offerBottom(ctx, target, already);
       return;
     }
-    ctx.setCounter("pryRevealRemaining", remaining);
+    ctx.setState("pryRevealRemaining", remaining);
     ctx.requestCardChoice(
       "pry-reveal",
       decisionPrompt(`${ctx.data.name}: choose a card to reveal`, "card.evr.reveal.choose", {
@@ -537,8 +537,8 @@ function pry(revealCount: number): CardScript {
       if (hook === "pry-target") {
         const target = heroChoiceSeat(ctx, option);
         if (target === undefined) return;
-        ctx.setCounter("pryTarget", target);
-        ctx.setCounter("pryRevealedCount", 0);
+        ctx.setState("pryTarget", target);
+        ctx.setState("pryRevealedCount", 0);
         const count =
           ctx.state.activePlayer !== ctx.seat
             ? ctx.player(target).hand.length
@@ -547,20 +547,20 @@ function pry(revealCount: number): CardScript {
         return;
       }
       if (hook === "pry-reveal") {
-        const target = ctx.getCounter("pryTarget");
+        const target = ctx.getState("pryTarget");
         const handCard = ctx.player(target).hand.find((card) => card.instanceId === Number(option));
         if (!handCard) return;
-        const index = ctx.getCounter("pryRevealedCount");
-        ctx.setCounter(`pryRevealed:${index}`, handCard.instanceId);
-        ctx.setCounter("pryRevealedCount", index + 1);
-        revealNext(ctx, target, ctx.getCounter("pryRevealRemaining") - 1);
+        const index = ctx.getState("pryRevealedCount");
+        ctx.setState(`pryRevealed:${index}`, handCard.instanceId);
+        ctx.setState("pryRevealedCount", index + 1);
+        revealNext(ctx, target, ctx.getState("pryRevealRemaining") - 1);
         return;
       }
       if (hook !== "pry-bottom" || option === "pass") return;
-      const target = ctx.getCounter("pryTarget");
+      const target = ctx.getState("pryTarget");
       const id = Number(option);
-      const allowed = Array.from({ length: ctx.getCounter("pryRevealedCount") }, (_, index) =>
-        ctx.getCounter(`pryRevealed:${index}`),
+      const allowed = Array.from({ length: ctx.getState("pryRevealedCount") }, (_, index) =>
+        ctx.getState(`pryRevealed:${index}`),
       );
       if (!allowed.includes(id) || !ctx.putOnDeckBottom(id)) return;
       ctx.drawCards(target, 1);
@@ -589,7 +589,7 @@ function timekeepersWhim(amount: number): CardScript {
     arcaneDamageEffectAmounts: [amount],
     playAsInstant: wizardActionAsInstant,
     additionalCost(ctx) {
-      if (ctx.state.activePlayer !== ctx.seat) ctx.setCounter("whimOpponentTurn", 1);
+      if (ctx.state.activePlayer !== ctx.seat) ctx.setState("whimOpponentTurn", 1);
     },
     onPlay(ctx) {
       requestHeroChoice(
@@ -607,10 +607,10 @@ function timekeepersWhim(amount: number): CardScript {
       if (hook !== "whim-target") return;
       const target = heroChoiceSeat(ctx, option);
       if (target !== undefined) ctx.dealDamage(target, amount, { arcane: true });
-      if (ctx.getCounter("whimOpponentTurn")) ctx.putOnDeckBottom(ctx.self.instanceId);
+      if (ctx.getState("whimOpponentTurn")) ctx.putOnDeckBottom(ctx.self.instanceId);
     },
     graveyardReplacement(ctx) {
-      return ctx.getCounter("whimOpponentTurn") ? "bottom-of-deck" : undefined;
+      return ctx.getState("whimOpponentTurn") ? "bottom-of-deck" : undefined;
     },
   };
 }
@@ -712,13 +712,13 @@ function lifeOfParty(): CardScript {
       name: "Crazy Brew",
     },
     onAlternativeCostPaid(ctx) {
-      ctx.setCounter("partyAlternativeCost", 1);
+      ctx.setState("partyAlternativeCost", 1);
     },
     onAttackDeclared(ctx) {
-      const allModes = ctx.getCounter("partyAlternativeCost") > 0;
+      const allModes = ctx.getState("partyAlternativeCost") > 0;
       const mode = allModes ? -1 : ctx.randomInt(3);
       if (allModes || mode === 0) {
-        ctx.setCounter("lifeOnHit", 1);
+        ctx.setState("lifeOnHit", 1);
         ctx.logPublic(
           localizedCardLog(
             ctx,
@@ -740,7 +740,7 @@ function lifeOfParty(): CardScript {
       }
     },
     canTriggerOnHit(ctx) {
-      return ctx.getCounter("lifeOnHit") > 0;
+      return ctx.getState("lifeOnHit") > 0;
     },
     onHit(ctx) {
       ctx.gainLife(ctx.seat, 2);
@@ -751,7 +751,7 @@ function lifeOfParty(): CardScript {
 function highStriker(count: number): CardScript {
   return {
     onPlay(ctx) {
-      ctx.setCounter("highStriker", count);
+      ctx.setState("highStriker", count);
       ctx.addModifier({
         scope: "until-end-of-turn",
         ...ongoingLabel(
@@ -762,11 +762,11 @@ function highStriker(count: number): CardScript {
       });
     },
     canTriggerOnHit(ctx) {
-      return ctx.getCounter("highStriker") > 0;
+      return ctx.getState("highStriker") > 0;
     },
     onHit(ctx) {
-      const remaining = ctx.getCounter("highStriker");
-      ctx.setCounter("highStriker", 0);
+      const remaining = ctx.getState("highStriker");
+      ctx.setState("highStriker", 0);
       makeCopies(ctx, COPPER, remaining);
     },
   };
@@ -787,12 +787,12 @@ function pickACard(repeats: number): CardScript {
         }),
         names,
       );
-      ctx.setCounter("pickRepeats", repeats);
+      ctx.setState("pickRepeats", repeats);
     },
     onChoose(ctx, hook, option) {
       if (hook !== "pick-name") return;
       const hand = ctx.player(opponentSeat(ctx)).hand;
-      for (let i = 0; i < ctx.getCounter("pickRepeats") && hand.length > 0; i++) {
+      for (let i = 0; i < ctx.getState("pickRepeats") && hand.length > 0; i++) {
         const card = hand[ctx.randomInt(hand.length)]!;
         const name = ctx.cardData(card.cardId).name;
         ctx.logPublic(
@@ -813,7 +813,7 @@ function pickACard(repeats: number): CardScript {
 function smashingGoodTime(amount: number): CardScript {
   return {
     onPlay(ctx) {
-      ctx.setCounter("smashingReady", 1);
+      ctx.setState("smashingReady", 1);
       ctx.addModifier({
         scope: "until-end-of-turn",
         ...ongoingLabel(
@@ -827,13 +827,13 @@ function smashingGoodTime(amount: number): CardScript {
     },
     canTriggerOnHit(ctx) {
       return (
-        ctx.getCounter("smashingReady") > 0 &&
+        ctx.getState("smashingReady") > 0 &&
         ctx.link?.attackCardType === "action" &&
         ctx.link.targetAllyId === undefined
       );
     },
     onHit(ctx) {
-      ctx.setCounter("smashingReady", 0);
+      ctx.setState("smashingReady", 0);
       const items = ctx
         .player(opponentSeat(ctx))
         .board.filter((card) => hasType(ctx, card, "item") && (ctx.cardData(card.cardId).cost ?? 0) <= 2);
@@ -898,7 +898,7 @@ const amuletAssertiveness: CardScript = {
     },
     onActivate(ctx) {
       if (!ctx.link) return;
-      ctx.setCounter("assertivenessAttack", ctx.link.attackingCard.instanceId);
+      ctx.setState("assertivenessAttack", ctx.link.attackingCard.instanceId);
       ctx.addModifier({
         scope: "until-end-of-turn",
         appliesToInstanceId: ctx.link.attackingCard.instanceId,
@@ -911,10 +911,10 @@ const amuletAssertiveness: CardScript = {
     },
   },
   canTriggerOnHit(ctx) {
-    return !!ctx.link && ctx.getCounter("assertivenessAttack") === ctx.link.attackingCard.instanceId;
+    return !!ctx.link && ctx.getState("assertivenessAttack") === ctx.link.attackingCard.instanceId;
   },
   onHit(ctx) {
-    ctx.setCounter("assertivenessAttack", 0);
+    ctx.setState("assertivenessAttack", 0);
     const top = ctx.player(ctx.seat).deck[0];
     if (!top || !ctx.banish(top.instanceId)) return;
     if (isAttackAction(ctx, top)) ctx.allowPlayFrom(top.instanceId, "banish");
@@ -954,8 +954,8 @@ const amuletEchoes: CardScript = {
     if (hook === "echoes-target") {
       const target = heroChoiceSeat(ctx, option);
       if (target === undefined) return;
-      ctx.setCounter("echoes-target-seat", target);
-      ctx.setCounter("echoes-discards-left", 2);
+      ctx.setState("echoes-target-seat", target);
+      ctx.setState("echoes-discards-left", 2);
       requestDiscardChoice(
         ctx,
         "echoes-discard",
@@ -965,10 +965,10 @@ const amuletEchoes: CardScript = {
       return;
     }
     if (hook !== "echoes-discard") return;
-    const targetSeat = ctx.getCounter("echoes-target-seat");
+    const targetSeat = ctx.getState("echoes-target-seat");
     if (!resolveDiscardChoice(ctx, option, targetSeat)) return;
-    const left = ctx.getCounter("echoes-discards-left") - 1;
-    ctx.setCounter("echoes-discards-left", left);
+    const left = ctx.getState("echoes-discards-left") - 1;
+    ctx.setState("echoes-discards-left", left);
     if (left > 0)
       requestDiscardChoice(
         ctx,

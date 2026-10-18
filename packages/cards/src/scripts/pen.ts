@@ -1,4 +1,5 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx, TriggerDef } from "@fyendal/engine";
+import type { CounterKind } from "@fyendal/shared";
 import {
   buffNextAttack,
   bloodDebtScript as bloodDebt,
@@ -148,7 +149,7 @@ function continuePoundOfFlesh(ctx: ScriptCtx, startIndex = 0): void {
     return;
   }
   for (const player of ctx.state.players) {
-    if (ctx.getCounter(`pound-six:${player.seat}`) !== 1) ctx.loseLife(player.seat, 1);
+    if (ctx.getState(`pound-six:${player.seat}`) !== 1) ctx.loseLife(player.seat, 1);
   }
 }
 
@@ -275,10 +276,10 @@ function arcaneSpell(
 function bond(tag: "earth" | "ice" | "lightning", effect: (ctx: ScriptCtx) => void): CardScript {
   return {
     onPlayCostPaid(ctx, paid) {
-      if (paid.some((card) => hasTag(ctx, card, tag))) ctx.setCounter("bonded", 1);
+      if (paid.some((card) => hasTag(ctx, card, tag))) ctx.setState("bonded", 1);
     },
     onPlay(ctx) {
-      if (ctx.getCounter("bonded") > 0) effect(ctx);
+      if (ctx.getState("bonded") > 0) effect(ctx);
     },
   };
 }
@@ -479,7 +480,7 @@ function decompose(payoff: (ctx: ScriptCtx) => void): CardScript {
         if (option === "no") return;
         const first = ctx.player(ctx.seat).graveyard.find((card) => card.instanceId === Number(option));
         if (!first || !hasTag(ctx, first, "earth")) return;
-        ctx.setCounter("decomposeEarth1", first.instanceId);
+        ctx.setState("decomposeEarth1", first.instanceId);
         const secondEarth = ctx
           .player(ctx.seat)
           .graveyard.filter(
@@ -501,10 +502,10 @@ function decompose(payoff: (ctx: ScriptCtx) => void): CardScript {
           secondEarth.map((card) => card.instanceId),
         );
       } else if (hook === "pen-decompose-earth-2") {
-        const firstId = ctx.getCounter("decomposeEarth1");
+        const firstId = ctx.getState("decomposeEarth1");
         const second = ctx.player(ctx.seat).graveyard.find((card) => card.instanceId === Number(option));
         if (!second || second.instanceId === firstId || !hasTag(ctx, second, "earth")) return;
-        ctx.setCounter("decomposeEarth2", second.instanceId);
+        ctx.setState("decomposeEarth2", second.instanceId);
         const actions = ctx
           .player(ctx.seat)
           .graveyard.filter(
@@ -517,7 +518,7 @@ function decompose(payoff: (ctx: ScriptCtx) => void): CardScript {
           actions.map((card) => card.instanceId),
         );
       } else if (hook === "pen-decompose-action") {
-        const ids = [ctx.getCounter("decomposeEarth1"), ctx.getCounter("decomposeEarth2"), Number(option)];
+        const ids = [ctx.getState("decomposeEarth1"), ctx.getState("decomposeEarth2"), Number(option)];
         const grave = ctx.player(ctx.seat).graveyard;
         const chosen = ids.map((id) => grave.find((card) => card.instanceId === id));
         if (
@@ -559,13 +560,13 @@ function putOnIce(count: number): CardScript {
       if (ctx.fromArsenal) ctx.drawCards(ctx.seat, 1);
     },
     onChoose(ctx, hook, option) {
-      if (hook !== "pen-freeze-ally" || option === "done" || ctx.getCounter("frozen") >= count) return;
-      ctx.setCardCounter(Number(option), "frozenUntilTurn", ctx.state.turn + 2);
-      ctx.setCounter("frozen", ctx.getCounter("frozen") + 1);
+      if (hook !== "pen-freeze-ally" || option === "done" || ctx.getState("frozen") >= count) return;
+      ctx.setCardState(Number(option), "frozenUntilTurn", ctx.state.turn + 2);
+      ctx.setState("frozen", ctx.getState("frozen") + 1);
       const remaining = ctx.state.players
         .flatMap((player) => player.board)
         .filter((card) => hasTag(ctx, card, "ally") && !ctx.isFrozen(card));
-      if (remaining.length && ctx.getCounter("frozen") < count)
+      if (remaining.length && ctx.getState("frozen") < count)
         ctx.requestCardChoice(
           "pen-freeze-ally",
           decisionPrompt("Freeze another ally?", "card.pen.ally.freeze.next", {
@@ -656,11 +657,11 @@ function requestTendenciesAura(ctx: ScriptCtx, itemChosen: boolean): void {
 
 /** Remove all counters from the chosen item token and aura token together. */
 function finishTendencies(ctx: ScriptCtx, auraId?: number): void {
-  const itemId = ctx.getCounter("tendenciesItem");
-  ctx.setCounter("tendenciesItem", 0);
+  const itemId = ctx.getState("tendenciesItem");
+  ctx.setState("tendenciesItem", 0);
   for (const card of ctx.state.players.flatMap((player) => player.board)) {
     if (card.instanceId !== itemId && card.instanceId !== auraId) continue;
-    for (const key of Object.keys(card.counters ?? {})) ctx.setCardCounter(card.instanceId, key, 0);
+    for (const key of (Object.keys(card.counters ?? {}) as CounterKind[])) ctx.setCardCounter(card.instanceId, key, 0);
   }
 }
 
@@ -780,11 +781,11 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
       ],
       onActivate(ctx) {
         ctx.addModifier({ scope: "chain-link", attack: 1 });
-        ctx.setCounter("armed", 1);
+        ctx.setState("armed", 1);
       },
     },
     onMiss(ctx) {
-      if (ctx.getCounter("armed")) ctx.destroySelf();
+      if (ctx.getState("armed")) ctx.destroySelf();
     },
   },
   "two steps forward|0": {
@@ -871,7 +872,7 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
       if (hook !== "pen-rend-flesh") return;
       const sword = ctx.link?.attackingCard;
       if (!sword || Number(sword.counters?.power ?? 0) <= 0) return;
-      ctx.setCounter("rendFleshSword", sword.instanceId);
+      ctx.setState("rendFleshSword", sword.instanceId);
       ctx.requestChoice(
         "pen-rend-flesh-remove",
         decisionPrompt(
@@ -887,7 +888,7 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
       const sword = ctx.link?.attackingCard;
       if (
         !sword ||
-        sword.instanceId !== ctx.getCounter("rendFleshSword") ||
+        sword.instanceId !== ctx.getState("rendFleshSword") ||
         Number(sword.counters?.power ?? 0) <= 0
       ) return;
       ctx.addCounter(sword.instanceId, "power", -1);
@@ -899,7 +900,7 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
     onPlay(ctx) {
       ctx.addModifier({ scope: "chain-link", attack: 5 - pitch });
       const weapon = ctx.link?.attackingCard;
-      if (weapon && Number(weapon.counters?.sharpenedTurn ?? 0) === ctx.state.turn)
+      if (weapon && Number(weapon.scriptState?.sharpenedTurn ?? 0) === ctx.state.turn)
         ctx.addCounter(weapon.instanceId, "power", 1);
     },
   })),
@@ -972,10 +973,10 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
         );
       if (!target) return;
       const driver = named(ctx, target, "Hyper Driver");
-      if (ctx.banish(target.instanceId) && driver) ctx.setCounter("scrappedDriver", 1);
+      if (ctx.banish(target.instanceId) && driver) ctx.setState("scrappedDriver", 1);
     },
     onAttackDeclared(ctx) {
-      if (ctx.getCounter("scrappedDriver")) ctx.createToken(HYPER_DRIVER, undefined, { steam: 2 });
+      if (ctx.getState("scrappedDriver")) ctx.createToken(HYPER_DRIVER, undefined, { steam: 2 });
     },
   },
   "assembly module|3": {
@@ -1430,12 +1431,12 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
   "solray plating|0": { optionalDamagePrevention: { amount: 1, moveSource: "destroy" } },
   "blessing of themis|2": {
     onEnterArena(ctx) {
-      ctx.setCounter("themisNamed", 0);
+      ctx.setState("themisNamed", 0);
     },
     onChoose(ctx, hook, option) {
       if (hook !== "pen-themis-name") return;
       ctx.setChosenName(option);
-      ctx.setCounter("themisNamed", 1);
+      ctx.setState("themisNamed", 1);
       for (const player of ctx.state.players) {
         for (const card of player.banish) {
           if (!card.faceDown && named(ctx, card, option)) ctx.setCardFaceDown(card.instanceId, true);
@@ -1465,7 +1466,7 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
         whose: "any",
         label: "Turn the named banished card face-down",
         labelMessage: decisionMessage("card.trigger.pen.themis.facedown"),
-        condition: (ctx, card) => ctx.getCounter("themisNamed") === 1 &&
+        condition: (ctx, card) => ctx.getState("themisNamed") === 1 &&
           !!card && !card.faceDown && !!ctx.self.chosenName &&
           named(ctx, card, ctx.self.chosenName),
         effect(ctx, card) {
@@ -1497,7 +1498,7 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
       if (seat === undefined) return;
       const card = ctx.player(seat).hand.find((candidate) => candidate.instanceId === Number(option));
       if (card && ctx.banish(card.instanceId) && isSixPlus(ctx, card)) {
-        ctx.setCounter(`pound-six:${seat}`, 1);
+        ctx.setState(`pound-six:${seat}`, 1);
       }
       continuePoundOfFlesh(ctx, index + 1);
     },
@@ -1552,13 +1553,13 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
   "seeds of strength|1": {
     ...bond("earth", (ctx) => create(ctx, MIGHT, 4)),
     onPlay(ctx) {
-      create(ctx, MIGHT, ctx.getCounter("bonded") ? 4 : 3);
+      create(ctx, MIGHT, ctx.getState("bonded") ? 4 : 3);
     },
   },
   "arc bending|1": {
     ...bond("lightning", (ctx) => ctx.grantGoAgain()),
     onAttackDeclared(ctx) {
-      if (ctx.getCounter("bonded")) ctx.grantGoAgain();
+      if (ctx.getState("bonded")) ctx.grantGoAgain();
       ctx.addModifier({ scope: "combat-chain", damage: 1, appliesToType: ["lightning", "elemental"] });
     },
   },
@@ -1572,7 +1573,7 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
           "card.effect.pen.verdanttide",
         ),
       });
-      if (ctx.getCounter("bonded")) create(ctx, EARTH);
+      if (ctx.getState("bonded")) create(ctx, EARTH);
     },
     replaceFriendlyTokenCreation(ctx, cardId, count) {
       return hasTag(ctx, cardId, "aura") && (hasTag(ctx, cardId, "elemental") || hasTag(ctx, cardId, "runeblade"))
@@ -1584,7 +1585,7 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
     ...bond("lightning", (ctx) => dealArcane(ctx, opponentSeat(ctx), 1)),
     onPlay(ctx) {
       ctx.preventNextDamage(ctx.seat, 4);
-      if (ctx.getCounter("bonded")) dealArcane(ctx, opponentSeat(ctx), 1);
+      if (ctx.getState("bonded")) dealArcane(ctx, opponentSeat(ctx), 1);
     },
   },
   "colors of aria|1": { allZoneTypes: ["earth", "ice", "lightning"] },
@@ -1595,21 +1596,21 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
     ...bond("earth", (ctx) => create(ctx, EARTH)),
     onPlay(ctx) {
       buffNextAttack(ctx, { attack: 3 });
-      if (ctx.getCounter("bonded")) create(ctx, EARTH);
+      if (ctx.getState("bonded")) create(ctx, EARTH);
     },
   },
   "laden with frost|1": {
     ...bond("ice", (ctx) => create(ctx, FROSTBITE, 1, opponentSeat(ctx))),
     onPlay(ctx) {
       buffNextAttack(ctx, { attack: 3 });
-      if (ctx.getCounter("bonded")) create(ctx, FROSTBITE, 1, opponentSeat(ctx));
+      if (ctx.getState("bonded")) create(ctx, FROSTBITE, 1, opponentSeat(ctx));
     },
   },
   "laden with lightning|1": {
     ...bond("lightning", (ctx) => create(ctx, LIGHTNING)),
     onPlay(ctx) {
       buffNextAttack(ctx, { attack: 3 });
-      if (ctx.getCounter("bonded")) create(ctx, LIGHTNING);
+      if (ctx.getState("bonded")) create(ctx, LIGHTNING);
     },
   },
   "chorus of rotwood|1": {
@@ -1971,7 +1972,7 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
           hasKeyword(ctx, played, "ephemeral"),
         effect(ctx, played) {
           if (!played) return;
-          ctx.setCounter("shapelessTarget", played.instanceId);
+          ctx.setState("shapelessTarget", played.instanceId);
           ctx.requestNameChoice(
             "pen-shapeless-name",
             decisionPrompt("Choose a name for the ephemeral attack", "card.pen.ephemeral.name"),
@@ -1981,7 +1982,7 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
     ],
     onChoose(ctx, hook, option) {
       if (hook !== "pen-shapeless-name") return;
-      const target = ctx.getCounter("shapelessTarget");
+      const target = ctx.getState("shapelessTarget");
       if (target > 0) ctx.grantCardName(target, option);
     },
   },
@@ -2010,7 +2011,7 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
   "recede to mistform|3": {
     variablePlayCost: {
       base: 0,
-      counterKey: "recedeX",
+      stateKey: "recedeX",
       prompt: decisionPrompt("Choose X", "engine.decision.x.choose"),
       maximum(ctx) {
         return Object.values(ctx.player(ctx.seat).equipment).filter(
@@ -2022,7 +2023,7 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
       },
     },
     onPlay(ctx) {
-      if (ctx.getCounter("recedeX") <= 0) return;
+      if (ctx.getState("recedeX") <= 0) return;
       const equipment = Object.values(ctx.player(ctx.seat).equipment).filter(
         (card): card is DeepReadonly<CardInstance> =>
           !!card &&
@@ -2038,8 +2039,8 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
     },
     onChoose(ctx, hook, option) {
       if (hook !== "recede-equipment") return;
-      if (ctx.setCardFaceDown(Number(option), true)) ctx.addCounter(ctx.self.instanceId, "recedeChosen", 1);
-      if (ctx.getCounter("recedeChosen") >= ctx.getCounter("recedeX")) return;
+      if (ctx.setCardFaceDown(Number(option), true)) ctx.addCardState(ctx.self.instanceId, "recedeChosen", 1);
+      if (ctx.getState("recedeChosen") >= ctx.getState("recedeX")) return;
       const equipment = Object.values(ctx.player(ctx.seat).equipment).filter(
         (card): card is DeepReadonly<CardInstance> =>
           !!card &&
@@ -2230,7 +2231,7 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
   "ransack and raze|3": {
     variablePlayCost: {
       base: 0,
-      counterKey: "ransackX",
+      stateKey: "ransackX",
       prompt: decisionPrompt("Choose X", "engine.decision.x.choose"),
       maximum(ctx) {
         const target = ctx.globalCards().find((card) => card.instanceId === ctx.playTargetInstanceId);
@@ -2249,7 +2250,7 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
     },
     onPlay(ctx) {
       const target = ctx.globalCards().find((card) => card.instanceId === ctx.playTargetInstanceId);
-      const x = ctx.getCounter("ransackX");
+      const x = ctx.getState("ransackX");
       if (target && ctx.destroyGlobal(target.instanceId)) create(ctx, GOLD, x);
     },
   },
@@ -2258,7 +2259,7 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
     // is offered only while the other mode can still be chosen. Counters are
     // removed from both targets once the choices are made.
     onPlay(ctx) {
-      ctx.setCounter("tendenciesItem", 0);
+      ctx.setState("tendenciesItem", 0);
       const items = tendenciesTargets(ctx, "item");
       if (items.length === 0) {
         requestTendenciesAura(ctx, false);
@@ -2276,7 +2277,7 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
     onChoose(ctx, hook, option) {
       if (hook === "pen-tendencies-item") {
         const chosen = option !== "pass";
-        if (chosen) ctx.setCounter("tendenciesItem", Number(option));
+        if (chosen) ctx.setState("tendenciesItem", Number(option));
         requestTendenciesAura(ctx, chosen);
         return;
       }

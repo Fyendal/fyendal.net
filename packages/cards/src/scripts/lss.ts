@@ -10,15 +10,15 @@ function continueBuddySearch(ctx: ScriptCtx): void {
     ctx.seat,
     ...ctx.state.players.filter((player) => player.seat !== ctx.seat).map((player) => player.seat),
   ];
-  let step = ctx.getCounter("buddySearchStep");
+  let step = ctx.getState("buddySearchStep");
   while (step < order.length) {
     const target = order[step]!;
-    ctx.setCounter("buddySearchStep", ++step);
+    ctx.setState("buddySearchStep", ++step);
     const choices = ctx.canSearchDeck(target)
       ? ctx.player(target).deck.filter((card) => isPotionOrBrew(ctx, card))
       : [];
     if (!choices.length) continue;
-    ctx.setCounter("buddySearchSeat", target);
+    ctx.setState("buddySearchSeat", target);
     ctx.requestCardChoice(
       "buddy-search",
       decisionPrompt("Drinking Buddy: search for a Potion or Brew item?", "card.lss.drinking.buddy.search", {
@@ -29,21 +29,21 @@ function continueBuddySearch(ctx: ScriptCtx): void {
     );
     return;
   }
-  if (ctx.getCounter("buddySearches") >= 2) ctx.grantGoAgain();
+  if (ctx.getState("buddySearches") >= 2) ctx.grantGoAgain();
 }
 
 export const lss: Record<string, CardScript> = {
   "drinking buddy|1": {
     onAttackDeclared(ctx) {
-      ctx.setCounter("buddySearchStep", 0);
-      ctx.setCounter("buddySearches", 0);
+      ctx.setState("buddySearchStep", 0);
+      ctx.setState("buddySearches", 0);
       continueBuddySearch(ctx);
     },
     onChoose(ctx, hook, option) {
       if (hook !== "buddy-search") return;
-      const target = ctx.getCounter("buddySearchSeat");
+      const target = ctx.getState("buddySearchSeat");
       if (option !== "no" && ctx.settleCard(Number(option), { controllerSeat: target })) {
-        ctx.addCounter(ctx.self.instanceId, "buddySearches", 1);
+        ctx.addCardState(ctx.self.instanceId, "buddySearches", 1);
         ctx.shuffleDeck(target);
       }
       continueBuddySearch(ctx);

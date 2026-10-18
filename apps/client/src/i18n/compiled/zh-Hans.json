@@ -11416,6 +11416,12 @@
       "value": "弃置一张牌"
     }
   ],
+  "card.omn.cog.search.arena": [
+    {
+      "type": 0,
+      "value": "从牌库搜寻一张 cog 并放入竞技场？"
+    }
+  ],
   "card.omn.color.choose": [
     {
       "type": 0,

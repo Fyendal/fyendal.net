@@ -97,9 +97,9 @@ function evoEquipment(extra: CardScript = {}): CardScript {
 const ANTE_MODES = ["agility", "gold", "vigor", "power"] as const;
 type AnteMode = (typeof ANTE_MODES)[number];
 function requestAnteMode(ctx: ScriptCtx): void {
-  const remaining = ctx.getCounter("ante-remaining");
+  const remaining = ctx.getState("ante-remaining");
   if (remaining <= 0) return;
-  const total = Math.min(ANTE_MODES.length, ctx.getCounter("anteX") + 1);
+  const total = Math.min(ANTE_MODES.length, ctx.getState("anteX") + 1);
   ctx.requestChoice(
     "ante-mode",
     decisionPrompt(
@@ -112,15 +112,15 @@ function requestAnteMode(ctx: ScriptCtx): void {
           vigor: decisionMessage("card.hvy.wager.option.vigor"),
           power: decisionMessage("card.hvy.wager.option.power"),
         },
-        chosen: ANTE_MODES.filter((mode) => ctx.getCounter(`ante-mode:${mode}`) > 0),
+        chosen: ANTE_MODES.filter((mode) => ctx.getState(`ante-mode:${mode}`) > 0),
       },
     ),
-    ANTE_MODES.filter((mode) => ctx.getCounter(`ante-mode:${mode}`) <= 0),
+    ANTE_MODES.filter((mode) => ctx.getState(`ante-mode:${mode}`) <= 0),
   );
 }
 function applyAnteModes(ctx: ScriptCtx): void {
   for (const mode of ANTE_MODES) {
-    if (ctx.getCounter(`ante-mode:${mode}`) <= 0) continue;
+    if (ctx.getState(`ante-mode:${mode}`) <= 0) continue;
     if (mode === "agility") ctx.wager(opponentSeat(ctx), [AGILITY]);
     else if (mode === "gold") ctx.wager(opponentSeat(ctx), [GOLD]);
     else if (mode === "vigor") ctx.wager(opponentSeat(ctx), [VIGOR]);
@@ -150,11 +150,11 @@ export const hvyHighRarity: Record<string, CardScript> = {
       const arsenal = ctx.player(opponentSeat(ctx)).arsenal[0];
       if (arsenal) {
         ctx.banish(arsenal.instanceId, { faceDown: false });
-        ctx.setCounter("packed", arsenal.instanceId);
+        ctx.setState("packed", arsenal.instanceId);
       }
     },
     onMiss(ctx) {
-      const id = ctx.getCounter("packed");
+      const id = ctx.getState("packed");
       if (id) ctx.moveToHand(id);
     },
   },
@@ -200,7 +200,7 @@ export const hvyHighRarity: Record<string, CardScript> = {
     onChoose(ctx, hook, option) {
       if (hook !== "no-fear") return;
       if (option === "done") {
-        const count = ctx.getCounter("fear-count");
+        const count = ctx.getState("fear-count");
         ctx.preventNextDamage(ctx.seat, 2 + count);
         if (count > 0) {
           ctx.scheduleEndOfTurnTrigger(
@@ -208,14 +208,14 @@ export const hvyHighRarity: Record<string, CardScript> = {
             decisionPrompt("Return cards banished by No Fear", "card.trigger.common.nofear.return"),
             ctx.state.activePlayer,
           );
-          ctx.setCounter("fear-count", 0);
+          ctx.setState("fear-count", 0);
         }
         return;
       }
       if (ctx.banish(Number(option))) {
-        const count = ctx.getCounter("fear-count") + 1;
-        ctx.setCounter("fear-count", count);
-        ctx.setCounter(`fear-card-${count}`, Number(option));
+        const count = ctx.getState("fear-count") + 1;
+        ctx.setState("fear-count", count);
+        ctx.setState(`fear-card-${count}`, Number(option));
         const cards = ctx.player(ctx.seat).hand.filter((card) => isSix(ctx, card));
         ctx.requestCardChoice(
           "no-fear",
@@ -228,8 +228,8 @@ export const hvyHighRarity: Record<string, CardScript> = {
     },
     onDelayedTrigger(ctx, hook) {
       if (hook !== "no-fear-return") return;
-      const count = ctx.getCounter("fear-count");
-      for (let i = 1; i <= count; i++) ctx.moveToHand(ctx.getCounter(`fear-card-${i}`));
+      const count = ctx.getState("fear-count");
+      for (let i = 1; i <= count; i++) ctx.moveToHand(ctx.getState(`fear-card-${i}`));
     },
   },
   "betsy, skin in the game|0": {
@@ -239,7 +239,7 @@ export const hvyHighRarity: Record<string, CardScript> = {
         label: "Pay 2 for +1 and overpower?",
         effect(ctx, attacking) {
           if (!attacking) return;
-          ctx.setCounter("betsy-attack", attacking.instanceId);
+          ctx.setState("betsy-attack", attacking.instanceId);
           ctx.requestPayment(
             "betsy-pay",
             decisionPrompt("Pay 2 for +1 and overpower?", "card.hvy.betsy.pay.generic", {
@@ -256,7 +256,7 @@ export const hvyHighRarity: Record<string, CardScript> = {
         ctx.addModifier({
           scope: "chain-link",
           attack: 1,
-          appliesToInstanceId: ctx.getCounter("betsy-attack"),
+          appliesToInstanceId: ctx.getState("betsy-attack"),
           overpower: true,
         });
       }
@@ -274,11 +274,11 @@ export const hvyHighRarity: Record<string, CardScript> = {
   "aurum aegis|0": { allZoneNames: ["Gold"] },
   "gauntlets of iron will|0": {
     onDefend(ctx) {
-      ctx.setCounter("replacement-ready", 1);
+      ctx.setState("replacement-ready", 1);
     },
     replacePowerGain(ctx, amount) {
-      if (ctx.getCounter("replacement-ready") <= 0 || amount <= 0) return amount;
-      ctx.setCounter("replacement-ready", 0);
+      if (ctx.getState("replacement-ready") <= 0 || amount <= 0) return amount;
+      ctx.setState("replacement-ready", 0);
       return Math.max(0, amount - 1);
     },
   },
@@ -317,9 +317,9 @@ export const hvyHighRarity: Record<string, CardScript> = {
     },
     onClashResult(ctx, hook, winner) {
       if (hook === "trounce-one") {
-        ctx.setCounter("trounce-winner", winner);
+        ctx.setState("trounce-winner", winner);
         ctx.requestClash(opponentSeat(ctx), "trounce-two");
-      } else if (hook === "trounce-two" && winner >= 0 && winner === ctx.getCounter("trounce-winner")) {
+      } else if (hook === "trounce-two" && winner >= 0 && winner === ctx.getState("trounce-winner")) {
         ctx.createToken(GOLD, winner);
         ctx.createToken(MIGHT, winner);
         ctx.createToken(VIGOR, winner);
@@ -407,14 +407,14 @@ export const hvyHighRarity: Record<string, CardScript> = {
     variablePlayCost: {
       base: 0,
       maximum: ANTE_MODES.length - 1,
-      counterKey: "anteX",
+      stateKey: "anteX",
       prompt: decisionPrompt("Choose X", "engine.decision.x.choose"),
     },
     playTargetOptions(ctx) {
       return ctx.link ? [ctx.link.attackingCard.instanceId] : [];
     },
     additionalCost(ctx) {
-      ctx.setCounter("ante-remaining", ctx.getCounter("anteX") + 1);
+      ctx.setState("ante-remaining", ctx.getState("anteX") + 1);
       requestAnteMode(ctx);
     },
     onPlay(ctx) {
@@ -423,8 +423,8 @@ export const hvyHighRarity: Record<string, CardScript> = {
     onChoose(ctx, hook, option) {
       if (hook !== "ante-mode" || !ANTE_MODES.includes(option as AnteMode)) return;
       const mode = option as AnteMode;
-      ctx.setCounter(`ante-mode:${mode}`, 1);
-      ctx.setCounter("ante-remaining", ctx.getCounter("ante-remaining") - 1);
+      ctx.setState(`ante-mode:${mode}`, 1);
+      ctx.setState("ante-remaining", ctx.getState("ante-remaining") - 1);
       requestAnteMode(ctx);
     },
   },
@@ -516,7 +516,7 @@ export const hvyHighRarity: Record<string, CardScript> = {
       ]);
     },
     onChoose(ctx, hook, option) {
-      if (hook === "big-number") ctx.setCounter("talk-threshold", Number(option));
+      if (hook === "big-number") ctx.setState("talk-threshold", Number(option));
     },
     triggers: [
       {
@@ -527,14 +527,14 @@ export const hvyHighRarity: Record<string, CardScript> = {
         // from the pending threshold to the amount to create.
         condition(ctx, _eventCard, event) {
           const damage = heroDamage(event);
-          const threshold = ctx.getCounter("talk-threshold");
+          const threshold = ctx.getState("talk-threshold");
           return !!damage && damage.byController && !damage.arcane && threshold > 0 && damage.amount >= threshold;
         },
         onTrigger(ctx) {
-          ctx.setCounter("talk-might", ctx.getCounter("talk-threshold"));
-          ctx.setCounter("talk-threshold", 0);
+          ctx.setState("talk-might", ctx.getState("talk-threshold"));
+          ctx.setState("talk-threshold", 0);
         },
-        effect: (ctx) => ctx.createTokens(MIGHT, ctx.getCounter("talk-might")),
+        effect: (ctx) => ctx.createTokens(MIGHT, ctx.getState("talk-might")),
       },
     ],
   },
@@ -714,7 +714,7 @@ export const hvyHighRarity: Record<string, CardScript> = {
     },
     onChoose(ctx, hook, option, _unused?: never) {
       if (hook === "coercive-first") {
-        ctx.setCounter("coercive-first", Number(option));
+        ctx.setState("coercive-first", Number(option));
         const cards = ctx
           .player(opponentSeat(ctx))
           .deck.slice(0, 3)
@@ -728,7 +728,7 @@ export const hvyHighRarity: Record<string, CardScript> = {
         return;
       }
       if (hook !== "coercive-second") return;
-      const first = ctx.getCounter("coercive-first");
+      const first = ctx.getState("coercive-first");
       const cards = ctx.player(opponentSeat(ctx)).deck.slice(0, 3);
       const third = cards.find((card) => card.instanceId !== first && card.instanceId !== Number(option));
       if (third) ctx.putOnDeckTop(third.instanceId);
@@ -798,9 +798,9 @@ export const hvyHighRarity: Record<string, CardScript> = {
     },
   },
   "reel in|3": {
-    variablePlayCost: { base: 0, counterKey: "reelX", prompt: decisionPrompt("Choose X", "engine.decision.x.choose") },
+    variablePlayCost: { base: 0, stateKey: "reelX", prompt: decisionPrompt("Choose X", "engine.decision.x.choose") },
     onPlay(ctx) {
-      const looked = topCards(ctx, ctx.getCounter("reelX") + 1);
+      const looked = topCards(ctx, ctx.getState("reelX") + 1);
       for (const card of looked) ctx.lookAt(card.instanceId);
       const cards = looked.filter((card) => has(ctx, card, "trap")).slice(0, 4);
       ctx.revealCards(cards.map((card) => card.instanceId));
@@ -812,7 +812,7 @@ export const hvyHighRarity: Record<string, CardScript> = {
     variablePlayCost: {
       base: 0,
       resourcesPerX: 2,
-      counterKey: "galaxiaX",
+      stateKey: "galaxiaX",
       prompt: decisionPrompt("Choose X", "engine.decision.x.choose"),
     },
     modifyPlayCost(ctx, base) {
@@ -820,7 +820,7 @@ export const hvyHighRarity: Record<string, CardScript> = {
       return Math.max(0, base - runechants);
     },
     onPlay(ctx) {
-      const x = ctx.getCounter("galaxiaX");
+      const x = ctx.getState("galaxiaX");
       const cards = ctx
         .player(ctx.seat)
         .deck.filter(
@@ -846,11 +846,11 @@ export const hvyHighRarity: Record<string, CardScript> = {
         card &&
         has(ctx, card, "runeblade") &&
         has(ctx, card, "aura") &&
-        (data(ctx, card).cost ?? 0) <= ctx.getCounter("galaxiaX")
+        (data(ctx, card).cost ?? 0) <= ctx.getState("galaxiaX")
       )
         ctx.settleCard(card.instanceId);
       ctx.shuffleDeck();
-      if (ctx.getCounter("galaxiaX") >= 2) ctx.gainActionPoint();
+      if (ctx.getState("galaxiaX") >= 2) ctx.gainActionPoint();
     },
   },
   "aether arc|3": {

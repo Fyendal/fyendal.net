@@ -180,15 +180,15 @@ export function modifierApplies(
     if (link.targetAllyId !== undefined) return false;
     const targetHero = (state.players[opponent(link.attacker)] as PlayerState).hero;
     if (
-      (targetHero.counters?.marked ?? 0) <= 0 &&
+      (targetHero.scriptState?.marked ?? 0) <= 0 &&
       link.flags.targetWasMarkedOnHit !== true
     ) return false;
   }
   if (modifier.appliesToFromArsenal === true && link.flags.fromArsenal !== true) return false;
-  if (modifier.appliesToRuneGated === true && !link.attackingCard.counters?.runeGated) {
+  if (modifier.appliesToRuneGated === true && !link.attackingCard.scriptState?.runeGated) {
     return false;
   }
-  if (modifier.appliesToCharged === true && !link.attackingCard.counters?.chargedPitch) {
+  if (modifier.appliesToCharged === true && !link.attackingCard.scriptState?.chargedPitch) {
     return false;
   }
   if (

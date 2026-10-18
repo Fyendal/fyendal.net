@@ -44,7 +44,7 @@ function tickTockNextItem(ctx: ScriptCtx): void {
   const items = ctx.state.players.flatMap((player) =>
     player.board.filter((card) => card.instanceId !== ctx.self.instanceId && isItem(ctx, card)),
   );
-  if (ctx.getCounter("tickTockChosen") < 2 && items.length) {
+  if (ctx.getState("tickTockChosen") < 2 && items.length) {
     ctx.requestCardChoice(
       TICK_TOCK_ITEM,
       decisionPrompt("Destroy another item?", "card.evo.ticktock.item.destroy", {
@@ -54,7 +54,7 @@ function tickTockNextItem(ctx: ScriptCtx): void {
     );
     return;
   }
-  const destroyed = ctx.getCounter("tickTockDestroyed");
+  const destroyed = ctx.getState("tickTockDestroyed");
   if (destroyed > 0) ctx.dealDamage(opponentSeat(ctx), destroyed);
 }
 
@@ -74,9 +74,9 @@ function emboldenedBladeReveal(ctx: ScriptCtx, instanceId: number): void {
 }
 const FABRICATE_MODES = ["equip", "defense", "under", "hand"] as const;
 function recordFabricateMode(ctx: ScriptCtx, mode: string) {
-  ctx.setCounter(`fabricate-mode:${mode}`, 1);
-  const used = ctx.getCounter("fabricate-modes") + 1;
-  ctx.setCounter("fabricate-modes", used);
+  ctx.setState(`fabricate-mode:${mode}`, 1);
+  const used = ctx.getState("fabricate-modes") + 1;
+  ctx.setState("fabricate-modes", used);
   if (used < 2) {
     ctx.requestChoice(
       "fabricate-mode",
@@ -88,12 +88,12 @@ function recordFabricateMode(ctx: ScriptCtx, mode: string) {
           hand: decisionMessage("card.evo.fabricate.option.hand"),
         },
       }),
-      FABRICATE_MODES.filter((candidate) => ctx.getCounter(`fabricate-mode:${candidate}`) === 0),
+      FABRICATE_MODES.filter((candidate) => ctx.getState(`fabricate-mode:${candidate}`) === 0),
     );
   }
 }
 function applyFabricateHandMode(ctx: ScriptCtx): void {
-  if (ctx.getCounter("fabricate-mode:hand") <= 0) return;
+  if (ctx.getState("fabricate-mode:hand") <= 0) return;
   const evo = ctx.player(ctx.seat).hand.find((card) => has(ctx, card, "evo"));
   if (evo && ctx.banish(evo.instanceId)) ctx.drawCards(ctx.seat, 1);
 }
@@ -220,8 +220,8 @@ function scrap(extra: CardScript = {}, count = 1): CardScript {
             (isItem(ctx, candidate) || data(ctx, candidate).cardType === "equipment"),
         );
       if (!card || !ctx.banish(card.instanceId)) return;
-      const scrapped = ctx.getCounter("scrapped") + 1;
-      ctx.setCounter("scrapped", scrapped);
+      const scrapped = ctx.getState("scrapped") + 1;
+      ctx.setState("scrapped", scrapped);
       if (scrapped >= count) return;
       const cards = ctx
         .player(ctx.seat)
@@ -254,10 +254,10 @@ function breakerEvo(extra: CardScript = {}): CardScript {
     },
     onChoose(ctx, hook, option) {
       if (hook === "breaker-driver" && option !== "done") {
-        const n = ctx.getCounter("breaker-count") + 1;
-        ctx.setCounter("breaker-count", n);
-        ctx.setCounter(`breaker-driver-${n}`, Number(option));
-        const chosen = new Set(Array.from({ length: n }, (_, i) => ctx.getCounter(`breaker-driver-${i + 1}`)));
+        const n = ctx.getState("breaker-count") + 1;
+        ctx.setState("breaker-count", n);
+        ctx.setState(`breaker-driver-${n}`, Number(option));
+        const chosen = new Set(Array.from({ length: n }, (_, i) => ctx.getState(`breaker-driver-${i + 1}`)));
         const drivers = ctx
           .player(ctx.seat)
           .board.filter((card) => named(ctx, card, "hyper driver") && !chosen.has(card.instanceId));
@@ -272,8 +272,8 @@ function breakerEvo(extra: CardScript = {}): CardScript {
       } else extra.onChoose?.(ctx, hook, option);
     },
     onEnterArena(ctx) {
-      const ids = Array.from({ length: ctx.getCounter("breaker-count") }, (_, i) =>
-        ctx.getCounter(`breaker-driver-${i + 1}`),
+      const ids = Array.from({ length: ctx.getState("breaker-count") }, (_, i) =>
+        ctx.getState(`breaker-driver-${i + 1}`),
       ).filter(Boolean);
       if (ids.length) {
         ctx.transformInto(ctx.self.cardId, ids, ctx.self.instanceId);
@@ -295,24 +295,24 @@ function optionalBreakerBoost(effect: (ctx: ScriptCtx, boostedInstanceId: number
   return {
     onBoosted(ctx, boosted) {
       if (!ctx.self.subcards?.length) return;
-      const pending = ctx.getCounter("breaker-boost-pending");
-      ctx.setCounter(`breaker-boosted-instance:${pending + 1}`, boosted.instanceId);
-      ctx.setCounter("breaker-boost-pending", pending + 1);
+      const pending = ctx.getState("breaker-boost-pending");
+      ctx.setState(`breaker-boosted-instance:${pending + 1}`, boosted.instanceId);
+      ctx.setState("breaker-boost-pending", pending + 1);
       if (pending === 0) requestChoice(ctx);
     },
     onChoose(ctx, hook, option) {
       if (hook !== "breaker-boost") return;
-      const boostedInstanceId = ctx.getCounter("breaker-boosted-instance:1");
+      const boostedInstanceId = ctx.getState("breaker-boosted-instance:1");
       if (option === "yes" && boostedInstanceId > 0 && ctx.destroySubcard(ctx.self.instanceId)) {
         effect(ctx, boostedInstanceId);
       }
-      const pending = Math.max(0, ctx.getCounter("breaker-boost-pending") - 1);
+      const pending = Math.max(0, ctx.getState("breaker-boost-pending") - 1);
       for (let i = 1; i <= pending; i += 1) {
-        ctx.setCounter(`breaker-boosted-instance:${i}`, ctx.getCounter(`breaker-boosted-instance:${i + 1}`));
+        ctx.setState(`breaker-boosted-instance:${i}`, ctx.getState(`breaker-boosted-instance:${i + 1}`));
       }
-      ctx.setCounter("breaker-boost-pending", pending);
+      ctx.setState("breaker-boost-pending", pending);
       if (pending > 0 && ctx.self.subcards?.length) requestChoice(ctx);
-      else if (pending > 0) ctx.setCounter("breaker-boost-pending", 0);
+      else if (pending > 0) ctx.setState("breaker-boost-pending", 0);
     },
   };
 }
@@ -513,14 +513,14 @@ export const evoHighRarity: Record<string, CardScript> = {
     onTransform(ctx, _direction, other) {
       const count = steelSoulTriggerCount(ctx, other);
       if (count <= 0) return;
-      ctx.setCounter("steel-controller-triggers", count);
+      ctx.setState("steel-controller-triggers", count);
       requestSteelControllerChoice(ctx);
     },
     onChoose(ctx, hook, option) {
       if (hook !== "steel-controller") return;
       if (option !== "no") ctx.putOnDeckAtDepth(Number(option), 5);
-      const remaining = Math.max(0, ctx.getCounter("steel-controller-triggers") - 1);
-      ctx.setCounter("steel-controller-triggers", remaining);
+      const remaining = Math.max(0, ctx.getState("steel-controller-triggers") - 1);
+      ctx.setState("steel-controller-triggers", remaining);
       if (remaining > 0) requestSteelControllerChoice(ctx);
     },
   }),
@@ -573,7 +573,7 @@ export const evoHighRarity: Record<string, CardScript> = {
   }),
   "demolition protocol|1": {
     onAttackDeclared(ctx) {
-      ctx.setCounter("upgrades", equippedEvos(ctx));
+      ctx.setState("upgrades", equippedEvos(ctx));
       const cards = [
         ...ctx.player(opponentSeat(ctx)).board,
         ...ctx.player(opponentSeat(ctx)).weapons,
@@ -593,8 +593,8 @@ export const evoHighRarity: Record<string, CardScript> = {
     onChoose(ctx, hook, option) {
       if (hook !== "demolition" || option === "done") return;
       ctx.setCardCounter(Number(option), "steam", 0);
-      const n = ctx.getCounter("demolished") + 1;
-      ctx.setCounter("demolished", n);
+      const n = ctx.getState("demolished") + 1;
+      ctx.setState("demolished", n);
       const cards = [
         ...ctx.player(opponentSeat(ctx)).board,
         ...ctx.player(opponentSeat(ctx)).weapons,
@@ -602,7 +602,7 @@ export const evoHighRarity: Record<string, CardScript> = {
           (card): card is DeepReadonly<CardInstance> => !!card,
         ),
       ].filter((card) => (card.counters?.steam ?? 0) > 0);
-      if (n < ctx.getCounter("upgrades") && cards.length)
+      if (n < ctx.getState("upgrades") && cards.length)
         ctx.requestCardChoice(
           "demolition",
           decisionPrompt("Remove steam from another permanent?", "card.evo.permanent.steam.remove.next", {
@@ -760,18 +760,18 @@ export const evoHighRarity: Record<string, CardScript> = {
         const inArena = () => ctx.player(ctx.seat).board.some((card) => card.instanceId === ctx.self.instanceId);
         const wasInArena = inArena();
         ctx.destroySelf();
-        ctx.setCounter("tickTockDestroyed", wasInArena && !inArena() ? 1 : 0);
-        ctx.setCounter("tickTockChosen", 0);
+        ctx.setState("tickTockDestroyed", wasInArena && !inArena() ? 1 : 0);
+        ctx.setState("tickTockChosen", 0);
         tickTockNextItem(ctx);
       },
       onChoose(ctx, hook, option) {
         if (hook !== TICK_TOCK_ITEM) return;
         if (option === "done") {
-          ctx.setCounter("tickTockChosen", 2);
+          ctx.setState("tickTockChosen", 2);
         } else {
-          ctx.setCounter("tickTockChosen", ctx.getCounter("tickTockChosen") + 1);
+          ctx.setState("tickTockChosen", ctx.getState("tickTockChosen") + 1);
           if (ctx.destroyPermanent(Number(option))) {
-            ctx.setCounter("tickTockDestroyed", ctx.getCounter("tickTockDestroyed") + 1);
+            ctx.setState("tickTockDestroyed", ctx.getState("tickTockDestroyed") + 1);
           }
         }
         tickTockNextItem(ctx);
@@ -782,14 +782,14 @@ export const evoHighRarity: Record<string, CardScript> = {
   "hyper scrapper|3": {
     variablePlayCost: {
       base: 0,
-      counterKey: "scrapperX",
+      stateKey: "scrapperX",
       prompt: decisionPrompt("Choose X", "engine.decision.x.choose"),
       maximum(ctx) {
         return ctx.player(ctx.seat).graveyard.filter((card) => isItem(ctx, card)).length;
       },
     },
     declareAdditionalCost(ctx) {
-      if (ctx.getCounter("scrapperX") <= 0) return;
+      if (ctx.getState("scrapperX") <= 0) return;
       const items = ctx.player(ctx.seat).graveyard.filter((card) => isItem(ctx, card));
       if (items.length)
         ctx.requestCardChoice(
@@ -802,10 +802,10 @@ export const evoHighRarity: Record<string, CardScript> = {
       if (hook !== "hyper-scrapper-item") return;
       const card = ctx.player(ctx.seat).graveyard.find((candidate) => candidate.instanceId === Number(option));
       if (card && ctx.banish(card.instanceId)) {
-        ctx.addCounter(ctx.self.instanceId, "scrapped", 1);
-        if (named(ctx, card, "hyper driver")) ctx.addCounter(ctx.self.instanceId, "scrappedDrivers", 1);
+        ctx.addCardState(ctx.self.instanceId, "scrapped", 1);
+        if (named(ctx, card, "hyper driver")) ctx.addCardState(ctx.self.instanceId, "scrappedDrivers", 1);
       }
-      if (ctx.getCounter("scrapped") >= ctx.getCounter("scrapperX")) return;
+      if (ctx.getState("scrapped") >= ctx.getState("scrapperX")) return;
       const items = ctx.player(ctx.seat).graveyard.filter((candidate) => isItem(ctx, candidate));
       if (items.length)
         ctx.requestCardChoice(
@@ -814,9 +814,9 @@ export const evoHighRarity: Record<string, CardScript> = {
           items.map((card) => card.instanceId),
         );
     },
-    modifyAttack: (ctx) => ctx.getCounter("scrapperX"),
+    modifyAttack: (ctx) => ctx.getState("scrapperX"),
     onAttackDeclared(ctx) {
-      if (ctx.getCounter("scrappedDrivers") >= 3) {
+      if (ctx.getState("scrappedDrivers") >= 3) {
         ctx.changeResources(ctx.seat, 6);
         ctx.grantGoAgain();
       }
@@ -825,7 +825,7 @@ export const evoHighRarity: Record<string, CardScript> = {
   "scrap trader|1": scrap(
     {
       onPlay(ctx) {
-        ctx.changeResources(ctx.seat, ctx.getCounter("scrapped") * 2);
+        ctx.changeResources(ctx.seat, ctx.getState("scrapped") * 2);
       },
     },
     2,
@@ -834,7 +834,7 @@ export const evoHighRarity: Record<string, CardScript> = {
     variablePlayCost: {
       base: 0,
       resourcesPerX: 2,
-      counterKey: "moonshotX",
+      stateKey: "moonshotX",
       prompt: decisionPrompt("Choose X", "engine.decision.x.choose"),
       maximum(ctx) {
         return ctx.player(ctx.seat).board.filter((card) => named(ctx, card, "hyper driver")).length;
@@ -842,7 +842,7 @@ export const evoHighRarity: Record<string, CardScript> = {
     },
     canPlay: (ctx) => ctx.getPlayerFlag(ctx.seat, "boostedThisTurn") === true,
     additionalCost(ctx) {
-      if (ctx.getCounter("moonshotX") <= 0) return;
+      if (ctx.getState("moonshotX") <= 0) return;
       const drivers = ctx.player(ctx.seat).board.filter((card) => named(ctx, card, "hyper driver"));
       if (drivers.length)
         ctx.requestCardChoice(
@@ -853,8 +853,8 @@ export const evoHighRarity: Record<string, CardScript> = {
     },
     onChoose(ctx, hook, option) {
       if (hook !== "moonshot") return;
-      if (ctx.destroyPermanent(Number(option))) ctx.addCounter(ctx.self.instanceId, "drivers", 1);
-      if (ctx.getCounter("drivers") >= ctx.getCounter("moonshotX")) return;
+      if (ctx.destroyPermanent(Number(option))) ctx.addCardState(ctx.self.instanceId, "drivers", 1);
+      if (ctx.getState("drivers") >= ctx.getState("moonshotX")) return;
       const drivers = ctx.player(ctx.seat).board.filter((card) => named(ctx, card, "hyper driver"));
       if (drivers.length)
         ctx.requestCardChoice(
@@ -863,7 +863,7 @@ export const evoHighRarity: Record<string, CardScript> = {
           drivers.map((card) => card.instanceId),
         );
     },
-    modifyAttack: (ctx) => ctx.getCounter("drivers") * 3,
+    modifyAttack: (ctx) => ctx.getState("drivers") * 3,
     onAttackDeclared(ctx) {
       if (ctx.currentAttackPower() >= 10) ctx.setFlag("link", "overpower", true);
     },
@@ -876,7 +876,7 @@ export const evoHighRarity: Record<string, CardScript> = {
     variablePlayCost: {
       base: 0,
       resourcesPerX: 3,
-      counterKey: "lockwaveX",
+      stateKey: "lockwaveX",
       prompt: decisionPrompt("Choose X", "engine.decision.x.choose"),
       maximum(ctx) {
         return Object.values(ctx.player(opponentSeat(ctx)).equipment).filter((card) => !!card).length;
@@ -886,7 +886,7 @@ export const evoHighRarity: Record<string, CardScript> = {
       return [ctx.player(opponentSeat(ctx)).hero.instanceId];
     },
     onPlay(ctx) {
-      if (ctx.getCounter("lockwaveX") <= 0) return;
+      if (ctx.getState("lockwaveX") <= 0) return;
       const equipment = Object.values(ctx.player(opponentSeat(ctx)).equipment).filter(
         (card): card is DeepReadonly<CardInstance> => !!card,
       );
@@ -900,12 +900,12 @@ export const evoHighRarity: Record<string, CardScript> = {
     },
     onChoose(ctx, hook, option) {
       if (hook === "lockwave-offer") {
-        const count = ctx.getCounter("lockwaveOffered") + 1;
-        ctx.setCounter("lockwaveOffered", count);
-        ctx.setCounter(`lockwaveOffer:${count}`, Number(option));
-        if (count < ctx.getCounter("lockwaveX")) {
+        const count = ctx.getState("lockwaveOffered") + 1;
+        ctx.setState("lockwaveOffered", count);
+        ctx.setState(`lockwaveOffer:${count}`, Number(option));
+        if (count < ctx.getState("lockwaveX")) {
           const chosen = new Set(
-            Array.from({ length: count }, (_, index) => ctx.getCounter(`lockwaveOffer:${index + 1}`)),
+            Array.from({ length: count }, (_, index) => ctx.getState(`lockwaveOffer:${index + 1}`)),
           );
           const equipment = Object.values(ctx.player(opponentSeat(ctx)).equipment).filter(
             (card): card is DeepReadonly<CardInstance> => !!card && !chosen.has(card.instanceId),
@@ -919,7 +919,7 @@ export const evoHighRarity: Record<string, CardScript> = {
             );
           return;
         }
-        const offered = Array.from({ length: count }, (_, index) => ctx.getCounter(`lockwaveOffer:${index + 1}`));
+        const offered = Array.from({ length: count }, (_, index) => ctx.getState(`lockwaveOffer:${index + 1}`));
         ctx.requestCardChoice(
           "lockwave-pick",
           decisionPrompt("Choose equipment that must defend", "card.evo.equipment.mustdefend"),
@@ -966,7 +966,7 @@ export const evoHighRarity: Record<string, CardScript> = {
   "system reset|2": {
     variablePlayCost: {
       base: 0,
-      counterKey: "systemResetX",
+      stateKey: "systemResetX",
       prompt: decisionPrompt("Choose X", "engine.decision.x.choose"),
       maximum(ctx) {
         return ctx
@@ -977,7 +977,7 @@ export const evoHighRarity: Record<string, CardScript> = {
       },
     },
     onPlay(ctx) {
-      if (ctx.getCounter("systemResetX") <= 0) return;
+      if (ctx.getState("systemResetX") <= 0) return;
       const items = ctx
         .player(ctx.seat)
         .board.filter(
@@ -993,12 +993,12 @@ export const evoHighRarity: Record<string, CardScript> = {
     onChoose(ctx, hook, option) {
       if (hook !== "system-reset") return;
       if (ctx.banish(Number(option))) {
-        const count = ctx.getCounter("systemResetChosen") + 1;
-        ctx.setCounter("systemResetChosen", count);
-        ctx.setCounter(`systemResetItem:${count}`, Number(option));
+        const count = ctx.getState("systemResetChosen") + 1;
+        ctx.setState("systemResetChosen", count);
+        ctx.setState(`systemResetItem:${count}`, Number(option));
       }
-      const chosen = ctx.getCounter("systemResetChosen");
-      if (chosen < ctx.getCounter("systemResetX")) {
+      const chosen = ctx.getState("systemResetChosen");
+      if (chosen < ctx.getState("systemResetX")) {
         const items = ctx
           .player(ctx.seat)
           .board.filter(
@@ -1012,7 +1012,7 @@ export const evoHighRarity: Record<string, CardScript> = {
           );
         return;
       }
-      for (let index = 1; index <= chosen; index++) ctx.settleCard(ctx.getCounter(`systemResetItem:${index}`));
+      for (let index = 1; index <= chosen; index++) ctx.settleCard(ctx.getState(`systemResetItem:${index}`));
     },
   },
   "fabricate|1": {
@@ -1031,13 +1031,13 @@ export const evoHighRarity: Record<string, CardScript> = {
       );
     },
     onPlay(ctx) {
-      if (ctx.getCounter("fabricate-mode:equip") > 0) {
+      if (ctx.getState("fabricate-mode:equip") > 0) {
         const base = ctx
           .player(ctx.seat)
           .inventory?.find((card) => has(ctx, card, "base") && cardNameContains(ctx, card, "Proto"));
         if (base) ctx.equipFromInventory(base.instanceId);
       }
-      if (ctx.getCounter("fabricate-mode:defense") > 0) {
+      if (ctx.getState("fabricate-mode:defense") > 0) {
         ctx.addModifier({
           scope: "until-end-of-turn",
           defense: 1,
@@ -1045,12 +1045,12 @@ export const evoHighRarity: Record<string, CardScript> = {
           appliesToSubtype: "evo",
         });
       }
-      if (ctx.getCounter("fabricate-mode:under") > 0) {
+      if (ctx.getState("fabricate-mode:under") > 0) {
         const evos = Object.values(ctx.player(ctx.seat).equipment).filter(
           (card): card is DeepReadonly<CardInstance> => !!card && has(ctx, card, "evo"),
         );
         if (evos.length) {
-          if (ctx.getCounter("fabricate-mode:hand") > 0) ctx.setCounter("fabricate-hand-pending", 1);
+          if (ctx.getState("fabricate-mode:hand") > 0) ctx.setState("fabricate-hand-pending", 1);
           ctx.requestCardChoice(
             "fabricate-under",
             decisionPrompt("Choose an Evo equipment to put Fabricate under", "card.evo.fabricate.under.choose"),
@@ -1064,7 +1064,7 @@ export const evoHighRarity: Record<string, CardScript> = {
     onChoose(ctx, hook, option) {
       if (hook === "fabricate-under") {
         ctx.putSelfUnder(Number(option));
-        if (ctx.getCounter("fabricate-hand-pending") > 0) applyFabricateHandMode(ctx);
+        if (ctx.getState("fabricate-hand-pending") > 0) applyFabricateHandMode(ctx);
         return;
       }
       if (hook !== "fabricate-mode") return;
@@ -1147,11 +1147,11 @@ export const evoHighRarity: Record<string, CardScript> = {
   "tectonic rift|3": {
     variablePlayCost: {
       base: 0,
-      counterKey: "tectonicX",
+      stateKey: "tectonicX",
       prompt: decisionPrompt("Choose X", "engine.decision.x.choose"),
     },
     onPlay(ctx) {
-      ctx.createTokens(SEISMIC, ctx.getCounter("tectonicX"));
+      ctx.createTokens(SEISMIC, ctx.getState("tectonicX"));
     },
   },
   "wax off|3": {
@@ -1207,11 +1207,11 @@ export const evoHighRarity: Record<string, CardScript> = {
     variablePlayCost: {
       base: 0,
       resourcesPerX: 2,
-      counterKey: "sonataX",
+      stateKey: "sonataX",
       prompt: decisionPrompt("Choose X", "engine.decision.x.choose"),
     },
     onPlay(ctx) {
-      const x = ctx.getCounter("sonataX");
+      const x = ctx.getState("sonataX");
       ctx.createTokens(RUNECHANT, x);
       if (x >= 6) ctx.discardRandom(opponentSeat(ctx), 3);
     },

@@ -27,7 +27,7 @@ function chargeOnChoose(ctx: ScriptCtx, hook: string, option: string): boolean {
   if (hook !== CHARGE_HOOK) return false;
   if (option !== "no") {
     const charged = ctx.charge(Number(option));
-    if (charged) ctx.setCounter("chargedPitch", ctx.cardColor(charged));
+    if (charged) ctx.setState("chargedPitch", ctx.cardColor(charged));
   }
   return true;
 }

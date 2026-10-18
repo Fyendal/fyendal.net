@@ -566,7 +566,7 @@ describe("DTD — registration and core mechanics", () => {
         { hero: "dorinthea" },
       ],
     });
-    s.state.players[0]!.hero.counters = { abilitiesDisabledPermanently: 1 };
+    s.state.players[0]!.hero.scriptState = { abilitiesDisabledPermanently: 1 };
 
     s.endTurn().expectLife(0, 11).expectTurn(2).expectZoneSize(0, "banish", 2);
   });

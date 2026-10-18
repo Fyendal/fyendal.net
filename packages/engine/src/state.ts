@@ -1,5 +1,7 @@
 import type {
   CardColor,
+  CardCounters,
+  CounterKind,
   EquipmentSlot,
   GameLogPayload,
   GameMessage,
@@ -38,9 +40,18 @@ export interface CardInstance {
   tapped?: boolean;
   /** -1 defense counters (Battleworn/Temper); persist until the card leaves play */
   defCounters?: number;
-  /** Named counters on the card (e.g. lesson counters on a mentor); unlike
-   *  player flags these persist across turns, until the card leaves play */
-  counters?: Record<string, number>;
+  /** Rules counters on the card. Only arena objects carry counters; every
+   *  move out of the arena deletes this map (CR 3.0.9). */
+  counters?: CardCounters;
+  /** The counters this card had when it last left the arena: last-known
+   *  information for its own abilities that resolve after it moved (a cost
+   *  that destroys it, a leave-arena trigger). Never consulted as counters. */
+  lastKnownCounters?: CardCounters;
+  /** Private script bookkeeping and engine statuses (marks, freezes, fusion,
+   *  declared X values, resumable choice state). Never projected to clients
+   *  except the public statuses `project.ts` names, and kept across zone moves
+   *  so a resolving layer and its lingering effects can still read it. */
+  scriptState?: Record<string, number>;
   /** Public name chosen for an active name-prohibition effect. */
   chosenName?: string;
   /** Extra zones this card may be played from, granted by an effect (e.g. a
@@ -169,7 +180,9 @@ export interface TokenCreationRequest {
   count: number;
   cause: TokenCreationContext;
   /** Counters the created token has as it enters the arena. */
-  initialCounters?: Record<string, number>;
+  initialCounters?: CardCounters;
+  /** Script state the created token has as it enters the arena. */
+  initialState?: Record<string, number>;
 }
 
 export interface TokenCreationReplacementBatch extends TokenCreationRequest {
@@ -653,7 +666,7 @@ export interface Modifier {
     label: string;
     labelMessage?: GameMessage;
     heroOnly?: boolean;
-    requiresAttackCounter?: string;
+    requiresAttackCounter?: CounterKind;
     requiresAttackNameContains?: string;
   };
   /** Replace combat damage from the affected weapon with optional destruction
@@ -747,7 +760,7 @@ export interface Modifier {
   appliesToCharged?: boolean;
   /** Only matches a card carrying at least one counter with this key ("the
    *  next arrow with a +1{p} counter you play"). */
-  appliesToCounter?: string;
+  appliesToCounter?: CounterKind;
   /** while this modifier is on the link, defense reactions can't be played
    *  from the arsenal ("this chain link") */
   noDefenseReactionsFromArsenal?: boolean;

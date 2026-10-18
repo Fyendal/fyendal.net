@@ -281,7 +281,7 @@ describe("Monarch, Tales of Aria, and Everfest rules regression coverage", () =>
     g.doRaw({ kind: "choose", optionId: confirm! });
     const bloodLayer = g.state.stack.find((layer) => cardData[layer.card?.cardId ?? ""]?.name === "Blood on Her Hands");
     expect(bloodLayer).toBeDefined();
-    expect(bloodLayer?.card?.counters).toMatchObject({
+    expect(bloodLayer?.card?.scriptState).toMatchObject({
       bloodPaid: 2,
       [`bloodAllocation:power:${bodyId}`]: 1,
       [`bloodAllocation:go-again:${bodyId}`]: 1,

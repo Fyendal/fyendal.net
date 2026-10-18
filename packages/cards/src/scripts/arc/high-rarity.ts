@@ -97,19 +97,19 @@ const sparkOfGenius: CardScript = {
   variablePlayCost: {
     base: 0,
     resourcesPerX: 2,
-    counterKey: "sparkX",
+    stateKey: "sparkX",
     prompt: decisionPrompt("Choose X", "engine.decision.x.choose"),
   },
   onChoose(ctx, hook, option) {
     if (hook !== "spark-item") return;
     const item = ctx.player(ctx.seat).deck.find((card) => card.instanceId === Number(option));
-    if (!item || !mechanologistItem(ctx, item, ctx.getCounter("sparkX"))) return;
+    if (!item || !mechanologistItem(ctx, item, ctx.getState("sparkX"))) return;
     ctx.settleCard(item.instanceId);
     ctx.shuffleDeck();
     if (ctx.getFlag("player", "boostedThisTurn") === true) ctx.drawCards(ctx.seat, 1);
   },
   onPlay(ctx) {
-    const x = ctx.getCounter("sparkX");
+    const x = ctx.getState("sparkX");
     const items = ctx.player(ctx.seat).deck.filter((card) => mechanologistItem(ctx, card, x));
     if (items.length > 0) {
       ctx.requestCardChoice(
@@ -240,9 +240,9 @@ const tomeOfAetherwind: CardScript = {
   },
   onChoose(ctx, hook, option) {
     if (hook !== "tome-mode") return;
-    ctx.setCounter(`tomeMode:${option}`, ctx.getCounter(`tomeMode:${option}`) + 1);
-    const chosen = ctx.getCounter("tomeModesChosen") + 1;
-    ctx.setCounter("tomeModesChosen", chosen);
+    ctx.setState(`tomeMode:${option}`, ctx.getState(`tomeMode:${option}`) + 1);
+    const chosen = ctx.getState("tomeModesChosen") + 1;
+    ctx.setState("tomeModesChosen", chosen);
     if (chosen < 2)
       ctx.requestChoice(
         "tome-mode",
@@ -256,8 +256,8 @@ const tomeOfAetherwind: CardScript = {
       );
   },
   onPlay(ctx) {
-    for (let count = 0; count < ctx.getCounter("tomeMode:draw"); count++) applyTomeMode(ctx, "draw");
-    for (let count = 0; count < ctx.getCounter("tomeMode:+1 arcane damage"); count++)
+    for (let count = 0; count < ctx.getState("tomeMode:draw"); count++) applyTomeMode(ctx, "draw");
+    for (let count = 0; count < ctx.getState("tomeMode:+1 arcane damage"); count++)
       applyTomeMode(ctx, "+1 arcane damage");
   },
 };
@@ -296,9 +296,9 @@ const artOfWar: CardScript = {
   },
   onChoose(ctx, hook, option) {
     if (hook === "art-mode") {
-      ctx.setCounter(`art:${option}`, 1);
-      const chosen = ctx.getCounter("artModesChosen") + 1;
-      ctx.setCounter("artModesChosen", chosen);
+      ctx.setState(`art:${option}`, 1);
+      const chosen = ctx.getState("artModesChosen") + 1;
+      ctx.setState("artModesChosen", chosen);
       if (chosen < 2)
         ctx.requestChoice(
           "art-mode",
@@ -316,7 +316,7 @@ const artOfWar: CardScript = {
     } else if (hook === "art-banish-card" && ctx.banish(Number(option))) ctx.drawCards(ctx.seat, 2);
   },
   onPlay(ctx) {
-    for (const mode of ART_OF_WAR_MODES) if (ctx.getCounter(`art:${mode}`) > 0) artMode(ctx, mode);
+    for (const mode of ART_OF_WAR_MODES) if (ctx.getState(`art:${mode}`) > 0) artMode(ctx, mode);
   },
 };
 
@@ -532,7 +532,7 @@ export const arcHighRarity: Record<string, CardScript> = {
     },
     onChoose(ctx, hook, option) {
       if (hook === "fork-first") {
-        ctx.setCounter("forkFirst", option === "your hero" ? ctx.seat : opponentSeat(ctx));
+        ctx.setState("forkFirst", option === "your hero" ? ctx.seat : opponentSeat(ctx));
         ctx.requestChoice(
           "fork-second",
           decisionPrompt("Choose the second hero for 2 arcane damage", "card.arc.fork.hero.second", {
@@ -545,7 +545,7 @@ export const arcHighRarity: Record<string, CardScript> = {
           "opposing hero",
         );
       } else if (hook === "fork-second") {
-        dealArcane(ctx, ctx.getCounter("forkFirst"), 2);
+        dealArcane(ctx, ctx.getState("forkFirst"), 2);
         dealArcane(ctx, option === "your hero" ? ctx.seat : opponentSeat(ctx), 2);
       }
     },

@@ -87,13 +87,13 @@ function attackTrigger(
 }
 
 function isMarked(ctx: ScriptCtx, seat: number): boolean {
-  return (ctx.player(seat).hero.counters?.marked ?? 0) > 0;
+  return (ctx.player(seat).hero.scriptState?.marked ?? 0) > 0;
 }
 
 function markHero(ctx: ScriptCtx, seat: number): void {
   const hero = ctx.player(seat).hero;
-  if ((hero.counters?.marked ?? 0) > 0) return;
-  ctx.addCounter(hero.instanceId, "marked", 1);
+  if ((hero.scriptState?.marked ?? 0) > 0) return;
+  ctx.addCardState(hero.instanceId, "marked", 1);
   ctx.logPublic(
     localizedCardLog(ctx, `${ctx.cardData(hero.cardId).name} is marked`, "card.log.common.hero.marked", {
       target: { kind: "card", cardId: hero.cardId },
@@ -166,9 +166,9 @@ function longWhiskerOptionMessages(): Record<(typeof LONG_WHISKER_MODES)[number]
 }
 
 function requestLongWhiskerTarget(ctx: ScriptCtx): void {
-  const modes = ctx.getCounter("longWhiskerModes");
+  const modes = ctx.getState("longWhiskerModes");
   const daggers = daggerOptions(ctx);
-  if ((modes & 2) !== 0 && ctx.getCounter("longWhiskerAdditionalAttackTarget") === 0) {
+  if ((modes & 2) !== 0 && ctx.getState("longWhiskerAdditionalAttackTarget") === 0) {
     ctx.requestCardChoice(
       "long-whisker-additional-attack-target",
       decisionPrompt(
@@ -179,7 +179,7 @@ function requestLongWhiskerTarget(ctx: ScriptCtx): void {
     );
     return;
   }
-  if ((modes & 4) !== 0 && ctx.getCounter("longWhiskerMarkTarget") === 0) {
+  if ((modes & 4) !== 0 && ctx.getState("longWhiskerMarkTarget") === 0) {
     ctx.requestCardChoice(
       "long-whisker-mark-target",
       decisionPrompt("Long Whisker Loyalty: choose a dagger to mark on hit", "card.hnt.longwhisker.dagger.mark"),
@@ -188,8 +188,8 @@ function requestLongWhiskerTarget(ctx: ScriptCtx): void {
   }
 }
 
-function longWhiskerTarget(ctx: ScriptCtx, counter: string): DeepReadonly<CardInstance> | undefined {
-  const targetId = ctx.getCounter(counter);
+function longWhiskerTarget(ctx: ScriptCtx, stateKey: string): DeepReadonly<CardInstance> | undefined {
+  const targetId = ctx.getState(stateKey);
   return ctx.player(ctx.seat).weapons.find((card) => card.instanceId === targetId && isDagger(ctx, card));
 }
 
@@ -1405,7 +1405,7 @@ Object.assign(hnt, {
       const defenseMode =
         hasKeyword(ctx, ctx.link.attackingCard, "stealth") &&
         [...ctx.link.defendingCards, ...ctx.link.defendingEquipment].length > 0;
-      const selectedMode = ctx.getCounter("tarantulaMode");
+      const selectedMode = ctx.getState("tarantulaMode");
       if (daggerMode && (!defenseMode || selectedMode === 1 || selectedMode === 3)) {
         ctx.addModifier({ scope: "chain-link", attack: 3 });
       }
@@ -1420,7 +1420,7 @@ Object.assign(hnt, {
     },
     onChoose(ctx, hook, option) {
       if (hook === "tarantula-mode") {
-        ctx.setCounter("tarantulaMode", option === "+3 attack" ? 1 : option === "-3 defense" ? 2 : 3);
+        ctx.setState("tarantulaMode", option === "+3 attack" ? 1 : option === "-3 defense" ? 2 : 3);
         return;
       }
       if (hook === "toxin-defender") ctx.addCardTempDefense(Number(option), -3);
@@ -1518,10 +1518,10 @@ Object.assign(hnt, {
     canPlay: currentDaggerAttack,
     additionalCost(ctx) {
       const count = Math.min(LONG_WHISKER_MODES.length, draconicLinks(ctx));
-      ctx.setCounter("longWhiskerModes", 0);
-      ctx.setCounter("longWhiskerModesRemaining", count);
-      ctx.setCounter("longWhiskerAdditionalAttackTarget", 0);
-      ctx.setCounter("longWhiskerMarkTarget", 0);
+      ctx.setState("longWhiskerModes", 0);
+      ctx.setState("longWhiskerModesRemaining", count);
+      ctx.setState("longWhiskerAdditionalAttackTarget", 0);
+      ctx.setState("longWhiskerMarkTarget", 0);
       if (count > 0) {
         ctx.requestChoice(
           "long-whisker-mode",
@@ -1538,7 +1538,7 @@ Object.assign(hnt, {
       if (hook === "long-whisker-mode") {
         if (!isLongWhiskerMode(option)) return;
         const bit = longWhiskerModeBit(option);
-        const selected = ctx.getCounter("longWhiskerModes");
+        const selected = ctx.getState("longWhiskerModes");
         if ((selected & bit) !== 0) return;
         const modeMessage = longWhiskerOptionMessages()[option];
         ctx.logPublic(
@@ -1553,9 +1553,9 @@ Object.assign(hnt, {
           ),
         );
         const updated = selected | bit;
-        const remaining = ctx.getCounter("longWhiskerModesRemaining") - 1;
-        ctx.setCounter("longWhiskerModes", updated);
-        ctx.setCounter("longWhiskerModesRemaining", remaining);
+        const remaining = ctx.getState("longWhiskerModesRemaining") - 1;
+        ctx.setState("longWhiskerModes", updated);
+        ctx.setState("longWhiskerModesRemaining", remaining);
         if (remaining > 0) {
           ctx.requestChoice(
             "long-whisker-mode",
@@ -1572,17 +1572,17 @@ Object.assign(hnt, {
         return;
       }
       if (hook === "long-whisker-additional-attack-target") {
-        ctx.setCounter("longWhiskerAdditionalAttackTarget", Number(option));
+        ctx.setState("longWhiskerAdditionalAttackTarget", Number(option));
         requestLongWhiskerTarget(ctx);
         return;
       }
       if (hook === "long-whisker-mark-target") {
-        ctx.setCounter("longWhiskerMarkTarget", Number(option));
+        ctx.setState("longWhiskerMarkTarget", Number(option));
       }
     },
     onPlay(ctx) {
       if (!ctx.link) return;
-      const modes = ctx.getCounter("longWhiskerModes");
+      const modes = ctx.getState("longWhiskerModes");
       if (modes & 1) ctx.addModifier({ scope: "chain-link", attack: 2 });
       const additionalAttackTarget = longWhiskerTarget(ctx, "longWhiskerAdditionalAttackTarget");
       if ((modes & 2) !== 0 && additionalAttackTarget) {
@@ -1866,11 +1866,11 @@ Object.assign(hnt, {
   "roiling fissure|3": {
     variablePlayCost: {
       base: 1,
-      counterKey: "fissureX",
+      stateKey: "fissureX",
       prompt: decisionPrompt("Choose X", "engine.decision.x.choose"),
     },
     onPlay(ctx) {
-      const x = ctx.getCounter("fissureX");
+      const x = ctx.getState("fissureX");
       const aura = ctx.state.players
         .flatMap((player) => player.board)
         .find((card) => dataTags(ctx, card).includes("aura") && (ctx.cardData(card.cardId).cost ?? 0) <= x);
@@ -2058,12 +2058,12 @@ Object.assign(hnt, {
       timing: "instant",
       fromHand: true,
       variableBanishSoulCost: {
-        counterKey: "warCryThemisX",
+        stateKey: "warCryThemisX",
         prompt: decisionPrompt("Choose X cards to banish from your soul", "card.common.cost.soul.banishx"),
       },
       label: "Discard: turn X banished cards face-down",
       onActivate(ctx) {
-        const remaining = ctx.getCounter("warCryThemisX");
+        const remaining = ctx.getState("warCryThemisX");
         if (remaining <= 0) return;
         const targets = ctx.state.players.flatMap((player) => player.banish.filter((card) => !card.faceDown));
         if (targets.length) {
@@ -2085,8 +2085,8 @@ Object.assign(hnt, {
         .flatMap((player) => player.banish)
         .find((card) => card.instanceId === Number(option) && !card.faceDown);
       if (!chosen || !ctx.setCardFaceDown(chosen.instanceId, true)) return;
-      const remaining = ctx.getCounter("warCryThemisX") - 1;
-      ctx.setCounter("warCryThemisX", remaining);
+      const remaining = ctx.getState("warCryThemisX") - 1;
+      ctx.setState("warCryThemisX", remaining);
       if (remaining <= 0) return;
       const targets = ctx.state.players.flatMap((player) => player.banish.filter((card) => !card.faceDown));
       if (targets.length) {
@@ -2117,7 +2117,7 @@ Object.assign(hnt, {
       timing: "instant",
       fromHand: true,
       variableBanishSoulCost: {
-        counterKey: "warCryBellonaX",
+        stateKey: "warCryBellonaX",
         prompt: decisionPrompt("Choose X cards to banish from your soul", "card.common.cost.soul.banishx"),
       },
       label: "Discard: reflect a weapon's next X or less damage",
@@ -2136,7 +2136,7 @@ Object.assign(hnt, {
       const target = ctx.state.players
         .flatMap((player) => player.weapons.map((card) => ({ player, card })))
         .find(({ card }) => card.instanceId === Number(option));
-      const x = ctx.getCounter("warCryBellonaX");
+      const x = ctx.getState("warCryBellonaX");
       if (!target || x <= 0) return;
       ctx.addModifier({
         scope: "until-end-of-turn",

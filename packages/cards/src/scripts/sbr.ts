@@ -61,7 +61,7 @@ function chokeslam(): CardScript {
     canTriggerOnHit: crushTriggered,
     onHit(ctx) {
       const hero = ctx.player(opponentSeat(ctx)).hero;
-      ctx.setCardCounter(hero.instanceId, "attackActionNoPowerGainUntilTurn", ctx.state.turn + 1);
+      ctx.setCardState(hero.instanceId, "attackActionNoPowerGainUntilTurn", ctx.state.turn + 1);
       ctx.logPublic(
         localizedCardLog(
           ctx,
@@ -244,8 +244,8 @@ export const sbr: Record<string, CardScript> = {
     canTriggerOnHit: crushTriggered,
     onHit(ctx) {
       const hero = ctx.player(opponentSeat(ctx)).hero;
-      ctx.setCardCounter(hero.instanceId, "attackActionBasePowerLimitUntilTurn", ctx.state.turn + 1);
-      ctx.setCardCounter(hero.instanceId, "attackActionBasePowerLimit", 3);
+      ctx.setCardState(hero.instanceId, "attackActionBasePowerLimitUntilTurn", ctx.state.turn + 1);
+      ctx.setCardState(hero.instanceId, "attackActionBasePowerLimit", 3);
       ctx.logPublic(
         localizedCardLog(
           ctx,

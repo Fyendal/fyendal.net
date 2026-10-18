@@ -549,7 +549,7 @@ function quickSuccession(count: number): CardScript {
   return {
     onPlay(ctx) {
       buffNextAttack(ctx, { goAgain: true, appliesToType: ["runeblade", "lightning"] });
-      ctx.setCounter("quickRemaining", count);
+      ctx.setState("quickRemaining", count);
       ctx.addModifier({
         scope: "until-end-of-turn",
         ...ongoingLabel(
@@ -562,10 +562,10 @@ function quickSuccession(count: number): CardScript {
       });
     },
     onFriendlyAttackDeclared(ctx) {
-      const remaining = ctx.getCounter("quickRemaining");
+      const remaining = ctx.getState("quickRemaining");
       if (remaining <= 0 || !ctx.link) return;
       ctx.setFlag("link", `quickSuccession:${ctx.self.instanceId}`, true);
-      ctx.setCounter("quickRemaining", remaining - 1);
+      ctx.setState("quickRemaining", remaining - 1);
     },
     modifyAttack(ctx) {
       return ctx.link?.goAgain && ctx.getFlag("link", `quickSuccession:${ctx.self.instanceId}`) === true ? 1 : 0;
@@ -587,7 +587,7 @@ function mercurialSkies(amount: number): CardScript {
   };
   return {
     onPlay(ctx) {
-      ctx.setCounter("mercurialDamage", amount);
+      ctx.setState("mercurialDamage", amount);
       // `once` only phrases the label as the next matching card; the script
       // consumes this modifier when a matching attack action card attacks.
       ctx.addModifier({
@@ -633,7 +633,7 @@ function mercurialSkies(amount: number): CardScript {
     ],
     onChoose(ctx, hook, option) {
       if (hook !== "mercurial-flow" || option === "no" || !ctx.destroyPermanent(Number(option))) return;
-      dealArcane(ctx, opponentSeat(ctx), ctx.getCounter("mercurialDamage"));
+      dealArcane(ctx, opponentSeat(ctx), ctx.getState("mercurialDamage"));
     },
   };
 }
@@ -920,10 +920,10 @@ export const omn: Record<string, CardScript> = mergeSetScripts("OMN", omnHighRar
         const banished = paid.find((card) =>
           ctx.player(ctx.seat).banish.some((candidate) => candidate.instanceId === card.instanceId),
         );
-        if (banished) ctx.setCounter("zyggyAura", banished.instanceId);
+        if (banished) ctx.setState("zyggyAura", banished.instanceId);
       },
       onActivate(ctx) {
-        const id = ctx.getCounter("zyggyAura");
+        const id = ctx.getState("zyggyAura");
         if (!id) return;
         ctx.setCardCounter(id, "holo", 1);
         ctx.settleCard(id);

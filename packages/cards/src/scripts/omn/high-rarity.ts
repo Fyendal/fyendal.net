@@ -589,7 +589,20 @@ export const omnHighRarity: Record<string, CardScript> = {
   }),
   "gear turner|1": {
     onHit(ctx) {
-      const cog = ctx.player(ctx.seat).deck.find((card) => has(ctx, card, "cog"));
+      const cogs = ctx.player(ctx.seat).deck.filter((card) => has(ctx, card, "cog"));
+      ctx.requestCardChoice(
+        "gear-turner-cog",
+        decisionPrompt("Search your deck for a cog to put into the arena?", "card.omn.cog.search.arena", {
+          optionMessages: commonOptionMessages("no"),
+        }),
+        ["no", ...cogs.map((card) => card.instanceId)],
+      );
+    },
+    onChoose(ctx, hook, option) {
+      if (hook !== "gear-turner-cog" || option === "no") return;
+      const cog = ctx
+        .player(ctx.seat)
+        .deck.find((card) => card.instanceId === Number(option) && has(ctx, card, "cog"));
       if (cog) ctx.settleCard(cog.instanceId);
       ctx.shuffleDeck();
     },
@@ -691,13 +704,13 @@ export const omnHighRarity: Record<string, CardScript> = {
             (has(ctx, candidate, "item") || data(ctx, candidate).cardType === "equipment"),
         );
       if (card && ctx.banish(card.instanceId)) {
-        ctx.setCounter("scrapped", 1);
-        if (has(ctx, card, "cog")) ctx.setCounter("scrappedCog", 1);
+        ctx.setState("scrapped", 1);
+        if (has(ctx, card, "cog")) ctx.setState("scrappedCog", 1);
       }
     },
     onAttackDeclared(ctx) {
-      if (ctx.getCounter("scrapped")) ctx.grantGoAgain();
-      if (ctx.getCounter("scrappedCog")) ctx.createToken(GOLD);
+      if (ctx.getState("scrapped")) ctx.grantGoAgain();
+      if (ctx.getState("scrappedCog")) ctx.createToken(GOLD);
     },
   },
   "golden skull|2": { allZoneNames: ["Gold"] },

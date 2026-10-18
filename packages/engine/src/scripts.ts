@@ -1,7 +1,9 @@
 import type {
   CardColor,
+  CardCounters,
   CardData,
   CardType,
+  CounterKind,
   EquipmentSlot,
   GameLogPayload,
   GameMessage,
@@ -399,10 +401,14 @@ export interface ScriptCtx {
   returnSelfToHand(): boolean;
   /** Add `delta` to a named counter on any card (e.g. +1{p} counters put on
    *  weapons by Sharpen/Glisten). Negative deltas remove. */
-  addCounter(instanceId: number, key: string, delta: number): void;
+  addCounter(instanceId: number, kind: CounterKind, delta: number): void;
   /** Set a named counter on any card exactly. Unlike addCounter, zero remains
    *  explicit so state-based "when this has no counters" checks can observe it. */
-  setCardCounter(instanceId: number, key: string, value: number): void;
+  setCardCounter(instanceId: number, kind: CounterKind, value: number): void;
+  /** Add `delta` to a named private script-state value on any card. */
+  addCardState(instanceId: number, key: string, delta: number): void;
+  /** Set a named private script-state value on any card. */
+  setCardState(instanceId: number, key: string, value: number): void;
   /** Freeze a permanent for as long as this source remains in the arena.
    *  The freeze ends when either object leaves the arena. */
   freezeWhileInArena(instanceId: number): boolean;
@@ -427,12 +433,14 @@ export interface ScriptCtx {
   /** Create a token/aura; returns the created instance, or undefined when a
    *  replacement effect prevents its creation. Defaults to the
    *  controller's board — pass `seat` to create it for another player
-   *  (e.g. Test of Strength's clash winner). `initialCounters` are present
-   *  as the token enters, before Crank and enter-arena observers. */
+   *  (e.g. Test of Strength's clash winner). `initialCounters` and
+   *  `initialState` are present as the token enters, before Crank and
+   *  enter-arena observers. */
   createToken(
     cardId: string,
     seat?: number,
-    initialCounters?: Readonly<Record<string, number>>,
+    initialCounters?: Readonly<CardCounters>,
+    initialState?: Readonly<Record<string, number>>,
   ): DeepReadonly<CardInstance> | undefined;
   /** Create a token copy of a public arena object, preserving its copiable
    * granted characteristics but not counters or temporary modifiers. */
@@ -446,7 +454,8 @@ export interface ScriptCtx {
     cardId: string,
     count: number,
     seat?: number,
-    initialCounters?: Readonly<Record<string, number>>,
+    initialCounters?: Readonly<CardCounters>,
+    initialState?: Readonly<Record<string, number>>,
   ): DeepReadonly<CardInstance>[];
   /** Create a new card object directly in a player's hand. The created card's
    * identity is public because the generating effect names it. */
@@ -517,10 +526,18 @@ export interface ScriptCtx {
   oncePerTurnEffectUsed(): boolean;
   /** Mark this source's public once-per-turn triggered effect as consumed. */
   markOncePerTurnEffectUsed(): void;
-  /** Read a persistent named counter on self (survives end-of-turn cleanup) */
-  getCounter(key: string): number;
-  /** Set a persistent named counter on self */
-  setCounter(key: string, n: number): void;
+  /** Read a rules counter on self. */
+  getCounter(kind: CounterKind): number;
+  /** Set a rules counter on self. */
+  setCounter(kind: CounterKind, n: number): void;
+  /** Read a counter self had when it last left the arena (last-known
+   *  information), for an ability resolving after self moved. */
+  lastKnownCounter(kind: CounterKind): number;
+  /** Read private script state on self (survives end-of-turn cleanup and
+   *  zone moves; never shown to players). */
+  getState(key: string): number;
+  /** Set private script state on self. */
+  setState(key: string, n: number): void;
   /** Queue a scripted choice; resolved by a "choose" intent routed back to onChoose with the same hook key.
    *  `cardOptions` (parallel to `options`) tags the live card instance or
    *  registered card definition each option refers to so clients can render
@@ -755,8 +772,8 @@ export interface ActivatedEffectCardCost {
   types?: string[];
   name?: string;
   /** Only cards without this named counter are eligible. */
-  withoutCounter?: string;
-  counter?: { key: string; amount: number };
+  withoutCounter?: CounterKind;
+  counter?: { key: CounterKind; amount: number };
   prompt: ScriptPrompt;
 }
 
@@ -774,12 +791,12 @@ export interface ActivatedAbility {
    * declares X before pitching and stores it on the source before resolution. */
   variableCost?: {
     base: number;
-    counterKey: string;
+    stateKey: string;
     resourcesPerX?: number;
     /** Remove X named counters from this source as part of the activation
      *  cost. `resourcesPerX` may be 0 when counters, rather than resources,
      *  are the variable portion of the printed cost. */
-    removeCounterKey?: string;
+    removeCounterKey?: CounterKind;
     maximum?: number | ((ctx: ScriptCtx) => number);
     /** Restrict declarations to values that can produce the printed effect. */
     canDeclareX?(ctx: ScriptCtx, x: number): boolean;
@@ -820,12 +837,12 @@ export interface ActivatedAbility {
    *  `onActivate` still performs the gain. */
   resourceSource?: number;
   /** Remove named counters from this source as part of the activation cost. */
-  removeCounterCost?: { key: string; amount: number };
+  removeCounterCost?: { key: CounterKind; amount: number };
   /** Remove named counters from the current attacking card as part of this
    *  reaction ability's activation cost. */
-  removeAttackCounterCost?: { key: string; amount: number };
+  removeAttackCounterCost?: { key: CounterKind; amount: number };
   /** Put named counters on this source as part of the activation cost. */
-  putCounterCost?: { key: string; amount: number };
+  putCounterCost?: { key: CounterKind; amount: number };
   /** Tap the controller's hero as part of the activation cost. */
   tapHeroCost?: boolean;
   /** Banish this many cards from the controller's hero soul as an activation
@@ -835,7 +852,7 @@ export interface ActivatedAbility {
    *  an activation cost. The chosen value is stored on the source so the
    *  resolving effect can use it. */
   variableBanishSoulCost?: {
-    counterKey: string;
+    stateKey: string;
     maximum?: number;
     prompt?: ScriptPrompt;
   };
@@ -1404,10 +1421,10 @@ export interface CardScript {
   /** Printed variable resource cost. The engine asks for X before presenting
    * pitch choices, then pays `base + X * resourcesPerX` together with normal
    * cost increases and reductions. The declared value is stored on the card
-   * under `counterKey` before its play hooks run. */
+   * under `stateKey` before its play hooks run. */
   variablePlayCost?: {
     base: number;
-    counterKey: string;
+    stateKey: string;
     resourcesPerX?: number;
     minimum?: number;
     maximum?: number | ((ctx: ScriptCtx) => number);
@@ -1676,7 +1693,7 @@ export interface CardScript {
    *  was explicitly reduced to 0 is destroyed. A counter the card never
    *  received doesn't trigger it — a properly-entered permanent always got
    *  its entering counters from its ETB effect. */
-  destroyAtZeroCounter?: string;
+  destroyAtZeroCounter?: CounterKind;
   /** This card was charged into a hero's soul (Solflare). */
   onCharged?(ctx: ScriptCtx): void;
   /** A card owned by this source's controller was put into their hero's soul.

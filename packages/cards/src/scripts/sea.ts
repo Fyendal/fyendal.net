@@ -632,7 +632,7 @@ export const sea: Record<string, CardScript> = {
       onActivate(ctx) {
         ctx.setFlag("player", "nextActionGoAgain", true);
         if (!pirateHero(ctx, ctx.seat))
-          ctx.setCardCounter(ctx.player(ctx.seat).hero.instanceId, "cannotUntapUntilTurn", ctx.state.turn);
+          ctx.setCardState(ctx.player(ctx.seat).hero.instanceId, "cannotUntapUntilTurn", ctx.state.turn);
       },
     },
   },
@@ -724,8 +724,8 @@ export const sea: Record<string, CardScript> = {
       if (hook !== "lubricate" || option === "done") return;
       ctx.untap(Number(option));
       const cogs = controlledCogs(ctx, true);
-      const count = ctx.getCounter("lubricated") + 1;
-      ctx.setCounter("lubricated", count);
+      const count = ctx.getState("lubricated") + 1;
+      ctx.setState("lubricated", count);
       if (count < 3 && cogs.length)
         ctx.requestCardChoice(
           "lubricate",
@@ -1331,10 +1331,10 @@ export const sea: Record<string, CardScript> = {
       const card = ctx.player(ctx.seat).graveyard.find((candidate) => candidate.instanceId === Number(option));
       if (!card) return;
       ctx.banish(card.instanceId);
-      ctx.setCounter("jackNimbleBuff", 1);
+      ctx.setState("jackNimbleBuff", 1);
       ctx.grantGoAgain();
     },
-    modifyAttack: (ctx) => ctx.getCounter("jackNimbleBuff"),
+    modifyAttack: (ctx) => ctx.getState("jackNimbleBuff"),
     canTriggerOnHit: (ctx) => ctx.link?.targetAllyId === undefined,
     onHit(ctx) {
       const items = ctx.player(opponentSeat(ctx)).board.filter((card) => isItem(ctx, card));
@@ -1436,7 +1436,7 @@ export const sea: Record<string, CardScript> = {
 
   "clap 'em in irons|3": {
     preventsUntapOf(ctx, target) {
-      return ctx.getCounter("clapTarget") === target.instanceId;
+      return ctx.getState("clapTarget") === target.instanceId;
     },
     triggers: [
       entersArenaTrigger(
@@ -1444,7 +1444,7 @@ export const sea: Record<string, CardScript> = {
         decisionMessage("card.trigger.sea.pirate.tap"),
         (ctx) => {
           const target = ctx.playTargetInstanceId;
-          if (target !== undefined && ctx.tap(target)) ctx.setCounter("clapTarget", target);
+          if (target !== undefined && ctx.tap(target)) ctx.setState("clapTarget", target);
         },
         {
           target: {
@@ -1507,7 +1507,7 @@ export const sea: Record<string, CardScript> = {
       if (hook === "tit-tap") {
         const seat = Number(option.split(":")[1]);
         ctx.tap(ctx.player(seat).hero.instanceId);
-        ctx.setCounter("titTappedSeat", seat + 1);
+        ctx.setState("titTappedSeat", seat + 1);
         const others = ctx.state.players.filter((player) => player.seat !== seat);
         ctx.requestChoice(
           "tit-untap",
@@ -1663,7 +1663,7 @@ Object.assign(
       `chart a course|${pitch}`,
       {
         onPlay(ctx: ScriptCtx) {
-          ctx.setCounter("chartOrdinal", pitch);
+          ctx.setState("chartOrdinal", pitch);
           ctx.addModifier({
             scope: "until-end-of-turn",
             ...ongoingLabel(
@@ -1679,7 +1679,7 @@ Object.assign(
           );
         },
         onFriendlyAttackDeclared(ctx: ScriptCtx) {
-          if (Number(ctx.getFlag("player", "attacksDeclaredThisTurn")) !== ctx.getCounter("chartOrdinal")) return;
+          if (Number(ctx.getFlag("player", "attacksDeclaredThisTurn")) !== ctx.getState("chartOrdinal")) return;
           ctx.addModifier({ scope: "chain-link", attack: 3 });
           consumeDelayedEffect(ctx);
         },
@@ -1713,7 +1713,7 @@ Object.assign(
       {
         canTriggerOnHit: (ctx: ScriptCtx) => ctx.link?.targetAllyId === undefined,
         onHit(ctx: ScriptCtx) {
-          ctx.setCounter("moneyRepeats", isThief(ctx) ? 2 : 1);
+          ctx.setState("moneyRepeats", isThief(ctx) ? 2 : 1);
           const gold = controlledGold(ctx, opponentSeat(ctx));
           ctx.requestCardChoice(
             "money-choice",
@@ -1728,8 +1728,8 @@ Object.assign(
           if (hook !== "money-choice") return;
           if (option === "damage") ctx.dealDamage(opponentSeat(ctx), 2);
           else ctx.steal(Number(option), { duration: "indefinite" });
-          const remaining = ctx.getCounter("moneyRepeats") - 1;
-          ctx.setCounter("moneyRepeats", remaining);
+          const remaining = ctx.getState("moneyRepeats") - 1;
+          ctx.setState("moneyRepeats", remaining);
           if (remaining > 0) {
             const gold = controlledGold(ctx, opponentSeat(ctx));
             ctx.requestCardChoice(
@@ -2222,11 +2222,11 @@ Object.assign(sea, {
           },
         ],
         onActivate(ctx) {
-          ctx.setCounter("must-target-turn", ctx.state.turn);
+          ctx.setState("must-target-turn", ctx.state.turn);
         },
       },
     ],
-    mandatoryAttackTarget: (ctx) => ctx.getCounter("must-target-turn") === ctx.state.turn,
+    mandatoryAttackTarget: (ctx) => ctx.getState("must-target-turn") === ctx.state.turn,
   },
   "moray le fay|2": {
     activated: [
@@ -2405,7 +2405,7 @@ Object.assign(sea, {
     },
     onChoose(ctx: ScriptCtx, hook: string, option: string) {
       if (hook !== "return-fire" || option === "pass" || !ctx.banish(Number(option))) return;
-      ctx.setCounter("returnFireArrow", Number(option));
+      ctx.setState("returnFireArrow", Number(option));
       ctx.scheduleStartOfNextTurnTrigger(
         "return-fire-load",
         decisionPrompt("Put the banished arrow face up into arsenal", "card.sea.returnfire.arrow.arsenal"),
@@ -2413,7 +2413,7 @@ Object.assign(sea, {
     },
     onDelayedTrigger(ctx: ScriptCtx, hook: string) {
       if (hook !== "return-fire-load") return;
-      const arrowId = ctx.getCounter("returnFireArrow");
+      const arrowId = ctx.getState("returnFireArrow");
       if (arrowId > 0 && ctx.putIntoArsenal(arrowId, "banish", { faceUp: true })) {
         ctx.addCardTempPower(arrowId, 3);
       }
@@ -2434,7 +2434,7 @@ Object.assign(sea, {
       goAgain: true,
       tap: true,
       onActivate(ctx: ScriptCtx) {
-        ctx.setCounter("goldBaitedHookActivatedTurn", ctx.state.turn);
+        ctx.setState("goldBaitedHookActivatedTurn", ctx.state.turn);
         buffNextAttack(ctx, {
           appliesToClass: "pirate",
           onHitScriptHook: {
@@ -2458,7 +2458,7 @@ Object.assign(sea, {
         event: "end-of-turn",
         label: "Destroy Gold-Baited Hook",
         condition: (ctx: ScriptCtx) =>
-          ctx.getCounter("goldBaitedHookActivatedTurn") === ctx.state.turn &&
+          ctx.getState("goldBaitedHookActivatedTurn") === ctx.state.turn &&
           ctx.getFlag("player", "createdName:gold") !== true &&
           ctx.getFlag("player", "stolenName:gold") !== true,
         effect(ctx: ScriptCtx) {

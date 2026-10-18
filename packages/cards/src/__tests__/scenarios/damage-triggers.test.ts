@@ -274,7 +274,7 @@ describe("damage-dealt triggers use the stack", () => {
         foe({ arsenal: ["snatch|1"] }),
       ],
     });
-    g.state.players[1]!.arsenal[0]!.counters = { frozenUntilTurn: 99 };
+    g.state.players[1]!.arsenal[0]!.scriptState = { frozenUntilTurn: 99 };
 
     g.activate("conduit of frostburn|0");
     g.play("zap|1").chooseOption("opposing hero").settle().expectLife(1, 17).expectZoneSize(1, "arsenal", 0);

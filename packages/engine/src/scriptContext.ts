@@ -363,6 +363,25 @@ function publishAttackPowerChange(
   }
 }
 
+/** Apply one counter or script-state write to a card. The arena object and
+ * the active link's attacking copy are distinct after JSON cloning, so a write
+ * to the attacking card updates both and publishes any power change once. */
+function updateCardCopies(
+  state: GameStateInternal,
+  runtime: EngineRuntime,
+  source: AttackPowerSource,
+  instanceId: number,
+  update: (card: CardInstance) => void,
+): void {
+  const found = findCardAnywhere(state, instanceId);
+  if (!found) return;
+  const observed = observeAttackPower(state, runtime);
+  update(found.card);
+  const activeAttack = currentLink(state)?.attackingCard;
+  if (activeAttack?.instanceId === instanceId && activeAttack !== found.card) update(activeAttack);
+  publishAttackPowerChange(state, runtime, observed, source);
+}
+
 interface ScriptedChoiceDetails {
   cardOptions?: (number | string | null)[];
   defaultOption?: string;
@@ -546,7 +565,7 @@ export function makeCtx(
     const copies = new Set([
       layer?.card,
       state.resolving.find((card) => card.instanceId === self.instanceId),
-      Number(origin?.counters?.declaringAdditionalCost ?? 0) === 1 ? origin : undefined,
+      Number(origin?.scriptState?.declaringAdditionalCost ?? 0) === 1 ? origin : undefined,
     ].filter((card): card is CardInstance => card !== undefined));
     for (const card of copies) {
       const granted = (card.grantedKeywords ??= []);
@@ -706,7 +725,7 @@ export function makeCtx(
     suppressHeroAbilitiesPermanently(targetSeat) {
       const target = state.players[targetSeat] as PlayerState | undefined;
       if (!target) return;
-      (target.hero.counters ??= {}).abilitiesDisabledPermanently = 1;
+      (target.hero.scriptState ??= {}).abilitiesDisabledPermanently = 1;
       logPublic(state, gameLogMessage(
         `${nameOf(state, target.heroCardId)} loses all abilities`,
         "engine.log.hero.loses.all.abilities",
@@ -744,9 +763,9 @@ export function makeCtx(
       const target = state.players[targetSeat] as PlayerState | undefined;
       if (!target) return;
       const disabledTurn = state.turn + (targetSeat === state.activePlayer ? 2 : 1);
-      const counters = (target.hero.counters ??= {});
-      counters.ownedCardAbilitiesDisabledTurn = Math.max(
-        Number(counters.ownedCardAbilitiesDisabledTurn ?? 0),
+      const heroState = (target.hero.scriptState ??= {});
+      heroState.ownedCardAbilitiesDisabledTurn = Math.max(
+        Number(heroState.ownedCardAbilitiesDisabledTurn ?? 0),
         disabledTurn,
       );
       logPublic(state, gameLogMessage(
@@ -1836,9 +1855,9 @@ export function makeCtx(
     annexFaceUpArsenalThroughNextTurn(targetSeat) {
       const target = state.players[targetSeat] as PlayerState | undefined;
       if (!target || targetSeat === seat) return;
-      const counters = (target.hero.counters ??= {});
-      counters.faceUpArsenalAnnexedBySeat = seat;
-      counters.faceUpArsenalAnnexedThroughTurn = state.turn + 2;
+      const heroState = (target.hero.scriptState ??= {});
+      heroState.faceUpArsenalAnnexedBySeat = seat;
+      heroState.faceUpArsenalAnnexedThroughTurn = state.turn + 2;
       logPublic(
         state,
         gameLogMessage(
@@ -2009,41 +2028,39 @@ export function makeCtx(
       }
       return true;
     },
-    addCounter(instanceId, key, delta) {
-      const found = findCardAnywhere(state, instanceId);
-      if (!found) return;
-      const observed = observeAttackPower(state, runtime);
-      const copies = [found.card];
-      const activeAttack = currentLink(state)?.attackingCard;
-      if (activeAttack?.instanceId === instanceId && activeAttack !== found.card) copies.push(activeAttack);
-      // Keep an explicit 0 for the destroy-at-zero marker so state-based
-      // actions see the removal of the last counter.
-      const keepZero = scriptOf(state, found.card.cardId, found.card)?.destroyAtZeroCounter === key;
-      for (const copy of copies) {
-        const c = (copy.counters ??= {});
-        c[key] = (c[key] ?? 0) + delta;
-        if ((c[key] as number) <= 0) {
-          if (keepZero) c[key] = 0;
-          else delete c[key];
-        }
-      }
-      publishAttackPowerChange(state, runtime, observed, self);
+    addCounter(instanceId, kind, delta) {
+      updateCardCopies(state, runtime, self, instanceId, (card) => {
+        const counters = (card.counters ??= {});
+        counters[kind] = (counters[kind] ?? 0) + delta;
+        if ((counters[kind] as number) > 0) return;
+        // Keep an explicit 0 for the destroy-at-zero marker so state-based
+        // actions see the removal of the last counter.
+        if (scriptOf(state, card.cardId, card)?.destroyAtZeroCounter === kind) counters[kind] = 0;
+        else delete counters[kind];
+      });
     },
-    setCardCounter(instanceId, key, value) {
-      const found = findCardAnywhere(state, instanceId);
-      if (!found) return;
-      const observed = observeAttackPower(state, runtime);
-      (found.card.counters ??= {})[key] = value;
-      const activeAttack = currentLink(state)?.attackingCard;
-      if (activeAttack?.instanceId === instanceId && activeAttack !== found.card) {
-        (activeAttack.counters ??= {})[key] = value;
-      }
-      publishAttackPowerChange(state, runtime, observed, self);
+    setCardCounter(instanceId, kind, value) {
+      updateCardCopies(state, runtime, self, instanceId, (card) => {
+        (card.counters ??= {})[kind] = value;
+      });
+    },
+    addCardState(instanceId, key, delta) {
+      updateCardCopies(state, runtime, self, instanceId, (card) => {
+        const values = (card.scriptState ??= {});
+        values[key] = (values[key] ?? 0) + delta;
+        if ((values[key] as number) <= 0) delete values[key];
+        if (Object.keys(values).length === 0) delete card.scriptState;
+      });
+    },
+    setCardState(instanceId, key, value) {
+      updateCardCopies(state, runtime, self, instanceId, (card) => {
+        (card.scriptState ??= {})[key] = value;
+      });
     },
     freezeWhileInArena(instanceId) {
       const target = findPermanent(state, instanceId);
       if (!target || !findPermanent(state, self.instanceId)) return false;
-      (target.card.counters ??= {})[`${FROZEN_WHILE_SOURCE_IN_ARENA}${self.instanceId}`] = 1;
+      (target.card.scriptState ??= {})[`${FROZEN_WHILE_SOURCE_IN_ARENA}${self.instanceId}`] = 1;
       logPublic(state, gameLogMessage(
         `${nameOf(state, target.card.cardId)} is frozen`,
         "engine.log.card.frozen",
@@ -2053,10 +2070,10 @@ export function makeCtx(
     },
     unfreeze(instanceId) {
       const found = findCardAnywhere(state, instanceId);
-      const counters = found?.card.counters;
-      if (!counters) return;
-      for (const key of Object.keys(counters)) {
-        if (key === "frozenUntilTurn" || key.startsWith(FROZEN_WHILE_SOURCE_IN_ARENA)) delete counters[key];
+      const values = found?.card.scriptState;
+      if (!values) return;
+      for (const key of Object.keys(values)) {
+        if (key === "frozenUntilTurn" || key.startsWith(FROZEN_WHILE_SOURCE_IN_ARENA)) delete values[key];
       }
     },
     isFrozen(card) {
@@ -2077,32 +2094,32 @@ export function makeCtx(
       const target = state.players[targetSeat] as PlayerState | undefined;
       if (!target) return;
       const turn = state.turn + (targetSeat === state.activePlayer ? 2 : 1);
-      const counters = (target.hero.counters ??= {});
-      const existing = Number(counters.firstAttackExtraCostTurn ?? 0) === turn
-        ? Number(counters.firstAttackExtraCost ?? 0)
+      const heroState = (target.hero.scriptState ??= {});
+      const existing = Number(heroState.firstAttackExtraCostTurn ?? 0) === turn
+        ? Number(heroState.firstAttackExtraCost ?? 0)
         : 0;
-      counters.firstAttackExtraCostTurn = turn;
-      counters.firstAttackExtraCost = existing + amount;
+      heroState.firstAttackExtraCostTurn = turn;
+      heroState.firstAttackExtraCost = existing + amount;
     },
     increaseFirstActionCostNextTurn(targetSeat, amount) {
       if (amount <= 0) return;
       const target = state.players[targetSeat] as PlayerState | undefined;
       if (!target) return;
       const turn = state.turn + (targetSeat === state.activePlayer ? 2 : 1);
-      const counters = (target.hero.counters ??= {});
-      const existing = Number(counters.firstActionExtraCostTurn ?? 0) === turn
-        ? Number(counters.firstActionExtraCost ?? 0)
+      const heroState = (target.hero.scriptState ??= {});
+      const existing = Number(heroState.firstActionExtraCostTurn ?? 0) === turn
+        ? Number(heroState.firstActionExtraCost ?? 0)
         : 0;
-      counters.firstActionExtraCostTurn = turn;
-      counters.firstActionExtraCost = existing + amount;
+      heroState.firstActionExtraCostTurn = turn;
+      heroState.firstActionExtraCost = existing + amount;
     },
     preventAuraTokenCreationNextTurn(targetSeat) {
       const target = state.players[targetSeat] as PlayerState | undefined;
       if (!target) return;
-      const counters = (target.hero.counters ??= {});
-      counters.auraTokenCreationLockedUntilTurn = state.turn + 1;
+      const heroState = (target.hero.scriptState ??= {});
+      heroState.auraTokenCreationLockedUntilTurn = state.turn + 1;
     },
-    createToken(cardId, tokenSeat, initialCounters) {
+    createToken(cardId, tokenSeat, initialCounters, initialState) {
       const target =
         tokenSeat === undefined ? player : (state.players[tokenSeat] as PlayerState);
       return runtime.commands.createTokenFor(
@@ -2111,6 +2128,7 @@ export function makeCtx(
         cardId,
         tokenCreationCause,
         initialCounters,
+        initialState,
       );
     },
     createTokenCopy(instanceId) {
@@ -2145,7 +2163,7 @@ export function makeCtx(
       }
       return token;
     },
-    createTokens(cardId, count, tokenSeat, initialCounters) {
+    createTokens(cardId, count, tokenSeat, initialCounters, initialState) {
       const target =
         tokenSeat === undefined ? player : (state.players[tokenSeat] as PlayerState);
       return runtime.commands.createTokensFor(
@@ -2155,6 +2173,7 @@ export function makeCtx(
         count,
         tokenCreationCause,
         initialCounters,
+        initialState,
       );
     },
     createCardInHand(cardId, targetSeat) {
@@ -2394,12 +2413,23 @@ export function makeCtx(
     markOncePerTurnEffectUsed() {
       player.flags[oncePerTurnEffectFlagKey(self.instanceId)] = true;
     },
-    getCounter(key) {
-      return self.counters?.[key] ?? 0;
+    getCounter(kind) {
+      return self.counters?.[kind] ?? 0;
     },
-    setCounter(key, n) {
+    setCounter(kind, n) {
       const observed = observeAttackPower(state, runtime);
-      (self.counters ??= {})[key] = n;
+      (self.counters ??= {})[kind] = n;
+      publishAttackPowerChange(state, runtime, observed, self);
+    },
+    lastKnownCounter(kind) {
+      return self.lastKnownCounters?.[kind] ?? 0;
+    },
+    getState(key) {
+      return self.scriptState?.[key] ?? 0;
+    },
+    setState(key, n) {
+      const observed = observeAttackPower(state, runtime);
+      (self.scriptState ??= {})[key] = n;
       publishAttackPowerChange(state, runtime, observed, self);
     },
     requestChoice(hook, prompt, options, choiceSeat, cardOptions, defaultOption) {
@@ -3607,7 +3637,7 @@ export function fireOnDiscard(
   const data = dataOf(state, discarded.cardId);
   const player = state.players[seat] as PlayerState;
   const payingBruteAttackCost = state.resolving.some((card) => {
-    if (Number(card.counters?.payingAdditionalCost ?? 0) !== 1) return false;
+    if (Number(card.scriptState?.payingAdditionalCost ?? 0) !== 1) return false;
     const resolvingData = dataOf(state, card.cardId);
     return resolvingData.cardType === "action" &&
       (resolvingData.subtypes ?? []).includes("attack") &&

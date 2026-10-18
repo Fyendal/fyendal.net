@@ -826,7 +826,7 @@ describe("MST — Ninja and generic", () => {
       ],
     });
     g.play("blanch|1", { pitch: ["wrecker romp|3"] }).blockWith().settle();
-    expect(g.state.players[1]!.hero.counters?.colorsSuppressedUntilTurn).toBe(2);
+    expect(g.state.players[1]!.hero.scriptState?.colorsSuppressedUntilTurn).toBe(2);
     g.endTurn()
       .play("sky fire lanterns|1")
       .expectZoneSize(1, "board", 0)

@@ -110,12 +110,33 @@ function projectedAbilityLabels(
   ];
 }
 
+/** Engine statuses kept in script state that every player may see. All other
+ * script state is private implementation detail and never projected. */
+function isPublicStatusKey(key: string): boolean {
+  return key === "marked" || key === "attacked" || key === "arcaneBonus" || key === "sharpenedTurn" ||
+    key === "fused" || key === "fusedEarth" || key === "fusedIce" ||
+    key.startsWith("fused:") || key.startsWith("frostZone:");
+}
+
+/** A card's rules counters plus its public statuses, as `CardView.counters`. */
+function publicCounters(card: CardInstance): Record<string, number> | undefined {
+  const projected: Record<string, number> = { ...card.counters };
+  for (const [key, value] of Object.entries(card.scriptState ?? {})) {
+    if (isPublicStatusKey(key)) projected[key] = value;
+  }
+  return Object.keys(projected).length > 0 ? projected : undefined;
+}
+
+/** Cards outside the arena carry no counters and no arena statuses. */
+const INACTIVE_ZONE: CardViewOptions = { includeCounters: false };
+
 function cardView(state: GameStateInternal,
   runtime: EngineRuntime, c: CardInstance, opts: CardViewOptions = {}): CardView {
   const d = instanceDataOf(state, c);
   const includeCounters = opts.includeCounters ?? true;
   const includeLife = opts.includeLife ?? true;
   const power = includeCounters ? (c.counters?.power ?? 0) : 0;
+  const counters = includeCounters ? publicCounters(c) : undefined;
   const controller = opts.controller;
   const abilities = abilityList(scriptOf(state, c.cardId, c));
   const abilityUsage = controller
@@ -171,9 +192,7 @@ function cardView(state: GameStateInternal,
     ...(c.intimidated ? { intimidated: true } : {}),
     ...(c.tapped ? { tapped: true } : {}),
     ...(includeCounters && c.defCounters ? { defCounters: c.defCounters } : {}),
-    ...(includeCounters && c.counters && Object.keys(c.counters).length > 0
-      ? { counters: c.counters }
-      : {}),
+    ...(counters ? { counters } : {}),
     ...(playableFromSource ? { playableFromSourceCardId: playableFromSource } : {}),
     ...(usedAbilityIndexes.length > 0 ? { usedAbilityIndexes } : {}),
     ...(hasRemainingMultipleActivation ? { remainingAbilityActivations } : {}),
@@ -288,14 +307,13 @@ function playerView(
   const heroUsedAbilityIndexes = heroAbilities.flatMap((ability, index) =>
     activatedAbilityUsage(p, p.hero.instanceId, index, ability)?.remaining === 0 ? [index] : []);
   const heroSubcards = cardView(state, runtime, p.hero).subcards;
+  const heroCounters = publicCounters(p.hero);
   return {
     seat: p.seat,
     heroCardId: p.heroCardId,
     heroInstanceId: p.hero.instanceId,
     ...(p.hero.tapped ? { heroTapped: true } : {}),
-    ...(p.hero.counters && Object.keys(p.hero.counters).length > 0
-      ? { heroCounters: p.hero.counters }
-      : {}),
+    ...(heroCounters ? { heroCounters } : {}),
     ...(p.hero.defCounters ? { heroDefCounters: p.hero.defCounters } : {}),
     ...(heroSubcards ? { heroSubcards } : {}),
     ...(heroAbilityLabels ? { heroAbilityLabels } : {}),
@@ -306,18 +324,18 @@ function playerView(
     actionPoints: p.actionPoints,
     resources: p.resources,
     chi: p.chi,
-    hand: self || gameOver || revealAll ? p.hand.map((c) => cardView(state, runtime, c)) : [],
+    hand: self || gameOver || revealAll ? p.hand.map((c) => cardView(state, runtime, c, INACTIVE_ZONE)) : [],
     handCount: p.hand.length,
     deckCount: p.deck.length,
-    ...(gameOver || revealAll ? { deck: p.deck.map((c) => cardView(state, runtime, c)) } : {}),
+    ...(gameOver || revealAll ? { deck: p.deck.map((c) => cardView(state, runtime, c, INACTIVE_ZONE)) } : {}),
     // face-up cards (e.g. a flipped mentor) are public; face-down stay secret
     arsenal: self || gameOver || revealAll
-      ? p.arsenal.map((c) => cardView(state, runtime, c))
-      : p.arsenal.filter((c) => !c.faceDown).map((c) => cardView(state, runtime, c)),
+      ? p.arsenal.map((c) => cardView(state, runtime, c, INACTIVE_ZONE))
+      : p.arsenal.filter((c) => !c.faceDown).map((c) => cardView(state, runtime, c, INACTIVE_ZONE)),
     arsenalCount: p.arsenal.length,
     arsenalCapacity: arsenalCapacity(state, p.seat),
     arsenalZones: arsenalZoneCount(state, p.seat),
-    pitch: p.pitch.map((c) => cardView(state, runtime, c)), // pitch zone is public
+    pitch: p.pitch.map((c) => cardView(state, runtime, c, INACTIVE_ZONE)), // pitch zone is public
     pitchCount: p.pitch.length,
     // Watery Grave cards are public until their trigger turns them face down;
     // after that, only the owner retains their identity.
@@ -343,7 +361,7 @@ function playerView(
           })
     ),
     // the soul is face-up and public
-    soul: p.soul.map((c) => cardView(state, runtime, c)),
+    soul: p.soul.map((c) => cardView(state, runtime, c, INACTIVE_ZONE)),
     ...(visibleDeckTop ? { visibleDeckTop: cardView(state, runtime, visibleDeckTop) } : {}),
     equipment,
     weapons: p.weapons.map((c) => cardView(state, runtime, c, { controller: p })),
@@ -580,7 +598,7 @@ function projectedCombatPrevention(
         Number(target.flags.damageEventsThisTurn ?? 0) !== (pendingPacket ? 1 : 0)) ||
       (fixed.condition && !fixed.condition(runtime.makeCtx(state, targetSeat, preventionSource, link))) ||
       (fixed.oncePerTurn &&
-        Number(preventionSource.counters?.fixedPreventionUsedTurn ?? -1) === state.turn)
+        Number(preventionSource.scriptState?.fixedPreventionUsedTurn ?? -1) === state.turn)
     ) continue;
     addContribution(fixed.amount, {
       sourceInstanceId: preventionSource.instanceId,

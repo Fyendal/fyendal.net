@@ -659,7 +659,8 @@ describe("Jarl policy", () => {
         instanceId: state.nextInstanceId++, cardId, owner: 0,
       }));
       const blade = state.players[1]!.weapons.find((card) => cardData[card.cardId]?.name === "Zenith Blade")!;
-      blade.counters = { power: 1, sharpenedTurn: 2 };
+      blade.counters = { power: 1 };
+      blade.scriptState = { sharpenedTurn: 2 };
       state.players[1]!.resources = 1;
       const attack = legalIntents(state, 1).find((intent) =>
         intent.kind === "activate-ability" && intent.sourceInstanceId === blade.instanceId

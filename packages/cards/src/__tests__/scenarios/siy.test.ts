@@ -172,7 +172,7 @@ describe("SIY — freeze, prevention, and Stir", () => {
       .chooseOption("arsenal");
 
     const frozen = s.state.players[1]!.arsenal[0]!;
-    expect(frozen.counters?.frozenUntilTurn).toBe(3);
+    expect(frozen.scriptState?.frozenUntilTurn).toBe(3);
     s.endTurn();
     expect(
       legalIntents(s.state, 1).some(

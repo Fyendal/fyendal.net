@@ -37,7 +37,7 @@ describe("printed activated counter costs", () => {
   it("Blaze declares and removes X energy counters as a variable activation cost", () => {
     expect(ability("blaze, firemind|0").variableCost).toMatchObject({
       resourcesPerX: 0,
-      counterKey: "blazeX",
+      stateKey: "blazeX",
       removeCounterKey: "energy",
     });
   });

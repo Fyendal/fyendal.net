@@ -141,7 +141,7 @@ describe("ELE — Fusion and Elemental heroes", () => {
         { hero: "dorinthea", hand: ["blizzard|3"] },
       ],
     });
-    g.state.players[0]!.weapons[0]!.counters = {
+    g.state.players[0]!.weapons[0]!.scriptState = {
       sharpenedTurn: g.state.turn,
     };
 

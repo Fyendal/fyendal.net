@@ -412,10 +412,8 @@ describe("PEN — import and set mechanics", () => {
       },
       { hero: "dorinthea", equipment: NO_EQUIPMENT },
     ] });
-    g.state.players[0]!.weapons[0]!.counters = {
-      power: 1,
-      sharpenedTurn: g.state.turn,
-    };
+    g.state.players[0]!.weapons[0]!.counters = { power: 1 };
+    g.state.players[0]!.weapons[0]!.scriptState = { sharpenedTurn: g.state.turn };
 
     g.play("cut n' carve|3")
       .chooseCard("zenith blade|0")
@@ -436,10 +434,8 @@ describe("PEN — import and set mechanics", () => {
       },
       { hero: "dorinthea", equipment: NO_EQUIPMENT },
     ] });
-    g.state.players[0]!.weapons[0]!.counters = {
-      power: 2,
-      sharpenedTurn: g.state.turn,
-    };
+    g.state.players[0]!.weapons[0]!.counters = { power: 2 };
+    g.state.players[0]!.weapons[0]!.scriptState = { sharpenedTurn: g.state.turn };
 
     g.play("cut n' carve|3")
       .chooseCard("zenith blade|0")
@@ -509,7 +505,7 @@ describe("PEN — import and set mechanics", () => {
     expect(g.state.pendingDecision?.resourcePayment?.cost).toBe(2);
     g.doRaw({ kind: "choose", optionId: g.state.pendingDecision!.options![0]! });
     expect(g.state.players[0]!.equipment.arms?.tapped).toBe(true);
-    expect(g.state.players[0]!.equipment.arms?.counters?.wardX).toBe(2);
+    expect(g.state.players[0]!.equipment.arms?.scriptState?.wardX).toBe(2);
     expect(g.state.stack).toHaveLength(1);
   });
 
@@ -596,7 +592,7 @@ describe("PEN — import and set mechanics", () => {
     expect(g.state.players[0]!.resources).toBe(0);
     expect(g.state.players[0]!.equipment.arms).toMatchObject({
       tapped: true,
-      counters: { wardX: 2 },
+      scriptState: { wardX: 2 },
     });
   });
 

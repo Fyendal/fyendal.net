@@ -1085,6 +1085,7 @@
   "card.omn.aura.token.destroy.named": "{card}: destrua um token de aura",
   "card.omn.aura.token.steal": "Roube um token de aura",
   "card.omn.card.discard": "Descarte uma carta",
+  "card.omn.cog.search.arena": "Procurar um cog no seu deck para colocar na arena?",
   "card.omn.color.choose": "Escolha uma cor",
   "card.omn.flow.destroy": "Destrua um Lightning Flow",
   "card.omn.flow.destroy.damage": "{card}: destruir um Lightning Flow para causar {amount} de dano arcane?",

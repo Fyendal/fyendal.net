@@ -111,7 +111,7 @@ function nextWager(power: number): CardScript {
     onChoose(ctx, hook, option) {
       if (hook !== "cheat-wager") return;
       if (option !== "no" && ctx.discardCard(ctx.seat, Number(option))) {
-        ctx.setCounter("wagerWinnerOverride", ctx.seat + 1);
+        ctx.setState("wagerWinnerOverride", ctx.seat + 1);
       }
     },
   };
@@ -123,8 +123,8 @@ function seismicSurges(ctx: ScriptCtx): Card[] {
 
 function seismicAuraTokens(ctx: ScriptCtx): Card[] {
   const chosen = new Set(
-    Array.from({ length: ctx.getCounter("seismicTargetsChosen") }, (_, index) =>
-      ctx.getCounter(`seismicTarget:${index}`),
+    Array.from({ length: ctx.getState("seismicTargetsChosen") }, (_, index) =>
+      ctx.getState(`seismicTarget:${index}`),
     ),
   );
   return ctx.state.players
@@ -133,8 +133,8 @@ function seismicAuraTokens(ctx: ScriptCtx): Card[] {
 }
 
 function continueSeismicChoices(ctx: ScriptCtx): void {
-  const x = ctx.getCounter("seismicX");
-  const surgesChosen = ctx.getCounter("seismicSurgesChosen");
+  const x = ctx.getState("seismicX");
+  const surgesChosen = ctx.getState("seismicSurgesChosen");
   if (surgesChosen < x) {
     ctx.requestCardChoice(
       "seismic-surge",
@@ -145,7 +145,7 @@ function continueSeismicChoices(ctx: ScriptCtx): void {
     );
     return;
   }
-  const targetsChosen = ctx.getCounter("seismicTargetsChosen");
+  const targetsChosen = ctx.getState("seismicTargetsChosen");
   if (targetsChosen < x) {
     ctx.requestCardChoice(
       "seismic-target",
@@ -191,26 +191,26 @@ export const penHighRarity: Record<string, CardScript> = {
     },
     onChoose(ctx, hook, option) {
       if (hook === "seismic-x") {
-        ctx.setCounter("seismicX", Number(option));
+        ctx.setState("seismicX", Number(option));
         continueSeismicChoices(ctx);
         return;
       }
       if (hook === "seismic-surge") {
         ctx.tap(Number(option));
-        ctx.setCounter("seismicSurgesChosen", ctx.getCounter("seismicSurgesChosen") + 1);
+        ctx.setState("seismicSurgesChosen", ctx.getState("seismicSurgesChosen") + 1);
         continueSeismicChoices(ctx);
         return;
       }
       if (hook === "seismic-target") {
-        const chosen = ctx.getCounter("seismicTargetsChosen");
-        ctx.setCounter(`seismicTarget:${chosen}`, Number(option));
-        ctx.setCounter("seismicTargetsChosen", chosen + 1);
+        const chosen = ctx.getState("seismicTargetsChosen");
+        ctx.setState(`seismicTarget:${chosen}`, Number(option));
+        ctx.setState("seismicTargetsChosen", chosen + 1);
         continueSeismicChoices(ctx);
       }
     },
     onPlay(ctx) {
-      for (let index = 0; index < ctx.getCounter("seismicTargetsChosen"); index++) {
-        ctx.destroyPermanent(ctx.getCounter(`seismicTarget:${index}`));
+      for (let index = 0; index < ctx.getState("seismicTargetsChosen"); index++) {
+        ctx.destroyPermanent(ctx.getState(`seismicTarget:${index}`));
       }
     },
   },
@@ -520,7 +520,7 @@ export const penHighRarity: Record<string, CardScript> = {
       cost: 0,
       variableCost: {
         base: 0,
-        counterKey: "wardX",
+        stateKey: "wardX",
         prompt: decisionPrompt("Choose ward X", "card.common.ward.x.choose"),
       },
       isAttack: false,
@@ -529,7 +529,7 @@ export const penHighRarity: Record<string, CardScript> = {
       tap: true,
       onActivate: (ctx) => ctx.destroyAtEndPhase(ctx.self.instanceId),
     },
-    wardValue: (ctx) => ctx.getCounter("wardX"),
+    wardValue: (ctx) => ctx.getState("wardX"),
   },
   "lunar mirage|1": {
     friendlyDefendedTrigger: {
@@ -656,7 +656,7 @@ export const penHighRarity: Record<string, CardScript> = {
       if (hook !== "bone-puppetry-ally" || option === "no") return;
       const allyId = Number(option);
       if (!ctx.settleCard(allyId)) return;
-      ctx.setCounter("puppet", allyId);
+      ctx.setState("puppet", allyId);
       ctx.scheduleEndOfTurnTrigger(
         "bone-puppetry-cleanup",
         decisionPrompt("Destroy the returned ally and discard your hand", "card.trigger.common.bonepuppetry.cleanup"),
@@ -665,7 +665,7 @@ export const penHighRarity: Record<string, CardScript> = {
     },
     onDelayedTrigger(ctx, hook) {
       if (hook !== "bone-puppetry-cleanup") return;
-      const allyId = ctx.getCounter("puppet");
+      const allyId = ctx.getState("puppet");
       if (allyId) ctx.destroyPermanent(allyId);
       for (const card of [...ctx.player(ctx.seat).hand]) ctx.discardCard(ctx.seat, card.instanceId);
     },
@@ -736,10 +736,10 @@ export const penHighRarity: Record<string, CardScript> = {
     // persist on the card until it resolves.
     onPlayCostPaid(ctx) {
       const fromBanish = ctx.player(ctx.seat).banish.some((card) => card.instanceId === ctx.self.instanceId);
-      ctx.setCounter("embalmFromBanish", fromBanish ? 1 : 0);
+      ctx.setState("embalmFromBanish", fromBanish ? 1 : 0);
     },
     onPlay(ctx) {
-      if (ctx.getCounter("embalmFromBanish") === 1) ctx.grantGoAgain();
+      if (ctx.getState("embalmFromBanish") === 1) ctx.grantGoAgain();
       const attack = ctx
         .player(ctx.seat)
         .graveyard.find(
@@ -817,7 +817,7 @@ export const penHighRarity: Record<string, CardScript> = {
   "crown of frozen thoughts|0": {
     onDefend(ctx) {
       if (ctx.link)
-        ctx.setCardCounter(ctx.player(ctx.link.attacker).hero.instanceId, "frozenUntilTurn", ctx.state.turn + 2);
+        ctx.setCardState(ctx.player(ctx.link.attacker).hero.instanceId, "frozenUntilTurn", ctx.state.turn + 2);
     },
   },
   "channel iceloch glaze|3": {

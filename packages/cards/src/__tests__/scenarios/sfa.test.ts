@@ -411,7 +411,7 @@ describe("SFA — Draconic chain link thresholds", () => {
       .blockWith().settle()
       .expectAP(0, 1) // go again refunded
       .expectLog("is marked");
-    expect(s.state.players[1]!.hero.counters?.marked).toBe(1);
+    expect(s.state.players[1]!.hero.scriptState?.marked).toBe(1);
   });
 
   it("Mark is removed after the marked hero is hit by an opponent", () => {
@@ -419,9 +419,9 @@ describe("SFA — Draconic chain link thresholds", () => {
       active: 1,
       seats: [faiSeat({ hand: [] }), { hero: "rhinar", hand: ["head jab|2"] }],
     });
-    s.state.players[0]!.hero.counters = { marked: 1 };
+    s.state.players[0]!.hero.scriptState = { marked: 1 };
     s.play("head jab|2").blockWith().settle();
-    expect(s.state.players[0]!.hero.counters?.marked ?? 0).toBe(0);
+    expect(s.state.players[0]!.hero.scriptState?.marked ?? 0).toBe(0);
   });
 });
 

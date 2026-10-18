@@ -131,7 +131,7 @@ function bloodAllocationKey(mode: BloodMode, weaponId: number): string {
 
 function bloodModeTotal(ctx: ScriptCtx, mode: BloodMode): number {
   return bloodWeapons(ctx).reduce(
-    (total, weapon) => total + ctx.getCounter(bloodAllocationKey(mode, weapon.instanceId)),
+    (total, weapon) => total + ctx.getState(bloodAllocationKey(mode, weapon.instanceId)),
     0,
   );
 }
@@ -141,7 +141,7 @@ function bloodSelectedTotal(ctx: ScriptCtx): number {
 }
 
 function requestBloodMode(ctx: ScriptCtx): void {
-  const required = ctx.getCounter("bloodPaid");
+  const required = ctx.getState("bloodPaid");
   if (required <= 0) return;
   const selected = bloodSelectedTotal(ctx);
   const options: string[] = [];
@@ -149,7 +149,7 @@ function requestBloodMode(ctx: ScriptCtx): void {
   const optionMessages: Record<string, ReturnType<typeof decisionMessage>> = {};
   for (const weapon of bloodWeapons(ctx)) {
     for (const mode of BLOOD_MODES) {
-      const count = ctx.getCounter(bloodAllocationKey(mode, weapon.instanceId));
+      const count = ctx.getState(bloodAllocationKey(mode, weapon.instanceId));
       for (const operation of ["decrement", "increment"] as const) {
         const value = `blood-mode:${operation}:${mode}:${weapon.instanceId}:${count}:${selected}:${required}`;
         options.push(value);
@@ -181,9 +181,9 @@ function requestBloodMode(ctx: ScriptCtx): void {
 function applyBloodAllocation(ctx: ScriptCtx): void {
   for (const weapon of bloodWeapons(ctx)) {
     const weaponId = weapon.instanceId;
-    const power = ctx.getCounter(bloodAllocationKey("power", weaponId));
-    const goAgain = ctx.getCounter(bloodAllocationKey("go-again", weaponId));
-    const extraAttacks = ctx.getCounter(bloodAllocationKey("extra-attack", weaponId));
+    const power = ctx.getState(bloodAllocationKey("power", weaponId));
+    const goAgain = ctx.getState(bloodAllocationKey("go-again", weaponId));
+    const extraAttacks = ctx.getState(bloodAllocationKey("extra-attack", weaponId));
     if (power > 0) {
       ctx.addModifier({
         scope: "until-end-of-turn",
@@ -227,14 +227,14 @@ const bloodOnHerHands: CardScript = {
       if (!Number.isSafeInteger(count) || count < 0 || count > maximum) return;
       let destroyed = 0;
       for (const copper of coppers.slice(0, count)) if (ctx.destroyPermanent(copper.instanceId)) destroyed++;
-      ctx.setCounter("bloodPaid", destroyed);
+      ctx.setState("bloodPaid", destroyed);
       requestBloodMode(ctx);
     } else if (hook === "blood-mode") {
       const confirm = /^blood-mode:confirm:(\d+):(\d+)$/.exec(option);
       if (confirm) {
         const selected = Number(confirm[1]);
         const required = Number(confirm[2]);
-        if (required !== ctx.getCounter("bloodPaid") || selected !== required || selected !== bloodSelectedTotal(ctx)) {
+        if (required !== ctx.getState("bloodPaid") || selected !== required || selected !== bloodSelectedTotal(ctx)) {
           requestBloodMode(ctx);
         }
         return;
@@ -252,15 +252,15 @@ const bloodOnHerHands: CardScript = {
       const key = bloodAllocationKey(mode, weaponId);
       if (
         !weapon ||
-        count !== ctx.getCounter(key) ||
+        count !== ctx.getState(key) ||
         selected !== bloodSelectedTotal(ctx) ||
-        required !== ctx.getCounter("bloodPaid")
+        required !== ctx.getState("bloodPaid")
       )
         return;
       if (operation === "increment" && selected < required && bloodModeTotal(ctx, mode) < 2) {
-        ctx.setCounter(key, count + 1);
+        ctx.setState(key, count + 1);
       } else if (operation === "decrement" && count > 0) {
-        ctx.setCounter(key, count - 1);
+        ctx.setState(key, count - 1);
       }
       requestBloodMode(ctx);
     }
@@ -288,7 +288,7 @@ function knickTargets(ctx: ScriptCtx): DeepReadonly<CardInstance>[] {
 
 function requestKnickSearch(ctx: ScriptCtx): void {
   const targets = knickTargets(ctx);
-  if (ctx.getCounter("knickSearches") <= 0 || targets.length === 0) {
+  if (ctx.getState("knickSearches") <= 0 || targets.length === 0) {
     ctx.shuffleDeck();
     return;
   }
@@ -310,7 +310,7 @@ const knickKnack: CardScript = {
     );
   },
   onPlay(ctx) {
-    ctx.setCounter("knickSearches", 1 + Math.floor(ctx.getCounter("knickUnits") / 4));
+    ctx.setState("knickSearches", 1 + Math.floor(ctx.getState("knickUnits") / 4));
     requestKnickSearch(ctx);
   },
   onChoose(ctx, hook, option) {
@@ -318,7 +318,7 @@ const knickKnack: CardScript = {
       if (option === "done") return;
       const card = knickMoney(ctx).find((candidate) => candidate.instanceId === Number(option));
       if (!card) return;
-      ctx.setCounter("knickUnits", ctx.getCounter("knickUnits") + moneyValue(ctx, card));
+      ctx.setState("knickUnits", ctx.getState("knickUnits") + moneyValue(ctx, card));
       if (ctx.destroyPermanent(card.instanceId)) {
         ctx.requestCardChoice(
           "knick-money",
@@ -330,7 +330,7 @@ const knickKnack: CardScript = {
       }
     } else if (hook === "knick-search") {
       ctx.settleCard(Number(option));
-      ctx.setCounter("knickSearches", ctx.getCounter("knickSearches") - 1);
+      ctx.setState("knickSearches", ctx.getState("knickSearches") - 1);
       requestKnickSearch(ctx);
     }
   },
@@ -460,11 +460,11 @@ export const evrHighRarity: Record<string, CardScript> = {
   "imposing visage|3": {
     variablePlayCost: {
       base: 3,
-      counterKey: "visageX",
+      stateKey: "visageX",
       prompt: decisionPrompt("Choose X", "engine.decision.x.choose"),
     },
     onPlay(ctx) {
-      const x = ctx.getCounter("visageX");
+      const x = ctx.getState("visageX");
       const cards = ctx
         .player(ctx.seat)
         .deck.filter((card) => hasType(ctx, card, "aura") && (ctx.cardData(card.cardId).cost ?? -1) <= x);
@@ -483,7 +483,7 @@ export const evrHighRarity: Record<string, CardScript> = {
     onChoose(ctx, hook, option) {
       if (hook !== "visage-search") return;
       const card = ctx.player(ctx.seat).deck.find((candidate) => candidate.instanceId === Number(option));
-      if (!card || !hasType(ctx, card, "aura") || (ctx.cardData(card.cardId).cost ?? -1) > ctx.getCounter("visageX"))
+      if (!card || !hasType(ctx, card, "aura") || (ctx.cardData(card.cardId).cost ?? -1) > ctx.getState("visageX"))
         return;
       ctx.settleCard(card.instanceId);
       ctx.shuffleDeck();
@@ -899,12 +899,12 @@ export const evrHighRarity: Record<string, CardScript> = {
   "scour|3": {
     arcaneDamageEffect: true,
     arcaneDamageEffectAmounts: [0],
-    variablePlayCost: { base: 0, counterKey: "scourX", prompt: decisionPrompt("Choose X", "engine.decision.x.choose") },
+    variablePlayCost: { base: 0, stateKey: "scourX", prompt: decisionPrompt("Choose X", "engine.decision.x.choose") },
     onPlay(ctx) {
       const auras = ctx
         .player(opponentSeat(ctx))
         .board.filter((card) => hasType(ctx, card, "aura") && (ctx.cardData(card.cardId).cost ?? -1) === 0)
-        .slice(0, ctx.getCounter("scourX"));
+        .slice(0, ctx.getState("scourX"));
       for (const aura of auras) ctx.destroyPermanent(aura.instanceId);
       ctx.dealDamage(opponentSeat(ctx), auras.length, { arcane: true, sourceInstanceId: ctx.self.instanceId });
     },

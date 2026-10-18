@@ -114,7 +114,7 @@ function opposingArcaneSpell(damage: number, extra: CardScript = {}): CardScript
     prospectiveHeroDamage: (ctx) => [
       {
         targetSeat: opponentSeat(ctx),
-        amount: damage + ctx.getCounter("arcaneBonus"),
+        amount: damage + ctx.getState("arcaneBonus"),
       },
     ],
     onPlay: (ctx) => dealArcane(ctx, opponentSeat(ctx), damage),

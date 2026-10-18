@@ -246,7 +246,7 @@ describe("SDO — non-attack actions", () => {
     expect(s.state.phase).toBe("action");
     expect(s.state.pendingDecision).toBeNull();
     expect(chum.tapped).not.toBe(true);
-    expect(chum.counters?.["must-target-turn"]).toBeUndefined();
+    expect(chum.scriptState?.["must-target-turn"]).toBeUndefined();
     s.expectNotInZone(0, "agility|0", "board")
       .expectNotInZone(0, "vigor|0", "board")
       .expectInZone(0, "moray le fay|2", "hand");

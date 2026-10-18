@@ -289,7 +289,7 @@ export const aol: Record<string, CardScript> = {
   "drawing dead|2": wagerReaction(1, "Winner discards a card", (ctx, winner) => {
     const hand = winner >= 0 ? ctx.player(winner).hand : [];
     if (hand.length) {
-      ctx.setCounter("decisionSeat", winner);
+      ctx.setState("decisionSeat", winner);
       ctx.requestCardChoice(
         "drawing-discard",
         decisionPrompt("Discard a card", "card.aol.card.discard"),
@@ -304,14 +304,14 @@ export const aol: Record<string, CardScript> = {
       if (winner < 0) return;
       const target = ctx.player(winner);
       const targetTurn = winner === ctx.state.activePlayer ? ctx.state.turn : ctx.state.turn + 1;
-      ctx.setCardCounter(target.hero.instanceId, "bonusIntellectAtEndPhaseTurn", targetTurn);
+      ctx.setCardState(target.hero.instanceId, "bonusIntellectAtEndPhaseTurn", targetTurn);
     }),
   },
   "donkey|3": wagerReaction(1, "Winner destroys a card in their arsenal", (ctx, winner) => {
     const arsenal = winner >= 0 ? ctx.player(winner).arsenal : [];
     if (arsenal.length === 1) ctx.moveToGraveyard(arsenal[0]!.instanceId, "arsenal");
     else if (arsenal.length > 1) {
-      ctx.setCounter("decisionSeat", winner);
+      ctx.setState("decisionSeat", winner);
       ctx.requestCardChoice(
         "donkey-arsenal",
         decisionPrompt("Choose an arsenal card to destroy", "card.aol.arsenal.card.destroy"),
@@ -350,7 +350,7 @@ export const aol: Record<string, CardScript> = {
       if (winner < 0) return;
       const deck = ctx.player(winner).deck;
       if (!deck.length) return;
-      ctx.setCounter("decisionSeat", winner);
+      ctx.setState("decisionSeat", winner);
       ctx.requestCardChoice(
         "odds-top",
         decisionPrompt("Choose a card to put on top", "card.aol.deck.card.top"),
@@ -367,7 +367,7 @@ export const aol: Record<string, CardScript> = {
           ? ctx.player(winner).graveyard.filter((card) => ctx.cardData(card.cardId).cardType === "equipment")
           : [];
       if (equipment.length) {
-        ctx.setCounter("decisionSeat", winner);
+        ctx.setState("decisionSeat", winner);
         ctx.requestCardChoice(
           "rake-equip",
           decisionPrompt("Equip an equipment from your graveyard?", "card.aol.graveyard.equipment.equip", {
@@ -386,7 +386,7 @@ export const aol: Record<string, CardScript> = {
         (card) => cardNamed(ctx, card, "Prized Galea"),
       );
       if (gold.length > 0 && galea) {
-        ctx.setCounter("prizedGalea", galea.instanceId);
+        ctx.setState("prizedGalea", galea.instanceId);
         ctx.requestCardChoice(
           "visit-gold",
           decisionPrompt("Visit the Prize Room: destroy a Gold to equip Prized Galea?", "card.aol.gold.destroy.galea", {
@@ -400,7 +400,7 @@ export const aol: Record<string, CardScript> = {
     },
     onChoose(ctx, hook, option) {
       if (hook === "visit-gold" && option !== "no" && ctx.destroyPermanent(Number(option))) {
-        ctx.equipFromInventory(ctx.getCounter("prizedGalea"));
+        ctx.equipFromInventory(ctx.getState("prizedGalea"));
       }
     },
   },
@@ -411,10 +411,10 @@ for (const script of Object.values(aol)) {
   const original = script.onChoose;
   script.onChoose = (ctx, hook, option) => {
     original?.(ctx, hook, option);
-    if (hook === "drawing-discard") ctx.discardCard(ctx.getCounter("decisionSeat"), Number(option));
+    if (hook === "drawing-discard") ctx.discardCard(ctx.getState("decisionSeat"), Number(option));
     if (hook === "donkey-arsenal") ctx.moveToGraveyard(Number(option), "arsenal");
     if (hook === "odds-top") {
-      ctx.shuffleDeck(ctx.getCounter("decisionSeat"));
+      ctx.shuffleDeck(ctx.getState("decisionSeat"));
       ctx.putOnDeckTop(Number(option));
     }
     if (hook === "rake-equip" && option !== "no") ctx.equipFromGraveyard(Number(option));

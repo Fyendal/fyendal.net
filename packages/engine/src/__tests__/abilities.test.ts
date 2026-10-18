@@ -108,11 +108,11 @@ describe("activated ability counter costs", () => {
           cost: 0,
           isAttack: false,
           goAgain: false,
-          removeCounterCost: { key: "charge", amount: 1 },
+          removeCounterCost: { key: "suspense", amount: 1 },
         },
       },
     };
-    player(s, 0).board.find((card) => card.instanceId === id)!.counters = { charge: 1 };
+    player(s, 0).board.find((card) => card.instanceId === id)!.counters = { suspense: 1 };
     player(s, 0).actionPoints = 1;
 
     const activation = abilityIntents(s, 0, id)[0];
@@ -122,7 +122,7 @@ describe("activated ability counter costs", () => {
     if (!accepted.ok) throw new Error(accepted.error);
     s = accepted.state;
     expect(player(s, 0).board.some((card) => card.instanceId === id)).toBe(false);
-    expect(player(s, 0).graveyard.find((card) => card.instanceId === id)?.counters?.charge).toBe(0);
+    expect(player(s, 0).graveyard.find((card) => card.instanceId === id)).toBeDefined();
   });
 
   it("puts a counter on the source before an attack layer resolves", () => {
@@ -462,7 +462,7 @@ describe("shared card-play announcement", () => {
         },
       },
     };
-    (player(s, 1).hero.counters ??= {}).loseLifeOnActionUntilTurn = s.turn;
+    (player(s, 1).hero.scriptState ??= {}).loseLifeOnActionUntilTurn = s.turn;
 
     let result = applyIntent(s, 0, {
       kind: "play-card",

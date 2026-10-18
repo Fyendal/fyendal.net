@@ -101,7 +101,7 @@ describe("AJV — Jarl", () => {
 
     expect(g.state.players[1]!.equipment.chest).toBeUndefined();
     expect(g.state.players[1]!.board.some(
-      (card) => card.counters?.["frostZone:chest"] === 1,
+      (card) => card.scriptState?.["frostZone:chest"] === 1,
     )).toBe(true);
   });
 

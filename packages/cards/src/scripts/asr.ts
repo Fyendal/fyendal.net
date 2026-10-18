@@ -172,18 +172,18 @@ export const asr: Record<string, CardScript> = {
     onFriendlyDefended(ctx) {
       if (ctx.link?.attackingCard.instanceId !== ctx.self.instanceId) return;
       const actionDefenders = ctx.link.defendingCards.filter((card) => ctx.hasCardType(card, "action")).length;
-      const seen = ctx.getCounter("giveTakeActionDefendersSeen");
+      const seen = ctx.getState("giveTakeActionDefendersSeen");
       const triggers = Math.max(0, actionDefenders - seen);
-      ctx.setCounter("giveTakeActionDefendersSeen", actionDefenders);
+      ctx.setState("giveTakeActionDefendersSeen", actionDefenders);
       if (triggers <= 0) return;
-      ctx.setCounter("giveTakeRemaining", triggers);
+      ctx.setState("giveTakeRemaining", triggers);
       offerGiveAndTake(ctx);
     },
     onChoose(ctx, hook, option) {
       if (hook !== "give-take-top") return;
       if (option !== "pass") ctx.putOnDeckTop(Number(option));
-      const remaining = Math.max(0, ctx.getCounter("giveTakeRemaining") - 1);
-      ctx.setCounter("giveTakeRemaining", remaining);
+      const remaining = Math.max(0, ctx.getState("giveTakeRemaining") - 1);
+      ctx.setState("giveTakeRemaining", remaining);
       if (remaining > 0) offerGiveAndTake(ctx);
     },
   },

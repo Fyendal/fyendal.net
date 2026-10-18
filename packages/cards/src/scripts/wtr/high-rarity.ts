@@ -33,7 +33,7 @@ function previousAttackNamed(ctx: ScriptCtx, name: string): boolean {
 
 function rememberRandomDiscard(ctx: ScriptCtx): void {
   const discarded = ctx.discardRandom(ctx.seat, 1)[0];
-  ctx.setCounter("discardedSixPlus", isSixPlus(ctx, discarded) ? 1 : 0);
+  ctx.setState("discardedSixPlus", isSixPlus(ctx, discarded) ? 1 : 0);
 }
 
 function chooseDeckCard(
@@ -93,7 +93,7 @@ const bloodrushBellow: CardScript = {
   additionalCost: rememberRandomDiscard,
   onPlay(ctx) {
     ctx.addModifier({ scope: "until-end-of-turn", attack: 2, appliesToClass: "brute" });
-    if (ctx.getCounter("discardedSixPlus") === 1) {
+    if (ctx.getState("discardedSixPlus") === 1) {
       ctx.drawCards(ctx.seat, 2);
       ctx.grantGoAgain();
     }
@@ -165,12 +165,12 @@ const lordOfWind: CardScript = {
       ctx.requestXPayment("lord-wind-x", decisionPrompt("Lord of Wind: choose X", "card.wtr.lordwind.x"), ctx.seat);
     }
   },
-  modifyAttack: (ctx) => ctx.getCounter("lordWindX"),
+  modifyAttack: (ctx) => ctx.getState("lordWindX"),
   onChoose(ctx, hook, option) {
     if (hook === "lord-wind-x" && option.startsWith("x:")) {
       const amount = Number(option.slice(2));
-      ctx.setCounter("lordWindX", amount);
-      ctx.setCounter("lordWindRemaining", amount);
+      ctx.setState("lordWindX", amount);
+      ctx.setState("lordWindRemaining", amount);
       const eligible = ctx
         .player(ctx.seat)
         .graveyard.filter((card) =>
@@ -193,8 +193,8 @@ const lordOfWind: CardScript = {
       return;
     }
     if (!ctx.putOnDeckBottom(Number(option))) return;
-    const remaining = ctx.getCounter("lordWindRemaining") - 1;
-    ctx.setCounter("lordWindRemaining", remaining);
+    const remaining = ctx.getState("lordWindRemaining") - 1;
+    ctx.setState("lordWindRemaining", remaining);
     const eligible = ctx
       .player(ctx.seat)
       .graveyard.filter((card) =>
@@ -225,7 +225,7 @@ const hurricaneTechnique = comboAttack("rising knee thrust", 1, (ctx) => {
 });
 
 function requestRemembrance(ctx: ScriptCtx): void {
-  const remaining = ctx.getCounter("remembranceRemaining");
+  const remaining = ctx.getState("remembranceRemaining");
   const actions = ctx.player(ctx.seat).graveyard.filter((card) => ctx.hasCardType(card, "action"));
   if (remaining > 0 && actions.length > 0) {
     ctx.requestCardChoice(
@@ -261,7 +261,7 @@ export const wtrHighRarity: Record<string, CardScript> = {
     requiredHandCardsForAdditionalCost: 1,
     additionalCost(ctx) {
       rememberRandomDiscard(ctx);
-      if (ctx.getCounter("discardedSixPlus") && ctx.link) ctx.dealDamage(ctx.link.attacker, 2);
+      if (ctx.getState("discardedSixPlus") && ctx.link) ctx.dealDamage(ctx.link.attacker, 2);
     },
   },
   "sand sketched plan|3": sandSketchedPlan,
@@ -300,7 +300,7 @@ export const wtrHighRarity: Record<string, CardScript> = {
     onHit(ctx) {
       const target = ctx.player(opponentSeat(ctx));
       ctx.setPlayerFlag(target.seat, "cannotDrawNextActionPhase", true);
-      ctx.setCardCounter(target.hero.instanceId, "cannotDrawActionTurn", ctx.state.turn + 1);
+      ctx.setCardState(target.hero.instanceId, "cannotDrawActionTurn", ctx.state.turn + 1);
     },
   },
   "forged for war|2": {
@@ -493,7 +493,7 @@ export const wtrHighRarity: Record<string, CardScript> = {
           : option === "+2"
             ? decisionMessage("card.wtr.estrike.option.power")
             : decisionMessage("card.wtr.estrike.option.goagain");
-        ctx.setCounter("estrikeMode", option === "draw" ? 1 : option === "+2" ? 2 : 3);
+        ctx.setState("estrikeMode", option === "draw" ? 1 : option === "+2" ? 2 : 3);
         ctx.logPublic(localizedCardLog(
           ctx,
           `${ctx.cardData(ctx.player(ctx.seat).heroCardId).name} chooses ${modeLabel} for ${ctx.data.name}`,
@@ -506,7 +506,7 @@ export const wtrHighRarity: Record<string, CardScript> = {
       }
     },
     onAttackDeclared(ctx) {
-      const mode = ctx.getCounter("estrikeMode");
+      const mode = ctx.getState("estrikeMode");
       if (mode === 1) ctx.drawCards(ctx.seat, 1);
       else if (mode === 2) ctx.addModifier({ scope: "chain-link", attack: 2 });
       else if (mode === 3) ctx.grantGoAgain();
@@ -535,7 +535,7 @@ export const wtrHighRarity: Record<string, CardScript> = {
   },
   "remembrance|2": {
     onPlay(ctx) {
-      ctx.setCounter("remembranceRemaining", 3);
+      ctx.setState("remembranceRemaining", 3);
       requestRemembrance(ctx);
     },
     onChoose(ctx, hook, option) {
@@ -545,7 +545,7 @@ export const wtrHighRarity: Record<string, CardScript> = {
         return;
       }
       if (!ctx.putOnDeckBottom(Number(option))) return;
-      ctx.setCounter("remembranceRemaining", ctx.getCounter("remembranceRemaining") - 1);
+      ctx.setState("remembranceRemaining", ctx.getState("remembranceRemaining") - 1);
       requestRemembrance(ctx);
     },
     graveyardReplacement: "banish",

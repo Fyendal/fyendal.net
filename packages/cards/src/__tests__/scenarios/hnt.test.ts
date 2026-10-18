@@ -125,7 +125,7 @@ describe("HNT — opposing hand reveals", () => {
       expect(revealed).toContain("Razor Reflex");
       expect(revealed).toContain("Fry");
       expect(revealed).toContain("from hand");
-      expect(g.state.players[1]!.hero.counters?.marked).toBe(1);
+      expect(g.state.players[1]!.hero.scriptState?.marked).toBe(1);
     },
   );
 
@@ -143,7 +143,7 @@ describe("HNT — opposing hand reveals", () => {
     expect(revealed).toContain("Lightning Press");
     expect(revealed).toContain("Fry");
     expect(revealed).toContain("from hand");
-    expect(g.state.players[1]!.hero.counters?.marked ?? 0).toBe(0);
+    expect(g.state.players[1]!.hero.scriptState?.marked ?? 0).toBe(0);
   });
 });
 
@@ -396,7 +396,7 @@ describe("HNT — marked heroes and daggers", () => {
 
     const dagger = g.state.players[0]!.weapons[0]!;
     expect(g.state.players[0]!.flags[`additionalActivations:${dagger.instanceId}:0`]).toBeUndefined();
-    expect(g.state.players[1]!.hero.counters?.marked).toBe(1);
+    expect(g.state.players[1]!.hero.scriptState?.marked).toBe(1);
   });
 
   it("Long Whisker Loyalty can target the non-attacking dagger for its lasting modes", () => {
@@ -439,10 +439,10 @@ describe("HNT — marked heroes and daggers", () => {
 
     expect(g.state.players[0]!.flags[`additionalActivations:${attackingDagger.instanceId}:0`]).toBeUndefined();
     expect(g.state.players[0]!.flags[`additionalActivations:${otherDagger.instanceId}:0`]).toBe(1);
-    expect(g.state.players[1]!.hero.counters?.marked).toBeUndefined();
+    expect(g.state.players[1]!.hero.scriptState?.marked).toBeUndefined();
 
     g.attackWithWeapon("kunai of retribution|0").blockWith().settle();
-    expect(g.state.players[1]!.hero.counters?.marked).toBe(1);
+    expect(g.state.players[1]!.hero.scriptState?.marked).toBe(1);
   });
 
   it("journals Relentless Pursuit's self-move as a deck-bottom placement", () => {
@@ -471,7 +471,7 @@ describe("HNT — marked heroes and daggers", () => {
         { hero: "dorinthea", heroKey: targetHero },
       ],
     });
-    g.state.players[1]!.hero.counters = { marked: 1 };
+    g.state.players[1]!.hero.scriptState = { marked: 1 };
 
     g.play(contract).blockWith().settle().expectHandSize(0, 1);
     expect(g.state.players[0]!.flags.completedContractThisTurn).toBe(true);
@@ -574,7 +574,7 @@ describe("HNT — marked heroes and daggers", () => {
         },
       ],
     });
-    g.state.players[0]!.hero.counters = { marked: 1 };
+    g.state.players[0]!.hero.scriptState = { marked: 1 };
 
     g.play("snatch|1").blockWith("mask of deceit|0").settle();
 
@@ -1086,13 +1086,13 @@ describe("HNT — marked heroes and daggers", () => {
     expect(g.state.stack).toEqual([
       expect.objectContaining({ label: "Mark the defending hero" }),
     ]);
-    expect(g.state.players[1]!.hero.counters?.marked ?? 0).toBe(0);
+    expect(g.state.players[1]!.hero.scriptState?.marked ?? 0).toBe(0);
 
     g.passPriority().passPriority();
 
     expect(g.state.stack).toEqual([]);
     expect(g.state.pendingDecision?.kind).toBe("defend");
-    expect(g.state.players[1]!.hero.counters?.marked).toBe(1);
+    expect(g.state.players[1]!.hero.scriptState?.marked).toBe(1);
   });
 
   it("Hunt the Hunter does not trigger without another red card played this turn", () => {
@@ -1112,7 +1112,7 @@ describe("HNT — marked heroes and daggers", () => {
 
     expect(g.state.stack).toEqual([]);
     expect(g.state.pendingDecision?.kind).toBe("defend");
-    expect(g.state.players[1]!.hero.counters?.marked ?? 0).toBe(0);
+    expect(g.state.players[1]!.hero.scriptState?.marked ?? 0).toBe(0);
   });
 
   it("Cindra cannot equip a face-down Draconic dagger from the graveyard", () => {
@@ -1193,7 +1193,7 @@ describe("HNT — marked heroes and daggers", () => {
       .chooseCard("graphene chelicera|0")
       .expectLife(1, 19)
       .expectInZone(0, "fealty|0", "board");
-    expect(g.state.players[1]!.hero.counters?.marked ?? 0).toBe(0);
+    expect(g.state.players[1]!.hero.scriptState?.marked ?? 0).toBe(0);
   });
 
   it("Cindra does not trigger for a dagger effect hit on an unmarked hero", () => {
@@ -1240,7 +1240,7 @@ describe("HNT — marked heroes and daggers", () => {
       .settle()
       .expectHandSize(0, 1);
 
-    expect(g.state.players[1]!.hero.counters?.marked ?? 0).toBe(0);
+    expect(g.state.players[1]!.hero.scriptState?.marked ?? 0).toBe(0);
   });
 
   it("Savor Bloodshed draws when a dagger effect hits a marked hero", () => {
@@ -1255,14 +1255,14 @@ describe("HNT — marked heroes and daggers", () => {
         { hero: "dorinthea", hand: [] },
       ],
     });
-    g.state.players[1]!.hero.counters = { marked: 1 };
+    g.state.players[1]!.hero.scriptState = { marked: 1 };
 
     g.play("savor bloodshed|1")
       .play("bite|1")
       .chooseCard("graphene chelicera|0")
       .expectHandSize(0, 1);
 
-    expect(g.state.players[1]!.hero.counters?.marked ?? 0).toBe(0);
+    expect(g.state.players[1]!.hero.scriptState?.marked ?? 0).toBe(0);
   });
 
   it("Savor Bloodshed does not trigger when a dagger effect hits an unmarked hero", () => {
@@ -1803,7 +1803,7 @@ describe("HNT — attack triggers use the stack", () => {
         { hero: "dorinthea" },
       ],
     });
-    g.state.players[1]!.hero.counters = { marked: 1 };
+    g.state.players[1]!.hero.scriptState = { marked: 1 };
 
     g.play("whittle from bone|1", { settle: false });
 
@@ -1823,7 +1823,7 @@ describe("HNT — attack triggers use the stack", () => {
           { hero: "dorinthea" },
         ],
       });
-      g.state.players[1]!.hero.counters = { marked: 1 };
+      g.state.players[1]!.hero.scriptState = { marked: 1 };
 
       g.play(key, { settle: false });
 
@@ -1957,11 +1957,11 @@ describe("HNT — attack triggers use the stack", () => {
     g.play("hunt to the ends of rathe|1", { settle: false });
 
     expectAttackTrigger(g, "Mark the defending hero");
-    expect(g.state.players[1]!.hero.counters?.marked ?? 0).toBe(0);
+    expect(g.state.players[1]!.hero.scriptState?.marked ?? 0).toBe(0);
     g.expectAttackValue(2);
 
     resolveTrigger(g).expectAttackValue(4);
-    expect(g.state.players[1]!.hero.counters?.marked).toBe(1);
+    expect(g.state.players[1]!.hero.scriptState?.marked).toBe(1);
   });
 
   it("Hunt to the Ends of Rathe does not trigger against a hero other than Arakni", () => {

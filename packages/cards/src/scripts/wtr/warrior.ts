@@ -36,7 +36,7 @@ function strokeOfForesight(bonus: number): CardScript {
       const p = ctx.player(ctx.seat);
       if (hook === "stroke-card") {
         // remember the pick while the follow-up position choice is answered
-        ctx.setCounter("strokeCard", Number(option));
+        ctx.setState("strokeCard", Number(option));
         ctx.requestChoice(
           "stroke-position",
           decisionPrompt("Stroke of Foresight: put it on the top or bottom of your deck?", "card.wtr.stroke.position", {
@@ -47,7 +47,7 @@ function strokeOfForesight(bonus: number): CardScript {
         return;
       }
       if (hook !== "stroke-position") return;
-      const card = p.hand.find((c) => c.instanceId === ctx.getCounter("strokeCard"));
+      const card = p.hand.find((c) => c.instanceId === ctx.getState("strokeCard"));
       if (!card) return;
       if (option === "top") {
         ctx.putOnDeckTop(card.instanceId);

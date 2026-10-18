@@ -62,24 +62,35 @@ export function clearPrivateZonePlacement(card: CardInstance): void {
   delete card.arsenalSlot;
 }
 
+/** Engine statuses scoped to an arena object. Like counters they end when the
+ * card leaves the arena; other script state deliberately survives the move so
+ * a resolving layer and its lingering effects can still read it. */
+const ARENA_STATUS_KEYS = ["attacked", "frozenUntilTurn", "marked"];
+
 /** A card that changes zones becomes a new object (CR 3.0.9). Effects scoped
  * to its previous object (this-chain defense, this-turn power, granted or
  * suppressed keywords and names, freezes lasting while a source is in the
- * arena) do not follow it to hand, deck, graveyard,
- * banish, or soul, so a card returned and defending again later in the same
- * chain starts from its printed values. Callers that need last-known
- * information keep a snapshot of the previous object. */
+ * arena, every counter, arena-only statuses) do not follow it to hand, deck,
+ * graveyard, banish, or soul, so a card returned and defending again later in
+ * the same chain starts from its printed values. The departing counters are
+ * kept only as `lastKnownCounters` for the card's own abilities that resolve
+ * after the move; callers needing other last-known information keep a
+ * snapshot of the previous object. */
 export function clearTemporaryObjectEffects(card: CardInstance): void {
   delete card.tempPower;
   delete card.tempDefense;
   delete card.grantedKeywords;
   delete card.suppressedKeywords;
   delete card.grantedNames;
-  const counters = card.counters;
-  if (!counters) return;
-  const sourceFreezes = Object.keys(counters).filter((key) => key.startsWith(FROZEN_WHILE_SOURCE_IN_ARENA));
-  for (const key of sourceFreezes) delete counters[key];
-  if (sourceFreezes.length && Object.keys(counters).length === 0) delete card.counters;
+  delete card.defCounters;
+  if (card.counters) card.lastKnownCounters = card.counters;
+  delete card.counters;
+  const values = card.scriptState;
+  if (!values) return;
+  for (const key of Object.keys(values)) {
+    if (key.startsWith(FROZEN_WHILE_SOURCE_IN_ARENA) || ARENA_STATUS_KEYS.includes(key)) delete values[key];
+  }
+  if (Object.keys(values).length === 0) delete card.scriptState;
 }
 
 /** Move up to `n` cards from the top of the player's deck to their hand. */
@@ -102,7 +113,7 @@ export function drawCards(
   if (
     state.phase === "action" &&
     state.activePlayer === player.seat &&
-    Number(player.hero.counters?.cannotDrawActionTurn ?? 0) === state.turn
+    Number(player.hero.scriptState?.cannotDrawActionTurn ?? 0) === state.turn
   ) {
     return;
   }
@@ -311,7 +322,7 @@ export function canUntapPermanent(
   runtime: EngineRuntime,
   target: CardInstance,
 ): boolean {
-  if (Number(target.counters?.cannotUntapUntilTurn ?? 0) >= state.turn) return false;
+  if (Number(target.scriptState?.cannotUntapUntilTurn ?? 0) >= state.turn) return false;
   for (const controller of state.players as PlayerState[]) {
     for (const source of controlledPermanents(state, controller.seat, { faceDownEquipment: false })) {
       if (scriptOf(state, source.cardId, source)?.preventsUntapOf?.(

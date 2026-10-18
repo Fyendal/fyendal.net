@@ -39,11 +39,11 @@ function arakniSeat(extra: Record<string, unknown> = {}) {
 
 /** Stamp the marked condition on a hero (setup touch). */
 function mark(s: Scenario, seat: number): void {
-  s.state.players[seat]!.hero.counters = { marked: 1 };
+  s.state.players[seat]!.hero.scriptState = { marked: 1 };
 }
 
 function markedCount(s: Scenario, seat: number): number {
-  return s.state.players[seat]!.hero.counters?.marked ?? 0;
+  return s.state.players[seat]!.hero.scriptState?.marked ?? 0;
 }
 
 describe("SAR — mark and the brood", () => {

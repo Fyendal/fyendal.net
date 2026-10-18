@@ -38,7 +38,7 @@ function playedLightning(ctx: ScriptCtx): boolean {
 }
 
 function isFused(ctx: ScriptCtx): boolean {
-  return ctx.getCounter("fused") > 0;
+  return ctx.getState("fused") > 0;
 }
 
 /** Name-only identity check (any pitch variant — "a Nimblism"). */
@@ -105,7 +105,7 @@ function fusionOnChoose(ctx: ScriptCtx, hook: string, option: string): void {
   if (hook !== "fusion" || option === "no") return;
   const card = ctx.player(ctx.seat).hand.find((c) => c.instanceId === Number(option));
   if (!card) return;
-  ctx.setCounter("fused", 1);
+  ctx.setState("fused", 1);
   ctx.setFlag("player", "fusedThisTurn", true);
   for (const type of ["earth", "ice", "lightning"] as const) {
     if (ctx.cardTypes(card).includes(type)) {
@@ -301,12 +301,12 @@ export const sba: Record<string, CardScript> = {
     },
     onChoose(ctx, hook, option) {
       if (hook === "crown-attack") {
-        ctx.setCounter("crownAttack", Number(option));
+        ctx.setState("crownAttack", Number(option));
         crownPickNonAttack(ctx);
         return;
       }
       if (hook === "crown-non-attack") {
-        ctx.setCounter("crownNonAttack", Number(option));
+        ctx.setState("crownNonAttack", Number(option));
         crownOrder(ctx);
         return;
       }
@@ -314,7 +314,7 @@ export const sba: Record<string, CardScript> = {
         // the chosen card goes on top: put the other one there first
         const chosen = Number(option);
         const other =
-          chosen === ctx.getCounter("crownAttack") ? ctx.getCounter("crownNonAttack") : ctx.getCounter("crownAttack");
+          chosen === ctx.getState("crownAttack") ? ctx.getState("crownNonAttack") : ctx.getState("crownAttack");
         crownPutOnTop(ctx, other);
         crownPutOnTop(ctx, chosen);
         ctx.logPublic(
@@ -399,7 +399,7 @@ export const sba: Record<string, CardScript> = {
       const card = ctx.player(ctx.seat).graveyard.find((c) => c.instanceId === Number(option));
       if (!card) return;
       ctx.banish(card.instanceId);
-      ctx.setCounter("jackBuff", 1);
+      ctx.setState("jackBuff", 1);
       ctx.grantGoAgain();
       ctx.logPublic(
         localizedCardLog(
@@ -412,7 +412,7 @@ export const sba: Record<string, CardScript> = {
       );
     },
     modifyAttack(ctx) {
-      return ctx.getCounter("jackBuff") ? 1 : 0;
+      return ctx.getState("jackBuff") ? 1 : 0;
     },
     canTriggerOnHit(ctx) {
       return ctx.link?.targetAllyId === undefined;
@@ -443,11 +443,11 @@ export const sba: Record<string, CardScript> = {
     canPlay(ctx) {
       // counters persist on the card while it leaves its zone (unlike flags)
       const fromArsenal = ctx.player(ctx.seat).arsenal.includes(ctx.self);
-      ctx.setCounter("fromArsenal", fromArsenal ? 1 : 0);
+      ctx.setState("fromArsenal", fromArsenal ? 1 : 0);
       return true;
     },
     onAttackDeclared(ctx) {
-      if (!ctx.getCounter("fromArsenal")) return;
+      if (!ctx.getState("fromArsenal")) return;
       ctx.grantGoAgain();
       ctx.logPublic(
         localizedCardLog(
@@ -644,7 +644,7 @@ export const sba: Record<string, CardScript> = {
       const subs = ctx.cardTypes(link.attackingCard);
       if (!subs.includes("lightning") && !subs.includes("elemental")) return;
       if (!consumeDelayedEffect(ctx)) return;
-      if ((link.attackingCard.counters?.fused ?? 0) > 0) {
+      if ((link.attackingCard.scriptState?.fused ?? 0) > 0) {
         ctx.grantGoAgain();
         ctx.logPublic(
           localizedCardLog(
@@ -793,7 +793,7 @@ function crownPickNonAttack(ctx: ScriptCtx): void {
   const nonAttacks = ctx.player(ctx.seat).graveyard.filter((c) => isRunebladeAction(ctx, c, false));
   if (nonAttacks.length === 0) {
     // only an attack action was available: straight to the top
-    const picked = ctx.getCounter("crownAttack");
+    const picked = ctx.getState("crownAttack");
     if (picked > 0) crownPutOnTop(ctx, picked);
     return;
   }
@@ -808,8 +808,8 @@ function crownPickNonAttack(ctx: ScriptCtx): void {
 }
 
 function crownOrder(ctx: ScriptCtx): void {
-  const attack = ctx.getCounter("crownAttack");
-  const nonAttack = ctx.getCounter("crownNonAttack");
+  const attack = ctx.getState("crownAttack");
+  const nonAttack = ctx.getState("crownNonAttack");
   if (attack <= 0) {
     crownPutOnTop(ctx, nonAttack);
     return;

@@ -146,10 +146,10 @@ const permafrostFrostbites: TriggerDef = {
   labelMessage: { id: "card.trigger.common.frostbite.create.damage" },
   condition(ctx, _eventCard, event) {
     const damage = heroDamage(event);
-    return ctx.getCounter("sigilFrost") > 0 && !!damage?.arcane && damage.byController;
+    return ctx.getState("sigilFrost") > 0 && !!damage?.arcane && damage.byController;
   },
   onTrigger(ctx) {
-    ctx.setCounter("sigilFrost", 0);
+    ctx.setState("sigilFrost", 0);
     consumeOwnMarker(ctx);
   },
   effect(ctx, _eventCard, event) {
@@ -160,8 +160,8 @@ const permafrostFrostbites: TriggerDef = {
 
 function freeze(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): void {
   const expiry = ctx.state.turn + (ctx.state.activePlayer === ctx.seat ? 2 : 1);
-  const current = Number(card.counters?.frozenUntilTurn ?? 0);
-  ctx.addCounter(card.instanceId, "frozenUntilTurn", Math.max(0, expiry - current));
+  const current = Number(card.scriptState?.frozenUntilTurn ?? 0);
+  ctx.addCardState(card.instanceId, "frozenUntilTurn", Math.max(0, expiry - current));
   if (ctx.player(card.owner).arsenal.some((candidate) => candidate.instanceId === card.instanceId)) {
     ctx.logPublic(
       localizedCardLog(
@@ -250,7 +250,7 @@ function handleFusion(ctx: ScriptCtx, hook: string, option: string): boolean {
   if (option === "no") return true;
   const card = ctx.player(ctx.seat).hand.find((candidate) => candidate.instanceId === Number(option));
   if (!card) return true;
-  ctx.setCounter("fused", 1);
+  ctx.setState("fused", 1);
   ctx.setFlag("player", "fusedThisTurn", true);
   ctx.setFlag("player", "iceFusedThisTurn", true);
   consumeIsenhowl(ctx);
@@ -267,7 +267,7 @@ function handleFusion(ctx: ScriptCtx, hook: string, option: string): boolean {
 }
 
 function fused(ctx: ScriptCtx): boolean {
-  return ctx.getCounter("fused") > 0;
+  return ctx.getState("fused") > 0;
 }
 
 function arcaneSpell(amount: number): CardScript {
@@ -313,9 +313,8 @@ function fusedArcane(
       if (handleFusion(ctx, hook, option)) return;
       if (hook !== "fused-arcane") return;
       const id = Number(option);
-      ctx.setCounter("target", id);
-      ctx.setCounter(
-        "targetedAlly",
+      ctx.setState("target", id);
+      ctx.setState("targetedAlly",
         ctx.state.players.some((player) => player.board.some((card) => card.instanceId === id)) ? 1 : 0,
       );
       dealToTarget(ctx, option, amount, true);
@@ -402,19 +401,19 @@ function quelling(): CardScript {
 }
 
 function nekriaDamageTrigger(ctx: ScriptCtx): void {
-  ctx.setCounter("lifePenalty", ctx.getCounter("lifePenalty") + 1);
+  ctx.setState("lifePenalty", ctx.getState("lifePenalty") + 1);
   ctx.setPermanentLife(ctx.self.instanceId, (ctx.self.life ?? 0) - 1);
   ctx.createToken(ASH);
 }
 
 function readRipples(times: number): CardScript {
   const next = (ctx: ScriptCtx) => {
-    const remaining = ctx.getCounter("remainingOpts");
+    const remaining = ctx.getState("remainingOpts");
     if (remaining <= 0) {
       ctx.drawCards(ctx.seat, 1);
       return;
     }
-    ctx.setCounter("remainingOpts", remaining - 1);
+    ctx.setState("remainingOpts", remaining - 1);
     optN(ctx, 1);
   };
   return {
@@ -425,7 +424,7 @@ function readRipples(times: number): CardScript {
         label: "Destroy this, opt, then draw",
         effect(ctx) {
           ctx.destroySelf();
-          ctx.setCounter("remainingOpts", times);
+          ctx.setState("remainingOpts", times);
           next(ctx);
         },
       },
@@ -438,7 +437,7 @@ function readRipples(times: number): CardScript {
 
 function sift(max: number): CardScript {
   const offer = (ctx: ScriptCtx) => {
-    const moved = ctx.getCounter("siftMoved");
+    const moved = ctx.getState("siftMoved");
     if (moved >= max || ctx.player(ctx.seat).hand.length === 0) {
       ctx.drawCards(ctx.seat, moved);
       return;
@@ -454,17 +453,17 @@ function sift(max: number): CardScript {
   };
   return {
     onPlay(ctx) {
-      ctx.setCounter("siftMoved", 0);
+      ctx.setState("siftMoved", 0);
       offer(ctx);
     },
     onChoose(ctx, hook, option) {
       if (hook !== "sift") return;
       if (option === "done") {
-        ctx.drawCards(ctx.seat, ctx.getCounter("siftMoved"));
+        ctx.drawCards(ctx.seat, ctx.getState("siftMoved"));
         return;
       }
       if (!ctx.putOnDeckBottom(Number(option))) return;
-      ctx.setCounter("siftMoved", ctx.getCounter("siftMoved") + 1);
+      ctx.setState("siftMoved", ctx.getState("siftMoved") + 1);
       offer(ctx);
     },
   };
@@ -527,7 +526,7 @@ function sigilProtection(): CardScript {
 
 function singe(maxAllyTargets: number): CardScript {
   const offerAlly = (ctx: ScriptCtx, another = false): void => {
-    const target = ctx.getCounter("singeTarget");
+    const target = ctx.getState("singeTarget");
     const allies = ctx.player(target).board.filter((card) => hasSubtype(ctx, card, "ally"));
     if (!allies.length) return;
     ctx.requestCardChoice(
@@ -550,14 +549,14 @@ function singe(maxAllyTargets: number): CardScript {
     onChoose(ctx, hook, option) {
       if (hook === "singe-hero") {
         const target = option === "you" ? ctx.seat : opponentSeat(ctx);
-        ctx.setCounter("singeTarget", target);
-        ctx.setCounter("singeRemaining", maxAllyTargets);
+        ctx.setState("singeTarget", target);
+        ctx.setState("singeRemaining", maxAllyTargets);
         dealArcane(ctx, target, 1);
         offerAlly(ctx);
       } else if (hook === "singe-ally" && option !== "done") {
-        dealArcane(ctx, ctx.getCounter("singeTarget"), 1, Number(option));
-        const remaining = ctx.getCounter("singeRemaining") - 1;
-        ctx.setCounter("singeRemaining", remaining);
+        dealArcane(ctx, ctx.getState("singeTarget"), 1, Number(option));
+        const remaining = ctx.getState("singeRemaining") - 1;
+        ctx.setState("singeRemaining", remaining);
         if (remaining > 0) offerAlly(ctx, true);
       }
     },
@@ -634,8 +633,8 @@ export const upr: Record<string, CardScript> = mergeSetScripts("UPR", uprHighRar
   "azvolai|0": {
     activated: dragonAttack(),
     onAttackDeclared(ctx) {
-      ctx.setCounter("azvolaiHits", 0);
-      ctx.setCounter("azvolaiFirstTarget", 0);
+      ctx.setState("azvolaiHits", 0);
+      ctx.setState("azvolaiFirstTarget", 0);
       ctx.requestCardChoice(
         "azvolai",
         decisionPrompt(
@@ -656,9 +655,9 @@ export const upr: Record<string, CardScript> = mergeSetScripts("UPR", uprHighRar
     onChoose(ctx, hook, option) {
       if (hook !== "azvolai" || option === "done") return;
       dealToTarget(ctx, option, 1, true);
-      const count = ctx.getCounter("azvolaiHits") + 1;
-      ctx.setCounter("azvolaiHits", count);
-      if (count === 1) ctx.setCounter("azvolaiFirstTarget", Number(option));
+      const count = ctx.getState("azvolaiHits") + 1;
+      ctx.setState("azvolaiHits", count);
+      if (count === 1) ctx.setState("azvolaiFirstTarget", Number(option));
       const opposingHeroId = ctx.player(opponentSeat(ctx)).hero.instanceId;
       if (count < 2)
         ctx.requestCardChoice(
@@ -671,12 +670,12 @@ export const upr: Record<string, CardScript> = mergeSetScripts("UPR", uprHighRar
               optionMessages: commonOptionMessages("done"),
             },
           ),
-          ["done", ...livingTargets(ctx).filter((target) => Number(target) !== ctx.getCounter("azvolaiFirstTarget"))],
+          ["done", ...livingTargets(ctx).filter((target) => Number(target) !== ctx.getState("azvolaiFirstTarget"))],
           undefined,
           undefined,
           undefined,
           // the opposing hero unless it already took the first point
-          opposingHeroId === ctx.getCounter("azvolaiFirstTarget") ? "done" : opposingHeroId,
+          opposingHeroId === ctx.getState("azvolaiFirstTarget") ? "done" : opposingHeroId,
         );
     },
   },
@@ -765,9 +764,9 @@ export const upr: Record<string, CardScript> = mergeSetScripts("UPR", uprHighRar
       ctx.setCounter("endurance", 1);
     },
     replaceDamageToSelf(ctx, amount) {
-      if (ctx.getCounter("endurance") <= 0 && ctx.getCounter("enduranceSpent") > 0) return amount;
+      if (ctx.getCounter("endurance") <= 0 && ctx.getState("enduranceSpent") > 0) return amount;
       ctx.addCounter(ctx.self.instanceId, "endurance", -1);
-      ctx.setCounter("enduranceSpent", 1);
+      ctx.setState("enduranceSpent", 1);
       return Math.max(0, amount - 3);
     },
   },
@@ -875,14 +874,14 @@ export const upr: Record<string, CardScript> = mergeSetScripts("UPR", uprHighRar
       {
         onPlay(ctx: ScriptCtx) {
           ctx.createToken(ASH);
-          ctx.setCounter("rakeRemaining", 4 - pitch);
+          ctx.setState("rakeRemaining", 4 - pitch);
           requestAsh(ctx, "rake", "Transform an Ash?", true);
         },
         onChoose(ctx: ScriptCtx, hook: string, option: string) {
           if (hook !== "rake" || option === "pass") return;
           transformAsh(ctx, Number(option), AETHER_ASHWING);
-          const remaining = ctx.getCounter("rakeRemaining") - 1;
-          ctx.setCounter("rakeRemaining", remaining);
+          const remaining = ctx.getState("rakeRemaining") - 1;
+          ctx.setState("rakeRemaining", remaining);
           if (remaining > 0) requestAsh(ctx, "rake", "Transform another Ash?", true);
         },
       } satisfies CardScript,
@@ -1095,13 +1094,13 @@ export const upr: Record<string, CardScript> = mergeSetScripts("UPR", uprHighRar
           },
         ),
       );
-      ctx.setCounter("redHotDamage", red);
+      ctx.setState("redHotDamage", red);
       if (red > 0) chooseDamageTarget(ctx, "red-hot", `Deal ${red} damage to any target`, red, false);
       else ctx.shuffleDeck();
     },
     onChoose(ctx, h, o) {
       if (h === "red-hot") {
-        dealToTarget(ctx, o, ctx.getCounter("redHotDamage"));
+        dealToTarget(ctx, o, ctx.getState("redHotDamage"));
         ctx.shuffleDeck();
       }
     },
@@ -1246,35 +1245,35 @@ export const upr: Record<string, CardScript> = mergeSetScripts("UPR", uprHighRar
     },
   },
   "icebind|1": fusedArcane(3, (ctx, target, dealt) => {
-    if (fused(ctx) && dealt > 0 && ctx.getCounter("targetedAlly") === 0) {
+    if (fused(ctx) && dealt > 0 && ctx.getState("targetedAlly") === 0) {
       const card = ctx.player(target).arsenal[0];
       if (card) freeze(ctx, card);
     }
   }),
   "icebind|2": fusedArcane(2, (ctx, target, dealt) => {
-    if (fused(ctx) && dealt > 0 && ctx.getCounter("targetedAlly") === 0) {
+    if (fused(ctx) && dealt > 0 && ctx.getState("targetedAlly") === 0) {
       const card = ctx.player(target).arsenal[0];
       if (card) freeze(ctx, card);
     }
   }),
   "icebind|3": fusedArcane(1, (ctx, target, dealt) => {
-    if (fused(ctx) && dealt > 0 && ctx.getCounter("targetedAlly") === 0) {
+    if (fused(ctx) && dealt > 0 && ctx.getState("targetedAlly") === 0) {
       const card = ctx.player(target).arsenal[0];
       if (card) freeze(ctx, card);
     }
   }),
   "polar cap|2": fusedArcane(3, (ctx, target, dealt) => {
-    if (fused(ctx) && dealt > 0 && ctx.getCounter("targetedAlly") === 0) ctx.createToken(FROSTBITE, target);
+    if (fused(ctx) && dealt > 0 && ctx.getState("targetedAlly") === 0) ctx.createToken(FROSTBITE, target);
   }),
   "polar cap|3": fusedArcane(2, (ctx, target, dealt) => {
-    if (fused(ctx) && dealt > 0 && ctx.getCounter("targetedAlly") === 0) ctx.createToken(FROSTBITE, target);
+    if (fused(ctx) && dealt > 0 && ctx.getState("targetedAlly") === 0) ctx.createToken(FROSTBITE, target);
   }),
   "succumb to winter|1": fusedArcane(5, (ctx, target) => {
     if (!fused(ctx)) return;
-    if (ctx.getCounter("targetedAlly")) {
+    if (ctx.getState("targetedAlly")) {
       const ally = ctx.state.players
         .flatMap((p) => p.board)
-        .find((card) => card.instanceId === ctx.getCounter("target"));
+        .find((card) => card.instanceId === ctx.getState("target"));
       if (ally && ctx.isFrozen(ally)) ctx.destroyPermanent(ally.instanceId);
     } else {
       const card = ctx.player(target).arsenal.find((candidate) => ctx.isFrozen(candidate));
@@ -1283,10 +1282,10 @@ export const upr: Record<string, CardScript> = mergeSetScripts("UPR", uprHighRar
   }),
   "succumb to winter|2": fusedArcane(4, (ctx, target) => {
     if (!fused(ctx)) return;
-    if (ctx.getCounter("targetedAlly")) {
+    if (ctx.getState("targetedAlly")) {
       const ally = ctx.state.players
         .flatMap((p) => p.board)
-        .find((card) => card.instanceId === ctx.getCounter("target"));
+        .find((card) => card.instanceId === ctx.getState("target"));
       if (ally && ctx.isFrozen(ally)) ctx.destroyPermanent(ally.instanceId);
     } else {
       const card = ctx.player(target).arsenal.find((candidate) => ctx.isFrozen(candidate));
@@ -1295,10 +1294,10 @@ export const upr: Record<string, CardScript> = mergeSetScripts("UPR", uprHighRar
   }),
   "succumb to winter|3": fusedArcane(3, (ctx, target) => {
     if (!fused(ctx)) return;
-    if (ctx.getCounter("targetedAlly")) {
+    if (ctx.getState("targetedAlly")) {
       const ally = ctx.state.players
         .flatMap((p) => p.board)
-        .find((card) => card.instanceId === ctx.getCounter("target"));
+        .find((card) => card.instanceId === ctx.getState("target"));
       if (ally && ctx.isFrozen(ally)) ctx.destroyPermanent(ally.instanceId);
     } else {
       const card = ctx.player(target).arsenal.find((candidate) => ctx.isFrozen(candidate));
@@ -1350,7 +1349,7 @@ export const upr: Record<string, CardScript> = mergeSetScripts("UPR", uprHighRar
     onChoose(ctx, h, o) {
       if (h === "cold-target") {
         const target = o === "you" ? ctx.seat : opponentSeat(ctx);
-        ctx.setCounter("coldTarget", target);
+        ctx.setState("coldTarget", target);
         if (
           !ctx.requestPayment(
             "cold-pay",
@@ -1371,7 +1370,7 @@ export const upr: Record<string, CardScript> = mergeSetScripts("UPR", uprHighRar
             );
         }
       } else if (h === "cold-pay" && o !== "paid") {
-        const target = ctx.getCounter("coldTarget");
+        const target = ctx.getState("coldTarget");
         const choices = [
           ...ctx.player(target).arsenal,
           ...ctx.player(target).board.filter((c) => hasSubtype(ctx, c, "ally")),
@@ -1384,8 +1383,8 @@ export const upr: Record<string, CardScript> = mergeSetScripts("UPR", uprHighRar
           );
       } else if (h === "cold-freeze") {
         const card = [
-          ...ctx.player(ctx.getCounter("coldTarget")).arsenal,
-          ...ctx.player(ctx.getCounter("coldTarget")).board,
+          ...ctx.player(ctx.getState("coldTarget")).arsenal,
+          ...ctx.player(ctx.getState("coldTarget")).board,
         ].find((c) => c.instanceId === Number(o));
         if (card) freeze(ctx, card);
       }
@@ -1400,7 +1399,7 @@ export const upr: Record<string, CardScript> = mergeSetScripts("UPR", uprHighRar
     onChoose(ctx, h, o) {
       if (h === "cold-target") {
         const target = o === "you" ? ctx.seat : opponentSeat(ctx);
-        ctx.setCounter("coldTarget", target);
+        ctx.setState("coldTarget", target);
         if (
           !ctx.requestPayment(
             "cold-pay",
@@ -1421,7 +1420,7 @@ export const upr: Record<string, CardScript> = mergeSetScripts("UPR", uprHighRar
             );
         }
       } else if (h === "cold-pay" && o !== "paid") {
-        const target = ctx.getCounter("coldTarget");
+        const target = ctx.getState("coldTarget");
         const choices = [
           ...ctx.player(target).arsenal,
           ...ctx.player(target).board.filter((c) => hasSubtype(ctx, c, "ally")),
@@ -1434,8 +1433,8 @@ export const upr: Record<string, CardScript> = mergeSetScripts("UPR", uprHighRar
           );
       } else if (h === "cold-freeze") {
         const card = [
-          ...ctx.player(ctx.getCounter("coldTarget")).arsenal,
-          ...ctx.player(ctx.getCounter("coldTarget")).board,
+          ...ctx.player(ctx.getState("coldTarget")).arsenal,
+          ...ctx.player(ctx.getState("coldTarget")).board,
         ].find((c) => c.instanceId === Number(o));
         if (card) freeze(ctx, card);
       }
@@ -1445,7 +1444,7 @@ export const upr: Record<string, CardScript> = mergeSetScripts("UPR", uprHighRar
     additionalCost: fusionAdditionalCost,
     onPlay(ctx) {
       if (fused(ctx)) {
-        ctx.setCounter("sigilFrost", 1);
+        ctx.setState("sigilFrost", 1);
         ctx.addModifier({ scope: "until-end-of-turn", ...SIGIL_OF_PERMAFROST_LABEL });
       }
     },
@@ -1458,7 +1457,7 @@ export const upr: Record<string, CardScript> = mergeSetScripts("UPR", uprHighRar
     additionalCost: fusionAdditionalCost,
     onPlay(ctx) {
       if (fused(ctx)) {
-        ctx.setCounter("sigilFrost", 1);
+        ctx.setState("sigilFrost", 1);
         ctx.addModifier({ scope: "until-end-of-turn", ...SIGIL_OF_PERMAFROST_LABEL });
       }
     },
@@ -1471,7 +1470,7 @@ export const upr: Record<string, CardScript> = mergeSetScripts("UPR", uprHighRar
     additionalCost: fusionAdditionalCost,
     onPlay(ctx) {
       if (fused(ctx)) {
-        ctx.setCounter("sigilFrost", 1);
+        ctx.setState("sigilFrost", 1);
         ctx.addModifier({ scope: "until-end-of-turn", ...SIGIL_OF_PERMAFROST_LABEL });
       }
     },
@@ -1489,7 +1488,7 @@ export const upr: Record<string, CardScript> = mergeSetScripts("UPR", uprHighRar
       destroySelfCost: true,
       label: "Destroy: empower next arcane card",
       onActivate(ctx) {
-        ctx.setCounter("conduitReady", 1);
+        ctx.setState("conduitReady", 1);
         ctx.addModifier({
           scope: "until-end-of-turn",
           ...ongoingLabel(
@@ -1502,10 +1501,10 @@ export const upr: Record<string, CardScript> = mergeSetScripts("UPR", uprHighRar
     },
     quell: { amount: 1, cost: 1 },
     onFriendlyPlay(ctx, played) {
-      if (!ctx.getCounter("conduitReady") || !ctx.cardData(played.cardId).text.toLowerCase().includes("arcane damage"))
+      if (!ctx.getState("conduitReady") || !ctx.cardData(played.cardId).text.toLowerCase().includes("arcane damage"))
         return;
-      ctx.setCounter("conduitSource", played.instanceId);
-      ctx.setCounter("conduitReady", 0);
+      ctx.setState("conduitSource", played.instanceId);
+      ctx.setState("conduitReady", 0);
     },
     triggers: [
       {
@@ -1513,7 +1512,7 @@ export const upr: Record<string, CardScript> = mergeSetScripts("UPR", uprHighRar
         label: "Destroy a frozen card in the damaged hero's arsenal",
         labelMessage: { id: "card.trigger.common.frozen.arsenal.destroy" },
         condition: (ctx, eventCard, event) =>
-          heroDamage(event)?.arcane === true && eventCard?.instanceId === ctx.getCounter("conduitSource"),
+          heroDamage(event)?.arcane === true && eventCard?.instanceId === ctx.getState("conduitSource"),
         onTrigger: consumeOwnMarker,
         effect(ctx, _eventCard, event) {
           const damage = heroDamage(event);
@@ -1538,7 +1537,7 @@ export const upr: Record<string, CardScript> = mergeSetScripts("UPR", uprHighRar
     onChoose(ctx, h, o) {
       if (h === "horns-target") {
         const target = o === "you" ? ctx.seat : opponentSeat(ctx);
-        ctx.setCounter("hornsTarget", target);
+        ctx.setState("hornsTarget", target);
         if (ctx.player(target).arsenal[0])
           ctx.requestChoice("horns-arsenal", yesNoPrompt("Freeze their arsenal card?", "card.upr.freeze.arsenal"), [
             "yes",
@@ -1556,7 +1555,7 @@ export const upr: Record<string, CardScript> = mergeSetScripts("UPR", uprHighRar
             );
         }
       } else if (h === "horns-arsenal") {
-        const target = ctx.getCounter("hornsTarget");
+        const target = ctx.getState("hornsTarget");
         const arsenalCard = ctx.player(target).arsenal[0];
         if (o === "yes" && arsenalCard) freeze(ctx, arsenalCard);
         const allies = ctx.player(target).board.filter((c) => hasSubtype(ctx, c, "ally"));
@@ -1567,7 +1566,7 @@ export const upr: Record<string, CardScript> = mergeSetScripts("UPR", uprHighRar
             ["pass", ...allies.map((c) => c.instanceId)],
           );
       } else if (h === "horns-ally" && o !== "pass") {
-        const card = ctx.player(ctx.getCounter("hornsTarget")).board.find((c) => c.instanceId === Number(o));
+        const card = ctx.player(ctx.getState("hornsTarget")).board.find((c) => c.instanceId === Number(o));
         if (card) freeze(ctx, card);
       }
     },

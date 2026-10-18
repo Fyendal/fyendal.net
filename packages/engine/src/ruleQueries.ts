@@ -52,7 +52,7 @@ export function opposingInstantsProhibited(
 export function goAgainSuppressed(state: GameStateInternal, seat: number): boolean {
   const player = state.players[seat] as PlayerState | undefined;
   return !!player && state.activePlayer === seat &&
-    Number(player.hero.counters?.goAgainSuppressedTurn ?? 0) === state.turn;
+    Number(player.hero.scriptState?.goAgainSuppressedTurn ?? 0) === state.turn;
 }
 
 /** Resource increase on this hero's first attack during the stamped turn.
@@ -61,8 +61,8 @@ export function firstAttackExtraCost(
   state: GameStateInternal,
   player: PlayerState,
 ): number {
-  if (Number(player.hero.counters?.firstAttackExtraCostTurn ?? 0) !== state.turn) return 0;
-  return Math.max(0, Number(player.hero.counters?.firstAttackExtraCost ?? 0));
+  if (Number(player.hero.scriptState?.firstAttackExtraCostTurn ?? 0) !== state.turn) return 0;
+  return Math.max(0, Number(player.hero.scriptState?.firstAttackExtraCost ?? 0));
 }
 
 /** Consume the delayed first-attack increase after a legal attack is paid for. */
@@ -71,8 +71,8 @@ export function consumeFirstAttackExtraCost(
   player: PlayerState,
 ): void {
   if (firstAttackExtraCost(state, player) <= 0) return;
-  delete player.hero.counters?.firstAttackExtraCost;
-  delete player.hero.counters?.firstAttackExtraCostTurn;
+  delete player.hero.scriptState?.firstAttackExtraCost;
+  delete player.hero.scriptState?.firstAttackExtraCostTurn;
 }
 
 /** Resource increase on this hero's first action during the stamped turn.
@@ -81,8 +81,8 @@ export function firstActionExtraCost(
   state: GameStateInternal,
   player: PlayerState,
 ): number {
-  if (Number(player.hero.counters?.firstActionExtraCostTurn ?? 0) !== state.turn) return 0;
-  return Math.max(0, Number(player.hero.counters?.firstActionExtraCost ?? 0));
+  if (Number(player.hero.scriptState?.firstActionExtraCostTurn ?? 0) !== state.turn) return 0;
+  return Math.max(0, Number(player.hero.scriptState?.firstActionExtraCost ?? 0));
 }
 
 /** Consume the delayed first-action increase after its cost is paid. */
@@ -91,14 +91,14 @@ export function consumeFirstActionExtraCost(
   player: PlayerState,
 ): void {
   if (firstActionExtraCost(state, player) <= 0) return;
-  delete player.hero.counters?.firstActionExtraCost;
-  delete player.hero.counters?.firstActionExtraCostTurn;
+  delete player.hero.scriptState?.firstActionExtraCost;
+  delete player.hero.scriptState?.firstActionExtraCostTurn;
 }
 
 /** Whether a delayed cap prevents another action play or activation. */
 export function actionLimitReached(state: GameStateInternal, player: PlayerState): boolean {
-  const turn = Number(player.hero.counters?.actionLimitTurn ?? 0);
-  const limit = Number(player.hero.counters?.actionLimit ?? 0);
+  const turn = Number(player.hero.scriptState?.actionLimitTurn ?? 0);
+  const limit = Number(player.hero.scriptState?.actionLimit ?? 0);
   return turn === state.turn && limit > 0 &&
     Number(player.flags.actionsPlayedOrActivatedThisTurn ?? 0) >= limit;
 }
@@ -113,8 +113,8 @@ export function removeMarkOnOpponentHit(
 ): boolean {
   if (sourceSeat === targetSeat) return false;
   const hero = (state.players[targetSeat] as PlayerState).hero;
-  if ((hero.counters?.marked ?? 0) <= 0) return false;
-  delete hero.counters!.marked;
+  if ((hero.scriptState?.marked ?? 0) <= 0) return false;
+  delete hero.scriptState!.marked;
   logPublic(state, gameLogMessage(
     `${nameOf(state, hero.cardId)} is no longer marked`,
     "engine.log.hero.unmarked",
@@ -161,8 +161,8 @@ export const FROZEN_WHILE_SOURCE_IN_ARENA = "frozenWhileInArena:";
  * use that turn as the expiry, so the object is usable as soon as that turn
  * begins. */
 function frozenByEffect(state: GameStateInternal, card: CardInstance): boolean {
-  if (Number(card.counters?.frozenUntilTurn || 0) > state.turn) return true;
-  return Object.keys(card.counters ?? {}).some((key) =>
+  if (Number(card.scriptState?.frozenUntilTurn || 0) > state.turn) return true;
+  return Object.keys(card.scriptState ?? {}).some((key) =>
     key.startsWith(FROZEN_WHILE_SOURCE_IN_ARENA) &&
     findPermanent(state, Number(key.slice(FROZEN_WHILE_SOURCE_IN_ARENA.length))) !== undefined
   );

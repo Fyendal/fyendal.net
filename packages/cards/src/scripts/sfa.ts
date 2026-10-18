@@ -482,8 +482,8 @@ export const sfa: Record<string, CardScript> = {
     },
     onHit(ctx) {
       const hero = ctx.player(opponentSeat(ctx)).hero;
-      if ((hero.counters?.marked ?? 0) > 0) return;
-      ctx.addCounter(hero.instanceId, "marked", 1);
+      if ((hero.scriptState?.marked ?? 0) > 0) return;
+      ctx.addCardState(hero.instanceId, "marked", 1);
       ctx.logPublic(
         localizedCardLog(ctx, `${ctx.cardData(hero.cardId).name} is marked`, "card.log.common.hero.marked", {
           target: { kind: "card", cardId: hero.cardId },

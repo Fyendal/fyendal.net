@@ -1085,6 +1085,7 @@
   "card.omn.aura.token.destroy.named": "{card}：摧毁一个灵气 (Aura)衍生物",
   "card.omn.aura.token.steal": "夺取一个灵气 (Aura)衍生物",
   "card.omn.card.discard": "弃置一张牌",
+  "card.omn.cog.search.arena": "从牌库搜寻一张 cog 并放入竞技场？",
   "card.omn.color.choose": "选择一种颜色",
   "card.omn.flow.destroy": "摧毁一个 Lightning Flow",
   "card.omn.flow.destroy.damage": "{card}：摧毁一个 Lightning Flow 以造成 {amount} 点奥术伤害？",

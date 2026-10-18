@@ -11950,6 +11950,12 @@
       "value": "Discard a card"
     }
   ],
+  "card.omn.cog.search.arena": [
+    {
+      "type": 0,
+      "value": "Search your deck for a cog to put into the arena?"
+    }
+  ],
   "card.omn.color.choose": [
     {
       "type": 0,

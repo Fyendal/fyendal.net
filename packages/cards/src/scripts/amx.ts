@@ -58,7 +58,7 @@ function hyperDriver(steam: number): CardScript {
 }
 
 function requestConstructDriver(ctx: ScriptCtx): void {
-  const chosen = [0, 1, 2].map((index) => ctx.getCounter(`constructDriver${index}`)).filter((id) => id > 0);
+  const chosen = [0, 1, 2].map((index) => ctx.getState(`constructDriver${index}`)).filter((id) => id > 0);
   const choices = hyperDrivers(ctx).filter((card) => !chosen.includes(card.instanceId));
   if (choices.length === 0) return;
   ctx.requestCardChoice(
@@ -232,19 +232,19 @@ export const amx: Record<string, CardScript> = {
     },
     onChoose(ctx, hook, option) {
       if (hook === "construct-wrench") {
-        ctx.setCounter("constructWrench", Number(option));
+        ctx.setState("constructWrench", Number(option));
         requestConstructDriver(ctx);
         return;
       }
       if (hook !== "construct-driver") return;
-      const chosen = [0, 1, 2].map((index) => ctx.getCounter(`constructDriver${index}`)).filter((id) => id > 0);
+      const chosen = [0, 1, 2].map((index) => ctx.getState(`constructDriver${index}`)).filter((id) => id > 0);
       if (chosen.includes(Number(option))) return;
-      ctx.setCounter(`constructDriver${chosen.length}`, Number(option));
+      ctx.setState(`constructDriver${chosen.length}`, Number(option));
       if (chosen.length < 2) {
         requestConstructDriver(ctx);
         return;
       }
-      const wrench = ctx.getCounter("constructWrench");
+      const wrench = ctx.getState("constructWrench");
       ctx.transformInto(BANK_BREAKER, [wrench, ...chosen, Number(option)], wrench);
     },
   },

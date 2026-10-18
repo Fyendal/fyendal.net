@@ -171,7 +171,7 @@ function blessingIngenuity(count: number): CardScript {
     const candidates = [...ctx.player(ctx.seat).graveyard, ...ctx.player(ctx.seat).banish].filter(
       (card) => cardNamed(ctx, card, "Hyper Driver"),
     );
-    if (ctx.getCounter("ingenuityRemaining") <= 0 || candidates.length === 0) return;
+    if (ctx.getState("ingenuityRemaining") <= 0 || candidates.length === 0) return;
     ctx.requestCardChoice(
       "ingenuity",
       decisionPrompt("Return a Hyper Driver to the arena?", "card.dyn.ingenuity.hyperdriver.return", {
@@ -182,13 +182,13 @@ function blessingIngenuity(count: number): CardScript {
   };
   return {
     ...blessing((ctx) => {
-      ctx.setCounter("ingenuityRemaining", count);
+      ctx.setState("ingenuityRemaining", count);
       offer(ctx);
     }),
     onChoose(ctx, hook, option) {
       if (hook !== "ingenuity" || option === "done") return;
       if (!ctx.settleCard(Number(option), { allowCrank: false })) return;
-      ctx.setCounter("ingenuityRemaining", ctx.getCounter("ingenuityRemaining") - 1);
+      ctx.setState("ingenuityRemaining", ctx.getState("ingenuityRemaining") - 1);
       offer(ctx);
     },
   };
@@ -385,7 +385,7 @@ function arcaneTargetSpell(amount: number, surge: "go-again" | "opt" | "energy" 
 function aetherSlash(): CardScript {
   return {
     onPlayCostPaid(ctx, paid) {
-      ctx.setCounter("nonAttackPitched", paid.some((card) => isNonAttackAction(ctx, card)) ? 1 : 0);
+      ctx.setState("nonAttackPitched", paid.some((card) => isNonAttackAction(ctx, card)) ? 1 : 0);
     },
     triggers: [
       {
@@ -393,7 +393,7 @@ function aetherSlash(): CardScript {
         sourceZone: "self",
         label: "Deal 1 arcane damage to any target",
         labelMessage: decisionMessage("card.trigger.common.arcane.anytarget", { amount: 1 }),
-        condition: (ctx) => ctx.getCounter("nonAttackPitched") > 0,
+        condition: (ctx) => ctx.getState("nonAttackPitched") > 0,
         target: anyDamageTarget((ctx) => {
           const amount = ctx.previewArcaneDamage(1);
           return decisionPrompt(`Deal ${amount} arcane damage to any target`, "card.dyn.aetherslash.target.choose", {
@@ -409,12 +409,12 @@ function aetherSlash(): CardScript {
 function deathlyDuet(): CardScript {
   return {
     onPlayCostPaid(ctx, paid) {
-      ctx.setCounter("attackPitched", paid.some((card) => isAttackAction(ctx, card)) ? 1 : 0);
-      ctx.setCounter("nonAttackPitched", paid.some((card) => isNonAttackAction(ctx, card)) ? 1 : 0);
+      ctx.setState("attackPitched", paid.some((card) => isAttackAction(ctx, card)) ? 1 : 0);
+      ctx.setState("nonAttackPitched", paid.some((card) => isNonAttackAction(ctx, card)) ? 1 : 0);
     },
     onAttackDeclared(ctx) {
-      if (ctx.getCounter("attackPitched")) ctx.addModifier({ scope: "chain-link", attack: 2 });
-      if (ctx.getCounter("nonAttackPitched")) createTokens(ctx, RUNECHANT, 2);
+      if (ctx.getState("attackPitched")) ctx.addModifier({ scope: "chain-link", attack: 2 });
+      if (ctx.getState("nonAttackPitched")) createTokens(ctx, RUNECHANT, 2);
     },
   };
 }
@@ -422,13 +422,13 @@ function deathlyDuet(): CardScript {
 function runicReaping(count: number): CardScript {
   return {
     onPlayCostPaid(ctx, paid) {
-      ctx.setCounter("attackPitched", paid.some((card) => isAttackAction(ctx, card)) ? 1 : 0);
+      ctx.setState("attackPitched", paid.some((card) => isAttackAction(ctx, card)) ? 1 : 0);
     },
     onPlay(ctx) {
       buffNextAttack(ctx, {
         appliesTo: "attack-action",
         appliesToClass: "runeblade",
-        attack: ctx.getCounter("attackPitched") ? 1 : 0,
+        attack: ctx.getState("attackPitched") ? 1 : 0,
         onHitCreateToken: { cardId: RUNECHANT, count },
       });
     },
@@ -447,7 +447,7 @@ function tranquilPassing(maxCost: number): CardScript {
           // that already left banishes nothing.
           const inArena = ctx.player(ctx.seat).board.some((card) => card.instanceId === ctx.self.instanceId);
           if (target === undefined || !inArena) return;
-          ctx.setCounter("tranquilTarget", target);
+          ctx.setState("tranquilTarget", target);
           ctx.banish(target);
         },
         {
@@ -467,7 +467,7 @@ function tranquilPassing(maxCost: number): CardScript {
       ),
     ],
     onLeaveArena(ctx) {
-      const target = ctx.getCounter("tranquilTarget");
+      const target = ctx.getState("tranquilTarget");
       if (target) ctx.settleCard(target, { allowCrank: false });
     },
   };
@@ -500,13 +500,13 @@ export const dyn: Record<string, CardScript> = mergeSetScripts("DYN", dynHighRar
           const top = ctx.player(opponentSeat(ctx)).deck[0];
           if (!top) return;
           ctx.lookAt(top.instanceId);
-          ctx.setCounter("arakniTop", top.instanceId);
+          ctx.setState("arakniTop", top.instanceId);
           ctx.requestChoice("arakni-top", bottomOrKeepPrompt(), ["bottom", "keep"]);
         },
       },
     ],
     onChoose(ctx, hook, option) {
-      if (hook === "arakni-top" && option === "bottom") ctx.putOnDeckBottom(ctx.getCounter("arakniTop"));
+      if (hook === "arakni-top" && option === "bottom") ctx.putOnDeckBottom(ctx.getState("arakniTop"));
     },
   },
   "emperor, dracai of aesir|0": {
@@ -1016,12 +1016,12 @@ export const dyn: Record<string, CardScript> = mergeSetScripts("DYN", dynHighRar
       const top = ctx.player(opponentSeat(ctx)).deck[0];
       if (top) {
         ctx.lookAt(top.instanceId);
-        ctx.setCounter("cutTop", top.instanceId);
+        ctx.setState("cutTop", top.instanceId);
         ctx.requestChoice("cut-top", bottomOrKeepPrompt(), ["bottom", "keep"]);
       }
     },
     onChoose(ctx, h, o) {
-      if (h === "cut-top" && o === "bottom") ctx.putOnDeckBottom(ctx.getCounter("cutTop"));
+      if (h === "cut-top" && o === "bottom") ctx.putOnDeckBottom(ctx.getState("cutTop"));
     },
   },
   "cut to the chase|2": {
@@ -1034,12 +1034,12 @@ export const dyn: Record<string, CardScript> = mergeSetScripts("DYN", dynHighRar
       const top = ctx.player(opponentSeat(ctx)).deck[0];
       if (top) {
         ctx.lookAt(top.instanceId);
-        ctx.setCounter("cutTop", top.instanceId);
+        ctx.setState("cutTop", top.instanceId);
         ctx.requestChoice("cut-top", bottomOrKeepPrompt(), ["bottom", "keep"]);
       }
     },
     onChoose(ctx, h, o) {
-      if (h === "cut-top" && o === "bottom") ctx.putOnDeckBottom(ctx.getCounter("cutTop"));
+      if (h === "cut-top" && o === "bottom") ctx.putOnDeckBottom(ctx.getState("cutTop"));
     },
   },
   "cut to the chase|3": {
@@ -1052,12 +1052,12 @@ export const dyn: Record<string, CardScript> = mergeSetScripts("DYN", dynHighRar
       const top = ctx.player(opponentSeat(ctx)).deck[0];
       if (top) {
         ctx.lookAt(top.instanceId);
-        ctx.setCounter("cutTop", top.instanceId);
+        ctx.setState("cutTop", top.instanceId);
         ctx.requestChoice("cut-top", bottomOrKeepPrompt(), ["bottom", "keep"]);
       }
     },
     onChoose(ctx, h, o) {
-      if (h === "cut-top" && o === "bottom") ctx.putOnDeckBottom(ctx.getCounter("cutTop"));
+      if (h === "cut-top" && o === "bottom") ctx.putOnDeckBottom(ctx.getState("cutTop"));
     },
   },
   "shred|1": {
@@ -1237,12 +1237,12 @@ export const dyn: Record<string, CardScript> = mergeSetScripts("DYN", dynHighRar
       oncePerTurn: true,
       label: "Draw a card",
       onCostPaid(ctx, paid) {
-        ctx.setCounter("annalsAttack", paid.some((card) => isAttackAction(ctx, card)) ? 1 : 0);
-        ctx.setCounter("annalsNonAttack", paid.some((card) => isNonAttackAction(ctx, card)) ? 1 : 0);
+        ctx.setState("annalsAttack", paid.some((card) => isAttackAction(ctx, card)) ? 1 : 0);
+        ctx.setState("annalsNonAttack", paid.some((card) => isNonAttackAction(ctx, card)) ? 1 : 0);
       },
       onActivate(ctx) {
         ctx.drawCards(ctx.seat, 1);
-        if (ctx.getCounter("annalsAttack") && ctx.getCounter("annalsNonAttack")) ctx.createToken(RUNECHANT);
+        if (ctx.getState("annalsAttack") && ctx.getState("annalsNonAttack")) ctx.createToken(RUNECHANT);
       },
     },
   },
@@ -1301,52 +1301,52 @@ export const dyn: Record<string, CardScript> = mergeSetScripts("DYN", dynHighRar
   "blessing of aether|3": blessing((ctx) => buffNextArcaneDamageCard(ctx, 1)),
   "tempest aurora|1": {
     onPlay(ctx) {
-      ctx.setCounter("auroraMax", 2);
+      ctx.setState("auroraMax", 2);
       ctx.addModifier({ scope: "until-end-of-turn", ...tempestAuroraLabel(2) });
     },
     onFriendlyPlay(ctx, played) {
       if (
-        ctx.getCounter("auroraMax") < 0 ||
-        (data(ctx, played).cost ?? 0) > ctx.getCounter("auroraMax") ||
+        ctx.getState("auroraMax") < 0 ||
+        (data(ctx, played).cost ?? 0) > ctx.getState("auroraMax") ||
         !data(ctx, played).text.toLowerCase().includes("arcane damage")
       )
         return;
-      ctx.addCounter(played.instanceId, "arcaneBonus", 1);
-      ctx.setCounter("auroraMax", -1);
+      ctx.addCardState(played.instanceId, "arcaneBonus", 1);
+      ctx.setState("auroraMax", -1);
       consumeDelayedEffect(ctx);
     },
   },
   "tempest aurora|2": {
     onPlay(ctx) {
-      ctx.setCounter("auroraMax", 1);
+      ctx.setState("auroraMax", 1);
       ctx.addModifier({ scope: "until-end-of-turn", ...tempestAuroraLabel(1) });
     },
     onFriendlyPlay(ctx, played) {
       if (
-        ctx.getCounter("auroraMax") < 0 ||
-        (data(ctx, played).cost ?? 0) > ctx.getCounter("auroraMax") ||
+        ctx.getState("auroraMax") < 0 ||
+        (data(ctx, played).cost ?? 0) > ctx.getState("auroraMax") ||
         !data(ctx, played).text.toLowerCase().includes("arcane damage")
       )
         return;
-      ctx.addCounter(played.instanceId, "arcaneBonus", 1);
-      ctx.setCounter("auroraMax", -1);
+      ctx.addCardState(played.instanceId, "arcaneBonus", 1);
+      ctx.setState("auroraMax", -1);
       consumeDelayedEffect(ctx);
     },
   },
   "tempest aurora|3": {
     onPlay(ctx) {
-      ctx.setCounter("auroraMax", 0);
+      ctx.setState("auroraMax", 0);
       ctx.addModifier({ scope: "until-end-of-turn", ...tempestAuroraLabel(0) });
     },
     onFriendlyPlay(ctx, played) {
       if (
-        ctx.getCounter("auroraMax") < 0 ||
-        (data(ctx, played).cost ?? 0) > ctx.getCounter("auroraMax") ||
+        ctx.getState("auroraMax") < 0 ||
+        (data(ctx, played).cost ?? 0) > ctx.getState("auroraMax") ||
         !data(ctx, played).text.toLowerCase().includes("arcane damage")
       )
         return;
-      ctx.addCounter(played.instanceId, "arcaneBonus", 1);
-      ctx.setCounter("auroraMax", -1);
+      ctx.addCardState(played.instanceId, "arcaneBonus", 1);
+      ctx.setState("auroraMax", -1);
       consumeDelayedEffect(ctx);
     },
   },
@@ -1360,14 +1360,14 @@ export const dyn: Record<string, CardScript> = mergeSetScripts("DYN", dynHighRar
         const top = ctx.player(ctx.seat).deck[0];
         if (top) {
           ctx.lookAt(top.instanceId);
-          ctx.setCounter("seerTop", top.instanceId);
+          ctx.setState("seerTop", top.instanceId);
           ctx.requestChoice("seerstone", bottomOrKeepPrompt(), ["bottom", "keep"]);
         } else ctx.createToken("DYN244");
       },
     },
     onChoose(ctx, h, o) {
       if (h !== "seerstone") return;
-      if (o === "bottom") ctx.putOnDeckBottom(ctx.getCounter("seerTop"));
+      if (o === "bottom") ctx.putOnDeckBottom(ctx.getState("seerTop"));
       ctx.createToken("DYN244");
     },
   },

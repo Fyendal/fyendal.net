@@ -12225,6 +12225,12 @@
       "value": "Descarte uma carta"
     }
   ],
+  "card.omn.cog.search.arena": [
+    {
+      "type": 0,
+      "value": "Procurar um cog no seu deck para colocar na arena?"
+    }
+  ],
   "card.omn.color.choose": [
     {
       "type": 0,

@@ -95,16 +95,16 @@ export const agb: Record<string, CardScript> = {
           },
         ],
         onCostPaid(ctx) {
-          ctx.setCounter("ankaDrawTrap", ctx.state.turn);
+          ctx.setState("ankaDrawTrap", ctx.state.turn);
         },
       },
     ],
     onOpponentDraws(ctx, drawingSeat, count) {
-      if (count <= 0 || ctx.getCounter("ankaDrawTrap") !== ctx.state.turn) return;
-      ctx.setCounter("ankaDrawTrap", 0);
+      if (count <= 0 || ctx.getState("ankaDrawTrap") !== ctx.state.turn) return;
+      ctx.setState("ankaDrawTrap", 0);
       const hand = ctx.player(drawingSeat).hand;
       if (!hand.length) return;
-      ctx.setCounter("ankaDrawingSeat", drawingSeat + 1);
+      ctx.setState("ankaDrawingSeat", drawingSeat + 1);
       ctx.requestCardChoice(
         "anka-discard",
         decisionPrompt("Anka: discard a card", "card.agb.anka.card.discard"),
@@ -114,7 +114,7 @@ export const agb: Record<string, CardScript> = {
     },
     onChoose(ctx, hook, option) {
       if (hook !== "anka-discard") return;
-      const drawingSeat = ctx.getCounter("ankaDrawingSeat") - 1;
+      const drawingSeat = ctx.getState("ankaDrawingSeat") - 1;
       if (drawingSeat >= 0) ctx.discardCard(drawingSeat, Number(option));
     },
   },

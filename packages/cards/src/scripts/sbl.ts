@@ -58,7 +58,7 @@ function chargedThisTurn(ctx: ScriptCtx): boolean {
 
 /** The pitch of the card charged as this card's additional cost (0 = none). */
 function chargedPitchThisWay(ctx: ScriptCtx): number {
-  return ctx.getCounter("chargedPitch");
+  return ctx.getState("chargedPitch");
 }
 
 // ── Charge as an optional additional cost ───────────────────────────────────
@@ -83,7 +83,7 @@ function chargeOnChoose(ctx: ScriptCtx, hook: string, option: string): boolean {
   if (hook !== CHARGE_HOOK) return false;
   if (option !== "no") {
     const charged = ctx.charge(Number(option));
-    if (charged) ctx.setCounter("chargedPitch", ctx.cardColor(charged));
+    if (charged) ctx.setState("chargedPitch", ctx.cardColor(charged));
   }
   return true;
 }
@@ -352,7 +352,7 @@ export const sbl: Record<string, CardScript> = {
         const charged = ctx.charge(Number(option));
         if (charged) {
           if (isLight(ctx, charged)) {
-            ctx.setCounter("vLight", ctx.getCounter("vLight") + 1);
+            ctx.setState("vLight", ctx.getState("vLight") + 1);
           }
           const hand = ctx.player(ctx.seat).hand;
           if (hand.length > 0) {
@@ -367,7 +367,7 @@ export const sbl: Record<string, CardScript> = {
           }
         }
       }
-      const n = ctx.getCounter("vLight");
+      const n = ctx.getState("vLight");
       if (n > 0) {
         ctx.addModifier({ scope: "combat-chain", attack: n });
         ctx.logPublic(
@@ -506,9 +506,9 @@ export const sbl: Record<string, CardScript> = {
     // "played from arsenal" is stamped on the card at resolution (the chain
     // copy keeps the counter through cloneState)
     onPlay(ctx) {
-      ctx.setCounter("fromArsenal", ctx.fromArsenal ? 1 : 0);
+      ctx.setState("fromArsenal", ctx.fromArsenal ? 1 : 0);
     },
-    modifyDefense: (ctx) => (ctx.getCounter("fromArsenal") ? 2 : 0),
+    modifyDefense: (ctx) => (ctx.getState("fromArsenal") ? 2 : 0),
   },
 
   // ── Tokens ────────────────────────────────────────────────────────────────

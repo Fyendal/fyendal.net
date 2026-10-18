@@ -547,7 +547,7 @@ export function channelLightning(
   hook: string,
 ): { triggers: TriggerDef[]; onChoose: NonNullable<CardScript["onChoose"]> } {
   const payNext = (ctx: ScriptCtx): void => {
-    const remaining = ctx.getCounter(remainingKey);
+    const remaining = ctx.getState(remainingKey);
     if (remaining <= 0) return;
     const lightning = ctx.player(ctx.seat).pitch.filter((card) => ctx.cardTypes(card).includes("lightning"));
     if (lightning.length < remaining) {
@@ -571,7 +571,7 @@ export function channelLightning(
         effect(ctx) {
           const flow = ctx.getCounter("flow") + 1;
           ctx.setCounter("flow", flow);
-          ctx.setCounter(remainingKey, flow);
+          ctx.setState(remainingKey, flow);
           payNext(ctx);
         },
       },
@@ -579,7 +579,7 @@ export function channelLightning(
     onChoose(ctx, choiceHook, option) {
       if (choiceHook !== hook) return;
       if (ctx.putOnDeckBottom(Number(option))) {
-        ctx.setCounter(remainingKey, ctx.getCounter(remainingKey) - 1);
+        ctx.setState(remainingKey, ctx.getState(remainingKey) - 1);
         payNext(ctx);
       }
     },
@@ -796,7 +796,7 @@ export function markedStealthHeroScript(agentCardIds: readonly string[]): CardSc
     modifyAttack(ctx) {
       const link = ctx.link;
       if (!link || link.targetAllyId !== undefined || !hasStealth(ctx, link.attackingCard)) return 0;
-      return (ctx.player(opponentSeat(ctx)).hero.counters?.marked ?? 0) > 0 ? 1 : 0;
+      return (ctx.player(opponentSeat(ctx)).hero.scriptState?.marked ?? 0) > 0 ? 1 : 0;
     },
     canTriggerOnHit(ctx) {
       const link = ctx.link;
@@ -813,7 +813,7 @@ export function markedStealthHeroScript(agentCardIds: readonly string[]): CardSc
     triggers: [
       {
         event: "end-of-turn",
-        condition: (ctx) => (ctx.player(opponentSeat(ctx)).hero.counters?.marked ?? 0) > 0,
+        condition: (ctx) => (ctx.player(opponentSeat(ctx)).hero.scriptState?.marked ?? 0) > 0,
         label: "Become a random Agent of Chaos",
         effect(ctx) {
           ctx.becomeHero(agentCardIds[ctx.randomInt(agentCardIds.length)]!);

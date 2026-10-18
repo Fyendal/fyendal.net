@@ -102,7 +102,7 @@ describe("PEN / WTR / EVR enter and leave arena triggers use the stack", () => {
       expect.objectContaining({ label: "Freeze target ally, aura, item, or equipment" }),
     ]);
     const frozenWhileCradle = (): boolean =>
-      Object.keys(g.state.players[1]!.board[0]!.counters ?? {}).some((key) => key.startsWith("frozenWhileInArena:"));
+      Object.keys(g.state.players[1]!.board[0]!.scriptState ?? {}).some((key) => key.startsWith("frozenWhileInArena:"));
     expect(frozenWhileCradle()).toBe(false);
 
     g.passPriority().passPriority();

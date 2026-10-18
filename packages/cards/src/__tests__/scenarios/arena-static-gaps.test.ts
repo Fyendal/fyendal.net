@@ -94,7 +94,7 @@ describe("Channel Galcia's Cradle", () => {
     g.settle();
     expect(canActivate(g, 0, boo.instanceId)).toBe(false);
     expect(
-      Object.keys(g.state.players[1]!.equipment.arms!.counters ?? {}).some((key) =>
+      Object.keys(g.state.players[1]!.equipment.arms!.scriptState ?? {}).some((key) =>
         key.startsWith("frozenWhileInArena:"),
       ),
     ).toBe(true);

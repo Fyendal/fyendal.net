@@ -73,12 +73,12 @@ export function startTurn(state: GameStateInternal, runtime: EngineRuntime): voi
       }
     }
   }
-  if (Number(player.hero.counters?.cannotDrawActionTurn ?? 0) === state.turn) {
+  if (Number(player.hero.scriptState?.cannotDrawActionTurn ?? 0) === state.turn) {
     player.flags.cannotDrawNextActionPhase = true;
   }
-  if (Number(player.hero.counters?.goAgainSuppressedPending ?? 0) > 0) {
-    (player.hero.counters ??= {}).goAgainSuppressedTurn = state.turn;
-    delete player.hero.counters?.goAgainSuppressedPending;
+  if (Number(player.hero.scriptState?.goAgainSuppressedPending ?? 0) > 0) {
+    (player.hero.scriptState ??= {}).goAgainSuppressedTurn = state.turn;
+    delete player.hero.scriptState?.goAgainSuppressedPending;
   }
   const originalHeroId = player.hero.temporaryHeroOriginalCardId;
   if (
@@ -151,20 +151,20 @@ export function endTurn(state: GameStateInternal, runtime: EngineRuntime): void 
   // delayed counter wipes (Glisten's "at the beginning of your end phase,
   // remove all +1{p} counters from weapons you control")
   const turnPlayer = state.players[state.activePlayer] as PlayerState;
-  if (Number(turnPlayer.hero.counters?.clearHandAndArsenalAtEndPhaseTurn ?? 0) === state.turn) {
+  if (Number(turnPlayer.hero.scriptState?.clearHandAndArsenalAtEndPhaseTurn ?? 0) === state.turn) {
     const ctx = runtime.makeCtx(state, turnPlayer.seat, turnPlayer.hero);
     for (const card of [...turnPlayer.hand]) ctx.discardCard(turnPlayer.seat, card.instanceId);
     for (const card of [...turnPlayer.arsenal]) ctx.moveToGraveyard(card.instanceId, "arsenal");
-    delete turnPlayer.hero.counters?.clearHandAndArsenalAtEndPhaseTurn;
+    delete turnPlayer.hero.scriptState?.clearHandAndArsenalAtEndPhaseTurn;
   }
   for (const candidate of state.players as PlayerState[]) {
-    if (Number(candidate.hero.counters?.bonusIntellectAtEndPhaseTurn ?? 0) !== state.turn) continue;
-    delete candidate.hero.counters?.bonusIntellectAtEndPhaseTurn;
+    if (Number(candidate.hero.scriptState?.bonusIntellectAtEndPhaseTurn ?? 0) !== state.turn) continue;
+    delete candidate.hero.scriptState?.bonusIntellectAtEndPhaseTurn;
     candidate.flags.bonusIntellect = Number(candidate.flags.bonusIntellect ?? 0) + 1;
   }
   for (const candidate of state.players as PlayerState[]) {
-    if (Number(candidate.hero.counters?.drawUpToAtEndPhaseTurn ?? 0) !== state.turn) continue;
-    delete candidate.hero.counters?.drawUpToAtEndPhaseTurn;
+    if (Number(candidate.hero.scriptState?.drawUpToAtEndPhaseTurn ?? 0) !== state.turn) continue;
+    delete candidate.hero.scriptState?.drawUpToAtEndPhaseTurn;
     drawUpTo(state, runtime, candidate);
   }
   if (Number(turnPlayer.flags.clearWeaponPowerCountersAtTurn || 0) === state.turn) {
@@ -388,8 +388,8 @@ function completeEndPhase(state: GameStateInternal, runtime: EngineRuntime): voi
   // Granted aura attacks leave a public presentation marker on the attacking
   // card. It is turn state, so remove it during that controller's cleanup.
   for (const card of player.board) {
-    delete card.counters?.attacked;
-    if (card.counters && Object.keys(card.counters).length === 0) delete card.counters;
+    delete card.scriptState?.attacked;
+    if (card.scriptState && Object.keys(card.scriptState).length === 0) delete card.scriptState;
   }
   // untap step (APUD): only the turn player untaps their permanents, after
   // pitching and before drawing
@@ -420,7 +420,7 @@ function completeEndPhase(state: GameStateInternal, runtime: EngineRuntime): voi
       const printed = dataOf(state, c.cardId).life;
       const base = printed === undefined
         ? undefined
-        : Math.max(0, printed - (Number(c.counters?.lifePenalty) || 0));
+        : Math.max(0, printed - (Number(c.scriptState?.lifePenalty) || 0));
       if (base !== undefined && c.life !== undefined && c.life !== base) {
         c.life = base;
         logPublic(state, gameLogMessage(
@@ -443,12 +443,12 @@ function completeEndPhase(state: GameStateInternal, runtime: EngineRuntime): voi
     p.resources = 0;
     p.chi = 0;
     p.flags = {};
-    if (Number(p.hero.counters?.cannotDrawActionTurn ?? 0) <= state.turn) {
-      delete p.hero.counters?.cannotDrawActionTurn;
+    if (Number(p.hero.scriptState?.cannotDrawActionTurn ?? 0) <= state.turn) {
+      delete p.hero.scriptState?.cannotDrawActionTurn;
     }
-    if (Number(p.hero.counters?.loseLifeOnActionUntilTurn ?? 0) <= state.turn) {
-      delete p.hero.counters?.loseLifeOnActionUntilTurn;
-      delete p.hero.counters?.loseLifeOnActionSource;
+    if (Number(p.hero.scriptState?.loseLifeOnActionUntilTurn ?? 0) <= state.turn) {
+      delete p.hero.scriptState?.loseLifeOnActionUntilTurn;
+      delete p.hero.scriptState?.loseLifeOnActionSource;
     }
     // source-side prevention shields (Oasis Respite's damagePrevented) expire
     for (const c of controlledPermanents(state, p.seat, {

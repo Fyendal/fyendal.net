@@ -328,13 +328,13 @@ function valdaSeismicImpact(): CardScript {
 }
 
 function advanceTectonicInstability(ctx: ScriptCtx): void {
-  const step = ctx.getCounter("tectonicStep");
+  const step = ctx.getState("tectonicStep");
   if (step >= ctx.state.players.length) {
-    ctx.createTokens(SEISMIC_SURGE, ctx.getCounter("tectonicDraws"));
+    ctx.createTokens(SEISMIC_SURGE, ctx.getState("tectonicDraws"));
     return;
   }
   const seat = (ctx.state.activePlayer + step) % ctx.state.players.length;
-  ctx.setCounter("tectonicStep", step + 1);
+  ctx.setState("tectonicStep", step + 1);
   const arsenal = ctx.player(seat).arsenal;
   if (arsenal.length === 0) {
     advanceTectonicInstability(ctx);
@@ -354,8 +354,8 @@ function advanceTectonicInstability(ctx: ScriptCtx): void {
 function tectonicInstability(): CardScript {
   return {
     onPlay(ctx) {
-      ctx.setCounter("tectonicStep", 0);
-      ctx.setCounter("tectonicDraws", 0);
+      ctx.setState("tectonicStep", 0);
+      ctx.setState("tectonicDraws", 0);
       advanceTectonicInstability(ctx);
     },
     onChoose(ctx, hook, option) {
@@ -364,7 +364,7 @@ function tectonicInstability(): CardScript {
       const card = ctx.player(seat).arsenal.find((candidate) => candidate.instanceId === Number(option));
       if (card && ctx.putOnDeckBottom(card.instanceId)) {
         ctx.drawCards(seat, 1);
-        ctx.setCounter("tectonicDraws", ctx.getCounter("tectonicDraws") + 1);
+        ctx.setState("tectonicDraws", ctx.getState("tectonicDraws") + 1);
       }
       advanceTectonicInstability(ctx);
     },
@@ -404,7 +404,7 @@ function clashEquipment(slot: ClashSlot): CardScript {
       } else if (equipment.length === 1) {
         ctx.addCardDefenseCounters(equipment[0]!.instanceId, 1);
       } else {
-        ctx.setCounter("clashEquipmentLoser", loser);
+        ctx.setState("clashEquipmentLoser", loser);
         ctx.requestCardChoice(
           `clash-equipment:${slot}`,
           decisionPrompt(`Clash: put a -1{d} counter on an equipped ${slot}`, clashSlotMessageIds[slot]),
@@ -679,10 +679,10 @@ function clashAndDestroyAura(): CardScript {
     onClashResult(ctx, hook, winner) {
       if (hook !== "bravado-clash" || winner < 0) return;
       destroyAuraChoice(ctx, winner === ctx.seat ? opponentSeat(ctx) : ctx.seat, "bravado-aura");
-      ctx.setCounter("bravadoWinner", winner);
+      ctx.setState("bravadoWinner", winner);
     },
     onChoose(ctx, hook, option) {
-      if (hook === "bravado-aura" && ctx.getCounter("bravadoWinner") >= 0) ctx.destroyPermanent(Number(option));
+      if (hook === "bravado-aura" && ctx.getState("bravadoWinner") >= 0) ctx.destroyPermanent(Number(option));
     },
   };
 }
@@ -794,7 +794,7 @@ Object.assign(mpg, {
   "visit anvilheim|3": {
     variablePlayCost: {
       base: 0,
-      counterKey: "anvilheimX",
+      stateKey: "anvilheimX",
       prompt: decisionPrompt("Choose X", "engine.decision.x.choose"),
       maximum(ctx: ScriptCtx) {
         return ctx
@@ -804,7 +804,7 @@ Object.assign(mpg, {
       },
     },
     onPlay(ctx: ScriptCtx) {
-      const x = ctx.getCounter("anvilheimX");
+      const x = ctx.getState("anvilheimX");
       const offHands = ctx
         .player(ctx.seat)
         .weapons.filter((card) => hasType(ctx, card, "off-hand") && (card.defCounters ?? 0) >= x);
@@ -818,7 +818,7 @@ Object.assign(mpg, {
         );
     },
     onChoose(ctx: ScriptCtx, hook: string, option: string) {
-      if (hook === "anvilheim") ctx.addCardDefenseCounters(Number(option), -ctx.getCounter("anvilheimX"));
+      if (hook === "anvilheim") ctx.addCardDefenseCounters(Number(option), -ctx.getState("anvilheimX"));
     },
   },
   "daily grind|3": {

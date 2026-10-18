@@ -430,7 +430,7 @@ const CEREMONY_CURED = "ceremonyCured";
 const CEREMONY_MODES = ["power", "go again", "veil"] as const;
 type CeremonyMode = (typeof CEREMONY_MODES)[number];
 
-const ceremonyModeCounter = (mode: CeremonyMode) => `ceremonyMode:${mode}`;
+const ceremonyModeKey = (mode: CeremonyMode) => `ceremonyMode:${mode}`;
 
 function ceremonyHeroes(ctx: ScriptCtx): number[] {
   return [ctx.seat, opponentSeat(ctx)];
@@ -441,18 +441,18 @@ function controlledDiseases(ctx: ScriptCtx, seat: number): DeepReadonly<CardInst
 }
 
 function cureForCeremony(ctx: ScriptCtx, seat: number, instanceId: number): void {
-  if (ctx.destroyPermanent(instanceId, seat)) ctx.setCounter(CEREMONY_CURED, ctx.getCounter(CEREMONY_CURED) + 1);
+  if (ctx.destroyPermanent(instanceId, seat)) ctx.setState(CEREMONY_CURED, ctx.getState(CEREMONY_CURED) + 1);
 }
 
 /** Each hero, in turn order, cures a disease they control if able, choosing
  * among several; then the controller picks one mode per cured disease. */
 function continueCeremony(ctx: ScriptCtx): void {
   const heroes = ceremonyHeroes(ctx);
-  for (let index = ctx.getCounter(CEREMONY_HERO); index < heroes.length; index++) {
+  for (let index = ctx.getState(CEREMONY_HERO); index < heroes.length; index++) {
     const seat = heroes[index]!;
     const diseases = controlledDiseases(ctx, seat);
     if (diseases.length > 1) {
-      ctx.setCounter(CEREMONY_HERO, index);
+      ctx.setState(CEREMONY_HERO, index);
       ctx.requestCardChoice(
         CEREMONY_CURE_HOOK,
         decisionPrompt("Cure a disease you control", "card.obk.ceremony.disease.cure"),
@@ -464,9 +464,9 @@ function continueCeremony(ctx: ScriptCtx): void {
     if (diseases.length === 1) cureForCeremony(ctx, seat, diseases[0]!.instanceId);
   }
   // Cures are complete; later mode picks resume here without curing again.
-  ctx.setCounter(CEREMONY_HERO, heroes.length);
-  const chosen = CEREMONY_MODES.filter((mode) => ctx.getCounter(ceremonyModeCounter(mode)) > 0);
-  const remaining = ctx.getCounter(CEREMONY_CURED) - chosen.length;
+  ctx.setState(CEREMONY_HERO, heroes.length);
+  const chosen = CEREMONY_MODES.filter((mode) => ctx.getState(ceremonyModeKey(mode)) > 0);
+  const remaining = ctx.getState(CEREMONY_CURED) - chosen.length;
   const available = CEREMONY_MODES.filter((mode) => !chosen.includes(mode));
   if (remaining <= 0 || available.length === 0) return;
   ctx.requestChoice(
@@ -485,24 +485,24 @@ function continueCeremony(ctx: ScriptCtx): void {
 
 const curativeCeremony: CardScript = {
   additionalCost(ctx) {
-    ctx.setCounter(CEREMONY_HERO, 0);
-    ctx.setCounter(CEREMONY_CURED, 0);
-    for (const mode of CEREMONY_MODES) ctx.setCounter(ceremonyModeCounter(mode), 0);
+    ctx.setState(CEREMONY_HERO, 0);
+    ctx.setState(CEREMONY_CURED, 0);
+    for (const mode of CEREMONY_MODES) ctx.setState(ceremonyModeKey(mode), 0);
     continueCeremony(ctx);
   },
   onChoose(ctx, hook, option) {
     if (hook === CEREMONY_CURE_HOOK) {
-      const index = ctx.getCounter(CEREMONY_HERO);
+      const index = ctx.getState(CEREMONY_HERO);
       const seat = ceremonyHeroes(ctx)[index];
       if (seat === undefined) return;
       const disease = controlledDiseases(ctx, seat).find((card) => card.instanceId === Number(option));
       if (disease) cureForCeremony(ctx, seat, disease.instanceId);
-      ctx.setCounter(CEREMONY_HERO, index + 1);
+      ctx.setState(CEREMONY_HERO, index + 1);
       continueCeremony(ctx);
     } else if (hook === CEREMONY_MODE_HOOK) {
       const mode = CEREMONY_MODES.find((candidate) => candidate === option);
-      if (!mode || ctx.getCounter(ceremonyModeCounter(mode)) > 0) return;
-      ctx.setCounter(ceremonyModeCounter(mode), 1);
+      if (!mode || ctx.getState(ceremonyModeKey(mode)) > 0) return;
+      ctx.setState(ceremonyModeKey(mode), 1);
       if (mode === "power") ctx.addCardTempPower(ctx.self.instanceId, 2);
       else ctx.grantCardKeyword(ctx.self.instanceId, mode);
       continueCeremony(ctx);

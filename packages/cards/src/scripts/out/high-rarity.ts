@@ -124,7 +124,7 @@ function codexBloodrotChoice(ctx: ScriptCtx, seat: number): void {
 function codexFrailtyChoice(ctx: ScriptCtx, seat: number): void {
   if (seat > 1) {
     const first = [0, 1].find(
-      (target) => ctx.getCounter(`codexFrailtyMoved:${target}`) > 0 && ctx.player(target).hand.length,
+      (target) => ctx.getState(`codexFrailtyMoved:${target}`) > 0 && ctx.player(target).hand.length,
     );
     if (first !== undefined) chooseDiscard(ctx, `codex-frailty-discard:${first}`, first);
     else {
@@ -438,7 +438,7 @@ export const outHighRarity: Record<string, CardScript> = {
     },
     onChoose(ctx, hook, option) {
       if (hook === "dojo-strike" || hook === "dojo-combo") {
-        ctx.setCounter(hook === "dojo-strike" ? "dojoStrike" : "dojoCombo", Number(option));
+        ctx.setState(hook === "dojo-strike" ? "dojoStrike" : "dojoCombo", Number(option));
         ctx.requestChoice(
           `${hook}-position`,
           decisionPrompt("Put it on top or bottom?", "card.out.deck.position", {
@@ -448,7 +448,7 @@ export const outHighRarity: Record<string, CardScript> = {
         );
       } else if (hook.endsWith("-position")) {
         const isStrike = hook.startsWith("dojo-strike");
-        const id = ctx.getCounter(isStrike ? "dojoStrike" : "dojoCombo");
+        const id = ctx.getState(isStrike ? "dojoStrike" : "dojoCombo");
         if (option === "top") ctx.putOnDeckTop(id);
         else ctx.putOnDeckBottom(id);
         if (isStrike) {
@@ -719,7 +719,7 @@ export const outHighRarity: Record<string, CardScript> = {
         ctx.discardCard(seat, Number(option));
         const next = [0, 1].find(
           (target) =>
-            target > seat && ctx.getCounter(`codexFrailtyMoved:${target}`) > 0 && ctx.player(target).hand.length,
+            target > seat && ctx.getState(`codexFrailtyMoved:${target}`) > 0 && ctx.player(target).hand.length,
         );
         if (next !== undefined) chooseDiscard(ctx, `codex-frailty-discard:${next}`, next);
         else {
@@ -731,7 +731,7 @@ export const outHighRarity: Record<string, CardScript> = {
       if (!hook.startsWith("codex-frailty:")) return;
       const seat = Number(hook.split(":")[1]);
       if (ctx.putIntoArsenal(Number(option), "graveyard", { faceUp: false }))
-        ctx.setCounter(`codexFrailtyMoved:${seat}`, 1);
+        ctx.setState(`codexFrailtyMoved:${seat}`, 1);
       codexFrailtyChoice(ctx, seat + 1);
     },
   },
@@ -821,7 +821,7 @@ export const outHighRarity: Record<string, CardScript> = {
   "premeditate|1": {
     onPlay(ctx) {
       buffNextAttack(ctx, { attack: 3, appliesTo: "attack-action", appliesToFromArsenal: true });
-      ctx.setCounter("ponderOnHit", 1);
+      ctx.setState("ponderOnHit", 1);
       ctx.addModifier({
         scope: "until-end-of-turn",
         ...ongoingLabel(
@@ -832,11 +832,11 @@ export const outHighRarity: Record<string, CardScript> = {
     },
     canTriggerOnHit(ctx) {
       return (
-        ctx.getCounter("ponderOnHit") > 0 && ctx.link?.targetAllyId === undefined && ctx.link?.attackCardType === "action"
+        ctx.getState("ponderOnHit") > 0 && ctx.link?.targetAllyId === undefined && ctx.link?.attackCardType === "action"
       );
     },
     onHit(ctx) {
-      ctx.setCounter("ponderOnHit", 0);
+      ctx.setState("ponderOnHit", 0);
       ctx.createToken(PONDER);
     },
   },

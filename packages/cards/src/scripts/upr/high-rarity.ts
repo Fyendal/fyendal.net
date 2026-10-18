@@ -77,7 +77,7 @@ function fusedIce(): Pick<CardScript, "additionalCost" | "onChoose"> {
     },
     onChoose(ctx, hook, option) {
       if (hook === "upr-high-fuse" && option !== "no") {
-        ctx.setCounter("fused", 1);
+        ctx.setState("fused", 1);
         ctx.setFlag("player", "fusedThisTurn", true);
       }
     },
@@ -187,7 +187,7 @@ export const uprHighRarity: Record<string, CardScript> = {
     onAttackDeclared(ctx) {
       const red = revealRed(ctx, 2);
       if (red <= 0) return;
-      ctx.setCounter("tomeltaiRed", red);
+      ctx.setState("tomeltaiRed", red);
       const equipment = equippedCards(ctx, opponentSeat(ctx));
       if (equipment.length)
         ctx.requestCardChoice(
@@ -200,7 +200,7 @@ export const uprHighRarity: Record<string, CardScript> = {
       if (hook !== "tomeltai-equipment") return;
       const equipment = equippedCards(ctx, opponentSeat(ctx)).find((card) => card.instanceId === Number(option));
       if (!equipment) return;
-      ctx.addCardDefenseCounters(equipment.instanceId, ctx.getCounter("tomeltaiRed"));
+      ctx.addCardDefenseCounters(equipment.instanceId, ctx.getState("tomeltaiRed"));
       if ((ctx.cardData(equipment.cardId).defense ?? 0) - (equipment.defCounters ?? 0) <= 0) {
         ctx.destroyPermanent(equipment.instanceId);
       }
@@ -391,7 +391,7 @@ export const uprHighRarity: Record<string, CardScript> = {
         ctx,
         opp.seat,
         5 +
-          (ctx.getCounter("fused")
+          (ctx.getState("fused")
             ? frozen + ice + opp.board.filter((card) => cardNamed(ctx, card, "frostbite")).length
             : 0),
       );
@@ -449,9 +449,9 @@ export const uprHighRarity: Record<string, CardScript> = {
         label: "Channel Ice",
         effect(ctx) {
           ctx.addCounter(ctx.self.instanceId, "flow", 1);
-          ctx.setCounter("channelRemaining", ctx.getCounter("flow"));
+          ctx.setState("channelRemaining", ctx.getCounter("flow"));
           const ice = ctx.player(ctx.seat).pitch.filter((card) => has(ctx, card, "ice"));
-          if (ice.length < ctx.getCounter("channelRemaining")) ctx.destroySelf();
+          if (ice.length < ctx.getState("channelRemaining")) ctx.destroySelf();
           else
             ctx.requestCardChoice(
               "bleak-channel",
@@ -463,10 +463,10 @@ export const uprHighRarity: Record<string, CardScript> = {
     ],
     onChoose(ctx, hook, option) {
       if (hook !== "bleak-channel" || !ctx.putOnDeckBottom(Number(option))) return;
-      ctx.setCounter("channelRemaining", ctx.getCounter("channelRemaining") - 1);
-      if (ctx.getCounter("channelRemaining") <= 0) return;
+      ctx.setState("channelRemaining", ctx.getState("channelRemaining") - 1);
+      if (ctx.getState("channelRemaining") <= 0) return;
       const ice = ctx.player(ctx.seat).pitch.filter((card) => has(ctx, card, "ice"));
-      if (ice.length < ctx.getCounter("channelRemaining")) ctx.destroySelf();
+      if (ice.length < ctx.getState("channelRemaining")) ctx.destroySelf();
       else
         ctx.requestCardChoice(
           "bleak-channel",
@@ -493,7 +493,7 @@ export const uprHighRarity: Record<string, CardScript> = {
         event: "card-played",
         label: "Remove a frost counter; opposing hero pays 2 or discards",
         condition: (ctx, card) =>
-          !!card && Number(card.counters?.fused ?? 0) > 0 && ctx.getCounter("frost") > 0 && has(ctx, card, "ice"),
+          !!card && Number(card.scriptState?.fused ?? 0) > 0 && ctx.getCounter("frost") > 0 && has(ctx, card, "ice"),
         onTrigger(ctx) {
           ctx.addCounter(ctx.self.instanceId, "frost", -1);
         },
@@ -575,8 +575,8 @@ export const uprHighRarity: Record<string, CardScript> = {
   },
   "double strike|1": {
     onChainLinkResolved(ctx) {
-      if (ctx.getCounter("replayed") > 0) return;
-      ctx.setCounter("replayed", 1);
+      if (ctx.getState("replayed") > 0) return;
+      ctx.setState("replayed", 1);
       if (ctx.banish(ctx.self.instanceId)) ctx.allowPlayFrom(ctx.self.instanceId, "banish", { untilChainClose: true });
     },
   },
@@ -606,8 +606,8 @@ export const uprHighRarity: Record<string, CardScript> = {
   "alluvion constellas|0": {
     preventArcaneDamage: 1,
     onPreventsDamage(ctx) {
-      if (ctx.getCounter("preventionObservedTurn") === ctx.state.turn || ctx.getCounter("energy") >= 4) return;
-      ctx.setCounter("preventionObservedTurn", ctx.state.turn);
+      if (ctx.getState("preventionObservedTurn") === ctx.state.turn || ctx.getCounter("energy") >= 4) return;
+      ctx.setState("preventionObservedTurn", ctx.state.turn);
       ctx.requestChoice(
         "alluvion-energy",
         yesNoPrompt("Put an energy counter on Alluvion Constellas?", "card.upr.alluvion.counter"),
@@ -695,13 +695,13 @@ export const uprHighRarity: Record<string, CardScript> = {
       oncePerTurn: false,
       onActivate(ctx) {
         ctx.preventNextDamage(ctx.seat, 1);
-        ctx.setCounter("used", 1);
+        ctx.setState("used", 1);
       },
     },
     triggers: [
       {
         event: "end-of-turn",
-        condition: (ctx) => ctx.getCounter("used") > 0,
+        condition: (ctx) => ctx.getState("used") > 0,
         label: "Destroy Helio's Mitre",
         effect: (ctx) => ctx.destroySelf(),
       },

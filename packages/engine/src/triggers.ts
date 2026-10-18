@@ -672,7 +672,7 @@ export function playWindowInstant(
   if (firstActionExtraCost(state, player) > 0 && cardHasType(state, card, "action")) {
     consumeFirstActionExtraCost(state, player);
   }
-  if (variableCost) (card.counters ??= {})[variableCost.counterKey] = declaredVariableX!;
+  if (variableCost) (card.scriptState ??= {})[variableCost.stateKey] = declaredVariableX!;
   if (alternativeCostCardInstanceIds !== undefined) {
     const alternativeErr = payAlternativePlayCost(
       state, runtime,
@@ -805,10 +805,10 @@ export function announceCardPlayed(
     }
     if (
       cardHasType(state, card, "action") &&
-      Number(player.hero.counters?.loseLifeOnActionUntilTurn ?? 0) >= state.turn
+      Number(player.hero.scriptState?.loseLifeOnActionUntilTurn ?? 0) >= state.turn
     ) {
       layers.push({
-        sourceInstanceId: Number(player.hero.counters?.loseLifeOnActionSource ?? player.hero.instanceId),
+        sourceInstanceId: Number(player.hero.scriptState?.loseLifeOnActionSource ?? player.hero.instanceId),
         seat,
         triggerIndex: -2,
         label: "Lose 1 life for playing an action card",

@@ -4259,7 +4259,7 @@ describe("Cindra engine-driven behavior scenarios", () => {
     replaceHand(game, 0, ["FAB307", "HNT083", "HNT057", "ANQ031"]);
     replaceDeck(game, 0, []);
     replaceHand(game, 1, ["RNR020"]);
-    game.players[1]!.hero.counters = { ...(game.players[1]!.hero.counters ?? {}), marked: 1 };
+    game.players[1]!.hero.scriptState = { ...(game.players[1]!.hero.scriptState ?? {}), marked: 1 };
     game.players[0]!.equipment.chest = {
       instanceId: game.nextInstanceId++,
       cardId: "HNT168",

@@ -72,7 +72,7 @@ function decay(): Pick<CardScript, "triggers"> {
             ctx.destroySelf();
             return;
           }
-          ctx.setCounter("lifePenalty", ctx.getCounter("lifePenalty") + 1);
+          ctx.setState("lifePenalty", ctx.getState("lifePenalty") + 1);
           ctx.setPermanentLife(ctx.self.instanceId, life - 1);
         },
       },
@@ -131,11 +131,11 @@ export const ama: Record<string, CardScript> = {
         !hasType(ctx, played, "zombie")
       )
         return;
-      ctx.setCardCounter(played.instanceId, "voxAttackOnEnter", 1);
+      ctx.setCardState(played.instanceId, "voxAttackOnEnter", 1);
     },
     onFriendlyEnterArena(ctx, entered) {
-      if ((entered.counters?.voxAttackOnEnter ?? 0) <= 0) return;
-      ctx.setCardCounter(entered.instanceId, "voxAttackOnEnter", 0);
+      if ((entered.scriptState?.voxAttackOnEnter ?? 0) <= 0) return;
+      ctx.setCardState(entered.instanceId, "voxAttackOnEnter", 0);
       ctx.tap(entered.instanceId);
       ctx.attackWithPermanent(entered.instanceId);
     },
@@ -242,9 +242,9 @@ export const ama: Record<string, CardScript> = {
   },
 
   "dig for souls|1": {
-    variablePlayCost: { base: 0, counterKey: "digX", prompt: decisionPrompt("Choose X", "engine.decision.x.choose") },
+    variablePlayCost: { base: 0, stateKey: "digX", prompt: decisionPrompt("Choose X", "engine.decision.x.choose") },
     onPlay(ctx) {
-      const x = ctx.getCounter("digX");
+      const x = ctx.getState("digX");
       const looked = ctx.player(ctx.seat).deck.slice(0, x);
       for (const card of looked) ctx.lookAt(card.instanceId);
       const choices = zombies(ctx, looked);
@@ -258,7 +258,7 @@ export const ama: Record<string, CardScript> = {
     },
     onChoose(ctx, hook, option) {
       if (hook !== "ama-dig-zombie") return;
-      const x = ctx.getCounter("digX");
+      const x = ctx.getState("digX");
       const looked = ctx.player(ctx.seat).deck.slice(0, x);
       if (option !== "no") ctx.moveToGraveyard(Number(option), "deck");
       const rest = looked

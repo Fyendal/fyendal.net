@@ -32,8 +32,8 @@ export function pitchProhibitedByEffect(
   card: CardInstance,
 ): boolean {
   if (cardProhibitedByChosenName(state, card)) return true;
-  const prohibitedColors = Number(player.hero.counters?.pitchColorsProhibitedMask ?? 0);
-  const throughTurn = Number(player.hero.counters?.pitchColorProhibitedThroughTurn ?? 0);
+  const prohibitedColors = Number(player.hero.scriptState?.pitchColorsProhibitedMask ?? 0);
+  const throughTurn = Number(player.hero.scriptState?.pitchColorProhibitedThroughTurn ?? 0);
   const color = cardColorOf(state, card);
   return prohibitedColors > 0 && color > 0 && state.turn <= throughTurn &&
     (prohibitedColors & (1 << (color - 1))) !== 0;

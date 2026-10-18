@@ -18,12 +18,12 @@ function hasStealth(ctx: ScriptCtx, card: Card): boolean {
   return (ctx.cardData(card.cardId).keywords ?? []).some((keyword) => keyword.toLowerCase() === "stealth");
 }
 function isMarked(ctx: ScriptCtx, seat: number): boolean {
-  return (ctx.player(seat).hero.counters?.marked ?? 0) > 0;
+  return (ctx.player(seat).hero.scriptState?.marked ?? 0) > 0;
 }
 function markHero(ctx: ScriptCtx, seat: number): void {
   const hero = ctx.player(seat).hero;
-  if ((hero.counters?.marked ?? 0) > 0) return;
-  ctx.addCounter(hero.instanceId, "marked", 1);
+  if ((hero.scriptState?.marked ?? 0) > 0) return;
+  ctx.addCardState(hero.instanceId, "marked", 1);
   ctx.logPublic(
     localizedCardLog(ctx, `${ctx.cardData(hero.cardId).name} is marked`, "card.log.common.hero.marked", {
       target: { kind: "card", cardId: hero.cardId },

@@ -218,7 +218,7 @@ export function activateFromHandAbility(
     },
   );
   if (costError) return { status: "error", error: costError };
-  if (variableSoul) (card.counters ??= {})[variableSoul.counterKey] = declaredVariableX!;
+  if (variableSoul) (card.scriptState ??= {})[variableSoul.stateKey] = declaredVariableX!;
   if (ability.fromHandMove === "banish") ctx.banish(card.instanceId);
   else ctx.discardCard(seat, card.instanceId);
   pushAbilityLayer(state, seat, card, nameOf(state, card.cardId), {

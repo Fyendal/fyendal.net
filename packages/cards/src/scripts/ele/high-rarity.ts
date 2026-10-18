@@ -51,7 +51,7 @@ function fusion(type: "earth" | "ice" | "lightning"): Pick<CardScript, "addition
       if (hook !== `high-fuse:${type}` || option === "no") return;
       const card = ctx.player(ctx.seat).hand.find((candidate) => candidate.instanceId === Number(option));
       if (!card) return;
-      ctx.setCounter("fused", 1);
+      ctx.setState("fused", 1);
       ctx.setFlag("player", "fusedThisTurn", true);
       ctx.setFlag("player", `${type}FusedThisTurn`, true);
       ctx.revealCards([card.instanceId]);
@@ -121,10 +121,10 @@ function elementalFusion(
       const second = ctx.player(ctx.seat).hand.find((card) => card.instanceId === Number(secondId));
       const firstCard = kind === firstType ? first : kind === "both" ? first : undefined;
       const secondCard = kind === secondType ? first : kind === "both" ? second : undefined;
-      if (firstCard && hasType(ctx, firstCard, firstType)) ctx.setCounter(`fused:${firstType}`, 1);
-      if (secondCard && hasType(ctx, secondCard, secondType)) ctx.setCounter(`fused:${secondType}`, 1);
+      if (firstCard && hasType(ctx, firstCard, firstType)) ctx.setState(`fused:${firstType}`, 1);
+      if (secondCard && hasType(ctx, secondCard, secondType)) ctx.setState(`fused:${secondType}`, 1);
       if (!firstCard && !secondCard) return;
-      ctx.setCounter("fused", 1);
+      ctx.setState("fused", 1);
       ctx.setFlag("player", "fusedThisTurn", true);
       if (firstCard) ctx.setFlag("player", `${firstType}FusedThisTurn`, true);
       if (secondCard) ctx.setFlag("player", `${secondType}FusedThisTurn`, true);
@@ -159,7 +159,7 @@ function oakenOldFusion(): Pick<CardScript, "additionalCost" | "onChoose"> {
         if (!iceCard) return;
         const earthCards = ctx.player(ctx.seat).hand.filter((card) => hasType(ctx, card, "earth"));
         if (!earthCards.length) return;
-        ctx.setCounter("oakenFuseIce", iceCard.instanceId);
+        ctx.setState("oakenFuseIce", iceCard.instanceId);
         ctx.requestCardChoice(
           "oaken-fuse-earth",
           decisionPrompt("Reveal an Earth card to fuse Oaken Old?", "card.ele.oaken.fusion.earth", {
@@ -170,15 +170,15 @@ function oakenOldFusion(): Pick<CardScript, "additionalCost" | "onChoose"> {
         return;
       }
       if (hook !== "oaken-fuse-earth") return;
-      const iceId = ctx.getCounter("oakenFuseIce");
+      const iceId = ctx.getState("oakenFuseIce");
       const hand = ctx.player(ctx.seat).hand;
       const iceCard = hand.find((card) => card.instanceId === iceId && hasType(ctx, card, "ice"));
       const earthCard = hand.find((card) => card.instanceId === Number(option) && hasType(ctx, card, "earth"));
-      ctx.setCounter("oakenFuseIce", 0);
+      ctx.setState("oakenFuseIce", 0);
       if (!iceCard || !earthCard) return;
-      ctx.setCounter("fused:ice", 1);
-      ctx.setCounter("fused:earth", 1);
-      ctx.setCounter("fused", 1);
+      ctx.setState("fused:ice", 1);
+      ctx.setState("fused:earth", 1);
+      ctx.setState("fused", 1);
       ctx.setFlag("player", "fusedThisTurn", true);
       ctx.setFlag("player", "iceFusedThisTurn", true);
       ctx.setFlag("player", "earthFusedThisTurn", true);
@@ -201,7 +201,7 @@ function withFusionChoices(
   };
 }
 
-const fused = (ctx: ScriptCtx) => ctx.getCounter("fused") > 0;
+const fused = (ctx: ScriptCtx) => ctx.getState("fused") > 0;
 
 function blossomingBanishChoice(ctx: ScriptCtx): void {
   const cards = ctx
@@ -219,7 +219,7 @@ function blossomingBanishChoice(ctx: ScriptCtx): void {
 
 function channel(type: "earth" | "ice" | "lightning", extra: CardScript): CardScript {
   function maintain(ctx: ScriptCtx): void {
-    const remaining = ctx.getCounter("channelRemaining");
+    const remaining = ctx.getState("channelRemaining");
     if (remaining <= 0) return;
     const cards = ctx.player(ctx.seat).pitch.filter((card) => hasType(ctx, card, type));
     if (cards.length < remaining) {
@@ -244,7 +244,7 @@ function channel(type: "earth" | "ice" | "lightning", extra: CardScript): CardSc
         effect(ctx) {
           const flow = ctx.getCounter("flow") + 1;
           ctx.setCounter("flow", flow);
-          ctx.setCounter("channelRemaining", flow);
+          ctx.setState("channelRemaining", flow);
           maintain(ctx);
         },
       },
@@ -252,7 +252,7 @@ function channel(type: "earth" | "ice" | "lightning", extra: CardScript): CardSc
     onChoose(ctx, hook, option) {
       if (hook === "channel-bottom") {
         if (ctx.putOnDeckBottom(Number(option))) {
-          ctx.setCounter("channelRemaining", ctx.getCounter("channelRemaining") - 1);
+          ctx.setState("channelRemaining", ctx.getState("channelRemaining") - 1);
           maintain(ctx);
         }
         return;
@@ -270,12 +270,12 @@ const oldhim: CardScript = {
     timing: "defense-reaction",
     oncePerTurn: true,
     onCostPaid(ctx, cards) {
-      ctx.setCounter("oldhimEarth", cards.some((card) => hasType(ctx, card, "earth")) ? 1 : 0);
-      ctx.setCounter("oldhimIce", cards.some((card) => hasType(ctx, card, "ice")) ? 1 : 0);
+      ctx.setState("oldhimEarth", cards.some((card) => hasType(ctx, card, "earth")) ? 1 : 0);
+      ctx.setState("oldhimIce", cards.some((card) => hasType(ctx, card, "ice")) ? 1 : 0);
     },
     onActivate(ctx) {
-      if (ctx.getCounter("oldhimEarth")) ctx.preventNextDamage(ctx.seat, 2);
-      if (ctx.getCounter("oldhimIce") && ctx.link && ctx.player(ctx.link.attacker).hand.length)
+      if (ctx.getState("oldhimEarth")) ctx.preventNextDamage(ctx.seat, 2);
+      if (ctx.getState("oldhimIce") && ctx.link && ctx.player(ctx.link.attacker).hand.length)
         ctx.requestCardChoice(
           "adult-oldhim-top",
           decisionPrompt("Put a card from hand on top of deck", "card.ele.hand.card.top"),
@@ -353,7 +353,7 @@ export const eleHighRarity: Record<string, CardScript> = {
   "korshem, crossroad of elements|0": {
     global: true,
     onAnyHeroReveals(ctx, revealingSeat) {
-      ctx.setCounter("revealingSeat", revealingSeat + 1);
+      ctx.setState("revealingSeat", revealingSeat + 1);
       ctx.requestChoice(
         "korshem-benefit",
         decisionPrompt("Choose Korshem's benefit", "card.ele.korshem.benefit", {
@@ -370,7 +370,7 @@ export const eleHighRarity: Record<string, CardScript> = {
     },
     onChoose(ctx, hook, option) {
       if (hook !== "korshem-benefit") return;
-      const target = ctx.getCounter("revealingSeat") - 1;
+      const target = ctx.getState("revealingSeat") - 1;
       if (target < 0) return;
       if (option === "resource") ctx.changeResources(target, 1);
       else if (option === "life") ctx.gainLife(target, 1);
@@ -404,11 +404,11 @@ export const eleHighRarity: Record<string, CardScript> = {
       goAgain: false,
       oncePerTurn: true,
       onCostPaid(ctx, cards) {
-        ctx.setCounter("icePitched", cards.some((card) => hasType(ctx, card, "ice")) ? 1 : 0);
+        ctx.setState("icePitched", cards.some((card) => hasType(ctx, card, "ice")) ? 1 : 0);
       },
     },
     canTriggerOnHit(ctx) {
-      return ctx.getCounter("icePitched") > 0 && ctx.link?.targetAllyId === undefined;
+      return ctx.getState("icePitched") > 0 && ctx.link?.targetAllyId === undefined;
     },
     onHit(ctx) {
       ctx.createToken(FROSTBITE, opponentSeat(ctx));
@@ -601,7 +601,7 @@ export const eleHighRarity: Record<string, CardScript> = {
       buffNextAttack(ctx, {
         attack: 3,
         appliesToSubtype: "arrow",
-        ...(ctx.getCounter("fused:ice") && ctx.getCounter("fused:lightning")
+        ...(ctx.getState("fused:ice") && ctx.getState("fused:lightning")
           ? { onHitDealDamage: 1, onDamageDealtCreateTokenPerPoint: FROSTBITE }
           : {}),
       });
@@ -664,9 +664,9 @@ export const eleHighRarity: Record<string, CardScript> = {
   "fulminate|2": {
     ...elementalFusion("earth", "lightning"),
     onPlay(ctx) {
-      if (ctx.getCounter("fused:earth"))
+      if (ctx.getState("fused:earth"))
         ctx.addModifier({ scope: "until-end-of-turn", attack: 3, appliesTo: "attack-action" });
-      if (ctx.getCounter("fused:lightning"))
+      if (ctx.getState("fused:lightning"))
         ctx.addModifier({ scope: "until-end-of-turn", goAgain: true, appliesTo: "attack-action" });
     },
   },
@@ -676,11 +676,11 @@ export const eleHighRarity: Record<string, CardScript> = {
         ctx.addModifier({
           scope: "until-end-of-turn",
           appliesTo: "attack",
-          ...(ctx.getCounter("fused:lightning") ? { onHitDealDamage: 3 } : {}),
+          ...(ctx.getState("fused:lightning") ? { onHitDealDamage: 3 } : {}),
         });
     },
     onFriendlyAttackDeclared(ctx) {
-      if (!ctx.getCounter("fused:ice")) return;
+      if (!ctx.getState("fused:ice")) return;
       if (
         !ctx.requestPayment(
           "flashfreeze-ice",
@@ -858,7 +858,7 @@ export const eleHighRarity: Record<string, CardScript> = {
         condition: (ctx, played) => !!played && ctx.hasCardType(played, "action"),
         effect(ctx, played) {
           if (!played) return;
-          ctx.setCounter("thunderTarget", played.instanceId);
+          ctx.setState("thunderTarget", played.instanceId);
           ctx.requestPayment(
             "thunder-steppe",
             decisionPrompt("Pay 1 to give this action go again?", "card.ele.goagain.give.pay", {
@@ -871,7 +871,7 @@ export const eleHighRarity: Record<string, CardScript> = {
     ],
     onChoose(ctx, hook, option) {
       if (hook === "thunder-steppe" && option === "paid") {
-        const target = ctx.getCounter("thunderTarget");
+        const target = ctx.getState("thunderTarget");
         ctx.grantCardKeyword(target, "go again");
         ctx.grantGoAgain(target);
       }

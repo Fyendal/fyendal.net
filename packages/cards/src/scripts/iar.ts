@@ -67,13 +67,13 @@ function selfHitsHero(ctx: ScriptCtx): boolean {
 function exposedEquipmentSlots(ctx: ScriptCtx, seat: number): readonly string[] {
   const player = ctx.player(seat);
   return EQUIPMENT_SLOTS.filter(
-    (slot) => !player.equipment[slot] && !player.board.some((card) => card.counters?.[`frostZone:${slot}`]),
+    (slot) => !player.equipment[slot] && !player.board.some((card) => card.scriptState?.[`frostZone:${slot}`]),
   );
 }
 
 function createFrostbitesInExposedZones(ctx: ScriptCtx, seat: number): void {
   for (const slot of exposedEquipmentSlots(ctx, seat)) {
-    ctx.createToken(FROSTBITE, seat, { [`frostZone:${slot}`]: 1 });
+    ctx.createToken(FROSTBITE, seat, undefined, { [`frostZone:${slot}`]: 1 });
   }
 }
 
@@ -125,7 +125,7 @@ function decay(): Pick<CardScript, "triggers"> {
             ctx.destroySelf();
             return;
           }
-          ctx.setCounter("lifePenalty", ctx.getCounter("lifePenalty") + 1);
+          ctx.setState("lifePenalty", ctx.getState("lifePenalty") + 1);
           ctx.setPermanentLife(ctx.self.instanceId, life - 1);
         },
       },
@@ -329,16 +329,16 @@ function violentGusto(): CardScript {
 }
 
 const FORSAKEN_STRIKE_MODES = [
-  { option: "Create a Gate to i'Arathael", counter: "forsakenGateModes", message: "card.iar.forsaken.option.gate" },
-  { option: "Give Forsaken Strike +2 power", counter: "forsakenPowerModes", message: "card.iar.forsaken.option.power" },
-  { option: "Give Forsaken Strike go again", counter: "forsakenGoAgainModes", message: "card.iar.forsaken.option.goagain" },
+  { option: "Create a Gate to i'Arathael", stateKey: "forsakenGateModes", message: "card.iar.forsaken.option.gate" },
+  { option: "Give Forsaken Strike +2 power", stateKey: "forsakenPowerModes", message: "card.iar.forsaken.option.power" },
+  { option: "Give Forsaken Strike go again", stateKey: "forsakenGoAgainModes", message: "card.iar.forsaken.option.goagain" },
 ] as const;
 
 function requestForsakenStrikeMode(ctx: ScriptCtx): void {
   // Each paid zombie chooses a mode, but a mode can be chosen only once
   // (CR 1.7.5b), so zombies beyond the third add nothing.
-  const total = Math.min(ctx.getCounter("forsakenModesTotal"), FORSAKEN_STRIKE_MODES.length);
-  const chosen = FORSAKEN_STRIKE_MODES.filter((mode) => ctx.getCounter(mode.counter) > 0);
+  const total = Math.min(ctx.getState("forsakenModesTotal"), FORSAKEN_STRIKE_MODES.length);
+  const chosen = FORSAKEN_STRIKE_MODES.filter((mode) => ctx.getState(mode.stateKey) > 0);
   if (chosen.length >= total) {
     applyForsakenStrikeModes(ctx);
     return;
@@ -358,13 +358,13 @@ function requestForsakenStrikeMode(ctx: ScriptCtx): void {
 }
 
 function applyForsakenStrikeModes(ctx: ScriptCtx): void {
-  const [gate, power, goAgain] = FORSAKEN_STRIKE_MODES.map((mode) => ctx.getCounter(mode.counter) > 0);
+  const [gate, power, goAgain] = FORSAKEN_STRIKE_MODES.map((mode) => ctx.getState(mode.stateKey) > 0);
   if (gate) ctx.createToken(GATE);
   if (power) ctx.addCardTempPower(ctx.self.instanceId, 2);
   if (goAgain) ctx.grantGoAgain();
   // Counters survive zone changes; clear them so a later play starts fresh.
-  ctx.setCounter("forsakenModesTotal", 0);
-  for (const mode of FORSAKEN_STRIKE_MODES) ctx.setCounter(mode.counter, 0);
+  ctx.setState("forsakenModesTotal", 0);
+  for (const mode of FORSAKEN_STRIKE_MODES) ctx.setState(mode.stateKey, 0);
 }
 
 const forsakenStrike: CardScript = {
@@ -377,7 +377,7 @@ const forsakenStrike: CardScript = {
     replacesResourceCost: false,
   },
   onAlternativeCostPaid(ctx, paidCards) {
-    ctx.setCounter("forsakenModesTotal", paidCards.length);
+    ctx.setState("forsakenModesTotal", paidCards.length);
   },
   additionalCost(ctx) {
     requestForsakenStrikeMode(ctx);
@@ -385,7 +385,7 @@ const forsakenStrike: CardScript = {
   onChoose(ctx, hook, option) {
     if (hook !== "iar-forsaken-strike-mode") return;
     const mode = FORSAKEN_STRIKE_MODES.find((candidate) => candidate.option === option);
-    if (mode) ctx.setCounter(mode.counter, 1);
+    if (mode) ctx.setState(mode.stateKey, 1);
     requestForsakenStrikeMode(ctx);
   },
 };
@@ -849,7 +849,7 @@ function freshFromTheForge(): CardScript {
     onPlay(ctx) {
       for (const dagger of ctx.player(ctx.seat).weapons.filter((card) => hasType(ctx, card, "dagger"))) {
         ctx.addCounter(dagger.instanceId, "power", 1);
-        ctx.setCardCounter(dagger.instanceId, "sharpenedTurn", ctx.state.turn);
+        ctx.setCardState(dagger.instanceId, "sharpenedTurn", ctx.state.turn);
         ctx.setFlag(
           "player",
           "clearWeaponPowerCountersAtTurn",
@@ -877,7 +877,7 @@ function freshFromTheForge(): CardScript {
       if (hook !== "iar-fresh-forge-mark") return;
       const dagger = ctx.link?.attackingCard;
       if (!dagger || Number(dagger.counters?.power ?? 0) <= 0) return;
-      ctx.setCounter("iarFreshForgeDagger", dagger.instanceId);
+      ctx.setState("iarFreshForgeDagger", dagger.instanceId);
       ctx.requestChoice(
         "iar-fresh-forge-remove",
         decisionPrompt("Remove a +1 power counter to mark the hit hero?", "card.iar.freshforge.mark.optional", {
@@ -888,7 +888,7 @@ function freshFromTheForge(): CardScript {
     },
     onChoose(ctx, hook, option) {
       if (hook !== "iar-fresh-forge-remove" || option !== "yes") return;
-      const daggerId = ctx.getCounter("iarFreshForgeDagger");
+      const daggerId = ctx.getState("iarFreshForgeDagger");
       const dagger = ctx.link?.attackingCard;
       if (!dagger || dagger.instanceId !== daggerId || Number(dagger.counters?.power ?? 0) <= 0) {
         return;
@@ -896,8 +896,8 @@ function freshFromTheForge(): CardScript {
       ctx.addCounter(dagger.instanceId, "power", -1);
       const target = opponentSeat(ctx);
       const hero = ctx.player(target).hero;
-      if (Number(hero.counters?.marked ?? 0) === 0) {
-        ctx.addCounter(hero.instanceId, "marked", 1);
+      if (Number(hero.scriptState?.marked ?? 0) === 0) {
+        ctx.addCardState(hero.instanceId, "marked", 1);
         ctx.logPublic(
           localizedCardLog(ctx, `${ctx.cardData(hero.cardId).name} is marked`, "card.log.common.hero.marked", {
             target: { kind: "card", cardId: hero.cardId },
@@ -1152,14 +1152,14 @@ function sonataDystopia(): CardScript {
   return {
     variablePlayCost: {
       base: 0,
-      counterKey: "iarSonataDystopiaX",
+      stateKey: "iarSonataDystopiaX",
       prompt: decisionPrompt("Choose X", "engine.decision.x.choose"),
       maximum(ctx) {
         return ctx.player(ctx.seat).board.filter((card) => ctx.isRunechant(card)).length;
       },
     },
     additionalCost(ctx) {
-      const x = ctx.getCounter("iarSonataDystopiaX");
+      const x = ctx.getState("iarSonataDystopiaX");
       if (x <= 0) return;
       const runechants = ctx.player(ctx.seat).board.filter((card) => ctx.isRunechant(card));
       ctx.requestCardChoices(
@@ -1186,7 +1186,7 @@ function sonataDystopia(): CardScript {
       }
     },
     onPlay(ctx) {
-      const x = ctx.getCounter("iarSonataDystopiaX");
+      const x = ctx.getState("iarSonataDystopiaX");
       ctx.addModifier({
         scope: "until-end-of-turn",
         appliesTo: "attack-action",
@@ -1998,10 +1998,10 @@ export const iar: Record<string, CardScript> = {
       }
     },
     onChoose(ctx, hook, option) {
-      if (hook === "iar-ferryman-target") ctx.setCounter("iarFerrymanTarget", Number(option));
+      if (hook === "iar-ferryman-target") ctx.setState("iarFerrymanTarget", Number(option));
     },
     onResolved(ctx) {
-      const target = ctx.getCounter("iarFerrymanTarget");
+      const target = ctx.getState("iarFerrymanTarget");
       if (target > 0) {
         ctx.putOnDeckBottomInChosenOrder(
           [ctx.self.instanceId, target],
@@ -2050,7 +2050,7 @@ export const iar: Record<string, CardScript> = {
     onDefend(ctx) {
       const attacker = ctx.link?.attacker;
       if (attacker === undefined) return;
-      ctx.setCounter("iarEchoingAttacker", attacker + 1);
+      ctx.setState("iarEchoingAttacker", attacker + 1);
       requestDiscardChoice(
         ctx,
         "iar-echoing-trap-discard",
@@ -2060,7 +2060,7 @@ export const iar: Record<string, CardScript> = {
     },
     onChoose(ctx, hook, option) {
       if (hook !== "iar-echoing-trap-discard") return;
-      const attacker = ctx.getCounter("iarEchoingAttacker") - 1;
+      const attacker = ctx.getState("iarEchoingAttacker") - 1;
       if (attacker >= 0) resolveDiscardChoice(ctx, option, attacker);
     },
   },
@@ -2297,9 +2297,9 @@ export const iar: Record<string, CardScript> = {
       const card = ctx.player(ctx.seat).hand.find((candidate) => candidate.instanceId === Number(option));
       if (!card) return;
       const shadow = hasType(ctx, card, "shadow");
-      if (ctx.banish(card.instanceId) && shadow) ctx.setCounter("iarHarbingerShadow", 1);
+      if (ctx.banish(card.instanceId) && shadow) ctx.setState("iarHarbingerShadow", 1);
     },
-    canTriggerOnHit: (ctx) => !!ctx.link && ctx.getCounter("iarHarbingerShadow") > 0,
+    canTriggerOnHit: (ctx) => !!ctx.link && ctx.getState("iarHarbingerShadow") > 0,
     onHit(ctx) {
       ctx.createTokens(GATE, 2);
     },
@@ -2449,7 +2449,7 @@ export const iar: Record<string, CardScript> = {
             (card) => card?.instanceId === ctx.self.instanceId && !card.tapped,
           );
           if (!liveAndUntapped) return;
-          ctx.setCounter("iarDanseAlly", entered.instanceId);
+          ctx.setState("iarDanseAlly", entered.instanceId);
           ctx.requestPayment(
             "iar-danse-macabre-pay",
             decisionPrompt("Danse Macabre: pay 2 and tap this?", "card.iar.danse.pay", {
@@ -2463,7 +2463,7 @@ export const iar: Record<string, CardScript> = {
     onChoose(ctx, hook, option) {
       if (hook !== "iar-danse-macabre-pay" || option !== "paid") return;
       if (!ctx.tap(ctx.self.instanceId)) return;
-      const allyId = ctx.getCounter("iarDanseAlly");
+      const allyId = ctx.getState("iarDanseAlly");
       ctx.addModifier({
         scope: "next-attack",
         goAgain: true,
@@ -2580,7 +2580,7 @@ export const iar: Record<string, CardScript> = {
     onChoose(ctx, hook, option) {
       if (hook === "iar-bravery-charge" && option !== "no") {
         const charged = ctx.charge(Number(option));
-        if (charged) ctx.setCounter("chargedPitch", ctx.cardColor(charged));
+        if (charged) ctx.setState("chargedPitch", ctx.cardColor(charged));
       }
     },
     onAttackDeclared(ctx) {
@@ -2661,17 +2661,17 @@ export const iar: Record<string, CardScript> = {
 
   "ice aged oak|3": {
     onPlayCostPaid(ctx, paid) {
-      if (paidWithType(ctx, paid, "ice")) ctx.setCounter("iarIceBond", 1);
+      if (paidWithType(ctx, paid, "ice")) ctx.setState("iarIceBond", 1);
     },
     onAttackDeclared(ctx) {
-      if (ctx.getCounter("iarIceBond") > 0) {
+      if (ctx.getState("iarIceBond") > 0) {
         ctx.addModifier({ scope: "chain-link", dominate: true });
       }
     },
     canTriggerOnHit: selfHitsHero,
     onHit(ctx) {
       ctx.createToken(EMBODIMENT_OF_EARTH);
-      if (ctx.getCounter("iarIceBond") > 0) {
+      if (ctx.getState("iarIceBond") > 0) {
         createFrostbitesInExposedZones(ctx, opponentSeat(ctx));
       }
     },
@@ -2679,13 +2679,13 @@ export const iar: Record<string, CardScript> = {
 
   "ancient earth oak|1": {
     onPlayCostPaid(ctx, paid) {
-      if (paidWithType(ctx, paid, "earth")) ctx.setCounter("iarEarthBond", 1);
+      if (paidWithType(ctx, paid, "earth")) ctx.setState("iarEarthBond", 1);
     },
-    modifyAttack: (ctx) => (ctx.getCounter("iarEarthBond") > 0 ? 2 : 0),
+    modifyAttack: (ctx) => (ctx.getState("iarEarthBond") > 0 ? 2 : 0),
     canTriggerOnHit: selfHitsHero,
     onHit(ctx) {
       ctx.createToken(FROSTBITE, opponentSeat(ctx));
-      if (ctx.getCounter("iarEarthBond") > 0) ctx.setFlag("link", "attackToBottom", true);
+      if (ctx.getState("iarEarthBond") > 0) ctx.setFlag("link", "attackToBottom", true);
     },
   },
 
@@ -2904,7 +2904,7 @@ export const iar: Record<string, CardScript> = {
       },
       onCostPaid(ctx) {
         const anyZone = ctx.getFlag("player", "iarPlanarChaosGate") === true;
-        ctx.setCounter("iarGateAnyZoneTarget", anyZone ? 1 : 0);
+        ctx.setState("iarGateAnyZoneTarget", anyZone ? 1 : 0);
         ctx.setFlag("player", "iarPlanarChaosGate", false);
       },
       onActivate(ctx) {
@@ -2913,7 +2913,7 @@ export const iar: Record<string, CardScript> = {
           ctx.allowPlayFrom(
             ctx.playTargetInstanceId,
             "banish",
-            ctx.getCounter("iarGateAnyZoneTarget") > 0 ? { forSeat: ctx.seat } : undefined,
+            ctx.getState("iarGateAnyZoneTarget") > 0 ? { forSeat: ctx.seat } : undefined,
           );
         }
       },

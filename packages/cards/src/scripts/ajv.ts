@@ -27,7 +27,7 @@ function hasType(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, type: string)
 function exposed(ctx: ScriptCtx, seat: number): string[] {
   const player = ctx.player(seat);
   return SLOTS.filter(
-    (slot) => !player.equipment[slot] && !player.board.some((card) => card.counters?.[`frostZone:${slot}`]),
+    (slot) => !player.equipment[slot] && !player.board.some((card) => card.scriptState?.[`frostZone:${slot}`]),
   );
 }
 
@@ -52,7 +52,7 @@ function offerExposedFrostbite(ctx: ScriptCtx, hook: string, seat: number, optio
 
 function createExposedFrostbite(ctx: ScriptCtx, seat: number, slot: string): void {
   if (!SLOTS.includes(slot as (typeof SLOTS)[number]) || !exposed(ctx, seat).includes(slot)) return;
-  ctx.createToken(FROSTBITE, seat, { [`frostZone:${slot}`]: 1 });
+  ctx.createToken(FROSTBITE, seat, undefined, { [`frostZone:${slot}`]: 1 });
 }
 
 function allEquipment(ctx: ScriptCtx, seat?: number): DeepReadonly<CardInstance>[] {
@@ -66,8 +66,8 @@ function allEquipment(ctx: ScriptCtx, seat?: number): DeepReadonly<CardInstance>
 
 function fused(ctx: ScriptCtx, type?: "earth" | "ice"): boolean {
   return type
-    ? ctx.getCounter(`fused${type === "earth" ? "Earth" : "Ice"}`) > 0
-    : ctx.getCounter("fusedEarth") > 0 || ctx.getCounter("fusedIce") > 0;
+    ? ctx.getState(`fused${type === "earth" ? "Earth" : "Ice"}`) > 0
+    : ctx.getState("fusedEarth") > 0 || ctx.getState("fusedIce") > 0;
 }
 
 function elementalFusion(): Pick<CardScript, "additionalCost" | "onChoose"> {
@@ -120,8 +120,8 @@ function elementalFusion(): Pick<CardScript, "additionalCost" | "onChoose"> {
       const second = ctx.player(ctx.seat).hand.find((card) => card.instanceId === Number(secondText));
       const earthCard = kind === "earth" ? first : kind === "both" ? first : undefined;
       const iceCard = kind === "ice" ? first : kind === "both" ? second : undefined;
-      if (earthCard && hasType(ctx, earthCard, "earth")) ctx.setCounter("fusedEarth", 1);
-      if (iceCard && hasType(ctx, iceCard, "ice")) ctx.setCounter("fusedIce", 1);
+      if (earthCard && hasType(ctx, earthCard, "earth")) ctx.setState("fusedEarth", 1);
+      if (iceCard && hasType(ctx, iceCard, "ice")) ctx.setState("fusedIce", 1);
       const revealed = [
         ...new Map(
           [earthCard, iceCard]
@@ -204,13 +204,13 @@ export const ajv: Record<string, CardScript> = {
       goAgain: true,
       oncePerTurn: true,
       onCostPaid(ctx, paid) {
-        ctx.setCounter("earthPaid", paid.some((card) => hasType(ctx, card, "earth")) ? 1 : 0);
-        ctx.setCounter("icePaid", paid.some((card) => hasType(ctx, card, "ice")) ? 1 : 0);
+        ctx.setState("earthPaid", paid.some((card) => hasType(ctx, card, "earth")) ? 1 : 0);
+        ctx.setState("icePaid", paid.some((card) => hasType(ctx, card, "ice")) ? 1 : 0);
       },
       onActivate(ctx) {
-        if (ctx.getCounter("earthPaid"))
+        if (ctx.getState("earthPaid"))
           ctx.addModifier({ scope: "until-end-of-turn", attack: 2, appliesToName: "mangle" });
-        if (ctx.getCounter("icePaid"))
+        if (ctx.getState("icePaid"))
           ctx.addModifier({ scope: "until-end-of-turn", dominate: true, appliesToName: "mangle" });
       },
     },
@@ -246,7 +246,7 @@ export const ajv: Record<string, CardScript> = {
           const target = ctx.state.activePlayer;
           const count = ctx
             .player(target)
-            .board.filter((card) => SLOTS.some((slot) => card.counters?.[`frostZone:${slot}`])).length;
+            .board.filter((card) => SLOTS.some((slot) => card.scriptState?.[`frostZone:${slot}`])).length;
           if (count) ctx.loseLife(target, count);
         },
       },
@@ -260,7 +260,7 @@ export const ajv: Record<string, CardScript> = {
           const ice = ctx.player(ctx.seat).pitch.filter((card) => hasType(ctx, card, "ice"));
           if (ice.length < flow) ctx.destroySelf();
           else {
-            ctx.setCounter("channelRemaining", flow);
+            ctx.setState("channelRemaining", flow);
             ctx.requestCardChoice(
               "channel-ice",
               decisionPrompt(
@@ -284,8 +284,8 @@ export const ajv: Record<string, CardScript> = {
         ctx.destroySelf();
         return;
       }
-      const remaining = ctx.getCounter("channelRemaining") - 1;
-      ctx.setCounter("channelRemaining", remaining);
+      const remaining = ctx.getState("channelRemaining") - 1;
+      ctx.setState("channelRemaining", remaining);
       if (remaining <= 0) return;
       const ice = ctx.player(ctx.seat).pitch.filter((card) => hasType(ctx, card, "ice"));
       if (ice.length < remaining) ctx.destroySelf();
@@ -410,7 +410,7 @@ export const ajv: Record<string, CardScript> = {
           );
       } else if (hook === "exposed-hero") {
         const target = Number(option);
-        ctx.setCounter("exposedTarget", target);
+        ctx.setState("exposedTarget", target);
         if (
           !ctx.requestPayment(
             "exposed-pay",
@@ -432,7 +432,7 @@ export const ajv: Record<string, CardScript> = {
             );
         }
       } else if (hook === "exposed-pay" && option === "declined") {
-        const target = ctx.getCounter("exposedTarget");
+        const target = ctx.getState("exposedTarget");
         const equipment = allEquipment(ctx, target).filter(
           (card) => Math.max(0, (data(ctx, card).defense ?? 0) - (card.defCounters ?? 0)) === 0,
         );

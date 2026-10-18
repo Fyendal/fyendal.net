@@ -42,7 +42,7 @@ export function mayPlayFromZone(
 ): boolean {
   if (
     zone === "banish" &&
-    Number((state.players[card.owner] as PlayerState).hero.counters?.banishPlayLockedUntilTurn ?? 0) === state.turn
+    Number((state.players[card.owner] as PlayerState).hero.scriptState?.banishPlayLockedUntilTurn ?? 0) === state.turn
   ) {
     return false;
   }
@@ -232,8 +232,8 @@ export function mayPlayFromArsenal(
 ): boolean {
   if (card.faceDown) return actingSeat === card.owner;
   const owner = state.players[card.owner] as PlayerState;
-  const annexingSeat = owner.hero.counters?.faceUpArsenalAnnexedBySeat;
-  const throughTurn = owner.hero.counters?.faceUpArsenalAnnexedThroughTurn;
+  const annexingSeat = owner.hero.scriptState?.faceUpArsenalAnnexedBySeat;
+  const throughTurn = owner.hero.scriptState?.faceUpArsenalAnnexedThroughTurn;
   if (
     annexingSeat !== undefined &&
     throughTurn !== undefined &&
@@ -420,10 +420,10 @@ export function noteCardPlayed(
   if (
     isAction &&
     (d.subtypes ?? []).includes("attack") &&
-    Number(player.hero.counters?.halveNextAttackActionOnTurn ?? 0) === state.turn
+    Number(player.hero.scriptState?.halveNextAttackActionOnTurn ?? 0) === state.turn
   ) {
-    (card.counters ??= {}).halveBasePower = 1;
-    (player.hero.counters ??= {}).halveNextAttackActionOnTurn = 0;
+    (card.scriptState ??= {}).halveBasePower = 1;
+    (player.hero.scriptState ??= {}).halveNextAttackActionOnTurn = 0;
   }
   const nonAttackAction =
     isAction && !(d.subtypes ?? []).includes("attack");
@@ -515,15 +515,15 @@ export function noteCardPlayed(
     if (wizardBonus > 0 && effectiveTypes.has("wizard")) {
       player.flags.nextWizardNonAttackArcaneBonus = 0;
       if (scriptOf(state, cardId, card)?.arcaneDamageEffect) {
-        (card.counters ??= {}).arcaneBonus =
-          Number(card.counters?.arcaneBonus || 0) + wizardBonus;
+        (card.scriptState ??= {}).arcaneBonus =
+          Number(card.scriptState?.arcaneBonus || 0) + wizardBonus;
       }
     }
   }
   const arcaneCardBonus = Number(player.flags.nextArcaneCardBonus || 0);
   if (arcaneCardBonus > 0 && scriptOf(state, cardId, card)?.arcaneDamageEffect) {
-    (card.counters ??= {}).arcaneBonus =
-      Number(card.counters?.arcaneBonus || 0) + arcaneCardBonus;
+    (card.scriptState ??= {}).arcaneBonus =
+      Number(card.scriptState?.arcaneBonus || 0) + arcaneCardBonus;
     player.flags.nextArcaneCardBonus = 0;
     for (const key of Object.keys(player.flags)) {
       if (key.startsWith("nextArcaneCardBonusSource:")) delete player.flags[key];
@@ -538,8 +538,8 @@ export function noteCardPlayed(
     if (mod.scope !== "next-play" || mod.seat !== player.seat || !modifierMatchesPlayedCard(state, mod, card)) continue;
     consumedNextPlay.add(mod.id);
     if (mod.basePower !== undefined) {
-      (card.counters ??= {}).setBasePower = mod.basePower;
-      card.counters.setBasePowerUntilTurn = state.turn;
+      (card.scriptState ??= {}).setBasePower = mod.basePower;
+      card.scriptState.setBasePowerUntilTurn = state.turn;
     }
     if (mod.grantType) {
       const tag = mod.grantType.toLowerCase();
@@ -904,13 +904,13 @@ export function cardPlayRestrictedByModifier(
   )) return true;
   if (
     data.cardType === "action" && (data.subtypes ?? []).includes("attack") &&
-    Number(player.hero.counters?.actionCardCapsTurn ?? 0) === state.turn &&
-    Number(player.flags.attackActionsPlayedThisTurn ?? 0) >= Number(player.hero.counters?.attackActionCardCap ?? 0)
+    Number(player.hero.scriptState?.actionCardCapsTurn ?? 0) === state.turn &&
+    Number(player.flags.attackActionsPlayedThisTurn ?? 0) >= Number(player.hero.scriptState?.attackActionCardCap ?? 0)
   ) return true;
   if (
     data.cardType === "action" && !(data.subtypes ?? []).includes("attack") &&
-    Number(player.hero.counters?.actionCardCapsTurn ?? 0) === state.turn &&
-    Number(player.flags.nonAttackActionsPlayedThisTurn ?? 0) >= Number(player.hero.counters?.nonAttackActionCardCap ?? 0)
+    Number(player.hero.scriptState?.actionCardCapsTurn ?? 0) === state.turn &&
+    Number(player.flags.nonAttackActionsPlayedThisTurn ?? 0) >= Number(player.hero.scriptState?.nonAttackActionCardCap ?? 0)
   ) return true;
   if (data.cardType === "action" && actionLimitReached(state, state.players[seat] as PlayerState)) {
     return true;

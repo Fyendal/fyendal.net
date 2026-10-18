@@ -88,11 +88,11 @@ export const mpa: Record<string, CardScript> = {
         },
         onTrigger(ctx, left, event) {
           if (left && event?.controllerSeat !== undefined) {
-            ctx.setCounter(`copySeat:${left.instanceId}`, event.controllerSeat);
+            ctx.setState(`copySeat:${left.instanceId}`, event.controllerSeat);
           }
         },
         effect(ctx, destroyed) {
-          if (destroyed) ctx.createTokenCopyOf(destroyed, ctx.getCounter(`copySeat:${destroyed.instanceId}`));
+          if (destroyed) ctx.createTokenCopyOf(destroyed, ctx.getState(`copySeat:${destroyed.instanceId}`));
         },
       },
     ],
@@ -183,10 +183,10 @@ export const mpa: Record<string, CardScript> = {
         condition(ctx, played) {
           if (!played || !isReaction(ctx, played)) return false;
           if (ctx.link?.attackingCard.instanceId !== ctx.self.instanceId) return false;
-          return ctx.getCounter(`reaction:${played.owner}`) === 0;
+          return ctx.getState(`reaction:${played.owner}`) === 0;
         },
         onTrigger(ctx, played) {
-          if (played) ctx.setCounter(`reaction:${played.owner}`, 1);
+          if (played) ctx.setState(`reaction:${played.owner}`, 1);
         },
         effect(ctx) {
           for (const player of ctx.state.players) ctx.createToken(BLOODROT_POX, player.seat);

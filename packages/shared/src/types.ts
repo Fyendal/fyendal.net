@@ -139,6 +139,34 @@ export type Zone =
   | "weapon2"
   | EquipmentSlot;
 
+/** Every kind of rules counter a card can carry. Counters exist only on
+ * objects in the arena: a card that leaves it becomes a new object
+ * (CR 3.0.9) and loses all of them. Script bookkeeping and engine statuses
+ * never belong here; they live in the card's private script state. */
+export type CounterKind =
+  | "aim"
+  | "balance"
+  | "bind"
+  | "defense"
+  | "doom"
+  | "endurance"
+  | "energy"
+  | "flow"
+  | "frost"
+  | "haunt"
+  | "holo"
+  | "lessons"
+  | "power"
+  | "rust"
+  | "sand"
+  | "stain"
+  | "steam"
+  | "storm"
+  | "suspense"
+  | "verse";
+
+export type CardCounters = Partial<Record<CounterKind, number>>;
+
 export interface CardView {
   /** Unique per game instance */
   instanceId: number;
@@ -167,7 +195,9 @@ export interface CardView {
   /** -1 defense counters on the card (Battleworn/Temper) — `defense` already
    *  reflects them; this is for rendering the counter badge. */
   defCounters?: number;
-  /** Named counters on the card (e.g. lesson counters on a mentor). */
+  /** Rules counters on an arena card, plus its public engine statuses
+   *  (marked, attacked, arcane bonus, sharpened this turn, fused, frostbite
+   *  zone). */
   counters?: Record<string, number>;
   /** Card whose ability currently permits this card to be played from its zone.
    *  Projected only to the player entitled to use that permission. */

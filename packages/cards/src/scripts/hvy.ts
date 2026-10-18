@@ -300,10 +300,10 @@ function downButNotOut(): CardScript {
         return;
       ctx.addModifier({ scope: "chain-link", attack: 3 });
       ctx.setFlag("link", "overpower", true);
-      ctx.setCounter("downButNotOut", 1);
+      ctx.setState("downButNotOut", 1);
     },
     canTriggerOnHit(ctx) {
-      return ctx.getCounter("downButNotOut") > 0 && ctx.link?.targetAllyId === undefined;
+      return ctx.getState("downButNotOut") > 0 && ctx.link?.targetAllyId === undefined;
     },
     onHit(ctx) {
       ctx.createToken(AGILITY);

@@ -93,10 +93,10 @@ function typedPermanents(ctx: ScriptCtx, seat: number, type: string): readonly D
 }
 function advanceDiabolic(ctx: ScriptCtx, stage: "ally" | "aura", seat: number): void {
   if (seat > 1) {
-    if (stage === "ally" && ctx.getCounter("diabolicAura") > 0) return advanceDiabolic(ctx, "aura", 0);
+    if (stage === "ally" && ctx.getState("diabolicAura") > 0) return advanceDiabolic(ctx, "aura", 0);
     for (const type of ["ally", "aura"] as const)
       for (const targetSeat of [0, 1]) {
-        const id = ctx.getCounter(`diabolic:${type}:${targetSeat}`);
+        const id = ctx.getState(`diabolic:${type}:${targetSeat}`);
         if (id > 0) ctx.destroyPermanent(id);
       }
     return;
@@ -120,11 +120,11 @@ function warhornPermanents(ctx: ScriptCtx, seat: number): readonly DeepReadonly<
 }
 // Reveals started before the reveal count was tracked separately used X.
 function harpoonRevealCount(ctx: ScriptCtx): number {
-  return ctx.getCounter("harpoonRevealCount") || ctx.getCounter("harpoonX");
+  return ctx.getState("harpoonRevealCount") || ctx.getState("harpoonX");
 }
 function finishHarpoonReveal(ctx: ScriptCtx): void {
-  const x = ctx.getCounter("harpoonX");
-  const ids = Array.from({ length: harpoonRevealCount(ctx) }, (_, index) => ctx.getCounter(`harpoonReveal:${index}`)).filter((id) => id > 0);
+  const x = ctx.getState("harpoonX");
+  const ids = Array.from({ length: harpoonRevealCount(ctx) }, (_, index) => ctx.getState(`harpoonReveal:${index}`)).filter((id) => id > 0);
   if (!ctx.revealCards(ids, opponentSeat(ctx))) return;
   const hand = ctx.player(opponentSeat(ctx)).hand;
   const actions = ids.flatMap((id) => {
@@ -149,7 +149,7 @@ function advanceWarhorn(ctx: ScriptCtx, afterSeat: number): void {
   const next = [0, 1].find(
     (target) =>
       target > afterSeat &&
-      (ctx.getCounter("warhornMask") & (1 << target)) !== 0 &&
+      (ctx.getState("warhornMask") & (1 << target)) !== 0 &&
       warhornPermanents(ctx, target).length > 0,
   );
   if (next !== undefined) {
@@ -162,7 +162,7 @@ function advanceWarhorn(ctx: ScriptCtx, afterSeat: number): void {
     return;
   }
   for (const target of [0, 1]) {
-    const id = ctx.getCounter(`warhornChoice:${target}`);
+    const id = ctx.getState(`warhornChoice:${target}`);
     if (id) ctx.destroyPermanent(id);
   }
 }
@@ -364,7 +364,7 @@ export const dynHighRarity: Record<string, CardScript> = {
         (card) => card.instanceId !== ctx.link?.targetAllyId,
       );
       if (allies.length && (ctx.link?.damage ?? 0) > 0) {
-        ctx.setCounter("cleaveDamage", ctx.link!.damage);
+        ctx.setState("cleaveDamage", ctx.link!.damage);
         ctx.requestCardChoice(
           "cleave-ally",
           decisionPrompt("Deal the hit damage to another ally?", "card.dyn.cleave.ally.choose", {
@@ -376,7 +376,7 @@ export const dynHighRarity: Record<string, CardScript> = {
     },
     onChoose(ctx, hook, option) {
       if (hook === "cleave-ally" && option !== "no")
-        ctx.dealDamage(opponentSeat(ctx), ctx.getCounter("cleaveDamage"), { targetAllyId: Number(option) });
+        ctx.dealDamage(opponentSeat(ctx), ctx.getState("cleaveDamage"), { targetAllyId: Number(option) });
     },
   },
   "ironsong pride|1": {
@@ -448,12 +448,12 @@ export const dynHighRarity: Record<string, CardScript> = {
       const x = Number(ctx.getFlag("player", "boostCountThisChain")) || 0;
       const hand = ctx.player(opponentSeat(ctx)).hand;
       const revealCount = Math.min(x, hand.length);
-      ctx.setCounter("harpoonX", x);
-      ctx.setCounter("harpoonRevealCount", revealCount);
+      ctx.setState("harpoonX", x);
+      ctx.setState("harpoonRevealCount", revealCount);
       if (revealCount <= 0) return;
       if (hand.length === revealCount) {
         hand.forEach((card, index) =>
-          ctx.setCardCounter(ctx.self.instanceId, `harpoonReveal:${index}`, card.instanceId),
+          ctx.setCardState(ctx.self.instanceId, `harpoonReveal:${index}`, card.instanceId),
         );
         finishHarpoonReveal(ctx);
       } else
@@ -471,12 +471,12 @@ export const dynHighRarity: Record<string, CardScript> = {
       }
       if (!hook.startsWith("harpoon-reveal:")) return;
       const index = Number(hook.split(":")[1]);
-      ctx.setCardCounter(ctx.self.instanceId, `harpoonReveal:${index}`, Number(option));
+      ctx.setCardState(ctx.self.instanceId, `harpoonReveal:${index}`, Number(option));
       if (index + 1 >= harpoonRevealCount(ctx)) {
         finishHarpoonReveal(ctx);
         return;
       }
-      const selected = new Set(Array.from({ length: index + 1 }, (_, i) => ctx.getCounter(`harpoonReveal:${i}`)));
+      const selected = new Set(Array.from({ length: index + 1 }, (_, i) => ctx.getState(`harpoonReveal:${i}`)));
       const hand = ctx.player(opponentSeat(ctx)).hand.filter((card) => !selected.has(card.instanceId));
       ctx.requestCardChoice(
         `harpoon-reveal:${index + 1}`,
@@ -711,14 +711,14 @@ export const dynHighRarity: Record<string, CardScript> = {
           const top = ctx.player(opponentSeat(ctx)).deck[0];
           if (!top) return;
           ctx.lookAt(top.instanceId);
-          ctx.setCounter("arakniTop", top.instanceId);
+          ctx.setState("arakniTop", top.instanceId);
           ctx.requestChoice("arakni-top", bottomOrKeepPrompt(), ["bottom", "keep"]);
         },
       },
     ],
     onChoose(ctx, hook, option) {
       if (hook === "arakni-top" && option === "bottom") {
-        ctx.putOnDeckBottom(ctx.getCounter("arakniTop"));
+        ctx.putOnDeckBottom(ctx.getState("arakniTop"));
       }
     },
   },
@@ -865,19 +865,19 @@ export const dynHighRarity: Record<string, CardScript> = {
   },
   "heat seeker|1": {
     onHit(ctx) {
-      ctx.setCounter("heatSeekerEndTurn", ctx.state.turn);
+      ctx.setState("heatSeekerEndTurn", ctx.state.turn);
     },
     triggers: [
       {
         event: "end-of-turn",
         whose: "subject",
         sourceZone: "graveyard",
-        condition: (ctx) => ctx.getCounter("heatSeekerEndTurn") === ctx.state.turn,
+        condition: (ctx) => ctx.getState("heatSeekerEndTurn") === ctx.state.turn,
         label: "Put the top card face up into arsenal",
         effect(ctx) {
           const top = ctx.player(ctx.seat).deck[0];
           if (top) ctx.putIntoArsenal(top.instanceId, "deck", { faceUp: true });
-          ctx.setCounter("heatSeekerEndTurn", 0);
+          ctx.setState("heatSeekerEndTurn", 0);
         },
       },
     ],
@@ -952,8 +952,7 @@ export const dynHighRarity: Record<string, CardScript> = {
   },
   "cryptic crossing|2": {
     onPlayCostPaid(ctx, cards) {
-      ctx.setCounter(
-        "mixedPitch",
+      ctx.setState("mixedPitch",
         cards.some((card) => isAttack(ctx, card)) &&
           cards.some((card) => !isAttack(ctx, card) && ctx.hasCardType(card, "action"))
           ? 1
@@ -969,7 +968,7 @@ export const dynHighRarity: Record<string, CardScript> = {
         // "The first time": the attack's link records that it triggered.
         condition: (ctx, eventCard, event) =>
           dealtByThis(ctx, eventCard) &&
-          ctx.getCounter("mixedPitch") > 0 &&
+          ctx.getState("mixedPitch") > 0 &&
           heroDamage(event)?.targetSeat === opponentSeat(ctx) &&
           ctx.getFlag("link", "crypticDamage") !== true,
         onTrigger: (ctx) => ctx.setFlag("link", "crypticDamage", true),
@@ -985,20 +984,19 @@ export const dynHighRarity: Record<string, CardScript> = {
   },
   "diabolic ultimatum|1": {
     onPlayCostPaid(ctx, cards) {
-      ctx.setCounter("diabolicAlly", cards.some(isAttack.bind(undefined, ctx)) ? 1 : 0);
-      ctx.setCounter(
-        "diabolicAura",
+      ctx.setState("diabolicAlly", cards.some(isAttack.bind(undefined, ctx)) ? 1 : 0);
+      ctx.setState("diabolicAura",
         cards.some((card) => ctx.hasCardType(card, "action") && !has(ctx, card, "attack")) ? 1 : 0,
       );
     },
     onPlay(ctx) {
-      if (ctx.getCounter("diabolicAlly") > 0) advanceDiabolic(ctx, "ally", 0);
-      else if (ctx.getCounter("diabolicAura") > 0) advanceDiabolic(ctx, "aura", 0);
+      if (ctx.getState("diabolicAlly") > 0) advanceDiabolic(ctx, "ally", 0);
+      else if (ctx.getState("diabolicAura") > 0) advanceDiabolic(ctx, "aura", 0);
     },
     onChoose(ctx, hook, option) {
       if (!hook.startsWith("diabolic:")) return;
       const [, stage, seatText] = hook.split(":");
-      ctx.setCardCounter(ctx.self.instanceId, hook, Number(option));
+      ctx.setCardState(ctx.self.instanceId, hook, Number(option));
       advanceDiabolic(ctx, stage as "ally" | "aura", Number(seatText) + 1);
     },
   },
@@ -1206,14 +1204,13 @@ export const dynHighRarity: Record<string, CardScript> = {
       if (hook === "warhorn-heroes") {
         const seats =
           option === "both" ? [0, 1] : option === "none" ? [] : [option === "self" ? ctx.seat : opponentSeat(ctx)];
-        ctx.setCounter(
-          "warhornMask",
+        ctx.setState("warhornMask",
           seats.reduce((mask, target) => mask | (1 << target), 0),
         );
         advanceWarhorn(ctx, -1);
       } else if (hook.startsWith("warhorn:")) {
         const seat = Number(hook.split(":")[1]);
-        ctx.setCardCounter(ctx.self.instanceId, `warhornChoice:${seat}`, Number(option));
+        ctx.setCardState(ctx.self.instanceId, `warhornChoice:${seat}`, Number(option));
         advanceWarhorn(ctx, seat);
       }
     },

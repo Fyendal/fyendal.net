@@ -68,7 +68,7 @@ function ownedCards(ctx: ScriptCtx): readonly DeepReadonly<CardInstance>[] {
 }
 
 function requestItemDestruction(ctx: ScriptCtx): void {
-  const remaining = ctx.getCounter("smashRemaining");
+  const remaining = ctx.getState("smashRemaining");
   const items = ctx.player(opponentSeat(ctx)).board.filter((card) => hasType(ctx, card, "item"));
   if (remaining > 0 && items.length > 0) {
     ctx.requestCardChoice(
@@ -174,12 +174,12 @@ const heronsFlight: CardScript = {
       );
   },
   canBeDefendedBy(ctx, defending) {
-    const mode = ctx.getCounter("heronMode");
+    const mode = ctx.getState("heronMode");
     if (mode === 0) return true;
     return mode === 1 ? isAttack(ctx, defending) : isNonAttack(ctx, defending);
   },
   onChoose(ctx, hook, option) {
-    if (hook === "heron-mode") ctx.setCounter("heronMode", option === "attack actions" ? 1 : 2);
+    if (hook === "heron-mode") ctx.setState("heronMode", option === "attack actions" ? 1 : 2);
   },
 };
 
@@ -305,16 +305,16 @@ const plasmaPurifier: CardScript = {
 
 const remorseless: CardScript = {
   onEnterArsenal(ctx) {
-    if (!ctx.self.faceDown) ctx.setCounter("faceUpLoadedTurn", ctx.state.turn);
+    if (!ctx.self.faceDown) ctx.setState("faceUpLoadedTurn", ctx.state.turn);
   },
   onAttackDeclared(ctx) {
-    if (ctx.getCounter("faceUpLoadedTurn") === ctx.state.turn) ctx.addModifier({ scope: "chain-link", noDefenseReactionsFromArsenal: true });
+    if (ctx.getState("faceUpLoadedTurn") === ctx.state.turn) ctx.addModifier({ scope: "chain-link", noDefenseReactionsFromArsenal: true });
   },
   onHit(ctx) {
     const target = ctx.player(opponentSeat(ctx));
     ctx.setPlayerFlag(target.seat, "loseLifeOnActionThroughNextTurn", true);
-    ctx.setCardCounter(target.hero.instanceId, "loseLifeOnActionUntilTurn", ctx.state.turn + 1);
-    ctx.setCardCounter(target.hero.instanceId, "loseLifeOnActionSource", ctx.self.instanceId);
+    ctx.setCardState(target.hero.instanceId, "loseLifeOnActionUntilTurn", ctx.state.turn + 1);
+    ctx.setCardState(target.hero.instanceId, "loseLifeOnActionSource", ctx.self.instanceId);
   },
 };
 
@@ -394,7 +394,7 @@ const metacarpusNode: CardScript = {
         !!played && ctx.cardData(played.cardId).text?.toLowerCase().includes("arcane damage") === true,
       effect(ctx, played) {
         if (!played) return;
-        ctx.setCounter("metacarpusTarget", played.instanceId);
+        ctx.setState("metacarpusTarget", played.instanceId);
         ctx.requestPayment(
           "metacarpus-pay",
           decisionPrompt("Metacarpus Node: pay 1 resource for +1 arcane damage?", "card.cru.metacarpus.pay", {
@@ -407,7 +407,7 @@ const metacarpusNode: CardScript = {
   ],
   onChoose(ctx, hook, option) {
     if (hook !== "metacarpus-pay" || option !== "paid") return;
-    ctx.addCounter(ctx.getCounter("metacarpusTarget"), "arcaneBonus", 1);
+    ctx.addCardState(ctx.getState("metacarpusTarget"), "arcaneBonus", 1);
     ctx.destroyAtEndPhase(ctx.self.instanceId);
   },
 };
@@ -487,14 +487,14 @@ export const cruHighRarity: Record<string, CardScript> = {
     },
     onDieRollResolved(ctx, hook, roll) {
       if (hook === "argh-smash") {
-        ctx.setCounter("smashRemaining", Math.floor(roll / 2));
+        ctx.setState("smashRemaining", Math.floor(roll / 2));
         requestItemDestruction(ctx);
       }
     },
     onChoose(ctx, hook, option) {
       if (hook !== "smash-item" || option === "done") return;
       if (ctx.destroyPermanent(Number(option))) {
-        ctx.setCounter("smashRemaining", ctx.getCounter("smashRemaining") - 1);
+        ctx.setState("smashRemaining", ctx.getState("smashRemaining") - 1);
         requestItemDestruction(ctx);
       }
     },
@@ -653,14 +653,14 @@ export const cruHighRarity: Record<string, CardScript> = {
     onEnterArena(ctx) {
       const steam = Number(ctx.getFlag("player", "boostCountThisTurn")) || 0;
       ctx.setCounter("steam", steam);
-      ctx.setCounter("damageReplacement", steam);
+      ctx.setState("damageReplacement", steam);
     },
     replaceDamageToController(ctx, amount) {
       const prevented = Math.min(amount, ctx.getCounter("steam"));
       if (prevented <= 0) return amount;
       const remaining = ctx.getCounter("steam") - prevented;
       ctx.setCounter("steam", remaining);
-      ctx.setCounter("damageReplacement", remaining);
+      ctx.setState("damageReplacement", remaining);
       ctx.logPublic(
         localizedCardLog(ctx, `Absorption Dome prevents ${prevented} damage`, "card.log.cru.damage.prevented", {
           amount: prevented,
@@ -738,7 +738,7 @@ export const cruHighRarity: Record<string, CardScript> = {
         decisionMessage("card.trigger.common.runechant.create.count", { count: 4 }),
         (ctx) => {
           ctx.createTokens(RUNECHANT, 4);
-          ctx.setCounter("runechantDamageReplacement", 4);
+          ctx.setState("runechantDamageReplacement", 4);
         },
       ),
       { event: "begin-action-phase", label: "Destroy Runeblood Barrier", effect: (ctx) => ctx.destroySelf() },
@@ -747,7 +747,7 @@ export const cruHighRarity: Record<string, CardScript> = {
       const runechants = ctx.player(ctx.seat).board.filter((card) => ctx.isRunechant(card));
       const prevented = Math.min(amount, runechants.length);
       for (const token of runechants.slice(0, prevented)) ctx.destroyPermanent(token.instanceId);
-      ctx.setCounter("runechantDamageReplacement", runechants.length - prevented);
+      ctx.setState("runechantDamageReplacement", runechants.length - prevented);
       if (prevented > 0)
         ctx.logPublic(
           localizedCardLog(ctx, `Runeblood Barrier prevents ${prevented} damage`, "card.log.cru.damage.prevented", {

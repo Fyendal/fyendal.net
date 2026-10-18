@@ -11,7 +11,7 @@ function earthBond(extra: CardScript): CardScript {
   return {
     ...extra,
     onPlayCostPaid(ctx, paid) {
-      ctx.setCounter("earth-bond", paid.some((card) => hasType(ctx, card, "earth")) ? 1 : 0);
+      ctx.setState("earth-bond", paid.some((card) => hasType(ctx, card, "earth")) ? 1 : 0);
       extra.onPlayCostPaid?.(ctx, paid);
     },
   };
@@ -20,7 +20,7 @@ function earthBond(extra: CardScript): CardScript {
 function brackenRap(): CardScript {
   return earthBond({
     onAttackDeclared(ctx) {
-      if (ctx.getCounter("earth-bond") > 0) ctx.createToken(MIGHT);
+      if (ctx.getState("earth-bond") > 0) ctx.createToken(MIGHT);
     },
   });
 }
@@ -28,7 +28,7 @@ function brackenRap(): CardScript {
 function logFall(): CardScript {
   return earthBond({
     onAttackDeclared(ctx) {
-      if (ctx.getCounter("earth-bond") > 0) ctx.addModifier({ scope: "chain-link", overpower: true });
+      if (ctx.getState("earth-bond") > 0) ctx.addModifier({ scope: "chain-link", overpower: true });
     },
   });
 }
@@ -36,7 +36,7 @@ function logFall(): CardScript {
 function strongWood(): CardScript {
   return earthBond({
     onAttackDeclared(ctx) {
-      if (ctx.getCounter("earth-bond") > 0) ctx.addModifier({ scope: "chain-link", attack: 1 });
+      if (ctx.getState("earth-bond") > 0) ctx.addModifier({ scope: "chain-link", attack: 1 });
     },
   });
 }
@@ -57,7 +57,7 @@ function powerGainReplacement(bonus: number, once: boolean): CardScript {
 function seedsOfStrength(base: number): CardScript {
   return earthBond({
     onPlay(ctx) {
-      ctx.createTokens(MIGHT, base + (ctx.getCounter("earth-bond") > 0 ? 1 : 0));
+      ctx.createTokens(MIGHT, base + (ctx.getState("earth-bond") > 0 ? 1 : 0));
     },
   });
 }
@@ -93,11 +93,11 @@ export const ter: Record<string, CardScript> = {
       oncePerTurn: true,
       label: "Attack",
       onCostPaid(ctx, paid) {
-        ctx.setCounter("earth-pitched", paid.some((card) => hasType(ctx, card, "earth")) ? 1 : 0);
+        ctx.setState("earth-pitched", paid.some((card) => hasType(ctx, card, "earth")) ? 1 : 0);
       },
     },
     onAttackDeclared(ctx) {
-      if (ctx.getCounter("earth-pitched") > 0) ctx.addModifier({ scope: "chain-link", attack: 1 });
+      if (ctx.getState("earth-pitched") > 0) ctx.addModifier({ scope: "chain-link", attack: 1 });
     },
   },
   "hard knuckle|0": {
@@ -108,7 +108,7 @@ export const ter: Record<string, CardScript> = {
         condition: (ctx, played) => !!played && ctx.hasCardType(played, "action") && hasType(ctx, played, "attack"),
         effect(ctx, played) {
           if (!played) return;
-          ctx.setCounter("hard-knuckle-attack", played.instanceId);
+          ctx.setState("hard-knuckle-attack", played.instanceId);
           ctx.requestChoice(
             "hard-knuckle",
             yesNoPrompt("Hard Knuckle: destroy this to give the attack +1{p}?", "card.ter.hard.knuckle.destroy"),
@@ -119,7 +119,7 @@ export const ter: Record<string, CardScript> = {
     ],
     onChoose(ctx, hook, option) {
       if (hook !== "hard-knuckle" || option !== "yes") return;
-      const attackId = ctx.getCounter("hard-knuckle-attack");
+      const attackId = ctx.getState("hard-knuckle-attack");
       ctx.destroySelf();
       ctx.addCardTempPower(attackId, 1);
     },

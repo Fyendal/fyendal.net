@@ -100,8 +100,8 @@ function resolveGrantedOnHitEffect(
   if (mod.onHitBottomDeck) link.flags.attackToBottom = true;
   if (mod.onHitMark && link.targetAllyId === undefined) {
     const hero = (state.players[opponent(link.attacker)] as PlayerState).hero;
-    if ((hero.counters?.marked ?? 0) <= 0) {
-      (hero.counters ??= {}).marked = 1;
+    if ((hero.scriptState?.marked ?? 0) <= 0) {
+      (hero.scriptState ??= {}).marked = 1;
       logPublic(state, gameLogMessage(
         `${nameOf(state, hero.cardId)} is marked`,
         "engine.log.hero.marked",
@@ -111,7 +111,7 @@ function resolveGrantedOnHitEffect(
   }
   if (mod.onHitClearHandAndArsenalAtEndPhase && link.targetAllyId === undefined) {
     const target = state.players[opponent(link.attacker)] as PlayerState;
-    (target.hero.counters ??= {}).clearHandAndArsenalAtEndPhaseTurn = state.turn + 1;
+    (target.hero.scriptState ??= {}).clearHandAndArsenalAtEndPhaseTurn = state.turn + 1;
   }
   // granted hit effects with their own scripted choices route back to the
   // granting card's script (which may since have changed zones)

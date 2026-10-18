@@ -1335,6 +1335,27 @@ describe("PersistedStateV1", () => {
       .toThrow(/state\.modifiers\[0\]\.newEngineEffect.*unexpected field/);
   });
 
+  it("round-trips rules counters apart from script state and rejects unknown counter kinds", () => {
+    const source = game();
+    source.players[0]!.hero.counters = { energy: 2 };
+    source.players[0]!.hero.lastKnownCounters = { flow: 1 };
+    source.players[0]!.hero.scriptState = { marked: 1, privateChoice: 4 };
+    const encoded = encodePersistedState(source);
+    const decoded = decodePersistedState(jsonCopy(encoded), "ABC123", cardData, scripts);
+    expect(decoded.players[0]!.hero).toMatchObject({
+      counters: { energy: 2 },
+      lastKnownCounters: { flow: 1 },
+      scriptState: { marked: 1, privateChoice: 4 },
+    });
+
+    const misplaced = jsonCopy(encoded) as unknown as {
+      state: { players: Array<{ hero: { counters: Record<string, number> } }> };
+    };
+    misplaced.state.players[0]!.hero.counters.privateChoice = 4;
+    expect(() => decodePersistedState(misplaced, "ABC123", cardData, scripts))
+      .toThrow(/hero\.counters\.privateChoice.*unknown counter kind/);
+  });
+
   it("rejects missing, future, and cross-ruleset envelopes", () => {
     const encoded = jsonCopy(encodePersistedState(game(), "rules-a")) as unknown as Record<string, unknown>;
     delete encoded.schemaVersion;

@@ -8,13 +8,13 @@ function rememberDiscardedSixPlus(ctx: ScriptCtx): void {
   const [discarded] = ctx.discardRandom(ctx.seat, 1);
   if (attackAction) ctx.setFlag("player", "discardingForBruteAttackCost", false);
   if (discarded) {
-    ctx.setCounter("discardedSixPlus", isSixPlus(ctx, discarded) ? 1 : 0);
+    ctx.setState("discardedSixPlus", isSixPlus(ctx, discarded) ? 1 : 0);
   }
 }
 
 /** Was the card's additional-cost discard a 6+ card? */
 function discardedSixPlus(ctx: ScriptCtx): boolean {
-  return ctx.getCounter("discardedSixPlus") === 1;
+  return ctx.getState("discardedSixPlus") === 1;
 }
 
 // ── WTR Brute actions ──

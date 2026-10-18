@@ -154,9 +154,9 @@ export function finishLinkResolution(state: GameStateInternal,
   // Delayed effects may mark attack-action cards on the active link to return
   // when that link resolves (Electromagnetic Somersault). The link keeps its
   // last-known attacking object, while close-chain settlement skips it.
-  if (link.attackingCard.counters?.returnToHandAtLinkResolution) {
+  if (link.attackingCard.scriptState?.returnToHandAtLinkResolution) {
     const returning = link.attackingCard;
-    delete returning.counters?.returnToHandAtLinkResolution;
+    delete returning.scriptState?.returnToHandAtLinkResolution;
     link.attackingCard = runtime.commands.snapshotSerializable(returning);
     clearTemporaryObjectEffects(returning);
     (state.players[returning.owner] as PlayerState).hand.push(returning);
@@ -169,10 +169,10 @@ export function finishLinkResolution(state: GameStateInternal,
     ));
   }
   const returningDefenders = link.defendingCards.filter(
-    (card) => card.counters?.returnToHandAtLinkResolution,
+    (card) => card.scriptState?.returnToHandAtLinkResolution,
   );
   for (const card of returningDefenders) {
-    delete card.counters?.returnToHandAtLinkResolution;
+    delete card.scriptState?.returnToHandAtLinkResolution;
     clearTemporaryObjectEffects(card);
     (state.players[card.owner] as PlayerState).hand.push(card);
     fireLeaveCombatChain(state, runtime, card.owner, card, "defending");

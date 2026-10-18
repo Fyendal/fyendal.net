@@ -174,12 +174,12 @@ export const ast: Record<string, CardScript> = {
       );
     },
     onPlay(ctx) {
-      applySerenadeChoices(ctx, [ctx.getCounter("serenadeFirst"), ctx.getCounter("serenadeSecond")]);
+      applySerenadeChoices(ctx, [ctx.getState("serenadeFirst"), ctx.getState("serenadeSecond")]);
     },
     onChoose(ctx, hook, option) {
       if (hook === "serenade-first") {
         const first = Number(option[0]);
-        ctx.setCounter("serenadeFirst", first);
+        ctx.setState("serenadeFirst", first);
         ctx.requestChoice(
           "serenade-second",
           decisionPrompt("Skyward Serenade: choose a different second mode", "card.ast.serenade.mode.second", {
@@ -194,7 +194,7 @@ export const ast: Record<string, CardScript> = {
             .map((mode) => `${mode}: ${mode === 1 ? "Embodiment" : mode === 2 ? "Search Skyzyk" : "Next attack +1"}`),
         );
       } else if (hook === "serenade-second") {
-        ctx.setCounter("serenadeSecond", Number(option[0]));
+        ctx.setState("serenadeSecond", Number(option[0]));
       } else if (hook === "serenade-skyzyk") {
         const id = Number(option);
         const card = ctx.player(ctx.seat).deck.find((candidate) => candidate.instanceId === id);

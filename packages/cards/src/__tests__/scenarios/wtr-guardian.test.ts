@@ -177,7 +177,7 @@ describe("WTR Guardian — crush attacks", () => {
       .expectNoLog("Cartilage Crush triggers: On hit")
       .expectNoLog("Cartilage Crush: opponent's next action costs +{r}")
       .expectInZone(1, "barnacle|2", "graveyard");
-    expect(g.state.players[1]!.hero.counters?.firstActionExtraCost).toBeUndefined();
+    expect(g.state.players[1]!.hero.scriptState?.firstActionExtraCost).toBeUndefined();
   });
 
   it("Crush Confidence crush disables opponent hero abilities", () => {

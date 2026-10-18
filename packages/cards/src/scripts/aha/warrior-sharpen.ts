@@ -117,7 +117,7 @@ export function sharpenSword(ctx: ScriptCtx, instanceId: number, count = 1, foll
   if (extra) ctx.setFlag("player", "ahaExtraSharpen", 0);
   const total = count + extra;
   ctx.addCounter(instanceId, "power", total);
-  ctx.setCardCounter(instanceId, "sharpenedTurn", ctx.state.turn);
+  ctx.setCardState(instanceId, "sharpenedTurn", ctx.state.turn);
   ctx.setFlag(
     "player",
     "clearWeaponPowerCountersAtTurn",
@@ -145,10 +145,10 @@ export function sharpenSword(ctx: ScriptCtx, instanceId: number, count = 1, foll
       )
     : undefined;
   if (rerebrace) {
-    ctx.setCardCounter(rerebrace.instanceId, "sharpenTarget", instanceId);
-    ctx.setCardCounter(rerebrace.instanceId, "sharpenFollowupThreshold", followup?.threshold ?? 0);
-    ctx.setCardCounter(rerebrace.instanceId, "sharpenFollowupKind", followup?.kind ?? 0);
-    ctx.setCardCounter(rerebrace.instanceId, "sharpenFollowupSource", followup ? ctx.self.instanceId : 0);
+    ctx.setCardState(rerebrace.instanceId, "sharpenTarget", instanceId);
+    ctx.setCardState(rerebrace.instanceId, "sharpenFollowupThreshold", followup?.threshold ?? 0);
+    ctx.setCardState(rerebrace.instanceId, "sharpenFollowupKind", followup?.kind ?? 0);
+    ctx.setCardState(rerebrace.instanceId, "sharpenFollowupSource", followup ? ctx.self.instanceId : 0);
     const requested = ctx.requestPaymentFrom(
       rerebrace.instanceId,
       "rerebrace-sharpen",

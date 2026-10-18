@@ -531,7 +531,7 @@ function hurl(): CardScript {
         sourceZone: "self",
         label: "Target dagger you control deals 1 damage to the opposing hero, then destroy it",
         labelMessage: decisionMessage("card.trigger.common.dagger.damage.hero", { amount: 1 }),
-        condition: (ctx) => ctx.getCounter("hurlPaid") === 1,
+        condition: (ctx) => ctx.getState("hurlPaid") === 1,
         // Two heroes play, so "target hero" is the opposing hero; only the
         // dagger is a real choice.
         target: {
@@ -547,7 +547,7 @@ function hurl(): CardScript {
       },
     ],
     onChoose(ctx, hook, option) {
-      if (hook === "hurl-pay" && option === "paid") ctx.setCounter("hurlPaid", 1);
+      if (hook === "hurl-pay" && option === "paid") ctx.setState("hurlPaid", 1);
     },
   };
 }

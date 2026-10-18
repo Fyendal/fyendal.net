@@ -212,7 +212,7 @@ export const arcMechanologist: Record<string, CardScript> = {
       destroySelfCost: true,
       label: "Destroy: prevent damage equal to steam counters",
       onActivate(ctx) {
-        const steam = ctx.getCounter("steam");
+        const steam = ctx.lastKnownCounter("steam");
         if (steam > 0) ctx.preventNextDamage(ctx.seat, steam);
       },
     },

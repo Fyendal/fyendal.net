@@ -76,8 +76,8 @@ function crushTheWeak(): CardScript {
     canTriggerOnHit: crushTriggered,
     onHit(ctx) {
       const opponent = ctx.state.players[opponentSeat(ctx)]!;
-      ctx.setCardCounter(opponent.hero.instanceId, "attackActionBasePowerLimitUntilTurn", ctx.state.turn + 1);
-      ctx.setCardCounter(opponent.hero.instanceId, "attackActionBasePowerLimit", 3);
+      ctx.setCardState(opponent.hero.instanceId, "attackActionBasePowerLimitUntilTurn", ctx.state.turn + 1);
+      ctx.setCardState(opponent.hero.instanceId, "attackActionBasePowerLimit", 3);
       ctx.logPublic(
         localizedCardLog(
           ctx,
@@ -95,7 +95,7 @@ function chokeslam(): CardScript {
     canTriggerOnHit: crushTriggered,
     onHit(ctx) {
       const opponent = ctx.state.players[opponentSeat(ctx)]!;
-      ctx.setCardCounter(opponent.hero.instanceId, "attackActionNoPowerGainUntilTurn", ctx.state.turn + 1);
+      ctx.setCardState(opponent.hero.instanceId, "attackActionNoPowerGainUntilTurn", ctx.state.turn + 1);
       ctx.logPublic(
         localizedCardLog(
           ctx,
@@ -147,14 +147,14 @@ export const cruBruteGuardian: Record<string, CardScript> = {
           (ctx.cardData(played.cardId).attack ?? 0) >= 6,
         effect(ctx, played) {
           if (!played) return;
-          ctx.setCounter("kayoRolledAttack", played.instanceId);
+          ctx.setState("kayoRolledAttack", played.instanceId);
           ctx.requestDieRoll("kayo-power", 6);
         },
       },
     ],
     onDieRollResolved(ctx, hook, roll) {
       if (hook !== "kayo-power") return;
-      const playedId = ctx.getCounter("kayoRolledAttack");
+      const playedId = ctx.getState("kayoRolledAttack");
       const played = [
         ...ctx.state.chain.map((link) => link.attackingCard),
         ...ctx.state.stack.flatMap((layer) => (layer.card ? [layer.card] : [])),
@@ -162,12 +162,12 @@ export const cruBruteGuardian: Record<string, CardScript> = {
       ].find((card) => card.instanceId === playedId);
       if (!played) return;
       const data = ctx.cardData(played.cardId);
-      ctx.setCardCounter(played.instanceId, "halveBasePowerRoundDown", 0);
-      ctx.setCardCounter(played.instanceId, "doubleBasePower", 0);
+      ctx.setCardState(played.instanceId, "halveBasePowerRoundDown", 0);
+      ctx.setCardState(played.instanceId, "doubleBasePower", 0);
       if (roll <= 4) {
-        ctx.setCardCounter(played.instanceId, "halveBasePowerRoundDown", 1);
+        ctx.setCardState(played.instanceId, "halveBasePowerRoundDown", 1);
       } else {
-        ctx.setCardCounter(played.instanceId, "doubleBasePower", 1);
+        ctx.setCardState(played.instanceId, "doubleBasePower", 1);
       }
       ctx.logPublic(
         localizedCardLog(

@@ -47,12 +47,12 @@ function pitchedChiThisTurn(ctx: ScriptCtx): boolean {
  * play this"; a Chi pitched earlier in the turn does not count. */
 const recordsChiPitched: Pick<CardScript, "onPlayCostPaid"> = {
   onPlayCostPaid(ctx, paid) {
-    ctx.setCounter("chiPitched", paid.filter((card) => hasType(ctx, card, "chi")).length);
+    ctx.setState("chiPitched", paid.filter((card) => hasType(ctx, card, "chi")).length);
   },
 };
 
 function chiPitched(ctx: ScriptCtx): number {
-  return ctx.getCounter("chiPitched");
+  return ctx.getState("chiPitched");
 }
 
 function playedAnotherBlue(ctx: ScriptCtx): boolean {
@@ -138,7 +138,7 @@ function supercellDrivers(ctx: ScriptCtx): DeepReadonly<CardInstance>[] {
 }
 
 function finishSupercell(ctx: ScriptCtx): void {
-  const x = ctx.getCounter("supercellX");
+  const x = ctx.getState("supercellX");
   const id = tokenNamed(ctx, "Hyper Driver");
   if (id) ctx.createToken(id, undefined, { steam: x });
   if (x < 3) return;
@@ -159,9 +159,9 @@ function finishSupercell(ctx: ScriptCtx): void {
 }
 
 function requestSupercellTarget(ctx: ScriptCtx): void {
-  const x = ctx.getCounter("supercellX");
-  const chosenCount = ctx.getCounter("supercellTargetsChosen");
-  const chosen = new Set(Array.from({ length: chosenCount }, (_, index) => ctx.getCounter(`supercellTarget:${index}`)));
+  const x = ctx.getState("supercellX");
+  const chosenCount = ctx.getState("supercellTargetsChosen");
+  const chosen = new Set(Array.from({ length: chosenCount }, (_, index) => ctx.getState(`supercellTarget:${index}`)));
   const drivers = supercellDrivers(ctx).filter((card) => !chosen.has(card.instanceId));
   if (drivers.length === 0) return;
   ctx.requestCardChoice(
@@ -554,7 +554,7 @@ function vengeful(maxCost: number): CardScript {
         decisionMessage("card.trigger.mst.vengefulapparition.instant", { cost: maxCost }),
         (ctx) => {
           if (controlsIllusionistAura(ctx)) return;
-          ctx.setCounter("vengefulMax", maxCost);
+          ctx.setState("vengefulMax", maxCost);
           armDelayedEffect(
             ctx,
             ongoingLabel(
@@ -568,10 +568,10 @@ function vengeful(maxCost: number): CardScript {
       ),
     ],
     allowsFriendlyCardPlayAsInstant(ctx, card) {
-      return isAura(ctx, card) && (data(ctx, card).cost ?? 0) <= ctx.getCounter("vengefulMax");
+      return isAura(ctx, card) && (data(ctx, card).cost ?? 0) <= ctx.getState("vengefulMax");
     },
     onFriendlyPlay(ctx, played) {
-      if (!isAura(ctx, played) || (data(ctx, played).cost ?? 0) > ctx.getCounter("vengefulMax")) return;
+      if (!isAura(ctx, played) || (data(ctx, played).cost ?? 0) > ctx.getState("vengefulMax")) return;
       if (!consumeDelayedEffect(ctx)) return;
       ctx.addCounter(played.instanceId, "power", 1);
     },
@@ -740,7 +740,7 @@ export const mst: Record<string, CardScript> = {
         if (!top) return;
         ctx.lookAt(top.instanceId);
         if (ctx.cardColor(top) === 3) {
-          ctx.setCounter("nuuTop", top.instanceId);
+          ctx.setState("nuuTop", top.instanceId);
           ctx.requestChoice("nuu-banish", yesNoPrompt("Banish the blue card?", "card.mst.blue.card.banish"), [
             "yes",
             "no",
@@ -750,7 +750,7 @@ export const mst: Record<string, CardScript> = {
     },
     onChoose(ctx, hook, option) {
       if (hook !== "nuu-banish" || option !== "yes") return;
-      const instanceId = ctx.getCounter("nuuTop");
+      const instanceId = ctx.getState("nuuTop");
       const card = ctx.player(opponentSeat(ctx)).deck.find((candidate) => candidate.instanceId === instanceId);
       if (card) ctx.banish(instanceId);
     },
@@ -1049,9 +1049,9 @@ function intimateInducement(count: number): CardScript {
       const cards = ctx.player(opponentSeat(ctx)).deck.slice(0, count);
       cards.forEach((card, index) => {
         ctx.lookAt(card.instanceId);
-        ctx.setCounter(`induce:${index}`, card.instanceId);
+        ctx.setState(`induce:${index}`, card.instanceId);
       });
-      ctx.setCounter("induceCount", cards.length);
+      ctx.setState("induceCount", cards.length);
       if (cards.length)
         ctx.requestCardChoice(
           "induce-defender",
@@ -1066,12 +1066,12 @@ function intimateInducement(count: number): CardScript {
         if (card && ctx.cardColor(card) === 3) ctx.addCardTempDefense(chosen, -(data(ctx, card).defense ?? 0));
         ctx.addDefenderFromDeck(chosen);
         const remaining: number[] = [];
-        for (let i = 0; i < ctx.getCounter("induceCount"); i++) {
-          const id = ctx.getCounter(`induce:${i}`);
+        for (let i = 0; i < ctx.getState("induceCount"); i++) {
+          const id = ctx.getState(`induce:${i}`);
           if (id && id !== chosen) remaining.push(id);
         }
-        remaining.forEach((id, index) => ctx.setCounter(`induceRemain:${index}`, id));
-        ctx.setCounter("induceRemaining", remaining.length);
+        remaining.forEach((id, index) => ctx.setState(`induceRemain:${index}`, id));
+        ctx.setState("induceRemaining", remaining.length);
         if (remaining.length > 1)
           ctx.requestCardChoice(
             "induce-order",
@@ -1082,12 +1082,12 @@ function intimateInducement(count: number): CardScript {
         const chosen = Number(option);
         ctx.putOnDeckTop(chosen);
         const remaining: number[] = [];
-        for (let i = 0; i < ctx.getCounter("induceRemaining"); i++) {
-          const id = ctx.getCounter(`induceRemain:${i}`);
+        for (let i = 0; i < ctx.getState("induceRemaining"); i++) {
+          const id = ctx.getState(`induceRemain:${i}`);
           if (id && id !== chosen) remaining.push(id);
         }
-        remaining.forEach((id, index) => ctx.setCounter(`induceRemain:${index}`, id));
-        ctx.setCounter("induceRemaining", remaining.length);
+        remaining.forEach((id, index) => ctx.setState(`induceRemain:${index}`, id));
+        ctx.setState("induceRemaining", remaining.length);
         if (remaining.length > 1)
           ctx.requestCardChoice(
             "induce-order",
@@ -1260,7 +1260,7 @@ function blanch(): CardScript {
     },
     onHit(ctx) {
       const opponent = ctx.player(opponentSeat(ctx));
-      ctx.setCardCounter(opponent.hero.instanceId, "colorsSuppressedUntilTurn", ctx.state.turn + 1);
+      ctx.setCardState(opponent.hero.instanceId, "colorsSuppressedUntilTurn", ctx.state.turn + 1);
     },
   };
 }
@@ -1523,7 +1523,7 @@ Object.assign(mst, {
         condition: (ctx, played) => !!played && cardNamed(ctx, played, "Crouching Tiger"),
         effect(ctx, played) {
           if (!played) return;
-          ctx.setCounter("shiftingTarget", played.instanceId);
+          ctx.setState("shiftingTarget", played.instanceId);
           ctx.requestNameChoice(
             "shifting-name",
             decisionPrompt("Choose a name for Crouching Tiger", "card.mst.crouchingtiger.name"),
@@ -1532,7 +1532,7 @@ Object.assign(mst, {
       },
     ],
     onChoose(ctx, hook, option) {
-      if (hook === "shifting-name") ctx.grantCardName(ctx.getCounter("shiftingTarget"), option);
+      if (hook === "shifting-name") ctx.grantCardName(ctx.getState("shiftingTarget"), option);
     },
   },
   "sacred art: jade tiger domain|3": {
@@ -1700,7 +1700,7 @@ Object.assign(mst, {
       if (!ctx.link) return;
       const powerMode = ctx.link.attackCardType === "action" && ctx.basePower(ctx.link.attackingCard) <= 1;
       const banishMode = hasKeyword(ctx, ctx.link.attackingCard, "stealth");
-      const selectedMode = ctx.getCounter("justANickMode");
+      const selectedMode = ctx.getState("justANickMode");
       if (powerMode && (!banishMode || selectedMode === 1 || selectedMode === 3)) {
         ctx.addModifier({ scope: "chain-link", attack: 5 });
       }
@@ -1717,7 +1717,7 @@ Object.assign(mst, {
     },
     onChoose(ctx, hook, option) {
       if (hook !== "just-a-nick-mode") return;
-      ctx.setCounter("justANickMode", option === "power" ? 1 : option === "banish" ? 2 : 3);
+      ctx.setState("justANickMode", option === "power" ? 1 : option === "banish" ? 2 : 3);
     },
     onGrantedHit(ctx, hook) {
       if (hook !== "just-a-nick-hit" || ctx.link?.targetAllyId !== undefined) return;
@@ -1856,27 +1856,27 @@ Object.assign(mst, {
   "supercell|3": {
     variablePlayCost: {
       base: 0,
-      counterKey: "supercellX",
+      stateKey: "supercellX",
       prompt: decisionPrompt("Choose X", "engine.decision.x.choose"),
       maximum: (ctx) => supercellDrivers(ctx).length,
     },
     onPlay(ctx) {
-      if (ctx.getCounter("supercellX") > 0) requestSupercellTarget(ctx);
+      if (ctx.getState("supercellX") > 0) requestSupercellTarget(ctx);
       else finishSupercell(ctx);
     },
     onChoose(ctx, hook, option) {
       if (hook === "supercell-driver") {
         const target = supercellDrivers(ctx).find((card) => card.instanceId === Number(option));
         if (!target) return;
-        const x = ctx.getCounter("supercellX");
-        const chosenCount = ctx.getCounter("supercellTargetsChosen");
+        const x = ctx.getState("supercellX");
+        const chosenCount = ctx.getState("supercellTargetsChosen");
         const alreadyChosen = Array.from({ length: chosenCount }, (_, index) =>
-          ctx.getCounter(`supercellTarget:${index}`),
+          ctx.getState(`supercellTarget:${index}`),
         ).includes(target.instanceId);
         if (alreadyChosen) return;
         ctx.addCounter(target.instanceId, "steam", x);
-        ctx.setCounter(`supercellTarget:${chosenCount}`, target.instanceId);
-        ctx.setCounter("supercellTargetsChosen", chosenCount + 1);
+        ctx.setState(`supercellTarget:${chosenCount}`, target.instanceId);
+        ctx.setState("supercellTargetsChosen", chosenCount + 1);
         if (chosenCount + 1 < x) requestSupercellTarget(ctx);
         else finishSupercell(ctx);
         return;
@@ -2039,11 +2039,11 @@ Object.assign(mst, {
           ctx.allowPlayFrom(instanceId, "banish", { singleUseGroup });
         }
       }
-      ctx.setCounter("shadowrealmSixPlusBanished", sixPlusBanished);
+      ctx.setState("shadowrealmSixPlusBanished", sixPlusBanished);
     },
-    modifyAttack: (ctx) => (ctx.getCounter("shadowrealmSixPlusBanished") >= 1 ? 1 : 0),
+    modifyAttack: (ctx) => (ctx.getState("shadowrealmSixPlusBanished") >= 1 ? 1 : 0),
     onAttackDeclared(ctx) {
-      if (ctx.getCounter("shadowrealmSixPlusBanished") >= 2) ctx.grantGoAgain();
+      if (ctx.getState("shadowrealmSixPlusBanished") >= 2) ctx.grantGoAgain();
     },
   }),
   "eloquent eulogy|1": bloodDebt({

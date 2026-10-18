@@ -318,17 +318,17 @@ export function playCard(
     [...pitchInstanceIds, ...(alternativeCostCardInstanceIds ?? [])],
   )) return "cannot pay the card's additional hand-card cost";
   if (variableCost) {
-    (card.counters ??= {})[variableCost.counterKey] = declaredVariableX!;
+    (card.scriptState ??= {})[variableCost.stateKey] = declaredVariableX!;
   }
   // Attack-play trigger sources are fixed when the play is announced.
   // Permanents created while declaring or paying costs must not retroactively
   // observe that same attack (for example, Courage created by charging it).
   if (isAttackAction) {
-    (card.counters ??= {}).enginePlayEventNextId ??= state.nextInstanceId;
+    (card.scriptState ??= {}).enginePlayEventNextId ??= state.nextInstanceId;
   }
   if (!additionalCostDeclared && script?.declareAdditionalCost) {
     // Marks the card as being played while it is still in its origin zone.
-    (card.counters ??= {}).declaringAdditionalCost = 1;
+    (card.scriptState ??= {}).declaringAdditionalCost = 1;
     script.declareAdditionalCost(runtime.makeCtx(state, seat, card));
     const declarationDecision = state.pendingDecision;
     if (declarationDecision?.chooseHook) {
@@ -352,7 +352,7 @@ export function playCard(
       return undefined;
     }
   }
-  delete card.counters?.declaringAdditionalCost;
+  delete card.scriptState?.declaringAdditionalCost;
   const costErr = payCost(state, runtime, player, effectiveCost, pitchInstanceIds, instanceId, {
     beforePitch: () =>
       logPublic(state, gameLogMessage(
@@ -391,9 +391,9 @@ export function playCard(
   // discard (Wrecker Romp, Alpha Rampage) can never hit the card being played
   removeFromArray(source, instanceId);
   delete card.faceDown;
-  if (runeGated) (card.counters ??= {}).runeGated = 1;
+  if (runeGated) (card.scriptState ??= {}).runeGated = 1;
   // additional costs (discard random, reveal, ...) run as part of playing the card
-  (card.counters ??= {}).payingAdditionalCost = 1;
+  (card.scriptState ??= {}).payingAdditionalCost = 1;
   state.resolving.push(card);
   if (isAttackAction) recordAnnouncedAttackTarget(state, seat, card, targetAllyId);
   script?.additionalCost?.(runtime.makeCtx(state, seat, card));
@@ -425,7 +425,7 @@ export function finishPlayCard(
 ): void {
   const player = state.players[seat] as PlayerState;
   const data = dataOf(state, card.cardId);
-  delete card.counters?.payingAdditionalCost;
+  delete card.scriptState?.payingAdditionalCost;
   if (from === "banish") player.flags.playedFromBanishThisTurn = true;
   // Snapshot method/timing before noteCardPlayed consumes one-shot permissions.
   const instantPermission = canPlayAsInstant(state, runtime, seat, card, undefined, from);
@@ -443,8 +443,8 @@ export function finishPlayCard(
   // closes. Process close-event effects first so permanents they create can
   // observe this card's subsequent played event.
   if (!isInstant && !isAttackActionData(data)) closeChain(state, runtime);
-  const playEventNextId = card.counters?.enginePlayEventNextId ?? state.nextInstanceId;
-  delete card.counters?.enginePlayEventNextId;
+  const playEventNextId = card.scriptState?.enginePlayEventNextId ?? state.nextInstanceId;
+  delete card.scriptState?.enginePlayEventNextId;
   const { goAgain, layers: playedTriggers } = announceCardPlayed(
     state,
     runtime,
@@ -885,7 +885,7 @@ export function activateAbility(
   // Cost payment notifies friendly observers, which may grant go again to
   // this qualifying action activation (for example, Chane).
   const nextActionGoAgain = timing === "action" && consumeNextActionGoAgain(player);
-  if (variableCost) (card.counters ??= {})[variableCost.counterKey] = declaredVariableX!;
+  if (variableCost) (card.scriptState ??= {})[variableCost.stateKey] = declaredVariableX!;
   if (ability.isAttack) consumeAttackCostReductions(state, seat, card, targetAllyId);
   if (costsAP) player.actionPoints -= 1;
   if (timing === "action") noteActionPlayedOrActivated(player);

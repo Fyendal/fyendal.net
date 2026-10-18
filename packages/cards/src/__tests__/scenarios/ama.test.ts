@@ -278,7 +278,7 @@ describe("Malice Armory Deck spoiled cards", () => {
 
     expect(g.state.players[0]!.board[0]).toEqual(expect.objectContaining({
       life: 2,
-      counters: expect.objectContaining({ lifePenalty: 1 }),
+      scriptState: expect.objectContaining({ lifePenalty: 1 }),
     }));
   });
 

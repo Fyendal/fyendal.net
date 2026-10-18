@@ -103,7 +103,7 @@ const beaconOfVictory: CardScript = {
     );
   },
   onPlay(ctx) {
-    const x = ctx.getCounter("beaconX");
+    const x = ctx.getState("beaconX");
     if (x > 0) ctx.addModifier({ scope: "chain-link", attack: x });
     if (ctx.getFlag("player", "chargedThisTurn") !== true) return;
     const cards = ctx.player(ctx.seat).deck.filter((card) => {
@@ -121,13 +121,13 @@ const beaconOfVictory: CardScript = {
   onChoose(ctx, hook, option) {
     if (hook === "beacon-x") {
       const x = Number(option.slice(2));
-      ctx.setCounter("beaconX", x);
-      ctx.setCounter("beaconRemaining", x);
+      ctx.setState("beaconX", x);
+      ctx.setState("beaconRemaining", x);
       requestSoulBanish(ctx, "beacon-soul");
     } else if (hook === "beacon-soul") {
       if (!ctx.banish(Number(option))) return;
-      const remaining = ctx.getCounter("beaconRemaining") - 1;
-      ctx.setCounter("beaconRemaining", remaining);
+      const remaining = ctx.getState("beaconRemaining") - 1;
+      ctx.setState("beaconRemaining", remaining);
       if (remaining > 0) requestSoulBanish(ctx, "beacon-soul", true);
     } else if (hook === "beacon-search") {
       const id = Number(option);
@@ -141,19 +141,19 @@ const beaconOfVictory: CardScript = {
 const celestialCataclysm: CardScript = {
   canPlay: (ctx) => ctx.player(ctx.seat).soul.length >= 3,
   additionalCost(ctx) {
-    ctx.setCounter("cataclysmRemaining", 3);
+    ctx.setState("cataclysmRemaining", 3);
     requestSoulBanish(ctx, "cataclysm-soul");
   },
   onChoose(ctx, hook, option) {
     if (hook !== "cataclysm-soul" || !ctx.banish(Number(option))) return;
-    const remaining = ctx.getCounter("cataclysmRemaining") - 1;
-    ctx.setCounter("cataclysmRemaining", remaining);
+    const remaining = ctx.getState("cataclysmRemaining") - 1;
+    ctx.setState("cataclysmRemaining", remaining);
     if (remaining > 0) requestSoulBanish(ctx, "cataclysm-soul", true);
   },
 };
 
 function finishSonata(ctx: ScriptCtx): void {
-  ctx.dealDamage(opponentSeat(ctx), ctx.getCounter("sonataChosen"), {
+  ctx.dealDamage(opponentSeat(ctx), ctx.getState("sonataChosen"), {
     arcane: true,
     sourceInstanceId: ctx.self.instanceId,
   });
@@ -164,8 +164,8 @@ function finishSonata(ctx: ScriptCtx): void {
 function requestSonataAttack(ctx: ScriptCtx): void {
   const attacks = ctx
     .player(ctx.seat)
-    .deck.filter((card) => ctx.getCounter(`sonata:${card.instanceId}`) > 0 && isAttack(ctx, card));
-  if (ctx.getCounter("sonataRemaining") <= 0 || attacks.length === 0) {
+    .deck.filter((card) => ctx.getState(`sonata:${card.instanceId}`) > 0 && isAttack(ctx, card));
+  if (ctx.getState("sonataRemaining") <= 0 || attacks.length === 0) {
     finishSonata(ctx);
     return;
   }
@@ -182,15 +182,15 @@ const sonataArcanix: CardScript = {
   variablePlayCost: {
     base: 0,
     resourcesPerX: 2,
-    counterKey: "sonataX",
+    stateKey: "sonataX",
     prompt: decisionPrompt("Choose X", "engine.decision.x.choose"),
   },
   onPlay(ctx) {
-    const revealed = ctx.player(ctx.seat).deck.slice(0, ctx.getCounter("sonataX") + 3);
+    const revealed = ctx.player(ctx.seat).deck.slice(0, ctx.getState("sonataX") + 3);
     ctx.revealCards(revealed.map((card) => card.instanceId));
-    for (const card of revealed) ctx.setCounter(`sonata:${card.instanceId}`, 1);
-    ctx.setCounter("sonataRemaining", revealed.filter((card) => !isAttack(ctx, card)).length);
-    ctx.setCounter("sonataChosen", 0);
+    for (const card of revealed) ctx.setState(`sonata:${card.instanceId}`, 1);
+    ctx.setState("sonataRemaining", revealed.filter((card) => !isAttack(ctx, card)).length);
+    ctx.setState("sonataChosen", 0);
     requestSonataAttack(ctx);
   },
   onChoose(ctx, hook, option) {
@@ -201,9 +201,9 @@ const sonataArcanix: CardScript = {
       }
       const id = Number(option);
       if (ctx.moveToHand(id)) {
-        ctx.setCounter(`sonata:${id}`, 0);
-        ctx.setCounter("sonataRemaining", ctx.getCounter("sonataRemaining") - 1);
-        ctx.setCounter("sonataChosen", ctx.getCounter("sonataChosen") + 1);
+        ctx.setState(`sonata:${id}`, 0);
+        ctx.setState("sonataRemaining", ctx.getState("sonataRemaining") - 1);
+        ctx.setState("sonataChosen", ctx.getState("sonataChosen") + 1);
       }
       requestSonataAttack(ctx);
     }
@@ -247,12 +247,12 @@ const rouseTheAncients: CardScript = {
         ["no", ...options],
       );
   },
-  modifyAttack: (ctx) => (ctx.getCounter("roused") ? 7 : 0),
+  modifyAttack: (ctx) => (ctx.getState("roused") ? 7 : 0),
   onChoose(ctx, hook, option) {
     if (hook !== "rouse-reveal" || option === "no") return;
     const ids = option.split(":").slice(1).map(Number);
     ctx.revealCards(ids);
-    ctx.setCounter("roused", 1);
+    ctx.setState("roused", 1);
     ctx.grantGoAgain();
   },
 };
@@ -408,7 +408,7 @@ export const monHighRarity: Record<string, CardScript> = {
     },
     onFriendlyAttackLost(ctx, card, cause) {
       if (cause !== "phantasm" || !ctx.cardTypes(card).includes("illusionist")) return;
-      if (ctx.getCounter("actionPointTurn") === ctx.state.turn) return;
+      if (ctx.getState("actionPointTurn") === ctx.state.turn) return;
       ctx.requestPayment(
         "footsteps-action",
         decisionPrompt("Pay 1 to gain an action point?", "card.mon.actionpoint.pay"),
@@ -419,7 +419,7 @@ export const monHighRarity: Record<string, CardScript> = {
       if (option !== "paid") return;
       if (hook === "footsteps-defense") ctx.addCardTempDefense(ctx.self.instanceId, 1);
       if (hook === "footsteps-action") {
-        ctx.setCounter("actionPointTurn", ctx.state.turn);
+        ctx.setState("actionPointTurn", ctx.state.turn);
         ctx.gainActionPoint();
       }
     },
@@ -551,12 +551,12 @@ export const monHighRarity: Record<string, CardScript> = {
         condition(ctx, played, event) {
           if (!played || event?.from !== "banish" || !ctx.hasCardType(played, "action")) return false;
           const kind = ctx.cardTypes(played).includes("attack") ? "attack" : "nonattack";
-          return !ctx.getCounter(`crossroads:${kind}`);
+          return !ctx.getState(`crossroads:${kind}`);
         },
         onTrigger(ctx, played) {
           if (!played) return;
           const kind = ctx.cardTypes(played).includes("attack") ? "attack" : "nonattack";
-          ctx.setCounter(`crossroads:${kind}`, 1);
+          ctx.setState(`crossroads:${kind}`, 1);
         },
         effect(ctx) {
           const seat = targetHeroSeat(ctx);
@@ -582,15 +582,15 @@ export const monHighRarity: Record<string, CardScript> = {
         const attack = isAttack(ctx, card);
         const nonAttack = isNonAttackAction(ctx, card);
         if (!ctx.banish(card.instanceId)) return;
-        if (attack) ctx.setCounter("invertExistenceAttack", 1);
-        if (nonAttack) ctx.setCounter("invertExistenceNonAttack", 1);
-        const count = ctx.getCounter("invertExistenceCount") + 1;
-        ctx.setCounter("invertExistenceCount", count);
+        if (attack) ctx.setState("invertExistenceAttack", 1);
+        if (nonAttack) ctx.setState("invertExistenceNonAttack", 1);
+        const count = ctx.getState("invertExistenceCount") + 1;
+        ctx.setState("invertExistenceCount", count);
         if (count < 2 && ctx.player(opponentSeat(ctx)).graveyard.length) {
           requestInvertExistenceChoice(ctx, true);
           return;
         }
-        if (ctx.getCounter("invertExistenceAttack") && ctx.getCounter("invertExistenceNonAttack")) {
+        if (ctx.getState("invertExistenceAttack") && ctx.getState("invertExistenceNonAttack")) {
           dealArcane(ctx, opponentSeat(ctx), 2);
         }
       },
@@ -698,7 +698,7 @@ export const monHighRarity: Record<string, CardScript> = {
       goAgain: false,
       oncePerTurn: true,
       onCostPaid(ctx, cards) {
-        ctx.setCounter("shadowDiscarded", cards.some((card) => ctx.cardTypes(card).includes("shadow")) ? 1 : 0);
+        ctx.setState("shadowDiscarded", cards.some((card) => ctx.cardTypes(card).includes("shadow")) ? 1 : 0);
       },
     },
   },

@@ -43,7 +43,7 @@ function handleFusion(ctx: ScriptCtx, hook: string, option: string): boolean {
   if (option === "no") return true;
   const revealed = ctx.player(ctx.seat).hand.find((card) => card.instanceId === Number(option));
   if (!revealed) return true;
-  ctx.setCounter("fused", 1);
+  ctx.setState("fused", 1);
   ctx.setFlag("player", "fusedThisTurn", true);
   ctx.setFlag("player", "iceFusedThisTurn", true);
   for (const target of [0, 1]) {
@@ -69,7 +69,7 @@ function iceEternalAdditionalCost(ctx: ScriptCtx): void {
 }
 
 function isFused(ctx: ScriptCtx): boolean {
-  return ctx.getCounter("fused") > 0;
+  return ctx.getState("fused") > 0;
 }
 
 function requestHeroTarget(
@@ -118,7 +118,7 @@ function targetSeat(ctx: ScriptCtx, option: string): number {
 
 function dealToChosenTarget(ctx: ScriptCtx, option: string, damage: number): void {
   const ally = /^ally:(\d+):(\d+)$/.exec(option);
-  ctx.setCounter("targetedAlly", ally ? 1 : 0);
+  ctx.setState("targetedAlly", ally ? 1 : 0);
   if (ally) {
     dealArcane(ctx, Number(ally[1]), damage, Number(ally[2]));
     return;
@@ -228,7 +228,7 @@ function aetherIcevein(damage: number): CardScript {
       );
     },
     onDamageDealt(ctx, target, amount, arcane) {
-      if (arcane && amount > 0 && isFused(ctx) && ctx.getCounter("targetedAlly") === 0) {
+      if (arcane && amount > 0 && isFused(ctx) && ctx.getState("targetedAlly") === 0) {
         discardUnlessPay(ctx, target, 2, "icevein");
       }
     },
@@ -260,7 +260,7 @@ function polarCap(damage: number): CardScript {
       );
     },
     onDamageDealt(ctx, target, amount, arcane) {
-      if (arcane && amount > 0 && isFused(ctx) && ctx.getCounter("targetedAlly") === 0) {
+      if (arcane && amount > 0 && isFused(ctx) && ctx.getState("targetedAlly") === 0) {
         ctx.createToken(FROSTBITE, target);
       }
     },
@@ -318,8 +318,8 @@ function freezeChoice(ctx: ScriptCtx, target: number, option: string): void {
   const card = [...player.arsenal, ...player.board].find((candidate) => candidate.instanceId === id);
   if (!card) return;
   const expiry = ctx.state.turn + (ctx.state.activePlayer === ctx.seat ? 2 : 1);
-  const current = Number(card.counters?.frozenUntilTurn || 0);
-  ctx.addCounter(card.instanceId, "frozenUntilTurn", Math.max(0, expiry - current));
+  const current = Number(card.scriptState?.frozenUntilTurn || 0);
+  ctx.addCardState(card.instanceId, "frozenUntilTurn", Math.max(0, expiry - current));
   ctx.logPublic(
     localizedCardLog(
       ctx,
@@ -430,7 +430,7 @@ export const siy: Record<string, CardScript> = {
       const options: string[] = [];
       for (const player of ctx.state.players) {
         for (const slot of slots) {
-          const occupiedByToken = player.board.some((card) => card.counters?.[`frostZone:${slot}`]);
+          const occupiedByToken = player.board.some((card) => card.scriptState?.[`frostZone:${slot}`]);
           if (!player.equipment[slot] && !occupiedByToken) options.push(`${player.seat}:${slot}`);
         }
       }
@@ -449,7 +449,7 @@ export const siy: Record<string, CardScript> = {
     onChoose(ctx, hook, option) {
       if (hook !== "frost-spike-zone") return;
       const [seatText, slot] = option.split(":");
-      ctx.createToken(FROSTBITE, Number(seatText), { [`frostZone:${slot}`]: 1 });
+      ctx.createToken(FROSTBITE, Number(seatText), undefined, { [`frostZone:${slot}`]: 1 });
     },
   },
 
@@ -499,12 +499,12 @@ export const siy: Record<string, CardScript> = {
     variablePlayCost: {
       base: 0,
       resourcesPerX: 2,
-      counterKey: "x",
+      stateKey: "x",
       prompt: decisionPrompt("Choose X", "engine.decision.x.choose"),
     },
     additionalCost: iceEternalAdditionalCost,
     onPlay(ctx) {
-      const x = ctx.getCounter("x");
+      const x = ctx.getState("x");
       requestHeroTarget(
         ctx,
         "ice-eternal-target",
@@ -519,7 +519,7 @@ export const siy: Record<string, CardScript> = {
       }
       if (hook !== "ice-eternal-target") return;
       const target = targetSeat(ctx, option);
-      ctx.createTokens(FROSTBITE, ctx.getCounter("x"), target);
+      ctx.createTokens(FROSTBITE, ctx.getState("x"), target);
       if (!isFused(ctx)) return;
       const frostbites = ctx.state.players[target]!.board.filter(
         (card) => cardNamed(ctx, card, "Frostbite"),

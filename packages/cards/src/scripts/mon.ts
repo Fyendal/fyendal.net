@@ -130,7 +130,7 @@ function chargeAttack(extra: CardScript = {}): CardScript {
       if (hook === "mon-charge") {
         if (option !== "no") {
           const charged = ctx.charge(Number(option));
-          if (charged) ctx.setCounter("chargedPitch", ctx.cardColor(charged));
+          if (charged) ctx.setState("chargedPitch", ctx.cardColor(charged));
         }
         return;
       }
@@ -287,7 +287,7 @@ function banishThreeCost(extra: CardScript = {}): CardScript {
     canPlay: (ctx) => ctx.player(ctx.seat).graveyard.length >= 3,
     additionalCost(ctx) {
       const banished = banishRandomFromGraveyard(ctx, 3);
-      if (banished.some((card) => isSixPlus(ctx, card))) ctx.setCounter("banishedSix", 1);
+      if (banished.some((card) => isSixPlus(ctx, card))) ctx.setState("banishedSix", 1);
       extra.additionalCost?.(ctx);
     },
     ...extra,
@@ -298,10 +298,10 @@ function shadowBruteBanishThree(kind: "plain" | "power" | "dominate" | "go-again
   return bloodDebt(
     banishThreeCost({
       modifyAttack(ctx) {
-        return kind === "power" && ctx.getCounter("banishedSix") ? 3 : 0;
+        return kind === "power" && ctx.getState("banishedSix") ? 3 : 0;
       },
       onAttackDeclared(ctx) {
-        if (!ctx.getCounter("banishedSix")) return;
+        if (!ctx.getState("banishedSix")) return;
         if (kind === "dominate") {
           ctx.addModifier({ scope: "chain-link", dominate: true });
         } else if (kind === "go-again") {
@@ -315,7 +315,7 @@ function shadowBruteBanishThree(kind: "plain" | "power" | "dominate" | "go-again
 function convulsions(attack: number): CardScript {
   return banishThreeCost({
     onPlay(ctx) {
-      if (!ctx.getCounter("banishedSix")) return;
+      if (!ctx.getState("banishedSix")) return;
       buffNextAttack(ctx, { attack, dominate: true, appliesTo: "attack-action" });
     },
   });
@@ -359,7 +359,7 @@ function dimenxxionalGateway(opt: number): CardScript {
     );
     const runeblade = hasType(ctx, top, "runeblade");
     const shadow = hasType(ctx, top, "shadow");
-    if (runeblade && shadow) ctx.setCounter("gatewayShadowCard", top.instanceId);
+    if (runeblade && shadow) ctx.setState("gatewayShadowCard", top.instanceId);
     if (runeblade) {
       dealArcane(ctx, opponentSeat(ctx), 1);
       return;
@@ -377,9 +377,9 @@ function dimenxxionalGateway(opt: number): CardScript {
         ctx.banish(Number(option));
     },
     onDamageDealt(ctx) {
-      const instanceId = ctx.getCounter("gatewayShadowCard");
+      const instanceId = ctx.getState("gatewayShadowCard");
       if (instanceId <= 0) return;
-      ctx.setCounter("gatewayShadowCard", 0);
+      ctx.setState("gatewayShadowCard", 0);
       if (ctx.player(ctx.seat).deck[0]?.instanceId === instanceId) {
         requestShadowBanish(ctx, instanceId);
       }
@@ -569,10 +569,10 @@ function seekHorizon(): CardScript {
     },
     onChoose(ctx, hook, option) {
       if (hook !== "seek-horizon-top" || option === "no") return;
-      if (ctx.putOnDeckTop(Number(option))) ctx.setCounter("paidTop", 1);
+      if (ctx.putOnDeckTop(Number(option))) ctx.setState("paidTop", 1);
     },
     onAttackDeclared(ctx) {
-      if (ctx.getCounter("paidTop")) ctx.grantGoAgain();
+      if (ctx.getState("paidTop")) ctx.grantGoAgain();
     },
   };
 }
@@ -597,10 +597,10 @@ function captainsCall(maxCost: number): CardScript {
       );
     },
     onChoose(ctx, hook, option) {
-      if (hook === "captains-call-mode") ctx.setCounter("captainsCallMode", option === "power" ? 1 : 2);
+      if (hook === "captains-call-mode") ctx.setState("captainsCallMode", option === "power" ? 1 : 2);
     },
     onPlay(ctx) {
-      const mode = ctx.getCounter("captainsCallMode");
+      const mode = ctx.getState("captainsCallMode");
       if (mode <= 0) return;
       buffNextAttack(ctx, {
         appliesTo: "attack-action",
@@ -756,7 +756,7 @@ export const mon: Record<string, CardScript> = mergeSetScripts("MON", monHighRar
     onHit(ctx) {
       if (ctx.link?.targetAllyId !== undefined) return;
       const opponent = ctx.player(opponentSeat(ctx));
-      ctx.setCardCounter(opponent.hero.instanceId, "banishPlayLockedUntilTurn", ctx.state.turn + 1);
+      ctx.setCardState(opponent.hero.instanceId, "banishPlayLockedUntilTurn", ctx.state.turn + 1);
     },
   }),
   "herald of triumph|1": putAttackIntoSoulOnHit({
@@ -1031,8 +1031,8 @@ export const mon: Record<string, CardScript> = mergeSetScripts("MON", monHighRar
   "hooves of the shadowbeast|0": {
     onCardBanished(ctx, card) {
       if (!isSixPlus(ctx, card)) return;
-      const pending = ctx.getCounter("pendingTriggers") + 1;
-      ctx.setCounter("pendingTriggers", pending);
+      const pending = ctx.getState("pendingTriggers") + 1;
+      ctx.setState("pendingTriggers", pending);
       if (pending === 1) {
         ctx.requestChoice(
           "hooves-shadowbeast",
@@ -1043,8 +1043,8 @@ export const mon: Record<string, CardScript> = mergeSetScripts("MON", monHighRar
     },
     onChoose(ctx, hook, option) {
       if (hook !== "hooves-shadowbeast") return;
-      const remaining = Math.max(0, ctx.getCounter("pendingTriggers") - 1);
-      ctx.setCounter("pendingTriggers", remaining);
+      const remaining = Math.max(0, ctx.getState("pendingTriggers") - 1);
+      ctx.setState("pendingTriggers", remaining);
       if (option === "yes") {
         ctx.destroySelf();
         ctx.gainActionPoint();
@@ -1400,7 +1400,7 @@ export const mon: Record<string, CardScript> = mergeSetScripts("MON", monHighRar
   "soul harvest|3": {
     canPlay: (ctx) => ctx.player(ctx.seat).graveyard.length >= 6,
     additionalCost(ctx) {
-      ctx.setCounter("harvestRemaining", 6);
+      ctx.setState("harvestRemaining", 6);
       ctx.requestCardChoice(
         "soul-harvest-banish",
         decisionPrompt(`${ctx.data.name}: choose 6 graveyard cards to banish`, "card.mon.graveyard.cards.banish", {
@@ -1409,7 +1409,7 @@ export const mon: Record<string, CardScript> = mergeSetScripts("MON", monHighRar
         ctx.player(ctx.seat).graveyard.map((card) => card.instanceId),
       );
     },
-    modifyAttack: (ctx) => ctx.getCounter("harvestBloodDebt"),
+    modifyAttack: (ctx) => ctx.getState("harvestBloodDebt"),
     canTriggerOnHit: (ctx) => ctx.link?.targetAllyId === undefined,
     onHit(ctx) {
       const soul = [...ctx.player(opponentSeat(ctx)).soul];
@@ -1421,10 +1421,10 @@ export const mon: Record<string, CardScript> = mergeSetScripts("MON", monHighRar
       const card = ctx.player(ctx.seat).graveyard.find((candidate) => candidate.instanceId === Number(option));
       if (!card) return;
       if (hasKeyword(ctx, card.cardId, "blood debt"))
-        ctx.setCounter("harvestBloodDebt", ctx.getCounter("harvestBloodDebt") + 1);
+        ctx.setState("harvestBloodDebt", ctx.getState("harvestBloodDebt") + 1);
       if (!ctx.banish(card.instanceId)) return;
-      const remaining = ctx.getCounter("harvestRemaining") - 1;
-      ctx.setCounter("harvestRemaining", remaining);
+      const remaining = ctx.getState("harvestRemaining") - 1;
+      ctx.setState("harvestRemaining", remaining);
       if (remaining > 0)
         ctx.requestCardChoice(
           "soul-harvest-banish",

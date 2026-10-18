@@ -4,7 +4,7 @@ import type {
   PersistedCombatValueModifierV1, PersistedModifierV1, PersistedPendingArcaneV1,
   PersistedDecisionResumeV1, PersistedPendingDecisionV1, PersistedGameLogEntryV1,
   PersistedGameTurnStatsV1, PersistedGameStatsV1, PersistedGameStateV1,
-  BotSimulationSnapshotV1, GameMessage, GameLogEvent, GameLogPayload,
+  BotSimulationSnapshotV1, CounterKind, GameMessage, GameLogEvent, GameLogPayload,
 } from "@fyendal/shared";
 type CardInstance = PersistedCardInstanceV1;
 type Modifier = PersistedModifierV1;
@@ -259,14 +259,17 @@ function validateTokenCreationRequests(value: unknown, code: string, path: strin
       code,
       entryPath,
       ["seat", "cardId", "count", "cause"],
-      ["initialCounters"],
+      ["initialCounters", "initialState"],
     );
     integer(entry.seat, code, `${entryPath}.seat`);
     string(entry.cardId, code, `${entryPath}.cardId`, 128);
     integer(entry.count, code, `${entryPath}.count`);
     validateTokenCreationCause(entry.cause, code, `${entryPath}.cause`);
     optional(entry, "initialCounters", (counters, countersPath) => {
-      validateFlags(counters, code, countersPath, true);
+      validateCounters(counters, code, countersPath);
+    }, entryPath);
+    optional(entry, "initialState", (values, valuesPath) => {
+      validateFlags(values, code, valuesPath, true);
     }, entryPath);
   });
 }
@@ -293,8 +296,27 @@ function validateFlags(value: unknown, code: string, path: string, numbersOnly =
   }
 }
 
+const COUNTER_KINDS = [
+  "aim", "balance", "bind", "defense", "doom", "endurance", "energy", "flow", "frost", "haunt",
+  "holo", "lessons", "power", "rust", "sand", "stain", "steam", "storm", "suspense", "verse",
+] as const satisfies readonly CounterKind[];
+type _CounterKindsAreExhaustive = Assert<
+  SameKeys<Record<CounterKind, unknown>, Record<(typeof COUNTER_KINDS)[number], unknown>>
+>;
+const COUNTER_KIND_SET: ReadonlySet<string> = new Set(COUNTER_KINDS);
+
+function counterKind(value: unknown, code: string, path: string): void {
+  if (typeof value !== "string" || !COUNTER_KIND_SET.has(value)) fail(code, path, "unknown counter kind");
+}
+
+/** Rules counters: safe integers keyed only by a known counter kind. */
+function validateCounters(value: unknown, code: string, path: string): void {
+  validateFlags(value, code, path, true);
+  for (const key of Object.keys(value as JsonObject)) counterKind(key, code, `${path}.${key}`);
+}
+
 const CARD_REQUIRED = ["instanceId", "cardId", "owner"] as const satisfies readonly (keyof CardInstance)[];
-const CARD_OPTIONAL = ["subcards", "pitchCount", "faceDown", "intimidated", "returnToHandAtTurn", "tapped", "defCounters", "counters", "chosenName", "playableFrom", "playableFromSourceCardId", "playableFromSingleUseGroup", "playableBySeat", "playableFromExpiry", "playableFromEndTurnExpiry", "playableFromUntilStartOfSeatTurn", "playableFromUntilEndOfSeatTurn", "playableFromGrantedTurn", "playableFromUntilChainClose", "playCostReduction", "playCostReductionSeat", "playTargetInstanceId", "boundToInstanceId", "grantedTypes", "grantedColor", "grantedNames", "originalHeroCardId", "temporaryHeroOriginalCardId", "temporaryHeroUntilTurn", "grantedBaseAbilitiesCardId", "grantedBaseAbilitiesCardIds", "copyOriginalCardId", "grantedKeywords", "suppressedKeywords", "tempPower", "tempDefense", "temporaryAlly", "meldSide", "attackTargetIds", "life", "damagePrevented", "flipped", "arsenalSlot", "temporaryGraveyardReplacement", "playableAsInstant"] as const satisfies readonly (keyof CardInstance)[];
+const CARD_OPTIONAL = ["subcards", "pitchCount", "faceDown", "intimidated", "returnToHandAtTurn", "tapped", "defCounters", "counters", "lastKnownCounters", "scriptState", "chosenName", "playableFrom", "playableFromSourceCardId", "playableFromSingleUseGroup", "playableBySeat", "playableFromExpiry", "playableFromEndTurnExpiry", "playableFromUntilStartOfSeatTurn", "playableFromUntilEndOfSeatTurn", "playableFromGrantedTurn", "playableFromUntilChainClose", "playCostReduction", "playCostReductionSeat", "playTargetInstanceId", "boundToInstanceId", "grantedTypes", "grantedColor", "grantedNames", "originalHeroCardId", "temporaryHeroOriginalCardId", "temporaryHeroUntilTurn", "grantedBaseAbilitiesCardId", "grantedBaseAbilitiesCardIds", "copyOriginalCardId", "grantedKeywords", "suppressedKeywords", "tempPower", "tempDefense", "temporaryAlly", "meldSide", "attackTargetIds", "life", "damagePrevented", "flipped", "arsenalSlot", "temporaryGraveyardReplacement", "playableAsInstant"] as const satisfies readonly (keyof CardInstance)[];
 type _CardValidatorIsExhaustive = Assert<
   SameKeys<CardInstance, Record<(typeof CARD_REQUIRED)[number] | (typeof CARD_OPTIONAL)[number], unknown>>
 >;
@@ -309,7 +331,9 @@ function validateCard(value: unknown, code: string, path: string, depth = 0): vo
     if (integer(v, code, p) < 0) fail(code, p, "expected a non-negative safe integer");
   }, path);
   for (const key of ["returnToHandAtTurn", "defCounters", "playableBySeat", "playableFromExpiry", "playableFromEndTurnExpiry", "playableFromUntilStartOfSeatTurn", "playableFromUntilEndOfSeatTurn", "playableFromGrantedTurn", "playCostReduction", "playCostReductionSeat", "playTargetInstanceId", "boundToInstanceId", "temporaryHeroUntilTurn", "tempPower", "tempDefense", "life", "arsenalSlot"] as const) optional(card, key, (v, p) => { integer(v, code, p); }, path);
-  optional(card, "counters", (v, p) => validateFlags(v, code, p, true), path);
+  optional(card, "counters", (v, p) => validateCounters(v, code, p), path);
+  optional(card, "lastKnownCounters", (v, p) => validateCounters(v, code, p), path);
+  optional(card, "scriptState", (v, p) => validateFlags(v, code, p, true), path);
   optional(card, "chosenName", (v, p) => { string(v, code, p, 128); }, path);
   optional(card, "playableFromSourceCardId", (v, p) => { string(v, code, p, 128); }, path);
   optional(card, "playableFromSingleUseGroup", (v, p) => { string(v, code, p, 128); }, path);
@@ -525,7 +549,8 @@ function validateChainLink(value: unknown, code: string, path: string): void {
 const MODIFIER_REQUIRED = ["id", "sourceInstanceId", "seat", "scope"] as const;
 const MODIFIER_NUMBERS = ["expiresAtStartOfTurn", "expiresAtEndOfTurn", "expiresAtStartOfSeatTurn", "expiresAtEndOfSeatTurn", "createdTurn", "basePower", "attack", "powerGainBonus", "attackActivationCostReduction", "activationCostReduction", "attackCostReduction", "piercing", "defense", "damage", "intimidate", "preventNextDamageAmount", "preventNextDamagePool", "preventDamagePerEvent", "preventDamageEventsRemaining", "discardDamagePreventionAmount", "discardDamagePreventionDraw", "preventNextDamageFromPitch", "maxDamageEventAmount", "reflectPreventedDamageToSeat", "redirectDamageFromSeat", "redirectDamageToSeat", "redirectDamagePrevent", "onHitGainLife", "onHitGainResources", "onHitDraw", "attackActionCardCap", "nonAttackActionCardCap", "goAgainIfAttackPowerAtLeast", "onDefendedDealDamage", "onHitLoseLife", "onDestroyedDraw", "onBoostAttack", "onActionPlayedGainActionPoints", "extraDiceIgnoreLowest", "onHitDealDamage", "defendedLessThanNonEquip", "minCost", "maxCost", "maxBasePower", "minBasePower", "minimumAttackBasePower", "appliesToInstanceId", "suppressesActivatedAbilitiesOfInstanceId", "cannotDefendWithInstanceId", "appliesToPitch", "playCostReduction", "playBaseCostOverride", "remainingCostUses", "maxNonBlockDefenders", "onDefendedByAttackActionPowerCounters", "swapsNextClashWithSeat"] as const satisfies readonly (keyof Modifier)[];
 const MODIFIER_BOOLEANS = ["appliesToEquipment", "appliesToFirstDefenderOnly", "damageArcaneOnly", "damageUnpreventable", "goAgain", "dominate", "overpower", "preventAllDamageFromSource", "reflectPreventedDamageUnpreventable", "onHitGoAgain", "suppressesHeroAbilities", "suppressesHeroAbilitiesDuringActionPhase", "suppressesOwnedNames", "suppressesOwnedClassTalentTypes", "restrictActionsToWeaponOrAttack", "restrictActionsToNonWeaponNonAttack", "prohibitsDefenseReactionNamesInGraveyard", "goAgainIfDefendedByAttackAction", "suppressHitEffects", "suppressHitEffectsThisTurn", "onHitToSoul", "onHitBottomDeck", "onHitReenableAttacker", "onHitReenableAttackerIfMarked", "onHitMark", "onBoostDominate", "onHitClearHandAndArsenalAtEndPhase", "replaceCombatDamageWithDefendingEquipment", "appliesToMarkedHero", "appliesToFromArsenal", "appliesToRuneGated", "appliesToCharged", "noDefenseReactionsFromArsenal", "noDefenseReactionsFromHand", "once", "expiresOnChainClose", "consumed"] as const satisfies readonly (keyof Modifier)[];
-const MODIFIER_STRINGS = ["sourceCardId", "grantType", "grantName", "discardDamagePreventionCardType", "preventLethalDamageByBanishingNamedCard", "banishPreventedDamageSourceFaceDownIfType", "appliesToDamageSourceType", "appliesToDamageRecipientType", "grantKeyword", "suppressKeyword", "prohibitsName", "grantsTypeToName", "grantsType", "onFriendlyActivateCreateToken", "onDamageDealtCreateTokenPerPoint", "onPreventCreateToken", "appliesToClass", "appliesToKeyword", "appliesToName", "appliesToTargetType", "appliesToTargetNamePrefix", "excludesSubtype", "appliesToCardType", "restrictCardPlaysToType", "ongoingLabel", "grantsPlayFromNameContains", "goAgainIfPlayedOrCreatedSubtype", "overpowerIfNameContains", "appliesToCounter"] as const satisfies readonly (keyof Modifier)[];
+const MODIFIER_STRINGS = ["sourceCardId", "grantType", "grantName", "discardDamagePreventionCardType", "preventLethalDamageByBanishingNamedCard", "banishPreventedDamageSourceFaceDownIfType", "appliesToDamageSourceType", "appliesToDamageRecipientType", "grantKeyword", "suppressKeyword", "prohibitsName", "grantsTypeToName", "grantsType", "onFriendlyActivateCreateToken", "onDamageDealtCreateTokenPerPoint", "onPreventCreateToken", "appliesToClass", "appliesToKeyword", "appliesToName", "appliesToTargetType", "appliesToTargetNamePrefix", "excludesSubtype", "appliesToCardType", "restrictCardPlaysToType", "ongoingLabel", "grantsPlayFromNameContains", "goAgainIfPlayedOrCreatedSubtype", "overpowerIfNameContains"] as const satisfies readonly (keyof Modifier)[];
+const MODIFIER_COUNTER_KINDS = ["appliesToCounter"] as const satisfies readonly (keyof Modifier)[];
 const MODIFIER_OBJECTS = ["onHitCreateToken", "onAttackActionPlayedFromBanishCreateToken", "onHitDestroyTopDeckCards", "onHitScriptHook", "ongoingLabelMessage", "defendingPitchDefenseAdjustment", "appliesTo", "appliesToSubtype", "appliesToType", "grantsPlayFromZone", "grantsPlayFromZoneOwner"] as const satisfies readonly (keyof Modifier)[];
 type _ModifierValidatorIsExhaustive = Assert<
   SameKeys<
@@ -535,19 +560,21 @@ type _ModifierValidatorIsExhaustive = Assert<
       | (typeof MODIFIER_NUMBERS)[number]
       | (typeof MODIFIER_BOOLEANS)[number]
       | (typeof MODIFIER_STRINGS)[number]
+      | (typeof MODIFIER_COUNTER_KINDS)[number]
       | (typeof MODIFIER_OBJECTS)[number],
       unknown
     >
   >
 >;
 function validateModifier(value: unknown, code: string, path: string): void {
-  const optionalKeys = [...MODIFIER_NUMBERS, ...MODIFIER_BOOLEANS, ...MODIFIER_STRINGS, ...MODIFIER_OBJECTS];
+  const optionalKeys = [...MODIFIER_NUMBERS, ...MODIFIER_BOOLEANS, ...MODIFIER_STRINGS, ...MODIFIER_COUNTER_KINDS, ...MODIFIER_OBJECTS];
   const modifier = exact(value, code, path, MODIFIER_REQUIRED, optionalKeys);
   for (const key of ["id", "sourceInstanceId", "seat"] as const) integer(modifier[key], code, `${path}.${key}`);
   oneOf(modifier.scope, ["chain-link", "next-attack", "until-end-of-turn", "static", "combat-chain", "next-play"] as const, code, `${path}.scope`);
   for (const key of MODIFIER_NUMBERS) optional(modifier, key, (v, p) => { integer(v, code, p); }, path);
   for (const key of MODIFIER_BOOLEANS) optional(modifier, key, (v, p) => { bool(v, code, p); }, path);
   for (const key of MODIFIER_STRINGS) optional(modifier, key, (v, p) => { string(v, code, p, 256); }, path);
+  for (const key of MODIFIER_COUNTER_KINDS) optional(modifier, key, (v, p) => { counterKind(v, code, p); }, path);
   optional(modifier, "onHitCreateToken", (v, p) => {
     const token = exact(v, code, p, ["cardId", "count"]);
     string(token.cardId, code, `${p}.cardId`, 128);
@@ -575,7 +602,7 @@ function validateModifier(value: unknown, code: string, path: string): void {
     string(effect.label, code, `${p}.label`, 256);
     optional(effect, "labelMessage", (entry, entryPath) => { validateGameMessage(entry, code, entryPath); }, p);
     optional(effect, "heroOnly", (entry, entryPath) => { bool(entry, code, entryPath); }, p);
-    optional(effect, "requiresAttackCounter", (entry, entryPath) => { string(entry, code, entryPath, 128); }, p);
+    optional(effect, "requiresAttackCounter", (entry, entryPath) => { counterKind(entry, code, entryPath); }, p);
     optional(effect, "requiresAttackNameContains", (entry, entryPath) => { string(entry, code, entryPath, 128); }, p);
   }, path);
   optional(modifier, "ongoingLabelMessage", (v, p) => { validateGameMessage(v, code, p); }, path);
@@ -859,13 +886,16 @@ function validateDecision(value: unknown, code: string, path: string, depth = 0)
     optional(variable, "declaredX", (entry, entryPath) => { integer(entry, code, entryPath); }, p);
   }, path);
   optional(decision, "tokenCreationReplacement", (v, p) => {
-    const batch = exact(v, code, p, ["seat", "cardId", "count", "cause", "remainingReplacements"], ["controllerSeats", "initialCounters"]);
+    const batch = exact(v, code, p, ["seat", "cardId", "count", "cause", "remainingReplacements"], ["controllerSeats", "initialCounters", "initialState"]);
     integer(batch.seat, code, `${p}.seat`);
     string(batch.cardId, code, `${p}.cardId`, 128);
     integer(batch.count, code, `${p}.count`);
     validateTokenCreationCause(batch.cause, code, `${p}.cause`);
     optional(batch, "initialCounters", (counters, countersPath) => {
-      validateFlags(counters, code, countersPath, true);
+      validateCounters(counters, code, countersPath);
+    }, p);
+    optional(batch, "initialState", (values, valuesPath) => {
+      validateFlags(values, code, valuesPath, true);
     }, p);
     validateTokenCreationReplacementRefs(batch.remainingReplacements, code, `${p}.remainingReplacements`);
     optional(batch, "controllerSeats", (entry, entryPath) => {
@@ -873,13 +903,16 @@ function validateDecision(value: unknown, code: string, path: string, depth = 0)
     }, p);
   }, path);
   optional(decision, "tokenCreationReplacementOrder", (v, p) => {
-    const batch = exact(v, code, p, ["seat", "cardId", "count", "cause", "remainingReplacements"], ["controllerSeats", "initialCounters"]);
+    const batch = exact(v, code, p, ["seat", "cardId", "count", "cause", "remainingReplacements"], ["controllerSeats", "initialCounters", "initialState"]);
     integer(batch.seat, code, `${p}.seat`);
     string(batch.cardId, code, `${p}.cardId`, 128);
     integer(batch.count, code, `${p}.count`);
     validateTokenCreationCause(batch.cause, code, `${p}.cause`);
     optional(batch, "initialCounters", (counters, countersPath) => {
-      validateFlags(counters, code, countersPath, true);
+      validateCounters(counters, code, countersPath);
+    }, p);
+    optional(batch, "initialState", (values, valuesPath) => {
+      validateFlags(values, code, valuesPath, true);
     }, p);
     validateTokenCreationReplacementRefs(batch.remainingReplacements, code, `${p}.remainingReplacements`);
     optional(batch, "controllerSeats", (entry, entryPath) => {

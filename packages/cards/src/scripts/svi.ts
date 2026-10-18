@@ -210,7 +210,7 @@ export const svi: Record<string, CardScript> = {
       variableCost: {
         base: 1,
         resourcesPerX: 2,
-        counterKey: "beckoningX",
+        stateKey: "beckoningX",
         maximum: 10,
         prompt: decisionPrompt("Choose X", "engine.decision.x.choose"),
         canDeclareX(ctx, x) {
@@ -223,7 +223,7 @@ export const svi: Record<string, CardScript> = {
       goAgain: false,
       destroySelfCost: true,
       onActivate(ctx) {
-        const x = ctx.getCounter("beckoningX");
+        const x = ctx.getState("beckoningX");
         const auras = ctx
           .player(ctx.seat)
           .graveyard.filter((card) => isAura(ctx, card) && (ctx.cardData(card.cardId).cost ?? 0) === x);

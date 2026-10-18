@@ -44,7 +44,7 @@ function beatChest(extra: CardScript = {}): CardScript {
         if (attackAction) ctx.setFlag("player", "discardingForBruteAttackCost", false);
         if (discarded) {
           ctx.setFlag("player", "beatenChestThisTurn", true);
-          ctx.setCardCounter(ctx.self.instanceId, "beatChestPaid", 1);
+          ctx.setCardState(ctx.self.instanceId, "beatChestPaid", 1);
         }
         return;
       }

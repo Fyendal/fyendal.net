@@ -56,7 +56,7 @@ const INERTIA = "SAZ036";
 /** ctx.state is typed without the internal side tables; the runtime object has them. */
 
 function isMarked(ctx: ScriptCtx, seat: number): boolean {
-  return (ctx.state.players[seat]!.hero.counters?.marked ?? 0) > 0;
+  return (ctx.state.players[seat]!.hero.scriptState?.marked ?? 0) > 0;
 }
 
 /** Mark is removed as part of the hit event. Hit-triggered effects that care
@@ -67,8 +67,8 @@ function hitMarkedHero(ctx: ScriptCtx): boolean {
 
 function markHero(ctx: ScriptCtx, seat: number): void {
   const hero = ctx.state.players[seat]!.hero;
-  if ((hero.counters?.marked ?? 0) > 0) return;
-  ctx.addCounter(hero.instanceId, "marked", 1);
+  if ((hero.scriptState?.marked ?? 0) > 0) return;
+  ctx.addCardState(hero.instanceId, "marked", 1);
   ctx.logPublic(
     localizedCardLog(ctx, `${ctx.cardData(hero.cardId).name} is marked`, "card.log.common.hero.marked", {
       target: { kind: "card", cardId: hero.cardId },
@@ -526,7 +526,7 @@ export const sar: Record<string, CardScript> = {
       const link = ctx.link!;
       const dagger = isDagger(ctx, link.attackingCard);
       const stealthAction = link.attackCardType === "action" && hasStealth(ctx, link.attackingCard.cardId);
-      const selectedStealth = ctx.getCounter("twoSidesMode") === 2;
+      const selectedStealth = ctx.getState("twoSidesMode") === 2;
       ctx.addModifier({ scope: "chain-link", attack: 3 });
       if (stealthAction && (!dagger || selectedStealth)) {
         ctx.addModifier({ scope: "until-end-of-turn", ...markOnHitLabel }); // marker for the mark rider
@@ -540,7 +540,7 @@ export const sar: Record<string, CardScript> = {
     },
     onChoose(ctx, hook, option) {
       if (hook !== "two-sides") return;
-      ctx.setCounter("twoSidesMode", option.startsWith("Stealth") ? 2 : 1);
+      ctx.setState("twoSidesMode", option.startsWith("Stealth") ? 2 : 1);
     },
   },
 

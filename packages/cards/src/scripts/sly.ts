@@ -91,7 +91,7 @@ function oasisRespite(amount: number): CardScript {
       if (hook === "target-hero") {
         const target = heroChoiceSeat(ctx, option);
         if (target === undefined) return;
-        ctx.setCounter("oasisTarget", target);
+        ctx.setState("oasisTarget", target);
         ctx.requestCardChoice(
           "source",
           decisionPrompt(`Prevent the next ${amount} damage from which source?`, "card.sly.damage.source.choose", {
@@ -102,7 +102,7 @@ function oasisRespite(amount: number): CardScript {
         return;
       }
       if (hook === "source") {
-        const target = ctx.getCounter("oasisTarget");
+        const target = ctx.getState("oasisTarget");
         ctx.preventNextDamage(target, amount, Number(option));
         // the targeted hero's controller decides the life gain
         if (ctx.compareLife(target, target === 0 ? 1 : 0) < 0) {
@@ -116,7 +116,7 @@ function oasisRespite(amount: number): CardScript {
         return;
       }
       if (hook === "gain-life" && option === "yes") {
-        ctx.gainLife(ctx.getCounter("oasisTarget"), 1);
+        ctx.gainLife(ctx.getState("oasisTarget"), 1);
       }
     },
   };
@@ -348,7 +348,7 @@ export const sly: Record<string, CardScript> = {
     // "until the end of their next turn": the hero counter survives end-of-turn
     // flag cleanup and covers the rest of this turn plus their next turn
     const hero = ctx.player(opponentSeat(ctx)).hero;
-    ctx.setCardCounter(hero.instanceId, "halveBaseAttackActionUntil", ctx.state.turn + 1);
+    ctx.setCardState(hero.instanceId, "halveBaseAttackActionUntil", ctx.state.turn + 1);
     ctx.logPublic(
       localizedCardLog(
         ctx,
@@ -412,11 +412,11 @@ export const sly: Record<string, CardScript> = {
   "power play|3": {
     canPlay(ctx) {
       // counters persist on the card while it leaves its zone (unlike flags)
-      ctx.setCounter("fromArsenal", ctx.player(ctx.seat).arsenal.includes(ctx.self) ? 1 : 0);
+      ctx.setState("fromArsenal", ctx.player(ctx.seat).arsenal.includes(ctx.self) ? 1 : 0);
       return true;
     },
     modifyAttack(ctx) {
-      return ctx.getCounter("fromArsenal") ? 5 : 0;
+      return ctx.getState("fromArsenal") ? 5 : 0;
     },
   },
 

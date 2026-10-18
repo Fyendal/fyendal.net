@@ -54,6 +54,15 @@ does not consult ambient configuration.
 
 - `CardInstance` holds stable identity, ownership, counters, temporary grants,
   face state, tap state, and other serializable per-card data.
+- `counters` holds only rules counters, keyed by the closed `CounterKind`
+  union (`ctx.getCounter`/`setCounter`). Every move out of the arena deletes
+  the map; the departing values remain as `lastKnownCounters` for the card's
+  own abilities that resolve afterwards (`ctx.lastKnownCounter`).
+  `scriptState` holds script bookkeeping and engine statuses
+  (`ctx.getState`/`setState`). It survives zone moves except arena-only
+  statuses, and `project.ts` exposes only its named public statuses, inside
+  `CardView.counters` for arena cards. Never store bookkeeping as a counter,
+  and add a new rules counter to `CounterKind` and the protocol decoder.
 - `PlayerState` holds the hero, life, resources, action points, flags, and all
   zones: hand, deck, arsenal, pitch, graveyard, banish, soul, equipment,
   weapons, and board. Face-down banished cards are inert — no properties, not

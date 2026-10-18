@@ -35,6 +35,6 @@ describe("printed variable costs", () => {
   it("Touch of Reality declares its activated X cost before pitching", () => {
     const activated = scripts[printingId("touch of reality|0")]?.activated;
     expect(Array.isArray(activated) ? activated[0]?.variableCost : activated?.variableCost)
-      .toEqual(expect.objectContaining({ base: 0, counterKey: "wardX" }));
+      .toEqual(expect.objectContaining({ base: 0, stateKey: "wardX" }));
   });
 });

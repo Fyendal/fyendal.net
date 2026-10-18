@@ -89,7 +89,7 @@ const NUMBSKULL_CHARM_MODES = [
 ] as const;
 
 function requestNumbskullCharmMode(ctx: ScriptCtx): void {
-  const selected = ctx.getCounter("numbskull-modes");
+  const selected = ctx.getState("numbskull-modes");
   const chosen = NUMBSKULL_CHARM_MODES.filter((mode) => (selected & mode.bit) !== 0);
   const remaining = NUMBSKULL_CHARM_MODES.filter((mode) => (selected & mode.bit) === 0);
   if (remaining.length === 0) return;
@@ -112,8 +112,8 @@ function requestNumbskullCharmMode(ctx: ScriptCtx): void {
 /** Resolve the cheer and pitch modes after any token destruction, in printed
  * order, then clear the mode counter so a later play starts fresh. */
 function resolveNumbskullCharm(ctx: ScriptCtx): void {
-  const modes = ctx.getCounter("numbskull-modes");
-  ctx.setCounter("numbskull-modes", 0);
+  const modes = ctx.getState("numbskull-modes");
+  ctx.setState("numbskull-modes", 0);
   if ((modes & 2) !== 0) ctx.crowdCheer(ctx.seat);
   if ((modes & 4) === 0) return;
   const top = ctx.player(ctx.seat).deck[0];
@@ -198,17 +198,17 @@ function battlefieldBeaconModePrompt(ctx: ScriptCtx, remaining: number) {
       vigor: decisionMessage("card.sup.option.vigor"),
     },
     chosen: BATTLEFIELD_BEACON_MODES.flatMap((mode) =>
-      Array<string>(ctx.getCounter(`beacon-mode:${mode}`)).fill(mode)),
+      Array<string>(ctx.getState(`beacon-mode:${mode}`)).fill(mode)),
   });
 }
 
 function requestBattlefieldBeaconMode(ctx: ScriptCtx): void {
-  const remaining = ctx.getCounter("beacon-modes-remaining");
+  const remaining = ctx.getState("beacon-modes-remaining");
   if (remaining <= 0) return;
   ctx.requestChoice(
     "beacon-mode",
     battlefieldBeaconModePrompt(ctx, remaining),
-    BATTLEFIELD_BEACON_MODES.filter((mode) => ctx.getCounter(`beacon-mode:${mode}`) < 3),
+    BATTLEFIELD_BEACON_MODES.filter((mode) => ctx.getState(`beacon-mode:${mode}`) < 3),
   );
 }
 
@@ -350,7 +350,7 @@ function clashToken(tokenId: string): CardScript {
       if (winner >= 0) ctx.createToken(tokenId, winner);
       const top = ctx.player(ctx.seat).deck[0];
       if (top) {
-        ctx.setCounter("clashTop", top.instanceId);
+        ctx.setState("clashTop", top.instanceId);
         ctx.requestChoice(
           "clash-bottom",
           yesNoPrompt("Put your revealed card on the bottom?", "card.sup.revealed.bottom"),
@@ -359,7 +359,7 @@ function clashToken(tokenId: string): CardScript {
       }
     },
     onChoose(ctx, hook, option) {
-      if (hook === "clash-bottom" && option === "yes") ctx.putOnDeckBottom(ctx.getCounter("clashTop"));
+      if (hook === "clash-bottom" && option === "yes") ctx.putOnDeckBottom(ctx.getState("clashTop"));
     },
   };
 }
@@ -367,10 +367,10 @@ function clashToken(tokenId: string): CardScript {
 function missCreates(tokenId: string): CardScript {
   return {
     onMiss(ctx) {
-      ctx.setCounter("missed", 1);
+      ctx.setState("missed", 1);
     },
     onCombatChainClosed(ctx) {
-      if (ctx.getCounter("missed")) ctx.createToken(tokenId, opponentSeat(ctx));
+      if (ctx.getState("missed")) ctx.createToken(tokenId, opponentSeat(ctx));
     },
   };
 }
@@ -537,15 +537,15 @@ function defendedByClassToken(className: string, tokenId: string): CardScript {
       condition(ctx, defenders) {
         return (
           ctx.link?.attackingCard.instanceId === ctx.self.instanceId &&
-          ctx.getCounter("madeToken") === 0 &&
+          ctx.getState("madeToken") === 0 &&
           defenders.some((card) => hasTag(ctx, card, className))
         );
       },
     },
     onFriendlyDefended(ctx) {
-      if (ctx.link?.attackingCard.instanceId !== ctx.self.instanceId || ctx.getCounter("madeToken")) return;
+      if (ctx.link?.attackingCard.instanceId !== ctx.self.instanceId || ctx.getState("madeToken")) return;
       if (defendedByTag(ctx, className)) {
-        ctx.setCounter("madeToken", 1);
+        ctx.setState("madeToken", 1);
         ctx.createToken(tokenId);
       }
     },
@@ -820,7 +820,7 @@ export const sup: Record<string, CardScript> = {
 
   "kayo, strong-arm|0": {
     modifyBasePower(_ctx, card, base) {
-      return card.counters?.kayoBaseSix ? 6 : base;
+      return card.scriptState?.kayoBaseSix ? 6 : base;
     },
     activated: {
       cost: 4,
@@ -830,7 +830,7 @@ export const sup: Record<string, CardScript> = {
       timing: "instant",
       canActivate: (ctx) => !!ctx.link && ctx.link.attacker === ctx.seat && ctx.link.attackCardType === "action",
       onActivate(ctx) {
-        if (ctx.link) ctx.setCardCounter(ctx.link.attackingCard.instanceId, "kayoBaseSix", 1);
+        if (ctx.link) ctx.setCardState(ctx.link.attackingCard.instanceId, "kayoBaseSix", 1);
       },
     },
     onBooed(ctx) {
@@ -1097,7 +1097,7 @@ export const sup: Record<string, CardScript> = {
       const top = ctx.player(ctx.seat).deck[0];
       if (!top) return;
       ctx.lookAt(top.instanceId);
-      ctx.setCounter("rightTop", top.instanceId);
+      ctx.setState("rightTop", top.instanceId);
       ctx.requestChoice(
         "right-bottom",
         yesNoPrompt("Put the looked-at card on the bottom?", "card.sup.looked.bottom"),
@@ -1105,7 +1105,7 @@ export const sup: Record<string, CardScript> = {
       );
     },
     onChoose(ctx, hook, option) {
-      if (hook === "right-bottom" && option === "yes") ctx.putOnDeckBottom(ctx.getCounter("rightTop"));
+      if (hook === "right-bottom" && option === "yes") ctx.putOnDeckBottom(ctx.getState("rightTop"));
     },
   })),
   "prime the crowd|2": primeCrowd(3),
@@ -1232,14 +1232,14 @@ Object.assign(sup, {
   },
   "numbskull charm|2": {
     additionalCost(ctx: ScriptCtx) {
-      ctx.setCounter("numbskull-modes", 0);
+      ctx.setState("numbskull-modes", 0);
       requestNumbskullCharmMode(ctx);
     },
     onChoose(ctx: ScriptCtx, hook: string, option: string) {
       if (hook === "numbskull-mode") {
         const mode = NUMBSKULL_CHARM_MODES.find((candidate) => candidate.option === option);
         if (!mode) return;
-        ctx.setCounter("numbskull-modes", ctx.getCounter("numbskull-modes") | mode.bit);
+        ctx.setState("numbskull-modes", ctx.getState("numbskull-modes") | mode.bit);
         requestNumbskullCharmMode(ctx);
       } else if (hook === "numbskull-destroy") {
         ctx.destroyPermanent(Number(option));
@@ -1247,7 +1247,7 @@ Object.assign(sup, {
       }
     },
     onPlay(ctx: ScriptCtx) {
-      const modes = ctx.getCounter("numbskull-modes");
+      const modes = ctx.getState("numbskull-modes");
       if ((modes & 1) !== 0) {
         const tokens = ctx.state.players.flatMap((player) =>
           player.board.filter((card) => tokenAura(ctx, card) && (named(ctx, card, "Confidence") || named(ctx, card, "Might"))),
@@ -1327,10 +1327,10 @@ Object.assign(sup, {
     },
     canTriggerOnDefend: (ctx: ScriptCtx) => ctx.currentPower(ctx.self) >= 6,
     onDefend(ctx: ScriptCtx) {
-      if (ctx.currentPower(ctx.self) >= 6) ctx.setCounter("oldBottom", 1);
+      if (ctx.currentPower(ctx.self) >= 6) ctx.setState("oldBottom", 1);
     },
     onCombatChainClosed(ctx: ScriptCtx) {
-      if (ctx.getCounter("oldBottom")) ctx.putOnDeckBottom(ctx.self.instanceId);
+      if (ctx.getState("oldBottom")) ctx.putOnDeckBottom(ctx.self.instanceId);
     },
   },
   "tame the beastly behavior|1": {
@@ -1497,7 +1497,7 @@ Object.assign(sup, {
                       : option === "boo + abilities"
                         ? 6
                         : 7;
-        ctx.setCounter("liar-modes", modes);
+        ctx.setState("liar-modes", modes);
         if ((modes & 1) !== 0) {
           const tokens = ["Toughness", "Vigor"].flatMap((name) => {
             const token = tokenNamed(ctx, opponentSeat(ctx), name);
@@ -1515,7 +1515,7 @@ Object.assign(sup, {
         finishLiarsCharmModes(ctx, modes);
       } else if (hook === "liar-steal") {
         ctx.steal(Number(option), { duration: "indefinite" });
-        finishLiarsCharmModes(ctx, ctx.getCounter("liar-modes"));
+        finishLiarsCharmModes(ctx, ctx.getState("liar-modes"));
       } else if (hook === "liar-discard") {
         const target = opponentSeat(ctx);
         if (option === "lose abilities") ctx.suppressHeroAbilitiesThroughNextTurn(target);
@@ -1544,7 +1544,7 @@ Object.assign(sup, {
     },
     onChoose(ctx: ScriptCtx, hook: string, option: string) {
       if (hook === "truth-color" && option !== "pass") {
-        ctx.setCounter("truth-color", option === "red" ? 1 : option === "yellow" ? 2 : 3);
+        ctx.setState("truth-color", option === "red" ? 1 : option === "yellow" ? 2 : 3);
         ctx.requestChoice(
           "truth-guess",
           yesNoPrompt(`Is the top card ${option}?`, "card.sup.top.color.guess", { color: option }),
@@ -1555,7 +1555,7 @@ Object.assign(sup, {
         const top = ctx.player(ctx.seat).deck[0];
         if (!top) return;
         ctx.lookAtForSeat(top.instanceId, opponentSeat(ctx));
-        const matches = ctx.cardColor(top) === ctx.getCounter("truth-color");
+        const matches = ctx.cardColor(top) === ctx.getState("truth-color");
         const guessedYes = option === "yes";
         if (matches !== guessedYes)
           requestDiscardChoice(
@@ -1723,7 +1723,7 @@ Object.assign(sup, {
       }
       // Each hero chooses in turn order; distinct hooks queue both decisions.
       for (const { seat, instanceId } of revealed) {
-        ctx.setCounter(`stampedeTop:${seat}`, instanceId);
+        ctx.setState(`stampedeTop:${seat}`, instanceId);
         ctx.requestChoice(
           `stampede-bottom:${seat}`,
           yesNoPrompt("Put your revealed card on the bottom?", "card.sup.revealed.bottom"),
@@ -1735,7 +1735,7 @@ Object.assign(sup, {
     onChoose(ctx: ScriptCtx, hook: string, option: string) {
       if (!hook.startsWith("stampede-bottom:") || option !== "yes") return;
       const seat = Number(hook.slice("stampede-bottom:".length));
-      const instanceId = ctx.getCounter(`stampedeTop:${seat}`);
+      const instanceId = ctx.getState(`stampedeTop:${seat}`);
       if (ctx.player(seat).deck.some((card) => card.instanceId === instanceId)) ctx.putOnDeckBottom(instanceId);
     },
   },
@@ -2017,8 +2017,8 @@ Object.assign(sup, {
     additionalCost(ctx: ScriptCtx) {
       const counters = Math.max(0, Number(ctx.link?.attackingCard.counters?.power ?? 0));
       const count = Math.min(BEAT_OF_THE_IRONSONG_MODES.length, counters + 1);
-      ctx.setCounter("beat-modes-remaining", count);
-      ctx.setCounter("beat-modes", 0);
+      ctx.setState("beat-modes-remaining", count);
+      ctx.setState("beat-modes", 0);
       ctx.requestChoice(
         "beat-mode",
         decisionPrompt(
@@ -2040,11 +2040,11 @@ Object.assign(sup, {
     onChoose(ctx: ScriptCtx, hook: string, option: string) {
       if (hook !== "beat-mode") return;
       const bit = beatOfTheIronsongModeBit(option);
-      if (bit === 0 || (ctx.getCounter("beat-modes") & bit) !== 0) return;
-      const selected = ctx.getCounter("beat-modes") | bit;
-      const remaining = ctx.getCounter("beat-modes-remaining") - 1;
-      ctx.setCounter("beat-modes", selected);
-      ctx.setCounter("beat-modes-remaining", remaining);
+      if (bit === 0 || (ctx.getState("beat-modes") & bit) !== 0) return;
+      const selected = ctx.getState("beat-modes") | bit;
+      const remaining = ctx.getState("beat-modes-remaining") - 1;
+      ctx.setState("beat-modes", selected);
+      ctx.setState("beat-modes-remaining", remaining);
       if (remaining > 0) {
         ctx.requestChoice(
           "beat-mode",
@@ -2067,7 +2067,7 @@ Object.assign(sup, {
     },
     onPlay(ctx: ScriptCtx) {
       if (!ctx.link || !named(ctx, ctx.link.attackingCard, "dawnblade")) return;
-      const modes = ctx.getCounter("beat-modes");
+      const modes = ctx.getState("beat-modes");
       if ((modes & 1) !== 0) ctx.addModifier({ scope: "chain-link", attack: 1 });
       if ((modes & 2) !== 0) ctx.grantGoAgain();
       if ((modes & 4) !== 0) ctx.setFlag("link", "defendingCardsCannotGainDefense", true);
@@ -2271,9 +2271,9 @@ Object.assign(sup, {
         Number(ctx.getFlag("player", "soulBanishedThisChain")) || 0,
       );
       if (count <= 0) return;
-      ctx.setCounter("beacon-modes-remaining", count);
+      ctx.setState("beacon-modes-remaining", count);
       for (const mode of BATTLEFIELD_BEACON_MODES) {
-        ctx.setCounter(`beacon-mode:${mode}`, 0);
+        ctx.setState(`beacon-mode:${mode}`, 0);
       }
       requestBattlefieldBeaconMode(ctx);
     },
@@ -2284,11 +2284,11 @@ Object.assign(sup, {
       )
         return;
       const mode = option as (typeof BATTLEFIELD_BEACON_MODES)[number];
-      const selected = ctx.getCounter(`beacon-mode:${mode}`);
+      const selected = ctx.getState(`beacon-mode:${mode}`);
       if (selected >= 3) return;
-      ctx.setCounter(`beacon-mode:${mode}`, selected + 1);
-      const remaining = ctx.getCounter("beacon-modes-remaining") - 1;
-      ctx.setCounter("beacon-modes-remaining", remaining);
+      ctx.setState(`beacon-mode:${mode}`, selected + 1);
+      const remaining = ctx.getState("beacon-modes-remaining") - 1;
+      ctx.setState("beacon-modes-remaining", remaining);
       if (remaining > 0) {
         requestBattlefieldBeaconMode(ctx);
         return;
@@ -2298,7 +2298,7 @@ Object.assign(sup, {
         ["toughness", TOUGHNESS],
         ["vigor", VIGOR],
       ] as const) {
-        ctx.createTokens(tokenId, ctx.getCounter(`beacon-mode:${tokenMode}`));
+        ctx.createTokens(tokenId, ctx.getState(`beacon-mode:${tokenMode}`));
       }
     },
   },
@@ -2355,7 +2355,7 @@ Object.assign(sup, {
         if (option === "pass") return;
         const target = Number(option);
         if (!ctx.banish(target)) return;
-        ctx.setCounter("painful-target", target);
+        ctx.setState("painful-target", target);
         ctx.requestChoice(
           "painful-mode",
           decisionPrompt("Choose +3 power or go again", "card.common.bonus.choose", {
@@ -2369,7 +2369,7 @@ Object.assign(sup, {
         return;
       }
       if (hook !== "painful-mode") return;
-      const target = ctx.getCounter("painful-target");
+      const target = ctx.getState("painful-target");
       if (option === "power") ctx.addCardTempPower(target, 3);
       else if (option === "go-again") ctx.grantCardKeyword(target, "go again");
       else return;

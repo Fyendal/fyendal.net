@@ -9,7 +9,7 @@ const REVERE_COUNT = "revereCount";
 const REVERE_DONE = "revereDone";
 
 function revereChosen(ctx: ScriptCtx): number[] {
-  return Array.from({ length: ctx.getCounter(REVERE_COUNT) }, (_, index) => ctx.getCounter(`revereCard:${index}`));
+  return Array.from({ length: ctx.getState(REVERE_COUNT) }, (_, index) => ctx.getState(`revereCard:${index}`));
 }
 
 function revereCandidates(ctx: ScriptCtx): DeepReadonly<CardInstance>[] {
@@ -32,7 +32,7 @@ function revereCandidates(ctx: ScriptCtx): DeepReadonly<CardInstance>[] {
  * exclude the names already chosen, then shuffle them in together. */
 function continueRevere(ctx: ScriptCtx): void {
   const chosen = revereChosen(ctx);
-  const choosing = chosen.length < REVERE_LIMIT && ctx.getCounter(REVERE_DONE) === 0;
+  const choosing = chosen.length < REVERE_LIMIT && ctx.getState(REVERE_DONE) === 0;
   const candidates = choosing ? revereCandidates(ctx) : [];
   if (candidates.length) {
     ctx.requestCardChoice(
@@ -57,8 +57,8 @@ function continueRevere(ctx: ScriptCtx): void {
 
 const revereTheCopperIdol: CardScript = {
   onPlay(ctx) {
-    ctx.setCounter(REVERE_COUNT, 0);
-    ctx.setCounter(REVERE_DONE, 0);
+    ctx.setState(REVERE_COUNT, 0);
+    ctx.setState(REVERE_DONE, 0);
     continueRevere(ctx);
   },
   onChoose(ctx, hook, option) {
@@ -67,11 +67,11 @@ const revereTheCopperIdol: CardScript = {
       ? undefined
       : revereCandidates(ctx).find((card) => card.instanceId === Number(option));
     if (picked) {
-      const count = ctx.getCounter(REVERE_COUNT);
-      ctx.setCounter(`revereCard:${count}`, picked.instanceId);
-      ctx.setCounter(REVERE_COUNT, count + 1);
+      const count = ctx.getState(REVERE_COUNT);
+      ctx.setState(`revereCard:${count}`, picked.instanceId);
+      ctx.setState(REVERE_COUNT, count + 1);
     } else {
-      ctx.setCounter(REVERE_DONE, 1);
+      ctx.setState(REVERE_DONE, 1);
     }
     continueRevere(ctx);
   },

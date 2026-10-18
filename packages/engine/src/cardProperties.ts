@@ -78,7 +78,7 @@ export function cardAbilitiesSuppressed(
 function ownAbilitiesSuppressed(state: GameStateInternal, card: CardInstance): boolean {
   const owner = state.players[card.owner] as PlayerState | undefined;
   const link = currentLink(state);
-  return Number(owner?.hero.counters?.ownedCardAbilitiesDisabledTurn ?? 0) === state.turn ||
+  return Number(owner?.hero.scriptState?.ownedCardAbilitiesDisabledTurn ?? 0) === state.turn ||
     (link?.flags.attackAbilitiesSuppressed === true &&
       link.attackingCard.instanceId === card.instanceId);
 }
@@ -135,7 +135,7 @@ export function cardCostOf(state: GameStateInternal, card: CardInstance): number
   if (!variableCost) return instanceDataOf(state, card).cost;
   const beingPlayed = state.resolving.some((candidate) => candidate.instanceId === card.instanceId) ||
     state.stack.some((layer) => layer.card?.instanceId === card.instanceId);
-  const x = beingPlayed ? Math.max(0, Math.floor(Number(card.counters?.[variableCost.counterKey] ?? 0))) : 0;
+  const x = beingPlayed ? Math.max(0, Math.floor(Number(card.scriptState?.[variableCost.stateKey] ?? 0))) : 0;
   return variableCost.base + x * Math.max(0, Math.floor(variableCost.resourcesPerX ?? 1));
 }
 
@@ -223,7 +223,7 @@ export function cardColorOf(
   },
 ): CardColor | 0 {
   const owner = state.players[card.owner] as PlayerState;
-  if (Number(owner.hero.counters?.colorsSuppressedUntilTurn ?? 0) >= state.turn) return 0;
+  if (Number(owner.hero.scriptState?.colorsSuppressedUntilTurn ?? 0) >= state.turn) return 0;
   if (card.grantedColor !== undefined) return card.grantedColor;
   const front = dataOf(state, card.cardId);
   const data = card.flipped && front.backId ? dataOf(state, front.backId) : front;
@@ -236,7 +236,7 @@ export function cardColorOf(
 export function cardNamesOf(state: GameStateInternal, card: CardInstance): string[] {
   const owner = state.players[card.owner] as PlayerState;
   if (
-    Number(owner.hero.counters?.namesSuppressedUntilTurn ?? 0) >= state.turn ||
+    Number(owner.hero.scriptState?.namesSuppressedUntilTurn ?? 0) >= state.turn ||
     state.modifiers.some(
       (modifier) => modifier.seat === owner.seat && modifier.suppressesOwnedNames === true,
     )
@@ -271,7 +271,7 @@ function ownedClassTalentTypesSuppressed(
   card: CardInstance,
 ): boolean {
   const owner = state.players[card.owner] as PlayerState;
-  return Number(owner.hero.counters?.classTalentTypesSuppressedUntilTurn ?? 0) >= state.turn ||
+  return Number(owner.hero.scriptState?.classTalentTypesSuppressedUntilTurn ?? 0) >= state.turn ||
     state.modifiers.some(
       (modifier) =>
         modifier.seat === owner.seat && modifier.suppressesOwnedClassTalentTypes === true,

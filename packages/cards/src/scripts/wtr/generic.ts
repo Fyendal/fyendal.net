@@ -69,13 +69,13 @@ const demolitionCrewScript = (): CardScript => ({
       .player(ctx.seat)
       .hand.find((c) => c.instanceId !== ctx.self.instanceId && (ctx.cardData(c.cardId).cost ?? 0) >= 2);
     if (reveal) {
-      ctx.setCounter("revealTarget", reveal.instanceId);
+      ctx.setState("revealTarget", reveal.instanceId);
     }
     return !!reveal;
   },
   additionalCost(ctx) {
     const p = ctx.player(ctx.seat);
-    const targetId = ctx.getCounter("revealTarget");
+    const targetId = ctx.getState("revealTarget");
     const reveal = p.hand.find((c) => c.instanceId === targetId) ?? p.pitch.find((c) => c.instanceId === targetId);
     if (reveal) {
       ctx.logPublic(
@@ -168,13 +168,13 @@ const flockScript = (): CardScript => {
     canPlay(ctx) {
       const reveal = ctx.player(ctx.seat).hand.find(revealable(ctx));
       if (reveal) {
-        ctx.setCounter("revealTarget", reveal.instanceId);
+        ctx.setState("revealTarget", reveal.instanceId);
       }
       return !!reveal;
     },
     additionalCost(ctx) {
       const p = ctx.player(ctx.seat);
-      const targetId = ctx.getCounter("revealTarget");
+      const targetId = ctx.getState("revealTarget");
       const reveal = p.hand.find((c) => c.instanceId === targetId) ?? p.pitch.find((c) => c.instanceId === targetId);
       if (reveal)
         ctx.logPublic(
@@ -269,7 +269,7 @@ const hopeMerchantsHoodScript = (): CardScript => ({
       if (idx >= 0) {
         const card = p.hand[idx]!;
         ctx.putOnDeckBottom(card.instanceId);
-        ctx.setCounter("hoodCount", ctx.getCounter("hoodCount") + 1);
+        ctx.setState("hoodCount", ctx.getState("hoodCount") + 1);
         ctx.logPrivate(
           ctx.seat,
           localizedLog(
@@ -302,7 +302,7 @@ const hopeMerchantsHoodScript = (): CardScript => ({
         return;
       }
     }
-    const n = ctx.getCounter("hoodCount");
+    const n = ctx.getState("hoodCount");
     if (n > 0) {
       ctx.shuffleDeck();
       ctx.drawCards(ctx.seat, n);
@@ -325,7 +325,7 @@ const nimbleStrikeScript = (): CardScript => ({
     const nimblism = cardInGraveyard(ctx, "Nimblism");
     if (!nimblism) return;
     if (ctx.banish(nimblism.instanceId)) {
-      ctx.setCounter("nimblismBanished", 1);
+      ctx.setState("nimblismBanished", 1);
       ctx.logPublic(
         localizedLog(
           `${ctx.data.name}: banishes Nimblism from graveyard`,
@@ -340,10 +340,10 @@ const nimbleStrikeScript = (): CardScript => ({
     }
   },
   modifyAttack(ctx) {
-    return ctx.getCounter("nimblismBanished") ? 1 : 0;
+    return ctx.getState("nimblismBanished") ? 1 : 0;
   },
   onAttackDeclared(ctx) {
-    if (ctx.getCounter("nimblismBanished")) {
+    if (ctx.getState("nimblismBanished")) {
       ctx.grantGoAgain();
       ctx.logPublic(
         localizedLog(`${ctx.data.name}: gains go again`, "card.log.common.goagain.gained", {
@@ -401,7 +401,7 @@ const pummelScript = (buff: number): CardScript => ({
     const canClubHammer = isWeaponAttackOfSubtype(ctx, ["club", "hammer"]);
     const canBigAttack = isAttackActionWithCost(ctx, (cost) => cost >= 2);
 
-    const selectedMode = ctx.getCounter("pummelMode");
+    const selectedMode = ctx.getState("pummelMode");
     if (canClubHammer && canBigAttack && selectedMode === 1) {
       applyPummelClubHammer(ctx, buff);
     } else if (canClubHammer && canBigAttack && selectedMode === 2) {
@@ -418,7 +418,7 @@ const pummelScript = (buff: number): CardScript => ({
       return;
     }
     if (hook !== "pummel-mode") return;
-    ctx.setCounter("pummelMode", option === "club/hammer weapon" ? 1 : 2);
+    ctx.setState("pummelMode", option === "club/hammer weapon" ? 1 : 2);
   },
   canTriggerOnHit(ctx) {
     return ctx.getFlag("link", "pummelDiscardMode") === true && ctx.link?.targetAllyId === undefined;
@@ -487,7 +487,7 @@ const razorReflexScript = (buff: number): CardScript => ({
     const canDaggerSword = isWeaponAttackOfSubtype(ctx, ["dagger", "sword"]);
     const canSmallAttack = isAttackActionWithCost(ctx, (cost) => cost <= 1);
 
-    const selectedMode = ctx.getCounter("razorMode");
+    const selectedMode = ctx.getState("razorMode");
     if (canDaggerSword && canSmallAttack && selectedMode === 1) {
       applyRazorWeapon(ctx, buff);
     } else if (canDaggerSword && canSmallAttack && selectedMode === 2) {
@@ -500,7 +500,7 @@ const razorReflexScript = (buff: number): CardScript => ({
   },
   onChoose(ctx, hook, option) {
     if (hook !== "razor-mode") return;
-    ctx.setCounter("razorMode", option === "dagger/sword weapon" ? 1 : 2);
+    ctx.setState("razorMode", option === "dagger/sword weapon" ? 1 : 2);
   },
 });
 
@@ -532,7 +532,7 @@ const regurgitatingSlogScript = (): CardScript => ({
     const sloggism = cardInGraveyard(ctx, "Sloggism");
     if (!sloggism) return;
     if (ctx.banish(sloggism.instanceId)) {
-      ctx.setCounter("sloggismBanished", 1);
+      ctx.setState("sloggismBanished", 1);
       ctx.logPublic(
         localizedLog(
           `${ctx.data.name}: banishes Sloggism from graveyard`,
@@ -547,7 +547,7 @@ const regurgitatingSlogScript = (): CardScript => ({
     }
   },
   onAttackDeclared(ctx) {
-    if (ctx.getCounter("sloggismBanished")) {
+    if (ctx.getState("sloggismBanished")) {
       buffNextAttack(ctx, { dominate: true, appliesTo: "attack-action" });
       ctx.logPublic(
         localizedLog(`${ctx.data.name}: gains dominate`, "card.log.common.dominate.gained", {
@@ -588,11 +588,11 @@ const scourScript = (): CardScript => ({
     // go again during attack declaration. Counters persist on the card while
     // it leaves its zone, unlike player/link flags.
     const fromArsenal = ctx.player(ctx.seat).arsenal.includes(ctx.self);
-    ctx.setCounter("fromArsenal", fromArsenal ? 1 : 0);
+    ctx.setState("fromArsenal", fromArsenal ? 1 : 0);
     return true;
   },
   onAttackDeclared(ctx) {
-    if (ctx.getCounter("fromArsenal")) {
+    if (ctx.getState("fromArsenal")) {
       ctx.grantGoAgain();
       ctx.logPublic(
         localizedLog(`${ctx.data.name}: gains go again (played from arsenal)`, "card.log.wtr.scour.goagain", {

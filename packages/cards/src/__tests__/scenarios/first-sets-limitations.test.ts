@@ -199,7 +199,8 @@ describe("first-set rules regression coverage", () => {
       { hero: "rhinar", life: 20, board: ["absorption dome|2"], equipment: NO_EQUIPMENT },
       { hero: "dorinthea", hand: ["head jab|1"], equipment: NO_EQUIPMENT },
     ] });
-    g.state.players[0]!.board[0]!.counters = { steam: 2, damageReplacement: 2 };
+    g.state.players[0]!.board[0]!.counters = { steam: 2 };
+    g.state.players[0]!.board[0]!.scriptState = { damageReplacement: 2 };
     g.play("head jab|1").blockWith().settle();
     expect(g.state.players[0]!.life).toBe(19);
     expect(g.state.players[0]!.board).toHaveLength(0);

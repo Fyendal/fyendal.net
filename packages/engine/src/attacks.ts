@@ -237,7 +237,7 @@ export function activateAuraAttack(
   player.actionPoints -= 1;
   noteActionPlayedOrActivated(player);
   player.flags[activatedFlagKey(card.instanceId, grantedIndex)] = true;
-  (card.counters ??= {}).attacked = 1;
+  (card.scriptState ??= {}).attacked = 1;
   runtime.events.fireOnFriendlyActivate(state, seat, card, "action");
   // Observers may grant go again specifically to this action activation.
   const nextActionGoAgain = consumeNextActionGoAgain(player);
@@ -373,8 +373,8 @@ export function beginAttackStep(state: GameStateInternal, runtime: EngineRuntime
   for (const t of card.grantedTypes ?? []) {
     link.flags[`grantedType:${t.toLowerCase()}`] = true;
   }
-  const penaltyUntil = Number(player.hero.counters?.nextAttackPowerPenaltyUntilTurn || 0);
-  const penalty = Number(player.hero.counters?.nextAttackPowerPenalty || 0);
+  const penaltyUntil = Number(player.hero.scriptState?.nextAttackPowerPenaltyUntilTurn || 0);
+  const penalty = Number(player.hero.scriptState?.nextAttackPowerPenalty || 0);
   if (penalty > 0 && penaltyUntil === state.turn) {
     state.modifiers.push({
       id: state.nextModifierId++,
@@ -383,7 +383,7 @@ export function beginAttackStep(state: GameStateInternal, runtime: EngineRuntime
       scope: "chain-link",
       attack: -penalty,
     });
-    (player.hero.counters ??= {}).nextAttackPowerPenalty = 0;
+    (player.hero.scriptState ??= {}).nextAttackPowerPenalty = 0;
   }
   attachNextAttackModifiers(state, runtime, link);
   if (

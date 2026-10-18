@@ -23,13 +23,13 @@ function completeWagerResult(
     ? findCardAnywhere(state, replacementSourceId)?.card
     : undefined;
   const override = Number(
-    replacementSource?.counters?.wagerWinnerOverride ?? source.counters?.wagerWinnerOverride ?? 0,
+    replacementSource?.scriptState?.wagerWinnerOverride ?? source.scriptState?.wagerWinnerOverride ?? 0,
   ) - 1;
   const winner = override >= 0 && state.players[override] ? override : proposedWinner;
   delete link.flags[`wagerPendingWinner:${wagerIndex}`];
   delete link.flags[`wagerReplacementSource:${wagerIndex}`];
-  if (replacementSource?.counters) delete replacementSource.counters.wagerWinnerOverride;
-  if (source.counters) delete source.counters.wagerWinnerOverride;
+  if (replacementSource?.scriptState) delete replacementSource.scriptState.wagerWinnerOverride;
+  if (source.scriptState) delete source.scriptState.wagerWinnerOverride;
 
   const winningPlayer = state.players[winner] as PlayerState;
   logPublic(state, gameLogMessage(
@@ -255,7 +255,7 @@ export function resumeWagerLossReplacements(
   const replacementSource = replacementSourceId
     ? findCardAnywhere(state, replacementSourceId)?.card
     : undefined;
-  const winnerOverride = Number(replacementSource?.counters?.wagerWinnerOverride ?? 0);
+  const winnerOverride = Number(replacementSource?.scriptState?.wagerWinnerOverride ?? 0);
   if (winnerOverride > 0) {
     completeWagerResult(state, runtime, link, wagerIndex);
   } else {

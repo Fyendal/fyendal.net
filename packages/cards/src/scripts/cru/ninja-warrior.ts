@@ -114,14 +114,14 @@ function rushingRiver(): CardScript {
       const hits = ctx.state.chain.filter((link) => link.hit).length;
       if (hits <= 0) return;
       ctx.drawCards(ctx.seat, hits);
-      ctx.setCounter("rushingRemaining", hits);
+      ctx.setState("rushingRemaining", hits);
       requestTopCard(ctx);
     },
     onChoose(ctx, hook, option) {
       if (hook !== "rushing-top") return;
       if (!ctx.putOnDeckTop(Number(option))) return;
-      const remaining = Math.max(0, ctx.getCounter("rushingRemaining") - 1);
-      ctx.setCounter("rushingRemaining", remaining);
+      const remaining = Math.max(0, ctx.getState("rushingRemaining") - 1);
+      ctx.setState("rushingRemaining", remaining);
       if (remaining > 0) requestTopCard(ctx);
     },
   };

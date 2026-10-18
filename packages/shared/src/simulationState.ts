@@ -1,4 +1,4 @@
-import type { GameLogEvent, GameLogPayload, GameMessage } from "./types.js";
+import type { CardCounters, CounterKind, GameLogEvent, GameLogPayload, GameMessage } from "./types.js";
 
 type FlagValue = number | boolean;
 export type PlayFromZoneOwner = "own" | "opponent" | "both";
@@ -13,7 +13,9 @@ export interface PersistedCardInstanceV1 {
   returnToHandAtTurn?: number;
   tapped?: boolean;
   defCounters?: number;
-  counters?: Record<string, number>;
+  counters?: CardCounters;
+  lastKnownCounters?: CardCounters;
+  scriptState?: Record<string, number>;
   chosenName?: string;
   playableFrom?: ("banish" | "graveyard" | "deck")[];
   playableFromSourceCardId?: string;
@@ -291,7 +293,7 @@ export interface PersistedModifierV1 {
     label: string;
     labelMessage?: GameMessage;
     heroOnly?: boolean;
-    requiresAttackCounter?: string;
+    requiresAttackCounter?: CounterKind;
     requiresAttackNameContains?: string;
   };
   onHitDestroyTopDeckCards?: { count: number; minimumDamage: number };
@@ -331,7 +333,7 @@ export interface PersistedModifierV1 {
   appliesToFromArsenal?: boolean;
   appliesToRuneGated?: boolean;
   appliesToCharged?: boolean;
-  appliesToCounter?: string;
+  appliesToCounter?: CounterKind;
   noDefenseReactionsFromArsenal?: boolean;
   noDefenseReactionsFromHand?: boolean;
   maxNonBlockDefenders?: number;
@@ -443,7 +445,8 @@ export interface PersistedPendingDecisionV1 {
     cardId: string;
     count: number;
     cause: { kind: "effect" | "wager"; sourceCardId?: string };
-    initialCounters?: Record<string, number>;
+    initialCounters?: CardCounters;
+    initialState?: Record<string, number>;
     remainingReplacements: { instanceId: number; kind: "global" | "friendly" | "optional-friendly" }[];
     controllerSeats?: number[];
   };
@@ -452,7 +455,8 @@ export interface PersistedPendingDecisionV1 {
     cardId: string;
     count: number;
     cause: { kind: "effect" | "wager"; sourceCardId?: string };
-    initialCounters?: Record<string, number>;
+    initialCounters?: CardCounters;
+    initialState?: Record<string, number>;
     remainingReplacements: { instanceId: number; kind: "global" | "friendly" | "optional-friendly" }[];
     controllerSeats?: number[];
   };
@@ -551,7 +555,8 @@ export interface PersistedGameStateV1 {
     cardId: string;
     count: number;
     cause: { kind: "effect" | "wager"; sourceCardId?: string };
-    initialCounters?: Record<string, number>;
+    initialCounters?: CardCounters;
+    initialState?: Record<string, number>;
   }[];
   reactionPasses: number;
   stack: PersistedStackLayerV1[];

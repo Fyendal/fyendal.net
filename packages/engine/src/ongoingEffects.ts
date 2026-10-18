@@ -1017,10 +1017,10 @@ export function projectOngoingEffects(
   // rather than modifiers: delayed Crush restrictions, permanent ability loss,
   // prevention and amp pools. Surface them on that hero without a source card,
   // attributed to the seat that caused them, so an opponent's restriction is
-  // not shown as the hero's own buff. The counters remain the rules authority
-  // and control the lifetime; this projection adds no new mutable state.
+  // not shown as the hero's own buff. The hero's script state remains the rules
+  // authority and controls the lifetime; this projection adds no new mutable state.
   for (const player of state.players as PlayerState[]) {
-    const counters = player.hero.counters;
+    const heroState = player.hero.scriptState;
     const heroKey = `hero:${player.hero.instanceId}`;
     const opponentSeat = opponent(player.seat);
     const addHeroEffect = (
@@ -1084,7 +1084,7 @@ export function projectOngoingEffects(
       "next-arcane-card-bonus",
       duration("once", "next arcane damage card", "engine.effect.duration.next.arcane.card"),
     );
-    if (counters?.abilitiesDisabledPermanently === 1) {
+    if (heroState?.abilitiesDisabledPermanently === 1) {
       addHeroEffect(
         "abilities-lost",
         "hero loses all abilities",
@@ -1093,7 +1093,7 @@ export function projectOngoingEffects(
         opponentSeat,
       );
     }
-    if ((counters?.halveBaseAttackActionUntil ?? 0) >= state.turn) {
+    if ((heroState?.halveBaseAttackActionUntil ?? 0) >= state.turn) {
       addHeroEffect(
         "halve-base",
         "base power and defense of attack action cards are halved",
@@ -1102,8 +1102,8 @@ export function projectOngoingEffects(
         opponentSeat,
       );
     }
-    if ((counters?.attackActionBasePowerLimitUntilTurn ?? 0) >= state.turn) {
-      const limit = counters?.attackActionBasePowerLimit ?? 0;
+    if ((heroState?.attackActionBasePowerLimitUntilTurn ?? 0) >= state.turn) {
+      const limit = heroState?.attackActionBasePowerLimit ?? 0;
       addHeroEffect(
         "base-power-limit",
         `can't play attack action cards with base power ${limit} or less`,
@@ -1112,7 +1112,7 @@ export function projectOngoingEffects(
         opponentSeat,
       );
     }
-    if ((counters?.attackActionNoPowerGainUntilTurn ?? 0) >= state.turn) {
+    if ((heroState?.attackActionNoPowerGainUntilTurn ?? 0) >= state.turn) {
       addHeroEffect(
         "no-power-gain",
         "attack action cards can't gain power",
@@ -1121,7 +1121,7 @@ export function projectOngoingEffects(
         opponentSeat,
       );
     }
-    if ((counters?.cannotDrawActionTurn ?? 0) >= state.turn) {
+    if ((heroState?.cannotDrawActionTurn ?? 0) >= state.turn) {
       addHeroEffect(
         "cannot-draw",
         "can't draw cards",
@@ -1196,7 +1196,7 @@ export function projectOngoingEffects(
     for (const source of controlledPermanents(state, player.seat, { faceDownEquipment: false })) {
       const fixed = scriptOf(state, source.cardId, source)?.fixedDamagePrevention;
       if (!fixed?.firstDamageEventEachTurn || fixed.amount <= 0) continue;
-      if (Number(source.counters?.fixedPreventionUsedTurn ?? -1) === state.turn) continue;
+      if (Number(source.scriptState?.fixedPreventionUsedTurn ?? -1) === state.turn) continue;
       if (fixed.condition && !fixed.condition(
         runtime.makeCtx(state, player.seat, source, currentLink(state)),
       )) continue;

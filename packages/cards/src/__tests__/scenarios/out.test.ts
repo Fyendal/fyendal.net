@@ -358,12 +358,12 @@ describe("OUT — registration and core mechanics", () => {
       .expectLife(1, 19);
 
     s.expectInZone(0, "hunter's klaive|0", "graveyard");
-    expect(s.state.players[1]!.hero.counters?.marked ?? 0).toBe(0);
+    expect(s.state.players[1]!.hero.scriptState?.marked ?? 0).toBe(0);
     expect(s.state.stack[0]?.engineEffect?.kind).toBe("on-effect-hit-hook");
     expect(s.state.pendingDecision?.kind).toBe("attack-reaction");
 
     s.passPriority().passPriority();
-    expect(s.state.players[1]!.hero.counters?.marked).toBe(1);
+    expect(s.state.players[1]!.hero.scriptState?.marked).toBe(1);
   });
 
   it.each([

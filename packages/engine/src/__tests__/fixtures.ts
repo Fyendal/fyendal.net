@@ -36,7 +36,7 @@ export const cards: Record<string, CardData> = {
   BELLOW: { id: "BELLOW", name: "Test Bellow", cardType: "action", subtypes: [], classes: ["brute"], pitch: 2, cost: 0, defense: 3, keywords: ["Intimidate", "Go again"], text: "Intimidate. Go again" },
   PUMP: { id: "PUMP", name: "Test Pump", cardType: "action", subtypes: [], classes: ["generic"], pitch: 1, cost: 0, defense: 2, keywords: ["Go again"], text: "Go again. Your next attack action gets +2{p}" },
   TOKEN: { id: "TOKEN", name: "Test Token", cardType: "token", classes: ["generic"], text: "" },
-  AURA: { id: "AURA", name: "Test Aura", cardType: "action", subtypes: ["aura"], classes: ["generic"], cost: 0, defense: 3, text: "Enters with 2 charge counters. Destroyed at 0." },
+  AURA: { id: "AURA", name: "Test Aura", cardType: "action", subtypes: ["aura"], classes: ["generic"], cost: 0, defense: 3, text: "Enters with 2 suspense counters. Destroyed at 0." },
   ZAP: { id: "ZAP", name: "Test Zap", cardType: "instant", classes: ["generic"], pitch: 3, cost: 0, text: "Remove a charge counter from your first board card" },
   SPLIT: { id: "SPLIT", name: "Test Split // Test Half", cardType: "instant", classes: ["generic"], pitch: 3, cost: 2, keywords: ["Meld"], text: "Meld" },
   RUNE_GATE: { id: "RUNE_GATE", name: "Test Rune Gate", cardType: "action", classes: ["runeblade"], subtypes: ["shadow", "attack"], pitch: 1, cost: 2, attack: 5, defense: 3, keywords: ["Rune Gate"], text: "Rune Gate" },
@@ -109,7 +109,7 @@ export const scripts: Record<string, CardScript> = {
     },
     onChoose(ctx, hook, option) {
       if (hook === "choice-item") {
-        ctx.setCounter("choice", option === "yes" ? 1 : 0);
+        ctx.setState("choice", option === "yes" ? 1 : 0);
         ctx.setFlag("player", "choiceItemResult", option === "yes");
       }
     },
@@ -117,7 +117,7 @@ export const scripts: Record<string, CardScript> = {
       ctx.setFlag(
         "player",
         "choiceItemEnteredAfterResolution",
-        ctx.getFlag("player", "choiceItemResult") === true && ctx.getCounter("choice") === 1,
+        ctx.getFlag("player", "choiceItemResult") === true && ctx.getState("choice") === 1,
       );
     },
   },
@@ -217,16 +217,16 @@ export const scripts: Record<string, CardScript> = {
   RUNECHANT: { runechantToken: true },
   SURGE: { seismicSurgeToken: true },
   AURA: {
-    destroyAtZeroCounter: "charge",
+    destroyAtZeroCounter: "suspense",
     onEnterArena(ctx) {
-      ctx.setCounter("charge", 2);
+      ctx.setCounter("suspense", 2);
     },
   },
   ZAP: {
     onPlay(ctx) {
       const first = ctx.state.players[ctx.seat]!.board[0];
       if (!first) return;
-      ctx.setCardCounter(first.instanceId, "charge", Math.max(0, (first.counters?.charge ?? 0) - 1));
+      ctx.setCardCounter(first.instanceId, "suspense", Math.max(0, (first.counters?.suspense ?? 0) - 1));
     },
   },
 };

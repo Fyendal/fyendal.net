@@ -48,7 +48,7 @@ export const jdg: Record<string, CardScript> = {
       ctx.revealCards([instanceId]);
       if (!ctx.moveInventoryToHand(instanceId)) return;
       const target = ctx.player(opponentSeat(ctx));
-      ctx.setCardCounter(target.hero.instanceId, "bonusIntellectAtEndPhaseTurn", ctx.state.turn + 1);
+      ctx.setCardState(target.hero.instanceId, "bonusIntellectAtEndPhaseTurn", ctx.state.turn + 1);
     },
   },
 
@@ -61,7 +61,7 @@ export const jdg: Record<string, CardScript> = {
       )
         return;
       ctx.setFlag("player", "theryonObservedDestruction", true);
-      ctx.setCounter("theryonDestroyingSeat", destroyingSeat);
+      ctx.setState("theryonDestroyingSeat", destroyingSeat);
       ctx.requestPayment(
         "theryon-pay",
         decisionPrompt(
@@ -73,7 +73,7 @@ export const jdg: Record<string, CardScript> = {
     },
     onChoose(ctx, hook, option) {
       if (hook === "theryon-pay" && option === "paid") {
-        const destroyingSeat = ctx.getCounter("theryonDestroyingSeat");
+        const destroyingSeat = ctx.getState("theryonDestroyingSeat");
         const permanents = nonHeroPermanents(ctx, destroyingSeat);
         if (permanents.length) {
           ctx.requestCardChoice(
@@ -84,7 +84,7 @@ export const jdg: Record<string, CardScript> = {
           );
         }
       } else if (hook === "theryon-destroy") {
-        const destroyingSeat = ctx.getCounter("theryonDestroyingSeat");
+        const destroyingSeat = ctx.getState("theryonDestroyingSeat");
         ctx.destroyPermanent(Number(option), destroyingSeat);
       }
     },

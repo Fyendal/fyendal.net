@@ -33,7 +33,7 @@ describe("arena activation announcement projection", () => {
       state.scriptsRef = { ...state.scriptsRef, [source.cardId]: {
         activated: {
           cost: 0, isAttack: zone === "weapon", goAgain: false,
-          variableCost: { base: 0, counterKey: "announcedX", maximum: 2 },
+          variableCost: { base: 0, stateKey: "announcedX", maximum: 2 },
           discardCost: { count: 1 },
           ...(zone === "board" ? { tap: true } : {}),
         },

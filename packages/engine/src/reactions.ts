@@ -494,7 +494,7 @@ export function activateWindowAbility(
     },
   );
   if (prepErr) return prepErr;
-  if (variableCost) (card.counters ??= {})[variableCost.counterKey] = declaredVariableX!;
+  if (variableCost) (card.scriptState ??= {})[variableCost.stateKey] = declaredVariableX!;
   if (timing === "action") noteActionPlayedOrActivated(player);
   if (timing === "attack-reaction" && link) {
     link.flags.reactionPlayedOrActivated = true;
@@ -772,7 +772,7 @@ export function playReaction(
     },
   );
   if (costErr) return costErr;
-  if (variableCost) (card.counters ??= {})[variableCost.counterKey] = declaredVariableX!;
+  if (variableCost) (card.scriptState ??= {})[variableCost.stateKey] = declaredVariableX!;
   if (alternativeCostCardInstanceIds !== undefined) {
     const alternativeErr = payAlternativePlayCost(
       state, runtime,

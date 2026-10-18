@@ -196,7 +196,7 @@ describe("IAR cards", () => {
     g.endTurn();
     expect(g.state.players[0]!.board[0]).toEqual(expect.objectContaining({
       life: 2,
-      counters: expect.objectContaining({ lifePenalty: 1 }),
+      scriptState: expect.objectContaining({ lifePenalty: 1 }),
     }));
   });
 
@@ -2417,6 +2417,37 @@ describe("September 2 IAR spoilers", () => {
       cardData[card.cardId]?.name === "Channel Stormgarden"
     );
     expect(channel?.counters?.flow).toBe(1);
+  });
+
+  it("Channel Stormgarden returned to hand loses its flow counters", () => {
+    const g = scenario({ seats: [
+      {
+        hero: "rhinar",
+        hand: ["channel stormgarden|2"],
+        deck: ["sigil of lightning|3"],
+        pitch: ["arc ramp|3"],
+        equipment: { ...NO_EQUIPMENT, head: "flash of brilliance|0" },
+      },
+      { hero: "dorinthea", deck: ["arc ramp|3"], equipment: NO_EQUIPMENT },
+    ] });
+
+    g.play("channel stormgarden|2")
+      .doRaw({ kind: "pass" })
+      .settle()
+      .chooseCard("arc ramp|3")
+      .expectTurn(2)
+      .attackWithWeapon()
+      .blockWith("flash of brilliance|0")
+      .passPriority()
+      .passPriority()
+      .chooseCard("sigil of lightning|3")
+      .chooseCard("channel stormgarden|2")
+      .expectInZone(0, "channel stormgarden|2", "hand");
+
+    const channel = g.state.players[0]!.hand.find((card) =>
+      cardData[card.cardId]?.name === "Channel Stormgarden"
+    );
+    expect(channel?.counters?.flow).toBeUndefined();
   });
 
   it("Channel Stormgarden destroys itself when Channel Lightning cannot be paid", () => {

@@ -8,8 +8,8 @@ export function heroAbilitiesDisabled(state: GameStateInternal, seat: number): b
   const withinActionPhase = ["action", "layer", "reaction", "defend"].includes(state.phase);
   return (
     player.flags.disableHeroAbilities === true ||
-    player.hero.counters?.abilitiesDisabledPermanently === 1 ||
-    Number(player.hero.counters?.abilitiesDisabledUntilTurn ?? 0) >= state.turn ||
+    player.hero.scriptState?.abilitiesDisabledPermanently === 1 ||
+    Number(player.hero.scriptState?.abilitiesDisabledUntilTurn ?? 0) >= state.turn ||
     state.modifiers.some((modifier) =>
       modifier.seat === seat && (
         modifier.suppressesHeroAbilities === true ||

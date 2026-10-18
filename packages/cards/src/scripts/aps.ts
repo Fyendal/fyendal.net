@@ -244,7 +244,7 @@ export const aps: Record<string, CardScript> = {
     },
     onHit(ctx) {
       const target = ctx.player(opponentSeat(ctx));
-      ctx.setCardCounter(target.hero.instanceId, "goAgainSuppressedPending", 1);
+      ctx.setCardState(target.hero.instanceId, "goAgainSuppressedPending", 1);
     },
   },
   "standing ovation|3": {
@@ -254,7 +254,7 @@ export const aps: Record<string, CardScript> = {
     onHit(ctx) {
       ctx.takeExtraTurn(ctx.seat);
       const target = ctx.player(opponentSeat(ctx));
-      ctx.setCardCounter(target.hero.instanceId, "drawUpToAtEndPhaseTurn", ctx.state.turn);
+      ctx.setCardState(target.hero.instanceId, "drawUpToAtEndPhaseTurn", ctx.state.turn);
     },
   },
   "superstar|3": suspense({ enters: crowdTrigger("cheer"), leaves: crowdTrigger("cheer") }),

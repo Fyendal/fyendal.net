@@ -64,7 +64,7 @@ describe("card-play announcement", () => {
           ctx.requestChoice("declare-extra", "Pay the optional additional cost?", ["yes", "no"]);
         },
         onChoose(ctx, hook, option) {
-          if (hook === "declare-extra" && option === "yes") ctx.setCounter("declaredExtra", 1);
+          if (hook === "declare-extra" && option === "yes") ctx.setState("declaredExtra", 1);
         },
       },
     };
@@ -108,7 +108,7 @@ describe("card-play announcement", () => {
     expect(player(state, 0).resources).toBe(1);
     expect(state.chain.at(-1)?.attackingCard).toMatchObject({
       instanceId: attackId,
-      counters: { declaredExtra: 1 },
+      scriptState: { declaredExtra: 1 },
     });
   });
 
@@ -176,7 +176,7 @@ describe("card-play announcement", () => {
           ctx.requestChoice("mode", "Choose a mode", ["first", "second"]);
         },
         onChoose(ctx, hook, option) {
-          if (hook === "mode") ctx.setCounter("selectedMode", option === "first" ? 1 : 2);
+          if (hook === "mode") ctx.setState("selectedMode", option === "first" ? 1 : 2);
         },
         onPlay(ctx) {
           ctx.setFlag("player", "modalActionResolved", true);
@@ -221,7 +221,7 @@ describe("card-play announcement", () => {
     state = result.state;
 
     expect(state.stack).toHaveLength(1);
-    expect(state.stack[0]?.card?.counters?.selectedMode).toBe(2);
+    expect(state.stack[0]?.card?.scriptState?.selectedMode).toBe(2);
     expect(state.players[0]!.flags.modalActionResolved).not.toBe(true);
     expect(state.pendingDecision).toMatchObject({ kind: "priority-window", player: 0 });
     expect(legalIntents(state, 0).some((intent) => intent.kind === "pass")).toBe(true);
@@ -424,7 +424,7 @@ describe("card-play announcement", () => {
           replacesResourceCost: false,
         },
         onAlternativeCostPaid(ctx, paidCards) {
-          ctx.setCounter("paidAllies", paidCards.length);
+          ctx.setState("paidAllies", paidCards.length);
         },
       },
     };
@@ -476,7 +476,7 @@ describe("card-play announcement", () => {
     ));
     expect(state.chain[0]?.attackingCard).toMatchObject({
       instanceId: strikeId,
-      counters: { paidAllies: 6 },
+      scriptState: { paidAllies: 6 },
     });
   });
 

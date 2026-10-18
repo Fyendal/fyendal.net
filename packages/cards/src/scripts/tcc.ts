@@ -121,12 +121,12 @@ function interlude(amount: number): CardScript {
       );
     },
     onPreventsDamage(ctx, prevented) {
-      if (prevented > 0 && ctx.getCounter("interlude-target") !== ctx.seat) ctx.createToken(COPPER);
+      if (prevented > 0 && ctx.getState("interlude-target") !== ctx.seat) ctx.createToken(COPPER);
     },
     onChoose(ctx, hook, option) {
       if (hook !== "interlude-target") return;
       const target = option === "you" ? ctx.seat : opponentSeat(ctx);
-      ctx.setCounter("interlude-target", target);
+      ctx.setState("interlude-target", target);
       ctx.preventNextDamage(target, amount);
     },
   };

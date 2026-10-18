@@ -75,7 +75,7 @@ function chargeAttack(extra: CardScript = {}): CardScript {
       if (hook === "dtd-charge") {
         if (option !== "no") {
           const card = ctx.charge(Number(option));
-          if (card) ctx.setCounter("chargedPitch", ctx.cardColor(card));
+          if (card) ctx.setState("chargedPitch", ctx.cardColor(card));
         }
         return;
       }
@@ -183,7 +183,7 @@ function randomBanishCost(ctx: ScriptCtx): DeepReadonly<CardInstance> | undefine
   if (!hand.length) return undefined;
   const chosen = hand[ctx.randomInt(hand.length)];
   if (!chosen || !ctx.banish(chosen.instanceId)) return undefined;
-  if (ctx.basePower(chosen) >= 6) ctx.setCounter("banishedSix", 1);
+  if (ctx.basePower(chosen) >= 6) ctx.setState("banishedSix", 1);
   return chosen;
 }
 function randomBanishAttack(reward?: "go-again" | "power"): CardScript {
@@ -191,7 +191,7 @@ function randomBanishAttack(reward?: "go-again" | "power"): CardScript {
     requiredHandCardsForAdditionalCost: 1,
     additionalCost: randomBanishCost,
     onAttackDeclared(ctx) {
-      if (!ctx.getCounter("banishedSix")) return;
+      if (!ctx.getState("banishedSix")) return;
       if (reward === "go-again") ctx.grantGoAgain();
       if (reward === "power") ctx.addModifier({ scope: "chain-link", attack: 2 });
     },
@@ -419,7 +419,7 @@ export const dtd: Record<string, CardScript> = mergeSetScripts("DTD", dtdHighRar
   },
   "banneret of resilience|2": banneret("defense"),
   "banneret of vigor|2": banneret("resource"),
-  "beaming bravado|3": chargeAttack({ modifyAttack: (ctx) => (ctx.getCounter("chargedPitch") === 2 ? 1 : 0) }),
+  "beaming bravado|3": chargeAttack({ modifyAttack: (ctx) => (ctx.getState("chargedPitch") === 2 ? 1 : 0) }),
   "radiant view|0": radiantEquipment(),
   "radiant raiment|0": radiantEquipment(),
   "radiant flow|0": radiantEquipment(),
@@ -511,17 +511,17 @@ export const dtd: Record<string, CardScript> = mergeSetScripts("DTD", dtdHighRar
       condition(ctx, defenders) {
         return (
           ctx.link?.attackingCard.instanceId === ctx.self.instanceId &&
-          ctx.getCounter("usedTurn") !== ctx.state.turn &&
+          ctx.getState("usedTurn") !== ctx.state.turn &&
           defenders.some((card) => ctx.cardData(card.cardId).cardType !== "equipment")
         );
       },
     },
     onFriendlyDefended(ctx) {
-      if (ctx.link?.attackingCard.instanceId !== ctx.self.instanceId || ctx.getCounter("usedTurn") === ctx.state.turn)
+      if (ctx.link?.attackingCard.instanceId !== ctx.self.instanceId || ctx.getState("usedTurn") === ctx.state.turn)
         return;
       const cards = [...ctx.link!.defendingCards, ...ctx.link!.defendingEquipment];
       if (!cards.length) return;
-      ctx.setCounter("usedTurn", ctx.state.turn);
+      ctx.setState("usedTurn", ctx.state.turn);
       ctx.requestCardChoice(
         "decimator",
         decisionPrompt("Choose a defending card to halve its base defense", "card.dtd.defender.defense.halve"),
@@ -595,12 +595,12 @@ for (const [pitch, power] of [
   dtd[`v for valor|${pitch}`] = vForValor(power);
   dtd[`glaring impact|${pitch}`] = chargeAttack({
     onAttackDeclared(ctx) {
-      if (ctx.getCounter("chargedPitch") === 2) ctx.setFlag("link", "overpower", true);
+      if (ctx.getState("chargedPitch") === 2) ctx.setFlag("link", "overpower", true);
     },
   });
   if (pitch === 3)
     dtd[`light the way|${pitch}`] = chargeAttack({
-      canTriggerOnHit: (ctx) => ctx.getCounter("chargedPitch") === 2,
+      canTriggerOnHit: (ctx) => ctx.getState("chargedPitch") === 2,
       onHit(ctx) {
         ctx.grantGoAgain();
       },

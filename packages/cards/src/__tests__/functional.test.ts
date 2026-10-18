@@ -145,6 +145,6 @@ describe("script expansion", () => {
       .toBeUndefined();
     expect(Array.isArray(beckoning)).toBe(false);
     expect(beckoning && !Array.isArray(beckoning) ? beckoning.variableCost : undefined)
-      .toMatchObject({ base: 1, resourcesPerX: 2, counterKey: "beckoningX" });
+      .toMatchObject({ base: 1, resourcesPerX: 2, stateKey: "beckoningX" });
   });
 });

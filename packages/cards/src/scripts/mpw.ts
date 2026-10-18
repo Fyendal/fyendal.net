@@ -149,7 +149,7 @@ function sharpenAction(threshold: number, reward: "blade" | "flurry" | "discount
 
 function displayOfArtistry(power: number): CardScript {
   return weaponReaction(power, (ctx, weapon) => {
-    if (Number(weapon.counters?.sharpenedTurn) !== ctx.state.turn) return;
+    if (Number(weapon.scriptState?.sharpenedTurn) !== ctx.state.turn) return;
     ctx.addModifier({ scope: "chain-link", defense: -1, appliesToCardType: "attack-reaction" });
     ctx.addModifier({ scope: "chain-link", defense: -1, appliesToCardType: "defense-reaction" });
   });
@@ -159,7 +159,7 @@ function silverdrop(power: number): CardScript {
   return {
     ...weaponReaction(power),
     modifyPlayCost(ctx, base) {
-      return Number(ctx.link?.attackingCard.counters?.sharpenedTurn) === ctx.state.turn ? Math.max(0, base - 1) : base;
+      return Number(ctx.link?.attackingCard.scriptState?.sharpenedTurn) === ctx.state.turn ? Math.max(0, base - 1) : base;
     },
   };
 }
@@ -243,7 +243,7 @@ export const mpw: Record<string, CardScript> = {
       goAgain: false,
       timing: "instant",
       destroySelfCost: true,
-      canActivate: (ctx) => swords(ctx).some((sword) => Number(sword.counters?.sharpenedTurn) === ctx.state.turn),
+      canActivate: (ctx) => swords(ctx).some((sword) => Number(sword.scriptState?.sharpenedTurn) === ctx.state.turn),
     }),
   },
   "duelist gauntlets|0": {
@@ -374,8 +374,8 @@ export const mpw: Record<string, CardScript> = {
           modifier.scope === "until-end-of-turn" &&
           !modifier.consumed,
       );
-      if (!isSwordAttack(ctx) || !marker || ctx.getCounter("allInUsed") > 0) return;
-      ctx.setCounter("allInUsed", 1);
+      if (!isSwordAttack(ctx) || !marker || ctx.getState("allInUsed") > 0) return;
+      ctx.setState("allInUsed", 1);
       const gold = [...controlledNamed(ctx, "Gold")];
       for (const token of gold) ctx.destroyPermanent(token.instanceId);
       if (gold.length) ctx.addModifier({ scope: "chain-link", attack: gold.length * 2 });
@@ -391,14 +391,14 @@ export const mpw: Record<string, CardScript> = {
     canPlay: (ctx) =>
       swords(ctx).some(
         (sword) =>
-          Number(sword.counters?.sharpenedTurn) === ctx.state.turn &&
+          Number(sword.scriptState?.sharpenedTurn) === ctx.state.turn &&
           Number(ctx.getFlag("player", `attackedInstance:${sword.instanceId}`)) > 0,
       ),
     playTargetOptions(ctx) {
       return swords(ctx)
         .filter(
           (sword) =>
-            Number(sword.counters?.sharpenedTurn) === ctx.state.turn &&
+            Number(sword.scriptState?.sharpenedTurn) === ctx.state.turn &&
             Number(ctx.getFlag("player", `attackedInstance:${sword.instanceId}`)) > 0,
         )
         .map((sword) => sword.instanceId);
@@ -501,22 +501,22 @@ export const mpw: Record<string, CardScript> = {
     },
     onChoose(ctx, hook, option) {
       if (hook !== "lessons-learned") return;
-      const count = ctx.getCounter("lessonsCount");
+      const count = ctx.getState("lessonsCount");
       if (option === "done") {
         if (count > 0) ctx.shuffleDeck();
         return;
       }
       const chosen = ctx.player(ctx.seat).graveyard.find((card) => card.instanceId === Number(option));
       if (!chosen || !ctx.putOnDeckBottom(chosen.instanceId)) return;
-      ctx.setCounter("lessonsCount", count + 1);
-      ctx.setCounter(`lessonsCard:${count}`, chosen.instanceId);
+      ctx.setState("lessonsCount", count + 1);
+      ctx.setState(`lessonsCard:${count}`, chosen.instanceId);
       if (count >= 2) {
         ctx.shuffleDeck();
         return;
       }
       const chosenNames = new Set(
         Array.from({ length: count + 1 }, (_, index) => {
-          const id = ctx.getCounter(`lessonsCard:${index}`);
+          const id = ctx.getState(`lessonsCard:${index}`);
           const card = ctx.player(ctx.seat).deck.find((candidate) => candidate.instanceId === id);
           return card ? ctx.cardNames(card) : [];
         }).flat(),
@@ -678,10 +678,10 @@ export const mpw: Record<string, CardScript> = {
           const token = ctx.player(ctx.seat).board.find((card) => cardNamed(ctx, card, name));
           if (token && ctx.destroyPermanent(token.instanceId)) count++;
         }
-        ctx.setCounter("offBeatCount", count);
+        ctx.setState("offBeatCount", count);
         if (count > 0) chooseSword(ctx, "off-beat", (inner, id) => sharpenSword(inner, id, count));
       } else if (hook === "off-beat") {
-        sharpenSword(ctx, Number(option), ctx.getCounter("offBeatCount"));
+        sharpenSword(ctx, Number(option), ctx.getState("offBeatCount"));
       }
     },
   },
@@ -786,7 +786,7 @@ export const mpw: Record<string, CardScript> = {
     for (const card of [...ctx.player(target).arsenal]) ctx.moveToGraveyard(card.instanceId, "arsenal");
   }),
   "deadly display|2": weaponReaction(2, (ctx, weapon) => {
-    if (Number(weapon.counters?.sharpenedTurn) === ctx.state.turn)
+    if (Number(weapon.scriptState?.sharpenedTurn) === ctx.state.turn)
       ctx.addModifier({ scope: "chain-link", onHitCreateToken: { cardId: FLURRY, count: 1 } });
   }),
   "dice up|3": onHitRemoveCounter((ctx, target) => {

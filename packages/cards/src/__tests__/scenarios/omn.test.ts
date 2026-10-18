@@ -145,6 +145,29 @@ describe("OMN — import and set mechanics", () => {
     expect(g.state.players[0]!.board.some((card) => card.cardId === printingId("gold|0"))).toBe(false);
   });
 
+  it("Gear Turner may search a cog into the arena when it hits", () => {
+    const g = scenario({ seats: [
+      hero("puffin|0", { hand: ["gear turner|1", "copper cog|3"], deck: ["copper cog|3"] }),
+      foe(),
+    ] });
+
+    g.play("gear turner|1").blockWith().settle();
+    expect(g.state.pendingDecision).toMatchObject({ chooseHook: "gear-turner-cog" });
+    g.chooseCard("copper cog|3").expectInZone(0, "copper cog|3", "board");
+  });
+
+  it("Gear Turner may decline its cog search", () => {
+    const g = scenario({ seats: [
+      hero("puffin|0", { hand: ["gear turner|1", "copper cog|3"], deck: ["copper cog|3"] }),
+      foe(),
+    ] });
+
+    g.play("gear turner|1").blockWith().settle()
+      .chooseOption("no")
+      .expectInZone(0, "copper cog|3", "deck")
+      .expectNotInZone(0, "copper cog|3", "board");
+  });
+
   it.each(["snatch|1", "nimblism|1"])(
     "Red Lure Harpoon lets its controller play an opponent's banished %s",
     (borrowedCard) => {
@@ -467,7 +490,8 @@ describe("OMN — import and set mechanics", () => {
       ],
     });
     const sword = g.state.players[0]!.weapons[0]!;
-    sword.counters = { power: 2, sharpenedTurn: g.state.turn };
+    sword.counters = { power: 2 };
+    sword.scriptState = { sharpenedTurn: g.state.turn };
 
     g.attackWithWeapon("zenith blade|0")
       .blockWith("raging onslaught|1", "raging onslaught|1")

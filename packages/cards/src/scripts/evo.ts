@@ -291,10 +291,10 @@ function scrapAttack(effect?: (ctx: ScriptCtx) => void): CardScript {
     onChoose(ctx, hook, option) {
       if (hook !== "scrap" || option === "none") return;
       const card = scrapCards(ctx).find((candidate) => candidate.instanceId === Number(option));
-      if (card && ctx.banish(card.instanceId)) ctx.setCounter("scrapped", 1);
+      if (card && ctx.banish(card.instanceId)) ctx.setState("scrapped", 1);
     },
     onAttackDeclared(ctx) {
-      if (ctx.getCounter("scrapped") > 0) effect?.(ctx);
+      if (ctx.getState("scrapped") > 0) effect?.(ctx);
     },
   };
 }

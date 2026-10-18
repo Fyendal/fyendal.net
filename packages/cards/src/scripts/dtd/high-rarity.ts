@@ -225,7 +225,7 @@ function replaceActionPhaseDraw(ctx: ScriptCtx, drawingSeat: number, count: numb
   return 0;
 }
 function requestSkullChoice(ctx: ScriptCtx): void {
-  const chosen = [ctx.getCounter("skull-1"), ctx.getCounter("skull-2")].filter(Boolean);
+  const chosen = [ctx.getState("skull-1"), ctx.getState("skull-2")].filter(Boolean);
   const chosenNames = new Set(
     chosen.flatMap((id) => {
       const card = ctx.player(ctx.seat).banish.find((candidate) => candidate.instanceId === id);
@@ -488,18 +488,18 @@ export const dtdHighRarity: Record<string, CardScript> = {
         );
     },
     onPlay(ctx) {
-      if (ctx.getCounter("lance-mode:power") > 0)
+      if (ctx.getState("lance-mode:power") > 0)
         ctx.addModifier({ scope: "chain-link", attack: 2, appliesToSubtype: "light" });
-      if (ctx.getCounter("lance-mode:draw") > 0)
+      if (ctx.getState("lance-mode:draw") > 0)
         ctx.addModifier({ scope: "chain-link", onHitDraw: 1, appliesToSubtype: "light" });
-      if (ctx.getCounter("lance-mode:go-again") > 0)
+      if (ctx.getState("lance-mode:go-again") > 0)
         ctx.addModifier({ scope: "chain-link", onHitGoAgain: true, appliesToSubtype: "light" });
     },
     onChoose(ctx, hook, option) {
       if (hook === "lance-soul") {
         if (option !== "done" && ctx.banish(Number(option))) {
-          const count = ctx.getCounter("lance-count") + 1;
-          ctx.setCounter("lance-count", count);
+          const count = ctx.getState("lance-count") + 1;
+          ctx.setState("lance-count", count);
           const soul = ctx.player(ctx.seat).soul;
           if (count < 3 && soul.length) {
             ctx.requestCardChoice(
@@ -512,7 +512,7 @@ export const dtdHighRarity: Record<string, CardScript> = {
             return;
           }
         }
-        if (ctx.getCounter("lance-count") > 0)
+        if (ctx.getState("lance-count") > 0)
           ctx.requestChoice(
             "lance-mode",
             decisionPrompt("Choose a Lumina Lance mode", "card.dtd.lance.mode", {
@@ -525,10 +525,10 @@ export const dtdHighRarity: Record<string, CardScript> = {
             ["power", "draw", "go-again"],
           );
       } else if (hook === "lance-mode") {
-        ctx.setCounter(`lance-mode:${option}`, 1);
-        const used = ctx.getCounter("lance-modes") + 1;
-        ctx.setCounter("lance-modes", used);
-        if (used < ctx.getCounter("lance-count"))
+        ctx.setState(`lance-mode:${option}`, 1);
+        const used = ctx.getState("lance-modes") + 1;
+        ctx.setState("lance-modes", used);
+        if (used < ctx.getState("lance-count"))
           ctx.requestChoice(
             "lance-mode",
             decisionPrompt("Choose another Lumina Lance mode", "card.dtd.lance.mode.next", {
@@ -538,7 +538,7 @@ export const dtdHighRarity: Record<string, CardScript> = {
                 "go-again": decisionMessage("card.dtd.lance.option.goagain"),
               },
             }),
-            ["power", "draw", "go-again"].filter((mode) => ctx.getCounter(`lance-mode:${mode}`) <= 0),
+            ["power", "draw", "go-again"].filter((mode) => ctx.getState(`lance-mode:${mode}`) <= 0),
           );
       }
     },
@@ -556,17 +556,17 @@ export const dtdHighRarity: Record<string, CardScript> = {
     },
     onChoose(ctx, hook, option) {
       if (hook !== "spoiled-skull") return;
-      if (!ctx.getCounter("skull-1")) {
-        ctx.setCounter("skull-1", Number(option));
+      if (!ctx.getState("skull-1")) {
+        ctx.setState("skull-1", Number(option));
         requestSkullChoice(ctx);
         return;
       }
-      if (!ctx.getCounter("skull-2")) {
-        ctx.setCounter("skull-2", Number(option));
+      if (!ctx.getState("skull-2")) {
+        ctx.setState("skull-2", Number(option));
         requestSkullChoice(ctx);
         return;
       }
-      const choices = [ctx.getCounter("skull-1"), ctx.getCounter("skull-2"), Number(option)];
+      const choices = [ctx.getState("skull-1"), ctx.getState("skull-2"), Number(option)];
       ctx.allowPlayFrom(choices[ctx.randomInt(choices.length)]!, "banish");
     },
   }),
@@ -755,7 +755,7 @@ export const dtdHighRarity: Record<string, CardScript> = {
         for (const card of [...Object.values(player.equipment), ...player.board]
           .filter((c): c is DeepReadonly<CardInstance> => !!c)
           .slice(0, 3))
-          ctx.setCardCounter(card.instanceId, "frozenUntilTurn", ctx.state.turn + 1);
+          ctx.setCardState(card.instanceId, "frozenUntilTurn", ctx.state.turn + 1);
     },
     canTriggerOnDefend: defendsTogetherWithCardFromHand,
     onDefend(ctx) {

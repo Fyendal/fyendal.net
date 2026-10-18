@@ -24,9 +24,9 @@ export function attackActionPlayRestricted(
   const data = instanceDataOf(state, card);
   if (data.cardType !== "action" || !(data.subtypes ?? []).includes("attack")) return false;
   if (attackBasePowerRestricted(state, runtime, player.seat, card)) return true;
-  const until = Number(player.hero.counters?.attackActionBasePowerLimitUntilTurn ?? 0);
+  const until = Number(player.hero.scriptState?.attackActionBasePowerLimitUntilTurn ?? 0);
   if (until !== state.turn) return false;
-  const limit = Number(player.hero.counters?.attackActionBasePowerLimit ?? -1);
+  const limit = Number(player.hero.scriptState?.attackActionBasePowerLimit ?? -1);
   return basePowerOf(state, runtime, player.seat, card, data.attack ?? 0) <= limit;
 }
 

@@ -581,9 +581,9 @@ describe("game setup & turn structure", () => {
     helm.faceDown = true;
     expect(cardTypesOf(s, p.hero)).not.toContain("royal");
     helm.faceDown = false;
-    p.hero.counters = { ownedCardAbilitiesDisabledTurn: s.turn };
+    p.hero.scriptState = { ownedCardAbilitiesDisabledTurn: s.turn };
     expect(cardTypesOf(s, p.hero)).not.toContain("royal");
-    delete p.hero.counters.ownedCardAbilitiesDisabledTurn;
+    delete p.hero.scriptState.ownedCardAbilitiesDisabledTurn;
     expect(cardTypesOf(s, p.hero)).toContain("royal");
 
     destroyPermanent(s, engineRuntime, 0, helm);
@@ -1078,7 +1078,7 @@ describe("game setup & turn structure", () => {
         },
         onChoose(ctx, hook, option) {
           if (hook === "hero-wager-loss" && option === "yes") {
-            ctx.setCounter("wagerWinnerOverride", ctx.seat + 1);
+            ctx.setState("wagerWinnerOverride", ctx.seat + 1);
           }
         },
       },
@@ -1321,14 +1321,14 @@ describe("game setup & turn structure", () => {
     s.scriptsRef = {
       ...s.scriptsRef,
       AURA: {
-        onAttackDeclared(ctx) { ctx.addCounter(ctx.self.instanceId, "self", 1); },
-        onFriendlyAttackDeclared(ctx) { ctx.addCounter(ctx.self.instanceId, "friendly", 1); },
+        onAttackDeclared(ctx) { ctx.addCardState(ctx.self.instanceId, "self", 1); },
+        onFriendlyAttackDeclared(ctx) { ctx.addCardState(ctx.self.instanceId, "friendly", 1); },
       },
       ATK4: {
-        onAttackDeclared(ctx) { ctx.addCounter(ctx.self.instanceId, "self", 1); },
+        onAttackDeclared(ctx) { ctx.addCardState(ctx.self.instanceId, "self", 1); },
       },
       IDOL: {
-        onAttackDeclared(ctx) { ctx.addCounter(ctx.self.instanceId, "self", 1); },
+        onAttackDeclared(ctx) { ctx.addCardState(ctx.self.instanceId, "self", 1); },
       },
     };
     s.modifiers.push({
@@ -1346,10 +1346,10 @@ describe("game setup & turn structure", () => {
 
     declareAttack(s, engineRuntime, 0, attacker, "action");
 
-    expect(s.chain.at(-1)?.attackingCard.counters?.self).toBe(1);
-    expect(p.board[0]?.counters?.self).toBeUndefined();
-    expect(p.board[0]?.counters?.friendly).toBe(1);
-    expect(p.board[1]?.counters?.self).toBeUndefined();
+    expect(s.chain.at(-1)?.attackingCard.scriptState?.self).toBe(1);
+    expect(p.board[0]?.scriptState?.self).toBeUndefined();
+    expect(p.board[0]?.scriptState?.friendly).toBe(1);
+    expect(p.board[1]?.scriptState?.self).toBeUndefined();
   });
 
   it("expires seat-bound continuous effects at start or end independently", () => {
@@ -1565,7 +1565,7 @@ describe("game setup & turn structure", () => {
   it("omits inactive arena state from graveyard and banished card views", () => {
     const s = makeGame(41);
     const staleState = {
-      counters: { arcaneBonus: 2, fused: 1, power: 3 },
+      scriptState: { arcaneBonus: 2, fused: 1, power: 3 },
       defCounters: 1,
       life: 2,
     };
@@ -2567,7 +2567,7 @@ describe("pitch & costs", () => {
   it("a delayed first-attack tax ignores non-attacks", () => {
     let s = makeGame(403);
     const pump = giveCard(s, 0, "PUMP");
-    player(s, 0).hero.counters = {
+    player(s, 0).hero.scriptState = {
       firstAttackExtraCostTurn: s.turn,
       firstAttackExtraCost: 1,
     };
@@ -2584,14 +2584,14 @@ describe("pitch & costs", () => {
     expect(result.ok).toBe(true);
     if (!result.ok) return;
     s = result.state;
-    expect(player(s, 0).hero.counters?.firstAttackExtraCost).toBe(1);
+    expect(player(s, 0).hero.scriptState?.firstAttackExtraCost).toBe(1);
   });
 
   it("a delayed first-action tax is paid and consumed by an action card", () => {
     let s = makeGame(413);
     const action = giveCard(s, 0, "PUMP");
     const pitch = giveCard(s, 0, "BLUE");
-    player(s, 0).hero.counters = {
+    player(s, 0).hero.scriptState = {
       firstActionExtraCostTurn: s.turn,
       firstActionExtraCost: 1,
     };
@@ -2612,13 +2612,13 @@ describe("pitch & costs", () => {
     if (!result.ok) return;
     s = result.state;
     expect(player(s, 0).resources).toBe(2);
-    expect(player(s, 0).hero.counters?.firstActionExtraCost).toBeUndefined();
+    expect(player(s, 0).hero.scriptState?.firstActionExtraCost).toBeUndefined();
   });
 
   it("a delayed first-action tax ignores instant cards", () => {
     const s = makeGame(414);
     const instant = giveCard(s, 0, "INSTANT");
-    player(s, 0).hero.counters = {
+    player(s, 0).hero.scriptState = {
       firstActionExtraCostTurn: s.turn,
       firstActionExtraCost: 1,
     };
@@ -2630,7 +2630,7 @@ describe("pitch & costs", () => {
     });
     expect(result.ok).toBe(true);
     if (!result.ok) return;
-    expect(player(result.state, 0).hero.counters?.firstActionExtraCost).toBe(1);
+    expect(player(result.state, 0).hero.scriptState?.firstActionExtraCost).toBe(1);
   });
 
   it("a delayed first-action tax applies to action abilities", () => {
@@ -2638,7 +2638,7 @@ describe("pitch & costs", () => {
     const weapon = player(s, 0).weapons[0]!;
     const pitch = giveCard(s, 0, "YEL");
     player(s, 0).hand = player(s, 0).hand.filter((card) => card.instanceId === pitch);
-    player(s, 0).hero.counters = {
+    player(s, 0).hero.scriptState = {
       firstActionExtraCostTurn: s.turn,
       firstActionExtraCost: 1,
     };
@@ -2658,14 +2658,14 @@ describe("pitch & costs", () => {
     expect(result.ok).toBe(true);
     if (!result.ok) return;
     expect(player(result.state, 0).resources).toBe(0);
-    expect(player(result.state, 0).hero.counters?.firstActionExtraCost).toBeUndefined();
+    expect(player(result.state, 0).hero.scriptState?.firstActionExtraCost).toBeUndefined();
   });
 
   it("a delayed first-attack tax is paid and consumed by an attack action card", () => {
     let s = makeGame(404);
     const attack = giveCard(s, 0, "ATK6");
     const pitch = giveCard(s, 0, "ATK6");
-    player(s, 0).hero.counters = {
+    player(s, 0).hero.scriptState = {
       firstAttackExtraCostTurn: s.turn,
       firstAttackExtraCost: 1,
     };
@@ -2686,7 +2686,7 @@ describe("pitch & costs", () => {
     if (!result.ok) return;
     s = result.state;
     expect(player(s, 0).resources).toBe(0);
-    expect(player(s, 0).hero.counters?.firstAttackExtraCost).toBeUndefined();
+    expect(player(s, 0).hero.scriptState?.firstAttackExtraCost).toBeUndefined();
   });
 
   it("a delayed first-attack tax applies to attack abilities", () => {
@@ -2694,7 +2694,7 @@ describe("pitch & costs", () => {
     const weapon = player(s, 0).weapons[0]!;
     const pitch = giveCard(s, 0, "YEL");
     player(s, 0).hand = player(s, 0).hand.filter((card) => card.instanceId === pitch);
-    player(s, 0).hero.counters = {
+    player(s, 0).hero.scriptState = {
       firstAttackExtraCostTurn: s.turn,
       firstAttackExtraCost: 1,
     };
@@ -2715,7 +2715,7 @@ describe("pitch & costs", () => {
     if (!result.ok) return;
     s = result.state;
     expect(player(s, 0).resources).toBe(0);
-    expect(player(s, 0).hero.counters?.firstAttackExtraCost).toBeUndefined();
+    expect(player(s, 0).hero.scriptState?.firstAttackExtraCost).toBeUndefined();
   });
 
   it("pays a 2-cost attack with a blue pitch, floats the spare resource", () => {
@@ -3707,7 +3707,7 @@ describe("legalIntents / applyIntent contract", () => {
     expect(result.ok).toBe(true);
     if (!result.ok) return;
     s = result.state;
-    expect(s.chain.at(-1)?.attackingCard.counters?.runeGated).toBe(1);
+    expect(s.chain.at(-1)?.attackingCard.scriptState?.runeGated).toBe(1);
   });
 
   it("every enumerated legal intent succeeds (seeded random playout)", () => {
@@ -4903,7 +4903,7 @@ describe("ongoing effects", () => {
   it("projects delayed Crush restrictions on the affected opponent", () => {
     const s = makeGame(51);
     const opponent = player(s, 1);
-    opponent.hero.counters = {
+    opponent.hero.scriptState = {
       firstActionExtraCostTurn: s.turn,
       firstActionExtraCost: 1,
       halveBaseAttackActionUntil: s.turn + 1,
@@ -4938,7 +4938,7 @@ describe("ongoing effects", () => {
 
   it("projects permanent ability loss as a rest-of-game effect imposed by the opponent", () => {
     const s = makeGame(52);
-    player(s, 1).hero.counters = { abilitiesDisabledPermanently: 1 };
+    player(s, 1).hero.scriptState = { abilitiesDisabledPermanently: 1 };
 
     expect(projectStateFor(s, 0).ongoing).toEqual([{
       seat: 1,
@@ -5213,7 +5213,7 @@ describe("state-based destroy-at-zero-counter", () => {
       instanceId: s.nextInstanceId++,
       cardId: "AURA",
       owner: 0,
-      ...(charges !== undefined ? { counters: { charge: charges } } : {}),
+      ...(charges !== undefined ? { counters: { suspense: charges } } : {}),
     };
     player(s, 0).board.push(aura);
     return aura;
@@ -5243,6 +5243,6 @@ describe("state-based destroy-at-zero-counter", () => {
     s = r.state;
     s = passTopLayer(s);
     expect(player(s, 0).board).toHaveLength(2);
-    expect(player(s, 0).board[0]!.counters?.charge).toBe(1);
+    expect(player(s, 0).board[0]!.counters?.suspense).toBe(1);
   });
 });

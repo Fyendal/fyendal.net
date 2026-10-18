@@ -79,7 +79,7 @@ function enchantingMelody(prevention: number): CardScript {
 function plunderRun(attack: number): CardScript {
   return {
     onPlay(ctx) {
-      ctx.setCounter("drawOnHit", 1);
+      ctx.setState("drawOnHit", 1);
       ctx.addModifier({
         scope: "until-end-of-turn",
         ...ongoingLabel(
@@ -90,10 +90,10 @@ function plunderRun(attack: number): CardScript {
       if (ctx.fromArsenal) buffNextAttack(ctx, { attack, appliesTo: "attack-action" });
     },
     canTriggerOnHit(ctx) {
-      return ctx.link?.attackCardType === "action" && ctx.getCounter("drawOnHit") > 0;
+      return ctx.link?.attackCardType === "action" && ctx.getState("drawOnHit") > 0;
     },
     onHit(ctx) {
-      ctx.setCounter("drawOnHit", 0);
+      ctx.setState("drawOnHit", 0);
       ctx.drawCards(ctx.seat, 1);
     },
   };

@@ -206,7 +206,7 @@ describe("CRU — Guardian", () => {
 
     s.play("chokeslam|2", { targetAlly: "barnacle|2" });
     expect(
-      s.state.players[1]!.hero.counters?.attackActionNoPowerGainUntilTurn,
+      s.state.players[1]!.hero.scriptState?.attackActionNoPowerGainUntilTurn,
     ).toBeUndefined();
   });
 

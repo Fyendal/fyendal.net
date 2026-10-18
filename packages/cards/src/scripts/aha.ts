@@ -103,7 +103,7 @@ export const aha: Record<string, CardScript> = {
     activated: attackAbility(1),
     onAttackDeclared(ctx) {
       if (
-        Number(ctx.self.counters?.sharpenedTurn) === ctx.state.turn &&
+        Number(ctx.self.scriptState?.sharpenedTurn) === ctx.state.turn &&
         Number(ctx.getFlag("player", `attackedInstance:${ctx.self.instanceId}`)) === 1
       )
         ctx.grantGoAgain();
@@ -116,7 +116,7 @@ export const aha: Record<string, CardScript> = {
     },
     onHit(ctx) {
       if (!ctx.link) return;
-      ctx.setCounter("gazeSword", ctx.link.attackingCard.instanceId);
+      ctx.setState("gazeSword", ctx.link.attackingCard.instanceId);
       ctx.requestChoice(
         "gaze-draw",
         yesNoPrompt("Anticipating Gaze: remove a counter, destroy this, and draw?", "card.aha.gaze.counter.draw"),
@@ -125,7 +125,7 @@ export const aha: Record<string, CardScript> = {
     },
     onChoose(ctx, hook, option) {
       if (hook !== "gaze-draw" || option !== "yes") return;
-      const id = ctx.getCounter("gazeSword");
+      const id = ctx.getState("gazeSword");
       ctx.addCounter(id, "power", -1);
       ctx.destroySelf();
       ctx.drawCards(ctx.seat, 1);
@@ -149,14 +149,14 @@ export const aha: Record<string, CardScript> = {
         return;
       }
       if (hook !== "rerebrace-sharpen") return;
-      const target = ctx.getCounter("sharpenTarget");
-      const threshold = ctx.getCounter("sharpenFollowupThreshold");
-      const payoff = ctx.getCounter("sharpenFollowupKind");
-      const sourceId = ctx.getCounter("sharpenFollowupSource");
+      const target = ctx.getState("sharpenTarget");
+      const threshold = ctx.getState("sharpenFollowupThreshold");
+      const payoff = ctx.getState("sharpenFollowupKind");
+      const sourceId = ctx.getState("sharpenFollowupSource");
       const source = ctx.state.resolving.find((card) => card.instanceId === sourceId);
-      ctx.setCardCounter(ctx.self.instanceId, "sharpenFollowupThreshold", 0);
-      ctx.setCardCounter(ctx.self.instanceId, "sharpenFollowupKind", 0);
-      ctx.setCardCounter(ctx.self.instanceId, "sharpenFollowupSource", 0);
+      ctx.setCardState(ctx.self.instanceId, "sharpenFollowupThreshold", 0);
+      ctx.setCardState(ctx.self.instanceId, "sharpenFollowupKind", 0);
+      ctx.setCardState(ctx.self.instanceId, "sharpenFollowupSource", 0);
       if (option === "paid") {
         ctx.addCounter(target, "power", 1);
         ctx.destroySelf();
@@ -177,12 +177,12 @@ export const aha: Record<string, CardScript> = {
     },
   },
   "deadly display|1": weaponReaction(3, (ctx, weapon) => {
-    if (Number(weapon.counters?.sharpenedTurn) === ctx.state.turn) {
+    if (Number(weapon.scriptState?.sharpenedTurn) === ctx.state.turn) {
       ctx.addModifier({ scope: "chain-link", onHitCreateToken: { cardId: FLURRY, count: 1 } });
     }
   }),
   "deadly display|3": weaponReaction(1, (ctx, weapon) => {
-    if (Number(weapon.counters?.sharpenedTurn) === ctx.state.turn) {
+    if (Number(weapon.scriptState?.sharpenedTurn) === ctx.state.turn) {
       ctx.addModifier({ scope: "chain-link", onHitCreateToken: { cardId: FLURRY, count: 1 } });
     }
   }),
@@ -208,7 +208,7 @@ export const aha: Record<string, CardScript> = {
     additionalCost(ctx) {
       const weapon = ctx.link?.attackingCard;
       if (!weapon) return;
-      ctx.setCounter("polishedSword", weapon.instanceId);
+      ctx.setState("polishedSword", weapon.instanceId);
       const maximum = Math.min(2, Number(weapon.counters?.power ?? 0));
       ctx.requestChoice(
         "polished-counters",
@@ -217,8 +217,8 @@ export const aha: Record<string, CardScript> = {
       );
     },
     onPlay(ctx) {
-      const sword = ctx.getCounter("polishedSword");
-      const modes = ctx.getCounter("polishedModes");
+      const sword = ctx.getState("polishedSword");
+      const modes = ctx.getState("polishedModes");
       if (modes & 1) ctx.grantGoAgain();
       if (modes & 2) ctx.setAttackActivationLimit(sword, 2);
       if (modes & 4) buffNextAttack(ctx, { attackActivationCostReduction: 1, appliesToInstanceId: sword });
@@ -226,17 +226,17 @@ export const aha: Record<string, CardScript> = {
     onChoose(ctx, hook, option) {
       if (hook === "polished-counters") {
         const removed = Number(option.replace("remove ", ""));
-        ctx.addCounter(ctx.getCounter("polishedSword"), "power", -removed);
-        ctx.setCounter("polishedModesRemaining", removed + 1);
-        ctx.setCounter("polishedModes", 0);
+        ctx.addCounter(ctx.getState("polishedSword"), "power", -removed);
+        ctx.setState("polishedModesRemaining", removed + 1);
+        ctx.setState("polishedModes", 0);
       } else if (hook === "polished-mode") {
         const bit = option === "go again" ? 1 : option === "additional attack" ? 2 : 4;
-        ctx.setCounter("polishedModes", ctx.getCounter("polishedModes") | bit);
-        ctx.setCounter("polishedModesRemaining", ctx.getCounter("polishedModesRemaining") - 1);
+        ctx.setState("polishedModes", ctx.getState("polishedModes") | bit);
+        ctx.setState("polishedModesRemaining", ctx.getState("polishedModesRemaining") - 1);
       } else return;
-      const remaining = ctx.getCounter("polishedModesRemaining");
+      const remaining = ctx.getState("polishedModesRemaining");
       if (remaining <= 0) return;
-      const mask = ctx.getCounter("polishedModes");
+      const mask = ctx.getState("polishedModes");
       const modes = [
         ...(mask & 1 ? [] : ["go again"]),
         ...(mask & 2 ? [] : ["additional attack"]),
@@ -264,7 +264,7 @@ export const aha: Record<string, CardScript> = {
   "silverdrop downpour|1": {
     ...weaponReaction(4),
     modifyPlayCost(ctx, base) {
-      return Number(ctx.link?.attackingCard.counters?.sharpenedTurn) === ctx.state.turn ? Math.max(0, base - 1) : base;
+      return Number(ctx.link?.attackingCard.scriptState?.sharpenedTurn) === ctx.state.turn ? Math.max(0, base - 1) : base;
     },
   },
   "brimming blade|1": {

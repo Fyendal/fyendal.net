@@ -105,7 +105,7 @@ describe("promotional card pool", () => {
       .chooseCard("tome of fyendal|2")
       .expectHandSize(0, 1)
       .expectAP(0, 1);
-    expect(g.state.players[1]!.hero.counters?.bonusIntellectAtEndPhaseTurn).toBe(2);
+    expect(g.state.players[1]!.hero.scriptState?.bonusIntellectAtEndPhaseTurn).toBe(2);
   });
 
   it("Batter's large damage bypasses prevention and Theryon answers its equipment destruction", () => {

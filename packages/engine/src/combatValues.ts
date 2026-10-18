@@ -132,7 +132,7 @@ export function attackHasDominate(
   if (link.flags.attackAbilitiesSuppressed === true) return false;
   if ((link.attackingCard.suppressedKeywords ?? []).includes("dominate")) return false;
   const attacker = state.players[link.attacker] as PlayerState;
-  if (Number(attacker.hero.counters?.suppressDominateUntilTurn ?? 0) >= state.turn) {
+  if (Number(attacker.hero.scriptState?.suppressDominateUntilTurn ?? 0) >= state.turn) {
     return false;
   }
   if (instanceHasKeyword(state, link.attackingCard, "dominate")) return true;
@@ -371,7 +371,7 @@ function attackCannotGainPower(
     link.flags.cannotGainPower === true ||
     attacker.flags.attacksCannotGainPower === true ||
     (isAttackActionData(data) &&
-      Number(attacker.hero.counters?.attackActionNoPowerGainUntilTurn ?? 0) === state.turn)
+      Number(attacker.hero.scriptState?.attackActionNoPowerGainUntilTurn ?? 0) === state.turn)
   );
 }
 
@@ -783,8 +783,8 @@ function applyBaseModifier(
   // Numeric-property stage 2: layer effects stamped onto a card when it was
   // played set its base power before any multiplication.
   if (kind === "power") {
-    if (Number(card.counters?.setBasePowerUntilTurn ?? 0) === state.turn) {
-      base = Number(card.counters?.setBasePower ?? base);
+    if (Number(card.scriptState?.setBasePowerUntilTurn ?? 0) === state.turn) {
+      base = Number(card.scriptState?.setBasePower ?? base);
     }
 
     // Numeric-property stage 3: multiplication. Card and hero hooks model
@@ -801,7 +801,7 @@ function applyBaseModifier(
         base = heroMultiply(runtime.makeCtx(state, seat, player.hero), card, base);
       }
     }
-    const doublings = Math.max(0, Number(card.counters?.doubleBasePower ?? 0));
+    const doublings = Math.max(0, Number(card.scriptState?.doubleBasePower ?? 0));
     for (let i = 0; i < doublings; i++) base *= 2;
 
     // Numeric-property stage 4: division. Kayo's low roll is the round-down
@@ -820,14 +820,14 @@ function applyBaseModifier(
     }
     const roundDownHalvings = Math.max(
       0,
-      Number(card.counters?.halveBasePowerRoundDown ?? 0),
+      Number(card.scriptState?.halveBasePowerRoundDown ?? 0),
     );
     for (let i = 0; i < roundDownHalvings; i++) base = Math.floor(base / 2);
   }
   if (halveAttackActionBase(state, player, card)) {
     base = Math.ceil(base / 2);
   }
-  if (Number(card.counters?.halveBasePower ?? 0) > 0) {
+  if (Number(card.scriptState?.halveBasePower ?? 0) > 0) {
     base = Math.ceil(base / 2);
   }
   return base;
@@ -838,7 +838,7 @@ function halveAttackActionBase(
   player: PlayerState,
   card: CardInstance,
 ): boolean {
-  const until = Number(player.hero.counters?.halveBaseAttackActionUntil ?? 0);
+  const until = Number(player.hero.scriptState?.halveBaseAttackActionUntil ?? 0);
   return until >= state.turn && isAttackActionData(dataOf(state, card.cardId));
 }
 

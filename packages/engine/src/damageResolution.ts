@@ -184,7 +184,7 @@ function applyPreventionShields(
     )) continue;
     if (
       replacement.oncePerTurn &&
-      Number(preventionSource.counters?.fixedPreventionUsedTurn ?? -1) === state.turn
+      Number(preventionSource.scriptState?.fixedPreventionUsedTurn ?? -1) === state.turn
     ) continue;
     const prevented = preventable
       ? Math.min(replacement.amount, remaining)
@@ -196,7 +196,7 @@ function applyPreventionShields(
     }
     if (prevented > 0) {
       if (replacement.oncePerTurn) {
-        (preventionSource.counters ??= {}).fixedPreventionUsedTurn = state.turn;
+        (preventionSource.scriptState ??= {}).fixedPreventionUsedTurn = state.turn;
       }
       remaining -= prevented;
       logPublic(state, gameLogMessage(
@@ -1402,7 +1402,7 @@ export function boundArcaneCardBonus(state: GameStateInternal, packet: PendingAr
   if (!packet.arcane || packet.amount <= 0) return 0;
   return Math.max(
     0,
-    Number(findCardAnywhere(state, packet.sourceInstanceId)?.card.counters?.arcaneBonus ?? 0),
+    Number(findCardAnywhere(state, packet.sourceInstanceId)?.card.scriptState?.arcaneBonus ?? 0),
   );
 }
 
@@ -1417,7 +1417,7 @@ function applyBoundArcaneCardBonus(state: GameStateInternal, packet: PendingArca
 
   const base = packet.amount;
   packet.amount += bonus;
-  (source.counters ??= {}).arcaneBonus = 0;
+  (source.scriptState ??= {}).arcaneBonus = 0;
   logPublic(state, gameLogMessage(
     `${nameOf(state, source.cardId)} deals ${base} + ${bonus} arcane damage`,
     "engine.log.damage.arcane.bonus",

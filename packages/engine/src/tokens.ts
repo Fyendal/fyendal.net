@@ -1,4 +1,4 @@
-import type { GameMessage } from "@fyendal/shared";
+import type { CardCounters, GameMessage } from "@fyendal/shared";
 import type { EngineRuntime } from "./runtimePorts.js";
 import type { GameStateInternal } from "./runtimeState.js";
 import { cardHasName, cardNameKeysOf, dataOf, scriptOf } from "./cardProperties.js";
@@ -22,7 +22,8 @@ function createTokenRaw(
   runtime: EngineRuntime,
   player: PlayerState,
   cardId: string,
-  initialCounters?: Readonly<Record<string, number>>,
+  initialCounters?: Readonly<CardCounters>,
+  initialState?: Readonly<Record<string, number>>,
 ): CardInstance {
   const token: CardInstance = {
     instanceId: state.nextInstanceId++,
@@ -30,6 +31,9 @@ function createTokenRaw(
     owner: player.seat,
     ...(initialCounters && Object.keys(initialCounters).length > 0
       ? { counters: { ...initialCounters } }
+      : {}),
+    ...(initialState && Object.keys(initialState).length > 0
+      ? { scriptState: { ...initialState } }
       : {}),
   };
   stampEnteringLife(state, token);
@@ -85,7 +89,8 @@ function createTokenBatchRaw(
   player: PlayerState,
   cardId: string,
   count: number,
-  initialCounters?: Readonly<Record<string, number>>,
+  initialCounters?: Readonly<CardCounters>,
+  initialState?: Readonly<Record<string, number>>,
 ): CardInstance[] {
   const maxTriggerSourceId = state.nextInstanceId;
   const data = dataOf(state, cardId);
@@ -96,7 +101,7 @@ function createTokenBatchRaw(
   const allowedCount = unique ? (alreadyControlled ? 0 : Math.min(1, count)) : count;
   const tokens = Array.from(
     { length: allowedCount },
-    () => createTokenRaw(state, runtime, player, cardId, initialCounters),
+    () => createTokenRaw(state, runtime, player, cardId, initialCounters, initialState),
   );
   if (tokens.length === 0) return tokens;
   runtime.events.queueTriggeredEvent(
@@ -320,7 +325,8 @@ function continueTokenCreation(
   cause: TokenCreationContext,
   remainingReplacements: TokenCreationReplacementRef[],
   controllerSeats?: number[],
-  initialCounters?: Readonly<Record<string, number>>,
+  initialCounters?: Readonly<CardCounters>,
+  initialState?: Readonly<Record<string, number>>,
 ): CardInstance[] {
   const normalizedCount = Math.max(0, Math.floor(count));
   // An instruction to create zero tokens does not produce an event, so no
@@ -335,7 +341,7 @@ function continueTokenCreation(
     remainingReplacements,
   );
   if (applicable.length === 0) {
-    return createTokenBatchRaw(state, runtime, player, cardId, normalizedCount, initialCounters);
+    return createTokenBatchRaw(state, runtime, player, cardId, normalizedCount, initialCounters, initialState);
   }
 
   let orderedControllers = controllerSeats?.filter((controllerSeat) =>
@@ -360,6 +366,7 @@ function continueTokenCreation(
           count: normalizedCount,
           cause,
           ...(initialCounters ? { initialCounters: { ...initialCounters } } : {}),
+          ...(initialState ? { initialState: { ...initialState } } : {}),
           remainingReplacements,
         },
       };
@@ -370,7 +377,7 @@ function continueTokenCreation(
 
   const currentController = orderedControllers[0];
   if (currentController === undefined) {
-    return createTokenBatchRaw(state, runtime, player, cardId, normalizedCount, initialCounters);
+    return createTokenBatchRaw(state, runtime, player, cardId, normalizedCount, initialCounters, initialState);
   }
   const controlledApplicable = applicable.filter(
     (candidate) => candidate.controllerSeat === currentController,
@@ -419,6 +426,7 @@ function continueTokenCreation(
         count: normalizedCount,
         cause,
         ...(initialCounters ? { initialCounters: { ...initialCounters } } : {}),
+        ...(initialState ? { initialState: { ...initialState } } : {}),
         remainingReplacements,
         controllerSeats: orderedControllers,
       },
@@ -451,6 +459,7 @@ function continueTokenCreation(
         count: normalizedCount,
         cause,
         ...(initialCounters ? { initialCounters: { ...initialCounters } } : {}),
+        ...(initialState ? { initialState: { ...initialState } } : {}),
         remainingReplacements: remaining,
         controllerSeats: orderedControllers,
       },
@@ -466,6 +475,7 @@ function continueTokenCreation(
     remaining,
     orderedControllers,
     initialCounters,
+    initialState,
   );
 }
 
@@ -477,7 +487,8 @@ function beginTokenCreation(
   cardId: string,
   count: number,
   cause: TokenCreationContext = { kind: "effect" },
-  initialCounters?: Readonly<Record<string, number>>,
+  initialCounters?: Readonly<CardCounters>,
+  initialState?: Readonly<Record<string, number>>,
 ): CardInstance[] {
   const tokenData = dataOf(state, cardId);
   const auraTokensProhibited =
@@ -489,7 +500,7 @@ function beginTokenCreation(
   if (
     tokenData.cardType === "token" &&
     (tokenData.subtypes ?? []).includes("aura") &&
-    (auraTokensProhibited || Number(player.hero.counters?.auraTokenCreationLockedUntilTurn ?? 0) === state.turn)
+    (auraTokensProhibited || Number(player.hero.scriptState?.auraTokenCreationLockedUntilTurn ?? 0) === state.turn)
   ) {
     logPublic(state, gameLogMessage(
       `${nameOf(state, player.heroCardId)} can't create aura tokens this turn`,
@@ -507,6 +518,7 @@ function beginTokenCreation(
     tokenCreationReplacementRefs(state, player),
     undefined,
     initialCounters,
+    initialState,
   );
 }
 
@@ -540,7 +552,8 @@ export function createTokensFor(
   cardId: string,
   count: number,
   cause: TokenCreationContext = { kind: "effect" },
-  initialCounters?: Readonly<Record<string, number>>,
+  initialCounters?: Readonly<CardCounters>,
+  initialState?: Readonly<Record<string, number>>,
 ): CardInstance[] {
   const canonicalCardId = canonicalTokenCardId(state, cardId);
   const pendingHook = state.pendingDecision?.chooseHook;
@@ -555,6 +568,7 @@ export function createTokensFor(
       count,
       cause,
       ...(initialCounters ? { initialCounters: { ...initialCounters } } : {}),
+      ...(initialState ? { initialState: { ...initialState } } : {}),
     });
     return [];
   }
@@ -566,6 +580,7 @@ export function createTokensFor(
     count,
     cause,
     initialCounters,
+    initialState,
   );
 }
 
@@ -584,6 +599,7 @@ export function resumePendingTokenCreations(state: GameStateInternal, runtime: E
       request.count,
       request.cause,
       request.initialCounters,
+      request.initialState,
     );
   }
 }
@@ -613,6 +629,7 @@ export function answerTokenReplacementOrder(
       batch.remainingReplacements.filter((candidate) => candidate.kind !== "optional-friendly"),
       batch.controllerSeats,
       batch.initialCounters,
+      batch.initialState,
     );
     return undefined;
   }
@@ -651,6 +668,7 @@ export function answerTokenReplacementOrder(
     remaining,
     batch.controllerSeats,
     batch.initialCounters,
+    batch.initialState,
   );
   return undefined;
 }
@@ -698,6 +716,7 @@ export function answerTokenReplacementPlayerOrder(
     batch.remainingReplacements,
     controllerSeats,
     batch.initialCounters,
+    batch.initialState,
   );
   return undefined;
 }
@@ -735,6 +754,7 @@ export function answerTokenCreationReplacement(
     withoutDeclinedCopies(state, sourceInstanceId, batch.remainingReplacements),
     batch.controllerSeats,
     batch.initialCounters,
+    batch.initialState,
   );
   return undefined;
 }
@@ -746,7 +766,8 @@ export function createTokenFor(
   player: PlayerState,
   cardId: string,
   cause: TokenCreationContext = { kind: "effect" },
-  initialCounters?: Readonly<Record<string, number>>,
+  initialCounters?: Readonly<CardCounters>,
+  initialState?: Readonly<Record<string, number>>,
 ): CardInstance | undefined {
-  return createTokensFor(state, runtime, player, cardId, 1, cause, initialCounters)[0];
+  return createTokensFor(state, runtime, player, cardId, 1, cause, initialCounters, initialState)[0];
 }

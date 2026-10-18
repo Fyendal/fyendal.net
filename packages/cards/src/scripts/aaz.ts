@@ -145,13 +145,13 @@ export const aaz: Record<string, CardScript> = {
       const color = option === "red" ? 1 : option === "yellow" ? 2 : option === "blue" ? 3 : 0;
       if (color === 0) return;
       const target = ctx.player(opponentSeat(ctx));
-      const mask = Number(target.hero.counters?.pitchColorsProhibitedMask ?? 0) | (1 << (color - 1));
+      const mask = Number(target.hero.scriptState?.pitchColorsProhibitedMask ?? 0) | (1 << (color - 1));
       const throughTurn = Math.max(
-        Number(target.hero.counters?.pitchColorProhibitedThroughTurn ?? 0),
+        Number(target.hero.scriptState?.pitchColorProhibitedThroughTurn ?? 0),
         ctx.state.turn + 1,
       );
-      ctx.setCardCounter(target.hero.instanceId, "pitchColorsProhibitedMask", mask);
-      ctx.setCardCounter(target.hero.instanceId, "pitchColorProhibitedThroughTurn", throughTurn);
+      ctx.setCardState(target.hero.instanceId, "pitchColorsProhibitedMask", mask);
+      ctx.setCardState(target.hero.instanceId, "pitchColorProhibitedThroughTurn", throughTurn);
     },
   },
   "red in the ledger|1": {
@@ -160,8 +160,8 @@ export const aaz: Record<string, CardScript> = {
     },
     onHit(ctx) {
       const target = ctx.player(opponentSeat(ctx));
-      ctx.setCardCounter(target.hero.instanceId, "actionLimit", 1);
-      ctx.setCardCounter(target.hero.instanceId, "actionLimitTurn", ctx.state.turn + 1);
+      ctx.setCardState(target.hero.instanceId, "actionLimit", 1);
+      ctx.setCardState(target.hero.instanceId, "actionLimitTurn", ctx.state.turn + 1);
     },
   },
   "stone rain|1": {

@@ -349,7 +349,7 @@ describe("Armory Decks — AIO, AJV, and AST", () => {
       ],
     });
     g.play("icy encounter|1").chooseOption("head").blockWith().settle();
-    expect(g.state.players[1]!.board.some((card) => card.counters?.["frostZone:head"] === 1)).toBe(true);
+    expect(g.state.players[1]!.board.some((card) => card.scriptState?.["frostZone:head"] === 1)).toBe(true);
   });
 
   it("Jarl treats a played Colors of Aria as an Ice card", () => {
@@ -368,7 +368,7 @@ describe("Armory Decks — AIO, AJV, and AST", () => {
 
     g.play("colors of aria|1").chooseOption("head");
     expect(g.state.players[1]!.board.some(
-      (card) => card.counters?.["frostZone:head"] === 1,
+      (card) => card.scriptState?.["frostZone:head"] === 1,
     )).toBe(true);
   });
 
@@ -764,18 +764,18 @@ describe("Armory Decks — AHA, AZS, and AOL", () => {
     expect(spike?.counters?.holo).toBe(1);
   });
 
-  it("Blur Reality is not playable without an eligible Lightning aura", () => {
+  it("Blur Reality is playable without an eligible Lightning aura and does nothing", () => {
     const g = scenario({
       seats: [
         { hero: "rhinar", hand: ["blur reality|3"], equipment: NO_EQUIPMENT },
         { hero: "dorinthea", equipment: NO_EQUIPMENT },
       ],
     });
-    const blur = g.state.players[0]!.hand[0]!;
 
-    expect(legalIntents(g.state, 0).some((intent) =>
-      intent.kind === "play-card" && intent.instanceId === blur.instanceId
-    )).toBe(false);
+    g.play("blur reality|3");
+
+    expect(g.state.pendingDecision).toBeNull();
+    g.expectInZone(0, "blur reality|3", "graveyard");
   });
 
   it("Blur Reality leaves the stack before the returned aura's enter choice", () => {
@@ -933,8 +933,8 @@ describe("Armory Decks — AHA, AZS, and AOL", () => {
     });
 
     g.activate("stardust spike|1").blockWith().settle();
-    const attacked = g.state.players[0]!.board.find((card) => card.counters?.attacked === 1);
-    const ready = g.state.players[0]!.board.find((card) => card.counters?.attacked !== 1);
+    const attacked = g.state.players[0]!.board.find((card) => card.scriptState?.attacked === 1);
+    const ready = g.state.players[0]!.board.find((card) => card.scriptState?.attacked !== 1);
     expect(attacked).toBeDefined();
     expect(ready).toBeDefined();
 
@@ -943,7 +943,7 @@ describe("Armory Decks — AHA, AZS, and AOL", () => {
     expect(projected.find((card) => card.instanceId === ready!.instanceId)?.counters?.attacked).toBeUndefined();
 
     g.endTurn();
-    expect(g.state.players[0]!.board.find((card) => card.instanceId === attacked!.instanceId)?.counters?.attacked).toBeUndefined();
+    expect(g.state.players[0]!.board.find((card) => card.instanceId === attacked!.instanceId)?.scriptState?.attacked).toBeUndefined();
   });
 
   it("Starfield Veil gives the next aura holo after an attack fragments", () => {
@@ -1601,7 +1601,7 @@ describe("Armory Decks — rules regression coverage", () => {
         { hero: "dorinthea", equipment: NO_EQUIPMENT },
       ],
     });
-    g.state.players[1]!.hero.counters = { marked: 1 };
+    g.state.players[1]!.hero.scriptState = { marked: 1 };
     g.play("creep|1").blockWith().react("take up the mantle|2").chooseCard("infect|1").settle();
     expect(g.state.players[1]!.board.some((card) => functionalKeyOf(cardData[card.cardId]!) === "bloodrot pox|0")).toBe(true);
     g.doRaw({ kind: "close-chain" }).expectInZone(0, "creep|1", "graveyard");
@@ -1956,7 +1956,8 @@ describe("Armory Decks — rules regression coverage", () => {
         { hero: "dorinthea", equipment: NO_EQUIPMENT },
       ],
     });
-    g.state.players[0]!.weapons[0]!.counters = { power: 2, sharpenedTurn: g.state.turn };
+    g.state.players[0]!.weapons[0]!.counters = { power: 2 };
+    g.state.players[0]!.weapons[0]!.scriptState = { sharpenedTurn: g.state.turn };
     g.attackWithWeapon("zenith blade|0").blockWith().react("polished blade|1");
     expect(g.state.pendingDecision?.prompt).toContain("counters");
     g.chooseOption("remove 2").chooseOption("go again").chooseOption("additional attack").chooseOption("discount");

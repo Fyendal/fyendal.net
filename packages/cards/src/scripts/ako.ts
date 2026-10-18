@@ -80,9 +80,9 @@ export const ako: Record<string, CardScript> = {
     requiredHandCardsForAdditionalCost: 1,
     additionalCost(ctx) {
       const discarded = ctx.discardRandom(ctx.seat, 1)[0];
-      ctx.setCounter("discardedSix", isSixPlus(ctx, discarded) ? 1 : 0);
+      ctx.setState("discardedSix", isSixPlus(ctx, discarded) ? 1 : 0);
     },
-    modifyAttack: (ctx) => (ctx.getCounter("discardedSix") === 1 ? 6 : 0),
+    modifyAttack: (ctx) => (ctx.getState("discardedSix") === 1 ? 6 : 0),
   },
   "strength rules all|1": {
     canTriggerOnHit(ctx) {

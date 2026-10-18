@@ -194,7 +194,7 @@ export const sbz: Record<string, CardScript> = {
       variableCost: {
         base: 0,
         resourcesPerX: 0,
-        counterKey: "blazeX",
+        stateKey: "blazeX",
         removeCounterKey: "energy",
         maximum: (ctx) => ctx.getCounter("energy"),
         prompt: decisionPrompt("Blaze, Firemind: remove how many energy counters?", "card.sbz.blaze.energy.choose"),
@@ -202,7 +202,7 @@ export const sbz: Record<string, CardScript> = {
       canActivate: (ctx) =>
         ctx.getCounter("energy") > 0 || ctx.player(ctx.seat).hand.some((card) => blazeMatches(ctx, card, 0)),
       onActivate(ctx) {
-        const x = ctx.getCounter("blazeX");
+        const x = ctx.getState("blazeX");
         const matches = ctx.player(ctx.seat).hand.filter((card) => blazeMatches(ctx, card, x));
         if (matches.length === 0) {
           ctx.logPublic(
