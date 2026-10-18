@@ -23,7 +23,6 @@
   box-shadow: inset 0 0 0 1px #b8933f33, 0 0 16px #b8933f22;
 }
 .deck-card:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
-.deck-library-card > a.deck-card:hover { background: #2c1d0e; }
 .deck-card-img {
   width: 83px;
   height: 83px;
@@ -682,33 +681,73 @@
 .deck-library-management-tools {
   grid-template-columns: minmax(180px, 1fr) minmax(145px, .55fr) minmax(145px, .55fr);
 }
+.deck-grid-saved {
+  grid-template-columns: repeat(auto-fill, minmax(min(300px, 100%), 1fr));
+  gap: 16px;
+}
+/* Saved decks are framed banners: the hero art lights the right side and
+   fades into the plate behind the name, Hearthstone style, inside a bronze
+   frame with a gilt inner bevel. Actions sit on a strip below the banner so
+   every card in a row lines up. */
 .deck-library-card {
   position: relative;
+  display: flex;
   min-width: 0;
-  border: 1px solid var(--border-subtle);
-  background: #160e07;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid #7a5d2c;
+  border-radius: 4px;
+  background: #17110c;
+  box-shadow: 0 6px 18px #0008;
 }
+.deck-library-card::after {
+  position: absolute;
+  inset: 3px;
+  border: 1px solid #b8933f40;
+  border-radius: 2px;
+  content: "";
+  pointer-events: none;
+}
+.deck-library-card:hover { border-color: #a8833f; }
+.deck-library-card:has(.deck-library-select input:checked) {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 1px var(--gold), 0 0 22px #ffd47940, 0 6px 18px #0008;
+}
+.deck-library-card:has(.deck-library-select input:checked)::after { border-color: #ffd47966; }
+/* Selection is a small gilt gem, not a form box. */
 .deck-library-select {
   position: absolute;
-  z-index: 1;
+  z-index: 2;
   top: 8px;
-  left: 8px;
+  right: 8px;
   display: flex;
-  width: 44px;
-  height: 44px;
+  width: 32px;
+  height: 32px;
   align-items: center;
   justify-content: center;
   cursor: pointer;
 }
 .deck-library-select input {
+  appearance: none;
   box-sizing: border-box;
-  width: 22px;
-  height: 22px;
-  min-height: 22px;
+  width: 14px;
+  height: 14px;
+  min-height: 14px;
   margin: 0;
   padding: 0;
-  accent-color: var(--gold);
+  border: 1.5px solid #d9b56a;
+  border-radius: 2px;
+  background: #0d0805cc;
+  box-shadow: 0 0 0 1px #000a;
   cursor: pointer;
+  transform: rotate(45deg);
+  transition: background-color 120ms ease, box-shadow 120ms ease;
+}
+.deck-library-select:hover input { border-color: var(--gold); background: #3a2a12cc; }
+.deck-library-select input:checked {
+  border-color: #fff0c4;
+  background: radial-gradient(circle at 35% 35%, #fff4cf, var(--gold) 45%, #b8862d);
+  box-shadow: 0 0 0 1px #000a, 0 0 10px #ffd479aa;
 }
 .deck-library-select input:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
 .deck-bulk-actions {
@@ -729,52 +768,171 @@
   color: var(--text-secondary);
 }
 .deck-bulk-delete-list li + li { margin-top: 5px; }
+/* The name and any legality hint sit beside the art; the hero line is
+   pinned to the foot of the banner across its full width, on a scrim, so
+   long hero names have room. */
 .deck-library-card > .deck-card {
+  position: relative;
+  display: flex;
   width: 100%;
-  min-height: 180px;
+  min-height: 148px;
+  flex: 1;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  overflow: hidden;
+  padding: 16px 20px 14px;
   border: 0;
   border-radius: 0;
+  clip-path: none;
+  background: radial-gradient(120% 140% at 100% 50%, #3a2716 0%, #17110c 60%);
+  text-align: left;
 }
-.deck-library-card-actions {
-  display: grid;
+.deck-library-card > .deck-card:focus-visible { outline-offset: -4px; }
+.deck-library-card > .deck-card::after {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 62%;
+  background: linear-gradient(0deg, #120c08f2 0%, #120c08b8 45%, transparent 100%);
+  content: "";
+  pointer-events: none;
+}
+/* The hero card's art window lights the right of the banner and fades out
+   under the name. The card is scaled so its frame sides fall outside the
+   slot and shifted up past the title bar. Without card art, the headshot
+   takes the same place. */
+.deck-library-card .deck-card-art,
+.deck-library-card .deck-card-img {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 58%;
+  height: 100%;
+  -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 55%);
+  mask-image: linear-gradient(90deg, transparent 0%, #000 55%);
+}
+.deck-library-card .deck-card-art { overflow: hidden; }
+.deck-library-card .deck-card-art img {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 175%;
+  max-width: none;
+  height: auto;
+  transform: translate(-50%, -13%);
+  transform-origin: 50% 25%;
+}
+.deck-library-card .deck-card.has-art .deck-card-img { display: none; }
+.deck-library-card .deck-card-img {
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  object-fit: cover;
+  object-position: center 30%;
+}
+.deck-library-card .deck-card-art img,
+.deck-library-card .deck-card-img {
+  filter: saturate(.92) brightness(.82);
+  transition: filter 180ms ease, scale 240ms ease;
+}
+.deck-library-card > .deck-card:hover .deck-card-art img,
+.deck-library-card > .deck-card:hover .deck-card-img {
+  filter: saturate(1.05) brightness(1);
+  scale: 1.04;
+}
+.deck-library-card .deck-card-name,
+.deck-library-card .deck-card-details,
+.deck-library-card .deck-legality-hint { position: relative; z-index: 1; }
+.deck-library-card .deck-card:not(.deck-import-card) .deck-card-name {
+  width: auto;
+  max-width: 70%;
+  min-height: 0;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  color: #f6e8c6;
+  font: 700 18px/1.25 var(--font-lobby-title);
+  text-shadow: 0 1px 2px #000, 0 0 14px #000c;
+}
+.deck-library-card > .deck-card:hover .deck-card-name { color: var(--gold); }
+/* The format chip leads, the hero name takes what is left and may wrap. */
+.deck-library-card .deck-card-details {
+  display: flex;
+  width: 100%;
+  order: 1;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: auto;
+  padding-top: 6px;
+}
+.deck-library-card .deck-card-details > span:first-child {
+  display: -webkit-box;
   min-width: 0;
-  gap: 6px;
-  padding: 8px 10px;
-  border-top: 1px solid var(--border-subtle);
-}
-.deck-library-card-actions > .format-badge {
-  justify-self: center;
-  max-width: 100%;
   overflow: hidden;
-  text-align: center;
-  text-overflow: ellipsis;
+  color: #e3d5b8;
+  font: 600 14px/19px var(--font-lobby-ui);
+  text-shadow: 0 1px 2px #000;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+}
+.deck-library-card .deck-card-format {
+  display: block;
+  order: -1;
+  flex: 0 0 auto;
+  padding: 1px 7px;
+  border: 1px solid;
+  border-radius: 3px;
+  font: 700 12px/17px var(--font-lobby-ui);
+  white-space: nowrap;
+}
+.deck-card-format[data-format="cc"] { border-color: #c45a34a0; background: #3a150cd9; color: #ffa47f; }
+.deck-card-format[data-format="silver-age"] { border-color: #a39a88a0; background: #26221cd9; color: #d6d0c2; }
+.deck-library-card .deck-legality-hint { max-width: 70%; font-size: 13px; text-shadow: 0 1px 2px #000; }
+.deck-library-card-actions {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  justify-content: flex-end;
+  padding: 6px 10px 7px;
+  border-top: 1px solid #b8933f59;
+  background: linear-gradient(180deg, #120d09, #0e0a07);
 }
 .deck-library-card-actions > div {
   display: flex;
   min-width: 0;
-  flex-wrap: wrap;
-  justify-content: center;
   gap: 4px;
 }
 .deck-library-card-actions button {
+  display: inline-flex;
   min-width: 0;
-  padding: 6px 8px;
+  min-height: 34px;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 12px;
   border: 0;
+  border-radius: 3px;
   background: transparent;
   clip-path: none;
   color: var(--text-secondary);
-  font: 500 13px var(--font-lobby-ui);
+  font: 600 14px var(--font-lobby-ui);
   letter-spacing: normal;
   text-transform: none;
   white-space: nowrap;
 }
-.deck-library-card-actions button:hover { background: transparent; color: var(--gold); }
+.deck-library-card-actions button:hover { background: #2a1d12; color: var(--gold); }
+.deck-library-card-actions button:focus-visible { outline: 2px solid var(--gold); outline-offset: -2px; }
 .deck-library-card-actions .deck-library-delete { color: #e8a39c; }
-.deck-library-card-actions .deck-library-delete:hover { color: #ffc1b9; }
-/* Desktop cards spell out their actions and carry the format badge; the
-   action icons and format chip belong to the mobile rows below. */
-.deck-library-card-actions .ui-icon,
-.deck-card-format { display: none; }
+.deck-library-card-actions .deck-library-delete:hover { background: #351813; color: #ffc1b9; }
+.deck-library-card-actions .ui-icon { width: 16px; height: 16px; }
+@media (prefers-reduced-motion: reduce) {
+  .deck-library-card .deck-card-img,
+  .deck-library-card .deck-card-art img,
+  .deck-library-select input { transition: none; }
+  .deck-library-card > .deck-card:hover .deck-card-art img,
+  .deck-library-card > .deck-card:hover .deck-card-img { scale: none; }
+}
 
 .home-panel {
   padding: 0;
@@ -979,9 +1137,14 @@
     align-items: center;
     border: 0;
     border-bottom: 1px solid #45331f99;
+    border-radius: 0;
     background: transparent;
+    box-shadow: none;
   }
+  .deck-library-card::after { display: none; }
+  .deck-library-card:hover { border-color: #45331f99; }
   .deck-library-card:has(.deck-library-select input:checked) {
+    border-color: #45331f99;
     background: #2a1b0d99;
     box-shadow: inset 3px 0 0 var(--gold);
   }
@@ -992,7 +1155,6 @@
     justify-content: flex-start;
     padding-left: 4px;
   }
-  .deck-library-select input { width: 20px; height: 20px; min-height: 20px; }
   .deck-library-card > .deck-card {
     display: grid;
     min-height: 0;
@@ -1002,63 +1164,50 @@
     gap: 0 10px;
     padding: 11px 2px;
     background: transparent;
-    clip-path: none;
-    text-align: left;
   }
-  .deck-library-card > a.deck-card:hover { background: transparent; }
-  .deck-library-card > .deck-card:focus-visible { outline-offset: -2px; }
   .deck-library-card .deck-card-img {
     grid-row: 1 / span 2;
     align-self: center;
+    position: static;
     width: 40px;
     height: 40px;
-    box-shadow: none;
+    border: 1px solid #6b5326;
+    border-radius: 50%;
+    -webkit-mask-image: none;
+    mask-image: none;
+    filter: none;
   }
+  .deck-library-card > .deck-card:hover .deck-card-img { scale: none; }
+  /* Rows keep the round headshot, which is sharp at this size. */
+  .deck-library-card .deck-card-art { display: none; }
+  .deck-library-card .deck-card.has-art .deck-card-img { display: block; }
   .deck-library-card .deck-card:not(.deck-import-card) .deck-card-name {
     display: block;
-    min-height: 0;
+    width: 100%;
+    max-width: none;
     overflow: hidden;
     font-size: 15px;
-    line-height: 1.3;
+    text-shadow: none;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
-  /* Second line: the format chip leads, the hero name takes what is left. */
-  .deck-library-card .deck-card-details {
-    display: flex;
-    width: 100%;
-    align-items: center;
-    gap: 7px;
-    margin-top: 3px;
-  }
+  .deck-library-card > .deck-card::after { display: none; }
+  .deck-library-card .deck-card-details { order: 0; align-items: center; gap: 7px; margin-top: 3px; padding-top: 0; }
   .deck-library-card .deck-card-details > span:first-child {
-    min-width: 0;
-    overflow: hidden;
+    display: block;
     font-size: 13px;
+    line-height: 1.25;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
-  .deck-library-card .deck-card-format {
-    display: block;
-    order: -1;
-    flex: 0 0 auto;
-    padding: 1px 6px;
-    border: 1px solid;
-    border-radius: 3px;
-    font-size: 11px;
-    font-weight: 700;
-    line-height: 15px;
-    white-space: nowrap;
-  }
-  .deck-card-format[data-format="cc"] { border-color: #a74a2a80; background: #a74a2a26; color: #ff9d76; }
-  .deck-card-format[data-format="silver-age"] { border-color: #8a827280; background: #8a827226; color: #c8c2b4; }
-  .deck-library-card .deck-legality-hint { grid-column: 2; margin-top: 3px; }
+  .deck-library-card .deck-card-format { padding: 1px 6px; font-size: 11px; line-height: 15px; }
+  .deck-library-card .deck-legality-hint { grid-column: 2; max-width: none; margin-top: 3px; font-size: 12px; }
   .deck-library-card-actions {
     display: block;
     padding: 0;
     border-top: 0;
+    background: transparent;
   }
-  .deck-library-card-actions > .format-badge { display: none; }
   .deck-library-card-actions > div { flex-wrap: nowrap; gap: 0; }
   .deck-library-card-actions button {
     display: grid;
@@ -1067,7 +1216,9 @@
     place-items: center;
     padding: 0;
   }
-  .deck-library-card-actions .ui-icon { display: inline-block; width: 19px; height: 19px; }
+  .deck-library-card-actions button:hover,
+  .deck-library-card-actions .deck-library-delete:hover { background: transparent; }
+  .deck-library-card-actions .ui-icon { width: 19px; height: 19px; }
   .deck-library-action-label {
     position: absolute;
     width: 1px;

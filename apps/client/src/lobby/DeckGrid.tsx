@@ -1,12 +1,13 @@
 import { useState } from "react";
 import { useIntl } from "react-intl";
-import { precon, preconsForFormat } from "@fyendal/cards/client";
+import { findPrinting, precon, preconsForFormat } from "@fyendal/cards/client";
 import type { DeckSummary } from "@fyendal/protocol";
 import type { CardPoolMode, Format } from "@fyendal/shared";
 import { useStore } from "../store.js";
 import { preconPrepDeck } from "../prep/prepDeck.js";
 import { formatSelectLabel, shortFormatLabel } from "./FormatBadge.js";
 import { heroImageUrl } from "./heroImage.js";
+import { cardImageUrl } from "../game/Card.js";
 import { deckErrorMessages } from "./deckErrors.js";
 import { ModalSurface } from "../components/ModalSurface.js";
 
@@ -76,24 +77,34 @@ export function deckIsLegalForRoom(deck: DeckSummary, cardPoolMode: CardPoolMode
  * and room-join picker. A headshot slug that misses on Fabrary
  * just hides the image — the tile stays usable. Pickers mix saved decks
  * with built-in precons, so their tiles name the source; the library holds
- * only saved decks and passes `format` for the chip its mobile rows show in
- * place of the card's format badge.
+ * only saved decks and passes `format` for the chip beside the hero name.
+ * `banner` adds the hero card's artwork, which the library crops into a
+ * banner; the 200px headshot is too small to fill one sharply.
  */
 export function DeckTile(props: {
   deck: DeckSummary;
   selected?: boolean;
   blocked?: boolean;
   format?: Format;
+  banner?: boolean;
   onSelect: () => void;
   href?: string;
 }) {
   const intl = useIntl();
   const [imgOk, setImgOk] = useState(true);
+  const [artOk, setArtOk] = useState(true);
   const d = props.deck;
+  const heroCard = props.banner ? findPrinting(d.heroName) : undefined;
+  const showArt = heroCard !== undefined && artOk;
   const bannedCards = d.bannedCards ?? [];
   const futureCards = d.futureCards ?? [];
   const contents = (
     <>
+      {showArt ? (
+        <span className="deck-card-art">
+          <img src={cardImageUrl(heroCard.id)} alt="" loading="lazy" onError={() => setArtOk(false)} />
+        </span>
+      ) : null}
       {imgOk && (
         <img
           className="deck-card-img"
@@ -138,7 +149,7 @@ export function DeckTile(props: {
       ) : null}
     </>
   );
-  const className = `deck-card${props.selected ? " selected" : ""}${props.blocked ? " blocked" : ""}`;
+  const className = `deck-card${showArt ? " has-art" : ""}${props.selected ? " selected" : ""}${props.blocked ? " blocked" : ""}`;
   if (props.href) {
     return (
       <a className={className} href={props.href} target="_blank" rel="noopener noreferrer"

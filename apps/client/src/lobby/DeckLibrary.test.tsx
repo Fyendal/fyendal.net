@@ -67,7 +67,7 @@ describe("DeckLibrary", () => {
       </TestI18nProvider>,
     );
     expect(html).not.toContain('href="javascript:');
-    expect(html).toContain('class="deck-card"');
+    expect(html).toMatch(/<button class="deck-card[ "]/);
   });
 });
 

@@ -109,10 +109,8 @@
   width: 46px;
   height: 46px;
   flex: 0 0 auto;
-  border-radius: 6px;
-  border: 1px solid #6b5326;
-  box-shadow: 0 0 14px #7cff6b2e, 0 2px 7px #000;
-  object-fit: cover;
+  filter: drop-shadow(0 0 8px #7cff6b33) drop-shadow(0 2px 4px #000);
+  object-fit: contain;
 }
 .brand-copy {
   display: flex;

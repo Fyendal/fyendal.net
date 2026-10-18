@@ -6,7 +6,7 @@ import { FORMATS } from "../domain.js";
 import type { Format } from "@fyendal/shared";
 
 import { useStore } from "../store.js";
-import { FormatBadge, formatSelectLabel } from "./FormatBadge.js";
+import { formatSelectLabel } from "./FormatBadge.js";
 import { ModalSurface } from "../components/ModalSurface.js";
 import { UiIcon } from "../components/UiIcon.js";
 import {
@@ -137,10 +137,9 @@ export function DeckLibrary(props: {
                   aria-label={intl.formatMessage({ id: "lobby.deck.selectNamed" }, { name: deck.name })}
                   onChange={() => toggleSelected(deck.id)} />
               </label>
-              <DeckTile deck={deck} format={deck.format} href={fabraryDeckHref(deck.fabraryUrl)}
+              <DeckTile deck={deck} format={deck.format} banner href={fabraryDeckHref(deck.fabraryUrl)}
                 onSelect={() => setEditingDeck(deck)} />
               <div className="deck-library-card-actions">
-                <FormatBadge format={deck.format} />
                 <div>
                   <button onClick={() => setEditingDeck(deck)}>
                     <UiIcon name="edit" />
