@@ -119,9 +119,11 @@ export function DeckLibrary(props: {
         <div className="deck-bulk-actions" role="group" aria-label={intl.formatMessage({ id: "lobby.deck.selectionActions" })}>
           <span role="status">{intl.formatMessage({ id: "lobby.deck.selectedCount" }, { count: selectedDecks.length })}</span>
           <button onClick={() => setSelectedIds(new Set())}>
+            <UiIcon name="close" />
             {intl.formatMessage({ id: "lobby.deck.clearSelection" })}
           </button>
-          <button className="btn-danger" onClick={() => setBulkDeletingDecks(selectedDecks)}>
+          <button className="deck-library-delete" onClick={() => setBulkDeletingDecks(selectedDecks)}>
+            <UiIcon name="trash" />
             {intl.formatMessage({ id: "lobby.deck.deleteSelected" })}
           </button>
         </div>

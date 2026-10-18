@@ -32375,7 +32375,7 @@
   "lobby.deck.createImport": [
     {
       "type": 0,
-      "value": "Criar / importar deck"
+      "value": "Criar / Importar Deck"
     }
   ],
   "lobby.deck.deckList": [
@@ -33331,7 +33331,7 @@
   "lobby.rooms.create": [
     {
       "type": 0,
-      "value": "Criar sala"
+      "value": "Criar Sala"
     }
   ],
   "lobby.rooms.empty": [

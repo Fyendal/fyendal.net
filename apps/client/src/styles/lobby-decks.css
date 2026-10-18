@@ -731,19 +731,22 @@
 .deck-library-select input:checked {
   border-color: #fff0c4;
   background: radial-gradient(circle at 35% 35%, #fff4cf, var(--gold) 45%, #b8862d);
-  box-shadow: 0 0 0 1px #000a, 0 0 10px #ffd479aa;
+  box-shadow: 0 0 0 1px #000a, 0 0 4px #ffd47959;
 }
 .deck-library-select input:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
 .deck-bulk-actions {
   display: flex;
   align-items: center;
-  flex-wrap: wrap;
-  gap: 10px;
+  gap: 4px;
   margin: -4px 0 18px;
+  padding: 4px 4px 4px 14px;
+  border: 1px solid #b8933f59;
+  border-radius: 4px;
+  background: linear-gradient(180deg, #120d09, #0e0a07);
   color: var(--text-secondary);
+  font: 500 14px var(--font-lobby-ui);
 }
-.deck-bulk-actions span { margin-right: auto; }
-.deck-bulk-actions button { min-height: 38px; padding: 7px 12px; }
+.deck-bulk-actions > span { margin-right: auto; }
 .deck-bulk-delete-list {
   max-height: 180px;
   overflow-y: auto;
@@ -888,7 +891,8 @@
   min-width: 0;
   gap: 4px;
 }
-.deck-library-card-actions button {
+/* Shared by each card's action strip and the bulk selection bar. */
+:is(.deck-library-card-actions, .deck-bulk-actions) button {
   display: inline-flex;
   min-width: 0;
   min-height: 34px;
@@ -905,11 +909,11 @@
   text-transform: none;
   white-space: nowrap;
 }
-.deck-library-card-actions button:hover { background: #2a1d12; color: var(--gold); }
-.deck-library-card-actions button:focus-visible { outline: 2px solid var(--gold); outline-offset: -2px; }
-.deck-library-card-actions .deck-library-delete { color: #e8a39c; }
-.deck-library-card-actions .deck-library-delete:hover { background: #351813; color: #ffc1b9; }
-.deck-library-card-actions .ui-icon { width: 16px; height: 16px; }
+:is(.deck-library-card-actions, .deck-bulk-actions) button:hover { background: #2a1d12; color: var(--gold); }
+:is(.deck-library-card-actions, .deck-bulk-actions) button:focus-visible { outline: 2px solid var(--gold); outline-offset: -2px; }
+:is(.deck-library-card-actions, .deck-bulk-actions) .deck-library-delete { color: #e8a39c; }
+:is(.deck-library-card-actions, .deck-bulk-actions) .deck-library-delete:hover { background: #351813; color: #ffc1b9; }
+:is(.deck-library-card-actions, .deck-bulk-actions) .ui-icon { width: 16px; height: 16px; }
 @media (prefers-reduced-motion: reduce) {
   .deck-library-card .deck-card-img,
   .deck-library-card .deck-card-art img,
@@ -1112,8 +1116,11 @@
   .home-play-poster img { position: static; height: auto; }
   .deck-panel-heading { display: flex; align-items: flex-start; flex-wrap: wrap; }
   .deck-library-management-tools { grid-template-columns: 1fr; }
+  .deck-bulk-actions { flex-wrap: wrap; padding: 4px; }
+  .deck-bulk-actions > span { flex-basis: 100%; padding: 6px 8px 2px; }
+  .deck-bulk-actions button { flex: 1 1 auto; justify-content: center; min-height: 44px; }
   /* Saved decks become flat list rows, like match history: one hairline per
-     row and the checked state shown as the shared gold selection bar. */
+     row, with the filled gem and a warm row tint marking the selection. */
   .deck-grid-saved { gap: 0; border-top: 1px solid #45331f99; }
   .deck-library-card {
     display: grid;
@@ -1130,14 +1137,12 @@
   .deck-library-card:has(.deck-library-select input:checked) {
     border-color: #45331f99;
     background: #2a1b0d99;
-    box-shadow: inset 3px 0 0 var(--gold);
+    box-shadow: none;
   }
   .deck-library-select {
     position: static;
     width: 34px;
     height: 44px;
-    justify-content: flex-start;
-    padding-left: 4px;
   }
   .deck-library-card > .deck-card {
     display: grid;
