@@ -1056,9 +1056,14 @@
 .hand::-webkit-scrollbar { display: none; }
 /* Auto margins center a hand while it fits. They resolve to zero once the row
    overflows, keeping the first and last cards reachable by horizontal scroll.
-   A focused card remains in the DOM but no longer occupies a hand slot. */
-.hand > :nth-child(1 of :not(.pitch-focus-source-hidden)) { margin-left: auto; }
-.hand > :nth-last-child(1 of :not(.pitch-focus-source-hidden)) { margin-right: auto; }
+   A focused card remains in the DOM but no longer occupies a hand slot, and
+   neither does the empty-hand probe while ghost cards share the strip. */
+.hand > :nth-child(1 of :not(.pitch-focus-source-hidden, .hand-slot-probe:not(:only-child))) {
+  margin-left: auto;
+}
+.hand > :nth-last-child(1 of :not(.pitch-focus-source-hidden, .hand-slot-probe:not(:only-child))) {
+  margin-right: auto;
+}
 .hand .card-hand {
   width: clamp(131px, 19.65vh, 240px);
   height: var(--hand-card-height);
@@ -1077,6 +1082,13 @@
 .hand .card-hand.hand-slot-probe {
   visibility: hidden;
   pointer-events: none;
+}
+/* Playable ghost cards from other zones keep the empty hand's centered layout;
+   the probe stays at the center as the draw anchor without taking a slot. */
+.hand > .card-hand.hand-slot-probe:not(:only-child) {
+  position: absolute;
+  left: 50%;
+  transform: translate(-50%, var(--hand-rest-offset));
 }
 .hand .card-hand.card-selected,
 .hand .card-hand.card-selected:hover { transform: translateY(calc(-1 * var(--hand-selected-lift))); }
