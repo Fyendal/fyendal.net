@@ -7,6 +7,7 @@ import { createGame as createGameState, type GameStateInternal } from "../runtim
 import type { CardInstance, PlayerState } from "../state.js";
 import { destroyPermanent } from "../zoneMoves.js";
 import { drawUpTo, startTurn } from "../turn.js";
+import { passDamageStep } from "./fixtures.js";
 
 // ── fixture cards ────────────────────────────────────────────────────────────
 
@@ -446,6 +447,7 @@ describe("ward", () => {
     s = apply(s, 1, { kind: "choose", optionId: `destroy ${aura}` });
     expect(player(s, 1).life).toBe(17); // 5 - 2 prevented
     expect(player(s, 1).board.some((c) => c.instanceId === aura)).toBe(false);
+    s = passDamageStep(s);
     expect(s.phase).toBe("action"); // link resolution resumed and finished
   });
 
@@ -476,6 +478,7 @@ describe("ward", () => {
     expect(s.pendingDecision?.chooseHook).toBe("ward");
     s = apply(s, 1, { kind: "choose", optionId: `destroy ${b}` });
     // no ward sources remain: the rest applies immediately
+    s = passDamageStep(s);
     expect(s.pendingDecision).toBeNull();
     expect(player(s, 1).life).toBe(17); // 5 - 1 - 1
     expect(s.phase).toBe("action");

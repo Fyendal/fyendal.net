@@ -32,6 +32,7 @@ import {
   projectStateForReplay as projectStateForReplayImpl,
 } from "./project.js";
 import {
+  anyWindowAction as anyWindowActionImpl,
   answerTriggerChoice,
   answerTriggerOrder,
   answerTriggerOrderList,
@@ -766,6 +767,11 @@ export function onlyIdleResourceSources(
   return onlyIdleResourceSourcesImpl(state, engineRuntime, seat, legal, isPassive);
 }
 
+/** See triggers.ts: whether either player has an instant-speed action. */
+export function anyWindowAction(state: GameStateInternal) {
+  return anyWindowActionImpl(state, engineRuntime);
+}
+
 export function actionCandidates(state: GameStateInternal, seat: number) {
   return actionCandidatesImpl(state, engineRuntime, seat);
 }
@@ -782,6 +788,7 @@ export function projectStateForReplay(state: GameStateInternal, publicGameId?: s
   return projectStateForReplayImpl(state, engineRuntime, publicGameId);
 }
 export { TOKEN_SKIP_INTENTS, tokenSkipSequenceActive } from "./tokenSkip.js";
+export { damageStepPriorityAttacker } from "./triggers.js";
 export { rngNext } from "./rng.js";
 export {
   chainLinkNumber,

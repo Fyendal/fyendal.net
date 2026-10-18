@@ -36,6 +36,7 @@ import {
   actionCandidates,
   applyIntent as engineApplyIntent,
   createGame,
+  damageStepPriorityAttacker,
   legalIntents,
   onlyIdleResourceSources,
   projectStateFor,
@@ -340,6 +341,14 @@ function isEmptyPriorityWindow(state: GameState, seat: number): boolean {
     return false;
   }
   return onlyPassOrIdleResources(state, seat);
+}
+
+/** Whether auto-pass skips this seat's empty window. A human attacker still
+ *  stops in the Damage Step to see the block and its outcome; bots never
+ *  stop. */
+function autoPassSkipsWindow(state: GameState, seat: number, controller: "bot" | undefined): boolean {
+  return isEmptyPriorityWindow(state, seat) &&
+    (controller === "bot" || damageStepPriorityAttacker(state) !== seat);
 }
 
 /** A bot with nothing to do but idle resource activations has no choice to
@@ -3836,7 +3845,7 @@ export class PgRoomStore {
         : undefined;
       const intent: GameIntent | null = skipKind
         ? { kind: TOKEN_SKIP_INTENTS[skipKind] }
-        : autoPasses(seat) && (isEmptyPriorityWindow(state, seat) ||
+        : autoPasses(seat) && (autoPassSkipsWindow(state, seat, member?.controller) ||
           (member?.controller === "bot" && isEmptyBotActionWindow(state, seat)))
           ? { kind: "pass" }
           : null;
@@ -3865,7 +3874,7 @@ export class PgRoomStore {
       const shouldPass = mode === "auto-pass"
         && !!room.state
         && room.state.phase !== "game-over"
-        && isEmptyPriorityWindow(room.state, seat);
+        && autoPassSkipsWindow(room.state, seat, room.seats[seat]!.controller);
       if (!shouldPass) return { room, result: { autoPassed: false }, versionNeutral: true };
       const events: EngineTransitionMove[] = [];
       this.applyServerShortcuts(room, events);

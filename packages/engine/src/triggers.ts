@@ -261,7 +261,8 @@ function anyWindowAbility(
   return false;
 }
 
-function anyWindowAction(state: GameStateInternal, runtime: EngineRuntime): boolean {
+/** Whether either player has an instant-speed play or activation. */
+export function anyWindowAction(state: GameStateInternal, runtime: EngineRuntime): boolean {
   return (
     windowInstantPlays(state, runtime, 0).length > 0 ||
     windowInstantPlays(state, runtime, 1).length > 0 ||
@@ -392,10 +393,23 @@ function openWindow(state: GameStateInternal, seat?: number, initialPasses = 0):
   };
 }
 
+/** The current link's attacker while `state` holds the Damage Step's
+ * empty-stack priority window, otherwise null. The block and combat damage
+ * are final here, but the link has not yet resolved. */
+export function damageStepPriorityAttacker(state: GameStateInternal): number | null {
+  const link = currentLink(state);
+  return state.pendingDecision?.kind === "priority-window" &&
+    state.stack.length === 0 &&
+    state.stackResume === "finish-link-resolution" &&
+    link && !link.resolved && link.flags.resolutionStepBegan !== true
+    ? link.attacker
+    : null;
+}
+
 /** Finish the Damage Step after combat damage. Players receive priority before
- * the step ends; once both pass, the link enters and completes the beginning
- * of its Resolution Step. Skip the window when neither player has an
- * instant-speed action. */
+ * the step ends (CR 7.5), even when neither has an instant-speed action, so a
+ * client can pause on the combat outcome; once both pass, the link enters and
+ * completes the beginning of its Resolution Step. */
 export function finishDamageStep(state: GameStateInternal, runtime: EngineRuntime): void {
   const link = currentLink(state);
   // Damage observers may pause on a direct scripted choice. Preserve that
@@ -418,7 +432,7 @@ export function finishDamageStep(state: GameStateInternal, runtime: EngineRuntim
     continueStack(state, runtime);
     return;
   }
-  if (link.flags.damageStepPriorityOpened !== true && anyWindowAction(state, runtime)) {
+  if (link.flags.damageStepPriorityOpened !== true) {
     link.flags.damageStepPriorityOpened = true;
     state.stackResume = "finish-link-resolution";
     openWindow(state);

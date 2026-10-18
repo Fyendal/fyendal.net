@@ -67,6 +67,9 @@ describe("SBA — Briar hero", () => {
       .play("second strike|1")
       .blockWith()
       .passPriority()
+      .passPriority()
+      // Damage Step priority
+      .passPriority()
       .passPriority();
 
     expect(g.state.stack).toHaveLength(0);

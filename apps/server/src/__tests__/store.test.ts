@@ -1,8 +1,8 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { precon, preconsForFormat, silverAgePrecon } from "@fyendal/cards";
+import { cardData, precon, preconsForFormat, silverAgePrecon } from "@fyendal/cards";
 import { legalIntents } from "@fyendal/engine";
 import { decodeServerMessage, replayFileViews } from "@fyendal/protocol";
-import type { Format, PresentedDeck, QueuePoolCounts } from "@fyendal/shared";
+import type { Format, GameIntent, PresentedDeck, QueuePoolCounts } from "@fyendal/shared";
 import type { SeatCredentials } from "../store.js";
 import type { Queryable } from "../db.js";
 import { finalizeReplay, getReplay, listReplays } from "../replays.js";
@@ -1592,6 +1592,49 @@ describe("PgRoomStore storage", () => {
     expect(after!.state!.pendingDecision).not.toMatchObject({ player: second, kind: "priority-window" });
     // Only the manual pass is undoable; the auto-pass folded into its step.
     expect(await store.getHistory(code)).toHaveLength(1);
+  });
+
+  it("auto-pass stops the attacker in the Damage Step to show the combat outcome", async () => {
+    const { code, tokens } = await fullRoom();
+    await startGame(code, tokens);
+    // Empty every zone so both reaction windows offer nothing, then return
+    // to the attacker's action phase with a single 0-cost attack.
+    await forceEmptyPriorityWindow(code, 0);
+    const room = await store.getRoom(code);
+    const state = room!.state!;
+    const attacker = state.activePlayer as 0 | 1;
+    const defender = (1 - attacker) as 0 | 1;
+    const blowId = Object.values(cardData)
+      .find((card) => card.name === "Wounding Blow" && card.pitch === 1)!.id;
+    const blow = { instanceId: state.nextInstanceId++, cardId: blowId, owner: attacker };
+    state.players[attacker]!.hand = [blow];
+    state.players[attacker]!.actionPoints = 1;
+    state.phase = "action";
+    state.priorityPlayer = attacker;
+    state.pendingDecision = null;
+    await db.query("UPDATE rooms SET state = $2 WHERE code = $1", [
+      code,
+      JSON.stringify(dehydrateState(state, "rules-a")),
+    ]);
+    for (const seat of [attacker, defender]) {
+      expect((await store.setPriorityMode(code, { token: tokens[seat] }, "auto-pass")).ok).toBe(true);
+    }
+
+    const play: GameIntent = { kind: "play-card", instanceId: blow.instanceId, pitchInstanceIds: [] };
+    expect((await store.applyIntent(code, { token: tokens[attacker] }, play)).ok).toBe(true);
+    expect((await store.applyIntent(code, { token: tokens[defender] }, { kind: "defend", instanceIds: [] })).ok)
+      .toBe(true);
+    // Both reaction windows auto-pass and damage is dealt, but the attacker
+    // keeps the Damage Step window instead of resolving the link unseen.
+    let current = (await store.getRoom(code))!.state!;
+    expect(current.pendingDecision).toMatchObject({ player: attacker, kind: "priority-window" });
+    expect(current.chain[0]).toMatchObject({ resolved: false, damage: 4 });
+
+    // Passing it auto-passes the defender and resolves the link.
+    expect((await store.applyIntent(code, { token: tokens[attacker] }, { kind: "pass" })).ok).toBe(true);
+    current = (await store.getRoom(code))!.state!;
+    expect(current.chain[0]?.resolved).toBe(true);
+    expect(current.phase).toBe("action");
   });
 
   it("server-skips only the current Runechant sequence", async () => {

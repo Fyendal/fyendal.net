@@ -1,6 +1,6 @@
 import { engineRuntime } from "../engineRuntime.js";
 import type { CardData, Decklist } from "@fyendal/shared";
-import type { CardScript } from "../index.js";
+import { applyIntent, damageStepPriorityAttacker, type CardScript } from "../index.js";
 import { createGame as createGameState, type GameStateInternal } from "../runtimeState.js";
 import { drawUpTo, startTurn } from "../turn.js";
 import type { PlayerState } from "../state.js";
@@ -278,4 +278,16 @@ export function giveCard(state: GameStateInternal, seat: number, cardId: string)
   const c = { instanceId: state.nextInstanceId++, cardId, owner: seat };
   p.hand.push(c);
   return c.instanceId;
+}
+
+/** Pass both players through the Damage Step priority window, when `state`
+ *  holds it. */
+export function passDamageStep(state: GameStateInternal): GameStateInternal {
+  let next = state;
+  while (damageStepPriorityAttacker(next) !== null) {
+    const result = applyIntent(next, next.priorityPlayer, { kind: "pass" });
+    if (!result.ok) throw new Error(result.error);
+    next = result.state;
+  }
+  return next;
 }

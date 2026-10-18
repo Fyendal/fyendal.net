@@ -19,7 +19,7 @@ import { heroAbilitiesDisabled } from "../stateQueries.js";
 import { createGame as createGameState } from "../runtimeState.js";
 import { drawUpTo, finishEndPhase, startTurn } from "../turn.js";
 import { continueStack } from "../triggers.js";
-import { cards, decklist, giveCard, makeGame, player, scripts } from "./fixtures.js";
+import { cards, decklist, giveCard, makeGame, passDamageStep, player, scripts } from "./fixtures.js";
 
 function passTopLayer(state: ReturnType<typeof makeGame>): ReturnType<typeof makeGame> {
   let next = state;
@@ -1500,10 +1500,10 @@ describe("game setup & turn structure", () => {
     expect(r.ok).toBe(true);
     if (!r.ok) return;
     s = r.state;
-    r = applyIntent(s, 1, { kind: "pass" }); // defender reaction pass → resolve
+    r = applyIntent(s, 1, { kind: "pass" }); // defender reaction pass → damage
     expect(r.ok).toBe(true);
     if (!r.ok) return;
-    s = r.state;
+    s = passDamageStep(r.state);
     expect(player(s, 1).life).toBe(16); // 20 - 4
     expect(s.chain).toHaveLength(1); // resolved link stays until the chain closes
     // The first pair closes the resolved chain; the second ends the action
@@ -1729,6 +1729,7 @@ describe("game setup & turn structure", () => {
     }
     expect(player(s, 0).hand.length).toBe(3); // spent 1 of 4
     expect(player(s, 1).hand.length).toBe(3);
+    s = passDamageStep(s);
     // The first pair closes the chain; the second ends the action phase.
     for (const seat of [0, 1, 0, 1] as const) {
       r = applyIntent(s, seat, { kind: "pass" });
@@ -1764,6 +1765,7 @@ describe("game setup & turn structure", () => {
       s = r.state;
     }
     expect(player(s, 0).hand.length).toBe(3); // spent a card defending
+    s = passDamageStep(s);
     // The first pair closes the chain; the second ends the action phase.
     for (const seat of [1, 0, 1, 0] as const) {
       r = applyIntent(s, seat, { kind: "pass" });
@@ -2784,6 +2786,7 @@ describe("pitch & costs", () => {
       if (!r.ok) return;
       s = r.state;
     }
+    s = passDamageStep(s);
     expect(player(s, 0).resources).toBe(1); // floats until end of turn
 
     // float up to 2 via a 1-cost weapon attack paid with a blue
@@ -2965,6 +2968,7 @@ describe("combat", () => {
     expect(r.ok).toBe(true);
     if (!r.ok) return;
     s = r.state;
+    s = passDamageStep(s);
     expect(player(s, 1).life).toBe(17); // 3 weapon damage
     expect(player(s, 0).actionPoints).toBe(1); // go again refund
     // once per turn: cannot activate again
@@ -2997,6 +3001,7 @@ describe("combat", () => {
     expect(r.ok).toBe(true);
     if (!r.ok) return;
     s = r.state;
+    s = passDamageStep(s);
     expect(player(s, 1).life).toBe(17); // 6 - 3
     // cards stay on the resolved link until the combat chain closes
     expect(s.chain).toHaveLength(1);
@@ -3049,6 +3054,7 @@ describe("combat", () => {
     expect(r.ok).toBe(true);
     if (!r.ok) return;
     s = r.state;
+    s = passDamageStep(s);
     expect(s.chain).toHaveLength(1);
 
     r = applyIntent(s, 0, {
@@ -3314,6 +3320,7 @@ describe("combat", () => {
     expect(r.ok).toBe(true);
     if (!r.ok) return;
     s = r.state;
+    s = passDamageStep(s);
     // The first pair closes the resolved chain; the second ends the action
     // phase and begins the end phase.
     for (const seat of [0, 1, 0, 1] as const) {
@@ -3354,6 +3361,7 @@ describe("combat", () => {
     expect(r.ok).toBe(true);
     if (!r.ok) return;
     s = r.state;
+    s = passDamageStep(s);
     expect(player(s, 1).life).toBe(15); // 6 - 1
     // the equipment survives link resolution; it is destroyed at chain close
     expect(player(s, 1).equipment.head).toBeDefined();
@@ -3386,6 +3394,7 @@ describe("combat", () => {
     expect(r.ok).toBe(true);
     if (!r.ok) return;
     s = r.state;
+    s = passDamageStep(s);
     expect(player(s, 1).life).toBe(16); // 6 - 2
     // close the chain with a non-attack action: counter, not destruction
     const blue = giveCard(s, 0, "BLUE");
@@ -3550,6 +3559,7 @@ describe("combat", () => {
     expect(r.ok).toBe(true);
     if (!r.ok) return;
     s = r.state;
+    s = passDamageStep(s);
     expect(player(s, 1).life).toBe(17);
     const blue = giveCard(s, 0, "BLUE");
     r = applyIntent(s, 0, { kind: "play-card", instanceId: blue, pitchInstanceIds: [] });
@@ -4266,6 +4276,7 @@ describe("trigger stack & priority windows", () => {
     expect(r.ok).toBe(true);
     if (!r.ok) return;
     s = r.state;
+    s = passDamageStep(s);
     expect(s.chain[0]!.resolved).toBe(true);
     // open chain: offered to the turn player, not the opponent
     expect(legalIntents(s, 0).some((i) => i.kind === "close-chain")).toBe(true);
@@ -4402,6 +4413,7 @@ describe("trigger stack & priority windows", () => {
     expect(r.ok).toBe(true);
     if (!r.ok) return;
     s = r.state;
+    s = passDamageStep(s);
     // The trigger has resolved and the attack has entered its Resolution Step:
     // go again refunds the AP and Dorinthea re-enables the weapon.
     expect(player(s, 0).actionPoints).toBe(1);
@@ -4520,6 +4532,7 @@ describe("trigger stack & priority windows", () => {
     expect(r.ok).toBe(true);
     if (!r.ok) return;
     s = r.state;
+    s = passDamageStep(s);
     expect(player(s, 1).life).toBe(12); // 4 + 2 + 2
     // the resolved link keeps its buffed values even though the reaction
     // modifiers expired with it

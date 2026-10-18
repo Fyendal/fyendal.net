@@ -1,6 +1,6 @@
 import { sha256 } from "@noble/hashes/sha2.js";
 import { bytesToHex, utf8ToBytes } from "@noble/hashes/utils.js";
-import { applyIntent, legalIntents, projectStateFor, type GameState } from "@fyendal/engine";
+import { anyWindowAction, applyIntent, damageStepPriorityAttacker, legalIntents, projectStateFor, type GameState } from "@fyendal/engine";
 import type { GameIntent } from "@fyendal/shared";
 import {
   arsenalCardValue,
@@ -511,7 +511,12 @@ function advanceForced<Evaluation extends TurnEvaluation>(
       ? config.chooseForced(observation(current, root, context.publicGameId))
       : opponentRolloutIntent(current);
     if (!intent) return { kind: "terminal", state: current, complete: false };
-    context.transitions++;
+    // The Damage Step always offers priority so humans can pause on the
+    // combat outcome. Passing through it when nobody has an instant-speed
+    // action is free, so it does not shorten the search budget per attack.
+    const emptyDamageStepPass = intent.kind === "pass" &&
+      damageStepPriorityAttacker(current) !== null && !anyWindowAction(current);
+    if (!emptyDamageStepPass) context.transitions++;
     const applied = applySimulationIntent(current, actor, intent);
     if (!applied.ok) return { kind: "terminal", state: current, complete: false };
     current = applied.state;
