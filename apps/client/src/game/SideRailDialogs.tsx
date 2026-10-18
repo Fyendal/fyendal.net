@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState, type CSSProperties } from "react";
 import { useIntl } from "react-intl";
 import type { UndoTarget } from "@fyendal/shared";
+import { LanguagePicker } from "../i18n/LanguagePicker.js";
 import type {
   CardDisplayPreference,
   MotionPreference,
@@ -201,6 +202,7 @@ export function GameSettingsDialog({
                 />
                 <span className="switch-track" aria-hidden="true" />
               </label>
+              <LanguagePicker placement="settings" />
             </div>
           </section>
           <section className="settings-section settings-presentation">

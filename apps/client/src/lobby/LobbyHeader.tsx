@@ -45,7 +45,7 @@ export function LobbyHeader() {
       ) : null}
       <div className="topbar-actions">
         <div className="topbar-tools">
-          <LanguagePicker />
+          <LanguagePicker placement="header" />
           <DiscordLink />
           <FullscreenButton placement="header" />
         </div>

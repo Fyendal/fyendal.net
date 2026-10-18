@@ -302,32 +302,42 @@ export function Lobby() {
           className="mobile-lobby-more"
           onClose={() => setShowMobileMore(false)}
         >
-          <div className="mobile-more-actions">
-            <LanguagePicker />
-            <FullscreenButton placement="menu" onToggle={() => setShowMobileMore(false)} />
-            <SocialMenuButton onOpen={() => {
-              setShowMobileMore(false);
-              setSocialOpen(true);
-            }} />
-            <button onClick={() => { setRail("achievements"); setShowMobileMore(false); }}>
-              {intl.formatMessage({ id: "achievements.title" })}
-            </button>
-            <button
-              onClick={() => {
-                setRail("account");
+          <div className="mobile-more">
+            <div className="mobile-more-group">
+              <LanguagePicker placement="menu" />
+            </div>
+            <div className="mobile-more-group">
+              <SocialMenuButton onOpen={() => {
                 setShowMobileMore(false);
-              }}
-            >
-              {intl.formatMessage({ id: "lobby.nav.account" })}
-            </button>
-            <a href="https://discord.gg/DpTjVbfPVv" target="_blank" rel="noopener noreferrer">
-              {intl.formatMessage({ id: "lobby.discordCommunity" })}
-            </a>
-            <a href="/terms">{intl.formatMessage({ id: "footer.terms" })}</a>
-            <a href="/privacy">{intl.formatMessage({ id: "footer.privacy" })}</a>
-            <button className="mobile-more-logout" onClick={() => void logout()}>
-              {intl.formatMessage({ id: "common.logOut" })}
-            </button>
+                setSocialOpen(true);
+              }} />
+              <button onClick={() => { setRail("achievements"); setShowMobileMore(false); }}>
+                {intl.formatMessage({ id: "achievements.title" })}
+              </button>
+              <button
+                onClick={() => {
+                  setRail("account");
+                  setShowMobileMore(false);
+                }}
+              >
+                {intl.formatMessage({ id: "lobby.nav.account" })}
+              </button>
+            </div>
+            <div className="mobile-more-group">
+              <a href="https://discord.gg/DpTjVbfPVv" target="_blank" rel="noopener noreferrer">
+                {intl.formatMessage({ id: "lobby.discordCommunity" })}
+              </a>
+              <FullscreenButton placement="menu" onToggle={() => setShowMobileMore(false)} />
+            </div>
+            <div className="mobile-more-group">
+              <button className="mobile-more-logout" onClick={() => void logout()}>
+                {intl.formatMessage({ id: "common.logOut" })}
+              </button>
+            </div>
+            <div className="mobile-more-legal">
+              <a href="/terms">{intl.formatMessage({ id: "footer.terms" })}</a>
+              <a href="/privacy">{intl.formatMessage({ id: "footer.privacy" })}</a>
+            </div>
           </div>
         </ModalSurface>
       ) : null}

@@ -68,6 +68,9 @@ describe("game settings dialog", () => {
     expect(html).toContain(">Glow</button>");
     expect(html).toContain(">High contrast</button>");
     expect(html).toContain("Glow adds a restrained green halo");
+    expect(html).toContain('class="settings-control-row settings-language-row"');
+    expect(html).toContain('<select aria-label="Language">');
+    expect(html).toContain('<option value="en" lang="en" selected="">English</option>');
   });
 
   it("disables history actions while a room command is pending", () => {

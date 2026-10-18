@@ -402,6 +402,14 @@
 .settings-control-row input:checked + .switch-track::after {
   background: #fff0c5;
 }
+/* Language keeps the shared field-dropdown skin; this row only sizes it to
+   sit beside the segmented controls. */
+.settings-language-row select {
+  width: 200px;
+  min-height: 38px;
+  padding-block: 6px;
+  font-size: 14px;
+}
 .settings-volume-row:has(input:disabled) {
   color: #8a7f6d;
 }

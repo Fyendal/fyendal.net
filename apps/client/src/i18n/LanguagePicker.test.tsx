@@ -4,31 +4,35 @@ import { TestI18nProvider } from "./TestI18nProvider.js";
 import { LanguagePicker } from "./LanguagePicker.js";
 
 describe("LanguagePicker", () => {
-  it("renders the selected English locale with an accessible label", () => {
+  it("renders the header badge with the active language mark and an accessible label", () => {
     const html = renderToStaticMarkup(
-      <TestI18nProvider><LanguagePicker /></TestI18nProvider>,
+      <TestI18nProvider><LanguagePicker placement="header" /></TestI18nProvider>,
     );
 
     expect(html).toContain('aria-label="Language"');
-    expect(html).toContain('<option value="en" selected="">English</option>');
-    expect(html).toContain('<option value="zh-Hans">简体中文</option>');
-    expect(html).toContain('<option value="pt-BR">Português</option>');
+    expect(html).toContain('aria-haspopup="menu"');
+    expect(html).toContain('aria-expanded="false"');
+    expect(html).toContain('<span class="language-mark" lang="en" aria-hidden="true">EN</span>');
   });
 
-  it("renders the selected Simplified Chinese locale from its catalog", () => {
+  it("labels the header badge from the Simplified Chinese catalog", () => {
     const html = renderToStaticMarkup(
-      <TestI18nProvider locale="zh-Hans"><LanguagePicker /></TestI18nProvider>,
+      <TestI18nProvider locale="zh-Hans"><LanguagePicker placement="header" /></TestI18nProvider>,
     );
 
     expect(html).toContain('aria-label="语言"');
-    expect(html).toContain('<option value="zh-Hans" selected="">简体中文</option>');
+    expect(html).toContain('lang="zh-Hans" aria-hidden="true">中</span>');
   });
 
-  it("renders the selected Brazilian Portuguese locale", () => {
+  it("renders the More sheet row over a native select of every autonym", () => {
     const html = renderToStaticMarkup(
-      <TestI18nProvider locale="pt-BR"><LanguagePicker /></TestI18nProvider>,
+      <TestI18nProvider locale="pt-BR"><LanguagePicker placement="menu" /></TestI18nProvider>,
     );
 
-    expect(html).toContain('<option value="pt-BR" selected="">Português</option>');
+    expect(html).toContain('<span class="language-row-value" lang="pt-BR">Português</span>');
+    expect(html).toContain('<select aria-label="Idioma">');
+    expect(html).toContain('<option value="en" lang="en">English</option>');
+    expect(html).toContain('<option value="zh-Hans" lang="zh-Hans">简体中文</option>');
+    expect(html).toContain('<option value="pt-BR" lang="pt-BR" selected="">Português</option>');
   });
 });

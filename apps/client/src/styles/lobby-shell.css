@@ -169,54 +169,134 @@
 .topbar-fullscreen-button { padding: 0; clip-path: none; }
 .topbar-fullscreen-button svg { fill: none; }
 .lobby-topbar .topbar-tools > .topbar-fullscreen-button { min-height: 38px; padding: 0; }
-.language-picker {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-}
-.language-picker-label {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip-path: inset(50%);
-  white-space: nowrap;
-}
-.language-picker select {
-  width: 116px;
+/* Language: a round badge with the active language's native mark. The
+   circle sets it apart from the square tool buttons beside it, like an
+   account avatar rather than a command. */
+.language-badge-menu { position: relative; display: inline-flex; }
+.language-badge {
+  display: inline-grid;
+  width: 38px;
+  min-width: 38px;
   height: 38px;
   min-height: 38px;
+  place-items: center;
+  padding: 0;
   border: 1px solid #5a4426;
-  border-radius: 2px;
-  padding: 0 29px 0 11px;
-  background:
-    var(--chevron-muted) no-repeat right 11px center / 10px 7px,
-    linear-gradient(180deg, #2d1f0e, #201508);
+  border-radius: 50%;
+  background: #1f1509;
   color: #c9b78f;
-  font-family: var(--font-lobby-ui);
-  font-size: 13px;
-  font-weight: 700;
-  line-height: normal;
-  cursor: pointer;
+  clip-path: none;
+  letter-spacing: 0;
+  text-transform: none;
 }
-.language-picker select:hover,
-.language-picker select:focus-visible {
-  border-color: #7a5c32;
-  background-image: var(--chevron-gold), linear-gradient(180deg, #2d1f0e, #201508);
+.language-badge:hover,
+.language-badge[aria-expanded="true"] {
+  border-color: var(--bronze);
+  background: #2a1c0b;
   color: var(--gold);
 }
-.language-picker select:focus-visible {
-  outline: 0;
-  box-shadow: inset 0 0 0 2px var(--focus-ring);
+.language-badge:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+.language-badge:disabled { cursor: wait; opacity: .65; }
+.language-mark {
+  font: 700 12px/1 var(--font-lobby-ui);
+  letter-spacing: .5px;
 }
-.language-picker select:disabled { cursor: wait; opacity: .65; }
+.language-mark:lang(zh-Hans) { font-size: 15px; letter-spacing: 0; }
+.language-menu {
+  position: absolute;
+  z-index: 60;
+  top: calc(100% + 8px);
+  right: 0;
+  display: grid;
+  min-width: 190px;
+  padding: 5px;
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+  background: var(--surface-raised);
+  box-shadow: var(--shadow-raised);
+}
+.language-menu button {
+  display: grid;
+  grid-template-columns: 30px minmax(0, 1fr) 16px;
+  align-items: center;
+  gap: 11px;
+  min-height: 42px;
+  padding: 6px 9px;
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  color: var(--text-primary);
+  clip-path: none;
+  font: 600 14px var(--font-lobby-ui);
+  letter-spacing: normal;
+  text-align: left;
+  text-transform: none;
+}
+.language-menu button:hover,
+.language-menu button:focus-visible { background: #ffffff0d; outline: 0; }
+.language-menu button:focus-visible { box-shadow: inset 0 0 0 2px var(--focus-ring); }
+.language-menu .language-mark {
+  display: grid;
+  width: 30px;
+  height: 30px;
+  place-items: center;
+  border: 1px solid var(--border-subtle);
+  border-radius: 50%;
+  color: var(--text-secondary);
+  font-size: 10.5px;
+}
+.language-menu button:lang(zh-Hans) .language-mark { font-size: 13px; }
+.language-menu button[aria-checked="true"] .language-mark { border-color: var(--bronze); color: var(--gold); }
+.language-menu-check { color: var(--gold); font-size: 16px; }
 @media (max-width: 700px) {
-  .language-picker select { min-height: 44px; height: 44px; }
+  .language-badge { width: 42px; min-width: 42px; height: 42px; min-height: 42px; }
 }
-.mobile-more-actions .language-picker,
-.mobile-more-actions .language-picker select {
+
+/* In the More sheet, language is a settings row: name on the left, current
+   value on the right. A transparent native select covers the row so phones
+   open their own picker. */
+.language-row {
+  position: relative;
+  display: flex;
+  min-height: 50px;
+  align-items: center;
+  gap: 12px;
+  padding: 0 14px 0 16px;
+  color: var(--text-primary);
+  font: 500 16px var(--font-lobby-ui);
+  cursor: pointer;
+}
+.language-row-label { flex: 1 1 auto; }
+.language-row-value {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--text-secondary);
+  font-size: 15px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.language-row::after {
+  content: "";
+  width: 16px;
+  height: 16px;
+  flex: 0 0 auto;
+  background-color: var(--text-muted);
+  -webkit-mask: url("/icons/ui/chevron-down.svg") center / contain no-repeat;
+  mask: url("/icons/ui/chevron-down.svg") center / contain no-repeat;
+}
+.language-row select {
+  position: absolute;
+  inset: 0;
   width: 100%;
+  height: 100%;
+  min-height: 0;
+  opacity: 0;
+  cursor: pointer;
 }
+.language-row:hover { background: #ffffff08; }
+.language-row:has(select:focus-visible) { box-shadow: inset 0 0 0 2px var(--focus-ring); }
+.language-row:has(select:disabled) { cursor: wait; opacity: .65; }
+
 .user-chip {
   display: flex;
   min-height: 38px;
@@ -402,23 +482,65 @@
 }
 .mobile-lobby-nav { display: none; }
 
-.mobile-more-actions { display: grid; gap: 8px; }
-.mobile-more-actions > a,
-.mobile-more-actions > button {
-  display: flex;
-  min-height: 48px;
-  align-items: center;
-  padding: 10px 14px;
+/* More sheet: grouped settings-style rows. Rows in a group share one outline
+   and hairline dividers instead of each wearing its own box. */
+.mobile-more { display: grid; gap: 14px; }
+.mobile-more-group {
+  display: grid;
+  overflow: hidden;
   border: 1px solid var(--border-subtle);
+  border-radius: 9px;
   background: var(--surface-control);
-  border-radius: 6px;
+}
+.mobile-more-group > a,
+.mobile-more-group > button {
+  display: flex;
+  min-height: 50px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 0;
+  padding: 0 14px 0 16px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
   color: var(--text-primary);
-  font: 600 15px var(--font-lobby-ui);
+  clip-path: none;
+  font: 500 16px var(--font-lobby-ui);
+  letter-spacing: normal;
+  text-align: left;
+  text-decoration: none;
+  text-transform: none;
+}
+.mobile-more-group > :is(a, button) + :is(a, button) { border-top: 1px solid #4d3a2399; }
+.mobile-more-group > a::after,
+.mobile-more-group > button:not(.mobile-more-logout)::after {
+  content: "";
+  width: 16px;
+  height: 16px;
+  flex: 0 0 auto;
+  background-color: var(--text-muted);
+  -webkit-mask: url("/icons/ui/chevron-right.svg") center / contain no-repeat;
+  mask: url("/icons/ui/chevron-right.svg") center / contain no-repeat;
+}
+.mobile-more-group > a:hover,
+.mobile-more-group > button:hover { background: #ffffff08; }
+.mobile-more-group > a:focus-visible,
+.mobile-more-group > button:focus-visible { outline: 0; box-shadow: inset 0 0 0 2px var(--focus-ring); }
+.mobile-more-group > .mobile-more-logout { justify-content: center; color: #ff9b92; font-weight: 600; }
+.mobile-more-legal {
+  display: flex;
+  justify-content: center;
+  gap: 22px;
+  padding-top: 2px;
+}
+.mobile-more-legal a {
+  color: var(--text-muted);
+  font: 500 13px var(--font-lobby-ui);
   text-decoration: none;
 }
-.mobile-more-actions > a:hover,
-.mobile-more-actions > a:focus-visible { border-color: var(--border-strong); color: var(--gold); }
-.mobile-more-actions .mobile-more-logout { margin-top: 10px; border-color: #873b33; color: #ffaaa2; }
+.mobile-more-legal a:hover,
+.mobile-more-legal a:focus-visible { color: var(--text-secondary); text-decoration: underline; }
 
 @media (min-width: 701px) and (max-width: 1099px) {
   .lobby-grid {

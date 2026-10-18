@@ -9,6 +9,14 @@ export const LOCALE_AUTONYMS: Readonly<Record<SupportedLocale, string>> = {
   "pt-BR": "Português",
 };
 
+/** Short native marks for the round header badge. They name languages, not
+ * countries, so no locale is tied to a national flag. */
+export const LOCALE_MARKS: Readonly<Record<SupportedLocale, string>> = {
+  en: "EN",
+  "zh-Hans": "中",
+  "pt-BR": "PT",
+};
+
 export const LOCALE_STORAGE_KEY = "fyendal-locale";
 
 interface StoredLocale {

@@ -155,12 +155,11 @@ input {
 }
 input:focus { outline: 1px solid #b8933f88; border-color: #b8933f; }
 
-/* Dropdowns come in two kinds. A field dropdown is a form choice and shares
-   the input well; ListboxDropdown (.listbox-trigger) wears the same skin
-   when options need portraits, tags or groups. A toolbar dropdown
-   (.language-picker) is compact top-bar chrome. Context rules may size a
-   dropdown but must not restyle its skin, and `background` shorthands there
-   would erase the chevron. */
+/* A field dropdown is a form choice and shares the input well;
+   ListboxDropdown (.listbox-trigger) wears the same skin when options need
+   portraits, tags or groups. Context rules may size a dropdown but must not
+   restyle its skin, and `background` shorthands there would erase the
+   chevron. */
 select {
   appearance: none;
   min-width: 0;
