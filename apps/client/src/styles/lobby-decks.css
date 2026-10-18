@@ -657,22 +657,6 @@
 /* ── room listings ── */
 .rooms-header .panel-title { margin: 0; }
 
-/* Room listings prioritize quick scanning over the lobby's decorative type. */
-.all-rooms-panel {
-  --font-display: "Segoe UI", system-ui, sans-serif;
-  font-family: "Segoe UI", system-ui, sans-serif;
-}
-.lobby-page .all-rooms-panel .room-section .panel-title {
-  font-family: var(--font-display);
-  letter-spacing: 1px;
-}
-.all-rooms-panel .format-badge,
-.all-rooms-panel .room-card-status,
-.all-rooms-panel .hero-vs-sep {
-  font-weight: 700;
-  letter-spacing: .8px;
-}
-
 .room-section + .room-section { margin-top: 24px; }
 .room-section .panel-title { font-size: 15px; margin-bottom: 10px; }
 

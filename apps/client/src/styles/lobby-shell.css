@@ -385,20 +385,37 @@
   border-bottom: 0;
   padding-bottom: 0;
 }
-.lobby-panel-action {
+/* Create actions in panel headers wear the deck card's bronze frame so they
+   read as part of the panel rather than a call to arms. */
+.lobby-create-action {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 250px;
+  gap: 8px;
   max-width: 100%;
-  min-height: 44px;
-  padding: 8px 18px;
-  font-family: var(--font-lobby-ui);
-  font-size: var(--lobby-action-font-size);
-  font-weight: 700;
-  line-height: 1.2;
-  letter-spacing: var(--lobby-action-letter-spacing);
+  min-height: 38px;
+  padding: 8px 16px;
+  border: 1px solid #7a5d2c;
+  border-radius: 4px;
+  background: #17110c;
+  clip-path: none;
+  color: var(--text-secondary);
+  font: 600 14px/1.2 var(--font-lobby-ui);
+  letter-spacing: normal;
+  text-transform: none;
   white-space: nowrap;
+  transition: border-color 120ms ease, color 120ms ease, background-color 120ms ease;
+}
+.lobby-create-action:hover {
+  border-color: #a8833f;
+  background: #21170e;
+  color: var(--gold);
+}
+.lobby-create-action:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+.lobby-create-action .ui-icon { width: 16px; height: 16px; color: var(--bronze); }
+.lobby-create-action:hover .ui-icon { color: var(--gold); }
+@media (prefers-reduced-motion: reduce) {
+  .lobby-create-action { transition: none; }
 }
 
 .btn-danger { background: #781f1b; border-color: #bc4b40; }

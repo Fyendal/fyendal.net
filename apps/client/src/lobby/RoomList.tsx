@@ -3,6 +3,7 @@ import { useIntl } from "react-intl";
 import { useShallow } from "zustand/react/shallow";
 import type { RoomSummary, Format } from "@fyendal/shared";
 import { useStore } from "../store.js";
+import { UiIcon } from "../components/UiIcon.js";
 import { formatLabel } from "./FormatBadge.js";
 import {
   DeckTile,
@@ -48,7 +49,8 @@ export function RoomList(props: { onGoToDecks: (format: Format) => void }) {
     <div className="panel all-rooms-panel">
       <div className="rooms-header">
         <h2 className="panel-title">{intl.formatMessage({ id: "lobby.rooms.all" })}</h2>
-        <button className="btn-primary lobby-panel-action" onClick={() => setCreating(true)}>
+        <button className="lobby-create-action" onClick={() => setCreating(true)}>
+          <UiIcon name="plus" />
           {intl.formatMessage({ id: "lobby.rooms.create" })}
         </button>
       </div>

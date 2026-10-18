@@ -26,6 +26,7 @@ export type UiIconName =
   | "more"
   | "note"
   | "play"
+  | "plus"
   | "share"
   | "skip-forward"
   | "star"

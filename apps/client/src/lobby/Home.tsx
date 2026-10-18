@@ -232,7 +232,7 @@ export function Home() {
                 {intl.formatMessage({ id: "lobby.action.cancelSearch" })}
               </button>
             ) : (
-              <button type="submit" className="btn-primary" disabled={!selectedDeck}>
+              <button type="submit" className="btn-cta" disabled={!selectedDeck}>
                 {intl.formatMessage({ id: "lobby.home.start" })}
               </button>
             )}

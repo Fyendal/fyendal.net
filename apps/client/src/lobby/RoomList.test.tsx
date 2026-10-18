@@ -111,7 +111,7 @@ describe("RoomList", () => {
     expect(html).toContain(">Started</span>");
     expect(html).toContain('class="room-card-status"');
     expect(html).not.toContain(">Future cards</span>");
-    expect(html).toContain("Create room");
+    expect(html).toContain("Create Room");
     expect(html.match(/<article class="room-card/g)).toHaveLength(4);
     expect(html).not.toContain("Quick Match");
     expect(html).not.toContain("Find Game");
@@ -149,7 +149,7 @@ describe("RoomList", () => {
     expect(html).toContain("About card pool modes");
     expect(html).toContain("Tournament-legal cards only.");
     expect(html).not.toContain("card-pool-segments");
-    expect(html).toContain('type="submit" class="btn-primary"');
+    expect(html).toContain('type="submit" class="btn-cta"');
     expect(html).not.toContain("Manage decks");
     expect(html).toContain("Rejoin rooms");
     expect(html).toContain("Victor");

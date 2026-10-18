@@ -39,7 +39,7 @@ export function RoomCard({
       </div>
       <div className="room-card-actions">
         {owned ? (
-          <button className="btn-primary" onClick={() => onRejoin(room.code)}>
+          <button className="btn-cta" onClick={() => onRejoin(room.code)}>
             {intl.formatMessage({ id: "lobby.action.rejoin" })}
           </button>
         ) : (

@@ -42,7 +42,7 @@ describe("DeckLibrary", () => {
     expect(html).toContain('data-format="cc">CC</span>');
     expect(html).toContain('data-format="silver-age">Silver Age</span>');
     expect(html).not.toContain("Saved");
-    expect(html).toContain("Create / import deck");
+    expect(html).toContain("Create / Import Deck");
     expect(html).not.toContain("Find match");
     expect(html).not.toContain("Play vs bot");
 

@@ -126,13 +126,29 @@ button:disabled { opacity: 0.4; cursor: default; }
   :where(button, input, select, summary) { min-height: 44px; }
 }
 
+/* The everyday primary action: a tonal blood wash that leads without
+   shouting. Reserve .btn-cta for starting a game and rejoining a room. */
 .btn-primary {
+  border: 1px solid #c4483b99;
+  border-radius: 6px;
+  background: #9e2b2538;
+  color: #ffd8c8;
+  font-family: var(--font-lobby-ui);
+  font-weight: 600;
+  text-transform: none;
+  letter-spacing: 0.1px;
+  clip-path: none;
+  transition: background-color 120ms ease, border-color 120ms ease, color 120ms ease;
+}
+.btn-primary:hover { background: #b0322866; border-color: #e0684a; color: #fff1e8; }
+.btn-primary:focus-visible { outline: 2px solid #e0684a; outline-offset: 2px; }
+.btn-cta {
   background: linear-gradient(180deg, var(--blood-hi), var(--blood));
   border-color: #d4553f;
   color: #f4e9d4;
   text-shadow: 0 1px 2px #00000080;
 }
-.btn-primary:hover { background: linear-gradient(180deg, #d24a34, #b03228); border-color: #e0684a; }
+.btn-cta:hover { background: linear-gradient(180deg, #d24a34, #b03228); border-color: #e0684a; }
 .btn-private-room {
   border-color: #d4a958;
   background: linear-gradient(180deg, #6b4b19, #3c270b);
