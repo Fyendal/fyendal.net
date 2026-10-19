@@ -1774,7 +1774,9 @@ function requirePlayer(
 const port = Number(process.env.PORT ?? 8080);
 /** How often expired rooms (game over / both players disconnected) are deleted. */
 const SWEEP_INTERVAL_MS = 60_000;
-const MATCH_PREP_SWEEP_INTERVAL_MS = 5_000;
+/** Expired accept/prep deadlines resolve within this interval, so a dialog
+ *  outlives its countdown by at most about a second. */
+const MATCH_PREP_SWEEP_INTERVAL_MS = 1_000;
 const SOCIAL_CLEANUP_INTERVAL_MS = 60 * 60 * 1000;
 if (!process.env.VITEST) {
   // Initialize shared persistence and this gateway before accepting traffic.
@@ -1827,10 +1829,14 @@ if (!process.env.VITEST) {
   };
   cleanupSocial();
   const socialCleanupTimer = setInterval(cleanupSocial, SOCIAL_CLEANUP_INTERVAL_MS);
+  let sweepingMatchPrep = false;
   const sweepMatchPrep = (): void => {
-    void tryAcquireLease(pool, "maintenance:match-prep", instanceId, 2 * MATCH_PREP_SWEEP_INTERVAL_MS)
+    if (sweepingMatchPrep) return;
+    sweepingMatchPrep = true;
+    void tryAcquireLease(pool, "maintenance:match-prep", instanceId, 5 * MATCH_PREP_SWEEP_INTERVAL_MS)
       .then((claimed) => claimed ? rooms.sweepMatchmadePrep() : [])
-      .catch((error: Error) => consoleError("match prep sweep failed", error));
+      .catch((error: Error) => consoleError("match prep sweep failed", error))
+      .finally(() => { sweepingMatchPrep = false; });
   };
   sweepMatchPrep();
   const matchPrepSweepTimer = setInterval(sweepMatchPrep, MATCH_PREP_SWEEP_INTERVAL_MS);
