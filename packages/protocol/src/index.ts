@@ -316,6 +316,25 @@ export interface ReplayNotesResponse { ok: true; notes: ReplayServerNote[] }
 export type ReplayNoteInput =
   | { replayId: string; frame: number; text: string }
   | { roomCode: string; roomVersion?: number; frame: number; text: string };
+export const EMAIL_MAX_LENGTH = 254;
+export const PASSWORD_MIN_LENGTH = 8;
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+/** The one recovery-email shape check shared by client and server. Returns
+ * the trimmed address, or null when it is not address-shaped or too long. */
+export function normalizeEmailAddress(input: string): string | null {
+  const email = input.trim();
+  return email.length <= EMAIL_MAX_LENGTH && EMAIL_RE.test(email) ? email : null;
+}
+export interface AccountEmailResponse {
+  ok: true;
+  /** False when the server has no email transport configured. */
+  available: boolean;
+  /** Verified recovery address. */
+  email: string | null;
+  /** Address awaiting its confirmation link. */
+  pendingEmail: string | null;
+}
 export interface AccountBadgesResponse {
   ok: true;
   availableBadges: PlayerBadge[];
@@ -2129,6 +2148,22 @@ export const decodeStatsResponse: Decoder<StatsResponse> = (value) => {
   return data && exactKeys(data, ["ok", "inGame", "openRooms"]) && data.ok === true
     && nonNegativeInteger(data.inGame) && nonNegativeInteger(data.openRooms)
     ? { ok: true, inGame: data.inGame, openRooms: data.openRooms }
+    : null;
+};
+
+function nullableEmail(value: unknown): value is string | null {
+  return value === null || string(value, EMAIL_MAX_LENGTH, false);
+}
+
+export const decodeAccountEmailResponse: Decoder<AccountEmailResponse> = (value) => {
+  const data = object(value);
+  return !!data
+    && exactKeys(data, ["ok", "available", "email", "pendingEmail"])
+    && data.ok === true
+    && typeof data.available === "boolean"
+    && nullableEmail(data.email)
+    && nullableEmail(data.pendingEmail)
+    ? { ok: true, available: data.available, email: data.email, pendingEmail: data.pendingEmail }
     : null;
 };
 

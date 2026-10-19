@@ -3,6 +3,7 @@ import {
   ACTIVE_ACHIEVEMENT_IDS,
   decodeAccountExportResponse,
   decodeAccountBadgesResponse,
+  decodeAccountEmailResponse,
   decodeAchievementReplaySnapshot,
   decodeAchievementsResponse,
   decodeBugReportNotificationsResponse,
@@ -1320,6 +1321,12 @@ describe("replays and HTTP responses", () => {
       availableBadges: [],
       selectedBadge: "early-tester",
     })).toBeNull();
+    expect(decodeAccountEmailResponse({ ok: true, available: true, email: null, pendingEmail: "a@b.io" }))
+      .toEqual({ ok: true, available: true, email: null, pendingEmail: "a@b.io" });
+    expect(decodeAccountEmailResponse({ ok: true, available: true, email: "", pendingEmail: null })).toBeNull();
+    expect(decodeAccountEmailResponse({ ok: true, available: true, email: `${"a".repeat(250)}@b.io`, pendingEmail: null }))
+      .toBeNull();
+    expect(decodeAccountEmailResponse({ ok: true, available: "yes", email: null, pendingEmail: null })).toBeNull();
     const achievements = {
       ok: true,
       unlocks: [{ id: "big-turn", unlockedAt: 123, roomCode: "ABC123" }],
@@ -1521,6 +1528,7 @@ describe("replays and HTTP responses", () => {
         availableBadges: ["early-tester"],
         selectedBadge: "early-tester",
       }],
+      [decodeAccountEmailResponse, { ok: true, available: true, email: "a@b.io", pendingEmail: null }],
       [decodeAccountExportResponse, {
         ok: true,
         export: {
