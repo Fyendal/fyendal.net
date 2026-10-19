@@ -483,9 +483,10 @@
 
 
 /* Lobby rail: a flat list of places hung from one bronze spine. Labels use
-   the card-name face so the menu reads like printed card titles; the selected
-   place wears a flat blood smear that lands on the spine and fades out to the
-   right, instead of a raised box. */
+   the interface sans so the menu sits quietly beside the controls, leaving
+   the card-name face to the panel titles; the selected place wears a flat
+   blood smear that lands on the spine and fades out to the right, instead of
+   a raised box. */
 .rail-nav {
   display: flex;
   flex-direction: column;
@@ -547,7 +548,7 @@
   border-top: 1px solid #4d3a2399;
 }
 .rail-nav-label {
-  font: 500 19px/1.2 var(--font-heading);
+  font: 600 16px/1.2 var(--font-lobby-ui);
 }
 .rail-nav-count {
   color: var(--text-muted);
@@ -557,7 +558,7 @@
 }
 .rail-nav-item.selected .rail-nav-count { color: #f0c9a8; }
 @media (min-width: 701px) and (max-width: 1099px) {
-  .rail-nav-label { font-size: 18px; }
+  .rail-nav-label { font-size: 15px; }
 }
 .mobile-lobby-nav { display: none; }
 

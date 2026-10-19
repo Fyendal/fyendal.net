@@ -37,9 +37,10 @@
   --font-card-name: Alegreya, Palatino, "Palatino Linotype", "Book Antiqua", Georgia, serif;
   /* Names of places: navigation, panel and modal titles. Only weight 500 is
      bundled, so headings take emphasis from size and color, never bold.
-     Interface titles in this face are title case in every locale: English
-     is hand-cased in its catalog so small words stay lowercase, and other
-     locales are transformed below. */
+     Reserved for display sizes (panel, modal and landing titles); navigation
+     and list labels use the interface sans. Titles are title case in every
+     locale: English is hand-cased in its catalog so small words stay
+     lowercase, and other locales are transformed below. */
   --font-heading: var(--font-card-name);
   /* Keep the old-world display voice exclusive to the product wordmark in the
      lobby. Headings use --font-heading; controls use a quieter system face. */
@@ -346,9 +347,9 @@ input::placeholder {
 .muted { color: #8a7f6d; font-size: 14px; }
 .error { color: #ff7b72; font-size: 14px; padding: 5px 0; }
 
-/* Interface titles outside English take their title case from CSS; player
-   content such as deck, card and user names (.modal-surface-name) and the
-   landing FAQ questions are never transformed. */
+/* Interface titles and navigation labels outside English take their title
+   case from CSS; player content such as deck, card and user names
+   (.modal-surface-name) and the landing FAQ questions are never transformed. */
 html:not(:lang(en)) :is(
   .lobby-page .panel-title,
   .modal-surface-header h2:not(.modal-surface-name),
