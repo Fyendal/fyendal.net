@@ -68,7 +68,7 @@ describe("guest search landing", () => {
 
     expect(html).toContain("在线畅玩赤魂战纪 (Flesh &amp; Blood)");
     expect(html).toContain("<strong>2</strong> 人正在对局");
-    expect(html).toContain("常见问题");
+    expect(html).toContain("关于在 Fyendal 上游玩");
     expect(html).toContain("我需要下载或安装什么吗？");
     expect(html).toContain("如何成为贡献者？");
   });

@@ -30582,12 +30582,6 @@
       "value": "Where can I play in person?"
     }
   ],
-  "landing.faq.kicker": [
-    {
-      "type": 0,
-      "value": "Common questions"
-    }
-  ],
   "landing.faq.official.answer": [
     {
       "type": 0,
@@ -30641,7 +30635,7 @@
   "landing.faq.title": [
     {
       "type": 0,
-      "value": "About Playing on Fyendal"
+      "value": "About playing on Fyendal"
     }
   ],
   "landing.inGame": [
@@ -30754,16 +30748,10 @@
       "value": "Play Flesh and Blood Online"
     }
   ],
-  "landing.ways.kicker": [
-    {
-      "type": 0,
-      "value": "Play your way"
-    }
-  ],
   "landing.ways.title": [
     {
       "type": 0,
-      "value": "Online Matches and Focused Practice"
+      "value": "Online matches and focused practice"
     }
   ],
   "language.label": [

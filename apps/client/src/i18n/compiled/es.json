@@ -31524,12 +31524,6 @@
       "value": "¿Dónde puedo jugar en persona?"
     }
   ],
-  "landing.faq.kicker": [
-    {
-      "type": 0,
-      "value": "Preguntas frecuentes"
-    }
-  ],
   "landing.faq.official.answer": [
     {
       "type": 0,
@@ -31694,12 +31688,6 @@
     {
       "type": 0,
       "value": "Juega a Flesh and Blood en línea"
-    }
-  ],
-  "landing.ways.kicker": [
-    {
-      "type": 0,
-      "value": "Juega a tu manera"
     }
   ],
   "landing.ways.title": [

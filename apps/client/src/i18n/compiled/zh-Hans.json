@@ -29725,12 +29725,6 @@
       "value": "我可以在哪里参加线下对局？"
     }
   ],
-  "landing.faq.kicker": [
-    {
-      "type": 0,
-      "value": "常见问题"
-    }
-  ],
   "landing.faq.official.answer": [
     {
       "type": 0,
@@ -29871,12 +29865,6 @@
     {
       "type": 0,
       "value": "在线畅玩赤魂战纪 (Flesh & Blood)"
-    }
-  ],
-  "landing.ways.kicker": [
-    {
-      "type": 0,
-      "value": "按你的方式游玩"
     }
   ],
   "landing.ways.title": [

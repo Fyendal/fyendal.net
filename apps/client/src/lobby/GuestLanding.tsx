@@ -78,33 +78,38 @@ export function LobbyBrand() {
 }
 
 function GuestLandingHeroView({ intl, stats }: { intl: IntlShape; stats?: LandingStats | null }) {
+  const live = stats ? stats.inGame + stats.openRooms > 0 : false;
   return (
-    <section className="panel intro-panel" aria-labelledby="guest-landing-title">
-      <h1 id="guest-landing-title" className="intro-title">
-        {intl.formatMessage({ id: "landing.title" })}
-      </h1>
-      <p className="intro-subtitle">
-        {intl.formatMessage({ id: "landing.subtitle" })}
-      </p>
-      {stats ? (
-        <div
-          className="intro-stats"
-          aria-label={intl.formatMessage({ id: "landing.activityLabel" })}
-        >
-          <span>
-            {intl.formatMessage(
-              { id: "landing.inGame" },
-              { count: stats.inGame, strong: (chunks) => <strong>{chunks}</strong> },
-            )}
-          </span>
-          <span>
-            {intl.formatMessage(
-              { id: "landing.openRooms" },
-              { count: stats.openRooms, strong: (chunks) => <strong>{chunks}</strong> },
-            )}
-          </span>
-        </div>
-      ) : null}
+    <section className="intro-panel" aria-labelledby="guest-landing-title">
+      <div className="intro-poster" aria-hidden="true" />
+      <div className="intro-copy">
+        <h1 id="guest-landing-title" className="intro-title">
+          {intl.formatMessage({ id: "landing.title" })}
+        </h1>
+        <p className="intro-subtitle">
+          {intl.formatMessage({ id: "landing.subtitle" })}
+        </p>
+        {stats ? (
+          <div
+            className="intro-stats"
+            aria-label={intl.formatMessage({ id: "landing.activityLabel" })}
+          >
+            <span>
+              {live ? <span className="home-play-live-dot" aria-hidden="true" /> : null}
+              {intl.formatMessage(
+                { id: "landing.inGame" },
+                { count: stats.inGame, strong: (chunks) => <strong>{chunks}</strong> },
+              )}
+            </span>
+            <span>
+              {intl.formatMessage(
+                { id: "landing.openRooms" },
+                { count: stats.openRooms, strong: (chunks) => <strong>{chunks}</strong> },
+              )}
+            </span>
+          </div>
+        ) : null}
+      </div>
     </section>
   );
 }
@@ -117,45 +122,41 @@ function GuestLandingDetailsView({ intl }: { intl: IntlShape }) {
   return (
     <div className="landing-details">
       <section className="landing-section" aria-labelledby="ways-to-play-title">
-        <div className="landing-section-heading">
-          <p className="landing-kicker">{intl.formatMessage({ id: "landing.ways.kicker" })}</p>
+        <div className="landing-section-lead">
           <h2 id="ways-to-play-title">{intl.formatMessage({ id: "landing.ways.title" })}</h2>
-        </div>
-        <div className="landing-play-layout">
-          <div className="landing-card-grid">
-            <article id="practice-bots" className="landing-info-card">
+          <div className="landing-ways">
+            <article id="practice-bots" className="landing-way">
               <h3>{intl.formatMessage({ id: "landing.bots.title" })}</h3>
               <p>{intl.formatMessage({ id: "landing.bots.body" })}</p>
             </article>
-            <article id="player-matches" className="landing-info-card">
+            <article id="player-matches" className="landing-way">
               <h3>{intl.formatMessage({ id: "landing.matches.title" })}</h3>
               <p>{intl.formatMessage({ id: "landing.matches.body" })}</p>
             </article>
-            <article id="watch-replays" className="landing-info-card">
+            <article id="watch-replays" className="landing-way">
               <h3>{intl.formatMessage({ id: "landing.replays.title" })}</h3>
               <p>{intl.formatMessage({ id: "landing.replays.body" })}</p>
             </article>
           </div>
-          <div className="landing-demo">
-            <img
-              className="landing-demo-image"
-              src="/fyendal-gameplay-cindra-home.jpg"
-              alt={intl.formatMessage({ id: "landing.demoAlt" })}
-              width={1600}
-              height={871}
-              loading="lazy"
-              decoding="async"
-            />
-          </div>
+        </div>
+        <div className="landing-demo">
+          <img
+            className="landing-demo-image"
+            src="/fyendal-gameplay-cindra-home.jpg"
+            alt={intl.formatMessage({ id: "landing.demoAlt" })}
+            width={1600}
+            height={871}
+            loading="lazy"
+            decoding="async"
+          />
         </div>
       </section>
 
       <section className="landing-section landing-faq" aria-labelledby="faq-title">
-        <div className="landing-section-heading">
-          <p className="landing-kicker">{intl.formatMessage({ id: "landing.faq.kicker" })}</p>
+        <div className="landing-section-lead">
           <h2 id="faq-title">{intl.formatMessage({ id: "landing.faq.title" })}</h2>
         </div>
-        <div className="landing-faq-grid">
+        <div className="landing-faq-list">
           {FAQ_KEYS.map((faq) => (
             <details key={faq}>
               <summary>{intl.formatMessage({ id: `landing.faq.${faq}.question` })}</summary>

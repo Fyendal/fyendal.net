@@ -253,10 +253,10 @@
   }
   .deck-grid { grid-template-columns: minmax(0, 1fr); }
   .deck-actions { flex-direction: column; }
-  .intro-grid { width: calc(100% - 24px); padding: 12px 0; gap: 12px; }
-  .intro-panel { text-align: center; }
-  .intro-title { font-size: 25px; }
-  .intro-stats { justify-content: center; flex-wrap: wrap; gap: 14px; }
+  .guest-landing { --landing-width: calc(100% - 24px); }
+  .intro-grid { margin-top: 12px; }
+  .intro-copy { padding: 20px 16px 24px; }
+  .intro-auth { padding: 20px 16px 24px; }
   .site-footer { padding-inline: 14px; }
 
   .table {
