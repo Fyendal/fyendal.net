@@ -351,6 +351,8 @@ export const sbl: Record<string, CardScript> = {
       if (option !== "no") {
         const charged = ctx.charge(Number(option));
         if (charged) {
+          // Marks the attack as charged-to-play for "next attack you charge" buffs.
+          if (!ctx.getState("chargedPitch")) ctx.setState("chargedPitch", ctx.cardColor(charged));
           if (isLight(ctx, charged)) {
             ctx.setState("vLight", ctx.getState("vLight") + 1);
           }

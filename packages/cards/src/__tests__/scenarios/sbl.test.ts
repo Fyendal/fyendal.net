@@ -120,6 +120,39 @@ describe("SBL — Charge as an additional cost", () => {
     s.blockWith().settle();
     s.expectFinalAttack(4); // 3 base + 1 Light card charged
   });
+
+  it("V of the Vanguard receives Charge of the Light Brigade's charged-attack bonus", () => {
+    const s = scenario({
+      seats: [
+        boltynSeat({
+          hand: ["charge of the light brigade|1", "v of the vanguard|2", "snatch|1", "beaming bravado|2", YELLOW],
+        }),
+        { hero: "dorinthea" },
+      ],
+    });
+    s.play("charge of the light brigade|1");
+    s.play("v of the vanguard|2", { pitch: ["snatch|1"] });
+    s.chooseCard("beaming bravado|2"); // Light
+    s.chooseCard(YELLOW); // non-Light; hand empty, loop stops
+    s.blockWith().settle();
+    s.expectFinalAttack(7); // 3 base + 1 Light card charged + 3 Charge of the Light Brigade
+  });
+
+  it("V of the Vanguard played without charging does not receive Charge of the Light Brigade's bonus", () => {
+    const s = scenario({
+      seats: [
+        boltynSeat({
+          hand: ["charge of the light brigade|1", "v of the vanguard|2", "snatch|1", YELLOW],
+        }),
+        { hero: "dorinthea" },
+      ],
+    });
+    s.play("charge of the light brigade|1");
+    s.play("v of the vanguard|2", { pitch: ["snatch|1"] });
+    s.chooseOption("no");
+    s.blockWith().settle();
+    s.expectFinalAttack(3);
+  });
 });
 
 describe("SBL — soul payoffs", () => {
