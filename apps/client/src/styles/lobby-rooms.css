@@ -103,7 +103,6 @@
   border-top: 1px solid #45331f88;
 }
 .create-room-actions button { min-width: 0; padding-inline: 10px; }
-.create-room-actions .btn-bot { min-width: 0; font-size: 13px; letter-spacing: 1.5px; }
 .create-room-actions > button:last-child { grid-column: 1 / -1; }
 
 @media (max-width: 620px) {
@@ -446,7 +445,7 @@
 }
 /* Keep equivalent lobby actions typographically consistent across the home,
    format, room-list, and matchmaking views. */
-.lobby-page :is(.new-player-play-actions, .room-card-actions) > button {
+.lobby-page :is(.new-player-play-actions, .room-card-actions, .home-play-actions) > button {
   font-family: var(--font-lobby-ui);
   font-size: var(--lobby-action-font-size);
   font-weight: 700;
