@@ -1,8 +1,7 @@
 import { useStore } from "../store.js";
 import { useShallow } from "zustand/react/shallow";
 import { useIntl } from "react-intl";
-import { DeadlineCountdown } from "../prep/DeadlineCountdown.js";
-import { AcceptHeroMatchup } from "../prep/AcceptHeroMatchup.js";
+import { AcceptHeroMatchup, MatchAcceptContent } from "../prep/AcceptHeroMatchup.js";
 
 /** Holding screen before a game starts: the host waits for an opponent,
  *  a spectator for the match to begin (the board appears on game start). */
@@ -76,34 +75,14 @@ export function WaitingRoom() {
           aria-labelledby="joining-match-accept-title"
           aria-live="polite"
         >
-          <span className="match-accept-eyebrow">{intl.formatMessage({ id: "lobby.waiting.matchFound" })}</span>
-          <h2 className="panel-title" id="joining-match-accept-title">
-            {intl.formatMessage({
-              id: me?.accepted
-                ? "matchmaking.background.waiting"
-                : opponent?.accepted
-                ? "prep.accept.opponentAccepted"
-                : "lobby.waiting.ready",
-            })}
-          </h2>
-          <AcceptHeroMatchup you={me} opponent={opponent} showAcceptance />
-          <p className="muted">
-            {me?.accepted
-              ? intl.formatMessage({ id: "lobby.waiting.accepted" })
-              : opponent?.accepted
-              ? intl.formatMessage({ id: "lobby.waiting.namedOpponent" }, { username: opponent.username })
-              : opponent
-              ? intl.formatMessage({ id: "lobby.waiting.namedOpponentDeciding" }, { username: opponent.username })
-              : intl.formatMessage({ id: "lobby.waiting.opponentDeciding" })}
-          </p>
-          {me?.accepted ? (
-            <p><DeadlineCountdown deadlineAt={prep.deadlineAt} /></p>
-          ) : (
-            <button className="btn-primary match-accept-primary" onClick={acceptMatch}>
-              {intl.formatMessage({ id: "lobby.action.accept" })} · <DeadlineCountdown deadlineAt={prep.deadlineAt} />
-            </button>
-          )}
-          <button onClick={declineMatch}>{intl.formatMessage({ id: "lobby.action.decline" })}</button>
+          <MatchAcceptContent
+            titleId="joining-match-accept-title"
+            you={me}
+            opponent={opponent}
+            deadlineAt={prep.deadlineAt}
+            onAccept={acceptMatch}
+            onDecline={declineMatch}
+          />
         </div>
       </div>
     );

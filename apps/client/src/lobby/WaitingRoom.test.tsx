@@ -33,17 +33,15 @@ function render({ accepted = false, opponentAccepted = false, fallback = false, 
 describe("match acceptance holding screen", () => {
   it("offers acceptance before the player accepts", () => {
     const html = render();
-    expect(html).toContain("Ready to play?");
-    expect(html).toContain("Accept to start preparing against Bob.");
+    expect(html).toContain("Match found");
+    expect(html).toContain("accept-hero-side is-deciding");
     expect(html).toContain("Deciding…");
-    expect(html).not.toContain("Bob is waiting for you.");
-    expect(html).toContain("Accept");
+    expect(html).toContain("match-accept-primary");
+    expect(html).toContain("Decline");
   });
 
-  it("tells the player when the opponent already accepted", () => {
+  it("shows the opponent's acceptance on their portrait", () => {
     const html = render({ opponentAccepted: true });
-    expect(html).toContain("Your opponent accepted");
-    expect(html).toContain("Bob is waiting for you.");
     expect(html).toContain("accept-hero-side is-accepted");
     expect(html).toContain("accept-seal");
     expect(html).not.toContain("Deciding…");
@@ -52,11 +50,9 @@ describe("match acceptance holding screen", () => {
 
   it("keeps accepted players waiting for their opponent without another accept button", () => {
     const html = render({ accepted: true });
-    expect(html).toContain("Accepted — waiting for opponent");
-    expect(html).toContain("Preparation will open once your opponent accepts too.");
+    expect(html).toContain("Waiting for opponent");
     expect(html).toContain("Decline");
     expect(html).not.toContain("match-accept-primary");
-    expect(html).not.toContain("Bob is waiting for you.");
   });
 
   it.each([true, false])("names the bot and requires acknowledgement (searching: %s)", (searching) => {
@@ -66,6 +62,6 @@ describe("match acceptance holding screen", () => {
     expect(html).toContain("Continue to bot prep");
     expect(html).toContain("Cancel");
     expect(html.includes("still looking for a real player")).toBe(searching);
-    expect(html).not.toContain("Ready to play?");
+    expect(html).not.toContain("match-accept-actions");
   });
 });

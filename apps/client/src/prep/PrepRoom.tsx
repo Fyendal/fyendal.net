@@ -32,7 +32,7 @@ import {
 import { canChooseFirst, firstPlayerStatus } from "./firstPlayerStatus.js";
 import { derivePrepReadiness } from "./readiness.js";
 import { DeadlineCountdown } from "./DeadlineCountdown.js";
-import { AcceptHeroMatchup } from "./AcceptHeroMatchup.js";
+import { MatchAcceptContent } from "./AcceptHeroMatchup.js";
 import { MatchupPicker } from "./MatchupPicker.js";
 import {
   BOT_PRACTICE_NUDGE_DELAY_MS,
@@ -720,38 +720,14 @@ export function PrepRoom() {
             aria-labelledby="prep-match-accept-title"
             aria-live="polite"
           >
-            <span className="match-accept-eyebrow">
-              {intl.formatMessage({ id: "prep.accept.matchFound" })}
-            </span>
-            <h2 className="panel-title" id="prep-match-accept-title">
-              {intl.formatMessage({
-                id: me?.accepted
-                  ? "prep.accept.waiting"
-                  : opp?.accepted
-                  ? "prep.accept.opponentAccepted"
-                  : "prep.accept.ready",
-              })}
-            </h2>
-            <AcceptHeroMatchup you={me} opponent={opp} showAcceptance />
-            <p className="muted">
-              {me?.accepted
-                ? intl.formatMessage({ id: "prep.accept.acceptedDescription" })
-                : opp?.accepted
-                ? intl.formatMessage({ id: "prep.accept.opponentAcceptedDescription" }, { username: opp.username })
-                : intl.formatMessage({ id: "prep.accept.description" })}
-            </p>
-            {me?.accepted ? (
-              <div className="match-accepted-state">
-                {intl.formatMessage({ id: "prep.accept.accepted" })} ✓ ·{" "}
-                <DeadlineCountdown deadlineAt={prep.deadlineAt} />
-              </div>
-            ) : (
-              <button className="btn-primary match-accept-primary" onClick={acceptMatch}>
-                {intl.formatMessage({ id: "lobby.action.accept" })} ·{" "}
-                <DeadlineCountdown deadlineAt={prep.deadlineAt} />
-              </button>
-            )}
-            <button onClick={declineMatch}>{intl.formatMessage({ id: "lobby.action.decline" })}</button>
+            <MatchAcceptContent
+              titleId="prep-match-accept-title"
+              you={me}
+              opponent={opp}
+              deadlineAt={prep.deadlineAt}
+              onAccept={acceptMatch}
+              onDecline={declineMatch}
+            />
           </section>
         </div>
       ) : null}

@@ -368,10 +368,15 @@
   min-height: 100%;
   padding: 18px;
 }
-.waiting-panel.match-accept-panel {
-  width: min(360px, 100%);
-  margin: 0;
-  padding: 24px;
+.waiting-panel.match-accept-panel { margin: 0; }
+/* Both accept dialogs are flat: one solid surface, no title rule or shadow. */
+:is(.match-accept-panel, .prep-match-accept-prompt) {
+  width: min(400px, 100%);
+  padding: 28px 24px 24px;
+  border-color: #3a2c1c;
+  border-radius: 10px;
+  background: #1a120a;
+  box-shadow: none;
 }
 .match-accept-eyebrow {
   display: block;
@@ -380,13 +385,64 @@
   font: 600 13px var(--font-lobby-ui);
 }
 .match-accept-panel .panel-title,
-.prep-match-accept-prompt .panel-title { margin-bottom: 8px; }
+.prep-match-accept-prompt .panel-title {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  color: #eadfc9;
+  font-size: 22px;
+}
 .match-accept-panel p,
 .prep-match-accept-prompt p { margin: 0 0 18px; }
 .match-accept-primary {
   width: 100%;
   min-height: 44px;
   margin-bottom: 9px;
+}
+.match-accept-actions {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 8px;
+}
+.match-accept-actions > * {
+  display: flex;
+  min-width: 0;
+  min-height: 44px;
+  margin: 0;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+.match-accept-decline {
+  padding: 0 16px;
+  border-color: #3a2c1c;
+  background: transparent;
+  color: #b5a78f;
+}
+.match-accepted-state {
+  padding: 0 14px;
+  border-radius: 6px;
+  background: #1f2e1d;
+  color: var(--success);
+  font: 600 14px var(--font-lobby-ui);
+}
+/* Phones stack the row, the main action first, so labels keep full width. */
+@media (max-width: 440px) {
+  .match-accept-actions { grid-template-columns: minmax(0, 1fr); }
+  .match-accept-decline { order: 1; }
+}
+/* Action labels never wrap; an unusually long translation truncates. */
+.match-accept-label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.match-accept-countdown {
+  flex: none;
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+  opacity: .72;
 }
 /* Keep equivalent lobby actions typographically consistent across the home,
    format, room-list, and matchmaking views. */
@@ -396,35 +452,25 @@
   font-weight: 700;
   letter-spacing: var(--lobby-action-letter-spacing);
 }
-.match-accepted-state {
-  margin-bottom: 9px;
-  padding: 12px;
-  border: 1px solid #4d754d;
-  border-radius: 4px;
-  background: #20352080;
-  color: #9be09b;
-  font-weight: 700;
-}
 .accept-hero-matchup {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
-  align-items: center;
-  gap: 12px;
-  margin: 18px 0;
+  align-items: start;
+  gap: 8px;
+  margin: 24px 0 28px;
 }
 .accept-hero-side {
   display: flex;
   min-width: 0;
   flex-direction: column;
   align-items: center;
-  gap: 3px;
+  gap: 10px;
 }
 .accept-hero-portrait {
   position: relative;
   display: block;
-  width: 76px;
-  height: 76px;
-  margin-bottom: 5px;
+  width: 96px;
+  height: 96px;
   border-radius: 50%;
 }
 .accept-hero-portrait img,
@@ -433,27 +479,23 @@
   width: 100%;
   height: 100%;
   place-items: center;
-  border: 2px solid #806334;
+  border: 2px solid #4a3a26;
   border-radius: 50%;
   background: #181008;
   object-fit: cover;
-  box-shadow: 0 4px 14px #000b;
-  transition: border-color .3s ease, box-shadow .3s ease;
+  transition: border-color .3s ease, filter .3s ease;
 }
 .accept-hero-fallback {
   color: var(--gold);
   font-family: var(--font-display);
-  font-size: 34px;
+  font-size: 38px;
 }
-.accept-hero-label {
-  color: #9c8a6d;
-  font-size: 12px;
-  font-weight: 600;
-}
-/* An accepted seat's portrait turns the same green as the accepted state. */
+/* An accepted seat's ring turns green; an opponent still deciding is dimmed. */
 .accept-hero-side.is-accepted :is(.accept-hero-portrait img, .accept-hero-fallback) {
   border-color: var(--success);
-  box-shadow: 0 4px 14px #000b, 0 0 14px #8fd48f40;
+}
+.accept-hero-side.is-deciding :is(.accept-hero-portrait img, .accept-hero-fallback) {
+  filter: grayscale(.7) brightness(.6);
 }
 /* Acceptance marks shared by the accept prompts and the background offer: a
    check seal sized by font-size, and a ring that lights once when a seat
@@ -466,7 +508,7 @@
   width: 1.6em;
   height: 1.6em;
   place-items: center;
-  border: 2px solid #171008;
+  border: 3px solid #1a120a;
   border-radius: 50%;
   background: var(--success);
   color: #142414;
@@ -486,31 +528,41 @@
   from { opacity: .9; transform: scale(1); }
   to { opacity: 0; transform: scale(1.35); }
 }
-.accept-hero-status {
-  min-height: 16px;
-  margin-top: 2px;
-  font-size: 12px;
-  font-weight: 700;
+/* Seat labels and acceptance are announced; the portrait shows them. */
+.accept-hero-announce {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
-.accept-hero-status.is-accepted { color: var(--success); }
-.accept-hero-status.is-deciding { color: #9c8a6d; font-weight: 600; font-style: italic; }
 @media (prefers-reduced-motion: reduce) {
   .accept-ignite::after { animation: none; }
   .accept-hero-portrait img,
   .accept-hero-fallback { transition: none; }
 }
-.accept-hero-side strong {
-  overflow: hidden;
+/* Full hero names wrap in balanced lines rather than truncating. */
+.accept-hero-name {
+  display: grid;
+  gap: 2px;
   max-width: 100%;
   color: #eadfc9;
-  font-size: 12px;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  font: 600 15px/1.25 var(--font-lobby-ui);
+  overflow-wrap: anywhere;
+  text-wrap: balance;
 }
+.accept-hero-epithet {
+  color: #9c8d75;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.3;
+}
+/* Centred on the 96px portraits, not on the variable-height names. */
 .accept-hero-vs {
-  color: var(--gold);
-  font-family: var(--font-display);
-  font-size: 16px;
+  margin-top: 40px;
+  color: #6f5f48;
+  font: 600 12px var(--font-lobby-ui);
 }
 .room-code {
   font-family: var(--font-display);

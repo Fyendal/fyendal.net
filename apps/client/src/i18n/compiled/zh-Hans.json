@@ -30845,64 +30845,16 @@
       "value": "你的房间"
     }
   ],
-  "lobby.waiting.accepted": [
-    {
-      "type": 0,
-      "value": "你已接受对局。对手也接受后，将进入准备房间。"
-    }
-  ],
   "lobby.waiting.forOpponent": [
     {
       "type": 0,
       "value": "正在等待对手…"
     }
   ],
-  "lobby.waiting.matchFound": [
-    {
-      "type": 0,
-      "value": "已找到对局"
-    }
-  ],
-  "lobby.waiting.namedOpponent": [
-    {
-      "type": 1,
-      "value": "username"
-    },
-    {
-      "type": 0,
-      "value": " 正在等你。"
-    }
-  ],
-  "lobby.waiting.namedOpponentDeciding": [
-    {
-      "type": 0,
-      "value": "接受后即可与 "
-    },
-    {
-      "type": 1,
-      "value": "username"
-    },
-    {
-      "type": 0,
-      "value": " 进入准备阶段。"
-    }
-  ],
-  "lobby.waiting.opponentDeciding": [
-    {
-      "type": 0,
-      "value": "接受后即可与对手进入准备阶段。"
-    }
-  ],
   "lobby.waiting.playersPreparing": [
     {
       "type": 0,
       "value": "玩家仍在准备；对局开始后，游戏界面会显示在这里。"
-    }
-  ],
-  "lobby.waiting.ready": [
-    {
-      "type": 0,
-      "value": "准备好了吗？"
     }
   ],
   "lobby.waiting.shareHint": [
@@ -31183,22 +31135,10 @@
       "value": "已接受"
     }
   ],
-  "prep.accept.acceptedDescription": [
-    {
-      "type": 0,
-      "value": "你已接受。对手接受后，对局将会开启。"
-    }
-  ],
   "prep.accept.deciding": [
     {
       "type": 0,
       "value": "考虑中…"
-    }
-  ],
-  "prep.accept.description": [
-    {
-      "type": 0,
-      "value": "接受对局以继续准备你的牌组。"
     }
   ],
   "prep.accept.matchFound": [
@@ -31207,32 +31147,10 @@
       "value": "已找到对局"
     }
   ],
-  "prep.accept.opponentAccepted": [
-    {
-      "type": 0,
-      "value": "对手已接受"
-    }
-  ],
-  "prep.accept.opponentAcceptedDescription": [
-    {
-      "type": 1,
-      "value": "username"
-    },
-    {
-      "type": 0,
-      "value": " 已准备就绪。接受对局以继续准备你的牌组。"
-    }
-  ],
-  "prep.accept.ready": [
-    {
-      "type": 0,
-      "value": "准备好开始了吗？"
-    }
-  ],
   "prep.accept.waiting": [
     {
       "type": 0,
-      "value": "正在等待你的对手"
+      "value": "等待对手"
     }
   ],
   "prep.arena.afterTurnOrder": [

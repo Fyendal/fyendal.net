@@ -341,14 +341,7 @@
   background: #090603b8;
   backdrop-filter: blur(4px);
 }
-.prep-match-accept-prompt {
-  width: min(440px, 100%);
-  padding: 32px;
-  text-align: center;
-  box-shadow: 0 20px 55px #000e, inset 0 1px 0 #ffd4791f;
-}
-.prep-match-accept-prompt .panel-title { font-size: 28px; }
-.prep-match-accept-prompt > button:last-child { width: 100%; }
+.prep-match-accept-prompt { text-align: center; }
 .prep-ready-controls .btn-primary { white-space: nowrap; }
 .prep-ready-controls .btn-primary:disabled {
   color: #93866f;
@@ -454,9 +447,7 @@
   .prep-matchup-plan .listbox { flex-basis: 100%; }
   .prep-group,
   .prep-cardrow { max-width: 100%; min-width: 0; }
-  .waiting-panel.match-accept-panel { padding: 20px; }
-  .prep-match-accept-prompt { padding: 24px 20px; }
-  .prep-match-accept-prompt .panel-title { font-size: 24px; }
+  :is(.match-accept-panel, .prep-match-accept-prompt) { padding: 24px 20px 20px; }
   .prep-bot-nudge-backdrop {
     align-items: end;
     padding: 12px 12px max(12px, env(safe-area-inset-bottom));

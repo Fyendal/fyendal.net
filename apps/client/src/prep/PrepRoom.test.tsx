@@ -107,8 +107,7 @@ describe("preparation stage layout", () => {
     prep.seats = [{ ...prep.seats[0]!, accepted: false }, { ...prep.seats[1]!, accepted: true }];
     const html = render(prep, false, deck, { matchAcceptanceRole: "existing" });
     const prompt = html.match(/<section class="panel prep-match-accept-prompt"[\s\S]*?<\/section>/)?.[0] ?? "";
-    expect(prompt).toContain("Your opponent accepted");
-    expect(prompt).toContain("Player 1 is ready. Accept to continue preparing your deck.");
+    expect(prompt).toContain("Match found");
     expect(prompt.match(/accept-hero-side is-accepted/g)).toHaveLength(1);
     expect(prompt).toContain("match-accept-primary");
   });

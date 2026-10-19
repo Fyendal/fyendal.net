@@ -33420,64 +33420,16 @@
       "value": "Suas salas"
     }
   ],
-  "lobby.waiting.accepted": [
-    {
-      "type": 0,
-      "value": "Você aceitou. A preparação começa assim que seu oponente também aceitar."
-    }
-  ],
   "lobby.waiting.forOpponent": [
     {
       "type": 0,
       "value": "Aguardando oponente…"
     }
   ],
-  "lobby.waiting.matchFound": [
-    {
-      "type": 0,
-      "value": "Partida encontrada"
-    }
-  ],
-  "lobby.waiting.namedOpponent": [
-    {
-      "type": 1,
-      "value": "username"
-    },
-    {
-      "type": 0,
-      "value": " está esperando por você."
-    }
-  ],
-  "lobby.waiting.namedOpponentDeciding": [
-    {
-      "type": 0,
-      "value": "Aceite para começar a preparação contra "
-    },
-    {
-      "type": 1,
-      "value": "username"
-    },
-    {
-      "type": 0,
-      "value": "."
-    }
-  ],
-  "lobby.waiting.opponentDeciding": [
-    {
-      "type": 0,
-      "value": "Aceite para começar a preparação contra seu oponente."
-    }
-  ],
   "lobby.waiting.playersPreparing": [
     {
       "type": 0,
       "value": "Os jogadores ainda estão se preparando; o tabuleiro aparece aqui quando a partida começar."
-    }
-  ],
-  "lobby.waiting.ready": [
-    {
-      "type": 0,
-      "value": "Tudo pronto para jogar?"
     }
   ],
   "lobby.waiting.shareHint": [
@@ -33824,22 +33776,10 @@
       "value": "Aceito"
     }
   ],
-  "prep.accept.acceptedDescription": [
-    {
-      "type": 0,
-      "value": "Você aceitou. A partida abrirá quando seu oponente aceitar."
-    }
-  ],
   "prep.accept.deciding": [
     {
       "type": 0,
       "value": "Decidindo…"
-    }
-  ],
-  "prep.accept.description": [
-    {
-      "type": 0,
-      "value": "Aceite a partida para continuar preparando seu deck."
     }
   ],
   "prep.accept.matchFound": [
@@ -33848,32 +33788,10 @@
       "value": "Partida encontrada"
     }
   ],
-  "prep.accept.opponentAccepted": [
-    {
-      "type": 0,
-      "value": "Seu oponente aceitou"
-    }
-  ],
-  "prep.accept.opponentAcceptedDescription": [
-    {
-      "type": 1,
-      "value": "username"
-    },
-    {
-      "type": 0,
-      "value": " já aceitou. Aceite para continuar preparando seu deck."
-    }
-  ],
-  "prep.accept.ready": [
-    {
-      "type": 0,
-      "value": "Tudo pronto para jogar?"
-    }
-  ],
   "prep.accept.waiting": [
     {
       "type": 0,
-      "value": "Aguardando seu oponente"
+      "value": "Aguardando oponente"
     }
   ],
   "prep.arena.afterTurnOrder": [
