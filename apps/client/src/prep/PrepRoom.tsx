@@ -115,7 +115,7 @@ function FirstPlayerChoice({
       <button type="button" className="btn-primary" onClick={() => onChoose(true)}>
         {intl.formatMessage({ id: "prep.firstPlayer.goFirst" })}
       </button>
-      <button type="button" onClick={() => onChoose(false)}>
+      <button type="button" className="btn-primary" onClick={() => onChoose(false)}>
         {intl.formatMessage({ id: "prep.firstPlayer.goSecond" })}
       </button>
     </div>
@@ -485,7 +485,11 @@ export function PrepRoom() {
   ) : null;
 
   // The desktop sheet already states lock progress; the grid only explains
-  // why it is disabled.
+  // why it is disabled. While you pick turn order it also stops presenting
+  // itself as the current task.
+  const arenaHeading = deckStage
+    ? "prep.arena.revealed"
+    : choosingTurnOrder ? "prep.arena.pending" : "prep.arena.select";
   const arenaNote = deckStage
     ? null
     : choosingTurnOrder
@@ -681,10 +685,11 @@ export function PrepRoom() {
 
         <div className="prep-selection-column">
           {matchupPlan}
-          {!deckStage || mobilePrepLayout ? <section className="panel prep-arena-stage" aria-live="polite">
-            <h3 className="panel-title">
-              {intl.formatMessage({ id: deckStage ? "prep.arena.revealed" : "prep.arena.select" })}
-            </h3>
+          {!deckStage || mobilePrepLayout ? <section
+            className={`panel prep-arena-stage${choosingTurnOrder ? " prep-arena-pending" : ""}`}
+            aria-live="polite"
+          >
+            <h3 className="panel-title">{intl.formatMessage({ id: arenaHeading })}</h3>
             {arenaNote ? <p className="muted">{intl.formatMessage({ id: arenaNote })}</p> : null}
             {mobilePrepLayout && prep?.yourArena ? <PrepArenaCards arena={prep.yourArena} owner="you" /> : null}
             {mobilePrepLayout && shownOpponentArena

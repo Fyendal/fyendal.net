@@ -3228,6 +3228,7 @@
   "play.cards.future": "{count, plural, =0 {# cartas futuras} one {# carta futura} other {# cartas futuras}}",
   "prep.arena.select": "Selecione as cartas de arena",
   "prep.arena.revealed": "Cartas de arena reveladas",
+  "prep.arena.pending": "Cartas de arena",
   "prep.arena.lock": "Travar cartas de arena",
   "prep.arena.locked": "Cartas de arena travadas",
   "prep.arena.afterTurnOrder": "As cartas de arena são liberadas quando a ordem dos turnos for decidida.",

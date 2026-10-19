@@ -3228,6 +3228,7 @@
   "play.cards.future": "{count, plural, one {# future card} other {# future cards}}",
   "prep.arena.select": "Select Arena Cards",
   "prep.arena.revealed": "Arena Cards Revealed",
+  "prep.arena.pending": "Arena Cards",
   "prep.arena.lock": "Lock arena cards",
   "prep.arena.locked": "Arena cards locked",
   "prep.arena.afterTurnOrder": "Arena cards open once turn order is decided.",

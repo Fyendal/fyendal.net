@@ -75,6 +75,8 @@ describe("preparation stage layout", () => {
     for (const choice of choices) expect(choice).not.toContain("disabled");
     expect(html).not.toContain("Lock arena cards");
     expect(html).not.toContain("Arena cards open once turn order is decided.");
+    expect(html).toContain("Select Arena Cards");
+    expect(html).not.toContain("prep-arena-pending");
   });
 
   it.each([false, true])("keeps arena drafting disabled while you choose turn order (bot game: %s)", (botGame) => {
@@ -86,6 +88,8 @@ describe("preparation stage layout", () => {
     expect(choices.length).toBeGreaterThan(0);
     for (const choice of choices) expect(choice).toContain("disabled");
     expect(html).toContain("Arena cards open once turn order is decided.");
+    expect(html).not.toContain("Select Arena Cards");
+    expect(html).toContain("prep-arena-pending");
     expect(html).not.toMatch(/<button[^>]*id="fabrary-matchup"[^>]*disabled/);
   });
 

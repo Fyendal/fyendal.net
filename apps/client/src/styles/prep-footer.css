@@ -55,6 +55,14 @@
 }
 .prep-selection-column { min-width: 0; display: grid; gap: 16px; }
 .prep-arena-stage .prep-cardrow { flex-wrap: wrap; }
+/* While you pick turn order the grid recedes, hover previews included, so
+   the sheet's choice is the only live control; it brightens once decided. */
+.prep-arena-stage .prep-section { transition: opacity .25s ease-out, filter .25s ease-out; }
+.prep-arena-stage.prep-arena-pending .prep-section {
+  opacity: .38;
+  filter: saturate(.45) brightness(.78);
+  pointer-events: none;
+}
 .prep-cloaked-card { display: grid; place-items: center; padding: 12px; text-align: center; }
 .prep-card-choice:disabled { cursor: default; }
 .prep-bot-nudge-backdrop {

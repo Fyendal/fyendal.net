@@ -31433,6 +31433,12 @@
       "value": "对手的场上卡牌"
     }
   ],
+  "prep.arena.pending": [
+    {
+      "type": 0,
+      "value": "场上卡牌"
+    }
+  ],
   "prep.arena.revealed": [
     {
       "type": 0,

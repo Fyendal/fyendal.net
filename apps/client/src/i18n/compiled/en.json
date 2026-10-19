@@ -32558,6 +32558,12 @@
       "value": "Opponent’s arena cards"
     }
   ],
+  "prep.arena.pending": [
+    {
+      "type": 0,
+      "value": "Arena Cards"
+    }
+  ],
   "prep.arena.revealed": [
     {
       "type": 0,

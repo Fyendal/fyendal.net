@@ -3228,6 +3228,7 @@
   "play.cards.future": "{count} 张未来卡牌",
   "prep.arena.select": "选择场上卡牌",
   "prep.arena.revealed": "场上卡牌已公开",
+  "prep.arena.pending": "场上卡牌",
   "prep.arena.lock": "锁定场上卡牌",
   "prep.arena.locked": "场上卡牌已锁定",
   "prep.arena.afterTurnOrder": "决定先后手后即可选择场上卡牌。",

@@ -33496,6 +33496,12 @@
       "value": "Cartas de arena del oponente"
     }
   ],
+  "prep.arena.pending": [
+    {
+      "type": 0,
+      "value": "Cartas de arena"
+    }
+  ],
   "prep.arena.revealed": [
     {
       "type": 0,
