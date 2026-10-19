@@ -248,6 +248,38 @@ describe("locale catalogs", () => {
     )).toBe("A carta Nimble Strike é destruída");
   });
 
+  it("uses official Spanish card terminology", () => {
+    const intl = createTestIntl("es");
+
+    expect(intl.formatMessage({ id: "format.classicConstructed" })).toBe("Classic Constructed");
+    expect(intl.formatMessage({ id: "format.silverAge" })).toBe("Silver Age");
+    expect(intl.formatMessage(
+      { id: "lobby.deck.heroAndCount" },
+      { hero: "Bravo", count: 0 },
+    )).toBe("Bravo · 0 cartas");
+    expect(intl.formatMessage({ id: "game.chain.onHit" })).toBe("Al impactar");
+    expect(intl.formatMessage({ id: "game.chain.linksShort" })).toBe("Eslabones");
+    expect(intl.formatMessage({ id: "game.chain.title" })).toBe("Cadena de combate");
+    expect(intl.formatMessage({ id: "game.timing.actionPhase" })).toBe("FASE DE ACCIÓN");
+    expect(intl.formatMessage({ id: "game.timing.layerStep" })).toBe("PASO DE CAPA");
+    expect(intl.formatMessage({ id: "game.timing.damageStep" })).toBe("PASO DE DAÑO");
+    expect(intl.formatMessage({ id: "game.zone.graveyard" })).toBe("Cementerio");
+    expect(intl.formatMessage({ id: "game.zone.arsenal" })).toBe("Arsenal");
+    expect(intl.formatMessage({ id: "game.zone.pitch" })).toBe("Pitch");
+    expect(intl.formatMessage({ id: "game.stack.title" })).toBe("La pila");
+    expect(intl.formatMessage({ id: "game.decision.bloodMode.goAgain" }))
+      .toBe("Los ataques obtienen continuar");
+    expect(intl.formatMessage({ id: "engine.effect.part.dominate" })).toBe("dominar");
+    expect(intl.formatMessage(
+      { id: "card.log.common.goagain.gained" },
+      { card: "Nimble Strike" },
+    )).toBe("Nimble Strike obtiene continuar");
+    expect(intl.formatMessage(
+      { id: "engine.log.card.destroyed" },
+      { card: "Nimble Strike" },
+    )).toBe("La carta Nimble Strike es destruida");
+  });
+
   it("separates Chinese text from interpolated names with a space", () => {
     const tight = /[一-鿿]\{(?:card|source|player|name|hero)\}|\{(?:card|source|player|name|hero)\}[一-鿿]/;
     const source: unknown = JSON.parse(
