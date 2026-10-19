@@ -123,6 +123,128 @@
       "value": "Delete account"
     }
   ],
+  "account.email.current": [
+    {
+      "type": 0,
+      "value": "Recovery email: "
+    },
+    {
+      "type": 8,
+      "value": "strong",
+      "children": [
+        {
+          "type": 1,
+          "value": "email"
+        }
+      ]
+    }
+  ],
+  "account.email.description": [
+    {
+      "type": 0,
+      "value": "An optional, confirmed address used only to reset your password. Other players never see it."
+    }
+  ],
+  "account.email.loading": [
+    {
+      "type": 0,
+      "value": "Loading…"
+    }
+  ],
+  "account.email.newPlaceholder": [
+    {
+      "type": 0,
+      "value": "New email address"
+    }
+  ],
+  "account.email.none": [
+    {
+      "type": 0,
+      "value": "No recovery email set."
+    }
+  ],
+  "account.email.passwordRequired": [
+    {
+      "type": 0,
+      "value": "Enter your current password to remove the email."
+    }
+  ],
+  "account.email.pending": [
+    {
+      "type": 0,
+      "value": "Waiting for confirmation: "
+    },
+    {
+      "type": 8,
+      "value": "strong",
+      "children": [
+        {
+          "type": 1,
+          "value": "email"
+        }
+      ]
+    },
+    {
+      "type": 0,
+      "value": ". Check your inbox."
+    }
+  ],
+  "account.email.remove": [
+    {
+      "type": 0,
+      "value": "Remove email"
+    }
+  ],
+  "account.email.removed": [
+    {
+      "type": 0,
+      "value": "Recovery email removed."
+    }
+  ],
+  "account.email.removing": [
+    {
+      "type": 0,
+      "value": "Removing…"
+    }
+  ],
+  "account.email.save": [
+    {
+      "type": 0,
+      "value": "Send confirmation link"
+    }
+  ],
+  "account.email.saving": [
+    {
+      "type": 0,
+      "value": "Sending…"
+    }
+  ],
+  "account.email.sent": [
+    {
+      "type": 0,
+      "value": "We sent a confirmation link to "
+    },
+    {
+      "type": 1,
+      "value": "email"
+    },
+    {
+      "type": 0,
+      "value": ". It expires in 24 hours."
+    }
+  ],
+  "account.email.title": [
+    {
+      "type": 0,
+      "value": "Recovery email"
+    }
+  ],
+  "account.email.unavailable": [
+    {
+      "type": 0,
+      "value": "Password recovery by email is not available right now."
+    }
+  ],
   "account.export.description": [
     {
       "type": 0,
@@ -701,10 +823,40 @@
       "value": "Creating account…"
     }
   ],
+  "auth.email.hint": [
+    {
+      "type": 0,
+      "value": "Only used to recover your account. We'll send a link to confirm it."
+    }
+  ],
+  "auth.email.label": [
+    {
+      "type": 0,
+      "value": "Email (optional)"
+    }
+  ],
+  "auth.email.placeholder": [
+    {
+      "type": 0,
+      "value": "you@example.com"
+    }
+  ],
+  "auth.error.invalidEmail": [
+    {
+      "type": 0,
+      "value": "Enter a valid email address"
+    }
+  ],
   "auth.error.invalidUsername": [
     {
       "type": 0,
       "value": "Username must be 3–20 characters using letters, numbers, or _"
+    }
+  ],
+  "auth.error.missingIdentifier": [
+    {
+      "type": 0,
+      "value": "Enter your username or email"
     }
   ],
   "auth.error.missingPassword": [
@@ -729,6 +881,48 @@
     {
       "type": 0,
       "value": "Agree to the Terms of Service to create an account."
+    }
+  ],
+  "auth.forgot.back": [
+    {
+      "type": 0,
+      "value": "Back to log in"
+    }
+  ],
+  "auth.forgot.description": [
+    {
+      "type": 0,
+      "value": "Enter your username or recovery email. If it matches an account with a confirmed recovery email, we'll send a reset link."
+    }
+  ],
+  "auth.forgot.identifier": [
+    {
+      "type": 0,
+      "value": "Username or email"
+    }
+  ],
+  "auth.forgot.link": [
+    {
+      "type": 0,
+      "value": "Forgot password?"
+    }
+  ],
+  "auth.forgot.send": [
+    {
+      "type": 0,
+      "value": "Send reset link"
+    }
+  ],
+  "auth.forgot.sending": [
+    {
+      "type": 0,
+      "value": "Sending…"
+    }
+  ],
+  "auth.forgot.sent": [
+    {
+      "type": 0,
+      "value": "If that matches an account with a confirmed recovery email, a reset link is on its way. It expires in 30 minutes."
     }
   ],
   "auth.loggingIn": [
@@ -761,10 +955,64 @@
       "value": "8 or more characters"
     }
   ],
+  "auth.recovery.continue": [
+    {
+      "type": 0,
+      "value": "Continue to Fyendal"
+    }
+  ],
   "auth.register": [
     {
       "type": 0,
       "value": "Register"
+    }
+  ],
+  "auth.reset.confirmPassword": [
+    {
+      "type": 0,
+      "value": "Confirm new password"
+    }
+  ],
+  "auth.reset.invalidLink": [
+    {
+      "type": 0,
+      "value": "This reset link is invalid or has expired. Request a new one from the log-in screen."
+    }
+  ],
+  "auth.reset.mismatch": [
+    {
+      "type": 0,
+      "value": "Passwords don't match"
+    }
+  ],
+  "auth.reset.newPassword": [
+    {
+      "type": 0,
+      "value": "New password"
+    }
+  ],
+  "auth.reset.save": [
+    {
+      "type": 0,
+      "value": "Save password"
+    }
+  ],
+  "auth.reset.saving": [
+    {
+      "type": 0,
+      "value": "Saving…"
+    }
+  ],
+  "auth.reset.signsOut": [
+    {
+      "type": 0,
+      "value": "Saving signs you out on every other device."
+    }
+  ],
+  "auth.reset.title": [
+    {
+      "type": 0,
+      "value": "Choose a new password"
     }
   ],
   "auth.username": [
@@ -777,6 +1025,30 @@
     {
       "type": 0,
       "value": "3–20 letters, numbers, or underscores"
+    }
+  ],
+  "auth.verifyEmail.invalidLink": [
+    {
+      "type": 0,
+      "value": "This confirmation link is invalid or has expired. Add the email again from your account settings."
+    }
+  ],
+  "auth.verifyEmail.title": [
+    {
+      "type": 0,
+      "value": "Confirm recovery email"
+    }
+  ],
+  "auth.verifyEmail.verified": [
+    {
+      "type": 0,
+      "value": "Your recovery email is confirmed. You can use it to reset your password."
+    }
+  ],
+  "auth.verifyEmail.verifying": [
+    {
+      "type": 0,
+      "value": "Confirming…"
     }
   ],
   "brand.subtitle": [

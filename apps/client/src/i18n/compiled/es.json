@@ -123,6 +123,128 @@
       "value": "Eliminar cuenta"
     }
   ],
+  "account.email.current": [
+    {
+      "type": 0,
+      "value": "Correo de recuperación: "
+    },
+    {
+      "type": 8,
+      "value": "strong",
+      "children": [
+        {
+          "type": 1,
+          "value": "email"
+        }
+      ]
+    }
+  ],
+  "account.email.description": [
+    {
+      "type": 0,
+      "value": "Una dirección opcional y confirmada que solo se usa para restablecer tu contraseña. Los demás jugadores nunca la ven."
+    }
+  ],
+  "account.email.loading": [
+    {
+      "type": 0,
+      "value": "Cargando…"
+    }
+  ],
+  "account.email.newPlaceholder": [
+    {
+      "type": 0,
+      "value": "Nueva dirección de correo"
+    }
+  ],
+  "account.email.none": [
+    {
+      "type": 0,
+      "value": "No hay ningún correo de recuperación."
+    }
+  ],
+  "account.email.passwordRequired": [
+    {
+      "type": 0,
+      "value": "Introduce tu contraseña actual para quitar el correo."
+    }
+  ],
+  "account.email.pending": [
+    {
+      "type": 0,
+      "value": "Pendiente de confirmación: "
+    },
+    {
+      "type": 8,
+      "value": "strong",
+      "children": [
+        {
+          "type": 1,
+          "value": "email"
+        }
+      ]
+    },
+    {
+      "type": 0,
+      "value": ". Revisa tu bandeja de entrada."
+    }
+  ],
+  "account.email.remove": [
+    {
+      "type": 0,
+      "value": "Quitar correo"
+    }
+  ],
+  "account.email.removed": [
+    {
+      "type": 0,
+      "value": "Correo de recuperación eliminado."
+    }
+  ],
+  "account.email.removing": [
+    {
+      "type": 0,
+      "value": "Quitando…"
+    }
+  ],
+  "account.email.save": [
+    {
+      "type": 0,
+      "value": "Enviar enlace de confirmación"
+    }
+  ],
+  "account.email.saving": [
+    {
+      "type": 0,
+      "value": "Enviando…"
+    }
+  ],
+  "account.email.sent": [
+    {
+      "type": 0,
+      "value": "Enviamos un enlace de confirmación a "
+    },
+    {
+      "type": 1,
+      "value": "email"
+    },
+    {
+      "type": 0,
+      "value": ". Caduca en 24 horas."
+    }
+  ],
+  "account.email.title": [
+    {
+      "type": 0,
+      "value": "Correo de recuperación"
+    }
+  ],
+  "account.email.unavailable": [
+    {
+      "type": 0,
+      "value": "La recuperación de contraseña por correo no está disponible en este momento."
+    }
+  ],
   "account.export.description": [
     {
       "type": 0,
@@ -705,10 +827,40 @@
       "value": "Creando cuenta…"
     }
   ],
+  "auth.email.hint": [
+    {
+      "type": 0,
+      "value": "Solo se usa para recuperar tu cuenta. Te enviaremos un enlace para confirmarlo."
+    }
+  ],
+  "auth.email.label": [
+    {
+      "type": 0,
+      "value": "Correo electrónico (opcional)"
+    }
+  ],
+  "auth.email.placeholder": [
+    {
+      "type": 0,
+      "value": "tu@ejemplo.com"
+    }
+  ],
+  "auth.error.invalidEmail": [
+    {
+      "type": 0,
+      "value": "Introduce una dirección de correo válida"
+    }
+  ],
   "auth.error.invalidUsername": [
     {
       "type": 0,
       "value": "El nombre de usuario debe tener 3–20 caracteres con letras, números o _"
+    }
+  ],
+  "auth.error.missingIdentifier": [
+    {
+      "type": 0,
+      "value": "Introduce tu nombre de usuario o correo"
     }
   ],
   "auth.error.missingPassword": [
@@ -733,6 +885,48 @@
     {
       "type": 0,
       "value": "Acepta los Términos del servicio para crear una cuenta."
+    }
+  ],
+  "auth.forgot.back": [
+    {
+      "type": 0,
+      "value": "Volver a iniciar sesión"
+    }
+  ],
+  "auth.forgot.description": [
+    {
+      "type": 0,
+      "value": "Introduce tu nombre de usuario o correo de recuperación. Si corresponde a una cuenta con un correo de recuperación confirmado, te enviaremos un enlace para restablecerla."
+    }
+  ],
+  "auth.forgot.identifier": [
+    {
+      "type": 0,
+      "value": "Nombre de usuario o correo"
+    }
+  ],
+  "auth.forgot.link": [
+    {
+      "type": 0,
+      "value": "¿Olvidaste tu contraseña?"
+    }
+  ],
+  "auth.forgot.send": [
+    {
+      "type": 0,
+      "value": "Enviar enlace"
+    }
+  ],
+  "auth.forgot.sending": [
+    {
+      "type": 0,
+      "value": "Enviando…"
+    }
+  ],
+  "auth.forgot.sent": [
+    {
+      "type": 0,
+      "value": "Si corresponde a una cuenta con un correo de recuperación confirmado, el enlace para restablecer la contraseña ya va en camino. Caduca en 30 minutos."
     }
   ],
   "auth.loggingIn": [
@@ -765,10 +959,64 @@
       "value": "8 caracteres o más"
     }
   ],
+  "auth.recovery.continue": [
+    {
+      "type": 0,
+      "value": "Continuar a Fyendal"
+    }
+  ],
   "auth.register": [
     {
       "type": 0,
       "value": "Registrarse"
+    }
+  ],
+  "auth.reset.confirmPassword": [
+    {
+      "type": 0,
+      "value": "Confirma la contraseña nueva"
+    }
+  ],
+  "auth.reset.invalidLink": [
+    {
+      "type": 0,
+      "value": "Este enlace no es válido o ha caducado. Solicita uno nuevo desde la pantalla de inicio de sesión."
+    }
+  ],
+  "auth.reset.mismatch": [
+    {
+      "type": 0,
+      "value": "Las contraseñas no coinciden"
+    }
+  ],
+  "auth.reset.newPassword": [
+    {
+      "type": 0,
+      "value": "Contraseña nueva"
+    }
+  ],
+  "auth.reset.save": [
+    {
+      "type": 0,
+      "value": "Guardar contraseña"
+    }
+  ],
+  "auth.reset.saving": [
+    {
+      "type": 0,
+      "value": "Guardando…"
+    }
+  ],
+  "auth.reset.signsOut": [
+    {
+      "type": 0,
+      "value": "Al guardarla, se cerrará tu sesión en todos los demás dispositivos."
+    }
+  ],
+  "auth.reset.title": [
+    {
+      "type": 0,
+      "value": "Elige una contraseña nueva"
     }
   ],
   "auth.username": [
@@ -781,6 +1029,30 @@
     {
       "type": 0,
       "value": "3–20 letras, números o guiones bajos"
+    }
+  ],
+  "auth.verifyEmail.invalidLink": [
+    {
+      "type": 0,
+      "value": "Este enlace de confirmación no es válido o ha caducado. Vuelve a añadir el correo desde los ajustes de tu cuenta."
+    }
+  ],
+  "auth.verifyEmail.title": [
+    {
+      "type": 0,
+      "value": "Confirmar correo de recuperación"
+    }
+  ],
+  "auth.verifyEmail.verified": [
+    {
+      "type": 0,
+      "value": "Tu correo de recuperación está confirmado. Puedes usarlo para restablecer tu contraseña."
+    }
+  ],
+  "auth.verifyEmail.verifying": [
+    {
+      "type": 0,
+      "value": "Confirmando…"
     }
   ],
   "brand.subtitle": [

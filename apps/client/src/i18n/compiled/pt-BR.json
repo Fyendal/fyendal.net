@@ -123,6 +123,128 @@
       "value": "Excluir conta"
     }
   ],
+  "account.email.current": [
+    {
+      "type": 0,
+      "value": "E-mail de recuperação: "
+    },
+    {
+      "type": 8,
+      "value": "strong",
+      "children": [
+        {
+          "type": 1,
+          "value": "email"
+        }
+      ]
+    }
+  ],
+  "account.email.description": [
+    {
+      "type": 0,
+      "value": "Um endereço opcional e confirmado, usado apenas para redefinir sua senha. Outros jogadores nunca o veem."
+    }
+  ],
+  "account.email.loading": [
+    {
+      "type": 0,
+      "value": "Carregando…"
+    }
+  ],
+  "account.email.newPlaceholder": [
+    {
+      "type": 0,
+      "value": "Novo endereço de e-mail"
+    }
+  ],
+  "account.email.none": [
+    {
+      "type": 0,
+      "value": "Nenhum e-mail de recuperação definido."
+    }
+  ],
+  "account.email.passwordRequired": [
+    {
+      "type": 0,
+      "value": "Digite sua senha atual para remover o e-mail."
+    }
+  ],
+  "account.email.pending": [
+    {
+      "type": 0,
+      "value": "Aguardando confirmação: "
+    },
+    {
+      "type": 8,
+      "value": "strong",
+      "children": [
+        {
+          "type": 1,
+          "value": "email"
+        }
+      ]
+    },
+    {
+      "type": 0,
+      "value": ". Confira sua caixa de entrada."
+    }
+  ],
+  "account.email.remove": [
+    {
+      "type": 0,
+      "value": "Remover e-mail"
+    }
+  ],
+  "account.email.removed": [
+    {
+      "type": 0,
+      "value": "E-mail de recuperação removido."
+    }
+  ],
+  "account.email.removing": [
+    {
+      "type": 0,
+      "value": "Removendo…"
+    }
+  ],
+  "account.email.save": [
+    {
+      "type": 0,
+      "value": "Enviar link de confirmação"
+    }
+  ],
+  "account.email.saving": [
+    {
+      "type": 0,
+      "value": "Enviando…"
+    }
+  ],
+  "account.email.sent": [
+    {
+      "type": 0,
+      "value": "Enviamos um link de confirmação para "
+    },
+    {
+      "type": 1,
+      "value": "email"
+    },
+    {
+      "type": 0,
+      "value": ". Ele expira em 24 horas."
+    }
+  ],
+  "account.email.title": [
+    {
+      "type": 0,
+      "value": "E-mail de recuperação"
+    }
+  ],
+  "account.email.unavailable": [
+    {
+      "type": 0,
+      "value": "A recuperação de senha por e-mail não está disponível no momento."
+    }
+  ],
   "account.export.description": [
     {
       "type": 0,
@@ -701,10 +823,40 @@
       "value": "Criando conta…"
     }
   ],
+  "auth.email.hint": [
+    {
+      "type": 0,
+      "value": "Usado apenas para recuperar sua conta. Vamos enviar um link para confirmá-lo."
+    }
+  ],
+  "auth.email.label": [
+    {
+      "type": 0,
+      "value": "E-mail (opcional)"
+    }
+  ],
+  "auth.email.placeholder": [
+    {
+      "type": 0,
+      "value": "voce@exemplo.com"
+    }
+  ],
+  "auth.error.invalidEmail": [
+    {
+      "type": 0,
+      "value": "Digite um endereço de e-mail válido"
+    }
+  ],
   "auth.error.invalidUsername": [
     {
       "type": 0,
       "value": "O nome de usuário deve ter de 3 a 20 caracteres, usando letras, números ou _"
+    }
+  ],
+  "auth.error.missingIdentifier": [
+    {
+      "type": 0,
+      "value": "Digite seu nome de usuário ou e-mail"
     }
   ],
   "auth.error.missingPassword": [
@@ -729,6 +881,48 @@
     {
       "type": 0,
       "value": "Concorde com os Termos de Serviço para criar uma conta."
+    }
+  ],
+  "auth.forgot.back": [
+    {
+      "type": 0,
+      "value": "Voltar para o login"
+    }
+  ],
+  "auth.forgot.description": [
+    {
+      "type": 0,
+      "value": "Digite seu nome de usuário ou e-mail de recuperação. Se corresponder a uma conta com e-mail de recuperação confirmado, vamos enviar um link de redefinição."
+    }
+  ],
+  "auth.forgot.identifier": [
+    {
+      "type": 0,
+      "value": "Nome de usuário ou e-mail"
+    }
+  ],
+  "auth.forgot.link": [
+    {
+      "type": 0,
+      "value": "Esqueceu a senha?"
+    }
+  ],
+  "auth.forgot.send": [
+    {
+      "type": 0,
+      "value": "Enviar link de redefinição"
+    }
+  ],
+  "auth.forgot.sending": [
+    {
+      "type": 0,
+      "value": "Enviando…"
+    }
+  ],
+  "auth.forgot.sent": [
+    {
+      "type": 0,
+      "value": "Se corresponder a uma conta com e-mail de recuperação confirmado, um link de redefinição está a caminho. Ele expira em 30 minutos."
     }
   ],
   "auth.loggingIn": [
@@ -761,10 +955,64 @@
       "value": "8 caracteres ou mais"
     }
   ],
+  "auth.recovery.continue": [
+    {
+      "type": 0,
+      "value": "Continuar para o Fyendal"
+    }
+  ],
   "auth.register": [
     {
       "type": 0,
       "value": "Cadastrar"
+    }
+  ],
+  "auth.reset.confirmPassword": [
+    {
+      "type": 0,
+      "value": "Confirme a nova senha"
+    }
+  ],
+  "auth.reset.invalidLink": [
+    {
+      "type": 0,
+      "value": "Este link de redefinição é inválido ou expirou. Peça um novo na tela de login."
+    }
+  ],
+  "auth.reset.mismatch": [
+    {
+      "type": 0,
+      "value": "As senhas não coincidem"
+    }
+  ],
+  "auth.reset.newPassword": [
+    {
+      "type": 0,
+      "value": "Nova senha"
+    }
+  ],
+  "auth.reset.save": [
+    {
+      "type": 0,
+      "value": "Salvar senha"
+    }
+  ],
+  "auth.reset.saving": [
+    {
+      "type": 0,
+      "value": "Salvando…"
+    }
+  ],
+  "auth.reset.signsOut": [
+    {
+      "type": 0,
+      "value": "Ao salvar, você sai da conta em todos os outros dispositivos."
+    }
+  ],
+  "auth.reset.title": [
+    {
+      "type": 0,
+      "value": "Escolha uma nova senha"
     }
   ],
   "auth.username": [
@@ -777,6 +1025,30 @@
     {
       "type": 0,
       "value": "3 a 20 letras, números ou sublinhados"
+    }
+  ],
+  "auth.verifyEmail.invalidLink": [
+    {
+      "type": 0,
+      "value": "Este link de confirmação é inválido ou expirou. Adicione o e-mail de novo nas configurações da conta."
+    }
+  ],
+  "auth.verifyEmail.title": [
+    {
+      "type": 0,
+      "value": "Confirmar e-mail de recuperação"
+    }
+  ],
+  "auth.verifyEmail.verified": [
+    {
+      "type": 0,
+      "value": "Seu e-mail de recuperação foi confirmado. Você pode usá-lo para redefinir sua senha."
+    }
+  ],
+  "auth.verifyEmail.verifying": [
+    {
+      "type": 0,
+      "value": "Confirmando…"
     }
   ],
   "brand.subtitle": [

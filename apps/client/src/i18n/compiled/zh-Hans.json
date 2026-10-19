@@ -123,6 +123,128 @@
       "value": "删除账户"
     }
   ],
+  "account.email.current": [
+    {
+      "type": 0,
+      "value": "找回邮箱："
+    },
+    {
+      "type": 8,
+      "value": "strong",
+      "children": [
+        {
+          "type": 1,
+          "value": "email"
+        }
+      ]
+    }
+  ],
+  "account.email.description": [
+    {
+      "type": 0,
+      "value": "可选的已确认邮箱，仅用于重置密码。其他玩家永远看不到它。"
+    }
+  ],
+  "account.email.loading": [
+    {
+      "type": 0,
+      "value": "加载中…"
+    }
+  ],
+  "account.email.newPlaceholder": [
+    {
+      "type": 0,
+      "value": "新的电子邮箱地址"
+    }
+  ],
+  "account.email.none": [
+    {
+      "type": 0,
+      "value": "尚未设置找回邮箱。"
+    }
+  ],
+  "account.email.passwordRequired": [
+    {
+      "type": 0,
+      "value": "请输入当前密码以移除邮箱。"
+    }
+  ],
+  "account.email.pending": [
+    {
+      "type": 0,
+      "value": "等待确认："
+    },
+    {
+      "type": 8,
+      "value": "strong",
+      "children": [
+        {
+          "type": 1,
+          "value": "email"
+        }
+      ]
+    },
+    {
+      "type": 0,
+      "value": "。请查看收件箱。"
+    }
+  ],
+  "account.email.remove": [
+    {
+      "type": 0,
+      "value": "移除邮箱"
+    }
+  ],
+  "account.email.removed": [
+    {
+      "type": 0,
+      "value": "已移除找回邮箱。"
+    }
+  ],
+  "account.email.removing": [
+    {
+      "type": 0,
+      "value": "移除中…"
+    }
+  ],
+  "account.email.save": [
+    {
+      "type": 0,
+      "value": "发送确认链接"
+    }
+  ],
+  "account.email.saving": [
+    {
+      "type": 0,
+      "value": "发送中…"
+    }
+  ],
+  "account.email.sent": [
+    {
+      "type": 0,
+      "value": "确认链接已发送至 "
+    },
+    {
+      "type": 1,
+      "value": "email"
+    },
+    {
+      "type": 0,
+      "value": "，将在 24 小时后失效。"
+    }
+  ],
+  "account.email.title": [
+    {
+      "type": 0,
+      "value": "找回邮箱"
+    }
+  ],
+  "account.email.unavailable": [
+    {
+      "type": 0,
+      "value": "邮箱找回密码功能暂时不可用。"
+    }
+  ],
   "account.export.description": [
     {
       "type": 0,
@@ -705,10 +827,40 @@
       "value": "正在创建账户…"
     }
   ],
+  "auth.email.hint": [
+    {
+      "type": 0,
+      "value": "仅用于找回账号。我们会发送一封邮件请你确认。"
+    }
+  ],
+  "auth.email.label": [
+    {
+      "type": 0,
+      "value": "电子邮箱（可选）"
+    }
+  ],
+  "auth.email.placeholder": [
+    {
+      "type": 0,
+      "value": "you@example.com"
+    }
+  ],
+  "auth.error.invalidEmail": [
+    {
+      "type": 0,
+      "value": "请输入有效的电子邮箱地址"
+    }
+  ],
   "auth.error.invalidUsername": [
     {
       "type": 0,
       "value": "用户名必须为 3–20 个字母、数字或下划线"
+    }
+  ],
+  "auth.error.missingIdentifier": [
+    {
+      "type": 0,
+      "value": "请输入用户名或电子邮箱"
     }
   ],
   "auth.error.missingPassword": [
@@ -733,6 +885,48 @@
     {
       "type": 0,
       "value": "请同意服务条款后再创建账户。"
+    }
+  ],
+  "auth.forgot.back": [
+    {
+      "type": 0,
+      "value": "返回登录"
+    }
+  ],
+  "auth.forgot.description": [
+    {
+      "type": 0,
+      "value": "输入你的用户名或找回邮箱。如果它对应一个已确认找回邮箱的账号，我们会发送重置链接。"
+    }
+  ],
+  "auth.forgot.identifier": [
+    {
+      "type": 0,
+      "value": "用户名或电子邮箱"
+    }
+  ],
+  "auth.forgot.link": [
+    {
+      "type": 0,
+      "value": "忘记密码？"
+    }
+  ],
+  "auth.forgot.send": [
+    {
+      "type": 0,
+      "value": "发送重置链接"
+    }
+  ],
+  "auth.forgot.sending": [
+    {
+      "type": 0,
+      "value": "发送中…"
+    }
+  ],
+  "auth.forgot.sent": [
+    {
+      "type": 0,
+      "value": "如果它对应一个已确认找回邮箱的账号，重置链接已发出。链接将在 30 分钟后失效。"
     }
   ],
   "auth.loggingIn": [
@@ -765,10 +959,64 @@
       "value": "至少 8 个字符"
     }
   ],
+  "auth.recovery.continue": [
+    {
+      "type": 0,
+      "value": "继续前往 Fyendal"
+    }
+  ],
   "auth.register": [
     {
       "type": 0,
       "value": "注册"
+    }
+  ],
+  "auth.reset.confirmPassword": [
+    {
+      "type": 0,
+      "value": "确认新密码"
+    }
+  ],
+  "auth.reset.invalidLink": [
+    {
+      "type": 0,
+      "value": "此重置链接无效或已过期。请在登录界面重新申请。"
+    }
+  ],
+  "auth.reset.mismatch": [
+    {
+      "type": 0,
+      "value": "两次输入的密码不一致"
+    }
+  ],
+  "auth.reset.newPassword": [
+    {
+      "type": 0,
+      "value": "新密码"
+    }
+  ],
+  "auth.reset.save": [
+    {
+      "type": 0,
+      "value": "保存密码"
+    }
+  ],
+  "auth.reset.saving": [
+    {
+      "type": 0,
+      "value": "保存中…"
+    }
+  ],
+  "auth.reset.signsOut": [
+    {
+      "type": 0,
+      "value": "保存后，其他所有设备都会退出登录。"
+    }
+  ],
+  "auth.reset.title": [
+    {
+      "type": 0,
+      "value": "设置新密码"
     }
   ],
   "auth.username": [
@@ -781,6 +1029,30 @@
     {
       "type": 0,
       "value": "3–20 个字母、数字或下划线"
+    }
+  ],
+  "auth.verifyEmail.invalidLink": [
+    {
+      "type": 0,
+      "value": "此确认链接无效或已过期。请在账号设置中重新添加邮箱。"
+    }
+  ],
+  "auth.verifyEmail.title": [
+    {
+      "type": 0,
+      "value": "确认找回邮箱"
+    }
+  ],
+  "auth.verifyEmail.verified": [
+    {
+      "type": 0,
+      "value": "你的找回邮箱已确认，可用于重置密码。"
+    }
+  ],
+  "auth.verifyEmail.verifying": [
+    {
+      "type": 0,
+      "value": "确认中…"
     }
   ],
   "brand.subtitle": [
