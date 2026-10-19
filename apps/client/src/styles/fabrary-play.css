@@ -1,115 +1,76 @@
+/* Fabrary play link: the stage panel with the gameplay still and the pitch
+   on the left, the deck and its play controls on the right. On narrow
+   screens the deck comes first, since the link's purpose is to play it. */
 .fabrary-play-main {
-  width: 100%;
-  max-width: 680px;
-  margin: 0 auto;
-  padding: clamp(24px, 5vh, 48px) 16px;
-  flex: 1;
-}
-
-.fabrary-play-intro {
-  display: none;
-}
-
-@media (min-width: 1050px) {
-  .fabrary-play-main {
-    max-width: 1160px;
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 480px);
-    gap: 22px;
-    align-items: start;
-  }
-
-  .fabrary-play-intro {
-    display: flex;
-    position: relative;
-    isolation: isolate;
-    flex-direction: column;
-    justify-content: flex-end;
-    min-width: 0;
-    min-height: 560px;
-    overflow: hidden;
-    border: 1px solid #6b4d28;
-    border-radius: 6px;
-    background: #160e07;
-    box-shadow: 0 18px 48px #00000077, inset 0 1px 0 #ffe1a338;
-  }
-
-  .fabrary-play-intro::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    z-index: -1;
-    background: linear-gradient(180deg, #0b070400 18%, #0b07045c 40%, #100904f2 72%, #100904 100%);
-  }
-
-  .fabrary-play-intro-content {
-    padding: 32px;
-  }
-
-  .fabrary-play-intro-kicker {
-    display: inline-block;
-    margin-bottom: 12px;
-    padding: 5px 10px;
-    border: 1px solid #d6a85d88;
-    border-radius: 2px;
-    background: #130d09bc;
-    color: #f2cf8a;
-    font-family: var(--font-display);
-    font-size: 12px;
-    font-weight: 700;
-    letter-spacing: .08em;
-    text-transform: uppercase;
-  }
-
-  .fabrary-play-intro-title {
-    max-width: 23ch;
-    margin: 0 0 12px;
-    color: #ffdb96;
-    font: 700 clamp(28px, 3vw, 36px)/1.15 var(--font-lobby-title);
-    text-shadow: 0 2px 12px #000;
-    text-wrap: balance;
-  }
-
-  .fabrary-play-intro-body {
-    max-width: 42ch;
-    margin: 0;
-    color: #eddfc7;
-    font-size: 16px;
-    line-height: 1.55;
-    text-shadow: 0 1px 5px #000;
-  }
-
-  .fabrary-play-intro img {
-    position: absolute;
-    inset: 0;
-    z-index: -2;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    object-position: center;
-  }
-}
-
-.fabrary-play-panel {
-  padding: clamp(20px, 4vw, 32px);
+  grid-template-columns: minmax(0, 1fr) 420px;
+  margin-bottom: 40px;
   font-size: 15px;
   line-height: 1.5;
 }
+.fabrary-play-poster {
+  aspect-ratio: 1260 / 760;
+  overflow: hidden;
+  background: #1b1512;
+}
+.fabrary-play-poster img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 42%;
+}
 
+.fabrary-play-panel {
+  display: grid;
+  align-content: center;
+  gap: 20px;
+}
 .fabrary-play-deck {
   padding-bottom: 20px;
-  margin-bottom: 22px;
-  border-bottom: 1px solid var(--border-subtle);
+  border-bottom: 1px solid #45331f;
 }
-
-.fabrary-play-auth {
-  padding: 20px;
-  border: 1px solid #9b7441;
-  border-top: 3px solid var(--gold);
-  border-radius: 4px;
-  background: linear-gradient(160deg, #281a0d, #1b120a 72%);
-  box-shadow: 0 14px 36px #00000055, inset 0 1px 0 #ffe1a323;
+.fabrary-play-eyebrow {
+  margin: 0 0 12px;
+  color: var(--text-muted);
+  font: 500 14px var(--font-lobby-ui);
 }
+.fabrary-play-identity {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.fabrary-play-names {
+  min-width: 0;
+  flex: 1;
+}
+.fabrary-play-panel h1 {
+  margin: 0 0 4px;
+  color: #f0d59a;
+  font: 500 clamp(24px, 2.4vw, 28px)/1.2 var(--font-heading);
+  overflow-wrap: anywhere;
+}
+.fabrary-play-hero {
+  margin: 0;
+  color: var(--text-secondary);
+}
+.fabrary-play-portrait {
+  width: 64px;
+  height: 64px;
+  flex: none;
+  border: 1px solid var(--border-strong);
+  border-radius: 50%;
+  object-fit: cover;
+}
+.fabrary-play-source {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 16px;
+  margin: 16px 0 0;
+  font-size: 14px;
+}
+.fabrary-play-source a { color: #e3c77f; }
 
 .fabrary-play-auth .auth-card {
   max-width: none;
@@ -119,133 +80,43 @@
   background: transparent;
 }
 
-.fabrary-play-auth .auth-tabs {
-  margin-bottom: 18px;
-}
-
-.fabrary-play-auth .auth-form .btn-primary {
-  min-height: 46px;
-  margin-top: 4px;
-}
-
-.fabrary-play-panel h1 {
-  margin: 0 0 6px;
-  color: #f6ead5;
-  font-size: clamp(24px, 5vw, 30px);
-  line-height: 1.18;
-  overflow-wrap: anywhere;
-}
-
-.fabrary-play-identity {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.fabrary-play-names {
-  min-width: 0;
-  flex: 1;
-}
-
-.fabrary-play-portrait {
-  width: clamp(64px, 14vw, 80px);
-  height: clamp(64px, 14vw, 80px);
-  flex: none;
-  object-fit: cover;
-  border-radius: 50%;
-  border: 1px solid var(--gold);
-}
-
-.fabrary-play-eyebrow {
-  color: var(--text-secondary);
-  margin: 0 0 12px;
-  font-size: 14px;
-}
-
-.fabrary-play-source,
-.fabrary-play-actions {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 20px;
-}
-
-.fabrary-play-source {
-  justify-content: space-between;
-  gap: 8px 16px;
-  font-size: 14px;
-  margin: 16px 0 0;
-}
-
-.fabrary-play-source a {
-  color: var(--gold);
-}
-
-.fabrary-play-hero {
-  margin: 0;
-  color: var(--text-secondary);
-}
-
 .fabrary-play-settings {
   display: grid;
-  gap: 10px;
+  gap: 8px;
 }
-
 .fabrary-play-label {
-  color: var(--text-secondary);
-  font-size: 13px;
-  font-weight: 600;
+  color: #bbaea0;
+  font: 600 13px var(--font-lobby-ui);
 }
-
 .fabrary-play-mode-hint {
   margin: 0;
   color: var(--gold);
   font-size: 13px;
 }
-
 .fabrary-play-actions {
-  margin: 24px 0 0;
+  display: grid;
+  gap: 10px;
 }
-
 .fabrary-play-actions button {
-  flex: 1;
-  min-width: 160px;
-  min-height: 48px;
-  letter-spacing: .03em;
+  min-height: 46px;
   font-size: 15px;
 }
 
-.fabrary-play-actions .fabrary-play-bot {
-  color: #211507;
-  background: var(--gold);
-  border-color: var(--gold);
-}
-
-.fabrary-play-actions .fabrary-play-bot:hover:not(:disabled) {
-  background: #ffe3a6;
-  border-color: #ffe3a6;
-}
-
 .fabrary-play-card-notes {
-  margin-top: 24px;
-  border-top: 1px solid var(--border-subtle);
-  padding-top: 8px;
+  padding-top: 4px;
+  border-top: 1px solid #45331f;
 }
-
 .fabrary-play-card-note summary {
-  padding: 10px 0;
   min-height: 44px;
+  padding: 10px 0;
   color: var(--text-secondary);
   cursor: pointer;
   font-size: 13px;
 }
-
 .fabrary-play-card-note summary:focus-visible {
   outline: 2px solid var(--focus-ring);
   outline-offset: 3px;
 }
-
 .fabrary-play-card-note ul {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -258,11 +129,19 @@
   font-size: 13px;
   overflow-wrap: anywhere;
 }
-
 .fabrary-play-cancel {
-  display: block;
-  margin: 28px auto 0;
+  justify-self: center;
+  margin-top: 4px;
   font-size: 13px;
+}
+
+@media (max-width: 1035px) {
+  .fabrary-play-main { grid-template-columns: 1fr; }
+  .fabrary-play-intro {
+    order: 2;
+    border-top: 1px solid #45331f;
+  }
+  .fabrary-play-panel { padding-top: 26px; border-top: 0; }
 }
 
 @media (max-width: 700px) {
@@ -287,12 +166,5 @@
 }
 
 @media (max-width: 480px) {
-  .fabrary-play-actions {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .fabrary-play-card-note ul {
-    grid-template-columns: 1fr;
-  }
+  .fabrary-play-card-note ul { grid-template-columns: 1fr; }
 }

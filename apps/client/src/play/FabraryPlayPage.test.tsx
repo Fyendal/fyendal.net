@@ -51,7 +51,6 @@ describe("Fabrary play entry page", () => {
     expect(html).not.toContain('class="fabrary-play-actions"');
     expect(html).toContain("Play Flesh and Blood online");
     expect(html).toContain("Bring your Fabrary deck to face other players or challenge a competitive bot.");
-    expect(html).toContain('class="fabrary-play-intro-kicker">Free · Open source · Community driven');
     expect(html).toContain('class="fabrary-play-deck"');
     expect(html).not.toContain("Online Matches and Focused Practice");
     expect(html).not.toContain("Spectate and review");
@@ -132,7 +131,7 @@ describe("Fabrary play entry page", () => {
     expect(html).not.toContain("Return to your game");
     expect(html).not.toContain('disabled="">Find a player');
     expect(html).toContain('>Play vs bot</button>');
-    expect(html).toContain('class="fabrary-play-intro"');
+    expect(html).toContain('class="fabrary-play-intro intro-panel"');
   });
 
   it("keeps a long future-card list collapsed and only asks for a mode change when needed", () => {
@@ -167,7 +166,6 @@ describe("Fabrary play entry page", () => {
     expect(html).toContain("选择开放模式");
     expect(html).toContain("寻找玩家");
     expect(html).toContain("对战机器人");
-    expect(html).toContain("免费 · 开源 · 社区共建");
     expect(html).toContain("在线畅玩赤魂战纪 (Flesh &amp; Blood)");
     expect(html).toContain("使用你的 Fabrary 牌组，与其他玩家对战或挑战强力机器人。");
   });

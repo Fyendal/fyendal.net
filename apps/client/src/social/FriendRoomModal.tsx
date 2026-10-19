@@ -47,6 +47,7 @@ export function FriendRoomModal() {
   return (
     <ModalSurface
       title={intl.formatMessage({ id: "social.invite.modalTitle" }, { username: target })}
+      nameTitle
       className="friend-room-modal"
       onClose={cancelFriendInvite}
     >

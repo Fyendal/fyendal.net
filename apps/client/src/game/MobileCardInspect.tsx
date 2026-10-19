@@ -31,6 +31,7 @@ function CardInspect({ cardId, owner, onClose }: {
   return (
     <ModalSurface
       title={cardData[visibleCardId]?.name ?? intl.formatMessage({ id: "game.cardDetails" })}
+      nameTitle
       className="mobile-card-inspect-sheet"
       onClose={onClose}
     >

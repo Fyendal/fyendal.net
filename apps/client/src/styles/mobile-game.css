@@ -253,10 +253,10 @@
   }
   .deck-grid { grid-template-columns: minmax(0, 1fr); }
   .deck-actions { flex-direction: column; }
-  .guest-landing { --landing-width: calc(100% - 24px); }
-  .intro-grid { margin-top: 12px; }
-  .intro-copy { padding: 20px 16px 24px; }
-  .intro-auth { padding: 20px 16px 24px; }
+  .lobby-page { --stage-width: calc(100% - 24px); }
+  .stage-panel { margin-top: 12px; }
+  .intro-copy,
+  .stage-side { padding: 20px 16px 24px; }
   .site-footer { padding-inline: 14px; }
 
   .table {

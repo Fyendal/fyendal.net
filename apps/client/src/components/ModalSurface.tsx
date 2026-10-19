@@ -19,6 +19,7 @@ export function ModalSurface({
   description,
   eyebrow,
   showCloseButton = true,
+  nameTitle = false,
 }: {
   title: string;
   onClose: () => void;
@@ -27,6 +28,8 @@ export function ModalSurface({
   description?: ReactNode;
   eyebrow?: string;
   showCloseButton?: boolean;
+  /** Player content (a deck, card or user name) is never restyled as an interface title. */
+  nameTitle?: boolean;
 }) {
   const intl = useIntl();
   const titleId = useId();
@@ -110,7 +113,7 @@ export function ModalSurface({
         <header className="modal-surface-header">
           <div>
             {eyebrow ? <span className="modal-surface-eyebrow">{eyebrow}</span> : null}
-            <h2 id={titleId}>{title}</h2>
+            <h2 id={titleId} className={nameTitle ? "modal-surface-name" : undefined}>{title}</h2>
           </div>
           {showCloseButton ? (
             <button

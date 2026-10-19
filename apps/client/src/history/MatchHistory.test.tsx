@@ -91,7 +91,7 @@ function render(locale: "en" | "zh-Hans" = "en"): string {
 describe("MatchHistory", () => {
   it("opens on the overview with the stat strip, hero grid and recent matches", () => {
     const html = render();
-    expect(html).toContain("Match history");
+    expect(html).toContain("Match History");
     expect(html).not.toContain("Open a replay file");
     expect(html).toContain("Replays stay for 7 days. Favorite one to keep it.");
     expect(html).toContain('id="history-tab-overview"');

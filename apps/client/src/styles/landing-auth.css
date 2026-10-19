@@ -1,16 +1,12 @@
-/* ── logged-out landing ──
-   One framed panel on the member's play-panel surface: the artwork and
-   headline on the left, the account form on the right behind a hairline.
-   The taller register form is absorbed by the art column. Everything below
-   sits open on the page background, so the panel is the only framed object. */
-.guest-landing {
-  --landing-width: min(1176px, calc(100% - 2 * clamp(22px, 3vw, 44px)));
-  width: 100%;
-}
-.intro-grid {
+/* ── stage panel ──
+   One framed panel on the member's play-panel surface, shared by the
+   logged-out landing and the Fabrary play page: artwork and copy on the
+   left, the account form or deck controls on the right behind a hairline.
+   Everything below sits open on the page background, so the panel is the
+   only framed object. */
+.stage-panel {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 392px;
-  width: var(--landing-width);
+  width: var(--stage-width);
   margin: 28px auto 0;
   border: 1px solid #59493a;
   border-radius: 3px;
@@ -18,6 +14,33 @@
   box-shadow: 0 18px 48px #0007;
   overflow: hidden;
 }
+.stage-side {
+  min-width: 0;
+  padding: 26px 30px 30px;
+  border-left: 1px solid #45331f;
+}
+/* The one call to action: the dashboard's flat chamfered blood block. */
+.stage-cta {
+  min-height: 46px;
+  border: 1px solid #c23a2c;
+  border-radius: 2px;
+  background: var(--blood);
+  color: #f4e9d4;
+  clip-path: var(--chamfer);
+  font: 700 15px var(--font-lobby-ui);
+  letter-spacing: .6px;
+  text-shadow: none;
+  text-transform: uppercase;
+  transition: background-color 120ms ease, border-color 120ms ease;
+}
+.stage-cta:hover:not(:disabled) { background: #b03228; border-color: #d4553f; }
+@media (prefers-reduced-motion: reduce) {
+  .stage-cta { transition: none; }
+}
+
+/* ── logged-out landing ── */
+.guest-landing { width: 100%; }
+.intro-grid { grid-template-columns: minmax(0, 1fr) 392px; }
 .intro-panel {
   display: flex;
   min-width: 0;
@@ -70,11 +93,8 @@
 }
 .intro-auth {
   display: flex;
-  min-width: 0;
   flex-direction: column;
   justify-content: center;
-  padding: 26px 30px 30px;
-  border-left: 1px solid #45331f;
 }
 .intro-auth .auth-card {
   margin: 0;
@@ -97,7 +117,7 @@
 /* Below the panel: editorial rows, heading left and content right. */
 .landing-details {
   display: grid;
-  width: var(--landing-width);
+  width: var(--stage-width);
   margin: 0 auto 40px;
 }
 .landing-section {
@@ -185,8 +205,8 @@
 }
 
 @media (max-width: 1035px) {
-  .intro-grid { grid-template-columns: 1fr; }
-  .intro-auth {
+  .stage-panel { grid-template-columns: 1fr; }
+  .stage-side {
     padding-top: 24px;
     border-top: 1px solid #45331f;
     border-left: 0;
@@ -298,25 +318,9 @@
   text-underline-offset: 2px;
 }
 .auth-link:hover { color: #f0d59a; }
-/* The one call to action: the dashboard's flat chamfered blood block. */
-.auth-form .auth-submit {
-  min-height: 46px;
-  margin-top: 2px;
-  border: 1px solid #c23a2c;
-  border-radius: 2px;
-  background: var(--blood);
-  color: #f4e9d4;
-  clip-path: var(--chamfer);
-  font: 700 15px var(--font-lobby-ui);
-  letter-spacing: .6px;
-  text-shadow: none;
-  text-transform: uppercase;
-  transition: background-color 120ms ease, border-color 120ms ease;
-}
-.auth-form .auth-submit:hover:not(:disabled) { background: #b03228; border-color: #d4553f; }
+.auth-form .stage-cta { margin-top: 2px; }
 @media (prefers-reduced-motion: reduce) {
-  .auth-tab,
-  .auth-form .auth-submit { transition: none; }
+  .auth-tab { transition: none; }
 }
 
 @media (max-width: 700px) {

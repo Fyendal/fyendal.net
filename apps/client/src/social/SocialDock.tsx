@@ -548,7 +548,7 @@ function ChatModal() {
     setDraft("");
   };
   return (
-    <ModalSurface title={username} className="chat-modal" onClose={closeChat}>
+    <ModalSurface title={username} nameTitle className="chat-modal" onClose={closeChat}>
       <div className="chat-contact-avatar" aria-hidden="true">
         {username.charAt(0).toUpperCase()}
       </div>

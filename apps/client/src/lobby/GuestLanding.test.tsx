@@ -37,7 +37,7 @@ describe("guest search landing", () => {
     expect(html).toContain('width="1600" height="871"');
     expect(html).toContain('loading="lazy"');
     expect(html).toContain('id="practice-bots"');
-    expect(html).toContain("Challenge competitive bots");
+    expect(html).toContain("Challenge Competitive Bots");
     expect(html.match(/<details/g)).toHaveLength(7);
     expect(html).toContain("Is Fyendal free to play?");
     expect(html).not.toContain("How do I create an account?");

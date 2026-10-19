@@ -113,11 +113,11 @@ export function Lobby() {
         <LobbyHeader />
 
         <main id="main-content" className="guest-landing">
-          <div className="intro-grid">
+          <div className="intro-grid stage-panel">
             <GuestLandingHero stats={stats} />
             <aside
               id="create-account"
-              className="intro-auth"
+              className="intro-auth stage-side"
               aria-label={intl.formatMessage({ id: "landing.accountAccess" })}
             >
               <Auth />

@@ -92,12 +92,12 @@ describe("RoomList", () => {
     };
     const html = renderLocalized(<RoomList onGoToDecks={() => {}} />);
 
-    const yourHeading = html.indexOf("Your rooms");
+    const yourHeading = html.indexOf("Your Rooms");
     const yourRoom = html.indexOf("Owned Hero");
-    const openHeading = html.indexOf("Open rooms");
+    const openHeading = html.indexOf("Open Rooms");
     const openRoom = html.indexOf("Open Hero");
     const fullPrepRoom = html.indexOf("Prep Hero");
-    const startedHeading = html.indexOf("Started games");
+    const startedHeading = html.indexOf("Started Games");
     const startedRoom = html.indexOf("Started Hero");
 
     expect(yourHeading).toBeGreaterThan(-1);
@@ -151,9 +151,9 @@ describe("RoomList", () => {
     expect(html).not.toContain("card-pool-segments");
     expect(html).toContain('type="submit" class="btn-cta"');
     expect(html).not.toContain("Manage decks");
-    expect(html).toContain("Rejoin rooms");
+    expect(html).toContain("Rejoin Rooms");
     expect(html).toContain("Victor");
-    expect(html.indexOf("Rejoin rooms")).toBeLessThan(html.indexOf("home-play-poster"));
+    expect(html.indexOf("Rejoin Rooms")).toBeLessThan(html.indexOf("home-play-poster"));
     expect(html).not.toContain("Open Hero");
     expect(html).not.toContain("Started Hero");
   });

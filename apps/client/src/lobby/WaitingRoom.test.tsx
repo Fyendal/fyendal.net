@@ -33,7 +33,7 @@ function render({ accepted = false, opponentAccepted = false, fallback = false, 
 describe("match acceptance holding screen", () => {
   it("offers acceptance before the player accepts", () => {
     const html = render();
-    expect(html).toContain("Match found");
+    expect(html).toContain("Match Found");
     expect(html).toContain("accept-hero-side is-deciding");
     expect(html).toContain("Deciding…");
     expect(html).toContain("match-accept-primary");

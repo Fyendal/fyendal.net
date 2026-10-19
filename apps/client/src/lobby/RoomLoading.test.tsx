@@ -11,7 +11,7 @@ describe("RoomLoading", () => {
 
     expect(html).toContain('role="status"');
     expect(html).toContain('aria-live="polite"');
-    expect(html).toContain("Restoring game…");
+    expect(html).toContain("Restoring Game…");
     expect(html).toContain("Loading the latest room state.");
     expect(html).toContain("ABC123");
     expect(html).not.toContain("Waiting for opponent");

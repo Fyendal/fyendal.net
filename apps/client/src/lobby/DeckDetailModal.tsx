@@ -113,7 +113,7 @@ export function DeckDetailModal(props: {
   };
 
   return (
-    <ModalSurface title={deck.name} className="deck-detail-modal" onClose={props.onClose}>
+    <ModalSurface title={deck.name} nameTitle className="deck-detail-modal" onClose={props.onClose}>
       <div className="deck-detail-banner">
         {showArt ? (
           <span className="deck-card-art">

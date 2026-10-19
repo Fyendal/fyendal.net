@@ -3,6 +3,8 @@
   --font-display: var(--font-lobby-ui);
   --lobby-action-font-size: 15px;
   --lobby-action-letter-spacing: 1px;
+  /* Content width of the framed stage panel and the rows beneath it. */
+  --stage-width: min(1176px, calc(100% - 2 * clamp(22px, 3vw, 44px)));
   min-height: 100vh;
   display: flex;
   flex-direction: column;

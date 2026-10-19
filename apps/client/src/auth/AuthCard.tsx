@@ -203,7 +203,7 @@ export function Auth(props: { initialMode?: "login" | "register" } = {}) {
                 : intl.formatMessage({ id: `auth.error.${error.code}` })}
             </div>
           ) : null}
-          <button type="submit" className="auth-submit" disabled={busy}>
+          <button type="submit" className="stage-cta" disabled={busy}>
             {intl.formatMessage({ id: submitLabel })}
           </button>
           {mode === "login" ? (

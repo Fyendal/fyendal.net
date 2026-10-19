@@ -54,22 +54,21 @@ export function FabraryPlayPage() {
   return (
     <div className="lobby-page fabrary-play-page">
       <LobbyHeader />
-      <main id="main-content" className="fabrary-play-main">
-        <aside className="fabrary-play-intro" aria-labelledby="fabrary-play-intro-title">
-          <img src="/fyendal-gameplay-cindra-play.jpg"
-            alt={intl.formatMessage({ id: "landing.demoAlt" })}
-            width={1260} height={1118} loading="lazy" decoding="async" />
-          <div className="fabrary-play-intro-content">
-            <span className="fabrary-play-intro-kicker">
-              {intl.formatMessage({ id: "play.intro.kicker" })}
-            </span>
-            <p id="fabrary-play-intro-title" className="fabrary-play-intro-title">
+      <main id="main-content" className="fabrary-play-main stage-panel">
+        <aside className="fabrary-play-intro intro-panel" aria-labelledby="fabrary-play-intro-title">
+          <div className="fabrary-play-poster">
+            <img src="/fyendal-gameplay-cindra-play.jpg"
+              alt={intl.formatMessage({ id: "landing.demoAlt" })}
+              width={1260} height={1118} loading="lazy" decoding="async" />
+          </div>
+          <div className="intro-copy">
+            <p id="fabrary-play-intro-title" className="intro-title">
               {intl.formatMessage({ id: "play.intro.title" })}
             </p>
-            <p className="fabrary-play-intro-body">{intl.formatMessage({ id: "play.intro.body" })}</p>
+            <p className="intro-subtitle">{intl.formatMessage({ id: "play.intro.body" })}</p>
           </div>
         </aside>
-        <section className="panel fabrary-play-panel" aria-labelledby="fabrary-play-title">
+        <section className="fabrary-play-panel stage-side" aria-labelledby="fabrary-play-title">
           <div className="fabrary-play-deck">
             <p className="fabrary-play-eyebrow">{intl.formatMessage({ id: "play.source" })}</p>
             <div className="fabrary-play-identity">
@@ -132,7 +131,7 @@ export function FabraryPlayPage() {
                     onClick={() => start({ kind: "player" })}>
                     {intl.formatMessage({ id: "play.find.player" })}
                   </button>
-                  <button className="fabrary-play-bot" disabled={blocked || starting} onClick={() => setShowBots(true)}>
+                  <button className="stage-cta" disabled={blocked || starting} onClick={() => setShowBots(true)}>
                     {intl.formatMessage({ id: "play.bot" })}
                   </button>
                 </div>

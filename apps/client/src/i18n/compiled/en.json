@@ -72,7 +72,7 @@
   "account.badge.title": [
     {
       "type": 0,
-      "value": "Player badge"
+      "value": "Player Badge"
     }
   ],
   "account.badge.updated": [
@@ -19027,7 +19027,7 @@
   "connection.update.title": [
     {
       "type": 0,
-      "value": "Update available"
+      "value": "Update Available"
     }
   ],
   "discord.label": [
@@ -26902,7 +26902,7 @@
   "game.cardDetails": [
     {
       "type": 0,
-      "value": "Card details"
+      "value": "Card Details"
     }
   ],
   "game.cardName": [
@@ -27240,7 +27240,7 @@
   "game.concede.confirmTitle": [
     {
       "type": 0,
-      "value": "Concede game?"
+      "value": "Concede Game?"
     }
   ],
   "game.concede.short": [
@@ -27264,7 +27264,7 @@
   "game.controls": [
     {
       "type": 0,
-      "value": "Game controls"
+      "value": "Game Controls"
     }
   ],
   "game.controls.more": [
@@ -28150,7 +28150,7 @@
   "game.effects.lingering": [
     {
       "type": 0,
-      "value": "Lingering effects"
+      "value": "Lingering Effects"
     }
   ],
   "game.effects.more": [
@@ -28349,7 +28349,7 @@
   "game.end.confirmTitle": [
     {
       "type": 0,
-      "value": "End game?"
+      "value": "End Game?"
     }
   ],
   "game.flipCard": [
@@ -28583,7 +28583,7 @@
   "game.notes.title": [
     {
       "type": 0,
-      "value": "Note on replay frame "
+      "value": "Note on Replay Frame "
     },
     {
       "type": 1,
@@ -30459,7 +30459,7 @@
   "history.title": [
     {
       "type": 0,
-      "value": "Match history"
+      "value": "Match History"
     }
   ],
   "landing.accountAccess": [
@@ -30483,7 +30483,7 @@
   "landing.bots.title": [
     {
       "type": 0,
-      "value": "Challenge competitive bots"
+      "value": "Challenge Competitive Bots"
     }
   ],
   "landing.demoAlt": [
@@ -30635,7 +30635,7 @@
   "landing.faq.title": [
     {
       "type": 0,
-      "value": "About playing on Fyendal"
+      "value": "About Playing on Fyendal"
     }
   ],
   "landing.inGame": [
@@ -30663,7 +30663,7 @@
   "landing.matches.title": [
     {
       "type": 0,
-      "value": "Find or host a match"
+      "value": "Find or Host a Match"
     }
   ],
   "landing.openRooms": [
@@ -30715,7 +30715,7 @@
   "landing.replays.title": [
     {
       "type": 0,
-      "value": "Spectate and review"
+      "value": "Spectate and Review"
     }
   ],
   "landing.startPlayingBody": [
@@ -30733,7 +30733,7 @@
   "landing.startPlayingTitle": [
     {
       "type": 0,
-      "value": "Start playing"
+      "value": "Start Playing"
     }
   ],
   "landing.subtitle": [
@@ -30751,7 +30751,7 @@
   "landing.ways.title": [
     {
       "type": 0,
-      "value": "Online matches and focused practice"
+      "value": "Online Matches and Focused Practice"
     }
   ],
   "language.label": [
@@ -30835,7 +30835,7 @@
   "lobby.bot.chooseOpponent": [
     {
       "type": 0,
-      "value": "Choose your opponent"
+      "value": "Choose Your Opponent"
     }
   ],
   "lobby.bot.cindra.description": [
@@ -31123,7 +31123,7 @@
   "lobby.createRoom.title": [
     {
       "type": 0,
-      "value": "Create a room"
+      "value": "Create a Room"
     }
   ],
   "lobby.deck.actions": [
@@ -31797,7 +31797,7 @@
   "lobby.home.rejoinRooms": [
     {
       "type": 0,
-      "value": "Rejoin rooms"
+      "value": "Rejoin Rooms"
     }
   ],
   "lobby.home.searchingNow": [
@@ -31997,7 +31997,7 @@
   "lobby.invite.title": [
     {
       "type": 0,
-      "value": "Room invitation · "
+      "value": "Room Invitation · "
     },
     {
       "type": 1,
@@ -32019,7 +32019,7 @@
   "lobby.nav.allRooms": [
     {
       "type": 0,
-      "value": "All rooms"
+      "value": "All Rooms"
     }
   ],
   "lobby.nav.decks": [
@@ -32031,7 +32031,7 @@
   "lobby.nav.history": [
     {
       "type": 0,
-      "value": "Match history"
+      "value": "Match History"
     }
   ],
   "lobby.nav.historyShort": [
@@ -32085,7 +32085,7 @@
   "lobby.room.restoring": [
     {
       "type": 0,
-      "value": "Restoring game…"
+      "value": "Restoring Game…"
     }
   ],
   "lobby.room.status.full": [
@@ -32115,7 +32115,7 @@
   "lobby.rooms.all": [
     {
       "type": 0,
-      "value": "All rooms"
+      "value": "All Rooms"
     }
   ],
   "lobby.rooms.create": [
@@ -32153,7 +32153,7 @@
   "lobby.rooms.open": [
     {
       "type": 0,
-      "value": "Open rooms"
+      "value": "Open Rooms"
     }
   ],
   "lobby.rooms.pickDeck": [
@@ -32167,25 +32167,25 @@
     },
     {
       "type": 0,
-      "value": " — pick a deck"
+      "value": " — Pick a Deck"
     }
   ],
   "lobby.rooms.started": [
     {
       "type": 0,
-      "value": "Started games"
+      "value": "Started Games"
     }
   ],
   "lobby.rooms.yours": [
     {
       "type": 0,
-      "value": "Your rooms"
+      "value": "Your Rooms"
     }
   ],
   "lobby.waiting.forOpponent": [
     {
       "type": 0,
-      "value": "Waiting for opponent…"
+      "value": "Waiting for Opponent…"
     }
   ],
   "lobby.waiting.playersPreparing": [
@@ -32209,7 +32209,7 @@
   "lobby.waiting.spectating": [
     {
       "type": 0,
-      "value": "Spectating — waiting for the game to start"
+      "value": "Spectating — Waiting for the Game to Start"
     }
   ],
   "matchmaking.background.declined": [
@@ -32305,7 +32305,7 @@
   "matchmaking.fallback.title": [
     {
       "type": 0,
-      "value": "The PvP match didn't go ahead"
+      "value": "The PvP Match Didn't Go Ahead"
     }
   ],
   "meta.home.description": [
@@ -32456,12 +32456,6 @@
       "value": "Bring your Fabrary deck to face other players or challenge a competitive bot."
     }
   ],
-  "play.intro.kicker": [
-    {
-      "type": 0,
-      "value": "Free · Open source · Community driven"
-    }
-  ],
   "play.intro.title": [
     {
       "type": 0,
@@ -32525,7 +32519,7 @@
   "prep.accept.matchFound": [
     {
       "type": 0,
-      "value": "Match found"
+      "value": "Match Found"
     }
   ],
   "prep.accept.waiting": [
@@ -32567,13 +32561,13 @@
   "prep.arena.revealed": [
     {
       "type": 0,
-      "value": "Arena cards revealed"
+      "value": "Arena Cards Revealed"
     }
   ],
   "prep.arena.select": [
     {
       "type": 0,
-      "value": "Select arena cards"
+      "value": "Select Arena Cards"
     }
   ],
   "prep.arena.waiting": [
@@ -32615,7 +32609,7 @@
   "prep.botNudge.title": [
     {
       "type": 0,
-      "value": "No match yet"
+      "value": "No Match Yet"
     }
   ],
   "prep.copied": [
@@ -32789,13 +32783,13 @@
   "prep.imageLoading.title": [
     {
       "type": 0,
-      "value": "Loading card art"
+      "value": "Loading Card Art"
     }
   ],
   "prep.loadingDeck": [
     {
       "type": 0,
-      "value": "Loading your deck…"
+      "value": "Loading Your Deck…"
     }
   ],
   "prep.loadingPlan": [
@@ -33125,7 +33119,7 @@
   "prep.presentation.title": [
     {
       "type": 0,
-      "value": "Your presentation"
+      "value": "Your Presentation"
     }
   ],
   "prep.presentation.weapons": [
@@ -33858,7 +33852,7 @@
   "replay.share.title": [
     {
       "type": 0,
-      "value": "Share replay"
+      "value": "Share Replay"
     }
   ],
   "replay.share.visibility.friends": [
@@ -33894,7 +33888,7 @@
   "replay.shared.gateTitle": [
     {
       "type": 0,
-      "value": "Shared replay"
+      "value": "Shared Replay"
     }
   ],
   "replay.shared.goHome": [

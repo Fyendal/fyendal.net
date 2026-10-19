@@ -181,11 +181,11 @@ export function SeoPrerenderedLanding({ intl }: { intl: IntlShape }) {
         <LobbyBrandView intl={intl} />
       </header>
       <main id="main-content" className="guest-landing">
-        <div className="intro-grid">
+        <div className="intro-grid stage-panel">
           <GuestLandingHeroView intl={intl} />
           <aside
             id="create-account"
-            className="intro-auth landing-static-account"
+            className="intro-auth stage-side landing-static-account"
             aria-label={intl.formatMessage({ id: "landing.startPlayingLabel" })}
           >
             <div className="auth-card">

@@ -107,7 +107,7 @@ describe("preparation stage layout", () => {
     prep.seats = [{ ...prep.seats[0]!, accepted: false }, { ...prep.seats[1]!, accepted: true }];
     const html = render(prep, false, deck, { matchAcceptanceRole: "existing" });
     const prompt = html.match(/<section class="panel prep-match-accept-prompt"[\s\S]*?<\/section>/)?.[0] ?? "";
-    expect(prompt).toContain("Match found");
+    expect(prompt).toContain("Match Found");
     expect(prompt.match(/accept-hero-side is-accepted/g)).toHaveLength(1);
     expect(prompt).toContain("match-accept-primary");
   });
@@ -123,7 +123,7 @@ describe("preparation stage layout", () => {
     expect(html).not.toContain("prep-sheet-state");
     expect(html).not.toContain("sideboarding");
     expect(html).not.toContain("prep-ready-float");
-    expect(html).not.toContain("Your presentation");
+    expect(html).not.toContain("Your Presentation");
   });
 
   it("heads the desktop selection column with the matchup plan, not the match sheet", () => {
@@ -177,8 +177,8 @@ describe("preparation stage layout", () => {
     const action = html.match(/<div class="prep-sheet-action">([\s\S]*?)<\/section>/)?.[1];
     expect(action).toContain("Ready");
     expect(html).not.toContain("prep-ready-float");
-    expect(html).not.toContain("Arena cards revealed");
-    expect(html).toContain("Your presentation");
+    expect(html).not.toContain("Arena Cards Revealed");
+    expect(html).toContain("Your Presentation");
   });
 
   it("shows mobile first-player choices without an arena lock action", () => {
@@ -214,7 +214,7 @@ describe("preparation stage layout", () => {
   it("waits for uncached card art before opening the room", () => {
     vi.stubGlobal("Image", class {});
     const html = render(pairedPrep("select-arena"), false);
-    expect(html).toContain("Loading card art");
+    expect(html).toContain("Loading Card Art");
     expect(html).toMatch(/0 of \d+ cards ready/);
     expect(html).not.toContain("prep-columns");
   });
@@ -226,7 +226,7 @@ describe("preparation stage layout", () => {
     prep.deadlinePhase = "accept";
     prep.deadlineAt = Date.now() + 30_000;
     const html = render(prep, false, deck, { matchAcceptanceRole: "existing" });
-    expect(html).not.toContain("Loading card art");
+    expect(html).not.toContain("Loading Card Art");
     expect(html).toContain("prep-match-accept-prompt");
   });
 });

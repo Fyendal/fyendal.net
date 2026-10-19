@@ -17,7 +17,7 @@ describe("BotOpponentModal", () => {
     );
 
     expect(html).toContain('role="dialog"');
-    expect(html).toContain("Choose your opponent");
+    expect(html).toContain("Choose Your Opponent");
     expect(html).toContain("Keep searching for a real player");
     expect(html).toContain('type="checkbox" checked=""');
     expect(html).toContain("Ira");
@@ -41,7 +41,7 @@ describe("BotOpponentModal", () => {
     expect(html).toContain("An aggressive deck that builds Gates for explosive Bloodrush turns.");
     expect(html).not.toContain("Starvo");
     expect(html).not.toContain("Star of the Show");
-    expect(html).toContain('aria-label="Close Choose your opponent"');
+    expect(html).toContain('aria-label="Close Choose Your Opponent"');
     expect(html).toContain('class="bot-deck-type bot-deck-type-aggro">Aggro</span>');
     // Deck-type chips are text only; the dialog's close icon is the sole decoration.
     expect(html.match(/aria-hidden="true"/g)).toHaveLength(1);
