@@ -646,7 +646,9 @@ export function PrepRoom() {
         </div>
         <div className="prep-topbar-actions">
           <FullscreenButton placement="header" />
-          <button onClick={leave}>{intl.formatMessage({ id: "common.leave" })}</button>
+          <button className="lobby-create-action" onClick={leave}>
+            {intl.formatMessage({ id: "common.leave" })}
+          </button>
         </div>
       </div>
 
