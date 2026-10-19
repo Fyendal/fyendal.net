@@ -67,7 +67,7 @@ const PRIVACY: Section[] = [
   {
     title: "Information Fyendal stores",
     body: [
-      "Account information includes your username, sign-in credentials, and any cosmetic entitlement attached to your account. Fyendal does not collect an email address during registration.",
+      "Account information includes your username, sign-in credentials, and any cosmetic entitlement attached to your account. An email address is optional. If you add one, Fyendal uses it only to confirm the address, send password-reset links, and notify you when your recovery email changes. Other players never see it.",
       "Game data: your saved decklists, room membership, private replay notes, and the state and history of games you play (needed to run, reconnect, resume, and review games). Completed replays contain full-information frames, including both players' hidden zones; they are available only to the two signed-in participants. A replay note is available only to the participant who created it and is not shown in the opponent's replay.",
       "Social data: friend requests and connections, direct messages and their delivery or read information, whether friends are available, and game invitations. Your username, availability, and messages are shown only as needed to provide these features to the players involved.",
       "Bug reports: when you choose to submit one, we store your description, a report reference, and a server-side copy of the room's current state and recent history. The trace can contain both players' hidden game zones and is available only to service operators for diagnosis; it is not returned through the player-facing API.",
@@ -92,6 +92,7 @@ const PRIVACY: Section[] = [
       "Fyendal has no advertising and does not track you across other websites. It counts registrations, completed games, and daily active players for its own operations. Fyendal does not sell or share your information with third parties for their own purposes. Because there is no cross-site tracking, browser Do Not Track signals do not change how Fyendal operates.",
       "Fyendal uses Umami, a cookieless analytics service, to count visits and which parts of the site are used, such as which tabs are opened. Umami receives standard connection and browser information, but Fyendal does not send your username, account identifiers, room codes, or game content, and Umami does not set cookies or track you across other websites.",
       "Service providers that help operate Fyendal may process information on Fyendal's behalf. They are not permitted to use it for their own purposes.",
+      "If you add a recovery email, Fyendal sends account emails through a transactional email provider. The provider receives your address and the message content, including your username and a single-use link, only to deliver that email.",
       "Card and hero images come from a third-party content provider. Loading those images shares standard connection information with that provider, but Fyendal does not send your account credentials or username with the request.",
     ],
   },
@@ -99,14 +100,14 @@ const PRIVACY: Section[] = [
     title: "Retention",
     body: [
       "Direct messages are kept for up to 30 days. Removing a friendship deletes the retained conversation. Friend connections remain until either player removes the friendship, and pending requests remain until they are accepted, declined, or canceled. Availability and game invitations are short-lived.",
-      "Rooms are normally deleted 15 minutes after a finished game or after everyone leaves. Completed player replays and their private notes expire 7 days after the game ends. Sign-in sessions expire after 30 days without renewal. Accounts, saved decks, submitted bug reports, and your game activity dates persist until deletion.",
+      "Rooms are normally deleted 15 minutes after a finished game or after everyone leaves. Completed player replays and their private notes expire 7 days after the game ends. Sign-in sessions expire after 30 days without renewal. Unused email confirmation links expire after 24 hours and password-reset links after 30 minutes. A recovery email remains until you remove it or delete your account. Accounts, saved decks, submitted bug reports, and your game activity dates persist until deletion.",
       "Deleted information may remain briefly in routine backup copies before those copies expire automatically.",
     ],
   },
   {
     title: "Your choices",
     body: [
-      "Signed-in users can download their account data or delete their account from the Account panel. Exports include friendships, pending friend requests, retained messages, replays and private replay notes, bug-report descriptions, and trace references, but not hidden bug-report room-state attachments. Deletion removes the account and associated social, game, and account data from Fyendal's active systems.",
+      "Signed-in users can download their account data or delete their account from the Account panel. Exports include your recovery email, friendships, pending friend requests, retained messages, replays and private replay notes, bug-report descriptions, and trace references, but not hidden bug-report room-state attachments. Deletion removes the account and associated social, game, and account data from Fyendal's active systems.",
       "Backups are not edited to remove individual records, but deleted information disappears as those backups expire.",
       `For a request you cannot complete while signed in, contact ${CONTACT}.`,
     ],
