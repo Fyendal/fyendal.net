@@ -481,20 +481,85 @@
 }
 
 
-.format-list { display: flex; flex-direction: column; gap: 9px; }
-.format-card {
+/* Lobby rail: a flat list of places hung from one bronze spine. Labels use
+   the card-name face so the menu reads like printed card titles; the selected
+   place wears a flat blood smear that lands on the spine and fades out to the
+   right, instead of a raised box. */
+.rail-nav {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  gap: 2px;
+  border-left: 1px solid var(--border-subtle);
+}
+.rail-nav-item {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  column-gap: 12px;
   width: 100%;
-  min-height: 54px;
-  padding: 10px 13px;
+  min-height: 46px;
+  margin: 0;
+  padding: 10px 14px 10px 18px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  clip-path: none;
+  color: var(--text-secondary);
   text-align: left;
-  background: #20160c;
   text-transform: none;
   letter-spacing: normal;
+  transition: color 120ms ease, background-color 120ms ease;
 }
+.rail-nav-item:hover {
+  background: #ffffff06;
+  color: var(--text-primary);
+}
+.rail-nav-item:not(.selected):hover::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 -2px;
+  width: 3px;
+  background: var(--border-strong);
+}
+.rail-nav-item:focus-visible {
+  outline: 0;
+  box-shadow: inset 0 0 0 2px var(--focus-ring);
+}
+.rail-nav-item.selected { color: #ffe6b0; }
+/* The smear spills a few pixels past the row so its spatter isn't clipped. */
+.rail-nav-item.selected::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: -3px 0 -3px -1px;
+  background: var(--blood);
+  -webkit-mask: url("/textures/blood-smear.svg") 0 0 / 100% 100% no-repeat;
+  mask: url("/textures/blood-smear.svg") 0 0 / 100% 100% no-repeat;
+  opacity: .85;
+  pointer-events: none;
+}
+.rail-nav-divider {
+  margin: 7px 14px 7px 18px;
+  border: 0;
+  border-top: 1px solid #4d3a2399;
+}
+.rail-nav-label {
+  font: 500 19px/1.2 var(--font-card-name);
+}
+.rail-nav-count {
+  color: var(--text-muted);
+  font: 500 13px/1.2 var(--font-lobby-ui);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.rail-nav-item.selected .rail-nav-count { color: #f0c9a8; }
+@media (min-width: 701px) and (max-width: 1099px) {
+  .rail-nav-label { font-size: 18px; }
+}
+/* Alegreya has no CJK glyphs; Chinese labels keep the UI face. */
+html:lang(zh-Hans) .rail-nav-label { font-family: var(--font-lobby-ui); font-size: 17px; }
 .mobile-lobby-nav { display: none; }
 
 /* More sheet: grouped settings-style rows. Rows in a group share one outline
@@ -564,22 +629,6 @@
     padding-inline: 18px;
   }
 }
-.format-card.selected {
-  border-color: var(--bronze);
-  background: linear-gradient(180deg, #2c1d0e, #221507);
-  box-shadow: inset 3px 0 0 var(--blood-hi), inset 0 0 0 1px #b8933f33;
-}
-.format-card-name {
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
-  font-family: var(--font-lobby-ui);
-  font-size: 16px;
-  font-weight: 650;
-  letter-spacing: .4px;
-  text-transform: uppercase;
-  color: #d6c9b1;
-}
 .format-name-primary { display: block; }
 .format-name-subtitle {
   display: block;
@@ -589,17 +638,6 @@
   letter-spacing: .7px;
   line-height: 1.1;
   text-transform: none;
-}
-.format-card.selected .format-card-name {
-  color: var(--gold);
-  font-weight: 700;
-}
-.format-card.selected .format-name-subtitle { color: #c7a96d; }
-.format-card-queue { font-size: 13px; color: #a0927c; margin-top: 2px; }
-.format-card.selected .format-card-queue { color: #d4a958; }
-
-@media (min-width: 701px) and (max-width: 1099px) {
-  .format-card-name { font-size: 15px; }
 }
 
 .play-label {

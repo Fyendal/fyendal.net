@@ -2,6 +2,7 @@ import { lazy, Suspense, useEffect, useState } from "react";
 import { useIntl } from "react-intl";
 import { useShallow } from "zustand/react/shallow";
 import { useStore } from "../store.js";
+import type { LobbyRail } from "../store/types.js";
 import { apiStats, type StatsOk } from "../auth/auth.js";
 import { Auth } from "../auth/AuthCard.js";
 import type { Format } from "@fyendal/shared";
@@ -17,6 +18,12 @@ import {
   GuestLandingDetails,
   GuestLandingHero,
 } from "./GuestLanding.js";
+
+interface RailPlace {
+  rail: LobbyRail;
+  label: string;
+  count?: string;
+}
 
 const RoomList = lazy(() => import("./RoomList.js").then((module) => ({ default: module.RoomList })));
 const Home = lazy(() => import("./Home.js").then((module) => ({ default: module.Home })));
@@ -166,6 +173,37 @@ export function Lobby() {
     );
   }
 
+  const railPlaces: RailPlace[] = [
+    {
+      rail: "home",
+      label: intl.formatMessage({ id: "lobby.nav.home" }),
+      count: rejoinRoomCount > 0
+        ? intl.formatMessage({ id: "lobby.count.rejoin" }, { count: rejoinRoomCount })
+        : undefined,
+    },
+    { rail: "decks", label: intl.formatMessage({ id: "lobby.nav.decks" }) },
+    {
+      rail: "all",
+      label: intl.formatMessage({ id: "lobby.nav.allRooms" }),
+      count: rooms.length > 0
+        ? intl.formatMessage({ id: "lobby.count.live" }, { count: rooms.length })
+        : undefined,
+    },
+    { rail: "history", label: intl.formatMessage({ id: "lobby.nav.history" }) },
+    { rail: "achievements", label: intl.formatMessage({ id: "achievements.title" }) },
+  ];
+  const railButton = (place: RailPlace) => (
+    <button
+      key={place.rail}
+      className={`rail-nav-item${rail === place.rail ? " selected" : ""}`}
+      aria-current={rail === place.rail ? "page" : undefined}
+      onClick={() => setRail(place.rail)}
+    >
+      <span className="rail-nav-label">{place.label}</span>
+      {place.count ? <span className="rail-nav-count">{place.count}</span> : null}
+    </button>
+  );
+
   return (
     <div className="lobby-page lobby-page-authenticated">
       {rail === "home" ? <GlobalNoticeBanner /> : null}
@@ -176,56 +214,11 @@ export function Lobby() {
 
       <div className="lobby-grid">
         <div className="lobby-rail">
-          <div className="panel format-rail">
-            <div className="format-list">
-              <button
-                className={`format-card${rail === "home" ? " selected" : ""}`}
-                onClick={() => setRail("home")}
-              >
-                <span className="format-card-name">{intl.formatMessage({ id: "lobby.nav.home" })}</span>
-                {rejoinRoomCount > 0 ? (
-                  <span className="format-card-queue">
-                    {intl.formatMessage({ id: "lobby.count.rejoin" }, { count: rejoinRoomCount })}
-                  </span>
-                ) : null}
-              </button>
-              <button
-                className={`format-card${rail === "decks" ? " selected" : ""}`}
-                onClick={() => goToDecks()}
-              >
-                <span className="format-card-name">{intl.formatMessage({ id: "lobby.nav.decks" })}</span>
-              </button>
-              <button
-                className={`format-card${rail === "all" ? " selected" : ""}`}
-                onClick={() => setRail("all")}
-              >
-                <span className="format-card-name">{intl.formatMessage({ id: "lobby.nav.allRooms" })}</span>
-                {rooms.length > 0 ? (
-                  <span className="format-card-queue">
-                    {intl.formatMessage({ id: "lobby.count.live" }, { count: rooms.length })}
-                  </span>
-                ) : null}
-              </button>
-              <button
-                className={`format-card${rail === "history" ? " selected" : ""}`}
-                onClick={() => setRail("history")}
-              >
-                <span className="format-card-name">{intl.formatMessage({ id: "lobby.nav.history" })}</span>
-              </button>
-              <button
-                className={`format-card${rail === "achievements" ? " selected" : ""}`}
-                onClick={() => setRail("achievements")}
-              >
-                <span className="format-card-name">{intl.formatMessage({ id: "achievements.title" })}</span>
-              </button>
-              <button
-                className={`format-card${rail === "account" ? " selected" : ""}`}
-                onClick={() => setRail("account")}
-              >
-                <span className="format-card-name">{intl.formatMessage({ id: "lobby.nav.account" })}</span>
-              </button>
-            </div>
-          </div>
+          <nav className="rail-nav" aria-label={intl.formatMessage({ id: "lobby.nav.primary" })}>
+            {railPlaces.map(railButton)}
+            <hr className="rail-nav-divider" />
+            {railButton({ rail: "account", label: intl.formatMessage({ id: "lobby.nav.account" }) })}
+          </nav>
         </div>
 
         <div className="lobby-main">
