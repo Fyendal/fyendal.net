@@ -37,11 +37,12 @@ describe("LanguagePicker", () => {
     expect(html).toContain('<option value="es" lang="es">Español</option>');
   });
 
-  it("renders the selected Spanish locale with its mark", () => {
+  it("renders the selected Spanish locale with its mark and label", () => {
     const html = renderToStaticMarkup(
       <TestI18nProvider locale="es"><LanguagePicker placement="header" /></TestI18nProvider>,
     );
 
+    expect(html).toContain('aria-label="Idioma"');
     expect(html).toContain('lang="es" aria-hidden="true">ES</span>');
   });
 });
