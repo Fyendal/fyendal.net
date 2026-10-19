@@ -139,7 +139,7 @@
   margin-bottom: 18px;
 }
 .deck-library-tools label { display: grid; gap: 5px; }
-.deck-library-tools label > span {
+.deck-library-tools label > span:first-child {
   color: var(--text-muted);
   font: 600 13px var(--font-lobby-ui);
 }
@@ -152,6 +152,19 @@
   padding: 8px 12px;
 }
 .deck-library-tools select { width: 100%; }
+.deck-library-search-field { position: relative; display: block; }
+.deck-library-search-field .ui-icon {
+  position: absolute;
+  top: 50%;
+  left: 12px;
+  width: 16px;
+  height: 16px;
+  color: var(--bronze);
+  pointer-events: none;
+  transform: translateY(-50%);
+}
+.deck-library-search-field input { padding-left: 38px; }
+.deck-library-search-field:focus-within .ui-icon { color: var(--gold); }
 .deck-library-empty {
   display: grid;
   justify-items: center;
@@ -653,8 +666,6 @@
 }
 
 @media (max-width: 700px) {
-  .deck-library-panel { padding-bottom: 18px; }
-  .deck-panel-heading { display: none; }
   .deck-catalog-tabs {
     gap: 4px;
     margin-bottom: 10px;
@@ -1211,82 +1222,63 @@
 @media (max-width: 700px) {
   .home-play-poster { aspect-ratio: auto; }
   .home-play-poster img { position: static; height: auto; }
-  .deck-panel-heading { display: flex; align-items: flex-start; flex-wrap: wrap; }
-  .deck-library-management-tools { grid-template-columns: 1fr; }
+  /* The heading, search and both filters fit above the fold so the decks
+     themselves start within the first screen. */
+  .deck-library-panel { padding: 16px 14px 18px; }
+  .deck-panel-heading { gap: 12px; margin-bottom: 14px; }
+  .deck-panel-heading .lobby-create-action { min-width: 0; padding: 8px 13px; }
+  .deck-library-management-tools {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px 8px;
+    margin-bottom: 16px;
+  }
+  .deck-library-search { grid-column: 1 / -1; }
+  /* The glyph and placeholder name the search field; its label stays for
+     assistive technology only. The filters keep theirs because "All" alone
+     says nothing. */
+  .deck-library-search > span:first-child {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  .deck-library-management-tools label { gap: 4px; }
+  .deck-library-management-tools label > span:first-child { font-size: 12px; }
+  .deck-library-management-tools select { padding: 6px 30px 6px 11px; background-position-x: calc(100% - 10px); font-size: 15px; }
   .deck-bulk-actions { flex-wrap: wrap; padding: 4px; }
   .deck-bulk-actions > span { flex-basis: 100%; padding: 6px 8px 2px; }
   .deck-bulk-actions button { flex: 1 1 auto; justify-content: center; min-height: 44px; }
-  /* Saved decks become flat list rows, like match history: one hairline per
-     row, with the filled gem and a warm row tint marking the selection. */
-  .deck-grid-saved { gap: 0; border-top: 1px solid #45331f99; }
-  .deck-library-card {
-    display: grid;
-    grid-template-columns: 34px minmax(0, 1fr);
-    align-items: center;
-    border: 0;
-    border-bottom: 1px solid #45331f99;
-    border-radius: 0;
-    background: transparent;
-    box-shadow: none;
-  }
-  .deck-library-card:hover { border-color: #45331f99; }
-  .deck-library-card:has(.deck-library-select input:checked) {
-    border-color: #45331f99;
-    background: #2a1b0d99;
-    box-shadow: none;
-  }
-  .deck-library-select {
-    position: static;
-    width: 34px;
-    height: 44px;
-  }
+  /* Saved decks keep the laptop's banners, cut shorter: the art still lights
+     the right side, the name holds two lines and the hero line one. */
+  .deck-grid-saved { gap: 10px; }
   .deck-library-card > .deck-card {
-    display: grid;
-    min-height: 0;
-    grid-template-columns: 40px minmax(0, 1fr);
-    align-content: center;
-    justify-items: start;
-    gap: 0 10px;
-    padding: 11px 2px;
-    background: transparent;
+    min-height: 118px;
+    gap: 4px;
+    padding: 13px 14px 12px;
   }
-  .deck-library-card .deck-card-img {
-    grid-row: 1 / span 2;
-    align-self: center;
-    position: static;
-    width: 40px;
-    height: 40px;
-    border: 1px solid #6b5326;
-    border-radius: 50%;
-    -webkit-mask-image: none;
-    mask-image: none;
-    filter: none;
-  }
-  .deck-library-card > .deck-card:hover .deck-card-img { scale: none; }
-  /* Rows keep the round headshot, which is sharp at this size. */
-  .deck-library-card .deck-card-art { display: none; }
-  .deck-library-card .deck-card.has-art .deck-card-img { display: block; }
+  .deck-library-card :is(.deck-card-art, .deck-card-img) { width: 64%; }
+  .deck-library-card .deck-card-art img { width: 150%; transform: translate(-50%, -17%); }
+  /* align-self undoes the deck picker's end alignment above. */
   .deck-library-card .deck-card:not(.deck-import-card) .deck-card-name {
-    display: block;
-    width: 100%;
-    max-width: none;
-    overflow: hidden;
-    font-size: 15px;
-    text-shadow: none;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    max-width: 72%;
+    align-self: flex-start;
+    font-size: 17px;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
   }
-  .deck-library-card > .deck-card::after { display: none; }
-  .deck-library-card .deck-card-details { order: 0; align-items: center; gap: 7px; margin-top: 3px; padding-top: 0; }
+  .deck-library-card .deck-card-details { align-items: center; padding-top: 4px; }
   .deck-library-card .deck-card-details > span:first-child {
-    display: block;
     font-size: 13px;
-    line-height: 1.25;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    line-height: 18px;
+    -webkit-line-clamp: 1;
+    line-clamp: 1;
   }
-  .deck-library-card .deck-card-format { padding: 1px 6px; font-size: 11px; line-height: 15px; }
-  .deck-library-card .deck-legality-hint { grid-column: 2; max-width: none; margin-top: 3px; font-size: 12px; }
+  .deck-library-card .deck-card-format { padding: 0 6px; font-size: 11px; line-height: 16px; }
+  .deck-library-card .deck-legality-hint { max-width: 72%; font-size: 12px; }
+  /* A finger-sized target around the same small gem. */
+  .deck-library-select { top: 2px; right: 2px; width: 44px; height: 44px; }
   .home-play-form { grid-template-columns: 1fr; }
   .home-play-primary-fields { grid-column: 1; grid-template-columns: 1fr; }
   .home-play-actions { grid-column: 1; align-items: center; }

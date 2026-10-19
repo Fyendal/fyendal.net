@@ -485,7 +485,6 @@ input::placeholder {
   cursor: default;
 }
 @media (max-width: 520px) {
-  .deck-panel-heading { align-items: flex-start; }
   .toggle-switch { font-size: 10px; }
 }
 .toggle-switch input[type="checkbox"] {

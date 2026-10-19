@@ -81,16 +81,19 @@ export function DeckLibrary(props: {
       </div>
 
       <div className="deck-library-tools deck-library-management-tools">
-        <label>
+        <label className="deck-library-search">
           <span>{intl.formatMessage({ id: "lobby.deck.search" })}</span>
-          <input
-            type="search"
-            name="deck-search"
-            value={query}
-            autoComplete="off"
-            placeholder={intl.formatMessage({ id: "lobby.deck.searchPlaceholder" })}
-            onChange={(event) => setQuery(event.target.value)}
-          />
+          <span className="deck-library-search-field">
+            <UiIcon name="search" />
+            <input
+              type="search"
+              name="deck-search"
+              value={query}
+              autoComplete="off"
+              placeholder={intl.formatMessage({ id: "lobby.deck.searchPlaceholder" })}
+              onChange={(event) => setQuery(event.target.value)}
+            />
+          </span>
         </label>
         <label>
           <span>{intl.formatMessage({ id: "common.format" })}</span>
