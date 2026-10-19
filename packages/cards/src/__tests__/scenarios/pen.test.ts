@@ -226,6 +226,25 @@ describe("PEN — import and set mechanics", () => {
     expect(g.state.players[1]!.equipment.chest?.counters?.energy).toBe(0);
   });
 
+  it.each([
+    { life: 10, expected: 8 },
+    { life: 20, expected: 6 },
+  ])("Energy of the Audience counts only auras of suspense at $life life", ({ life, expected }) => {
+    const g = scenario({ seats: [
+      {
+        hero: "rhinar",
+        life,
+        hand: ["energy of the audience|2"],
+        resources: 3,
+        board: ["what happens next?|3", "edge of their seats|1", "sigil of solace|3"],
+        equipment: NO_EQUIPMENT,
+      },
+      { hero: "dorinthea", life: 20, equipment: NO_EQUIPMENT },
+    ] });
+
+    g.play("energy of the audience|2").expectAttackValue(expected);
+  });
+
   it("Comeback Kicks offers its action point when the crowd cheers its lower-life hero", () => {
     const g = scenario({
       seats: [

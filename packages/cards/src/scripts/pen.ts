@@ -2105,7 +2105,8 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
   },
   "energy of the audience|2": {
     modifyAttack: (ctx) =>
-      lowerLife(ctx) ? ctx.player(ctx.seat).board.filter((card) => hasTag(ctx, card, "suspense")).length : 0,
+      lowerLife(ctx) ? ctx.player(ctx.seat).board.filter((card) => hasTag(ctx, card, "aura") && hasKeyword(ctx, card, "suspense"))
+            .length : 0,
   },
   "comeback kicks|0": {
     onCheered(ctx) {
