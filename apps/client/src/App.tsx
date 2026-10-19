@@ -5,12 +5,14 @@ import { Lobby } from "./lobby/Lobby.js";
 import { ClientUpdateRequired } from "./lobby/ClientUpdateRequired.js";
 import { RoomLoading } from "./lobby/RoomLoading.js";
 import { savedReplayIdFromPath, sharedReplayTokenFromPath } from "./replay/route.js";
+import { recoveryRouteFromPath } from "./auth/recoveryRoute.js";
 import { BackgroundMatchOffer } from "./matchmaking/BackgroundMatchOffer.js";
 
 const WaitingRoom = lazy(() => import("./lobby/WaitingRoom.js").then((module) => ({ default: module.WaitingRoom })));
 const PrepRoom = lazy(() => import("./prep/PrepRoom.js").then((module) => ({ default: module.PrepRoom })));
 const GameBoard = lazy(() => import("./game/GameBoard.js").then((module) => ({ default: module.GameBoard })));
 const ReplayBar = lazy(() => import("./replay/ReplayBar.js").then((module) => ({ default: module.ReplayBar })));
+const RecoveryPage = lazy(() => import("./auth/RecoveryPage.js").then((module) => ({ default: module.RecoveryPage })));
 const LegalPage = lazy(() => import("./legal/LegalPage.js").then((module) => ({ default: module.LegalPage })));
 const SharedReplayGate = lazy(() => import("./replay/SharedReplayGate.js")
   .then((module) => ({ default: module.SharedReplayGate })));
@@ -102,13 +104,16 @@ function AppContent() {
   const [, setReplayRouteFailure] = useState<string | null>(null);
   const sharedLoadRef = useRef<string | null>(null);
   const [sharedGate, setSharedGate] = useState<{ token: string; reason: "sign-in" | "friends-only" } | null>(null);
+  const [, setRecoveryLeft] = useState(0);
   const path = location.pathname;
+  const recoveryRoute = recoveryRouteFromPath(path);
   const routeRoomCode = roomCodeFromUrl();
   const savedReplayId = savedReplayIdFromPath(path);
   const sharedReplayToken = sharedReplayTokenFromPath(path);
   useRouteMetadata(
     path,
-    routeRoomCode !== null || savedReplayId !== null || sharedReplayToken !== null || pendingFabraryPlay !== null,
+    routeRoomCode !== null || savedReplayId !== null || sharedReplayToken !== null || pendingFabraryPlay !== null
+      || recoveryRoute !== null,
     intl.formatMessage({ id: "meta.home.title" }),
     intl.formatMessage({ id: "meta.home.description" }),
   );
@@ -200,6 +205,20 @@ function AppContent() {
     return (
       <Suspense fallback={<ScreenFallback />}>
         <LegalPage kind={path.startsWith("/terms") ? "terms" : "privacy"} />
+      </Suspense>
+    );
+  }
+
+  if (recoveryRoute) {
+    return (
+      <Suspense fallback={<ScreenFallback />}>
+        <RecoveryPage
+          route={recoveryRoute}
+          onDone={() => {
+            history.replaceState(null, "", "/");
+            setRecoveryLeft((count) => count + 1);
+          }}
+        />
       </Suspense>
     );
   }

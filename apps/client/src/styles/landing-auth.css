@@ -234,6 +234,32 @@
   accent-color: var(--gold);
 }
 .auth-consent a { color: #e3c77f; }
+.auth-field-hint {
+  color: #9c8a6d;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.35;
+}
+.auth-note {
+  margin: 0;
+  color: #d2c3a8;
+  font-size: 13px;
+  line-height: 1.45;
+}
+.auth-link {
+  align-self: center;
+  min-height: 0;
+  padding: 2px 4px;
+  border: 0;
+  background: transparent;
+  color: #e3c77f;
+  font-size: 13px;
+  letter-spacing: normal;
+  text-transform: none;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.auth-link:hover { color: #f0d59a; }
 .auth-form .btn-primary {
   text-transform: none;
   letter-spacing: .8px;
@@ -309,4 +335,19 @@
 .spec-list-row button:focus-visible {
   border-color: #e59689;
   outline: 1px solid #e59689;
+}
+
+/* recovery email link pages */
+.recovery-page {
+  min-height: 100vh;
+  padding: 48px 16px;
+  box-sizing: border-box;
+}
+.recovery-title {
+  margin: 0 0 14px;
+  color: #e8dcc4;
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 400;
+  letter-spacing: .8px;
 }

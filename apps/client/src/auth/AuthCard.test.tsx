@@ -2,7 +2,8 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
 import { TestI18nProvider } from "../i18n/TestI18nProvider.js";
 import type { StoreState } from "../store/types.js";
-import { validateAuthInput } from "./validation.js";
+import { recoveryRouteFromPath } from "./recoveryRoute.js";
+import { isValidEmail, validateAuthInput } from "./validation.js";
 
 const authStore = vi.hoisted(() => ({
   state: {
@@ -28,6 +29,22 @@ describe("registration username validation", () => {
   });
 });
 
+describe("recovery email", () => {
+  it("accepts trimmed address-shaped input within the protocol bound", () => {
+    expect(isValidEmail(" player@example.com ")).toBe(true);
+    expect(isValidEmail("player@example")).toBe(false);
+    expect(isValidEmail("two words@example.com")).toBe(false);
+    expect(isValidEmail(`${"a".repeat(250)}@b.io`)).toBe(false);
+  });
+
+  it("recognizes only the two recovery link routes", () => {
+    expect(recoveryRouteFromPath("/reset-password")).toBe("reset-password");
+    expect(recoveryRouteFromPath("/verify-email/")).toBe("verify-email");
+    expect(recoveryRouteFromPath("/reset-password/extra")).toBeNull();
+    expect(recoveryRouteFromPath("/ABC123")).toBeNull();
+  });
+});
+
 describe("authentication form", () => {
   it("uses persistent labels and sentence-case placeholders", () => {
     const html = renderToStaticMarkup(
@@ -40,6 +57,24 @@ describe("authentication form", () => {
     expect(html).toContain('placeholder="Dracai"');
     expect(html).toContain("<span>Password</span>");
     expect(html).toContain('placeholder="Your password"');
+    expect(html).toContain(">Forgot password?</button>");
+    expect(html).not.toContain('name="email"');
+  });
+
+  it("offers an optional recovery email during registration without native tooltips", () => {
+    const html = renderToStaticMarkup(
+      <TestI18nProvider>
+        <Auth initialMode="register" />
+      </TestI18nProvider>,
+    );
+
+    expect(html).toContain("<span>Email (optional)</span>");
+    expect(html).toContain('name="email"');
+    expect(html).toContain('type="email"');
+    expect(html).toContain("Only used to recover your account.");
+    expect(html).toContain("3–20 letters, numbers, or underscores");
+    expect(html).not.toContain("title=");
+    expect(html).not.toContain("Forgot password?");
   });
 
   it("requires concise terms agreement during registration", () => {

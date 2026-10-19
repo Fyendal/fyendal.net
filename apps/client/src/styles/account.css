@@ -105,7 +105,12 @@
 .account-badge-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 20px; }
 .account-badge-actions button { min-height: 40px; padding: 8px 18px; }
 
+.account-email-status { display: grid; gap: 4px; margin-bottom: 10px; font-size: 14px; }
+.account-email-status p { margin: 0; overflow-wrap: anywhere; }
+.account-email-form { display: grid; gap: 8px; width: 100%; max-width: 320px; margin-bottom: 8px; }
+.account-email-actions { display: flex; flex-wrap: wrap; gap: 8px; }
 .account-delete-form { display: flex; flex-wrap: wrap; gap: 8px; width: 100%; }
+.account-email-form input,
 .account-delete-form input {
   flex: 1 1 220px;
   max-width: 320px;
@@ -115,6 +120,7 @@
   background: var(--surface-well);
   font: 14px var(--font-lobby-ui);
 }
+.account-email-form input:focus,
 .account-delete-form input:focus { border-color: var(--bronze); outline: 2px solid #b8933f55; outline-offset: 0; }
 .account-panel .btn-danger:disabled {
   border-color: var(--border-subtle);
@@ -131,6 +137,7 @@
   .account-panel { padding: 18px 16px; }
   .account-header { align-items: flex-start; flex-direction: column; gap: 6px; }
   .account-delete-form input { max-width: none; }
+  .account-email-form { max-width: none; }
   .account-delete-form button { flex: 1 1 auto; }
   .account-badge-current { grid-template-columns: 40px minmax(0, 1fr); }
   .account-badge-current button { grid-column: 1 / -1; }

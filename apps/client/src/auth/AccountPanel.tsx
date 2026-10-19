@@ -6,6 +6,7 @@ import { ModalSurface } from "../components/ModalSurface.js";
 import { PlayerBadgeMark } from "../game/PlayerBadge.js";
 import { useStore } from "../store.js";
 import { BadgeArt, badgeMessageIds, BadgePicker } from "./BadgePicker.js";
+import { RecoveryEmailSetting } from "./RecoveryEmailSetting.js";
 import "../styles/account.css";
 
 type AccountAction = "badges" | "export" | "delete";
@@ -140,6 +141,7 @@ export function AccountPanel() {
           {draftBadge === undefined ? errorFor("badges") : null}
         </div>
       </section>
+      <RecoveryEmailSetting />
       <section className="account-setting" aria-labelledby="account-export-title">
         <div className="account-setting-copy">
           <h3 id="account-export-title">{intl.formatMessage({ id: "account.export.title" })}</h3>
