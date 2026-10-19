@@ -18777,7 +18777,7 @@
   "engine.decision.activation.discard": [
     {
       "type": 0,
-      "value": "Choose a card to discard for "
+      "value": "Elige una carta para descartar por "
     },
     {
       "type": 1,
@@ -18787,7 +18787,7 @@
   "engine.decision.arsenal": [
     {
       "type": 0,
-      "value": "You may put a card from your hand into your arsenal, or pass"
+      "value": "Puedes poner una carta de tu mano en tu arsenal, o pasar"
     }
   ],
   "engine.decision.attack.target": [
@@ -18797,7 +18797,7 @@
     },
     {
       "type": 0,
-      "value": ": choose an attack target"
+      "value": ": elige un objetivo de ataque"
     }
   ],
   "engine.decision.clash.again": [
@@ -18807,7 +18807,7 @@
     },
     {
       "type": 0,
-      "value": ": destroy a "
+      "value": ": ¿destruir "
     },
     {
       "type": 1,
@@ -18815,7 +18815,7 @@
     },
     {
       "type": 0,
-      "value": " to put a revealed card on the bottom of its owner's deck and clash again?"
+      "value": " para poner una carta enseñada en la parte inferior del mazo de su propietario y desafiar de nuevo?"
     }
   ],
   "engine.decision.clash.revealed.bottom": [
@@ -18825,7 +18825,7 @@
     },
     {
       "type": 0,
-      "value": ": choose a revealed card to put on the bottom of its owner's deck"
+      "value": ": elige una carta enseñada para ponerla en la parte inferior del mazo de su propietario"
     }
   ],
   "engine.decision.clash.winner": [
@@ -18835,19 +18835,19 @@
     },
     {
       "type": 0,
-      "value": ": choose which hero wins the clash"
+      "value": ": elige qué héroe gana el desafío"
     }
   ],
   "engine.decision.combat.damage.order.first": [
     {
       "type": 0,
-      "value": "Choose the attack-target to deal combat damage to first"
+      "value": "Elige el objetivo de ataque que recibe primero el daño de combate"
     }
   ],
   "engine.decision.combat.damage.order.next": [
     {
       "type": 0,
-      "value": "Choose the next attack-target to deal combat damage to"
+      "value": "Elige el siguiente objetivo de ataque que recibe el daño de combate"
     }
   ],
   "engine.decision.crank": [
@@ -18857,13 +18857,13 @@
     },
     {
       "type": 0,
-      "value": ": Crank — remove a steam counter to gain 1 action point?"
+      "value": ": Arrancar — ¿quitar un contador de vapor para obtener 1 punto de acción?"
     }
   ],
   "engine.decision.damage.arcane.barrier": [
     {
       "type": 0,
-      "value": "Arcane Barrier: you would be dealt "
+      "value": "Barrera arcana: recibirías "
     },
     {
       "type": 1,
@@ -18871,13 +18871,13 @@
     },
     {
       "type": 0,
-      "value": " arcane damage — pay resources to prevent that much?"
+      "value": " de daño arcano — ¿pagar recursos para evitar esa cantidad?"
     }
   ],
   "engine.decision.damage.arcane.barrier.pay": [
     {
       "type": 0,
-      "value": "Pitch cards to pay "
+      "value": "Usa cartas como pitch para pagar "
     },
     {
       "type": 1,
@@ -18885,7 +18885,7 @@
     },
     {
       "type": 0,
-      "value": " for Arcane Barrier ("
+      "value": " por barrera arcana (faltan "
     },
     {
       "type": 1,
@@ -18893,19 +18893,19 @@
     },
     {
       "type": 0,
-      "value": " more needed)"
+      "value": ")"
     }
   ],
   "engine.decision.damage.combatequipment": [
     {
       "type": 0,
-      "value": "Replace combat damage by destroying defending equipment?"
+      "value": "¿Sustituir el daño de combate destruyendo un equipo defensor?"
     }
   ],
   "engine.decision.damage.discardprevent": [
     {
       "type": 0,
-      "value": "You would be dealt "
+      "value": "Recibirías "
     },
     {
       "type": 1,
@@ -18913,7 +18913,7 @@
     },
     {
       "type": 0,
-      "value": " damage — discard an eligible card to prevent "
+      "value": " de daño — ¿descartar una carta válida para evitar "
     },
     {
       "type": 1,
@@ -18921,7 +18921,7 @@
     },
     {
       "type": 0,
-      "value": " and draw "
+      "value": " y robar "
     },
     {
       "type": 1,
@@ -18935,7 +18935,7 @@
   "engine.decision.damage.lethalprevent": [
     {
       "type": 0,
-      "value": "You would be dealt "
+      "value": "Recibirías "
     },
     {
       "type": 1,
@@ -18943,7 +18943,7 @@
     },
     {
       "type": 0,
-      "value": " lethal damage — banish "
+      "value": " de daño letal — ¿desterrar "
     },
     {
       "type": 1,
@@ -18951,13 +18951,13 @@
     },
     {
       "type": 0,
-      "value": " from hand or arsenal to prevent it?"
+      "value": " de la mano o el arsenal para evitarlo?"
     }
   ],
   "engine.decision.damage.prevent": [
     {
       "type": 0,
-      "value": "You would be dealt "
+      "value": "Recibirías "
     },
     {
       "type": 1,
@@ -18965,13 +18965,13 @@
     },
     {
       "type": 0,
-      "value": " damage — use a prevention effect?"
+      "value": " de daño — ¿usar un efecto de evitación?"
     }
   ],
   "engine.decision.damage.quell": [
     {
       "type": 0,
-      "value": "Quell: you would be dealt "
+      "value": "Quell: recibirías "
     },
     {
       "type": 1,
@@ -18979,13 +18979,13 @@
     },
     {
       "type": 0,
-      "value": " damage — pay to prevent some of it?"
+      "value": " de daño — ¿pagar para evitar una parte?"
     }
   ],
   "engine.decision.damage.quellpay": [
     {
       "type": 0,
-      "value": "Pitch cards to pay "
+      "value": "Usa cartas como pitch para pagar "
     },
     {
       "type": 1,
@@ -18993,13 +18993,13 @@
     },
     {
       "type": 0,
-      "value": " for Quell"
+      "value": " por quell"
     }
   ],
   "engine.decision.damage.soulprevent": [
     {
       "type": 0,
-      "value": "You would be dealt "
+      "value": "Recibirías "
     },
     {
       "type": 1,
@@ -19007,7 +19007,7 @@
     },
     {
       "type": 0,
-      "value": " damage — choose a soul card to banish and prevent "
+      "value": " de daño — elige una carta del alma para desterrar y evitar "
     },
     {
       "type": 1,
@@ -19017,7 +19017,7 @@
   "engine.decision.damage.spellvoid": [
     {
       "type": 0,
-      "value": "Spellvoid: you would be dealt "
+      "value": "Spellvoid: recibirías "
     },
     {
       "type": 1,
@@ -19025,19 +19025,19 @@
     },
     {
       "type": 0,
-      "value": " arcane damage — destroy an equipment with Spellvoid to prevent some of it?"
+      "value": " de daño arcano — ¿destruir un equipo con spellvoid para evitar una parte?"
     }
   ],
   "engine.decision.damage.unpreventable": [
     {
       "type": 0,
-      "value": "Warning: this damage cannot be prevented."
+      "value": "Atención: este daño no se puede evitar."
     }
   ],
   "engine.decision.damage.ward": [
     {
       "type": 0,
-      "value": "Ward: you would be dealt "
+      "value": "Protección: recibirías "
     },
     {
       "type": 1,
@@ -19045,13 +19045,13 @@
     },
     {
       "type": 0,
-      "value": " damage — destroy a card with Ward to prevent some of it"
+      "value": " de daño — destruye una carta con protección para evitar una parte"
     }
   ],
   "engine.decision.damage.ward.unpreventable": [
     {
       "type": 0,
-      "value": "Ward: you would be dealt "
+      "value": "Protección: recibirías "
     },
     {
       "type": 1,
@@ -19059,25 +19059,25 @@
     },
     {
       "type": 0,
-      "value": " damage that can't be prevented — Ward is still destroyed"
+      "value": " de daño que no se puede evitar — la carta con protección se destruye igualmente"
     }
   ],
   "engine.decision.deckbottom.first": [
     {
       "type": 0,
-      "value": "Choose the first card to put on the bottom of your deck"
+      "value": "Elige la primera carta que pondrás en la parte inferior de tu mazo"
     }
   ],
   "engine.decision.deckbottom.next": [
     {
       "type": 0,
-      "value": "Choose the next card to put on the bottom of your deck"
+      "value": "Elige la siguiente carta que pondrás en la parte inferior de tu mazo"
     }
   ],
   "engine.decision.defend": [
     {
       "type": 0,
-      "value": "Defend against "
+      "value": "Defiende contra "
     },
     {
       "type": 1,
@@ -19093,13 +19093,13 @@
     },
     {
       "type": 0,
-      "value": " power)"
+      "value": " de poder)"
     }
   ],
   "engine.decision.die.reroll": [
     {
       "type": 0,
-      "value": "Destroy "
+      "value": "¿Destruir "
     },
     {
       "type": 1,
@@ -19107,7 +19107,7 @@
     },
     {
       "type": 0,
-      "value": " to reroll the "
+      "value": " para volver a tirar el "
     },
     {
       "type": 1,
@@ -19125,13 +19125,13 @@
     },
     {
       "type": 0,
-      "value": ": look at"
+      "value": ": mirar"
     }
   ],
   "engine.decision.payment": [
     {
       "type": 0,
-      "value": "Pay "
+      "value": "Paga "
     },
     {
       "type": 1,
@@ -19139,29 +19139,33 @@
     },
     {
       "type": 0,
-      "value": " resources"
+      "value": " recursos"
     }
   ],
   "engine.decision.priority.ability": [
+    {
+      "type": 0,
+      "value": "Habilidad de "
+    },
     {
       "type": 1,
       "value": "card"
     },
     {
       "type": 0,
-      "value": "'s ability on the stack — play an instant or pass"
+      "value": " en la pila — juega un instantáneo o pasa"
     }
   ],
   "engine.decision.priority.ability.hidden": [
     {
       "type": 0,
-      "value": "A face-down card's ability on the stack — play an instant or pass"
+      "value": "Habilidad de una carta boca abajo en la pila — juega un instantáneo o pasa"
     }
   ],
   "engine.decision.priority.ability.triggered": [
     {
       "type": 0,
-      "value": "Triggered ability on the stack — play an instant or pass"
+      "value": "Habilidad disparada en la pila — juega un instantáneo o pasa"
     }
   ],
   "engine.decision.priority.attacking": [
@@ -19171,13 +19175,13 @@
     },
     {
       "type": 0,
-      "value": " is attacking — play an instant or pass"
+      "value": " está atacando — juega un instantáneo o pasa"
     }
   ],
   "engine.decision.priority.base": [
     {
       "type": 0,
-      "value": "Priority — play an instant or pass"
+      "value": "Prioridad — juega un instantáneo o pasa"
     }
   ],
   "engine.decision.priority.card": [
@@ -19187,17 +19191,21 @@
     },
     {
       "type": 0,
-      "value": " on the stack — play an instant or pass"
+      "value": " en la pila — juega un instantáneo o pasa"
     }
   ],
   "engine.decision.priority.trigger": [
+    {
+      "type": 0,
+      "value": "Disparador de "
+    },
     {
       "type": 1,
       "value": "card"
     },
     {
       "type": 0,
-      "value": " triggers: "
+      "value": ": "
     },
     {
       "type": 1,
@@ -19205,23 +19213,27 @@
     },
     {
       "type": 0,
-      "value": " — play an instant or pass"
+      "value": " — juega un instantáneo o pasa"
     }
   ],
   "engine.decision.priority.trigger.cardgeneric": [
+    {
+      "type": 0,
+      "value": "La habilidad disparada de "
+    },
     {
       "type": 1,
       "value": "card"
     },
     {
       "type": 0,
-      "value": "'s triggered ability is on the stack — play an instant or pass"
+      "value": " está en la pila — juega un instantáneo o pasa"
     }
   ],
   "engine.decision.priority.trigger.generic": [
     {
       "type": 0,
-      "value": "Triggered ability: "
+      "value": "Habilidad disparada: "
     },
     {
       "type": 1,
@@ -19229,13 +19241,13 @@
     },
     {
       "type": 0,
-      "value": " — play an instant or pass"
+      "value": " — juega un instantáneo o pasa"
     }
   ],
   "engine.decision.priority.trigger.hidden": [
     {
       "type": 0,
-      "value": "A face-down card triggers: "
+      "value": "Disparador de una carta boca abajo: "
     },
     {
       "type": 1,
@@ -19243,19 +19255,19 @@
     },
     {
       "type": 0,
-      "value": " — play an instant or pass"
+      "value": " — juega un instantáneo o pasa"
     }
   ],
   "engine.decision.reaction.attack": [
     {
       "type": 0,
-      "value": "Attack reaction window — play a reaction or pass"
+      "value": "Ventana de reacciones de ataque — juega una reacción o pasa"
     }
   ],
   "engine.decision.reaction.attack.card": [
     {
       "type": 0,
-      "value": "Attack reaction window — play a reaction or pass ("
+      "value": "Ventana de reacciones de ataque — juega una reacción o pasa ("
     },
     {
       "type": 1,
@@ -19263,19 +19275,19 @@
     },
     {
       "type": 0,
-      "value": " on the stack)"
+      "value": " en la pila)"
     }
   ],
   "engine.decision.reaction.defense": [
     {
       "type": 0,
-      "value": "Defense reaction window — play a reaction or pass"
+      "value": "Ventana de reacciones de defensa — juega una reacción o pasa"
     }
   ],
   "engine.decision.reaction.defense.card": [
     {
       "type": 0,
-      "value": "Defense reaction window — play a reaction or pass ("
+      "value": "Ventana de reacciones de defensa — juega una reacción o pasa ("
     },
     {
       "type": 1,
@@ -19283,7 +19295,7 @@
     },
     {
       "type": 0,
-      "value": " on the stack)"
+      "value": " en la pila)"
     }
   ],
   "engine.decision.soul.banishcost": [
@@ -19293,7 +19305,7 @@
     },
     {
       "type": 0,
-      "value": ": choose soul card "
+      "value": ": elige la carta del alma "
     },
     {
       "type": 1,
@@ -19301,7 +19313,7 @@
     },
     {
       "type": 0,
-      "value": " of "
+      "value": " de "
     },
     {
       "type": 1,
@@ -19309,13 +19321,13 @@
     },
     {
       "type": 0,
-      "value": " to banish as a cost"
+      "value": " para desterrar como coste"
     }
   ],
   "engine.decision.token.choose": [
     {
       "type": 0,
-      "value": "Choose a replacement effect, or create "
+      "value": "Elige un efecto de sustitución o crea "
     },
     {
       "type": 1,
@@ -19323,13 +19335,13 @@
     },
     {
       "type": 0,
-      "value": " normally"
+      "value": " normalmente"
     }
   ],
   "engine.decision.token.next": [
     {
       "type": 0,
-      "value": "Choose which replacement effect applies first to creating "
+      "value": "Elige qué efecto de sustitución se aplica primero al crear "
     },
     {
       "type": 1,
@@ -19339,7 +19351,7 @@
   "engine.decision.token.option.count": [
     {
       "type": 0,
-      "value": "Create "
+      "value": "Crear "
     },
     {
       "type": 1,
@@ -19347,13 +19359,13 @@
     },
     {
       "type": 0,
-      "value": " instead"
+      "value": " en su lugar"
     }
   ],
   "engine.decision.token.option.none": [
     {
       "type": 0,
-      "value": "Create "
+      "value": "Crear "
     },
     {
       "type": 1,
@@ -19361,19 +19373,19 @@
     },
     {
       "type": 0,
-      "value": " normally"
+      "value": " normalmente"
     }
   ],
   "engine.decision.token.option.skipoptional": [
     {
       "type": 0,
-      "value": "Skip optional replacement effects"
+      "value": "Omitir los efectos de sustitución opcionales"
     }
   ],
   "engine.decision.token.optional": [
     {
       "type": 0,
-      "value": "Use this token replacement effect?"
+      "value": "¿Usar este efecto de sustitución de fichas?"
     }
   ],
   "engine.decision.token.optional.card": [
@@ -19383,19 +19395,19 @@
     },
     {
       "type": 0,
-      "value": ": use this token replacement effect?"
+      "value": ": ¿usar este efecto de sustitución de fichas?"
     }
   ],
   "engine.decision.token.playerorder": [
     {
       "type": 0,
-      "value": "Choose which player's token replacements apply first"
+      "value": "Elige de qué jugador se aplican primero las sustituciones de fichas"
     }
   ],
   "engine.decision.trigger.optional": [
     {
       "type": 0,
-      "value": "Use this triggered ability?"
+      "value": "¿Usar esta habilidad disparada?"
     }
   ],
   "engine.decision.trigger.optional.card": [
@@ -19405,56 +19417,53 @@
     },
     {
       "type": 0,
-      "value": ": use this triggered ability?"
+      "value": ": ¿usar esta habilidad disparada?"
     }
   ],
   "engine.decision.triggers.order": [
     {
       "type": 0,
-      "value": "Order your triggered abilities"
+      "value": "Ordena tus habilidades disparadas"
     }
   ],
   "engine.decision.unique.keep": [
     {
       "type": 0,
-      "value": "Unique: choose which card to keep"
+      "value": "Unique: elige qué carta conservar"
     }
   ],
   "engine.decision.wager.next": [
     {
       "type": 0,
-      "value": "Choose the next wager-loss replacement to apply"
+      "value": "Elige la siguiente sustitución por perder una apuesta que se aplicará"
     }
   ],
   "engine.decision.x.choose": [
     {
       "type": 0,
-      "value": "Choose X"
+      "value": "Elige X"
     }
   ],
   "engine.effect.duration.cards.this.chain": [
     {
       "type": 5,
-      "value": "subtype",
+      "value": "noun",
       "options": {
-        "draconic": {
+        "weapon": {
           "value": [
             {
               "type": 0,
-              "value": "Draconic "
-            }
-          ]
-        },
-        "dagger": {
-          "value": [
-            {
-              "type": 0,
-              "value": "dagger "
+              "value": "armas"
             }
           ]
         },
         "other": {
-          "value": []
+          "value": [
+            {
+              "type": 0,
+              "value": "cartas"
+            }
+          ]
         }
       }
     },
@@ -19466,7 +19475,7 @@
           "value": [
             {
               "type": 0,
-              "value": "action "
+              "value": " de acción"
             }
           ]
         },
@@ -19474,7 +19483,7 @@
           "value": [
             {
               "type": 0,
-              "value": "instant "
+              "value": " de instantáneo"
             }
           ]
         },
@@ -19485,54 +19494,54 @@
     },
     {
       "type": 5,
-      "value": "noun",
+      "value": "subtype",
       "options": {
-        "weapon": {
+        "draconic": {
           "value": [
             {
               "type": 0,
-              "value": "weapons"
+              "value": " dracónicas"
+            }
+          ]
+        },
+        "dagger": {
+          "value": [
+            {
+              "type": 0,
+              "value": " daga"
             }
           ]
         },
         "other": {
-          "value": [
-            {
-              "type": 0,
-              "value": "cards"
-            }
-          ]
+          "value": []
         }
       }
     },
     {
       "type": 0,
-      "value": " this combat chain"
+      "value": " en esta cadena de combate"
     }
   ],
   "engine.effect.duration.cards.this.link": [
     {
       "type": 5,
-      "value": "subtype",
+      "value": "noun",
       "options": {
-        "draconic": {
+        "weapon": {
           "value": [
             {
               "type": 0,
-              "value": "Draconic "
-            }
-          ]
-        },
-        "dagger": {
-          "value": [
-            {
-              "type": 0,
-              "value": "dagger "
+              "value": "armas"
             }
           ]
         },
         "other": {
-          "value": []
+          "value": [
+            {
+              "type": 0,
+              "value": "cartas"
+            }
+          ]
         }
       }
     },
@@ -19544,7 +19553,7 @@
           "value": [
             {
               "type": 0,
-              "value": "action "
+              "value": " de acción"
             }
           ]
         },
@@ -19552,7 +19561,7 @@
           "value": [
             {
               "type": 0,
-              "value": "instant "
+              "value": " de instantáneo"
             }
           ]
         },
@@ -19563,124 +19572,124 @@
     },
     {
       "type": 5,
-      "value": "noun",
+      "value": "subtype",
       "options": {
-        "weapon": {
+        "draconic": {
           "value": [
             {
               "type": 0,
-              "value": "weapons"
+              "value": " dracónicas"
+            }
+          ]
+        },
+        "dagger": {
+          "value": [
+            {
+              "type": 0,
+              "value": " daga"
             }
           ]
         },
         "other": {
-          "value": [
-            {
-              "type": 0,
-              "value": "cards"
-            }
-          ]
+          "value": []
         }
       }
     },
     {
       "type": 0,
-      "value": " this chain link"
+      "value": " en este eslabón"
     }
   ],
   "engine.effect.duration.each.end.phase": [
     {
       "type": 0,
-      "value": "each of their end phases"
+      "value": "cada una de sus fases finales"
     }
   ],
   "engine.effect.duration.each.turn.start": [
     {
       "type": 0,
-      "value": "the start of each of their turns"
+      "value": "el principio de cada uno de sus turnos"
     }
   ],
   "engine.effect.duration.end.of.turn": [
     {
       "type": 0,
-      "value": "end of this turn"
+      "value": "final de este turno"
     }
   ],
   "engine.effect.duration.first.action.this.turn": [
     {
       "type": 0,
-      "value": "first action this turn"
+      "value": "primera acción de este turno"
     }
   ],
   "engine.effect.duration.first.damage.passed": [
     {
       "type": 0,
-      "value": "already dealt damage this turn"
+      "value": "ya aplicó daño este turno"
     }
   ],
   "engine.effect.duration.next.action": [
     {
       "type": 0,
-      "value": "next action"
+      "value": "próxima acción"
     }
   ],
   "engine.effect.duration.next.action.phase": [
     {
       "type": 0,
-      "value": "next action phase"
+      "value": "próxima fase de acción"
     }
   ],
   "engine.effect.duration.next.arcane.card": [
     {
       "type": 0,
-      "value": "next arcane damage card"
+      "value": "próxima carta de daño arcano"
     }
   ],
   "engine.effect.duration.next.arcane.damage": [
     {
       "type": 0,
-      "value": "next arcane damage event"
+      "value": "próximo evento de daño arcano"
     }
   ],
   "engine.effect.duration.next.attack": [
     {
       "type": 0,
-      "value": "next attack"
+      "value": "próximo ataque"
     }
   ],
   "engine.effect.duration.next.card": [
     {
       "type": 0,
-      "value": "next card"
+      "value": "próxima carta"
     }
   ],
   "engine.effect.duration.next.card.this.chain": [
     {
       "type": 0,
-      "value": "next "
+      "value": "próxima "
     },
     {
       "type": 5,
-      "value": "subtype",
+      "value": "noun",
       "options": {
-        "draconic": {
+        "weapon": {
           "value": [
             {
               "type": 0,
-              "value": "Draconic "
-            }
-          ]
-        },
-        "dagger": {
-          "value": [
-            {
-              "type": 0,
-              "value": "dagger "
+              "value": "arma"
             }
           ]
         },
         "other": {
-          "value": []
+          "value": [
+            {
+              "type": 0,
+              "value": "carta"
+            }
+          ]
         }
       }
     },
@@ -19692,7 +19701,7 @@
           "value": [
             {
               "type": 0,
-              "value": "action "
+              "value": " de acción"
             }
           ]
         },
@@ -19700,7 +19709,7 @@
           "value": [
             {
               "type": 0,
-              "value": "instant "
+              "value": " de instantáneo"
             }
           ]
         },
@@ -19711,85 +19720,38 @@
     },
     {
       "type": 5,
-      "value": "noun",
+      "value": "subtype",
       "options": {
-        "weapon": {
+        "draconic": {
           "value": [
             {
               "type": 0,
-              "value": "weapon"
+              "value": " dracónica"
+            }
+          ]
+        },
+        "dagger": {
+          "value": [
+            {
+              "type": 0,
+              "value": " daga"
             }
           ]
         },
         "other": {
-          "value": [
-            {
-              "type": 0,
-              "value": "card"
-            }
-          ]
+          "value": []
         }
       }
     },
     {
       "type": 0,
-      "value": " this combat chain"
+      "value": " en esta cadena de combate"
     }
   ],
   "engine.effect.duration.next.card.this.link": [
     {
       "type": 0,
-      "value": "next "
-    },
-    {
-      "type": 5,
-      "value": "subtype",
-      "options": {
-        "draconic": {
-          "value": [
-            {
-              "type": 0,
-              "value": "Draconic "
-            }
-          ]
-        },
-        "dagger": {
-          "value": [
-            {
-              "type": 0,
-              "value": "dagger "
-            }
-          ]
-        },
-        "other": {
-          "value": []
-        }
-      }
-    },
-    {
-      "type": 5,
-      "value": "cardType",
-      "options": {
-        "action": {
-          "value": [
-            {
-              "type": 0,
-              "value": "action "
-            }
-          ]
-        },
-        "instant": {
-          "value": [
-            {
-              "type": 0,
-              "value": "instant "
-            }
-          ]
-        },
-        "other": {
-          "value": []
-        }
-      }
+      "value": "próxima "
     },
     {
       "type": 5,
@@ -19799,7 +19761,7 @@
           "value": [
             {
               "type": 0,
-              "value": "weapon"
+              "value": "arma"
             }
           ]
         },
@@ -19807,52 +19769,9 @@
           "value": [
             {
               "type": 0,
-              "value": "card"
+              "value": "carta"
             }
           ]
-        }
-      }
-    },
-    {
-      "type": 0,
-      "value": " this chain link"
-    }
-  ],
-  "engine.effect.duration.next.play": [
-    {
-      "type": 0,
-      "value": "next "
-    },
-    {
-      "type": 5,
-      "value": "color",
-      "options": {
-        "red": {
-          "value": [
-            {
-              "type": 0,
-              "value": "red "
-            }
-          ]
-        },
-        "yellow": {
-          "value": [
-            {
-              "type": 0,
-              "value": "yellow "
-            }
-          ]
-        },
-        "blue": {
-          "value": [
-            {
-              "type": 0,
-              "value": "blue "
-            }
-          ]
-        },
-        "other": {
-          "value": []
         }
       }
     },
@@ -19864,7 +19783,7 @@
           "value": [
             {
               "type": 0,
-              "value": "action card"
+              "value": " de acción"
             }
           ]
         },
@@ -19872,7 +19791,67 @@
           "value": [
             {
               "type": 0,
-              "value": "instant card"
+              "value": " de instantáneo"
+            }
+          ]
+        },
+        "other": {
+          "value": []
+        }
+      }
+    },
+    {
+      "type": 5,
+      "value": "subtype",
+      "options": {
+        "draconic": {
+          "value": [
+            {
+              "type": 0,
+              "value": " dracónica"
+            }
+          ]
+        },
+        "dagger": {
+          "value": [
+            {
+              "type": 0,
+              "value": " daga"
+            }
+          ]
+        },
+        "other": {
+          "value": []
+        }
+      }
+    },
+    {
+      "type": 0,
+      "value": " en este eslabón"
+    }
+  ],
+  "engine.effect.duration.next.play": [
+    {
+      "type": 0,
+      "value": "próxima "
+    },
+    {
+      "type": 5,
+      "value": "cardType",
+      "options": {
+        "action": {
+          "value": [
+            {
+              "type": 0,
+              "value": "carta de acción"
+            }
+          ]
+        },
+        "instant": {
+          "value": [
+            {
+              "type": 0,
+              "value": "carta de instantáneo"
             }
           ]
         },
@@ -19880,7 +19859,7 @@
           "value": [
             {
               "type": 0,
-              "value": "reaction card"
+              "value": "carta de reacción"
             }
           ]
         },
@@ -19894,7 +19873,7 @@
                   "value": [
                     {
                       "type": 0,
-                      "value": "matching play"
+                      "value": "jugada coincidente"
                     }
                   ]
                 },
@@ -19902,7 +19881,7 @@
                   "value": [
                     {
                       "type": 0,
-                      "value": "card"
+                      "value": "carta"
                     }
                   ]
                 }
@@ -19911,18 +19890,97 @@
           ]
         }
       }
+    },
+    {
+      "type": 5,
+      "value": "color",
+      "options": {
+        "red": {
+          "value": [
+            {
+              "type": 0,
+              "value": " roja"
+            }
+          ]
+        },
+        "yellow": {
+          "value": [
+            {
+              "type": 0,
+              "value": " amarilla"
+            }
+          ]
+        },
+        "blue": {
+          "value": [
+            {
+              "type": 0,
+              "value": " azul"
+            }
+          ]
+        },
+        "other": {
+          "value": []
+        }
+      }
     }
   ],
   "engine.effect.duration.next.rune.gated.attack": [
     {
       "type": 0,
-      "value": "next rune-gated attack"
+      "value": "próximo ataque mediante rune gate"
     }
   ],
   "engine.effect.duration.next.subject": [
     {
+      "type": 5,
+      "value": "noun",
+      "options": {
+        "attack": {
+          "value": [
+            {
+              "type": 0,
+              "value": "próximo"
+            }
+          ]
+        },
+        "weaponAttack": {
+          "value": [
+            {
+              "type": 0,
+              "value": "próximo"
+            }
+          ]
+        },
+        "attackWith": {
+          "value": [
+            {
+              "type": 0,
+              "value": "próximo"
+            }
+          ]
+        },
+        "equipment": {
+          "value": [
+            {
+              "type": 0,
+              "value": "próximo"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 0,
+              "value": "próxima"
+            }
+          ]
+        }
+      }
+    },
+    {
       "type": 0,
-      "value": "next "
+      "value": " "
     },
     {
       "type": 1,
@@ -19931,8 +19989,54 @@
   ],
   "engine.effect.duration.next.subject.this.chain": [
     {
+      "type": 5,
+      "value": "noun",
+      "options": {
+        "attack": {
+          "value": [
+            {
+              "type": 0,
+              "value": "próximo"
+            }
+          ]
+        },
+        "weaponAttack": {
+          "value": [
+            {
+              "type": 0,
+              "value": "próximo"
+            }
+          ]
+        },
+        "attackWith": {
+          "value": [
+            {
+              "type": 0,
+              "value": "próximo"
+            }
+          ]
+        },
+        "equipment": {
+          "value": [
+            {
+              "type": 0,
+              "value": "próximo"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 0,
+              "value": "próxima"
+            }
+          ]
+        }
+      }
+    },
+    {
       "type": 0,
-      "value": "next "
+      "value": " "
     },
     {
       "type": 1,
@@ -19940,13 +20044,59 @@
     },
     {
       "type": 0,
-      "value": " this combat chain"
+      "value": " en esta cadena de combate"
     }
   ],
   "engine.effect.duration.next.subject.this.link": [
     {
+      "type": 5,
+      "value": "noun",
+      "options": {
+        "attack": {
+          "value": [
+            {
+              "type": 0,
+              "value": "próximo"
+            }
+          ]
+        },
+        "weaponAttack": {
+          "value": [
+            {
+              "type": 0,
+              "value": "próximo"
+            }
+          ]
+        },
+        "attackWith": {
+          "value": [
+            {
+              "type": 0,
+              "value": "próximo"
+            }
+          ]
+        },
+        "equipment": {
+          "value": [
+            {
+              "type": 0,
+              "value": "próximo"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 0,
+              "value": "próxima"
+            }
+          ]
+        }
+      }
+    },
+    {
       "type": 0,
-      "value": "next "
+      "value": " "
     },
     {
       "type": 1,
@@ -19954,13 +20104,59 @@
     },
     {
       "type": 0,
-      "value": " this chain link"
+      "value": " en este eslabón"
     }
   ],
   "engine.effect.duration.next.subject.this.turn": [
     {
+      "type": 5,
+      "value": "noun",
+      "options": {
+        "attack": {
+          "value": [
+            {
+              "type": 0,
+              "value": "próximo"
+            }
+          ]
+        },
+        "weaponAttack": {
+          "value": [
+            {
+              "type": 0,
+              "value": "próximo"
+            }
+          ]
+        },
+        "attackWith": {
+          "value": [
+            {
+              "type": 0,
+              "value": "próximo"
+            }
+          ]
+        },
+        "equipment": {
+          "value": [
+            {
+              "type": 0,
+              "value": "próximo"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 0,
+              "value": "próxima"
+            }
+          ]
+        }
+      }
+    },
+    {
       "type": 0,
-      "value": "next "
+      "value": " "
     },
     {
       "type": 1,
@@ -19968,19 +20164,65 @@
     },
     {
       "type": 0,
-      "value": " this turn"
+      "value": " este turno"
     }
   ],
   "engine.effect.duration.next.turn": [
     {
       "type": 0,
-      "value": "next turn"
+      "value": "próximo turno"
     }
   ],
   "engine.effect.duration.next.uses.subject.this.turn": [
     {
+      "type": 5,
+      "value": "noun",
+      "options": {
+        "attack": {
+          "value": [
+            {
+              "type": 0,
+              "value": "próximos"
+            }
+          ]
+        },
+        "weaponAttack": {
+          "value": [
+            {
+              "type": 0,
+              "value": "próximos"
+            }
+          ]
+        },
+        "attackWith": {
+          "value": [
+            {
+              "type": 0,
+              "value": "próximos"
+            }
+          ]
+        },
+        "equipment": {
+          "value": [
+            {
+              "type": 0,
+              "value": "próximos"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 0,
+              "value": "próximas"
+            }
+          ]
+        }
+      }
+    },
+    {
       "type": 0,
-      "value": "next "
+      "value": " "
     },
     {
       "type": 1,
@@ -19996,19 +20238,19 @@
     },
     {
       "type": 0,
-      "value": " this turn"
+      "value": " este turno"
     }
   ],
   "engine.effect.duration.rest.of.game": [
     {
       "type": 0,
-      "value": "rest of the game"
+      "value": "resto de la partida"
     }
   ],
   "engine.effect.duration.start.of.next.turn": [
     {
       "type": 0,
-      "value": "start of their next turn"
+      "value": "principio de su próximo turno"
     }
   ],
   "engine.effect.duration.subject.this.chain": [
@@ -20018,7 +20260,7 @@
     },
     {
       "type": 0,
-      "value": " this combat chain"
+      "value": " en esta cadena de combate"
     }
   ],
   "engine.effect.duration.subject.this.link": [
@@ -20028,7 +20270,7 @@
     },
     {
       "type": 0,
-      "value": " this chain link"
+      "value": " en este eslabón"
     }
   ],
   "engine.effect.duration.subject.this.turn": [
@@ -20038,49 +20280,49 @@
     },
     {
       "type": 0,
-      "value": " this turn"
+      "value": " este turno"
     }
   ],
   "engine.effect.duration.this.action.phase": [
     {
       "type": 0,
-      "value": "this action phase"
+      "value": "esta fase de acción"
     }
   ],
   "engine.effect.duration.this.chain.link": [
     {
       "type": 0,
-      "value": "this chain link"
+      "value": "este eslabón"
     }
   ],
   "engine.effect.duration.this.combat.chain": [
     {
       "type": 0,
-      "value": "this combat chain"
+      "value": "esta cadena de combate"
     }
   ],
   "engine.effect.duration.this.turn": [
     {
       "type": 0,
-      "value": "this turn"
+      "value": "este turno"
     }
   ],
   "engine.effect.duration.through.next.turn": [
     {
       "type": 0,
-      "value": "through next turn"
+      "value": "hasta el final del próximo turno"
     }
   ],
   "engine.effect.duration.until.your.next.turn": [
     {
       "type": 0,
-      "value": "until the start of your next turn"
+      "value": "hasta el principio de tu próximo turno"
     }
   ],
   "engine.effect.part.action.played.gain.action.points": [
     {
       "type": 0,
-      "value": "gain "
+      "value": "obtén "
     },
     {
       "type": 6,
@@ -20090,7 +20332,7 @@
           "value": [
             {
               "type": 0,
-              "value": "an action point"
+              "value": "un punto de acción"
             }
           ]
         },
@@ -20101,7 +20343,7 @@
             },
             {
               "type": 0,
-              "value": " action points"
+              "value": " puntos de acción"
             }
           ]
         }
@@ -20111,7 +20353,7 @@
     },
     {
       "type": 0,
-      "value": " the next time you play an action card with cost "
+      "value": " la próxima vez que juegues una carta de acción con coste "
     },
     {
       "type": 1,
@@ -20119,21 +20361,13 @@
     },
     {
       "type": 0,
-      "value": " or more"
+      "value": " o más"
     }
   ],
   "engine.effect.part.activate.create.token": [
     {
       "type": 0,
-      "value": "create "
-    },
-    {
-      "type": 1,
-      "value": "activateTokenArticle"
-    },
-    {
-      "type": 0,
-      "value": " "
+      "value": "crea una ficha de "
     },
     {
       "type": 1,
@@ -20141,17 +20375,21 @@
     },
     {
       "type": 0,
-      "value": " token whenever they activate an ability"
+      "value": " cada vez que ese jugador active una habilidad"
     }
   ],
   "engine.effect.part.activated.abilities.locked": [
+    {
+      "type": 0,
+      "value": "las habilidades activadas de "
+    },
     {
       "type": 1,
       "value": "lockedCard"
     },
     {
       "type": 0,
-      "value": "'s activated abilities can't be activated"
+      "value": " no se pueden activar"
     }
   ],
   "engine.effect.part.attack": [
@@ -20161,13 +20399,13 @@
     },
     {
       "type": 0,
-      "value": " power"
+      "value": " de poder"
     }
   ],
   "engine.effect.part.attack.gain.bonus": [
     {
       "type": 0,
-      "value": "the next time an attack would gain power, it gains "
+      "value": "la próxima vez que un ataque fuera a ganar poder, gana "
     },
     {
       "type": 1,
@@ -20175,7 +20413,7 @@
     },
     {
       "type": 0,
-      "value": " more"
+      "value": " más"
     }
   ],
   "engine.effect.part.attack.lightly.defended": [
@@ -20185,7 +20423,7 @@
     },
     {
       "type": 0,
-      "value": " power while defended by fewer than "
+      "value": " de poder mientras lo defiendan menos de "
     },
     {
       "type": 1,
@@ -20193,13 +20431,13 @@
     },
     {
       "type": 0,
-      "value": " non-equipment cards"
+      "value": " cartas que no sean equipo"
     }
   ],
   "engine.effect.part.banish.play.create.token": [
     {
       "type": 0,
-      "value": "create "
+      "value": "crea "
     },
     {
       "type": 6,
@@ -20208,20 +20446,12 @@
         "one": {
           "value": [
             {
-              "type": 1,
-              "value": "banishTokenArticle"
-            },
-            {
               "type": 0,
-              "value": " "
+              "value": "una ficha de "
             },
             {
               "type": 1,
               "value": "banishToken"
-            },
-            {
-              "type": 0,
-              "value": " token"
             }
           ]
         },
@@ -20232,15 +20462,11 @@
             },
             {
               "type": 0,
-              "value": " "
+              "value": " fichas de "
             },
             {
               "type": 1,
               "value": "banishToken"
-            },
-            {
-              "type": 0,
-              "value": " tokens"
             }
           ]
         }
@@ -20250,7 +20476,7 @@
     },
     {
       "type": 0,
-      "value": " when you play an attack action card from banish"
+      "value": " cuando juegues una carta de acción de ataque desde la zona de destierro"
     }
   ],
   "engine.effect.part.base.attack": [
@@ -20260,7 +20486,7 @@
     },
     {
       "type": 0,
-      "value": " base power"
+      "value": " de poder base"
     }
   ],
   "engine.effect.part.cannot.defend": [
@@ -20270,13 +20496,13 @@
     },
     {
       "type": 0,
-      "value": " can't defend"
+      "value": " no puede defender"
     }
   ],
   "engine.effect.part.cost": [
     {
       "type": 0,
-      "value": "costs "
+      "value": "cuesta "
     },
     {
       "type": 1,
@@ -20294,7 +20520,7 @@
           "value": [
             {
               "type": 0,
-              "value": "more"
+              "value": "más"
             }
           ]
         },
@@ -20302,7 +20528,7 @@
           "value": [
             {
               "type": 0,
-              "value": "less"
+              "value": "menos"
             }
           ]
         }
@@ -20310,7 +20536,7 @@
     },
     {
       "type": 0,
-      "value": " to "
+      "value": " "
     },
     {
       "type": 5,
@@ -20320,7 +20546,7 @@
           "value": [
             {
               "type": 0,
-              "value": "activate"
+              "value": "activar"
             }
           ]
         },
@@ -20328,7 +20554,7 @@
           "value": [
             {
               "type": 0,
-              "value": "play or activate"
+              "value": "jugar o activar"
             }
           ]
         },
@@ -20336,7 +20562,7 @@
           "value": [
             {
               "type": 0,
-              "value": "play"
+              "value": "jugar"
             }
           ]
         }
@@ -20346,7 +20572,7 @@
   "engine.effect.part.crush.destroy.deck": [
     {
       "type": 0,
-      "value": "destroy the top "
+      "value": "destruye las "
     },
     {
       "type": 1,
@@ -20354,7 +20580,7 @@
     },
     {
       "type": 0,
-      "value": " cards of their deck when it deals "
+      "value": " cartas superiores del mazo de ese héroe cuando aplique "
     },
     {
       "type": 1,
@@ -20362,7 +20588,7 @@
     },
     {
       "type": 0,
-      "value": " or more damage to a hero"
+      "value": " o más de daño a un héroe"
     }
   ],
   "engine.effect.part.damage": [
@@ -20382,7 +20608,7 @@
           "value": [
             {
               "type": 0,
-              "value": "arcane damage"
+              "value": "de daño arcano"
             }
           ]
         },
@@ -20390,7 +20616,7 @@
           "value": [
             {
               "type": 0,
-              "value": "damage"
+              "value": "de daño"
             }
           ]
         }
@@ -20400,7 +20626,7 @@
   "engine.effect.part.damage.create.tokens": [
     {
       "type": 0,
-      "value": "whenever it deals damage to a hero, create that many "
+      "value": "cada vez que aplique daño a un héroe, crea esa cantidad de fichas de "
     },
     {
       "type": 1,
@@ -20408,13 +20634,13 @@
     },
     {
       "type": 0,
-      "value": " tokens under their control"
+      "value": " bajo el control de ese héroe"
     }
   ],
   "engine.effect.part.damage.unpreventable": [
     {
       "type": 0,
-      "value": "its damage can't be prevented"
+      "value": "su daño no se puede evitar"
     }
   ],
   "engine.effect.part.defense": [
@@ -20424,35 +20650,45 @@
     },
     {
       "type": 0,
-      "value": " defense"
+      "value": " de defensa"
     }
   ],
   "engine.effect.part.destroy.defending.equipment": [
     {
       "type": 0,
-      "value": "may destroy a defending equipment instead of dealing damage"
+      "value": "puede destruir un equipo defensor en lugar de aplicar daño"
     }
   ],
   "engine.effect.part.discard.prevent": [
     {
       "type": 0,
-      "value": "discard "
+      "value": "descarta una carta "
     },
     {
-      "type": 1,
-      "value": "discardArticle"
+      "type": 5,
+      "value": "discardType",
+      "options": {
+        "instant": {
+          "value": [
+            {
+              "type": 0,
+              "value": "de instantáneo"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 1,
+              "value": "discardType"
+            }
+          ]
+        }
+      }
     },
     {
       "type": 0,
-      "value": " "
-    },
-    {
-      "type": 1,
-      "value": "discardType"
-    },
-    {
-      "type": 0,
-      "value": " card to prevent "
+      "value": " para evitar "
     },
     {
       "type": 1,
@@ -20460,7 +20696,7 @@
     },
     {
       "type": 0,
-      "value": " damage"
+      "value": " de daño"
     },
     {
       "type": 6,
@@ -20473,7 +20709,7 @@
           "value": [
             {
               "type": 0,
-              "value": " and draw a card"
+              "value": " y roba una carta"
             }
           ]
         },
@@ -20481,14 +20717,14 @@
           "value": [
             {
               "type": 0,
-              "value": " and draw "
+              "value": " y roba "
             },
             {
               "type": 7
             },
             {
               "type": 0,
-              "value": " cards"
+              "value": " cartas"
             }
           ]
         }
@@ -20500,13 +20736,13 @@
   "engine.effect.part.dominate": [
     {
       "type": 0,
-      "value": "dominate"
+      "value": "dominar"
     }
   ],
   "engine.effect.part.extra.dice": [
     {
       "type": 0,
-      "value": "roll "
+      "value": "tira "
     },
     {
       "type": 1,
@@ -20514,7 +20750,7 @@
     },
     {
       "type": 0,
-      "value": " more "
+      "value": " "
     },
     {
       "type": 6,
@@ -20524,7 +20760,7 @@
           "value": [
             {
               "type": 0,
-              "value": "die"
+              "value": "dado"
             }
           ]
         },
@@ -20532,7 +20768,7 @@
           "value": [
             {
               "type": 0,
-              "value": "dice"
+              "value": "dados"
             }
           ]
         }
@@ -20542,19 +20778,19 @@
     },
     {
       "type": 0,
-      "value": " and ignore the lowest"
+      "value": " más e ignora el resultado más bajo"
     }
   ],
   "engine.effect.part.go.again": [
     {
       "type": 0,
-      "value": "go again"
+      "value": "continuar"
     }
   ],
   "engine.effect.part.go.again.if.attack": [
     {
       "type": 0,
-      "value": "go again while it has "
+      "value": "continuar mientras tenga "
     },
     {
       "type": 1,
@@ -20562,27 +20798,19 @@
     },
     {
       "type": 0,
-      "value": " or more power"
+      "value": " o más de poder"
     }
   ],
   "engine.effect.part.go.again.if.defended.by.attack.action": [
     {
       "type": 0,
-      "value": "go again if defended by an attack action card"
+      "value": "continuar si lo defiende una carta de acción de ataque"
     }
   ],
   "engine.effect.part.go.again.if.played.or.created": [
     {
       "type": 0,
-      "value": "go again if you've played or created "
-    },
-    {
-      "type": 1,
-      "value": "createdArticle"
-    },
-    {
-      "type": 0,
-      "value": " "
+      "value": "continuar si has jugado o creado "
     },
     {
       "type": 1,
@@ -20590,19 +20818,19 @@
     },
     {
       "type": 0,
-      "value": " this turn"
+      "value": " este turno"
     }
   ],
   "engine.effect.part.go.again.on.hit": [
     {
       "type": 0,
-      "value": "go again when it hits"
+      "value": "continuar cuando impacte"
     }
   ],
   "engine.effect.part.grant.name": [
     {
       "type": 0,
-      "value": "is named "
+      "value": "se llama "
     },
     {
       "type": 1,
@@ -20612,7 +20840,7 @@
   "engine.effect.part.grant.type": [
     {
       "type": 0,
-      "value": "is also "
+      "value": "también es "
     },
     {
       "type": 1,
@@ -20622,7 +20850,7 @@
   "engine.effect.part.hit.effects.suppressed": [
     {
       "type": 0,
-      "value": "its hit effects don't trigger"
+      "value": "sus efectos de impacto no se disparan"
     }
   ],
   "engine.effect.part.intimidate": [
@@ -20634,7 +20862,7 @@
           "value": [
             {
               "type": 0,
-              "value": "intimidate"
+              "value": "intimidar"
             }
           ]
         },
@@ -20642,7 +20870,7 @@
           "value": [
             {
               "type": 0,
-              "value": "intimidate "
+              "value": "intimidar "
             },
             {
               "type": 7
@@ -20663,7 +20891,7 @@
   "engine.effect.part.keyword.lost": [
     {
       "type": 0,
-      "value": "loses "
+      "value": "pierde "
     },
     {
       "type": 1,
@@ -20673,13 +20901,13 @@
   "engine.effect.part.lose.class.talent.types": [
     {
       "type": 0,
-      "value": "cards they own lose all class and talent types"
+      "value": "las cartas que posee ese jugador pierden todos sus tipos de clase y talento"
     }
   ],
   "engine.effect.part.max.non.block.defenders": [
     {
       "type": 0,
-      "value": "can't be defended by more than "
+      "value": "no lo pueden defender más de "
     },
     {
       "type": 1,
@@ -20687,13 +20915,13 @@
     },
     {
       "type": 0,
-      "value": " non-block cards"
+      "value": " cartas sin block"
     }
   ],
   "engine.effect.part.minimum.base.attack": [
     {
       "type": 0,
-      "value": "can only play or activate attacks with "
+      "value": "solo puede jugar o activar ataques con "
     },
     {
       "type": 1,
@@ -20701,13 +20929,13 @@
     },
     {
       "type": 0,
-      "value": " or more base power"
+      "value": " o más de poder base"
     }
   ],
   "engine.effect.part.name.gains.type": [
     {
       "type": 0,
-      "value": "cards named "
+      "value": "las cartas llamadas "
     },
     {
       "type": 1,
@@ -20715,7 +20943,7 @@
     },
     {
       "type": 0,
-      "value": " are "
+      "value": " son "
     },
     {
       "type": 1,
@@ -20725,7 +20953,7 @@
   "engine.effect.part.on.boost.attack": [
     {
       "type": 0,
-      "value": "the next attack you boost gets "
+      "value": "el próximo ataque que potencies obtiene "
     },
     {
       "type": 1,
@@ -20733,19 +20961,19 @@
     },
     {
       "type": 0,
-      "value": " power"
+      "value": " de poder"
     }
   ],
   "engine.effect.part.on.boost.dominate": [
     {
       "type": 0,
-      "value": "the next attack you boost gets dominate"
+      "value": "el próximo ataque que potencies obtiene dominar"
     }
   ],
   "engine.effect.part.on.defended.deal.damage": [
     {
       "type": 0,
-      "value": "deal "
+      "value": "aplica "
     },
     {
       "type": 1,
@@ -20753,13 +20981,13 @@
     },
     {
       "type": 0,
-      "value": " damage to the defending hero when defended"
+      "value": " de daño al héroe defensor cuando sea defendido"
     }
   ],
   "engine.effect.part.on.hit.create.token": [
     {
       "type": 0,
-      "value": "create "
+      "value": "crea "
     },
     {
       "type": 6,
@@ -20768,20 +20996,12 @@
         "one": {
           "value": [
             {
-              "type": 1,
-              "value": "tokenArticle"
-            },
-            {
               "type": 0,
-              "value": " "
+              "value": "una ficha de "
             },
             {
               "type": 1,
               "value": "token"
-            },
-            {
-              "type": 0,
-              "value": " token"
             }
           ]
         },
@@ -20792,15 +21012,11 @@
             },
             {
               "type": 0,
-              "value": " "
+              "value": " fichas de "
             },
             {
               "type": 1,
               "value": "token"
-            },
-            {
-              "type": 0,
-              "value": " tokens"
             }
           ]
         }
@@ -20810,13 +21026,13 @@
     },
     {
       "type": 0,
-      "value": " when it hits"
+      "value": " cuando impacte"
     }
   ],
   "engine.effect.part.on.hit.deal.damage": [
     {
       "type": 0,
-      "value": "deal "
+      "value": "aplica "
     },
     {
       "type": 1,
@@ -20824,13 +21040,13 @@
     },
     {
       "type": 0,
-      "value": " damage when it hits"
+      "value": " de daño cuando impacte"
     }
   ],
   "engine.effect.part.on.hit.draw": [
     {
       "type": 0,
-      "value": "draw "
+      "value": "roba "
     },
     {
       "type": 6,
@@ -20840,7 +21056,7 @@
           "value": [
             {
               "type": 0,
-              "value": "a card"
+              "value": "una carta"
             }
           ]
         },
@@ -20851,7 +21067,7 @@
             },
             {
               "type": 0,
-              "value": " cards"
+              "value": " cartas"
             }
           ]
         }
@@ -20861,13 +21077,13 @@
     },
     {
       "type": 0,
-      "value": " when it hits"
+      "value": " cuando impacte"
     }
   ],
   "engine.effect.part.on.hit.gain.life": [
     {
       "type": 0,
-      "value": "gain "
+      "value": "gana "
     },
     {
       "type": 1,
@@ -20875,13 +21091,13 @@
     },
     {
       "type": 0,
-      "value": " life the next time you hit"
+      "value": " de vida la próxima vez que impactes"
     }
   ],
   "engine.effect.part.on.hit.gain.resources": [
     {
       "type": 0,
-      "value": "gain "
+      "value": "gana "
     },
     {
       "type": 1,
@@ -20899,7 +21115,7 @@
           "value": [
             {
               "type": 0,
-              "value": "resource"
+              "value": "recurso"
             }
           ]
         },
@@ -20907,7 +21123,7 @@
           "value": [
             {
               "type": 0,
-              "value": "resources"
+              "value": "recursos"
             }
           ]
         }
@@ -20917,13 +21133,13 @@
     },
     {
       "type": 0,
-      "value": " the next time you hit"
+      "value": " la próxima vez que impactes"
     }
   ],
   "engine.effect.part.on.hit.lose.life": [
     {
       "type": 0,
-      "value": "when it hits a hero, they lose "
+      "value": "cuando impacte a un héroe, ese héroe pierde "
     },
     {
       "type": 1,
@@ -20931,19 +21147,19 @@
     },
     {
       "type": 0,
-      "value": " life"
+      "value": " de vida"
     }
   ],
   "engine.effect.part.on.hit.mark": [
     {
       "type": 0,
-      "value": "mark the hero when it hits"
+      "value": "marca al héroe cuando impacte"
     }
   ],
   "engine.effect.part.on.hit.script": [
     {
       "type": 0,
-      "value": "when it hits"
+      "value": "cuando impacte"
     },
     {
       "type": 5,
@@ -20953,7 +21169,7 @@
           "value": [
             {
               "type": 0,
-              "value": " a hero"
+              "value": " a un héroe"
             }
           ]
         },
@@ -20974,15 +21190,7 @@
   "engine.effect.part.on.prevent.create.token": [
     {
       "type": 0,
-      "value": "create "
-    },
-    {
-      "type": 1,
-      "value": "preventTokenArticle"
-    },
-    {
-      "type": 0,
-      "value": " "
+      "value": "crea una ficha de "
     },
     {
       "type": 1,
@@ -20990,39 +21198,35 @@
     },
     {
       "type": 0,
-      "value": " token when it prevents damage"
+      "value": " cuando evite daño"
     }
   ],
   "engine.effect.part.only.non.weapon.attack.actions": [
     {
       "type": 0,
-      "value": "can only play or activate non-weapon, non-attack actions"
+      "value": "solo puede jugar o activar acciones que no sean de arma ni de ataque"
     }
   ],
   "engine.effect.part.only.play.type": [
     {
       "type": 0,
-      "value": "can only play "
+      "value": "solo puede jugar cartas "
     },
     {
       "type": 1,
       "value": "playType"
-    },
-    {
-      "type": 0,
-      "value": " cards"
     }
   ],
   "engine.effect.part.only.weapon.attack.actions": [
     {
       "type": 0,
-      "value": "can only play or activate weapon and attack actions"
+      "value": "solo puede jugar o activar acciones de arma y de ataque"
     }
   ],
   "engine.effect.part.overpower": [
     {
       "type": 0,
-      "value": "overpower"
+      "value": "someter"
     }
   ],
   "engine.effect.part.piercing": [
@@ -21038,13 +21242,13 @@
   "engine.effect.part.prevent.all.damage.chosen": [
     {
       "type": 0,
-      "value": "prevent all damage from the chosen source"
+      "value": "evita todo el daño de la fuente elegida"
     }
   ],
   "engine.effect.part.prevent.all.damage.from": [
     {
       "type": 0,
-      "value": "prevent all damage from "
+      "value": "evita todo el daño de "
     },
     {
       "type": 1,
@@ -21054,21 +21258,51 @@
   "engine.effect.part.prevent.damage.color": [
     {
       "type": 0,
-      "value": "prevent the next damage from a "
+      "value": "evita el próximo daño de una fuente "
     },
     {
-      "type": 1,
-      "value": "sourceColor"
-    },
-    {
-      "type": 0,
-      "value": " source"
+      "type": 5,
+      "value": "sourceColor",
+      "options": {
+        "red": {
+          "value": [
+            {
+              "type": 0,
+              "value": "roja"
+            }
+          ]
+        },
+        "yellow": {
+          "value": [
+            {
+              "type": 0,
+              "value": "amarilla"
+            }
+          ]
+        },
+        "blue": {
+          "value": [
+            {
+              "type": 0,
+              "value": "azul"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 1,
+              "value": "sourceColor"
+            }
+          ]
+        }
+      }
     }
   ],
   "engine.effect.part.prevent.damage.recipient.type": [
     {
       "type": 0,
-      "value": "prevent next "
+      "value": "evita los próximos "
     },
     {
       "type": 1,
@@ -21076,15 +21310,7 @@
     },
     {
       "type": 0,
-      "value": " damage to you or "
-    },
-    {
-      "type": 1,
-      "value": "recipientTypeArticle"
-    },
-    {
-      "type": 0,
-      "value": " "
+      "value": " de daño a ti o a cualquier "
     },
     {
       "type": 1,
@@ -21092,13 +21318,13 @@
     },
     {
       "type": 0,
-      "value": " you control"
+      "value": " que controles"
     }
   ],
   "engine.effect.part.prevent.damage.source.type": [
     {
       "type": 0,
-      "value": "prevent next "
+      "value": "evita los próximos "
     },
     {
       "type": 1,
@@ -21106,29 +21332,17 @@
     },
     {
       "type": 0,
-      "value": " damage from "
-    },
-    {
-      "type": 1,
-      "value": "sourceTypeArticle"
-    },
-    {
-      "type": 0,
-      "value": " "
+      "value": " de daño de una fuente "
     },
     {
       "type": 1,
       "value": "sourceType"
-    },
-    {
-      "type": 0,
-      "value": " source"
     }
   ],
   "engine.effect.part.prevent.each.event": [
     {
       "type": 0,
-      "value": "prevent "
+      "value": "evita "
     },
     {
       "type": 1,
@@ -21136,7 +21350,7 @@
     },
     {
       "type": 0,
-      "value": " damage the next "
+      "value": " de daño "
     },
     {
       "type": 6,
@@ -21146,18 +21360,22 @@
           "value": [
             {
               "type": 0,
-              "value": "time"
+              "value": "la próxima vez"
             }
           ]
         },
         "other": {
           "value": [
             {
+              "type": 0,
+              "value": "las próximas "
+            },
+            {
               "type": 7
             },
             {
               "type": 0,
-              "value": " times"
+              "value": " veces"
             }
           ]
         }
@@ -21167,13 +21385,13 @@
     },
     {
       "type": 0,
-      "value": " you would be dealt damage"
+      "value": " que fueras a recibir daño"
     }
   ],
   "engine.effect.part.prevent.lethal.banish": [
     {
       "type": 0,
-      "value": "may banish "
+      "value": "puede desterrar "
     },
     {
       "type": 1,
@@ -21181,13 +21399,13 @@
     },
     {
       "type": 0,
-      "value": " from hand or arsenal to prevent the next lethal damage"
+      "value": " de la mano o el arsenal para evitar el próximo daño letal"
     }
   ],
   "engine.effect.part.prevent.small.damage": [
     {
       "type": 0,
-      "value": "prevent the next damage of "
+      "value": "evita el próximo daño de "
     },
     {
       "type": 1,
@@ -21195,147 +21413,10 @@
     },
     {
       "type": 0,
-      "value": " or less"
+      "value": " o menos"
     }
   ],
   "engine.effect.subject.one": [
-    {
-      "type": 5,
-      "value": "via",
-      "options": {
-        "defending": {
-          "value": [
-            {
-              "type": 0,
-              "value": "defending "
-            }
-          ]
-        },
-        "runeGate": {
-          "value": [
-            {
-              "type": 0,
-              "value": "rune-gated "
-            }
-          ]
-        },
-        "charge": {
-          "value": [
-            {
-              "type": 0,
-              "value": "charged "
-            }
-          ]
-        },
-        "other": {
-          "value": []
-        }
-      }
-    },
-    {
-      "type": 5,
-      "value": "color",
-      "options": {
-        "red": {
-          "value": [
-            {
-              "type": 0,
-              "value": "red "
-            }
-          ]
-        },
-        "yellow": {
-          "value": [
-            {
-              "type": 0,
-              "value": "yellow "
-            }
-          ]
-        },
-        "blue": {
-          "value": [
-            {
-              "type": 0,
-              "value": "blue "
-            }
-          ]
-        },
-        "other": {
-          "value": []
-        }
-      }
-    },
-    {
-      "type": 6,
-      "value": "typeCount",
-      "options": {
-        "=0": {
-          "value": []
-        },
-        "=1": {
-          "value": [
-            {
-              "type": 1,
-              "value": "type1"
-            },
-            {
-              "type": 0,
-              "value": " "
-            }
-          ]
-        },
-        "=2": {
-          "value": [
-            {
-              "type": 1,
-              "value": "type1"
-            },
-            {
-              "type": 0,
-              "value": " or "
-            },
-            {
-              "type": 1,
-              "value": "type2"
-            },
-            {
-              "type": 0,
-              "value": " "
-            }
-          ]
-        },
-        "other": {
-          "value": [
-            {
-              "type": 1,
-              "value": "type1"
-            },
-            {
-              "type": 0,
-              "value": ", "
-            },
-            {
-              "type": 1,
-              "value": "type2"
-            },
-            {
-              "type": 0,
-              "value": ", or "
-            },
-            {
-              "type": 1,
-              "value": "type3"
-            },
-            {
-              "type": 0,
-              "value": " "
-            }
-          ]
-        }
-      },
-      "offset": 0,
-      "pluralType": "cardinal"
-    },
     {
       "type": 5,
       "value": "noun",
@@ -21344,7 +21425,7 @@
           "value": [
             {
               "type": 0,
-              "value": "attack"
+              "value": "ataque"
             }
           ]
         },
@@ -21352,7 +21433,7 @@
           "value": [
             {
               "type": 0,
-              "value": "attack action card"
+              "value": "carta de acción de ataque"
             }
           ]
         },
@@ -21360,7 +21441,7 @@
           "value": [
             {
               "type": 0,
-              "value": "weapon attack"
+              "value": "ataque con arma"
             }
           ]
         },
@@ -21368,7 +21449,7 @@
           "value": [
             {
               "type": 0,
-              "value": "attack with "
+              "value": "ataque con "
             },
             {
               "type": 1,
@@ -21396,7 +21477,7 @@
           "value": [
             {
               "type": 0,
-              "value": "action card"
+              "value": "carta de acción"
             }
           ]
         },
@@ -21404,7 +21485,7 @@
           "value": [
             {
               "type": 0,
-              "value": "non-attack action card"
+              "value": "carta de acción de no-ataque"
             }
           ]
         },
@@ -21412,7 +21493,7 @@
           "value": [
             {
               "type": 0,
-              "value": "instant card"
+              "value": "carta de instantáneo"
             }
           ]
         },
@@ -21420,7 +21501,7 @@
           "value": [
             {
               "type": 0,
-              "value": "reaction card"
+              "value": "carta de reacción"
             }
           ]
         },
@@ -21428,7 +21509,7 @@
           "value": [
             {
               "type": 0,
-              "value": "attack reaction card"
+              "value": "carta de reacción de ataque"
             }
           ]
         },
@@ -21436,7 +21517,7 @@
           "value": [
             {
               "type": 0,
-              "value": "defense reaction card"
+              "value": "carta de reacción de defensa"
             }
           ]
         },
@@ -21444,7 +21525,7 @@
           "value": [
             {
               "type": 0,
-              "value": "equipment"
+              "value": "equipo"
             }
           ]
         },
@@ -21452,7 +21533,7 @@
           "value": [
             {
               "type": 0,
-              "value": "weapon"
+              "value": "arma"
             }
           ]
         },
@@ -21460,9 +21541,280 @@
           "value": [
             {
               "type": 0,
-              "value": "card"
+              "value": "carta"
             }
           ]
+        }
+      }
+    },
+    {
+      "type": 6,
+      "value": "typeCount",
+      "options": {
+        "=0": {
+          "value": []
+        },
+        "=1": {
+          "value": [
+            {
+              "type": 0,
+              "value": " "
+            },
+            {
+              "type": 1,
+              "value": "type1"
+            }
+          ]
+        },
+        "=2": {
+          "value": [
+            {
+              "type": 0,
+              "value": " "
+            },
+            {
+              "type": 1,
+              "value": "type1"
+            },
+            {
+              "type": 0,
+              "value": " o "
+            },
+            {
+              "type": 1,
+              "value": "type2"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 0,
+              "value": " "
+            },
+            {
+              "type": 1,
+              "value": "type1"
+            },
+            {
+              "type": 0,
+              "value": ", "
+            },
+            {
+              "type": 1,
+              "value": "type2"
+            },
+            {
+              "type": 0,
+              "value": " o "
+            },
+            {
+              "type": 1,
+              "value": "type3"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    },
+    {
+      "type": 5,
+      "value": "color",
+      "options": {
+        "red": {
+          "value": [
+            {
+              "type": 5,
+              "value": "noun",
+              "options": {
+                "attack": {
+                  "value": [
+                    {
+                      "type": 0,
+                      "value": " rojo"
+                    }
+                  ]
+                },
+                "weaponAttack": {
+                  "value": [
+                    {
+                      "type": 0,
+                      "value": " rojo"
+                    }
+                  ]
+                },
+                "attackWith": {
+                  "value": [
+                    {
+                      "type": 0,
+                      "value": " rojo"
+                    }
+                  ]
+                },
+                "equipment": {
+                  "value": [
+                    {
+                      "type": 0,
+                      "value": " rojo"
+                    }
+                  ]
+                },
+                "other": {
+                  "value": [
+                    {
+                      "type": 0,
+                      "value": " roja"
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        "yellow": {
+          "value": [
+            {
+              "type": 5,
+              "value": "noun",
+              "options": {
+                "attack": {
+                  "value": [
+                    {
+                      "type": 0,
+                      "value": " amarillo"
+                    }
+                  ]
+                },
+                "weaponAttack": {
+                  "value": [
+                    {
+                      "type": 0,
+                      "value": " amarillo"
+                    }
+                  ]
+                },
+                "attackWith": {
+                  "value": [
+                    {
+                      "type": 0,
+                      "value": " amarillo"
+                    }
+                  ]
+                },
+                "equipment": {
+                  "value": [
+                    {
+                      "type": 0,
+                      "value": " amarillo"
+                    }
+                  ]
+                },
+                "other": {
+                  "value": [
+                    {
+                      "type": 0,
+                      "value": " amarilla"
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        "blue": {
+          "value": [
+            {
+              "type": 0,
+              "value": " azul"
+            }
+          ]
+        },
+        "other": {
+          "value": []
+        }
+      }
+    },
+    {
+      "type": 5,
+      "value": "via",
+      "options": {
+        "defending": {
+          "value": [
+            {
+              "type": 0,
+              "value": " en defensa"
+            }
+          ]
+        },
+        "runeGate": {
+          "value": [
+            {
+              "type": 0,
+              "value": " mediante rune gate"
+            }
+          ]
+        },
+        "charge": {
+          "value": [
+            {
+              "type": 5,
+              "value": "noun",
+              "options": {
+                "attack": {
+                  "value": [
+                    {
+                      "type": 0,
+                      "value": " cargado"
+                    }
+                  ]
+                },
+                "weaponAttack": {
+                  "value": [
+                    {
+                      "type": 0,
+                      "value": " cargado"
+                    }
+                  ]
+                },
+                "attackWith": {
+                  "value": [
+                    {
+                      "type": 0,
+                      "value": " cargado"
+                    }
+                  ]
+                },
+                "equipment": {
+                  "value": [
+                    {
+                      "type": 0,
+                      "value": " cargado"
+                    }
+                  ]
+                },
+                "other": {
+                  "value": [
+                    {
+                      "type": 0,
+                      "value": " cargada"
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        "arsenal": {
+          "value": [
+            {
+              "type": 0,
+              "value": " desde el arsenal"
+            }
+          ]
+        },
+        "other": {
+          "value": []
         }
       }
     },
@@ -21477,7 +21829,7 @@
           "value": [
             {
               "type": 0,
-              "value": " with a +1 power counter"
+              "value": " con un contador de +1 de poder"
             }
           ]
         },
@@ -21485,7 +21837,7 @@
           "value": [
             {
               "type": 0,
-              "value": " with "
+              "value": " con "
             },
             {
               "type": 1,
@@ -21503,7 +21855,7 @@
           "value": [
             {
               "type": 0,
-              "value": " with cost "
+              "value": " con coste "
             },
             {
               "type": 1,
@@ -21511,7 +21863,7 @@
             },
             {
               "type": 0,
-              "value": " or less"
+              "value": " o menos"
             }
           ]
         },
@@ -21519,7 +21871,7 @@
           "value": [
             {
               "type": 0,
-              "value": " with cost "
+              "value": " con coste "
             },
             {
               "type": 1,
@@ -21527,7 +21879,7 @@
             },
             {
               "type": 0,
-              "value": " or more"
+              "value": " o más"
             }
           ]
         },
@@ -21535,7 +21887,7 @@
           "value": [
             {
               "type": 0,
-              "value": " with "
+              "value": " con "
             },
             {
               "type": 1,
@@ -21543,7 +21895,7 @@
             },
             {
               "type": 0,
-              "value": " or less base power"
+              "value": " o menos de poder base"
             }
           ]
         },
@@ -21551,7 +21903,7 @@
           "value": [
             {
               "type": 0,
-              "value": " with "
+              "value": " con "
             },
             {
               "type": 1,
@@ -21559,24 +21911,7 @@
             },
             {
               "type": 0,
-              "value": " or more base power"
-            }
-          ]
-        },
-        "other": {
-          "value": []
-        }
-      }
-    },
-    {
-      "type": 5,
-      "value": "via",
-      "options": {
-        "arsenal": {
-          "value": [
-            {
-              "type": 0,
-              "value": " from arsenal"
+              "value": " o más de poder base"
             }
           ]
         },
@@ -21593,23 +21928,11 @@
           "value": [
             {
               "type": 0,
-              "value": " targeting "
-            },
-            {
-              "type": 1,
-              "value": "targetArticle"
-            },
-            {
-              "type": 0,
-              "value": " "
+              "value": " que tenga como objetivo a un héroe "
             },
             {
               "type": 1,
               "value": "targetName"
-            },
-            {
-              "type": 0,
-              "value": " hero"
             }
           ]
         },
@@ -21617,7 +21940,7 @@
           "value": [
             {
               "type": 0,
-              "value": " targeting "
+              "value": " que tenga como objetivo a "
             },
             {
               "type": 1,
@@ -21629,7 +21952,7 @@
           "value": [
             {
               "type": 0,
-              "value": " targeting a marked hero"
+              "value": " que tenga como objetivo a un héroe marcado"
             }
           ]
         },
@@ -21642,150 +21965,13 @@
   "engine.effect.subject.other": [
     {
       "type": 5,
-      "value": "via",
-      "options": {
-        "defending": {
-          "value": [
-            {
-              "type": 0,
-              "value": "defending "
-            }
-          ]
-        },
-        "runeGate": {
-          "value": [
-            {
-              "type": 0,
-              "value": "rune-gated "
-            }
-          ]
-        },
-        "charge": {
-          "value": [
-            {
-              "type": 0,
-              "value": "charged "
-            }
-          ]
-        },
-        "other": {
-          "value": []
-        }
-      }
-    },
-    {
-      "type": 5,
-      "value": "color",
-      "options": {
-        "red": {
-          "value": [
-            {
-              "type": 0,
-              "value": "red "
-            }
-          ]
-        },
-        "yellow": {
-          "value": [
-            {
-              "type": 0,
-              "value": "yellow "
-            }
-          ]
-        },
-        "blue": {
-          "value": [
-            {
-              "type": 0,
-              "value": "blue "
-            }
-          ]
-        },
-        "other": {
-          "value": []
-        }
-      }
-    },
-    {
-      "type": 6,
-      "value": "typeCount",
-      "options": {
-        "=0": {
-          "value": []
-        },
-        "=1": {
-          "value": [
-            {
-              "type": 1,
-              "value": "type1"
-            },
-            {
-              "type": 0,
-              "value": " "
-            }
-          ]
-        },
-        "=2": {
-          "value": [
-            {
-              "type": 1,
-              "value": "type1"
-            },
-            {
-              "type": 0,
-              "value": " or "
-            },
-            {
-              "type": 1,
-              "value": "type2"
-            },
-            {
-              "type": 0,
-              "value": " "
-            }
-          ]
-        },
-        "other": {
-          "value": [
-            {
-              "type": 1,
-              "value": "type1"
-            },
-            {
-              "type": 0,
-              "value": ", "
-            },
-            {
-              "type": 1,
-              "value": "type2"
-            },
-            {
-              "type": 0,
-              "value": ", or "
-            },
-            {
-              "type": 1,
-              "value": "type3"
-            },
-            {
-              "type": 0,
-              "value": " "
-            }
-          ]
-        }
-      },
-      "offset": 0,
-      "pluralType": "cardinal"
-    },
-    {
-      "type": 5,
       "value": "noun",
       "options": {
         "attack": {
           "value": [
             {
               "type": 0,
-              "value": "attacks"
+              "value": "ataques"
             }
           ]
         },
@@ -21793,7 +21979,7 @@
           "value": [
             {
               "type": 0,
-              "value": "attack action cards"
+              "value": "cartas de acción de ataque"
             }
           ]
         },
@@ -21801,7 +21987,7 @@
           "value": [
             {
               "type": 0,
-              "value": "weapon attacks"
+              "value": "ataques con arma"
             }
           ]
         },
@@ -21809,7 +21995,7 @@
           "value": [
             {
               "type": 0,
-              "value": "attacks with "
+              "value": "ataques con "
             },
             {
               "type": 1,
@@ -21837,7 +22023,7 @@
           "value": [
             {
               "type": 0,
-              "value": "action cards"
+              "value": "cartas de acción"
             }
           ]
         },
@@ -21845,7 +22031,7 @@
           "value": [
             {
               "type": 0,
-              "value": "non-attack action cards"
+              "value": "cartas de acción de no-ataque"
             }
           ]
         },
@@ -21853,7 +22039,7 @@
           "value": [
             {
               "type": 0,
-              "value": "instant cards"
+              "value": "cartas de instantáneo"
             }
           ]
         },
@@ -21861,7 +22047,7 @@
           "value": [
             {
               "type": 0,
-              "value": "reaction cards"
+              "value": "cartas de reacción"
             }
           ]
         },
@@ -21869,7 +22055,7 @@
           "value": [
             {
               "type": 0,
-              "value": "attack reaction cards"
+              "value": "cartas de reacción de ataque"
             }
           ]
         },
@@ -21877,7 +22063,7 @@
           "value": [
             {
               "type": 0,
-              "value": "defense reaction cards"
+              "value": "cartas de reacción de defensa"
             }
           ]
         },
@@ -21885,7 +22071,7 @@
           "value": [
             {
               "type": 0,
-              "value": "equipment"
+              "value": "equipos"
             }
           ]
         },
@@ -21893,7 +22079,7 @@
           "value": [
             {
               "type": 0,
-              "value": "weapons"
+              "value": "armas"
             }
           ]
         },
@@ -21901,9 +22087,280 @@
           "value": [
             {
               "type": 0,
-              "value": "cards"
+              "value": "cartas"
             }
           ]
+        }
+      }
+    },
+    {
+      "type": 6,
+      "value": "typeCount",
+      "options": {
+        "=0": {
+          "value": []
+        },
+        "=1": {
+          "value": [
+            {
+              "type": 0,
+              "value": " "
+            },
+            {
+              "type": 1,
+              "value": "type1"
+            }
+          ]
+        },
+        "=2": {
+          "value": [
+            {
+              "type": 0,
+              "value": " "
+            },
+            {
+              "type": 1,
+              "value": "type1"
+            },
+            {
+              "type": 0,
+              "value": " o "
+            },
+            {
+              "type": 1,
+              "value": "type2"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 0,
+              "value": " "
+            },
+            {
+              "type": 1,
+              "value": "type1"
+            },
+            {
+              "type": 0,
+              "value": ", "
+            },
+            {
+              "type": 1,
+              "value": "type2"
+            },
+            {
+              "type": 0,
+              "value": " o "
+            },
+            {
+              "type": 1,
+              "value": "type3"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    },
+    {
+      "type": 5,
+      "value": "color",
+      "options": {
+        "red": {
+          "value": [
+            {
+              "type": 5,
+              "value": "noun",
+              "options": {
+                "attack": {
+                  "value": [
+                    {
+                      "type": 0,
+                      "value": " rojos"
+                    }
+                  ]
+                },
+                "weaponAttack": {
+                  "value": [
+                    {
+                      "type": 0,
+                      "value": " rojos"
+                    }
+                  ]
+                },
+                "attackWith": {
+                  "value": [
+                    {
+                      "type": 0,
+                      "value": " rojos"
+                    }
+                  ]
+                },
+                "equipment": {
+                  "value": [
+                    {
+                      "type": 0,
+                      "value": " rojos"
+                    }
+                  ]
+                },
+                "other": {
+                  "value": [
+                    {
+                      "type": 0,
+                      "value": " rojas"
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        "yellow": {
+          "value": [
+            {
+              "type": 5,
+              "value": "noun",
+              "options": {
+                "attack": {
+                  "value": [
+                    {
+                      "type": 0,
+                      "value": " amarillos"
+                    }
+                  ]
+                },
+                "weaponAttack": {
+                  "value": [
+                    {
+                      "type": 0,
+                      "value": " amarillos"
+                    }
+                  ]
+                },
+                "attackWith": {
+                  "value": [
+                    {
+                      "type": 0,
+                      "value": " amarillos"
+                    }
+                  ]
+                },
+                "equipment": {
+                  "value": [
+                    {
+                      "type": 0,
+                      "value": " amarillos"
+                    }
+                  ]
+                },
+                "other": {
+                  "value": [
+                    {
+                      "type": 0,
+                      "value": " amarillas"
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        "blue": {
+          "value": [
+            {
+              "type": 0,
+              "value": " azules"
+            }
+          ]
+        },
+        "other": {
+          "value": []
+        }
+      }
+    },
+    {
+      "type": 5,
+      "value": "via",
+      "options": {
+        "defending": {
+          "value": [
+            {
+              "type": 0,
+              "value": " en defensa"
+            }
+          ]
+        },
+        "runeGate": {
+          "value": [
+            {
+              "type": 0,
+              "value": " mediante rune gate"
+            }
+          ]
+        },
+        "charge": {
+          "value": [
+            {
+              "type": 5,
+              "value": "noun",
+              "options": {
+                "attack": {
+                  "value": [
+                    {
+                      "type": 0,
+                      "value": " cargados"
+                    }
+                  ]
+                },
+                "weaponAttack": {
+                  "value": [
+                    {
+                      "type": 0,
+                      "value": " cargados"
+                    }
+                  ]
+                },
+                "attackWith": {
+                  "value": [
+                    {
+                      "type": 0,
+                      "value": " cargados"
+                    }
+                  ]
+                },
+                "equipment": {
+                  "value": [
+                    {
+                      "type": 0,
+                      "value": " cargados"
+                    }
+                  ]
+                },
+                "other": {
+                  "value": [
+                    {
+                      "type": 0,
+                      "value": " cargadas"
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        "arsenal": {
+          "value": [
+            {
+              "type": 0,
+              "value": " desde el arsenal"
+            }
+          ]
+        },
+        "other": {
+          "value": []
         }
       }
     },
@@ -21918,7 +22375,7 @@
           "value": [
             {
               "type": 0,
-              "value": " with a +1 power counter"
+              "value": " con un contador de +1 de poder"
             }
           ]
         },
@@ -21926,7 +22383,7 @@
           "value": [
             {
               "type": 0,
-              "value": " with "
+              "value": " con "
             },
             {
               "type": 1,
@@ -21944,7 +22401,7 @@
           "value": [
             {
               "type": 0,
-              "value": " with cost "
+              "value": " con coste "
             },
             {
               "type": 1,
@@ -21952,7 +22409,7 @@
             },
             {
               "type": 0,
-              "value": " or less"
+              "value": " o menos"
             }
           ]
         },
@@ -21960,7 +22417,7 @@
           "value": [
             {
               "type": 0,
-              "value": " with cost "
+              "value": " con coste "
             },
             {
               "type": 1,
@@ -21968,7 +22425,7 @@
             },
             {
               "type": 0,
-              "value": " or more"
+              "value": " o más"
             }
           ]
         },
@@ -21976,7 +22433,7 @@
           "value": [
             {
               "type": 0,
-              "value": " with "
+              "value": " con "
             },
             {
               "type": 1,
@@ -21984,7 +22441,7 @@
             },
             {
               "type": 0,
-              "value": " or less base power"
+              "value": " o menos de poder base"
             }
           ]
         },
@@ -21992,7 +22449,7 @@
           "value": [
             {
               "type": 0,
-              "value": " with "
+              "value": " con "
             },
             {
               "type": 1,
@@ -22000,24 +22457,7 @@
             },
             {
               "type": 0,
-              "value": " or more base power"
-            }
-          ]
-        },
-        "other": {
-          "value": []
-        }
-      }
-    },
-    {
-      "type": 5,
-      "value": "via",
-      "options": {
-        "arsenal": {
-          "value": [
-            {
-              "type": 0,
-              "value": " from arsenal"
+              "value": " o más de poder base"
             }
           ]
         },
@@ -22034,23 +22474,11 @@
           "value": [
             {
               "type": 0,
-              "value": " targeting "
-            },
-            {
-              "type": 1,
-              "value": "targetArticle"
-            },
-            {
-              "type": 0,
-              "value": " "
+              "value": " que tengan como objetivo a un héroe "
             },
             {
               "type": 1,
               "value": "targetName"
-            },
-            {
-              "type": 0,
-              "value": " hero"
             }
           ]
         },
@@ -22058,7 +22486,7 @@
           "value": [
             {
               "type": 0,
-              "value": " targeting "
+              "value": " que tengan como objetivo a "
             },
             {
               "type": 1,
@@ -22070,7 +22498,7 @@
           "value": [
             {
               "type": 0,
-              "value": " targeting a marked hero"
+              "value": " que tengan como objetivo a un héroe marcado"
             }
           ]
         },
@@ -22083,7 +22511,7 @@
   "engine.effect.summary.amp": [
     {
       "type": 0,
-      "value": "amp "
+      "value": "amplifica "
     },
     {
       "type": 1,
@@ -22093,7 +22521,7 @@
   "engine.effect.summary.base.power.limit": [
     {
       "type": 0,
-      "value": "can't play attack action cards with base power "
+      "value": "no puede jugar cartas de acción de ataque con poder base "
     },
     {
       "type": 1,
@@ -22101,19 +22529,19 @@
     },
     {
       "type": 0,
-      "value": " or less"
+      "value": " o menos"
     }
   ],
   "engine.effect.summary.cannot.draw": [
     {
       "type": 0,
-      "value": "can't draw cards"
+      "value": "no puede robar cartas"
     }
   ],
   "engine.effect.summary.halve.base": [
     {
       "type": 0,
-      "value": "base power and defense of attack action cards are halved"
+      "value": "el poder y la defensa base de las cartas de acción de ataque se reducen a la mitad"
     }
   ],
   "engine.effect.summary.list.four": [
@@ -22185,13 +22613,13 @@
   "engine.effect.summary.loses.all.abilities": [
     {
       "type": 0,
-      "value": "hero loses all abilities"
+      "value": "el héroe pierde todas sus habilidades"
     }
   ],
   "engine.effect.summary.next.action.cost": [
     {
       "type": 0,
-      "value": "next action costs +"
+      "value": "la próxima acción cuesta +"
     },
     {
       "type": 1,
@@ -22199,25 +22627,25 @@
     },
     {
       "type": 0,
-      "value": " resource"
+      "value": " de recurso"
     }
   ],
   "engine.effect.summary.no.power.gain": [
     {
       "type": 0,
-      "value": "attack action cards can't gain power"
+      "value": "las cartas de acción de ataque no pueden ganar poder"
     }
   ],
   "engine.effect.summary.ongoing": [
     {
       "type": 0,
-      "value": "ongoing effect"
+      "value": "efecto continuo"
     }
   ],
   "engine.effect.summary.prevent.arcane": [
     {
       "type": 0,
-      "value": "prevent next "
+      "value": "evita los próximos "
     },
     {
       "type": 1,
@@ -22225,13 +22653,13 @@
     },
     {
       "type": 0,
-      "value": " arcane damage"
+      "value": " de daño arcano"
     }
   ],
   "engine.effect.summary.prevent.damage": [
     {
       "type": 0,
-      "value": "prevent next "
+      "value": "evita los próximos "
     },
     {
       "type": 1,
@@ -22239,13 +22667,13 @@
     },
     {
       "type": 0,
-      "value": " damage"
+      "value": " de daño"
     }
   ],
   "engine.effect.summary.prevent.damage.from": [
     {
       "type": 0,
-      "value": "prevent next "
+      "value": "evita los próximos "
     },
     {
       "type": 1,
@@ -22253,7 +22681,7 @@
     },
     {
       "type": 0,
-      "value": " damage from "
+      "value": " de daño de "
     },
     {
       "type": 1,
@@ -22263,7 +22691,7 @@
   "engine.effect.summary.prevent.first.damage": [
     {
       "type": 0,
-      "value": "prevent "
+      "value": "evita "
     },
     {
       "type": 1,
@@ -22271,13 +22699,13 @@
     },
     {
       "type": 0,
-      "value": " of the first damage"
+      "value": " del primer daño"
     }
   ],
   "engine.effect.summary.prevent.physical": [
     {
       "type": 0,
-      "value": "prevent next "
+      "value": "evita los próximos "
     },
     {
       "type": 1,
@@ -22285,67 +22713,67 @@
     },
     {
       "type": 0,
-      "value": " physical damage"
+      "value": " de daño físico"
     }
   ],
   "engine.log.ability.fizzles.source.gone": [
     {
       "type": 0,
-      "value": "An activated ability resolves without effect because its source is gone"
+      "value": "Una habilidad activada se resuelve sin efecto porque su fuente ya no está"
     }
   ],
   "engine.log.ally.life.restored": [
     {
+      "type": 0,
+      "value": "La vida de "
+    },
+    {
       "type": 1,
       "value": "card"
     },
     {
       "type": 0,
-      "value": " is restored to "
+      "value": " se restablece a "
     },
     {
       "type": 1,
       "value": "life"
-    },
-    {
-      "type": 0,
-      "value": " life"
     }
   ],
   "engine.log.arsenal.card.turned.face.up": [
     {
+      "type": 0,
+      "value": "La carta "
+    },
+    {
       "type": 1,
       "value": "card"
     },
     {
       "type": 0,
-      "value": " is turned face up in "
+      "value": " se pone boca arriba en el arsenal de "
     },
     {
       "type": 1,
       "value": "hero"
-    },
-    {
-      "type": 0,
-      "value": "'s arsenal"
     }
   ],
   "engine.log.arsenal.facedown.private": [
     {
+      "type": 0,
+      "value": "La carta "
+    },
+    {
       "type": 1,
       "value": "card"
     },
     {
       "type": 0,
-      "value": " is put face down into "
+      "value": " se coloca boca abajo en el arsenal de "
     },
     {
       "type": 1,
       "value": "hero"
-    },
-    {
-      "type": 0,
-      "value": "'s arsenal"
     }
   ],
   "engine.log.arsenal.facedown.public": [
@@ -22355,25 +22783,25 @@
     },
     {
       "type": 0,
-      "value": " puts a card face down into arsenal"
+      "value": " coloca una carta boca abajo en su arsenal"
     }
   ],
   "engine.log.arsenal.faceup": [
+    {
+      "type": 0,
+      "value": "La carta "
+    },
     {
       "type": 1,
       "value": "card"
     },
     {
       "type": 0,
-      "value": " is put face up into "
+      "value": " se coloca boca arriba en el arsenal de "
     },
     {
       "type": 1,
       "value": "hero"
-    },
-    {
-      "type": 0,
-      "value": "'s arsenal"
     }
   ],
   "engine.log.arsenal.faceup.annexed": [
@@ -22383,7 +22811,7 @@
     },
     {
       "type": 0,
-      "value": " annexes "
+      "value": " se anexiona el arsenal boca arriba de "
     },
     {
       "type": 1,
@@ -22391,17 +22819,21 @@
     },
     {
       "type": 0,
-      "value": "'s face-up arsenal through their next turn"
+      "value": " hasta el final de su próximo turno"
     }
   ],
   "engine.log.attack.queued": [
+    {
+      "type": 0,
+      "value": "La carta "
+    },
     {
       "type": 1,
       "value": "card"
     },
     {
       "type": 0,
-      "value": " is put into the attack queue"
+      "value": " se coloca en la cola de ataques"
     }
   ],
   "engine.log.card.activated": [
@@ -22411,7 +22843,7 @@
     },
     {
       "type": 0,
-      "value": " activates "
+      "value": " activa "
     },
     {
       "type": 1,
@@ -22420,42 +22852,58 @@
   ],
   "engine.log.card.added.as.defender": [
     {
+      "type": 0,
+      "value": "La carta "
+    },
+    {
       "type": 1,
       "value": "card"
     },
     {
       "type": 0,
-      "value": " is added to the chain link as a defending card"
+      "value": " se añade al eslabón como carta defensora"
     }
   ],
   "engine.log.card.added.as.defender.from.arsenal": [
     {
+      "type": 0,
+      "value": "La carta "
+    },
+    {
       "type": 1,
       "value": "card"
     },
     {
       "type": 0,
-      "value": " is added from arsenal as a defending card"
+      "value": " se añade desde el arsenal como carta defensora"
     }
   ],
   "engine.log.card.added.as.defender.from.hand": [
     {
+      "type": 0,
+      "value": "La carta "
+    },
+    {
       "type": 1,
       "value": "card"
     },
     {
       "type": 0,
-      "value": " is added from hand as a defending card"
+      "value": " se añade desde la mano como carta defensora"
     }
   ],
   "engine.log.card.banished": [
     {
+      "type": 0,
+      "value": "La carta "
+    },
+    {
       "type": 1,
       "value": "card"
     },
     {
       "type": 0,
-      "value": " is banished"
+      "value": " es desterrada"
     },
     {
       "type": 5,
@@ -22465,7 +22913,7 @@
           "value": [
             {
               "type": 0,
-              "value": " from the deck"
+              "value": " del mazo"
             }
           ]
         },
@@ -22473,7 +22921,7 @@
           "value": [
             {
               "type": 0,
-              "value": " from the graveyard"
+              "value": " del cementerio"
             }
           ]
         },
@@ -22485,12 +22933,16 @@
   ],
   "engine.log.card.banished.facedown.private": [
     {
+      "type": 0,
+      "value": "La carta "
+    },
+    {
       "type": 1,
       "value": "card"
     },
     {
       "type": 0,
-      "value": " is banished face down"
+      "value": " es desterrada boca abajo"
     },
     {
       "type": 5,
@@ -22500,7 +22952,7 @@
           "value": [
             {
               "type": 0,
-              "value": " from the deck"
+              "value": " del mazo"
             }
           ]
         },
@@ -22508,7 +22960,7 @@
           "value": [
             {
               "type": 0,
-              "value": " from the graveyard"
+              "value": " del cementerio"
             }
           ]
         },
@@ -22521,7 +22973,7 @@
   "engine.log.card.banished.facedown.public": [
     {
       "type": 0,
-      "value": "A face-down card is banished"
+      "value": "Una carta boca abajo es desterrada"
     },
     {
       "type": 5,
@@ -22531,7 +22983,7 @@
           "value": [
             {
               "type": 0,
-              "value": " from the deck"
+              "value": " del mazo"
             }
           ]
         },
@@ -22539,7 +22991,7 @@
           "value": [
             {
               "type": 0,
-              "value": " from the graveyard"
+              "value": " del cementerio"
             }
           ]
         },
@@ -22551,30 +23003,84 @@
   ],
   "engine.log.card.banished.from.under": [
     {
+      "type": 0,
+      "value": "La carta "
+    },
+    {
       "type": 1,
       "value": "card"
     },
     {
       "type": 0,
-      "value": " is banished from under "
+      "value": ", que estaba debajo de "
     },
     {
       "type": 1,
       "value": "parent"
+    },
+    {
+      "type": 0,
+      "value": ", es desterrada"
     }
   ],
   "engine.log.card.becomes.color": [
+    {
+      "type": 0,
+      "value": "La carta "
+    },
     {
       "type": 1,
       "value": "card"
     },
     {
       "type": 0,
-      "value": " becomes "
+      "value": " pasa a ser "
     },
     {
-      "type": 1,
-      "value": "color"
+      "type": 5,
+      "value": "color",
+      "options": {
+        "red": {
+          "value": [
+            {
+              "type": 0,
+              "value": "roja"
+            }
+          ]
+        },
+        "yellow": {
+          "value": [
+            {
+              "type": 0,
+              "value": "amarilla"
+            }
+          ]
+        },
+        "blue": {
+          "value": [
+            {
+              "type": 0,
+              "value": "azul"
+            }
+          ]
+        },
+        "purple": {
+          "value": [
+            {
+              "type": 0,
+              "value": "morada"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 1,
+              "value": "color"
+            }
+          ]
+        }
+      }
     }
   ],
   "engine.log.card.boosts": [
@@ -22584,7 +23090,7 @@
     },
     {
       "type": 0,
-      "value": " boosts"
+      "value": " potencia"
     }
   ],
   "engine.log.card.ceases.to.exist": [
@@ -22594,7 +23100,7 @@
     },
     {
       "type": 0,
-      "value": " ceases to exist"
+      "value": " deja de existir"
     }
   ],
   "engine.log.card.ceases.to.exist.ephemeral": [
@@ -22604,7 +23110,7 @@
     },
     {
       "type": 0,
-      "value": " ceases to exist (Ephemeral)"
+      "value": " deja de existir (ephemeral)"
     }
   ],
   "engine.log.card.ceases.to.exist.incarnate": [
@@ -22614,27 +23120,31 @@
     },
     {
       "type": 0,
-      "value": " ceases to exist (Incarnate)"
+      "value": " deja de existir (incarnate)"
     }
   ],
   "engine.log.card.charged": [
     {
-      "type": 1,
-      "value": "card"
+      "type": 0,
+      "value": "Se carga "
     },
     {
-      "type": 0,
-      "value": " is charged"
+      "type": 1,
+      "value": "card"
     }
   ],
   "engine.log.card.cleared": [
     {
+      "type": 0,
+      "value": "La carta "
+    },
+    {
       "type": 1,
       "value": "card"
     },
     {
       "type": 0,
-      "value": " is cleared"
+      "value": " es retirada (clear)"
     }
   ],
   "engine.log.card.control.gained": [
@@ -22644,7 +23154,7 @@
     },
     {
       "type": 0,
-      "value": " gains control of "
+      "value": " obtiene el control de "
     },
     {
       "type": 1,
@@ -22658,7 +23168,7 @@
     },
     {
       "type": 0,
-      "value": " gives control of "
+      "value": " da el control de "
     },
     {
       "type": 1,
@@ -22666,7 +23176,7 @@
     },
     {
       "type": 0,
-      "value": " to "
+      "value": " a "
     },
     {
       "type": 1,
@@ -22680,7 +23190,7 @@
     },
     {
       "type": 0,
-      "value": " steals "
+      "value": " roba "
     },
     {
       "type": 1,
@@ -22688,17 +23198,21 @@
     },
     {
       "type": 0,
-      "value": " until the end of the action phase"
+      "value": " hasta el final de la fase de acción"
     }
   ],
   "engine.log.card.cranked": [
     {
+      "type": 0,
+      "value": "Se arranca "
+    },
+    {
       "type": 1,
       "value": "card"
     },
     {
       "type": 0,
-      "value": " is cranked: remove a steam counter"
+      "value": ": quita un contador de vapor"
     }
   ],
   "engine.log.card.created.in.banish": [
@@ -22708,7 +23222,7 @@
     },
     {
       "type": 0,
-      "value": " creates "
+      "value": " crea "
     },
     {
       "type": 1,
@@ -22716,7 +23230,7 @@
     },
     {
       "type": 0,
-      "value": " in their banished zone"
+      "value": " en su zona de destierro"
     }
   ],
   "engine.log.card.created.in.hand": [
@@ -22726,7 +23240,7 @@
     },
     {
       "type": 0,
-      "value": " creates "
+      "value": " crea "
     },
     {
       "type": 1,
@@ -22734,61 +23248,85 @@
     },
     {
       "type": 0,
-      "value": " in their hand"
+      "value": " en su mano"
     }
   ],
   "engine.log.card.destroy.prevented.opposing.effect": [
     {
+      "type": 0,
+      "value": "La carta "
+    },
+    {
       "type": 1,
       "value": "card"
     },
     {
       "type": 0,
-      "value": " can't be destroyed by the opposing effect"
+      "value": " no puede ser destruida por el efecto del oponente"
     }
   ],
   "engine.log.card.destroy.scheduled.end.phase": [
     {
+      "type": 0,
+      "value": "La carta "
+    },
+    {
       "type": 1,
       "value": "card"
     },
     {
       "type": 0,
-      "value": " will be destroyed at the beginning of the end phase"
+      "value": " será destruida al principio de la fase final"
     }
   ],
   "engine.log.card.destroyed": [
     {
+      "type": 0,
+      "value": "La carta "
+    },
+    {
       "type": 1,
       "value": "card"
     },
     {
       "type": 0,
-      "value": " is destroyed"
+      "value": " es destruida"
     }
   ],
   "engine.log.card.destroyed.from.under": [
     {
+      "type": 0,
+      "value": "La carta "
+    },
+    {
       "type": 1,
       "value": "card"
     },
     {
       "type": 0,
-      "value": " is destroyed from under "
+      "value": ", que estaba debajo de "
     },
     {
       "type": 1,
       "value": "parent"
+    },
+    {
+      "type": 0,
+      "value": ", es destruida"
     }
   ],
   "engine.log.card.destroyed.phantasm": [
+    {
+      "type": 0,
+      "value": "La carta "
+    },
     {
       "type": 1,
       "value": "card"
     },
     {
       "type": 0,
-      "value": " is destroyed (Phantasm)"
+      "value": " es destruida (phantasm)"
     }
   ],
   "engine.log.card.discarded": [
@@ -22798,7 +23336,7 @@
     },
     {
       "type": 0,
-      "value": " discards "
+      "value": " descarta "
     },
     {
       "type": 1,
@@ -22812,7 +23350,7 @@
     },
     {
       "type": 0,
-      "value": " discards "
+      "value": " descarta "
     },
     {
       "type": 1,
@@ -22820,7 +23358,7 @@
     },
     {
       "type": 0,
-      "value": " at random"
+      "value": " al azar"
     }
   ],
   "engine.log.card.enters.arena": [
@@ -22830,7 +23368,7 @@
     },
     {
       "type": 0,
-      "value": " enters the arena"
+      "value": " entra en la arena"
     }
   ],
   "engine.log.card.enters.arena.instead.of.soul": [
@@ -22840,93 +23378,201 @@
     },
     {
       "type": 0,
-      "value": " enters the arena instead of its hero's soul"
+      "value": " entra en la arena en lugar de ir al alma de su héroe"
     }
   ],
   "engine.log.card.equip.failed": [
     {
+      "type": 0,
+      "value": "La carta "
+    },
+    {
       "type": 1,
       "value": "card"
     },
     {
       "type": 0,
-      "value": " can't be equipped"
+      "value": " no se puede equipar"
     }
   ],
   "engine.log.card.equip.failed.no.equipment.zone": [
     {
+      "type": 0,
+      "value": "La carta "
+    },
+    {
       "type": 1,
       "value": "card"
     },
     {
       "type": 0,
-      "value": " can't be equipped (no free equipment zone)"
+      "value": " no se puede equipar (no hay ninguna zona de equipo libre)"
     }
   ],
   "engine.log.card.equip.failed.no.weapon.zone": [
     {
+      "type": 0,
+      "value": "La carta "
+    },
+    {
       "type": 1,
       "value": "card"
     },
     {
       "type": 0,
-      "value": " can't be equipped (no empty weapon zone)"
+      "value": " no se puede equipar (no hay ninguna zona de arma vacía)"
     }
   ],
   "engine.log.card.equipment.zone.changed": [
     {
+      "type": 0,
+      "value": "La carta "
+    },
+    {
       "type": 1,
       "value": "card"
     },
     {
       "type": 0,
-      "value": " moves from the "
+      "value": " pasa de la zona "
     },
     {
-      "type": 1,
-      "value": "from"
+      "type": 5,
+      "value": "from",
+      "options": {
+        "head": {
+          "value": [
+            {
+              "type": 0,
+              "value": "de cabeza"
+            }
+          ]
+        },
+        "chest": {
+          "value": [
+            {
+              "type": 0,
+              "value": "de pecho"
+            }
+          ]
+        },
+        "arms": {
+          "value": [
+            {
+              "type": 0,
+              "value": "de brazos"
+            }
+          ]
+        },
+        "legs": {
+          "value": [
+            {
+              "type": 0,
+              "value": "de piernas"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 1,
+              "value": "from"
+            }
+          ]
+        }
+      }
     },
     {
       "type": 0,
-      "value": " zone to the "
+      "value": " a la zona "
     },
     {
-      "type": 1,
-      "value": "to"
-    },
-    {
-      "type": 0,
-      "value": " zone"
+      "type": 5,
+      "value": "to",
+      "options": {
+        "head": {
+          "value": [
+            {
+              "type": 0,
+              "value": "de cabeza"
+            }
+          ]
+        },
+        "chest": {
+          "value": [
+            {
+              "type": 0,
+              "value": "de pecho"
+            }
+          ]
+        },
+        "arms": {
+          "value": [
+            {
+              "type": 0,
+              "value": "de brazos"
+            }
+          ]
+        },
+        "legs": {
+          "value": [
+            {
+              "type": 0,
+              "value": "de piernas"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 1,
+              "value": "to"
+            }
+          ]
+        }
+      }
     }
   ],
   "engine.log.card.equipped.from.banish": [
     {
+      "type": 0,
+      "value": "La carta "
+    },
+    {
       "type": 1,
       "value": "card"
     },
     {
       "type": 0,
-      "value": " is equipped from banish"
+      "value": " se equipa desde la zona de destierro"
     }
   ],
   "engine.log.card.equipped.from.graveyard": [
     {
+      "type": 0,
+      "value": "La carta "
+    },
+    {
       "type": 1,
       "value": "card"
     },
     {
       "type": 0,
-      "value": " is equipped from the graveyard"
+      "value": " se equipa desde el cementerio"
     }
   ],
   "engine.log.card.equipped.from.inventory": [
     {
+      "type": 0,
+      "value": "La carta "
+    },
+    {
       "type": 1,
       "value": "card"
     },
     {
       "type": 0,
-      "value": " is equipped from inventory"
+      "value": " se equipa desde el inventario"
     }
   ],
   "engine.log.card.equipped.from.opponent": [
@@ -22936,7 +23582,7 @@
     },
     {
       "type": 0,
-      "value": " equips "
+      "value": " equipa "
     },
     {
       "type": 1,
@@ -22944,7 +23590,7 @@
     },
     {
       "type": 0,
-      "value": " from "
+      "value": " de "
     },
     {
       "type": 1,
@@ -22953,40 +23599,90 @@
   ],
   "engine.log.card.equipped.to.slot": [
     {
+      "type": 0,
+      "value": "La carta "
+    },
+    {
       "type": 1,
       "value": "card"
     },
     {
       "type": 0,
-      "value": " is equipped to the "
+      "value": " se equipa en la zona "
     },
     {
-      "type": 1,
-      "value": "slot"
-    },
-    {
-      "type": 0,
-      "value": " zone"
+      "type": 5,
+      "value": "slot",
+      "options": {
+        "head": {
+          "value": [
+            {
+              "type": 0,
+              "value": "de cabeza"
+            }
+          ]
+        },
+        "chest": {
+          "value": [
+            {
+              "type": 0,
+              "value": "de pecho"
+            }
+          ]
+        },
+        "arms": {
+          "value": [
+            {
+              "type": 0,
+              "value": "de brazos"
+            }
+          ]
+        },
+        "legs": {
+          "value": [
+            {
+              "type": 0,
+              "value": "de piernas"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 1,
+              "value": "slot"
+            }
+          ]
+        }
+      }
     }
   ],
   "engine.log.card.equipped.to.weapon.zone": [
     {
+      "type": 0,
+      "value": "La carta "
+    },
+    {
       "type": 1,
       "value": "card"
     },
     {
       "type": 0,
-      "value": " is equipped to a weapon zone"
+      "value": " se equipa en una zona de arma"
     }
   ],
   "engine.log.card.facedown.banished.returns.to.hand": [
+    {
+      "type": 0,
+      "value": "La carta desterrada boca abajo de "
+    },
     {
       "type": 1,
       "value": "hero"
     },
     {
       "type": 0,
-      "value": "'s face-down banished card returns to their hand"
+      "value": " vuelve a su mano"
     }
   ],
   "engine.log.card.fragments": [
@@ -22996,7 +23692,7 @@
     },
     {
       "type": 0,
-      "value": " fragments (-"
+      "value": " se fragmenta (-"
     },
     {
       "type": 1,
@@ -23004,17 +23700,21 @@
     },
     {
       "type": 0,
-      "value": " power)"
+      "value": " de poder)"
     }
   ],
   "engine.log.card.frozen": [
+    {
+      "type": 0,
+      "value": "La carta "
+    },
     {
       "type": 1,
       "value": "card"
     },
     {
       "type": 0,
-      "value": " is frozen"
+      "value": " recibe freeze"
     }
   ],
   "engine.log.card.gains.additional.type": [
@@ -23024,7 +23724,7 @@
     },
     {
       "type": 0,
-      "value": " is "
+      "value": " también es "
     },
     {
       "type": 1,
@@ -23032,7 +23732,7 @@
     },
     {
       "type": 0,
-      "value": " in addition to its other types"
+      "value": ", además de sus otros tipos"
     }
   ],
   "engine.log.card.gains.keyword": [
@@ -23042,7 +23742,7 @@
     },
     {
       "type": 0,
-      "value": " gains "
+      "value": " obtiene "
     },
     {
       "type": 1,
@@ -23056,7 +23756,7 @@
     },
     {
       "type": 0,
-      "value": " gets "
+      "value": " recibe "
     },
     {
       "type": 6,
@@ -23066,7 +23766,7 @@
           "value": [
             {
               "type": 0,
-              "value": "a -1 defense counter"
+              "value": "un contador de -1 de defensa"
             }
           ]
         },
@@ -23077,7 +23777,7 @@
             },
             {
               "type": 0,
-              "value": " -1 defense counters"
+              "value": " contadores de -1 de defensa"
             }
           ]
         }
@@ -23105,7 +23805,7 @@
     },
     {
       "type": 0,
-      "value": " gains the name "
+      "value": " obtiene el nombre "
     },
     {
       "type": 1,
@@ -23119,7 +23819,7 @@
     },
     {
       "type": 0,
-      "value": " gets "
+      "value": " recibe "
     },
     {
       "type": 6,
@@ -23129,7 +23829,7 @@
           "value": [
             {
               "type": 0,
-              "value": "a +1 power counter"
+              "value": "un contador de +1 de poder"
             }
           ]
         },
@@ -23140,7 +23840,7 @@
             },
             {
               "type": 0,
-              "value": " +1 power counters"
+              "value": " contadores de +1 de poder"
             }
           ]
         }
@@ -23156,7 +23856,7 @@
     },
     {
       "type": 0,
-      "value": " gains the type "
+      "value": " obtiene el tipo "
     },
     {
       "type": 1,
@@ -23165,28 +23865,36 @@
   ],
   "engine.log.card.intimidated.returns.to.hand": [
     {
+      "type": 0,
+      "value": "La carta intimidada de "
+    },
+    {
       "type": 1,
       "value": "hero"
     },
     {
       "type": 0,
-      "value": "'s intimidated card returns to their hand"
+      "value": " vuelve a su mano"
     }
   ],
   "engine.log.card.inventory.revealed.to.hand": [
+    {
+      "type": 0,
+      "value": "La carta "
+    },
     {
       "type": 1,
       "value": "card"
     },
     {
       "type": 0,
-      "value": " is revealed from inventory and put into hand"
+      "value": " se enseña desde el inventario y se pone en la mano"
     }
   ],
   "engine.log.card.looked.at.private": [
     {
       "type": 0,
-      "value": "You look at "
+      "value": "Miras "
     },
     {
       "type": 1,
@@ -23200,17 +23908,21 @@
     },
     {
       "type": 0,
-      "value": " may attack an additional time this turn"
+      "value": " puede atacar una vez más este turno"
     }
   ],
   "engine.log.card.negated": [
+    {
+      "type": 0,
+      "value": "La carta "
+    },
     {
       "type": 1,
       "value": "card"
     },
     {
       "type": 0,
-      "value": " is negated"
+      "value": " es anulada"
     }
   ],
   "engine.log.card.pitched": [
@@ -23220,11 +23932,15 @@
     },
     {
       "type": 0,
-      "value": " pitches "
+      "value": " usa "
     },
     {
       "type": 1,
       "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " como pitch"
     }
   ],
   "engine.log.card.pitched.chi": [
@@ -23234,7 +23950,7 @@
     },
     {
       "type": 0,
-      "value": " pitches "
+      "value": " usa "
     },
     {
       "type": 1,
@@ -23242,7 +23958,7 @@
     },
     {
       "type": 0,
-      "value": " ("
+      "value": " como pitch ("
     },
     {
       "type": 1,
@@ -23260,7 +23976,7 @@
     },
     {
       "type": 0,
-      "value": " plays "
+      "value": " juega "
     },
     {
       "type": 1,
@@ -23274,7 +23990,7 @@
     },
     {
       "type": 0,
-      "value": " plays "
+      "value": " juega "
     },
     {
       "type": 1,
@@ -23282,27 +23998,31 @@
     },
     {
       "type": 0,
-      "value": " in response"
+      "value": " en respuesta"
     }
   ],
   "engine.log.card.power.counters.removed": [
     {
-      "type": 1,
-      "value": "card"
+      "type": 0,
+      "value": "Se quitan los contadores de +1 de poder de "
     },
     {
-      "type": 0,
-      "value": "'s +1 power counters are removed"
+      "type": 1,
+      "value": "card"
     }
   ],
   "engine.log.card.put.at.deck.depth": [
     {
+      "type": 0,
+      "value": "La carta "
+    },
+    {
       "type": 1,
       "value": "card"
     },
     {
       "type": 0,
-      "value": " is put "
+      "value": " se coloca en la posición "
     },
     {
       "type": 1,
@@ -23310,13 +24030,13 @@
     },
     {
       "type": 0,
-      "value": " from the top of the deck"
+      "value": " desde la parte superior del mazo"
     }
   ],
   "engine.log.card.put.at.deck.depth.hidden": [
     {
       "type": 0,
-      "value": "A card is put "
+      "value": "Una carta se coloca en la posición "
     },
     {
       "type": 1,
@@ -23324,61 +24044,73 @@
     },
     {
       "type": 0,
-      "value": " from the top of the deck"
+      "value": " desde la parte superior del mazo"
     }
   ],
   "engine.log.card.put.into.graveyard.from.deck": [
     {
+      "type": 0,
+      "value": "La carta "
+    },
+    {
       "type": 1,
       "value": "card"
     },
     {
       "type": 0,
-      "value": " is put into the graveyard from the deck"
+      "value": " va del mazo al cementerio"
     }
   ],
   "engine.log.card.put.into.soul": [
     {
+      "type": 0,
+      "value": "La carta "
+    },
+    {
       "type": 1,
       "value": "card"
     },
     {
       "type": 0,
-      "value": " is put into "
+      "value": " se coloca en el alma de "
     },
     {
       "type": 1,
       "value": "hero"
-    },
-    {
-      "type": 0,
-      "value": "'s soul"
     }
   ],
   "engine.log.card.put.on.deck.bottom": [
+    {
+      "type": 0,
+      "value": "La carta "
+    },
     {
       "type": 1,
       "value": "card"
     },
     {
       "type": 0,
-      "value": " is put on the bottom of the deck"
+      "value": " se coloca en la parte inferior del mazo"
     }
   ],
   "engine.log.card.put.on.deck.bottom.hidden": [
     {
       "type": 0,
-      "value": "A card is put on the bottom of the deck"
+      "value": "Una carta se coloca en la parte inferior del mazo"
     }
   ],
   "engine.log.card.put.on.deck.position": [
+    {
+      "type": 0,
+      "value": "La carta "
+    },
     {
       "type": 1,
       "value": "card"
     },
     {
       "type": 0,
-      "value": " is put on the "
+      "value": " se coloca "
     },
     {
       "type": 5,
@@ -23388,7 +24120,7 @@
           "value": [
             {
               "type": 0,
-              "value": "top"
+              "value": "en la parte superior"
             }
           ]
         },
@@ -23396,7 +24128,7 @@
           "value": [
             {
               "type": 0,
-              "value": "bottom"
+              "value": "en la parte inferior"
             }
           ]
         },
@@ -23404,7 +24136,7 @@
           "value": [
             {
               "type": 0,
-              "value": "selected position"
+              "value": "en la posición elegida"
             }
           ]
         }
@@ -23412,13 +24144,13 @@
     },
     {
       "type": 0,
-      "value": " of the deck"
+      "value": " del mazo"
     }
   ],
   "engine.log.card.put.on.deck.position.hidden": [
     {
       "type": 0,
-      "value": "A card is put on the "
+      "value": "Una carta se coloca "
     },
     {
       "type": 5,
@@ -23428,7 +24160,7 @@
           "value": [
             {
               "type": 0,
-              "value": "top"
+              "value": "en la parte superior"
             }
           ]
         },
@@ -23436,7 +24168,7 @@
           "value": [
             {
               "type": 0,
-              "value": "bottom"
+              "value": "en la parte inferior"
             }
           ]
         },
@@ -23444,7 +24176,7 @@
           "value": [
             {
               "type": 0,
-              "value": "selected position"
+              "value": "en la posición elegida"
             }
           ]
         }
@@ -23452,27 +24184,35 @@
     },
     {
       "type": 0,
-      "value": " of the deck"
+      "value": " del mazo"
     }
   ],
   "engine.log.card.put.on.owner.deck.bottom": [
     {
+      "type": 0,
+      "value": "La carta "
+    },
+    {
       "type": 1,
       "value": "card"
     },
     {
       "type": 0,
-      "value": " is put on the bottom of its owner's deck"
+      "value": " se coloca en la parte inferior del mazo de su propietario"
     }
   ],
   "engine.log.card.put.under": [
     {
+      "type": 0,
+      "value": "La carta "
+    },
+    {
       "type": 1,
       "value": "card"
     },
     {
       "type": 0,
-      "value": " is put under "
+      "value": " se coloca debajo de "
     },
     {
       "type": 1,
@@ -23486,7 +24226,7 @@
     },
     {
       "type": 0,
-      "value": " banishes a random card face down"
+      "value": " destierra boca abajo una carta al azar"
     }
   ],
   "engine.log.card.resolve.failed.cannot.defend": [
@@ -23496,7 +24236,7 @@
     },
     {
       "type": 0,
-      "value": " resolves without effect because it cannot defend this attack"
+      "value": " se resuelve sin efecto porque no puede defender este ataque"
     }
   ],
   "engine.log.card.resolve.failed.dominate": [
@@ -23506,7 +24246,7 @@
     },
     {
       "type": 0,
-      "value": " resolves without effect (dominate)"
+      "value": " se resuelve sin efecto (dominar)"
     }
   ],
   "engine.log.card.returns.to.hero.control": [
@@ -23516,15 +24256,11 @@
     },
     {
       "type": 0,
-      "value": " returns to "
+      "value": " vuelve al control de "
     },
     {
       "type": 1,
       "value": "hero"
-    },
-    {
-      "type": 0,
-      "value": "'s control"
     }
   ],
   "engine.log.card.returns.to.hero.hand": [
@@ -23534,15 +24270,11 @@
     },
     {
       "type": 0,
-      "value": " returns to "
+      "value": " vuelve a la mano de "
     },
     {
       "type": 1,
       "value": "hero"
-    },
-    {
-      "type": 0,
-      "value": "'s hand"
     }
   ],
   "engine.log.card.returns.to.owner.hand": [
@@ -23552,49 +24284,49 @@
     },
     {
       "type": 0,
-      "value": " returns to its owner's hand"
+      "value": " vuelve a la mano de su propietario"
     }
   ],
   "engine.log.card.shuffled.into.deck": [
+    {
+      "type": 0,
+      "value": "La carta "
+    },
     {
       "type": 1,
       "value": "card"
     },
     {
       "type": 0,
-      "value": " is shuffled into "
+      "value": " se baraja en el mazo de "
     },
     {
       "type": 1,
       "value": "player"
-    },
-    {
-      "type": 0,
-      "value": "'s deck"
     }
   ],
   "engine.log.card.shuffled.into.deck.hidden": [
     {
       "type": 0,
-      "value": "A card is shuffled into "
+      "value": "Una carta se baraja en el mazo de "
     },
     {
       "type": 1,
       "value": "player"
-    },
-    {
-      "type": 0,
-      "value": "'s deck"
     }
   ],
   "engine.log.card.tapped": [
+    {
+      "type": 0,
+      "value": "La carta "
+    },
     {
       "type": 1,
       "value": "card"
     },
     {
       "type": 0,
-      "value": " taps"
+      "value": " se gira"
     }
   ],
   "engine.log.card.transcends.to.hand": [
@@ -23604,15 +24336,11 @@
     },
     {
       "type": 0,
-      "value": " transcends into "
+      "value": " trasciende a la mano de "
     },
     {
       "type": 1,
       "value": "hero"
-    },
-    {
-      "type": 0,
-      "value": "'s hand"
     }
   ],
   "engine.log.card.turned.face.up": [
@@ -23622,7 +24350,7 @@
     },
     {
       "type": 0,
-      "value": " turns "
+      "value": " pone "
     },
     {
       "type": 1,
@@ -23630,37 +24358,49 @@
     },
     {
       "type": 0,
-      "value": " face up"
+      "value": " boca arriba"
     }
   ],
   "engine.log.card.turned.facedown.graveyard.watery.grave": [
     {
+      "type": 0,
+      "value": "La carta "
+    },
+    {
       "type": 1,
       "value": "card"
     },
     {
       "type": 0,
-      "value": " is turned face down in its graveyard (Watery Grave)"
+      "value": " se pone boca abajo en su cementerio (Watery Grave)"
     }
   ],
   "engine.log.card.unequipped": [
     {
+      "type": 0,
+      "value": "La carta "
+    },
+    {
       "type": 1,
       "value": "card"
     },
     {
       "type": 0,
-      "value": " is unequipped"
+      "value": " deja de estar equipada"
     }
   ],
   "engine.log.card.untapped": [
     {
+      "type": 0,
+      "value": "La carta "
+    },
+    {
       "type": 1,
       "value": "card"
     },
     {
       "type": 0,
-      "value": " untaps"
+      "value": " se endereza"
     }
   ],
   "engine.log.cards.drawn": [
@@ -23670,7 +24410,7 @@
     },
     {
       "type": 0,
-      "value": " draws "
+      "value": " roba "
     },
     {
       "type": 6,
@@ -23683,7 +24423,7 @@
             },
             {
               "type": 0,
-              "value": " card"
+              "value": " carta"
             }
           ]
         },
@@ -23694,7 +24434,7 @@
             },
             {
               "type": 0,
-              "value": " cards"
+              "value": " cartas"
             }
           ]
         }
@@ -23710,7 +24450,7 @@
     },
     {
       "type": 0,
-      "value": " reveals "
+      "value": " enseña "
     },
     {
       "type": 1,
@@ -23724,7 +24464,7 @@
     },
     {
       "type": 0,
-      "value": " reveals "
+      "value": " enseña "
     },
     {
       "type": 1,
@@ -23732,7 +24472,7 @@
     },
     {
       "type": 0,
-      "value": " from hand"
+      "value": " de su mano"
     }
   ],
   "engine.log.cards.transform.into": [
@@ -23742,7 +24482,7 @@
     },
     {
       "type": 0,
-      "value": " transforms into "
+      "value": " se transforma en "
     },
     {
       "type": 1,
@@ -23756,7 +24496,7 @@
     },
     {
       "type": 0,
-      "value": " reveals "
+      "value": " enseña "
     },
     {
       "type": 1,
@@ -23772,13 +24512,13 @@
     },
     {
       "type": 0,
-      "value": " power)"
+      "value": " de poder)"
     }
   ],
   "engine.log.clash.tie": [
     {
       "type": 0,
-      "value": "The clash is a tie — no winner"
+      "value": "El desafío termina en empate — no hay ganador"
     }
   ],
   "engine.log.clash.winner": [
@@ -23788,7 +24528,7 @@
     },
     {
       "type": 0,
-      "value": " wins the clash"
+      "value": " gana el desafío"
     }
   ],
   "engine.log.combat.additional.target": [
@@ -23798,7 +24538,7 @@
     },
     {
       "type": 0,
-      "value": " attacks an additional target: "
+      "value": " ataca a un objetivo adicional: "
     },
     {
       "type": 1,
@@ -23812,15 +24552,7 @@
     },
     {
       "type": 0,
-      "value": " gives "
-    },
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": " +"
+      "value": " da +"
     },
     {
       "type": 1,
@@ -23828,7 +24560,15 @@
     },
     {
       "type": 0,
-      "value": " power ("
+      "value": " de poder a "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " ("
     },
     {
       "type": 1,
@@ -23836,7 +24576,7 @@
     },
     {
       "type": 0,
-      "value": " power)"
+      "value": " de poder)"
     }
   ],
   "engine.log.combat.attack.power.gained.self": [
@@ -23846,7 +24586,7 @@
     },
     {
       "type": 0,
-      "value": " gets +"
+      "value": " obtiene +"
     },
     {
       "type": 1,
@@ -23854,7 +24594,7 @@
     },
     {
       "type": 0,
-      "value": " power ("
+      "value": " de poder ("
     },
     {
       "type": 1,
@@ -23862,7 +24602,7 @@
     },
     {
       "type": 0,
-      "value": " power)"
+      "value": " de poder)"
     }
   ],
   "engine.log.combat.attack.power.lost": [
@@ -23872,15 +24612,7 @@
     },
     {
       "type": 0,
-      "value": " gives "
-    },
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": " -"
+      "value": " da -"
     },
     {
       "type": 1,
@@ -23888,7 +24620,15 @@
     },
     {
       "type": 0,
-      "value": " power ("
+      "value": " de poder a "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " ("
     },
     {
       "type": 1,
@@ -23896,7 +24636,7 @@
     },
     {
       "type": 0,
-      "value": " power)"
+      "value": " de poder)"
     }
   ],
   "engine.log.combat.attack.power.lost.self": [
@@ -23906,7 +24646,7 @@
     },
     {
       "type": 0,
-      "value": " gets -"
+      "value": " obtiene -"
     },
     {
       "type": 1,
@@ -23914,7 +24654,7 @@
     },
     {
       "type": 0,
-      "value": " power ("
+      "value": " de poder ("
     },
     {
       "type": 1,
@@ -23922,17 +24662,21 @@
     },
     {
       "type": 0,
-      "value": " power)"
+      "value": " de poder)"
     }
   ],
   "engine.log.combat.attacker.replaced": [
+    {
+      "type": 0,
+      "value": "La carta "
+    },
     {
       "type": 1,
       "value": "previous"
     },
     {
       "type": 0,
-      "value": " is put on the bottom of its owner's deck and replaced by "
+      "value": " se coloca en la parte inferior del mazo de su propietario y "
     },
     {
       "type": 1,
@@ -23940,7 +24684,7 @@
     },
     {
       "type": 0,
-      "value": " as the attacking card"
+      "value": " la sustituye como carta atacante"
     }
   ],
   "engine.log.combat.attacks": [
@@ -23950,7 +24694,7 @@
     },
     {
       "type": 0,
-      "value": " attacks with "
+      "value": " ataca con "
     },
     {
       "type": 1,
@@ -23966,7 +24710,7 @@
     },
     {
       "type": 0,
-      "value": " power)"
+      "value": " de poder)"
     }
   ],
   "engine.log.combat.attacks.targeting": [
@@ -23976,7 +24720,7 @@
     },
     {
       "type": 0,
-      "value": " attacks with "
+      "value": " ataca con "
     },
     {
       "type": 1,
@@ -23992,17 +24736,21 @@
     },
     {
       "type": 0,
-      "value": " power), targeting "
+      "value": " de poder) con "
     },
     {
       "type": 1,
       "value": "target"
+    },
+    {
+      "type": 0,
+      "value": " como objetivo"
     }
   ],
   "engine.log.combat.chain.closed": [
     {
       "type": 0,
-      "value": "The combat chain closes"
+      "value": "La cadena de combate se cierra"
     }
   ],
   "engine.log.combat.defends": [
@@ -24012,7 +24760,7 @@
     },
     {
       "type": 0,
-      "value": " defends with "
+      "value": " defiende con "
     },
     {
       "type": 6,
@@ -24025,7 +24773,7 @@
             },
             {
               "type": 0,
-              "value": " card"
+              "value": " carta"
             }
           ]
         },
@@ -24036,7 +24784,7 @@
             },
             {
               "type": 0,
-              "value": " cards"
+              "value": " cartas"
             }
           ]
         }
@@ -24054,17 +24802,21 @@
     },
     {
       "type": 0,
-      "value": " defense)"
+      "value": " de defensa)"
     }
   ],
   "engine.log.combat.fully.defended": [
+    {
+      "type": 0,
+      "value": "La carta "
+    },
     {
       "type": 1,
       "value": "card"
     },
     {
       "type": 0,
-      "value": " is fully defended"
+      "value": " es defendida por completo"
     }
   ],
   "engine.log.combat.go.again": [
@@ -24074,17 +24826,21 @@
     },
     {
       "type": 0,
-      "value": " has Go again (+1 action point)"
+      "value": " tiene continuar (+1 punto de acción)"
     }
   ],
   "engine.log.combat.hit.effects.suppressed": [
+    {
+      "type": 0,
+      "value": "Los efectos de impacto de "
+    },
     {
       "type": 1,
       "value": "card"
     },
     {
       "type": 0,
-      "value": "'s hit effects are suppressed"
+      "value": " se suprimen"
     }
   ],
   "engine.log.combat.no.defense": [
@@ -24094,7 +24850,7 @@
     },
     {
       "type": 0,
-      "value": " takes the attack (no defense)"
+      "value": " recibe el ataque (sin defensa)"
     }
   ],
   "engine.log.combat.no.target.ally.gone": [
@@ -24104,7 +24860,7 @@
     },
     {
       "type": 0,
-      "value": " finds no target because the ally is gone"
+      "value": " se queda sin objetivo porque el aliado ya no está"
     }
   ],
   "engine.log.combat.resolve.failed.left.chain": [
@@ -24114,7 +24870,7 @@
     },
     {
       "type": 0,
-      "value": " resolves without effect because the attack left the combat chain"
+      "value": " se resuelve sin efecto porque el ataque salió de la cadena de combate"
     }
   ],
   "engine.log.combat.resolve.failed.source.left.arena": [
@@ -24124,13 +24880,13 @@
     },
     {
       "type": 0,
-      "value": " resolves without effect because its source left the arena"
+      "value": " se resuelve sin efecto porque su fuente salió de la arena"
     }
   ],
   "engine.log.crowd.boos": [
     {
       "type": 0,
-      "value": "The crowd boos "
+      "value": "El público abuchea a "
     },
     {
       "type": 1,
@@ -24144,7 +24900,7 @@
   "engine.log.crowd.cheers": [
     {
       "type": 0,
-      "value": "The crowd cheers "
+      "value": "El público aclama a "
     },
     {
       "type": 1,
@@ -24162,7 +24918,7 @@
     },
     {
       "type": 0,
-      "value": " hits "
+      "value": " impacta a "
     },
     {
       "type": 1,
@@ -24170,7 +24926,7 @@
     },
     {
       "type": 0,
-      "value": " for "
+      "value": " por "
     },
     {
       "type": 1,
@@ -24178,7 +24934,7 @@
     },
     {
       "type": 0,
-      "value": " ("
+      "value": " (le quedan "
     },
     {
       "type": 1,
@@ -24186,7 +24942,7 @@
     },
     {
       "type": 0,
-      "value": " life left)"
+      "value": " de vida)"
     }
   ],
   "engine.log.damage.ally.prevented": [
@@ -24196,7 +24952,7 @@
     },
     {
       "type": 0,
-      "value": " prevents "
+      "value": " evita "
     },
     {
       "type": 1,
@@ -24204,7 +24960,7 @@
     },
     {
       "type": 0,
-      "value": " damage"
+      "value": " de daño"
     }
   ],
   "engine.log.damage.ally.takes": [
@@ -24214,7 +24970,7 @@
     },
     {
       "type": 0,
-      "value": " takes "
+      "value": " recibe "
     },
     {
       "type": 1,
@@ -24222,7 +24978,7 @@
     },
     {
       "type": 0,
-      "value": " damage ("
+      "value": " de daño (le quedan "
     },
     {
       "type": 1,
@@ -24230,7 +24986,7 @@
     },
     {
       "type": 0,
-      "value": " life left)"
+      "value": " de vida)"
     }
   ],
   "engine.log.damage.ally.takes.arcane": [
@@ -24240,7 +24996,7 @@
     },
     {
       "type": 0,
-      "value": " takes "
+      "value": " recibe "
     },
     {
       "type": 1,
@@ -24248,7 +25004,7 @@
     },
     {
       "type": 0,
-      "value": " arcane damage ("
+      "value": " de daño arcano (le quedan "
     },
     {
       "type": 1,
@@ -24256,7 +25012,7 @@
     },
     {
       "type": 0,
-      "value": " life left)"
+      "value": " de vida)"
     }
   ],
   "engine.log.damage.arcane.barrier.paid": [
@@ -24266,7 +25022,7 @@
     },
     {
       "type": 0,
-      "value": " pays "
+      "value": " paga "
     },
     {
       "type": 1,
@@ -24274,17 +25030,21 @@
     },
     {
       "type": 0,
-      "value": " (Arcane Barrier)"
+      "value": " (barrera arcana)"
     }
   ],
   "engine.log.damage.arcane.barrier.unpreventable": [
+    {
+      "type": 0,
+      "value": "La barrera arcana de "
+    },
     {
       "type": 1,
       "value": "hero"
     },
     {
       "type": 0,
-      "value": "'s Arcane Barrier can't prevent this damage"
+      "value": " no puede evitar este daño"
     }
   ],
   "engine.log.damage.arcane.bonus": [
@@ -24294,7 +25054,7 @@
     },
     {
       "type": 0,
-      "value": " deals "
+      "value": " aplica "
     },
     {
       "type": 1,
@@ -24310,7 +25070,7 @@
     },
     {
       "type": 0,
-      "value": " arcane damage"
+      "value": " de daño arcano"
     }
   ],
   "engine.log.damage.arcane.would.deal": [
@@ -24320,7 +25080,7 @@
     },
     {
       "type": 0,
-      "value": " would deal "
+      "value": " aplicaría "
     },
     {
       "type": 1,
@@ -24328,7 +25088,7 @@
     },
     {
       "type": 0,
-      "value": " arcane damage to "
+      "value": " de daño arcano a "
     },
     {
       "type": 1,
@@ -24342,7 +25102,7 @@
     },
     {
       "type": 0,
-      "value": " prevents "
+      "value": " evita "
     },
     {
       "type": 1,
@@ -24350,7 +25110,7 @@
     },
     {
       "type": 0,
-      "value": " damage"
+      "value": " de daño"
     }
   ],
   "engine.log.damage.hero.prevented.arcane": [
@@ -24360,7 +25120,7 @@
     },
     {
       "type": 0,
-      "value": " prevents "
+      "value": " evita "
     },
     {
       "type": 1,
@@ -24368,7 +25128,7 @@
     },
     {
       "type": 0,
-      "value": " arcane damage"
+      "value": " de daño arcano"
     }
   ],
   "engine.log.damage.hero.prevented.arcane.barrier": [
@@ -24378,7 +25138,7 @@
     },
     {
       "type": 0,
-      "value": " prevents "
+      "value": " evita "
     },
     {
       "type": 1,
@@ -24386,7 +25146,7 @@
     },
     {
       "type": 0,
-      "value": " arcane damage (Arcane Barrier)"
+      "value": " de daño arcano (barrera arcana)"
     }
   ],
   "engine.log.damage.hero.prevented.lethal": [
@@ -24396,7 +25156,7 @@
     },
     {
       "type": 0,
-      "value": " prevents "
+      "value": " evita "
     },
     {
       "type": 1,
@@ -24404,7 +25164,7 @@
     },
     {
       "type": 0,
-      "value": " lethal damage"
+      "value": " de daño letal"
     }
   ],
   "engine.log.damage.hero.prevented.physical": [
@@ -24414,7 +25174,7 @@
     },
     {
       "type": 0,
-      "value": " prevents "
+      "value": " evita "
     },
     {
       "type": 1,
@@ -24422,17 +25182,21 @@
     },
     {
       "type": 0,
-      "value": " physical damage"
+      "value": " de daño físico"
     }
   ],
   "engine.log.damage.hero.redirected": [
+    {
+      "type": 0,
+      "value": "El daño a "
+    },
     {
       "type": 1,
       "value": "originalHero"
     },
     {
       "type": 0,
-      "value": "'s damage is redirected to "
+      "value": " se redirige a "
     },
     {
       "type": 1,
@@ -24446,7 +25210,7 @@
     },
     {
       "type": 0,
-      "value": " takes "
+      "value": " recibe "
     },
     {
       "type": 1,
@@ -24454,7 +25218,7 @@
     },
     {
       "type": 0,
-      "value": " damage ("
+      "value": " de daño (le quedan "
     },
     {
       "type": 1,
@@ -24462,7 +25226,7 @@
     },
     {
       "type": 0,
-      "value": " life left)"
+      "value": " de vida)"
     }
   ],
   "engine.log.damage.hero.takes.arcane": [
@@ -24472,7 +25236,7 @@
     },
     {
       "type": 0,
-      "value": " takes "
+      "value": " recibe "
     },
     {
       "type": 1,
@@ -24480,7 +25244,7 @@
     },
     {
       "type": 0,
-      "value": " arcane damage ("
+      "value": " de daño arcano (le quedan "
     },
     {
       "type": 1,
@@ -24488,7 +25252,7 @@
     },
     {
       "type": 0,
-      "value": " life left)"
+      "value": " de vida)"
     }
   ],
   "engine.log.damage.hit": [
@@ -24498,7 +25262,7 @@
     },
     {
       "type": 0,
-      "value": " hits for "
+      "value": " impacta por "
     },
     {
       "type": 1,
@@ -24514,7 +25278,7 @@
     },
     {
       "type": 0,
-      "value": " at "
+      "value": " queda con "
     },
     {
       "type": 1,
@@ -24522,13 +25286,13 @@
     },
     {
       "type": 0,
-      "value": " life)"
+      "value": " de vida)"
     }
   ],
   "engine.log.damage.next.redirected": [
     {
       "type": 0,
-      "value": "The next damage to "
+      "value": "El próximo daño a "
     },
     {
       "type": 1,
@@ -24536,7 +25300,7 @@
     },
     {
       "type": 0,
-      "value": " will be redirected to "
+      "value": " se redirigirá a "
     },
     {
       "type": 1,
@@ -24546,7 +25310,7 @@
   "engine.log.damage.no.ally.target": [
     {
       "type": 0,
-      "value": "The damage finds no target because the ally is gone"
+      "value": "El daño se queda sin objetivo porque el aliado ya no está"
     }
   ],
   "engine.log.damage.none.to.ally": [
@@ -24556,7 +25320,7 @@
     },
     {
       "type": 0,
-      "value": " deals no damage to "
+      "value": " no aplica daño a "
     },
     {
       "type": 1,
@@ -24566,7 +25330,7 @@
   "engine.log.damage.prevention.reduced.physical": [
     {
       "type": 0,
-      "value": "The prevention effect prevents 1 less physical damage"
+      "value": "El efecto de evitación evita 1 de daño físico menos"
     }
   ],
   "engine.log.damage.quell.paid": [
@@ -24576,7 +25340,7 @@
     },
     {
       "type": 0,
-      "value": " pays "
+      "value": " paga "
     },
     {
       "type": 1,
@@ -24584,7 +25348,7 @@
     },
     {
       "type": 0,
-      "value": " to prevent "
+      "value": " para evitar "
     },
     {
       "type": 1,
@@ -24592,7 +25356,7 @@
     },
     {
       "type": 0,
-      "value": " damage (Quell "
+      "value": " de daño (quell "
     },
     {
       "type": 1,
@@ -24610,7 +25374,7 @@
     },
     {
       "type": 0,
-      "value": " deals "
+      "value": " aplica "
     },
     {
       "type": 1,
@@ -24618,7 +25382,7 @@
     },
     {
       "type": 0,
-      "value": " redirected damage ("
+      "value": " de daño redirigido ("
     },
     {
       "type": 1,
@@ -24626,7 +25390,7 @@
     },
     {
       "type": 0,
-      "value": " at "
+      "value": " queda con "
     },
     {
       "type": 1,
@@ -24634,17 +25398,21 @@
     },
     {
       "type": 0,
-      "value": " life)"
+      "value": " de vida)"
     }
   ],
   "engine.log.damage.redirected.prevented": [
+    {
+      "type": 0,
+      "value": "El daño a "
+    },
     {
       "type": 1,
       "value": "originalHero"
     },
     {
       "type": 0,
-      "value": "'s damage is redirected to "
+      "value": " se redirige a "
     },
     {
       "type": 1,
@@ -24652,25 +25420,25 @@
     },
     {
       "type": 0,
-      "value": " and "
+      "value": " y se evitan "
     },
     {
       "type": 1,
       "value": "amount"
-    },
-    {
-      "type": 0,
-      "value": " is prevented"
     }
   ],
   "engine.log.damage.replaced.destroy.equipment": [
+    {
+      "type": 0,
+      "value": "El daño de "
+    },
     {
       "type": 1,
       "value": "attack"
     },
     {
       "type": 0,
-      "value": "'s damage is replaced by destroying "
+      "value": " se sustituye por la destrucción de "
     },
     {
       "type": 1,
@@ -24684,17 +25452,13 @@
     },
     {
       "type": 0,
-      "value": " finds no target because the ally is gone"
+      "value": " se queda sin objetivo porque el aliado ya no está"
     }
   ],
   "engine.log.damage.source.prevented": [
     {
-      "type": 1,
-      "value": "source"
-    },
-    {
       "type": 0,
-      "value": "'s "
+      "value": "Se evitan "
     },
     {
       "type": 1,
@@ -24702,17 +25466,25 @@
     },
     {
       "type": 0,
-      "value": " damage is prevented"
+      "value": " de daño de "
+    },
+    {
+      "type": 1,
+      "value": "source"
     }
   ],
   "engine.log.damage.source.to.hero.prevented": [
+    {
+      "type": 0,
+      "value": "Se evita el daño de "
+    },
     {
       "type": 1,
       "value": "source"
     },
     {
       "type": 0,
-      "value": "'s damage to "
+      "value": " a "
     },
     {
       "type": 1,
@@ -24720,7 +25492,7 @@
     },
     {
       "type": 0,
-      "value": " is prevented ("
+      "value": " ("
     },
     {
       "type": 1,
@@ -24738,7 +25510,7 @@
     },
     {
       "type": 0,
-      "value": " prevents "
+      "value": " evita "
     },
     {
       "type": 1,
@@ -24746,7 +25518,7 @@
     },
     {
       "type": 0,
-      "value": " arcane damage (Spellvoid "
+      "value": " de daño arcano (spellvoid "
     },
     {
       "type": 1,
@@ -24764,7 +25536,7 @@
     },
     {
       "type": 0,
-      "value": " destroys Spellvoid "
+      "value": " destruye spellvoid "
     },
     {
       "type": 1,
@@ -24772,7 +25544,7 @@
     },
     {
       "type": 0,
-      "value": ", but the damage can't be prevented"
+      "value": ", pero el daño no se puede evitar"
     }
   ],
   "engine.log.damage.ward.prevented": [
@@ -24782,7 +25554,7 @@
     },
     {
       "type": 0,
-      "value": " prevents "
+      "value": " evita "
     },
     {
       "type": 1,
@@ -24790,7 +25562,7 @@
     },
     {
       "type": 0,
-      "value": " damage (Ward "
+      "value": " de daño (protección "
     },
     {
       "type": 1,
@@ -24808,7 +25580,7 @@
     },
     {
       "type": 0,
-      "value": " destroys Ward "
+      "value": " destruye protección "
     },
     {
       "type": 1,
@@ -24816,13 +25588,13 @@
     },
     {
       "type": 0,
-      "value": ", but the damage can't be prevented"
+      "value": ", pero el daño no se puede evitar"
     }
   ],
   "engine.log.decision.duplicate.skipped": [
     {
       "type": 0,
-      "value": "Skipped duplicate choice: "
+      "value": "Elección duplicada omitida: "
     },
     {
       "type": 1,
@@ -24832,7 +25604,7 @@
   "engine.log.decision.fizzles.no.options": [
     {
       "type": 0,
-      "value": "The choice resolves without effect because it has no options: "
+      "value": "La elección se resuelve sin efecto porque no tiene opciones: "
     },
     {
       "type": 1,
@@ -24842,13 +25614,13 @@
   "engine.log.deck.search.prohibited": [
     {
       "type": 0,
-      "value": "The deck search is prohibited"
+      "value": "La búsqueda en el mazo está prohibida"
     }
   ],
   "engine.log.die.rerolled": [
     {
       "type": 0,
-      "value": "The die is rerolled: "
+      "value": "Se vuelve a tirar el dado: "
     },
     {
       "type": 1,
@@ -24862,7 +25634,7 @@
     },
     {
       "type": 0,
-      "value": " rolls "
+      "value": " saca "
     },
     {
       "type": 1,
@@ -24872,7 +25644,7 @@
   "engine.log.fragment.fizzles.attack.gone": [
     {
       "type": 0,
-      "value": "Fragment resolves without effect because the attack is gone"
+      "value": "Fragment se resuelve sin efecto porque el ataque ya no está"
     }
   ],
   "engine.log.game.concedes": [
@@ -24882,7 +25654,7 @@
     },
     {
       "type": 0,
-      "value": " concedes"
+      "value": " se rinde"
     }
   ],
   "engine.log.game.draw.accepted": [
@@ -24892,7 +25664,7 @@
     },
     {
       "type": 0,
-      "value": " accepts the draw — the game ends in a draw"
+      "value": " acepta el empate — la partida termina en empate"
     }
   ],
   "engine.log.game.draw.declined": [
@@ -24902,7 +25674,7 @@
     },
     {
       "type": 0,
-      "value": " declines the draw offer"
+      "value": " rechaza la oferta de empate"
     }
   ],
   "engine.log.game.draw.offered": [
@@ -24912,7 +25684,7 @@
     },
     {
       "type": 0,
-      "value": " offers a draw"
+      "value": " ofrece un empate"
     }
   ],
   "engine.log.game.draw.withdrawn": [
@@ -24922,7 +25694,7 @@
     },
     {
       "type": 0,
-      "value": " withdraws the draw offer"
+      "value": " retira la oferta de empate"
     }
   ],
   "engine.log.game.player.loses": [
@@ -24932,17 +25704,21 @@
     },
     {
       "type": 0,
-      "value": " loses the game"
+      "value": " pierde la partida"
     }
   ],
   "engine.log.game.winner": [
+    {
+      "type": 0,
+      "value": "¡"
+    },
     {
       "type": 1,
       "value": "player"
     },
     {
       "type": 0,
-      "value": " wins the game!"
+      "value": " gana la partida!"
     }
   ],
   "engine.log.hero.becomes": [
@@ -24952,7 +25728,7 @@
     },
     {
       "type": 0,
-      "value": " becomes "
+      "value": " se convierte en "
     },
     {
       "type": 1,
@@ -24966,7 +25742,7 @@
     },
     {
       "type": 0,
-      "value": " becomes "
+      "value": " se convierte en "
     },
     {
       "type": 1,
@@ -24974,17 +25750,21 @@
     },
     {
       "type": 0,
-      "value": " until the start of their next turn"
+      "value": " hasta el principio de su próximo turno"
     }
   ],
   "engine.log.hero.cards.lose.abilities.next.turn": [
     {
+      "type": 0,
+      "value": "Las cartas de "
+    },
+    {
       "type": 1,
       "value": "hero"
     },
     {
       "type": 0,
-      "value": "'s cards lose all abilities during their next turn"
+      "value": " pierden todas sus habilidades durante el próximo turno de ese héroe"
     }
   ],
   "engine.log.hero.loses.all.abilities": [
@@ -24994,17 +25774,17 @@
     },
     {
       "type": 0,
-      "value": " loses all abilities"
+      "value": " pierde todas sus habilidades"
     }
   ],
   "engine.log.hero.marked": [
     {
-      "type": 1,
-      "value": "hero"
+      "type": 0,
+      "value": "Se marca a "
     },
     {
-      "type": 0,
-      "value": " is marked"
+      "type": 1,
+      "value": "hero"
     }
   ],
   "engine.log.hero.returns.to.original": [
@@ -25014,7 +25794,7 @@
     },
     {
       "type": 0,
-      "value": " returns to being "
+      "value": " vuelve a ser "
     },
     {
       "type": 1,
@@ -25028,7 +25808,7 @@
     },
     {
       "type": 0,
-      "value": " transforms into "
+      "value": " se transforma en "
     },
     {
       "type": 1,
@@ -25042,7 +25822,7 @@
     },
     {
       "type": 0,
-      "value": " is no longer marked"
+      "value": " pierde la marca"
     }
   ],
   "engine.log.intimidate.random.card.banished": [
@@ -25052,7 +25832,7 @@
     },
     {
       "type": 0,
-      "value": " banishes a random card face down (Intimidate)"
+      "value": " destierra boca abajo una carta al azar (intimidar)"
     }
   ],
   "engine.log.life.gain.prevented.ahead": [
@@ -25062,13 +25842,13 @@
     },
     {
       "type": 0,
-      "value": " can't gain life while ahead on life"
+      "value": " no puede ganar vida mientras tenga más vida que su oponente"
     }
   ],
   "engine.log.phantasm.fizzles.condition.failed": [
     {
       "type": 0,
-      "value": "Phantasm resolves without effect because its condition is no longer met"
+      "value": "Phantasm se resuelve sin efecto porque su condición ya no se cumple"
     }
   ],
   "engine.log.player.draws": [
@@ -25078,7 +25858,7 @@
     },
     {
       "type": 0,
-      "value": " draws "
+      "value": " roba "
     },
     {
       "type": 6,
@@ -25091,7 +25871,7 @@
             },
             {
               "type": 0,
-              "value": " card"
+              "value": " carta"
             }
           ]
         },
@@ -25102,7 +25882,7 @@
             },
             {
               "type": 0,
-              "value": " cards"
+              "value": " cartas"
             }
           ]
         }
@@ -25118,7 +25898,7 @@
     },
     {
       "type": 0,
-      "value": " gains an action point"
+      "value": " obtiene un punto de acción"
     }
   ],
   "engine.log.player.gains.action.points": [
@@ -25128,7 +25908,7 @@
     },
     {
       "type": 0,
-      "value": " gains "
+      "value": " obtiene "
     },
     {
       "type": 6,
@@ -25141,7 +25921,7 @@
             },
             {
               "type": 0,
-              "value": " action point"
+              "value": " punto de acción"
             }
           ]
         },
@@ -25152,7 +25932,7 @@
             },
             {
               "type": 0,
-              "value": " action points"
+              "value": " puntos de acción"
             }
           ]
         }
@@ -25168,7 +25948,7 @@
     },
     {
       "type": 0,
-      "value": " gains "
+      "value": " gana "
     },
     {
       "type": 1,
@@ -25176,7 +25956,7 @@
     },
     {
       "type": 0,
-      "value": " life ("
+      "value": " de vida ("
     },
     {
       "type": 1,
@@ -25184,7 +25964,7 @@
     },
     {
       "type": 0,
-      "value": " life)"
+      "value": " de vida)"
     }
   ],
   "engine.log.player.gains.resources": [
@@ -25194,7 +25974,7 @@
     },
     {
       "type": 0,
-      "value": " gains "
+      "value": " obtiene "
     },
     {
       "type": 6,
@@ -25207,7 +25987,7 @@
             },
             {
               "type": 0,
-              "value": " resource"
+              "value": " recurso"
             }
           ]
         },
@@ -25218,7 +25998,7 @@
             },
             {
               "type": 0,
-              "value": " resources"
+              "value": " recursos"
             }
           ]
         }
@@ -25234,7 +26014,7 @@
     },
     {
       "type": 0,
-      "value": " loses "
+      "value": " pierde "
     },
     {
       "type": 1,
@@ -25242,7 +26022,7 @@
     },
     {
       "type": 0,
-      "value": " life"
+      "value": " de vida"
     }
   ],
   "engine.log.player.shuffles.deck": [
@@ -25252,7 +26032,7 @@
     },
     {
       "type": 0,
-      "value": " shuffles their deck"
+      "value": " baraja su mazo"
     }
   ],
   "engine.log.player.untaps.permanents": [
@@ -25262,7 +26042,7 @@
     },
     {
       "type": 0,
-      "value": " untaps "
+      "value": " endereza "
     },
     {
       "type": 6,
@@ -25275,7 +26055,7 @@
             },
             {
               "type": 0,
-              "value": " permanent"
+              "value": " permanente"
             }
           ]
         },
@@ -25286,7 +26066,7 @@
             },
             {
               "type": 0,
-              "value": " permanents"
+              "value": " permanentes"
             }
           ]
         }
@@ -25298,7 +26078,7 @@
   "engine.log.prevention.next.arcane.damage": [
     {
       "type": 0,
-      "value": "The next "
+      "value": "Se evitarán los próximos "
     },
     {
       "type": 1,
@@ -25306,7 +26086,7 @@
     },
     {
       "type": 0,
-      "value": " arcane damage to "
+      "value": " de daño arcano a "
     },
     {
       "type": 1,
@@ -25314,13 +26094,13 @@
     },
     {
       "type": 0,
-      "value": " will be prevented this turn"
+      "value": " este turno"
     }
   ],
   "engine.log.prevention.next.damage": [
     {
       "type": 0,
-      "value": "The next "
+      "value": "Se evitarán los próximos "
     },
     {
       "type": 1,
@@ -25328,7 +26108,7 @@
     },
     {
       "type": 0,
-      "value": " damage to "
+      "value": " de daño a "
     },
     {
       "type": 1,
@@ -25336,13 +26116,13 @@
     },
     {
       "type": 0,
-      "value": " will be prevented this turn"
+      "value": " este turno"
     }
   ],
   "engine.log.prevention.next.damage.from.type": [
     {
       "type": 0,
-      "value": "The next "
+      "value": "Se evitarán los próximos "
     },
     {
       "type": 1,
@@ -25350,7 +26130,7 @@
     },
     {
       "type": 0,
-      "value": " damage from a "
+      "value": " de daño de una fuente "
     },
     {
       "type": 1,
@@ -25358,7 +26138,7 @@
     },
     {
       "type": 0,
-      "value": " source to "
+      "value": " a "
     },
     {
       "type": 1,
@@ -25366,13 +26146,13 @@
     },
     {
       "type": 0,
-      "value": " will be prevented this turn"
+      "value": " este turno"
     }
   ],
   "engine.log.prevention.next.event": [
     {
       "type": 0,
-      "value": "The next time "
+      "value": "La próxima vez que "
     },
     {
       "type": 1,
@@ -25380,7 +26160,7 @@
     },
     {
       "type": 0,
-      "value": " would be dealt damage this turn, up to "
+      "value": " fuera a recibir daño este turno, se evitarán hasta "
     },
     {
       "type": 1,
@@ -25388,13 +26168,13 @@
     },
     {
       "type": 0,
-      "value": " damage will be prevented"
+      "value": " de daño"
     }
   ],
   "engine.log.prevention.next.event.at.most": [
     {
       "type": 0,
-      "value": "The next damage event of "
+      "value": "Al próximo evento de daño de "
     },
     {
       "type": 1,
@@ -25402,7 +26182,7 @@
     },
     {
       "type": 0,
-      "value": " or less to "
+      "value": " o menos a "
     },
     {
       "type": 1,
@@ -25410,7 +26190,7 @@
     },
     {
       "type": 0,
-      "value": " will have up to "
+      "value": " se le evitarán hasta "
     },
     {
       "type": 1,
@@ -25418,13 +26198,13 @@
     },
     {
       "type": 0,
-      "value": " damage prevented this turn"
+      "value": " de daño este turno"
     }
   ],
   "engine.log.prevention.next.events": [
     {
       "type": 0,
-      "value": "The next "
+      "value": "A cada uno de los próximos "
     },
     {
       "type": 1,
@@ -25432,7 +26212,7 @@
     },
     {
       "type": 0,
-      "value": " damage events to "
+      "value": " eventos de daño a "
     },
     {
       "type": 1,
@@ -25440,7 +26220,7 @@
     },
     {
       "type": 0,
-      "value": " will each have "
+      "value": " se le evitarán "
     },
     {
       "type": 1,
@@ -25448,13 +26228,13 @@
     },
     {
       "type": 0,
-      "value": " damage prevented this turn"
+      "value": " de daño este turno"
     }
   ],
   "engine.log.prevention.next.physical.event": [
     {
       "type": 0,
-      "value": "The next physical damage event to "
+      "value": "Al próximo evento de daño físico a "
     },
     {
       "type": 1,
@@ -25462,7 +26242,7 @@
     },
     {
       "type": 0,
-      "value": " will have up to "
+      "value": " se le evitarán hasta "
     },
     {
       "type": 1,
@@ -25470,25 +26250,29 @@
     },
     {
       "type": 0,
-      "value": " damage prevented this turn"
+      "value": " de daño este turno"
     }
   ],
   "engine.log.prevention.source.next.damage": [
+    {
+      "type": 0,
+      "value": "Se evitarán los próximos "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " de daño de "
+    },
     {
       "type": 1,
       "value": "source"
     },
     {
       "type": 0,
-      "value": "'s next "
-    },
-    {
-      "type": 1,
-      "value": "amount"
-    },
-    {
-      "type": 0,
-      "value": " damage to "
+      "value": " a "
     },
     {
       "type": 1,
@@ -25496,13 +26280,13 @@
     },
     {
       "type": 0,
-      "value": " will be prevented this turn"
+      "value": " este turno"
     }
   ],
   "engine.log.spectra.fizzles.source.gone": [
     {
       "type": 0,
-      "value": "Spectra resolves without effect because its source is gone"
+      "value": "Spectra se resuelve sin efecto porque su fuente ya no está"
     }
   ],
   "engine.log.token.aura.creation.prohibited": [
@@ -25512,7 +26296,7 @@
     },
     {
       "type": 0,
-      "value": " can't create Aura tokens this turn"
+      "value": " no puede crear fichas de aura este turno"
     }
   ],
   "engine.log.token.created": [
@@ -25522,7 +26306,7 @@
     },
     {
       "type": 0,
-      "value": " creates "
+      "value": " crea "
     },
     {
       "type": 1,
@@ -25531,22 +26315,30 @@
   ],
   "engine.log.trigger.attack.defended": [
     {
+      "type": 0,
+      "value": "Disparador de "
+    },
+    {
       "type": 1,
       "value": "source"
     },
     {
       "type": 0,
-      "value": " triggers: When the affected attack is defended by 1 or more cards"
+      "value": ": cuando el ataque afectado sea defendido por 1 o más cartas"
     }
   ],
   "engine.log.trigger.card": [
+    {
+      "type": 0,
+      "value": "Disparador de "
+    },
     {
       "type": 1,
       "value": "triggerSource"
     },
     {
       "type": 0,
-      "value": " triggers: "
+      "value": ": "
     },
     {
       "type": 1,
@@ -25582,15 +26374,11 @@
     },
     {
       "type": 0,
-      "value": " declines "
+      "value": " rechaza el disparador de "
     },
     {
       "type": 1,
       "value": "source"
-    },
-    {
-      "type": 0,
-      "value": "'s trigger"
     }
   ],
   "engine.log.trigger.declined.facedown": [
@@ -25600,7 +26388,7 @@
     },
     {
       "type": 0,
-      "value": " declines a face-down trigger"
+      "value": " rechaza un disparador boca abajo"
     }
   ],
   "engine.log.trigger.declined.generic": [
@@ -25610,19 +26398,19 @@
     },
     {
       "type": 0,
-      "value": " declines the trigger"
+      "value": " rechaza el disparador"
     }
   ],
   "engine.log.trigger.defend.fizzles.chain.gone": [
     {
       "type": 0,
-      "value": "A defend trigger resolves without effect because the chain link is gone"
+      "value": "Un disparador de defensa se resuelve sin efecto porque el eslabón ya no está"
     }
   ],
   "engine.log.trigger.delayed.destroy.card": [
     {
       "type": 0,
-      "value": "A delayed effect triggers: destroy "
+      "value": "Disparador de un efecto retardado: destruye "
     },
     {
       "type": 1,
@@ -25631,12 +26419,16 @@
   ],
   "engine.log.trigger.delayed.lose.life": [
     {
+      "type": 0,
+      "value": "Disparador del efecto retardado de "
+    },
+    {
       "type": 1,
       "value": "hero"
     },
     {
       "type": 0,
-      "value": "'s delayed effect triggers: lose "
+      "value": ": pierde "
     },
     {
       "type": 1,
@@ -25644,27 +26436,35 @@
     },
     {
       "type": 0,
-      "value": " life"
+      "value": " de vida"
     }
   ],
   "engine.log.trigger.enter.arsenal": [
+    {
+      "type": 0,
+      "value": "Disparador de "
+    },
     {
       "type": 1,
       "value": "source"
     },
     {
       "type": 0,
-      "value": " triggers: When put face up into arsenal"
+      "value": ": cuando se coloca boca arriba en el arsenal"
     }
   ],
   "engine.log.trigger.facedown": [
+    {
+      "type": 0,
+      "value": "Disparador de la carta boca abajo de "
+    },
     {
       "type": 1,
       "value": "triggerSource"
     },
     {
       "type": 0,
-      "value": "'s face-down card triggers: "
+      "value": ": "
     },
     {
       "type": 1,
@@ -25696,7 +26496,7 @@
   "engine.log.trigger.fizzles.source.gone": [
     {
       "type": 0,
-      "value": "A triggered ability resolves without effect because its source is gone"
+      "value": "Una habilidad disparada se resuelve sin efecto porque su fuente ya no está"
     }
   ],
   "engine.log.trigger.fragment": [
@@ -25706,17 +26506,21 @@
     },
     {
       "type": 0,
-      "value": " triggers Fragment"
+      "value": " dispara fragment"
     }
   ],
   "engine.log.trigger.gains.action.points": [
+    {
+      "type": 0,
+      "value": "Disparador de "
+    },
     {
       "type": 1,
       "value": "source"
     },
     {
       "type": 0,
-      "value": " triggers: gain "
+      "value": ": obtén "
     },
     {
       "type": 6,
@@ -25729,7 +26533,7 @@
             },
             {
               "type": 0,
-              "value": " action point"
+              "value": " punto de acción"
             }
           ]
         },
@@ -25740,7 +26544,7 @@
             },
             {
               "type": 0,
-              "value": " action points"
+              "value": " puntos de acción"
             }
           ]
         }
@@ -25752,7 +26556,7 @@
   "engine.log.trigger.generic": [
     {
       "type": 0,
-      "value": "A triggered ability triggers"
+      "value": "Se dispara una habilidad disparada"
     },
     {
       "type": 6,
@@ -25779,28 +26583,36 @@
   ],
   "engine.log.trigger.on.friendly.hit": [
     {
+      "type": 0,
+      "value": "Disparador de "
+    },
+    {
       "type": 1,
       "value": "source"
     },
     {
       "type": 0,
-      "value": " triggers: On friendly hit"
+      "value": ": al impactar un ataque aliado"
     }
   ],
   "engine.log.trigger.on.hit": [
     {
+      "type": 0,
+      "value": "Disparador de "
+    },
+    {
       "type": 1,
       "value": "source"
     },
     {
       "type": 0,
-      "value": " triggers: On hit"
+      "value": ": Al impactar"
     }
   ],
   "engine.log.trigger.on.hit.fizzles.chain.gone": [
     {
       "type": 0,
-      "value": "An on-hit trigger resolves without effect because the chain link is gone"
+      "value": "Un disparador de al impactar se resuelve sin efecto porque el eslabón ya no está"
     }
   ],
   "engine.log.trigger.phantasm": [
@@ -25810,7 +26622,7 @@
     },
     {
       "type": 0,
-      "value": " triggers Phantasm"
+      "value": " dispara phantasm"
     }
   ],
   "engine.log.trigger.spectra": [
@@ -25820,17 +26632,21 @@
     },
     {
       "type": 0,
-      "value": " triggers Spectra"
+      "value": " dispara spectra"
     }
   ],
   "engine.log.trigger.target.declared": [
+    {
+      "type": 0,
+      "value": "La habilidad disparada de "
+    },
     {
       "type": 1,
       "value": "card"
     },
     {
       "type": 0,
-      "value": "'s triggered ability targets "
+      "value": " tiene como objetivo a "
     },
     {
       "type": 1,
@@ -25839,22 +26655,30 @@
   ],
   "engine.log.trigger.target.illegal": [
     {
+      "type": 0,
+      "value": "La habilidad disparada de "
+    },
+    {
       "type": 1,
       "value": "card"
     },
     {
       "type": 0,
-      "value": "'s triggered ability fails (its target is no longer legal)"
+      "value": " falla (su objetivo ya no es válido)"
     }
   ],
   "engine.log.trigger.target.none": [
     {
+      "type": 0,
+      "value": "La habilidad disparada de "
+    },
+    {
       "type": 1,
       "value": "card"
     },
     {
       "type": 0,
-      "value": "'s triggered ability has no legal target"
+      "value": " no tiene ningún objetivo válido"
     }
   ],
   "engine.log.trigger.watery.grave": [
@@ -25864,7 +26688,7 @@
     },
     {
       "type": 0,
-      "value": " triggers Watery Grave"
+      "value": " dispara Watery Grave"
     }
   ],
   "engine.log.turn.extra.granted": [
@@ -25874,13 +26698,13 @@
     },
     {
       "type": 0,
-      "value": " will take an extra turn"
+      "value": " jugará un turno adicional"
     }
   ],
   "engine.log.turn.started": [
     {
       "type": 0,
-      "value": "— Turn "
+      "value": "— Turno "
     },
     {
       "type": 1,
@@ -25888,7 +26712,7 @@
     },
     {
       "type": 0,
-      "value": ": "
+      "value": ": turno de "
     },
     {
       "type": 1,
@@ -25896,7 +26720,7 @@
     },
     {
       "type": 0,
-      "value": "'s turn —"
+      "value": " —"
     }
   ],
   "engine.log.wager.created": [
@@ -25906,7 +26730,7 @@
     },
     {
       "type": 0,
-      "value": " wagers with "
+      "value": " hace una apuesta con "
     },
     {
       "type": 1,
@@ -25916,13 +26740,13 @@
   "engine.log.wager.fizzles.chain.gone": [
     {
       "type": 0,
-      "value": "A wager resolves without effect because the chain link is gone"
+      "value": "Una apuesta se resuelve sin efecto porque el eslabón ya no está"
     }
   ],
   "engine.log.wager.fizzles.wager.gone": [
     {
       "type": 0,
-      "value": "A wager resolves without effect because its wager is gone"
+      "value": "Una apuesta se resuelve sin efecto porque la apuesta ya no está"
     }
   ],
   "engine.log.wager.winner": [
@@ -25932,31 +26756,31 @@
     },
     {
       "type": 0,
-      "value": " wins the wager"
+      "value": " gana la apuesta"
     }
   ],
   "engine.log.watery.grave.fizzles.source.left.graveyard": [
     {
       "type": 0,
-      "value": "Watery Grave resolves without effect because its source left the graveyard"
+      "value": "Watery Grave se resuelve sin efecto porque su fuente salió del cementerio"
     }
   ],
   "engine.option.unique.clear": [
     {
       "type": 0,
-      "value": "Clear the Unique card"
+      "value": "Retirar la carta unique"
     }
   ],
   "engine.term.attack.defended": [
     {
       "type": 0,
-      "value": "When the affected attack is defended by 1 or more cards"
+      "value": "Cuando el ataque afectado sea defendido por 1 o más cartas"
     }
   ],
   "engine.term.card.destroy": [
     {
       "type": 0,
-      "value": "Destroy "
+      "value": "Destruye "
     },
     {
       "type": 1,
@@ -25966,31 +26790,31 @@
   "engine.term.delayed.effect": [
     {
       "type": 0,
-      "value": "Delayed effect"
+      "value": "Efecto retardado"
     }
   ],
   "engine.term.enter.arsenal": [
     {
       "type": 0,
-      "value": "When put face up into arsenal"
+      "value": "Cuando se coloca boca arriba en el arsenal"
     }
   ],
   "engine.term.triggered.ability": [
     {
       "type": 0,
-      "value": "Triggered ability"
+      "value": "Habilidad disparada"
     }
   ],
   "engine.term.when.this.defends": [
     {
       "type": 0,
-      "value": "When this defends"
+      "value": "Cuando esta carta defienda"
     }
   ],
   "engine.term.whenever.this.fragments": [
     {
       "type": 0,
-      "value": "Whenever this fragments"
+      "value": "Cada vez que esta carta se fragmente"
     }
   ],
   "footer.legal": [
