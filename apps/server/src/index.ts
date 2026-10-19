@@ -25,6 +25,8 @@ import { appendClusterEvent, ClusterEventConsumer, sweepClusterEvents, type Clus
 import { tryAcquireLease } from "./leases.js";
 import { consoleError } from "./logging.js";
 import { PgRateLimiter, sweepRateLimits } from "./rateLimits.js";
+import { sweepRecoveryTokens } from "./recovery.js";
+import type { EmailSender } from "./email.js";
 import { startGatewayRuntimeMetrics, type RuntimeMetricLogger } from "./runtimeMetrics.js";
 import {
   cancelFriendRequest,
@@ -88,6 +90,8 @@ interface ServerDeps {
   botDelayMs?: number;
   /** Injectable upstream used by both HTTP deck detail and game entry. */
   fabraryClient?: FabraryClient;
+  /** Recovery email transport; null disables it. Defaults to EMAIL_PROVIDER. */
+  emailSender?: EmailSender | null;
   /** Unique Cloud Run container identity; generated per gateway when omitted. */
   instanceId?: string;
   /** Production observability seam. Tests and local development default off. */
@@ -181,6 +185,8 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
     rateLimiter: new PgRateLimiter(deps.db, "http-ip", 10, 10 * 60 * 1000),
     deckDeleteRateLimiter: new PgRateLimiter(deps.db, "deck-delete-ip", 120, 10 * 60 * 1000),
     accountRateLimiter: new PgRateLimiter(deps.db, "login-account", 10, 10 * 60 * 1000),
+    emailSender: deps.emailSender,
+    recoveryRateLimiter: new PgRateLimiter(deps.db, "recovery-target", 3, 60 * 60 * 1000),
     noticeRateLimiter: new PgRateLimiter(deps.db, "notice-ip", 600, 10 * 60 * 1000),
     replayShareRateLimiter: new PgRateLimiter(deps.db, "replay-share-ip", 120, 10 * 60 * 1000),
     sharedReplayRateLimiter: new PgRateLimiter(deps.db, "shared-replay-ip", 120, 10 * 60 * 1000),
@@ -1812,6 +1818,7 @@ if (!process.env.VITEST) {
         await sweepClusterEvents(pool);
         await sweepRoomCommands(pool);
         await sweepRateLimits(pool);
+        await sweepRecoveryTokens(pool);
         const offlineUserIds = await sweepSocialPresence(pool);
         for (const userId of offlineUserIds) {
           await appendClusterEvent(pool, { type: "social-presence", userId });

@@ -14,6 +14,7 @@ import {
   type MatchupRecord,
 } from "@fyendal/protocol";
 import { exportSocialData } from "./social.js";
+import { accountEmail } from "./recovery.js";
 import { listUserAchievements } from "./achievements.js";
 import {
   detachMatchesForUser, listMatches, loadMatchRecords, MAX_EXPORTED_MATCHES, sweepOrphanedMatches,
@@ -66,6 +67,8 @@ export interface AccountExport {
     createdAt: number;
     earlyTester: boolean;
     selectedBadge: PlayerBadge | null;
+    email: string | null;
+    pendingEmail: string | null;
   };
   decks: Array<Record<string, unknown>>;
   deckPlays: DeckPlay[];
@@ -184,6 +187,7 @@ function exportedAvoidedHeroes(value: unknown): string[] {
 export async function exportAccount(db: Queryable, userId: number): Promise<AccountExport | null> {
   const [
     { rows: users },
+    recoveryEmail,
     decks,
     deckPlays,
     { rows: roomRows },
@@ -197,6 +201,7 @@ export async function exportAccount(db: Queryable, userId: number): Promise<Acco
     social,
   ] = await Promise.all([
     db.query("SELECT username, created_at, early_tester, selected_badge FROM users WHERE id = $1", [userId]),
+    accountEmail(db, userId),
     listDecks(db, userId),
     listDeckPlays(db, userId),
     db.query(
@@ -337,6 +342,8 @@ export async function exportAccount(db: Queryable, userId: number): Promise<Acco
       createdAt: Number(user.created_at),
       earlyTester: user.early_tester,
       selectedBadge: badgePreferences(user.early_tester, user.selected_badge).selectedBadge,
+      email: recoveryEmail?.email ?? null,
+      pendingEmail: recoveryEmail?.pendingEmail ?? null,
     },
     decks: decks.map((deck) => ({
       id: deck.id,

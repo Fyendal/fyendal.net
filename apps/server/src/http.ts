@@ -53,6 +53,23 @@ import {
 } from "./replays.js";
 import { readSharedReplay, removeReplayShare, resetReplayShare, setReplayShare } from "./replayShares.js";
 import { createFabraryClient, parseFabraryDeckUrl, type FabraryClient } from "./fabrary.js";
+import {
+  configuredEmailSender,
+  emailChangedNotice,
+  passwordResetEmail,
+  sendInBackground,
+  verificationEmail,
+  type EmailSender,
+} from "./email.js";
+import { normalizeEmail, type PendingVerification } from "./emailVerification.js";
+import {
+  accountEmail,
+  confirmEmailVerification,
+  removeEmail,
+  requestEmailChange,
+  requestPasswordReset,
+  resetPassword,
+} from "./recovery.js";
 
 const BODY_LIMIT = 16 * 1024; // 16kb cap on JSON bodies (decklist exports)
 const RATE_WINDOW_MS = 10 * 60 * 1000; // 10 minutes
@@ -141,6 +158,10 @@ export interface ApiDeps {
   stats?: () => Promise<Record<string, unknown>>;
   /** Injectable for tests; production reads FABRARY_API_SECRET server-side. */
   fabraryClient?: FabraryClient;
+  /** Recovery email transport; null disables recovery email. Defaults to EMAIL_PROVIDER. */
+  emailSender?: EmailSender | null;
+  /** Throttles recovery and verification email per normalized target. */
+  recoveryRateLimiter?: RateLimiter;
   /** Lets the WebSocket gateway immediately close sockets for a revoked token. */
   onSessionRevoked?: (token: string) => void;
   /** Lets the gateway close every live socket belonging to an account. */
@@ -328,6 +349,8 @@ export function createApiServer(deps: ApiDeps): http.Server {
   const deckDeleteLimiter = deps.deckDeleteRateLimiter ?? createRateLimiter(120);
   const accountLimiter = deps.accountRateLimiter ?? createRateLimiter();
   const fabraryClient = deps.fabraryClient ?? createFabraryClient();
+  const emailSender = deps.emailSender !== undefined ? deps.emailSender : configuredEmailSender();
+  const recoveryLimiter = deps.recoveryRateLimiter ?? createRateLimiter(3, 60 * 60 * 1000);
   const noticeLimiter = deps.noticeRateLimiter ?? createRateLimiter(600);
   const replayShareLimiter = deps.replayShareRateLimiter ?? createRateLimiter(120);
   const sharedReplayLimiter = deps.sharedReplayRateLimiter ?? createRateLimiter(120);
@@ -351,6 +374,28 @@ export function createApiServer(deps: ApiDeps): http.Server {
     return token ? sessionForToken(deps.db, token) : null;
   };
 
+  // Links point at the client origin and carry their token in the fragment so
+  // it never reaches request logs or a Referer header.
+  const email = emailSender && appOrigin ? { sender: emailSender, origin: appOrigin } : null;
+  const emailUnavailable: ApiResult = {
+    status: 503,
+    body: { ok: false, error: "email recovery unavailable" },
+  };
+  const tooMany: ApiResult = { status: 429, body: { ok: false, error: "too many attempts, try again later" } };
+  const invalidEmail: ApiResult = { status: 400, body: { ok: false, error: "enter a valid email address" } };
+  /** Password-confirmed account actions share these two failure answers. */
+  const passwordCheckFailure = (status: "invalid-password" | "not-found"): ApiResult => status === "invalid-password"
+    ? { status: 403, body: { ok: false, error: "invalid password" } }
+    : { status: 404, body: { ok: false, error: "account not found" } };
+  const sendVerification = (pending: PendingVerification): void => {
+    if (!email) return;
+    sendInBackground(email.sender, verificationEmail(
+      pending.email,
+      pending.username,
+      `${email.origin}/verify-email#${pending.token}`,
+    ));
+  };
+
   const routes: Record<
     string,
     (body: unknown, user: AuthUser | null, token: string | null) => Promise<ApiResult>
@@ -358,9 +403,73 @@ export function createApiServer(deps: ApiDeps): http.Server {
     "/api/register": async (body) => {
       const username = field(body, "username");
       const password = field(body, "password");
-      const r = await register(deps.db, username, password);
+      const rawEmail = field(body, "email");
+      const address = rawEmail.trim() ? normalizeEmail(rawEmail) : null;
+      if (rawEmail.trim() && !address) return invalidEmail;
+      if (address && !email) return emailUnavailable;
+      const r = await register(deps.db, username, password, address ?? undefined);
       if (!r.ok) return { status: 400, body: { ok: false, error: r.error } };
+      if (r.verification) sendVerification(r.verification);
       return { status: 200, body: { ok: true } };
+    },
+    "/api/account/email": async (body, user) => {
+      if (!user) return { status: 401, body: { ok: false, error: "not logged in" } };
+      if (!email) return emailUnavailable;
+      const address = normalizeEmail(field(body, "email"));
+      if (!address) return invalidEmail;
+      if (!(await recoveryLimiter.allow(`user:${user.id}`, "/api/account/email"))) return tooMany;
+      const result = await requestEmailChange(deps.db, user.id, field(body, "password"), address);
+      if (result.status !== "ok") return passwordCheckFailure(result.status);
+      sendVerification(result.value.pending);
+      return {
+        status: 200,
+        body: { ok: true, available: true, email: result.value.email, pendingEmail: result.value.pending.email },
+      };
+    },
+    "/api/account/email/remove": async (body, user) => {
+      if (!user) return { status: 401, body: { ok: false, error: "not logged in" } };
+      const result = await removeEmail(deps.db, user.id, field(body, "password"));
+      if (result.status !== "ok") return passwordCheckFailure(result.status);
+      if (email && result.value.previousEmail) {
+        sendInBackground(email.sender, emailChangedNotice(result.value.previousEmail, result.value.username, true));
+      }
+      return { status: 200, body: { ok: true, available: email !== null, email: null, pendingEmail: null } };
+    },
+    "/api/account/email/verify": async (body) => {
+      const confirmed = await confirmEmailVerification(deps.db, field(body, "token"));
+      if (!confirmed) return { status: 400, body: { ok: false, error: "invalid or expired link" } };
+      if (email && confirmed.previousEmail) {
+        sendInBackground(email.sender, emailChangedNotice(confirmed.previousEmail, confirmed.username, false));
+      }
+      return { status: 200, body: { ok: true } };
+    },
+    "/api/password/forgot": async (body) => {
+      if (!email) return emailUnavailable;
+      const identifier = field(body, "identifier");
+      const targetKey = identifier.trim().toLowerCase();
+      if (!targetKey) return { status: 400, body: { ok: false, error: "enter a username or email" } };
+      // The response is identical whether or not anything matched, and mail
+      // goes out after it, so neither content nor timing reveals an account.
+      if (!(await recoveryLimiter.allow(targetKey, "/api/password/forgot"))) return tooMany;
+      void requestPasswordReset(deps.db, identifier)
+        .then((delivery) => {
+          if (!delivery) return;
+          sendInBackground(email.sender, passwordResetEmail(
+            delivery.to,
+            delivery.accounts.map((account) => ({
+              username: account.username,
+              url: `${email.origin}/reset-password#${account.token}`,
+            })),
+          ));
+        })
+        .catch((error: unknown) => consoleError("password reset request failed", error));
+      return { status: 200, body: { ok: true } };
+    },
+    "/api/password/reset": async (body) => {
+      const result = await resetPassword(deps.db, field(body, "token"), field(body, "password"));
+      if (!result.ok) return { status: 400, body: { ok: false, error: result.error } };
+      await deps.onUserSessionsRevoked?.(result.userId);
+      return { status: 200, body: { ok: true, token: result.token, username: result.username } };
     },
     "/api/login": async (body) => {
       const username = field(body, "username");
@@ -390,12 +499,7 @@ export function createApiServer(deps: ApiDeps): http.Server {
     "/api/account/delete": async (body, user) => {
       if (!user) return { status: 401, body: { ok: false, error: "not logged in" } };
       const result = await deleteAccount(deps.db, user.id, field(body, "password"));
-      if (result.status === "invalid-password") {
-        return { status: 403, body: { ok: false, error: "invalid password" } };
-      }
-      if (result.status === "not-found") {
-        return { status: 404, body: { ok: false, error: "account not found" } };
-      }
+      if (result.status !== "deleted") return passwordCheckFailure(result.status);
       await deps.onUserSessionsRevoked?.(user.id);
       await deps.onRoomsDeleted?.(result.deletedRooms);
       return { status: 200, body: { ok: true } };
@@ -684,6 +788,17 @@ export function createApiServer(deps: ApiDeps): http.Server {
           const preferences = await getAccountBadges(deps.db, user.id);
           if (!preferences) return sendJson(res, 404, { ok: false, error: "account not found" });
           sendJson(res, 200, { ok: true, ...preferences });
+        })
+        .catch((e) => internalError(res, e));
+      return;
+    }
+    if (req.method === "GET" && url.pathname === "/api/account/email") {
+      authUser(req)
+        .then(async (user) => {
+          if (!user) return sendJson(res, 401, { ok: false, error: "not logged in" });
+          const current = await accountEmail(deps.db, user.id);
+          if (!current) return sendJson(res, 404, { ok: false, error: "account not found" });
+          sendJson(res, 200, { ok: true, available: email !== null, ...current });
         })
         .catch((e) => internalError(res, e));
       return;

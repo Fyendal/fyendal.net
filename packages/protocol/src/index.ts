@@ -368,6 +368,8 @@ export interface AccountExport {
     createdAt: number;
     earlyTester: boolean;
     selectedBadge: PlayerBadge | null;
+    email: string | null;
+    pendingEmail: string | null;
   };
   decks: Array<{
     id: string;
@@ -2440,7 +2442,8 @@ export const decodeAccountExportResponse: Decoder<AccountExportResponse> = (valu
         "playerReports", "gameDays", "achievements", "replays", "matches", "heroRecords", "matchupRecords",
         "friends", "friendRequests", "friendMessages"],
     ) && !!account
-    && exactKeys(account, ["username", "createdAt", "earlyTester", "selectedBadge"])
+    && exactKeys(account, ["username", "createdAt", "earlyTester", "selectedBadge", "email", "pendingEmail"])
+    && nullableEmail(account.email) && nullableEmail(account.pendingEmail)
     && string(exported.exportedAt, 64, false) && string(account.username, MAX_SHORT_TEXT, false)
     && nonNegativeInteger(account.createdAt) && typeof account.earlyTester === "boolean"
     && (account.selectedBadge === null || playerBadge(account.selectedBadge))

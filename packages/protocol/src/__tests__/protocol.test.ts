@@ -1362,7 +1362,7 @@ describe("replays and HTTP responses", () => {
       ok: true,
       export: {
         exportedAt: "2026-01-01T00:00:00.000Z",
-        account: { username: "alice", createdAt: 1, earlyTester: true, selectedBadge: "early-tester" },
+        account: { username: "alice", createdAt: 1, earlyTester: true, selectedBadge: "early-tester", email: null, pendingEmail: null },
         decks: [{
           id: summary.id,
           name: summary.name,
@@ -1533,7 +1533,7 @@ describe("replays and HTTP responses", () => {
         ok: true,
         export: {
           exportedAt: "2026-01-01T00:00:00.000Z",
-          account: { username: "alice", createdAt: 1, earlyTester: true, selectedBadge: "early-tester" },
+          account: { username: "alice", createdAt: 1, earlyTester: true, selectedBadge: "early-tester", email: null, pendingEmail: null },
           decks: [],
           deckPlays: [],
           rooms: [],

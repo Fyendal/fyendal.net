@@ -3,10 +3,16 @@ import {
   scrypt,
   timingSafeEqual,
 } from "node:crypto";
+import { PASSWORD_MIN_LENGTH } from "@fyendal/protocol";
 import { recordUserRegistration } from "./analytics.js";
 import { withTransaction, type Queryable, type UserRow } from "./db.js";
 import { appendClusterEvent } from "./clusterEvents.js";
-import { hashToken } from "./tokenHash.js";
+import {
+  insertEmailVerification,
+  type NormalizedEmail,
+  type PendingVerification,
+} from "./emailVerification.js";
+import { hashToken, newToken } from "./tokenHash.js";
 
 // scrypt parameters: N=131072, r=8, p=1 with a random 16-byte salt,
 // stored as scrypt:N:r:p:salt:hash (base64).
@@ -117,8 +123,21 @@ function passwordNeedsRehash(stored: string): boolean {
 
 export const hashSessionToken = hashToken;
 
-function newToken(): string {
-  return randomBytes(32).toString("base64url");
+/** The single password policy shared by registration and password reset. */
+export function passwordError(password: string): string | null {
+  return password.length < PASSWORD_MIN_LENGTH
+    ? `password must be at least ${PASSWORD_MIN_LENGTH} characters`
+    : null;
+}
+
+/** Issue a 30-day session for an already authenticated account. */
+export async function createSession(db: Queryable, userId: number): Promise<string> {
+  const token = newToken();
+  await db.query(
+    "INSERT INTO sessions (token_hash, user_id, expires_at) VALUES ($1, $2, $3)",
+    [hashSessionToken(token), userId, Date.now() + SESSION_TTL_MS],
+  );
+  return token;
 }
 
 async function userByName(
@@ -139,13 +158,17 @@ async function userById(
   return rows[0] as UserRow | undefined;
 }
 
-export type RegisterResult = { ok: true } | { ok: false; error: string };
+export type RegisterResult =
+  | { ok: true; verification?: PendingVerification }
+  | { ok: false; error: string };
 
-/** Create an account identified only by its unique username. */
+/** Create an account identified only by its unique username, optionally
+ * starting verification of a recovery address in the same transaction. */
 export async function register(
   db: Queryable,
   username: string,
   password: string,
+  email?: NormalizedEmail,
 ): Promise<RegisterResult> {
   if (!USERNAME_RE.test(username)) {
     return {
@@ -153,20 +176,21 @@ export async function register(
       error: "username must be 3-20 characters (letters, digits, _)",
     };
   }
-  if (password.length < 8) {
-    return { ok: false, error: "password must be at least 8 characters" };
-  }
+  const invalidPassword = passwordError(password);
+  if (invalidPassword) return { ok: false, error: invalidPassword };
   if (await userByName(db, username)) return { ok: false, error: "username taken" };
   try {
     const passHash = await hashPassword(password);
     const createdAt = Date.now();
-    await withTransaction(db, async (tx) => {
-      await tx.query(
-        "INSERT INTO users (username, username_lc, pass_hash, created_at) VALUES ($1, $2, $3, $4)",
+    const verification = await withTransaction(db, async (tx) => {
+      const { rows } = await tx.query(
+        "INSERT INTO users (username, username_lc, pass_hash, created_at) VALUES ($1, $2, $3, $4) RETURNING id",
         [username, username.toLowerCase(), passHash, createdAt],
       );
       await recordUserRegistration(tx, createdAt);
+      return email ? insertEmailVerification(tx, Number(rows[0]?.id), username, email) : undefined;
     });
+    return verification ? { ok: true, verification } : { ok: true };
   } catch (e) {
     // Lost a registration race (check-then-insert): a concurrent request
     // claimed the name between the check above and the INSERT.
@@ -175,7 +199,6 @@ export async function register(
     if (await userByName(db, username)) return { ok: false, error: "username taken" };
     throw e;
   }
-  return { ok: true };
 }
 
 export type LoginResult =
@@ -199,11 +222,7 @@ export async function login(
     const upgraded = await hashPassword(password);
     await db.query("UPDATE users SET pass_hash = $1 WHERE id = $2", [upgraded, user.id]);
   }
-  const token = newToken();
-  await db.query(
-    "INSERT INTO sessions (token_hash, user_id, expires_at) VALUES ($1, $2, $3)",
-    [hashSessionToken(token), user.id, Date.now() + SESSION_TTL_MS],
-  );
+  const token = await createSession(db, user.id);
   return { ok: true, token, username: user.username };
 }
 
@@ -265,14 +284,17 @@ export async function revokeSession(db: Queryable, token: string): Promise<void>
   });
 }
 
+/** Revoke every session belonging to an account inside the caller's transaction. */
+export async function revokeAllSessionsIn(tx: Queryable, userId: number): Promise<void> {
+  const deleted = await tx.query("DELETE FROM sessions WHERE user_id = $1", [userId]);
+  if (deleted.rowCount) {
+    await appendClusterEvent(tx, { type: "user-sessions-revoked", userId });
+  }
+}
+
 /** Revoke every session belonging to an account. */
 export async function revokeAllSessions(db: Queryable, userId: number): Promise<void> {
-  await withTransaction(db, async (tx) => {
-    const deleted = await tx.query("DELETE FROM sessions WHERE user_id = $1", [userId]);
-    if (deleted.rowCount) {
-      await appendClusterEvent(tx, { type: "user-sessions-revoked", userId });
-    }
-  });
+  await withTransaction(db, (tx) => revokeAllSessionsIn(tx, userId));
 }
 
 /** Delete expired sessions in one bounded, indexable statement. */
