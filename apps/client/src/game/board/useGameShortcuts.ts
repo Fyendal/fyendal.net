@@ -12,6 +12,8 @@ export function useGameShortcuts({
   hotkeyIntent,
   pendingDecision,
   setConfirmArsenalSkip,
+  warnBeforeEndTurn,
+  setConfirmEndTurn,
   onSend,
   onReset,
   actionShortcutEnabled,
@@ -24,6 +26,8 @@ export function useGameShortcuts({
   hotkeyIntent: GameIntent | null;
   pendingDecision: PendingDecision | null;
   setConfirmArsenalSkip: (confirmed: boolean) => void;
+  warnBeforeEndTurn: boolean;
+  setConfirmEndTurn: (confirmed: boolean) => void;
   onSend: (intent: GameIntent) => boolean;
   onReset: () => void;
   actionShortcutEnabled: boolean;
@@ -41,11 +45,24 @@ export function useGameShortcuts({
         setConfirmArsenalSkip(true);
         return;
       }
+      if (warnBeforeEndTurn && hotkeyIntent.kind === "pass") {
+        setConfirmEndTurn(true);
+        return;
+      }
       if (onSend(hotkeyIntent)) onReset();
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [hotkeyIntent, onReset, onSend, passEnabled, pendingDecision, setConfirmArsenalSkip]);
+  }, [
+    hotkeyIntent,
+    onReset,
+    onSend,
+    passEnabled,
+    pendingDecision,
+    setConfirmArsenalSkip,
+    setConfirmEndTurn,
+    warnBeforeEndTurn,
+  ]);
 
   useEffect(() => {
     if (!actionShortcutEnabled) return;

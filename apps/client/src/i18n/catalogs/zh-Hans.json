@@ -2763,6 +2763,8 @@
   "game.decision.arsenal.context": "结束回合且不将卡牌放入Arsenal？",
   "game.decision.arsenal.action": "跳过Arsenal",
   "game.decision.arsenal.choosePrompt": "你可以将一张手牌放入 arsenal，或选择让过",
+  "game.decision.endTurn.prompt": "你还有行动点，确定要结束回合吗？",
+  "game.decision.endTurn.action": "仍然结束回合",
   "game.decision.opt.instructions": "最后放到顶部的牌位于最上方；最后放到底部的牌位于最下方。",
   "game.decision.opt.top": "顶部",
   "game.decision.opt.bottom": "底部",

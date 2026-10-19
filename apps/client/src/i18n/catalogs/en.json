@@ -2763,6 +2763,8 @@
   "game.decision.arsenal.context": "End the turn without putting a card into your arsenal?",
   "game.decision.arsenal.action": "Skip arsenal",
   "game.decision.arsenal.choosePrompt": "You may put a card from your hand into your arsenal, or pass",
+  "game.decision.endTurn.prompt": "You still have an action point. Are you sure you want to end your turn?",
+  "game.decision.endTurn.action": "End turn anyway",
   "game.decision.opt.instructions": "Last Top is topmost; last Bottom is bottommost.",
   "game.decision.opt.top": "Top",
   "game.decision.opt.bottom": "Bottom",

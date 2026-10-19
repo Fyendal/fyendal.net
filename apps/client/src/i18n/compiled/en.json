@@ -27419,6 +27419,18 @@
       "value": "Apply one replacement effect. Any that still apply afterward are offered next."
     }
   ],
+  "game.decision.endTurn.action": [
+    {
+      "type": 0,
+      "value": "End turn anyway"
+    }
+  ],
+  "game.decision.endTurn.prompt": [
+    {
+      "type": 0,
+      "value": "You still have an action point. Are you sure you want to end your turn?"
+    }
+  ],
   "game.decision.name.choose": [
     {
       "type": 0,

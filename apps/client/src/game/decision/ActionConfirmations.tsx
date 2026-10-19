@@ -118,6 +118,29 @@ export function ArsenalSkipConfirmation({
   );
 }
 
+export function EndTurnConfirmation({
+  onConfirm,
+  onCancel,
+}: {
+  onConfirm: () => void;
+  onCancel: () => void;
+}) {
+  const intl = useIntl();
+  return (
+    <>
+      <span className="decision-prompt">{intl.formatMessage({ id: "game.decision.endTurn.prompt" })}</span>
+      <ChoiceList
+        options={[{
+          key: "end-turn",
+          label: intl.formatMessage({ id: "game.decision.endTurn.action" }),
+          onChoose: onConfirm,
+        }]}
+      />
+      <ChoiceCancel onCancel={onCancel} />
+    </>
+  );
+}
+
 export function OptDecisionInstructions({ cardCount }: { cardCount: number }) {
   const intl = useIntl();
   if (cardCount < 2) return null;

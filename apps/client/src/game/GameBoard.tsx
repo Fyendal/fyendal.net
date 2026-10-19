@@ -73,6 +73,7 @@ import { useGameViewport } from "./board/useGameViewport.js";
 import { useFullscreen } from "../components/useFullscreen.js";
 import { useIdleVictoryPrompt } from "./board/useIdleVictoryPrompt.js";
 import { useGameShortcuts } from "./board/useGameShortcuts.js";
+import { shouldWarnBeforeEndTurn } from "./endTurnWarning.js";
 import type { BoardOverlay } from "./board/BoardPrimitives.js";
 import { heroCard } from "./board/heroCard.js";
 import { PlayerHalf } from "./board/PlayerHalf.js";
@@ -286,6 +287,7 @@ export function GameBoard() {
   // for a fresh result or after leaving and returning to the replay's last frame.
   const [gameOverDismissed, setGameOverDismissed] = useState(false);
   const [confirmSkipArsenal, setConfirmSkipArsenal] = useState(false);
+  const [confirmEndTurn, setConfirmEndTurn] = useState(false);
   const [boundedChoiceSelection, setBoundedChoiceSelection] = useState<{
     decisionKey: string;
     optionIds: readonly string[];
@@ -318,6 +320,8 @@ export function GameBoard() {
       : null;
   useEffect(() => setGameOverDismissed(false), [winnerNow]);
   useEffect(() => setConfirmSkipArsenal(false), [arsenalDecisionKey]);
+  // Any authoritative update (including undo) dismisses a pending end-turn warning.
+  useEffect(() => setConfirmEndTurn(false), [authoritativeView]);
   // the combat chain window's on-screen rect, reported by ChainFloat so the
   // status window can dock to its right edge
   const [chainRect, setChainRect] = useState<DOMRect | null>(null);
@@ -438,11 +442,21 @@ export function GameBoard() {
     screen !== "replay" &&
     !spectating &&
     yourSeat !== null;
+  const warnBeforeEndTurn =
+    screen !== "replay" &&
+    !spectating &&
+    shouldWarnBeforeEndTurn(authoritativeView, yourSeat, actionCandidates);
+  // Choosing a card or ability instead also dismisses it.
+  useEffect(() => {
+    if (sel.kind !== "none") setConfirmEndTurn(false);
+  }, [sel.kind]);
   useGameShortcuts({
-    passEnabled: passHotkeyEnabled,
+    passEnabled: passHotkeyEnabled && !confirmEndTurn,
     hotkeyIntent,
     pendingDecision: view?.pendingDecision ?? null,
     setConfirmArsenalSkip: setConfirmSkipArsenal,
+    warnBeforeEndTurn,
+    setConfirmEndTurn,
     onSend: sendIntent,
     onReset: resetSel,
     actionShortcutEnabled: actionShortcutReady,
@@ -638,6 +652,10 @@ export function GameBoard() {
     const intent = { kind: "pass" } as const;
     if (shouldConfirmArsenalPass(pd, intent)) {
       setConfirmSkipArsenal(true);
+      return;
+    }
+    if (warnBeforeEndTurn) {
+      setConfirmEndTurn(true);
       return;
     }
     send(intent);
@@ -1382,6 +1400,15 @@ export function GameBoard() {
       {gameMotion.turnStartUiReady ? <DecisionFloat
         viewerSeat={seat}
         optionHotkeys={optionHotkeys}
+        endTurnConfirmation={confirmEndTurn && warnBeforeEndTurn
+          ? {
+              onConfirm: () => {
+                setConfirmEndTurn(false);
+                send({ kind: "pass" });
+              },
+              onCancel: () => setConfirmEndTurn(false),
+            }
+          : null}
         pitchFocused={choosingPitch || pitchSource !== null}
         pending={{
           decision: hidePriorityGuidance || showCardSearchOverlay ? null : pd,

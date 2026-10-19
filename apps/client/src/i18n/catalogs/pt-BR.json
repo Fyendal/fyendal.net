@@ -2763,6 +2763,8 @@
   "game.decision.arsenal.context": "Encerrar o turno sem colocar uma carta no seu arsenal?",
   "game.decision.arsenal.action": "Pular arsenal",
   "game.decision.arsenal.choosePrompt": "Você pode colocar uma carta da sua mão no seu arsenal ou passar",
+  "game.decision.endTurn.prompt": "Você ainda tem um Action Point. Tem certeza de que quer encerrar o turno?",
+  "game.decision.endTurn.action": "Encerrar turno mesmo assim",
   "game.decision.opt.instructions": "O último Topo fica mais acima; o último Fundo fica mais abaixo.",
   "game.decision.opt.top": "Topo",
   "game.decision.opt.bottom": "Fundo",

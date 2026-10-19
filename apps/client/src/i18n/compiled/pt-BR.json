@@ -28747,6 +28747,18 @@
       "value": "Aplique um efeito de substituição. Os que ainda se aplicarem depois serão oferecidos em seguida."
     }
   ],
+  "game.decision.endTurn.action": [
+    {
+      "type": 0,
+      "value": "Encerrar turno mesmo assim"
+    }
+  ],
+  "game.decision.endTurn.prompt": [
+    {
+      "type": 0,
+      "value": "Você ainda tem um Action Point. Tem certeza de que quer encerrar o turno?"
+    }
+  ],
   "game.decision.name.choose": [
     {
       "type": 0,

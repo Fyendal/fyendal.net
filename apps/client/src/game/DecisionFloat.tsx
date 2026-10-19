@@ -9,6 +9,7 @@ import type {
 } from "./decision/DecisionModels.js";
 import { PendingDecisionPanel, pendingDecisionPanelShown } from "./decision/PendingDecisionPanel.js";
 import { ChoiceHotkeysEnabled } from "./decision/choiceHotkeys.js";
+import { EndTurnConfirmation } from "./decision/ActionConfirmations.js";
 
 export type { ActionAnnouncementModel, PendingDecisionModel } from "./decision/DecisionModels.js";
 
@@ -49,21 +50,30 @@ export function DecisionFloat({
   viewerSeat,
   pitchFocused = false,
   optionHotkeys = false,
+  endTurnConfirmation = null,
 }: {
   pending: PendingDecisionModel;
   action: ActionAnnouncementModel;
   viewerSeat: number;
   pitchFocused?: boolean;
   optionHotkeys?: boolean;
+  /** Present while the player confirms ending the turn with an unused action point. */
+  endTurnConfirmation?: { onConfirm: () => void; onCancel: () => void } | null;
 }) {
   const decisionFloat = useFloatDrag({
-    resetKey: decisionFloatDragKey(
-      pending.decision,
-      action.sel,
-      action.autoCommitPending,
-    ),
+    resetKey: endTurnConfirmation
+      ? "end-turn-confirmation"
+      : decisionFloatDragKey(
+          pending.decision,
+          action.sel,
+          action.autoCommitPending,
+        ),
   });
-  if (!pendingDecisionPanelShown(pending) && (action.sel.kind === "none" || action.autoCommitPending)) {
+  if (
+    !endTurnConfirmation &&
+    !pendingDecisionPanelShown(pending) &&
+    (action.sel.kind === "none" || action.autoCommitPending)
+  ) {
     return null;
   }
 
@@ -74,8 +84,19 @@ export function DecisionFloat({
       {...(pitchFocused ? {} : decisionFloat.dragProps)}
     >
       <ChoiceHotkeysEnabled.Provider value={optionHotkeys}>
-        <PendingDecisionPanel model={pending} viewerSeat={viewerSeat} />
-        <ActionAnnouncementPanel model={action} viewerSeat={viewerSeat} />
+        {endTurnConfirmation ? (
+          <div className="decision decision-options decision-choice">
+            <EndTurnConfirmation
+              onConfirm={endTurnConfirmation.onConfirm}
+              onCancel={endTurnConfirmation.onCancel}
+            />
+          </div>
+        ) : (
+          <>
+            <PendingDecisionPanel model={pending} viewerSeat={viewerSeat} />
+            <ActionAnnouncementPanel model={action} viewerSeat={viewerSeat} />
+          </>
+        )}
       </ChoiceHotkeysEnabled.Provider>
     </div>
   );

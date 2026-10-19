@@ -26758,6 +26758,18 @@
       "value": "应用一个替代效果。之后仍适用的效果会继续提供选择。"
     }
   ],
+  "game.decision.endTurn.action": [
+    {
+      "type": 0,
+      "value": "仍然结束回合"
+    }
+  ],
+  "game.decision.endTurn.prompt": [
+    {
+      "type": 0,
+      "value": "你还有行动点，确定要结束回合吗？"
+    }
+  ],
   "game.decision.name.choose": [
     {
       "type": 0,
