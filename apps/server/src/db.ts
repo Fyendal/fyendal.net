@@ -10,6 +10,8 @@ export interface UserRow {
   created_at: number;
   early_tester: boolean;
   selected_badge: "early-tester" | null;
+  email: string | null;
+  email_lc: string | null;
 }
 
 export interface Queryable {
@@ -963,6 +965,37 @@ export const MIGRATIONS: Migration[] = [
       await db.query("ALTER TABLE room_seats DROP COLUMN runechant_skip");
       await db.query(`ALTER TABLE room_seats ADD CONSTRAINT room_seats_token_skip_check
         CHECK (token_skip IS NULL OR token_skip IN ('runechant', 'seismic-surge'))`);
+    },
+  },
+  {
+    version: 52,
+    // Optional recovery email. `users.email` holds only a verified address;
+    // an unconfirmed address waits in `email_verifications`. Addresses are
+    // deliberately not unique so registration and email changes cannot probe
+    // whether another account uses an address. Both token tables store only
+    // SHA-256 hashes and cascade with the account.
+    sql: "",
+    apply: async (db) => {
+      await db.query("ALTER TABLE users ADD COLUMN email TEXT");
+      await db.query("ALTER TABLE users ADD COLUMN email_lc TEXT");
+      await db.query("CREATE INDEX users_email_lc_idx ON users (email_lc)");
+      await db.query(`CREATE TABLE email_verifications (
+        token_hash TEXT PRIMARY KEY,
+        user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        email TEXT NOT NULL,
+        email_lc TEXT NOT NULL,
+        expires_at BIGINT NOT NULL
+      )`);
+      await db.query("CREATE INDEX email_verifications_user_id_idx ON email_verifications (user_id)");
+      await db.query("CREATE INDEX email_verifications_expires_at_idx ON email_verifications (expires_at)");
+      await db.query(`CREATE TABLE password_resets (
+        token_hash TEXT PRIMARY KEY,
+        user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        created_at BIGINT NOT NULL,
+        expires_at BIGINT NOT NULL
+      )`);
+      await db.query("CREATE INDEX password_resets_user_id_idx ON password_resets (user_id)");
+      await db.query("CREATE INDEX password_resets_expires_at_idx ON password_resets (expires_at)");
     },
   },
 ];

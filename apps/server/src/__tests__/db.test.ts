@@ -252,6 +252,31 @@ describe("initial schema", () => {
     await expect(db.query("UPDATE room_seats SET token_skip = 'aura'")).rejects.toThrow();
   });
 
+  it("adds optional recovery email and cascading recovery tokens to existing accounts", async () => {
+    const db = rawDb();
+    await applyMigrations(db, MIGRATIONS.filter((migration) => migration.version <= 51));
+    await db.query(
+      "INSERT INTO users (username, username_lc, pass_hash, created_at) VALUES ('Old', 'old', 'hash', 1)",
+    );
+
+    await applyMigrations(db, MIGRATIONS);
+
+    const { rows } = await db.query("SELECT id, email, email_lc FROM users");
+    expect(rows).toEqual([{ id: expect.any(Number), email: null, email_lc: null }]);
+    const userId = rows[0].id;
+    await db.query(
+      "INSERT INTO email_verifications (token_hash, user_id, email, email_lc, expires_at) VALUES ('v', $1, 'A@x.io', 'a@x.io', 9)",
+      [userId],
+    );
+    await db.query(
+      "INSERT INTO password_resets (token_hash, user_id, created_at, expires_at) VALUES ('r', $1, 1, 9)",
+      [userId],
+    );
+    await db.query("DELETE FROM users WHERE id = $1", [userId]);
+    expect((await db.query("SELECT * FROM email_verifications")).rows).toEqual([]);
+    expect((await db.query("SELECT * FROM password_resets")).rows).toEqual([]);
+  });
+
   it("adds candidate skip state to an already-applied version 26 database", async () => {
     const db = rawDb();
     await applyMigrations(db, MIGRATIONS.filter((migration) => migration.version <= 26));
