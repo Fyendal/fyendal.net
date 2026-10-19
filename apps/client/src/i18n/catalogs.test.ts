@@ -4,6 +4,7 @@ import ts from "typescript";
 import { describe, expect, it } from "vitest";
 import englishMessages from "./compiled/en.json";
 import portugueseMessages from "./compiled/pt-BR.json";
+import spanishMessages from "./compiled/es.json";
 import chineseMessages from "./compiled/zh-Hans.json";
 import { createTestIntl } from "./TestI18nProvider.js";
 
@@ -132,6 +133,7 @@ const GRAMMATICAL_ARGUMENTS = new Set(["noun"]);
 const LOCALIZED_CATALOGS: ReadonlyArray<readonly [string, Record<string, unknown>]> = [
   ["zh-Hans", chineseMessages],
   ["pt-BR", portugueseMessages],
+  ["es", spanishMessages],
 ];
 
 describe("locale catalogs", () => {

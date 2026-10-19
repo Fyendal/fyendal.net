@@ -1,4 +1,4 @@
-export const SUPPORTED_LOCALES = ["en", "zh-Hans", "pt-BR"] as const;
+export const SUPPORTED_LOCALES = ["en", "zh-Hans", "pt-BR", "es"] as const;
 export type SupportedLocale = (typeof SUPPORTED_LOCALES)[number];
 
 /** Language choices are autonyms so they remain recognizable before and
@@ -7,6 +7,7 @@ export const LOCALE_AUTONYMS: Readonly<Record<SupportedLocale, string>> = {
   en: "English",
   "zh-Hans": "简体中文",
   "pt-BR": "Português",
+  es: "Español",
 };
 
 /** Short native marks for the round header badge. They name languages, not
@@ -15,6 +16,7 @@ export const LOCALE_MARKS: Readonly<Record<SupportedLocale, string>> = {
   en: "EN",
   "zh-Hans": "中",
   "pt-BR": "PT",
+  es: "ES",
 };
 
 export const LOCALE_STORAGE_KEY = "fyendal-locale";
@@ -30,7 +32,8 @@ export function isSupportedLocale(value: unknown): value is SupportedLocale {
 }
 
 /** Match browser BCP-47 preferences without mapping Traditional Chinese to
- * Simplified Chinese. Every Portuguese variant uses Brazilian Portuguese.
+ * Simplified Chinese. Every Portuguese variant uses Brazilian Portuguese and
+ * every Spanish variant uses the one neutral Spanish catalog.
  * Explicit user choices are already canonical. */
 export function matchSupportedLocale(languages: readonly string[]): SupportedLocale {
   for (const language of languages) {
@@ -42,6 +45,7 @@ export function matchSupportedLocale(languages: readonly string[]): SupportedLoc
     }
     if (locale.language === "en") return "en";
     if (locale.language === "pt") return "pt-BR";
+    if (locale.language === "es") return "es";
     if (locale.language !== "zh") continue;
     if (locale.script === "Hant" || locale.region === "HK" || locale.region === "MO" || locale.region === "TW") {
       continue;

@@ -34,5 +34,14 @@ describe("LanguagePicker", () => {
     expect(html).toContain('<option value="en" lang="en">English</option>');
     expect(html).toContain('<option value="zh-Hans" lang="zh-Hans">简体中文</option>');
     expect(html).toContain('<option value="pt-BR" lang="pt-BR" selected="">Português</option>');
+    expect(html).toContain('<option value="es" lang="es">Español</option>');
+  });
+
+  it("renders the selected Spanish locale with its mark", () => {
+    const html = renderToStaticMarkup(
+      <TestI18nProvider locale="es"><LanguagePicker placement="header" /></TestI18nProvider>,
+    );
+
+    expect(html).toContain('lang="es" aria-hidden="true">ES</span>');
   });
 });

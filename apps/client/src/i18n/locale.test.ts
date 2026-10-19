@@ -35,11 +35,19 @@ describe("locale preference", () => {
     expect(matchSupportedLocale(["pt-AO"])).toBe("pt-BR");
   });
 
+  it("matches every Spanish variant to Spanish", () => {
+    expect(matchSupportedLocale(["es"])).toBe("es");
+    expect(matchSupportedLocale(["es-ES"])).toBe("es");
+    expect(matchSupportedLocale(["es-MX"])).toBe("es");
+    expect(matchSupportedLocale(["es-419"])).toBe("es");
+  });
+
   it("uses browser preference order and ignores malformed tags", () => {
     expect(matchSupportedLocale(["not_a_locale", "zh-CN", "en-US"])).toBe("zh-Hans");
     expect(matchSupportedLocale(["en-GB", "zh-CN"])).toBe("en");
     expect(matchSupportedLocale(["fr-FR", "pt-PT", "en-US"])).toBe("pt-BR");
     expect(matchSupportedLocale(["en-US", "pt-BR"])).toBe("en");
+    expect(matchSupportedLocale(["fr-FR", "es-AR", "pt-BR"])).toBe("es");
   });
 
   it("round-trips only the exact versioned storage shape", () => {

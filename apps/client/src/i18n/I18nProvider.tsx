@@ -31,6 +31,7 @@ const LOCALIZED_CATALOGS: Record<
 > = {
   "zh-Hans": () => import("./compiled/zh-Hans.json"),
   "pt-BR": () => import("./compiled/pt-BR.json"),
+  es: () => import("./compiled/es.json"),
 };
 
 export async function loadLocaleMessages(locale: SupportedLocale): Promise<LocaleMessages> {

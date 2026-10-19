@@ -14,7 +14,8 @@
         try {
           var stored = JSON.parse(localStorage.getItem("fyendal-locale") || "null");
           var locale = stored && stored.version === 1 ? stored.locale : null;
-          if (locale !== "en" && locale !== "zh-Hans" && locale !== "pt-BR") {
+          if (locale !== "en" && locale !== "zh-Hans" && locale !== "pt-BR" &&
+            locale !== "es") {
             locale = "en";
             var languages = navigator.languages || [];
             for (var i = 0; i < languages.length; i++) {
@@ -22,6 +23,7 @@
               try { parsed = new Intl.Locale(languages[i]); } catch (e) { continue; }
               if (parsed.language === "en") break;
               if (parsed.language === "pt") { locale = "pt-BR"; break; }
+              if (parsed.language === "es") { locale = "es"; break; }
               if (parsed.language !== "zh" || parsed.script === "Hant" ||
                 /^(HK|MO|TW)$/.test(parsed.region || "")) continue;
               locale = "zh-Hans";
