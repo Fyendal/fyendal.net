@@ -70,6 +70,7 @@ import { EffectHeroesContext, effectHeroes } from "./effects/effectHeroes.js";
 import { abilityLabelForSource, deriveBoardLegalState } from "./board/boardModel.js";
 import { useGameSettings } from "./board/useGameSettings.js";
 import { useGameViewport } from "./board/useGameViewport.js";
+import { useHudReserve } from "./board/useHudReserve.js";
 import { useFullscreen } from "../components/useFullscreen.js";
 import { useIdleVictoryPrompt } from "./board/useIdleVictoryPrompt.js";
 import { useGameShortcuts } from "./board/useGameShortcuts.js";
@@ -227,11 +228,13 @@ export function GameBoard() {
     mobileLandscapeViewport,
     mobileFloatViewport,
     compactDesktopViewport,
+    compactHudViewport,
     mobileHandIsHidden,
     toggleMobileHand,
     mobileCombatFloatVisibility,
   } = useGameViewport(boardRef);
   const compactBoard = compactDesktopViewport && !mobileFloatViewport && !mobileLandscapeViewport;
+  const compactHud = compactHudViewport && !mobileFloatViewport && !mobileLandscapeViewport;
   const {
     lessGuidance,
     cardDisplayPreference,
@@ -326,6 +329,15 @@ export function GameBoard() {
   // status window can dock to its right edge
   const [chainRect, setChainRect] = useState<DOMRect | null>(null);
   const [splitLineMiniHost, setSplitLineMiniHost] = useState<HTMLDivElement | null>(null);
+  const [hudHost, setHudHost] = useState<HTMLDivElement | null>(null);
+  const dividerRef = useRef<HTMLDivElement>(null);
+  useHudReserve({
+    table: tableRef,
+    board: boardRef,
+    divider: dividerRef,
+    hud: hudHost,
+    layoutKey: `${compactBoard}|${squareCardsEnabled}`,
+  });
   // idle-opponent prompt: no messages flow while the opponent is idle, so a
   // slow local tick re-evaluates their last-activity stamp
   const { now, dismissedFor: idleDismissedFor, dismiss: dismissIdleVictory } =
@@ -1123,7 +1135,7 @@ export function GameBoard() {
     <SquareCardPresentation enabled={squareCardsEnabled}>
     <div
       ref={tableRef}
-      className={`table${railCollapsed ? " rail-is-collapsed" : ""}${view.phase === "game-over" ? " game-is-over" : ""}${hasActiveCombatChain ? " has-active-combat-chain" : ""}${mobileHandIsHidden ? " mobile-hand-is-hidden" : ""}`}
+      className={`table${railCollapsed ? " rail-is-collapsed" : ""}${view.phase === "game-over" ? " game-is-over" : ""}${hasActiveCombatChain ? " has-active-combat-chain" : ""}${mobileHandIsHidden ? " mobile-hand-is-hidden" : ""}${compactHud ? " hud-is-compact" : ""}`}
       data-playability-cue={playabilityCuePreference}
       data-motion-preference={motionPreference}
       onMouseMove={onHoverCard}
@@ -1231,7 +1243,7 @@ export function GameBoard() {
         />
 
         {/* center divider: a brass-inlay strip marking the seam */}
-        <div className="mat-divider">
+        <div className="mat-divider" ref={dividerRef}>
           {priorityHolder !== null ? (
             <span className="mat-priority-status" role="status">
               {intl.formatMessage({ id: "game.decision.playerDeciding" }, { player: priorityHolderName })}
@@ -1337,6 +1349,7 @@ export function GameBoard() {
           Docks to the right edge of the combat chain while it's open ── */}
       <StatusFloat
         dockRect={chainRect}
+        hostRef={setHudHost}
         oppLife={opp.life}
         myLife={me.life}
         oppHeroName={opp.heroName}

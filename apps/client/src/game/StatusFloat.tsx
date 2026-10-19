@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type CSSProperties } from "react";
+import { useEffect, useRef, useState, type CSSProperties, type Ref } from "react";
 import { useIntl } from "react-intl";
 import type { GameLogViewEntry } from "@fyendal/shared";
 import { LifeHeroPortrait } from "./LifeHeroPortrait.js";
@@ -258,6 +258,7 @@ export function PrimaryActionButton({
  *  this button instead of adding another floating control surface. */
 export function StatusFloat({
   dockRect: _dockRect,
+  hostRef,
   oppLife,
   myLife,
   oppHeroName,
@@ -274,6 +275,7 @@ export function StatusFloat({
   onPass,
 }: {
   dockRect: DOMRect | null;
+  hostRef?: Ref<HTMLDivElement>;
   oppLife: number;
   myLife: number;
   oppHeroName: string;
@@ -292,6 +294,7 @@ export function StatusFloat({
   const intl = useIntl();
   return (
     <div
+      ref={hostRef}
       className="float status-float game-hud"
       aria-label={intl.formatMessage({ id: "game.hud.label" })}
     >

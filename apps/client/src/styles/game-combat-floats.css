@@ -140,12 +140,39 @@
 /* Match the square board's pile column and leave space beside its graveyards. */
 @media (min-width: 701px) {
   .table:has(.mat-square-board) .status-float {
-    right: calc(var(--rail-w) + var(--mat-zone-col) + 50px);
+    right: calc(var(--rail-w) + var(--arena-square-size) + 50px);
   }
 }
-@media (min-width: 1101px) {
-  .table:has(.mat-square-board) .status-float {
-    right: calc(var(--rail-w) + var(--arena-square-size) + 50px);
+/* Smaller HUD controls for narrow desktop boards and the compact arena. */
+@media (min-width: 701px) {
+  .table { --hud-card-width: var(--mat-zone-col); }
+  .table:has(.mat-square-board) { --hud-card-width: var(--arena-square-size); }
+  .table:has(.mat-compact-board) { --hud-card-width: var(--compact-card-width); }
+  .table.hud-is-compact .status-float {
+    gap: 7px;
+    padding: 9px 11px;
+  }
+  .table.hud-is-compact .status-float .life {
+    font-size: clamp(22px, calc(var(--hud-card-width) * .36), 27px);
+  }
+  .table.hud-is-compact .status-float .life-impact { gap: 4px; }
+  .table.hud-is-compact .status-float .ico-lg {
+    width: 18px;
+    height: 18px;
+  }
+  .table.hud-is-compact .status-float .ap-pip {
+    padding: 4px 7px;
+    font-size: 12px;
+  }
+  .table.hud-is-compact .status-float .btn-pass {
+    gap: 5px;
+    padding: 5px 10px;
+    font-size: 13px;
+  }
+  .table.hud-is-compact .status-float .shortcut-key {
+    flex-basis: 16px;
+    width: 16px;
+    height: 13px;
   }
 }
 
@@ -198,30 +225,6 @@
   }
   .table:has(.mat-compact-board) .status-float {
     right: calc(var(--rail-w) + var(--compact-card-width) + 23px);
-    gap: 7px;
-    padding: 9px 11px;
-  }
-  .table:has(.mat-compact-board) .status-float .life {
-    font-size: clamp(22px, calc(var(--compact-card-width) * .36), 27px);
-  }
-  .table:has(.mat-compact-board) .status-float .life-impact { gap: 4px; }
-  .table:has(.mat-compact-board) .status-float .ico-lg {
-    width: 18px;
-    height: 18px;
-  }
-  .table:has(.mat-compact-board) .status-float .ap-pip {
-    padding: 4px 7px;
-    font-size: 12px;
-  }
-  .table:has(.mat-compact-board) .status-float .btn-pass {
-    gap: 5px;
-    padding: 5px 10px;
-    font-size: 13px;
-  }
-  .table:has(.mat-compact-board) .status-float .shortcut-key {
-    flex-basis: 16px;
-    width: 16px;
-    height: 13px;
   }
 }
 .ap-pip {

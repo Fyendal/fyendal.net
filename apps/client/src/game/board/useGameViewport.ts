@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useMemo, useState, type RefObject } from "react";
 import type { FloatVisibilityController } from "../floatVisibility.js";
-import { shouldUseCompactBoard } from "./compactBoard.js";
+import { shouldUseCompactBoard, shouldUseCompactHud } from "./compactBoard.js";
 
 const MOBILE_LANDSCAPE_RAIL_QUERY =
   "(min-width: 701px) and (orientation: landscape) and (pointer: coarse)";
@@ -17,6 +17,7 @@ export function useGameViewport(boardRef: RefObject<HTMLDivElement | null>) {
     () => typeof window !== "undefined" && window.matchMedia(MOBILE_FLOAT_QUERY).matches,
   );
   const [compactDesktopViewport, setCompactDesktopViewport] = useState(false);
+  const [compactHudViewport, setCompactHudViewport] = useState(false);
   const [mobileHandHidden, setMobileHandHidden] = useState(false);
   const [mobileCombatFloatsHidden, setMobileCombatFloatsHidden] = useState(false);
 
@@ -51,11 +52,9 @@ export function useGameViewport(boardRef: RefObject<HTMLDivElement | null>) {
       const style = window.getComputedStyle(board);
       const usableWidth = board.clientWidth -
         Number.parseFloat(style.paddingLeft) - Number.parseFloat(style.paddingRight);
-      setCompactDesktopViewport(shouldUseCompactBoard(
-        usableWidth,
-        window.innerWidth,
-        window.innerHeight,
-      ));
+      const compact = shouldUseCompactBoard(usableWidth, window.innerWidth, window.innerHeight);
+      setCompactDesktopViewport(compact);
+      setCompactHudViewport(shouldUseCompactHud(usableWidth, window.innerWidth, compact));
     };
     syncCompactBoard();
     const observer = new ResizeObserver(syncCompactBoard);
@@ -80,6 +79,7 @@ export function useGameViewport(boardRef: RefObject<HTMLDivElement | null>) {
     mobileLandscapeViewport,
     mobileFloatViewport,
     compactDesktopViewport,
+    compactHudViewport,
     mobileHandIsHidden: mobileFloatViewport && mobileHandHidden,
     toggleMobileHand: () => setMobileHandHidden((hidden) => !hidden),
     mobileCombatFloatVisibility,

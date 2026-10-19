@@ -510,23 +510,37 @@
     #000000b0 100%
   );
 }
+/* The trailing spacer keeps the HUD's strip (--hud-reserve, measured by the
+   board) clear; the leading spacer shrinks first, so the status shifts left
+   before it wraps. */
 .mat-divider-center {
+  --divider-status-room: calc(100% - var(--hud-reserve, 0px) - 24px);
   position: absolute;
   z-index: 7;
   top: 50%;
-  left: 50%;
+  left: 0;
+  right: 0;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 7px;
-  width: max-content;
-  max-width: calc(100vw - var(--rail-w) - 20px);
-  transform: translate(-50%, -50%);
+  transform: translateY(-50%);
   pointer-events: none;
 }
+.mat-divider-center::before,
+.mat-divider-center::after {
+  content: "";
+  min-width: 10px;
+}
+.mat-divider-center::before { flex: 0 1 var(--hud-reserve, 0px); }
+.mat-divider-center::after { flex: 0 0 var(--hud-reserve, 0px); }
 .mat-divider-center > .priority-float {
   position: static;
   flex: 0 0 auto;
+  min-width: min(250px, var(--divider-status-room));
+  max-width: var(--divider-status-room);
+  max-height: none;
+  white-space: normal;
   transform: none;
 }
 .mat-divider-mini-dock {
