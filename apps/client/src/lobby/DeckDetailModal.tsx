@@ -122,12 +122,30 @@ export function DeckDetailModal(props: {
         ) : headshotOk ? (
           <img className="deck-card-img" src={heroImageUrl(deck.heroName)} alt="" onError={() => setHeadshotOk(false)} />
         ) : null}
-        <p className="deck-detail-meta">
-          <span className="deck-card-format" data-format={format}>{shortFormatLabel(intl, format)}</span>
-          <span>
-            {intl.formatMessage({ id: "lobby.deck.heroAndCount" }, { hero: deck.heroName, count: deck.deckSize })}
-          </span>
-        </p>
+        <div className="deck-detail-overlay">
+          <p className="deck-detail-meta">
+            <span className="deck-card-format" data-format={format}>{shortFormatLabel(intl, format)}</span>
+            <span>
+              {intl.formatMessage({ id: "lobby.deck.heroAndCount" }, { hero: deck.heroName, count: deck.deckSize })}
+            </span>
+          </p>
+          <div className="deck-detail-actions">
+            {props.fabraryHref ? (
+              <a href={props.fabraryHref} target="_blank" rel="noopener noreferrer">
+                <UiIcon name="external-link" />
+                {intl.formatMessage({ id: "lobby.deck.openFabrary" })}
+              </a>
+            ) : null}
+            <button type="button" onClick={props.onEdit}>
+              <UiIcon name="edit" />
+              {intl.formatMessage({ id: "lobby.deck.edit" })}
+            </button>
+            <button type="button" className="deck-detail-delete" onClick={props.onDelete}>
+              <UiIcon name="trash" />
+              {intl.formatMessage({ id: "lobby.deck.delete" })}
+            </button>
+          </div>
+        </div>
       </div>
 
       <div className="deck-detail-body">
@@ -190,23 +208,6 @@ export function DeckDetailModal(props: {
             </button>
           )}
         </div>
-      </div>
-
-      <div className="deck-detail-actions">
-        {props.fabraryHref ? (
-          <a href={props.fabraryHref} target="_blank" rel="noopener noreferrer">
-            <UiIcon name="external-link" />
-            {intl.formatMessage({ id: "lobby.deck.openFabrary" })}
-          </a>
-        ) : null}
-        <button type="button" onClick={props.onEdit}>
-          <UiIcon name="edit" />
-          {intl.formatMessage({ id: "lobby.deck.edit" })}
-        </button>
-        <button type="button" className="deck-detail-delete" onClick={props.onDelete}>
-          <UiIcon name="trash" />
-          {intl.formatMessage({ id: "lobby.deck.delete" })}
-        </button>
       </div>
     </ModalSurface>
   );

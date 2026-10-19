@@ -166,6 +166,7 @@ export function DeckTile(props: {
 
 export function ImportDeckModal(props: {
   format: Format;
+  onImported: (deck: DeckSummary) => void;
   onClose: () => void;
 }) {
   const intl = useIntl();
@@ -190,7 +191,7 @@ export function ImportDeckModal(props: {
     });
     setBusy(false);
     if (result.ok) {
-      props.onClose();
+      props.onImported(result.deck);
       return;
     }
     setErrors(deckErrorMessages(

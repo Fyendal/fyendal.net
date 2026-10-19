@@ -448,72 +448,83 @@
   white-space: nowrap;
 }
 .deck-library-panel > .modal-surface-backdrop { z-index: 200; }
-/* A saved deck's hub, in the bot picker's flat chrome. It opens on the
-   same banner as the deck's tile, with the name laid over the art in place
-   of a header; the game modes below are the main choice and the card pool
-   a quiet setting beside Start. */
+/* A saved deck's hub. The banner is the deck itself: its name over the
+   art, and below it the identity line with the deck's own management
+   actions as glass chips on the artwork. The body is only about playing:
+   a compact segmented mode switch, then the card pool beside Start. */
 .deck-detail-modal {
   position: relative;
-  width: min(560px, calc(100vw - 40px));
+  width: min(540px, calc(100vw - 40px));
   padding: 0;
-  border-color: #59493a;
-  border-radius: 3px;
-  background: #211a15;
-  box-shadow: 0 18px 48px #000a;
+  border-color: #4d3f33;
+  border-radius: 10px;
+  background: #1d1713;
+  box-shadow: 0 1px 0 #ffffff0d inset, 0 24px 64px #000c;
   font-family: var(--font-lobby-ui);
 }
 .deck-detail-modal .modal-surface-header {
   position: absolute;
+  /* Above the banner overlay, whose box reaches under the close button. */
+  z-index: 2;
   top: 0;
   right: 0;
   left: 0;
   align-items: flex-start;
   margin: 0;
-  padding: 20px 12px 0 24px;
+  padding: 22px 14px 0 24px;
   border: 0;
   background: transparent;
 }
-.deck-detail-modal .modal-surface-header > div { min-width: 0; max-width: 62%; }
+.deck-detail-modal .modal-surface-header > div { min-width: 0; max-width: 64%; }
 .deck-detail-modal .modal-surface-header h2 {
   display: -webkit-box;
   overflow: hidden;
   overflow-wrap: anywhere;
   color: #f6e8c6;
-  font-size: 22px;
-  line-height: 1.25;
-  text-shadow: 0 1px 2px #000, 0 0 14px #000c;
+  font: 750 24px/1.2 var(--font-lobby-title);
+  letter-spacing: -0.01em;
+  text-shadow: 0 1px 2px #000, 0 0 18px #000c;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 3;
   line-clamp: 3;
 }
-/* Sits where the tile's selection gem does, on a plate so it reads over
-   any artwork. */
+/* A glass plate so it reads over any artwork. */
 .deck-detail-modal .modal-surface-close {
   width: 32px;
   min-width: 32px;
   height: 32px;
   margin-top: -8px;
-  border: 0;
-  border-radius: 3px;
-  background: #191510cc;
+  border: 1px solid #ffffff14;
+  border-radius: 999px;
+  background: #15110ea6;
   color: var(--text-secondary);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
 }
-.deck-detail-modal .modal-surface-close:hover { background: #332519; color: var(--text-primary); }
+.deck-detail-modal .modal-surface-close:hover { background: #2c2118d9; color: var(--text-primary); }
 .deck-detail-modal .modal-surface-close svg { width: 14px; height: 14px; stroke-width: 2.25; }
 .deck-detail-banner {
   position: relative;
-  height: 200px;
+  display: flex;
+  min-height: 216px;
+  flex-direction: column;
+  justify-content: flex-end;
   overflow: hidden;
-  border-bottom: 1px solid #3d3128;
-  background: radial-gradient(120% 140% at 100% 50%, #3a2716 0%, #211a15 60%);
+  background: radial-gradient(120% 140% at 100% 50%, #3a2716 0%, #1d1713 60%);
+}
+/* Taller than the tile's scrim: it carries the action chips too. */
+.deck-detail-modal .deck-detail-banner::after { height: 78%; }
+.deck-detail-overlay {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  justify-items: start;
+  gap: 12px;
+  padding: 104px 24px 18px;
 }
 .deck-detail-meta {
-  position: absolute;
-  z-index: 1;
-  right: 20px;
-  bottom: 14px;
-  left: 24px;
   display: flex;
+  max-width: 100%;
   align-items: center;
   gap: 8px;
   margin: 0;
@@ -523,47 +534,86 @@
 }
 .deck-detail-meta .deck-card-format { text-shadow: none; }
 .deck-detail-meta > span:last-child { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* Deck management rides on the art: small frosted chips, delete last and
+   tinted so it is never mistaken for the others. */
+.deck-detail-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.deck-detail-actions > :is(a, button) {
+  display: inline-flex;
+  min-height: 30px;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 11px 4px 9px;
+  border: 1px solid #ffffff1a;
+  border-radius: 999px;
+  background: #15110eb3;
+  clip-path: none;
+  color: #e3d5b8;
+  font: 600 12.5px var(--font-lobby-ui);
+  letter-spacing: normal;
+  text-decoration: none;
+  text-transform: none;
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  transition: background-color 120ms ease, border-color 120ms ease, color 120ms ease;
+}
+.deck-detail-actions > :is(a, button):hover { border-color: #b8933f80; background: #2c2118e6; color: var(--gold); }
+.deck-detail-actions > :is(a, button):focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+.deck-detail-actions > .deck-detail-delete { color: #f0aaa2; }
+.deck-detail-actions > .deck-detail-delete:hover { border-color: #c4483b99; background: #3a1612e6; color: #ffc1b9; }
+.deck-detail-actions .ui-icon { width: 14px; height: 14px; }
 .deck-detail-body {
   display: grid;
   gap: 16px;
-  padding: 20px 24px 24px;
+  padding: 18px 24px 22px;
+  border-top: 1px solid #3a2f26;
 }
+/* One segmented control instead of three cards: the mode is a setting of
+   Start, not a destination of its own. */
 .deck-detail-modes {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 8px;
+  gap: 2px;
+  padding: 3px;
+  border: 1px solid #3a2f26;
+  border-radius: 8px;
+  background: #141009;
 }
 .deck-detail-modes button {
-  display: grid;
+  display: inline-flex;
   min-width: 0;
-  justify-items: start;
-  gap: 10px;
-  padding: 14px;
-  border: 1px solid #5b4c3e;
-  border-radius: 3px;
-  background: #191510;
+  min-height: 36px;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 6px 10px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
   clip-path: none;
-  color: var(--text-primary);
-  font: 650 15px var(--font-lobby-ui);
+  color: var(--text-secondary);
+  font: 600 13.5px var(--font-lobby-ui);
   letter-spacing: normal;
-  text-align: left;
   text-transform: none;
-  transition: border-color 120ms ease, background-color 120ms ease;
+  white-space: nowrap;
+  transition: background-color 120ms ease, color 120ms ease;
 }
-.deck-detail-modes button:hover:not(:disabled) { border-color: #806334; background: #261c14; }
-.deck-detail-modes button:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+.deck-detail-modes button:hover:not(:disabled, [aria-pressed="true"]) { background: #241b14; color: var(--text-primary); }
+.deck-detail-modes button:focus-visible { outline: 2px solid var(--gold); outline-offset: -2px; }
 .deck-detail-modes button[aria-pressed="true"] {
-  border-color: var(--bronze);
-  background: #4a311c;
-  box-shadow: inset 0 0 0 1px var(--bronze);
+  background: linear-gradient(180deg, #4d3420, #3d2817);
+  box-shadow: 0 0 0 1px #b8933f99 inset, 0 1px 3px #0008;
   color: var(--gold);
 }
-.deck-detail-modes .ui-icon { width: 22px; height: 22px; color: var(--text-muted); }
-.deck-detail-modes button[aria-pressed="true"] .ui-icon { color: var(--gold); }
+.deck-detail-modes .ui-icon { width: 16px; height: 16px; flex: 0 0 auto; }
 .deck-detail-blocked {
   margin: 0;
   padding: 10px 12px;
-  border-left: 2px solid #c4483b;
+  border: 1px solid #c4483b66;
+  border-radius: 6px;
   background: #3a1612;
   color: #ffb6ad;
   font-size: 13px;
@@ -572,9 +622,9 @@
 /* Card pool stays a compact setting; Start takes the remaining width. */
 .deck-detail-launch {
   display: grid;
-  grid-template-columns: minmax(0, 168px) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 152px) minmax(0, 1fr);
   align-items: end;
-  gap: 12px;
+  gap: 10px;
 }
 .deck-detail-pool { position: relative; display: grid; gap: 6px; }
 .deck-detail-pool .home-play-field-label { min-height: 20px; font-size: 12px; }
@@ -586,45 +636,17 @@
 }
 .deck-detail-pool select {
   width: 100%;
-  min-height: 44px;
+  min-height: 42px;
   padding-block: 8px;
+  border-radius: 6px;
   font-size: 14px;
 }
 .deck-detail-start {
   width: 100%;
-  min-height: 44px;
-  border-radius: 3px;
-  font-size: 16px;
+  min-height: 42px;
+  border-radius: 6px;
+  font-size: 15px;
 }
-/* Deck management is secondary: a quiet row of text actions. */
-.deck-detail-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
-  padding: 8px 12px;
-  border-top: 1px solid #3d3128;
-}
-.deck-detail-actions > :is(a, button) {
-  display: inline-flex;
-  min-height: 36px;
-  align-items: center;
-  gap: 7px;
-  padding: 6px 12px;
-  border: 0;
-  border-radius: 3px;
-  background: transparent;
-  clip-path: none;
-  color: var(--text-secondary);
-  font: 600 14px var(--font-lobby-ui);
-  letter-spacing: normal;
-  text-decoration: none;
-  text-transform: none;
-}
-.deck-detail-actions > :is(a, button):hover { background: #332519; color: var(--gold); }
-.deck-detail-actions > :is(a, button):focus-visible { outline: 2px solid var(--gold); outline-offset: -2px; }
-.deck-detail-actions > .deck-detail-delete { margin-left: auto; color: #e8a39c; }
-.deck-detail-actions > .deck-detail-delete:hover { background: #351813; color: #ffc1b9; }
-.deck-detail-actions .ui-icon { width: 16px; height: 16px; }
 .deck-delete-modal { width: min(440px, calc(100vw - 32px)); }
 
 @media (prefers-reduced-motion: reduce) {
@@ -726,22 +748,25 @@
   }
   .deck-card-details { align-self: start; }
   .deck-legality-hint { grid-column: 2; }
-  .deck-detail-modal { width: 100%; padding-bottom: env(safe-area-inset-bottom); border-radius: 10px 10px 3px 3px; }
+  .deck-detail-modal { width: 100%; padding-bottom: env(safe-area-inset-bottom); border-radius: 14px 14px 0 0; }
   .deck-detail-modal .modal-surface-header { padding: 18px 10px 0 18px; }
-  .deck-detail-modal .modal-surface-header h2 { font-size: 20px; }
+  .deck-detail-modal .modal-surface-header h2 { font-size: 21px; }
   .deck-detail-modal .modal-surface-close { width: 40px; min-width: 40px; height: 40px; }
-  .deck-detail-banner { height: 168px; }
-  .deck-detail-meta { left: 18px; }
+  .deck-detail-banner { min-height: 196px; }
+  .deck-detail-overlay { padding: 92px 18px 16px; }
+  .deck-detail-actions > :is(a, button) { min-height: 36px; }
   .deck-detail-body { padding: 16px 18px 20px; }
-  .deck-detail-modes { grid-template-columns: 1fr; gap: 6px; }
+  /* Three segments stay side by side; labels sit under their icons. */
   .deck-detail-modes button {
-    grid-template-columns: 22px minmax(0, 1fr);
-    align-items: center;
-    gap: 12px;
-    padding: 10px 12px;
+    flex-direction: column;
+    gap: 3px;
+    min-height: 52px;
+    padding: 6px 4px;
+    font-size: 12px;
+    white-space: normal;
   }
   .deck-detail-launch { grid-template-columns: 1fr; }
-  .deck-detail-actions > :is(a, button) { min-height: 44px; }
+  .deck-detail-start { min-height: 46px; }
   .deck-actions { flex-direction: column; }
   .btn-bot { width: 100%; min-width: 0; }
   .bot-opponent-modal { width: 100%; border-radius: 10px 10px 3px 3px; }

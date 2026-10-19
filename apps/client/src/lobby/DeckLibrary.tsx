@@ -161,6 +161,11 @@ export function DeckLibrary(props: {
       {importing ? (
         <ImportDeckModal
           format={props.formatFilter === "all" ? "cc" : props.formatFilter}
+          onImported={(deck) => {
+            // A new deck opens on its hub, ready to play.
+            setImporting(false);
+            setOpenDeck(deck);
+          }}
           onClose={() => setImporting(false)}
         />
       ) : null}
