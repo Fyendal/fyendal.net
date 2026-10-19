@@ -11,7 +11,8 @@ import { LobbyHeader } from "./LobbyHeader.js";
 import { ModalSurface } from "../components/ModalSurface.js";
 import { LanguagePicker } from "../i18n/LanguagePicker.js";
 import { SocialMenuButton, UnreadMessageBadge } from "../social/MobileSocialControls.js";
-import { mobileLobbyDestinationSelected } from "./mobileNavigation.js";
+import { mobileLobbyDestinationSelected, type MobileLobbyDestination } from "./mobileNavigation.js";
+import { UiIcon, type UiIconName } from "../components/UiIcon.js";
 import { FullscreenButton } from "../components/FullscreenButton.js";
 import { GlobalNoticeBanner } from "../notices/GlobalNoticeBanner.js";
 import {
@@ -25,6 +26,12 @@ interface RailPlace {
   count?: string;
 }
 
+interface MobilePlace {
+  rail: Exclude<MobileLobbyDestination, "more">;
+  icon: UiIconName;
+  label: string;
+}
+
 const RoomList = lazy(() => import("./RoomList.js").then((module) => ({ default: module.RoomList })));
 const Home = lazy(() => import("./Home.js").then((module) => ({ default: module.Home })));
 const RoomInviteModal = lazy(() => import("./RoomInviteModal.js").then((module) => ({ default: module.RoomInviteModal })));
@@ -34,52 +41,6 @@ const AchievementsPanel = lazy(() => import("../achievements/AchievementsPanel.j
 const MatchHistory = lazy(() => import("../history/MatchHistory.js").then((module) => ({ default: module.MatchHistory })));
 const VersionUpdateModal = lazy(() => import("../notices/VersionUpdateModal.js")
   .then((module) => ({ default: module.VersionUpdateModal })));
-
-function MobileLobbyIcon({ kind }: { kind: "home" | "decks" | "rooms" | "history" | "more" }) {
-  const content = kind === "home" ? (
-    <>
-      <path d="M3.5 10.5 12 3.5l8.5 7" />
-      <path d="M5.5 9.5V21h13V9.5M9.5 21v-7h5v7" />
-    </>
-  ) : kind === "decks" ? (
-    <>
-      <rect x="6" y="3.5" width="12" height="17" rx="2" />
-      <path d="M9 8h6M9 12h6M3.5 7v11a2 2 0 0 0 2 2" />
-    </>
-  ) : kind === "rooms" ? (
-    <>
-      <circle cx="9" cy="8" r="3" />
-      <circle cx="17" cy="9" r="2.5" />
-      <path d="M3.5 20v-2a5.5 5.5 0 0 1 11 0v2M14 15a4.5 4.5 0 0 1 6.5 4v1" />
-    </>
-  ) : kind === "history" ? (
-    <>
-      <path d="M4.5 4.5h15v15h-15z" />
-      <path d="M8 9.5h8M8 13h5M8 16.5h6.5" />
-    </>
-  ) : (
-    <>
-      <circle cx="5" cy="12" r="1.5" />
-      <circle cx="12" cy="12" r="1.5" />
-      <circle cx="19" cy="12" r="1.5" />
-    </>
-  );
-  return (
-    <svg
-      className="mobile-lobby-nav-icon"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-      focusable="false"
-    >
-      {content}
-    </svg>
-  );
-}
 
 export function Lobby() {
   const intl = useIntl();
@@ -192,6 +153,12 @@ export function Lobby() {
     { rail: "history", label: intl.formatMessage({ id: "lobby.nav.history" }) },
     { rail: "achievements", label: intl.formatMessage({ id: "achievements.title" }) },
   ];
+  const mobilePlaces: MobilePlace[] = [
+    { rail: "home", icon: "nav-home", label: intl.formatMessage({ id: "lobby.nav.home" }) },
+    { rail: "decks", icon: "nav-decks", label: intl.formatMessage({ id: "lobby.nav.decks" }) },
+    { rail: "all", icon: "nav-rooms", label: intl.formatMessage({ id: "lobby.nav.rooms" }) },
+    { rail: "history", icon: "nav-history", label: intl.formatMessage({ id: "lobby.nav.historyShort" }) },
+  ];
   const railButton = (place: RailPlace) => (
     <button
       key={place.rail}
@@ -241,42 +208,22 @@ export function Lobby() {
         </div>
       </div>
       <nav className="mobile-lobby-nav" aria-label={intl.formatMessage({ id: "lobby.nav.primary" })}>
-        <button
-          type="button"
-          className={mobileLobbyDestinationSelected("home", rail) ? "selected" : ""}
-          aria-current={mobileLobbyDestinationSelected("home", rail) ? "page" : undefined}
-          onClick={() => setRail("home")}
-        >
-          <MobileLobbyIcon kind="home" />
-          <span className="mobile-lobby-nav-label">{intl.formatMessage({ id: "lobby.nav.home" })}</span>
-        </button>
-        <button
-          type="button"
-          className={mobileLobbyDestinationSelected("decks", rail) ? "selected" : ""}
-          aria-current={mobileLobbyDestinationSelected("decks", rail) ? "page" : undefined}
-          onClick={() => goToDecks()}
-        >
-          <MobileLobbyIcon kind="decks" />
-          <span className="mobile-lobby-nav-label">{intl.formatMessage({ id: "lobby.nav.decks" })}</span>
-        </button>
-        <button
-          type="button"
-          className={mobileLobbyDestinationSelected("all", rail) ? "selected" : ""}
-          aria-current={mobileLobbyDestinationSelected("all", rail) ? "page" : undefined}
-          onClick={() => setRail("all")}
-        >
-          <MobileLobbyIcon kind="rooms" />
-          <span className="mobile-lobby-nav-label">{intl.formatMessage({ id: "lobby.nav.rooms" })}</span>
-        </button>
-        <button
-          type="button"
-          className={mobileLobbyDestinationSelected("history", rail) ? "selected" : ""}
-          aria-current={mobileLobbyDestinationSelected("history", rail) ? "page" : undefined}
-          onClick={() => setRail("history")}
-        >
-          <MobileLobbyIcon kind="history" />
-          <span className="mobile-lobby-nav-label">{intl.formatMessage({ id: "lobby.nav.historyShort" })}</span>
-        </button>
+        {mobilePlaces.map((place) => {
+          const current = mobileLobbyDestinationSelected(place.rail, rail);
+          return (
+            <button
+              key={place.rail}
+              type="button"
+              // While the More sheet is open it is the only marked place.
+              className={current && !showMobileMore ? "selected" : ""}
+              aria-current={current ? "page" : undefined}
+              onClick={() => setRail(place.rail)}
+            >
+              <UiIcon name={place.icon} className="mobile-lobby-nav-icon" />
+              <span className="mobile-lobby-nav-label">{place.label}</span>
+            </button>
+          );
+        })}
         <button
           type="button"
           className={mobileLobbyDestinationSelected("more", rail) ? "selected" : ""}
@@ -284,7 +231,7 @@ export function Lobby() {
           aria-expanded={showMobileMore}
           onClick={() => setShowMobileMore(true)}
         >
-          <MobileLobbyIcon kind="more" />
+          <UiIcon name="more" className="mobile-lobby-nav-icon" />
           <UnreadMessageBadge count={unreadMessageCount} />
           <span className="mobile-lobby-nav-label">{intl.formatMessage({ id: "lobby.nav.more" })}</span>
         </button>

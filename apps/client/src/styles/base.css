@@ -35,8 +35,11 @@
   --font-fantasy-meta: "Alegreya Sans SC", "Segoe UI", system-ui, sans-serif;
   /* card names, as printed on the mat's name plates */
   --font-card-name: Alegreya, Palatino, "Palatino Linotype", "Book Antiqua", Georgia, serif;
+  /* Names of places: navigation, panel and modal titles. Only weight 500 is
+     bundled, so headings take emphasis from size and color, never bold. */
+  --font-heading: var(--font-card-name);
   /* Keep the old-world display voice exclusive to the product wordmark in the
-     lobby. Application headings and controls use a quieter system face. */
+     lobby. Headings use --font-heading; controls use a quieter system face. */
   --font-brand: "Tiller", "Alegreya SC", Georgia, "Times New Roman", serif;
   --font-lobby-title: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
   --font-lobby-ui: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
@@ -68,6 +71,8 @@
 }
 
 html:lang(zh-Hans) {
+  /* The bundled Alegreya subset has no CJK glyphs. */
+  --font-heading: var(--font-lobby-ui);
   --font-display: "PingFang SC", "Microsoft YaHei", "Noto Sans CJK SC", system-ui, sans-serif;
   --font-lobby-title: "PingFang SC", "Microsoft YaHei", "Noto Sans CJK SC", system-ui, sans-serif;
   --font-lobby-ui: "PingFang SC", "Microsoft YaHei", "Noto Sans CJK SC", system-ui, sans-serif;
@@ -371,7 +376,7 @@ input::placeholder {
 .modal-surface-header h2 {
   margin: 0;
   color: var(--gold);
-  font: 700 22px var(--font-lobby-title);
+  font: 500 23px/1.2 var(--font-heading);
 }
 .modal-surface-close {
   display: inline-grid;

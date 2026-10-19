@@ -367,10 +367,9 @@
   padding-bottom: 9px;
 }
 .lobby-page .panel-title {
-  font-family: var(--font-lobby-ui);
-  font-size: 18px;
-  font-weight: 750;
-  letter-spacing: .7px;
+  font: 500 22px/1.2 var(--font-heading);
+  letter-spacing: normal;
+  text-transform: none;
 }
 :where(.lobby-page .panel > :is(.deck-panel-heading, .rooms-header, .history-header, .achievements-header, .account-header)) {
   display: flex;
@@ -546,7 +545,7 @@
   border-top: 1px solid #4d3a2399;
 }
 .rail-nav-label {
-  font: 500 19px/1.2 var(--font-card-name);
+  font: 500 19px/1.2 var(--font-heading);
 }
 .rail-nav-count {
   color: var(--text-muted);
@@ -558,8 +557,6 @@
 @media (min-width: 701px) and (max-width: 1099px) {
   .rail-nav-label { font-size: 18px; }
 }
-/* Alegreya has no CJK glyphs; Chinese labels keep the UI face. */
-html:lang(zh-Hans) .rail-nav-label { font-family: var(--font-lobby-ui); font-size: 17px; }
 .mobile-lobby-nav { display: none; }
 
 /* More sheet: grouped settings-style rows. Rows in a group share one outline

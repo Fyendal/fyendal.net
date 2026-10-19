@@ -131,59 +131,56 @@
     z-index: 45;
     display: grid;
     grid-template-columns: repeat(5, minmax(0, 1fr));
-    gap: 3px;
-    min-height: calc(66px + env(safe-area-inset-bottom));
-    padding: 5px max(7px, env(safe-area-inset-right)) max(5px, env(safe-area-inset-bottom)) max(7px, env(safe-area-inset-left));
-    border-top: 1px solid #a883463d;
-    background: linear-gradient(180deg, #100c09f2, #080605fc);
-    box-shadow: 0 -10px 30px #000a;
-    backdrop-filter: blur(14px) saturate(1.15);
+    min-height: calc(62px + env(safe-area-inset-bottom));
+    padding: 4px max(6px, env(safe-area-inset-right)) max(4px, env(safe-area-inset-bottom)) max(6px, env(safe-area-inset-left));
+    border-top: 1px solid var(--border-subtle);
+    background: #110a05;
   }
   .mobile-lobby-nav button {
     position: relative;
+    isolation: isolate;
     display: flex;
     min-width: 0;
     min-height: 54px;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 3px;
-    padding: 5px 2px 4px;
-    clip-path: none;
+    gap: 4px;
+    padding: 5px 2px 6px;
     border: 0;
-    border-radius: 11px;
-    border-color: transparent;
+    border-radius: 0;
     background: transparent;
-    color: #aa9e8a;
-    font: 600 10.5px/1.1 "Segoe UI", system-ui, sans-serif;
-    letter-spacing: .15px;
+    clip-path: none;
+    color: var(--text-muted);
+    font: 500 13.5px/1.1 var(--font-heading);
+    letter-spacing: normal;
     text-transform: none;
-    transition: color 140ms ease, background-color 140ms ease;
+    transition: color 120ms ease;
+  }
+  .mobile-lobby-nav button:focus-visible {
+    outline: 0;
+    box-shadow: inset 0 0 0 2px var(--focus-ring);
   }
   .mobile-lobby-nav button.selected,
-  .mobile-lobby-nav button[aria-expanded="true"] {
-    background: #d4a9581a;
-    color: #f1cf84;
-    box-shadow: inset 0 0 0 1px #d4a95835;
-  }
+  .mobile-lobby-nav button[aria-expanded="true"] { color: #ffe6b0; }
+  .mobile-lobby-nav button.selected .mobile-lobby-nav-icon,
+  .mobile-lobby-nav button[aria-expanded="true"] .mobile-lobby-nav-icon { color: var(--gold); }
   .mobile-lobby-nav button.selected::after,
   .mobile-lobby-nav button[aria-expanded="true"]::after {
-    position: absolute;
-    top: 3px;
-    left: 50%;
-    width: 18px;
-    height: 3px;
-    border-radius: 999px;
-    background: #e0b75f;
-    box-shadow: 0 0 8px #d4a95866;
     content: "";
-    transform: translateX(-50%);
+    position: absolute;
+    z-index: -1;
+    right: 5px;
+    bottom: 3px;
+    left: 5px;
+    height: 24px;
+    background: var(--blood);
+    -webkit-mask: url("/textures/blood-swipe.svg") 0 0 / 100% 100% no-repeat;
+    mask: url("/textures/blood-swipe.svg") 0 0 / 100% 100% no-repeat;
+    opacity: .85;
+    pointer-events: none;
   }
-  .mobile-lobby-nav-icon {
-    width: 21px;
-    height: 21px;
-    flex: 0 0 auto;
-  }
+  .mobile-lobby-nav-icon { font-size: 22px; }
   .mobile-lobby-nav-label {
     overflow: hidden;
     max-width: 100%;

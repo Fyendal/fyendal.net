@@ -1,0 +1,5 @@
+<!-- Deck library: a card in front of a second card's edge. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+  <rect x="6" y="3.5" width="12" height="17" rx="2" />
+  <path d="M9 8h6M9 12h6M3.5 7v11a2 2 0 0 0 2 2" />
+</svg>
