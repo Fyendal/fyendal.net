@@ -2999,7 +2999,7 @@
   "lobby.deck.confirmDelete": "Confirmar exclusão",
   "lobby.deck.delete": "Excluir deck",
   "lobby.deck.deletePrompt": "Excluir {name}? Isso não pode ser desfeito.",
-  "lobby.deck.viewOnFabrary": "Ver {name} no Fabrary",
+  "lobby.deck.openFabrary": "Ver no Fabrary",
   "lobby.deck.selectNamed": "Selecionar {name}",
   "lobby.deck.selectionActions": "Ações dos decks selecionados",
   "lobby.deck.selectedCount": "{count, plural, =0 {# decks selecionados} one {# deck selecionado} other {# decks selecionados}}",

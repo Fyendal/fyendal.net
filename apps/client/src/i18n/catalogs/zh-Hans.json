@@ -2999,7 +2999,7 @@
   "lobby.deck.confirmDelete": "确认删除",
   "lobby.deck.delete": "删除牌组",
   "lobby.deck.deletePrompt": "删除 {name}？此操作无法撤销。",
-  "lobby.deck.viewOnFabrary": "在 Fabrary 查看 {name}",
+  "lobby.deck.openFabrary": "在 Fabrary 查看",
   "lobby.deck.selectNamed": "选择 {name}",
   "lobby.deck.selectionActions": "已选牌组操作",
   "lobby.deck.selectedCount": "已选择{count}副牌组",

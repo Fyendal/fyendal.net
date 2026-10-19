@@ -31294,6 +31294,12 @@
       "value": "Needs attention"
     }
   ],
+  "lobby.deck.openFabrary": [
+    {
+      "type": 0,
+      "value": "View on Fabrary"
+    }
+  ],
   "lobby.deck.optionalName": [
     {
       "type": 0,
@@ -31434,20 +31440,6 @@
     {
       "type": 0,
       "value": "Saved"
-    }
-  ],
-  "lobby.deck.viewOnFabrary": [
-    {
-      "type": 0,
-      "value": "View "
-    },
-    {
-      "type": 1,
-      "value": "name"
-    },
-    {
-      "type": 0,
-      "value": " on Fabrary"
     }
   ],
   "lobby.discordCommunity": [

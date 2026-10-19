@@ -3,6 +3,7 @@ import type { CSSProperties } from "react";
 /** Interface icons stored as SVG files in `public/icons/ui/`. */
 export type UiIconName =
   | "attack-queue"
+  | "bot"
   | "check"
   | "chevron-down"
   | "chevron-left"
@@ -17,6 +18,7 @@ export type UiIconName =
   | "effect-once"
   | "effect-recurring"
   | "effect-turn"
+  | "external-link"
   | "flag"
   | "flag-filled"
   | "grip"
@@ -27,6 +29,7 @@ export type UiIconName =
   | "note"
   | "play"
   | "plus"
+  | "search"
   | "share"
   | "skip-forward"
   | "star"

@@ -30267,6 +30267,12 @@
       "value": "需要处理"
     }
   ],
+  "lobby.deck.openFabrary": [
+    {
+      "type": 0,
+      "value": "在 Fabrary 查看"
+    }
+  ],
   "lobby.deck.optionalName": [
     {
       "type": 0,
@@ -30393,16 +30399,6 @@
     {
       "type": 0,
       "value": "已保存"
-    }
-  ],
-  "lobby.deck.viewOnFabrary": [
-    {
-      "type": 0,
-      "value": "在 Fabrary 查看 "
-    },
-    {
-      "type": 1,
-      "value": "name"
     }
   ],
   "lobby.discordCommunity": [

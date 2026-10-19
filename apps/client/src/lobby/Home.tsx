@@ -9,6 +9,7 @@ import { deckChoicesFor, deckIsLegalForRoom, sortDecksForPicker } from "./DeckGr
 import { DeckDropdown } from "./CreateRoomModal.js";
 import { RoomCard } from "./RoomCard.js";
 import { BotOpponentModal } from "./BotOpponentModal.js";
+import { CardPoolHelp } from "./CardPoolHelp.js";
 import { formatSelectLabel } from "./FormatBadge.js";
 import { deckCardPool, pairableSearchers } from "../matchmaking/pairableSearchers.js";
 
@@ -61,7 +62,6 @@ export function Home() {
   );
   const [choosingBot, setChoosingBot] = useState(false);
   const cardPoolId = useId();
-  const cardPoolHelpId = useId();
 
   if (decksLoading) {
     return <div className="panel home-panel"><p className="muted" role="status">{intl.formatMessage({ id: "lobby.loadingDecks" })}</p></div>;
@@ -167,22 +167,7 @@ export function Home() {
           <div className="home-play-field home-card-pool-field">
             <div className="home-play-field-label">
               <label htmlFor={cardPoolId}>{intl.formatMessage({ id: "lobby.cardPool.title" })}</label>
-              <button
-                type="button"
-                className="home-card-pool-help"
-                aria-label={intl.formatMessage({ id: "lobby.cardPool.help" })}
-                aria-describedby={cardPoolHelpId}
-              >?</button>
-              <div className="home-card-pool-tooltip" id={cardPoolHelpId} role="tooltip">
-                <dl>
-                  {(["legal", "future", "open"] as const).map((poolMode) => (
-                    <div key={poolMode}>
-                      <dt>{intl.formatMessage({ id: `lobby.cardPool.${poolMode}` })}</dt>
-                      <dd>{intl.formatMessage({ id: `lobby.cardPool.${poolMode}Description` })}</dd>
-                    </div>
-                  ))}
-                </dl>
-              </div>
+              <CardPoolHelp />
             </div>
             <select
               id={cardPoolId}

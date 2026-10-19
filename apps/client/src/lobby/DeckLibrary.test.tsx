@@ -13,7 +13,7 @@ import { DeckLibrary } from "./DeckLibrary.js";
 import { DeckTile, preconSummaries } from "./DeckGrid.js";
 
 describe("DeckLibrary", () => {
-  it("links Fabrary decks, keeps pasted lists editable, and shows selection controls", () => {
+  it("opens every deck as a button and shows selection controls", () => {
     libraryStore.state = {
       decks: [
         { id: "cc", name: "Bravo Deck", format: "cc", fabraryUrl: "https://www.fabrary.net/decks/01M1WZTPC64GDCMN2GX752E3R7?matchup=abc", heroName: "Bravo", deckSize: 80, updatedAt: 2 },
@@ -31,14 +31,13 @@ describe("DeckLibrary", () => {
 
     expect(html).toContain("Bravo Deck");
     expect(html).toContain("Briar Deck");
-    expect(html).toContain('href="https://fabrary.net/decks/01M1WZTPC64GDCMN2GX752E3R7"');
-    expect(html).toContain('target="_blank" rel="noopener noreferrer"');
-    expect(html).toContain('aria-label="View Bravo Deck on Fabrary"');
+    expect(html).not.toContain("href=");
+    expect(html.match(/<button class="deck-card has-art"|<button class="deck-card"/g)).toHaveLength(2);
     expect(html).toContain('aria-label="Select Bravo Deck"');
     expect(html).toContain('aria-label="Select Briar Deck"');
     expect(html.match(/type="checkbox"/g)).toHaveLength(2);
-    expect(html.match(/>Edit deck<\/span><\/button>/g)).toHaveLength(2);
-    expect(html.match(/>Delete deck<\/span><\/button>/g)).toHaveLength(2);
+    expect(html).not.toContain("Edit deck");
+    expect(html).not.toContain("Delete deck");
     expect(html).toContain('data-format="cc">CC</span>');
     expect(html).toContain('data-format="silver-age">Silver Age</span>');
     expect(html).not.toContain("Saved");

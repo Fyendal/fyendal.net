@@ -17,6 +17,7 @@ import {
   filterAndSortDecks,
   type DeckLegalityFilter,
 } from "./DeckGrid.js";
+import { DeckDetailModal } from "./DeckDetailModal.js";
 
 export type DeckFormatFilter = "all" | Format;
 
@@ -47,6 +48,7 @@ export function DeckLibrary(props: {
   const [query, setQuery] = useState("");
   const [legality, setLegality] = useState<DeckLegalityFilter>("all");
   const [importing, setImporting] = useState(false);
+  const [openDeck, setOpenDeck] = useState<DeckSummary | null>(null);
   const [editingDeck, setEditingDeck] = useState<DeckSummary | null>(null);
   const [deletingDeck, setDeletingDeck] = useState<DeckSummary | null>(null);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(() => new Set());
@@ -140,24 +142,7 @@ export function DeckLibrary(props: {
                   aria-label={intl.formatMessage({ id: "lobby.deck.selectNamed" }, { name: deck.name })}
                   onChange={() => toggleSelected(deck.id)} />
               </label>
-              <DeckTile deck={deck} format={deck.format} banner href={fabraryDeckHref(deck.fabraryUrl)}
-                onSelect={() => setEditingDeck(deck)} />
-              <div className="deck-library-card-actions">
-                <div>
-                  <button onClick={() => setEditingDeck(deck)}>
-                    <UiIcon name="edit" />
-                    <span className="deck-library-action-label">
-                      {intl.formatMessage({ id: "lobby.deck.edit" })}
-                    </span>
-                  </button>
-                  <button className="deck-library-delete" onClick={() => setDeletingDeck(deck)}>
-                    <UiIcon name="trash" />
-                    <span className="deck-library-action-label">
-                      {intl.formatMessage({ id: "lobby.deck.delete" })}
-                    </span>
-                  </button>
-                </div>
-              </div>
+              <DeckTile deck={deck} format={deck.format} banner onSelect={() => setOpenDeck(deck)} />
             </div>
           ))}
         </div>
@@ -177,6 +162,21 @@ export function DeckLibrary(props: {
         <ImportDeckModal
           format={props.formatFilter === "all" ? "cc" : props.formatFilter}
           onClose={() => setImporting(false)}
+        />
+      ) : null}
+      {openDeck ? (
+        <DeckDetailModal
+          deck={openDeck}
+          fabraryHref={fabraryDeckHref(openDeck.fabraryUrl)}
+          onEdit={() => {
+            setOpenDeck(null);
+            setEditingDeck(openDeck);
+          }}
+          onDelete={() => {
+            setOpenDeck(null);
+            setDeletingDeck(openDeck);
+          }}
+          onClose={() => setOpenDeck(null)}
         />
       ) : null}
       {editingDeck ? <EditDeckModal deck={editingDeck} onClose={() => setEditingDeck(null)} /> : null}

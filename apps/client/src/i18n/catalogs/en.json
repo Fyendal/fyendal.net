@@ -2999,7 +2999,7 @@
   "lobby.deck.confirmDelete": "Confirm delete",
   "lobby.deck.delete": "Delete deck",
   "lobby.deck.deletePrompt": "Delete {name}? This cannot be undone.",
-  "lobby.deck.viewOnFabrary": "View {name} on Fabrary",
+  "lobby.deck.openFabrary": "View on Fabrary",
   "lobby.deck.selectNamed": "Select {name}",
   "lobby.deck.selectionActions": "Selected deck actions",
   "lobby.deck.selectedCount": "{count, plural, one {# deck selected} other {# decks selected}}",

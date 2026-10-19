@@ -1,0 +1,10 @@
+<!-- Bot: a robot head with an antenna and two eyes. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+  <rect x="4.5" y="8" width="15" height="11" rx="3" />
+  <line x1="12" y1="8" x2="12" y2="4.5" />
+  <circle cx="12" cy="3.8" r="0.9" fill="#000" stroke="none" />
+  <circle cx="9.2" cy="13" r="1.2" fill="#000" stroke="none" />
+  <circle cx="14.8" cy="13" r="1.2" fill="#000" stroke="none" />
+  <line x1="2.5" y1="12" x2="2.5" y2="15" />
+  <line x1="21.5" y1="12" x2="21.5" y2="15" />
+</svg>

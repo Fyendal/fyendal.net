@@ -3,7 +3,7 @@ import { useIntl } from "react-intl";
 import type { CardPoolMode } from "@fyendal/shared";
 import { ViewportTooltip } from "../components/ViewportTooltip.js";
 
-const CARD_POOL_MODES = ["legal", "future", "open"] as const satisfies readonly CardPoolMode[];
+export const CARD_POOL_MODES = ["legal", "future", "open"] as const satisfies readonly CardPoolMode[];
 
 export function CardPoolModeControl(props: {
   value: CardPoolMode;

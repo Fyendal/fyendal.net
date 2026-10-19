@@ -447,97 +447,184 @@
   clip-path: inset(50%);
   white-space: nowrap;
 }
-.deck-card-pool-control { width: 250px; }
-.deck-play-modal {
-  width: min(480px, calc(100vw - 40px));
-}
 .deck-library-panel > .modal-surface-backdrop { z-index: 200; }
-.deck-play-summary {
-  display: grid;
-  grid-template-columns: 64px minmax(0, 1fr);
+/* A saved deck's hub, in the bot picker's flat chrome. It opens on the
+   same banner as the deck's tile, with the name laid over the art in place
+   of a header; the game modes below are the main choice and the card pool
+   a quiet setting beside Start. */
+.deck-detail-modal {
+  position: relative;
+  width: min(560px, calc(100vw - 40px));
+  padding: 0;
+  border-color: #59493a;
+  border-radius: 3px;
+  background: #211a15;
+  box-shadow: 0 18px 48px #000a;
+  font-family: var(--font-lobby-ui);
+}
+.deck-detail-modal .modal-surface-header {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  align-items: flex-start;
+  margin: 0;
+  padding: 20px 12px 0 24px;
+  border: 0;
+  background: transparent;
+}
+.deck-detail-modal .modal-surface-header > div { min-width: 0; max-width: 62%; }
+.deck-detail-modal .modal-surface-header h2 {
+  display: -webkit-box;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+  color: #f6e8c6;
+  font-size: 22px;
+  line-height: 1.25;
+  text-shadow: 0 1px 2px #000, 0 0 14px #000c;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+}
+/* Sits where the tile's selection gem does, on a plate so it reads over
+   any artwork. */
+.deck-detail-modal .modal-surface-close {
+  width: 32px;
+  min-width: 32px;
+  height: 32px;
+  margin-top: -8px;
+  border: 0;
+  border-radius: 3px;
+  background: #191510cc;
+  color: var(--text-secondary);
+}
+.deck-detail-modal .modal-surface-close:hover { background: #332519; color: var(--text-primary); }
+.deck-detail-modal .modal-surface-close svg { width: 14px; height: 14px; stroke-width: 2.25; }
+.deck-detail-banner {
+  position: relative;
+  height: 200px;
+  overflow: hidden;
+  border-bottom: 1px solid #3d3128;
+  background: radial-gradient(120% 140% at 100% 50%, #3a2716 0%, #211a15 60%);
+}
+.deck-detail-meta {
+  position: absolute;
+  z-index: 1;
+  right: 20px;
+  bottom: 14px;
+  left: 24px;
+  display: flex;
   align-items: center;
-  gap: 13px;
-  margin-bottom: 16px;
-  padding-bottom: 16px;
-  border-bottom: 1px solid var(--border-subtle);
+  gap: 8px;
+  margin: 0;
+  color: #e3d5b8;
+  font: 600 14px/19px var(--font-lobby-ui);
+  text-shadow: 0 1px 2px #000;
 }
-.deck-play-summary img {
-  width: 64px;
-  height: 64px;
-  border: 1px solid #806334;
-  border-radius: 50%;
-  background: #100a06;
-  box-shadow: 0 4px 12px #0009;
-  object-fit: cover;
+.deck-detail-meta .deck-card-format { text-shadow: none; }
+.deck-detail-meta > span:last-child { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.deck-detail-body {
+  display: grid;
+  gap: 16px;
+  padding: 20px 24px 24px;
 }
-.deck-play-summary div {
+.deck-detail-modes {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+.deck-detail-modes button {
   display: grid;
   min-width: 0;
-  gap: 4px;
-}
-.deck-play-summary strong {
-  overflow: hidden;
+  justify-items: start;
+  gap: 10px;
+  padding: 14px;
+  border: 1px solid #5b4c3e;
+  border-radius: 3px;
+  background: #191510;
+  clip-path: none;
   color: var(--text-primary);
-  font: 700 18px/1.2 var(--font-lobby-title);
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  font: 650 15px var(--font-lobby-ui);
+  letter-spacing: normal;
+  text-align: left;
+  text-transform: none;
+  transition: border-color 120ms ease, background-color 120ms ease;
 }
-.deck-play-summary span {
-  color: var(--text-secondary);
-  font-size: 13px;
+.deck-detail-modes button:hover:not(:disabled) { border-color: #806334; background: #261c14; }
+.deck-detail-modes button:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+.deck-detail-modes button[aria-pressed="true"] {
+  border-color: var(--bronze);
+  background: #4a311c;
+  box-shadow: inset 0 0 0 1px var(--bronze);
+  color: var(--gold);
 }
-.deck-play-modal > .deck-card-pool-control {
-  position: relative;
-  z-index: 3;
-  width: 100%;
-  margin-bottom: 16px;
-}
-.deck-play-modal > .deck-card-pool-control .card-pool-segments { padding: 2px; }
-.deck-play-modal > .deck-card-pool-control .card-pool-segments::before {
-  top: 2px;
-  bottom: 2px;
-  left: 2px;
-  width: calc((100% - 4px) / 3);
-  border-radius: 4px;
-}
-.deck-play-modal > .deck-card-pool-control .card-pool-segments button {
-  min-height: 34px;
-  padding: 6px 8px;
-  font-size: 10px;
-}
-.deck-play-blocked {
-  margin: -6px 0 15px;
-  padding: 9px 11px;
-  border: 1px solid #9a3c32;
-  border-radius: 5px;
-  background: #4b1714a8;
+.deck-detail-modes .ui-icon { width: 22px; height: 22px; color: var(--text-muted); }
+.deck-detail-modes button[aria-pressed="true"] .ui-icon { color: var(--gold); }
+.deck-detail-blocked {
+  margin: 0;
+  padding: 10px 12px;
+  border-left: 2px solid #c4483b;
+  background: #3a1612;
   color: #ffb6ad;
-  font-size: 12px;
+  font-size: 13px;
   line-height: 1.4;
 }
-.deck-play-actions {
+/* Card pool stays a compact setting; Start takes the remaining width. */
+.deck-detail-launch {
   display: grid;
-  gap: 9px;
+  grid-template-columns: minmax(0, 168px) minmax(0, 1fr);
+  align-items: end;
+  gap: 12px;
 }
-.deck-play-actions > .btn-primary {
+.deck-detail-pool { position: relative; display: grid; gap: 6px; }
+.deck-detail-pool .home-play-field-label { min-height: 20px; font-size: 12px; }
+/* Opens upward: below the field the modal's scroll edge would clip it. */
+.deck-detail-pool .home-card-pool-tooltip {
+  top: auto;
+  bottom: calc(100% + 7px);
+  width: min(320px, calc(100vw - 72px));
+}
+.deck-detail-pool select {
   width: 100%;
-  min-height: 50px;
-  font-size: 17px;
-  letter-spacing: 2.5px;
-}
-.deck-play-secondary-actions {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 9px;
-}
-.deck-play-secondary-actions button {
-  width: 100%;
-  min-width: 0;
   min-height: 44px;
-  padding: 8px 10px;
-  font-size: 13px;
-  letter-spacing: 1px;
+  padding-block: 8px;
+  font-size: 14px;
 }
+.deck-detail-start {
+  width: 100%;
+  min-height: 44px;
+  border-radius: 3px;
+  font-size: 16px;
+}
+/* Deck management is secondary: a quiet row of text actions. */
+.deck-detail-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 8px 12px;
+  border-top: 1px solid #3d3128;
+}
+.deck-detail-actions > :is(a, button) {
+  display: inline-flex;
+  min-height: 36px;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 12px;
+  border: 0;
+  border-radius: 3px;
+  background: transparent;
+  clip-path: none;
+  color: var(--text-secondary);
+  font: 600 14px var(--font-lobby-ui);
+  letter-spacing: normal;
+  text-decoration: none;
+  text-transform: none;
+}
+.deck-detail-actions > :is(a, button):hover { background: #332519; color: var(--gold); }
+.deck-detail-actions > :is(a, button):focus-visible { outline: 2px solid var(--gold); outline-offset: -2px; }
+.deck-detail-actions > .deck-detail-delete { margin-left: auto; color: #e8a39c; }
+.deck-detail-actions > .deck-detail-delete:hover { background: #351813; color: #ffc1b9; }
+.deck-detail-actions .ui-icon { width: 16px; height: 16px; }
 .deck-delete-modal { width: min(440px, calc(100vw - 32px)); }
 
 @media (prefers-reduced-motion: reduce) {
@@ -639,9 +726,22 @@
   }
   .deck-card-details { align-self: start; }
   .deck-legality-hint { grid-column: 2; }
-  .deck-play-modal { width: 100%; }
-  .deck-play-secondary-actions { grid-template-columns: 1fr; }
-  .deck-play-secondary-actions button { min-height: 46px; }
+  .deck-detail-modal { width: 100%; padding-bottom: env(safe-area-inset-bottom); border-radius: 10px 10px 3px 3px; }
+  .deck-detail-modal .modal-surface-header { padding: 18px 10px 0 18px; }
+  .deck-detail-modal .modal-surface-header h2 { font-size: 20px; }
+  .deck-detail-modal .modal-surface-close { width: 40px; min-width: 40px; height: 40px; }
+  .deck-detail-banner { height: 168px; }
+  .deck-detail-meta { left: 18px; }
+  .deck-detail-body { padding: 16px 18px 20px; }
+  .deck-detail-modes { grid-template-columns: 1fr; gap: 6px; }
+  .deck-detail-modes button {
+    grid-template-columns: 22px minmax(0, 1fr);
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+  }
+  .deck-detail-launch { grid-template-columns: 1fr; }
+  .deck-detail-actions > :is(a, button) { min-height: 44px; }
   .deck-actions { flex-direction: column; }
   .btn-bot { width: 100%; min-width: 0; }
   .bot-opponent-modal { width: 100%; border-radius: 10px 10px 3px 3px; }
@@ -669,35 +769,25 @@
   grid-template-columns: repeat(auto-fill, minmax(min(300px, 100%), 1fr));
   gap: 16px;
 }
-/* Saved decks are framed banners: the hero art lights the right side and
-   fades into the plate behind the name, Hearthstone style, inside a bronze
-   frame with a gilt inner bevel. Actions sit on a strip below the banner so
-   every card in a row lines up. */
+/* Saved decks are flat banners on the home panel's surface: the hero art
+   lights the right side and fades into the plate behind the name. The
+   whole banner opens the deck modal, which holds every deck action. */
 .deck-library-card {
   position: relative;
   display: flex;
   min-width: 0;
   flex-direction: column;
   overflow: hidden;
-  border: 1px solid #7a5d2c;
-  border-radius: 4px;
-  background: #17110c;
-  box-shadow: 0 6px 18px #0008;
+  border: 1px solid #59493a;
+  border-radius: 3px;
+  background: #211a15;
+  transition: border-color 120ms ease;
 }
-.deck-library-card::after {
-  position: absolute;
-  inset: 3px;
-  border: 1px solid #b8933f40;
-  border-radius: 2px;
-  content: "";
-  pointer-events: none;
-}
-.deck-library-card:hover { border-color: #a8833f; }
+.deck-library-card:hover { border-color: #806334; }
 .deck-library-card:has(.deck-library-select input:checked) {
   border-color: var(--gold);
-  box-shadow: 0 0 0 1px var(--gold), 0 0 22px #ffd47940, 0 6px 18px #0008;
+  box-shadow: inset 0 0 0 1px var(--gold);
 }
-.deck-library-card:has(.deck-library-select input:checked)::after { border-color: #ffd47966; }
 /* Selection is a small gilt gem, not a form box. */
 .deck-library-select {
   position: absolute;
@@ -762,7 +852,7 @@
   position: relative;
   display: flex;
   width: 100%;
-  min-height: 148px;
+  min-height: 168px;
   flex: 1;
   flex-direction: column;
   align-items: flex-start;
@@ -772,24 +862,24 @@
   border: 0;
   border-radius: 0;
   clip-path: none;
-  background: radial-gradient(120% 140% at 100% 50%, #3a2716 0%, #17110c 60%);
+  background: radial-gradient(120% 140% at 100% 50%, #3a2716 0%, #211a15 60%);
   text-align: left;
 }
 .deck-library-card > .deck-card:focus-visible { outline-offset: -4px; }
-.deck-library-card > .deck-card::after {
+/* The scrim behind the hero line, shared with the deck modal's banner. */
+:is(.deck-library-card > .deck-card, .deck-detail-banner)::after {
   position: absolute;
   right: 0;
   bottom: 0;
   left: 0;
   height: 62%;
-  background: linear-gradient(0deg, #120c08f2 0%, #120c08b8 45%, transparent 100%);
+  background: linear-gradient(0deg, #191510f2 0%, #191510b8 45%, transparent 100%);
   content: "";
   pointer-events: none;
 }
 /* The hero card's art fades in from under the name, cropped inside the
    card frame. Without card art, the headshot takes the same place. */
-.deck-library-card .deck-card-art,
-.deck-library-card .deck-card-img {
+:is(.deck-library-card, .deck-detail-banner) :is(.deck-card-art, .deck-card-img) {
   position: absolute;
   top: 0;
   right: 0;
@@ -798,8 +888,8 @@
   -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 38%);
   mask-image: linear-gradient(90deg, transparent 0%, #000 38%);
 }
-.deck-library-card .deck-card-art { overflow: hidden; }
-.deck-library-card .deck-card-art img {
+:is(.deck-library-card, .deck-detail-banner) .deck-card-art { overflow: hidden; }
+:is(.deck-library-card, .deck-detail-banner) .deck-card-art img {
   position: absolute;
   top: 0;
   left: 54%;
@@ -810,7 +900,7 @@
   transform-origin: 50% 25%;
 }
 .deck-library-card .deck-card.has-art .deck-card-img { display: none; }
-.deck-library-card .deck-card-img {
+:is(.deck-library-card, .deck-detail-banner) .deck-card-img {
   border: 0;
   border-radius: 0;
   box-shadow: none;
@@ -862,7 +952,7 @@
   -webkit-line-clamp: 2;
   line-clamp: 2;
 }
-.deck-library-card .deck-card-format {
+:is(.deck-library-card, .deck-detail-meta) .deck-card-format {
   display: block;
   order: -1;
   flex: 0 0 auto;
@@ -875,22 +965,7 @@
 .deck-card-format[data-format="cc"] { border-color: #c45a34a0; background: #3a150cd9; color: #ffa47f; }
 .deck-card-format[data-format="silver-age"] { border-color: #a39a88a0; background: #26221cd9; color: #d6d0c2; }
 .deck-library-card .deck-legality-hint { max-width: 70%; font-size: 13px; text-shadow: 0 1px 2px #000; }
-.deck-library-card-actions {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  justify-content: flex-end;
-  padding: 6px 10px 7px;
-  border-top: 1px solid #b8933f59;
-  background: linear-gradient(180deg, #120d09, #0e0a07);
-}
-.deck-library-card-actions > div {
-  display: flex;
-  min-width: 0;
-  gap: 4px;
-}
-/* Shared by each card's action strip and the bulk selection bar. */
-:is(.deck-library-card-actions, .deck-bulk-actions) button {
+.deck-bulk-actions button {
   display: inline-flex;
   min-width: 0;
   min-height: 34px;
@@ -907,11 +982,11 @@
   text-transform: none;
   white-space: nowrap;
 }
-:is(.deck-library-card-actions, .deck-bulk-actions) button:hover { background: #2a1d12; color: var(--gold); }
-:is(.deck-library-card-actions, .deck-bulk-actions) button:focus-visible { outline: 2px solid var(--gold); outline-offset: -2px; }
-:is(.deck-library-card-actions, .deck-bulk-actions) .deck-library-delete { color: #e8a39c; }
-:is(.deck-library-card-actions, .deck-bulk-actions) .deck-library-delete:hover { background: #351813; color: #ffc1b9; }
-:is(.deck-library-card-actions, .deck-bulk-actions) .ui-icon { width: 16px; height: 16px; }
+.deck-bulk-actions button:hover { background: #2a1d12; color: var(--gold); }
+.deck-bulk-actions button:focus-visible { outline: 2px solid var(--gold); outline-offset: -2px; }
+.deck-bulk-actions .deck-library-delete { color: #e8a39c; }
+.deck-bulk-actions .deck-library-delete:hover { background: #351813; color: #ffc1b9; }
+.deck-bulk-actions .ui-icon { width: 16px; height: 16px; }
 @media (prefers-reduced-motion: reduce) {
   .deck-library-card .deck-card-img,
   .deck-library-card .deck-card-art img,
@@ -1122,7 +1197,7 @@
   .deck-grid-saved { gap: 0; border-top: 1px solid #45331f99; }
   .deck-library-card {
     display: grid;
-    grid-template-columns: 34px minmax(0, 1fr) auto;
+    grid-template-columns: 34px minmax(0, 1fr);
     align-items: center;
     border: 0;
     border-bottom: 1px solid #45331f99;
@@ -1130,7 +1205,6 @@
     background: transparent;
     box-shadow: none;
   }
-  .deck-library-card::after { display: none; }
   .deck-library-card:hover { border-color: #45331f99; }
   .deck-library-card:has(.deck-library-select input:checked) {
     border-color: #45331f99;
@@ -1189,31 +1263,6 @@
   }
   .deck-library-card .deck-card-format { padding: 1px 6px; font-size: 11px; line-height: 15px; }
   .deck-library-card .deck-legality-hint { grid-column: 2; max-width: none; margin-top: 3px; font-size: 12px; }
-  .deck-library-card-actions {
-    display: block;
-    padding: 0;
-    border-top: 0;
-    background: transparent;
-  }
-  .deck-library-card-actions > div { flex-wrap: nowrap; gap: 0; }
-  .deck-library-card-actions button {
-    display: grid;
-    width: 36px;
-    height: 44px;
-    place-items: center;
-    padding: 0;
-  }
-  .deck-library-card-actions button:hover,
-  .deck-library-card-actions .deck-library-delete:hover { background: transparent; }
-  .deck-library-card-actions .ui-icon { width: 19px; height: 19px; }
-  .deck-library-action-label {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-    clip: rect(0 0 0 0);
-    white-space: nowrap;
-  }
   .home-play-form { grid-template-columns: 1fr; }
   .home-play-primary-fields { grid-column: 1; grid-template-columns: 1fr; }
   .home-play-actions { grid-column: 1; align-items: center; }

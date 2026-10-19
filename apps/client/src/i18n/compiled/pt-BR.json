@@ -32749,6 +32749,12 @@
       "value": "Requer atenção"
     }
   ],
+  "lobby.deck.openFabrary": [
+    {
+      "type": 0,
+      "value": "Ver no Fabrary"
+    }
+  ],
   "lobby.deck.optionalName": [
     {
       "type": 0,
@@ -32900,20 +32906,6 @@
     {
       "type": 0,
       "value": "Salvo"
-    }
-  ],
-  "lobby.deck.viewOnFabrary": [
-    {
-      "type": 0,
-      "value": "Ver "
-    },
-    {
-      "type": 1,
-      "value": "name"
-    },
-    {
-      "type": 0,
-      "value": " no Fabrary"
     }
   ],
   "lobby.discordCommunity": [

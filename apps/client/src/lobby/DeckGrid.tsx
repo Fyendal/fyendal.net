@@ -67,9 +67,15 @@ export function sortDecksForPicker(
   );
 }
 
+/** Cards the pool rejects: open allows everything, future only bans. */
+export function deckBlockedCards(deck: DeckSummary, cardPoolMode: CardPoolMode): string[] {
+  if (cardPoolMode === "open") return [];
+  const banned = deck.bannedCards ?? [];
+  return cardPoolMode === "future" ? banned : [...banned, ...(deck.futureCards ?? [])];
+}
+
 export function deckIsLegalForRoom(deck: DeckSummary, cardPoolMode: CardPoolMode): boolean {
-  return (cardPoolMode === "open" || !deck.bannedCards?.length) &&
-    (cardPoolMode !== "legal" || !deck.futureCards?.length);
+  return deckBlockedCards(deck, cardPoolMode).length === 0;
 }
 
 /**
@@ -88,7 +94,6 @@ export function DeckTile(props: {
   format?: Format;
   banner?: boolean;
   onSelect: () => void;
-  href?: string;
 }) {
   const intl = useIntl();
   const [imgOk, setImgOk] = useState(true);
@@ -150,14 +155,6 @@ export function DeckTile(props: {
     </>
   );
   const className = `deck-card${showArt ? " has-art" : ""}${props.selected ? " selected" : ""}${props.blocked ? " blocked" : ""}`;
-  if (props.href) {
-    return (
-      <a className={className} href={props.href} target="_blank" rel="noopener noreferrer"
-        aria-label={intl.formatMessage({ id: "lobby.deck.viewOnFabrary" }, { name: d.name })}>
-        {contents}
-      </a>
-    );
-  }
   return (
     <button className={className} aria-disabled={props.blocked || undefined}
       aria-expanded={props.selected || undefined}

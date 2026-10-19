@@ -1,0 +1,6 @@
+<!-- External link: an arrow leaving the corner of a box. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M18 13.5V19a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5.5" />
+  <path d="M14.5 4H20v5.5" />
+  <line x1="20" y1="4" x2="11" y2="13" />
+</svg>
