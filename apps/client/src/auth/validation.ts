@@ -1,10 +1,17 @@
+import { normalizeEmailAddress, PASSWORD_MIN_LENGTH } from "@fyendal/protocol";
+
 const USERNAME_RE = /^[a-zA-Z0-9_]{3,20}$/;
 
 export type AuthValidationError =
   | "invalidUsername"
   | "missingUsername"
   | "shortPassword"
-  | "missingPassword";
+  | "missingPassword"
+  | "invalidEmail";
+
+export function isShortPassword(password: string): boolean {
+  return password.length < PASSWORD_MIN_LENGTH;
+}
 
 export function validateAuthInput(
   username: string,
@@ -18,7 +25,11 @@ export function validateAuthInput(
   } else if (!username) {
     return "missingUsername";
   }
-  if (mode === "register" && password.length < 8) return "shortPassword";
+  if (mode === "register" && isShortPassword(password)) return "shortPassword";
   if (!password) return "missingPassword";
   return null;
+}
+
+export function isValidEmail(email: string): boolean {
+  return normalizeEmailAddress(email) !== null;
 }

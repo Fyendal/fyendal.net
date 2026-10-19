@@ -1,5 +1,6 @@
 import {
   apiAccountBadges,
+  apiAccountEmail,
   apiBugReportNotifications,
   apiDecks,
   apiDeleteAccount,
@@ -10,8 +11,10 @@ import {
   apiFabraryDeckPreview,
   apiImportDeck,
   apiReportBug,
+  apiRemoveAccountEmail,
   apiReportPlayer,
   apiSelectAccountBadge,
+  apiSetAccountEmail,
   apiUpdateDeck,
 } from "../auth/auth.js";
 import type { StoreState } from "./types.js";
@@ -32,6 +35,9 @@ type AccountActionKey =
   | "exportAccount"
   | "getAccountBadges"
   | "selectAccountBadge"
+  | "getAccountEmail"
+  | "setAccountEmail"
+  | "removeAccountEmail"
   | "deleteAccount"
   | "reportBug"
   | "reportOpponent"
@@ -169,6 +175,27 @@ export function createAccountActions({
       if (!token) return { ok: false, error: "not logged in" };
       const request = authRequest(token);
       const result = await apiSelectAccountBadge(token, badge, request.signal);
+      return isCurrentAuth(request) ? result : superseded;
+    },
+    getAccountEmail: async () => {
+      const token = get().authToken;
+      if (!token) return { ok: false, error: "not logged in" };
+      const request = authRequest(token);
+      const result = await apiAccountEmail(token, request.signal);
+      return isCurrentAuth(request) ? result : superseded;
+    },
+    setAccountEmail: async (password, email) => {
+      const token = get().authToken;
+      if (!token) return { ok: false, error: "not logged in" };
+      const request = authRequest(token);
+      const result = await apiSetAccountEmail(token, password, email, request.signal);
+      return isCurrentAuth(request) ? result : superseded;
+    },
+    removeAccountEmail: async (password) => {
+      const token = get().authToken;
+      if (!token) return { ok: false, error: "not logged in" };
+      const request = authRequest(token);
+      const result = await apiRemoveAccountEmail(token, password, request.signal);
       return isCurrentAuth(request) ? result : superseded;
     },
     deleteAccount: async (password) => {

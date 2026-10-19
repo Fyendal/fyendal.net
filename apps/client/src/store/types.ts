@@ -28,6 +28,7 @@ import type {
 import type {
   AccountExport,
   AccountBadgesResponse,
+  AccountEmailResponse,
   ApiError,
   FixedBugReportNotification,
   DeckDetailResponse,
@@ -125,7 +126,9 @@ export interface StoreState {
   authToken: string | null;
   error: string | null;
   login: (username: string, password: string) => Promise<LoginResult>;
-  register: (username: string, password: string) => Promise<RegisterResult>;
+  register: (username: string, password: string, email?: string) => Promise<RegisterResult>;
+  /** Consume a reset link; success signs this browser in as that account. */
+  resetPassword: (token: string, password: string) => Promise<LoginResult>;
   logout: () => Promise<void>;
   clearError: () => void;
   setError: (message: string) => void;
@@ -189,6 +192,9 @@ export interface StoreState {
   getAccountBadges: () => Promise<AccountBadgesResponse | ApiError>;
   selectAccountBadge: (badge: PlayerBadge | null) => Promise<AccountBadgesResponse | ApiError>;
   deleteAccount: (password: string) => Promise<{ ok: true } | ApiError>;
+  getAccountEmail: () => Promise<AccountEmailResponse | ApiError>;
+  setAccountEmail: (password: string, email: string) => Promise<AccountEmailResponse | ApiError>;
+  removeAccountEmail: (password: string) => Promise<AccountEmailResponse | ApiError>;
   prepDeck: DeckDetailResponse["deck"] | null;
   selectPrepMatchup: (matchupId: string | null) => Promise<string | null>;
 

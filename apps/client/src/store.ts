@@ -66,6 +66,7 @@ import {
   apiLogout,
   apiReplayNotes,
   apiRegister,
+  apiResetPassword,
   apiRoomReplay,
   apiSaveReplayNote,
 } from "./auth/auth.js";
@@ -217,6 +218,30 @@ export const useStore = create<StoreState>((set, get) => {
 
   function isCurrentAuth(request: { epoch: number; token: string }): boolean {
     return request.epoch === authEpoch && request.token === get().authToken;
+  }
+
+  /** Switch the store to a freshly issued session (login or password reset). */
+  function adoptSession(session: { token: string; username: string }): void {
+    // A socket authenticated as the previous account must never receive a
+    // late acknowledgement after the store switches identities.
+    closeCurrentSocket();
+    saveStoredAuth(localStorage, { token: session.token, username: session.username });
+    const accountLobbySettings = loadLobbySettings(localStorage, session.username);
+    set({
+      authToken: session.token,
+      authUser: session.username,
+      pendingFabraryPlay: get().pendingFabraryPlay
+        ? { route: get().pendingFabraryPlay!.route, status: "idle", result: null }
+        : null,
+      decks: [],
+      decksLoading: true,
+      bugReportNotifications: [],
+      cardPoolModes: accountLobbySettings.cardPoolModes,
+      deckPlayedAt: {},
+    });
+    // proactively open the socket so ws auth happens without needing to
+    // create/join a room first
+    connect(() => {});
   }
 
   function resetRoomCommandPipeline(): void {
@@ -1474,30 +1499,20 @@ export const useStore = create<StoreState>((set, get) => {
         return { ok: false, error: "login request was superseded" };
       }
       if (!res.ok) return res;
-      // A socket authenticated as the previous account must never receive a
-      // late acknowledgement after the store switches identities.
-      closeCurrentSocket();
-      saveStoredAuth(localStorage, { token: res.token, username: res.username });
-      const accountLobbySettings = loadLobbySettings(localStorage, res.username);
-      set({
-        authToken: res.token,
-        authUser: res.username,
-        pendingFabraryPlay: get().pendingFabraryPlay
-          ? { route: get().pendingFabraryPlay!.route, status: "idle", result: null }
-          : null,
-        decks: [],
-        decksLoading: true,
-        bugReportNotifications: [],
-        cardPoolModes: accountLobbySettings.cardPoolModes,
-        deckPlayedAt: {},
-      });
-      // proactively open the socket so ws auth happens without needing to
-      // create/join a room first
-      connect(() => {});
+      adoptSession(res);
       return res;
     },
-    register: async (username, password) => {
-      const result = await apiRegister(username, password);
+    resetPassword: async (token, password) => {
+      const resetRequest = advanceAuthEpoch();
+      const res = await apiResetPassword(token, password);
+      if (resetRequest.epoch !== authEpoch) {
+        return { ok: false, error: "login request was superseded" };
+      }
+      if (res.ok) adoptSession(res);
+      return res;
+    },
+    register: async (username, password, email) => {
+      const result = await apiRegister(username, password, email);
       if (!result.ok) return result;
       // Registration is an onboarding action, not a separate account-management
       // step. Issue the first session immediately so invitees can continue from

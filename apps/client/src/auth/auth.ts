@@ -1,6 +1,7 @@
 /** HTTP auth API wrapper — thin fetch layer over the server's /api endpoints. */
 import {
   decodeAccountBadgesResponse,
+  decodeAccountEmailResponse,
   decodeAchievementsResponse,
   decodeAccountExportResponse,
   decodeApiError,
@@ -28,6 +29,7 @@ import {
   type GlobalNoticeResponse,
   type VersionUpdateNoticeResponse,
   type AccountBadgesResponse,
+  type AccountEmailResponse,
   type AchievementsResponse,
   type AccountExport,
   type ApiError,
@@ -129,8 +131,44 @@ export function apiVersionUpdateNotice(signal?: AbortSignal): Promise<VersionUpd
   return get("version-update", decodeVersionUpdateNoticeResponse, { signal });
 }
 
-export function apiRegister(username: string, password: string): Promise<RegisterResult> {
-  return post<RegisterOk>("register", { username, password }, okOnly);
+export function apiRegister(username: string, password: string, email?: string): Promise<RegisterResult> {
+  return post<RegisterOk>("register", { username, password, ...(email ? { email } : {}) }, okOnly);
+}
+
+export function apiForgotPassword(identifier: string): Promise<OkResponse | ApiError> {
+  return post("password/forgot", { identifier }, okOnly);
+}
+
+export function apiResetPassword(token: string, password: string): Promise<LoginResult> {
+  return post<LoginOk>("password/reset", { token, password }, decodeLoginResponse);
+}
+
+export function apiVerifyEmail(token: string): Promise<OkResponse | ApiError> {
+  return post("account/email/verify", { token }, okOnly);
+}
+
+export function apiAccountEmail(
+  token: string,
+  signal?: AbortSignal,
+): Promise<AccountEmailResponse | ApiError> {
+  return get("account/email", decodeAccountEmailResponse, { token, signal });
+}
+
+export function apiSetAccountEmail(
+  token: string,
+  password: string,
+  email: string,
+  signal?: AbortSignal,
+): Promise<AccountEmailResponse | ApiError> {
+  return post("account/email", { password, email }, decodeAccountEmailResponse, { token, signal });
+}
+
+export function apiRemoveAccountEmail(
+  token: string,
+  password: string,
+  signal?: AbortSignal,
+): Promise<AccountEmailResponse | ApiError> {
+  return post("account/email/remove", { password }, decodeAccountEmailResponse, { token, signal });
 }
 
 export function apiLogin(username: string, password: string, signal?: AbortSignal): Promise<LoginResult> {
