@@ -30298,12 +30298,6 @@
       "value": "Pasar siempre"
     }
   ],
-  "game.standingOrder.stack.passed": [
-    {
-      "type": 0,
-      "value": "Pasado por ti"
-    }
-  ],
   "game.standingOrder.timing.actionPhase": [
     {
       "type": 0,

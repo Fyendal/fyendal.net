@@ -28623,12 +28623,6 @@
       "value": "总是让过"
     }
   ],
-  "game.standingOrder.stack.passed": [
-    {
-      "type": 0,
-      "value": "已为你让过"
-    }
-  ],
   "game.standingOrder.timing.actionPhase": [
     {
       "type": 0,

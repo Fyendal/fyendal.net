@@ -2779,7 +2779,6 @@
   "game.standingOrder.optional.use": "Usar siempre",
   "game.standingOrder.priority.generic": "Cuando su habilidad disparada está en la pila",
   "game.standingOrder.optional.generic": "Cuando pregunta si usar su habilidad disparada",
-  "game.standingOrder.stack.passed": "Pasado por ti",
   "game.standingOrder.timing.startOfTurn": "Al comienzo del turno: {effect}",
   "game.standingOrder.timing.actionPhase": "Al comienzo de la fase de acción: {effect}",
   "game.standingOrder.timing.endPhase": "Al comienzo de la fase final: {effect}",

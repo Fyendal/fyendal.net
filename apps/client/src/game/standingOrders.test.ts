@@ -1,14 +1,10 @@
 import { describe, expect, it } from "vitest";
-import type { GameIntent, GameView, PlayerView } from "@fyendal/shared";
+import type { GameView, PlayerView } from "@fyendal/shared";
 import {
   activeOrderValues,
   currentStandingOrderQuestion,
-  fenceStandingOrderAnswer,
-  INITIAL_STANDING_ORDER_FENCE,
-  standingOrderAnswer,
   standingOrderCardModels,
   standingOrderKey,
-  suspendStandingOrder,
   type ObservedStandingOrderQuestion,
 } from "./standingOrders.js";
 
@@ -96,9 +92,6 @@ function dynamoChoice(player: number): GameView {
   });
 }
 
-const PASS: GameIntent[] = [{ kind: "pass" }];
-const YES_NO: GameIntent[] = [{ kind: "choose", optionId: "yes" }, { kind: "choose", optionId: "no" }];
-
 describe("standing order keys", () => {
   it("keys every Fealty printing and token copy to one functional identity", () => {
     expect(standingOrderKey({ cardId: FEALTY_SFA })).toBe("fealty|0");
@@ -154,51 +147,6 @@ describe("currentStandingOrderQuestion", () => {
     expect(currentStandingOrderQuestion(view({
       pendingDecision: { ...choice.pendingDecision!, sourceInstanceId: undefined },
     }), 0)).toBeNull();
-  });
-});
-
-describe("standingOrderAnswer", () => {
-  it("passes a Fealty window only with a pass order and a legal pass", () => {
-    expect(standingOrderAnswer(fealtyWindow(11, 0, 0), 0, {}, PASS)).toBeNull();
-    expect(standingOrderAnswer(fealtyWindow(11, 0, 0), 0, { "fealty|0": { priorityWindow: "ask" } }, PASS)).toBeNull();
-    expect(standingOrderAnswer(fealtyWindow(11, 0, 0), 0, { "fealty|0": { priorityWindow: "pass" } }, [])).toBeNull();
-    expect(standingOrderAnswer(fealtyWindow(12, 0, 0), 0, { "fealty|0": { priorityWindow: "pass" } }, PASS))
-      .toMatchObject({ intent: { kind: "pass" }, value: "pass", question: { key: "fealty|0" } });
-  });
-
-  it("passes the viewer's own windows once its optional trigger is decided", () => {
-    const dynamoWindow = view({
-      stack: [{
-        card: { instanceId: 13, cardId: DYNAMO, owner: 0 },
-        seat: 0,
-        label: "Recover Valiant Dynamo",
-        optional: true,
-      }],
-      pendingDecision: { player: 0, kind: "priority-window", prompt: "Respond?" },
-    });
-    expect(standingOrderAnswer(dynamoWindow, 0, { "valiant dynamo|0": { optionalTrigger: "no" } }, PASS))
-      .toMatchObject({ value: "pass" });
-    expect(standingOrderAnswer(dynamoWindow, 0, { "valiant dynamo|0": { optionalTrigger: "ask" } }, PASS))
-      .toBeNull();
-    const theirs = view({
-      players: [player(0), player(1, { equipment: { chest: { instanceId: 23, cardId: DYNAMO, owner: 1 } } })],
-      stack: [{ card: { instanceId: 23, cardId: DYNAMO, owner: 1 }, seat: 1, label: "Recover Valiant Dynamo", optional: true }],
-      pendingDecision: { player: 0, kind: "priority-window", prompt: "Respond?" },
-    });
-    expect(standingOrderAnswer(theirs, 0, { "valiant dynamo|0": { optionalTrigger: "yes" } }, PASS)).toBeNull();
-  });
-
-  it("answers the Dynamo choice with the ordered option", () => {
-    const orders = { "valiant dynamo|0": { optionalTrigger: "no" as const } };
-    expect(standingOrderAnswer(dynamoChoice(0), 0, orders, YES_NO))
-      .toMatchObject({ intent: { kind: "choose", optionId: "no" }, value: "no" });
-    expect(standingOrderAnswer(dynamoChoice(0), 0, { "valiant dynamo|0": { optionalTrigger: "yes" } }, YES_NO))
-      .toMatchObject({ intent: { kind: "choose", optionId: "yes" }, value: "yes" });
-    expect(standingOrderAnswer(dynamoChoice(0), 0, { "valiant dynamo|0": { optionalTrigger: "ask" } }, YES_NO))
-      .toBeNull();
-    expect(standingOrderAnswer(dynamoChoice(0), 0, orders, PASS)).toBeNull();
-    expect(standingOrderAnswer(dynamoChoice(0), 0, { "valiant dynamo|0": { priorityWindow: "pass" } }, YES_NO))
-      .toBeNull();
   });
 });
 
@@ -278,55 +226,5 @@ describe("standingOrderCardModels", () => {
       { kind: "priority-window", timing: null, label: null, fallback: null, order: "pass" },
       { kind: "optional-trigger", timing: null, label: null, fallback: null, order: "ask" },
     ])).toEqual(["pass"]);
-  });
-});
-
-describe("fenceStandingOrderAnswer", () => {
-  const answer = standingOrderAnswer(fealtyWindow(11, 0, 0), 0, { "fealty|0": { priorityWindow: "pass" } }, PASS)!;
-  const question = answer.question;
-
-  it("sends once per room version and never again for a re-delivered view", () => {
-    const first = fenceStandingOrderAnswer(INITIAL_STANDING_ORDER_FENCE, {
-      question, answer, roomVersion: 7, enabled: true,
-    });
-    expect(first.send).toBe(answer);
-    const again = fenceStandingOrderAnswer(first.state, { question, answer, roomVersion: 7, enabled: true });
-    expect(again.send).toBeNull();
-    const next = fenceStandingOrderAnswer(again.state, { question, answer, roomVersion: 8, enabled: true });
-    expect(next.send).toBe(answer);
-  });
-
-  it("does not send while disabled, unversioned, or without an answer", () => {
-    expect(fenceStandingOrderAnswer(INITIAL_STANDING_ORDER_FENCE, {
-      question, answer, roomVersion: 7, enabled: false,
-    }).send).toBeNull();
-    expect(fenceStandingOrderAnswer(INITIAL_STANDING_ORDER_FENCE, {
-      question, answer, roomVersion: null, enabled: true,
-    }).send).toBeNull();
-    expect(fenceStandingOrderAnswer(INITIAL_STANDING_ORDER_FENCE, {
-      question, answer: null, roomVersion: 7, enabled: true,
-    }).send).toBeNull();
-  });
-
-  it("holds the undone question until the viewer faces a different one", () => {
-    const sent = fenceStandingOrderAnswer(INITIAL_STANDING_ORDER_FENCE, {
-      question, answer, roomVersion: 7, enabled: true,
-    }).state;
-    const held = suspendStandingOrder(sent, { key: "fealty|0", kind: "priority-window" });
-    const afterUndo = fenceStandingOrderAnswer(held, { question, answer, roomVersion: 9, enabled: true });
-    expect(afterUndo.send).toBeNull();
-    expect(afterUndo.state.suspended).toEqual({ key: "fealty|0", kind: "priority-window" });
-
-    const released = fenceStandingOrderAnswer(afterUndo.state, {
-      question: null, answer: null, roomVersion: 10, enabled: true,
-    });
-    expect(released.state.suspended).toBeNull();
-    expect(fenceStandingOrderAnswer(released.state, {
-      question, answer, roomVersion: 11, enabled: true,
-    }).send).toBe(answer);
-  });
-
-  it("ignores an undo that follows no automatic answer", () => {
-    expect(suspendStandingOrder(INITIAL_STANDING_ORDER_FENCE, null)).toBe(INITIAL_STANDING_ORDER_FENCE);
   });
 });

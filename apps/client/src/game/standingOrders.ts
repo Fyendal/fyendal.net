@@ -1,10 +1,9 @@
-import type { CardView, GameIntent, GameMessage, GameView, TurnTriggerEvent } from "@fyendal/shared";
+import type { CardView, GameMessage, GameView, TurnTriggerEvent } from "@fyendal/shared";
 import { cardData, functionalKeyOf } from "@fyendal/cards/client";
 import { heroCard } from "./board/heroCard.js";
 import type {
   OptionalTriggerOrder,
   PriorityWindowOrder,
-  StandingOrder,
   StandingOrders,
 } from "../storage.js";
 
@@ -23,12 +22,6 @@ export interface StandingOrderQuestion {
   label: GameMessage | null;
   /** English fallback for `label`. */
   fallback: string;
-}
-
-export interface StandingOrderAnswer {
-  question: StandingOrderQuestion;
-  intent: GameIntent;
-  value: "pass" | "yes" | "no";
 }
 
 /** One question seen this game, remembered so the card keeps its chip row
@@ -129,39 +122,6 @@ export function currentStandingOrderQuestion(
   return null;
 }
 
-/** The intent a standing order answers the current question with, when one
- * is set and the authoritative legal intents allow it. */
-export function standingOrderAnswer(
-  view: GameView,
-  viewerSeat: number,
-  orders: StandingOrders,
-  legal: readonly GameIntent[],
-): StandingOrderAnswer | null {
-  const question = currentStandingOrderQuestion(view, viewerSeat);
-  if (!question) return null;
-  const order: StandingOrder | undefined = orders[question.key];
-  if (question.kind === "priority-window") {
-    // A decided optional trigger of the viewer's own card runs through its
-    // priority windows too; the single row stands for both questions.
-    const decidedOwnTrigger = question.seat === viewerSeat
-      && (order?.optionalTrigger === "yes" || order?.optionalTrigger === "no");
-    if (order?.priorityWindow !== "pass" && !decidedOwnTrigger) return null;
-    if (!legal.some((intent) => intent.kind === "pass")) return null;
-    return { question, intent: { kind: "pass" }, value: "pass" };
-  }
-  const value = order?.optionalTrigger;
-  if (value !== "yes" && value !== "no") return null;
-  if (!legal.some((intent) => intent.kind === "choose" && intent.optionId === value)) return null;
-  return { question, intent: { kind: "choose", optionId: value }, value };
-}
-
-/** Functional key of the stack's top layer source, for the "Passed for you"
- * marker. */
-export function topStackLayerKey(view: GameView): string | null {
-  const top = view.stack[0];
-  return top?.card ? standingOrderKey(top.card) : null;
-}
-
 const KIND_ORDER: StandingOrderKind[] = ["priority-window", "optional-trigger"];
 
 /** Rows for one functional card: its printed turn triggers, every question
@@ -223,53 +183,4 @@ export function standingOrderCardModels(
 /** Short order words shown on a set chip, in row order. */
 export function activeOrderValues(rows: readonly StandingOrderRow[]): Array<"pass" | "yes" | "no"> {
   return rows.flatMap((row) => row.order === "ask" ? [] : [row.order]);
-}
-
-export interface StandingOrderFenceState {
-  /** Room version the last automatic answer was sent against. */
-  sentVersion: number | null;
-  /** Question put on hold after an undo, until a different question comes up. */
-  suspended: { key: string; kind: StandingOrderKind } | null;
-}
-
-export const INITIAL_STANDING_ORDER_FENCE: StandingOrderFenceState = {
-  sentVersion: null,
-  suspended: null,
-};
-
-/** Decide whether to send an automatic answer for this exact authoritative
- * state. Each room version is answered at most once, so a re-rendered or
- * re-delivered view never double-sends, and a question suspended by undo
- * waits until the viewer faces a different question. */
-export function fenceStandingOrderAnswer(
-  state: StandingOrderFenceState,
-  input: {
-    question: StandingOrderQuestion | null;
-    answer: StandingOrderAnswer | null;
-    roomVersion: number | null;
-    enabled: boolean;
-  },
-): { state: StandingOrderFenceState; send: StandingOrderAnswer | null } {
-  const { question, answer, roomVersion, enabled } = input;
-  let suspended = state.suspended;
-  if (
-    suspended
-    && (!question || question.key !== suspended.key || question.kind !== suspended.kind)
-  ) {
-    suspended = null;
-  }
-  const next = suspended === state.suspended ? state : { ...state, suspended };
-  if (!enabled || !answer || roomVersion === null) return { state: next, send: null };
-  if (suspended) return { state: next, send: null };
-  if (state.sentVersion === roomVersion) return { state: next, send: null };
-  return { state: { ...next, sentVersion: roomVersion }, send: answer };
-}
-
-/** Put the most recent automatic answer on hold: an undo means the viewer
- * wants to act in that window themselves. */
-export function suspendStandingOrder(
-  state: StandingOrderFenceState,
-  last: { key: string; kind: StandingOrderKind } | null,
-): StandingOrderFenceState {
-  return last ? { ...state, suspended: { key: last.key, kind: last.kind } } : state;
 }

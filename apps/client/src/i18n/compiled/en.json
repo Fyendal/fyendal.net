@@ -29352,12 +29352,6 @@
       "value": "Always pass"
     }
   ],
-  "game.standingOrder.stack.passed": [
-    {
-      "type": 0,
-      "value": "Passed for you"
-    }
-  ],
   "game.standingOrder.timing.actionPhase": [
     {
       "type": 0,

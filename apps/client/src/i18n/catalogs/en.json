@@ -2779,7 +2779,6 @@
   "game.standingOrder.optional.use": "Always use",
   "game.standingOrder.priority.generic": "When its trigger is on the stack",
   "game.standingOrder.optional.generic": "When it asks whether to use its trigger",
-  "game.standingOrder.stack.passed": "Passed for you",
   "game.standingOrder.timing.startOfTurn": "At the start of the turn: {effect}",
   "game.standingOrder.timing.actionPhase": "At the beginning of the action phase: {effect}",
   "game.standingOrder.timing.endPhase": "At the beginning of the end phase: {effect}",

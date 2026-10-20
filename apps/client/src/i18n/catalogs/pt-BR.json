@@ -2779,7 +2779,6 @@
   "game.standingOrder.optional.use": "Sempre usar",
   "game.standingOrder.priority.generic": "Quando o trigger dela está na pilha",
   "game.standingOrder.optional.generic": "Quando pergunta se deve usar o trigger",
-  "game.standingOrder.stack.passed": "Passado por você",
   "game.standingOrder.timing.startOfTurn": "No início do turno: {effect}",
   "game.standingOrder.timing.actionPhase": "No início da action phase: {effect}",
   "game.standingOrder.timing.endPhase": "No início da end phase: {effect}",
