@@ -10,6 +10,9 @@ import { EquipmentStack } from "../EquipmentStack.js";
 import { HeroEmote } from "../HeroEmote.js";
 import { HoverHint } from "../../history/HoverHint.js";
 import { PitchStack } from "../PitchStack.js";
+import { StandingOrderChip } from "../StandingOrderChip.js";
+import { standingOrderKey } from "../standingOrders.js";
+import type { StandingOrderBoard } from "../useStandingOrders.js";
 import {
   motionLocationKey,
   opaqueMotionPresentationKey,
@@ -121,6 +124,7 @@ export function PlayerHalf({
   onSendEmote,
   onOpenOverlay,
   onOpenEffects,
+  standingOrders,
 }: {
   player: PlayerView;
   mine: boolean;
@@ -145,9 +149,28 @@ export function PlayerHalf({
   onSendEmote: (message: EmoteMessage) => void;
   onOpenOverlay: (overlay: BoardOverlay) => void;
   onOpenEffects: (target: EffectLedgerTarget) => void;
+  /** Repeating-question badges for arena cards, keyed by functional identity. */
+  standingOrders?: StandingOrderBoard;
 }) {
   const intl = useIntl();
   const row = (value: number) => (mirrored ? 4 - value : value);
+  const standingOrderChip = (card: CardView) => {
+    const key = standingOrders ? standingOrderKey(card) : null;
+    const model = key ? standingOrders?.cards.get(key) : undefined;
+    return model && standingOrders
+      ? <StandingOrderChip model={model} onSetOrder={standingOrders.onSetOrder} />
+      : null;
+  };
+  /** Equipment, weapon and hero cards get the same badge host as board cards. */
+  const withStandingOrderChip = (card: CardView, stack: React.ReactNode) => {
+    const chip = standingOrderChip(card);
+    return chip ? (
+      <div className="board-card-stack" data-cardid={card.cardId}>
+        {stack}
+        {chip}
+      </div>
+    ) : stack;
+  };
   const zoneLabel = (zone: string) => intl.formatMessage({ id: `game.zone.${zone}` });
   const ownedZoneTitle = (zone: string) => intl.formatMessage(
     { id: mine ? "game.zone.mine" : "game.zone.opponent" },
@@ -211,14 +234,16 @@ export function PlayerHalf({
           className={`zone-${slot}`}
           motionZone={motionLocationKey(zoneLocation)}
         >
-          <EquipmentStack
-            card={card}
-            squareArt={squareBoard}
-            motionLocation={cardLocation}
-            underCardCountLabel={underCardCountLabel}
-            dimmed={interaction.stagedIds.has(card.instanceId) ||
-              interaction.committedDefenderIds.has(card.instanceId)}
-          />
+          {withStandingOrderChip(card, (
+            <EquipmentStack
+              card={card}
+              squareArt={squareBoard}
+              motionLocation={cardLocation}
+              underCardCountLabel={underCardCountLabel}
+              dimmed={interaction.stagedIds.has(card.instanceId) ||
+                interaction.committedDefenderIds.has(card.instanceId)}
+            />
+          ))}
         </MatZone>
       );
     }
@@ -235,21 +260,23 @@ export function PlayerHalf({
         className={`zone-${slot}`}
         motionZone={motionLocationKey(zoneLocation)}
       >
-        <EquipmentStack
-          card={card}
-          squareArt={squareBoard}
-          motionLocation={cardLocation}
-          underCardCountLabel={underCardCountLabel}
-          highlighted={canActivate || canBlock}
-          selected={interaction.selection.kind === "activate" &&
-            interaction.selection.sourceInstanceId === card.instanceId}
-          dimmed={blocking || (interaction.defending && !canBlock)}
-          onClick={canBlock
-            ? () => interaction.onStage([...interaction.stagedIds, card.instanceId])
-            : canActivate
-              ? activate(card.instanceId)
-              : undefined}
-        />
+        {withStandingOrderChip(card, (
+          <EquipmentStack
+            card={card}
+            squareArt={squareBoard}
+            motionLocation={cardLocation}
+            underCardCountLabel={underCardCountLabel}
+            highlighted={canActivate || canBlock}
+            selected={interaction.selection.kind === "activate" &&
+              interaction.selection.sourceInstanceId === card.instanceId}
+            dimmed={blocking || (interaction.defending && !canBlock)}
+            onClick={canBlock
+              ? () => interaction.onStage([...interaction.stagedIds, card.instanceId])
+              : canActivate
+                ? activate(card.instanceId)
+                : undefined}
+          />
+        ))}
       </MatZone>
     );
   };
@@ -278,7 +305,7 @@ export function PlayerHalf({
         className={`zone-weapon-${index}`}
         motionZone={motionLocationKey(location)}
       >
-        {card ? (
+        {card ? withStandingOrderChip(card, (
           <EquipmentStack
             card={card}
             squareArt={squareBoard}
@@ -297,7 +324,7 @@ export function PlayerHalf({
                 ? activate(card.instanceId)
                 : undefined}
           />
-        ) : (
+        )) : (
           <span
             className="card-zone equipment-zone-empty"
             role="img"
@@ -465,6 +492,7 @@ export function PlayerHalf({
                       ×{group.count}
                     </span>
                   ) : null}
+                  {standingOrderChip(group.card)}
                 </div>
               );
             })}
@@ -491,27 +519,29 @@ export function PlayerHalf({
             canSend={mine && canSendEmote && !mobileFloatViewport}
             onSend={onSendEmote}
           >
-            <EquipmentStack
-              card={hero}
-              squareArt={squareBoard}
-              motionLocation={{ kind: "hero", seat: player.seat }}
-              underCards={player.soul}
-              underCardMotionLocation={{ kind: "soul", seat: player.seat }}
-              highlighted={heroCanActivate || heroCanBlock}
-              selected={mine && interaction.selection.kind === "activate" &&
-                interaction.selection.sourceInstanceId === hero.instanceId}
-              dimmed={heroBlocking || (mine && interaction.defending && !heroCanBlock)}
-              soulCount={player.soul.length}
-              soulCountLabel={intl.formatMessage(
-                { id: "game.soul.count" },
-                { count: player.soul.length },
-              )}
-              onClick={heroCanBlock
-                ? () => interaction.onStage([...interaction.stagedIds, hero.instanceId])
-                : heroCanActivate
-                  ? activate(hero.instanceId)
-                  : undefined}
-            />
+            {withStandingOrderChip(hero, (
+              <EquipmentStack
+                card={hero}
+                squareArt={squareBoard}
+                motionLocation={{ kind: "hero", seat: player.seat }}
+                underCards={player.soul}
+                underCardMotionLocation={{ kind: "soul", seat: player.seat }}
+                highlighted={heroCanActivate || heroCanBlock}
+                selected={mine && interaction.selection.kind === "activate" &&
+                  interaction.selection.sourceInstanceId === hero.instanceId}
+                dimmed={heroBlocking || (mine && interaction.defending && !heroCanBlock)}
+                soulCount={player.soul.length}
+                soulCountLabel={intl.formatMessage(
+                  { id: "game.soul.count" },
+                  { count: player.soul.length },
+                )}
+                onClick={heroCanBlock
+                  ? () => interaction.onStage([...interaction.stagedIds, hero.instanceId])
+                  : heroCanActivate
+                    ? activate(hero.instanceId)
+                    : undefined}
+              />
+            ))}
           </HeroEmote>
           <EffectPins
             effects={ongoing}

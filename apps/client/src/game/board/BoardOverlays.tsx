@@ -4,6 +4,7 @@ import { DeckCardToast, type useDeckCardFeedback } from "../DeckCardToast.js";
 import { GameOver } from "../GameOver.js";
 import { HoverCardPreview, type BoardPreview } from "../HoverCardPreview.js";
 import { MobileCardInspect } from "../MobileCardInspect.js";
+import type { StandingOrderPanelModel } from "../StandingOrderPanel.js";
 import { PostGameFriendAction } from "../../social/PostGameFriendAction.js";
 import type { BoardOverlay } from "./BoardPrimitives.js";
 import { ZoneOverlay } from "./ZoneOverlay.js";
@@ -42,6 +43,7 @@ export function BoardOverlays({
   drawOfferSeat,
   onAcceptDraw,
   onDeclineDraw,
+  standingOrders = null,
 }: {
   preview: BoardPreview | null;
   overlay: BoardOverlay | null;
@@ -74,6 +76,8 @@ export function BoardOverlays({
   drawOfferSeat: number | undefined;
   onAcceptDraw: (() => void) | null;
   onDeclineDraw: (() => void) | null;
+  /** The inspected card's repeating questions. */
+  standingOrders?: StandingOrderPanelModel | null;
 }) {
   const intl = useIntl();
   return (
@@ -91,6 +95,7 @@ export function BoardOverlays({
         cardId={inspectedCardId}
         owner={seat}
         onClose={() => onInspectCard(null)}
+        standingOrders={standingOrders}
       />
       <DeckCardToast
         event={deckCardFeedback.activeEvent}

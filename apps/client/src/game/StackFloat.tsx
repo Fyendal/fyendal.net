@@ -123,6 +123,7 @@ export function StackFloat({
   visibility,
   motionDeferred = false,
   tokenSkip,
+  autoPassedTopLayer = false,
 }: {
   layers: StackLayerView[];
   /** Attacks waiting to move onto the combat chain, first attack first. */
@@ -138,6 +139,8 @@ export function StackFloat({
   /** One-shot shortcut offered only during the viewer's Runechant or
    *  Seismic Surge choice. */
   tokenSkip?: { kind: TokenSkipKind; onSkip: () => void };
+  /** The top layer's priority window was passed by the viewer's standing order. */
+  autoPassedTopLayer?: boolean;
 }) {
   const intl = useIntl();
   const [localHidden, setLocalHidden] = useState(false);
@@ -261,6 +264,11 @@ export function StackFloat({
                     <span className="muted"> ({intl.formatMessage({ id: "game.stack.optional" })})</span>
                   ) : null}
                 </div>
+              ) : null}
+              {i === 0 && autoPassedTopLayer ? (
+                <span className="stack-layer-auto" role="status">
+                  {intl.formatMessage({ id: "game.standingOrder.stack.passed" })}
+                </span>
               ) : null}
             </div>
           );

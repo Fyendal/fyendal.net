@@ -60,6 +60,8 @@ import { hoverSurfaceLayout } from "./hoverSurfaceLayout.js";
 import { readEffectHint, sameEffectHint } from "./effects/effectHint.js";
 import { cardPreviewSurfaceSize } from "./cardPreviewFaces.js";
 import { skippableTokenRun } from "./tokenSkip.js";
+import { useStandingOrders } from "./useStandingOrders.js";
+import { standingOrderKey } from "./standingOrders.js";
 import { PlayerNameplate } from "./PlayerNameplate.js";
 import { OpponentActions } from "../social/OpponentActions.js";
 import { shouldShowIdleVictoryClaim } from "./idleVictory.js";
@@ -102,7 +104,7 @@ const EMPTY_INSTANCE_IDS: ReadonlySet<number> = new Set();
 
 export function GameBoard() {
   const intl = useIntl();
-  const { view: authoritativeView, viewUpdate: authoritativeViewUpdate, playerProfiles, legal, actionCandidates, roomCommandPending, pendingInteraction, pendingDefenderStageIds, yourSeat, spectating, spectatorCount, spectatorUsernames, botGame, sendIntent, sendPriorityMode, sendTokenSkip, sendEmote, kickSpectator, latestEmote, undo, error, leave, opponentConnected, connected, connectionIssueVisible, roomCode, screen, replayFrames, replayViews, replayStep, replayNotes, setLiveReplayNote, watchReplay, downloadReplay, closeReplay, getRecordedViews, lastActionAt, claimVictory, reportBug, reportOpponent, backgroundSearching, stopBackgroundMatchmaking, authUser, authToken, setLobbyRail, unreadMessageCount, setSocialOpen } = useStore(
+  const { view: authoritativeView, viewUpdate: authoritativeViewUpdate, playerProfiles, legal, actionCandidates, roomCommandPending, pendingInteraction, pendingDefenderStageIds, yourSeat, spectating, spectatorCount, spectatorUsernames, botGame, browserBotStatus, sendIntent, sendPriorityMode, sendTokenSkip, sendEmote, kickSpectator, latestEmote, undo, error, leave, opponentConnected, connected, connectionIssueVisible, roomCode, screen, replayFrames, replayViews, replayStep, replayNotes, setLiveReplayNote, watchReplay, downloadReplay, closeReplay, getRecordedViews, lastActionAt, claimVictory, reportBug, reportOpponent, backgroundSearching, stopBackgroundMatchmaking, authUser, authToken, setLobbyRail, unreadMessageCount, setSocialOpen } = useStore(
     useShallow((state) => ({
       view: state.view,
       viewUpdate: state.viewUpdate,
@@ -117,6 +119,7 @@ export function GameBoard() {
       spectatorCount: state.spectatorCount,
       spectatorUsernames: state.spectatorUsernames,
       botGame: state.botGame,
+      browserBotStatus: state.browserBotStatus,
       sendIntent: state.sendIntent,
       sendPriorityMode: state.sendPriorityMode,
       sendTokenSkip: state.sendTokenSkip,
@@ -254,10 +257,34 @@ export function GameBoard() {
     updateOptionHotkeys,
     updateSoundEffectsEnabled,
     updateSoundEffectsVolume,
+    standingOrders: standingOrderSettings,
+    updateStandingOrder,
   } = useGameSettings({
     syncPriorityMode: connected && screen !== "replay" && !spectating && yourSeat !== null,
     sendPriorityMode,
   });
+  const standingOrders = useStandingOrders({
+    view: authoritativeView,
+    roomVersion: authoritativeViewUpdate.source === "live"
+      ? authoritativeViewUpdate.roomVersion ?? null
+      : null,
+    viewerSeat: spectating ? null : yourSeat,
+    enabled: connected
+      && screen !== "replay"
+      && !spectating
+      && yourSeat !== null
+      && authoritativeViewUpdate.source === "live"
+      && browserBotStatus !== "fallback"
+      && !roomCommandPending,
+    orders: standingOrderSettings,
+    legal,
+    sendIntent,
+    updateStandingOrder,
+  });
+  const inspectedStandingOrderKey = inspectedCardId ? standingOrderKey({ cardId: inspectedCardId }) : null;
+  const inspectedStandingOrders = inspectedStandingOrderKey
+    ? standingOrders.cards.get(inspectedStandingOrderKey)
+    : undefined;
   const squareCardsEnabled = cardDisplayPreference === "square"
     && !mobileFloatViewport && !mobileLandscapeViewport && !compactBoard;
   const presentedDefenderIds = screen === "replay" || spectating
@@ -409,6 +436,7 @@ export function GameBoard() {
   } = announcement;
   const undoAndDismissAnnouncement: typeof undo = (target) => {
     resetSel();
+    standingOrders.onUndo();
     undo(target);
   };
   const localPitchPayment = sel.kind !== "none" && !autoCommitPending && actionStep === "payment" &&
@@ -1240,6 +1268,7 @@ export function GameBoard() {
           onSendEmote={sendEmote}
           onOpenOverlay={setOverlay}
           onOpenEffects={openEffectLedger}
+          standingOrders={standingOrders}
         />
 
         {/* center divider: a brass-inlay strip marking the seam */}
@@ -1285,6 +1314,7 @@ export function GameBoard() {
           onSendEmote={sendEmote}
           onOpenOverlay={setOverlay}
           onOpenEffects={openEffectLedger}
+          standingOrders={standingOrders}
         />
 
         <PlayerHand
@@ -1378,6 +1408,7 @@ export function GameBoard() {
         tokenSkip={connected && !spectating && !replaying && skippableRun
           ? { kind: skippableRun, onSkip: () => sendTokenSkip(skippableRun, true) }
           : undefined}
+        autoPassedTopLayer={standingOrders.autoPassedTopLayer}
       /> : null}
 
       {/* ── floating combat chain panel: draggable + hidable, past links browsable.
@@ -1665,6 +1696,9 @@ export function GameBoard() {
           ? () => send({ kind: "accept-draw" }) : null}
         onDeclineDraw={!spectating && !replaying && !botGame && view.phase !== "game-over"
           ? () => send({ kind: "decline-draw" }) : null}
+        standingOrders={inspectedStandingOrders
+          ? { model: inspectedStandingOrders, onSetOrder: standingOrders.onSetOrder }
+          : null}
       />
       <GameMotionLayer
         batch={gameMotion.batch}

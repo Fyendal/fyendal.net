@@ -33,4 +33,27 @@ describe("MobileCardInspect", () => {
   it.each([null, "UNKNOWN"])("does not inspect an absent card %s", (cardId) => {
     expect(inspect(cardId)).toBe("");
   });
+
+  it("puts the card's standing order rows under the inspected card", () => {
+    const html = renderToStaticMarkup(createElement(TestI18nProvider, {
+      locale: "en",
+      children: createElement(MobileCardInspect, {
+        cardId: "MON107",
+        owner: 0,
+        onClose: () => {},
+        standingOrders: {
+          model: {
+            key: "valiant dynamo|0",
+            cardId: "MON107",
+            rows: [{ kind: "optional-trigger", label: null, fallback: "Recover Valiant Dynamo", order: "no" }],
+          },
+          onSetOrder: () => undefined,
+        },
+      }),
+    }));
+    expect(html).toContain('class="standing-order-sheet"');
+    expect(html).toContain("Recover Valiant Dynamo");
+    expect(html).toContain('aria-pressed="true">Always deny<');
+    expect(inspect("MON107")).not.toContain("standing-order-sheet");
+  });
 });

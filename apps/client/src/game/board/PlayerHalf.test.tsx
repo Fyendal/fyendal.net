@@ -1,3 +1,4 @@
+import type { ComponentProps } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import type { PlayerView } from "@fyendal/shared";
@@ -40,6 +41,7 @@ function renderPlayerHalf(
   mobileFloatViewport = false,
   mobileLandscapeViewport = false,
   compactBoard = false,
+  standingOrders?: ComponentProps<typeof PlayerHalf>["standingOrders"],
 ): string {
   return renderToStaticMarkup(
     <TestI18nProvider locale={locale}>
@@ -84,12 +86,49 @@ function renderPlayerHalf(
       onSendEmote={() => undefined}
       onOpenOverlay={() => undefined}
       onOpenEffects={() => undefined}
+      standingOrders={standingOrders}
       />
     </TestI18nProvider>,
   );
 }
 
+const standingOrderBoard: NonNullable<ComponentProps<typeof PlayerHalf>["standingOrders"]> = {
+  cards: new Map([
+    ["fealty|0", {
+      key: "fealty|0",
+      cardId: "SFA037",
+      rows: [{ kind: "priority-window", label: null, fallback: "Destroy Fealty", order: "pass" }],
+    }],
+    ["valiant dynamo|0", {
+      key: "valiant dynamo|0",
+      cardId: "MON107",
+      rows: [{ kind: "optional-trigger", label: null, fallback: null, order: "ask" }],
+    }],
+  ]),
+  onSetOrder: () => undefined,
+};
+
 describe("PlayerHalf", () => {
+  it("puts a standing order badge on every arena card with a repeating question", () => {
+    const html = renderPlayerHalf({
+      ...player,
+      equipment: { chest: { instanceId: 12, cardId: "MON107", owner: 0 } },
+      board: [
+        { instanceId: 13, cardId: "SFA037", owner: 0 },
+        { instanceId: 14, cardId: "HNT167", owner: 0 },
+        { instanceId: 15, cardId: "SBA034", owner: 0 },
+      ],
+    }, true, undefined, undefined, "en", null, false, false, false, standingOrderBoard);
+
+    // Both Fealty printings stack into one group, so one badge covers them;
+    // the chest equipment gets its own host and the plain ally gets none.
+    expect(html.match(/class="standing-order-chip/g)).toHaveLength(2);
+    expect(html).toMatch(/board-card-stack" data-cardid="MON107">.*standing-order-chip/);
+    expect(html).toMatch(/data-cardid="SFA037"[^>]*>.*standing-order-chip standing-order-chip-set/);
+    expect(html).not.toMatch(/data-cardid="SBA034"[^>]*>(?:(?!board-card-stack).)*standing-order-chip/);
+    expect(renderPlayerHalf(player)).not.toContain("standing-order-chip");
+  });
+
   it("keeps full portrait card art on mobile", () => {
     const html = renderPlayerHalf({
       ...player,

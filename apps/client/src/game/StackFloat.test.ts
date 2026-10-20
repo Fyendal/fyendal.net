@@ -20,6 +20,20 @@ function renderStack(
   }));
 }
 
+describe("standing order marker", () => {
+  it("notes the top layer the viewer's standing order passed", () => {
+    const layers = [
+      { card: { instanceId: 7, cardId: "SFA037", owner: 0 }, seat: 0, label: "Destroy Fealty", optional: false },
+      { card: { instanceId: 8, cardId: "SFA037", owner: 0 }, seat: 0, label: "Destroy Fealty", optional: false },
+    ];
+    const html = renderStack({ layers, autoPassedTopLayer: true });
+    expect(html.match(/stack-layer-auto/g)).toHaveLength(1);
+    expect(html).toContain("Passed for you");
+    expect(renderStack({ layers })).not.toContain("stack-layer-auto");
+    expect(renderStack({ layers, autoPassedTopLayer: true }, "zh-Hans")).toContain("已为你让过");
+  });
+});
+
 describe("stack popup visibility", () => {
   it("keeps full card faces and trigger backs inside a square board", () => {
     const html = renderStack({
