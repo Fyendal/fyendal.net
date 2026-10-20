@@ -17,6 +17,8 @@ const PREP_CARD_HEIGHT = Math.round(
 const STACK_COPY_OFFSET = 25;
 const STACK_CARD_ASPECT_PERCENT = (CARD_PREVIEW_HEIGHT / CARD_PREVIEW_WIDTH) * 100;
 
+const ANCHOR_MAX_AGE_MS = 1000;
+
 function WrappingPrepGroups({ children }: { children: React.ReactNode }) {
   const groupsRef = useRef<HTMLDivElement>(null);
 
@@ -42,6 +44,16 @@ function WrappingPrepGroups({ children }: { children: React.ReactNode }) {
   return <div ref={groupsRef} className="prep-groups">{children}</div>;
 }
 
+function scrollParent(el: HTMLElement): HTMLElement {
+  for (let node = el.parentElement; node; node = node.parentElement) {
+    const { overflowY } = getComputedStyle(node);
+    if ((overflowY === "auto" || overflowY === "scroll") && node.scrollHeight > node.clientHeight) {
+      return node;
+    }
+  }
+  return (document.scrollingElement ?? document.documentElement) as HTMLElement;
+}
+
 function CardStack({
   id,
   count,
@@ -53,7 +65,7 @@ function CardStack({
   count: number;
   destination?: "main" | "inventory";
   locked: boolean;
-  onMove?: () => void;
+  onMove?: (button: HTMLElement) => void;
 }) {
   const intl = useIntl();
   const name = cardData[id]?.name ?? id;
@@ -77,7 +89,7 @@ function CardStack({
       aria-disabled={immovable}
       aria-label={actionLabel}
       title={actionLabel}
-      onClick={immovable ? undefined : onMove}
+      onClick={immovable ? undefined : (event) => onMove(event.currentTarget)}
     >
       {Array.from({ length: count }, (_, index) => (
         <CardArtwork
@@ -130,6 +142,22 @@ export const PrepPresentation = memo(function PrepPresentation({
   const mainRequirement = exactMainCount === undefined
     ? intl.formatMessage({ id: "prep.presentation.minimum" }, { count: minimumMainCount })
     : intl.formatMessage({ id: "prep.presentation.exact" }, { count: exactMainCount });
+  // Moving a copy can add or remove a row in the other zone and shift the stack
+  // under the pointer; keep the clicked stack at the same viewport position so
+  // repeated clicks hit the same card.
+  const anchorRef = useRef<{ button: HTMLElement; top: number; at: number } | null>(null);
+  const moveCopy = (button: HTMLElement, id: string, delta: -1 | 1) => {
+    anchorRef.current = { button, top: button.getBoundingClientRect().top, at: performance.now() };
+    onMoveMainCopy(id, delta);
+  };
+  useLayoutEffect(() => {
+    const anchor = anchorRef.current;
+    if (!anchor) return;
+    anchorRef.current = null;
+    if (!anchor.button.isConnected || performance.now() - anchor.at > ANCHOR_MAX_AGE_MS) return;
+    const shift = anchor.button.getBoundingClientRect().top - anchor.top;
+    if (shift !== 0) scrollParent(anchor.button).scrollTop += shift;
+  }, [selection]);
   const Container = sections === "arena" ? "div" : "section";
 
   return (
@@ -254,7 +282,7 @@ export const PrepPresentation = memo(function PrepPresentation({
                   count={count}
                   destination="inventory"
                   locked={locked}
-                  onMove={() => onMoveMainCopy(id, -1)}
+                  onMove={(button) => moveCopy(button, id, -1)}
                 />
               ) : null;
             })}
@@ -275,7 +303,7 @@ export const PrepPresentation = memo(function PrepPresentation({
                   count={count}
                   destination="main"
                   locked={locked}
-                  onMove={() => onMoveMainCopy(id, 1)}
+                  onMove={(button) => moveCopy(button, id, 1)}
                 />
               ) : null;
             })}
