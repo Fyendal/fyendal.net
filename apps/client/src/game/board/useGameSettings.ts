@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
 import {
+  applyStandingOrder,
   loadGameSettings,
   saveGameSettings,
   type CardDisplayPreference,
   type MotionPreference,
   type PlayabilityCuePreference,
   type PriorityWindowMode,
+  type StandingOrderUpdate,
 } from "../../storage.js";
 
 export function useGameSettings({
@@ -88,6 +90,16 @@ export function useGameSettings({
     });
   };
 
+  const updateStandingOrder = (key: string, update: StandingOrderUpdate) => {
+    setSettings((current) => {
+      const standingOrders = applyStandingOrder(current.standingOrders, key, update);
+      if (standingOrders === current.standingOrders) return current;
+      const next = { ...current, standingOrders };
+      saveGameSettings(localStorage, next);
+      return next;
+    });
+  };
+
   return {
     ...settings,
     updatePriorityWindowMode,
@@ -99,5 +111,6 @@ export function useGameSettings({
     updatePlayabilityCuePreference,
     updateSoundEffectsEnabled,
     updateSoundEffectsVolume,
+    updateStandingOrder,
   };
 }

@@ -5,8 +5,11 @@ import {
   CHOICE_HOTKEYS_STORAGE_KEY,
   loadChoiceHotkeys,
   saveChoiceHotkeys,
+  decodeStandingOrders,
   DEFAULT_GAME_SETTINGS,
   DEFAULT_LOBBY_SETTINGS,
+  MAX_STANDING_ORDER_CARDS,
+  applyStandingOrder,
   GAME_SETTINGS_STORAGE_KEY,
   LOBBY_SETTINGS_STORAGE_KEY,
   loadRejectedMatchRooms,
@@ -132,7 +135,7 @@ describe("client storage keys", () => {
     };
 
     expect(loadGameSettings(storage)).toEqual({
-      version: 7,
+      version: 8,
       cardDisplayPreference: "square",
       priorityWindowMode: "always-pause",
       lessGuidance: true,
@@ -142,9 +145,10 @@ describe("client storage keys", () => {
       soundEffectsEnabled: true,
       soundEffectsVolume: 35,
       optionHotkeys: false,
+      standingOrders: {},
     });
     saveGameSettings(storage, {
-      version: 7,
+      version: 8,
       cardDisplayPreference: "full",
       priorityWindowMode: "auto-pass",
       lessGuidance: false,
@@ -154,9 +158,10 @@ describe("client storage keys", () => {
       soundEffectsEnabled: false,
       soundEffectsVolume: 60,
       optionHotkeys: true,
+      standingOrders: {},
     });
     expect(loadGameSettings(storage)).toEqual({
-      version: 7,
+      version: 8,
       cardDisplayPreference: "full",
       priorityWindowMode: "auto-pass",
       lessGuidance: false,
@@ -166,6 +171,7 @@ describe("client storage keys", () => {
       soundEffectsEnabled: false,
       soundEffectsVolume: 60,
       optionHotkeys: true,
+      standingOrders: {},
     });
   });
 
@@ -178,7 +184,7 @@ describe("client storage keys", () => {
         skipPlayConfirmation: false,
       }),
     })).toEqual({
-      version: 7,
+      version: 8,
       cardDisplayPreference: "square",
       priorityWindowMode: "auto-pass",
       lessGuidance: true,
@@ -188,6 +194,7 @@ describe("client storage keys", () => {
       soundEffectsEnabled: true,
       soundEffectsVolume: 35,
       optionHotkeys: false,
+      standingOrders: {},
     });
   });
 
@@ -201,7 +208,7 @@ describe("client storage keys", () => {
         motionPreference: "reduced",
       }),
     })).toEqual({
-      version: 7,
+      version: 8,
       cardDisplayPreference: "square",
       priorityWindowMode: "auto-pass",
       lessGuidance: true,
@@ -211,6 +218,7 @@ describe("client storage keys", () => {
       soundEffectsEnabled: true,
       soundEffectsVolume: 35,
       optionHotkeys: false,
+      standingOrders: {},
     });
   });
 
@@ -226,7 +234,7 @@ describe("client storage keys", () => {
         soundEffectsVolume: 60,
       }),
     })).toEqual({
-      version: 7,
+      version: 8,
       cardDisplayPreference: "square",
       priorityWindowMode: "auto-pass",
       lessGuidance: true,
@@ -236,6 +244,7 @@ describe("client storage keys", () => {
       soundEffectsEnabled: false,
       soundEffectsVolume: 60,
       optionHotkeys: false,
+      standingOrders: {},
     });
   });
 
@@ -286,6 +295,7 @@ describe("client storage keys", () => {
     expect(loadGameSettings({ getItem: () => JSON.stringify(previous) })).toEqual({
       ...previous,
       optionHotkeys: false,
+      standingOrders: {},
     });
     expect(loadGameSettings({
       getItem: () => JSON.stringify({ ...previous, optionHotkeys: "yes" }),
@@ -305,10 +315,89 @@ describe("client storage keys", () => {
     };
     expect(loadGameSettings({ getItem: () => JSON.stringify(previous) })).toEqual({
       ...previous,
-      version: 7,
+      version: 8,
       cardDisplayPreference: "square",
       optionHotkeys: false,
+      standingOrders: {},
     });
+  });
+
+  it("round-trips standing orders keyed by functional card identity", () => {
+    let stored: string | null = null;
+    const storage = {
+      getItem: (key: string) => key === GAME_SETTINGS_STORAGE_KEY ? stored : null,
+      setItem: (key: string, value: string) => {
+        if (key === GAME_SETTINGS_STORAGE_KEY) stored = value;
+      },
+    };
+    saveGameSettings(storage, {
+      ...DEFAULT_GAME_SETTINGS,
+      standingOrders: {
+        "fealty|0": { priorityWindow: "pass" },
+        "valiant dynamo|0": { priorityWindow: "ask", optionalTrigger: "yes" },
+      },
+    });
+    expect(loadGameSettings(storage).standingOrders).toEqual({
+      "fealty|0": { priorityWindow: "pass" },
+      "valiant dynamo|0": { priorityWindow: "ask", optionalTrigger: "yes" },
+    });
+  });
+
+  it("migrates version 7 settings without standing orders", () => {
+    const previous = { ...DEFAULT_GAME_SETTINGS, version: 7 } as Record<string, unknown>;
+    delete previous.standingOrders;
+    expect(loadGameSettings({ getItem: () => JSON.stringify(previous) })).toEqual(DEFAULT_GAME_SETTINGS);
+  });
+
+  it.each([
+    ["an array", []],
+    ["a printing id key", { SFA037: { priorityWindow: "pass" } }],
+    ["an unknown field", { "fealty|0": { priorityWindow: "pass", extra: 1 } }],
+    ["an unknown priority order", { "fealty|0": { priorityWindow: "always" } }],
+    ["an unknown trigger order", { "valiant dynamo|0": { optionalTrigger: "maybe" } }],
+    ["an empty entry", { "fealty|0": {} }],
+    ["a non-object entry", { "fealty|0": "pass" }],
+  ])("rejects standing orders with %s", (_, standingOrders) => {
+    expect(decodeStandingOrders(standingOrders)).toBeNull();
+    expect(loadGameSettings({
+      getItem: () => JSON.stringify({ ...DEFAULT_GAME_SETTINGS, standingOrders }),
+    })).toEqual(DEFAULT_GAME_SETTINGS);
+  });
+
+  it("bounds the number of standing-order cards", () => {
+    const orders = Object.fromEntries(Array.from(
+      { length: MAX_STANDING_ORDER_CARDS + 1 },
+      (_, index) => [`card ${index}|0`, { priorityWindow: "pass" }],
+    ));
+    expect(decodeStandingOrders(orders)).toBeNull();
+    delete orders[`card ${MAX_STANDING_ORDER_CARDS}|0`];
+    expect(decodeStandingOrders(orders)).not.toBeNull();
+  });
+
+  it("clears an order with \"ask\" and drops an entry with nothing left", () => {
+    const orders = { "valiant dynamo|0": { priorityWindow: "pass", optionalTrigger: "yes" } } as const;
+    const cleared = applyStandingOrder(orders, "valiant dynamo|0", { kind: "optional-trigger", value: "ask" });
+    expect(cleared).toEqual({ "valiant dynamo|0": { priorityWindow: "pass" } });
+    expect(applyStandingOrder(cleared, "valiant dynamo|0", { kind: "priority-window", value: "ask" }))
+      .toEqual({});
+    expect(applyStandingOrder({}, "fealty|0", { kind: "priority-window", value: "ask" })).toEqual({});
+  });
+
+  it("returns the same orders when nothing changes", () => {
+    const orders = { "fealty|0": { priorityWindow: "pass" } } as const;
+    expect(applyStandingOrder(orders, "fealty|0", { kind: "priority-window", value: "pass" })).toBe(orders);
+    expect(applyStandingOrder(orders, "fealty|0", { kind: "optional-trigger", value: "ask" })).toBe(orders);
+  });
+
+  it("forgets the oldest card rather than exceeding the decoder's bound", () => {
+    let orders: Record<string, { priorityWindow: "pass" }> = {};
+    for (let index = 0; index <= MAX_STANDING_ORDER_CARDS; index += 1) {
+      orders = applyStandingOrder(orders, `card ${index}|0`, { kind: "priority-window", value: "pass" }) as typeof orders;
+    }
+    expect(Object.keys(orders)).toHaveLength(MAX_STANDING_ORDER_CARDS);
+    expect(orders["card 0|0"]).toBeUndefined();
+    expect(orders[`card ${MAX_STANDING_ORDER_CARDS}|0`]).toEqual({ priorityWindow: "pass" });
+    expect(decodeStandingOrders(orders)).not.toBeNull();
   });
 
   it("rejects invalid card display preferences", () => {

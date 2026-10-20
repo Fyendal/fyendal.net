@@ -360,8 +360,98 @@ export type CardDisplayPreference = "square" | "full";
 export type MotionPreference = "system" | "full" | "reduced";
 export type PlayabilityCuePreference = "glow" | "high-contrast";
 
+/** What the client does on its own when a repeating question comes up for
+ * one functional card: pass its priority windows, or always use or deny its
+ * optional trigger. "ask" entries record that the question has been seen so
+ * the card keeps its rows in later games. */
+export type PriorityWindowOrder = "ask" | "pass";
+export type OptionalTriggerOrder = "ask" | "yes" | "no";
+export interface StandingOrder {
+  priorityWindow?: PriorityWindowOrder;
+  optionalTrigger?: OptionalTriggerOrder;
+}
+/** Keyed by functional card identity (`name lowercase|pitch`), never by
+ * printing or instance id, so reprints and every token copy share one order. */
+export type StandingOrders = Record<string, StandingOrder>;
+
+export const MAX_STANDING_ORDER_CARDS = 200;
+const MAX_STANDING_ORDER_KEY_LENGTH = 120;
+
+export type StandingOrderUpdate =
+  | { kind: "priority-window"; value: PriorityWindowOrder }
+  | { kind: "optional-trigger"; value: OptionalTriggerOrder };
+
+/** Change one card's order. "ask" is the absence of an order, so choosing it
+ * clears the field and an entry with nothing left is dropped. Returns the
+ * same object when nothing changes. Oldest entries give way past the
+ * decoder's bound, which would otherwise discard every setting on load. */
+export function applyStandingOrder(
+  orders: StandingOrders,
+  key: string,
+  update: StandingOrderUpdate,
+): StandingOrders {
+  const existing: StandingOrder = orders[key] ?? {};
+  const updated: StandingOrder = { ...existing };
+  if (update.kind === "priority-window") {
+    if (update.value === "ask") delete updated.priorityWindow;
+    else updated.priorityWindow = update.value;
+  } else if (update.value === "ask") {
+    delete updated.optionalTrigger;
+  } else {
+    updated.optionalTrigger = update.value;
+  }
+  if (
+    existing.priorityWindow === updated.priorityWindow
+    && existing.optionalTrigger === updated.optionalTrigger
+  ) return orders;
+  const { [key]: _previous, ...others } = orders;
+  const next: StandingOrders = Object.keys(updated).length === 0
+    ? others
+    : { ...others, [key]: updated };
+  const keys = Object.keys(next);
+  for (const stale of keys.slice(0, Math.max(0, keys.length - MAX_STANDING_ORDER_CARDS))) {
+    delete next[stale];
+  }
+  return next;
+}
+
+export function decodeStandingOrders(value: unknown): StandingOrders | null {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return null;
+  const entries = Object.entries(value as Record<string, unknown>);
+  if (entries.length > MAX_STANDING_ORDER_CARDS) return null;
+  const orders: StandingOrders = {};
+  for (const [key, entry] of entries) {
+    if (
+      key.length === 0
+      || key.length > MAX_STANDING_ORDER_KEY_LENGTH
+      || !/^[^|]+\|\d$/.test(key)
+      || !entry || typeof entry !== "object" || Array.isArray(entry)
+    ) return null;
+    const record = entry as Record<string, unknown>;
+    const order: StandingOrder = {};
+    for (const field of Object.keys(record)) {
+      if (field === "priorityWindow") {
+        if (record.priorityWindow !== "ask" && record.priorityWindow !== "pass") return null;
+        order.priorityWindow = record.priorityWindow;
+      } else if (field === "optionalTrigger") {
+        if (
+          record.optionalTrigger !== "ask"
+          && record.optionalTrigger !== "yes"
+          && record.optionalTrigger !== "no"
+        ) return null;
+        order.optionalTrigger = record.optionalTrigger;
+      } else {
+        return null;
+      }
+    }
+    if (Object.keys(order).length === 0) return null;
+    orders[key] = order;
+  }
+  return orders;
+}
+
 export interface GameSettings {
-  version: 7;
+  version: 8;
   priorityWindowMode: PriorityWindowMode;
   lessGuidance: boolean;
   skipPlayConfirmation: boolean;
@@ -371,10 +461,11 @@ export interface GameSettings {
   soundEffectsEnabled: boolean;
   soundEffectsVolume: number;
   optionHotkeys: boolean;
+  standingOrders: StandingOrders;
 }
 
 export const DEFAULT_GAME_SETTINGS: GameSettings = {
-  version: 7,
+  version: 8,
   priorityWindowMode: "always-pause",
   lessGuidance: true,
   skipPlayConfirmation: true,
@@ -384,6 +475,7 @@ export const DEFAULT_GAME_SETTINGS: GameSettings = {
   soundEffectsEnabled: true,
   soundEffectsVolume: 35,
   optionHotkeys: false,
+  standingOrders: {},
 };
 
 export function replayStorageKey(code: string): string {
@@ -412,6 +504,7 @@ export function loadGameSettings(storage: Pick<Storage, "getItem">): GameSetting
         && record.version !== 5
         && record.version !== 6
         && record.version !== 7
+        && record.version !== 8
       )
       || (
         record.priorityWindowMode !== "auto-pass"
@@ -424,6 +517,7 @@ export function loadGameSettings(storage: Pick<Storage, "getItem">): GameSetting
       || record.version === 5
       || record.version === 6
       || record.version === 7
+      || record.version === 8
     )
       && (
         record.motionPreference === "system"
@@ -433,7 +527,7 @@ export function loadGameSettings(storage: Pick<Storage, "getItem">): GameSetting
       ? record.motionPreference
       : "system";
     if (
-      (record.version === 4 || record.version === 5 || record.version === 6 || record.version === 7)
+      (record.version === 4 || record.version === 5 || record.version === 6 || record.version === 7 || record.version === 8)
       && (
         typeof record.soundEffectsEnabled !== "boolean"
         || typeof record.soundEffectsVolume !== "number"
@@ -442,22 +536,27 @@ export function loadGameSettings(storage: Pick<Storage, "getItem">): GameSetting
         || record.soundEffectsVolume > 100
       )
     ) return DEFAULT_GAME_SETTINGS;
-    const playabilityCuePreference = record.version === 5 || record.version === 6 || record.version === 7
+    const playabilityCuePreference = record.version === 5 || record.version === 6 || record.version === 7 || record.version === 8
       ? record.playabilityCuePreference
       : "glow";
     if (
       playabilityCuePreference !== "glow"
       && playabilityCuePreference !== "high-contrast"
     ) return DEFAULT_GAME_SETTINGS;
-    const cardDisplayPreference = record.version === 7 ? record.cardDisplayPreference : "square";
+    const cardDisplayPreference = record.version === 7 || record.version === 8
+      ? record.cardDisplayPreference
+      : "square";
     if (cardDisplayPreference !== "square" && cardDisplayPreference !== "full") {
       return DEFAULT_GAME_SETTINGS;
     }
+    const standingOrders = record.version === 8 ? decodeStandingOrders(record.standingOrders) : {};
+    if (standingOrders === null) return DEFAULT_GAME_SETTINGS;
     return {
-      version: 7,
+      version: 8,
       cardDisplayPreference,
       priorityWindowMode: record.priorityWindowMode,
-      lessGuidance: (record.version === 6 || record.version === 7) && typeof record.lessGuidance === "boolean"
+      lessGuidance: (record.version === 6 || record.version === 7 || record.version === 8)
+        && typeof record.lessGuidance === "boolean"
         ? record.lessGuidance
         : true,
       skipPlayConfirmation: typeof record.skipPlayConfirmation === "boolean"
@@ -465,13 +564,14 @@ export function loadGameSettings(storage: Pick<Storage, "getItem">): GameSetting
         : true,
       motionPreference,
       playabilityCuePreference,
-      soundEffectsEnabled: record.version === 4 || record.version === 5 || record.version === 6 || record.version === 7
+      soundEffectsEnabled: record.version === 4 || record.version === 5 || record.version === 6 || record.version === 7 || record.version === 8
         ? record.soundEffectsEnabled as boolean
         : true,
-      soundEffectsVolume: record.version === 4 || record.version === 5 || record.version === 6 || record.version === 7
+      soundEffectsVolume: record.version === 4 || record.version === 5 || record.version === 6 || record.version === 7 || record.version === 8
         ? record.soundEffectsVolume as number
         : 35,
       optionHotkeys: typeof record.optionHotkeys === "boolean" ? record.optionHotkeys : false,
+      standingOrders,
     };
   } catch {
     return DEFAULT_GAME_SETTINGS;
