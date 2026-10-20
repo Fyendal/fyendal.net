@@ -161,15 +161,17 @@ export function PlayerHalf({
       ? <StandingOrderChip model={model} onSetOrder={standingOrders.onSetOrder} />
       : null;
   };
-  /** Equipment, weapon and hero cards get the same badge host as board cards. */
+  /** Badge host for equipment, weapon and hero cards. Always mounted so a chip
+   * appearing later does not remount the card. */
   const withStandingOrderChip = (card: CardView, stack: React.ReactNode) => {
+    if (!standingOrders || !standingOrderKey(card)) return stack;
     const chip = standingOrderChip(card);
-    return chip ? (
-      <div className="board-card-stack" data-cardid={card.cardId}>
+    return (
+      <div className={`board-card-stack${chip ? "" : " board-card-stack-bare"}`} data-cardid={card.cardId}>
         {stack}
         {chip}
       </div>
-    ) : stack;
+    );
   };
   const zoneLabel = (zone: string) => intl.formatMessage({ id: `game.zone.${zone}` });
   const ownedZoneTitle = (zone: string) => intl.formatMessage(

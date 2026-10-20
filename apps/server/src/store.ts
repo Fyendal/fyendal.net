@@ -25,6 +25,7 @@ import {
   type RoomInvite,
   type RoomSummary,
   type ServerMessage,
+  type SeatStandingOrders,
   type TokenSkipKind,
   type UndoTarget,
 } from "@fyendal/shared";
@@ -55,6 +56,7 @@ import {
 } from "@fyendal/cards";
 import {
   decodePresentedArena,
+  decodeSeatStandingOrders,
   MAX_MATCHMAKING_AVOID_HEROES,
   MAX_MATCHMAKING_AVOID_ROOM_CODES,
   MAX_MATCHMAKING_AVOID_USERS,
@@ -75,6 +77,7 @@ import {
   startReplay,
 } from "./replays.js";
 import { hashToken } from "./tokenHash.js";
+import { standingOrderIntent } from "./standingOrders.js";
 
 /**
  * Postgres-backed room storage. Room membership and full game state live in
@@ -118,6 +121,8 @@ export interface SeatRow {
   priorityMode?: PriorityWindowMode;
   /** One-shot shortcut for the current consecutive run of this token. */
   tokenSkip?: TokenSkipKind;
+  /** Answers the server applies to the seat's repeating questions. */
+  standingOrders?: SeatStandingOrders;
   /** presence: last heartbeat/attach (epoch ms); 0 = absent */
   lastSeenAt: number;
   /** idle-claim baseline (epoch ms): stamped for both seats at game start and
@@ -359,6 +364,22 @@ function isEmptyBotActionWindow(state: GameState, seat: number): boolean {
     state.activePlayer !== seat || state.priorityPlayer !== seat) return false;
   return onlyPassOrIdleResources(state, seat);
 }
+
+/** Parse stored JSON text as `unknown`; malformed text is `null`. */
+function parseJson(text: unknown): unknown {
+  if (typeof text !== "string") return null;
+  try {
+    return JSON.parse(text);
+  } catch {
+    return null;
+  }
+}
+
+/** Standing orders as stored JSON text; no orders is NULL. */
+function encodeStandingOrders(orders: SeatStandingOrders | undefined): string | null {
+  return orders && Object.keys(orders).length > 0 ? JSON.stringify(orders) : null;
+}
+
 /** Spectator slots per room — anonymous joins must not grow a room unboundedly. */
 const MAX_SPECTATORS = 20;
 /** Player-seat gate message, shared by the store and the ws gateway. */
@@ -745,6 +766,12 @@ function decodeSeatRows(values: unknown[], code: string): [SeatRow | null, SeatR
     if (!(row.selected_badge === null || row.selected_badge === "early-tester")) {
       throw new CorruptRoomError(code, `seats[${index}].selected_badge`, "expected a known badge or null");
     }
+    const standingOrders = row.standing_orders == null
+      ? undefined
+      : decodeSeatStandingOrders(parseJson(row.standing_orders));
+    if (standingOrders === null) {
+      throw new CorruptRoomError(code, `seats[${index}].standing_orders`, "expected standing orders");
+    }
     const presented = row.presented == null
       ? undefined
       : decodeDecklist(row.presented, code, `seats[${index}].presented`);
@@ -764,6 +791,7 @@ function decodeSeatRows(values: unknown[], code: string): [SeatRow | null, SeatR
       ...(row.queue_card_pool_mode == null ? {} : { queueCardPoolMode: row.queue_card_pool_mode }),
       priorityMode: row.priority_mode,
       ...(row.token_skip == null ? {} : { tokenSkip: row.token_skip }),
+      ...(standingOrders && Object.keys(standingOrders).length > 0 ? { standingOrders } : {}),
       lastSeenAt: 0,
       ...(row.last_action_at == null ? {} : { lastActionAt: Number(row.last_action_at) }),
     };
@@ -1101,6 +1129,7 @@ export class PgRoomStore {
       member.tokenSkip ?? null,
       member.accepted ?? false,
       member.queueCardPoolMode ?? null,
+      encodeStandingOrders(member.standingOrders),
     ];
   }
 
@@ -1141,8 +1170,8 @@ export class PgRoomStore {
             `INSERT INTO room_seats
               (room_code, seat, user_id, token_hash, username, hero_id, deck_id, deck_name,
                from_queue, ready, presented, last_action_at, controller, priority_mode, token_skip, accepted,
-               queue_card_pool_mode)
-             VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17)`,
+               queue_card_pool_mode, standing_orders)
+             VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18)`,
             values,
           )
         : await db.query(
@@ -1161,7 +1190,8 @@ export class PgRoomStore {
                priority_mode = $14,
                token_skip = $15,
                accepted = $16,
-               queue_card_pool_mode = $17
+               queue_card_pool_mode = $17,
+               standing_orders = $18
              WHERE room_code = $1 AND seat = $2`,
             values,
           );
@@ -1178,9 +1208,15 @@ export class PgRoomStore {
       const member = room.seats[seat];
       if (!member) continue;
       const { rowCount } = await db.query(
-        `UPDATE room_seats SET priority_mode = $3, token_skip = $4
+        `UPDATE room_seats SET priority_mode = $3, token_skip = $4, standing_orders = $5
          WHERE room_code = $1 AND seat = $2`,
-        [room.code, seat, member.priorityMode ?? "always-pause", member.tokenSkip ?? null],
+        [
+          room.code,
+          seat,
+          member.priorityMode ?? "always-pause",
+          member.tokenSkip ?? null,
+          encodeStandingOrders(member.standingOrders),
+        ],
       );
       if (rowCount !== 1) throw VERSION_CONFLICT;
     }
@@ -1402,7 +1438,11 @@ export class PgRoomStore {
           }
         }
         const preferencesBefore = room.seats.map((seat) => seat
-          ? [seat.priorityMode ?? "always-pause", seat.tokenSkip ?? null] as const
+          ? [
+              seat.priorityMode ?? "always-pause",
+              seat.tokenSkip ?? null,
+              seat.standingOrders,
+            ] as const
           : null);
         const wasGameOver = room.state?.phase === "game-over";
         const out = await fn(room, db);
@@ -1417,7 +1457,8 @@ export class PgRoomStore {
           const after = out.room.seats[seat];
           return before != null && after !== null && !fullSeatWrites.has(seat)
             && (before[0] !== (after.priorityMode ?? "always-pause")
-              || before[1] !== (after.tokenSkip ?? null));
+              || before[1] !== (after.tokenSkip ?? null)
+              || before[2] !== after.standingOrders);
         });
         await this.persistSeatPreferences(db, out.room, preferenceSeats);
         if (out.versionNeutral) {
@@ -3814,14 +3855,17 @@ export class PgRoomStore {
    *  first because a Runechant skip can deliberately decline optional
    *  prevention; each token shortcut is expired before auto-pass is
    *  considered at any boundary outside its own run. Bot seats always
-   *  auto-pass empty windows. Automatic steps write no undo snapshots. */
+   *  auto-pass empty windows; a seat's standing orders answer the repeating
+   *  questions they cover. Automatic steps write no undo snapshots. */
   private applyServerShortcuts(
     room: RoomRow,
     transitionEvents?: EngineTransitionMove[],
   ): void {
     const autoPasses = (seat: number): boolean =>
       room.seats[seat]?.controller === "bot" || room.seats[seat]?.priorityMode === "auto-pass";
-    if (!autoPasses(0) && !autoPasses(1) && !room.seats.some((seat) => seat?.tokenSkip)) return;
+    const hasOrders = (seat: number): boolean => room.seats[seat]?.standingOrders !== undefined;
+    if (!autoPasses(0) && !autoPasses(1) && !hasOrders(0) && !hasOrders(1)
+      && !room.seats.some((seat) => seat?.tokenSkip)) return;
     // Each shortcut strictly advances the game; the bound is insurance only.
     for (let guard = 0; guard < 64; guard++) {
       const state = room.state;
@@ -3848,7 +3892,9 @@ export class PgRoomStore {
         : autoPasses(seat) && (autoPassSkipsWindow(state, seat, member?.controller) ||
           (member?.controller === "bot" && isEmptyBotActionWindow(state, seat)))
           ? { kind: "pass" }
-          : null;
+          : member?.standingOrders
+            ? standingOrderIntent(state, seat, member.standingOrders, room.code)
+            : null;
       if (!intent) return;
       const res = engineApplyIntent(state, seat, intent);
       if (!res.ok) return;
@@ -3888,6 +3934,40 @@ export class PgRoomStore {
     } : undefined);
     return r.ok
       ? { ok: true, version: r.version, autoPassed: r.result.autoPassed, ...(r.replayFinalizationId ? { replayFinalizationId: r.replayFinalizationId } : {}) }
+      : { ok: false, error: r.error };
+  }
+
+  /** Record a seat's standing orders, answering a question already pending. */
+  async setStandingOrders(
+    code: string,
+    credentials: SeatCredentials,
+    orders: SeatStandingOrders,
+    command?: RoomCommand,
+  ): Promise<{ ok: true; version: number; advanced: boolean; replayFinalizationId?: string } | { ok: false; error: string }> {
+    const upper = code.toUpperCase();
+    const r = await this.withRetry<{ advanced: boolean }>(upper, (room) => {
+      const seat = seatForCredentials(room, credentials);
+      if (seat === null) return { error: "not a player in this room" };
+      const member = room.seats[seat]!;
+      if (Object.keys(orders).length > 0) member.standingOrders = orders;
+      else delete member.standingOrders;
+      const answers = !!room.state
+        && room.state.phase !== "game-over"
+        && !!member.standingOrders
+        && standingOrderIntent(room.state, seat, member.standingOrders, room.code) !== null;
+      if (!answers) return { room, result: { advanced: false }, versionNeutral: true };
+      const events: EngineTransitionMove[] = [];
+      this.applyServerShortcuts(room, events);
+      room.lastTransition = { fromVersion: room.version, kind: "forward", events };
+      return { room, result: { advanced: true }, replay: { kind: "frame" } };
+    }, command ? {
+      meta: command,
+      credentials,
+      type: "standing-orders",
+      duplicateResult: () => ({ advanced: false }),
+    } : undefined);
+    return r.ok
+      ? { ok: true, version: r.version, advanced: r.result.advanced, ...(r.replayFinalizationId ? { replayFinalizationId: r.replayFinalizationId } : {}) }
       : { ok: false, error: r.error };
   }
 

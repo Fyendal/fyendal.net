@@ -432,6 +432,8 @@ describe("client messages", () => {
     { type: "choose-first", first: true },
     { type: "priority-mode", mode: "auto-pass" },
     { type: "priority-mode", mode: "always-pause" },
+    { type: "standing-orders", orders: {} },
+    { type: "standing-orders", orders: { "fealty|0": { priorityWindow: "pass" }, "valiant dynamo|0": { optionalTrigger: "no" } } },
     { type: "runechant-skip", enabled: true },
     { type: "runechant-skip", enabled: false },
     { type: "seismic-surge-skip", enabled: true },
@@ -559,6 +561,15 @@ describe("client messages", () => {
     expect(decodeClientMessage({ type: "intent", intent: { kind: "pass" }, autoPass: "yes" })).toBeNull();
     expect(decodeClientMessage({ type: "priority-mode" })).toBeNull();
     expect(decodeClientMessage({ type: "priority-mode", mode: "sometimes" })).toBeNull();
+    expect(decodeClientMessage({ type: "standing-orders" })).toBeNull();
+    expect(decodeClientMessage({ type: "standing-orders", orders: [] })).toBeNull();
+    expect(decodeClientMessage({ type: "standing-orders", orders: { a: { priorityWindow: "ask" } } })).toBeNull();
+    expect(decodeClientMessage({ type: "standing-orders", orders: { a: { optionalTrigger: "maybe" } } })).toBeNull();
+    expect(decodeClientMessage({ type: "standing-orders", orders: { a: { extra: 1 } } })).toBeNull();
+    expect(decodeClientMessage({
+      type: "standing-orders",
+      orders: Object.fromEntries(Array.from({ length: 257 }, (_, i) => [`k${i}`, { priorityWindow: "pass" }])),
+    })).toBeNull();
     expect(decodeClientMessage({ type: "runechant-skip" })).toBeNull();
     expect(decodeClientMessage({ type: "runechant-skip", enabled: "yes" })).toBeNull();
     expect(decodeClientMessage({ type: "seismic-surge-skip" })).toBeNull();

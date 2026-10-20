@@ -1791,6 +1791,11 @@ export const useStore = create<StoreState>((set, get) => {
       // acknowledgement, so they must not occupy the state-command gate.
       send({ type: "priority-mode", mode, ...roomCommand() });
     },
+    sendStandingOrders: (orders) => {
+      // Like the priority mode, a preference: version-neutral unless it
+      // answers a question the seat is already facing.
+      send({ type: "standing-orders", orders, ...roomCommand() });
+    },
     sendTokenSkip: (kind, enabled) => {
       send({ type: kind === "runechant" ? "runechant-skip" : "seismic-surge-skip", enabled, ...roomCommand() });
     },

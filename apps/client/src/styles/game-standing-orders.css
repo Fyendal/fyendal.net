@@ -4,6 +4,8 @@
    choice to open. Pressing it shows the card's questions above the card, each
    written in the card's own serif with a segmented choice beneath. */
 .board-card-stack:has(> .standing-order-chip) { z-index: 4; }
+/* Mounted without a chip so the card never remounts; adds no box. */
+.board-card-stack-bare { display: contents; }
 .standing-order-chip {
   position: absolute;
   z-index: 5;

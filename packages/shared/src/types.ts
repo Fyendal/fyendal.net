@@ -1047,6 +1047,14 @@ export interface FriendGameInvite {
 /** How a seat wants empty priority/reaction windows handled. */
 export type PriorityWindowMode = "auto-pass" | "always-pause";
 
+/** A card's decided standing answers; "ask" is absence. */
+export interface SeatStandingOrder {
+  priorityWindow?: "pass";
+  optionalTrigger?: "yes" | "no";
+}
+
+export type SeatStandingOrders = Record<string, SeatStandingOrder>;
+
 export type ClientMessage =
   | { type: "bot-ready"; runtimeId: string }
   | BotSubmission
@@ -1100,6 +1108,9 @@ export type ClientMessage =
   /** Per-seat priority preference, applied by the server before broadcasting:
    *  auto-pass immediately passes empty priority/reaction windows. */
   | { type: "priority-mode"; mode: PriorityWindowMode; commandId?: string; expectedVersion?: number }
+  /** The seat's standing orders by functional card key; the server applies
+   *  them in the commit that reaches the question. */
+  | { type: "standing-orders"; orders: SeatStandingOrders; commandId?: string; expectedVersion?: number }
   /** Temporary per-seat shortcut for only the current consecutive Runechant
    *  resolution. The server expires it at the first non-Runechant boundary. */
   | { type: "runechant-skip"; enabled: boolean; commandId?: string; expectedVersion?: number }

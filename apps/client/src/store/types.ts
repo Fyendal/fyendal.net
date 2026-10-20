@@ -24,6 +24,7 @@ import type {
   RoomSummary,
   UndoTarget,
   EmoteMessage,
+  SeatStandingOrders,
 } from "@fyendal/shared";
 import type {
   AccountExport,
@@ -272,6 +273,7 @@ export interface StoreState {
   /** True when the command was sent or intentionally queued. */
   sendIntent: (intent: GameIntent) => boolean;
   sendPriorityMode: (mode: PriorityWindowMode) => void;
+  sendStandingOrders: (orders: SeatStandingOrders) => void;
   sendTokenSkip: (kind: TokenSkipKind, enabled: boolean) => void;
   sendEmote: (message: EmoteMessage) => void;
   kickSpectator: (username: string) => void;

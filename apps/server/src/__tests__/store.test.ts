@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { cardData, precon, preconsForFormat, silverAgePrecon } from "@fyendal/cards";
+import { cardData, functionalKeyOf, precon, preconsForFormat, silverAgePrecon } from "@fyendal/cards";
 import { legalIntents } from "@fyendal/engine";
 import { decodeServerMessage, replayFileViews } from "@fyendal/protocol";
 import type { Format, GameIntent, PresentedDeck, QueuePoolCounts } from "@fyendal/shared";
@@ -1740,6 +1740,46 @@ describe("PgRoomStore storage", () => {
       player: 0,
       kind: "priority-window",
     });
+  });
+
+  it("passes a standing-order window in the commit that reaches it and persists the orders", async () => {
+    const { code, tokens } = await fullRoom();
+    await startGame(code, tokens);
+    const room = await store.getRoom(code);
+    const state = room!.state!;
+    const hero = state.players[0]!.hero;
+    const key = functionalKeyOf(cardData[hero.cardId]!);
+    state.stack = [{
+      sourceInstanceId: hero.instanceId,
+      seat: 0,
+      triggerIndex: 99,
+      label: "A turn trigger",
+      optional: false,
+    }];
+    state.phase = "layer";
+    state.priorityPlayer = 0;
+    state.stackPasses = 0;
+    state.pendingDecision = { player: 0, kind: "priority-window", prompt: "Respond or pass" };
+    await db.query("UPDATE rooms SET state = $2 WHERE code = $1", [
+      code,
+      JSON.stringify(dehydrateState(state, "rules-a")),
+    ]);
+
+    expect(await store.setStandingOrders(code, { token: tokens[0] }, {})).toMatchObject({
+      ok: true,
+      advanced: false,
+    });
+    expect((await store.getRoom(code))!.state!.pendingDecision).toMatchObject({ player: 0 });
+
+    expect(await store.setStandingOrders(code, { token: tokens[0] }, { [key]: { priorityWindow: "pass" } }))
+      .toMatchObject({ ok: true, advanced: true });
+    const after = (await store.getRoom(code))!;
+    expect(after.state!.pendingDecision).toMatchObject({ player: 1, kind: "priority-window" });
+    expect(after.seats[0]!.standingOrders).toEqual({ [key]: { priorityWindow: "pass" } });
+    expect(after.seats[1]!.standingOrders).toBeUndefined();
+
+    expect(await store.setStandingOrders(code, { token: tokens[0] }, {})).toMatchObject({ ok: true });
+    expect((await store.getRoom(code))!.seats[0]!.standingOrders).toBeUndefined();
   });
 
   it("expires Runechant skipping at a non-Runechant trigger boundary", async () => {

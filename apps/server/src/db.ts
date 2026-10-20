@@ -998,6 +998,11 @@ export const MIGRATIONS: Migration[] = [
       await db.query("CREATE INDEX password_resets_expires_at_idx ON password_resets (expires_at)");
     },
   },
+  {
+    version: 53,
+    // A seat's standing orders as JSON text.
+    sql: "ALTER TABLE room_seats ADD COLUMN standing_orders TEXT;",
+  },
 ];
 
 async function publicTables(db: Queryable): Promise<string[]> {

@@ -1347,6 +1347,26 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
         }
         return;
       }
+      case "standing-orders": {
+        const player = requirePlayer(ws, ctx);
+        if (!player) return;
+        const r = await rooms.setStandingOrders(
+          player.code,
+          player.credentials,
+          msg.orders,
+          msg.commandId !== undefined && msg.expectedVersion !== undefined
+            ? { id: msg.commandId, expectedVersion: msg.expectedVersion }
+            : undefined,
+        );
+        if (!r.ok) {
+          send(ws, { type: "error", message: r.error });
+          return;
+        }
+        if (r.advanced) {
+          await afterStateCommit(player.code, r.version, r.replayFinalizationId);
+        }
+        return;
+      }
       case "runechant-skip":
       case "seismic-surge-skip": {
         const player = requirePlayer(ws, ctx);

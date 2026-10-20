@@ -9,6 +9,8 @@ import type {
   ChatMessage,
   CombatValueModifierView,
   ClientMessage,
+  SeatStandingOrder,
+  SeatStandingOrders,
   DeckPool,
   DefenderDefenseView,
   EffectLifetime,
@@ -856,6 +858,37 @@ function decodeGameIntentValue(value: unknown): value is GameIntent {
 const commandId = (value: unknown): value is string =>
   typeof value === "string" && /^[A-Za-z0-9_-]{8,64}$/.test(value);
 
+const MAX_STANDING_ORDER_KEYS = 256;
+const MAX_STANDING_ORDER_KEY_LENGTH = 120;
+
+/** Decode a seat's standing orders: bounded, exact keys. */
+export function decodeSeatStandingOrders(value: unknown): SeatStandingOrders | null {
+  const record = object(value);
+  if (!record) return null;
+  const keys = Object.keys(record);
+  if (keys.length > MAX_STANDING_ORDER_KEYS) return null;
+  const orders: SeatStandingOrders = {};
+  for (const key of keys) {
+    if (key.length === 0 || key.length > MAX_STANDING_ORDER_KEY_LENGTH) return null;
+    const entry = object(record[key]);
+    if (!entry || !exactKeys(entry, ["priorityWindow", "optionalTrigger"], [])) return null;
+    const order: SeatStandingOrder = {};
+    if ("priorityWindow" in entry) {
+      if (entry.priorityWindow !== "pass") return null;
+      order.priorityWindow = "pass";
+    }
+    if ("optionalTrigger" in entry) {
+      if (entry.optionalTrigger !== "yes" && entry.optionalTrigger !== "no") return null;
+      order.optionalTrigger = entry.optionalTrigger;
+    }
+    if (order.priorityWindow !== undefined || order.optionalTrigger !== undefined) {
+      // Keeps a key such as "__proto__" an ordinary entry.
+      Object.defineProperty(orders, key, { value: order, enumerable: true, writable: true, configurable: true });
+    }
+  }
+  return orders;
+}
+
 function commandFields(message: Record<string, unknown>): boolean {
   if (message.commandId === undefined && message.expectedVersion === undefined) return true;
   return commandId(message.commandId) && nonNegativeInteger(message.expectedVersion);
@@ -1025,6 +1058,11 @@ export function decodeClientMessage(value: unknown): ClientMessage | null {
     case "priority-mode":
       valid = exactKeys(message, ["type", "mode", "commandId", "expectedVersion"], ["type", "mode"])
         && (message.mode === "auto-pass" || message.mode === "always-pause")
+        && commandFields(message);
+      break;
+    case "standing-orders":
+      valid = exactKeys(message, ["type", "orders", "commandId", "expectedVersion"], ["type", "orders"])
+        && decodeSeatStandingOrders(message.orders) !== null
         && commandFields(message);
       break;
     case "runechant-skip":
