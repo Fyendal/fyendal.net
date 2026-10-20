@@ -2,6 +2,17 @@ import { describe, expect, it, vi } from "vitest";
 import { hoverPreviewTarget } from "./hoverPreviewTarget.js";
 
 describe("hoverPreviewTarget", () => {
+  it("never previews the card under a standing-order badge or its dialog", () => {
+    const card = { dataset: { cardid: "MON107" } } as unknown as HTMLElement;
+    const chip = {} as HTMLElement;
+    const target = {
+      closest: vi.fn((selector: string) =>
+        selector === ".standing-order-chip, .standing-order-popover" ? chip : card),
+    } as unknown as HTMLElement;
+
+    expect(hoverPreviewTarget(target)).toBeNull();
+  });
+
   it("selects the bound card inside an exposed stack layer", () => {
     const boundCard = {} as HTMLElement;
     const boundLayer = {
