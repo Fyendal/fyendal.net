@@ -316,7 +316,13 @@ export const monHighRarity: Record<string, CardScript> = {
     },
   },
   "luminaris|0": {
-    grantsAuraAttack: { cost: 0, basePower: 1, requiresClass: "illusionist" },
+    grantsAuraAttack: {
+      cost: 0,
+      basePower: 1,
+      requiresClass: "illusionist",
+      requiresSubtype: "aura",
+      requiresWard: false,
+    },
     onFriendlyAttackDeclared(ctx) {
       if (
         ctx.currentAttackHasType("illusionist") &&

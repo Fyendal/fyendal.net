@@ -1885,6 +1885,17 @@ describe("PEN — generalized rules interactions", () => {
     expect(opposingWeapon(["haboob|1"])).toBe(opposingWeapon([]));
   });
 
+  it("Haboob does nothing while only defending from hand", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", hand: ["head jab|1"], resources: 2, equipment: NO_EQUIPMENT },
+        { hero: "dorinthea", hand: ["haboob|1"], equipment: NO_EQUIPMENT },
+      ],
+    });
+    g.play("head jab|1", { settle: false }).blockWith("haboob|1");
+    g.expectAttackValue(3);
+  });
+
   it.each([
     { option: "yes", haboob: 1, ash: 0 },
     { option: "no", haboob: 0, ash: 1 },

@@ -202,6 +202,17 @@ describe("MON — Light Illusionist", () => {
       .expectAP(0, 1);
   });
 
+  it("Luminaris lets any Illusionist aura attack, not only Ward auras", () => {
+    const s = scenario({
+      seats: [
+        prismSeat({ weapons: ["luminaris|0"], board: ["parable of humility|2"] }),
+        { hero: "dorinthea" },
+      ],
+    });
+
+    s.activate("parable of humility|2").expectAttackValue(1);
+  });
+
   it("Dream Weavers makes the next Illusionist attack lose phantasm", () => {
     const s = scenario({
       seats: [

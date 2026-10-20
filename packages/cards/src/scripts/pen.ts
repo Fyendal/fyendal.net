@@ -102,8 +102,10 @@ function isAttackAction(ctx: ScriptCtx, card: Card): boolean {
   return ctx.hasCardType(card, "action") && ctx.cardTypes(card).includes("attack");
 }
 
+// Static ability of a permanent: inert while Haboob is only a defending card on the chain.
 function haboobPower(ctx: ScriptCtx, card: Card): number {
-  return isAttackAction(ctx, card) ? -1 : 0;
+  const inArena = ctx.player(ctx.seat).board.some((c) => c.instanceId === ctx.self.instanceId);
+  return inArena && isAttackAction(ctx, card) ? -1 : 0;
 }
 
 function haboobAsh(ctx: ScriptCtx) {
