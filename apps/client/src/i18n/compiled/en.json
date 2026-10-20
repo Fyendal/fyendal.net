@@ -29358,6 +29358,36 @@
       "value": "Passed for you"
     }
   ],
+  "game.standingOrder.timing.actionPhase": [
+    {
+      "type": 0,
+      "value": "At the beginning of the action phase: "
+    },
+    {
+      "type": 1,
+      "value": "effect"
+    }
+  ],
+  "game.standingOrder.timing.endPhase": [
+    {
+      "type": 0,
+      "value": "At the beginning of the end phase: "
+    },
+    {
+      "type": 1,
+      "value": "effect"
+    }
+  ],
+  "game.standingOrder.timing.startOfTurn": [
+    {
+      "type": 0,
+      "value": "At the start of the turn: "
+    },
+    {
+      "type": 1,
+      "value": "effect"
+    }
+  ],
   "game.standingOrder.title": [
     {
       "type": 0,

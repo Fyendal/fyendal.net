@@ -374,19 +374,19 @@ describe("client storage keys", () => {
     expect(decodeStandingOrders(orders)).not.toBeNull();
   });
 
-  it("clears an order with \"ask\" and drops an entry with nothing left", () => {
+  it("keeps an explicit \"ask\" so the card's row survives into later games", () => {
     const orders = { "valiant dynamo|0": { priorityWindow: "pass", optionalTrigger: "yes" } } as const;
-    const cleared = applyStandingOrder(orders, "valiant dynamo|0", { kind: "optional-trigger", value: "ask" });
-    expect(cleared).toEqual({ "valiant dynamo|0": { priorityWindow: "pass" } });
-    expect(applyStandingOrder(cleared, "valiant dynamo|0", { kind: "priority-window", value: "ask" }))
-      .toEqual({});
-    expect(applyStandingOrder({}, "fealty|0", { kind: "priority-window", value: "ask" })).toEqual({});
+    expect(applyStandingOrder(orders, "valiant dynamo|0", { kind: "optional-trigger", value: "ask" }))
+      .toEqual({ "valiant dynamo|0": { priorityWindow: "pass", optionalTrigger: "ask" } });
+    expect(applyStandingOrder({}, "fealty|0", { kind: "priority-window", value: "ask" }))
+      .toEqual({ "fealty|0": { priorityWindow: "ask" } });
   });
 
   it("returns the same orders when nothing changes", () => {
     const orders = { "fealty|0": { priorityWindow: "pass" } } as const;
     expect(applyStandingOrder(orders, "fealty|0", { kind: "priority-window", value: "pass" })).toBe(orders);
-    expect(applyStandingOrder(orders, "fealty|0", { kind: "optional-trigger", value: "ask" })).toBe(orders);
+    const asked = applyStandingOrder(orders, "fealty|0", { kind: "optional-trigger", value: "ask" });
+    expect(applyStandingOrder(asked, "fealty|0", { kind: "optional-trigger", value: "ask" })).toBe(asked);
   });
 
   it("forgets the oldest card rather than exceeding the decoder's bound", () => {

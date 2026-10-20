@@ -16,10 +16,12 @@ import type {
   PlayerView,
   StackLayerView,
   TurnFactsView,
+  TurnTriggerEvent,
 } from "@fyendal/shared";
 import type { CardInstance, CombatValueModifier, Modifier, PendingDecisionState, PlayerState } from "./state.js";
 import { arsenalCapacity, arsenalZoneCount } from "./cardLifecycle.js";
 import { attackHasVeil, cardColorOf, cardTypesOf, dataOf, instanceDataOf, scriptOf } from "./cardProperties.js";
+import type { TriggerEvent } from "./eventTypes.js";
 import { pendingOnHitEffects } from "./hits.js";
 import {
   conditionalModifierGrantsGoAgain,
@@ -132,6 +134,17 @@ function publicCounters(card: CardInstance): Record<string, number> | undefined 
 /** Cards outside the arena carry no counters and no arena statuses. */
 const INACTIVE_ZONE: CardViewOptions = { includeCounters: false };
 
+/** Triggers that recur with the turn structure rather than with play. */
+const TURN_TRIGGER_EVENTS: ReadonlySet<string> = new Set<TurnTriggerEvent>([
+  "start-of-turn",
+  "begin-action-phase",
+  "end-of-turn",
+]);
+
+function isTurnTriggerEvent(event: TriggerEvent): event is TriggerEvent & TurnTriggerEvent {
+  return TURN_TRIGGER_EVENTS.has(event);
+}
+
 function cardView(state: GameStateInternal,
   runtime: EngineRuntime, c: CardInstance, opts: CardViewOptions = {}): CardView {
   const d = instanceDataOf(state, c);
@@ -140,7 +153,18 @@ function cardView(state: GameStateInternal,
   const power = includeCounters ? (c.counters?.power ?? 0) : 0;
   const counters = includeCounters ? publicCounters(c) : undefined;
   const controller = opts.controller;
-  const abilities = abilityList(scriptOf(state, c.cardId, c));
+  const script = scriptOf(state, c.cardId, c);
+  const abilities = abilityList(script);
+  const turnTriggers = controller
+    ? (script?.triggers ?? []).flatMap((trigger) => isTurnTriggerEvent(trigger.event)
+        ? [{
+            event: trigger.event,
+            label: trigger.label,
+            ...(trigger.labelMessage ? { labelMessage: trigger.labelMessage } : {}),
+            ...(trigger.optional ? { optional: true } : {}),
+          }]
+        : [])
+    : [];
   const abilityUsage = controller
     ? abilities.map((ability, index) =>
         activatedAbilityUsage(controller, c.instanceId, index, ability))
@@ -199,6 +223,7 @@ function cardView(state: GameStateInternal,
     ...(usedAbilityIndexes.length > 0 ? { usedAbilityIndexes } : {}),
     ...(hasRemainingMultipleActivation ? { remainingAbilityActivations } : {}),
     ...(activatedAbilityLabels ? { activatedAbilityLabels } : {}),
+    ...(turnTriggers.length > 0 ? { turnTriggers } : {}),
     ...(attackAbilityIndexes.length > 0 ? { attackAbilityIndexes } : {}),
     ...(c.grantedNames && c.grantedNames.length > 0 ? { grantedNames: c.grantedNames } : {}),
     ...(c.chosenName ? { chosenName: c.chosenName } : {}),

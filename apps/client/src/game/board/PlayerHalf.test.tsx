@@ -97,12 +97,12 @@ const standingOrderBoard: NonNullable<ComponentProps<typeof PlayerHalf>["standin
     ["fealty|0", {
       key: "fealty|0",
       cardId: "SFA037",
-      rows: [{ kind: "priority-window", label: null, fallback: "Destroy Fealty", order: "pass" }],
+      rows: [{ kind: "priority-window", timing: null, label: null, fallback: "Destroy Fealty", order: "pass" }],
     }],
     ["valiant dynamo|0", {
       key: "valiant dynamo|0",
       cardId: "MON107",
-      rows: [{ kind: "optional-trigger", label: null, fallback: null, order: "ask" }],
+      rows: [{ kind: "optional-trigger", timing: null, label: null, fallback: null, order: "ask" }],
     }],
   ]),
   onSetOrder: () => undefined,

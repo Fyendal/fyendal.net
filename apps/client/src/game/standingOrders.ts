@@ -1,4 +1,4 @@
-import type { CardView, GameIntent, GameMessage, GameView } from "@fyendal/shared";
+import type { CardView, GameIntent, GameMessage, GameView, TurnTriggerEvent } from "@fyendal/shared";
 import { cardData, functionalKeyOf } from "@fyendal/cards/client";
 import { heroCard } from "./board/heroCard.js";
 import type {
@@ -17,6 +17,8 @@ export interface StandingOrderQuestion {
   key: string;
   /** The arena card the question came from, for display. */
   card: CardView;
+  /** Seat whose arena holds that card. */
+  seat: number;
   /** Semantic label of the trigger that asked, when the server projected one. */
   label: GameMessage | null;
   /** English fallback for `label`. */
@@ -39,6 +41,9 @@ export interface ObservedStandingOrderQuestion {
 
 export interface StandingOrderRow {
   kind: StandingOrderKind;
+  /** When the printed trigger fires, so "Destroy Fealty" reads as the end-phase
+   * trigger rather than the token's instant ability. */
+  timing: TurnTriggerEvent | null;
   label: GameMessage | null;
   fallback: string | null;
   order: PriorityWindowOrder | OptionalTriggerOrder;
@@ -104,7 +109,7 @@ export function currentStandingOrderQuestion(
     if (!source) return null;
     const key = standingOrderKey(source.card);
     if (!key) return null;
-    return { kind: "priority-window", key, card: source.card, ...layerLabel(top) };
+    return { kind: "priority-window", key, card: source.card, seat: source.seat, ...layerLabel(top) };
   }
   if (decision.kind === "optional-effect") {
     if (decision.sourceInstanceId === undefined || !isYesNo(decision.options)) return null;
@@ -116,6 +121,7 @@ export function currentStandingOrderQuestion(
       kind: "optional-trigger",
       key,
       card: source.card,
+      seat: source.seat,
       label: decision.promptMessage ?? null,
       fallback: decision.prompt,
     };
@@ -135,7 +141,11 @@ export function standingOrderAnswer(
   if (!question) return null;
   const order: StandingOrder | undefined = orders[question.key];
   if (question.kind === "priority-window") {
-    if (order?.priorityWindow !== "pass") return null;
+    // A decided optional trigger of the viewer's own card runs through its
+    // priority windows too; the single row stands for both questions.
+    const decidedOwnTrigger = question.seat === viewerSeat
+      && (order?.optionalTrigger === "yes" || order?.optionalTrigger === "no");
+    if (order?.priorityWindow !== "pass" && !decidedOwnTrigger) return null;
     if (!legal.some((intent) => intent.kind === "pass")) return null;
     return { question, intent: { kind: "pass" }, value: "pass" };
   }
@@ -154,10 +164,13 @@ export function topStackLayerKey(view: GameView): string | null {
 
 const KIND_ORDER: StandingOrderKind[] = ["priority-window", "optional-trigger"];
 
-/** Rows for one functional card: every question seen this game or remembered
- * in settings. Opponent-controlled cards show only the viewer's own priority
- * windows; their "you may" choices are never the viewer's to answer. */
+/** Rows for one functional card: its printed turn triggers, every question
+ * seen this game, and orders remembered in settings. Opponent-controlled cards
+ * show only the viewer's own priority windows; their "you may" choices are
+ * never the viewer's to answer. A card the viewer controls with an optional
+ * trigger shows that choice alone, since deciding it also passes its windows. */
 export function standingOrderRows(
+  card: CardView,
   key: string,
   orders: StandingOrders,
   observed: ReadonlyMap<string, readonly ObservedStandingOrderQuestion[]>,
@@ -165,15 +178,22 @@ export function standingOrderRows(
 ): StandingOrderRow[] {
   const stored = orders[key];
   const seen = observed.get(key) ?? [];
+  const printed = card.turnTriggers ?? [];
+  const optionalTrigger = printed.find((entry) => entry.optional);
+  const asksToUse = controlledByViewer
+    && (optionalTrigger !== undefined || seen.some((entry) => entry.kind === "optional-trigger"));
   return KIND_ORDER.flatMap((kind): StandingOrderRow[] => {
     if (kind === "optional-trigger" && !controlledByViewer) return [];
+    if (kind === "priority-window" && asksToUse) return [];
     const observation = seen.find((entry) => entry.kind === kind);
+    const trigger = kind === "priority-window" ? printed[0] : optionalTrigger;
     const storedOrder = kind === "priority-window" ? stored?.priorityWindow : stored?.optionalTrigger;
-    if (!observation && storedOrder === undefined) return [];
+    if (!observation && !trigger && storedOrder === undefined) return [];
     return [{
       kind,
-      label: observation?.label ?? null,
-      fallback: observation?.fallback ?? null,
+      timing: trigger?.event ?? null,
+      label: observation?.label ?? trigger?.labelMessage ?? null,
+      fallback: observation?.fallback ?? trigger?.label ?? null,
       order: storedOrder ?? "ask",
     }];
   });
@@ -192,7 +212,7 @@ export function standingOrderCardModels(
     for (const card of arenaCards(view, seat)) {
       const key = standingOrderKey(card);
       if (!key || models.has(key)) continue;
-      const rows = standingOrderRows(key, orders, observed, seat === viewerSeat);
+      const rows = standingOrderRows(card, key, orders, observed, seat === viewerSeat);
       if (rows.length === 0) continue;
       models.set(key, { key, cardId: card.cardId, rows });
     }

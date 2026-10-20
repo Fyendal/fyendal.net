@@ -11,6 +11,7 @@ const fealty: StandingOrderCardModel = {
   cardId: "SFA037",
   rows: [{
     kind: "priority-window",
+    timing: "end-of-turn",
     label: { id: "engine.term.card.destroy", values: { card: { kind: "card", cardId: "SFA037" } } },
     fallback: "Destroy Fealty",
     order: "ask",
@@ -21,9 +22,10 @@ const dynamo: StandingOrderCardModel = {
   key: "valiant dynamo|0",
   cardId: "MON107",
   rows: [
-    { kind: "priority-window", label: null, fallback: null, order: "pass" },
+    { kind: "priority-window", timing: null, label: null, fallback: null, order: "pass" },
     {
       kind: "optional-trigger",
+      timing: null,
       label: { id: "card.trigger.common.valiantdynamo.recover" },
       fallback: "Recover Valiant Dynamo",
       order: "no",
@@ -46,6 +48,13 @@ describe("StandingOrderRows", () => {
     expect(html).toContain(">Always use<");
     expect(html.match(/>Always ask</g)).toHaveLength(2);
     expect(html).toContain("standing-order-segmented-3");
+  });
+
+  it("names the trigger's timing so the row is not mistaken for an activated ability", () => {
+    expect(render(createElement(StandingOrderRows, { model: fealty, onSetOrder: () => undefined })))
+      .toContain("At the beginning of the end phase: Destroy Fealty");
+    expect(render(createElement(StandingOrderRows, { model: fealty, onSetOrder: () => undefined }), "zh-Hans"))
+      .toContain("结束阶段开始时：");
   });
 
   it("resolves card references inside the question label and localizes", () => {

@@ -13,14 +13,26 @@ function cardName(cardId: string): string {
   return cardData[cardId]?.name ?? cardId;
 }
 
+const TIMING_MESSAGES = {
+  "start-of-turn": "game.standingOrder.timing.startOfTurn",
+  "begin-action-phase": "game.standingOrder.timing.actionPhase",
+  "end-of-turn": "game.standingOrder.timing.endPhase",
+} as const;
+
 function rowLabel(intl: IntlShape, row: StandingOrderRow): string {
-  if (row.label) return formatGameMessage(intl, row.label, { card: cardName });
-  if (row.fallback) return row.fallback;
-  return intl.formatMessage({
-    id: row.kind === "priority-window"
-      ? "game.standingOrder.priority.generic"
-      : "game.standingOrder.optional.generic",
-  });
+  const effect = row.label
+    ? formatGameMessage(intl, row.label, { card: cardName })
+    : row.fallback;
+  if (effect === null) {
+    return intl.formatMessage({
+      id: row.kind === "priority-window"
+        ? "game.standingOrder.priority.generic"
+        : "game.standingOrder.optional.generic",
+    });
+  }
+  return row.timing
+    ? intl.formatMessage({ id: TIMING_MESSAGES[row.timing] }, { effect })
+    : effect;
 }
 
 const PRIORITY_OPTIONS = [

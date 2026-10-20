@@ -167,6 +167,17 @@ export type CounterKind =
 
 export type CardCounters = Partial<Record<CounterKind, number>>;
 
+export type TurnTriggerEvent = "start-of-turn" | "begin-action-phase" | "end-of-turn";
+
+export interface TurnTriggerView {
+  /** When in the turn structure the trigger fires. */
+  event: TurnTriggerEvent;
+  label: string;
+  labelMessage?: GameMessage;
+  /** The trigger asks its controller whether to use it. */
+  optional?: boolean;
+}
+
 export interface CardView {
   /** Unique per game instance */
   instanceId: number;
@@ -211,6 +222,11 @@ export interface CardView {
   /** Labels for sources with multiple activated abilities. Derived by the
    * authoritative engine so clients do not load executable card scripts. */
   activatedAbilityLabels?: string[];
+  /** Turn-structure triggers (start of turn, action phase, end of turn) this
+   * arena card puts on the stack every turn, so clients can offer standing
+   * orders before the first one fires. Derived by the engine, like
+   * `activatedAbilityLabels`. */
+  turnTriggers?: TurnTriggerView[];
   /** Zero-based activated abilities that declare an attack. Presentation data
    * for showing their pending attack in the combat chain. */
   attackAbilityIndexes?: number[];

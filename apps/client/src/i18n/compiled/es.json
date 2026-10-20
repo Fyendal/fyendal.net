@@ -30304,6 +30304,36 @@
       "value": "Pasado por ti"
     }
   ],
+  "game.standingOrder.timing.actionPhase": [
+    {
+      "type": 0,
+      "value": "Al comienzo de la fase de acción: "
+    },
+    {
+      "type": 1,
+      "value": "effect"
+    }
+  ],
+  "game.standingOrder.timing.endPhase": [
+    {
+      "type": 0,
+      "value": "Al comienzo de la fase final: "
+    },
+    {
+      "type": 1,
+      "value": "effect"
+    }
+  ],
+  "game.standingOrder.timing.startOfTurn": [
+    {
+      "type": 0,
+      "value": "Al comienzo del turno: "
+    },
+    {
+      "type": 1,
+      "value": "effect"
+    }
+  ],
   "game.standingOrder.title": [
     {
       "type": 0,

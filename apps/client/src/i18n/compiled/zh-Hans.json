@@ -28629,6 +28629,36 @@
       "value": "已为你让过"
     }
   ],
+  "game.standingOrder.timing.actionPhase": [
+    {
+      "type": 0,
+      "value": "行动阶段开始时："
+    },
+    {
+      "type": 1,
+      "value": "effect"
+    }
+  ],
+  "game.standingOrder.timing.endPhase": [
+    {
+      "type": 0,
+      "value": "结束阶段开始时："
+    },
+    {
+      "type": 1,
+      "value": "effect"
+    }
+  ],
+  "game.standingOrder.timing.startOfTurn": [
+    {
+      "type": 0,
+      "value": "回合开始时："
+    },
+    {
+      "type": 1,
+      "value": "effect"
+    }
+  ],
   "game.standingOrder.title": [
     {
       "type": 1,

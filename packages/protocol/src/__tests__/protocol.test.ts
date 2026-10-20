@@ -268,6 +268,7 @@ const card = {
   usedAbilityIndexes: [0, 2],
   remainingAbilityActivations: [1, 0],
   activatedAbilityLabels: ["Attack", "Reload"],
+  turnTriggers: [{ event: "end-of-turn", label: "Recover", labelMessage: { id: "test.recover" }, optional: true }],
   attackAbilityIndexes: [0],
   life: 1,
   hidden: false,
@@ -974,6 +975,19 @@ describe("GameView and server messages", () => {
           preStackSource: { card, zone },
         },
       })).not.toBeNull();
+    }
+    for (const turnTriggers of [
+      [{ event: "end-of-turn", label: "" }],
+      [{ event: "end-of-turn", label: "Recover", extra: 1 }],
+      [{ event: "damage-dealt", label: "Recover" }],
+      [{ label: "Recover" }],
+      "Recover",
+    ]) {
+      const base = gameView();
+      expect(decodeGameView({
+        ...base,
+        players: [{ ...base.players[0], weapons: [{ ...card, turnTriggers }] }, base.players[1]],
+      })).toBeNull();
     }
     for (const sourceInstanceId of [7, -1, 1.5, "7"]) {
       const decoded = decodeGameView({

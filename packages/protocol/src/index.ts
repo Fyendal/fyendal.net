@@ -47,6 +47,7 @@ import type {
   StateMessage,
   PlayerTurnFactsView,
   TurnFactsView,
+  TurnTriggerView,
 } from "@fyendal/shared";
 
 type JsonObject = Record<string, unknown>;
@@ -1081,7 +1082,7 @@ function cardView(value: unknown, depth = 0): value is CardView {
   const card = object(value);
   if (!card || !exactKeys(card, [
     "instanceId", "cardId", "name", "owner", "pitchCount", "attack", "defense", "faceDown", "arsenalSlot", "tapped",
-    "defCounters", "counters", "usedAbilityIndexes", "remainingAbilityActivations", "activatedAbilityLabels", "attackAbilityIndexes", "life", "hidden", "subcards", "grantedNames", "chosenName", "boundToInstanceId",
+    "defCounters", "counters", "usedAbilityIndexes", "remainingAbilityActivations", "activatedAbilityLabels", "turnTriggers", "attackAbilityIndexes", "life", "hidden", "subcards", "grantedNames", "chosenName", "boundToInstanceId",
     "grantedTypes", "grantedColor", "playableFromSourceCardId", "intimidated",
   ], ["instanceId", "cardId", "owner"])) return false;
   const validInstanceId = instanceId(card.instanceId)
@@ -1105,6 +1106,14 @@ function cardView(value: unknown, depth = 0): value is CardView {
       array(v, (count): count is number => nonNegativeInteger(count) && count <= 32, 33))
     && optional(card.activatedAbilityLabels, (v): v is string[] =>
       array(v, (label): label is string => string(label, MAX_SHORT_TEXT, false), 33))
+    && optional(card.turnTriggers, (v): v is TurnTriggerView[] => array(v, (entry): entry is TurnTriggerView => {
+      const trigger = object(entry);
+      return !!trigger && exactKeys(trigger, ["event", "label", "labelMessage", "optional"], ["event", "label"])
+        && (trigger.event === "start-of-turn" || trigger.event === "begin-action-phase" || trigger.event === "end-of-turn")
+        && string(trigger.label, MAX_SHORT_TEXT, false)
+        && optional(trigger.labelMessage, (value): value is GameMessage => decodeGameMessage(value) !== null)
+        && optional(trigger.optional, (value): value is boolean => typeof value === "boolean");
+    }, 16))
     && optional(card.attackAbilityIndexes, abilityIndexes)
     && optional(card.subcards, (v): v is CardView[] => array(v, (entry) => cardView(entry, depth + 1), 16))
     && optional(card.grantedNames, (v): v is string[] => array(v, (entry): entry is string => string(entry, MAX_ID), 16))

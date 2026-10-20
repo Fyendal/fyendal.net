@@ -45,7 +45,7 @@ describe("MobileCardInspect", () => {
           model: {
             key: "valiant dynamo|0",
             cardId: "MON107",
-            rows: [{ kind: "optional-trigger", label: null, fallback: "Recover Valiant Dynamo", order: "no" }],
+            rows: [{ kind: "optional-trigger", timing: null, label: null, fallback: "Recover Valiant Dynamo", order: "no" }],
           },
           onSetOrder: () => undefined,
         },

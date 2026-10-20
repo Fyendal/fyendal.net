@@ -360,18 +360,15 @@ export type CardDisplayPreference = "square" | "full";
 export type MotionPreference = "system" | "full" | "reduced";
 export type PlayabilityCuePreference = "glow" | "high-contrast";
 
-/** What the client does on its own when a repeating question comes up for
- * one functional card: pass its priority windows, or always use or deny its
- * optional trigger. "ask" entries record that the question has been seen so
- * the card keeps its rows in later games. */
+/** What the client answers for a card on its own; "ask" keeps the card's
+ * row without answering. */
 export type PriorityWindowOrder = "ask" | "pass";
 export type OptionalTriggerOrder = "ask" | "yes" | "no";
 export interface StandingOrder {
   priorityWindow?: PriorityWindowOrder;
   optionalTrigger?: OptionalTriggerOrder;
 }
-/** Keyed by functional card identity (`name lowercase|pitch`), never by
- * printing or instance id, so reprints and every token copy share one order. */
+/** Keyed by functional card identity (`name lowercase|pitch`). */
 export type StandingOrders = Record<string, StandingOrder>;
 
 export const MAX_STANDING_ORDER_CARDS = 200;
@@ -381,33 +378,22 @@ export type StandingOrderUpdate =
   | { kind: "priority-window"; value: PriorityWindowOrder }
   | { kind: "optional-trigger"; value: OptionalTriggerOrder };
 
-/** Change one card's order. "ask" is the absence of an order, so choosing it
- * clears the field and an entry with nothing left is dropped. Returns the
- * same object when nothing changes. Oldest entries give way past the
- * decoder's bound, which would otherwise discard every setting on load. */
+/** Same object when nothing changes; the oldest card is evicted at the bound. */
 export function applyStandingOrder(
   orders: StandingOrders,
   key: string,
   update: StandingOrderUpdate,
 ): StandingOrders {
   const existing: StandingOrder = orders[key] ?? {};
-  const updated: StandingOrder = { ...existing };
-  if (update.kind === "priority-window") {
-    if (update.value === "ask") delete updated.priorityWindow;
-    else updated.priorityWindow = update.value;
-  } else if (update.value === "ask") {
-    delete updated.optionalTrigger;
-  } else {
-    updated.optionalTrigger = update.value;
-  }
+  const updated: StandingOrder = update.kind === "priority-window"
+    ? { ...existing, priorityWindow: update.value }
+    : { ...existing, optionalTrigger: update.value };
   if (
     existing.priorityWindow === updated.priorityWindow
     && existing.optionalTrigger === updated.optionalTrigger
   ) return orders;
   const { [key]: _previous, ...others } = orders;
-  const next: StandingOrders = Object.keys(updated).length === 0
-    ? others
-    : { ...others, [key]: updated };
+  const next: StandingOrders = { ...others, [key]: updated };
   const keys = Object.keys(next);
   for (const stale of keys.slice(0, Math.max(0, keys.length - MAX_STANDING_ORDER_CARDS))) {
     delete next[stale];

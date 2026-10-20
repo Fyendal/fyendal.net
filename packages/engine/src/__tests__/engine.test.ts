@@ -71,6 +71,24 @@ describe("game setup & turn structure", () => {
     expect(withdrawn.state.phase).not.toBe("game-over");
   });
 
+  it("projects turn-structure triggers for arena presentation", () => {
+    const state = makeGame(898);
+    state.scriptsRef = {
+      ...state.scriptsRef,
+      SWORD: {
+        triggers: [
+          { event: "end-of-turn", optional: true, label: "Recover", labelMessage: { id: "test.recover" }, effect() {} },
+          { event: "damage-dealt", label: "Sting", effect() {} },
+        ],
+      },
+    };
+
+    expect(projectStateFor(state, 0).players[0]?.weapons[0]?.turnTriggers).toEqual([
+      { event: "end-of-turn", label: "Recover", labelMessage: { id: "test.recover" }, optional: true },
+    ]);
+    expect(projectStateFor(state, 0).players[0]?.hand[0]?.turnTriggers).toBeUndefined();
+  });
+
   it("projects attack ability indexes for arena presentation", () => {
     const state = makeGame(897);
     state.scriptsRef = {

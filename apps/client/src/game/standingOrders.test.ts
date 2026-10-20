@@ -166,6 +166,28 @@ describe("standingOrderAnswer", () => {
       .toMatchObject({ intent: { kind: "pass" }, value: "pass", question: { key: "fealty|0" } });
   });
 
+  it("passes the viewer's own windows once its optional trigger is decided", () => {
+    const dynamoWindow = view({
+      stack: [{
+        card: { instanceId: 13, cardId: DYNAMO, owner: 0 },
+        seat: 0,
+        label: "Recover Valiant Dynamo",
+        optional: true,
+      }],
+      pendingDecision: { player: 0, kind: "priority-window", prompt: "Respond?" },
+    });
+    expect(standingOrderAnswer(dynamoWindow, 0, { "valiant dynamo|0": { optionalTrigger: "no" } }, PASS))
+      .toMatchObject({ value: "pass" });
+    expect(standingOrderAnswer(dynamoWindow, 0, { "valiant dynamo|0": { optionalTrigger: "ask" } }, PASS))
+      .toBeNull();
+    const theirs = view({
+      players: [player(0), player(1, { equipment: { chest: { instanceId: 23, cardId: DYNAMO, owner: 1 } } })],
+      stack: [{ card: { instanceId: 23, cardId: DYNAMO, owner: 1 }, seat: 1, label: "Recover Valiant Dynamo", optional: true }],
+      pendingDecision: { player: 0, kind: "priority-window", prompt: "Respond?" },
+    });
+    expect(standingOrderAnswer(theirs, 0, { "valiant dynamo|0": { optionalTrigger: "yes" } }, PASS)).toBeNull();
+  });
+
   it("answers the Dynamo choice with the ordered option", () => {
     const orders = { "valiant dynamo|0": { optionalTrigger: "no" as const } };
     expect(standingOrderAnswer(dynamoChoice(0), 0, orders, YES_NO))
@@ -193,18 +215,49 @@ describe("standingOrderCardModels", () => {
     const models = standingOrderCardModels(view(), 0, {}, observed);
     expect([...models.keys()]).toEqual(["valiant dynamo|0", "fealty|0"]);
     expect(models.get("fealty|0")?.rows).toEqual([
-      { kind: "priority-window", label: null, fallback: "Destroy Fealty", order: "ask" },
+      { kind: "priority-window", timing: null, label: null, fallback: "Destroy Fealty", order: "ask" },
     ]);
-    expect(models.get("valiant dynamo|0")?.rows.map((row) => row.kind))
-      .toEqual(["priority-window", "optional-trigger"]);
+    expect(models.get("valiant dynamo|0")?.rows.map((row) => row.kind)).toEqual(["optional-trigger"]);
   });
 
   it("builds rows from remembered orders when nothing was seen this game", () => {
     const models = standingOrderCardModels(view(), 0, { "fealty|0": { priorityWindow: "pass" } }, new Map());
     expect(models.get("fealty|0")?.rows).toEqual([
-      { kind: "priority-window", label: null, fallback: null, order: "pass" },
+      { kind: "priority-window", timing: null, label: null, fallback: null, order: "pass" },
     ]);
     expect(models.has("valiant dynamo|0")).toBe(false);
+  });
+
+  it("offers rows for printed turn triggers before they first fire", () => {
+    const printed = view({
+      players: [
+        player(0, {
+          equipment: {
+            chest: {
+              instanceId: 13,
+              cardId: DYNAMO,
+              owner: 0,
+              turnTriggers: [{
+                event: "end-of-turn",
+                label: "Recover Valiant Dynamo",
+                labelMessage: { id: "card.trigger.common.valiantdynamo.recover" },
+                optional: true,
+              }],
+            },
+          },
+        }),
+        player(1),
+      ],
+    });
+    expect(standingOrderCardModels(printed, 0, {}, new Map()).get("valiant dynamo|0")?.rows).toEqual([
+      {
+        kind: "optional-trigger",
+        timing: "end-of-turn",
+        label: { id: "card.trigger.common.valiantdynamo.recover" },
+        fallback: "Recover Valiant Dynamo",
+        order: "ask",
+      },
+    ]);
   });
 
   it("shows only priority windows on the opponent's permanents", () => {
@@ -222,8 +275,8 @@ describe("standingOrderCardModels", () => {
 
   it("lists the set orders for the chip text", () => {
     expect(activeOrderValues([
-      { kind: "priority-window", label: null, fallback: null, order: "pass" },
-      { kind: "optional-trigger", label: null, fallback: null, order: "ask" },
+      { kind: "priority-window", timing: null, label: null, fallback: null, order: "pass" },
+      { kind: "optional-trigger", timing: null, label: null, fallback: null, order: "ask" },
     ])).toEqual(["pass"]);
   });
 });
