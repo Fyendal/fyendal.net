@@ -975,6 +975,18 @@ describe("GameView and server messages", () => {
         },
       })).not.toBeNull();
     }
+    for (const sourceInstanceId of [7, -1, 1.5, "7"]) {
+      const decoded = decodeGameView({
+        ...gameView(),
+        pendingDecision: {
+          player: 0, kind: "optional-effect", prompt: "Recover?",
+          options: ["yes", "no"],
+          sourceInstanceId,
+        },
+      });
+      if (sourceInstanceId === 7) expect(decoded).not.toBeNull();
+      else expect(decoded).toBeNull();
+    }
     const triggerOrder = {
       ...gameView(),
       pendingDecision: {

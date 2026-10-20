@@ -1261,6 +1261,9 @@ function projectState(
                 }
               : {}),
             ...(preStackSource ? { preStackSource } : {}),
+            ...(privateDecision && pd.chooseHook === "trigger-choice" && pd.sourceInstanceId !== undefined
+              ? { sourceInstanceId: pd.sourceInstanceId }
+              : {}),
             ...(privateDecision && pd.chooseHook === "engine-token-replacement-order"
               ? { optionLayout: "effect-list" as const }
               : {}),

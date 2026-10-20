@@ -125,6 +125,7 @@ import rawDecklists from "./data/decklists.json" with { type: "json" };
 import rawPreconsJson from "./data/precons.json" with { type: "json" };
 import { validateArenaAgainstCards, validatePresentationAgainstCards } from "./presentation.js";
 export { equipmentFitsSlot, isWeaponZoneCard } from "./equipment.js";
+export { functionalKey, functionalKeyOf } from "./functional.js";
 import { formatLegalityIssues } from "./formatLegality.js";
 export {
   CLASSIC_CONSTRUCTED_LEGALITY_CHECKED_ON,
