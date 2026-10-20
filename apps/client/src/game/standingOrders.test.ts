@@ -221,6 +221,31 @@ describe("standingOrderCardModels", () => {
     expect(models.get("valiant dynamo|0")?.rows.map((row) => row.kind)).toEqual(["priority-window"]);
   });
 
+  it("gives no chip to the opponent's turn-structure triggers", () => {
+    const opponentDynamo = view({
+      players: [
+        player(0),
+        player(1, {
+          equipment: {
+            chest: {
+              instanceId: 23,
+              cardId: DYNAMO,
+              owner: 1,
+              turnTriggers: [{ event: "end-of-turn", label: "Recover Valiant Dynamo", optional: true }],
+            },
+          },
+        }),
+      ],
+    });
+    const orders = { "valiant dynamo|0": { priorityWindow: "pass" as const } };
+    expect(standingOrderCardModels(opponentDynamo, 0, orders, new Map()).size).toBe(0);
+    const observed = new Map([["valiant dynamo|0", [
+      { kind: "priority-window" as const, label: null, fallback: "Some other trigger" },
+    ]]]);
+    expect(standingOrderCardModels(opponentDynamo, 0, orders, observed).get("valiant dynamo|0")?.rows)
+      .toHaveLength(1);
+  });
+
   it("lists the set orders for the chip text", () => {
     expect(activeOrderValues([
       { kind: "priority-window", timing: null, label: null, fallback: null, order: "pass" },

@@ -126,9 +126,9 @@ const KIND_ORDER: StandingOrderKind[] = ["priority-window", "optional-trigger"];
 
 /** Rows for one functional card: its printed turn triggers, every question
  * seen this game, and orders remembered in settings. Opponent-controlled cards
- * show only the viewer's own priority windows; their "you may" choices are
- * never the viewer's to answer. A card the viewer controls with an optional
- * trigger shows that choice alone, since deciding it also passes its windows. */
+ * show only the viewer's own priority windows, never their turn triggers or
+ * "you may" choices. A card the viewer controls with an optional trigger shows
+ * that choice alone, since deciding it also passes its windows. */
 export function standingOrderRows(
   card: CardView,
   key: string,
@@ -146,6 +146,9 @@ export function standingOrderRows(
     if (kind === "optional-trigger" && !controlledByViewer) return [];
     if (kind === "priority-window" && asksToUse) return [];
     const observation = seen.find((entry) => entry.kind === kind);
+    // The opponent's turn triggers are theirs alone to answer.
+    if (!controlledByViewer && printed.length > 0
+      && (!observation || printed.some((entry) => entry.label === observation.fallback))) return [];
     const trigger = kind === "priority-window" ? printed[0] : optionalTrigger;
     const storedOrder = kind === "priority-window" ? stored?.priorityWindow : stored?.optionalTrigger;
     if (!observation && !trigger && storedOrder === undefined) return [];

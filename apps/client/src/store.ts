@@ -1792,9 +1792,9 @@ export const useStore = create<StoreState>((set, get) => {
       send({ type: "priority-mode", mode, ...roomCommand() });
     },
     sendStandingOrders: (orders) => {
-      // Like the priority mode, a preference: version-neutral unless it
-      // answers a question the seat is already facing.
-      send({ type: "standing-orders", orders, ...roomCommand() });
+      // Full set, last write wins; no expected version, so a concurrent
+      // commit cannot reject it and leave the old orders in force.
+      send({ type: "standing-orders", orders });
     },
     sendTokenSkip: (kind, enabled) => {
       send({ type: kind === "runechant" ? "runechant-skip" : "seismic-surge-skip", enabled, ...roomCommand() });
