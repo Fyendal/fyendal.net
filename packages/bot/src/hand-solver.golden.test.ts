@@ -1,6 +1,7 @@
 import { cardData, decklists, findPrinting, precon, scripts } from "@fyendal/cards";
 import { createGame, projectStateFor, type GameState } from "@fyendal/engine";
 import { describe, expect, it } from "vitest";
+import { boltynSolverRules } from "./boltyn-rules.js";
 import { briarSolverRules } from "./briar-rules.js";
 import { buildHandSolver, modelContext, type HeroSolverRules } from "./card-model.js";
 import { cindraSolverRules } from "./cindra-rules.js";
@@ -8,6 +9,7 @@ import { decklistsFromState } from "./deck-knowledge.js";
 import { kayoSolverRules } from "./kayo-rules.js";
 import type { BotPolicyInput } from "./policy.js";
 import {
+  boltynPresentationFor,
   bravoPresentationFor,
   briarPresentationFor,
   cindraPresentationFor,
@@ -145,6 +147,30 @@ describe("hand solver on real hands", () => {
     const result = solve(input, { name: "bravo" });
     expect(result.damage).toBe(8);
     expect(names(input, result.line[0]!.pitchIds).sort()).toEqual(["Boulder Drop", "Crash and Bash"]);
+  });
+
+  it("Boltyn: a charge turns on Raydn and Lumina's second swing, with the hero ability chaining them", () => {
+    const input = scenario({
+      deckId: "bot-boltyn-raydn",
+      presentation: boltynPresentationFor(opponent),
+      hand: [["Beaming Bravado", 1], ["Lumina Ascension", 2], ["Engulfing Light", 1], ["Bolt of Courage", 2]],
+      opponentTurn: true,
+    });
+    input.state!.players[0]!.soul = [
+      { instanceId: input.state!.nextInstanceId++, cardId: "ASB007", owner: 0 },
+      { instanceId: input.state!.nextInstanceId++, cardId: "ASB007", owner: 0 },
+    ];
+    input.view = projectStateFor(input.state!, 0);
+    const result = solve(input, boltynSolverRules(input));
+    const played = names(input, result.line.map((step) => step.instanceId));
+    // Beaming charges the yellow Bolt for +1, so the hero ability can give it
+    // go again; Lumina follows and the charged Raydn swings twice at 4.
+    expect(played.filter((name) => name === "Raydn, Duskbane")).toHaveLength(2);
+    expect(played).toContain("Lumina Ascension");
+    expect(played).not.toContain("Bolt of Courage");
+    expect(played.indexOf("Lumina Ascension")).toBeLessThan(played.indexOf("Raydn, Duskbane"));
+    expect(result.line.find((step) => names(input, [step.instanceId])[0] === "Beaming Bravado")?.damage).toBe(4);
+    expect(result.damage).toBeGreaterThanOrEqual(12);
   });
 
   it("values a leftover go-again attack as arsenal at its full attack value", () => {
