@@ -219,12 +219,13 @@
   }
   .status-float .ap-pip {
     display: flex;
-    min-width: 72px;
+    min-width: 60px;
     align-items: center;
     justify-content: center;
     padding: 3px 10px;
     border-block: 0;
     border-inline: 1px solid #b8933f38;
+    border-right: 0;
     border-radius: 0;
     background: transparent;
     line-height: 1;
@@ -245,6 +246,33 @@
   .status-float .ap-count strong {
     color: #ffd479;
     font-size: 19px;
+  }
+  /* resources join AP as one cost cluster; the board pitch pip is often covered here */
+  .status-float .hud-resources {
+    order: 2;
+    display: flex;
+    align-items: center;
+    padding: 3px 10px 3px 2px;
+    border-right: 1px solid #b8933f38;
+  }
+  .status-float .hud-resources-gem {
+    display: flex;
+    width: 28px;
+    height: 28px;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: url("/icons/resource.png") center / cover no-repeat;
+    box-shadow: 0 2px 7px #000a;
+    color: #fff;
+    font-size: 15px;
+    font-weight: 800;
+    line-height: 1;
+    text-shadow: 0 1px 3px #000, 0 0 6px #000;
+  }
+  .status-float .hud-resources-empty .hud-resources-gem {
+    filter: grayscale(.85) brightness(.6);
+    color: #cbbd9d;
   }
   .mobile-primary-action .btn-pass { min-height: 48px; padding-block: 8px; font-size: 14px; }
 
@@ -367,7 +395,8 @@
   .status-float .life-hero { width: 28px; height: 28px; flex-basis: 28px; }
   .status-float .life-me .life-hero { margin-right: 4px; }
   .status-float .life-opp .life-hero { margin-left: 4px; }
-  .status-float .ap-pip { min-width: 64px; padding-inline: 7px; }
+  .status-float .ap-pip { min-width: 52px; padding-inline: 7px 2px; }
+  .status-float .hud-resources { padding-right: 7px; }
   .mobile-primary-action .btn-pass { padding-inline: 4px; }
 }
 

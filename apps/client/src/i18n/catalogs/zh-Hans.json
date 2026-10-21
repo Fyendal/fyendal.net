@@ -2308,6 +2308,7 @@
   "game.action.pass.short": "让过",
   "game.actionPoints.hero": "{hero} 剩余的行动点",
   "game.actionPoints.remaining": "剩余 {count} 个行动点",
+  "game.resources.yours": "你有 {count} 点资源",
   "game.waiting.spectating": "观战中 — 等待 {hero} 行动",
   "game.waiting.opponent": "正在等待对手…",
   "game.result.namedWinner": "{winner} 获胜！",

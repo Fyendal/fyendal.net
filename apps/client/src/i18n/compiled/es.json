@@ -29894,6 +29894,46 @@
       "value": "username"
     }
   ],
+  "game.resources.yours": [
+    {
+      "type": 6,
+      "value": "count",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 0,
+              "value": "Tienes "
+            },
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " recurso"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 0,
+              "value": "Tienes "
+            },
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " recursos"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    }
+  ],
   "game.result.defeat": [
     {
       "type": 0,

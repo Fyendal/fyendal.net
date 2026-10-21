@@ -255,7 +255,9 @@ export function PrimaryActionButton({
 
 /** Fixed responsive game HUD: life + remaining AP + the current primary action.
  *  Pass-only decisions, defend confirmation, and the arsenal skip action use
- *  this button instead of adding another floating control surface. */
+ *  this button instead of adding another floating control surface. The
+ *  viewer's floating resources sit beside AP only in the portrait HUD, where
+ *  decision and stack floats routinely cover the pitch zone. */
 export function StatusFloat({
   dockRect: _dockRect,
   hostRef,
@@ -270,6 +272,7 @@ export function StatusFloat({
   logEntries,
   activeHeroName,
   actionPoints,
+  myResources,
   primaryAction,
   passDisabled = false,
   onPass,
@@ -287,6 +290,7 @@ export function StatusFloat({
   logEntries?: readonly GameLogViewEntry[];
   activeHeroName: string;
   actionPoints: number;
+  myResources: number;
   primaryAction: PrimaryAction | null;
   passDisabled?: boolean;
   onPass: () => void;
@@ -316,6 +320,13 @@ export function StatusFloat({
           <span className="ap-abbr">AP</span>
           <strong>{actionPoints}</strong>
         </span>
+      </div>
+      <div
+        className={`hud-resources${myResources > 0 ? "" : " hud-resources-empty"}`}
+        role="img"
+        aria-label={intl.formatMessage({ id: "game.resources.yours" }, { count: myResources })}
+      >
+        <span className="hud-resources-gem" aria-hidden="true">{myResources}</span>
       </div>
       {primaryAction ? (
         <PrimaryActionButton

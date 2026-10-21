@@ -2308,6 +2308,7 @@
   "game.action.pass.short": "PASAR",
   "game.actionPoints.hero": "Puntos de acción restantes de {hero}",
   "game.actionPoints.remaining": "{count, plural, one {Queda # punto de acción} other {Quedan # puntos de acción}}",
+  "game.resources.yours": "{count, plural, one {Tienes # recurso} other {Tienes # recursos}}",
   "game.waiting.spectating": "Observando — turno de actuar de {hero}",
   "game.waiting.opponent": "Esperando al oponente…",
   "game.result.namedWinner": "¡{winner} gana!",

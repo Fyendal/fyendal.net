@@ -28267,6 +28267,20 @@
       "value": "username"
     }
   ],
+  "game.resources.yours": [
+    {
+      "type": 0,
+      "value": "你有 "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " 点资源"
+    }
+  ],
   "game.result.defeat": [
     {
       "type": 0,

@@ -30314,6 +30314,61 @@
       "value": "username"
     }
   ],
+  "game.resources.yours": [
+    {
+      "type": 6,
+      "value": "count",
+      "options": {
+        "=0": {
+          "value": [
+            {
+              "type": 0,
+              "value": "Você tem "
+            },
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " recursos"
+            }
+          ]
+        },
+        "one": {
+          "value": [
+            {
+              "type": 0,
+              "value": "Você tem "
+            },
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " recurso"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 0,
+              "value": "Você tem "
+            },
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " recursos"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    }
+  ],
   "game.result.defeat": [
     {
       "type": 0,

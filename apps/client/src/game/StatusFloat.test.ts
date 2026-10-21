@@ -125,6 +125,7 @@ describe("status action", () => {
       log: [],
       activeHeroName: "Briar",
       actionPoints: 0,
+      myResources: 0,
       primaryAction: "confirm-blocks",
       onPass: vi.fn(),
     });
@@ -158,6 +159,7 @@ describe("status action", () => {
       log: [],
       activeHeroName: "Briar",
       actionPoints: 1,
+      myResources: 0,
       primaryAction,
       onPass: vi.fn(),
     });
@@ -178,6 +180,7 @@ describe("status action", () => {
       log: [],
       activeHeroName: "Briar",
       actionPoints: 1,
+      myResources: 0,
       primaryAction: "end-turn",
       passDisabled: true,
       onPass: vi.fn(),
@@ -187,7 +190,7 @@ describe("status action", () => {
     expect(html).toContain("End turn (Space)");
   });
 
-  it("shows action points without duplicating the board's turn status", () => {
+  it("shows action points and the viewer's resources without duplicating the board's turn status", () => {
     const html = renderStatus({
       dockRect: null,
       oppHeroCardId: "MON001",
@@ -199,11 +202,14 @@ describe("status action", () => {
       log: [],
       activeHeroName: "Briar",
       actionPoints: 2,
+      myResources: 3,
       primaryAction: null,
       onPass: vi.fn(),
     });
 
     expect(html).toContain("2 action points remaining");
+    expect(html).toContain("You have 3 resources");
+    expect(html).not.toContain("hud-resources-empty");
     expect(html).not.toContain("TURN");
   });
 
@@ -219,6 +225,7 @@ describe("status action", () => {
       log: [],
       activeHeroName: "Briar",
       actionPoints: 1,
+      myResources: 0,
       primaryAction: "end-turn",
       onPass: vi.fn(),
     }, "zh-Hans");
@@ -226,5 +233,7 @@ describe("status action", () => {
     expect(html).toContain("对局状态与主要操作");
     expect(html).toContain("结束回合");
     expect(html).toContain("剩余 1 个行动点");
+    expect(html).toContain("你有 0 点资源");
+    expect(html).toContain("hud-resources-empty");
   });
 });
