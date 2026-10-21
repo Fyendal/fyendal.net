@@ -173,6 +173,26 @@
   height: 100%;
 }
 
+/* Hand → compact zone: the full card shrinks and its frame closes in on the
+   art window while the compact card resolves underneath it. */
+.game-motion-visual-morph .game-motion-card-side {
+  animation: game-motion-morph-in var(--motion-duration) ease-out var(--motion-delay) both;
+}
+
+.game-motion-image.game-motion-morph-full {
+  z-index: 1;
+  inset: auto;
+  left: calc(50% - var(--motion-from-width) / 2);
+  top: calc(50% - var(--motion-from-height) / 2);
+  width: var(--motion-from-width);
+  height: var(--motion-from-height);
+  border-radius: 6px;
+  box-shadow: 0 9px 25px #000c;
+  transform-origin: center;
+  will-change: transform, clip-path, opacity;
+  animation: game-motion-morph-out var(--motion-duration) cubic-bezier(.3, 0, .15, 1) var(--motion-delay) both;
+}
+
 .game-motion-image {
   position: absolute;
   inset: 0;
@@ -336,6 +356,29 @@
   }
 }
 
+@keyframes game-motion-morph-out {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+    clip-path: inset(0 round 6px);
+  }
+  22% {
+    opacity: 1;
+    transform: scale(var(--motion-morph-scale));
+    clip-path: inset(var(--motion-morph-crop) 0 round 5px);
+  }
+  34%, 100% {
+    opacity: 0;
+    transform: scale(var(--motion-morph-scale));
+    clip-path: inset(var(--motion-morph-crop) 0 round 5px);
+  }
+}
+
+@keyframes game-motion-morph-in {
+  0%, 6% { opacity: 0; transform: scale(1.08); }
+  30%, 100% { opacity: 1; transform: scale(1); }
+}
+
 @keyframes game-motion-settle-face {
   from { opacity: 1; transform: scale(.97); }
   to { opacity: 1; transform: scale(1); }
@@ -396,6 +439,14 @@
     filter: blur(3px);
     transform: rotate(var(--motion-angle)) scaleX(1);
   }
+}
+
+.game-motion-layer-reduced .game-motion-morph-full {
+  display: none;
+}
+
+.game-motion-layer-reduced .game-motion-visual-morph .game-motion-card-side {
+  animation: none;
 }
 
 .game-motion-layer-reduced .game-motion-flight-disappear {

@@ -1,4 +1,4 @@
-import { useEffect, useRef, type AnimationEvent, type CSSProperties } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type AnimationEvent, type CSSProperties, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { CARD_BACK_IMAGE_URL, CardBack, CardFace, cardImageUrl } from "../Card.js";
 import {
@@ -39,6 +39,42 @@ export function squareMotionFlight(flight: MotionFlight, squareCardsEnabled: boo
     && flight.end.width / flight.end.height >= .9;
 }
 
+/** A card charged into the soul is tucked beneath its hero card. */
+export function motionFlightSoulSeat(flight: MotionFlight): number | null {
+  const match = /^(\d+):soul:/.exec(flight.destinationPresentationKey ?? "");
+  return match ? Number(match[1]) : null;
+}
+
+/** Clip everything but a hole over the hero so charged cards slide under it. */
+export function heroHoleClipPath(hero: MotionRect): string {
+  const { left, top, width, height } = hero;
+  const right = left + width;
+  const bottom = top + height;
+  return `polygon(evenodd, 0 0, 100% 0, 100% 100%, 0 100%, 0 0, ${left}px ${top}px, ${right}px ${top}px, ${right}px ${bottom}px, ${left}px ${bottom}px, ${left}px ${top}px)`;
+}
+
+function MotionUnderHeroLayer({ seat, reducedMotion, children }: {
+  seat: number;
+  reducedMotion: boolean;
+  children: ReactNode;
+}) {
+  const [clipPath, setClipPath] = useState<string | undefined>(undefined);
+  useLayoutEffect(() => {
+    const hero = document.querySelector<HTMLElement>(`[data-motion-card^="${seat}:hero:"]`);
+    const rect = hero?.getBoundingClientRect();
+    setClipPath(rect && rect.width > 0 ? heroHoleClipPath(rect) : undefined);
+  }, [seat]);
+  return (
+    <div
+      className={`game-motion-layer${reducedMotion ? " game-motion-layer-reduced" : ""}`}
+      style={{ clipPath }}
+      aria-hidden="true"
+    >
+      {children}
+    </div>
+  );
+}
+
 /** Stack departures must clear their source float as well as their destination. */
 export function motionFlightLayer(flight: MotionFlight): "stack" | "chain" | undefined {
   return flight.sourceMaskPresentationKey ? "stack" : flight.destinationLayer;
@@ -51,18 +87,59 @@ export function motionFlightHandsOff(flight: MotionFlight, destinationVisible: b
     || (flight.destinationPresentationKey === undefined && flight.mode !== "reflow");
 }
 
+/** A face-up card leaving a full-size slot for a compact zone. The flight box
+ * already has the compact shape, so the full card is drawn inside it at its
+ * source size and cropped down to the compact window while it travels. */
+export interface MotionMorph {
+  fromWidth: number;
+  fromHeight: number;
+  scale: number;
+  crop: number;
+}
+
+export function motionFlightMorph(flight: MotionFlight, squareCardsEnabled: boolean): MotionMorph | null {
+  if (flight.visual.kind !== "face" || !squareMotionFlight(flight, squareCardsEnabled)) return null;
+  const { start, end } = flight;
+  if (start.width / start.height >= .9) return null;
+  const scale = end.width / start.width;
+  return {
+    fromWidth: start.width,
+    fromHeight: start.height,
+    scale,
+    crop: Math.max(0, (start.height - end.height / scale) / 2),
+  };
+}
+
+function morphStyle(morph: MotionMorph): MotionStyle {
+  return {
+    "--motion-from-width": `${morph.fromWidth}px`,
+    "--motion-from-height": `${morph.fromHeight}px`,
+    "--motion-morph-scale": String(morph.scale),
+    "--motion-morph-crop": `${morph.crop}px`,
+  };
+}
+
 export function MotionCardVisual({
   visual,
   count,
   square = false,
+  morph = null,
 }: {
   visual: MotionVisual;
   count: number;
   square?: boolean;
+  morph?: MotionMorph | null;
 }) {
   const faceUrl = visualFaceUrl(visual);
+  const morphing = square && morph !== null && faceUrl !== null;
   return (
-    <div className={`game-motion-visual game-motion-visual-${visual.kind}${square ? " game-motion-visual-square" : ""}`}>
+    <div
+      className={`game-motion-visual game-motion-visual-${visual.kind}${square ? " game-motion-visual-square" : ""}${morphing ? " game-motion-visual-morph" : ""}`}
+      style={morphing ? morphStyle(morph) : undefined}
+    >
+      {morphing ? (
+        <img className="game-motion-image game-motion-morph-full" src={faceUrl} alt="" />
+      ) : null}
       {visual.kind !== "face" ? (
         square ? (
           <span className="game-motion-card-side game-motion-back">
@@ -189,6 +266,7 @@ function MotionFlightOverlay({
         visual={flight.visual}
         count={flight.showCount ? flight.count : 1}
         square={squareMotionFlight(flight, squareCardsEnabled)}
+        morph={motionFlightMorph(flight, squareCardsEnabled)}
       />
     </div>
   );
@@ -277,9 +355,12 @@ export function GameMotionLayer({
   const boardFlights: MotionFlight[] = [];
   const chainFlights: MotionFlight[] = [];
   const stackFlights: MotionFlight[] = [];
+  const soulFlights = new Map<number, MotionFlight[]>();
   for (const flight of batch.flights) {
     const layer = motionFlightLayer(flight);
-    if (layer === "chain") chainFlights.push(flight);
+    const soulSeat = layer === undefined && flight.mode !== "appear" ? motionFlightSoulSeat(flight) : null;
+    if (soulSeat !== null) soulFlights.set(soulSeat, [...(soulFlights.get(soulSeat) ?? []), flight]);
+    else if (layer === "chain") chainFlights.push(flight);
     else if (layer === "stack") stackFlights.push(flight);
     else if (flight.mode === "appear") appearanceFlights.push(flight);
     else boardFlights.push(flight);
@@ -345,6 +426,21 @@ export function GameMotionLayer({
           <MotionDeckCover flight={flight} squareCardsEnabled={squareCardsEnabled} key={`${flight.id}:deck-cover`} />
         ))}
       </div>
+      {[...soulFlights].map(([seat, flights]) => (
+        <MotionUnderHeroLayer seat={seat} reducedMotion={batch.reducedMotion === true} key={`soul:${seat}`}>
+          {flights.map((flight) => (
+            <MotionFlightOverlay
+              batchId={batch.id}
+              flight={flight}
+              squareCardsEnabled={squareCardsEnabled}
+              key={flight.id}
+              onFlightArrive={onFlightArrive}
+              onFlightDepart={onFlightDepart}
+              onCueComplete={completeCue}
+            />
+          ))}
+        </MotionUnderHeroLayer>
+      ))}
       {chainFlights.length > 0 ? (
         <div
           className="game-motion-layer game-motion-layer-chain"

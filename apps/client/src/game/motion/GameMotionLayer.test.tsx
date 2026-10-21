@@ -1,7 +1,16 @@
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
-import { MotionCardVisual, motionFlightHandsOff, motionFlightLayer, motionFlightStartRect, squareMotionFlight } from "./GameMotionLayer.js";
+import {
+  heroHoleClipPath,
+  MotionCardVisual,
+  motionFlightHandsOff,
+  motionFlightLayer,
+  motionFlightMorph,
+  motionFlightSoulSeat,
+  motionFlightStartRect,
+  squareMotionFlight,
+} from "./GameMotionLayer.js";
 import { measureMotionAnchors, resolveMotionBatch, type MotionFlight } from "./motionGeometry.js";
 
 const card = { instanceId: 12, cardId: "WTR160", owner: 0 };
@@ -117,5 +126,34 @@ describe("motion card presentation", () => {
       height: 195,
     });
     expect(motionFlightStartRect(flight, false)).toEqual(flight.start);
+  });
+
+  it("morphs a hand card down to a compact zone instead of swapping shapes", () => {
+    const flight = {
+      visual: { kind: "face", card },
+      start: { left: 100, top: 500, width: 140, height: 196 },
+      end: { left: 400, top: 200, width: 120, height: 106 },
+    } as MotionFlight;
+    const morph = motionFlightMorph(flight, true);
+
+    expect(morph).not.toBeNull();
+    expect(morph!.scale).toBeCloseTo(120 / 140);
+    expect(morph!.crop).toBeCloseTo((196 - 106 / (120 / 140)) / 2);
+    const html = renderToStaticMarkup(createElement(MotionCardVisual, {
+      visual: flight.visual, count: 1, square: true, morph,
+    }));
+    expect(html).toContain("game-motion-morph-full");
+    expect(motionFlightMorph(flight, false)).toBeNull();
+    expect(motionFlightMorph({ ...flight, visual: { kind: "back" } } as MotionFlight, true)).toBeNull();
+    expect(motionFlightMorph({
+      ...flight, start: { ...flight.start, width: 120, height: 106 },
+    }, true)).toBeNull();
+  });
+
+  it("sends charged cards beneath their own hero", () => {
+    const flight = { destinationPresentationKey: "1:soul:42" } as MotionFlight;
+    expect(motionFlightSoulSeat(flight)).toBe(1);
+    expect(motionFlightSoulSeat({ destinationPresentationKey: "1:graveyard:42" } as MotionFlight)).toBeNull();
+    expect(heroHoleClipPath({ left: 10, top: 20, width: 100, height: 50 })).toContain("polygon(evenodd");
   });
 });
