@@ -1374,6 +1374,8 @@ export function GameBoard() {
         myHeroName={me.heroName}
         oppHeroCardId={opp.heroCardId}
         myHeroCardId={me.heroCardId}
+        oppMarked={(opp.heroCounters?.marked ?? 0) > 0}
+        myMarked={(me.heroCounters?.marked ?? 0) > 0}
         mySeat={seat}
         log={view.log}
         logEntries={view.logEntries}

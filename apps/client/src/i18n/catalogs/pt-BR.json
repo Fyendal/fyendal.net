@@ -2295,6 +2295,7 @@
   "game.deckToast.roll.rerolled": "O dado é rolado novamente",
   "game.deckToast.roll.result": "Resultado: {result}",
   "game.life.total": "Vida ({owner}): {life}",
+  "game.life.totalMarked": "Vida ({owner}): {life}, com mark",
   "game.life.damage": "Herói ({owner}) sofreu {amount} de dano. Restam {life} de vida.",
   "game.life.gain": "Herói ({owner}) ganhou {amount} de vida. Total de {life} de vida.",
   "game.hud.label": "Status do jogo e ação principal",

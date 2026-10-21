@@ -27851,6 +27851,24 @@
       "value": "life"
     }
   ],
+  "game.life.totalMarked": [
+    {
+      "type": 1,
+      "value": "owner"
+    },
+    {
+      "type": 0,
+      "value": "英雄生命："
+    },
+    {
+      "type": 1,
+      "value": "life"
+    },
+    {
+      "type": 0,
+      "value": "，被标记 (marked)"
+    }
+  ],
   "game.log.short": [
     {
       "type": 0,

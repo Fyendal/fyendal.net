@@ -2295,6 +2295,7 @@
   "game.deckToast.roll.rerolled": "重掷骰子",
   "game.deckToast.roll.result": "掷出 {result}",
   "game.life.total": "{owner}英雄生命：{life}",
+  "game.life.totalMarked": "{owner}英雄生命：{life}，被标记 (marked)",
   "game.life.damage": "{owner}英雄受到 {amount} 点伤害，剩余 {life} 点生命。",
   "game.life.gain": "{owner}英雄恢复 {amount} 点生命，当前共有 {life} 点生命。",
   "game.hud.label": "对局状态与主要操作",

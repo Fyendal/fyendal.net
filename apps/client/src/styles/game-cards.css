@@ -809,7 +809,8 @@
 /* Marked is a binary hero condition. Only the token's burning X is shown,
    screened over the hero art so its black ground drops out and the hero stays
    visible beneath the brand. It sits under the name banner and stats. Full
-   cards confine it to the printed art window, above the text box. */
+   cards confine it to the printed art window, above the text box. The ember
+   rim keeps the X visible on red art. */
 .c-marked-token {
   position: absolute;
   inset: 9.5% 5% 41.5%;
@@ -818,6 +819,9 @@
   overflow: hidden;
   mix-blend-mode: screen;
   pointer-events: none;
+  box-shadow:
+    inset 0 0 0 2px #ff7a33cc,
+    inset 0 0 14px #d0260f;
 }
 /* Square arena cards show only art, so the brand and an ember rim frame it. */
 .card-board-square .c-marked-token {

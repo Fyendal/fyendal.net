@@ -29490,6 +29490,28 @@
       "value": "life"
     }
   ],
+  "game.life.totalMarked": [
+    {
+      "type": 0,
+      "value": "Vida ("
+    },
+    {
+      "type": 1,
+      "value": "owner"
+    },
+    {
+      "type": 0,
+      "value": "): "
+    },
+    {
+      "type": 1,
+      "value": "life"
+    },
+    {
+      "type": 0,
+      "value": ", héroe marcado"
+    }
+  ],
   "game.log.short": [
     {
       "type": 0,

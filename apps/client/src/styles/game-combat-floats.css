@@ -227,7 +227,7 @@
     right: calc(var(--rail-w) + var(--compact-card-width) + 23px);
   }
 }
-/* viewer resources: portrait HUD only (mobile-portrait.css) */
+/* Portrait HUD only. */
 .hud-resources { display: none; }
 .ap-pip {
   font-size: 15px;

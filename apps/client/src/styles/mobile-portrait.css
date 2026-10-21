@@ -184,58 +184,98 @@
     right: 0 !important;
     top: env(safe-area-inset-top) !important;
     bottom: auto !important;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto minmax(0, 1fr);
+    align-items: center;
+    gap: 0;
     min-height: 52px;
     padding: 7px max(14px, env(safe-area-inset-right)) 7px max(14px, env(safe-area-inset-left));
-    border-inline: 0;
+    border: 0;
+    border-bottom: 1px solid #b8933f40;
     border-radius: 0;
-    background:
-      linear-gradient(90deg, #74b94610, transparent 36%, transparent 64%, #df5e5810),
-      #0d0805f8;
-    box-shadow: 0 5px 18px #0008, inset 0 -1px 0 #d2ae5433;
+    background: #0d0805;
+    box-shadow: none;
     z-index: 31;
   }
-  .status-float .life-me { order: 1; }
+  .status-float .life-me { order: 1; justify-self: start; }
   .status-float .ap-pip { order: 2; }
-  .status-float .life-opp { order: 3; }
+  .status-float .hud-resources { order: 3; }
+  .status-float .life-opp { order: 4; justify-self: end; }
   .status-float > .btn-pass { display: none; }
-  .status-float .life { font-size: 29px; }
+  .status-float .life {
+    gap: 10px;
+    font-size: 29px;
+  }
   .status-float .life-impact .ico { display: none; }
+  /* Sized on the frame so the marked ring insets the art. */
+  .status-float .life-hero-frame {
+    position: relative;
+    display: block;
+    flex: 0 0 auto;
+    width: 34px;
+    height: 34px;
+    overflow: hidden;
+    border: 1px solid #b8933f80;
+    border-radius: 50%;
+  }
   .status-float .life-hero {
     display: block;
-    flex: 0 0 32px;
-    width: 32px;
-    height: 32px;
-    border: 1px solid #b8933f99;
-    border-radius: 50%;
+    width: 100%;
+    height: 100%;
     object-fit: cover;
     object-position: center top;
-    box-shadow: 0 2px 7px #000a;
   }
-  .status-float .life-me .life-hero { margin-right: 6px; }
-  .status-float .life-opp .life-hero { margin-left: 6px; }
+  /* LifeHeroPortrait hides an image with no headshot or card art. */
+  .status-float .life-hero[hidden] { display: none; }
+  .status-float .life-hero-frame:not(.life-hero-marked):has(> .life-hero[hidden]) { display: none; }
+  /* Marked mirrors the board hero card, inside the circle. */
+  .status-float .life-hero-marked {
+    border: 2px solid #ff6a2a;
+  }
+  .status-float .life-hero-marked .life-hero {
+    filter: brightness(.6) saturate(.7);
+  }
+  .status-float .life-hero-brand {
+    position: absolute;
+    inset: 0;
+    display: block;
+    overflow: hidden;
+    mix-blend-mode: screen;
+    pointer-events: none;
+    animation: c-marked-ignite 520ms cubic-bezier(.2, .8, .3, 1) both;
+  }
+  /* Same crop of the token's X as .c-marked-brand img. */
+  .status-float .life-hero-brand img {
+    position: absolute;
+    top: -45.55%;
+    left: -21.1%;
+    width: 133.33%;
+    filter: brightness(1.15) contrast(1.6) saturate(1.25);
+  }
+  .table[data-motion-preference="reduced"] .status-float .life-hero-brand { animation: none; }
+  @media (prefers-reduced-motion: reduce) {
+    .table:not([data-motion-preference="full"]) .status-float .life-hero-brand { animation: none; }
+  }
   .status-float .life-change-pop {
     top: calc(100% + 5px);
     bottom: auto;
   }
-  .status-float .ap-pip {
+  .status-float .ap-pip,
+  .status-float .hud-resources {
     display: flex;
-    min-width: 60px;
     align-items: center;
-    justify-content: center;
-    padding: 3px 10px;
-    border-block: 0;
-    border-inline: 1px solid #b8933f38;
-    border-right: 0;
+    gap: 6px;
+    padding: 2px 12px;
+    border: 0;
     border-radius: 0;
     background: transparent;
     line-height: 1;
   }
+  .status-float .hud-resources { border-left: 1px solid #b8933f40; }
   .status-float .ap-count {
     display: inline-flex;
     align-items: baseline;
-    gap: 5px;
-    color: #f2e8d2;
-    font-weight: 700;
+    gap: 6px;
   }
   .status-float .ap-abbr {
     color: #cbbd9d;
@@ -243,37 +283,26 @@
     font-size: 12px;
     letter-spacing: .08em;
   }
-  .status-float .ap-count strong {
-    color: #ffd479;
+  .status-float .ap-count strong,
+  .status-float .hud-resources-count {
     font-size: 19px;
+    font-weight: 700;
   }
-  /* resources join AP as one cost cluster; the board pitch pip is often covered here */
-  .status-float .hud-resources {
-    order: 2;
-    display: flex;
+  .status-float .ap-count strong { color: #ffd479; }
+  .status-float .hud-resources-count {
+    display: inline-flex;
     align-items: center;
-    padding: 3px 10px 3px 2px;
-    border-right: 1px solid #b8933f38;
+    gap: 6px;
+    color: #ff8a5c;
   }
-  .status-float .hud-resources-gem {
-    display: flex;
-    width: 28px;
-    height: 28px;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
+  .status-float .hud-resources-count::before {
+    content: "";
+    width: 16px;
+    height: 16px;
     background: url("/icons/resource.png") center / cover no-repeat;
-    box-shadow: 0 2px 7px #000a;
-    color: #fff;
-    font-size: 15px;
-    font-weight: 800;
-    line-height: 1;
-    text-shadow: 0 1px 3px #000, 0 0 6px #000;
   }
-  .status-float .hud-resources-empty .hud-resources-gem {
-    filter: grayscale(.85) brightness(.6);
-    color: #cbbd9d;
-  }
+  .status-float .hud-resources-empty .hud-resources-count { color: #8a7b66; }
+  .status-float .hud-resources-empty .hud-resources-count::before { filter: grayscale(1) brightness(.6); }
   .mobile-primary-action .btn-pass { min-height: 48px; padding-block: 8px; font-size: 14px; }
 
   .decision-float,
@@ -391,12 +420,10 @@
 @media (max-width: 380px) {
   .mobile-gamebar-actions { gap: 4px; }
   .mobile-gamebar-actions button { min-width: 0; padding-inline: 5px; }
-  .status-float .life { font-size: 24px; }
-  .status-float .life-hero { width: 28px; height: 28px; flex-basis: 28px; }
-  .status-float .life-me .life-hero { margin-right: 4px; }
-  .status-float .life-opp .life-hero { margin-left: 4px; }
-  .status-float .ap-pip { min-width: 52px; padding-inline: 7px 2px; }
-  .status-float .hud-resources { padding-right: 7px; }
+  .status-float .life { gap: 8px; font-size: 24px; }
+  .status-float .life-hero-frame { width: 30px; height: 30px; }
+  .status-float .ap-pip,
+  .status-float .hud-resources { padding-inline: 8px; }
   .mobile-primary-action .btn-pass { padding-inline: 4px; }
 }
 

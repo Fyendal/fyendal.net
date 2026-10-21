@@ -213,6 +213,30 @@ describe("status action", () => {
     expect(html).not.toContain("TURN");
   });
 
+  it("brands only the marked hero's portrait and names the mark for screen readers", () => {
+    const html = renderStatus({
+      dockRect: null,
+      oppHeroCardId: "MON001",
+      myHeroCardId: "WTR001",
+      oppLife: 18,
+      myLife: 20,
+      oppHeroName: "Rhinar",
+      myHeroName: "Briar",
+      oppMarked: true,
+      log: [],
+      activeHeroName: "Briar",
+      actionPoints: 1,
+      myResources: 0,
+      primaryAction: null,
+      onPass: vi.fn(),
+    });
+
+    expect(html.match(/life-hero-marked/g)).toHaveLength(1);
+    expect(html.match(/life-hero-brand/g)).toHaveLength(1);
+    expect(html).toContain("Opponent life: 18, marked");
+    expect(html).not.toContain("20, marked");
+  });
+
   it("renders the primary game HUD in Simplified Chinese", () => {
     const html = renderStatus({
       dockRect: null,

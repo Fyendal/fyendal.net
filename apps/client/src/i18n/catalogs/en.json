@@ -2295,6 +2295,7 @@
   "game.deckToast.roll.rerolled": "The die is rerolled",
   "game.deckToast.roll.result": "Rolled {result}",
   "game.life.total": "{owner} life: {life}",
+  "game.life.totalMarked": "{owner} life: {life}, marked",
   "game.life.damage": "{owner} hero took {amount} damage. {life} life remaining.",
   "game.life.gain": "{owner} hero gained {amount} life. {life} life total.",
   "game.hud.label": "Game status and primary action",

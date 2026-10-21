@@ -28544,6 +28544,24 @@
       "value": "life"
     }
   ],
+  "game.life.totalMarked": [
+    {
+      "type": 1,
+      "value": "owner"
+    },
+    {
+      "type": 0,
+      "value": " life: "
+    },
+    {
+      "type": 1,
+      "value": "life"
+    },
+    {
+      "type": 0,
+      "value": ", marked"
+    }
+  ],
   "game.log.short": [
     {
       "type": 0,

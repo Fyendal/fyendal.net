@@ -114,6 +114,8 @@
   font-variant-numeric: tabular-nums;
 }
 .life-hero { display: none; }
+.life-hero-frame { display: contents; }
+.life-hero-brand { display: none; }
 .life-me { color: #91c84a; }
 .life-opp { color: #e4675b; }
 .life-opp .ico { filter: hue-rotate(275deg) saturate(1.75) brightness(.95); }

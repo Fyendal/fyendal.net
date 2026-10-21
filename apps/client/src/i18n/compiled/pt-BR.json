@@ -29906,6 +29906,28 @@
       "value": "life"
     }
   ],
+  "game.life.totalMarked": [
+    {
+      "type": 0,
+      "value": "Vida ("
+    },
+    {
+      "type": 1,
+      "value": "owner"
+    },
+    {
+      "type": 0,
+      "value": "): "
+    },
+    {
+      "type": 1,
+      "value": "life"
+    },
+    {
+      "type": 0,
+      "value": ", com mark"
+    }
+  ],
   "game.log.short": [
     {
       "type": 0,

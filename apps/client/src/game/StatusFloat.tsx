@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState, type CSSProperties, type Ref } from "react";
 import { useIntl } from "react-intl";
 import type { GameLogViewEntry } from "@fyendal/shared";
+import { cardImageUrl } from "./Card.js";
+import { MARKED_TOKEN_ID } from "./cardBadges.js";
 import { LifeHeroPortrait } from "./LifeHeroPortrait.js";
 
 export type PrimaryAction = "end-turn" | "confirm-blocks" | "confirm-no-blocks" | "pass";
@@ -113,6 +115,7 @@ function LifeStatus({
   seat,
   heroName,
   heroCardId,
+  marked,
   log,
   logEntries,
 }: {
@@ -121,6 +124,7 @@ function LifeStatus({
   seat: number;
   heroName: string;
   heroCardId: string;
+  marked: boolean;
   log: readonly string[];
   logEntries?: readonly GameLogViewEntry[];
 }) {
@@ -173,12 +177,22 @@ function LifeStatus({
     ? displayedPackets.find((packet) => packet.animation !== "default")?.animation ?? "damage"
     : activeChange?.kind;
   const heroPortrait = (
-    <LifeHeroPortrait heroName={heroName} heroCardId={heroCardId} />
+    <span className={`life-hero-frame${marked ? " life-hero-marked" : ""}`}>
+      <LifeHeroPortrait heroName={heroName} heroCardId={heroCardId} />
+      {marked ? (
+        <span className="life-hero-brand" aria-hidden="true">
+          <img src={cardImageUrl(MARKED_TOKEN_ID)} alt="" draggable={false} />
+        </span>
+      ) : null}
+    </span>
   );
   return (
     <div
       className={`life life-${side}`}
-      aria-label={intl.formatMessage({ id: "game.life.total" }, { owner, life })}
+      aria-label={intl.formatMessage(
+        { id: marked ? "game.life.totalMarked" : "game.life.total" },
+        { owner, life },
+      )}
     >
       {side === "me" ? heroPortrait : null}
       <span
@@ -256,8 +270,7 @@ export function PrimaryActionButton({
 /** Fixed responsive game HUD: life + remaining AP + the current primary action.
  *  Pass-only decisions, defend confirmation, and the arsenal skip action use
  *  this button instead of adding another floating control surface. The
- *  viewer's floating resources sit beside AP only in the portrait HUD, where
- *  decision and stack floats routinely cover the pitch zone. */
+ *  portrait HUD also shows the viewer's resources, since floats cover pitch. */
 export function StatusFloat({
   dockRect: _dockRect,
   hostRef,
@@ -267,6 +280,8 @@ export function StatusFloat({
   myHeroName,
   oppHeroCardId,
   myHeroCardId,
+  oppMarked = false,
+  myMarked = false,
   mySeat = 0,
   log,
   logEntries,
@@ -285,6 +300,8 @@ export function StatusFloat({
   myHeroName: string;
   oppHeroCardId: string;
   myHeroCardId: string;
+  oppMarked?: boolean;
+  myMarked?: boolean;
   mySeat?: 0 | 1;
   log: readonly string[];
   logEntries?: readonly GameLogViewEntry[];
@@ -308,6 +325,7 @@ export function StatusFloat({
         seat={mySeat === 0 ? 1 : 0}
         heroName={oppHeroName}
         heroCardId={oppHeroCardId}
+        marked={oppMarked}
         log={log}
         logEntries={logEntries}
       />
@@ -326,7 +344,7 @@ export function StatusFloat({
         role="img"
         aria-label={intl.formatMessage({ id: "game.resources.yours" }, { count: myResources })}
       >
-        <span className="hud-resources-gem" aria-hidden="true">{myResources}</span>
+        <span className="hud-resources-count" aria-hidden="true">{myResources}</span>
       </div>
       {primaryAction ? (
         <PrimaryActionButton
@@ -341,6 +359,7 @@ export function StatusFloat({
         seat={mySeat}
         heroName={myHeroName}
         heroCardId={myHeroCardId}
+        marked={myMarked}
         log={log}
         logEntries={logEntries}
       />
