@@ -1084,7 +1084,7 @@ function projectState(
         : attackHasDominate(state, runtime, link),
       overpower: link.resolved
         ? link.flags.overpowerAtResolution === true
-        : attackHasOverpower(state, link),
+        : attackHasOverpower(state, runtime, link),
       ...(attackHasVeil(state, link) ? { veil: true } : {}),
       ...(maxNonBlockDefenders !== undefined
         ? { maxNonBlockDefenders }

@@ -57,7 +57,6 @@ describe("SGB — High Tide", () => {
       ],
     });
     g.play("swiftwater sloop|1", { pitch: ["titanium bauble|3"] })
-      .expectLog("gains go again (High Tide)")
       .blockWith()
       .settle()
       .expectAP(0, 1);
@@ -73,6 +72,20 @@ describe("SGB — High Tide", () => {
       .blockWith()
       .settle()
       .expectAP(0, 0);
+  });
+
+  it("Swiftwater Sloop gets go again when a reaction pitches the second blue", () => {
+    const g = scenario({
+      seats: [
+        { ...GRAVY, hand: ["swiftwater sloop|1", "titanium bauble|3", "pummel|1", "titanium bauble|3"] },
+        { hero: "dorinthea", hand: [] },
+      ],
+    });
+    g.play("swiftwater sloop|1", { pitch: ["titanium bauble|3"] })
+      .blockWith()
+      .react("pummel|1", { pitch: ["titanium bauble|3"] })
+      .expectLog("Swiftwater Sloop has Go again")
+      .expectAP(0, 1);
   });
 });
 

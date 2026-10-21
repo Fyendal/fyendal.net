@@ -148,11 +148,17 @@ export function attackHasDominate(
 /** Overpower (CR 8.3.22): at most one action card may defend the attack. */
 export function attackHasOverpower(
   state: GameStateInternal,
+  runtime: EngineRuntime,
   link: ChainLinkState,
 ): boolean {
   if (link.flags.attackAbilitiesSuppressed === true) return false;
   if (instanceHasKeyword(state, link.attackingCard, "overpower")) return true;
   if (link.flags.overpower === true) return true;
+  if (
+    scriptOf(state, link.attackingCard.cardId, link.attackingCard)?.hasConditionalOverpower?.(
+      runtime.makeCtx(state, link.attacker, link.attackingCard, link),
+    ) === true
+  ) return true;
   return activeModifiers(state, link, ["chain-link", "until-end-of-turn"])
     .some((modifier) =>
       modifier.overpower || (

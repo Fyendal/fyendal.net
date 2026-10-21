@@ -391,26 +391,12 @@ export const sgb: Record<string, CardScript> = {
     modifyAttack: (ctx) => (highTide(ctx) ? 2 : 0),
   },
 
-  // Swiftwater Sloop — High Tide: go again (checked at declaration)
+  // Swiftwater Sloop — High Tide: go again
   "swiftwater sloop|1": {
-    onAttackDeclared(ctx) {
-      if (highTide(ctx)) {
-        ctx.grantGoAgain();
-        ctx.logPublic(
-          localizedCardLog(ctx, `${ctx.data.name} gains go again (High Tide)`, "card.log.sgb.hightide.goagain"),
-        );
-      }
-    },
+    hasConditionalGoAgain: highTide,
   },
   "swiftwater sloop|3": {
-    onAttackDeclared(ctx) {
-      if (highTide(ctx)) {
-        ctx.grantGoAgain();
-        ctx.logPublic(
-          localizedCardLog(ctx, `${ctx.data.name} gains go again (High Tide)`, "card.log.sgb.hightide.goagain"),
-        );
-      }
-    },
+    hasConditionalGoAgain: highTide,
   },
 
   // Golden Tipple — when this attacks: may discard a yellow → draw + Gold

@@ -430,10 +430,9 @@ export function noteCardPlayed(
   if (
     isAction &&
     (d.subtypes ?? []).includes("attack") &&
-    (player.flags.nextActionGoAgain === true || player.flags.nextActionCardGoAgain === true)
+    player.flags.nextActionGoAgain === true
   ) {
     player.flags.nextActionGoAgain = false;
-    player.flags.nextActionCardGoAgain = false;
     (card.grantedKeywords ??= []).push("go again");
   }
   if (nonAttackAction) {
@@ -620,11 +619,9 @@ export function cardLayerGoAgain(
   if ((!isAction && !isInstant) || (isAction && (data.subtypes ?? []).includes("attack"))) return false;
   const nonAttackAction = isAction && !(data.subtypes ?? []).includes("attack");
   const flagGoAgain = isAction && player.flags.nextActionGoAgain === true;
-  const nextActionCardGoAgain = isAction && player.flags.nextActionCardGoAgain === true;
   const nextNonAttackActionCardGoAgain = nonAttackAction &&
     player.flags.nextNonAttackActionCardGoAgain === true;
   if (flagGoAgain) player.flags.nextActionGoAgain = false;
-  if (nextActionCardGoAgain) player.flags.nextActionCardGoAgain = false;
   if (nextNonAttackActionCardGoAgain) player.flags.nextNonAttackActionCardGoAgain = false;
   if (isAction && goAgainSuppressed(state, player.seat)) return false;
   if (isAction && state.players.some((candidate) =>
@@ -641,7 +638,6 @@ export function cardLayerGoAgain(
   );
   return (
     flagGoAgain ||
-    nextActionCardGoAgain ||
     nextNonAttackActionCardGoAgain ||
     modifierGoAgain ||
     (isAction && !cardAbilitiesSuppressed(state, card) && (

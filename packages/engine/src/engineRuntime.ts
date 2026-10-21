@@ -40,7 +40,7 @@ export function createEngineRuntime(
       attackBonusAboveBase: bind(attackBonusAboveBase, true),
       attackFromDeck: bind(attackFromDeck, true),
       attackHasDominate: bind(attackHasDominate, true),
-      attackHasOverpower: bind(attackHasOverpower, false),
+      attackHasOverpower: bind(attackHasOverpower, true),
       attackWithPermanent: bind(attackWithPermanent, true),
       banishCard: bind(banishCard, true),
       basePowerOf: bind(basePowerOf, true),

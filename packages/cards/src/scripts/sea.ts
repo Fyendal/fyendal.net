@@ -234,19 +234,13 @@ function highTidePower(power: number): CardScript {
 }
 
 function highTideGoAgain(): CardScript {
-  return {
-    onAttackDeclared(ctx) {
-      if (highTide(ctx)) ctx.grantGoAgain();
-    },
-  };
+  return { hasConditionalGoAgain: highTide };
 }
 
 function highTideOverpower(onHit?: (ctx: ScriptCtx) => void): CardScript {
   return {
     modifyAttack: (ctx) => (highTide(ctx) ? 1 : 0),
-    onAttackDeclared(ctx) {
-      if (highTide(ctx)) ctx.setFlag("link", "overpower", true);
-    },
+    hasConditionalOverpower: highTide,
     ...(onHit ? { onHit } : {}),
   };
 }
@@ -2474,9 +2468,7 @@ Object.assign(sea, {
   },
   "conqueror of the high seas|1": {
     modifyAttack: (ctx: ScriptCtx) => (highTide(ctx) ? 1 : 0),
-    onAttackDeclared(ctx: ScriptCtx) {
-      if (highTide(ctx)) ctx.grantGoAgain();
-    },
+    hasConditionalGoAgain: highTide,
     canTriggerOnHit: (ctx: ScriptCtx) => ctx.link?.targetAllyId === undefined,
     onHit(ctx: ScriptCtx) {
       for (const card of [...ctx.player(opponentSeat(ctx)).arsenal])

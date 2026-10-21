@@ -52,7 +52,7 @@ function expireLinkModifiers(state: GameStateInternal,
   link.finalDefenseModifiers = defenseValueModifiers(state, runtime, link);
   // Snapshot keyword presence too: granted keywords disappear with the modifiers.
   link.flags.dominateAtResolution = attackHasDominate(state, runtime, link);
-  link.flags.overpowerAtResolution = attackHasOverpower(state, link);
+  link.flags.overpowerAtResolution = attackHasOverpower(state, runtime, link);
   state.modifiers = state.modifiers.filter((m) => m.scope !== "chain-link");
 }
 

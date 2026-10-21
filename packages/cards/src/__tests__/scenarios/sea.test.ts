@@ -1038,6 +1038,25 @@ describe("SEA — pirate and generic attacks", () => {
       .expectAP(0, 1);
   });
 
+  it("HMS Marlin gains overpower once a reaction pitches the second blue", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          hand: ["hms marlin|2", "raging onslaught|2", "raging onslaught|2", "pummel|1", "titanium bauble|3"],
+          pitch: ["murderous rabble|3"],
+        },
+        { hero: "dorinthea", hand: [] },
+      ],
+    });
+    g.play("hms marlin|2", { pitch: ["raging onslaught|2", "raging onslaught|2"] })
+      .expectAttackValue(6);
+    expect(projectStateFor(g.state, 0).chain.at(-1)?.overpower).toBe(false);
+
+    g.blockWith().react("pummel|1", { pitch: ["titanium bauble|3"], settle: false });
+    expect(projectStateFor(g.state, 0).chain.at(-1)?.overpower).toBe(true);
+  });
+
   it("Not So Fast replaces an opponent's Gold draw from the graveyard", () => {
     const g = scenario({
       active: 1,

@@ -4,7 +4,6 @@ import {
   buffNextAttack,
   cardNamed,
   commonOptionMessages,
-  consumeDelayedEffect,
   dealArcane,
   dealToAnyTarget,
   decisionMessage,
@@ -18,10 +17,6 @@ const LIGHTNING = "AST028";
 
 function data(ctx: ScriptCtx, card: DeepReadonly<CardInstance>) {
   return ctx.cardData(card.cardId);
-}
-
-function hasType(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, type: string): boolean {
-  return ctx.cardTypes(card).includes(type.toLowerCase());
 }
 
 function instantCards(ctx: ScriptCtx): readonly DeepReadonly<CardInstance>[] {
@@ -134,14 +129,7 @@ export const ast: Record<string, CardScript> = {
         scope: "until-end-of-turn",
         ...ongoingLabel("deal 1 arcane damage to any target whenever you go again", "card.effect.ast.arclightning"),
       });
-      // The flag grants the go again; this modifier shows it and only an
-      // attack action card may consume it, never a weapon attack.
-      ctx.addModifier({ scope: "next-attack", goAgain: true, appliesToCardType: "action" });
-      ctx.setFlag("player", "nextActionCardGoAgain", true);
-    },
-    onFriendlyPlay(ctx, played) {
-      if (!ctx.hasCardType(played, "action") || hasType(ctx, played, "attack")) return;
-      consumeDelayedEffect(ctx, { scope: "next-attack" });
+      ctx.addModifier({ scope: "next-play", grantKeyword: "go again", appliesToCardType: "action" });
     },
     triggers: [
       {

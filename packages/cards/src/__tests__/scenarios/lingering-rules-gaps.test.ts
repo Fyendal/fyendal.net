@@ -39,6 +39,17 @@ describe("Arc Lightning grants go again to the next action card only", () => {
       .expectAP(0, 1);
   });
 
+  it("Arc Lightning's go again is spent on a non-attack action card that already has go again", () => {
+    const g = scenario({
+      seats: [hero({ heroKey: "aurora|0", hand: ["arc lightning|2", "nimblism|1", "lightning surge|1"] }), foe()],
+    });
+    g.play("arc lightning|2").declareTarget(1).play("nimblism|1").declareTarget(1).expectAP(0, 1);
+    expect(ongoing(g, "arc lightning|2").map((effect) => effect.label)).toEqual([
+      "deal 1 arcane damage to any target whenever you go again · this turn",
+    ]);
+    g.play("lightning surge|1").blockWith().settle().expectAP(0, 0);
+  });
+
   it("Arc Lightning labels its go again for the next action card and its arcane trigger for the turn", () => {
     const g = scenario({
       seats: [hero({ heroKey: "aurora|0", hand: ["arc lightning|2"] }), foe()],

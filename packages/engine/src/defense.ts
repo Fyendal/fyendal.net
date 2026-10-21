@@ -272,7 +272,7 @@ export function defenderSelectionError(
 ): string | undefined {
   const { hand, arsenal, equipment } = defenders;
   const dominate = attackHasDominate(state, runtime, link);
-  const overpower = attackHasOverpower(state, link);
+  const overpower = attackHasOverpower(state, runtime, link);
   const maxNonBlock = attackMaxNonBlockDefenders(state, link);
   const seen = new Set<number>();
   let handCount = 0;
