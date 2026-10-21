@@ -1108,6 +1108,7 @@ export function makeCtx(
     pitchCard(instanceId) {
       const located = findCardAnywhere(state, instanceId);
       if (!located) return false;
+      if (runtime.commands.pitchValueOfInstance(state, located.card) <= 0) return false;
       const pitchingPlayer = state.players[located.seat] as PlayerState;
       if (runtime.commands.pitchProhibitedByEffect(state, pitchingPlayer, located.card)) return false;
       const found = runtime.commands.removeFromOwnerZones(state, instanceId);

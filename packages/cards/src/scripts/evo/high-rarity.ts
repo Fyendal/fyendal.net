@@ -1246,7 +1246,7 @@ export const evoHighRarity: Record<string, CardScript> = {
   "tome of imperial flame|1": {
     onPlay(ctx) {
       ctx.drawCards(ctx.seat, has(ctx, ctx.player(ctx.seat).hero, "royal") ? 2 : 1);
-      const reds = ctx.player(ctx.seat).hand.filter((card) => ctx.cardColor(card) === 1);
+      const reds = ctx.player(ctx.seat).hand.filter((card) => ctx.cardColor(card) === 1 && (ctx.cardData(card.cardId).pitch ?? 0) > 0);
       if (reds.length >= 2)
         ctx.requestCardChoice(
           "tome-red-1",
@@ -1265,7 +1265,7 @@ export const evoHighRarity: Record<string, CardScript> = {
           return;
         }
         ctx.pitchCard(Number(option));
-        const reds = ctx.player(ctx.seat).hand.filter((card) => ctx.cardColor(card) === 1);
+        const reds = ctx.player(ctx.seat).hand.filter((card) => ctx.cardColor(card) === 1 && (ctx.cardData(card.cardId).pitch ?? 0) > 0);
         if (reds.length)
           ctx.requestCardChoice(
             "tome-red-2",

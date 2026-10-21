@@ -680,7 +680,7 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
   "rip off the top|2": {
     onPlay(ctx) {
       ctx.drawCards(ctx.seat, 1);
-      const hand = ctx.player(ctx.seat).hand;
+      const hand = ctx.player(ctx.seat).hand.filter((card) => (ctx.cardData(card.cardId).pitch ?? 0) > 0);
       const pitched = hand[ctx.randomInt(hand.length)];
       if (pitched && ctx.pitchCard(pitched.instanceId) && isSixPlus(ctx, pitched)) buffNextAttack(ctx, { attack: 3 });
     },
@@ -1345,7 +1345,7 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
   },
   "trench of watery depths|0": {
     onDefend(ctx) {
-      const blues = ctx.player(ctx.seat).graveyard.filter((card) => ctx.cardColor(card) === 3);
+      const blues = ctx.player(ctx.seat).graveyard.filter((card) => ctx.cardColor(card) === 3 && (ctx.cardData(card.cardId).pitch ?? 0) > 0);
       if (blues.length)
         ctx.requestCardChoice(
           "pen-trench-pitch",
