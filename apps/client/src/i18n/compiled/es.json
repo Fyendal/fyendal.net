@@ -307,6 +307,18 @@
       "value": "Contra todo pronóstico"
     }
   ],
+  "achievements.beatboltyn.description": [
+    {
+      "type": 0,
+      "value": "Derrota a Boltyn Bot en una partida de práctica."
+    }
+  ],
+  "achievements.beatboltyn.name": [
+    {
+      "type": 0,
+      "value": "Vence a Boltyn Bot"
+    }
+  ],
   "achievements.beatbravo.description": [
     {
       "type": 0,
@@ -31842,6 +31854,12 @@
     {
       "type": 0,
       "value": "Observar"
+    }
+  ],
+  "lobby.bot.boltyn.description": [
+    {
+      "type": 0,
+      "value": "Un mazo de tempo que carga el alma para golpes de Raydn y turnos explosivos de V of the Vanguard."
     }
   ],
   "lobby.bot.bravo.description": [

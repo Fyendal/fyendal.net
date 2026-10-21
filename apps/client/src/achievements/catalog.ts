@@ -11,7 +11,7 @@ export const ACHIEVEMENT_GROUPS: ReadonlyArray<{
   ] },
   { titleId: "achievements.group.bots", ids: [
     "beat-bravo", "beat-briar", "beat-kayo", "beat-cindra",
-    "beat-ira", "beat-hala", "beat-jarl", "beat-levia",
+    "beat-ira", "beat-hala", "beat-jarl", "beat-levia", "beat-boltyn",
   ] },
 ];
 
@@ -24,6 +24,7 @@ export const ACHIEVEMENT_BOT_HEROES: Partial<Record<AchievementId, string>> = {
   "beat-hala": "Hala, Bladesaint of the Vow",
   "beat-jarl": "Jarl Vetreiði",
   "beat-levia": "Levia, Shadowborn Abomination",
+  "beat-boltyn": "Ser Boltyn, Breaker of Dawn",
 };
 
 export function achievementMessageId(id: AchievementId, part: "name" | "description"): string {

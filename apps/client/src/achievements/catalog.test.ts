@@ -7,4 +7,5 @@ it("lists every active achievement and hides retired Starvo", () => {
   expect(listed).toEqual(ACTIVE_ACHIEVEMENT_IDS);
   expect(listed).not.toContain("beat-starvo");
   expect(listed).toContain("beat-levia");
+  expect(listed).toContain("beat-boltyn");
 });

@@ -307,6 +307,18 @@
       "value": "Against the Odds"
     }
   ],
+  "achievements.beatboltyn.description": [
+    {
+      "type": 0,
+      "value": "Defeat Boltyn Bot in a practice game."
+    }
+  ],
+  "achievements.beatboltyn.name": [
+    {
+      "type": 0,
+      "value": "Beat Boltyn Bot"
+    }
+  ],
   "achievements.beatbravo.description": [
     {
       "type": 0,
@@ -30900,6 +30912,12 @@
     {
       "type": 0,
       "value": "Spectate"
+    }
+  ],
+  "lobby.bot.boltyn.description": [
+    {
+      "type": 0,
+      "value": "A tempo deck that charges Soul for Raydn swings and explosive V of the Vanguard turns."
     }
   ],
   "lobby.bot.bravo.description": [

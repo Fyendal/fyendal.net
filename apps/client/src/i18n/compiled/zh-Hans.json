@@ -307,6 +307,18 @@
       "value": "逆转乾坤"
     }
   ],
+  "achievements.beatboltyn.description": [
+    {
+      "type": 0,
+      "value": "在练习对局中击败 Boltyn 机器人。"
+    }
+  ],
+  "achievements.beatboltyn.name": [
+    {
+      "type": 0,
+      "value": "击败 Boltyn 机器人"
+    }
+  ],
   "achievements.beatbravo.description": [
     {
       "type": 0,
@@ -30019,6 +30031,12 @@
     {
       "type": 0,
       "value": "观战"
+    }
+  ],
+  "lobby.bot.boltyn.description": [
+    {
+      "type": 0,
+      "value": "通过充能积累 soul，用 Raydn 挥砍和爆发式 V of the Vanguard 回合取胜的节奏牌组。"
     }
   ],
   "lobby.bot.bravo.description": [

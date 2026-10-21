@@ -65,6 +65,15 @@ const BOTS: Readonly<Record<Format, readonly BotOption[]>> = {
       deckType: "aggro",
       descriptionId: "lobby.bot.levia.description",
     },
+    {
+      id: "boltyn",
+      name: "Boltyn",
+      title: "Breaker of Dawn",
+      heroName: "Ser Boltyn, Breaker of Dawn",
+      deckId: "bot-boltyn-raydn",
+      deckType: "aggro",
+      descriptionId: "lobby.bot.boltyn.description",
+    },
   ],
   "silver-age": [
     {

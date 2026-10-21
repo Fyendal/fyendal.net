@@ -9,7 +9,7 @@ afterEach(() => {
 });
 
 describe("BotOpponentModal", () => {
-  it("offers Ira, Hala, Cindra, Jarl, and Levia in a focused opponent dialog", () => {
+  it("offers Ira, Hala, Cindra, Jarl, Levia, and Boltyn in a focused opponent dialog", () => {
     const html = renderToStaticMarkup(
       <TestI18nProvider>
         <BotOpponentModal format="cc" onSelect={vi.fn()} onClose={vi.fn()} />
@@ -39,6 +39,9 @@ describe("BotOpponentModal", () => {
     expect(html).toContain("Levia");
     expect(html).toContain("Shadowborn Abomination");
     expect(html).toContain("An aggressive deck that builds Gates for explosive Bloodrush turns.");
+    expect(html).toContain("Boltyn");
+    expect(html).toContain("Breaker of Dawn");
+    expect(html).toContain("A tempo deck that charges Soul for Raydn swings and explosive V of the Vanguard turns.");
     expect(html).not.toContain("Starvo");
     expect(html).not.toContain("Star of the Show");
     expect(html).toContain('aria-label="Close Choose Your Opponent"');
