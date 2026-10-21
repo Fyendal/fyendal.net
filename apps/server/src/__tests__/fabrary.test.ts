@@ -83,6 +83,15 @@ describe("Fabrary response decoding", () => {
     ].join("\n"));
   });
 
+  it("drops a color suffix Fabrary adds to an unpitched card", () => {
+    const source = parseFabraryDeckUrl(DECK_URL);
+    if (!source) throw new Error("test URL should parse");
+    expect(decodeFabraryDeck({
+      name: "Elegy",
+      cards: [{ identifier: "deep_blue_blue", total: 1, sideboardTotal: 0 }],
+    }, source)?.text).toBe(["Name: Elegy", "Deck cards", "1x Deep Blue"].join("\n"));
+  });
+
   it("resolves Fabrary's purple pitch identifier", () => {
     const source = parseFabraryDeckUrl(DECK_URL);
     if (!source) throw new Error("test URL should parse");

@@ -116,10 +116,15 @@ function cardLine(identifier: string, qty: number): string {
   // resulting underscores so `burn-up--shock-red` resolves to
   // `Burn Up // Shock` instead of the fallback name "burn up shock".
   const normalizedIdentifier = identifier.replace(/-/g, "_").replace(/_+/g, "_").toLowerCase();
-  const card = cardsByIdentifier.get(normalizedIdentifier);
   const fallback = readableUnknownIdentifier(normalizedIdentifier);
+  // Fabrary appends a color to some identifiers (deep_blue_blue) for cards that
+  // are unpitched in our data, so retry without the color suffix.
+  const unpitched = fallback.pitch
+    ? cardsByIdentifier.get(fallback.name.replace(/ /g, "_"))
+    : undefined;
+  const card = cardsByIdentifier.get(normalizedIdentifier) ?? (unpitched?.pitch ? undefined : unpitched);
   const name = card?.name ?? fallback.name;
-  const pitch = card?.pitch ?? fallback.pitch;
+  const pitch = card ? card.pitch : fallback.pitch;
   return `${qty}x ${name}${pitch ? ` (${pitch})` : ""}`;
 }
 
