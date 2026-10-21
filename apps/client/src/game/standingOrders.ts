@@ -149,7 +149,9 @@ export function standingOrderRows(
     // The opponent's turn triggers are theirs alone to answer.
     if (!controlledByViewer && printed.length > 0
       && (!observation || printed.some((entry) => entry.label === observation.fallback))) return [];
-    const trigger = kind === "priority-window" ? printed[0] : optionalTrigger;
+    // A mandatory printed trigger resolves on its own; it earns a priority
+    // window row only once the viewer is actually asked to order it.
+    const trigger = kind === "priority-window" ? printed.find((entry) => entry.optional) : optionalTrigger;
     const storedOrder = kind === "priority-window" ? stored?.priorityWindow : stored?.optionalTrigger;
     if (!observation && !trigger && storedOrder === undefined) return [];
     return [{

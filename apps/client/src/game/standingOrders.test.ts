@@ -208,6 +208,25 @@ describe("standingOrderCardModels", () => {
     ]);
   });
 
+  it("gives no chip to a mandatory printed trigger until it asks to be ordered", () => {
+    const mandatory = view({
+      players: [
+        player(0, {
+          equipment: {
+            chest: {
+              instanceId: 13,
+              cardId: DYNAMO,
+              owner: 0,
+              turnTriggers: [{ event: "end-of-turn", label: "Gain a Might token" }],
+            },
+          },
+        }),
+        player(1),
+      ],
+    });
+    expect(standingOrderCardModels(mandatory, 0, {}, new Map()).has("valiant dynamo|0")).toBe(false);
+  });
+
   it("shows only priority windows on the opponent's permanents", () => {
     const opponentDynamo = view({
       players: [
