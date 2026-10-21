@@ -1197,6 +1197,34 @@ describe("game motion detection", () => {
     }]);
   });
 
+  it("plays a token's dissolve before a trigger that enters the stack in the same edge", () => {
+    const flurry = face(91);
+    const surge = face(92);
+    const previous = view(
+      [player(0, { board: [flurry, surge] }), player(1)],
+      { stack: [{ card: flurry, seat: 0, label: "Destroy Flurry", optional: false }] },
+    );
+    const current = view(
+      [player(0, { board: [surge] }), player(1)],
+      { stack: [{ card: surge, seat: 0, label: "Destroy Surge", optional: false }] },
+    );
+    const events = transitionMotionEvents(previous, current, {
+      fromVersion: 8,
+      kind: "forward",
+      events: [{
+        kind: "move",
+        from: { kind: "board", seat: 0 },
+        to: null,
+        count: 1,
+        instanceId: flurry.instanceId,
+      }],
+    }, "forward");
+    expect(events.some((event) => event.kind === "disappear")).toBe(true);
+    const connects = events.filter((event) => event.kind === "connect");
+    expect(connects.length).toBeGreaterThan(0);
+    for (const connect of connects) expect(connect).toEqual(expect.objectContaining({ timeline: "post-result" }));
+  });
+
   it("holds remaining arena cards in place until a departing token has dissolved", () => {
     const exertion = face(91);
     const frailty = face(92);

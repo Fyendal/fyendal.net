@@ -11,6 +11,7 @@ export function motionCombatPresentation(
 ): CombatPresentation & { deferChain: boolean; deferStack: boolean } {
   const batches = queue.active ? [queue.active, ...queue.pending] : [];
   const flights = batches.flatMap((batch) => batch.flights);
+  const connectors = batches.flatMap((batch) => batch.connectors);
   const arrivingAttack = current.chain.at(-1)?.attackingCard.instanceId;
   const chainKey = arrivingAttack === undefined ? undefined : motionPresentationKey(
     { kind: "chain-attack", link: current.chain.length - 1 }, arrivingAttack,
@@ -42,7 +43,7 @@ export function motionCombatPresentation(
   const deferStack = stack.length > 0 && stack.every((layer, index) => {
     if (!layer.card) return false;
     const key = motionPresentationKey({ kind: "stack-layer", index }, layer.card.instanceId);
-    const entry = flights.find((flight) => flight.destinationPresentationKey === key);
+    const entry = [...flights, ...connectors].find((arrival) => arrival.destinationPresentationKey === key);
     return entry !== undefined && !startedFlightIds.has(entry.id);
   });
   return {

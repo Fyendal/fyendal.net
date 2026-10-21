@@ -13,6 +13,7 @@ export type MotionTimelinePhase =
   | "effect-discard"
   | "trigger"
   | "result"
+  | "post-result"
   | "arsenal"
   | "cleanup"
   | "draw"
@@ -31,6 +32,7 @@ const PHASE_ORDER: readonly MotionTimelinePhase[] = [
   "effect-discard",
   "trigger",
   "result",
+  "post-result",
   "arsenal",
   "cleanup",
   "draw",
@@ -54,6 +56,7 @@ const PHASE_STAGE: Readonly<Record<MotionTimelinePhase, number>> = {
   "effect-discard": 7,
   trigger: 8,
   result: 9,
+  "post-result": 9.5,
   arsenal: 10,
   cleanup: 11,
   draw: 12,

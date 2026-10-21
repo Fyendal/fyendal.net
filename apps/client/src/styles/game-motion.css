@@ -101,6 +101,9 @@
   transform-origin: center;
   animation-name: game-motion-disappear;
   animation-timing-function: cubic-bezier(.3, .05, .55, 1);
+  /* The departed card is already gone from the board, so the copy must stay
+     visible through its delay instead of reappearing when the dissolve starts. */
+  animation-fill-mode: both;
 }
 
 .game-motion-flight-arsenal {

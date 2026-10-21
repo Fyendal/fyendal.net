@@ -80,6 +80,19 @@ describe("attack float motion lifecycle", () => {
     expect(motionCombatPresentation(onStack, queued, none).deferStack).toBe(true);
   });
 
+  it("holds the stack closed until a trigger connector to its layer starts", () => {
+    const batch: GameMotionBatch = {
+      id: "trigger", flights: [], durationMs: 900, combatPresentation: onStack,
+      connectors: [{
+        id: "trigger:connector", phase: "post-result", start: rect(0), end: rect(300),
+        delayMs: 500, destinationPresentationKey: "stack:layer:42",
+      }],
+    };
+    const queue = { active: batch, pending: [] };
+    expect(motionCombatPresentation(onStack, queue, none).deferStack).toBe(true);
+    expect(motionCombatPresentation(onStack, queue, new Set(["trigger:connector"])).deferStack).toBe(false);
+  });
+
   it("settles immediately after cancellation or with motion disabled", () => {
     expect(motionCombatPresentation(current, EMPTY_MOTION_BATCH_QUEUE, none)).toEqual({
       ...current, deferChain: false, deferStack: false,

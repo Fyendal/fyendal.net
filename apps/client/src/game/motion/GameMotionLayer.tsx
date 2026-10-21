@@ -8,6 +8,7 @@ import {
   type MotionConnector,
   type MotionFlight,
   type MotionRect,
+  type MotionDeparture,
 } from "./motionGeometry.js";
 import type { MotionVisual } from "./motionTypes.js";
 
@@ -144,7 +145,7 @@ function MotionFlightOverlay({
   flight: MotionFlight;
   squareCardsEnabled: boolean;
   onFlightArrive: (batchId: string, destinationPresentationKey?: string) => boolean;
-  onFlightDepart: (batchId: string, flight: MotionFlight) => void;
+  onFlightDepart: (batchId: string, flight: MotionDeparture) => void;
   onCueComplete: (cueId: string) => void;
 }) {
   const lingerTimerRef = useRef<number | null>(null);
@@ -233,7 +234,7 @@ export function GameMotionLayer({
   queuedSources: readonly MotionFlight[];
   squareCardsEnabled: boolean;
   onFlightArrive: (batchId: string, destinationPresentationKey?: string) => boolean;
-  onFlightDepart: (batchId: string, flight: MotionFlight) => void;
+  onFlightDepart: (batchId: string, flight: MotionDeparture) => void;
   onComplete: (batchId: string) => void;
 }) {
   const completedCuesRef = useRef<{
@@ -314,6 +315,11 @@ export function GameMotionLayer({
             className="game-motion-connector"
             key={connector.id}
             style={connectorStyle(connector)}
+            onAnimationStart={(event) => {
+              if (event.target === event.currentTarget) {
+                onFlightDepart(batch.id, { id: connector.id, destinationLayer: "stack" });
+              }
+            }}
             onAnimationEnd={(event) => {
               if (event.target !== event.currentTarget) return;
               onFlightArrive(batch.id, connector.destinationPresentationKey);

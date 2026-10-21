@@ -32,6 +32,7 @@ import {
   type MotionAnchorSnapshot,
   type MotionRect,
   type MotionFlight,
+  type MotionDeparture,
 } from "./motionGeometry.js";
 import { attackLayerPresentation } from "../attackLayerPresentation.js";
 import { useMotionPreference } from "./useMotionPreference.js";
@@ -73,7 +74,7 @@ export function useGameMotion({
   queuedSources: readonly MotionFlight[];
   turnStartUiReady: boolean;
   arriveFlight: (batchId: string, destinationPresentationKey?: string) => boolean;
-  departFlight: (batchId: string, flight: MotionFlight) => void;
+  departFlight: (batchId: string, flight: MotionDeparture) => void;
   completeBatch: (batchId: string) => void;
   getStackFocusOrigin: (instanceId: number) => MotionRect | undefined;
   getHandFocusOrigin: (seat: number, instanceId: number) => MotionRect | undefined;
@@ -196,7 +197,7 @@ export function useGameMotion({
     );
   }, []);
 
-  const departFlight = useCallback((batchId: string, flight: MotionFlight) => {
+  const departFlight = useCallback((batchId: string, flight: MotionDeparture) => {
     if (batchQueueRef.current.active?.id !== batchId) return;
     // Only float-bound flights affect React presentation. Other departures
     // reveal their source pile directly without rerendering the board.

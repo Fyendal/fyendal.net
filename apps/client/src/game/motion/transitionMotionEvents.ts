@@ -134,6 +134,23 @@ function deferTurnStartStackEntry(event: GameMotionEvent): GameMotionEvent {
     : event;
 }
 
+/** A trigger that goes on the stack in the same edge as a token ceasing to
+ * exist (a start-of-turn token expiring just before the begin-action-phase
+ * trigger) happens after it, so the disappearance plays first. */
+function deferStackEntryPastDisappearances(
+  events: readonly GameMotionEvent[],
+): (event: GameMotionEvent) => GameMotionEvent {
+  const disappears = events.some((event) => event.kind === "disappear");
+  return (event) => {
+    if (!disappears) return event;
+    if (event.kind === "connect" && event.timeline === undefined
+      && event.destination.kind === "stack-layer") {
+      return { ...event, timeline: "post-result" };
+    }
+    return event;
+  };
+}
+
 /** Convert an authoritative domain transition into client motion while keeping
  * snapshot detection only for presentation-only changes not covered by it. */
 export function transitionMotionEvents(
@@ -299,7 +316,8 @@ export function transitionMotionEvents(
   // End-phase cleanup and startTurn are committed as one authoritative edge.
   // A trigger already visible on the new turn's stack must nevertheless wait
   // for arsenal, pitch-bottoming, draw-up, and hand reflow to finish playing.
-  return direction === "forward" && current.turn > previous.turn
-    ? events.map(deferTurnStartStackEntry)
-    : events;
+  if (direction === "forward" && current.turn > previous.turn) {
+    return events.map(deferTurnStartStackEntry);
+  }
+  return direction === "forward" ? events.map(deferStackEntryPastDisappearances(events)) : events;
 }

@@ -44,6 +44,9 @@ export interface MeasuredMotionAnchors {
   cardElements: ReadonlyMap<string, HTMLElement>;
 }
 
+/** What a departing overlay reports: a flight, or a trigger connector. */
+export type MotionDeparture = Pick<MotionFlight, "id" | "destinationLayer" | "sourceRevealPresentationKey">;
+
 export interface MotionFlight {
   id: string;
   phase: MotionTimelinePhase;

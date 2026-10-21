@@ -111,7 +111,7 @@ export interface ConnectMotionEvent {
   instanceId: number;
   sourcePresentationKey: string;
   destinationPresentationKey: string;
-  timeline?: "turn-start";
+  timeline?: "turn-start" | "post-result";
 }
 
 /** A publicly known card leaves play without entering another visible zone.
