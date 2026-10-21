@@ -155,6 +155,26 @@ describe("Classic Constructed shared decks", () => {
     }
   });
 
+  it("keeps the complete Raydn Boltyn pool internal and implemented", () => {
+    const boltyn = precon("bot-boltyn-raydn");
+    expect(boltyn).toMatchObject({ name: "Raydn Boltyn", format: "cc", botOnly: true });
+    expect(preconsForFormat("cc").map((deck) => deck.id)).not.toContain("bot-boltyn-raydn");
+    const pool = boltyn!.pool;
+    expect(pool.heroId).toBe("ASB001");
+    expect(pool.weaponIds).toEqual(["ASB002"]);
+    expect(pool.deck).toHaveLength(60);
+    expect(pool.sideboard).toHaveLength(8);
+    expect(pool.equipmentPool).toHaveLength(11);
+    for (const id of [...pool.weaponIds, ...pool.equipmentPool, ...pool.deck, ...pool.sideboard!]) {
+      expect(cardData[id], id).toBeTruthy();
+      expect(isImplemented(cardData[id]!), id).toBe(true);
+    }
+    const names = [...pool.deck, ...pool.sideboard!].map((id) => cardData[id]!.name);
+    expect(names.filter((name) => name === "V of the Vanguard")).toHaveLength(3);
+    expect(names.filter((name) => name === "Blessing of Suraya")).toHaveLength(3);
+    expect(names.filter((name) => name === "Saving Grace")).toHaveLength(3);
+  });
+
   it("registers the open-pool Starvo boss only for the practice bot", () => {
     const starvo = precon("bot-starvo-boss");
     expect(starvo).toMatchObject({
