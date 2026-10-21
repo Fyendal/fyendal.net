@@ -13,8 +13,9 @@ import { createApiServer } from "./http.js";
 import { createFabraryClient, type FabraryClient } from "./fabrary.js";
 import { clientIp, configuredTrustedProxyHops } from "./network.js";
 import {
-  CLIENT_UPDATE_CLOSE_CODE, LIVE_TRANSPORT_VERSION, decodeClientMessage, resetsStateStream,
+  BETA_BOT_OPPONENTS, CLIENT_UPDATE_CLOSE_CODE, LIVE_TRANSPORT_VERSION, decodeClientMessage, resetsStateStream,
 } from "@fyendal/protocol";
+import { isBetaTester } from "./betaTesters.js";
 import { StateLogTransport } from "./stateLogTransport.js";
 import { encodeWireMessage, type WireServerMessage } from "./errors.js";
 import { RoomBroadcaster } from "./roomBroadcaster.js";
@@ -781,7 +782,8 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
         const botFormat = msg.format ?? "silver-age";
         const botOpponent = msg.bot ?? (botFormat === "cc" ? "hala" : "briar");
         const definition = botDefinition(botOpponent);
-        if (!definition || definition.format !== botFormat) {
+        if (!definition || definition.format !== botFormat
+          || (BETA_BOT_OPPONENTS.has(botOpponent) && !await isBetaTester(deps.db, ctx.user.id))) {
           send(ws, { type: "error", message: `choose a ${botFormat} bot` });
           return;
         }

@@ -1,5 +1,11 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
+import type { StoreState } from "../store/types.js";
+
+vi.mock("../store.js", () => ({
+  useStore: (selector: (state: StoreState) => unknown) => selector({ betaTester: false } as StoreState),
+}));
+
 import {
   BOT_PRACTICE_NUDGE_DELAY_MS,
   BotPracticeNudge,

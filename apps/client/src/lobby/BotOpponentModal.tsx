@@ -2,9 +2,11 @@ import { useId, useRef, useState } from "react";
 import { useIntl } from "react-intl";
 import { FUTURE_SET_CODES, cardData, formatLegalityIssues, precon } from "@fyendal/cards/client";
 import type { BotOpponent, Format } from "@fyendal/shared";
+import { BETA_BOT_OPPONENTS } from "@fyendal/protocol";
 import { heroImageUrl } from "./heroImage.js";
 import { ModalSurface } from "../components/ModalSurface.js";
 import { ViewportTooltip } from "../components/ViewportTooltip.js";
+import { useStore } from "../store.js";
 
 interface BotOption {
   id: BotOpponent;
@@ -138,6 +140,8 @@ export function BotOpponentModal(props: {
   onClose: () => void;
 }) {
   const intl = useIntl();
+  const betaTester = useStore((state) => state.betaTester);
+  const bots = BOTS[props.format].filter((bot) => betaTester || !BETA_BOT_OPPONENTS.has(bot.id));
   const [searchForPlayer, setSearchForPlayer] = useState(true);
   const tooltipId = useId();
   const warningRefs = useRef<Partial<Record<BotOpponent, HTMLSpanElement | null>>>({});
@@ -176,7 +180,7 @@ export function BotOpponentModal(props: {
         <span className="switch-track" />
       </label>
       <div className="bot-opponent-options">
-        {BOTS[props.format].map((bot, index) => {
+        {bots.map((bot, index) => {
           const warnings = BOT_CARD_WARNINGS.get(bot.id)!;
           return (
             <button
@@ -234,7 +238,7 @@ export function BotOpponentModal(props: {
           );
         })}
       </div>
-      {BOTS[props.format].map((bot) => {
+      {bots.map((bot) => {
         const warnings = BOT_CARD_WARNINGS.get(bot.id)!;
         return warnings.banned.length > 0 || warnings.future.length > 0 ? (
           <span

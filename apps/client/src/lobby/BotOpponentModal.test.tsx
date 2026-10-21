@@ -1,15 +1,25 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { BotOpponentModal } from "./BotOpponentModal.js";
 import { TestI18nProvider } from "../i18n/TestI18nProvider.js";
 import { BOT_MATCHMAKING_PREFERENCE_STORAGE_KEY } from "../storage.js";
+import type { StoreState } from "../store/types.js";
+
+const botModalStore = vi.hoisted(() => ({ state: { betaTester: false } as StoreState }));
+
+vi.mock("../store.js", () => ({
+  useStore: (selector: (state: StoreState) => unknown) => selector(botModalStore.state),
+}));
+
+import { BotOpponentModal } from "./BotOpponentModal.js";
 
 afterEach(() => {
   vi.unstubAllGlobals();
+  botModalStore.state = { betaTester: false } as StoreState;
 });
 
 describe("BotOpponentModal", () => {
-  it("offers Ira, Hala, Cindra, Jarl, Levia, and Boltyn in a focused opponent dialog", () => {
+  it("offers Ira, Hala, Cindra, Jarl, Levia, and Boltyn to beta testers in a focused opponent dialog", () => {
+    botModalStore.state = { betaTester: true } as StoreState;
     const html = renderToStaticMarkup(
       <TestI18nProvider>
         <BotOpponentModal format="cc" onSelect={vi.fn()} onClose={vi.fn()} />
@@ -48,6 +58,18 @@ describe("BotOpponentModal", () => {
     expect(html).toContain('class="bot-deck-type bot-deck-type-aggro">Aggro</span>');
     // Deck-type chips are text only; the dialog's close icon is the sole decoration.
     expect(html.match(/aria-hidden="true"/g)).toHaveLength(1);
+  });
+
+  it("hides the beta-only Boltyn bot from other players", () => {
+    const html = renderToStaticMarkup(
+      <TestI18nProvider>
+        <BotOpponentModal format="cc" onSelect={vi.fn()} onClose={vi.fn()} />
+      </TestI18nProvider>,
+    );
+
+    expect(html).toContain("Levia");
+    expect(html).not.toContain("Boltyn");
+    expect(html).not.toContain("Breaker of Dawn");
   });
 
   it("offers Kayo, Briar, and Bravo for Silver Age", () => {

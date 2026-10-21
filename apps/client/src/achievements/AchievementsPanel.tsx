@@ -5,12 +5,13 @@ import { apiAchievements } from "../auth/auth.js";
 import { UiIcon } from "../components/UiIcon.js";
 import { heroImageUrl } from "../lobby/heroImage.js";
 import { useStore } from "../store.js";
-import { ACHIEVEMENT_BOT_HEROES, ACHIEVEMENT_GROUPS, achievementMessageId } from "./catalog.js";
+import { ACHIEVEMENT_BOT_HEROES, ACHIEVEMENT_GROUPS, BETA_ACHIEVEMENT_IDS, achievementMessageId } from "./catalog.js";
 import "../styles/achievements.css";
 
 export function AchievementsPanel() {
   const intl = useIntl();
   const token = useStore((state) => state.authToken);
+  const betaTester = useStore((state) => state.betaTester);
   const [data, setData] = useState<AchievementsResponse | null>(null);
   const [error, setError] = useState(false);
   const [revision, setRevision] = useState(0);
@@ -32,11 +33,13 @@ export function AchievementsPanel() {
   const unlocked = new Map(data?.unlocks
     .filter((item) => ACTIVE_ACHIEVEMENT_IDS.includes(item.id))
     .map((item) => [item.id, item.unlockedAt]));
+  const activeIds = ACTIVE_ACHIEVEMENT_IDS
+    .filter((id) => betaTester || !BETA_ACHIEVEMENT_IDS.has(id) || unlocked.has(id));
   const percentages = new Map(data?.percentages.map((item) => [item.id, item.percent]));
   const count = unlocked.size;
-  const visibleCount = filter === "all" ? ACTIVE_ACHIEVEMENT_IDS.length
-    : filter === "unlocked" ? count : ACTIVE_ACHIEVEMENT_IDS.length - count;
-  const progressLabel = intl.formatMessage({ id: "achievements.progress" }, { count, total: ACTIVE_ACHIEVEMENT_IDS.length });
+  const visibleCount = filter === "all" ? activeIds.length
+    : filter === "unlocked" ? count : activeIds.length - count;
+  const progressLabel = intl.formatMessage({ id: "achievements.progress" }, { count, total: activeIds.length });
 
   return (
     <div className="panel achievements-panel">
@@ -48,9 +51,9 @@ export function AchievementsPanel() {
         <div className="achievements-progress">
           <div className="achievements-progress-copy" aria-hidden="true">
             <span>{intl.formatMessage({ id: "achievements.unlocked" })}</span>
-            <strong>{count}<span> / {ACTIVE_ACHIEVEMENT_IDS.length}</span></strong>
+            <strong>{count}<span> / {activeIds.length}</span></strong>
           </div>
-          <progress value={count} max={ACTIVE_ACHIEVEMENT_IDS.length} aria-label={progressLabel} />
+          <progress value={count} max={activeIds.length} aria-label={progressLabel} />
         </div>
       </header>
       {error ? (
@@ -64,23 +67,24 @@ export function AchievementsPanel() {
         {(["all", "locked", "unlocked"] as const).map((option) => (
           <button key={option} type="button" className={filter === option ? "selected" : ""} aria-pressed={filter === option} onClick={() => setFilter(option)}>
             {intl.formatMessage({ id: `achievements.filter.${option}` })}
-            <span>{option === "all" ? ACTIVE_ACHIEVEMENT_IDS.length : option === "locked" ? ACTIVE_ACHIEVEMENT_IDS.length - count : count}</span>
+            <span>{option === "all" ? activeIds.length : option === "locked" ? activeIds.length - count : count}</span>
           </button>
         ))}
       </div> : null}
       {data && visibleCount === 0 ? <p className="muted">{intl.formatMessage({ id: "achievements.filter.empty" })}</p> : null}
       {data ? ACHIEVEMENT_GROUPS.map((group) => {
-        const ids = group.ids
+        const groupIds = group.ids.filter((id) => activeIds.includes(id));
+        const ids = groupIds
           .filter((id) => filter === "all" || (filter === "unlocked") === unlocked.has(id))
           .sort((a, b) => Number(unlocked.has(b)) - Number(unlocked.has(a))
             || (unlocked.get(b) ?? 0) - (unlocked.get(a) ?? 0));
         if (ids.length === 0) return null;
-        const groupCount = group.ids.filter((id) => unlocked.has(id)).length;
+        const groupCount = groupIds.filter((id) => unlocked.has(id)).length;
         return <section className="achievements-group" key={group.titleId}>
           <div className="achievements-group-heading">
             <h3>{intl.formatMessage({ id: group.titleId })}</h3>
-            <span aria-label={intl.formatMessage({ id: "achievements.progress" }, { count: groupCount, total: group.ids.length })}>{groupCount} / {group.ids.length}</span>
-            <progress value={groupCount} max={group.ids.length} aria-hidden="true" />
+            <span aria-label={intl.formatMessage({ id: "achievements.progress" }, { count: groupCount, total: groupIds.length })}>{groupCount} / {groupIds.length}</span>
+            <progress value={groupCount} max={groupIds.length} aria-hidden="true" />
           </div>
           <div className="achievements-list">
             {ids.map((id) => {
