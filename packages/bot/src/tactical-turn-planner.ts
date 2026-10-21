@@ -22,6 +22,9 @@ export interface TacticalTurnEvaluation {
   futureValue: number;
   /** Damage-equivalent blocking value of equipment this line spent. */
   equipmentSpent: number;
+  /** Hero-defined self-inflicted cost of the line's end state (see
+   * `TacticalTurnConfig.risk`); recorded for the policy, not scored here. */
+  risk: number;
   complete: boolean;
 }
 
@@ -32,7 +35,13 @@ export interface TacticalTurnConfig {
   rankCandidate?(intent: GameIntent, input: BotPolicyInput): number;
   scoreIntent?(intent: GameIntent, input: BotPolicyInput): number;
   positionBonus?(input: BotPolicyInput, complete: boolean): number;
+  /** Life-unit cost the hero's own line inflicts (life lost, debt exposed),
+   * so a policy can tell lines that save life from lines that merely deal
+   * more. The position bonus still prices it into the score. */
+  risk?(input: BotPolicyInput, complete: boolean): number;
   prepareCandidates?: TurnPlannerConfig<TacticalTurnEvaluation>["prepareCandidates"];
+  /** Order continuation candidates by `rankCandidate` too (see planner). */
+  rankContinuations?: boolean;
   /** Use a smaller win bonus when speculative opponent no-blocks are uncertain. */
   simulatedWinBonus?: number;
   maxSearchNodes?: number;
@@ -83,6 +92,7 @@ function evaluateTacticalTurn(
     expectedDamage: opponentResponse.expectedDamage,
     futureValue: future.score,
     equipmentSpent,
+    risk: config.risk?.(input, complete) ?? 0,
     complete,
   };
 }
@@ -98,6 +108,7 @@ export function planTacticalTurn(
     rankCandidate: config.rankCandidate,
     scoreIntent: config.scoreIntent,
     prepareCandidates: config.prepareCandidates,
+    rankContinuations: config.rankContinuations,
     maxSearchNodes: config.maxSearchNodes ?? DEFAULT_TACTICAL_MAX_SEARCH_NODES,
     maxTransitions: config.maxTransitions ?? DEFAULT_TACTICAL_MAX_TRANSITIONS,
     recordCheckpoints: config.recordCheckpoints,

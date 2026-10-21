@@ -44,8 +44,18 @@ export interface TurnEvaluation {
   complete: boolean;
 }
 
+/** Best line found from one explored root intent. */
+export interface TurnPlanRootResult<Evaluation extends TurnEvaluation = TurnEvaluation> {
+  intent: GameIntent;
+  score: number;
+  evaluation: Evaluation;
+}
+
 export interface TurnPlan<Evaluation extends TurnEvaluation = TurnEvaluation> {
   intent: GameIntent;
+  /** Every root the search explored, in search order, with its best line's
+   * score and end evaluation. */
+  rootResults: readonly TurnPlanRootResult<Evaluation>[];
   line: readonly GameIntent[];
   checkpoints: readonly TurnPlanCheckpoint[];
   nodes: number;
@@ -291,6 +301,9 @@ export interface TurnPlannerConfig<Evaluation extends TurnEvaluation> {
   /** Root ordering before the strict candidate cap. Higher values are searched
    * first; omitted policies use a generic public card/action priority. */
   rankCandidate?(intent: GameIntent, input: BotPolicyInput): number;
+  /** Also order continuation candidates by `rankCandidate` (or
+   * `scoreIntent`), so a small budget follows the policy's preferred lines. */
+  rankContinuations?: boolean;
   maxSearchNodes?: number;
   /** Deterministic cap covering every simulated `applyIntent`, including
    * forced priority, reaction, defense, and resolution steps. */
@@ -614,7 +627,12 @@ function plannerCandidates<Evaluation extends TurnEvaluation>(
     context.config.maxRootCandidates ?? MAX_ROOT_CANDIDATES,
     Math.max(1, context.config.maxSearchNodes ?? DEFAULT_MAX_SEARCH_NODES),
   );
-  const ordered = depth === 0 && selectedBeforeRootLimit.length > rootLimit
+  // Continuations are explored in legal order unless the policy asks for its
+  // ranking there too, which lets a small budget follow its preferred lines.
+  const ranked = depth === 0
+    ? selectedBeforeRootLimit.length > rootLimit
+    : context.config.rankContinuations === true && selectedBeforeRootLimit.length > 1;
+  const ordered = ranked
     ? selectedBeforeRootLimit
       .map((intent, index) => ({
         intent,
@@ -760,6 +778,7 @@ export function planTurn<Evaluation extends TurnEvaluation>(
   const totalTransitionBudget = config.maxTransitions ?? DEFAULT_MAX_SEARCH_TRANSITIONS;
   const rootObservationKey = config.recordCheckpoints ? botObservationKey(input) : undefined;
   let best: SearchResult<Evaluation> | undefined;
+  const rootResults: TurnPlanRootResult<Evaluation>[] = [];
   for (const [index, intent] of rootCandidates.entries()) {
     if (context.nodes >= totalBudget || context.transitions >= totalTransitionBudget) break;
     const rootsRemaining = rootCandidates.length - index;
@@ -804,12 +823,14 @@ export function planTurn<Evaluation extends TurnEvaluation>(
             evaluation,
           };
         })();
+    rootResults.push({ intent, score: result.score, evaluation: result.evaluation });
     if (!best || result.score > best.score) best = result;
   }
   const first = best?.line[0];
   return first && best
     ? {
         intent: first,
+        rootResults,
         line: best.line,
         checkpoints: best.checkpoints,
         nodes: context.nodes,

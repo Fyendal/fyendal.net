@@ -103,6 +103,17 @@ export function leviaMacroIntentBonus(
   return 0;
 }
 
+/** Life a line costs Levia herself: life lost this turn plus the blood debt
+ * its end phase drains while exposed (half of it at a search horizon, where
+ * a later play may still banish a six). */
+export function leviaLifeRisk(root: BotPolicyInput, observed: BotPolicyInput, complete: boolean): number {
+  const start = root.view.players[root.seat];
+  const me = observed.view.players[root.seat];
+  const suppressed = observed.view.turnFacts?.players[root.seat]?.banishedSixPlusThisTurn === true;
+  const exposed = suppressed ? 0 : bloodDebt(me.banish, observed);
+  return Math.max(0, start.life - me.life) + (complete ? exposed : exposed / 2);
+}
+
 /** Score a projected rollout end against the observed start of this decision. */
 export function leviaMacroPositionBonus(
   macro: LeviaMacroChoice,

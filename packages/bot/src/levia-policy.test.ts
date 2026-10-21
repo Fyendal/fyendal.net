@@ -3,8 +3,8 @@ import { applyIntent, createGame, legalIntents, projectStateFor } from "@fyendal
 import type { Decklist, GameIntent } from "@fyendal/shared";
 import { describe, expect, it } from "vitest";
 import { chooseLeviaIntent, chooseLeviaIntentWithTrace, leviaEngineValue, leviaSolverRules } from "./levia-policy.js";
-import { handDamage } from "./hand-value.js";
-import { leviaMacroPositionBonus } from "./levia-macros.js";
+import { handDamage, handResponse, heldCardValue } from "./hand-value.js";
+import { leviaLifeRisk, leviaMacroPositionBonus } from "./levia-macros.js";
 import { leviaPresentationFor } from "./sideboard.js";
 
 const opponent = decklists.dorinthea;
@@ -457,6 +457,22 @@ describe("Levia Gates policy", () => {
     expect(selected).toMatchObject({ kind: "play-from-zone", instanceId: feedingFrenzy.instanceId });
   });
 
+  it("plays the attack a Gate unlocked before a hand attack competing for its resources", () => {
+    let state = game();
+    hand(state, ["IAR026", "ROS218"]);
+    const cleave = { instanceId: state.nextInstanceId++, cardId: "IAR020", owner: 0 };
+    state.players[0]!.banish = [cleave];
+    const gate = { instanceId: state.nextInstanceId++, cardId: "IAR222", owner: 0 };
+    state.players[0]!.board.push(gate);
+    state.players[0]!.resources = 3;
+    const access = legalIntents(state, 0).find((intent) => intent.kind === "activate-ability" &&
+      intent.sourceInstanceId === gate.instanceId && intent.targetCardInstanceId === cleave.instanceId &&
+      intent.pitchInstanceIds.length === 0)!;
+    state = playAndResolve(state, access);
+    expect(state.players[0]!.resources).toBe(2);
+    expect(choice(state)).toMatchObject({ kind: "play-from-zone", instanceId: cleave.instanceId });
+  });
+
   it("opens a Gate on the stronger of two banished attacks without go again", () => {
     const state = game();
     hand(state, ["MON140"]);
@@ -676,6 +692,17 @@ describe("Levia Gates policy", () => {
     if (selected.kind !== "play-card") return;
     const card = state.players[0]!.hand.find((item) => item.instanceId === selected.instanceId);
     expect(card?.cardId).toBe("WTR007");
+  });
+
+  it("attacks instead of a Bloodrush whose discard would take its only follow-up", () => {
+    const state = game();
+    state.players[0]!.banish = cards(state, ["IAR028", "IAR028", "IAR028"]);
+    hand(state, ["WTR007", "MST236", "IAR022"]);
+    state.players[0]!.graveyard = cards(state, ["MST236", "WTR007", "SUP165"]);
+    const [bellow, horror] = state.players[0]!.hand;
+    const selected = choice(state);
+    expect(selected).not.toMatchObject({ kind: "play-card", instanceId: bellow!.instanceId });
+    expect(selected).toMatchObject({ kind: "play-card", instanceId: horror!.instanceId });
   });
 
   it("uses an attack instead of early Hexagore self-damage at low life", () => {
@@ -1007,6 +1034,73 @@ describe("Levia Gates policy", () => {
       expect(leviaEngineValue(input(state))).toBeGreaterThan(0);
       state.players[0]!.banish[0]!.faceDown = true;
       expect(leviaEngineValue(input(state))).toBe(0);
+    });
+
+    function exposeDebt(state: ReturnType<typeof game>, count: number) {
+      for (let index = 0; index < count; index++) {
+        state.players[0]!.banish.push({ instanceId: state.nextInstanceId++, cardId: "IAR028", owner: 0 });
+      }
+    }
+
+    it("values a six-power banish by the blood debt it suppresses", () => {
+      const state = game();
+      state.activePlayer = 1;
+      state.players[0]!.weapons = [];
+      hand(state, ["IAR026", "MON140"]);
+      const frenzy = handResponse(state.players[0]!.hand, input(state), leviaSolverRules).total;
+      exposeDebt(state, 5);
+      // Feeding Frenzy banishes the top card, a six more often than not.
+      expect(handResponse(state.players[0]!.hand, input(state), leviaSolverRules).total).toBeGreaterThan(frenzy + 2);
+      hand(state, ["IAR165"]);
+      const held = state.players[0]!.hand[0]!;
+      const insured = heldCardValue(held, input(state), leviaSolverRules);
+      state.players[0]!.banish = [];
+      // Held, Fallen Herald can be banished to suppress the debt on demand,
+      // worth the five life over its six-power attack.
+      expect(insured).toBeGreaterThan(heldCardValue(held, input(state), leviaSolverRules) + 1);
+    });
+
+    it("measures a line's life risk from life lost and exposed debt", () => {
+      const root = game();
+      const observed = game();
+      observed.players[0]!.life = root.players[0]!.life - 2;
+      exposeDebt(observed, 3);
+      expect(leviaLifeRisk(input(root), input(observed), true)).toBe(5);
+      expect(leviaLifeRisk(input(root), input(observed), false)).toBe(3.5);
+      observed.players[0]!.flags.banishedSixPlusThisTurn = true;
+      expect(leviaLifeRisk(input(root), input(observed), true)).toBe(2);
+    });
+
+    it("banishes Fallen Herald to suppress heavy blood debt instead of pitching it to Hexagore", () => {
+      const state = game();
+      state.players[0]!.life = 13;
+      exposeDebt(state, 7);
+      hand(state, ["IAR165"]);
+      state.players[0]!.arsenal = [{ instanceId: state.nextInstanceId++, cardId: "SUP165", owner: 0, faceDown: true }];
+      const herald = state.players[0]!.hand[0]!;
+      expect(choice(state)).toMatchObject({ kind: "activate-ability", sourceInstanceId: herald.instanceId });
+    });
+
+    it("lets the rollout stop a Hexagore swing that would expose blood debt at healthy life", () => {
+      const state = game();
+      state.players[0]!.life = 25;
+      exposeDebt(state, 5);
+      hand(state, ["IAR165"]);
+      const herald = state.players[0]!.hand[0]!;
+      const hexagore = state.players[0]!.weapons.find((weapon) => weapon.cardId === "MON121")!;
+      const reactive = chooseLeviaIntent({ ...input(state), state: undefined });
+      expect(reactive).toMatchObject({ kind: "activate-ability", sourceInstanceId: hexagore.instanceId });
+      expect(choice(state)).toMatchObject({ kind: "activate-ability", sourceInstanceId: herald.instanceId });
+    });
+
+    it("banishes a red Cleave for a Gate rather than pitching it to an attack under heavy debt", () => {
+      const state = game();
+      state.players[0]!.life = 8;
+      exposeDebt(state, 6);
+      hand(state, ["IAR020"]);
+      state.players[0]!.arsenal = [{ instanceId: state.nextInstanceId++, cardId: "SUP165", owner: 0, faceDown: true }];
+      const cleave = state.players[0]!.hand[0]!;
+      expect(choice(state)).toMatchObject({ kind: "activate-ability", sourceInstanceId: cleave.instanceId });
     });
 
     it("trades a held six-power Cleave for another Gate once the turn's plays are done", () => {

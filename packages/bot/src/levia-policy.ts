@@ -7,13 +7,14 @@ import {
   incomingAttackDamage,
   intentCard,
   isAttack,
+  isOpeningTurn,
   optionCard,
   ownCards,
   pitchIds,
   pitchValue,
+  preferredPitchIntents,
   resourcePaymentPitchIds,
   resourcesAfterCost,
-  responseEvaluation,
   scoreArsenalChoice,
   scoreBinaryChoice,
   scoreDefenseIntent,
@@ -25,14 +26,17 @@ import {
 import { threatenedAttackDamage } from "./public-threat.js";
 import { DISRUPTION_HIT_CHANCE } from "./card-ev.js";
 import { probabilityAtLeastOne, totalCount, unseenCounts } from "./deck-knowledge.js";
-import { solverCard, type HeroSolverRules, type SolverCardPatch } from "./card-model.js";
+import { cardUses, solverCard, type HeroSolverRules, type SolverCardPatch } from "./card-model.js";
 import type { PendingEffect, SolverCard, SolverView } from "./hand-solver.js";
 import {
   arsenalCardValue, arsenalValuer, handResponse, heldCardValue, opportunityValuer, solveHand,
 } from "./hand-value.js";
 import { planTacticalTurn, type TacticalTurnPlan } from "./tactical-turn-planner.js";
+import { POINTS_PER_DAMAGE } from "./turn-planner.js";
+import type { LifeThreshold } from "./value.js";
 import {
   chooseLeviaMacro,
+  leviaLifeRisk,
   leviaMacroIntentBonus,
   leviaMacroPositionBonus,
   type LeviaMacroChoice,
@@ -58,6 +62,70 @@ function ownBloodDebt(input: BotPolicyInput): number {
   return input.view.players[input.seat].banish.filter((card) =>
     !card.faceDown && input.cards[card.cardId]?.keywords?.includes("Blood Debt")
   ).length;
+}
+
+/** Share of six-power cards assumed in an unknown deck. */
+const DEFAULT_TOP_SIX_SHARE = 0.6;
+
+/** Share of the bot's unseen deck with 6 or more power: the chance a banish
+ * from the top of the deck suppresses blood debt. Rockyard Rodeo's power is
+ * its weapon's wherever it is. */
+function topSixShare(input: BotPolicyInput): number {
+  const counts = unseenCounts(input, "own");
+  const total = counts ? totalCount(counts) : 0;
+  if (!counts || total === 0) return DEFAULT_TOP_SIX_SHARE;
+  const me = input.view.players[input.seat];
+  const weaponPower = Math.max(0, ...me.weapons.map((weapon) => input.cards[weapon.cardId]?.attack ?? 0));
+  let sixes = 0;
+  for (const [cardId, count] of counts) {
+    const data = input.cards[cardId];
+    const power = name(data) === "rockyard rodeo" ? weaponPower : data?.attack ?? 0;
+    if (power >= 6) sixes += count;
+  }
+  return sixes / total;
+}
+
+/** Chance a play banishes a card with 6 or more power: the top of the deck
+ * for Feeding Frenzy, Beckoning Hunger and Pull from Beyond; three random
+ * graveyard cards for Dread Screamer, Endless Maw and Shadowrealm Horror; a
+ * chosen six for Soul Harvest. */
+function sixBanishChance(data: CardData | undefined, input: BotPolicyInput): number {
+  const me = input.view.players[input.seat];
+  const sixes = me.graveyard.filter((card) => (input.cards[card.cardId]?.attack ?? 0) >= 6).length;
+  switch (name(data)) {
+    case "feeding frenzy":
+    case "beckoning hunger":
+    case "pull from beyond":
+      return me.deckCount > 0 ? topSixShare(input) : 0;
+    case "dread screamer":
+    case "endless maw":
+    case "shadowrealm horror":
+      return probabilityAtLeastOne(sixes, me.graveyard.length, 3);
+    case "soul harvest":
+      return sixes > 0 ? 1 : 0;
+    default:
+      return 0;
+  }
+}
+
+/** Solver flag: percent chance the line has already banished a six. */
+const SUPPRESSION_FLAG = "levia:suppressed";
+
+function suppressionBefore(view: SolverView): number {
+  return view.flag(SUPPRESSION_FLAG) / 100;
+}
+
+function suppressionAfter(view: SolverView, chance: number): number {
+  const before = suppressionBefore(view);
+  return before + (1 - before) * chance;
+}
+
+/** A held six-power card that can be banished from hand at instant speed,
+ * suppressing blood debt on demand. */
+function handBanishSuppressor(card: CardView, input: BotPolicyInput): boolean {
+  const data = input.cards[card.cardId];
+  return HAND_BANISH_INSTANTS.includes(name(data)) && (data?.attack ?? 0) >= 6 &&
+    input.view.players[input.seat].hand.some((held) => held.instanceId === card.instanceId);
 }
 
 function hasGate(input: BotPolicyInput): boolean {
@@ -218,7 +286,10 @@ function leviaRules(input: BotPolicyInput, gateMode: boolean): HeroSolverRules {
   const nextTurn = input.view.activePlayer !== input.seat;
   const banishedSix = !nextTurn && input.view.turnFacts?.players[input.seat]?.banishedSixPlusThisTurn === true;
   const weaponPower = Math.max(0, ...me.weapons.map((weapon) => input.cards[weapon.cardId]?.attack ?? 0));
-  const hexagoreSelfDamage = Math.max(0, 6 - ownBloodDebt(input));
+  const debt = ownBloodDebt(input);
+  const hexagoreSelfDamage = Math.max(0, 6 - debt);
+  // Life the evaluated turn's end phase drains unless a six is banished.
+  const playExposure = nextTurn || !banishedSix ? debt : 0;
   return {
     name: "levia",
     trackedTraits: [],
@@ -233,11 +304,27 @@ function leviaRules(input: BotPolicyInput, gateMode: boolean): HeroSolverRules {
         patch.goAgainIn = () => continues;
         if (continues) patch.uses = { reliableGoAgain: true };
       }
+      // The first play likely to banish a six earns the life it protects.
+      const chance = playExposure > 0 ? sixBanishChance(data, input) : 0;
+      if (chance > 0) {
+        patch.bonusIn = (view) => playExposure * (suppressionAfter(view, chance) - suppressionBefore(view));
+        patch.after = (view) => ({
+          flags: { [SUPPRESSION_FLAG]: Math.round(suppressionAfter(view, chance) * 100) },
+        });
+      }
+      if (debt > 0 && handBanishSuppressor(card, input)) {
+        // Held, it suppresses next turn's blood debt on demand.
+        const printed = cardUses(data, input, card).alternative ?? 0;
+        patch.uses = { ...patch.uses, alternative: Math.max(printed, debt) };
+      }
       switch (name(data)) {
         case "cleave the heavens":
           // Held, it can also be banished for a Gate at instant speed.
           if (gateMode && me.hand.some((held) => held.instanceId === card.instanceId)) {
-            patch.uses = { ...patch.uses, alternative: Math.max(0, banishGain(card, input)) };
+            patch.uses = {
+              ...patch.uses,
+              alternative: Math.max(patch.uses?.alternative ?? 0, banishGain(card, input)),
+            };
           }
           break;
         case "bloodrush bellow": {
@@ -353,7 +440,14 @@ function endOfTurnBanishScore(intent: GameIntent, card: CardView, input: BotPoli
     pitchIds(intent).length > 0 || (intent.kind === "activate-ability" && (intent.pitchRequired ?? 0) > 0) ||
     !me.hand.some((held) => held.instanceId === card.instanceId)) return -80;
   const gain = endOfTurnBanishGain(card, input);
-  return gain > 0 ? 3 + Math.min(0.9, gain / 10) : -80;
+  if (gain <= 0) return -80;
+  // A suppression that protects a large share of Levia's life ranks among the
+  // attacks, so the planner's root candidates include it.
+  const debt = ownBloodDebt(input);
+  const suppresses = debt > 0 && (input.cards[card.cardId]?.attack ?? 0) >= 6 &&
+    input.view.turnFacts?.players[input.seat]?.banishedSixPlusThisTurn !== true;
+  const urgent = suppresses && me.life <= debt * 2 + 6 ? Math.min(45, debt * 6) : 0;
+  return 3 + Math.min(0.9, gain / 10) + urgent;
 }
 
 /** Prevent with Fallen Herald when needed to survive or worth more than the card next turn. */
@@ -374,6 +468,7 @@ function heraldPreventionScore(card: CardView, input: BotPolicyInput): number {
 }
 
 const BLOOD_HARVEST_RESOURCES = 3;
+const EXPIRING_ACCESS_BONUS = 24;
 const PITCH_OPPORTUNITY_WEIGHT = 0.7;
 
 /** Score given up by spending a card as payment. */
@@ -413,6 +508,8 @@ function bloodHarvestPaymentScore(
   for (const attacker of [...me.hand, ...me.arsenal]) {
     if (attacker.instanceId === harvest.instanceId || legalAttackers.has(attacker.instanceId) ||
       !leviaAttackPlayable(attacker, input)) continue;
+    // Wrecker Romp's random discard needs another card after Blood Harvest leaves the hand.
+    if (name(input.cards[attacker.cardId]) === "wrecker romp" && me.hand.length < 3) continue;
     let missing = leviaAttackCost(input.cards[attacker.cardId], sash) - me.resources - BLOOD_HARVEST_RESOURCES;
     const pitchInstanceIds: number[] = [];
     const spare = me.hand.filter((held) =>
@@ -474,7 +571,14 @@ function scorePlay(intent: GameIntent, input: BotPolicyInput, own: ReadonlyMap<n
   } else if (named === "blood harvest" && intent.kind === "activate-ability") {
     score = Math.max(bloodHarvestPaymentScore(card, input, own), endOfTurnBanishScore(intent, card, input));
   } else if (named === "bloodrush bellow") {
-    score = followups() > 0 ? 72 + Math.min(followups(), 2) * 8 : -60;
+    // Its random discard must leave an attack: after paying, keep two other
+    // hand cards, or one beside a playable arsenal attack.
+    const spent = new Set([card.instanceId, ...pitchIds(intent)]);
+    const kept = me.hand.filter((held) => !spent.has(held.instanceId)).length;
+    const arsenalAttack = me.arsenal.some((held) => leviaAttackPlayable(held, input));
+    score = followups() > 0 && (kept >= 2 || (kept === 1 && arsenalAttack))
+      ? 72 + Math.min(followups(), 2) * 8
+      : -60;
   } else if (named === "call to the grave") {
     score = me.graveyard.length < 6 ? 58 : 38;
   } else if (named === "pull from beyond") {
@@ -500,6 +604,10 @@ function scorePlay(intent: GameIntent, input: BotPolicyInput, own: ReadonlyMap<n
     score = scoreDefenseReaction(data, input);
   } else if (isAttack(data) || data.cardType === "weapon") {
     score = 22 + (data.attack ?? 0) * 2;
+    // A Gate or Blasmophet permission already paid for expires with the turn
+    // and spends no hand card; play it before a hand attack competing for the
+    // same resources.
+    if (intent.kind === "play-from-zone" && card.playableFromSourceCardId !== undefined) score += EXPIRING_ACCESS_BONUS;
     if (bloodrushActive && data.classes?.includes("brute")) score += 30;
     if (["feeding frenzy", "dread screamer", "shadowrealm horror"].includes(named) && followups() > 0) {
       score += 20;
@@ -655,14 +763,21 @@ const leviaResponse: ResponseModel = {
   offensiveCards: (input) => [
     ...input.view.players[input.seat].hand, ...input.view.players[input.seat].arsenal,
   ],
-  evaluateResponse: (cards, input) => {
-    const response = handResponse(cards, input, leviaSolverRules);
-    // Blood debt drains each end phase; keep something to shed it with.
-    return ownBloodDebt(input) > 0 && cards.length === 0
-      ? responseEvaluation({ ...response, strategicAdjustment: response.strategicAdjustment - 4 })
-      : response;
-  },
+  // Blood-debt suppression is part of the solved line (see leviaRules).
+  evaluateResponse: (cards, input) => handResponse(cards, input, leviaSolverRules),
 };
+
+/** Low-life breakpoints for defense: at or below the exposed blood debt one
+ * unsuppressed end phase kills, a few life above it every turn must banish a
+ * six, and below Hexagore's self-damage band the weapon costs life. */
+function leviaLifeThresholds(input: BotPolicyInput): LifeThreshold[] {
+  const debt = ownBloodDebt(input);
+  return [
+    { atOrBelow: debt, cost: 8 },
+    { atOrBelow: debt + 4, cost: 4 },
+    { atOrBelow: 8, cost: 2 },
+  ];
+}
 
 function scoreDefense(
   intent: Extract<GameIntent, { kind: "defend" }>,
@@ -671,13 +786,15 @@ function scoreDefense(
 ): number {
   return scoreDefenseIntent(intent, input, own, {
     cardOpportunity,
+    lifeThresholds: leviaLifeThresholds(input),
     equipmentUseIsFree: (card, policy) => name(policy.cards[card.cardId]) === "savage sash" &&
       (card.defCounters ?? 0) === 0 && leviaSashEnablesPair(policy,
         [...policy.view.players[policy.seat].hand, ...policy.view.players[policy.seat].arsenal]
           .filter((held) => !intent.instanceIds.includes(held.instanceId)), true),
     ...leviaResponse,
-    // Play style: Levia leans slightly toward keeping her attack pair.
-    responseLossWeight: 1.1,
+    // Play style: neutral. Blood debt already prices her life into every
+    // line through the solver and the low-life band above.
+    responseLossWeight: 1,
   });
 }
 
@@ -709,6 +826,21 @@ function scoreCandidate(intent: GameIntent, input: BotPolicyInput, macro: LeviaM
   return score + leviaMacroIntentBonus(macro, intent, input);
 }
 
+// Gate activations and banish plays stretch a turn to several short actions.
+const LEVIA_MAX_SEARCH_NODES = 48;
+const LEVIA_MAX_TRANSITIONS = 400;
+const LEVIA_MAX_ROOT_CANDIDATES = 5;
+/** Rollout opponents never block, so a simulated kill is a nudge, not a goal. */
+const LEVIA_SIMULATED_WIN_BONUS = 4 * POINTS_PER_DAMAGE;
+/** Rollout advantage, in points, before it overrides the reactive sequencing. */
+const LEVIA_PLAN_OVERRIDE_MARGIN = 3 * POINTS_PER_DAMAGE;
+/** Life the rollout's line must save over the reactive line to override it. */
+const LEVIA_PLAN_OVERRIDE_RISK = 3;
+
+function sameIntent(left: GameIntent, right: GameIntent): boolean {
+  return JSON.stringify(left) === JSON.stringify(right);
+}
+
 export interface LeviaIntentDecision {
   intent: GameIntent;
   plan?: TacticalTurnPlan;
@@ -725,6 +857,11 @@ export function chooseLeviaIntentWithTrace(input: BotPolicyInput): LeviaIntentDe
     if (pass) return { intent: pass, macro };
   }
   const reactive = chooseReactive(input);
+  // The opening hand is replaced after turn one; the reactive setup rules
+  // (bank a Gate, keep blockers) stand without a rollout.
+  if (isOpeningTurn(input)) {
+    return { intent: enforceAllyTargetPolicy(input, enforceSpectraPolicy(input, reactive)), macro };
+  }
   const plan = planTacticalTurn(input, {
     chooseForced: (forced) => chooseReactive({ ...forced, state: undefined }),
     rules: leviaSolverRules,
@@ -732,14 +869,36 @@ export function chooseLeviaIntentWithTrace(input: BotPolicyInput): LeviaIntentDe
     scoreIntent: (intent, observed) => leviaMacroIntentBonus(macro, intent, observed),
     positionBonus: (observed, complete) =>
       leviaMacroPositionBonus(macro, input, observed, complete, leviaEngineValue),
-    maxSearchNodes: 12,
-    maxTransitions: 72,
-    maxRootCandidates: 4,
+    risk: (observed, complete) => leviaLifeRisk(input, observed, complete),
+    maxSearchNodes: LEVIA_MAX_SEARCH_NODES,
+    maxTransitions: LEVIA_MAX_TRANSITIONS,
+    maxRootCandidates: LEVIA_MAX_ROOT_CANDIDATES,
+    rankContinuations: true,
+    // Continuations keep the preferred pitch pattern per action; the root
+    // candidates still carry every pattern.
+    prepareCandidates: (candidates, observed, { depth }) =>
+      depth === 0 ? candidates : preferredPitchIntents(candidates, observed),
     maxForcedSteps: 48,
-    simulatedWinBonus: 0,
+    simulatedWinBonus: LEVIA_SIMULATED_WIN_BONUS,
   });
+  // The reactive rules sequence the turn; the rollout decides among roots they
+  // rank equally. It overrides a higher-ranked root only when its best line
+  // both scores clearly higher and costs Levia clearly less life, as when
+  // attacking would leave blood debt exposed that a banish suppresses; a
+  // single sampled rollout is not trusted on damage alone.
   const rootScore = (intent: GameIntent) => scoreCandidate(intent, input, macro);
-  const selected = plan && rootScore(plan.intent) >= rootScore(reactive) ? plan.intent : reactive;
+  const reactiveRoot = plan?.rootResults.find((root) => sameIntent(root.intent, reactive));
+  // Equal lines fall back to the reactive ranking.
+  const bestRoot = plan?.rootResults.reduce((best, root) =>
+    root.score > best.score || (root.score === best.score && rootScore(root.intent) > rootScore(best.intent))
+      ? root
+      : best);
+  const savesLife = reactiveRoot && bestRoot &&
+    bestRoot.score - reactiveRoot.score >= LEVIA_PLAN_OVERRIDE_MARGIN &&
+    reactiveRoot.evaluation.risk - bestRoot.evaluation.risk >= LEVIA_PLAN_OVERRIDE_RISK;
+  const selected = bestRoot && (savesLife || rootScore(bestRoot.intent) >= rootScore(reactive))
+    ? bestRoot.intent
+    : reactive;
   const intent = enforceAllyTargetPolicy(input, enforceSpectraPolicy(input, selected));
   return plan ? { intent, plan, macro } : { intent, macro };
 }
