@@ -98,8 +98,8 @@ Setup may pause on an ordinary scripted decision.
 
 A turn follows this sequence:
 
-1. Start-of-turn triggers use the stack but resolve automatically without
-   priority during the start phase.
+1. Start-of-turn triggers resolve automatically without priority during the
+   start phase. Mandatory ones resolve inline (see below).
 2. The action phase begins, beginning-of-action-phase triggers are created,
    and the active player has 1 action point before receiving priority over
    those layers.
@@ -109,6 +109,21 @@ A turn follows this sequence:
    arsenal decision, lets each player privately order their pitched cards onto
    the bottom of their deck, performs APUD cleanup,
    expires turn-scoped state, and starts the other player's turn.
+
+Inline turn triggers (deliberate deviation from CR 4.2, 4.4 and 6.6): a
+mandatory start-of-turn or end-of-turn trigger (a non-`optional`, untargeted
+`TriggerDef`, plus engine delayed triggers and pending destructions) resolves
+without a priority window or a projected stack layer. Neither player can
+respond during the Start or End Phase, so the stack is noise there. The
+controller still orders distinct simultaneous triggers through the ordinary
+`order-triggers` decision. `isInlineTurnLayer` identifies the layers; they ride
+the internal stack machinery, `continueStack` resolves them without opening
+priority, and `projectedStackLayers` filters them out. Announcement logs and
+effects are unchanged, and a scripted choice inside one still pauses as an
+ordinary decision. Optional triggers, targeted triggers and all beginning-of-
+action-phase triggers (which can be responded to) keep the stack. Changing which
+triggers are inline is an incompatible rules change needing a `rulesetVersion`
+bump.
 
 Played cards and triggered or activated abilities ride the stack. Effects run
 only when their layer resolves after both players pass. Go again grants its

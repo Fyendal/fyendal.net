@@ -2678,7 +2678,7 @@ describe("September 3 IAR spoilers", () => {
     expect(boardNames(g, 0)).toContain("Gate to i'Arathael");
   });
 
-  it("keeps the other Restless Templar's Decay visible while ordering both Gate triggers", () => {
+  it("hides the other Restless Templar's inline Decay while ordering both Gate triggers", () => {
     const g = scenario({ seats: [
       {
         hero: "rhinar",
@@ -2702,8 +2702,7 @@ describe("September 3 IAR spoilers", () => {
     expect(pd.options).toEqual([`${survivor!.instanceId}:0`, `${dying!.instanceId}:1`]);
     expect(pd.optionMessages?.map((message) => message?.id))
       .toEqual(["card.iar.forsaken.option.gate", "card.iar.forsaken.option.gate"]);
-    expect(projectStateFor(g.state, 0).stack.map((layer) => [layer.card?.instanceId, layer.labelMessage?.id]))
-      .toEqual([[survivor!.instanceId, "card.trigger.common.decay"]]);
+    expect(projectStateFor(g.state, 0).stack).toEqual([]);
   });
 
   it("Tome of Necrosis can discard an ally, then draws and untaps the hero", () => {

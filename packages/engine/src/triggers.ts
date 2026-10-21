@@ -271,6 +271,28 @@ export function anyWindowAction(state: GameStateInternal, runtime: EngineRuntime
   );
 }
 
+/**
+ * Mandatory start-of-turn and end-of-turn triggers are resolved by the engine
+ * without a priority window, ordering decision, or visible stack layer. This
+ * deliberately deviates from CR 4.2/4.4 and 6.6 (see DESIGN.md): neither
+ * player may respond during those phases anyway. The controller still orders
+ * distinct simultaneous triggers. Optional and targeted triggers keep the
+ * ordinary stack behavior. Beginning-of-
+ * action-phase triggers can be responded to and are never inline.
+ */
+export function isInlineTurnLayer(state: GameStateInternal, layer: StackLayer): boolean {
+  if (layer.card || layer.ability || layer.optional) return false;
+  if (layer.engineEffect) {
+    return layer.engineEffect.kind === "delayed-trigger";
+  }
+  if (layer.triggerIndex < 0) return false;
+  const source = layer.triggerSource ?? findCardAnywhere(state, layer.sourceInstanceId)?.card;
+  const def = source ? scriptOf(state, source.cardId, source)?.triggers?.[layer.triggerIndex] : undefined;
+  return def !== undefined &&
+    (def.event === "start-of-turn" || def.event === "end-of-turn") &&
+    !def.optional && !def.target;
+}
+
 /** Start and End Phase layers resolve as if every player passes priority.
  * Game-over is terminal; every other engine phase may expose a real window. */
 function phaseAllowsPriority(state: GameStateInternal): boolean {
@@ -1679,7 +1701,8 @@ export function continueStack(state: GameStateInternal,
   // may now have a newly legal instant-speed action before the step ends (CR
   // 5.3.7, 7.5.3-7.5.4). The unresolved attack-layer also remains open until
   // it resolves into the Attack Step.
-  const priorityAllowed = phaseAllowsPriority(state);
+  const priorityAllowed = phaseAllowsPriority(state) &&
+    !(top !== undefined && isInlineTurnLayer(state, top));
   const hasWindowAction = priorityAllowed && anyWindowAction(state, runtime);
   const combatStepContinuation = state.stackResume === "finish-link-resolution";
   // Played cards and activated abilities always create layers on the stack
@@ -1878,7 +1901,8 @@ function coalesceInterchangeableLayers(
  * and 4.4.1–4.4.3). Ordering simultaneous layers or declaring their targets
  * does not make an automatic phase interactive. */
 function openPlacedTriggers(state: GameStateInternal, runtime: EngineRuntime): void {
-  if (state.stack.length > 0 && phaseAllowsPriority(state)) openWindow(state);
+  const top = state.stack[0];
+  if (top && phaseAllowsPriority(state) && !isInlineTurnLayer(state, top)) openWindow(state);
   else continueStack(state, runtime);
 }
 

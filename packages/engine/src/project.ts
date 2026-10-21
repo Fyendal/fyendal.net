@@ -52,7 +52,7 @@ import { activatedAbilityUsage } from "./abilityRules.js";
 import { legalDefenderCards } from "./defense.js";
 import { wardPieces } from "./damageResolution.js";
 import { playFromSourceCardId } from "./playRules.js";
-import { windowPrompt, windowPromptMessage } from "./triggers.js";
+import { isInlineTurnLayer, windowPrompt, windowPromptMessage } from "./triggers.js";
 import { triggerLabelMessage } from "./triggerPresentation.js";
 import { projectOngoingEffects } from "./ongoingEffects.js";
 
@@ -808,7 +808,7 @@ function projectedStackLayers(
   revealAll: boolean,
 ): StackLayerView[] {
   const parked = state.pendingDecision?.triggerOrder?.baseStack ?? [];
-  return [...state.stack, ...parked].map((layer) => {
+  return [...state.stack, ...parked].filter((layer) => !isInlineTurnLayer(state, layer)).map((layer) => {
     // Card layers carry their card; trigger layers point at a source in a zone.
     // A face-down source remains secret to an opposing viewer.
     const card = layer.card ??
