@@ -37,6 +37,8 @@ export interface MotionAnchorSnapshot {
   cardSizedZones?: ReadonlySet<string>;
   /** Local announcement geometry; never changes the card's actual zone. */
   focusSources?: ReadonlyMap<number, MotionRect>;
+  /** Visual depth (2 or 3) of arena stacks, keyed like `cards`. */
+  stackDepths?: ReadonlyMap<string, number>;
 }
 
 export interface MeasuredMotionAnchors {
@@ -82,6 +84,8 @@ export interface MotionFlight {
   queueHoldSource?: true;
   destinationCoverVisual?: MotionVisual;
   destinationLayer?: "chain" | "stack";
+  /** The moving copy is an arena stack; draw its stacking edges while it slides. */
+  stackDepth?: number;
 }
 
 export function motionFlightDurationMs(
@@ -131,6 +135,7 @@ function motionRect(element: Element): MotionRect | null {
 /** Read all geometry before the coordinator performs any masking/class writes. */
 export function measureMotionAnchors(root: ParentNode): MeasuredMotionAnchors {
   const cards = new Map<string, MotionRect>();
+  const stackDepths = new Map<string, number>();
   const zones = new Map<string, MotionRect>();
   const cardSizedZones = new Set<string>();
   const cardElements = new Map<string, HTMLElement>();
@@ -144,10 +149,15 @@ export function measureMotionAnchors(root: ParentNode): MeasuredMotionAnchors {
       key,
       ...(element.dataset.motionCardAliases?.split(/\s+/).filter(Boolean) ?? []),
     ];
+    const stackDepth = Number(element.dataset.stackDepth);
     for (const presentationKey of keys) {
       if (cards.has(presentationKey)) continue;
       cards.set(presentationKey, rect);
-      cardElements.set(presentationKey, element);
+      if (stackDepth >= 2) stackDepths.set(presentationKey, stackDepth);
+      // An alias is a card merged into a multi-card arena stack. Its element is
+      // the whole stack, so masking it would hide the cards already there and
+      // their stacking effect until the arrival lands.
+      if (presentationKey === key) cardElements.set(presentationKey, element);
     }
   }
   for (const element of root.querySelectorAll<HTMLElement>("[data-motion-zone]")) {
@@ -175,7 +185,7 @@ export function measureMotionAnchors(root: ParentNode): MeasuredMotionAnchors {
     const rect = motionRect(element);
     if (Number.isSafeInteger(instanceId) && instanceId >= 0 && rect) focusSources.set(instanceId, rect);
   }
-  return { snapshot: { cards, zones, cardSizedZones, focusSources }, cardElements };
+  return { snapshot: { cards, zones, cardSizedZones, focusSources, stackDepths }, cardElements };
 }
 
 function endpoint(
@@ -480,10 +490,14 @@ export function resolveMotionBatch(
     const sourceRevealPresentationKey = event.kind === "move"
       ? exposedSourceTopKey(event, previous, current)
       : undefined;
+    const stackDepth = event.kind === "reflow" && event.destinationPresentationKey !== undefined
+      ? current.stackDepths?.get(event.destinationPresentationKey)
+      : undefined;
     const flight: MotionFlight = {
       id: `${batchId}:flight:${flights.length}`,
       phase,
       mode,
+      ...(stackDepth !== undefined ? { stackDepth } : {}),
       ...(event.kind === "reflow" && event.phase === "movement" ? { durationMs: MOTION_HAND_CLOSE_MS } : {}),
       start,
       end,

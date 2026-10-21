@@ -156,7 +156,8 @@ function MotionFlightOverlay({
     <div
       className={`game-motion-flight game-motion-flight-${flight.mode}${
         flight.holdAtSource ? " game-motion-flight-hold-source" : ""
-      }`}
+      }${flight.stackDepth ? " game-motion-stacked" : ""}`}
+      data-stack-depth={flight.stackDepth}
       style={flightStyle(flight, squareCardsEnabled)}
       onAnimationStart={(event: AnimationEvent<HTMLDivElement>) => {
         if (event.target === event.currentTarget) {
@@ -210,7 +211,8 @@ function QueuedSource({ flight, squareCardsEnabled }: { flight: MotionFlight; sq
     <div
       className={`game-motion-queued-source${
         flight.mode === "reflow" ? " game-motion-queued-source-reflow" : ""
-      }`}
+      }${flight.stackDepth ? " game-motion-stacked" : ""}`}
+      data-stack-depth={flight.stackDepth}
       style={rectStyle(flight.start)}
     >
       <MotionCardVisual

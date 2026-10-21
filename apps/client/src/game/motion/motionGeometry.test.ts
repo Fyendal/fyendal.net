@@ -1070,7 +1070,34 @@ describe("motion geometry", () => {
     expect(measured.snapshot.cards.get("0:board:8")).toEqual(rect(10, 20));
     expect(measured.snapshot.cards.get("0:board:9")).toEqual(rect(10, 20));
     expect(measured.snapshot.zones.get("0:hand")).toEqual(rect(0, 0, 600, 220));
-    expect(measured.cardElements.get("0:board:8")).toBe(cardElement);
+    expect(measured.cardElements.get("0:board:7")).toBe(cardElement);
+    expect(measured.cardElements.has("0:board:8")).toBe(false);
+  });
+
+  it("records the stack depth for a grouped board card and its aliases", () => {
+    const stackElement = {
+      dataset: {
+        motionCard: "0:board:7",
+        motionCardAliases: "0:board:8",
+        stackDepth: "3",
+      },
+      getBoundingClientRect: () => rect(10, 20),
+    } as unknown as HTMLElement;
+    const single = {
+      dataset: { motionCard: "0:board:9" },
+      getBoundingClientRect: () => rect(50, 20),
+    } as unknown as HTMLElement;
+    const root = {
+      querySelectorAll: (selector: string) => (
+        selector === "[data-motion-card]" ? [stackElement, single] : []
+      ),
+    } as unknown as ParentNode;
+
+    const { stackDepths } = measureMotionAnchors(root).snapshot;
+
+    expect(stackDepths?.get("0:board:7")).toBe(3);
+    expect(stackDepths?.get("0:board:8")).toBe(3);
+    expect(stackDepths?.has("0:board:9")).toBe(false);
   });
 
   it("prefers a card-sized zone anchor over a broad hidden-hand container", () => {
