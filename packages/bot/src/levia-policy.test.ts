@@ -308,7 +308,8 @@ describe("Levia Gates policy", () => {
     expect(decide().macro.goal).toBe("engine");
     state.turn = 3;
     expect(decide().macro.goal).toBe("pressure");
-    hand(state, ["WTR007", "IAR026", "IAR020", "MON140"]);
+    hand(state, ["WTR007", "IAR026", "IAR020", "IAR005"]);
+    state.players[0]!.resources = 3;
     state.players[0]!.equipment.chest = { instanceId: state.nextInstanceId++, cardId: "AKO004", owner: 0 };
     expect(decide().macro.goal).toBe("bloodrush");
     state.players[1]!.heroCardId = "MPG000";
@@ -685,15 +686,25 @@ describe("Levia Gates policy", () => {
     expect(state.players[0]!.resources).toBe(0);
   });
 
-  it("starts a Bloodrush turn when Sash lets two attacks and a blue make it worth ten", () => {
+  it("attacks instead of a Bellow whose discard would leave one attack", () => {
     const state = game();
     hand(state, ["WTR007", "IAR026", "IAR020", "MON140"]);
     state.players[0]!.equipment.chest = { instanceId: state.nextInstanceId++, cardId: "AKO004", owner: 0 };
+    const [bellow, frenzy] = state.players[0]!.hand;
     const selected = choice(state);
-    expect(selected.kind).toBe("play-card");
-    if (selected.kind !== "play-card") return;
-    const card = state.players[0]!.hand.find((item) => item.instanceId === selected.instanceId);
-    expect(card?.cardId).toBe("WTR007");
+    expect(selected).toMatchObject({ kind: "play-card", instanceId: frenzy!.instanceId });
+    expect(selected).not.toMatchObject({ instanceId: bellow!.instanceId });
+  });
+
+  it("rolls Scabskin before attacking under a Bellow when the pair has no go again", () => {
+    const state = bloodrushTurn(["IAR020", "IAR020"]);
+    state.players[0]!.resources = 4;
+    const scabskin = state.players[0]!.equipment.legs!;
+    expect(cardData[scabskin.cardId]?.name).toBe("Scabskin Leathers");
+    expect(choice(state)).toMatchObject({ kind: "activate-ability", sourceInstanceId: scabskin.instanceId });
+    // With the opponent in range of one attack, the attack comes first.
+    state.players[1]!.life = 5;
+    expect(choice(state)).toMatchObject({ kind: "play-card" });
   });
 
   it("holds a Bellow from arsenal while two non-sixes could be its discard", () => {
@@ -702,8 +713,8 @@ describe("Levia Gates policy", () => {
     state.players[0]!.equipment.chest = { instanceId: state.nextInstanceId++, cardId: "AKO004", owner: 0 };
     state.players[0]!.arsenal = [{ instanceId: state.nextInstanceId++, cardId: "WTR007", owner: 0, faceDown: true }];
     expect(choice(state)).not.toMatchObject({ kind: "play-from-arsenal" });
-    // One non-six is fine: it pays for the Bellow.
-    hand(state, ["IAR026", "IAR020", "ROS218"]);
+    // One non-six is fine: it pays for the Bellow, and Blood Harvest absorbs the discard.
+    hand(state, ["IAR026", "IAR020", "IAR005", "ROS218"]);
     expect(choice(state)).toMatchObject({ kind: "play-from-arsenal" });
   });
 
@@ -713,6 +724,61 @@ describe("Levia Gates policy", () => {
     const [bellow, frenzy] = state.players[0]!.hand;
     expect(choice(state)).toMatchObject({ kind: "play-card", instanceId: frenzy!.instanceId });
     expect(choice(state)).not.toMatchObject({ instanceId: bellow!.instanceId });
+  });
+
+  it("pitches Pull from Beyond to the hand's only attack instead of playing it", () => {
+    const state = game();
+    hand(state, ["IAR017", "IAR214"]);
+    const [hunger, pull] = state.players[0]!.hand;
+    expect(choice(state)).toMatchObject({
+      kind: "play-card", instanceId: hunger!.instanceId, pitchInstanceIds: [pull!.instanceId],
+    });
+  });
+
+  it("does not attack with a powerless Diabolic Offering", () => {
+    const state = game();
+    hand(state, ["DTD107", "WTR007"]);
+    const offering = state.players[0]!.hand[0]!;
+    expect(choice(state)).not.toMatchObject({ kind: "play-card", instanceId: offering.instanceId });
+  });
+
+  it("keeps a card back from a non-lethal block rather than skipping its next turn", () => {
+    let state = game();
+    hand(state, ["ROS218", "ROS218", "IAR037", "IAR037"]);
+    state.players[0]!.arsenal = [];
+    state.players[0]!.equipment = {};
+    state.players[0]!.life = 30;
+    state = defending(state);
+    const view = projectStateFor(state, 0);
+    const link = { ...view.chain.at(-1)!, damage: 12 };
+    const intent = chooseLeviaIntent({
+      seat: 0, view: { ...view, chain: [...view.chain.slice(0, -1), link] },
+      legal: legalIntents(state, 0), cards: cardData, state,
+    });
+    expect(["stage-defenders", "defend"]).toContain(intent.kind);
+    if (intent.kind === "stage-defenders" || intent.kind === "defend") {
+      expect(intent.instanceIds.length).toBeLessThanOrEqual(3);
+    }
+  });
+
+  it("blocks with a waiting Bellow only against a damaging on-hit", () => {
+    let state = game();
+    hand(state, ["WTR007", "ROS218"]);
+    state.players[0]!.arsenal = [{ instanceId: state.nextInstanceId++, cardId: "LEV011", owner: 0, faceDown: true }];
+    state.players[0]!.equipment = {};
+    const bellow = state.players[0]!.hand[0]!;
+    state = defending(state);
+    const legal = legalIntents(state, 0);
+    const view = projectStateFor(state, 0);
+    const choose = (onHit?: string) => {
+      const link = { ...view.chain.at(-1)!, damage: 5, onHitEffects: onHit ? [{ sourceCardId: "", text: onHit }] : [] };
+      const intent = chooseLeviaIntent({
+        seat: 0, view: { ...view, chain: [...view.chain.slice(0, -1), link] }, legal, cards: cardData, state,
+      });
+      return intent.kind === "stage-defenders" || intent.kind === "defend" ? [...intent.instanceIds] : [];
+    };
+    expect(choose()).not.toContain(bellow.instanceId);
+    expect(choose(COMMAND_AND_CONQUER)).toContain(bellow.instanceId);
   });
 
   it("keeps a Bellow its hand cannot send for the free arsenal instead of blocking with it", () => {
@@ -729,7 +795,7 @@ describe("Levia Gates policy", () => {
     }
   });
 
-  it("blocks with a Bellow its hand cannot send when the arsenal slot is stuck", () => {
+  it("keeps a Bellow out of a plain block even when the arsenal slot is stuck", () => {
     let state = game();
     hand(state, ["WTR007", "ROS218"]);
     state.players[0]!.arsenal = [{ instanceId: state.nextInstanceId++, cardId: "ROS218", owner: 0, faceDown: true }];
@@ -739,7 +805,7 @@ describe("Levia Gates policy", () => {
     const selected = choice(state);
     expect(["stage-defenders", "defend"]).toContain(selected.kind);
     if (selected.kind === "stage-defenders" || selected.kind === "defend") {
-      expect(selected.instanceIds).toContain(bellow.instanceId);
+      expect(selected.instanceIds).not.toContain(bellow.instanceId);
     }
   });
 
@@ -765,9 +831,10 @@ describe("Levia Gates policy", () => {
       .toBeGreaterThan(arsenalCardValue(screamer!, observed, leviaSolverRules));
   });
 
-  it("sends a Bellow from arsenal when the hand goes two attacks wide, then cashes Sash into it", () => {
+  it("sends a Bellow from arsenal when two attacks survive the discard, then cashes Sash into it", () => {
     const state = game();
-    hand(state, ["IAR026", "IAR020", "MON140"]);
+    // Blood Harvest is a third six to absorb the discard.
+    hand(state, ["IAR026", "IAR020", "IAR005", "MON140"]);
     state.players[0]!.flags.banishedSixPlusThisTurn = true;
     state.players[0]!.arsenal = [{ instanceId: state.nextInstanceId++, cardId: "WTR007", owner: 0, faceDown: true }];
     const sash = { instanceId: state.nextInstanceId++, cardId: "AKO004", owner: 0 };

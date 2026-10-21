@@ -38,6 +38,7 @@ import {
   defenseValueModifiers,
   effectiveDefense,
   grantsAuraAttackMarker,
+  linkWithStagedDefenders,
   stagedDefenseTotal,
 } from "./combatValues.js";
 import {
@@ -1312,7 +1313,8 @@ function projectState(
 
 /** Marginal defense of each legal defender relative to the staged set (for a
  * staged card, the defense unstaging it removes), measured exactly as the
- * staged total so delayed one-shot defense effects are included. */
+ * staged total so delayed one-shot defense effects are included, and the
+ * attack value the link takes once that card defends beside the staged set. */
 function projectedDefenderDefense(
   state: GameStateInternal,
   runtime: EngineRuntime,
@@ -1323,6 +1325,8 @@ function projectedDefenderDefense(
   if (!link) return [];
   const total = (cards: CardInstance[]) =>
     cards.length > 0 ? stagedDefenseTotal(state, runtime, link, cards) : 0;
+  const attack = (cards: readonly CardInstance[]) =>
+    computeAttack(state, runtime, linkWithStagedDefenders(state, link, cards));
   const base = total([...staged]);
   const stagedIds = new Set(staged.map((card) => card.instanceId));
   const { hand, arsenal, equipment } = legalDefenderCards(state, runtime, defenderSeat);
@@ -1331,5 +1335,6 @@ function projectedDefenderDefense(
     defense: Math.max(0, stagedIds.has(card.instanceId)
       ? base - total(staged.filter((other) => other.instanceId !== card.instanceId))
       : total([...staged, card]) - base),
+    attack: attack(stagedIds.has(card.instanceId) ? staged : [...staged, card]),
   }));
 }

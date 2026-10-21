@@ -1077,6 +1077,20 @@ export function equipmentDefense(
   return Math.max(0, modified);
 }
 
+/** `link` as it would stand with an uncommitted staged set declared as
+ * defenders, without moving cards or firing defend hooks. */
+export function linkWithStagedDefenders(
+  state: GameStateInternal,
+  link: ChainLinkState,
+  staged: readonly CardInstance[],
+): ChainLinkState {
+  return {
+    ...link,
+    defendingCards: [...link.defendingCards, ...staged.filter((card) => !cardHasType(state, card, "equipment"))],
+    defendingEquipment: [...link.defendingEquipment, ...staged.filter((card) => cardHasType(state, card, "equipment"))],
+  };
+}
+
 /** Defense contributed by an uncommitted staged set if those cards became
  * defenders on `link`. This mirrors the committed per-card calculation
  * without moving cards, firing defend hooks, or adding link-wide defense a
@@ -1089,11 +1103,7 @@ export function stagedDefenseTotal(
 ): number {
   const cards = staged.filter((card) => !cardHasType(state, card, "equipment"));
   const equipment = staged.filter((card) => cardHasType(state, card, "equipment"));
-  const stagedLink: ChainLinkState = {
-    ...link,
-    defendingCards: [...link.defendingCards, ...cards],
-    defendingEquipment: [...link.defendingEquipment, ...equipment],
-  };
+  const stagedLink = linkWithStagedDefenders(state, link, staged);
   // Preview the attachments that applyOneShotDefenseModifiers would create
   // if this staged set became the next defend event, without consuming the
   // live delayed modifiers or advancing the state's modifier id.

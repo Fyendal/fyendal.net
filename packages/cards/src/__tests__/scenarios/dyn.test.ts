@@ -218,7 +218,8 @@ describe("DYN — registration and heroes", () => {
     const firstBlock = s.state.players[1]!.hand[0]!;
     const blockers = s.state.players[1]!.hand.map((card) => card.instanceId);
     const handDefense = () => projectStateFor(s.state, 1).pendingDecision?.defenderDefense
-      ?.filter((entry) => blockers.includes(entry.instanceId));
+      ?.filter((entry) => blockers.includes(entry.instanceId))
+      .map(({ instanceId, defense }) => ({ instanceId, defense }));
     expect(handDefense()).toEqual(blockers.map((instanceId) => ({ instanceId, defense: 2 })));
     expect(projectStateFor(s.state, 0).pendingDecision?.defenderDefense).toBeUndefined();
     s.doRaw({ kind: "stage-defenders", instanceIds: [firstBlock.instanceId] });

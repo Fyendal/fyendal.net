@@ -330,6 +330,23 @@ describe("DTD — registration and core mechanics", () => {
       .expectResources(0, 1);
   });
 
+  it("projects a charged Boltyn's bonus onto each attack action defender", () => {
+    const s = scenario({
+      seats: [
+        { hero: "rhinar", heroKey: "boltyn|0", hand: ["beaming bravado|3", "banneret of vigor|2"] },
+        { hero: "dorinthea", hand: ["head jab|1", "nimblism|1"] },
+      ],
+    });
+    s.play("beaming bravado|3").chooseCard("banneret of vigor|2");
+    const view = projectStateFor(s.state, 1);
+    const link = [...view.chain].reverse().find((candidate) => !candidate.resolved)!;
+    const [headJab, nimblism] = s.state.players[1]!.hand;
+    const projected = (instanceId: number) =>
+      view.pendingDecision?.defenderDefense?.find((entry) => entry.instanceId === instanceId)?.attack;
+    expect(projected(headJab!.instanceId)).toBe(link.attackValue + 1);
+    expect(projected(nimblism!.instanceId)).toBe(link.attackValue);
+  });
+
   it("random-banish attacks recognize a six-power card banished for their own cost", () => {
     const s = scenario({
       seats: [

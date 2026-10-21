@@ -21,8 +21,11 @@ import {
   scoreDefenseReaction,
   scoreSpendCardChoice,
   type BotPolicyInput,
+  type DefenseCandidateContext,
+  type DefensePermission,
   type ResponseModel,
 } from "./policy.js";
+import { SIGNIFICANT_ON_HIT_VALUE } from "./on-hit.js";
 import { threatenedAttackDamage } from "./public-threat.js";
 import { DISRUPTION_HIT_CHANCE } from "./card-ev.js";
 import { probabilityAtLeastOne, totalCount, unseenCounts } from "./deck-knowledge.js";
@@ -33,7 +36,7 @@ import {
 } from "./hand-value.js";
 import { planTacticalTurn, type TacticalTurnPlan } from "./tactical-turn-planner.js";
 import { POINTS_PER_DAMAGE } from "./turn-planner.js";
-import type { LifeThreshold } from "./value.js";
+import { valueBreakdown, type LifeThreshold, type ValueBreakdown } from "./value.js";
 import {
   chooseLeviaMacro,
   leviaLifeRisk,
@@ -236,12 +239,15 @@ function gateSetupValue(card: CardView, input: BotPolicyInput, own: ReadonlyMap<
   return affordableTarget ? 46 : !convertible ? 24 : -80;
 }
 
-/** Whether the card's pitch is what funds this turn's attack pair. */
-function fundsAttackPair(card: CardView, input: BotPolicyInput): boolean {
+/** Whether the card's pitch is what funds this turn's attack pair, or (for
+ * `any`) its only attack. */
+function fundsAttackPair(card: CardView, input: BotPolicyInput, any = false): boolean {
   const me = input.view.players[input.seat];
   const reserve = [...me.hand, ...me.arsenal];
-  return leviaAttackPair(input, reserve) &&
-    !leviaAttackPair(input, reserve.filter((held) => held.instanceId !== card.instanceId));
+  const without = reserve.filter((held) => held.instanceId !== card.instanceId);
+  if (leviaAttackPair(input, reserve) && !leviaAttackPair(input, without)) return true;
+  return any && affordableFollowups(input, new Set()) > 0 &&
+    affordableFollowups(input, new Set([card.instanceId])) === 0;
 }
 
 function affordableFollowups(input: BotPolicyInput, spent: ReadonlySet<number>): number {
@@ -614,9 +620,9 @@ function scorePlay(intent: GameIntent, input: BotPolicyInput, own: ReadonlyMap<n
       ? 72 + Math.min(turn.width, BLOODRUSH_PLAN_WIDTH) * 8
       : -60;
   } else if (named === "call to the grave") {
-    score = fundsAttackPair(card, input) ? 20 : me.graveyard.length < 6 ? 58 : 38;
+    score = fundsAttackPair(card, input, true) ? 20 : me.graveyard.length < 6 ? 58 : 38;
   } else if (named === "pull from beyond") {
-    score = fundsAttackPair(card, input) ? 20
+    score = fundsAttackPair(card, input, true) ? 20
       : bloodrushActive && hasDirectAttack(input, own) ? 12 : !hasGate(input) ? 60 : 42;
   } else if (named === "goremass summoning") {
     score = fundsAttackPair(card, input) ? 20
@@ -627,9 +633,27 @@ function scorePlay(intent: GameIntent, input: BotPolicyInput, own: ReadonlyMap<n
   } else if (named === "doomsday") {
     score = 75;
   } else if (named === "scabskin leathers") {
+    // Under an active Bellow the roll comes before the attacks, so a chain
+    // whose go-again card was discarded can still go wide. Otherwise a one
+    // whiffs the turn, which exposed blood debt cannot afford.
     const reserve = [...me.hand, ...me.arsenal];
-    score = me.actionPoints < 2 && me.life > 5 &&
-      !leviaAttackPair(input, reserve) && leviaAttackPair(input, reserve, { grantGoAgain: true }) ? 53 : -55;
+    const exposed = ownBloodDebt(input) > 0 &&
+      input.view.turnFacts?.players[input.seat]?.banishedSixPlusThisTurn !== true;
+    // Never gamble the action point while one attack already kills.
+    const opponentLife = input.view.players[1 - input.seat]!.life;
+    const lethalAttack = input.legal.some((candidate) => {
+      if (candidate.kind !== "play-card" && candidate.kind !== "play-from-arsenal" &&
+        candidate.kind !== "play-from-zone") return false;
+      const attacker = intentCard(candidate, own);
+      const attackerData = attacker && input.cards[attacker.cardId];
+      if (!attackerData || !isAttack(attackerData)) return false;
+      const bellowed = bloodrushActive && attackerData.classes?.includes("brute") ? 2 : 0;
+      return (attackerData.attack ?? 0) + bellowed >= opponentLife;
+    });
+    score = me.actionPoints < 2 && me.life > 5 && !lethalAttack && (bloodrushActive || !exposed) &&
+      !leviaAttackPair(input, reserve) && leviaAttackPair(input, reserve, { grantGoAgain: true })
+      ? (bloodrushActive ? 85 : 53)
+      : -55;
   } else if (named === "fyendal's spring tunic") {
     score = followups() > 0 ? 32 : -30;
   } else if (named === "hex gauntlet") {
@@ -638,6 +662,10 @@ function scorePlay(intent: GameIntent, input: BotPolicyInput, own: ReadonlyMap<n
     score = followups() > 0 ? 35 : -35;
   } else if (data.cardType === "defense-reaction") {
     score = scoreDefenseReaction(data, input);
+  } else if (named === "diabolic offering" &&
+    input.view.turnFacts?.players[input.seat]?.banishedSixPlusThisTurn !== true) {
+    // Zero power until a six is banished this turn.
+    score = -30;
   } else if (isAttack(data) || data.cardType === "weapon") {
     score = 22 + (data.attack ?? 0) * 2;
     // A Gate or Blasmophet permission already paid for expires with the turn
@@ -815,6 +843,31 @@ function leviaLifeThresholds(input: BotPolicyInput): LifeThreshold[] {
   ];
 }
 
+/** Tempo cost of a block that leaves the hand empty, or with one card: the
+ * next turn has no pitch for Hexagore and nothing to banish, so it is skipped
+ * rather than merely weakened. Lethal attacks are exempt. */
+const EMPTY_HAND_COST = 6;
+const ONE_CARD_HAND_COST = 1.5;
+
+/** The Bellow blocks only when the block answers a damaging on-hit, or is
+ * needed to survive; otherwise it waits for its turn. */
+function leviaBellowBlocks(candidate: DefenseCandidateContext): DefensePermission {
+  const { input } = candidate;
+  const bellow = candidate.chosen.some((card) =>
+    name(input.cards[card.cardId]) === "bloodrush bellow" &&
+    input.view.players[input.seat].hand.some((held) => held.instanceId === card.instanceId));
+  if (!bellow || candidate.lethal) return "allow";
+  return candidate.stopsHit && candidate.onHit.value >= SIGNIFICANT_ON_HIT_VALUE ? "allow" : "forbid";
+}
+
+function leviaKeepsCards(value: ValueBreakdown, candidate: DefenseCandidateContext): ValueBreakdown {
+  if (candidate.lethal) return value;
+  const me = candidate.input.view.players[candidate.input.seat];
+  const left = me.hand.filter((card) => !candidate.consumedIds.has(card.instanceId)).length;
+  const cost = left === 0 ? EMPTY_HAND_COST : left === 1 ? ONE_CARD_HAND_COST : 0;
+  return cost === 0 ? value : valueBreakdown({ ...value, strategicAdjustment: value.strategicAdjustment - cost });
+}
+
 function scoreDefense(
   intent: Extract<GameIntent, { kind: "defend" }>,
   input: BotPolicyInput,
@@ -822,6 +875,8 @@ function scoreDefense(
 ): number {
   return scoreDefenseIntent(intent, input, own, {
     cardOpportunity,
+    adjustCycleValue: leviaKeepsCards,
+    defensePermission: leviaBellowBlocks,
     lifeThresholds: leviaLifeThresholds(input),
     equipmentUseIsFree: (card, policy) => name(policy.cards[card.cardId]) === "savage sash" &&
       (card.defCounters ?? 0) === 0 && leviaSashEnablesPair(policy,

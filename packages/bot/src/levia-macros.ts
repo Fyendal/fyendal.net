@@ -25,14 +25,16 @@ function enginePermanents(cards: readonly CardView[], input: BotPolicyInput): nu
     .includes(cardName(input.cards[card.cardId]))).length;
 }
 
-function matchup(input: BotPolicyInput): LeviaMacroChoice["matchup"] {
+/** Public matchup prior from the revealed opposing hero. */
+export function leviaMatchup(input: BotPolicyInput): LeviaMacroChoice["matchup"] {
   const opponent = cardName(input.cards[input.view.players[1 - input.seat]!.heroCardId]);
   if (opponent.includes("oscilio") || opponent.includes("kano") || opponent.includes("blaze")) return "wizard";
   if (opponent.includes("levia")) return "mirror";
   if (opponent.includes("riptide")) return "trap";
   if (opponent.includes("arakni") || opponent.includes("uzuri")) return "assassin";
   if (["jarl", "bravo", "pleiades", "mortimer"].some((name) => opponent.includes(name))) return "grindy";
-  if (["fai", "kassai", "boltyn", "teklovossen", "vynnset"].some((name) => opponent.includes(name))) return "race";
+  if (["fai", "kassai", "boltyn", "teklovossen", "vynnset", "cindra", "katsu", "ira", "dash"]
+    .some((name) => opponent.includes(name))) return "race";
   return "default";
 }
 
@@ -40,7 +42,7 @@ function matchup(input: BotPolicyInput): LeviaMacroChoice["matchup"] {
 export function chooseLeviaMacro(input: BotPolicyInput): LeviaMacroChoice {
   const me = input.view.players[input.seat];
   const opponent = input.view.players[1 - input.seat]!;
-  const context = matchup(input);
+  const context = leviaMatchup(input);
   const debt = bloodDebt(me.banish, input);
   const suppressed = input.view.turnFacts?.players[input.seat]?.banishedSixPlusThisTurn === true;
   const canRedeem = input.legal.some((intent) =>

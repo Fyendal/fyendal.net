@@ -123,8 +123,8 @@ describe("optimistic defender staging", () => {
     // A delayed -1 (Spider's Bite) applies to each attack action defender.
     view.pendingDecision.stagedDefense = 2;
     view.pendingDecision.defenderDefense = [
-      { instanceId: 11, defense: 2 },
-      { instanceId: 12, defense: 2 },
+      { instanceId: 11, defense: 2, attack: 4 },
+      { instanceId: 12, defense: 2, attack: 4 },
     ];
 
     const both = optimisticDefenderView(view, 0, [11, 12]);

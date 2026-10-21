@@ -733,6 +733,10 @@ export type EffectLifetime = "once" | "chain" | "turn" | "later" | "game";
 export interface DefenderDefenseView {
   instanceId: number;
   defense: number;
+  /** Attack value of the current link once this card (with the staged set)
+   *  defends, so defenders that change the attack's power are priced before
+   *  the commit */
+  attack: number;
 }
 
 export interface OngoingEffectView {

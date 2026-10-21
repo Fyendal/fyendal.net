@@ -3,12 +3,14 @@ import { createGame, projectStateFor } from "@fyendal/engine";
 import type { CardData, CardView, GameIntent } from "@fyendal/shared";
 import { describe, expect, it } from "vitest";
 import {
+  allyLethalThreshold,
   chooseArcaneBarrierIntent,
   chooseScoredIntent,
   chooseSharedPolicyIntent,
-  allyLethalThreshold,
+  defendersAttackChange,
   enforceAllyTargetPolicy,
   enforceSpectraPolicy,
+  MAX_OPTIONAL_DEFENDERS,
   nextTurnArsenalOpportunityCost,
   ownCards,
   plannedDefenseReactionPlan,
@@ -16,10 +18,9 @@ import {
   scoreDefenseIntent,
   scoreDefenseIntentWithTrace,
   spendsOpeningArsenalReserve,
-  wagerRewardValue,
-  MAX_OPTIONAL_DEFENDERS,
   type BotPolicyInput,
   type BotPolicyScorers,
+  wagerRewardValue,
 } from "./policy.js";
 import { botDefinitions } from "./registry.js";
 
@@ -172,6 +173,41 @@ describe("non-lethal Arcane Barrier", () => {
       expect(bot.chooseIntent(input)).toEqual({ kind: "choose", optionId: "pay 1" });
     });
   }
+});
+
+describe("defenders that change the attack's power", () => {
+  function projectedFixture() {
+    const fixture = cycleDefenseFixture(
+      [{ id: "PUMPED_DEFENDER", attack: 3, defense: 2 }, { id: "PLAIN_DEFENDER", attack: 0, defense: 2 }],
+      { attackValue: 4, life: 3 },
+    );
+    const [pumped, plain] = fixture.held;
+    fixture.input.view.pendingDecision = {
+      ...fixture.input.view.pendingDecision!,
+      defenderDefense: [
+        { instanceId: pumped!.instanceId, defense: 2, attack: 5 },
+        { instanceId: plain!.instanceId, defense: 2, attack: 4 },
+      ],
+    };
+    return { ...fixture, pumped: pumped!, plain: plain! };
+  }
+
+  it("reads each defender's projected attack value and keeps a set's largest change", () => {
+    const { input, pumped, plain } = projectedFixture();
+    expect(defendersAttackChange(input, [pumped])).toBe(1);
+    expect(defendersAttackChange(input, [plain])).toBe(0);
+    expect(defendersAttackChange(input, [pumped, plain])).toBe(1);
+    const unprojected = { ...input, view: { ...input.view, pendingDecision: null } };
+    expect(defendersAttackChange(unprojected, [pumped])).toBe(0);
+  });
+
+  it("plans survival against the attack as pumped by the chosen defenders", () => {
+    const { input, own, model, pumped, plain } = projectedFixture();
+    const trace = (card: CardView) =>
+      scoreDefenseIntentWithTrace({ kind: "defend", instanceIds: [card.instanceId] }, input, own, model);
+    expect(trace(plain).survives).toBe(true);
+    expect(trace(pumped).survives).toBe(false);
+  });
 });
 
 describe("opening-turn defense", () => {
@@ -1114,7 +1150,7 @@ describe("projected defender defense", () => {
     expect(score()).toMatchObject({ survives: true, stopsHit: true });
 
     fixture.input.view.pendingDecision!.defenderDefense =
-      ids.map((instanceId) => ({ instanceId, defense: 1 }));
+      ids.map((instanceId) => ({ instanceId, defense: 1, attack: 4 }));
     expect(score()).toMatchObject({ lethal: true, survives: false, stopsHit: false });
   });
 });

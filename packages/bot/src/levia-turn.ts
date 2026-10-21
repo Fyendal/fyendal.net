@@ -86,7 +86,7 @@ export const BLOODRUSH_MIN_DAMAGE = 10;
 export interface LeviaBloodrushTurn {
   /** Attacks the turn chains. */
   readonly width: number;
-  /** Damage of the strongest `width` attacks it can fund. */
+  /** Expected damage of the chained attacks, net of the one the discard may take. */
   readonly damage: number;
   /** The discard is certain to be a six: a miss ends the turn unplayed. */
   readonly hit: boolean;
@@ -109,7 +109,8 @@ export function leviaSixPower(card: CardView, input: BotPolicyInput): boolean {
 
 /** Projection of the turn a Bellow could send now. Each other held card is
  * either sent or pitched (a sent hand card costs its price plus its pitch),
- * funded cheapest first; a likely hit credits one more attack from the draw. */
+ * funded cheapest first. The discard may take a sent hand attack, so the
+ * damage is net of that expected loss; arsenal and banished attacks are safe. */
 export function leviaBloodrushTurn(input: BotPolicyInput, bellow: CardView): LeviaBloodrushTurn {
   const me = input.view.players[input.seat];
   const held = [...me.hand, ...me.arsenal].filter((card) => card.instanceId !== bellow.instanceId);
@@ -135,16 +136,31 @@ export function leviaBloodrushTurn(input: BotPolicyInput, bellow: CardView): Lev
   }
   if (sent.length === 0) return { width: 0, damage: 0, hit: false };
   const others = held.filter(inHand);
+  const nonSix = others.filter((card) => !leviaSixPower(card, input)).length;
   // One non-six may pay for the Bellow itself.
-  const hit = others.length > 0 && others.filter((card) => !leviaSixPower(card, input)).length <= 1;
-  const bellowContinues = hit ? 1 : 0;
+  const hit = others.length > 0 && nonSix <= 1;
   const continues = sent.filter((card) => leviaAttackContinues(card, input)).length;
-  const width = Math.min(sent.length + bellowContinues, continues + bellowContinues + 1);
-  const damage = sent.map((card) => leviaBellowedPower(input.cards[card.cardId]))
-    .sort((left, right) => right - left)
-    .slice(0, width)
-    .reduce((total, power) => total + power, 0);
-  return { width, damage, hit };
+  const width = Math.min(sent.length, continues + 1);
+  const chained = [...sent]
+    .sort((left, right) => leviaBellowedPower(input.cards[right.cardId]) - leviaBellowedPower(input.cards[left.cardId]))
+    .slice(0, width);
+  const base = chained.reduce((total, card) => total + leviaBellowedPower(input.cards[card.cardId]), 0);
+  // The discard hits one of the hand cards left after paying: each chained
+  // hand attack is lost with that probability.
+  const price = (card: CardView) => effectiveCost(card) - (inHand(card) ? input.cards[card.cardId]?.pitch ?? 0 : 0);
+  let needed = (input.cards[bellow.cardId]?.cost ?? 0) - me.resources +
+    sent.reduce((total, card) => total + price(card), 0);
+  let pitched = 0;
+  for (const card of others.filter((card) => !sent.includes(card))
+    .sort((left, right) => (input.cards[right.cardId]?.pitch ?? 0) - (input.cards[left.cardId]?.pitch ?? 0))) {
+    if (needed <= 0 || (input.cards[card.cardId]?.pitch ?? 0) === 0) break;
+    needed -= input.cards[card.cardId]?.pitch ?? 0;
+    pitched++;
+  }
+  const left = Math.max(1, others.length - pitched);
+  const fromHand = chained.filter(inHand);
+  const expectedLoss = fromHand.reduce((total, card) => total + leviaBellowedPower(input.cards[card.cardId]), 0) / left;
+  return { width, damage: base - expectedLoss, hit };
 }
 
 /** An attack's power under the Bellow. */

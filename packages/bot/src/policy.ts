@@ -939,6 +939,22 @@ function isBladeBeckoner(card: CardView, input: BotPolicyInput): boolean {
   return input.cards[card.cardId]?.name.trim().toLowerCase().startsWith("blade beckoner ") === true;
 }
 
+/** Power the current attack gains (or loses) once `defenders` are declared,
+ * from the engine's defend projection: the link's attack value is computed
+ * from its defenders, so a charged Boltyn's bonus against attack action
+ * defenders is missing from the link until the block commits. The projection
+ * prices each defender added alone, so a set takes its largest change. */
+export function defendersAttackChange(input: BotPolicyInput, defenders: readonly CardView[]): number {
+  const link = currentLink(input);
+  const decision = input.view.pendingDecision;
+  if (!link || decision?.kind !== "defend" || decision.player !== input.seat) return 0;
+  const changes = defenders.flatMap((card) => {
+    const projected = decision.defenderDefense?.find((entry) => entry.instanceId === card.instanceId);
+    return projected ? [projected.attack - link.attackValue] : [];
+  });
+  return changes.length > 0 ? Math.max(...changes) : 0;
+}
+
 /** Defense a card would contribute if it defended the current attack. */
 export function defenderDefense(card: CardView, input: BotPolicyInput): number {
   // The engine's projection includes delayed defend-event effects, such as
@@ -1406,15 +1422,17 @@ export function scoreDefenseIntentWithTrace(
       ...traceDefaults(),
     };
   }
-  const incoming = Math.max(0, link.damage);
   const me = input.view.players[input.seat];
+  const chosen = intent.instanceIds.flatMap((id) => own.get(id) ?? []);
+  // Declaring the defenders can itself change the attack's power.
+  const pump = defendersAttackChange(input, chosen);
+  const incoming = Math.max(0, Math.max(0, link.damage) + pump);
   // Survival is planned against every public pump the attacker can still
   // spend after blocks. Direct damage ignores blocks, so it lowers the life
   // the combat damage must stay under instead.
-  const threatenedCombat = Math.max(incoming, threatenedCombatDamage(input));
+  const threatenedCombat = Math.max(incoming, threatenedCombatDamage(input) + pump, 0);
   const survivableLife = me.life - publicCombatThreat(input).directDamage;
   const lethal = threatenedCombat >= survivableLife;
-  const chosen = intent.instanceIds.flatMap((id) => own.get(id) ?? []);
   if (model.canUseDefender && chosen.some((card) => !model.canUseDefender!(card, input))) {
     return {
       score: -1_000_000,
