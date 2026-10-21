@@ -751,15 +751,9 @@ export function assignDefenders(
 export function resolveDefendEventLayer(state: GameStateInternal,
   runtime: EngineRuntime, layer: StackLayer): void {
   const link = currentLink(state);
-  if (!link) {
-    logPublic(state, gameLogMessage(
-      "A defend trigger resolves without effect (the chain link is gone)",
-      "engine.log.trigger.defend.fizzles.chain.gone",
-    ));
-    return;
-  }
   const effect = layer.engineEffect;
-  if (effect?.kind === "on-defend-hook") {
+  if (effect?.kind === "on-defend-hook" && (link ||
+    scriptOf(state, effect.source.cardId, effect.source)?.onDefendResolvesWithoutChainLink === true)) {
     const source = findCardAnywhere(state, layer.sourceInstanceId)?.card ?? effect.source;
     // A trap's defend trigger is the trap triggering ("whenever a trap you
     // control triggers"); announce it for every trap rather than per script.
@@ -771,6 +765,13 @@ export function resolveDefendEventLayer(state: GameStateInternal,
     // Defender-side "when this defends, intimidate" (Scowling Flesh Bag) queues
     // on the defending seat; resolve it as the trigger resolves.
     consumeQueuedIntimidate(state, runtime, layer.seat);
+    return;
+  }
+  if (!link) {
+    logPublic(state, gameLogMessage(
+      "A defend trigger resolves without effect (the chain link is gone)",
+      "engine.log.trigger.defend.fizzles.chain.gone",
+    ));
     return;
   }
   if (effect?.kind === "on-friendly-defended-hook") {

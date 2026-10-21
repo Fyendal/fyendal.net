@@ -10,6 +10,7 @@ import {
   type HeroRulesFactory,
 } from "./hand-value.js";
 import { strategicPitchIntents, type BotPolicyInput } from "./policy.js";
+import { reserveLethalUpkeep } from "./upkeep.js";
 
 export const DEFAULT_MAX_SEARCH_NODES = 64;
 export const DEFAULT_MAX_SEARCH_TRANSITIONS = 512;
@@ -413,13 +414,13 @@ function applySimulationIntent(
 }
 
 function observation(state: GameState, root: TurnPlannerRoot, publicGameId: string): BotPolicyInput {
-  return {
+  return reserveLethalUpkeep({
     seat: root.seat,
     view: projectStateFor(state, root.seat, publicGameId),
     legal: legalIntents(state, root.seat),
     cards: root.cards,
     ...(root.decklists ? { decklists: root.decklists } : {}),
-  };
+  });
 }
 
 /** Deterministic policy-relevant projection-and-legality fingerprint used for

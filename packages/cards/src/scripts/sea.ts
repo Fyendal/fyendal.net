@@ -2358,10 +2358,15 @@ Object.assign(sea, {
           prompt: decisionPrompt("Turn a blue arrow face-up", "card.common.cost.bluearrow.faceup"),
         },
       ],
+      // Another face-up blue arrow may already share the arsenal; only the
+      // card turned face-up to pay the cost gets go again.
+      onCostPaid(ctx: ScriptCtx, paidCards) {
+        const arrow = paidCards.find((card) => isArrow(ctx, card) && ctx.cardColor(card) === 3);
+        ctx.setState("sarongArrow", arrow?.instanceId ?? 0);
+      },
       onActivate(ctx: ScriptCtx) {
-        const arrow = ctx
-          .player(ctx.seat)
-          .arsenal.find((card) => !card.faceDown && isArrow(ctx, card) && ctx.cardColor(card) === 3);
+        const arrowId = ctx.getState("sarongArrow");
+        const arrow = ctx.player(ctx.seat).arsenal.find((card) => card.instanceId === arrowId && !card.faceDown);
         if (arrow) ctx.grantCardKeyword(arrow.instanceId, "go again");
       },
     },

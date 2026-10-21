@@ -18,6 +18,7 @@ import {
   type LifeThreshold,
   type ValueBreakdown,
 } from "./value.js";
+import { chooseUpkeepPayment } from "./upkeep.js";
 
 export interface BotPolicyInput {
   seat: 0 | 1;
@@ -567,6 +568,8 @@ export function scoreBinaryChoice(
 export function chooseSharedPolicyIntent(input: BotPolicyInput): GameIntent | undefined {
   const decision = input.view.pendingDecision;
   if (!decision) return undefined;
+  const upkeep = chooseUpkeepPayment(input);
+  if (upkeep) return upkeep;
 
   const incoming = arcaneBarrierIncoming(decision);
   if (incoming === undefined) return undefined;

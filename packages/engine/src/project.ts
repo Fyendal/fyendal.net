@@ -716,7 +716,7 @@ function projectedAdditionalTargets(
   });
 }
 
-/** The recipient-type shield an attack-target ally would spend (mirrors
+/** The recipient-type shields an attack-target ally would spend (mirrors
  * dealAllyDamage), recorded as spent so later targets do not count it. */
 function projectedAllyPrevention(
   state: GameStateInternal,
@@ -728,21 +728,27 @@ function projectedAllyPrevention(
 ): { amount: number; modifiers: CombatValueModifier[] } | undefined {
   if (damage <= 0 || link.flags.unpreventable === true) return undefined;
   const recipientTypes = cardTypesOf(state, ally);
-  const shield = state.modifiers.find((modifier) =>
-    !modifier.consumed &&
-    !spentShields.has(modifier) &&
-    modifier.seat === targetSeat &&
-    modifier.scope === "until-end-of-turn" &&
-    Number(modifier.preventNextDamageAmount ?? 0) > 0 &&
-    modifier.appliesToDamageRecipientType !== undefined &&
-    recipientTypes.includes(modifier.appliesToDamageRecipientType.toLowerCase())
-  );
-  if (!shield) return undefined;
-  spentShields.add(shield);
-  const amount = Math.min(damage, Number(shield.preventNextDamageAmount));
-  const sourceCardId = shield.sourceCardId ??
-    findCardAnywhere(state, shield.sourceInstanceId)?.card.cardId ?? "";
-  return { amount, modifiers: [{ sourceInstanceId: shield.sourceInstanceId, sourceCardId, amount }] };
+  let total = 0;
+  const modifiers: CombatValueModifier[] = [];
+  for (const shield of state.modifiers) {
+    if (total >= damage) break;
+    if (
+      shield.consumed ||
+      spentShields.has(shield) ||
+      shield.seat !== targetSeat ||
+      shield.scope !== "until-end-of-turn" ||
+      !(Number(shield.preventNextDamageAmount ?? 0) > 0) ||
+      shield.appliesToDamageRecipientType === undefined ||
+      !recipientTypes.includes(shield.appliesToDamageRecipientType.toLowerCase())
+    ) continue;
+    spentShields.add(shield);
+    const amount = Math.min(damage - total, Number(shield.preventNextDamageAmount));
+    total += amount;
+    const sourceCardId = shield.sourceCardId ??
+      findCardAnywhere(state, shield.sourceInstanceId)?.card.cardId ?? "";
+    modifiers.push({ sourceInstanceId: shield.sourceInstanceId, sourceCardId, amount });
+  }
+  return modifiers.length ? { amount: total, modifiers } : undefined;
 }
 
 function projectedStackContext(state: GameStateInternal): string | undefined {

@@ -592,6 +592,38 @@ describe("ROS — Lightning and Runeblade", () => {
     expect(g.state.chain).toHaveLength(0);
   });
 
+  it("Face Purgatory's stacked defend trigger still resolves after Gone in a Flash closes the chain", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", hand: ["gone in a flash|1", "sigil of lightning|3", "nimblism|3"] },
+        {
+          hero: "dorinthea",
+          equipment: { head: "face purgatory|0" },
+          hand: ["wounding blow|1", "nimblism|1"],
+          deck: ["sink below|1"],
+        },
+      ],
+    });
+
+    g.play("gone in a flash|1")
+      .blockWith("face purgatory|0", "wounding blow|1", "nimblism|1")
+      .react("sigil of lightning|3", { settle: false })
+      .passPriority()
+      .passPriority();
+    g.doRaw({ kind: "choose", optionId: "yes" });
+    expect(g.state.chain).toHaveLength(0);
+
+    g.settle();
+    expect(g.state.pendingDecision?.chooseHook).toBe("face-purgatory-discard");
+    g.chooseCard("nimblism|3")
+      .expectInZone(0, "nimblism|3", "graveyard")
+      .expectInZone(0, "gone in a flash|1", "hand")
+      .expectInZone(1, "sink below|1", "hand")
+      .expectNoLog("A defend trigger resolves without effect");
+    expect(g.state.phase).toBe("action");
+    expect(g.state.pendingDecision).toBeNull();
+  });
+
   it("Gone in a Flash may return after damage and still grants its existing go again", () => {
     const g = scenario({
       seats: [

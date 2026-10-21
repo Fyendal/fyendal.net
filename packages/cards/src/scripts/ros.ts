@@ -1468,6 +1468,7 @@ Object.assign(ros, {
       const cards = ctx.link?.defendingCards ?? [];
       return cards.some((card) => isAttackAction(ctx, card)) && cards.some((card) => isNonAttackAction(ctx, card));
     },
+    onDefendResolvesWithoutChainLink: true,
     onDefend(ctx: ScriptCtx) {
       if (
         !requestDiscardChoice(

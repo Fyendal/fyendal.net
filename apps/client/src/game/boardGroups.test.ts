@@ -119,14 +119,21 @@ describe("equipment-zone board cards", () => {
     const boardToken = card(1);
     const frostbite = card(2, { counters: { "frostZone:legs": 1 } });
 
-    expect(boardCardsOutsideEquipmentZones([boardToken, frostbite])).toEqual([boardToken]);
+    expect(boardCardsOutsideEquipmentZones([boardToken, frostbite], {})).toEqual([boardToken]);
+  });
+
+  it("keeps slot-assigned auras in the strip when equipment fills their zone", () => {
+    const frostbite = card(2, { counters: { "frostZone:legs": 1 } });
+
+    expect(boardCardsOutsideEquipmentZones([frostbite], { legs: card(3) })).toEqual([frostbite]);
+    expect(boardCardsOutsideEquipmentZones([frostbite], { head: card(3) })).toEqual([]);
   });
 
   it("ignores inactive equipment-zone markers", () => {
     const token = card(1, { counters: { "frostZone:head": 0 } });
 
     expect(boardCardInEquipmentZone([token], "head")).toBeUndefined();
-    expect(boardCardsOutsideEquipmentZones([token])).toEqual([token]);
+    expect(boardCardsOutsideEquipmentZones([token], {})).toEqual([token]);
   });
 });
 

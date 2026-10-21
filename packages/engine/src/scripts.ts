@@ -1658,6 +1658,11 @@ export interface CardScript {
   canTriggerOnDefend?(ctx: ScriptCtx): boolean;
   /** This card was chosen as a defender (hand cards and equipment). */
   onDefend?(ctx: ScriptCtx): void;
+  /** `onDefend` never reads the chain link, so a defend layer still on the
+   * stack resolves after the attack leaves and the combat chain closes
+   * (CR 7.7.2c). `ctx.link` is then undefined. Without this, the layer
+   * resolves without effect once its chain link is gone. */
+  onDefendResolvesWithoutChainLink?: boolean;
   /** A target declared as this card's defend layer is added to the stack,
    * like `onHitTarget`. */
   onDefendTarget?: TriggerTarget;

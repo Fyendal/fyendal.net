@@ -1538,6 +1538,28 @@ describe("Armory Decks — rules regression coverage", () => {
     g.expectLife(0, 19);
   });
 
+  it("stacks two Sawbones prevention effects on damage to a Pirate ally", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          heroKey: "gravy bones|0",
+          board: ["sawbones, dock hand|2", "sawbones, dock hand|2", "barnacle|2"],
+          equipment: NO_EQUIPMENT,
+        },
+        { hero: "rhinar", hand: ["head jab|2"], equipment: NO_EQUIPMENT },
+      ],
+      active: 1,
+    });
+
+    g.play("head jab|2", { targetAlly: "barnacle|2", settle: false })
+      .passPriority()
+      .activate("sawbones, dock hand|2", { ability: 1, settle: false })
+      .activate("sawbones, dock hand|2", { ability: 1 });
+    const barnacle = g.state.players[0]!.board.find((card) => functionalKeyOf(cardData[card.cardId]!) === "barnacle|2");
+    expect(barnacle?.life).toBe(3);
+  });
+
   it("Standing Ovation grants an extra turn after three suspense auras leave", () => {
     const g = scenario({
       seats: [

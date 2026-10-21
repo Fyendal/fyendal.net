@@ -395,6 +395,14 @@ export function resolveLink(state: GameStateInternal, runtime: EngineRuntime): v
     link.resolved = true;
     state.modifiers = state.modifiers.filter((modifier) => modifier.scope !== "chain-link");
     runtime.dispatchFlow("closeChain", state);
+    // Layers still on the stack (such as defend triggers) resolve after the
+    // Close Step; the combat step they were queued to continue no longer exists.
+    if (
+      state.stackResume === "start-attack-step" ||
+      state.stackResume === "continue-attack" ||
+      state.stackResume === "start-reaction-step" ||
+      state.stackResume === "finish-link-resolution"
+    ) state.stackResume = "begin-action";
     state.reactionPasses = 0;
     if (!state.pendingDecision?.chooseHook) state.pendingDecision = null;
     state.phase = "action";

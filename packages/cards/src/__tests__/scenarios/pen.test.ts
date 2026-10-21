@@ -2021,3 +2021,25 @@ describe("PEN — Look Within", () => {
       .expectDeckTop(0, "inner chi|3");
   });
 });
+
+describe("PEN — Synapse Sparkcap", () => {
+  it("creates a Ponder without go again", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          hand: ["evo beta base legs|3"],
+          equipment: { ...NO_EQUIPMENT, head: "synapse sparkcap|0" },
+        },
+        { hero: "dorinthea", equipment: NO_EQUIPMENT },
+      ],
+    });
+
+    g.activate("synapse sparkcap|0").chooseCard("evo beta base legs|3");
+
+    const player = g.state.players[0]!;
+    expect(player.banish.map((card) => card.cardId)).toContain(printingId("evo beta base legs|3"));
+    expect(player.equipment.head?.tapped).toBe(true);
+    expect(player.actionPoints).toBe(0);
+  });
+});

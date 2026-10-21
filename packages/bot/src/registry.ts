@@ -25,6 +25,7 @@ import {
 } from "./starvo-policy.js";
 import type { BotPrepOpponent } from "./sideboard.js";
 import type { BotPolicyInput } from "./policy.js";
+import { chooseUpkeepPayment, reserveLethalUpkeep } from "./upkeep.js";
 import {
   MAX_BOT_CONTINUATION_STEPS,
   type TurnPlanCheckpoint,
@@ -102,10 +103,39 @@ function botDecisionFromTrace(
   };
 }
 
+/** Cross-hero survival guard: pay end-phase upkeep, and withhold plays that
+ * leave too little to pay one that would be lethal. */
+function guardedDecisions(
+  definition: Omit<BotDefinition, "arenaFor" | "deckFor">,
+): Pick<BotDefinition, "chooseIntent" | "chooseDecision" | "chooseContinuationIntent"> {
+  const chooseIntent = (input: BotPolicyInput): GameIntent =>
+    chooseUpkeepPayment(input) ?? definition.chooseIntent(reserveLethalUpkeep(input));
+  const continuation = definition.chooseContinuationIntent;
+  return {
+    chooseIntent,
+    chooseDecision(input) {
+      const upkeep = chooseUpkeepPayment(input);
+      return upkeep ? { intent: upkeep } : definition.chooseDecision(reserveLethalUpkeep(input));
+    },
+    ...(continuation
+      ? {
+        chooseContinuationIntent(input: BotPolicyInput, proposed: GameIntent) {
+          const guarded = reserveLethalUpkeep(input);
+          const proposedKey = JSON.stringify(proposed);
+          return guarded.legal.some((intent) => JSON.stringify(intent) === proposedKey)
+            ? continuation(guarded, proposed)
+            : chooseIntent(input);
+        },
+      }
+      : {}),
+  };
+}
+
 /** Stage the existing matchup plans while keeping equipment fixed at reveal. */
 function stagedDefinition(definition: Omit<BotDefinition, "arenaFor" | "deckFor">): BotDefinition {
   return {
     ...definition,
+    ...guardedDecisions(definition),
     arenaFor: (opponent, order) => {
       const selection = definition.presentationFor({ ...opponent, weaponIds: [], equipment: {} }, order);
       return { weaponIds: [...selection.weaponIds], equipment: { ...selection.equipment } };

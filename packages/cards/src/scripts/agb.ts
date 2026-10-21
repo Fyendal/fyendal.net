@@ -94,24 +94,42 @@ export const agb: Record<string, CardScript> = {
             prompt: decisionPrompt("Discard a card with watery grave", "card.common.cost.waterygrave.discard"),
           },
         ],
-        onCostPaid(ctx) {
+        onActivate(ctx) {
           ctx.setState("ankaDrawTrap", ctx.state.turn);
         },
       },
     ],
-    onOpponentDraws(ctx, drawingSeat, count) {
-      if (count <= 0 || ctx.getState("ankaDrawTrap") !== ctx.state.turn) return;
-      ctx.setState("ankaDrawTrap", 0);
-      const hand = ctx.player(drawingSeat).hand;
-      if (!hand.length) return;
-      ctx.setState("ankaDrawingSeat", drawingSeat + 1);
-      ctx.requestCardChoice(
-        "anka-discard",
-        decisionPrompt("Anka: discard a card", "card.agb.anka.card.discard"),
-        hand.map((card) => card.instanceId),
-        drawingSeat,
-      );
-    },
+    triggers: [
+      {
+        // One draw event queues one card-drawn event per card; the first
+        // consumes the trap so a multi-card draw triggers once. The discard
+        // resolves as a layer, after the drawing effect finishes.
+        event: "card-drawn",
+        whose: "any",
+        label: "Anka: discard a card",
+        labelMessage: { id: "card.agb.anka.card.discard" },
+        condition: (ctx, drawn) =>
+          drawn !== undefined &&
+          drawn.owner !== ctx.seat &&
+          ["action", "layer", "reaction"].includes(ctx.state.phase) &&
+          ctx.getState("ankaDrawTrap") === ctx.state.turn,
+        onTrigger(ctx, drawn) {
+          ctx.setState("ankaDrawTrap", 0);
+          ctx.setState("ankaDrawingSeat", drawn!.owner + 1);
+        },
+        effect(ctx) {
+          const drawingSeat = ctx.getState("ankaDrawingSeat") - 1;
+          const hand = ctx.player(drawingSeat).hand;
+          if (!hand.length) return;
+          ctx.requestCardChoice(
+            "anka-discard",
+            decisionPrompt("Anka: discard a card", "card.agb.anka.card.discard"),
+            hand.map((card) => card.instanceId),
+            drawingSeat,
+          );
+        },
+      },
+    ],
     onChoose(ctx, hook, option) {
       if (hook !== "anka-discard") return;
       const drawingSeat = ctx.getState("ankaDrawingSeat") - 1;

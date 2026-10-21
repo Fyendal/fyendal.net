@@ -329,7 +329,7 @@ export const penHighRarity: Record<string, CardScript> = {
     activated: {
       cost: 0,
       isAttack: false,
-      goAgain: true,
+      goAgain: false,
       tap: true,
       effectCardCosts: [
         {

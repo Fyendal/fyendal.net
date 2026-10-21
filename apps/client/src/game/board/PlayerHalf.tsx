@@ -192,6 +192,7 @@ export function PlayerHalf({
     presentedDeckTop !== undefined && interaction.legal.playableZones.get(presentedDeckTop.instanceId) === "deck";
   const arenaBoard = boardCardsOutsideEquipmentZones(
     player.board.filter((card) => !optimisticallyHiddenIds.has(card.instanceId)),
+    player.equipment,
   );
   const arrangedBoard = arrangeBoundBoardCards(arenaBoard);
 

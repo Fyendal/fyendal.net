@@ -64,10 +64,15 @@ export function boardCardInEquipmentZone(
   return cards.find((card) => occupiesEquipmentZone(card, slot));
 }
 
-/** Slot-assigned auras render in their equipment cells instead of the arena strip. */
-export function boardCardsOutsideEquipmentZones(cards: readonly CardView[]): CardView[] {
+/** Slot-assigned auras render in their equipment cells instead of the arena
+ * strip. An aura whose cell already shows equipment stays in the strip so it
+ * is never hidden behind that equipment. */
+export function boardCardsOutsideEquipmentZones(
+  cards: readonly CardView[],
+  equipment: Partial<Record<EquipmentSlot, CardView>>,
+): CardView[] {
   return cards.filter(
-    (card) => !EQUIPMENT_SLOTS.some((slot) => occupiesEquipmentZone(card, slot)),
+    (card) => !EQUIPMENT_SLOTS.some((slot) => !equipment[slot] && occupiesEquipmentZone(card, slot)),
   );
 }
 

@@ -1269,15 +1269,16 @@ export function dealAllyDamage(state: GameStateInternal,
   if (packet.amount <= 0) return 0;
   if (!packet.unpreventable && packet.amount > 0) {
     const recipientTypes = cardTypesOf(state, ally);
-    const shield = state.modifiers.find((modifier) =>
-      !modifier.consumed &&
-      modifier.seat === found.seat &&
-      modifier.scope === "until-end-of-turn" &&
-      Number(modifier.preventNextDamageAmount ?? 0) > 0 &&
-      modifier.appliesToDamageRecipientType !== undefined &&
-      recipientTypes.includes(modifier.appliesToDamageRecipientType.toLowerCase())
-    );
-    if (shield) {
+    for (const shield of state.modifiers) {
+      if (packet.amount <= 0) break;
+      if (
+        shield.consumed ||
+        shield.seat !== found.seat ||
+        shield.scope !== "until-end-of-turn" ||
+        !(Number(shield.preventNextDamageAmount ?? 0) > 0) ||
+        shield.appliesToDamageRecipientType === undefined ||
+        !recipientTypes.includes(shield.appliesToDamageRecipientType.toLowerCase())
+      ) continue;
       const prevented = Math.min(Number(shield.preventNextDamageAmount), packet.amount);
       packet.amount -= prevented;
       shield.consumed = true;

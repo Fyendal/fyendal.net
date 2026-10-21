@@ -1633,4 +1633,55 @@ describe("SEA — rules regression coverage", () => {
       .play("sigil of solace|1")
       .expectLife(0, 10);
   });
+
+  it("Sealace Sarong gives go again to the arrow it turns face up, not another face-up blue arrow", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "dorinthea",
+          heroKey: "azalea, ace in the hole|0",
+          weapons: ["death dealer|0"],
+          equipment: { legs: "sealace sarong|0" },
+          hand: ["raging onslaught|3"],
+          arsenal: ["bolt'n' shot|3"],
+          arsenalFaceDown: ["withering shot|3"],
+        },
+        { hero: "rhinar" },
+      ],
+    });
+    g.activate("sealace sarong|0").chooseCard("withering shot|3");
+    g.play("withering shot|3", { fromArsenal: true }).blockWith().settle().expectAP(0, 1);
+  });
+
+  it("Anka's draw trap resolves after the drawing effect and discards from the hand at that time", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          hand: ["deadwood rumbler|1", "sigil of solace|3", "sigil of solace|3"],
+          deck: ["sigil of solace|3"],
+          resources: 3,
+        },
+        {
+          hero: "dorinthea",
+          board: ["anka, drag under|2"],
+          hand: ["sawbones, dock hand|2"],
+        },
+      ],
+    });
+
+    g.play("deadwood rumbler|1", { settle: false })
+      .passPriority()
+      .activate("anka, drag under|2", { ability: 1, settle: false })
+      .chooseCard("sawbones, dock hand|2")
+      .expectInZone(1, "sawbones, dock hand|2", "graveyard");
+    // Rumbler drew one and discarded one at random; Anka's trigger then asks
+    // its drawer to discard from the two cards left in hand.
+    expect(g.state.pendingDecision?.chooseHook).toBe("anka-discard");
+    expect(g.state.pendingDecision?.player).toBe(0);
+    expect(g.state.pendingDecision?.options).toEqual(
+      g.state.players[0]!.hand.map((card) => String(card.instanceId)),
+    );
+    g.chooseCard("sigil of solace|3").expectHandSize(0, 1).expectZoneSize(0, "graveyard", 2);
+  });
 });
