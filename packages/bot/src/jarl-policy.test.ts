@@ -295,6 +295,30 @@ describe("Jarl policy", () => {
       .toEqual({ kind: "choose", optionId: String(crumble.instanceId) });
   });
 
+  it("creates Frostbite in an exposed equipment zone instead of declining", () => {
+    const state = createGame({
+      decklists: [jarlDeck(), decklists.dorinthea],
+      cards: cardData,
+      scripts,
+      seed: 12_103,
+      startPlayer: 0,
+    });
+    const view = projectStateFor(state, 0);
+    view.pendingDecision = {
+      player: 0,
+      kind: "choose-target",
+      prompt: "Choose an exposed equipment zone for Frostbite",
+      options: ["none", "legs"],
+    };
+    view.priorityPlayer = 0;
+    const legal: GameIntent[] = [
+      { kind: "choose", optionId: "none" },
+      { kind: "choose", optionId: "legs" },
+    ];
+    expect(chooseJarlIntent({ seat: 0, view, legal, cards: cardData }))
+      .toEqual({ kind: "choose", optionId: "legs" });
+  });
+
   it("declares X = 2 for Imposing Visage into aggro when affordable and X = 0 otherwise", () => {
     const state = createGame({
       decklists: [jarlDeck(), decklists.dorinthea],

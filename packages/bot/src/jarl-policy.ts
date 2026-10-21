@@ -241,11 +241,12 @@ function scoreChoice(intent: Extract<GameIntent, { kind: "choose" }>, input: Bot
     if (functional === "crumble to eternity|3") return opponentIsAggro(input) ? 70 : 100;
     return card ? 10 : -20;
   }
-  if (prompt.includes("equipment")) {
-    return card ? targetEquipmentValue(card, input) : intent.optionId === "none" ? 0 : -20;
-  }
+  // Checked before the generic equipment-target prompt, whose wording it shares.
   if (prompt.includes("exposed equipment zone")) {
     return ({ chest: 40, arms: 35, head: 30, legs: 25, none: 0 } as Record<string, number>)[intent.optionId] ?? 1;
+  }
+  if (prompt.includes("equipment")) {
+    return card ? targetEquipmentValue(card, input) : intent.optionId === "none" ? 0 : -20;
   }
   if (prompt.includes("put an action on the bottom") && card) {
     return key(input.cards[card.cardId]) === "everbloom // life|3" ? 60 : 10;
