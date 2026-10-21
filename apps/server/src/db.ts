@@ -1003,6 +1003,15 @@ export const MIGRATIONS: Migration[] = [
     // A seat's standing orders as JSON text.
     sql: "ALTER TABLE room_seats ADD COLUMN standing_orders TEXT;",
   },
+  {
+    version: 54,
+    // Boltyn joins the durable pending-practice bot ids.
+    sql: `ALTER TABLE pending_bot_starts
+      DROP CONSTRAINT IF EXISTS pending_bot_starts_bot_check;
+    ALTER TABLE pending_bot_starts
+      ADD CONSTRAINT pending_bot_starts_bot_check
+      CHECK (bot IN ('ira', 'hala', 'cindra', 'jarl', 'briar', 'bravo', 'starvo', 'kayo', 'levia', 'boltyn'));`,
+  },
 ];
 
 async function publicTables(db: Queryable): Promise<string[]> {

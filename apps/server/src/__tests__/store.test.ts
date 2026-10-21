@@ -522,6 +522,44 @@ describe("PgRoomStore storage", () => {
     expect(room!.state).not.toBeNull();
   });
 
+  it("seats the Boltyn bot and presents its warrior plan against Ira", async () => {
+    const user = await db.query(
+      `INSERT INTO users (username, username_lc, pass_hash, created_at)
+       VALUES ('BoltynOwner','boltynowner','hash',1) RETURNING id`,
+    );
+    const userId = Number(user.rows[0]!.id);
+    const created = await store.createBotRoom("cc", {
+      deckId: "precon-asr",
+      username: "BoltynOwner",
+      userId,
+    }, "legal", "boltyn");
+    let room = await store.getRoom(created.code);
+    expect(room?.seats[1]).toMatchObject({
+      controller: "bot",
+      username: "Boltyn Bot",
+      deckId: "bot-boltyn-raydn",
+    });
+    expect(prepViewFor(room!, 0).seats[1]).toMatchObject({
+      heroName: "Ser Boltyn, Breaker of Dawn",
+      connected: true,
+    });
+    const ira = precon("precon-asr")!.pool;
+    await chooseBotTurn(created.code, created.token, userId);
+    const ready = await presentBotDeck(store,
+      created.code,
+      { token: created.token, userId },
+      { weaponIds: ira.weaponIds, equipment: {}, deck: ira.deck },
+    );
+    expect(ready.ok).toBe(true);
+    room = await store.getRoom(created.code);
+    expect(room!.seats[1]!.presented).toMatchObject({
+      heroId: "ASB001",
+      weaponIds: ["ASB002"],
+      equipment: { head: "ASB003", chest: "DTD047", arms: "DTD207", legs: "ASB006" },
+    });
+    expect(room!.seats[1]!.presented!.deck).toHaveLength(60);
+  });
+
   it("durably seats, sideboards, and presents the Classic Constructed Hala bot", async () => {
     const user = await db.query(
       `INSERT INTO users (username, username_lc, pass_hash, created_at)
@@ -2672,7 +2710,7 @@ describe("PgRoomStore storage", () => {
     ]);
   });
 
-  it.each(["starvo", "levia"] as const)("persists %s as a pending background-practice opponent", async (bot) => {
+  it.each(["starvo", "levia", "boltyn"] as const)("persists %s as a pending background-practice opponent", async (bot) => {
     const user = await db.query(
       `INSERT INTO users (username, username_lc, pass_hash, created_at)
        VALUES ('StarvoPractice','starvopractice','hash',1) RETURNING id`,

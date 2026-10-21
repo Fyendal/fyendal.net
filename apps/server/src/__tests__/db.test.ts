@@ -80,6 +80,27 @@ describe("initial schema", () => {
       .toEqual([{ bot: "levia" }]);
   });
 
+  it("upgrades an existing database to accept Boltyn for pending practice", async () => {
+    const db = rawDb();
+    await applyMigrations(db, MIGRATIONS.filter((migration) => migration.version <= 53));
+    const user = await db.query(`INSERT INTO users (username, username_lc, pass_hash, created_at)
+      VALUES ('BoltynOwner', 'boltynowner', 'hash', 1) RETURNING id`);
+    const userId = user.rows[0]!.id;
+    await db.query(`INSERT INTO matchmaking_entries (user_id, format, deck_id, joined_at)
+      VALUES ($1, 'cc', 'precon-asb', 1)`, [userId]);
+    await expect(db.query(`INSERT INTO pending_bot_starts (user_id, format, deck_id, bot, card_pool_mode, requested_at)
+      VALUES ($1, 'cc', 'precon-asb', 'boltyn', 'legal', 1)`, [userId])).rejects.toThrow();
+
+    await applyMigrations(db, MIGRATIONS);
+    await applyMigrations(db, MIGRATIONS);
+    await db.query(`INSERT INTO pending_bot_starts (user_id, format, deck_id, bot, card_pool_mode, requested_at)
+      VALUES ($1, 'cc', 'precon-asb', 'boltyn', 'legal', 1)`, [userId]);
+    expect((await db.query("SELECT bot FROM pending_bot_starts WHERE user_id = $1", [userId])).rows)
+      .toEqual([{ bot: "boltyn" }]);
+    await expect(db.query(`INSERT INTO pending_bot_starts (user_id, format, deck_id, bot, card_pool_mode, requested_at)
+      VALUES ($1, 'cc', 'precon-asb', 'unknown', 'legal', 1)`, [userId])).rejects.toThrow();
+  });
+
   it("uses an already checked-out client without reconnecting or releasing it", async () => {
     const statements: string[] = [];
     let released = false;
