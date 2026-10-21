@@ -281,6 +281,19 @@ function playIntentsWithPitches(
           ],
         }
       : alternativeCostCardInstanceIds !== undefined &&
+          declaredCost?.replacesResourceCost === false &&
+          (declaredCost.kind === "discard-hand-named" ||
+            declaredCost.kind === "discard-hand-subtype")
+        ? {
+            kind: "choose-card-cost",
+            cardLabel: declaredCost.kind === "discard-hand-named"
+              ? declaredCost.name
+              : declaredCost.subtype,
+            minimum: 1,
+            maximum: 1,
+            modes: [{ kind: "discard", maximum: 1 }],
+          }
+      : alternativeCostCardInstanceIds !== undefined &&
           declaredCost?.kind === "discard-or-destroy-controlled-subtype"
         ? {
             kind: "choose-card-cost",

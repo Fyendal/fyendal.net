@@ -3136,6 +3136,27 @@ describe("September 3 IAR spoilers", () => {
       .expectAP(0, 1);
   });
 
+  it("Favorable Winds announces the Goldfin Harpoon discard as an additional cost", () => {
+    const g = scenario({ seats: [
+      {
+        hero: "rhinar",
+        hand: ["favorable winds|2", "SEA093"],
+        resources: 1,
+        equipment: NO_EQUIPMENT,
+      },
+      { hero: "dorinthea", equipment: NO_EQUIPMENT },
+    ] });
+
+    expect(legalIntents(g.state, 0)).toContainEqual(expect.objectContaining({
+      kind: "play-card",
+      cardCostSelection: expect.objectContaining({
+        minimum: 1,
+        maximum: 1,
+        modes: [{ kind: "discard", maximum: 1 }],
+      }),
+    }));
+  });
+
   it("Banneret of Swordsmanship creates a Flurry when charged", () => {
     const g = scenario({ seats: [
       {

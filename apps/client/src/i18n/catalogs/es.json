@@ -2723,7 +2723,7 @@
   "game.emote.nicePlay": "¡Buena jugada!",
   "game.emote.thinking": "Pensando...",
   "game.emote.oops": "¡Uy!",
-  "game.stack.title": "La pila",
+  "game.stack.title": "Pila",
   "game.stack.short": "Pila",
   "game.stack.show": "Mostrar pila",
   "game.stack.minimize": "Minimizar pila",

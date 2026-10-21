@@ -771,9 +771,11 @@ export const omnHighRarity: Record<string, CardScript> = {
       }),
     canTriggerOnHit(ctx) {
       return (
-        ctx.link?.targetAllyId === undefined &&
+        ctx.link !== undefined &&
+        ctx.link.targetAllyId === undefined &&
+        ctx.cardTypes(ctx.link.attackingCard).some((type) => type.toLowerCase() === "axe") &&
         ctx.state.modifiers.some(
-          (modifier) => modifier.sourceInstanceId === ctx.self.instanceId && modifier.scope === "chain-link",
+          (modifier) => modifier.sourceInstanceId === ctx.self.instanceId && modifier.scope === "until-end-of-turn",
         )
       );
     },

@@ -266,7 +266,7 @@ describe("locale catalogs", () => {
     expect(intl.formatMessage({ id: "game.zone.graveyard" })).toBe("Cementerio");
     expect(intl.formatMessage({ id: "game.zone.arsenal" })).toBe("Arsenal");
     expect(intl.formatMessage({ id: "game.zone.pitch" })).toBe("Pitch");
-    expect(intl.formatMessage({ id: "game.stack.title" })).toBe("La pila");
+    expect(intl.formatMessage({ id: "game.stack.title" })).toBe("Pila");
     expect(intl.formatMessage({ id: "game.decision.bloodMode.goAgain" }))
       .toBe("Los ataques obtienen continuar");
     expect(intl.formatMessage({ id: "engine.effect.part.dominate" })).toBe("dominar");

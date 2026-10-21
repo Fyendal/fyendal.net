@@ -1546,3 +1546,19 @@ describe("OMN — Settle the Bill", () => {
     s.expectLife(1, 16).expectInZone(1, "fry|2", "graveyard");
   });
 });
+
+describe("OMN — A Bit off the Side", () => {
+  it("makes the opponent discard when an axe weapon hits", () => {
+    const g = scenario({ seats: [
+      hero("lyath goldmane|0", {
+        weapons: ["lionclaw maul|0"],
+        hand: ["a bit off the side|1", "power play|3"],
+      }),
+      hero("ira, scarlet revenger|0", { hand: ["power play|3"] }),
+    ] });
+    g.play("a bit off the side|1").settle();
+    g.attackWithWeapon("lionclaw maul|0", { pitch: ["power play|3"] }).blockWith().settle();
+    g.chooseCard("power play|3").settle();
+    expect(g.state.players[1]!.hand).toHaveLength(0);
+  });
+});
