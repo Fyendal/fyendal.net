@@ -36,10 +36,6 @@
   #root:has(.table) { scroll-padding: 70px 0 220px; }
   .lobby-page { width: 100%; min-width: 0; min-height: 100dvh; }
 
-  input,
-  select,
-  textarea { font-size: 16px; }
-
   /* Authenticated lobby navigation becomes a persistent thumb-reachable bar. */
   .topbar {
     flex-wrap: wrap;

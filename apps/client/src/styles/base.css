@@ -103,6 +103,15 @@ body {
 
 button { touch-action: manipulation; }
 
+/* iOS Safari zooms into any focused field under 16px and keeps that zoom
+   after blur, leaving the whole app magnified. This must beat every
+   component's own field size on phones in either orientation. */
+@media (max-width: 700px), (pointer: coarse) {
+  input,
+  select,
+  textarea { font-size: 16px !important; }
+}
+
 /* SVG file from public/icons/ui/ used as a mask over the current text color. */
 .ui-icon {
   display: inline-block;
