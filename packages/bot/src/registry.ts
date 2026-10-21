@@ -5,6 +5,7 @@ import type {
   PresentedDeck,
   PresentedArena,
 } from "@fyendal/shared";
+import { chooseBoltynIntent, chooseBoltynIntentWithTrace } from "./boltyn-policy.js";
 import { chooseBravoIntent, chooseBravoIntentWithTrace } from "./bravo-policy.js";
 import { chooseKayoIntent, chooseKayoIntentWithTrace } from "./kayo-policy.js";
 import { chooseBriarIntent, chooseBriarIntentWithTrace } from "./briar-policy.js";
@@ -30,6 +31,7 @@ import {
   type TurnPlannerCandidateTrace,
 } from "./turn-planner.js";
 import {
+  boltynPresentationFor,
   bravoPresentationFor,
   briarPresentationFor,
   kayoPresentationFor,
@@ -209,6 +211,16 @@ export const BOT_DEFINITIONS = {
     chooseDecision: (input) => botDecisionFromTrace(chooseStarvoIntentWithTrace(input), true),
     chooseContinuationIntent: chooseStarvoContinuationIntent,
     presentationFor: (opponent) => starvoPresentationFor(opponent),
+  }),
+  boltyn: stagedDefinition({
+    id: "boltyn",
+    format: "cc",
+    deckId: "bot-boltyn-raydn",
+    username: "Boltyn Bot",
+    deckName: "Raydn Boltyn",
+    chooseIntent: chooseBoltynIntent,
+    chooseDecision: (input) => botDecisionFromTrace(chooseBoltynIntentWithTrace(input)),
+    presentationFor: (opponent) => boltynPresentationFor(opponent),
   }),
 } as const satisfies Readonly<Record<BotOpponent, BotDefinition>>;
 

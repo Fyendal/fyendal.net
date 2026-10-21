@@ -14,7 +14,7 @@ export type CardPoolMode = "legal" | "future" | "open";
 export type QueuePoolCounts = Record<CardPoolMode, Record<CardPoolMode, number>>;
 
 /** Stable identities for the supported practice opponents. */
-export type BotOpponent = "bravo" | "briar" | "kayo" | "cindra" | "ira" | "hala" | "jarl" | "levia" | "starvo";
+export type BotOpponent = "bravo" | "briar" | "kayo" | "cindra" | "ira" | "hala" | "jarl" | "levia" | "starvo" | "boltyn";
 
 /** Numeric resources produced when pitched. Colored cards use their red/
  * yellow/blue/purple color value (1/2/3/4). */

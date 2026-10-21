@@ -57,3 +57,5 @@ export { chooseStarvoIntent, chooseStarvoIntentWithTrace } from "./starvo-policy
 export type { StarvoIntentDecision } from "./starvo-policy.js";
 export { cloneStateForBotSimulation } from "./turn-planner.js";
 export { chooseKayoIntent, chooseKayoIntentWithTrace } from "./kayo-policy.js";
+export { chooseBoltynIntent, chooseBoltynIntentWithTrace } from "./boltyn-policy.js";
+export type { BoltynIntentDecision } from "./boltyn-policy.js";
