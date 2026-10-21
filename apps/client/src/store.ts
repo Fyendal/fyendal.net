@@ -31,6 +31,7 @@ import {
   AUTH_STORAGE_KEY,
   DEFAULT_LOBBY_SETTINGS,
   LOBBY_SETTINGS_STORAGE_KEY,
+  loadGameSettings,
   loadRejectedMatchRoomsForChoice,
   loadLobbySettings,
   pruneRejectedMatchRooms,
@@ -197,6 +198,7 @@ export const useStore = create<StoreState>((set, get) => {
     send,
     resync: () => ws?.close(1012, "bot resync"),
     status: (browserBotStatus) => set({ browserBotStatus }),
+    skipPacing: () => get().betaTester && loadGameSettings(localStorage).skipBotDelay,
   });
   disposeBrowserBot = () => browserBot.reset();
 

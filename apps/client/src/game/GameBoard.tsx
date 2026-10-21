@@ -104,7 +104,7 @@ const EMPTY_INSTANCE_IDS: ReadonlySet<number> = new Set();
 
 export function GameBoard() {
   const intl = useIntl();
-  const { view: authoritativeView, viewUpdate: authoritativeViewUpdate, playerProfiles, legal, actionCandidates, roomCommandPending, pendingInteraction, pendingDefenderStageIds, yourSeat, spectating, spectatorCount, spectatorUsernames, botGame, sendIntent, sendPriorityMode, sendStandingOrders, sendTokenSkip, sendEmote, kickSpectator, latestEmote, undo, error, leave, opponentConnected, connected, connectionIssueVisible, roomCode, screen, replayFrames, replayViews, replayStep, replayNotes, setLiveReplayNote, watchReplay, downloadReplay, closeReplay, getRecordedViews, lastActionAt, claimVictory, reportBug, reportOpponent, backgroundSearching, stopBackgroundMatchmaking, authUser, authToken, setLobbyRail, unreadMessageCount, setSocialOpen } = useStore(
+  const { view: authoritativeView, viewUpdate: authoritativeViewUpdate, playerProfiles, legal, actionCandidates, roomCommandPending, pendingInteraction, pendingDefenderStageIds, yourSeat, spectating, spectatorCount, spectatorUsernames, botGame, betaTester, sendIntent, sendPriorityMode, sendStandingOrders, sendTokenSkip, sendEmote, kickSpectator, latestEmote, undo, error, leave, opponentConnected, connected, connectionIssueVisible, roomCode, screen, replayFrames, replayViews, replayStep, replayNotes, setLiveReplayNote, watchReplay, downloadReplay, closeReplay, getRecordedViews, lastActionAt, claimVictory, reportBug, reportOpponent, backgroundSearching, stopBackgroundMatchmaking, authUser, authToken, setLobbyRail, unreadMessageCount, setSocialOpen } = useStore(
     useShallow((state) => ({
       view: state.view,
       viewUpdate: state.viewUpdate,
@@ -119,6 +119,7 @@ export function GameBoard() {
       spectatorCount: state.spectatorCount,
       spectatorUsernames: state.spectatorUsernames,
       botGame: state.botGame,
+      betaTester: state.betaTester,
       sendIntent: state.sendIntent,
       sendPriorityMode: state.sendPriorityMode,
       sendStandingOrders: state.sendStandingOrders,
@@ -246,6 +247,7 @@ export function GameBoard() {
     priorityWindowMode,
     skipPlayConfirmation,
     optionHotkeys,
+    skipBotDelay,
     soundEffectsEnabled,
     soundEffectsVolume,
     updatePriorityWindowMode,
@@ -255,6 +257,7 @@ export function GameBoard() {
     updatePlayabilityCuePreference,
     updateSkipPlayConfirmation,
     updateOptionHotkeys,
+    updateSkipBotDelay,
     updateSoundEffectsEnabled,
     updateSoundEffectsVolume,
     standingOrders: standingOrderSettings,
@@ -1593,6 +1596,8 @@ export function GameBoard() {
         onSkipPlayConfirmationChange={updateSkipPlayConfirmation}
         optionHotkeys={optionHotkeys}
         onOptionHotkeysChange={updateOptionHotkeys}
+        skipBotDelay={skipBotDelay}
+        onSkipBotDelayChange={betaTester && botGame && !spectating ? updateSkipBotDelay : null}
         motionPreference={motionPreference}
         onMotionPreferenceChange={updateMotionPreference}
         cardDisplayPreference={cardDisplayPreference}

@@ -447,6 +447,7 @@ export interface GameSettings {
   soundEffectsEnabled: boolean;
   soundEffectsVolume: number;
   optionHotkeys: boolean;
+  skipBotDelay: boolean;
   standingOrders: StandingOrders;
 }
 
@@ -461,6 +462,7 @@ export const DEFAULT_GAME_SETTINGS: GameSettings = {
   soundEffectsEnabled: true,
   soundEffectsVolume: 35,
   optionHotkeys: false,
+  skipBotDelay: false,
   standingOrders: {},
 };
 
@@ -557,6 +559,7 @@ export function loadGameSettings(storage: Pick<Storage, "getItem">): GameSetting
         ? record.soundEffectsVolume as number
         : 35,
       optionHotkeys: typeof record.optionHotkeys === "boolean" ? record.optionHotkeys : false,
+      skipBotDelay: typeof record.skipBotDelay === "boolean" ? record.skipBotDelay : false,
       standingOrders,
     };
   } catch {

@@ -33198,6 +33198,24 @@
       "value": "显示优先权窗口和响应窗口提示。"
     }
   ],
+  "settings.skipBotDelay": [
+    {
+      "type": 0,
+      "value": "机器人即时行动"
+    }
+  ],
+  "settings.skipBotDelay.aria": [
+    {
+      "type": 0,
+      "value": "跳过练习机器人的一秒停顿"
+    }
+  ],
+  "settings.skipBotDelay.tooltip": [
+    {
+      "type": 0,
+      "value": "测试版：练习机器人决定后立即行动，不再等待一秒。"
+    }
+  ],
   "settings.soundEffects": [
     {
       "type": 0,

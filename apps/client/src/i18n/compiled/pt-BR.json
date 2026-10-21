@@ -35999,6 +35999,24 @@
       "value": "Mostra avisos das janelas de prioridade e de reaction."
     }
   ],
+  "settings.skipBotDelay": [
+    {
+      "type": 0,
+      "value": "Jogadas instantâneas do bot"
+    }
+  ],
+  "settings.skipBotDelay.aria": [
+    {
+      "type": 0,
+      "value": "Pular a pausa de um segundo do bot de treino"
+    }
+  ],
+  "settings.skipBotDelay.tooltip": [
+    {
+      "type": 0,
+      "value": "Beta: o bot de treino age assim que decide, sem a pausa de um segundo."
+    }
+  ],
   "settings.soundEffects": [
     {
       "type": 0,

@@ -145,6 +145,7 @@ describe("client storage keys", () => {
       soundEffectsEnabled: true,
       soundEffectsVolume: 35,
       optionHotkeys: false,
+      skipBotDelay: false,
       standingOrders: {},
     });
     saveGameSettings(storage, {
@@ -158,6 +159,7 @@ describe("client storage keys", () => {
       soundEffectsEnabled: false,
       soundEffectsVolume: 60,
       optionHotkeys: true,
+      skipBotDelay: true,
       standingOrders: {},
     });
     expect(loadGameSettings(storage)).toEqual({
@@ -171,6 +173,7 @@ describe("client storage keys", () => {
       soundEffectsEnabled: false,
       soundEffectsVolume: 60,
       optionHotkeys: true,
+      skipBotDelay: true,
       standingOrders: {},
     });
   });
@@ -194,6 +197,7 @@ describe("client storage keys", () => {
       soundEffectsEnabled: true,
       soundEffectsVolume: 35,
       optionHotkeys: false,
+      skipBotDelay: false,
       standingOrders: {},
     });
   });
@@ -218,6 +222,7 @@ describe("client storage keys", () => {
       soundEffectsEnabled: true,
       soundEffectsVolume: 35,
       optionHotkeys: false,
+      skipBotDelay: false,
       standingOrders: {},
     });
   });
@@ -244,6 +249,7 @@ describe("client storage keys", () => {
       soundEffectsEnabled: false,
       soundEffectsVolume: 60,
       optionHotkeys: false,
+      skipBotDelay: false,
       standingOrders: {},
     });
   });
@@ -302,6 +308,17 @@ describe("client storage keys", () => {
     }).optionHotkeys).toBe(false);
   });
 
+  it("leaves the bot delay on unless a boolean opt-out was saved", () => {
+    const { skipBotDelay: _absent, ...previous } = DEFAULT_GAME_SETTINGS;
+    expect(loadGameSettings({ getItem: () => JSON.stringify(previous) }).skipBotDelay).toBe(false);
+    expect(loadGameSettings({
+      getItem: () => JSON.stringify({ ...previous, skipBotDelay: "yes" }),
+    }).skipBotDelay).toBe(false);
+    expect(loadGameSettings({
+      getItem: () => JSON.stringify({ ...previous, skipBotDelay: true }),
+    }).skipBotDelay).toBe(true);
+  });
+
   it("adds square cards to version 6 settings without resetting existing choices", () => {
     const previous = {
       version: 6,
@@ -318,6 +335,7 @@ describe("client storage keys", () => {
       version: 8,
       cardDisplayPreference: "square",
       optionHotkeys: false,
+      skipBotDelay: false,
       standingOrders: {},
     });
   });

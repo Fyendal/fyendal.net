@@ -37,6 +37,8 @@ export function GameSettingsDialog({
   onSkipPlayConfirmationChange,
   optionHotkeys,
   onOptionHotkeysChange,
+  skipBotDelay = false,
+  onSkipBotDelayChange = null,
   cardDisplayPreference,
   onCardDisplayPreferenceChange,
   motionPreference,
@@ -64,6 +66,8 @@ export function GameSettingsDialog({
   onSkipPlayConfirmationChange: (enabled: boolean) => void;
   optionHotkeys: boolean;
   onOptionHotkeysChange: (enabled: boolean) => void;
+  skipBotDelay?: boolean;
+  onSkipBotDelayChange?: ((enabled: boolean) => void) | null;
   cardDisplayPreference: CardDisplayPreference;
   onCardDisplayPreferenceChange: (preference: CardDisplayPreference) => void;
   motionPreference: MotionPreference;
@@ -202,6 +206,28 @@ export function GameSettingsDialog({
                 />
                 <span className="switch-track" aria-hidden="true" />
               </label>
+              {onSkipBotDelayChange ? (
+                <label className="toggle-switch settings-control-row">
+                  <span className="settings-control-name">
+                    {intl.formatMessage({ id: "settings.skipBotDelay" })}
+                    <span
+                      className="settings-info-tooltip"
+                      data-tooltip={intl.formatMessage({ id: "settings.skipBotDelay.tooltip" })}
+                      aria-hidden="true"
+                    >
+                      i
+                    </span>
+                  </span>
+                  <input
+                    type="checkbox"
+                    role="switch"
+                    aria-label={intl.formatMessage({ id: "settings.skipBotDelay.aria" })}
+                    checked={skipBotDelay}
+                    onChange={(event) => onSkipBotDelayChange(event.target.checked)}
+                  />
+                  <span className="switch-track" aria-hidden="true" />
+                </label>
+              ) : null}
               <LanguagePicker placement="settings" />
             </div>
           </section>

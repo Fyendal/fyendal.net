@@ -34467,6 +34467,24 @@
       "value": "Shows priority and reaction window prompts."
     }
   ],
+  "settings.skipBotDelay": [
+    {
+      "type": 0,
+      "value": "Instant bot moves"
+    }
+  ],
+  "settings.skipBotDelay.aria": [
+    {
+      "type": 0,
+      "value": "Skip the practice bot's one-second pause"
+    }
+  ],
+  "settings.skipBotDelay.tooltip": [
+    {
+      "type": 0,
+      "value": "Beta: the practice bot acts as soon as it decides, without the one-second pause."
+    }
+  ],
   "settings.soundEffects": [
     {
       "type": 0,

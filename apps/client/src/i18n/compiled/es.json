@@ -35411,6 +35411,24 @@
       "value": "Muestra indicaciones de prioridad y de ventanas de reacción."
     }
   ],
+  "settings.skipBotDelay": [
+    {
+      "type": 0,
+      "value": "Movimientos instantáneos del bot"
+    }
+  ],
+  "settings.skipBotDelay.aria": [
+    {
+      "type": 0,
+      "value": "Omitir la pausa de un segundo del bot de práctica"
+    }
+  ],
+  "settings.skipBotDelay.tooltip": [
+    {
+      "type": 0,
+      "value": "Beta: el bot de práctica actúa en cuanto decide, sin la pausa de un segundo."
+    }
+  ],
   "settings.soundEffects": [
     {
       "type": 0,

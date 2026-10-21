@@ -233,6 +233,8 @@ export function SideRail({
   onSkipPlayConfirmationChange,
   optionHotkeys,
   onOptionHotkeysChange,
+  skipBotDelay = false,
+  onSkipBotDelayChange = null,
   cardDisplayPreference,
   onCardDisplayPreferenceChange,
   motionPreference,
@@ -303,6 +305,8 @@ export function SideRail({
   onSkipPlayConfirmationChange: (enabled: boolean) => void;
   optionHotkeys: boolean;
   onOptionHotkeysChange: (enabled: boolean) => void;
+  skipBotDelay?: boolean;
+  onSkipBotDelayChange?: ((enabled: boolean) => void) | null;
   cardDisplayPreference: CardDisplayPreference;
   onCardDisplayPreferenceChange: (preference: CardDisplayPreference) => void;
   motionPreference: MotionPreference;
@@ -660,6 +664,8 @@ export function SideRail({
           onSkipPlayConfirmationChange={onSkipPlayConfirmationChange}
           optionHotkeys={optionHotkeys}
           onOptionHotkeysChange={onOptionHotkeysChange}
+          skipBotDelay={skipBotDelay}
+          onSkipBotDelayChange={onSkipBotDelayChange}
           cardDisplayPreference={cardDisplayPreference}
           onCardDisplayPreferenceChange={onCardDisplayPreferenceChange}
           motionPreference={motionPreference}

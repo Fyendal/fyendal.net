@@ -73,6 +73,13 @@ export function useGameSettings({
       return next;
     });
   };
+  const updateSkipBotDelay = (skipBotDelay: boolean) => {
+    setSettings((current) => {
+      const next = { ...current, skipBotDelay };
+      saveGameSettings(localStorage, next);
+      return next;
+    });
+  };
   const updateCardDisplayPreference = (cardDisplayPreference: CardDisplayPreference) => {
     setSettings((current) => {
       const next = { ...current, cardDisplayPreference };
@@ -127,6 +134,7 @@ export function useGameSettings({
     updateLessGuidance,
     updateSkipPlayConfirmation,
     updateOptionHotkeys,
+    updateSkipBotDelay,
     updateCardDisplayPreference,
     updateMotionPreference,
     updatePlayabilityCuePreference,
