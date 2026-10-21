@@ -73,6 +73,19 @@ describe("authoritative match stats", () => {
     expect(projectStateFor(state, 1, "game").turnFacts?.players[0].banishedSixPlusThisTurn).toBeUndefined();
   });
 
+  it("projects public soul facts only while they are set", () => {
+    const state = makeGame(84);
+    expect(projectStateFor(state, 1, "game").turnFacts?.players[0]).not.toHaveProperty("chargesThisTurn");
+    player(state, 0).flags.chargedCountThisTurn = 2;
+    player(state, 0).flags["soulPitch:2"] = 1;
+    player(state, 0).flags.soulBanishedThisChain = 3;
+    expect(projectStateFor(state, 1, "game").turnFacts?.players[0]).toMatchObject({
+      chargesThisTurn: 2,
+      yellowSoulThisTurn: true,
+      soulBanishedThisChain: 3,
+    });
+  });
+
   it("records Blood Debt-like life loss and life gain separately from damage", () => {
     const state = makeGame(85);
     const sourceId = giveCard(state, 0, "INSTANT");

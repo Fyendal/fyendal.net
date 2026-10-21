@@ -1120,6 +1120,14 @@ function projectState(
       ...((seat === player.seat || revealAll)
         ? { banishedSixPlusThisTurn: player.flags.banishedSixPlusThisTurn === true }
         : {}),
+      // Soul movement is public (the soul is face up and charging is logged).
+      ...(Number(player.flags.chargedCountThisTurn) > 0
+        ? { chargesThisTurn: Number(player.flags.chargedCountThisTurn) }
+        : {}),
+      ...(Number(player.flags["soulPitch:2"]) > 0 ? { yellowSoulThisTurn: true } : {}),
+      ...(Number(player.flags.soulBanishedThisChain) > 0
+        ? { soulBanishedThisChain: Number(player.flags.soulBanishedThisChain) }
+        : {}),
       playedSubtypes: Object.keys(player.flags)
         .filter((flag) => flag.startsWith("playedSubtype:") && player.flags[flag] === true)
         .map((flag) => flag.slice("playedSubtype:".length))

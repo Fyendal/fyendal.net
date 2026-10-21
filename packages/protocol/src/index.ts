@@ -1426,6 +1426,7 @@ function playerTurnFacts(value: unknown): value is PlayerTurnFactsView {
     "attacks", "weaponAttacks", "playedSubtypes", "usedOncePerTurnEffectSourceIds", "dealtDamage",
     "physicalDamageDealt", "arcaneDamageDealt", "damageTaken",
     "physicalDamageTaken", "arcaneDamageTaken", "banishedSixPlusThisTurn",
+    "chargesThisTurn", "yellowSoulThisTurn", "soulBanishedThisChain",
   ], [
     "attacks", "weaponAttacks", "playedSubtypes", "usedOncePerTurnEffectSourceIds", "dealtDamage",
     "physicalDamageDealt", "arcaneDamageDealt", "damageTaken",
@@ -1434,6 +1435,9 @@ function playerTurnFacts(value: unknown): value is PlayerTurnFactsView {
     && nonNegativeInteger(facts.attacks)
     && nonNegativeInteger(facts.weaponAttacks)
     && optional(facts.banishedSixPlusThisTurn, (value): value is boolean => typeof value === "boolean")
+    && optional(facts.chargesThisTurn, nonNegativeInteger)
+    && optional(facts.yellowSoulThisTurn, (value): value is boolean => typeof value === "boolean")
+    && optional(facts.soulBanishedThisChain, nonNegativeInteger)
     && shortStrings(facts.playedSubtypes)
     && array(facts.usedOncePerTurnEffectSourceIds, instanceId, MAX_CARDS)
     && typeof facts.dealtDamage === "boolean"

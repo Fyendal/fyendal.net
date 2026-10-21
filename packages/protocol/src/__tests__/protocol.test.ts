@@ -600,6 +600,16 @@ describe("GameView and server messages", () => {
     Object.assign(malformed.turnFacts.players[0]!, { banishedSixPlusThisTurn: "yes" });
     expect(decodeGameView(malformed)).toBeNull();
   });
+  it("accepts the public soul turn facts and rejects malformed values", () => {
+    const current = gameView();
+    Object.assign(current.turnFacts.players[0]!, { chargesThisTurn: 2, yellowSoulThisTurn: true, soulBanishedThisChain: 1 });
+    expect(decodeGameView(current)).not.toBeNull();
+    for (const malformed of [{ chargesThisTurn: -1 }, { yellowSoulThisTurn: "yes" }, { soulBanishedThisChain: 1.5 }]) {
+      const view = gameView();
+      Object.assign(view.turnFacts.players[0]!, malformed);
+      expect(decodeGameView(view), JSON.stringify(malformed)).toBeNull();
+    }
+  });
   it("decodes the attack queue and rejects empty or malformed entries", () => {
     const card = { instanceId: 7, cardId: "HNT012", owner: 0 };
     expect(decodeGameView({ ...gameView(), attackQueue: [{ card, seat: 0 }] })).not.toBeNull();

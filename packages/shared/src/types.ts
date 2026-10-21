@@ -616,6 +616,15 @@ export interface PlayerTurnFactsView {
   /** Whether this player has banished a card with at least six power this turn.
    * Visible only to that player; optional in opponent views and older replays. */
   banishedSixPlusThisTurn?: boolean;
+  /** Public: times this player has charged their hero's soul this turn.
+   * Omitted when zero. */
+  chargesThisTurn?: number;
+  /** Public: a yellow card was put into this player's soul this turn.
+   * Omitted when false. */
+  yellowSoulThisTurn?: boolean;
+  /** Public: cards banished from this player's soul during the open combat
+   * chain. Omitted when zero. */
+  soulBanishedThisChain?: number;
   playedSubtypes: string[];
   /** Public permanent instance ids whose once-per-turn triggered effects have
    * already been consumed this turn. */
