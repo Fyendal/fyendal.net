@@ -195,9 +195,9 @@
   outline-offset: 3px;
 }
 
-/* Flat opponent list: matches the home play panel's surfaces and states. */
+/* Opponent roster: portrait tiles so the list stays short as bots are added. */
 .bot-opponent-modal {
-  width: min(640px, calc(100vw - 40px));
+  width: min(720px, calc(100vw - 40px));
   border-color: #59493a;
   border-radius: 3px;
   background: #211a15;
@@ -225,7 +225,7 @@
   display: flex;
   align-items: center;
   gap: 16px;
-  margin-bottom: 16px;
+  margin-bottom: 12px;
   padding: 12px 14px;
   border: 1px solid #5b4c3e;
   border-radius: 3px;
@@ -256,41 +256,29 @@
 
 .bot-opponent-options {
   display: grid;
-  overflow: hidden;
-  border: 1px solid #5b4c3e;
-  border-radius: 3px;
-  background: #191510;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
 }
 .bot-opponent-options > button {
   display: grid;
-  grid-template-columns: 48px minmax(0, 1fr) 10px;
+  grid-template:
+    "portrait type" auto
+    "details details" 1fr / auto minmax(0, 1fr);
   min-width: 0;
   align-items: start;
-  gap: 4px 14px;
-  padding: 14px 16px 14px 14px;
-  border: 0;
-  border-radius: 0;
+  gap: 10px 8px;
+  padding: 14px;
+  border: 1px solid #3d3128;
+  border-radius: 3px;
   clip-path: none;
-  background: transparent;
+  background: #191510;
   color: inherit;
   font: inherit;
   letter-spacing: 0;
   text-align: left;
   text-transform: none;
 }
-.bot-opponent-options > button + button { border-top: 1px solid #3d3128; }
-.bot-opponent-options > button::after {
-  width: 7px;
-  height: 7px;
-  align-self: center;
-  border-right: 2px solid #6e5c48;
-  border-bottom: 2px solid #6e5c48;
-  content: "";
-  transform: rotate(-45deg);
-}
-.bot-opponent-options > button:hover { background: #2a201a; }
-.bot-opponent-options > button:hover::after,
-.bot-opponent-options > button:focus-visible::after { border-color: var(--gold); }
+.bot-opponent-options > button:hover { border-color: #745c3f; background: #2a201a; }
 .bot-opponent-options > button:focus-visible {
   background: #2a201a;
   outline: 2px solid var(--gold);
@@ -299,48 +287,44 @@
 .bot-opponent-options img,
 .bot-opponent-fallback {
   display: grid;
-  width: 48px;
-  height: 48px;
+  grid-area: portrait;
+  width: 64px;
+  height: 64px;
   place-items: center;
   border: 1px solid #6b5326;
   border-radius: 50%;
   background: #181008;
   color: var(--gold);
-  font: 700 18px var(--font-lobby-title);
+  font: 700 22px var(--font-lobby-title);
   object-fit: cover;
 }
 .bot-opponent-details {
   display: grid;
+  grid-area: details;
   min-width: 0;
-  gap: 4px;
-  padding-top: 2px;
+  gap: 2px;
 }
-.bot-opponent-heading {
-  display: flex;
-  min-width: 0;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 2px 8px;
-}
-.bot-opponent-heading strong {
+.bot-opponent-name {
   color: var(--text-primary);
   font-size: 16px;
   font-weight: 700;
   line-height: 1.25;
 }
-.bot-opponent-options > button:hover .bot-opponent-heading strong { color: var(--gold); }
+.bot-opponent-options > button:hover .bot-opponent-name { color: var(--gold); }
 .bot-opponent-title {
   color: var(--text-muted);
   font-size: 13px;
   line-height: 1.25;
 }
 .bot-opponent-description {
+  margin-top: 4px;
   color: var(--text-secondary);
-  font-size: 14px;
+  font-size: 13px;
   line-height: 1.45;
 }
 .bot-deck-type {
-  margin-left: auto;
+  grid-area: type;
+  justify-self: end;
   padding: 3px 8px;
   border-radius: 3px;
   background: color-mix(in srgb, currentColor 12%, transparent);
@@ -779,14 +763,20 @@
   .deck-detail-start { min-height: 46px; }
   .deck-actions { flex-direction: column; }
   .btn-bot { width: 100%; min-width: 0; }
-  .bot-opponent-modal { width: 100%; border-radius: 10px 10px 3px 3px; }
-  .bot-opponent-options > button {
-    grid-template-columns: 40px minmax(0, 1fr) 10px;
-    gap: 4px 12px;
-    padding: 12px;
+  .bot-opponent-modal {
+    width: 100%;
+    padding: 12px 12px max(12px, env(safe-area-inset-bottom));
+    border-radius: 10px 10px 3px 3px;
   }
+  .bot-opponent-modal .modal-surface-header {
+    top: -12px;
+    margin: -12px -12px 12px;
+    padding: 12px 14px;
+  }
+  .bot-opponent-options { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .bot-opponent-options > button { gap: 8px 6px; padding: 12px; }
   .bot-opponent-options img,
-  .bot-opponent-fallback { width: 40px; height: 40px; }
+  .bot-opponent-fallback { width: 56px; height: 56px; }
 }
 
 /* ── room listings ── */

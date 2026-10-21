@@ -200,13 +200,8 @@ export function BotOpponentModal(props: {
             >
               <BotPortrait name={bot.name} heroName={bot.heroName} />
               <span className="bot-opponent-details">
-                <span className="bot-opponent-heading">
-                  <strong>{bot.name}</strong>
-                  <small className="bot-opponent-title">{bot.title}</small>
-                  <span className={`bot-deck-type bot-deck-type-${bot.deckType}`}>
-                    {intl.formatMessage({ id: `lobby.bot.type.${bot.deckType}` })}
-                  </span>
-                </span>
+                <strong className="bot-opponent-name">{bot.name}</strong>
+                <small className="bot-opponent-title">{bot.title}</small>
                 <span className="bot-opponent-description">
                   {intl.formatMessage({ id: bot.descriptionId })}
                 </span>
@@ -233,6 +228,9 @@ export function BotOpponentModal(props: {
                     ) : null}
                   </span>
                 ) : null}
+              </span>
+              <span className={`bot-deck-type bot-deck-type-${bot.deckType}`}>
+                {intl.formatMessage({ id: `lobby.bot.type.${bot.deckType}` })}
               </span>
             </button>
           );
