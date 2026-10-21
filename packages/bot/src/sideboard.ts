@@ -15,6 +15,7 @@ const IRA_PRECON_ID = "precon-asr";
 const JARL_BOT_DECK_ID = "bot-jarl";
 const LEVIA_BOT_DECK_ID = "bot-levia-gates";
 const STARVO_BOT_DECK_ID = "bot-starvo-boss";
+const BOLTYN_BOT_DECK_ID = "bot-boltyn-raydn";
 
 const BRAVO_ARCANE_POLARITY = ["SBA030", "SBA030"];
 const BRAVO_RED_CHOKESLAM = ["SBR016", "SBR016"];
@@ -652,4 +653,213 @@ export function kayoPresentationFor(
     },
     deck,
   };
+}
+
+// ── Ser Boltyn, Breaker of Dawn ──────────────────────────────────────────
+
+const BOLTYN_EDICT = "SBL020";
+const BOLTYN_STEELHAND = "ASB014";
+const BOLTYN_TENACITY = "ANQ015";
+const BOLTYN_SAVING_GRACE = "ASB025";
+const BOLTYN_SINK_BELOW = "ASB016";
+const BOLTYN_SOUL_SHIELD = "MON063";
+const BOLTYN_ENERGY_POTION = "MPW146";
+
+/** The registered sixty carries the guide's default seven on top of the
+ * fifty-three card source main deck; every matchup rebuilds from that core. */
+const BOLTYN_DEFAULT_PACKAGE: readonly [cardId: string, count: number][] = [
+  [BOLTYN_EDICT, 2], [BOLTYN_STEELHAND, 2], [BOLTYN_TENACITY, 1], [BOLTYN_SAVING_GRACE, 2],
+];
+const BOLTYN_CORE_SIZE = 53;
+
+const BOLTYN_AGGRESSIVE_PACKAGE = [
+  BOLTYN_EDICT, BOLTYN_EDICT, BOLTYN_STEELHAND, BOLTYN_STEELHAND,
+  BOLTYN_ENERGY_POTION, BOLTYN_ENERGY_POTION, BOLTYN_TENACITY,
+];
+const BOLTYN_DEFENSIVE_PACKAGE = [
+  BOLTYN_SAVING_GRACE, BOLTYN_SAVING_GRACE, BOLTYN_SAVING_GRACE,
+  BOLTYN_SINK_BELOW, BOLTYN_SINK_BELOW, BOLTYN_SINK_BELOW, BOLTYN_EDICT,
+];
+const BOLTYN_SAVING_GRACES = [BOLTYN_SAVING_GRACE, BOLTYN_SAVING_GRACE, BOLTYN_SAVING_GRACE];
+const BOLTYN_SOUL_SHIELDS = [BOLTYN_SOUL_SHIELD, BOLTYN_SOUL_SHIELD];
+const BOLTYN_SWORD_PACKAGE = [BOLTYN_EDICT, BOLTYN_EDICT, BOLTYN_STEELHAND, BOLTYN_STEELHAND];
+
+const BOLTYN_HEAD = { helm: "ASB003", circlet: "IAR223", kabuto: "HNT115", warband: "EVO247" } as const;
+const BOLTYN_CHEST = { soulbond: "DTD047", tunic: "PEN311" } as const;
+const BOLTYN_ARMS = { ironsong: "DTD207", solforge: "PEN179" } as const;
+const BOLTYN_LEGS = { warpath: "ASB006", snapdragon: "BOL008" } as const;
+
+export type BoltynMatchup =
+  | "marionette"
+  | "hyper-aggro"
+  | "dash"
+  | "aggressive-defender"
+  | "levia"
+  | "marlynn"
+  | "aurora"
+  | "viserai"
+  | "vynnset"
+  | "wizard"
+  | "victor"
+  | "jarl"
+  | "valda"
+  | "fatigue"
+  | "dorinthea"
+  | "warrior"
+  | "fang"
+  | "olympia"
+  | "gravy"
+  | "zyggy"
+  | "default";
+
+/** Guide matchup chapters keyed by the revealed hero, falling back to class. */
+export function boltynMatchupForHeroName(name: string, classes: readonly string[] = []): BoltynMatchup {
+  if (name.includes("arakni, marionette")) return "marionette";
+  if (name.includes("dash")) return "dash";
+  if (name.includes("cindra") || name.includes("fai")) return "hyper-aggro";
+  if (name.includes("levia")) return "levia";
+  if (name.includes("marlynn")) return "marlynn";
+  if (name.includes("aurora")) return "aurora";
+  if (name.includes("viserai")) return "viserai";
+  if (name.includes("vynnset")) return "vynnset";
+  if (name.includes("victor")) return "victor";
+  if (name.includes("jarl")) return "jarl";
+  if (name.includes("valda")) return "valda";
+  if (name.includes("arakni, huntsman") || name.includes("teklovossen") || name.includes("pleiades")) return "fatigue";
+  if (name.includes("dorinthea")) return "dorinthea";
+  if (name.includes("fang")) return "fang";
+  if (name.includes("olympia")) return "olympia";
+  if (name.includes("gravy bones")) return "gravy";
+  if (name.includes("zyggy")) return "zyggy";
+  if (["ira", "puffin", "rhinar", "lyath"].some((hero) => name.includes(hero))) return "aggressive-defender";
+  if (name.includes("hala") || name.includes("kassai") || classes.includes("warrior")) return "warrior";
+  if (name.includes("oscilio") || classes.includes("wizard")) return "wizard";
+  return "default";
+}
+
+function boltynMatchupFor(
+  opponent: BotPrepOpponent,
+  cards: Readonly<Record<string, CardData>>,
+): BoltynMatchup {
+  const classes = cards[opponent.heroId]?.classes?.map((value) => value.toLowerCase()) ?? [];
+  return boltynMatchupForHeroName(opponentHeroName(opponent, cards), classes);
+}
+
+/** The guide's turn-order preference; bot rooms let the human pick. */
+export function boltynPreferredTurnOrderFor(
+  opponent: BotPrepOpponent,
+  cards: Readonly<Record<string, CardData>> = cardData,
+): "first" | "second" {
+  const matchup = boltynMatchupFor(opponent, cards);
+  return matchup === "marionette" || matchup === "dorinthea" ? "second" : "first";
+}
+
+/** Present the Raydn Boltyn list by guide matchup: stance, flex package and deck size. */
+export function boltynPresentationFor(
+  opponent: BotPrepOpponent,
+  cards: Readonly<Record<string, CardData>> = cardData,
+): PresentedDeck {
+  const registered = precon(BOLTYN_BOT_DECK_ID);
+  if (!registered || registered.format !== "cc" || registered.botOnly !== true) {
+    throw new Error("Boltyn bot deck is not registered");
+  }
+  const deck = [...registered.pool.deck];
+  for (const [cardId, count] of BOLTYN_DEFAULT_PACKAGE) removeCopies(deck, cardId, count);
+  if (deck.length !== BOLTYN_CORE_SIZE) {
+    throw new Error(`Boltyn core has ${deck.length} cards, expected ${BOLTYN_CORE_SIZE}`);
+  }
+  const matchup = boltynMatchupFor(opponent, cards);
+
+  const defender: Partial<Record<EquipmentSlot, string>> = {
+    head: BOLTYN_HEAD.helm, chest: BOLTYN_CHEST.soulbond, arms: BOLTYN_ARMS.ironsong, legs: BOLTYN_LEGS.warpath,
+  };
+  const aggressor: Partial<Record<EquipmentSlot, string>> = {
+    head: BOLTYN_HEAD.warband, chest: BOLTYN_CHEST.tunic, arms: BOLTYN_ARMS.ironsong, legs: BOLTYN_LEGS.warpath,
+  };
+  let equipment: Partial<Record<EquipmentSlot, string>>;
+  let flex: readonly string[];
+  switch (matchup) {
+    case "marionette":
+    case "hyper-aggro":
+    case "dash":
+      equipment = defender;
+      flex = BOLTYN_DEFENSIVE_PACKAGE;
+      break;
+    case "aggressive-defender":
+      equipment = defender;
+      flex = [...BOLTYN_SAVING_GRACES, ...BOLTYN_SWORD_PACKAGE];
+      break;
+    case "levia":
+      equipment = defender;
+      flex = [...BOLTYN_SAVING_GRACES, ...BOLTYN_SOUL_SHIELDS, BOLTYN_SINK_BELOW, BOLTYN_SINK_BELOW];
+      break;
+    case "marlynn":
+      equipment = defender;
+      flex = [...BOLTYN_SAVING_GRACES, BOLTYN_SINK_BELOW, BOLTYN_SINK_BELOW, BOLTYN_SINK_BELOW, BOLTYN_STEELHAND];
+      break;
+    case "aurora":
+      equipment = { ...defender, arms: BOLTYN_ARMS.solforge };
+      flex = BOLTYN_DEFENSIVE_PACKAGE;
+      break;
+    case "viserai":
+      equipment = { ...defender, head: BOLTYN_HEAD.circlet, arms: BOLTYN_ARMS.solforge };
+      flex = BOLTYN_DEFENSIVE_PACKAGE;
+      break;
+    case "vynnset":
+      equipment = { ...aggressor, head: BOLTYN_HEAD.circlet, arms: BOLTYN_ARMS.solforge };
+      flex = [...BOLTYN_AGGRESSIVE_PACKAGE, ...BOLTYN_SAVING_GRACES];
+      break;
+    case "wizard":
+      equipment = { ...aggressor, arms: BOLTYN_ARMS.solforge, legs: BOLTYN_LEGS.snapdragon };
+      flex = BOLTYN_AGGRESSIVE_PACKAGE;
+      break;
+    case "victor":
+      equipment = aggressor;
+      flex = [...BOLTYN_AGGRESSIVE_PACKAGE, ...BOLTYN_SOUL_SHIELDS];
+      break;
+    case "jarl":
+      equipment = aggressor;
+      flex = [...BOLTYN_AGGRESSIVE_PACKAGE, ...BOLTYN_SOUL_SHIELDS, BOLTYN_SINK_BELOW];
+      break;
+    case "valda":
+      equipment = { ...aggressor, chest: BOLTYN_CHEST.soulbond };
+      flex = [...BOLTYN_SWORD_PACKAGE, ...BOLTYN_SAVING_GRACES, ...BOLTYN_SOUL_SHIELDS, BOLTYN_SINK_BELOW];
+      break;
+    case "fatigue":
+    case "zyggy":
+      equipment = { ...aggressor, legs: BOLTYN_LEGS.snapdragon };
+      flex = BOLTYN_AGGRESSIVE_PACKAGE;
+      break;
+    case "dorinthea":
+      equipment = { ...aggressor, head: BOLTYN_HEAD.kabuto };
+      flex = [
+        ...BOLTYN_SAVING_GRACES, BOLTYN_SINK_BELOW, BOLTYN_SINK_BELOW, BOLTYN_SINK_BELOW, ...BOLTYN_SWORD_PACKAGE,
+      ];
+      break;
+    case "warrior":
+      equipment = { ...aggressor, head: BOLTYN_HEAD.kabuto };
+      flex = [...BOLTYN_SAVING_GRACES, ...BOLTYN_SWORD_PACKAGE, BOLTYN_TENACITY, BOLTYN_SINK_BELOW, BOLTYN_SINK_BELOW];
+      break;
+    case "fang":
+      equipment = { ...aggressor, head: BOLTYN_HEAD.kabuto, arms: BOLTYN_ARMS.solforge };
+      flex = BOLTYN_AGGRESSIVE_PACKAGE;
+      break;
+    case "olympia":
+      equipment = aggressor;
+      flex = [...BOLTYN_AGGRESSIVE_PACKAGE, ...BOLTYN_SAVING_GRACES];
+      break;
+    case "gravy":
+      equipment = aggressor;
+      flex = BOLTYN_AGGRESSIVE_PACKAGE;
+      break;
+    default:
+      equipment = aggressor;
+      flex = BOLTYN_DEFAULT_PACKAGE.flatMap(([cardId, count]) => Array<string>(count).fill(cardId));
+      break;
+  }
+  deck.push(...flex);
+  if (deck.length < 60 || deck.length > 65) {
+    throw new Error(`Boltyn matchup presentation has ${deck.length} cards`);
+  }
+  return { weaponIds: ["ASB002"], equipment, deck };
 }

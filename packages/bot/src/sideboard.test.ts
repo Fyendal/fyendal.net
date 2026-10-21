@@ -2,6 +2,8 @@ import { cardData, precon, validatePresentation } from "@fyendal/cards";
 import type { Decklist } from "@fyendal/shared";
 import { describe, expect, it } from "vitest";
 import {
+  boltynPreferredTurnOrderFor,
+  boltynPresentationFor,
   bravoPresentationFor,
   briarPresentationFor,
   cindraPresentationFor,
@@ -472,5 +474,111 @@ describe("Hala Masterclass presentation", () => {
       expect(validatePresentation(pool, halaPresentationFor(matchup), "cc"))
         .toMatchObject({ ok: true });
     }
+  });
+});
+
+describe("Boltyn Raydn matchup guide", () => {
+  const pool = precon("bot-boltyn-raydn")!.pool;
+  const guide = (heroName: string, classes: string[] = []) => {
+    const cards = { ...cardData, GUIDE_HERO: { ...cardData["WTR001"]!, name: heroName, classes } };
+    const opponent = { heroId: "GUIDE_HERO", weaponIds: [], equipment: {} };
+    return {
+      presented: boltynPresentationFor(opponent, cards),
+      preference: boltynPreferredTurnOrderFor(opponent, cards),
+      validation: validatePresentation(pool, boltynPresentationFor(opponent, cards), "cc", { cardPoolMode: "open" }),
+    };
+  };
+  const count = (deck: readonly string[], id: string) => deck.filter((card) => card === id).length;
+
+  it("defaults unknown heroes to the Defensive Aggressor sixty", () => {
+    const { presented, preference, validation } = guide("Unknown Hero");
+    expect(validation).toMatchObject({ ok: true });
+    expect(preference).toBe("first");
+    expect(presented.weaponIds).toEqual(["ASB002"]);
+    expect(presented.equipment).toEqual({ head: "EVO247", chest: "PEN311", arms: "DTD207", legs: "ASB006" });
+    expect(presented.deck).toHaveLength(60);
+    expect(count(presented.deck, "SBL020")).toBe(2);
+    expect(count(presented.deck, "ASB014")).toBe(2);
+    expect(count(presented.deck, "ANQ015")).toBe(1);
+    expect(count(presented.deck, "ASB025")).toBe(2);
+    expect(presented.deck).not.toContain("ASB016");
+    expect(presented.deck).not.toContain("MPW146");
+  });
+
+  it("takes the Soulbond defender stance with the full reaction suite against aggro", () => {
+    for (const name of ["Cindra, Dracai of Retribution", "Fai, Rising Rebellion", "Arakni, Marionette", "Dash I/O"]) {
+      const { presented, validation } = guide(name);
+      expect(validation, name).toMatchObject({ ok: true });
+      expect(presented.equipment, name).toEqual({ head: "ASB003", chest: "DTD047", arms: "DTD207", legs: "ASB006" });
+      expect(presented.deck, name).toHaveLength(60);
+      expect(count(presented.deck, "ASB025"), name).toBe(3);
+      expect(count(presented.deck, "ASB016"), name).toBe(3);
+      expect(count(presented.deck, "SBL020"), name).toBe(1);
+    }
+    expect(guide("Arakni, Marionette").preference).toBe("second");
+    expect(guide("Dash I/O").preference).toBe("first");
+    expect(count(guide("Levia, Shadowborn Abomination").presented.deck, "MON063")).toBe(2);
+  });
+
+  it("brings Kabuto and the sword package against warriors", () => {
+    const dorinthea = guide("Dorinthea Ironsong", ["warrior"]);
+    expect(dorinthea.preference).toBe("second");
+    expect(dorinthea.presented.equipment).toEqual({ head: "HNT115", chest: "PEN311", arms: "DTD207", legs: "ASB006" });
+    expect(dorinthea.presented.deck).toHaveLength(63);
+    expect(count(dorinthea.presented.deck, "ASB025")).toBe(3);
+    expect(count(dorinthea.presented.deck, "ASB016")).toBe(3);
+    const hala = guide("Hala, Bladesaint of the Vow", ["warrior"]);
+    expect(hala.presented.equipment.head).toBe("HNT115");
+    expect(hala.presented.deck).toHaveLength(63);
+    expect(count(hala.presented.deck, "ANQ015")).toBe(1);
+    const fang = guide("Fang, Dracai of Blades", ["warrior"]);
+    expect(fang.presented.equipment).toMatchObject({ head: "HNT115", arms: "PEN179" });
+    expect(fang.presented.deck).toHaveLength(60);
+    expect(guide("Unknown Swordsman", ["warrior"]).presented.equipment.head).toBe("HNT115");
+  });
+
+  it("races fatigue and wizards on Tunic with Snapdragon Scalers", () => {
+    for (const name of ["Arakni, Huntsman", "Teklovossen, Esteemed Magnate", "Zyggy Starlight", "Oscilio, Constella Intelligence"]) {
+      const { presented, preference } = guide(name, name.includes("Oscilio") ? ["wizard"] : []);
+      expect(presented.equipment, name).toMatchObject({ chest: "PEN311", legs: "BOL008" });
+      expect(presented.deck, name).toHaveLength(60);
+      expect(count(presented.deck, "MPW146"), name).toBe(2);
+      expect(preference, name).toBe("first");
+    }
+    expect(guide("Oscilio, Constella Intelligence", ["wizard"]).presented.equipment.arms).toBe("PEN179");
+  });
+
+  it("uses the Circlet against shadow runeblades and larger decks into guardians", () => {
+    const vynnset = guide("Vynnset, Iron Maiden", ["runeblade"]);
+    expect(vynnset.presented.equipment).toEqual({ head: "IAR223", chest: "PEN311", arms: "PEN179", legs: "ASB006" });
+    expect(vynnset.presented.deck).toHaveLength(63);
+    const viserai = guide("Viserai, the Forsaken", ["runeblade"]);
+    expect(viserai.presented.equipment).toEqual({ head: "IAR223", chest: "DTD047", arms: "PEN179", legs: "ASB006" });
+    expect(viserai.presented.deck).toHaveLength(60);
+    const jarl = guide("Jarl Vetreiði", ["guardian"]);
+    expect(jarl.preference).toBe("first");
+    expect(jarl.presented.deck).toHaveLength(63);
+    expect(count(jarl.presented.deck, "MON063")).toBe(2);
+    expect(guide("Victor Goldmane, High and Mighty", ["guardian"]).presented.deck).toHaveLength(62);
+    const valda = guide("Valda Brightaxe", ["guardian"]);
+    expect(valda.presented.equipment.chest).toBe("DTD047");
+    expect(valda.presented.deck).toHaveLength(63);
+  });
+
+  it("presents a legal deck for every named hero in both turn orders", () => {
+    const names = [
+      "Marlynn, Treasure Hunter", "Aurora, Tempest in a Teacup", "Gravy Bones, Shipwrecked Looter",
+      "Olympia, Prized Fighter", "Kassai of the Golden Sand", "Ira, Scarlet Revenger", "Puffin, Hightail",
+      "Rhinar, Reckless Rampage", "Lyath Goldmane, Vile Savant", "Pleiades, Superstar", "Katsu, the Wanderer",
+    ];
+    for (const name of names) {
+      const { validation, presented } = guide(name);
+      expect(validation, name).toMatchObject({ ok: true });
+      expect(presented.deck.length, name).toBeGreaterThanOrEqual(60);
+      expect(presented.deck.length, name).toBeLessThanOrEqual(65);
+    }
+    expect(count(guide("Marlynn, Treasure Hunter").presented.deck, "ASB016")).toBe(3);
+    expect(guide("Aurora, Tempest in a Teacup").presented.equipment.arms).toBe("PEN179");
+    expect(guide("Olympia, Prized Fighter").presented.deck).toHaveLength(63);
   });
 });

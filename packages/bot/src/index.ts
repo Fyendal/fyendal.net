@@ -1,5 +1,7 @@
 export type { BotPrepOpponent } from "./sideboard.js";
 export {
+  boltynPreferredTurnOrderFor,
+  boltynPresentationFor,
   bravoPresentationFor,
   briarPresentationFor,
   kayoPresentationFor,
