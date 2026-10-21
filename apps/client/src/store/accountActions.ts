@@ -1,5 +1,6 @@
 import {
   apiAccountBadges,
+  apiAccountBeta,
   apiAccountEmail,
   apiBugReportNotifications,
   apiDecks,
@@ -33,6 +34,7 @@ type AccountActionKey =
   | "updateDeck"
   | "deleteDeck"
   | "exportAccount"
+  | "refreshBetaTester"
   | "getAccountBadges"
   | "selectAccountBadge"
   | "getAccountEmail"
@@ -162,6 +164,16 @@ export function createAccountActions({
       const request = authRequest(token);
       const result = await apiExportAccount(token, request.signal);
       return isCurrentAuth(request) ? result : superseded;
+    },
+    refreshBetaTester: async () => {
+      const token = get().authToken;
+      if (!token) {
+        set({ betaTester: false });
+        return;
+      }
+      const request = authRequest(token);
+      const result = await apiAccountBeta(token, request.signal);
+      if (isCurrentAuth(request) && result.ok) set({ betaTester: result.betaTester });
     },
     getAccountBadges: async () => {
       const token = get().authToken;

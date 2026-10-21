@@ -2,7 +2,7 @@ import { afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 import type { Server } from "node:http";
 import type { AddressInfo } from "node:net";
 import { gzipSync } from "node:zlib";
-import { decodeAchievementsResponse, decodeMatchRecordsResponse, decodeMatchesResponse } from "@fyendal/protocol";
+import { decodeAccountBetaResponse, decodeAchievementsResponse, decodeMatchRecordsResponse, decodeMatchesResponse } from "@fyendal/protocol";
 import { cardData, precon } from "@fyendal/cards";
 import { createApiServer, createRateLimiter, type ApiDeps } from "../http.js";
 import { login, register, sessionForToken } from "../auth.js";
@@ -996,6 +996,31 @@ describe("account rights", () => {
     });
     expect(invalid.status).toBe(400);
     expect(await invalid.json()).toEqual({ ok: false, error: "invalid badge" });
+  });
+
+  it("reports the operator beta tester allowlist independently of badges and exports it", async () => {
+    await register(db, "BetaUser", "password1");
+    const session = await login(db, "betauser", "password1");
+    if (!session.ok) throw new Error("login failed");
+    const user = await sessionForToken(db, session.token);
+    if (!user) throw new Error("session missing");
+    const url = await startApi();
+    const headers = { Authorization: `Bearer ${session.token}` };
+
+    expect((await fetch(`${url}/api/account/beta`)).status).toBe(401);
+    expect(await (await fetch(`${url}/api/account/beta`, { headers })).json())
+      .toEqual({ ok: true, betaTester: false });
+
+    await db.query("INSERT INTO beta_testers (user_id, added_at) VALUES ($1, 123)", [user.id]);
+    expect(decodeAccountBetaResponse(await (await fetch(`${url}/api/account/beta`, { headers })).json()))
+      .toEqual({ ok: true, betaTester: true });
+    expect(await (await fetch(`${url}/api/account/badges`, { headers })).json())
+      .toEqual({ ok: true, availableBadges: [], selectedBadge: null });
+    const exported = await (await fetch(`${url}/api/account/export`, { headers })).json() as any;
+    expect(exported.export.account).toMatchObject({ earlyTester: false, betaTester: true });
+
+    await db.query("DELETE FROM users WHERE id = $1", [user.id]);
+    expect((await db.query("SELECT user_id FROM beta_testers")).rows).toEqual([]);
   });
 
   it("exports account data and password-confirmed deletion removes account-bound data", async () => {

@@ -67,6 +67,7 @@ export interface AccountExport {
     createdAt: number;
     earlyTester: boolean;
     selectedBadge: PlayerBadge | null;
+    betaTester: boolean;
     email: string | null;
     pendingEmail: string | null;
   };
@@ -200,7 +201,13 @@ export async function exportAccount(db: Queryable, userId: number): Promise<Acco
     { rows: gameDayRows },
     social,
   ] = await Promise.all([
-    db.query("SELECT username, created_at, early_tester, selected_badge FROM users WHERE id = $1", [userId]),
+    db.query(
+      `SELECT u.username, u.created_at, u.early_tester, u.selected_badge,
+              b.user_id IS NOT NULL AS beta_tester
+       FROM users u LEFT JOIN beta_testers b ON b.user_id = u.id
+       WHERE u.id = $1`,
+      [userId],
+    ),
     accountEmail(db, userId),
     listDecks(db, userId),
     listDeckPlays(db, userId),
@@ -259,6 +266,7 @@ export async function exportAccount(db: Queryable, userId: number): Promise<Acco
     created_at: number;
     early_tester: boolean;
     selected_badge: unknown;
+    beta_tester: boolean;
   } | undefined;
   if (!user) return null;
   const rooms: AccountExport["rooms"] = [];
@@ -342,6 +350,7 @@ export async function exportAccount(db: Queryable, userId: number): Promise<Acco
       createdAt: Number(user.created_at),
       earlyTester: user.early_tester,
       selectedBadge: badgePreferences(user.early_tester, user.selected_badge).selectedBadge,
+      betaTester: user.beta_tester,
       email: recoveryEmail?.email ?? null,
       pendingEmail: recoveryEmail?.pendingEmail ?? null,
     },

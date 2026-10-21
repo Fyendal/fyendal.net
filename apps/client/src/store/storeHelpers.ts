@@ -45,6 +45,7 @@ export function initialStoreProjection(
     latestEmote: null,
     authUser: auth?.username ?? null,
     authToken: auth?.token ?? null,
+    betaTester: false,
     rooms: [],
     inviteRoom: null,
     queueCounts: emptyQueueCounts(),

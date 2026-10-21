@@ -1012,6 +1012,14 @@ export const MIGRATIONS: Migration[] = [
       ADD CONSTRAINT pending_bot_starts_bot_check
       CHECK (bot IN ('ira', 'hala', 'cindra', 'jarl', 'briar', 'bravo', 'starvo', 'kayo', 'levia', 'boltyn'));`,
   },
+  {
+    version: 55,
+    // Operator-managed beta tester allowlist, edited from the dashboard.
+    sql: `CREATE TABLE beta_testers (
+      user_id INTEGER PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+      added_at BIGINT NOT NULL
+    );`,
+  },
 ];
 
 async function publicTables(db: Queryable): Promise<string[]> {

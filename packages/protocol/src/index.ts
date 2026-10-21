@@ -343,6 +343,10 @@ export interface AccountBadgesResponse {
   availableBadges: PlayerBadge[];
   selectedBadge: PlayerBadge | null;
 }
+export interface AccountBetaResponse {
+  ok: true;
+  betaTester: boolean;
+}
 export const ACHIEVEMENT_IDS = [
   "first-victory", "first-pvp-win", "first-bot-win", "big-turn", "relentless-victory",
   "full-hand", "overkill", "healthy-victory", "last-life",
@@ -371,6 +375,7 @@ export interface AccountExport {
     createdAt: number;
     earlyTester: boolean;
     selectedBadge: PlayerBadge | null;
+    betaTester: boolean;
     email: string | null;
     pendingEmail: string | null;
   };
@@ -2221,6 +2226,14 @@ export const decodeAccountEmailResponse: Decoder<AccountEmailResponse> = (value)
     : null;
 };
 
+export const decodeAccountBetaResponse: Decoder<AccountBetaResponse> = (value) => {
+  const data = object(value);
+  return !!data && exactKeys(data, ["ok", "betaTester"]) && data.ok === true
+    && typeof data.betaTester === "boolean"
+    ? { ok: true, betaTester: data.betaTester }
+    : null;
+};
+
 export const decodeAccountBadgesResponse: Decoder<AccountBadgesResponse> = (value) => {
   const data = object(value);
   return !!data
@@ -2494,7 +2507,8 @@ export const decodeAccountExportResponse: Decoder<AccountExportResponse> = (valu
         "playerReports", "gameDays", "achievements", "replays", "matches", "heroRecords", "matchupRecords",
         "friends", "friendRequests", "friendMessages"],
     ) && !!account
-    && exactKeys(account, ["username", "createdAt", "earlyTester", "selectedBadge", "email", "pendingEmail"])
+    && exactKeys(account, ["username", "createdAt", "earlyTester", "selectedBadge", "betaTester", "email", "pendingEmail"])
+    && typeof account.betaTester === "boolean"
     && nullableEmail(account.email) && nullableEmail(account.pendingEmail)
     && string(exported.exportedAt, 64, false) && string(account.username, MAX_SHORT_TEXT, false)
     && nonNegativeInteger(account.createdAt) && typeof account.earlyTester === "boolean"

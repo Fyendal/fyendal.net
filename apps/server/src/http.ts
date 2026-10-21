@@ -38,6 +38,7 @@ import {
 import { createPlayerReport } from "./playerReports.js";
 import { consoleError } from "./logging.js";
 import { getGlobalNotice } from "./globalNotice.js";
+import { isBetaTester } from "./betaTesters.js";
 import { getVersionUpdateNotice } from "./versionUpdateNotice.js";
 import { getAchievements } from "./achievements.js";
 import { isMatchFormat, listMatches, loadMatchRecords, parseMatchCursor } from "./matches.js";
@@ -788,6 +789,15 @@ export function createApiServer(deps: ApiDeps): http.Server {
           const preferences = await getAccountBadges(deps.db, user.id);
           if (!preferences) return sendJson(res, 404, { ok: false, error: "account not found" });
           sendJson(res, 200, { ok: true, ...preferences });
+        })
+        .catch((e) => internalError(res, e));
+      return;
+    }
+    if (req.method === "GET" && url.pathname === "/api/account/beta") {
+      authUser(req)
+        .then(async (user) => {
+          if (!user) return sendJson(res, 401, { ok: false, error: "not logged in" });
+          sendJson(res, 200, { ok: true, betaTester: await isBetaTester(deps.db, user.id) });
         })
         .catch((e) => internalError(res, e));
       return;

@@ -236,6 +236,7 @@ export const useStore = create<StoreState>((set, get) => {
       decks: [],
       decksLoading: true,
       bugReportNotifications: [],
+      betaTester: false,
       cardPoolModes: accountLobbySettings.cardPoolModes,
       deckPlayedAt: {},
     });
@@ -391,6 +392,7 @@ export const useStore = create<StoreState>((set, get) => {
       decks: [],
       decksLoading: false,
       bugReportNotifications: [],
+      betaTester: false,
       friends: [],
       friendRequests: [],
       friendGameInvites: [],
@@ -806,6 +808,7 @@ export const useStore = create<StoreState>((set, get) => {
       case "authed":
         saveStoredAuth(localStorage, { token: get().authToken ?? "", username: msg.username });
         set({ authUser: msg.username });
+        void get().refreshBetaTester();
         void get().refreshDecks();
         void get().refreshReplays();
         void get().refreshMatchRecords();

@@ -125,6 +125,9 @@ export interface StoreState {
   connectionIssueVisible: boolean;
   authUser: string | null;
   authToken: string | null;
+  /** Operator allowlist for unreleased UI; false until the account's flag loads. */
+  betaTester: boolean;
+  refreshBetaTester: () => Promise<void>;
   error: string | null;
   login: (username: string, password: string) => Promise<LoginResult>;
   register: (username: string, password: string, email?: string) => Promise<RegisterResult>;
