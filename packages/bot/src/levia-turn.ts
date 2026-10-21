@@ -78,6 +78,85 @@ export function leviaSashEnablesPair(input: BotPolicyInput, cards: readonly Card
 }
 
 const GATE = "Gate to i'Arathael";
+const BELLOW = "Bloodrush Bellow";
+
+export const BLOODRUSH_PLAN_WIDTH = 3;
+export const BLOODRUSH_MIN_DAMAGE = 10;
+
+export interface LeviaBloodrushTurn {
+  /** Attacks the turn chains. */
+  readonly width: number;
+  /** Damage of the strongest `width` attacks it can fund. */
+  readonly damage: number;
+  /** The discard is certain to be a six: a miss ends the turn unplayed. */
+  readonly hit: boolean;
+}
+
+/** A Bloodrush Bellow in hand or arsenal. */
+export function leviaHoldsBellow(input: BotPolicyInput): boolean {
+  const me = input.view.players[input.seat];
+  return [...me.hand, ...me.arsenal].some((card) => input.cards[card.cardId]?.name === BELLOW);
+}
+
+/** Six power as the engine counts it, including Rockyard Rodeo's weapon-set power. */
+export function leviaSixPower(card: CardView, input: BotPolicyInput): boolean {
+  const data = input.cards[card.cardId];
+  if (data?.name === "Rockyard Rodeo") {
+    return input.view.players[input.seat].weapons.some((weapon) => (input.cards[weapon.cardId]?.attack ?? 0) >= 6);
+  }
+  return (data?.attack ?? 0) >= 6;
+}
+
+/** Projection of the turn a Bellow could send now. Each other held card is
+ * either sent or pitched (a sent hand card costs its price plus its pitch),
+ * funded cheapest first; a likely hit credits one more attack from the draw. */
+export function leviaBloodrushTurn(input: BotPolicyInput, bellow: CardView): LeviaBloodrushTurn {
+  const me = input.view.players[input.seat];
+  const held = [...me.hand, ...me.arsenal].filter((card) => card.instanceId !== bellow.instanceId);
+  const access = leviaBanishAccess(input, false);
+  const gated = new Set(access.filter(({ viaGate }) => viaGate).map(({ card }) => card.instanceId));
+  const sash = Object.values(me.equipment).some((card) => card && input.cards[card.cardId]?.name === "Savage Sash");
+  const inHand = (card: CardView) => me.hand.some((heldCard) => heldCard.instanceId === card.instanceId);
+  const effectiveCost = (card: CardView) =>
+    leviaAttackCost(input.cards[card.cardId], sash) + (gated.has(card.instanceId) ? LEVIA_GATE_COST : 0) +
+    (inHand(card) ? input.cards[card.cardId]?.pitch ?? 0 : 0);
+  const attacks = [
+    ...held.filter((card) => leviaAttackPlayable(card, input)),
+    ...access.map(({ card }) => card),
+  ].sort((left, right) => effectiveCost(left) - effectiveCost(right) ||
+    (input.cards[right.cardId]?.attack ?? 0) - (input.cards[left.cardId]?.attack ?? 0));
+  let pool = me.resources - (input.cards[bellow.cardId]?.cost ?? 0) +
+    held.filter(inHand).reduce((total, card) => total + (input.cards[card.cardId]?.pitch ?? 0), 0);
+  const sent: CardView[] = [];
+  for (const attack of attacks) {
+    if (effectiveCost(attack) > pool) continue;
+    pool -= effectiveCost(attack);
+    sent.push(attack);
+  }
+  if (sent.length === 0) return { width: 0, damage: 0, hit: false };
+  const others = held.filter(inHand);
+  // One non-six may pay for the Bellow itself.
+  const hit = others.length > 0 && others.filter((card) => !leviaSixPower(card, input)).length <= 1;
+  const bellowContinues = hit ? 1 : 0;
+  const continues = sent.filter((card) => leviaAttackContinues(card, input)).length;
+  const width = Math.min(sent.length + bellowContinues, continues + bellowContinues + 1);
+  const damage = sent.map((card) => leviaBellowedPower(input.cards[card.cardId]))
+    .sort((left, right) => right - left)
+    .slice(0, width)
+    .reduce((total, power) => total + power, 0);
+  return { width, damage, hit };
+}
+
+/** An attack's power under the Bellow. */
+export function leviaBellowedPower(data: CardData | undefined): number {
+  return (data?.attack ?? 0) + (data?.classes?.some((cls) => cls.toLowerCase() === "brute") ? 2 : 0);
+}
+
+/** Whether a projected Bellow turn is worth sending. */
+export function leviaBloodrushWorthSending(turn: LeviaBloodrushTurn, opponentLife: number): boolean {
+  return turn.hit && (turn.damage >= BLOODRUSH_MIN_DAMAGE || turn.damage >= opponentLife);
+}
+
 const BLASMOPHET = "Blasmophet, the Insatiable Hunger";
 
 /** A Gate's activation cost. */

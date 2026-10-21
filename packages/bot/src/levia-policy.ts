@@ -43,12 +43,17 @@ import {
 } from "./levia-macros.js";
 import {
   leviaAttackContinues,
+  BLOODRUSH_PLAN_WIDTH,
   leviaAttackCost,
   leviaAttackPair,
   leviaAttackPlayable,
   leviaBanishAccess,
   leviaBloodDebtAction as bloodDebtAction,
+  leviaBloodrushTurn,
+  leviaBloodrushWorthSending,
   leviaEffectActive,
+  leviaHoldsBellow,
+  leviaSixPower,
   LEVIA_GATE_COST,
   leviaSashEnablesPair,
   type LeviaBanishAccess,
@@ -193,6 +198,8 @@ function gateTargetValue(intent: GameIntent, input: BotPolicyInput, own: Readonl
   const bloodrushActive = leviaEffectActive(input, "bloodrush bellow");
   // Rank targets by the attack they will make, not by their value in hand.
   const power = (targetData.attack ?? 0) + (bloodrushActive && targetData.classes?.includes("brute") ? 2 : 0);
+  // Banked for the Bellow turn while one waits, unless nothing else attacks.
+  if (!bloodrushActive && leviaHoldsBellow(input) && hasDirectAttack(input, own)) return -20;
   const reserve = [...me.hand, ...me.arsenal].filter((card) => !pitched.has(card.instanceId));
   if (!leviaAttackPair(input, reserve) &&
     leviaAttackPair(input, [...reserve, target], { resources: afterActivation })) {
@@ -227,6 +234,14 @@ function gateSetupValue(card: CardView, input: BotPolicyInput, own: ReadonlyMap<
     name(input.cards[intentCard(intent, own)?.cardId ?? ""]) === "bloodrush bellow"
   );
   return affordableTarget ? 46 : !convertible ? 24 : -80;
+}
+
+/** Whether the card's pitch is what funds this turn's attack pair. */
+function fundsAttackPair(card: CardView, input: BotPolicyInput): boolean {
+  const me = input.view.players[input.seat];
+  const reserve = [...me.hand, ...me.arsenal];
+  return leviaAttackPair(input, reserve) &&
+    !leviaAttackPair(input, reserve.filter((held) => held.instanceId !== card.instanceId));
 }
 
 function affordableFollowups(input: BotPolicyInput, spent: ReadonlySet<number>): number {
@@ -328,17 +343,30 @@ function leviaRules(input: BotPolicyInput, gateMode: boolean): HeroSolverRules {
           }
           break;
         case "bloodrush bellow": {
-          // Go again and draw 2 when most other held cards have 6+ power.
+          // The discard is a six for certain when at most one other held card
+          // is not, since that one pays for the Bellow.
           const others = (view: SolverView) => view.held.filter((held) => held.instanceId !== card.instanceId);
           const hits = (view: SolverView) => {
             const pool = others(view);
-            return pool.length > 0 && pool.filter((held) => held.power >= 6).length * 2 >= pool.length;
+            return pool.length > 0 && pool.filter((held) => held.power < 6).length <= 1;
           };
-          patch.canPlay = (view) => others(view).length > 0;
+          const sendable = leviaBloodrushWorthSending(
+            leviaBloodrushTurn(input, card), input.view.players[1 - input.seat]!.life,
+          );
+          patch.canPlay = (view) => sendable && others(view).length > 0;
           patch.goAgainIn = hits;
           patch.bonusIn = (view) => hits(view) ? context.averageDraw : -context.averageDraw;
           patch.after = () => ({ pending: [bloodrushPending(`bloodrush#${card.instanceId}`)] });
-          patch.uses = { pump: 4 };
+          // Static value: the three-wide plan, kept through the opposing turn
+          // unless the arsenal slot is stuck, in which case it is a blocker.
+          const waiting = me.arsenal.some((held) => held.instanceId === card.instanceId);
+          const arsenalFree = me.arsenal.length === 0 ||
+            me.arsenal.some((held) => leviaAttackPlayable(held, input));
+          const planned = !nextTurn || sendable || waiting || arsenalFree;
+          patch.uses = {
+            pump: planned ? 2 * BLOODRUSH_PLAN_WIDTH : 0,
+            pumpRider: planned ? context.averageDraw * (2 * topSixShare(input) - 1) : 0,
+          };
           break;
         }
         case "diabolic offering":
@@ -567,24 +595,32 @@ function scorePlay(intent: GameIntent, input: BotPolicyInput, own: ReadonlyMap<n
       leviaAttackPair(input, remaining, { resources, grantGoAgain: true });
     score = needsGoAgain ? (bloodrushActive ? 95 : 65) : endOfTurnBanishScore(intent, card, input);
   } else if (named === "savage sash") {
-    score = leviaSashEnablesPair(input, [...me.hand, ...me.arsenal]) ? (bloodrushActive ? 100 : 74) : -60;
+    // Reserved for the Bellow turn unless the opponent is low.
+    const saved = !bloodrushActive && leviaHoldsBellow(input) && input.view.players[1 - input.seat]!.life > 14;
+    score = !saved && leviaSashEnablesPair(input, [...me.hand, ...me.arsenal]) ? (bloodrushActive ? 100 : 74) : -60;
   } else if (named === "blood harvest" && intent.kind === "activate-ability") {
     score = Math.max(bloodHarvestPaymentScore(card, input, own), endOfTurnBanishScore(intent, card, input));
   } else if (named === "bloodrush bellow") {
-    // Its random discard must leave an attack: after paying, keep two other
-    // hand cards, or one beside a playable arsenal attack.
+    // Keep enough cards after paying that the random discard leaves an attack.
     const spent = new Set([card.instanceId, ...pitchIds(intent)]);
     const kept = me.hand.filter((held) => !spent.has(held.instanceId)).length;
     const arsenalAttack = me.arsenal.some((held) => leviaAttackPlayable(held, input));
-    score = followups() > 0 && (kept >= 2 || (kept === 1 && arsenalAttack))
-      ? 72 + Math.min(followups(), 2) * 8
+    const turn = leviaBloodrushTurn(input, card);
+    // The discard hits for certain only if every card left after this pitch is a six.
+    const remaining = me.hand.filter((held) => !spent.has(held.instanceId));
+    const hit = remaining.length > 0 && remaining.every((held) => leviaSixPower(held, input));
+    const worth = hit && leviaBloodrushWorthSending(turn, input.view.players[1 - input.seat]!.life);
+    score = worth && followups() > 0 && (kept >= 2 || (kept === 1 && arsenalAttack))
+      ? 72 + Math.min(turn.width, BLOODRUSH_PLAN_WIDTH) * 8
       : -60;
   } else if (named === "call to the grave") {
-    score = me.graveyard.length < 6 ? 58 : 38;
+    score = fundsAttackPair(card, input) ? 20 : me.graveyard.length < 6 ? 58 : 38;
   } else if (named === "pull from beyond") {
-    score = bloodrushActive && hasDirectAttack(input, own) ? 12 : !hasGate(input) ? 60 : 42;
+    score = fundsAttackPair(card, input) ? 20
+      : bloodrushActive && hasDirectAttack(input, own) ? 12 : !hasGate(input) ? 60 : 42;
   } else if (named === "goremass summoning") {
-    score = input.view.turnFacts?.players[input.seat]?.banishedSixPlusThisTurn === true ? 52 : -20;
+    score = fundsAttackPair(card, input) ? 20
+      : input.view.turnFacts?.players[input.seat]?.banishedSixPlusThisTurn === true ? 52 : -20;
   } else if (named === "levia, shadowborn abomination" && intent.kind === "activate-ability") {
     score = me.life <= 8 || (ownBloodDebt(input) >= me.life &&
       input.view.turnFacts?.players[input.seat]?.banishedSixPlusThisTurn !== true) ? 180 : -120;
@@ -869,7 +905,7 @@ export function chooseLeviaIntentWithTrace(input: BotPolicyInput): LeviaIntentDe
     scoreIntent: (intent, observed) => leviaMacroIntentBonus(macro, intent, observed),
     positionBonus: (observed, complete) =>
       leviaMacroPositionBonus(macro, input, observed, complete, leviaEngineValue),
-    risk: (observed, complete) => leviaLifeRisk(input, observed, complete),
+    risk: (observed) => leviaLifeRisk(input, observed),
     maxSearchNodes: LEVIA_MAX_SEARCH_NODES,
     maxTransitions: LEVIA_MAX_TRANSITIONS,
     maxRootCandidates: LEVIA_MAX_ROOT_CANDIDATES,

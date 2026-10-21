@@ -1,6 +1,6 @@
 import type { CardData, CardView, GameIntent } from "@fyendal/shared";
 import { intentCard, isAttack, ownCards, type BotPolicyInput } from "./policy.js";
-import { leviaEffectActive } from "./levia-turn.js";
+import { leviaBloodrushTurn, leviaBloodrushWorthSending, leviaEffectActive } from "./levia-turn.js";
 import { POINTS_PER_DAMAGE } from "./turn-planner.js";
 
 export type LeviaMacro = "redeem" | "stabilize" | "engine" | "bloodrush" | "attrition" | "pressure";
@@ -47,10 +47,9 @@ export function chooseLeviaMacro(input: BotPolicyInput): LeviaMacroChoice {
     intent.kind === "activate-ability" && intent.sourceInstanceId === me.heroInstanceId
   );
   const attacks = [...me.hand, ...me.arsenal].filter((card) => isAttack(input.cards[card.cardId]));
-  const hasBloodrush = [...me.hand, ...me.arsenal].some((card) =>
+  const bellow = [...me.hand, ...me.arsenal].find((card) =>
     cardName(input.cards[card.cardId]) === "bloodrush bellow"
   );
-  const hasPitch = me.hand.some((card) => (input.cards[card.cardId]?.pitch ?? 0) >= 2);
   const hasEngine = enginePermanents(me.board, input) > 0;
 
   if (canRedeem && (me.life <= 8 || (!suppressed && debt >= me.life))) {
@@ -60,8 +59,8 @@ export function chooseLeviaMacro(input: BotPolicyInput): LeviaMacroChoice {
   if (debt > 0 && !suppressed && (me.life <= debt + 5 || attacks.length === 0)) {
     return { goal: "stabilize", matchup: context };
   }
-  if (hasBloodrush && attacks.length > 0 && hasPitch &&
-    (attacks.length > 1 || opponent.life <= 14 || context === "race")) {
+  if (bellow && input.view.activePlayer === input.seat &&
+    leviaBloodrushWorthSending(leviaBloodrushTurn(input, bellow), opponent.life)) {
     return { goal: "bloodrush", matchup: context };
   }
   if (!hasEngine && input.view.turn === 1) {
@@ -103,15 +102,15 @@ export function leviaMacroIntentBonus(
   return 0;
 }
 
-/** Life a line costs Levia herself: life lost this turn plus the blood debt
- * its end phase drains while exposed (half of it at a search horizon, where
- * a later play may still banish a six). */
-export function leviaLifeRisk(root: BotPolicyInput, observed: BotPolicyInput, complete: boolean): number {
+/** Life a line costs Levia herself: life lost plus blood debt still exposed.
+ * A line cut at a search horizon carries the full exposure; the override that
+ * reads this must not credit a banish that has not happened. */
+export function leviaLifeRisk(root: BotPolicyInput, observed: BotPolicyInput): number {
   const start = root.view.players[root.seat];
   const me = observed.view.players[root.seat];
   const suppressed = observed.view.turnFacts?.players[root.seat]?.banishedSixPlusThisTurn === true;
   const exposed = suppressed ? 0 : bloodDebt(me.banish, observed);
-  return Math.max(0, start.life - me.life) + (complete ? exposed : exposed / 2);
+  return Math.max(0, start.life - me.life) + exposed;
 }
 
 /** Score a projected rollout end against the observed start of this decision. */

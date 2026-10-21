@@ -3,7 +3,7 @@ import { applyIntent, createGame, legalIntents, projectStateFor } from "@fyendal
 import type { Decklist, GameIntent } from "@fyendal/shared";
 import { describe, expect, it } from "vitest";
 import { chooseLeviaIntent, chooseLeviaIntentWithTrace, leviaEngineValue, leviaSolverRules } from "./levia-policy.js";
-import { handDamage, handResponse, heldCardValue } from "./hand-value.js";
+import { arsenalCardValue, handDamage, handResponse, heldCardValue } from "./hand-value.js";
 import { leviaLifeRisk, leviaMacroPositionBonus } from "./levia-macros.js";
 import { leviaPresentationFor } from "./sideboard.js";
 
@@ -308,7 +308,8 @@ describe("Levia Gates policy", () => {
     expect(decide().macro.goal).toBe("engine");
     state.turn = 3;
     expect(decide().macro.goal).toBe("pressure");
-    hand(state, ["WTR007", "IAR026", "MON140", "PEN322"]);
+    hand(state, ["WTR007", "IAR026", "IAR020", "MON140"]);
+    state.players[0]!.equipment.chest = { instanceId: state.nextInstanceId++, cardId: "AKO004", owner: 0 };
     expect(decide().macro.goal).toBe("bloodrush");
     state.players[1]!.heroCardId = "MPG000";
     hand(state, ["MON140", "PEN322", "DTD107", "IAR214"]);
@@ -684,14 +685,62 @@ describe("Levia Gates policy", () => {
     expect(state.players[0]!.resources).toBe(0);
   });
 
-  it("starts a Bloodrush turn when it has an attack and a blue", () => {
+  it("starts a Bloodrush turn when Sash lets two attacks and a blue make it worth ten", () => {
     const state = game();
-    hand(state, ["WTR007", "IAR026", "MON140", "PEN322"]);
+    hand(state, ["WTR007", "IAR026", "IAR020", "MON140"]);
+    state.players[0]!.equipment.chest = { instanceId: state.nextInstanceId++, cardId: "AKO004", owner: 0 };
     const selected = choice(state);
     expect(selected.kind).toBe("play-card");
     if (selected.kind !== "play-card") return;
     const card = state.players[0]!.hand.find((item) => item.instanceId === selected.instanceId);
     expect(card?.cardId).toBe("WTR007");
+  });
+
+  it("holds a Bellow from arsenal while two non-sixes could be its discard", () => {
+    const state = game();
+    hand(state, ["IAR026", "IAR020", "ROS218", "IAR037"]);
+    state.players[0]!.equipment.chest = { instanceId: state.nextInstanceId++, cardId: "AKO004", owner: 0 };
+    state.players[0]!.arsenal = [{ instanceId: state.nextInstanceId++, cardId: "WTR007", owner: 0, faceDown: true }];
+    expect(choice(state)).not.toMatchObject({ kind: "play-from-arsenal" });
+    // One non-six is fine: it pays for the Bellow.
+    hand(state, ["IAR026", "IAR020", "ROS218"]);
+    expect(choice(state)).toMatchObject({ kind: "play-from-arsenal" });
+  });
+
+  it("holds a Bellow whose turn would be one eight-power attack", () => {
+    const state = game();
+    hand(state, ["WTR007", "IAR026", "MON140", "PEN322"]);
+    const [bellow, frenzy] = state.players[0]!.hand;
+    expect(choice(state)).toMatchObject({ kind: "play-card", instanceId: frenzy!.instanceId });
+    expect(choice(state)).not.toMatchObject({ instanceId: bellow!.instanceId });
+  });
+
+  it("keeps a Bellow its hand cannot send for the free arsenal instead of blocking with it", () => {
+    let state = game();
+    hand(state, ["WTR007", "ROS218"]);
+    state.players[0]!.arsenal = [];
+    state.players[0]!.equipment = {};
+    const bellow = state.players[0]!.hand[0]!;
+    state = defending(state);
+    const selected = choice(state);
+    expect(["stage-defenders", "defend"]).toContain(selected.kind);
+    if (selected.kind === "stage-defenders" || selected.kind === "defend") {
+      expect(selected.instanceIds).not.toContain(bellow.instanceId);
+    }
+  });
+
+  it("blocks with a Bellow its hand cannot send when the arsenal slot is stuck", () => {
+    let state = game();
+    hand(state, ["WTR007", "ROS218"]);
+    state.players[0]!.arsenal = [{ instanceId: state.nextInstanceId++, cardId: "ROS218", owner: 0, faceDown: true }];
+    state.players[0]!.equipment = {};
+    const bellow = state.players[0]!.hand[0]!;
+    state = defending(state);
+    const selected = choice(state);
+    expect(["stage-defenders", "defend"]).toContain(selected.kind);
+    if (selected.kind === "stage-defenders" || selected.kind === "defend") {
+      expect(selected.instanceIds).toContain(bellow.instanceId);
+    }
   });
 
   it("attacks instead of a Bloodrush whose discard would take its only follow-up", () => {
@@ -703,6 +752,63 @@ describe("Levia Gates policy", () => {
     const selected = choice(state);
     expect(selected).not.toMatchObject({ kind: "play-card", instanceId: bellow!.instanceId });
     expect(selected).toMatchObject({ kind: "play-card", instanceId: horror!.instanceId });
+  });
+
+  it("arsenals Bloodrush Bellow ahead of a go-again attack as the spike turn in waiting", () => {
+    const state = game();
+    hand(state, ["WTR007", "LEV011"]);
+    const [bellow, screamer] = state.players[0]!.hand;
+    const observed = {
+      seat: 0 as const, view: projectStateFor(state, 0), legal: legalIntents(state, 0), cards: cardData, state,
+    };
+    expect(arsenalCardValue(bellow!, observed, leviaSolverRules))
+      .toBeGreaterThan(arsenalCardValue(screamer!, observed, leviaSolverRules));
+  });
+
+  it("sends a Bellow from arsenal when the hand goes two attacks wide, then cashes Sash into it", () => {
+    const state = game();
+    hand(state, ["IAR026", "IAR020", "MON140"]);
+    state.players[0]!.flags.banishedSixPlusThisTurn = true;
+    state.players[0]!.arsenal = [{ instanceId: state.nextInstanceId++, cardId: "WTR007", owner: 0, faceDown: true }];
+    const sash = { instanceId: state.nextInstanceId++, cardId: "AKO004", owner: 0 };
+    state.players[0]!.equipment.chest = sash;
+    const bellow = state.players[0]!.arsenal[0]!;
+    const selected = choice(state);
+    expect(selected).toMatchObject({ kind: "play-from-arsenal", instanceId: bellow.instanceId });
+    const decision = chooseLeviaIntentWithTrace({
+      seat: 0, view: projectStateFor(state, 0), legal: legalIntents(state, 0), cards: cardData, state,
+    });
+    expect(decision.macro.goal).toBe("bloodrush");
+  });
+
+  it("saves Savage Sash while a Bellow waits for a wider turn", () => {
+    const state = game();
+    // Frenzy and a blue Cleave pair only through Sash; the Bellow's discard
+    // would likely miss, so its turn is one attack wide and it waits.
+    hand(state, ["IAR026", "IAR022", "ROS218"]);
+    state.players[0]!.flags.banishedSixPlusThisTurn = true;
+    state.players[0]!.arsenal = [{ instanceId: state.nextInstanceId++, cardId: "WTR007", owner: 0, faceDown: true }];
+    const sash = { instanceId: state.nextInstanceId++, cardId: "AKO004", owner: 0 };
+    state.players[0]!.equipment.chest = sash;
+    const selected = choice(state);
+    expect(selected).not.toMatchObject({ kind: "activate-ability", sourceInstanceId: sash.instanceId });
+    expect(selected).not.toMatchObject({ kind: "play-from-arsenal" });
+    // Without the Bellow the same hand cashes Sash for two six-power attacks.
+    state.players[0]!.arsenal = [];
+    expect(choice(state)).toMatchObject({ kind: "activate-ability", sourceInstanceId: sash.instanceId });
+  });
+
+  it("banks a Gate while a Bellow waits when the turn has an attack without it", () => {
+    const state = game();
+    hand(state, ["IAR022", "IAR026"]);
+    state.players[0]!.banish = [{ instanceId: state.nextInstanceId++, cardId: "IAR026", owner: 0 }];
+    const gate = { instanceId: state.nextInstanceId++, cardId: "IAR222", owner: 0 };
+    state.players[0]!.board.push(gate);
+    state.players[0]!.arsenal = [{ instanceId: state.nextInstanceId++, cardId: "WTR007", owner: 0, faceDown: true }];
+    const [cleave, frenzy] = state.players[0]!.hand;
+    expect(choice(state)).toMatchObject({
+      kind: "play-card", instanceId: frenzy!.instanceId, pitchInstanceIds: [cleave!.instanceId],
+    });
   });
 
   it("uses an attack instead of early Hexagore self-damage at low life", () => {
@@ -1065,10 +1171,9 @@ describe("Levia Gates policy", () => {
       const observed = game();
       observed.players[0]!.life = root.players[0]!.life - 2;
       exposeDebt(observed, 3);
-      expect(leviaLifeRisk(input(root), input(observed), true)).toBe(5);
-      expect(leviaLifeRisk(input(root), input(observed), false)).toBe(3.5);
+      expect(leviaLifeRisk(input(root), input(observed))).toBe(5);
       observed.players[0]!.flags.banishedSixPlusThisTurn = true;
-      expect(leviaLifeRisk(input(root), input(observed), true)).toBe(2);
+      expect(leviaLifeRisk(input(root), input(observed))).toBe(2);
     });
 
     it("banishes Fallen Herald to suppress heavy blood debt instead of pitching it to Hexagore", () => {
