@@ -52,6 +52,7 @@ import { additionalTargetsAroundPrimary, currentLink, findCardAnywhere } from ".
 import { queuedAttackObjects } from "./attackQueue.js";
 import { controlledPermanents } from "./sourceQueries.js";
 import { activatedAbilityUsage } from "./abilityRules.js";
+import { weaponAttacksProhibited } from "./combatRestrictions.js";
 import { legalDefenderCards } from "./defense.js";
 import { wardPieces } from "./damageResolution.js";
 import { playFromSourceCardId } from "./playRules.js";
@@ -1163,6 +1164,7 @@ function projectState(
       ...(Number(player.flags.soulBanishedThisChain) > 0
         ? { soulBanishedThisChain: Number(player.flags.soulBanishedThisChain) }
         : {}),
+      ...(weaponAttacksProhibited(player) ? { weaponAttacksProhibited: true } : {}),
       playedSubtypes: Object.keys(player.flags)
         .filter((flag) => flag.startsWith("playedSubtype:") && player.flags[flag] === true)
         .map((flag) => flag.slice("playedSubtype:".length))

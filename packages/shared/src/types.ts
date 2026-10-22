@@ -637,6 +637,9 @@ export interface PlayerTurnFactsView {
   /** Public: cards banished from this player's soul during the open combat
    * chain. Omitted when zero. */
   soulBanishedThisChain?: number;
+  /** Public: a turn-scoped effect (Kabuto) prohibits this player's weapon
+   * attacks. Omitted when false. */
+  weaponAttacksProhibited?: boolean;
   playedSubtypes: string[];
   /** Public permanent instance ids whose once-per-turn triggered effects have
    * already been consumed this turn. */

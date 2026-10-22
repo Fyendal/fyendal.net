@@ -79,10 +79,12 @@ describe("authoritative match stats", () => {
     player(state, 0).flags.chargedCountThisTurn = 2;
     player(state, 0).flags["soulPitch:2"] = 1;
     player(state, 0).flags.soulBanishedThisChain = 3;
+    player(state, 0).flags.cannotAttackWithWeaponsThisTurn = true;
     expect(projectStateFor(state, 1, "game").turnFacts?.players[0]).toMatchObject({
       chargesThisTurn: 2,
       yellowSoulThisTurn: true,
       soulBanishedThisChain: 3,
+      weaponAttacksProhibited: true,
     });
   });
 

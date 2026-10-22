@@ -117,6 +117,7 @@ function raydnAvailable(input: BotPolicyInput): boolean {
   const sword = raydn(input);
   if (!sword) return false;
   if (input.view.activePlayer !== input.seat) return true;
+  if (input.view.turnFacts?.players[input.seat]?.weaponAttacksProhibited === true) return false;
   return !sword.usedAbilityIndexes?.includes(0) || (sword.remainingAbilityActivations?.[0] ?? 0) > 0;
 }
 
@@ -162,6 +163,7 @@ function holds(input: BotPolicyInput, functional: string): boolean {
 
 /** An opponent weapon can still activate this turn. */
 function opponentWeaponAttackLeft(input: BotPolicyInput): boolean {
+  if (input.view.turnFacts?.players[1 - input.seat]?.weaponAttacksProhibited === true) return false;
   return input.view.players[1 - input.seat]!.weapons.some((weapon) =>
     !weapon.usedAbilityIndexes?.includes(0) || (weapon.remainingAbilityActivations?.[0] ?? 0) > 0
   );

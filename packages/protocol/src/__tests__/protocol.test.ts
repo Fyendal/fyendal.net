@@ -621,9 +621,12 @@ describe("GameView and server messages", () => {
   });
   it("accepts the public soul turn facts and rejects malformed values", () => {
     const current = gameView();
-    Object.assign(current.turnFacts.players[0]!, { chargesThisTurn: 2, yellowSoulThisTurn: true, soulBanishedThisChain: 1 });
+    Object.assign(current.turnFacts.players[0]!, {
+      chargesThisTurn: 2, yellowSoulThisTurn: true, soulBanishedThisChain: 1, weaponAttacksProhibited: true,
+    });
     expect(decodeGameView(current)).not.toBeNull();
-    for (const malformed of [{ chargesThisTurn: -1 }, { yellowSoulThisTurn: "yes" }, { soulBanishedThisChain: 1.5 }]) {
+    for (const malformed of [{ chargesThisTurn: -1 }, { yellowSoulThisTurn: "yes" }, { soulBanishedThisChain: 1.5 },
+      { weaponAttacksProhibited: 1 }]) {
       const view = gameView();
       Object.assign(view.turnFacts.players[0]!, malformed);
       expect(decodeGameView(view), JSON.stringify(malformed)).toBeNull();

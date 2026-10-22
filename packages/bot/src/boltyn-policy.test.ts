@@ -375,6 +375,27 @@ describe("Boltyn policy", () => {
     });
   });
 
+  it("keeps the soul once Kabuto of Imperial Authority stops Raydn swinging again", () => {
+    const swing = (locked: boolean) => {
+      const state = settled(game());
+      // As in the report: Lumina Ascension grants Raydn a second swing.
+      hand(state, ["ASB026"]);
+      soul(state, 2);
+      state.players[0]!.flags.chargedThisTurn = true;
+      state.players[0]!.flags.chargedCountThisTurn = 1;
+      state.players[0]!.resources = 6;
+      const reacting = (current: GameState) => current.pendingDecision?.kind === "attack-reaction" &&
+        current.pendingDecision.player === 0;
+      const swung = play(state, (current) => reacting(current) || turnOver(current));
+      expect(swung.intents).toContain(RAYDN);
+      // As when the defender's Kabuto resolves its defend trigger.
+      if (locked) swung.state.players[0]!.flags.cannotAttackWithWeaponsThisTurn = true;
+      return play(swung.state, turnOver).intents;
+    };
+    expect(swing(false)).toContain(HERO);
+    expect(swing(true)).not.toContain(HERO);
+  });
+
   it("passes instead of swinging an uncharged Raydn for nothing", () => {
     const state = settled(game());
     hand(state, ["MON062", "MON033", "ASB026", "SBL020"]);
