@@ -2373,6 +2373,7 @@
   "engine.log.player.gains.life": "{player} ganha {amount} de vida ({life} de vida)",
   "engine.log.player.shuffles.deck": "{player} embaralha o próprio deck",
   "engine.log.player.untaps.permanents": "{hero} desvira {count, plural, =0 {# permanentes} one {# permanente} other {# permanentes}}",
+  "engine.log.token.creation.reduced": "{source} reduz a criação de {card} de {player} de {from, number} para {to, number}",
   "engine.log.token.created": "{player} cria {card}",
   "engine.log.trigger.card": "Trigger de {triggerSource}: {triggerEffect}{occurrences, plural, one {} other { ×#}}",
   "engine.log.trigger.facedown": "Trigger da carta virada para baixo de {triggerSource}: {triggerEffect}{occurrences, plural, one {} other { ×#}}",

@@ -2373,6 +2373,7 @@
   "engine.log.player.gains.life": "{player} 恢复 {amount} 点生命（当前 {life} 点生命）",
   "engine.log.player.shuffles.deck": "{player} 洗切牌库",
   "engine.log.player.untaps.permanents": "{hero} 重置 {count} 个永久物",
+  "engine.log.token.creation.reduced": "{source} 将 {player} 生成 {card} 的数量从 {from, number} 减少为 {to, number}",
   "engine.log.token.created": "{player} 生成 {card}",
   "engine.log.trigger.card": "{triggerSource} 触发：{triggerEffect}{occurrences, plural, =1 {} other { ×#}}",
   "engine.log.trigger.facedown": "{triggerSource} 的面朝下卡牌触发：{triggerEffect}{occurrences, plural, one {} other { ×#}}",

@@ -837,6 +837,34 @@ describe("game setup & turn structure", () => {
     expect(drawn).not.toHaveProperty("arsenalSlot");
   });
 
+  it("logs publicly when a replacement cancels token creation", () => {
+    const s = makeGame(102);
+    const p = player(s, 0);
+    s.scriptsRef = {
+      ...s.scriptsRef,
+      HERO_B: {
+        globalTokenCreationReplacement: {
+          label: "Create one fewer token",
+          replace: (_ctx, _seat, _cardId, count) => Math.max(0, count - 1),
+        },
+      },
+    };
+
+    makeCtx(s, engineRuntime, 0, p.hand[0]!).createToken("TOKEN");
+
+    expect(p.board.some((card) => card.cardId === "TOKEN")).toBe(false);
+    expect(s.log.at(-1)?.publicPayload?.message).toEqual({
+      id: "engine.log.token.creation.reduced",
+      values: {
+        source: { kind: "card", cardId: "HERO_B" },
+        player: { kind: "player", seat: 0 },
+        card: { kind: "card", cardId: "TOKEN" },
+        from: 1,
+        to: 0,
+      },
+    });
+  });
+
   it("orders global and optional-friendly token replacements together", () => {
     const s = makeGame(102);
     const p = player(s, 0);

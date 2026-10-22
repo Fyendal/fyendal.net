@@ -25348,6 +25348,46 @@
       "value": "card"
     }
   ],
+  "engine.log.token.creation.reduced": [
+    {
+      "type": 1,
+      "value": "source"
+    },
+    {
+      "type": 0,
+      "value": " 将 "
+    },
+    {
+      "type": 1,
+      "value": "player"
+    },
+    {
+      "type": 0,
+      "value": " 生成 "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 的数量从 "
+    },
+    {
+      "type": 2,
+      "value": "from",
+      "style": null
+    },
+    {
+      "type": 0,
+      "value": " 减少为 "
+    },
+    {
+      "type": 2,
+      "value": "to",
+      "style": null
+    }
+  ],
   "engine.log.trigger.attack.defended": [
     {
       "type": 1,

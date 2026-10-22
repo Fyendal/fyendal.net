@@ -26995,6 +26995,46 @@
       "value": "card"
     }
   ],
+  "engine.log.token.creation.reduced": [
+    {
+      "type": 1,
+      "value": "source"
+    },
+    {
+      "type": 0,
+      "value": " reduz a criação de "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " de "
+    },
+    {
+      "type": 1,
+      "value": "player"
+    },
+    {
+      "type": 0,
+      "value": " de "
+    },
+    {
+      "type": 2,
+      "value": "from",
+      "style": null
+    },
+    {
+      "type": 0,
+      "value": " para "
+    },
+    {
+      "type": 2,
+      "value": "to",
+      "style": null
+    }
+  ],
   "engine.log.trigger.attack.defended": [
     {
       "type": 0,

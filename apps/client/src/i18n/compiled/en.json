@@ -25815,6 +25815,46 @@
       "value": "card"
     }
   ],
+  "engine.log.token.creation.reduced": [
+    {
+      "type": 1,
+      "value": "source"
+    },
+    {
+      "type": 0,
+      "value": " reduces "
+    },
+    {
+      "type": 1,
+      "value": "player"
+    },
+    {
+      "type": 0,
+      "value": "'s "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " creation from "
+    },
+    {
+      "type": 2,
+      "value": "from",
+      "style": null
+    },
+    {
+      "type": 0,
+      "value": " to "
+    },
+    {
+      "type": 2,
+      "value": "to",
+      "style": null
+    }
+  ],
   "engine.log.trigger.attack.defended": [
     {
       "type": 1,

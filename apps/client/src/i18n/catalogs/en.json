@@ -2373,6 +2373,7 @@
   "engine.log.player.gains.life": "{player} gains {amount} life ({life} life)",
   "engine.log.player.shuffles.deck": "{player} shuffles their deck",
   "engine.log.player.untaps.permanents": "{hero} untaps {count, plural, one {# permanent} other {# permanents}}",
+  "engine.log.token.creation.reduced": "{source} reduces {player}'s {card} creation from {from, number} to {to, number}",
   "engine.log.token.created": "{player} creates {card}",
   "engine.log.trigger.card": "{triggerSource} triggers: {triggerEffect}{occurrences, plural, one {} other { ×#}}",
   "engine.log.trigger.facedown": "{triggerSource}'s face-down card triggers: {triggerEffect}{occurrences, plural, one {} other { ×#}}",
