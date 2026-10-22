@@ -169,6 +169,61 @@ function underAttack(state: GameState, attackId: string): GameState {
   throw new Error("attack did not reach defense");
 }
 
+function currentLinkPower(state: GameState): number | undefined {
+  return projectStateFor(state, 0).chain.at(-1)?.attackValue;
+}
+
+/** Fang, wearing Grains of Bloodspill, swings Obsidian Fire Veins in turn;
+ * returns Boltyn's defend decision on the given swing. */
+function veinSwing(state: GameState, swing: 0 | 1): GameState {
+  state.activePlayer = 1;
+  state.priorityPlayer = 1;
+  state.players[0]!.actionPoints = 0;
+  const fang = state.players[1]!;
+  fang.hero = { ...fang.hero, cardId: "HNT098" };
+  fang.actionPoints = 2;
+  fang.hand = cards(state, ["OMN245"], 1);
+  fang.resources = 5;
+  fang.weapons = cards(state, ["FNG002", "FNG002"], 1);
+  fang.equipment.chest = cards(state, ["FAB182"], 1)[0];
+  let current = state;
+  let blocked = false;
+  for (const vein of fang.weapons) {
+    const activation = legalIntents(current, 1).find((intent) =>
+      intent.kind === "activate-ability" && intent.sourceInstanceId === vein.instanceId
+    );
+    if (!activation) throw new Error("Fang cannot swing the Vein");
+    let result = applyIntent(current, 1, activation);
+    if (!result.ok) throw new Error(result.error);
+    for (let step = 0; step < 30; step++) {
+      const decision = result.state.pendingDecision;
+      if (decision?.player === 0 && decision.kind === "defend") {
+        if (vein === fang.weapons[swing]) {
+          if (swing === 1) expect(currentLinkPower(result.state)).toBe(3);
+          return result.state;
+        }
+        result = applyIntent(result.state, 0, { kind: "defend", instanceIds: [] });
+        blocked = true;
+      } else if (result.state.chain.length === 0 && result.state.stack.length === 0 && !decision) {
+        break;
+      } else {
+        const actor = (decision?.player ?? result.state.priorityPlayer) as 0 | 1;
+        const legal = legalIntents(result.state, actor);
+        // As in the report, Draco Fire follows the first block and pumps the second Vein.
+        const dracoFire = actor === 1 && blocked
+          ? legal.find((intent) => intent.kind === "play-card" && intent.instanceId === fang.hand[0]?.instanceId)
+          : undefined;
+        const pass = dracoFire ?? legal.find((intent) => intent.kind === "pass") ??
+          legal.find((intent) => intent.kind === "choose" && ["no", "decline", "pass"].includes(intent.optionId))!;
+        result = applyIntent(result.state, actor, pass);
+      }
+      if (!result.ok) throw new Error(result.error);
+    }
+    current = result.state;
+  }
+  throw new Error("the Vein swing did not reach defense");
+}
+
 const HERO = "Ser Boltyn, Breaker of Dawn";
 const RAYDN = "Raydn, Duskbane";
 /** Wounding Blow: a plain four-power attack. */
@@ -241,6 +296,20 @@ describe("Boltyn policy", () => {
     expect(before - after.players[1]!.life).toBeGreaterThanOrEqual(11);
   });
 
+  it("keeps Kabuto of Imperial Authority once Fang has no weapon swing left", () => {
+    const state = settled(createGame({
+      decklists: [boltynDeck("HNT098"), decklists.dorinthea], cards: cardData, scripts, seed: 4040, startPlayer: 0,
+    }));
+    hand(state, ["DYN066", "DYN066"]);
+    const defending = veinSwing(state, 1);
+    const kabuto = defending.players[0]!.equipment.head!;
+    expect(cardData[kabuto.cardId]!.name).toBe("Kabuto of Imperial Authority");
+    const intent = chooseBoltynIntent(input(defending));
+    // Both Veins are spent, so Kabuto's weapon lock would deny nothing.
+    expect(intent.kind === "defend" || intent.kind === "stage-defenders" ? intent.instanceIds : [])
+      .not.toContain(kabuto.instanceId);
+  });
+
   it("keeps Lumina Ascension when Raydn will not swing after it this turn", () => {
     const state = settled(game(4070));
     // Bolt of Courage is the turn's only attack: Raydn has no go-again path to follow it.
@@ -253,6 +322,20 @@ describe("Boltyn policy", () => {
     expect(intents).not.toContain("Lumina Ascension");
     const held = [...after.players[0]!.hand, ...after.players[0]!.arsenal];
     expect(held.some((card) => card.instanceId === lumina)).toBe(true);
+  });
+
+  it("holds Lumina Ascension for a charge turn instead of pumping an uncharged Raydn", () => {
+    const base = createGame({
+      decklists: [boltynDeck("HNT098"), decklists.dorinthea], cards: cardData, scripts, seed: 4040, startPlayer: 0,
+    });
+    base.turn = 3;
+    delete base.players[0]!.equipment.arms;
+    const state = settled(base);
+    // Nothing charges this turn, so Lumina would only add +1 to a 0-power Raydn swing.
+    hand(state, ["PEN181", "ASB026", "MON032"]);
+    state.players[0]!.soul = cards(state, ["PEN179"]);
+    const { intents } = play(state, turnOver);
+    expect(intents).not.toContain("Lumina Ascension");
   });
 
   it("charges Spirit of Eirina, then follows the Beacon of Victory search into more Raydn swings", () => {

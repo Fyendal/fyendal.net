@@ -81,6 +81,8 @@ const POWER_CARDS = new Set([
 ]);
 
 const cardOpportunity = opportunityValuer(boltynSolverRules);
+/** Damage equivalent of Kabuto shutting off the opponent's remaining weapon swings. */
+const KABUTO_DENIAL_VALUE = 3;
 
 function me(input: BotPolicyInput) {
   return input.view.players[input.seat];
@@ -156,6 +158,13 @@ function reserve(input: BotPolicyInput): CardView[] {
 
 function holds(input: BotPolicyInput, functional: string): boolean {
   return reserve(input).some((card) => key(input.cards[card.cardId]) === functional);
+}
+
+/** An opponent weapon can still activate this turn. */
+function opponentWeaponAttackLeft(input: BotPolicyInput): boolean {
+  return input.view.players[1 - input.seat]!.weapons.some((weapon) =>
+    !weapon.usedAbilityIndexes?.includes(0) || (weapon.remainingAbilityActivations?.[0] ?? 0) > 0
+  );
 }
 
 /** The Tunic stances race; the Soulbond stances block and pivot later. */
@@ -283,7 +292,10 @@ function scoreDefend(intent: DefendIntent, input: BotPolicyInput, own: ReadonlyM
       if (chosenKeys.includes(SOULBOND_RESOLVE) && anyLeft) adjustment += SOUL_VALUE + 0.5;
       const link = currentLink(observed);
       const weaponAttack = observed.cards[link?.attackingCard.cardId ?? ""]?.cardType === "weapon";
-      if (chosenKeys.includes(KABUTO) && weaponAttack) adjustment += 3;
+      // Kabuto only stops weapon swings still to come; spent otherwise, it forfeits that denial.
+      if (chosenKeys.includes(KABUTO) && weaponAttack) {
+        adjustment += opponentWeaponAttackLeft(observed) ? KABUTO_DENIAL_VALUE : -KABUTO_DENIAL_VALUE;
+      }
       if (chosenKeys.includes(CIRCLET)) {
         const opponent = observed.view.players[1 - observed.seat]!;
         if (opponent.banish.some((card) => !card.faceDown && observed.cards[card.cardId]?.cardType === "action")) {
