@@ -572,6 +572,28 @@ describe("initial schema", () => {
     );
   });
 
+  it("tunes replay payload toast autovacuum only on real PostgreSQL", async () => {
+    const migration = MIGRATIONS.find((candidate) => candidate.version === 56)!;
+    const statementsOn = async (serverVersion: string): Promise<string[]> => {
+      const statements: string[] = [];
+      await migration.apply!({
+        query: async (text) => {
+          statements.push(text);
+          return {
+            rows: text === "SHOW server_version" ? [{ server_version: serverVersion }] : [],
+            rowCount: null,
+          };
+        },
+      });
+      return statements;
+    };
+    expect(await statementsOn("12.2 (pg-mem)")).toEqual(["SHOW server_version"]);
+    const postgres = await statementsOn("16.4");
+    expect(postgres).toHaveLength(2);
+    expect(postgres[1]).toContain("ALTER TABLE replay_participants SET (");
+    expect(postgres[1]).toContain("toast.autovacuum_vacuum_scale_factor = 0.01");
+  });
+
   it("fails with RESET_REQUIRED for unexpected tables or another epoch", async () => {
     const unexpected = rawDb();
     await unexpected.query("CREATE TABLE users (id INTEGER)");

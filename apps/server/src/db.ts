@@ -53,6 +53,12 @@ export interface Migration {
 
 export const SCHEMA_EPOCH = 1;
 
+/** pg-mem names itself in `server_version`; used to skip PostgreSQL-only tuning. */
+export async function isPgMem(db: Queryable): Promise<boolean> {
+  const { rows } = await db.query("SHOW server_version");
+  return String(rows[0]?.server_version ?? "").includes("pg-mem");
+}
+
 export class ResetRequiredError extends Error {
   readonly code = "RESET_REQUIRED";
 
@@ -1019,6 +1025,26 @@ export const MIGRATIONS: Migration[] = [
       user_id INTEGER PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
       added_at BIGINT NOT NULL
     );`,
+  },
+  {
+    version: 56,
+    // Stored replay payloads are multi-megabyte blobs expiring after a week,
+    // so the replay_participants TOAST relation is by far the largest table.
+    // At the default 20% dead-tuple trigger its autovacuum runs about daily
+    // and rewrites close to 1 GiB of WAL in under a minute, saturating the
+    // single-vCPU instance. A 1% trigger keeps each run small and the longer
+    // cost delay spreads its I/O. pg-mem has no autovacuum and cannot parse
+    // storage parameters, so the tuning applies only to real PostgreSQL.
+    sql: "",
+    apply: async (db) => {
+      if (await isPgMem(db)) return;
+      await db.query(`ALTER TABLE replay_participants SET (
+        toast.autovacuum_vacuum_scale_factor = 0.01,
+        toast.autovacuum_vacuum_insert_scale_factor = 0.01,
+        toast.autovacuum_vacuum_threshold = 1000,
+        toast.autovacuum_vacuum_cost_delay = 20
+      )`);
+    },
   },
 ];
 
