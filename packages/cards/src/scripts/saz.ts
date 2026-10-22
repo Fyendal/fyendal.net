@@ -192,8 +192,6 @@ export const saz: Record<string, CardScript> = {
       goAgain: true,
       oncePerTurn: true,
       label: "Put an arrow from your hand into your arsenal; draw a card",
-      canActivate: (ctx) =>
-        ctx.player(ctx.seat).arsenal.length === 0 && ctx.player(ctx.seat).hand.some((c) => isArrow(ctx, c)),
       onActivate(ctx) {
         requestArrowToArsenal(ctx, "death-dealer", "Death Dealer: put an arrow from your hand into your arsenal?");
       },
@@ -241,8 +239,6 @@ export const saz: Record<string, CardScript> = {
       goAgain: true,
       destroySelfCost: true,
       label: "Destroy: put an arrow from your hand into your arsenal — it gains +1{p} this turn",
-      canActivate: (ctx) =>
-        ctx.player(ctx.seat).arsenal.length === 0 && ctx.player(ctx.seat).hand.some((c) => isArrow(ctx, c)),
       onActivate(ctx) {
         requestArrowToArsenal(
           ctx,
