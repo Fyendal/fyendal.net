@@ -563,6 +563,27 @@ describe("Boltyn policy", () => {
     }
   });
 
+  it("keeps Beaming Bravado and its yellow charge when they unlock Duty Bound Blitz", () => {
+    const state = settled(fangGame());
+    hand(state, ["PEN183", "ASB020", "MON062", "PEN183"]);
+    state.players[0]!.arsenal = cards(state, ["PEN183"]);
+    soul(state, 1);
+    const [, bravado, cataclysm] = state.players[0]!.hand;
+    let current = underAttack(state, PLAIN_ATTACK);
+    let intent = chooseBoltynIntent(input(current));
+    for (let step = 0; step < 6 && intent.kind === "stage-defenders"; step++) {
+      const result = applyIntent(current, 0, intent);
+      if (!result.ok) throw new Error(result.error);
+      current = result.state;
+      intent = chooseBoltynIntent(input(current));
+    }
+    expect(intent.kind).toBe("defend");
+    if (intent.kind === "defend") {
+      expect(intent.instanceIds).not.toContain(bravado!.instanceId);
+      expect(intent.instanceIds).not.toContain(cataclysm!.instanceId);
+    }
+  });
+
   it("charges a yellow card into Helm of Halo's Grace when it blocks", () => {
     const state = settled(game());
     hand(state, ["ASB021", "ASB009"]);

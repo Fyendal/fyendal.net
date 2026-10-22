@@ -118,15 +118,23 @@ export function solverChargeCost(card: SolverCard): number {
   return Math.max(explicit ?? 0, offense, card.heldValue);
 }
 
-/** Hand cards other than `selfId`, cheapest charge first, yellow on ties. */
+/** Hand cards other than `selfId`, cheapest charge first, yellow on ties.
+ * Yellow leads while a held Duty Bound Blitz still waits on one: a cheaper
+ * red charge would strand every Blitz. */
 export function chargeCandidates(view: SolverView, selfId: number): SolverCard[] {
-  return view.held
-    .filter((card) => card.zone === "hand" && card.instanceId !== selfId && !isCharged(view, card.instanceId))
-    .sort((left, right) =>
-      solverChargeCost(left) - solverChargeCost(right) ||
-      (right.pitch === 2 ? 1 : 0) - (left.pitch === 2 ? 1 : 0) ||
-      left.instanceId - right.instanceId
-    );
+  const candidates = view.held
+    .filter((card) => card.zone === "hand" && card.instanceId !== selfId && !isCharged(view, card.instanceId));
+  const yellowFirst = view.flag("soulYellow") === 0 && view.held.some((card) =>
+    card.instanceId !== selfId && !isCharged(view, card.instanceId) &&
+    card.name.toLowerCase() === "duty bound blitz"
+  );
+  const yellow = (card: SolverCard) => card.pitch === 2 ? 1 : 0;
+  return candidates.sort((left, right) =>
+    (yellowFirst ? yellow(right) - yellow(left) : 0) ||
+    solverChargeCost(left) - solverChargeCost(right) ||
+    yellow(right) - yellow(left) ||
+    left.instanceId - right.instanceId
+  );
 }
 
 /** Charged cards stay in the solver's hand, so a flag keeps them out of the line. */
