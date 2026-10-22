@@ -131,10 +131,45 @@ function luminaActive(input: BotPolicyInput): boolean {
   return ongoingFrom(input, LUMINA_ASCENSION);
 }
 
+/** Raydn swings again after Lumina: unused, or granted another swing by a charged Lumina. */
+function raydnSwingAfterLumina(input: BotPolicyInput): boolean {
+  if (raydnAvailable(input)) return true;
+  return raydn(input) !== undefined && charged(input) &&
+    input.view.turnFacts?.players[input.seat]?.weaponAttacksProhibited !== true;
+}
+
+/** Spirit of Eirina lets Lumina wait for Raydn's reaction step. */
+function luminaIsInstant(input: BotPolicyInput): boolean {
+  return boardCount(input, "spirit of eirina") > 0;
+}
+
+/** Raydn's activation is on the stack or its link is unresolved. */
+function raydnAttacking(input: BotPolicyInput): boolean {
+  const sword = raydn(input);
+  if (!sword) return false;
+  return currentLink(input)?.attackingCard.instanceId === sword.instanceId ||
+    input.view.stack.some((layer) => layer.seat === input.seat && layer.card?.instanceId === sword.instanceId);
+}
+
+/** Lumina's go again is the only action point past our current link. */
+function luminaActionPointNeeded(input: BotPolicyInput): boolean {
+  const link = currentLink(input);
+  if (!link || !currentAttackIsOurs(input) || link.goAgain === true || me(input).actionPoints > 0) return false;
+  // A Lumina already on the stack grants it.
+  const luminaPending = input.view.stack.some((layer) =>
+    layer.seat === input.seat && key(input.cards[layer.card?.cardId ?? ""]) === LUMINA_ASCENSION
+  );
+  if (luminaPending) return false;
+  const heroId = me(input).heroInstanceId;
+  return !input.legal.some((intent) => intent.kind === "activate-ability" && intent.sourceInstanceId === heroId);
+}
+
 /** Lumina pays off only through a later Raydn swing: follow the hand solver's best line on whether one comes. */
 function luminaPaysOff(input: BotPolicyInput): boolean {
   const sword = raydn(input);
-  if (!sword || !raydnAvailable(input)) return false;
+  if (!sword || !raydnSwingAfterLumina(input)) return false;
+  // A charged Lumina grants the swing itself.
+  if (!raydnAvailable(input)) return true;
   const { line } = solveHand(reserve(input), input, boltynSolverRules);
   const luminaIds = new Set(reserve(input).flatMap((card) =>
     key(input.cards[card.cardId]) === LUMINA_ASCENSION ? [card.instanceId] : []
@@ -402,6 +437,11 @@ function scoreChargeOption(intent: ChooseIntent, input: BotPolicyInput): number 
   return gain;
 }
 
+/** Beacon banishes the whole soul so a Roaring Beam above it charges before the search resolves. */
+function roaringBeamChargesBeacon(input: BotPolicyInput): boolean {
+  return !charged(input) && holds(input, ROARING_BEAM) && (raydnAttacking(input) || raydnAvailable(input));
+}
+
 /** Beacon of Victory's X: one for the search, lethal when reachable, else the spare soul. */
 function desiredBeaconX(input: BotPolicyInput): number {
   const soul = soulCount(input);
@@ -411,6 +451,7 @@ function desiredBeaconX(input: BotPolicyInput): number {
   const lethal = opponent.life - pending;
   if (lethal > 0 && lethal <= soul) return lethal;
   if (charged(input)) return 1;
+  if (roaringBeamChargesBeacon(input)) return soul;
   const further = reserve(input).filter((card) => isAttack(input.cards[card.cardId])).length +
     (raydnAvailable(input) ? 1 : 0);
   return Math.max(1, soul - Math.min(soul - 1, further));
@@ -535,8 +576,11 @@ function scoreHeroAbility(input: BotPolicyInput, own: ReadonlyMap<number, CardVi
   const swordWorthSwinging = raydnAvailable(input) &&
     (charged(input) || luminaActive(input) || (sword?.attack ?? 0) > 0 || boardCount(input, "courage") > 0 ||
       vBuffActive(input) || holds(input, LUMINA_ASCENSION));
-  const others = attackSourcesAfter(pass, input, own) - (raydnAvailable(input) ? 1 : 0);
+  const sources = attackSourcesAfter(pass, input, own);
+  const others = sources - (raydnAvailable(input) ? 1 : 0);
   if (others === 0 && !swordWorthSwinging) return -100;
+  // Floating action points, such as Lumina's go again, already carry every remaining attack.
+  if (me(input).actionPoints >= sources) return -100;
   return 30;
 }
 
@@ -573,7 +617,10 @@ function scoreRaydn(
   if (further && (boardCount(input, "quicken") > 0 || soulCount(input) > 0)) score += 10;
   // Set-up first: a charge, Lumina or Edict makes the swing bigger.
   if (!charged(input) && me(input).hand.some((held) => isChargeAttack(input.cards[held.cardId]))) score -= 4;
-  if (charged(input) && !luminaActive(input) && holds(input, LUMINA_ASCENSION)) score -= 20;
+  // An instant Lumina follows the swing instead.
+  if (charged(input) && !luminaActive(input) && holds(input, LUMINA_ASCENSION) && !luminaIsInstant(input)) {
+    score -= 20;
+  }
   if (holds(input, EDICT_OF_STEEL)) score -= 5;
   return score;
 }
@@ -589,9 +636,10 @@ function scoreAttackReaction(data: CardData, input: BotPolicyInput, own: Readonl
     if (soul === 0) return -100;
     const pending = Math.max(0, link.attackValue - link.defenseValue);
     const lethal = pending < opponent.life && pending + soul >= opponent.life;
+    const combo = roaringBeamChargesBeacon(input);
     // Uncharged it trades a soul card and the search for +1: hold it for a charged turn.
-    if (!charged(input) && !lethal) return -100;
-    return 8 + (charged(input) ? 12 : 0) + (lethal ? 30 : 0) +
+    if (!charged(input) && !lethal && !combo) return -100;
+    return 8 + (charged(input) || combo ? 12 : 0) + (lethal ? 30 : 0) +
       (link.goAgain !== true && further && soul >= 2 ? 4 : 0);
   }
   if (functional === ROARING_BEAM) return soul === 0 ? 14 : further ? 6 : 2;
@@ -599,6 +647,22 @@ function scoreAttackReaction(data: CardData, input: BotPolicyInput, own: Readonl
     return charged(input) ? 9 + (link.goAgain !== true && soul >= 1 && further ? 6 : 0) : -100;
   }
   return 4;
+}
+
+/** An instant Lumina waits for Raydn's reaction step, after blocks, unless its go again is needed sooner. */
+function scoreLumina(card: CardView, input: BotPolicyInput, chargeable: readonly CardView[]): number {
+  const reacting = input.view.pendingDecision?.kind === "attack-reaction";
+  if (charged(input) && raydnSwingAfterLumina(input)) {
+    const ready = luminaActive(input) ? 25 : 45;
+    if (raydnAttacking(input)) return reacting ? ready : -5;
+    if (!luminaIsInstant(input) || !raydnAvailable(input)) return luminaActive(input) ? 25 : 40;
+    return reacting && luminaActionPointNeeded(input) ? ready : -5;
+  }
+  const chargeAttackNow = me(input).hand.some((held) =>
+    held.instanceId !== card.instanceId && isChargeAttack(input.cards[held.cardId])
+  );
+  if (!charged(input) && chargeable.length > 0 && chargeAttackNow) return -10;
+  return luminaPaysOff(input) ? 4 : -20;
 }
 
 function scorePlay(intent: GameIntent, input: BotPolicyInput, own: ReadonlyMap<number, CardView>): number {
@@ -670,14 +734,7 @@ function scorePlay(intent: GameIntent, input: BotPolicyInput, own: ReadonlyMap<n
   } else if (functional === LUMINA_ASCENSION && !ourTurn) {
     score = -100;
   } else if (functional === LUMINA_ASCENSION) {
-    const chargeAttackNow = player.hand.some((held) =>
-      held.instanceId !== card.instanceId && isChargeAttack(input.cards[held.cardId])
-    );
-    score = charged(input) && raydnAvailable(input)
-      ? (luminaActive(input) ? 25 : ourTurn && input.view.pendingDecision ? 45 : 40)
-      : !charged(input) && chargeable.length > 0 && chargeAttackNow
-      ? -10
-      : luminaPaysOff(input) ? 4 : -20;
+    score = scoreLumina(card, input, chargeable);
   } else if (functional === EDICT_OF_STEEL) {
     score = raydnAvailable(input) ? 10 + (charged(input) && holds(input, LUMINA_ASCENSION) ? 6 : 0) : -10;
   } else if (functional === CELESTIAL_CATACLYSM) {

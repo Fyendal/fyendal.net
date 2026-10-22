@@ -347,9 +347,52 @@ describe("Boltyn policy", () => {
     const before = state.players[1]!.life;
     const { state: after, intents } = play(settled(state), turnOver);
     expect(intents.slice(0, 2)).toEqual(["Bravery of the Blade", `choose:${spirit}`]);
-    expect(intents.indexOf("Lumina Ascension")).toBeLessThan(intents.indexOf(RAYDN));
+    // Spirit of Eirina makes Lumina an instant: it follows the first swing's blocks.
+    expect(intents.indexOf("Lumina Ascension")).toBeGreaterThan(intents.indexOf(RAYDN));
     expect(intents.filter((name) => name === RAYDN).length).toBeGreaterThanOrEqual(2);
     expect(before - after.players[1]!.life).toBeGreaterThanOrEqual(11);
+  });
+
+  it("plays an instant Lumina Ascension in Raydn's reaction step instead of before the swing", () => {
+    const state = game();
+    hand(state, ["ASB007", "ASB026", "ASB021"]);
+    soul(state, 1);
+    state.players[0]!.board = cards(state, ["DYN066"]);
+    const lumina = state.players[0]!.hand[1]!.instanceId;
+    let luminaLink: string | undefined;
+    play(settled(state), (current, intent) => {
+      if (intent?.kind === "play-card" && intent.instanceId === lumina) {
+        luminaLink = cardData[current.chain.at(-1)?.attackingCard.cardId ?? ""]?.name;
+      }
+      return turnOver(current);
+    });
+    expect(luminaLink).toBe(RAYDN);
+  });
+
+  it("swings Raydn, charges through Roaring Beam, then reacts with Lumina Ascension for a second swing", () => {
+    const state = game();
+    hand(state, ["PEN178", "ASB026"]);
+    soul(state, 0);
+    state.players[0]!.board = cards(state, ["DYN066"]);
+    const before = state.players[1]!.life;
+    const { state: after, intents } = play(settled(state), turnOver);
+    expect(intents.indexOf("Roaring Beam")).toBeGreaterThan(intents.indexOf(RAYDN));
+    expect(intents.indexOf("Lumina Ascension")).toBeGreaterThan(intents.indexOf("Roaring Beam"));
+    expect(intents.filter((name) => name === RAYDN)).toHaveLength(2);
+    expect(before - after.players[1]!.life).toBeGreaterThanOrEqual(8);
+  });
+
+  it("empties the soul into Beacon of Victory so Roaring Beam charges before the search", () => {
+    const state = game();
+    hand(state, ["MON033", "PEN178", "ASB026"]);
+    soul(state, 2);
+    state.players[0]!.board = cards(state, ["DYN066"]);
+    const before = state.players[1]!.life;
+    const { state: after, intents } = play(settled(state), turnOver);
+    expect(intents.slice(0, 5)).toEqual([RAYDN, "pass", "pass", "Beacon of Victory", "choose:x:2"]);
+    expect(intents.indexOf("Roaring Beam")).toBeGreaterThan(intents.indexOf("Beacon of Victory"));
+    expect(intents.filter((name) => name === RAYDN).length).toBeGreaterThanOrEqual(2);
+    expect(before - after.players[1]!.life).toBeGreaterThanOrEqual(12);
   });
 
   it("holds Beacon of Victory instead of banishing a soul card for +1 without a charge", () => {
