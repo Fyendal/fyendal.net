@@ -15,6 +15,11 @@
     border-top: 1px solid #b8933f55;
     border-bottom: 0;
   }
+  .decision.decision-bounded {
+    bottom: calc(64px + env(safe-area-inset-bottom));
+    max-height: calc(88dvh - 64px - env(safe-area-inset-bottom));
+    padding-bottom: 12px;
+  }
   .table::after {
     content: "";
     position: fixed;

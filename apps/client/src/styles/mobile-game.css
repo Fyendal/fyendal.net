@@ -987,6 +987,54 @@
   .decision-target-band { padding: 3px 2px; font-size: 10px; }
   .decision-optcard:has(.card-tapped) { width: 124px; }
   .decision-optcard button { min-width: 90px; }
+  /* Bounded picks dock as a native bottom sheet. It is fixed to the viewport
+     so the scrolling float neither clips its corners nor lets the hand
+     toggle overlap it; the raised float keeps it above that toggle. */
+  .decision-float:has(> .decision-bounded) { z-index: 30; }
+  .decision.decision-bounded {
+    --sheet-card-w: min(118px, calc((100vw - 52px) / 3));
+    position: fixed;
+    inset: auto 0 0;
+    grid-template-columns: minmax(0, 1fr);
+    width: auto;
+    max-width: none;
+    max-height: 88dvh;
+    padding: 0 0 max(12px, env(safe-area-inset-bottom));
+    border-width: 1px 0 0;
+    border-radius: 16px 16px 0 0;
+    box-shadow: 0 0 0 100vmax #0009;
+    animation: bounded-sheet-in 180ms ease-out;
+  }
+  .decision-bounded > .decision-prompt { padding: 18px 16px 6px; font-size: 16px; line-height: 1.3; }
+  .decision-bounded > .bounded-choice-tally {
+    grid-column: 1;
+    justify-self: start;
+    padding: 0 16px 4px;
+  }
+  .decision-bounded > .bounded-choice-cards {
+    justify-content: center;
+    gap: 10px;
+    max-height: calc(var(--sheet-card-w) * 2.76 + 34px);
+    padding: 12px 16px;
+    border: 0;
+    background: none;
+    overflow: hidden auto;
+    overscroll-behavior: contain;
+    touch-action: pan-y;
+  }
+  .bounded-choice-cards > .card-hand {
+    width: var(--sheet-card-w);
+    height: calc(var(--sheet-card-w) * 1.38);
+  }
+  .decision-bounded > .bounded-choice-footer { padding: 6px 16px 0; }
+  .bounded-choice-footer > .btn-primary { flex: 1 1 auto; min-height: 52px; font-size: 16px; }
+  .bounded-choice-footer .shortcut-key { display: none; }
+  @keyframes bounded-sheet-in {
+    from { transform: translateY(24px); opacity: 0; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .decision.decision-bounded { animation: none; }
+  }
 
   .waiting { top: 70px; left: 50%; max-width: 86vw; text-align: center; }
   .idle-toast {
