@@ -634,7 +634,8 @@
   color: #ffe9d4cc;
 }
 @media (hover: none) and (pointer: coarse) {
-  .bounded-choice-footer .shortcut-key { display: none; }
+  .bounded-choice-footer .shortcut-key,
+  .card-search-overlay .shortcut-key { display: none; }
 }
 @media (prefers-reduced-motion: reduce) {
   .bounded-choice-slot { transition: none; }

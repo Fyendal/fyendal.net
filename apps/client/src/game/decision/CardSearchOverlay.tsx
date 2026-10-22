@@ -110,15 +110,23 @@ export function toggleCardSearchSelection(
 export function CardSearchOverlay({
   decision,
   zoneCounts,
+  selectedOptionIds: controlledSelection,
+  canSelect: controlledCanSelect,
+  onToggle,
   onSubmit,
 }: {
   decision: PendingDecision | null;
   zoneCounts: CardSearchZoneCounts;
+  /** Board-owned selection, so Space can submit it. */
+  selectedOptionIds?: readonly string[];
+  canSelect?: (optionId: string) => boolean;
+  onToggle?: (optionId: string) => void;
   onSubmit: (optionIds: readonly string[]) => void;
 }) {
   const intl = useIntl();
   const [minimized, setMinimized] = useState(false);
-  const [selectedOptionIds, setSelectedOptionIds] = useState<readonly string[]>([]);
+  const [localSelection, setLocalSelection] = useState<readonly string[]>([]);
+  const selectedOptionIds = controlledSelection ?? localSelection;
   const model = useMemo(
     () => cardSearchOverlayModel(decision, zoneCounts),
     [decision, zoneCounts.hand, zoneCounts.deck, zoneCounts.arsenal],
@@ -176,9 +184,10 @@ export function CardSearchOverlay({
               −
             </button>
             <button
-              className="btn-primary"
+              className="btn-primary shortcut-button"
               type="button"
               disabled={!canSubmit}
+              aria-keyshortcuts={canSubmit ? "Space" : undefined}
               onClick={() => onSubmit(selectedOptionIds)}
             >
               {selectedOptionIds.length === 0
@@ -187,6 +196,9 @@ export function CardSearchOverlay({
                     { id: "game.search.submit" },
                     { count: selectedOptionIds.length },
                   )}
+              {canSubmit
+                ? <kbd className="shortcut-key" aria-label={intl.formatMessage({ id: "common.spaceKey" })} />
+                : null}
             </button>
           </div>
         </div>
@@ -201,7 +213,9 @@ export function CardSearchOverlay({
                 {section.cards.map((card) => {
                   const option = model.optionByCardId.get(card.instanceId);
                   const selected = option !== undefined && selectedOptionIds.includes(option);
-                  const canSelect = selected || selectedOptionIds.length < model.maximumSelections;
+                  const canSelect = option !== undefined && (controlledCanSelect
+                    ? controlledCanSelect(option)
+                    : selected || selectedOptionIds.length < model.maximumSelections);
                   return (
                     <CardFace
                       key={card.instanceId}
@@ -212,9 +226,11 @@ export function CardSearchOverlay({
                       selected={selected}
                       onClick={option === undefined || !canSelect
                         ? undefined
-                        : () => setSelectedOptionIds((current) =>
-                            toggleCardSearchSelection(current, option, model.maximumSelections)
-                          )}
+                        : () => onToggle
+                          ? onToggle(option)
+                          : setLocalSelection((current) =>
+                              toggleCardSearchSelection(current, option, model.maximumSelections)
+                            )}
                     />
                   );
                 })}

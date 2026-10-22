@@ -1635,6 +1635,14 @@ export function GameBoard() {
             deck: opp.deckCount,
             arsenal: opp.arsenalCount,
           }}
+          {...(boundedCardChoice
+            ? {
+                selectedOptionIds: boundedChoiceSelectedOptionIds,
+                canSelect: (optionId: string) =>
+                  boundedCardChoiceSelectable(boundedCardChoice, boundedChoiceSelectedOptionIds, optionId),
+                onToggle: toggleBoundedChoice,
+              }
+            : {})}
           onSubmit={(optionIds) => send({ kind: "choose-many", optionIds: [...optionIds] })}
         />
       ) : null}
