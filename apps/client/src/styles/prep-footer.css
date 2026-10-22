@@ -223,6 +223,15 @@
   box-shadow: 0 3px 8px #000b;
 }
 .prep-card-choice.selected .prep-card-check { display: grid; }
+.prep-pool-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px 16px;
+  margin-bottom: 16px;
+}
+.prep-pool-heading .panel-title { margin: 0; border-bottom: 0; padding-bottom: 0; }
 .prep-deck-zone {
   border-top: 1px solid #45331f88;
   padding-top: 16px;

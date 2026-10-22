@@ -1172,7 +1172,7 @@
     padding: 10px 8px 10px 14px;
   }
   .zone-viewer-close { width: 40px; height: 40px; min-height: 40px; }
-  .zone-viewer-sort button { flex: 1; justify-content: center; min-height: 34px; }
+  .zone-viewer-header .card-sort button { flex: 1; justify-content: center; min-height: 34px; }
   .zone-viewer > .zone-viewer-cards { padding: 12px 8px; }
   .settings-panel {
     width: calc(100vw - 20px);

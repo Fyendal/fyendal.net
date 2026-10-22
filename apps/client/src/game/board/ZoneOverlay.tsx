@@ -1,47 +1,11 @@
-import { cardData } from "@fyendal/cards/client";
-import type { CardView } from "@fyendal/shared";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useIntl } from "react-intl";
+import { UiIcon } from "../../components/UiIcon.js";
 import { CardFace, InactiveZoneCard } from "../Card.js";
+import { CardSortToggle, sortCards, type CardSortOrder } from "../CardSort.js";
 import type { BoardOverlay } from "./BoardPrimitives.js";
 
-export type ZoneSortOrder = "zone" | "pitch" | "name";
-
-const CARD_NAME_COLLATOR = new Intl.Collator("en", {
-  numeric: true,
-  sensitivity: "base",
-});
-
-function cardName(card: CardView): string {
-  return cardData[card.cardId]?.name ?? card.name ?? card.cardId;
-}
-
-function cardPitchOrder(card: CardView): number {
-  const pitch = cardData[card.cardId]?.pitch;
-  return pitch === 1 || pitch === 2 || pitch === 3 ? pitch : 4;
-}
-
-/** Keep a pile's meaningful zone order by default, while allowing every
- * shared zone viewer to group printings of the same named card together. */
-export function sortZoneCards(
-  cards: readonly CardView[],
-  sortOrder: ZoneSortOrder,
-): readonly CardView[] {
-  if (sortOrder === "zone") return cards;
-  return [...cards].sort((left, right) => {
-    const nameOrder = CARD_NAME_COLLATOR.compare(cardName(left), cardName(right));
-    const pitchOrder = cardPitchOrder(left) - cardPitchOrder(right);
-    return sortOrder === "pitch"
-      ? pitchOrder || nameOrder
-      : nameOrder || pitchOrder;
-  });
-}
-
-const SORT_OPTIONS: readonly { value: ZoneSortOrder; messageId: string }[] = [
-  { value: "zone", messageId: "game.zone.sort.zoneOrder" },
-  { value: "pitch", messageId: "game.zone.sort.pitch" },
-  { value: "name", messageId: "game.zone.sort.cardName" },
-];
+const ZONE_SORT_OPTIONS: readonly CardSortOrder[] = ["zone", "pitch", "name"];
 
 export function ZoneOverlay({
   overlay,
@@ -56,9 +20,9 @@ export function ZoneOverlay({
 }) {
   const intl = useIntl();
   const panelRef = useRef<HTMLDivElement>(null);
-  const [sortOrder, setSortOrder] = useState<ZoneSortOrder>("zone");
+  const [sortOrder, setSortOrder] = useState<CardSortOrder>("zone");
   const cards = useMemo(
-    () => sortZoneCards(overlay.cards, sortOrder),
+    () => sortCards(overlay.cards, sortOrder, (card) => card),
     [overlay.cards, sortOrder],
   );
 
@@ -95,27 +59,7 @@ export function ZoneOverlay({
             </span>
           </div>
           {overlay.cards.length > 1 ? (
-            <div
-              className="zone-viewer-sort"
-              role="group"
-              aria-label={intl.formatMessage({ id: "game.zone.sort.label" })}
-            >
-              {SORT_OPTIONS.map(({ value, messageId }) => (
-                <button
-                  key={value}
-                  type="button"
-                  aria-pressed={sortOrder === value}
-                  onClick={() => setSortOrder(value)}
-                >
-                  {value === "pitch" ? (
-                    <span className="zone-viewer-pips" aria-hidden="true">
-                      <i /><i /><i />
-                    </span>
-                  ) : null}
-                  {intl.formatMessage({ id: messageId })}
-                </button>
-              ))}
-            </div>
+            <CardSortToggle options={ZONE_SORT_OPTIONS} value={sortOrder} onChange={setSortOrder} />
           ) : null}
           <button
             type="button"
@@ -123,9 +67,7 @@ export function ZoneOverlay({
             aria-label={intl.formatMessage({ id: "common.closeNamed" }, { title: overlay.title })}
             onClick={onClose}
           >
-            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-              <path d="M6 6 18 18M18 6 6 18" />
-            </svg>
+            <UiIcon name="close" />
           </button>
         </div>
         <div

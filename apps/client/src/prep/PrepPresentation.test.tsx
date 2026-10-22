@@ -1,6 +1,6 @@
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import type { DeckPool } from "@fyendal/shared";
 import { PrepPresentation } from "./PrepPresentation.js";
 import { TestI18nProvider } from "../i18n/TestI18nProvider.js";
@@ -174,5 +174,51 @@ describe("PrepPresentation equipment controls", () => {
     expect(html).toContain("对局配置");
     expect(html).toContain("主牌组（0 / 至少 60 张）");
     expect(html).toContain("备牌区中没有卡牌");
+  });
+  describe("deck sorting", () => {
+    const renderDeck = () => renderToStaticMarkup(createElement(TestI18nProvider, null, createElement(PrepPresentation, {
+      sections: "deck",
+      showHero: true,
+      pool: { heroId: "HVY195", weaponIds: [], equipmentPool: [], deck: [] },
+      selection: {
+        forDeck: "deck",
+        weaponIndexes: [],
+        equipment: {},
+        // Sink Below (blue) is fully in inventory; Nimblism (yellow) is split.
+        main: new Map([["WTR218", 1], ["WTR219", 1]]),
+      },
+      selectionKey: "deck",
+      locked: false,
+      mainCount: 2,
+      minimumMainCount: 60,
+      inventoryCount: 3,
+      poolMainEntries: [["WTR217", 1], ["WTR219", 2], ["WTR218", 1]],
+      fixedInventoryCounts: new Map([["WTR215", 1]]),
+      onToggleWeapon: vi.fn(),
+      onToggleEquipment: vi.fn(),
+      onMoveMainCopy: vi.fn(),
+    })));
+    const order = (html: string, zone: number) =>
+      [...html.split("prep-deck-zone")[zone + 1]!.matchAll(/prep-stack-button"[^>]*?data-cardid="([^"]+)"/g)].map((m) => m[1]);
+
+    afterEach(() => vi.unstubAllGlobals());
+
+    it("sorts both zones by name, then pitch, by default", () => {
+      vi.stubGlobal("localStorage", { getItem: () => null, setItem: vi.fn() });
+      const html = renderDeck();
+      expect(html).toContain('role="group" aria-label="Sort by"');
+      expect(html).toContain('aria-pressed="true">Name</button>');
+      expect(html).not.toContain("Zone order");
+      expect(order(html, 0)).toEqual(["WTR218", "WTR219"]);
+      expect(order(html, 1)).toEqual(["WTR219", "WTR215", "WTR217"]);
+    });
+
+    it("restores a remembered pitch sort", () => {
+      vi.stubGlobal("localStorage", { getItem: () => "pitch", setItem: vi.fn() });
+      const html = renderDeck();
+      expect(html).toContain('aria-pressed="true"><span class="card-sort-pips"');
+      expect(order(html, 0)).toEqual(["WTR218", "WTR219"]);
+      expect(order(html, 1)).toEqual(["WTR215", "WTR219", "WTR217"]);
+    });
   });
 });

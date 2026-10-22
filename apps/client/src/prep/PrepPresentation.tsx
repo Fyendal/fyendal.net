@@ -1,4 +1,4 @@
-import { memo, useLayoutEffect, useRef } from "react";
+import { memo, useLayoutEffect, useRef, useState } from "react";
 import { useIntl } from "react-intl";
 import type { DeckPool, EquipmentSlot } from "@fyendal/shared";
 import { cardData, equipmentFitsSlot } from "@fyendal/cards/client";
@@ -7,7 +7,9 @@ import {
   CARD_PREVIEW_HEIGHT,
   CARD_PREVIEW_WIDTH,
 } from "../game/Card.js";
+import { CardSortToggle, sortCards } from "../game/CardSort.js";
 import { EQUIPMENT_SLOTS } from "../domain.js";
+import { loadPrepSortOrder, savePrepSortOrder, type PrepSortOrder } from "../storage.js";
 import type { PrepSelection } from "./selection.js";
 
 const PREP_CARD_WIDTH = 105;
@@ -18,6 +20,14 @@ const STACK_COPY_OFFSET = 25;
 const STACK_CARD_ASPECT_PERCENT = (CARD_PREVIEW_HEIGHT / CARD_PREVIEW_WIDTH) * 100;
 
 const ANCHOR_MAX_AGE_MS = 1000;
+
+const PREP_SORT_OPTIONS: readonly PrepSortOrder[] = ["name", "pitch"];
+
+interface InventoryStack {
+  id: string;
+  count: number;
+  fixed: boolean;
+}
 
 function WrappingPrepGroups({ children }: { children: React.ReactNode }) {
   const groupsRef = useRef<HTMLDivElement>(null);
@@ -158,12 +168,33 @@ export const PrepPresentation = memo(function PrepPresentation({
     const shift = anchor.button.getBoundingClientRect().top - anchor.top;
     if (shift !== 0) scrollParent(anchor.button).scrollTop += shift;
   }, [selection]);
+  const [sortOrder, setSortOrder] = useState(() => loadPrepSortOrder(globalThis.localStorage));
+  const changeSortOrder = (order: PrepSortOrder) => {
+    setSortOrder(order);
+    savePrepSortOrder(globalThis.localStorage, order);
+  };
+  const sortedMainEntries = sortCards(poolMainEntries, sortOrder, ([cardId]) => ({ cardId }));
+  const inventoryStacks = sortCards<InventoryStack>(
+    [
+      ...poolMainEntries.map(([id, total]) => ({
+        id,
+        count: total - (selection.main.get(id) ?? 0),
+        fixed: false,
+      })),
+      ...[...fixedInventoryCounts].map(([id, count]) => ({ id, count, fixed: true })),
+    ].filter(({ count }) => count > 0),
+    sortOrder,
+    ({ id }) => ({ cardId: id }),
+  );
   const Container = sections === "arena" ? "div" : "section";
 
   return (
     <Container className={sections === "arena" ? "prep-arena-selection" : "panel prep-pool"}>
       {sections === "deck" ? (
-        <h3 className="panel-title">{intl.formatMessage({ id: "prep.presentation.title" })}</h3>
+        <div className="prep-pool-heading">
+          <h3 className="panel-title">{intl.formatMessage({ id: "prep.presentation.title" })}</h3>
+          <CardSortToggle options={PREP_SORT_OPTIONS} value={sortOrder} onChange={changeSortOrder} />
+        </div>
       ) : null}
       {sections !== "deck" && showHero ? <div className="prep-section">
         <span className="play-label">{intl.formatMessage({ id: "prep.presentation.hero" })}</span>
@@ -273,7 +304,7 @@ export const PrepPresentation = memo(function PrepPresentation({
             {!locked ? <span>{intl.formatMessage({ id: "prep.presentation.moveToInventoryHint" })}</span> : null}
           </div>
           <div className="prep-card-grid">
-            {poolMainEntries.map(([id]) => {
+            {sortedMainEntries.map(([id]) => {
               const count = selection.main.get(id) ?? 0;
               return count > 0 ? (
                 <CardStack
@@ -294,21 +325,17 @@ export const PrepPresentation = memo(function PrepPresentation({
             {!locked ? <span>{intl.formatMessage({ id: "prep.presentation.moveToMainHint" })}</span> : null}
           </div>
           <div className="prep-card-grid">
-            {poolMainEntries.map(([id, total]) => {
-              const count = total - (selection.main.get(id) ?? 0);
-              return count > 0 ? (
-                <CardStack
-                  key={id}
-                  id={id}
-                  count={count}
-                  destination="main"
-                  locked={locked}
-                  onMove={(button) => moveCopy(button, id, 1)}
-                />
-              ) : null;
-            })}
-            {[...fixedInventoryCounts].map(([id, count]) => (
+            {inventoryStacks.map(({ id, count, fixed }) => fixed ? (
               <CardStack key={`fixed-${id}`} id={id} count={count} locked />
+            ) : (
+              <CardStack
+                key={id}
+                id={id}
+                count={count}
+                destination="main"
+                locked={locked}
+                onMove={(button) => moveCopy(button, id, 1)}
+              />
             ))}
             {inventoryCount === 0 ? (
               <p className="prep-empty-zone muted">
