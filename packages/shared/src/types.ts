@@ -176,6 +176,18 @@ export interface TurnTriggerView {
   labelMessage?: GameMessage;
   /** The trigger asks its controller whether to use it. */
   optional?: boolean;
+  /** Repeating choices standing orders may answer. */
+  choices?: TurnTriggerChoiceView[];
+}
+
+export interface TurnTriggerChoiceView {
+  hook: string;
+  options: TurnTriggerChoiceOption[];
+}
+
+export interface TurnTriggerChoiceOption {
+  value: string;
+  message: GameMessage;
 }
 
 export interface CardView {

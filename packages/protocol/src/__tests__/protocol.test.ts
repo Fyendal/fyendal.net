@@ -268,7 +268,16 @@ const card = {
   usedAbilityIndexes: [0, 2],
   remainingAbilityActivations: [1, 0],
   activatedAbilityLabels: ["Attack", "Reload"],
-  turnTriggers: [{ event: "end-of-turn", label: "Recover", labelMessage: { id: "test.recover" }, optional: true }],
+  turnTriggers: [{
+    event: "end-of-turn",
+    label: "Recover",
+    labelMessage: { id: "test.recover" },
+    optional: true,
+    choices: [{
+      hook: "trigger-choice",
+      options: [{ value: "yes", message: { id: "common.option.yes" } }, { value: "no", message: { id: "common.option.no" } }],
+    }],
+  }],
   attackAbilityIndexes: [0],
   life: 1,
   hidden: false,
@@ -1004,6 +1013,10 @@ describe("GameView and server messages", () => {
       [{ event: "damage-dealt", label: "Recover" }],
       [{ label: "Recover" }],
       "Recover",
+      [{ event: "end-of-turn", label: "Recover", choices: [{ hook: "trigger-choice", options: [] }] }],
+      [{ event: "end-of-turn", label: "Recover", choices: [{ hook: "Trigger Choice", options: [{ value: "yes", message: { id: "a" } }] }] }],
+      [{ event: "end-of-turn", label: "Recover", choices: [{ hook: "trigger-choice", options: [{ value: "yes" }] }] }],
+      [{ event: "end-of-turn", label: "Recover", choices: [{ hook: "trigger-choice", options: [{ value: "yes", message: { id: "a" }, extra: 1 }] }] }],
     ]) {
       const base = gameView();
       expect(decodeGameView({

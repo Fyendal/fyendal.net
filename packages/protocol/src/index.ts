@@ -49,6 +49,8 @@ import type {
   StateMessage,
   PlayerTurnFactsView,
   TurnFactsView,
+  TurnTriggerChoiceOption,
+  TurnTriggerChoiceView,
   TurnTriggerView,
 } from "@fyendal/shared";
 
@@ -896,6 +898,25 @@ export function decodeSeatStandingOrders(value: unknown): SeatStandingOrders | n
   return orders;
 }
 
+const MAX_STANDING_CHOICE_OPTIONS = 8;
+
+function standingChoiceToken(value: unknown): value is string {
+  return typeof value === "string" && value.length <= 64 && /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(value);
+}
+
+function turnTriggerChoice(value: unknown): value is TurnTriggerChoiceView {
+  const choice = object(value);
+  return !!choice && exactKeys(choice, ["hook", "options"], ["hook", "options"])
+    && standingChoiceToken(choice.hook)
+    && Array.isArray(choice.options) && choice.options.length > 0
+    && array(choice.options, (entry): entry is TurnTriggerChoiceOption => {
+      const option = object(entry);
+      return !!option && exactKeys(option, ["value", "message"], ["value", "message"])
+        && standingChoiceToken(option.value)
+        && decodeGameMessage(option.message) !== null;
+    }, MAX_STANDING_CHOICE_OPTIONS);
+}
+
 function commandFields(message: Record<string, unknown>): boolean {
   if (message.commandId === undefined && message.expectedVersion === undefined) return true;
   return commandId(message.commandId) && nonNegativeInteger(message.expectedVersion);
@@ -1153,11 +1174,12 @@ function cardView(value: unknown, depth = 0): value is CardView {
       array(v, (label): label is string => string(label, MAX_SHORT_TEXT, false), 33))
     && optional(card.turnTriggers, (v): v is TurnTriggerView[] => array(v, (entry): entry is TurnTriggerView => {
       const trigger = object(entry);
-      return !!trigger && exactKeys(trigger, ["event", "label", "labelMessage", "optional"], ["event", "label"])
+      return !!trigger && exactKeys(trigger, ["event", "label", "labelMessage", "optional", "choices"], ["event", "label"])
         && (trigger.event === "start-of-turn" || trigger.event === "begin-action-phase" || trigger.event === "end-of-turn")
         && string(trigger.label, MAX_SHORT_TEXT, false)
         && optional(trigger.labelMessage, (value): value is GameMessage => decodeGameMessage(value) !== null)
-        && optional(trigger.optional, (value): value is boolean => typeof value === "boolean");
+        && optional(trigger.optional, (value): value is boolean => typeof value === "boolean")
+        && optional(trigger.choices, (value): value is TurnTriggerChoiceView[] => array(value, turnTriggerChoice, 4));
     }, 16))
     && optional(card.attackAbilityIndexes, abilityIndexes)
     && optional(card.subcards, (v): v is CardView[] => array(v, (entry) => cardView(entry, depth + 1), 16))

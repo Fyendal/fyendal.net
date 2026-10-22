@@ -79,12 +79,45 @@ describe("game setup & turn structure", () => {
         triggers: [
           { event: "end-of-turn", optional: true, label: "Recover", labelMessage: { id: "test.recover" }, effect() {} },
           { event: "damage-dealt", label: "Sting", effect() {} },
+          {
+            event: "start-of-turn",
+            label: "Maintain",
+            standingChoice: {
+              hook: "test-maintain",
+              options: ["keep", "drop"],
+              optionMessages: { keep: { id: "test.keep" }, drop: { id: "test.drop" } },
+            },
+            effect() {},
+          },
         ],
       },
     };
 
     expect(projectStateFor(state, 0).players[0]?.weapons[0]?.turnTriggers).toEqual([
-      { event: "end-of-turn", label: "Recover", labelMessage: { id: "test.recover" }, optional: true },
+      {
+        event: "end-of-turn",
+        label: "Recover",
+        labelMessage: { id: "test.recover" },
+        optional: true,
+        choices: [{
+          hook: "trigger-choice",
+          options: [
+            { value: "yes", message: { id: "common.option.yes" } },
+            { value: "no", message: { id: "common.option.no" } },
+          ],
+        }],
+      },
+      {
+        event: "start-of-turn",
+        label: "Maintain",
+        choices: [{
+          hook: "test-maintain",
+          options: [
+            { value: "keep", message: { id: "test.keep" } },
+            { value: "drop", message: { id: "test.drop" } },
+          ],
+        }],
+      },
     ]);
     expect(projectStateFor(state, 0).players[0]?.hand[0]?.turnTriggers).toBeUndefined();
   });

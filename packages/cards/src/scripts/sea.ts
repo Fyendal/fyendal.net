@@ -111,6 +111,12 @@ function attackAbilityForAlly(cost: number, goAgain = false): CardScript {
   return { activated: attackAbility(cost, { tap: true, goAgain, oncePerTurn: false }) };
 }
 
+const COG_MAINTENANCE = {
+  hook: "sea-cog-maintenance",
+  options: ["remove", "destroy"],
+  optionMessages: commonOptionMessages("remove", "destroy"),
+} as const;
+
 function maintenanceCog(steam: number): CardScript {
   return {
     onEnterArena(ctx) {
@@ -121,21 +127,22 @@ function maintenanceCog(steam: number): CardScript {
         event: "start-of-turn",
         label: "Remove a steam counter or destroy this",
         labelMessage: decisionMessage("card.trigger.steam.maintain"),
+        standingChoice: COG_MAINTENANCE,
         effect(ctx) {
           if (ctx.getCounter("steam") <= 0) ctx.destroySelf();
           else
             ctx.requestChoice(
-              "sea-cog-maintenance",
+              COG_MAINTENANCE.hook,
               decisionPrompt("Remove a steam counter or destroy this?", "card.sea.cog.maintenance.choose", {
-                optionMessages: commonOptionMessages("remove", "destroy"),
+                optionMessages: COG_MAINTENANCE.optionMessages,
               }),
-              ["remove", "destroy"],
+              [...COG_MAINTENANCE.options],
             );
         },
       },
     ],
     onChoose(ctx, hook, option) {
-      if (hook !== "sea-cog-maintenance") return;
+      if (hook !== COG_MAINTENANCE.hook) return;
       if (option === "remove") ctx.setCounter("steam", Math.max(0, ctx.getCounter("steam") - 1));
       else ctx.destroySelf();
     },

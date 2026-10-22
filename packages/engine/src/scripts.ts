@@ -994,6 +994,12 @@ export interface TriggerDef {
   };
   /** Space-bar default for an optional trigger choice. */
   defaultOption?: "yes" | "no";
+  /** The effect's `requestChoice`, declared so standing orders exist before it is asked. */
+  standingChoice?: {
+    hook: string;
+    options: readonly string[];
+    optionMessages: Readonly<Record<string, GameMessage>>;
+  };
   /** Short description shown in the stack window, e.g. "Turn face up?" */
   label: string;
   /** Locale-independent counterpart to `label`. It is derived from the script

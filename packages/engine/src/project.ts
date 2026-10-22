@@ -16,6 +16,7 @@ import type {
   PlayerView,
   StackLayerView,
   TurnFactsView,
+  TurnTriggerChoiceView,
   TurnTriggerEvent,
 } from "@fyendal/shared";
 import type { CardInstance, CombatValueModifier, Modifier, PendingDecisionState, PlayerState } from "./state.js";
@@ -45,6 +46,7 @@ import {
   abilityList,
   activatedFlagKey,
   ONCE_PER_TURN_EFFECT_FLAG_PREFIX,
+  type TriggerDef,
 } from "./scripts.js";
 import { additionalTargetsAroundPrimary, currentLink, findCardAnywhere } from "./zoneQueries.js";
 import { queuedAttackObjects } from "./attackQueue.js";
@@ -146,6 +148,31 @@ function isTurnTriggerEvent(event: TriggerEvent): event is TriggerEvent & TurnTr
   return TURN_TRIGGER_EVENTS.has(event);
 }
 
+const TRIGGER_CHOICE: TurnTriggerChoiceView = {
+  hook: "trigger-choice",
+  options: [
+    { value: "yes", message: { id: "common.option.yes" } },
+    { value: "no", message: { id: "common.option.no" } },
+  ],
+};
+
+function turnTriggerChoices(trigger: TriggerDef): { choices?: TurnTriggerChoiceView[] } {
+  const declared = trigger.standingChoice;
+  const choices: TurnTriggerChoiceView[] = [
+    ...(trigger.optional ? [TRIGGER_CHOICE] : []),
+    ...(declared
+      ? [{
+          hook: declared.hook,
+          options: declared.options.flatMap((value) => {
+            const message = declared.optionMessages[value];
+            return message ? [{ value, message }] : [];
+          }),
+        }]
+      : []),
+  ];
+  return choices.length > 0 ? { choices } : {};
+}
+
 function cardView(state: GameStateInternal,
   runtime: EngineRuntime, c: CardInstance, opts: CardViewOptions = {}): CardView {
   const d = instanceDataOf(state, c);
@@ -163,6 +190,7 @@ function cardView(state: GameStateInternal,
             label: trigger.label,
             ...(trigger.labelMessage ? { labelMessage: trigger.labelMessage } : {}),
             ...(trigger.optional ? { optional: true } : {}),
+            ...turnTriggerChoices(trigger),
           }]
         : [])
     : [];
