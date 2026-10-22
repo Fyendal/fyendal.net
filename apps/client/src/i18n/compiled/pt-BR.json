@@ -32131,6 +32131,18 @@
       "value": "Como posso contribuir?"
     }
   ],
+  "landing.faq.decks.answer": [
+    {
+      "type": 0,
+      "value": "Sim. Cole um deck exportado do Fabrary e o Fyendal verifica se todas as cartas são suportadas. Você também pode começar na hora com um deck pré-construído."
+    }
+  ],
+  "landing.faq.decks.question": [
+    {
+      "type": 0,
+      "value": "Posso usar meu próprio deck de Flesh and Blood?"
+    }
+  ],
   "landing.faq.download.answer": [
     {
       "type": 0,
@@ -32143,6 +32155,18 @@
       "value": "Preciso baixar alguma coisa?"
     }
   ],
+  "landing.faq.formats.answer": [
+    {
+      "type": 0,
+      "value": "O Fyendal suporta Classic Constructed e Silver Age. Todo deck passa por uma verificação de legalidade no formato, e você escolhe as armas e os equipamentos do seu herói antes de cada partida."
+    }
+  ],
+  "landing.faq.formats.question": [
+    {
+      "type": 0,
+      "value": "Quais formatos de Flesh and Blood posso jogar?"
+    }
+  ],
   "landing.faq.free.answer": [
     {
       "type": 0,
@@ -32153,6 +32177,18 @@
     {
       "type": 0,
       "value": "O Fyendal é gratuito?"
+    }
+  ],
+  "landing.faq.howToPlay.answer": [
+    {
+      "type": 0,
+      "value": "Crie uma conta gratuita, importe um deck ou escolha um pré-construído e depois entre na fila, participe de uma sala aberta ou convide um amigo. O motor de regras cuida dos turnos, da combat chain e das informações ocultas, para você se concentrar no jogo."
+    }
+  ],
+  "landing.faq.howToPlay.question": [
+    {
+      "type": 0,
+      "value": "Como jogar Flesh and Blood online?"
     }
   ],
   "landing.faq.inPerson.answer": [
@@ -32234,7 +32270,7 @@
   "landing.faq.title": [
     {
       "type": 0,
-      "value": "Sobre jogar no Fyendal"
+      "value": "Jogar Flesh and Blood online"
     }
   ],
   "landing.inGame": [
@@ -32346,13 +32382,13 @@
   "landing.subtitle": [
     {
       "type": 0,
-      "value": "Gratuito, de código aberto e feito pela comunidade. Jogue no navegador contra outros jogadores ou contra bots competitivos, específicos para cada herói, com seus decks do Fabrary."
+      "value": "Gratuito, de código aberto e feito pela comunidade. Jogue o card game Flesh and Blood no navegador contra outros jogadores ou contra bots competitivos, específicos para cada herói, com seus decks do Fabrary."
     }
   ],
   "landing.title": [
     {
       "type": 0,
-      "value": "Jogue Flesh and Blood online"
+      "value": "Jogue Flesh and Blood TCG online"
     }
   ],
   "landing.ways.title": [

@@ -31618,6 +31618,18 @@
       "value": "¿Cómo puedo colaborar?"
     }
   ],
+  "landing.faq.decks.answer": [
+    {
+      "type": 0,
+      "value": "Sí. Pega un mazo exportado desde Fabrary y Fyendal comprobará que todas las cartas sean compatibles. También puedes empezar enseguida con un mazo preconstruido."
+    }
+  ],
+  "landing.faq.decks.question": [
+    {
+      "type": 0,
+      "value": "¿Puedo usar mi propio mazo de Flesh and Blood?"
+    }
+  ],
   "landing.faq.download.answer": [
     {
       "type": 0,
@@ -31630,6 +31642,18 @@
       "value": "¿Necesito descargar algo?"
     }
   ],
+  "landing.faq.formats.answer": [
+    {
+      "type": 0,
+      "value": "Fyendal admite Classic Constructed y Silver Age. Cada mazo se comprueba según la legalidad del formato, y eliges las armas y el equipo de tu héroe antes de cada partida."
+    }
+  ],
+  "landing.faq.formats.question": [
+    {
+      "type": 0,
+      "value": "¿Qué formatos de Flesh and Blood puedo jugar?"
+    }
+  ],
   "landing.faq.free.answer": [
     {
       "type": 0,
@@ -31640,6 +31664,18 @@
     {
       "type": 0,
       "value": "¿Fyendal es gratis?"
+    }
+  ],
+  "landing.faq.howToPlay.answer": [
+    {
+      "type": 0,
+      "value": "Crea una cuenta gratuita, importa un mazo o elige uno preconstruido, y luego entra en la cola, únete a una sala abierta o invita a un amigo. El motor de reglas se encarga de los turnos, la cadena de combate y la información oculta para que te concentres en jugar."
+    }
+  ],
+  "landing.faq.howToPlay.question": [
+    {
+      "type": 0,
+      "value": "¿Cómo se juega a Flesh and Blood en línea?"
     }
   ],
   "landing.faq.inPerson.answer": [
@@ -31721,7 +31757,7 @@
   "landing.faq.title": [
     {
       "type": 0,
-      "value": "Sobre jugar en Fyendal"
+      "value": "Jugar a Flesh and Blood en línea"
     }
   ],
   "landing.inGame": [
@@ -31825,13 +31861,13 @@
   "landing.subtitle": [
     {
       "type": 0,
-      "value": "Gratis, de código abierto y creado por la comunidad. Juega en tu navegador contra otros jugadores o contra bots competitivos específicos de cada héroe con tus mazos de Fabrary."
+      "value": "Gratis, de código abierto y creado por la comunidad. Juega al juego de cartas coleccionables Flesh and Blood en tu navegador contra otros jugadores o contra bots competitivos específicos de cada héroe con tus mazos de Fabrary."
     }
   ],
   "landing.title": [
     {
       "type": 0,
-      "value": "Juega a Flesh and Blood en línea"
+      "value": "Juega a Flesh and Blood TCG en línea"
     }
   ],
   "landing.ways.title": [
