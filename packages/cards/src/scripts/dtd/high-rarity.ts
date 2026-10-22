@@ -248,10 +248,6 @@ function requestSkullChoice(ctx: ScriptCtx): void {
     );
 }
 
-function isFaceUpBloodDebt(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
-  return !card.faceDown && data(ctx, card).text.includes("Blood Debt");
-}
-
 export const dtdHighRarity: Record<string, CardScript> = {
   "light of sol|2": topYellowToSoul(),
   "prism, awakener of sol|0": prismAdult(),
@@ -703,12 +699,11 @@ export const dtdHighRarity: Record<string, CardScript> = {
   "blasmophet, levia consumed|0": {
     allowsFriendlyCardPlayFrom: (ctx, card, zone) =>
       zone === "banish" &&
-      isFaceUpBloodDebt(ctx, card) &&
+      !card.faceDown &&
+      data(ctx, card).text.includes("Blood Debt") &&
       ctx.getFlag("player", "leviaConsumedBanishPlayUsed") !== true,
-    onFriendlyPlay(ctx, played, from) {
-      if (from === "banish" && isFaceUpBloodDebt(ctx, played)) {
-        ctx.setFlag("player", "leviaConsumedBanishPlayUsed", true);
-      }
+    onFriendlyPlayFromPermission(ctx) {
+      ctx.setFlag("player", "leviaConsumedBanishPlayUsed", true);
     },
     onCardBanished(ctx, card) {
       ctx.setCardFaceDown(card.instanceId, true);

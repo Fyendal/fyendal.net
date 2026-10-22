@@ -906,6 +906,34 @@ describe("DTD — registration and core mechanics", () => {
     expect(banishPlays(s)).toEqual([]);
   });
 
+  it("Blasmophet, Levia Consumed keeps its banish play when a card uses its own permission", () => {
+    const banishPlayIds = (s: ReturnType<typeof scenario>) => new Set(legalIntents(s.state, 0).flatMap((i) =>
+      i.kind === "play-from-zone" && i.zone === "banish" ? [i.instanceId] : []));
+    const s = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          heroKey: "blasmophet, levia consumed|0",
+          resources: 20,
+          banish: ["ghostly visit|1", "feeding frenzy|1", "feeding frenzy|1"],
+        },
+        { hero: "dorinthea" },
+      ],
+    });
+    const visit = s.state.players[0]!.banish.find((card) => card.cardId === printingId("ghostly visit|1"))!;
+    const playFromBanish = (instanceId: number) => {
+      const intent = legalIntents(s.state, 0).find((i) =>
+        i.kind === "play-from-zone" && i.zone === "banish" && i.instanceId === instanceId)!;
+      s.doRaw(intent).settle().blockWith().settle();
+      s.state.players[0]!.actionPoints = 1;
+    };
+
+    playFromBanish(visit.instanceId);
+    expect(banishPlayIds(s).size).toBe(2);
+    playFromBanish([...banishPlayIds(s)][0]!);
+    expect(banishPlayIds(s).size).toBe(0);
+  });
+
   it("a face-down banished Funeral Moon cannot be played — face-down cards have no properties", () => {
     const banishPlays = (s: ReturnType<typeof scenario>) =>
       legalIntents(s.state, 0).filter((i) => i.kind === "play-from-zone" && i.zone === "banish");

@@ -869,6 +869,32 @@ describe("IAR cards", () => {
     expect(g.state.players[0]!.actionPoints).toBe(0);
   });
 
+  it("Blasmophet, the Insatiable Hunger keeps its banish play when a card uses its own permission", () => {
+    const banishPlayIds = (g: ReturnType<typeof scenario>) => new Set(legalIntents(g.state, 0).flatMap((i) =>
+      i.kind === "play-from-zone" && i.zone === "banish" ? [i.instanceId] : []));
+    const g = scenario({ seats: [
+      {
+        hero: "rhinar",
+        board: ["blasmophet, the insatiable hunger|0"],
+        banish: ["ghostly visit|1", "feeding frenzy|1", "feeding frenzy|1"],
+        resources: 20,
+      },
+      { hero: "dorinthea" },
+    ] });
+    const visit = g.state.players[0]!.banish.find((card) => cardData[card.cardId]?.name === "Ghostly Visit")!;
+    const playFromBanish = (instanceId: number) => {
+      const intent = legalIntents(g.state, 0).find((i) =>
+        i.kind === "play-from-zone" && i.zone === "banish" && i.instanceId === instanceId)!;
+      g.doRaw(intent).settle().blockWith().settle();
+      g.state.players[0]!.actionPoints = 1;
+    };
+
+    playFromBanish(visit.instanceId);
+    expect(banishPlayIds(g).size).toBe(2);
+    playFromBanish([...banishPlayIds(g)][0]!);
+    expect(banishPlayIds(g).size).toBe(0);
+  });
+
   it("Unique prevents a second Blasmophet token from entering", () => {
     const g = scenario({ seats: [
       {

@@ -53,7 +53,7 @@ import {
 } from "./zoneQueries.js";
 import { abilitiesAsInstantForCard, abilityResourceCost, actionAbilityRestrictedByModifier, payActivatedAbilityCost, prepareActivatedAbilityTarget, prepareActivatedDiscardCost, prepareActivatedEffectCardCosts } from "./abilityRules.js";
 import { consumeNextActionGoAgain, noteActionPlayedOrActivated } from "./cardLifecycle.js";
-import { canPlayAsInstant, cardPlayCost, cardPlayReductionForSeat, cardPlayRestrictedByModifier, playOriginRestricted, mayPlayFromArsenal, mayPlayFromZone, payAlternativePlayCost, preparePlayTarget } from "./playRules.js";
+import { canPlayAsInstant, cardPlayCost, cardPlayReductionForSeat, cardPlayRestrictedByModifier, playOriginRestricted, mayPlayFromArsenal, mayPlayFromZone, notePlayPermissionSource, payAlternativePlayCost, preparePlayTarget } from "./playRules.js";
 import { canPayRequiredHandCardsForAdditionalCost } from "./resources.js";
 import { heroAbilitiesDisabled } from "./stateQueries.js";
 import { actionLimitReached, isFrozen, opposingInstantsProhibited } from "./ruleQueries.js";
@@ -795,9 +795,10 @@ export function playReaction(
   if (isDefReact && Number(player.flags.nextDefenseReactionExtraCost || 0) > 0) {
     player.flags.nextDefenseReactionExtraCost = 0;
   }
+  const origin = fromZone ?? (fromArsenal ? "arsenal" : source === player.banish ? "banish" : "hand");
+  notePlayPermissionSource(state, runtime, card, origin, seat);
   const removed = removeFromArray(source, card.instanceId) as CardInstance;
   delete removed.faceDown; // a card is played openly, even out of the banished zone
-  const origin = fromZone ?? (fromArsenal ? "arsenal" : source === player.banish ? "banish" : "hand");
   // An attack card being played waits in the resolving zone, where effects
   // paid while playing it can add attack-targets.
   const attackAction = isAttackActionData(instanceDataOf(state, removed));

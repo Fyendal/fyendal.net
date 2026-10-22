@@ -2346,10 +2346,8 @@ export const iar: Record<string, CardScript> = {
         ctx.getFlag("player", "iarBlasmophetPlayUsed") !== true
       );
     },
-    onFriendlyPlay(ctx, played, from) {
-      if (from === "banish" && isBloodDebtAction(ctx, played)) {
-        ctx.setFlag("player", "iarBlasmophetPlayUsed", true);
-      }
+    onFriendlyPlayFromPermission(ctx) {
+      ctx.setFlag("player", "iarBlasmophetPlayUsed", true);
     },
     triggers: [
       {

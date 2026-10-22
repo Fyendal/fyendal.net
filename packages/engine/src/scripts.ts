@@ -1118,6 +1118,9 @@ export interface CardScript {
     card: DeepReadonly<CardInstance>,
     zone: PlayableZone,
   ): boolean;
+  /** A friendly card was played using this source's
+   * `allowsFriendlyCardPlayFrom` permission rather than another one. */
+  onFriendlyPlayFromPermission?(ctx: ScriptCtx, played: DeepReadonly<CardInstance>): void;
   /** A play-from-zone permission supplied by this source permits the matching
    * card only through the instant play method. */
   requiresFriendlyCardPlayAsInstant?(

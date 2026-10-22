@@ -47,7 +47,7 @@ import {
 
 import { abilityResourceCost, activatedAbilityAvailable, canPayAbilityLifeCost, canPayActivatedEffectCardCosts, discardCostOptions, effectiveAbilityList } from "./abilityRules.js";
 import { settlesInArena, settlePlayedCard } from "./cardLifecycle.js";
-import { alternativePlayCostOptions, canPlayAsInstant, cardPlayCost, cardPlayReductionForSeat, cardPlayRestrictedByModifier, playOriginRestricted, cardsPlayableFromArsenal, cardsPlayableFromZone, cardLayerGoAgain, consumeSingleUsePlayFromGroup, mayPlayFromArsenal, mayPlayFromZone, modifierMatchesPlayedCard, noteCardPlayed, payAlternativePlayCost, playFromZoneOwnerMatches, playTargetOptions, preparePlayTarget } from "./playRules.js";
+import { alternativePlayCostOptions, canPlayAsInstant, cardPlayCost, cardPlayReductionForSeat, cardPlayRestrictedByModifier, playOriginRestricted, cardsPlayableFromArsenal, cardsPlayableFromZone, cardLayerGoAgain, consumeSingleUsePlayFromGroup, mayPlayFromArsenal, mayPlayFromZone, modifierMatchesPlayedCard, noteCardPlayed, notePlayPermissionSource, payAlternativePlayCost, playFromZoneOwnerMatches, playTargetOptions, preparePlayTarget, spendFriendlyPlayPermission } from "./playRules.js";
 import { canPayRequiredHandCardsForAdditionalCost, pitchValueOfInstance } from "./resources.js";
 import { heroAbilitiesDisabled } from "./stateQueries.js";
 import { consumeFirstActionExtraCost, firstActionExtraCost, goAgainSuppressed, isFrozen, opposingInstantsProhibited, snapshotSerializable } from "./ruleQueries.js";
@@ -728,9 +728,10 @@ export function playWindowInstant(
       paidCards,
     );
   }
+  const origin = fromZone ?? (fromArsenal ? "arsenal" : source === player.banish ? "banish" : "hand");
+  notePlayPermissionSource(state, runtime, card, origin, seat);
   removeFromArray(source, card.instanceId);
   delete card.faceDown;
-  const origin = fromZone ?? (fromArsenal ? "arsenal" : source === player.banish ? "banish" : "hand");
   // An attack card being played waits in the resolving zone, where effects
   // paid while playing it can add attack-targets.
   const attackAction = isAttackActionData(instanceDataOf(state, card));
@@ -813,6 +814,7 @@ export function announceCardPlayed(
   if (!alreadyResolving) state.resolving.push(card);
   try {
     consumeSingleUsePlayFromGroup(state, card, origin);
+    spendFriendlyPlayPermission(state, runtime, seat, card);
     for (const modifier of state.modifiers) {
       if (
         modifier.seat === seat &&

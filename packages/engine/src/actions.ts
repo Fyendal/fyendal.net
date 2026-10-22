@@ -80,7 +80,7 @@ import { consumeNextActionGoAgain, noteActionPlayedOrActivated } from "./cardLif
 import { answerArcaneBarrier } from "./damageResolution.js";
 import { answerAttackTargetDamageOrder } from "./damage.js";
 import { answerDieRollReplacement } from "./dieRoll.js";
-import { boostCountForCardPlay, cardPlayRestrictedByModifier, playOriginRestricted, cardPlayCost, cardPlayReductionForSeat, payAlternativePlayCost, preparePlayTarget, canPlayAsInstant, canRuneGate, consumeAttackCostReductions, mayPlayFromArsenal, mayPlayFromZone, playFromZoneRequiresInstant } from "./playRules.js";
+import { boostCountForCardPlay, cardPlayRestrictedByModifier, playOriginRestricted, cardPlayCost, cardPlayReductionForSeat, payAlternativePlayCost, preparePlayTarget, canPlayAsInstant, canRuneGate, consumeAttackCostReductions, mayPlayFromArsenal, mayPlayFromZone, notePlayPermissionSource, playFromZoneRequiresInstant } from "./playRules.js";
 import { canPayRequiredHandCardsForAdditionalCost, scriptedPaymentOptions } from "./resources.js";
 import { heroAbilitiesDisabled } from "./stateQueries.js";
 import { actionLimitReached, consumeFirstActionExtraCost, controlsBow, firstActionExtraCost, firstAttackExtraCost, consumeFirstAttackExtraCost, isFrozen, opposingInstantsProhibited } from "./ruleQueries.js";
@@ -389,6 +389,7 @@ export function playCard(
   if (guardianAttackReduction > 0) player.flags.nextGuardianAttackCostReduction = 0;
   // the card leaves its zone before additional costs are paid, so a random
   // discard (Wrecker Romp, Alpha Rampage) can never hit the card being played
+  notePlayPermissionSource(state, runtime, card, from, seat);
   removeFromArray(source, instanceId);
   delete card.faceDown;
   if (runeGated) (card.scriptState ??= {}).runeGated = 1;
