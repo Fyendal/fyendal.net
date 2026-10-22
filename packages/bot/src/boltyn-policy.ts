@@ -26,7 +26,7 @@ import {
   type ResponseModel,
 } from "./policy.js";
 import { weaponCost } from "./card-model.js";
-import { arsenalValuer, handResponse, opportunityValuer } from "./hand-value.js";
+import { arsenalValuer, handResponse, opportunityValuer, solveHand } from "./hand-value.js";
 import { planTacticalTurn, type TacticalTurnPlan } from "./tactical-turn-planner.js";
 import { POINTS_PER_DAMAGE } from "./turn-planner.js";
 import { adjustValueBreakdown } from "./value.js";
@@ -126,6 +126,24 @@ function ongoingFrom(input: BotPolicyInput, functional: string): boolean {
 
 function luminaActive(input: BotPolicyInput): boolean {
   return ongoingFrom(input, LUMINA_ASCENSION);
+}
+
+/** Lumina pays off only through a later Raydn swing: follow the hand solver's best line on whether one comes. */
+function luminaPaysOff(input: BotPolicyInput): boolean {
+  const sword = raydn(input);
+  if (!sword || !raydnAvailable(input)) return false;
+  const { line } = solveHand(reserve(input), input, boltynSolverRules);
+  const luminaIds = new Set(reserve(input).flatMap((card) =>
+    key(input.cards[card.cardId]) === LUMINA_ASCENSION ? [card.instanceId] : []
+  ));
+  const lumina = line.findIndex((step) => luminaIds.has(step.instanceId));
+  return lumina >= 0 && line.slice(lumina + 1).some((step) => step.instanceId === sword.instanceId);
+}
+
+function playsLumina(intent: GameIntent, input: BotPolicyInput): boolean {
+  const card = intentCard(intent, ownCards(input));
+  return (intent.kind === "play-card" || intent.kind === "play-from-arsenal") &&
+    key(input.cards[card?.cardId ?? ""]) === LUMINA_ASCENSION;
 }
 
 function vBuffActive(input: BotPolicyInput): boolean {
@@ -645,7 +663,7 @@ function scorePlay(intent: GameIntent, input: BotPolicyInput, own: ReadonlyMap<n
       ? (luminaActive(input) ? 25 : ourTurn && input.view.pendingDecision ? 45 : 40)
       : !charged(input) && chargeable.length > 0 && chargeAttackNow
       ? -10
-      : raydnAvailable(input) ? 4 : -20;
+      : luminaPaysOff(input) ? 4 : -20;
   } else if (functional === EDICT_OF_STEEL) {
     score = raydnAvailable(input) ? 10 + (charged(input) && holds(input, LUMINA_ASCENSION) ? 6 : 0) : -10;
   } else if (functional === CELESTIAL_CATACLYSM) {
@@ -721,6 +739,9 @@ export function chooseBoltynIntentWithTrace(input: BotPolicyInput): BoltynIntent
     chooseForced: (forced) => chooseBoltynReactiveIntent({ ...forced, state: undefined }),
     rules: boltynSolverRules,
     rankCandidate: (intent, observed) => scorePlay(intent, observed, ownCards(observed)),
+    // A budget-starved Lumina root reaches the horizon, which cannot see its lost held value.
+    prepareCandidates: (candidates, observed) =>
+      candidates.filter((intent) => !playsLumina(intent, observed) || luminaPaysOff(observed)),
     // A tie-breaker below one damage equivalent, not a substitute for the rollout.
     scoreIntent: (intent, observed) => scorePlay(intent, observed, ownCards(observed)),
     positionBonus: (observed) =>

@@ -241,6 +241,20 @@ describe("Boltyn policy", () => {
     expect(before - after.players[1]!.life).toBeGreaterThanOrEqual(11);
   });
 
+  it("keeps Lumina Ascension when Raydn will not swing after it this turn", () => {
+    const state = settled(game(4070));
+    // Bolt of Courage is the turn's only attack: Raydn has no go-again path to follow it.
+    hand(state, ["ASB026", "SUP266", "MON033", "ASB008", "PEN181"]);
+    state.players[0]!.arsenal = cards(state, ["AHA012"]);
+    soul(state, 0);
+    const lumina = state.players[0]!.hand[0]!.instanceId;
+    const { state: after, intents } = play(state, turnOver);
+    expect(intents).toContain("Bolt of Courage");
+    expect(intents).not.toContain("Lumina Ascension");
+    const held = [...after.players[0]!.hand, ...after.players[0]!.arsenal];
+    expect(held.some((card) => card.instanceId === lumina)).toBe(true);
+  });
+
   it("charges Spirit of Eirina, then follows the Beacon of Victory search into more Raydn swings", () => {
     const state = fangGame();
     hand(state, ["ASB026", "DYN066", "MON033"]);
