@@ -192,6 +192,43 @@ describe("Bravo policy", () => {
     expect(intent.instanceIds).not.toContain(attack.instanceId);
   });
 
+  it("blocks Phantasm with only the six-power attack that destroys it", () => {
+    const state = createGame({
+      decklists: [bravoDeck(), decklists.dorinthea],
+      cards: cardData,
+      scripts,
+      seed: 9603,
+      startPlayer: 1,
+    });
+    replaceHand(state, 0, ["SBR013", "SBR023", "SBR022", "MPG047"]);
+    const view = projectStateFor(state, 0);
+    view.players[0].arsenal = [];
+    view.players[0].arsenalCount = 0;
+    const [phantasmBlocker, , crash] = view.players[0].hand as [CardView, CardView, CardView, CardView];
+    const [armorA, armorB] = Object.values(view.players[0].equipment)
+      .filter((card): card is CardView => card !== undefined && (card.defense ?? 0) > 0);
+    view.phase = "defend";
+    view.priorityPlayer = 0;
+    view.pendingDecision = { player: 0, kind: "defend", prompt: "Choose defenders" };
+    view.chain = [{
+      attackingCard: { instanceId: 96_032, cardId: "MON098", owner: 1 },
+      defendingCards: [],
+      attackValue: 8,
+      defenseValue: 0,
+      damage: 8,
+      resolved: false,
+      reactions: [],
+    }];
+    const legal: GameIntent[] = [
+      { kind: "defend", instanceIds: [phantasmBlocker.instanceId] },
+      { kind: "defend", instanceIds: [phantasmBlocker.instanceId, crash.instanceId] },
+      { kind: "defend", instanceIds: [phantasmBlocker.instanceId, armorA!.instanceId, armorB!.instanceId] },
+      { kind: "defend", instanceIds: [phantasmBlocker.instanceId, crash.instanceId, armorA!.instanceId] },
+    ];
+
+    expect(chooseBravoIntent({ seat: 0, view, legal, cards: cardData })).toEqual(legal[0]);
+  });
+
   it("blocks Static Shock for three instead of saving that card to pitch for AB1", () => {
     const state = createGame({
       decklists: [bravoDeck(), decklists.dorinthea],
