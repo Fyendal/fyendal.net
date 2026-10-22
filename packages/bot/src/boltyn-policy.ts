@@ -532,8 +532,9 @@ function scoreRaydn(
     (boardCount(input, "courage") > 0 ? 1 : 0);
   const further = attackSourcesAfter(intent, input, own) > 0;
   if (power === 0) {
-    // A 0-power swing only opens a reaction window for Roaring Beam or Beacon.
-    const window = holds(input, ROARING_BEAM) || (holds(input, BEACON_OF_VICTORY) && soulCount(input) > 0);
+    // A 0-power swing only opens a reaction window for Roaring Beam or a lethal Beacon.
+    const window = holds(input, ROARING_BEAM) ||
+      (holds(input, BEACON_OF_VICTORY) && soulCount(input) >= input.view.players[1 - input.seat]!.life);
     return window ? 3 : -5;
   }
   let score = power + (ongoingFrom(input, IRONSONG_VERSUS) ? 2 : 0);
@@ -556,6 +557,8 @@ function scoreAttackReaction(data: CardData, input: BotPolicyInput, own: Readonl
     if (soul === 0) return -100;
     const pending = Math.max(0, link.attackValue - link.defenseValue);
     const lethal = pending < opponent.life && pending + soul >= opponent.life;
+    // Uncharged it trades a soul card and the search for +1: hold it for a charged turn.
+    if (!charged(input) && !lethal) return -100;
     return 8 + (charged(input) ? 12 : 0) + (lethal ? 30 : 0) +
       (link.goAgain !== true && further && soul >= 2 ? 4 : 0);
   }
@@ -706,6 +709,8 @@ const BOLTYN_MAX_SEARCH_NODES = 32;
 const BOLTYN_MAX_TRANSITIONS = 400;
 const BOLTYN_MAX_ROOT_CANDIDATES = 5;
 const BOLTYN_FIRST_ROOT_TRANSITIONS = 160;
+// Charge, setup and two Raydn swings outrun an even share of the node budget.
+const BOLTYN_FIRST_ROOT_NODES = 16;
 
 /** Boltyn: charge, chain go-again attacks through the soul, convert with V or Lumina. */
 export function chooseBoltynIntentWithTrace(input: BotPolicyInput): BoltynIntentDecision {
@@ -724,6 +729,7 @@ export function chooseBoltynIntentWithTrace(input: BotPolicyInput): BoltynIntent
     maxTransitions: BOLTYN_MAX_TRANSITIONS,
     maxRootCandidates: BOLTYN_MAX_ROOT_CANDIDATES,
     firstRootTransitionBudget: BOLTYN_FIRST_ROOT_TRANSITIONS,
+    firstRootNodeBudget: BOLTYN_FIRST_ROOT_NODES,
   });
   const intent = guard(plan?.intent ?? reactive);
   return plan ? { intent, plan } : { intent };

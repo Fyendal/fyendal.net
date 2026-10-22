@@ -30,6 +30,17 @@ function game(seed = 4040, startPlayer: 0 | 1 = 0, opponent: Decklist = decklist
   return state;
 }
 
+/** The Fang-matchup list after Kabuto is destroyed and Solforge Gauntlet enters the soul. */
+function fangGame(): GameState {
+  const state = createGame({
+    decklists: [boltynDeck("HNT098"), decklists.dorinthea], cards: cardData, scripts, seed: 4040, startPlayer: 0,
+  });
+  state.turn = 3;
+  delete state.players[0]!.equipment.head;
+  delete state.players[0]!.equipment.arms;
+  return state;
+}
+
 function cards(state: GameState, cardIds: readonly string[], owner: 0 | 1 = 0) {
   return cardIds.map((cardId) => ({ instanceId: state.nextInstanceId++, cardId, owner }));
 }
@@ -216,6 +227,41 @@ describe("Boltyn policy", () => {
     expect(intents.indexOf("Lumina Ascension")).toBeGreaterThan(intents.indexOf("Beaming Bravado"));
     expect(intents.indexOf("Lumina Ascension")).toBeLessThan(intents.indexOf(RAYDN));
     expect(before - after.players[1]!.life).toBeGreaterThanOrEqual(11);
+  });
+
+  it("charges before Lumina Ascension so Raydn swings twice with Spirit of Eirina in arsenal", () => {
+    const state = fangGame();
+    hand(state, ["ASB026", "IAR254", "MON033"]);
+    state.players[0]!.arsenal = cards(state, ["DYN066"]);
+    soul(state, 1);
+    const before = state.players[1]!.life;
+    const { state: after, intents } = play(settled(state), turnOver);
+    expect(intents.indexOf("Lumina Ascension")).toBeGreaterThan(intents.indexOf("Bravery of the Blade"));
+    expect(intents.filter((name) => name === RAYDN)).toHaveLength(2);
+    expect(before - after.players[1]!.life).toBeGreaterThanOrEqual(11);
+  });
+
+  it("charges Spirit of Eirina, then follows the Beacon of Victory search into more Raydn swings", () => {
+    const state = fangGame();
+    hand(state, ["ASB026", "DYN066", "MON033"]);
+    state.players[0]!.arsenal = cards(state, ["IAR254"]);
+    soul(state, 1);
+    const spirit = state.players[0]!.hand[1]!.instanceId;
+    const before = state.players[1]!.life;
+    const { state: after, intents } = play(settled(state), turnOver);
+    expect(intents.slice(0, 2)).toEqual(["Bravery of the Blade", `choose:${spirit}`]);
+    expect(intents.indexOf("Lumina Ascension")).toBeLessThan(intents.indexOf(RAYDN));
+    expect(intents.filter((name) => name === RAYDN).length).toBeGreaterThanOrEqual(2);
+    expect(before - after.players[1]!.life).toBeGreaterThanOrEqual(11);
+  });
+
+  it("holds Beacon of Victory instead of banishing a soul card for +1 without a charge", () => {
+    const state = settled(fangGame());
+    hand(state, ["MON033"]);
+    soul(state, 1);
+    const { intents } = play(state, turnOver);
+    expect(intents).not.toContain("Beacon of Victory");
+    expect(intents).not.toContain(RAYDN);
   });
 
   it("swings a sharpened, charged Raydn through a Flurry token instead of passing", () => {

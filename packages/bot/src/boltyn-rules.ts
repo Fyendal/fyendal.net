@@ -385,8 +385,9 @@ export function boltynSolverRules(input: BotPolicyInput): HeroSolverRules {
           return patch;
         case BEACON_OF_VICTORY:
           patch.reactionPower = 1;
-          patch.canPlay = (view) => soulLeft(view) >= 1;
-          patch.bonusIn = (view) => charged(view) ? BEACON_SEARCH_VALUE : 0;
+          // The policy holds it until a charge enables the search.
+          patch.canPlay = (view) => charged(view) && soulLeft(view) >= 1;
+          patch.bonusIn = () => BEACON_SEARCH_VALUE;
           patch.after = (view) => ({
             flags: {
               soulSpent: view.flag("soulSpent") + 1,
