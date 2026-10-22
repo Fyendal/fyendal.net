@@ -375,6 +375,16 @@ export function PlayerHalf({
           data-stack-depth={cards.length > 1 ? Math.min(cards.length, 3) : undefined}
           data-motion-zone-anchor={motionLocationKey(location)}
         >
+          {/* Shows the previous top while an arriving card is masked for its flight. */}
+          {cards.length > 1 ? (
+            <div className="zone-card-pile-under" aria-hidden="true">
+              <InactiveZoneCard
+                card={cards[cards.length - 2]!}
+                squareArt={squareBoard}
+                showOverlays={false}
+              />
+            </div>
+          ) : null}
           <InactiveZoneCard
             card={cards[cards.length - 1]!}
             squareArt={squareBoard}

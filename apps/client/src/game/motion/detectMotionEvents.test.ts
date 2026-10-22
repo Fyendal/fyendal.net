@@ -250,6 +250,33 @@ describe("game motion detection", () => {
     }]);
   });
 
+  it("flies a weapon-slot card destroyed as a cost from its slot once, despite a board-labelled transition", () => {
+    const quiver = face(42);
+    const previous = view([player(0, { weapons: [face(41), quiver] }), player(1)], {
+      stack: [{ card: quiver, seat: 0, label: "Quiver", optional: false }],
+    });
+    const current = view([player(0, { weapons: [face(41)], graveyard: [quiver] }), player(1)], {
+      stack: [{ card: quiver, seat: 0, label: "Quiver", optional: false }],
+    });
+    const events = transitionMotionEvents(previous, current, {
+      fromVersion: 1,
+      kind: "forward",
+      events: [{
+        kind: "move",
+        from: { kind: "board", seat: 0 },
+        to: { kind: "graveyard", seat: 0 },
+        count: 1,
+        instanceId: 42,
+      }],
+    }, "forward", { sourceIncludesPredictedTransition: true });
+    expect(events.filter((event) => event.kind === "move")).toEqual([expect.objectContaining({
+      source: { kind: "weapon", seat: 0, index: 1 },
+      destination: { kind: "graveyard", seat: 0 },
+      sourcePresentationKey: "0:weapon:1:42",
+      destinationPresentationKey: "0:graveyard:42",
+    })]);
+  });
+
   it("flies a hidden opponent card from hand to banish for intimidate", () => {
     const previous = view([player(0), player(1, { handCount: 4 })]);
     const current = view([player(0), player(1, {

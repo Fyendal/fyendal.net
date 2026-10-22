@@ -19,12 +19,17 @@ import {
   type MotionVisual,
 } from "./motionTypes.js";
 
+const ARENA_KINDS: ReadonlySet<string> = new Set(["board", "equipment", "weapon"]);
+
 function zoneMatches(location: MotionLocation, zone: GameTransitionZone): boolean {
   if (zone.kind === "stack") {
     return location.kind === "stack-layer";
   }
   if (zone.kind === "chain") return location.kind.startsWith("chain-");
   if (!("seat" in location) || location.seat !== zone.seat) return false;
+  // The engine may label an arena departure by "arena" (board) or card type
+  // rather than its slot, e.g. an off-hand quiver destroyed as a cost.
+  if (ARENA_KINDS.has(zone.kind)) return ARENA_KINDS.has(location.kind);
   return location.kind === zone.kind;
 }
 
