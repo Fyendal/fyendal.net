@@ -218,6 +218,37 @@ describe("motion geometry", () => {
     },
   );
 
+  it.each(["graveyard", "banish"] as const)(
+    "reveals only the true %s top beneath which the previous top is rendered",
+    (kind) => {
+      const pile = rect(40, 500);
+      const destination = rect(500, 300);
+      const move = (instanceId: number): GameMotionEvent => ({
+        kind: "move",
+        source: { kind, seat: 0 },
+        destination: { kind: "board", seat: 0 },
+        visual: { kind: "face", card: { instanceId, cardId: `TST00${instanceId}`, owner: 0 } },
+        instanceId,
+        sourcePresentationKey: `0:${kind}:${instanceId}`,
+        destinationPresentationKey: `0:board:${instanceId}`,
+        count: 1,
+        confidence: "exact",
+      });
+      // DOM order: the previous top (under) precedes the visible top.
+      const previous = anchors({ cards: [[`0:${kind}:8`, pile], [`0:${kind}:9`, pile]] });
+
+      const topLeaves = resolveMotionBatch([move(9)], previous, anchors({ cards: [
+        [`0:${kind}:7`, pile], [`0:${kind}:8`, pile], ["0:board:9", destination],
+      ] }), `${kind}:top`);
+      expect(topLeaves?.flights[0]?.sourceRevealPresentationKey).toBe(`0:${kind}:8`);
+
+      const underLeaves = resolveMotionBatch([move(8)], previous, anchors({ cards: [
+        [`0:${kind}:7`, pile], [`0:${kind}:9`, pile], ["0:board:8", destination],
+      ] }), `${kind}:under`);
+      expect(underLeaves?.flights[0]?.sourceRevealPresentationKey).toBeUndefined();
+    },
+  );
+
   it("marks hand-to-arsenal travel for its dedicated settle animation", () => {
     const source = rect(60, 620, 160, 220);
     const destination = rect(520, 470, 100, 138);

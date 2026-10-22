@@ -382,6 +382,7 @@ export function PlayerHalf({
                 card={cards[cards.length - 2]!}
                 squareArt={squareBoard}
                 showOverlays={false}
+                motionKey={motionPresentationKey(location, cards[cards.length - 2]!.instanceId)}
               />
             </div>
           ) : null}

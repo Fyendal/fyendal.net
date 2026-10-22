@@ -705,6 +705,9 @@
   display: flex;
   pointer-events: none;
 }
+.zone-card-pile:not(:has([data-game-motion-destination-hidden])) > .zone-card-pile-under {
+  visibility: hidden;
+}
 .board-card-stack-multiple,
 .zone-card-pile-multiple,
 .game-motion-stacked {

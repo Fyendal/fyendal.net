@@ -243,9 +243,13 @@ function exposedSourceTopKey(
   if (event.source.kind !== "deck" && event.source.kind !== "graveyard"
     && event.source.kind !== "banish") return undefined;
   const sourceKey = event.sourcePresentationKey;
-  if (!sourceKey || !previous.cards.has(sourceKey)) return undefined;
+  if (!sourceKey) return undefined;
   const prefix = `${motionLocationKey(event.source)}:`;
-  return [...current.cards.keys()].find((key) => key.startsWith(prefix) && key !== sourceKey);
+  // A pile renders its previous top beneath the top card; the top is last.
+  const pileKeys = (snapshot: MotionAnchorSnapshot) =>
+    [...snapshot.cards.keys()].filter((key) => key.startsWith(prefix));
+  if (pileKeys(previous).at(-1) !== sourceKey) return undefined;
+  return pileKeys(current).filter((key) => key !== sourceKey).at(-1);
 }
 
 function measuredHandCards(
