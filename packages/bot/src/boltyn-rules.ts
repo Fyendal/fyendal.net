@@ -506,8 +506,9 @@ export function boltynSolverRules(input: BotPolicyInput): HeroSolverRules {
 /** Later-turn value is uncertain and credited at this share. */
 export const POSITION_DISCOUNT = 0.6;
 
-/** Discounted board value the planner credits at the end of a line. */
-export function boltynPositionValue(input: BotPolicyInput): number {
+/** Discounted board value the planner credits at the end of a line.
+ * `offenseRate` is the planner's response weighting for a later swing. */
+export function boltynPositionValue(input: BotPolicyInput, offenseRate = 1): number {
   const me = input.view.players[input.seat];
   const board = (name: string) => boardCount(input, name);
   const tunicCounters = Number(me.equipment.chest?.counters?.energy ?? 0);
@@ -515,7 +516,8 @@ export function boltynPositionValue(input: BotPolicyInput): number {
     tunicCounters * TUNIC_COUNTER_VALUE +
     board("courage") * COURAGE_TOKEN_VALUE +
     board("quicken") * QUICKEN_TOKEN_VALUE +
-    board("flurry") * FLURRY_TOKEN_VALUE +
+    // One weapon attack destroys every Flurry for a single extra swing.
+    (board("flurry") > 0 ? FLURRY_TOKEN_VALUE * offenseRate : 0) +
     board("ponder") * PONDER_TOKEN_VALUE +
     (board("spirit of eirina") > 0 ? SPIRIT_OF_EIRINA_VALUE : 0) +
     board("blessing of bellona") * (SOUL_VALUE + COURAGE_TOKEN_VALUE) +

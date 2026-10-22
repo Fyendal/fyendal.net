@@ -211,7 +211,7 @@ export function horizonDamage(
  * response weighting `responseWeightedDamage` applies to damage dealt this
  * turn, against the opponent's hand at the root (they refill before the bot's
  * next turn) and their life after this line. */
-function futureOffenseRate(
+export function futureOffenseRate(
   input: BotPolicyInput,
   root: TurnPlannerRoot,
   attackThreat: number,

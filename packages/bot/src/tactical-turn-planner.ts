@@ -34,7 +34,7 @@ export interface TacticalTurnConfig {
   rules: HeroRulesFactory;
   rankCandidate?(intent: GameIntent, input: BotPolicyInput): number;
   scoreIntent?(intent: GameIntent, input: BotPolicyInput): number;
-  positionBonus?(input: BotPolicyInput, complete: boolean): number;
+  positionBonus?(input: BotPolicyInput, complete: boolean, root: TurnPlannerRoot): number;
   /** Life-unit cost the hero's own line inflicts (life lost, debt exposed),
    * so a policy can tell lines that save life from lines that merely deal
    * more. The position bonus still prices it into the score. */
@@ -86,7 +86,7 @@ function evaluateTacticalTurn(
     score: winnerScore
       + responseWeightedDamage(opponentResponse) * POINTS_PER_DAMAGE
       + future.score
-      + (config.positionBonus?.(input, complete) ?? 0)
+      + (config.positionBonus?.(input, complete, root) ?? 0)
       - equipmentSpent * POINTS_PER_DAMAGE,
     damage: opponentResponse.rawDamage,
     expectedDamage: opponentResponse.expectedDamage,

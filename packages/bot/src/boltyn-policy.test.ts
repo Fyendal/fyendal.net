@@ -375,6 +375,20 @@ describe("Boltyn policy", () => {
     });
   });
 
+  it("swings a sharpened Raydn into a full hand instead of passing to keep its Flurry tokens", () => {
+    const state = settled(game());
+    // As after Blessing of Bellona and two Edicts of Steel with only Courageous Steelhand left.
+    hand(state, ["ASB014"]);
+    soul(state, 0);
+    state.players[0]!.board = cards(state, ["PEN181", "SBL036", "SBL036"]);
+    state.players[0]!.weapons[0]!.counters = { power: 2 };
+    expect(state.players[1]!.hand.length).toBeGreaterThanOrEqual(4);
+    const { intent } = choice(state);
+    expect(intent).toMatchObject({
+      kind: "activate-ability", sourceInstanceId: state.players[0]!.weapons[0]!.instanceId,
+    });
+  });
+
   it("keeps the soul once Kabuto of Imperial Authority stops Raydn swinging again", () => {
     const swing = (locked: boolean) => {
       const state = settled(game());

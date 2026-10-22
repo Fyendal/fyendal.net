@@ -28,7 +28,7 @@ import {
 import { weaponCost } from "./card-model.js";
 import { arsenalValuer, handResponse, opportunityValuer, solveHand } from "./hand-value.js";
 import { planTacticalTurn, type TacticalTurnPlan } from "./tactical-turn-planner.js";
-import { POINTS_PER_DAMAGE } from "./turn-planner.js";
+import { futureOffenseRate, POINTS_PER_DAMAGE } from "./turn-planner.js";
 import { adjustValueBreakdown } from "./value.js";
 import {
   BANNERET_OF_SWORDSMANSHIP,
@@ -758,8 +758,9 @@ export function chooseBoltynIntentWithTrace(input: BotPolicyInput): BoltynIntent
       candidates.filter((intent) => !playsLumina(intent, observed) || luminaPaysOff(observed)),
     // A tie-breaker below one damage equivalent, not a substitute for the rollout.
     scoreIntent: (intent, observed) => scorePlay(intent, observed, ownCards(observed)),
-    positionBonus: (observed) =>
-      (boltynPositionValue(observed) + observed.view.players[observed.seat].life) * POINTS_PER_DAMAGE,
+    positionBonus: (observed, _complete, root) =>
+      (boltynPositionValue(observed, futureOffenseRate(observed, root, FLURRY_TOKEN_VALUE)) +
+        observed.view.players[observed.seat].life) * POINTS_PER_DAMAGE,
     maxSearchNodes: BOLTYN_MAX_SEARCH_NODES,
     maxTransitions: BOLTYN_MAX_TRANSITIONS,
     maxRootCandidates: BOLTYN_MAX_ROOT_CANDIDATES,
