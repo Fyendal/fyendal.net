@@ -903,7 +903,7 @@ describe("Murky Water", () => {
     g.play("murky water|1", { fromArsenal: true }).blockWith().settle().chooseOption("yes");
     expect(g.state.pendingDecision?.options?.map(Number).sort((a, b) => a - b))
       .toEqual([...chosen, tripwire].sort((a, b) => a - b));
-    g.doRaw({ kind: "choose-many", optionIds: chosen.map(String) }).settle();
+    g.chooseMany(chosen.map(String)).settle();
 
     const player = g.state.players[0]!;
     expect(player.arsenal).toHaveLength(1);

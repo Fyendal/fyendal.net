@@ -1283,16 +1283,44 @@
       "value": "Put a steam counter on Symbiosis Shot?"
     }
   ],
-  "card.ajv.channel.ice.choose": [
+  "card.ajv.channel.ice.many": [
     {
       "type": 0,
-      "value": "Choose an Ice card from pitch for Channel Ice, or destroy this"
-    }
-  ],
-  "card.ajv.channel.ice.next": [
+      "value": "Choose "
+    },
+    {
+      "type": 6,
+      "value": "count",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " Ice card"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " Ice cards"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    },
     {
       "type": 0,
-      "value": "Choose another Ice card for Channel Ice, or destroy this"
+      "value": " from pitch for Channel Ice, or fewer to destroy this"
     }
   ],
   "card.ajv.equipment.counter": [
@@ -1441,16 +1469,10 @@
       "value": "Put a zombie into your graveyard?"
     }
   ],
-  "card.amg.revere.shuffle": [
+  "card.amg.revere.shuffle.choose": [
     {
       "type": 0,
-      "value": "Shuffle a Mechanologist action card from your banished zone into your deck?"
-    }
-  ],
-  "card.amg.revere.shuffle.next": [
-    {
-      "type": 0,
-      "value": "Shuffle another differently named Mechanologist action card?"
+      "value": "Choose up to 3 Mechanologist action cards with different names to shuffle into your deck"
     }
   ],
   "card.amo.mortimer.disease.choose": [
@@ -1609,16 +1631,41 @@
       "value": "Return an aura you control to its owner's hand?"
     }
   ],
-  "card.aps.card.discard.first": [
+  "card.aps.card.discard.choose": [
     {
       "type": 0,
-      "value": "Discard a card"
-    }
-  ],
-  "card.aps.card.discard.next": [
+      "value": "Choose "
+    },
+    {
+      "type": 6,
+      "value": "count",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 0,
+              "value": "a card"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " cards"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    },
     {
       "type": 0,
-      "value": "Discard another card"
+      "value": " to discard"
     }
   ],
   "card.aps.crowd.cheer": [
@@ -2737,10 +2784,44 @@
       "value": "Shiyana: choose a hero to copy"
     }
   ],
-  "card.cru.smash.item.destroy": [
+  "card.cru.smash.items.destroy": [
     {
       "type": 0,
-      "value": "Argh... Smash!: destroy an item?"
+      "value": "Argh... Smash!: choose up to "
+    },
+    {
+      "type": 6,
+      "value": "count",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " item"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " items"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    },
+    {
+      "type": 0,
+      "value": " to destroy"
     }
   ],
   "card.cru.tripwire.pay": [
@@ -2989,12 +3070,6 @@
       "value": "Pay 1 life to make the next Runechant unpreventable?"
     }
   ],
-  "card.dtd.soul.banish.next": [
-    {
-      "type": 0,
-      "value": "Banish another soul card?"
-    }
-  ],
   "card.dtd.soul.banish.shields": [
     {
       "type": 0,
@@ -3133,16 +3208,41 @@
       "value": "No revealed cards can defend"
     }
   ],
-  "card.dyn.harpoon.reveal.choose": [
+  "card.dyn.harpoon.reveal.cards.choose": [
     {
       "type": 0,
-      "value": "Choose a card to reveal"
-    }
-  ],
-  "card.dyn.harpoon.reveal.next": [
+      "value": "Choose "
+    },
+    {
+      "type": 6,
+      "value": "count",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 0,
+              "value": "a card"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " cards"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    },
     {
       "type": 0,
-      "value": "Choose another card to reveal"
+      "value": " to reveal"
     }
   ],
   "card.dyn.hornet.target.choose": [
@@ -5051,16 +5151,18 @@
       "value": "Choose equipment that must defend"
     }
   ],
-  "card.evo.equipment.offer": [
+  "card.evo.equipment.offer.many": [
     {
       "type": 0,
-      "value": "Choose equipment to offer"
-    }
-  ],
-  "card.evo.equipment.offer.next": [
+      "value": "Choose "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
     {
       "type": 0,
-      "value": "Choose another equipment to offer"
+      "value": " equipment to offer"
     }
   ],
   "card.evo.equipment.zone.choose": [
@@ -5125,16 +5227,44 @@
       "value": " defense?"
     }
   ],
-  "card.evo.graveyard.item.banish": [
+  "card.evo.graveyard.items.banish": [
     {
       "type": 0,
-      "value": "Banish an item from your graveyard"
-    }
-  ],
-  "card.evo.graveyard.item.banish.next": [
+      "value": "Banish "
+    },
+    {
+      "type": 6,
+      "value": "count",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " item"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " items"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    },
     {
       "type": 0,
-      "value": "Banish another item from your graveyard"
+      "value": " from your graveyard"
     }
   ],
   "card.evo.hand.card.banish.draw": [
@@ -5155,22 +5285,40 @@
       "value": "Put a Hyper Driver into the arena?"
     }
   ],
-  "card.evo.hyperdriver.destroy": [
+  "card.evo.hyperdrivers.destroy": [
     {
       "type": 0,
-      "value": "Destroy a Hyper Driver"
-    }
-  ],
-  "card.evo.hyperdriver.destroy.next": [
+      "value": "Destroy "
+    },
     {
-      "type": 0,
-      "value": "Destroy another Hyper Driver"
-    }
-  ],
-  "card.evo.hyperdriver.transform.next": [
-    {
-      "type": 0,
-      "value": "Choose another Hyper Driver?"
+      "type": 6,
+      "value": "count",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " Hyper Driver"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " Hyper Drivers"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
     }
   ],
   "card.evo.hyperdrivers.transform": [
@@ -5185,18 +5333,6 @@
       "value": "Put an item into the arena"
     }
   ],
-  "card.evo.item.reset": [
-    {
-      "type": 0,
-      "value": "Choose an item to reset"
-    }
-  ],
-  "card.evo.item.reset.next": [
-    {
-      "type": 0,
-      "value": "Choose another item to reset"
-    }
-  ],
   "card.evo.item.small.arena": [
     {
       "type": 0,
@@ -5207,6 +5343,46 @@
     {
       "type": 0,
       "value": "Put an item with cost 0 or 1 into the arena?"
+    }
+  ],
+  "card.evo.items.reset": [
+    {
+      "type": 0,
+      "value": "Choose "
+    },
+    {
+      "type": 6,
+      "value": "count",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " item"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " items"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    },
+    {
+      "type": 0,
+      "value": " to reset"
     }
   ],
   "card.evo.maintenance.choose": [
@@ -5239,22 +5415,30 @@
       "value": "Remove all steam counters from a permanent"
     }
   ],
-  "card.evo.permanent.steam.remove.next": [
-    {
-      "type": 0,
-      "value": "Remove steam from another permanent?"
-    }
-  ],
   "card.evo.permanent.steam.remove.uptox": [
     {
       "type": 0,
       "value": "Remove steam counters from up to X permanents"
     }
   ],
-  "card.evo.red.pitch.first": [
+  "card.evo.red.pitch.choose": [
     {
       "type": 0,
-      "value": "Pitch the first of "
+      "value": "Choose "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " red cards to pitch"
+    }
+  ],
+  "card.evo.red.pitch.optional": [
+    {
+      "type": 0,
+      "value": "Pitch "
     },
     {
       "type": 1,
@@ -5263,12 +5447,6 @@
     {
       "type": 0,
       "value": " red cards?"
-    }
-  ],
-  "card.evo.red.pitch.second": [
-    {
-      "type": 0,
-      "value": "Pitch the second red card?"
     }
   ],
   "card.evo.revealed.card.defend": [
@@ -5289,10 +5467,44 @@
       "value": "Scrap an item or equipment from your graveyard?"
     }
   ],
-  "card.evo.scrap.choose.next": [
+  "card.evo.scrap.choose.many": [
     {
       "type": 0,
-      "value": "Scrap another item or equipment from your graveyard?"
+      "value": "Choose up to "
+    },
+    {
+      "type": 6,
+      "value": "count",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " item or equipment"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " items or equipment"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    },
+    {
+      "type": 0,
+      "value": " in your graveyard to scrap"
     }
   ],
   "card.evo.soul.charge": [
@@ -5301,10 +5513,18 @@
       "value": "Charge your hero's soul?"
     }
   ],
-  "card.evo.ticktock.item.destroy": [
+  "card.evo.ticktock.items.destroy": [
     {
       "type": 0,
-      "value": "Destroy another item?"
+      "value": "Choose up to "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " other items to destroy"
     }
   ],
   "card.evo.weapon.attackagain.choose": [
@@ -5655,16 +5875,47 @@
       "value": ": choose a card to discard"
     }
   ],
-  "card.evr.discard.next": [
-    {
-      "type": 0,
-      "value": "Choose another card to discard"
-    }
-  ],
   "card.evr.dreadbore.arrow.load": [
     {
       "type": 0,
       "value": "Put an arrow from your hand face up into arsenal?"
+    }
+  ],
+  "card.evr.echoes.discard.choose": [
+    {
+      "type": 0,
+      "value": "Choose "
+    },
+    {
+      "type": 6,
+      "value": "count",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 0,
+              "value": "a card"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " cards"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    },
+    {
+      "type": 0,
+      "value": " to discard"
     }
   ],
   "card.evr.echoes.hero.choose": [
@@ -5749,6 +6000,12 @@
       "value": " or less?"
     }
   ],
+  "card.evr.knick.money.choose": [
+    {
+      "type": 0,
+      "value": "Choose any number of Copper, Silver, and Gold to destroy"
+    }
+  ],
   "card.evr.knick.search": [
     {
       "type": 0,
@@ -5759,18 +6016,6 @@
     {
       "type": 0,
       "value": "Destroy Mask of the Pouncing Lynx to search your deck?"
-    }
-  ],
-  "card.evr.money.destroy": [
-    {
-      "type": 0,
-      "value": "Destroy money tokens?"
-    }
-  ],
-  "card.evr.money.destroy.next": [
-    {
-      "type": 0,
-      "value": "Destroy another money token?"
     }
   ],
   "card.evr.nonattack.bottom": [
@@ -5869,32 +6114,44 @@
       "value": "Turn a non-attack action in arsenal face-up"
     }
   ],
-  "card.hnt.banished.facedown.first": [
+  "card.hnt.banished.facedown.choose": [
     {
       "type": 0,
-      "value": "Choose banished card 1 of "
+      "value": "Choose "
     },
     {
-      "type": 1,
-      "value": "total"
+      "type": 6,
+      "value": "count",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " banished card"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " banished cards"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
     },
     {
       "type": 0,
       "value": " to turn face-down"
-    }
-  ],
-  "card.hnt.banished.facedown.next": [
-    {
-      "type": 0,
-      "value": "Choose another banished card ("
-    },
-    {
-      "type": 1,
-      "value": "remaining"
-    },
-    {
-      "type": 0,
-      "value": " remaining)"
     }
   ],
   "card.hnt.card.choose": [
@@ -5967,12 +6224,6 @@
     {
       "type": 0,
       "value": "Dragonscaler Flight Path: choose a Draconic attack"
-    }
-  ],
-  "card.hnt.draconicdagger.equip.next": [
-    {
-      "type": 0,
-      "value": "Equip one more Draconic dagger?"
     }
   ],
   "card.hnt.draconicdagger.equip.upto": [
@@ -6339,10 +6590,10 @@
       "value": " or less"
     }
   ],
-  "card.hvy.six.banish": [
+  "card.hvy.six.banish.choose": [
     {
       "type": 0,
-      "value": "Banish a "
+      "value": "Banish any number of cards with "
     },
     {
       "type": 1,
@@ -6350,13 +6601,7 @@
     },
     {
       "type": 0,
-      "value": "-power card?"
-    }
-  ],
-  "card.hvy.six.banish.next": [
-    {
-      "type": 0,
-      "value": "Banish another?"
+      "value": " or more power"
     }
   ],
   "card.hvy.vigor.pay": [
@@ -11310,52 +11555,6 @@
       "value": " graveyard cards to banish"
     }
   ],
-  "card.mon.graveyard.cards.banish.more": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": ": choose "
-    },
-    {
-      "type": 1,
-      "value": "count"
-    },
-    {
-      "type": 0,
-      "value": " more "
-    },
-    {
-      "type": 6,
-      "value": "count",
-      "options": {
-        "one": {
-          "value": [
-            {
-              "type": 0,
-              "value": "card"
-            }
-          ]
-        },
-        "other": {
-          "value": [
-            {
-              "type": 0,
-              "value": "cards"
-            }
-          ]
-        }
-      },
-      "offset": 0,
-      "pluralType": "cardinal"
-    },
-    {
-      "type": 0,
-      "value": " to banish"
-    }
-  ],
   "card.mon.hand.card.banish": [
     {
       "type": 1,
@@ -11410,16 +11609,6 @@
     {
       "type": 0,
       "value": ": choose a Minnowism from your deck"
-    }
-  ],
-  "card.mon.opposing.graveyard.banish.next": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": ": choose another card in the opposing hero's graveyard to banish, or finish"
     }
   ],
   "card.mon.opposing.graveyard.banish.upto": [
@@ -11528,16 +11717,44 @@
       "value": "Shadow Puppetry: you may banish the top card"
     }
   ],
-  "card.mon.soul.banish.choose": [
+  "card.mon.soul.banish.count": [
     {
       "type": 0,
-      "value": "Choose a soul card to banish"
-    }
-  ],
-  "card.mon.soul.banish.next": [
+      "value": "Choose "
+    },
+    {
+      "type": 6,
+      "value": "count",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " soul card"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " soul cards"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    },
     {
       "type": 0,
-      "value": "Choose another soul card to banish"
+      "value": " to banish"
     }
   ],
   "card.mon.soul.card.choose": [
@@ -11624,16 +11841,10 @@
       "value": "Call for Backup: choose an attack action card to banish"
     }
   ],
-  "card.mpg.backup.first": [
+  "card.mpg.backup.pair.choose": [
     {
       "type": 0,
-      "value": "Call for Backup: choose the first attack action card"
-    }
-  ],
-  "card.mpg.backup.second": [
-    {
-      "type": 0,
-      "value": "Call for Backup: choose an attack action card with a different name"
+      "value": "Call for Backup: choose 2 attack action cards with different names"
     }
   ],
   "card.mpg.card.discard": [
@@ -11764,16 +11975,10 @@
       "value": "Add an attack reaction as a defender"
     }
   ],
-  "card.mpw.reaction.shuffle": [
+  "card.mpw.reaction.shuffle.choose": [
     {
       "type": 0,
-      "value": "Shuffle an attack reaction into your deck?"
-    }
-  ],
-  "card.mpw.reaction.shuffle.next": [
-    {
-      "type": 0,
-      "value": "Shuffle another differently named attack reaction?"
+      "value": "Choose up to 3 attack reactions with different names to shuffle into your deck"
     }
   ],
   "card.mpw.reaction.top": [
@@ -12660,24 +12865,44 @@
       "value": ": discard an ally?"
     }
   ],
-  "card.pen.ally.freeze.next": [
+  "card.pen.ally.freeze.choose": [
     {
       "type": 0,
-      "value": "Freeze another ally?"
-    }
-  ],
-  "card.pen.ally.freeze.upto": [
-    {
-      "type": 0,
-      "value": "Freeze up to "
+      "value": "Choose up to "
     },
     {
-      "type": 1,
-      "value": "count"
+      "type": 6,
+      "value": "count",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " ally"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " allies"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
     },
     {
       "type": 0,
-      "value": " allies"
+      "value": " to freeze"
     }
   ],
   "card.pen.ally.return": [
@@ -12814,16 +13039,18 @@
       "value": "Name a card"
     }
   ],
-  "card.pen.cloaked.equipment.facedown": [
+  "card.pen.cloaked.equipment.facedown.choose": [
     {
       "type": 0,
-      "value": "Choose equipment with cloaked to turn face-down"
-    }
-  ],
-  "card.pen.cloaked.equipment.facedown.next": [
+      "value": "Choose "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
     {
       "type": 0,
-      "value": "Choose another equipment with cloaked"
+      "value": " equipment with cloaked to turn face-down"
     }
   ],
   "card.pen.color.choose": [
@@ -13252,12 +13479,6 @@
       "value": "Return an attack action to its owner's hand"
     }
   ],
-  "card.ros.attack.return.next": [
-    {
-      "type": 0,
-      "value": "Choose another attack action, or finish"
-    }
-  ],
   "card.ros.attack.return.upto": [
     {
       "type": 0,
@@ -13652,16 +13873,10 @@
       "value": "Edict of Steel: sharpen target sword you control"
     }
   ],
-  "card.sbl.v.charge.first": [
+  "card.sbl.v.charge.choose": [
     {
       "type": 0,
-      "value": "V of the Vanguard: choose a card from your hand to charge, or stop"
-    }
-  ],
-  "card.sbl.v.charge.next": [
-    {
-      "type": 0,
-      "value": "V of the Vanguard: choose another card to charge, or stop"
+      "value": "V of the Vanguard: choose any number of cards from your hand to charge"
     }
   ],
   "card.sbl.weapon.counters.distribute": [
@@ -14032,16 +14247,10 @@
       "value": "Discard a card or lose 2 life"
     }
   ],
-  "card.sea.lubricate.cog.choose": [
+  "card.sea.lubricate.cogs.choose": [
     {
       "type": 0,
-      "value": "Untap up to 3 cogs, one at a time"
-    }
-  ],
-  "card.sea.lubricate.cog.next": [
-    {
-      "type": 0,
-      "value": "Untap another cog?"
+      "value": "Untap up to 3 cogs"
     }
   ],
   "card.sea.marlynn.arrow.arsenal": [
@@ -18198,7 +18407,7 @@
       "value": "Put an energy counter on Alluvion Constellas?"
     }
   ],
-  "card.upr.arcane.ally.choose": [
+  "card.upr.arcane.allies.upto": [
     {
       "type": 0,
       "value": "Deal "
@@ -18209,21 +18418,37 @@
     },
     {
       "type": 0,
-      "value": " arcane damage to an ally?"
-    }
-  ],
-  "card.upr.arcane.ally.next": [
-    {
-      "type": 0,
-      "value": "Deal "
+      "value": " arcane damage to up to "
     },
     {
-      "type": 1,
-      "value": "amount"
-    },
-    {
-      "type": 0,
-      "value": " arcane damage to another ally?"
+      "type": 6,
+      "value": "count",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " ally"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " allies"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
     }
   ],
   "card.upr.arcane.hero.choose": [
@@ -18282,20 +18507,6 @@
     {
       "type": 0,
       "value": ": banish an eligible attack?"
-    }
-  ],
-  "card.upr.azvolai.target.next": [
-    {
-      "type": 0,
-      "value": "Azvolai: deal "
-    },
-    {
-      "type": 1,
-      "value": "amount"
-    },
-    {
-      "type": 0,
-      "value": " arcane damage to another target?"
     }
   ],
   "card.upr.azvolai.targets": [
@@ -18430,16 +18641,41 @@
       "value": "Choose a hero"
     }
   ],
-  "card.upr.ice.bottom": [
+  "card.upr.ice.bottom.count": [
     {
       "type": 0,
-      "value": "Put an Ice card on the bottom of your deck"
-    }
-  ],
-  "card.upr.ice.bottom.next": [
+      "value": "Put "
+    },
+    {
+      "type": 6,
+      "value": "count",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 0,
+              "value": "an Ice card"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " Ice cards"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    },
     {
       "type": 0,
-      "value": "Put another Ice card on the bottom of your deck"
+      "value": " on the bottom of your deck"
     }
   ],
   "card.upr.ice.fusion.reveal": [
@@ -18626,16 +18862,10 @@
       "value": "Put a card from hand on the bottom of your deck?"
     }
   ],
-  "card.wtr.hood.shuffle": [
+  "card.wtr.hood.shuffle.choose": [
     {
       "type": 0,
-      "value": "Hope Merchant's Hood: shuffle a card from your hand into your deck?"
-    }
-  ],
-  "card.wtr.hood.shuffle.next": [
-    {
-      "type": 0,
-      "value": "Hope Merchant's Hood: shuffle another card into your deck?"
+      "value": "Hope Merchant's Hood: choose any number of cards from your hand to shuffle into your deck"
     }
   ],
   "card.wtr.katsu.combo.choose": [
@@ -18650,16 +18880,44 @@
       "value": "Katsu: discard a card with cost 0 to search for a combo card?"
     }
   ],
-  "card.wtr.lordwind.card.choose": [
+  "card.wtr.lordwind.cards.choose": [
     {
       "type": 0,
-      "value": "Lord of Wind: choose a combo-line card to shuffle in"
-    }
-  ],
-  "card.wtr.lordwind.card.next": [
+      "value": "Lord of Wind: choose up to "
+    },
+    {
+      "type": 6,
+      "value": "count",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " combo-line card"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " combo-line cards"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    },
     {
       "type": 0,
-      "value": "Lord of Wind: choose another card"
+      "value": " to shuffle in"
     }
   ],
   "card.wtr.lordwind.x": [
@@ -18704,10 +18962,18 @@
       "value": "Dagger or sword weapon"
     }
   ],
-  "card.wtr.remembrance.action.choose": [
+  "card.wtr.remembrance.actions.choose": [
     {
       "type": 0,
-      "value": "Remembrance: choose an action card"
+      "value": "Remembrance: choose up to "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " action cards to shuffle into your deck"
     }
   ],
   "card.wtr.rout.defender.return": [

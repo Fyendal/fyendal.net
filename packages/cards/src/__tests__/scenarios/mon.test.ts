@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { actionCandidates, applyIntent, legalIntents, projectStateFor } from "@fyendal/engine";
-import { scenario } from "../harness.js";
+import { printingId, scenario } from "../harness.js";
 
 const BLUE = "raging onslaught|3";
 const SIX = "raging onslaught|2";
@@ -16,6 +16,10 @@ function leviaSeat(extra: Record<string, unknown> = {}) {
 
 function chaneSeat(extra: Record<string, unknown> = {}) {
   return { hero: "rhinar" as const, heroKey: "chane|0", ...extra };
+}
+
+function opposingGraveyardId(s: ReturnType<typeof scenario>, key: string): string {
+  return String(s.state.players[1]!.graveyard.find((c) => c.cardId === printingId(key))!.instanceId);
 }
 
 describe("MON — Light Illusionist", () => {
@@ -282,10 +286,11 @@ describe("MON — Light and Charge", () => {
       ],
     });
 
-    s.play("v of the vanguard|2")
-      .chooseCard("beaming bravado|2")
-      .chooseCard("light the way|1")
-      .chooseOption("no")
+    s.play("v of the vanguard|2");
+    const handId = (key: string) =>
+      String(s.state.players[0]!.hand.find((c) => c.cardId === printingId(key))!.instanceId);
+    s.chooseMany([handId("beaming bravado|2"), handId("light the way|1")])
+      .settle()
       .blockWith()
       .activate("ser boltyn, breaker of dawn|0", { settle: false });
     s.doRaw({
@@ -632,6 +637,35 @@ describe("MON — Shadow Brute and Blood Debt", () => {
       .settle()
       .expectFinalAttack(6);
   });
+
+  it("Soul Harvest banishes exactly 6 chosen graveyard cards and counts blood debt", () => {
+    const s = scenario({
+      seats: [
+        leviaSeat({
+          resources: 6,
+          hand: ["soul harvest|3"],
+          graveyard: ["ghostly visit|1", "void wraith|1", "snatch|1", "snatch|2", "snatch|3", SIX, SEVEN],
+        }),
+        { hero: "dorinthea" },
+      ],
+    });
+
+    s.play("soul harvest|3", { settle: false });
+    while (s.state.pendingDecision?.chooseHook !== "soul-harvest-banish") s.passPriority();
+    const pd = s.state.pendingDecision!;
+    expect([pd.minimumSelections, pd.maximumSelections]).toEqual([6, 6]);
+    expect(pd.options).toHaveLength(7);
+    const graveyardId = (key: string) =>
+      String(s.state.players[0]!.graveyard.find((c) => c.cardId === printingId(key))!.instanceId);
+    const chosen = ["ghostly visit|1", "snatch|1", "snatch|2", "snatch|3", SIX, SEVEN].map(graveyardId);
+
+    expect(() => s.doRaw({ kind: "choose-many", optionIds: chosen.slice(0, 5) })).toThrow();
+    s.chooseMany(chosen)
+      .settle()
+      .expectZoneSize(0, "banish", 6)
+      .expectInZone(0, "void wraith|1", "graveyard")
+      .expectAttackValue(7);
+  });
 });
 
 describe("MON — Chane and banished-zone play", () => {
@@ -753,9 +787,13 @@ describe("MON — Chane and banished-zone play", () => {
       .settle()
       .expectLife(1, 16)
       .activate("spellbound creepers|0")
-      .play("invert existence|3", { fromZone: "banish" })
-      .chooseCard("snatch|1")
-      .chooseCard("snapback|3")
+      .play("invert existence|3", { fromZone: "banish" });
+    const pd = s.state.pendingDecision!;
+    expect(pd.chooseHook).toBe("invert-existence-banish");
+    expect([pd.minimumSelections, pd.maximumSelections]).toEqual([0, 2]);
+    expect(pd.options).toHaveLength(3);
+    s.chooseMany([opposingGraveyardId(s, "snatch|1"), opposingGraveyardId(s, "snapback|3")])
+      .settle()
       .expectLife(1, 14)
       .expectLog("takes 2 arcane damage")
       .expectInZone(1, "snatch|1", "banish")
@@ -778,8 +816,11 @@ describe("MON — Chane and banished-zone play", () => {
     });
 
     s.play("invert existence|3", { fromZone: "banish" })
-      .chooseCard("snatch|1")
-      .chooseCard("ironrot gauntlet|0")
+      .doRaw({
+        kind: "choose-many",
+        optionIds: [opposingGraveyardId(s, "snatch|1"), opposingGraveyardId(s, "ironrot gauntlet|0")],
+      })
+      .settle()
       .expectLife(1, 20);
   });
 
@@ -792,8 +833,8 @@ describe("MON — Chane and banished-zone play", () => {
     });
 
     s.play("invert existence|3", { fromZone: "banish" })
-      .chooseCard("snatch|1")
-      .chooseOption("done")
+      .chooseMany([opposingGraveyardId(s, "snatch|1")])
+      .settle()
       .expectInZone(1, "snatch|1", "banish")
       .expectInZone(1, "snapback|3", "graveyard");
   });

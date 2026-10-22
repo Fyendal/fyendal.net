@@ -1160,38 +1160,21 @@ for (const [pitch, minimum] of [
         (card) => isAttackAction(ctx, card) && (data(ctx, card).cost ?? 0) >= minimum,
       );
       if (cards.length)
-        ctx.requestCardChoice(
-          "somersault:2",
+        ctx.requestCardChoices(
+          "somersault",
           decisionPrompt(
             "Choose up to 2 attack actions to return when the link resolves",
             "card.ros.attack.return.upto",
-            { values: { count: 2 }, optionMessages: commonOptionMessages("done") },
+            { values: { count: 2 } },
           ),
-          ["done", ...cards.map((card) => card.instanceId)],
+          cards.map((card) => card.instanceId),
+          0,
+          2,
         );
     },
-    onChoose(ctx, hook, option) {
-      const match = /^somersault:(\d+)$/.exec(hook);
-      if (!match || option === "done") return;
-      const id = Number(option);
-      ctx.setCardState(id, "returnToHandAtLinkResolution", 1);
-      const remaining = Number(match[1]) - 1;
-      if (remaining <= 0 || !ctx.link) return;
-      const cards = [ctx.link.attackingCard, ...ctx.link.defendingCards].filter(
-        (card) =>
-          card.instanceId !== id &&
-          isAttackAction(ctx, card) &&
-          (data(ctx, card).cost ?? 0) >= minimum &&
-          !card.scriptState?.returnToHandAtLinkResolution,
-      );
-      if (cards.length)
-        ctx.requestCardChoice(
-          `somersault:${remaining}`,
-          decisionPrompt("Choose another attack action, or finish", "card.ros.attack.return.next", {
-            optionMessages: commonOptionMessages("done"),
-          }),
-          ["done", ...cards.map((card) => card.instanceId)],
-        );
+    onChooseMany(ctx, hook, options) {
+      if (hook !== "somersault") return;
+      for (const option of options) ctx.setCardState(Number(option), "returnToHandAtLinkResolution", 1);
     },
   };
 }

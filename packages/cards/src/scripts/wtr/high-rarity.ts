@@ -170,47 +170,30 @@ const lordOfWind: CardScript = {
     if (hook === "lord-wind-x" && option.startsWith("x:")) {
       const amount = Number(option.slice(2));
       ctx.setState("lordWindX", amount);
-      ctx.setState("lordWindRemaining", amount);
       const eligible = ctx
         .player(ctx.seat)
         .graveyard.filter((card) =>
           namedAny(ctx, card, ["surging strike", "whelming gustwave", "mugenshi: release"]),
         );
       if (amount > 0 && eligible.length > 0) {
-        ctx.requestCardChoice(
+        ctx.requestCardChoices(
           "lord-wind-card",
-          decisionPrompt("Lord of Wind: choose a combo-line card to shuffle in", "card.wtr.lordwind.card.choose", {
-            optionMessages: commonOptionMessages("done"),
-          }),
-          ["done", ...eligible.map((card) => card.instanceId)],
+          decisionPrompt(
+            `Lord of Wind: choose up to ${amount} combo-line card(s) to shuffle in`,
+            "card.wtr.lordwind.cards.choose",
+            { values: { count: amount } },
+          ),
+          eligible.map((card) => card.instanceId),
+          0,
+          amount,
         );
       }
-      return;
     }
+  },
+  onChooseMany(ctx, hook, options) {
     if (hook !== "lord-wind-card") return;
-    if (option === "done") {
-      ctx.shuffleDeck();
-      return;
-    }
-    if (!ctx.putOnDeckBottom(Number(option))) return;
-    const remaining = ctx.getState("lordWindRemaining") - 1;
-    ctx.setState("lordWindRemaining", remaining);
-    const eligible = ctx
-      .player(ctx.seat)
-      .graveyard.filter((card) =>
-        namedAny(ctx, card, ["surging strike", "whelming gustwave", "mugenshi: release"]),
-      );
-    if (remaining > 0 && eligible.length > 0) {
-      ctx.requestCardChoice(
-        "lord-wind-card",
-        decisionPrompt("Lord of Wind: choose another card", "card.wtr.lordwind.card.next", {
-          optionMessages: commonOptionMessages("done"),
-        }),
-        ["done", ...eligible.map((card) => card.instanceId)],
-      );
-    } else {
-      ctx.shuffleDeck();
-    }
+    for (const option of options) ctx.putOnDeckBottom(Number(option));
+    ctx.shuffleDeck();
   },
 };
 
@@ -223,22 +206,6 @@ const mugenshiRelease = comboAttack("whelming gustwave", 1, (ctx) => {
 const hurricaneTechnique = comboAttack("rising knee thrust", 1, (ctx) => {
   ctx.returnSelfToHand();
 });
-
-function requestRemembrance(ctx: ScriptCtx): void {
-  const remaining = ctx.getState("remembranceRemaining");
-  const actions = ctx.player(ctx.seat).graveyard.filter((card) => ctx.hasCardType(card, "action"));
-  if (remaining > 0 && actions.length > 0) {
-    ctx.requestCardChoice(
-      "remembrance-card",
-      decisionPrompt("Remembrance: choose an action card", "card.wtr.remembrance.action.choose", {
-        optionMessages: commonOptionMessages("done"),
-      }),
-      ["done", ...actions.map((card) => card.instanceId)],
-    );
-  } else {
-    ctx.shuffleDeck();
-  }
-}
 
 export const wtrHighRarity: Record<string, CardScript> = {
   "heart of fyendal|3": heartOfFyendal,
@@ -535,18 +502,27 @@ export const wtrHighRarity: Record<string, CardScript> = {
   },
   "remembrance|2": {
     onPlay(ctx) {
-      ctx.setState("remembranceRemaining", 3);
-      requestRemembrance(ctx);
-    },
-    onChoose(ctx, hook, option) {
-      if (hook !== "remembrance-card") return;
-      if (option === "done") {
+      const actions = ctx.player(ctx.seat).graveyard.filter((card) => ctx.hasCardType(card, "action"));
+      if (!actions.length) {
         ctx.shuffleDeck();
         return;
       }
-      if (!ctx.putOnDeckBottom(Number(option))) return;
-      ctx.setState("remembranceRemaining", ctx.getState("remembranceRemaining") - 1);
-      requestRemembrance(ctx);
+      ctx.requestCardChoices(
+        "remembrance-card",
+        decisionPrompt(
+          "Remembrance: choose up to 3 action cards to shuffle into your deck",
+          "card.wtr.remembrance.actions.choose",
+          { values: { count: 3 } },
+        ),
+        actions.map((card) => card.instanceId),
+        0,
+        3,
+      );
+    },
+    onChooseMany(ctx, hook, options) {
+      if (hook !== "remembrance-card") return;
+      for (const option of options) ctx.putOnDeckBottom(Number(option));
+      ctx.shuffleDeck();
     },
     graveyardReplacement: "banish",
   },

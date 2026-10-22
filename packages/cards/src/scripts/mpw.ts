@@ -491,52 +491,28 @@ export const mpw: Record<string, CardScript> = {
     onPlay(ctx) {
       const reactions = ctx.player(ctx.seat).graveyard.filter((card) => data(ctx, card).cardType === "attack-reaction");
       if (reactions.length)
-        ctx.requestCardChoice(
+        ctx.requestCardChoices(
           "lessons-learned",
-          decisionPrompt("Shuffle an attack reaction into your deck?", "card.mpw.reaction.shuffle", {
-            optionMessages: commonOptionMessages("done"),
-          }),
-          ["done", ...reactions.map((card) => card.instanceId)],
+          decisionPrompt(
+            "Choose up to 3 attack reactions with different names to shuffle into your deck",
+            "card.mpw.reaction.shuffle.choose",
+          ),
+          reactions.map((card) => card.instanceId),
+          0,
+          3,
+          undefined,
+          undefined,
+          undefined,
+          true,
         );
     },
-    onChoose(ctx, hook, option) {
+    onChooseMany(ctx, hook, options) {
       if (hook !== "lessons-learned") return;
-      const count = ctx.getState("lessonsCount");
-      if (option === "done") {
-        if (count > 0) ctx.shuffleDeck();
-        return;
-      }
-      const chosen = ctx.player(ctx.seat).graveyard.find((card) => card.instanceId === Number(option));
-      if (!chosen || !ctx.putOnDeckBottom(chosen.instanceId)) return;
-      ctx.setState("lessonsCount", count + 1);
-      ctx.setState(`lessonsCard:${count}`, chosen.instanceId);
-      if (count >= 2) {
-        ctx.shuffleDeck();
-        return;
-      }
-      const chosenNames = new Set(
-        Array.from({ length: count + 1 }, (_, index) => {
-          const id = ctx.getState(`lessonsCard:${index}`);
-          const card = ctx.player(ctx.seat).deck.find((candidate) => candidate.instanceId === id);
-          return card ? ctx.cardNames(card) : [];
-        }).flat(),
-      );
-      const remaining = ctx
-        .player(ctx.seat)
-        .graveyard.filter(
-          (card) =>
-            data(ctx, card).cardType === "attack-reaction" &&
-            !ctx.cardNames(card).some((name) => chosenNames.has(name)),
-        );
-      if (remaining.length)
-        ctx.requestCardChoice(
-          "lessons-learned",
-          decisionPrompt("Shuffle another differently named attack reaction?", "card.mpw.reaction.shuffle.next", {
-            optionMessages: commonOptionMessages("done"),
-          }),
-          ["done", ...remaining.map((card) => card.instanceId)],
-        );
-      else ctx.shuffleDeck();
+      const chosen = new Set(options);
+      const cards = ctx.player(ctx.seat).graveyard.filter((card) => chosen.has(String(card.instanceId)));
+      let moved = false;
+      for (const card of cards) if (ctx.putOnDeckBottom(card.instanceId)) moved = true;
+      if (moved) ctx.shuffleDeck();
     },
   },
   "stand tall|2": { modifyDefense: (ctx) => 2 * Number(ctx.getFlag("link", "reactionCount")) },

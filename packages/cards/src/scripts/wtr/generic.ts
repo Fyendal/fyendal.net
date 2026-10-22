@@ -248,61 +248,46 @@ const hopeMerchantsHoodScript = (): CardScript => ({
     timing: "instant",
     destroySelfCost: true,
     onActivate(ctx) {
-      const p = ctx.player(ctx.seat);
-      if (p.hand.length === 0) return;
-      ctx.requestCardChoice(
+      const hand = ctx.player(ctx.seat).hand;
+      if (hand.length === 0) return;
+      ctx.requestCardChoices(
         "hood-shuffle",
         decisionPrompt(
-          "Hope Merchant's Hood: shuffle a card from your hand into your deck? (or done)",
-          "card.wtr.hood.shuffle",
-          { optionMessages: commonOptionMessages("done") },
+          "Hope Merchant's Hood: choose any number of cards from your hand to shuffle into your deck",
+          "card.wtr.hood.shuffle.choose",
         ),
-        [...p.hand.map((c) => c.instanceId), "done"],
+        hand.map((c) => c.instanceId),
+        0,
+        hand.length,
       );
     },
   },
-  onChoose(ctx, hook, option) {
+  onChooseMany(ctx, hook, options) {
     if (hook !== "hood-shuffle") return;
-    const p = ctx.player(ctx.seat);
-    if (option !== "done") {
-      const idx = p.hand.findIndex((c) => c.instanceId === Number(option));
-      if (idx >= 0) {
-        const card = p.hand[idx]!;
-        ctx.putOnDeckBottom(card.instanceId);
-        ctx.setState("hoodCount", ctx.getState("hoodCount") + 1);
-        ctx.logPrivate(
-          ctx.seat,
-          localizedLog(
-            `${ctx.data.name}: put ${ctx.cardData(card.cardId).name} into the deck`,
-            "card.log.wtr.hood.card.private",
-            {
-              card: { kind: "card", cardId: ctx.self.cardId },
-              result: { kind: "card", cardId: card.cardId },
-            },
-            { kind: "card-moved", cardId: card.cardId, ownerSeat: ctx.seat, from: "hand", to: "deck" },
-          ),
-          localizedLog(
-            `${ctx.data.name}: put a card into the deck`,
-            "card.log.wtr.hood.card.public",
-            { card: { kind: "card", cardId: ctx.self.cardId } },
-            { kind: "card-moved", ownerSeat: ctx.seat, from: "hand", to: "deck" },
-          ),
-        );
-      }
-      if (p.hand.length > 0) {
-        ctx.requestCardChoice(
-          "hood-shuffle",
-          decisionPrompt(
-            "Hope Merchant's Hood: shuffle another card into your deck? (or done)",
-            "card.wtr.hood.shuffle.next",
-            { optionMessages: commonOptionMessages("done") },
-          ),
-          [...p.hand.map((c) => c.instanceId), "done"],
-        );
-        return;
-      }
+    let n = 0;
+    for (const option of options) {
+      const card = ctx.player(ctx.seat).hand.find((c) => c.instanceId === Number(option));
+      if (!card || !ctx.putOnDeckBottom(card.instanceId)) continue;
+      n++;
+      ctx.logPrivate(
+        ctx.seat,
+        localizedLog(
+          `${ctx.data.name}: put ${ctx.cardData(card.cardId).name} into the deck`,
+          "card.log.wtr.hood.card.private",
+          {
+            card: { kind: "card", cardId: ctx.self.cardId },
+            result: { kind: "card", cardId: card.cardId },
+          },
+          { kind: "card-moved", cardId: card.cardId, ownerSeat: ctx.seat, from: "hand", to: "deck" },
+        ),
+        localizedLog(
+          `${ctx.data.name}: put a card into the deck`,
+          "card.log.wtr.hood.card.public",
+          { card: { kind: "card", cardId: ctx.self.cardId } },
+          { kind: "card-moved", ownerSeat: ctx.seat, from: "hand", to: "deck" },
+        ),
+      );
     }
-    const n = ctx.getState("hoodCount");
     if (n > 0) {
       ctx.shuffleDeck();
       ctx.drawCards(ctx.seat, n);

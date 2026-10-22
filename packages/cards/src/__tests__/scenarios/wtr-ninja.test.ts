@@ -252,6 +252,40 @@ describe("WTR Ninja — combo attacks", () => {
   });
 });
 
+describe("WTR Ninja — Lord of Wind", () => {
+  it("Lord of Wind shuffles up to X chosen combo-line cards from the graveyard", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "dorinthea",
+          resources: 2,
+          hand: ["WTR083", "lord of wind|3"],
+          deck: ["raging onslaught|2"],
+          graveyard: ["surging strike|1", "whelming gustwave|1", "snatch|1"],
+        },
+        { hero: "rhinar", hand: [] },
+      ],
+    });
+    g.play("WTR083").blockWith().settle();
+    g.state.players[0]!.actionPoints = 1;
+    g.play("lord of wind|3", { settle: false });
+    while (g.state.pendingDecision?.chooseHook !== "lord-wind-x") g.passPriority();
+    g.chooseOption("X = 1");
+    const pd = g.state.pendingDecision!;
+    expect(pd.chooseHook).toBe("lord-wind-card");
+    expect([pd.minimumSelections, pd.maximumSelections]).toEqual([0, 1]);
+    expect(pd.options).toHaveLength(2);
+    const gustwave = g.state.players[0]!.graveyard.find((c) => c.cardId === printingId("whelming gustwave|1"))!;
+    g.chooseMany([String(gustwave.instanceId)])
+      .settle()
+      .expectInZone(0, "whelming gustwave|1", "deck")
+      .expectInZone(0, "surging strike|1", "graveyard")
+      .expectInZone(0, "snatch|1", "graveyard")
+      .expectZoneSize(0, "deck", 2)
+      .expectAttackValue(3);
+  });
+});
+
 describe("WTR Ninja — Flic Flak", () => {
   it("Flic Flak gives +2 defense to the next combo card defended later this turn", () => {
     const g = scenario({

@@ -186,7 +186,7 @@ describe("MPG — import and Guardian pressure", () => {
       ].includes(functionalKeyOf(cardData[card.cardId]!)))
       .map((card) => String(card.instanceId));
     expect(selected).toHaveLength(2);
-    g.doRaw({ kind: "choose-many", optionIds: selected })
+    g.chooseMany(selected)
       .settle()
       .expectFinalDefense(7)
       .expectHandSize(0, 2)
@@ -210,11 +210,20 @@ describe("MPG — import and Guardian pressure", () => {
     });
 
     g.play("head jab|1").blockWith("call for backup|1").settle();
-    expect(g.state.pendingDecision).toMatchObject({ player: 0, chooseHook: "backup-first" });
-    g.chooseCard("head jab|1");
-    const raging = g.state.players[0]!.graveyard.find((card) => cardData[card.cardId]?.name === "Raging Onslaught")!;
-    expect(g.state.pendingDecision?.options).toEqual([String(raging.instanceId)]);
-    g.chooseCard("raging onslaught|1");
+    expect(g.state.pendingDecision).toMatchObject({
+      player: 0,
+      chooseHook: "backup-pair",
+      minimumSelections: 2,
+      maximumSelections: 2,
+      distinctCardNames: true,
+    });
+    const graveyardId = (name: string) =>
+      String(g.state.players[0]!.graveyard.find((card) => cardData[card.cardId]?.name === name)!.instanceId);
+    const headJabIds = g.state.players[0]!.graveyard
+      .filter((card) => cardData[card.cardId]?.name === "Head Jab")
+      .map((card) => String(card.instanceId));
+    expect(() => g.doRaw({ kind: "choose-many", optionIds: headJabIds })).toThrow(/different names/);
+    g.chooseMany([graveyardId("Head Jab"), graveyardId("Raging Onslaught")]);
     expect(g.state.pendingDecision).toMatchObject({ player: 1 });
     g.chooseCard("raging onslaught|1");
 
@@ -235,7 +244,7 @@ describe("MPG — import and Guardian pressure", () => {
     });
 
     g.play("head jab|1").blockWith("call for backup|1").settle();
-    expect(g.state.pendingDecision?.chooseHook).not.toBe("backup-first");
+    expect(g.state.pendingDecision?.chooseHook).not.toBe("backup-pair");
     expect(g.state.players[0]!.banish).toHaveLength(0);
     expect(g.state.players[0]!.graveyard).toHaveLength(2);
   });

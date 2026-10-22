@@ -480,12 +480,12 @@ export const dtdHighRarity: Record<string, CardScript> = {
     additionalCost(ctx) {
       const soul = ctx.player(ctx.seat).soul;
       if (soul.length)
-        ctx.requestCardChoice(
+        ctx.requestCardChoices(
           "lance-soul",
-          decisionPrompt("Banish up to 3 cards from soul", "card.dtd.soul.banish.three", {
-            optionMessages: commonOptionMessages("done"),
-          }),
-          ["done", ...soul.map((card) => card.instanceId)],
+          decisionPrompt("Banish up to 3 cards from soul", "card.dtd.soul.banish.three"),
+          soul.map((card) => card.instanceId),
+          0,
+          3,
         );
     },
     onPlay(ctx) {
@@ -496,36 +496,26 @@ export const dtdHighRarity: Record<string, CardScript> = {
       if (ctx.getState("lance-mode:go-again") > 0)
         ctx.addModifier({ scope: "chain-link", onHitGoAgain: true, appliesToSubtype: "light" });
     },
+    onChooseMany(ctx, hook, options) {
+      if (hook !== "lance-soul") return;
+      let count = 0;
+      for (const option of options) if (ctx.banish(Number(option))) count++;
+      ctx.setState("lance-count", count);
+      if (count > 0)
+        ctx.requestChoice(
+          "lance-mode",
+          decisionPrompt("Choose a Lumina Lance mode", "card.dtd.lance.mode", {
+            optionMessages: {
+              power: decisionMessage("card.dtd.lance.option.power"),
+              draw: decisionMessage("card.dtd.lance.option.draw"),
+              "go-again": decisionMessage("card.dtd.lance.option.goagain"),
+            },
+          }),
+          ["power", "draw", "go-again"],
+        );
+    },
     onChoose(ctx, hook, option) {
-      if (hook === "lance-soul") {
-        if (option !== "done" && ctx.banish(Number(option))) {
-          const count = ctx.getState("lance-count") + 1;
-          ctx.setState("lance-count", count);
-          const soul = ctx.player(ctx.seat).soul;
-          if (count < 3 && soul.length) {
-            ctx.requestCardChoice(
-              "lance-soul",
-              decisionPrompt("Banish another soul card?", "card.dtd.soul.banish.next", {
-                optionMessages: commonOptionMessages("done"),
-              }),
-              ["done", ...soul.map((card) => card.instanceId)],
-            );
-            return;
-          }
-        }
-        if (ctx.getState("lance-count") > 0)
-          ctx.requestChoice(
-            "lance-mode",
-            decisionPrompt("Choose a Lumina Lance mode", "card.dtd.lance.mode", {
-              optionMessages: {
-                power: decisionMessage("card.dtd.lance.option.power"),
-                draw: decisionMessage("card.dtd.lance.option.draw"),
-                "go-again": decisionMessage("card.dtd.lance.option.goagain"),
-              },
-            }),
-            ["power", "draw", "go-again"],
-          );
-      } else if (hook === "lance-mode") {
+      if (hook === "lance-mode") {
         ctx.setState(`lance-mode:${option}`, 1);
         const used = ctx.getState("lance-modes") + 1;
         ctx.setState("lance-modes", used);

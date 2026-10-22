@@ -579,33 +579,25 @@ export const hnt: Record<string, CardScript> = {
       modifyCost: (ctx, base) => base - draconicLinks(ctx),
       canActivate: (ctx) => availableDraconicDaggers(ctx).length > 0,
       onActivate(ctx) {
-        const ids = availableDraconicDaggers(ctx);
-        ctx.requestCardChoice(
-          "cindra-equip:0",
+        ctx.requestCardChoices(
+          "cindra-equip",
           decisionPrompt("Equip up to 2 Draconic daggers from your graveyard", "card.hnt.draconicdagger.equip.upto", {
             values: { count: 2 },
-            optionMessages: commonOptionMessages("pass"),
           }),
-          ["pass", ...ids],
+          availableDraconicDaggers(ctx),
+          0,
+          2,
         );
       },
     },
-    onChoose(ctx, hook, option) {
-      if (!hook.startsWith("cindra-equip:") || option === "pass") return;
-      const count = Number(hook.slice("cindra-equip:".length));
-      const id = Number(option);
-      const card = ctx.player(ctx.seat).graveyard.find((candidate) => candidate.instanceId === id);
-      if (!card || !isDagger(ctx, card) || !isDraconic(ctx, card)) return;
-      if (!ctx.equipFromGraveyard(id) || count >= 1) return;
-      const ids = availableDraconicDaggers(ctx);
-      if (ids.length)
-        ctx.requestCardChoice(
-          "cindra-equip:1",
-          decisionPrompt("Equip one more Draconic dagger?", "card.hnt.draconicdagger.equip.next", {
-            optionMessages: commonOptionMessages("pass"),
-          }),
-          ["pass", ...ids],
-        );
+    onChooseMany(ctx, hook, options) {
+      if (hook !== "cindra-equip") return;
+      const chosen = new Set(options);
+      const daggers = ctx
+        .player(ctx.seat)
+        .graveyard.filter((card) => chosen.has(String(card.instanceId)) && isDagger(ctx, card) && isDraconic(ctx, card))
+        .map((card) => card.instanceId);
+      for (const id of daggers) if (!ctx.equipFromGraveyard(id)) return;
     },
   },
   "kunai of retribution|0": {
@@ -2063,41 +2055,25 @@ Object.assign(hnt, {
       },
       label: "Discard: turn X banished cards face-down",
       onActivate(ctx) {
-        const remaining = ctx.getState("warCryThemisX");
-        if (remaining <= 0) return;
         const targets = ctx.state.players.flatMap((player) => player.banish.filter((card) => !card.faceDown));
-        if (targets.length) {
-          ctx.requestCardChoice(
+        const n = Math.min(ctx.getState("warCryThemisX"), targets.length);
+        if (n > 0)
+          ctx.requestCardChoices(
             "war-cry-themis-target",
             decisionPrompt(
-              `Choose banished card 1 of ${remaining} to turn face-down`,
-              "card.hnt.banished.facedown.first",
-              { values: { total: remaining } },
+              `Choose ${n} banished ${n === 1 ? "card" : "cards"} to turn face-down`,
+              "card.hnt.banished.facedown.choose",
+              { values: { count: n } },
             ),
             targets.map((card) => card.instanceId),
+            n,
+            n,
           );
-        }
       },
     },
-    onChoose(ctx, hook, option) {
+    onChooseMany(ctx, hook, options) {
       if (hook !== "war-cry-themis-target") return;
-      const chosen = ctx.state.players
-        .flatMap((player) => player.banish)
-        .find((card) => card.instanceId === Number(option) && !card.faceDown);
-      if (!chosen || !ctx.setCardFaceDown(chosen.instanceId, true)) return;
-      const remaining = ctx.getState("warCryThemisX") - 1;
-      ctx.setState("warCryThemisX", remaining);
-      if (remaining <= 0) return;
-      const targets = ctx.state.players.flatMap((player) => player.banish.filter((card) => !card.faceDown));
-      if (targets.length) {
-        ctx.requestCardChoice(
-          "war-cry-themis-target",
-          decisionPrompt(`Choose another banished card (${remaining} remaining)`, "card.hnt.banished.facedown.next", {
-            values: { remaining },
-          }),
-          targets.map((card) => card.instanceId),
-        );
-      }
+      for (const option of options) ctx.setCardFaceDown(Number(option), true);
     },
   },
   "war cry of bellona|2": {

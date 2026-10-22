@@ -1287,16 +1287,44 @@
       "value": "¿Poner un contador de vapor en Symbiosis Shot?"
     }
   ],
-  "card.ajv.channel.ice.choose": [
+  "card.ajv.channel.ice.many": [
     {
       "type": 0,
-      "value": "Elige una carta de Hielo de tu zona de pitch para Channel Ice, o destruye esta carta"
-    }
-  ],
-  "card.ajv.channel.ice.next": [
+      "value": "Elige "
+    },
+    {
+      "type": 6,
+      "value": "count",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " carta de Hielo"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " cartas de Hielo"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    },
     {
       "type": 0,
-      "value": "Elige otra carta de Hielo para Channel Ice, o destruye esta carta"
+      "value": " de tu zona de pitch para Channel Ice, o menos para destruir esta carta"
     }
   ],
   "card.ajv.equipment.counter": [
@@ -1445,16 +1473,10 @@
       "value": "¿Poner un zombi en tu cementerio?"
     }
   ],
-  "card.amg.revere.shuffle": [
+  "card.amg.revere.shuffle.choose": [
     {
       "type": 0,
-      "value": "¿Barajar en tu mazo una carta de acción de Mecanólogo de tu zona de destierro?"
-    }
-  ],
-  "card.amg.revere.shuffle.next": [
-    {
-      "type": 0,
-      "value": "¿Barajar otra carta de acción de Mecanólogo con un nombre distinto?"
+      "value": "Elige hasta 3 cartas de acción de Mecanólogo con nombres distintos para barajarlas en tu mazo"
     }
   ],
   "card.amo.mortimer.disease.choose": [
@@ -1613,16 +1635,41 @@
       "value": "¿Devolver un aura que controles a la mano de su propietario?"
     }
   ],
-  "card.aps.card.discard.first": [
+  "card.aps.card.discard.choose": [
     {
       "type": 0,
-      "value": "Descarta una carta"
-    }
-  ],
-  "card.aps.card.discard.next": [
+      "value": "Elige "
+    },
+    {
+      "type": 6,
+      "value": "count",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 0,
+              "value": "una carta"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " cartas"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    },
     {
       "type": 0,
-      "value": "Descarta otra carta"
+      "value": " para descartar"
     }
   ],
   "card.aps.crowd.cheer": [
@@ -2737,10 +2784,44 @@
       "value": "Shiyana: elige un héroe para copiar"
     }
   ],
-  "card.cru.smash.item.destroy": [
+  "card.cru.smash.items.destroy": [
     {
       "type": 0,
-      "value": "Argh... Smash!: ¿destruir un artículo?"
+      "value": "Argh... Smash!: elige hasta "
+    },
+    {
+      "type": 6,
+      "value": "count",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " artículo"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " artículos"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    },
+    {
+      "type": 0,
+      "value": " para destruir"
     }
   ],
   "card.cru.tripwire.pay": [
@@ -2989,12 +3070,6 @@
       "value": "¿Pagar 1 de vida para que el próximo Runechant no pueda evitarse?"
     }
   ],
-  "card.dtd.soul.banish.next": [
-    {
-      "type": 0,
-      "value": "¿Desterrar otra carta del alma?"
-    }
-  ],
   "card.dtd.soul.banish.shields": [
     {
       "type": 0,
@@ -3133,16 +3208,41 @@
       "value": "Ninguna carta enseñada puede defender"
     }
   ],
-  "card.dyn.harpoon.reveal.choose": [
+  "card.dyn.harpoon.reveal.cards.choose": [
     {
       "type": 0,
-      "value": "Elige una carta para enseñar"
-    }
-  ],
-  "card.dyn.harpoon.reveal.next": [
+      "value": "Elige "
+    },
+    {
+      "type": 6,
+      "value": "count",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 0,
+              "value": "una carta"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " cartas"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    },
     {
       "type": 0,
-      "value": "Elige otra carta para enseñar"
+      "value": " para enseñar"
     }
   ],
   "card.dyn.hornet.target.choose": [
@@ -5059,16 +5159,44 @@
       "value": "Elige un equipo que deba defender"
     }
   ],
-  "card.evo.equipment.offer": [
+  "card.evo.equipment.offer.many": [
     {
       "type": 0,
-      "value": "Elige un equipo para ofrecer"
-    }
-  ],
-  "card.evo.equipment.offer.next": [
+      "value": "Elige "
+    },
+    {
+      "type": 6,
+      "value": "count",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " equipo"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " equipos"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    },
     {
       "type": 0,
-      "value": "Elige otro equipo para ofrecer"
+      "value": " para ofrecer"
     }
   ],
   "card.evo.equipment.zone.choose": [
@@ -5133,16 +5261,44 @@
       "value": " de defensa?"
     }
   ],
-  "card.evo.graveyard.item.banish": [
+  "card.evo.graveyard.items.banish": [
     {
       "type": 0,
-      "value": "Destierra un artículo de tu cementerio"
-    }
-  ],
-  "card.evo.graveyard.item.banish.next": [
+      "value": "Destierra "
+    },
+    {
+      "type": 6,
+      "value": "count",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " artículo"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " artículos"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    },
     {
       "type": 0,
-      "value": "Destierra otro artículo de tu cementerio"
+      "value": " de tu cementerio"
     }
   ],
   "card.evo.hand.card.banish.draw": [
@@ -5163,22 +5319,40 @@
       "value": "¿Poner un Hyper Driver en la arena?"
     }
   ],
-  "card.evo.hyperdriver.destroy": [
+  "card.evo.hyperdrivers.destroy": [
     {
       "type": 0,
-      "value": "Destruye un Hyper Driver"
-    }
-  ],
-  "card.evo.hyperdriver.destroy.next": [
+      "value": "Destruye "
+    },
     {
-      "type": 0,
-      "value": "Destruye otro Hyper Driver"
-    }
-  ],
-  "card.evo.hyperdriver.transform.next": [
-    {
-      "type": 0,
-      "value": "¿Elegir otro Hyper Driver?"
+      "type": 6,
+      "value": "count",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " Hyper Driver"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " Hyper Drivers"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
     }
   ],
   "card.evo.hyperdrivers.transform": [
@@ -5193,18 +5367,6 @@
       "value": "Pon un artículo en la arena"
     }
   ],
-  "card.evo.item.reset": [
-    {
-      "type": 0,
-      "value": "Elige un artículo para reiniciar"
-    }
-  ],
-  "card.evo.item.reset.next": [
-    {
-      "type": 0,
-      "value": "Elige otro artículo para reiniciar"
-    }
-  ],
   "card.evo.item.small.arena": [
     {
       "type": 0,
@@ -5215,6 +5377,46 @@
     {
       "type": 0,
       "value": "¿Poner un artículo de coste 0 o 1 en la arena?"
+    }
+  ],
+  "card.evo.items.reset": [
+    {
+      "type": 0,
+      "value": "Elige "
+    },
+    {
+      "type": 6,
+      "value": "count",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " artículo"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " artículos"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    },
+    {
+      "type": 0,
+      "value": " para reiniciar"
     }
   ],
   "card.evo.maintenance.choose": [
@@ -5247,22 +5449,30 @@
       "value": "Quita todos los contadores de vapor de un permanente"
     }
   ],
-  "card.evo.permanent.steam.remove.next": [
-    {
-      "type": 0,
-      "value": "¿Quitar el vapor de otro permanente?"
-    }
-  ],
   "card.evo.permanent.steam.remove.uptox": [
     {
       "type": 0,
       "value": "Quita contadores de vapor de hasta X permanentes"
     }
   ],
-  "card.evo.red.pitch.first": [
+  "card.evo.red.pitch.choose": [
     {
       "type": 0,
-      "value": "¿Usar como pitch la primera de "
+      "value": "Elige "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " cartas rojas para usar como pitch"
+    }
+  ],
+  "card.evo.red.pitch.optional": [
+    {
+      "type": 0,
+      "value": "¿Usar como pitch "
     },
     {
       "type": 1,
@@ -5271,12 +5481,6 @@
     {
       "type": 0,
       "value": " cartas rojas?"
-    }
-  ],
-  "card.evo.red.pitch.second": [
-    {
-      "type": 0,
-      "value": "¿Usar como pitch la segunda carta roja?"
     }
   ],
   "card.evo.revealed.card.defend": [
@@ -5297,10 +5501,44 @@
       "value": "¿Desechar un artículo o equipo de tu cementerio?"
     }
   ],
-  "card.evo.scrap.choose.next": [
+  "card.evo.scrap.choose.many": [
     {
       "type": 0,
-      "value": "¿Desechar otro artículo o equipo de tu cementerio?"
+      "value": "Elige hasta "
+    },
+    {
+      "type": 6,
+      "value": "count",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " artículo o equipo"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " artículos o equipos"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    },
+    {
+      "type": 0,
+      "value": " de tu cementerio para desechar"
     }
   ],
   "card.evo.soul.charge": [
@@ -5309,10 +5547,18 @@
       "value": "¿Cargar el alma de tu héroe?"
     }
   ],
-  "card.evo.ticktock.item.destroy": [
+  "card.evo.ticktock.items.destroy": [
     {
       "type": 0,
-      "value": "¿Destruir otro artículo?"
+      "value": "Elige hasta "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " otros artículos para destruir"
     }
   ],
   "card.evo.weapon.attackagain.choose": [
@@ -5667,16 +5913,47 @@
       "value": ": elige una carta para descartar"
     }
   ],
-  "card.evr.discard.next": [
-    {
-      "type": 0,
-      "value": "Elige otra carta para descartar"
-    }
-  ],
   "card.evr.dreadbore.arrow.load": [
     {
       "type": 0,
       "value": "¿Poner una flecha de tu mano boca arriba en el arsenal?"
+    }
+  ],
+  "card.evr.echoes.discard.choose": [
+    {
+      "type": 0,
+      "value": "Elige "
+    },
+    {
+      "type": 6,
+      "value": "count",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 0,
+              "value": "una carta"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " cartas"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    },
+    {
+      "type": 0,
+      "value": " para descartar"
     }
   ],
   "card.evr.echoes.hero.choose": [
@@ -5761,6 +6038,12 @@
       "value": " o menos?"
     }
   ],
+  "card.evr.knick.money.choose": [
+    {
+      "type": 0,
+      "value": "Elige cualquier número de Copper, Silver y Gold para destruir"
+    }
+  ],
   "card.evr.knick.search": [
     {
       "type": 0,
@@ -5771,18 +6054,6 @@
     {
       "type": 0,
       "value": "¿Destruir Mask of the Pouncing Lynx para buscar en tu mazo?"
-    }
-  ],
-  "card.evr.money.destroy": [
-    {
-      "type": 0,
-      "value": "¿Destruir fichas de dinero?"
-    }
-  ],
-  "card.evr.money.destroy.next": [
-    {
-      "type": 0,
-      "value": "¿Destruir otra ficha de dinero?"
     }
   ],
   "card.evr.nonattack.bottom": [
@@ -5881,32 +6152,44 @@
       "value": "Pon boca arriba una acción de no-ataque de tu arsenal"
     }
   ],
-  "card.hnt.banished.facedown.first": [
+  "card.hnt.banished.facedown.choose": [
     {
       "type": 0,
-      "value": "Elige la carta desterrada 1 de "
+      "value": "Elige "
     },
     {
-      "type": 1,
-      "value": "total"
+      "type": 6,
+      "value": "count",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " carta desterrada para ponerla"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " cartas desterradas para ponerlas"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
     },
     {
       "type": 0,
-      "value": " para ponerla boca abajo"
-    }
-  ],
-  "card.hnt.banished.facedown.next": [
-    {
-      "type": 0,
-      "value": "Elige otra carta desterrada (quedan "
-    },
-    {
-      "type": 1,
-      "value": "remaining"
-    },
-    {
-      "type": 0,
-      "value": ")"
+      "value": " boca abajo"
     }
   ],
   "card.hnt.card.choose": [
@@ -5979,12 +6262,6 @@
     {
       "type": 0,
       "value": "Dragonscaler Flight Path: elige un ataque Dracónico"
-    }
-  ],
-  "card.hnt.draconicdagger.equip.next": [
-    {
-      "type": 0,
-      "value": "¿Equipar otra daga Dracónica?"
     }
   ],
   "card.hnt.draconicdagger.equip.upto": [
@@ -6351,10 +6628,10 @@
       "value": " o menos"
     }
   ],
-  "card.hvy.six.banish": [
+  "card.hvy.six.banish.choose": [
     {
       "type": 0,
-      "value": "¿Desterrar una carta de "
+      "value": "Destierra cualquier número de cartas con "
     },
     {
       "type": 1,
@@ -6362,13 +6639,7 @@
     },
     {
       "type": 0,
-      "value": " de poder?"
-    }
-  ],
-  "card.hvy.six.banish.next": [
-    {
-      "type": 0,
-      "value": "¿Desterrar otra?"
+      "value": " o más de poder"
     }
   ],
   "card.hvy.vigor.pay": [
@@ -11314,52 +11585,6 @@
       "value": " cartas del cementerio para desterrar"
     }
   ],
-  "card.mon.graveyard.cards.banish.more": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": ": elige "
-    },
-    {
-      "type": 1,
-      "value": "count"
-    },
-    {
-      "type": 0,
-      "value": " "
-    },
-    {
-      "type": 6,
-      "value": "count",
-      "options": {
-        "one": {
-          "value": [
-            {
-              "type": 0,
-              "value": "carta"
-            }
-          ]
-        },
-        "other": {
-          "value": [
-            {
-              "type": 0,
-              "value": "cartas"
-            }
-          ]
-        }
-      },
-      "offset": 0,
-      "pluralType": "cardinal"
-    },
-    {
-      "type": 0,
-      "value": " más para desterrar"
-    }
-  ],
   "card.mon.hand.card.banish": [
     {
       "type": 1,
@@ -11414,16 +11639,6 @@
     {
       "type": 0,
       "value": ": elige un Minnowism de tu mazo"
-    }
-  ],
-  "card.mon.opposing.graveyard.banish.next": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": ": elige otra carta del cementerio del héroe oponente para desterrar, o termina"
     }
   ],
   "card.mon.opposing.graveyard.banish.upto": [
@@ -11536,16 +11751,44 @@
       "value": "Shadow Puppetry: puedes desterrar la carta superior"
     }
   ],
-  "card.mon.soul.banish.choose": [
+  "card.mon.soul.banish.count": [
     {
       "type": 0,
-      "value": "Elige una carta del alma para desterrar"
-    }
-  ],
-  "card.mon.soul.banish.next": [
+      "value": "Elige "
+    },
+    {
+      "type": 6,
+      "value": "count",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " carta del alma"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " cartas del alma"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    },
     {
       "type": 0,
-      "value": "Elige otra carta del alma para desterrar"
+      "value": " para desterrar"
     }
   ],
   "card.mon.soul.card.choose": [
@@ -11632,16 +11875,10 @@
       "value": "Call for Backup: elige una carta de acción de ataque para desterrar"
     }
   ],
-  "card.mpg.backup.first": [
+  "card.mpg.backup.pair.choose": [
     {
       "type": 0,
-      "value": "Call for Backup: elige la primera carta de acción de ataque"
-    }
-  ],
-  "card.mpg.backup.second": [
-    {
-      "type": 0,
-      "value": "Call for Backup: elige una carta de acción de ataque con otro nombre"
+      "value": "Call for Backup: elige 2 cartas de acción de ataque con nombres distintos"
     }
   ],
   "card.mpg.card.discard": [
@@ -11772,16 +12009,10 @@
       "value": "Añade una reacción de ataque como carta defensora"
     }
   ],
-  "card.mpw.reaction.shuffle": [
+  "card.mpw.reaction.shuffle.choose": [
     {
       "type": 0,
-      "value": "¿Barajar una reacción de ataque en tu mazo?"
-    }
-  ],
-  "card.mpw.reaction.shuffle.next": [
-    {
-      "type": 0,
-      "value": "¿Barajar otra reacción de ataque con un nombre distinto?"
+      "value": "Elige hasta 3 reacciones de ataque con nombres distintos para barajarlas en tu mazo"
     }
   ],
   "card.mpw.reaction.top": [
@@ -12736,24 +12967,44 @@
       "value": ": ¿descartar un aliado?"
     }
   ],
-  "card.pen.ally.freeze.next": [
+  "card.pen.ally.freeze.choose": [
     {
       "type": 0,
-      "value": "¿Aplicar freeze a otro aliado?"
-    }
-  ],
-  "card.pen.ally.freeze.upto": [
-    {
-      "type": 0,
-      "value": "Aplica freeze a hasta "
+      "value": "Elige hasta "
     },
     {
-      "type": 1,
-      "value": "count"
+      "type": 6,
+      "value": "count",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " aliado"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " aliados"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
     },
     {
       "type": 0,
-      "value": " aliados"
+      "value": " para aplicar freeze"
     }
   ],
   "card.pen.ally.return": [
@@ -12890,16 +13141,44 @@
       "value": "Nombra una carta"
     }
   ],
-  "card.pen.cloaked.equipment.facedown": [
+  "card.pen.cloaked.equipment.facedown.choose": [
     {
       "type": 0,
-      "value": "Elige un equipo con oculto para ponerlo boca abajo"
-    }
-  ],
-  "card.pen.cloaked.equipment.facedown.next": [
+      "value": "Elige "
+    },
+    {
+      "type": 6,
+      "value": "count",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " equipo con oculto para ponerlo"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " equipos con oculto para ponerlos"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    },
     {
       "type": 0,
-      "value": "Elige otro equipo con oculto"
+      "value": " boca abajo"
     }
   ],
   "card.pen.color.choose": [
@@ -13328,12 +13607,6 @@
       "value": "Devuelve una acción de ataque a la mano de su propietario"
     }
   ],
-  "card.ros.attack.return.next": [
-    {
-      "type": 0,
-      "value": "Elige otra acción de ataque, o termina"
-    }
-  ],
   "card.ros.attack.return.upto": [
     {
       "type": 0,
@@ -13728,16 +14001,10 @@
       "value": "Edict of Steel: afila la espada objetivo que controlas"
     }
   ],
-  "card.sbl.v.charge.first": [
+  "card.sbl.v.charge.choose": [
     {
       "type": 0,
-      "value": "V of the Vanguard: elige una carta de tu mano para cargar, o detente"
-    }
-  ],
-  "card.sbl.v.charge.next": [
-    {
-      "type": 0,
-      "value": "V of the Vanguard: elige otra carta para cargar, o detente"
+      "value": "V of the Vanguard: elige cualquier número de cartas de tu mano para cargar"
     }
   ],
   "card.sbl.weapon.counters.distribute": [
@@ -14108,16 +14375,10 @@
       "value": "Descarta una carta o pierde 2 de vida"
     }
   ],
-  "card.sea.lubricate.cog.choose": [
+  "card.sea.lubricate.cogs.choose": [
     {
       "type": 0,
-      "value": "Endereza hasta 3 engranajes, de uno en uno"
-    }
-  ],
-  "card.sea.lubricate.cog.next": [
-    {
-      "type": 0,
-      "value": "¿Enderezar otro engranaje?"
+      "value": "Endereza hasta 3 engranajes"
     }
   ],
   "card.sea.marlynn.arrow.arsenal": [
@@ -18308,10 +18569,10 @@
       "value": "¿Poner un contador de energía en Alluvion Constellas?"
     }
   ],
-  "card.upr.arcane.ally.choose": [
+  "card.upr.arcane.allies.upto": [
     {
       "type": 0,
-      "value": "¿Aplicar "
+      "value": "Aplica "
     },
     {
       "type": 1,
@@ -18319,21 +18580,37 @@
     },
     {
       "type": 0,
-      "value": " de daño arcano a un aliado?"
-    }
-  ],
-  "card.upr.arcane.ally.next": [
-    {
-      "type": 0,
-      "value": "¿Aplicar "
+      "value": " de daño arcano a hasta "
     },
     {
-      "type": 1,
-      "value": "amount"
-    },
-    {
-      "type": 0,
-      "value": " de daño arcano a otro aliado?"
+      "type": 6,
+      "value": "count",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " aliado"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " aliados"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
     }
   ],
   "card.upr.arcane.hero.choose": [
@@ -18392,20 +18669,6 @@
     {
       "type": 0,
       "value": ": ¿desterrar un ataque válido?"
-    }
-  ],
-  "card.upr.azvolai.target.next": [
-    {
-      "type": 0,
-      "value": "Azvolai: ¿aplicar "
-    },
-    {
-      "type": 1,
-      "value": "amount"
-    },
-    {
-      "type": 0,
-      "value": " de daño arcano a otro objetivo?"
     }
   ],
   "card.upr.azvolai.targets": [
@@ -18540,16 +18803,41 @@
       "value": "Elige un héroe"
     }
   ],
-  "card.upr.ice.bottom": [
+  "card.upr.ice.bottom.count": [
     {
       "type": 0,
-      "value": "Pon una carta de Hielo en la parte inferior de tu mazo"
-    }
-  ],
-  "card.upr.ice.bottom.next": [
+      "value": "Pon "
+    },
+    {
+      "type": 6,
+      "value": "count",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 0,
+              "value": "una carta de Hielo"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " cartas de Hielo"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    },
     {
       "type": 0,
-      "value": "Pon otra carta de Hielo en la parte inferior de tu mazo"
+      "value": " en la parte inferior de tu mazo"
     }
   ],
   "card.upr.ice.fusion.reveal": [
@@ -18736,16 +19024,10 @@
       "value": "¿Poner una carta de tu mano en la parte inferior de tu mazo?"
     }
   ],
-  "card.wtr.hood.shuffle": [
+  "card.wtr.hood.shuffle.choose": [
     {
       "type": 0,
-      "value": "Hope Merchant's Hood: ¿barajar una carta de tu mano en tu mazo?"
-    }
-  ],
-  "card.wtr.hood.shuffle.next": [
-    {
-      "type": 0,
-      "value": "Hope Merchant's Hood: ¿barajar otra carta en tu mazo?"
+      "value": "Hope Merchant's Hood: elige cualquier número de cartas de tu mano para barajarlas en tu mazo"
     }
   ],
   "card.wtr.katsu.combo.choose": [
@@ -18760,16 +19042,44 @@
       "value": "Katsu: ¿descartar una carta de coste 0 para buscar una carta con combo?"
     }
   ],
-  "card.wtr.lordwind.card.choose": [
+  "card.wtr.lordwind.cards.choose": [
     {
       "type": 0,
-      "value": "Lord of Wind: elige una carta de la línea de combo para barajarla"
-    }
-  ],
-  "card.wtr.lordwind.card.next": [
+      "value": "Lord of Wind: elige hasta "
+    },
+    {
+      "type": 6,
+      "value": "count",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " carta de la línea de combo"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " cartas de la línea de combo"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    },
     {
       "type": 0,
-      "value": "Lord of Wind: elige otra carta"
+      "value": " para barajarlas"
     }
   ],
   "card.wtr.lordwind.x": [
@@ -18814,10 +19124,18 @@
       "value": "Arma daga o espada"
     }
   ],
-  "card.wtr.remembrance.action.choose": [
+  "card.wtr.remembrance.actions.choose": [
     {
       "type": 0,
-      "value": "Remembrance: elige una carta de acción"
+      "value": "Remembrance: elige hasta "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " cartas de acción para barajarlas en tu mazo"
     }
   ],
   "card.wtr.rout.defender.return": [

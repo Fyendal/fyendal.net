@@ -1813,7 +1813,13 @@ function scoreIntent(
   switch (intent.kind) {
     case "defend": score = scorers.defend(intent, input, own); break;
     case "choose": score = scorers.choose(intent, input); break;
-    case "choose-many": score = 0; break;
+    // A subset scores as the sum of its cards' single-pick scores.
+    case "choose-many":
+      score = intent.optionIds.reduce(
+        (sum, optionId) => sum + scorers.choose({ kind: "choose", optionId }, input),
+        0,
+      );
+      break;
     case "order-triggers": score = 0; break;
     case "skip-runechant":
     case "skip-seismic-surge": score = 0; break;

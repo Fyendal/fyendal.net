@@ -1072,7 +1072,7 @@ describe("SGB — allies being attacked (CR 8.2.8)", () => {
     const chum = g.state.players[0]!.hand.find(
       (card) => card.cardId === printingId("chum, friendly first mate|2"),
     )!;
-    g.doRaw({ kind: "choose-many", optionIds: [String(chum.instanceId)] })
+    g.chooseMany([String(chum.instanceId)])
       .expectLog("Chum, Friendly First Mate is added to the chain link as a defending card")
       .settle()
       .doRaw({ kind: "close-chain" })

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { projectStateFor } from "@fyendal/engine";
+import { legalIntents, projectStateFor } from "@fyendal/engine";
 import { cardData, scripts } from "../../index.js";
 import { printingId, scenario } from "../harness.js";
 
@@ -500,10 +500,16 @@ describe("OUT — rules regression coverage", () => {
     expect([pd.minimumSelections, pd.maximumSelections]).toEqual([0, 3]);
     expect(pd.options).toHaveLength(4);
 
+    const offered = legalIntents(s.state, 0).flatMap((intent) => intent.kind === "choose-many" ? [intent.optionIds] : []);
+    const infecting = [graveyardId("infecting shot|1"), graveyardId("infecting shot|2")];
+    expect(offered[0]).toEqual([]);
+    expect(offered.some((ids) => ids.length === 3)).toBe(true);
+    expect(offered.every((ids) => ids.length <= 3 && !infecting.every((id) => ids.includes(id)))).toBe(true);
+
     expect(() =>
-      s.doRaw({ kind: "choose-many", optionIds: [graveyardId("infecting shot|1"), graveyardId("infecting shot|2")] })
+      s.doRaw({ kind: "choose-many", optionIds: infecting })
     ).toThrow(/different names/);
-    s.doRaw({ kind: "choose-many", optionIds: [graveyardId("infecting shot|2"), graveyardId("falcon wing|1")] });
+    s.chooseMany([graveyardId("infecting shot|2"), graveyardId("falcon wing|1")]);
 
     s.expectZoneSize(0, "deck", 3)
       .expectInZone(0, "infecting shot|2", "deck")

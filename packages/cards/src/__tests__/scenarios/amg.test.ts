@@ -166,20 +166,25 @@ describe("Min armory deck cards", () => {
         },
         { hero: "dorinthea", weapons: [], equipment: NO_EQUIPMENT },
       ] });
-      const optionNames = () =>
-        game.state.pendingDecision!.options!
-          .filter((option) => option !== "done")
-          .map((option) => {
-            const card = game.state.players[0]!.banish.find((candidate) => candidate.instanceId === Number(option))!;
-            return cardData[card.cardId]!.name;
-          })
-          .sort();
+      const banished = () => game.state.players[0]!.banish;
+      const nameOf = (option: string) =>
+        cardData[banished().find((candidate) => candidate.instanceId === Number(option))!.cardId]!.name;
+      const banishedId = (key: string) =>
+        String(banished().find((card) => card.cardId === printingId(key))!.instanceId);
 
       game.play(REVERE);
-      expect(optionNames()).toEqual(["Madness Spiral", "Zero to Sixty", "Zero to Sixty", "Zipper Hit"]);
-      game.chooseCard(ZERO_TO_SIXTY);
-      expect(optionNames()).toEqual(["Madness Spiral", "Zipper Hit"]);
-      game.chooseCard(ZIPPER_HIT).chooseCard(MADNESS_SPIRAL);
+      const pending = game.state.pendingDecision!;
+      expect(pending).toMatchObject({ minimumSelections: 0, maximumSelections: 3, distinctCardNames: true });
+      expect(pending.options!.map(nameOf).sort())
+        .toEqual(["Madness Spiral", "Zero to Sixty", "Zero to Sixty", "Zipper Hit"]);
+      const zeroToSixtyIds = banished()
+        .filter((card) => card.cardId === printingId(ZERO_TO_SIXTY))
+        .map((card) => String(card.instanceId));
+      expect(() => game.doRaw({ kind: "choose-many", optionIds: zeroToSixtyIds })).toThrow(/different names/);
+      game.doRaw({
+        kind: "choose-many",
+        optionIds: [banishedId(ZERO_TO_SIXTY), banishedId(ZIPPER_HIT), banishedId(MADNESS_SPIRAL)],
+      });
 
       expect(game.state.pendingDecision).toBeNull();
       expect(zoneNames(game, 0, "banish").sort()).toEqual(["Raging Onslaught", "Zero to Sixty"]);
@@ -200,7 +205,7 @@ describe("Min armory deck cards", () => {
         { hero: "dorinthea", weapons: [], equipment: NO_EQUIPMENT },
       ] });
 
-      game.play(REVERE).chooseOption("done");
+      game.play(REVERE).chooseMany([]);
 
       game.expectInZone(0, ZIPPER_HIT, "banish");
     });

@@ -114,10 +114,12 @@ describe("DTD, EVO, and HVY rules regression coverage", () => {
 
     g.play("herald of protection|3")
       .blockWith()
-      .react("lumina lance|2")
-      .chooseCard("snatch|1")
-      .chooseCard("raging onslaught|1")
-      .chooseOption("power");
+      .react("lumina lance|2");
+    const pd = g.state.pendingDecision!;
+    expect(pd.chooseHook).toBe("lance-soul");
+    expect([pd.minimumSelections, pd.maximumSelections]).toEqual([0, 2]);
+    g.chooseMany(pd.options!).settle().chooseOption("power");
+    g.expectZoneSize(0, "soul", 0);
     expect(g.state.pendingDecision?.options).not.toContain("power");
   });
   it("Radiant Forcefield lets its controller choose a soul card", () => {
@@ -261,7 +263,6 @@ describe("DTD, EVO, and HVY rules regression coverage", () => {
     g.expectNoEquipment(0, "arms");
   });
   it("Steel Soul observes transforms", () => expect(script("evo steel soul memory|3").onTransform).toBeTypeOf("function"));
-  it("Demolition removes selected steam", () => expect(script("demolition protocol|1").onChoose).toBeTypeOf("function"));
   it("Meganetic Protocol gives defending equipment -1 defense counters", () => {
     const g = scenario({
       seats: [
@@ -278,11 +279,9 @@ describe("DTD, EVO, and HVY rules regression coverage", () => {
     g.play("meganetic protocol|3").blockWith("ironrot helm|0");
     expect(g.state.players[1]!.equipment.head?.counters?.defense).toBe(-1);
   });
-  it("Scrap supports multiple cards", () => expect(script("hyper scrapper|3").onChoose).toBeTypeOf("function"));
   it("Twin Drive has two separately payable Boost abilities", () => expect(script("twin drive|1").boostCount).toBe(2));
   it("Lockwave resolves nested choices", () => expect(script("meganetic lockwave|3").playTargetOptions).toBeTypeOf("function"));
   it("System Failure damages the controller", () => expect(script("system failure|2").playTargetOptions).toBeTypeOf("function"));
-  it("System Reset returns one batch", () => expect(script("system reset|2").onChoose).toBeTypeOf("function"));
   it("Shriek Razors returns from graveyard only at the start of its controller's turn", () => {
     const illegalReaction = scenario({
       seats: [

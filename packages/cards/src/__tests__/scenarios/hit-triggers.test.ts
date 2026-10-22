@@ -93,14 +93,38 @@ describe("friendly hit observers use on-hit layers", () => {
     g.expectEquipped(0, "head", "anticipating gaze|0");
   });
 
-  it("Tick Tock Clock destroys itself and a chosen item, then deals that much damage", () => {
+  it("Tick Tock Clock destroys itself and up to 2 chosen items, then deals that much damage", () => {
+    const g = scenario({
+      seats: [
+        seat({ board: ["tick tock clock|1", "energy potion|3", "energy potion|3"], hand: ["sky skimmer|1"] }),
+        foe({ board: ["energy potion|3"] }),
+      ],
+    });
+    const [, mine] = g.state.players[0]!.board;
+    const theirs = g.state.players[1]!.board[0]!;
+
+    g.play("sky skimmer|1").blockWith();
+    passUntilHitTrigger(g, "tick tock clock|1");
+    g.settle();
+    const pd = g.state.pendingDecision!;
+    expect(pd.chooseHook).toBe("tick-tock-item");
+    expect([pd.minimumSelections, pd.maximumSelections]).toEqual([0, 2]);
+    expect(pd.options).toHaveLength(3);
+
+    g.chooseMany([String(mine!.instanceId), String(theirs.instanceId)])
+      .expectLife(1, 13)
+      .expectZoneSize(0, "board", 1)
+      .expectZoneSize(1, "board", 0);
+  });
+
+  it("Tick Tock Clock may destroy no other items and still deals damage for itself", () => {
     const g = scenario({
       seats: [seat({ board: ["tick tock clock|1", "energy potion|3"], hand: ["sky skimmer|1"] }), foe()],
     });
 
     g.play("sky skimmer|1").blockWith();
     passUntilHitTrigger(g, "tick tock clock|1");
-    g.settle().chooseCard("energy potion|3").expectLife(1, 14).expectZoneSize(0, "board", 0);
+    g.settle().chooseMany([]).expectLife(1, 15).expectZoneSize(0, "board", 1);
   });
 
   it("Autosave Script puts the hitting Mechanologist attack on the bottom of the deck", () => {

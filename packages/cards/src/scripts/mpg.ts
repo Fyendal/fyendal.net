@@ -920,47 +920,43 @@ Object.assign(mpg, {
         .player(ctx.seat)
         .graveyard.filter((card) => ctx.hasCardType(card, "action") && hasType(ctx, card, "attack"));
       if (attacks.some((card) => attacks.some((other) => !sharesName(ctx, card, other))))
-        ctx.requestCardChoice(
-          "backup-first",
-          decisionPrompt("Call for Backup: choose the first attack action card", "card.mpg.backup.first"),
+        ctx.requestCardChoices(
+          "backup-pair",
+          decisionPrompt(
+            "Call for Backup: choose 2 attack action cards with different names",
+            "card.mpg.backup.pair.choose",
+          ),
           attacks.map((card) => card.instanceId),
+          2,
+          2,
+          undefined,
+          undefined,
+          undefined,
+          true,
         );
     },
+    onChooseMany(ctx: ScriptCtx, hook: string, options: readonly string[]) {
+      if (hook !== "backup-pair") return;
+      const [first, second] = options.map(Number);
+      if (first === undefined || second === undefined) return;
+      ctx.requestCardChoice(
+        `backup-banish:${first}:${second}`,
+        decisionPrompt("Call for Backup: choose an attack action card to banish", "card.mpg.backup.banish"),
+        [first, second],
+        opponentSeat(ctx),
+      );
+    },
     onChoose(ctx: ScriptCtx, hook: string, option: string) {
+      if (!hook.startsWith("backup-banish:")) return;
       const attacks = ctx.player(ctx.seat).graveyard.filter(
         (card) => ctx.hasCardType(card, "action") && hasType(ctx, card, "attack"),
       );
-      if (hook === "backup-first") {
-        const first = attacks.find((card) => card.instanceId === Number(option));
-        if (!first) return;
-        ctx.requestCardChoice(
-          `backup-second:${first.instanceId}`,
-          decisionPrompt("Call for Backup: choose an attack action card with a different name", "card.mpg.backup.second"),
-          attacks.filter((card) => !sharesName(ctx, card, first))
-            .map((card) => card.instanceId),
-        );
-        return;
-      }
-      if (hook.startsWith("backup-second:")) {
-        const first = attacks.find((card) => card.instanceId === Number(hook.slice("backup-second:".length)));
-        const second = attacks.find((card) => card.instanceId === Number(option));
-        if (!first || !second || sharesName(ctx, first, second)) return;
-        ctx.requestCardChoice(
-          `backup-banish:${first.instanceId}:${second.instanceId}`,
-          decisionPrompt("Call for Backup: choose an attack action card to banish", "card.mpg.backup.banish"),
-          [first.instanceId, second.instanceId],
-          opponentSeat(ctx),
-        );
-        return;
-      }
-      if (hook.startsWith("backup-banish:")) {
-        const [firstId, secondId] = hook.slice("backup-banish:".length).split(":").map(Number);
-        const chosenId = Number(option);
-        if (chosenId !== firstId && chosenId !== secondId) return;
-        if (!attacks.some((card) => card.instanceId === firstId)
-          || !attacks.some((card) => card.instanceId === secondId)) return;
-        if (ctx.banish(chosenId)) ctx.putOnDeckTop(chosenId === firstId ? secondId! : firstId!);
-      }
+      const [firstId, secondId] = hook.slice("backup-banish:".length).split(":").map(Number);
+      const chosenId = Number(option);
+      if (chosenId !== firstId && chosenId !== secondId) return;
+      if (!attacks.some((card) => card.instanceId === firstId)
+        || !attacks.some((card) => card.instanceId === secondId)) return;
+      if (ctx.banish(chosenId)) ctx.putOnDeckTop(chosenId === firstId ? secondId! : firstId!);
     },
   },
   "captain of the guard|3": {

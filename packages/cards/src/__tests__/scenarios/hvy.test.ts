@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { applyIntent, legalIntents, projectStateFor } from "@fyendal/engine";
 import { cardData, scripts } from "../../index.js";
 import { functionalKeyOf } from "../../functional.js";
-import { scenario } from "../harness.js";
+import { printingId, scenario } from "../harness.js";
 
 function tokenCount(g: ReturnType<typeof scenario>, seat: number, key: string): number {
   return g.state.players[seat]!.board.filter(
@@ -284,11 +284,19 @@ describe("HVY — Heavy Hitters mechanics", () => {
 
     g.play("raging onslaught|2", { pitch: ["titanium bauble|3"], settle: false })
       .passPriority()
-      .react("no fear|1", { settle: false })
-      .chooseCard("beast mode|1")
-      .chooseCard("raging onslaught|2")
-      .chooseCard("wrecker romp|3")
-      .chooseOption("done")
+      .react("no fear|1", { settle: false });
+    expect(g.state.pendingDecision).toMatchObject({
+      chooseHook: "no-fear",
+      player: 0,
+      minimumSelections: 0,
+      maximumSelections: 3,
+    });
+    const handId = (key: string) =>
+      String(g.state.players[0]!.hand.find((card) => card.cardId === printingId(key))!.instanceId);
+    g.doRaw({
+      kind: "choose-many",
+      optionIds: [handId("beast mode|1"), handId("raging onslaught|2"), handId("wrecker romp|3")],
+    })
       .settle()
       .expectInZone(0, "beast mode|1", "banish")
       .expectInZone(0, "raging onslaught|2", "banish")

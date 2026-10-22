@@ -38,26 +38,6 @@ function isItem(ctx: ScriptCtx, card: DeepReadonly<CardInstance>) {
 
 const TICK_TOCK_ITEM = "tick-tock-item";
 
-/** Tick Tock Clock: offer up to 2 other items in the arena, then deal damage
- * equal to the items destroyed, counting the clock itself. */
-function tickTockNextItem(ctx: ScriptCtx): void {
-  const items = ctx.state.players.flatMap((player) =>
-    player.board.filter((card) => card.instanceId !== ctx.self.instanceId && isItem(ctx, card)),
-  );
-  if (ctx.getState("tickTockChosen") < 2 && items.length) {
-    ctx.requestCardChoice(
-      TICK_TOCK_ITEM,
-      decisionPrompt("Destroy another item?", "card.evo.ticktock.item.destroy", {
-        optionMessages: commonOptionMessages("done"),
-      }),
-      ["done", ...items.map((card) => card.instanceId)],
-    );
-    return;
-  }
-  const destroyed = ctx.getState("tickTockDestroyed");
-  if (destroyed > 0) ctx.dealDamage(opponentSeat(ctx), destroyed);
-}
-
 function isMechAttack(ctx: ScriptCtx, card: DeepReadonly<CardInstance>) {
   return ctx.hasCardType(card, "action") && has(ctx, card, "attack") && has(ctx, card, "mechanologist");
 }
@@ -190,50 +170,37 @@ function galvanize(extra: CardScript = {}): CardScript {
   };
 }
 function scrap(extra: CardScript = {}, count = 1): CardScript {
+  const scrappable = (ctx: ScriptCtx, card: DeepReadonly<CardInstance>) =>
+    isItem(ctx, card) || data(ctx, card).cardType === "equipment";
   return {
     ...extra,
     declareAdditionalCost(ctx) {
-      const cards = ctx
-        .player(ctx.seat)
-        .graveyard.filter((card) => isItem(ctx, card) || data(ctx, card).cardType === "equipment");
+      const cards = ctx.player(ctx.seat).graveyard.filter((card) => scrappable(ctx, card));
       if (cards.length)
-        ctx.requestCardChoice(
+        ctx.requestCardChoices(
           "evo-scrap",
-          decisionPrompt("Scrap an item or equipment from your graveyard?", "card.evo.scrap.choose", {
-            optionMessages: commonOptionMessages("none"),
-          }),
-          ["none", ...cards.map((card) => card.instanceId)],
+          decisionPrompt(
+            `Choose up to ${count} items or equipment in your graveyard to scrap`,
+            "card.evo.scrap.choose.many",
+            { values: { count } },
+          ),
+          cards.map((card) => card.instanceId),
+          0,
+          count,
         );
       extra.declareAdditionalCost?.(ctx);
     },
-    onChoose(ctx, hook, option) {
+    onChooseMany(ctx, hook, options) {
       if (hook !== "evo-scrap") {
-        extra.onChoose?.(ctx, hook, option);
+        extra.onChooseMany?.(ctx, hook, options);
         return;
       }
-      if (option === "none") return;
-      const card = ctx
-        .player(ctx.seat)
-        .graveyard.find(
-          (candidate) =>
-            candidate.instanceId === Number(option) &&
-            (isItem(ctx, candidate) || data(ctx, candidate).cardType === "equipment"),
-        );
-      if (!card || !ctx.banish(card.instanceId)) return;
-      const scrapped = ctx.getState("scrapped") + 1;
-      ctx.setState("scrapped", scrapped);
-      if (scrapped >= count) return;
-      const cards = ctx
-        .player(ctx.seat)
-        .graveyard.filter((candidate) => isItem(ctx, candidate) || data(ctx, candidate).cardType === "equipment");
-      if (cards.length)
-        ctx.requestCardChoice(
-          "evo-scrap",
-          decisionPrompt("Scrap another item or equipment from your graveyard?", "card.evo.scrap.choose.next", {
-            optionMessages: commonOptionMessages("none"),
-          }),
-          ["none", ...cards.map((candidate) => candidate.instanceId)],
-        );
+      for (const option of options) {
+        const card = ctx
+          .player(ctx.seat)
+          .graveyard.find((candidate) => candidate.instanceId === Number(option) && scrappable(ctx, candidate));
+        if (card && ctx.banish(card.instanceId)) ctx.setState("scrapped", ctx.getState("scrapped") + 1);
+      }
     },
   };
 }
@@ -243,33 +210,22 @@ function breakerEvo(extra: CardScript = {}): CardScript {
     additionalCost(ctx) {
       const drivers = ctx.player(ctx.seat).board.filter((card) => named(ctx, card, "hyper driver"));
       if (drivers.length)
-        ctx.requestCardChoice(
+        ctx.requestCardChoices(
           "breaker-driver",
-          decisionPrompt("Choose Hyper Drivers to transform", "card.evo.hyperdrivers.transform", {
-            optionMessages: commonOptionMessages("done"),
-          }),
-          ["done", ...drivers.map((card) => card.instanceId)],
+          decisionPrompt("Choose Hyper Drivers to transform", "card.evo.hyperdrivers.transform"),
+          drivers.map((card) => card.instanceId),
+          0,
+          drivers.length,
         );
       extra.additionalCost?.(ctx);
     },
-    onChoose(ctx, hook, option) {
-      if (hook === "breaker-driver" && option !== "done") {
-        const n = ctx.getState("breaker-count") + 1;
-        ctx.setState("breaker-count", n);
-        ctx.setState(`breaker-driver-${n}`, Number(option));
-        const chosen = new Set(Array.from({ length: n }, (_, i) => ctx.getState(`breaker-driver-${i + 1}`)));
-        const drivers = ctx
-          .player(ctx.seat)
-          .board.filter((card) => named(ctx, card, "hyper driver") && !chosen.has(card.instanceId));
-        if (drivers.length)
-          ctx.requestCardChoice(
-            "breaker-driver",
-            decisionPrompt("Choose another Hyper Driver?", "card.evo.hyperdriver.transform.next", {
-              optionMessages: commonOptionMessages("done"),
-            }),
-            ["done", ...drivers.map((card) => card.instanceId)],
-          );
-      } else extra.onChoose?.(ctx, hook, option);
+    onChooseMany(ctx, hook, options) {
+      if (hook !== "breaker-driver") {
+        extra.onChooseMany?.(ctx, hook, options);
+        return;
+      }
+      ctx.setState("breaker-count", options.length);
+      options.forEach((option, i) => ctx.setState(`breaker-driver-${i + 1}`, Number(option)));
     },
     onEnterArena(ctx) {
       const ids = Array.from({ length: ctx.getState("breaker-count") }, (_, i) =>
@@ -573,7 +529,7 @@ export const evoHighRarity: Record<string, CardScript> = {
   }),
   "demolition protocol|1": {
     onAttackDeclared(ctx) {
-      ctx.setState("upgrades", equippedEvos(ctx));
+      const upgrades = equippedEvos(ctx);
       const cards = [
         ...ctx.player(opponentSeat(ctx)).board,
         ...ctx.player(opponentSeat(ctx)).weapons,
@@ -581,35 +537,18 @@ export const evoHighRarity: Record<string, CardScript> = {
           (card): card is DeepReadonly<CardInstance> => !!card,
         ),
       ].filter((card) => (card.counters?.steam ?? 0) > 0);
-      if (cards.length && equippedEvos(ctx) > 0)
-        ctx.requestCardChoice(
+      if (cards.length && upgrades > 0)
+        ctx.requestCardChoices(
           "demolition",
-          decisionPrompt("Remove steam counters from up to X permanents", "card.evo.permanent.steam.remove.uptox", {
-            optionMessages: commonOptionMessages("done"),
-          }),
-          ["done", ...cards.map((card) => card.instanceId)],
+          decisionPrompt("Remove steam counters from up to X permanents", "card.evo.permanent.steam.remove.uptox"),
+          cards.map((card) => card.instanceId),
+          0,
+          upgrades,
         );
     },
-    onChoose(ctx, hook, option) {
-      if (hook !== "demolition" || option === "done") return;
-      ctx.setCardCounter(Number(option), "steam", 0);
-      const n = ctx.getState("demolished") + 1;
-      ctx.setState("demolished", n);
-      const cards = [
-        ...ctx.player(opponentSeat(ctx)).board,
-        ...ctx.player(opponentSeat(ctx)).weapons,
-        ...Object.values(ctx.player(opponentSeat(ctx)).equipment).filter(
-          (card): card is DeepReadonly<CardInstance> => !!card,
-        ),
-      ].filter((card) => (card.counters?.steam ?? 0) > 0);
-      if (n < ctx.getState("upgrades") && cards.length)
-        ctx.requestCardChoice(
-          "demolition",
-          decisionPrompt("Remove steam from another permanent?", "card.evo.permanent.steam.remove.next", {
-            optionMessages: commonOptionMessages("done"),
-          }),
-          ["done", ...cards.map((card) => card.instanceId)],
-        );
+    onChooseMany(ctx, hook, options) {
+      if (hook !== "demolition") return;
+      for (const option of options) ctx.setCardCounter(Number(option), "steam", 0);
     },
   },
   "pulsewave protocol|2": {
@@ -760,21 +699,30 @@ export const evoHighRarity: Record<string, CardScript> = {
         const inArena = () => ctx.player(ctx.seat).board.some((card) => card.instanceId === ctx.self.instanceId);
         const wasInArena = inArena();
         ctx.destroySelf();
-        ctx.setState("tickTockDestroyed", wasInArena && !inArena() ? 1 : 0);
-        ctx.setState("tickTockChosen", 0);
-        tickTockNextItem(ctx);
-      },
-      onChoose(ctx, hook, option) {
-        if (hook !== TICK_TOCK_ITEM) return;
-        if (option === "done") {
-          ctx.setState("tickTockChosen", 2);
-        } else {
-          ctx.setState("tickTockChosen", ctx.getState("tickTockChosen") + 1);
-          if (ctx.destroyPermanent(Number(option))) {
-            ctx.setState("tickTockDestroyed", ctx.getState("tickTockDestroyed") + 1);
-          }
+        const destroyedSelf = wasInArena && !inArena() ? 1 : 0;
+        const items = ctx.state.players.flatMap((player) =>
+          player.board.filter((card) => card.instanceId !== ctx.self.instanceId && isItem(ctx, card)),
+        );
+        if (!items.length) {
+          if (destroyedSelf > 0) ctx.dealDamage(opponentSeat(ctx), destroyedSelf);
+          return;
         }
-        tickTockNextItem(ctx);
+        ctx.setState("tickTockDestroyed", destroyedSelf);
+        ctx.requestCardChoices(
+          TICK_TOCK_ITEM,
+          decisionPrompt("Choose up to 2 other items to destroy", "card.evo.ticktock.items.destroy", {
+            values: { count: 2 },
+          }),
+          items.map((card) => card.instanceId),
+          0,
+          2,
+        );
+      },
+      onChooseMany(ctx, hook, options) {
+        if (hook !== TICK_TOCK_ITEM) return;
+        let destroyed = ctx.getState("tickTockDestroyed");
+        for (const option of options) if (ctx.destroyPermanent(Number(option))) destroyed += 1;
+        if (destroyed > 0) ctx.dealDamage(opponentSeat(ctx), destroyed);
       },
     },
     1,
@@ -789,30 +737,27 @@ export const evoHighRarity: Record<string, CardScript> = {
       },
     },
     declareAdditionalCost(ctx) {
-      if (ctx.getState("scrapperX") <= 0) return;
       const items = ctx.player(ctx.seat).graveyard.filter((card) => isItem(ctx, card));
-      if (items.length)
-        ctx.requestCardChoice(
-          "hyper-scrapper-item",
-          decisionPrompt("Banish an item from your graveyard", "card.evo.graveyard.item.banish"),
-          items.map((card) => card.instanceId),
-        );
+      const count = Math.min(ctx.getState("scrapperX"), items.length);
+      if (count <= 0) return;
+      ctx.requestCardChoices(
+        "hyper-scrapper-item",
+        decisionPrompt(`Banish ${count} items from your graveyard`, "card.evo.graveyard.items.banish", {
+          values: { count },
+        }),
+        items.map((card) => card.instanceId),
+        count,
+        count,
+      );
     },
-    onChoose(ctx, hook, option) {
+    onChooseMany(ctx, hook, options) {
       if (hook !== "hyper-scrapper-item") return;
-      const card = ctx.player(ctx.seat).graveyard.find((candidate) => candidate.instanceId === Number(option));
-      if (card && ctx.banish(card.instanceId)) {
+      for (const option of options) {
+        const card = ctx.player(ctx.seat).graveyard.find((candidate) => candidate.instanceId === Number(option));
+        if (!card || !ctx.banish(card.instanceId)) continue;
         ctx.addCardState(ctx.self.instanceId, "scrapped", 1);
         if (named(ctx, card, "hyper driver")) ctx.addCardState(ctx.self.instanceId, "scrappedDrivers", 1);
       }
-      if (ctx.getState("scrapped") >= ctx.getState("scrapperX")) return;
-      const items = ctx.player(ctx.seat).graveyard.filter((candidate) => isItem(ctx, candidate));
-      if (items.length)
-        ctx.requestCardChoice(
-          "hyper-scrapper-item",
-          decisionPrompt("Banish another item from your graveyard", "card.evo.graveyard.item.banish.next"),
-          items.map((card) => card.instanceId),
-        );
     },
     modifyAttack: (ctx) => ctx.getState("scrapperX"),
     onAttackDeclared(ctx) {
@@ -842,26 +787,21 @@ export const evoHighRarity: Record<string, CardScript> = {
     },
     canPlay: (ctx) => ctx.getPlayerFlag(ctx.seat, "boostedThisTurn") === true,
     additionalCost(ctx) {
-      if (ctx.getState("moonshotX") <= 0) return;
       const drivers = ctx.player(ctx.seat).board.filter((card) => named(ctx, card, "hyper driver"));
-      if (drivers.length)
-        ctx.requestCardChoice(
-          "moonshot",
-          decisionPrompt("Destroy a Hyper Driver", "card.evo.hyperdriver.destroy"),
-          drivers.map((card) => card.instanceId),
-        );
+      const count = Math.min(ctx.getState("moonshotX"), drivers.length);
+      if (count <= 0) return;
+      ctx.requestCardChoices(
+        "moonshot",
+        decisionPrompt(`Destroy ${count} Hyper Drivers`, "card.evo.hyperdrivers.destroy", { values: { count } }),
+        drivers.map((card) => card.instanceId),
+        count,
+        count,
+      );
     },
-    onChoose(ctx, hook, option) {
+    onChooseMany(ctx, hook, options) {
       if (hook !== "moonshot") return;
-      if (ctx.destroyPermanent(Number(option))) ctx.addCardState(ctx.self.instanceId, "drivers", 1);
-      if (ctx.getState("drivers") >= ctx.getState("moonshotX")) return;
-      const drivers = ctx.player(ctx.seat).board.filter((card) => named(ctx, card, "hyper driver"));
-      if (drivers.length)
-        ctx.requestCardChoice(
-          "moonshot",
-          decisionPrompt("Destroy another Hyper Driver", "card.evo.hyperdriver.destroy.next"),
-          drivers.map((card) => card.instanceId),
-        );
+      for (const option of options)
+        if (ctx.destroyPermanent(Number(option))) ctx.addCardState(ctx.self.instanceId, "drivers", 1);
     },
     modifyAttack: (ctx) => ctx.getState("drivers") * 3,
     onAttackDeclared(ctx) {
@@ -886,47 +826,29 @@ export const evoHighRarity: Record<string, CardScript> = {
       return [ctx.player(opponentSeat(ctx)).hero.instanceId];
     },
     onPlay(ctx) {
-      if (ctx.getState("lockwaveX") <= 0) return;
       const equipment = Object.values(ctx.player(opponentSeat(ctx)).equipment).filter(
         (card): card is DeepReadonly<CardInstance> => !!card,
       );
-      if (equipment.length)
-        ctx.requestCardChoice(
-          "lockwave-offer",
-          decisionPrompt("Choose equipment to offer", "card.evo.equipment.offer"),
-          equipment.map((card) => card.instanceId),
-          opponentSeat(ctx),
-        );
+      const count = Math.min(ctx.getState("lockwaveX"), equipment.length);
+      if (count <= 0) return;
+      ctx.requestCardChoices(
+        "lockwave-offer",
+        decisionPrompt(`Choose ${count} equipment to offer`, "card.evo.equipment.offer.many", { values: { count } }),
+        equipment.map((card) => card.instanceId),
+        count,
+        count,
+        opponentSeat(ctx),
+      );
+    },
+    onChooseMany(ctx, hook, options) {
+      if (hook !== "lockwave-offer") return;
+      ctx.requestCardChoice(
+        "lockwave-pick",
+        decisionPrompt("Choose equipment that must defend", "card.evo.equipment.mustdefend"),
+        options.map(Number),
+      );
     },
     onChoose(ctx, hook, option) {
-      if (hook === "lockwave-offer") {
-        const count = ctx.getState("lockwaveOffered") + 1;
-        ctx.setState("lockwaveOffered", count);
-        ctx.setState(`lockwaveOffer:${count}`, Number(option));
-        if (count < ctx.getState("lockwaveX")) {
-          const chosen = new Set(
-            Array.from({ length: count }, (_, index) => ctx.getState(`lockwaveOffer:${index + 1}`)),
-          );
-          const equipment = Object.values(ctx.player(opponentSeat(ctx)).equipment).filter(
-            (card): card is DeepReadonly<CardInstance> => !!card && !chosen.has(card.instanceId),
-          );
-          if (equipment.length)
-            ctx.requestCardChoice(
-              "lockwave-offer",
-              decisionPrompt("Choose another equipment to offer", "card.evo.equipment.offer.next"),
-              equipment.map((card) => card.instanceId),
-              opponentSeat(ctx),
-            );
-          return;
-        }
-        const offered = Array.from({ length: count }, (_, index) => ctx.getState(`lockwaveOffer:${index + 1}`));
-        ctx.requestCardChoice(
-          "lockwave-pick",
-          decisionPrompt("Choose equipment that must defend", "card.evo.equipment.mustdefend"),
-          offered,
-        );
-        return;
-      }
       if (hook === "lockwave-pick") ctx.setPlayerFlag(opponentSeat(ctx), `mustDefend:${option}`, true);
     },
   },
@@ -977,42 +899,25 @@ export const evoHighRarity: Record<string, CardScript> = {
       },
     },
     onPlay(ctx) {
-      if (ctx.getState("systemResetX") <= 0) return;
       const items = ctx
         .player(ctx.seat)
         .board.filter(
           (card) => isItem(ctx, card) && has(ctx, card, "mechanologist") && (data(ctx, card).cost ?? 0) <= 1,
         );
-      if (items.length)
-        ctx.requestCardChoice(
-          "system-reset",
-          decisionPrompt("Choose an item to reset", "card.evo.item.reset"),
-          items.map((card) => card.instanceId),
-        );
+      const count = Math.min(ctx.getState("systemResetX"), items.length);
+      if (count <= 0) return;
+      ctx.requestCardChoices(
+        "system-reset",
+        decisionPrompt(`Choose ${count} items to reset`, "card.evo.items.reset", { values: { count } }),
+        items.map((card) => card.instanceId),
+        count,
+        count,
+      );
     },
-    onChoose(ctx, hook, option) {
+    onChooseMany(ctx, hook, options) {
       if (hook !== "system-reset") return;
-      if (ctx.banish(Number(option))) {
-        const count = ctx.getState("systemResetChosen") + 1;
-        ctx.setState("systemResetChosen", count);
-        ctx.setState(`systemResetItem:${count}`, Number(option));
-      }
-      const chosen = ctx.getState("systemResetChosen");
-      if (chosen < ctx.getState("systemResetX")) {
-        const items = ctx
-          .player(ctx.seat)
-          .board.filter(
-            (card) => isItem(ctx, card) && has(ctx, card, "mechanologist") && (data(ctx, card).cost ?? 0) <= 1,
-          );
-        if (items.length)
-          ctx.requestCardChoice(
-            "system-reset",
-            decisionPrompt("Choose another item to reset", "card.evo.item.reset.next"),
-            items.map((card) => card.instanceId),
-          );
-        return;
-      }
-      for (let index = 1; index <= chosen; index++) ctx.settleCard(ctx.getState(`systemResetItem:${index}`));
+      const banished = options.map(Number).filter((instanceId) => ctx.banish(instanceId));
+      for (const instanceId of banished) ctx.settleCard(instanceId);
     },
   },
   "fabricate|1": {
@@ -1248,36 +1153,27 @@ export const evoHighRarity: Record<string, CardScript> = {
       ctx.drawCards(ctx.seat, has(ctx, ctx.player(ctx.seat).hero, "royal") ? 2 : 1);
       const reds = ctx.player(ctx.seat).hand.filter((card) => ctx.cardColor(card) === 1 && (ctx.cardData(card.cardId).pitch ?? 0) > 0);
       if (reds.length >= 2)
-        ctx.requestCardChoice(
-          "tome-red-1",
-          decisionPrompt("Pitch the first of 2 red cards?", "card.evo.red.pitch.first", {
-            values: { count: 2 },
-            optionMessages: commonOptionMessages("decline"),
-          }),
-          ["decline", ...reds.map((card) => card.instanceId)],
-        );
+        ctx.requestChoice("tome-pitch", yesNoPrompt("Pitch 2 red cards?", "card.evo.red.pitch.optional", { count: 2 }), [
+          "yes",
+          "no",
+        ]);
       else for (const card of [...ctx.player(ctx.seat).hand]) ctx.banish(card.instanceId);
     },
     onChoose(ctx, hook, option) {
-      if (hook === "tome-red-1") {
-        if (option === "decline") {
-          for (const card of [...ctx.player(ctx.seat).hand]) ctx.banish(card.instanceId);
-          return;
-        }
-        ctx.pitchCard(Number(option));
-        const reds = ctx.player(ctx.seat).hand.filter((card) => ctx.cardColor(card) === 1 && (ctx.cardData(card.cardId).pitch ?? 0) > 0);
-        if (reds.length)
-          ctx.requestCardChoice(
-            "tome-red-2",
-            decisionPrompt("Pitch the second red card?", "card.evo.red.pitch.second", {
-              optionMessages: commonOptionMessages("decline"),
-            }),
-            ["decline", ...reds.map((card) => card.instanceId)],
-          );
-      } else if (hook === "tome-red-2") {
-        if (option === "decline") for (const card of [...ctx.player(ctx.seat).hand]) ctx.banish(card.instanceId);
-        else ctx.pitchCard(Number(option));
-      }
+      if (hook !== "tome-pitch") return;
+      const reds = ctx.player(ctx.seat).hand.filter((card) => ctx.cardColor(card) === 1 && (ctx.cardData(card.cardId).pitch ?? 0) > 0);
+      if (option === "yes" && reds.length >= 2)
+        ctx.requestCardChoices(
+          "tome-red",
+          decisionPrompt("Choose 2 red cards to pitch", "card.evo.red.pitch.choose", { values: { count: 2 } }),
+          reds.map((card) => card.instanceId),
+          2,
+          2,
+        );
+      else for (const card of [...ctx.player(ctx.seat).hand]) ctx.banish(card.instanceId);
+    },
+    onChooseMany(ctx, hook, options) {
+      if (hook === "tome-red") for (const option of options) ctx.pitchCard(Number(option));
     },
   },
   "dust from the chrome caverns|1": { materialKeywords: ["phantasm"] },

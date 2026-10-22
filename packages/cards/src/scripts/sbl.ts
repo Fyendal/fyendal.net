@@ -330,54 +330,39 @@ export const sbl: Record<string, CardScript> = {
   }),
 
   "v of the vanguard|2": {
-    // "you may charge your hero's soul any number of times" — a repeated
-    // yes/no choice; each Light card charged feeds the chain-wide buff
     additionalCost(ctx) {
       const hand = ctx.player(ctx.seat).hand;
       if (hand.length > 0) {
-        ctx.requestCardChoice(
+        ctx.requestCardChoices(
           "v-charge",
           decisionPrompt(
-            "V of the Vanguard: choose a card from your hand to charge, or stop",
-            "card.sbl.v.charge.first",
-            { optionMessages: commonOptionMessages("no") },
+            "V of the Vanguard: choose any number of cards from your hand to charge",
+            "card.sbl.v.charge.choose",
           ),
-          ["no", ...hand.map((card) => card.instanceId)],
+          hand.map((card) => card.instanceId),
+          0,
+          hand.length,
         );
       }
     },
-    onChoose(ctx, hook, option) {
+    onChooseMany(ctx, hook, options) {
       if (hook !== "v-charge") return;
-      if (option !== "no") {
+      let light = 0;
+      for (const option of options) {
         const charged = ctx.charge(Number(option));
-        if (charged) {
-          // Marks the attack as charged-to-play for "next attack you charge" buffs.
-          if (!ctx.getState("chargedPitch")) ctx.setState("chargedPitch", ctx.cardColor(charged));
-          if (isLight(ctx, charged)) {
-            ctx.setState("vLight", ctx.getState("vLight") + 1);
-          }
-          const hand = ctx.player(ctx.seat).hand;
-          if (hand.length > 0) {
-            ctx.requestCardChoice(
-              "v-charge",
-              decisionPrompt("V of the Vanguard: choose another card to charge, or stop", "card.sbl.v.charge.next", {
-                optionMessages: commonOptionMessages("no"),
-              }),
-              ["no", ...hand.map((card) => card.instanceId)],
-            );
-            return;
-          }
-        }
+        if (!charged) continue;
+        // Marks the attack as charged-to-play for "next attack you charge" buffs.
+        if (!ctx.getState("chargedPitch")) ctx.setState("chargedPitch", ctx.cardColor(charged));
+        if (isLight(ctx, charged)) light++;
       }
-      const n = ctx.getState("vLight");
-      if (n > 0) {
-        ctx.addModifier({ scope: "combat-chain", attack: n });
+      if (light > 0) {
+        ctx.addModifier({ scope: "combat-chain", attack: light });
         ctx.logPublic(
           localizedCardLog(
             ctx,
-            `V of the Vanguard: attacks on this combat chain get +${n}{p}`,
+            `V of the Vanguard: attacks on this combat chain get +${light}{p}`,
             "card.log.sbl.vanguard.attack",
-            { amount: n },
+            { amount: light },
           ),
         );
       }

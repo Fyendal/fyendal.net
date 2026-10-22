@@ -496,6 +496,34 @@ describe("SEA — High Seas heroes and cogs", () => {
     )?.counters?.steam).toBeUndefined();
   });
 
+  it("Lubricate untaps up to 3 chosen cogs at once", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          hand: ["lubricate|3"],
+          board: ["copper cog|3", "copper cog|3", "copper cog|3", "copper cog|3"],
+        },
+        { hero: "dorinthea" },
+      ],
+    });
+    for (const card of g.state.players[0]!.board) card.tapped = true;
+    const [first, second, , fourth] = g.state.players[0]!.board.map((card) => card.instanceId);
+
+    g.play("lubricate|3", { settle: false }).passPriority().passPriority();
+    expect(g.state.pendingDecision).toMatchObject({
+      chooseHook: "lubricate",
+      minimumSelections: 0,
+      maximumSelections: 3,
+    });
+    expect(g.state.pendingDecision?.options).toHaveLength(4);
+    g.chooseMany([String(first), String(fourth)]).settle();
+
+    const tapped = (id: number | undefined) =>
+      g.state.players[0]!.board.find((card) => card.instanceId === id)?.tapped === true;
+    expect([tapped(first), tapped(second), tapped(fourth)]).toEqual([false, true, false]);
+  });
+
   it("Sky Skimmer can tap a cog for its instant ability while attacking", () => {
     const g = scenario({
       seats: [

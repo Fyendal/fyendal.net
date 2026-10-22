@@ -3096,7 +3096,7 @@ describe("September 3 IAR spoilers", () => {
 
     g.activate("hoodwink|3");
     const other = g.state.players[0]!.hand[0]!;
-    g.doRaw({ kind: "choose-many", optionIds: [String(other.instanceId)] })
+    g.chooseMany([String(other.instanceId)])
       .settle()
       .expectInZone(0, "raging onslaught|1", "graveyard");
     expect(g.state.players[0]!.flags.preventNextArcaneDamage).toBe(6);

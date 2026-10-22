@@ -17,7 +17,6 @@ import {
   optN,
   optOnChoose,
   previousAttackHasName,
-  requestDiscardChoice,
   requestHeroChoice,
   resolveDiscardChoice,
   wizardActionAsInstant,
@@ -951,31 +950,30 @@ const amuletEchoes: CardScript = {
     },
   },
   onChoose(ctx, hook, option) {
-    if (hook === "echoes-target") {
-      const target = heroChoiceSeat(ctx, option);
-      if (target === undefined) return;
-      ctx.setState("echoes-target-seat", target);
-      ctx.setState("echoes-discards-left", 2);
-      requestDiscardChoice(
-        ctx,
-        "echoes-discard",
-        decisionPrompt("Choose a card to discard", "card.common.card.discard.choose"),
-        target,
-      );
-      return;
-    }
+    if (hook !== "echoes-target") return;
+    const target = heroChoiceSeat(ctx, option);
+    if (target === undefined) return;
+    const hand = ctx.player(target).hand;
+    const count = Math.min(2, hand.length);
+    if (!count) return;
+    ctx.setState("echoes-target-seat", target);
+    ctx.requestCardChoices(
+      "echoes-discard",
+      decisionPrompt(
+        count === 1 ? "Choose a card to discard" : `Choose ${count} cards to discard`,
+        "card.evr.echoes.discard.choose",
+        { values: { count } },
+      ),
+      hand.map((card) => card.instanceId),
+      count,
+      count,
+      target,
+    );
+  },
+  onChooseMany(ctx, hook, options) {
     if (hook !== "echoes-discard") return;
     const targetSeat = ctx.getState("echoes-target-seat");
-    if (!resolveDiscardChoice(ctx, option, targetSeat)) return;
-    const left = ctx.getState("echoes-discards-left") - 1;
-    ctx.setState("echoes-discards-left", left);
-    if (left > 0)
-      requestDiscardChoice(
-        ctx,
-        "echoes-discard",
-        decisionPrompt("Choose another card to discard", "card.evr.discard.next"),
-        targetSeat,
-      );
+    for (const option of options) resolveDiscardChoice(ctx, option, targetSeat);
   },
 };
 

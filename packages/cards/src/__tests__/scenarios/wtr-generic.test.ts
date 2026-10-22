@@ -545,8 +545,12 @@ describe("WTR generic — equipment", () => {
     });
     g.activate("hope merchant's hood|0") // instant speed; destroys itself, then asks
       .expectNoEquipment(0, "head");
-    chooseHandCard(g, 0, "wrecker romp|3") // shuffle one in…
-      .chooseOption("done") // …and stop
+    const pd = g.state.pendingDecision!;
+    expect(pd.chooseHook).toBe("hood-shuffle");
+    expect([pd.minimumSelections, pd.maximumSelections]).toEqual([0, 2]);
+    const romp = g.state.players[0]!.hand.find((c) => c.cardId === printingId("wrecker romp|3"))!;
+    g.chooseMany([String(romp.instanceId)])
+      .settle()
       .expectHandSize(0, 2) // Wrecker Romp swapped for a fresh draw
       .expectLog("Hope Merchant's Hood: shuffled 1 card(s) in and drew 1");
 

@@ -1,79 +1,36 @@
-import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
-import { attackAbility, commonOptionMessages, decisionMessage, decisionPrompt } from "./shared-helpers.js";
+import type { CardScript } from "@fyendal/engine";
+import { attackAbility, decisionMessage, decisionPrompt } from "./shared-helpers.js";
 
 // AMG — Min armory deck, released beside OBK.
 
 const REVERE_HOOK = "amg-revere-shuffle";
-const REVERE_LIMIT = 3;
-const REVERE_COUNT = "revereCount";
-const REVERE_DONE = "revereDone";
-
-function revereChosen(ctx: ScriptCtx): number[] {
-  return Array.from({ length: ctx.getState(REVERE_COUNT) }, (_, index) => ctx.getState(`revereCard:${index}`));
-}
-
-function revereCandidates(ctx: ScriptCtx): DeepReadonly<CardInstance>[] {
-  const banish = ctx.player(ctx.seat).banish;
-  const chosen = revereChosen(ctx);
-  const chosenNames = new Set(
-    banish.filter((card) => chosen.includes(card.instanceId)).flatMap((card) => ctx.cardNames(card)),
-  );
-  return banish.filter(
-    (card) =>
-      !card.faceDown &&
-      !chosen.includes(card.instanceId) &&
-      ctx.hasCardType(card, "action") &&
-      ctx.cardTypes(card).includes("mechanologist") &&
-      !ctx.cardNames(card).some((name) => chosenNames.has(name)),
-  );
-}
-
-/** Choose the Mechanologist action cards one at a time so each pick can
- * exclude the names already chosen, then shuffle them in together. */
-function continueRevere(ctx: ScriptCtx): void {
-  const chosen = revereChosen(ctx);
-  const choosing = chosen.length < REVERE_LIMIT && ctx.getState(REVERE_DONE) === 0;
-  const candidates = choosing ? revereCandidates(ctx) : [];
-  if (candidates.length) {
-    ctx.requestCardChoice(
-      REVERE_HOOK,
-      chosen.length === 0
-        ? decisionPrompt(
-            "Shuffle a Mechanologist action card from your banished zone into your deck?",
-            "card.amg.revere.shuffle",
-            { optionMessages: commonOptionMessages("done") },
-          )
-        : decisionPrompt(
-            "Shuffle another differently named Mechanologist action card?",
-            "card.amg.revere.shuffle.next",
-            { optionMessages: commonOptionMessages("done") },
-          ),
-      ["done", ...candidates.map((card) => card.instanceId)],
-    );
-    return;
-  }
-  ctx.shuffleIntoDeck(chosen);
-}
 
 const revereTheCopperIdol: CardScript = {
   onPlay(ctx) {
-    ctx.setState(REVERE_COUNT, 0);
-    ctx.setState(REVERE_DONE, 0);
-    continueRevere(ctx);
-  },
-  onChoose(ctx, hook, option) {
-    if (hook !== REVERE_HOOK) return;
-    const picked = option === "done"
-      ? undefined
-      : revereCandidates(ctx).find((card) => card.instanceId === Number(option));
-    if (picked) {
-      const count = ctx.getState(REVERE_COUNT);
-      ctx.setState(`revereCard:${count}`, picked.instanceId);
-      ctx.setState(REVERE_COUNT, count + 1);
-    } else {
-      ctx.setState(REVERE_DONE, 1);
+    const candidates = ctx.player(ctx.seat).banish.filter(
+      (card) => !card.faceDown && ctx.hasCardType(card, "action") && ctx.cardTypes(card).includes("mechanologist"),
+    );
+    if (!candidates.length) {
+      ctx.shuffleIntoDeck([]);
+      return;
     }
-    continueRevere(ctx);
+    ctx.requestCardChoices(
+      REVERE_HOOK,
+      decisionPrompt(
+        "Choose up to 3 Mechanologist action cards with different names to shuffle into your deck",
+        "card.amg.revere.shuffle.choose",
+      ),
+      candidates.map((card) => card.instanceId),
+      0,
+      3,
+      undefined,
+      undefined,
+      undefined,
+      true,
+    );
+  },
+  onChooseMany(ctx, hook, options) {
+    if (hook === REVERE_HOOK) ctx.shuffleIntoDeck(options.map(Number));
   },
   triggers: [
     {

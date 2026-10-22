@@ -118,13 +118,8 @@ function warhornPermanents(ctx: ScriptCtx, seat: number): readonly DeepReadonly<
     .player(seat)
     .board.filter((card) => ["ally", "aura", "item", "landmark"].some((type) => has(ctx, card, type)));
 }
-// Reveals started before the reveal count was tracked separately used X.
-function harpoonRevealCount(ctx: ScriptCtx): number {
-  return ctx.getState("harpoonRevealCount") || ctx.getState("harpoonX");
-}
-function finishHarpoonReveal(ctx: ScriptCtx): void {
+function finishHarpoonReveal(ctx: ScriptCtx, ids: number[]): void {
   const x = ctx.getState("harpoonX");
-  const ids = Array.from({ length: harpoonRevealCount(ctx) }, (_, index) => ctx.getState(`harpoonReveal:${index}`)).filter((id) => id > 0);
   if (!ctx.revealCards(ids, opponentSeat(ctx))) return;
   const hand = ctx.player(opponentSeat(ctx)).hand;
   const actions = ids.flatMap((id) => {
@@ -449,41 +444,28 @@ export const dynHighRarity: Record<string, CardScript> = {
       const hand = ctx.player(opponentSeat(ctx)).hand;
       const revealCount = Math.min(x, hand.length);
       ctx.setState("harpoonX", x);
-      ctx.setState("harpoonRevealCount", revealCount);
       if (revealCount <= 0) return;
-      if (hand.length === revealCount) {
-        hand.forEach((card, index) =>
-          ctx.setCardState(ctx.self.instanceId, `harpoonReveal:${index}`, card.instanceId),
-        );
-        finishHarpoonReveal(ctx);
-      } else
-        ctx.requestCardChoice(
-          "harpoon-reveal:0",
-          decisionPrompt("Choose a card to reveal", "card.dyn.harpoon.reveal.choose"),
+      if (hand.length === revealCount)
+        finishHarpoonReveal(ctx, hand.map((card) => card.instanceId));
+      else
+        ctx.requestCardChoices(
+          "harpoon-reveal",
+          decisionPrompt(
+            `Choose ${revealCount} card${revealCount === 1 ? "" : "s"} to reveal`,
+            "card.dyn.harpoon.reveal.cards.choose",
+            { values: { count: revealCount } },
+          ),
           hand.map((card) => card.instanceId),
+          revealCount,
+          revealCount,
           opponentSeat(ctx),
         );
     },
     onChoose(ctx, hook, option) {
-      if (hook === "harpoon-defender") {
-        if (option !== "Close") ctx.addDefenderFromHand(Number(option));
-        return;
-      }
-      if (!hook.startsWith("harpoon-reveal:")) return;
-      const index = Number(hook.split(":")[1]);
-      ctx.setCardState(ctx.self.instanceId, `harpoonReveal:${index}`, Number(option));
-      if (index + 1 >= harpoonRevealCount(ctx)) {
-        finishHarpoonReveal(ctx);
-        return;
-      }
-      const selected = new Set(Array.from({ length: index + 1 }, (_, i) => ctx.getState(`harpoonReveal:${i}`)));
-      const hand = ctx.player(opponentSeat(ctx)).hand.filter((card) => !selected.has(card.instanceId));
-      ctx.requestCardChoice(
-        `harpoon-reveal:${index + 1}`,
-        decisionPrompt("Choose another card to reveal", "card.dyn.harpoon.reveal.next"),
-        hand.map((card) => card.instanceId),
-        opponentSeat(ctx),
-      );
+      if (hook === "harpoon-defender" && option !== "Close") ctx.addDefenderFromHand(Number(option));
+    },
+    onChooseMany(ctx, hook, options) {
+      if (hook === "harpoon-reveal") finishHarpoonReveal(ctx, options.map(Number));
     },
   },
   "bios update|1": {

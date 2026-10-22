@@ -3,6 +3,12 @@ import { applyIntent, legalIntents, projectStateFor } from "@fyendal/engine";
 import { cardData, isImplemented } from "../../index.js";
 import { printingId, scenario } from "../harness.js";
 
+function graveyardIds(g: ReturnType<typeof scenario>, seat: number, key: string): string[] {
+  return g.state.players[seat]!.graveyard
+    .filter((card) => card.cardId === printingId(key))
+    .map((card) => String(card.instanceId));
+}
+
 it("registers every HNT printing as implemented", () => {
   const cards = Object.values(cardData).filter((card) => card.set === "HNT");
   expect(cards).toHaveLength(265);
@@ -552,8 +558,12 @@ describe("HNT — marked heroes and daggers", () => {
     g.chooseOption("X = 2")
       .chooseCard("soul food|2")
       .chooseCard("tome of divinity|2")
-      .chooseCard("wounding blow|1")
-      .chooseCard("wounding blow|2")
+      .settle();
+    const pd = g.state.pendingDecision!;
+    expect(pd.chooseHook).toBe("war-cry-themis-target");
+    expect([pd.minimumSelections, pd.maximumSelections]).toEqual([2, 2]);
+    g.chooseMany(g.state.players[1]!.banish.map((card) => String(card.instanceId)))
+      .settle()
       .expectInZone(0, "war cry of themis|2", "graveyard")
       .expectZoneSize(0, "soul", 0);
 
@@ -808,7 +818,7 @@ describe("HNT — marked heroes and daggers", () => {
       .activate("flick knives|0")
       .chooseCard("kunai of retribution|0")
       .activate("cindra|0")
-      .chooseCard("kunai of retribution|0")
+      .chooseMany(graveyardIds(g, 0, "kunai of retribution|0"))
       .settle()
       .endTurn();
 
@@ -840,7 +850,7 @@ describe("HNT — marked heroes and daggers", () => {
       .activate("flick knives|0")
       .chooseCard("kunai of retribution|0")
       .activate("cindra|0")
-      .chooseCard("kunai of retribution|0")
+      .chooseMany(graveyardIds(g, 0, "kunai of retribution|0"))
       .settle()
       .attackWithWeapon("kunai of retribution|0")
       .blockWith()
@@ -967,7 +977,7 @@ describe("HNT — marked heroes and daggers", () => {
     });
 
     g.activate("cindra|0")
-      .chooseCard("kunai of retribution|0")
+      .chooseMany(graveyardIds(g, 0, "kunai of retribution|0"))
       .settle()
       .expectNoLegalPlay("demonstrate devotion|1");
   });
@@ -987,12 +997,39 @@ describe("HNT — marked heroes and daggers", () => {
     });
     expect(projectStateFor(g.state, 0).players[0]!.heroUsedAbilityIndexes).toBeUndefined();
 
-    g.activate("cindra|0").chooseCard("kunai of retribution|0").settle();
+    g.activate("cindra|0")
+      .chooseMany(graveyardIds(g, 0, "kunai of retribution|0"))
+      .settle();
 
     expect(projectStateFor(g.state, 0).players[0]!.heroUsedAbilityIndexes).toEqual([0]);
     expect(projectStateFor(g.state, 1).players[0]!.heroUsedAbilityIndexes).toEqual([0]);
     g.endTurn();
     expect(projectStateFor(g.state, 0).players[0]!.heroUsedAbilityIndexes).toBeUndefined();
+  });
+
+  it("Cindra equips up to 2 chosen Draconic daggers from the graveyard at once", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          heroKey: "cindra|0",
+          weapons: [],
+          resources: 3,
+          graveyard: ["kunai of retribution|0", "kunai of retribution|0", "kunai of retribution|0"],
+        },
+        { hero: "dorinthea" },
+      ],
+    });
+
+    g.activate("cindra|0");
+    const pd = g.state.pendingDecision!;
+    expect(pd.chooseHook).toBe("cindra-equip");
+    expect(pd.options).toHaveLength(3);
+    expect([pd.minimumSelections, pd.maximumSelections]).toEqual([0, 2]);
+    g.chooseMany(graveyardIds(g, 0, "kunai of retribution|0").slice(0, 2)).settle();
+
+    g.expectZoneSize(0, "graveyard", 1);
+    expect(g.state.players[0]!.weapons).toHaveLength(2);
   });
 
   it("Ignite grants its reduction only after its attack trigger resolves", () => {

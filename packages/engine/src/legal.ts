@@ -5,6 +5,7 @@ import type { CardInstance, PlayerState } from "./state.js";
 import {
   activatedAbilitiesSuppressed,
   cardHasType,
+  cardNamesOf,
   cardTypesOf,
   dataOf,
   instanceDataOf,
@@ -47,6 +48,46 @@ import { heroAbilitiesDisabled } from "./stateQueries.js";
 import { actionLimitReached, controlsBow, firstAttackExtraCost, isFrozen, opposingInstantsProhibited } from "./ruleQueries.js";
 import { nonAttackActionCardLimitReached, opposingActionsProhibited, ownedCardActionProhibited } from "./restrictions.js";
 import { attackActionPlayRestricted, defendingHeroCannotRespondBelowPower, weaponAttacksProhibited } from "./combatRestrictions.js";
+
+/** Valid subsets, smallest first, capped for search and the wire; the greedy
+ *  largest set survives the cap. */
+const MAX_CHOICE_SUBSETS = 64;
+function boundedChoiceIntents(
+  state: GameStateInternal,
+  options: readonly string[],
+  minimum: number,
+  maximum: number,
+  distinctCardNames: boolean,
+): GameIntent[] {
+  const names = distinctCardNames
+    ? options.map((option) => {
+        const card = findCardAnywhere(state, Number(option))?.card;
+        return new Set(card ? cardNamesOf(state, card) : []);
+      })
+    : null;
+  const clashes = (a: number, b: number) => names !== null && [...names[a]!].some((name) => names[b]!.has(name));
+  const subsets: number[][] = [];
+  const visit = (start: number, chosen: number[], size: number): void => {
+    if (chosen.length === size) {
+      subsets.push([...chosen]);
+      return;
+    }
+    for (let index = start; index < options.length && subsets.length < MAX_CHOICE_SUBSETS; index++) {
+      if (chosen.some((other) => clashes(index, other))) continue;
+      chosen.push(index);
+      visit(index + 1, chosen, size);
+      chosen.pop();
+    }
+  };
+  for (let size = minimum; size <= maximum && subsets.length < MAX_CHOICE_SUBSETS; size++) visit(0, [], size);
+  const greedy: number[] = [];
+  for (let index = 0; index < options.length && greedy.length < maximum; index++) {
+    if (!greedy.some((other) => clashes(index, other))) greedy.push(index);
+  }
+  const greedyKey = greedy.join(",");
+  if (greedy.length >= minimum && !subsets.some((subset) => subset.join(",") === greedyKey)) subsets.push(greedy);
+  return subsets.map((subset) => ({ kind: "choose-many", optionIds: subset.map((index) => options[index]!) }));
+}
 
 function filterOwnedCardActions(
   state: GameStateInternal,
@@ -1361,10 +1402,13 @@ function enumerateIntents(
           pd.maximumSelections !== undefined
         ) {
           return [
-            {
-              kind: "choose-many",
-              optionIds: (pd.options ?? []).slice(0, pd.minimumSelections),
-            },
+            ...boundedChoiceIntents(
+              state,
+              pd.options ?? [],
+              pd.minimumSelections,
+              pd.maximumSelections,
+              pd.distinctCardNames === true,
+            ),
             ...intents,
           ];
         }

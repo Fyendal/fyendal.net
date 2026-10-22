@@ -713,28 +713,17 @@ export const sea: Record<string, CardScript> = {
     onPlay(ctx) {
       const cogs = controlledCogs(ctx, true);
       if (cogs.length)
-        ctx.requestCardChoice(
+        ctx.requestCardChoices(
           "lubricate",
-          decisionPrompt("Untap up to 3 cogs (choose one at a time)", "card.sea.lubricate.cog.choose", {
-            optionMessages: commonOptionMessages("done"),
-          }),
-          ["done", ...cogs.map((card) => card.instanceId)],
+          decisionPrompt("Untap up to 3 cogs", "card.sea.lubricate.cogs.choose"),
+          cogs.map((card) => card.instanceId),
+          0,
+          3,
         );
     },
-    onChoose(ctx, hook, option) {
-      if (hook !== "lubricate" || option === "done") return;
-      ctx.untap(Number(option));
-      const cogs = controlledCogs(ctx, true);
-      const count = ctx.getState("lubricated") + 1;
-      ctx.setState("lubricated", count);
-      if (count < 3 && cogs.length)
-        ctx.requestCardChoice(
-          "lubricate",
-          decisionPrompt("Untap another cog?", "card.sea.lubricate.cog.next", {
-            optionMessages: commonOptionMessages("done"),
-          }),
-          ["done", ...cogs.map((card) => card.instanceId)],
-        );
+    onChooseMany(ctx, hook, options) {
+      if (hook !== "lubricate") return;
+      for (const option of options) ctx.untap(Number(option));
     },
   },
   "pinion sentry|3": {

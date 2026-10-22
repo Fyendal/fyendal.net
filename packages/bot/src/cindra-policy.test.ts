@@ -4408,10 +4408,6 @@ describe("Cindra engine-driven behavior scenarios", () => {
       candidate.pendingDecision?.prompt.includes("Equip up to 2 Draconic daggers") === true
     );
     game = applyCindra(game);
-    game = advanceUntil(game, (candidate) =>
-      candidate.pendingDecision?.prompt.includes("Equip one more Draconic dagger") === true
-    );
-    game = applyCindra(game);
 
     expect(game.players[0]!.weapons).toHaveLength(2);
     expect(game.players[0]!.hand).toHaveLength(0);
@@ -4625,7 +4621,7 @@ describe("Cindra engine-driven behavior scenarios", () => {
       candidate.pendingDecision?.prompt.includes("Draconic daggers") === true
     );
     const equipDagger = cindraIntent(game);
-    expect(equipDagger).toEqual({ kind: "choose", optionId: String(daggerId) });
+    expect(equipDagger).toMatchObject({ kind: "choose-many", optionIds: expect.arrayContaining([String(daggerId)]) });
     game = apply(game, 0, equipDagger);
     expect(game.players[0]!.weapons.some((card) => card.instanceId === daggerId)).toBe(true);
 
@@ -4784,10 +4780,6 @@ describe("Cindra engine-driven behavior scenarios", () => {
     game = apply(game, 0, buyback);
     game = advanceUntil(game, (candidate) =>
       candidate.pendingDecision?.prompt.includes("Equip up to 2 Draconic daggers") === true
-    );
-    game = applyCindra(game);
-    game = advanceUntil(game, (candidate) =>
-      candidate.pendingDecision?.prompt.includes("Equip one more Draconic dagger") === true
     );
     game = applyCindra(game);
 

@@ -265,6 +265,18 @@ export class Scenario {
     this.state = r.state;
   }
 
+  /** Submit a bounded multi-card selection that must match a legal
+   *  choose-many in any order; the submitted order is kept. */
+  chooseMany(optionIds: readonly string[]): this {
+    const key = (ids: readonly string[]) => [...ids].sort().join(",");
+    const legal = legalIntents(this.state, this.actor()).some((intent) =>
+      intent.kind === "choose-many" && key(intent.optionIds) === key(optionIds)
+    );
+    if (!legal) throw new Error(`no legal choose-many for [${optionIds.join(", ")}]`);
+    this.do({ kind: "choose-many", optionIds: [...optionIds] });
+    return this;
+  }
+
   /** Send a raw intent, bypassing legalIntents for explicit rejection and
    * edge-path specifications. */
   doRaw(intent: GameIntent): this {

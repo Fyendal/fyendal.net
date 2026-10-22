@@ -148,9 +148,8 @@ describe("SUP — heroes and the crowd", () => {
     });
 
     g.play("celestial cataclysm|2")
-      .chooseCard("soul food|2")
-      .chooseCard("tome of divinity|2")
-      .chooseCard("beacon of victory|2")
+      .chooseMany(g.state.players[0]!.soul.map((card) => String(card.instanceId)))
+      .settle()
       .blockWith()
       .settle()
       .play("battlefield beacon|2");
@@ -597,7 +596,7 @@ describe("SUP — heroes and the crowd", () => {
     })).toMatchObject({ ok: false, error: "invalid selection count" });
 
     const selected = options.slice(0, 2);
-    g.doRaw({ kind: "choose-many", optionIds: selected });
+    g.chooseMany(selected);
 
     expect(g.state.players[0]!.banish.filter(
       (card) => functionalKeyOf(cardData[card.cardId]!) === "blunten|2",

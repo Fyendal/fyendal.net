@@ -522,8 +522,12 @@ describe("ROS — Lightning and Runeblade", () => {
     });
     g.play("fry|1", { settle: false })
       .passPriority()
-      .react("electromagnetic somersault|1")
-      .chooseCard("fry|1")
+      .react("electromagnetic somersault|1");
+    const pd = g.state.pendingDecision!;
+    expect(pd.chooseHook).toBe("somersault");
+    expect([pd.minimumSelections, pd.maximumSelections]).toEqual([0, 1]);
+    g.chooseMany([String(g.state.chain.at(-1)!.attackingCard.instanceId)])
+      .settle()
       .blockWith()
       .settle()
       .expectInZone(0, "fry|1", "hand")
@@ -1349,7 +1353,7 @@ describe("ROS — delayed end-phase effects", () => {
     const chosen = ["CRU127", "OUT172"].map((key) =>
       String(deck.find((card) => card.cardId === printingId(key))!.instanceId),
     );
-    g.doRaw({ kind: "choose-many", optionIds: chosen }).settle();
+    g.chooseMany(chosen).settle();
     expect(g.state.pendingDecision).toMatchObject({
       chooseHook: "plan-for-worst-hand",
       minimumSelections: 2,
@@ -1359,7 +1363,7 @@ describe("ROS — delayed end-phase effects", () => {
     const returned = ["snatch|1", "CRU127"].map((key) =>
       String(hand.find((card) => card.cardId === printingId(key))!.instanceId),
     );
-    g.doRaw({ kind: "choose-many", optionIds: returned }).settle();
+    g.chooseMany(returned).settle();
 
     g.expectInZone(0, "OUT172", "hand")
       .expectInZone(0, BLUE, "hand")
@@ -1380,7 +1384,7 @@ describe("ROS — delayed end-phase effects", () => {
     });
     g.play("plan for the worst|3");
     expect(g.state.pendingDecision?.chooseHook).toBe("plan-for-worst-hand");
-    g.doRaw({ kind: "choose-many", optionIds: g.state.pendingDecision!.options! }).settle();
+    g.chooseMany(g.state.pendingDecision!.options!).settle();
     g.expectInZone(0, "snatch|1", "deck").expectInZone(0, BLUE, "deck");
     expect(g.state.pendingDecision).toBeNull();
   });
@@ -1398,7 +1402,7 @@ describe("ROS — delayed end-phase effects", () => {
       minimumSelections: 1,
       maximumSelections: 1,
     });
-    g.doRaw({ kind: "choose-many", optionIds: g.state.pendingDecision!.options! }).settle();
+    g.chooseMany(g.state.pendingDecision!.options!).settle();
     g.expectInZone(0, BLUE, "deck");
   });
 

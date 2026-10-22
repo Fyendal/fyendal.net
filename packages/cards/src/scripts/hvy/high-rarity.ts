@@ -185,46 +185,35 @@ export const hvyHighRarity: Record<string, CardScript> = {
     additionalCost(ctx) {
       const cards = ctx.player(ctx.seat).hand.filter((card) => isSix(ctx, card));
       if (cards.length) {
-        ctx.requestCardChoice(
+        ctx.requestCardChoices(
           "no-fear",
-          decisionPrompt("Banish a 6-power card?", "card.hvy.six.banish", {
+          decisionPrompt("Banish any number of cards with 6 or more power", "card.hvy.six.banish.choose", {
             values: { amount: 6 },
-            optionMessages: commonOptionMessages("done"),
           }),
-          ["done", ...cards.map((card) => card.instanceId)],
+          cards.map((card) => card.instanceId),
+          0,
+          cards.length,
         );
       } else {
         ctx.preventNextDamage(ctx.seat, 2);
       }
     },
-    onChoose(ctx, hook, option) {
+    onChooseMany(ctx, hook, options) {
       if (hook !== "no-fear") return;
-      if (option === "done") {
-        const count = ctx.getState("fear-count");
-        ctx.preventNextDamage(ctx.seat, 2 + count);
-        if (count > 0) {
-          ctx.scheduleEndOfTurnTrigger(
-            "no-fear-return",
-            decisionPrompt("Return cards banished by No Fear", "card.trigger.common.nofear.return"),
-            ctx.state.activePlayer,
-          );
-          ctx.setState("fear-count", 0);
-        }
-        return;
-      }
-      if (ctx.banish(Number(option))) {
-        const count = ctx.getState("fear-count") + 1;
-        ctx.setState("fear-count", count);
+      let count = 0;
+      for (const option of options) {
+        if (!ctx.banish(Number(option))) continue;
+        count += 1;
         ctx.setState(`fear-card-${count}`, Number(option));
-        const cards = ctx.player(ctx.seat).hand.filter((card) => isSix(ctx, card));
-        ctx.requestCardChoice(
-          "no-fear",
-          decisionPrompt("Banish another?", "card.hvy.six.banish.next", {
-            optionMessages: commonOptionMessages("done"),
-          }),
-          ["done", ...cards.map((card) => card.instanceId)],
-        );
       }
+      ctx.setState("fear-count", count);
+      ctx.preventNextDamage(ctx.seat, 2 + count);
+      if (count > 0)
+        ctx.scheduleEndOfTurnTrigger(
+          "no-fear-return",
+          decisionPrompt("Return cards banished by No Fear", "card.trigger.common.nofear.return"),
+          ctx.state.activePlayer,
+        );
     },
     onDelayedTrigger(ctx, hook) {
       if (hook !== "no-fear-return") return;

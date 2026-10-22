@@ -551,31 +551,22 @@ function putOnIce(count: number): CardScript {
     onPlay(ctx) {
       const allies = ctx.state.players.flatMap((player) => player.board).filter((card) => hasTag(ctx, card, "ally"));
       if (allies.length)
-        ctx.requestCardChoice(
+        ctx.requestCardChoices(
           "pen-freeze-ally",
-          decisionPrompt(`Freeze an ally (${count} maximum; repeat as desired)`, "card.pen.ally.freeze.upto", {
-            values: { count },
-            optionMessages: commonOptionMessages("done"),
-          }),
-          ["done", ...allies.map((card) => card.instanceId)],
+          decisionPrompt(
+            `Choose up to ${count} ${count === 1 ? "ally" : "allies"} to freeze`,
+            "card.pen.ally.freeze.choose",
+            { values: { count } },
+          ),
+          allies.map((card) => card.instanceId),
+          0,
+          count,
         );
       if (ctx.fromArsenal) ctx.drawCards(ctx.seat, 1);
     },
-    onChoose(ctx, hook, option) {
-      if (hook !== "pen-freeze-ally" || option === "done" || ctx.getState("frozen") >= count) return;
-      ctx.setCardState(Number(option), "frozenUntilTurn", ctx.state.turn + 2);
-      ctx.setState("frozen", ctx.getState("frozen") + 1);
-      const remaining = ctx.state.players
-        .flatMap((player) => player.board)
-        .filter((card) => hasTag(ctx, card, "ally") && !ctx.isFrozen(card));
-      if (remaining.length && ctx.getState("frozen") < count)
-        ctx.requestCardChoice(
-          "pen-freeze-ally",
-          decisionPrompt("Freeze another ally?", "card.pen.ally.freeze.next", {
-            optionMessages: commonOptionMessages("done"),
-          }),
-          ["done", ...remaining.map((card) => card.instanceId)],
-        );
+    onChooseMany(ctx, hook, options) {
+      if (hook !== "pen-freeze-ally") return;
+      for (const option of options) ctx.setCardState(Number(option), "frozenUntilTurn", ctx.state.turn + 2);
     },
   };
 }
@@ -2025,36 +2016,29 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
       },
     },
     onPlay(ctx) {
-      if (ctx.getState("recedeX") <= 0) return;
       const equipment = Object.values(ctx.player(ctx.seat).equipment).filter(
         (card): card is DeepReadonly<CardInstance> =>
           !!card &&
           !card.faceDown &&
           (data(ctx, card).keywords ?? []).some((keyword) => keyword.toLowerCase() === "cloaked"),
       );
-      if (equipment.length)
-        ctx.requestCardChoice(
+      const n = Math.min(ctx.getState("recedeX"), equipment.length);
+      if (n > 0)
+        ctx.requestCardChoices(
           "recede-equipment",
-          decisionPrompt("Choose equipment with cloaked to turn face-down", "card.pen.cloaked.equipment.facedown"),
+          decisionPrompt(
+            `Choose ${n} equipment with cloaked to turn face-down`,
+            "card.pen.cloaked.equipment.facedown.choose",
+            { values: { count: n } },
+          ),
           equipment.map((card) => card.instanceId),
+          n,
+          n,
         );
     },
-    onChoose(ctx, hook, option) {
+    onChooseMany(ctx, hook, options) {
       if (hook !== "recede-equipment") return;
-      if (ctx.setCardFaceDown(Number(option), true)) ctx.addCardState(ctx.self.instanceId, "recedeChosen", 1);
-      if (ctx.getState("recedeChosen") >= ctx.getState("recedeX")) return;
-      const equipment = Object.values(ctx.player(ctx.seat).equipment).filter(
-        (card): card is DeepReadonly<CardInstance> =>
-          !!card &&
-          !card.faceDown &&
-          (data(ctx, card).keywords ?? []).some((keyword) => keyword.toLowerCase() === "cloaked"),
-      );
-      if (equipment.length)
-        ctx.requestCardChoice(
-          "recede-equipment",
-          decisionPrompt("Choose another equipment with cloaked", "card.pen.cloaked.equipment.facedown.next"),
-          equipment.map((card) => card.instanceId),
-        );
+      for (const option of options) ctx.setCardFaceDown(Number(option), true);
     },
   },
   "mistborn protector|3": { modifyDefense: (ctx) => (createdThisTurn(ctx) ? 1 : 0) },
