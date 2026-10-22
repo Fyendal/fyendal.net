@@ -23,60 +23,40 @@ function rowLabel(intl: IntlShape, row: StandingOrderRow): string {
   const effect = row.label
     ? formatGameMessage(intl, row.label, { card: cardName })
     : row.fallback;
-  if (effect === null) {
-    return intl.formatMessage({
-      id: row.kind === "priority-window"
-        ? "game.standingOrder.priority.generic"
-        : "game.standingOrder.optional.generic",
-    });
-  }
-  return row.timing
-    ? intl.formatMessage({ id: TIMING_MESSAGES[row.timing] }, { effect })
-    : effect;
+  return intl.formatMessage({ id: TIMING_MESSAGES[row.timing] }, { effect });
 }
 
-const PRIORITY_OPTIONS = [
-  ["ask", "game.standingOrder.priority.ask"],
-  ["pass", "game.standingOrder.priority.pass"],
-] as const;
-const OPTIONAL_OPTIONS = [
-  ["ask", "game.standingOrder.optional.ask"],
-  ["no", "game.standingOrder.optional.deny"],
-  ["yes", "game.standingOrder.optional.use"],
-] as const;
-
-/** One row per repeating question: the trigger's own wording, then a
- * segmented choice of what the client answers from now on. Shared by the
- * card badge's dialog and the phone card sheet. */
+/** Shared by the card badge's dialog and the phone card sheet. */
 export function StandingOrderRows({ model, onSetOrder }: StandingOrderPanelModel) {
   const intl = useIntl();
   return (
     <ul className="standing-order-list">
       {model.rows.map((row) => {
-        const options = row.kind === "priority-window" ? PRIORITY_OPTIONS : OPTIONAL_OPTIONS;
         const label = rowLabel(intl, row);
+        const buttons = [
+          { value: null, text: intl.formatMessage({ id: "game.standingOrder.ask" }) },
+          ...row.options.map((option) => ({
+            value: option.value,
+            text: formatGameMessage(intl, option.message, { card: cardName }),
+          })),
+        ];
         return (
-          <li key={row.kind} className="standing-order-row">
+          <li key={row.hook} className="standing-order-row">
             <span className="standing-order-label">{label}</span>
             <div
-              className={`settings-segmented standing-order-segmented${options.length === 3 ? " standing-order-segmented-3" : ""}`}
+              className={`settings-segmented standing-order-segmented${buttons.length === 3 ? " standing-order-segmented-3" : ""}`}
               role="group"
               aria-label={label}
             >
-              {options.map(([value, id]) => (
+              {buttons.map(({ value, text }) => (
                 <button
-                  key={value}
+                  key={value ?? ""}
                   type="button"
                   className={row.order === value ? "settings-selected" : ""}
                   aria-pressed={row.order === value}
-                  onClick={() => onSetOrder(
-                    model.key,
-                    row.kind === "priority-window"
-                      ? { kind: "priority-window", value: value as "ask" | "pass" }
-                      : { kind: "optional-trigger", value: value as "ask" | "yes" | "no" },
-                  )}
+                  onClick={() => onSetOrder(model.key, { hook: row.hook, value })}
                 >
-                  {intl.formatMessage({ id })}
+                  {text}
                 </button>
               ))}
             </div>

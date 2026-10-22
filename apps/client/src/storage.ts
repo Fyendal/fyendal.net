@@ -1,5 +1,5 @@
-import type { CardPoolMode, PriorityWindowMode, Format } from "@fyendal/shared";
-import { MAX_MATCHMAKING_AVOID_ROOM_CODES } from "@fyendal/protocol";
+import type { CardPoolMode, PriorityWindowMode, Format, SeatStandingOrders } from "@fyendal/shared";
+import { decodeSeatStandingOrders, MAX_MATCHMAKING_AVOID_ROOM_CODES } from "@fyendal/protocol";
 
 export const AUTH_STORAGE_KEY = "fyendal-auth";
 export const ROOM_SESSION_STORAGE_KEY = "fyendal-room-session";
@@ -360,23 +360,15 @@ export type CardDisplayPreference = "square" | "full";
 export type MotionPreference = "system" | "full" | "reduced";
 export type PlayabilityCuePreference = "glow" | "high-contrast";
 
-/** What the client answers for a card on its own; "ask" keeps the card's
- * row without answering. */
-export type PriorityWindowOrder = "ask" | "pass";
-export type OptionalTriggerOrder = "ask" | "yes" | "no";
-export interface StandingOrder {
-  priorityWindow?: PriorityWindowOrder;
-  optionalTrigger?: OptionalTriggerOrder;
-}
-/** Keyed by functional card identity (`name lowercase|pitch`). */
-export type StandingOrders = Record<string, StandingOrder>;
+/** Functional card key → `chooseHook` → engine option id; asking is absence. */
+export type StandingOrders = SeatStandingOrders;
 
 export const MAX_STANDING_ORDER_CARDS = 200;
-const MAX_STANDING_ORDER_KEY_LENGTH = 120;
 
-export type StandingOrderUpdate =
-  | { kind: "priority-window"; value: PriorityWindowOrder }
-  | { kind: "optional-trigger"; value: OptionalTriggerOrder };
+export interface StandingOrderUpdate {
+  hook: string;
+  value: string | null;
+}
 
 /** Same object when nothing changes; the oldest card is evicted at the bound. */
 export function applyStandingOrder(
@@ -384,16 +376,13 @@ export function applyStandingOrder(
   key: string,
   update: StandingOrderUpdate,
 ): StandingOrders {
-  const existing: StandingOrder = orders[key] ?? {};
-  const updated: StandingOrder = update.kind === "priority-window"
-    ? { ...existing, priorityWindow: update.value }
-    : { ...existing, optionalTrigger: update.value };
-  if (
-    existing.priorityWindow === updated.priorityWindow
-    && existing.optionalTrigger === updated.optionalTrigger
-  ) return orders;
-  const { [key]: _previous, ...others } = orders;
-  const next: StandingOrders = { ...others, [key]: updated };
+  const existing = Object.hasOwn(orders, key) ? orders[key]! : {};
+  const current = Object.hasOwn(existing, update.hook) ? existing[update.hook] : undefined;
+  if (current === (update.value ?? undefined)) return orders;
+  const { [update.hook]: _previous, ...hooks } = existing;
+  const updated = update.value === null ? hooks : { ...hooks, [update.hook]: update.value };
+  const { [key]: _card, ...others } = orders;
+  const next: StandingOrders = Object.keys(updated).length > 0 ? { ...others, [key]: updated } : others;
   const keys = Object.keys(next);
   for (const stale of keys.slice(0, Math.max(0, keys.length - MAX_STANDING_ORDER_CARDS))) {
     delete next[stale];
@@ -402,42 +391,41 @@ export function applyStandingOrder(
 }
 
 export function decodeStandingOrders(value: unknown): StandingOrders | null {
+  const orders = decodeSeatStandingOrders(value);
+  if (!orders) return null;
+  const keys = Object.keys(orders);
+  return keys.length <= MAX_STANDING_ORDER_CARDS && keys.every((key) => /^[^|]+\|\d$/.test(key))
+    ? orders
+    : null;
+}
+
+/** Version 8: drop `priorityWindow`; `optionalTrigger` becomes `trigger-choice`. */
+function migrateVersion8StandingOrders(value: unknown): StandingOrders | null {
   if (!value || typeof value !== "object" || Array.isArray(value)) return null;
-  const entries = Object.entries(value as Record<string, unknown>);
-  if (entries.length > MAX_STANDING_ORDER_CARDS) return null;
-  const orders: StandingOrders = {};
-  for (const [key, entry] of entries) {
-    if (
-      key.length === 0
-      || key.length > MAX_STANDING_ORDER_KEY_LENGTH
-      || !/^[^|]+\|\d$/.test(key)
-      || !entry || typeof entry !== "object" || Array.isArray(entry)
-    ) return null;
+  const migrated: Record<string, Record<string, string>> = {};
+  for (const [key, entry] of Object.entries(value as Record<string, unknown>)) {
+    if (!entry || typeof entry !== "object" || Array.isArray(entry)) return null;
     const record = entry as Record<string, unknown>;
-    const order: StandingOrder = {};
     for (const field of Object.keys(record)) {
       if (field === "priorityWindow") {
         if (record.priorityWindow !== "ask" && record.priorityWindow !== "pass") return null;
-        order.priorityWindow = record.priorityWindow;
       } else if (field === "optionalTrigger") {
-        if (
-          record.optionalTrigger !== "ask"
-          && record.optionalTrigger !== "yes"
-          && record.optionalTrigger !== "no"
-        ) return null;
-        order.optionalTrigger = record.optionalTrigger;
+        if (record.optionalTrigger !== "ask" && record.optionalTrigger !== "yes" && record.optionalTrigger !== "no") {
+          return null;
+        }
       } else {
         return null;
       }
     }
-    if (Object.keys(order).length === 0) return null;
-    orders[key] = order;
+    if (record.optionalTrigger === "yes" || record.optionalTrigger === "no") {
+      migrated[key] = { "trigger-choice": record.optionalTrigger };
+    }
   }
-  return orders;
+  return decodeStandingOrders(migrated);
 }
 
 export interface GameSettings {
-  version: 8;
+  version: 9;
   priorityWindowMode: PriorityWindowMode;
   lessGuidance: boolean;
   skipPlayConfirmation: boolean;
@@ -452,7 +440,7 @@ export interface GameSettings {
 }
 
 export const DEFAULT_GAME_SETTINGS: GameSettings = {
-  version: 8,
+  version: 9,
   priorityWindowMode: "always-pause",
   lessGuidance: true,
   skipPlayConfirmation: true,
@@ -493,6 +481,7 @@ export function loadGameSettings(storage: Pick<Storage, "getItem">): GameSetting
         && record.version !== 6
         && record.version !== 7
         && record.version !== 8
+        && record.version !== 9
       )
       || (
         record.priorityWindowMode !== "auto-pass"
@@ -506,6 +495,7 @@ export function loadGameSettings(storage: Pick<Storage, "getItem">): GameSetting
       || record.version === 6
       || record.version === 7
       || record.version === 8
+      || record.version === 9
     )
       && (
         record.motionPreference === "system"
@@ -515,7 +505,7 @@ export function loadGameSettings(storage: Pick<Storage, "getItem">): GameSetting
       ? record.motionPreference
       : "system";
     if (
-      (record.version === 4 || record.version === 5 || record.version === 6 || record.version === 7 || record.version === 8)
+      (record.version === 4 || record.version === 5 || record.version === 6 || record.version === 7 || record.version === 8 || record.version === 9)
       && (
         typeof record.soundEffectsEnabled !== "boolean"
         || typeof record.soundEffectsVolume !== "number"
@@ -524,26 +514,30 @@ export function loadGameSettings(storage: Pick<Storage, "getItem">): GameSetting
         || record.soundEffectsVolume > 100
       )
     ) return DEFAULT_GAME_SETTINGS;
-    const playabilityCuePreference = record.version === 5 || record.version === 6 || record.version === 7 || record.version === 8
+    const playabilityCuePreference = record.version === 5 || record.version === 6 || record.version === 7 || record.version === 8 || record.version === 9
       ? record.playabilityCuePreference
       : "glow";
     if (
       playabilityCuePreference !== "glow"
       && playabilityCuePreference !== "high-contrast"
     ) return DEFAULT_GAME_SETTINGS;
-    const cardDisplayPreference = record.version === 7 || record.version === 8
+    const cardDisplayPreference = record.version === 7 || record.version === 8 || record.version === 9
       ? record.cardDisplayPreference
       : "square";
     if (cardDisplayPreference !== "square" && cardDisplayPreference !== "full") {
       return DEFAULT_GAME_SETTINGS;
     }
-    const standingOrders = record.version === 8 ? decodeStandingOrders(record.standingOrders) : {};
+    const standingOrders = record.version === 9
+      ? decodeStandingOrders(record.standingOrders)
+      : record.version === 8
+        ? migrateVersion8StandingOrders(record.standingOrders)
+        : {};
     if (standingOrders === null) return DEFAULT_GAME_SETTINGS;
     return {
-      version: 8,
+      version: 9,
       cardDisplayPreference,
       priorityWindowMode: record.priorityWindowMode,
-      lessGuidance: (record.version === 6 || record.version === 7 || record.version === 8)
+      lessGuidance: (record.version === 6 || record.version === 7 || record.version === 8 || record.version === 9)
         && typeof record.lessGuidance === "boolean"
         ? record.lessGuidance
         : true,
@@ -552,10 +546,10 @@ export function loadGameSettings(storage: Pick<Storage, "getItem">): GameSetting
         : true,
       motionPreference,
       playabilityCuePreference,
-      soundEffectsEnabled: record.version === 4 || record.version === 5 || record.version === 6 || record.version === 7 || record.version === 8
+      soundEffectsEnabled: record.version === 4 || record.version === 5 || record.version === 6 || record.version === 7 || record.version === 8 || record.version === 9
         ? record.soundEffectsEnabled as boolean
         : true,
-      soundEffectsVolume: record.version === 4 || record.version === 5 || record.version === 6 || record.version === 7 || record.version === 8
+      soundEffectsVolume: record.version === 4 || record.version === 5 || record.version === 6 || record.version === 7 || record.version === 8 || record.version === 9
         ? record.soundEffectsVolume as number
         : 35,
       optionHotkeys: typeof record.optionHotkeys === "boolean" ? record.optionHotkeys : false,

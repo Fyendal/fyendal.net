@@ -587,7 +587,7 @@ export interface PendingDecision {
     sourceInstanceId?: number;
   };
   /** Arena source of an optional trigger choice (yes/no), projected only to
-   * the deciding player so clients can attach standing orders to that card. */
+   * the deciding player so clients can attach the choice to that card. */
   sourceInstanceId?: number;
   /** Publicly announced card or arena ability whose play/activation is paused
    * on a declaration, resource payment, or additional-cost choice before its

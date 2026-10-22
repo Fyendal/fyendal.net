@@ -29380,46 +29380,10 @@
       "value": "Trigger"
     }
   ],
-  "game.standingOrder.optional.ask": [
+  "game.standingOrder.ask": [
     {
       "type": 0,
       "value": "Always ask"
-    }
-  ],
-  "game.standingOrder.optional.deny": [
-    {
-      "type": 0,
-      "value": "Always deny"
-    }
-  ],
-  "game.standingOrder.optional.generic": [
-    {
-      "type": 0,
-      "value": "When it asks whether to use its trigger"
-    }
-  ],
-  "game.standingOrder.optional.use": [
-    {
-      "type": 0,
-      "value": "Always use"
-    }
-  ],
-  "game.standingOrder.priority.ask": [
-    {
-      "type": 0,
-      "value": "Always ask"
-    }
-  ],
-  "game.standingOrder.priority.generic": [
-    {
-      "type": 0,
-      "value": "When its trigger is on the stack"
-    }
-  ],
-  "game.standingOrder.priority.pass": [
-    {
-      "type": 0,
-      "value": "Always pass"
     }
   ],
   "game.standingOrder.timing.actionPhase": [
@@ -29460,6 +29424,24 @@
     {
       "type": 1,
       "value": "card"
+    }
+  ],
+  "game.standingOrder.titleSet": [
+    {
+      "type": 0,
+      "value": "Standing orders for "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": "
+    },
+    {
+      "type": 1,
+      "value": "orders"
     }
   ],
   "game.stats.allies": [

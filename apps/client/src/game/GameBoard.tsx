@@ -1259,7 +1259,6 @@ export function GameBoard() {
           onSendEmote={sendEmote}
           onOpenOverlay={setOverlay}
           onOpenEffects={openEffectLedger}
-          standingOrders={standingOrders}
         />
 
         {/* center divider: a brass-inlay strip marking the seam */}

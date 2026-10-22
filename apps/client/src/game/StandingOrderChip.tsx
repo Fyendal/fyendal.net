@@ -3,8 +3,9 @@ import { createPortal } from "react-dom";
 import { useIntl } from "react-intl";
 import { cardData } from "@fyendal/cards/client";
 import { UiIcon } from "../components/UiIcon.js";
+import { formatGameMessage } from "../i18n/GameMessage.js";
 import { StandingOrderRows } from "./StandingOrderPanel.js";
-import { activeOrderValues, type StandingOrderCardModel } from "./standingOrders.js";
+import { activeOrderMessages, type StandingOrderCardModel } from "./standingOrders.js";
 import type { StandingOrderBoard } from "./useStandingOrders.js";
 
 const POPOVER_WIDTH = 256;
@@ -27,7 +28,8 @@ export function StandingOrderChip({
   const [open, setOpen] = useState(false);
   const [position, setPosition] = useState<{ left: number; bottom: number } | null>(null);
   const name = cardData[model.cardId]?.name ?? model.cardId;
-  const set = activeOrderValues(model.rows).length > 0;
+  const orders = activeOrderMessages(model.rows).map((message) => formatGameMessage(intl, message));
+  const set = orders.length > 0;
 
   useEffect(() => {
     if (!open) {
@@ -83,13 +85,16 @@ export function StandingOrderChip({
   }, [open, position]);
 
   const label = intl.formatMessage({ id: "game.standingOrder.title" }, { card: name });
+  const chipLabel = set
+    ? intl.formatMessage({ id: "game.standingOrder.titleSet" }, { card: name, orders: intl.formatList(orders) })
+    : label;
   return (
     <>
       <button
         type="button"
         ref={chipRef}
         className={`standing-order-chip${set ? " standing-order-chip-set" : ""}`}
-        aria-label={label}
+        aria-label={chipLabel}
         aria-haspopup="dialog"
         aria-expanded={open}
         aria-controls={open ? popoverId : undefined}

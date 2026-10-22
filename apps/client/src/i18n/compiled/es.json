@@ -30330,46 +30330,10 @@
       "value": "Disparador"
     }
   ],
-  "game.standingOrder.optional.ask": [
+  "game.standingOrder.ask": [
     {
       "type": 0,
       "value": "Preguntar siempre"
-    }
-  ],
-  "game.standingOrder.optional.deny": [
-    {
-      "type": 0,
-      "value": "Rechazar siempre"
-    }
-  ],
-  "game.standingOrder.optional.generic": [
-    {
-      "type": 0,
-      "value": "Cuando pregunta si usar su habilidad disparada"
-    }
-  ],
-  "game.standingOrder.optional.use": [
-    {
-      "type": 0,
-      "value": "Usar siempre"
-    }
-  ],
-  "game.standingOrder.priority.ask": [
-    {
-      "type": 0,
-      "value": "Preguntar siempre"
-    }
-  ],
-  "game.standingOrder.priority.generic": [
-    {
-      "type": 0,
-      "value": "Cuando su habilidad disparada está en la pila"
-    }
-  ],
-  "game.standingOrder.priority.pass": [
-    {
-      "type": 0,
-      "value": "Pasar siempre"
     }
   ],
   "game.standingOrder.timing.actionPhase": [
@@ -30410,6 +30374,24 @@
     {
       "type": 1,
       "value": "card"
+    }
+  ],
+  "game.standingOrder.titleSet": [
+    {
+      "type": 0,
+      "value": "Órdenes permanentes para "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": "
+    },
+    {
+      "type": 1,
+      "value": "orders"
     }
   ],
   "game.stats.allies": [

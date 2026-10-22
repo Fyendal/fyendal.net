@@ -92,17 +92,26 @@ function renderPlayerHalf(
   );
 }
 
+const cogRow = {
+  hook: "sea-cog-maintenance",
+  timing: "start-of-turn",
+  label: null,
+  fallback: "Remove a steam counter or destroy this",
+  options: [{ value: "remove", message: { id: "common.option.remove" } }],
+  order: null,
+} as const;
+
 const standingOrderBoard: NonNullable<ComponentProps<typeof PlayerHalf>["standingOrders"]> = {
   cards: new Map([
     ["fealty|0", {
       key: "fealty|0",
       cardId: "SFA037",
-      rows: [{ kind: "priority-window", timing: null, label: null, fallback: "Destroy Fealty", order: "pass" }],
+      rows: [{ ...cogRow, order: "remove" }],
     }],
     ["valiant dynamo|0", {
       key: "valiant dynamo|0",
       cardId: "MON107",
-      rows: [{ kind: "optional-trigger", timing: null, label: null, fallback: null, order: "ask" }],
+      rows: [cogRow],
     }],
   ]),
   onSetOrder: () => undefined,

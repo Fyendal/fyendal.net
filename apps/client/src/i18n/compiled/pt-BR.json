@@ -30783,46 +30783,10 @@
       "value": "Trigger"
     }
   ],
-  "game.standingOrder.optional.ask": [
+  "game.standingOrder.ask": [
     {
       "type": 0,
       "value": "Sempre perguntar"
-    }
-  ],
-  "game.standingOrder.optional.deny": [
-    {
-      "type": 0,
-      "value": "Sempre recusar"
-    }
-  ],
-  "game.standingOrder.optional.generic": [
-    {
-      "type": 0,
-      "value": "Quando pergunta se deve usar o trigger"
-    }
-  ],
-  "game.standingOrder.optional.use": [
-    {
-      "type": 0,
-      "value": "Sempre usar"
-    }
-  ],
-  "game.standingOrder.priority.ask": [
-    {
-      "type": 0,
-      "value": "Sempre perguntar"
-    }
-  ],
-  "game.standingOrder.priority.generic": [
-    {
-      "type": 0,
-      "value": "Quando o trigger dela está na pilha"
-    }
-  ],
-  "game.standingOrder.priority.pass": [
-    {
-      "type": 0,
-      "value": "Sempre passar"
     }
   ],
   "game.standingOrder.timing.actionPhase": [
@@ -30863,6 +30827,24 @@
     {
       "type": 1,
       "value": "card"
+    }
+  ],
+  "game.standingOrder.titleSet": [
+    {
+      "type": 0,
+      "value": "Ordens permanentes para "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": "
+    },
+    {
+      "type": 1,
+      "value": "orders"
     }
   ],
   "game.stats.allies": [

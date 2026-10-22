@@ -149,7 +149,6 @@ export function PlayerHalf({
   onSendEmote: (message: EmoteMessage) => void;
   onOpenOverlay: (overlay: BoardOverlay) => void;
   onOpenEffects: (target: EffectLedgerTarget) => void;
-  /** Repeating-question badges for arena cards, keyed by functional identity. */
   standingOrders?: StandingOrderBoard;
 }) {
   const intl = useIntl();

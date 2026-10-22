@@ -45,7 +45,17 @@ describe("MobileCardInspect", () => {
           model: {
             key: "valiant dynamo|0",
             cardId: "MON107",
-            rows: [{ kind: "optional-trigger", timing: null, label: null, fallback: "Recover Valiant Dynamo", order: "no" }],
+            rows: [{
+              hook: "trigger-choice",
+              timing: "end-of-turn",
+              label: null,
+              fallback: "Recover Valiant Dynamo",
+              options: [
+                { value: "yes", message: { id: "common.option.yes" } },
+                { value: "no", message: { id: "common.option.no" } },
+              ],
+              order: "no",
+            }],
           },
           onSetOrder: () => undefined,
         },
@@ -53,7 +63,8 @@ describe("MobileCardInspect", () => {
     }));
     expect(html).toContain('class="standing-order-sheet"');
     expect(html).toContain("Recover Valiant Dynamo");
-    expect(html).toContain('aria-pressed="true">Always deny<');
+    expect(html).toContain('aria-pressed="true">No<');
+    expect(html).toContain('aria-pressed="false">Always ask<');
     expect(inspect("MON107")).not.toContain("standing-order-sheet");
   });
 });
