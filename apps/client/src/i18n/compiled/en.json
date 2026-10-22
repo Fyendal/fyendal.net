@@ -12460,6 +12460,20 @@
       "value": "Choose a token"
     }
   ],
+  "card.out.abyssal.arrow.choose": [
+    {
+      "type": 0,
+      "value": "Choose an arrow to shuffle into your deck ("
+    },
+    {
+      "type": 1,
+      "value": "remaining"
+    },
+    {
+      "type": 0,
+      "value": " remaining)"
+    }
+  ],
   "card.out.arsenal.attack.choose": [
     {
       "type": 0,

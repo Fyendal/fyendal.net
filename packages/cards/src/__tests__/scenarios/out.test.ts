@@ -477,6 +477,41 @@ describe("OUT — registration and core mechanics", () => {
 });
 
 describe("OUT — rules regression coverage", () => {
+  it("Quiver of Abyssal Depths lets its controller choose up to 3 differently named arrows", () => {
+    const s = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          resources: 3,
+          deck: [BLUE],
+          weapons: ["sandscour greatbow|0", "quiver of abyssal depths|0"],
+          graveyard: ["infecting shot|1", "infecting shot|2", "falcon wing|1", "barbed undertow|1", NON_ATTACK],
+        },
+        { hero: "dorinthea", hand: [] },
+      ],
+    });
+    const optionKeys = () =>
+      s.state.pendingDecision!.options!.filter((option) => option !== "pass").map((option) => {
+        const card = s.state.players[0]!.graveyard.find((c) => String(c.instanceId) === option)!;
+        return cardData[card.cardId]!.name;
+      });
+
+    s.activate("quiver of abyssal depths|0");
+    while (!s.state.pendingDecision?.chooseHook?.startsWith("abyssal-depths")) s.passPriority();
+    expect(optionKeys().sort()).toEqual(["Barbed Undertow", "Falcon Wing", "Infecting Shot", "Infecting Shot"]);
+
+    s.chooseCard("infecting shot|2");
+    expect(optionKeys().sort()).toEqual(["Barbed Undertow", "Falcon Wing"]);
+    s.chooseCard("falcon wing|1").chooseOption("pass");
+
+    s.expectZoneSize(0, "deck", 3)
+      .expectInZone(0, "infecting shot|2", "deck")
+      .expectInZone(0, "falcon wing|1", "deck")
+      .expectInZone(0, "infecting shot|1", "graveyard")
+      .expectInZone(0, "barbed undertow|1", "graveyard")
+      .expectInZone(0, NON_ATTACK, "graveyard");
+  });
+
   it("Infiltrate's banished card stays playable until the end of the attacker's next turn", () => {
     const g = scenario({
       seats: [

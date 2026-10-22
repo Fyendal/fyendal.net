@@ -497,6 +497,7 @@
   "card.ajv.ice.hero.choose": "Elige el héroe para el efecto de fusión de Hielo",
   "card.ajv.mangle.search": "Busca un Mangle, o rechaza",
   "card.ajv.zero.equipment.destroy": "Destruye un equipo con 0 de defensa",
+  "card.out.abyssal.arrow.choose": "Elige una flecha para barajarla en tu mazo (quedan {remaining})",
   "card.out.arsenal.attack.choose": "Elige un ataque para el arsenal",
   "card.out.arsenal.card.choose": "Elige una carta para el arsenal",
   "card.out.arsenal.facedown.choose": "Elige una carta boca abajo del arsenal",

@@ -12735,6 +12735,20 @@
       "value": "Escolha um token"
     }
   ],
+  "card.out.abyssal.arrow.choose": [
+    {
+      "type": 0,
+      "value": "Escolha uma carta arrow para embaralhar no seu deck (restam "
+    },
+    {
+      "type": 1,
+      "value": "remaining"
+    },
+    {
+      "type": 0,
+      "value": ")"
+    }
+  ],
   "card.out.arsenal.attack.choose": [
     {
       "type": 0,

@@ -56,6 +56,34 @@ function chooseDiscard(ctx: ScriptCtx, hook: string, seat: number): void {
       seat,
     );
 }
+const ABYSSAL_DEPTHS_HOOK = "abyssal-depths";
+/** One arrow per choice keeps every offered option name-distinct, the hook
+ * carries earlier picks so they shuffle in together at the end. */
+function chooseAbyssalArrow(ctx: ScriptCtx, chosenIds: readonly number[], done = false): void {
+  const graveyard = ctx.player(ctx.seat).graveyard;
+  const chosen = graveyard.filter((card) => chosenIds.includes(card.instanceId));
+  const options =
+    done || chosen.length >= 3
+      ? []
+      : graveyard
+          .filter((card) => has(ctx, card, "arrow") && !chosen.some((other) => sharesName(ctx, other, card)))
+          .map((card) => card.instanceId);
+  if (!options.length) {
+    for (const card of chosen) ctx.putOnDeckBottom(card.instanceId);
+    ctx.shuffleDeck();
+    return;
+  }
+  const remaining = 3 - chosen.length;
+  ctx.requestCardChoice(
+    `${ABYSSAL_DEPTHS_HOOK}:${chosen.map((card) => card.instanceId).join(",")}`,
+    decisionPrompt(`Choose an arrow to shuffle into your deck (${remaining} remaining)`, "card.out.abyssal.arrow.choose", {
+      values: { remaining },
+      optionMessages: commonOptionMessages("pass"),
+      chosen: chosen.map((card) => String(card.instanceId)),
+    }),
+    ["pass", ...options],
+  );
+}
 function graveyardChest(extra: CardScript = {}): CardScript {
   return {
     ...extra,
@@ -551,16 +579,14 @@ export const outHighRarity: Record<string, CardScript> = {
       timing: "instant",
       destroySelfCost: true,
       onActivate(ctx) {
-        const arrows = ctx.player(ctx.seat).graveyard.filter((card) => has(ctx, card, "arrow"));
-        for (const card of arrows
-          .filter(
-            (card, index) =>
-              arrows.findIndex((other) => sharesName(ctx, other, card)) === index,
-          )
-          .slice(0, 3))
-          ctx.putOnDeckBottom(card.instanceId);
-        ctx.shuffleDeck();
+        chooseAbyssalArrow(ctx, []);
       },
+    },
+    onChoose(ctx, hook, option) {
+      if (!hook.startsWith(`${ABYSSAL_DEPTHS_HOOK}:`)) return;
+      const chosen = hook.slice(ABYSSAL_DEPTHS_HOOK.length + 1).split(",").filter(Boolean).map(Number);
+      if (option === "pass") chooseAbyssalArrow(ctx, chosen, true);
+      else chooseAbyssalArrow(ctx, [...chosen, Number(option)]);
     },
   },
   "quiver of rustling leaves|0": {

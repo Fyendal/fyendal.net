@@ -497,6 +497,7 @@
   "card.ajv.ice.hero.choose": "Choose the hero for the Ice fusion effect",
   "card.ajv.mangle.search": "Search for a Mangle, or decline",
   "card.ajv.zero.equipment.destroy": "Destroy an equipment with 0 defense",
+  "card.out.abyssal.arrow.choose": "Choose an arrow to shuffle into your deck ({remaining} remaining)",
   "card.out.arsenal.attack.choose": "Choose an attack for arsenal",
   "card.out.arsenal.card.choose": "Choose a card for arsenal",
   "card.out.arsenal.facedown.choose": "Choose a face-down arsenal card",

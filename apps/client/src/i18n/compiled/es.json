@@ -12468,6 +12468,20 @@
       "value": "Elige una ficha"
     }
   ],
+  "card.out.abyssal.arrow.choose": [
+    {
+      "type": 0,
+      "value": "Elige una flecha para barajarla en tu mazo (quedan "
+    },
+    {
+      "type": 1,
+      "value": "remaining"
+    },
+    {
+      "type": 0,
+      "value": ")"
+    }
+  ],
   "card.out.arsenal.attack.choose": [
     {
       "type": 0,
