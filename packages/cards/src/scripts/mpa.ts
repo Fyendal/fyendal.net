@@ -145,7 +145,7 @@ export const mpa: Record<string, CardScript> = {
   "seed frailty|3": seedDisease(FRAILTY),
   "seed inertia|3": seedDisease(INERTIA),
 
-  "outbreak|1": {
+  "outbreak|3": {
     playTargetOptions(ctx) {
       return ctx.state.chain
         .filter((link) =>
