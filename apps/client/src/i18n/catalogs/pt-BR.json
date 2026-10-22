@@ -3391,6 +3391,7 @@
   "engine.effect.duration.first.action.this.turn": "primeira action neste turno",
   "engine.effect.duration.until.your.next.turn": "até o início do seu próximo turno",
   "engine.effect.part.attack": "{attack} de poder",
+  "engine.effect.part.attack.base.power": "+X de poder, em que X é seu poder base",
   "engine.effect.part.attack.lightly.defended": "{attack} de poder enquanto defendido por menos de {defenders} cartas que não são equipamentos",
   "engine.effect.part.piercing": "piercing {piercing}",
   "engine.effect.part.defense": "{defense} de defesa",

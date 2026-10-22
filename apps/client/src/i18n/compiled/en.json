@@ -20444,6 +20444,12 @@
       "value": " power"
     }
   ],
+  "engine.effect.part.attack.base.power": [
+    {
+      "type": 0,
+      "value": "+X power, where X is its base power"
+    }
+  ],
   "engine.effect.part.attack.gain.bonus": [
     {
       "type": 0,

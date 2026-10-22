@@ -21101,6 +21101,12 @@
       "value": " de poder"
     }
   ],
+  "engine.effect.part.attack.base.power": [
+    {
+      "type": 0,
+      "value": "+X de poder, em que X é seu poder base"
+    }
+  ],
   "engine.effect.part.attack.gain.bonus": [
     {
       "type": 0,

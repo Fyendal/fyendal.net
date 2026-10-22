@@ -17,6 +17,7 @@ import {
   modifierAppliesTo,
 } from "./combatModifiers.js";
 import {
+  basePowerOf,
   computeAttack,
   grantsAuraAttackMarker,
   replaceTemporalPowerGain,
@@ -86,6 +87,11 @@ function attachNextAttackModifiers(
   link: ChainLinkState,
 ): void {
   const attach = (mod: Modifier): void => {
+    if (mod.attackFromBasePower) {
+      const printed = dataOf(state, link.attackingCard.cardId).attack ?? 0;
+      mod.attack = basePowerOf(state, runtime, link.attacker, link.attackingCard, printed);
+      delete mod.attackFromBasePower;
+    }
     if (mod.attack !== undefined && mod.attack > 0) {
       mod.attack = replacePowerGain(state, runtime, link, mod.attack);
     }

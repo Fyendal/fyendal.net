@@ -104,6 +104,9 @@ function modifierPhrases(state: GameStateInternal, m: Modifier): Phrase[] {
   if (m.basePower !== undefined) {
     parts.push(phrase(`${m.basePower} base power`, "engine.effect.part.base.attack", { basePower: m.basePower }));
   }
+  if (m.attackFromBasePower) {
+    parts.push(phrase("+X power, where X is its base power", "engine.effect.part.attack.base.power"));
+  }
   if (m.attack) {
     const attack = signed(m.attack);
     parts.push(m.defendedLessThanNonEquip === undefined
@@ -497,7 +500,7 @@ function affectsObjects(m: Modifier): boolean {
   if (prevention) return false;
   return Boolean(
     m.attack || m.defense || m.piercing || m.goAgain || m.dominate || m.overpower || m.intimidate ||
-    m.grantKeyword || m.suppressKeyword || m.grantType || m.grantName || m.basePower !== undefined ||
+    m.grantKeyword || m.suppressKeyword || m.grantType || m.grantName || m.basePower !== undefined || m.attackFromBasePower ||
     m.onHitGoAgain || m.onHitDraw || m.onHitCreateToken || m.onHitLoseLife || m.onHitDealDamage ||
     m.onHitMark || m.onHitScriptHook || m.onHitDestroyTopDeckCards || m.onDefendedDealDamage ||
     m.onDamageDealtCreateTokenPerPoint ||

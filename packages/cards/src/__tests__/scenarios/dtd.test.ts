@@ -883,6 +883,29 @@ describe("DTD — registration and core mechanics", () => {
     expect(banishPlays(faceDown)).toEqual([]);
   });
 
+  it("Blasmophet plays a Blood Debt card from the banished zone only once each turn", () => {
+    const banishPlays = (s: ReturnType<typeof scenario>) =>
+      legalIntents(s.state, 0).filter((i) => i.kind === "play-from-zone" && i.zone === "banish");
+    const s = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          heroKey: "blasmophet, levia consumed|0",
+          resources: 12,
+          banish: ["shaden death hydra|2", "shaden death hydra|2"],
+        },
+        { hero: "dorinthea" },
+      ],
+    });
+    const [first] = banishPlays(s);
+    expect(banishPlays(s)).toHaveLength(2);
+
+    s.doRaw(first!).settle().blockWith().settle();
+    s.state.players[0]!.actionPoints = 1;
+    expect(s.state.players[0]!.banish.filter((card) => !card.faceDown)).toHaveLength(1);
+    expect(banishPlays(s)).toEqual([]);
+  });
+
   it("a face-down banished Funeral Moon cannot be played — face-down cards have no properties", () => {
     const banishPlays = (s: ReturnType<typeof scenario>) =>
       legalIntents(s.state, 0).filter((i) => i.kind === "play-from-zone" && i.zone === "banish");

@@ -469,6 +469,8 @@ export interface Modifier {
    * Multiplication, division, and ordinary power adjustments apply later. */
   basePower?: number;
   attack?: number;
+  /** Set `attack` to the matching attack's base power when this attaches. */
+  attackFromBasePower?: boolean;
   /** Add this much to each matching positive power-gain event after other
    * replacements. With `once`, consume this modifier after the first event. */
   powerGainBonus?: number;

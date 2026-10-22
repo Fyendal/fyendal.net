@@ -19909,6 +19909,12 @@
       "value": " 力量"
     }
   ],
+  "engine.effect.part.attack.base.power": [
+    {
+      "type": 0,
+      "value": "+X 力量，X 为其基础力量"
+    }
+  ],
   "engine.effect.part.attack.gain.bonus": [
     {
       "type": 0,

@@ -3391,6 +3391,7 @@
   "engine.effect.duration.first.action.this.turn": "本回合第一个行动",
   "engine.effect.duration.until.your.next.turn": "直到你的下回合开始",
   "engine.effect.part.attack": "{attack} 力量",
+  "engine.effect.part.attack.base.power": "+X 力量，X 为其基础力量",
   "engine.effect.part.attack.lightly.defended": "被少于 {defenders} 张非装备牌防御时 {attack} 力量",
   "engine.effect.part.piercing": "穿透 (piercing) {piercing}",
   "engine.effect.part.defense": "{defense} 防御",

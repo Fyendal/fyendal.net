@@ -975,6 +975,20 @@ describe("MON — rules regression coverage", () => {
     s.activate("ravenous meataxe|0", { settle: false }).expectResources(0, 0);
   });
 
+  it("Tear Limb from Limb buffs the next Brute attack by that attack's base power", () => {
+    const s = scenario({
+      seats: [
+        { hero: "dorinthea", hand: ["tear limb from limb|3", "swing big|1"], deck: ["swing big|1"], resources: 4 },
+        { hero: "rhinar" },
+      ],
+    });
+
+    s.play("tear limb from limb|3")
+      .expectInZone(0, "swing big|1", "graveyard")
+      .play("swing big|1")
+      .expectAttackValue(16);
+  });
+
   it("Valiant Dynamo removes a Battleworn counter after two weapon attacks", () => {
     const s = scenario({
       seats: [

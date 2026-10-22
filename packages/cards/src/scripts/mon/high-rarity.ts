@@ -723,7 +723,7 @@ export const monHighRarity: Record<string, CardScript> = {
   "tear limb from limb|3": {
     onPlay(ctx) {
       ctx.drawCards(ctx.seat, 1);
-      if (randomDiscardSix(ctx)) buffNextAttack(ctx, { attack: 6, appliesToType: ["brute"] });
+      if (randomDiscardSix(ctx)) buffNextAttack(ctx, { attackFromBasePower: true, appliesTo: "attack-action", appliesToType: ["brute"] });
     },
   },
   "dread scythe|0": weapon(3, {

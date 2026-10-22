@@ -209,6 +209,7 @@ export interface PersistedModifierV1 {
   createdTurn?: number;
   basePower?: number;
   attack?: number;
+  attackFromBasePower?: boolean;
   powerGainBonus?: number;
   attackActivationCostReduction?: number;
   activationCostReduction?: number;
