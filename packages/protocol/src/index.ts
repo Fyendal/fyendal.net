@@ -1489,7 +1489,7 @@ function turnFacts(value: unknown): value is TurnFactsView {
 function pendingDecision(value: unknown): boolean {
   const decision = object(value);
   return !!decision && exactKeys(decision, [
-    "player", "kind", "prompt", "promptMessage", "options", "minimumSelections", "maximumSelections", "defaultOption", "optionLabels", "optionMessages", "chosenOptions", "chosenOptionMessages", "optionCounts", "optionCards", "revealedCards", "lookedCards", "stagedCards", "stagedHandCount", "stagedDefense", "defenderDefense",
+    "player", "kind", "prompt", "promptMessage", "options", "minimumSelections", "maximumSelections", "distinctCardNames", "defaultOption", "optionLabels", "optionMessages", "chosenOptions", "chosenOptionMessages", "optionCounts", "optionCards", "revealedCards", "lookedCards", "stagedCards", "stagedHandCount", "stagedDefense", "defenderDefense",
     "resourcePayment", "preStackSource", "optionLayout", "sourceInstanceId",
   ], ["player", "kind", "prompt"])
     && seat(decision.player) && DECISION_KINDS.has(String(decision.kind))
@@ -1498,6 +1498,7 @@ function pendingDecision(value: unknown): boolean {
     && optional(decision.options, (v): v is string[] => shortStrings(v))
     && optional(decision.minimumSelections, nonNegativeInteger)
     && optional(decision.maximumSelections, nonNegativeInteger)
+    && optional(decision.distinctCardNames, (v): v is boolean => typeof v === "boolean")
     && optional(decision.defaultOption, (v): v is string => string(v, MAX_SHORT_TEXT, false))
     && optional(decision.optionLabels, (v): v is string[] => shortStrings(v))
     && optional(decision.optionMessages, (v): v is Array<GameMessage | null> =>
@@ -1565,6 +1566,7 @@ function pendingDecision(value: unknown): boolean {
       && Number(decision.minimumSelections) <= Number(decision.maximumSelections)
       && Number(decision.maximumSelections) <= decision.options.length
     ))
+    && (decision.distinctCardNames === undefined || decision.maximumSelections !== undefined)
     && (typeof decision.defaultOption !== "string"
       || (Array.isArray(decision.options) && decision.options.includes(decision.defaultOption)));
 }

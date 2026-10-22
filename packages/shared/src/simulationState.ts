@@ -396,6 +396,7 @@ export interface PersistedPendingDecisionV1 {
   options?: string[];
   minimumSelections?: number;
   maximumSelections?: number;
+  distinctCardNames?: boolean;
   defaultOption?: string;
   optionLabels?: string[];
   optionMessages?: (GameMessage | null)[];

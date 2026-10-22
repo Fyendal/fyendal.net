@@ -387,6 +387,7 @@ interface ScriptedChoiceDetails {
   defaultOption?: string;
   minimumSelections?: number;
   maximumSelections?: number;
+  distinctCardNames?: boolean;
   revealedCardIds?: number[];
   lookedCardIds?: number[];
 }
@@ -485,6 +486,7 @@ export function makeCtx(
         : {
             minimumSelections: details.minimumSelections,
             maximumSelections: details.maximumSelections,
+            ...(details.distinctCardNames ? { distinctCardNames: true } : {}),
           }),
       ...(details.revealedCardIds?.length
         ? { revealedCardIds: [...new Set(details.revealedCardIds)] }
@@ -2452,6 +2454,7 @@ export function makeCtx(
       choiceSeat,
       revealedCardIds,
       lookedCardIds,
+      distinctCardNames,
     ) {
       const maximum = Math.min(maximumSelections, options.length);
       if (
@@ -2464,6 +2467,7 @@ export function makeCtx(
         maximumSelections: maximum,
         revealedCardIds,
         lookedCardIds,
+        distinctCardNames,
       });
     },
     requestNameChoice(hook, prompt, choiceSeat) {

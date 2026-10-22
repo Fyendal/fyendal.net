@@ -477,7 +477,7 @@ describe("OUT — registration and core mechanics", () => {
 });
 
 describe("OUT — rules regression coverage", () => {
-  it("Quiver of Abyssal Depths lets its controller choose up to 3 differently named arrows", () => {
+  it("Quiver of Abyssal Depths shuffles in up to 3 chosen arrows with different names", () => {
     const s = scenario({
       seats: [
         {
@@ -490,19 +490,20 @@ describe("OUT — rules regression coverage", () => {
         { hero: "dorinthea", hand: [] },
       ],
     });
-    const optionKeys = () =>
-      s.state.pendingDecision!.options!.filter((option) => option !== "pass").map((option) => {
-        const card = s.state.players[0]!.graveyard.find((c) => String(c.instanceId) === option)!;
-        return cardData[card.cardId]!.name;
-      });
+    const graveyardId = (key: string) =>
+      String(s.state.players[0]!.graveyard.find((c) => c.cardId === printingId(key))!.instanceId);
 
     s.activate("quiver of abyssal depths|0");
-    while (!s.state.pendingDecision?.chooseHook?.startsWith("abyssal-depths")) s.passPriority();
-    expect(optionKeys().sort()).toEqual(["Barbed Undertow", "Falcon Wing", "Infecting Shot", "Infecting Shot"]);
+    while (s.state.pendingDecision?.chooseHook !== "abyssal-depths") s.passPriority();
+    const pd = s.state.pendingDecision!;
+    expect(pd.distinctCardNames).toBe(true);
+    expect([pd.minimumSelections, pd.maximumSelections]).toEqual([0, 3]);
+    expect(pd.options).toHaveLength(4);
 
-    s.chooseCard("infecting shot|2");
-    expect(optionKeys().sort()).toEqual(["Barbed Undertow", "Falcon Wing"]);
-    s.chooseCard("falcon wing|1").chooseOption("pass");
+    expect(() =>
+      s.doRaw({ kind: "choose-many", optionIds: [graveyardId("infecting shot|1"), graveyardId("infecting shot|2")] })
+    ).toThrow(/different names/);
+    s.doRaw({ kind: "choose-many", optionIds: [graveyardId("infecting shot|2"), graveyardId("falcon wing|1")] });
 
     s.expectZoneSize(0, "deck", 3)
       .expectInZone(0, "infecting shot|2", "deck")

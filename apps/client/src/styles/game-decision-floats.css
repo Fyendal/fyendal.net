@@ -558,6 +558,87 @@
 .decision-card-option:has(.card-action:focus-visible) .decision-card-caption {
   color: var(--text-primary);
 }
+/* Bounded card picks: header (prompt + slot tally), a recessed card well,
+   and a footer whose primary button also answers Space. */
+.decision-bounded {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0 24px;
+  padding: 0;
+  border-color: var(--border-strong);
+  border-radius: 6px;
+  background: var(--surface-panel);
+  box-shadow: 0 18px 48px #000c;
+  /* Width fits the balanced column count of hand-size cards; narrower
+     screens still wrap the well naturally. */
+  max-width: min(
+    max(560px, calc(var(--bounded-choice-columns, 5) * (clamp(87px, 13.1vh, 160px) + 18px) + 32px)),
+    calc(100vw - var(--rail-w) - 32px)
+  );
+}
+.decision-bounded > * { grid-column: 1 / -1; }
+.decision-bounded > .decision-prompt {
+  grid-column: 1;
+  padding: 18px 0 16px 22px;
+  color: var(--text-primary);
+  font: 600 17px/1.35 var(--font-lobby-ui);
+  text-align: left;
+}
+.decision-bounded > .bounded-choice-tally { grid-column: 2; padding-right: 22px; }
+.bounded-choice-tally {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.bounded-choice-slots { display: flex; gap: 7px; }
+/* Pitch-gem diamonds: flat, outlined while open, solid gold once filled. */
+.bounded-choice-slot {
+  width: 9px;
+  height: 9px;
+  border: 1.5px solid var(--bronze);
+  transform: rotate(45deg);
+  transition: background-color 120ms ease, border-color 120ms ease;
+}
+.bounded-choice-slot-filled {
+  border-color: var(--gold);
+  background: var(--gold);
+}
+.bounded-choice-count {
+  min-width: 2.6em;
+  color: var(--text-secondary);
+  font: 600 13px/1 var(--font-lobby-ui);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+.decision-bounded > .bounded-choice-cards {
+  gap: 18px;
+  max-width: none;
+  margin: 0;
+  padding: 22px 24px;
+  border-block: 1px solid var(--border-subtle);
+  background: var(--surface-well);
+}
+.decision-bounded > .bounded-choice-footer {
+  justify-content: flex-end;
+  padding: 14px 22px;
+}
+.bounded-choice-footer > .btn-primary {
+  min-width: 168px;
+  min-height: 40px;
+  padding: 8px 18px;
+  font-size: 15px;
+}
+.bounded-choice-footer > .btn-primary .shortcut-key {
+  border-color: #ffe9d488;
+  color: #ffe9d4cc;
+}
+@media (hover: none) and (pointer: coarse) {
+  .bounded-choice-footer .shortcut-key { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .bounded-choice-slot { transition: none; }
+}
 .decision-target-cards {
   display: flex;
   flex-wrap: wrap;

@@ -11929,15 +11929,7 @@
   "card.out.abyssal.arrow.choose": [
     {
       "type": 0,
-      "value": "选择一张箭洗入你的牌库（剩余 "
-    },
-    {
-      "type": 1,
-      "value": "remaining"
-    },
-    {
-      "type": 0,
-      "value": " 张）"
+      "value": "选择至多 3 张名称各不相同的箭洗入你的牌库"
     }
   ],
   "card.out.arsenal.attack.choose": [
@@ -27260,6 +27252,24 @@
     {
       "type": 1,
       "value": "card"
+    }
+  ],
+  "game.decision.selection.count": [
+    {
+      "type": 0,
+      "value": "已选择 "
+    },
+    {
+      "type": 1,
+      "value": "selected"
+    },
+    {
+      "type": 0,
+      "value": "/"
+    },
+    {
+      "type": 1,
+      "value": "maximum"
     }
   ],
   "game.decision.target.opponent": [

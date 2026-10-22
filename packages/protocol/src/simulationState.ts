@@ -696,7 +696,7 @@ function validateResume(value: unknown, code: string, path: string): void {
 
 function validateDecision(value: unknown, code: string, path: string, depth = 0): void {
   if (depth > 16) fail(code, path, "follow-up decision nesting is too deep");
-  const decision = exact(value, code, path, ["player", "kind", "prompt"], ["promptMessage", "options", "minimumSelections", "maximumSelections", "defaultOption", "optionLabels", "optionMessages", "chosenOptions", "chosenOptionMessages", "optionCounts", "sourceInstanceId", "scriptSourceSnapshot", "chooseHook", "followUpDecisions", "tokenCreationCause", "cardOptions", "revealedCardIds", "lookedCardIds", "payment", "resourcePayment", "xPayment", "variablePlayCost", "variableActivationCost", "tokenCreationReplacement", "tokenCreationReplacementOrder", "wagerLossReplacementOrder", "activationCost", "clash", "arcane", "triggerOrder", "deckBottomOrder", "dieRoll", "staged", "resume"]);
+  const decision = exact(value, code, path, ["player", "kind", "prompt"], ["promptMessage", "options", "minimumSelections", "maximumSelections", "distinctCardNames", "defaultOption", "optionLabels", "optionMessages", "chosenOptions", "chosenOptionMessages", "optionCounts", "sourceInstanceId", "scriptSourceSnapshot", "chooseHook", "followUpDecisions", "tokenCreationCause", "cardOptions", "revealedCardIds", "lookedCardIds", "payment", "resourcePayment", "xPayment", "variablePlayCost", "variableActivationCost", "tokenCreationReplacement", "tokenCreationReplacementOrder", "wagerLossReplacementOrder", "activationCost", "clash", "arcane", "triggerOrder", "deckBottomOrder", "dieRoll", "staged", "resume"]);
   integer(decision.player, code, `${path}.player`);
   oneOf(decision.kind, ["defend", "attack-reaction", "defense-reaction", "priority-window", "arsenal", "choose-target", "choose-name", "order-triggers", "optional-effect"] as const, code, `${path}.kind`);
   string(decision.prompt, code, `${path}.prompt`);
@@ -704,6 +704,10 @@ function validateDecision(value: unknown, code: string, path: string, depth = 0)
   optional(decision, "options", (v, p) => validateStringArray(v, code, p), path);
   optional(decision, "minimumSelections", (v, p) => { integer(v, code, p); }, path);
   optional(decision, "maximumSelections", (v, p) => { integer(v, code, p); }, path);
+  optional(decision, "distinctCardNames", (v, p) => { bool(v, code, p); }, path);
+  if (decision.distinctCardNames !== undefined && decision.maximumSelections === undefined) {
+    fail(code, path, "distinct card names require selection bounds");
+  }
   if ((decision.minimumSelections === undefined) !== (decision.maximumSelections === undefined)) {
     fail(code, path, "selection bounds must be present together");
   }

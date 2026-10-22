@@ -579,6 +579,8 @@ export interface ScriptCtx {
     revealedCardIds?: number[],
     /** Additional cards shown privately as non-selectable context. */
     lookedCardIds?: number[],
+    /** Reject a selection containing two cards that share a name. */
+    distinctCardNames?: boolean,
   ): void;
   /** Ask for an arbitrary registered card name without projecting the entire
    * card catalog as a giant option list. */

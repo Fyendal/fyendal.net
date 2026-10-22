@@ -529,6 +529,8 @@ export interface PendingDecision {
    * one atomic intent. Both bounds are present together. */
   minimumSelections?: number;
   maximumSelections?: number;
+  /** Bounded selections may not include two cards that share a name. */
+  distinctCardNames?: boolean;
   /** Option selected by the board's Space shortcut. Card scripts set this
    * explicitly when one choice is the expected/common path. */
   defaultOption?: string;

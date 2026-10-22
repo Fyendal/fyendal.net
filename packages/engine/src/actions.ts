@@ -7,6 +7,7 @@ import { activateFromHandAbility } from "./activation.js";
 import {
   activatedAbilitiesSuppressed,
   cardHasType,
+  cardNamesOf,
   cardTypesOf,
   dataOf,
   instanceDataOf,
@@ -1115,6 +1116,13 @@ export function answerChoices(
   const options = pd.options;
   if (!options || optionIds.some((optionId) => !options.includes(optionId))) {
     return "invalid option";
+  }
+  if (pd.distinctCardNames) {
+    const names = optionIds.flatMap((optionId) => {
+      const card = findCardAnywhere(state, Number(optionId))?.card;
+      return card ? [...new Set(cardNamesOf(state, card))] : [];
+    });
+    if (new Set(names).size !== names.length) return "selected cards must have different names";
   }
 
   const srcId = pd.sourceInstanceId;

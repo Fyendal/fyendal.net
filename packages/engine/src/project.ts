@@ -1276,6 +1276,7 @@ function projectState(
               ? {
                   minimumSelections: pd.minimumSelections,
                   maximumSelections: pd.maximumSelections,
+                  ...(pd.distinctCardNames ? { distinctCardNames: true } : {}),
                 }
               : {}),
             ...((revealAll || pd.player === seat) && pd.defaultOption

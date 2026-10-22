@@ -48,6 +48,7 @@ import {
   handCardChoiceOptions,
   heroTargetSide,
   optDecisionCards,
+  boundedCardChoiceSelectable,
   toggleBoundedCardChoice,
 } from "./decisionPresentation.js";
 
@@ -878,6 +879,7 @@ describe("scripted card-choice presentation", () => {
       ],
       minimumSelections: 0,
       maximumSelections: 2,
+      distinctCardNames: false,
     });
     expect([...boundedHandCardChoiceOptions(decision, [first, second])!]).toEqual([
       [41, "41"],
@@ -887,6 +889,28 @@ describe("scripted card-choice presentation", () => {
     expect(toggleBoundedCardChoice(["41"], "42", 2)).toEqual(["41", "42"]);
     expect(toggleBoundedCardChoice(["41", "42"], "43", 2)).toEqual(["41", "42"]);
     expect(toggleBoundedCardChoice(["41", "42"], "41", 2)).toEqual(["42"]);
+  });
+
+  it("blocks a bounded choice from selecting two cards that share a name", () => {
+    const choice = boundedCardChoiceModel({
+      player: 0,
+      kind: "choose-target",
+      prompt: "Choose up to 3 arrows with different names",
+      options: ["41", "42", "43"],
+      optionCards: [
+        { instanceId: 41, cardId: "OUT-RED", owner: 0, name: "Infecting Shot" },
+        { instanceId: 42, cardId: "OUT-YELLOW", owner: 0, name: "Infecting Shot" },
+        { instanceId: 43, cardId: "OUT-FALCON", owner: 0, name: "Falcon Wing" },
+      ],
+      minimumSelections: 0,
+      maximumSelections: 3,
+      distinctCardNames: true,
+    })!;
+
+    expect(boundedCardChoiceSelectable(choice, ["41"], "42")).toBe(false);
+    expect(boundedCardChoiceSelectable(choice, ["41"], "43")).toBe(true);
+    expect(boundedCardChoiceSelectable(choice, ["41"], "41")).toBe(true);
+    expect(boundedCardChoiceSelectable(choice, [], "42")).toBe(true);
   });
 
   it("keeps a bounded hand choice out of the float and renders one confirmation", () => {
@@ -928,7 +952,7 @@ describe("scripted card-choice presentation", () => {
 
     expect(html).not.toContain('data-cardid="TEST-A"');
     expect(html).not.toContain('data-cardid="TEST-B"');
-    expect(html).toContain(">Done</button>");
+    expect(html).toMatch(/>Done<kbd class="shortcut-key"[^>]*><\/kbd><\/button>/);
   });
 
   it("replaces a guidance dash with a line break", () => {

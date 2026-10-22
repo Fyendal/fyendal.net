@@ -166,6 +166,22 @@ export interface BoundedCardChoiceModel {
   choices: Array<{ optionId: string; card: CardView }>;
   minimumSelections: number;
   maximumSelections: number;
+  distinctCardNames: boolean;
+}
+
+/** Whether `optionId` may be toggled given the current selection. */
+export function boundedCardChoiceSelectable(
+  choice: BoundedCardChoiceModel,
+  selected: readonly string[],
+  optionId: string,
+): boolean {
+  if (selected.includes(optionId)) return true;
+  if (selected.length >= choice.maximumSelections) return false;
+  if (!choice.distinctCardNames) return true;
+  const name = choice.choices.find((candidate) => candidate.optionId === optionId)?.card.name;
+  return !choice.choices.some((candidate) =>
+    selected.includes(candidate.optionId) && candidate.card.name === name
+  );
 }
 
 export function toggleBoundedCardChoice(
@@ -204,7 +220,21 @@ export function boundedCardChoiceModel(
     choices,
     minimumSelections: decision.minimumSelections,
     maximumSelections: decision.maximumSelections,
+    distinctCardNames: decision.distinctCardNames === true,
   };
+}
+
+/** Identity of one bounded card choice, so a local selection never carries
+ * over into a later decision. */
+export function boundedCardChoiceKey(decision: PendingDecision | null): string | null {
+  if (!decision || !boundedCardChoiceModel(decision)) return null;
+  return JSON.stringify([
+    decision.player,
+    decision.promptMessage ?? decision.prompt,
+    decision.options,
+    decision.minimumSelections,
+    decision.maximumSelections,
+  ]);
 }
 
 /** Return the card-to-option mapping only when every bounded choice is a card

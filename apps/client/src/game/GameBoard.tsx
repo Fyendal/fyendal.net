@@ -53,6 +53,8 @@ import {
   boundedHandCardChoiceOptions,
   cardChoiceLocationLabels,
   handCardChoiceOptions,
+  boundedCardChoiceKey,
+  boundedCardChoiceSelectable,
   toggleBoundedCardChoice,
 } from "./decisionPresentation.js";
 import { shouldHidePriorityGuidance } from "./decisionPass.js";
@@ -462,8 +464,13 @@ export function GameBoard() {
 
   const skippableRun = skippableTokenRun(legal);
 
+  const boundedChoiceKey = boundedCardChoiceKey(view?.pendingDecision ?? null);
+  const boundedChoiceSelectedOptionIds =
+    boundedChoiceKey !== null && boundedChoiceSelection?.decisionKey === boundedChoiceKey
+      ? boundedChoiceSelection.optionIds
+      : [];
   const hotkeyIntent = sel.kind === "none"
-    ? passHotkeyIntent(legal, view?.pendingDecision ?? null, pitchSel)
+    ? passHotkeyIntent(legal, view?.pendingDecision ?? null, pitchSel, boundedChoiceSelectedOptionIds)
     : null;
   const passHotkeyEnabled =
     hotkeyIntent !== null &&
@@ -704,19 +711,17 @@ export function GameBoard() {
   const boundedHandPick = replaying || !myDecision
     ? null
     : boundedHandCardChoiceOptions(pd, me.hand);
-  const boundedHandChoiceKey = boundedHandPick && pd
-    ? JSON.stringify([
-        pd.player,
-        pd.promptMessage ?? pd.prompt,
-        pd.options,
-        pd.minimumSelections,
-        pd.maximumSelections,
-      ])
-    : null;
-  const boundedChoiceSelectedOptionIds =
-    boundedHandChoiceKey !== null && boundedChoiceSelection?.decisionKey === boundedHandChoiceKey
-      ? boundedChoiceSelection.optionIds
-      : [];
+  const toggleBoundedChoice = (optionId: string) => {
+    if (!boundedCardChoice || boundedChoiceKey === null) return;
+    setBoundedChoiceSelection((current) => {
+      const selected = current?.decisionKey === boundedChoiceKey ? current.optionIds : [];
+      if (!boundedCardChoiceSelectable(boundedCardChoice, selected, optionId)) return current;
+      return {
+        decisionKey: boundedChoiceKey,
+        optionIds: toggleBoundedCardChoice(selected, optionId, boundedCardChoice.maximumSelections),
+      };
+    });
+  };
   const selectedBoundedChoiceOptionIds = new Set(boundedChoiceSelectedOptionIds);
   const stagedDefenders: CardView[] = pd?.kind === "defend" ? (pd.stagedCards ?? []) : [];
   const stagedIds = new Set(stagedDefenders.map((c) => c.instanceId));
@@ -741,17 +746,9 @@ export function GameBoard() {
       if (optionId !== undefined) send({ kind: "choose", optionId });
       return;
     }
-    if (boundedHandPick && boundedHandChoiceKey && boundedCardChoice) {
+    if (boundedHandPick) {
       const optionId = boundedHandPick.get(c.instanceId);
-      if (optionId === undefined) return;
-      setBoundedChoiceSelection((current) => ({
-        decisionKey: boundedHandChoiceKey,
-        optionIds: toggleBoundedCardChoice(
-          current?.decisionKey === boundedHandChoiceKey ? current.optionIds : [],
-          optionId,
-          boundedCardChoice.maximumSelections,
-        ),
-      }));
+      if (optionId !== undefined) toggleBoundedChoice(optionId);
       return;
     }
     if (resourcePayment) {
@@ -1464,13 +1461,14 @@ export function GameBoard() {
           onDisableGuidance: () => updateLessGuidance(true),
           onConfirmSkipArsenal: () => send({ kind: "pass" }),
           onCancelSkipArsenal: () => setConfirmSkipArsenal(false),
-          ...(boundedHandPick
+          ...(boundedCardChoice
             ? {
                 boundedChoiceSelectedOptionIds,
                 onConfirmBoundedChoice: () => send({
                   kind: "choose-many",
                   optionIds: [...boundedChoiceSelectedOptionIds],
                 }),
+                ...(boundedHandPick ? {} : { onToggleBoundedChoice: toggleBoundedChoice }),
               }
             : {}),
           onSend: send,
