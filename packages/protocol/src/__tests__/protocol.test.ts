@@ -443,7 +443,7 @@ describe("client messages", () => {
     { type: "priority-mode", mode: "auto-pass" },
     { type: "priority-mode", mode: "always-pause" },
     { type: "standing-orders", orders: {} },
-    { type: "standing-orders", orders: { "fealty|0": { priorityWindow: "pass" }, "valiant dynamo|0": { optionalTrigger: "no" } } },
+    { type: "standing-orders", orders: { "golden cog|0": { "sea-cog-maintenance": "remove" }, "valiant dynamo|0": { "trigger-choice": "no" } } },
     { type: "runechant-skip", enabled: true },
     { type: "runechant-skip", enabled: false },
     { type: "seismic-surge-skip", enabled: true },
@@ -573,12 +573,21 @@ describe("client messages", () => {
     expect(decodeClientMessage({ type: "priority-mode", mode: "sometimes" })).toBeNull();
     expect(decodeClientMessage({ type: "standing-orders" })).toBeNull();
     expect(decodeClientMessage({ type: "standing-orders", orders: [] })).toBeNull();
-    expect(decodeClientMessage({ type: "standing-orders", orders: { a: { priorityWindow: "ask" } } })).toBeNull();
-    expect(decodeClientMessage({ type: "standing-orders", orders: { a: { optionalTrigger: "maybe" } } })).toBeNull();
-    expect(decodeClientMessage({ type: "standing-orders", orders: { a: { extra: 1 } } })).toBeNull();
+    // The pre-turn-trigger shape is accepted only as a stored legacy repair.
+    expect(decodeClientMessage({ type: "standing-orders", orders: { a: { priorityWindow: "pass" } } })).toBeNull();
+    expect(decodeClientMessage({ type: "standing-orders", orders: { a: { optionalTrigger: "yes" } } })).toBeNull();
+    expect(decodeClientMessage({ type: "standing-orders", orders: { a: { "trigger-choice": 1 } } })).toBeNull();
+    expect(decodeClientMessage({ type: "standing-orders", orders: { a: { "trigger-choice": "Yes" } } })).toBeNull();
+    expect(decodeClientMessage({ type: "standing-orders", orders: { a: { "trigger-choice": "y".repeat(65) } } }))
+      .toBeNull();
+    expect(decodeClientMessage({ type: "standing-orders", orders: { a: "yes" } })).toBeNull();
     expect(decodeClientMessage({
       type: "standing-orders",
-      orders: Object.fromEntries(Array.from({ length: 257 }, (_, i) => [`k${i}`, { priorityWindow: "pass" }])),
+      orders: { a: Object.fromEntries(Array.from({ length: 9 }, (_, i) => [`hook-${i}`, "yes"])) },
+    })).toBeNull();
+    expect(decodeClientMessage({
+      type: "standing-orders",
+      orders: Object.fromEntries(Array.from({ length: 257 }, (_, i) => [`k${i}`, { "trigger-choice": "yes" }])),
     })).toBeNull();
     expect(decodeClientMessage({ type: "runechant-skip" })).toBeNull();
     expect(decodeClientMessage({ type: "runechant-skip", enabled: "yes" })).toBeNull();

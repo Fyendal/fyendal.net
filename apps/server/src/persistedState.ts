@@ -1,5 +1,5 @@
 import type { CardInstance, GameState, Modifier } from "@fyendal/engine";
-import type { GameLogEvent, GameLogPayload, GameMessage } from "@fyendal/shared";
+import type { GameLogEvent, GameLogPayload, GameMessage, SeatStandingOrders } from "@fyendal/shared";
 
 import type {
   PersistedCardInstanceV1, PersistedStackLayerV1, PersistedDelayedTriggerV1,
@@ -16,7 +16,7 @@ export type {
   PersistedDecisionResumeV1, PersistedPendingDecisionV1, PersistedGameLogEntryV1,
   PersistedGameTurnStatsV1, PersistedGameStatsV1, PersistedGameStateV1,
 } from "@fyendal/shared";
-import { decodeSerializedStateEnvelope, CorruptRoomError } from "@fyendal/protocol";
+import { decodeSeatStandingOrders, decodeSerializedStateEnvelope, CorruptRoomError } from "@fyendal/protocol";
 export { CorruptRoomError, PERSISTED_STATE_VERSION, MAX_PERSISTED_STATE_BYTES } from "@fyendal/protocol";
 type JsonObject = Record<string, unknown>;
 type Seat = 0 | 1;
@@ -152,6 +152,28 @@ function repairArcaneBarrierPitchOptionMessages(value: unknown): unknown {
       pendingDecision: repairedDecision,
     },
   };
+}
+
+/** Legacy seats: drop `priorityWindow` passes; `optionalTrigger` becomes `trigger-choice`. */
+function repairLegacyStandingOrders(value: unknown): unknown {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return value;
+  const repaired: JsonObject = {};
+  for (const [key, entry] of Object.entries(value as JsonObject)) {
+    const fields = entry && typeof entry === "object" && !Array.isArray(entry) ? entry as JsonObject : null;
+    const legacy = !!fields && Object.keys(fields).length > 0
+      && Object.keys(fields).every((field) =>
+        (field === "priorityWindow" && fields.priorityWindow === "pass")
+        || (field === "optionalTrigger" && (fields.optionalTrigger === "yes" || fields.optionalTrigger === "no")));
+    const next = legacy
+      ? (fields.optionalTrigger === undefined ? {} : { "trigger-choice": fields.optionalTrigger })
+      : entry;
+    Object.defineProperty(repaired, key, { value: next, enumerable: true, writable: true, configurable: true });
+  }
+  return repaired;
+}
+
+export function decodeStoredStandingOrders(value: unknown): SeatStandingOrders | null {
+  return decodeSeatStandingOrders(repairLegacyStandingOrders(value));
 }
 
 /** Validate unknown persisted JSON exhaustively before restoring registries. */

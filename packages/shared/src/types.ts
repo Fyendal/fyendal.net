@@ -1072,11 +1072,8 @@ export interface FriendGameInvite {
 /** How a seat wants empty priority/reaction windows handled. */
 export type PriorityWindowMode = "auto-pass" | "always-pause";
 
-/** A card's decided standing answers; "ask" is absence. */
-export interface SeatStandingOrder {
-  priorityWindow?: "pass";
-  optionalTrigger?: "yes" | "no";
-}
+/** `chooseHook` → option value; "ask" is absence. */
+export type SeatStandingOrder = Record<string, string>;
 
 export type SeatStandingOrders = Record<string, SeatStandingOrder>;
 

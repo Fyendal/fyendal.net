@@ -869,8 +869,19 @@ const commandId = (value: unknown): value is string =>
 
 const MAX_STANDING_ORDER_KEYS = 256;
 const MAX_STANDING_ORDER_KEY_LENGTH = 120;
+const MAX_STANDING_ORDER_HOOKS = 8;
+const MAX_STANDING_CHOICE_OPTIONS = 8;
 
-/** Decode a seat's standing orders: bounded, exact keys. */
+function standingChoiceToken(value: unknown): value is string {
+  return typeof value === "string" && value.length <= 64 && /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(value);
+}
+
+function defineEntry<T>(record: Record<string, T>, key: string, value: T): void {
+  // Keeps a key such as "__proto__" an ordinary entry.
+  Object.defineProperty(record, key, { value, enumerable: true, writable: true, configurable: true });
+}
+
+/** Empty cards are dropped. */
 export function decodeSeatStandingOrders(value: unknown): SeatStandingOrders | null {
   const record = object(value);
   if (!record) return null;
@@ -880,28 +891,18 @@ export function decodeSeatStandingOrders(value: unknown): SeatStandingOrders | n
   for (const key of keys) {
     if (key.length === 0 || key.length > MAX_STANDING_ORDER_KEY_LENGTH) return null;
     const entry = object(record[key]);
-    if (!entry || !exactKeys(entry, ["priorityWindow", "optionalTrigger"], [])) return null;
+    if (!entry) return null;
+    const hooks = Object.keys(entry);
+    if (hooks.length > MAX_STANDING_ORDER_HOOKS) return null;
     const order: SeatStandingOrder = {};
-    if ("priorityWindow" in entry) {
-      if (entry.priorityWindow !== "pass") return null;
-      order.priorityWindow = "pass";
+    for (const hook of hooks) {
+      const option = entry[hook];
+      if (!standingChoiceToken(hook) || !standingChoiceToken(option)) return null;
+      defineEntry(order, hook, option);
     }
-    if ("optionalTrigger" in entry) {
-      if (entry.optionalTrigger !== "yes" && entry.optionalTrigger !== "no") return null;
-      order.optionalTrigger = entry.optionalTrigger;
-    }
-    if (order.priorityWindow !== undefined || order.optionalTrigger !== undefined) {
-      // Keeps a key such as "__proto__" an ordinary entry.
-      Object.defineProperty(orders, key, { value: order, enumerable: true, writable: true, configurable: true });
-    }
+    if (hooks.length > 0) defineEntry(orders, key, order);
   }
   return orders;
-}
-
-const MAX_STANDING_CHOICE_OPTIONS = 8;
-
-function standingChoiceToken(value: unknown): value is string {
-  return typeof value === "string" && value.length <= 64 && /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(value);
 }
 
 function turnTriggerChoice(value: unknown): value is TurnTriggerChoiceView {

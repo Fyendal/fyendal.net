@@ -56,7 +56,6 @@ import {
 } from "@fyendal/cards";
 import {
   decodePresentedArena,
-  decodeSeatStandingOrders,
   MAX_MATCHMAKING_AVOID_HEROES,
   MAX_MATCHMAKING_AVOID_ROOM_CODES,
   MAX_MATCHMAKING_AVOID_USERS,
@@ -69,7 +68,12 @@ import { decodeDeckPool, resolveDeck, validatePresentation } from "./decks.js";
 import { appendClusterEvent, type ClusterEvent } from "./clusterEvents.js";
 import { assertActiveRuleset } from "./rulesetFence.js";
 import { withTransaction, type Queryable } from "./db.js";
-import { CorruptRoomError, decodePersistedState, encodePersistedState } from "./persistedState.js";
+import {
+  CorruptRoomError,
+  decodePersistedState,
+  decodeStoredStandingOrders,
+  encodePersistedState,
+} from "./persistedState.js";
 import {
   appendReplayView,
   endReplayForRoom,
@@ -768,7 +772,7 @@ function decodeSeatRows(values: unknown[], code: string): [SeatRow | null, SeatR
     }
     const standingOrders = row.standing_orders == null
       ? undefined
-      : decodeSeatStandingOrders(parseJson(row.standing_orders));
+      : decodeStoredStandingOrders(parseJson(row.standing_orders));
     if (standingOrders === null) {
       throw new CorruptRoomError(code, `seats[${index}].standing_orders`, "expected standing orders");
     }
@@ -3855,8 +3859,8 @@ export class PgRoomStore {
    *  first because a Runechant skip can deliberately decline optional
    *  prevention; each token shortcut is expired before auto-pass is
    *  considered at any boundary outside its own run. Bot seats always
-   *  auto-pass empty windows; a seat's standing orders answer the repeating
-   *  questions they cover. Automatic steps write no undo snapshots. */
+   *  auto-pass empty windows; standing orders never pass. Automatic steps
+   *  write no undo snapshots. */
   private applyServerShortcuts(
     room: RoomRow,
     transitionEvents?: EngineTransitionMove[],
@@ -3893,7 +3897,7 @@ export class PgRoomStore {
           (member?.controller === "bot" && isEmptyBotActionWindow(state, seat)))
           ? { kind: "pass" }
           : member?.standingOrders
-            ? standingOrderIntent(state, seat, member.standingOrders, room.code)
+            ? standingOrderIntent(state, seat, member.standingOrders)
             : null;
       if (!intent) return;
       const res = engineApplyIntent(state, seat, intent);
@@ -3954,7 +3958,7 @@ export class PgRoomStore {
       const answers = !!room.state
         && room.state.phase !== "game-over"
         && !!member.standingOrders
-        && standingOrderIntent(room.state, seat, member.standingOrders, room.code) !== null;
+        && standingOrderIntent(room.state, seat, member.standingOrders) !== null;
       if (!answers) return { room, result: { advanced: false }, versionNeutral: true };
       const events: EngineTransitionMove[] = [];
       this.applyServerShortcuts(room, events);
