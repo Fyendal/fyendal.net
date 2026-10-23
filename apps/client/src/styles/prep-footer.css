@@ -473,7 +473,7 @@
 }
 .prep-bar-copy .prep-sheet-turn,
 .prep-bar-copy .prep-sheet-prompt,
-.prep-bar-copy .prep-decision-status { font-size: 16px; text-align: left; }
+.prep-bar-copy .prep-decision-status { font-size: 16px; }
 .prep-bar-copy .prep-sheet-state { font-size: 14px; }
 .prep-bar-count { color: var(--text-secondary); font-size: 14px; }
 .prep-bar-count.valid { color: var(--success); }
@@ -682,8 +682,6 @@
    and the step that advances preparation sits at the end. */
 .panel.prep-sheet {
   display: flex;
-  flex-wrap: wrap;
-  align-items: stretch;
   padding: 0;
   overflow: hidden;
   text-align: left;
@@ -691,7 +689,7 @@
 /* Both mats share the body's rows, so a status line under one player never
    pushes that player's cards out of line with the other's. */
 .prep-sheet-body {
-  flex: 1 1 640px;
+  flex: 1 1 auto;
   display: grid;
   grid-template-columns: auto auto auto;
   grid-template-rows: auto auto;
@@ -804,28 +802,50 @@
   text-shadow: 0 1px 2px #000;
   text-transform: lowercase;
 }
-.prep-die { margin: 0; color: var(--text-secondary); font-size: 13px; text-align: center; }
+.prep-die { margin: 0; color: var(--text-secondary); font-size: 13px; }
 
+/* The advancing step floats bottom-right so the match sheet keeps its width. */
 .prep-sheet-action {
-  flex: 0 1 320px;
+  position: fixed;
+  right: max(20px, env(safe-area-inset-right));
+  bottom: max(20px, env(safe-area-inset-bottom));
+  z-index: 30;
   display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 16px;
+  width: max-content;
   min-width: 260px;
-  padding: 14px 16px;
-  border-left: 1px solid var(--border-strong);
-  background: linear-gradient(180deg, #2a1b0d, #1a1108);
+  max-width: min(400px, calc(100vw - 40px));
+  padding: 12px 14px 12px 16px;
+  border: 1px solid var(--border-strong);
+  border-radius: 6px;
+  background: linear-gradient(180deg, #2a1b0df7, #170f07fa);
+  box-shadow: inset 0 1px 0 #ffd4792e, 0 14px 34px #000d, 0 2px 6px #0009;
 }
 .prep-sheet-action:empty { display: none; }
-.prep-sheet-turn { margin: 0; color: var(--text-secondary); font-size: 13px; }
-.prep-sheet-turn strong { color: var(--gold); font-weight: 600; }
+.prep-sheet-action > * { flex: 1 1 100%; }
+.prep-sheet-action > .prep-sheet-turn { flex: 1 1 auto; }
+.prep-sheet-action > .prep-sheet-lock { flex: 0 1 auto; }
+.prep-sheet-turn {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 14px;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+.prep-sheet-turn strong {
+  color: var(--gold);
+  font-family: var(--font-fantasy-title);
+  font-size: 19px;
+  font-weight: 700;
+  text-transform: lowercase;
+}
 .prep-sheet-prompt {
   margin: 0;
   color: var(--text-primary);
   font-size: 14px;
   line-height: 1.4;
-  text-align: center;
 }
 /* The turn-order pair sits side by side while both labels fit on one line;
    otherwise each takes a full row rather than breaking a label. */
@@ -834,8 +854,8 @@
   flex-wrap: wrap;
   gap: 8px;
 }
-.prep-pick button { flex: 1 0 auto; min-height: 44px; white-space: nowrap; }
-.prep-sheet-lock button { width: 100%; min-height: 44px; white-space: normal; }
+.prep-pick button { flex: 1 0 auto; min-height: 40px; white-space: nowrap; }
+.prep-sheet-lock button { min-height: 40px; padding-inline: 16px; white-space: nowrap; }
 /* Both turn-order answers share the primary's quieter mixed-case face, which
    also keeps longer translations compact. */
 .prep-pick button,
@@ -847,27 +867,10 @@
   letter-spacing: 0.1px;
   line-height: 1.2;
 }
-.prep-sheet .prep-decision-status { text-align: center; }
-.prep-sheet-ready { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.prep-sheet-ready { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
 .prep-sheet-ready .prep-main-count { flex: 1 1 auto; }
 .prep-sheet-ready .prep-ready-controls { flex: none; }
-
-/* Stacked tablet layout: the sheet scrolls away above the deck, so its action
-   floats where the deck footer used to be. */
-@media (max-width: 1035px) and (orientation: portrait) {
-  .prep-page { padding-bottom: 132px; }
-  .panel.prep-sheet { max-height: none; overflow: visible; }
-  .prep-sheet-action {
-    position: fixed;
-    right: max(18px, env(safe-area-inset-right));
-    bottom: max(18px, env(safe-area-inset-bottom));
-    z-index: 30;
-    width: min(470px, calc(100vw - 36px));
-    border: 1px solid #8b6c37;
-    border-radius: 5px;
-    box-shadow: 0 10px 30px #000d;
-  }
-}
+.prep-page:has(.prep-sheet-action) { padding-bottom: 120px; }
 
 /* Short-lived explanation when a pick is refused, e.g. a second weapon beside
    a two-hander. Sits under the top bar so it never covers the action footer. */
