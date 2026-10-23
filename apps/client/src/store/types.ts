@@ -242,6 +242,8 @@ export interface StoreState {
    * skip that hero for the rest of the search. */
   declinedBackgroundHero: { heroId: string; heroName: string } | null;
   pendingBotStart: boolean;
+  /** A create request awaits its room while the server refreshes the deck. */
+  roomStartPending: boolean;
   /** Keep an accepted PvP offer distinct from its fallback to bot practice. */
   botMatchTransition: "accepted" | "fallback" | null;
   acknowledgeBotMatchFallback: () => void;

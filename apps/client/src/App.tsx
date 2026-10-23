@@ -10,6 +10,8 @@ import { BackgroundMatchOffer } from "./matchmaking/BackgroundMatchOffer.js";
 
 const WaitingRoom = lazy(() => import("./lobby/WaitingRoom.js").then((module) => ({ default: module.WaitingRoom })));
 const PrepRoom = lazy(() => import("./prep/PrepRoom.js").then((module) => ({ default: module.PrepRoom })));
+const RoomStartLoading = lazy(() => import("./prep/RoomStartLoading.js")
+  .then((module) => ({ default: module.RoomStartLoading })));
 const GameBoard = lazy(() => import("./game/GameBoard.js").then((module) => ({ default: module.GameBoard })));
 const ReplayBar = lazy(() => import("./replay/ReplayBar.js").then((module) => ({ default: module.ReplayBar })));
 const RecoveryPage = lazy(() => import("./auth/RecoveryPage.js").then((module) => ({ default: module.RecoveryPage })));
@@ -91,6 +93,7 @@ function AppContent() {
   const screen = useStore((state) => state.screen);
   const clientUpdateRequired = useStore((state) => state.clientUpdateRequired);
   const pendingFabraryPlay = useStore((state) => state.pendingFabraryPlay);
+  const roomStartPending = useStore((state) => state.roomStartPending);
   const roomCode = useStore((state) => state.roomCode);
   const activeSavedReplayId = useStore((state) => state.activeSavedReplayId);
   const inspectRoom = useStore((state) => state.inspectRoom);
@@ -248,6 +251,7 @@ function AppContent() {
   }
   else if (screen === "waiting") content = <WaitingRoom />;
   else if (screen === "prep") content = <PrepRoom />;
+  else if (roomStartPending) content = <RoomStartLoading />;
   else if (pendingFabraryPlay) content = <FabraryPlayPage key={authUser ?? "guest"} />;
   else content = <Lobby />;
   return (

@@ -49,24 +49,16 @@ import {
   preloadCardImage,
   useCardImagePreload,
 } from "../game/cardImagePreload.js";
-import { PrepImageLoading } from "./PrepImageLoading.js";
+import {
+  DECK_IMAGE_TIMEOUT_MS,
+  deckPoolCardIds,
+  PrepDeckLoading,
+  PrepImageLoading,
+} from "./PrepImageLoading.js";
 
 const WEAPON_TOAST_MS = 3_500;
-/** Card art gates entry to the room, but a slow CDN must not eat the deadlines. */
-const DECK_IMAGE_TIMEOUT_MS = 12_000;
 /** A revealed opponent arena waits briefly so it appears with its art. */
 const OPPONENT_ARENA_IMAGE_TIMEOUT_MS = 4_000;
-
-function deckPoolCardIds(pool: DeckPool): string[] {
-  return [
-    pool.heroId,
-    ...pool.weaponIds,
-    ...pool.equipmentPool,
-    ...(pool.inventoryPool ?? []),
-    ...pool.deck,
-    ...(pool.sideboard ?? []),
-  ];
-}
 
 function revealedArenaCardIds(arena: RevealedArena): string[] {
   return [...arena.weaponIds, ...Object.values(arena.equipment)]
@@ -231,16 +223,7 @@ export function PrepRoom() {
     return () => window.clearTimeout(timer);
   }, [botNudgeKey]);
 
-  if (!prepDeck) {
-    return (
-      <div className="lobby-page">
-        <div className="panel waiting-panel">
-          <h2 className="panel-title">{intl.formatMessage({ id: "prep.loadingDeck" })}</h2>
-          <button onClick={leave}>{intl.formatMessage({ id: "common.cancel" })}</button>
-        </div>
-      </div>
-    );
-  }
+  if (!prepDeck) return <PrepDeckLoading onCancel={leave} />;
   // The match-accept dialog lives in this room, so never hide it behind loading.
   if (
     !deckImages.done

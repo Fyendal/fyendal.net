@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { precon } from "@fyendal/cards/client";
 
 class MemoryStorage implements Storage {
   private readonly values = new Map<string, string>();
@@ -1391,6 +1392,44 @@ describe("client connection and account race fences", () => {
       deckId: "precon-asb",
       private: false,
     });
+  });
+
+  it("loads the start deck early and refetches it once the room exists", async () => {
+    localStorage.setItem("fyendal-auth", JSON.stringify({ token: "token-a", username: "Alice" }));
+    const pool = precon("precon-svi")!.pool;
+    let updatedAt = 0;
+    const fetchMock = vi.fn((input: string | URL | Request) => {
+      expect(String(input)).toBe("http://localhost:8080/api/decks/saved-deck");
+      updatedAt += 1;
+      return Promise.resolve(jsonResponse({ ok: true, deck: {
+        id: "saved-deck", name: "Saved", format: "silver-age", fabraryUrl,
+        heroName: "Hero", deckSize: 40, updatedAt, decklist: pool,
+      } }));
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    const { useStore } = await import("../store.js");
+
+    useStore.getState().createBotRoom("silver-age", "saved-deck");
+    expect(useStore.getState()).toMatchObject({ screen: "lobby", roomStartPending: true });
+    await vi.waitFor(() => expect(useStore.getState().prepDeck?.updatedAt).toBe(1));
+
+    const socket = FakeWebSocket.instances[0]!;
+    socket.open();
+    socket.message({ type: "room-created", code: "BOT001", seat: 0, token: "seat", version: 1 });
+    expect(useStore.getState()).toMatchObject({ screen: "prep", roomStartPending: false });
+    await vi.waitFor(() => expect(useStore.getState().prepDeck?.updatedAt).toBe(2));
+  });
+
+  it("returns to the lobby when the start request fails", async () => {
+    localStorage.setItem("fyendal-auth", JSON.stringify({ token: "token-a", username: "Alice" }));
+    const { useStore } = await import("../store.js");
+
+    useStore.getState().createRoom("silver-age", "precon-svi");
+    expect(useStore.getState().roomStartPending).toBe(true);
+    const socket = FakeWebSocket.instances[0]!;
+    socket.open();
+    socket.message({ type: "error", code: "INVALID_MESSAGE", message: "deck could not be refreshed" });
+    expect(useStore.getState()).toMatchObject({ screen: "lobby", roomStartPending: false });
   });
 
   it("ends a projected bot game instead of leaving it reconnectable", async () => {

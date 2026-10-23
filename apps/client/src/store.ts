@@ -127,6 +127,10 @@ import.meta.hot?.dispose(() => {
 
 /** deck chosen for the current prep session (queue or hosted room) */
 let prepDeckId: string | null = null;
+/** Only the newest prep-deck fetch may publish its pool. */
+let prepDeckLoad = 0;
+/** The pool was fetched before the server's Fabrary refresh; reload it once. */
+let prepDeckProvisional = false;
 
 /** store snapshot taken when a replay opens from the game screen; restored on close */
 let preReplay: PreReplaySnapshot | null = null;
@@ -710,10 +714,13 @@ export const useStore = create<StoreState>((set, get) => {
     };
   }
 
-  /** Fetch the full registered pool for the prep room (idempotent per deck). */
-  async function loadPrepDeck(id: string): Promise<void> {
+  /** Fetch the full registered pool for the prep room (idempotent per deck).
+   * An `early` fetch warms art before the room exists and is reloaded later. */
+  async function loadPrepDeck(id: string, early = false): Promise<void> {
     const token = get().authToken;
-    if (!token || get().prepDeck?.id === id) return;
+    if (!token || (!prepDeckProvisional && get().prepDeck?.id === id)) return;
+    prepDeckProvisional = early && !id.startsWith("precon-");
+    const load = ++prepDeckLoad;
     const request = authRequest(token);
     // hardcoded precons have no DB row — synthesize locally
     if (id.startsWith("precon-")) {
@@ -723,7 +730,7 @@ export const useStore = create<StoreState>((set, get) => {
       return;
     }
     const r = await apiDeck(token, id, request.signal);
-    if (!isCurrentAuth(request)) return;
+    if (!isCurrentAuth(request) || load !== prepDeckLoad) return;
     if (r.ok && prepDeckId === id) {
       set({ prepDeck: r.deck });
     } else if (!r.ok) {
@@ -934,6 +941,7 @@ export const useStore = create<StoreState>((set, get) => {
           queuedFormat: null,
           matchmakingActive: fromMatchmaking,
           matchAcceptanceRole: fromMatchmaking ? "existing" : null,
+          roomStartPending: false,
           ...(declinedRoom ? { prep: null } : {}),
         });
         // hosts land on the prep room once the room exists
@@ -978,6 +986,7 @@ export const useStore = create<StoreState>((set, get) => {
           queuedFormat: null,
           matchmakingActive: fromMatchmaking,
           matchAcceptanceRole: fromMatchmaking ? "joining" : null,
+          roomStartPending: false,
           ...(declinedRoom ? { prep: null } : {}),
         });
         // Matchmade joiners accept from a focused holding screen. Manual joins
@@ -1137,7 +1146,7 @@ export const useStore = create<StoreState>((set, get) => {
         break;
       case "queued":
         completeFabraryPlay();
-        set({ queuedFormat: msg.format, matchmakingActive: true });
+        set({ queuedFormat: msg.format, matchmakingActive: true, roomStartPending: false });
         // queueing lives on the prep screen (sideboard while waiting); after
         // a decline, wait for the new opener instead of the declined prep
         if (pendingMatchDecline === null) enterPrep();
@@ -1209,6 +1218,7 @@ export const useStore = create<StoreState>((set, get) => {
           prep: msg.prep,
           botGame: msg.prep.botGame === true,
           queuedFormat: null,
+          roomStartPending: false,
           matchAcceptanceRole,
           botMatchTransition,
         });
@@ -1251,6 +1261,7 @@ export const useStore = create<StoreState>((set, get) => {
           set({ socialError: msg.code });
           break;
         }
+        set({ roomStartPending: false });
         if ((get().pendingBotStart || pendingMatchDecline !== null) && get().screen === "room-loading"
           && get().prep?.deadlinePhase === "accept") {
           set({ screen: get().pendingBotStart || get().matchAcceptanceRole === "joining" ? "waiting" : "prep" });
@@ -1537,7 +1548,9 @@ export const useStore = create<StoreState>((set, get) => {
       pendingBotRoom = null;
       // hosts land on the prep room once the room exists
       prepDeckId = deckId;
-      set({ prep: null, prepDeck: null, botGame: false, matchmakingActive: false });
+      set({ prep: null, prepDeck: null, botGame: false, matchmakingActive: false, roomStartPending: true });
+      // Warm the deck art while the server refreshes the Fabrary deck.
+      void loadPrepDeck(deckId, true);
       connect(() => {
         send({
           type: "create-room",
@@ -1569,7 +1582,9 @@ export const useStore = create<StoreState>((set, get) => {
         declinedBackgroundHero: null,
         pendingBotStart: searchForPlayer,
         botMatchTransition: null,
+        roomStartPending: true,
       });
+      void loadPrepDeck(deckId, true);
       connect(() => {
         send({
           type: "create-bot-room",
