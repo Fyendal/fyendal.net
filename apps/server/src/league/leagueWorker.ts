@@ -16,6 +16,7 @@ import {
 } from "./bracket.js";
 import { resolveOverdue } from "./forfeits.js";
 import { leagueStatus, matchResult, matchStage, matchStatus, nullableNumber, storedWindows } from "./leagueRows.js";
+import { notifyLeague } from "./leagueEvents.js";
 import { resetLostLeagueRooms } from "./leagueMatches.js";
 import { dropLeagueMember } from "./leagueStore.js";
 import { pairWeek, suggestSlots } from "./pairing.js";
@@ -286,7 +287,8 @@ async function startPlayoffs(tx: Queryable, league: League, now: number): Promis
   await createPlayoffMatches(tx, league, members, openingRound(ranked, size), now);
 }
 
-async function advancePlayoffs(tx: Queryable, league: League, now: number): Promise<void> {
+/** Returns whether the bracket changed. */
+async function advancePlayoffs(tx: Queryable, league: League, now: number): Promise<boolean> {
   const [members, matches] = await Promise.all([loadMembers(tx, league.id), loadMatches(tx, league.id)]);
   const seeds = new Map(members.flatMap((member) =>
     member.playoffSeed === null ? [] : [[member.memberId, member.playoffSeed] as const]));
@@ -296,19 +298,20 @@ async function advancePlayoffs(tx: Queryable, league: League, now: number): Prom
     : [{ stage: match.stage, slot: match.slot!, a: match.a, b: match.b, status: match.status, result: match.result, winner: match.winner }]);
   if (playoffChampion(bracket) !== null) {
     await completeLeague(tx, league.id, now);
-    return;
+    return true;
   }
   const pending = pendingPlayoffPairings(size, bracket, seeds);
-  if (!pending.length) return;
+  if (!pending.length) return false;
   await createPlayoffMatches(tx, league, members, pending, now);
   const stages = playoffStages(size);
   const round = Math.max(...pending.map((pairing) => stages.indexOf(pairing.stage) + 1));
   await tx.query("UPDATE leagues SET playoff_round = GREATEST(playoff_round, $2) WHERE id = $1", [league.id, round]);
+  return true;
 }
 
-/** Resolves unplayed matches past their deadline. A match whose game is
- * already in a room waits for that game. */
-async function resolveOverdueMatches(tx: Queryable, leagueId: string, now: number): Promise<void> {
+/** Resolves unplayed matches past their deadline and returns how many. A
+ * match whose game is already in a room waits for that game. */
+async function resolveOverdueMatches(tx: Queryable, leagueId: string, now: number): Promise<number> {
   const overdue = (await loadMatches(tx, leagueId)).filter((match) => match.b !== null
     && match.deadlineAt <= now && (match.status === "unscheduled" || match.status === "proposed" || match.status === "scheduled"));
   for (const match of overdue) {
@@ -318,6 +321,7 @@ async function resolveOverdueMatches(tx: Queryable, leagueId: string, now: numbe
       [match.id, outcome.result, outcome.winner],
     );
   }
+  return overdue.length;
 }
 
 /** One league's scheduled work: release lost rooms, resolve overdue matches,
@@ -329,13 +333,16 @@ export async function advanceLeague(db: Queryable, leagueId: string, now = Date.
     let league = await lockLeague(tx, leagueId);
     if (!league || (league.status !== "season" && league.status !== "playoffs")) return;
     await resetLostLeagueRooms(tx, league.id);
-    await resolveOverdueMatches(tx, league.id, now);
+    let changed = await resolveOverdueMatches(tx, league.id, now) > 0;
     const startsAt = league.startsAt;
     if (league.status === "season" && startsAt !== null && now >= startsAt) {
       const dueWeek = Math.min(league.seasonWeeks, Math.floor((now - startsAt) / WEEK_MS) + 1);
       for (let week = league.currentWeek + 1; week <= dueWeek; week++) {
-        await pairSeasonWeek(tx, league, week, now);
+        // A week that ended while no worker ran is skipped; its matches could
+        // only be double forfeits.
+        if (seasonWeekBounds(startsAt, week).end > now) await pairSeasonWeek(tx, league, week, now);
         await tx.query("UPDATE leagues SET current_week = $2 WHERE id = $1", [league.id, week]);
+        changed = true;
       }
       league = { ...league, currentWeek: Math.max(league.currentWeek, dueWeek) };
       const seasonOver = now >= startsAt + league.seasonWeeks * WEEK_MS;
@@ -345,10 +352,12 @@ export async function advanceLeague(db: Queryable, leagueId: string, now = Date.
       );
       if (seasonOver && open.length === 0) {
         await startPlayoffs(tx, league, now);
-        return;
+        changed = true;
       }
     }
-    if (league.status === "playoffs") await advancePlayoffs(tx, league, now);
+    // A bracket seeded this tick advances on the next one.
+    if (league.status === "playoffs" && await advancePlayoffs(tx, league, now)) changed = true;
+    if (changed) await notifyLeague(tx, league.id);
   });
 }
 
@@ -406,6 +415,7 @@ async function applyAction(tx: Queryable, league: League, action: LeagueAction, 
       const match = (await loadMatches(tx, league.id)).find((candidate) => candidate.id === action.matchId);
       if (!match) return "no match in this league has that id";
       if (match.b === null) return "byes cannot be changed";
+      if (match.stage === "season" && league.status === "playoffs") return "season results are final once the playoffs start";
       if (match.stage !== "season") {
         const later = playoffStages(8).slice(playoffStages(8).indexOf(match.stage) + 1);
         const { rows } = await tx.query(
@@ -428,6 +438,7 @@ async function applyAction(tx: Queryable, league: League, action: LeagueAction, 
       return null;
     }
     case "extend-deadline": {
+      if (league.status !== "season" && league.status !== "playoffs") return "deadlines can change only during the season or playoffs";
       const { rows } = await tx.query(
         "SELECT status FROM league_matches WHERE id = $1 AND league_id = $2",
         [action.matchId, league.id],
@@ -461,6 +472,7 @@ export async function applyLeagueActions(db: Queryable, leagueId: string, now = 
         const action = decodeLeagueAction(typeof row.action === "string" ? JSON.parse(row.action) as unknown : row.action);
         const error = action ? await applyAction(tx, league, action, now) : "unrecognized action";
         await tx.query("UPDATE league_actions SET applied_at = $2, error = $3 WHERE id = $1", [actionId, now, error]);
+        if (error === null) await notifyLeague(tx, leagueId);
         return true;
       });
       if (!applied) return processed;

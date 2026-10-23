@@ -908,6 +908,9 @@ export const useStore = create<StoreState>((set, get) => {
         }, remainingMs));
         break;
       }
+      case "league-updated":
+        void get().refreshLeagues();
+        break;
       case "friend-game-invite-dismissed": {
         const timer = friendInviteTimers.get(msg.inviteId);
         if (timer) clearTimeout(timer);

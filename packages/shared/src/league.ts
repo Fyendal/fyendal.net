@@ -89,6 +89,41 @@ export interface LeagueMatchView {
   overlap: LeagueTimeRange[];
 }
 
+/** One row of the season table, in rank order. */
+export interface LeagueStandingView {
+  rank: number;
+  /** Null for a deleted account. */
+  username: string | null;
+  you: boolean;
+  points: number;
+  wins: number;
+  losses: number;
+  draws: number;
+  byes: number;
+  /** Opponents' match-win rate, 0..1, the first tiebreaker. */
+  opponentMatchWinRate: number;
+  dropped: boolean;
+  playoffSeed: number | null;
+}
+
+export interface LeagueBracketPlayer {
+  username: string | null;
+  seed: number;
+  you: boolean;
+}
+
+/** The deciding (or latest) match in one bracket position. */
+export interface LeagueBracketView {
+  stage: LeaguePlayoffStage;
+  slot: number;
+  a: LeagueBracketPlayer;
+  b: LeagueBracketPlayer;
+  status: LeagueMatchStatus;
+  result: LeagueMatchResult | null;
+  /** Who advances; null while undecided. */
+  advancer: "a" | "b" | null;
+}
+
 export interface LeagueMatchRequest {
   matchId: string;
 }
@@ -115,4 +150,8 @@ export interface LeagueMembership {
   availability: LeagueAvailabilityWindow[];
   /** The current week's or round's matches, plus any still open. */
   matches: LeagueMatchView[];
+  /** Empty during sign-up. */
+  standings: LeagueStandingView[];
+  /** Empty until the playoffs start. */
+  bracket: LeagueBracketView[];
 }

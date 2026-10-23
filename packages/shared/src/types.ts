@@ -1166,6 +1166,8 @@ export type ServerMessage =
   | { type: "chat-message"; message: ChatMessage }
   | { type: "friend-game-invite"; invite: FriendGameInvite }
   | { type: "friend-game-invite-dismissed"; inviteId: string }
+  /** Something in one of the account's leagues changed; reload them. */
+  | { type: "league-updated" }
   | { type: "room-created"; code: string; seat: number; token: string; version: number }
   | { type: "joined"; code: string; seat: number | null; token: string; spectator?: boolean; resumed?: true; version: number }
   | { type: "room-info"; room: RoomInvite }

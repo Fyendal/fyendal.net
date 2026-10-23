@@ -7,6 +7,7 @@ import type {
 } from "@fyendal/shared";
 import { withTransaction, type Queryable } from "../db.js";
 import { intersectIntervals, materializeWeek, MINUTE_MS, seasonWeekBounds, type Interval } from "./availability.js";
+import { notifyLeague } from "./leagueEvents.js";
 import { format, leagueStatus, matchResult, matchStage, matchStatus, nullableNumber, storedWindows } from "./leagueRows.js";
 
 /** A player can mark ready from shortly before the agreed start until a
@@ -81,71 +82,85 @@ const playable = (match: MemberMatch) => running(match) && match.b !== null && S
 /** Back to scheduling after a room ends without a result; any earlier time
  * returns to proposed so both players confirm it again. The room, if it
  * still exists, no longer counts for the league. */
-async function returnToScheduling(tx: Queryable, matchId: string, scheduledAt: unknown, roomCode: string | null): Promise<void> {
+async function returnToScheduling(
+  tx: Queryable,
+  match: { id: string; leagueId: string; a: number; b: number; scheduledAt: unknown },
+  roomCode: string | null,
+): Promise<void> {
   if (roomCode !== null) await tx.query("UPDATE rooms SET league_match_id = NULL WHERE code = $1", [roomCode]);
   await tx.query(
     "UPDATE league_matches SET status = $2, room_code = NULL WHERE id = $1",
-    [matchId, scheduledAt === null ? "unscheduled" : "proposed"],
+    [match.id, match.scheduledAt === null ? "unscheduled" : "proposed"],
   );
+  await notifyLeague(tx, match.leagueId, [match.a, match.b]);
+}
+
+/** Locks the user's match and applies a change; `change` returns false when
+ * the match cannot change now. Both players' tabs hear about a change. */
+async function changeMatch(
+  db: Queryable,
+  userId: number,
+  matchId: string,
+  change: (tx: Queryable, match: MemberMatch) => Promise<boolean>,
+): Promise<LeagueMatchUpdateResult> {
+  return withTransaction(db, async (tx) => {
+    const match = await lockMemberMatch(tx, matchId, userId);
+    if (!match) return "not-found";
+    if (!(await change(tx, match))) return "closed";
+    await notifyLeague(tx, match.leagueId, [match.a, match.b!]);
+    return "updated";
+  });
 }
 
 /** Proposes a start for a match; a new proposal replaces any agreed time. */
-export async function proposeLeagueTime(
+export function proposeLeagueTime(
   db: Queryable,
   userId: number,
   request: LeagueProposeRequest,
   now = Date.now(),
 ): Promise<LeagueMatchUpdateResult> {
-  return withTransaction(db, async (tx) => {
-    const match = await lockMemberMatch(tx, request.matchId, userId);
-    if (!match) return "not-found";
-    if (!playable(match) || request.at <= now || request.at + match.matchMinutes * MINUTE_MS > match.deadlineAt) return "closed";
+  return changeMatch(db, userId, request.matchId, async (tx, match) => {
+    if (!playable(match) || request.at <= now || request.at + match.matchMinutes * MINUTE_MS > match.deadlineAt) return false;
     await tx.query(
       `UPDATE league_matches SET status = 'proposed', proposed_by = $2, proposed_at = $3, scheduled_at = $4,
                                  ready_a = NULL, ready_b = NULL
        WHERE id = $1`,
       [match.id, me(match), now, request.at],
     );
-    return "updated";
+    return true;
   });
 }
 
 /** Accepts the opponent's or the league's proposed time while it is still ahead. */
-export async function acceptLeagueTime(db: Queryable, userId: number, matchId: string, now = Date.now()): Promise<LeagueMatchUpdateResult> {
-  return withTransaction(db, async (tx) => {
-    const match = await lockMemberMatch(tx, matchId, userId);
-    if (!match) return "not-found";
+export function acceptLeagueTime(db: Queryable, userId: number, matchId: string, now = Date.now()): Promise<LeagueMatchUpdateResult> {
+  return changeMatch(db, userId, matchId, async (tx, match) => {
     if (!running(match) || match.status !== "proposed" || match.proposedBy === me(match)
-      || match.scheduledAt === null || match.scheduledAt + READY_CLOSES_MS <= now) return "closed";
+      || match.scheduledAt === null || match.scheduledAt + READY_CLOSES_MS <= now) return false;
     await tx.query("UPDATE league_matches SET status = 'scheduled' WHERE id = $1", [match.id]);
-    return "updated";
+    return true;
   });
 }
 
-export async function markLeagueReady(db: Queryable, userId: number, matchId: string, now = Date.now()): Promise<LeagueMatchUpdateResult> {
-  return withTransaction(db, async (tx) => {
-    const match = await lockMemberMatch(tx, matchId, userId);
-    if (!match) return "not-found";
+export function markLeagueReady(db: Queryable, userId: number, matchId: string, now = Date.now()): Promise<LeagueMatchUpdateResult> {
+  return changeMatch(db, userId, matchId, async (tx, match) => {
     if (!running(match) || match.status !== "scheduled" || match.scheduledAt === null
-      || now < match.scheduledAt - READY_OPENS_MS || now > match.scheduledAt + READY_CLOSES_MS) return "closed";
+      || now < match.scheduledAt - READY_OPENS_MS || now > match.scheduledAt + READY_CLOSES_MS) return false;
     await tx.query(`UPDATE league_matches SET ready_${match.side} = $2 WHERE id = $1`, [match.id, now]);
-    return "updated";
+    return true;
   });
 }
 
 /** After the ready window, a player who showed up wins if the opponent did not. */
-export async function claimLeagueForfeit(db: Queryable, userId: number, matchId: string, now = Date.now()): Promise<LeagueMatchUpdateResult> {
-  return withTransaction(db, async (tx) => {
-    const match = await lockMemberMatch(tx, matchId, userId);
-    if (!match) return "not-found";
+export function claimLeagueForfeit(db: Queryable, userId: number, matchId: string, now = Date.now()): Promise<LeagueMatchUpdateResult> {
+  return changeMatch(db, userId, matchId, async (tx, match) => {
     const [mine, theirs] = match.side === "a" ? [match.readyA, match.readyB] : [match.readyB, match.readyA];
     if (!running(match) || match.status !== "scheduled" || match.scheduledAt === null
-      || now <= match.scheduledAt + READY_CLOSES_MS || mine === null || theirs !== null) return "closed";
+      || now <= match.scheduledAt + READY_CLOSES_MS || mine === null || theirs !== null) return false;
     await tx.query(
       "UPDATE league_matches SET status = 'complete', result = 'forfeit', winner = $2 WHERE id = $1",
       [match.id, me(match)],
     );
-    return "updated";
+    return true;
   });
 }
 
@@ -174,6 +189,7 @@ export async function bindLeagueRoom(tx: Queryable, userId: number, matchId: str
   const match = await playableMatch(tx, userId, matchId);
   await tx.query("UPDATE league_matches SET status = 'in-room', room_code = $2 WHERE id = $1", [match.id, roomCode]);
   await tx.query("UPDATE rooms SET league_match_id = $2 WHERE code = $1", [roomCode, match.id]);
+  await notifyLeague(tx, match.leagueId, [match.a, match.b!]);
 }
 
 /** Accounts allowed to take a league room's seats, or null for any other room. */
@@ -217,8 +233,12 @@ export async function resolveLeagueRoomGame(
     winner = nullableNumber(members[0]?.member_id);
   }
   const decided = winner !== null && (winner === Number(match.member_a) || winner === Number(match.member_b));
+  const players = {
+    id: String(match.id), leagueId: String(match.league_id),
+    a: Number(match.member_a), b: Number(match.member_b), scheduledAt: match.scheduled_at,
+  };
   if (!decided && !game.draw) {
-    await returnToScheduling(db, String(match.id), match.scheduled_at, roomCode);
+    await returnToScheduling(db, players, roomCode);
     return;
   }
   const { rows: recorded } = await db.query(
@@ -229,6 +249,7 @@ export async function resolveLeagueRoomGame(
     "UPDATE league_matches SET status = 'complete', result = $2, winner = $3, match_id = $4 WHERE id = $1",
     [match.id, decided ? "played" : "draw", decided ? winner : null, recorded[0]?.id ?? null],
   );
+  await notifyLeague(db, players.leagueId, [players.a, players.b]);
 }
 
 /** A room can vanish before its game ends (garbage collection or a ruleset
@@ -236,7 +257,7 @@ export async function resolveLeagueRoomGame(
  * until garbage collection. Either way its match goes back to scheduling. */
 export async function resetLostLeagueRooms(tx: Queryable, leagueId: string): Promise<void> {
   const { rows } = await tx.query(
-    "SELECT id, scheduled_at, room_code FROM league_matches WHERE league_id = $1 AND status = 'in-room'",
+    "SELECT id, member_a, member_b, scheduled_at, room_code FROM league_matches WHERE league_id = $1 AND status = 'in-room'",
     [leagueId],
   );
   for (const row of rows) {
@@ -245,7 +266,9 @@ export async function resetLostLeagueRooms(tx: Queryable, leagueId: string): Pro
       const { rows: seats } = await tx.query("SELECT 1 FROM room_seats WHERE room_code = $1 LIMIT 1", [code]);
       if (seats.length) continue;
     }
-    await returnToScheduling(tx, String(row.id), row.scheduled_at, code);
+    await returnToScheduling(tx, {
+      id: String(row.id), leagueId, a: Number(row.member_a), b: Number(row.member_b), scheduledAt: row.scheduled_at,
+    }, code);
   }
 }
 

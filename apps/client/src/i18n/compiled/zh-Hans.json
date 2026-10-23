@@ -30101,6 +30101,22 @@
       "value": " 小时"
     }
   ],
+  "league.bracket.champion": [
+    {
+      "type": 0,
+      "value": "冠军："
+    },
+    {
+      "type": 1,
+      "value": "name"
+    }
+  ],
+  "league.bracket.title": [
+    {
+      "type": 0,
+      "value": "季后赛"
+    }
+  ],
   "league.empty": [
     {
       "type": 0,
@@ -30601,6 +30617,82 @@
       "value": "组织者开始赛季后才会进行配对。在此之前请保持你的空闲时间为最新。"
     }
   ],
+  "league.standings.byes": [
+    {
+      "type": 0,
+      "value": "轮空"
+    }
+  ],
+  "league.standings.dropped": [
+    {
+      "type": 0,
+      "value": "（已退出）"
+    }
+  ],
+  "league.standings.omw": [
+    {
+      "type": 0,
+      "value": "对手胜率"
+    }
+  ],
+  "league.standings.player": [
+    {
+      "type": 0,
+      "value": "玩家"
+    }
+  ],
+  "league.standings.points": [
+    {
+      "type": 0,
+      "value": "积分"
+    }
+  ],
+  "league.standings.rank": [
+    {
+      "type": 0,
+      "value": "#"
+    }
+  ],
+  "league.standings.record": [
+    {
+      "type": 0,
+      "value": "胜–负–平"
+    }
+  ],
+  "league.standings.recordValue": [
+    {
+      "type": 1,
+      "value": "wins"
+    },
+    {
+      "type": 0,
+      "value": "–"
+    },
+    {
+      "type": 1,
+      "value": "losses"
+    },
+    {
+      "type": 0,
+      "value": "–"
+    },
+    {
+      "type": 1,
+      "value": "draws"
+    }
+  ],
+  "league.standings.seed": [
+    {
+      "type": 0,
+      "value": "种子"
+    }
+  ],
+  "league.standings.title": [
+    {
+      "type": 0,
+      "value": "积分榜"
+    }
+  ],
   "league.starts": [
     {
       "type": 0,
@@ -30941,6 +31033,16 @@
     {
       "type": 0,
       "value": "卡牌范围"
+    }
+  ],
+  "lobby.count.leagueActions": [
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " 项待处理"
     }
   ],
   "lobby.count.live": [

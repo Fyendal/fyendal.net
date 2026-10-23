@@ -125,7 +125,7 @@ describe("league sign-up", () => {
       id: LEAGUE, name: "Friday league", format: "cc", status: "signup", startsAt: null,
       seasonWeeks: 4, matchesPerWeek: 2, matchMinutes: 60, maxPlayers: 3, signupOpen: true,
       roster: [{ username: "alice", you: false }, { username: "bob", you: true }],
-      timeZone: "Asia/Tokyo", availability: evenings, matches: [],
+      timeZone: "Asia/Tokyo", availability: evenings, matches: [], standings: [], bracket: [],
     });
     expect(decodeLeaguesResponse({ ok: true, leagues: [league] })).not.toBeNull();
     expect(await listMemberLeagues(db, await user("carol"))).toEqual([]);

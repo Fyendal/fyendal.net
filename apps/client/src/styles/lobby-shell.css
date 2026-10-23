@@ -557,6 +557,7 @@
   white-space: nowrap;
 }
 .rail-nav-item.selected .rail-nav-count { color: #f0c9a8; }
+.mobile-more-count { margin-left: 8px; color: var(--gold); font-size: 12px; }
 @media (min-width: 701px) and (max-width: 1099px) {
   .rail-nav-label { font-size: 15px; }
 }

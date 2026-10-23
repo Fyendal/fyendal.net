@@ -69,6 +69,16 @@ beforeEach(async () => {
   matchId = String(rows[0].id);
 });
 
+/** Completes the week-1 match as a forfeit win for `winner`. */
+async function claimForfeitFor(winner: number) {
+  const at = start + 24 * 60 * MINUTE_MS;
+  const loser = winner === alice ? bob : alice;
+  await proposeLeagueTime(db, loser, { matchId, at }, start);
+  await acceptLeagueTime(db, winner, matchId, start);
+  await markLeagueReady(db, winner, matchId, at);
+  expect(await claimLeagueForfeit(db, winner, matchId, at + READY_CLOSES_MS + 1)).toBe("updated");
+}
+
 describe("league match scheduling", () => {
   it("shows each player the match, the league's suggestion, and the shared time", async () => {
     const [league] = await listMemberLeagues(db, alice, start);
@@ -111,6 +121,31 @@ describe("league match scheduling", () => {
     expect(await claimLeagueForfeit(db, bob, matchId, at + READY_CLOSES_MS + 1)).toBe("closed");
     expect(await claimLeagueForfeit(db, alice, matchId, at + READY_CLOSES_MS + 1)).toBe("updated");
     expect(await match()).toMatchObject({ status: "complete", result: "forfeit", winner: 1 });
+  });
+
+  it("tells both players about a change", async () => {
+    await proposeLeagueTime(db, alice, { matchId, at: start + 24 * 60 * MINUTE_MS }, start);
+    const { rows } = await db.query("SELECT subject_user_id FROM cluster_events WHERE event_type = 'league-updated'");
+    expect(new Set(rows.map((row) => Number(row.subject_user_id)))).toEqual(new Set([alice, bob]));
+  });
+
+  it("shows standings and, after the season, the bracket", async () => {
+    await claimForfeitFor(alice);
+    const [league] = await listMemberLeagues(db, bob, start);
+    expect(league!.standings.map((row) => [row.rank, row.username, row.points, row.you])).toEqual([
+      [1, "alice", 3, false],
+      [2, "bob", 0, true],
+    ]);
+    expect(league!.bracket).toEqual([]);
+    await tickLeagues(db, start + 4 * WEEK_MS);
+    const [playoffs] = await listMemberLeagues(db, bob, start + 4 * WEEK_MS);
+    expect(playoffs!.status).toBe("playoffs");
+    expect(playoffs!.bracket).toEqual([{
+      stage: "final", slot: 0,
+      a: { username: "alice", seed: 1, you: false }, b: { username: "bob", seed: 2, you: true },
+      status: "proposed", result: null, advancer: null,
+    }]);
+    expect(decodeLeaguesResponse({ ok: true, leagues: [playoffs] })).not.toBeNull();
   });
 
   it("refuses a claim when both players were ready", async () => {

@@ -8,6 +8,8 @@ import { AvailabilityGrid } from "./AvailabilityGrid.js";
 import { sameWindows } from "./availability.js";
 import { leagueErrorMessage, leagueStart, leagueSummary } from "./leagueText.js";
 import { LeagueMatchList } from "./LeagueMatchList.js";
+import { LeagueBracket } from "./LeagueBracket.js";
+import { LeagueStandings } from "./LeagueStandings.js";
 import { TimeZoneSelect } from "./TimeZoneSelect.js";
 import "../styles/league.css";
 
@@ -74,21 +76,39 @@ function LeagueCard({ league }: { league: LeagueMembership }) {
       {league.status === "season" || league.status === "playoffs"
         ? <LeagueMatchList league={league} onChanged={refreshLeagues} />
         : null}
+      {league.bracket.length ? (
+        <>
+          <h4 className="league-section-title">{intl.formatMessage({ id: "league.bracket.title" })}</h4>
+          <LeagueBracket matches={league.bracket} />
+        </>
+      ) : null}
+      {league.standings.length ? (
+        <>
+          <h4 className="league-section-title" id={`league-${league.id}-standings`}>
+            {intl.formatMessage({ id: "league.standings.title" })}
+          </h4>
+          <LeagueStandings rows={league.standings} titleId={`league-${league.id}-standings`} />
+        </>
+      ) : null}
 
-      <h4 className="league-section-title">
-        {intl.formatMessage({ id: "league.roster.title" }, { count: league.roster.length, max: league.maxPlayers })}
-      </h4>
-      <ul className="league-roster">
-        {league.roster.map((member, index) => (
-          <li key={member.username ?? `deleted-${index}`} className={member.you ? "you" : undefined}>
-            {member.username === null
-              ? intl.formatMessage({ id: "league.roster.deleted" })
-              : member.you
-                ? intl.formatMessage({ id: "league.roster.you" }, { username: member.username })
-                : member.username}
-          </li>
-        ))}
-      </ul>
+      {league.status === "signup" ? (
+        <>
+          <h4 className="league-section-title">
+            {intl.formatMessage({ id: "league.roster.title" }, { count: league.roster.length, max: league.maxPlayers })}
+          </h4>
+          <ul className="league-roster">
+            {league.roster.map((member, index) => (
+              <li key={member.username ?? `deleted-${index}`} className={member.you ? "you" : undefined}>
+                {member.username === null
+                  ? intl.formatMessage({ id: "league.roster.deleted" })
+                  : member.you
+                    ? intl.formatMessage({ id: "league.roster.you" }, { username: member.username })
+                    : member.username}
+              </li>
+            ))}
+          </ul>
+        </>
+      ) : null}
 
       {editable ? (
         <form onSubmit={(event) => { event.preventDefault(); void save(); }}>

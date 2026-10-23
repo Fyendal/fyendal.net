@@ -3544,5 +3544,18 @@
   "league.room.title": "Start your league game",
   "league.room.description": "Choose a {format} deck. Only {opponent} can take the other seat.",
   "league.room.submit": "Open room",
-  "league.room.noDeck": "You have no legal {format} deck yet. Add one in Decks."
+  "league.room.noDeck": "You have no legal {format} deck yet. Add one in Decks.",
+  "lobby.count.leagueActions": "{count, plural, one {# to do} other {# to do}}",
+  "league.standings.title": "Standings",
+  "league.standings.rank": "#",
+  "league.standings.player": "Player",
+  "league.standings.points": "Points",
+  "league.standings.record": "W–L–D",
+  "league.standings.recordValue": "{wins}–{losses}–{draws}",
+  "league.standings.byes": "Byes",
+  "league.standings.omw": "Opp. win %",
+  "league.standings.seed": "Seed",
+  "league.standings.dropped": "(dropped)",
+  "league.bracket.title": "Playoffs",
+  "league.bracket.champion": "Champion: {name}"
 }

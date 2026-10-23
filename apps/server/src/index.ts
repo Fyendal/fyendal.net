@@ -439,6 +439,9 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
           client.send({ type: "friend-game-invite-dismissed", inviteId: event.inviteId });
         }
         return;
+      case "league-updated":
+        for (const client of localClientsForUser(event.userId)) client.send({ type: "league-updated" });
+        return;
     }
   }, { logError: consoleError });
   clusterPublisherByServer.set(server, publishRoomEvent);

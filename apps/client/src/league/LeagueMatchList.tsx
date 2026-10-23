@@ -6,11 +6,9 @@ import { apiLeagueMatchAction, apiProposeLeagueTime, type LeagueMatchAction } fr
 import { useStore } from "../store.js";
 import { startOptions } from "./availability.js";
 import { leagueErrorMessage } from "./leagueText.js";
+import { canClaimForfeit, inReadyWindow } from "./pendingActions.js";
 import { LeagueRoomModal } from "./LeagueRoomModal.js";
 
-// Mirrors the server's ready window around an agreed start.
-const READY_OPENS_MS = 5 * 60_000;
-const READY_CLOSES_MS = 15 * 60_000;
 const SHORT_TIME: Intl.DateTimeFormatOptions = { weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" };
 
 function MatchItem({ league, match, now, onChanged }: {
@@ -40,10 +38,8 @@ function MatchItem({ league, match, now, onChanged }: {
   const options = proposing ? startOptions(match.overlap, league.matchMinutes, now) : [];
   const open = match.status !== "complete";
   const schedulable = open && match.status !== "in-room" && match.opponent !== null;
-  const inReadyWindow = match.status === "scheduled" && match.scheduledAt !== null
-    && now >= match.scheduledAt - READY_OPENS_MS && now <= match.scheduledAt + READY_CLOSES_MS;
-  const canClaim = match.status === "scheduled" && match.scheduledAt !== null
-    && now > match.scheduledAt + READY_CLOSES_MS && match.youReady && !match.opponentReady;
+  const checkInOpen = inReadyWindow(match, now);
+  const canClaim = canClaimForfeit(match, now);
 
   const run = async (request: (token: string) => ReturnType<typeof apiProposeLeagueTime>) => {
     if (!authToken) return;
@@ -119,7 +115,7 @@ function MatchItem({ league, match, now, onChanged }: {
             {intl.formatMessage({ id: "league.match.accept" })}
           </button>
         ) : null}
-        {inReadyWindow && !match.youReady ? (
+        {checkInOpen && !match.youReady ? (
           <button type="button" disabled={busy} onClick={() => void action("ready")}>
             {intl.formatMessage({ id: "league.match.ready" })}
           </button>

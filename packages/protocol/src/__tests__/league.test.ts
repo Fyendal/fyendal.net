@@ -7,6 +7,7 @@ import {
   decodeLeagueMatchRequest,
   decodeLeagueProposeRequest,
   decodeClientMessage,
+  decodeServerMessage,
   decodeLeaguesResponse,
   decodeLeagueJoinPreviewResponse,
   decodeLeagueJoinRequest,
@@ -65,7 +66,7 @@ describe("league decoding", () => {
       id: "b".repeat(24), name: "Friday league", format: "cc", status: "signup", startsAt: null,
       seasonWeeks: 4, matchesPerWeek: 2, matchMinutes: 60, maxPlayers: 8, signupOpen: true,
       roster: [{ username: "alice", you: true }, { username: null, you: false }],
-      timeZone: "UTC", availability: [window], matches: [],
+      timeZone: "UTC", availability: [window], matches: [], standings: [], bracket: [],
     };
     expect(decodeLeaguesResponse({ ok: true, leagues: [league] })).toEqual({ ok: true, leagues: [league] });
     const match = {
@@ -82,6 +83,30 @@ describe("league decoding", () => {
     ]) expect(decodeLeaguesResponse({ ok: true, leagues: [{ ...league, matches: [invalid] }] })).toBeNull();
     expect(decodeLeaguesResponse({ ok: true, leagues: [{ ...league, roster: [{ username: "a b", you: true }] }] })).toBeNull();
     expect(decodeLeaguesResponse({ ok: true, leagues: [{ ...league, timeZone: "Mars/Base" }] })).toBeNull();
+  });
+
+  it("decodes standings and the bracket", () => {
+    const league = {
+      id: "b".repeat(24), name: "League", format: "cc", status: "playoffs", startsAt: 1, seasonWeeks: 4,
+      matchesPerWeek: 1, matchMinutes: 60, maxPlayers: 8, signupOpen: false, roster: [], timeZone: "UTC",
+      availability: [], matches: [],
+    };
+    const standing = {
+      rank: 1, username: "alice", you: true, points: 9, wins: 3, losses: 0, draws: 0, byes: 0,
+      opponentMatchWinRate: 0.5, dropped: false, playoffSeed: 1,
+    };
+    const bracket = {
+      stage: "final", slot: 0, a: { username: "alice", seed: 1, you: true }, b: { username: null, seed: 2, you: false },
+      status: "complete", result: "played", advancer: "a",
+    };
+    expect(decodeLeaguesResponse({ ok: true, leagues: [{ ...league, standings: [standing], bracket: [bracket] }] })).not.toBeNull();
+    for (const invalid of [{ ...standing, opponentMatchWinRate: 1.5 }, { ...standing, rank: 0 }, { ...standing, playoffSeed: 9 }]) {
+      expect(decodeLeaguesResponse({ ok: true, leagues: [{ ...league, standings: [invalid], bracket: [] }] })).toBeNull();
+    }
+    for (const invalid of [{ ...bracket, stage: "season" }, { ...bracket, advancer: "c" }, { ...bracket, slot: 4 }]) {
+      expect(decodeLeaguesResponse({ ok: true, leagues: [{ ...league, standings: [], bracket: [invalid] }] })).toBeNull();
+    }
+    expect(decodeServerMessage({ type: "league-updated" })).toEqual({ type: "league-updated" });
   });
 
   it("decodes match requests and the league room message", () => {

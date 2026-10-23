@@ -3544,5 +3544,18 @@
   "league.room.title": "开始联赛对局",
   "league.room.description": "选择一副 {format} 牌组。只有 {opponent} 能占据另一个座位。",
   "league.room.submit": "创建房间",
-  "league.room.noDeck": "你还没有合法的 {format} 牌组。请在牌组页添加。"
+  "league.room.noDeck": "你还没有合法的 {format} 牌组。请在牌组页添加。",
+  "lobby.count.leagueActions": "{count} 项待处理",
+  "league.standings.title": "积分榜",
+  "league.standings.rank": "#",
+  "league.standings.player": "玩家",
+  "league.standings.points": "积分",
+  "league.standings.record": "胜–负–平",
+  "league.standings.recordValue": "{wins}–{losses}–{draws}",
+  "league.standings.byes": "轮空",
+  "league.standings.omw": "对手胜率",
+  "league.standings.seed": "种子",
+  "league.standings.dropped": "（已退出）",
+  "league.bracket.title": "季后赛",
+  "league.bracket.champion": "冠军：{name}"
 }

@@ -15,6 +15,7 @@ import { mobileLobbyDestinationSelected, type MobileLobbyDestination } from "./m
 import { UiIcon, type UiIconName } from "../components/UiIcon.js";
 import { FullscreenButton } from "../components/FullscreenButton.js";
 import { GlobalNoticeBanner } from "../notices/GlobalNoticeBanner.js";
+import { leagueActionCount } from "../league/pendingActions.js";
 import {
   GuestLandingDetails,
   GuestLandingHero,
@@ -59,6 +60,7 @@ export function Lobby() {
     unreadMessageCount,
     setSocialOpen,
     hasLeague,
+    leagueActions,
     refreshLeagues,
   } = useStore(useShallow((state) => ({
     error: state.error,
@@ -74,6 +76,7 @@ export function Lobby() {
     unreadMessageCount: state.friends.reduce((total, friend) => total + friend.unreadCount, 0),
     setSocialOpen: state.setSocialOpen,
     hasLeague: (state.leagues?.length ?? 0) > 0,
+    leagueActions: leagueActionCount(state.leagues, Date.now()),
     refreshLeagues: state.refreshLeagues,
   })));
   const [deckFormatFilter, setDeckFormatFilter] = useState<"all" | Format>("all");
@@ -160,7 +163,13 @@ export function Lobby() {
         : undefined,
     },
     { rail: "history", label: intl.formatMessage({ id: "lobby.nav.history" }) },
-    ...(hasLeague || rail === "league" ? [{ rail: "league" as const, label: intl.formatMessage({ id: "lobby.nav.league" }) }] : []),
+    ...(hasLeague || rail === "league"
+      ? [{
+          rail: "league" as const,
+          label: intl.formatMessage({ id: "lobby.nav.league" }),
+          count: leagueActions > 0 ? intl.formatMessage({ id: "lobby.count.leagueActions" }, { count: leagueActions }) : undefined,
+        }]
+      : []),
     { rail: "achievements", label: intl.formatMessage({ id: "achievements.title" }) },
   ];
   const mobilePlaces: MobilePlace[] = [
@@ -265,6 +274,11 @@ export function Lobby() {
               {hasLeague ? (
                 <button onClick={() => { setRail("league"); setShowMobileMore(false); }}>
                   {intl.formatMessage({ id: "lobby.nav.league" })}
+                  {leagueActions > 0 ? (
+                    <span className="mobile-more-count">
+                      {intl.formatMessage({ id: "lobby.count.leagueActions" }, { count: leagueActions })}
+                    </span>
+                  ) : null}
                 </button>
               ) : null}
               <button onClick={() => { setRail("achievements"); setShowMobileMore(false); }}>

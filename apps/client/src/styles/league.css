@@ -43,6 +43,25 @@
 .league-propose { display: grid; gap: 8px; max-width: 520px; margin-top: 12px; }
 .league-propose button { justify-self: start; }
 
+.league-table-wrap { overflow-x: auto; }
+.league-standings { width: 100%; border-collapse: collapse; font-size: 14px; font-variant-numeric: tabular-nums; }
+.league-standings th, .league-standings td { padding: 7px 10px; border-bottom: 1px solid var(--border-subtle); text-align: right; white-space: nowrap; }
+.league-standings th[scope="row"], .league-standings thead th:nth-child(2) { text-align: left; font-weight: 500; }
+.league-standings thead th { color: var(--text-muted); font-size: 12px; font-weight: 600; }
+.league-standings tr.you th, .league-standings tr.you td { color: var(--gold); }
+.league-standings tr.dropped th, .league-standings tr.dropped td { color: var(--text-muted); }
+.league-dropped { font-size: 12px; }
+.league-champion { margin: 4px 0 12px; color: var(--gold); font: 500 18px/1.3 var(--font-heading); }
+.league-bracket { display: flex; gap: 16px; overflow-x: auto; padding-bottom: 4px; }
+.league-bracket-round { display: flex; flex-direction: column; justify-content: space-around; gap: 12px; min-width: 160px; }
+.league-bracket-round h5 { margin: 0; color: var(--text-muted); font-size: 12px; font-weight: 600; }
+.league-bracket-match { margin: 0; padding: 0; list-style: none; border: 1px solid var(--border-subtle); border-radius: 6px; background: var(--surface-raised); }
+.league-bracket-match li { display: flex; gap: 8px; padding: 6px 10px; color: var(--text-secondary); }
+.league-bracket-match li + li { border-top: 1px solid var(--border-subtle); }
+.league-bracket-match li.advanced { color: var(--text-primary); font-weight: 600; }
+.league-bracket-match li.you { color: var(--gold); }
+.league-seed { min-width: 1.2em; color: var(--text-muted); font-variant-numeric: tabular-nums; }
+
 .availability-editor { margin-top: 8px; }
 .availability-grid {
   display: grid;

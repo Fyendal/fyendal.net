@@ -3544,5 +3544,18 @@
   "league.room.title": "Iniciar tu partida de liga",
   "league.room.description": "Elige un mazo de {format}. Solo {opponent} puede ocupar el otro asiento.",
   "league.room.submit": "Abrir sala",
-  "league.room.noDeck": "Aún no tienes un mazo legal de {format}. Añade uno en Mazos."
+  "league.room.noDeck": "Aún no tienes un mazo legal de {format}. Añade uno en Mazos.",
+  "lobby.count.leagueActions": "{count, plural, one {# pendiente} other {# pendientes}}",
+  "league.standings.title": "Clasificación",
+  "league.standings.rank": "#",
+  "league.standings.player": "Jugador",
+  "league.standings.points": "Puntos",
+  "league.standings.record": "G–P–E",
+  "league.standings.recordValue": "{wins}–{losses}–{draws}",
+  "league.standings.byes": "Byes",
+  "league.standings.omw": "% vic. rivales",
+  "league.standings.seed": "Seed",
+  "league.standings.dropped": "(abandonó)",
+  "league.bracket.title": "Playoffs",
+  "league.bracket.champion": "Título de la liga: {name}"
 }

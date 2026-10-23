@@ -8,6 +8,8 @@ import type { LeagueExport } from "@fyendal/protocol";
 import { withTransaction, type Queryable } from "../db.js";
 import { hashToken } from "../tokenHash.js";
 import { memberMatchViews } from "./leagueMatches.js";
+import { leagueTables } from "./leagueTables.js";
+import { notifyLeague } from "./leagueEvents.js";
 import { format, leagueStatus, matchResult, matchStage, matchStatus, nullableNumber, storedWindows } from "./leagueRows.js";
 
 export type JoinLeagueResult = "joined" | "already-joined" | "not-found" | "full";
@@ -75,6 +77,7 @@ export async function joinLeague(db: Queryable, userId: number, request: LeagueJ
         );
       }
     }
+    await notifyLeague(tx, leagueId);
     return "joined";
   });
 }
@@ -90,6 +93,7 @@ export async function leaveLeague(db: Queryable, userId: number, leagueId: strin
     if (!rows[0] || !members.length) return "not-found";
     if (rows[0].status !== "signup") return "closed";
     await tx.query("DELETE FROM league_members WHERE league_id = $1 AND user_id = $2", [leagueId, userId]);
+    await notifyLeague(tx, leagueId);
     return "updated";
   });
 }
@@ -139,6 +143,7 @@ export async function listMemberLeagues(db: Queryable, userId: number, now = Dat
   const { rows } = await db.query(
     `SELECT l.id, l.name, l.format, l.status, l.starts_at, l.season_weeks, l.matches_per_week, l.match_minutes,
             l.max_players, l.signup_token_hash IS NOT NULL AS signup_open, l.current_week, l.playoff_round_hours,
+            l.pairing_seed,
             m.member_id, m.time_zone, m.availability
      FROM leagues l JOIN league_members m ON m.league_id = l.id
      WHERE m.user_id = $1 AND m.status = 'active' AND l.status <> 'cancelled'
@@ -152,33 +157,41 @@ export async function listMemberLeagues(db: Queryable, userId: number, now = Dat
      WHERE r.status = 'active' ORDER BY r.league_id, r.member_id`,
     [userId],
   );
-  return Promise.all(rows.map(async (row) => ({
-    id: String(row.id),
-    name: String(row.name),
-    format: format(row.format),
-    status: leagueStatus(row.status),
-    startsAt: nullableNumber(row.starts_at),
-    seasonWeeks: Number(row.season_weeks),
-    matchesPerWeek: Number(row.matches_per_week),
-    matchMinutes: Number(row.match_minutes),
-    maxPlayers: Number(row.max_players),
-    signupOpen: row.status === "signup" && row.signup_open === true,
-    roster: rosterRows.filter((member) => member.league_id === row.id).map((member) => ({
-      username: member.username === null ? null : String(member.username),
-      you: Number(member.user_id) === userId,
-    })),
-    timeZone: String(row.time_zone),
-    availability: storedWindows(row.availability, "league availability"),
-    matches: await memberMatchViews(db, {
-      leagueId: String(row.id),
-      status: leagueStatus(row.status),
+  return Promise.all(rows.map(async (row) => {
+    const status = leagueStatus(row.status);
+    const memberId = Number(row.member_id);
+    const tables = status === "signup"
+      ? { standings: [], bracket: [] }
+      : await leagueTables(db, { id: String(row.id), seed: String(row.pairing_seed) }, memberId);
+    return {
+      id: String(row.id),
+      name: String(row.name),
+      format: format(row.format),
+      status,
       startsAt: nullableNumber(row.starts_at),
-      currentWeek: Number(row.current_week),
+      seasonWeeks: Number(row.season_weeks),
+      matchesPerWeek: Number(row.matches_per_week),
       matchMinutes: Number(row.match_minutes),
-      playoffRoundHours: Number(row.playoff_round_hours),
-      memberId: Number(row.member_id),
-    }, now),
-  })));
+      maxPlayers: Number(row.max_players),
+      signupOpen: status === "signup" && row.signup_open === true,
+      roster: rosterRows.filter((member) => member.league_id === row.id).map((member) => ({
+        username: member.username === null ? null : String(member.username),
+        you: Number(member.user_id) === userId,
+      })),
+      timeZone: String(row.time_zone),
+      availability: storedWindows(row.availability, "league availability"),
+      matches: await memberMatchViews(db, {
+        leagueId: String(row.id),
+        status,
+        startsAt: nullableNumber(row.starts_at),
+        currentWeek: Number(row.current_week),
+        matchMinutes: Number(row.match_minutes),
+        playoffRoundHours: Number(row.playoff_round_hours),
+        memberId,
+      }, now),
+      ...tables,
+    };
+  }));
 }
 
 /** Drops a member. Their unfinished season matches are cancelled and open

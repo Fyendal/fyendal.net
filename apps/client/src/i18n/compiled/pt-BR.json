@@ -33035,6 +33035,22 @@
       "value": " por semana"
     }
   ],
+  "league.bracket.champion": [
+    {
+      "type": 0,
+      "value": "Título da liga: "
+    },
+    {
+      "type": 1,
+      "value": "name"
+    }
+  ],
+  "league.bracket.title": [
+    {
+      "type": 0,
+      "value": "Playoffs"
+    }
+  ],
   "league.empty": [
     {
       "type": 0,
@@ -33527,6 +33543,82 @@
       "value": "Os pareamentos começam quando a temporada for iniciada. Até lá, mantenha sua disponibilidade atualizada."
     }
   ],
+  "league.standings.byes": [
+    {
+      "type": 0,
+      "value": "Byes"
+    }
+  ],
+  "league.standings.dropped": [
+    {
+      "type": 0,
+      "value": "(saiu)"
+    }
+  ],
+  "league.standings.omw": [
+    {
+      "type": 0,
+      "value": "% vit. adv."
+    }
+  ],
+  "league.standings.player": [
+    {
+      "type": 0,
+      "value": "Jogador"
+    }
+  ],
+  "league.standings.points": [
+    {
+      "type": 0,
+      "value": "Pontos"
+    }
+  ],
+  "league.standings.rank": [
+    {
+      "type": 0,
+      "value": "#"
+    }
+  ],
+  "league.standings.record": [
+    {
+      "type": 0,
+      "value": "V–D–E"
+    }
+  ],
+  "league.standings.recordValue": [
+    {
+      "type": 1,
+      "value": "wins"
+    },
+    {
+      "type": 0,
+      "value": "–"
+    },
+    {
+      "type": 1,
+      "value": "losses"
+    },
+    {
+      "type": 0,
+      "value": "–"
+    },
+    {
+      "type": 1,
+      "value": "draws"
+    }
+  ],
+  "league.standings.seed": [
+    {
+      "type": 0,
+      "value": "Seed"
+    }
+  ],
+  "league.standings.title": [
+    {
+      "type": 0,
+      "value": "Classificação"
+    }
+  ],
   "league.starts": [
     {
       "type": 0,
@@ -33935,6 +34027,46 @@
     {
       "type": 0,
       "value": "Pool de cartas"
+    }
+  ],
+  "lobby.count.leagueActions": [
+    {
+      "type": 6,
+      "value": "count",
+      "options": {
+        "=0": {
+          "value": [
+            {
+              "type": 0,
+              "value": "nada pendente"
+            }
+          ]
+        },
+        "one": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " pendente"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " pendentes"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
     }
   ],
   "lobby.count.live": [

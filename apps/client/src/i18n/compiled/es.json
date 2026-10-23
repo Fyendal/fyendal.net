@@ -32282,6 +32282,22 @@
       "value": " por semana"
     }
   ],
+  "league.bracket.champion": [
+    {
+      "type": 0,
+      "value": "Título de la liga: "
+    },
+    {
+      "type": 1,
+      "value": "name"
+    }
+  ],
+  "league.bracket.title": [
+    {
+      "type": 0,
+      "value": "Playoffs"
+    }
+  ],
   "league.empty": [
     {
       "type": 0,
@@ -32774,6 +32790,82 @@
       "value": "Los emparejamientos empiezan cuando se inicie la temporada. Hasta entonces, mantén tu disponibilidad al día."
     }
   ],
+  "league.standings.byes": [
+    {
+      "type": 0,
+      "value": "Byes"
+    }
+  ],
+  "league.standings.dropped": [
+    {
+      "type": 0,
+      "value": "(abandonó)"
+    }
+  ],
+  "league.standings.omw": [
+    {
+      "type": 0,
+      "value": "% vic. rivales"
+    }
+  ],
+  "league.standings.player": [
+    {
+      "type": 0,
+      "value": "Jugador"
+    }
+  ],
+  "league.standings.points": [
+    {
+      "type": 0,
+      "value": "Puntos"
+    }
+  ],
+  "league.standings.rank": [
+    {
+      "type": 0,
+      "value": "#"
+    }
+  ],
+  "league.standings.record": [
+    {
+      "type": 0,
+      "value": "G–P–E"
+    }
+  ],
+  "league.standings.recordValue": [
+    {
+      "type": 1,
+      "value": "wins"
+    },
+    {
+      "type": 0,
+      "value": "–"
+    },
+    {
+      "type": 1,
+      "value": "losses"
+    },
+    {
+      "type": 0,
+      "value": "–"
+    },
+    {
+      "type": 1,
+      "value": "draws"
+    }
+  ],
+  "league.standings.seed": [
+    {
+      "type": 0,
+      "value": "Seed"
+    }
+  ],
+  "league.standings.title": [
+    {
+      "type": 0,
+      "value": "Clasificación"
+    }
+  ],
   "league.starts": [
     {
       "type": 0,
@@ -33166,6 +33258,38 @@
     {
       "type": 0,
       "value": "Grupo de cartas"
+    }
+  ],
+  "lobby.count.leagueActions": [
+    {
+      "type": 6,
+      "value": "count",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " pendiente"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " pendientes"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
     }
   ],
   "lobby.count.live": [

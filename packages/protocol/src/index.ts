@@ -36,6 +36,9 @@ import type {
   LeagueMatchStatus,
   LeagueMatchView,
   LeagueMembership,
+  LeagueBracketPlayer,
+  LeagueBracketView,
+  LeagueStandingView,
   LeaguePairingNote,
   LeagueProposeRequest,
   LeagueTimeRange,
@@ -1868,7 +1871,7 @@ function decodeServerEvent(value: unknown): Exclude<ServerMessage, StateMessage>
     case "friend-game-invite-dismissed":
       valid = exactKeys(message, ["type", "inviteId"]) && requestId(message.inviteId);
       break;
-    case "auth-failed": case "queue-left": case "left": case "match-timeout": case "spectator-kicked":
+    case "auth-failed": case "queue-left": case "left": case "match-timeout": case "spectator-kicked": case "league-updated":
       valid = exactKeys(message, ["type"]);
       break;
     case "background-matchmaking":
@@ -2381,11 +2384,44 @@ function leagueMatchView(value: unknown): value is LeagueMatchView {
     && array(match.overlap, leagueTimeRange, MAX_LEAGUE_OVERLAPS);
 }
 
+const LEAGUE_PLAYOFF_STAGES = new Set(["quarterfinal", "semifinal", "final"]);
+const MAX_LEAGUE_COUNT = 1_000;
+const leagueCount = (value: unknown): value is number => nonNegativeInteger(value) && value <= MAX_LEAGUE_COUNT;
+
+function leagueStanding(value: unknown): value is LeagueStandingView {
+  const row = object(value);
+  return !!row && exactKeys(row, [
+    "rank", "username", "you", "points", "wins", "losses", "draws", "byes", "opponentMatchWinRate", "dropped", "playoffSeed",
+  ]) && positiveInteger(row.rank) && row.rank <= MAX_LEAGUE_PLAYERS
+    && (row.username === null || username(row.username)) && typeof row.you === "boolean"
+    && leagueCount(row.points) && leagueCount(row.wins) && leagueCount(row.losses) && leagueCount(row.draws) && leagueCount(row.byes)
+    && finite(row.opponentMatchWinRate) && row.opponentMatchWinRate >= 0 && row.opponentMatchWinRate <= 1
+    && typeof row.dropped === "boolean"
+    && (row.playoffSeed === null || (positiveInteger(row.playoffSeed) && row.playoffSeed <= 8));
+}
+
+function leagueBracketPlayer(value: unknown): value is LeagueBracketPlayer {
+  const player = object(value);
+  return !!player && exactKeys(player, ["username", "seed", "you"])
+    && (player.username === null || username(player.username))
+    && nonNegativeInteger(player.seed) && player.seed <= 8 && typeof player.you === "boolean";
+}
+
+function leagueBracket(value: unknown): value is LeagueBracketView {
+  const match = object(value);
+  return !!match && exactKeys(match, ["stage", "slot", "a", "b", "status", "result", "advancer"])
+    && LEAGUE_PLAYOFF_STAGES.has(String(match.stage)) && nonNegativeInteger(match.slot) && match.slot < 4
+    && leagueBracketPlayer(match.a) && leagueBracketPlayer(match.b)
+    && LEAGUE_MATCH_STATUSES.has(String(match.status))
+    && (match.result === null || LEAGUE_MATCH_RESULTS.has(String(match.result)))
+    && (match.advancer === null || match.advancer === "a" || match.advancer === "b");
+}
+
 function leagueMembership(value: unknown): value is LeagueMembership {
   const league = object(value);
   return !!league && exactKeys(league, [
     "id", "name", "format", "status", "startsAt", "seasonWeeks", "matchesPerWeek", "matchMinutes",
-    "maxPlayers", "signupOpen", "roster", "timeZone", "availability", "matches",
+    "maxPlayers", "signupOpen", "roster", "timeZone", "availability", "matches", "standings", "bracket",
   ]) && leagueId(league.id) && string(league.name, MAX_LEAGUE_NAME, false) && FORMATS.has(String(league.format))
     && LEAGUE_STATUSES.has(String(league.status)) && nullableTimestamp(league.startsAt)
     && positiveInteger(league.seasonWeeks) && league.seasonWeeks <= MAX_LEAGUE_WEEK
@@ -2399,7 +2435,9 @@ function leagueMembership(value: unknown): value is LeagueMembership {
         && (member.username === null || username(member.username)) && typeof member.you === "boolean";
     }, MAX_LEAGUE_PLAYERS)
     && decodeLeagueTimeZone(league.timeZone) !== null && leagueWindows(league.availability)
-    && array(league.matches, leagueMatchView, MAX_LEAGUE_MATCHES);
+    && array(league.matches, leagueMatchView, MAX_LEAGUE_MATCHES)
+    && array(league.standings, leagueStanding, MAX_LEAGUE_PLAYERS)
+    && array(league.bracket, leagueBracket, 8);
 }
 
 export const decodeLeaguesResponse: Decoder<LeaguesResponse> = (value) => {

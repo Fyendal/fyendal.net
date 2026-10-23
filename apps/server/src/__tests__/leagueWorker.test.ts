@@ -121,6 +121,15 @@ describe("league worker: starting and pairing", () => {
     expect(byes[0].winner).toBe(byes[0].member_a);
   });
 
+  it("skips weeks that ended while no worker ran", async () => {
+    await createLeague({ members: 2, seasonWeeks: 3 });
+    await queue({ kind: "start" });
+    await tickLeagues(db, T0);
+    await tickLeagues(db, T0 + 2 * WEEK_MS + HOUR);
+    expect((await league()).current_week).toBe(3);
+    expect((await matches()).map((match) => match.week)).toEqual([1, 3]);
+  });
+
   it("is idempotent when ticked repeatedly", async () => {
     await createLeague({ members: 4 });
     await queue({ kind: "start" });
@@ -219,6 +228,14 @@ describe("league worker: playoffs", () => {
       .toEqual([["set-result", "a later playoff round is already paired"]]);
   });
 
+  it("freezes season results once the playoffs start", async () => {
+    await playoffsWithFour();
+    const [season] = await matches("stage = 'season'");
+    await queue({ kind: "set-result", matchId: season.id, outcome: "b" });
+    await tickLeagues(db, T0 + WEEK_MS + HOUR);
+    expect((await actionErrors()).at(-1)).toEqual(["set-result", "season results are final once the playoffs start"]);
+  });
+
   it("forfeits a dropped player's playoff matches, including later rounds", async () => {
     await playoffsWithFour();
     const [one, two] = await matches("stage = 'semifinal'");
@@ -298,6 +315,36 @@ describe("league worker: operator actions", () => {
       ["close-signup", "sign-up is not open"],
       ["cancel", "the league has already finished"],
     ]);
+  });
+
+  it("rejects deadline changes in a finished league", async () => {
+    await createLeague({ members: 2 });
+    await queue({ kind: "start" });
+    await tickLeagues(db, T0);
+    const [match] = await matches();
+    await queue({ kind: "cancel" }, { kind: "extend-deadline", matchId: match.id, deadlineAt: T0 + 2 * WEEK_MS });
+    await tickLeagues(db, T0 + HOUR);
+    expect((await actionErrors()).at(-1)).toEqual(["extend-deadline", "deadlines can change only during the season or playoffs"]);
+  });
+
+  it("tells members when the league changes", async () => {
+    await createLeague({ members: 2 });
+    const { rows: users } = await db.query(
+      "INSERT INTO users (username, username_lc, pass_hash, created_at) VALUES ('alice', 'alice', 'h', 1) RETURNING id",
+    );
+    await db.query("UPDATE league_members SET user_id = $1 WHERE member_id = 1", [users[0].id]);
+    const notices = async () => (await db.query(
+      "SELECT 1 FROM cluster_events WHERE event_type = 'league-updated' AND subject_user_id = $1",
+      [users[0].id],
+    )).rows.length;
+    await queue({ kind: "start" });
+    await tickLeagues(db, T0);
+    const afterStart = await notices();
+    expect(afterStart).toBeGreaterThanOrEqual(2);
+    await tickLeagues(db, T0 + HOUR);
+    expect(await notices()).toBe(afterStart);
+    await tickLeagues(db, T0 + WEEK_MS);
+    expect(await notices()).toBeGreaterThan(afterStart);
   });
 
   it("closes sign-up without starting", async () => {
