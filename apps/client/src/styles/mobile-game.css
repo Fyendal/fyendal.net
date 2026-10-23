@@ -1313,6 +1313,33 @@
     padding: 8px 9px 8px 0;
   }
   .prep-page { padding-bottom: 104px; }
+  .prep-arena-reveal + .prep-arena-reveal {
+    padding-top: 12px;
+    border-top: 1px solid #45331f;
+  }
+  .prep-arena-reveal h4 {
+    margin: 0 0 7px;
+    color: #b7a78b;
+    font-size: 13px;
+    font-weight: 600;
+  }
+  .prep-arena-strip {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+    max-width: 360px;
+  }
+  .prep-arena-strip .prep-card {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 5 / 7;
+  }
+  .prep-arena-strip .prep-cloaked-card {
+    border-style: dashed;
+    background: #120c06;
+    color: #8a7656;
+    font-size: 11px;
+  }
 }
 
 @media (max-width: 700px) and (orientation: landscape) {
