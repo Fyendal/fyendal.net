@@ -4,6 +4,9 @@ import {
   decodeLeagueAvailability,
   decodeLeagueAvailabilityRequest,
   decodeLeagueIdRequest,
+  decodeLeagueMatchRequest,
+  decodeLeagueProposeRequest,
+  decodeClientMessage,
   decodeLeaguesResponse,
   decodeLeagueJoinPreviewResponse,
   decodeLeagueJoinRequest,
@@ -62,11 +65,34 @@ describe("league decoding", () => {
       id: "b".repeat(24), name: "Friday league", format: "cc", status: "signup", startsAt: null,
       seasonWeeks: 4, matchesPerWeek: 2, matchMinutes: 60, maxPlayers: 8, signupOpen: true,
       roster: [{ username: "alice", you: true }, { username: null, you: false }],
-      timeZone: "UTC", availability: [window],
+      timeZone: "UTC", availability: [window], matches: [],
     };
     expect(decodeLeaguesResponse({ ok: true, leagues: [league] })).toEqual({ ok: true, leagues: [league] });
+    const match = {
+      id: "c".repeat(24), stage: "season", week: 1, opponent: { username: "bob", timeZone: "Asia/Tokyo" },
+      status: "proposed", scheduledAt: 1_800_000_000_000, proposedBy: "league", deadlineAt: 1_800_600_000_000,
+      youReady: false, opponentReady: false, roomCode: null, result: null, won: null,
+      overlap: [{ start: 1_800_000_000_000, end: 1_800_007_200_000 }],
+    };
+    expect(decodeLeaguesResponse({ ok: true, leagues: [{ ...league, matches: [match] }] })).not.toBeNull();
+    expect(decodeLeaguesResponse({ ok: true, leagues: [{ ...league, matches: [{ ...match, opponent: null, roomCode: "ABC123" }] }] })).not.toBeNull();
+    for (const invalid of [
+      { ...match, proposedBy: "someone" }, { ...match, roomCode: "abc" },
+      { ...match, overlap: [{ start: 5, end: 5 }] }, { ...match, extra: 1 },
+    ]) expect(decodeLeaguesResponse({ ok: true, leagues: [{ ...league, matches: [invalid] }] })).toBeNull();
     expect(decodeLeaguesResponse({ ok: true, leagues: [{ ...league, roster: [{ username: "a b", you: true }] }] })).toBeNull();
     expect(decodeLeaguesResponse({ ok: true, leagues: [{ ...league, timeZone: "Mars/Base" }] })).toBeNull();
+  });
+
+  it("decodes match requests and the league room message", () => {
+    const matchId = "d".repeat(24);
+    expect(decodeLeagueMatchRequest({ matchId })).toEqual({ matchId });
+    expect(decodeLeagueMatchRequest({ matchId: "x" })).toBeNull();
+    expect(decodeLeagueProposeRequest({ matchId, at: 1_800_000_000_000 })).toEqual({ matchId, at: 1_800_000_000_000 });
+    expect(decodeLeagueProposeRequest({ matchId, at: -1 })).toBeNull();
+    expect(decodeClientMessage({ type: "create-league-room", matchId, deckId: "deck" }))
+      .toEqual({ type: "create-league-room", matchId, deckId: "deck" });
+    expect(decodeClientMessage({ type: "create-league-room", matchId, deckId: "deck", format: "cc" })).toBeNull();
   });
 
   it("decodes pairing notes", () => {

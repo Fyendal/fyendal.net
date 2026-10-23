@@ -1,49 +1,17 @@
 import type {
-  Format,
   LeagueAvailabilityRequest,
-  LeagueAvailabilityWindow,
   LeagueJoinPreview,
   LeagueJoinRequest,
-  LeagueMatchResult,
-  LeagueMatchStatus,
   LeagueMembership,
-  LeagueStage,
 } from "@fyendal/shared";
-import { decodeLeagueAvailability, type LeagueExport } from "@fyendal/protocol";
+import type { LeagueExport } from "@fyendal/protocol";
 import { withTransaction, type Queryable } from "../db.js";
 import { hashToken } from "../tokenHash.js";
+import { memberMatchViews } from "./leagueMatches.js";
+import { format, leagueStatus, matchResult, matchStage, matchStatus, nullableNumber, storedWindows } from "./leagueRows.js";
 
 export type JoinLeagueResult = "joined" | "already-joined" | "not-found" | "full";
 export type LeagueMemberUpdateResult = "updated" | "not-found" | "closed";
-
-export function storedWindows(value: unknown, label: string): LeagueAvailabilityWindow[] {
-  const decoded = decodeLeagueAvailability(typeof value === "string" ? JSON.parse(value) as unknown : value);
-  if (!decoded) throw new Error(`${label} is corrupt`);
-  return decoded;
-}
-
-export function nullableNumber(value: unknown): number | null {
-  return value === null || value === undefined ? null : Number(value);
-}
-
-function oneOf<T extends string>(values: readonly T[], label: string): (value: unknown) => T {
-  return (value) => {
-    if (values.includes(value as T)) return value as T;
-    throw new Error(`${label} is corrupt`);
-  };
-}
-
-export const format = oneOf<Format>(["cc", "silver-age"], "league format");
-export const leagueStatus = oneOf<LeagueMembership["status"]>(["signup", "season", "playoffs", "complete", "cancelled"], "league status");
-export const matchStage = oneOf<LeagueStage>(["season", "quarterfinal", "semifinal", "final"], "league match stage");
-export const matchStatus = oneOf<LeagueMatchStatus>(
-  ["unscheduled", "proposed", "scheduled", "in-room", "complete", "cancelled"],
-  "league match status",
-);
-export const matchResult = oneOf<LeagueMatchResult>(
-  ["played", "draw", "forfeit", "double-forfeit", "bye", "operator"],
-  "league match result",
-);
 
 /** A sign-up link resolves only while sign-up is open. */
 export async function leaguePreview(db: Queryable, token: string, userId: number | null): Promise<LeagueJoinPreview | null> {
@@ -167,10 +135,11 @@ export async function setLeagueAvailability(
 }
 
 /** Active memberships, newest league first. */
-export async function listMemberLeagues(db: Queryable, userId: number): Promise<LeagueMembership[]> {
+export async function listMemberLeagues(db: Queryable, userId: number, now = Date.now()): Promise<LeagueMembership[]> {
   const { rows } = await db.query(
     `SELECT l.id, l.name, l.format, l.status, l.starts_at, l.season_weeks, l.matches_per_week, l.match_minutes,
-            l.max_players, l.signup_token_hash IS NOT NULL AS signup_open, m.time_zone, m.availability
+            l.max_players, l.signup_token_hash IS NOT NULL AS signup_open, l.current_week, l.playoff_round_hours,
+            m.member_id, m.time_zone, m.availability
      FROM leagues l JOIN league_members m ON m.league_id = l.id
      WHERE m.user_id = $1 AND m.status = 'active' AND l.status <> 'cancelled'
      ORDER BY l.created_at DESC, l.id`,
@@ -183,7 +152,7 @@ export async function listMemberLeagues(db: Queryable, userId: number): Promise<
      WHERE r.status = 'active' ORDER BY r.league_id, r.member_id`,
     [userId],
   );
-  return rows.map((row) => ({
+  return Promise.all(rows.map(async (row) => ({
     id: String(row.id),
     name: String(row.name),
     format: format(row.format),
@@ -200,7 +169,16 @@ export async function listMemberLeagues(db: Queryable, userId: number): Promise<
     })),
     timeZone: String(row.time_zone),
     availability: storedWindows(row.availability, "league availability"),
-  }));
+    matches: await memberMatchViews(db, {
+      leagueId: String(row.id),
+      status: leagueStatus(row.status),
+      startsAt: nullableNumber(row.starts_at),
+      currentWeek: Number(row.current_week),
+      matchMinutes: Number(row.match_minutes),
+      playoffRoundHours: Number(row.playoff_round_hours),
+      memberId: Number(row.member_id),
+    }, now),
+  })));
 }
 
 /** Drops a member. Their unfinished season matches are cancelled and open

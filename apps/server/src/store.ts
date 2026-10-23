@@ -64,6 +64,7 @@ import {
 import { recordGameCompletion, recordGamePlayers } from "./analytics.js";
 import { awardAchievements } from "./achievements.js";
 import { matchEndReason, recordMatch, type MatchSeatInput } from "./matches.js";
+import { leagueRoomPlayers, resolveLeagueRoomGame } from "./league/leagueMatches.js";
 import { decodeDeckPool, resolveDeck, validatePresentation } from "./decks.js";
 import { appendClusterEvent, type ClusterEvent } from "./clusterEvents.js";
 import { assertActiveRuleset } from "./rulesetFence.js";
@@ -920,6 +921,11 @@ async function recordRoomMatch(
     finishedAt: outcome.finishedAt,
     replayId: outcome.replayId,
   });
+  await resolveLeagueRoomGame(db, room.code.toUpperCase(), {
+    winnerUserId: outcome.winner === null ? null : seats[outcome.winner]?.userId ?? null,
+    draw: outcome.endReason === "draw",
+    startedAt,
+  });
 }
 
 function heroNameForSeat(seat: Pick<SeatRow, "heroId"> | null): string | null {
@@ -1582,6 +1588,8 @@ export class PgRoomStore {
     },
     visibility: "public" | "private" = "public",
     cardPoolMode: CardPoolMode = "legal",
+    /** Runs in the creation transaction, e.g. to bind the room to a league match. */
+    onCreate?: (db: Queryable, code: string) => Promise<void>,
   ): Promise<{ code: string; seat: number; token: string; version: number }> {
     // snapshot the hero for prep-room display (best-effort; caller validated)
     const heroId = (await resolveDeck(this.db, seat.deckId))?.decklist.heroId;
@@ -1608,6 +1616,7 @@ export class PgRoomStore {
               heroId ?? null, seat.deckId, seat.deckName ?? null,
               seat.fromQueue ?? false],
           );
+          await onCreate?.(db, code);
           await appendClusterEvent(db, {
             type: "room",
             event: { code, kind: "sync", version: 0 },
@@ -3124,6 +3133,10 @@ export class PgRoomStore {
         };
       }
       if (!opts.allowPlayer) return { error: PLAY_REQUIRES_LOGIN };
+      const leaguePlayers = await leagueRoomPlayers(this.db, upperCode);
+      if (leaguePlayers && (opts.userId == null || !leaguePlayers.includes(opts.userId))) {
+        return { error: "this seat is reserved for a league opponent" };
+      }
 
       // Keep an abandoned opener available for its owner to reconnect, but do
       // not let a new player revive it during the GC grace period. Account and

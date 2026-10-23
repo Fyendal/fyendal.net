@@ -31,10 +31,14 @@ import type {
   LeagueAvailabilityWindow,
   LeagueJoinPreview,
   LeagueJoinRequest,
+  LeagueMatchRequest,
   LeagueMatchResult,
   LeagueMatchStatus,
+  LeagueMatchView,
   LeagueMembership,
   LeaguePairingNote,
+  LeagueProposeRequest,
+  LeagueTimeRange,
   LeagueStage,
   LeagueStatus,
   VersionUpdateNotice,
@@ -1060,6 +1064,9 @@ export function decodeClientMessage(value: unknown): ClientMessage | null {
       break;
     case "friend-game-invite-dismiss":
       valid = exactKeys(message, ["type", "inviteId"]) && requestId(message.inviteId);
+      break;
+    case "create-league-room":
+      valid = exactKeys(message, ["type", "matchId", "deckId"]) && leagueRecordId(message.matchId) && id(message.deckId);
       break;
     case "create-room":
       valid = exactKeys(message, ["type", "format", "deckId", "private", "cardPoolMode"], ["type", "format", "deckId"])
@@ -2213,7 +2220,9 @@ export function decodeLeagueAvailability(value: unknown): LeagueAvailabilityWind
 
 /** Sign-up links carry a 32-byte base64url capability. */
 export const LEAGUE_TOKEN_RE = /^[A-Za-z0-9_-]{43}$/;
-const leagueId = (value: unknown): value is string => typeof value === "string" && /^[a-f0-9]{24}$/.test(value);
+/** League and league-match ids are both 12 random bytes in hex. */
+const leagueRecordId = (value: unknown): value is string => typeof value === "string" && /^[a-f0-9]{24}$/.test(value);
+const leagueId = leagueRecordId;
 
 export function decodeLeagueJoinRequest(value: unknown): LeagueJoinRequest | null {
   const data = object(value);
@@ -2239,6 +2248,19 @@ export function decodeLeagueAvailabilityRequest(value: unknown): LeagueAvailabil
 export function decodeLeagueIdRequest(value: unknown): { leagueId: string } | null {
   const data = object(value);
   return data && exactKeys(data, ["leagueId"]) && leagueId(data.leagueId) ? { leagueId: data.leagueId } : null;
+}
+
+export function decodeLeagueMatchRequest(value: unknown): LeagueMatchRequest | null {
+  const data = object(value);
+  return data && exactKeys(data, ["matchId"]) && leagueRecordId(data.matchId) ? { matchId: data.matchId } : null;
+}
+
+export function decodeLeagueProposeRequest(value: unknown): LeagueProposeRequest | null {
+  const data = object(value);
+  return data && exactKeys(data, ["matchId", "at"]) && leagueRecordId(data.matchId)
+    && nonNegativeInteger(data.at) && data.at <= MAX_TIMESTAMP
+    ? { matchId: data.matchId, at: data.at }
+    : null;
 }
 
 export function decodeLeaguePairingNote(value: unknown): LeaguePairingNote | null {
@@ -2329,11 +2351,41 @@ const nullableTimestamp = (value: unknown): value is number | null =>
   value === null || (nonNegativeInteger(value) && value <= MAX_TIMESTAMP);
 const leagueWindows = (value: unknown): value is LeagueAvailabilityWindow[] => decodeLeagueAvailability(value) !== null;
 
+const MAX_LEAGUE_OVERLAPS = 7 * 48;
+const LEAGUE_PROPOSERS = new Set(["you", "opponent", "league"]);
+
+function leagueTimeRange(value: unknown): value is LeagueTimeRange {
+  const range = object(value);
+  return !!range && exactKeys(range, ["start", "end"]) && nonNegativeInteger(range.start)
+    && nonNegativeInteger(range.end) && range.start < range.end && range.end <= MAX_TIMESTAMP;
+}
+
+function leagueMatchView(value: unknown): value is LeagueMatchView {
+  const match = object(value);
+  if (!match || !exactKeys(match, [
+    "id", "stage", "week", "opponent", "status", "scheduledAt", "proposedBy", "deadlineAt",
+    "youReady", "opponentReady", "roomCode", "result", "won", "overlap",
+  ])) return false;
+  const opponent = match.opponent === null ? null : object(match.opponent);
+  return leagueRecordId(match.id) && LEAGUE_STAGES.has(String(match.stage))
+    && (match.week === null || (positiveInteger(match.week) && match.week <= MAX_LEAGUE_WEEK))
+    && (match.opponent === null || (!!opponent && exactKeys(opponent, ["username", "timeZone"])
+      && (opponent.username === null || username(opponent.username)) && decodeLeagueTimeZone(opponent.timeZone) !== null))
+    && LEAGUE_MATCH_STATUSES.has(String(match.status)) && nullableTimestamp(match.scheduledAt)
+    && (match.proposedBy === null || LEAGUE_PROPOSERS.has(String(match.proposedBy)))
+    && nonNegativeInteger(match.deadlineAt) && match.deadlineAt <= MAX_TIMESTAMP
+    && typeof match.youReady === "boolean" && typeof match.opponentReady === "boolean"
+    && (match.roomCode === null || roomCode(match.roomCode))
+    && (match.result === null || LEAGUE_MATCH_RESULTS.has(String(match.result)))
+    && (match.won === null || typeof match.won === "boolean")
+    && array(match.overlap, leagueTimeRange, MAX_LEAGUE_OVERLAPS);
+}
+
 function leagueMembership(value: unknown): value is LeagueMembership {
   const league = object(value);
   return !!league && exactKeys(league, [
     "id", "name", "format", "status", "startsAt", "seasonWeeks", "matchesPerWeek", "matchMinutes",
-    "maxPlayers", "signupOpen", "roster", "timeZone", "availability",
+    "maxPlayers", "signupOpen", "roster", "timeZone", "availability", "matches",
   ]) && leagueId(league.id) && string(league.name, MAX_LEAGUE_NAME, false) && FORMATS.has(String(league.format))
     && LEAGUE_STATUSES.has(String(league.status)) && nullableTimestamp(league.startsAt)
     && positiveInteger(league.seasonWeeks) && league.seasonWeeks <= MAX_LEAGUE_WEEK
@@ -2346,7 +2398,8 @@ function leagueMembership(value: unknown): value is LeagueMembership {
       return !!member && exactKeys(member, ["username", "you"])
         && (member.username === null || username(member.username)) && typeof member.you === "boolean";
     }, MAX_LEAGUE_PLAYERS)
-    && decodeLeagueTimeZone(league.timeZone) !== null && leagueWindows(league.availability);
+    && decodeLeagueTimeZone(league.timeZone) !== null && leagueWindows(league.availability)
+    && array(league.matches, leagueMatchView, MAX_LEAGUE_MATCHES);
 }
 
 export const decodeLeaguesResponse: Decoder<LeaguesResponse> = (value) => {

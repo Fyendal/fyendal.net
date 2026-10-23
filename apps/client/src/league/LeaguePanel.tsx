@@ -7,6 +7,7 @@ import { useStore } from "../store.js";
 import { AvailabilityGrid } from "./AvailabilityGrid.js";
 import { sameWindows } from "./availability.js";
 import { leagueErrorMessage, leagueStart, leagueSummary } from "./leagueText.js";
+import { LeagueMatchList } from "./LeagueMatchList.js";
 import { TimeZoneSelect } from "./TimeZoneSelect.js";
 import "../styles/league.css";
 
@@ -70,6 +71,9 @@ function LeagueCard({ league }: { league: LeagueMembership }) {
       </header>
       {league.startsAt !== null ? <p className="league-meta">{leagueStart(intl, league.startsAt)}</p> : null}
       {league.status === "signup" ? <p className="muted">{intl.formatMessage({ id: "league.signup.next" })}</p> : null}
+      {league.status === "season" || league.status === "playoffs"
+        ? <LeagueMatchList league={league} onChanged={refreshLeagues} />
+        : null}
 
       <h4 className="league-section-title">
         {intl.formatMessage({ id: "league.roster.title" }, { count: league.roster.length, max: league.maxPlayers })}
@@ -109,16 +113,28 @@ function LeagueCard({ league }: { league: LeagueMembership }) {
   );
 }
 
+/** Opponents' proposals, ready marks, and rooms arrive by polling. */
+const REFRESH_MS = 30_000;
+
 export function LeaguePanel() {
   const intl = useIntl();
   const { leagues, refreshLeagues } = useStore(useShallow((state) => ({
     leagues: state.leagues,
     refreshLeagues: state.refreshLeagues,
   })));
+  const running = leagues?.some((league) => league.status === "season" || league.status === "playoffs") ?? false;
 
   useEffect(() => {
     void refreshLeagues();
   }, [refreshLeagues]);
+
+  useEffect(() => {
+    if (!running) return;
+    const timer = setInterval(() => {
+      if (document.visibilityState === "visible") void refreshLeagues();
+    }, REFRESH_MS);
+    return () => clearInterval(timer);
+  }, [refreshLeagues, running]);
 
   return (
     <div className="panel league-panel">

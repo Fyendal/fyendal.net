@@ -33173,6 +33173,316 @@
       "value": "Não foi possível sair da liga. Tente novamente."
     }
   ],
+  "league.match.accept": [
+    {
+      "type": 0,
+      "value": "Aceitar horário"
+    }
+  ],
+  "league.match.bye": [
+    {
+      "type": 0,
+      "value": "Bye: conta como vitória."
+    }
+  ],
+  "league.match.claim": [
+    {
+      "type": 0,
+      "value": "Pedir vitória por W.O."
+    }
+  ],
+  "league.match.deadline": [
+    {
+      "type": 0,
+      "value": "Jogue até "
+    },
+    {
+      "type": 1,
+      "value": "time"
+    }
+  ],
+  "league.match.failed": [
+    {
+      "type": 0,
+      "value": "Não foi possível atualizar a partida. Tente novamente."
+    }
+  ],
+  "league.match.join": [
+    {
+      "type": 0,
+      "value": "Entrar na partida"
+    }
+  ],
+  "league.match.propose": [
+    {
+      "type": 0,
+      "value": "Propor horário"
+    }
+  ],
+  "league.match.propose.choose": [
+    {
+      "type": 0,
+      "value": "Escolha um horário livre para os dois"
+    }
+  ],
+  "league.match.propose.label": [
+    {
+      "type": 0,
+      "value": "Horário de início"
+    }
+  ],
+  "league.match.propose.noOverlap": [
+    {
+      "type": 0,
+      "value": "Vocês não têm mais horário livre em comum antes do prazo. Escolha qualquer horário no relógio do seu dispositivo e combine pelo chat."
+    }
+  ],
+  "league.match.propose.submit": [
+    {
+      "type": 0,
+      "value": "Enviar proposta"
+    }
+  ],
+  "league.match.ready": [
+    {
+      "type": 0,
+      "value": "Marcar presença"
+    }
+  ],
+  "league.match.ready.opponent": [
+    {
+      "type": 1,
+      "value": "opponent"
+    },
+    {
+      "type": 0,
+      "value": " marcou presença."
+    }
+  ],
+  "league.match.ready.you": [
+    {
+      "type": 0,
+      "value": "Você marcou presença."
+    }
+  ],
+  "league.match.result.doubleForfeit": [
+    {
+      "type": 0,
+      "value": "Não jogada: derrota para os dois jogadores."
+    }
+  ],
+  "league.match.result.draw": [
+    {
+      "type": 0,
+      "value": "Empate."
+    }
+  ],
+  "league.match.result.lost": [
+    {
+      "type": 0,
+      "value": "Você perdeu."
+    }
+  ],
+  "league.match.result.lostForfeit": [
+    {
+      "type": 0,
+      "value": "Você perdeu por W.O."
+    }
+  ],
+  "league.match.result.won": [
+    {
+      "type": 0,
+      "value": "Você venceu."
+    }
+  ],
+  "league.match.result.wonForfeit": [
+    {
+      "type": 0,
+      "value": "Você venceu por W.O."
+    }
+  ],
+  "league.match.stage.final": [
+    {
+      "type": 0,
+      "value": "Final"
+    }
+  ],
+  "league.match.stage.quarterfinal": [
+    {
+      "type": 0,
+      "value": "Quartas de final"
+    }
+  ],
+  "league.match.stage.semifinal": [
+    {
+      "type": 0,
+      "value": "Semifinal"
+    }
+  ],
+  "league.match.start": [
+    {
+      "type": 0,
+      "value": "Iniciar partida"
+    }
+  ],
+  "league.match.status.inRoom": [
+    {
+      "type": 0,
+      "value": "Partida em andamento."
+    }
+  ],
+  "league.match.status.scheduled": [
+    {
+      "type": 0,
+      "value": "Marcada para "
+    },
+    {
+      "type": 1,
+      "value": "time"
+    }
+  ],
+  "league.match.status.suggested": [
+    {
+      "type": 0,
+      "value": "Horário sugerido: "
+    },
+    {
+      "type": 1,
+      "value": "time"
+    }
+  ],
+  "league.match.status.theyProposed": [
+    {
+      "type": 1,
+      "value": "opponent"
+    },
+    {
+      "type": 0,
+      "value": " propôs "
+    },
+    {
+      "type": 1,
+      "value": "time"
+    }
+  ],
+  "league.match.status.unscheduled": [
+    {
+      "type": 0,
+      "value": "Nenhum horário combinado ainda."
+    }
+  ],
+  "league.match.status.youProposed": [
+    {
+      "type": 0,
+      "value": "Aguardando "
+    },
+    {
+      "type": 1,
+      "value": "opponent"
+    },
+    {
+      "type": 0,
+      "value": " aceitar "
+    },
+    {
+      "type": 1,
+      "value": "time"
+    }
+  ],
+  "league.match.theirTime": [
+    {
+      "type": 1,
+      "value": "time"
+    },
+    {
+      "type": 0,
+      "value": " para "
+    },
+    {
+      "type": 1,
+      "value": "opponent"
+    }
+  ],
+  "league.match.versus": [
+    {
+      "type": 0,
+      "value": "contra "
+    },
+    {
+      "type": 1,
+      "value": "opponent"
+    }
+  ],
+  "league.match.week": [
+    {
+      "type": 0,
+      "value": "Semana "
+    },
+    {
+      "type": 1,
+      "value": "week"
+    }
+  ],
+  "league.matches.empty": [
+    {
+      "type": 0,
+      "value": "Nenhuma partida ainda. Os pareamentos aparecem no início de cada semana."
+    }
+  ],
+  "league.matches.title": [
+    {
+      "type": 0,
+      "value": "Suas partidas"
+    }
+  ],
+  "league.room.description": [
+    {
+      "type": 0,
+      "value": "Escolha um deck de "
+    },
+    {
+      "type": 1,
+      "value": "format"
+    },
+    {
+      "type": 0,
+      "value": ". Só "
+    },
+    {
+      "type": 1,
+      "value": "opponent"
+    },
+    {
+      "type": 0,
+      "value": " pode ocupar o outro lugar."
+    }
+  ],
+  "league.room.noDeck": [
+    {
+      "type": 0,
+      "value": "Você ainda não tem um deck legal de "
+    },
+    {
+      "type": 1,
+      "value": "format"
+    },
+    {
+      "type": 0,
+      "value": ". Adicione um em Decks."
+    }
+  ],
+  "league.room.submit": [
+    {
+      "type": 0,
+      "value": "Abrir sala"
+    }
+  ],
+  "league.room.title": [
+    {
+      "type": 0,
+      "value": "Iniciar sua partida da liga"
+    }
+  ],
   "league.roster.deleted": [
     {
       "type": 0,

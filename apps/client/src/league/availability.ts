@@ -64,3 +64,23 @@ export function supportedTimeZones(current: string): string[] {
   const zones = typeof Intl.supportedValuesOf === "function" ? Intl.supportedValuesOf("timeZone") : [];
   return zones.includes(current) ? zones : [current, ...zones];
 }
+
+/** Start times every half hour at which a whole match fits in the shared
+ * time, from `now` on; capped so a wide-open week stays a usable list. */
+export function startOptions(
+  overlap: ReadonlyArray<{ start: number; end: number }>,
+  matchMinutes: number,
+  now: number,
+  limit = 96,
+): number[] {
+  const step = LEAGUE_SLOT_MINUTES * 60_000;
+  const length = matchMinutes * 60_000;
+  const options: number[] = [];
+  for (const range of overlap) {
+    for (let at = Math.ceil(Math.max(range.start, now + 1) / step) * step; at + length <= range.end; at += step) {
+      options.push(at);
+      if (options.length >= limit) return options;
+    }
+  }
+  return options;
+}

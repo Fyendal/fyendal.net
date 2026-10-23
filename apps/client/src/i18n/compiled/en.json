@@ -31514,6 +31514,316 @@
       "value": "Could not leave the league. Try again."
     }
   ],
+  "league.match.accept": [
+    {
+      "type": 0,
+      "value": "Accept time"
+    }
+  ],
+  "league.match.bye": [
+    {
+      "type": 0,
+      "value": "Bye: counts as a win."
+    }
+  ],
+  "league.match.claim": [
+    {
+      "type": 0,
+      "value": "Claim forfeit win"
+    }
+  ],
+  "league.match.deadline": [
+    {
+      "type": 0,
+      "value": "Play by "
+    },
+    {
+      "type": 1,
+      "value": "time"
+    }
+  ],
+  "league.match.failed": [
+    {
+      "type": 0,
+      "value": "Could not update the match. Try again."
+    }
+  ],
+  "league.match.join": [
+    {
+      "type": 0,
+      "value": "Join game"
+    }
+  ],
+  "league.match.propose": [
+    {
+      "type": 0,
+      "value": "Propose a time"
+    }
+  ],
+  "league.match.propose.choose": [
+    {
+      "type": 0,
+      "value": "Choose a time you are both free"
+    }
+  ],
+  "league.match.propose.label": [
+    {
+      "type": 0,
+      "value": "Start time"
+    }
+  ],
+  "league.match.propose.noOverlap": [
+    {
+      "type": 0,
+      "value": "You have no shared free time left before the deadline. Pick any time on your device's clock and agree on it in chat."
+    }
+  ],
+  "league.match.propose.submit": [
+    {
+      "type": 0,
+      "value": "Send proposal"
+    }
+  ],
+  "league.match.ready": [
+    {
+      "type": 0,
+      "value": "Check in"
+    }
+  ],
+  "league.match.ready.opponent": [
+    {
+      "type": 1,
+      "value": "opponent"
+    },
+    {
+      "type": 0,
+      "value": " checked in."
+    }
+  ],
+  "league.match.ready.you": [
+    {
+      "type": 0,
+      "value": "You checked in."
+    }
+  ],
+  "league.match.result.doubleForfeit": [
+    {
+      "type": 0,
+      "value": "Not played: a loss for both players."
+    }
+  ],
+  "league.match.result.draw": [
+    {
+      "type": 0,
+      "value": "Draw."
+    }
+  ],
+  "league.match.result.lost": [
+    {
+      "type": 0,
+      "value": "You lost."
+    }
+  ],
+  "league.match.result.lostForfeit": [
+    {
+      "type": 0,
+      "value": "You lost by forfeit."
+    }
+  ],
+  "league.match.result.won": [
+    {
+      "type": 0,
+      "value": "You won."
+    }
+  ],
+  "league.match.result.wonForfeit": [
+    {
+      "type": 0,
+      "value": "You won by forfeit."
+    }
+  ],
+  "league.match.stage.final": [
+    {
+      "type": 0,
+      "value": "Final"
+    }
+  ],
+  "league.match.stage.quarterfinal": [
+    {
+      "type": 0,
+      "value": "Quarterfinal"
+    }
+  ],
+  "league.match.stage.semifinal": [
+    {
+      "type": 0,
+      "value": "Semifinal"
+    }
+  ],
+  "league.match.start": [
+    {
+      "type": 0,
+      "value": "Start game"
+    }
+  ],
+  "league.match.status.inRoom": [
+    {
+      "type": 0,
+      "value": "Game in progress."
+    }
+  ],
+  "league.match.status.scheduled": [
+    {
+      "type": 0,
+      "value": "Scheduled for "
+    },
+    {
+      "type": 1,
+      "value": "time"
+    }
+  ],
+  "league.match.status.suggested": [
+    {
+      "type": 0,
+      "value": "Suggested time: "
+    },
+    {
+      "type": 1,
+      "value": "time"
+    }
+  ],
+  "league.match.status.theyProposed": [
+    {
+      "type": 1,
+      "value": "opponent"
+    },
+    {
+      "type": 0,
+      "value": " proposed "
+    },
+    {
+      "type": 1,
+      "value": "time"
+    }
+  ],
+  "league.match.status.unscheduled": [
+    {
+      "type": 0,
+      "value": "No time agreed yet."
+    }
+  ],
+  "league.match.status.youProposed": [
+    {
+      "type": 0,
+      "value": "Waiting for "
+    },
+    {
+      "type": 1,
+      "value": "opponent"
+    },
+    {
+      "type": 0,
+      "value": " to accept "
+    },
+    {
+      "type": 1,
+      "value": "time"
+    }
+  ],
+  "league.match.theirTime": [
+    {
+      "type": 1,
+      "value": "time"
+    },
+    {
+      "type": 0,
+      "value": " for "
+    },
+    {
+      "type": 1,
+      "value": "opponent"
+    }
+  ],
+  "league.match.versus": [
+    {
+      "type": 0,
+      "value": "vs "
+    },
+    {
+      "type": 1,
+      "value": "opponent"
+    }
+  ],
+  "league.match.week": [
+    {
+      "type": 0,
+      "value": "Week "
+    },
+    {
+      "type": 1,
+      "value": "week"
+    }
+  ],
+  "league.matches.empty": [
+    {
+      "type": 0,
+      "value": "No matches yet. Pairings appear when each week starts."
+    }
+  ],
+  "league.matches.title": [
+    {
+      "type": 0,
+      "value": "Your matches"
+    }
+  ],
+  "league.room.description": [
+    {
+      "type": 0,
+      "value": "Choose a "
+    },
+    {
+      "type": 1,
+      "value": "format"
+    },
+    {
+      "type": 0,
+      "value": " deck. Only "
+    },
+    {
+      "type": 1,
+      "value": "opponent"
+    },
+    {
+      "type": 0,
+      "value": " can take the other seat."
+    }
+  ],
+  "league.room.noDeck": [
+    {
+      "type": 0,
+      "value": "You have no legal "
+    },
+    {
+      "type": 1,
+      "value": "format"
+    },
+    {
+      "type": 0,
+      "value": " deck yet. Add one in Decks."
+    }
+  ],
+  "league.room.submit": [
+    {
+      "type": 0,
+      "value": "Open room"
+    }
+  ],
+  "league.room.title": [
+    {
+      "type": 0,
+      "value": "Start your league game"
+    }
+  ],
   "league.roster.deleted": [
     {
       "type": 0,

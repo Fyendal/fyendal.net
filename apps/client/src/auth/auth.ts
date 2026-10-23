@@ -340,6 +340,16 @@ export function apiLeaveLeague(token: string, leagueId: string): Promise<LeagueR
   return post("leagues/leave", { leagueId }, okOrLeagueError, { token });
 }
 
+export function apiProposeLeagueTime(token: string, matchId: string, at: number): Promise<LeagueResult<OkResponse>> {
+  return post("leagues/propose", { matchId, at }, okOrLeagueError, { token });
+}
+
+export type LeagueMatchAction = "accept" | "ready" | "claim";
+
+export function apiLeagueMatchAction(token: string, action: LeagueMatchAction, matchId: string): Promise<LeagueResult<OkResponse>> {
+  return post(`leagues/${action}`, { matchId }, okOrLeagueError, { token });
+}
+
 // ── replays ───────────────────────────────────────────────────────────────
 
 export function apiReplays(token: string, signal?: AbortSignal): Promise<ReplaysResponse | ApiError> {

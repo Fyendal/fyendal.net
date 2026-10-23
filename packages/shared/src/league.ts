@@ -60,6 +60,43 @@ export interface LeagueJoinPreview {
   joined: boolean;
 }
 
+/** Half-open UTC interval in epoch milliseconds. */
+export interface LeagueTimeRange {
+  start: number;
+  end: number;
+}
+
+/** One of the signed-in member's league matches. */
+export interface LeagueMatchView {
+  id: string;
+  stage: LeagueStage;
+  week: number | null;
+  /** Null for a bye. */
+  opponent: { username: string | null; timeZone: string } | null;
+  status: LeagueMatchStatus;
+  /** The proposed or agreed start. */
+  scheduledAt: number | null;
+  /** Who proposed `scheduledAt`: you, your opponent, or the league's suggestion. */
+  proposedBy: "you" | "opponent" | "league" | null;
+  deadlineAt: number;
+  youReady: boolean;
+  opponentReady: boolean;
+  roomCode: string | null;
+  result: LeagueMatchResult | null;
+  /** Null while unresolved or after a draw. */
+  won: boolean | null;
+  /** Shared free time long enough for a match, before the deadline. */
+  overlap: LeagueTimeRange[];
+}
+
+export interface LeagueMatchRequest {
+  matchId: string;
+}
+
+export interface LeagueProposeRequest extends LeagueMatchRequest {
+  at: number;
+}
+
 /** A league the signed-in account belongs to, with its own settings. */
 export interface LeagueMembership {
   id: string;
@@ -76,4 +113,6 @@ export interface LeagueMembership {
   roster: Array<{ username: string | null; you: boolean }>;
   timeZone: string;
   availability: LeagueAvailabilityWindow[];
+  /** The current week's or round's matches, plus any still open. */
+  matches: LeagueMatchView[];
 }

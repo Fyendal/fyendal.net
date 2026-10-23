@@ -15,15 +15,9 @@ import {
   type PlayoffSize,
 } from "./bracket.js";
 import { resolveOverdue } from "./forfeits.js";
-import {
-  dropLeagueMember,
-  leagueStatus,
-  matchResult,
-  matchStage,
-  matchStatus,
-  nullableNumber,
-  storedWindows,
-} from "./leagueStore.js";
+import { leagueStatus, matchResult, matchStage, matchStatus, nullableNumber, storedWindows } from "./leagueRows.js";
+import { resetLostLeagueRooms } from "./leagueMatches.js";
+import { dropLeagueMember } from "./leagueStore.js";
 import { pairWeek, suggestSlots } from "./pairing.js";
 import { computeStandings, type StandingRow } from "./standings.js";
 
@@ -326,13 +320,15 @@ async function resolveOverdueMatches(tx: Queryable, leagueId: string, now: numbe
   }
 }
 
-/** One league's scheduled work: resolve overdue matches, pair each season
- * week once its start passes, seed the bracket after the last week, and
- * advance the playoffs. Safe to repeat; every step checks state first. */
+/** One league's scheduled work: release lost rooms, resolve overdue matches,
+ * pair each season week once its start passes, seed the bracket after the
+ * last week, and advance the playoffs. Safe to repeat; every step checks
+ * state first. */
 export async function advanceLeague(db: Queryable, leagueId: string, now = Date.now()): Promise<void> {
   await withTransaction(db, async (tx) => {
     let league = await lockLeague(tx, leagueId);
     if (!league || (league.status !== "season" && league.status !== "playoffs")) return;
+    await resetLostLeagueRooms(tx, league.id);
     await resolveOverdueMatches(tx, league.id, now);
     const startsAt = league.startsAt;
     if (league.status === "season" && startsAt !== null && now >= startsAt) {

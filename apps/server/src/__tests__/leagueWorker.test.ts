@@ -28,6 +28,23 @@ async function createLeague(options: { members: number; seasonWeeks?: number; pl
   }
 }
 
+/** A seated room for a match, so the worker's lost-room reset leaves it alone. */
+async function inRoom(matchId: string) {
+  const code = `R${matchId.slice(0, 5).toUpperCase()}`;
+  await db.query(
+    `INSERT INTO rooms (code, format, spectators, state, prep, ruleset_version, version, created_at, gc_at, status, winner,
+                        is_private, card_pool_mode)
+     VALUES ($1, 'cc', '[]', NULL, NULL, 'rules-a', 0, 1, NULL, 'open', NULL, TRUE, 'legal')`,
+    [code],
+  );
+  await db.query(
+    `INSERT INTO room_seats (room_code, seat, user_id, token_hash, username, hero_id, deck_id, deck_name, from_queue, ready)
+     VALUES ($1, 0, NULL, 'token', 'p1', NULL, 'precon-asb', NULL, FALSE, FALSE)`,
+    [code],
+  );
+  await db.query("UPDATE league_matches SET status = 'in-room', room_code = $2 WHERE id = $1", [matchId, code]);
+}
+
 async function queue(...actions: Array<LeagueAction | Record<string, unknown>>) {
   for (const action of actions) {
     await db.query("INSERT INTO league_actions (league_id, action, created_at) VALUES ($1, $2, 1)", [LEAGUE, JSON.stringify(action)]);
@@ -140,7 +157,7 @@ describe("league worker: deadlines and the season", () => {
 
   it("leaves an in-room match and an extended deadline open", async () => {
     const [first, second] = await startedSeason();
-    await db.query("UPDATE league_matches SET status = 'in-room' WHERE id = $1", [first.id]);
+    await inRoom(first.id);
     await queue({ kind: "extend-deadline", matchId: second.id, deadlineAt: T0 + WEEK_MS + 24 * HOUR });
     await tickLeagues(db, T0 + WEEK_MS);
     expect((await matches("week = 1")).map((match) => match.status).sort()).toEqual(["in-room", "proposed"]);
@@ -150,7 +167,7 @@ describe("league worker: deadlines and the season", () => {
 
   it("waits for open season matches before seeding the playoffs", async () => {
     const [first] = await startedSeason(4, 1);
-    await db.query("UPDATE league_matches SET status = 'in-room' WHERE id = $1", [first.id]);
+    await inRoom(first.id);
     await tickLeagues(db, T0 + WEEK_MS);
     expect((await league()).status).toBe("season");
     await queue({ kind: "set-result", matchId: first.id, outcome: "a" });

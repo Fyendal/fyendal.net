@@ -30239,6 +30239,324 @@
       "value": "无法退出联赛，请重试。"
     }
   ],
+  "league.match.accept": [
+    {
+      "type": 0,
+      "value": "接受时间"
+    }
+  ],
+  "league.match.bye": [
+    {
+      "type": 0,
+      "value": "轮空：计为一胜。"
+    }
+  ],
+  "league.match.claim": [
+    {
+      "type": 0,
+      "value": "申请对手弃权"
+    }
+  ],
+  "league.match.deadline": [
+    {
+      "type": 0,
+      "value": "请在 "
+    },
+    {
+      "type": 1,
+      "value": "time"
+    },
+    {
+      "type": 0,
+      "value": " 前完成"
+    }
+  ],
+  "league.match.failed": [
+    {
+      "type": 0,
+      "value": "无法更新对局，请重试。"
+    }
+  ],
+  "league.match.join": [
+    {
+      "type": 0,
+      "value": "加入对局"
+    }
+  ],
+  "league.match.propose": [
+    {
+      "type": 0,
+      "value": "提议时间"
+    }
+  ],
+  "league.match.propose.choose": [
+    {
+      "type": 0,
+      "value": "选择双方都有空的时间"
+    }
+  ],
+  "league.match.propose.label": [
+    {
+      "type": 0,
+      "value": "开始时间"
+    }
+  ],
+  "league.match.propose.noOverlap": [
+    {
+      "type": 0,
+      "value": "截止前你们没有共同的空闲时间。请按你设备的时钟任选一个时间，并在聊天中商定。"
+    }
+  ],
+  "league.match.propose.submit": [
+    {
+      "type": 0,
+      "value": "发送提议"
+    }
+  ],
+  "league.match.ready": [
+    {
+      "type": 0,
+      "value": "就位"
+    }
+  ],
+  "league.match.ready.opponent": [
+    {
+      "type": 1,
+      "value": "opponent"
+    },
+    {
+      "type": 0,
+      "value": " 已就位。"
+    }
+  ],
+  "league.match.ready.you": [
+    {
+      "type": 0,
+      "value": "你已就位。"
+    }
+  ],
+  "league.match.result.doubleForfeit": [
+    {
+      "type": 0,
+      "value": "未进行：双方均判负。"
+    }
+  ],
+  "league.match.result.draw": [
+    {
+      "type": 0,
+      "value": "平局。"
+    }
+  ],
+  "league.match.result.lost": [
+    {
+      "type": 0,
+      "value": "你输了。"
+    }
+  ],
+  "league.match.result.lostForfeit": [
+    {
+      "type": 0,
+      "value": "你因弃权落败。"
+    }
+  ],
+  "league.match.result.won": [
+    {
+      "type": 0,
+      "value": "你赢了。"
+    }
+  ],
+  "league.match.result.wonForfeit": [
+    {
+      "type": 0,
+      "value": "对手弃权，你获胜。"
+    }
+  ],
+  "league.match.stage.final": [
+    {
+      "type": 0,
+      "value": "决赛"
+    }
+  ],
+  "league.match.stage.quarterfinal": [
+    {
+      "type": 0,
+      "value": "八强赛"
+    }
+  ],
+  "league.match.stage.semifinal": [
+    {
+      "type": 0,
+      "value": "半决赛"
+    }
+  ],
+  "league.match.start": [
+    {
+      "type": 0,
+      "value": "开始对局"
+    }
+  ],
+  "league.match.status.inRoom": [
+    {
+      "type": 0,
+      "value": "对局进行中。"
+    }
+  ],
+  "league.match.status.scheduled": [
+    {
+      "type": 0,
+      "value": "已约定于 "
+    },
+    {
+      "type": 1,
+      "value": "time"
+    }
+  ],
+  "league.match.status.suggested": [
+    {
+      "type": 0,
+      "value": "建议时间："
+    },
+    {
+      "type": 1,
+      "value": "time"
+    }
+  ],
+  "league.match.status.theyProposed": [
+    {
+      "type": 1,
+      "value": "opponent"
+    },
+    {
+      "type": 0,
+      "value": " 提议 "
+    },
+    {
+      "type": 1,
+      "value": "time"
+    }
+  ],
+  "league.match.status.unscheduled": [
+    {
+      "type": 0,
+      "value": "尚未约定时间。"
+    }
+  ],
+  "league.match.status.youProposed": [
+    {
+      "type": 0,
+      "value": "等待 "
+    },
+    {
+      "type": 1,
+      "value": "opponent"
+    },
+    {
+      "type": 0,
+      "value": " 接受 "
+    },
+    {
+      "type": 1,
+      "value": "time"
+    }
+  ],
+  "league.match.theirTime": [
+    {
+      "type": 1,
+      "value": "opponent"
+    },
+    {
+      "type": 0,
+      "value": " 的时间："
+    },
+    {
+      "type": 1,
+      "value": "time"
+    }
+  ],
+  "league.match.versus": [
+    {
+      "type": 0,
+      "value": "对阵 "
+    },
+    {
+      "type": 1,
+      "value": "opponent"
+    }
+  ],
+  "league.match.week": [
+    {
+      "type": 0,
+      "value": "第 "
+    },
+    {
+      "type": 1,
+      "value": "week"
+    },
+    {
+      "type": 0,
+      "value": " 周"
+    }
+  ],
+  "league.matches.empty": [
+    {
+      "type": 0,
+      "value": "暂无对局。每周开始时会生成配对。"
+    }
+  ],
+  "league.matches.title": [
+    {
+      "type": 0,
+      "value": "你的对局"
+    }
+  ],
+  "league.room.description": [
+    {
+      "type": 0,
+      "value": "选择一副 "
+    },
+    {
+      "type": 1,
+      "value": "format"
+    },
+    {
+      "type": 0,
+      "value": " 牌组。只有 "
+    },
+    {
+      "type": 1,
+      "value": "opponent"
+    },
+    {
+      "type": 0,
+      "value": " 能占据另一个座位。"
+    }
+  ],
+  "league.room.noDeck": [
+    {
+      "type": 0,
+      "value": "你还没有合法的 "
+    },
+    {
+      "type": 1,
+      "value": "format"
+    },
+    {
+      "type": 0,
+      "value": " 牌组。请在牌组页添加。"
+    }
+  ],
+  "league.room.submit": [
+    {
+      "type": 0,
+      "value": "创建房间"
+    }
+  ],
+  "league.room.title": [
+    {
+      "type": 0,
+      "value": "开始联赛对局"
+    }
+  ],
   "league.roster.deleted": [
     {
       "type": 0,

@@ -34,6 +34,15 @@
 .league-field { display: grid; gap: 6px; max-width: 360px; margin: 12px 0; color: var(--text-secondary); font-size: 14px; }
 .league-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 16px; }
 
+.league-matches { display: grid; gap: 10px; margin: 0; padding: 0; list-style: none; }
+.league-match { padding: 12px 14px; border: 1px solid var(--border-subtle); border-radius: 8px; background: var(--surface-raised); }
+.league-match-heading { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px; color: var(--text-primary); }
+.league-match-heading span { color: var(--text-secondary); }
+.league-match-status { margin: 6px 0 2px; color: var(--text-primary); }
+.league-match .league-actions { margin-top: 10px; }
+.league-propose { display: grid; gap: 8px; max-width: 520px; margin-top: 12px; }
+.league-propose button { justify-self: start; }
+
 .availability-editor { margin-top: 8px; }
 .availability-grid {
   display: grid;

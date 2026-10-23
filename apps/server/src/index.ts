@@ -25,6 +25,7 @@ import { ReplayFinalizer, sweepReplays } from "./replays.js";
 import { appendClusterEvent, ClusterEventConsumer, sweepClusterEvents, type ClusterEvent } from "./clusterEvents.js";
 import { tryAcquireLease } from "./leases.js";
 import { LEAGUE_LEASE, LEAGUE_TICK_INTERVAL_MS, tickLeagues } from "./league/leagueWorker.js";
+import { bindLeagueRoom, leagueRoomFormat, LeagueRoomUnavailable } from "./league/leagueMatches.js";
 import { consoleError } from "./logging.js";
 import { PgRateLimiter, sweepRateLimits } from "./rateLimits.js";
 import { sweepRecoveryTokens } from "./recovery.js";
@@ -736,6 +737,43 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
         send(ws, { type: "room-created", code, seat, token, version });
         await publishRoomEvent({ code, kind: "created", version });
         await publishClusterEvent({ type: "friend-game-invite", userId: friend.id, invite });
+        return;
+      }
+      case "create-league-room": {
+        if (ctx.code !== null) {
+          send(ws, { type: "error", message: ALREADY_IN_ROOM });
+          return;
+        }
+        if (!ctx.user) {
+          send(ws, { type: "error", message: PLAY_REQUIRES_LOGIN });
+          return;
+        }
+        const user = ctx.user;
+        let created: { code: string; seat: number; token: string; deckId: string };
+        try {
+          const leagueFormat = await leagueRoomFormat(deps.db, user.id, msg.matchId);
+          const choice = await resolveChoice(user, leagueFormat, msg.deckId, "legal");
+          if ("error" in choice) {
+            send(ws, { type: "error", message: choice.error });
+            return;
+          }
+          const room = await rooms.createRoom(leagueFormat, {
+            ...choice.choice,
+            username: user.username,
+            userId: user.id,
+          }, "private", "legal", (db, code) => bindLeagueRoom(db, user.id, msg.matchId, code));
+          created = { ...room, deckId: choice.choice.deckId };
+        } catch (error) {
+          if (!(error instanceof LeagueRoomUnavailable)) throw error;
+          send(ws, { type: "error", message: error.message });
+          return;
+        }
+        const { code, seat, token } = created;
+        await rememberAcceptedDeck(user.id, created.deckId);
+        connections.attach(ctx, code, seat, token);
+        const version = await markAttachedPresent(ctx);
+        send(ws, { type: "room-created", code, seat, token, version });
+        await publishRoomEvent({ code, kind: "created", version });
         return;
       }
       case "create-room": {

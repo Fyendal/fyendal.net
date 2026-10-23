@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { availableMinutes, cellIndex, cellsToWindows, sameWindows, windowsToCells } from "./availability.js";
+import { availableMinutes, cellIndex, cellsToWindows, sameWindows, startOptions, windowsToCells } from "./availability.js";
 
 describe("league availability cells", () => {
   it("round-trips windows through grid cells and merges adjacent slots", () => {
@@ -23,5 +23,16 @@ describe("league availability cells", () => {
       { weekday: 1, start: 60, end: 90 },
       { weekday: 1, start: 1410, end: 1440 },
     ]);
+  });
+});
+
+describe("league start options", () => {
+  const HOUR = 3_600_000;
+  it("offers half-hour starts that fit a whole match, from now on", () => {
+    const base = Date.UTC(2026, 10, 2, 18);
+    const overlap = [{ start: base, end: base + 2 * HOUR }, { start: base + 5 * HOUR, end: base + 5.5 * HOUR }];
+    expect(startOptions(overlap, 60, base + 10 * 60_000)).toEqual([base + 0.5 * HOUR, base + HOUR]);
+    expect(startOptions(overlap, 30, base - HOUR)).toEqual([base, base + 0.5 * HOUR, base + HOUR, base + 1.5 * HOUR, base + 5 * HOUR]);
+    expect(startOptions(overlap, 30, base - HOUR, 2)).toEqual([base, base + 0.5 * HOUR]);
   });
 });
