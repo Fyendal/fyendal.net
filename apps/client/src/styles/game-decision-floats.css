@@ -708,7 +708,7 @@
 @media (min-width: 701px) {
   .decision.decision-target-choice {
     width: max-content;
-    min-width: min(360px, calc(100vw - var(--rail-w) - 32px));
+    min-width: min(260px, calc(100vw - var(--rail-w) - 32px));
     max-width: min(880px, calc(100vw - var(--rail-w) - 32px));
     align-items: stretch;
     gap: 14px;
@@ -719,10 +719,14 @@
     font: 600 16px/1.4 var(--font-lobby-ui);
     text-align: left;
   }
+  /* Shrink-wraps a single row so one or two targets sit centered; once the
+     row wraps it fills the panel and keeps a left-aligned grid. */
   .decision-target-choice .decision-target-cards {
+    align-self: center;
     justify-content: flex-start;
     gap: 12px;
-    max-width: none;
+    max-width: 100%;
+    box-sizing: border-box;
     padding: 4px;
     overscroll-behavior: contain;
   }
