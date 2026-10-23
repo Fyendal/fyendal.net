@@ -354,6 +354,8 @@ export function boltynSolverRules(input: BotPolicyInput): HeroSolverRules {
           return patch;
         case LUMINA_ASCENSION:
           if (spiritInArena) patch.kind = "instant";
+          // The policy plays an action Lumina only once charged.
+          else patch.canPlay = charged;
           patch.uses = { pump: 5 };
           patch.replaceAfter = true;
           patch.after = (view) => ({
@@ -429,6 +431,8 @@ export function boltynSolverRules(input: BotPolicyInput): HeroSolverRules {
           patch.after = () => ({ flags: { suraya: 1 } });
           return patch;
         case SPIRIT_OF_EIRINA:
+          // Charged from hand it enters the arena for free; from arsenal it costs the action point.
+          patch.uses = { handOnly: true };
           patch.bonusIn = (view) => view.flag("spirit") > 0 ? 0 : SPIRIT_OF_EIRINA_VALUE;
           patch.after = () => ({ flags: { spirit: 1 } });
           return patch;

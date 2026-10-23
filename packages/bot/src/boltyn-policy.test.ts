@@ -310,6 +310,42 @@ describe("Boltyn policy", () => {
       .not.toContain(kabuto.instanceId);
   });
 
+  it("charges before Lumina Ascension instead of pumping an uncharged Raydn first", () => {
+    const base = createGame({
+      decklists: [boltynDeck("HNT098"), decklists.dorinthea], cards: cardData, scripts, seed: 4040, startPlayer: 0,
+    });
+    base.turn = 3;
+    delete base.players[0]!.equipment.head;
+    const state = settled(base);
+    // As reported, Lumina led into a 1-power Raydn swing and Bolt of Courage charged too late.
+    hand(state, ["ASB026", "ASB008", "ASB014", "MON033"]);
+    state.players[0]!.soul = cards(state, ["ASB021", "MON033"]);
+    const { intents } = play(state, turnOver);
+    const lumina = intents.indexOf("Lumina Ascension");
+    if (lumina >= 0) expect(lumina).toBeGreaterThan(intents.indexOf("Bolt of Courage"));
+    expect(intents.indexOf("Bolt of Courage")).toBeLessThan(intents.indexOf(RAYDN));
+  });
+
+  it("plays every Lumina Ascension before Raydn's first swing", () => {
+    const state = game();
+    hand(state, ["ASB007", "ASB026", "ASB026", "ASB021"]);
+    soul(state, 1);
+    const { intents } = play(settled(state), turnOver);
+    const firstSwing = intents.indexOf(RAYDN);
+    expect(intents.slice(0, firstSwing).filter((name) => name === "Lumina Ascension")).toHaveLength(2);
+    expect(intents.filter((name) => name === RAYDN)).toHaveLength(3);
+  });
+
+  it("keeps Spirit of Eirina in hand to charge instead of arsenaling it", () => {
+    const state = settled(game());
+    hand(state, ["DYN066", "MPW146"]);
+    const spirit = state.players[0]!.hand[0]!.instanceId;
+    state.players[0]!.actionPoints = 0;
+    const { state: after } = play(state, turnOver);
+    expect(after.players[0]!.arsenal.map((card) => card.instanceId)).not.toContain(spirit);
+    expect(after.players[0]!.hand.map((card) => card.instanceId)).toContain(spirit);
+  });
+
   it("keeps Lumina Ascension when Raydn will not swing after it this turn", () => {
     const state = settled(game(4070));
     // Bolt of Courage is the turn's only attack: Raydn has no go-again path to follow it.
