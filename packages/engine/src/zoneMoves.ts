@@ -9,7 +9,7 @@ import {
   dataOf,
   scriptOf,
 } from "./cardProperties.js";
-import { basePowerOf } from "./combatValues.js";
+import { basePowerOf, computeAttack, currentPowerOf } from "./combatValues.js";
 import {
   cardCeasesToExistLogMessage,
   cardDestroyedLogMessage,
@@ -142,7 +142,15 @@ function enterGraveyard(
   owner.flags.graveThisTurn = true;
   const d = dataOf(state, card.cardId);
   for (const name of cardNameKeysOf(state, card)) owner.flags[`graveName:${name}`] = true;
-  owner.flags[`graveCardType:${d.cardType.toLowerCase()}`] = true;
+  // CR 3.0.7a: a meld card moving from the stack has only its declared side(s).
+  const meld = from === "stack" && card.meldSide ? scriptOf(state, card.cardId, card)?.meld : undefined;
+  const movedTypes = meld
+    ? [
+        ...(card.meldSide !== "right" ? [meld.leftCardType] : []),
+        ...(card.meldSide !== "left" ? [meld.rightCardType] : []),
+      ]
+    : [d.cardType];
+  for (const type of movedTypes) owner.flags[`graveCardType:${type.toLowerCase()}`] = true;
   for (const s of d.subtypes ?? []) {
     owner.flags[`graveSubtype:${s.toLowerCase()}`] = true;
   }
@@ -615,6 +623,25 @@ function findAndRemoveCard(
   return undefined;
 }
 
+/** CR 3.0.7a: a card leaving the combat chain moves with its power there. */
+function powerAtOrigin(
+  state: GameStateInternal,
+  runtime: EngineRuntime,
+  card: CardInstance,
+  from: string,
+): number {
+  if (from === "chain") {
+    const attacking = state.chain.find((link) =>
+      link.flags.attackGone !== true && link.attackingCard.instanceId === card.instanceId);
+    // Chain-link modifiers expire at resolution; a resolved link keeps its snapshot.
+    if (attacking) return attacking.finalAttack ?? computeAttack(state, runtime, attacking);
+    const defending = state.chain.find((link) =>
+      link.defendingCards.some((candidate) => candidate.instanceId === card.instanceId));
+    if (defending) return currentPowerOf(state, runtime, card, defending);
+  }
+  return basePowerOf(state, runtime, card.owner, card, dataOf(state, card.cardId).attack ?? 0);
+}
+
 /** Put an already removed card into its owner's banished zone and record all
  * public, per-turn, and observer consequences of the move. */
 export function enterBanish(
@@ -626,6 +653,7 @@ export function enterBanish(
 ): void {
   const owner = state.players[card.owner] as PlayerState;
   const causedBy = state.players[causedBySeat] as PlayerState | undefined;
+  const power = powerAtOrigin(state, runtime, card, from);
   // A card in banish is a new object (CR 3.0.9), so arena-only tap state and
   // effects on its previous object must not follow it or survive a later
   // play from this zone.
@@ -662,7 +690,7 @@ export function enterBanish(
     causedBy.flags.banishedBloodDebtThisTurn = true;
   }
   owner.flags.banishedThisTurn = (Number(owner.flags.banishedThisTurn) || 0) + 1;
-  if (basePowerOf(state, runtime, owner.seat, card, dataOf(state, card.cardId).attack ?? 0) >= 6) {
+  if (power >= 6) {
     owner.flags.banishedSixPlusThisTurn = true;
   }
   // Observers historically see ordinary cards already present in banish.

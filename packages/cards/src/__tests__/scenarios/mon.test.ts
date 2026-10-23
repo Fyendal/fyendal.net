@@ -584,6 +584,32 @@ describe("MON — Shadow Brute and Blood Debt", () => {
     expect(legalIntents(faceDown.state, 0).filter((i) => i.kind === "play-card")).toEqual([]);
   });
 
+  it.each([
+    [false, true],
+    [true, false],
+  ])("Mark of the Beast is banished with its chain power (Fearless Confrontation: %s)", (weakened, sixPlus) => {
+    const s = scenario({
+      seats: [
+        leviaSeat({ banish: [], hand: [BLUE, "mark of the beast|2"] }),
+        { hero: "dorinthea", hand: weakened ? ["fearless confrontation|3"] : [] },
+      ],
+    });
+
+    s.play("mark of the beast|2", { pitch: [BLUE], settle: false });
+    if (weakened) {
+      s.passPriority()
+        .activate("fearless confrontation|3", { settle: false })
+        .passPriority()
+        .passPriority();
+    }
+    s.blockWith()
+      .settle()
+      .expectFinalAttack(weakened ? 5 : 6);
+    while (s.state.chain.length > 0) s.passPriority();
+    s.expectTurn(1).expectInZone(0, "mark of the beast|2", "banish");
+    expect(s.state.players[0]!.flags.banishedSixPlusThisTurn === true).toBe(sixPlus);
+  });
+
   it("Blood-debt attacks with conditional permission can be played from hand", () => {
     const s = scenario({
       seats: [

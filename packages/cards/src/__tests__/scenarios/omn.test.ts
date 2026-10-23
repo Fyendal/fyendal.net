@@ -1298,6 +1298,30 @@ describe("OMN — import and set mechanics", () => {
       .expectLife(1, 14);
   });
 
+  it.each([
+    ["left", false],
+    ["right", true],
+    ["both", true],
+  ] as const)("Volzar sees an instant enter the graveyard only from a melded side that is one (%s)", (meldSide, instant) => {
+    const g = scenario({
+      seats: [
+        hero("oscilio, scion of the third age|0", {
+          weapons: ["volzar, meteor storm|0"],
+          hand: ["comet storm // shock|1", "tome of quandaries|3", "tome of quandaries|3"],
+        }),
+        foe(),
+      ],
+    });
+
+    g.endTurn().endTurn().play("comet storm // shock|1", { meldSide });
+    while (g.state.pendingDecision?.chooseHook) g.chooseOption("opposing hero");
+    g.expectInZone(0, "comet storm // shock|1", "graveyard");
+    const volzar = g.state.players[0]!.weapons[0]!;
+    expect(legalIntents(g.state, 0).some(
+      (intent) => intent.kind === "activate-ability" && intent.sourceInstanceId === volzar.instanceId,
+    )).toBe(instant);
+  });
+
   it("Chromatic Refinement buffs only the bound card when Constella Uplift responds", () => {
     const g = scenario({
       seats: [

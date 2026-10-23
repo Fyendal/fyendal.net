@@ -1459,11 +1459,8 @@ export function finishStackCardResolution(
     continueStack(state, runtime, state.activePlayer);
     return;
   }
-  if (layer?.card && scriptOf(state, layer.card.cardId, layer.card)?.meld) {
-    // The declared side(s) apply only to this stack object's existence. Once
-    // it leaves, the new split-card object again has both sides (CR 9.2.2).
-    delete layer.card.meldSide;
-  }
+  // Stage 2 narrowed the side for onPlay; the object itself had both sides.
+  if (layer?.meldStage === 2 && layer.card) layer.card.meldSide = "both";
   // A non-attack action card or ability with go again refunds its action point
   // only now that its layer resolves.
   const gainedGoAgain = layer?.goAgain === true && layer.seat === state.activePlayer &&
@@ -1530,6 +1527,9 @@ export function finishStackCardResolution(
     } else if (!remainsOnChain) {
       moveToGraveyard(state, runtime, resolvedCard, "stack");
     }
+    // The declared side(s) apply only to this stack object's existence. Once
+    // it leaves, the new split-card object again has both sides (CR 9.2.2).
+    delete resolvedCard.meldSide;
   }
   // Zone-entry hooks can queue new layers. Remove this exact resolved layer,
   // rather than blindly shifting the current top after those hooks run. The
