@@ -26,6 +26,13 @@ import type {
   GameTurnStatsView,
   GameView,
   GlobalNotice,
+  LeagueAction,
+  LeagueAvailabilityRequest,
+  LeagueAvailabilityWindow,
+  LeagueJoinPreview,
+  LeagueJoinRequest,
+  LeaguePairingNote,
+  LeagueStatus,
   VersionUpdateNotice,
   FriendGameInvite,
   FriendRequestSummary,
@@ -2137,6 +2144,128 @@ export const decodeMatchRecordsResponse: Decoder<MatchRecordsResponse> = (value)
     && array(data.matchups, matchupRecord, MAX_HERO_RECORDS)
     ? value as MatchRecordsResponse
     : null;
+};
+
+/** Availability grid granularity; every window edge falls on this boundary. */
+export const LEAGUE_SLOT_MINUTES = 30;
+const MAX_LEAGUE_WINDOWS = 7 * (24 * 60 / LEAGUE_SLOT_MINUTES);
+const MAX_LEAGUE_WEEK = 16;
+const MAX_LEAGUE_NAME = 80;
+const MAX_LEAGUE_PLAYERS = 20;
+const MAX_TIMESTAMP = 8_640_000_000_000_000;
+const LEAGUE_STATUSES = new Set(["signup", "season", "playoffs", "complete", "cancelled"]);
+const LEAGUE_OUTCOMES = new Set(["a", "b", "draw", "double-forfeit", "void"]);
+
+export interface LeagueJoinPreviewResponse { ok: true; league: LeagueJoinPreview }
+
+/** IANA zones only; the runtime's Intl database is authoritative. */
+export function decodeLeagueTimeZone(value: unknown): string | null {
+  if (!string(value, 64, false) || !/^[A-Za-z0-9_+\-/]+$/.test(value)) return null;
+  try {
+    new Intl.DateTimeFormat("en-US", { timeZone: value });
+    return value;
+  } catch {
+    return null;
+  }
+}
+
+function leagueWindow(value: unknown): value is LeagueAvailabilityWindow {
+  const window = object(value);
+  return !!window && exactKeys(window, ["weekday", "start", "end"])
+    && nonNegativeInteger(window.weekday) && window.weekday <= 6
+    && nonNegativeInteger(window.start) && nonNegativeInteger(window.end)
+    && window.start < window.end && window.end <= 24 * 60
+    && window.start % LEAGUE_SLOT_MINUTES === 0 && window.end % LEAGUE_SLOT_MINUTES === 0;
+}
+
+export function decodeLeagueAvailability(value: unknown): LeagueAvailabilityWindow[] | null {
+  return array(value, leagueWindow, MAX_LEAGUE_WINDOWS)
+    ? value.map(({ weekday, start, end }) => ({ weekday, start, end }))
+    : null;
+}
+
+export function decodeLeagueJoinRequest(value: unknown): LeagueJoinRequest | null {
+  const data = object(value);
+  if (!data || !exactKeys(data, ["timeZone", "availability"])) return null;
+  const timeZone = decodeLeagueTimeZone(data.timeZone);
+  const availability = decodeLeagueAvailability(data.availability);
+  return timeZone && availability ? { timeZone, availability } : null;
+}
+
+export function decodeLeagueAvailabilityRequest(value: unknown): LeagueAvailabilityRequest | null {
+  const data = object(value);
+  if (!data || !exactKeys(data, ["timeZone", "availability", "week"], ["timeZone", "availability"])) return null;
+  const timeZone = decodeLeagueTimeZone(data.timeZone);
+  const availability = decodeLeagueAvailability(data.availability);
+  if (!timeZone || !availability) return null;
+  if (data.week === undefined) return { timeZone, availability };
+  return positiveInteger(data.week) && data.week <= MAX_LEAGUE_WEEK ? { timeZone, availability, week: data.week } : null;
+}
+
+export function decodeLeaguePairingNote(value: unknown): LeaguePairingNote | null {
+  const note = object(value);
+  if (!note || !exactKeys(note, ["overlapMinutes", "scoreGap", "rematches", "cost"])
+    || !nonNegativeInteger(note.overlapMinutes) || note.overlapMinutes > 7 * 24 * 60
+    || !finite(note.scoreGap) || note.scoreGap < 0 || note.scoreGap > 3
+    || !nonNegativeInteger(note.rematches) || !finite(note.cost)) return null;
+  return { overlapMinutes: note.overlapMinutes, scoreGap: note.scoreGap, rematches: note.rematches, cost: note.cost };
+}
+
+export function decodeLeagueAction(value: unknown): LeagueAction | null {
+  const action = object(value);
+  if (!action) return null;
+  switch (action.kind) {
+    case "close-signup":
+    case "start":
+    case "cancel":
+      return exactKeys(action, ["kind"]) ? { kind: action.kind } : null;
+    case "drop":
+      return exactKeys(action, ["kind", "memberId"]) && positiveInteger(action.memberId)
+        ? { kind: "drop", memberId: action.memberId }
+        : null;
+    case "set-result":
+      return exactKeys(action, ["kind", "matchId", "outcome"]) && id(action.matchId)
+        && LEAGUE_OUTCOMES.has(String(action.outcome))
+        ? { kind: "set-result", matchId: action.matchId, outcome: action.outcome as "a" | "b" | "draw" | "double-forfeit" | "void" }
+        : null;
+    case "extend-deadline":
+      return exactKeys(action, ["kind", "matchId", "deadlineAt"]) && id(action.matchId)
+        && nonNegativeInteger(action.deadlineAt) && action.deadlineAt <= MAX_TIMESTAMP
+        ? { kind: "extend-deadline", matchId: action.matchId, deadlineAt: action.deadlineAt }
+        : null;
+    default:
+      return null;
+  }
+}
+
+export const decodeLeagueJoinPreviewResponse: Decoder<LeagueJoinPreviewResponse> = (value) => {
+  const data = object(value);
+  if (!data || !exactKeys(data, ["ok", "league"]) || data.ok !== true) return null;
+  const league = object(data.league);
+  if (!league || !exactKeys(league, [
+    "name", "format", "status", "startsAt", "members", "maxPlayers", "matchesPerWeek", "seasonWeeks", "joined",
+  ]) || !string(league.name, MAX_LEAGUE_NAME, false) || !FORMATS.has(String(league.format))
+    || !LEAGUE_STATUSES.has(String(league.status))
+    || !(league.startsAt === null || (nonNegativeInteger(league.startsAt) && league.startsAt <= MAX_TIMESTAMP))
+    || !positiveInteger(league.maxPlayers) || league.maxPlayers > MAX_LEAGUE_PLAYERS
+    || !nonNegativeInteger(league.members) || league.members > league.maxPlayers
+    || !positiveInteger(league.matchesPerWeek) || league.matchesPerWeek > 7
+    || !positiveInteger(league.seasonWeeks) || league.seasonWeeks > MAX_LEAGUE_WEEK
+    || typeof league.joined !== "boolean") return null;
+  return {
+    ok: true,
+    league: {
+      name: league.name,
+      format: league.format as Format,
+      status: league.status as LeagueStatus,
+      startsAt: league.startsAt,
+      members: league.members,
+      maxPlayers: league.maxPlayers,
+      matchesPerWeek: league.matchesPerWeek,
+      seasonWeeks: league.seasonWeeks,
+      joined: league.joined,
+    },
+  };
 };
 
 export const decodeReplayResponse: Decoder<ReplayResponse> = (value) => {
