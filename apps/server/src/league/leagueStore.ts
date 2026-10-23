@@ -16,13 +16,13 @@ import { hashToken } from "../tokenHash.js";
 export type JoinLeagueResult = "joined" | "already-joined" | "not-found" | "full";
 export type LeagueMemberUpdateResult = "updated" | "not-found" | "closed";
 
-function windows(value: unknown, label: string): LeagueAvailabilityWindow[] {
+export function storedWindows(value: unknown, label: string): LeagueAvailabilityWindow[] {
   const decoded = decodeLeagueAvailability(typeof value === "string" ? JSON.parse(value) as unknown : value);
   if (!decoded) throw new Error(`${label} is corrupt`);
   return decoded;
 }
 
-function nullableNumber(value: unknown): number | null {
+export function nullableNumber(value: unknown): number | null {
   return value === null || value === undefined ? null : Number(value);
 }
 
@@ -33,14 +33,14 @@ function oneOf<T extends string>(values: readonly T[], label: string): (value: u
   };
 }
 
-const format = oneOf<Format>(["cc", "silver-age"], "league format");
-const leagueStatus = oneOf<LeagueMembership["status"]>(["signup", "season", "playoffs", "complete", "cancelled"], "league status");
-const matchStage = oneOf<LeagueStage>(["season", "quarterfinal", "semifinal", "final"], "league match stage");
-const matchStatus = oneOf<LeagueMatchStatus>(
+export const format = oneOf<Format>(["cc", "silver-age"], "league format");
+export const leagueStatus = oneOf<LeagueMembership["status"]>(["signup", "season", "playoffs", "complete", "cancelled"], "league status");
+export const matchStage = oneOf<LeagueStage>(["season", "quarterfinal", "semifinal", "final"], "league match stage");
+export const matchStatus = oneOf<LeagueMatchStatus>(
   ["unscheduled", "proposed", "scheduled", "in-room", "complete", "cancelled"],
   "league match status",
 );
-const matchResult = oneOf<LeagueMatchResult>(
+export const matchResult = oneOf<LeagueMatchResult>(
   ["played", "draw", "forfeit", "double-forfeit", "bye", "operator"],
   "league match result",
 );
@@ -199,11 +199,12 @@ export async function listMemberLeagues(db: Queryable, userId: number): Promise<
       you: Number(member.user_id) === userId,
     })),
     timeZone: String(row.time_zone),
-    availability: windows(row.availability, "league availability"),
+    availability: storedWindows(row.availability, "league availability"),
   }));
 }
 
-/** Drops a member and cancels their unfinished matches; completed ones still count. */
+/** Drops a member. Their unfinished season matches are cancelled and open
+ * playoff matches go to the opponent; completed matches still count. */
 export async function dropLeagueMember(db: Queryable, leagueId: string, memberId: number): Promise<void> {
   await db.query(
     "UPDATE league_members SET status = 'dropped' WHERE league_id = $1 AND member_id = $2",
@@ -211,7 +212,15 @@ export async function dropLeagueMember(db: Queryable, leagueId: string, memberId
   );
   await db.query(
     `UPDATE league_matches SET status = 'cancelled'
-     WHERE league_id = $1 AND (member_a = $2 OR member_b = $2) AND status NOT IN ('complete', 'cancelled')`,
+     WHERE league_id = $1 AND stage = 'season' AND (member_a = $2 OR member_b = $2)
+       AND status NOT IN ('complete', 'cancelled')`,
+    [leagueId, memberId],
+  );
+  await db.query(
+    `UPDATE league_matches
+     SET status = 'complete', result = 'forfeit', winner = CASE WHEN member_a = $2 THEN member_b ELSE member_a END
+     WHERE league_id = $1 AND stage <> 'season' AND (member_a = $2 OR member_b = $2)
+       AND status NOT IN ('complete', 'cancelled')`,
     [leagueId, memberId],
   );
 }
@@ -280,10 +289,10 @@ export async function exportLeagueData(db: Queryable, userId: number): Promise<L
       memberStatus: membership.status === "dropped" ? "dropped" : "active",
       joinedAt: Number(membership.joined_at),
       timeZone: String(membership.time_zone),
-      availability: windows(membership.availability, "league availability"),
+      availability: storedWindows(membership.availability, "league availability"),
       availabilityWeeks: weeks.map((week) => ({
         week: Number(week.week),
-        availability: windows(week.availability, "league week availability"),
+        availability: storedWindows(week.availability, "league week availability"),
       })),
       matches: matches.map((match) => ({
         stage: matchStage(match.stage),

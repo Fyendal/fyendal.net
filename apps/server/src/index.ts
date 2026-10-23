@@ -24,6 +24,7 @@ import { composeProductionGateway } from "./gateway/composition.js";
 import { ReplayFinalizer, sweepReplays } from "./replays.js";
 import { appendClusterEvent, ClusterEventConsumer, sweepClusterEvents, type ClusterEvent } from "./clusterEvents.js";
 import { tryAcquireLease } from "./leases.js";
+import { LEAGUE_LEASE, LEAGUE_TICK_INTERVAL_MS, tickLeagues } from "./league/leagueWorker.js";
 import { consoleError } from "./logging.js";
 import { PgRateLimiter, sweepRateLimits } from "./rateLimits.js";
 import { sweepRecoveryTokens } from "./recovery.js";
@@ -1869,6 +1870,17 @@ if (!process.env.VITEST) {
   };
   sweepMatchPrep();
   const matchPrepSweepTimer = setInterval(sweepMatchPrep, MATCH_PREP_SWEEP_INTERVAL_MS);
+  let tickingLeagues = false;
+  const tickLeague = (): void => {
+    if (tickingLeagues) return;
+    tickingLeagues = true;
+    void tryAcquireLease(pool, LEAGUE_LEASE, instanceId, 4 * LEAGUE_TICK_INTERVAL_MS)
+      .then((claimed) => claimed ? tickLeagues(pool) : undefined)
+      .catch((error: Error) => consoleError("league tick failed", error))
+      .finally(() => { tickingLeagues = false; });
+  };
+  tickLeague();
+  const leagueTimer = setInterval(tickLeague, LEAGUE_TICK_INTERVAL_MS);
 
   let shuttingDown = false;
   const shutdown = (signal: string): void => {
@@ -1878,6 +1890,7 @@ if (!process.env.VITEST) {
     clearInterval(sweepTimer);
     clearInterval(socialCleanupTimer);
     clearInterval(matchPrepSweepTimer);
+    clearInterval(leagueTimer);
     closeGameServer(server)
       .then(() => pool.end())
       .then(() => process.exit(0))
