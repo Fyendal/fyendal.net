@@ -48,14 +48,7 @@
   padding: 0 var(--prep-content-gutter);
   align-items: start;
 }
-/* The match sheet is a band across the top that stays in view while the
-   deck ledgers scroll beneath it. */
-.prep-opponent {
-  position: sticky;
-  top: 8px;
-  z-index: 20;
-  text-align: center;
-}
+.prep-opponent { text-align: center; }
 .prep-selection-column { min-width: 0; display: grid; gap: 16px; }
 .prep-arena-stage .prep-cardrow { flex-wrap: wrap; }
 /* While you pick turn order the grid recedes, hover previews included, so
@@ -528,6 +521,13 @@
   letter-spacing: 1px;
   white-space: nowrap;
 }
+/* The requirement carries a localized word, so only the count is display-sized. */
+.prep-main-count small {
+  font-family: var(--font-lobby-ui);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0;
+}
 .prep-main-count.valid strong { color: #8fd48f; }
 .prep-main-count.invalid strong { color: #e0684a; }
 .prep-ready-controls {
@@ -585,7 +585,7 @@
 
 @media (max-width: 1035px) and (orientation: portrait) {
   .prep-columns { grid-template-columns: 1fr; }
-  .prep-opponent { position: static; order: 1; }
+  .prep-opponent { order: 1; }
   .prep-selection-column { order: 2; }
 }
 
@@ -688,20 +688,27 @@
   overflow: hidden;
   text-align: left;
 }
+/* Both mats share the body's rows, so a status line under one player never
+   pushes that player's cards out of line with the other's. */
 .prep-sheet-body {
   flex: 1 1 640px;
-  display: flex;
-  align-items: center;
+  display: grid;
+  grid-template-columns: auto auto auto;
+  grid-template-rows: auto auto;
   justify-content: center;
-  gap: 18px;
+  align-content: center;
+  gap: 8px 18px;
   min-width: 0;
   padding: 14px 16px;
+  container-type: inline-size;
+  /* Fourteen zones (heroes count 1.23) plus gaps and the VS column fill the band. */
+  --mat-zone: clamp(44px, (100cqi - 130px) / 14.5, 84px);
 }
 .prep-mat {
   --owner: #76b995;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+  display: grid;
+  grid-row: 1 / span 2;
+  grid-template-rows: subgrid;
   min-width: 0;
 }
 /* Ownership dots use the board's friendly/opponent colours. */
@@ -709,13 +716,13 @@
 /* Hero, then weapons and equipment; the opponent's row runs right to left so
    both heroes face the VS mark. */
 .prep-mat-cards { display: flex; align-items: center; gap: 5px; }
-.prep-mat.theirs { align-items: flex-end; text-align: right; }
+.prep-mat.theirs { justify-items: end; text-align: right; }
 .prep-mat.theirs .prep-mat-cards { flex-direction: row-reverse; }
-.prep-mat-player { min-width: 0; }
+.prep-mat-player { align-self: end; min-width: 0; }
 
 .prep-mat-zone {
   display: block;
-  width: 44px;
+  width: var(--mat-zone);
   aspect-ratio: 300 / 413;
   border: 1px solid var(--border-subtle);
   border-radius: 4px;
@@ -731,7 +738,7 @@
 .prep-mat-zone .c-text,
 .prep-mat-zone .c-cost,
 .prep-mat-zone .c-stats { display: none; }
-.prep-mat-hero { width: 54px; border-color: var(--border-strong); }
+.prep-mat-hero { width: calc(var(--mat-zone) * 1.23); border-color: var(--border-strong); }
 .prep-mat-empty {
   display: grid;
   place-items: center;
@@ -771,8 +778,8 @@
 .prep-sheet-state.disconnected { color: var(--danger); }
 .prep-sheet-state.disconnected::before { border-style: dashed; }
 .prep-mat-divider {
+  grid-row: 1 / span 2;
   display: flex;
-  flex: none;
   flex-direction: column;
   align-items: center;
   align-self: stretch;
@@ -842,9 +849,7 @@
 }
 .prep-sheet .prep-decision-status { text-align: center; }
 .prep-sheet-ready { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-/* Longer translations of the count wrap beside the button, never under it. */
 .prep-sheet-ready .prep-main-count { flex: 1 1 auto; }
-.prep-sheet-ready .prep-main-count strong { white-space: normal; }
 .prep-sheet-ready .prep-ready-controls { flex: none; }
 
 /* Stacked tablet layout: the sheet scrolls away above the deck, so its action

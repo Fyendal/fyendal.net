@@ -205,7 +205,7 @@ describe("preparation stage layout", () => {
     const html = render(prep, true);
     expect(html).toContain("Your arena cards");
     expect(html).toContain("Opponent’s arena cards");
-    expect(html).toContain("50 / 60 min");
+    expect(html.replace(/<[^>]*>/g, "")).toContain("50 / 60 min");
     expect(html).not.toContain("prep-card-choice");
     expect(html).not.toContain("Lock arena cards");
   });

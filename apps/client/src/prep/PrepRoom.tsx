@@ -568,7 +568,7 @@ export function PrepRoom() {
       )}
     >
       <span>{intl.formatMessage({ id: "prep.zone.main" })}</span>
-      <strong>{mainCount} / {mainCountRequirement}</strong>
+      <strong>{mainCount}<small> / {mainCountRequirement}</small></strong>
     </div>
   );
   const readyControls = ready ? (
