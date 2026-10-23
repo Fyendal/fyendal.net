@@ -248,7 +248,7 @@ describe("locale catalogs", () => {
     )).toBe("A carta Nimble Strike é destruída");
   });
 
-  it("uses official Spanish card terminology", () => {
+  it("keeps Flesh and Blood terms in English for Spanish", () => {
     const intl = createTestIntl("es");
 
     expect(intl.formatMessage({ id: "format.classicConstructed" })).toBe("Classic Constructed");
@@ -257,27 +257,30 @@ describe("locale catalogs", () => {
       { id: "lobby.deck.heroAndCount" },
       { hero: "Bravo", count: 0 },
     )).toBe("Bravo · 0 cartas");
-    expect(intl.formatMessage({ id: "game.chain.onHit" })).toBe("Al impactar");
-    expect(intl.formatMessage({ id: "game.chain.linksShort" })).toBe("Eslabones");
-    expect(intl.formatMessage({ id: "game.chain.title" })).toBe("Cadena de combate");
-    expect(intl.formatMessage({ id: "game.timing.actionPhase" })).toBe("FASE DE ACCIÓN");
-    expect(intl.formatMessage({ id: "game.timing.layerStep" })).toBe("PASO DE CAPA");
-    expect(intl.formatMessage({ id: "game.timing.damageStep" })).toBe("PASO DE DAÑO");
+    expect(intl.formatMessage({ id: "game.chain.onHit" })).toBe("On hit");
+    expect(intl.formatMessage({ id: "game.chain.linksShort" })).toBe("Links");
+    expect(intl.formatMessage({ id: "game.chain.title" })).toBe("Combat Chain");
+    expect(intl.formatMessage({ id: "game.timing.actionPhase" })).toBe("ACTION PHASE");
+    expect(intl.formatMessage({ id: "game.timing.layerStep" })).toBe("LAYER STEP");
+    expect(intl.formatMessage({ id: "game.timing.damageStep" })).toBe("DAMAGE STEP");
     expect(intl.formatMessage({ id: "game.zone.graveyard" })).toBe("Cementerio");
     expect(intl.formatMessage({ id: "game.zone.arsenal" })).toBe("Arsenal");
     expect(intl.formatMessage({ id: "game.zone.pitch" })).toBe("Pitch");
+    expect(intl.formatMessage({ id: "game.zone.banished" })).toBe("Banished");
     expect(intl.formatMessage({ id: "game.stack.title" })).toBe("Pila");
     expect(intl.formatMessage({ id: "game.decision.bloodMode.goAgain" }))
-      .toBe("Los ataques obtienen continuar");
-    expect(intl.formatMessage({ id: "engine.effect.part.dominate" })).toBe("dominar");
+      .toBe("Los ataques obtienen go again");
+    expect(intl.formatMessage({ id: "engine.effect.part.dominate" })).toBe("dominate");
     expect(intl.formatMessage(
       { id: "card.log.common.goagain.gained" },
       { card: "Nimble Strike" },
-    )).toBe("Nimble Strike obtiene continuar");
+    )).toBe("Nimble Strike obtiene go again");
     expect(intl.formatMessage(
       { id: "engine.log.card.destroyed" },
       { card: "Nimble Strike" },
     )).toBe("La carta Nimble Strike es destruida");
+    expect(intl.formatMessage({ id: "engine.log.hero.marked" }, { hero: "Arakni" }))
+      .toBe("Arakni recibe mark");
   });
 
   it("separates Chinese text from interpolated names with a space", () => {

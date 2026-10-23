@@ -76,7 +76,7 @@ describe("attack queue presentation", () => {
       layers: [{ card: KISS_OF_DEATH, seat: 0, label: "Attack layer", optional: false }],
       queue: queued(ZERO_TO_SIXTY),
     }));
-    expect(html).toContain("The Stack");
+    expect(html).toContain('stack-title">Stack</span>');
     expect(html).toContain('<section class="stack-queue" aria-label="Attack queue">');
     expect(html).toContain('data-motion-zone="stack:queue:0"');
     expect(html).toContain('class="stack-queue-order" aria-hidden="true">1</span>');
@@ -86,7 +86,7 @@ describe("attack queue presentation", () => {
   it("shrinks to a one-line queue strip when no layer is left", () => {
     const html = render(createElement(StackFloat, { layers: [], queue: queued(ZERO_TO_SIXTY, KISS_OF_DEATH) }));
     expect(html).toContain("stack-queue-strip");
-    expect(html).not.toContain("The Stack");
+    expect(html).not.toContain('stack-title">Stack</span>');
     expect(html).not.toContain("stack-layers");
     expect(html).toContain('data-motion-zone="stack:queue:1"');
   });
