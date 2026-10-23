@@ -1,5 +1,6 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
 import {
+  hasBloodDebt,
   armDelayedEffect,
   attackAbility,
   bloodDebtScript as bloodDebt,
@@ -745,7 +746,7 @@ export const penHighRarity: Record<string, CardScript> = {
         .graveyard.find(
           (card) =>
             isAttack(ctx, card) &&
-            (data(ctx, card).keywords ?? []).some((keyword) => keyword.toLowerCase() === "blood debt"),
+            hasBloodDebt(ctx, card),
         );
       if (attack) ctx.putOnDeckBottom(attack.instanceId);
     },

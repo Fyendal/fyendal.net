@@ -729,4 +729,39 @@ describe("Blood Debt and Rune Gate", () => {
 
     g.endTurn().expectLife(0, cardData[printingId("levia, redeemed|0")]!.life!);
   });
+
+  it("Levia, Redeemed's banished cards no longer reduce Hexagore's self-damage", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          heroKey: "levia, redeemed|0",
+          weapons: ["hexagore, the death hydra|0"],
+          banish: Array(6).fill("dread screamer|1") as string[],
+          resources: 2,
+        },
+        { hero: "dorinthea" },
+      ],
+    });
+
+    g.attackWithWeapon().expectLife(0, cardData[printingId("levia, redeemed|0")]!.life! - 6);
+  });
+
+  it("Gate to i'Arathael cannot target Levia, Redeemed's former blood-debt cards", () => {
+    const gateActivatable = (heroKey: string) => {
+      const g = scenario({
+        seats: [
+          { hero: "rhinar", heroKey, board: ["gate to i'arathael|0"], banish: ["shadowrealm horror|1"], resources: 10 },
+          { hero: "dorinthea" },
+        ],
+      });
+      const gate = g.state.players[0]!.board[0]!;
+      return legalIntents(g.state, 0).some(
+        (intent) => intent.kind === "activate-ability" && intent.sourceInstanceId === gate.instanceId,
+      );
+    };
+
+    expect(gateActivatable("levia, shadowborn abomination|0")).toBe(true);
+    expect(gateActivatable("levia, redeemed|0")).toBe(false);
+  });
 });

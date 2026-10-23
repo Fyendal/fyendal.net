@@ -1,5 +1,6 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
 import {
+  hasBloodDebt,
   bloodDebtScript as bloodDebt,
   buffNextAttack,
   cardNamed,
@@ -449,7 +450,7 @@ export const monHighRarity: Record<string, CardScript> = {
         .banish.filter(
           (card) =>
             !card.faceDown &&
-            (ctx.cardData(card.cardId).keywords ?? []).some((keyword) => keyword.toLowerCase() === "blood debt"),
+            hasBloodDebt(ctx, card),
         ).length;
       ctx.dealDamage(ctx.seat, Math.max(0, 6 - blood), { sourceInstanceId: ctx.self.instanceId });
     },
@@ -465,7 +466,7 @@ export const monHighRarity: Record<string, CardScript> = {
         const cards = ctx
           .player(ctx.seat)
           .deck.filter((card) =>
-            (ctx.cardData(card.cardId).keywords ?? []).some((keyword) => keyword.toLowerCase() === "blood debt"),
+            hasBloodDebt(ctx, card),
           );
         if (cards.length)
           ctx.requestCardChoice(
@@ -505,7 +506,7 @@ export const monHighRarity: Record<string, CardScript> = {
         const cards = ctx
           .player(ctx.seat)
           .hand.filter((card) =>
-            (ctx.cardData(card.cardId).keywords ?? []).some((keyword) => keyword.toLowerCase() === "blood debt"),
+            hasBloodDebt(ctx, card),
           );
         if (cards.length)
           ctx.requestCardChoice(
@@ -608,7 +609,7 @@ export const monHighRarity: Record<string, CardScript> = {
         .banish.filter(
           (card) =>
             !card.faceDown &&
-            (ctx.cardData(card.cardId).keywords ?? []).some((keyword) => keyword.toLowerCase() === "blood debt"),
+            hasBloodDebt(ctx, card),
         ).length >= 6,
     onPlay(ctx) {
       ctx.createToken(BLASMOPHET);

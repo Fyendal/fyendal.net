@@ -902,6 +902,14 @@ const BLOOD_DEBT = {
   redeemedName: "levia, redeemed",
 } as const;
 
+/** Printed Blood Debt, unless the owner is Levia, Redeemed (her cards lose it). */
+export function hasBloodDebt(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
+  if (!(ctx.cardData(card.cardId).keywords ?? []).some((keyword) => keyword.trim().toLowerCase() === "blood debt"))
+    return false;
+  const ownerHero = ctx.cardData(ctx.player(card.owner).hero.cardId).name.toLowerCase();
+  return ownerHero !== BLOOD_DEBT.redeemedName || ctx.heroAbilitiesDisabled(card.owner);
+}
+
 function activeHeroName(ctx: ScriptCtx): string {
   return ctx.cardData(ctx.player(ctx.seat).hero.cardId).name.toLowerCase();
 }
@@ -943,7 +951,7 @@ export const leviaRedeemedAbility: ActivatedAbility = {
       leviaTwinFace(ctx, BLOOD_DEBT.redeemedName) !== undefined &&
       ctx
         .player(ctx.seat)
-        .banish.filter((card) => !card.faceDown && ctx.cardData(card.cardId).text.includes("Blood Debt")).length >= 13
+        .banish.filter((card) => !card.faceDown && hasBloodDebt(ctx, card)).length >= 13
     );
   },
   onCostPaid(ctx) {
@@ -964,11 +972,12 @@ export function bloodDebtScript(extra: CardScript = {}, playableFromBanish = fal
     ...extra,
     ...(playableFromBanish ? { staticPlayableFrom: ["banish" as const] } : {}),
     onPlay(ctx) {
-      ctx.setFlag(
-        "player",
-        "bloodDebtCardsPlayedThisTurn",
-        Number(ctx.getFlag("player", "bloodDebtCardsPlayedThisTurn")) + 1,
-      );
+      if (hasBloodDebt(ctx, ctx.self))
+        ctx.setFlag(
+          "player",
+          "bloodDebtCardsPlayedThisTurn",
+          Number(ctx.getFlag("player", "bloodDebtCardsPlayedThisTurn")) + 1,
+        );
       extra.onPlay?.(ctx);
     },
     onChoose(ctx, hook, option) {

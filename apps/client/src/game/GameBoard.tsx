@@ -895,6 +895,7 @@ export function GameBoard() {
       }
     }
     const combatCards = view.chain.flatMap((link) => [link.attackingCard, ...link.defendingCards]);
+    const stackCards = view.stack.flatMap((layer) => (layer.card ? [layer.card] : []));
     const publicZoneCards = view.players.flatMap((player) => [
       ...player.banish,
       ...player.graveyard,
@@ -903,7 +904,7 @@ export function GameBoard() {
       ...Object.values(player.equipment).filter((card): card is CardView => card !== undefined),
     ]);
     const choices = [...ids].flatMap((id) => {
-      const card = [...combatCards, ...publicZoneCards]
+      const card = [...stackCards, ...combatCards, ...publicZoneCards]
         .find((candidate) => candidate.instanceId === id);
       if (!card) return [];
       const playPermission = targetPlayPermissionNote(intl, card);

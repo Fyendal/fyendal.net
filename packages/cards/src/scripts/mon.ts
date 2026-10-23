@@ -1,5 +1,6 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
 import {
+  hasBloodDebt,
   attackedWithWeapon,
   bloodDebtScript as bloodDebt,
   buffNextAttack,
@@ -1190,7 +1191,7 @@ export const mon: Record<string, CardScript> = mergeSetScripts("MON", monHighRar
           return (
             ctx.hasCardType(card, "action") &&
             !hasType(ctx, card, "attack") &&
-            hasKeyword(ctx, card.cardId, "blood debt")
+            hasBloodDebt(ctx, card)
           );
         });
         if (cards.length > 0)
@@ -1224,7 +1225,7 @@ export const mon: Record<string, CardScript> = mergeSetScripts("MON", monHighRar
           return (
             ctx.hasCardType(card, "action") &&
             !hasType(ctx, card, "attack") &&
-            hasKeyword(ctx, card.cardId, "blood debt")
+            hasBloodDebt(ctx, card)
           );
         });
         if (cards.length > 0)
@@ -1258,7 +1259,7 @@ export const mon: Record<string, CardScript> = mergeSetScripts("MON", monHighRar
           return (
             ctx.hasCardType(card, "action") &&
             !hasType(ctx, card, "attack") &&
-            hasKeyword(ctx, card.cardId, "blood debt")
+            hasBloodDebt(ctx, card)
           );
         });
         if (cards.length > 0)
@@ -1422,7 +1423,7 @@ export const mon: Record<string, CardScript> = mergeSetScripts("MON", monHighRar
       for (const option of options) {
         const card = ctx.player(ctx.seat).graveyard.find((candidate) => candidate.instanceId === Number(option));
         if (!card) continue;
-        if (hasKeyword(ctx, card.cardId, "blood debt"))
+        if (hasBloodDebt(ctx, card))
           ctx.setState("harvestBloodDebt", ctx.getState("harvestBloodDebt") + 1);
         ctx.banish(card.instanceId);
       }
@@ -1431,7 +1432,7 @@ export const mon: Record<string, CardScript> = mergeSetScripts("MON", monHighRar
   "soul reaping|1": {
     alternativePlayCost: { kind: "banish-hand", min: 1 },
     onAlternativeCostPaid(ctx, paidCards) {
-      const bloodDebt = paidCards.filter((card) => hasKeyword(ctx, card.cardId, "blood debt")).length;
+      const bloodDebt = paidCards.filter((card) => hasBloodDebt(ctx, card)).length;
       if (bloodDebt > 0) ctx.changeResources(ctx.seat, bloodDebt);
     },
     onAttackDeclared(ctx) {

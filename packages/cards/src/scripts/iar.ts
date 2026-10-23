@@ -1,5 +1,6 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx, TriggerDef } from "@fyendal/engine";
 import {
+  hasBloodDebt,
   ampNextArcane,
   anyDamageTarget,
   attackAbility,
@@ -1317,11 +1318,6 @@ const viseraiBack: CardScript = {
     },
   ],
 };
-
-function hasBloodDebt(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
-  const data = ctx.cardData(card.cardId);
-  return (data.keywords ?? []).some((keyword) => keyword.trim().toLowerCase() === "blood debt");
-}
 
 function replaceActionPhaseDrawWithPonder(ctx: ScriptCtx, drawingSeat: number, count: number): number {
   if (!["action", "defend", "reaction", "layer"].includes(ctx.state.phase) || count <= 0) {

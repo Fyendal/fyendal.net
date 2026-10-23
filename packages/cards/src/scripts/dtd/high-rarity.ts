@@ -1,6 +1,7 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
 import type { GameMessage } from "@fyendal/shared";
 import {
+  hasBloodDebt,
   armDelayedEffect,
   attackAbility,
   bloodDebtScript as bloodDebt,
@@ -569,7 +570,7 @@ export const dtdHighRarity: Record<string, CardScript> = {
     onAttackDeclared(ctx) {
       const count = ctx
         .player(ctx.seat)
-        .banish.filter((card) => !card.faceDown && data(ctx, card).text.includes("Blood Debt")).length;
+        .banish.filter((card) => !card.faceDown && hasBloodDebt(ctx, card)).length;
       ctx.dealDamage(ctx.seat, Math.max(0, 13 - count));
     },
   }),
@@ -593,7 +594,7 @@ export const dtdHighRarity: Record<string, CardScript> = {
       let bloodDebtCards = 0;
       for (const card of [...ctx.player(ctx.seat).hand]) {
         if (ctx.basePower(card) >= 6) sixes++;
-        if (data(ctx, card).text.includes("Blood Debt")) bloodDebtCards++;
+        if (hasBloodDebt(ctx, card)) bloodDebtCards++;
         ctx.banish(card.instanceId);
       }
       ctx.drawCards(ctx.seat, bloodDebtCards);
@@ -690,7 +691,7 @@ export const dtdHighRarity: Record<string, CardScript> = {
     allowsFriendlyCardPlayFrom: (ctx, card, zone) =>
       zone === "banish" &&
       !card.faceDown &&
-      data(ctx, card).text.includes("Blood Debt") &&
+      hasBloodDebt(ctx, card) &&
       ctx.getFlag("player", "leviaConsumedBanishPlayUsed") !== true,
     onFriendlyPlayFromPermission(ctx) {
       ctx.setFlag("player", "leviaConsumedBanishPlayUsed", true);
