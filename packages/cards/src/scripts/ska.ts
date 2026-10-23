@@ -34,11 +34,7 @@ function hasSixPlusInPitch(ctx: ScriptCtx): boolean {
 }
 
 function conditionalPitchGoAgain(): CardScript {
-  return {
-    onAttackDeclared(ctx) {
-      if (hasSixPlusInPitch(ctx)) ctx.grantGoAgain();
-    },
-  };
+  return { hasConditionalGoAgain: hasSixPlusInPitch };
 }
 
 function clashForToken(tokenId: string): CardScript {

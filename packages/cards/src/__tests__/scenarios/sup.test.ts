@@ -432,6 +432,19 @@ describe("SUP — heroes and the crowd", () => {
       .expectAP(0, 1);
   });
 
+  it("Buckwild gets go again from a 6-power card Tuffnut pitches during the reaction step", () => {
+    for (const buckwild of ["buckwild|1", "buckwild|2", "buckwild|3"]) {
+      const g = scenario({
+        seats: [
+          hero("tuffnut|0", { hand: [buckwild], deck: ["old leather and vim|1"], resources: 3 }),
+          foe(),
+        ],
+      });
+
+      g.play(buckwild).blockWith().activate("tuffnut|0").settle().expectAP(0, 1);
+    }
+  });
+
   it("Cries of Encore lets its controller pay to play one suspense aura from graveyard", () => {
     const g = scenario({
       seats: [

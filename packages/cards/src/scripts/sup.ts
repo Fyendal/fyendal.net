@@ -552,11 +552,10 @@ function defendedByClassToken(className: string, tokenId: string): CardScript {
   };
 }
 
-function pitchCondition(kind: "go" | "token" | "power", tokenId = VIGOR): CardScript {
+function pitchCondition(kind: "token" | "power", tokenId = VIGOR): CardScript {
   return {
     onAttackDeclared(ctx) {
       if (!hasSixPlusInPitch(ctx)) return;
-      if (kind === "go") ctx.grantGoAgain();
       if (kind === "token") ctx.createToken(tokenId);
       if (kind === "power") ctx.addModifier({ scope: "chain-link", attack: 1 });
     },
@@ -964,7 +963,7 @@ export const sup: Record<string, CardScript> = {
   },
   "bash guardian|1": bashHero("guardian"),
   "familiar stench|1": defendedByClassToken("brute", VIGOR),
-  "buckwild|2": pitchCondition("go"),
+  "buckwild|2": { hasConditionalGoAgain: hasSixPlusInPitch },
   ...pitches("flex speed", () => flex("speed")),
   ...pitches("flex strength", () => flex("strength")),
   ...pitches("give 'em a piece of your mind", () => missCreates(VIGOR)),
