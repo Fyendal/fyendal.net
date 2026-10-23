@@ -26,6 +26,9 @@ import {
   decodeSharedReplayResponse,
   decodeStatsResponse,
   decodeGlobalNoticeResponse,
+  decodeLeagueErrorResponse,
+  decodeLeagueJoinPreviewResponse,
+  decodeLeaguesResponse,
   decodeVersionUpdateNoticeResponse,
   type GlobalNoticeResponse,
   type VersionUpdateNoticeResponse,
@@ -57,8 +60,17 @@ import {
   type SharedReplayDenialResponse,
   type SharedReplayResponse,
   type StatsResponse,
+  type LeagueErrorResponse,
+  type LeagueJoinPreviewResponse,
+  type LeaguesResponse,
 } from "@fyendal/protocol";
-import type { PlayerBadge, PlayerReportReason, Format } from "@fyendal/shared";
+import type {
+  Format,
+  LeagueAvailabilityRequest,
+  LeagueJoinRequest,
+  PlayerBadge,
+  PlayerReportReason,
+} from "@fyendal/shared";
 
 type RegisterOk = OkResponse;
 type LoginOk = LoginResponse;
@@ -288,6 +300,44 @@ export function apiMatches(
   if (cursor) params.set("cursor", cursor);
   const query = params.toString();
   return get(`matches${query ? `?${query}` : ""}`, decodeMatchesResponse, { token, signal });
+}
+
+// ── leagues ───────────────────────────────────────────────────────────────
+
+export type LeagueResult<T> = T | LeagueErrorResponse | ApiError;
+const okOrLeagueError: Decoder<OkResponse | LeagueErrorResponse> = (value) =>
+  decodeOkResponse(value) ?? decodeLeagueErrorResponse(value);
+
+export function apiLeagues(token: string, signal?: AbortSignal): Promise<LeaguesResponse | ApiError> {
+  return get("leagues", decodeLeaguesResponse, { token, signal });
+}
+
+/** Sign-up links preview signed out too; signed in, the preview says whether you joined. */
+export function apiLeaguePreview(
+  leagueToken: string,
+  token: string | null,
+  signal?: AbortSignal,
+): Promise<LeagueResult<LeagueJoinPreviewResponse>> {
+  return get(
+    `leagues/join/${leagueToken}`,
+    (value) => decodeLeagueJoinPreviewResponse(value) ?? decodeLeagueErrorResponse(value),
+    { ...(token ? { token } : {}), signal },
+  );
+}
+
+export function apiJoinLeague(token: string, request: LeagueJoinRequest): Promise<LeagueResult<OkResponse>> {
+  return post("leagues/join", request, okOrLeagueError, { token });
+}
+
+export function apiSetLeagueAvailability(
+  token: string,
+  request: LeagueAvailabilityRequest,
+): Promise<LeagueResult<OkResponse>> {
+  return post("leagues/availability", request, okOrLeagueError, { token });
+}
+
+export function apiLeaveLeague(token: string, leagueId: string): Promise<LeagueResult<OkResponse>> {
+  return post("leagues/leave", { leagueId }, okOrLeagueError, { token });
 }
 
 // ── replays ───────────────────────────────────────────────────────────────

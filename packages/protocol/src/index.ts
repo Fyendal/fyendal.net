@@ -31,7 +31,11 @@ import type {
   LeagueAvailabilityWindow,
   LeagueJoinPreview,
   LeagueJoinRequest,
+  LeagueMatchResult,
+  LeagueMatchStatus,
+  LeagueMembership,
   LeaguePairingNote,
+  LeagueStage,
   LeagueStatus,
   VersionUpdateNotice,
   FriendGameInvite,
@@ -477,6 +481,29 @@ export interface AccountExport {
   friends: Array<{ username: string; friendsSince: number }>;
   friendRequests: FriendRequestSummary[];
   friendMessages: ChatMessage[];
+  leagues: LeagueExport[];
+}
+export interface LeagueExport {
+  name: string;
+  format: Format;
+  leagueStatus: LeagueStatus;
+  memberStatus: "active" | "dropped";
+  joinedAt: number;
+  timeZone: string;
+  availability: LeagueAvailabilityWindow[];
+  availabilityWeeks: Array<{ week: number; availability: LeagueAvailabilityWindow[] }>;
+  matches: Array<{
+    stage: LeagueStage;
+    week: number | null;
+    bracketSlot: number | null;
+    /** Null for a bye or a deleted opponent account. */
+    opponent: string | null;
+    status: LeagueMatchStatus;
+    scheduledAt: number | null;
+    result: LeagueMatchResult | null;
+    /** Null while unresolved or after a draw. */
+    won: boolean | null;
+  }>;
 }
 export interface AccountExportResponse { ok: true; export: AccountExport }
 
@@ -2184,22 +2211,34 @@ export function decodeLeagueAvailability(value: unknown): LeagueAvailabilityWind
     : null;
 }
 
+/** Sign-up links carry a 32-byte base64url capability. */
+export const LEAGUE_TOKEN_RE = /^[A-Za-z0-9_-]{43}$/;
+const leagueId = (value: unknown): value is string => typeof value === "string" && /^[a-f0-9]{24}$/.test(value);
+
 export function decodeLeagueJoinRequest(value: unknown): LeagueJoinRequest | null {
   const data = object(value);
-  if (!data || !exactKeys(data, ["timeZone", "availability"])) return null;
+  if (!data || !exactKeys(data, ["token", "timeZone", "availability"])
+    || typeof data.token !== "string" || !LEAGUE_TOKEN_RE.test(data.token)) return null;
   const timeZone = decodeLeagueTimeZone(data.timeZone);
   const availability = decodeLeagueAvailability(data.availability);
-  return timeZone && availability ? { timeZone, availability } : null;
+  return timeZone && availability ? { token: data.token, timeZone, availability } : null;
 }
 
 export function decodeLeagueAvailabilityRequest(value: unknown): LeagueAvailabilityRequest | null {
   const data = object(value);
-  if (!data || !exactKeys(data, ["timeZone", "availability", "week"], ["timeZone", "availability"])) return null;
+  if (!data || !exactKeys(data, ["leagueId", "timeZone", "availability", "week"], ["leagueId", "timeZone", "availability"])
+    || !leagueId(data.leagueId)) return null;
   const timeZone = decodeLeagueTimeZone(data.timeZone);
   const availability = decodeLeagueAvailability(data.availability);
   if (!timeZone || !availability) return null;
-  if (data.week === undefined) return { timeZone, availability };
-  return positiveInteger(data.week) && data.week <= MAX_LEAGUE_WEEK ? { timeZone, availability, week: data.week } : null;
+  const request = { leagueId: data.leagueId, timeZone, availability };
+  if (data.week === undefined) return request;
+  return positiveInteger(data.week) && data.week <= MAX_LEAGUE_WEEK ? { ...request, week: data.week } : null;
+}
+
+export function decodeLeagueIdRequest(value: unknown): { leagueId: string } | null {
+  const data = object(value);
+  return data && exactKeys(data, ["leagueId"]) && leagueId(data.leagueId) ? { leagueId: data.leagueId } : null;
 }
 
 export function decodeLeaguePairingNote(value: unknown): LeaguePairingNote | null {
@@ -2267,6 +2306,83 @@ export const decodeLeagueJoinPreviewResponse: Decoder<LeagueJoinPreviewResponse>
     },
   };
 };
+
+export interface LeaguesResponse { ok: true; leagues: LeagueMembership[] }
+export type LeagueErrorCode = "LEAGUE_NOT_FOUND" | "LEAGUE_FULL" | "LEAGUE_CLOSED";
+export interface LeagueErrorResponse { ok: false; error: string; code: LeagueErrorCode }
+const LEAGUE_ERROR_CODES = new Set(["LEAGUE_NOT_FOUND", "LEAGUE_FULL", "LEAGUE_CLOSED"]);
+
+export const decodeLeagueErrorResponse: Decoder<LeagueErrorResponse> = (value) => {
+  const data = object(value);
+  return data && exactKeys(data, ["ok", "error", "code"]) && data.ok === false && string(data.error, MAX_TEXT)
+    && LEAGUE_ERROR_CODES.has(String(data.code))
+    ? { ok: false, error: data.error, code: data.code as LeagueErrorCode }
+    : null;
+};
+
+const LEAGUE_STAGES = new Set(["season", "quarterfinal", "semifinal", "final"]);
+const LEAGUE_MATCH_STATUSES = new Set(["unscheduled", "proposed", "scheduled", "in-room", "complete", "cancelled"]);
+const LEAGUE_MATCH_RESULTS = new Set(["played", "draw", "forfeit", "double-forfeit", "bye", "operator"]);
+const MAX_LEAGUES = 50;
+const MAX_LEAGUE_MATCHES = 200;
+const nullableTimestamp = (value: unknown): value is number | null =>
+  value === null || (nonNegativeInteger(value) && value <= MAX_TIMESTAMP);
+const leagueWindows = (value: unknown): value is LeagueAvailabilityWindow[] => decodeLeagueAvailability(value) !== null;
+
+function leagueMembership(value: unknown): value is LeagueMembership {
+  const league = object(value);
+  return !!league && exactKeys(league, [
+    "id", "name", "format", "status", "startsAt", "seasonWeeks", "matchesPerWeek", "matchMinutes",
+    "maxPlayers", "signupOpen", "roster", "timeZone", "availability",
+  ]) && leagueId(league.id) && string(league.name, MAX_LEAGUE_NAME, false) && FORMATS.has(String(league.format))
+    && LEAGUE_STATUSES.has(String(league.status)) && nullableTimestamp(league.startsAt)
+    && positiveInteger(league.seasonWeeks) && league.seasonWeeks <= MAX_LEAGUE_WEEK
+    && positiveInteger(league.matchesPerWeek) && league.matchesPerWeek <= 7
+    && positiveInteger(league.matchMinutes) && league.matchMinutes <= 180
+    && positiveInteger(league.maxPlayers) && league.maxPlayers <= MAX_LEAGUE_PLAYERS
+    && typeof league.signupOpen === "boolean"
+    && array(league.roster, (item): item is LeagueMembership["roster"][number] => {
+      const member = object(item);
+      return !!member && exactKeys(member, ["username", "you"])
+        && (member.username === null || username(member.username)) && typeof member.you === "boolean";
+    }, MAX_LEAGUE_PLAYERS)
+    && decodeLeagueTimeZone(league.timeZone) !== null && leagueWindows(league.availability);
+}
+
+export const decodeLeaguesResponse: Decoder<LeaguesResponse> = (value) => {
+  const data = object(value);
+  return data && exactKeys(data, ["ok", "leagues"]) && data.ok === true && array(data.leagues, leagueMembership, MAX_LEAGUES)
+    ? value as LeaguesResponse
+    : null;
+};
+
+function exportLeague(value: unknown): value is LeagueExport {
+  const league = object(value);
+  return !!league && exactKeys(league, [
+    "name", "format", "leagueStatus", "memberStatus", "joinedAt", "timeZone", "availability",
+    "availabilityWeeks", "matches",
+  ]) && string(league.name, MAX_LEAGUE_NAME, false) && FORMATS.has(String(league.format))
+    && LEAGUE_STATUSES.has(String(league.leagueStatus))
+    && (league.memberStatus === "active" || league.memberStatus === "dropped")
+    && nonNegativeInteger(league.joinedAt) && decodeLeagueTimeZone(league.timeZone) !== null
+    && leagueWindows(league.availability)
+    && array(league.availabilityWeeks, (item): item is LeagueExport["availabilityWeeks"][number] => {
+      const week = object(item);
+      return !!week && exactKeys(week, ["week", "availability"])
+        && positiveInteger(week.week) && week.week <= MAX_LEAGUE_WEEK && leagueWindows(week.availability);
+    }, MAX_LEAGUE_WEEK)
+    && array(league.matches, (item): item is LeagueExport["matches"][number] => {
+      const match = object(item);
+      return !!match && exactKeys(match, ["stage", "week", "bracketSlot", "opponent", "status", "scheduledAt", "result", "won"])
+        && LEAGUE_STAGES.has(String(match.stage))
+        && (match.week === null || (positiveInteger(match.week) && match.week <= MAX_LEAGUE_WEEK))
+        && (match.bracketSlot === null || (nonNegativeInteger(match.bracketSlot) && match.bracketSlot < 8))
+        && (match.opponent === null || username(match.opponent))
+        && LEAGUE_MATCH_STATUSES.has(String(match.status)) && nullableTimestamp(match.scheduledAt)
+        && (match.result === null || LEAGUE_MATCH_RESULTS.has(String(match.result)))
+        && (match.won === null || typeof match.won === "boolean");
+    }, MAX_LEAGUE_MATCHES);
+}
 
 export const decodeReplayResponse: Decoder<ReplayResponse> = (value) => {
   const data = object(value);
@@ -2663,7 +2779,7 @@ export const decodeAccountExportResponse: Decoder<AccountExportResponse> = (valu
       exported,
       ["exportedAt", "account", "decks", "deckPlays", "rooms", "matchmaking", "bugReports",
         "playerReports", "gameDays", "achievements", "replays", "matches", "heroRecords", "matchupRecords",
-        "friends", "friendRequests", "friendMessages"],
+        "friends", "friendRequests", "friendMessages", "leagues"],
     ) && !!account
     && exactKeys(account, ["username", "createdAt", "earlyTester", "selectedBadge", "betaTester", "email", "pendingEmail"])
     && typeof account.betaTester === "boolean"
@@ -2694,7 +2810,8 @@ export const decodeAccountExportResponse: Decoder<AccountExportResponse> = (valu
         && username(friend.username) && nonNegativeInteger(friend.friendsSince);
     }, MAX_SOCIAL_ITEMS)
     && array(exported.friendRequests, friendRequestSummary, MAX_SOCIAL_ITEMS)
-    && array(exported.friendMessages, chatMessage, MAX_SOCIAL_ITEMS);
+    && array(exported.friendMessages, chatMessage, MAX_SOCIAL_ITEMS)
+    && array(exported.leagues, exportLeague, MAX_LEAGUES);
   return valid ? value as AccountExportResponse : null;
 };
 

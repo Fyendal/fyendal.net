@@ -32927,6 +32927,448 @@
       "value": "Idioma"
     }
   ],
+  "league.availability.cell": [
+    {
+      "type": 1,
+      "value": "day"
+    },
+    {
+      "type": 0,
+      "value": ", das "
+    },
+    {
+      "type": 1,
+      "value": "start"
+    },
+    {
+      "type": 0,
+      "value": " às "
+    },
+    {
+      "type": 1,
+      "value": "end"
+    }
+  ],
+  "league.availability.clear": [
+    {
+      "type": 0,
+      "value": "Limpar"
+    }
+  ],
+  "league.availability.failed": [
+    {
+      "type": 0,
+      "value": "Não foi possível salvar sua disponibilidade. Tente novamente."
+    }
+  ],
+  "league.availability.help": [
+    {
+      "type": 0,
+      "value": "Arraste pela grade para marcar quando você costuma poder jogar, no seu fuso horário. Os pareamentos favorecem oponentes com horários livres em comum."
+    }
+  ],
+  "league.availability.save": [
+    {
+      "type": 0,
+      "value": "Salvar disponibilidade"
+    }
+  ],
+  "league.availability.saved": [
+    {
+      "type": 0,
+      "value": "Disponibilidade salva."
+    }
+  ],
+  "league.availability.saving": [
+    {
+      "type": 0,
+      "value": "Salvando…"
+    }
+  ],
+  "league.availability.title": [
+    {
+      "type": 0,
+      "value": "Disponibilidade semanal"
+    }
+  ],
+  "league.availability.total": [
+    {
+      "type": 6,
+      "value": "hours",
+      "options": {
+        "=0": {
+          "value": [
+            {
+              "type": 0,
+              "value": "nenhuma hora"
+            }
+          ]
+        },
+        "one": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " hora"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " horas"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    },
+    {
+      "type": 0,
+      "value": " por semana"
+    }
+  ],
+  "league.empty": [
+    {
+      "type": 0,
+      "value": "Você não está em nenhuma liga. Peça um link de inscrição a quem organiza."
+    }
+  ],
+  "league.error.closed": [
+    {
+      "type": 0,
+      "value": "A liga já começou, então isso não pode mais ser alterado."
+    }
+  ],
+  "league.error.full": [
+    {
+      "type": 0,
+      "value": "Esta liga está cheia."
+    }
+  ],
+  "league.error.notFound": [
+    {
+      "type": 0,
+      "value": "Este link de inscrição não está mais ativo. Peça um novo a quem organiza."
+    }
+  ],
+  "league.join.alreadyJoined": [
+    {
+      "type": 0,
+      "value": "Você já está nesta liga."
+    }
+  ],
+  "league.join.availabilityHelp": [
+    {
+      "type": 0,
+      "value": "Quando você costuma poder jogar? Arraste pela grade no seu fuso horário. Os pareamentos favorecem oponentes com horários livres em comum, e você pode mudar isso depois."
+    }
+  ],
+  "league.join.failed": [
+    {
+      "type": 0,
+      "value": "Não foi possível entrar na liga. Tente novamente."
+    }
+  ],
+  "league.join.goHome": [
+    {
+      "type": 0,
+      "value": "Voltar ao Fyendal"
+    }
+  ],
+  "league.join.joining": [
+    {
+      "type": 0,
+      "value": "Entrando…"
+    }
+  ],
+  "league.join.loadFailed": [
+    {
+      "type": 0,
+      "value": "Não foi possível carregar esta liga. Tente novamente."
+    }
+  ],
+  "league.join.open": [
+    {
+      "type": 0,
+      "value": "Abrir liga"
+    }
+  ],
+  "league.join.seats": [
+    {
+      "type": 1,
+      "value": "members"
+    },
+    {
+      "type": 0,
+      "value": " de "
+    },
+    {
+      "type": 1,
+      "value": "max"
+    },
+    {
+      "type": 0,
+      "value": " vagas preenchidas"
+    }
+  ],
+  "league.join.signIn": [
+    {
+      "type": 0,
+      "value": "Entre ou crie uma conta para participar desta liga."
+    }
+  ],
+  "league.join.submit": [
+    {
+      "type": 0,
+      "value": "Entrar na liga"
+    }
+  ],
+  "league.join.title": [
+    {
+      "type": 0,
+      "value": "Entrar em "
+    },
+    {
+      "type": 1,
+      "value": "name"
+    }
+  ],
+  "league.join.unavailableTitle": [
+    {
+      "type": 0,
+      "value": "Inscrição na liga"
+    }
+  ],
+  "league.leave": [
+    {
+      "type": 0,
+      "value": "Sair da liga"
+    }
+  ],
+  "league.leave.confirm": [
+    {
+      "type": 0,
+      "value": "Sair de "
+    },
+    {
+      "type": 1,
+      "value": "name"
+    },
+    {
+      "type": 0,
+      "value": "? Você pode voltar pelo link de inscrição enquanto as inscrições estiverem abertas."
+    }
+  ],
+  "league.leave.failed": [
+    {
+      "type": 0,
+      "value": "Não foi possível sair da liga. Tente novamente."
+    }
+  ],
+  "league.roster.deleted": [
+    {
+      "type": 0,
+      "value": "Conta excluída"
+    }
+  ],
+  "league.roster.title": [
+    {
+      "type": 0,
+      "value": "Jogadores ("
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": "/"
+    },
+    {
+      "type": 1,
+      "value": "max"
+    },
+    {
+      "type": 0,
+      "value": ")"
+    }
+  ],
+  "league.roster.you": [
+    {
+      "type": 1,
+      "value": "username"
+    },
+    {
+      "type": 0,
+      "value": " (você)"
+    }
+  ],
+  "league.signup.next": [
+    {
+      "type": 0,
+      "value": "Os pareamentos começam quando a temporada for iniciada. Até lá, mantenha sua disponibilidade atualizada."
+    }
+  ],
+  "league.starts": [
+    {
+      "type": 0,
+      "value": "Início previsto: "
+    },
+    {
+      "type": 1,
+      "value": "date"
+    }
+  ],
+  "league.status.cancelled": [
+    {
+      "type": 0,
+      "value": "Cancelada"
+    }
+  ],
+  "league.status.complete": [
+    {
+      "type": 0,
+      "value": "Encerrada"
+    }
+  ],
+  "league.status.playoffs": [
+    {
+      "type": 0,
+      "value": "Playoffs"
+    }
+  ],
+  "league.status.season": [
+    {
+      "type": 0,
+      "value": "Temporada em andamento"
+    }
+  ],
+  "league.status.signupClosed": [
+    {
+      "type": 0,
+      "value": "Inscrições encerradas"
+    }
+  ],
+  "league.status.signupOpen": [
+    {
+      "type": 0,
+      "value": "Inscrições abertas"
+    }
+  ],
+  "league.summary": [
+    {
+      "type": 1,
+      "value": "format"
+    },
+    {
+      "type": 0,
+      "value": " · "
+    },
+    {
+      "type": 6,
+      "value": "weeks",
+      "options": {
+        "=0": {
+          "value": [
+            {
+              "type": 0,
+              "value": "nenhuma semana"
+            }
+          ]
+        },
+        "one": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " semana"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " semanas"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    },
+    {
+      "type": 0,
+      "value": " · "
+    },
+    {
+      "type": 6,
+      "value": "matches",
+      "options": {
+        "=0": {
+          "value": [
+            {
+              "type": 0,
+              "value": "nenhuma partida"
+            }
+          ]
+        },
+        "one": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " partida"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " partidas"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    },
+    {
+      "type": 0,
+      "value": " por semana"
+    }
+  ],
+  "league.timeZone.label": [
+    {
+      "type": 0,
+      "value": "Seu fuso horário"
+    }
+  ],
+  "league.title": [
+    {
+      "type": 0,
+      "value": "Ligas"
+    }
+  ],
   "lobby.action.accept": [
     {
       "type": 0,
@@ -34259,6 +34701,12 @@
     {
       "type": 0,
       "value": "Início"
+    }
+  ],
+  "lobby.nav.league": [
+    {
+      "type": 0,
+      "value": "Liga"
     }
   ],
   "lobby.nav.more": [

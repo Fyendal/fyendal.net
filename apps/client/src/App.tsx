@@ -6,6 +6,7 @@ import { ClientUpdateRequired } from "./lobby/ClientUpdateRequired.js";
 import { RoomLoading } from "./lobby/RoomLoading.js";
 import { savedReplayIdFromPath, sharedReplayTokenFromPath } from "./replay/route.js";
 import { recoveryRouteFromPath } from "./auth/recoveryRoute.js";
+import { leagueJoinTokenFromPath } from "./league/route.js";
 import { BackgroundMatchOffer } from "./matchmaking/BackgroundMatchOffer.js";
 
 const WaitingRoom = lazy(() => import("./lobby/WaitingRoom.js").then((module) => ({ default: module.WaitingRoom })));
@@ -19,6 +20,8 @@ const LegalPage = lazy(() => import("./legal/LegalPage.js").then((module) => ({ 
 const SharedReplayGate = lazy(() => import("./replay/SharedReplayGate.js")
   .then((module) => ({ default: module.SharedReplayGate })));
 const SocialDock = lazy(() => import("./social/SocialDock.js").then((module) => ({ default: module.SocialDock })));
+const LeagueJoinPage = lazy(() => import("./league/LeagueJoinPage.js")
+  .then((module) => ({ default: module.LeagueJoinPage })));
 const FabraryPlayPage = lazy(() => import("./play/FabraryPlayPage.js")
   .then((module) => ({ default: module.FabraryPlayPage })));
 
@@ -108,15 +111,17 @@ function AppContent() {
   const sharedLoadRef = useRef<string | null>(null);
   const [sharedGate, setSharedGate] = useState<{ token: string; reason: "sign-in" | "friends-only" } | null>(null);
   const [, setRecoveryLeft] = useState(0);
+  const [, setLeagueJoinLeft] = useState(0);
   const path = location.pathname;
   const recoveryRoute = recoveryRouteFromPath(path);
   const routeRoomCode = roomCodeFromUrl();
   const savedReplayId = savedReplayIdFromPath(path);
   const sharedReplayToken = sharedReplayTokenFromPath(path);
+  const leagueJoinToken = leagueJoinTokenFromPath(path);
   useRouteMetadata(
     path,
     routeRoomCode !== null || savedReplayId !== null || sharedReplayToken !== null || pendingFabraryPlay !== null
-      || recoveryRoute !== null,
+      || recoveryRoute !== null || leagueJoinToken !== null,
     intl.formatMessage({ id: "meta.home.title" }),
     intl.formatMessage({ id: "meta.home.description" }),
   );
@@ -227,6 +232,19 @@ function AppContent() {
   }
 
   if (clientUpdateRequired) return <ClientUpdateRequired />;
+  if (leagueJoinToken) {
+    return (
+      <Suspense fallback={<ScreenFallback />}>
+        <LeagueJoinPage
+          token={leagueJoinToken}
+          onLeave={() => {
+            history.replaceState(null, "", "/");
+            setLeagueJoinLeft((count) => count + 1);
+          }}
+        />
+      </Suspense>
+    );
+  }
   if (savedReplayId && authToken && screen !== "replay") return <ScreenFallback />;
   if (sharedReplayToken && screen !== "replay") {
     if (sharedGate?.token !== sharedReplayToken) return <ScreenFallback />;

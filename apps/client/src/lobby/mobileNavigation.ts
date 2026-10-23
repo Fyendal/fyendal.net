@@ -6,6 +6,6 @@ export function mobileLobbyDestinationSelected(
   destination: MobileLobbyDestination,
   rail: LobbyRail,
 ): boolean {
-  if (destination === "more") return rail === "account" || rail === "achievements";
+  if (destination === "more") return rail === "account" || rail === "achievements" || rail === "league";
   return destination === rail;
 }

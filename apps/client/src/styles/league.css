@@ -1,0 +1,93 @@
+/* Leagues: the lobby tab and the sign-up page share cards, fields, and the
+   weekly availability grid (days as columns so it fits a phone). */
+.league-panel, .league-join-panel { min-width: 0; font-family: var(--font-lobby-ui); }
+.league-join { width: min(760px, 100%); margin: 0 auto; padding: 24px 16px 48px; }
+.league-join-panel h1.panel-title { margin-bottom: 8px; }
+.league-join-auth { max-width: 420px; }
+.league-meta { margin: 4px 0; color: var(--text-secondary); }
+.league-error { color: var(--danger); }
+.league-saved { color: var(--success); }
+
+.league-card { padding: 18px 0 24px; border-top: 1px solid var(--border-subtle); }
+.league-card:first-of-type { border-top: 0; padding-top: 4px; }
+.league-card-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.league-card-header h3 { margin: 0; color: var(--text-primary); font: 500 20px/1.25 var(--font-heading); }
+.league-status {
+  flex: none;
+  padding: 3px 8px;
+  border: 1px solid var(--border-strong);
+  border-radius: 999px;
+  color: var(--gold);
+  font-size: 12px;
+  white-space: nowrap;
+}
+.league-section-title { margin: 20px 0 8px; color: var(--text-secondary); font-size: 14px; font-weight: 650; }
+.league-roster { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; padding: 0; list-style: none; }
+.league-roster li {
+  padding: 4px 10px;
+  border: 1px solid var(--border-subtle);
+  border-radius: 999px;
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+.league-roster li.you { border-color: var(--border-strong); color: var(--text-primary); }
+.league-field { display: grid; gap: 6px; max-width: 360px; margin: 12px 0; color: var(--text-secondary); font-size: 14px; }
+.league-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 16px; }
+
+.availability-editor { margin-top: 8px; }
+.availability-grid {
+  display: grid;
+  grid-template-columns: max-content repeat(7, minmax(28px, 1fr));
+  max-width: 560px;
+  touch-action: none;
+  user-select: none;
+}
+.availability-row { display: contents; }
+.availability-day {
+  padding: 0 0 6px;
+  color: var(--text-secondary);
+  font-size: 12px;
+  text-align: center;
+}
+.availability-time {
+  padding-right: 8px;
+  color: var(--text-muted);
+  font-size: 11px;
+  line-height: 1;
+  text-align: right;
+  transform: translateY(-50%);
+}
+.availability-cell {
+  height: 14px;
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  border-left: 1px solid var(--border-subtle);
+  border-radius: 0;
+  background: var(--surface-well);
+  clip-path: none;
+  cursor: pointer;
+}
+.availability-row.hour .availability-cell { border-top: 1px solid var(--border-subtle); }
+.availability-cell:last-child { border-right: 1px solid var(--border-subtle); }
+.availability-row:last-child .availability-cell { border-bottom: 1px solid var(--border-subtle); }
+.availability-cell:hover:not(:disabled) { background: #2a1d0e; }
+.availability-cell[aria-pressed="true"] { background: #8a6a2c; }
+.availability-cell[aria-pressed="true"]:hover:not(:disabled) { background: #a07c35; }
+.availability-cell:focus-visible { position: relative; z-index: 1; outline: 2px solid var(--focus-ring); outline-offset: -1px; }
+.availability-cell:disabled { opacity: 1; cursor: default; }
+.availability-summary {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  max-width: 560px;
+  margin-top: 8px;
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+@media (max-width: 700px) {
+  .availability-cell { height: 16px; }
+  .league-card-header { flex-direction: column; }
+}

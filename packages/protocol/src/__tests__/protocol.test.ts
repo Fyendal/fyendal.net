@@ -1535,6 +1535,7 @@ describe("replays and HTTP responses", () => {
         friends: [{ username: "Bob", friendsSince: 1 }],
         friendRequests: [{ username: "Carol", direction: "outgoing", createdAt: 2 }],
         friendMessages: [{ id: "1", friendUsername: "Bob", senderUsername: "alice", text: "hello", sentAt: 3, readAt: null }],
+        leagues: [],
       },
     })).not.toBeNull();
     const replaySummary = {
@@ -1619,6 +1620,7 @@ describe("replays and HTTP responses", () => {
           friends: [],
           friendRequests: [],
           friendMessages: [],
+          leagues: [],
         },
       }],
       [decodeReplaysResponse, { ok: true, replays: [replaySummary] }],

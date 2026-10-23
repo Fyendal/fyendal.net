@@ -74,6 +74,7 @@ import {
 import { createAccountActions } from "./store/accountActions.js";
 import { createReplayActions } from "./store/replayActions.js";
 import { createHistoryActions, initialHistoryState } from "./store/historyActions.js";
+import { createLeagueActions, initialLeagueState } from "./store/leagueActions.js";
 import { replayViewerProjection, snapshotBeforeReplay } from "./store/replayView.js";
 import { createErrorController } from "./store/errorController.js";
 import { withReplayNotes } from "./replay/replayFileNotes.js";
@@ -411,6 +412,7 @@ export const useStore = create<StoreState>((set, get) => {
       savedReplays: [],
       replaysLoading: false,
       ...initialHistoryState(),
+      ...initialLeagueState(),
       queueCounts: emptyQueueCounts(),
       lobbyRail: "home",
       cardPoolModes: { ...DEFAULT_LOBBY_SETTINGS.cardPoolModes },
@@ -1357,6 +1359,7 @@ export const useStore = create<StoreState>((set, get) => {
     showError: errors.show,
   });
   const historyActions = createHistoryActions({ set, get, authRequest, isCurrentAuth });
+  const leagueActions = createLeagueActions({ set, get, authRequest, isCurrentAuth });
 
   return {
     ...initialStoreProjection(stored, lobbySettings),
@@ -1364,6 +1367,7 @@ export const useStore = create<StoreState>((set, get) => {
     ...accountActions,
     ...replayActions,
     ...historyActions,
+    ...leagueActions,
     dismissFabraryPlay: () => {
       history.replaceState(null, "", "/");
       set({ pendingFabraryPlay: null });

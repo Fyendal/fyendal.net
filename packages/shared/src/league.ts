@@ -34,12 +34,16 @@ export type LeagueAction =
   | { kind: "extend-deadline"; matchId: string; deadlineAt: number };
 
 export interface LeagueJoinRequest {
+  token: string;
   timeZone: string;
   availability: LeagueAvailabilityWindow[];
 }
 
 /** Replaces the template, or one upcoming week when `week` is present. */
-export interface LeagueAvailabilityRequest extends LeagueJoinRequest {
+export interface LeagueAvailabilityRequest {
+  leagueId: string;
+  timeZone: string;
+  availability: LeagueAvailabilityWindow[];
   week?: number;
 }
 
@@ -54,4 +58,22 @@ export interface LeagueJoinPreview {
   matchesPerWeek: number;
   seasonWeeks: number;
   joined: boolean;
+}
+
+/** A league the signed-in account belongs to, with its own settings. */
+export interface LeagueMembership {
+  id: string;
+  name: string;
+  format: Format;
+  status: LeagueStatus;
+  startsAt: number | null;
+  seasonWeeks: number;
+  matchesPerWeek: number;
+  matchMinutes: number;
+  maxPlayers: number;
+  signupOpen: boolean;
+  /** Active members in join order; null for a deleted account. */
+  roster: Array<{ username: string | null; you: boolean }>;
+  timeZone: string;
+  availability: LeagueAvailabilityWindow[];
 }

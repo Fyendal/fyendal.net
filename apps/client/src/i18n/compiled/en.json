@@ -31276,6 +31276,424 @@
       "value": "Language"
     }
   ],
+  "league.availability.cell": [
+    {
+      "type": 1,
+      "value": "day"
+    },
+    {
+      "type": 0,
+      "value": ", "
+    },
+    {
+      "type": 1,
+      "value": "start"
+    },
+    {
+      "type": 0,
+      "value": " to "
+    },
+    {
+      "type": 1,
+      "value": "end"
+    }
+  ],
+  "league.availability.clear": [
+    {
+      "type": 0,
+      "value": "Clear"
+    }
+  ],
+  "league.availability.failed": [
+    {
+      "type": 0,
+      "value": "Could not save your availability. Try again."
+    }
+  ],
+  "league.availability.help": [
+    {
+      "type": 0,
+      "value": "Drag across the grid to mark when you can usually play, in your time zone. Pairings favor opponents whose free time overlaps yours."
+    }
+  ],
+  "league.availability.save": [
+    {
+      "type": 0,
+      "value": "Save availability"
+    }
+  ],
+  "league.availability.saved": [
+    {
+      "type": 0,
+      "value": "Availability saved."
+    }
+  ],
+  "league.availability.saving": [
+    {
+      "type": 0,
+      "value": "Saving…"
+    }
+  ],
+  "league.availability.title": [
+    {
+      "type": 0,
+      "value": "Weekly availability"
+    }
+  ],
+  "league.availability.total": [
+    {
+      "type": 6,
+      "value": "hours",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " hour"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " hours"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    },
+    {
+      "type": 0,
+      "value": " a week"
+    }
+  ],
+  "league.empty": [
+    {
+      "type": 0,
+      "value": "You are not in a league. Ask an organizer for a sign-up link."
+    }
+  ],
+  "league.error.closed": [
+    {
+      "type": 0,
+      "value": "This league has started, so this can no longer be changed."
+    }
+  ],
+  "league.error.full": [
+    {
+      "type": 0,
+      "value": "This league is full."
+    }
+  ],
+  "league.error.notFound": [
+    {
+      "type": 0,
+      "value": "This sign-up link is no longer active. Ask the organizer for a new one."
+    }
+  ],
+  "league.join.alreadyJoined": [
+    {
+      "type": 0,
+      "value": "You are already in this league."
+    }
+  ],
+  "league.join.availabilityHelp": [
+    {
+      "type": 0,
+      "value": "When can you usually play? Drag across the grid in your time zone. Pairings favor opponents whose free time overlaps yours, and you can change this later."
+    }
+  ],
+  "league.join.failed": [
+    {
+      "type": 0,
+      "value": "Could not join the league. Try again."
+    }
+  ],
+  "league.join.goHome": [
+    {
+      "type": 0,
+      "value": "Back to Fyendal"
+    }
+  ],
+  "league.join.joining": [
+    {
+      "type": 0,
+      "value": "Joining…"
+    }
+  ],
+  "league.join.loadFailed": [
+    {
+      "type": 0,
+      "value": "Could not load this league. Try again."
+    }
+  ],
+  "league.join.open": [
+    {
+      "type": 0,
+      "value": "Open league"
+    }
+  ],
+  "league.join.seats": [
+    {
+      "type": 1,
+      "value": "members"
+    },
+    {
+      "type": 0,
+      "value": " of "
+    },
+    {
+      "type": 1,
+      "value": "max"
+    },
+    {
+      "type": 0,
+      "value": " spots taken"
+    }
+  ],
+  "league.join.signIn": [
+    {
+      "type": 0,
+      "value": "Sign in or create an account to join this league."
+    }
+  ],
+  "league.join.submit": [
+    {
+      "type": 0,
+      "value": "Join league"
+    }
+  ],
+  "league.join.title": [
+    {
+      "type": 0,
+      "value": "Join "
+    },
+    {
+      "type": 1,
+      "value": "name"
+    }
+  ],
+  "league.join.unavailableTitle": [
+    {
+      "type": 0,
+      "value": "League sign-up"
+    }
+  ],
+  "league.leave": [
+    {
+      "type": 0,
+      "value": "Leave league"
+    }
+  ],
+  "league.leave.confirm": [
+    {
+      "type": 0,
+      "value": "Leave "
+    },
+    {
+      "type": 1,
+      "value": "name"
+    },
+    {
+      "type": 0,
+      "value": "? You can rejoin with the sign-up link while sign-up is open."
+    }
+  ],
+  "league.leave.failed": [
+    {
+      "type": 0,
+      "value": "Could not leave the league. Try again."
+    }
+  ],
+  "league.roster.deleted": [
+    {
+      "type": 0,
+      "value": "Deleted account"
+    }
+  ],
+  "league.roster.title": [
+    {
+      "type": 0,
+      "value": "Players ("
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": "/"
+    },
+    {
+      "type": 1,
+      "value": "max"
+    },
+    {
+      "type": 0,
+      "value": ")"
+    }
+  ],
+  "league.roster.you": [
+    {
+      "type": 1,
+      "value": "username"
+    },
+    {
+      "type": 0,
+      "value": " (you)"
+    }
+  ],
+  "league.signup.next": [
+    {
+      "type": 0,
+      "value": "Pairings begin when the organizer starts the season. Keep your availability up to date until then."
+    }
+  ],
+  "league.starts": [
+    {
+      "type": 0,
+      "value": "Planned start: "
+    },
+    {
+      "type": 1,
+      "value": "date"
+    }
+  ],
+  "league.status.cancelled": [
+    {
+      "type": 0,
+      "value": "Cancelled"
+    }
+  ],
+  "league.status.complete": [
+    {
+      "type": 0,
+      "value": "Complete"
+    }
+  ],
+  "league.status.playoffs": [
+    {
+      "type": 0,
+      "value": "Playoffs"
+    }
+  ],
+  "league.status.season": [
+    {
+      "type": 0,
+      "value": "Season in progress"
+    }
+  ],
+  "league.status.signupClosed": [
+    {
+      "type": 0,
+      "value": "Sign-up closed"
+    }
+  ],
+  "league.status.signupOpen": [
+    {
+      "type": 0,
+      "value": "Sign-up open"
+    }
+  ],
+  "league.summary": [
+    {
+      "type": 1,
+      "value": "format"
+    },
+    {
+      "type": 0,
+      "value": " · "
+    },
+    {
+      "type": 6,
+      "value": "weeks",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " week"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " weeks"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    },
+    {
+      "type": 0,
+      "value": " · "
+    },
+    {
+      "type": 6,
+      "value": "matches",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " match"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " matches"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    },
+    {
+      "type": 0,
+      "value": " a week"
+    }
+  ],
+  "league.timeZone.label": [
+    {
+      "type": 0,
+      "value": "Your time zone"
+    }
+  ],
+  "league.title": [
+    {
+      "type": 0,
+      "value": "Leagues"
+    }
+  ],
   "lobby.action.accept": [
     {
       "type": 0,
@@ -32566,6 +32984,12 @@
     {
       "type": 0,
       "value": "Home"
+    }
+  ],
+  "lobby.nav.league": [
+    {
+      "type": 0,
+      "value": "League"
     }
   ],
   "lobby.nav.more": [

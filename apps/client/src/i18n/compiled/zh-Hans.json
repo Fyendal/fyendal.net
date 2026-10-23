@@ -30023,6 +30023,350 @@
       "value": "语言"
     }
   ],
+  "league.availability.cell": [
+    {
+      "type": 1,
+      "value": "day"
+    },
+    {
+      "type": 0,
+      "value": "，"
+    },
+    {
+      "type": 1,
+      "value": "start"
+    },
+    {
+      "type": 0,
+      "value": " 至 "
+    },
+    {
+      "type": 1,
+      "value": "end"
+    }
+  ],
+  "league.availability.clear": [
+    {
+      "type": 0,
+      "value": "清除"
+    }
+  ],
+  "league.availability.failed": [
+    {
+      "type": 0,
+      "value": "无法保存空闲时间，请重试。"
+    }
+  ],
+  "league.availability.help": [
+    {
+      "type": 0,
+      "value": "在网格上拖动，按你的时区标出你通常可以对战的时间。配对会优先选择与你空闲时间重叠的对手。"
+    }
+  ],
+  "league.availability.save": [
+    {
+      "type": 0,
+      "value": "保存空闲时间"
+    }
+  ],
+  "league.availability.saved": [
+    {
+      "type": 0,
+      "value": "空闲时间已保存。"
+    }
+  ],
+  "league.availability.saving": [
+    {
+      "type": 0,
+      "value": "保存中…"
+    }
+  ],
+  "league.availability.title": [
+    {
+      "type": 0,
+      "value": "每周空闲时间"
+    }
+  ],
+  "league.availability.total": [
+    {
+      "type": 0,
+      "value": "每周 "
+    },
+    {
+      "type": 1,
+      "value": "hours"
+    },
+    {
+      "type": 0,
+      "value": " 小时"
+    }
+  ],
+  "league.empty": [
+    {
+      "type": 0,
+      "value": "你还没有加入联赛。请向组织者索取报名链接。"
+    }
+  ],
+  "league.error.closed": [
+    {
+      "type": 0,
+      "value": "联赛已开始，无法再更改。"
+    }
+  ],
+  "league.error.full": [
+    {
+      "type": 0,
+      "value": "该联赛已满员。"
+    }
+  ],
+  "league.error.notFound": [
+    {
+      "type": 0,
+      "value": "此报名链接已失效。请向组织者索取新链接。"
+    }
+  ],
+  "league.join.alreadyJoined": [
+    {
+      "type": 0,
+      "value": "你已加入此联赛。"
+    }
+  ],
+  "league.join.availabilityHelp": [
+    {
+      "type": 0,
+      "value": "你通常什么时候可以对战？按你的时区在网格上拖动标记。配对会优先选择与你空闲时间重叠的对手，之后也可以修改。"
+    }
+  ],
+  "league.join.failed": [
+    {
+      "type": 0,
+      "value": "无法加入联赛，请重试。"
+    }
+  ],
+  "league.join.goHome": [
+    {
+      "type": 0,
+      "value": "返回 Fyendal"
+    }
+  ],
+  "league.join.joining": [
+    {
+      "type": 0,
+      "value": "加入中…"
+    }
+  ],
+  "league.join.loadFailed": [
+    {
+      "type": 0,
+      "value": "无法加载此联赛，请重试。"
+    }
+  ],
+  "league.join.open": [
+    {
+      "type": 0,
+      "value": "打开联赛"
+    }
+  ],
+  "league.join.seats": [
+    {
+      "type": 0,
+      "value": "已报名 "
+    },
+    {
+      "type": 1,
+      "value": "members"
+    },
+    {
+      "type": 0,
+      "value": "/"
+    },
+    {
+      "type": 1,
+      "value": "max"
+    }
+  ],
+  "league.join.signIn": [
+    {
+      "type": 0,
+      "value": "登录或注册账号以加入此联赛。"
+    }
+  ],
+  "league.join.submit": [
+    {
+      "type": 0,
+      "value": "加入联赛"
+    }
+  ],
+  "league.join.title": [
+    {
+      "type": 0,
+      "value": "加入 "
+    },
+    {
+      "type": 1,
+      "value": "name"
+    }
+  ],
+  "league.join.unavailableTitle": [
+    {
+      "type": 0,
+      "value": "联赛报名"
+    }
+  ],
+  "league.leave": [
+    {
+      "type": 0,
+      "value": "退出联赛"
+    }
+  ],
+  "league.leave.confirm": [
+    {
+      "type": 0,
+      "value": "退出 "
+    },
+    {
+      "type": 1,
+      "value": "name"
+    },
+    {
+      "type": 0,
+      "value": "？报名开放期间可以通过报名链接重新加入。"
+    }
+  ],
+  "league.leave.failed": [
+    {
+      "type": 0,
+      "value": "无法退出联赛，请重试。"
+    }
+  ],
+  "league.roster.deleted": [
+    {
+      "type": 0,
+      "value": "已删除的账号"
+    }
+  ],
+  "league.roster.title": [
+    {
+      "type": 0,
+      "value": "玩家（"
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": "/"
+    },
+    {
+      "type": 1,
+      "value": "max"
+    },
+    {
+      "type": 0,
+      "value": "）"
+    }
+  ],
+  "league.roster.you": [
+    {
+      "type": 1,
+      "value": "username"
+    },
+    {
+      "type": 0,
+      "value": "（你）"
+    }
+  ],
+  "league.signup.next": [
+    {
+      "type": 0,
+      "value": "组织者开始赛季后才会进行配对。在此之前请保持你的空闲时间为最新。"
+    }
+  ],
+  "league.starts": [
+    {
+      "type": 0,
+      "value": "计划开始时间："
+    },
+    {
+      "type": 1,
+      "value": "date"
+    }
+  ],
+  "league.status.cancelled": [
+    {
+      "type": 0,
+      "value": "已取消"
+    }
+  ],
+  "league.status.complete": [
+    {
+      "type": 0,
+      "value": "已结束"
+    }
+  ],
+  "league.status.playoffs": [
+    {
+      "type": 0,
+      "value": "季后赛"
+    }
+  ],
+  "league.status.season": [
+    {
+      "type": 0,
+      "value": "赛季进行中"
+    }
+  ],
+  "league.status.signupClosed": [
+    {
+      "type": 0,
+      "value": "报名已截止"
+    }
+  ],
+  "league.status.signupOpen": [
+    {
+      "type": 0,
+      "value": "报名中"
+    }
+  ],
+  "league.summary": [
+    {
+      "type": 1,
+      "value": "format"
+    },
+    {
+      "type": 0,
+      "value": " · "
+    },
+    {
+      "type": 1,
+      "value": "weeks"
+    },
+    {
+      "type": 0,
+      "value": " 周 · 每周 "
+    },
+    {
+      "type": 1,
+      "value": "matches"
+    },
+    {
+      "type": 0,
+      "value": " 场"
+    }
+  ],
+  "league.timeZone.label": [
+    {
+      "type": 0,
+      "value": "你的时区"
+    }
+  ],
+  "league.title": [
+    {
+      "type": 0,
+      "value": "联赛"
+    }
+  ],
   "lobby.action.accept": [
     {
       "type": 0,
@@ -31113,6 +31457,12 @@
     {
       "type": 0,
       "value": "首页"
+    }
+  ],
+  "lobby.nav.league": [
+    {
+      "type": 0,
+      "value": "联赛"
     }
   ],
   "lobby.nav.more": [

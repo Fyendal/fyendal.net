@@ -3,6 +3,8 @@ import {
   decodeLeagueAction,
   decodeLeagueAvailability,
   decodeLeagueAvailabilityRequest,
+  decodeLeagueIdRequest,
+  decodeLeaguesResponse,
   decodeLeagueJoinPreviewResponse,
   decodeLeagueJoinRequest,
   decodeLeaguePairingNote,
@@ -39,14 +41,32 @@ describe("league decoding", () => {
     expect(decodeLeagueAvailability(Array.from({ length: 337 }, () => window))).toBeNull();
   });
 
-  it("decodes join and availability requests", () => {
-    const join = { timeZone: "Europe/London", availability: [window] };
+  it("decodes join, availability, and league id requests", () => {
+    const token = "A".repeat(43);
+    const join = { token, timeZone: "Europe/London", availability: [window] };
     expect(decodeLeagueJoinRequest(join)).toEqual(join);
+    expect(decodeLeagueJoinRequest({ ...join, token: "short" })).toBeNull();
     expect(decodeLeagueJoinRequest({ ...join, week: 2 })).toBeNull();
-    expect(decodeLeagueAvailabilityRequest(join)).toEqual(join);
-    expect(decodeLeagueAvailabilityRequest({ ...join, week: 2 })).toEqual({ ...join, week: 2 });
-    expect(decodeLeagueAvailabilityRequest({ ...join, week: 0 })).toBeNull();
-    expect(decodeLeagueAvailabilityRequest({ ...join, timeZone: "Nowhere/Land" })).toBeNull();
+    const update = { leagueId: "a".repeat(24), timeZone: "Europe/London", availability: [window] };
+    expect(decodeLeagueAvailabilityRequest(update)).toEqual(update);
+    expect(decodeLeagueAvailabilityRequest({ ...update, week: 2 })).toEqual({ ...update, week: 2 });
+    expect(decodeLeagueAvailabilityRequest({ ...update, week: 0 })).toBeNull();
+    expect(decodeLeagueAvailabilityRequest({ ...update, leagueId: "ZZ" })).toBeNull();
+    expect(decodeLeagueAvailabilityRequest({ ...update, timeZone: "Nowhere/Land" })).toBeNull();
+    expect(decodeLeagueIdRequest({ leagueId: update.leagueId })).toEqual({ leagueId: update.leagueId });
+    expect(decodeLeagueIdRequest({ leagueId: update.leagueId, extra: 1 })).toBeNull();
+  });
+
+  it("decodes memberships", () => {
+    const league = {
+      id: "b".repeat(24), name: "Friday league", format: "cc", status: "signup", startsAt: null,
+      seasonWeeks: 4, matchesPerWeek: 2, matchMinutes: 60, maxPlayers: 8, signupOpen: true,
+      roster: [{ username: "alice", you: true }, { username: null, you: false }],
+      timeZone: "UTC", availability: [window],
+    };
+    expect(decodeLeaguesResponse({ ok: true, leagues: [league] })).toEqual({ ok: true, leagues: [league] });
+    expect(decodeLeaguesResponse({ ok: true, leagues: [{ ...league, roster: [{ username: "a b", you: true }] }] })).toBeNull();
+    expect(decodeLeaguesResponse({ ok: true, leagues: [{ ...league, timeZone: "Mars/Base" }] })).toBeNull();
   });
 
   it("decodes pairing notes", () => {

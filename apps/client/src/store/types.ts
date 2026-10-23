@@ -25,6 +25,7 @@ import type {
   UndoTarget,
   EmoteMessage,
   SeatStandingOrders,
+  LeagueMembership,
 } from "@fyendal/shared";
 import type {
   AccountExport,
@@ -67,7 +68,7 @@ export interface PendingFabraryPlay {
 }
 
 export type Screen = "lobby" | "room-loading" | "waiting" | "prep" | "game" | "replay";
-export type LobbyRail = "home" | "decks" | "all" | "history" | "achievements" | "account";
+export type LobbyRail = "home" | "decks" | "all" | "history" | "league" | "achievements" | "account";
 export type MatchAcceptanceRole = "existing" | "joining";
 export interface MatchListState {
   filters: MatchListFilters;
@@ -301,6 +302,9 @@ export interface StoreState {
   matchRecordsLoading: boolean;
   matchRecordsError: boolean;
   matchList: MatchListState;
+  /** Active league memberships; null until loaded for this account. */
+  leagues: LeagueMembership[] | null;
+  refreshLeagues: () => Promise<void>;
   refreshMatchRecords: () => Promise<void>;
   loadMatches: (filters: MatchListFilters, cursor?: string | null) => Promise<void>;
   setMatchReplayFavorite: (matchId: string, replayId: string, favorite: boolean) => Promise<FavoriteReplayResult>;
