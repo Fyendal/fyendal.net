@@ -23454,6 +23454,20 @@
       "value": " hasta el final de su próximo turno"
     }
   ],
+  "engine.log.attack.cleared.no.target": [
+    {
+      "type": 0,
+      "value": "La carta "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " se retira de la cola de ataques porque no tiene un objetivo de ataque legal"
+    }
+  ],
   "engine.log.attack.queued": [
     {
       "type": 0,

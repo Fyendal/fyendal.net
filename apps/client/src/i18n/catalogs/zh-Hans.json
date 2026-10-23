@@ -2344,6 +2344,7 @@
   "engine.log.arsenal.faceup": "{card} 被面朝上置入 {hero} 的 arsenal",
   "engine.log.combat.chain.closed": "战斗链关闭",
   "engine.log.attack.queued": "{card} 被放入攻击队列",
+  "engine.log.attack.cleared.no.target": "{card} 因没有合法的攻击目标而被移出攻击队列",
   "engine.log.combat.attacks": "{hero} 使用 {card} 发起攻击（{attack} 攻击力）",
   "engine.log.combat.attacks.targeting": "{hero} 使用 {card} 发起攻击（{attack} 攻击力），目标为 {target}",
   "engine.log.combat.attack.power.gained": "{source} 使 {card} 获得 +{amount} 力量（{attack} 攻击力）",

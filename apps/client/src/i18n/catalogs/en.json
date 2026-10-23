@@ -2344,6 +2344,7 @@
   "engine.log.arsenal.faceup": "{card} is put face up into {hero}'s arsenal",
   "engine.log.combat.chain.closed": "The combat chain closes",
   "engine.log.attack.queued": "{card} is put into the attack queue",
+  "engine.log.attack.cleared.no.target": "{card} is cleared from the attack queue because it has no legal attack target",
   "engine.log.combat.attacks": "{hero} attacks with {card} ({attack} power)",
   "engine.log.combat.attacks.targeting": "{hero} attacks with {card} ({attack} power), targeting {target}",
   "engine.log.combat.attack.power.gained": "{source} gives {card} +{amount} power ({attack} power)",

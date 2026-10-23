@@ -192,6 +192,71 @@ describe("Outbreak heroes", () => {
       game.expectLife(1, 13).expectAP(0, 0);
     });
 
+    const huxleySpectraGame = () => scenario({ seats: [
+      { hero: "rhinar", heroKey: HUXLEY, hand: [ZERO_TO_SIXTY], deck: [PROWL], weapons: [], equipment: NO_EQUIPMENT },
+      { hero: "dorinthea", weapons: [], equipment: NO_EQUIPMENT, board: ["genesis|2"] },
+    ] });
+
+    it("breaks the chain after the boosted attack when a queued stealth attack's Spectra target is gone", () => {
+      const game = huxleySpectraGame();
+
+      game.play(ZERO_TO_SIXTY, { boost: true }).chooseOption("yes").blockWith();
+      game.play(PROWL, { fromZone: "banish", asInstant: true, targetAlly: "genesis|2", settle: false });
+      expect(game.stackLabels()[0]).toBe("Spectra — destroy this");
+      game.settle()
+        .expectNotInZone(1, "genesis|2", "board")
+        .expectInZone(0, PROWL, "graveyard")
+        // Zero to Sixty still hits; Prowl is then cleared from the queue and
+        // the Close Step begins (CR 7.2.2c).
+        .expectLife(1, 16)
+        .expectLog("Prowl is cleared from the attack queue because it has no legal attack target")
+        .expectLog("The combat chain closes");
+      expect(game.state.chain).toHaveLength(0);
+    });
+
+    it("keeps the chain open when the stealth attack's Spectra target is gone before the boosted attack-layer resolves", () => {
+      const game = huxleySpectraGame();
+
+      game.play(ZERO_TO_SIXTY, { boost: true }).doRaw({ kind: "choose", optionId: "yes" });
+      for (let guard = 0; guard < 6 && banishedPlayIntents(game, 0, PROWL).length === 0; guard++) {
+        game.passPriority();
+      }
+      expect(game.state.phase).toBe("layer");
+      game.play(PROWL, { fromZone: "banish", asInstant: true, targetAlly: "genesis|2", settle: false });
+      expect(game.stackLabels()[0]).toBe("Spectra — destroy this");
+      game.settle()
+        .expectNotInZone(1, "genesis|2", "board")
+        .expectInZone(0, PROWL, "graveyard")
+        .expectLog("Prowl is cleared from the attack queue");
+      expect(game.state.chain.map((link) => link.attackingCard.cardId)).toEqual([printingId(ZERO_TO_SIXTY)]);
+      game.blockWith().settle().expectLife(1, 16);
+      expect(game.state.chain).toHaveLength(1);
+      expect(game.state.log.some((entry) => entry.publicText === "The combat chain closes")).toBe(false);
+    });
+
+    it("still attacks with a stealth attack queued above a boosted attack-layer that loses its Spectra target", () => {
+      const game = huxleySpectraGame();
+
+      game.play(ZERO_TO_SIXTY, { boost: true, targetAlly: "genesis|2", settle: false });
+      for (let guard = 0; guard < 6 && game.state.pendingDecision?.kind !== "optional-effect"; guard++) {
+        game.passPriority();
+      }
+      game.doRaw({ kind: "choose", optionId: "yes" });
+      // Prowl is now playable above the unresolved Spectra trigger.
+      expect(game.stackLabels()).toEqual(["Spectra — destroy this"]);
+      game.play(PROWL, { fromZone: "banish", asInstant: true, settle: false });
+      game.settle()
+        .expectNotInZone(1, "genesis|2", "board")
+        .expectLog("Prowl is put into the attack queue");
+      // Prowl reached the queue first (CR 7.1.2a); Zero to Sixty waits behind it.
+      expect(game.state.chain.map((link) => link.attackingCard.cardId)).toEqual([printingId(PROWL)]);
+      game.blockWith().settle()
+        .expectLife(1, 17)
+        .expectLog("Zero to Sixty is cleared from the attack queue")
+        .expectLog("The combat chain closes")
+        .expectInZone(0, ZERO_TO_SIXTY, "graveyard");
+    });
+
     it("puts a stealth attack played above the boosted attack-layer on the combat chain first", () => {
       const game = huxleyGame(PROWL);
 

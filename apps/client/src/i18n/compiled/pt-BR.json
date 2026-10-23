@@ -23898,6 +23898,20 @@
       "value": " até o fim do próximo turno"
     }
   ],
+  "engine.log.attack.cleared.no.target": [
+    {
+      "type": 0,
+      "value": "A carta "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " é removida da fila de ataques porque não tem um alvo de ataque válido"
+    }
+  ],
   "engine.log.attack.queued": [
     {
       "type": 0,

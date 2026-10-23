@@ -542,6 +542,7 @@ export function playReaction(
   targetCardInstanceId?: number,
   fromZone?: PlayableZone,
   declaredVariableX?: number,
+  targetAllyId?: number,
 ): string | undefined {
   const link = currentLink(state);
   if (state.phase !== "reaction" || !link) return "no active reaction window";
@@ -682,6 +683,11 @@ export function playReaction(
     fromArsenal,
   );
   if (targetErr) return targetErr;
+  const attackAction = isAttackActionData(data);
+  if (targetAllyId !== undefined && !attackAction) return "only attacks declare an attack target";
+  if (attackAction && !runtime.dispatchFlow("attackTargetIsLegal", state, seat, targetAllyId)) {
+    return "not a legal attack target";
+  }
   const variableCost = alternativeCostCardInstanceIds === undefined
     ? script?.variablePlayCost
     : undefined;
@@ -690,6 +696,7 @@ export function playReaction(
     meldSide,
     alternativeCost: alternativeCostCardInstanceIds !== undefined,
     targetCardInstanceId,
+    targetAllyId,
     perCardReduction: cardPlayReductionForSeat(card, seat),
   });
   let variableBaseCost: number | undefined;
@@ -733,6 +740,7 @@ export function playReaction(
           choices,
           ...(meldSide ? { meldSide } : {}),
           ...(targetCardInstanceId === undefined ? {} : { targetCardInstanceId }),
+          ...(targetAllyId === undefined ? {} : { targetAllyId }),
         },
       };
       return undefined;
@@ -801,9 +809,8 @@ export function playReaction(
   delete removed.faceDown; // a card is played openly, even out of the banished zone
   // An attack card being played waits in the resolving zone, where effects
   // paid while playing it can add attack-targets.
-  const attackAction = isAttackActionData(instanceDataOf(state, removed));
   if (attackAction) {
-    recordAnnouncedAttackTarget(state, seat, removed);
+    recordAnnouncedAttackTarget(state, seat, removed, targetAllyId);
     state.resolving.push(removed);
   }
   script?.additionalCost?.(runtime.makeCtx(state, seat, removed, link, fromArsenal));
@@ -837,6 +844,7 @@ export function finishReactionPlay(
   // a defending card when it resolves (7.4.2d)
   if (isAttackActionData(instanceDataOf(state, removed))) {
     pushAttackCardLayer(state, seat, removed, origin);
+    runtime.dispatchFlow("triggerPlayedAttackSpectra", state, seat, removed);
   } else {
     state.stack.unshift({
       sourceInstanceId: removed.instanceId,

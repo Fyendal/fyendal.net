@@ -530,6 +530,7 @@ export function playWindowInstant(
   fromZone?: PlayableZone,
   declaredVariableX?: number,
   alternativeCostCardInstanceIds?: number[],
+  targetAllyId?: number,
 ): string | undefined {
   if (state.phase !== "layer" || (
     declaredVariableX === undefined && state.pendingDecision?.kind !== "priority-window"
@@ -622,6 +623,11 @@ export function playWindowInstant(
     fromArsenal,
   );
   if (targetErr) return targetErr;
+  const attackAction = isAttackActionData(data);
+  if (targetAllyId !== undefined && !attackAction) return "only attacks declare an attack target";
+  if (attackAction && !runtime.dispatchFlow("attackTargetIsLegal", state, seat, targetAllyId)) {
+    return "not a legal attack target";
+  }
   const variableCost = alternativeCostCardInstanceIds === undefined
     ? script?.variablePlayCost
     : undefined;
@@ -630,6 +636,7 @@ export function playWindowInstant(
     meldSide,
     alternativeCost: alternativeCostCardInstanceIds !== undefined,
     targetCardInstanceId,
+    targetAllyId,
     perCardReduction: cardPlayReductionForSeat(card, seat),
   });
   let variableBaseCost: number | undefined;
@@ -673,6 +680,7 @@ export function playWindowInstant(
           choices,
           ...(meldSide ? { meldSide } : {}),
           ...(targetCardInstanceId === undefined ? {} : { targetCardInstanceId }),
+          ...(targetAllyId === undefined ? {} : { targetAllyId }),
         },
       };
       return undefined;
@@ -734,9 +742,8 @@ export function playWindowInstant(
   delete card.faceDown;
   // An attack card being played waits in the resolving zone, where effects
   // paid while playing it can add attack-targets.
-  const attackAction = isAttackActionData(instanceDataOf(state, card));
   if (attackAction) {
-    recordAnnouncedAttackTarget(state, seat, card);
+    recordAnnouncedAttackTarget(state, seat, card, targetAllyId);
     state.resolving.push(card);
   }
   script?.additionalCost?.(runtime.makeCtx(state, seat, card, link, fromArsenal));
@@ -764,6 +771,7 @@ export function finishWindowInstantPlay(
   // both players pass in succession (CR 5.3.2)
   if (isAttackActionData(instanceDataOf(state, card))) {
     pushAttackCardLayer(state, seat, card, origin);
+    runtime.dispatchFlow("triggerPlayedAttackSpectra", state, seat, card);
   } else {
     pushCardLayer(state, seat, card, { fromHand: origin === "hand", goAgain });
   }
@@ -1204,6 +1212,10 @@ function advanceStack(state: GameStateInternal, runtime: EngineRuntime): void {
         return;
       }
       if (layersRemain) continueStack(state, runtime, layer.seat);
+      return;
+    }
+    if (state.pendingDecision?.chooseHook) {
+      state.pendingDecision.resume ??= { kind: "continue-stack", seat: layer.seat };
       return;
     }
     continueStack(state, runtime, layer.seat);

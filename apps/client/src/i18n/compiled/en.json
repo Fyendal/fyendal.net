@@ -22952,6 +22952,16 @@
       "value": "'s face-up arsenal through their next turn"
     }
   ],
+  "engine.log.attack.cleared.no.target": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " is cleared from the attack queue because it has no legal attack target"
+    }
+  ],
   "engine.log.attack.queued": [
     {
       "type": 1,

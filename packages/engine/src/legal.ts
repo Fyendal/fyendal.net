@@ -10,6 +10,7 @@ import {
   dataOf,
   instanceDataOf,
   isArrowData,
+  isAttackActionData,
   isChiCard,
   meldSideHasType,
   scriptOf,
@@ -1015,11 +1016,12 @@ function reactionIntents(
       const cardTargets: Array<number | undefined> = script?.playTargetOptions
         ? playTargetOptions(state, runtime, player.seat, card, link, fromArsenal)
         : [undefined];
+      const allyTargets = isAttackActionData(data) ? attackTargets(state, runtime, player) : [undefined];
       const markInstantMethod = (candidates: GameIntent[]): GameIntent[] =>
         markInstantPlayMethod(candidates, data.cardType === "action" && asInstant);
       for (const meldSide of meldSides) {
-        for (const targetCardInstanceId of cardTargets) {
-          const regularIntents = markInstantMethod(playIntentsWithPitches(
+        for (const targetAllyId of allyTargets) for (const targetCardInstanceId of cardTargets) {
+          const regularIntents = announceAttackTarget(markInstantMethod(playIntentsWithPitches(
             state,
             player,
             card,
@@ -1032,6 +1034,7 @@ function reactionIntents(
                 : {}),
               meldSide,
               targetCardInstanceId,
+              targetAllyId,
             }),
             meldSide,
             undefined,
@@ -1039,7 +1042,7 @@ function reactionIntents(
             undefined,
             targetCardInstanceId,
             includeUnaffordable,
-          ));
+          )), targetAllyId);
           if (script?.variablePlayCost) {
             const first = regularIntents[0];
             if (first && (
@@ -1051,7 +1054,7 @@ function reactionIntents(
             intents.push(...regularIntents);
           }
           for (const alternativeCostCardInstanceIds of alternativeCosts) {
-            intents.push(...markInstantMethod(playIntentsWithPitches(
+            intents.push(...announceAttackTarget(markInstantMethod(playIntentsWithPitches(
               state,
               player,
               card,
@@ -1061,6 +1064,7 @@ function reactionIntents(
                 meldSide,
                 alternativeCost: true,
                 targetCardInstanceId,
+                targetAllyId,
               }),
               meldSide,
               undefined,
@@ -1068,7 +1072,7 @@ function reactionIntents(
               alternativeCostCardInstanceIds,
               targetCardInstanceId,
               includeUnaffordable,
-            )));
+            )), targetAllyId));
           }
         }
       }
@@ -1472,9 +1476,12 @@ function enumerateIntents(
           const cardTargets: Array<number | undefined> = script?.playTargetOptions
             ? playTargetOptions(state, runtime, seat, card, currentLink(state), fromArsenal)
             : [undefined];
+          const allyTargets = isAttackActionData(instanceDataOf(state, card))
+            ? attackTargets(state, runtime, player)
+            : [undefined];
           for (const meldSide of meldSides) {
-            for (const targetCardInstanceId of cardTargets) {
-              const regularIntents = markInstantMethod(playIntentsWithPitches(
+            for (const targetAllyId of allyTargets) for (const targetCardInstanceId of cardTargets) {
+              const regularIntents = announceAttackTarget(markInstantMethod(playIntentsWithPitches(
                 state,
                 player,
                 card,
@@ -1487,6 +1494,7 @@ function enumerateIntents(
                     : {}),
                   meldSide,
                   targetCardInstanceId,
+                  targetAllyId,
                   perCardReduction: cardPlayReductionForSeat(card, seat),
                 }),
                 meldSide,
@@ -1495,7 +1503,7 @@ function enumerateIntents(
                 undefined,
                 targetCardInstanceId,
                 includeUnaffordable,
-              ));
+              )), targetAllyId);
               if (script?.variablePlayCost) {
                 const first = regularIntents[0];
                 if (first && (
@@ -1507,7 +1515,7 @@ function enumerateIntents(
                 intentsOut.push(...regularIntents);
               }
               for (const alternativeCostCardInstanceIds of alternativeCosts) {
-                intentsOut.push(...markInstantMethod(playIntentsWithPitches(
+                intentsOut.push(...announceAttackTarget(markInstantMethod(playIntentsWithPitches(
                   state,
                   player,
                   card,
@@ -1517,6 +1525,7 @@ function enumerateIntents(
                     meldSide,
                     alternativeCost: true,
                     targetCardInstanceId,
+                    targetAllyId,
                     perCardReduction: cardPlayReductionForSeat(card, seat),
                   }),
                   meldSide,
@@ -1525,7 +1534,7 @@ function enumerateIntents(
                   alternativeCostCardInstanceIds,
                   targetCardInstanceId,
                   includeUnaffordable,
-                )));
+                )), targetAllyId));
               }
             }
           }

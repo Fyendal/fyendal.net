@@ -32,7 +32,7 @@ import {
 } from "./gameLog.js";
 import { abilityList, activatedFlagKey } from "./scripts.js";
 import type { ActivatedAbility } from "./scripts.js";
-import type { CardInstance, ChainLinkState, Modifier, PlayerState } from "./state.js";
+import type { CardInstance, ChainLinkState, Modifier, PlayerState, StackLayer } from "./state.js";
 
 import { controlledPermanents, observingHookSources } from "./sourceQueries.js";
 
@@ -53,7 +53,7 @@ import {
 } from "./zoneQueries.js";
 import type { CardPlayOrigin } from "./stackCore.js";
 import { transitionZone } from "./transitions.js";
-import { dequeueAttack, enqueueAttack, type DeferredAttackLayer, type QueuedAttack } from "./attackQueue.js";
+import { ATTACKS_QUEUED_ABOVE_LAYER, dequeueAttack, enqueueAttack, type DeferredAttackLayer, type QueuedAttack } from "./attackQueue.js";
 
 function replacePowerGain(
   state: GameStateInternal,
@@ -287,9 +287,6 @@ function attackGoAgain(state: GameStateInternal, card: CardInstance, cardType: "
   );
 }
 
-/** An attack resolved into the queue above this unresolved attack-layer. */
-const ATTACKS_QUEUED_ABOVE_LAYER = "attacksQueuedAboveLayer";
-
 /**
  * Open a chain link for an attack. Caller has already paid costs/AP and,
  * for action cards, removed the card from its zone (it is passed in `card`).
@@ -310,6 +307,7 @@ export function declareAttack(
   declaredAtNextId = state.nextInstanceId,
   fromBanish = false,
   fromOutsideHandOrArsenal = false,
+  targetsAlreadyDeclared = false,
 ): void {
   const link: ChainLinkState = {
     attacker: seat,
@@ -335,7 +333,7 @@ export function declareAttack(
   state.chain.push(link);
   // The attack-layer exists now, but the object does not become attacking
   // until that layer resolves and the Attack Step begins.
-  queueSpectraLayer(state);
+  if (!targetsAlreadyDeclared) state.stack.push(...spectraLayers(state, seat, linkTargetIds(link)));
   runtime.dispatchFlow("enterAttackLayerWindow", state);
 }
 
@@ -476,7 +474,13 @@ export function queueAttackCard(
   if (!state.resolving.some((candidate) => candidate.instanceId === card.instanceId)) {
     state.resolving.push(card);
   }
-  enqueueAttack(state.players[seat] as PlayerState, { instanceId: card.instanceId, cardOrigin });
+  const declared = card.attackTargetIds ?? [];
+  const targetAllyId = declared.includes(opposingHeroId(state, seat)) ? undefined : declared[0];
+  enqueueAttack(state.players[seat] as PlayerState, {
+    instanceId: card.instanceId,
+    cardOrigin,
+    ...(targetAllyId !== undefined ? { targetAllyId } : {}),
+  });
   // The engine announces a played attack as its chain link at once, but its
   // attack-layer is still beneath every layer played in its Layer Step. An
   // attack resolving from above it reaches the queue first (CR 7.1.2a).
@@ -499,6 +503,14 @@ function logAttackQueued(state: GameStateInternal, card: CardInstance): void {
   ));
 }
 
+function logAttackCleared(state: GameStateInternal, card: CardInstance): void {
+  logPublic(state, gameLogMessage(
+    `${nameOf(state, card.cardId)} is cleared from the attack queue because it has no legal attack target`,
+    "engine.log.attack.cleared.no.target",
+    { card: logCardValue(card.cardId) },
+  ));
+}
+
 /** CR 7.1.2a / 7.2.2: when an attack-layer resolves after attacks played
  * above it, it joins the attack queue behind them and the queue's first
  * attack becomes the chain link instead. */
@@ -515,7 +527,7 @@ function deferAttackLayerBehindQueue(
   // The queue keeps only the primary target; the card carries the rest.
   if (link.additionalTargetAllyIds) {
     card.attackTargetIds = [
-      link.targetAllyId ?? (state.players[opponent(link.attacker)] as PlayerState).hero.instanceId,
+      link.targetAllyId ?? opposingHeroId(state, link.attacker),
       ...link.additionalTargetAllyIds,
     ];
   }
@@ -525,7 +537,13 @@ function deferAttackLayerBehindQueue(
     layer: { cardType: link.attackCardType, flags: link.flags },
   });
   logAttackQueued(state, card);
-  return runtime.dispatchFlow("startNextQueuedAttack", state, link.attacker);
+  if (!runtime.dispatchFlow("startNextQueuedAttack", state, link.attacker)) {
+    // Every queued attack, this one included, was cleared (CR 7.2.2c).
+    state.stackResume = null;
+    state.phase = "action";
+    state.priorityPlayer = state.activePlayer;
+  }
+  return true;
 }
 
 /** CR 7.7.3: attack cards still queued when the combat chain closes are
@@ -552,21 +570,24 @@ export function clearAttackQueue(state: GameStateInternal, runtime: EngineRuntim
 /** Move the next queued attack onto the combat chain: an effect-generated
  * permanent attack, an attack card played at instant speed, or a held-back
  * attack-layer. Invalid attacks are cleared and the next queued attack is
- * tried, matching CR 7.2.2c. */
+ * tried; when none remains, the Close Step begins (CR 7.2.2c). */
 export function startNextQueuedAttack(
   state: GameStateInternal,
   runtime: EngineRuntime,
   seat: number,
 ): boolean {
   const player = state.players[seat] as PlayerState;
+  let cleared = false;
   for (let queued = dequeueAttack(player); queued; queued = dequeueAttack(player)) {
     if (queuedAttackIsCard(queued)) {
       const card = state.resolving.find((candidate) => candidate.instanceId === queued.instanceId);
       if (!card) continue;
       removeFromArray(state.resolving, card.instanceId);
-      if (!attackTargetIsLegal(state, runtime, seat, queued.targetAllyId)) {
+      if (!queuedCardHasLegalTarget(state, runtime, seat, card, queued.targetAllyId)) {
+        logAttackCleared(state, card);
         delete card.attackTargetIds;
         runtime.commands.moveToGraveyard(state, card, "stack");
+        cleared = true;
         continue;
       }
       const origin = queued.cardOrigin;
@@ -585,21 +606,31 @@ export function startNextQueuedAttack(
       card.instanceId === queued.instanceId && cardTypesOf(state, card).includes("ally")
     );
     const card = weapon ?? ally;
+    const targetLegal = attackTargetIsLegal(state, runtime, seat, queued.targetAllyId);
     if (
       !card ||
       player.flags[`cannotAttackInstance:${queued.instanceId}`] === true ||
       (weapon !== undefined && weaponAttacksProhibited(player)) ||
-      !attackTargetIsLegal(state, runtime, seat, queued.targetAllyId)
-    ) continue;
+      !targetLegal
+    ) {
+      if (card && !targetLegal) logAttackCleared(state, card);
+      cleared = true;
+      continue;
+    }
     if (queued.layer) {
       startQueuedAttack(state, runtime, seat, card, queued.targetAllyId, queued.layer);
       return true;
     }
     // An effect-generated attack waited here as an unresolved attack-layer
-    // (CR 8.5.38), so its Layer Step still opens now.
-    declareAttack(state, runtime, seat, card, weapon ? "weapon" : "ally", false, queued.targetAllyId);
+    // (CR 8.5.38), so its Layer Step still opens now. Its target was declared,
+    // and any Spectra triggered, when the effect queued it.
+    declareAttack(
+      state, runtime, seat, card, weapon ? "weapon" : "ally", false, queued.targetAllyId,
+      false, false, state.nextInstanceId, false, false, true,
+    );
     return true;
   }
+  if (cleared) runtime.dispatchFlow("closeChain", state);
   return false;
 }
 
@@ -630,7 +661,6 @@ function startQueuedAttack(
     flags: layer.flags,
     ...takeDeclaredAttackTargets(state, seat, card, targetAllyId),
   });
-  queueSpectraLayer(state);
   // Enter the Attack Step exactly as a resolved attack-layer does: the open
   // priority window and its stack continuation are finished.
   state.phase = "layer";
@@ -698,6 +728,10 @@ export function attackWithPermanent(
   if (!attackTargetIsLegal(state, runtime, seat, targetAllyId)) return false;
   if (state.stack.length > 0 || state.resolving.length > 0 || currentLink(state)) {
     enqueueAttack(player, { instanceId, ...(targetAllyId !== undefined ? { targetAllyId } : {}) });
+    // Attack (with) targets as it queues the attack (CR 8.5.38), so Spectra
+    // triggers now rather than when the attack reaches the chain (8.3.14b).
+    const layers = spectraLayers(state, seat, targetAllyId === undefined ? [] : [targetAllyId]);
+    if (layers.length > 0) (state.pendingTriggeredLayers ??= []).push(...layers);
     return true;
   }
   declareAttack(state, runtime, seat, card, weapon ? "weapon" : "ally", false, targetAllyId);
@@ -866,8 +900,8 @@ function takeDeclaredAttackTargets(
   const declared = card.attackTargetIds;
   delete card.attackTargetIds;
   if (!declared || declared.length < 2) return targetAllyId === undefined ? {} : { targetAllyId };
-  const heroId = (state.players[opponent(seat)] as PlayerState).hero.instanceId;
-  const allies = declared.filter((id) => id !== heroId);
+  const heroId = opposingHeroId(state, seat);
+  const allies = declared.filter((id) => id !== heroId && findAttackTargetAlly(state, seat, id));
   const primary = declared.includes(heroId) ? undefined : allies.shift();
   return {
     ...(primary === undefined ? {} : { targetAllyId: primary }),
@@ -923,33 +957,61 @@ export function declareAdditionalAttackTarget(
   return true;
 }
 
-/** Spectra (8.3.14): becoming an attack target creates a mandatory triggered
- *  layer. It is queued before the generic attack-declared layers so all of
- *  them resolve before the attack can advance to the attack step. */
-function queueSpectraLayer(state: GameStateInternal): void {
-  const link = currentLink(state);
-  if (!link) return;
-  const targetIds = [
+function opposingHeroId(state: GameStateInternal, seat: number): number {
+  return (state.players[opponent(seat)] as PlayerState).hero.instanceId;
+}
+
+/** Every non-hero object a chain link targets. */
+function linkTargetIds(link: ChainLinkState): number[] {
+  return [
     ...(link.targetAllyId === undefined ? [] : [link.targetAllyId]),
     ...(link.additionalTargetAllyIds ?? []),
   ];
-  for (const targetId of targetIds) queueSpectraLayerFor(state, link, targetId);
 }
 
-function queueSpectraLayerFor(state: GameStateInternal, link: ChainLinkState, targetId: number): void {
-  const target = findAttackTargetAlly(state, link.attacker, targetId);
-  if (!target || !instanceHasKeyword(state, target, "spectra")) return;
-  state.stack.push({
-    sourceInstanceId: target.instanceId,
-    seat: target.owner,
-    triggerIndex: -4,
-    label: "Spectra — destroy this",
-    optional: false,
-    engineEffect: { kind: "spectra-destroy" },
-  });
-  logPublic(state, gameLogMessage(
-    `${nameOf(state, target.cardId)} triggers Spectra`,
-    "engine.log.trigger.spectra",
-    { card: logCardValue(target.cardId) },
-  ));
+/** A queued attack card still has a legal attack-target (CR 7.2.2c). */
+function queuedCardHasLegalTarget(
+  state: GameStateInternal,
+  runtime: EngineRuntime,
+  seat: number,
+  card: CardInstance,
+  targetAllyId: number | undefined,
+): boolean {
+  const declared = card.attackTargetIds;
+  if (!declared || declared.length < 2) return attackTargetIsLegal(state, runtime, seat, targetAllyId);
+  const heroId = opposingHeroId(state, seat);
+  return declared.some((id) => id === heroId || findAttackTargetAlly(state, seat, id) !== undefined);
+}
+
+/** An attack card played at instant speed declares its attack-targets as it
+ *  is played (CR 1.4.5), so Spectra triggers above its stack layer. */
+export function triggerPlayedAttackSpectra(state: GameStateInternal, seat: number, card: CardInstance): void {
+  const heroId = opposingHeroId(state, seat);
+  const targets = (card.attackTargetIds ?? []).filter((id) => id !== heroId);
+  state.stack.unshift(...spectraLayers(state, seat, targets));
+}
+
+/** Spectra (8.3.14b): becoming an attack target creates a mandatory triggered
+ *  layer. The caller places the layers: beneath an attack's own Layer Step
+ *  layers, or as triggers of the effect or play that declared the target. */
+export function spectraLayers(state: GameStateInternal, attackerSeat: number, targetIds: readonly number[]): StackLayer[] {
+  const layers: StackLayer[] = [];
+  for (const targetId of targetIds) {
+    const target = findAttackTargetAlly(state, attackerSeat, targetId);
+    if (!target || !instanceHasKeyword(state, target, "spectra")) continue;
+    layers.push({
+      sourceInstanceId: target.instanceId,
+      seat: target.owner,
+      triggerIndex: -4,
+      label: "Spectra — destroy this",
+      optional: false,
+      engineEffect: { kind: "spectra-destroy" },
+    });
+    logPublic(state, gameLogMessage(
+      `${nameOf(state, target.cardId)} triggers Spectra`,
+      "engine.log.trigger.spectra",
+      { card: logCardValue(target.cardId) },
+    ));
+  }
+  return layers;
 }

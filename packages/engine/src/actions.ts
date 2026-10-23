@@ -216,7 +216,7 @@ export function playCard(
   // before increases and decreases. The side announcement was validated and
   // stamped above so it could also determine the play method and AP cost.
   const isAttackAction = data.cardType === "action" && (data.subtypes ?? []).includes("attack");
-  if (targetAllyId !== undefined && !isAttackAction) return "only attacks can target an ally";
+  if (targetAllyId !== undefined && !isAttackAction) return "only attacks declare an attack target";
   if (isAttackAction && !attackTargetIsLegal(state, runtime, seat, targetAllyId)) return "not a legal attack target";
   const targetErr = preparePlayTarget(
     state, runtime,
@@ -912,7 +912,7 @@ export function activateAbility(
     );
     return undefined;
   }
-  if (targetAllyId !== undefined) return "only attacks can target an ally";
+  if (targetAllyId !== undefined) return "only attacks declare an attack target";
   // Like playing a non-attack action card, activating a non-attack action
   // ability ends the current combat chain before its layer is added. Instant
   // abilities use this same path but do not close the chain.

@@ -24,6 +24,10 @@ export type QueuedAttack = {
   layer?: DeferredAttackLayer;
 };
 
+/** Link flag: an attack resolved into the queue above this unresolved
+ * attack-layer, so it reaches the chain first (CR 7.1.2a). */
+export const ATTACKS_QUEUED_ABOVE_LAYER = "attacksQueuedAboveLayer";
+
 const queueKey = (slot: number, field: string) => `effectAttackQueue:${slot}:${field}`;
 const queueLinkFlagPrefix = (slot: number) => queueKey(slot, "linkFlag:");
 

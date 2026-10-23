@@ -2344,6 +2344,7 @@
   "engine.log.arsenal.faceup": "La carta {card} se coloca boca arriba en el arsenal de {hero}",
   "engine.log.combat.chain.closed": "La combat chain se cierra",
   "engine.log.attack.queued": "La carta {card} se coloca en la cola de ataques",
+  "engine.log.attack.cleared.no.target": "La carta {card} se retira de la cola de ataques porque no tiene un objetivo de ataque legal",
   "engine.log.combat.attacks": "{hero} ataca con {card} ({attack} de poder)",
   "engine.log.combat.attacks.targeting": "{hero} ataca con {card} ({attack} de poder) con {target} como objetivo",
   "engine.log.combat.attack.power.gained": "{source} da +{amount} de poder a {card} ({attack} de poder)",

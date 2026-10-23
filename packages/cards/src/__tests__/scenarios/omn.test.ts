@@ -566,6 +566,39 @@ describe("OMN — import and set mechanics", () => {
     expect(g.state.chain[1]!.targetAllyId).toBe(barnacleId);
   });
 
+  it("Beckon Steel's queued attack triggers Spectra at once, then is cleared and closes the chain", () => {
+    const g = scenario({
+      seats: [
+        hero("hala|0", {
+          resources: 1,
+          weapons: ["durendal|0"],
+          hand: ["beckon steel|3"],
+        }),
+        foe({ board: ["genesis|2"] }),
+      ],
+    });
+    g.state.players[0]!.weapons[0]!.counters = { power: 2 };
+    const genesisId = g.state.players[1]!.board[0]!.instanceId;
+
+    g.activate("durendal|0")
+      .blockWith()
+      .react("beckon steel|3");
+    expect(g.state.pendingDecision?.prompt).toBe("Durendal: choose an attack target");
+    g.doRaw({ kind: "choose", optionId: String(genesisId) });
+
+    // CR 8.5.38 / 8.3.14b: the trigger exists while the first link is still open.
+    expect(g.state.chain).toHaveLength(1);
+    expect(g.stackLabels()).toContain("Spectra — destroy this");
+    // With Genesis gone the queued attack is cleared and the Close Step begins (CR 7.2.2c).
+    g.settle()
+      .expectInZone(1, "genesis|2", "graveyard")
+      .expectLog("Durendal is cleared from the attack queue")
+      .expectLog("The combat chain closes")
+      .expectLife(1, 15);
+    expect(g.state.chain).toHaveLength(0);
+    expect(g.state.log.filter((entry) => entry.publicText?.includes("triggers Spectra"))).toHaveLength(1);
+  });
+
   it("queues multiple Beckon Steel attacks in order", () => {
     const g = scenario({
       seats: [

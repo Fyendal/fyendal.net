@@ -22265,6 +22265,16 @@
       "value": " 面朝上的 arsenal，持续至其下回合结束"
     }
   ],
+  "engine.log.attack.cleared.no.target": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 因没有合法的攻击目标而被移出攻击队列"
+    }
+  ],
   "engine.log.attack.queued": [
     {
       "type": 1,

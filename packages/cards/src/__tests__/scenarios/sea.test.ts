@@ -1457,6 +1457,18 @@ describe("SEA — rules regression coverage", () => {
       .expectNotInZone(1, "barnacle|2", "board");
   });
 
+  it("Barbed Barrage destroys an additional Spectra target and still attacks the hero", () => {
+    const g = barbedBarrage({ board: ["genesis|2"] });
+
+    g.play("barbed barrage|1", { fromArsenal: true, settle: false })
+      .chooseOption("pay")
+      .expectLog("triggers Spectra")
+      .blockWith()
+      .settle()
+      .expectNotInZone(1, "genesis|2", "board")
+      .expectLife(1, 15);
+  });
+
   it("Barbed Barrage chooses its additional target among several opposing allies", () => {
     const g = barbedBarrage({ board: ["barnacle|2", "barnacle|2"] });
 

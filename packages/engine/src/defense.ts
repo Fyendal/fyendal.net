@@ -50,6 +50,7 @@ import { snapshotSerializable } from "./ruleQueries.js";
 import { declaredLayerTargetLegal } from "./layerTargets.js";
 import { cardProhibitedByChosenName } from "./restrictions.js";
 import { transitionZone } from "./transitions.js";
+import { ATTACKS_QUEUED_ABOVE_LAYER } from "./attackQueue.js";
 
 /** The attack becomes a chain link and is now attacking: intimidate, then the defend decision. */
 export function proceedWithAttack(state: GameStateInternal, runtime: EngineRuntime): void {
@@ -360,38 +361,54 @@ function phantasmDefender(state: GameStateInternal,
   });
 }
 
-/** Resolve Spectra's triggered layer, then clear the attack because its sole
- *  non-hero target no longer exists as a legal attack target (7.2.2c). The
- *  attacking action card follows the normal close-chain path to graveyard;
- *  weapons and attacking allies remain in the arena. */
+/** Resolve Spectra's triggered layer: destroy its source (CR 8.3.14b). An
+ *  active attack left without targets is cleared and the chain closes
+ *  (returns true); any other attack is cleared when it leaves the queue
+ *  (7.2.2c). */
 export function resolveSpectraLayer(
   state: GameStateInternal,
   runtime: EngineRuntime,
   sourceInstanceId: number,
 ): boolean {
-  const link = currentLink(state);
-  if (!link || link.targetAllyId !== sourceInstanceId) return false;
-  const defender = state.players[opponent(link.attacker)] as PlayerState;
-  const target = defender.board.find((card) => card.instanceId === sourceInstanceId);
-  if (target) {
-    destroyPermanent(state, runtime, defender.seat, target);
+  const owner = (state.players as PlayerState[]).find((player) =>
+    player.board.some((card) => card.instanceId === sourceInstanceId)
+  );
+  const target = owner?.board.find((card) => card.instanceId === sourceInstanceId);
+  if (owner && target) {
+    destroyPermanent(state, runtime, owner.seat, target);
   } else {
     logPublic(state, gameLogMessage(
       "Spectra resolves without effect (its source is gone)",
       "engine.log.spectra.fizzles.source.gone",
     ));
   }
-  link.resolved = true;
-  link.damage = 0;
-  link.hit = false;
-  link.goAgain = false;
-  state.modifiers = state.modifiers.filter((modifier) => modifier.scope !== "chain-link");
-  runtime.dispatchFlow("closeChain", state);
-  state.reactionPasses = 0;
-  if (!state.pendingDecision?.chooseHook) state.pendingDecision = null;
-  state.phase = "action";
-  state.priorityPlayer = state.activePlayer;
-  return true;
+  const link = currentLink(state);
+  if (!link || link.resolved) return false;
+  const additional = link.additionalTargetAllyIds ?? [];
+  if (link.targetAllyId !== sourceInstanceId && !additional.includes(sourceInstanceId)) return false;
+  const remaining = additional.filter((id) => id !== sourceInstanceId);
+  const promoted = link.targetAllyId === sourceInstanceId ? remaining.shift() : link.targetAllyId;
+  if (link.targetAllyId === sourceInstanceId && promoted === undefined) {
+    // Attacks already queued above this layer still attack first (7.1.2a).
+    if (link.flags[ATTACKS_QUEUED_ABOVE_LAYER] === true) return false;
+    link.resolved = true;
+    link.damage = 0;
+    link.hit = false;
+    link.goAgain = false;
+    state.modifiers = state.modifiers.filter((modifier) => modifier.scope !== "chain-link");
+    runtime.dispatchFlow("closeChain", state);
+    state.reactionPasses = 0;
+    if (!state.pendingDecision?.chooseHook) state.pendingDecision = null;
+    state.phase = "action";
+    state.priorityPlayer = state.activePlayer;
+    return true;
+  }
+  // The hero, or the next declared object, remains the primary target.
+  if (promoted === undefined) delete link.targetAllyId;
+  else link.targetAllyId = promoted;
+  if (remaining.length > 0) link.additionalTargetAllyIds = remaining;
+  else delete link.additionalTargetAllyIds;
+  return false;
 }
 
 /** Resolve Phantasm's state-triggered layer. The condition is checked again;

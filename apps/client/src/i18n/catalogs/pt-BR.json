@@ -2344,6 +2344,7 @@
   "engine.log.arsenal.faceup": "A carta {card} é colocada virada para cima no arsenal de {hero}",
   "engine.log.combat.chain.closed": "A combat chain se fecha",
   "engine.log.attack.queued": "A carta {card} é colocada na fila de ataques",
+  "engine.log.attack.cleared.no.target": "A carta {card} é removida da fila de ataques porque não tem um alvo de ataque válido",
   "engine.log.combat.attacks": "{hero} ataca com {card} ({attack} de poder)",
   "engine.log.combat.attacks.targeting": "{hero} ataca com {card} ({attack} de poder), tendo {target} como alvo",
   "engine.log.combat.attack.power.gained": "{source} dá +{amount} de poder a {card} ({attack} de poder)",
