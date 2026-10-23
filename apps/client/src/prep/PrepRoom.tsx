@@ -321,10 +321,12 @@ export function PrepRoom() {
       return;
     }
     const r = el.getBoundingClientRect();
+    // A ledger row previews beside its own ledger rather than over its rows.
+    const span = el.closest(".prep-deck-zone")?.getBoundingClientRect() ?? r;
     const gap = 12;
-    let x = r.right + gap;
+    let x = span.right + gap;
     if (x + CARD_PREVIEW_WIDTH > window.innerWidth - 8) {
-      x = r.left - CARD_PREVIEW_WIDTH - gap;
+      x = Math.max(8, span.left - CARD_PREVIEW_WIDTH - gap);
     }
     const y = Math.min(
       Math.max(r.top + r.height / 2 - CARD_PREVIEW_HEIGHT / 2, 8),
@@ -369,6 +371,10 @@ export function PrepRoom() {
     setSel({ ...selection, equipment });
   };
 
+  const restoreMain = () => {
+    if (locked) return;
+    setSel({ ...selection, main: defaultSelection(pool, selectionKey).main });
+  };
   const moveMainCopy = (id: string, delta: -1 | 1) => {
     if (locked) return;
     setErrors([]);
@@ -462,6 +468,8 @@ export function PrepRoom() {
       onToggleWeapon={toggleWeapon}
       onToggleEquipment={toggleEquipment}
       onMoveMainCopy={moveMainCopy}
+      onRestoreMain={restoreMain}
+      onInspectCard={setInspectedCardId}
     />
   );
   const arenaLockButton = (

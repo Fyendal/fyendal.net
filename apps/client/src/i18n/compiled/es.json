@@ -34468,6 +34468,36 @@
       "value": "order"
     }
   ],
+  "prep.presentation.column.card": [
+    {
+      "type": 0,
+      "value": "Carta"
+    }
+  ],
+  "prep.presentation.column.copies": [
+    {
+      "type": 0,
+      "value": "Copias"
+    }
+  ],
+  "prep.presentation.column.cost": [
+    {
+      "type": 0,
+      "value": "Coste"
+    }
+  ],
+  "prep.presentation.column.defense": [
+    {
+      "type": 0,
+      "value": "Defensa"
+    }
+  ],
+  "prep.presentation.column.power": [
+    {
+      "type": 0,
+      "value": "Poder"
+    }
+  ],
   "prep.presentation.emptyInventory": [
     {
       "type": 0,
@@ -34482,6 +34512,12 @@
     {
       "type": 0,
       "value": " exactas"
+    }
+  ],
+  "prep.presentation.fixedInventory": [
+    {
+      "type": 0,
+      "value": "Se queda en el inventario"
     }
   ],
   "prep.presentation.hero": [
@@ -34554,22 +34590,66 @@
       "value": "destination"
     }
   ],
-  "prep.presentation.moveToInventoryHint": [
-    {
-      "type": 0,
-      "value": "Haz clic en una carta para mover una copia al inventario."
-    }
-  ],
-  "prep.presentation.moveToMainHint": [
-    {
-      "type": 0,
-      "value": "Haz clic en una carta para mover una copia al mazo principal."
-    }
-  ],
   "prep.presentation.noneRegistered": [
     {
       "type": 0,
       "value": "ninguna registrada"
+    }
+  ],
+  "prep.presentation.pitch.blue": [
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " azules"
+    }
+  ],
+  "prep.presentation.pitch.red": [
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " rojas"
+    }
+  ],
+  "prep.presentation.pitch.yellow": [
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " amarillas"
+    }
+  ],
+  "prep.presentation.pitchSplit": [
+    {
+      "type": 0,
+      "value": "Reparto de pitch: "
+    },
+    {
+      "type": 1,
+      "value": "red"
+    },
+    {
+      "type": 0,
+      "value": ", "
+    },
+    {
+      "type": 1,
+      "value": "yellow"
+    },
+    {
+      "type": 0,
+      "value": ", "
+    },
+    {
+      "type": 1,
+      "value": "blue"
     }
   ],
   "prep.presentation.removeCard": [
@@ -34600,6 +34680,12 @@
       "value": "slot"
     }
   ],
+  "prep.presentation.restore": [
+    {
+      "type": 0,
+      "value": "Restaurar el mazo registrado"
+    }
+  ],
   "prep.presentation.selectCard": [
     {
       "type": 0,
@@ -34628,10 +34714,68 @@
       "value": "slot"
     }
   ],
+  "prep.presentation.showCard": [
+    {
+      "type": 0,
+      "value": "Mostrar "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    }
+  ],
   "prep.presentation.title": [
     {
       "type": 0,
       "value": "Tu presentación"
+    }
+  ],
+  "prep.presentation.type.action": [
+    {
+      "type": 0,
+      "value": "Acción"
+    }
+  ],
+  "prep.presentation.type.attackReaction": [
+    {
+      "type": 0,
+      "value": "Reacción de ataque"
+    }
+  ],
+  "prep.presentation.type.block": [
+    {
+      "type": 0,
+      "value": "Bloqueo"
+    }
+  ],
+  "prep.presentation.type.defenseReaction": [
+    {
+      "type": 0,
+      "value": "Reacción de defensa"
+    }
+  ],
+  "prep.presentation.type.instant": [
+    {
+      "type": 0,
+      "value": "Instantáneo"
+    }
+  ],
+  "prep.presentation.type.item": [
+    {
+      "type": 0,
+      "value": "Artículo"
+    }
+  ],
+  "prep.presentation.type.mentor": [
+    {
+      "type": 0,
+      "value": "Mentor"
+    }
+  ],
+  "prep.presentation.type.resource": [
+    {
+      "type": 0,
+      "value": "Recurso"
     }
   ],
   "prep.presentation.weapons": [

@@ -31911,6 +31911,36 @@
       "value": "order"
     }
   ],
+  "prep.presentation.column.card": [
+    {
+      "type": 0,
+      "value": "卡牌"
+    }
+  ],
+  "prep.presentation.column.copies": [
+    {
+      "type": 0,
+      "value": "数量"
+    }
+  ],
+  "prep.presentation.column.cost": [
+    {
+      "type": 0,
+      "value": "费用"
+    }
+  ],
+  "prep.presentation.column.defense": [
+    {
+      "type": 0,
+      "value": "防御"
+    }
+  ],
+  "prep.presentation.column.power": [
+    {
+      "type": 0,
+      "value": "力量"
+    }
+  ],
   "prep.presentation.emptyInventory": [
     {
       "type": 0,
@@ -31925,6 +31955,12 @@
     {
       "type": 0,
       "value": " 张"
+    }
+  ],
+  "prep.presentation.fixedInventory": [
+    {
+      "type": 0,
+      "value": "固定在备牌区"
     }
   ],
   "prep.presentation.hero": [
@@ -32001,22 +32037,78 @@
       "value": "destination"
     }
   ],
-  "prep.presentation.moveToInventoryHint": [
-    {
-      "type": 0,
-      "value": "点击卡牌，将一张移至备牌区。"
-    }
-  ],
-  "prep.presentation.moveToMainHint": [
-    {
-      "type": 0,
-      "value": "点击卡牌，将一张移至主牌组。"
-    }
-  ],
   "prep.presentation.noneRegistered": [
     {
       "type": 0,
       "value": "未登记武器"
+    }
+  ],
+  "prep.presentation.pitch.blue": [
+    {
+      "type": 0,
+      "value": "蓝色 "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " 张"
+    }
+  ],
+  "prep.presentation.pitch.red": [
+    {
+      "type": 0,
+      "value": "红色 "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " 张"
+    }
+  ],
+  "prep.presentation.pitch.yellow": [
+    {
+      "type": 0,
+      "value": "黄色 "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " 张"
+    }
+  ],
+  "prep.presentation.pitchSplit": [
+    {
+      "type": 0,
+      "value": "扣置分布："
+    },
+    {
+      "type": 1,
+      "value": "red"
+    },
+    {
+      "type": 0,
+      "value": "，"
+    },
+    {
+      "type": 1,
+      "value": "yellow"
+    },
+    {
+      "type": 0,
+      "value": "，"
+    },
+    {
+      "type": 1,
+      "value": "blue"
     }
   ],
   "prep.presentation.removeCard": [
@@ -32047,6 +32139,12 @@
       "value": "card"
     }
   ],
+  "prep.presentation.restore": [
+    {
+      "type": 0,
+      "value": "恢复已登记的牌组"
+    }
+  ],
   "prep.presentation.selectCard": [
     {
       "type": 0,
@@ -32075,10 +32173,68 @@
       "value": "card"
     }
   ],
+  "prep.presentation.showCard": [
+    {
+      "type": 0,
+      "value": "查看 "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    }
+  ],
   "prep.presentation.title": [
     {
       "type": 0,
       "value": "对局配置"
+    }
+  ],
+  "prep.presentation.type.action": [
+    {
+      "type": 0,
+      "value": "行动"
+    }
+  ],
+  "prep.presentation.type.attackReaction": [
+    {
+      "type": 0,
+      "value": "攻击反应"
+    }
+  ],
+  "prep.presentation.type.block": [
+    {
+      "type": 0,
+      "value": "格挡"
+    }
+  ],
+  "prep.presentation.type.defenseReaction": [
+    {
+      "type": 0,
+      "value": "防御反应"
+    }
+  ],
+  "prep.presentation.type.instant": [
+    {
+      "type": 0,
+      "value": "瞬间"
+    }
+  ],
+  "prep.presentation.type.item": [
+    {
+      "type": 0,
+      "value": "物品"
+    }
+  ],
+  "prep.presentation.type.mentor": [
+    {
+      "type": 0,
+      "value": "导师"
+    }
+  ],
+  "prep.presentation.type.resource": [
+    {
+      "type": 0,
+      "value": "资源"
     }
   ],
   "prep.presentation.weapons": [

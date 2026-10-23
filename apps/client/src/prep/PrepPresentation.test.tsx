@@ -13,7 +13,7 @@ describe("PrepPresentation equipment controls", () => {
       selectionKey: "deck",
       showHero: true, mainCount: 1, minimumMainCount: 60, inventoryCount: 0, poolMainEntries: [["HVY103", 1]] as [string, number][],
       fixedInventoryCounts: new Map<string, number>(),
-      onToggleWeapon: vi.fn(), onToggleEquipment: vi.fn(), onMoveMainCopy: vi.fn(),
+      onToggleWeapon: vi.fn(), onToggleEquipment: vi.fn(), onMoveMainCopy: vi.fn(), onRestoreMain: vi.fn(), onInspectCard: vi.fn(),
     };
     const render = (sections: "arena" | "deck") => renderToStaticMarkup(createElement(
       TestI18nProvider, null,
@@ -56,6 +56,8 @@ describe("PrepPresentation equipment controls", () => {
       onToggleWeapon: vi.fn(),
       onToggleEquipment: vi.fn(),
       onMoveMainCopy: vi.fn(),
+      onRestoreMain: vi.fn(),
+      onInspectCard: vi.fn(),
     })));
 
     expect(html).toContain('aria-pressed="true"');
@@ -67,40 +69,79 @@ describe("PrepPresentation equipment controls", () => {
     expect(html).toContain("Compass of Sunken Depths");
   });
 
-  it("shows copy counts through stacked card faces without a duplicate badge", () => {
+  it("lists each main-deck card once with a copy count and steppers", () => {
     const pool: DeckPool = {
       heroId: "HVY195",
       weaponIds: [],
       equipmentPool: [],
-      deck: [],
+      deck: ["HVY103", "HVY103", "HVY103"],
     };
+    const render = (main: Map<string, number>, mainCount: number) =>
+      renderToStaticMarkup(createElement(TestI18nProvider, null, createElement(PrepPresentation, {
+        sections: "deck",
+        showHero: true,
+        pool,
+        selection: { forDeck: "deck", weaponIndexes: [], equipment: {}, main },
+        selectionKey: "deck",
+        locked: false,
+        mainCount,
+        minimumMainCount: 60,
+        inventoryCount: 3 - mainCount,
+        poolMainEntries: [["HVY103", 3]],
+        fixedInventoryCounts: new Map(),
+        onToggleWeapon: vi.fn(),
+        onToggleEquipment: vi.fn(),
+        onMoveMainCopy: vi.fn(),
+        onRestoreMain: vi.fn(),
+        onInspectCard: vi.fn(),
+      })));
+
+    const full = render(new Map([["HVY103", 3]]), 3);
+    expect(full.match(/HVY103\.webp/g)).toHaveLength(1);
+    expect(full).toContain('class="prep-copies">3<');
+    expect(full).toContain("Up the Ante");
+    expect(full).toContain('aria-label="Move one copy of Up the Ante to Inventory"');
+    // Every copy is already in: the add stepper waits, disabled.
+    expect(full).toMatch(/Move one copy of Up the Ante to Main deck" class="prep-step" disabled=""/);
+    expect(full).not.toContain("Restore registered deck");
+    expect(full).not.toContain(" changed\"");
+    expect(full).toContain("3 blue");
+
+    const trimmed = render(new Map([["HVY103", 2]]), 2);
+    expect(trimmed).toContain("Restore registered deck");
+    expect(trimmed.match(/class="prep-row changed"/g)).toHaveLength(2);
+    expect(trimmed).not.toMatch(/to Main deck" class="prep-step" disabled=""/);
+    // The inventory row steps the same card from its own side.
+    expect(trimmed.match(/aria-label="Move one copy of Up the Ante to Main deck"/g)).toHaveLength(2);
+    // Inventory rows offer only the add step.
+    expect(trimmed.split("prep-inventory-zone")[1]).not.toContain("minus.svg");
+    expect(trimmed).toContain("2 blue");
+  });
+
+  it("labels non-attack rows by type and keeps inventory-only cards locked", () => {
     const html = renderToStaticMarkup(createElement(TestI18nProvider, null, createElement(PrepPresentation, {
       sections: "deck",
       showHero: true,
-      pool,
-      selection: {
-        forDeck: "deck",
-        weaponIndexes: [],
-        equipment: {},
-        main: new Map([["HVY103", 3]]),
-      },
+      pool: { heroId: "HVY195", weaponIds: [], equipmentPool: [], deck: ["WTR218"] },
+      selection: { forDeck: "deck", weaponIndexes: [], equipment: {}, main: new Map([["WTR218", 1]]) },
       selectionKey: "deck",
       locked: false,
-      mainCount: 3,
+      mainCount: 1,
       minimumMainCount: 60,
-      inventoryCount: 0,
-      poolMainEntries: [["HVY103", 3]],
-      fixedInventoryCounts: new Map(),
+      inventoryCount: 1,
+      poolMainEntries: [["WTR218", 1]],
+      fixedInventoryCounts: new Map([["WTR215", 1]]),
       onToggleWeapon: vi.fn(),
       onToggleEquipment: vi.fn(),
       onMoveMainCopy: vi.fn(),
+      onRestoreMain: vi.fn(),
+      onInspectCard: vi.fn(),
     })));
 
-    expect(html.match(/HVY103\.webp/g)).toHaveLength(3);
-    expect(html.match(/loading="eager"/g)).toHaveLength(3);
-    expect(html.match(/card-artwork-placeholder/g)).toHaveLength(3);
-    expect(html).toContain("Up the Ante");
-    expect(html).not.toContain("prep-stack-count");
+    expect(html).toContain('class="prep-row-type">Action<');
+    expect(html).toContain('class="prep-row-type">Stays in inventory<');
+    expect(html).toContain('class="prep-row fixed"');
+    expect(html).not.toContain("Move one copy of Sink Below to Main deck");
   });
 
   it("tracks separately registered copies of the same weapon independently", () => {
@@ -130,6 +171,8 @@ describe("PrepPresentation equipment controls", () => {
       onToggleWeapon: vi.fn(),
       onToggleEquipment: vi.fn(),
       onMoveMainCopy: vi.fn(),
+      onRestoreMain: vi.fn(),
+      onInspectCard: vi.fn(),
     })));
 
     expect(html.match(/aria-pressed="true"/g)).toHaveLength(1);
@@ -167,6 +210,8 @@ describe("PrepPresentation equipment controls", () => {
           onToggleWeapon={vi.fn()}
           onToggleEquipment={vi.fn()}
           onMoveMainCopy={vi.fn()}
+          onRestoreMain={vi.fn()}
+          onInspectCard={vi.fn()}
         />
       </TestI18nProvider>,
     );
@@ -197,9 +242,11 @@ describe("PrepPresentation equipment controls", () => {
       onToggleWeapon: vi.fn(),
       onToggleEquipment: vi.fn(),
       onMoveMainCopy: vi.fn(),
+      onRestoreMain: vi.fn(),
+      onInspectCard: vi.fn(),
     })));
     const order = (html: string, zone: number) =>
-      [...html.split("prep-deck-zone")[zone + 1]!.matchAll(/prep-stack-button"[^>]*?data-cardid="([^"]+)"/g)].map((m) => m[1]);
+      [...html.split("prep-deck-zone")[zone + 1]!.matchAll(/class="prep-row[^"]*" data-cardid="([^"]+)"/g)].map((m) => m[1]);
 
     afterEach(() => vi.unstubAllGlobals());
 

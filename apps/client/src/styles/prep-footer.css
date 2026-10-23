@@ -40,17 +40,20 @@
 }
 .prep-columns {
   display: grid;
-  grid-template-columns: clamp(280px, 28vw, 345px) minmax(0, 1fr);
-  gap: 21px;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 16px;
   max-width: var(--prep-content-width);
   width: 100%;
   margin: 21px auto 0;
   padding: 0 var(--prep-content-gutter);
   align-items: start;
 }
+/* The match sheet is a band across the top that stays in view while the
+   deck ledgers scroll beneath it. */
 .prep-opponent {
   position: sticky;
-  top: 18px;
+  top: 8px;
+  z-index: 20;
   text-align: center;
 }
 .prep-selection-column { min-width: 0; display: grid; gap: 16px; }
@@ -232,74 +235,220 @@
   margin-bottom: 16px;
 }
 .prep-pool-heading .panel-title { margin: 0; border-bottom: 0; padding-bottom: 0; }
-.prep-deck-zone {
-  border-top: 1px solid #45331f88;
-  padding-top: 16px;
-}
-.prep-deck-zone + .prep-deck-zone { margin-top: 25px; }
+/* Sideboarding ledger: one row per card, main deck and Inventory side by
+   side, with the pitch split of the main deck always in view. */
+.prep-ledgers { display: flex; flex-wrap: wrap; gap: 20px 24px; align-items: flex-start; }
+.prep-deck-zone { flex: 5 1 430px; min-width: 0; }
 .prep-inventory-zone {
-  border: 1px solid #45331f88;
-  border-radius: 3px;
-  background: #120c0677;
-  padding: 16px;
+  flex: 3 1 340px;
+  padding-left: 18px;
+  border-left: 1px solid #2f2315;
 }
 .prep-zone-heading {
   display: flex;
+  flex-wrap: wrap;
   align-items: baseline;
   justify-content: space-between;
-  gap: 14px;
-  margin-bottom: 14px;
+  gap: 6px 14px;
 }
 .prep-zone-heading h4 {
   margin: 0;
   color: var(--text-primary);
   font: 600 16px/1.3 var(--font-lobby-ui);
 }
-.prep-zone-heading span { color: #8a7f6d; font-size: 13px; }
-.prep-card-grid {
-  display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  align-items: flex-start;
-  gap: 21px 14px;
-  min-height: 42px;
+.prep-restore {
+  min-height: 26px;
+  padding: 0 8px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  clip-path: none;
+  color: var(--text-muted);
+  font: 500 13px var(--font-lobby-ui);
+  letter-spacing: normal;
+  text-transform: none;
 }
-.prep-stack-button {
-  position: relative;
-  width: 100%;
-  min-width: 0;
+.prep-restore:hover { border: 0; background: #231709; color: var(--text-primary); }
+.prep-pitch-bar {
+  display: flex;
+  gap: 2px;
+  height: 6px;
+  margin-top: 10px;
+  border-radius: 3px;
+  overflow: hidden;
+}
+.prep-pitch-bar span { flex: 0 1 0; }
+.prep-pitch-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  margin-top: 6px;
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+.prep-pitch-legend > span { display: inline-flex; align-items: center; gap: 5px; }
+.prep-pitch {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+}
+/* The three pitch colors the sort toggle already previews. */
+.prep-pitch-0 { background: var(--text-muted); }
+.prep-pitch-1 { background: #e5534b; }
+.prep-pitch-2 { background: #e3b341; }
+.prep-pitch-3 { background: #539bf5; }
+.prep-ledger,
+.prep-ledger-rows { list-style: none; margin: 0; padding: 0; }
+.prep-ledger-head,
+.prep-row {
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr) 36px 36px 42px 92px;
+  align-items: center;
+  column-gap: 6px;
+  padding: 0 4px;
+}
+.prep-ledger-head {
+  margin-top: 14px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid #2f2315;
+  color: var(--text-muted);
+  font-size: 11px;
+  white-space: nowrap;
+}
+.prep-ledger-head > span { text-align: center; }
+.prep-ledger-head > span:nth-child(2) { text-align: left; }
+.prep-ledger-head > span:last-child { text-align: right; }
+.prep-group-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 28px;
+  margin-top: 6px;
+  padding: 0 4px;
+  color: var(--text-muted);
+  font-size: 12px;
+}
+.prep-group-title::after { content: ""; flex: 1; height: 1px; background: #2f2315; }
+.prep-row {
+  min-height: 36px;
+  border-radius: 4px;
+  transition: background-color 80ms ease-out;
+}
+.prep-row:hover { background: #231709; }
+.prep-row.fixed :is(.prep-row-art, .prep-row-title) { opacity: .55; }
+/* A rectangular thumbnail cropped to the card's art window. */
+.prep-row-art {
+  width: 40px;
+  height: 24px;
+  min-height: 0;
   padding: 0;
   border: 0;
-  border-radius: 8px;
-  background: transparent;
-  box-shadow: 0 8px 20px #0008;
+  border-radius: 3px;
+  background: var(--surface-control);
   clip-path: none;
-  transition: transform 0.08s ease-out, filter 0.08s ease-out;
-  content-visibility: auto;
+  overflow: hidden;
 }
-.prep-stack-button:not([aria-disabled="true"]):hover,
-.prep-stack-button:not([aria-disabled="true"]):focus-visible {
-  z-index: 2;
-  transform: translateY(-4px);
-  filter: brightness(1.08);
-}
-.prep-stack-button:focus-visible { outline: 2px solid var(--gold); outline-offset: 4px; }
-.prep-stack-button[aria-disabled="true"] { opacity: 1; cursor: default; }
-.prep-stack-button:hover { background: transparent; border-color: transparent; }
-.prep-stack-card {
+.prep-row-art:hover { background: var(--surface-control); border: 0; }
+.prep-row-art:focus-visible { outline-offset: 2px; }
+.prep-row-tile { position: relative; display: block; width: 100%; height: 100%; }
+/* Show roughly the printed art window (8–92% across, 13–50% down): width
+   119% of the tile puts both side frames outside it, and the top offset
+   skips the name bar. */
+.prep-row-tile .card-artwork-image {
   position: absolute;
-  left: 0;
-  display: block;
-  width: 100%;
-  aspect-ratio: 300 / 413;
-  object-fit: cover;
-  border: 1px solid #211608;
-  border-radius: 8px;
-  background: #211608;
-  box-shadow: 0 3px 8px #000b;
-  pointer-events: none;
+  top: -36%;
+  left: -9.5%;
+  width: 119%;
+  height: auto;
+  max-width: none;
 }
-.prep-stack-card .card-artwork-placeholder { border-radius: inherit; }
-.prep-empty-zone { margin: 0; align-self: center; }
+.prep-row-tile .card-artwork-placeholder { padding: 0; }
+.prep-row-tile :is(.c-name, .c-text, .c-cost, .c-stats) { display: none; }
+.prep-row-name {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  min-width: 0;
+  overflow: hidden;
+}
+.prep-row-name .prep-pitch { flex: none; width: 8px; height: 8px; transform: translateY(-1px); }
+.prep-row-title {
+  flex: none;
+  overflow: hidden;
+  color: var(--text-primary);
+  font: 500 15px/1.2 var(--font-card-name);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+/* The type label gives way before the name does. */
+.prep-row-type {
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  color: var(--text-muted);
+  font-size: 11px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.prep-row-stat {
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+.prep-row-stat.empty { color: #5f5241; }
+.prep-row-controls {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+}
+.prep-copies {
+  display: inline-grid;
+  place-items: center;
+  min-width: 30px;
+  height: 24px;
+  padding: 0 4px;
+  border-radius: 4px;
+  background: var(--surface-well);
+  color: var(--text-primary);
+  font: 600 14px var(--font-lobby-ui);
+  font-variant-numeric: tabular-nums;
+}
+.prep-row.changed .prep-copies { color: var(--gold); box-shadow: inset 0 0 0 1px #ffd47966; }
+.prep-step {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  min-height: 0;
+  padding: 0;
+  border: 1px solid var(--border-subtle);
+  border-radius: 4px;
+  background: transparent;
+  clip-path: none;
+  color: var(--text-secondary);
+  font-size: 15px;
+}
+.prep-step:hover:not(:disabled) { border-color: var(--border-strong); background: #2b1e10; color: var(--gold); }
+.prep-step:disabled { opacity: .3; }
+.prep-row-fixed {
+  display: inline-grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  color: var(--text-muted);
+  font-size: 15px;
+}
+.prep-empty-zone { margin: 14px 0 0; font-size: 13px; }
+@media (max-width: 900px) {
+  .prep-row,
+  .prep-ledger-head { grid-template-columns: 40px minmax(0, 1fr) 92px; }
+  .prep-row-stat,
+  .prep-col-stat { display: none; }
+}
 /* Phone action bar: docked flush to the bottom edge as one row — opponent
    hero, turn order and deck count, then the single action. */
 .prep-ready-float {
@@ -454,8 +603,11 @@
     min-width: 0;
     padding-inline: 12px;
   }
-  .prep-zone-heading { align-items: flex-start; flex-direction: column; gap: 4px; }
-  .prep-card-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .prep-inventory-zone { padding-left: 0; border-left: 0; }
+  .prep-row { min-height: 44px; }
+  .prep-row,
+  .prep-ledger-head { grid-template-columns: 40px minmax(0, 1fr) 128px; }
+  .prep-step { width: 40px; height: 40px; }
   .prep-arena-stage .prep-cardrow { overflow: visible; }
   .prep-matchup-plan .listbox { flex-basis: 100%; }
   .prep-group,
@@ -526,56 +678,44 @@
   }
 }
 
-/* Desktop match sheet: heroes face off across the VS spine, each arena sits
-   under its own hero, and the step that advances preparation always sits in
-   the footer. */
+/* Desktop match sheet: a band where both arenas face off across the VS mark
+   and the step that advances preparation sits at the end. */
 .panel.prep-sheet {
   display: flex;
-  flex-direction: column;
-  max-height: calc(100dvh - 36px);
+  flex-wrap: wrap;
+  align-items: stretch;
   padding: 0;
   overflow: hidden;
   text-align: left;
 }
 .prep-sheet-body {
-  flex: 1 1 auto;
-  min-height: 0;
-  overflow-y: auto;
-  padding: 16px 12px;
-  scrollbar-width: thin;
+  flex: 1 1 640px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  min-width: 0;
+  padding: 14px 16px;
 }
 .prep-mat {
   --owner: #76b995;
-  display: grid;
-  /* Proportional so the hero stays larger than its equipment as the column
-     narrows on smaller laptops. */
-  grid-template-columns:
-    repeat(2, minmax(0, 5fr)) minmax(0, 0.4fr)
-    minmax(0, 5fr) minmax(0, 6fr) minmax(0, 5fr);
-  align-items: center;
-  grid-template-rows: repeat(3, auto);
-  gap: 5px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
 }
 /* Ownership dots use the board's friendly/opponent colours. */
 .prep-mat.theirs { --owner: #d9796f; }
-/* Zone placement follows the game board: head, chest and legs down the left
-   with arms beside chest; weapons flank the hero. The opponent's half is
-   flipped vertically so both heads face the centre line. */
-.prep-mat .at-head { grid-area: 1 / 1; }
-.prep-mat .at-chest { grid-area: 2 / 1; }
-.prep-mat .at-arms { grid-area: 2 / 2; }
-.prep-mat .at-legs { grid-area: 3 / 1; }
-.prep-mat .at-weapon-left { grid-area: 2 / 4; }
-.prep-mat .at-hero { grid-area: 2 / 5; }
-.prep-mat .at-weapon-right { grid-area: 2 / 6; }
-.prep-mat-player { grid-area: 3 / 2 / 4 / -1; align-self: end; padding-left: 6px; }
-.prep-mat.theirs .at-head { grid-area: 3 / 1; }
-.prep-mat.theirs .at-legs { grid-area: 1 / 1; }
-.prep-mat.theirs .prep-mat-player { grid-area: 1 / 2 / 2 / -1; align-self: start; }
+/* Hero, then weapons and equipment; the opponent's row runs right to left so
+   both heroes face the VS mark. */
+.prep-mat-cards { display: flex; align-items: center; gap: 5px; }
+.prep-mat.theirs { align-items: flex-end; text-align: right; }
+.prep-mat.theirs .prep-mat-cards { flex-direction: row-reverse; }
+.prep-mat-player { min-width: 0; }
 
 .prep-mat-zone {
   display: block;
-  width: 100%;
+  width: 44px;
   aspect-ratio: 300 / 413;
   border: 1px solid var(--border-subtle);
   border-radius: 4px;
@@ -591,7 +731,7 @@
 .prep-mat-zone .c-text,
 .prep-mat-zone .c-cost,
 .prep-mat-zone .c-stats { display: none; }
-.prep-mat-hero { border-color: var(--border-strong); }
+.prep-mat-hero { width: 54px; border-color: var(--border-strong); }
 .prep-mat-empty {
   display: grid;
   place-items: center;
@@ -632,18 +772,20 @@
 .prep-sheet-state.disconnected::before { border-style: dashed; }
 .prep-mat-divider {
   display: flex;
+  flex: none;
+  flex-direction: column;
   align-items: center;
-  gap: 12px;
-  margin: 10px 0;
+  align-self: stretch;
+  gap: 8px;
 }
 .prep-mat-divider::before,
 .prep-mat-divider::after {
   content: "";
   flex: 1;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, var(--border-strong));
+  width: 1px;
+  background: linear-gradient(180deg, transparent, var(--border-strong));
 }
-.prep-mat-divider::after { background: linear-gradient(90deg, var(--border-strong), transparent); }
+.prep-mat-divider::after { background: linear-gradient(180deg, var(--border-strong), transparent); }
 /* Small caps in the card-title face, matching the hero names it separates. */
 .prep-vs {
   color: var(--bronze);
@@ -655,17 +797,18 @@
   text-shadow: 0 1px 2px #000;
   text-transform: lowercase;
 }
-.prep-die { margin: 16px 0 0; color: var(--text-secondary); font-size: 13px; text-align: center; }
+.prep-die { margin: 0; color: var(--text-secondary); font-size: 13px; text-align: center; }
 
 .prep-sheet-action {
-  flex: none;
+  flex: 0 1 320px;
   display: flex;
   flex-direction: column;
+  justify-content: center;
   gap: 10px;
-  padding: 14px 16px 16px;
-  border-top: 1px solid var(--border-strong);
+  min-width: 260px;
+  padding: 14px 16px;
+  border-left: 1px solid var(--border-strong);
   background: linear-gradient(180deg, #2a1b0d, #1a1108);
-  box-shadow: 0 -8px 18px #0006;
 }
 .prep-sheet-action:empty { display: none; }
 .prep-sheet-turn { margin: 0; color: var(--text-secondary); font-size: 13px; }

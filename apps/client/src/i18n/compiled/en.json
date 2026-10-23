@@ -33474,6 +33474,36 @@
       "value": "order"
     }
   ],
+  "prep.presentation.column.card": [
+    {
+      "type": 0,
+      "value": "Card"
+    }
+  ],
+  "prep.presentation.column.copies": [
+    {
+      "type": 0,
+      "value": "Copies"
+    }
+  ],
+  "prep.presentation.column.cost": [
+    {
+      "type": 0,
+      "value": "Cost"
+    }
+  ],
+  "prep.presentation.column.defense": [
+    {
+      "type": 0,
+      "value": "Defense"
+    }
+  ],
+  "prep.presentation.column.power": [
+    {
+      "type": 0,
+      "value": "Power"
+    }
+  ],
   "prep.presentation.emptyInventory": [
     {
       "type": 0,
@@ -33488,6 +33518,12 @@
     {
       "type": 0,
       "value": " exact"
+    }
+  ],
+  "prep.presentation.fixedInventory": [
+    {
+      "type": 0,
+      "value": "Stays in inventory"
     }
   ],
   "prep.presentation.hero": [
@@ -33560,22 +33596,66 @@
       "value": "destination"
     }
   ],
-  "prep.presentation.moveToInventoryHint": [
-    {
-      "type": 0,
-      "value": "Click a card to move one copy to Inventory."
-    }
-  ],
-  "prep.presentation.moveToMainHint": [
-    {
-      "type": 0,
-      "value": "Click a card to move one copy to the main deck."
-    }
-  ],
   "prep.presentation.noneRegistered": [
     {
       "type": 0,
       "value": "none registered"
+    }
+  ],
+  "prep.presentation.pitch.blue": [
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " blue"
+    }
+  ],
+  "prep.presentation.pitch.red": [
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " red"
+    }
+  ],
+  "prep.presentation.pitch.yellow": [
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " yellow"
+    }
+  ],
+  "prep.presentation.pitchSplit": [
+    {
+      "type": 0,
+      "value": "Pitch split: "
+    },
+    {
+      "type": 1,
+      "value": "red"
+    },
+    {
+      "type": 0,
+      "value": ", "
+    },
+    {
+      "type": 1,
+      "value": "yellow"
+    },
+    {
+      "type": 0,
+      "value": ", "
+    },
+    {
+      "type": 1,
+      "value": "blue"
     }
   ],
   "prep.presentation.removeCard": [
@@ -33606,6 +33686,12 @@
       "value": "slot"
     }
   ],
+  "prep.presentation.restore": [
+    {
+      "type": 0,
+      "value": "Restore registered deck"
+    }
+  ],
   "prep.presentation.selectCard": [
     {
       "type": 0,
@@ -33634,10 +33720,68 @@
       "value": "slot"
     }
   ],
+  "prep.presentation.showCard": [
+    {
+      "type": 0,
+      "value": "Show "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    }
+  ],
   "prep.presentation.title": [
     {
       "type": 0,
       "value": "Your Presentation"
+    }
+  ],
+  "prep.presentation.type.action": [
+    {
+      "type": 0,
+      "value": "Action"
+    }
+  ],
+  "prep.presentation.type.attackReaction": [
+    {
+      "type": 0,
+      "value": "Attack reaction"
+    }
+  ],
+  "prep.presentation.type.block": [
+    {
+      "type": 0,
+      "value": "Block"
+    }
+  ],
+  "prep.presentation.type.defenseReaction": [
+    {
+      "type": 0,
+      "value": "Defense reaction"
+    }
+  ],
+  "prep.presentation.type.instant": [
+    {
+      "type": 0,
+      "value": "Instant"
+    }
+  ],
+  "prep.presentation.type.item": [
+    {
+      "type": 0,
+      "value": "Item"
+    }
+  ],
+  "prep.presentation.type.mentor": [
+    {
+      "type": 0,
+      "value": "Mentor"
+    }
+  ],
+  "prep.presentation.type.resource": [
+    {
+      "type": 0,
+      "value": "Resource"
     }
   ],
   "prep.presentation.weapons": [
