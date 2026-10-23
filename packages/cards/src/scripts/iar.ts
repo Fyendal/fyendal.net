@@ -2814,9 +2814,7 @@ export const iar: Record<string, CardScript> = {
   "dark arcanite gloves|0": shadowResist(),
   "dark arcanite boots|0": shadowResist(),
   "murmur of i'arathael|1": {
-    onAttackDeclared(ctx) {
-      if (Number(ctx.getFlag("player", "banishedThisTurn")) > 0) ctx.grantGoAgain();
-    },
+    hasConditionalGoAgain: (ctx) => Number(ctx.getFlag("player", "banishedThisTurn")) > 0,
   },
   "rumbling of i'arathael|1": {
     onAttackDeclared(ctx) {

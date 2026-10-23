@@ -954,9 +954,7 @@ export const hnt: Record<string, CardScript> = {
     modifyAttack: (ctx) => (isMarked(ctx, opponentSeat(ctx)) ? 2 : 0),
   },
   "march of loyalty|1": {
-    onAttackDeclared(ctx) {
-      if (ctx.getFlag("player", "createdName:fealty")) ctx.grantGoAgain();
-    },
+    hasConditionalGoAgain: (ctx) => ctx.getFlag("player", "createdName:fealty") === true,
   },
   "bubble to the surface|1": {
     modifyPlayCost: (ctx, base) => base - draconicLinks(ctx),

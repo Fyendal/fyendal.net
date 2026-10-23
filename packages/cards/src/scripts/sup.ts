@@ -566,7 +566,7 @@ function flex(kind: "speed" | "strength"): CardScript {
   return kind === "speed"
     ? {
         onAttackDeclared(ctx) {
-          if (ctx.currentAttackPower() >= 6) ctx.grantGoAgain();
+          ctx.addModifier({ scope: "chain-link", goAgainIfAttackPowerAtLeast: 6 });
         },
       }
     : {
@@ -1937,14 +1937,7 @@ Object.assign(sup, {
   },
   "unwavering resolve|1": {
     modifyAttack: (ctx: ScriptCtx) => (ctx.player(ctx.seat).deck.length === 0 ? 4 : 0),
-    friendlyDefendedTrigger: {
-      label: "If this is defended by 3 or more cards",
-      condition: (ctx) =>
-        ctx.link?.attackingCard.instanceId === ctx.self.instanceId && (ctx.link?.defendingCards.length ?? 0) >= 3,
-    },
-    onFriendlyDefended(ctx: ScriptCtx) {
-      if ((ctx.link?.defendingCards.length ?? 0) >= 3) ctx.grantGoAgain();
-    },
+    hasConditionalGoAgain: (ctx: ScriptCtx) => (ctx.link?.defendingCards.length ?? 0) >= 3,
   },
   "beat the same drum|3": {
     onPlay(ctx: ScriptCtx) {

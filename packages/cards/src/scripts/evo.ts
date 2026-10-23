@@ -375,11 +375,11 @@ function nextBoostBuff(amount: number, addDriver = false): CardScript {
 }
 
 function conditionalDestroyedItem(keyword: "go again" | "overpower"): CardScript {
+  const destroyedItem = (ctx: ScriptCtx) => ctx.getPlayerFlag(ctx.seat, "destroyedSubtype:item") === true;
+  if (keyword === "go again") return { hasConditionalGoAgain: destroyedItem };
   return {
     onAttackDeclared(ctx) {
-      if (ctx.getPlayerFlag(ctx.seat, "destroyedSubtype:item") !== true) return;
-      if (keyword === "go again") ctx.grantGoAgain();
-      else ctx.setFlag("link", "overpower", true);
+      if (destroyedItem(ctx)) ctx.setFlag("link", "overpower", true);
     },
   };
 }

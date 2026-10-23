@@ -910,10 +910,7 @@ export const hvy: Record<string, CardScript> = mergeSetScripts("HVY", hvyHighRar
   },
   ...pitches("rising power", () => ({ modifyAttack: (ctx) => (drawnThisTurn(ctx) ? 1 : 0) })),
   ...pitches("rising speed", () => ({
-    onAttackDeclared(ctx) {
-      ctx.suppressCardKeyword(ctx.self.instanceId, "go again");
-      if (drawnThisTurn(ctx)) ctx.grantGoAgain();
-    },
+    hasConditionalGoAgain: drawnThisTurn,
   })),
   ...pitches("rising energy", () => ({
     modifyPlayCost: (ctx, base) => (drawnThisTurn(ctx) ? Math.max(0, base - 1) : base),

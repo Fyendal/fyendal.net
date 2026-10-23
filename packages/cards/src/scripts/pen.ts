@@ -677,9 +677,7 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
     },
   },
   ...pitches("aggressive pounce", () => ({
-    onAttackDeclared(ctx) {
-      if (ctx.getFlag("player", "intimidatedThisTurn") === true) ctx.grantGoAgain();
-    },
+    hasConditionalGoAgain: (ctx) => ctx.getFlag("player", "intimidatedThisTurn") === true,
   })),
   "bear hug|1": { canPlay: (ctx) => ctx.player(ctx.seat).pitch.some((card) => isSixPlus(ctx, card)) },
   "bear hug|2": { canPlay: (ctx) => ctx.player(ctx.seat).pitch.some((card) => isSixPlus(ctx, card)) },

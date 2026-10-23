@@ -280,10 +280,7 @@ export const sen: Record<string, CardScript> = {
   },
 
   "second tenet of chi: wind|3": {
-    // Go again is conditional (KEYWORD_OVERRIDES strips the printed keyword).
-    onAttackDeclared(ctx) {
-      if (ctx.getFlag("player", "transcendedThisTurn")) ctx.grantGoAgain();
-    },
+    hasConditionalGoAgain: (ctx) => ctx.getFlag("player", "transcendedThisTurn") === true,
   },
 
   "spectral rider|3": {
