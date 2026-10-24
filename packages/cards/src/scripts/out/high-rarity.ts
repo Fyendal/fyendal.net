@@ -464,29 +464,6 @@ export const outHighRarity: Record<string, CardScript> = {
       }
     },
   },
-  "riptide, lurker of the deep|0": {
-    triggers: [
-      {
-        event: "card-played",
-        label: "Put a card from hand face down into arsenal?",
-        condition: (_ctx, _card, event) => event?.from === "hand",
-        effect(ctx) {
-          arsenalFromHand(ctx, "riptide-arsenal");
-        },
-      },
-      {
-        event: "trap-triggered",
-        whose: "subject",
-        label: "Deal 1 damage",
-        effect(ctx) {
-          ctx.dealDamage(opponentSeat(ctx), 1);
-        },
-      },
-    ],
-    onChoose(ctx, hook, option) {
-      if (hook === "riptide-arsenal" && option !== "no") ctx.putIntoArsenal(Number(option), "hand", { faceUp: false });
-    },
-  },
   "barbed castaway|0": {
     activated: [
       {

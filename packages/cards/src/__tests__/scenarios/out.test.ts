@@ -725,6 +725,48 @@ describe("OUT — rules regression coverage", () => {
     },
   );
 
+  describe("Riptide, Lurker of the Deep's arsenal trigger", () => {
+    const lurker = (spec: { arsenal?: string[]; arsenalFaceDown?: string[]; head?: string } = {}) =>
+      scenario({
+        seats: [
+          {
+            hero: "rhinar",
+            heroKey: "riptide, lurker of the deep|0",
+            hand: ["wounded bull|1", BLUE, BLUE],
+            resources: 3,
+            ...(spec.arsenal ? { arsenal: spec.arsenal } : {}),
+            ...(spec.arsenalFaceDown ? { arsenalFaceDown: spec.arsenalFaceDown } : {}),
+            ...(spec.head ? { equipment: { head: spec.head } } : {}),
+          },
+          { hero: "dorinthea" },
+        ],
+      });
+
+    it("offers hand cards directly and arsenals the picked one face down", () => {
+      const g = lurker();
+      g.play("wounded bull|1", { pitch: [] });
+      const hand = g.state.players[0]!.hand;
+      const blue = hand.find((card) => card.cardId === printingId(BLUE))!.instanceId;
+      expect(g.state.pendingDecision).toMatchObject({ chooseHook: "riptide-arsenal", defaultOption: "pass" });
+      expect(g.state.pendingDecision?.options).toEqual(["pass", ...hand.map((card) => String(card.instanceId))]);
+      g.chooseOption(String(blue));
+      expect(g.state.players[0]!.arsenal).toMatchObject([{ instanceId: blue, faceDown: true }]);
+    });
+
+    it("does not trigger with a full arsenal", () => {
+      const g = lurker({ arsenalFaceDown: [BLUE] });
+      g.play("wounded bull|1", { pitch: [] });
+      expect(g.state.pendingDecision?.chooseHook).not.toBe("riptide-arsenal");
+      expect(g.state.log.some((entry) => entry.publicText?.includes("face down into arsenal?"))).toBe(false);
+    });
+
+    it("triggers when New Horizon adds a second arsenal zone", () => {
+      const g = lurker({ arsenal: ["falcon wing|1"], head: "new horizon|0" });
+      g.play("wounded bull|1", { pitch: [] });
+      expect(g.state.pendingDecision?.chooseHook).toBe("riptide-arsenal");
+    });
+  });
+
   it("Be Like Water's chosen name enables the matching Combo condition", () => {
     const s = scenario({
       seats: [
