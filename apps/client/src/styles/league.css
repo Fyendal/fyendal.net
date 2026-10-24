@@ -199,13 +199,17 @@
 .league-availability-side p[role] { margin: 0; font-size: 13px; }
 
 .availability-editor { margin-top: 8px; }
+.availability-hint { max-width: 560px; margin: 0 0 8px; color: var(--text-muted); font-size: 12px; line-height: 1.4; }
 .availability-grid {
   display: grid;
   grid-template-columns: max-content repeat(7, minmax(28px, 1fr));
   max-width: 560px;
-  touch-action: none;
+  /* The page scrolls from the grid; a held touch cancels touchmove to paint. */
+  touch-action: pan-y pinch-zoom;
   user-select: none;
+  -webkit-touch-callout: none;
 }
+.availability-grid[data-holding] { outline: 2px solid var(--gold); outline-offset: 4px; }
 .availability-row { display: contents; }
 .availability-day {
   padding: 0 0 6px;

@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useIntl } from "react-intl";
 import { useShallow } from "zustand/react/shallow";
 import type { LeagueAvailabilityWindow, LeagueMembership } from "@fyendal/shared";
@@ -136,9 +136,14 @@ function AvailabilityView({ league, onSaved }: { league: LeagueMembership; onSav
   const [notice, setNotice] = useState<{ text: string; error: boolean } | null>(null);
   const dirty = timeZone !== league.timeZone || !sameWindows(availability, league.availability);
 
+  // Polling replaces `league` every refresh; keep an unsaved draft unless
+  // the saved template itself changed.
+  const loaded = useRef({ timeZone: league.timeZone, availability: league.availability });
   useEffect(() => {
-    setTimeZone(league.timeZone);
-    setAvailability(league.availability);
+    const previous = loaded.current;
+    loaded.current = { timeZone: league.timeZone, availability: league.availability };
+    if (previous.timeZone !== league.timeZone) setTimeZone(league.timeZone);
+    if (!sameWindows(previous.availability, league.availability)) setAvailability(league.availability);
   }, [league.availability, league.timeZone]);
 
   const save = async () => {

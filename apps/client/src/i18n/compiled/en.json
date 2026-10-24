@@ -31309,7 +31309,19 @@
   "league.availability.help": [
     {
       "type": 0,
-      "value": "Drag across the grid to mark when you can usually play, in your time zone. Pairings favor opponents whose free time overlaps yours."
+      "value": "Mark when you can usually play, in your time zone. Pairings favor opponents whose free time overlaps yours."
+    }
+  ],
+  "league.availability.hint.pointer": [
+    {
+      "type": 0,
+      "value": "Drag across the grid to mark half hours."
+    }
+  ],
+  "league.availability.hint.touch": [
+    {
+      "type": 0,
+      "value": "Tap a half hour, or press and hold, then drag."
     }
   ],
   "league.availability.save": [
@@ -31415,7 +31427,7 @@
   "league.join.availabilityHelp": [
     {
       "type": 0,
-      "value": "When can you usually play? Drag across the grid in your time zone. Pairings favor opponents whose free time overlaps yours, and you can change this later."
+      "value": "When can you usually play? Mark it in your time zone. Pairings favor opponents whose free time overlaps yours, and you can change this later."
     }
   ],
   "league.join.failed": [

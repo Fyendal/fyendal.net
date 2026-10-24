@@ -32215,7 +32215,19 @@
   "league.availability.help": [
     {
       "type": 0,
-      "value": "Arrastra por la cuadrícula para marcar cuándo sueles poder jugar, en tu zona horaria. Los emparejamientos favorecen a rivales con horarios libres en común."
+      "value": "Marca cuándo sueles poder jugar, en tu zona horaria. Los emparejamientos favorecen a rivales con horarios libres en común."
+    }
+  ],
+  "league.availability.hint.pointer": [
+    {
+      "type": 0,
+      "value": "Arrastra por la cuadrícula para marcar medias horas."
+    }
+  ],
+  "league.availability.hint.touch": [
+    {
+      "type": 0,
+      "value": "Toca una media hora, o mantén pulsado y luego arrastra."
     }
   ],
   "league.availability.save": [
@@ -32321,7 +32333,7 @@
   "league.join.availabilityHelp": [
     {
       "type": 0,
-      "value": "¿Cuándo sueles poder jugar? Arrastra por la cuadrícula en tu zona horaria. Los emparejamientos favorecen a rivales con horarios libres en común, y puedes cambiarlo después."
+      "value": "¿Cuándo sueles poder jugar? Márcalo en tu zona horaria. Los emparejamientos favorecen a rivales con horarios libres en común, y puedes cambiarlo después."
     }
   ],
   "league.join.failed": [

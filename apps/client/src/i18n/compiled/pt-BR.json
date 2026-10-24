@@ -32960,7 +32960,19 @@
   "league.availability.help": [
     {
       "type": 0,
-      "value": "Arraste pela grade para marcar quando você costuma poder jogar, no seu fuso horário. Os pareamentos favorecem oponentes com horários livres em comum."
+      "value": "Marque quando você costuma poder jogar, no seu fuso horário. Os pareamentos favorecem oponentes com horários livres em comum."
+    }
+  ],
+  "league.availability.hint.pointer": [
+    {
+      "type": 0,
+      "value": "Arraste pela grade para marcar meias horas."
+    }
+  ],
+  "league.availability.hint.touch": [
+    {
+      "type": 0,
+      "value": "Toque em uma meia hora, ou pressione e segure e depois arraste."
     }
   ],
   "league.availability.save": [
@@ -33074,7 +33086,7 @@
   "league.join.availabilityHelp": [
     {
       "type": 0,
-      "value": "Quando você costuma poder jogar? Arraste pela grade no seu fuso horário. Os pareamentos favorecem oponentes com horários livres em comum, e você pode mudar isso depois."
+      "value": "Quando você costuma poder jogar? Marque no seu fuso horário. Os pareamentos favorecem oponentes com horários livres em comum, e você pode mudar isso depois."
     }
   ],
   "league.join.failed": [

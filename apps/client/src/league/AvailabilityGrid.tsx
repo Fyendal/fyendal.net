@@ -1,4 +1,13 @@
-import { useEffect, useMemo, useRef, useState, type KeyboardEvent, type PointerEvent } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type KeyboardEvent,
+  type MouseEvent,
+  type PointerEvent,
+} from "react";
 import { useIntl } from "react-intl";
 import { LEAGUE_SLOT_MINUTES } from "@fyendal/protocol";
 import type { LeagueAvailabilityWindow } from "@fyendal/shared";
@@ -8,8 +17,33 @@ import { availableMinutes, cellIndex, cellsToWindows, GRID_WEEKDAYS, SLOTS_PER_D
 const weekdayDate = (weekday: number) => Date.UTC(2024, 0, 7 + weekday);
 const slotDate = (slot: number) => Date.UTC(2024, 0, 7, 0, slot * LEAGUE_SLOT_MINUTES);
 
-/** Weekly availability in the member's own time zone: drag to paint cells,
- * or move with the arrow keys and toggle with Space. */
+/** A touch held this long on a cell starts painting, matching the card
+ * inspect gesture; a shorter one toggles the cell and a moving one scrolls. */
+export const HOLD_MS = 425;
+const HOLD_MOVE_PX = 10;
+const COARSE_POINTER_QUERY = "(pointer: coarse)";
+
+type Gesture =
+  | { kind: "hold"; pointerId: number; cell: number; x: number; y: number; timer: number }
+  | { kind: "paint"; selected: boolean; last: number };
+
+function useCoarsePointer(): boolean {
+  const supported = typeof window !== "undefined" && typeof window.matchMedia === "function";
+  const [coarse, setCoarse] = useState(() => supported && window.matchMedia(COARSE_POINTER_QUERY).matches);
+  useEffect(() => {
+    if (!supported) return;
+    const query = window.matchMedia(COARSE_POINTER_QUERY);
+    const update = () => setCoarse(query.matches);
+    update();
+    query.addEventListener("change", update);
+    return () => query.removeEventListener("change", update);
+  }, [supported]);
+  return coarse;
+}
+
+/** Weekly availability in the member's own time zone. A mouse paints cells
+ * on drag; a touch taps one cell or holds before dragging, so the page still
+ * scrolls from the grid; the arrow keys move and Space toggles. */
 export function AvailabilityGrid({
   value,
   onChange,
@@ -22,13 +56,15 @@ export function AvailabilityGrid({
   labelledBy: string;
 }) {
   const intl = useIntl();
+  const coarse = useCoarsePointer();
   const cells = useMemo(() => windowsToCells(value), [value]);
   // Several pointer moves can land before the parent re-renders with the
   // last change, so paint onto the newest cells rather than this render's.
   const latest = useRef(cells);
   latest.current = cells;
   const gridRef = useRef<HTMLDivElement>(null);
-  const paint = useRef<{ selected: boolean; last: number } | null>(null);
+  const gesture = useRef<Gesture | null>(null);
+  const [holding, setHolding] = useState(false);
   const [focus, setFocus] = useState(cellIndex(GRID_WEEKDAYS[0], 36));
 
   const labels = useMemo(() => {
@@ -41,14 +77,33 @@ export function AvailabilityGrid({
     };
   }, [intl]);
 
+  const endGesture = useCallback(() => {
+    const current = gesture.current;
+    if (current?.kind === "hold") window.clearTimeout(current.timer);
+    gesture.current = null;
+    setHolding(false);
+  }, []);
+
   useEffect(() => {
-    const stop = () => { paint.current = null; };
-    window.addEventListener("pointerup", stop);
-    window.addEventListener("pointercancel", stop);
+    window.addEventListener("pointerup", endGesture);
+    window.addEventListener("pointercancel", endGesture);
     return () => {
-      window.removeEventListener("pointerup", stop);
-      window.removeEventListener("pointercancel", stop);
+      window.removeEventListener("pointerup", endGesture);
+      window.removeEventListener("pointercancel", endGesture);
+      endGesture();
     };
+  }, [endGesture]);
+
+  useEffect(() => {
+    const grid = gridRef.current;
+    if (!grid) return;
+    // `touch-action` is fixed at touchstart, so a held touch keeps the page
+    // still by cancelling each touchmove before the browser starts a scroll.
+    const block = (event: TouchEvent) => {
+      if (gesture.current?.kind === "paint") event.preventDefault();
+    };
+    grid.addEventListener("touchmove", block, { passive: false });
+    return () => grid.removeEventListener("touchmove", block);
   }, []);
 
   const setCells = (targets: readonly number[], selected: boolean) => {
@@ -82,29 +137,67 @@ export function AvailabilityGrid({
     });
   };
 
-  // Hit-test by point so a touch drag paints every cell it crosses.
+  // Hit-test by point so a drag paints every cell it crosses.
   const cellAt = (x: number, y: number): number | null => {
     const element = document.elementFromPoint(x, y);
     const cell = element instanceof HTMLElement ? element.dataset.cell : undefined;
     return cell === undefined || !gridRef.current?.contains(element) ? null : Number(cell);
   };
 
+  const startPaint = (cell: number, held: boolean) => {
+    const selected = !latest.current.has(cell);
+    gesture.current = { kind: "paint", selected, last: cell };
+    setHolding(held);
+    setFocus(cell);
+    setCells([cell], selected);
+  };
+
   const onPointerDown = (event: PointerEvent<HTMLDivElement>) => {
-    if (disabled || event.button !== 0) return;
+    if (disabled || event.button !== 0 || !event.isPrimary) return;
     const cell = cellAt(event.clientX, event.clientY);
     if (cell === null) return;
-    event.preventDefault();
-    paint.current = { selected: !cells.has(cell), last: cell };
-    setFocus(cell);
-    setCells([cell], paint.current.selected);
+    endGesture();
+    if (event.pointerType === "mouse") {
+      event.preventDefault();
+      startPaint(cell, false);
+      return;
+    }
+    const pointerId = event.pointerId;
+    const timer = window.setTimeout(() => {
+      const current = gesture.current;
+      if (current?.kind !== "hold" || current.pointerId !== pointerId) return;
+      navigator.vibrate?.(12);
+      startPaint(cell, true);
+    }, HOLD_MS);
+    gesture.current = { kind: "hold", pointerId, cell, x: event.clientX, y: event.clientY, timer };
   };
 
   const onPointerMove = (event: PointerEvent<HTMLDivElement>) => {
-    if (paint.current === null) return;
+    const current = gesture.current;
+    if (current === null) return;
+    if (current.kind === "hold") {
+      const moved = Math.abs(event.clientX - current.x) > HOLD_MOVE_PX || Math.abs(event.clientY - current.y) > HOLD_MOVE_PX;
+      if (current.pointerId === event.pointerId && moved) endGesture();
+      return;
+    }
     const cell = cellAt(event.clientX, event.clientY);
-    if (cell === null || cell === paint.current.last) return;
-    setCells(path(paint.current.last, cell), paint.current.selected);
-    paint.current = { ...paint.current, last: cell };
+    if (cell === null || cell === current.last) return;
+    setCells(path(current.last, cell), current.selected);
+    gesture.current = { ...current, last: cell };
+  };
+
+  // A touch released before the hold elapses is a tap on one cell.
+  const onPointerUp = (event: PointerEvent<HTMLDivElement>) => {
+    const current = gesture.current;
+    if (current?.kind === "hold" && current.pointerId === event.pointerId) {
+      setFocus(current.cell);
+      setCells([current.cell], !latest.current.has(current.cell));
+    }
+    endGesture();
+  };
+
+  const onContextMenu = (event: MouseEvent<HTMLDivElement>) => {
+    if (gesture.current !== null) event.preventDefault();
   };
 
   const onKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
@@ -131,14 +224,20 @@ export function AvailabilityGrid({
 
   return (
     <div className="availability-editor">
+      <p className="availability-hint">
+        {intl.formatMessage({ id: coarse ? "league.availability.hint.touch" : "league.availability.hint.pointer" })}
+      </p>
       <div
         ref={gridRef}
         className="availability-grid"
         role="group"
         aria-labelledby={labelledBy}
         aria-disabled={disabled || undefined}
+        data-holding={holding || undefined}
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
+        onPointerUp={onPointerUp}
+        onContextMenu={onContextMenu}
         onKeyDown={onKeyDown}
       >
         <span className="availability-corner" aria-hidden="true" />
@@ -162,7 +261,7 @@ export function AvailabilityGrid({
                   )}
                   tabIndex={cell === focus ? 0 : -1}
                   disabled={disabled}
-                  // Pointer input paints on pointerdown; this handles keyboard activation only.
+                  // Pointer input is handled above; this handles keyboard activation only.
                   onClick={(event) => { if (event.detail === 0) setCells([cell], !selected); }}
                   onFocus={() => setFocus(cell)}
                 />

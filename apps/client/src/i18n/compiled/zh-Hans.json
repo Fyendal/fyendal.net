@@ -30056,7 +30056,19 @@
   "league.availability.help": [
     {
       "type": 0,
-      "value": "在网格上拖动，按你的时区标出你通常可以对战的时间。配对会优先选择与你空闲时间重叠的对手。"
+      "value": "按你的时区标出你通常可以对战的时间。配对会优先选择与你空闲时间重叠的对手。"
+    }
+  ],
+  "league.availability.hint.pointer": [
+    {
+      "type": 0,
+      "value": "在网格上拖动以标出半小时时段。"
+    }
+  ],
+  "league.availability.hint.touch": [
+    {
+      "type": 0,
+      "value": "点按一个半小时时段，或长按后拖动。"
     }
   ],
   "league.availability.save": [
@@ -30140,7 +30152,7 @@
   "league.join.availabilityHelp": [
     {
       "type": 0,
-      "value": "你通常什么时候可以对战？按你的时区在网格上拖动标记。配对会优先选择与你空闲时间重叠的对手，之后也可以修改。"
+      "value": "你通常什么时候可以对战？按你的时区标出。配对会优先选择与你空闲时间重叠的对手，之后也可以修改。"
     }
   ],
   "league.join.failed": [
