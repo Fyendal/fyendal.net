@@ -1,7 +1,7 @@
 import type { CardView, GameView } from "@fyendal/shared";
 import { cardData } from "@fyendal/cards/client";
 import { describe, expect, it } from "vitest";
-import { detectDeckCardEvents, revealedCardIdsFromLogs } from "./deckCardEvents.js";
+import { decisionRevealEvent, detectDeckCardEvents, revealedCardIdsFromLogs } from "./deckCardEvents.js";
 
 function card(instanceId: number, cardId: string): CardView {
   return { instanceId, cardId, owner: 0 };
@@ -407,5 +407,46 @@ describe("public deck-card events", () => {
       log: ["Hero plays Spark of Genius", "Hero shuffles their deck"],
     });
     expect(detectDeckCardEvents(previous, current).some((event) => event.kind === "graveyard")).toBe(false);
+  });
+});
+
+describe("decision reveal toast", () => {
+  const revealedHand = [
+    { ...card(41, "1HP402"), owner: 1 },
+    { ...card(42, "1HP408"), owner: 1 },
+  ];
+  const decisionView = (options: string[]): GameView => ({
+    ...view(),
+    pendingDecision: {
+      player: 0,
+      kind: "choose-target",
+      prompt: "Search for a defense reaction?",
+      options,
+      revealedCards: revealedHand,
+    },
+    logEntries: [{
+      fallback: "Opponent reveals Razor Reflex, Sink Below from hand",
+      message: { id: "engine.log.cards.revealed.from.hand" },
+      sequence: 7,
+      event: {
+        kind: "cards-revealed",
+        cards: revealedHand.map((revealed) => ({ cardId: revealed.cardId, ownerSeat: 1 })),
+        sourceZone: "hand",
+      },
+    }],
+  });
+
+  it("rebuilds a context reveal from the pending choice", () => {
+    expect(decisionRevealEvent(decisionView(["pass", "90"]))).toEqual({
+      kind: "reveal",
+      cardIds: ["1HP402", "1HP408"],
+      label: "Revealed from hand",
+      sourceZone: "hand",
+      cardSeats: [1, 1],
+    });
+  });
+
+  it("leaves a selectable revealed group to the decision panel", () => {
+    expect(decisionRevealEvent(decisionView(["41"]))).toBeNull();
   });
 });

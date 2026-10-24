@@ -152,11 +152,20 @@ function finishClashAttempt(
   }
   const source = findCardAnywhere(state, request.sourceInstanceId);
   if (source) {
+    const before = state.pendingDecision;
     scriptOf(state, source.card.cardId, source.card)?.onClashResult?.(
       runtime.makeCtx(state, request.sourceSeat, source.card, currentLink(state)),
       request.resultHook,
       attempt.winner,
     );
+    // the clashed cards stay public beside the choice the result asks
+    const decision = state.pendingDecision;
+    const revealedCardIds = attempt.revealed
+      .map((revealed) => revealed.instanceId)
+      .filter((instanceId) => findCardAnywhere(state, instanceId));
+    if (decision && decision !== before && !decision.revealedCardIds?.length && revealedCardIds.length) {
+      decision.revealedCardIds = revealedCardIds;
+    }
   }
 }
 

@@ -52,6 +52,10 @@ describe("HNT — Sound the Alarm", () => {
       "defense-reaction",
       "defense-reaction",
     ]);
+    // the revealed hand stays on the decision, so undo back to it shows it again
+    expect(revealedView.pendingDecision?.revealedCards?.map((card) => card.cardId).sort()).toEqual(
+      g.state.players[1]!.hand.map((card) => card.cardId).sort(),
+    );
 
     g.chooseCard("sink below|1")
       .expectDeckTop(0, "sink below|1");

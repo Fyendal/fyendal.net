@@ -3,7 +3,7 @@ import { useIntl } from "react-intl";
 import type { GameView } from "@fyendal/shared";
 import { cardData } from "@fyendal/cards/client";
 import { cardImageUrl } from "./Card.js";
-import { detectDeckCardEvents, type DeckCardEvent } from "./deckCardEvents.js";
+import { decisionRevealEvent, detectDeckCardEvents, type DeckCardEvent } from "./deckCardEvents.js";
 
 const DISPLAY_MS = 2_600;
 // a die lingers a little longer: its result only shows once it lands
@@ -91,6 +91,8 @@ export function useDeckCardFeedback(view: GameView | null, enabled: boolean): {
   };
 } {
   const previousRef = useRef<GameView | null>(view);
+  // the choice whose reveal was already shown, so a dismissal sticks
+  const revealShownForRef = useRef<string | null>(null);
   const shuffleTimersRef = useRef(new Map<number, number>());
   const [queue, setQueue] = useState<{ event: DeckCardEvent; choiceKey: string | null }[]>([]);
   const [shuffledSeats, setShuffledSeats] = useState<ReadonlySet<number>>(() => new Set());
@@ -105,22 +107,30 @@ export function useDeckCardFeedback(view: GameView | null, enabled: boolean): {
   useClientLayoutEffect(() => {
     const previous = previousRef.current;
     previousRef.current = view;
-    if (!enabled || !previous || !view) {
+    if (!enabled || !view) {
       if (!enabled) {
         setQueue([]);
         setShuffledSeats(new Set());
         setHovered(false);
         setExiting(false);
+        revealShownForRef.current = null;
       }
       return;
     }
-    const events = detectDeckCardEvents(previous, view);
+    const events = previous ? detectDeckCardEvents(previous, view) : [];
     const toastEvents = events.filter((event) => event.kind !== "shuffle");
     const seats = events.flatMap((event) => event.kind === "shuffle" && event.seat !== undefined ? [event.seat] : []);
     // a reveal shown beside a pending choice stays until that choice is answered or dismissed
     const choiceKey = scriptedChoiceKey(view);
-    if (toastEvents.length > 0) {
-      setQueue((current) => [...current, ...toastEvents.map((event) => ({ event, choiceKey }))]);
+    if (choiceKey !== scriptedChoiceKey(previous)) revealShownForRef.current = null;
+    const restored = choiceKey !== null && revealShownForRef.current !== choiceKey &&
+        !toastEvents.some((event) => event.kind === "reveal")
+      ? decisionRevealEvent(view)
+      : null;
+    const queued = restored ? [...toastEvents, restored] : toastEvents;
+    if (choiceKey !== null && queued.some((event) => event.kind === "reveal")) revealShownForRef.current = choiceKey;
+    if (queued.length > 0) {
+      setQueue((current) => [...current, ...queued.map((event) => ({ event, choiceKey }))]);
     }
     if (seats.length > 0) {
       setShuffledSeats((current) => new Set([...current, ...seats]));

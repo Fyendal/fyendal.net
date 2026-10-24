@@ -811,14 +811,20 @@ describe("SUP — heroes and the crowd", () => {
         }),
         foe({
           hand: ["path of same ends|1", "snatch|1"],
+          deck: ["raging onslaught|1", "raging onslaught|2"],
         }),
       ],
     });
 
     g.play("path of same ends|1")
       .blockWith("vigorous smashup|2")
-      .settle()
-      .chooseOption("no");
+      .settle();
+    // the clashed cards ride on the bottom choice, so undo back to it shows them again
+    expect(g.state.pendingDecision?.chooseHook).toBe("clash-bottom");
+    const revealed = projectStateFor(g.state, 1).pendingDecision?.revealedCards ?? [];
+    expect(revealed.map((card) => card.instanceId)).toContain(g.state.players[0]!.deck[0]!.instanceId);
+    expect(revealed.map((card) => card.owner).sort()).toEqual([0, 1]);
+    g.chooseOption("no");
 
     expect(g.state.players[0]!.deck[0]?.cardId).toBe(printingId("vigorous smashup|2"));
 

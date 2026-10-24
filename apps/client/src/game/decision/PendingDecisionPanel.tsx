@@ -1,5 +1,5 @@
 import { cardData } from "@fyendal/cards/client";
-import type { CardView } from "@fyendal/shared";
+import type { CardView, PendingDecision } from "@fyendal/shared";
 import { useEffect, useId, useRef, useState, type CSSProperties } from "react";
 import { createPortal } from "react-dom";
 import { useIntl } from "react-intl";
@@ -19,6 +19,7 @@ import {
   boundedCardChoiceSelectable,
   toggleBoundedCardChoice,
 } from "../decisionPresentation.js";
+import { contextRevealedCards } from "../deckCardEvents.js";
 import { decisionSpaceOption } from "../passHotkey.js";
 import { ArsenalSkipConfirmation, OptDecisionInstructions } from "./ActionConfirmations.js";
 import { BloodModeDecision } from "./BloodModeDecision.js";
@@ -282,12 +283,17 @@ function GuidanceSettingsInfo({
   );
 }
 
+/** A reveal offered only as context shows in the reveal toast instead. */
+function panelRevealedCards(decision: PendingDecision): CardView[] {
+  return contextRevealedCards(decision).length > 0 ? [] : decision.revealedCards ?? [];
+}
+
 /** The tinted mat half shows who is deciding, so another player's decision needs
  * a panel only to show the cards it reveals. */
 export function pendingDecisionPanelShown(model: PendingDecisionModel): boolean {
   const decision = model.decision;
   if (!decision) return false;
-  return model.isMine || (decision.revealedCards?.length ?? 0) > 0;
+  return model.isMine || panelRevealedCards(decision).length > 0;
 }
 
 export function PendingDecisionPanel({
@@ -332,7 +338,7 @@ export function PendingDecisionPanel({
   const bloodAllocation = bloodModeAllocation(pd);
   const boundedCardChoice = boundedCardChoiceModel(pd);
   const handPickDecision = handCardChoiceOptions(pd, hand) !== null;
-  const revealedCards = pd.revealedCards ?? [];
+  const revealedCards = panelRevealedCards(pd);
   const revealedChoice = revealedCards.length > 0;
   const lookedCards = pd.lookedCards ?? [];
   const offeredCardIds = new Set<number>();
