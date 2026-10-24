@@ -244,6 +244,7 @@ describe("EVR — registration and combat designs", () => {
     s.expectNotInZone(0, "frostbite|0", "board");
     expect(s.state.stack[0]?.engineEffect?.kind).toBe("on-defend-hook");
     expect(s.state.pendingDecision?.kind).toBe("priority-window");
+    expect(projectStateFor(s.state, 0).stackContext).toBe("DEFEND STEP · TRIGGERS");
 
     s.settle().expectInZone(0, "frostbite|0", "board");
   });

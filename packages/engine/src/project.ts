@@ -785,6 +785,7 @@ function projectedStackContext(state: GameStateInternal): string | undefined {
   const attackOnStack = state.stackResume === "start-attack-step";
   const attackStepEffects = !!link && !link.resolved &&
     state.phase === "layer" &&
+    state.stackResume !== "start-reaction-step" &&
     (link.flags.attackStepBegan === true || state.stackResume === "continue-attack");
   if (state.stackResume === "finish-link-resolution") {
     if (currentLink(state)?.flags.resolutionStepBegan === true) {
