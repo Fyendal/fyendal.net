@@ -8,14 +8,23 @@ import type {
 import { withTransaction, type Queryable } from "../db.js";
 import { intersectIntervals, materializeWeek, MINUTE_MS, seasonWeekBounds, type Interval } from "./availability.js";
 import { notifyLeague } from "./leagueEvents.js";
-import { format, leagueStatus, matchResult, matchStage, matchStatus, nullableNumber, storedWindows } from "./leagueRows.js";
+import {
+  format,
+  leagueStatus,
+  matchResult,
+  matchStage,
+  matchStatus,
+  nullableNumber,
+  OPEN_STATUSES,
+  SCHEDULABLE_STATUSES,
+  storedWindows,
+} from "./leagueRows.js";
 
 /** A player can mark ready from shortly before the agreed start until a
  * short grace after it; a lone ready player can then claim the forfeit. */
 export const READY_OPENS_MS = 5 * MINUTE_MS;
 export const READY_CLOSES_MS = 15 * MINUTE_MS;
 const HOUR_MS = 60 * MINUTE_MS;
-const SCHEDULABLE: readonly LeagueMatchStatus[] = ["unscheduled", "proposed", "scheduled"];
 
 export type LeagueMatchUpdateResult = "updated" | "not-found" | "closed";
 
@@ -79,17 +88,14 @@ async function lockMemberMatch(tx: Queryable, matchId: string, userId: number): 
 
 const running = (match: MemberMatch) => match.leagueStatus === "season" || match.leagueStatus === "playoffs";
 const me = (match: MemberMatch) => (match.side === "a" ? match.a : match.b!);
-const playable = (match: MemberMatch) => running(match) && match.b !== null && SCHEDULABLE.includes(match.status);
+const playable = (match: MemberMatch) => running(match) && match.b !== null && SCHEDULABLE_STATUSES.includes(match.status);
 
-/** Back to scheduling after a room ends without a result; any earlier time
- * returns to proposed so both players confirm it again. The room, if it
- * still exists, no longer counts for the league. */
+/** Back to scheduling after a game ends without a result; any earlier time
+ * returns to proposed so both players confirm it again. */
 async function returnToScheduling(
   tx: Queryable,
   match: { id: string; leagueId: string; a: number; b: number; scheduledAt: unknown },
-  roomCode: string | null,
 ): Promise<void> {
-  if (roomCode !== null) await tx.query("UPDATE rooms SET league_match_id = NULL WHERE code = $1", [roomCode]);
   await tx.query(
     "UPDATE league_matches SET status = $2, room_code = NULL WHERE id = $1",
     [match.id, match.scheduledAt === null ? "unscheduled" : "proposed"],
@@ -200,7 +206,7 @@ export async function claimLeagueRoom(
     if (rows.length) return { code: match.roomCode, format: match.format };
   }
   // The game's room was lost; the replacement starts a new game.
-  if (match.status === "in-room") await returnToScheduling(tx, { ...match, b: match.b! }, null);
+  if (match.status === "in-room") await returnToScheduling(tx, { ...match, b: match.b! });
   return { code: null, format: match.format };
 }
 
@@ -241,7 +247,7 @@ export async function startLeagueRoomGame(db: Queryable, roomCode: string): Prom
     [matchId],
   );
   const match = rows[0];
-  if (!match || !SCHEDULABLE.includes(matchStatus(match.status))) return;
+  if (!match || !SCHEDULABLE_STATUSES.includes(matchStatus(match.status))) return;
   await db.query("UPDATE league_matches SET status = 'in-room' WHERE id = $1", [match.id]);
   await notifyLeague(db, String(match.league_id), [Number(match.member_a), Number(match.member_b)]);
 }
@@ -278,7 +284,9 @@ export async function resolveLeagueRoomGame(
     a: Number(match.member_a), b: Number(match.member_b), scheduledAt: match.scheduled_at,
   };
   if (!decided && !game.draw) {
-    await returnToScheduling(db, players, roomCode);
+    // The finished room cannot host another game; the next entry creates one.
+    await db.query("UPDATE rooms SET league_match_id = NULL WHERE code = $1", [roomCode]);
+    await returnToScheduling(db, players);
     return;
   }
   const { rows: recorded } = await db.query(
@@ -292,6 +300,18 @@ export async function resolveLeagueRoomGame(
   await notifyLeague(db, players.leagueId, [players.a, players.b]);
 }
 
+/** League rooms that GC must keep: an open match's room, except an abandoned
+ * game's once its deadline passes. `code` narrows the check to one room. */
+export async function leagueRoomsInUse(db: Queryable, now: number, code?: string): Promise<string[]> {
+  const { rows } = await db.query(
+    `SELECT r.code FROM rooms r JOIN league_matches m ON m.id = r.league_match_id
+     WHERE ($3::text IS NULL OR r.code = $3)
+       AND (m.status = ANY($2) OR (m.status = 'in-room' AND m.deadline_at > $1))`,
+    [now, SCHEDULABLE_STATUSES, code ?? null],
+  );
+  return rows.map((row) => String(row.code));
+}
+
 /** A ruleset cutover or garbage collection can delete a room. A game lost
  * that way returns its match to scheduling; before a game, the match only
  * forgets the room, and the next entry creates another. */
@@ -299,7 +319,7 @@ export async function resetLostLeagueRooms(tx: Queryable, leagueId: string): Pro
   const { rows } = await tx.query(
     `SELECT id, member_a, member_b, status, scheduled_at, room_code FROM league_matches
      WHERE league_id = $1 AND status = ANY($2) AND room_code IS NOT NULL`,
-    [leagueId, [...SCHEDULABLE, "in-room"]],
+    [leagueId, OPEN_STATUSES],
   );
   for (const row of rows) {
     const code = String(row.room_code);
@@ -308,7 +328,7 @@ export async function resetLostLeagueRooms(tx: Queryable, leagueId: string): Pro
     if (row.status === "in-room") {
       await returnToScheduling(tx, {
         id: String(row.id), leagueId, a: Number(row.member_a), b: Number(row.member_b), scheduledAt: row.scheduled_at,
-      }, null);
+      });
     } else {
       await tx.query("UPDATE league_matches SET room_code = NULL WHERE id = $1", [row.id]);
     }

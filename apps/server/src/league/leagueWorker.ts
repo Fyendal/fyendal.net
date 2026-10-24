@@ -15,7 +15,16 @@ import {
   type PlayoffSize,
 } from "./bracket.js";
 import { resolveOverdue } from "./forfeits.js";
-import { leagueStatus, matchResult, matchStage, matchStatus, nullableNumber, storedWindows } from "./leagueRows.js";
+import {
+  leagueStatus,
+  matchResult,
+  matchStage,
+  matchStatus,
+  nullableNumber,
+  OPEN_STATUSES,
+  SCHEDULABLE_STATUSES,
+  storedWindows,
+} from "./leagueRows.js";
 import { notifyLeague } from "./leagueEvents.js";
 import { resetLostLeagueRooms } from "./leagueMatches.js";
 import { dropLeagueMember } from "./leagueStore.js";
@@ -26,7 +35,6 @@ import { computeStandings, type StandingRow } from "./standings.js";
 export const LEAGUE_LEASE = "league";
 export const LEAGUE_TICK_INTERVAL_MS = 15_000;
 const HOUR_MS = 3_600_000;
-const OPEN_STATUSES: readonly LeagueMatchStatus[] = ["unscheduled", "proposed", "scheduled", "in-room"];
 
 interface League {
   id: string;
@@ -310,10 +318,10 @@ async function advancePlayoffs(tx: Queryable, league: League, now: number): Prom
 }
 
 /** Resolves unplayed matches past their deadline and returns how many. A
- * match whose game is already in a room waits for that game. */
+ * match whose game has started waits for that game. */
 async function resolveOverdueMatches(tx: Queryable, leagueId: string, now: number): Promise<number> {
   const overdue = (await loadMatches(tx, leagueId)).filter((match) => match.b !== null
-    && match.deadlineAt <= now && (match.status === "unscheduled" || match.status === "proposed" || match.status === "scheduled"));
+    && match.deadlineAt <= now && SCHEDULABLE_STATUSES.includes(match.status));
   for (const match of overdue) {
     const outcome = resolveOverdue({ ...match, b: match.b! });
     await tx.query(
@@ -324,7 +332,7 @@ async function resolveOverdueMatches(tx: Queryable, leagueId: string, now: numbe
   return overdue.length;
 }
 
-/** One league's scheduled work: release lost rooms, resolve overdue matches,
+/** One league's scheduled work: forget lost rooms, resolve overdue matches,
  * pair each season week once its start passes, seed the bracket after the
  * last week, and advance the playoffs. Safe to repeat; every step checks
  * state first. */

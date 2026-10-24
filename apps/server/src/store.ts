@@ -64,7 +64,14 @@ import {
 import { recordGameCompletion, recordGamePlayers } from "./analytics.js";
 import { awardAchievements } from "./achievements.js";
 import { matchEndReason, recordMatch, type MatchSeatInput } from "./matches.js";
-import { bindLeagueRoom, claimLeagueRoom, leagueRoomSeats, resolveLeagueRoomGame, startLeagueRoomGame } from "./league/leagueMatches.js";
+import {
+  bindLeagueRoom,
+  claimLeagueRoom,
+  leagueRoomSeats,
+  leagueRoomsInUse,
+  resolveLeagueRoomGame,
+  startLeagueRoomGame,
+} from "./league/leagueMatches.js";
 import { decodeDeckPool, resolveDeck, validatePresentation } from "./decks.js";
 import { appendClusterEvent, type ClusterEvent } from "./clusterEvents.js";
 import { assertActiveRuleset } from "./rulesetFence.js";
@@ -856,18 +863,6 @@ function toRoom(value: unknown): RoomRow {
     cardPoolMode: r.card_pool_mode,
     lastTransition: decodeStoredTransition(r.last_transition, r.code, "row.last_transition"),
   };
-}
-
-/** Rooms whose league match still needs them: GC waits until the match
- * closes, or, for an abandoned game, until the match's deadline. */
-async function openLeagueRoomCodes(db: Queryable, now: number, code?: string): Promise<string[]> {
-  const { rows } = await db.query(
-    `SELECT r.code FROM rooms r JOIN league_matches m ON m.id = r.league_match_id
-     WHERE ($2::text IS NULL OR r.code = $2)
-       AND (m.status IN ('unscheduled', 'proposed', 'scheduled') OR (m.status = 'in-room' AND m.deadline_at > $1))`,
-    [now, code ?? null],
-  );
-  return rows.map((row) => String(row.code));
 }
 
 /**
@@ -4757,7 +4752,7 @@ export class PgRoomStore {
     const retainedSearchRooms = new Set(searches.rows.map((value) =>
       dbObject(value, "<matchmaking>", "retained search").retained_room_code
     ));
-    const leagueRooms = new Set(await openLeagueRoomCodes(this.db, now));
+    const leagueRooms = new Set(await leagueRoomsInUse(this.db, now));
     const candidates = armedRooms.filter((room) => Number(room.gc_at) <= now
       && !retainedSearchRooms.has(room.code) && !leagueRooms.has(room.code));
     const deleted: { code: string; version: number }[] = [];
@@ -4778,7 +4773,7 @@ export class PgRoomStore {
           [candidate.code],
         );
         if (protectedSearch.rows.length > 0) return null;
-        if ((await openLeagueRoomCodes(db, now, candidate.code)).length > 0) return null;
+        if ((await leagueRoomsInUse(db, now, candidate.code)).length > 0) return null;
         const sourceSearches = await db.query(
           `SELECT user_id, retained_room_code, pending_offer_room_code FROM matchmaking_entries
            WHERE source_room_code = $1 AND mode = 'background'`,

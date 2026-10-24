@@ -33,6 +33,11 @@ export const matchStatus = oneOf<LeagueMatchStatus>(
   ["unscheduled", "proposed", "scheduled", "in-room", "complete", "cancelled"],
   "league match status",
 );
+/** Statuses of a match that has not been played or resolved yet. */
+export const SCHEDULABLE_STATUSES: readonly LeagueMatchStatus[] = ["unscheduled", "proposed", "scheduled"];
+/** Every unresolved status, including a game in progress. */
+export const OPEN_STATUSES: readonly LeagueMatchStatus[] = [...SCHEDULABLE_STATUSES, "in-room"];
+
 export const matchResult = oneOf<LeagueMatchResult>(
   ["played", "draw", "forfeit", "double-forfeit", "bye", "operator"],
   "league match result",
