@@ -3551,6 +3551,8 @@
   "league.match.time.theyProposed": "Horário proposto por {opponent}",
   "league.match.time.youProposed": "Aguardando {opponent} aceitar",
   "league.match.time.scheduled": "Horário combinado com {opponent}",
+  "league.match.time.missed": "O horário passou sem partida. Inicie quando vocês dois estiverem aqui, ou combinem um novo horário.",
+  "league.match.propose.again": "Propor novo horário",
   "league.room.title": "Iniciar sua partida da liga",
   "league.room.description": "Escolha um deck de {format}. Só {opponent} pode ocupar o outro lugar.",
   "league.room.submit": "Ocupar seu lugar",

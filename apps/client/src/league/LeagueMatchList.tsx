@@ -3,11 +3,14 @@ import { useIntl } from "react-intl";
 import { useShallow } from "zustand/react/shallow";
 import type { LeagueMatchView, LeagueMembership } from "@fyendal/shared";
 import { apiLeagueMatchAction, apiProposeLeagueTime, type LeagueMatchAction } from "../auth/auth.js";
+import { HoverHint } from "../history/HoverHint.js";
+import { useFriendRelation } from "../social/friendRelation.js";
 import { useStore } from "../store.js";
 import { startOptions } from "./availability.js";
 import { leagueErrorMessage } from "./leagueText.js";
-import { canClaimForfeit, inReadyWindow, waitsOnYou } from "./pendingActions.js";
+import { canClaimForfeit, inReadyWindow, missedTime, waitsOnYou } from "./pendingActions.js";
 import { LeagueAvatar } from "./LeagueAvatar.js";
+import { LeagueFriendAction } from "./LeagueFriendAction.js";
 import { LeagueRoomModal } from "./LeagueRoomModal.js";
 
 /** The row's accent: whose move it is, or how it ended. */
@@ -32,9 +35,12 @@ function MatchItem({ league, match, now, onChanged }: {
   const [choosingDeck, setChoosingDeck] = useState(false);
   const [proposal, setProposal] = useState("");
 
+  const opponentName = match.opponent?.username ?? null;
   const opponent = match.opponent === null
     ? null
-    : match.opponent.username ?? intl.formatMessage({ id: "league.roster.deleted" });
+    : opponentName ?? intl.formatMessage({ id: "league.roster.deleted" });
+  const relation = useFriendRelation(opponentName);
+  const online = relation.kind === "friend" && relation.presence === "online";
   const time = (at: number, timeZone = league.timeZone) => intl.formatDate(at, { ...SHORT_TIME, timeZone });
   const theirTime = (at: number) => match.opponent
     ? intl.formatMessage({ id: "league.match.theirTime" }, { time: time(at, match.opponent.timeZone), opponent })
@@ -44,6 +50,7 @@ function MatchItem({ league, match, now, onChanged }: {
   const schedulable = open && match.status !== "in-room" && match.opponent !== null;
   const checkInOpen = inReadyWindow(match, now);
   const canClaim = canClaimForfeit(match, now);
+  const missed = missedTime(match, now);
 
   const run = async (request: (token: string) => ReturnType<typeof apiProposeLeagueTime>) => {
     if (!authToken) return;
@@ -83,6 +90,10 @@ function MatchItem({ league, match, now, onChanged }: {
   } else if (match.scheduledAt === null) {
     headline = intl.formatMessage({ id: "league.match.status.unscheduled" });
     tone = "open";
+  } else if (missed) {
+    headline = time(match.scheduledAt);
+    caption = intl.formatMessage({ id: "league.match.time.missed" });
+    tone = "open";
   } else {
     headline = time(match.scheduledAt);
     caption = intl.formatMessage({
@@ -102,10 +113,18 @@ function MatchItem({ league, match, now, onChanged }: {
         <span className="league-match-round">{round}</span>
         {opponent === null ? null : (
           <span className="league-match-opponent">
-            <LeagueAvatar username={match.opponent?.username ?? null} />
+            <span className="league-match-avatar">
+              <LeagueAvatar username={opponentName} />
+              {online ? (
+                <HoverHint hint={intl.formatMessage({ id: "social.online" })} className="league-presence">
+                  <i aria-hidden="true" />
+                </HoverHint>
+              ) : null}
+            </span>
             <strong>{opponent}</strong>
           </span>
         )}
+        {opponentName === null ? null : <LeagueFriendAction username={opponentName} />}
       </div>
       <div className="league-match-when">
         <strong className="league-match-headline">{headline}</strong>
@@ -123,7 +142,7 @@ function MatchItem({ league, match, now, onChanged }: {
             {intl.formatMessage({ id: "league.match.start" })}
           </button>
         ) : null}
-        {schedulable && match.status === "proposed" && match.proposedBy !== "you" ? (
+        {schedulable && !missed && match.status === "proposed" && match.proposedBy !== "you" ? (
           <button type="button" className="league-button" disabled={busy} onClick={() => void action("accept")}>
             {intl.formatMessage({ id: "league.match.accept" })}
           </button>
@@ -141,12 +160,12 @@ function MatchItem({ league, match, now, onChanged }: {
         {schedulable ? (
           <button
             type="button"
-            className={`league-button league-button-quiet${proposing ? " is-open" : ""}`}
+            className={`league-button${missed ? "" : " league-button-quiet"}${proposing ? " is-open" : ""}`}
             disabled={busy}
             aria-expanded={proposing}
             onClick={() => setProposing(!proposing)}
           >
-            {intl.formatMessage({ id: "league.match.propose" })}
+            {intl.formatMessage({ id: missed ? "league.match.propose.again" : "league.match.propose" })}
           </button>
         ) : null}
       </div>

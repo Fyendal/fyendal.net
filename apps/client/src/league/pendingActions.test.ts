@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { LeagueMatchView, LeagueMembership } from "@fyendal/shared";
-import { leagueActionCount, waitsOnYou } from "./pendingActions.js";
+import { leagueActionCount, missedTime, waitsOnYou } from "./pendingActions.js";
 
 const NOW = Date.UTC(2026, 10, 2, 18);
 const MINUTE = 60_000;
@@ -22,6 +22,15 @@ describe("league actions waiting on you", () => {
     expect(waitsOnYou({ ...scheduled, youReady: true }, NOW + 16 * MINUTE)).toBe(true);
     expect(waitsOnYou({ ...scheduled, youReady: true, opponentReady: true }, NOW + 16 * MINUTE)).toBe(false);
     expect(waitsOnYou(match({ status: "complete", result: "played", won: true }), NOW)).toBe(false);
+  });
+
+  it("flags an agreed or proposed time once its check-in window closed", () => {
+    const scheduled = match({ status: "scheduled", scheduledAt: NOW });
+    expect(missedTime(scheduled, NOW + 15 * MINUTE)).toBe(false);
+    expect(missedTime(scheduled, NOW + 16 * MINUTE)).toBe(true);
+    expect(missedTime(match({ scheduledAt: NOW }), NOW + 16 * MINUTE)).toBe(true);
+    expect(missedTime(match({ status: "unscheduled", scheduledAt: null }), NOW)).toBe(false);
+    expect(missedTime(match({ status: "in-room", scheduledAt: NOW }), NOW + 16 * MINUTE)).toBe(false);
   });
 
   it("sums across leagues", () => {

@@ -31578,6 +31578,12 @@
       "value": "Propose a time"
     }
   ],
+  "league.match.propose.again": [
+    {
+      "type": 0,
+      "value": "Propose a new time"
+    }
+  ],
   "league.match.propose.choose": [
     {
       "type": 0,
@@ -31708,6 +31714,12 @@
     {
       "type": 1,
       "value": "opponent"
+    }
+  ],
+  "league.match.time.missed": [
+    {
+      "type": 0,
+      "value": "This time passed without a game. Start it when you are both here, or agree on a new time."
     }
   ],
   "league.match.time.scheduled": [

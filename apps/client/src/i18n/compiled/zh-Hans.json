@@ -30307,6 +30307,12 @@
       "value": "提议时间"
     }
   ],
+  "league.match.propose.again": [
+    {
+      "type": 0,
+      "value": "提议新时间"
+    }
+  ],
   "league.match.propose.choose": [
     {
       "type": 0,
@@ -30437,6 +30443,12 @@
     {
       "type": 1,
       "value": "time"
+    }
+  ],
+  "league.match.time.missed": [
+    {
+      "type": 0,
+      "value": "该时间已过，对局未进行。双方都在时可直接开始，或另约新时间。"
     }
   ],
   "league.match.time.scheduled": [

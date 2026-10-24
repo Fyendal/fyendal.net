@@ -3551,6 +3551,8 @@
   "league.match.time.theyProposed": "Hora propuesta por {opponent}",
   "league.match.time.youProposed": "Esperando a que {opponent} acepte",
   "league.match.time.scheduled": "Hora acordada con {opponent}",
+  "league.match.time.missed": "La hora pasó sin partida. Inicia cuando ambos estén aquí, o acuerden una nueva hora.",
+  "league.match.propose.again": "Proponer nueva hora",
   "league.room.title": "Iniciar tu partida de liga",
   "league.room.description": "Elige un mazo de {format}. Solo {opponent} puede ocupar el otro asiento.",
   "league.room.submit": "Ocupar tu asiento",

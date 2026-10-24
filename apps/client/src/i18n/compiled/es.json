@@ -32484,6 +32484,12 @@
       "value": "Proponer hora"
     }
   ],
+  "league.match.propose.again": [
+    {
+      "type": 0,
+      "value": "Proponer nueva hora"
+    }
+  ],
   "league.match.propose.choose": [
     {
       "type": 0,
@@ -32614,6 +32620,12 @@
     {
       "type": 1,
       "value": "opponent"
+    }
+  ],
+  "league.match.time.missed": [
+    {
+      "type": 0,
+      "value": "La hora pasó sin partida. Inicia cuando ambos estén aquí, o acuerden una nueva hora."
     }
   ],
   "league.match.time.scheduled": [

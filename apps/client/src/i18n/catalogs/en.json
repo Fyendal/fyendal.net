@@ -3551,6 +3551,8 @@
   "league.match.time.theyProposed": "Proposed by {opponent}",
   "league.match.time.youProposed": "Waiting for {opponent} to accept",
   "league.match.time.scheduled": "Agreed with {opponent}",
+  "league.match.time.missed": "This time passed without a game. Start it when you are both here, or agree on a new time.",
+  "league.match.propose.again": "Propose a new time",
   "league.room.title": "Start your league game",
   "league.room.description": "Choose a {format} deck. Only {opponent} can take the other seat.",
   "league.room.submit": "Take your seat",

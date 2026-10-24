@@ -3551,6 +3551,8 @@
   "league.match.time.theyProposed": "{opponent} 提议的时间",
   "league.match.time.youProposed": "等待 {opponent} 接受",
   "league.match.time.scheduled": "已与 {opponent} 约定",
+  "league.match.time.missed": "该时间已过，对局未进行。双方都在时可直接开始，或另约新时间。",
+  "league.match.propose.again": "提议新时间",
   "league.room.title": "开始联赛对局",
   "league.room.description": "选择一副 {format} 牌组。只有 {opponent} 能占据另一个座位。",
   "league.room.submit": "入座",

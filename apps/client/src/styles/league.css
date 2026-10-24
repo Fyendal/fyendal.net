@@ -98,6 +98,30 @@
 .league-match-opponent { display: flex; align-items: center; gap: 10px; min-width: 0; }
 .league-match-opponent .league-avatar { width: 30px; height: 30px; font-size: 13px; }
 .league-match-opponent strong { overflow: hidden; color: var(--text-primary); font-size: 16px; font-weight: 650; text-overflow: ellipsis; white-space: nowrap; }
+.league-match-avatar { position: relative; display: inline-grid; flex: none; }
+.league-presence { position: absolute; right: -3px; bottom: -3px; display: inline-grid; place-items: center; width: 14px; height: 14px; border-radius: 50%; background: var(--surface-panel); }
+.league-presence i { width: 8px; height: 8px; border-radius: 50%; background: #61b978; box-shadow: 0 0 7px #61b97877; }
+.league-friend-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  width: fit-content;
+  min-height: 0;
+  padding: 2px 0;
+  border: 0;
+  clip-path: none;
+  background: none;
+  color: var(--text-secondary);
+  font: 600 13px var(--font-lobby-ui);
+  letter-spacing: 0;
+  text-transform: none;
+}
+.league-friend-action .ui-icon { width: 15px; height: 15px; }
+.league-friend-action:hover { background: none; }
+.league-friend-action:hover:not(:disabled) { color: var(--gold); }
+.league-friend-action:disabled { opacity: 1; color: var(--text-muted); }
+.league-friend-action[data-relation="incoming"] { color: var(--gold); }
+.league-friend-action:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
 .league-match-when { display: grid; gap: 3px; min-width: 0; color: var(--text-muted); font-size: 13px; line-height: 1.4; }
 .league-match-headline { color: var(--text-primary); font-size: 15px; font-weight: 600; }
 .is-won .league-match-headline { color: var(--gold); }
@@ -265,4 +289,5 @@
   .league-match { grid-template-columns: minmax(0, 1fr); padding-left: 14px; }
   .league-match-actions { justify-content: flex-start; }
   .league-match-foot, .league-propose, .league-match-error { grid-column: 1; }
+  .league-friend-action { min-height: 32px; }
 }
