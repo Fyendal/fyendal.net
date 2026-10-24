@@ -49,3 +49,30 @@ describe("AKO — Wild Ride (draw then discard on attack)", () => {
       .expectLife(0, 14);
   });
 });
+
+describe("AKO — Savage Sash (6+ power attack action discount)", () => {
+  it("discounts only attack action cards with 6 or more base power", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          hand: ["consuming command|3", "feeding frenzy|1"],
+          deck: ["raging onslaught|1"],
+          resources: 2,
+          equipment: { chest: "savage sash|0" },
+        },
+        { hero: "dorinthea", hand: [] },
+      ],
+    });
+    g.activate("savage sash|0")
+      .expectLog("Savage Sash is destroyed")
+      .expectAP(0, 1)
+      .play("consuming command|3") // non-attack action: full cost 1
+      .expectResources(0, 1)
+      .play("feeding frenzy|1") // 6-power attack action: cost 2 reduced to 1
+      .expectResources(0, 0)
+      .blockWith()
+      .settle()
+      .expectLife(0, 20);
+  });
+});

@@ -2033,6 +2033,29 @@ describe("August 29–31 IAR and GEM Pack 6 spoilers", () => {
     }));
   });
 
+  it("Cleave the Heavens' activation log tags the activated printing, not a visible namesake", () => {
+    const g = scenario({ seats: [
+      {
+        hero: "rhinar",
+        hand: ["cleave the heavens|1"],
+        banish: ["cleave the heavens|3"],
+        equipment: NO_EQUIPMENT,
+      },
+      { hero: "dorinthea", life: 20, equipment: NO_EQUIPMENT },
+    ] });
+
+    g.activate("cleave the heavens|1");
+
+    const activation = g.state.log.find((entry) =>
+      entry.publicPayload?.message.id === "engine.log.card.activated"
+    );
+    expect(activation?.publicPayload?.message.values).toMatchObject({
+      card: { kind: "card", cardId: "IAR020" },
+    });
+    expect(activation?.publicPayload?.fallback).toMatch(/⟦IAR020⟧$/);
+    expect(activation?.publicText).toMatch(/⟦IAR020⟧$/);
+  });
+
   it("Consuming Lash gives the next attack go again", () => {
     const g = scenario({ seats: [
       {

@@ -133,6 +133,26 @@ describe("Armory Decks — AIO, AJV, and AST", () => {
     expect(cards.every((card) => isImplemented(card))).toBe(true);
   });
 
+  it("Spark Spray offers its payment only when a card defends it", () => {
+    const undefended = scenario({
+      seats: [
+        { hero: "rhinar", hand: ["spark spray|1"], resources: 1, equipment: NO_EQUIPMENT },
+        { hero: "dorinthea", hand: [], equipment: NO_EQUIPMENT },
+      ],
+    });
+    undefended.play("spark spray|1").blockWith().settle();
+    undefended.expectNoLog("When your attack is defended").expectFinalAttack(4).expectLife(1, 16);
+
+    const defended = scenario({
+      seats: [
+        { hero: "rhinar", hand: ["spark spray|1"], resources: 1, equipment: NO_EQUIPMENT },
+        { hero: "dorinthea", hand: ["head jab|3"], equipment: NO_EQUIPMENT },
+      ],
+    });
+    defended.play("spark spray|1").blockWith("head jab|3").settle().chooseOption("pay 1");
+    defended.expectLog("When your attack is defended").expectFinalAttack(5).expectLife(1, 17);
+  });
+
   it("Heavy Industry Power Plant keeps paying for boosts after it is destroyed", () => {
     const g = scenario({
       seats: [

@@ -416,6 +416,42 @@ describe("EVO — registration and core mechanics", () => {
       .expectEquipped(0, "arms", "evo steel soul controller|3");
   });
 
+  it("Temper skips a defending Evo that another Evo covered before the chain closed", () => {
+    const s = scenario({
+      active: 1,
+      seats: [
+        {
+          hero: "rhinar",
+          heroKey: "teklovossen, esteemed magnate|0",
+          resources: 3,
+          hand: ["evo beta base arms|3"],
+          equipment: { arms: "evo steel soul controller|3" },
+        },
+        { hero: "dorinthea", hand: ["head jab|1"] },
+      ],
+    });
+    const controller = s.state.players[0]!.equipment.arms!;
+    controller.defCounters = 2;
+
+    s.play("head jab|1")
+      .blockWith("evo steel soul controller|3")
+      .passPriority()
+      .activate("teklovossen, esteemed magnate|0")
+      .passPriority()
+      .react("evo beta base arms|3")
+      .expectEquipped(0, "arms", "evo beta base arms|3");
+    s.endTurn();
+
+    const arms = s.state.players[0]!.equipment.arms!;
+    expect(arms.cardId).toBe(printingId("evo beta base arms|3"));
+    expect(arms.subcards?.map((card) => card.instanceId)).toEqual([controller.instanceId]);
+    expect(arms.subcards?.[0]?.defCounters).toBe(2);
+    expect(arms.defCounters ?? 0).toBe(0);
+    expect(s.state.players[0]!.graveyard).not.toEqual(expect.arrayContaining([
+      expect.objectContaining({ cardId: printingId("evo steel soul controller|3") }),
+    ]));
+  });
+
   it("does not spend an action point when Evo Face Breaker is played with Teklovossen's instant permission", () => {
     const s = scenario({
       seats: [

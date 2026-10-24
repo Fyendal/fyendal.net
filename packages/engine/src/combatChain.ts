@@ -26,7 +26,7 @@ import {
 } from "./gameLog.js";
 import type { CardInstance, ChainLinkState, PlayerState, StackLayer } from "./state.js";
 
-import { findCardAnywhere, removeFromArray } from "./zoneQueries.js";
+import { findCardAnywhere, severDefendingEquipment } from "./zoneQueries.js";
 import {
   destroyPermanent,
   enterBanish,
@@ -334,14 +334,9 @@ export function closeChain(state: GameStateInternal, runtime: EngineRuntime): vo
     for (const c of [...link.defendingEquipment]) {
       if (link.flags[`equipmentGone:${c.instanceId}`] === true) continue;
       if (link.flags[`banishOnClose:${c.instanceId}`] === true) {
-        // Equipment remains in its arena slot while defending and may be
-        // represented on more than one link. Clear every chain representation
-        // first so the ordinary zone-movement command removes the live object.
-        for (const chainLink of state.chain) {
-          if (removeFromArray(chainLink.defendingEquipment, c.instanceId)) {
-            chainLink.flags[`equipmentGone:${c.instanceId}`] = true;
-          }
-        }
+        // Clear every chain representation first so the ordinary
+        // zone-movement command removes the live arena object.
+        severDefendingEquipment(state, c.instanceId);
         runtime.makeCtx(state, c.owner, c, link).banish(c.instanceId);
         continue;
       }

@@ -348,6 +348,14 @@ function modifierMatchesPlayedCard(
     !(data.keywords ?? []).some((keyword) => keyword.toLowerCase() === mod.appliesToKeyword!.toLowerCase())
   ) return false;
   const tags = cardTypesOf(state, card);
+  const attackAction = data.cardType === "action" && tags.includes("attack");
+  const appliesTo = mod.appliesTo ?? "any";
+  if (appliesTo === "attack-action" && !attackAction) return false;
+  if (appliesTo === "attack" && !attackAction && data.cardType !== "weapon") return false;
+  if (appliesTo === "weapon" && data.cardType !== "weapon") return false;
+  if (appliesTo === "sword" && (data.cardType !== "weapon" || !tags.includes("sword"))) return false;
+  if (mod.minBasePower !== undefined && (data.attack ?? 0) < mod.minBasePower) return false;
+  if (mod.maxBasePower !== undefined && (data.attack ?? 0) > mod.maxBasePower) return false;
   if (mod.appliesToClass && !tags.includes(mod.appliesToClass.toLowerCase())) return false;
   if (mod.appliesToSubtype) {
     const wanted = Array.isArray(mod.appliesToSubtype) ? mod.appliesToSubtype : [mod.appliesToSubtype];

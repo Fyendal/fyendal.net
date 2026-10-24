@@ -128,6 +128,18 @@ export function removeFromArray(
   return cards.splice(index, 1)[0];
 }
 
+/** Equipment stays represented on every link it defended while its arena
+ * object is live. Once that object leaves the arena (destruction, banish, or
+ * being covered by an Evo), drop each chain copy so close-of-chain keywords
+ * and defense no longer apply to it. */
+export function severDefendingEquipment(state: GameStateInternal, instanceId: number): void {
+  for (const link of state.chain) {
+    if (removeFromArray(link.defendingEquipment, instanceId)) {
+      link.flags[`equipmentGone:${instanceId}`] = true;
+    }
+  }
+}
+
 export function currentLink(state: GameStateInternal): ChainLinkState | undefined {
   const link = state.chain[state.chain.length - 1];
   return link && !link.resolved ? link : undefined;

@@ -15,7 +15,7 @@ import {
 import type { GameStateInternal } from "./runtimeState.js";
 
 import type { CardInstance, PendingDecisionState, PlayerState } from "./state.js";
-import { currentLink, findCardAnywhere, findPermanent } from "./zoneQueries.js";
+import { currentLink, findCardAnywhere, findPermanent, severDefendingEquipment } from "./zoneQueries.js";
 import type { CardData } from "@fyendal/shared";
 import { transitionZone } from "./transitions.js";
 
@@ -377,6 +377,7 @@ export function settlePlayedCard(
     }
     const base = player.equipment[slot];
     if (base) {
+      severDefendingEquipment(state, base.instanceId);
       runtime.commands.fireLeaveArena(state, player.seat, base, "subcard");
       card.subcards = [base];
     }

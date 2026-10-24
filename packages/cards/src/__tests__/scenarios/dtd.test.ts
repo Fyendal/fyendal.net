@@ -883,6 +883,44 @@ describe("DTD — registration and core mechanics", () => {
     expect(banishPlays(faceDown)).toEqual([]);
   });
 
+  it("Blasmophet's banish play never offers a banished card's from-hand instant", () => {
+    const cleaveIntents = (s: ReturnType<typeof scenario>, zone: "banish" | "hand") => {
+      const cleave = s.state.players[0]![zone].find((card) => card.cardId === printingId("cleave the heavens|3"))!;
+      return legalIntents(s.state, 0).filter((i) =>
+        (i.kind === "play-from-zone" && i.instanceId === cleave.instanceId) ||
+        (i.kind === "activate-ability" && i.sourceInstanceId === cleave.instanceId));
+    };
+    for (const zoneKey of ["banish", "banishFaceDown"] as const) {
+      const s = scenario({
+        seats: [
+          { hero: "rhinar", heroKey: "blasmophet, levia consumed|0", resources: 6, [zoneKey]: ["cleave the heavens|3"] },
+          { hero: "dorinthea" },
+        ],
+      });
+      const offered = cleaveIntents(s, "banish");
+      expect(offered.every((i) => i.kind === "play-from-zone" && i.zone === "banish")).toBe(true);
+      expect(offered.length).toBe(zoneKey === "banish" ? 1 : 0);
+      const banished = s.state.players[0]!.banish[0]!;
+      expect(applyIntent(s.state, 0, {
+        kind: "activate-ability",
+        sourceInstanceId: banished.instanceId,
+        pitchInstanceIds: [],
+      }).ok).toBe(false);
+    }
+
+    const held = scenario({
+      seats: [
+        { hero: "rhinar", heroKey: "blasmophet, levia consumed|0", hand: ["cleave the heavens|3"] },
+        { hero: "dorinthea" },
+      ],
+    });
+    expect(cleaveIntents(held, "hand").some((i) => i.kind === "activate-ability")).toBe(true);
+    held.activate("cleave the heavens|3").settle()
+      .expectInZone(0, "gate to i'arathael|0", "board");
+    expect(held.state.players[0]!.banish.find((card) => card.cardId === printingId("cleave the heavens|3"))?.faceDown)
+      .toBe(true);
+  });
+
   it("Blasmophet plays a Blood Debt card from the banished zone only once each turn", () => {
     const banishPlays = (s: ReturnType<typeof scenario>) =>
       legalIntents(s.state, 0).filter((i) => i.kind === "play-from-zone" && i.zone === "banish");

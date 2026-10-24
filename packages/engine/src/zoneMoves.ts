@@ -28,6 +28,7 @@ import {
   currentLink,
   findPermanent,
   removeFromArray,
+  severDefendingEquipment,
 } from "./zoneQueries.js";
 import { controlledPermanents, hookSources } from "./sourceQueries.js";
 import { snapshotSerializable } from "./ruleQueries.js";
@@ -370,21 +371,17 @@ function removePermanentFromArena(
   removeFromArray(p.board, card.instanceId);
   // weapons are permanents too (self-destroying daggers, "destroy target weapon")
   removeFromArray(p.weapons, card.instanceId);
-  // Equipment remains represented in its arena slot while it defends. If it
-  // is destroyed before combat damage, remove that separate chain copy at
-  // once so it no longer contributes defense or settles a second time when
-  // the combat chain closes.
-  for (const link of state.chain) {
-    if (removeFromArray(link.defendingEquipment, card.instanceId)) {
-      link.flags[`equipmentGone:${card.instanceId}`] = true;
-    }
-  }
+  severDefendingEquipment(state, card.instanceId);
   return sourceKind;
 }
 
 export function destroyPermanent(state: GameStateInternal,
   runtime: EngineRuntime, seat: number, card: CardInstance): boolean {
-  const controllerSeat = findPermanent(state, card.instanceId)?.seat ?? seat;
+  // Only a live arena object can be destroyed; moving anything else (a stale
+  // chain copy, a card retained under an Evo) would duplicate it.
+  const permanent = findPermanent(state, card.instanceId);
+  if (!permanent) return false;
+  const controllerSeat = permanent.seat;
   if (seat !== controllerSeat) {
     const protectedBy = hookSources(state, controllerSeat, {
       board: true,

@@ -473,6 +473,8 @@ function collectDefendEventLayers(
   defenders: DefendEventCard[],
   defendedFromHand: boolean,
 ): { seat: number; layers: StackLayer[] }[] {
+  // Taking the attack with no defenders is not an "attack-defended" event.
+  if (defenders.length === 0) return [];
   const groups = runtime.dispatchFlow(
     "collectEventTriggerLayers",
     state,
