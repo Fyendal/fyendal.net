@@ -290,6 +290,41 @@ describe("transformed permanent stacks", () => {
     }
   });
 
+  it("a Hyper Driver banished from under Nitro Mechanoid ceases to exist", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          resources: 4,
+          hand: ["construct nitro mechanoid|2"],
+          weapons: ["teklo plasma pistol|0"],
+          equipment: {
+            head: "teklo base head|0",
+            chest: "teklo base chest|0",
+            arms: "teklo base arms|0",
+            legs: "teklo base legs|0",
+          },
+          board: ["hyper driver|0", "hyper driver|0", "hyper driver|0"],
+        },
+        { hero: "dorinthea" },
+      ],
+    });
+
+    g.play("construct nitro mechanoid|2");
+    const nitro = g.state.players[0]!.board.find(
+      (card) => card.cardId === printingId("nitro mechanoid|0"),
+    );
+    const driver = nitro?.subcards?.find((card) => card.cardId === printingId("hyper driver|0"));
+    g.activate("nitro mechanoid|0", { settle: false }).chooseOption(String(driver!.instanceId));
+
+    const after = g.state.players[0]!.board.find((card) => card.instanceId === nitro?.instanceId);
+    expect(after?.subcards).toHaveLength(7);
+    expect(after?.subcards?.filter((card) => card.cardId === printingId("hyper driver|0"))).toHaveLength(2);
+    for (const zone of [g.state.players[0]!.banish, g.state.players[0]!.graveyard]) {
+      expect(zone.some((card) => card.cardId === printingId("hyper driver|0"))).toBe(false);
+    }
+  });
+
   it("chooses which three Hyper Drivers transform into Nitro Mechanoid", () => {
     const g = scenario({
       seats: [

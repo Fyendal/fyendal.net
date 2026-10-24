@@ -4,6 +4,7 @@ import {
   armDelayedEffect,
   attackAbility,
   buffNextAttack,
+  cardNamed,
   commonOptionMessages,
   consumeDelayedEffect,
   dealToAnyTarget,
@@ -2628,9 +2629,27 @@ Object.assign(sea, {
         label: "Resolve Surface Shaking",
         effect(ctx: ScriptCtx) {
           ctx.destroySelf();
+          const player = ctx.player(ctx.seat);
+          const surges = player.board.filter((card) => cardNamed(ctx, card, "Seismic Surge")).length;
+          const max = Math.min(surges, player.hand.length);
+          if (max === 0) return;
+          ctx.requestCardChoices(
+            "surface-shaking",
+            decisionPrompt(`${ctx.data.name}: put up to ${max} cards on the bottom`, "card.upr.hand.bottom.upto", {
+              values: { card: { kind: "card", cardId: ctx.self.cardId }, amount: max },
+            }),
+            player.hand.map((card) => card.instanceId),
+            0,
+            max,
+          );
         },
       },
     ],
+    onChooseMany(ctx: ScriptCtx, hook: string, options: readonly string[]) {
+      if (hook !== "surface-shaking") return;
+      const moved = options.filter((option) => ctx.putOnDeckBottom(Number(option))).length;
+      ctx.drawCards(ctx.seat, moved);
+    },
   },
   "preach modesty|1": {
     onEnterArena(ctx: ScriptCtx) {

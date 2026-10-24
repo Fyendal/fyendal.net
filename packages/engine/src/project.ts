@@ -24,6 +24,7 @@ import { arsenalCapacity, arsenalZoneCount } from "./cardLifecycle.js";
 import { attackHasVeil, cardColorOf, cardTypesOf, dataOf, instanceDataOf, scriptOf } from "./cardProperties.js";
 import type { TriggerEvent } from "./eventTypes.js";
 import { pendingOnHitEffects } from "./hits.js";
+import { linkGoAgainBlocked } from "./ruleQueries.js";
 import {
   conditionalModifierGrantsGoAgain,
   conditionalScriptGrantsGoAgain,
@@ -1108,6 +1109,7 @@ function projectState(
           conditionalModifierGrantsGoAgain(state, link, attack) ||
           conditionalScriptGrantsGoAgain(state, runtime, link)
         )),
+      ...(!link.resolved && linkGoAgainBlocked(state, link) ? { goAgainBlocked: true as const } : {}),
       wagered: link.flags.wagered === true,
       ...(link.wagerRewards?.length ? { wagerRewards: [...link.wagerRewards] } : {}),
       dominate: link.resolved

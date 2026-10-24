@@ -951,7 +951,8 @@ export function makeCtx(
       if (index < 0) return false;
       const [card] = found.card.subcards.splice(index, 1);
       if (!card) return false;
-      (state.players[card.owner] as PlayerState).banish.push(card);
+      // Tokens exist only in the arena or as sub-cards (CR 8.1.8a).
+      if (!cardHasType(state, card, "token")) (state.players[card.owner] as PlayerState).banish.push(card);
       logPublic(state, gameLogMessage(
         `${nameOf(state, card.cardId)} is banished from under ${nameOf(state, found.card.cardId)}`,
         "engine.log.card.banished.from.under",

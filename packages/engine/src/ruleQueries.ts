@@ -3,7 +3,7 @@ import { cardHasName, dataOf, scriptOf } from "./cardProperties.js";
 import { controlledPermanents } from "./sourceQueries.js";
 import { gameLogMessage, logCardValue, logPublic, nameOf } from "./gameLog.js";
 import type { GameStateInternal } from "./runtimeState.js";
-import type { CardInstance, Modifier, PlayerState } from "./state.js";
+import type { CardInstance, ChainLinkState, Modifier, PlayerState } from "./state.js";
 import { currentLink, findPermanent } from "./zoneQueries.js";
 
 /** Engine objects are JSON-safe; triggered layers retain independent
@@ -53,6 +53,13 @@ export function goAgainSuppressed(state: GameStateInternal, seat: number): boole
   const player = state.players[seat] as PlayerState | undefined;
   return !!player && state.activePlayer === seat &&
     Number(player.hero.scriptState?.goAgainSuppressedTurn ?? 0) === state.turn;
+}
+
+/** The attack can't gain go again, and loses any it would have. */
+export function linkGoAgainBlocked(state: GameStateInternal, link: ChainLinkState): boolean {
+  return link.flags.attackAbilitiesSuppressed === true ||
+    goAgainSuppressed(state, link.attacker) ||
+    (link.attackingCard.suppressedKeywords ?? []).some((keyword) => keyword.toLowerCase() === "go again");
 }
 
 /** Resource increase on this hero's first attack during the stamped turn.

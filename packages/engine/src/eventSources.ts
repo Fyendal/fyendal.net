@@ -9,7 +9,7 @@ import type { CardInstance, ChainLinkState, PlayerState, StackLayer } from "./st
 import { tokenCreationCauseForModifier } from "./tokenQueries.js";
 import { currentLink, opponent, removeFromArray } from "./zoneQueries.js";
 import { heroAbilitiesDisabled } from "./stateQueries.js";
-import { goAgainSuppressed } from "./ruleQueries.js";
+import { linkGoAgainBlocked } from "./ruleQueries.js";
 import {
   eventTriggerIsActive,
   eventTriggerSources,
@@ -503,12 +503,7 @@ function notifyGoAgain(state: GameStateInternal,
 /** Give the link go again. Idempotent; hooks fire only the first time it sticks. */
 export function grantLinkGoAgain(state: GameStateInternal,
   runtime: EngineRuntime, link: ChainLinkState): void {
-  if (
-    link.goAgain ||
-    link.flags.attackAbilitiesSuppressed === true ||
-    goAgainSuppressed(state, link.attacker) ||
-    (link.attackingCard.suppressedKeywords ?? []).includes("go again")
-  ) return;
+  if (link.goAgain || linkGoAgainBlocked(state, link)) return;
   link.goAgain = true;
   notifyGoAgain(state, runtime, link);
 }

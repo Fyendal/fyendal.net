@@ -451,6 +451,11 @@ export function currentLink(input: BotPolicyInput) {
   return [...input.view.chain].reverse().find((link) => !link.resolved);
 }
 
+/** Granting go again to this link would take effect. */
+export function canGainGoAgain(link: { goAgain?: boolean; goAgainBlocked?: true }): boolean {
+  return link.goAgain !== true && link.goAgainBlocked !== true;
+}
+
 export function currentAttackIsOurs(input: BotPolicyInput): boolean {
   return currentLink(input)?.attackingCard.owner === input.seat;
 }

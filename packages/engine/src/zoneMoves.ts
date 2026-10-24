@@ -283,11 +283,24 @@ export function fireLeaveArena(
   }
   // A non-permanent defending card's own abilities are non-functional
   // (CR 1.7.4a), so an aura that defended runs no permanent leave hook.
-  if (combatRole === "defending") return;
-  scriptOf(state, card.cardId, card)?.onLeaveArena?.(
-    runtime.makeCtx(state, seat, card, currentLink(state), undefined, undefined, asActivationCost),
-    to,
-  );
+  if (combatRole !== "defending") {
+    scriptOf(state, card.cardId, card)?.onLeaveArena?.(
+      runtime.makeCtx(state, seat, card, currentLink(state), undefined, undefined, asActivationCost),
+      to,
+    );
+  }
+  // A top-card that becomes a sub-card (transform, soul) keeps its sub-cards
+  // (CR 3.0.14c, 3.11.5); any other exit clears them (CR 3.0.14e).
+  if (to !== "subcard" && to !== "soul") clearSubcards(state, runtime, card);
+}
+
+function clearSubcards(state: GameStateInternal, runtime: EngineRuntime, card: CardInstance): void {
+  const subcards = card.subcards ?? [];
+  delete card.subcards;
+  for (const subcard of subcards) {
+    clearSubcards(state, runtime, subcard);
+    moveToGraveyard(state, runtime, subcard, "under");
+  }
 }
 
 /** A non-permanent attacking or defending card leaving the combat chain leaves

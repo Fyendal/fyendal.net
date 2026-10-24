@@ -2,6 +2,7 @@ import type { CardData, CardView, GameIntent } from "@fyendal/shared";
 import {
   chooseScoredIntent,
   currentAttackIsOurs,
+  canGainGoAgain,
   currentLink,
   enforceAllyTargetPolicy,
   enforceSpectraPolicy,
@@ -576,7 +577,7 @@ function heroAbilityPending(input: BotPolicyInput): boolean {
 
 function scoreHeroAbility(input: BotPolicyInput, own: ReadonlyMap<number, CardView>): number {
   const link = currentLink(input);
-  if (!link || link.resolved || !currentAttackIsOurs(input) || link.goAgain === true) return -100;
+  if (!link || link.resolved || !currentAttackIsOurs(input) || !canGainGoAgain(link)) return -100;
   if (input.view.pendingDecision?.kind !== "attack-reaction" || heroAbilityPending(input)) return -100;
   const pass: GameIntent = { kind: "pass" };
   const sword = raydn(input);
@@ -647,11 +648,11 @@ function scoreAttackReaction(data: CardData, input: BotPolicyInput, own: Readonl
     // Uncharged it trades a soul card and the search for +1: hold it for a charged turn.
     if (!charged(input) && !lethal && !combo) return -100;
     return 8 + (charged(input) || combo ? 12 : 0) + (lethal ? 30 : 0) +
-      (link.goAgain !== true && further && soul >= 2 ? 4 : 0);
+      (canGainGoAgain(link) && further && soul >= 2 ? 4 : 0);
   }
   if (functional === ROARING_BEAM) return soul === 0 ? 14 : further ? 6 : 2;
   if (functional === COURAGEOUS_STEELHAND) {
-    return charged(input) ? 9 + (link.goAgain !== true && soul >= 1 && further ? 6 : 0) : -100;
+    return charged(input) ? 9 + (canGainGoAgain(link) && soul >= 1 && further ? 6 : 0) : -100;
   }
   return 4;
 }
@@ -709,7 +710,7 @@ function scorePlay(intent: GameIntent, input: BotPolicyInput, own: ReadonlyMap<n
         : -40;
     } else if (functional === SNAPDRAGON_SCALERS) {
       const link = currentLink(input);
-      score = currentAttackIsOurs(input) && link?.goAgain !== true &&
+      score = currentAttackIsOurs(input) && !!link && canGainGoAgain(link) &&
           input.view.pendingDecision?.kind === "attack-reaction" && further
         ? 28
         : -100;

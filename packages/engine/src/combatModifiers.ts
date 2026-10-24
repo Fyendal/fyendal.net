@@ -10,7 +10,7 @@ import {
   scriptOf,
 } from "./cardProperties.js";
 import type { CardInstance, ChainLinkState, Modifier, PlayerState } from "./state.js";
-import { goAgainSuppressed } from "./ruleQueries.js";
+import { linkGoAgainBlocked } from "./ruleQueries.js";
 import { opponent } from "./zoneQueries.js";
 
 function isSword(data: CardData): boolean {
@@ -225,11 +225,7 @@ export function conditionalModifierGrantsGoAgain(
   currentAttack: number,
 ): boolean {
   const player = state.players[link.attacker] as PlayerState;
-  if (
-    link.flags.attackAbilitiesSuppressed === true ||
-    goAgainSuppressed(state, link.attacker) ||
-    (link.attackingCard.suppressedKeywords ?? []).includes("go again")
-  ) return false;
+  if (linkGoAgainBlocked(state, link)) return false;
   return activeModifiers(state, link, ["chain-link"]).some((modifier) => {
     const subtype = modifier.goAgainIfPlayedOrCreatedSubtype?.toLowerCase();
     return (
@@ -252,13 +248,7 @@ export function conditionalScriptGrantsGoAgain(
   runtime: EngineRuntime,
   link: ChainLinkState,
 ): boolean {
-  if (
-    link.flags.attackAbilitiesSuppressed === true ||
-    goAgainSuppressed(state, link.attacker) ||
-    (link.attackingCard.suppressedKeywords ?? []).some(
-      (keyword) => keyword.toLowerCase() === "go again",
-    )
-  ) return false;
+  if (linkGoAgainBlocked(state, link)) return false;
   const ctx = runtime.makeCtx(state, link.attacker, link.attackingCard, link);
   if (
     scriptOf(state, link.attackingCard.cardId, link.attackingCard)

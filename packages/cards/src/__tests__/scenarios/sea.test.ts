@@ -1743,4 +1743,40 @@ describe("SEA — rules regression coverage", () => {
     );
     g.chooseCard("sigil of solace|3").expectHandSize(0, 1).expectZoneSize(0, "graveyard", 2);
   });
+
+  it("Surface Shaking bottoms up to X hand cards for its Seismic Surges and draws that many", () => {
+    const g = scenario({
+      active: 1,
+      seats: [
+        {
+          hero: "rhinar",
+          heroKey: "valda brightaxe|0",
+          weapons: [],
+          board: ["surface shaking|3", "seismic surge|0", "seismic surge|0"],
+          hand: ["pummel|1", "disable|1", "buckle|3"],
+          deck: ["head jab|1", "head jab|1", "head jab|1"],
+        },
+        { hero: "dorinthea", hand: [] },
+      ],
+    });
+
+    g.passActionPhase().settle();
+    const pd = g.state.pendingDecision!;
+    expect(pd.chooseHook).toBe("surface-shaking");
+    expect([pd.minimumSelections, pd.maximumSelections]).toEqual([0, 2]);
+    const hand = g.state.players[0]!.hand;
+    const deckSize = g.state.players[0]!.deck.length;
+    const handSize = hand.length;
+    const bottomed = ["pummel|1", "disable|1"].map((key) =>
+      String(hand.find((card) => card.cardId === printingId(key))!.instanceId),
+    );
+    g.chooseMany(bottomed).settle();
+    g.expectNotInZone(0, "surface shaking|3", "board")
+      .expectInZone(0, "pummel|1", "deck")
+      .expectInZone(0, "disable|1", "deck")
+      .expectDeckBottom(0, "disable|1")
+      .expectInZone(0, "buckle|3", "hand")
+      .expectHandSize(0, handSize)
+      .expectZoneSize(0, "deck", deckSize);
+  });
 });

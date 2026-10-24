@@ -489,6 +489,26 @@ describe("Boltyn policy", () => {
     expect(swing(true)).not.toContain(HERO);
   });
 
+  it("keeps the soul once Blizzard stops the attack gaining go again", () => {
+    const swing = (blizzard: boolean) => {
+      const state = settled(game());
+      hand(state, ["ASB026"]);
+      soul(state, 2);
+      state.players[0]!.flags.chargedThisTurn = true;
+      state.players[0]!.flags.chargedCountThisTurn = 1;
+      state.players[0]!.resources = 6;
+      const reacting = (current: GameState) => current.pendingDecision?.kind === "attack-reaction" &&
+        current.pendingDecision.player === 0;
+      const swung = play(state, (current) => reacting(current) || turnOver(current));
+      expect(swung.intents).toContain(RAYDN);
+      // As when the attacker declines to pay for Blizzard.
+      if (blizzard) (swung.state.chain.at(-1)!.attackingCard.suppressedKeywords ??= []).push("go again");
+      return play(swung.state, turnOver).intents;
+    };
+    expect(swing(false)).toContain(HERO);
+    expect(swing(true)).not.toContain(HERO);
+  });
+
   it("passes instead of swinging an uncharged Raydn for nothing", () => {
     const state = settled(game());
     hand(state, ["MON062", "MON033", "ASB026", "SBL020"]);

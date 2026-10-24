@@ -311,6 +311,8 @@ export interface ChainLinkView {
   /** Effective keywords of the attack: printed or granted by modifiers.
    *  Snapshotted at resolution (chain-link modifiers expire with the link) */
   goAgain?: boolean;
+  /** The unresolved attack can't gain go again, e.g. after Blizzard. */
+  goAgainBlocked?: true;
   /** This attack has wagered on its current chain link. */
   wagered?: boolean;
   /** Public reward description for each wager completed on this chain link. */
