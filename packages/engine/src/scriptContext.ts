@@ -513,6 +513,11 @@ export function makeCtx(
       ));
       return;
     }
+    if (look && decision.lookedCardIds?.length) {
+      // A choice with its own private view would hide the look; show the look first.
+      (look.followUpDecisions ??= []).push(decision);
+      return;
+    }
     state.pendingDecision = decision;
     if (look?.lookedCardIds?.length && !decision.lookedCardIds?.length) {
       // Cards already offered as clickable options need no context copy.
@@ -1447,6 +1452,9 @@ export function makeCtx(
     },
     currentAttackHasDominate() {
       return link ? runtime.commands.attackHasDominate(state, link) : false;
+    },
+    currentAttackHasGoAgain() {
+      return link ? runtime.commands.attackHasGoAgain(state, link) : false;
     },
     currentAttackHasOverpower() {
       return link ? runtime.commands.attackHasOverpower(state, link) : false;

@@ -610,7 +610,7 @@ const maskManyFaces: CardScript = {
 
 const trapReaction = () => (ctx: ScriptCtx) => ctx.link?.flags.reactionPlayedOrActivated === true;
 const trapPower = () => (ctx: ScriptCtx) => ctx.attackBonusAboveBase() > 0;
-const trapGoAgain = () => (ctx: ScriptCtx) => ctx.link?.goAgain === true;
+const trapGoAgain = () => (ctx: ScriptCtx) => ctx.currentAttackHasGoAgain();
 
 function offerDaggerCycle(ctx: ScriptCtx, source: DeepReadonly<CardInstance>): void {
   if (ctx.getPlayerFlag(ctx.seat, "maskDaggerCycle") !== true || !isDagger(ctx, source)) return;

@@ -206,6 +206,8 @@ export interface ScriptCtx {
   currentAttackPower(): number;
   /** Whether the active attack currently has dominate from any rules source. */
   currentAttackHasDominate(): boolean;
+  /** Whether the active attack currently has go again from any rules source. */
+  currentAttackHasGoAgain(): boolean;
   /** Whether the active attack currently has overpower from any rules source. */
   currentAttackHasOverpower(): boolean;
   /** The largest unresolved damage event currently aimed at a hero, from an

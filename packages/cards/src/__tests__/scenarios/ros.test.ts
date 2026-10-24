@@ -1340,7 +1340,15 @@ describe("ROS — delayed end-phase effects", () => {
       ],
     });
 
-    g.play("plan for the worst|3");
+    g.play("plan for the worst|3", { settle: false });
+    g.passPriority();
+    g.passPriority();
+    // The opponent's hand is shown before the deck search, which would hide it.
+    expect(g.state.pendingDecision?.chooseHook).toBe("engine-look");
+    expect(projectStateFor(g.state, 0).pendingDecision?.lookedCards?.map((card) => card.cardId))
+      .toEqual([printingId("scar for a scar|3")]);
+    expect(projectStateFor(g.state, 1).pendingDecision?.lookedCards).toBeUndefined();
+    g.passPriority();
     expect(g.state.pendingDecision).toMatchObject({
       chooseHook: "plan-for-worst-traps",
       minimumSelections: 0,

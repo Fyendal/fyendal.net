@@ -1316,8 +1316,22 @@ export function answerChoice(
     const picked = payment.pitchOptions[optionId];
     if (optionId !== "no" && !picked) return "invalid payment option";
     if (picked) {
-      const err = payCost(state, runtime, state.players[seat] as PlayerState, picked.cost, picked.pitchIds);
+      const payer = state.players[seat] as PlayerState;
+      const err = payCost(state, runtime, payer, picked.cost, picked.pitchIds);
       if (err) return err;
+      // Without this, paying an "unless they pay" cost from floating resources leaves no trace.
+      const source = (srcId === undefined ? undefined : findCardAnywhere(state, srcId)?.card) ??
+        scriptSourceSnapshot?.card;
+      logPublic(state, gameLogMessage(
+        `${nameOf(state, payer.heroCardId)} pays ${picked.cost} resource(s)` +
+          (source ? ` for ${logNameOf(state, source.cardId)}` : ""),
+        source ? "engine.log.payment.paid.card" : "engine.log.payment.paid",
+        {
+          player: logPlayerValue(seat),
+          amount: picked.cost,
+          ...(source ? { card: logCardValue(source.cardId) } : {}),
+        },
+      ));
     }
     state.pendingDecision = null;
     resolveScriptChoice(

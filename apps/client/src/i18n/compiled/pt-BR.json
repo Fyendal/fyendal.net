@@ -10717,42 +10717,6 @@
       "value": ": nenhuma zona de equipamento exposta foi encontrada"
     }
   ],
-  "card.log.siy.hero.paid": [
-    {
-      "type": 1,
-      "value": "target"
-    },
-    {
-      "type": 0,
-      "value": " paga o custo de recurso de "
-    },
-    {
-      "type": 1,
-      "value": "card"
-    }
-  ],
-  "card.log.siy.hero.paid.amount": [
-    {
-      "type": 1,
-      "value": "target"
-    },
-    {
-      "type": 0,
-      "value": " paga "
-    },
-    {
-      "type": 1,
-      "value": "amount"
-    },
-    {
-      "type": 0,
-      "value": " recurso por "
-    },
-    {
-      "type": 1,
-      "value": "card"
-    }
-  ],
   "card.log.ska.barefangs.attack": [
     {
       "type": 1,
@@ -26943,6 +26907,116 @@
     {
       "type": 0,
       "value": " não pode ganhar vida enquanto estiver à frente na vida"
+    }
+  ],
+  "engine.log.payment.paid": [
+    {
+      "type": 1,
+      "value": "player"
+    },
+    {
+      "type": 0,
+      "value": " paga "
+    },
+    {
+      "type": 6,
+      "value": "amount",
+      "options": {
+        "=0": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " recursos"
+            }
+          ]
+        },
+        "one": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " recurso"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " recursos"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    }
+  ],
+  "engine.log.payment.paid.card": [
+    {
+      "type": 1,
+      "value": "player"
+    },
+    {
+      "type": 0,
+      "value": " paga "
+    },
+    {
+      "type": 6,
+      "value": "amount",
+      "options": {
+        "=0": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " recursos"
+            }
+          ]
+        },
+        "one": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " recurso"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " recursos"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    },
+    {
+      "type": 0,
+      "value": " por "
+    },
+    {
+      "type": 1,
+      "value": "card"
     }
   ],
   "engine.log.phantasm.fizzles.condition.failed": [

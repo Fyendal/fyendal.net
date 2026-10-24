@@ -626,7 +626,7 @@ export const outHighRarity: Record<string, CardScript> = {
     },
   },
   "collapsing trap|3": {
-    canTriggerOnDefend: (ctx) => ctx.link?.goAgain === true,
+    canTriggerOnDefend: (ctx) => ctx.currentAttackHasGoAgain(),
     onDefend(ctx) {
       if (!ctx.link) return;
       const seat = ctx.link.attacker;

@@ -10377,42 +10377,6 @@
       "value": ": no exposed equipment zone was found"
     }
   ],
-  "card.log.siy.hero.paid": [
-    {
-      "type": 1,
-      "value": "target"
-    },
-    {
-      "type": 0,
-      "value": " pays the resource cost for "
-    },
-    {
-      "type": 1,
-      "value": "card"
-    }
-  ],
-  "card.log.siy.hero.paid.amount": [
-    {
-      "type": 1,
-      "value": "target"
-    },
-    {
-      "type": 0,
-      "value": " pays "
-    },
-    {
-      "type": 1,
-      "value": "amount"
-    },
-    {
-      "type": 0,
-      "value": " resource for "
-    },
-    {
-      "type": 1,
-      "value": "card"
-    }
-  ],
   "card.log.ska.barefangs.attack": [
     {
       "type": 1,
@@ -25627,6 +25591,94 @@
     {
       "type": 0,
       "value": " can't gain life while ahead on life"
+    }
+  ],
+  "engine.log.payment.paid": [
+    {
+      "type": 1,
+      "value": "player"
+    },
+    {
+      "type": 0,
+      "value": " pays "
+    },
+    {
+      "type": 6,
+      "value": "amount",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " resource"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " resources"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    }
+  ],
+  "engine.log.payment.paid.card": [
+    {
+      "type": 1,
+      "value": "player"
+    },
+    {
+      "type": 0,
+      "value": " pays "
+    },
+    {
+      "type": 6,
+      "value": "amount",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " resource"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " resources"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    },
+    {
+      "type": 0,
+      "value": " for "
+    },
+    {
+      "type": 1,
+      "value": "card"
     }
   ],
   "engine.log.phantasm.fizzles.condition.failed": [

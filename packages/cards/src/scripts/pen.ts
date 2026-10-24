@@ -1005,7 +1005,7 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
     modifyAttack: (ctx) => (ctx.getFlag("player", "boostedSubtype:evo") === true ? 1 : 0),
   })),
 
-  "concealed nerve gas|0": concealedHitTrap(FRAILTY, "Frailty", (ctx) => ctx.link?.goAgain === true),
+  "concealed nerve gas|0": concealedHitTrap(FRAILTY, "Frailty", (ctx) => ctx.currentAttackHasGoAgain()),
   "concealed pathogen|0": concealedHitTrap(
     BLOODROT,
     "Bloodrot Pox",
@@ -1014,7 +1014,7 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
   "concealed sedative|0": concealedHitTrap(INERTIA, "Inertia", (ctx) => ctx.attackBonusAboveBase() > 0),
   "rainbow goo trap|1": {
     canTriggerOnDefend: (ctx) =>
-      ctx.attackBonusAboveBase() > 0 && ctx.currentAttackHasDominate() && ctx.link?.goAgain === true,
+      ctx.attackBonusAboveBase() > 0 && ctx.currentAttackHasDominate() && ctx.currentAttackHasGoAgain(),
     onDefend(ctx) {
       ctx.addModifier({ scope: "chain-link", attack: -2, seat: opponentSeat(ctx) });
       ctx.suppressAttackAbilities();
@@ -1066,7 +1066,7 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
       const seat = heroChoiceSeat(ctx, option);
       if (seat !== undefined) create(ctx, "DVR028", 1, seat);
     },
-    canTriggerOnDefend: (ctx) => ctx.link?.goAgain === true,
+    canTriggerOnDefend: (ctx) => ctx.currentAttackHasGoAgain(),
     onDefendTarget: {
       options: (ctx) => heroesAndAllies(ctx).map((card) => card.instanceId),
       prompt: () => decisionPrompt("Tap target hero or ally", "card.pen.heroally.tap"),

@@ -9702,50 +9702,6 @@
       "value": "：没有找到暴露的装备区域"
     }
   ],
-  "card.log.siy.hero.paid": [
-    {
-      "type": 1,
-      "value": "target"
-    },
-    {
-      "type": 0,
-      "value": " 为 "
-    },
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": " 支付资源费用"
-    }
-  ],
-  "card.log.siy.hero.paid.amount": [
-    {
-      "type": 1,
-      "value": "target"
-    },
-    {
-      "type": 0,
-      "value": " 为 "
-    },
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": " 支付 "
-    },
-    {
-      "type": 1,
-      "value": "amount"
-    },
-    {
-      "type": 0,
-      "value": " 点资源"
-    }
-  ],
   "card.log.ska.barefangs.attack": [
     {
       "type": 1,
@@ -24902,6 +24858,50 @@
     {
       "type": 0,
       "value": " 的生命领先时无法恢复生命"
+    }
+  ],
+  "engine.log.payment.paid": [
+    {
+      "type": 1,
+      "value": "player"
+    },
+    {
+      "type": 0,
+      "value": " 支付 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点资源"
+    }
+  ],
+  "engine.log.payment.paid.card": [
+    {
+      "type": 1,
+      "value": "player"
+    },
+    {
+      "type": 0,
+      "value": " 为 "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 支付 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点资源"
     }
   ],
   "engine.log.phantasm.fizzles.condition.failed": [

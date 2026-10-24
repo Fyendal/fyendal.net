@@ -488,6 +488,22 @@ describe("CRU — Ranger traps", () => {
     g.react("pitfall trap|2").expectLife(0, 18);
   });
 
+  it("Pitfall Trap logs the attacker paying from floating resources", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", hand: ["wounded bull|1", BLUE], resources: 1 },
+        { hero: "dorinthea", arsenal: ["pitfall trap|2"] },
+      ],
+    });
+
+    g.play("wounded bull|1", { pitch: [BLUE] }).blockWith().passPriority();
+    g.react("pitfall trap|2");
+    const pay = g.state.pendingDecision?.options?.find((option) => option !== "no");
+    expect(pay).toBeDefined();
+    g.chooseOption(pay!).expectLife(0, 20);
+    expect(g.state.log.some((entry) => entry.publicText?.includes("Rhinar pays 1 resource(s) for Pitfall Trap"))).toBe(true);
+  });
+
   it("Rockslide Trap gives the attack -2 power when the attacker cannot pay", () => {
     const g = scenario({
       seats: [

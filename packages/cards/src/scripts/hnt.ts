@@ -1939,7 +1939,7 @@ Object.assign(hnt, {
     },
   },
   "chain reaction|2": {
-    canTriggerOnDefend: (ctx) => ctx.link?.goAgain === true,
+    canTriggerOnDefend: (ctx) => ctx.currentAttackHasGoAgain(),
     onDefend(ctx) {
       const cards = ctx
         .player(ctx.seat)

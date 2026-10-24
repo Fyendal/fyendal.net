@@ -11,6 +11,7 @@ export type ScriptCommandName =
   | "attackBonusAboveBase"
   | "attackFromDeck"
   | "attackHasDominate"
+  | "attackHasGoAgain"
   | "attackHasOverpower"
   | "attackWithPermanent"
   | "banishCard"

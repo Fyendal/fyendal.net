@@ -10407,42 +10407,6 @@
       "value": ": no se encontró ninguna zona de equipo expuesta"
     }
   ],
-  "card.log.siy.hero.paid": [
-    {
-      "type": 1,
-      "value": "target"
-    },
-    {
-      "type": 0,
-      "value": " paga el coste de recursos de "
-    },
-    {
-      "type": 1,
-      "value": "card"
-    }
-  ],
-  "card.log.siy.hero.paid.amount": [
-    {
-      "type": 1,
-      "value": "target"
-    },
-    {
-      "type": 0,
-      "value": " paga "
-    },
-    {
-      "type": 1,
-      "value": "amount"
-    },
-    {
-      "type": 0,
-      "value": " recurso por "
-    },
-    {
-      "type": 1,
-      "value": "card"
-    }
-  ],
   "card.log.ska.barefangs.attack": [
     {
       "type": 1,
@@ -26477,6 +26441,94 @@
     {
       "type": 0,
       "value": " no puede ganar vida mientras tenga más vida que su oponente"
+    }
+  ],
+  "engine.log.payment.paid": [
+    {
+      "type": 1,
+      "value": "player"
+    },
+    {
+      "type": 0,
+      "value": " paga "
+    },
+    {
+      "type": 6,
+      "value": "amount",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " recurso"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " recursos"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    }
+  ],
+  "engine.log.payment.paid.card": [
+    {
+      "type": 1,
+      "value": "player"
+    },
+    {
+      "type": 0,
+      "value": " paga "
+    },
+    {
+      "type": 6,
+      "value": "amount",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " recurso"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " recursos"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    },
+    {
+      "type": 0,
+      "value": " por "
+    },
+    {
+      "type": 1,
+      "value": "card"
     }
   ],
   "engine.log.phantasm.fizzles.condition.failed": [
