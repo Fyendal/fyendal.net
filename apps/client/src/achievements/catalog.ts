@@ -16,7 +16,7 @@ export const ACHIEVEMENT_GROUPS: ReadonlyArray<{
 ];
 
 /** Hidden from players outside the beta allowlist unless already earned. */
-export const BETA_ACHIEVEMENT_IDS: ReadonlySet<AchievementId> = new Set<AchievementId>(["beat-boltyn"]);
+export const BETA_ACHIEVEMENT_IDS: ReadonlySet<AchievementId> = new Set<AchievementId>();
 
 export const ACHIEVEMENT_BOT_HEROES: Partial<Record<AchievementId, string>> = {
   "beat-bravo": "Bravo, Flattering Showman",
