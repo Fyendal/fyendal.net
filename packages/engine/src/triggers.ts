@@ -22,6 +22,7 @@ import {
   logNameOf,
   logPlayerValue,
   logPublic,
+  logTermValue,
   nameOf,
   triggerLogMessage,
 } from "./gameLog.js";
@@ -1144,12 +1145,21 @@ function askTriggerChoice(
     player: layer.seat,
     kind: "optional-effect",
     prompt: `${name}: ${layer.label}`,
-    promptMessage: labelMessage ?? (found
+    promptMessage: found && labelMessage
       ? {
-          id: "engine.decision.trigger.optional.card",
-          values: { card: { kind: "card", cardId: found.card.cardId } },
+          id: "engine.decision.trigger.source",
+          values: {
+            ...labelMessage.values,
+            triggerSource: logCardValue(found.card.cardId),
+            triggerEffect: logTermValue(labelMessage.id),
+          },
         }
-      : { id: "engine.decision.trigger.optional" }),
+      : labelMessage ?? (found
+        ? {
+            id: "engine.decision.trigger.optional.card",
+            values: { card: logCardValue(found.card.cardId) },
+          }
+        : { id: "engine.decision.trigger.optional" }),
     options: ["yes", "no"],
     optionMessages: [
       { id: "common.option.yes" },

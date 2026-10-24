@@ -57,7 +57,10 @@ describe("DYN — registration and heroes", () => {
     g.settle();
     expect(g.state.pendingDecision).toMatchObject({
       kind: "optional-effect",
-      promptMessage: { id: "card.dyn.arakni.opponenttop.look" },
+      promptMessage: {
+        id: "engine.decision.trigger.source",
+        values: { triggerEffect: { kind: "term", id: "card.dyn.arakni.opponenttop.look" } },
+      },
     });
   });
 

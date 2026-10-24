@@ -132,6 +132,7 @@
   "engine.decision.look": "{card}：查看",
   "engine.decision.trigger.optional": "是否使用此触发能力？",
   "engine.decision.trigger.optional.card": "{card}：是否使用此触发能力？",
+  "engine.decision.trigger.source": "{triggerSource}：{triggerEffect}",
   "engine.decision.clash.again": "{card}：摧毁一个 {permanent}，将一张展示的牌置于其拥有者牌库底部，然后再次 clash？",
   "engine.decision.clash.winner": "{card}：选择哪位英雄赢得 clash",
   "engine.decision.clash.revealed.bottom": "{card}：选择一张展示的牌置于其拥有者牌库底部",

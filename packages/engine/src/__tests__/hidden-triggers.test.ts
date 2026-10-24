@@ -44,8 +44,9 @@ describe("hidden triggered abilities (CR 5.4.7b)", () => {
     expect(opponentSees(s, held)).toEqual({ stack: false, log: false });
     expect(projectStateFor(s, 0).pendingDecision?.prompt).toBe("");
     expect(projectStateFor(s, 1).pendingDecision?.sourceInstanceId).toBe(held);
-    expect(projectStateFor(s, 1).pendingDecision?.lookedCards?.map((card) => card.instanceId)).toEqual([held]);
-    expect(projectStateFor(s, 0).pendingDecision?.lookedCards).toBeUndefined();
+    expect(projectStateFor(s, 1).pendingDecision?.promptMessage?.values?.card)
+      .toEqual({ kind: "card", cardId: "BLUE" });
+    expect(projectStateFor(s, 0).pendingDecision?.promptMessage).toBeUndefined();
   });
 
   it("names the source publicly once its owner decides to trigger it", () => {

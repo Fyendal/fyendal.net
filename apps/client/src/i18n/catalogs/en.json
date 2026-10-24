@@ -132,6 +132,7 @@
   "engine.decision.look": "{card}: look at",
   "engine.decision.trigger.optional": "Use this triggered ability?",
   "engine.decision.trigger.optional.card": "{card}: use this triggered ability?",
+  "engine.decision.trigger.source": "{triggerSource}: {triggerEffect}",
   "engine.decision.clash.again": "{card}: destroy a {permanent} to put a revealed card on the bottom of its owner's deck and clash again?",
   "engine.decision.clash.winner": "{card}: choose which hero wins the clash",
   "engine.decision.clash.revealed.bottom": "{card}: choose a revealed card to put on the bottom of its owner's deck",

@@ -132,6 +132,7 @@
   "engine.decision.look": "{card}: mirar",
   "engine.decision.trigger.optional": "¿Usar esta habilidad de trigger?",
   "engine.decision.trigger.optional.card": "{card}: ¿usar esta habilidad de trigger?",
+  "engine.decision.trigger.source": "{triggerSource}: {triggerEffect}",
   "engine.decision.clash.again": "{card}: ¿destruir {permanent} para poner una carta revelada en la parte inferior del mazo de su propietario y hacer clash de nuevo?",
   "engine.decision.clash.winner": "{card}: elige qué héroe gana el clash",
   "engine.decision.clash.revealed.bottom": "{card}: elige una carta revelada para ponerla en la parte inferior del mazo de su propietario",

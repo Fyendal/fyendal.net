@@ -18864,6 +18864,20 @@
       "value": "：是否使用此触发能力？"
     }
   ],
+  "engine.decision.trigger.source": [
+    {
+      "type": 1,
+      "value": "triggerSource"
+    },
+    {
+      "type": 0,
+      "value": "："
+    },
+    {
+      "type": 1,
+      "value": "triggerEffect"
+    }
+  ],
   "engine.decision.triggers.order": [
     {
       "type": 0,

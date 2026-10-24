@@ -481,7 +481,10 @@ describe("WTR generic — equipment", () => {
     expect(g.state.pendingDecision).toMatchObject({
       kind: "optional-effect",
       defaultOption: "yes",
-      promptMessage: { id: "card.trigger.energycounter.add" },
+      promptMessage: {
+        id: "engine.decision.trigger.source",
+        values: { triggerEffect: { kind: "term", id: "card.trigger.energycounter.add" } },
+      },
     });
     expect(projectStateFor(g.state, 0).logEntries?.find(
       (entry) => "message" in entry && entry.message.id === "engine.log.trigger.card",

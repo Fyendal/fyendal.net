@@ -132,6 +132,7 @@
   "engine.decision.look": "{card}: olhar",
   "engine.decision.trigger.optional": "Usar esta habilidade de trigger?",
   "engine.decision.trigger.optional.card": "{card}: usar esta habilidade de trigger?",
+  "engine.decision.trigger.source": "{triggerSource}: {triggerEffect}",
   "engine.decision.clash.again": "{card}: destruir {permanent} para colocar uma carta revelada no fundo do deck do dono e fazer clash de novo?",
   "engine.decision.clash.winner": "{card}: escolha qual herói vence o clash",
   "engine.decision.clash.revealed.bottom": "{card}: escolha uma carta revelada para colocar no fundo do deck do dono",
