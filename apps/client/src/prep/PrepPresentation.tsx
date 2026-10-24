@@ -235,6 +235,9 @@ export const PrepPresentation = memo(function PrepPresentation({
   const mainRequirement = exactMainCount === undefined
     ? intl.formatMessage({ id: "prep.presentation.minimum" }, { count: minimumMainCount })
     : intl.formatMessage({ id: "prep.presentation.exact" }, { count: exactMainCount });
+  const mainCountValid = exactMainCount === undefined
+    ? mainCount >= minimumMainCount
+    : mainCount === exactMainCount;
   // Moving a copy can add or remove a row in the other zone and shift the row
   // under the pointer; keep the pressed control at the same viewport position
   // so repeated clicks hit the same card.
@@ -415,45 +418,54 @@ export const PrepPresentation = memo(function PrepPresentation({
         </WrappingPrepGroups>
       </div> : null}
       {sections !== "arena" ? <div className="prep-section prep-ledgers">
-        <div className="prep-deck-zone">
-          <div className="prep-zone-heading">
-            <h4>{intl.formatMessage(
-              { id: "prep.presentation.mainCount" },
-              { count: mainCount, requirement: mainRequirement },
-            )}</h4>
-            {dirty && !locked ? (
-              <button type="button" className="prep-restore" onClick={onRestoreMain}>
-                {intl.formatMessage({ id: "prep.presentation.restore" })}
-              </button>
+        <div className="prep-deck-zone prep-main-zone">
+          <div className="prep-zone-head">
+            <div className="prep-zone-heading">
+              <h4 aria-label={intl.formatMessage(
+                { id: "prep.presentation.mainCount" },
+                { count: mainCount, requirement: mainRequirement },
+              )}>
+                <span aria-hidden="true">{intl.formatMessage({ id: "prep.zone.main" })}</span>
+                <span className="prep-zone-count" aria-hidden="true">
+                  <strong className={mainCountValid ? undefined : "invalid"}>{mainCount}</strong>
+                  {" / "}
+                  {mainRequirement}
+                </span>
+              </h4>
+              {dirty && !locked ? (
+                <button type="button" className="prep-restore" onClick={onRestoreMain}>
+                  {intl.formatMessage({ id: "prep.presentation.restore" })}
+                </button>
+              ) : null}
+            </div>
+            {mainCount > 0 ? (
+              <div
+                className="prep-pitch-bar"
+                role="img"
+                aria-label={intl.formatMessage(
+                  { id: "prep.presentation.pitchSplit" },
+                  { red: pitchLabel(1), yellow: pitchLabel(2), blue: pitchLabel(3) },
+                )}
+              >
+                {([1, 2, 3] as const).map((pitch) => (
+                  <span
+                    key={pitch}
+                    className={`prep-pitch-${pitch}`}
+                    style={{ flexGrow: pitchTotals[pitch] }}
+                  />
+                ))}
+              </div>
             ) : null}
-          </div>
-          {mainCount > 0 ? (
-            <div
-              className="prep-pitch-bar"
-              role="img"
-              aria-label={intl.formatMessage(
-                { id: "prep.presentation.pitchSplit" },
-                { red: pitchLabel(1), yellow: pitchLabel(2), blue: pitchLabel(3) },
-              )}
-            >
+            <div className="prep-pitch-legend" aria-hidden="true">
               {([1, 2, 3] as const).map((pitch) => (
-                <span
-                  key={pitch}
-                  className={`prep-pitch-${pitch}`}
-                  style={{ flexGrow: pitchTotals[pitch] }}
-                />
+                <span key={pitch}>
+                  <i className={`prep-pitch prep-pitch-${pitch}`} />
+                  {pitchLabel(pitch)}
+                </span>
               ))}
             </div>
-          ) : null}
-          <div className="prep-pitch-legend" aria-hidden="true">
-            {([1, 2, 3] as const).map((pitch) => (
-              <span key={pitch}>
-                <i className={`prep-pitch prep-pitch-${pitch}`} />
-                {pitchLabel(pitch)}
-              </span>
-            ))}
+            <LedgerHead />
           </div>
-          <LedgerHead />
           <ul className="prep-ledger">
             {renderGroups(mainGroups, ({ id, count }) => (
               <LedgerRow key={id} id={id} changed={changed(id)} fixed={false} onInspect={onInspectCard}>
@@ -479,10 +491,18 @@ export const PrepPresentation = memo(function PrepPresentation({
           </ul>
         </div>
         <div className="prep-deck-zone prep-inventory-zone">
-          <div className="prep-zone-heading">
-            <h4>{intl.formatMessage({ id: "prep.presentation.inventoryCount" }, { count: inventoryCount })}</h4>
+          <div className="prep-zone-head">
+            <div className="prep-zone-heading">
+              <h4 aria-label={intl.formatMessage(
+                { id: "prep.presentation.inventoryCount" },
+                { count: inventoryCount },
+              )}>
+                <span aria-hidden="true">{intl.formatMessage({ id: "prep.zone.inventory" })}</span>
+                <span className="prep-zone-count" aria-hidden="true"><strong>{inventoryCount}</strong></span>
+              </h4>
+            </div>
+            {inventoryCount > 0 ? <LedgerHead /> : null}
           </div>
-          {inventoryCount > 0 ? <LedgerHead /> : null}
           <ul className="prep-ledger">
             {renderGroups(inventoryGroups, ({ id, count, fixed }) => (
               <LedgerRow

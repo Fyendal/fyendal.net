@@ -27,6 +27,8 @@ describe("PrepPresentation equipment controls", () => {
     expect(render("deck")).not.toContain("SEA045.webp");
     expect(render("deck")).toContain("prep-deck-zone");
     expect(render("deck")).toContain("Move one copy of Up the Ante to Inventory");
+    expect(render("deck")).toContain('aria-label="Main deck (1 / 60 min)"');
+    expect(render("deck")).toContain('class="invalid">1</strong>');
   });
 
   it("exposes weapon and equipment selection as pressed buttons", () => {
