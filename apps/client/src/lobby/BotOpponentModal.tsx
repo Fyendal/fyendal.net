@@ -6,6 +6,7 @@ import { BETA_BOT_OPPONENTS } from "@fyendal/protocol";
 import { heroImageUrl } from "./heroImage.js";
 import { ModalSurface } from "../components/ModalSurface.js";
 import { ViewportTooltip } from "../components/ViewportTooltip.js";
+import { loadBotMatchmakingPreference, saveBotMatchmakingPreference } from "../storage.js";
 import { useStore } from "../store.js";
 
 interface BotOption {
@@ -142,7 +143,9 @@ export function BotOpponentModal(props: {
   const intl = useIntl();
   const betaTester = useStore((state) => state.betaTester);
   const bots = BOTS[props.format].filter((bot) => betaTester || !BETA_BOT_OPPONENTS.has(bot.id));
-  const [searchForPlayer, setSearchForPlayer] = useState(true);
+  const [searchForPlayer, setSearchForPlayer] = useState(() =>
+    typeof localStorage === "undefined" ? true : loadBotMatchmakingPreference(localStorage)
+  );
   const tooltipId = useId();
   const warningRefs = useRef<Partial<Record<BotOpponent, HTMLSpanElement | null>>>({});
   const [hoveredBot, setHoveredBot] = useState<BotOpponent | null>(null);
@@ -174,7 +177,9 @@ export function BotOpponentModal(props: {
           type="checkbox"
           checked={searchForPlayer}
           onChange={(event) => {
-            setSearchForPlayer(event.target.checked);
+            const enabled = event.target.checked;
+            setSearchForPlayer(enabled);
+            if (typeof localStorage !== "undefined") saveBotMatchmakingPreference(localStorage, enabled);
           }}
         />
         <span className="switch-track" />
