@@ -1,6 +1,7 @@
 import type { CardScript, DeepReadonly, CardInstance, ScriptCtx } from "@fyendal/engine";
 import {
   buffNextAttack,
+  canHeave,
   cardDefendsThisTrigger,
   cardNamed,
   commonOptionMessages,
@@ -8,7 +9,6 @@ import {
   decisionPrompt,
   entersArenaTrigger,
   localizedCardLog,
-  logHeaveUnaffordable,
   opponentSeat,
   sharesName,
 } from "./shared-helpers.js";
@@ -460,11 +460,10 @@ function heave(amount: number, extra: CardScript = {}): CardScript {
         event: "end-of-turn",
         sourceZone: "hand",
         label: `Heave ${amount}`,
-        condition: (ctx) => ctx.hasArsenalSpace(),
+        canAccept: (ctx) => canHeave(ctx, amount),
         effect(ctx) {
-          const player = ctx.player(ctx.seat);
-          if (!ctx.hasArsenalSpace() || !player.hand.some((card) => card.instanceId === ctx.self.instanceId)) return;
-          if (!ctx.requestPayment(
+          if (!canHeave(ctx, amount)) return;
+          ctx.requestPayment(
             `heave-${amount}`,
             decisionPrompt(
               `${ctx.data.name}: pay ${Array(amount).fill("{r}").join("")} to heave it?`,
@@ -476,7 +475,7 @@ function heave(amount: number, extra: CardScript = {}): CardScript {
             amount,
             undefined,
             [ctx.self.instanceId],
-          )) logHeaveUnaffordable(ctx, amount);
+          );
         },
       },
     ],

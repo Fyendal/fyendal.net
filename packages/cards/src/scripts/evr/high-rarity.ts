@@ -1,13 +1,13 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
 import {
   buffNextAttack,
+  canHeave,
   cardNameContains,
   commonOptionMessages,
   decisionMessage,
   decisionPrompt,
   entersArenaTrigger,
   heroDamage,
-  logHeaveUnaffordable,
   ongoingLabel,
   opponentSeat,
   previousAttackHasName,
@@ -428,11 +428,10 @@ export const evrHighRarity: Record<string, CardScript> = {
         event: "end-of-turn",
         sourceZone: "hand",
         label: "Heave 3",
-        condition: (ctx) => ctx.hasArsenalSpace(),
+        canAccept: (ctx) => canHeave(ctx, 3),
         effect(ctx) {
-          const player = ctx.player(ctx.seat);
-          if (!ctx.hasArsenalSpace() || !player.hand.some((card) => card.instanceId === ctx.self.instanceId)) return;
-          if (!ctx.requestPayment(
+          if (!canHeave(ctx, 3)) return;
+          ctx.requestPayment(
             "pulverize-heave",
             decisionPrompt("Pulverize: pay {r}{r}{r} to heave it?", "card.evr.pulverize.pay", {
               values: { amount: 3 },
@@ -441,7 +440,7 @@ export const evrHighRarity: Record<string, CardScript> = {
             3,
             undefined,
             [ctx.self.instanceId],
-          )) logHeaveUnaffordable(ctx, 3);
+          );
         },
       },
     ],

@@ -220,6 +220,10 @@ export interface StackLayer {
   optional: boolean;
   /** Space default snapshotted from the trigger definition when queued. */
   defaultOption?: "yes" | "no";
+  /** A hidden triggered ability (CR 5.4.7b) whose private source's owner has
+   *  not yet decided to trigger it. It is offered as it resolves and is not
+   *  projected until then. */
+  hiddenSource?: true;
   /** Optional triggers: set once the controller accepted the trigger (the
    *  trigger itself has resolved; its effect still awaits stack resolution) */
   accepted?: boolean;

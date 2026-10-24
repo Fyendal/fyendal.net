@@ -1,14 +1,8 @@
 import type { EngineRuntime } from "./runtimePorts.js";
 import type { GameStateInternal } from "./runtimeState.js";
-import type { GameMessage } from "@fyendal/shared";
 import { cardNameKeysOf, dataOf, scriptOf } from "./cardProperties.js";
-import {
-  gameLogMessage,
-  logCardValue,
-  logPublic,
-  nameOf,
-  triggerLogMessage,
-} from "./gameLog.js";
+import { logTriggerAnnouncement, triggerAnnouncement } from "./triggerPresentation.js";
+import type { TriggerAnnouncement } from "./triggerPresentation.js";
 import { triggerOccurrenceCount } from "./scripts.js";
 import type { DamageEventContext, ScriptCtx, TriggerEvent, TriggerEventContext } from "./scripts.js";
 import type { CardInstance, ChainLinkState, PlayerState, StackLayer } from "./state.js";
@@ -39,7 +33,7 @@ export function collectCardEventTriggerLayers(
   for (const seat of [subject, opponent(subject)]) {
     const player = state.players[seat] as PlayerState;
     const layers: StackLayer[] = [];
-    const announcements: { group?: string; text: string; message?: GameMessage; occurrences: number }[] = [];
+    const announcements: { group?: string; announcement: TriggerAnnouncement; occurrences: number }[] = [];
     const sources = eventTriggerSources(state, player);
     if (
       event !== "card-played" && eventCard?.owner === seat &&
@@ -65,10 +59,17 @@ export function collectCardEventTriggerLayers(
         if ((trigger.whose ?? "subject") === "subject" && seat !== subject) return;
         const ctx = runtime.makeCtx(state, seat, card, currentLink(state));
         if (trigger.condition && !trigger.condition(ctx, eventCard, eventContext)) return;
+        // CR 5.4.7b: the owner of a hidden triggered ability may decide to
+        // trigger it. It is offered only when it could do something, and stays
+        // unannounced with its onTrigger deferred until the owner accepts.
+        const hidden = trigger.sourceZone === "hand" && source.physicalZone === "hand";
+        if (hidden && trigger.canAccept && !trigger.canAccept(ctx)) return;
         const occurrences = triggerOccurrenceCount(trigger, ctx, eventCard, eventContext);
         if (occurrences === 0) return;
-        for (let occurrence = 0; occurrence < occurrences; occurrence++) {
-          trigger.onTrigger?.(ctx, eventCard, eventContext);
+        if (!hidden) {
+          for (let occurrence = 0; occurrence < occurrences; occurrence++) {
+            trigger.onTrigger?.(ctx, eventCard, eventContext);
+          }
         }
         layers.push({
           sourceInstanceId: card.instanceId,
@@ -79,38 +80,18 @@ export function collectCardEventTriggerLayers(
           ...(eventCard ? { triggerEventCard: runtime.commands.snapshotSerializable(eventCard) } : {}),
           ...(eventContext?.damage ? { triggerDamage: { ...eventContext.damage } } : {}),
           label: trigger.label,
-          optional: trigger.optional ?? false,
+          // Deciding to trigger a hidden ability is its only optional choice.
+          optional: !hidden && (trigger.optional ?? false),
+          ...(hidden ? { hiddenSource: true as const } : {}),
           ...(trigger.defaultOption ? { defaultOption: trigger.defaultOption } : {}),
         });
-        const publicText = card.faceDown
-          ? `${nameOf(state, player.heroCardId)}'s face-down card triggers: ${trigger.label}`
-          : trigger.publicLog ?? `${nameOf(state, card.cardId)} triggers: ${trigger.label}`;
-        const message = card.faceDown && trigger.labelMessage
-          ? triggerLogMessage(
-              publicText,
-              player.heroCardId,
-              trigger.labelMessage,
-              1,
-              "engine.log.trigger.facedown",
-            ).message
-          : trigger.publicLogMessage
-            ? {
-                ...trigger.publicLogMessage,
-                values: {
-                  ...trigger.publicLogMessage.values,
-                  triggerSource: logCardValue(card.cardId),
-                  occurrences: 1,
-                },
-              }
-            : !trigger.publicLog && trigger.labelMessage
-              ? triggerLogMessage(publicText, card.cardId, trigger.labelMessage).message
-              : undefined;
+        if (hidden) return;
+        const announcement = triggerAnnouncement(state, player, card, trigger);
         announcements.push({
           ...(trigger.simultaneousKey
-            ? { group: `${trigger.simultaneousKey}\u0000${publicText}` }
+            ? { group: `${trigger.simultaneousKey}\u0000${announcement.text}` }
             : {}),
-          text: publicText,
-          ...(message ? { message } : {}),
+          announcement,
           occurrences,
         });
       });
@@ -125,39 +106,14 @@ export function collectCardEventTriggerLayers(
       }
     }
     const announcedGroups = new Set<string>();
-    const announce = (announcement: (typeof announcements)[number], occurrences: number): void => {
-      const fallback = `${announcement.text}${occurrences > 1 ? ` ×${occurrences}` : ""}`;
-      if (!announcement.message) {
-        logPublic(
-          state,
-          gameLogMessage(
-            fallback,
-            "engine.log.trigger.generic",
-            { occurrences },
-          ),
-        );
-        return;
-      }
-      logPublic(state, {
-        fallback,
-        message: {
-          ...announcement.message,
-          values: {
-            ...announcement.message.values,
-            occurrences,
-          },
-        },
-      });
-    };
-    for (const announcement of announcements) {
-      if (!announcement.group) {
-        announce(announcement, announcement.occurrences);
+    for (const { group, announcement, occurrences } of announcements) {
+      if (!group) {
+        logTriggerAnnouncement(state, announcement, occurrences);
         continue;
       }
-      if (announcedGroups.has(announcement.group)) continue;
-      announcedGroups.add(announcement.group);
-      const count = groupedCounts.get(announcement.group) ?? 1;
-      announce(announcement, count);
+      if (announcedGroups.has(group)) continue;
+      announcedGroups.add(group);
+      logTriggerAnnouncement(state, announcement, groupedCounts.get(group) ?? 1);
     }
     if (layers.length > 0) groups.push({ seat, layers });
   }

@@ -125,6 +125,16 @@ action-phase triggers (which can be responded to) keep the stack. Changing which
 triggers are inline is an incompatible rules change needing a `rulesetVersion`
 bump.
 
+Hidden triggers (CR 5.4.7b): a `TriggerDef` with `sourceZone: "hand"` is a
+hidden triggered ability. Its layer is created with `hiddenSource`, without an
+announcement or `onTrigger`, and only when `canAccept` allows it. The owner
+still orders it among simultaneous triggers. Until decided it is treated as
+inline: it opens no priority window and is not projected. When it would
+resolve, `canAccept` is rechecked (so an earlier Heave can fill the arsenal)
+and the owner privately answers a `hidden-trigger` decision. Declining removes
+the layer without a public trace; accepting clears `hiddenSource`, runs
+`onTrigger`, announces the source publicly, and continues the stack.
+
 Played cards and triggered or activated abilities ride the stack. Effects run
 only when their layer resolves after both players pass. Go again grants its
 action point at resolution. An attack card is a stack layer first; its

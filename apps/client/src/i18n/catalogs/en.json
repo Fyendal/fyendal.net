@@ -1313,7 +1313,6 @@
   "card.log.common.hero.life.lost": "{target} loses {amount} life ({life} life)",
   "card.log.common.hero.marked": "{target} is marked",
   "card.log.common.life.gained": "{card}: gained {amount} life",
-  "card.log.common.heave.unaffordable": "{card}: can't pay {amount} resources to heave it",
   "card.log.common.intimidate": "{card}: intimidate",
   "card.log.common.lesson.counter.gained": "{card} gets a lesson counter ({count})",
   "card.log.common.mentor.search.private": "searched {result} into arsenal",

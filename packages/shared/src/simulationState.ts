@@ -80,6 +80,7 @@ export interface PersistedStackLayerV1 {
   label: string;
   optional: boolean;
   defaultOption?: "yes" | "no";
+  hiddenSource?: true;
   accepted?: boolean;
   card?: PersistedCardInstanceV1;
   goAgain?: boolean;

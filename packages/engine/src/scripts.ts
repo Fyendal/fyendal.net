@@ -598,6 +598,8 @@ export interface ScriptCtx {
     seat?: number,
     excludeInstanceIds?: readonly number[],
   ): boolean;
+  /** Whether `requestPayment` would offer at least one way to pay `cost`. */
+  canPayResources(cost: number, excludeInstanceIds?: readonly number[]): boolean;
   /** Offer a payment whose follow-up hook belongs to another active source. */
   requestPaymentFrom(sourceInstanceId: number, hook: string, prompt: ScriptPrompt, cost: number, seat?: number): boolean;
   /** Declare X, then pay the resulting resource cost while playing a card.
@@ -963,7 +965,8 @@ export interface TriggerDef {
   /** Zone the source must occupy when the event occurs. `self` means the card
    *  that caused the event, even if the event has already moved it to its
    *  destination zone. Defaults to an arena permanent (including
-   *  face-up/mentor arsenal where applicable). */
+   *  face-up/mentor arsenal where applicable). A `hand` trigger is a hidden
+   *  triggered ability (CR 5.4.7b): its owner privately decides to trigger it. */
   sourceZone?: "arena" | "hand" | "banish" | "graveyard" | "pitch" | "self" | "any";
   /** The trigger condition includes this card defending, so the ability stays
    * functional while it is a non-permanent defending card (CR 1.7.4a).
@@ -1030,7 +1033,8 @@ export interface TriggerDef {
     eventContext?: TriggerEventContext,
   ): void;
   /** Rechecked immediately before an optional trigger is offered. Returning
-   * false skips an effect that can no longer resolve successfully. */
+   * false skips an effect that can no longer resolve successfully. A hidden
+   * trigger (source in hand) is not offered at all while this is false. */
   canAccept?(ctx: ScriptCtx): boolean;
   /** Runs when the controller accepts an optional trigger — the trigger itself
    *  resolving (e.g. turning a mentor face up), before any priority window. */

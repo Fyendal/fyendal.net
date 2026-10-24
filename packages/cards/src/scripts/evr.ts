@@ -2,6 +2,7 @@ import type { CardInstance, CardScript, DeepReadonly, ScriptCtx, TriggerDef } fr
 import { evrHighRarity } from "./evr/high-rarity.js";
 import {
   buffNextAttack,
+  canHeave,
   cardNamed,
   commonOptionMessages,
   decisionMessage,
@@ -23,7 +24,6 @@ import {
   weaponAttackCount,
   opposingHeroDamage,
   ongoingLabel,
-  logHeaveUnaffordable,
 } from "./shared-helpers.js";
 
 const COPPER = "EVR194";
@@ -107,11 +107,10 @@ function heaveThree(): CardScript {
         event: "end-of-turn",
         sourceZone: "hand",
         label: "Heave 3",
-        condition: (ctx) => ctx.hasArsenalSpace(),
+        canAccept: (ctx) => canHeave(ctx, 3),
         effect(ctx) {
-          const player = ctx.player(ctx.seat);
-          if (!ctx.hasArsenalSpace() || !player.hand.some((card) => card.instanceId === ctx.self.instanceId)) return;
-          if (!ctx.requestPayment(
+          if (!canHeave(ctx, 3)) return;
+          ctx.requestPayment(
             "heave-three",
             decisionPrompt(`${ctx.data.name}: pay {r}{r}{r} to put it face up into arsenal?`, "card.evr.heave.pay", {
               values: { card: { kind: "card", cardId: ctx.self.cardId }, amount: 3 },
@@ -120,7 +119,7 @@ function heaveThree(): CardScript {
             3,
             undefined,
             [ctx.self.instanceId],
-          )) logHeaveUnaffordable(ctx, 3);
+          );
         },
       },
     ],

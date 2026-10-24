@@ -1,11 +1,11 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
 import {
   attackAbility,
+  canHeave,
   cardNamed,
   commonOptionMessages,
   decisionPrompt,
   localizedCardLog,
-  logHeaveUnaffordable,
   ongoingLabel,
   opponentSeat,
 } from "./shared-helpers.js";
@@ -272,13 +272,10 @@ export const sbr: Record<string, CardScript> = {
         event: "end-of-turn",
         sourceZone: "hand",
         label: "Heave 3",
-        condition(ctx) {
-          return ctx.hasArsenalSpace();
-        },
+        canAccept: (ctx) => canHeave(ctx, 3),
         effect(ctx) {
-          const player = ctx.player(ctx.seat);
-          if (!ctx.hasArsenalSpace() || !player.hand.some((card) => card.instanceId === ctx.self.instanceId)) return;
-          if (!ctx.requestPayment(
+          if (!canHeave(ctx, 3)) return;
+          ctx.requestPayment(
             "thunder-quake-heave",
             decisionPrompt(
               "Thunder Quake: pay {r}{r}{r} to heave it face up into your arsenal?",
@@ -287,7 +284,7 @@ export const sbr: Record<string, CardScript> = {
             3,
             undefined,
             [ctx.self.instanceId],
-          )) logHeaveUnaffordable(ctx, 3);
+          );
         },
       },
     ],

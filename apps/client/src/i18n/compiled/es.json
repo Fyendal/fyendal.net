@@ -7668,24 +7668,6 @@
       "value": ": puso una carta en la parte inferior y robó una carta"
     }
   ],
-  "card.log.common.heave.unaffordable": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": ": no puede pagar "
-    },
-    {
-      "type": 1,
-      "value": "amount"
-    },
-    {
-      "type": 0,
-      "value": " recursos para hacer heave"
-    }
-  ],
   "card.log.common.hero.life.lost": [
     {
       "type": 1,

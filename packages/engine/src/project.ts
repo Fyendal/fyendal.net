@@ -1259,6 +1259,9 @@ function projectState(
             revealAll ? pd.player : seat,
           );
           const preStackSource = projectedPreStackSource(state, runtime, pd, privateDecision);
+          const triggerChoiceSourceId = pd.chooseHook === "trigger-choice" || pd.chooseHook === "hidden-trigger"
+            ? pd.sourceInstanceId
+            : undefined;
           return {
             player: pd.player,
             kind: pd.kind,
@@ -1305,10 +1308,14 @@ function projectState(
                   ),
                 }
               : {}),
-            ...((revealAll || pd.player === seat) && pd.lookedCardIds
+            ...((revealAll || pd.player === seat) && (pd.lookedCardIds || triggerChoiceSourceId !== undefined)
               ? {
-                  // look-at floats are private, exactly like optionCards
-                  lookedCards: pd.lookedCardIds.flatMap((id) => {
+                  // look-at floats are private, exactly like optionCards; a
+                  // trigger choice shows its source card beside yes/no
+                  lookedCards: [
+                    ...(pd.lookedCardIds ?? []),
+                    ...(triggerChoiceSourceId !== undefined ? [triggerChoiceSourceId] : []),
+                  ].flatMap((id) => {
                     const card = optionCardView(state, runtime, id);
                     return card ? [card] : [];
                   }),
@@ -1334,8 +1341,8 @@ function projectState(
                 }
               : {}),
             ...(preStackSource ? { preStackSource } : {}),
-            ...(privateDecision && pd.chooseHook === "trigger-choice" && pd.sourceInstanceId !== undefined
-              ? { sourceInstanceId: pd.sourceInstanceId }
+            ...(privateDecision && triggerChoiceSourceId !== undefined
+              ? { sourceInstanceId: triggerChoiceSourceId }
               : {}),
             ...(privateDecision && pd.chooseHook === "engine-token-replacement-order"
               ? { optionLayout: "effect-list" as const }
