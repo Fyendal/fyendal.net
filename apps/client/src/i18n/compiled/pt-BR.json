@@ -32152,6 +32152,30 @@
       "value": "Herói"
     }
   ],
+  "history.filter.opponent": [
+    {
+      "type": 0,
+      "value": "Oponente"
+    }
+  ],
+  "history.filter.opponent.all": [
+    {
+      "type": 0,
+      "value": "Todos os oponentes"
+    }
+  ],
+  "history.filter.opponent.bots": [
+    {
+      "type": 0,
+      "value": "Só bots"
+    }
+  ],
+  "history.filter.opponent.players": [
+    {
+      "type": 0,
+      "value": "Só jogadores"
+    }
+  ],
   "history.heroes.games": [
     {
       "type": 6,

@@ -29381,6 +29381,30 @@
       "value": "英雄"
     }
   ],
+  "history.filter.opponent": [
+    {
+      "type": 0,
+      "value": "对手"
+    }
+  ],
+  "history.filter.opponent.all": [
+    {
+      "type": 0,
+      "value": "所有对手"
+    }
+  ],
+  "history.filter.opponent.bots": [
+    {
+      "type": 0,
+      "value": "仅机器人"
+    }
+  ],
+  "history.filter.opponent.players": [
+    {
+      "type": 0,
+      "value": "仅玩家"
+    }
+  ],
   "history.heroes.games": [
     {
       "type": 1,
