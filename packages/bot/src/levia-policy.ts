@@ -51,6 +51,7 @@ import {
   leviaAttackPair,
   leviaAttackPlayable,
   leviaBanishAccess,
+  leviaBloodDebt,
   leviaBloodDebtAction as bloodDebtAction,
   leviaBloodrushTurn,
   leviaBloodrushWorthSending,
@@ -67,9 +68,7 @@ function name(data: CardData | undefined): string {
 }
 
 function ownBloodDebt(input: BotPolicyInput): number {
-  return input.view.players[input.seat].banish.filter((card) =>
-    !card.faceDown && input.cards[card.cardId]?.keywords?.includes("Blood Debt")
-  ).length;
+  return leviaBloodDebt(input.view.players[input.seat].banish, input);
 }
 
 /** Share of six-power cards assumed in an unknown deck. */
@@ -174,6 +173,24 @@ function attackReserve(input: BotPolicyInput, spent: ReadonlySet<number>): CardV
     ),
     ...playableBanishAttacks(input, spent),
   ];
+}
+
+/** Whether an action card could spend Scabskin's action points: playable and
+ * paid from the floating resources plus the rest of the hand's pitch. */
+function actionPointsUsable(input: BotPolicyInput): boolean {
+  const me = input.view.players[input.seat];
+  const sash = leviaEffectActive(input, "savage sash");
+  const actions = [
+    ...[...me.hand, ...me.arsenal].filter((card) => input.cards[card.cardId]?.cardType === "action"),
+    ...playableBanishAttacks(input, new Set()),
+  ];
+  return actions.some((card) => {
+    const data = input.cards[card.cardId];
+    if (isAttack(data) && !leviaAttackPlayable(card, input)) return false;
+    const pitch = me.hand.filter((held) => held.instanceId !== card.instanceId)
+      .reduce((sum, held) => sum + (input.cards[held.cardId]?.pitch ?? 0), 0);
+    return me.resources + pitch >= leviaAttackCost(data, sash);
+  });
 }
 
 function gateTargetValue(intent: GameIntent, input: BotPolicyInput, own: ReadonlyMap<number, CardView>): number {
@@ -616,9 +633,11 @@ function scorePlay(intent: GameIntent, input: BotPolicyInput, own: ReadonlyMap<n
     const remaining = me.hand.filter((held) => !spent.has(held.instanceId));
     const hit = remaining.length > 0 && remaining.every((held) => leviaSixPower(held, input));
     const worth = hit && leviaBloodrushWorthSending(turn, input.view.players[1 - input.seat]!.life);
+    // A certain six discard of a last card that cannot attack anyway trades it for two draws.
+    const cyclesDeadCard = hit && kept === 1 && !remaining.some((held) => leviaAttackPlayable(held, input));
     score = worth && followups() > 0 && (kept >= 2 || (kept === 1 && arsenalAttack))
       ? 72 + Math.min(turn.width, BLOODRUSH_PLAN_WIDTH) * 8
-      : -60;
+      : cyclesDeadCard ? 45 : -60;
   } else if (named === "call to the grave") {
     score = fundsAttackPair(card, input, true) ? 20 : me.graveyard.length < 6 ? 58 : 38;
   } else if (named === "pull from beyond") {
@@ -650,10 +669,12 @@ function scorePlay(intent: GameIntent, input: BotPolicyInput, own: ReadonlyMap<n
       const bellowed = bloodrushActive && attackerData.classes?.includes("brute") ? 2 : 0;
       return (attackerData.attack ?? 0) + bellowed >= opponentLife;
     });
-    score = me.actionPoints < 2 && me.life > 5 && !lethalAttack && (bloodrushActive || !exposed) &&
-      !leviaAttackPair(input, reserve) && leviaAttackPair(input, reserve, { grantGoAgain: true })
-      ? (bloodrushActive ? 85 : 53)
-      : -55;
+    // An unusable roll ranks below any banish or pass, so a rollout tie never picks it.
+    score = !actionPointsUsable(input) ? -150
+      : me.actionPoints < 2 && me.life > 5 && !lethalAttack && (bloodrushActive || !exposed) &&
+        !leviaAttackPair(input, reserve) && leviaAttackPair(input, reserve, { grantGoAgain: true })
+        ? (bloodrushActive ? 85 : 53)
+        : -55;
   } else if (named === "fyendal's spring tunic") {
     score = followups() > 0 ? 32 : -30;
   } else if (named === "hex gauntlet") {

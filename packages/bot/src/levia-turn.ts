@@ -182,9 +182,18 @@ function controls(input: BotPolicyInput, name: string): number {
   return input.view.players[input.seat].board.filter((card) => input.cards[card.cardId]?.name === name).length;
 }
 
+/** Levia, Redeemed's cards lose blood debt. */
+function carriesBloodDebt(card: CardView, input: BotPolicyInput): boolean {
+  return !card.faceDown && input.cards[card.cardId]?.keywords?.includes("Blood Debt") === true &&
+    input.cards[input.view.players[input.seat].heroCardId]?.name !== "Levia, Redeemed";
+}
+
+export function leviaBloodDebt(cards: readonly CardView[], input: BotPolicyInput): number {
+  return cards.filter((card) => carriesBloodDebt(card, input)).length;
+}
+
 export function leviaBloodDebtAction(card: CardView, input: BotPolicyInput): boolean {
-  const data = input.cards[card.cardId];
-  return !card.faceDown && data?.cardType === "action" && data.keywords?.includes("Blood Debt") === true;
+  return input.cards[card.cardId]?.cardType === "action" && carriesBloodDebt(card, input);
 }
 
 /** Whether Blasmophet's once-per-turn banish play is still available. */

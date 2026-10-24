@@ -1,6 +1,6 @@
 import type { CardData, CardView, GameIntent } from "@fyendal/shared";
 import { intentCard, isAttack, ownCards, type BotPolicyInput } from "./policy.js";
-import { leviaBloodrushTurn, leviaBloodrushWorthSending, leviaEffectActive } from "./levia-turn.js";
+import { leviaBloodDebt, leviaBloodrushTurn, leviaBloodrushWorthSending, leviaEffectActive } from "./levia-turn.js";
 import { POINTS_PER_DAMAGE } from "./turn-planner.js";
 
 export type LeviaMacro = "redeem" | "stabilize" | "engine" | "bloodrush" | "attrition" | "pressure";
@@ -13,11 +13,6 @@ export interface LeviaMacroChoice {
 
 function cardName(data: CardData | undefined): string {
   return data?.name.toLowerCase() ?? "";
-}
-
-function bloodDebt(cards: readonly CardView[], input: BotPolicyInput): number {
-  return cards.filter((card) => !card.faceDown &&
-    input.cards[card.cardId]?.keywords?.includes("Blood Debt")).length;
 }
 
 function enginePermanents(cards: readonly CardView[], input: BotPolicyInput): number {
@@ -43,7 +38,7 @@ export function chooseLeviaMacro(input: BotPolicyInput): LeviaMacroChoice {
   const me = input.view.players[input.seat];
   const opponent = input.view.players[1 - input.seat]!;
   const context = leviaMatchup(input);
-  const debt = bloodDebt(me.banish, input);
+  const debt = leviaBloodDebt(me.banish, input);
   const suppressed = input.view.turnFacts?.players[input.seat]?.banishedSixPlusThisTurn === true;
   const canRedeem = input.legal.some((intent) =>
     intent.kind === "activate-ability" && intent.sourceInstanceId === me.heroInstanceId
@@ -111,7 +106,7 @@ export function leviaLifeRisk(root: BotPolicyInput, observed: BotPolicyInput): n
   const start = root.view.players[root.seat];
   const me = observed.view.players[root.seat];
   const suppressed = observed.view.turnFacts?.players[root.seat]?.banishedSixPlusThisTurn === true;
-  const exposed = suppressed ? 0 : bloodDebt(me.banish, observed);
+  const exposed = suppressed ? 0 : leviaBloodDebt(me.banish, observed);
   return Math.max(0, start.life - me.life) + exposed;
 }
 
@@ -125,7 +120,7 @@ export function leviaMacroPositionBonus(
 ): number {
   const start = root.view.players[root.seat];
   const me = observed.view.players[root.seat];
-  const debt = bloodDebt(me.banish, observed);
+  const debt = leviaBloodDebt(me.banish, observed);
   const suppressed = observed.view.turnFacts?.players[root.seat]?.banishedSixPlusThisTurn === true;
   const lifeLost = Math.max(0, start.life - me.life);
   const exposedDebt = suppressed ? 0 : debt;

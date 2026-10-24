@@ -218,6 +218,8 @@ describe("locale catalogs", () => {
       { id: "card.log.common.dominate.gained" },
       { card: "Regurgitating Slog" },
     )).toBe("Regurgitating Slog 获得压制 (dominate)");
+    expect(intl.formatMessage({ id: "game.zone.pitch" })).toBe("Pitch");
+    expect(intl.formatMessage({ id: "game.decision.choosePitch" })).toBe("选择要 pitch 以支付资源的手牌。");
   });
 
   it("keeps Flesh and Blood terms in English for Brazilian Portuguese", () => {

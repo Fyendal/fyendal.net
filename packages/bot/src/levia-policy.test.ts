@@ -27,6 +27,11 @@ function hand(state: ReturnType<typeof game>, cardIds: readonly string[]) {
   state.players[0]!.hand = cards(state, cardIds);
 }
 
+function redeem(state: ReturnType<typeof game>) {
+  state.players[0]!.heroCardId = "DTD164";
+  state.players[0]!.hero.cardId = "DTD164";
+}
+
 function choice(state: ReturnType<typeof game>): GameIntent {
   const legal = legalIntents(state, 0);
   const intent = chooseLeviaIntent({ seat: 0, view: projectStateFor(state, 0), legal, cards: cardData, state });
@@ -275,6 +280,18 @@ describe("Levia Gates policy", () => {
     state.players[0]!.flags.banishedSixPlusThisTurn = false;
     state.players[0]!.banish[0]!.faceDown = true;
     expect(leviaMacroPositionBonus(macro, root, observe(), true)).toBeGreaterThan(exposed);
+  });
+
+  it("counts no blood debt once Levia is Redeemed", () => {
+    const state = game();
+    state.players[0]!.life = 3;
+    state.players[0]!.banish = cards(state, ["PEN194"]);
+    const observe = () => ({
+      seat: 0 as const, view: projectStateFor(state, 0), legal: legalIntents(state, 0), cards: cardData, state,
+    });
+    expect(leviaLifeRisk(observe(), observe())).toBe(1);
+    redeem(state);
+    expect(leviaLifeRisk(observe(), observe())).toBe(0);
   });
 
   it("changes matchup priors without reading an opponent's hidden hand", () => {
@@ -705,6 +722,28 @@ describe("Levia Gates policy", () => {
     // With the opponent in range of one attack, the attack comes first.
     state.players[1]!.life = 5;
     expect(choice(state)).toMatchObject({ kind: "play-card" });
+  });
+
+  it("banishes Consuming Lash at one life without a Scabskin roll nothing could use", () => {
+    const state = game();
+    state.players[0]!.life = 1;
+    hand(state, ["SUP165", "IAR009"]);
+    state.players[0]!.banish = cards(state, ["DTD107", "PEN194", "IAR005", "MST236", "DTD107", "IAR020"]);
+    const lash = state.players[0]!.hand[1]!;
+    expect(choice(state)).toMatchObject({ kind: "activate-ability", sourceInstanceId: lash.instanceId });
+  });
+
+  it("sends a Bellow as Levia, Redeemed to cycle a dead last card into two draws", () => {
+    const state = game();
+    redeem(state);
+    state.players[0]!.life = 3;
+    hand(state, ["IAR009", "MON189"]);
+    state.players[0]!.arsenal = cards(state, ["WTR007"]);
+    const [, doomsday] = state.players[0]!.hand;
+    const [bellow] = state.players[0]!.arsenal;
+    expect(choice(state)).toMatchObject({
+      kind: "play-from-arsenal", instanceId: bellow!.instanceId, pitchInstanceIds: [doomsday!.instanceId],
+    });
   });
 
   it("holds a Bellow from arsenal while two non-sixes could be its discard", () => {

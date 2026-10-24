@@ -1136,7 +1136,7 @@
   "card.aaz.pitch.color.prohibit": [
     {
       "type": 0,
-      "value": "选择一种防守英雄不能扣置的颜色"
+      "value": "选择一种防守英雄不能 pitch 的颜色"
     }
   ],
   "card.aaz.reload.arsenal": [
@@ -5137,13 +5137,13 @@
     },
     {
       "type": 0,
-      "value": " 张红色牌置入扣置区"
+      "value": " 张红色牌进行 pitch"
     }
   ],
   "card.evo.red.pitch.optional": [
     {
       "type": 0,
-      "value": "将 "
+      "value": "Pitch "
     },
     {
       "type": 1,
@@ -5151,7 +5151,7 @@
     },
     {
       "type": 0,
-      "value": " 张红色牌置入扣置区？"
+      "value": " 张红色牌？"
     }
   ],
   "card.evo.revealed.card.defend": [
@@ -12363,7 +12363,7 @@
   "card.pen.graveyard.blue.pitch": [
     {
       "type": 0,
-      "value": "将墓地中的一张蓝色牌置入扣置区？"
+      "value": "从墓地 pitch 一张蓝色牌？"
     }
   ],
   "card.pen.graveyard.card.banish": [
@@ -15397,7 +15397,7 @@
   "card.trigger.common.decktop.pitch": [
     {
       "type": 0,
-      "value": "将你的牌库顶牌置入扣置区"
+      "value": "Pitch 你的牌库顶牌"
     }
   ],
   "card.trigger.common.decktop.reveal": [
@@ -26925,7 +26925,7 @@
   "game.decision.choosePitch": [
     {
       "type": 0,
-      "value": "选择要扣置以支付资源的手牌。"
+      "value": "选择要 pitch 以支付资源的手牌。"
     }
   ],
   "game.decision.chooseTarget": [
@@ -26989,13 +26989,13 @@
   "game.decision.defensePitch": [
     {
       "type": 0,
-      "value": "扣置卡牌以支付此次防御费用"
+      "value": "Pitch 卡牌以支付此次防御费用"
     }
   ],
   "game.decision.defensePitchList": [
     {
       "type": 0,
-      "value": "扣置卡牌以支付此次防御费用："
+      "value": "Pitch 卡牌以支付此次防御费用："
     }
   ],
   "game.decision.effectChoice.apply": [
@@ -29302,7 +29302,7 @@
   "game.zone.pitch": [
     {
       "type": 0,
-      "value": "扣置区"
+      "value": "Pitch"
     }
   ],
   "game.zone.sort.cardName": [
@@ -29320,7 +29320,7 @@
   "game.zone.sort.pitch": [
     {
       "type": 0,
-      "value": "扣置"
+      "value": "Pitch"
     }
   ],
   "game.zone.sort.zoneOrder": [
@@ -32892,7 +32892,7 @@
   "prep.presentation.pitchSplit": [
     {
       "type": 0,
-      "value": "扣置分布："
+      "value": "Pitch 分布："
     },
     {
       "type": 1,
