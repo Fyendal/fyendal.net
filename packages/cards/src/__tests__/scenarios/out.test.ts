@@ -784,6 +784,20 @@ describe("OUT — rules regression coverage", () => {
       .toBe("A face-down card is banished");
   });
 
+  it("Uzuri's replacement attack counts as not played from hand or arsenal", () => {
+    const s = scenario({
+      seats: [
+        { hero: "rhinar", heroKey: "uzuri|0", hand: ["infect|1", "remember the mists|3"] },
+        { hero: "dorinthea" },
+      ],
+    });
+    s.play("infect|1").blockWith()
+      .activate("uzuri|0")
+      .chooseCard("remember the mists|3");
+    expect(cardData[s.state.chain.at(-1)!.attackingCard.cardId]!.name).toBe("Remember the Mists");
+    expect(s.state.chain.at(-1)!.damage).toBe(6);
+  });
+
   it("Uzuri turns an ineligible cost card face up without replacing the attack", () => {
     const s = scenario({
       seats: [

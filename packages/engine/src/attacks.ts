@@ -795,6 +795,10 @@ function replaceAttackFromPlayerZone(
   source.splice(index, 1);
   link.attackingCard = replacement;
   link.attackCardType = "action";
+  // The replacement was never played, so the previous card's play origin no longer applies.
+  delete link.flags.fromArsenal;
+  delete link.flags.fromBanish;
+  link.flags.fromOutsideHandOrArsenal = true;
   if (previousCardType === "action") {
     const previousOwner = state.players[previous.owner] as PlayerState;
     clearTemporaryObjectEffects(previous);
