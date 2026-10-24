@@ -25,7 +25,7 @@ import { ReplayFinalizer, sweepReplays } from "./replays.js";
 import { appendClusterEvent, ClusterEventConsumer, sweepClusterEvents, type ClusterEvent } from "./clusterEvents.js";
 import { tryAcquireLease } from "./leases.js";
 import { LEAGUE_LEASE, LEAGUE_TICK_INTERVAL_MS, tickLeagues } from "./league/leagueWorker.js";
-import { bindLeagueRoom, leagueRoomFormat, LeagueRoomUnavailable } from "./league/leagueMatches.js";
+import { leagueRoomFormat, LeagueRoomUnavailable } from "./league/leagueMatches.js";
 import { consoleError } from "./logging.js";
 import { PgRateLimiter, sweepRateLimits } from "./rateLimits.js";
 import { sweepRecoveryTokens } from "./recovery.js";
@@ -607,6 +607,90 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
     };
   }
 
+  /** Takes a seat, reconnects, or spectates in an existing room. */
+  async function joinExistingRoom(
+    ws: WebSocket,
+    ctx: ClientCtx,
+    msg: { code: string; token?: string; deckId?: string; spectate?: boolean },
+  ): Promise<void> {
+    if (ctx.user && !msg.spectate) {
+      const practiceCode = await rooms.backgroundPracticeRoom(ctx.user.id, msg.code);
+      if (practiceCode && practiceCode !== msg.code.toUpperCase()) {
+        queuedUsers.set(ctx.user.id, ctx);
+        await deliverMatch(ctx.user.id, practiceCode, true);
+        return;
+      }
+    }
+    // Player seats (new or seat-token reconnect) require an account.
+    // Guests may still spectate; authenticated spectators expose only
+    // their public username through the live presence projection.
+    let deckName: string | undefined;
+    if (msg.deckId) {
+      if (!ctx.user) {
+        send(ws, { type: "error", message: PLAY_REQUIRES_LOGIN });
+        return;
+      }
+      const refreshed = await resolveFreshDeck(deps.db, ctx.user.id, msg.deckId, fabraryClient);
+      if (!refreshed.ok) {
+        send(ws, { type: "error", message: refreshed.error });
+        return;
+      }
+      deckName = refreshed.deck.name;
+    }
+    const r = await rooms.joinRoom(msg.code, msg.token, {
+      allowPlayer: !!ctx.user,
+      deckId: msg.deckId,
+      deckName,
+      username: ctx.user?.username,
+      userId: ctx.user?.id,
+      spectate: msg.spectate,
+    });
+    if (!r.ok) {
+      send(ws, { type: "error", message: r.error });
+      return;
+    }
+    const code = msg.code.toUpperCase();
+    connections.attach(ctx, code, r.seat, r.token);
+    const version = await markAttachedPresent(ctx);
+    if (r.kind === "spectator") {
+      send(ws, { type: "joined", code, seat: null, token: r.token, spectator: true, version });
+      const room = await rooms.getRoom(code);
+      const state = room ? stateMessage(room, null) : null;
+      if (state) send(ws, state);
+      if (room) send(ws, spectatorListMessage(room));
+      await publishRoomEvent({ code, kind: "spectators", version });
+      return;
+    }
+    if (!r.reconnected && ctx.user) await rememberAcceptedDeck(ctx.user.id, msg.deckId);
+    send(ws, {
+      type: "joined",
+      code,
+      seat: r.seat,
+      token: r.token,
+      version,
+      ...(r.reconnected ? { resumed: true as const } : {}),
+    });
+    if (r.reconnected) {
+      const room = await rooms.getRoom(code);
+      if (room) send(ws, spectatorListMessage(room));
+      // Join's durable sync may be consumed before this socket attaches.
+      // Reload locally to restore prep/state and negotiate browser bot work.
+      await broadcaster.afterCommit({ code, kind: "sync", version });
+      await publishRoomEvent({ code, kind: "presence", seat: r.seat, connected: true, version });
+      return;
+    }
+    if (r.started) {
+      await publishRoomEvent({ code, kind: "game-started", version });
+    } else {
+      // a fresh seat fill (re)rolls the prep die
+      const room = await rooms.getRoom(code);
+      if (room && !room.state) {
+        await publishRoomEvent({ code, kind: "prep", version });
+      }
+    }
+    await publishRoomEvent({ code, kind: "joined", version });
+  }
+
   async function handleMessage(ws: WebSocket, ctx: ClientCtx, msg: ClientMessage): Promise<void> {
     if (ctx.closed) return;
     switch (msg.type) {
@@ -742,7 +826,7 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
         await publishClusterEvent({ type: "friend-game-invite", userId: friend.id, invite });
         return;
       }
-      case "create-league-room": {
+      case "enter-league-room": {
         if (ctx.code !== null) {
           send(ws, { type: "error", message: ALREADY_IN_ROOM });
           return;
@@ -751,32 +835,21 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
           send(ws, { type: "error", message: PLAY_REQUIRES_LOGIN });
           return;
         }
-        const user = ctx.user;
-        let created: { code: string; seat: number; token: string; deckId: string };
+        let code: string;
         try {
-          const leagueFormat = await leagueRoomFormat(deps.db, user.id, msg.matchId);
-          const choice = await resolveChoice(user, leagueFormat, msg.deckId, "legal");
+          const leagueFormat = await leagueRoomFormat(deps.db, ctx.user.id, msg.matchId);
+          const choice = await resolveChoice(ctx.user, leagueFormat, msg.deckId, "legal");
           if ("error" in choice) {
             send(ws, { type: "error", message: choice.error });
             return;
           }
-          const room = await rooms.createRoom(leagueFormat, {
-            ...choice.choice,
-            username: user.username,
-            userId: user.id,
-          }, "private", "legal", (db, code) => bindLeagueRoom(db, user.id, msg.matchId, code));
-          created = { ...room, deckId: choice.choice.deckId };
+          code = await rooms.ensureLeagueRoom(ctx.user.id, msg.matchId);
         } catch (error) {
           if (!(error instanceof LeagueRoomUnavailable)) throw error;
           send(ws, { type: "error", message: error.message });
           return;
         }
-        const { code, seat, token } = created;
-        await rememberAcceptedDeck(user.id, created.deckId);
-        connections.attach(ctx, code, seat, token);
-        const version = await markAttachedPresent(ctx);
-        send(ws, { type: "room-created", code, seat, token, version });
-        await publishRoomEvent({ code, kind: "created", version });
+        await joinExistingRoom(ws, ctx, { code, deckId: msg.deckId });
         return;
       }
       case "create-room": {
@@ -902,82 +975,7 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
           send(ws, { type: "error", message: ALREADY_IN_ROOM });
           return;
         }
-        if (ctx.user && !msg.spectate) {
-          const practiceCode = await rooms.backgroundPracticeRoom(ctx.user.id, msg.code);
-          if (practiceCode && practiceCode !== msg.code.toUpperCase()) {
-            queuedUsers.set(ctx.user.id, ctx);
-            await deliverMatch(ctx.user.id, practiceCode, true);
-            return;
-          }
-        }
-        // Player seats (new or seat-token reconnect) require an account.
-        // Guests may still spectate; authenticated spectators expose only
-        // their public username through the live presence projection.
-        let deckName: string | undefined;
-        if (msg.deckId) {
-          if (!ctx.user) {
-            send(ws, { type: "error", message: PLAY_REQUIRES_LOGIN });
-            return;
-          }
-          const refreshed = await resolveFreshDeck(deps.db, ctx.user.id, msg.deckId, fabraryClient);
-          if (!refreshed.ok) {
-            send(ws, { type: "error", message: refreshed.error });
-            return;
-          }
-          deckName = refreshed.deck.name;
-        }
-        const r = await rooms.joinRoom(msg.code, msg.token, {
-          allowPlayer: !!ctx.user,
-          deckId: msg.deckId,
-          deckName,
-          username: ctx.user?.username,
-          userId: ctx.user?.id,
-          spectate: msg.spectate,
-        });
-        if (!r.ok) {
-          send(ws, { type: "error", message: r.error });
-          return;
-        }
-        const code = msg.code.toUpperCase();
-        connections.attach(ctx, code, r.seat, r.token);
-        const version = await markAttachedPresent(ctx);
-        if (r.kind === "spectator") {
-          send(ws, { type: "joined", code, seat: null, token: r.token, spectator: true, version });
-          const room = await rooms.getRoom(code);
-          const state = room ? stateMessage(room, null) : null;
-          if (state) send(ws, state);
-          if (room) send(ws, spectatorListMessage(room));
-          await publishRoomEvent({ code, kind: "spectators", version });
-          return;
-        }
-        if (!r.reconnected && ctx.user) await rememberAcceptedDeck(ctx.user.id, msg.deckId);
-        send(ws, {
-          type: "joined",
-          code,
-          seat: r.seat,
-          token: r.token,
-          version,
-          ...(r.reconnected ? { resumed: true as const } : {}),
-        });
-        if (r.reconnected) {
-          const room = await rooms.getRoom(code);
-          if (room) send(ws, spectatorListMessage(room));
-          // Join's durable sync may be consumed before this socket attaches.
-          // Reload locally to restore prep/state and negotiate browser bot work.
-          await broadcaster.afterCommit({ code, kind: "sync", version });
-          await publishRoomEvent({ code, kind: "presence", seat: r.seat, connected: true, version });
-          return;
-        }
-        if (r.started) {
-          await publishRoomEvent({ code, kind: "game-started", version });
-        } else {
-          // a fresh seat fill (re)rolls the prep die
-          const room = await rooms.getRoom(code);
-          if (room && !room.state) {
-            await publishRoomEvent({ code, kind: "prep", version });
-          }
-        }
-        await publishRoomEvent({ code, kind: "joined", version });
+        await joinExistingRoom(ws, ctx, msg);
         return;
       }
       case "inspect-room": {

@@ -5,7 +5,6 @@ import type { Queryable } from "../db.js";
 import { MINUTE_MS, WEEK_MS } from "../league/availability.js";
 import {
   acceptLeagueTime,
-  bindLeagueRoom,
   claimLeagueForfeit,
   LeagueRoomUnavailable,
   leagueRoomFormat,
@@ -159,81 +158,102 @@ describe("league match scheduling", () => {
 });
 
 describe("league rooms", () => {
-  async function openRoom(userId: number, username: string) {
-    return store.createRoom("cc", { deckId: DECK, userId, username }, "private", "legal",
-      (tx, code) => bindLeagueRoom(tx, userId, matchId, code));
-  }
+  const join = (code: string, userId: number, username: string) =>
+    store.joinRoom(code, undefined, { allowPlayer: true, deckId: DECK, userId, username });
 
-  async function markHostPresent(code: string) {
-    await db.query(
-      `INSERT INTO room_presence (room_code, lease_id, token_hash, seat, last_seen_at)
-       SELECT room_code, 'league-host', token_hash, seat, $2::bigint FROM room_seats WHERE room_code = $1 AND seat = 0`,
-      [code, Date.now()],
-    );
-  }
-
-  it("binds one room to the match and reserves its other seat", async () => {
-    expect(await leagueRoomFormat(db, alice, matchId)).toBe("cc");
-    const host = await openRoom(alice, "alice");
-    expect(await match()).toMatchObject({ status: "in-room", room_code: host.code });
-    expect((await listMemberLeagues(db, bob))[0]!.matches[0]!.roomCode).toBe(host.code);
-    await expect(openRoom(bob, "bob")).rejects.toBeInstanceOf(LeagueRoomUnavailable);
-    await expect(leagueRoomFormat(db, bob, matchId)).rejects.toMatchObject({ reason: "closed" });
-    await expect(leagueRoomFormat(db, carol, matchId)).rejects.toMatchObject({ reason: "not-found" });
-    await markHostPresent(host.code);
-    const intruder = await store.joinRoom(host.code, undefined, { allowPlayer: true, deckId: DECK, userId: carol, username: "carol" });
-    expect(intruder).toMatchObject({ ok: false, error: "this seat is reserved for a league opponent" });
-    const joined = await store.joinRoom(host.code, undefined, { allowPlayer: true, deckId: DECK, userId: bob, username: "bob" });
-    expect(joined).toMatchObject({ ok: true, kind: "player", seat: 1 });
-  });
-
-  it("completes the league match from the game result", async () => {
-    const host = await openRoom(alice, "alice");
-    await markHostPresent(host.code);
-    const joined = await store.joinRoom(host.code, undefined, { allowPlayer: true, deckId: DECK, userId: bob, username: "bob" });
+  async function seat(code: string, userId: number, username: string) {
+    const joined = await join(code, userId, username);
     if (!joined.ok || joined.kind !== "player") throw new Error("join failed");
-    const tokens = [host.token, joined.token] as const;
+    return joined;
+  }
+
+  async function startGame(code: string) {
+    const tokens = [(await seat(code, alice, "alice")).token, (await seat(code, bob, "bob")).token] as const;
     const users = [alice, bob] as const;
-    const dieWinner = (await store.getRoom(host.code))!.prep!.dieWinner;
-    await store.chooseFirst(host.code, { token: tokens[dieWinner], userId: users[dieWinner] }, true);
+    const dieWinner = (await store.getRoom(code))!.prep!.dieWinner;
+    await store.chooseFirst(code, { token: tokens[dieWinner], userId: users[dieWinner] }, true);
     const pool = precon(DECK)!.pool;
     for (const seat of [0, 1] as const) {
-      await store.presentArena(host.code, { token: tokens[seat], userId: users[seat] }, { weaponIds: pool.weaponIds, equipment: {} });
+      await store.presentArena(code, { token: tokens[seat], userId: users[seat] }, { weaponIds: pool.weaponIds, equipment: {} });
     }
     for (const seat of [0, 1] as const) {
-      await store.presentDeck(host.code, { token: tokens[seat], userId: users[seat] }, {
+      await store.presentDeck(code, { token: tokens[seat], userId: users[seat] }, {
         weaponIds: pool.weaponIds, equipment: {}, deck: pool.deck,
       });
     }
-    const conceded = await store.applyIntent(host.code, { token: tokens[1], userId: bob }, { kind: "concede" });
+    return tokens;
+  }
+
+  it("creates one empty room that either member can enter first", async () => {
+    expect(await leagueRoomFormat(db, bob, matchId)).toBe("cc");
+    const code = await store.ensureLeagueRoom(bob, matchId);
+    expect(await match()).toMatchObject({ status: "proposed", room_code: code });
+    expect((await store.getRoom(code))!.seats).toEqual([null, null]);
+    expect((await listMemberLeagues(db, alice))[0]!.matches[0]!.roomCode).toBe(code);
+    expect(await store.ensureLeagueRoom(alice, matchId)).toBe(code);
+    await expect(store.ensureLeagueRoom(carol, matchId)).rejects.toBeInstanceOf(LeagueRoomUnavailable);
+    await expect(leagueRoomFormat(db, carol, matchId)).rejects.toMatchObject({ reason: "not-found" });
+  });
+
+  it("gives each member their own seat and nobody else a seat", async () => {
+    const code = await store.ensureLeagueRoom(alice, matchId);
+    expect(await join(code, bob, "bob")).toMatchObject({ ok: true, kind: "player", seat: 1 });
+    expect(await join(code, carol, "carol")).toMatchObject({ ok: false, error: "this seat is reserved for a league opponent" });
+    expect(await join(code, alice, "alice")).toMatchObject({ ok: true, kind: "player", seat: 0 });
+    expect(await join(code, carol, "carol")).toMatchObject({ ok: true, kind: "spectator" });
+  });
+
+  it("keeps the room while members leave and return", async () => {
+    const code = await store.ensureLeagueRoom(alice, matchId);
+    const first = await seat(code, alice, "alice");
+    expect((await store.leaveRoom(code, { token: first.token, userId: alice })).ok).toBe(true);
+    await advanceLeague(db, LEAGUE, start + MINUTE_MS);
+    expect(await match()).toMatchObject({ status: "proposed", room_code: code });
+    expect(await join(code, bob, "bob")).toMatchObject({ ok: true, seat: 1 });
+    expect(await join(code, alice, "alice")).toMatchObject({ ok: true, seat: 0 });
+    expect((await store.getRoom(code))!.prep).not.toBeNull();
+  });
+
+  it("collects an empty room only once its match closes", async () => {
+    const code = await store.ensureLeagueRoom(alice, matchId);
+    const later = Date.now() + 60 * MINUTE_MS;
+    expect(await store.sweepRooms(later)).toEqual([]);
+    await advanceLeague(db, LEAGUE, start + WEEK_MS);
+    expect(await match()).toMatchObject({ status: "complete", result: "double-forfeit" });
+    expect((await store.sweepRooms(later)).map((room) => room.code)).toEqual([code]);
+  });
+
+  it("waits for a started game instead of its deadline, then records the result", async () => {
+    const code = await store.ensureLeagueRoom(alice, matchId);
+    const tokens = await startGame(code);
+    expect((await match()).status).toBe("in-room");
+    await advanceLeague(db, LEAGUE, start + WEEK_MS);
+    expect((await match()).status).toBe("in-room");
+    const conceded = await store.applyIntent(code, { token: tokens[1], userId: bob }, { kind: "concede" });
     expect(conceded.ok).toBe(true);
-    const { rows: recorded } = await db.query("SELECT id FROM matches WHERE room_code = $1", [host.code]);
+    const { rows: recorded } = await db.query("SELECT id FROM matches WHERE room_code = $1", [code]);
     expect(await match()).toMatchObject({ status: "complete", result: "played", winner: 1, match_id: recorded[0].id });
   });
 
-  it("returns a match to scheduling when its room disappears", async () => {
-    const host = await openRoom(alice, "alice");
+  it("forgets a lost room, and returns a lost game to scheduling", async () => {
+    const empty = await store.ensureLeagueRoom(alice, matchId);
+    await db.query("DELETE FROM rooms WHERE code = $1", [empty]);
     await advanceLeague(db, LEAGUE, start + MINUTE_MS);
-    expect((await match()).status).toBe("in-room");
-    await db.query("DELETE FROM rooms WHERE code = $1", [host.code]);
+    expect(await match()).toMatchObject({ status: "proposed", room_code: null });
+    const code = await store.ensureLeagueRoom(bob, matchId);
+    expect(code).not.toBe(empty);
+    await startGame(code);
+    await db.query("DELETE FROM rooms WHERE code = $1", [code]);
     await advanceLeague(db, LEAGUE, start + 2 * MINUTE_MS);
     expect(await match()).toMatchObject({ status: "proposed", room_code: null });
-    expect(await leagueRoomFormat(db, bob, matchId)).toBe("cc");
   });
 
-  it("returns a match to scheduling once everyone has left its room", async () => {
-    const host = await openRoom(alice, "alice");
-    const left = await store.leaveRoom(host.code, { token: host.token, userId: alice });
-    expect(left.ok).toBe(true);
-    await advanceLeague(db, LEAGUE, start + MINUTE_MS);
-    expect(await match()).toMatchObject({ status: "proposed", room_code: null });
-    const { rows } = await db.query("SELECT league_match_id FROM rooms WHERE code = $1", [host.code]);
-    expect(rows.every((row) => row.league_match_id === null)).toBe(true);
-  });
-
-  it("does not close an in-room match at its deadline", async () => {
-    await openRoom(alice, "alice");
-    await advanceLeague(db, LEAGUE, start + WEEK_MS);
-    expect((await match()).status).toBe("in-room");
+  it("replaces a lost game's room on the next entry", async () => {
+    const code = await store.ensureLeagueRoom(alice, matchId);
+    await startGame(code);
+    await db.query("DELETE FROM rooms WHERE code = $1", [code]);
+    const replacement = await store.ensureLeagueRoom(bob, matchId);
+    expect(replacement).not.toBe(code);
+    expect(await match()).toMatchObject({ status: "proposed", room_code: replacement });
   });
 });

@@ -115,9 +115,9 @@ describe("league decoding", () => {
     expect(decodeLeagueMatchRequest({ matchId: "x" })).toBeNull();
     expect(decodeLeagueProposeRequest({ matchId, at: 1_800_000_000_000 })).toEqual({ matchId, at: 1_800_000_000_000 });
     expect(decodeLeagueProposeRequest({ matchId, at: -1 })).toBeNull();
-    expect(decodeClientMessage({ type: "create-league-room", matchId, deckId: "deck" }))
-      .toEqual({ type: "create-league-room", matchId, deckId: "deck" });
-    expect(decodeClientMessage({ type: "create-league-room", matchId, deckId: "deck", format: "cc" })).toBeNull();
+    expect(decodeClientMessage({ type: "enter-league-room", matchId, deckId: "deck" }))
+      .toEqual({ type: "enter-league-room", matchId, deckId: "deck" });
+    expect(decodeClientMessage({ type: "enter-league-room", matchId, deckId: "deck", format: "cc" })).toBeNull();
   });
 
   it("decodes pairing notes", () => {

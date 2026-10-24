@@ -1096,8 +1096,8 @@ export type ClientMessage =
   | { type: "chat-read"; username: string; throughId: string }
   | { type: "create-friend-room"; username: string; format: Format; deckId: string; cardPoolMode?: CardPoolMode }
   | { type: "friend-game-invite-dismiss"; inviteId: string }
-  /** Opens the room for a league match; the league decides the format and the opponent's seat. */
-  | { type: "create-league-room"; matchId: string; deckId: string }
+  /** Takes your seat in a league match's room, creating the room on first entry. */
+  | { type: "enter-league-room"; matchId: string; deckId: string }
   /** deckId of a saved deck or format precon */
   | { type: "create-room"; format: Format; deckId: string; private?: boolean; cardPoolMode?: CardPoolMode }
   /** Create a dedicated constructed room with the selected AI opponent. */

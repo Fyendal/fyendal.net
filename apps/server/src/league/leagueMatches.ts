@@ -33,6 +33,7 @@ interface MemberMatch {
   readyA: number | null;
   readyB: number | null;
   deadlineAt: number;
+  roomCode: string | null;
   /** The caller's side of the match. */
   side: "a" | "b";
 }
@@ -40,7 +41,7 @@ interface MemberMatch {
 /** Locks a match the user plays in. Null when it does not exist or is not theirs. */
 async function lockMemberMatch(tx: Queryable, matchId: string, userId: number): Promise<MemberMatch | null> {
   const { rows } = await tx.query(
-    `SELECT id, league_id, member_a, member_b, status, scheduled_at, proposed_by, ready_a, ready_b, deadline_at
+    `SELECT id, league_id, member_a, member_b, status, scheduled_at, proposed_by, ready_a, ready_b, deadline_at, room_code
      FROM league_matches WHERE id = $1 FOR UPDATE`,
     [matchId],
   );
@@ -71,6 +72,7 @@ async function lockMemberMatch(tx: Queryable, matchId: string, userId: number): 
     readyA: nullableNumber(match.ready_a),
     readyB: nullableNumber(match.ready_b),
     deadlineAt: Number(match.deadline_at),
+    roomCode: match.room_code === null ? null : String(match.room_code),
     side: memberId === a ? "a" : "b",
   };
 }
@@ -170,40 +172,78 @@ export class LeagueRoomUnavailable extends Error {
   }
 }
 
-async function playableMatch(tx: Queryable, userId: number, matchId: string): Promise<MemberMatch> {
+/** The format a room for this match must use; throws `LeagueRoomUnavailable`
+ * when the user cannot enter one now. `claimLeagueRoom` rechecks it. */
+export async function leagueRoomFormat(db: Queryable, userId: number, matchId: string): Promise<Format> {
+  return withTransaction(db, async (tx) => (await enterableMatch(tx, userId, matchId)).format);
+}
+
+/** A member can enter before the game, in any scheduling state, or re-enter a game in progress. */
+async function enterableMatch(tx: Queryable, userId: number, matchId: string): Promise<MemberMatch> {
   const match = await lockMemberMatch(tx, matchId, userId);
   if (!match) throw new LeagueRoomUnavailable("not-found");
-  if (!playable(match)) throw new LeagueRoomUnavailable("closed");
+  if (!playable(match) && !(running(match) && match.status === "in-room")) throw new LeagueRoomUnavailable("closed");
   return match;
 }
 
-/** The format a room for this match must use; throws `LeagueRoomUnavailable`
- * when the user cannot open one now. `bindLeagueRoom` rechecks at creation. */
-export async function leagueRoomFormat(db: Queryable, userId: number, matchId: string): Promise<Format> {
-  return withTransaction(db, async (tx) => (await playableMatch(tx, userId, matchId)).format);
+/** Locks the match and returns its room when one still exists. A null code
+ * means the caller creates a room and binds it with `bindLeagueRoom` in the same
+ * transaction, so two players entering at once share one room. */
+export async function claimLeagueRoom(
+  tx: Queryable,
+  userId: number,
+  matchId: string,
+): Promise<{ code: string | null; format: Format }> {
+  const match = await enterableMatch(tx, userId, matchId);
+  if (match.roomCode !== null) {
+    const { rows } = await tx.query("SELECT 1 FROM rooms WHERE code = $1", [match.roomCode]);
+    if (rows.length) return { code: match.roomCode, format: match.format };
+  }
+  // The game's room was lost; the replacement starts a new game.
+  if (match.status === "in-room") await returnToScheduling(tx, { ...match, b: match.b! }, null);
+  return { code: null, format: match.format };
 }
 
-/** Binds a just-created room to the league match inside the room's creation
- * transaction, so two players starting at once cannot open two rooms. */
+/** Binds a just-created, empty room to the match `claimLeagueRoom` locked. */
 export async function bindLeagueRoom(tx: Queryable, userId: number, matchId: string, roomCode: string): Promise<void> {
-  const match = await playableMatch(tx, userId, matchId);
-  await tx.query("UPDATE league_matches SET status = 'in-room', room_code = $2 WHERE id = $1", [match.id, roomCode]);
+  const match = await enterableMatch(tx, userId, matchId);
+  await tx.query("UPDATE league_matches SET room_code = $2 WHERE id = $1", [match.id, roomCode]);
   await tx.query("UPDATE rooms SET league_match_id = $2 WHERE code = $1", [roomCode, match.id]);
   await notifyLeague(tx, match.leagueId, [match.a, match.b!]);
 }
 
-/** Accounts allowed to take a league room's seats, or null for any other room. */
-export async function leagueRoomPlayers(db: Queryable, roomCode: string): Promise<number[] | null> {
-  const { rows } = await db.query("SELECT league_match_id FROM rooms WHERE code = $1", [roomCode]);
-  const matchId = rows[0]?.league_match_id;
-  if (matchId === null || matchId === undefined) return null;
-  const { rows: members } = await db.query(
-    `SELECT m.user_id FROM league_matches x
+/** A league room's seats by member: seat 0 for member A, seat 1 for member B.
+ * Null for any other room. */
+export async function leagueRoomSeats(db: Queryable, roomCode: string): Promise<[number | null, number | null] | null> {
+  const { rows } = await db.query(
+    `SELECT x.member_a, x.member_b, m.member_id, m.user_id FROM rooms r
+     JOIN league_matches x ON x.id = r.league_match_id
      JOIN league_members m ON m.league_id = x.league_id AND (m.member_id = x.member_a OR m.member_id = x.member_b)
-     WHERE x.id = $1 AND m.user_id IS NOT NULL`,
+     WHERE r.code = $1`,
+    [roomCode],
+  );
+  if (!rows.length) return null;
+  const seatUser = (memberId: unknown) => {
+    const user = rows.find((row) => Number(row.member_id) === Number(memberId))?.user_id;
+    return user === null || user === undefined ? null : Number(user);
+  };
+  return [seatUser(rows[0].member_a), seatUser(rows[0].member_b)];
+}
+
+/** Runs in the transaction that starts a league room's game: from here the
+ * match waits for that game instead of its deadline. */
+export async function startLeagueRoomGame(db: Queryable, roomCode: string): Promise<void> {
+  const { rows: rooms } = await db.query("SELECT league_match_id FROM rooms WHERE code = $1", [roomCode]);
+  const matchId = rooms[0]?.league_match_id;
+  if (matchId === null || matchId === undefined) return;
+  const { rows } = await db.query(
+    "SELECT id, league_id, member_a, member_b, status FROM league_matches WHERE id = $1 FOR UPDATE",
     [matchId],
   );
-  return members.map((member) => Number(member.user_id));
+  const match = rows[0];
+  if (!match || !SCHEDULABLE.includes(matchStatus(match.status))) return;
+  await db.query("UPDATE league_matches SET status = 'in-room' WHERE id = $1", [match.id]);
+  await notifyLeague(db, String(match.league_id), [Number(match.member_a), Number(match.member_b)]);
 }
 
 /** Runs in the room's game-over transaction, after match history recorded
@@ -252,23 +292,26 @@ export async function resolveLeagueRoomGame(
   await notifyLeague(db, players.leagueId, [players.a, players.b]);
 }
 
-/** A room can vanish before its game ends (garbage collection or a ruleset
- * cutover), or be left by everyone before the game starts, which keeps it
- * until garbage collection. Either way its match goes back to scheduling. */
+/** A ruleset cutover or garbage collection can delete a room. A game lost
+ * that way returns its match to scheduling; before a game, the match only
+ * forgets the room, and the next entry creates another. */
 export async function resetLostLeagueRooms(tx: Queryable, leagueId: string): Promise<void> {
   const { rows } = await tx.query(
-    "SELECT id, member_a, member_b, scheduled_at, room_code FROM league_matches WHERE league_id = $1 AND status = 'in-room'",
-    [leagueId],
+    `SELECT id, member_a, member_b, status, scheduled_at, room_code FROM league_matches
+     WHERE league_id = $1 AND status = ANY($2) AND room_code IS NOT NULL`,
+    [leagueId, [...SCHEDULABLE, "in-room"]],
   );
   for (const row of rows) {
-    const code = row.room_code === null ? null : String(row.room_code);
-    if (code !== null) {
-      const { rows: seats } = await tx.query("SELECT 1 FROM room_seats WHERE room_code = $1 LIMIT 1", [code]);
-      if (seats.length) continue;
+    const code = String(row.room_code);
+    const { rows: room } = await tx.query("SELECT 1 FROM rooms WHERE code = $1", [code]);
+    if (room.length) continue;
+    if (row.status === "in-room") {
+      await returnToScheduling(tx, {
+        id: String(row.id), leagueId, a: Number(row.member_a), b: Number(row.member_b), scheduledAt: row.scheduled_at,
+      }, null);
+    } else {
+      await tx.query("UPDATE league_matches SET room_code = NULL WHERE id = $1", [row.id]);
     }
-    await returnToScheduling(tx, {
-      id: String(row.id), leagueId, a: Number(row.member_a), b: Number(row.member_b), scheduledAt: row.scheduled_at,
-    }, code);
   }
 }
 
@@ -350,7 +393,7 @@ export async function memberMatchViews(db: Queryable, context: LeagueViewContext
       deadlineAt,
       youReady: (side === "a" ? row.ready_a : row.ready_b) !== null,
       opponentReady: (side === "a" ? row.ready_b : row.ready_a) !== null,
-      roomCode: status === "in-room" && row.room_code !== null ? String(row.room_code) : null,
+      roomCode: open && row.room_code !== null ? String(row.room_code) : null,
       result,
       won: status !== "complete" || result === "draw" ? null : winner === context.memberId,
       overlap,

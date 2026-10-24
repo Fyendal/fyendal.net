@@ -3551,7 +3551,7 @@
   "league.match.time.scheduled": "Hora acordada con {opponent}",
   "league.room.title": "Iniciar tu partida de liga",
   "league.room.description": "Elige un mazo de {format}. Solo {opponent} puede ocupar el otro asiento.",
-  "league.room.submit": "Abrir sala",
+  "league.room.submit": "Ocupar tu asiento",
   "league.room.noDeck": "Aún no tienes un mazo legal de {format}. Añade uno en Mazos.",
   "lobby.count.leagueActions": "{count, plural, one {# pendiente} other {# pendientes}}",
   "league.standings.rank": "#",

@@ -3551,7 +3551,7 @@
   "league.match.time.scheduled": "Agreed with {opponent}",
   "league.room.title": "Start your league game",
   "league.room.description": "Choose a {format} deck. Only {opponent} can take the other seat.",
-  "league.room.submit": "Open room",
+  "league.room.submit": "Take your seat",
   "league.room.noDeck": "You have no legal {format} deck yet. Add one in Decks.",
   "lobby.count.leagueActions": "{count, plural, one {# to do} other {# to do}}",
   "league.standings.rank": "#",

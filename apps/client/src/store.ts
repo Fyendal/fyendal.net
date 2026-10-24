@@ -1471,12 +1471,12 @@ export const useStore = create<StoreState>((set, get) => {
         ...(get().cardPoolModes[format] === "legal" ? {} : { cardPoolMode: get().cardPoolModes[format] }),
       }));
     },
-    createLeagueRoom: (matchId, deckId) => {
+    enterLeagueRoom: (matchId, deckId) => {
       if (get().roomCode || get().screen !== "lobby") return;
       prepDeckId = deckId;
       roomEntryPending = false;
       set({ prep: null, prepDeck: null, botGame: false });
-      connect(() => send({ type: "create-league-room", matchId, deckId }));
+      connect(() => send({ type: "enter-league-room", matchId, deckId }));
     },
     dismissFriendGameInvite: (inviteId) => {
       const timer = friendInviteTimers.get(inviteId);

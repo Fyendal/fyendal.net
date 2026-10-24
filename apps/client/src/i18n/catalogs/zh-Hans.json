@@ -3551,7 +3551,7 @@
   "league.match.time.scheduled": "已与 {opponent} 约定",
   "league.room.title": "开始联赛对局",
   "league.room.description": "选择一副 {format} 牌组。只有 {opponent} 能占据另一个座位。",
-  "league.room.submit": "创建房间",
+  "league.room.submit": "入座",
   "league.room.noDeck": "你还没有合法的 {format} 牌组。请在牌组页添加。",
   "lobby.count.leagueActions": "{count} 项待处理",
   "league.standings.rank": "#",

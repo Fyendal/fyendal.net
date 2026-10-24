@@ -3551,7 +3551,7 @@
   "league.match.time.scheduled": "Horário combinado com {opponent}",
   "league.room.title": "Iniciar sua partida da liga",
   "league.room.description": "Escolha um deck de {format}. Só {opponent} pode ocupar o outro lugar.",
-  "league.room.submit": "Abrir sala",
+  "league.room.submit": "Ocupar seu lugar",
   "league.room.noDeck": "Você ainda não tem um deck legal de {format}. Adicione um em Decks.",
   "lobby.count.leagueActions": "{count, plural, =0 {nada pendente} one {# pendente} other {# pendentes}}",
   "league.standings.rank": "#",

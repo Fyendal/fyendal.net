@@ -7,7 +7,7 @@ import { DeckDropdown } from "../lobby/CreateRoomModal.js";
 import { deckChoicesFor, deckIsLegalForRoom } from "../lobby/DeckGrid.js";
 import { useStore } from "../store.js";
 
-/** Deck choice for opening a league match's room; the league fixes the format. */
+/** Deck choice for taking a seat in a league match's room; the league fixes the format. */
 export function LeagueRoomModal({
   matchId,
   format,
@@ -20,11 +20,11 @@ export function LeagueRoomModal({
   onClose: () => void;
 }) {
   const intl = useIntl();
-  const { decks, deckPlayedAt, refreshDecks, createLeagueRoom } = useStore(useShallow((state) => ({
+  const { decks, deckPlayedAt, refreshDecks, enterLeagueRoom } = useStore(useShallow((state) => ({
     decks: state.decks,
     deckPlayedAt: state.deckPlayedAt,
     refreshDecks: state.refreshDecks,
-    createLeagueRoom: state.createLeagueRoom,
+    enterLeagueRoom: state.enterLeagueRoom,
   })));
   const [deckId, setDeckId] = useState("");
   const choices = deckChoicesFor(format, decks, "legal");
@@ -58,7 +58,7 @@ export function LeagueRoomModal({
           disabled={!selected || !deckIsLegalForRoom(selected, "legal")}
           onClick={() => {
             if (!selected) return;
-            createLeagueRoom(matchId, selected.id);
+            enterLeagueRoom(matchId, selected.id);
             onClose();
           }}
         >

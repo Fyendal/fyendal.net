@@ -1068,7 +1068,7 @@ export function decodeClientMessage(value: unknown): ClientMessage | null {
     case "friend-game-invite-dismiss":
       valid = exactKeys(message, ["type", "inviteId"]) && requestId(message.inviteId);
       break;
-    case "create-league-room":
+    case "enter-league-room":
       valid = exactKeys(message, ["type", "matchId", "deckId"]) && leagueRecordId(message.matchId) && id(message.deckId);
       break;
     case "create-room":

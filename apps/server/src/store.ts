@@ -64,7 +64,7 @@ import {
 import { recordGameCompletion, recordGamePlayers } from "./analytics.js";
 import { awardAchievements } from "./achievements.js";
 import { matchEndReason, recordMatch, type MatchSeatInput } from "./matches.js";
-import { leagueRoomPlayers, resolveLeagueRoomGame } from "./league/leagueMatches.js";
+import { bindLeagueRoom, claimLeagueRoom, leagueRoomSeats, resolveLeagueRoomGame, startLeagueRoomGame } from "./league/leagueMatches.js";
 import { decodeDeckPool, resolveDeck, validatePresentation } from "./decks.js";
 import { appendClusterEvent, type ClusterEvent } from "./clusterEvents.js";
 import { assertActiveRuleset } from "./rulesetFence.js";
@@ -858,6 +858,18 @@ function toRoom(value: unknown): RoomRow {
   };
 }
 
+/** Rooms whose league match still needs them: GC waits until the match
+ * closes, or, for an abandoned game, until the match's deadline. */
+async function openLeagueRoomCodes(db: Queryable, now: number, code?: string): Promise<string[]> {
+  const { rows } = await db.query(
+    `SELECT r.code FROM rooms r JOIN league_matches m ON m.id = r.league_match_id
+     WHERE ($2::text IS NULL OR r.code = $2)
+       AND (m.status IN ('unscheduled', 'proposed', 'scheduled') OR (m.status = 'in-room' AND m.deadline_at > $1))`,
+    [now, code ?? null],
+  );
+  return rows.map((row) => String(row.code));
+}
+
 /**
  * Arm/disarm the GC deadline. The FIRST arming wins — reconnects and further
  * actions don't push the deadline out once the game is over or the room has
@@ -1522,6 +1534,7 @@ export class PgRoomStore {
             participants,
           });
           await recordGamePlayers(db, participants.map((participant) => participant.userId));
+          await startLeagueRoomGame(db, out.room.code);
         } else if (out.replay?.kind === "frame" && out.room.state) {
           const replayFrameAt = Date.now();
           replayFinalizationId = (await appendReplayView(
@@ -1588,8 +1601,6 @@ export class PgRoomStore {
     },
     visibility: "public" | "private" = "public",
     cardPoolMode: CardPoolMode = "legal",
-    /** Runs in the creation transaction, e.g. to bind the room to a league match. */
-    onCreate?: (db: Queryable, code: string) => Promise<void>,
   ): Promise<{ code: string; seat: number; token: string; version: number }> {
     // snapshot the hero for prep-room display (best-effort; caller validated)
     const heroId = (await resolveDeck(this.db, seat.deckId))?.decklist.heroId;
@@ -1616,7 +1627,6 @@ export class PgRoomStore {
               heroId ?? null, seat.deckId, seat.deckName ?? null,
               seat.fromQueue ?? false],
           );
-          await onCreate?.(db, code);
           await appendClusterEvent(db, {
             type: "room",
             event: { code, kind: "sync", version: 0 },
@@ -1625,6 +1635,35 @@ export class PgRoomStore {
         return { code, seat: 0, token, version: 0 };
       } catch (e) {
         // primary-key collision on the random code → try another one
+        if (!String((e as Error).message).includes("duplicate")) throw e;
+      }
+    }
+    throw new Error("could not allocate a room code");
+  }
+
+  /** A league match's room, created empty on first entry. Its seats belong to
+   * the two members, so either can take, leave, and retake theirs while the
+   * match is open. Throws `LeagueRoomUnavailable` when the user cannot enter. */
+  async ensureLeagueRoom(userId: number, matchId: string): Promise<string> {
+    for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
+      const code = newCode();
+      try {
+        return await withTransaction(this.db, async (db) => {
+          await assertActiveRuleset(db, this.rulesetVersion);
+          const claimed = await claimLeagueRoom(db, userId, matchId);
+          if (claimed.code !== null) return claimed.code;
+          const now = Date.now();
+          await db.query(
+            `INSERT INTO rooms
+              (code, format, spectators, state, prep, ruleset_version, version, created_at, gc_at, status, winner, is_private, card_pool_mode)
+             VALUES ($1, $2, '[]', NULL, NULL, $3, 0, $4, $5, 'open', NULL, TRUE, 'legal')`,
+            [code, claimed.format, this.rulesetVersion, now, now + GC_DELAY_MS],
+          );
+          await bindLeagueRoom(db, userId, matchId, code);
+          await appendClusterEvent(db, { type: "room", event: { code, kind: "sync", version: 0 } });
+          return code;
+        });
+      } catch (e) {
         if (!String((e as Error).message).includes("duplicate")) throw e;
       }
     }
@@ -3050,7 +3089,7 @@ export class PgRoomStore {
     },
   ): Promise<JoinResult> {
     const upperCode = code.toUpperCase();
-    const r = await this.withRetry<WithoutVersion<Extract<JoinResult, { ok: true }>>>(upperCode, async (room) => {
+    const r = await this.withRetry<WithoutVersion<Extract<JoinResult, { ok: true }>>>(upperCode, async (room, db) => {
       if (opts.spectate && opts.userId != null
         && room.seats.some((seat) => seat?.userId === opts.userId)) {
         return { error: "already a player in this room" };
@@ -3109,12 +3148,20 @@ export class PgRoomStore {
           };
         }
       }
-      const freeSeat = room.seats[0] === null ? 0 : room.seats[1] === null ? 1 : -1;
+      const openSeat = room.seats[0] === null ? 0 : room.seats[1] === null ? 1 : -1;
+      // A league room's seats belong to its two members, who may leave and
+      // retake their own seat while the match is open.
+      const leagueSeats = await leagueRoomSeats(db, upperCode);
+      const leagueSeat = leagueSeats && opts.userId != null ? leagueSeats.indexOf(opts.userId) : -1;
+      const freeSeat = !leagueSeats ? openSeat : leagueSeat !== -1 && room.seats[leagueSeat] === null ? leagueSeat : -1;
       // A reconnect credential that no longer owns any membership must not
       // fall through and silently claim the seat it just lost to a timeout.
       // Full rooms retain the longstanding behavior of admitting it as a
       // spectator instead.
-      if (token && freeSeat !== -1 && !opts.spectate) return { error: "room session expired" };
+      if (token && freeSeat !== -1 && leagueSeat === -1 && !opts.spectate) return { error: "room session expired" };
+      if (leagueSeats && leagueSeat === -1 && openSeat !== -1 && !opts.spectate) {
+        return { error: "this seat is reserved for a league opponent" };
+      }
       if (opts.spectate || freeSeat === -1) {
         // prune dead spectator rows (presence expired) so departed watchers
         // never fill the cap; rows at 0 are fresh joins not yet attach-stamped
@@ -3133,17 +3180,14 @@ export class PgRoomStore {
         };
       }
       if (!opts.allowPlayer) return { error: PLAY_REQUIRES_LOGIN };
-      const leaguePlayers = await leagueRoomPlayers(this.db, upperCode);
-      if (leaguePlayers && (opts.userId == null || !leaguePlayers.includes(opts.userId))) {
-        return { error: "this seat is reserved for a league opponent" };
-      }
 
       // Keep an abandoned opener available for its owner to reconnect, but do
       // not let a new player revive it during the GC grace period. Account and
       // token reclaims returned above; the bot bypass is only for the
-      // connectionless seat installed while createBotRoom is composing.
+      // connectionless seat installed while createBotRoom is composing. A
+      // league room has no opener.
       const host = room.seats[1 - freeSeat];
-      if (opts.controller !== "bot" && (!host || !isPresent(host.lastSeenAt, Date.now()))) {
+      if (!leagueSeats && opts.controller !== "bot" && (!host || !isPresent(host.lastSeenAt, Date.now()))) {
         return { error: "room host is disconnected" };
       }
 
@@ -4713,7 +4757,9 @@ export class PgRoomStore {
     const retainedSearchRooms = new Set(searches.rows.map((value) =>
       dbObject(value, "<matchmaking>", "retained search").retained_room_code
     ));
-    const candidates = armedRooms.filter((room) => Number(room.gc_at) <= now && !retainedSearchRooms.has(room.code));
+    const leagueRooms = new Set(await openLeagueRoomCodes(this.db, now));
+    const candidates = armedRooms.filter((room) => Number(room.gc_at) <= now
+      && !retainedSearchRooms.has(room.code) && !leagueRooms.has(room.code));
     const deleted: { code: string; version: number }[] = [];
     for (const candidate of candidates) {
       // Re-check the deadline in the DELETE so a concurrent heartbeat that
@@ -4732,6 +4778,7 @@ export class PgRoomStore {
           [candidate.code],
         );
         if (protectedSearch.rows.length > 0) return null;
+        if ((await openLeagueRoomCodes(db, now, candidate.code)).length > 0) return null;
         const sourceSearches = await db.query(
           `SELECT user_id, retained_room_code, pending_offer_room_code FROM matchmaking_entries
            WHERE source_room_code = $1 AND mode = 'background'`,

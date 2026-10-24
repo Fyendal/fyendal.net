@@ -22,9 +22,9 @@ function MatchItem({ league, match, now, onChanged }: {
   onChanged: () => Promise<void>;
 }) {
   const intl = useIntl();
-  const { authToken, inspectRoom } = useStore(useShallow((state) => ({
+  const { authToken, joinRoom } = useStore(useShallow((state) => ({
     authToken: state.authToken,
-    inspectRoom: state.inspectRoom,
+    joinRoom: state.joinRoom,
   })));
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -114,7 +114,7 @@ function MatchItem({ league, match, now, onChanged }: {
       </div>
       <div className="league-match-actions">
         {match.status === "in-room" && match.roomCode ? (
-          <button type="button" className="btn-primary" onClick={() => inspectRoom(match.roomCode!)}>
+          <button type="button" className="btn-primary" onClick={() => joinRoom(match.roomCode!)}>
             {intl.formatMessage({ id: "league.match.join" })}
           </button>
         ) : null}

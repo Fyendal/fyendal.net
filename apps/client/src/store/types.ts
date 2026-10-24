@@ -174,8 +174,8 @@ export interface StoreState {
   beginFriendInvite: (username: string) => void;
   cancelFriendInvite: () => void;
   createFriendRoom: (username: string, format: Format, deckId: string) => void;
-  /** Opens the room for a league match; the server checks the match and reserves the opponent's seat. */
-  createLeagueRoom: (matchId: string, deckId: string) => void;
+  /** Takes your seat in a league match's room; the server creates it on first entry. */
+  enterLeagueRoom: (matchId: string, deckId: string) => void;
   dismissFriendGameInvite: (inviteId: string) => void;
   acceptFriendGameInvite: (inviteId: string) => void;
 
