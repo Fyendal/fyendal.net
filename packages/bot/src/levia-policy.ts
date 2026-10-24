@@ -193,6 +193,31 @@ function actionPointsUsable(input: BotPolicyInput): boolean {
   });
 }
 
+/** Brute weapons attack for {r}{r}. */
+const WEAPON_SWING_COST = 2;
+
+/** Whether a legal weapon swing and one terminal attack card fit the floating
+ * resources plus the rest of the hand's pitch, given an action point for each.
+ * A card with go again already reaches the weapon without a roll. */
+function weaponSwingPair(input: BotPolicyInput, cards: readonly CardView[]): boolean {
+  const me = input.view.players[input.seat];
+  const weaponIds = new Set(me.weapons.map((weapon) => weapon.instanceId));
+  const swing = input.legal.some((intent) => {
+    if (intent.kind !== "activate-ability" || !weaponIds.has(intent.sourceInstanceId)) return false;
+    const weapon = me.weapons.find((held) => held.instanceId === intent.sourceInstanceId);
+    // A Hexagore swing that costs life is not worth rolling for.
+    return name(input.cards[weapon?.cardId ?? ""]) !== "hexagore, the death hydra" || ownBloodDebt(input) >= 6;
+  });
+  if (!swing) return false;
+  const sash = leviaEffectActive(input, "savage sash");
+  return cards.some((card) => {
+    if (!leviaAttackPlayable(card, input) || leviaAttackContinues(card, input)) return false;
+    const pitch = me.hand.filter((held) => held.instanceId !== card.instanceId)
+      .reduce((sum, held) => sum + (input.cards[held.cardId]?.pitch ?? 0), 0);
+    return me.resources + pitch >= WEAPON_SWING_COST + leviaAttackCost(input.cards[card.cardId], sash);
+  });
+}
+
 function gateTargetValue(intent: GameIntent, input: BotPolicyInput, own: ReadonlyMap<number, CardView>): number {
   if (intent.kind !== "activate-ability" || intent.targetCardInstanceId === undefined) return -500;
   const me = input.view.players[input.seat];
@@ -669,13 +694,15 @@ function scorePlay(intent: GameIntent, input: BotPolicyInput, own: ReadonlyMap<n
       const bellowed = bloodrushActive && attackerData.classes?.includes("brute") ? 2 : 0;
       return (attackerData.attack ?? 0) + bellowed >= opponentLife;
     });
+    // A whiff is fatal only when the unsuppressed blood debt drains the rest of Levia's life.
+    const whiffKills = exposed && ownBloodDebt(input) >= me.life;
     // An unusable roll ranks below any banish or pass, so a rollout tie never picks it.
     score = !actionPointsUsable(input) ? -150
-      : me.actionPoints < 2 && me.life > 5 && !lethalAttack && (bloodrushActive || !exposed) &&
-        !leviaAttackPair(input, reserve) && leviaAttackPair(input, reserve, { grantGoAgain: true })
+      : me.actionPoints < 2 && !whiffKills && !lethalAttack && (bloodrushActive || !exposed) &&
+        !leviaAttackPair(input, reserve) &&
+        (leviaAttackPair(input, reserve, { grantGoAgain: true }) || weaponSwingPair(input, reserve))
         ? (bloodrushActive ? 85 : 53)
-        : -55;
-  } else if (named === "fyendal's spring tunic") {
+        : -55;  } else if (named === "fyendal's spring tunic") {
     score = followups() > 0 ? 32 : -30;
   } else if (named === "hex gauntlet") {
     score = hexGauntletValue(input, card);

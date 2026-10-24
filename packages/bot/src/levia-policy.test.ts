@@ -261,7 +261,7 @@ describe("Levia Gates policy", () => {
     state.players[0]!.flags.banishedSixPlusThisTurn = true;
     const safe = chooseLeviaIntentWithTrace({ ...input, view: projectStateFor(state, 0) });
     expect(safe.macro.goal).not.toBe("stabilize");
-    expect(safe.plan?.transitions).toBeLessThanOrEqual(72);
+    expect(safe.plan?.transitions).toBeLessThanOrEqual(74);
   });
 
   it("values suppression and excludes face-down Blood Debt from the risk estimate", () => {
@@ -722,6 +722,21 @@ describe("Levia Gates policy", () => {
     // With the opponent in range of one attack, the attack comes first.
     state.players[1]!.life = 5;
     expect(choice(state)).toMatchObject({ kind: "play-card" });
+  });
+
+  it("rolls Scabskin at low life under a Bellow when Hexagore and an arsenal attack need the action point", () => {
+    const state = bloodrushTurn(["IAR009", "IAR037"]);
+    const me = state.players[0]!;
+    me.life = 3;
+    me.arsenal = cards(state, ["IAR005"]);
+    me.banish = cards(state, [
+      "PEN194", "IAR037", "DTD107", "PEN192", "WTR031", "SUP165", "ROS218", "IAR017", "MST236", "PEN194", "IAR005",
+    ]);
+    expect(me.weapons.map((weapon) => cardData[weapon.cardId]?.name)).toContain("Hexagore, the Death Hydra");
+    expect(me.resources).toBe(2);
+    // Blood Harvest was banished from hand to pay for the Bellow.
+    me.flags.banishedSixPlusThisTurn = true;
+    expect(choice(state)).toMatchObject({ kind: "activate-ability", sourceInstanceId: me.equipment.legs!.instanceId });
   });
 
   it("banishes Consuming Lash at one life without a Scabskin roll nothing could use", () => {
