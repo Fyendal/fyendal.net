@@ -2137,6 +2137,17 @@ describe("Armory Decks — rules regression coverage", () => {
     expect(g.state.players[0]!.hand).toHaveLength(5);
   });
 
+  it("Two Bluff Catcher wager wins stack their end-phase intellect", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", weapons: ["golden grail|0"], hand: ["bluff catcher|2", "bluff catcher|2"], deck: ["alpha instinct|3", "head jab|1", "head jab|2", "head jab|3", "raging onslaught|3", "ravenous rabble|1", "head jab|1"], resources: 7, equipment: NO_EQUIPMENT },
+        { hero: "dorinthea", deck: ["head jab|3"], equipment: NO_EQUIPMENT },
+      ],
+    });
+    g.play("bluff catcher|2").play("bluff catcher|2").attackWithWeapon("golden grail|0").blockWith().settle().endTurn();
+    expect(g.state.players[0]!.hand).toHaveLength(6);
+  });
+
   it("Visit the Prize Room equips Prized Galea from inventory", () => {
     const g = scenario({
       seats: [

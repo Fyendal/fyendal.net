@@ -465,6 +465,16 @@ export function opponentSeat(ctx: ScriptCtx): number {
   return ctx.seat === 0 ? 1 : 0;
 }
 
+/** Grant `seat` +1 intellect during the end phase of `turn`; repeated grants for that turn stack. */
+export function grantEndPhaseIntellect(ctx: ScriptCtx, seat: number, turn: number): void {
+  const hero = ctx.player(seat).hero;
+  const pending = Number(hero.scriptState?.bonusIntellectAtEndPhaseTurn ?? 0) === turn
+    ? Number(hero.scriptState?.bonusIntellectAtEndPhaseCount ?? 1)
+    : 0;
+  ctx.setCardState(hero.instanceId, "bonusIntellectAtEndPhaseTurn", turn);
+  ctx.setCardState(hero.instanceId, "bonusIntellectAtEndPhaseCount", pending + 1);
+}
+
 export type HeroChoiceOption = "opposing hero" | "your hero";
 
 /** Ask which hero an effect targets as a plain text choice. Games have two
