@@ -112,6 +112,146 @@ describe("motion geometry", () => {
     }));
   });
 
+  it("flies a heaved card from its enlarged presentation into arsenal", () => {
+    const focus = rect(360, 240, 260, 358);
+    const arsenal = rect(520, 470, 100, 138);
+    // The focused hand card is out of layout, so only its zone is measurable.
+    const previous = anchors({ zones: [["0:hand", rect(0, 600, 900, 220)]] });
+    previous.focusSources = new Map([[7, focus]]);
+    const batch = resolveMotionBatch([{
+      kind: "move", source: { kind: "hand", seat: 0 }, destination: { kind: "arsenal", seat: 0 },
+      instanceId: 7, sourcePresentationKey: "0:hand:7", destinationPresentationKey: "0:arsenal:7",
+      visual: { kind: "face", card: { instanceId: 7, cardId: "SBA016", owner: 0 } },
+      count: 1, confidence: "exact",
+    }], previous, anchors({ cards: [["0:arsenal:7", arsenal]] }), "heave");
+    expect(batch?.flights).toEqual([expect.objectContaining({
+      mode: "arsenal", start: focus, end: arsenal, holdAtSource: true,
+    })]);
+  });
+
+  it("pitches the heave payment before the heaved card leaves the focus for arsenal", () => {
+    const focus = rect(360, 240, 260, 358);
+    const pitchSlot = rect(40, 600, 160, 220);
+    const pitch = rect(620, 470, 100, 138);
+    const arsenal = rect(520, 470, 100, 138);
+    const previous = anchors({
+      cards: [["0:hand:8", pitchSlot]],
+      zones: [["0:hand", rect(0, 600, 900, 220)]],
+    });
+    previous.focusSources = new Map([[7, focus]]);
+    const batch = resolveMotionBatch([{
+      kind: "move", source: { kind: "hand", seat: 0 }, destination: { kind: "arsenal", seat: 0 },
+      instanceId: 7, sourcePresentationKey: "0:hand:7", destinationPresentationKey: "0:arsenal:7",
+      visual: { kind: "face", card: { instanceId: 7, cardId: "SBA016", owner: 0 } },
+      count: 1, confidence: "exact",
+    }, {
+      kind: "move", source: { kind: "hand", seat: 0 }, destination: { kind: "pitch", seat: 0 },
+      instanceId: 8, sourcePresentationKey: "0:hand:8", destinationPresentationKey: "0:pitch:8",
+      visual: { kind: "face", card: { instanceId: 8, cardId: "SBA017", owner: 0 } },
+      count: 1, confidence: "exact",
+    }], previous, anchors({ cards: [["0:arsenal:7", arsenal], ["0:pitch:8", pitch]] }), "heave");
+    const pitched = batch?.flights.find((flight) => flight.destinationPresentationKey === "0:pitch:8");
+    const heaved = batch?.flights.find((flight) => flight.destinationPresentationKey === "0:arsenal:7");
+    expect(pitched).toEqual(expect.objectContaining({ start: pitchSlot, end: pitch, delayMs: 0 }));
+    expect(heaved).toEqual(expect.objectContaining({ mode: "arsenal", start: focus, end: arsenal }));
+    expect(heaved!.delayMs).toBeGreaterThanOrEqual(320);
+  });
+
+  it("chains a pitched card's landing into its deck-bottom leg within one batch", () => {
+    const focus = rect(360, 240, 260, 358);
+    const handSlot = rect(40, 600, 160, 220);
+    const pitchZone = rect(600, 440, 240, 160);
+    const deck = rect(900, 440, 100, 100);
+    const arsenal = rect(520, 470, 100, 138);
+    const previous = anchors({
+      cards: [["0:hand:8", handSlot]],
+      zones: [["0:hand", rect(0, 600, 900, 220)], ["0:pitch", pitchZone]],
+    });
+    previous.focusSources = new Map([[7, focus]]);
+    const current = anchors({ cards: [["0:arsenal:7", arsenal]], zones: [["0:pitch", pitchZone], ["0:deck", deck]] });
+    const batch = resolveMotionBatch([{
+      kind: "move", source: { kind: "hand", seat: 0 }, destination: { kind: "pitch", seat: 0 },
+      instanceId: 8, sourcePresentationKey: "0:hand:8", destinationPresentationKey: "0:pitch:opaque",
+      visual: { kind: "face", card: { instanceId: 8, cardId: "SBA017", owner: 0 } },
+      count: 1, confidence: "exact",
+    }, {
+      kind: "move", source: { kind: "hand", seat: 0 }, destination: { kind: "arsenal", seat: 0 },
+      instanceId: 7, sourcePresentationKey: "0:hand:7", destinationPresentationKey: "0:arsenal:7",
+      visual: { kind: "face", card: { instanceId: 7, cardId: "SBA016", owner: 0 } },
+      count: 1, confidence: "exact",
+    }, {
+      kind: "move", source: { kind: "pitch", seat: 0 }, destination: { kind: "deck", seat: 0, position: "bottom" },
+      instanceId: 8, visual: { kind: "face-conceal", card: { instanceId: 8, cardId: "SBA017", owner: 0 } },
+      count: 1, confidence: "exact",
+    }], previous, current, "heave");
+    const [pitched, heaved, bottomed] = batch!.flights;
+    expect(pitched).toEqual(expect.objectContaining({ mode: "move", start: handSlot, delayMs: 0 }));
+    expect(pitched!.destinationPresentationKey).toBeUndefined();
+    expect(heaved).toEqual(expect.objectContaining({ mode: "arsenal", start: focus, end: arsenal }));
+    expect(bottomed).toEqual(expect.objectContaining({ mode: "deck-bottom", start: pitched!.end }));
+    expect(pitched!.lingerUntilMs).toBe(bottomed!.delayMs);
+    expect(heaved!.delayMs).toBeGreaterThanOrEqual(320);
+    expect(bottomed!.delayMs).toBeGreaterThanOrEqual(heaved!.delayMs + 320);
+  });
+
+  it("lands a pass-through pitch at the pile's compact card size so the flight morphs", () => {
+    const handSlot = rect(40, 600, 160, 220);
+    const pitchZone = rect(600, 440, 240, 160);
+    const deck = rect(900, 440, 100, 100);
+    const previous = anchors({ cards: [["0:hand:8", handSlot]], zones: [["0:hand", rect(0, 600, 900, 220)]] });
+    const current: MotionAnchorSnapshot = {
+      ...anchors({ zones: [["0:pitch", pitchZone], ["0:deck", deck]] }),
+      cardSizedZones: new Set(["0:deck"]),
+    };
+    const batch = resolveMotionBatch([{
+      kind: "move", source: { kind: "hand", seat: 0 }, destination: { kind: "pitch", seat: 0 },
+      instanceId: 8, sourcePresentationKey: "0:hand:8", destinationPresentationKey: "0:pitch:opaque",
+      visual: { kind: "face", card: { instanceId: 8, cardId: "SBA017", owner: 0 } },
+      count: 1, confidence: "exact",
+    }], previous, current, "pitch");
+    expect(batch?.flights[0]?.end).toEqual(rect(670, 470, 100, 100));
+  });
+
+  it("gathers a multi-card pitch packet from where the pitched cards landed", () => {
+    const pitchZone = rect(600, 440, 240, 160);
+    const deck = rect(900, 440, 100, 100);
+    const card = (instanceId: number) => ({ instanceId, cardId: `SBA0${instanceId}`, owner: 0 });
+    const previous = anchors({
+      cards: [["0:hand:8", rect(40, 600, 160, 220)], ["0:hand:9", rect(220, 600, 160, 220)]],
+      zones: [["0:hand", rect(0, 600, 900, 220)], ["0:pitch", pitchZone]],
+    });
+    const current = anchors({ zones: [["0:pitch", pitchZone], ["0:deck", deck]] });
+    const batches = resolveMotionBatches([
+      ...[8, 9].map((instanceId): GameMotionEvent => ({
+        kind: "move", source: { kind: "hand", seat: 0 }, destination: { kind: "pitch", seat: 0 },
+        instanceId, sourcePresentationKey: `0:hand:${instanceId}`, destinationPresentationKey: "0:pitch:opaque",
+        visual: { kind: "face", card: card(instanceId) }, count: 1, confidence: "exact",
+      })),
+      ...[8, 9].map((instanceId): GameMotionEvent => ({
+        kind: "move", source: { kind: "pitch", seat: 0 }, destination: { kind: "deck", seat: 0, position: "bottom" },
+        instanceId, visual: { kind: "face-conceal", card: card(instanceId) }, count: 1, confidence: "exact",
+      })),
+    ], previous, current, "packet");
+    const landed = batches[0]!.flights.map((flight) => flight.end);
+    const gather = batches.find((batch) => batch.id.includes("pitch-gather"))!;
+    expect(gather.flights.map((flight) => flight.start)).toEqual(landed);
+    expect(gather.flights.every((flight) => flight.visual.kind === "face")).toBe(true);
+  });
+
+  it.each(["graveyard", "stack-layer", "deck"] as const)("settles a card arriving in arsenal from %s with the arsenal animation", (kind) => {
+    const source = kind === "stack-layer" ? { kind, index: 0 } : { kind, seat: 0 };
+    const sourceKey = kind === "stack-layer" ? "stack:layer:7" : `0:${kind}:7`;
+    const start = rect(700, 300, 100, 138);
+    const arsenal = rect(520, 470, 100, 138);
+    const batch = resolveMotionBatch([{
+      kind: "move", source, destination: { kind: "arsenal", seat: 0 },
+      instanceId: 7, sourcePresentationKey: sourceKey, destinationPresentationKey: "0:arsenal:7",
+      visual: { kind: "face", card: { instanceId: 7, cardId: "SBA016", owner: 0 } },
+      count: 1, confidence: "exact",
+    }], anchors({ cards: [[sourceKey, start]] }), anchors({ cards: [["0:arsenal:7", arsenal]] }), "arsenal");
+    expect(batch?.flights).toEqual([expect.objectContaining({ mode: "arsenal", start, end: arsenal })]);
+  });
+
   it("connects focused board abilities to the stack without redirecting pitched cards", () => {
     const focus = rect(360, 240, 260, 358);
     const original = rect(40, 600, 160, 220);

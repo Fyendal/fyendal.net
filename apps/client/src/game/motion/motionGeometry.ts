@@ -284,6 +284,25 @@ function handCardWithinZone(
   };
 }
 
+/** A pitch landing with no real card to measure takes the pile's compact card
+ * size, so the flight morphs the full card into the zone shape like any pitch. */
+function pitchCardReference(
+  previous: MotionAnchorSnapshot,
+  current: MotionAnchorSnapshot,
+  seat: number,
+): MotionRect | undefined {
+  const prefix = `${seat}:pitch:`;
+  const deckKey = `${seat}:deck`;
+  for (const snapshot of [current, previous]) {
+    for (const [key, rect] of snapshot.cards) {
+      if (key.startsWith(prefix)) return rect;
+    }
+    const deck = snapshot.zones.get(deckKey);
+    if (deck && snapshot.cardSizedZones?.has(deckKey)) return deck;
+  }
+  return undefined;
+}
+
 function temporaryHandSlot(
   previous: MotionAnchorSnapshot,
   current: MotionAnchorSnapshot,
@@ -315,14 +334,23 @@ function temporaryHandSlot(
   };
 }
 
+/** Where a card with no presentation in its intermediate zone landed, so the
+ * leg out of that zone starts exactly there, in this batch or a later one. */
+export type MotionTransitLandings = Map<
+  number,
+  { rect: MotionRect; arrival: MotionFlight; batchId: string }
+>;
+
 export function resolveMotionBatch(
   events: readonly GameMotionEvent[],
   previous: MotionAnchorSnapshot,
   current: MotionAnchorSnapshot,
   id: string | number,
+  transit: MotionTransitLandings = new Map(),
 ): GameMotionBatch | null {
   const batchId = String(id);
   const flights: MotionFlight[] = [];
+  const transitLinks: Array<{ arrival: MotionFlight; departure: MotionFlight }> = [];
   const connectors: MotionConnector[] = [];
   const boardAppearances = new Map<string, MotionFlight>();
   const effectDraws: Array<{ event: MoveMotionEvent; flight: MotionFlight }> = [];
@@ -444,11 +472,18 @@ export function resolveMotionBatch(
       continue;
     }
 
+    // A focused hand card leaves the hand layout, so its play or heave departs
+    // from the enlarged presentation; pitched cards are never the focused card.
     const focusSource = event.kind === "move" && event.instanceId !== undefined &&
-      (motionLayerForDestination(event.destination) === "stack"
+      ((event.source.kind === "hand" && event.destination.kind !== "pitch")
+        || motionLayerForDestination(event.destination) === "stack"
         || event.destination.kind === "chain-attack")
       ? previous.focusSources?.get(event.instanceId) : undefined;
+    const transitLanding = event.kind === "move" && event.instanceId !== undefined && !focusSource
+      && (event.sourcePresentationKey === undefined || !previous.cards.has(event.sourcePresentationKey))
+      ? transit.get(event.instanceId) : undefined;
     const source = (focusSource ? { rect: focusSource, exact: true } : null)
+      ?? (transitLanding ? { rect: transitLanding.rect, exact: true } : null)
       ?? endpoint(previous, event.sourcePresentationKey, event.source);
     const destination = endpoint(
       current,
@@ -469,7 +504,12 @@ export function resolveMotionBatch(
           start,
           measuredHandCards(previous, current, event.destination.seat)[0],
         )
-        : cardRectWithinZone(destination.rect, start);
+        : event.kind === "move" && event.destination.kind === "pitch"
+          ? cardRectWithinZone(
+            destination.rect,
+            pitchCardReference(previous, current, event.destination.seat) ?? start,
+          )
+          : cardRectWithinZone(destination.rect, start);
     if (event.kind === "reflow" && sameRect(start, end)) continue;
     // Cards stacked in one board group share a presentation; slide it once.
     const boardReflow = event.kind === "reflow" && event.source.kind === "board"
@@ -483,7 +523,7 @@ export function resolveMotionBatch(
     }
     const mode = event.kind === "reflow"
       ? "reflow"
-      : event.source.kind === "hand" && event.destination.kind === "arsenal"
+      : event.destination.kind === "arsenal"
       ? "arsenal"
       : event.source.kind === "deck" && event.destination.kind === "hand"
         ? "draw"
@@ -533,6 +573,14 @@ export function resolveMotionBatch(
         : {}),
     };
     flights.push(flight);
+    if (transitLanding?.batchId === batchId) {
+      transitLinks.push({ arrival: transitLanding.arrival, departure: flight });
+    }
+    if (event.kind === "move" && event.instanceId !== undefined
+      && (event.destinationPresentationKey === undefined
+        || !current.cards.has(event.destinationPresentationKey))) {
+      transit.set(event.instanceId, { rect: end, arrival: flight, batchId });
+    }
     if (event.kind === "move" && event.source.kind === "hand"
       && event.destination.kind !== "hand" && event.visual.kind === "back") {
       handDepartures.push({ seat: event.source.seat, flight });
@@ -649,6 +697,11 @@ export function resolveMotionBatch(
   for (const { draw, successor } of stagedDraws) {
     draw.lingerUntilMs = successor.delayMs;
   }
+  // The landed copy waits in the intermediate zone until its next leg departs.
+  for (const { arrival, departure } of transitLinks) {
+    arrival.lingerUntilMs = departure.delayMs;
+    arrival.destinationPresentationKey = undefined;
+  }
   const durationMs = Math.max(
     0,
     ...flights.map((flight) => flight.delayMs + motionFlightDurationMs(flight)),
@@ -713,12 +766,14 @@ function resolvePitchPacketBatches(
   current: MotionAnchorSnapshot,
   id: string | number,
   groupIndex: number,
+  transit: MotionTransitLandings,
 ): GameMotionBatch[] {
   const resolved = resolveMotionBatch(
     events,
     previous,
     current,
     `${id}:pitch-source:${groupIndex}`,
+    transit,
   );
   if (!resolved || resolved.flights.length !== events.length) {
     return resolved ? [{ ...resolved, stage: "end-turn" }] : [];
@@ -826,6 +881,7 @@ export function resolveMotionBatches(
   }
 
   const batches: GameMotionBatch[] = [];
+  const transit: MotionTransitLandings = new Map();
   if (hasPitchPacket) {
     const beforePitch = endTurnEvents.filter((event) => (
       !isPitchBottomEvent(event) && motionTimelinePhase(event) !== "draw"
@@ -838,6 +894,7 @@ export function resolveMotionBatches(
       previous,
       current,
       `${id}:end-turn:before-pitch`,
+      transit,
     );
     if (beforePitchBatch) batches.push({ ...beforePitchBatch, stage: "end-turn" });
     for (const [groupIndex, pitchGroup] of pitchGroups.entries()) {
@@ -848,6 +905,7 @@ export function resolveMotionBatches(
           current,
           id,
           groupIndex,
+          transit,
         ));
       } else {
         const pitchBatch = resolveMotionBatch(
@@ -855,6 +913,7 @@ export function resolveMotionBatches(
           previous,
           current,
           `${id}:pitch-bottom:${groupIndex}`,
+          transit,
         );
         if (pitchBatch) batches.push({ ...pitchBatch, stage: "end-turn" });
       }

@@ -1344,6 +1344,63 @@ describe("game motion detection", () => {
     });
   });
 
+  it("keeps a heave payment's pitched card face up into pitch and flips it only when bottomed", () => {
+    const heaved = face(7);
+    const pitched = face(8);
+    const drawn = [face(9), face(10)];
+    const previous = view([
+      player(0, { hand: [heaved, pitched], handCount: 2, deckCount: 10 }),
+      player(1),
+    ], { phase: "end" });
+    const current = view([
+      player(0, { hand: drawn, handCount: 2, deckCount: 9, arsenal: [heaved], arsenalCount: 1 }),
+      player(1),
+    ], { turn: 2, phase: "action" });
+
+    const events = transitionMotionEvents(previous, current, {
+      fromVersion: 8,
+      kind: "forward",
+      events: [
+        { kind: "move", from: { kind: "hand", seat: 0 }, to: { kind: "pitch", seat: 0 }, count: 1, instanceId: 8 },
+        { kind: "move", from: { kind: "hand", seat: 0 }, to: { kind: "arsenal", seat: 0 }, count: 1, instanceId: 7 },
+        {
+          kind: "move",
+          from: { kind: "pitch", seat: 0 },
+          to: { kind: "deck", seat: 0, position: "bottom" },
+          count: 1,
+          instanceId: 8,
+        },
+        ...drawn.map((card) => ({
+          kind: "move" as const,
+          from: { kind: "deck" as const, seat: 0, position: "top" as const },
+          to: { kind: "hand" as const, seat: 0 },
+          count: 1,
+          instanceId: card.instanceId,
+        })),
+      ],
+    }, "forward");
+
+    expect(events).toContainEqual(expect.objectContaining({
+      kind: "move",
+      source: { kind: "hand", seat: 0 },
+      destination: { kind: "pitch", seat: 0 },
+      visual: { kind: "face", card: pitched },
+      instanceId: pitched.instanceId,
+    }));
+    expect(events).toContainEqual(expect.objectContaining({
+      kind: "move",
+      source: { kind: "pitch", seat: 0 },
+      destination: { kind: "deck", seat: 0, position: "bottom" },
+      visual: { kind: "face-conceal", card: pitched },
+      instanceId: pitched.instanceId,
+    }));
+    expect(events).toContainEqual(expect.objectContaining({
+      source: { kind: "hand", seat: 0 },
+      destination: { kind: "arsenal", seat: 0 },
+      visual: { kind: "face", card: heaved },
+    }));
+  });
+
   it("adds hand reflow motion alongside end-phase draw-up", () => {
     const kept = face(93);
     const chosen = face(94);

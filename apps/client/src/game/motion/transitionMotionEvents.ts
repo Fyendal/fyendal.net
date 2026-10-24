@@ -63,27 +63,36 @@ function cardVisible(card: CardView): boolean {
   return card.hidden !== true && card.cardId !== "";
 }
 
+function visibleCard(presentation: CardPresentation | null): CardView | undefined {
+  return presentation && cardVisible(presentation.card) ? presentation.card : undefined;
+}
+
 function visualFor(
-  source: CardPresentation | null,
-  destination: CardPresentation | null,
+  sourceCard: CardView | undefined,
+  destinationCard: CardView | undefined,
+  destinationKind: MotionLocation["kind"],
 ): MotionVisual {
-  const sourceVisible = source !== null && cardVisible(source.card);
-  const destinationVisible = destination !== null && cardVisible(destination.card);
-  if (!destinationVisible) {
-    return sourceVisible
-      ? { kind: "face-conceal", card: source.card }
+  if (!destinationCard) {
+    return sourceCard
+      ? { kind: "face-conceal", card: sourceCard }
       : { kind: "back" };
   }
   // A card projected visibly in hand belongs to the viewer. Draw it face-up
   // from the start; hidden opponent hands have no visible destination card and
   // continue through the anonymous-back branch above.
-  if (destination.location.kind === "hand") {
-    return { kind: "face", card: destination.card };
+  if (destinationKind === "hand") {
+    return { kind: "face", card: destinationCard };
   }
-  return sourceVisible
-    ? { kind: "face", card: destination.card }
-    : { kind: "back-reveal", card: destination.card };
+  return sourceCard
+    ? { kind: "face", card: destinationCard }
+    : { kind: "back-reveal", card: destinationCard };
 }
+
+/** Zones where a card passing through within one edge is face up, so the
+ * leg into it keeps the face and the leg out of it starts from the face. */
+const PUBLIC_TRANSIT_ZONES: ReadonlySet<GameTransitionZone["kind"]> = new Set([
+  "pitch", "graveyard", "banish", "soul", "board", "equipment", "weapon", "stack", "chain",
+]);
 
 /** The server identifies a deck-to-hand draw only to a viewer entitled to
  * see it. A card drawn and discarded in one update has no hand presentation,
@@ -197,6 +206,9 @@ export function transitionMotionEvents(
   const effectDrawSeats = new Set<number>();
   // A card drawn face-up and discarded in the same update stays face-up.
   const faceUpDraws = new Map<number, CardView>();
+  // A card that moves twice in one edge (pitched for Heave, then bottomed)
+  // has no presentation in its intermediate zone; carry its identity along.
+  const transitCards = new Map<number, CardView>();
   // Draw-up crosses the turn boundary; draws within a turn belong to the
   // resolving card effect and must precede any discard recorded after them.
   const isEffectDraw = direction === "forward" && sourceView.turn === destinationView.turn;
@@ -269,6 +281,17 @@ export function transitionMotionEvents(
           ? faceUpDraws.get(move.instanceId)
           : undefined;
       if (drawsForEffect && drawnCard) faceUpDraws.set(drawnCard.instanceId, drawnCard);
+      const sourceCard = visibleCard(sourcePresentation)
+        ?? (move.instanceId === undefined ? undefined : transitCards.get(move.instanceId));
+      const passesThrough = move.instanceId !== undefined && move.to !== null
+        && PUBLIC_TRANSIT_ZONES.has(move.to.kind)
+        && moves.slice(moveIndex + 1).some((later) => (
+          later.instanceId === move.instanceId && later.from?.kind === move.to?.kind
+        ));
+      const destinationCard = visibleCard(destinationPresentation)
+        ?? (passesThrough ? sourceCard : undefined);
+      const knownCard = destinationCard ?? sourceCard;
+      if (move.instanceId !== undefined && knownCard) transitCards.set(move.instanceId, knownCard);
       // An optimistic projection may already have shown the first part of an
       // authoritative edge (such as hand -> stack). Omit only that
       // exact movement; later cleanup and draw events on the same edge still
@@ -280,7 +303,7 @@ export function transitionMotionEvents(
           destination: destinationLocation,
           visual: drawnCard
             ? { kind: "face", card: drawnCard }
-            : visualFor(sourcePresentation, destinationPresentation),
+            : visualFor(sourceCard, destinationCard, destinationLocation.kind),
           count: move.count,
           confidence: move.instanceId === undefined ? "inferred" : "exact",
           ...(drawsForEffect ? { timeline: "effect-draw" as const } : {}),

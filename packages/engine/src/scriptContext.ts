@@ -1119,7 +1119,7 @@ export function makeCtx(
       runtime.commands.notePitch(state, found.owner, found.card);
       clearPrivateZonePlacement(found.card);
       found.owner.pitch.push(found.card);
-      runtime.commands.pitchIntoPool(state, found.owner, found.card, pitch);
+      runtime.commands.pitchIntoPool(state, found.owner, found.card, pitch, found.fromZone);
       if (found.fromZone === "graveyard") {
         runtime.events.fireCardLeavesGraveyard(state, found.owner.seat, found.card, "pitch");
       }
