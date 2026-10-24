@@ -12,7 +12,7 @@ export const FUTURE_SET_CODES: ReadonlySet<string> = new Set(["AMG", "AMO", "MPA
  * weekly by LSS, so this date must move whenever the lists below are refreshed.
  * https://fabtcg.com/rules-and-policy-center/card-legality-policy/
  */
-export const CLASSIC_CONSTRUCTED_LEGALITY_CHECKED_ON = "2026-10-13";
+export const CLASSIC_CONSTRUCTED_LEGALITY_CHECKED_ON = "2026-10-23";
 
 /**
  * Silver Age season snapshot beginning with the Usurp the Shadow Throne
@@ -23,6 +23,7 @@ export const CLASSIC_CONSTRUCTED_LEGALITY_CHECKED_ON = "2026-10-13";
 export const SILVER_AGE_LEGALITY_CHECKED_ON = "2026-09-18";
 
 const LIVING_LEGEND_HEROES = new Set([
+  "arakni, marionette",
   "aurora, shooting star",
   "azalea, ace in the hole",
   "bravo, star of the show",
@@ -32,6 +33,7 @@ const LIVING_LEGEND_HEROES = new Set([
   "dash, inventor extraordinaire",
   "dromai, ash artist",
   "enigma, ledger of ancestry",
+  "fai, rising rebellion",
   "florian, rotwood harbinger",
   "iyslander, stormbind",
   "kano, dracai of aether",
@@ -72,6 +74,8 @@ const LIVING_LEGEND_WEAPONS = new Set([
   "nebula blade",
   "tiger taming khakkara",
   "symbiosis shot",
+  "hunter's klaive",
+  "searing emberblade",
 ]);
 
 /** Classic Constructed cards banned at every pitch. */

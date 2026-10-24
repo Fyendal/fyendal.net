@@ -78,6 +78,10 @@ const cards: Record<string, CardData> = {
   SYMBIOSIS_SHOT: card("SYMBIOSIS_SHOT", "Symbiosis Shot", "weapon"),
   KASSAI_ADULT: card("KASSAI_ADULT", "Kassai of the Golden Sand", "hero"),
   OSCILIO_ADULT: card("OSCILIO_ADULT", "Oscilio, Constella Intelligence", "hero"),
+  FAI_ADULT: card("FAI_ADULT", "Fai, Rising Rebellion", "hero"),
+  SEARING_EMBERBLADE: card("SEARING_EMBERBLADE", "Searing Emberblade", "weapon"),
+  ARAKNI_MARIONETTE: card("ARAKNI_MARIONETTE", "Arakni, Marionette", "hero"),
+  HUNTERS_KLAIVE: card("HUNTERS_KLAIVE", "Hunter's Klaive", "weapon"),
   ART: card("ART", "Art of War"),
   CHANNEL_LIGHTNING_VALLEY: card("CHANNEL_LIGHTNING_VALLEY", "Channel Lightning Valley"),
   PHANTOM_TIDEMAW: card("PHANTOM_TIDEMAW", "Phantom Tidemaw"),
@@ -126,6 +130,8 @@ describe("Classic Constructed format legality", () => {
       ["DASH_IO", ["SYMBIOSIS_SHOT"]],
       ["KASSAI_ADULT", []],
       ["OSCILIO_ADULT", []],
+      ["FAI_ADULT", ["SEARING_EMBERBLADE"]],
+      ["ARAKNI_MARIONETTE", ["HUNTERS_KLAIVE"]],
     ] as const;
 
     for (const [heroId, weaponIds] of pairs) {
