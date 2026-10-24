@@ -30111,12 +30111,6 @@
       "value": "name"
     }
   ],
-  "league.bracket.title": [
-    {
-      "type": 0,
-      "value": "季后赛"
-    }
-  ],
   "league.empty": [
     {
       "type": 0,
@@ -30417,62 +30411,10 @@
       "value": "对局进行中。"
     }
   ],
-  "league.match.status.scheduled": [
-    {
-      "type": 0,
-      "value": "已约定于 "
-    },
-    {
-      "type": 1,
-      "value": "time"
-    }
-  ],
-  "league.match.status.suggested": [
-    {
-      "type": 0,
-      "value": "建议时间："
-    },
-    {
-      "type": 1,
-      "value": "time"
-    }
-  ],
-  "league.match.status.theyProposed": [
-    {
-      "type": 1,
-      "value": "opponent"
-    },
-    {
-      "type": 0,
-      "value": " 提议 "
-    },
-    {
-      "type": 1,
-      "value": "time"
-    }
-  ],
   "league.match.status.unscheduled": [
     {
       "type": 0,
       "value": "尚未约定时间。"
-    }
-  ],
-  "league.match.status.youProposed": [
-    {
-      "type": 0,
-      "value": "等待 "
-    },
-    {
-      "type": 1,
-      "value": "opponent"
-    },
-    {
-      "type": 0,
-      "value": " 接受 "
-    },
-    {
-      "type": 1,
-      "value": "time"
     }
   ],
   "league.match.theirTime": [
@@ -30489,14 +30431,48 @@
       "value": "time"
     }
   ],
-  "league.match.versus": [
+  "league.match.time.scheduled": [
     {
       "type": 0,
-      "value": "对阵 "
+      "value": "已与 "
     },
     {
       "type": 1,
       "value": "opponent"
+    },
+    {
+      "type": 0,
+      "value": " 约定"
+    }
+  ],
+  "league.match.time.suggested": [
+    {
+      "type": 0,
+      "value": "联赛建议的时间"
+    }
+  ],
+  "league.match.time.theyProposed": [
+    {
+      "type": 1,
+      "value": "opponent"
+    },
+    {
+      "type": 0,
+      "value": " 提议的时间"
+    }
+  ],
+  "league.match.time.youProposed": [
+    {
+      "type": 0,
+      "value": "等待 "
+    },
+    {
+      "type": 1,
+      "value": "opponent"
+    },
+    {
+      "type": 0,
+      "value": " 接受"
     }
   ],
   "league.match.week": [
@@ -30519,10 +30495,10 @@
       "value": "暂无对局。每周开始时会生成配对。"
     }
   ],
-  "league.matches.title": [
+  "league.picker.label": [
     {
       "type": 0,
-      "value": "你的对局"
+      "value": "联赛"
     }
   ],
   "league.room.description": [
@@ -30577,28 +30553,6 @@
     {
       "type": 0,
       "value": "已删除的账号"
-    }
-  ],
-  "league.roster.title": [
-    {
-      "type": 0,
-      "value": "玩家（"
-    },
-    {
-      "type": 1,
-      "value": "count"
-    },
-    {
-      "type": 0,
-      "value": "/"
-    },
-    {
-      "type": 1,
-      "value": "max"
-    },
-    {
-      "type": 0,
-      "value": "）"
     }
   ],
   "league.roster.you": [
@@ -30687,12 +30641,6 @@
       "value": "种子"
     }
   ],
-  "league.standings.title": [
-    {
-      "type": 0,
-      "value": "积分榜"
-    }
-  ],
   "league.starts": [
     {
       "type": 0,
@@ -30701,6 +30649,52 @@
     {
       "type": 1,
       "value": "date"
+    }
+  ],
+  "league.stat.rank": [
+    {
+      "type": 0,
+      "value": "排名"
+    }
+  ],
+  "league.stat.rankValue": [
+    {
+      "type": 1,
+      "value": "rank"
+    },
+    {
+      "type": 0,
+      "value": "/"
+    },
+    {
+      "type": 1,
+      "value": "total"
+    }
+  ],
+  "league.stat.round": [
+    {
+      "type": 0,
+      "value": "轮次"
+    }
+  ],
+  "league.stat.week": [
+    {
+      "type": 0,
+      "value": "周次"
+    }
+  ],
+  "league.stat.weekValue": [
+    {
+      "type": 1,
+      "value": "week"
+    },
+    {
+      "type": 0,
+      "value": "/"
+    },
+    {
+      "type": 1,
+      "value": "weeks"
     }
   ],
   "league.status.cancelled": [
@@ -30763,6 +30757,36 @@
     {
       "type": 0,
       "value": " 场"
+    }
+  ],
+  "league.tab.availability": [
+    {
+      "type": 0,
+      "value": "空闲时间"
+    }
+  ],
+  "league.tab.matches": [
+    {
+      "type": 0,
+      "value": "对局"
+    }
+  ],
+  "league.tab.players": [
+    {
+      "type": 0,
+      "value": "玩家"
+    }
+  ],
+  "league.tab.playoffs": [
+    {
+      "type": 0,
+      "value": "季后赛"
+    }
+  ],
+  "league.tab.standings": [
+    {
+      "type": 0,
+      "value": "积分榜"
     }
   ],
   "league.timeZone.label": [

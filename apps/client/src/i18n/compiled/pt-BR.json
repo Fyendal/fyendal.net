@@ -33045,12 +33045,6 @@
       "value": "name"
     }
   ],
-  "league.bracket.title": [
-    {
-      "type": 0,
-      "value": "Playoffs"
-    }
-  ],
   "league.empty": [
     {
       "type": 0,
@@ -33347,62 +33341,10 @@
       "value": "Partida em andamento."
     }
   ],
-  "league.match.status.scheduled": [
-    {
-      "type": 0,
-      "value": "Marcada para "
-    },
-    {
-      "type": 1,
-      "value": "time"
-    }
-  ],
-  "league.match.status.suggested": [
-    {
-      "type": 0,
-      "value": "Horário sugerido: "
-    },
-    {
-      "type": 1,
-      "value": "time"
-    }
-  ],
-  "league.match.status.theyProposed": [
-    {
-      "type": 1,
-      "value": "opponent"
-    },
-    {
-      "type": 0,
-      "value": " propôs "
-    },
-    {
-      "type": 1,
-      "value": "time"
-    }
-  ],
   "league.match.status.unscheduled": [
     {
       "type": 0,
       "value": "Nenhum horário combinado ainda."
-    }
-  ],
-  "league.match.status.youProposed": [
-    {
-      "type": 0,
-      "value": "Aguardando "
-    },
-    {
-      "type": 1,
-      "value": "opponent"
-    },
-    {
-      "type": 0,
-      "value": " aceitar "
-    },
-    {
-      "type": 1,
-      "value": "time"
     }
   ],
   "league.match.theirTime": [
@@ -33419,14 +33361,44 @@
       "value": "opponent"
     }
   ],
-  "league.match.versus": [
+  "league.match.time.scheduled": [
     {
       "type": 0,
-      "value": "contra "
+      "value": "Horário combinado com "
     },
     {
       "type": 1,
       "value": "opponent"
+    }
+  ],
+  "league.match.time.suggested": [
+    {
+      "type": 0,
+      "value": "Horário sugerido pela liga"
+    }
+  ],
+  "league.match.time.theyProposed": [
+    {
+      "type": 0,
+      "value": "Horário proposto por "
+    },
+    {
+      "type": 1,
+      "value": "opponent"
+    }
+  ],
+  "league.match.time.youProposed": [
+    {
+      "type": 0,
+      "value": "Aguardando "
+    },
+    {
+      "type": 1,
+      "value": "opponent"
+    },
+    {
+      "type": 0,
+      "value": " aceitar"
     }
   ],
   "league.match.week": [
@@ -33445,10 +33417,10 @@
       "value": "Nenhuma partida ainda. Os pareamentos aparecem no início de cada semana."
     }
   ],
-  "league.matches.title": [
+  "league.picker.label": [
     {
       "type": 0,
-      "value": "Suas partidas"
+      "value": "Liga"
     }
   ],
   "league.room.description": [
@@ -33503,28 +33475,6 @@
     {
       "type": 0,
       "value": "Conta excluída"
-    }
-  ],
-  "league.roster.title": [
-    {
-      "type": 0,
-      "value": "Jogadores ("
-    },
-    {
-      "type": 1,
-      "value": "count"
-    },
-    {
-      "type": 0,
-      "value": "/"
-    },
-    {
-      "type": 1,
-      "value": "max"
-    },
-    {
-      "type": 0,
-      "value": ")"
     }
   ],
   "league.roster.you": [
@@ -33613,12 +33563,6 @@
       "value": "Seed"
     }
   ],
-  "league.standings.title": [
-    {
-      "type": 0,
-      "value": "Classificação"
-    }
-  ],
   "league.starts": [
     {
       "type": 0,
@@ -33627,6 +33571,52 @@
     {
       "type": 1,
       "value": "date"
+    }
+  ],
+  "league.stat.rank": [
+    {
+      "type": 0,
+      "value": "Posição"
+    }
+  ],
+  "league.stat.rankValue": [
+    {
+      "type": 1,
+      "value": "rank"
+    },
+    {
+      "type": 0,
+      "value": " de "
+    },
+    {
+      "type": 1,
+      "value": "total"
+    }
+  ],
+  "league.stat.round": [
+    {
+      "type": 0,
+      "value": "Rodada"
+    }
+  ],
+  "league.stat.week": [
+    {
+      "type": 0,
+      "value": "Semana"
+    }
+  ],
+  "league.stat.weekValue": [
+    {
+      "type": 1,
+      "value": "week"
+    },
+    {
+      "type": 0,
+      "value": " de "
+    },
+    {
+      "type": 1,
+      "value": "weeks"
     }
   ],
   "league.status.cancelled": [
@@ -33757,6 +33747,36 @@
     {
       "type": 0,
       "value": " por semana"
+    }
+  ],
+  "league.tab.availability": [
+    {
+      "type": 0,
+      "value": "Disponibilidade"
+    }
+  ],
+  "league.tab.matches": [
+    {
+      "type": 0,
+      "value": "Partidas"
+    }
+  ],
+  "league.tab.players": [
+    {
+      "type": 0,
+      "value": "Jogadores"
+    }
+  ],
+  "league.tab.playoffs": [
+    {
+      "type": 0,
+      "value": "Playoffs"
+    }
+  ],
+  "league.tab.standings": [
+    {
+      "type": 0,
+      "value": "Classificação"
     }
   ],
   "league.timeZone.label": [

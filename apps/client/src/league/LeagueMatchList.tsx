@@ -6,8 +6,12 @@ import { apiLeagueMatchAction, apiProposeLeagueTime, type LeagueMatchAction } fr
 import { useStore } from "../store.js";
 import { startOptions } from "./availability.js";
 import { leagueErrorMessage } from "./leagueText.js";
-import { canClaimForfeit, inReadyWindow } from "./pendingActions.js";
+import { canClaimForfeit, inReadyWindow, waitsOnYou } from "./pendingActions.js";
+import { LeagueAvatar } from "./LeagueAvatar.js";
 import { LeagueRoomModal } from "./LeagueRoomModal.js";
+
+/** The row's accent: whose move it is, or how it ended. */
+type MatchTone = "waiting" | "live" | "scheduled" | "open" | "won" | "lost" | "draw";
 
 const SHORT_TIME: Intl.DateTimeFormatOptions = { weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" };
 
@@ -60,46 +64,55 @@ function MatchItem({ league, match, now, onChanged }: {
   const round = match.stage === "season"
     ? intl.formatMessage({ id: "league.match.week" }, { week: match.week })
     : intl.formatMessage({ id: `league.match.stage.${match.stage}` });
-  let status: string;
+  let headline: string;
+  let caption: string | null = null;
+  let tone: MatchTone;
   if (match.status === "complete") {
     const forfeit = match.result === "forfeit";
-    status = match.result === "bye"
+    headline = match.result === "bye"
       ? intl.formatMessage({ id: "league.match.bye" })
       : match.result === "double-forfeit"
         ? intl.formatMessage({ id: "league.match.result.doubleForfeit" })
         : match.won === null
           ? intl.formatMessage({ id: "league.match.result.draw" })
           : intl.formatMessage({ id: `league.match.result.${match.won ? "won" : "lost"}${forfeit ? "Forfeit" : ""}` });
+    tone = match.result === "bye" || match.won === true ? "won" : match.won === false || match.result === "double-forfeit" ? "lost" : "draw";
   } else if (match.status === "in-room") {
-    status = intl.formatMessage({ id: "league.match.status.inRoom" });
+    headline = intl.formatMessage({ id: "league.match.status.inRoom" });
+    tone = "live";
   } else if (match.scheduledAt === null) {
-    status = intl.formatMessage({ id: "league.match.status.unscheduled" });
+    headline = intl.formatMessage({ id: "league.match.status.unscheduled" });
+    tone = "open";
   } else {
-    const id = match.status === "scheduled"
-      ? "league.match.status.scheduled"
-      : match.proposedBy === "you"
-        ? "league.match.status.youProposed"
-        : match.proposedBy === "opponent" ? "league.match.status.theyProposed" : "league.match.status.suggested";
-    status = intl.formatMessage({ id }, { time: time(match.scheduledAt), opponent });
+    headline = time(match.scheduledAt);
+    caption = intl.formatMessage({
+      id: match.status === "scheduled"
+        ? "league.match.time.scheduled"
+        : match.proposedBy === "you"
+          ? "league.match.time.youProposed"
+          : match.proposedBy === "opponent" ? "league.match.time.theyProposed" : "league.match.time.suggested",
+    }, { opponent });
+    tone = match.status === "scheduled" ? "scheduled" : "open";
   }
+  if (waitsOnYou(match, now)) tone = "waiting";
 
   return (
-    <li className="league-match">
-      <div className="league-match-heading">
-        <strong>{round}</strong>
-        <span>{opponent === null ? null : intl.formatMessage({ id: "league.match.versus" }, { opponent })}</span>
+    <li className={`league-match is-${tone}`}>
+      <div className="league-match-who">
+        <span className="league-match-round">{round}</span>
+        {opponent === null ? null : (
+          <span className="league-match-opponent">
+            <LeagueAvatar username={match.opponent?.username ?? null} />
+            <strong>{opponent}</strong>
+          </span>
+        )}
       </div>
-      <p className="league-match-status">{status}</p>
-      {open && match.scheduledAt !== null && match.opponent ? <p className="league-meta">{theirTime(match.scheduledAt)}</p> : null}
-      {match.status === "scheduled" && (match.youReady || match.opponentReady) ? (
-        <p className="league-meta">
-          {[match.youReady ? intl.formatMessage({ id: "league.match.ready.you" }) : null,
-            match.opponentReady ? intl.formatMessage({ id: "league.match.ready.opponent" }, { opponent }) : null]
-            .filter(Boolean).join(" ")}
-        </p>
-      ) : null}
-      {open ? <p className="league-meta">{intl.formatMessage({ id: "league.match.deadline" }, { time: time(match.deadlineAt) })}</p> : null}
-      <div className="league-actions">
+      <div className="league-match-when">
+        <strong className="league-match-headline">{headline}</strong>
+        {caption ? <span>{caption}</span> : null}
+        {open && match.scheduledAt !== null && match.opponent ? <span>{theirTime(match.scheduledAt)}</span> : null}
+      </div>
+      <div className="league-match-actions">
         {match.status === "in-room" && match.roomCode ? (
           <button type="button" className="btn-primary" onClick={() => inspectRoom(match.roomCode!)}>
             {intl.formatMessage({ id: "league.match.join" })}
@@ -111,26 +124,41 @@ function MatchItem({ league, match, now, onChanged }: {
           </button>
         ) : null}
         {schedulable && match.status === "proposed" && match.proposedBy !== "you" ? (
-          <button type="button" disabled={busy} onClick={() => void action("accept")}>
+          <button type="button" className="league-button" disabled={busy} onClick={() => void action("accept")}>
             {intl.formatMessage({ id: "league.match.accept" })}
           </button>
         ) : null}
         {checkInOpen && !match.youReady ? (
-          <button type="button" disabled={busy} onClick={() => void action("ready")}>
+          <button type="button" className="league-button" disabled={busy} onClick={() => void action("ready")}>
             {intl.formatMessage({ id: "league.match.ready" })}
           </button>
         ) : null}
         {canClaim ? (
-          <button type="button" disabled={busy} onClick={() => void action("claim")}>
+          <button type="button" className="league-button" disabled={busy} onClick={() => void action("claim")}>
             {intl.formatMessage({ id: "league.match.claim" })}
           </button>
         ) : null}
         {schedulable ? (
-          <button type="button" className="history-link" disabled={busy} aria-expanded={proposing} onClick={() => setProposing(!proposing)}>
+          <button
+            type="button"
+            className={`league-button league-button-quiet${proposing ? " is-open" : ""}`}
+            disabled={busy}
+            aria-expanded={proposing}
+            onClick={() => setProposing(!proposing)}
+          >
             {intl.formatMessage({ id: "league.match.propose" })}
           </button>
         ) : null}
       </div>
+      {open ? (
+        <p className="league-match-foot">
+          <span>{intl.formatMessage({ id: "league.match.deadline" }, { time: time(match.deadlineAt) })}</span>
+          {match.status === "scheduled" && match.youReady ? <span className="is-ready">{intl.formatMessage({ id: "league.match.ready.you" })}</span> : null}
+          {match.status === "scheduled" && match.opponentReady
+            ? <span className="is-ready">{intl.formatMessage({ id: "league.match.ready.opponent" }, { opponent })}</span>
+            : null}
+        </p>
+      ) : null}
       {proposing ? (
         <form
           className="league-propose"
@@ -145,12 +173,12 @@ function MatchItem({ league, match, now, onChanged }: {
             <select id={`league-propose-${match.id}`} value={proposal} onChange={(event) => setProposal(event.target.value)} required>
               <option value="" disabled>{intl.formatMessage({ id: "league.match.propose.choose" })}</option>
               {options.map((at) => (
-                <option key={at} value={at}>{`${time(at)} · ${theirTime(at)}`}</option>
+                <option key={at} value={at}>{`${time(at)} (${theirTime(at)})`}</option>
               ))}
             </select>
           ) : (
             <>
-              <p className="muted">{intl.formatMessage({ id: "league.match.propose.noOverlap" })}</p>
+              <p className="history-note">{intl.formatMessage({ id: "league.match.propose.noOverlap" })}</p>
               <input
                 id={`league-propose-${match.id}`}
                 type="datetime-local"
@@ -165,7 +193,7 @@ function MatchItem({ league, match, now, onChanged }: {
           </button>
         </form>
       ) : null}
-      {error ? <p role="alert" className="league-error">{error}</p> : null}
+      {error ? <p role="alert" className="league-error league-match-error">{error}</p> : null}
       {choosingDeck && opponent !== null ? (
         <LeagueRoomModal matchId={match.id} format={league.format} opponent={opponent} onClose={() => setChoosingDeck(false)} />
       ) : null}
@@ -177,16 +205,13 @@ function MatchItem({ league, match, now, onChanged }: {
 export function LeagueMatchList({ league, onChanged }: { league: LeagueMembership; onChanged: () => Promise<void> }) {
   const intl = useIntl();
   const now = Date.now();
-  return (
-    <>
-      <h4 className="league-section-title">{intl.formatMessage({ id: "league.matches.title" })}</h4>
-      {league.matches.length === 0 ? <p className="muted">{intl.formatMessage({ id: "league.matches.empty" })}</p> : (
-        <ul className="league-matches">
-          {league.matches.map((match) => (
-            <MatchItem key={match.id} league={league} match={match} now={now} onChanged={onChanged} />
-          ))}
-        </ul>
-      )}
-    </>
-  );
+  return league.matches.length === 0
+    ? <div className="history-empty"><p>{intl.formatMessage({ id: "league.matches.empty" })}</p></div>
+    : (
+      <ul className="league-matches">
+        {league.matches.map((match) => (
+          <MatchItem key={match.id} league={league} match={match} now={now} onChanged={onChanged} />
+        ))}
+      </ul>
+    );
 }
