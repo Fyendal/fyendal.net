@@ -10,6 +10,17 @@ const DISPLAY_MS = 2_600;
 const ROLL_DISPLAY_MS = 3_200;
 const EXIT_MS = 220;
 const SHUFFLE_DISPLAY_MS = 900;
+const SCRIPTED_CHOICE_KINDS: ReadonlySet<string> = new Set([
+  "choose-target",
+  "choose-name",
+  "order-triggers",
+  "optional-effect",
+]);
+function scriptedChoiceKey(view: GameView | null): string | null {
+  const decision = view?.pendingDecision;
+  if (!decision || !SCRIPTED_CHOICE_KINDS.has(decision.kind)) return null;
+  return `${decision.player}:${decision.kind}:${decision.sourceInstanceId ?? ""}:${decision.prompt}`;
+}
 const useClientLayoutEffect = typeof window === "undefined" ? useEffect : useLayoutEffect;
 
 // Pip cells on a 3×3 grid, numbered row by row from the top left.
@@ -81,7 +92,7 @@ export function useDeckCardFeedback(view: GameView | null, enabled: boolean): {
 } {
   const previousRef = useRef<GameView | null>(view);
   const shuffleTimersRef = useRef(new Map<number, number>());
-  const [queue, setQueue] = useState<DeckCardEvent[]>([]);
+  const [queue, setQueue] = useState<{ event: DeckCardEvent; choiceKey: string | null }[]>([]);
   const [shuffledSeats, setShuffledSeats] = useState<ReadonlySet<number>>(() => new Set());
   const [hovered, setHovered] = useState(false);
   const [exiting, setExiting] = useState(false);
@@ -106,7 +117,11 @@ export function useDeckCardFeedback(view: GameView | null, enabled: boolean): {
     const events = detectDeckCardEvents(previous, view);
     const toastEvents = events.filter((event) => event.kind !== "shuffle");
     const seats = events.flatMap((event) => event.kind === "shuffle" && event.seat !== undefined ? [event.seat] : []);
-    if (toastEvents.length > 0) setQueue((current) => [...current, ...toastEvents]);
+    // a reveal shown beside a pending choice stays until that choice is answered or dismissed
+    const choiceKey = scriptedChoiceKey(view);
+    if (toastEvents.length > 0) {
+      setQueue((current) => [...current, ...toastEvents.map((event) => ({ event, choiceKey }))]);
+    }
     if (seats.length > 0) {
       setShuffledSeats((current) => new Set([...current, ...seats]));
       for (const seat of seats) {
@@ -125,16 +140,23 @@ export function useDeckCardFeedback(view: GameView | null, enabled: boolean): {
     }
   }, [enabled, view]);
 
-  const active = queue[0] ?? null;
+  const activeEntry = queue[0] ?? null;
+  const active = activeEntry?.event ?? null;
+  const pinnedChoiceKey = activeEntry?.choiceKey ?? null;
+  const pinned = pinnedChoiceKey !== null;
+  const currentChoiceKey = enabled ? scriptedChoiceKey(view) : null;
+  useEffect(() => {
+    if (pinnedChoiceKey !== null && currentChoiceKey !== pinnedChoiceKey) setExiting(true);
+  }, [pinnedChoiceKey, currentChoiceKey]);
   // hovering the toast pins it — the user is reading the revealed cards
   useEffect(() => {
-    if (!active || hovered || exiting) return;
+    if (!active || pinned || hovered || exiting) return;
     const timeout = window.setTimeout(
       () => setExiting(true),
       active.kind === "roll" ? ROLL_DISPLAY_MS : DISPLAY_MS,
     );
     return () => window.clearTimeout(timeout);
-  }, [active, hovered, exiting]);
+  }, [active, pinned, hovered, exiting]);
 
   // the exit animation plays before the event leaves the queue
   useEffect(() => {

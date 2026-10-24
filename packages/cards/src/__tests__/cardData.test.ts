@@ -82,6 +82,7 @@ describe("conditional keyword overrides", () => {
     "insult to injury|2": ["Go again"],
     "insult to injury|3": ["Go again"],
     "unwavering resolve|1": ["Go again"],
+    "murky water|1": ["Dominate"],
   };
 
   it("strips printed keywords that the card only gains conditionally", () => {
