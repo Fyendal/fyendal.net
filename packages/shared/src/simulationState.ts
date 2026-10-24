@@ -375,6 +375,7 @@ export interface PersistedPendingArcaneV1 {
 export type PersistedDecisionResumeV1 =
   | { kind: "stack-card"; seat: number; card: PersistedCardInstanceV1 }
   | { kind: "continue-play-after-declaration"; seat: number; instanceId: number; pitchInstanceIds: number[]; from: "hand" | "arsenal" | "banish" | "graveyard" | "deck"; meldSide?: "left" | "right" | "both"; targetAllyId?: number; boost?: boolean; boostCount?: number; asInstant?: boolean; alternativeCostCardInstanceIds?: number[]; targetCardInstanceId?: number; declaredVariableX?: number }
+  | { kind: "continue-reaction-after-declaration"; seat: number; instanceId: number; pitchInstanceIds: number[]; from: "hand" | "arsenal" | "banish" | "graveyard" | "deck"; meldSide?: "left" | "right" | "both"; targetAllyId?: number; alternativeCostCardInstanceIds?: number[]; targetCardInstanceId?: number; declaredVariableX?: number }
   | { kind: "finish-play"; seat: number; card: PersistedCardInstanceV1; from: "hand" | "arsenal" | "banish" | "graveyard" | "deck"; targetAllyId?: number; boost?: boolean; boostCount?: number; asInstant?: boolean }
   | { kind: "finish-reaction"; seat: number; card: PersistedCardInstanceV1; from: "hand" | "arsenal" | "banish" | "graveyard" | "deck" }
   | { kind: "finish-window-instant"; seat: number; card: PersistedCardInstanceV1; from: "hand" | "arsenal" | "banish" | "graveyard" | "deck" }

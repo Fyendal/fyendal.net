@@ -37,7 +37,7 @@ import {
   grantsAuraAttackMarker,
 } from "./combatValues.js";
 import { abilityList } from "./scripts.js";
-import type { ActivatedAbility } from "./scripts.js";
+import type { ActivatedAbility, CardScript } from "./scripts.js";
 import { windowInstantPlays } from "./triggers.js";
 import { TOKEN_SKIP_INTENTS, currentTokenSkip } from "./tokenSkip.js";
 import { controlledPermanents } from "./sourceQueries.js";
@@ -404,6 +404,15 @@ function markInstantPlayMethod(
   ));
 }
 
+/** A variable declaration or scripted additional cost can pause before the
+ * card becomes a stack layer. The hint is deliberately conservative:
+ * synchronous additional costs merely skip an optimistic animation. */
+function withPreStackPresentation(script: CardScript | undefined, intents: GameIntent[]): GameIntent[] {
+  return script?.variablePlayCost || script?.declareAdditionalCost || script?.additionalCost
+    ? intents.map((intent) => ({ ...intent, deferPlayPresentation: true as const }))
+    : intents;
+}
+
 function playIntentsForCard(
   state: GameStateInternal,
   runtime: EngineRuntime,
@@ -435,12 +444,7 @@ function playIntentsForCard(
   // Heartened Cross Strap, ...); Meld "both" doubles the base cost first
   const isAttackAction = data.cardType === "action" && (data.subtypes ?? []).includes("attack");
   const withPlayMethods = (intents: GameIntent[]): GameIntent[] => {
-    // A variable declaration or scripted additional cost can pause before the
-    // card becomes a stack layer. The hint is deliberately conservative:
-    // synchronous additional costs merely skip an optimistic animation.
-    const presented = script?.variablePlayCost || script?.declareAdditionalCost || script?.additionalCost
-      ? intents.map((intent) => ({ ...intent, deferPlayPresentation: true as const }))
-      : intents;
+    const presented = withPreStackPresentation(script, intents);
     if (data.cardType === "instant") return presented;
     if (!canPlayAsInstant(state, runtime, player.seat, card, undefined, from)) return presented;
     const instantIntents = presented.flatMap((intent): GameIntent[] => {
@@ -1019,6 +1023,7 @@ function reactionIntents(
       const allyTargets = isAttackActionData(data) ? attackTargets(state, runtime, player) : [undefined];
       const markInstantMethod = (candidates: GameIntent[]): GameIntent[] =>
         markInstantPlayMethod(candidates, data.cardType === "action" && asInstant);
+      const firstCardIntent = intents.length;
       for (const meldSide of meldSides) {
         for (const targetAllyId of allyTargets) for (const targetCardInstanceId of cardTargets) {
           const regularIntents = announceAttackTarget(markInstantMethod(playIntentsWithPitches(
@@ -1076,6 +1081,7 @@ function reactionIntents(
           }
         }
       }
+      intents.push(...withPreStackPresentation(script, intents.splice(firstCardIntent)));
     }
   }
   // "Attack Reaction" / "Instant" abilities of permanents (Breaking Scales,

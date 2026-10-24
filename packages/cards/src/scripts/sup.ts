@@ -1230,7 +1230,7 @@ Object.assign(sup, {
     },
   },
   "numbskull charm|2": {
-    additionalCost(ctx: ScriptCtx) {
+    declareAdditionalCost(ctx: ScriptCtx) {
       ctx.setState("numbskull-modes", 0);
       requestNumbskullCharmMode(ctx);
     },
@@ -2006,7 +2006,7 @@ Object.assign(sup, {
       !ctx.link.resolved &&
       ctx.link.attacker === ctx.seat &&
       named(ctx, ctx.link.attackingCard, "dawnblade"),
-    additionalCost(ctx: ScriptCtx) {
+    declareAdditionalCost(ctx: ScriptCtx) {
       const counters = Math.max(0, Number(ctx.link?.attackingCard.counters?.power ?? 0));
       const count = Math.min(BEAT_OF_THE_IRONSONG_MODES.length, counters + 1);
       ctx.setState("beat-modes-remaining", count);

@@ -266,6 +266,8 @@ describe("SUP — heroes and the crowd", () => {
     });
     g.chooseOption("cheer");
     expect(g.state.pendingDecision?.options).toEqual(["destroy", "pitch", "done"]);
+    // Modes are declared before the card leaves hand.
+    g.expectInZone(0, "numbskull charm|2", "hand");
     g.chooseOption("done").settle();
 
     expect(g.state.players[0]!.flags.cheeredThisTurn).toBe(true);
@@ -768,6 +770,8 @@ describe("SUP — heroes and the crowd", () => {
 
     g.chooseOption("damage can't be prevented");
     expect(g.state.pendingDecision?.options).toEqual(["go again"]);
+    // Modes are declared before the card leaves hand.
+    g.expectInZone(0, "beat of the ironsong|3", "hand");
 
     g.chooseOption("go again")
       .expectFinalAttack(7)

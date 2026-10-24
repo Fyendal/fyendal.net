@@ -1506,7 +1506,7 @@ Object.assign(hnt, {
   },
   "long whisker loyalty|1": {
     canPlay: currentDaggerAttack,
-    additionalCost(ctx) {
+    declareAdditionalCost(ctx) {
       const count = Math.min(LONG_WHISKER_MODES.length, draconicLinks(ctx));
       ctx.setState("longWhiskerModes", 0);
       ctx.setState("longWhiskerModesRemaining", count);

@@ -41,7 +41,7 @@ import {
   removeFromArray,
 } from "./zoneQueries.js";
 import { closeChain } from "./combatChain.js";
-import { finishReactionPlay } from "./reactions.js";
+import { finishReactionPlay, playReaction } from "./reactions.js";
 import { answerWagerLossReplacementOrder } from "./wagers.js";
 import {
   isValidVariableX,
@@ -1060,6 +1060,25 @@ function continueAfterScriptedChoice(
       resume.alternativeCostCardInstanceIds,
       resume.targetCardInstanceId,
       resume.declaredVariableX,
+      true,
+    );
+  }
+  if (resume?.kind === "continue-reaction-after-declaration") {
+    const found = findCardAnywhere(state, resume.instanceId);
+    if (!found) return "card not found";
+    return playReaction(
+      state,
+      runtime,
+      resume.seat,
+      found.card,
+      resume.from === "arsenal",
+      resume.pitchInstanceIds,
+      resume.meldSide,
+      resume.alternativeCostCardInstanceIds,
+      resume.targetCardInstanceId,
+      resume.from === "hand" || resume.from === "arsenal" ? undefined : resume.from,
+      resume.declaredVariableX,
+      resume.targetAllyId,
       true,
     );
   }

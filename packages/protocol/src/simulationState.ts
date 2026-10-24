@@ -637,12 +637,14 @@ function validateArcane(value: unknown, code: string, path: string, depth: numbe
 
 function validateResume(value: unknown, code: string, path: string): void {
   const resume = object(value, code, path);
-  const kind = oneOf(resume.kind, ["stack-card", "continue-play-after-declaration", "finish-play", "finish-reaction", "finish-window-instant", "after-declare", "start-reaction-step", "after-resolution", "continue-stack", "finish-wager-result", "continue-wager-loss-replacements", "continue-wager-prizes", "reopen-reaction", "game-setup"] as const, code, `${path}.kind`);
+  const kind = oneOf(resume.kind, ["stack-card", "continue-play-after-declaration", "continue-reaction-after-declaration", "finish-play", "finish-reaction", "finish-window-instant", "after-declare", "start-reaction-step", "after-resolution", "continue-stack", "finish-wager-result", "continue-wager-loss-replacements", "continue-wager-prizes", "reopen-reaction", "game-setup"] as const, code, `${path}.kind`);
   if (kind === "stack-card") {
     const entry = exact(value, code, path, ["kind", "seat", "card"]);
     integer(entry.seat, code, `${path}.seat`); validateCard(entry.card, code, `${path}.card`);
-  } else if (kind === "continue-play-after-declaration") {
-    const entry = exact(value, code, path, ["kind", "seat", "instanceId", "pitchInstanceIds", "from"], ["meldSide", "targetAllyId", "boost", "boostCount", "asInstant", "alternativeCostCardInstanceIds", "targetCardInstanceId", "declaredVariableX"]);
+  } else if (kind === "continue-play-after-declaration" || kind === "continue-reaction-after-declaration") {
+    // Only an action-speed play carries boost and play-method declarations.
+    const playOnly = kind === "continue-play-after-declaration" ? ["boost", "boostCount", "asInstant"] : [];
+    const entry = exact(value, code, path, ["kind", "seat", "instanceId", "pitchInstanceIds", "from"], ["meldSide", "targetAllyId", ...playOnly, "alternativeCostCardInstanceIds", "targetCardInstanceId", "declaredVariableX"]);
     integer(entry.seat, code, `${path}.seat`);
     integer(entry.instanceId, code, `${path}.instanceId`);
     validateIntegerArray(entry.pitchInstanceIds, code, `${path}.pitchInstanceIds`);

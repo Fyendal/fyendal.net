@@ -378,6 +378,8 @@ describe("HNT — marked heroes and daggers", () => {
       chooseHook: "long-whisker-mode",
       options: ["+2 attack", "additional attack", "mark on hit"],
     });
+    // Modes are declared before the card leaves hand.
+    g.expectInZone(0, "long whisker loyalty|1", "hand");
 
     g.chooseOption("+2 attack");
     expect(g.state.log.at(-1)).toMatchObject({

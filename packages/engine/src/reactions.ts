@@ -543,6 +543,7 @@ export function playReaction(
   fromZone?: PlayableZone,
   declaredVariableX?: number,
   targetAllyId?: number,
+  additionalCostDeclared = false,
 ): string | undefined {
   const link = currentLink(state);
   if (state.phase !== "reaction" || !link) return "no active reaction window";
@@ -584,6 +585,7 @@ export function playReaction(
         ? player.banish // a granted "you may play it" (e.g. a banished trap)
         : player.hand;
   if (!source.some((c) => c.instanceId === card.instanceId)) return "card not found in that zone";
+  const origin = fromZone ?? (fromArsenal ? "arsenal" : source === player.banish ? "banish" : "hand");
   if (fromArsenal && !mayPlayFromArsenal(state, card, seat)) {
     return `${nameOf(state, card.cardId)} may not be played from arsenal`;
   }
@@ -720,9 +722,6 @@ export function playReaction(
         resolvedVariableCost.prompt ?? DEFAULT_CHOOSE_X_PROMPT,
         options,
       );
-      const origin = fromZone ?? (fromArsenal
-        ? "arsenal"
-        : source === player.banish ? "banish" : "hand");
       state.pendingDecision = {
         player: seat,
         kind: "choose-target",
@@ -749,10 +748,10 @@ export function playReaction(
       variableCost,
       runtime.makeCtx(state, seat, card, link, fromArsenal),
     );
-    if (!isValidVariableX(declaredVariableX, resolvedVariableCost)) {
+    if (!additionalCostDeclared && !isValidVariableX(declaredVariableX, resolvedVariableCost)) {
       return "invalid X declaration";
     }
-    variableBaseCost = variableResourceCost(resolvedVariableCost, declaredVariableX);
+    variableBaseCost = variableResourceCost(resolvedVariableCost, declaredVariableX!);
   }
   const effectiveCost = costForBase(variableBaseCost);
   if (!canPayRequiredHandCardsForAdditionalCost(
@@ -761,6 +760,30 @@ export function playReaction(
     card,
     [...pitchInstanceIds, ...(alternativeCostCardInstanceIds ?? [])],
   )) return "cannot pay the card's additional hand-card cost";
+  if (!additionalCostDeclared && script?.declareAdditionalCost) {
+    // Marks the card as being played while it is still in its origin zone.
+    (card.scriptState ??= {}).declaringAdditionalCost = 1;
+    script.declareAdditionalCost(runtime.makeCtx(state, seat, card, link, fromArsenal));
+    const declarationDecision = state.pendingDecision;
+    if (declarationDecision?.chooseHook) {
+      declarationDecision.resume = {
+        kind: "continue-reaction-after-declaration",
+        seat,
+        instanceId: card.instanceId,
+        pitchInstanceIds: [...pitchInstanceIds],
+        from: origin,
+        ...(meldSide ? { meldSide } : {}),
+        ...(targetAllyId === undefined ? {} : { targetAllyId }),
+        ...(alternativeCostCardInstanceIds === undefined
+          ? {}
+          : { alternativeCostCardInstanceIds: [...alternativeCostCardInstanceIds] }),
+        ...(targetCardInstanceId === undefined ? {} : { targetCardInstanceId }),
+        ...(declaredVariableX === undefined ? {} : { declaredVariableX }),
+      };
+      return undefined;
+    }
+  }
+  delete card.scriptState?.declaringAdditionalCost;
   const costErr = payCost(
     state, runtime,
     player,
@@ -803,7 +826,6 @@ export function playReaction(
   if (isDefReact && Number(player.flags.nextDefenseReactionExtraCost || 0) > 0) {
     player.flags.nextDefenseReactionExtraCost = 0;
   }
-  const origin = fromZone ?? (fromArsenal ? "arsenal" : source === player.banish ? "banish" : "hand");
   notePlayPermissionSource(state, runtime, card, origin, seat);
   const removed = removeFromArray(source, card.instanceId) as CardInstance;
   delete removed.faceDown; // a card is played openly, even out of the banished zone

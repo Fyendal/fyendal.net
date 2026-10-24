@@ -893,6 +893,7 @@ function projectedPreStackSource(
 
   const resume = pd.resume;
   const play = pd.variablePlayCost ?? (resume?.kind === "continue-play-after-declaration"
+    || resume?.kind === "continue-reaction-after-declaration"
     ? resume
     : resume?.kind === "finish-play" || resume?.kind === "finish-reaction" || resume?.kind === "finish-window-instant"
       ? { instanceId: resume.card.instanceId, from: resume.from }
