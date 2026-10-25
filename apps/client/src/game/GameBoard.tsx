@@ -1,7 +1,7 @@
 import { BrowserBotNotice } from "../bot/BrowserBotNotice.js";
 import { useMatchAchievements } from "../achievements/useMatchAchievements.js";
 import { AchievementToast } from "../achievements/AchievementToast.js";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useIntl } from "react-intl";
 import { useShallow } from "zustand/react/shallow";
 import type { CardView, GameIntent, MeldSide } from "@fyendal/shared";
@@ -101,6 +101,16 @@ import { renderedCardBadges } from "./cardBadges.js";
 import { PitchFocus } from "./PitchFocus.js";
 import { postPaymentPitchFocus, usePitchFocus } from "./usePitchFocus.js";
 import { useOpponentPlayPresentation } from "./useOpponentPlayPresentation.js";
+
+/** Priority signals shown on the board, held at the last settled motion. */
+type PriorityPresentation = {
+  gameId: string;
+  /** Seat the game waits on: the pending decider, else the priority holder.
+   * Its half of the mat is tinted for players, spectators, and replays. */
+  holder: number | null;
+  priorityPlayer: number | null;
+  timingLabel: string;
+};
 
 const EMPTY_INSTANCE_IDS: ReadonlySet<number> = new Set();
 
@@ -307,6 +317,14 @@ export function GameBoard() {
       interactionProjection.predictsSemanticTransition || presentedDefenderIds !== null,
   });
   const { combatPresentation } = gameMotion;
+  // A priority hand-off that arrives while a card is still in flight waits
+  // for it to land. Declared after useGameMotion so the effect runs after
+  // that hook's layout effect has enqueued this commit's batches.
+  const livePriorityRef = useRef<PriorityPresentation | null>(null);
+  const settledPriorityRef = useRef<PriorityPresentation | null>(null);
+  useLayoutEffect(() => {
+    if (gameMotion.isMotionSettled()) settledPriorityRef.current = livePriorityRef.current;
+  });
   // End-of-game popup can be dismissed to inspect the final board. Re-arm it
   // for a fresh result or after leaving and returning to the replay's last frame.
   const [gameOverDismissed, setGameOverDismissed] = useState(false);
@@ -575,9 +593,33 @@ export function GameBoard() {
   const resourcePaymentRequired = resourcePayment
     ? Math.max(0, resourcePayment.cost - me.resources - (me.chi ?? 0))
     : 0;
+  const livePriority: PriorityPresentation = {
+    gameId: presentedView.gameId,
+    holder: presentedView.phase === "game-over"
+      ? null
+      : pd !== null
+        ? pd.player
+        : gameHasPriority(presentedView) ? presentedView.priorityPlayer : null,
+    priorityPlayer: gameHasPriority(view) ? view.priorityPlayer : null,
+    timingLabel: gameTimingLabel(view),
+  };
+  livePriorityRef.current = livePriority;
+  const settledPriority = settledPriorityRef.current;
+  const presentedPriority = settledPriority === null
+    || gameMotion.motionSettled
+    || settledPriority.gameId !== livePriority.gameId
+    ? livePriority
+    : settledPriority;
+  // Gate the viewer's affordances only while a hand-off to them is in flight;
+  // their own plays never wait.
+  const awaitingHandoff = presentedPriority !== livePriority
+    && presentedPriority.holder !== seat
+    && presentedPriority.priorityPlayer !== seat;
   // An open resource payment is a hand-card choice, rather than an invitation
   // to start another play or ability from the arena or inactive zones.
-  const boardActionState = choosingPitch ? deriveBoardLegalState([], legal, true) : derived;
+  const boardActionState = choosingPitch || awaitingHandoff
+    ? deriveBoardLegalState([], legal, true)
+    : derived;
   const myTurn = view.activePlayer === seat;
   const activeHeroName = view.players[view.activePlayer]?.heroName ?? "";
   const turnLabel = spectating
@@ -606,20 +648,14 @@ export function GameBoard() {
       rightWeapon: intl.formatMessage({ id: "game.zone.weapon.right" }),
     },
   );
-  const showPriorityFloat = !spectating && !replaying && gameHasPriority(view);
-  const hasOwnPriority = showPriorityFloat && view.priorityPlayer === seat;
-  /** Seat the game is waiting on — the pending decider, else the priority
-   * holder. Its half of the mat is tinted for players, spectators, and replays. */
-  const priorityHolder = presentedView.phase === "game-over"
-    ? null
-    : pd !== null
-      ? pd.player
-      : gameHasPriority(presentedView) ? presentedView.priorityPlayer : null;
+  const showPriorityFloat = !spectating && !replaying && presentedPriority.priorityPlayer !== null;
+  const hasOwnPriority = showPriorityFloat && presentedPriority.priorityPlayer === seat;
+  const priorityHolder = presentedPriority.holder;
   const priorityHolderName = priorityHolder === null
     ? ""
     : (presentedView.players[priorityHolder]?.heroName ?? "");
-  const priorityLabel = view.priorityPlayer === seat ? "YOUR PRIORITY" : "OPPONENT'S PRIORITY";
-  const priorityTimingLabel = gameTimingLabel(view);
+  const priorityLabel = presentedPriority.priorityPlayer === seat ? "YOUR PRIORITY" : "OPPONENT'S PRIORITY";
+  const priorityTimingLabel = presentedPriority.timingLabel;
   const showEndTurnPassToast =
     !spectating &&
     !replaying &&
@@ -1008,6 +1044,7 @@ export function GameBoard() {
             : "pass";
   const primaryActionDisabled =
     roomCommandPending ||
+    awaitingHandoff ||
     !connected ||
     (defending ? defendIntent === null : !derived.canPass);
   const triggerPrimaryAction = defending
@@ -1345,11 +1382,15 @@ export function GameBoard() {
       {/* Fixed HUD sibling: keeping this outside .board guarantees that
           waiting-state changes cannot affect board layout or motion anchors. */}
       <div
-        className={`waiting${waitingForOpponent && !replaying ? "" : " waiting-hidden"}`}
+        className={`waiting${spectating ? " waiting-spectating" : ""}${waitingForOpponent && !replaying ? "" : " waiting-hidden"}`}
         aria-hidden={waitingForOpponent && !replaying ? undefined : true}
       >
         {spectating
-          ? intl.formatMessage({ id: "game.waiting.spectating" }, { hero: activeHeroName })
+          // Phones have no room for the hero's name here; the lit HUD
+          // portrait already says whose action is awaited.
+          ? mobileFloatViewport
+            ? intl.formatMessage({ id: "game.waiting.spectating.short" })
+            : intl.formatMessage({ id: "game.waiting.spectating" }, { hero: activeHeroName })
           : intl.formatMessage({ id: "game.waiting.opponent" })}
       </div>
 
@@ -1377,6 +1418,8 @@ export function GameBoard() {
         oppMarked={(opp.heroCounters?.marked ?? 0) > 0}
         myMarked={(me.heroCounters?.marked ?? 0) > 0}
         mySeat={seat}
+        priorityHolderSeat={priorityHolder}
+        priorityPulse={hasOwnPriority}
         log={view.log}
         logEntries={view.logEntries}
         activeHeroName={activeHeroName}
@@ -1445,7 +1488,9 @@ export function GameBoard() {
           : null}
         pitchFocused={choosingPitch || pitchSource !== null}
         pending={{
-          decision: hidePriorityGuidance || showCardSearchOverlay ? null : pd,
+          decision: hidePriorityGuidance || showCardSearchOverlay || (awaitingHandoff && myDecision)
+            ? null
+            : pd,
           isMine: myDecision,
           playerName: (playerSeat) => view.players[playerSeat]?.heroName ?? "",
           optionCardLabels,

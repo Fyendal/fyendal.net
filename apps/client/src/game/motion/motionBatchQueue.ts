@@ -26,6 +26,11 @@ interface MotionBatchEnqueueResult {
   discardedBatchIds: readonly string[];
 }
 
+/** No card is in flight and none waits to fly. */
+export function motionQueueIsSettled(queue: MotionBatchQueue): boolean {
+  return queue.active === null && queue.pending.length === 0;
+}
+
 /** The authoritative view may already contain a new-turn stack. Keep that UI
  * gated only while an earlier batch is ahead of its queued turn-start batch. */
 export function motionQueueBlocksTurnStartUi(queue: MotionBatchQueue): boolean {

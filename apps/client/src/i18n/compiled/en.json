@@ -30344,6 +30344,12 @@
       "value": " to act"
     }
   ],
+  "game.waiting.spectating.short": [
+    {
+      "type": 0,
+      "value": "Spectating"
+    }
+  ],
   "game.zone.arms": [
     {
       "type": 0,

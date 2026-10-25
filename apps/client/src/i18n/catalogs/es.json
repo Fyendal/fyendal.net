@@ -2308,6 +2308,7 @@
   "game.actionPoints.remaining": "{count, plural, one {Queda # Action Point} other {Quedan # Action Points}}",
   "game.resources.yours": "{count, plural, one {Tienes # recurso} other {Tienes # recursos}}",
   "game.waiting.spectating": "Observando — turno de actuar de {hero}",
+  "game.waiting.spectating.short": "Observando",
   "game.waiting.opponent": "Esperando al oponente…",
   "game.result.namedWinner": "¡{winner} gana!",
   "game.result.victory": "¡Victoria!",

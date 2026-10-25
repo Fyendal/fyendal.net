@@ -29177,6 +29177,12 @@
       "value": " 行动"
     }
   ],
+  "game.waiting.spectating.short": [
+    {
+      "type": 0,
+      "value": "观战中"
+    }
+  ],
   "game.zone.arms": [
     {
       "type": 0,

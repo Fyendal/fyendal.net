@@ -2308,6 +2308,7 @@
   "game.actionPoints.remaining": "{count, plural, one {# action point remaining} other {# action points remaining}}",
   "game.resources.yours": "{count, plural, one {You have # resource} other {You have # resources}}",
   "game.waiting.spectating": "Spectating — {hero} to act",
+  "game.waiting.spectating.short": "Spectating",
   "game.waiting.opponent": "Waiting for opponent…",
   "game.result.namedWinner": "{winner} wins!",
   "game.result.victory": "Victory!",

@@ -2308,6 +2308,7 @@
   "game.actionPoints.remaining": "{count, plural, =0 {# Action Points restantes} one {# Action Point restante} other {# Action Points restantes}}",
   "game.resources.yours": "{count, plural, =0 {Você tem # recursos} one {Você tem # recurso} other {Você tem # recursos}}",
   "game.waiting.spectating": "Assistindo — vez de {hero}",
+  "game.waiting.spectating.short": "Assistindo",
   "game.waiting.opponent": "Aguardando oponente…",
   "game.result.namedWinner": "{winner} venceu!",
   "game.result.victory": "Vitória!",
