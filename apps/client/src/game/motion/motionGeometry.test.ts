@@ -1068,7 +1068,7 @@ describe("motion geometry", () => {
     );
 
     expect(batch?.flights).toEqual([
-      expect.objectContaining({ mode: "disappear", start: source, end: source }),
+      expect.objectContaining({ mode: "disappear", start: source, end: source, queueHoldSource: true }),
     ]);
     const reduced = reducedMotionBatch(batch!);
     expect(reduced?.flights).toEqual([

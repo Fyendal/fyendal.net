@@ -189,10 +189,8 @@ export function PlayerHalf({
     && !mobileFloatViewport && !mobileLandscapeViewport && !compactBoard;
   const deckTopPlayable =
     presentedDeckTop !== undefined && interaction.legal.playableZones.get(presentedDeckTop.instanceId) === "deck";
-  const arenaBoard = boardCardsOutsideEquipmentZones(
-    player.board.filter((card) => !optimisticallyHiddenIds.has(card.instanceId)),
-    player.equipment,
-  );
+  // Arena costs stay until the server removes them so their exit animates in place.
+  const arenaBoard = boardCardsOutsideEquipmentZones(player.board, player.equipment);
   const arrangedBoard = arrangeBoundBoardCards(arenaBoard);
 
   const activate = (instanceId: number) => () => interaction.onActivate(instanceId);

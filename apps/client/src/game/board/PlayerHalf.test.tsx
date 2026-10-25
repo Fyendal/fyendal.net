@@ -92,6 +92,56 @@ function renderPlayerHalf(
   );
 }
 
+function renderArenaInteraction(
+  overrides: Partial<ComponentProps<typeof PlayerHalf>["interaction"]>,
+): string {
+  return renderToStaticMarkup(
+    <TestI18nProvider locale="en">
+      <PlayerHalf
+        player={player}
+        mine
+        mirrored={false}
+        ongoing={[]}
+        gameOver={false}
+        replaying={false}
+        deckShuffling={false}
+        interaction={{
+          legal: {
+            playableHand: new Set(),
+            playableArsenal: new Set(),
+            playableZones: new Map(),
+            activatable: new Set(),
+            stageableDefenders: new Set(),
+            canPass: false,
+            canCloseChain: false,
+          },
+          selection: { kind: "none" },
+          paymentCandidateIds: new Set(),
+          paymentSelectedIds: new Set(),
+          preStackSelectedInstanceId: null,
+          stagedIds: new Set(),
+          committedDefenderIds: new Set(),
+          optimisticallyHiddenIds: new Set(),
+          defending: false,
+          onStage: () => undefined,
+          onSelectPaymentCard: () => undefined,
+          onActivate: () => undefined,
+          onSelect: () => undefined,
+          ...overrides,
+        }}
+        latestEmote={null}
+        canSendEmote={false}
+        mobileFloatViewport={false}
+        mobileLandscapeViewport={false}
+        activeChainAttackerInstanceId={null}
+        onSendEmote={() => undefined}
+        onOpenOverlay={() => undefined}
+        onOpenEffects={() => undefined}
+      />
+    </TestI18nProvider>,
+  );
+}
+
 const cogRow = {
   hook: "sea-cog-maintenance",
   timing: "start-of-turn",
@@ -513,54 +563,20 @@ describe("PlayerHalf", () => {
   });
 
   it("makes an arena card offered as an ability cost highlighted and clickable", () => {
-    const html = renderToStaticMarkup(
-      <TestI18nProvider locale="en">
-        <PlayerHalf
-          player={player}
-          mine
-          mirrored={false}
-          ongoing={[]}
-          gameOver={false}
-          replaying={false}
-          deckShuffling={false}
-          interaction={{
-            legal: {
-              playableHand: new Set(),
-              playableArsenal: new Set(),
-              playableZones: new Map(),
-              activatable: new Set(),
-              stageableDefenders: new Set(),
-              canPass: false,
-              canCloseChain: false,
-            },
-            selection: { kind: "activate", sourceInstanceId: 99 },
-            paymentCandidateIds: new Set([2]),
-            paymentSelectedIds: new Set(),
-            preStackSelectedInstanceId: null,
-            stagedIds: new Set(),
-            committedDefenderIds: new Set(),
-            optimisticallyHiddenIds: new Set(),
-            defending: false,
-            onStage: () => undefined,
-            onSelectPaymentCard: () => undefined,
-            onActivate: () => undefined,
-            onSelect: () => undefined,
-          }}
-          latestEmote={null}
-          canSendEmote={false}
-          mobileFloatViewport={false}
-          mobileLandscapeViewport={false}
-          activeChainAttackerInstanceId={null}
-          onSendEmote={() => undefined}
-          onOpenOverlay={() => undefined}
-          onOpenEffects={() => undefined}
-        />
-      </TestI18nProvider>,
-    );
+    const html = renderArenaInteraction({
+      selection: { kind: "activate", sourceInstanceId: 99 },
+      paymentCandidateIds: new Set([2]),
+    });
 
     expect(html).toMatch(
       /class="card card-zone [^"]*card-highlight[^"]*card-clickable"[^>]*data-cardid="TST-UPRIGHT"/,
     );
+  });
+
+  it("keeps an arena card paid as a pending cost in place until the server removes it", () => {
+    const html = renderArenaInteraction({ optimisticallyHiddenIds: new Set([2]) });
+
+    expect(html).toContain('data-cardid="TST-UPRIGHT"');
   });
 
   it("shows how many cards remain under an arena construct", () => {

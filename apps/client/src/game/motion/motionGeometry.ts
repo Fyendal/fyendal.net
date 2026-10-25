@@ -417,6 +417,8 @@ export function resolveMotionBatch(
         count: 1,
         showCount: false,
         delayMs: 0,
+        // The live card is already gone; keep a copy while this batch is queued.
+        queueHoldSource: true,
       };
       flights.push(flight);
       if (event.source.kind === "board") boardDepartures.push({ seat: event.source.seat, flight });
