@@ -1029,6 +1029,27 @@ describe("SUP — tokens and suspense", () => {
       .expectFinalDefense(0);
   });
 
+  it("No Hero Stands Alone shrinks a weapon only for that chain link", () => {
+    const g = scenario({
+      seats: [
+        foe({
+          heroKey: "hala, bladesaint of the vow|0",
+          weapons: ["zenith blade|0"],
+          hand: ["edict of steel|1"],
+          resources: 2,
+          deck: ["raging onslaught|3"],
+        }),
+        hero("tuffnut|0", { hand: ["no hero stands alone|2"], deck: ["raging onslaught|1"] }),
+      ],
+    });
+
+    g.play("edict of steel|1").attackWithWeapon("zenith blade|0").expectAttackValue(4);
+    g.blockWith("no hero stands alone|2").settle();
+    g.chooseCard("zenith blade|0").expectFinalAttack(1);
+    expect(g.state.log.some((line) => line.publicText?.includes("-3 power") === true)).toBe(true);
+    g.attackWithWeapon("zenith blade|0").expectAttackValue(4);
+  });
+
   it("Leave Them Hanging does not intimidate as it leaves at the start of its controller's turn", () => {
     const g = scenario({
       seats: [

@@ -143,7 +143,67 @@ function armoredBlock(cards: readonly string[], onHit: string) {
   return { selected, handIds };
 }
 
+const GRAINS = "Whenever a weapon attack you control hits, you may pay {r}. If you do, create a Vigor token.";
+
+/** Levia, holding `cardIds`, defends a 3-power opening-turn attack carrying `onHit` while wearing the Spring Tunic. */
+function openingTunicBlock(cardIds: readonly string[], onHit: string) {
+  let state = game();
+  state.turn = 1;
+  hand(state, cardIds);
+  const tunic = { instanceId: state.nextInstanceId++, cardId: "WTR150", owner: 0 };
+  state.players[0]!.equipment = { chest: tunic };
+  state.players[0]!.arsenal = [];
+  state = defending(state);
+  const view = projectStateFor(state, 0);
+  const link = { ...view.chain.at(-1)!, damage: 3, onHitEffects: [{ sourceCardId: "", text: onHit }] };
+  const intent = chooseLeviaIntent({
+    seat: 0, view: { ...view, chain: [...view.chain.slice(0, -1), link] },
+    legal: legalIntents(state, 0), cards: cardData, state,
+  });
+  const selected = intent.kind === "stage-defenders" || intent.kind === "defend" ? [...intent.instanceIds] : [];
+  return { intent, selected, handIds: state.players[0]!.hand.map((card) => card.instanceId), tunicId: tunic.instanceId };
+}
+
 describe("Levia Gates policy", () => {
+  it("covers a paid Vigor on-hit with two hand cards instead of the Spring Tunic", () => {
+    const { selected, handIds } = openingTunicBlock(["ROS218", "PEN322", "IAR165", "IAR005"], GRAINS);
+    expect(selected).toEqual(handIds.slice(0, 2));
+  });
+
+  it("keeps the Spring Tunic out of a nonlethal opening block despite a significant on-hit", () => {
+    const { selected, tunicId } = openingTunicBlock(
+      ["PEN322", "DTD107", "IAR005", "IAR005"],
+      "When this hits, draw a card.",
+    );
+    expect(selected).not.toContain(tunicId);
+  });
+
+  it("answers an opening attack with Fallen Herald instead of blocking", () => {
+    const { intent } = openingTunicBlock(["IAR165", "PEN322", "DTD107", "IAR005"], GRAINS);
+    expect(intent).toEqual({ kind: "defend", instanceIds: [] });
+  });
+
+  it("activates Fallen Herald after leaving an opening attack unblocked", () => {
+    let state = game();
+    state.turn = 1;
+    hand(state, ["IAR165", "PEN322", "DTD107", "IAR005"]);
+    const herald = state.players[0]!.hand[0]!;
+    state.players[0]!.arsenal = [];
+    state = defending(state);
+    let applied = applyIntent(state, 0, { kind: "defend", instanceIds: [] });
+    if (!applied.ok) throw new Error(JSON.stringify(applied));
+    state = applied.state;
+    for (let step = 0; step < 6 && state.priorityPlayer !== 0; step++) {
+      applied = applyIntent(state, state.priorityPlayer, { kind: "pass" });
+      if (!applied.ok) throw new Error(JSON.stringify(applied));
+      state = applied.state;
+    }
+    const intent = chooseLeviaIntent({
+      seat: 0, view: projectStateFor(state, 0), legal: legalIntents(state, 0), cards: cardData, state,
+    });
+    expect(intent).toMatchObject({ kind: "activate-ability", sourceInstanceId: herald.instanceId });
+  });
+
   it.each([1, 3])("preserves its hand before the opponent may attack on turn %i", (turn) => {
     let state = game();
     state.turn = turn;

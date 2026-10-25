@@ -1309,8 +1309,12 @@ Object.assign(sup, {
     },
     onChoose(ctx: ScriptCtx, hook: string, option: string) {
       if (hook === "hero-alone-card") {
-        ctx.addCardTempPower(Number(option), -3);
-        ctx.addCardTempDefense(Number(option), -3);
+        const id = Number(option);
+        // A weapon stays in the arena, so its temporary power would outlive the link.
+        if (id === ctx.link?.attackingCard.instanceId)
+          ctx.addModifier({ scope: "chain-link", attack: -3, appliesToInstanceId: id });
+        else ctx.addCardTempPower(id, -3);
+        ctx.addCardTempDefense(id, -3);
       }
     },
   },

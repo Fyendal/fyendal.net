@@ -2,6 +2,7 @@ import type { CardData, CardView, GameIntent } from "@fyendal/shared";
 import {
   chooseScoredIntent,
   currentLink,
+  defenderDefense,
   enforceAllyTargetPolicy,
   enforceSpectraPolicy,
   incomingAttackDamage,
@@ -23,6 +24,7 @@ import {
   type BotPolicyInput,
   type DefenseCandidateContext,
   type DefensePermission,
+  type PlannedPrevention,
   type ResponseModel,
 } from "./policy.js";
 import { SIGNIFICANT_ON_HIT_VALUE } from "./on-hit.js";
@@ -528,19 +530,62 @@ function endOfTurnBanishScore(intent: GameIntent, card: CardView, input: BotPoli
 
 /** Prevent with Fallen Herald when needed to survive or worth more than the card next turn. */
 function heraldPreventionScore(card: CardView, input: BotPolicyInput): number {
-  const me = input.view.players[input.seat];
   const link = currentLink(input);
   if (input.view.activePlayer === input.seat || !link || link.attackingCard.owner === input.seat ||
     link.onStack) return -100;
   const incoming = Math.max(0, incomingAttackDamage(input) - (link.damageToPrevent ?? 0));
-  const prevented = Math.min(4, incoming);
-  if (prevented === 0) return -100;
-  // Survival counts public pumps the attacker can still spend.
   const threatened = Math.max(0, threatenedAttackDamage(input) - (link.damageToPrevent ?? 0));
-  if (threatened >= me.life && threatened - prevented < me.life) return 150;
+  const worth = heraldWorth(card, input, incoming, threatened);
+  return worth === undefined ? -100 : worth === "survives" ? 150 : worth > 0 ? 20 + worth * 4 : -60;
+}
+
+/** Herald's margin over keeping it against `incoming` damage, or "survives"
+ * when it alone keeps Levia alive against the `threatened` pumps. */
+function heraldWorth(
+  card: CardView,
+  input: BotPolicyInput,
+  incoming: number,
+  threatened: number,
+): number | "survives" | undefined {
+  const me = input.view.players[input.seat];
+  const prevented = Math.min(4, incoming);
+  if (prevented === 0) return undefined;
+  // Survival counts public pumps the attacker can still spend.
+  if (threatened >= me.life && threatened - prevented < me.life) return "survives";
   const rest = me.hand.filter((held) => held.instanceId !== card.instanceId);
   const lost = solveHand(me.hand, input, leviaSolverRules).value - solveHand(rest, input, leviaSolverRules).value;
-  return prevented > lost ? 20 + (prevented - lost) * 4 : -60;
+  return prevented - lost;
+}
+
+/** Plans Fallen Herald's prevention into a block when activating it after the block would pay off. */
+function leviaPlannedPrevention(
+  input: BotPolicyInput,
+  intent: Extract<GameIntent, { kind: "defend" }>,
+  spentIds: ReadonlySet<number>,
+  reactionPlan: PlannedPrevention,
+): PlannedPrevention {
+  const link = currentLink(input);
+  if (!link) return reactionPlan;
+  const me = input.view.players[input.seat];
+  const herald = me.hand.find((card) => name(input.cards[card.cardId]) === "fallen herald" &&
+    !spentIds.has(card.instanceId) && !reactionPlan.consumedIds.includes(card.instanceId));
+  if (!herald) return reactionPlan;
+  const own = ownCards(input);
+  const defense = intent.instanceIds.reduce((total, id) => {
+    const card = own.get(id);
+    return total + (card ? defenderDefense(card, input) : 0);
+  }, 0);
+  const blocked = defense + reactionPlan.amount + (link.damageToPrevent ?? 0);
+  const incoming = Math.max(0, incomingAttackDamage(input) - blocked);
+  const threatened = Math.max(0, threatenedAttackDamage(input) - blocked);
+  const worth = heraldWorth(herald, input, incoming, threatened);
+  if (worth === undefined || (worth !== "survives" && worth <= 0)) return reactionPlan;
+  return {
+    ...reactionPlan,
+    amount: reactionPlan.amount + 4,
+    consumedIds: [...reactionPlan.consumedIds, herald.instanceId],
+    preventionIds: [...(reactionPlan.preventionIds ?? []), herald.instanceId],
+  };
 }
 
 const BLOOD_HARVEST_RESOURCES = 3;
@@ -926,6 +971,7 @@ function scoreDefense(
     adjustCycleValue: leviaKeepsCards,
     defensePermission: leviaBellowBlocks,
     lifeThresholds: leviaLifeThresholds(input),
+    plannedPrevention: leviaPlannedPrevention,
     equipmentUseIsFree: (card, policy) => name(policy.cards[card.cardId]) === "savage sash" &&
       (card.defCounters ?? 0) === 0 && leviaSashEnablesPair(policy,
         [...policy.view.players[policy.seat].hand, ...policy.view.players[policy.seat].arsenal]

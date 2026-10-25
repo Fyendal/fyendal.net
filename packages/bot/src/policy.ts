@@ -943,6 +943,10 @@ function equipmentKeywords(card: CardView, input: BotPolicyInput): ReadonlySet<s
   return new Set((input.cards[card.cardId]?.keywords ?? []).map((keyword) => keyword.toLowerCase()));
 }
 
+function isSpringTunic(card: CardView, input: BotPolicyInput): boolean {
+  return input.cards[card.cardId]?.name.trim().toLowerCase() === "fyendal's spring tunic";
+}
+
 function isBladeBeckoner(card: CardView, input: BotPolicyInput): boolean {
   return input.cards[card.cardId]?.name.trim().toLowerCase().startsWith("blade beckoner ") === true;
 }
@@ -1585,6 +1589,7 @@ export function scoreDefenseIntentWithTrace(
     // treating the sunk equipment selection as a new strategic choice.
     if (stagedIds.has(card.instanceId)) return false;
     if (lethal) return false;
+    if (openingDefense && isSpringTunic(card, input)) return true;
     // Early armor is justified by an on-hit or Wager only when the complete
     // defense actually stops that hit and therefore answers the effect.
     if (stopsHit && (meaningfulOnHit || link.wagered === true)) return false;
