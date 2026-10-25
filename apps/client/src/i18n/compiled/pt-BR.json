@@ -35319,12 +35319,6 @@
       "value": "Esta sala permite todas as cartas implementadas, incluindo cartas banidas e heróis Living Legend."
     }
   ],
-  "lobby.room.fullHint": [
-    {
-      "type": 0,
-      "value": "A sala está cheia — assista à partida"
-    }
-  ],
   "lobby.room.loadingState": [
     {
       "type": 0,

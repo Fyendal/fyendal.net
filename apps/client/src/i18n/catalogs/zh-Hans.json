@@ -2941,7 +2941,6 @@
   "lobby.room.status.started": "已开始",
   "lobby.room.status.full": "已满",
   "lobby.room.status.open": "开放中",
-  "lobby.room.fullHint": "房间已满——可进入观战",
   "lobby.room.restoring": "正在恢复对局…",
   "lobby.room.loadingState": "正在加载最新房间状态。",
   "lobby.rooms.all": "所有房间",

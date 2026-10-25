@@ -987,8 +987,8 @@
   font: 700 12px/17px var(--font-lobby-ui);
   white-space: nowrap;
 }
-.deck-card-format[data-format="cc"] { border-color: #c45a34a0; background: #3a150cd9; color: #ffa47f; }
-.deck-card-format[data-format="silver-age"] { border-color: #a39a88a0; background: #26221cd9; color: #d6d0c2; }
+.deck-card-format[data-format="cc"], .format-cc { border-color: #c45a34a0; background: #3a150cd9; color: #ffa47f; }
+.deck-card-format[data-format="silver-age"], .format-sa { border-color: #a39a88a0; background: #26221cd9; color: #d6d0c2; }
 .deck-library-card .deck-legality-hint { max-width: 70%; font-size: 13px; text-shadow: 0 1px 2px #000; }
 .deck-bulk-actions button {
   display: inline-flex;

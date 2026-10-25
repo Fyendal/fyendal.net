@@ -33572,12 +33572,6 @@
       "value": "This room allows all implemented cards, including banned cards and Living Legend heroes."
     }
   ],
-  "lobby.room.fullHint": [
-    {
-      "type": 0,
-      "value": "Room is full — spectate to watch"
-    }
-  ],
   "lobby.room.loadingState": [
     {
       "type": 0,

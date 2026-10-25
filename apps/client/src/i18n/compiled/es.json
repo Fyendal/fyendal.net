@@ -34474,12 +34474,6 @@
       "value": "Esta sala permite todas las cartas implementadas, incluidas las cartas prohibidas y los héroes Living Legend."
     }
   ],
-  "lobby.room.fullHint": [
-    {
-      "type": 0,
-      "value": "La sala está llena: obsérvala como espectador"
-    }
-  ],
   "lobby.room.loadingState": [
     {
       "type": 0,

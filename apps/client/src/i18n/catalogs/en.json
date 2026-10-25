@@ -2941,7 +2941,6 @@
   "lobby.room.status.started": "Started",
   "lobby.room.status.full": "Full",
   "lobby.room.status.open": "Open",
-  "lobby.room.fullHint": "Room is full — spectate to watch",
   "lobby.room.restoring": "Restoring Game…",
   "lobby.room.loadingState": "Loading the latest room state.",
   "lobby.rooms.all": "All Rooms",

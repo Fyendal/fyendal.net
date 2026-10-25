@@ -2941,7 +2941,6 @@
   "lobby.room.status.started": "Iniciada",
   "lobby.room.status.full": "Cheia",
   "lobby.room.status.open": "Aberta",
-  "lobby.room.fullHint": "A sala está cheia — assista à partida",
   "lobby.room.restoring": "Restaurando o jogo…",
   "lobby.room.loadingState": "Carregando o estado mais recente da sala.",
   "lobby.rooms.all": "Todas as salas",

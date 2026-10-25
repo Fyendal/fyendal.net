@@ -31983,12 +31983,6 @@
       "value": "此房间允许所有已实现卡牌，包括禁用卡牌和传奇殿堂英雄。"
     }
   ],
-  "lobby.room.fullHint": [
-    {
-      "type": 0,
-      "value": "房间已满——可进入观战"
-    }
-  ],
   "lobby.room.loadingState": [
     {
       "type": 0,

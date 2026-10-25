@@ -149,9 +149,6 @@
 .room-card-header .format-badge {
   min-width: 0;
   overflow: hidden;
-  padding-inline: 8px;
-  font-size: 12px;
-  letter-spacing: .5px;
   text-overflow: ellipsis;
 }
 .room-card-status {
@@ -159,7 +156,7 @@
   flex-shrink: 0;
   align-items: center;
   color: #a99a80;
-  font-size: 12px;
+  font: 500 12px var(--font-lobby-ui);
   white-space: nowrap;
 }
 .room-card-status .live-dot { margin-left: 0; margin-right: 6px; }
@@ -176,7 +173,15 @@
   padding-left: 12px;
   border-left: 1px solid #45331f88;
 }
-.room-card-actions button { width: 100%; min-width: 0; padding-inline: 10px; }
+/* Gold for watching keeps red reserved for rooms you can play in. */
+.room-card-spectate {
+  border: 1px solid #b08a4a99;
+  background: #ffd4790d;
+  color: var(--gold);
+  transition: background-color 120ms ease, border-color 120ms ease;
+}
+.room-card-spectate:hover { border-color: var(--bronze); background: #ffd4791f; }
+.room-card-spectate:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
 
 /* Shared data table used by deck management. */
 .room-table { width: 100%; border-collapse: collapse; }
@@ -226,28 +231,20 @@
   font-size: 15px;
 }
 .hero-vs-sep {
-  font-family: var(--font-display);
-  font-size: 12px;
-  letter-spacing: 1px;
-  text-transform: uppercase;
+  font: 600 12px var(--font-lobby-ui);
   color: #8a7f6d;
 }
 
+/* Matches the deck library's format chip, whose colors it shares. */
 .format-badge {
   display: inline-block;
-  padding: 2px 10px;
-  border-radius: 2px;
-  clip-path: var(--chamfer);
-  font-family: var(--font-display);
-  font-size: 13px;
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  border: 1px solid;
+  padding: 1px 7px;
+  border-width: 1px;
+  border-style: solid;
+  border-radius: 3px;
+  font: 700 12px/17px var(--font-lobby-ui);
   white-space: nowrap;
 }
-.format-cc { color: #ff9d76; border-color: #a74a2a66; background: #a74a2a14; }
-.format-sa { color: #c8c2b4; border-color: #8a827266; background: #8a827214; }
 
 .deck-link { color: #d4a958; }
 .deck-import { margin-top: 18px; border-top: 1px solid #45331f; padding-top: 14px; }
@@ -450,6 +447,16 @@
   font-size: var(--lobby-action-font-size);
   font-weight: 700;
   letter-spacing: var(--lobby-action-letter-spacing);
+}
+/* Rejoin, Join and Spectate share one shape; color alone ranks them. */
+.lobby-page .room-card-actions > button {
+  width: 100%;
+  min-width: 0;
+  padding-inline: 10px;
+  border-radius: 6px;
+  clip-path: none;
+  letter-spacing: 0;
+  text-transform: none;
 }
 .accept-hero-matchup {
   display: grid;
