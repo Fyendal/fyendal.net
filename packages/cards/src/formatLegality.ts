@@ -12,7 +12,7 @@ export const FUTURE_SET_CODES: ReadonlySet<string> = new Set(["AMG", "AMO", "MPA
  * weekly by LSS, so this date must move whenever the lists below are refreshed.
  * https://fabtcg.com/rules-and-policy-center/card-legality-policy/
  */
-export const CLASSIC_CONSTRUCTED_LEGALITY_CHECKED_ON = "2026-10-13";
+export const CLASSIC_CONSTRUCTED_LEGALITY_CHECKED_ON = "2026-10-26";
 
 /**
  * Silver Age season snapshot beginning with the Usurp the Shadow Throne
@@ -20,7 +20,7 @@ export const CLASSIC_CONSTRUCTED_LEGALITY_CHECKED_ON = "2026-10-13";
  * the next standalone booster season begins.
  * https://fabtcg.com/rules-and-policy-center/card-legality-policy/
  */
-export const SILVER_AGE_LEGALITY_CHECKED_ON = "2026-09-18";
+export const SILVER_AGE_LEGALITY_CHECKED_ON = "2026-10-26";
 
 const LIVING_LEGEND_HEROES = new Set([
   "aurora, shooting star",
@@ -90,7 +90,6 @@ const CLASSIC_CONSTRUCTED_BANNED_CARD_NAMES = new Set([
   "crown of seeds",
   "drone of brutality",
   "duskblade",
-  "entwine lightning",
   "high octane",
   "orihon of mystic tenets",
   "phantom tidemaw",
@@ -103,6 +102,7 @@ const CLASSIC_CONSTRUCTED_BANNED_CARD_NAMES = new Set([
   "tome of divinity",
   "tome of fyendal",
   "tome of firebrand",
+  "traverse the universe",
   "volzar, the lightning rod",
   "wrath of retribution",
   "zephyr needle",
@@ -115,8 +115,6 @@ const CLASSIC_CONSTRUCTED_BANNED_FUNCTIONAL_KEYS = new Set([
   "electromagnetic somersault|2",
   "golden tipple|1",
   "golden tipple|2",
-  "orb-weaver spinneret|2",
-  "orb-weaver spinneret|3",
 ]);
 
 const SILVER_AGE_BENCHED_HERO_NAMES = new Set([
@@ -128,7 +126,6 @@ const SILVER_AGE_BENCHED_HERO_NAMES = new Set([
 
 /** Silver Age bans apply to every pitch of the named card. */
 const SILVER_AGE_BANNED_CARD_NAMES = new Set([
-  "absorb in aether",
   "aether flare",
   "aether ironweave",
   "ball lightning",

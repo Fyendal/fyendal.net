@@ -11,7 +11,6 @@ const card = (
 ): CardData => ({ id, name, cardType, ...(pitch ? { pitch } : {}), ...(set ? { set } : {}), text: "" });
 
 const SILVER_AGE_BANNED_NAMES = [
-  "Absorb in Aether",
   "Aether Flare",
   "Aether Ironweave",
   "Ball Lightning",
