@@ -13,7 +13,6 @@ import {
   veilBlocksDefender,
 } from "./cardProperties.js";
 
-import { activeModifiers } from "./combatModifiers.js";
 import {
   attackHasDominate,
   attackMaxNonBlockDefenders,
@@ -57,7 +56,7 @@ import { canPlayAsInstant, cardPlayCost, cardPlayReductionForSeat, cardPlayRestr
 import { canPayRequiredHandCardsForAdditionalCost } from "./resources.js";
 import { heroAbilitiesDisabled } from "./stateQueries.js";
 import { actionLimitReached, isFrozen, opposingInstantsProhibited } from "./ruleQueries.js";
-import { defendingHeroCannotRespondBelowPower } from "./combatRestrictions.js";
+import { defendingHeroCannotRespondBelowPower, defenseReactionRestriction } from "./combatRestrictions.js";
 import { pushAbilityLayer, pushAttackCardLayer, recordAnnouncedAttackTarget } from "./stackCore.js";
 
 import {
@@ -65,27 +64,6 @@ import {
   passPriorityWindow,
   type PriorityWindow,
 } from "./priority.js";
-
-/** Defense-reaction restrictions on the link: "defense reactions can't be
- *  played to this chain link" (link flag noDefenseReactions) and "defense
- *  reactions can't be played from arsenal this chain link" (a modifier riding
- *  the link). Consulted in enumeration AND validation. */
-export function defenseReactionRestriction(
-  state: GameStateInternal,
-  link: ChainLinkState,
-): { all: boolean; fromArsenal: boolean; fromHand: boolean } {
-  return {
-    all:
-      link.flags.noDefenseReactions === true ||
-      (state.players[link.attacker] as PlayerState).flags.noDefenseReactionsThisTurn === true,
-    fromArsenal: activeModifiers(state, link, ["chain-link"]).some(
-      (m) => m.noDefenseReactionsFromArsenal === true,
-    ),
-    fromHand: activeModifiers(state, link, ["chain-link"]).some(
-      (m) => m.noDefenseReactionsFromHand === true,
-    ),
-  };
-}
 
 /** Enter the reaction step: attacker holds priority first. */
 export function beginReactionStep(state: GameStateInternal): void {

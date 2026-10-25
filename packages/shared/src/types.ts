@@ -313,6 +313,10 @@ export interface ChainLinkView {
   goAgain?: boolean;
   /** The unresolved attack can't gain go again, e.g. after Blizzard. */
   goAgainBlocked?: true;
+  /** Defense reactions can't be played from hand to this unresolved link. */
+  defenseReactionsBlockedFromHand?: true;
+  /** Defense reactions can't be played from arsenal to this unresolved link. */
+  defenseReactionsBlockedFromArsenal?: true;
   /** This attack has wagered on its current chain link. */
   wagered?: boolean;
   /** Public reward description for each wager completed on this chain link. */

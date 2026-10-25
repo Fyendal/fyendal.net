@@ -561,10 +561,17 @@ function scoreChoice(intent: ChooseIntent, input: BotPolicyInput): number {
   return card ? 10 - cardOpportunity(card, input) : 1;
 }
 
-/** Resources a held card still needs beyond what is floating. */
+/** Resources a card playable now still needs beyond what is floating. */
 function resourcesWanted(input: BotPolicyInput): number {
   const player = me(input);
-  const costs = reserve(input).map((card) => resourceCost(input.cards[card.cardId]));
+  const ourTurn = input.view.activePlayer === input.seat;
+  const reacting = input.view.pendingDecision?.kind === "defense-reaction";
+  const costs = reserve(input).flatMap((card) => {
+    const data = input.cards[card.cardId];
+    // A defense reaction only spends resources in the opponent's reaction step.
+    const usable = ourTurn ? data?.cardType !== "defense-reaction" : reacting && data?.cardType === "defense-reaction";
+    return usable ? [resourceCost(data)] : [];
+  });
   const needed = Math.max(0, ...costs);
   return Math.max(0, needed - player.resources);
 }
@@ -592,8 +599,9 @@ function scoreHeroAbility(input: BotPolicyInput, own: ReadonlyMap<number, CardVi
   return 30;
 }
 
-/** Raydn swings with power this turn and a path leads to it. */
+/** Raydn swings charged this turn and a path leads to it. */
 function raydnSwingSecured(intent: GameIntent, input: BotPolicyInput, own: ReadonlyMap<number, CardView>): boolean {
+  if (!raydnAvailable(input)) return false;
   const player = me(input);
   const chargeAttacks = player.hand.filter((held) => isChargeAttack(input.cards[held.cardId]));
   if (!charged(input) && !(chargeAttacks.length > 0 && chargeableAfter(intent, input, own).length > 1)) return false;
@@ -686,19 +694,12 @@ function scorePlay(intent: GameIntent, input: BotPolicyInput, own: ReadonlyMap<n
     } else if (functional === RAYDN) {
       score = opening ? -100 : scoreRaydn(card, intent, input, own);
     } else if (functional === FYENDALS_SPRING_TUNIC) {
-      const wanted = ourTurn
-        ? resourcesWanted(input)
-        : input.view.pendingDecision?.kind === "defense-reaction"
-        ? Math.max(0, ...player.hand.map((held) => {
-          const data = input.cards[held.cardId];
-          return data?.cardType === "defense-reaction" ? resourceCost(data) - player.resources : 0;
-        }))
-        : 0;
-      score = wanted > 0
+      // Unneeded resource sources rank below pass so the root cap still compares passing.
+      score = resourcesWanted(input) > 0
         ? (ourTurn && holds(input, V_OF_THE_VANGUARD) && player.hand.length >= 4 ? 50 : 25)
-        : -30;
+        : -100;
     } else if (functional === IRONSONG_VERSUS) {
-      score = ourTurn && !opening && raydnAvailable(input) && raydnSwingSecured(intent, input, own) ? 8 : -20;
+      score = ourTurn && !opening && raydnSwingSecured(intent, input, own) ? 8 : -20;
     } else if (functional === WARBAND_OF_BELLONA) {
       const chargeAttack = player.hand.some((held) => isChargeAttack(input.cards[held.cardId]));
       const payoff = reserve(input).some((held) =>
@@ -715,7 +716,7 @@ function scorePlay(intent: GameIntent, input: BotPolicyInput, own: ReadonlyMap<n
         ? 28
         : -100;
     } else if (functional === ENERGY_POTION) {
-      score = resourcesWanted(input) > 0 ? 15 : -10;
+      score = resourcesWanted(input) > 0 ? 15 : -100;
     } else {
       score = -100;
     }
@@ -737,7 +738,8 @@ function scorePlay(intent: GameIntent, input: BotPolicyInput, own: ReadonlyMap<n
   } else if (functional === LUMINA_ASCENSION) {
     score = scoreLumina(input);
   } else if (functional === EDICT_OF_STEEL) {
-    score = raydnAvailable(input) ? 10 + (charged(input) && holds(input, LUMINA_ASCENSION) ? 6 : 0) : -10;
+    // A bare Flurry is not worth the card; it blocks for 3 until a charged Raydn turn.
+    score = raydnSwingSecured(intent, input, own) ? 10 + (charged(input) && holds(input, LUMINA_ASCENSION) ? 6 : 0) : -100;
   } else if (functional === CELESTIAL_CATACLYSM) {
     score = 7 + (further ? 14 : 0) - (soul - 3 < 1 && further ? 2 : 0);
   } else if (functional === BATTLEFIELD_BEACON) {
@@ -812,7 +814,11 @@ export function chooseBoltynIntentWithTrace(input: BotPolicyInput): BoltynIntent
     rules: boltynSolverRules,
     rankCandidate: (intent, observed) => scorePlay(intent, observed, ownCards(observed)),
     prepareCandidates: (candidates, observed) => {
-      const allowed = candidates.filter((intent) => !playsLumina(intent, observed) || luminaWindow(observed));
+      const own = ownCards(observed);
+      const allowed = candidates.filter((intent) =>
+        (!playsLumina(intent, observed) || luminaWindow(observed)) &&
+        (!playsCard(intent, observed, EDICT_OF_STEEL) || raydnSwingSecured(intent, observed, own))
+      );
       // Each Lumina before the first swing adds a swing and +1 to all of them.
       const luminaFirst = !luminaIsInstant(observed) && allowed.some((intent) => playsLumina(intent, observed));
       return luminaFirst ? allowed.filter((intent) => !activatesRaydn(intent, observed)) : allowed;

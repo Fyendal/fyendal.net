@@ -1317,7 +1317,7 @@ function chainLink(value: unknown): boolean {
   const link = object(value);
   return !!link && exactKeys(link, [
     "attackingCard", "defendingCards", "attackValue", "defenseValue", "damage", "resolved",
-    "attackModifiers", "defenseModifiers", "onHitEffects", "damageToPrevent", "preventionModifiers", "onStack", "hit", "goAgain", "goAgainBlocked", "wagered", "wagerRewards", "dominate", "overpower", "veil", "maxNonBlockDefenders", "reactions", "targetAllyName", "targetAlly", "additionalTargets",
+    "attackModifiers", "defenseModifiers", "onHitEffects", "damageToPrevent", "preventionModifiers", "onStack", "hit", "goAgain", "goAgainBlocked", "defenseReactionsBlockedFromHand", "defenseReactionsBlockedFromArsenal", "wagered", "wagerRewards", "dominate", "overpower", "veil", "maxNonBlockDefenders", "reactions", "targetAllyName", "targetAlly", "additionalTargets",
   ], ["attackingCard", "defendingCards", "attackValue", "defenseValue", "damage", "resolved", "reactions"])
     && cardView(link.attackingCard) && cardViews(link.defendingCards) && finite(link.attackValue)
     && finite(link.defenseValue) && finite(link.damage) && typeof link.resolved === "boolean"
@@ -1330,6 +1330,8 @@ function chainLink(value: unknown): boolean {
     && optional(link.hit, (v): v is boolean => typeof v === "boolean")
     && optional(link.goAgain, (v): v is boolean => typeof v === "boolean")
     && optional(link.goAgainBlocked, (v): v is true => v === true)
+    && optional(link.defenseReactionsBlockedFromHand, (v): v is true => v === true)
+    && optional(link.defenseReactionsBlockedFromArsenal, (v): v is true => v === true)
     && optional(link.wagered, (v): v is boolean => typeof v === "boolean")
     && optional(link.wagerRewards, (v): v is string[] => shortStrings(v, 32))
     && optional(link.dominate, (v): v is boolean => typeof v === "boolean")

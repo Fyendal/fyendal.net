@@ -29,7 +29,6 @@ import {
   defenderSelectionError,
   legalDefenderCards,
 } from "./defense.js";
-import { defenseReactionRestriction } from "./reactions.js";
 import {
   attackHasDominate,
   attackMaxNonBlockDefenders,
@@ -48,7 +47,7 @@ import { resolveVariableAbilityCost, variableResourceChoices } from "./costs.js"
 import { heroAbilitiesDisabled } from "./stateQueries.js";
 import { actionLimitReached, controlsBow, firstAttackExtraCost, isFrozen, opposingInstantsProhibited } from "./ruleQueries.js";
 import { nonAttackActionCardLimitReached, opposingActionsProhibited, ownedCardActionProhibited } from "./restrictions.js";
-import { attackActionPlayRestricted, defendingHeroCannotRespondBelowPower, weaponAttacksProhibited } from "./combatRestrictions.js";
+import { attackActionPlayRestricted, defendingHeroCannotRespondBelowPower, defenseReactionRestriction, weaponAttacksProhibited } from "./combatRestrictions.js";
 
 /** Valid subsets, smallest first, capped for search and the wire; the greedy
  *  largest set survives the cap. */

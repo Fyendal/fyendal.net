@@ -339,6 +339,8 @@ const gameView = () => ({
     overpower: true,
     veil: true,
     maxNonBlockDefenders: 2,
+    defenseReactionsBlockedFromHand: true,
+    defenseReactionsBlockedFromArsenal: true,
     reactions: [card],
     targetAllyName: "Ally",
     targetAlly: card,
@@ -845,6 +847,10 @@ describe("GameView and server messages", () => {
     expect(decodeGameView({
       ...gameView(),
       chain: [{ ...gameView().chain[0], attackModifiers: [{ sourceCardId: "WTR001", amount: "two" }] }],
+    })).toBeNull();
+    expect(decodeGameView({
+      ...gameView(),
+      chain: [{ ...gameView().chain[0], defenseReactionsBlockedFromHand: false }],
     })).toBeNull();
     expect(decodeGameView({ ...gameView(), extra: true })).toBeNull();
     const badCard = gameView();

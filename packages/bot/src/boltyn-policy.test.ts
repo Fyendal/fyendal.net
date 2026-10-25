@@ -6,7 +6,7 @@ import { chooseBoltynIntent } from "./boltyn-policy.js";
 import { chooseHalaIntent } from "./hala-policy.js";
 import { decklistsFromState } from "./deck-knowledge.js";
 import { boltynPresentationFor, halaPresentationFor } from "./sideboard.js";
-import type { BotPolicyInput } from "./policy.js";
+import { plannedDefenseReactionPlan, type BotPolicyInput } from "./policy.js";
 
 const BOLTYN_POOL = precon("bot-boltyn-raydn")!.pool;
 
@@ -344,6 +344,44 @@ describe("Boltyn policy", () => {
     const { state: after } = play(state, turnOver);
     expect(after.players[0]!.arsenal.map((card) => card.instanceId)).not.toContain(spirit);
     expect(after.players[0]!.hand.map((card) => card.instanceId)).toContain(spirit);
+  });
+
+  it("does not plan Soul Shield against Command and Conquer", () => {
+    const state = settled(game());
+    // As reported: the block counted on Soul Shield and spent the charge attack and V instead.
+    hand(state, ["AHA012", "MON063", "ASB007", "ASB023"]);
+    const [, , bravado, vanguard] = state.players[0]!.hand.map((card) => card.instanceId);
+    state.players[0]!.equipment.chest!.counters = { energy: 3 };
+    state.players[1]!.resources = 2;
+    const observed = input(underAttack(state, "ARC159"));
+    expect(plannedDefenseReactionPlan(observed, { kind: "defend", instanceIds: [] }).amount).toBe(0);
+    const intent = chooseBoltynIntent(observed);
+    const blockers = intent.kind === "defend" || intent.kind === "stage-defenders" ? intent.instanceIds : [];
+    expect(blockers.includes(bravado!) && blockers.includes(vanguard!)).toBe(false);
+  });
+
+  it("keeps Edict, Tunic counters and Energy Potion on a turn it cannot charge", () => {
+    const state = settled(game());
+    hand(state, ["AHA012", "MON063"]);
+    const edict = state.players[0]!.hand[0]!.instanceId;
+    state.players[0]!.board = cards(state, ["MPW146"]);
+    state.players[0]!.equipment.chest!.counters = { energy: 3 };
+    const { state: after, intents } = play(state, turnOver);
+    expect(intents).not.toContain("Fyendal's Spring Tunic");
+    expect(intents).not.toContain("Energy Potion");
+    expect(intents).not.toContain("Edict of Steel");
+    expect(after.players[0]!.hand.map((card) => card.instanceId)).toContain(edict);
+    expect(after.players[0]!.equipment.chest!.counters?.energy).toBe(3);
+    expect(after.players[0]!.board.map((card) => cardData[card.cardId]?.name)).toContain("Energy Potion");
+  });
+
+  it("plays Edict of Steel before a charged Raydn swing", () => {
+    const state = settled(game());
+    hand(state, ["AHA012", "ASB007", "PEN181"]);
+    soul(state, 1);
+    const { intents } = play(state, turnOver);
+    expect(intents).toContain("Edict of Steel");
+    expect(intents.indexOf("Edict of Steel")).toBeLessThan(intents.indexOf(RAYDN));
   });
 
   it("keeps Lumina Ascension when Raydn will not swing after it this turn", () => {

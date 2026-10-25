@@ -13,6 +13,8 @@ export const PONDER_TOKEN_VALUE = 3;
 export const SPIRIT_OF_EIRINA_VALUE = 3;
 /** A Tunic energy counter: a third of the resource that funds V of the Vanguard. */
 export const TUNIC_COUNTER_VALUE = 0.4;
+/** An uncracked Energy Potion: two resources at the Tunic's rate. */
+export const ENERGY_POTION_VALUE = 6 * TUNIC_COUNTER_VALUE;
 /** A drawn card, matching the on-hit draw value in value.ts. */
 export const CARD_DRAW_VALUE = 3;
 /** Beacon of Victory's search: a chosen power card in hand. */
@@ -526,6 +528,7 @@ export function boltynPositionValue(input: BotPolicyInput, offenseRate = 1): num
   const tunicCounters = Number(me.equipment.chest?.counters?.energy ?? 0);
   return POSITION_DISCOUNT * (me.soul.length * SOUL_VALUE +
     tunicCounters * TUNIC_COUNTER_VALUE +
+    board("energy potion") * ENERGY_POTION_VALUE +
     board("courage") * COURAGE_TOKEN_VALUE +
     board("quicken") * QUICKEN_TOKEN_VALUE +
     // One weapon attack destroys every Flurry for a single extra swing.

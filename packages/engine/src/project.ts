@@ -53,7 +53,7 @@ import { additionalTargetsAroundPrimary, currentLink, findCardAnywhere } from ".
 import { queuedAttackObjects } from "./attackQueue.js";
 import { controlledPermanents } from "./sourceQueries.js";
 import { activatedAbilityUsage } from "./abilityRules.js";
-import { weaponAttacksProhibited } from "./combatRestrictions.js";
+import { defenseReactionRestriction, weaponAttacksProhibited } from "./combatRestrictions.js";
 import { legalDefenderCards } from "./defense.js";
 import { wardPieces } from "./damageResolution.js";
 import { playFromSourceCardId } from "./playRules.js";
@@ -1058,6 +1058,7 @@ function projectState(
     const maxNonBlockDefenders = link.resolved
       ? undefined
       : attackMaxNonBlockDefenders(state, link);
+    const reactionRestriction = link.resolved ? undefined : defenseReactionRestriction(state, link);
     return {
       // Per-turn usage of the attacking card's own abilities is public combat
       // information, exactly as it is for permanents in the arena.
@@ -1110,6 +1111,12 @@ function projectState(
           conditionalScriptGrantsGoAgain(state, runtime, link)
         )),
       ...(!link.resolved && linkGoAgainBlocked(state, link) ? { goAgainBlocked: true as const } : {}),
+      ...(reactionRestriction && (reactionRestriction.all || reactionRestriction.fromHand)
+        ? { defenseReactionsBlockedFromHand: true as const }
+        : {}),
+      ...(reactionRestriction && (reactionRestriction.all || reactionRestriction.fromArsenal)
+        ? { defenseReactionsBlockedFromArsenal: true as const }
+        : {}),
       wagered: link.flags.wagered === true,
       ...(link.wagerRewards?.length ? { wagerRewards: [...link.wagerRewards] } : {}),
       dominate: link.resolved

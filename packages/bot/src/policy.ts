@@ -768,8 +768,8 @@ export function plannedDefenseReactionPlan(
   const blockedFromHand = intent.instanceIds.some((id) => handIds.has(id));
   const spent = new Set([...intent.instanceIds, ...(intent.pitchInstanceIds ?? [])]);
   const candidates = [
-    ...(link.dominate && blockedFromHand ? [] : me.hand),
-    ...me.arsenal,
+    ...((link.dominate && blockedFromHand) || link.defenseReactionsBlockedFromHand ? [] : me.hand),
+    ...(link.defenseReactionsBlockedFromArsenal ? [] : me.arsenal),
   ].filter((card) => !spent.has(card.instanceId) && input.cards[card.cardId]?.cardType === "defense-reaction");
 
   const options: PlannedPrevention[] = [{

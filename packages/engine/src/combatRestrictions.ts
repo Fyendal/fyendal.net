@@ -2,7 +2,8 @@ import type { EngineRuntime } from "./runtimePorts.js";
 import { instanceDataOf, scriptOf, wardValueOf } from "./cardProperties.js";
 import { basePowerOf, computeAttack, currentPowerOf, grantsAuraAttackMarker } from "./combatValues.js";
 import type { GameStateInternal } from "./runtimeState.js";
-import type { CardInstance, PlayerState } from "./state.js";
+import { activeModifiers } from "./combatModifiers.js";
+import type { CardInstance, ChainLinkState, PlayerState } from "./state.js";
 import { currentLink, opponent } from "./zoneQueries.js";
 
 /** Whether a turn-scoped effect prohibits this player from attacking with
@@ -66,4 +67,25 @@ export function defendingHeroCannotRespondBelowPower(
   }
   const attackPower = computeAttack(state, runtime, link);
   return !link.defendingCards.some((card) => currentPowerOf(state, runtime, card, link) >= attackPower);
+}
+
+/** Defense-reaction restrictions on the link: "defense reactions can't be
+ *  played to this chain link" (link flag noDefenseReactions) and "defense
+ *  reactions can't be played from arsenal this chain link" (a modifier riding
+ *  the link). Consulted in enumeration AND validation. */
+export function defenseReactionRestriction(
+  state: GameStateInternal,
+  link: ChainLinkState,
+): { all: boolean; fromArsenal: boolean; fromHand: boolean } {
+  return {
+    all:
+      link.flags.noDefenseReactions === true ||
+      (state.players[link.attacker] as PlayerState).flags.noDefenseReactionsThisTurn === true,
+    fromArsenal: activeModifiers(state, link, ["chain-link"]).some(
+      (m) => m.noDefenseReactionsFromArsenal === true,
+    ),
+    fromHand: activeModifiers(state, link, ["chain-link"]).some(
+      (m) => m.noDefenseReactionsFromHand === true,
+    ),
+  };
 }
