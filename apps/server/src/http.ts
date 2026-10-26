@@ -427,10 +427,8 @@ export function createApiServer(deps: ApiDeps): http.Server {
       const rawEmail = field(body, "email");
       const address = rawEmail.trim() ? normalizeEmail(rawEmail) : null;
       if (rawEmail.trim() && !address) return invalidEmail;
-      if (address && !email) return emailUnavailable;
       const r = await register(deps.db, username, password, address ?? undefined);
       if (!r.ok) return { status: 400, body: { ok: false, error: r.error } };
-      if (r.verification) sendVerification(r.verification);
       return { status: 200, body: { ok: true } };
     },
     "/api/account/email": async (body, user) => {

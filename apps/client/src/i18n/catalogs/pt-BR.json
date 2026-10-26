@@ -64,7 +64,7 @@
   "auth.createAccount": "Criar conta",
   "auth.email.label": "E-mail (opcional)",
   "auth.email.placeholder": "voce@exemplo.com",
-  "auth.email.hint": "Usado apenas para recuperar sua conta. Vamos enviar um link para confirmá-lo.",
+  "auth.email.hint": "Usado apenas para recuperar sua conta.",
   "auth.error.invalidEmail": "Digite um endereço de e-mail válido",
   "auth.error.missingIdentifier": "Digite seu nome de usuário ou e-mail",
   "auth.forgot.link": "Esqueceu a senha?",

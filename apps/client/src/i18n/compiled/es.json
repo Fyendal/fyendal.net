@@ -842,7 +842,7 @@
   "auth.email.hint": [
     {
       "type": 0,
-      "value": "Solo se usa para recuperar tu cuenta. Te enviaremos un enlace para confirmarlo."
+      "value": "Solo se usa para recuperar tu cuenta."
     }
   ],
   "auth.email.label": [

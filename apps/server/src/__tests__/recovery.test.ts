@@ -73,13 +73,9 @@ async function emailState(h: Harness, token: string) {
   return decodeAccountEmailResponse(await res.json());
 }
 
-/** Register with an email and click the verification link. */
-async function verifiedAccount(h: Harness, username: string, email: string): Promise<void> {
-  const before = h.sent.length;
+/** Register with a recovery address, which sign-up stores without confirmation. */
+async function accountWithEmail(h: Harness, username: string, email: string): Promise<void> {
   expect((await h.post("/api/register", { username, password: "password1", email })).status).toBe(200);
-  await vi.waitFor(() => expect(h.sent.length).toBe(before + 1));
-  const res = await h.post("/api/account/email/verify", { token: linkToken(h.sent.at(-1)!, "verify-email") });
-  expect(res.status).toBe(200);
 }
 
 describe("recovery email", () => {
@@ -98,27 +94,36 @@ describe("recovery email", () => {
     expect((await h.db.query("SELECT * FROM users")).rows).toEqual([]);
   });
 
-  it("stores an address only after its link is confirmed, and links are single-use", async () => {
+  it("stores a sign-up address immediately without sending a confirmation", async () => {
     const h = await harness();
     await h.post("/api/register", { username: "Verify", password: "password1", email: " Verify@Example.com " });
-    await vi.waitFor(() => expect(h.sent).toHaveLength(1));
-    expect(h.sent[0]!.to).toBe("Verify@Example.com");
     const token = await loggedIn(h, "Verify");
-    expect(await emailState(h, token)).toMatchObject({ email: null, pendingEmail: "Verify@Example.com" });
+    expect(await emailState(h, token)).toMatchObject({ email: "Verify@Example.com", pendingEmail: null });
+    expect(h.sent).toEqual([]);
     expect(await (await h.post("/api/password/forgot", { identifier: "verify@example.com" })).json())
       .toEqual({ ok: true });
+    await vi.waitFor(() => expect(h.sent.at(-1)!.subject).toBe("Reset your Fyendal password"));
+  });
+
+  it("stores a changed address only after its link is confirmed, and links are single-use", async () => {
+    const h = await harness();
+    await register(h.db, "Changing", "password1");
+    const token = await loggedIn(h, "Changing");
+    await h.post("/api/account/email", { password: "password1", email: "change@example.com" }, token);
+    await vi.waitFor(() => expect(h.sent).toHaveLength(1));
+    expect(await emailState(h, token)).toMatchObject({ email: null, pendingEmail: "change@example.com" });
 
     const link = linkToken(h.sent[0]!, "verify-email");
     expect((await h.post("/api/account/email/verify", { token: link })).status).toBe(200);
-    expect(await emailState(h, token)).toMatchObject({ email: "Verify@Example.com", pendingEmail: null });
+    expect(await emailState(h, token)).toMatchObject({ email: "change@example.com", pendingEmail: null });
     expect((await h.post("/api/account/email/verify", { token: link })).status).toBe(400);
-    // The forgot request before verification sent nothing.
-    expect(h.sent).toHaveLength(1);
   });
 
   it("rejects an expired verification link", async () => {
     const h = await harness();
-    await h.post("/api/register", { username: "Late", password: "password1", email: "late@example.com" });
+    await register(h.db, "Late", "password1");
+    const token = await loggedIn(h, "Late");
+    await h.post("/api/account/email", { password: "password1", email: "late@example.com" }, token);
     await vi.waitFor(() => expect(h.sent).toHaveLength(1));
     const link = linkToken(h.sent[0]!, "verify-email");
     await h.db.query("UPDATE email_verifications SET expires_at = 1 WHERE token_hash = $1", [hashToken(link)]);
@@ -128,7 +133,7 @@ describe("recovery email", () => {
 
   it("requires the password to change or remove the address and notifies the old one", async () => {
     const h = await harness();
-    await verifiedAccount(h, "Changer", "old@example.com");
+    await accountWithEmail(h, "Changer", "old@example.com");
     const token = await loggedIn(h, "Changer");
 
     expect((await h.post("/api/account/email", { password: "wrong-pass", email: "new@example.com" }, token)).status)
@@ -152,7 +157,7 @@ describe("recovery email", () => {
 
   it("answers forgot requests identically whether or not an account matches", async () => {
     const h = await harness();
-    await verifiedAccount(h, "Known", "known@example.com");
+    await accountWithEmail(h, "Known", "known@example.com");
     await register(h.db, "NoAddress", "password1");
     const sentBefore = h.sent.length;
     for (const identifier of ["missing", "missing@example.com", "NoAddress"]) {
@@ -167,8 +172,8 @@ describe("recovery email", () => {
 
   it("sends one email listing every account that shares an address", async () => {
     const h = await harness();
-    await verifiedAccount(h, "Twin_A", "twins@example.com");
-    await verifiedAccount(h, "Twin_B", "Twins@Example.com");
+    await accountWithEmail(h, "Twin_A", "twins@example.com");
+    await accountWithEmail(h, "Twin_B", "Twins@Example.com");
     const sentBefore = h.sent.length;
     expect((await h.post("/api/password/forgot", { identifier: "TWINS@example.com" })).status).toBe(200);
     await vi.waitFor(() => expect(h.sent).toHaveLength(sentBefore + 1));
@@ -180,7 +185,7 @@ describe("recovery email", () => {
 
   it("resets the password once, revokes every session, and logs this browser in", async () => {
     const h = await harness();
-    await verifiedAccount(h, "Resetter", "reset@example.com");
+    await accountWithEmail(h, "Resetter", "reset@example.com");
     const oldSession = await loggedIn(h, "Resetter");
     await h.post("/api/password/forgot", { identifier: "resetter" });
     await vi.waitFor(() => expect(h.sent.at(-1)!.subject).toBe("Reset your Fyendal password"));
@@ -203,7 +208,7 @@ describe("recovery email", () => {
 
   it("rejects expired reset links and sweeps expired recovery tokens", async () => {
     const h = await harness();
-    await verifiedAccount(h, "Expired", "expired@example.com");
+    await accountWithEmail(h, "Expired", "expired@example.com");
     await h.post("/api/password/forgot", { identifier: "expired" });
     await vi.waitFor(() => expect(h.sent.at(-1)!.subject).toBe("Reset your Fyendal password"));
     const link = linkToken(h.sent.at(-1)!, "reset-password");
@@ -223,8 +228,6 @@ describe("recovery email", () => {
   it("reports recovery as unavailable without a transport", async () => {
     const h = await harness({ emailSender: null });
     expect((await h.post("/api/password/forgot", { identifier: "anyone" })).status).toBe(503);
-    expect((await h.post("/api/register", { username: "Offline", password: "password1", email: "a@b.io" })).status)
-      .toBe(503);
     await register(h.db, "Offline", "password1");
     const token = await loggedIn(h, "Offline");
     expect(await emailState(h, token)).toMatchObject({ available: false });
@@ -232,7 +235,7 @@ describe("recovery email", () => {
 
   it("includes the recovery address in the account export", async () => {
     const h = await harness();
-    await verifiedAccount(h, "Exporter", "export@example.com");
+    await accountWithEmail(h, "Exporter", "export@example.com");
     const token = await loggedIn(h, "Exporter");
     const res = await fetch(`${h.url}/api/account/export`, { headers: { Authorization: `Bearer ${token}` } });
     expect(((await res.json()) as any).export.account).toMatchObject({

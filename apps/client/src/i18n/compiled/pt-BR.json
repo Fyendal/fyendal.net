@@ -838,7 +838,7 @@
   "auth.email.hint": [
     {
       "type": 0,
-      "value": "Usado apenas para recuperar sua conta. Vamos enviar um link para confirmá-lo."
+      "value": "Usado apenas para recuperar sua conta."
     }
   ],
   "auth.email.label": [

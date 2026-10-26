@@ -64,7 +64,7 @@
   "auth.createAccount": "Create account",
   "auth.email.label": "Email (optional)",
   "auth.email.placeholder": "you@example.com",
-  "auth.email.hint": "Only used to recover your account. We'll send a link to confirm it.",
+  "auth.email.hint": "Only used to recover your account.",
   "auth.error.invalidEmail": "Enter a valid email address",
   "auth.error.missingIdentifier": "Enter your username or email",
   "auth.forgot.link": "Forgot password?",

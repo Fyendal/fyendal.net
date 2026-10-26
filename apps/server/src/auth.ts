@@ -7,11 +7,7 @@ import { PASSWORD_MIN_LENGTH } from "@fyendal/protocol";
 import { recordUserRegistration } from "./analytics.js";
 import { withTransaction, type Queryable, type UserRow } from "./db.js";
 import { appendClusterEvent } from "./clusterEvents.js";
-import {
-  insertEmailVerification,
-  type NormalizedEmail,
-  type PendingVerification,
-} from "./emailVerification.js";
+import type { NormalizedEmail } from "./emailVerification.js";
 import { hashToken, newToken } from "./tokenHash.js";
 
 // scrypt parameters: N=131072, r=8, p=1 with a random 16-byte salt,
@@ -159,11 +155,11 @@ async function userById(
 }
 
 export type RegisterResult =
-  | { ok: true; verification?: PendingVerification }
+  | { ok: true }
   | { ok: false; error: string };
 
 /** Create an account identified only by its unique username, optionally
- * starting verification of a recovery address in the same transaction. */
+ * with an unconfirmed recovery address. */
 export async function register(
   db: Queryable,
   username: string,
@@ -182,15 +178,15 @@ export async function register(
   try {
     const passHash = await hashPassword(password);
     const createdAt = Date.now();
-    const verification = await withTransaction(db, async (tx) => {
-      const { rows } = await tx.query(
-        "INSERT INTO users (username, username_lc, pass_hash, created_at) VALUES ($1, $2, $3, $4) RETURNING id",
-        [username, username.toLowerCase(), passHash, createdAt],
+    await withTransaction(db, async (tx) => {
+      await tx.query(
+        `INSERT INTO users (username, username_lc, pass_hash, created_at, email, email_lc)
+         VALUES ($1, $2, $3, $4, $5, $6)`,
+        [username, username.toLowerCase(), passHash, createdAt, email?.email ?? null, email?.emailLc ?? null],
       );
       await recordUserRegistration(tx, createdAt);
-      return email ? insertEmailVerification(tx, Number(rows[0]?.id), username, email) : undefined;
     });
-    return verification ? { ok: true, verification } : { ok: true };
+    return { ok: true };
   } catch (e) {
     // Lost a registration race (check-then-insert): a concurrent request
     // claimed the name between the check above and the INSERT.

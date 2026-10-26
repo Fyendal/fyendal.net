@@ -842,7 +842,7 @@
   "auth.email.hint": [
     {
       "type": 0,
-      "value": "仅用于找回账号。我们会发送一封邮件请你确认。"
+      "value": "仅用于找回账号。"
     }
   ],
   "auth.email.label": [

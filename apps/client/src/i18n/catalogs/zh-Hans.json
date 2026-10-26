@@ -64,7 +64,7 @@
   "auth.createAccount": "创建账户",
   "auth.email.label": "电子邮箱（可选）",
   "auth.email.placeholder": "you@example.com",
-  "auth.email.hint": "仅用于找回账号。我们会发送一封邮件请你确认。",
+  "auth.email.hint": "仅用于找回账号。",
   "auth.error.invalidEmail": "请输入有效的电子邮箱地址",
   "auth.error.missingIdentifier": "请输入用户名或电子邮箱",
   "auth.forgot.link": "忘记密码？",
