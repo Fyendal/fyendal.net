@@ -306,6 +306,51 @@ describe("SUP — heroes and the crowd", () => {
     g.expectInZone(0, "apex buster|2", "pitch");
   });
 
+  it("Liar's Charm declares any number of modes, then a target hero, as it is played", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", weapons: [], hand: ["liar's charm|2"] },
+        foe({ hand: ["apex buster|2"] }),
+      ],
+    });
+    const suppressed = (seat: number) =>
+      g.state.modifiers.some((modifier) => modifier.seat === seat && modifier.suppressesHeroAbilities);
+
+    g.play("liar's charm|2", { settle: false });
+    expect(g.state.pendingDecision).toMatchObject({
+      chooseHook: "liar-mode",
+      options: ["steal", "boo", "abilities", "done"],
+    });
+    g.chooseOption("abilities");
+    expect(g.state.pendingDecision?.options).toEqual(["steal", "boo", "done"]);
+    g.chooseOption("boo").chooseOption("done");
+    expect(g.state.pendingDecision).toMatchObject({
+      chooseHook: "liar-target",
+      options: g.state.players.map((player) => String(player.hero.instanceId)),
+      defaultOption: String(g.state.players[1]!.hero.instanceId),
+    });
+    g.expectInZone(0, "liar's charm|2", "hand");
+    g.doRaw({ kind: "choose", optionId: String(g.state.players[0]!.hero.instanceId) }).settle();
+
+    expect(g.state.players[0]!.flags.booedThisTurn).toBe(true);
+    expect(suppressed(0)).toBe(true);
+    expect(suppressed(1)).toBe(false);
+    g.expectHandSize(1, 1);
+  });
+
+  it("Liar's Charm suppresses the opposing hero only for this action phase", () => {
+    const g = scenario({
+      seats: [{ hero: "rhinar", weapons: [], hand: ["liar's charm|2"] }, foe()],
+    });
+
+    g.play("liar's charm|2", { settle: false }).chooseOption("abilities").chooseOption("done");
+    g.doRaw({ kind: "choose", optionId: String(g.state.players[1]!.hero.instanceId) }).settle();
+    expect(g.state.modifiers.some((modifier) => modifier.seat === 1 && modifier.suppressesHeroAbilities)).toBe(true);
+
+    g.endTurn();
+    expect(g.state.modifiers.some((modifier) => modifier.suppressesHeroAbilities)).toBe(false);
+  });
+
   it("Backspin Thrust untaps a cog, then chooses one bonus once per turn", () => {
     const g = scenario({
       seats: [

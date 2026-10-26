@@ -120,6 +120,10 @@ function evoEquipment(extra: CardScript = {}): CardScript {
   };
 }
 
+function instantEvoEquipment(extra: CardScript = {}): CardScript {
+  return evoEquipment({ ...extra, additionalCardTypes: ["instant"], playAsInstant: () => true });
+}
+
 function destroyUnderAbility(effect: (ctx: ScriptCtx) => void): CardScript {
   return evoEquipment({
     activated: {
@@ -536,7 +540,7 @@ export const evo: Record<string, CardScript> = mergeSetScripts("EVO", evoHighRar
   "evo charging rods|2": destroyUnderAbility((ctx) => {
     ctx.createToken(QUICKEN);
   }),
-  "evo zoom call|2": evoEquipment({
+  "evo zoom call|2": instantEvoEquipment({
     triggers: [
       entersArenaTrigger(
         "You may banish a card from your hand to draw a card",
@@ -554,14 +558,14 @@ export const evo: Record<string, CardScript> = mergeSetScripts("EVO", evoHighRar
       ),
     ],
   }),
-  "evo buzz hive|2": evoEquipment({
+  "evo buzz hive|2": instantEvoEquipment({
     triggers: [
       entersArenaTrigger("Gain 1 resource", decisionMessage("card.trigger.common.resource.gain", { amount: 1 }), (ctx) =>
         ctx.changeResources(ctx.seat, 1),
       ),
     ],
   }),
-  "evo whizz bang|2": evoEquipment({
+  "evo whizz bang|2": instantEvoEquipment({
     triggers: [
       entersArenaTrigger(
         "Up to 1 target attack gets +1 power",
@@ -574,7 +578,7 @@ export const evo: Record<string, CardScript> = mergeSetScripts("EVO", evoHighRar
       ),
     ],
   }),
-  "evo zip line|2": evoEquipment({
+  "evo zip line|2": instantEvoEquipment({
     triggers: [
       entersArenaTrigger(
         "Up to 1 target attack gets go again",

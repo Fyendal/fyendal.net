@@ -15657,12 +15657,6 @@
       "value": "Suprimir habilidades de herói"
     }
   ],
-  "card.sup.option.all": [
-    {
-      "type": 0,
-      "value": "Todos"
-    }
-  ],
   "card.sup.option.attackone": [
     {
       "type": 0,
@@ -15673,12 +15667,6 @@
     {
       "type": 0,
       "value": "Boo"
-    }
-  ],
-  "card.sup.option.booabilities": [
-    {
-      "type": 0,
-      "value": "Boo + suprimir habilidades"
     }
   ],
   "card.sup.option.courage": [
@@ -15727,18 +15715,6 @@
     {
       "type": 0,
       "value": "Roubar"
-    }
-  ],
-  "card.sup.option.stealabilities": [
-    {
-      "type": 0,
-      "value": "Roubar + suprimir habilidades"
-    }
-  ],
-  "card.sup.option.stealboo": [
-    {
-      "type": 0,
-      "value": "Roubar + boo"
     }
   ],
   "card.sup.option.suspense.add": [
@@ -23794,6 +23770,24 @@
       "value": "hero"
     }
   ],
+  "engine.log.arsenal.facedown.known": [
+    {
+      "type": 0,
+      "value": "A carta "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " é colocada virada para baixo no arsenal de "
+    },
+    {
+      "type": 1,
+      "value": "hero"
+    }
+  ],
   "engine.log.arsenal.facedown.private": [
     {
       "type": 0,
@@ -29937,6 +29931,18 @@
     {
       "type": 1,
       "value": "name"
+    }
+  ],
+  "game.deckToast.arsenalFromBanish": [
+    {
+      "type": 0,
+      "value": "Colocada virada para baixo no arsenal a partir da zona Banished"
+    }
+  ],
+  "game.deckToast.arsenalFromGraveyard": [
+    {
+      "type": 0,
+      "value": "Colocada virada para baixo no arsenal a partir do cemitério"
     }
   ],
   "game.deckToast.banishedFromDeck": [

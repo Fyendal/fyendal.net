@@ -1579,8 +1579,19 @@ Object.assign(ros, {
   "destructive aethertide|3": arcaneAnyTarget(1, {
     onDamageDealt(ctx: ScriptCtx, target: number, dealt: number, arcane: boolean) {
       if (!arcane || dealt <= 1) return;
-      const arsenal = ctx.player(target).arsenal;
-      if (arsenal.length) ctx.destroyPermanent(arsenal[0]!.instanceId);
+      const card = ctx.player(target).arsenal[0];
+      if (!card) return;
+      // Arsenal cards are not arena permanents, so destroyPermanent would no-op.
+      ctx.moveToGraveyard(card.instanceId, "arsenal");
+      ctx.logPublic(
+        localizedCardLog(
+          ctx,
+          `${ctx.data.name} destroys a card in their arsenal`,
+          "card.log.sly.arsenal.destroyed",
+          { target: { kind: "player", seat: target } },
+          { kind: "card-moved", ownerSeat: target, from: "arsenal", to: "graveyard" },
+        ),
+      );
     },
   }),
   "eternal inferno|1": {

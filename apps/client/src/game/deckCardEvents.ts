@@ -1,13 +1,13 @@
 import type { CardView, GameView, PendingDecision, PlayerView } from "@fyendal/shared";
 import { cardData } from "@fyendal/cards/client";
 
-export type DeckCardEventKind = "banish" | "graveyard" | "reveal" | "shuffle" | "roll" | "numbers";
+export type DeckCardEventKind = "banish" | "graveyard" | "reveal" | "arsenal" | "shuffle" | "roll" | "numbers";
 
 export interface DeckCardEvent {
   kind: DeckCardEventKind;
   cardIds: string[];
   label: string;
-  sourceZone?: "deck" | "graveyard" | "hand";
+  sourceZone?: "deck" | "graveyard" | "hand" | "banish";
   seat?: number;
   /** Per-card owner seats aligned with `cardIds`; used when one event mixes
    * owners (a clash reveals both heroes' cards in a single toast). */
@@ -231,6 +231,9 @@ export function detectDeckCardEvents(previous: GameView, current: GameView): Dec
   const announcedInstances = new Set<number>();
   const previouslyPublic = publicNonDeckIds(previous);
   const newLogLines = appendedLogLines(previous.log, current.log);
+  const previousSequence = (previous.logEntries ?? []).reduce((highest, entry) => (
+    "sequence" in entry ? Math.max(highest, entry.sequence) : highest
+  ), 0);
 
   const graveyardBanishNames = cardNamesBanishedFromGraveyard(newLogLines);
   if (graveyardBanishNames.size > 0) {
@@ -338,6 +341,32 @@ export function detectDeckCardEvents(previous: GameView, current: GameView): Dec
     });
   }
 
+  // A public card put face down into arsenal is shown once so both players know what went there.
+  for (const entry of previous.logEntries ? current.logEntries ?? [] : []) {
+    if (!("sequence" in entry) || entry.sequence <= previousSequence) continue;
+    const event = entry.event;
+    if (
+      event?.kind !== "card-moved" || !event.cardId || event.to !== "arsenal" ||
+      (event.from !== "graveyard" && event.from !== "banish")
+    ) continue;
+    const sourceZone = event.from;
+    const existing = events.find((candidate) => candidate.kind === "arsenal" && candidate.sourceZone === sourceZone);
+    if (existing) {
+      existing.cardIds.push(event.cardId);
+      existing.cardSeats = [...(existing.cardSeats ?? []), event.ownerSeat];
+    } else {
+      events.push({
+        kind: "arsenal",
+        cardIds: [event.cardId],
+        label: sourceZone === "graveyard"
+          ? "Put face down into arsenal from graveyard"
+          : "Put face down into arsenal from banished zone",
+        sourceZone,
+        cardSeats: [event.ownerSeat],
+      });
+    }
+  }
+
   const shuffledSeats = new Set<number>();
   for (const line of newLogLines) {
     const untagged = withoutCardPrintingTags(line);
@@ -378,9 +407,6 @@ export function detectDeckCardEvents(previous: GameView, current: GameView): Dec
 
   // Revealed secret numbers and die rolls come from structured log metadata;
   // sequences keep undo and resync from replaying an earlier reveal.
-  const previousSequence = (previous.logEntries ?? []).reduce((highest, entry) => (
-    "sequence" in entry ? Math.max(highest, entry.sequence) : highest
-  ), 0);
   for (const entry of previous.logEntries ? current.logEntries ?? [] : []) {
     if (!("sequence" in entry) || entry.sequence <= previousSequence) continue;
     // Card logs restate an engine roll ("Bad Beats: rolled 5"); only the

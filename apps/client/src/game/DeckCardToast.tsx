@@ -77,6 +77,12 @@ function localizedDeckCardEventLabel(event: DeckCardEvent): string | null {
   if (event.kind === "reveal" && event.sourceZone === "deck") {
     return "game.deckToast.revealedFromDeck";
   }
+  if (event.kind === "arsenal" && event.sourceZone === "graveyard") {
+    return "game.deckToast.arsenalFromGraveyard";
+  }
+  if (event.kind === "arsenal" && event.sourceZone === "banish") {
+    return "game.deckToast.arsenalFromBanish";
+  }
   return null;
 }
 

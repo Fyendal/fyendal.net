@@ -117,6 +117,30 @@ describe("MPW — import and Warrior mastery", () => {
       .expectFinalAttack(3);
   });
 
+  it("Sharpened Durendal weakens reactions defending it but not later attacks", () => {
+    const g = scenario({
+      seats: [
+        hala({ resources: 4, hand: ["snatch|1"], board: ["blade dance|0"] }),
+        { hero: "rhinar", hand: ["sink below|1", "sink below|1"], equipment: NO_EQUIPMENT },
+      ],
+    });
+    g.activate("hala|0")
+      .activate("durendal|0")
+      .blockWith()
+      .passPriority()
+      .react("sink below|1")
+      .chooseOption("pass")
+      .settle()
+      .expectFinalDefense(3)
+      .play("snatch|1")
+      .blockWith()
+      .passPriority()
+      .react("sink below|1")
+      .chooseOption("pass")
+      .settle()
+      .expectFinalDefense(4);
+  });
+
   it("And Again immediately attacks with a sharpened sword", () => {
     const g = scenario({
       seats: [

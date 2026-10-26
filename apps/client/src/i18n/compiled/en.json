@@ -15119,12 +15119,6 @@
       "value": "Suppress hero abilities"
     }
   ],
-  "card.sup.option.all": [
-    {
-      "type": 0,
-      "value": "All"
-    }
-  ],
   "card.sup.option.attackone": [
     {
       "type": 0,
@@ -15135,12 +15129,6 @@
     {
       "type": 0,
       "value": "Boo"
-    }
-  ],
-  "card.sup.option.booabilities": [
-    {
-      "type": 0,
-      "value": "Boo + suppress abilities"
     }
   ],
   "card.sup.option.courage": [
@@ -15189,18 +15177,6 @@
     {
       "type": 0,
       "value": "Steal"
-    }
-  ],
-  "card.sup.option.stealabilities": [
-    {
-      "type": 0,
-      "value": "Steal + suppress abilities"
-    }
-  ],
-  "card.sup.option.stealboo": [
-    {
-      "type": 0,
-      "value": "Steal + boo"
     }
   ],
   "card.sup.option.suspense.add": [
@@ -22848,6 +22824,24 @@
       "value": "'s arsenal"
     }
   ],
+  "engine.log.arsenal.facedown.known": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " is put face down into "
+    },
+    {
+      "type": 1,
+      "value": "hero"
+    },
+    {
+      "type": 0,
+      "value": "'s arsenal"
+    }
+  ],
   "engine.log.arsenal.facedown.private": [
     {
       "type": 1,
@@ -28403,6 +28397,18 @@
     {
       "type": 1,
       "value": "name"
+    }
+  ],
+  "game.deckToast.arsenalFromBanish": [
+    {
+      "type": 0,
+      "value": "Put face down into arsenal from banished zone"
+    }
+  ],
+  "game.deckToast.arsenalFromGraveyard": [
+    {
+      "type": 0,
+      "value": "Put face down into arsenal from graveyard"
     }
   ],
   "game.deckToast.banishedFromDeck": [

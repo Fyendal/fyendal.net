@@ -468,6 +468,8 @@ export interface Modifier {
   /** Seat-relative duration boundaries, robust to extra turns. */
   expiresAtStartOfSeatTurn?: number;
   expiresAtEndOfSeatTurn?: number;
+  /** Remove this modifier when the current action phase ends. */
+  expiresAtEndOfActionPhase?: boolean;
   createdTurn?: number;
   /** Base power stamped onto the next matching card when it is played.
    * Multiplication, division, and ordinary power adjustments apply later. */

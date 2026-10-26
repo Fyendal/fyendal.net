@@ -224,7 +224,14 @@ describe("OUT — registration and core mechanics", () => {
       .chooseCard(NON_ATTACK)
       .expectInZone(0, "infect|1", "arsenal")
       .expectInZone(1, "the weakest link|1", "arsenal")
-      .expectInZone(1, NON_ATTACK, "graveyard");
+      .expectInZone(1, NON_ATTACK, "graveyard")
+      .expectLog("Infect is put face down into")
+      .expectLog("The Weakest Link is put face down into")
+      .expectNoLog("puts a card face down into arsenal");
+    expect(s.state.players[1]!.arsenal[0]!.faceDown).toBe(true);
+    const moves = s.state.log.flatMap((entry) =>
+      entry.publicPayload?.event?.kind === "card-moved" ? [entry.publicPayload.event] : []);
+    expect(moves).toContainEqual(expect.objectContaining({ from: "graveyard", to: "arsenal", ownerSeat: 1, faceDown: true }));
   });
 
   it("Codex of Frailty cannot recover a face-down graveyard attack", () => {

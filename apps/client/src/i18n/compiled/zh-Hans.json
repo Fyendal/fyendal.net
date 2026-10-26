@@ -14168,12 +14168,6 @@
       "value": "压制英雄能力"
     }
   ],
-  "card.sup.option.all": [
-    {
-      "type": 0,
-      "value": "全部"
-    }
-  ],
   "card.sup.option.attackone": [
     {
       "type": 0,
@@ -14184,12 +14178,6 @@
     {
       "type": 0,
       "value": "喝倒彩 (boo)"
-    }
-  ],
-  "card.sup.option.booabilities": [
-    {
-      "type": 0,
-      "value": "喝倒彩 (boo) + 压制能力"
     }
   ],
   "card.sup.option.courage": [
@@ -14238,18 +14226,6 @@
     {
       "type": 0,
       "value": "夺取"
-    }
-  ],
-  "card.sup.option.stealabilities": [
-    {
-      "type": 0,
-      "value": "夺取 + 压制能力"
-    }
-  ],
-  "card.sup.option.stealboo": [
-    {
-      "type": 0,
-      "value": "夺取 + 喝倒彩 (boo)"
     }
   ],
   "card.sup.option.suspense.add": [
@@ -22153,6 +22129,24 @@
       "value": " 的 arsenal 中翻至面朝上"
     }
   ],
+  "engine.log.arsenal.facedown.known": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 被面朝下置入 "
+    },
+    {
+      "type": 1,
+      "value": "hero"
+    },
+    {
+      "type": 0,
+      "value": " 的 arsenal"
+    }
+  ],
   "engine.log.arsenal.facedown.private": [
     {
       "type": 1,
@@ -27364,6 +27358,18 @@
     {
       "type": 1,
       "value": "name"
+    }
+  ],
+  "game.deckToast.arsenalFromBanish": [
+    {
+      "type": 0,
+      "value": "从放逐区面朝下置入 arsenal"
+    }
+  ],
+  "game.deckToast.arsenalFromGraveyard": [
+    {
+      "type": 0,
+      "value": "从墓地面朝下置入 arsenal"
     }
   ],
   "game.deckToast.banishedFromDeck": [

@@ -368,6 +368,36 @@ describe("public deck-card events", () => {
     expect(detectDeckCardEvents(after, middle)).toEqual([]);
   });
 
+  it("announces public cards put face down into arsenal once", () => {
+    const moved = (sequence: number, cardId: string, ownerSeat: number) => ({
+      fallback: `${cardId} is put face down into arsenal`,
+      sequence,
+      message: { id: "engine.log.arsenal.facedown.known" },
+      event: {
+        kind: "card-moved" as const,
+        cardId,
+        ownerSeat,
+        from: "graveyard" as const,
+        to: "arsenal" as const,
+        faceDown: true as const,
+      },
+    });
+    const first = moved(1, "OUT001", 0);
+    const second = moved(2, "OUT002", 1);
+    const before = { ...view({ log: [] }), logEntries: [] };
+    const after = { ...view({ log: [first.fallback, second.fallback] }), logEntries: [first, second] };
+
+    expect(detectDeckCardEvents(before, after)).toEqual([{
+      kind: "arsenal",
+      cardIds: ["OUT001", "OUT002"],
+      label: "Put face down into arsenal from graveyard",
+      sourceZone: "graveyard",
+      cardSeats: [0, 1],
+    }]);
+    expect(detectDeckCardEvents(after, before)).toEqual([]);
+    expect(detectDeckCardEvents(after, after)).toEqual([]);
+  });
+
   it("announces revealed secret numbers once from structured log metadata", () => {
     const spur = Object.values(cardData).find((entry) => entry.name === "Spur Locked")!;
     const fallback = "Spur Locked: Hero chose 5, Opponent chose 2";

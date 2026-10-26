@@ -807,6 +807,9 @@ function modifierDuration(state: GameStateInternal, m: Modifier): EffectDuration
       ? duration("turn", "this action phase", "engine.effect.duration.this.action.phase")
       : duration("later", "next action phase", "engine.effect.duration.next.action.phase");
   }
+  if (m.expiresAtEndOfActionPhase) {
+    return duration("turn", "this action phase", "engine.effect.duration.this.action.phase");
+  }
   if (m.scope === "next-attack") return nextDuration(state, m, "attack");
   if (m.scope === "next-play") return nextDuration(state, m, "card");
   if (m.scope === "combat-chain" || m.scope === "chain-link") return chainCardDuration(state, m, CHAIN_SPANS[m.scope]);

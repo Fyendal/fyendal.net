@@ -2651,7 +2651,18 @@ export function makeCtx(
       if (fromGraveyard) {
         runtime.events.fireCardLeavesGraveyard(state, owner.seat, card, "arsenal");
       }
-      if (card.faceDown) {
+      if (card.faceDown && !sourceFaceDown && !transitionZoneIsPrivate(from)) {
+        // The card came from a public zone, so its identity is already known.
+        logPublic(state, gameLogMessage(
+          `${nameOf(state, card.cardId)} is put face down into ${nameOf(state, owner.heroCardId)}'s arsenal`,
+          "engine.log.arsenal.facedown.known",
+          {
+            card: logCardValue(card.cardId),
+            hero: logCardValue(owner.heroCardId),
+          },
+          { kind: "card-moved", cardId: card.cardId, ownerSeat: owner.seat, from, to: "arsenal", faceDown: true },
+        ));
+      } else if (card.faceDown) {
         logPrivate(
           state,
           owner.seat,

@@ -207,6 +207,7 @@ export interface PersistedModifierV1 {
   expiresAtEndOfTurn?: number;
   expiresAtStartOfSeatTurn?: number;
   expiresAtEndOfSeatTurn?: number;
+  expiresAtEndOfActionPhase?: boolean;
   createdTurn?: number;
   basePower?: number;
   attack?: number;

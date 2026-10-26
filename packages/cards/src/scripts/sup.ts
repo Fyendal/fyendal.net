@@ -66,10 +66,71 @@ function tokenAura(ctx: ScriptCtx, card: Card): boolean {
   return data(ctx, card).cardType === "token" && aura(ctx, card);
 }
 
-function finishLiarsCharmModes(ctx: ScriptCtx, modes: number): void {
-  if ((modes & 2) !== 0) ctx.crowdBoo(ctx.seat);
-  if ((modes & 4) === 0) return;
-  const target = opponentSeat(ctx);
+type CharmMode = { readonly option: string; readonly bit: number; readonly message: string };
+
+/** Offer the modes not yet chosen, plus "done"; false once none remain. */
+function requestCharmMode(
+  ctx: ScriptCtx,
+  hook: string,
+  stateKey: string,
+  modes: readonly CharmMode[],
+  prompt: string,
+  promptKey: string,
+): boolean {
+  const selected = ctx.getState(stateKey);
+  const remaining = modes.filter((mode) => (selected & mode.bit) === 0);
+  if (remaining.length === 0) return false;
+  ctx.requestChoice(
+    hook,
+    decisionPrompt(prompt, promptKey, {
+      optionMessages: {
+        ...Object.fromEntries(modes.map((mode) => [mode.option, decisionMessage(mode.message)])),
+        ...commonOptionMessages("done"),
+      },
+      chosen: modes.filter((mode) => (selected & mode.bit) !== 0).map((mode) => mode.option),
+    }),
+    [...remaining.map((mode) => mode.option), "done"],
+    undefined,
+    undefined,
+    "done",
+  );
+  return true;
+}
+
+const LIARS_CHARM_MODES = [
+  { option: "steal", bit: 1, message: "card.sup.option.steal" },
+  { option: "boo", bit: 2, message: "card.sup.option.boo" },
+  { option: "abilities", bit: 4, message: "card.sup.option.abilities" },
+] as const;
+
+function requestLiarsCharmTarget(ctx: ScriptCtx): void {
+  if ((ctx.getState("liar-modes") & 4) === 0) return;
+  ctx.requestCardChoice(
+    "liar-target",
+    decisionPrompt(`${ctx.data.name}: choose target hero`, "card.common.target.hero.choose", {
+      values: { card: { kind: "card", cardId: ctx.self.cardId } },
+    }),
+    ctx.state.players.map((player) => player.hero.instanceId),
+    undefined,
+    undefined,
+    undefined,
+    ctx.player(opponentSeat(ctx)).hero.instanceId,
+  );
+}
+function requestLiarsCharmMode(ctx: ScriptCtx): void {
+  const prompt = "Choose any number of modes";
+  if (!requestCharmMode(ctx, "liar-mode", "liar-modes", LIARS_CHARM_MODES, prompt, "card.sup.modes.choose"))
+    requestLiarsCharmTarget(ctx);
+}
+function suppressLiarsCharmTarget(ctx: ScriptCtx, target: number): void {
+  ctx.addModifier({
+    scope: "until-end-of-turn",
+    seat: target,
+    suppressesHeroAbilities: true,
+    expiresAtEndOfActionPhase: true,
+  });
+}
+function requestLiarsCharmDiscard(ctx: ScriptCtx, target: number): void {
   const hand = ctx.player(target).hand;
   if (hand.length)
     ctx.requestCardChoice(
@@ -80,8 +141,14 @@ function finishLiarsCharmModes(ctx: ScriptCtx, modes: number): void {
       ["lose abilities", ...hand.map((card) => card.instanceId)],
       target,
     );
-  else ctx.suppressHeroAbilitiesThroughNextTurn(target);
+  else suppressLiarsCharmTarget(ctx, target);
 }
+function finishLiarsCharmModes(ctx: ScriptCtx): void {
+  const modes = ctx.getState("liar-modes");
+  if ((modes & 2) !== 0) ctx.crowdBoo(ctx.seat);
+  if ((modes & 4) !== 0) requestLiarsCharmDiscard(ctx, ctx.getState("liar-target"));
+}
+
 const NUMBSKULL_CHARM_MODES = [
   { option: "destroy", bit: 1, message: "card.sup.option.numbskull.destroy" },
   { option: "cheer", bit: 2, message: "card.sup.option.numbskull.cheer" },
@@ -89,23 +156,13 @@ const NUMBSKULL_CHARM_MODES = [
 ] as const;
 
 function requestNumbskullCharmMode(ctx: ScriptCtx): void {
-  const selected = ctx.getState("numbskull-modes");
-  const chosen = NUMBSKULL_CHARM_MODES.filter((mode) => (selected & mode.bit) !== 0);
-  const remaining = NUMBSKULL_CHARM_MODES.filter((mode) => (selected & mode.bit) === 0);
-  if (remaining.length === 0) return;
-  ctx.requestChoice(
+  requestCharmMode(
+    ctx,
     "numbskull-mode",
-    decisionPrompt("Numbskull Charm: choose any number of modes", "card.sup.numbskull.modes.choose", {
-      optionMessages: {
-        ...Object.fromEntries(NUMBSKULL_CHARM_MODES.map((mode) => [mode.option, decisionMessage(mode.message)])),
-        ...commonOptionMessages("done"),
-      },
-      chosen: chosen.map((mode) => mode.option),
-    }),
-    [...remaining.map((mode) => mode.option), "done"],
-    undefined,
-    undefined,
-    "done",
+    "numbskull-modes",
+    NUMBSKULL_CHARM_MODES,
+    "Numbskull Charm: choose any number of modes",
+    "card.sup.numbskull.modes.choose",
   );
 }
 
@@ -1464,64 +1521,45 @@ Object.assign(sup, {
     ],
   },
   "liar's charm|2": {
+    declareAdditionalCost(ctx: ScriptCtx) {
+      ctx.setState("liar-modes", 0);
+      requestLiarsCharmMode(ctx);
+    },
     onPlay(ctx: ScriptCtx) {
-      ctx.requestChoice(
-        "liar-modes",
-        decisionPrompt("Choose any number of modes", "card.sup.modes.choose", {
-          optionMessages: {
-            none: decisionMessage("common.option.none"),
-            steal: decisionMessage("card.sup.option.steal"),
-            boo: decisionMessage("card.sup.option.boo"),
-            abilities: decisionMessage("card.sup.option.abilities"),
-            "steal + boo": decisionMessage("card.sup.option.stealboo"),
-            "steal + abilities": decisionMessage("card.sup.option.stealabilities"),
-            "boo + abilities": decisionMessage("card.sup.option.booabilities"),
-            all: decisionMessage("card.sup.option.all"),
-          },
-        }),
-        ["none", "steal", "boo", "abilities", "steal + boo", "steal + abilities", "boo + abilities", "all"],
-      );
+      if ((ctx.getState("liar-modes") & 1) !== 0) {
+        const tokens = ["Toughness", "Vigor"].flatMap((name) => {
+          const token = tokenNamed(ctx, opponentSeat(ctx), name);
+          return token ? [token] : [];
+        });
+        if (tokens.length) {
+          ctx.requestCardChoice(
+            "liar-steal",
+            decisionPrompt("Choose a Toughness or Vigor token to steal", "card.sup.token.steal.choose"),
+            tokens.map((card) => card.instanceId),
+          );
+          return;
+        }
+      }
+      finishLiarsCharmModes(ctx);
     },
     onChoose(ctx: ScriptCtx, hook: string, option: string) {
-      if (hook === "liar-modes") {
-        const modes =
-          option === "none"
-            ? 0
-            : option === "steal"
-              ? 1
-              : option === "boo"
-                ? 2
-                : option === "abilities"
-                  ? 4
-                  : option === "steal + boo"
-                    ? 3
-                    : option === "steal + abilities"
-                      ? 5
-                      : option === "boo + abilities"
-                        ? 6
-                        : 7;
-        ctx.setState("liar-modes", modes);
-        if ((modes & 1) !== 0) {
-          const tokens = ["Toughness", "Vigor"].flatMap((name) => {
-            const token = tokenNamed(ctx, opponentSeat(ctx), name);
-            return token ? [token] : [];
-          });
-          if (tokens.length) {
-            ctx.requestCardChoice(
-              "liar-steal",
-              decisionPrompt("Choose a Toughness or Vigor token to steal", "card.sup.token.steal.choose"),
-              tokens.map((card) => card.instanceId),
-            );
-            return;
-          }
+      if (hook === "liar-mode") {
+        const mode = LIARS_CHARM_MODES.find((candidate) => candidate.option === option);
+        if (!mode) {
+          requestLiarsCharmTarget(ctx);
+          return;
         }
-        finishLiarsCharmModes(ctx, modes);
+        ctx.setState("liar-modes", ctx.getState("liar-modes") | mode.bit);
+        requestLiarsCharmMode(ctx);
+      } else if (hook === "liar-target") {
+        const target = ctx.state.players.find((player) => player.hero.instanceId === Number(option))?.seat;
+        if (target !== undefined) ctx.setState("liar-target", target);
       } else if (hook === "liar-steal") {
         ctx.steal(Number(option), { duration: "indefinite" });
-        finishLiarsCharmModes(ctx, ctx.getState("liar-modes"));
+        finishLiarsCharmModes(ctx);
       } else if (hook === "liar-discard") {
-        const target = opponentSeat(ctx);
-        if (option === "lose abilities") ctx.suppressHeroAbilitiesThroughNextTurn(target);
+        const target = ctx.getState("liar-target");
+        if (option === "lose abilities") suppressLiarsCharmTarget(ctx, target);
         else resolveDiscardChoice(ctx, option, target);
       }
     },

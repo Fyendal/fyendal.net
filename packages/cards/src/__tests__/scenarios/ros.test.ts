@@ -1090,6 +1090,25 @@ describe("ROS — Wizard and generic", () => {
     g.play("chorus of the amphitheater|3", { pitch: ["will of arcana|3"] }).chooseOption("opposing hero").expectLife(1, 17);
   });
 
+  it("Destructive Aethertide destroys an arsenal card only when it surges", () => {
+    const seats = (hand: string[]): [SeatSpec, SeatSpec] => [
+      { hero: "rhinar", hand },
+      { hero: "dorinthea", hand: [], arsenalFaceDown: ["wounding blow|1"] },
+    ];
+    scenario({ seats: seats(["destructive aethertide|3"]) })
+      .play("destructive aethertide|3")
+      .chooseOption("opposing hero")
+      .expectLife(1, 19)
+      .expectInZone(1, "wounding blow|1", "arsenal");
+
+    scenario({ seats: seats(["exploding aether|1", BLUE, "destructive aethertide|3"]) })
+      .play("exploding aether|1", { pitch: [BLUE] })
+      .play("destructive aethertide|3")
+      .chooseOption("opposing hero")
+      .expectLife(1, 16)
+      .expectInZone(1, "wounding blow|1", "graveyard");
+  });
+
   it("Amp binds to Open the Flood Gates and Surge draws two cards", () => {
     const g = scenario({
       seats: [

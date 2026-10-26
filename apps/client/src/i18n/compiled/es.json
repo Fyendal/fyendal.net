@@ -15243,12 +15243,6 @@
       "value": "Suprimir las habilidades del héroe"
     }
   ],
-  "card.sup.option.all": [
-    {
-      "type": 0,
-      "value": "Todos"
-    }
-  ],
   "card.sup.option.attackone": [
     {
       "type": 0,
@@ -15259,12 +15253,6 @@
     {
       "type": 0,
       "value": "Abucheo (boo)"
-    }
-  ],
-  "card.sup.option.booabilities": [
-    {
-      "type": 0,
-      "value": "Abucheo (boo) + suprimir habilidades"
     }
   ],
   "card.sup.option.courage": [
@@ -15313,18 +15301,6 @@
     {
       "type": 0,
       "value": "Robar"
-    }
-  ],
-  "card.sup.option.stealabilities": [
-    {
-      "type": 0,
-      "value": "Robar + suprimir habilidades"
-    }
-  ],
-  "card.sup.option.stealboo": [
-    {
-      "type": 0,
-      "value": "Robar + abucheo (boo)"
     }
   ],
   "card.sup.option.suspense.add": [
@@ -23350,6 +23326,24 @@
       "value": "hero"
     }
   ],
+  "engine.log.arsenal.facedown.known": [
+    {
+      "type": 0,
+      "value": "La carta "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " se coloca boca abajo en el arsenal de "
+    },
+    {
+      "type": 1,
+      "value": "hero"
+    }
+  ],
   "engine.log.arsenal.facedown.private": [
     {
       "type": 0,
@@ -29297,6 +29291,18 @@
     {
       "type": 1,
       "value": "name"
+    }
+  ],
+  "game.deckToast.arsenalFromBanish": [
+    {
+      "type": 0,
+      "value": "Colocada boca abajo en el arsenal desde la zona Banished"
+    }
+  ],
+  "game.deckToast.arsenalFromGraveyard": [
+    {
+      "type": 0,
+      "value": "Colocada boca abajo en el arsenal desde el cementerio"
     }
   ],
   "game.deckToast.banishedFromDeck": [

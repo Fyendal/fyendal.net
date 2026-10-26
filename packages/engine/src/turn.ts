@@ -144,6 +144,7 @@ export function endTurn(state: GameStateInternal, runtime: EngineRuntime): void 
     }
   }
   state.phase = "end";
+  state.modifiers = state.modifiers.filter((m) => !m.expiresAtEndOfActionPhase);
   // Scheduled delayed destructions are collected with the other simultaneous
   // beginning-of-end-phase triggers below. They must not resolve before those
   // triggers are created: doing so can create new sources (for example a

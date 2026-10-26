@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { createGame } from "@fyendal/engine";
+import { createGame, legalIntents } from "@fyendal/engine";
 import { cardData, decklists, scripts } from "../../index.js";
 import { printingId, scenario } from "../harness.js";
 import type { Scenario } from "../harness.js";
@@ -61,6 +61,33 @@ describe("Mechanologist, Evo and Illusionist arena triggers use the stack", () =
     g.expectResources(0, 1);
   });
 
+  it("instant evos can be played on the opponent's turn", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", resources: 3, hand: ["raging onslaught|3"] },
+        {
+          hero: "dorinthea",
+          hand: ["evo zoom call|2", "evo buzz hive|2", "evo whizz bang|2", "evo zip line|2"],
+          equipment: {
+            head: "cogwerx base head|0",
+            chest: "cogwerx base chest|0",
+            arms: "cogwerx base arms|0",
+            legs: "cogwerx base legs|0",
+          },
+        },
+      ],
+    });
+
+    g.play("raging onslaught|3").blockWith();
+    yieldTo(g, 1);
+    const played = legalIntents(g.state, 1).flatMap((intent) =>
+      intent.kind === "play-card" ? [g.state.players[1]!.hand.find((card) => card.instanceId === intent.instanceId)?.cardId] : [],
+    );
+    for (const evo of ["evo zoom call|2", "evo buzz hive|2", "evo whizz bang|2", "evo zip line|2"]) {
+      expect(played).toContain(printingId(evo));
+    }
+  });
+
   it("Evo Heartdrive's next-attack discount waits for its equip trigger", () => {
     const g = scenario({
       seats: [
@@ -103,7 +130,6 @@ describe("Mechanologist, Evo and Illusionist arena triggers use the stack", () =
           { hero: "dorinthea" },
         ],
       });
-      g.state.players[0]!.flags.nextEvoAsInstant = true;
 
       g.play("raging onslaught|3").blockWith();
       yieldTo(g, 0);
@@ -132,7 +158,6 @@ describe("Mechanologist, Evo and Illusionist arena triggers use the stack", () =
         { hero: "dorinthea" },
       ],
     });
-    g.state.players[0]!.flags.nextEvoAsInstant = true;
 
     g.play("hunt to the ends of rathe|1").blockWith().settle();
     g.play("raging onslaught|3").blockWith();

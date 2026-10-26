@@ -214,6 +214,7 @@ export const mpw: Record<string, CardScript> = {
   "durendal|0": {
     activated: attackAbility(1),
     modifyDefendingDefense(ctx, defending) {
+      if (ctx.link?.attackingCard.instanceId !== ctx.self.instanceId) return 0;
       if (Number(ctx.self.counters?.power ?? 0) < 1) return 0;
       const cardType = data(ctx, defending).cardType;
       return cardType === "attack-reaction" || cardType === "defense-reaction" ? -1 : 0;
