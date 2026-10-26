@@ -107,6 +107,24 @@ export function consumeDelayedEffect(ctx: ScriptCtx, filter?: DelayedEffectFilte
   return pending ? ctx.consumeModifier(pending.id) : false;
 }
 
+const GRANTED_HIT_TARGET = "grantedHitTarget";
+
+/** Grant this card's on-hit rider to the active attack for the combat chain.
+ * The attack keeps it after its link resolves, so a later effect hit (Flick
+ * Knives) must still fire it. */
+export function armGrantedHitRider(
+  ctx: ScriptCtx,
+  label?: Pick<Modifier, "ongoingLabel" | "ongoingLabelMessage">,
+): void {
+  ctx.addModifier({ scope: "until-end-of-turn", expiresOnChainClose: true, ...label });
+  ctx.setState(GRANTED_HIT_TARGET, ctx.link!.attackingCard.instanceId);
+}
+
+/** Whether `card` still carries the rider this card armed. */
+export function grantedHitRiderOn(ctx: ScriptCtx, card: DeepReadonly<CardInstance> | undefined): boolean {
+  return !!card && ctx.getState(GRANTED_HIT_TARGET) === card.instanceId && !!pendingDelayedEffect(ctx);
+}
+
 /** The projected text of a granted on-hit script hook, after "when it hits:". */
 export function hitHookLabel(
   fallback: string,

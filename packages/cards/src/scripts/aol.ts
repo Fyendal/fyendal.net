@@ -280,10 +280,12 @@ export const aol: Record<string, CardScript> = {
     },
     triggers: [
       {
-        event: "wager-generated",
+        event: "attack-declared",
         label: "If it wagered, it gets dominate",
         condition: (ctx) => attached(ctx),
-        effect: (ctx) => ctx.addModifier({ scope: "chain-link", dominate: true }),
+        effect: (ctx) => {
+          if (ctx.getFlag("link", "wagered") === true) ctx.addModifier({ scope: "chain-link", dominate: true });
+        },
       },
     ],
   },

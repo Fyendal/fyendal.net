@@ -1349,12 +1349,36 @@ describe("Armory Decks — AHA, AZS, and AOL", () => {
     });
 
     g.play("heads up|1").play("money where ya mouth is|1")
-      .attackWithWeapon("golden grail|0").chooseOption("yes").settle();
+      .attackWithWeapon("golden grail|0", { settle: false });
+    const order = g.state.pendingDecision!;
+    g.doRaw({ kind: "choose", optionId: order.options![order.optionLabels!.findIndex((label) => label.includes("Wager"))]! }).settle()
+      .chooseOption("yes").settle();
 
     expect(projectStateFor(g.state, 0).chain.at(-1)?.dominate).toBe(true);
     expect(legalIntents(g.state, 1).some(
       (intent) => intent.kind === "defend" && intent.instanceIds.length === 2,
     )).toBe(false);
+  });
+
+  it("Heads Up does not grant dominate for a wager made after its attack trigger", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          weapons: ["golden grail|0"],
+          hand: ["heads up|1", "drawing dead|2"],
+          deck: ["alpha instinct|3"],
+          resources: 6,
+          equipment: NO_EQUIPMENT,
+        },
+        { hero: "dorinthea", hand: ["raging onslaught|1"], equipment: NO_EQUIPMENT },
+      ],
+    });
+
+    g.play("heads up|1").attackWithWeapon("golden grail|0").blockWith().react("drawing dead|2").settle();
+
+    expect(g.state.chain.at(-1)?.wagers).toHaveLength(1);
+    expect(projectStateFor(g.state, 0).chain.at(-1)?.dominate).toBe(false);
   });
 
   it("mandatory sword wagers still trigger when the attack targets an ally", () => {

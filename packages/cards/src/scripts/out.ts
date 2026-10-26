@@ -1,9 +1,11 @@
 import type { CardScript, DeepReadonly, CardInstance, ScriptCtx } from "@fyendal/engine";
 import {
+  armGrantedHitRider,
   buffNextAttack,
   commonOptionMessages,
   decisionMessage,
   decisionPrompt,
+  grantedHitRiderOn,
   heroChoiceSeat,
   heroTarget,
   mergeSetScripts,
@@ -58,11 +60,6 @@ function comboWith(ctx: ScriptCtx, ...names: string[]): boolean {
 function myAttack(ctx: ScriptCtx): boolean {
   return !!ctx.link && !ctx.link.resolved && ctx.link.attacker === ctx.seat;
 }
-function sourceArmed(ctx: ScriptCtx): boolean {
-  return ctx.state.modifiers.some(
-    (m) => m.sourceInstanceId === ctx.self.instanceId && m.scope === "chain-link" && !m.consumed,
-  );
-}
 function tokenOnHit(tokenId: string): CardScript {
   return {
     canTriggerOnHit(ctx) {
@@ -110,15 +107,19 @@ function stealthReaction(pump: number, token?: string): CardScript {
     },
     onPlay(ctx) {
       ctx.addModifier({ scope: "chain-link", attack: pump });
-      if (token) ctx.addModifier({ scope: "until-end-of-turn" });
+      if (token) armGrantedHitRider(ctx);
     },
     ...(token
       ? {
           canTriggerOnHit(ctx: ScriptCtx) {
-            return sourceArmed(ctx) && ctx.link?.targetAllyId === undefined;
+            return ctx.link?.targetAllyId === undefined && grantedHitRiderOn(ctx, ctx.link?.attackingCard);
           },
           onHit(ctx: ScriptCtx) {
             ctx.createToken(token, opponentSeat(ctx));
+          },
+          onFriendlyEffectHitCondition: grantedHitRiderOn,
+          onFriendlyEffectHit(ctx: ScriptCtx, _source: DeepReadonly<CardInstance>, targetSeat: number) {
+            ctx.createToken(token, targetSeat);
           },
         }
       : {}),

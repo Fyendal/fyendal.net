@@ -135,7 +135,7 @@ function codexFrailtyChoice(ctx: ScriptCtx, seat: number): void {
     return;
   }
   const player = ctx.player(seat);
-  const attacks = player.graveyard.filter((card) => isAttack(ctx, card));
+  const attacks = player.graveyard.filter((card) => !card.faceDown && isAttack(ctx, card));
   if (!attacks.length || !ctx.hasArsenalSpace(seat)) return codexFrailtyChoice(ctx, seat + 1);
   ctx.requestCardChoice(
     `codex-frailty:${seat}`,

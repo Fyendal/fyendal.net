@@ -391,6 +391,31 @@ describe("SAR — reaction pumps", () => {
       .expectInZone(1, "bloodrot pox|0", "board");
   });
 
+  it("Spike with Bloodrot creates Bloodrot Pox when Flick Knives makes its attack hit from an earlier link", () => {
+    const s = scenario({
+      seats: [
+        arakniSeat({
+          resources: 3,
+          equipment: { ...NO_EQUIPMENT, arms: "flick knives|0" },
+          hand: ["kiss of death|1", "spike with bloodrot|1"],
+        }),
+        { hero: "rhinar", hand: [BLUE, BLUE] },
+      ],
+    });
+    s.play("kiss of death|1")
+      .blockWith(BLUE, BLUE)
+      .react("spike with bloodrot|1")
+      .settle()
+      .expectNotInZone(1, "bloodrot pox|0", "board");
+    s.state.players[0]!.actionPoints = 1;
+    s.attackWithWeapon(HUNTSMAN)
+      .blockWith()
+      .activate("flick knives|0")
+      .chooseCard("kiss of death|1")
+      .settle()
+      .expectInZone(1, "bloodrot pox|0", "board");
+  });
+
   it("Stains of the Redback costs {r} less against a marked hero and grants go again", () => {
     const s = scenario({
       seats: [

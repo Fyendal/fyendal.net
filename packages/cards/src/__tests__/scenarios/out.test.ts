@@ -227,6 +227,26 @@ describe("OUT — registration and core mechanics", () => {
       .expectInZone(1, NON_ATTACK, "graveyard");
   });
 
+  it("Codex of Frailty cannot recover a face-down graveyard attack", () => {
+    const s = scenario({
+      seats: [
+        { hero: "rhinar", hand: ["codex of frailty|2", BLUE] },
+        {
+          hero: "dorinthea",
+          hand: [NON_ATTACK],
+          graveyard: ["the weakest link|1"],
+        },
+      ],
+    });
+    s.state.players[1]!.graveyard[0]!.faceDown = true;
+
+    s.play("codex of frailty|2")
+      .expectInZone(1, "the weakest link|1", "graveyard")
+      .expectInZone(1, NON_ATTACK, "hand");
+    expect(s.state.players[1]!.arsenal).toHaveLength(0);
+    expect(s.state.pendingDecision).toBeNull();
+  });
+
   it("Codex of Inertia makes only heroes whose arsenal took the top card discard", () => {
     const s = scenario({
       seats: [

@@ -1,11 +1,13 @@
 import type { ActivatedAbility, CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
 import {
+  armGrantedHitRider,
   attackAbility,
   buffNextAttack,
   cardNamed,
   commonOptionMessages,
   decisionMessage,
   decisionPrompt,
+  grantedHitRiderOn,
   localizedCardLog,
   markedStealthHeroScript,
   ongoingLabel,
@@ -170,12 +172,16 @@ function pumpWithRider(
     canPlay: (ctx) => myAttack(ctx) && target(ctx),
     onPlay(ctx) {
       ctx.addModifier({ scope: "chain-link", attack: pump });
-      ctx.addModifier({ scope: "until-end-of-turn", ...label }); // marker: source of the lingering onHit
+      armGrantedHitRider(ctx, label);
     },
     canTriggerOnHit(ctx) {
-      return ctx.link?.targetAllyId === undefined && armedBySelf(ctx);
+      return ctx.link?.targetAllyId === undefined && grantedHitRiderOn(ctx, ctx.link?.attackingCard);
     },
     onHit(ctx) {
+      rider(ctx);
+    },
+    onFriendlyEffectHitCondition: grantedHitRiderOn,
+    onFriendlyEffectHit(ctx) {
       rider(ctx);
     },
   };
@@ -529,13 +535,17 @@ export const sar: Record<string, CardScript> = {
       const selectedStealth = ctx.getState("twoSidesMode") === 2;
       ctx.addModifier({ scope: "chain-link", attack: 3 });
       if (stealthAction && (!dagger || selectedStealth)) {
-        ctx.addModifier({ scope: "until-end-of-turn", ...markOnHitLabel }); // marker for the mark rider
+        armGrantedHitRider(ctx, markOnHitLabel);
       }
     },
     canTriggerOnHit(ctx) {
-      return ctx.link?.targetAllyId === undefined && armedBySelf(ctx);
+      return ctx.link?.targetAllyId === undefined && grantedHitRiderOn(ctx, ctx.link?.attackingCard);
     },
     onHit(ctx) {
+      markHero(ctx, opponentSeat(ctx));
+    },
+    onFriendlyEffectHitCondition: grantedHitRiderOn,
+    onFriendlyEffectHit(ctx) {
       markHero(ctx, opponentSeat(ctx));
     },
     onChoose(ctx, hook, option) {
