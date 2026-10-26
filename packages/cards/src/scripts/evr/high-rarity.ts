@@ -889,6 +889,11 @@ export const evrHighRarity: Record<string, CardScript> = {
     onPlay(ctx) {
       ctx.dealDamage(opponentSeat(ctx), 4, { arcane: true, sourceInstanceId: ctx.self.instanceId });
     },
+    // Runs after any deferred Arcane Barrier payment, so X is the damage actually dealt.
+    onDamageDealt(ctx, _target, dealt, arcane) {
+      if (!arcane || dealt <= 0 || ctx.state.activePlayer === ctx.seat) return;
+      ctx.addModifier({ scope: "until-end-of-turn", damage: dealt, damageArcaneOnly: true, appliesToCardType: "action" });
+    },
   },
   "scour|3": {
     arcaneDamageEffect: true,

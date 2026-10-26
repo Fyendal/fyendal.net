@@ -1765,17 +1765,9 @@ export function scoreDefenseIntentWithTrace(
         ...cycleTrace,
       };
     }
-    // Staying alive is mandatory. Of the surviving plans, maximize the
-    // hero-specific next-turn damage projection first; only then prefer the
-    // lower-opportunity block and avoid needless overblocking/equipment wear.
-    const score = 100_000
-      + stopResponse.total * 1_000
-      + stopHitValue * 10
-      - preservationCost * 10
-      - overblock * 2
-      - chosen.length
-      - equipmentCost
-      + strategicDelta;
+    // Staying alive is mandatory; among surviving plans the full value still
+    // prices the life kept against the offense held.
+    const score = 100_000 + value.total;
     return { score, value, eligible: true, lethal, survives, stopsHit, ...cycleTrace };
   }
 

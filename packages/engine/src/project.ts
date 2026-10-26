@@ -24,7 +24,7 @@ import { arsenalCapacity, arsenalZoneCount } from "./cardLifecycle.js";
 import { attackHasVeil, cardColorOf, cardTypesOf, dataOf, instanceDataOf, scriptOf } from "./cardProperties.js";
 import type { TriggerEvent } from "./eventTypes.js";
 import { pendingOnHitEffects } from "./hits.js";
-import { linkGoAgainBlocked } from "./ruleQueries.js";
+import { freezeExpiry, linkGoAgainBlocked } from "./ruleQueries.js";
 import {
   conditionalModifierGrantsGoAgain,
   conditionalScriptGrantsGoAgain,
@@ -182,6 +182,7 @@ function cardView(state: GameStateInternal,
   const includeLife = opts.includeLife ?? true;
   const power = includeCounters ? (c.counters?.power ?? 0) : 0;
   const counters = includeCounters ? publicCounters(c) : undefined;
+  const frozenUntilTurn = freezeExpiry(state, c);
   const controller = opts.controller;
   const script = scriptOf(state, c.cardId, c);
   const abilities = abilityList(script);
@@ -248,6 +249,8 @@ function cardView(state: GameStateInternal,
     ...(c.arsenalSlot !== undefined ? { arsenalSlot: c.arsenalSlot } : {}),
     ...(c.intimidated ? { intimidated: true } : {}),
     ...(c.tapped ? { tapped: true } : {}),
+    ...(frozenUntilTurn !== undefined ? { frozen: true } : {}),
+    ...(typeof frozenUntilTurn === "number" ? { frozenUntilTurn } : {}),
     ...(includeCounters && c.defCounters ? { defCounters: c.defCounters } : {}),
     ...(counters ? { counters } : {}),
     ...(playableFromSource ? { playableFromSourceCardId: playableFromSource } : {}),

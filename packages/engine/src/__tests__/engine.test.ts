@@ -3545,6 +3545,25 @@ describe("combat", () => {
     expect(s.log.at(-1)?.publicText).toContain("is destroyed");
   });
 
+  it("projects frozen arsenal and arena cards with their unfreeze turn", () => {
+    const s = makeGame(37);
+    const p = player(s, 0);
+    p.arsenal = [{ instanceId: 992, cardId: "ATK6", owner: 0, faceDown: true, scriptState: { frozenUntilTurn: s.turn + 2 } }];
+    p.board.push({ instanceId: 993, cardId: "BLOCK3", owner: 0, scriptState: { "frozenWhileInArena:992": 1 } });
+    p.board.push({ instanceId: 994, cardId: "BLOCK3", owner: 0, scriptState: { frozenUntilTurn: s.turn } });
+
+    const view = projectStateFor(s, 0).players[0];
+    expect(view.arsenal[0]).toMatchObject({ frozen: true, frozenUntilTurn: s.turn + 2 });
+    // The source is not a permanent, so that freeze has already ended.
+    expect(view.board.find((c) => c.instanceId === 993)?.frozen).toBeUndefined();
+    expect(view.board.find((c) => c.instanceId === 994)?.frozen).toBeUndefined();
+
+    p.board.find((c) => c.instanceId === 993)!.scriptState = { "frozenWhileInArena:994": 1 };
+    const sourced = projectStateFor(s, 0).players[0].board.find((c) => c.instanceId === 993);
+    expect(sourced?.frozen).toBe(true);
+    expect(sourced?.frozenUntilTurn).toBeUndefined();
+  });
+
   it("clears named and defense counters when a card enters the graveyard", () => {
     const s = makeGame(36);
     const p = player(s, 0);

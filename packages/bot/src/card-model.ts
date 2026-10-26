@@ -263,6 +263,11 @@ export function chainStartFlags(input: BotPolicyInput): { links: number; flags: 
   return { links, flags };
 }
 
+/** Whether a card is still frozen on the given turn. */
+function frozenOnTurn(card: CardView, turn: number): boolean {
+  return card.frozen === true && (card.frozenUntilTurn === undefined || card.frozenUntilTurn > turn);
+}
+
 /**
  * Solver over the bot's hand, arsenal, weapons and equipment. On the bot's
  * own turn it continues the current action phase (resources, action points,
@@ -272,9 +277,11 @@ export function buildHandSolver(context: ModelContext): HandSolver {
   const { input, rules } = context;
   const me = input.view.players[input.seat];
   const nextTurn = input.view.activePlayer !== input.seat;
+  const solvedTurn = input.view.turn + (nextTurn ? 1 : 0);
   const chain = nextTurn ? undefined : chainStartFlags(input);
   const sources: SolverCard[] = [];
   const add = (card: CardView, zone: SolverZone) => {
+    if (frozenOnTurn(card, solvedTurn)) return;
     const model = solverCard(card, zone, context);
     if (model) sources.push(model);
   };

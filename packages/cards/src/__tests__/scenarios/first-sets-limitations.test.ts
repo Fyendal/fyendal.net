@@ -101,12 +101,22 @@ describe("first-set rules regression coverage", () => {
 
   it("Arcanite Skullcap conditionally has Arcane Barrier 3", () => {
     const g = scenario({ active: 1, seats: [
-      { hero: "rhinar", heroKey: "briar|0", life: 10, resources: 3, equipment: { ...NO_EQUIPMENT, head: "arcanite skullcap|0" } },
+      { hero: "rhinar", heroKey: "briar|0", life: 10, resources: 6, equipment: { ...NO_EQUIPMENT, head: "arcanite skullcap|0" } },
       { hero: "rhinar", heroKey: "briar|0", life: 20, hand: ["path of same ends|1"], equipment: NO_EQUIPMENT },
     ] });
     g.play("path of same ends|1");
     expect(g.state.pendingDecision?.prompt).toContain("Arcane Barrier");
     expect(g.state.pendingDecision?.options).toContain("pay 3");
+    expect(g.state.pendingDecision?.options).not.toContain("pay 6");
+  });
+
+  it("Arcanite Skullcap has no Arcane Barrier at equal life", () => {
+    const g = scenario({ active: 1, seats: [
+      { hero: "rhinar", heroKey: "briar|0", life: 20, resources: 3, equipment: { ...NO_EQUIPMENT, head: "arcanite skullcap|0" } },
+      { hero: "rhinar", heroKey: "briar|0", life: 20, hand: ["path of same ends|1"], equipment: NO_EQUIPMENT },
+    ] });
+    g.play("path of same ends|1");
+    expect(g.state.pendingDecision?.prompt ?? "").not.toContain("Arcane Barrier");
   });
 
   it("Chains of Eminence prohibits every use of the named card", () => {

@@ -3,6 +3,7 @@ import { createGame, legalIntents, projectStateFor } from "@fyendal/engine";
 import type { CardView, Decklist, GameIntent } from "@fyendal/shared";
 import { describe, expect, it } from "vitest";
 import { chooseBravoIntent } from "./bravo-policy.js";
+import { handDamage } from "./hand-value.js";
 import { bravoPresentationFor } from "./sideboard.js";
 
 function bravoDeck(opponent: Decklist = decklists.dorinthea): Decklist {
@@ -190,6 +191,72 @@ describe("Bravo policy", () => {
     expect(intent.instanceIds).toHaveLength(2);
     expect(intent.instanceIds).toContain(crash.instanceId);
     expect(intent.instanceIds).not.toContain(attack.instanceId);
+  });
+
+  it("blocks lethal with spare hand cards instead of falling to one life", () => {
+    const state = createGame({
+      decklists: [bravoDeck(), decklists.dorinthea],
+      cards: cardData,
+      scripts,
+      seed: 9604,
+      startPlayer: 1,
+    });
+    replaceHand(state, 0, ["SBR023", "SBR024", "SBR013", "SBR015"]);
+    state.players[0]!.life = 7;
+    // Pummel is frozen through Bravo's next turn, so it funds no line.
+    state.players[0]!.arsenal = [{
+      instanceId: state.nextInstanceId++,
+      cardId: "SBR020",
+      owner: 0,
+      faceDown: true,
+      scriptState: { frozenUntilTurn: state.turn + 2 },
+    }];
+    const view = projectStateFor(state, 0);
+    expect(view.players[0].arsenal[0]?.frozen).toBe(true);
+    const gauntlets = Object.values(view.players[0].equipment)
+      .find((card) => cardData[card?.cardId ?? ""]?.name === "Blade Beckoner Gauntlets")!;
+    const [blue, , red] = view.players[0].hand as [CardView, CardView, CardView, CardView];
+    view.phase = "defend";
+    view.priorityPlayer = 0;
+    view.pendingDecision = { player: 0, kind: "defend", prompt: "Choose defenders" };
+    view.chain = [{
+      attackingCard: { instanceId: 96_041, cardId: "AST011", owner: 1 },
+      defendingCards: [],
+      attackValue: 7,
+      defenseValue: 0,
+      damage: 7,
+      resolved: false,
+      reactions: [],
+    }];
+    const legal: GameIntent[] = [
+      { kind: "defend", instanceIds: [gauntlets.instanceId] },
+      { kind: "defend", instanceIds: [gauntlets.instanceId, blue.instanceId] },
+      { kind: "defend", instanceIds: [gauntlets.instanceId, red.instanceId] },
+    ];
+
+    expect(chooseBravoIntent({ seat: 0, view, legal, cards: cardData })).toEqual(legal[1]);
+  });
+
+  it("ignores an arsenal card that stays frozen through its next turn", () => {
+    const state = createGame({
+      decklists: [bravoDeck(), decklists.dorinthea],
+      cards: cardData,
+      scripts,
+      seed: 9605,
+      startPlayer: 1,
+    });
+    replaceHand(state, 0, ["SBR023", "SBR024", "SBR013"]);
+    const pummel = { instanceId: state.nextInstanceId++, cardId: "SBR020", owner: 0 as const, faceDown: true };
+    const damageWithPummelUntil = (unfreezeTurn: number | undefined) => {
+      state.players[0]!.arsenal = [{ ...pummel, ...(unfreezeTurn ? { scriptState: { frozenUntilTurn: unfreezeTurn } } : {}) }];
+      const input = inputFor(state, []);
+      const me = input.view.players[0];
+      return handDamage([...me.hand, ...me.arsenal], input, () => ({ name: "frozen-test" }));
+    };
+
+    const unfrozen = damageWithPummelUntil(undefined);
+    expect(damageWithPummelUntil(state.turn + 1)).toBe(unfrozen);
+    expect(damageWithPummelUntil(state.turn + 2)).toBeLessThan(unfrozen);
   });
 
   it("blocks Phantasm with only the six-power attack that destroys it", () => {

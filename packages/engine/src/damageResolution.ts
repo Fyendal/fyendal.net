@@ -366,8 +366,9 @@ function arcaneBarrierPieces(state: GameStateInternal,
   for (const source of controlledPermanents(state, player.seat, { faceDownEquipment: false })) {
     if (source.faceDown || cardAbilitiesSuppressed(state, source)) continue;
     const suppressed = new Set((source.suppressedKeywords ?? []).map((kw) => kw.toLowerCase()));
+    const script = scriptOf(state, source.cardId, source);
     const keywords = [
-      ...(dataOf(state, source.cardId).keywords ?? []),
+      ...(script?.arcaneBarrierValue ? [] : dataOf(state, source.cardId).keywords ?? []),
       ...(source.grantedKeywords ?? []),
     ];
     for (const kw of keywords) {
@@ -376,7 +377,7 @@ function arcaneBarrierPieces(state: GameStateInternal,
       if (m) out.push(Number(m[1]));
     }
     const dynamic = Number(
-      scriptOf(state, source.cardId, source)?.arcaneBarrierValue?.(
+      script?.arcaneBarrierValue?.(
         runtime.makeCtx(state, player.seat, source, currentLink(state)),
       ) ?? 0,
     );

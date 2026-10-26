@@ -1539,7 +1539,7 @@ export interface CardScript {
   /** Fixed arcane prevention applied while this source is attacking,
    * defending, or represented by an unresolved card layer on the stack. */
   preventArcaneDamageWhileActive?: number;
-  /** Conditional Arcane Barrier value while this source remains active. */
+  /** Conditional Arcane Barrier value; replaces the printed Arcane Barrier keyword. */
   arcaneBarrierValue?(ctx: ScriptCtx): number;
   /** Replace preventable damage to this source's controller. The returned
    * amount is the damage that remains in the event. */

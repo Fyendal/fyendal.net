@@ -694,6 +694,21 @@ describe("GameView and server messages", () => {
     expect(decodeGameView(invalidZones)).toBeNull();
   });
 
+  it("accepts frozen card status and rejects an unfreeze turn without it", () => {
+    const withArsenal = (card: Record<string, unknown>) => {
+      const view = gameView();
+      const player = view.players[0] as unknown as { arsenal: unknown[]; arsenalCount: number };
+      player.arsenal = [{ instanceId: 30, cardId: "ELE213", owner: 0, ...card }];
+      player.arsenalCount = 1;
+      return decodeGameView(view);
+    };
+    expect(withArsenal({ frozen: true, frozenUntilTurn: 8 })).not.toBeNull();
+    expect(withArsenal({ frozen: true })).not.toBeNull();
+    expect(withArsenal({ frozenUntilTurn: 8 })).toBeNull();
+    expect(withArsenal({ frozen: false, frozenUntilTurn: 8 })).toBeNull();
+    expect(withArsenal({ frozen: true, frozenUntilTurn: -1 })).toBeNull();
+  });
+
   it("accepts server-grouped stack layers with a bounded count", () => {
     const grouped = gameView();
     (grouped.stack[0] as typeof grouped.stack[0] & { count: number }).count = 3;

@@ -168,15 +168,33 @@ export const FROZEN_WHILE_SOURCE_IN_ARENA = "frozenWhileInArena:";
  * use that turn as the expiry, so the object is usable as soon as that turn
  * begins. */
 function frozenByEffect(state: GameStateInternal, card: CardInstance): boolean {
-  if (Number(card.scriptState?.frozenUntilTurn || 0) > state.turn) return true;
+  return timedFreezeExpiry(state, card) !== undefined || frozenWhileSourceInArena(state, card);
+}
+
+function timedFreezeExpiry(state: GameStateInternal, card: CardInstance): number | undefined {
+  const expiry = Number(card.scriptState?.frozenUntilTurn || 0);
+  return expiry > state.turn ? expiry : undefined;
+}
+
+function frozenWhileSourceInArena(state: GameStateInternal, card: CardInstance): boolean {
   return Object.keys(card.scriptState ?? {}).some((key) =>
     key.startsWith(FROZEN_WHILE_SOURCE_IN_ARENA) &&
     findPermanent(state, Number(key.slice(FROZEN_WHILE_SOURCE_IN_ARENA.length))) !== undefined
   );
 }
 
+/** The turn a frozen card unfreezes: a number for a freeze that is only timed,
+ * null while it lasts as long as another object, undefined when not frozen. */
+export function freezeExpiry(state: GameStateInternal, card: CardInstance): number | null | undefined {
+  if (frozenWhileSourceInArena(state, card) || frozenByArsenalCondition(state, card)) return null;
+  return timedFreezeExpiry(state, card);
+}
+
 export function isFrozen(state: GameStateInternal, card: CardInstance): boolean {
-  if (frozenByEffect(state, card)) return true;
+  return frozenByEffect(state, card) || frozenByArsenalCondition(state, card);
+}
+
+function frozenByArsenalCondition(state: GameStateInternal, card: CardInstance): boolean {
   const owner = (state.players as PlayerState[]).find((player) =>
     player.arsenal.some((candidate) => candidate.instanceId === card.instanceId)
   );

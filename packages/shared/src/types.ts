@@ -215,6 +215,11 @@ export interface CardView {
   intimidated?: boolean;
   /** Tapped permanent (arena zones only). */
   tapped?: boolean;
+  /** Frozen arena or arsenal card. Public status. */
+  frozen?: boolean;
+  /** First turn a timed freeze no longer applies; absent while the freeze
+   *  lasts as long as another object. */
+  frozenUntilTurn?: number;
   /** -1 defense counters on the card (Battleworn/Temper) — `defense` already
    *  reflects them; this is for rendering the counter badge. */
   defCounters?: number;

@@ -44,7 +44,8 @@ function handKey(input: BotPolicyInput, factory: HeroRulesFactory): string {
   const nextTurn = input.view.activePlayer !== input.seat;
   const ids = (cards: readonly CardView[]) => cards.map((card) =>
     `${card.instanceId}:${card.cardId}:${card.attack ?? ""}:${card.defense ?? ""}:${card.faceDown ? 1 : 0}` +
-    `:${card.usedAbilityIndexes?.join(".") ?? ""}:${card.playableFromSourceCardId ?? ""}`
+    `:${card.usedAbilityIndexes?.join(".") ?? ""}:${card.playableFromSourceCardId ?? ""}` +
+    `:${card.frozen ? card.frozenUntilTurn ?? "x" : ""}`
   ).join(",");
   return JSON.stringify([
     factory.name, input.view.gameId, input.seat, input.view.turn, nextTurn, me.life, opponent.life,

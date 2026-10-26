@@ -769,3 +769,43 @@ describe("EVR — Amulet of Echoes", () => {
     g.expectInZone(1, BLUE, "graveyard").expectInZone(1, RED_SIX, "graveyard").expectInZone(1, "head jab|1", "hand");
   });
 });
+
+describe("EVR — Aether Wildfire", () => {
+  const WILDFIRE = "aether wildfire|1";
+  const SNAPBACK = "snapback|1";
+
+  function opponentTurn() {
+    const s = scenario({
+      active: 1,
+      seats: [
+        {
+          hero: "rhinar",
+          equipment: { legs: "storm striders|0" },
+          hand: [WILDFIRE, SNAPBACK],
+          resources: 4,
+        },
+        { hero: "rhinar", resources: 3 },
+      ],
+    });
+    s.attackWithWeapon(undefined, { settle: false }).passPriority();
+    s.activate("storm striders|0", { settle: false }).passPriority().passPriority().passPriority();
+    s.react(WILDFIRE);
+    return s;
+  }
+
+  it("on an opponent's turn amps later action card arcane damage by the damage it dealt", () => {
+    const s = opponentTurn().expectLife(1, 16);
+    s.blockWith().passPriority().react(SNAPBACK).chooseOption("opposing hero").expectLife(1, 9);
+  });
+
+  it("on your own turn does not amp later arcane damage", () => {
+    const s = scenario({
+      seats: [
+        { hero: "rhinar", hand: [WILDFIRE, SNAPBACK], resources: 3 },
+        { hero: "dorinthea" },
+      ],
+    });
+    s.play(WILDFIRE).expectLife(1, 16);
+    s.react(SNAPBACK).chooseOption("opposing hero").expectLife(1, 13);
+  });
+});

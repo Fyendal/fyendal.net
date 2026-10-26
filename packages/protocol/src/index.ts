@@ -1194,7 +1194,7 @@ function cardView(value: unknown, depth = 0): value is CardView {
   if (!card || !exactKeys(card, [
     "instanceId", "cardId", "name", "owner", "pitchCount", "attack", "defense", "faceDown", "arsenalSlot", "tapped",
     "defCounters", "counters", "usedAbilityIndexes", "remainingAbilityActivations", "activatedAbilityLabels", "turnTriggers", "attackAbilityIndexes", "life", "hidden", "subcards", "grantedNames", "chosenName", "boundToInstanceId",
-    "grantedTypes", "grantedColor", "playableFromSourceCardId", "intimidated",
+    "grantedTypes", "grantedColor", "playableFromSourceCardId", "intimidated", "frozen", "frozenUntilTurn",
   ], ["instanceId", "cardId", "owner"])) return false;
   const validInstanceId = instanceId(card.instanceId)
     || (card.hidden === true
@@ -1211,6 +1211,9 @@ function cardView(value: unknown, depth = 0): value is CardView {
     && optional(card.arsenalSlot, (v): v is number => v === 0 || v === 1)
     && optional(card.intimidated, (v): v is boolean => typeof v === "boolean")
     && optional(card.tapped, (v): v is boolean => typeof v === "boolean")
+    && optional(card.frozen, (v): v is boolean => typeof v === "boolean")
+    && optional(card.frozenUntilTurn, nonNegativeInteger)
+    && (card.frozenUntilTurn === undefined || card.frozen === true)
     && optional(card.defCounters, nonNegativeInteger) && optional(card.counters, numberRecord)
     && optional(card.usedAbilityIndexes, abilityIndexes)
     && optional(card.remainingAbilityActivations, (v): v is number[] =>

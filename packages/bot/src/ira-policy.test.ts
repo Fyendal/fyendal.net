@@ -1029,7 +1029,7 @@ describe("Ira policy", () => {
       .toEqual({ kind: "defend", instanceIds: [blockThree!.instanceId] });
   });
 
-  it("stages a Lava Burst block that survives lethal and maximizes next-turn damage", () => {
+  it("stages a Lava Burst block that survives lethal and keeps its blue pitch", () => {
     const state = createGame({
       decklists: [iraDeck(), decklists.dorinthea],
       cards: cardData,
@@ -1065,15 +1065,13 @@ describe("Ira policy", () => {
     const intent = chooseIraIntent({ seat: 0, view, legal, cards: cardData });
     expect(intent.kind).toBe("stage-defenders");
     if (intent.kind !== "stage-defenders") return;
-    expect(intent.instanceIds).toHaveLength(1);
-    const blocker = view.players[0].hand.find((card) =>
-      card.instanceId === intent.instanceIds[0]
-    );
+    const blockers = view.players[0].hand
+      .filter((card) => intent.instanceIds.includes(card.instanceId))
+      .map((card) => card.cardId);
     // Give and Take and Legacy of Ikaru both block 3. Keeping blue Legacy
-    // pitches for 3 and funds Thorns, Razor Reflex and Edge of Autumn next
-    // turn; the three cost-1 reds alone cannot pay for each other.
-    expect(blocker?.cardId).toBe("ASR010");
-    expect(blocker?.defense).toBeGreaterThan(0);
+    // pitches for 3 and funds the cost-1 reds next turn.
+    expect(blockers).toContain("ASR010");
+    expect(blockers).not.toContain("ASR026");
   });
 
   it("only returns authoritative legal intents during a seeded playout", () => {
