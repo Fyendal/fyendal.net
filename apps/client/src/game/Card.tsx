@@ -253,7 +253,6 @@ export function CardFace({
   const [imageFailure, setImageFailure] = useState<{ cardId: string; attempts: number } | null>(null);
   const badges = cardBadges(card, { goAgain, dominate, overpower, veil, showFaceUp, wagered, wagerRewards });
   const marked = badges.some((badge) => badge.placement === "token");
-  const chips = badges.filter((badge) => badge.placement === "chip");
   const overlays = badges.flatMap((badge) => badge.placement === "overlay" ? [badge] : []);
   const rootRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -495,15 +494,6 @@ export function CardFace({
           </span>
         </div>
       ) : null}
-      {chips.length > 0 && (
-        <div className="c-chips">
-          {chips.map((chip) => (
-            <div key={chip.kind} className="c-chip">
-              {chip.text}
-            </div>
-          ))}
-        </div>
-      )}
       {hasOverlays && (
         <div className="c-ovls">
           {overlays.map((badge) => (

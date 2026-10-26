@@ -122,12 +122,6 @@
   object-position: 53% 51%;
   transform: scale(1.6);
 }
-.card-badge-value {
-  color: #ffd84a;
-  font-size: 13px;
-  font-weight: 800;
-  font-variant-numeric: tabular-nums;
-}
 .card-badge-text {
   display: flex;
   min-width: 0;
@@ -455,8 +449,7 @@
 /* real card image fills the frame; text layout is the fallback */
 .card-hasimg { padding: 0; overflow: hidden; }
 .card-hasimg.card-explained,
-.card-hasimg.card-countered,
-.card-hasimg:has(> .c-chips) { overflow: visible; }
+.card-hasimg.card-countered { overflow: visible; }
 .c-img {
   display: block;
   width: 100%;
@@ -494,13 +487,6 @@
   transform: none;
   border-radius: 5px;
   font-size: 9px;
-}
-/* Named counters sit on the artwork below the name bar, which would otherwise
-   cover the default top-left overhang. */
-.card-board-square .c-chips {
-  top: calc(var(--board-name-height) + 4px);
-  left: 3px;
-  z-index: 3;
 }
 /* The attacking weapon keeps a yellow frame around its complete silhouette. */
 .card-board-square.card-chain-source {
@@ -784,27 +770,6 @@
   font-size: 12px;
   line-height: 1.2;
   padding-right: 14px;
-}
-/* named-counter badges — top-left stack */
-.c-chips {
-  position: absolute;
-  top: -7px;
-  left: -7px;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  z-index: 1;
-}
-.c-chip {
-  background: radial-gradient(circle at 35% 35%, #3a3a46, #221a10);
-  border: 1px solid #a8854a;
-  border-radius: 12px;
-  padding: 3px 10px;
-  font-weight: 700;
-  font-size: 15px;
-  color: #ffd479;
-  white-space: nowrap;
-  text-shadow: 0 1px 2px #000;
 }
 /* Marked is a binary hero condition. Only the token's burning X is shown,
    screened over the hero art so its black ground drops out and the hero stays

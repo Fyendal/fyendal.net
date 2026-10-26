@@ -319,7 +319,6 @@
     --counter-icon-size: 16px;
     --counter-number-size: 11px;
   }
-  .mat-half .c-chip { padding: 2px 5px; font-size: 10px; }
   /* Preserve the desktop mat topology in six columns. The opponent's outer
      rows are mirrored below, just as they are by the desktop inline areas. */
   .mat-half .zone-head { grid-area: 1 / 1 !important; }

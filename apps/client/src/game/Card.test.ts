@@ -565,7 +565,7 @@ describe("CardFace counter icons", () => {
     expect(html).toContain("card-counter-42-attacked");
   });
 
-  it("renders steam and energy counters over their icons instead of text chips", () => {
+  it("renders steam and energy counters over their icons", () => {
     const html = renderToStaticMarkup(createElement(CardFace, {
       card: {
         instanceId: 43,
@@ -585,11 +585,9 @@ describe("CardFace counter icons", () => {
     expect(html.match(/role="tooltip"/g)).toHaveLength(2);
     expect(html.match(/tabindex="0"/g)).toHaveLength(2);
     expect(html).not.toContain("title=");
-    expect(html).not.toContain("2 steam</div>");
-    expect(html).not.toContain("3 energy</div>");
   });
 
-  it("renders suspense counters over the suspense icon instead of a text chip", () => {
+  it("renders suspense counters over the suspense icon", () => {
     const html = renderToStaticMarkup(createElement(CardFace, {
       card: {
         instanceId: 49,
@@ -602,10 +600,9 @@ describe("CardFace counter icons", () => {
     expect(html).toContain("/icons/suspense.png");
     expect(html).toContain("2 suspense counters");
     expect(html).toContain("card-counter-49-suspensec");
-    expect(html).not.toContain("2 suspense</div>");
   });
 
-  it("renders verse counters over the verse icon instead of a text chip", () => {
+  it("renders verse counters over the verse icon", () => {
     const html = renderToStaticMarkup(createElement(CardFace, {
       card: {
         instanceId: 50,
@@ -618,10 +615,9 @@ describe("CardFace counter icons", () => {
     expect(html).toContain("/icons/verse.png");
     expect(html).toContain("3 verse counters");
     expect(html).toContain("card-counter-50-versec");
-    expect(html).not.toContain("3 verse</div>");
   });
 
-  it("renders aim counters over the aim icon instead of a text chip", () => {
+  it("renders aim counters over the aim icon", () => {
     const html = renderToStaticMarkup(createElement(CardFace, {
       card: {
         instanceId: 54,
@@ -634,10 +630,9 @@ describe("CardFace counter icons", () => {
     expect(html).toContain("/icons/aim.png");
     expect(html).toContain("1 aim counter");
     expect(html).toContain("card-counter-54-aimc");
-    expect(html).not.toContain("1 aim</div>");
   });
 
-  it("renders flow, stain, and storm counters over their icons instead of text chips", () => {
+  it("renders flow, stain, and storm counters over their icons", () => {
     const html = renderToStaticMarkup(createElement(CardFace, {
       card: {
         instanceId: 53,
@@ -656,9 +651,6 @@ describe("CardFace counter icons", () => {
     expect(html).toContain("/icons/storm.png");
     expect(html).toContain("1 storm counter");
     expect(html).toContain("card-counter-53-stormc");
-    expect(html).not.toContain("2 flow</div>");
-    expect(html).not.toContain("3 stain</div>");
-    expect(html).not.toContain("1 storm</div>");
   });
 
   it("renders bind counters over their icon and frozen cards with the frozen icon", () => {
@@ -669,7 +661,6 @@ describe("CardFace counter icons", () => {
     expect(html).toContain("/icons/bind.png");
     expect(html).toContain("2 bind counters");
     expect(html).toContain("card-counter-54-bindc");
-    expect(html).not.toContain("2 bind</div>");
     expect(html).toContain('class="c-ovl c-frozen"');
     expect(html).toContain("/icons/frozen.svg");
   });
@@ -753,6 +744,27 @@ describe("CardFace counter icons", () => {
     }));
 
     expect(html).not.toContain("/icons/fuse.png");
+  });
+
+  it.each(["balance", "doom", "frost", "haunt", "lessons", "rust", "sand"])("renders %s counters over their icon", (key) => {
+    const html = renderToStaticMarkup(createElement(CardFace, {
+      card: { instanceId: 55, cardId: "DYN090", owner: 0, counters: { [key]: 3 } },
+    }));
+
+    expect(html).toContain(`/icons/${key}.png`);
+    expect(html).toContain(`3 ${key} counters`);
+    expect(html).toContain(`card-counter-55-${key}c`);
+  });
+
+  it("shows a counter's number only when it has two or more", () => {
+    const html = renderToStaticMarkup(createElement(CardFace, {
+      card: { instanceId: 56, cardId: "DYN090", owner: 0, counters: { rust: 1, sand: 2, steam: 1 } },
+    }));
+
+    expect(html).toContain("1 rust counter");
+    expect(html).toContain("1 steam counter");
+    expect(html.match(/class="c-ovl-num"/g)).toHaveLength(1);
+    expect(html).toContain('<span class="c-ovl-num">2</span>');
   });
 
   it("renders rules counters but hides card-script bookkeeping", () => {

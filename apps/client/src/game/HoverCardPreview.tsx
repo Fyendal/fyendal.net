@@ -50,14 +50,12 @@ function CardBadgePanel({ badges }: { badges: readonly CardBadge[] }) {
           <span className={`card-badge-tile c-${badge.kind}`} aria-hidden="true">
             {badge.icon ? (
               <img className="c-ovl-icon" src={badge.icon} alt="" />
-            ) : badge.placement === "token" ? (
+            ) : (
               <img
                 className="card-badge-token"
                 src={cardImageUrl(MARKED_TOKEN_ID)}
                 alt=""
               />
-            ) : (
-              <span className="card-badge-value">{badge.value}</span>
             )}
           </span>
           <span className="card-badge-text">

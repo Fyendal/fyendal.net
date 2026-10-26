@@ -9,21 +9,21 @@ export interface CardBadgeMessage {
 interface CardBadgeBase {
   /** Overlay class suffix (`c-<kind>`), which also selects the icon filter. */
   kind: string;
-  /** Number drawn over the on-card icon, or shown in an icon-less tile. */
+  /** Number drawn over the on-card icon. */
   value?: string;
-  /** English on-card copy: the icon's tooltip or the chip's label. */
+  /** English on-card copy: the icon's tooltip. */
   text: string;
   title: CardBadgeMessage;
   /** Rules reminder, or public runtime text such as wager rewards. */
   detail?: CardBadgeMessage | { text: string };
 }
 
-/** One public status or counter on a card. The card face draws it as an icon,
- * a text chip for icon-less rules counters, or the Marked token; the hover
- * preview spells the same list out beside a matching tile. */
+/** One public status or counter on a card. The card face draws it as an icon
+ * or the Marked token; the hover preview spells the same list out beside a
+ * matching tile. */
 export type CardBadge =
   | (CardBadgeBase & { placement: "overlay"; icon: string })
-  | (CardBadgeBase & { placement: "chip" | "token"; icon?: undefined });
+  | (CardBadgeBase & { placement: "token"; icon?: undefined });
 
 export const MARKED_TOKEN_ID = "HNT244";
 
@@ -39,10 +39,16 @@ export interface CardBadgeContext {
   wagerRewards?: readonly string[];
 }
 
-/** Rules counters that use the generic text-chip presentation. Card scripts
- * also keep implementation state in CardView.counters, so unknown keys must
- * not become player-facing labels. */
-const NAMED_COUNTER_KEYS = new Set([
+/** Rules counters drawn over `/icons/<key>.png`. Other counter keys are
+ * script bookkeeping and stay hidden. */
+const ICON_COUNTER_KEYS = [
+  "suspense",
+  "verse",
+  "flow",
+  "stain",
+  "storm",
+  "aim",
+  "bind",
   "balance",
   "doom",
   "frost",
@@ -50,17 +56,6 @@ const NAMED_COUNTER_KEYS = new Set([
   "lessons",
   "rust",
   "sand",
-]);
-
-/** Rules counters drawn over their own icon. */
-const ICON_COUNTERS = [
-  { key: "suspense", kind: "suspensec", icon: "/icons/suspense.png" },
-  { key: "verse", kind: "versec", icon: "/icons/verse.png" },
-  { key: "flow", kind: "flowc", icon: "/icons/flow.png" },
-  { key: "stain", kind: "stainc", icon: "/icons/stain.png" },
-  { key: "storm", kind: "stormc", icon: "/icons/storm.png" },
-  { key: "aim", kind: "aimc", icon: "/icons/aim.png" },
-  { key: "bind", kind: "bindc", icon: "/icons/bind.png" },
 ] as const;
 
 function signedCounter(value: number): string {
@@ -71,15 +66,24 @@ function isFuseCounter(key: string): boolean {
   return key === "fused" || key === "fusedEarth" || key === "fusedIce" || key.startsWith("fused:");
 }
 
+/** A single counter shows only its icon; the number appears from 2 up. */
+function stackedCount(count: number): { value?: string } {
+  return count >= 2 ? { value: String(count) } : {};
+}
+
 function counterTooltip(count: number, name: string): string {
   return `${count} ${name} counter${count === 1 ? "" : "s"}`;
 }
 
-function namedCounter(kind: string, name: string, count: number, icon?: string): CardBadge {
-  const title = { id: "game.card.badge.counter", values: { count, name } };
-  return icon
-    ? { kind, placement: "overlay", icon, value: String(count), text: counterTooltip(count, name), title }
-    : { kind, placement: "chip", value: String(count), text: `${count} ${name}`, title };
+function iconCounter(key: string, count: number): CardBadge {
+  return {
+    kind: `${key}c`,
+    placement: "overlay",
+    icon: `/icons/${key}.png`,
+    ...stackedCount(count),
+    text: counterTooltip(count, key),
+    title: { id: "game.card.badge.counter", values: { count, name: key } },
+  };
 }
 
 /** Every public status and counter on a visible card, in on-card order. */
@@ -189,7 +193,7 @@ export function cardBadges(card: CardView, context: CardBadgeContext = {}): Card
       kind: "steamc",
       placement: "overlay",
       icon: "/icons/gear.png",
-      value: String(steam),
+      ...stackedCount(steam),
       text: counterTooltip(steam, "steam"),
       title: { id: "game.card.badge.steam", values: { count: steam } },
     });
@@ -200,14 +204,14 @@ export function cardBadges(card: CardView, context: CardBadgeContext = {}): Card
       kind: "energyc",
       placement: "overlay",
       icon: "/icons/bolt.webp",
-      value: String(energy),
+      ...stackedCount(energy),
       text: counterTooltip(energy, "energy"),
       title: { id: "game.card.badge.energy", values: { count: energy } },
     });
   }
-  for (const { key, kind, icon } of ICON_COUNTERS) {
+  for (const key of ICON_COUNTER_KEYS) {
     const count = counters[key] ?? 0;
-    if (count > 0) badges.push(namedCounter(kind, key, count, icon));
+    if (count > 0) badges.push(iconCounter(key, count));
   }
   if ((counters.holo ?? 0) > 0) flag("holo", "/icons/holo.png", "Holo", "game.card.badge.holo");
   const arcane = counters.arcaneBonus ?? 0;
@@ -223,9 +227,6 @@ export function cardBadges(card: CardView, context: CardBadgeContext = {}): Card
   }
   if (Object.entries(counters).some(([key, value]) => isFuseCounter(key) && value > 0)) {
     flag("fusec", "/icons/fuse.png", "Fused", "game.card.badge.fused");
-  }
-  for (const [key, count] of Object.entries(counters)) {
-    if (NAMED_COUNTER_KEYS.has(key) && count !== 0) badges.push(namedCounter(`named-${key}`, key, count));
   }
   return badges;
 }

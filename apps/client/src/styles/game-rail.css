@@ -640,7 +640,6 @@
     --counter-icon-size: 15px;
     --counter-number-size: 10px;
   }
-  .mat-half .c-chip { padding: 1px 4px; font-size: 9px; }
   .board-cards { margin-block: -24px; padding-left: 15px; }
   .board-card-count {
     top: 1px;
