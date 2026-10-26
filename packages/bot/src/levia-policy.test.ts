@@ -1001,6 +1001,36 @@ describe("Levia Gates policy", () => {
     expect(selected).not.toMatchObject({ kind: "activate-ability", sourceInstanceId: hexagore?.instanceId });
   });
 
+  it("never swings Hexagore for three or more life on the opening turn", () => {
+    const state = game();
+    state.turn = 1;
+    hand(state, ["PEN194", "MON140"]);
+    const hexagore = state.players[0]!.weapons.find((weapon) => weapon.cardId === "MON121")!;
+    expect(legalIntents(state, 0)).toContainEqual(expect.objectContaining({
+      kind: "activate-ability", sourceInstanceId: hexagore.instanceId,
+    }));
+    expect(choice(state)).not.toMatchObject({ kind: "activate-ability", sourceInstanceId: hexagore.instanceId });
+  });
+
+  it("never swings Hexagore for three life at healthy life", () => {
+    const state = game();
+    state.players[0]!.life = 40;
+    for (let index = 0; index < 3; index++) {
+      state.players[0]!.banish.push({ instanceId: state.nextInstanceId++, cardId: "IAR028", owner: 0 });
+    }
+    hand(state, ["PEN194", "MON140"]);
+    const hexagore = state.players[0]!.weapons.find((weapon) => weapon.cardId === "MON121")!;
+    expect(choice(state)).not.toMatchObject({ kind: "activate-ability", sourceInstanceId: hexagore.instanceId });
+  });
+
+  it("still swings a costly Hexagore for lethal", () => {
+    const state = game();
+    state.players[1]!.life = 6;
+    hand(state, ["PEN194", "MON140"]);
+    const hexagore = state.players[0]!.weapons.find((weapon) => weapon.cardId === "MON121")!;
+    expect(choice(state)).toMatchObject({ kind: "activate-ability", sourceInstanceId: hexagore.instanceId });
+  });
+
   it("uses a lethal attack line without unnecessary Hexagore self-damage", () => {
     const state = game();
     state.players[0]!.life = 7;

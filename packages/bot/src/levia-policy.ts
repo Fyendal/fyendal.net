@@ -73,6 +73,30 @@ function ownBloodDebt(input: BotPolicyInput): number {
   return leviaBloodDebt(input.view.players[input.seat].banish, input);
 }
 
+/** Most life Levia pays for a Hexagore swing that does not end the game. */
+const HEXAGORE_MAX_SELF_DAMAGE = 2;
+
+function hexagoreSelfDamage(input: BotPolicyInput): number {
+  return Math.max(0, 6 - ownBloodDebt(input));
+}
+
+/** A Hexagore swing that costs more life than the cap and is not a survivable kill. */
+function costlyHexagore(intent: GameIntent, input: BotPolicyInput): boolean {
+  if (intent.kind !== "activate-ability") return false;
+  const me = input.view.players[input.seat];
+  const weapon = me.weapons.find((held) => held.instanceId === intent.sourceInstanceId);
+  const data = input.cards[weapon?.cardId ?? ""];
+  if (name(data) !== "hexagore, the death hydra") return false;
+  const selfDamage = hexagoreSelfDamage(input);
+  if (selfDamage <= HEXAGORE_MAX_SELF_DAMAGE) return false;
+  const lethal = (data?.attack ?? 0) >= input.view.players[1 - input.seat]!.life && selfDamage < me.life;
+  return !lethal;
+}
+
+function withoutCostlyHexagore(intents: readonly GameIntent[], input: BotPolicyInput): GameIntent[] {
+  return intents.filter((intent) => !costlyHexagore(intent, input));
+}
+
 /** Share of six-power cards assumed in an unknown deck. */
 const DEFAULT_TOP_SIX_SHARE = 0.6;
 
@@ -208,7 +232,7 @@ function weaponSwingPair(input: BotPolicyInput, cards: readonly CardView[]): boo
     if (intent.kind !== "activate-ability" || !weaponIds.has(intent.sourceInstanceId)) return false;
     const weapon = me.weapons.find((held) => held.instanceId === intent.sourceInstanceId);
     // A Hexagore swing that costs life is not worth rolling for.
-    return name(input.cards[weapon?.cardId ?? ""]) !== "hexagore, the death hydra" || ownBloodDebt(input) >= 6;
+    return name(input.cards[weapon?.cardId ?? ""]) !== "hexagore, the death hydra" || hexagoreSelfDamage(input) === 0;
   });
   if (!swing) return false;
   const sash = leviaEffectActive(input, "savage sash");
@@ -352,7 +376,7 @@ function leviaRules(input: BotPolicyInput, gateMode: boolean): HeroSolverRules {
   const banishedSix = !nextTurn && input.view.turnFacts?.players[input.seat]?.banishedSixPlusThisTurn === true;
   const weaponPower = Math.max(0, ...me.weapons.map((weapon) => input.cards[weapon.cardId]?.attack ?? 0));
   const debt = ownBloodDebt(input);
-  const hexagoreSelfDamage = Math.max(0, 6 - debt);
+  const selfDamage = hexagoreSelfDamage(input);
   // Life the evaluated turn's end phase drains unless a six is banished.
   const playExposure = nextTurn || !banishedSix ? debt : 0;
   return {
@@ -426,8 +450,8 @@ function leviaRules(input: BotPolicyInput, gateMode: boolean): HeroSolverRules {
           patch.powerIn = () => weaponPower;
           break;
         case "hexagore, the death hydra":
-          // Self-damage: 6 minus banished Blood Debt.
-          patch.bonusIn = () => -hexagoreSelfDamage;
+          patch.canPlay = () => selfDamage <= HEXAGORE_MAX_SELF_DAMAGE;
+          patch.bonusIn = () => -selfDamage;
           break;
         default:
           break;
@@ -770,7 +794,7 @@ function scorePlay(intent: GameIntent, input: BotPolicyInput, own: ReadonlyMap<n
       score += 20;
     }
     if (named === "hexagore, the death hydra") {
-      const selfDamage = Math.max(0, 6 - ownBloodDebt(input));
+      const selfDamage = hexagoreSelfDamage(input);
       score -= selfDamage * (me.life <= 9 ? 15 : 5);
       if (selfDamage >= me.life) score -= 1_000;
       else if ((data.attack ?? 0) >= input.view.players[1 - input.seat]!.life && !hasDirectAttack(input, own)) score += 120;
@@ -1032,7 +1056,8 @@ export interface LeviaIntentDecision {
   macro: LeviaMacroChoice;
 }
 
-export function chooseLeviaIntentWithTrace(input: BotPolicyInput): LeviaIntentDecision {
+export function chooseLeviaIntentWithTrace(raw: BotPolicyInput): LeviaIntentDecision {
+  const input = { ...raw, legal: withoutCostlyHexagore(raw.legal, raw) };
   const macro = chooseLeviaMacro(input);
   // Levia's instants set up her own attacks. Keep the hand for blocks throughout
   // the opponent's turn, including priority windows before an attack is declared.
@@ -1061,8 +1086,10 @@ export function chooseLeviaIntentWithTrace(input: BotPolicyInput): LeviaIntentDe
     rankContinuations: true,
     // Continuations keep the preferred pitch pattern per action; the root
     // candidates still carry every pattern.
-    prepareCandidates: (candidates, observed, { depth }) =>
-      depth === 0 ? candidates : preferredPitchIntents(candidates, observed),
+    prepareCandidates: (candidates, observed, { depth }) => {
+      const allowed = withoutCostlyHexagore(candidates, observed);
+      return depth === 0 ? allowed : preferredPitchIntents(allowed, observed);
+    },
     maxForcedSteps: 48,
     simulatedWinBonus: LEVIA_SIMULATED_WIN_BONUS,
   });
@@ -1074,16 +1101,16 @@ export function chooseLeviaIntentWithTrace(input: BotPolicyInput): LeviaIntentDe
   const rootScore = (intent: GameIntent) => scoreCandidate(intent, input, macro);
   const reactiveRoot = plan?.rootResults.find((root) => sameIntent(root.intent, reactive));
   // Equal lines fall back to the reactive ranking.
-  const bestRoot = plan?.rootResults.reduce((best, root) =>
-    root.score > best.score || (root.score === best.score && rootScore(root.intent) > rootScore(best.intent))
+  const best = (roots: NonNullable<typeof plan>["rootResults"]) => roots.length === 0 ? undefined : roots.reduce((top, root) =>
+    root.score > top.score || (root.score === top.score && rootScore(root.intent) > rootScore(top.intent))
       ? root
-      : best);
+      : top);
+  const bestRoot = plan && best(plan.rootResults);
   const savesLife = reactiveRoot && bestRoot &&
     bestRoot.score - reactiveRoot.score >= LEVIA_PLAN_OVERRIDE_MARGIN &&
     reactiveRoot.evaluation.risk - bestRoot.evaluation.risk >= LEVIA_PLAN_OVERRIDE_RISK;
-  const selected = bestRoot && (savesLife || rootScore(bestRoot.intent) >= rootScore(reactive))
-    ? bestRoot.intent
-    : reactive;
+  const bestRanked = plan && best(plan.rootResults.filter((root) => rootScore(root.intent) >= rootScore(reactive)));
+  const selected = savesLife ? bestRoot.intent : bestRanked?.intent ?? reactive;
   const intent = enforceAllyTargetPolicy(input, enforceSpectraPolicy(input, selected));
   return plan ? { intent, plan, macro } : { intent, macro };
 }
