@@ -536,16 +536,14 @@ function recordCharge(
   owner.flags.chargedCountThisTurn =
     (Number(owner.flags.chargedCountThisTurn) || 0) + 1;
   owner.flags[`chargedPitch:${color}`] = (Number(owner.flags[`chargedPitch:${color}`]) || 0) + 1;
-  scriptOf(state, card.cardId, card)?.onCharged?.(
-    runtime.makeCtx(state, card.owner, card, currentLink(state)),
-  );
+  runtime.events.queueTriggeredEvent(state, "card-charged", owner.seat, card);
 }
 
 /**
  * Put a card into its owner's soul (face up, public). Records the per-turn
  * facts on the owner (`soulThisTurn`, `soulPitch:<n>` counts). When `charged`,
  * also records the Charge named-event even if a replacement effect changes
- * the destination, and fires the charged card's onCharged hook (Solflare).
+ * the destination, and raises the "card-charged" event (Solflare).
  */
 export function enterSoul(
   state: GameStateInternal,

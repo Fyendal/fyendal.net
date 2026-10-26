@@ -1,5 +1,11 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
-import { decisionMessage, decisionPrompt, localizedCardLog } from "./shared-helpers.js";
+import {
+  chargeDeclineMessages,
+  decisionPrompt,
+  isChargeDecline,
+  localizedCardLog,
+  optionalChargeOptions,
+} from "./shared-helpers.js";
 
 const COURAGE = "ASB027";
 const QUICKEN = "ASB028";
@@ -16,16 +22,16 @@ function chargeAdditionalCost(ctx: ScriptCtx): void {
       CHARGE_HOOK,
       decisionPrompt(`${ctx.data.name}: choose a card to charge, or decline`, "card.asb.charge.choose", {
         values: { card: { kind: "card", cardId: ctx.self.cardId } },
-        optionMessages: { no: decisionMessage("common.option.decline") },
+        optionMessages: chargeDeclineMessages,
       }),
-      ["no", ...hand.map((card) => card.instanceId)],
+      optionalChargeOptions(ctx),
     );
   }
 }
 
 function chargeOnChoose(ctx: ScriptCtx, hook: string, option: string): boolean {
   if (hook !== CHARGE_HOOK) return false;
-  if (option !== "no") {
+  if (!isChargeDecline(option)) {
     const charged = ctx.charge(Number(option));
     if (charged) ctx.setState("chargedPitch", ctx.cardColor(charged));
   }
@@ -41,14 +47,14 @@ function graceEquipment(effect: (ctx: ScriptCtx) => void): CardScript {
           "grace-charge",
           decisionPrompt(`${ctx.data.name}: charge a card, or decline`, "card.asb.charge.choose", {
             values: { card: { kind: "card", cardId: ctx.self.cardId } },
-            optionMessages: { no: decisionMessage("common.option.decline") },
+            optionMessages: chargeDeclineMessages,
           }),
-          ["no", ...hand.map((card) => card.instanceId)],
+          optionalChargeOptions(ctx),
         );
       }
     },
     onChoose(ctx, hook, option) {
-      if (hook !== "grace-charge" || option === "no") return;
+      if (hook !== "grace-charge" || isChargeDecline(option)) return;
       const charged = ctx.charge(Number(option));
       if (charged && ctx.cardColor(charged) === 2) effect(ctx);
     },

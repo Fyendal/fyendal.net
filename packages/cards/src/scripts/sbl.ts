@@ -3,9 +3,13 @@ import { SHARPEN_FOLLOWUP, sharpenSword } from "./aha/warrior-sharpen.js";
 import {
   attackAbility,
   buffNextAttack,
-  commonOptionMessages,
+  chargeDeclineMessages,
+  decisionMessage,
   decisionPrompt,
+  isChargeDecline,
   localizedCardLog,
+  optionalChargeOptions,
+  solflareTrigger,
 } from "./shared-helpers.js";
 
 // ── SBL (Silver Age: Boltyn precon) ─────────────────────────────────────────
@@ -14,7 +18,7 @@ import {
 // - The hero's soul zone + Charge (engine: PlayerState.soul, ctx.charge /
 //   ctx.putIntoSoul, per-turn flags `chargedThisTurn` /
 //   `chargedCountThisTurn` / `chargedPitch:<n>` / `soulPitch:<n>`, and the
-//   onCharged script hook for Solflare). Charging as
+//   "card-charged" trigger event for Solflare). Charging as
 //   an optional additional cost is a scripted yes/no choice that pauses the
 //   play (the Fusion pause/resume machinery); the charged card's pitch is
 //   stamped on the played card as a `chargedPitch` counter so "if a yellow
@@ -72,16 +76,16 @@ function chargeAdditionalCost(ctx: ScriptCtx): void {
     CHARGE_HOOK,
     decisionPrompt(`${ctx.data.name}: choose a card from your hand to charge, or decline`, "card.sbl.charge.choose", {
       values: { card: { kind: "card", cardId: ctx.self.cardId } },
-      optionMessages: commonOptionMessages("no"),
+      optionMessages: chargeDeclineMessages,
     }),
-    ["no", ...hand.map((card) => card.instanceId)],
+    optionalChargeOptions(ctx),
   );
 }
 
 /** Shared onChoose for the charge-cost hook; returns true when handled. */
 function chargeOnChoose(ctx: ScriptCtx, hook: string, option: string): boolean {
   if (hook !== CHARGE_HOOK) return false;
-  if (option !== "no") {
+  if (!isChargeDecline(option)) {
     const charged = ctx.charge(Number(option));
     if (charged) ctx.setState("chargedPitch", ctx.cardColor(charged));
   }
@@ -376,17 +380,23 @@ export const sbl: Record<string, CardScript> = {
   // Solflare: "When this is charged to your hero's soul, the next time you hit
   // this turn, gain 1{h}."
   "banneret of salvation|2": {
-    onCharged(ctx) {
-      ctx.addModifier({ scope: "until-end-of-turn", onHitGainLife: 1 });
-      ctx.logPublic(
-        localizedCardLog(
-          ctx,
-          "Banneret of Salvation: the next time you hit this turn, gain 1 life",
-          "card.log.sbl.banneret.life",
-          { amount: 1 },
-        ),
-      );
-    },
+    triggers: [
+      solflareTrigger(
+        "The next time you hit this turn, gain 1 life",
+        decisionMessage("card.trigger.solflare.hit.life", { amount: 1 }),
+        (ctx) => {
+          ctx.addModifier({ scope: "until-end-of-turn", onHitGainLife: 1 });
+          ctx.logPublic(
+            localizedCardLog(
+              ctx,
+              "Banneret of Salvation: the next time you hit this turn, gain 1 life",
+              "card.log.sbl.banneret.life",
+              { amount: 1 },
+            ),
+          );
+        },
+      ),
+    ],
   },
 
   // ── Reactions / non-attack actions / instants ─────────────────────────────

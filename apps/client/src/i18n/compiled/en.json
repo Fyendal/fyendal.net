@@ -18283,6 +18283,82 @@
       "value": "Tap target Pirate hero or ally"
     }
   ],
+  "card.trigger.solflare.defense": [
+    {
+      "type": 0,
+      "value": "The next action card you defend with this turn gets +"
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " defense"
+    }
+  ],
+  "card.trigger.solflare.hit.life": [
+    {
+      "type": 0,
+      "value": "The next time you hit this turn, gain "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " life"
+    }
+  ],
+  "card.trigger.solflare.hit.resource": [
+    {
+      "type": 0,
+      "value": "The next time you hit this turn, gain "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " "
+    },
+    {
+      "type": 6,
+      "value": "amount",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 0,
+              "value": "resource"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 0,
+              "value": "resources"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    }
+  ],
+  "card.trigger.solflare.token.create": [
+    {
+      "type": 0,
+      "value": "Create a "
+    },
+    {
+      "type": 1,
+      "value": "token"
+    }
+  ],
   "card.trigger.steam.maintain": [
     {
       "type": 0,

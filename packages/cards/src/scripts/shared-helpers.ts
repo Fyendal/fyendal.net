@@ -164,6 +164,30 @@ export function leavesArenaTrigger(
   return { event: "card-left-arena", sourceZone: "self", label, labelMessage, effect, ...extra };
 }
 
+/** "pass" lets the client pick the charged card in hand instead of in a popup. */
+const CHARGE_DECLINE = "pass";
+
+/** Options for an optional charge: decline, then each hand card. */
+export function optionalChargeOptions(ctx: ScriptCtx): (string | number)[] {
+  return [CHARGE_DECLINE, ...ctx.player(ctx.seat).hand.map((card) => card.instanceId)];
+}
+
+export const chargeDeclineMessages = { [CHARGE_DECLINE]: decisionMessage("common.option.decline") };
+
+/** "no" still declines decisions persisted before charges declined with "pass". */
+export function isChargeDecline(option: string): boolean {
+  return option === CHARGE_DECLINE || option === "no";
+}
+
+/** Solflare: a triggered layer raised when this is charged to its hero's soul. */
+export function solflareTrigger(
+  label: string,
+  labelMessage: GameMessage,
+  effect: (ctx: ScriptCtx) => void,
+): TriggerDef {
+  return { event: "card-charged", sourceZone: "self", label, labelMessage, effect };
+}
+
 /** "When this is destroyed, ...": a triggered layer raised by this card's own
  * destruction, added before the next player receives priority (CR 6.6.6). */
 export function destroyedTrigger(

@@ -13,6 +13,7 @@ export type TriggerEvent =
   | "card-banished-for-boost"
   | "card-boosted"
   | "card-put-into-graveyard"
+  | "card-charged"
   | "card-moved-from-deck-by-effect"
   | "token-created"
   | "weapon-attack-activated"

@@ -7,15 +7,19 @@ import {
   bloodDebtScript as bloodDebt,
   buffNextAttack,
   cardNameContains,
+  chargeDeclineMessages,
   commonOptionMessages,
   consumeDelayedEffect,
   decisionMessage,
   decisionPrompt,
   entersArenaTrigger,
+  isChargeDecline,
   localizedCardLog,
   ongoingLabel,
   opponentSeat,
+  optionalChargeOptions,
   queueIntimidate,
+  solflareTrigger,
   yesNoPrompt,
 } from "../shared-helpers.js";
 
@@ -183,9 +187,13 @@ function prismAdult(): CardScript {
 }
 function solflareToken(cardId: string): CardScript {
   return {
-    onCharged: (ctx) => {
-      ctx.createToken(cardId);
-    },
+    triggers: [
+      solflareTrigger(
+        "Create a token",
+        decisionMessage("card.trigger.solflare.token.create", { token: { kind: "card", cardId } }),
+        (ctx) => ctx.createToken(cardId),
+      ),
+    ],
   };
 }
 function topYellowToSoul(): CardScript {
@@ -386,12 +394,12 @@ export const dtdHighRarity: Record<string, CardScript> = {
       if (hand.length)
         ctx.requestCardChoice(
           "soulbond",
-          decisionPrompt("Charge a card?", "card.dtd.charge.optional", { optionMessages: commonOptionMessages("no") }),
-          ["no", ...hand.map((card) => card.instanceId)],
+          decisionPrompt("Charge a card?", "card.dtd.charge.optional", { optionMessages: chargeDeclineMessages }),
+          optionalChargeOptions(ctx),
         );
     },
     onChoose(ctx, hook, option) {
-      if (hook === "soulbond" && option !== "no") ctx.charge(Number(option));
+      if (hook === "soulbond" && !isChargeDecline(option)) ctx.charge(Number(option));
     },
   },
   "banneret of courage|2": solflareToken(COURAGE),
@@ -403,12 +411,12 @@ export const dtdHighRarity: Record<string, CardScript> = {
       if (hand.length)
         ctx.requestCardChoice(
           "beckon-charge",
-          decisionPrompt("Charge a card?", "card.dtd.charge.optional", { optionMessages: commonOptionMessages("no") }),
-          ["no", ...hand.map((card) => card.instanceId)],
+          decisionPrompt("Charge a card?", "card.dtd.charge.optional", { optionMessages: chargeDeclineMessages }),
+          optionalChargeOptions(ctx),
         );
     },
     onChoose(ctx, hook, option) {
-      if (hook === "beckon-charge" && option !== "no") {
+      if (hook === "beckon-charge" && !isChargeDecline(option)) {
         const charged = ctx.charge(Number(option));
         if (charged && ctx.cardColor(charged) === 2) ctx.addModifier({ scope: "combat-chain" });
       } else if (hook === "beckon-top") ctx.putOnDeckTop(Number(option));
@@ -439,12 +447,12 @@ export const dtdHighRarity: Record<string, CardScript> = {
       if (hand.length)
         ctx.requestCardChoice(
           "spirit-charge",
-          decisionPrompt("Charge a card?", "card.dtd.charge.optional", { optionMessages: commonOptionMessages("no") }),
-          ["no", ...hand.map((card) => card.instanceId)],
+          decisionPrompt("Charge a card?", "card.dtd.charge.optional", { optionMessages: chargeDeclineMessages }),
+          optionalChargeOptions(ctx),
         );
     },
     onChoose(ctx, hook, option) {
-      if (hook === "spirit-charge" && option !== "no" && ctx.charge(Number(option)))
+      if (hook === "spirit-charge" && !isChargeDecline(option) && ctx.charge(Number(option)))
         ctx.addModifier({
           scope: "combat-chain",
           onHitCreateToken: { cardId: COURAGE, count: 1 },

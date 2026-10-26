@@ -368,14 +368,14 @@ export interface ScriptCtx {
   destroySelf(): void;
   /** Charge the controller's hero's soul: move the chosen card from their hand
    *  toward the soul zone, set the per-turn charge flags (`chargedThisTurn`,
-   *  `chargedCountThisTurn`, `chargedPitch:<n>`), and fire the charged card's
-   *  onCharged hook (Solflare), even if a replacement effect changes the
-   *  move's destination.
+   *  `chargedCountThisTurn`, `chargedPitch:<n>`), and raise the
+   *  "card-charged" event (Solflare), even if a replacement effect changes
+   *  the move's destination.
    *  Returns the charged card, or undefined when it is not in hand. */
   charge(instanceId: number): DeepReadonly<CardInstance> | undefined;
   /** Move a card from any of its owner's zones into its owner's soul (face up).
    *  Sets the per-turn "put into soul" flags (`soulThisTurn`, `soulPitch:<n>`)
-   *  but does NOT fire onCharged — only charging does. */
+   *  but does NOT raise "card-charged" — only charging does. */
   putIntoSoul(instanceId: number): boolean;
   /** Equip an equippable card from its owner's graveyard into a free matching
    * zone. Used by Retrieve and graveyard-equipping effects. */
@@ -1719,8 +1719,6 @@ export interface CardScript {
    *  received doesn't trigger it — a properly-entered permanent always got
    *  its entering counters from its ETB effect. */
   destroyAtZeroCounter?: CounterKind;
-  /** This card was charged into a hero's soul (Solflare). */
-  onCharged?(ctx: ScriptCtx): void;
   /** A card owned by this source's controller was put into their hero's soul.
    * `charged` distinguishes the Charge additional cost from other effects. */
   onCardPutIntoSoul?(

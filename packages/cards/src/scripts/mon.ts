@@ -4,6 +4,7 @@ import {
   attackedWithWeapon,
   bloodDebtScript as bloodDebt,
   buffNextAttack,
+  chargeDeclineMessages,
   commonOptionMessages,
   consumeDelayedEffect,
   dealArcane,
@@ -13,6 +14,7 @@ import {
   heroTarget,
   ironhideScript,
   isCard,
+  isChargeDecline,
   isSixPlus,
   leviaRedeemedAbility,
   localizedCardLog,
@@ -24,6 +26,7 @@ import {
   yesNoPrompt,
   opposingHeroDamage,
   ongoingLabel,
+  optionalChargeOptions,
   resourceAbility,
 } from "./shared-helpers.js";
 import { monHighRarity } from "./mon/high-rarity.js";
@@ -120,16 +123,16 @@ function chargeAttack(extra: CardScript = {}): CardScript {
           "card.mon.charge.choose",
           {
             values: { card: { kind: "card", cardId: ctx.self.cardId } },
-            optionMessages: commonOptionMessages("no"),
+            optionMessages: chargeDeclineMessages,
           },
         ),
-        ["no", ...hand.map((card) => card.instanceId)],
+        optionalChargeOptions(ctx),
       );
     },
     ...extra,
     onChoose(ctx, hook, option) {
       if (hook === "mon-charge") {
-        if (option !== "no") {
+        if (!isChargeDecline(option)) {
           const charged = ctx.charge(Number(option));
           if (charged) ctx.setState("chargedPitch", ctx.cardColor(charged));
         }

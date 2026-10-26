@@ -68,6 +68,35 @@ describe("EVR — registration and combat designs", () => {
     g.play("pathing helix|1", { fromArsenal: true }).expectAttackValue(4);
   });
 
+  it("Helm of Sharp Eye costs {r}, needs double power, and lets the banished card be played", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "dorinthea",
+          weapons: ["dawnblade|0"],
+          equipment: { head: "helm of sharp eye|0" },
+          resources: 6,
+          hand: ["overpower|1"],
+          deck: ["thrust|1"],
+        },
+        { hero: "rhinar", hand: [] },
+      ],
+    });
+    const helmId = g.state.players[0]!.equipment.head!.instanceId;
+    const helmLegal = () => legalIntents(g.state, 0).some((intent) =>
+      intent.kind === "activate-ability" && intent.sourceInstanceId === helmId
+    );
+    const resolveTop = () => g.passPriority().passPriority();
+
+    g.attackWithWeapon("dawnblade|0").blockWith();
+    expect(helmLegal()).toBe(false);
+    g.play("overpower|1", { settle: false });
+    resolveTop().expectAttackValue(7).expectResources(0, 2);
+    g.activate("helm of sharp eye|0", { settle: false }).expectResources(0, 1).expectNoEquipment(0, "head");
+    resolveTop().expectInZone(0, "thrust|1", "banish").play("thrust|1", { fromZone: "banish", settle: false });
+    resolveTop().expectAttackValue(10);
+  });
+
   it("Dreadbore's arrow reaction restriction applies without loading", () => {
     const g = scenario({
       seats: [

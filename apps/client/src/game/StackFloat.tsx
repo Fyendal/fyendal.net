@@ -254,7 +254,7 @@ export function StackFloat({
                     ? formatGameMessage(intl, l.labelMessage, {
                         card: (cardId) => l.card?.cardId === cardId
                           ? (l.card.name ?? cardId)
-                          : cardId,
+                          : (cardData[cardId]?.name ?? cardId),
                       })
                     : l.label)}
                   {l.optional ? (

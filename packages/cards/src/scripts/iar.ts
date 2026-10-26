@@ -9,6 +9,7 @@ import {
   cardNameContains,
   cardNamed,
   channelLightning,
+  chargeDeclineMessages,
   commonOptionMessages,
   dealToAnyTarget,
   decisionMessage,
@@ -24,8 +25,11 @@ import {
   resolveDiscardChoice,
   suspenseAura,
   hitHookLabel,
+  isChargeDecline,
   ongoingLabel,
+  optionalChargeOptions,
   resourceAbility,
+  solflareTrigger,
 } from "./shared-helpers.js";
 
 const RUNECHANT = "SBA036";
@@ -2566,13 +2570,13 @@ export const iar: Record<string, CardScript> = {
       ctx.requestCardChoice(
         "iar-bravery-charge",
         decisionPrompt("Charge your hero's soul?", "card.dtd.charge.soul.optional", {
-          optionMessages: commonOptionMessages("no"),
+          optionMessages: chargeDeclineMessages,
         }),
-        ["no", ...hand.map((card) => card.instanceId)],
+        optionalChargeOptions(ctx),
       );
     },
     onChoose(ctx, hook, option) {
-      if (hook === "iar-bravery-charge" && option !== "no") {
+      if (hook === "iar-bravery-charge" && !isChargeDecline(option)) {
         const charged = ctx.charge(Number(option));
         if (charged) ctx.setState("chargedPitch", ctx.cardColor(charged));
       }
@@ -2855,9 +2859,13 @@ export const iar: Record<string, CardScript> = {
     },
   },
   "banneret of swordsmanship|2": {
-    onCharged(ctx) {
-      ctx.createToken(FLURRY);
-    },
+    triggers: [
+      solflareTrigger(
+        "Create a Flurry",
+        decisionMessage("card.trigger.solflare.token.create", { token: { kind: "card", cardId: FLURRY } }),
+        (ctx) => ctx.createToken(FLURRY),
+      ),
+    ],
   },
   "fresh from the forge|1": freshFromTheForge(),
   "hoodwink|3": hoodwink(),

@@ -424,6 +424,9 @@ describe("DTD, EVO, and HVY rules regression coverage", () => {
 
     g.doRaw({ kind: "choose", optionId: String(charged.instanceId) });
 
+    expect(g.stackLabels()).toEqual(["Create a token"]);
+    expect(g.state.pendingDecision).toMatchObject({ player: 0, kind: "priority-window" });
+    g.settle();
     expect(g.state.chain.at(-1)?.flags.attackStepBegan).toBe(true);
     expect(g.state.pendingDecision).toMatchObject({
       player: 1,
@@ -474,6 +477,7 @@ describe("DTD, EVO, and HVY rules regression coverage", () => {
     expect(g.state.players[0]!.hand).toContainEqual(expect.objectContaining({
       cardId: printingId("head jab|1"),
     }));
+    g.settle();
     expect(g.state.pendingDecision).toMatchObject({ player: 1, kind: "defend" });
   });
   it("Cast Bones randomizes top six", () => expect(script("cast bones|1").onChoose).toBeTypeOf("function"));

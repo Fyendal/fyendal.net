@@ -50,7 +50,7 @@ describe("SBL — Charge as an additional cost", () => {
       ],
     });
     s.play("beaming bravado|1");
-    s.chooseOption("no");
+    s.chooseOption("pass");
     s.expectZoneSize(0, "soul", 0);
     s.blockWith().settle();
     s.expectFinalAttack(3);
@@ -199,7 +199,7 @@ describe("SBL — soul payoffs", () => {
     });
 
     s.play("light the way|1");
-    s.chooseOption("no");
+    s.chooseOption("pass");
     s.blockWith(RED_BLOCK);
     s.react("roaring beam|2", { settle: false });
     s.passPriority().passPriority();
@@ -301,7 +301,7 @@ describe("SBL — Boltyn", () => {
       ],
     });
     s.play("beaming bravado|1");
-    s.chooseOption("no");
+    s.chooseOption("pass");
     s.blockWith(RED_BLOCK).settle();
     s.expectFinalAttack(3);
   });

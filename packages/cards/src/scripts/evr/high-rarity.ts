@@ -585,16 +585,19 @@ export const evrHighRarity: Record<string, CardScript> = {
   },
   "helm of sharp eye|0": {
     activated: {
-      cost: 0,
+      cost: 1,
       isAttack: false,
       goAgain: false,
       timing: "attack-reaction",
       oncePerTurn: false,
       destroySelfCost: true,
-      canActivate: (ctx) => ctx.link?.attackCardType === "weapon",
+      canActivate: (ctx) =>
+        ctx.link?.attackCardType === "weapon" &&
+        ctx.link.attacker === ctx.seat &&
+        ctx.currentAttackPower() > 2 * ctx.basePower(ctx.link.attackingCard),
       onActivate(ctx) {
         const top = ctx.player(ctx.seat).deck[0];
-        if (top) ctx.banish(top.instanceId);
+        if (top && ctx.banish(top.instanceId)) ctx.allowPlayFrom(top.instanceId, "banish", { untilChainClose: true });
       },
     },
   },

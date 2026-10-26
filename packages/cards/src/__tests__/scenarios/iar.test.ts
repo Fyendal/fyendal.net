@@ -1,10 +1,16 @@
 import { describe, expect, it } from "vitest";
 import { actionCandidates, applyIntent, legalIntents, projectStateFor } from "@fyendal/engine";
 import { cardData, isImplemented } from "../../index.js";
+import { functionalKeyOf } from "../../functional.js";
 import { scenario } from "../harness.js";
 
 const NO_EQUIPMENT = { head: null, chest: null, arms: null, legs: null } as const;
 const RUNECHANT_ID = "ARC112";
+
+function chargeWithoutSettling(game: ReturnType<typeof scenario>, key: string): void {
+  const card = game.state.players[0]!.hand.find((c) => functionalKeyOf(cardData[c.cardId]!) === key)!;
+  game.doRaw({ kind: "choose", optionId: String(card.instanceId) });
+}
 
 function boardNames(game: ReturnType<typeof scenario>, seat: number): string[] {
   return game.state.players[seat]!.board.map((card) => cardData[card.cardId]!.name);
@@ -2380,6 +2386,45 @@ describe("September 2 IAR spoilers", () => {
       .expectAP(0, 1);
 
     expect(boardNames(g, 0)).toContain("Courage");
+  });
+
+  it("Banneret of Swordsmanship's Solflare uses the stack before creating Flurry", () => {
+    const g = scenario({ seats: [
+      {
+        hero: "rhinar",
+        hand: ["bravery of the blade|1", "banneret of swordsmanship|2"],
+        equipment: NO_EQUIPMENT,
+      },
+      { hero: "dorinthea", equipment: NO_EQUIPMENT },
+    ] });
+
+    g.play("bravery of the blade|1", { settle: false });
+    chargeWithoutSettling(g, "banneret of swordsmanship|2");
+
+    expect(g.stackLabels()[0]).toBe("Create a Flurry");
+    expect(boardNames(g, 0)).not.toContain("Flurry");
+    g.settle();
+    expect(boardNames(g, 0)).toContain("Flurry");
+  });
+
+  it("Ripple Away can respond to Banneret of Swordsmanship's Solflare trigger", () => {
+    const g = scenario({ seats: [
+      {
+        hero: "rhinar",
+        hand: ["bravery of the blade|1", "banneret of swordsmanship|2"],
+        equipment: NO_EQUIPMENT,
+      },
+      { hero: "dorinthea", hand: ["ripple away|3"], equipment: NO_EQUIPMENT },
+    ] });
+
+    g.play("bravery of the blade|1", { settle: false });
+    chargeWithoutSettling(g, "banneret of swordsmanship|2");
+    g.passPriority()
+      .activate("ripple away|3")
+      .settle();
+
+    expect(g.state.pendingDecision).toMatchObject({ player: 1, kind: "defend" });
+    expect(boardNames(g, 0)).not.toContain("Flurry");
   });
 
   it("Bravery of the Blade receives Charge of the Light Brigade's charged-attack bonus", () => {

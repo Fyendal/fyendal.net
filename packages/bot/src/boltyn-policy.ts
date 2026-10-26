@@ -413,7 +413,7 @@ function scoreChargeOption(intent: ChooseIntent, input: BotPolicyInput): number 
   const decision = input.view.pendingDecision!;
   const prompt = decision.prompt.toLowerCase();
   const card = optionCard(intent, input);
-  if (!card) return intent.optionId === "no" ? 0 : -50;
+  if (!card) return intent.optionId === "no" || intent.optionId === "pass" ? 0 : -50;
   const data = input.cards[card.cardId];
   const sourceKey = promptSourceKey(input);
   const ourTurn = input.view.activePlayer === input.seat;

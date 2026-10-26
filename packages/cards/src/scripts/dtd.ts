@@ -4,13 +4,17 @@ import {
   bloodDebtScript as bloodDebt,
   buffNextAttack,
   cardNameContains,
+  chargeDeclineMessages,
   commonOptionMessages,
   decisionMessage,
   decisionPrompt,
   entersArenaTrigger,
+  isChargeDecline,
   leviaRedeemedAbility,
   mergeSetScripts,
   opponentSeat,
+  optionalChargeOptions,
+  solflareTrigger,
   yesNoPrompt,
 } from "./shared-helpers.js";
 import { dtdHighRarity } from "./dtd/high-rarity.js";
@@ -65,15 +69,15 @@ function chargeAttack(extra: CardScript = {}): CardScript {
         ctx.requestCardChoice(
           "dtd-charge",
           decisionPrompt("Charge your hero's soul?", "card.dtd.charge.soul.optional", {
-            optionMessages: commonOptionMessages("no"),
+            optionMessages: chargeDeclineMessages,
           }),
-          ["no", ...hand.map((card) => card.instanceId)],
+          optionalChargeOptions(ctx),
         );
       extra.additionalCost?.(ctx);
     },
     onChoose(ctx, hook, option) {
       if (hook === "dtd-charge") {
-        if (option !== "no") {
+        if (!isChargeDecline(option)) {
           const card = ctx.charge(Number(option));
           if (card) ctx.setState("chargedPitch", ctx.cardColor(card));
         }
@@ -132,10 +136,19 @@ function boltynHero(): CardScript {
 }
 function banneret(kind: "defense" | "resource"): CardScript {
   return {
-    onCharged(ctx) {
-      if (kind === "resource") ctx.addModifier({ scope: "until-end-of-turn", onHitGainResources: 1 });
-      else ctx.addModifier({ scope: "until-end-of-turn", defense: 1, appliesToCardType: "action", once: true });
-    },
+    triggers: [
+      kind === "resource"
+        ? solflareTrigger(
+          "The next time you hit this turn, gain 1 resource",
+          decisionMessage("card.trigger.solflare.hit.resource", { amount: 1 }),
+          (ctx) => ctx.addModifier({ scope: "until-end-of-turn", onHitGainResources: 1 }),
+        )
+        : solflareTrigger(
+          "The next action card you defend with this turn gets +1 defense",
+          decisionMessage("card.trigger.solflare.defense", { amount: 1 }),
+          (ctx) => ctx.addModifier({ scope: "until-end-of-turn", defense: 1, appliesToCardType: "action", once: true }),
+        ),
+    ],
   };
 }
 function vForValor(power: number): CardScript {

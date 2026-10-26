@@ -19,7 +19,7 @@ describe("Soulbond Resolve", () => {
     s.chooseCard("wounding blow|2");
     if (defendChest) {
       expect(s.state.pendingDecision?.chooseHook).toBe("soulbond");
-      s.chooseOption("no");
+      s.chooseOption("pass");
     }
     s.expectLife(1, defendChest ? 18 : 16);
     expect(s.state.players[1]!.flags.chargedThisTurn).toBe(true);

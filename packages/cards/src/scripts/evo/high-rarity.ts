@@ -4,6 +4,7 @@ import {
   attackAbility,
   buffNextAttack,
   cardNameContains,
+  chargeDeclineMessages,
   commonOptionMessages,
   consumeDelayedEffect,
   contractWithSilver,
@@ -11,9 +12,11 @@ import {
   decisionPrompt,
   entersArenaTrigger,
   equipWithSilver,
+  isChargeDecline,
   leavesArenaTrigger,
   ongoingLabel,
   opponentSeat,
+  optionalChargeOptions,
   requestDiscardChoice,
   resolveDiscardChoice,
   sharesName,
@@ -1179,14 +1182,14 @@ export const evoHighRarity: Record<string, CardScript> = {
         ctx.requestCardChoice(
           "warband-charge",
           decisionPrompt("Charge your hero's soul?", "card.evo.soul.charge", {
-            optionMessages: commonOptionMessages("no"),
+            optionMessages: chargeDeclineMessages,
           }),
-          ["no", ...hand.map((candidate) => candidate.instanceId)],
+          optionalChargeOptions(ctx),
         );
       }
     },
     onChoose(ctx, hook, option) {
-      if (hook === "warband-charge" && option !== "no") {
+      if (hook === "warband-charge" && !isChargeDecline(option)) {
         const charged = ctx.charge(Number(option));
         if (charged && ctx.cardColor(charged) === 2) ctx.drawCards(ctx.seat, 1);
       }

@@ -18858,6 +18858,90 @@
       "value": "Vire (tap) o herói ou ally Pirate alvo"
     }
   ],
+  "card.trigger.solflare.defense": [
+    {
+      "type": 0,
+      "value": "A próxima carta de action com que você defender neste turno recebe +"
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " de defesa"
+    }
+  ],
+  "card.trigger.solflare.hit.life": [
+    {
+      "type": 0,
+      "value": "Da próxima vez que você acertar neste turno, ganhe "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " de vida"
+    }
+  ],
+  "card.trigger.solflare.hit.resource": [
+    {
+      "type": 0,
+      "value": "Da próxima vez que você acertar neste turno, ganhe "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " "
+    },
+    {
+      "type": 6,
+      "value": "amount",
+      "options": {
+        "=0": {
+          "value": [
+            {
+              "type": 0,
+              "value": "recursos"
+            }
+          ]
+        },
+        "one": {
+          "value": [
+            {
+              "type": 0,
+              "value": "recurso"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 0,
+              "value": "recursos"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    }
+  ],
+  "card.trigger.solflare.token.create": [
+    {
+      "type": 0,
+      "value": "Crie "
+    },
+    {
+      "type": 1,
+      "value": "token"
+    }
+  ],
   "card.trigger.steam.maintain": [
     {
       "type": 0,
