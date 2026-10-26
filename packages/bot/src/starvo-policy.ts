@@ -331,8 +331,6 @@ function scoreDefend(
     // Play style: Starvo protects its large-attack turns over chip prevention.
     responseLossWeight: 2.25,
     defensePermission(candidate) {
-      const usesTunic = candidate.chosen.some((card) => key(input.cards[card.cardId]) === TUNIC);
-      if (usesTunic && !candidate.lethal) return "forbid";
       const usesStalagmite = candidate.chosen.some((card) =>
         key(input.cards[card.cardId]) === STALAGMITE
       );

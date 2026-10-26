@@ -1998,6 +1998,55 @@ describe("Hala policy", () => {
       .toEqual({ kind: "choose", optionId: "pay 1" });
   });
 
+  it("pitches for Grains of Bloodspill when that pitch also funds the next Zenith attack", () => {
+    const state = createGame({
+      decklists: [halaDeck(), decklists.dorinthea],
+      cards: cardData,
+      scripts,
+      seed: 9313,
+      startPlayer: 0,
+    });
+    state.turn = 2;
+    replaceHand(state, 0, ["OMN238"]);
+    const view = projectStateFor(state, 0);
+    const weapon = view.players[0].weapons[0]!;
+    const beckon = view.players[0].hand[0]!.instanceId;
+    view.phase = "layer";
+    view.priorityPlayer = 0;
+    view.players[0].resources = 0;
+    view.pendingDecision = {
+      player: 0,
+      kind: "optional-effect",
+      prompt: "Grains of Bloodspill: Pay 1 to create Vigor?",
+      options: ["paid", "no"],
+      resourcePayment: { cost: 1, options: [{ optionId: "paid", pitchInstanceIds: [beckon] }] },
+    };
+    view.chain = [{
+      attackingCard: weapon,
+      defendingCards: [],
+      attackValue: 6,
+      defenseValue: 4,
+      damage: 2,
+      resolved: false,
+      hit: true,
+      goAgain: true,
+      reactions: [],
+    }];
+    view.turnFacts!.players[0].weaponAttacks = 1;
+    const legal: GameIntent[] = [
+      { kind: "choose", optionId: "paid" },
+      { kind: "choose", optionId: "no" },
+    ];
+
+    expect(chooseHalaIntent({ seat: 0, view, legal, cards: cardData }))
+      .toEqual({ kind: "choose", optionId: "paid" });
+
+    // Without another Zenith attack, a card is not worth pitching for Vigor.
+    weapon.usedAbilityIndexes = [0];
+    expect(chooseHalaIntent({ seat: 0, view, legal, cards: cardData }))
+      .toEqual({ kind: "choose", optionId: "no" });
+  });
+
   it("uses Beckon Steel when a sharpened hit will cross its three-counter threshold", () => {
     let state = createGame({
       decklists: [halaDeck(), decklists.dorinthea],

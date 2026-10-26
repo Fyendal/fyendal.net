@@ -1525,6 +1525,7 @@ export function scoreDefenseIntentWithTrace(
   // Marks, pumps and tempo are not worth wearing armor; disruption and card
   // advantage are.
   const meaningfulOnHit = onHit.value >= SIGNIFICANT_ON_HIT_VALUE;
+  const devastatingOnHit = onHit.handCardsLost > 0 || onHit.destroysOccupiedArsenal;
   const stopsHit = incoming > 0 && (destroysAttack || defense + plannedPrevention.amount >= incoming);
   // A landed hand loss is priced through the response projection below, so
   // stopping the hit no longer earns its flat generic-card estimate.
@@ -1589,7 +1590,7 @@ export function scoreDefenseIntentWithTrace(
     // treating the sunk equipment selection as a new strategic choice.
     if (stagedIds.has(card.instanceId)) return false;
     if (lethal) return false;
-    if (openingDefense && isSpringTunic(card, input)) return true;
+    if (isSpringTunic(card, input)) return openingDefense || !(stopsHit && devastatingOnHit);
     // Early armor is justified by an on-hit or Wager only when the complete
     // defense actually stops that hit and therefore answers the effect.
     if (stopsHit && (meaningfulOnHit || link.wagered === true)) return false;

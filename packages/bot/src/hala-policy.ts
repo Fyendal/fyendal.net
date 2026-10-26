@@ -1761,9 +1761,17 @@ function scoreChoice(intent: Extract<GameIntent, { kind: "choose" }>, input: Bot
       zenithCanAttackAgain(input) ? 1 : 0,
       twoCostAttackFloatingReserve(input),
     );
-    const canSpare = input.view.players[input.seat].resources > reserve;
+    const resources = input.view.players[input.seat].resources;
     const pay = !["no", "decline", "pass"].includes(intent.optionId);
-    return pay === canSpare ? 80 : 0;
+    if (!pay) return resources > reserve ? 0 : 80;
+    const pitched = (resourcePaymentPitchIds(intent, input) ?? []).reduce((total, id) => {
+      const card = input.view.players[input.seat].hand.find((candidate) => candidate.instanceId === id);
+      return total + Number(input.cards[card?.cardId ?? ""]?.pitch ?? 0);
+    }, 0);
+    const floatingAfter = resources + pitched - (decision.resourcePayment?.cost ?? 1);
+    // Pitch only a card the next attack would pitch anyway, and only if it covers both.
+    const canSpare = floatingAfter >= reserve && (pitched === 0 || resources < reserve);
+    return canSpare ? 80 + pitched : 0;
   }
   if (prompt.includes("polished blade") && prompt.includes("counters")) {
     return Number(/remove (\d+)/.exec(intent.optionId)?.[1] ?? 0) * 20;

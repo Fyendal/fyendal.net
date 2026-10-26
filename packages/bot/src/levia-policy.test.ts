@@ -145,14 +145,18 @@ function armoredBlock(cards: readonly string[], onHit: string) {
 
 const GRAINS = "Whenever a weapon attack you control hits, you may pay {r}. If you do, create a Vigor token.";
 
-/** Levia, holding `cardIds`, defends a 3-power opening-turn attack carrying `onHit` while wearing the Spring Tunic. */
-function openingTunicBlock(cardIds: readonly string[], onHit: string) {
+/** Levia, holding `cardIds`, defends a 3-power attack carrying `onHit` while wearing the Spring Tunic. */
+function tunicBlock(
+  cardIds: readonly string[],
+  onHit: string,
+  { turn = 1, arsenal = [] }: { turn?: number; arsenal?: readonly string[] } = {},
+) {
   let state = game();
-  state.turn = 1;
+  state.turn = turn;
   hand(state, cardIds);
   const tunic = { instanceId: state.nextInstanceId++, cardId: "WTR150", owner: 0 };
   state.players[0]!.equipment = { chest: tunic };
-  state.players[0]!.arsenal = [];
+  state.players[0]!.arsenal = cards(state, arsenal).map((card) => ({ ...card, faceDown: true }));
   state = defending(state);
   const view = projectStateFor(state, 0);
   const link = { ...view.chain.at(-1)!, damage: 3, onHitEffects: [{ sourceCardId: "", text: onHit }] };
@@ -166,20 +170,33 @@ function openingTunicBlock(cardIds: readonly string[], onHit: string) {
 
 describe("Levia Gates policy", () => {
   it("covers a paid Vigor on-hit with two hand cards instead of the Spring Tunic", () => {
-    const { selected, handIds } = openingTunicBlock(["ROS218", "PEN322", "IAR165", "IAR005"], GRAINS);
+    const { selected, handIds } = tunicBlock(["ROS218", "PEN322", "IAR165", "IAR005"], GRAINS);
     expect(selected).toEqual(handIds.slice(0, 2));
   });
 
-  it("keeps the Spring Tunic out of a nonlethal opening block despite a significant on-hit", () => {
-    const { selected, tunicId } = openingTunicBlock(
-      ["PEN322", "DTD107", "IAR005", "IAR005"],
-      "When this hits, draw a card.",
-    );
+  it.each([
+    [1, "When this hits, draw a card."],
+    [3, "When this hits, draw a card."],
+    [1, "When this hits a hero, they discard a card."],
+  ])("keeps the Spring Tunic out of a nonlethal turn %i block against %s", (turn, onHit) => {
+    const { selected, tunicId } = tunicBlock(["PEN322", "DTD107", "IAR005", "IAR005"], onHit, { turn });
     expect(selected).not.toContain(tunicId);
   });
 
+  it.each([
+    ["a discard", "When this hits a hero, they discard a card.", []],
+    ["arsenal destruction", COMMAND_AND_CONQUER, ["MON140"]],
+  ])("adds the Spring Tunic to cover %s", (_, onHit, arsenal) => {
+    const { selected, handIds, tunicId } = tunicBlock(
+      ["PEN322", "DTD107", "IAR005", "IAR005"],
+      onHit,
+      { turn: 3, arsenal },
+    );
+    expect(selected).toEqual(expect.arrayContaining([handIds[0], tunicId]));
+  });
+
   it("answers an opening attack with Fallen Herald instead of blocking", () => {
-    const { intent } = openingTunicBlock(["IAR165", "PEN322", "DTD107", "IAR005"], GRAINS);
+    const { intent } = tunicBlock(["IAR165", "PEN322", "DTD107", "IAR005"], GRAINS);
     expect(intent).toEqual({ kind: "defend", instanceIds: [] });
   });
 
