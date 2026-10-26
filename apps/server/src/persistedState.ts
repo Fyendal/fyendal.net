@@ -48,6 +48,8 @@ type PersistedEngineDecision = Omit<
   | "stagedCards"
   | "stagedHandCount"
   | "stagedDefense"
+  | "stagedAttack"
+  | "stagedAttackModifiers"
   | "defenderDefense"
   | "preStackSource"
   | "optionLayout"
