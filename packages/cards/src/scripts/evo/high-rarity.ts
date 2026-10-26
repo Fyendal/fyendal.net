@@ -10,6 +10,7 @@ import {
   decisionMessage,
   decisionPrompt,
   entersArenaTrigger,
+  equipWithSilver,
   leavesArenaTrigger,
   ongoingLabel,
   opponentSeat,
@@ -977,30 +978,7 @@ export const evoHighRarity: Record<string, CardScript> = {
     },
   },
   "shriek razors|0": {
-    triggers: [
-      {
-        event: "start-of-turn",
-        sourceZone: "graveyard",
-        optional: true,
-        label: "Destroy 2 Silvers to equip this?",
-        condition(ctx) {
-          return ctx.player(ctx.seat).board.filter((card) => named(ctx, card, "Silver")).length >= 2;
-        },
-        effect(ctx) {
-          const silvers = ctx
-            .player(ctx.seat)
-            .board.filter((card) => named(ctx, card, "Silver"))
-            .slice(0, 2);
-          if (
-            silvers.length === 2 &&
-            ctx.destroyPermanent(silvers[0]!.instanceId) &&
-            ctx.destroyPermanent(silvers[1]!.instanceId)
-          ) {
-            ctx.equipFromGraveyard(ctx.self.instanceId);
-          }
-        },
-      },
-    ],
+    triggers: [equipWithSilver(2)],
     activated: {
       cost: 2,
       isAttack: false,

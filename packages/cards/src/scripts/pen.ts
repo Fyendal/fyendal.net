@@ -1,8 +1,8 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx, TriggerDef } from "@fyendal/engine";
 import type { CounterKind } from "@fyendal/shared";
 import {
-  buffNextAttack,
   bloodDebtScript as bloodDebt,
+  buffNextAttack,
   cardNameContains,
   commonOptionMessages,
   contractWithSilver,
@@ -11,22 +11,23 @@ import {
   decisionMessage,
   decisionPrompt,
   entersArenaTrigger,
+  equipWithSilver,
   heroChoiceSeat,
+  heroDamage,
   heroTarget,
-  requestHeroChoice,
+  hitHookLabel,
   isSixPlus,
   leavesArenaTrigger,
   mergeSetScripts,
+  ongoingLabel,
   opponentSeat,
   optN,
   optOnChoose,
   queueIntimidate,
   requestDiscardChoice,
+  requestHeroChoice,
   resolveDiscardChoice,
   yesNoPrompt,
-  heroDamage,
-  hitHookLabel,
-  ongoingLabel,
 } from "./shared-helpers.js";
 import { SHARPEN_FOLLOWUP, sharpenSword } from "./aha/warrior-sharpen.js";
 import { penHighRarity } from "./pen/high-rarity.js";
@@ -390,7 +391,7 @@ function createSigils(count: number): CardScript {
   };
 }
 
-function gravenEquipment(slot: "head" | "chest" | "arms" | "legs"): CardScript {
+function gravenEquipment(): CardScript {
   return {
     onGameStart(ctx) {
       ctx.addCardDefenseCounters(ctx.self.instanceId, 1);
@@ -404,31 +405,7 @@ function gravenEquipment(slot: "head" | "chest" | "arms" | "legs"): CardScript {
         },
         { condition: (_ctx, _card, event) => event?.from !== "graveyard" },
       ),
-      {
-        event: "start-of-turn",
-        sourceZone: "graveyard",
-        optional: true,
-        label: "Destroy 2 Silver to equip this",
-        condition(ctx) {
-          return (
-            !ctx.player(ctx.seat).equipment[slot] &&
-            ctx.player(ctx.seat).board.filter((card) => named(ctx, card, "Silver")).length >= 2
-          );
-        },
-        effect(ctx) {
-          const silver = ctx
-            .player(ctx.seat)
-            .board.filter((card) => named(ctx, card, "Silver"))
-            .slice(0, 2);
-          if (
-            silver.length === 2 &&
-            ctx.destroyPermanent(silver[0]!.instanceId) &&
-            ctx.destroyPermanent(silver[1]!.instanceId)
-          ) {
-            ctx.equipFromGraveyard(ctx.self.instanceId);
-          }
-        },
-      },
+      equipWithSilver(2),
     ],
   };
 }
@@ -1225,10 +1202,10 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
     ],
   })),
 
-  "graven cowl|0": gravenEquipment("head"),
-  "graven vestment|0": gravenEquipment("chest"),
-  "graven gloves|0": gravenEquipment("arms"),
-  "graven walkers|0": gravenEquipment("legs"),
+  "graven cowl|0": gravenEquipment(),
+  "graven vestment|0": gravenEquipment(),
+  "graven gloves|0": gravenEquipment(),
+  "graven walkers|0": gravenEquipment(),
   "mist hunter|1": {
     ...contractWithSilver((ctx, card) => ctx.cardColor(card) === 3),
     canTriggerOnHit(ctx) {

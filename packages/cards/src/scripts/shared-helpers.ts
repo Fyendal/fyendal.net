@@ -738,6 +738,39 @@ export function contractWithSilver(
   };
 }
 
+/** "While this is in your graveyard, at the start of your turn, you may
+ * destroy N Silver you control. If you do, equip this." */
+export function equipWithSilver(amount: number): TriggerDef {
+  const silverControlled = (ctx: ScriptCtx) =>
+    ctx.player(ctx.seat).board.filter((card) => ctx.cardData(card.cardId).name === "Silver");
+  return {
+    event: "start-of-turn",
+    sourceZone: "graveyard",
+    optional: true,
+    label: `Destroy ${amount} Silver to equip this`,
+    labelMessage: decisionMessage("card.trigger.common.silver.equip", { amount }),
+    condition(ctx) {
+      return canEquipFromGraveyard(ctx) && silverControlled(ctx).length >= amount;
+    },
+    effect(ctx) {
+      const silver = silverControlled(ctx).slice(0, amount);
+      if (silver.length === amount && silver.every((card) => ctx.destroyPermanent(card.instanceId))) {
+        ctx.equipFromGraveyard(ctx.self.instanceId);
+      }
+    },
+  };
+}
+
+function canEquipFromGraveyard(ctx: ScriptCtx): boolean {
+  const subtypes = ctx.cardTypes(ctx.self);
+  const player = ctx.player(ctx.seat);
+  const slot = (["head", "chest", "arms", "legs"] as const).find((candidate) => subtypes.includes(candidate));
+  if (slot) return !player.equipment[slot];
+  const hands = subtypes.includes("2h") ? 2 : 1;
+  const occupied = player.weapons.reduce((total, card) => total + (ctx.cardTypes(card).includes("2h") ? 2 : 1), 0);
+  return occupied + hands <= 2;
+}
+
 /** Ask the affected hero to choose one of their hand cards to discard. */
 export function requestDiscardChoice(ctx: ScriptCtx, hook: string, prompt: ScriptPrompt, targetSeat: number): boolean {
   const hand = ctx.player(targetSeat).hand;

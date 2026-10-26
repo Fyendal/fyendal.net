@@ -1,8 +1,8 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
 import {
   contractWithSilver,
-  decisionMessage,
   decisionPrompt,
+  equipWithSilver,
   hitHookLabel,
   ongoingLabel,
   opponentSeat,
@@ -23,10 +23,6 @@ function seedDisease(tokenId: string): CardScript {
 
 function isReaction(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
   return ctx.hasCardType(card, "attack-reaction") || ctx.hasCardType(card, "defense-reaction");
-}
-
-function isSilver(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
-  return ctx.cardData(card.cardId).name === "Silver";
 }
 
 function isDagger(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
@@ -50,46 +46,19 @@ function chooseDisease(ctx: ScriptCtx): void {
   requestDiseaseTokenChoice(ctx, "mpa-phial-disease", [FRAILTY, INERTIA, BLOODROT_POX]);
 }
 
-function hasFreeWeaponZone(ctx: ScriptCtx): boolean {
-  const occupied = ctx
-    .player(ctx.seat)
-    .weapons.reduce((total, card) => total + (ctx.cardTypes(card).includes("2h") ? 2 : 1), 0);
-  return occupied < 2;
-}
-
 function isInfected(ctx: ScriptCtx, seat: number): boolean {
   return ctx.player(seat).board.some((card) => ctx.cardTypes(card).includes("disease"));
 }
 
+function activeAssassinAttack(ctx: ScriptCtx): number[] {
+  const link = ctx.link;
+  if (!link || link.flags.attackGone === true || !ctx.cardTypes(link.attackingCard).includes("assassin")) return [];
+  return [link.attackingCard.instanceId];
+}
+
 export const mpa: Record<string, CardScript> = {
   "phial of calamity|0": {
-    triggers: [
-      {
-        event: "start-of-turn",
-        sourceZone: "graveyard",
-        optional: true,
-        label: "Destroy 2 Silver to equip this",
-        labelMessage: decisionMessage("card.trigger.common.silver.equip", { amount: 2 }),
-        condition(ctx) {
-          return (
-            hasFreeWeaponZone(ctx) && ctx.player(ctx.seat).board.filter((card) => isSilver(ctx, card)).length >= 2
-          );
-        },
-        effect(ctx) {
-          const silver = ctx
-            .player(ctx.seat)
-            .board.filter((card) => isSilver(ctx, card))
-            .slice(0, 2);
-          if (
-            silver.length === 2 &&
-            ctx.destroyPermanent(silver[0]!.instanceId) &&
-            ctx.destroyPermanent(silver[1]!.instanceId)
-          ) {
-            ctx.equipFromGraveyard(ctx.self.instanceId);
-          }
-        },
-      },
-    ],
+    triggers: [equipWithSilver(2)],
     activated: {
       cost: 1,
       isAttack: false,
@@ -138,6 +107,27 @@ export const mpa: Record<string, CardScript> = {
       if (option === FRAILTY || option === INERTIA || option === BLOODROT_POX) {
         ctx.createToken(option, opponentSeat(ctx));
       }
+    },
+  },
+
+  "cadaver handlers|0": {
+    triggers: [equipWithSilver(2)],
+    activated: {
+      cost: 0,
+      isAttack: false,
+      goAgain: false,
+      timing: "attack-reaction",
+      destroySelfCost: true,
+      targetCardOptions: activeAssassinAttack,
+      canActivate: (ctx) => isInfected(ctx, opponentSeat(ctx)),
+      onActivate(ctx) {
+        const target = ctx.playTargetInstanceId;
+        const link = ctx.state.chain.find((candidate) => candidate.attackingCard.instanceId === target);
+        if (!link) return;
+        for (const card of [...link.defendingCards, ...link.defendingEquipment]) {
+          ctx.addCardTempDefense(card.instanceId, -1);
+        }
+      },
     },
   },
 

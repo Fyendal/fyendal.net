@@ -14,6 +14,9 @@ const WIDESPREAD_RUIN = "widespread ruin|1";
 const NO_EQUIPMENT = { head: null, chest: null, arms: null, legs: null } as const;
 const OUTBREAK = "outbreak|3";
 const PHIAL = "phial of calamity|0";
+const CADAVER = "cadaver handlers|0";
+const WOUNDING_BLOW = "wounding blow|3";
+const IRONROT_HELM = "ironrot helm|0";
 const KUNAI = "kunai of retribution|0";
 const KISS_OF_DEATH = "kiss of death|1";
 const FRAILTY_TOKEN = "OUT235";
@@ -447,6 +450,108 @@ describe("Armory Deck Mortimer and Mastery Pack Assassin spoilers", () => {
       zone: "banish",
       instanceId: ruin.instanceId,
     }));
+  });
+
+  it("Cadaver Handlers destroys 2 Silver at the start of its controller's turn to equip from graveyard", () => {
+    const game = scenario({
+      active: 1,
+      seats: [
+        {
+          hero: "rhinar",
+          graveyard: [CADAVER],
+          board: ["silver|0", "silver|0", "silver|0"],
+          weapons: [],
+          equipment: NO_EQUIPMENT,
+        },
+        { hero: "dorinthea", weapons: [], equipment: NO_EQUIPMENT },
+      ],
+    });
+
+    game.endTurn().chooseOption("yes");
+
+    expect(game.state.players[0]!.equipment.arms?.cardId).toBe("MPA007");
+    game.expectNotInZone(0, CADAVER, "graveyard");
+    expect(boardNames(game, 0)).toEqual(["Silver"]);
+  });
+
+  it("Cadaver Handlers stays in the graveyard while its controller has arms equipped", () => {
+    const game = scenario({
+      active: 1,
+      seats: [
+        {
+          hero: "rhinar",
+          graveyard: [CADAVER],
+          board: ["silver|0", "silver|0"],
+          weapons: [],
+          equipment: { ...NO_EQUIPMENT, arms: CADAVER },
+        },
+        { hero: "dorinthea", weapons: [], equipment: NO_EQUIPMENT },
+      ],
+    });
+
+    game.endTurn();
+
+    game.expectInZone(0, CADAVER, "graveyard");
+    expect(boardNames(game, 0)).toEqual(["Silver", "Silver"]);
+  });
+
+  it("Cadaver Handlers gives every card defending an Assassin attack -1 defense against an infected hero", () => {
+    const game = scenario({ seats: [
+      {
+        hero: "rhinar",
+        hand: [KISS_OF_DEATH],
+        resources: 1,
+        equipment: { ...NO_EQUIPMENT, arms: CADAVER },
+      },
+      {
+        hero: "dorinthea",
+        life: 20,
+        hand: [WOUNDING_BLOW],
+        board: [FRAILTY_TOKEN],
+        weapons: [],
+        equipment: { ...NO_EQUIPMENT, head: IRONROT_HELM },
+      },
+    ] });
+
+    game.play(KISS_OF_DEATH).blockWith(WOUNDING_BLOW, IRONROT_HELM)
+      .activate(CADAVER, { targetCard: KISS_OF_DEATH })
+      .expectInZone(0, CADAVER, "graveyard")
+      .passPriority();
+
+    // 3 power into 2 defense, plus Kiss of Death's life loss on hit.
+    game.expectLife(1, 18);
+  });
+
+  it("Cadaver Handlers can't be activated unless the defending hero is infected", () => {
+    const game = scenario({ seats: [
+      {
+        hero: "rhinar",
+        hand: [KISS_OF_DEATH],
+        resources: 1,
+        equipment: { ...NO_EQUIPMENT, arms: CADAVER },
+      },
+      { hero: "dorinthea", hand: [WOUNDING_BLOW], weapons: [], equipment: NO_EQUIPMENT },
+    ] });
+
+    game.play(KISS_OF_DEATH).blockWith(WOUNDING_BLOW);
+
+    expect(() => game.activate(CADAVER, { targetCard: KISS_OF_DEATH })).toThrow(/no legal intent/);
+  });
+
+  it("Cadaver Handlers can't target a non-Assassin attack", () => {
+    const game = scenario({ seats: [
+      {
+        hero: "rhinar",
+        hand: ["wounding blow|1"],
+        resources: 0,
+        equipment: { ...NO_EQUIPMENT, arms: CADAVER },
+      },
+      { hero: "dorinthea", hand: [WOUNDING_BLOW], board: [FRAILTY_TOKEN], weapons: [], equipment: NO_EQUIPMENT },
+    ] });
+
+    game.play("wounding blow|1").blockWith(WOUNDING_BLOW);
+
+    expect(() => game.activate(CADAVER, { targetCard: "wounding blow|1" })).toThrow(/no legal intent/);
   });
 
   it("Phial of Calamity destroys 2 Silver at the start of its controller's turn to equip from graveyard", () => {

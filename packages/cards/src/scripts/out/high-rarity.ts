@@ -1,10 +1,10 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
 import {
   buffNextAttack,
-  cardNamed,
   commonOptionMessages,
   decisionMessage,
   decisionPrompt,
+  equipWithSilver,
   localizedLog,
   ongoingLabel,
   opponentSeat,
@@ -60,26 +60,7 @@ const ABYSSAL_DEPTHS_HOOK = "abyssal-depths";
 function graveyardChest(extra: CardScript = {}): CardScript {
   return {
     ...extra,
-    triggers: [
-      {
-        event: "start-of-turn",
-        whose: "subject",
-        sourceZone: "graveyard",
-        optional: true,
-        condition(ctx) {
-          return ctx.player(ctx.seat).board.filter((card) => cardNamed(ctx, card, "Silver")).length >= 2;
-        },
-        label: "Destroy 2 Silvers to equip this?",
-        effect(ctx) {
-          const silvers = ctx
-            .player(ctx.seat)
-            .board.filter((card) => cardNamed(ctx, card, "Silver"))
-            .slice(0, 2);
-          if (silvers.length === 2 && silvers.every((card) => ctx.destroyPermanent(card.instanceId)))
-            ctx.equipFromGraveyard(ctx.self.instanceId);
-        },
-      },
-    ],
+    triggers: [equipWithSilver(2)],
   };
 }
 function combo(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
