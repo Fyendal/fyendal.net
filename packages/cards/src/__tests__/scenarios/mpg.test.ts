@@ -234,7 +234,7 @@ describe("MPG — import and Guardian pressure", () => {
       .toContain("Head Jab");
   });
 
-  it("Call for Backup does nothing without two differently named attacks in the graveyard", () => {
+  it("Call for Backup banishes the chosen attack when the graveyard holds only one attack name", () => {
     const g = scenario({
       active: 1,
       seats: [
@@ -244,9 +244,32 @@ describe("MPG — import and Guardian pressure", () => {
     });
 
     g.play("head jab|1").blockWith("call for backup|1").settle();
+    expect(g.state.pendingDecision).toMatchObject({
+      player: 0,
+      chooseHook: "backup-pair",
+      minimumSelections: 1,
+      maximumSelections: 1,
+    });
+    const deckSize = g.state.players[0]!.deck.length;
+    const headJab2 = g.state.players[0]!.graveyard.find((card) => cardData[card.cardId]?.pitch === 2)!;
+    g.chooseMany([String(headJab2.instanceId)]);
+
+    expect(g.state.players[0]!.banish.map((card) => card.instanceId)).toEqual([headJab2.instanceId]);
+    expect(g.state.players[0]!.deck).toHaveLength(deckSize);
+  });
+
+  it("Call for Backup does nothing without an attack in the graveyard", () => {
+    const g = scenario({
+      active: 1,
+      seats: [
+        { hero: "rhinar", hand: ["call for backup|1"], graveyard: [] },
+        { hero: "dorinthea", hand: ["head jab|1"] },
+      ],
+    });
+
+    g.play("head jab|1").blockWith("call for backup|1").settle();
     expect(g.state.pendingDecision?.chooseHook).not.toBe("backup-pair");
     expect(g.state.players[0]!.banish).toHaveLength(0);
-    expect(g.state.players[0]!.graveyard).toHaveLength(2);
   });
 
   it("Leave a Dent grants its deck-mill crush trigger to the next Guardian attack", () => {

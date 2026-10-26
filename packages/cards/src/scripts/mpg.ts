@@ -918,26 +918,35 @@ Object.assign(mpg, {
       const attacks = ctx
         .player(ctx.seat)
         .graveyard.filter((card) => ctx.hasCardType(card, "action") && hasType(ctx, card, "attack"));
-      if (attacks.some((card) => attacks.some((other) => !sharesName(ctx, card, other))))
-        ctx.requestCardChoices(
-          "backup-pair",
-          decisionPrompt(
+      if (attacks.length === 0) return;
+      // With a single name only one card can be chosen, so the opponent's pick is forced.
+      const single = attacks.every((card) => sharesName(ctx, card, attacks[0]!));
+      const count = single ? 1 : 2;
+      ctx.requestCardChoices(
+        "backup-pair",
+        single
+          ? decisionPrompt("Call for Backup: choose an attack action card to banish", "card.mpg.backup.banish")
+          : decisionPrompt(
             "Call for Backup: choose 2 attack action cards with different names",
             "card.mpg.backup.pair.choose",
           ),
-          attacks.map((card) => card.instanceId),
-          2,
-          2,
-          undefined,
-          undefined,
-          undefined,
-          true,
-        );
+        attacks.map((card) => card.instanceId),
+        count,
+        count,
+        undefined,
+        undefined,
+        undefined,
+        !single,
+      );
     },
     onChooseMany(ctx: ScriptCtx, hook: string, options: readonly string[]) {
       if (hook !== "backup-pair") return;
       const [first, second] = options.map(Number);
-      if (first === undefined || second === undefined) return;
+      if (first === undefined) return;
+      if (second === undefined) {
+        ctx.banish(first);
+        return;
+      }
       ctx.requestCardChoice(
         `backup-banish:${first}:${second}`,
         decisionPrompt("Call for Backup: choose an attack action card to banish", "card.mpg.backup.banish"),
