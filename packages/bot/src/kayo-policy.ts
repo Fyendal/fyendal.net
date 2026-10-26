@@ -2,6 +2,7 @@ import type { CardData, CardView, GameIntent } from "@fyendal/shared";
 import {
   chooseScoredIntent,
   currentLink,
+  defenderDefense,
   enforceSpectraPolicy,
   intentCard,
   isAttack,
@@ -16,6 +17,7 @@ import {
   scoreDefenseReaction,
   scoreSpendCardChoice,
   type BotPolicyInput,
+  type HeroCycleModel,
   type ResponseModel,
 } from "./policy.js";
 import { arsenalValuer, handResponse, opportunityValuer } from "./hand-value.js";
@@ -107,7 +109,7 @@ function scorePlay(intent: GameIntent, input: BotPolicyInput, own: ReadonlyMap<n
       });
       return mine && current?.attackingCard.owner === input.seat && short ? 40 : -100;
     }
-    if (named(data, "unflinching foothold")) return currentLink(input)?.dominate && !mine ? 100 : -100;
+    if (named(data, "unflinching foothold")) return footholdUnlocksBlock(input, own) ? 100 : -100;
     if (named(data, "knucklehead")) return -100;
     if (data.cardType !== "weapon") return -100;
   }
@@ -140,6 +142,40 @@ const kayoResponse: ResponseModel = {
   evaluateResponse: (cards, input) => handResponse(cards, input, kayoSolverRules),
 };
 
+const kayoDefense: HeroCycleModel = {
+  cardOpportunity,
+  ...kayoResponse,
+  // Play style: Kayo leans toward keeping its large attacks.
+  responseLossWeight: 1.3,
+};
+
+/** Dropping dominate pays only when the preferred block uses several hand cards. */
+function footholdUnlocksBlock(input: BotPolicyInput, own: ReadonlyMap<number, CardView>): boolean {
+  const link = currentLink(input);
+  if (!link?.dominate || link.attackingCard.owner === input.seat) return false;
+  const free: BotPolicyInput = {
+    ...input,
+    view: {
+      ...input.view,
+      chain: input.view.chain.map((entry) => entry === link ? { ...entry, dominate: false } : entry),
+    },
+  };
+  const blockers = input.view.players[input.seat].hand.filter((card) =>
+    input.cards[card.cardId]?.cardType !== "defense-reaction" && defenderDefense(card, input) > 0
+  );
+  let allowed = Number.NEGATIVE_INFINITY;
+  let unlocked = Number.NEGATIVE_INFINITY;
+  for (let mask = 0; mask < 2 ** blockers.length; mask++) {
+    const instanceIds = blockers
+      .filter((_, index) => (mask & (2 ** index)) !== 0)
+      .map((card) => card.instanceId);
+    const score = scoreDefenseIntent({ kind: "defend", instanceIds }, free, own, kayoDefense);
+    if (instanceIds.length > 1) unlocked = Math.max(unlocked, score);
+    else allowed = Math.max(allowed, score);
+  }
+  return unlocked > allowed;
+}
+
 function chooseReactive(input: BotPolicyInput): GameIntent {
   const hasAgility = input.view.players[input.seat].board.some((token) => named(input.cards[token.cardId], "agility"));
   if (input.view.turn === 1 && !hasAgility) {
@@ -152,12 +188,7 @@ function chooseReactive(input: BotPolicyInput): GameIntent {
     play: scorePlay,
     nextTurnArsenal: arsenalValuer(kayoSolverRules),
     response: kayoResponse,
-    defend: (intent, observed, own) => scoreDefenseIntent(intent, observed, own, {
-      cardOpportunity,
-      ...kayoResponse,
-      // Play style: Kayo leans toward keeping its large attacks.
-      responseLossWeight: 1.3,
-    }),
+    defend: (intent, observed, own) => scoreDefenseIntent(intent, observed, own, kayoDefense),
     choose: (intent, observed) => {
       if (observed.view.pendingDecision?.kind === "arsenal") {
         return scoreArsenalChoice(intent, observed, arsenalValuer(kayoSolverRules));

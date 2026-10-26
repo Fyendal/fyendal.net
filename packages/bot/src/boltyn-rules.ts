@@ -47,7 +47,6 @@ export const IRONSONG_VERSUS = "ironsong versus|0";
 export const WARBAND_OF_BELLONA = "warband of bellona|0";
 export const SNAPDRAGON_SCALERS = "snapdragon scalers|0";
 export const SOLFORGE_GAUNTLET = "solforge gauntlet|0";
-export const KABUTO = "kabuto of imperial authority|0";
 export const CIRCLET = "circlet of eternal end|0";
 export const HELM_OF_HALOS_GRACE = "helm of halo's grace|0";
 export const SOULBOND_RESOLVE = "soulbond resolve|0";

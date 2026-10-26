@@ -3316,4 +3316,46 @@ describe("Hala policy", () => {
     expect(chooseHalaIntent({ seat: 0, view: a, legal, cards: cardData }))
       .toEqual(chooseHalaIntent({ seat: 0, view: b, legal, cards: cardData }));
   });
+
+  it("spends Kabuto of Imperial Authority on Fang's first Vein swing to lock out the second", () => {
+    const base = advanceUntil(createGame({
+      decklists: [halaDeck(), decklists.dorinthea],
+      cards: cardData,
+      scripts,
+      seed: 3497,
+      startPlayer: 1,
+    }), (current) =>
+      current.phase === "action" && current.priorityPlayer === 1 &&
+      !current.pendingDecision && current.stack.length === 0
+    );
+    base.turn = 13;
+    base.players[0]!.life = 17;
+    replaceHand(base, 0, ["MPW103", "PEN048", "MPW105", "ASB016"]);
+    const fangCards = (cardIds: readonly string[]) =>
+      cardIds.map((cardId) => ({ instanceId: base.nextInstanceId++, cardId, owner: 1 as const }));
+    const fang = base.players[1]!;
+    fang.hero = { ...fang.hero, cardId: "HNT098" };
+    // The report's hand: Scar Tissue, Hunt's End, Cut from the Same Cloth.
+    fang.hand = fangCards(["SAR019", "HNT101", "HNT202"]);
+    fang.actionPoints = 2;
+    fang.resources = 5;
+    fang.weapons = fangCards(["FNG002", "FNG002"]);
+    const kabuto = base.players[0]!.equipment.head!;
+    expect(cardData[kabuto.cardId]?.name).toBe("Kabuto of Imperial Authority");
+    const activation = legalIntents(base, 1).find((intent) =>
+      intent.kind === "activate-ability" && intent.sourceInstanceId === fang.weapons[0]!.instanceId
+    )!;
+    const state = advanceUntil(apply(base, 1, activation), (current) =>
+      current.pendingDecision?.kind === "defend" && current.pendingDecision.player === 0
+    );
+    const intent = chooseHalaIntent({
+      seat: 0,
+      view: projectStateFor(state, 0),
+      legal: legalIntents(state, 0),
+      cards: cardData,
+    });
+
+    expect(intent.kind === "defend" || intent.kind === "stage-defenders" ? intent.instanceIds : [])
+      .toContain(kabuto.instanceId);
+  });
 });

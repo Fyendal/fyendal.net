@@ -2,6 +2,7 @@ import { cardData, decklists, precon, scripts } from "@fyendal/cards";
 import { applyIntent, createGame, legalIntents, projectStateFor } from "@fyendal/engine";
 import type { CardView, Decklist, GameIntent } from "@fyendal/shared";
 import { describe, expect, it } from "vitest";
+import { unneededDefenseBoostIntent } from "./defense.js";
 import { chooseJarlIntent } from "./jarl-policy.js";
 import { halaPresentationFor, jarlPresentationFor } from "./sideboard.js";
 
@@ -1189,5 +1190,47 @@ describe("Jarl policy", () => {
 
     expect(chooseJarlIntent({ seat: 0, view, legal, cards: cardData }))
       .toEqual({ kind: "choose", optionId: String(pulse.instanceId) });
+  });
+
+  it("skips Staunch Response's +3 when its own defense already stops the attack", () => {
+    const state = createGame({
+      decklists: [jarlDeck(), decklists.dorinthea], cards: cardData, scripts,
+      seed: 12_206, startPlayer: 1,
+    });
+    replaceHand(state, ["SBR021", "IAR260"]);
+    const view = projectStateFor(state, 0);
+    const [staunch, oak] = view.players[0].hand;
+    view.players[0].hand = [oak!];
+    view.phase = "reaction";
+    view.priorityPlayer = 0;
+    const pay = "pay 4 — pitch Ice Aged Oak";
+    view.pendingDecision = {
+      player: 0,
+      kind: "optional-effect",
+      prompt: "Staunch Response: pay {r}{r}{r}{r} for +3 defense?",
+      options: [pay, "no"],
+      resourcePayment: {
+        cost: 4,
+        options: [{ optionId: pay, pitchInstanceIds: [oak!.instanceId] }],
+        sourceInstanceId: staunch!.instanceId,
+      },
+    };
+    view.stack = [{ card: staunch!, seat: 0, label: "Staunch Response", optional: false }];
+    view.chain = [{
+      attackingCard: { instanceId: 90_206, cardId: "SUP019", owner: 1 },
+      defendingCards: [], attackValue: 6, defenseValue: 0, damage: 6,
+      resolved: false, reactions: [],
+    }];
+    const input = {
+      seat: 0 as const,
+      view,
+      legal: [{ kind: "choose", optionId: pay }, { kind: "choose", optionId: "no" }] as GameIntent[],
+      cards: cardData,
+    };
+    expect(chooseJarlIntent(input)).toEqual({ kind: "choose", optionId: "no" });
+
+    view.chain[0]!.attackValue = 9;
+    view.chain[0]!.damage = 9;
+    expect(unneededDefenseBoostIntent(input)).toBeUndefined();
   });
 });

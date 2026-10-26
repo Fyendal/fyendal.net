@@ -162,6 +162,10 @@ pnpm release:check   # significant engine/server changes only
 
 - Run `pnpm release:check` only after a significant change in
   `packages/engine` or `apps/server`, or when explicitly asked.
+- For bot changes, run only the affected files
+  (`pnpm --filter @fyendal/bot exec vitest run src/<hero>-policy.test.ts`).
+  The full bot suite is CPU-heavy and times out when sessions run it
+  concurrently; rerun a timed-out file alone before treating it as a failure.
 - Documentation-only and comment-only changes need diff review, not tests.
 - After catalog edits outside `pnpm dev`, run
   `pnpm --filter @fyendal/client i18n:compile` and include the compiled output.

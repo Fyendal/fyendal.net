@@ -1,6 +1,6 @@
 import type { BotDecklists, CardData, CardView, GameIntent, GameView, OngoingEffectView } from "@fyendal/shared";
 import type { GameState } from "@fyendal/engine";
-import { requiredEquipmentStageIntent } from "./defense.js";
+import { requiredEquipmentStageIntent, unneededDefenseBoostIntent } from "./defense.js";
 import {
   publicCombatThreat,
   threatenedAttackDamage,
@@ -575,6 +575,8 @@ export function chooseSharedPolicyIntent(input: BotPolicyInput): GameIntent | un
   if (!decision) return undefined;
   const upkeep = chooseUpkeepPayment(input);
   if (upkeep) return upkeep;
+  const unneededBoost = unneededDefenseBoostIntent(input);
+  if (unneededBoost) return unneededBoost;
 
   const incoming = arcaneBarrierIncoming(decision);
   if (incoming === undefined) return undefined;
@@ -949,6 +951,27 @@ function isSpringTunic(card: CardView, input: BotPolicyInput): boolean {
 
 function isBladeBeckoner(card: CardView, input: BotPolicyInput): boolean {
   return input.cards[card.cardId]?.name.trim().toLowerCase().startsWith("blade beckoner ") === true;
+}
+
+/** Kabuto spent with no weapon swing left forfeits its later denial. */
+const WASTED_WEAPON_LOCK_COST = 3;
+
+function isWeaponLock(card: CardView, input: BotPolicyInput): boolean {
+  return input.cards[card.cardId]?.name.trim().toLowerCase() === "kabuto of imperial authority";
+}
+
+/** Kabuto's denied swing, sized like a continuation attack; go again can arrive mid-chain. */
+function weaponLockValue(input: BotPolicyInput): number {
+  const attacker = input.view.players[1 - input.seat]!;
+  return Math.min(6, 3 + attacker.handCount + attacker.arsenalCount);
+}
+
+/** An opponent weapon can still activate this turn. */
+function opponentWeaponAttackLeft(input: BotPolicyInput): boolean {
+  if (input.view.turnFacts?.players[1 - input.seat]?.weaponAttacksProhibited === true) return false;
+  return input.view.players[1 - input.seat]!.weapons.some((weapon) =>
+    !weapon.usedAbilityIndexes?.includes(0) || (weapon.remainingAbilityActivations?.[0] ?? 0) > 0
+  );
 }
 
 /** Power the current attack gains (or loses) once `defenders` are declared,
@@ -1584,6 +1607,12 @@ export function scoreDefenseIntentWithTrace(
     };
   }
   const attackIsWeapon = input.cards[link.attackingCard.cardId]?.cardType === "weapon";
+  const swingLeft = opponentWeaponAttackLeft(input);
+  // Kabuto's lock pays only while a weapon swing remains to deny.
+  const locksWeapons = (card: CardView) => swingLeft && isWeaponLock(card, input);
+  const weaponLockCost = (card: CardView) => !isWeaponLock(card, input)
+    ? 0
+    : swingLeft ? -weaponLockValue(input) : WASTED_WEAPON_LOCK_COST;
   const protectedEquipment = selectedEquipment.filter((card) => {
     // Mandatory-defense attacks may already have forced this armor onto the
     // chain. At that point score how best to complete the block rather than
@@ -1597,6 +1626,7 @@ export function scoreDefenseIntentWithTrace(
     // Hand cards refill after the opening turn; do not spend fresh equipment
     // to improve an otherwise nonlethal opening block.
     if (openingDefense) return true;
+    if (locksWeapons(card)) return false;
     if (isMidgameDurableArmor(card, input)) return false;
     if (model.equipmentUseIsFree?.(card, input)) return false;
     if (attackIsWeapon && isBladeBeckoner(card, input)) return false;
@@ -1606,7 +1636,7 @@ export function scoreDefenseIntentWithTrace(
   const responseInput = projectedResponseInput(input, plannedPrevention);
   // Even when armor is otherwise justified, spare hand cards block first.
   const spendsArmor = !lethal && selectedEquipment.some((card) =>
-    !stagedIds.has(card.instanceId) && !model.equipmentUseIsFree?.(card, input)
+    !stagedIds.has(card.instanceId) && !model.equipmentUseIsFree?.(card, input) && !locksWeapons(card)
   );
   if (
     protectedEquipment.length > 0 ||
@@ -1627,7 +1657,7 @@ export function scoreDefenseIntentWithTrace(
   const equipmentCost = selectedEquipment.reduce(
     (total, card) => total + (model.equipmentUseIsFree?.(card, input)
       ? 0
-      : equipmentWearCost(card, input)),
+      : equipmentWearCost(card, input)) + weaponLockCost(card),
     0,
   );
   // Damage projection captures cards essential to the next offensive line,

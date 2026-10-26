@@ -37,3 +37,20 @@ export function requiredEquipmentStageIntent(
   }
   return undefined;
 }
+
+/** Decline an optional "+N{d}" payment once the attack is already stopped,
+ * counting the printed defense of a defense reaction still resolving. */
+export function unneededDefenseBoostIntent(
+  input: BotPolicyInput,
+): Extract<GameIntent, { kind: "choose" }> | undefined {
+  const decision = input.view.pendingDecision;
+  if (decision?.kind !== "optional-effect" || !decision.resourcePayment) return undefined;
+  if (!/\+\d+(?:\{d\}| defense)/.test(decision.prompt)) return undefined;
+  if (!input.legal.some((intent) => intent.kind === "choose" && intent.optionId === "no")) return undefined;
+  const link = [...input.view.chain].reverse().find((candidate) => !candidate.resolved);
+  if (!link || link.attackingCard.owner === input.seat) return undefined;
+  const resolving = input.view.stack.find((layer) =>
+    layer.seat === input.seat && layer.card?.instanceId === decision.resourcePayment?.sourceInstanceId
+  )?.card;
+  return link.damage - (resolving?.defense ?? 0) <= 0 ? { kind: "choose", optionId: "no" } : undefined;
+}

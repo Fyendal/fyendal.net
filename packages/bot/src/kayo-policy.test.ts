@@ -69,6 +69,45 @@ describe("Kayo presentation", () => {
 });
 
 describe("Kayo policy", () => {
+  function dominatedAttack(names: readonly [string, number][], life: number) {
+    let state = game(names);
+    const kayo = state.players[0]!;
+    kayo.life = life;
+    kayo.equipment.legs = {
+      instanceId: state.nextInstanceId++, cardId: findPrinting("Unflinching Foothold")!.id, owner: 0,
+    };
+    const attacker = state.players[1]!;
+    const attack = {
+      instanceId: state.nextInstanceId++, cardId: findPrinting("Nourishing Emptiness", 1)!.id, owner: 1 as const,
+    };
+    attacker.hand = [attack];
+    attacker.resources = 3;
+    attacker.actionPoints = 1;
+    state.activePlayer = 1;
+    state.priorityPlayer = 1;
+    const play = legalIntents(state, 1).find((intent) =>
+      intent.kind === "play-card" && intent.instanceId === attack.instanceId
+    );
+    state = apply(state, 1, play!);
+    for (let step = 0; step < 10; step++) {
+      const seat = (state.pendingDecision?.player ?? state.priorityPlayer) as 0 | 1;
+      if (seat === 0) return state;
+      state = apply(state, seat, opponentPass(state, seat));
+    }
+    throw new Error("Kayo never received priority");
+  }
+
+  it("keeps Unflinching Foothold when it would not block with two cards anyway", () => {
+    const state = dominatedAttack([["Bare Fangs", 1], ["Buckwild", 1], ["Clash of Might", 1], ["Wild Ride", 1]], 20);
+    expect(projectStateFor(state, 0).chain.at(-1)?.dominate).toBe(true);
+    expect(cardName(chooseKayoIntent(input(state)), state)).not.toBe("Unflinching Foothold");
+  });
+
+  it("destroys Unflinching Foothold to survive with a two-card block", () => {
+    const state = dominatedAttack([["Bear Hug", 3], ["Smash Instinct", 3], ["Unexpected Backhand", 3]], 3);
+    expect(cardName(chooseKayoIntent(input(state)), state)).toBe("Unflinching Foothold");
+  });
+
   it.each([2, 3])("discards pitch-%s Agile Windup on turn zero before arsenaling Bare Fangs", (pitch) => {
     let state = game([["Agile Windup", pitch], ["Bare Fangs", 1], ["Bear Hug", 3], ["Rough Up", 1]], 1);
     const first = chooseKayoIntentWithTrace(input(state));
