@@ -1988,6 +1988,30 @@ describe("August 29–31 IAR and GEM Pack 6 spoilers", () => {
     g.expectLife(1, 14).expectAP(0, 1);
   });
 
+  it("a Spectral Shield tapped by Astral Ambience can still attack with Reality Refractor", () => {
+    const g = scenario({ seats: [
+      {
+        hero: "rhinar",
+        heroKey: "prism, advent of thrones|0",
+        weapons: ["reality refractor|0"],
+        hand: ["astral ambience|2"],
+        board: ["spectral shield|0"],
+        resources: 4,
+        equipment: NO_EQUIPMENT,
+      },
+      { hero: "dorinthea", life: 20, equipment: NO_EQUIPMENT },
+    ] });
+
+    g.play("astral ambience|2")
+      .blockWith()
+      .activate("astral ambience|2")
+      .chooseCard("spectral shield|0")
+      .settle();
+
+    expect(g.state.players[0]!.board[0]!.tapped).toBe(true);
+    g.activate("spectral shield|0", { settle: false }).expectAttackValue(5);
+  });
+
   it("Astral Ambience cannot tap an already tapped Spectral Shield", () => {
     const g = scenario({ seats: [
       {

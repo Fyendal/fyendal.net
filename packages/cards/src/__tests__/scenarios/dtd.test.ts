@@ -1330,6 +1330,17 @@ describe("DTD — Prism and Figments", () => {
     s.activate("blessing of spirits|1", { settle: false }).expectAttackValue(5);
   });
 
+  it("Reality Refractor lets a tapped aura attack", () => {
+    const s = scenario({
+      seats: [
+        { hero: "rhinar", heroKey: "prism, advent of thrones|0", weapons: ["reality refractor|0"], board: ["spectral shield|0"], resources: 2 },
+        { hero: "dorinthea" },
+      ],
+    });
+    s.state.players[0]!.board[0]!.tapped = true;
+    s.activate("spectral shield|0", { settle: false }).expectAttackValue(5);
+  });
+
   it("Vynnset makes the next Runechant damage unpreventable", () => {
     const s = scenario({
       seats: [

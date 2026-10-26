@@ -140,7 +140,7 @@ export function isAuraAttacker(
   card: CardInstance,
 ): boolean {
   if (!player.board.some((c) => c.instanceId === card.instanceId)) return false;
-  if (card.tapped || card.faceDown) return false;
+  if (card.faceDown) return false;
   if (!grantsAuraAttackMarker(state, player, card)) return false;
   const abilityIndex = abilityList(scriptOf(state, card.cardId, card)).length;
   return !player.flags[activatedFlagKey(card.instanceId, abilityIndex)];

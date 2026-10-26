@@ -1802,7 +1802,7 @@ export interface CardScript {
   /** Called for this defending card immediately before its resolved combat
    * chain closes and the card settles. */
   onDefendingCombatChainClosed?(ctx: ScriptCtx): void;
-  /** Aura attacks (Iris, Cosmo, Reality Refractor): matching ready auras get a
+  /** Aura attacks (Iris, Cosmo, Reality Refractor): matching auras get a
    *  once-per-turn attack ability. `requiresClass`, `requiresSubtype`, and
    *  `requiresWard` constrain the grant; `basePower` overrides the aura's Ward
    *  value. With `goAgain`, the granted attack ability has go again. With

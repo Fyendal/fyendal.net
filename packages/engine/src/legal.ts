@@ -1320,8 +1320,8 @@ function abilityIntents(
       }
     }
   }
-  // granted aura attacks (Cosmo): ready board cards with a Ward keyword attack
-  // as weapons, once per turn each, for 1 AP + the marker's {r} cost
+  // granted aura attacks: matching board auras attack as weapons, once per
+  // turn each, for 1 AP + the marker's {r} cost
   if (player.actionPoints >= 1 && !actionLimitReached(state, player)) {
     for (const card of player.board) {
       if (weaponAttacksProhibited(player)) continue;
