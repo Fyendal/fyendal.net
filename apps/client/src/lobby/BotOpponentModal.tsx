@@ -4,8 +4,10 @@ import { FUTURE_SET_CODES, cardData, formatLegalityIssues, precon } from "@fyend
 import type { BotOpponent, Format } from "@fyendal/shared";
 import { BETA_BOT_OPPONENTS } from "@fyendal/protocol";
 import { heroImageUrl } from "./heroImage.js";
+import { cardImageUrl } from "../game/Card.js";
 import { ModalSurface } from "../components/ModalSurface.js";
 import { ViewportTooltip } from "../components/ViewportTooltip.js";
+import { loadBotMatchmakingPreference, saveBotMatchmakingPreference } from "../storage.js";
 import { useStore } from "../store.js";
 
 interface BotOption {
@@ -142,7 +144,9 @@ export function BotOpponentModal(props: {
   const intl = useIntl();
   const betaTester = useStore((state) => state.betaTester);
   const bots = BOTS[props.format].filter((bot) => betaTester || !BETA_BOT_OPPONENTS.has(bot.id));
-  const [searchForPlayer, setSearchForPlayer] = useState(true);
+  const [searchForPlayer, setSearchForPlayer] = useState(() =>
+    typeof localStorage === "undefined" ? true : loadBotMatchmakingPreference(localStorage)
+  );
   const tooltipId = useId();
   const warningRefs = useRef<Partial<Record<BotOpponent, HTMLSpanElement | null>>>({});
   const [hoveredBot, setHoveredBot] = useState<BotOpponent | null>(null);
@@ -174,7 +178,9 @@ export function BotOpponentModal(props: {
           type="checkbox"
           checked={searchForPlayer}
           onChange={(event) => {
-            setSearchForPlayer(event.target.checked);
+            const enabled = event.target.checked;
+            setSearchForPlayer(enabled);
+            if (typeof localStorage !== "undefined") saveBotMatchmakingPreference(localStorage, enabled);
           }}
         />
         <span className="switch-track" />
@@ -186,6 +192,7 @@ export function BotOpponentModal(props: {
             <button
               type="button"
               key={bot.id}
+              className="bot-opponent-card"
               data-modal-initial-focus={index === 0 ? "" : undefined}
               aria-describedby={warnings.banned.length > 0 || warnings.future.length > 0
                 ? `${tooltipId}-${bot.id}`
@@ -198,39 +205,39 @@ export function BotOpponentModal(props: {
               onBlur={() => setFocusedBot((current) => current === bot.id ? null : current)}
               onClick={() => props.onSelect(bot.id, searchForPlayer)}
             >
-              <BotPortrait name={bot.name} heroName={bot.heroName} />
-              <span className="bot-opponent-details">
-                <strong className="bot-opponent-name">{bot.name}</strong>
-                <small className="bot-opponent-title">{bot.title}</small>
+              <BotArt bot={bot} />
+              <strong className="bot-opponent-name">{bot.name}</strong>
+              <small className="bot-opponent-title">{bot.title}</small>
+              {warnings.banned.length > 0 || warnings.future.length > 0 ? (
+                <span
+                  className="bot-card-warnings"
+                  ref={(element) => { warningRefs.current[bot.id] = element; }}
+                  onPointerEnter={() => setHoveredBot(bot.id)}
+                  onPointerLeave={() => setHoveredBot((current) => current === bot.id ? null : current)}
+                >
+                  {warnings.banned.length > 0 ? (
+                    <span className="deck-legality-hint banned">
+                      {intl.formatMessage({ id: "lobby.deck.includesBanned" }, {
+                        count: warnings.banned.length,
+                      })}
+                    </span>
+                  ) : null}
+                  {warnings.future.length > 0 ? (
+                    <span className="deck-legality-hint future">
+                      {intl.formatMessage({ id: "lobby.deck.includesFuture" }, {
+                        count: warnings.future.length,
+                      })}
+                    </span>
+                  ) : null}
+                </span>
+              ) : null}
+              <span className="bot-opponent-foot">
+                <span className={`bot-deck-type bot-deck-type-${bot.deckType}`}>
+                  {intl.formatMessage({ id: `lobby.bot.type.${bot.deckType}` })}
+                </span>
                 <span className="bot-opponent-description">
                   {intl.formatMessage({ id: bot.descriptionId })}
                 </span>
-                {warnings.banned.length > 0 || warnings.future.length > 0 ? (
-                  <span
-                    className="bot-card-warnings"
-                    ref={(element) => { warningRefs.current[bot.id] = element; }}
-                    onPointerEnter={() => setHoveredBot(bot.id)}
-                    onPointerLeave={() => setHoveredBot((current) => current === bot.id ? null : current)}
-                  >
-                    {warnings.banned.length > 0 ? (
-                      <span className="deck-legality-hint banned">
-                        {intl.formatMessage({ id: "lobby.deck.includesBanned" }, {
-                          count: warnings.banned.length,
-                        })}
-                      </span>
-                    ) : null}
-                    {warnings.future.length > 0 ? (
-                      <span className="deck-legality-hint future">
-                        {intl.formatMessage({ id: "lobby.deck.includesFuture" }, {
-                          count: warnings.future.length,
-                        })}
-                      </span>
-                    ) : null}
-                  </span>
-                ) : null}
-              </span>
-              <span className={`bot-deck-type bot-deck-type-${bot.deckType}`}>
-                {intl.formatMessage({ id: `lobby.bot.type.${bot.deckType}` })}
               </span>
             </button>
           );
@@ -261,16 +268,25 @@ export function BotOpponentModal(props: {
   );
 }
 
-function BotPortrait(props: { name: string; heroName: string }) {
-  const [available, setAvailable] = useState(true);
-  return available ? (
+/** The hero card's art, as on deck banners; the headshot stands in when it fails. */
+function BotArt(props: { bot: BotOption }) {
+  const heroId = precon(props.bot.deckId)?.pool.heroId;
+  const [artOk, setArtOk] = useState(true);
+  const [headshotOk, setHeadshotOk] = useState(true);
+  if (heroId && artOk) {
+    return (
+      <span className="deck-card-art">
+        <img src={cardImageUrl(heroId)} alt="" loading="lazy" onError={() => setArtOk(false)} />
+      </span>
+    );
+  }
+  return headshotOk ? (
     <img
-      src={heroImageUrl(props.heroName)}
+      className="deck-card-img"
+      src={heroImageUrl(props.bot.heroName)}
       alt=""
       loading="lazy"
-      onError={() => setAvailable(false)}
+      onError={() => setHeadshotOk(false)}
     />
-  ) : (
-    <span className="bot-opponent-fallback" aria-hidden="true">{props.name.charAt(0)}</span>
-  );
+  ) : null;
 }

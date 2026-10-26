@@ -148,9 +148,8 @@ describe("SUP — heroes and the crowd", () => {
     });
 
     g.play("celestial cataclysm|2")
-      .chooseCard("soul food|2")
-      .chooseCard("tome of divinity|2")
-      .chooseCard("beacon of victory|2")
+      .chooseMany(g.state.players[0]!.soul.map((card) => String(card.instanceId)))
+      .settle()
       .blockWith()
       .settle()
       .play("battlefield beacon|2");
@@ -267,6 +266,8 @@ describe("SUP — heroes and the crowd", () => {
     });
     g.chooseOption("cheer");
     expect(g.state.pendingDecision?.options).toEqual(["destroy", "pitch", "done"]);
+    // Modes are declared before the card leaves hand.
+    g.expectInZone(0, "numbskull charm|2", "hand");
     g.chooseOption("done").settle();
 
     expect(g.state.players[0]!.flags.cheeredThisTurn).toBe(true);
@@ -433,6 +434,19 @@ describe("SUP — heroes and the crowd", () => {
       .expectAP(0, 1);
   });
 
+  it("Buckwild gets go again from a 6-power card Tuffnut pitches during the reaction step", () => {
+    for (const buckwild of ["buckwild|1", "buckwild|2", "buckwild|3"]) {
+      const g = scenario({
+        seats: [
+          hero("tuffnut|0", { hand: [buckwild], deck: ["old leather and vim|1"], resources: 3 }),
+          foe(),
+        ],
+      });
+
+      g.play(buckwild).blockWith().activate("tuffnut|0").settle().expectAP(0, 1);
+    }
+  });
+
   it("Cries of Encore lets its controller pay to play one suspense aura from graveyard", () => {
     const g = scenario({
       seats: [
@@ -597,7 +611,7 @@ describe("SUP — heroes and the crowd", () => {
     })).toMatchObject({ ok: false, error: "invalid selection count" });
 
     const selected = options.slice(0, 2);
-    g.doRaw({ kind: "choose-many", optionIds: selected });
+    g.chooseMany(selected);
 
     expect(g.state.players[0]!.banish.filter(
       (card) => functionalKeyOf(cardData[card.cardId]!) === "blunten|2",
@@ -756,6 +770,8 @@ describe("SUP — heroes and the crowd", () => {
 
     g.chooseOption("damage can't be prevented");
     expect(g.state.pendingDecision?.options).toEqual(["go again"]);
+    // Modes are declared before the card leaves hand.
+    g.expectInZone(0, "beat of the ironsong|3", "hand");
 
     g.chooseOption("go again")
       .expectFinalAttack(7)
@@ -795,14 +811,20 @@ describe("SUP — heroes and the crowd", () => {
         }),
         foe({
           hand: ["path of same ends|1", "snatch|1"],
+          deck: ["raging onslaught|1", "raging onslaught|2"],
         }),
       ],
     });
 
     g.play("path of same ends|1")
       .blockWith("vigorous smashup|2")
-      .settle()
-      .chooseOption("no");
+      .settle();
+    // the clashed cards ride on the bottom choice, so undo back to it shows them again
+    expect(g.state.pendingDecision?.chooseHook).toBe("clash-bottom");
+    const revealed = projectStateFor(g.state, 1).pendingDecision?.revealedCards ?? [];
+    expect(revealed.map((card) => card.instanceId)).toContain(g.state.players[0]!.deck[0]!.instanceId);
+    expect(revealed.map((card) => card.owner).sort()).toEqual([0, 1]);
+    g.chooseOption("no");
 
     expect(g.state.players[0]!.deck[0]?.cardId).toBe(printingId("vigorous smashup|2"));
 
@@ -1005,6 +1027,27 @@ describe("SUP — tokens and suspense", () => {
       .settle();
     g.chooseCard("head jab|1")
       .expectFinalDefense(0);
+  });
+
+  it("No Hero Stands Alone shrinks a weapon only for that chain link", () => {
+    const g = scenario({
+      seats: [
+        foe({
+          heroKey: "hala, bladesaint of the vow|0",
+          weapons: ["zenith blade|0"],
+          hand: ["edict of steel|1"],
+          resources: 2,
+          deck: ["raging onslaught|3"],
+        }),
+        hero("tuffnut|0", { hand: ["no hero stands alone|2"], deck: ["raging onslaught|1"] }),
+      ],
+    });
+
+    g.play("edict of steel|1").attackWithWeapon("zenith blade|0").expectAttackValue(4);
+    g.blockWith("no hero stands alone|2").settle();
+    g.chooseCard("zenith blade|0").expectFinalAttack(1);
+    expect(g.state.log.some((line) => line.publicText?.includes("-3 power") === true)).toBe(true);
+    g.attackWithWeapon("zenith blade|0").expectAttackValue(4);
   });
 
   it("Leave Them Hanging does not intimidate as it leaves at the start of its controller's turn", () => {

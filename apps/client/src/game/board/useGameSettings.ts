@@ -8,21 +8,8 @@ import {
   type MotionPreference,
   type PlayabilityCuePreference,
   type PriorityWindowMode,
-  type StandingOrders,
   type StandingOrderUpdate,
 } from "../../storage.js";
-
-/** The decided answers only; "ask" is the absence of an order. */
-export function toSeatStandingOrders(orders: StandingOrders): SeatStandingOrders {
-  const seat: SeatStandingOrders = {};
-  for (const [key, order] of Object.entries(orders)) {
-    const entry: SeatStandingOrders[string] = {};
-    if (order.priorityWindow === "pass") entry.priorityWindow = "pass";
-    if (order.optionalTrigger === "yes" || order.optionalTrigger === "no") entry.optionalTrigger = order.optionalTrigger;
-    if (entry.priorityWindow !== undefined || entry.optionalTrigger !== undefined) seat[key] = entry;
-  }
-  return seat;
-}
 
 export function useGameSettings({
   syncPriorityMode,
@@ -39,10 +26,10 @@ export function useGameSettings({
     if (syncPriorityMode) sendPriorityMode(settings.priorityWindowMode);
   }, [sendPriorityMode, settings.priorityWindowMode, syncPriorityMode]);
 
-  const seatOrders = useMemo(() => toSeatStandingOrders(settings.standingOrders), [settings.standingOrders]);
+  // Resent on every reconnect.
   useEffect(() => {
-    if (syncPriorityMode) sendStandingOrders(seatOrders);
-  }, [seatOrders, sendStandingOrders, syncPriorityMode]);
+    if (syncPriorityMode) sendStandingOrders(settings.standingOrders);
+  }, [sendStandingOrders, settings.standingOrders, syncPriorityMode]);
 
   const updatePriorityWindowMode = (mode: PriorityWindowMode) => {
     setSettings((current) => {
@@ -69,6 +56,13 @@ export function useGameSettings({
   const updateOptionHotkeys = (optionHotkeys: boolean) => {
     setSettings((current) => {
       const next = { ...current, optionHotkeys };
+      saveGameSettings(localStorage, next);
+      return next;
+    });
+  };
+  const updateSkipBotDelay = (skipBotDelay: boolean) => {
+    setSettings((current) => {
+      const next = { ...current, skipBotDelay };
       saveGameSettings(localStorage, next);
       return next;
     });
@@ -127,6 +121,7 @@ export function useGameSettings({
     updateLessGuidance,
     updateSkipPlayConfirmation,
     updateOptionHotkeys,
+    updateSkipBotDelay,
     updateCardDisplayPreference,
     updateMotionPreference,
     updatePlayabilityCuePreference,

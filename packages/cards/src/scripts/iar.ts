@@ -1,5 +1,6 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx, TriggerDef } from "@fyendal/engine";
 import {
+  hasBloodDebt,
   ampNextArcane,
   anyDamageTarget,
   attackAbility,
@@ -1318,11 +1319,6 @@ const viseraiBack: CardScript = {
   ],
 };
 
-function hasBloodDebt(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
-  const data = ctx.cardData(card.cardId);
-  return (data.keywords ?? []).some((keyword) => keyword.trim().toLowerCase() === "blood debt");
-}
-
 function replaceActionPhaseDrawWithPonder(ctx: ScriptCtx, drawingSeat: number, count: number): number {
   if (!["action", "defend", "reaction", "layer"].includes(ctx.state.phase) || count <= 0) {
     return count;
@@ -2346,10 +2342,8 @@ export const iar: Record<string, CardScript> = {
         ctx.getFlag("player", "iarBlasmophetPlayUsed") !== true
       );
     },
-    onFriendlyPlay(ctx, played, from) {
-      if (from === "banish" && isBloodDebtAction(ctx, played)) {
-        ctx.setFlag("player", "iarBlasmophetPlayUsed", true);
-      }
+    onFriendlyPlayFromPermission(ctx) {
+      ctx.setFlag("player", "iarBlasmophetPlayUsed", true);
     },
     triggers: [
       {
@@ -2820,9 +2814,7 @@ export const iar: Record<string, CardScript> = {
   "dark arcanite gloves|0": shadowResist(),
   "dark arcanite boots|0": shadowResist(),
   "murmur of i'arathael|1": {
-    onAttackDeclared(ctx) {
-      if (Number(ctx.getFlag("player", "banishedThisTurn")) > 0) ctx.grantGoAgain();
-    },
+    hasConditionalGoAgain: (ctx) => Number(ctx.getFlag("player", "banishedThisTurn")) > 0,
   },
   "rumbling of i'arathael|1": {
     onAttackDeclared(ctx) {

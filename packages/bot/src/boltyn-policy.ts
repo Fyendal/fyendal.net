@@ -2,6 +2,7 @@ import type { CardData, CardView, GameIntent } from "@fyendal/shared";
 import {
   chooseScoredIntent,
   currentAttackIsOurs,
+  canGainGoAgain,
   currentLink,
   enforceAllyTargetPolicy,
   enforceSpectraPolicy,
@@ -28,7 +29,7 @@ import {
 import { weaponCost } from "./card-model.js";
 import { arsenalValuer, handResponse, opportunityValuer } from "./hand-value.js";
 import { planTacticalTurn, type TacticalTurnPlan } from "./tactical-turn-planner.js";
-import { POINTS_PER_DAMAGE } from "./turn-planner.js";
+import { futureOffenseRate, POINTS_PER_DAMAGE } from "./turn-planner.js";
 import { adjustValueBreakdown } from "./value.js";
 import {
   BANNERET_OF_SWORDSMANSHIP,
@@ -81,6 +82,8 @@ const POWER_CARDS = new Set([
 ]);
 
 const cardOpportunity = opportunityValuer(boltynSolverRules);
+/** Damage equivalent of Kabuto shutting off the opponent's remaining weapon swings. */
+const KABUTO_DENIAL_VALUE = 3;
 
 function me(input: BotPolicyInput) {
   return input.view.players[input.seat];
@@ -115,6 +118,7 @@ function raydnAvailable(input: BotPolicyInput): boolean {
   const sword = raydn(input);
   if (!sword) return false;
   if (input.view.activePlayer !== input.seat) return true;
+  if (input.view.turnFacts?.players[input.seat]?.weaponAttacksProhibited === true) return false;
   return !sword.usedAbilityIndexes?.includes(0) || (sword.remainingAbilityActivations?.[0] ?? 0) > 0;
 }
 
@@ -128,6 +132,66 @@ function luminaActive(input: BotPolicyInput): boolean {
   return ongoingFrom(input, LUMINA_ASCENSION);
 }
 
+/** Raydn swings again after Lumina: unused, or granted another swing by a charged Lumina. */
+function raydnSwingAfterLumina(input: BotPolicyInput): boolean {
+  if (raydnAvailable(input)) return true;
+  return raydn(input) !== undefined && charged(input) &&
+    input.view.turnFacts?.players[input.seat]?.weaponAttacksProhibited !== true;
+}
+
+/** Spirit of Eirina lets Lumina wait for Raydn's reaction step. */
+function luminaIsInstant(input: BotPolicyInput): boolean {
+  return boardCount(input, "spirit of eirina") > 0;
+}
+
+/** Raydn's activation is on the stack or its link is unresolved. */
+function raydnAttacking(input: BotPolicyInput): boolean {
+  const sword = raydn(input);
+  if (!sword) return false;
+  return currentLink(input)?.attackingCard.instanceId === sword.instanceId ||
+    input.view.stack.some((layer) => layer.seat === input.seat && layer.card?.instanceId === sword.instanceId);
+}
+
+/** Lumina's go again is the only action point past our current link. */
+function luminaActionPointNeeded(input: BotPolicyInput): boolean {
+  const link = currentLink(input);
+  if (!link || !currentAttackIsOurs(input) || link.goAgain === true || me(input).actionPoints > 0) return false;
+  // A Lumina already on the stack grants it.
+  const luminaPending = input.view.stack.some((layer) =>
+    layer.seat === input.seat && key(input.cards[layer.card?.cardId ?? ""]) === LUMINA_ASCENSION
+  );
+  if (luminaPending) return false;
+  const heroId = me(input).heroInstanceId;
+  return !input.legal.some((intent) => intent.kind === "activate-ability" && intent.sourceInstanceId === heroId);
+}
+
+/** Lumina goes only into Raydn's reaction step as an instant, or before a Raydn swing once charged. */
+function luminaWindow(input: BotPolicyInput): boolean {
+  if (raydnAttacking(input)) {
+    if (!luminaIsInstant(input) || input.view.pendingDecision?.kind !== "attack-reaction") return false;
+    // A Roaring Beam charge first turns Lumina's +1 into another swing.
+    const beamPending = input.view.stack.some((layer) =>
+      layer.seat === input.seat && key(input.cards[layer.card?.cardId ?? ""]) === ROARING_BEAM
+    );
+    return charged(input) || !(beamPending || input.legal.some((intent) => playsCard(intent, input, ROARING_BEAM)));
+  }
+  return charged(input) && raydnSwingAfterLumina(input);
+}
+
+function playsCard(intent: GameIntent, input: BotPolicyInput, functional: string): boolean {
+  const card = intentCard(intent, ownCards(input));
+  return (intent.kind === "play-card" || intent.kind === "play-from-arsenal") &&
+    key(input.cards[card?.cardId ?? ""]) === functional;
+}
+
+function playsLumina(intent: GameIntent, input: BotPolicyInput): boolean {
+  return playsCard(intent, input, LUMINA_ASCENSION);
+}
+
+function activatesRaydn(intent: GameIntent, input: BotPolicyInput): boolean {
+  return intent.kind === "activate-ability" && intent.sourceInstanceId === raydn(input)?.instanceId;
+}
+
 function vBuffActive(input: BotPolicyInput): boolean {
   return ongoingFrom(input, V_OF_THE_VANGUARD);
 }
@@ -138,6 +202,14 @@ function reserve(input: BotPolicyInput): CardView[] {
 
 function holds(input: BotPolicyInput, functional: string): boolean {
   return reserve(input).some((card) => key(input.cards[card.cardId]) === functional);
+}
+
+/** An opponent weapon can still activate this turn. */
+function opponentWeaponAttackLeft(input: BotPolicyInput): boolean {
+  if (input.view.turnFacts?.players[1 - input.seat]?.weaponAttacksProhibited === true) return false;
+  return input.view.players[1 - input.seat]!.weapons.some((weapon) =>
+    !weapon.usedAbilityIndexes?.includes(0) || (weapon.remainingAbilityActivations?.[0] ?? 0) > 0
+  );
 }
 
 /** The Tunic stances race; the Soulbond stances block and pivot later. */
@@ -265,7 +337,10 @@ function scoreDefend(intent: DefendIntent, input: BotPolicyInput, own: ReadonlyM
       if (chosenKeys.includes(SOULBOND_RESOLVE) && anyLeft) adjustment += SOUL_VALUE + 0.5;
       const link = currentLink(observed);
       const weaponAttack = observed.cards[link?.attackingCard.cardId ?? ""]?.cardType === "weapon";
-      if (chosenKeys.includes(KABUTO) && weaponAttack) adjustment += 3;
+      // Kabuto only stops weapon swings still to come; spent otherwise, it forfeits that denial.
+      if (chosenKeys.includes(KABUTO) && weaponAttack) {
+        adjustment += opponentWeaponAttackLeft(observed) ? KABUTO_DENIAL_VALUE : -KABUTO_DENIAL_VALUE;
+      }
       if (chosenKeys.includes(CIRCLET)) {
         const opponent = observed.view.players[1 - observed.seat]!;
         if (opponent.banish.some((card) => !card.faceDown && observed.cards[card.cardId]?.cardType === "action")) {
@@ -370,6 +445,11 @@ function scoreChargeOption(intent: ChooseIntent, input: BotPolicyInput): number 
   return gain;
 }
 
+/** Beacon banishes the whole soul so a Roaring Beam above it charges before the search resolves. */
+function roaringBeamChargesBeacon(input: BotPolicyInput): boolean {
+  return !charged(input) && holds(input, ROARING_BEAM) && (raydnAttacking(input) || raydnAvailable(input));
+}
+
 /** Beacon of Victory's X: one for the search, lethal when reachable, else the spare soul. */
 function desiredBeaconX(input: BotPolicyInput): number {
   const soul = soulCount(input);
@@ -379,6 +459,7 @@ function desiredBeaconX(input: BotPolicyInput): number {
   const lethal = opponent.life - pending;
   if (lethal > 0 && lethal <= soul) return lethal;
   if (charged(input)) return 1;
+  if (roaringBeamChargesBeacon(input)) return soul;
   const further = reserve(input).filter((card) => isAttack(input.cards[card.cardId])).length +
     (raydnAvailable(input) ? 1 : 0);
   return Math.max(1, soul - Math.min(soul - 1, further));
@@ -480,10 +561,17 @@ function scoreChoice(intent: ChooseIntent, input: BotPolicyInput): number {
   return card ? 10 - cardOpportunity(card, input) : 1;
 }
 
-/** Resources a held card still needs beyond what is floating. */
+/** Resources a card playable now still needs beyond what is floating. */
 function resourcesWanted(input: BotPolicyInput): number {
   const player = me(input);
-  const costs = reserve(input).map((card) => resourceCost(input.cards[card.cardId]));
+  const ourTurn = input.view.activePlayer === input.seat;
+  const reacting = input.view.pendingDecision?.kind === "defense-reaction";
+  const costs = reserve(input).flatMap((card) => {
+    const data = input.cards[card.cardId];
+    // A defense reaction only spends resources in the opponent's reaction step.
+    const usable = ourTurn ? data?.cardType !== "defense-reaction" : reacting && data?.cardType === "defense-reaction";
+    return usable ? [resourceCost(data)] : [];
+  });
   const needed = Math.max(0, ...costs);
   return Math.max(0, needed - player.resources);
 }
@@ -496,20 +584,24 @@ function heroAbilityPending(input: BotPolicyInput): boolean {
 
 function scoreHeroAbility(input: BotPolicyInput, own: ReadonlyMap<number, CardView>): number {
   const link = currentLink(input);
-  if (!link || link.resolved || !currentAttackIsOurs(input) || link.goAgain === true) return -100;
+  if (!link || link.resolved || !currentAttackIsOurs(input) || !canGainGoAgain(link)) return -100;
   if (input.view.pendingDecision?.kind !== "attack-reaction" || heroAbilityPending(input)) return -100;
   const pass: GameIntent = { kind: "pass" };
   const sword = raydn(input);
   const swordWorthSwinging = raydnAvailable(input) &&
     (charged(input) || luminaActive(input) || (sword?.attack ?? 0) > 0 || boardCount(input, "courage") > 0 ||
       vBuffActive(input) || holds(input, LUMINA_ASCENSION));
-  const others = attackSourcesAfter(pass, input, own) - (raydnAvailable(input) ? 1 : 0);
+  const sources = attackSourcesAfter(pass, input, own);
+  const others = sources - (raydnAvailable(input) ? 1 : 0);
   if (others === 0 && !swordWorthSwinging) return -100;
+  // Floating action points, such as Lumina's go again, already carry every remaining attack.
+  if (me(input).actionPoints >= sources) return -100;
   return 30;
 }
 
-/** Raydn swings with power this turn and a path leads to it. */
+/** Raydn swings charged this turn and a path leads to it. */
 function raydnSwingSecured(intent: GameIntent, input: BotPolicyInput, own: ReadonlyMap<number, CardView>): boolean {
+  if (!raydnAvailable(input)) return false;
   const player = me(input);
   const chargeAttacks = player.hand.filter((held) => isChargeAttack(input.cards[held.cardId]));
   if (!charged(input) && !(chargeAttacks.length > 0 && chargeableAfter(intent, input, own).length > 1)) return false;
@@ -532,15 +624,19 @@ function scoreRaydn(
     (boardCount(input, "courage") > 0 ? 1 : 0);
   const further = attackSourcesAfter(intent, input, own) > 0;
   if (power === 0) {
-    // A 0-power swing only opens a reaction window for Roaring Beam or Beacon.
-    const window = holds(input, ROARING_BEAM) || (holds(input, BEACON_OF_VICTORY) && soulCount(input) > 0);
+    // A 0-power swing only opens a reaction window for Roaring Beam or a lethal Beacon.
+    const window = holds(input, ROARING_BEAM) ||
+      (holds(input, BEACON_OF_VICTORY) && soulCount(input) >= input.view.players[1 - input.seat]!.life);
     return window ? 3 : -5;
   }
   let score = power + (ongoingFrom(input, IRONSONG_VERSUS) ? 2 : 0);
   if (further && (boardCount(input, "quicken") > 0 || soulCount(input) > 0)) score += 10;
   // Set-up first: a charge, Lumina or Edict makes the swing bigger.
   if (!charged(input) && me(input).hand.some((held) => isChargeAttack(input.cards[held.cardId]))) score -= 4;
-  if (charged(input) && !luminaActive(input) && holds(input, LUMINA_ASCENSION)) score -= 20;
+  // Every held Lumina resolves first; an instant one follows the swing instead.
+  if (charged(input) && holds(input, LUMINA_ASCENSION) && !luminaIsInstant(input)) {
+    score -= 20;
+  }
   if (holds(input, EDICT_OF_STEEL)) score -= 5;
   return score;
 }
@@ -556,14 +652,26 @@ function scoreAttackReaction(data: CardData, input: BotPolicyInput, own: Readonl
     if (soul === 0) return -100;
     const pending = Math.max(0, link.attackValue - link.defenseValue);
     const lethal = pending < opponent.life && pending + soul >= opponent.life;
-    return 8 + (charged(input) ? 12 : 0) + (lethal ? 30 : 0) +
-      (link.goAgain !== true && further && soul >= 2 ? 4 : 0);
+    const combo = roaringBeamChargesBeacon(input);
+    // Uncharged it trades a soul card and the search for +1: hold it for a charged turn.
+    if (!charged(input) && !lethal && !combo) return -100;
+    return 8 + (charged(input) || combo ? 12 : 0) + (lethal ? 30 : 0) +
+      (canGainGoAgain(link) && further && soul >= 2 ? 4 : 0);
   }
   if (functional === ROARING_BEAM) return soul === 0 ? 14 : further ? 6 : 2;
   if (functional === COURAGEOUS_STEELHAND) {
-    return charged(input) ? 9 + (link.goAgain !== true && soul >= 1 && further ? 6 : 0) : -100;
+    return charged(input) ? 9 + (canGainGoAgain(link) && soul >= 1 && further ? 6 : 0) : -100;
   }
   return 4;
+}
+
+/** An instant Lumina waits for Raydn's reaction step, after blocks, unless its go again is needed sooner. */
+function scoreLumina(input: BotPolicyInput): number {
+  if (!luminaWindow(input)) return -100;
+  const ready = luminaActive(input) ? 25 : 45;
+  if (raydnAttacking(input)) return ready;
+  if (!luminaIsInstant(input) || !raydnAvailable(input)) return luminaActive(input) ? 25 : 40;
+  return input.view.pendingDecision?.kind === "attack-reaction" && luminaActionPointNeeded(input) ? ready : -5;
 }
 
 function scorePlay(intent: GameIntent, input: BotPolicyInput, own: ReadonlyMap<number, CardView>): number {
@@ -586,19 +694,12 @@ function scorePlay(intent: GameIntent, input: BotPolicyInput, own: ReadonlyMap<n
     } else if (functional === RAYDN) {
       score = opening ? -100 : scoreRaydn(card, intent, input, own);
     } else if (functional === FYENDALS_SPRING_TUNIC) {
-      const wanted = ourTurn
-        ? resourcesWanted(input)
-        : input.view.pendingDecision?.kind === "defense-reaction"
-        ? Math.max(0, ...player.hand.map((held) => {
-          const data = input.cards[held.cardId];
-          return data?.cardType === "defense-reaction" ? resourceCost(data) - player.resources : 0;
-        }))
-        : 0;
-      score = wanted > 0
+      // Unneeded resource sources rank below pass so the root cap still compares passing.
+      score = resourcesWanted(input) > 0
         ? (ourTurn && holds(input, V_OF_THE_VANGUARD) && player.hand.length >= 4 ? 50 : 25)
-        : -30;
+        : -100;
     } else if (functional === IRONSONG_VERSUS) {
-      score = ourTurn && !opening && raydnAvailable(input) && raydnSwingSecured(intent, input, own) ? 8 : -20;
+      score = ourTurn && !opening && raydnSwingSecured(intent, input, own) ? 8 : -20;
     } else if (functional === WARBAND_OF_BELLONA) {
       const chargeAttack = player.hand.some((held) => isChargeAttack(input.cards[held.cardId]));
       const payoff = reserve(input).some((held) =>
@@ -610,12 +711,12 @@ function scorePlay(intent: GameIntent, input: BotPolicyInput, own: ReadonlyMap<n
         : -40;
     } else if (functional === SNAPDRAGON_SCALERS) {
       const link = currentLink(input);
-      score = currentAttackIsOurs(input) && link?.goAgain !== true &&
+      score = currentAttackIsOurs(input) && !!link && canGainGoAgain(link) &&
           input.view.pendingDecision?.kind === "attack-reaction" && further
         ? 28
         : -100;
     } else if (functional === ENERGY_POTION) {
-      score = resourcesWanted(input) > 0 ? 15 : -10;
+      score = resourcesWanted(input) > 0 ? 15 : -100;
     } else {
       score = -100;
     }
@@ -635,16 +736,10 @@ function scorePlay(intent: GameIntent, input: BotPolicyInput, own: ReadonlyMap<n
   } else if (functional === LUMINA_ASCENSION && !ourTurn) {
     score = -100;
   } else if (functional === LUMINA_ASCENSION) {
-    const chargeAttackNow = player.hand.some((held) =>
-      held.instanceId !== card.instanceId && isChargeAttack(input.cards[held.cardId])
-    );
-    score = charged(input) && raydnAvailable(input)
-      ? (luminaActive(input) ? 25 : ourTurn && input.view.pendingDecision ? 45 : 40)
-      : !charged(input) && chargeable.length > 0 && chargeAttackNow
-      ? -10
-      : raydnAvailable(input) ? 4 : -20;
+    score = scoreLumina(input);
   } else if (functional === EDICT_OF_STEEL) {
-    score = raydnAvailable(input) ? 10 + (charged(input) && holds(input, LUMINA_ASCENSION) ? 6 : 0) : -10;
+    // A bare Flurry is not worth the card; it blocks for 3 until a charged Raydn turn.
+    score = raydnSwingSecured(intent, input, own) ? 10 + (charged(input) && holds(input, LUMINA_ASCENSION) ? 6 : 0) : -100;
   } else if (functional === CELESTIAL_CATACLYSM) {
     score = 7 + (further ? 14 : 0) - (soul - 3 < 1 && further ? 2 : 0);
   } else if (functional === BATTLEFIELD_BEACON) {
@@ -706,6 +801,8 @@ const BOLTYN_MAX_SEARCH_NODES = 32;
 const BOLTYN_MAX_TRANSITIONS = 400;
 const BOLTYN_MAX_ROOT_CANDIDATES = 5;
 const BOLTYN_FIRST_ROOT_TRANSITIONS = 160;
+// Charge, setup and two Raydn swings outrun an even share of the node budget.
+const BOLTYN_FIRST_ROOT_NODES = 16;
 
 /** Boltyn: charge, chain go-again attacks through the soul, convert with V or Lumina. */
 export function chooseBoltynIntentWithTrace(input: BotPolicyInput): BoltynIntentDecision {
@@ -716,14 +813,26 @@ export function chooseBoltynIntentWithTrace(input: BotPolicyInput): BoltynIntent
     chooseForced: (forced) => chooseBoltynReactiveIntent({ ...forced, state: undefined }),
     rules: boltynSolverRules,
     rankCandidate: (intent, observed) => scorePlay(intent, observed, ownCards(observed)),
+    prepareCandidates: (candidates, observed) => {
+      const own = ownCards(observed);
+      const allowed = candidates.filter((intent) =>
+        (!playsLumina(intent, observed) || luminaWindow(observed)) &&
+        (!playsCard(intent, observed, EDICT_OF_STEEL) || raydnSwingSecured(intent, observed, own))
+      );
+      // Each Lumina before the first swing adds a swing and +1 to all of them.
+      const luminaFirst = !luminaIsInstant(observed) && allowed.some((intent) => playsLumina(intent, observed));
+      return luminaFirst ? allowed.filter((intent) => !activatesRaydn(intent, observed)) : allowed;
+    },
     // A tie-breaker below one damage equivalent, not a substitute for the rollout.
     scoreIntent: (intent, observed) => scorePlay(intent, observed, ownCards(observed)),
-    positionBonus: (observed) =>
-      (boltynPositionValue(observed) + observed.view.players[observed.seat].life) * POINTS_PER_DAMAGE,
+    positionBonus: (observed, _complete, root) =>
+      (boltynPositionValue(observed, futureOffenseRate(observed, root, FLURRY_TOKEN_VALUE)) +
+        observed.view.players[observed.seat].life) * POINTS_PER_DAMAGE,
     maxSearchNodes: BOLTYN_MAX_SEARCH_NODES,
     maxTransitions: BOLTYN_MAX_TRANSITIONS,
     maxRootCandidates: BOLTYN_MAX_ROOT_CANDIDATES,
     firstRootTransitionBudget: BOLTYN_FIRST_ROOT_TRANSITIONS,
+    firstRootNodeBudget: BOLTYN_FIRST_ROOT_NODES,
   });
   const intent = guard(plan?.intent ?? reactive);
   return plan ? { intent, plan } : { intent };

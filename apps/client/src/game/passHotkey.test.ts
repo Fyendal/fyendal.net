@@ -152,4 +152,21 @@ describe("pass hotkey", () => {
     expect(passHotkeyIntent(legal, decision, [22])).toBe(defend);
     expect(passHotkeyIntent(legal, decision, [])).toBeNull();
   });
+
+  it("submits the current bounded card selection within its limits", () => {
+    const decision: PendingDecision = {
+      player: 0,
+      kind: "choose-target",
+      prompt: "Choose up to 3 arrows",
+      options: ["41", "42", "43", "44"],
+      minimumSelections: 1,
+      maximumSelections: 3,
+    };
+    const legal = [{ kind: "choose-many", optionIds: ["41"] }] satisfies GameIntent[];
+
+    expect(passHotkeyIntent(legal, decision, [], ["42", "43"]))
+      .toEqual({ kind: "choose-many", optionIds: ["42", "43"] });
+    expect(passHotkeyIntent(legal, decision, [], [])).toBeNull();
+    expect(passHotkeyIntent([], decision, [], ["42"])).toBeNull();
+  });
 });

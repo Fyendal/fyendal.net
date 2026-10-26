@@ -276,9 +276,7 @@ export const svi: Record<string, CardScript> = {
   "shrill of skullform|2": auraActivityAttackBonus(3),
   "shrill of skullform|3": auraActivityAttackBonus(3),
   "runerager swarm|1": {
-    onAttackDeclared(ctx) {
-      if (playedOrCreatedAura(ctx)) ctx.grantGoAgain();
-    },
+    hasConditionalGoAgain: playedOrCreatedAura,
   },
 
   "runic fellingsong|1": {

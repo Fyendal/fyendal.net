@@ -159,8 +159,11 @@ export function endTurn(state: GameStateInternal, runtime: EngineRuntime): void 
   }
   for (const candidate of state.players as PlayerState[]) {
     if (Number(candidate.hero.scriptState?.bonusIntellectAtEndPhaseTurn ?? 0) !== state.turn) continue;
+    // states persisted before the count existed hold a single grant
+    const count = Number(candidate.hero.scriptState?.bonusIntellectAtEndPhaseCount ?? 1);
     delete candidate.hero.scriptState?.bonusIntellectAtEndPhaseTurn;
-    candidate.flags.bonusIntellect = Number(candidate.flags.bonusIntellect ?? 0) + 1;
+    delete candidate.hero.scriptState?.bonusIntellectAtEndPhaseCount;
+    candidate.flags.bonusIntellect = Number(candidate.flags.bonusIntellect ?? 0) + count;
   }
   for (const candidate of state.players as PlayerState[]) {
     if (Number(candidate.hero.scriptState?.drawUpToAtEndPhaseTurn ?? 0) !== state.turn) continue;

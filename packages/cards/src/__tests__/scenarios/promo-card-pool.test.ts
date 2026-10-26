@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { projectStateFor } from "@fyendal/engine";
 import { scripts } from "../../index.js";
 import { scenario } from "../harness.js";
 
@@ -156,8 +157,11 @@ describe("promotional card pool", () => {
       ],
     });
 
-    g.activate("ruu'di, gem keeper|0", { pitch: ["raging onslaught|3"] })
-      .chooseOption("yes")
+    g.activate("ruu'di, gem keeper|0", { pitch: ["raging onslaught|3"] });
+    const top = g.state.players[0]!.deck[0]!;
+    expect(projectStateFor(g.state, 1).pendingDecision?.revealedCards?.map((card) => card.instanceId))
+      .toEqual([top.instanceId]);
+    g.chooseOption("yes")
       .expectHandSize(1, 1)
       .expectAP(0, 1);
   });

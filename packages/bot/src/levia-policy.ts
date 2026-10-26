@@ -2,6 +2,7 @@ import type { CardData, CardView, GameIntent } from "@fyendal/shared";
 import {
   chooseScoredIntent,
   currentLink,
+  defenderDefense,
   enforceAllyTargetPolicy,
   enforceSpectraPolicy,
   incomingAttackDamage,
@@ -23,6 +24,7 @@ import {
   type BotPolicyInput,
   type DefenseCandidateContext,
   type DefensePermission,
+  type PlannedPrevention,
   type ResponseModel,
 } from "./policy.js";
 import { SIGNIFICANT_ON_HIT_VALUE } from "./on-hit.js";
@@ -51,6 +53,7 @@ import {
   leviaAttackPair,
   leviaAttackPlayable,
   leviaBanishAccess,
+  leviaBloodDebt,
   leviaBloodDebtAction as bloodDebtAction,
   leviaBloodrushTurn,
   leviaBloodrushWorthSending,
@@ -67,9 +70,7 @@ function name(data: CardData | undefined): string {
 }
 
 function ownBloodDebt(input: BotPolicyInput): number {
-  return input.view.players[input.seat].banish.filter((card) =>
-    !card.faceDown && input.cards[card.cardId]?.keywords?.includes("Blood Debt")
-  ).length;
+  return leviaBloodDebt(input.view.players[input.seat].banish, input);
 }
 
 /** Share of six-power cards assumed in an unknown deck. */
@@ -174,6 +175,49 @@ function attackReserve(input: BotPolicyInput, spent: ReadonlySet<number>): CardV
     ),
     ...playableBanishAttacks(input, spent),
   ];
+}
+
+/** Whether an action card could spend Scabskin's action points: playable and
+ * paid from the floating resources plus the rest of the hand's pitch. */
+function actionPointsUsable(input: BotPolicyInput): boolean {
+  const me = input.view.players[input.seat];
+  const sash = leviaEffectActive(input, "savage sash");
+  const actions = [
+    ...[...me.hand, ...me.arsenal].filter((card) => input.cards[card.cardId]?.cardType === "action"),
+    ...playableBanishAttacks(input, new Set()),
+  ];
+  return actions.some((card) => {
+    const data = input.cards[card.cardId];
+    if (isAttack(data) && !leviaAttackPlayable(card, input)) return false;
+    const pitch = me.hand.filter((held) => held.instanceId !== card.instanceId)
+      .reduce((sum, held) => sum + (input.cards[held.cardId]?.pitch ?? 0), 0);
+    return me.resources + pitch >= leviaAttackCost(data, sash);
+  });
+}
+
+/** Brute weapons attack for {r}{r}. */
+const WEAPON_SWING_COST = 2;
+
+/** Whether a legal weapon swing and one terminal attack card fit the floating
+ * resources plus the rest of the hand's pitch, given an action point for each.
+ * A card with go again already reaches the weapon without a roll. */
+function weaponSwingPair(input: BotPolicyInput, cards: readonly CardView[]): boolean {
+  const me = input.view.players[input.seat];
+  const weaponIds = new Set(me.weapons.map((weapon) => weapon.instanceId));
+  const swing = input.legal.some((intent) => {
+    if (intent.kind !== "activate-ability" || !weaponIds.has(intent.sourceInstanceId)) return false;
+    const weapon = me.weapons.find((held) => held.instanceId === intent.sourceInstanceId);
+    // A Hexagore swing that costs life is not worth rolling for.
+    return name(input.cards[weapon?.cardId ?? ""]) !== "hexagore, the death hydra" || ownBloodDebt(input) >= 6;
+  });
+  if (!swing) return false;
+  const sash = leviaEffectActive(input, "savage sash");
+  return cards.some((card) => {
+    if (!leviaAttackPlayable(card, input) || leviaAttackContinues(card, input)) return false;
+    const pitch = me.hand.filter((held) => held.instanceId !== card.instanceId)
+      .reduce((sum, held) => sum + (input.cards[held.cardId]?.pitch ?? 0), 0);
+    return me.resources + pitch >= WEAPON_SWING_COST + leviaAttackCost(input.cards[card.cardId], sash);
+  });
 }
 
 function gateTargetValue(intent: GameIntent, input: BotPolicyInput, own: ReadonlyMap<number, CardView>): number {
@@ -486,19 +530,62 @@ function endOfTurnBanishScore(intent: GameIntent, card: CardView, input: BotPoli
 
 /** Prevent with Fallen Herald when needed to survive or worth more than the card next turn. */
 function heraldPreventionScore(card: CardView, input: BotPolicyInput): number {
-  const me = input.view.players[input.seat];
   const link = currentLink(input);
   if (input.view.activePlayer === input.seat || !link || link.attackingCard.owner === input.seat ||
     link.onStack) return -100;
   const incoming = Math.max(0, incomingAttackDamage(input) - (link.damageToPrevent ?? 0));
-  const prevented = Math.min(4, incoming);
-  if (prevented === 0) return -100;
-  // Survival counts public pumps the attacker can still spend.
   const threatened = Math.max(0, threatenedAttackDamage(input) - (link.damageToPrevent ?? 0));
-  if (threatened >= me.life && threatened - prevented < me.life) return 150;
+  const worth = heraldWorth(card, input, incoming, threatened);
+  return worth === undefined ? -100 : worth === "survives" ? 150 : worth > 0 ? 20 + worth * 4 : -60;
+}
+
+/** Herald's margin over keeping it against `incoming` damage, or "survives"
+ * when it alone keeps Levia alive against the `threatened` pumps. */
+function heraldWorth(
+  card: CardView,
+  input: BotPolicyInput,
+  incoming: number,
+  threatened: number,
+): number | "survives" | undefined {
+  const me = input.view.players[input.seat];
+  const prevented = Math.min(4, incoming);
+  if (prevented === 0) return undefined;
+  // Survival counts public pumps the attacker can still spend.
+  if (threatened >= me.life && threatened - prevented < me.life) return "survives";
   const rest = me.hand.filter((held) => held.instanceId !== card.instanceId);
   const lost = solveHand(me.hand, input, leviaSolverRules).value - solveHand(rest, input, leviaSolverRules).value;
-  return prevented > lost ? 20 + (prevented - lost) * 4 : -60;
+  return prevented - lost;
+}
+
+/** Plans Fallen Herald's prevention into a block when activating it after the block would pay off. */
+function leviaPlannedPrevention(
+  input: BotPolicyInput,
+  intent: Extract<GameIntent, { kind: "defend" }>,
+  spentIds: ReadonlySet<number>,
+  reactionPlan: PlannedPrevention,
+): PlannedPrevention {
+  const link = currentLink(input);
+  if (!link) return reactionPlan;
+  const me = input.view.players[input.seat];
+  const herald = me.hand.find((card) => name(input.cards[card.cardId]) === "fallen herald" &&
+    !spentIds.has(card.instanceId) && !reactionPlan.consumedIds.includes(card.instanceId));
+  if (!herald) return reactionPlan;
+  const own = ownCards(input);
+  const defense = intent.instanceIds.reduce((total, id) => {
+    const card = own.get(id);
+    return total + (card ? defenderDefense(card, input) : 0);
+  }, 0);
+  const blocked = defense + reactionPlan.amount + (link.damageToPrevent ?? 0);
+  const incoming = Math.max(0, incomingAttackDamage(input) - blocked);
+  const threatened = Math.max(0, threatenedAttackDamage(input) - blocked);
+  const worth = heraldWorth(herald, input, incoming, threatened);
+  if (worth === undefined || (worth !== "survives" && worth <= 0)) return reactionPlan;
+  return {
+    ...reactionPlan,
+    amount: reactionPlan.amount + 4,
+    consumedIds: [...reactionPlan.consumedIds, herald.instanceId],
+    preventionIds: [...(reactionPlan.preventionIds ?? []), herald.instanceId],
+  };
 }
 
 const BLOOD_HARVEST_RESOURCES = 3;
@@ -616,9 +703,11 @@ function scorePlay(intent: GameIntent, input: BotPolicyInput, own: ReadonlyMap<n
     const remaining = me.hand.filter((held) => !spent.has(held.instanceId));
     const hit = remaining.length > 0 && remaining.every((held) => leviaSixPower(held, input));
     const worth = hit && leviaBloodrushWorthSending(turn, input.view.players[1 - input.seat]!.life);
+    // A certain six discard of a last card that cannot attack anyway trades it for two draws.
+    const cyclesDeadCard = hit && kept === 1 && !remaining.some((held) => leviaAttackPlayable(held, input));
     score = worth && followups() > 0 && (kept >= 2 || (kept === 1 && arsenalAttack))
       ? 72 + Math.min(turn.width, BLOODRUSH_PLAN_WIDTH) * 8
-      : -60;
+      : cyclesDeadCard ? 45 : -60;
   } else if (named === "call to the grave") {
     score = fundsAttackPair(card, input, true) ? 20 : me.graveyard.length < 6 ? 58 : 38;
   } else if (named === "pull from beyond") {
@@ -650,11 +739,15 @@ function scorePlay(intent: GameIntent, input: BotPolicyInput, own: ReadonlyMap<n
       const bellowed = bloodrushActive && attackerData.classes?.includes("brute") ? 2 : 0;
       return (attackerData.attack ?? 0) + bellowed >= opponentLife;
     });
-    score = me.actionPoints < 2 && me.life > 5 && !lethalAttack && (bloodrushActive || !exposed) &&
-      !leviaAttackPair(input, reserve) && leviaAttackPair(input, reserve, { grantGoAgain: true })
-      ? (bloodrushActive ? 85 : 53)
-      : -55;
-  } else if (named === "fyendal's spring tunic") {
+    // A whiff is fatal only when the unsuppressed blood debt drains the rest of Levia's life.
+    const whiffKills = exposed && ownBloodDebt(input) >= me.life;
+    // An unusable roll ranks below any banish or pass, so a rollout tie never picks it.
+    score = !actionPointsUsable(input) ? -150
+      : me.actionPoints < 2 && !whiffKills && !lethalAttack && (bloodrushActive || !exposed) &&
+        !leviaAttackPair(input, reserve) &&
+        (leviaAttackPair(input, reserve, { grantGoAgain: true }) || weaponSwingPair(input, reserve))
+        ? (bloodrushActive ? 85 : 53)
+        : -55;  } else if (named === "fyendal's spring tunic") {
     score = followups() > 0 ? 32 : -30;
   } else if (named === "hex gauntlet") {
     score = hexGauntletValue(input, card);
@@ -878,6 +971,7 @@ function scoreDefense(
     adjustCycleValue: leviaKeepsCards,
     defensePermission: leviaBellowBlocks,
     lifeThresholds: leviaLifeThresholds(input),
+    plannedPrevention: leviaPlannedPrevention,
     equipmentUseIsFree: (card, policy) => name(policy.cards[card.cardId]) === "savage sash" &&
       (card.defCounters ?? 0) === 0 && leviaSashEnablesPair(policy,
         [...policy.view.players[policy.seat].hand, ...policy.view.players[policy.seat].arsenal]

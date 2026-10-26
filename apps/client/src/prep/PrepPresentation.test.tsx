@@ -1,6 +1,6 @@
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import type { DeckPool } from "@fyendal/shared";
 import { PrepPresentation } from "./PrepPresentation.js";
 import { TestI18nProvider } from "../i18n/TestI18nProvider.js";
@@ -13,7 +13,7 @@ describe("PrepPresentation equipment controls", () => {
       selectionKey: "deck",
       showHero: true, mainCount: 1, minimumMainCount: 60, inventoryCount: 0, poolMainEntries: [["HVY103", 1]] as [string, number][],
       fixedInventoryCounts: new Map<string, number>(),
-      onToggleWeapon: vi.fn(), onToggleEquipment: vi.fn(), onMoveMainCopy: vi.fn(),
+      onToggleWeapon: vi.fn(), onToggleEquipment: vi.fn(), onMoveMainCopy: vi.fn(), onRestoreMain: vi.fn(), onInspectCard: vi.fn(),
     };
     const render = (sections: "arena" | "deck") => renderToStaticMarkup(createElement(
       TestI18nProvider, null,
@@ -27,6 +27,8 @@ describe("PrepPresentation equipment controls", () => {
     expect(render("deck")).not.toContain("SEA045.webp");
     expect(render("deck")).toContain("prep-deck-zone");
     expect(render("deck")).toContain("Move one copy of Up the Ante to Inventory");
+    expect(render("deck")).toContain('aria-label="Main deck (1 / 60 min)"');
+    expect(render("deck")).toContain('class="invalid">1</strong>');
   });
 
   it("exposes weapon and equipment selection as pressed buttons", () => {
@@ -56,6 +58,8 @@ describe("PrepPresentation equipment controls", () => {
       onToggleWeapon: vi.fn(),
       onToggleEquipment: vi.fn(),
       onMoveMainCopy: vi.fn(),
+      onRestoreMain: vi.fn(),
+      onInspectCard: vi.fn(),
     })));
 
     expect(html).toContain('aria-pressed="true"');
@@ -67,40 +71,79 @@ describe("PrepPresentation equipment controls", () => {
     expect(html).toContain("Compass of Sunken Depths");
   });
 
-  it("shows copy counts through stacked card faces without a duplicate badge", () => {
+  it("lists each main-deck card once with a copy count and steppers", () => {
     const pool: DeckPool = {
       heroId: "HVY195",
       weaponIds: [],
       equipmentPool: [],
-      deck: [],
+      deck: ["HVY103", "HVY103", "HVY103"],
     };
+    const render = (main: Map<string, number>, mainCount: number) =>
+      renderToStaticMarkup(createElement(TestI18nProvider, null, createElement(PrepPresentation, {
+        sections: "deck",
+        showHero: true,
+        pool,
+        selection: { forDeck: "deck", weaponIndexes: [], equipment: {}, main },
+        selectionKey: "deck",
+        locked: false,
+        mainCount,
+        minimumMainCount: 60,
+        inventoryCount: 3 - mainCount,
+        poolMainEntries: [["HVY103", 3]],
+        fixedInventoryCounts: new Map(),
+        onToggleWeapon: vi.fn(),
+        onToggleEquipment: vi.fn(),
+        onMoveMainCopy: vi.fn(),
+        onRestoreMain: vi.fn(),
+        onInspectCard: vi.fn(),
+      })));
+
+    const full = render(new Map([["HVY103", 3]]), 3);
+    expect(full.match(/HVY103\.webp/g)).toHaveLength(1);
+    expect(full).toContain('class="prep-copies">3<');
+    expect(full).toContain("Up the Ante");
+    expect(full).toContain('aria-label="Move one copy of Up the Ante to Inventory"');
+    // Every copy is already in: the add stepper waits, disabled.
+    expect(full).toMatch(/Move one copy of Up the Ante to Main deck" class="prep-step" disabled=""/);
+    expect(full).not.toContain("Restore registered deck");
+    expect(full).not.toContain(" changed\"");
+    expect(full).toContain("3 blue");
+
+    const trimmed = render(new Map([["HVY103", 2]]), 2);
+    expect(trimmed).toContain("Restore registered deck");
+    expect(trimmed.match(/class="prep-row changed"/g)).toHaveLength(2);
+    expect(trimmed).not.toMatch(/to Main deck" class="prep-step" disabled=""/);
+    // The inventory row steps the same card from its own side.
+    expect(trimmed.match(/aria-label="Move one copy of Up the Ante to Main deck"/g)).toHaveLength(2);
+    // Inventory rows offer only the add step.
+    expect(trimmed.split("prep-inventory-zone")[1]).not.toContain("minus.svg");
+    expect(trimmed).toContain("2 blue");
+  });
+
+  it("labels non-attack rows by type and keeps inventory-only cards locked", () => {
     const html = renderToStaticMarkup(createElement(TestI18nProvider, null, createElement(PrepPresentation, {
       sections: "deck",
       showHero: true,
-      pool,
-      selection: {
-        forDeck: "deck",
-        weaponIndexes: [],
-        equipment: {},
-        main: new Map([["HVY103", 3]]),
-      },
+      pool: { heroId: "HVY195", weaponIds: [], equipmentPool: [], deck: ["WTR218"] },
+      selection: { forDeck: "deck", weaponIndexes: [], equipment: {}, main: new Map([["WTR218", 1]]) },
       selectionKey: "deck",
       locked: false,
-      mainCount: 3,
+      mainCount: 1,
       minimumMainCount: 60,
-      inventoryCount: 0,
-      poolMainEntries: [["HVY103", 3]],
-      fixedInventoryCounts: new Map(),
+      inventoryCount: 1,
+      poolMainEntries: [["WTR218", 1]],
+      fixedInventoryCounts: new Map([["WTR215", 1]]),
       onToggleWeapon: vi.fn(),
       onToggleEquipment: vi.fn(),
       onMoveMainCopy: vi.fn(),
+      onRestoreMain: vi.fn(),
+      onInspectCard: vi.fn(),
     })));
 
-    expect(html.match(/HVY103\.webp/g)).toHaveLength(3);
-    expect(html.match(/loading="eager"/g)).toHaveLength(3);
-    expect(html.match(/card-artwork-placeholder/g)).toHaveLength(3);
-    expect(html).toContain("Up the Ante");
-    expect(html).not.toContain("prep-stack-count");
+    expect(html).toContain('class="prep-row-type">Action<');
+    expect(html).toContain('class="prep-row-type">Stays in inventory<');
+    expect(html).toContain('class="prep-row fixed"');
+    expect(html).not.toContain("Move one copy of Sink Below to Main deck");
   });
 
   it("tracks separately registered copies of the same weapon independently", () => {
@@ -130,6 +173,8 @@ describe("PrepPresentation equipment controls", () => {
       onToggleWeapon: vi.fn(),
       onToggleEquipment: vi.fn(),
       onMoveMainCopy: vi.fn(),
+      onRestoreMain: vi.fn(),
+      onInspectCard: vi.fn(),
     })));
 
     expect(html.match(/aria-pressed="true"/g)).toHaveLength(1);
@@ -167,6 +212,8 @@ describe("PrepPresentation equipment controls", () => {
           onToggleWeapon={vi.fn()}
           onToggleEquipment={vi.fn()}
           onMoveMainCopy={vi.fn()}
+          onRestoreMain={vi.fn()}
+          onInspectCard={vi.fn()}
         />
       </TestI18nProvider>,
     );
@@ -174,5 +221,53 @@ describe("PrepPresentation equipment controls", () => {
     expect(html).toContain("对局配置");
     expect(html).toContain("主牌组（0 / 至少 60 张）");
     expect(html).toContain("备牌区中没有卡牌");
+  });
+  describe("deck sorting", () => {
+    const renderDeck = () => renderToStaticMarkup(createElement(TestI18nProvider, null, createElement(PrepPresentation, {
+      sections: "deck",
+      showHero: true,
+      pool: { heroId: "HVY195", weaponIds: [], equipmentPool: [], deck: [] },
+      selection: {
+        forDeck: "deck",
+        weaponIndexes: [],
+        equipment: {},
+        // Sink Below (blue) is fully in inventory; Nimblism (yellow) is split.
+        main: new Map([["WTR218", 1], ["WTR219", 1]]),
+      },
+      selectionKey: "deck",
+      locked: false,
+      mainCount: 2,
+      minimumMainCount: 60,
+      inventoryCount: 3,
+      poolMainEntries: [["WTR217", 1], ["WTR219", 2], ["WTR218", 1]],
+      fixedInventoryCounts: new Map([["WTR215", 1]]),
+      onToggleWeapon: vi.fn(),
+      onToggleEquipment: vi.fn(),
+      onMoveMainCopy: vi.fn(),
+      onRestoreMain: vi.fn(),
+      onInspectCard: vi.fn(),
+    })));
+    const order = (html: string, zone: number) =>
+      [...html.split("prep-deck-zone")[zone + 1]!.matchAll(/class="prep-row[^"]*" data-cardid="([^"]+)"/g)].map((m) => m[1]);
+
+    afterEach(() => vi.unstubAllGlobals());
+
+    it("sorts both zones by name, then pitch, by default", () => {
+      vi.stubGlobal("localStorage", { getItem: () => null, setItem: vi.fn() });
+      const html = renderDeck();
+      expect(html).toContain('role="group" aria-label="Sort by"');
+      expect(html).toContain('aria-pressed="true">Name</button>');
+      expect(html).not.toContain("Zone order");
+      expect(order(html, 0)).toEqual(["WTR218", "WTR219"]);
+      expect(order(html, 1)).toEqual(["WTR219", "WTR215", "WTR217"]);
+    });
+
+    it("restores a remembered pitch sort", () => {
+      vi.stubGlobal("localStorage", { getItem: () => "pitch", setItem: vi.fn() });
+      const html = renderDeck();
+      expect(html).toContain('aria-pressed="true"><span class="card-sort-pips"');
+      expect(order(html, 0)).toEqual(["WTR218", "WTR219"]);
+      expect(order(html, 1)).toEqual(["WTR215", "WTR219", "WTR217"]);
+    });
   });
 });

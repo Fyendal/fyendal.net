@@ -184,16 +184,7 @@ function handleDiscardUnlessPay(ctx: ScriptCtx, hook: string, option: string, ke
   if (pay) {
     const target = Number(pay[1]);
     const player = ctx.state.players[target]!;
-    if (option === "paid") {
-      ctx.logPublic(
-        localizedCardLog(
-          ctx,
-          `${ctx.cardData(player.heroCardId).name} pays the resource cost`,
-          "card.log.siy.hero.paid",
-          { target: { kind: "player", seat: target } },
-        ),
-      );
-    } else if (player.hand.length > 0) {
+    if (option !== "paid" && player.hand.length > 0) {
       ctx.requestCardChoice(
         `${key}:discard:${target}`,
         decisionPrompt(`${ctx.data.name}: choose a card to discard`, "card.siy.discard.choose", {
@@ -404,19 +395,7 @@ export const siy: Record<string, CardScript> = {
       const pay = /^cold-pay:(\d+)$/.exec(hook);
       if (pay) {
         const target = Number(pay[1]);
-        if (option !== "paid") {
-          offerFreezeTarget(ctx, target);
-        } else {
-          const player = ctx.state.players[target]!;
-          ctx.logPublic(
-            localizedCardLog(
-              ctx,
-              `${ctx.cardData(player.heroCardId).name} pays 1 resource`,
-              "card.log.siy.hero.paid.amount",
-              { target: { kind: "player", seat: target }, amount: 1 },
-            ),
-          );
-        }
+        if (option !== "paid") offerFreezeTarget(ctx, target);
         return;
       }
       const freeze = /^cold-freeze:(\d+)$/.exec(hook);

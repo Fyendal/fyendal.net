@@ -48,10 +48,13 @@ describe("Heave", () => {
       });
 
       game.settle().doRaw({ kind: "pass" }).settle();
+      expect(game.state.pendingDecision).toMatchObject({ player: 0, chooseHook: "hidden-trigger" });
+      game.chooseOption("yes");
       expect(game.state.pendingDecision?.resourcePayment?.cost).toBe(amount);
       const source = game.state.players[0]!.hand.find((candidate) =>
         functionalKeyOf(cardData[candidate.cardId]!) === card
       )!;
+      expect(JSON.stringify(projectStateFor(game.state, 1).logEntries ?? [])).toContain(source.cardId);
       expect(game.state.pendingDecision?.resourcePayment?.options.every((option) =>
         !option.pitchInstanceIds.includes(source.instanceId)
       )).toBe(true);
@@ -64,25 +67,87 @@ describe("Heave", () => {
   );
 
   it.each(HEAVE_CASES)(
-    "$card logs publicly when its Heave $amount cost can't be paid",
-    ({ card, amount }) => {
+    "$card stays private when its Heave $amount can't be paid",
+    ({ card }) => {
       const game = scenario({
         seats: [
           { hero: "rhinar", hand: [card] },
           { hero: "dorinthea", hand: [] },
         ],
       });
+      const cardId = game.state.players[0]!.hand[0]!.cardId;
+      const seenStacks: string[] = [];
+      game.settle();
+      game.doRaw({ kind: "pass" });
+      seenStacks.push(JSON.stringify(projectStateFor(game.state, 1).stack));
+      game.settle().expectTurn(2);
 
-      game.settle().doRaw({ kind: "pass" }).settle().expectTurn(2);
-      expect(game.state.players[0]!.arsenal).toHaveLength(0);
-      const logs = (projectStateFor(game.state, 1).logEntries ?? []).filter((entry) =>
-        "message" in entry && entry.message.id === "card.log.common.heave.unaffordable"
-      );
-      expect(logs.map((entry) => "message" in entry ? entry.message.values : undefined)).toEqual([
-        { amount, card: { kind: "card", cardId: game.state.players[0]!.hand[0]!.cardId } },
-      ]);
+      expect(game.state.players[0]!.hand.map((held) => held.cardId)).toContain(cardId);
+      expect(seenStacks.join()).not.toContain(cardId);
+      expect(JSON.stringify(projectStateFor(game.state, 1).logEntries ?? [])).not.toContain(cardId);
     },
   );
+
+  it.each(HEAVE_CASES)("$card stays private when its owner declines to heave", ({ card }) => {
+    const game = scenario({
+      seats: [
+        { hero: "rhinar", hand: [card, "wrecker romp|3"] },
+        { hero: "dorinthea", hand: [] },
+      ],
+    });
+    const cardId = game.state.players[0]!.hand[0]!.cardId;
+
+    game.settle().doRaw({ kind: "pass" }).settle();
+    expect(game.state.pendingDecision?.chooseHook).toBe("hidden-trigger");
+    const opponentView = projectStateFor(game.state, 1);
+    expect(JSON.stringify(opponentView.stack)).not.toContain(cardId);
+    expect(opponentView.pendingDecision?.prompt).toBe("");
+
+    game.chooseOption("no").expectTurn(2);
+    expect(game.state.players[0]!.hand.map((held) => held.cardId)).toContain(cardId);
+    expect(JSON.stringify(projectStateFor(game.state, 1).logEntries ?? [])).not.toContain(cardId);
+  });
+
+  describe("with two Heave cards and one payment", () => {
+    const twoHeaves = () => {
+      const game = scenario({
+        seats: [
+          { hero: "rhinar", hand: ["thunder quake|3", "pulverize|1", "wrecker romp|3"] },
+          { hero: "dorinthea", hand: [] },
+        ],
+      });
+      game.settle().doRaw({ kind: "pass" }).settle();
+      expect(game.state.pendingDecision?.chooseHook).toBe("hidden-trigger");
+      const first = game.state.pendingDecision!.sourceInstanceId!;
+      const second = game.state.players[0]!.hand.find((held) =>
+        held.instanceId !== first &&
+        ["thunder quake|3", "pulverize|1"].includes(functionalKeyOf(cardData[held.cardId]!))
+      )!;
+      return { game, first, second };
+    };
+
+    it("resolves the first Heave fully and never offers the second once the arsenal is full", () => {
+      const { game, first, second } = twoHeaves();
+
+      game.chooseOption("yes");
+      expect(game.state.pendingDecision?.resourcePayment?.cost).toBe(3);
+      game.chooseOption("pitch Wrecker Romp").expectTurn(2);
+
+      expect(game.state.players[0]!.arsenal.map((card) => card.instanceId)).toEqual([first]);
+      expect(game.state.players[0]!.hand.map((card) => card.instanceId)).toContain(second.instanceId);
+      expect(JSON.stringify(projectStateFor(game.state, 1).logEntries ?? [])).not.toContain(second.cardId);
+    });
+
+    it("offers the second Heave after the first is declined", () => {
+      const { game, second } = twoHeaves();
+
+      game.chooseOption("no");
+      expect(game.state.pendingDecision).toMatchObject({
+        chooseHook: "hidden-trigger",
+        sourceInstanceId: second.instanceId,
+      });
+    });
+  });
 
   it.each(HEAVE_CASES)("$card heaves into an empty additional arsenal zone", ({ card }) => {
     const game = scenario({
@@ -98,7 +163,7 @@ describe("Heave", () => {
       ],
     });
 
-    game.settle().doRaw({ kind: "pass" }).settle();
+    game.settle().doRaw({ kind: "pass" }).settle().chooseOption("yes");
     game.chooseOption("pitch Wrecker Romp").expectInZone(0, card, "arsenal");
     expect(game.state.players[0]!.arsenal).toHaveLength(2);
   });

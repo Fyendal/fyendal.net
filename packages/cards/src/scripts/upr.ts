@@ -436,35 +436,24 @@ function readRipples(times: number): CardScript {
 }
 
 function sift(max: number): CardScript {
-  const offer = (ctx: ScriptCtx) => {
-    const moved = ctx.getState("siftMoved");
-    if (moved >= max || ctx.player(ctx.seat).hand.length === 0) {
-      ctx.drawCards(ctx.seat, moved);
-      return;
-    }
-    ctx.requestCardChoice(
-      "sift",
-      decisionPrompt(`${ctx.data.name}: put up to ${max} cards on the bottom`, "card.upr.hand.bottom.upto", {
-        values: { card: { kind: "card", cardId: ctx.self.cardId }, amount: max },
-        optionMessages: commonOptionMessages("done"),
-      }),
-      ["done", ...ctx.player(ctx.seat).hand.map((card) => card.instanceId)],
-    );
-  };
   return {
     onPlay(ctx) {
-      ctx.setState("siftMoved", 0);
-      offer(ctx);
+      const hand = ctx.player(ctx.seat).hand;
+      if (!hand.length) return;
+      ctx.requestCardChoices(
+        "sift",
+        decisionPrompt(`${ctx.data.name}: put up to ${max} cards on the bottom`, "card.upr.hand.bottom.upto", {
+          values: { card: { kind: "card", cardId: ctx.self.cardId }, amount: max },
+        }),
+        hand.map((card) => card.instanceId),
+        0,
+        max,
+      );
     },
-    onChoose(ctx, hook, option) {
+    onChooseMany(ctx, hook, options) {
       if (hook !== "sift") return;
-      if (option === "done") {
-        ctx.drawCards(ctx.seat, ctx.getState("siftMoved"));
-        return;
-      }
-      if (!ctx.putOnDeckBottom(Number(option))) return;
-      ctx.setState("siftMoved", ctx.getState("siftMoved") + 1);
-      offer(ctx);
+      const moved = options.filter((option) => ctx.putOnDeckBottom(Number(option))).length;
+      ctx.drawCards(ctx.seat, moved);
     },
   };
 }
@@ -525,40 +514,34 @@ function sigilProtection(): CardScript {
 }
 
 function singe(maxAllyTargets: number): CardScript {
-  const offerAlly = (ctx: ScriptCtx, another = false): void => {
-    const target = ctx.getState("singeTarget");
-    const allies = ctx.player(target).board.filter((card) => hasSubtype(ctx, card, "ally"));
-    if (!allies.length) return;
-    ctx.requestCardChoice(
-      "singe-ally",
-      decisionPrompt(
-        another
-          ? `Deal ${ctx.previewArcaneDamage(1)} arcane damage to another ally?`
-          : `Deal ${ctx.previewArcaneDamage(1)} arcane damage to an ally?`,
-        another ? "card.upr.arcane.ally.next" : "card.upr.arcane.ally.choose",
-        { values: { amount: ctx.previewArcaneDamage(1) }, optionMessages: commonOptionMessages("done") },
-      ),
-      ["done", ...allies.map((card) => card.instanceId)],
-    );
-  };
   return {
     ...arcaneSpell(1),
     onPlay(ctx) {
       ctx.requestChoice("singe-hero", arcaneHeroChoicePrompt(ctx, 1), ["opponent", "you"], undefined, undefined, "opponent");
     },
     onChoose(ctx, hook, option) {
-      if (hook === "singe-hero") {
-        const target = option === "you" ? ctx.seat : opponentSeat(ctx);
-        ctx.setState("singeTarget", target);
-        ctx.setState("singeRemaining", maxAllyTargets);
-        dealArcane(ctx, target, 1);
-        offerAlly(ctx);
-      } else if (hook === "singe-ally" && option !== "done") {
-        dealArcane(ctx, ctx.getState("singeTarget"), 1, Number(option));
-        const remaining = ctx.getState("singeRemaining") - 1;
-        ctx.setState("singeRemaining", remaining);
-        if (remaining > 0) offerAlly(ctx, true);
-      }
+      if (hook !== "singe-hero") return;
+      const target = option === "you" ? ctx.seat : opponentSeat(ctx);
+      ctx.setState("singeTarget", target);
+      dealArcane(ctx, target, 1);
+      const allies = ctx.player(target).board.filter((card) => hasSubtype(ctx, card, "ally"));
+      if (!allies.length) return;
+      const amount = ctx.previewArcaneDamage(1);
+      ctx.requestCardChoices(
+        "singe-allies",
+        decisionPrompt(
+          `Deal ${amount} arcane damage to up to ${maxAllyTargets} ${maxAllyTargets === 1 ? "ally" : "allies"}`,
+          "card.upr.arcane.allies.upto",
+          { values: { amount, count: maxAllyTargets } },
+        ),
+        allies.map((card) => card.instanceId),
+        0,
+        maxAllyTargets,
+      );
+    },
+    onChooseMany(ctx, hook, options) {
+      if (hook !== "singe-allies") return;
+      for (const option of options) dealArcane(ctx, ctx.getState("singeTarget"), 1, Number(option));
     },
   };
 }
@@ -633,50 +616,21 @@ export const upr: Record<string, CardScript> = mergeSetScripts("UPR", uprHighRar
   "azvolai|0": {
     activated: dragonAttack(),
     onAttackDeclared(ctx) {
-      ctx.setState("azvolaiHits", 0);
-      ctx.setState("azvolaiFirstTarget", 0);
-      ctx.requestCardChoice(
+      ctx.requestCardChoices(
         "azvolai",
         decisionPrompt(
           `Azvolai: deal ${ctx.previewArcaneDamage(1)} arcane damage to up to 2 targets`,
           "card.upr.azvolai.targets",
-          {
-            values: { amount: ctx.previewArcaneDamage(1), count: 2 },
-            optionMessages: commonOptionMessages("done"),
-          },
+          { values: { amount: ctx.previewArcaneDamage(1), count: 2 } },
         ),
-        ["done", ...livingTargets(ctx)],
-        undefined,
-        undefined,
-        undefined,
-        ctx.player(opponentSeat(ctx)).hero.instanceId,
+        livingTargets(ctx),
+        0,
+        2,
       );
     },
-    onChoose(ctx, hook, option) {
-      if (hook !== "azvolai" || option === "done") return;
-      dealToTarget(ctx, option, 1, true);
-      const count = ctx.getState("azvolaiHits") + 1;
-      ctx.setState("azvolaiHits", count);
-      if (count === 1) ctx.setState("azvolaiFirstTarget", Number(option));
-      const opposingHeroId = ctx.player(opponentSeat(ctx)).hero.instanceId;
-      if (count < 2)
-        ctx.requestCardChoice(
-          "azvolai",
-          decisionPrompt(
-            `Azvolai: deal ${ctx.previewArcaneDamage(1)} arcane damage to another target?`,
-            "card.upr.azvolai.target.next",
-            {
-              values: { amount: ctx.previewArcaneDamage(1) },
-              optionMessages: commonOptionMessages("done"),
-            },
-          ),
-          ["done", ...livingTargets(ctx).filter((target) => Number(target) !== ctx.getState("azvolaiFirstTarget"))],
-          undefined,
-          undefined,
-          undefined,
-          // the opposing hero unless it already took the first point
-          opposingHeroId === ctx.getState("azvolaiFirstTarget") ? "done" : opposingHeroId,
-        );
+    onChooseMany(ctx, hook, options) {
+      if (hook !== "azvolai") return;
+      for (const option of options) dealToTarget(ctx, option, 1, true);
     },
   },
   "cromai|0": {

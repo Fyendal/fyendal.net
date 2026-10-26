@@ -1,5 +1,6 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
 import {
+  hasBloodDebt,
   bloodDebtScript as bloodDebt,
   buffNextAttack,
   cardNamed,
@@ -25,25 +26,6 @@ function isAttack(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
 
 function isNonAttackAction(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
   return ctx.hasCardType(card, "action") && !ctx.cardTypes(card).includes("attack");
-}
-
-function requestInvertExistenceChoice(ctx: ScriptCtx, another = false): void {
-  const cards = ctx.player(opponentSeat(ctx)).graveyard;
-  if (!cards.length) return;
-  ctx.requestCardChoice(
-    "invert-existence-banish",
-    decisionPrompt(
-      another
-        ? "Invert Existence: choose another opposing graveyard card to banish, or finish"
-        : "Invert Existence: choose up to 2 opposing graveyard cards to banish",
-      another ? "card.mon.opposing.graveyard.banish.next" : "card.mon.opposing.graveyard.banish.upto",
-      {
-        values: { card: { kind: "card", cardId: ctx.self.cardId }, count: 2 },
-        optionMessages: commonOptionMessages("done"),
-      },
-    ),
-    ["done", ...cards.map((card) => card.instanceId)],
-  );
 }
 
 function weapon(cost: number, extra: CardScript = {}): CardScript {
@@ -77,14 +59,13 @@ function randomDiscardSix(ctx: ScriptCtx): boolean {
   return !!card && ctx.basePower(card) >= 6;
 }
 
-function requestSoulBanish(ctx: ScriptCtx, hook: string, another = false): void {
-  ctx.requestCardChoice(
+function requestSoulBanish(ctx: ScriptCtx, hook: string, count: number): void {
+  ctx.requestCardChoices(
     hook,
-    decisionPrompt(
-      another ? "Choose another soul card to banish" : "Choose a soul card to banish",
-      another ? "card.mon.soul.banish.next" : "card.mon.soul.banish.choose",
-    ),
+    decisionPrompt(`Choose ${count} soul card(s) to banish`, "card.mon.soul.banish.count", { values: { count } }),
     ctx.player(ctx.seat).soul.map((card) => card.instanceId),
+    count,
+    count,
   );
 }
 
@@ -122,13 +103,7 @@ const beaconOfVictory: CardScript = {
     if (hook === "beacon-x") {
       const x = Number(option.slice(2));
       ctx.setState("beaconX", x);
-      ctx.setState("beaconRemaining", x);
-      requestSoulBanish(ctx, "beacon-soul");
-    } else if (hook === "beacon-soul") {
-      if (!ctx.banish(Number(option))) return;
-      const remaining = ctx.getState("beaconRemaining") - 1;
-      ctx.setState("beaconRemaining", remaining);
-      if (remaining > 0) requestSoulBanish(ctx, "beacon-soul", true);
+      requestSoulBanish(ctx, "beacon-soul", x);
     } else if (hook === "beacon-search") {
       const id = Number(option);
       ctx.revealCards([id]);
@@ -136,19 +111,20 @@ const beaconOfVictory: CardScript = {
       ctx.shuffleDeck();
     }
   },
+  onChooseMany(ctx, hook, options) {
+    if (hook !== "beacon-soul") return;
+    for (const option of options) ctx.banish(Number(option));
+  },
 };
 
 const celestialCataclysm: CardScript = {
   canPlay: (ctx) => ctx.player(ctx.seat).soul.length >= 3,
   additionalCost(ctx) {
-    ctx.setState("cataclysmRemaining", 3);
-    requestSoulBanish(ctx, "cataclysm-soul");
+    requestSoulBanish(ctx, "cataclysm-soul", 3);
   },
-  onChoose(ctx, hook, option) {
-    if (hook !== "cataclysm-soul" || !ctx.banish(Number(option))) return;
-    const remaining = ctx.getState("cataclysmRemaining") - 1;
-    ctx.setState("cataclysmRemaining", remaining);
-    if (remaining > 0) requestSoulBanish(ctx, "cataclysm-soul", true);
+  onChooseMany(ctx, hook, options) {
+    if (hook !== "cataclysm-soul") return;
+    for (const option of options) ctx.banish(Number(option));
   },
 };
 
@@ -474,7 +450,7 @@ export const monHighRarity: Record<string, CardScript> = {
         .banish.filter(
           (card) =>
             !card.faceDown &&
-            (ctx.cardData(card.cardId).keywords ?? []).some((keyword) => keyword.toLowerCase() === "blood debt"),
+            hasBloodDebt(ctx, card),
         ).length;
       ctx.dealDamage(ctx.seat, Math.max(0, 6 - blood), { sourceInstanceId: ctx.self.instanceId });
     },
@@ -490,7 +466,7 @@ export const monHighRarity: Record<string, CardScript> = {
         const cards = ctx
           .player(ctx.seat)
           .deck.filter((card) =>
-            (ctx.cardData(card.cardId).keywords ?? []).some((keyword) => keyword.toLowerCase() === "blood debt"),
+            hasBloodDebt(ctx, card),
           );
         if (cards.length)
           ctx.requestCardChoice(
@@ -530,7 +506,7 @@ export const monHighRarity: Record<string, CardScript> = {
         const cards = ctx
           .player(ctx.seat)
           .hand.filter((card) =>
-            (ctx.cardData(card.cardId).keywords ?? []).some((keyword) => keyword.toLowerCase() === "blood debt"),
+            hasBloodDebt(ctx, card),
           );
         if (cards.length)
           ctx.requestCardChoice(
@@ -577,28 +553,36 @@ export const monHighRarity: Record<string, CardScript> = {
       arcaneDamageEffect: true,
       arcaneDamageEffectAmounts: [2],
       onPlay(ctx) {
-        requestInvertExistenceChoice(ctx);
+        const cards = ctx.player(opponentSeat(ctx)).graveyard;
+        if (!cards.length) return;
+        ctx.requestCardChoices(
+          "invert-existence-banish",
+          decisionPrompt(
+            "Invert Existence: choose up to 2 opposing graveyard cards to banish",
+            "card.mon.opposing.graveyard.banish.upto",
+            { values: { card: { kind: "card", cardId: ctx.self.cardId }, count: 2 } },
+          ),
+          cards.map((card) => card.instanceId),
+          0,
+          2,
+        );
       },
-      onChoose(ctx, hook, option) {
-        if (hook !== "invert-existence-banish" || option === "done") return;
-        const card = ctx
-          .player(opponentSeat(ctx))
-          .graveyard.find((candidate) => candidate.instanceId === Number(option));
-        if (!card) return;
-        const attack = isAttack(ctx, card);
-        const nonAttack = isNonAttackAction(ctx, card);
-        if (!ctx.banish(card.instanceId)) return;
-        if (attack) ctx.setState("invertExistenceAttack", 1);
-        if (nonAttack) ctx.setState("invertExistenceNonAttack", 1);
-        const count = ctx.getState("invertExistenceCount") + 1;
-        ctx.setState("invertExistenceCount", count);
-        if (count < 2 && ctx.player(opponentSeat(ctx)).graveyard.length) {
-          requestInvertExistenceChoice(ctx, true);
-          return;
+      onChooseMany(ctx, hook, options) {
+        if (hook !== "invert-existence-banish") return;
+        let attack = false;
+        let nonAttack = false;
+        for (const option of options) {
+          const card = ctx
+            .player(opponentSeat(ctx))
+            .graveyard.find((candidate) => candidate.instanceId === Number(option));
+          if (!card) continue;
+          const isAttackCard = isAttack(ctx, card);
+          const isNonAttackCard = isNonAttackAction(ctx, card);
+          if (!ctx.banish(card.instanceId)) continue;
+          attack ||= isAttackCard;
+          nonAttack ||= isNonAttackCard;
         }
-        if (ctx.getState("invertExistenceAttack") && ctx.getState("invertExistenceNonAttack")) {
-          dealArcane(ctx, opponentSeat(ctx), 2);
-        }
+        if (attack && nonAttack) dealArcane(ctx, opponentSeat(ctx), 2);
       },
     },
     true,
@@ -625,7 +609,7 @@ export const monHighRarity: Record<string, CardScript> = {
         .banish.filter(
           (card) =>
             !card.faceDown &&
-            (ctx.cardData(card.cardId).keywords ?? []).some((keyword) => keyword.toLowerCase() === "blood debt"),
+            hasBloodDebt(ctx, card),
         ).length >= 6,
     onPlay(ctx) {
       ctx.createToken(BLASMOPHET);
@@ -723,7 +707,7 @@ export const monHighRarity: Record<string, CardScript> = {
   "tear limb from limb|3": {
     onPlay(ctx) {
       ctx.drawCards(ctx.seat, 1);
-      if (randomDiscardSix(ctx)) buffNextAttack(ctx, { attack: 6, appliesToType: ["brute"] });
+      if (randomDiscardSix(ctx)) buffNextAttack(ctx, { attackFromBasePower: true, appliesTo: "attack-action", appliesToType: ["brute"] });
     },
   },
   "dread scythe|0": weapon(3, {

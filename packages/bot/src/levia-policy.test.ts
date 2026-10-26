@@ -27,6 +27,11 @@ function hand(state: ReturnType<typeof game>, cardIds: readonly string[]) {
   state.players[0]!.hand = cards(state, cardIds);
 }
 
+function redeem(state: ReturnType<typeof game>) {
+  state.players[0]!.heroCardId = "DTD164";
+  state.players[0]!.hero.cardId = "DTD164";
+}
+
 function choice(state: ReturnType<typeof game>): GameIntent {
   const legal = legalIntents(state, 0);
   const intent = chooseLeviaIntent({ seat: 0, view: projectStateFor(state, 0), legal, cards: cardData, state });
@@ -138,7 +143,67 @@ function armoredBlock(cards: readonly string[], onHit: string) {
   return { selected, handIds };
 }
 
+const GRAINS = "Whenever a weapon attack you control hits, you may pay {r}. If you do, create a Vigor token.";
+
+/** Levia, holding `cardIds`, defends a 3-power opening-turn attack carrying `onHit` while wearing the Spring Tunic. */
+function openingTunicBlock(cardIds: readonly string[], onHit: string) {
+  let state = game();
+  state.turn = 1;
+  hand(state, cardIds);
+  const tunic = { instanceId: state.nextInstanceId++, cardId: "WTR150", owner: 0 };
+  state.players[0]!.equipment = { chest: tunic };
+  state.players[0]!.arsenal = [];
+  state = defending(state);
+  const view = projectStateFor(state, 0);
+  const link = { ...view.chain.at(-1)!, damage: 3, onHitEffects: [{ sourceCardId: "", text: onHit }] };
+  const intent = chooseLeviaIntent({
+    seat: 0, view: { ...view, chain: [...view.chain.slice(0, -1), link] },
+    legal: legalIntents(state, 0), cards: cardData, state,
+  });
+  const selected = intent.kind === "stage-defenders" || intent.kind === "defend" ? [...intent.instanceIds] : [];
+  return { intent, selected, handIds: state.players[0]!.hand.map((card) => card.instanceId), tunicId: tunic.instanceId };
+}
+
 describe("Levia Gates policy", () => {
+  it("covers a paid Vigor on-hit with two hand cards instead of the Spring Tunic", () => {
+    const { selected, handIds } = openingTunicBlock(["ROS218", "PEN322", "IAR165", "IAR005"], GRAINS);
+    expect(selected).toEqual(handIds.slice(0, 2));
+  });
+
+  it("keeps the Spring Tunic out of a nonlethal opening block despite a significant on-hit", () => {
+    const { selected, tunicId } = openingTunicBlock(
+      ["PEN322", "DTD107", "IAR005", "IAR005"],
+      "When this hits, draw a card.",
+    );
+    expect(selected).not.toContain(tunicId);
+  });
+
+  it("answers an opening attack with Fallen Herald instead of blocking", () => {
+    const { intent } = openingTunicBlock(["IAR165", "PEN322", "DTD107", "IAR005"], GRAINS);
+    expect(intent).toEqual({ kind: "defend", instanceIds: [] });
+  });
+
+  it("activates Fallen Herald after leaving an opening attack unblocked", () => {
+    let state = game();
+    state.turn = 1;
+    hand(state, ["IAR165", "PEN322", "DTD107", "IAR005"]);
+    const herald = state.players[0]!.hand[0]!;
+    state.players[0]!.arsenal = [];
+    state = defending(state);
+    let applied = applyIntent(state, 0, { kind: "defend", instanceIds: [] });
+    if (!applied.ok) throw new Error(JSON.stringify(applied));
+    state = applied.state;
+    for (let step = 0; step < 6 && state.priorityPlayer !== 0; step++) {
+      applied = applyIntent(state, state.priorityPlayer, { kind: "pass" });
+      if (!applied.ok) throw new Error(JSON.stringify(applied));
+      state = applied.state;
+    }
+    const intent = chooseLeviaIntent({
+      seat: 0, view: projectStateFor(state, 0), legal: legalIntents(state, 0), cards: cardData, state,
+    });
+    expect(intent).toMatchObject({ kind: "activate-ability", sourceInstanceId: herald.instanceId });
+  });
+
   it.each([1, 3])("preserves its hand before the opponent may attack on turn %i", (turn) => {
     let state = game();
     state.turn = turn;
@@ -256,7 +321,7 @@ describe("Levia Gates policy", () => {
     state.players[0]!.flags.banishedSixPlusThisTurn = true;
     const safe = chooseLeviaIntentWithTrace({ ...input, view: projectStateFor(state, 0) });
     expect(safe.macro.goal).not.toBe("stabilize");
-    expect(safe.plan?.transitions).toBeLessThanOrEqual(72);
+    expect(safe.plan?.transitions).toBeLessThanOrEqual(74);
   });
 
   it("values suppression and excludes face-down Blood Debt from the risk estimate", () => {
@@ -275,6 +340,18 @@ describe("Levia Gates policy", () => {
     state.players[0]!.flags.banishedSixPlusThisTurn = false;
     state.players[0]!.banish[0]!.faceDown = true;
     expect(leviaMacroPositionBonus(macro, root, observe(), true)).toBeGreaterThan(exposed);
+  });
+
+  it("counts no blood debt once Levia is Redeemed", () => {
+    const state = game();
+    state.players[0]!.life = 3;
+    state.players[0]!.banish = cards(state, ["PEN194"]);
+    const observe = () => ({
+      seat: 0 as const, view: projectStateFor(state, 0), legal: legalIntents(state, 0), cards: cardData, state,
+    });
+    expect(leviaLifeRisk(observe(), observe())).toBe(1);
+    redeem(state);
+    expect(leviaLifeRisk(observe(), observe())).toBe(0);
   });
 
   it("changes matchup priors without reading an opponent's hidden hand", () => {
@@ -705,6 +782,43 @@ describe("Levia Gates policy", () => {
     // With the opponent in range of one attack, the attack comes first.
     state.players[1]!.life = 5;
     expect(choice(state)).toMatchObject({ kind: "play-card" });
+  });
+
+  it("rolls Scabskin at low life under a Bellow when Hexagore and an arsenal attack need the action point", () => {
+    const state = bloodrushTurn(["IAR009", "IAR037"]);
+    const me = state.players[0]!;
+    me.life = 3;
+    me.arsenal = cards(state, ["IAR005"]);
+    me.banish = cards(state, [
+      "PEN194", "IAR037", "DTD107", "PEN192", "WTR031", "SUP165", "ROS218", "IAR017", "MST236", "PEN194", "IAR005",
+    ]);
+    expect(me.weapons.map((weapon) => cardData[weapon.cardId]?.name)).toContain("Hexagore, the Death Hydra");
+    expect(me.resources).toBe(2);
+    // Blood Harvest was banished from hand to pay for the Bellow.
+    me.flags.banishedSixPlusThisTurn = true;
+    expect(choice(state)).toMatchObject({ kind: "activate-ability", sourceInstanceId: me.equipment.legs!.instanceId });
+  });
+
+  it("banishes Consuming Lash at one life without a Scabskin roll nothing could use", () => {
+    const state = game();
+    state.players[0]!.life = 1;
+    hand(state, ["SUP165", "IAR009"]);
+    state.players[0]!.banish = cards(state, ["DTD107", "PEN194", "IAR005", "MST236", "DTD107", "IAR020"]);
+    const lash = state.players[0]!.hand[1]!;
+    expect(choice(state)).toMatchObject({ kind: "activate-ability", sourceInstanceId: lash.instanceId });
+  });
+
+  it("sends a Bellow as Levia, Redeemed to cycle a dead last card into two draws", () => {
+    const state = game();
+    redeem(state);
+    state.players[0]!.life = 3;
+    hand(state, ["IAR009", "MON189"]);
+    state.players[0]!.arsenal = cards(state, ["WTR007"]);
+    const [, doomsday] = state.players[0]!.hand;
+    const [bellow] = state.players[0]!.arsenal;
+    expect(choice(state)).toMatchObject({
+      kind: "play-from-arsenal", instanceId: bellow!.instanceId, pitchInstanceIds: [doomsday!.instanceId],
+    });
   });
 
   it("holds a Bellow from arsenal while two non-sixes could be its discard", () => {

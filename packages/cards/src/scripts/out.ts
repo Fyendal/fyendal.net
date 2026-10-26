@@ -555,21 +555,27 @@ function shortSharp(power: number): CardScript {
     },
   };
 }
+const canArsenalFromHand = (ctx: ScriptCtx) => ctx.hasArsenalSpace() && ctx.player(ctx.seat).hand.length > 0;
 function riptide(): CardScript {
   return {
     triggers: [
       {
         event: "card-played",
         label: "Put a card from hand face down into arsenal?",
-        condition: (ctx, _played, event) =>
-          event?.from === "hand" && ctx.hasArsenalSpace() && ctx.player(ctx.seat).hand.length > 0,
+        condition: (ctx, _played, event) => event?.from === "hand" && canArsenalFromHand(ctx),
         effect(ctx) {
+          // The arsenal may have filled or the hand emptied before this resolves.
+          if (!canArsenalFromHand(ctx)) return;
           ctx.requestCardChoice(
             "riptide-arsenal",
             decisionPrompt("Put a card from hand face down into arsenal?", "card.out.hand.arsenal", {
               optionMessages: commonOptionMessages("pass"),
             }),
             ["pass", ...ctx.player(ctx.seat).hand.map((card) => card.instanceId)],
+            undefined,
+            undefined,
+            undefined,
+            "pass",
           );
         },
       },
@@ -610,7 +616,7 @@ const maskManyFaces: CardScript = {
 
 const trapReaction = () => (ctx: ScriptCtx) => ctx.link?.flags.reactionPlayedOrActivated === true;
 const trapPower = () => (ctx: ScriptCtx) => ctx.attackBonusAboveBase() > 0;
-const trapGoAgain = () => (ctx: ScriptCtx) => ctx.link?.goAgain === true;
+const trapGoAgain = () => (ctx: ScriptCtx) => ctx.currentAttackHasGoAgain();
 
 function offerDaggerCycle(ctx: ScriptCtx, source: DeepReadonly<CardInstance>): void {
   if (ctx.getPlayerFlag(ctx.seat, "maskDaggerCycle") !== true || !isDagger(ctx, source)) return;
@@ -718,6 +724,7 @@ export const out: Record<string, CardScript> = mergeSetScripts("OUT", outHighRar
   "one-two punch|3": oneTwoPunch(),
 
   "riptide|0": riptide(),
+  "riptide, lurker of the deep|0": riptide(),
   "wayfinder's crest|0": {
     onDefendTarget: {
       ...heroTarget(),

@@ -496,6 +496,34 @@ describe("SEA — High Seas heroes and cogs", () => {
     )?.counters?.steam).toBeUndefined();
   });
 
+  it("Lubricate untaps up to 3 chosen cogs at once", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          hand: ["lubricate|3"],
+          board: ["copper cog|3", "copper cog|3", "copper cog|3", "copper cog|3"],
+        },
+        { hero: "dorinthea" },
+      ],
+    });
+    for (const card of g.state.players[0]!.board) card.tapped = true;
+    const [first, second, , fourth] = g.state.players[0]!.board.map((card) => card.instanceId);
+
+    g.play("lubricate|3", { settle: false }).passPriority().passPriority();
+    expect(g.state.pendingDecision).toMatchObject({
+      chooseHook: "lubricate",
+      minimumSelections: 0,
+      maximumSelections: 3,
+    });
+    expect(g.state.pendingDecision?.options).toHaveLength(4);
+    g.chooseMany([String(first), String(fourth)]).settle();
+
+    const tapped = (id: number | undefined) =>
+      g.state.players[0]!.board.find((card) => card.instanceId === id)?.tapped === true;
+    expect([tapped(first), tapped(second), tapped(fourth)]).toEqual([false, true, false]);
+  });
+
   it("Sky Skimmer can tap a cog for its instant ability while attacking", () => {
     const g = scenario({
       seats: [
@@ -1429,6 +1457,18 @@ describe("SEA — rules regression coverage", () => {
       .expectNotInZone(1, "barnacle|2", "board");
   });
 
+  it("Barbed Barrage destroys an additional Spectra target and still attacks the hero", () => {
+    const g = barbedBarrage({ board: ["genesis|2"] });
+
+    g.play("barbed barrage|1", { fromArsenal: true, settle: false })
+      .chooseOption("pay")
+      .expectLog("triggers Spectra")
+      .blockWith()
+      .settle()
+      .expectNotInZone(1, "genesis|2", "board")
+      .expectLife(1, 15);
+  });
+
   it("Barbed Barrage chooses its additional target among several opposing allies", () => {
     const g = barbedBarrage({ board: ["barnacle|2", "barnacle|2"] });
 
@@ -1702,5 +1742,41 @@ describe("SEA — rules regression coverage", () => {
       g.state.players[0]!.hand.map((card) => String(card.instanceId)),
     );
     g.chooseCard("sigil of solace|3").expectHandSize(0, 1).expectZoneSize(0, "graveyard", 2);
+  });
+
+  it("Surface Shaking bottoms up to X hand cards for its Seismic Surges and draws that many", () => {
+    const g = scenario({
+      active: 1,
+      seats: [
+        {
+          hero: "rhinar",
+          heroKey: "valda brightaxe|0",
+          weapons: [],
+          board: ["surface shaking|3", "seismic surge|0", "seismic surge|0"],
+          hand: ["pummel|1", "disable|1", "buckle|3"],
+          deck: ["head jab|1", "head jab|1", "head jab|1"],
+        },
+        { hero: "dorinthea", hand: [] },
+      ],
+    });
+
+    g.passActionPhase().settle();
+    const pd = g.state.pendingDecision!;
+    expect(pd.chooseHook).toBe("surface-shaking");
+    expect([pd.minimumSelections, pd.maximumSelections]).toEqual([0, 2]);
+    const hand = g.state.players[0]!.hand;
+    const deckSize = g.state.players[0]!.deck.length;
+    const handSize = hand.length;
+    const bottomed = ["pummel|1", "disable|1"].map((key) =>
+      String(hand.find((card) => card.cardId === printingId(key))!.instanceId),
+    );
+    g.chooseMany(bottomed).settle();
+    g.expectNotInZone(0, "surface shaking|3", "board")
+      .expectInZone(0, "pummel|1", "deck")
+      .expectInZone(0, "disable|1", "deck")
+      .expectDeckBottom(0, "disable|1")
+      .expectInZone(0, "buckle|3", "hand")
+      .expectHandSize(0, handSize)
+      .expectZoneSize(0, "deck", deckSize);
   });
 });

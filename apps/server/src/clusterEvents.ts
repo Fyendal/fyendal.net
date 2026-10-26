@@ -24,7 +24,8 @@ export type ClusterEvent =
   | { type: "social-presence"; userId: number }
   | { type: "chat-message"; userId: number; messageId: string }
   | { type: "friend-game-invite"; userId: number; invite: FriendGameInvite }
-  | { type: "friend-game-invite-dismiss"; userId: number; inviteId: string };
+  | { type: "friend-game-invite-dismiss"; userId: number; inviteId: string }
+  | { type: "league-updated"; userId: number };
 
 function safeInteger(value: unknown): number | null {
   const parsed = typeof value === "number" ? value : Number(value);
@@ -131,7 +132,8 @@ function decodeRow(value: unknown): { id: number; event: ClusterEvent } | null {
         : null;
     }
     case "social-refresh":
-    case "social-presence": {
+    case "social-presence":
+    case "league-updated": {
       const userId = safeInteger(row.subject_user_id);
       return userId !== null && userId > 0
         ? { id, event: { type: row.event_type, userId } as ClusterEvent }
@@ -220,7 +222,7 @@ export async function appendClusterEvent(db: Queryable, event: ClusterEvent): Pr
   } else if (event.type === "emote") {
     code = event.code;
     payload = { seat: event.seat, message: event.message };
-  } else if (event.type === "social-refresh" || event.type === "social-presence") {
+  } else if (event.type === "social-refresh" || event.type === "social-presence" || event.type === "league-updated") {
     userId = event.userId;
   } else if (event.type === "chat-message") {
     userId = event.userId;

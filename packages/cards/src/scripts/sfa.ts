@@ -341,11 +341,7 @@ export const sfa: Record<string, CardScript> = {
   },
 
   "blaze headlong|1": {
-    // "If you've played another red card this turn, this gets go again."
-    //  (Go again is conditional — KEYWORD_OVERRIDES strips the printed keyword.)
-    onAttackDeclared(ctx) {
-      if (playedAnotherRed(ctx)) ctx.grantGoAgain();
-    },
+    hasConditionalGoAgain: playedAnotherRed,
   },
 
   "brand with cinderclaw|1": brandWithCinderclaw,

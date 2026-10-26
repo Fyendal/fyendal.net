@@ -116,6 +116,8 @@ function LifeStatus({
   heroName,
   heroCardId,
   marked,
+  priority,
+  priorityPulse,
   log,
   logEntries,
 }: {
@@ -125,6 +127,9 @@ function LifeStatus({
   heroName: string;
   heroCardId: string;
   marked: boolean;
+  /** Whether the game waits on this hero, on the other hero, or on nobody. */
+  priority: "holder" | "waiting" | null;
+  priorityPulse: boolean;
   log: readonly string[];
   logEntries?: readonly GameLogViewEntry[];
 }) {
@@ -186,9 +191,14 @@ function LifeStatus({
       ) : null}
     </span>
   );
+  const priorityClass = priority === "holder"
+    ? ` life-priority-holder${priorityPulse ? " life-priority-pulse" : ""}`
+    : priority === "waiting"
+      ? " life-priority-waiting"
+      : "";
   return (
     <div
-      className={`life life-${side}`}
+      className={`life life-${side}${priorityClass}`}
       aria-label={intl.formatMessage(
         { id: marked ? "game.life.totalMarked" : "game.life.total" },
         { owner, life },
@@ -283,6 +293,8 @@ export function StatusFloat({
   oppMarked = false,
   myMarked = false,
   mySeat = 0,
+  priorityHolderSeat = null,
+  priorityPulse = false,
   log,
   logEntries,
   activeHeroName,
@@ -303,6 +315,10 @@ export function StatusFloat({
   oppMarked?: boolean;
   myMarked?: boolean;
   mySeat?: 0 | 1;
+  /** Seat the game waits on; its portrait lights up and the other recedes. */
+  priorityHolderSeat?: number | null;
+  /** Breathe the lit portrait while the viewer holds priority. */
+  priorityPulse?: boolean;
   log: readonly string[];
   logEntries?: readonly GameLogViewEntry[];
   activeHeroName: string;
@@ -313,6 +329,10 @@ export function StatusFloat({
   onPass: () => void;
 }) {
   const intl = useIntl();
+  const oppSeat = mySeat === 0 ? 1 : 0;
+  const priorityFor = (seat: 0 | 1) => priorityHolderSeat === null
+    ? null
+    : priorityHolderSeat === seat ? "holder" : "waiting";
   return (
     <div
       ref={hostRef}
@@ -322,10 +342,12 @@ export function StatusFloat({
       <LifeStatus
         life={oppLife}
         side="opp"
-        seat={mySeat === 0 ? 1 : 0}
+        seat={oppSeat}
         heroName={oppHeroName}
         heroCardId={oppHeroCardId}
         marked={oppMarked}
+        priority={priorityFor(oppSeat)}
+        priorityPulse={priorityPulse}
         log={log}
         logEntries={logEntries}
       />
@@ -360,6 +382,8 @@ export function StatusFloat({
         heroName={myHeroName}
         heroCardId={myHeroCardId}
         marked={myMarked}
+        priority={priorityFor(mySeat)}
+        priorityPulse={priorityPulse}
         log={log}
         logEntries={logEntries}
       />

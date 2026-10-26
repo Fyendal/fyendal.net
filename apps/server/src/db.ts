@@ -53,6 +53,12 @@ export interface Migration {
 
 export const SCHEMA_EPOCH = 1;
 
+/** pg-mem names itself in `server_version`; used to skip PostgreSQL-only tuning. */
+export async function isPgMem(db: Queryable): Promise<boolean> {
+  const { rows } = await db.query("SHOW server_version");
+  return String(rows[0]?.server_version ?? "").includes("pg-mem");
+}
+
 export class ResetRequiredError extends Error {
   readonly code = "RESET_REQUIRED";
 
@@ -1019,6 +1025,117 @@ export const MIGRATIONS: Migration[] = [
       user_id INTEGER PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
       added_at BIGINT NOT NULL
     );`,
+  },
+  {
+    version: 56,
+    // Stored replay payloads are multi-megabyte blobs expiring after a week,
+    // so the replay_participants TOAST relation is by far the largest table.
+    // At the default 20% dead-tuple trigger its autovacuum runs about daily
+    // and rewrites close to 1 GiB of WAL in under a minute, saturating the
+    // single-vCPU instance. A 1% trigger keeps each run small and the longer
+    // cost delay spreads its I/O. pg-mem has no autovacuum and cannot parse
+    // storage parameters, so the tuning applies only to real PostgreSQL.
+    sql: "",
+    apply: async (db) => {
+      if (await isPgMem(db)) return;
+      await db.query(`ALTER TABLE replay_participants SET (
+        toast.autovacuum_vacuum_scale_factor = 0.01,
+        toast.autovacuum_vacuum_insert_scale_factor = 0.01,
+        toast.autovacuum_vacuum_threshold = 1000,
+        toast.autovacuum_vacuum_cost_delay = 20
+      )`);
+    },
+  },
+  {
+    version: 57,
+    // Operator-run leagues. Members keep a per-league member_id and
+    // username snapshot so one account deletion preserves everyone
+    // else's standings. Standings derive from league_matches.
+    sql: `CREATE TABLE leagues (
+      id TEXT PRIMARY KEY,
+      name TEXT NOT NULL,
+      format TEXT NOT NULL CHECK (format IN ('cc', 'silver-age')),
+      status TEXT NOT NULL CHECK (status IN ('signup', 'season', 'playoffs', 'complete', 'cancelled')),
+      time_zone TEXT NOT NULL,
+      max_players INTEGER NOT NULL CHECK (max_players BETWEEN 2 AND 20),
+      auto_start BOOLEAN NOT NULL DEFAULT FALSE,
+      season_weeks INTEGER NOT NULL DEFAULT 4 CHECK (season_weeks BETWEEN 1 AND 12),
+      matches_per_week INTEGER NOT NULL CHECK (matches_per_week BETWEEN 1 AND 7),
+      match_minutes INTEGER NOT NULL DEFAULT 60 CHECK (match_minutes BETWEEN 30 AND 180),
+      playoff_size INTEGER NOT NULL DEFAULT 8 CHECK (playoff_size IN (2, 4, 8)),
+      playoff_round_hours INTEGER NOT NULL DEFAULT 96 CHECK (playoff_round_hours BETWEEN 24 AND 336),
+      signup_token_hash TEXT UNIQUE,
+      starts_at BIGINT,
+      current_week INTEGER NOT NULL DEFAULT 0 CHECK (current_week >= 0),
+      playoff_round INTEGER NOT NULL DEFAULT 0 CHECK (playoff_round >= 0),
+      pairing_seed TEXT NOT NULL,
+      created_at BIGINT NOT NULL,
+      finished_at BIGINT
+    );
+    CREATE TABLE league_members (
+      league_id TEXT NOT NULL REFERENCES leagues(id) ON DELETE CASCADE,
+      member_id INTEGER NOT NULL CHECK (member_id > 0),
+      user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+      username TEXT,
+      time_zone TEXT NOT NULL,
+      availability JSONB NOT NULL,
+      status TEXT NOT NULL CHECK (status IN ('active', 'dropped')),
+      joined_at BIGINT NOT NULL,
+      playoff_seed INTEGER CHECK (playoff_seed IS NULL OR playoff_seed > 0),
+      PRIMARY KEY (league_id, member_id),
+      UNIQUE (league_id, user_id)
+    );
+    CREATE INDEX league_members_user_idx ON league_members (user_id);
+    CREATE TABLE league_availability_weeks (
+      league_id TEXT NOT NULL,
+      member_id INTEGER NOT NULL,
+      week INTEGER NOT NULL CHECK (week > 0),
+      availability JSONB NOT NULL,
+      PRIMARY KEY (league_id, member_id, week),
+      FOREIGN KEY (league_id, member_id) REFERENCES league_members(league_id, member_id) ON DELETE CASCADE
+    );
+    CREATE TABLE league_matches (
+      id TEXT PRIMARY KEY,
+      league_id TEXT NOT NULL REFERENCES leagues(id) ON DELETE CASCADE,
+      stage TEXT NOT NULL CHECK (stage IN ('season', 'quarterfinal', 'semifinal', 'final')),
+      week INTEGER CHECK (week IS NULL OR week > 0),
+      bracket_slot INTEGER CHECK (bracket_slot IS NULL OR bracket_slot >= 0),
+      member_a INTEGER NOT NULL,
+      member_b INTEGER,
+      status TEXT NOT NULL CHECK (status IN ('unscheduled', 'proposed', 'scheduled', 'in-room', 'complete', 'cancelled')),
+      proposed_at BIGINT,
+      proposed_by INTEGER,
+      scheduled_at BIGINT,
+      ready_a BIGINT,
+      ready_b BIGINT,
+      room_code TEXT,
+      match_id TEXT REFERENCES matches(id) ON DELETE SET NULL,
+      winner INTEGER,
+      result TEXT CHECK (result IS NULL OR result IN ('played', 'draw', 'forfeit', 'double-forfeit', 'bye', 'operator')),
+      deadline_at BIGINT NOT NULL,
+      pairing_note JSONB,
+      created_at BIGINT NOT NULL,
+      CHECK ((stage = 'season') = (week IS NOT NULL)),
+      CHECK ((stage = 'season') = (bracket_slot IS NULL)),
+      CHECK ((member_b IS NULL) = (result IS NOT NULL AND result = 'bye')),
+      CHECK ((status = 'complete') = (result IS NOT NULL)),
+      CHECK (winner IS NULL OR winner = member_a OR winner = member_b),
+      FOREIGN KEY (league_id, member_a) REFERENCES league_members(league_id, member_id),
+      FOREIGN KEY (league_id, member_b) REFERENCES league_members(league_id, member_id)
+    );
+    CREATE INDEX league_matches_round_idx ON league_matches (league_id, stage, week);
+    CREATE INDEX league_matches_member_a_idx ON league_matches (league_id, member_a);
+    CREATE INDEX league_matches_member_b_idx ON league_matches (league_id, member_b);
+    ALTER TABLE rooms ADD COLUMN league_match_id TEXT REFERENCES league_matches(id) ON DELETE SET NULL;
+    CREATE TABLE league_actions (
+      id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+      league_id TEXT NOT NULL REFERENCES leagues(id) ON DELETE CASCADE,
+      action JSONB NOT NULL,
+      created_at BIGINT NOT NULL,
+      applied_at BIGINT,
+      error TEXT
+    );
+    CREATE INDEX league_actions_pending_idx ON league_actions (applied_at, id);`,
   },
 ];
 

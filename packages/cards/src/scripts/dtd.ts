@@ -660,9 +660,7 @@ for (const [pitch, power] of [
     },
   };
   dtd[`blistering assault|${pitch}`] = {
-    onAttackDeclared(ctx) {
-      if (ctx.player(ctx.seat).pitch.some((card) => ctx.cardColor(card) === 2)) ctx.grantGoAgain();
-    },
+    hasConditionalGoAgain: (ctx) => ctx.player(ctx.seat).pitch.some((card) => ctx.cardColor(card) === 2),
   };
   dtd[`defender of daybreak|${pitch}`] = {
     canTriggerOnDefend: (ctx) => !!ctx.link && has(ctx, ctx.link.attackingCard, "shadow"),
@@ -731,9 +729,7 @@ for (const [pitch, power] of [
     modifyAttack: (ctx) => (ctx.player(opponentSeat(ctx)).soul.length > 0 ? 2 : 0),
   });
   dtd[`soul cleaver|${pitch}`] = bloodDebt({
-    onAttackDeclared(ctx) {
-      if (ctx.player(opponentSeat(ctx)).soul.length > 0) ctx.grantGoAgain();
-    },
+    hasConditionalGoAgain: (ctx) => ctx.player(opponentSeat(ctx)).soul.length > 0,
   });
   dtd[`beseech the demigon|${pitch}`] = banishBuff(4 - pitch);
   dtd[`tear through the portal|${pitch}`] = banishGoAgain(pitch);

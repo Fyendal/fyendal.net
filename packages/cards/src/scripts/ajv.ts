@@ -259,44 +259,33 @@ export const ajv: Record<string, CardScript> = {
           ctx.setCounter("flow", flow);
           const ice = ctx.player(ctx.seat).pitch.filter((card) => hasType(ctx, card, "ice"));
           if (ice.length < flow) ctx.destroySelf();
-          else {
-            ctx.setState("channelRemaining", flow);
-            ctx.requestCardChoice(
+          else
+            ctx.requestCardChoices(
               "channel-ice",
               decisionPrompt(
-                "Choose an Ice card from pitch for Channel Ice, or destroy this",
-                "card.ajv.channel.ice.choose",
-                { optionMessages: commonOptionMessages("destroy") },
+                `Choose ${flow} Ice ${flow === 1 ? "card" : "cards"} from pitch for Channel Ice, or fewer to destroy this`,
+                "card.ajv.channel.ice.many",
+                { values: { count: flow } },
               ),
-              ["destroy", ...ice.map((card) => card.instanceId)],
+              ice.map((card) => card.instanceId),
+              0,
+              flow,
             );
-          }
         },
       },
     ],
-    onChoose(ctx, hook, option) {
+    onChooseMany(ctx, hook, options) {
       if (hook !== "channel-ice") return;
-      if (option === "destroy") {
+      if (options.length < ctx.getCounter("flow")) {
         ctx.destroySelf();
         return;
       }
-      if (!ctx.putOnDeckBottom(Number(option))) {
-        ctx.destroySelf();
-        return;
+      for (const option of options) {
+        if (!ctx.putOnDeckBottom(Number(option))) {
+          ctx.destroySelf();
+          return;
+        }
       }
-      const remaining = ctx.getState("channelRemaining") - 1;
-      ctx.setState("channelRemaining", remaining);
-      if (remaining <= 0) return;
-      const ice = ctx.player(ctx.seat).pitch.filter((card) => hasType(ctx, card, "ice"));
-      if (ice.length < remaining) ctx.destroySelf();
-      else
-        ctx.requestCardChoice(
-          "channel-ice",
-          decisionPrompt("Choose another Ice card for Channel Ice, or destroy this", "card.ajv.channel.ice.next", {
-            optionMessages: commonOptionMessages("destroy"),
-          }),
-          ["destroy", ...ice.map((card) => card.instanceId)],
-        );
     },
   },
   "crumble to eternity|3": {

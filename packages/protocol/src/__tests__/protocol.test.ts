@@ -268,7 +268,16 @@ const card = {
   usedAbilityIndexes: [0, 2],
   remainingAbilityActivations: [1, 0],
   activatedAbilityLabels: ["Attack", "Reload"],
-  turnTriggers: [{ event: "end-of-turn", label: "Recover", labelMessage: { id: "test.recover" }, optional: true }],
+  turnTriggers: [{
+    event: "end-of-turn",
+    label: "Recover",
+    labelMessage: { id: "test.recover" },
+    optional: true,
+    choices: [{
+      hook: "trigger-choice",
+      options: [{ value: "yes", message: { id: "common.option.yes" } }, { value: "no", message: { id: "common.option.no" } }],
+    }],
+  }],
   attackAbilityIndexes: [0],
   life: 1,
   hidden: false,
@@ -330,6 +339,8 @@ const gameView = () => ({
     overpower: true,
     veil: true,
     maxNonBlockDefenders: 2,
+    defenseReactionsBlockedFromHand: true,
+    defenseReactionsBlockedFromArsenal: true,
     reactions: [card],
     targetAllyName: "Ally",
     targetAlly: card,
@@ -360,6 +371,8 @@ const gameView = () => ({
     stagedCards: [card],
     stagedHandCount: 1,
     stagedDefense: 3,
+    stagedAttack: 5,
+    stagedAttackModifiers: [{ sourceCardId: "WTR001", amount: 1 }],
   },
   winner: null,
   log: ["started"],
@@ -434,7 +447,7 @@ describe("client messages", () => {
     { type: "priority-mode", mode: "auto-pass" },
     { type: "priority-mode", mode: "always-pause" },
     { type: "standing-orders", orders: {} },
-    { type: "standing-orders", orders: { "fealty|0": { priorityWindow: "pass" }, "valiant dynamo|0": { optionalTrigger: "no" } } },
+    { type: "standing-orders", orders: { "golden cog|0": { "sea-cog-maintenance": "remove" }, "valiant dynamo|0": { "trigger-choice": "no" } } },
     { type: "runechant-skip", enabled: true },
     { type: "runechant-skip", enabled: false },
     { type: "seismic-surge-skip", enabled: true },
@@ -564,12 +577,21 @@ describe("client messages", () => {
     expect(decodeClientMessage({ type: "priority-mode", mode: "sometimes" })).toBeNull();
     expect(decodeClientMessage({ type: "standing-orders" })).toBeNull();
     expect(decodeClientMessage({ type: "standing-orders", orders: [] })).toBeNull();
-    expect(decodeClientMessage({ type: "standing-orders", orders: { a: { priorityWindow: "ask" } } })).toBeNull();
-    expect(decodeClientMessage({ type: "standing-orders", orders: { a: { optionalTrigger: "maybe" } } })).toBeNull();
-    expect(decodeClientMessage({ type: "standing-orders", orders: { a: { extra: 1 } } })).toBeNull();
+    // The pre-turn-trigger shape is accepted only as a stored legacy repair.
+    expect(decodeClientMessage({ type: "standing-orders", orders: { a: { priorityWindow: "pass" } } })).toBeNull();
+    expect(decodeClientMessage({ type: "standing-orders", orders: { a: { optionalTrigger: "yes" } } })).toBeNull();
+    expect(decodeClientMessage({ type: "standing-orders", orders: { a: { "trigger-choice": 1 } } })).toBeNull();
+    expect(decodeClientMessage({ type: "standing-orders", orders: { a: { "trigger-choice": "Yes" } } })).toBeNull();
+    expect(decodeClientMessage({ type: "standing-orders", orders: { a: { "trigger-choice": "y".repeat(65) } } }))
+      .toBeNull();
+    expect(decodeClientMessage({ type: "standing-orders", orders: { a: "yes" } })).toBeNull();
     expect(decodeClientMessage({
       type: "standing-orders",
-      orders: Object.fromEntries(Array.from({ length: 257 }, (_, i) => [`k${i}`, { priorityWindow: "pass" }])),
+      orders: { a: Object.fromEntries(Array.from({ length: 9 }, (_, i) => [`hook-${i}`, "yes"])) },
+    })).toBeNull();
+    expect(decodeClientMessage({
+      type: "standing-orders",
+      orders: Object.fromEntries(Array.from({ length: 257 }, (_, i) => [`k${i}`, { "trigger-choice": "yes" }])),
     })).toBeNull();
     expect(decodeClientMessage({ type: "runechant-skip" })).toBeNull();
     expect(decodeClientMessage({ type: "runechant-skip", enabled: "yes" })).toBeNull();
@@ -603,9 +625,12 @@ describe("GameView and server messages", () => {
   });
   it("accepts the public soul turn facts and rejects malformed values", () => {
     const current = gameView();
-    Object.assign(current.turnFacts.players[0]!, { chargesThisTurn: 2, yellowSoulThisTurn: true, soulBanishedThisChain: 1 });
+    Object.assign(current.turnFacts.players[0]!, {
+      chargesThisTurn: 2, yellowSoulThisTurn: true, soulBanishedThisChain: 1, weaponAttacksProhibited: true,
+    });
     expect(decodeGameView(current)).not.toBeNull();
-    for (const malformed of [{ chargesThisTurn: -1 }, { yellowSoulThisTurn: "yes" }, { soulBanishedThisChain: 1.5 }]) {
+    for (const malformed of [{ chargesThisTurn: -1 }, { yellowSoulThisTurn: "yes" }, { soulBanishedThisChain: 1.5 },
+      { weaponAttacksProhibited: 1 }]) {
       const view = gameView();
       Object.assign(view.turnFacts.players[0]!, malformed);
       expect(decodeGameView(view), JSON.stringify(malformed)).toBeNull();
@@ -825,6 +850,10 @@ describe("GameView and server messages", () => {
       ...gameView(),
       chain: [{ ...gameView().chain[0], attackModifiers: [{ sourceCardId: "WTR001", amount: "two" }] }],
     })).toBeNull();
+    expect(decodeGameView({
+      ...gameView(),
+      chain: [{ ...gameView().chain[0], defenseReactionsBlockedFromHand: false }],
+    })).toBeNull();
     expect(decodeGameView({ ...gameView(), extra: true })).toBeNull();
     const badCard = gameView();
     (badCard.players[0] as unknown as { hand: unknown[] }).hand = [{ ...card, poison: "SECRET" }];
@@ -1004,6 +1033,10 @@ describe("GameView and server messages", () => {
       [{ event: "damage-dealt", label: "Recover" }],
       [{ label: "Recover" }],
       "Recover",
+      [{ event: "end-of-turn", label: "Recover", choices: [{ hook: "trigger-choice", options: [] }] }],
+      [{ event: "end-of-turn", label: "Recover", choices: [{ hook: "Trigger Choice", options: [{ value: "yes", message: { id: "a" } }] }] }],
+      [{ event: "end-of-turn", label: "Recover", choices: [{ hook: "trigger-choice", options: [{ value: "yes" }] }] }],
+      [{ event: "end-of-turn", label: "Recover", choices: [{ hook: "trigger-choice", options: [{ value: "yes", message: { id: "a" }, extra: 1 }] }] }],
     ]) {
       const base = gameView();
       expect(decodeGameView({
@@ -1510,6 +1543,7 @@ describe("replays and HTTP responses", () => {
         friends: [{ username: "Bob", friendsSince: 1 }],
         friendRequests: [{ username: "Carol", direction: "outgoing", createdAt: 2 }],
         friendMessages: [{ id: "1", friendUsername: "Bob", senderUsername: "alice", text: "hello", sentAt: 3, readAt: null }],
+        leagues: [],
       },
     })).not.toBeNull();
     const replaySummary = {
@@ -1594,6 +1628,7 @@ describe("replays and HTTP responses", () => {
           friends: [],
           friendRequests: [],
           friendMessages: [],
+          leagues: [],
         },
       }],
       [decodeReplaysResponse, { ok: true, replays: [replaySummary] }],

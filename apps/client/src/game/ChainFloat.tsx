@@ -323,6 +323,8 @@ export function ChainFloat({
   onRect,
   staged = [],
   stagedDefense = 0,
+  stagedAttack,
+  stagedAttackModifiers,
   onUnstage,
   onUnstageAll,
   onCloseChain,
@@ -342,6 +344,10 @@ export function ChainFloat({
   staged?: CardView[];
   /** combined defense value of the staged cards */
   stagedDefense?: number;
+  /** current link's attack with the viewer-visible staged defenders */
+  stagedAttack?: number;
+  /** attack modifiers priced with the same staged defenders */
+  stagedAttackModifiers?: CombatValueModifierView[];
   onUnstage?: (instanceId: number) => void;
   /** clear every defender staged on the current link */
   onUnstageAll?: () => void;
@@ -407,6 +413,7 @@ export function ChainFloat({
     ? cardIsActivatable(chain.attackingCard) : false;
   // staged defenders only belong to the link currently being defended
   const showStaged = staging && !showingEmptyCurrent && chainIdx === chainLen - 1;
+  const showStagedAttack = showStaged && stagedAttack !== undefined;
   const hasBlockerCard = chain !== undefined && (
     chain.targetAlly !== undefined || chain.defendingCards.length > 0 || showStaged
     || chain.reactions.some((reaction) => reaction.owner !== chain.attackingCard.owner)
@@ -426,7 +433,7 @@ export function ChainFloat({
       </span>
       <span className="chain-mini-score">
         <img className="ico" src="/icons/attack.png" alt="attack" />
-        {chainCurrent.attackValue} vs
+        {staging ? (stagedAttack ?? chainCurrent.attackValue) : chainCurrent.attackValue} vs
         <img className="ico" src="/icons/defence.png" alt="defense" />
         {chainCurrent.defenseValue + stagedDefense}
         {(chainCurrent.damageToPrevent ?? 0) > 0 ? (
@@ -609,8 +616,8 @@ export function ChainFloat({
                   <div className="chain-vs">
                     <ChainStat
                       kind="attack"
-                      value={chain.attackValue}
-                      modifiers={chain.attackModifiers ?? []}
+                      value={showStagedAttack ? stagedAttack : chain.attackValue}
+                      modifiers={(showStagedAttack ? stagedAttackModifiers : chain.attackModifiers) ?? []}
                     />
                     {!chain.targetAllyName ? (
                       <>

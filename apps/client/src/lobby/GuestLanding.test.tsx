@@ -15,7 +15,7 @@ describe("guest search landing", () => {
       </TestI18nProvider>,
     );
 
-    expect(html).toContain("Play Flesh and Blood Online");
+    expect(html).toContain("Play Flesh and Blood TCG Online");
     expect(html).toContain("Free, open source, and built by the community.");
     expect(html).toContain("against other players or competitive, hero-specific bots with your Fabrary decks");
     expect(html).not.toContain('class="intro-logo"');
@@ -38,7 +38,8 @@ describe("guest search landing", () => {
     expect(html).toContain('loading="lazy"');
     expect(html).toContain('id="practice-bots"');
     expect(html).toContain("Challenge Competitive Bots");
-    expect(html.match(/<details/g)).toHaveLength(7);
+    expect(html.match(/<details/g)).toHaveLength(10);
+    expect(html).toContain("How do I play Flesh and Blood online?");
     expect(html).toContain("Is Fyendal free to play?");
     expect(html).not.toContain("How do I create an account?");
     expect(html).not.toContain("Does Fyendal offer matchmaking or ranked play?");
@@ -51,7 +52,7 @@ describe("guest search landing", () => {
     const html = renderToStaticMarkup(<SeoPrerenderedLanding intl={createTestIntl()} />);
 
     expect(html).toContain('<main id="main-content"');
-    expect(html).toContain("Play Flesh and Blood Online");
+    expect(html).toContain("Play Flesh and Blood TCG Online");
     expect(html).toContain("Terms of Service");
     expect(html).toContain("Privacy Policy");
   });
@@ -66,9 +67,9 @@ describe("guest search landing", () => {
       </TestI18nProvider>,
     );
 
-    expect(html).toContain("在线畅玩赤魂战纪 (Flesh &amp; Blood)");
+    expect(html).toContain("在线畅玩赤魂战纪 (Flesh and Blood TCG)");
     expect(html).toContain("<strong>2</strong> 人正在对局");
-    expect(html).toContain("关于在 Fyendal 上游玩");
+    expect(html).toContain("关于在线玩赤魂战纪");
     expect(html).toContain("我需要下载或安装什么吗？");
     expect(html).toContain("如何成为贡献者？");
   });

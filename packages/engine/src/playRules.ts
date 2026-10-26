@@ -158,14 +158,66 @@ export function playFromSourceCardId(
   if (modifier) return modifier.sourceCardId;
   if (actingSeat !== card.owner) return undefined;
   if (zone === "banish" && canRuneGate(state, card)) return card.cardId;
-  const owner = state.players[card.owner] as PlayerState;
-  for (const source of controlledPermanents(state, owner.seat, { faceDownEquipment: false })) {
+  if (canUseStaticPlayPermission(state, runtime, card, zone, actingSeat)) return card.cardId;
+  return friendlyPlayPermissionSource(state, runtime, card, zone, actingSeat)?.cardId;
+}
+
+/** The live permanent whose `allowsFriendlyCardPlayFrom` permission a play of
+ *  `card` from `zone` uses. Card grants, modifiers, Rune Gate and the card's
+ *  own static permission take precedence, so a limited source permission is
+ *  spent only when nothing else permits the play. */
+function friendlyPlayPermissionSource(
+  state: GameStateInternal,
+  runtime: EngineRuntime,
+  card: CardInstance,
+  zone: PlayableZone,
+  actingSeat: number,
+): CardInstance | undefined {
+  if (actingSeat !== card.owner) return undefined;
+  if (
+    card.playableFrom?.includes(zone) === true &&
+    (card.playableBySeat === undefined || card.playableBySeat === actingSeat)
+  ) return undefined;
+  if (modifierGrantingPlayFromZone(state, card, zone, actingSeat)) return undefined;
+  if (zone === "banish" && canRuneGate(state, card)) return undefined;
+  if (canUseStaticPlayPermission(state, runtime, card, zone, actingSeat)) return undefined;
+  for (const source of controlledPermanents(state, actingSeat, { faceDownEquipment: false })) {
     const hook = scriptOf(state, source.cardId, source)?.allowsFriendlyCardPlayFrom;
-    if (hook?.(runtime.makeCtx(state, owner.seat, source), card, zone) === true) return source.cardId;
+    if (hook?.(runtime.makeCtx(state, actingSeat, source), card, zone) === true) return source;
   }
-  return canUseStaticPlayPermission(state, runtime, card, zone, actingSeat)
-    ? card.cardId
-    : undefined;
+  return undefined;
+}
+
+/** Record which source permission a play uses while the card is still in its
+ *  origin zone; `spendFriendlyPlayPermission` notifies it once announced. */
+export function notePlayPermissionSource(
+  state: GameStateInternal,
+  runtime: EngineRuntime,
+  card: CardInstance,
+  origin: "hand" | "arsenal" | PlayableZone,
+  seat: number,
+): void {
+  delete card.scriptState?.enginePlayPermissionSourceId;
+  if (origin === "hand" || origin === "arsenal") return;
+  const source = friendlyPlayPermissionSource(state, runtime, card, origin, seat);
+  if (source) (card.scriptState ??= {}).enginePlayPermissionSourceId = source.instanceId;
+}
+
+/** Notify the source recorded by `notePlayPermissionSource` that the play
+ *  was announced, if it is still in the arena. */
+export function spendFriendlyPlayPermission(
+  state: GameStateInternal,
+  runtime: EngineRuntime,
+  seat: number,
+  card: CardInstance,
+): void {
+  const sourceId = card.scriptState?.enginePlayPermissionSourceId;
+  if (sourceId === undefined) return;
+  delete card.scriptState!.enginePlayPermissionSourceId;
+  const source = controlledPermanents(state, seat, { faceDownEquipment: false })
+    .find((candidate) => candidate.instanceId === sourceId);
+  if (!source) return;
+  scriptOf(state, source.cardId, source)?.onFriendlyPlayFromPermission?.(runtime.makeCtx(state, seat, source), card);
 }
 
 function nameContainsWords(name: string, phrase: string): boolean {
@@ -296,6 +348,14 @@ function modifierMatchesPlayedCard(
     !(data.keywords ?? []).some((keyword) => keyword.toLowerCase() === mod.appliesToKeyword!.toLowerCase())
   ) return false;
   const tags = cardTypesOf(state, card);
+  const attackAction = data.cardType === "action" && tags.includes("attack");
+  const appliesTo = mod.appliesTo ?? "any";
+  if (appliesTo === "attack-action" && !attackAction) return false;
+  if (appliesTo === "attack" && !attackAction && data.cardType !== "weapon") return false;
+  if (appliesTo === "weapon" && data.cardType !== "weapon") return false;
+  if (appliesTo === "sword" && (data.cardType !== "weapon" || !tags.includes("sword"))) return false;
+  if (mod.minBasePower !== undefined && (data.attack ?? 0) < mod.minBasePower) return false;
+  if (mod.maxBasePower !== undefined && (data.attack ?? 0) > mod.maxBasePower) return false;
   if (mod.appliesToClass && !tags.includes(mod.appliesToClass.toLowerCase())) return false;
   if (mod.appliesToSubtype) {
     const wanted = Array.isArray(mod.appliesToSubtype) ? mod.appliesToSubtype : [mod.appliesToSubtype];

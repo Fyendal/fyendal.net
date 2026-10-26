@@ -49,24 +49,16 @@ import {
   preloadCardImage,
   useCardImagePreload,
 } from "../game/cardImagePreload.js";
-import { PrepImageLoading } from "./PrepImageLoading.js";
+import {
+  DECK_IMAGE_TIMEOUT_MS,
+  deckPoolCardIds,
+  PrepDeckLoading,
+  PrepImageLoading,
+} from "./PrepImageLoading.js";
 
 const WEAPON_TOAST_MS = 3_500;
-/** Card art gates entry to the room, but a slow CDN must not eat the deadlines. */
-const DECK_IMAGE_TIMEOUT_MS = 12_000;
 /** A revealed opponent arena waits briefly so it appears with its art. */
 const OPPONENT_ARENA_IMAGE_TIMEOUT_MS = 4_000;
-
-function deckPoolCardIds(pool: DeckPool): string[] {
-  return [
-    pool.heroId,
-    ...pool.weaponIds,
-    ...pool.equipmentPool,
-    ...(pool.inventoryPool ?? []),
-    ...pool.deck,
-    ...(pool.sideboard ?? []),
-  ];
-}
 
 function revealedArenaCardIds(arena: RevealedArena): string[] {
   return [...arena.weaponIds, ...Object.values(arena.equipment)]
@@ -231,16 +223,7 @@ export function PrepRoom() {
     return () => window.clearTimeout(timer);
   }, [botNudgeKey]);
 
-  if (!prepDeck) {
-    return (
-      <div className="lobby-page">
-        <div className="panel waiting-panel">
-          <h2 className="panel-title">{intl.formatMessage({ id: "prep.loadingDeck" })}</h2>
-          <button onClick={leave}>{intl.formatMessage({ id: "common.cancel" })}</button>
-        </div>
-      </div>
-    );
-  }
+  if (!prepDeck) return <PrepDeckLoading onCancel={leave} />;
   // The match-accept dialog lives in this room, so never hide it behind loading.
   if (
     !deckImages.done
@@ -321,10 +304,12 @@ export function PrepRoom() {
       return;
     }
     const r = el.getBoundingClientRect();
+    // A ledger row previews beside its own ledger rather than over its rows.
+    const span = el.closest(".prep-deck-zone")?.getBoundingClientRect() ?? r;
     const gap = 12;
-    let x = r.right + gap;
+    let x = span.right + gap;
     if (x + CARD_PREVIEW_WIDTH > window.innerWidth - 8) {
-      x = r.left - CARD_PREVIEW_WIDTH - gap;
+      x = Math.max(8, span.left - CARD_PREVIEW_WIDTH - gap);
     }
     const y = Math.min(
       Math.max(r.top + r.height / 2 - CARD_PREVIEW_HEIGHT / 2, 8),
@@ -369,6 +354,10 @@ export function PrepRoom() {
     setSel({ ...selection, equipment });
   };
 
+  const restoreMain = () => {
+    if (locked) return;
+    setSel({ ...selection, main: defaultSelection(pool, selectionKey).main });
+  };
   const moveMainCopy = (id: string, delta: -1 | 1) => {
     if (locked) return;
     setErrors([]);
@@ -462,6 +451,8 @@ export function PrepRoom() {
       onToggleWeapon={toggleWeapon}
       onToggleEquipment={toggleEquipment}
       onMoveMainCopy={moveMainCopy}
+      onRestoreMain={restoreMain}
+      onInspectCard={setInspectedCardId}
     />
   );
   const arenaLockButton = (
@@ -560,7 +551,7 @@ export function PrepRoom() {
       )}
     >
       <span>{intl.formatMessage({ id: "prep.zone.main" })}</span>
-      <strong>{mainCount} / {mainCountRequirement}</strong>
+      <strong>{mainCount}<small> / {mainCountRequirement}</small></strong>
     </div>
   );
   const readyControls = ready ? (

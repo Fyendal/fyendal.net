@@ -361,6 +361,10 @@ describe("defense-reaction restrictions", () => {
     const react = giveCard(s, 1, "REACT");
     s = declareAttackFromHand(s, 0, "NOREACT");
     s = openReactionWindow(s, 1);
+    expect(projectStateFor(s, 1).chain.at(-1)).toMatchObject({
+      defenseReactionsBlockedFromHand: true,
+      defenseReactionsBlockedFromArsenal: true,
+    });
     expect(
       legalIntents(s, 1).some((i) => i.kind === "play-card" && i.instanceId === react),
     ).toBe(false);
@@ -377,6 +381,9 @@ describe("defense-reaction restrictions", () => {
     s = declareAttackFromHand(s, 0, "ATK4");
     s = openReactionWindow(s, 1);
     const legal = legalIntents(s, 1);
+    const link = projectStateFor(s, 1).chain.at(-1);
+    expect(link?.defenseReactionsBlockedFromArsenal).toBe(true);
+    expect(link?.defenseReactionsBlockedFromHand).toBeUndefined();
     // the hand copy is still playable; the arsenal copy is not
     expect(legal.some((i) => i.kind === "play-card" && i.instanceId === handReact)).toBe(true);
     expect(legal.some((i) => i.kind === "play-from-arsenal" && i.instanceId === arsenalReact.instanceId)).toBe(false);

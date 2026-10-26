@@ -56,6 +56,7 @@ function chooseDiscard(ctx: ScriptCtx, hook: string, seat: number): void {
       seat,
     );
 }
+const ABYSSAL_DEPTHS_HOOK = "abyssal-depths";
 function graveyardChest(extra: CardScript = {}): CardScript {
   return {
     ...extra,
@@ -463,29 +464,6 @@ export const outHighRarity: Record<string, CardScript> = {
       }
     },
   },
-  "riptide, lurker of the deep|0": {
-    triggers: [
-      {
-        event: "card-played",
-        label: "Put a card from hand face down into arsenal?",
-        condition: (_ctx, _card, event) => event?.from === "hand",
-        effect(ctx) {
-          arsenalFromHand(ctx, "riptide-arsenal");
-        },
-      },
-      {
-        event: "trap-triggered",
-        whose: "subject",
-        label: "Deal 1 damage",
-        effect(ctx) {
-          ctx.dealDamage(opponentSeat(ctx), 1);
-        },
-      },
-    ],
-    onChoose(ctx, hook, option) {
-      if (hook === "riptide-arsenal" && option !== "no") ctx.putIntoArsenal(Number(option), "hand", { faceUp: false });
-    },
-  },
   "barbed castaway|0": {
     activated: [
       {
@@ -552,15 +530,30 @@ export const outHighRarity: Record<string, CardScript> = {
       destroySelfCost: true,
       onActivate(ctx) {
         const arrows = ctx.player(ctx.seat).graveyard.filter((card) => has(ctx, card, "arrow"));
-        for (const card of arrows
-          .filter(
-            (card, index) =>
-              arrows.findIndex((other) => sharesName(ctx, other, card)) === index,
-          )
-          .slice(0, 3))
-          ctx.putOnDeckBottom(card.instanceId);
-        ctx.shuffleDeck();
+        if (!arrows.length) {
+          ctx.shuffleDeck();
+          return;
+        }
+        ctx.requestCardChoices(
+          ABYSSAL_DEPTHS_HOOK,
+          decisionPrompt(
+            "Choose up to 3 arrows with different names to shuffle into your deck",
+            "card.out.abyssal.arrow.choose",
+          ),
+          arrows.map((card) => card.instanceId),
+          0,
+          3,
+          undefined,
+          undefined,
+          undefined,
+          true,
+        );
       },
+    },
+    onChooseMany(ctx, hook, options) {
+      if (hook !== ABYSSAL_DEPTHS_HOOK) return;
+      for (const option of options) ctx.putOnDeckBottom(Number(option));
+      ctx.shuffleDeck();
     },
   },
   "quiver of rustling leaves|0": {
@@ -610,7 +603,7 @@ export const outHighRarity: Record<string, CardScript> = {
     },
   },
   "collapsing trap|3": {
-    canTriggerOnDefend: (ctx) => ctx.link?.goAgain === true,
+    canTriggerOnDefend: (ctx) => ctx.currentAttackHasGoAgain(),
     onDefend(ctx) {
       if (!ctx.link) return;
       const seat = ctx.link.attacker;

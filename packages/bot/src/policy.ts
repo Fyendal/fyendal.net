@@ -451,6 +451,11 @@ export function currentLink(input: BotPolicyInput) {
   return [...input.view.chain].reverse().find((link) => !link.resolved);
 }
 
+/** Granting go again to this link would take effect. */
+export function canGainGoAgain(link: { goAgain?: boolean; goAgainBlocked?: true }): boolean {
+  return link.goAgain !== true && link.goAgainBlocked !== true;
+}
+
 export function currentAttackIsOurs(input: BotPolicyInput): boolean {
   return currentLink(input)?.attackingCard.owner === input.seat;
 }
@@ -763,8 +768,8 @@ export function plannedDefenseReactionPlan(
   const blockedFromHand = intent.instanceIds.some((id) => handIds.has(id));
   const spent = new Set([...intent.instanceIds, ...(intent.pitchInstanceIds ?? [])]);
   const candidates = [
-    ...(link.dominate && blockedFromHand ? [] : me.hand),
-    ...me.arsenal,
+    ...((link.dominate && blockedFromHand) || link.defenseReactionsBlockedFromHand ? [] : me.hand),
+    ...(link.defenseReactionsBlockedFromArsenal ? [] : me.arsenal),
   ].filter((card) => !spent.has(card.instanceId) && input.cards[card.cardId]?.cardType === "defense-reaction");
 
   const options: PlannedPrevention[] = [{
@@ -938,6 +943,10 @@ function equipmentKeywords(card: CardView, input: BotPolicyInput): ReadonlySet<s
   return new Set((input.cards[card.cardId]?.keywords ?? []).map((keyword) => keyword.toLowerCase()));
 }
 
+function isSpringTunic(card: CardView, input: BotPolicyInput): boolean {
+  return input.cards[card.cardId]?.name.trim().toLowerCase() === "fyendal's spring tunic";
+}
+
 function isBladeBeckoner(card: CardView, input: BotPolicyInput): boolean {
   return input.cards[card.cardId]?.name.trim().toLowerCase().startsWith("blade beckoner ") === true;
 }
@@ -981,6 +990,27 @@ export function defenderDefense(card: CardView, input: BotPolicyInput): number {
     return Math.max(0, (data?.defense ?? card.defense ?? 0) - (card.defCounters ?? 0) + 1);
   }
   return Math.max(0, card.defense ?? data?.defense ?? 0);
+}
+
+/** Phantasm (8.3.13): a non-Illusionist attack action defender with 6 or more
+ * power destroys the attack. Returns that defender's defense, the only block
+ * the destruction needs, or undefined when no chosen defender qualifies. */
+function phantasmDefenderDefense(
+  input: BotPolicyInput,
+  link: NonNullable<ReturnType<typeof currentLink>>,
+  chosen: readonly CardView[],
+): number | undefined {
+  const attack = input.cards[link.attackingCard.cardId];
+  if (!attack?.keywords?.some((keyword) => keyword.toLowerCase() === "phantasm")) return undefined;
+  const qualifying = chosen.filter((card) => {
+    const data = input.cards[card.cardId];
+    return data?.cardType === "action" && (data.subtypes ?? []).includes("attack") &&
+      !(data.classes ?? []).includes("illusionist") &&
+      (card.attack ?? data.attack ?? 0) >= 6;
+  });
+  return qualifying.length > 0
+    ? Math.max(...qualifying.map((card) => defenderDefense(card, input)))
+    : undefined;
 }
 
 function isMidgameDurableArmor(card: CardView, input: BotPolicyInput): boolean {
@@ -1473,8 +1503,15 @@ export function scoreDefenseIntentWithTrace(
   // planned around them, but they have not resolved yet. Count only prevention
   // supplied by the current defender choice; otherwise merely holding a
   // reaction can dominate an established efficient block before it is played.
-  const prevented = Math.min(incomingAfterPlannedPrevention, defense);
-  const overblock = Math.max(0, defense - incomingAfterPlannedPrevention);
+  // A Phantasm-destroyed attack deals nothing, so every other defender is overblock.
+  const phantasmDefense = phantasmDefenderDefense(input, link, chosen);
+  const destroysAttack = phantasmDefense !== undefined;
+  const prevented = destroysAttack
+    ? incomingAfterPlannedPrevention
+    : Math.min(incomingAfterPlannedPrevention, defense);
+  const overblock = destroysAttack
+    ? defense - phantasmDefense
+    : Math.max(0, defense - incomingAfterPlannedPrevention);
   const attackText = input.cards[link.attackingCard.cardId]?.text ?? "";
   const attacker = input.view.players[1 - input.seat]!;
   const onHit = evaluateOnHit({
@@ -1488,7 +1525,7 @@ export function scoreDefenseIntentWithTrace(
   // Marks, pumps and tempo are not worth wearing armor; disruption and card
   // advantage are.
   const meaningfulOnHit = onHit.value >= SIGNIFICANT_ON_HIT_VALUE;
-  const stopsHit = incoming > 0 && defense + plannedPrevention.amount >= incoming;
+  const stopsHit = incoming > 0 && (destroysAttack || defense + plannedPrevention.amount >= incoming);
   // A landed hand loss is priced through the response projection below, so
   // stopping the hit no longer earns its flat generic-card estimate.
   const modelledHandLoss = onHit.handLossSelector ? onHit.handLossValue : 0;
@@ -1507,7 +1544,9 @@ export function scoreDefenseIntentWithTrace(
       : [],
   );
   const plannedSpentIds = new Set([...spentIds, ...plannedPrevention.consumedIds]);
-  const survives = Math.max(0, threatenedCombat - defense - plannedPrevention.amount) < survivableLife;
+  const survives = destroysAttack
+    ? survivableLife > 0
+    : Math.max(0, threatenedCombat - defense - plannedPrevention.amount) < survivableLife;
   const candidate: DefenseCandidateContext = {
     input,
     intent,
@@ -1550,6 +1589,7 @@ export function scoreDefenseIntentWithTrace(
     // treating the sunk equipment selection as a new strategic choice.
     if (stagedIds.has(card.instanceId)) return false;
     if (lethal) return false;
+    if (openingDefense && isSpringTunic(card, input)) return true;
     // Early armor is justified by an on-hit or Wager only when the complete
     // defense actually stops that hit and therefore answers the effect.
     if (stopsHit && (meaningfulOnHit || link.wagered === true)) return false;
@@ -1652,7 +1692,7 @@ export function scoreDefenseIntentWithTrace(
     (total, id) => total + (own.get(id) ? model.cardOpportunity(own.get(id)!, input) : 0),
     0,
   );
-  const unprevented = Math.max(0, incoming - defense - plannedPrevention.amount);
+  const unprevented = destroysAttack ? 0 : Math.max(0, incoming - defense - plannedPrevention.amount);
   const lifeAfterDamage = me.life - unprevented;
   const thresholdRisk = lifeThresholdRisk(lifeAfterDamage, model.lifeThresholds);
   const continueProbability = 1 - stopProbability;
@@ -1709,7 +1749,7 @@ export function scoreDefenseIntentWithTrace(
 
   if (lethal) {
     const handDefenseNeeded = Math.max(0, threatenedCombat - plannedPrevention.amount - survivableLife + 1);
-    const survives = survivableLife > 0 && defense >= handDefenseNeeded;
+    const survives = survivableLife > 0 && (destroysAttack || defense >= handDefenseNeeded);
     // Equipment wear is priced by equipmentCost; opportunity is for hand cards.
     const preservationCost = chosen
       .filter((card) => !equipmentIds.has(card.instanceId))
@@ -1783,7 +1823,13 @@ function scoreIntent(
   switch (intent.kind) {
     case "defend": score = scorers.defend(intent, input, own); break;
     case "choose": score = scorers.choose(intent, input); break;
-    case "choose-many": score = 0; break;
+    // A subset scores as the sum of its cards' single-pick scores.
+    case "choose-many":
+      score = intent.optionIds.reduce(
+        (sum, optionId) => sum + scorers.choose({ kind: "choose", optionId }, input),
+        0,
+      );
+      break;
     case "order-triggers": score = 0; break;
     case "skip-runechant":
     case "skip-seismic-surge": score = 0; break;

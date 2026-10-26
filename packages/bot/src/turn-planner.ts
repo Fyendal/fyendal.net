@@ -211,7 +211,7 @@ export function horizonDamage(
  * response weighting `responseWeightedDamage` applies to damage dealt this
  * turn, against the opponent's hand at the root (they refill before the bot's
  * next turn) and their life after this line. */
-function futureOffenseRate(
+export function futureOffenseRate(
   input: BotPolicyInput,
   root: TurnPlannerRoot,
   attackThreat: number,
@@ -499,12 +499,26 @@ function opponentRolloutIntent(state: GameState): GameIntent | undefined {
   return legal.find((intent) => intent.kind === "skip-runechant" || intent.kind === "skip-seismic-surge");
 }
 
+/** A card left the deck for hand through a simulated draw rather than as the
+ * option this intent chose: a search picks a known card, a draw does not. */
+function drewPrivately(before: GameState, after: GameState, intent: GameIntent, root: TurnPlannerRoot): boolean {
+  const held = new Set(before.players[root.seat].hand.map((card) => card.instanceId));
+  return after.players[root.seat].hand.some((card) =>
+    root.deckIds.has(card.instanceId) && !held.has(card.instanceId) &&
+    !(intent.kind === "choose" && intent.optionId === String(card.instanceId))
+  );
+}
+
 function advanceForced<Evaluation extends TurnEvaluation>(
   state: GameState,
   context: SearchContext<Evaluation>,
+  entry: { before: GameState; intent: GameIntent },
 ): AdvancedState {
   let current = state;
   const { root, config } = context;
+  if (drewPrivately(entry.before, state, entry.intent, root)) {
+    return { kind: "terminal", state, complete: false };
+  }
   for (let step = 0; step < (config.maxForcedSteps ?? DEFAULT_MAX_FORCED_STEPS); step++) {
     if (current.phase === "game-over" || current.turn !== root.turn) {
       return { kind: "terminal", state: current, complete: true };
@@ -533,11 +547,10 @@ function advanceForced<Evaluation extends TurnEvaluation>(
     if (!emptyDamageStepPass) context.transitions++;
     const applied = applySimulationIntent(current, actor, intent);
     if (!applied.ok) return { kind: "terminal", state: current, complete: false };
+    const before = current;
     current = applied.state;
-    if (current.players[root.seat].hand.some((card) => root.deckIds.has(card.instanceId))) {
-      // Stop before a simulated private draw can influence another action.
-      return { kind: "terminal", state: current, complete: false };
-    }
+    // Stop before a simulated private draw can influence another action.
+    if (drewPrivately(before, current, intent, root)) return { kind: "terminal", state: current, complete: false };
   }
   return { kind: "terminal", state: current, complete: false };
 }
@@ -584,8 +597,10 @@ function evaluateEnd<Evaluation extends TurnEvaluation>(
   context: SearchContext<Evaluation>,
   complete: boolean,
 ): Evaluation {
+  // A line cut short mid-turn (a tutor or draw, a budget) still holds its hand.
+  if (!complete) return evaluateHorizon(state, context);
   const input = observation(state, context.root, context.publicGameId);
-  return context.config.evaluateEnd(state, input, context.root, complete);
+  return context.config.evaluateEnd(state, input, context.root, true);
 }
 
 function evaluateHorizon<Evaluation extends TurnEvaluation>(
@@ -630,8 +645,11 @@ function plannerCandidates<Evaluation extends TurnEvaluation>(
   );
   // Continuations are explored in legal order unless the policy asks for its
   // ranking there too, which lets a small budget follow its preferred lines.
+  // A first-root budget slice belongs to the best-ranked root, even under the cap.
+  const firstRootSlice = context.config.firstRootNodeBudget !== undefined ||
+    context.config.firstRootTransitionBudget !== undefined;
   const ranked = depth === 0
-    ? selectedBeforeRootLimit.length > rootLimit
+    ? selectedBeforeRootLimit.length > rootLimit || (firstRootSlice && selectedBeforeRootLimit.length > 1)
     : context.config.rankContinuations === true && selectedBeforeRootLimit.length > 1;
   const ordered = ranked
     ? selectedBeforeRootLimit
@@ -697,7 +715,7 @@ function search<Evaluation extends TurnEvaluation>(
     const applied = applySimulationIntent(state, context.root.seat, intent);
     if (!applied.ok) continue;
     const intentScore = context.config.scoreIntent?.(intent, observed) ?? 0;
-    const advanced = advanceForced(applied.state, context);
+    const advanced = advanceForced(applied.state, context, { before: state, intent });
     const result = advanced.kind === "decision"
       ? (() => {
           const continuation = search(advanced.state, context, depth + 1);
@@ -802,7 +820,7 @@ export function planTurn<Evaluation extends TurnEvaluation>(
     const applied = applySimulationIntent(simulation, input.seat, intent);
     if (!applied.ok) continue;
     const intentScore = config.scoreIntent?.(intent, input) ?? 0;
-    const advanced = advanceForced(applied.state, context);
+    const advanced = advanceForced(applied.state, context, { before: simulation, intent });
     const result = advanced.kind === "decision"
       ? (() => {
           const continuation = search(advanced.state, context, 1);

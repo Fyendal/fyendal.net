@@ -40,19 +40,15 @@
 }
 .prep-columns {
   display: grid;
-  grid-template-columns: clamp(280px, 28vw, 345px) minmax(0, 1fr);
-  gap: 21px;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 16px;
   max-width: var(--prep-content-width);
   width: 100%;
   margin: 21px auto 0;
   padding: 0 var(--prep-content-gutter);
   align-items: start;
 }
-.prep-opponent {
-  position: sticky;
-  top: 18px;
-  text-align: center;
-}
+.prep-opponent { text-align: center; }
 .prep-selection-column { min-width: 0; display: grid; gap: 16px; }
 .prep-arena-stage .prep-cardrow { flex-wrap: wrap; }
 /* While you pick turn order the grid recedes, hover previews included, so
@@ -223,74 +219,288 @@
   box-shadow: 0 3px 8px #000b;
 }
 .prep-card-choice.selected .prep-card-check { display: grid; }
-.prep-deck-zone {
-  border-top: 1px solid #45331f88;
-  padding-top: 16px;
+.prep-pool-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px 16px;
+  margin-bottom: 16px;
 }
-.prep-deck-zone + .prep-deck-zone { margin-top: 25px; }
+.prep-pool-heading .panel-title { margin: 0; border-bottom: 0; padding-bottom: 0; }
+/* Sideboarding ledger: the main deck's head pins while its rows scroll, and
+   Inventory is a sticky tray that scrolls inside its own frame beside them. */
+.prep-ledgers {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) clamp(340px, 36%, 460px);
+  gap: 0 28px;
+  align-items: start;
+}
+.prep-deck-zone { min-width: 0; }
+.prep-zone-head {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  padding-top: 10px;
+  background: #1a1109;
+}
 .prep-inventory-zone {
-  border: 1px solid #45331f88;
-  border-radius: 3px;
-  background: #120c0677;
-  padding: 16px;
+  position: sticky;
+  top: 10px;
+  display: flex;
+  flex-direction: column;
+  /* Leaves the fixed bottom-right action box uncovered. */
+  max-height: calc(100dvh - 170px);
+  border: 1px solid #3b2a16;
+  border-radius: 6px;
+  background: linear-gradient(180deg, #110a04, #150d06);
+  box-shadow: inset 0 1px 0 #000a, inset 0 0 0 1px #ffd47908;
+}
+.prep-inventory-zone .prep-zone-head {
+  position: static;
+  padding: 12px 14px 0;
+  background: transparent;
+}
+.prep-inventory-zone .prep-ledger {
+  flex: 1 1 auto;
+  min-height: 0;
+  padding: 4px 10px 10px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.prep-inventory-zone .prep-empty-zone { margin: 12px 0 0; padding: 0 14px 14px; }
+/* Inventory rows carry only the count and one step, so their columns are tighter. */
+.prep-inventory-zone .prep-row,
+.prep-inventory-zone .prep-ledger-head {
+  grid-template-columns: 40px minmax(0, 1fr) 30px 30px 36px 64px;
+  column-gap: 4px;
 }
 .prep-zone-heading {
   display: flex;
+  flex-wrap: wrap;
   align-items: baseline;
   justify-content: space-between;
-  gap: 14px;
-  margin-bottom: 14px;
+  gap: 6px 14px;
 }
 .prep-zone-heading h4 {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 10px;
   margin: 0;
   color: var(--text-primary);
-  font: 600 16px/1.3 var(--font-lobby-ui);
+  font: 500 19px/1.25 var(--font-heading);
 }
-.prep-zone-heading span { color: #8a7f6d; font-size: 13px; }
-.prep-card-grid {
+.prep-zone-count {
+  color: var(--text-muted);
+  font: 500 13px/1 var(--font-lobby-ui);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.prep-zone-count strong { color: var(--gold); font-size: 18px; font-weight: 600; }
+.prep-zone-count strong.invalid { color: #e0684a; }
+.prep-restore {
+  min-height: 26px;
+  padding: 0 8px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  clip-path: none;
+  color: var(--text-muted);
+  font: 500 13px var(--font-lobby-ui);
+  letter-spacing: normal;
+  text-transform: none;
+}
+.prep-restore:hover { border: 0; background: #231709; color: var(--text-primary); }
+.prep-pitch-bar {
+  display: flex;
+  gap: 2px;
+  height: 6px;
+  margin-top: 10px;
+  border-radius: 3px;
+  overflow: hidden;
+}
+.prep-pitch-bar span { flex: 0 1 0; }
+.prep-pitch-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  margin-top: 6px;
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+.prep-pitch-legend > span { display: inline-flex; align-items: center; gap: 5px; }
+.prep-pitch {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+}
+/* The three pitch colors the sort toggle already previews. */
+.prep-pitch-0 { background: var(--text-muted); }
+.prep-pitch-1 { background: #e5534b; }
+.prep-pitch-2 { background: #e3b341; }
+.prep-pitch-3 { background: #539bf5; }
+.prep-ledger,
+.prep-ledger-rows { list-style: none; margin: 0; padding: 0; }
+.prep-ledger-head,
+.prep-row {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  align-items: flex-start;
-  gap: 21px 14px;
-  min-height: 42px;
+  grid-template-columns: 40px minmax(0, 1fr) 36px 36px 42px 92px;
+  align-items: center;
+  column-gap: 6px;
+  padding: 0 4px;
 }
-.prep-stack-button {
-  position: relative;
-  width: 100%;
-  min-width: 0;
+.prep-ledger-head {
+  margin-top: 14px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid #2f2315;
+  color: var(--text-muted);
+  font-size: 11px;
+  white-space: nowrap;
+}
+.prep-ledger-head > span { text-align: center; }
+.prep-ledger-head > span:nth-child(2) { text-align: left; }
+.prep-ledger-head > span:last-child { text-align: right; }
+.prep-group-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 28px;
+  margin-top: 6px;
+  padding: 0 4px;
+  color: var(--text-muted);
+  font-size: 12px;
+}
+.prep-group-title::after { content: ""; flex: 1; height: 1px; background: #2f2315; }
+.prep-row {
+  min-height: 36px;
+  border-radius: 4px;
+  transition: background-color 80ms ease-out;
+}
+.prep-row:hover { background: #231709; }
+.prep-row.fixed :is(.prep-row-art, .prep-row-title) { opacity: .55; }
+/* A rectangular thumbnail cropped to the card's art window. */
+.prep-row-art {
+  width: 40px;
+  height: 24px;
+  min-height: 0;
   padding: 0;
   border: 0;
-  border-radius: 8px;
-  background: transparent;
-  box-shadow: 0 8px 20px #0008;
+  border-radius: 3px;
+  background: var(--surface-control);
   clip-path: none;
-  transition: transform 0.08s ease-out, filter 0.08s ease-out;
-  content-visibility: auto;
+  overflow: hidden;
+  /* The artwork's own z-index must not escape under the pinned zone head. */
+  isolation: isolate;
 }
-.prep-stack-button:not([aria-disabled="true"]):hover,
-.prep-stack-button:not([aria-disabled="true"]):focus-visible {
-  z-index: 2;
-  transform: translateY(-4px);
-  filter: brightness(1.08);
-}
-.prep-stack-button:focus-visible { outline: 2px solid var(--gold); outline-offset: 4px; }
-.prep-stack-button[aria-disabled="true"] { opacity: 1; cursor: default; }
-.prep-stack-button:hover { background: transparent; border-color: transparent; }
-.prep-stack-card {
+.prep-row-art:hover { background: var(--surface-control); border: 0; }
+.prep-row-art:focus-visible { outline-offset: 2px; }
+.prep-row-tile { position: relative; display: block; width: 100%; height: 100%; }
+/* Show roughly the printed art window (8–92% across, 13–50% down): width
+   119% of the tile puts both side frames outside it, and the top offset
+   skips the name bar. */
+.prep-row-tile .card-artwork-image {
   position: absolute;
-  left: 0;
-  display: block;
-  width: 100%;
-  aspect-ratio: 300 / 413;
-  object-fit: cover;
-  border: 1px solid #211608;
-  border-radius: 8px;
-  background: #211608;
-  box-shadow: 0 3px 8px #000b;
-  pointer-events: none;
+  top: -36%;
+  left: -9.5%;
+  width: 119%;
+  height: auto;
+  max-width: none;
 }
-.prep-stack-card .card-artwork-placeholder { border-radius: inherit; }
-.prep-empty-zone { margin: 0; align-self: center; }
+.prep-row-tile .card-artwork-placeholder { padding: 0; }
+.prep-row-tile :is(.c-name, .c-text, .c-cost, .c-stats) { display: none; }
+.prep-row-name {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  min-width: 0;
+  overflow: hidden;
+}
+.prep-row-name .prep-pitch { flex: none; width: 8px; height: 8px; transform: translateY(-1px); }
+.prep-row-title {
+  flex: none;
+  overflow: hidden;
+  color: var(--text-primary);
+  font: 500 15px/1.2 var(--font-card-name);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+/* The type label gives way before the name does. */
+.prep-row-type {
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  color: var(--text-muted);
+  font-size: 11px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.prep-row-stat {
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+.prep-row-stat.empty { color: #5f5241; }
+.prep-row-controls {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+}
+.prep-copies {
+  display: inline-grid;
+  place-items: center;
+  min-width: 30px;
+  height: 24px;
+  padding: 0 4px;
+  border-radius: 4px;
+  background: var(--surface-well);
+  color: var(--text-primary);
+  font: 600 14px var(--font-lobby-ui);
+  font-variant-numeric: tabular-nums;
+}
+.prep-row.changed .prep-copies { color: var(--gold); box-shadow: inset 0 0 0 1px #ffd47966; }
+.prep-step {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  min-height: 0;
+  padding: 0;
+  border: 1px solid var(--border-subtle);
+  border-radius: 4px;
+  background: transparent;
+  clip-path: none;
+  color: var(--text-secondary);
+  font-size: 15px;
+}
+.prep-step:hover:not(:disabled) { border-color: var(--border-strong); background: #2b1e10; color: var(--gold); }
+.prep-step:disabled { opacity: .3; }
+.prep-row-fixed {
+  display: inline-grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  color: var(--text-muted);
+  font-size: 15px;
+}
+.prep-empty-zone { margin: 14px 0 0; font-size: 13px; }
+@media (max-width: 960px) {
+  .prep-ledgers { grid-template-columns: minmax(0, 1fr); gap: 24px; }
+  .prep-inventory-zone { position: static; max-height: none; }
+  .prep-inventory-zone .prep-ledger { overflow: visible; }
+}
+@media (max-width: 900px) {
+  .prep-row,
+  .prep-ledger-head { grid-template-columns: 40px minmax(0, 1fr) 92px; }
+  .prep-inventory-zone .prep-row,
+  .prep-inventory-zone .prep-ledger-head { grid-template-columns: 40px minmax(0, 1fr) 64px; }
+  .prep-row-stat,
+  .prep-col-stat { display: none; }
+}
 /* Phone action bar: docked flush to the bottom edge as one row — opponent
    hero, turn order and deck count, then the single action. */
 .prep-ready-float {
@@ -322,7 +532,7 @@
 }
 .prep-bar-copy .prep-sheet-turn,
 .prep-bar-copy .prep-sheet-prompt,
-.prep-bar-copy .prep-decision-status { font-size: 16px; text-align: left; }
+.prep-bar-copy .prep-decision-status { font-size: 16px; }
 .prep-bar-copy .prep-sheet-state { font-size: 14px; }
 .prep-bar-count { color: var(--text-secondary); font-size: 14px; }
 .prep-bar-count.valid { color: var(--success); }
@@ -369,6 +579,13 @@
   font-weight: 500;
   letter-spacing: 1px;
   white-space: nowrap;
+}
+/* The requirement carries a localized word, so only the count is display-sized. */
+.prep-main-count small {
+  font-family: var(--font-lobby-ui);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0;
 }
 .prep-main-count.valid strong { color: #8fd48f; }
 .prep-main-count.invalid strong { color: #e0684a; }
@@ -427,7 +644,7 @@
 
 @media (max-width: 1035px) and (orientation: portrait) {
   .prep-columns { grid-template-columns: 1fr; }
-  .prep-opponent { position: static; order: 1; }
+  .prep-opponent { order: 1; }
   .prep-selection-column { order: 2; }
 }
 
@@ -445,8 +662,13 @@
     min-width: 0;
     padding-inline: 12px;
   }
-  .prep-zone-heading { align-items: flex-start; flex-direction: column; gap: 4px; }
-  .prep-card-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .prep-zone-head { position: static; padding-top: 0; }
+  .prep-row { min-height: 44px; }
+  .prep-row,
+  .prep-ledger-head { grid-template-columns: 40px minmax(0, 1fr) 128px; }
+  .prep-inventory-zone .prep-row,
+  .prep-inventory-zone .prep-ledger-head { grid-template-columns: 40px minmax(0, 1fr) 80px; }
+  .prep-step { width: 40px; height: 40px; }
   .prep-arena-stage .prep-cardrow { overflow: visible; }
   .prep-matchup-plan .listbox { flex-basis: 100%; }
   .prep-group,
@@ -517,56 +739,49 @@
   }
 }
 
-/* Desktop match sheet: heroes face off across the VS spine, each arena sits
-   under its own hero, and the step that advances preparation always sits in
-   the footer. */
+/* Desktop match sheet: a band where both arenas face off across the VS mark
+   and the step that advances preparation sits at the end. */
 .panel.prep-sheet {
   display: flex;
-  flex-direction: column;
-  max-height: calc(100dvh - 36px);
   padding: 0;
   overflow: hidden;
   text-align: left;
 }
+/* Both mats share the body's rows, so a status line under one player never
+   pushes that player's cards out of line with the other's. */
 .prep-sheet-body {
   flex: 1 1 auto;
-  min-height: 0;
-  overflow-y: auto;
-  padding: 16px 12px;
-  scrollbar-width: thin;
+  display: grid;
+  grid-template-columns: auto auto auto;
+  grid-template-rows: auto auto;
+  justify-content: center;
+  align-content: center;
+  gap: 8px 18px;
+  min-width: 0;
+  padding: 14px 16px;
+  container-type: inline-size;
+  /* Fourteen zones (heroes count 1.23) plus gaps and the VS column fill the band. */
+  --mat-zone: clamp(44px, (100cqi - 130px) / 14.5, 84px);
 }
 .prep-mat {
   --owner: #76b995;
   display: grid;
-  /* Proportional so the hero stays larger than its equipment as the column
-     narrows on smaller laptops. */
-  grid-template-columns:
-    repeat(2, minmax(0, 5fr)) minmax(0, 0.4fr)
-    minmax(0, 5fr) minmax(0, 6fr) minmax(0, 5fr);
-  align-items: center;
-  grid-template-rows: repeat(3, auto);
-  gap: 5px;
+  grid-row: 1 / span 2;
+  grid-template-rows: subgrid;
+  min-width: 0;
 }
 /* Ownership dots use the board's friendly/opponent colours. */
 .prep-mat.theirs { --owner: #d9796f; }
-/* Zone placement follows the game board: head, chest and legs down the left
-   with arms beside chest; weapons flank the hero. The opponent's half is
-   flipped vertically so both heads face the centre line. */
-.prep-mat .at-head { grid-area: 1 / 1; }
-.prep-mat .at-chest { grid-area: 2 / 1; }
-.prep-mat .at-arms { grid-area: 2 / 2; }
-.prep-mat .at-legs { grid-area: 3 / 1; }
-.prep-mat .at-weapon-left { grid-area: 2 / 4; }
-.prep-mat .at-hero { grid-area: 2 / 5; }
-.prep-mat .at-weapon-right { grid-area: 2 / 6; }
-.prep-mat-player { grid-area: 3 / 2 / 4 / -1; align-self: end; padding-left: 6px; }
-.prep-mat.theirs .at-head { grid-area: 3 / 1; }
-.prep-mat.theirs .at-legs { grid-area: 1 / 1; }
-.prep-mat.theirs .prep-mat-player { grid-area: 1 / 2 / 2 / -1; align-self: start; }
+/* Hero, then weapons and equipment; the opponent's row runs right to left so
+   both heroes face the VS mark. */
+.prep-mat-cards { display: flex; align-items: center; gap: 5px; }
+.prep-mat.theirs { justify-items: end; text-align: right; }
+.prep-mat.theirs .prep-mat-cards { flex-direction: row-reverse; }
+.prep-mat-player { align-self: end; min-width: 0; }
 
 .prep-mat-zone {
   display: block;
-  width: 100%;
+  width: var(--mat-zone);
   aspect-ratio: 300 / 413;
   border: 1px solid var(--border-subtle);
   border-radius: 4px;
@@ -582,7 +797,7 @@
 .prep-mat-zone .c-text,
 .prep-mat-zone .c-cost,
 .prep-mat-zone .c-stats { display: none; }
-.prep-mat-hero { border-color: var(--border-strong); }
+.prep-mat-hero { width: calc(var(--mat-zone) * 1.23); border-color: var(--border-strong); }
 .prep-mat-empty {
   display: grid;
   place-items: center;
@@ -622,19 +837,21 @@
 .prep-sheet-state.disconnected { color: var(--danger); }
 .prep-sheet-state.disconnected::before { border-style: dashed; }
 .prep-mat-divider {
+  grid-row: 1 / span 2;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 12px;
-  margin: 10px 0;
+  align-self: stretch;
+  gap: 8px;
 }
 .prep-mat-divider::before,
 .prep-mat-divider::after {
   content: "";
   flex: 1;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, var(--border-strong));
+  width: 1px;
+  background: linear-gradient(180deg, transparent, var(--border-strong));
 }
-.prep-mat-divider::after { background: linear-gradient(90deg, var(--border-strong), transparent); }
+.prep-mat-divider::after { background: linear-gradient(180deg, var(--border-strong), transparent); }
 /* Small caps in the card-title face, matching the hero names it separates. */
 .prep-vs {
   color: var(--bronze);
@@ -646,27 +863,50 @@
   text-shadow: 0 1px 2px #000;
   text-transform: lowercase;
 }
-.prep-die { margin: 16px 0 0; color: var(--text-secondary); font-size: 13px; text-align: center; }
+.prep-die { margin: 0; color: var(--text-secondary); font-size: 13px; }
 
+/* The advancing step floats bottom-right so the match sheet keeps its width. */
 .prep-sheet-action {
-  flex: none;
+  position: fixed;
+  right: max(20px, env(safe-area-inset-right));
+  bottom: max(20px, env(safe-area-inset-bottom));
+  z-index: 30;
   display: flex;
-  flex-direction: column;
-  gap: 10px;
-  padding: 14px 16px 16px;
-  border-top: 1px solid var(--border-strong);
-  background: linear-gradient(180deg, #2a1b0d, #1a1108);
-  box-shadow: 0 -8px 18px #0006;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 16px;
+  width: max-content;
+  min-width: 260px;
+  max-width: min(400px, calc(100vw - 40px));
+  padding: 12px 14px 12px 16px;
+  border: 1px solid var(--border-strong);
+  border-radius: 6px;
+  background: linear-gradient(180deg, #2a1b0df7, #170f07fa);
+  box-shadow: inset 0 1px 0 #ffd4792e, 0 14px 34px #000d, 0 2px 6px #0009;
 }
 .prep-sheet-action:empty { display: none; }
-.prep-sheet-turn { margin: 0; color: var(--text-secondary); font-size: 13px; }
-.prep-sheet-turn strong { color: var(--gold); font-weight: 600; }
+.prep-sheet-action > * { flex: 1 1 100%; }
+.prep-sheet-action > .prep-sheet-turn { flex: 1 1 auto; }
+.prep-sheet-action > .prep-sheet-lock { flex: 0 1 auto; }
+.prep-sheet-turn {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 14px;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+.prep-sheet-turn strong {
+  color: var(--gold);
+  font-family: var(--font-fantasy-title);
+  font-size: 19px;
+  font-weight: 700;
+  text-transform: lowercase;
+}
 .prep-sheet-prompt {
   margin: 0;
   color: var(--text-primary);
   font-size: 14px;
   line-height: 1.4;
-  text-align: center;
 }
 /* The turn-order pair sits side by side while both labels fit on one line;
    otherwise each takes a full row rather than breaking a label. */
@@ -675,8 +915,8 @@
   flex-wrap: wrap;
   gap: 8px;
 }
-.prep-pick button { flex: 1 0 auto; min-height: 44px; white-space: nowrap; }
-.prep-sheet-lock button { width: 100%; min-height: 44px; white-space: normal; }
+.prep-pick button { flex: 1 0 auto; min-height: 40px; white-space: nowrap; }
+.prep-sheet-lock button { min-height: 40px; padding-inline: 16px; white-space: nowrap; }
 /* Both turn-order answers share the primary's quieter mixed-case face, which
    also keeps longer translations compact. */
 .prep-pick button,
@@ -688,29 +928,10 @@
   letter-spacing: 0.1px;
   line-height: 1.2;
 }
-.prep-sheet .prep-decision-status { text-align: center; }
-.prep-sheet-ready { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-/* Longer translations of the count wrap beside the button, never under it. */
+.prep-sheet-ready { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
 .prep-sheet-ready .prep-main-count { flex: 1 1 auto; }
-.prep-sheet-ready .prep-main-count strong { white-space: normal; }
 .prep-sheet-ready .prep-ready-controls { flex: none; }
-
-/* Stacked tablet layout: the sheet scrolls away above the deck, so its action
-   floats where the deck footer used to be. */
-@media (max-width: 1035px) and (orientation: portrait) {
-  .prep-page { padding-bottom: 132px; }
-  .panel.prep-sheet { max-height: none; overflow: visible; }
-  .prep-sheet-action {
-    position: fixed;
-    right: max(18px, env(safe-area-inset-right));
-    bottom: max(18px, env(safe-area-inset-bottom));
-    z-index: 30;
-    width: min(470px, calc(100vw - 36px));
-    border: 1px solid #8b6c37;
-    border-radius: 5px;
-    box-shadow: 0 10px 30px #000d;
-  }
-}
+.prep-page:has(.prep-sheet-action) { padding-bottom: 120px; }
 
 /* Short-lived explanation when a pick is refused, e.g. a second weapon beside
    a two-hander. Sits under the top bar so it never covers the action footer. */

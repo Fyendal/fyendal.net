@@ -449,30 +449,27 @@ export const uprHighRarity: Record<string, CardScript> = {
         label: "Channel Ice",
         effect(ctx) {
           ctx.addCounter(ctx.self.instanceId, "flow", 1);
-          ctx.setState("channelRemaining", ctx.getCounter("flow"));
+          const count = ctx.getCounter("flow");
           const ice = ctx.player(ctx.seat).pitch.filter((card) => has(ctx, card, "ice"));
-          if (ice.length < ctx.getState("channelRemaining")) ctx.destroySelf();
+          if (ice.length < count) ctx.destroySelf();
           else
-            ctx.requestCardChoice(
+            ctx.requestCardChoices(
               "bleak-channel",
-              decisionPrompt("Put an Ice card on the bottom of your deck", "card.upr.ice.bottom"),
+              decisionPrompt(
+                count === 1 ? "Put an Ice card on the bottom of your deck" : `Put ${count} Ice cards on the bottom of your deck`,
+                "card.upr.ice.bottom.count",
+                { values: { count } },
+              ),
               ice.map((card) => card.instanceId),
+              count,
+              count,
             );
         },
       },
     ],
-    onChoose(ctx, hook, option) {
-      if (hook !== "bleak-channel" || !ctx.putOnDeckBottom(Number(option))) return;
-      ctx.setState("channelRemaining", ctx.getState("channelRemaining") - 1);
-      if (ctx.getState("channelRemaining") <= 0) return;
-      const ice = ctx.player(ctx.seat).pitch.filter((card) => has(ctx, card, "ice"));
-      if (ice.length < ctx.getState("channelRemaining")) ctx.destroySelf();
-      else
-        ctx.requestCardChoice(
-          "bleak-channel",
-          decisionPrompt("Put another Ice card on the bottom of your deck", "card.upr.ice.bottom.next"),
-          ice.map((card) => card.instanceId),
-        );
+    onChooseMany(ctx, hook, options) {
+      if (hook !== "bleak-channel") return;
+      for (const option of options) ctx.putOnDeckBottom(Number(option));
     },
   },
   "hypothermia|3": {

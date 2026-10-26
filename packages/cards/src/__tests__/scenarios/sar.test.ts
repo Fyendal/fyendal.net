@@ -584,6 +584,22 @@ describe("SAR — traps", () => {
       .expectInZone(0, "frailty|0", "board");
   });
 
+  it("Frailty Trap sees go again its own defense grants", () => {
+    // Unwavering Resolve gains go again once Frailty Trap is its third defender.
+    const s = scenario({
+      seats: [
+        { hero: "rhinar", hand: ["unwavering resolve|1"], resources: 3 },
+        { hero: "dorinthea", hand: ["raging onslaught|1", "raging onslaught|2", "frailty trap|1"] },
+      ],
+    });
+    s.play("unwavering resolve|1", { pitch: [] })
+      .blockWith("raging onslaught|1", "raging onslaught|2")
+      .passPriority()
+      .react("frailty trap|1")
+      .settle()
+      .expectInZone(0, "frailty|0", "board");
+  });
+
   it("Lair of the Spider marks a go-again attacker", () => {
     const s = scenario({
       seats: [

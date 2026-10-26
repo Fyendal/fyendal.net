@@ -176,6 +176,18 @@ export interface TurnTriggerView {
   labelMessage?: GameMessage;
   /** The trigger asks its controller whether to use it. */
   optional?: boolean;
+  /** Repeating choices standing orders may answer. */
+  choices?: TurnTriggerChoiceView[];
+}
+
+export interface TurnTriggerChoiceView {
+  hook: string;
+  options: TurnTriggerChoiceOption[];
+}
+
+export interface TurnTriggerChoiceOption {
+  value: string;
+  message: GameMessage;
 }
 
 export interface CardView {
@@ -299,6 +311,12 @@ export interface ChainLinkView {
   /** Effective keywords of the attack: printed or granted by modifiers.
    *  Snapshotted at resolution (chain-link modifiers expire with the link) */
   goAgain?: boolean;
+  /** The unresolved attack can't gain go again, e.g. after Blizzard. */
+  goAgainBlocked?: true;
+  /** Defense reactions can't be played from hand to this unresolved link. */
+  defenseReactionsBlockedFromHand?: true;
+  /** Defense reactions can't be played from arsenal to this unresolved link. */
+  defenseReactionsBlockedFromArsenal?: true;
   /** This attack has wagered on its current chain link. */
   wagered?: boolean;
   /** Public reward description for each wager completed on this chain link. */
@@ -517,6 +535,8 @@ export interface PendingDecision {
    * one atomic intent. Both bounds are present together. */
   minimumSelections?: number;
   maximumSelections?: number;
+  /** Bounded selections may not include two cards that share a name. */
+  distinctCardNames?: boolean;
   /** Option selected by the board's Space shortcut. Card scripts set this
    * explicitly when one choice is the expected/common path. */
   defaultOption?: string;
@@ -560,6 +580,12 @@ export interface PendingDecision {
   /** Combined defense of the staged cards — projected as 0 to anyone but the
    *  defender so face-down hand cards leak nothing before the commit */
   stagedDefense?: number;
+  /** Attack value of the current link with the staged defenders this viewer
+   *  can identify declared beside it; face-down hand or arsenal defenders are
+   *  excluded for everyone but the defender */
+  stagedAttack?: number;
+  /** Attack modifiers of the current link priced with the same staged set */
+  stagedAttackModifiers?: CombatValueModifierView[];
   /** Defend decisions, projected only to the defender: the defense each legal
    *  defender adds to the staged set (for a staged card, the defense unstaging
    *  it removes). Unlike `CardView.defense`, it includes delayed "next time
@@ -575,7 +601,7 @@ export interface PendingDecision {
     sourceInstanceId?: number;
   };
   /** Arena source of an optional trigger choice (yes/no), projected only to
-   * the deciding player so clients can attach standing orders to that card. */
+   * the deciding player so clients can attach the choice to that card. */
   sourceInstanceId?: number;
   /** Publicly announced card or arena ability whose play/activation is paused
    * on a declaration, resource payment, or additional-cost choice before its
@@ -625,6 +651,9 @@ export interface PlayerTurnFactsView {
   /** Public: cards banished from this player's soul during the open combat
    * chain. Omitted when zero. */
   soulBanishedThisChain?: number;
+  /** Public: a turn-scoped effect (Kabuto) prohibits this player's weapon
+   * attacks. Omitted when false. */
+  weaponAttacksProhibited?: boolean;
   playedSubtypes: string[];
   /** Public permanent instance ids whose once-per-turn triggered effects have
    * already been consumed this turn. */
@@ -1060,11 +1089,8 @@ export interface FriendGameInvite {
 /** How a seat wants empty priority/reaction windows handled. */
 export type PriorityWindowMode = "auto-pass" | "always-pause";
 
-/** A card's decided standing answers; "ask" is absence. */
-export interface SeatStandingOrder {
-  priorityWindow?: "pass";
-  optionalTrigger?: "yes" | "no";
-}
+/** `chooseHook` → option value; "ask" is absence. */
+export type SeatStandingOrder = Record<string, string>;
 
 export type SeatStandingOrders = Record<string, SeatStandingOrder>;
 
@@ -1082,6 +1108,8 @@ export type ClientMessage =
   | { type: "chat-read"; username: string; throughId: string }
   | { type: "create-friend-room"; username: string; format: Format; deckId: string; cardPoolMode?: CardPoolMode }
   | { type: "friend-game-invite-dismiss"; inviteId: string }
+  /** Takes your seat in a league match's room, creating the room on first entry. */
+  | { type: "enter-league-room"; matchId: string; deckId: string }
   /** deckId of a saved deck or format precon */
   | { type: "create-room"; format: Format; deckId: string; private?: boolean; cardPoolMode?: CardPoolMode }
   /** Create a dedicated constructed room with the selected AI opponent. */
@@ -1150,6 +1178,8 @@ export type ServerMessage =
   | { type: "chat-message"; message: ChatMessage }
   | { type: "friend-game-invite"; invite: FriendGameInvite }
   | { type: "friend-game-invite-dismissed"; inviteId: string }
+  /** Something in one of the account's leagues changed; reload them. */
+  | { type: "league-updated" }
   | { type: "room-created"; code: string; seat: number; token: string; version: number }
   | { type: "joined"; code: string; seat: number | null; token: string; spectator?: boolean; resumed?: true; version: number }
   | { type: "room-info"; room: RoomInvite }

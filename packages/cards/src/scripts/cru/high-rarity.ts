@@ -67,20 +67,6 @@ function ownedCards(ctx: ScriptCtx): readonly DeepReadonly<CardInstance>[] {
   ].filter((card) => card.owner === ctx.seat);
 }
 
-function requestItemDestruction(ctx: ScriptCtx): void {
-  const remaining = ctx.getState("smashRemaining");
-  const items = ctx.player(opponentSeat(ctx)).board.filter((card) => hasType(ctx, card, "item"));
-  if (remaining > 0 && items.length > 0) {
-    ctx.requestCardChoice(
-      "smash-item",
-      decisionPrompt("Argh... Smash!: destroy an item?", "card.cru.smash.item.destroy", {
-        optionMessages: commonOptionMessages("done"),
-      }),
-      ["done", ...items.map((card) => card.instanceId)],
-    );
-  }
-}
-
 function orderOnTop(ctx: ScriptCtx, ids: number[]): void {
   if (ids.length === 0) return;
   if (ids.length === 1) {
@@ -486,17 +472,23 @@ export const cruHighRarity: Record<string, CardScript> = {
       ctx.requestDieRoll("argh-smash", 6);
     },
     onDieRollResolved(ctx, hook, roll) {
-      if (hook === "argh-smash") {
-        ctx.setState("smashRemaining", Math.floor(roll / 2));
-        requestItemDestruction(ctx);
-      }
+      if (hook !== "argh-smash") return;
+      const count = Math.floor(roll / 2);
+      const items = ctx.player(opponentSeat(ctx)).board.filter((card) => hasType(ctx, card, "item"));
+      if (count > 0 && items.length > 0)
+        ctx.requestCardChoices(
+          "smash-item",
+          decisionPrompt(`Argh... Smash!: choose up to ${count} item(s) to destroy`, "card.cru.smash.items.destroy", {
+            values: { count },
+          }),
+          items.map((card) => card.instanceId),
+          0,
+          count,
+        );
     },
-    onChoose(ctx, hook, option) {
-      if (hook !== "smash-item" || option === "done") return;
-      if (ctx.destroyPermanent(Number(option))) {
-        ctx.setState("smashRemaining", ctx.getState("smashRemaining") - 1);
-        requestItemDestruction(ctx);
-      }
+    onChooseMany(ctx, hook, options) {
+      if (hook !== "smash-item") return;
+      for (const option of options) ctx.destroyPermanent(Number(option));
     },
   },
   "crater fist|0": {

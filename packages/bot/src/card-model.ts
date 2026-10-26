@@ -286,8 +286,9 @@ export function buildHandSolver(context: ModelContext): HandSolver {
       if (card.playableFromSourceCardId !== undefined && !card.faceDown) add(card, "banish");
     }
   }
+  const weaponsProhibited = !nextTurn && input.view.turnFacts?.players[input.seat]?.weaponAttacksProhibited === true;
   for (const weapon of me.weapons) {
-    if (nextTurn || !weapon.usedAbilityIndexes?.includes(0)) add(weapon, "weapon");
+    if (nextTurn || (!weaponsProhibited && !weapon.usedAbilityIndexes?.includes(0))) add(weapon, "weapon");
   }
   for (const equipment of Object.values(me.equipment)) if (equipment) add(equipment, "equipment");
   sources.push(...(rules.abilities?.(context, nextTurn) ?? []));

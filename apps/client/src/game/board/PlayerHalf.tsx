@@ -149,7 +149,6 @@ export function PlayerHalf({
   onSendEmote: (message: EmoteMessage) => void;
   onOpenOverlay: (overlay: BoardOverlay) => void;
   onOpenEffects: (target: EffectLedgerTarget) => void;
-  /** Repeating-question badges for arena cards, keyed by functional identity. */
   standingOrders?: StandingOrderBoard;
 }) {
   const intl = useIntl();
@@ -190,10 +189,8 @@ export function PlayerHalf({
     && !mobileFloatViewport && !mobileLandscapeViewport && !compactBoard;
   const deckTopPlayable =
     presentedDeckTop !== undefined && interaction.legal.playableZones.get(presentedDeckTop.instanceId) === "deck";
-  const arenaBoard = boardCardsOutsideEquipmentZones(
-    player.board.filter((card) => !optimisticallyHiddenIds.has(card.instanceId)),
-    player.equipment,
-  );
+  // Arena costs stay until the server removes them so their exit animates in place.
+  const arenaBoard = boardCardsOutsideEquipmentZones(player.board, player.equipment);
   const arrangedBoard = arrangeBoundBoardCards(arenaBoard);
 
   const activate = (instanceId: number) => () => interaction.onActivate(instanceId);
@@ -376,6 +373,17 @@ export function PlayerHalf({
           data-stack-depth={cards.length > 1 ? Math.min(cards.length, 3) : undefined}
           data-motion-zone-anchor={motionLocationKey(location)}
         >
+          {/* Shows the previous top while an arriving card is masked for its flight. */}
+          {cards.length > 1 ? (
+            <div className="zone-card-pile-under" aria-hidden="true">
+              <InactiveZoneCard
+                card={cards[cards.length - 2]!}
+                squareArt={squareBoard}
+                showOverlays={false}
+                motionKey={motionPresentationKey(location, cards[cards.length - 2]!.instanceId)}
+              />
+            </div>
+          ) : null}
           <InactiveZoneCard
             card={cards[cards.length - 1]!}
             squareArt={squareBoard}

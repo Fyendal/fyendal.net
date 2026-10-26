@@ -16,6 +16,8 @@ import {
 import {
   activeModifiers,
   attackGrantedType,
+  conditionalModifierGrantsGoAgain,
+  conditionalScriptGrantsGoAgain,
   modifierApplies,
   modifierAppliesToDefense,
 } from "./combatModifiers.js";
@@ -143,6 +145,19 @@ export function attackHasDominate(
   ) return true;
   return activeModifiers(state, link, ["chain-link", "until-end-of-turn"])
     .some((modifier) => modifier.dominate);
+}
+
+/** Go again from any source, including live conditions that only pay out at
+ * the Resolution Step. */
+export function attackHasGoAgain(
+  state: GameStateInternal,
+  runtime: EngineRuntime,
+  link: ChainLinkState,
+): boolean {
+  return link.goAgain || (!link.resolved && (
+    conditionalModifierGrantsGoAgain(state, link, computeAttack(state, runtime, link)) ||
+    conditionalScriptGrantsGoAgain(state, runtime, link)
+  ));
 }
 
 /** Overpower (CR 8.3.22): at most one action card may defend the attack. */

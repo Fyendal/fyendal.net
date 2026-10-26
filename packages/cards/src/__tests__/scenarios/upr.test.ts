@@ -118,10 +118,14 @@ describe("UPR — registration and heroes", () => {
         { hero: "dorinthea" },
       ],
     });
-    const opposingHeroId = s.state.players[1]!.hero.instanceId;
-    s.activate("azvolai|0").chooseCard("DVR001");
-    expect(s.state.pendingDecision?.options).not.toContain(String(opposingHeroId));
-    s.chooseOption("done").blockWith().settle();
+    const opposingHeroId = String(s.state.players[1]!.hero.instanceId);
+    s.activate("azvolai|0");
+    const pd = s.state.pendingDecision!;
+    expect(pd.chooseHook).toBe("azvolai");
+    expect([pd.minimumSelections, pd.maximumSelections]).toEqual([0, 2]);
+    expect(pd.options).toContain(opposingHeroId);
+    expect(() => s.doRaw({ kind: "choose-many", optionIds: [opposingHeroId, opposingHeroId] })).toThrow(/duplicate/);
+    s.chooseMany([opposingHeroId]).settle().blockWith().settle();
     s.expectLife(1, 17);
   });
 
@@ -506,7 +510,7 @@ describe("UPR — rules regression coverage", () => {
     s.play(invocationKey).chooseCard("ash|0");
     const dragon = s.state.players[0]!.board.find((card) => card.cardId === printingId(dragonKey))!;
     s.activate(dragonKey);
-    if (name === "azvolai") s.chooseOption("done");
+    if (name === "azvolai") s.chooseMany([]).settle();
     s.blockWith(RED).settle();
 
     expect(s.state.log.some((entry) => entry.publicText === `${cardData[dragon.cardId]!.name} is destroyed (Phantasm)`)).toBe(true);
@@ -607,9 +611,10 @@ describe("UPR — rules regression coverage", () => {
         { hero: "dorinthea", hand: ["singe|3", BLUE] },
       ],
     });
-    s.play("singe|3", { pitch: [BLUE] }).chooseOption("opponent").chooseCard("nekria|0").endTurn();
-    const nekria = s.state.players[0]!.board.find((card) => card.cardId === printingId("nekria|0"))!;
-    expect(nekria.life).toBe(6);
+    s.play("singe|3", { pitch: [BLUE] }).chooseOption("opponent");
+    const nekriaId = s.state.players[0]!.board.find((card) => card.cardId === printingId("nekria|0"))!.instanceId;
+    s.chooseMany([String(nekriaId)]).endTurn();
+    expect(s.state.players[0]!.board.find((card) => card.instanceId === nekriaId)!.life).toBe(6);
     s.expectInZone(0, "ash|0", "board");
   });
 
@@ -662,8 +667,10 @@ describe("UPR — rules regression coverage", () => {
         { hero: "dorinthea", hand: ["singe|3", BLUE] },
       ],
     });
-    s.play("singe|3", { pitch: [BLUE] }).chooseOption("opponent").chooseCard("yendurai|0");
-    const yendurai = s.state.players[0]!.board.find((card) => card.cardId === printingId("yendurai|0"))!;
+    s.play("singe|3", { pitch: [BLUE] }).chooseOption("opponent");
+    const yenduraiId = s.state.players[0]!.board.find((card) => card.cardId === printingId("yendurai|0"))!.instanceId;
+    s.chooseMany([String(yenduraiId)]).settle();
+    const yendurai = s.state.players[0]!.board.find((card) => card.instanceId === yenduraiId)!;
     expect(yendurai.life).toBe(3);
     expect(yendurai.counters?.endurance).toBeUndefined();
   });
@@ -688,5 +695,79 @@ describe("UPR — look-at floats", () => {
     // private: the opponent sees neither the options nor any looked cards
     expect(projectStateFor(s.state, 1).pendingDecision?.optionCards).toBeUndefined();
     s.chooseCard("wrecker romp|1").expectInZone(0, "wrecker romp|1", "banish");
+  });
+});
+
+describe("UPR — bounded multi-card choices", () => {
+  const ids = (s: ReturnType<typeof scenario>, seat: number, zone: "hand" | "board", keys: string[]) => {
+    const used = new Set<number>();
+    return keys.map((key) => {
+      const card = s.state.players[seat]![zone].find(
+        (candidate) => candidate.cardId === printingId(key) && !used.has(candidate.instanceId),
+      )!;
+      used.add(card.instanceId);
+      return String(card.instanceId);
+    });
+  };
+
+  it("Sift bottoms the chosen hand cards at once and draws that many", () => {
+    const s = scenario({
+      seats: [
+        { hero: "rhinar", hand: ["sift|1", BLUE, RED, "raging onslaught|1"], deck: ["head jab|1", "head jab|1", "head jab|1"] },
+        { hero: "dorinthea" },
+      ],
+    });
+    s.play("sift|1");
+    const pd = s.state.pendingDecision!;
+    expect(pd.chooseHook).toBe("sift");
+    expect([pd.minimumSelections, pd.maximumSelections]).toEqual([0, 3]);
+    s.chooseMany(ids(s, 0, "hand", [BLUE, RED])).settle();
+    s.expectHandSize(0, 3)
+      .expectInZone(0, "raging onslaught|1", "hand")
+      .expectInZone(0, BLUE, "deck")
+      .expectInZone(0, RED, "deck")
+      .expectDeckBottom(0, RED)
+      .expectZoneSize(0, "deck", 3);
+  });
+
+  it("Singe deals arcane damage to the target hero and the chosen allies they control", () => {
+    const s = scenario({
+      seats: [
+        { hero: "rhinar", hand: ["singe|2"], resources: 1 },
+        { hero: "dorinthea", board: ["aether ashwing|0", "aether ashwing|0", "barnacle|2"] },
+      ],
+    });
+    s.play("singe|2").chooseOption("opponent");
+    const pd = s.state.pendingDecision!;
+    expect(pd.chooseHook).toBe("singe-allies");
+    expect([pd.minimumSelections, pd.maximumSelections]).toEqual([0, 2]);
+    expect(pd.options).toHaveLength(3);
+    s.chooseMany(ids(s, 1, "board", ["aether ashwing|0", "barnacle|2"])).settle();
+    s.expectLife(1, 19);
+    expect(s.state.players[1]!.board.filter((card) => card.cardId === printingId("aether ashwing|0"))).toHaveLength(1);
+    expect(s.state.players[1]!.board.find((card) => card.cardId === printingId("barnacle|2"))?.life).toBe(2);
+  });
+
+  it("Channel the Bleak Expanse bottoms exactly one Ice card per flow counter", () => {
+    const s = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          board: ["channel the bleak expanse|3"],
+          pitch: ["winter's grasp|1", "winter's grasp|3"],
+          deck: [BLUE, BLUE, BLUE, BLUE, BLUE, BLUE],
+        },
+        { hero: "dorinthea" },
+      ],
+    });
+    const [first, chosen] = s.state.players[0]!.pitch.map((card) => String(card.instanceId));
+    s.passActionPhase().settle();
+    const pd = s.state.pendingDecision!;
+    expect(pd.chooseHook).toBe("bleak-channel");
+    expect([pd.minimumSelections, pd.maximumSelections]).toEqual([1, 1]);
+    expect(pd.options).toEqual([first, chosen]);
+    s.chooseMany([chosen!]);
+    expect(s.state.players[0]!.deck.slice(-2).map((card) => String(card.instanceId))).toEqual([chosen, first]);
+    s.expectInZone(0, "channel the bleak expanse|3", "board");
   });
 });

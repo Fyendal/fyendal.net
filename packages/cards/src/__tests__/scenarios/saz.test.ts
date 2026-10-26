@@ -131,6 +131,32 @@ describe("SAZ — loading the arsenal", () => {
     }));
   });
 
+  it("Death Dealer activates for go again without an arrow to load", () => {
+    const s = scenario({
+      seats: [
+        azaleaSeat({ hand: [RED], arsenal: [BLUE], deck: [RONIN_FREE] }),
+        { hero: "rhinar", hand: [] },
+      ],
+    });
+    s.activate(DEATH_DEALER, { pitch: [RED] })
+      .expectInZone(0, BLUE, "arsenal")
+      .expectInZone(0, RONIN_FREE, "deck") // no draw
+      .expectAP(0, 1); // go again
+  });
+
+  it("Bull's Eye Bracers activates with no arrow in hand", () => {
+    const s = scenario({
+      seats: [
+        azaleaSeat({ equipment: { ...NO_EQUIPMENT, arms: "bull's eye bracers|0" }, hand: [RED] }),
+        { hero: "rhinar", hand: [] },
+      ],
+    });
+    s.activate("bull's eye bracers|0")
+      .expectNoEquipment(0, "arms")
+      .expectInZone(0, RED, "hand")
+      .expectAP(0, 1); // go again
+  });
+
   it("Death Dealer loads the arrow before drawing, and its trigger sees the new deck top", () => {
     const s = scenario({
       seats: [

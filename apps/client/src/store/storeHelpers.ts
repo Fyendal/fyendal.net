@@ -2,6 +2,7 @@ import type { CardPoolMode, Format } from "@fyendal/shared";
 import type { StoreState } from "./types.js";
 import type { LobbySettings } from "../storage.js";
 import { initialHistoryState } from "./historyActions.js";
+import { initialLeagueState } from "./leagueActions.js";
 import { emptyQueueCounts } from "../matchmaking/pairableSearchers.js";
 
 export function initialStoreProjection(
@@ -40,6 +41,7 @@ export function initialStoreProjection(
     savedReplays: [],
     replaysLoading: false,
     ...initialHistoryState(),
+    ...initialLeagueState(),
     error: null,
     opponentConnected: true,
     latestEmote: null,
@@ -54,6 +56,7 @@ export function initialStoreProjection(
     backgroundMatchmaking: { state: "inactive" as const },
     declinedBackgroundHero: null,
     pendingBotStart: false,
+    roomStartPending: false,
     botMatchTransition: null,
     matchAcceptanceRole: null,
     decks: [],
@@ -120,6 +123,7 @@ export function clearedRoomProjection(): Pick<
   | "backgroundMatchmaking"
   | "declinedBackgroundHero"
   | "pendingBotStart"
+  | "roomStartPending"
   | "botMatchTransition"
   | "matchAcceptanceRole"
   | "prep"
@@ -161,6 +165,7 @@ export function clearedRoomProjection(): Pick<
     backgroundMatchmaking: { state: "inactive" },
     declinedBackgroundHero: null,
     pendingBotStart: false,
+    roomStartPending: false,
     botMatchTransition: null,
     matchAcceptanceRole: null,
     prep: null,

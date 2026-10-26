@@ -466,6 +466,22 @@ function continueTokenCreation(
     };
     return [];
   }
+  if (chosen.next !== undefined && chosen.next < normalizedCount) {
+    const source = findCardAnywhere(state, chosen.ref.instanceId);
+    if (source) {
+      logPublic(state, gameLogMessage(
+        `${nameOf(state, source.card.cardId)} reduces ${nameOf(state, player.heroCardId)}'s ${nameOf(state, cardId)} creation from ${normalizedCount} to ${chosen.next}`,
+        "engine.log.token.creation.reduced",
+        {
+          source: logCardValue(source.card.cardId),
+          player: logPlayerValue(player.seat),
+          card: logCardValue(cardId),
+          from: normalizedCount,
+          to: chosen.next,
+        },
+      ));
+    }
+  }
   return continueTokenCreation(
     state, runtime,
     player,

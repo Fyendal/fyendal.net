@@ -6,7 +6,7 @@ import { chooseBoltynIntent } from "./boltyn-policy.js";
 import { chooseHalaIntent } from "./hala-policy.js";
 import { decklistsFromState } from "./deck-knowledge.js";
 import { boltynPresentationFor, halaPresentationFor } from "./sideboard.js";
-import type { BotPolicyInput } from "./policy.js";
+import { plannedDefenseReactionPlan, type BotPolicyInput } from "./policy.js";
 
 const BOLTYN_POOL = precon("bot-boltyn-raydn")!.pool;
 
@@ -27,6 +27,17 @@ function game(seed = 4040, startPlayer: 0 | 1 = 0, opponent: Decklist = decklist
     decklists: [boltynDeck(opponent.heroId), opponent], cards: cardData, scripts, seed, startPlayer,
   });
   state.turn = 3;
+  return state;
+}
+
+/** The Fang-matchup list after Kabuto is destroyed and Solforge Gauntlet enters the soul. */
+function fangGame(): GameState {
+  const state = createGame({
+    decklists: [boltynDeck("HNT098"), decklists.dorinthea], cards: cardData, scripts, seed: 4040, startPlayer: 0,
+  });
+  state.turn = 3;
+  delete state.players[0]!.equipment.head;
+  delete state.players[0]!.equipment.arms;
   return state;
 }
 
@@ -158,6 +169,61 @@ function underAttack(state: GameState, attackId: string): GameState {
   throw new Error("attack did not reach defense");
 }
 
+function currentLinkPower(state: GameState): number | undefined {
+  return projectStateFor(state, 0).chain.at(-1)?.attackValue;
+}
+
+/** Fang, wearing Grains of Bloodspill, swings Obsidian Fire Veins in turn;
+ * returns Boltyn's defend decision on the given swing. */
+function veinSwing(state: GameState, swing: 0 | 1): GameState {
+  state.activePlayer = 1;
+  state.priorityPlayer = 1;
+  state.players[0]!.actionPoints = 0;
+  const fang = state.players[1]!;
+  fang.hero = { ...fang.hero, cardId: "HNT098" };
+  fang.actionPoints = 2;
+  fang.hand = cards(state, ["OMN245"], 1);
+  fang.resources = 5;
+  fang.weapons = cards(state, ["FNG002", "FNG002"], 1);
+  fang.equipment.chest = cards(state, ["FAB182"], 1)[0];
+  let current = state;
+  let blocked = false;
+  for (const vein of fang.weapons) {
+    const activation = legalIntents(current, 1).find((intent) =>
+      intent.kind === "activate-ability" && intent.sourceInstanceId === vein.instanceId
+    );
+    if (!activation) throw new Error("Fang cannot swing the Vein");
+    let result = applyIntent(current, 1, activation);
+    if (!result.ok) throw new Error(result.error);
+    for (let step = 0; step < 30; step++) {
+      const decision = result.state.pendingDecision;
+      if (decision?.player === 0 && decision.kind === "defend") {
+        if (vein === fang.weapons[swing]) {
+          if (swing === 1) expect(currentLinkPower(result.state)).toBe(3);
+          return result.state;
+        }
+        result = applyIntent(result.state, 0, { kind: "defend", instanceIds: [] });
+        blocked = true;
+      } else if (result.state.chain.length === 0 && result.state.stack.length === 0 && !decision) {
+        break;
+      } else {
+        const actor = (decision?.player ?? result.state.priorityPlayer) as 0 | 1;
+        const legal = legalIntents(result.state, actor);
+        // As in the report, Draco Fire follows the first block and pumps the second Vein.
+        const dracoFire = actor === 1 && blocked
+          ? legal.find((intent) => intent.kind === "play-card" && intent.instanceId === fang.hand[0]?.instanceId)
+          : undefined;
+        const pass = dracoFire ?? legal.find((intent) => intent.kind === "pass") ??
+          legal.find((intent) => intent.kind === "choose" && ["no", "decline", "pass"].includes(intent.optionId))!;
+        result = applyIntent(result.state, actor, pass);
+      }
+      if (!result.ok) throw new Error(result.error);
+    }
+    current = result.state;
+  }
+  throw new Error("the Vein swing did not reach defense");
+}
+
 const HERO = "Ser Boltyn, Breaker of Dawn";
 const RAYDN = "Raydn, Duskbane";
 /** Wounding Blow: a plain four-power attack. */
@@ -218,6 +284,200 @@ describe("Boltyn policy", () => {
     expect(before - after.players[1]!.life).toBeGreaterThanOrEqual(11);
   });
 
+  it("charges before Lumina Ascension so Raydn swings twice with Spirit of Eirina in arsenal", () => {
+    const state = fangGame();
+    hand(state, ["ASB026", "IAR254", "MON033"]);
+    state.players[0]!.arsenal = cards(state, ["DYN066"]);
+    soul(state, 1);
+    const before = state.players[1]!.life;
+    const { state: after, intents } = play(settled(state), turnOver);
+    expect(intents.indexOf("Lumina Ascension")).toBeGreaterThan(intents.indexOf("Bravery of the Blade"));
+    expect(intents.filter((name) => name === RAYDN)).toHaveLength(2);
+    expect(before - after.players[1]!.life).toBeGreaterThanOrEqual(11);
+  });
+
+  it("keeps Kabuto of Imperial Authority once Fang has no weapon swing left", () => {
+    const state = settled(createGame({
+      decklists: [boltynDeck("HNT098"), decklists.dorinthea], cards: cardData, scripts, seed: 4040, startPlayer: 0,
+    }));
+    hand(state, ["DYN066", "DYN066"]);
+    const defending = veinSwing(state, 1);
+    const kabuto = defending.players[0]!.equipment.head!;
+    expect(cardData[kabuto.cardId]!.name).toBe("Kabuto of Imperial Authority");
+    const intent = chooseBoltynIntent(input(defending));
+    // Both Veins are spent, so Kabuto's weapon lock would deny nothing.
+    expect(intent.kind === "defend" || intent.kind === "stage-defenders" ? intent.instanceIds : [])
+      .not.toContain(kabuto.instanceId);
+  });
+
+  it("charges before Lumina Ascension instead of pumping an uncharged Raydn first", () => {
+    const base = createGame({
+      decklists: [boltynDeck("HNT098"), decklists.dorinthea], cards: cardData, scripts, seed: 4040, startPlayer: 0,
+    });
+    base.turn = 3;
+    delete base.players[0]!.equipment.head;
+    const state = settled(base);
+    // As reported, Lumina led into a 1-power Raydn swing and Bolt of Courage charged too late.
+    hand(state, ["ASB026", "ASB008", "ASB014", "MON033"]);
+    state.players[0]!.soul = cards(state, ["ASB021", "MON033"]);
+    const { intents } = play(state, turnOver);
+    const lumina = intents.indexOf("Lumina Ascension");
+    if (lumina >= 0) expect(lumina).toBeGreaterThan(intents.indexOf("Bolt of Courage"));
+    expect(intents.indexOf("Bolt of Courage")).toBeLessThan(intents.indexOf(RAYDN));
+  });
+
+  it("plays every Lumina Ascension before Raydn's first swing", () => {
+    const state = game();
+    hand(state, ["ASB007", "ASB026", "ASB026", "ASB021"]);
+    soul(state, 1);
+    const { intents } = play(settled(state), turnOver);
+    const firstSwing = intents.indexOf(RAYDN);
+    expect(intents.slice(0, firstSwing).filter((name) => name === "Lumina Ascension")).toHaveLength(2);
+    expect(intents.filter((name) => name === RAYDN)).toHaveLength(3);
+  });
+
+  it("keeps Spirit of Eirina in hand to charge instead of arsenaling it", () => {
+    const state = settled(game());
+    hand(state, ["DYN066", "MPW146"]);
+    const spirit = state.players[0]!.hand[0]!.instanceId;
+    state.players[0]!.actionPoints = 0;
+    const { state: after } = play(state, turnOver);
+    expect(after.players[0]!.arsenal.map((card) => card.instanceId)).not.toContain(spirit);
+    expect(after.players[0]!.hand.map((card) => card.instanceId)).toContain(spirit);
+  });
+
+  it("does not plan Soul Shield against Command and Conquer", () => {
+    const state = settled(game());
+    // As reported: the block counted on Soul Shield and spent the charge attack and V instead.
+    hand(state, ["AHA012", "MON063", "ASB007", "ASB023"]);
+    const [, , bravado, vanguard] = state.players[0]!.hand.map((card) => card.instanceId);
+    state.players[0]!.equipment.chest!.counters = { energy: 3 };
+    state.players[1]!.resources = 2;
+    const observed = input(underAttack(state, "ARC159"));
+    expect(plannedDefenseReactionPlan(observed, { kind: "defend", instanceIds: [] }).amount).toBe(0);
+    const intent = chooseBoltynIntent(observed);
+    const blockers = intent.kind === "defend" || intent.kind === "stage-defenders" ? intent.instanceIds : [];
+    expect(blockers.includes(bravado!) && blockers.includes(vanguard!)).toBe(false);
+  });
+
+  it("keeps Edict, Tunic counters and Energy Potion on a turn it cannot charge", () => {
+    const state = settled(game());
+    hand(state, ["AHA012", "MON063"]);
+    const edict = state.players[0]!.hand[0]!.instanceId;
+    state.players[0]!.board = cards(state, ["MPW146"]);
+    state.players[0]!.equipment.chest!.counters = { energy: 3 };
+    const { state: after, intents } = play(state, turnOver);
+    expect(intents).not.toContain("Fyendal's Spring Tunic");
+    expect(intents).not.toContain("Energy Potion");
+    expect(intents).not.toContain("Edict of Steel");
+    expect(after.players[0]!.hand.map((card) => card.instanceId)).toContain(edict);
+    expect(after.players[0]!.equipment.chest!.counters?.energy).toBe(3);
+    expect(after.players[0]!.board.map((card) => cardData[card.cardId]?.name)).toContain("Energy Potion");
+  });
+
+  it("plays Edict of Steel before a charged Raydn swing", () => {
+    const state = settled(game());
+    hand(state, ["AHA012", "ASB007", "PEN181"]);
+    soul(state, 1);
+    const { intents } = play(state, turnOver);
+    expect(intents).toContain("Edict of Steel");
+    expect(intents.indexOf("Edict of Steel")).toBeLessThan(intents.indexOf(RAYDN));
+  });
+
+  it("keeps Lumina Ascension when Raydn will not swing after it this turn", () => {
+    const state = settled(game(4070));
+    // Bolt of Courage is the turn's only attack: Raydn has no go-again path to follow it.
+    hand(state, ["ASB026", "SUP266", "MON033", "ASB008", "PEN181"]);
+    state.players[0]!.arsenal = cards(state, ["AHA012"]);
+    soul(state, 0);
+    const lumina = state.players[0]!.hand[0]!.instanceId;
+    const { state: after, intents } = play(state, turnOver);
+    expect(intents).toContain("Bolt of Courage");
+    expect(intents).not.toContain("Lumina Ascension");
+    const held = [...after.players[0]!.hand, ...after.players[0]!.arsenal];
+    expect(held.some((card) => card.instanceId === lumina)).toBe(true);
+  });
+
+  it("holds Lumina Ascension for a charge turn instead of pumping an uncharged Raydn", () => {
+    const base = createGame({
+      decklists: [boltynDeck("HNT098"), decklists.dorinthea], cards: cardData, scripts, seed: 4040, startPlayer: 0,
+    });
+    base.turn = 3;
+    delete base.players[0]!.equipment.arms;
+    const state = settled(base);
+    // Nothing charges this turn, so Lumina would only add +1 to a 0-power Raydn swing.
+    hand(state, ["PEN181", "ASB026", "MON032"]);
+    state.players[0]!.soul = cards(state, ["PEN179"]);
+    const { intents } = play(state, turnOver);
+    expect(intents).not.toContain("Lumina Ascension");
+  });
+
+  it("charges Spirit of Eirina, then follows the Beacon of Victory search into more Raydn swings", () => {
+    const state = fangGame();
+    hand(state, ["ASB026", "DYN066", "MON033"]);
+    state.players[0]!.arsenal = cards(state, ["IAR254"]);
+    soul(state, 1);
+    const spirit = state.players[0]!.hand[1]!.instanceId;
+    const before = state.players[1]!.life;
+    const { state: after, intents } = play(settled(state), turnOver);
+    expect(intents.slice(0, 2)).toEqual(["Bravery of the Blade", `choose:${spirit}`]);
+    // Spirit of Eirina makes Lumina an instant: it follows the first swing's blocks.
+    expect(intents.indexOf("Lumina Ascension")).toBeGreaterThan(intents.indexOf(RAYDN));
+    expect(intents.filter((name) => name === RAYDN).length).toBeGreaterThanOrEqual(2);
+    expect(before - after.players[1]!.life).toBeGreaterThanOrEqual(11);
+  });
+
+  it("plays an instant Lumina Ascension in Raydn's reaction step instead of before the swing", () => {
+    const state = game();
+    hand(state, ["ASB007", "ASB026", "ASB021"]);
+    soul(state, 1);
+    state.players[0]!.board = cards(state, ["DYN066"]);
+    const lumina = state.players[0]!.hand[1]!.instanceId;
+    let luminaLink: string | undefined;
+    play(settled(state), (current, intent) => {
+      if (intent?.kind === "play-card" && intent.instanceId === lumina) {
+        luminaLink = cardData[current.chain.at(-1)?.attackingCard.cardId ?? ""]?.name;
+      }
+      return turnOver(current);
+    });
+    expect(luminaLink).toBe(RAYDN);
+  });
+
+  it("swings Raydn, charges through Roaring Beam, then reacts with Lumina Ascension for a second swing", () => {
+    const state = game();
+    hand(state, ["PEN178", "ASB026"]);
+    soul(state, 0);
+    state.players[0]!.board = cards(state, ["DYN066"]);
+    const before = state.players[1]!.life;
+    const { state: after, intents } = play(settled(state), turnOver);
+    expect(intents.indexOf("Roaring Beam")).toBeGreaterThan(intents.indexOf(RAYDN));
+    expect(intents.indexOf("Lumina Ascension")).toBeGreaterThan(intents.indexOf("Roaring Beam"));
+    expect(intents.filter((name) => name === RAYDN)).toHaveLength(2);
+    expect(before - after.players[1]!.life).toBeGreaterThanOrEqual(8);
+  });
+
+  it("empties the soul into Beacon of Victory so Roaring Beam charges before the search", () => {
+    const state = game();
+    hand(state, ["MON033", "PEN178", "ASB026"]);
+    soul(state, 2);
+    state.players[0]!.board = cards(state, ["DYN066"]);
+    const before = state.players[1]!.life;
+    const { state: after, intents } = play(settled(state), turnOver);
+    expect(intents.slice(0, 5)).toEqual([RAYDN, "pass", "pass", "Beacon of Victory", "choose:x:2"]);
+    expect(intents.indexOf("Roaring Beam")).toBeGreaterThan(intents.indexOf("Beacon of Victory"));
+    expect(intents.filter((name) => name === RAYDN).length).toBeGreaterThanOrEqual(2);
+    expect(before - after.players[1]!.life).toBeGreaterThanOrEqual(12);
+  });
+
+  it("holds Beacon of Victory instead of banishing a soul card for +1 without a charge", () => {
+    const state = settled(fangGame());
+    hand(state, ["MON033"]);
+    soul(state, 1);
+    const { intents } = play(state, turnOver);
+    expect(intents).not.toContain("Beacon of Victory");
+    expect(intents).not.toContain(RAYDN);
+  });
+
   it("swings a sharpened, charged Raydn through a Flurry token instead of passing", () => {
     const state = settled(game());
     hand(state, []);
@@ -230,6 +490,61 @@ describe("Boltyn policy", () => {
     expect(intent).toMatchObject({
       kind: "activate-ability", sourceInstanceId: state.players[0]!.weapons[0]!.instanceId,
     });
+  });
+
+  it("swings a sharpened Raydn into a full hand instead of passing to keep its Flurry tokens", () => {
+    const state = settled(game());
+    // As after Blessing of Bellona and two Edicts of Steel with only Courageous Steelhand left.
+    hand(state, ["ASB014"]);
+    soul(state, 0);
+    state.players[0]!.board = cards(state, ["PEN181", "SBL036", "SBL036"]);
+    state.players[0]!.weapons[0]!.counters = { power: 2 };
+    expect(state.players[1]!.hand.length).toBeGreaterThanOrEqual(4);
+    const { intent } = choice(state);
+    expect(intent).toMatchObject({
+      kind: "activate-ability", sourceInstanceId: state.players[0]!.weapons[0]!.instanceId,
+    });
+  });
+
+  it("keeps the soul once Kabuto of Imperial Authority stops Raydn swinging again", () => {
+    const swing = (locked: boolean) => {
+      const state = settled(game());
+      // As in the report: Lumina Ascension grants Raydn a second swing.
+      hand(state, ["ASB026"]);
+      soul(state, 2);
+      state.players[0]!.flags.chargedThisTurn = true;
+      state.players[0]!.flags.chargedCountThisTurn = 1;
+      state.players[0]!.resources = 6;
+      const reacting = (current: GameState) => current.pendingDecision?.kind === "attack-reaction" &&
+        current.pendingDecision.player === 0;
+      const swung = play(state, (current) => reacting(current) || turnOver(current));
+      expect(swung.intents).toContain(RAYDN);
+      // As when the defender's Kabuto resolves its defend trigger.
+      if (locked) swung.state.players[0]!.flags.cannotAttackWithWeaponsThisTurn = true;
+      return play(swung.state, turnOver).intents;
+    };
+    expect(swing(false)).toContain(HERO);
+    expect(swing(true)).not.toContain(HERO);
+  });
+
+  it("keeps the soul once Blizzard stops the attack gaining go again", () => {
+    const swing = (blizzard: boolean) => {
+      const state = settled(game());
+      hand(state, ["ASB026"]);
+      soul(state, 2);
+      state.players[0]!.flags.chargedThisTurn = true;
+      state.players[0]!.flags.chargedCountThisTurn = 1;
+      state.players[0]!.resources = 6;
+      const reacting = (current: GameState) => current.pendingDecision?.kind === "attack-reaction" &&
+        current.pendingDecision.player === 0;
+      const swung = play(state, (current) => reacting(current) || turnOver(current));
+      expect(swung.intents).toContain(RAYDN);
+      // As when the attacker declines to pay for Blizzard.
+      if (blizzard) (swung.state.chain.at(-1)!.attackingCard.suppressedKeywords ??= []).push("go again");
+      return play(swung.state, turnOver).intents;
+    };
+    expect(swing(false)).toContain(HERO);
+    expect(swing(true)).not.toContain(HERO);
   });
 
   it("passes instead of swinging an uncharged Raydn for nothing", () => {
@@ -339,6 +654,27 @@ describe("Boltyn policy", () => {
     expect(intent.kind === "stage-defenders" || intent.kind === "defend").toBe(true);
     if (intent.kind === "stage-defenders" || intent.kind === "defend") {
       expect(intent.instanceIds).not.toContain(tunic.instanceId);
+    }
+  });
+
+  it("keeps Beaming Bravado and its yellow charge when they unlock Duty Bound Blitz", () => {
+    const state = settled(fangGame());
+    hand(state, ["PEN183", "ASB020", "MON062", "PEN183"]);
+    state.players[0]!.arsenal = cards(state, ["PEN183"]);
+    soul(state, 1);
+    const [, bravado, cataclysm] = state.players[0]!.hand;
+    let current = underAttack(state, PLAIN_ATTACK);
+    let intent = chooseBoltynIntent(input(current));
+    for (let step = 0; step < 6 && intent.kind === "stage-defenders"; step++) {
+      const result = applyIntent(current, 0, intent);
+      if (!result.ok) throw new Error(result.error);
+      current = result.state;
+      intent = chooseBoltynIntent(input(current));
+    }
+    expect(intent.kind).toBe("defend");
+    if (intent.kind === "defend") {
+      expect(intent.instanceIds).not.toContain(bravado!.instanceId);
+      expect(intent.instanceIds).not.toContain(cataclysm!.instanceId);
     }
   });
 

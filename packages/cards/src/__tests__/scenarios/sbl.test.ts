@@ -17,6 +17,12 @@ const RAYDN = "raydn, duskbane|0";
 const YELLOW = "raging onslaught|2"; // vanilla yellow, not Light — charge fodder
 const RED_BLOCK = "raging onslaught|1"; // vanilla attack action, def 3
 
+type Scenario = ReturnType<typeof scenario>;
+
+function handId(s: Scenario, key: string): string {
+  return String(s.state.players[0]!.hand.find((c) => c.cardId === printingId(key))!.instanceId);
+}
+
 function boltynSeat(extra: Record<string, unknown> = {}) {
   return { hero: "rhinar" as const, heroKey: BOLTYN, weapons: [RAYDN], ...extra };
 }
@@ -114,8 +120,10 @@ describe("SBL — Charge as an additional cost", () => {
       ],
     });
     s.play("v of the vanguard|2", { pitch: ["snatch|1"] });
-    s.chooseCard("beaming bravado|2"); // Light
-    s.chooseCard(YELLOW); // non-Light; hand empty, loop stops
+    const pd = s.state.pendingDecision!;
+    expect(pd.chooseHook).toBe("v-charge");
+    expect([pd.minimumSelections, pd.maximumSelections]).toEqual([0, 2]);
+    s.chooseMany([handId(s, YELLOW), handId(s, "beaming bravado|2")]).settle();
     s.expectZoneSize(0, "soul", 2);
     s.blockWith().settle();
     s.expectFinalAttack(4); // 3 base + 1 Light card charged
@@ -132,8 +140,7 @@ describe("SBL — Charge as an additional cost", () => {
     });
     s.play("charge of the light brigade|1");
     s.play("v of the vanguard|2", { pitch: ["snatch|1"] });
-    s.chooseCard("beaming bravado|2"); // Light
-    s.chooseCard(YELLOW); // non-Light; hand empty, loop stops
+    s.chooseMany([handId(s, "beaming bravado|2"), handId(s, YELLOW)]).settle();
     s.blockWith().settle();
     s.expectFinalAttack(7); // 3 base + 1 Light card charged + 3 Charge of the Light Brigade
   });
@@ -149,7 +156,7 @@ describe("SBL — Charge as an additional cost", () => {
     });
     s.play("charge of the light brigade|1");
     s.play("v of the vanguard|2", { pitch: ["snatch|1"] });
-    s.chooseOption("no");
+    s.chooseMany([]).settle();
     s.blockWith().settle();
     s.expectFinalAttack(3);
   });
@@ -339,8 +346,8 @@ describe("SBL — Boltyn", () => {
     });
 
     s.play("v of the vanguard|2")
-      .chooseCard("beaming bravado|2")
-      .chooseOption("no")
+      .chooseMany([handId(s, "beaming bravado|2")])
+      .settle()
       .blockWith();
 
     // Give V go again so the reported follow-up attack can be made while the

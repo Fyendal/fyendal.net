@@ -28,7 +28,15 @@ export function passHotkeyIntent(
   legal: readonly GameIntent[],
   decision: PendingDecision | null,
   pitchInstanceIds: readonly number[],
+  boundedSelection: readonly string[] = [],
 ): GameIntent | null {
+  if (decision?.minimumSelections !== undefined && decision.maximumSelections !== undefined) {
+    const count = boundedSelection.length;
+    return legal.some((intent) => intent.kind === "choose-many") &&
+      count >= decision.minimumSelections && count <= decision.maximumSelections
+      ? { kind: "choose-many", optionIds: [...boundedSelection] }
+      : null;
+  }
   if (decision?.kind === "defend") {
     const defenderIds = (decision.stagedCards ?? []).map((card) => card.instanceId);
     return legal.find((intent) =>

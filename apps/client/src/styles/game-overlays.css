@@ -84,58 +84,11 @@
   font-size: 13px;
   font-variant-numeric: tabular-nums;
 }
-.zone-viewer-sort {
-  display: flex;
-  grid-area: sort;
-  gap: 2px;
-  padding: 3px;
-  border-radius: 6px;
-  background: #110c07;
-}
-.zone-viewer-sort button {
-  display: inline-flex;
-  min-height: 28px;
-  align-items: center;
-  gap: 6px;
-  padding: 0 11px;
-  border: 0;
-  border-radius: 4px;
-  background: transparent;
-  clip-path: none;
-  color: var(--text-muted);
-  font: 500 13px/1 var(--font-lobby-ui);
-  letter-spacing: normal;
-  text-transform: none;
-  white-space: nowrap;
-}
-.zone-viewer-sort button:hover {
-  border: 0;
-  background: #241a10;
-  color: var(--text-secondary);
-}
-.zone-viewer-sort button[aria-pressed="true"] {
-  background: #33261a;
-  color: var(--text-primary);
-}
-.zone-viewer-sort button:focus-visible,
+.zone-viewer-header .card-sort { grid-area: sort; }
 .zone-viewer-close:focus-visible {
   outline: 2px solid var(--focus-ring);
   outline-offset: 1px;
 }
-/* The pitch option previews what it sorts by: red, yellow, blue. */
-.zone-viewer-pips { display: inline-flex; gap: 2px; }
-.zone-viewer-pips i {
-  display: block;
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  background: #e5534b;
-  opacity: .55;
-}
-.zone-viewer-pips i:nth-child(2) { background: #e3b341; }
-.zone-viewer-pips i:nth-child(3) { background: #539bf5; }
-.zone-viewer-sort button[aria-pressed="true"] .zone-viewer-pips i,
-.zone-viewer-sort button:hover .zone-viewer-pips i { opacity: 1; }
 .zone-viewer-close {
   display: grid;
   grid-area: close;
@@ -154,15 +107,7 @@
   background: #2a1f14;
   color: var(--text-primary);
 }
-.zone-viewer-close svg {
-  display: block;
-  width: 16px;
-  height: 16px;
-  fill: none;
-  stroke: currentColor;
-  stroke-linecap: round;
-  stroke-width: 2.25;
-}
+.zone-viewer-close .ui-icon { width: 16px; height: 16px; }
 .zone-viewer > .zone-viewer-cards {
   gap: 12px;
   padding: 20px;

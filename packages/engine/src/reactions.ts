@@ -13,7 +13,6 @@ import {
   veilBlocksDefender,
 } from "./cardProperties.js";
 
-import { activeModifiers } from "./combatModifiers.js";
 import {
   attackHasDominate,
   attackMaxNonBlockDefenders,
@@ -53,11 +52,11 @@ import {
 } from "./zoneQueries.js";
 import { abilitiesAsInstantForCard, abilityResourceCost, actionAbilityRestrictedByModifier, payActivatedAbilityCost, prepareActivatedAbilityTarget, prepareActivatedDiscardCost, prepareActivatedEffectCardCosts } from "./abilityRules.js";
 import { consumeNextActionGoAgain, noteActionPlayedOrActivated } from "./cardLifecycle.js";
-import { canPlayAsInstant, cardPlayCost, cardPlayReductionForSeat, cardPlayRestrictedByModifier, playOriginRestricted, mayPlayFromArsenal, mayPlayFromZone, payAlternativePlayCost, preparePlayTarget } from "./playRules.js";
+import { canPlayAsInstant, cardPlayCost, cardPlayReductionForSeat, cardPlayRestrictedByModifier, playOriginRestricted, mayPlayFromArsenal, mayPlayFromZone, notePlayPermissionSource, payAlternativePlayCost, preparePlayTarget } from "./playRules.js";
 import { canPayRequiredHandCardsForAdditionalCost } from "./resources.js";
 import { heroAbilitiesDisabled } from "./stateQueries.js";
 import { actionLimitReached, isFrozen, opposingInstantsProhibited } from "./ruleQueries.js";
-import { defendingHeroCannotRespondBelowPower } from "./combatRestrictions.js";
+import { defendingHeroCannotRespondBelowPower, defenseReactionRestriction } from "./combatRestrictions.js";
 import { pushAbilityLayer, pushAttackCardLayer, recordAnnouncedAttackTarget } from "./stackCore.js";
 
 import {
@@ -65,27 +64,6 @@ import {
   passPriorityWindow,
   type PriorityWindow,
 } from "./priority.js";
-
-/** Defense-reaction restrictions on the link: "defense reactions can't be
- *  played to this chain link" (link flag noDefenseReactions) and "defense
- *  reactions can't be played from arsenal this chain link" (a modifier riding
- *  the link). Consulted in enumeration AND validation. */
-export function defenseReactionRestriction(
-  state: GameStateInternal,
-  link: ChainLinkState,
-): { all: boolean; fromArsenal: boolean; fromHand: boolean } {
-  return {
-    all:
-      link.flags.noDefenseReactions === true ||
-      (state.players[link.attacker] as PlayerState).flags.noDefenseReactionsThisTurn === true,
-    fromArsenal: activeModifiers(state, link, ["chain-link"]).some(
-      (m) => m.noDefenseReactionsFromArsenal === true,
-    ),
-    fromHand: activeModifiers(state, link, ["chain-link"]).some(
-      (m) => m.noDefenseReactionsFromHand === true,
-    ),
-  };
-}
 
 /** Enter the reaction step: attacker holds priority first. */
 export function beginReactionStep(state: GameStateInternal): void {
@@ -542,6 +520,8 @@ export function playReaction(
   targetCardInstanceId?: number,
   fromZone?: PlayableZone,
   declaredVariableX?: number,
+  targetAllyId?: number,
+  additionalCostDeclared = false,
 ): string | undefined {
   const link = currentLink(state);
   if (state.phase !== "reaction" || !link) return "no active reaction window";
@@ -583,6 +563,7 @@ export function playReaction(
         ? player.banish // a granted "you may play it" (e.g. a banished trap)
         : player.hand;
   if (!source.some((c) => c.instanceId === card.instanceId)) return "card not found in that zone";
+  const origin = fromZone ?? (fromArsenal ? "arsenal" : source === player.banish ? "banish" : "hand");
   if (fromArsenal && !mayPlayFromArsenal(state, card, seat)) {
     return `${nameOf(state, card.cardId)} may not be played from arsenal`;
   }
@@ -682,6 +663,11 @@ export function playReaction(
     fromArsenal,
   );
   if (targetErr) return targetErr;
+  const attackAction = isAttackActionData(data);
+  if (targetAllyId !== undefined && !attackAction) return "only attacks declare an attack target";
+  if (attackAction && !runtime.dispatchFlow("attackTargetIsLegal", state, seat, targetAllyId)) {
+    return "not a legal attack target";
+  }
   const variableCost = alternativeCostCardInstanceIds === undefined
     ? script?.variablePlayCost
     : undefined;
@@ -690,6 +676,7 @@ export function playReaction(
     meldSide,
     alternativeCost: alternativeCostCardInstanceIds !== undefined,
     targetCardInstanceId,
+    targetAllyId,
     perCardReduction: cardPlayReductionForSeat(card, seat),
   });
   let variableBaseCost: number | undefined;
@@ -713,9 +700,6 @@ export function playReaction(
         resolvedVariableCost.prompt ?? DEFAULT_CHOOSE_X_PROMPT,
         options,
       );
-      const origin = fromZone ?? (fromArsenal
-        ? "arsenal"
-        : source === player.banish ? "banish" : "hand");
       state.pendingDecision = {
         player: seat,
         kind: "choose-target",
@@ -733,6 +717,7 @@ export function playReaction(
           choices,
           ...(meldSide ? { meldSide } : {}),
           ...(targetCardInstanceId === undefined ? {} : { targetCardInstanceId }),
+          ...(targetAllyId === undefined ? {} : { targetAllyId }),
         },
       };
       return undefined;
@@ -741,10 +726,10 @@ export function playReaction(
       variableCost,
       runtime.makeCtx(state, seat, card, link, fromArsenal),
     );
-    if (!isValidVariableX(declaredVariableX, resolvedVariableCost)) {
+    if (!additionalCostDeclared && !isValidVariableX(declaredVariableX, resolvedVariableCost)) {
       return "invalid X declaration";
     }
-    variableBaseCost = variableResourceCost(resolvedVariableCost, declaredVariableX);
+    variableBaseCost = variableResourceCost(resolvedVariableCost, declaredVariableX!);
   }
   const effectiveCost = costForBase(variableBaseCost);
   if (!canPayRequiredHandCardsForAdditionalCost(
@@ -753,6 +738,30 @@ export function playReaction(
     card,
     [...pitchInstanceIds, ...(alternativeCostCardInstanceIds ?? [])],
   )) return "cannot pay the card's additional hand-card cost";
+  if (!additionalCostDeclared && script?.declareAdditionalCost) {
+    // Marks the card as being played while it is still in its origin zone.
+    (card.scriptState ??= {}).declaringAdditionalCost = 1;
+    script.declareAdditionalCost(runtime.makeCtx(state, seat, card, link, fromArsenal));
+    const declarationDecision = state.pendingDecision;
+    if (declarationDecision?.chooseHook) {
+      declarationDecision.resume = {
+        kind: "continue-reaction-after-declaration",
+        seat,
+        instanceId: card.instanceId,
+        pitchInstanceIds: [...pitchInstanceIds],
+        from: origin,
+        ...(meldSide ? { meldSide } : {}),
+        ...(targetAllyId === undefined ? {} : { targetAllyId }),
+        ...(alternativeCostCardInstanceIds === undefined
+          ? {}
+          : { alternativeCostCardInstanceIds: [...alternativeCostCardInstanceIds] }),
+        ...(targetCardInstanceId === undefined ? {} : { targetCardInstanceId }),
+        ...(declaredVariableX === undefined ? {} : { declaredVariableX }),
+      };
+      return undefined;
+    }
+  }
+  delete card.scriptState?.declaringAdditionalCost;
   const costErr = payCost(
     state, runtime,
     player,
@@ -795,14 +804,13 @@ export function playReaction(
   if (isDefReact && Number(player.flags.nextDefenseReactionExtraCost || 0) > 0) {
     player.flags.nextDefenseReactionExtraCost = 0;
   }
+  notePlayPermissionSource(state, runtime, card, origin, seat);
   const removed = removeFromArray(source, card.instanceId) as CardInstance;
   delete removed.faceDown; // a card is played openly, even out of the banished zone
-  const origin = fromZone ?? (fromArsenal ? "arsenal" : source === player.banish ? "banish" : "hand");
   // An attack card being played waits in the resolving zone, where effects
   // paid while playing it can add attack-targets.
-  const attackAction = isAttackActionData(instanceDataOf(state, removed));
   if (attackAction) {
-    recordAnnouncedAttackTarget(state, seat, removed);
+    recordAnnouncedAttackTarget(state, seat, removed, targetAllyId);
     state.resolving.push(removed);
   }
   script?.additionalCost?.(runtime.makeCtx(state, seat, removed, link, fromArsenal));
@@ -836,6 +844,7 @@ export function finishReactionPlay(
   // a defending card when it resolves (7.4.2d)
   if (isAttackActionData(instanceDataOf(state, removed))) {
     pushAttackCardLayer(state, seat, removed, origin);
+    runtime.dispatchFlow("triggerPlayedAttackSpectra", state, seat, removed);
   } else {
     state.stack.unshift({
       sourceInstanceId: removed.instanceId,

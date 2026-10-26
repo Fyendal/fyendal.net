@@ -730,15 +730,8 @@ describe("server rooms over websocket", () => {
     a.ws.close();
   });
 
-  it("creates the selected Classic Constructed Boltyn bot room only for beta testers", async () => {
+  it("creates the selected Classic Constructed Boltyn bot room", async () => {
     const a = await authedClient();
-    a.sendMsg({ type: "create-bot-room", format: "cc", deckId: "precon-asr", bot: "boltyn" });
-    expect(await a.next((message) => message.type === "error"))
-      .toMatchObject({ type: "error", message: "choose a cc bot" });
-    await db.query(
-      "INSERT INTO beta_testers (user_id, added_at) SELECT id, 1 FROM users WHERE username_lc = $1",
-      [a.username.toLowerCase()],
-    );
     a.sendMsg({ type: "create-bot-room", format: "cc", deckId: "precon-asr", bot: "boltyn" });
     await a.next((message) => message.type === "room-created");
     const prep = await a.next(

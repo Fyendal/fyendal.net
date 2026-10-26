@@ -1,5 +1,6 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
 import {
+  hasBloodDebt,
   attackedWithWeapon,
   bloodDebtScript as bloodDebt,
   buffNextAttack,
@@ -1190,7 +1191,7 @@ export const mon: Record<string, CardScript> = mergeSetScripts("MON", monHighRar
           return (
             ctx.hasCardType(card, "action") &&
             !hasType(ctx, card, "attack") &&
-            hasKeyword(ctx, card.cardId, "blood debt")
+            hasBloodDebt(ctx, card)
           );
         });
         if (cards.length > 0)
@@ -1224,7 +1225,7 @@ export const mon: Record<string, CardScript> = mergeSetScripts("MON", monHighRar
           return (
             ctx.hasCardType(card, "action") &&
             !hasType(ctx, card, "attack") &&
-            hasKeyword(ctx, card.cardId, "blood debt")
+            hasBloodDebt(ctx, card)
           );
         });
         if (cards.length > 0)
@@ -1258,7 +1259,7 @@ export const mon: Record<string, CardScript> = mergeSetScripts("MON", monHighRar
           return (
             ctx.hasCardType(card, "action") &&
             !hasType(ctx, card, "attack") &&
-            hasKeyword(ctx, card.cardId, "blood debt")
+            hasBloodDebt(ctx, card)
           );
         });
         if (cards.length > 0)
@@ -1400,13 +1401,14 @@ export const mon: Record<string, CardScript> = mergeSetScripts("MON", monHighRar
   "soul harvest|3": {
     canPlay: (ctx) => ctx.player(ctx.seat).graveyard.length >= 6,
     additionalCost(ctx) {
-      ctx.setState("harvestRemaining", 6);
-      ctx.requestCardChoice(
+      ctx.requestCardChoices(
         "soul-harvest-banish",
         decisionPrompt(`${ctx.data.name}: choose 6 graveyard cards to banish`, "card.mon.graveyard.cards.banish", {
           values: { card: { kind: "card", cardId: ctx.self.cardId }, count: 6 },
         }),
         ctx.player(ctx.seat).graveyard.map((card) => card.instanceId),
+        6,
+        6,
       );
     },
     modifyAttack: (ctx) => ctx.getState("harvestBloodDebt"),
@@ -1416,31 +1418,21 @@ export const mon: Record<string, CardScript> = mergeSetScripts("MON", monHighRar
       for (const card of soul) ctx.banish(card.instanceId);
       if (soul.length > 0) ctx.loseLife(opponentSeat(ctx), soul.length);
     },
-    onChoose(ctx, hook, option) {
+    onChooseMany(ctx, hook, options) {
       if (hook !== "soul-harvest-banish") return;
-      const card = ctx.player(ctx.seat).graveyard.find((candidate) => candidate.instanceId === Number(option));
-      if (!card) return;
-      if (hasKeyword(ctx, card.cardId, "blood debt"))
-        ctx.setState("harvestBloodDebt", ctx.getState("harvestBloodDebt") + 1);
-      if (!ctx.banish(card.instanceId)) return;
-      const remaining = ctx.getState("harvestRemaining") - 1;
-      ctx.setState("harvestRemaining", remaining);
-      if (remaining > 0)
-        ctx.requestCardChoice(
-          "soul-harvest-banish",
-          decisionPrompt(
-            `${ctx.data.name}: choose ${remaining} more card(s) to banish`,
-            "card.mon.graveyard.cards.banish.more",
-            { values: { card: { kind: "card", cardId: ctx.self.cardId }, count: remaining } },
-          ),
-          ctx.player(ctx.seat).graveyard.map((candidate) => candidate.instanceId),
-        );
+      for (const option of options) {
+        const card = ctx.player(ctx.seat).graveyard.find((candidate) => candidate.instanceId === Number(option));
+        if (!card) continue;
+        if (hasBloodDebt(ctx, card))
+          ctx.setState("harvestBloodDebt", ctx.getState("harvestBloodDebt") + 1);
+        ctx.banish(card.instanceId);
+      }
     },
   },
   "soul reaping|1": {
     alternativePlayCost: { kind: "banish-hand", min: 1 },
     onAlternativeCostPaid(ctx, paidCards) {
-      const bloodDebt = paidCards.filter((card) => hasKeyword(ctx, card.cardId, "blood debt")).length;
+      const bloodDebt = paidCards.filter((card) => hasBloodDebt(ctx, card)).length;
       if (bloodDebt > 0) ctx.changeResources(ctx.seat, bloodDebt);
     },
     onAttackDeclared(ctx) {

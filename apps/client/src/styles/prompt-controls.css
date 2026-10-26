@@ -140,3 +140,54 @@
   background: #2c1d0e;
   box-shadow: inset 0 0 0 1px #b8933f55;
 }
+/* Shared card sort toggle for zone viewers and the prep room. */
+.card-sort {
+  display: flex;
+  gap: 2px;
+  padding: 3px;
+  border-radius: 6px;
+  background: #110c07;
+}
+.card-sort button {
+  display: inline-flex;
+  min-height: 28px;
+  align-items: center;
+  gap: 6px;
+  padding: 0 11px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  clip-path: none;
+  color: var(--text-muted);
+  font: 500 13px/1 var(--font-lobby-ui);
+  letter-spacing: normal;
+  text-transform: none;
+  white-space: nowrap;
+}
+.card-sort button:hover {
+  border: 0;
+  background: #241a10;
+  color: var(--text-secondary);
+}
+.card-sort button[aria-pressed="true"] {
+  background: #33261a;
+  color: var(--text-primary);
+}
+.card-sort button:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 1px;
+}
+/* The pitch option previews what it sorts by: red, yellow, blue. */
+.card-sort-pips { display: inline-flex; gap: 2px; }
+.card-sort-pips i {
+  display: block;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #e5534b;
+  opacity: .55;
+}
+.card-sort-pips i:nth-child(2) { background: #e3b341; }
+.card-sort-pips i:nth-child(3) { background: #539bf5; }
+.card-sort button[aria-pressed="true"] .card-sort-pips i,
+.card-sort button:hover .card-sort-pips i { opacity: 1; }

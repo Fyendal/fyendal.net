@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import type { MatchListFilters, MatchRecords } from "@fyendal/protocol";
+import { MATCH_OPPONENT_FILTERS, type MatchListFilters, type MatchRecords } from "@fyendal/protocol";
 import type { Format } from "@fyendal/shared";
 import { useIntl } from "react-intl";
 import { useShallow } from "zustand/react/shallow";
@@ -10,6 +10,11 @@ import { MatchList } from "./MatchList.js";
 import { playedHeroes } from "./summarizeRecords.js";
 
 const FORMAT_OPTIONS: readonly Format[] = ["cc", "silver-age"];
+type OpponentFilter = (typeof MATCH_OPPONENT_FILTERS)[number];
+
+function isOpponentFilter(value: string): value is OpponentFilter {
+  return (MATCH_OPPONENT_FILTERS as readonly string[]).includes(value);
+}
 
 /** Watch a replay JSON file from disk. A replay action, so it lives with
  * the match list rather than in the page header. */
@@ -98,7 +103,8 @@ export function MatchesView({
     void loadMatches(filters);
   }, [filters, loadMatches, token]);
   const heroes = useMemo(() => playedHeroes(records), [records]);
-  const filtered = filters.format !== undefined || filters.heroId !== undefined;
+  const filtered = filters.format !== undefined || filters.heroId !== undefined
+    || (filters.opponent !== undefined && filters.opponent !== "all");
 
   return (
     <div className="history-matches-view">
@@ -115,6 +121,21 @@ export function MatchesView({
           <option value="">{intl.formatMessage({ id: "history.filter.anyHero" })}</option>
           {heroes.map((heroId) => (
             <option key={heroId} value={heroId}>{heroName(heroId)}</option>
+          ))}
+        </select>
+        <select
+          aria-label={intl.formatMessage({ id: "history.filter.opponent" })}
+          value={filters.opponent ?? "all"}
+          onChange={(event) => {
+            const value = event.target.value;
+            const { opponent: _opponent, ...rest } = filters;
+            onFiltersChange(isOpponentFilter(value) && value !== "all" ? { ...rest, opponent: value } : rest);
+          }}
+        >
+          {MATCH_OPPONENT_FILTERS.map((option) => (
+            <option key={option} value={option}>
+              {intl.formatMessage({ id: `history.filter.opponent.${option}` })}
+            </option>
           ))}
         </select>
         <OpenReplayFile />

@@ -4,6 +4,7 @@ import {
   armDelayedEffect,
   attackAbility,
   buffNextAttack,
+  cardNamed,
   commonOptionMessages,
   consumeDelayedEffect,
   dealToAnyTarget,
@@ -111,6 +112,12 @@ function attackAbilityForAlly(cost: number, goAgain = false): CardScript {
   return { activated: attackAbility(cost, { tap: true, goAgain, oncePerTurn: false }) };
 }
 
+const COG_MAINTENANCE = {
+  hook: "sea-cog-maintenance",
+  options: ["remove", "destroy"],
+  optionMessages: commonOptionMessages("remove", "destroy"),
+} as const;
+
 function maintenanceCog(steam: number): CardScript {
   return {
     onEnterArena(ctx) {
@@ -121,21 +128,22 @@ function maintenanceCog(steam: number): CardScript {
         event: "start-of-turn",
         label: "Remove a steam counter or destroy this",
         labelMessage: decisionMessage("card.trigger.steam.maintain"),
+        standingChoice: COG_MAINTENANCE,
         effect(ctx) {
           if (ctx.getCounter("steam") <= 0) ctx.destroySelf();
           else
             ctx.requestChoice(
-              "sea-cog-maintenance",
+              COG_MAINTENANCE.hook,
               decisionPrompt("Remove a steam counter or destroy this?", "card.sea.cog.maintenance.choose", {
-                optionMessages: commonOptionMessages("remove", "destroy"),
+                optionMessages: COG_MAINTENANCE.optionMessages,
               }),
-              ["remove", "destroy"],
+              [...COG_MAINTENANCE.options],
             );
         },
       },
     ],
     onChoose(ctx, hook, option) {
-      if (hook !== "sea-cog-maintenance") return;
+      if (hook !== COG_MAINTENANCE.hook) return;
       if (option === "remove") ctx.setCounter("steam", Math.max(0, ctx.getCounter("steam") - 1));
       else ctx.destroySelf();
     },
@@ -706,28 +714,17 @@ export const sea: Record<string, CardScript> = {
     onPlay(ctx) {
       const cogs = controlledCogs(ctx, true);
       if (cogs.length)
-        ctx.requestCardChoice(
+        ctx.requestCardChoices(
           "lubricate",
-          decisionPrompt("Untap up to 3 cogs (choose one at a time)", "card.sea.lubricate.cog.choose", {
-            optionMessages: commonOptionMessages("done"),
-          }),
-          ["done", ...cogs.map((card) => card.instanceId)],
+          decisionPrompt("Untap up to 3 cogs", "card.sea.lubricate.cogs.choose"),
+          cogs.map((card) => card.instanceId),
+          0,
+          3,
         );
     },
-    onChoose(ctx, hook, option) {
-      if (hook !== "lubricate" || option === "done") return;
-      ctx.untap(Number(option));
-      const cogs = controlledCogs(ctx, true);
-      const count = ctx.getState("lubricated") + 1;
-      ctx.setState("lubricated", count);
-      if (count < 3 && cogs.length)
-        ctx.requestCardChoice(
-          "lubricate",
-          decisionPrompt("Untap another cog?", "card.sea.lubricate.cog.next", {
-            optionMessages: commonOptionMessages("done"),
-          }),
-          ["done", ...cogs.map((card) => card.instanceId)],
-        );
+    onChooseMany(ctx, hook, options) {
+      if (hook !== "lubricate") return;
+      for (const option of options) ctx.untap(Number(option));
     },
   },
   "pinion sentry|3": {
@@ -2632,9 +2629,27 @@ Object.assign(sea, {
         label: "Resolve Surface Shaking",
         effect(ctx: ScriptCtx) {
           ctx.destroySelf();
+          const player = ctx.player(ctx.seat);
+          const surges = player.board.filter((card) => cardNamed(ctx, card, "Seismic Surge")).length;
+          const max = Math.min(surges, player.hand.length);
+          if (max === 0) return;
+          ctx.requestCardChoices(
+            "surface-shaking",
+            decisionPrompt(`${ctx.data.name}: put up to ${max} cards on the bottom`, "card.upr.hand.bottom.upto", {
+              values: { card: { kind: "card", cardId: ctx.self.cardId }, amount: max },
+            }),
+            player.hand.map((card) => card.instanceId),
+            0,
+            max,
+          );
         },
       },
     ],
+    onChooseMany(ctx: ScriptCtx, hook: string, options: readonly string[]) {
+      if (hook !== "surface-shaking") return;
+      const moved = options.filter((option) => ctx.putOnDeckBottom(Number(option))).length;
+      ctx.drawCards(ctx.seat, moved);
+    },
   },
   "preach modesty|1": {
     onEnterArena(ctx: ScriptCtx) {

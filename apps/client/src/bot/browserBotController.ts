@@ -23,6 +23,7 @@ interface Deps {
   send(message: BotSubmission | { type: "bot-ready"; runtimeId: string }): boolean;
   resync(): void;
   status(value: "fallback" | "refresh-required" | null): void;
+  skipPacing(): boolean;
 }
 
 /** Private connection-scoped runtime; never contains UI/replay/persisted state. */
@@ -210,7 +211,7 @@ export class BrowserBotController {
       if (this.command !== command || this.active !== task) return;
       if (!this.deps.send(command)) { this.deps.resync(); return; }
       this.timer = setTimeout(() => this.deps.resync(), RESYNC_TIMEOUT_MS);
-    }, Math.max(0, task.delayMs - (Date.now() - this.taskStartedAt)));
+    }, this.deps.skipPacing() ? 0 : Math.max(0, task.delayMs - (Date.now() - this.taskStartedAt)));
   }
 
   result(message: Extract<ServerMessage, { type: "bot-result" }>): void {

@@ -1,5 +1,5 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
-import { cardNameContains, decisionPrompt, opponentSeat } from "./shared-helpers.js";
+import { cardNameContains, decisionPrompt, grantEndPhaseIntellect, opponentSeat } from "./shared-helpers.js";
 
 function isTome(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
   return cardNameContains(ctx, card, "tome");
@@ -47,8 +47,7 @@ export const jdg: Record<string, CardScript> = {
       const instanceId = Number(option);
       ctx.revealCards([instanceId]);
       if (!ctx.moveInventoryToHand(instanceId)) return;
-      const target = ctx.player(opponentSeat(ctx));
-      ctx.setCardState(target.hero.instanceId, "bonusIntellectAtEndPhaseTurn", ctx.state.turn + 1);
+      grantEndPhaseIntellect(ctx, opponentSeat(ctx), ctx.state.turn + 1);
     },
   },
 

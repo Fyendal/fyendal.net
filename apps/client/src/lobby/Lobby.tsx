@@ -15,6 +15,7 @@ import { mobileLobbyDestinationSelected, type MobileLobbyDestination } from "./m
 import { UiIcon, type UiIconName } from "../components/UiIcon.js";
 import { FullscreenButton } from "../components/FullscreenButton.js";
 import { GlobalNoticeBanner } from "../notices/GlobalNoticeBanner.js";
+import { leagueActionCount } from "../league/pendingActions.js";
 import {
   GuestLandingDetails,
   GuestLandingHero,
@@ -38,6 +39,7 @@ const RoomInviteModal = lazy(() => import("./RoomInviteModal.js").then((module) 
 const DeckLibrary = lazy(() => import("./DeckLibrary.js").then((module) => ({ default: module.DeckLibrary })));
 const AccountPanel = lazy(() => import("../auth/AccountPanel.js").then((module) => ({ default: module.AccountPanel })));
 const AchievementsPanel = lazy(() => import("../achievements/AchievementsPanel.js").then((module) => ({ default: module.AchievementsPanel })));
+const LeaguePanel = lazy(() => import("../league/LeaguePanel.js").then((module) => ({ default: module.LeaguePanel })));
 const MatchHistory = lazy(() => import("../history/MatchHistory.js").then((module) => ({ default: module.MatchHistory })));
 const VersionUpdateModal = lazy(() => import("../notices/VersionUpdateModal.js")
   .then((module) => ({ default: module.VersionUpdateModal })));
@@ -57,6 +59,9 @@ export function Lobby() {
     setRail,
     unreadMessageCount,
     setSocialOpen,
+    hasLeague,
+    leagueActions,
+    refreshLeagues,
   } = useStore(useShallow((state) => ({
     error: state.error,
     spectatorKicked: state.spectatorKicked,
@@ -70,6 +75,9 @@ export function Lobby() {
     setRail: state.setLobbyRail,
     unreadMessageCount: state.friends.reduce((total, friend) => total + friend.unreadCount, 0),
     setSocialOpen: state.setSocialOpen,
+    hasLeague: (state.leagues?.length ?? 0) > 0,
+    leagueActions: leagueActionCount(state.leagues, Date.now()),
+    refreshLeagues: state.refreshLeagues,
   })));
   const [deckFormatFilter, setDeckFormatFilter] = useState<"all" | Format>("all");
   const [stats, setStats] = useState<StatsOk | null>(null);
@@ -84,6 +92,10 @@ export function Lobby() {
   useEffect(() => {
     if (authUser) listRooms();
   }, [authUser, listRooms]);
+
+  useEffect(() => {
+    if (authUser) void refreshLeagues();
+  }, [authUser, refreshLeagues]);
 
   // logged-out landing: live stats over HTTP, refreshed periodically
   useEffect(() => {
@@ -151,6 +163,13 @@ export function Lobby() {
         : undefined,
     },
     { rail: "history", label: intl.formatMessage({ id: "lobby.nav.history" }) },
+    ...(hasLeague || rail === "league"
+      ? [{
+          rail: "league" as const,
+          label: intl.formatMessage({ id: "lobby.nav.league" }),
+          count: leagueActions > 0 ? intl.formatMessage({ id: "lobby.count.leagueActions" }, { count: leagueActions }) : undefined,
+        }]
+      : []),
     { rail: "achievements", label: intl.formatMessage({ id: "achievements.title" }) },
   ];
   const mobilePlaces: MobilePlace[] = [
@@ -202,6 +221,7 @@ export function Lobby() {
               <DeckLibrary formatFilter={deckFormatFilter} onFormatFilterChange={setDeckFormatFilter} />
             )}
             {rail === "history" && <MatchHistory />}
+            {rail === "league" && <LeaguePanel />}
             {rail === "achievements" && <AchievementsPanel />}
             {rail === "account" && <AccountPanel />}
           </Suspense>
@@ -251,6 +271,16 @@ export function Lobby() {
                 setShowMobileMore(false);
                 setSocialOpen(true);
               }} />
+              {hasLeague ? (
+                <button onClick={() => { setRail("league"); setShowMobileMore(false); }}>
+                  {intl.formatMessage({ id: "lobby.nav.league" })}
+                  {leagueActions > 0 ? (
+                    <span className="mobile-more-count">
+                      {intl.formatMessage({ id: "lobby.count.leagueActions" }, { count: leagueActions })}
+                    </span>
+                  ) : null}
+                </button>
+              ) : null}
               <button onClick={() => { setRail("achievements"); setShowMobileMore(false); }}>
                 {intl.formatMessage({ id: "achievements.title" })}
               </button>

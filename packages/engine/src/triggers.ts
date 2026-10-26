@@ -3,7 +3,7 @@ import { recordLifeLost } from "./stats.js";
 import type { GameStateInternal } from "./runtimeState.js";
 import type { GameMessage, MeldSide, PlayableZone } from "@fyendal/shared";
 import { triggerOccurrenceCount } from "./scripts.js";
-import type { CardScript, ScriptCtx, TriggerEvent, TriggerEventContext, TriggerTarget } from "./scripts.js";
+import type { CardScript, ScriptCtx, TriggerDef, TriggerEvent, TriggerEventContext, TriggerTarget } from "./scripts.js";
 import { DEFAULT_CHOOSE_X_PROMPT, scriptPromptParts } from "./scriptPresentation.js";
 import {
   activatedAbilitiesSuppressed,
@@ -22,6 +22,7 @@ import {
   logNameOf,
   logPlayerValue,
   logPublic,
+  logTermValue,
   nameOf,
   triggerLogMessage,
 } from "./gameLog.js";
@@ -47,14 +48,14 @@ import {
 
 import { abilityResourceCost, activatedAbilityAvailable, canPayAbilityLifeCost, canPayActivatedEffectCardCosts, discardCostOptions, effectiveAbilityList } from "./abilityRules.js";
 import { settlesInArena, settlePlayedCard } from "./cardLifecycle.js";
-import { alternativePlayCostOptions, canPlayAsInstant, cardPlayCost, cardPlayReductionForSeat, cardPlayRestrictedByModifier, playOriginRestricted, cardsPlayableFromArsenal, cardsPlayableFromZone, cardLayerGoAgain, consumeSingleUsePlayFromGroup, mayPlayFromArsenal, mayPlayFromZone, modifierMatchesPlayedCard, noteCardPlayed, payAlternativePlayCost, playFromZoneOwnerMatches, playTargetOptions, preparePlayTarget } from "./playRules.js";
+import { alternativePlayCostOptions, canPlayAsInstant, cardPlayCost, cardPlayReductionForSeat, cardPlayRestrictedByModifier, playOriginRestricted, cardsPlayableFromArsenal, cardsPlayableFromZone, cardLayerGoAgain, consumeSingleUsePlayFromGroup, mayPlayFromArsenal, mayPlayFromZone, modifierMatchesPlayedCard, noteCardPlayed, notePlayPermissionSource, payAlternativePlayCost, playFromZoneOwnerMatches, playTargetOptions, preparePlayTarget, spendFriendlyPlayPermission } from "./playRules.js";
 import { canPayRequiredHandCardsForAdditionalCost, pitchValueOfInstance } from "./resources.js";
 import { heroAbilitiesDisabled } from "./stateQueries.js";
 import { consumeFirstActionExtraCost, firstActionExtraCost, goAgainSuppressed, isFrozen, opposingInstantsProhibited, snapshotSerializable } from "./ruleQueries.js";
 import { opposingActionsProhibited } from "./restrictions.js";
 import { defendingHeroCannotRespondBelowPower } from "./combatRestrictions.js";
 import { pushAttackCardLayer, pushCardLayer, recordAnnouncedAttackTarget, takeAttackLayerOrigin } from "./stackCore.js";
-import { DESTROY_AT_END_PHASE_HOOK, triggerLabelMessage } from "./triggerPresentation.js";
+import { DESTROY_AT_END_PHASE_HOOK, logTriggerAnnouncement, triggerAnnouncement, triggerLabelMessage } from "./triggerPresentation.js";
 import { declaredLayerTargetLegal, layerTargetOptions, layerTargetSpec, triggerLayerEventContext } from "./layerTargets.js";
 
 import {
@@ -281,6 +282,8 @@ export function anyWindowAction(state: GameStateInternal, runtime: EngineRuntime
  * action-phase triggers can be responded to and are never inline.
  */
 export function isInlineTurnLayer(state: GameStateInternal, layer: StackLayer): boolean {
+  // An undecided hidden trigger is not yet on the stack (CR 5.4.7b).
+  if (layer.hiddenSource) return true;
   if (layer.card || layer.ability || layer.optional) return false;
   if (layer.engineEffect) {
     return layer.engineEffect.kind === "delayed-trigger";
@@ -530,6 +533,7 @@ export function playWindowInstant(
   fromZone?: PlayableZone,
   declaredVariableX?: number,
   alternativeCostCardInstanceIds?: number[],
+  targetAllyId?: number,
 ): string | undefined {
   if (state.phase !== "layer" || (
     declaredVariableX === undefined && state.pendingDecision?.kind !== "priority-window"
@@ -622,6 +626,11 @@ export function playWindowInstant(
     fromArsenal,
   );
   if (targetErr) return targetErr;
+  const attackAction = isAttackActionData(data);
+  if (targetAllyId !== undefined && !attackAction) return "only attacks declare an attack target";
+  if (attackAction && !runtime.dispatchFlow("attackTargetIsLegal", state, seat, targetAllyId)) {
+    return "not a legal attack target";
+  }
   const variableCost = alternativeCostCardInstanceIds === undefined
     ? script?.variablePlayCost
     : undefined;
@@ -630,6 +639,7 @@ export function playWindowInstant(
     meldSide,
     alternativeCost: alternativeCostCardInstanceIds !== undefined,
     targetCardInstanceId,
+    targetAllyId,
     perCardReduction: cardPlayReductionForSeat(card, seat),
   });
   let variableBaseCost: number | undefined;
@@ -673,6 +683,7 @@ export function playWindowInstant(
           choices,
           ...(meldSide ? { meldSide } : {}),
           ...(targetCardInstanceId === undefined ? {} : { targetCardInstanceId }),
+          ...(targetAllyId === undefined ? {} : { targetAllyId }),
         },
       };
       return undefined;
@@ -728,14 +739,14 @@ export function playWindowInstant(
       paidCards,
     );
   }
+  const origin = fromZone ?? (fromArsenal ? "arsenal" : source === player.banish ? "banish" : "hand");
+  notePlayPermissionSource(state, runtime, card, origin, seat);
   removeFromArray(source, card.instanceId);
   delete card.faceDown;
-  const origin = fromZone ?? (fromArsenal ? "arsenal" : source === player.banish ? "banish" : "hand");
   // An attack card being played waits in the resolving zone, where effects
   // paid while playing it can add attack-targets.
-  const attackAction = isAttackActionData(instanceDataOf(state, card));
   if (attackAction) {
-    recordAnnouncedAttackTarget(state, seat, card);
+    recordAnnouncedAttackTarget(state, seat, card, targetAllyId);
     state.resolving.push(card);
   }
   script?.additionalCost?.(runtime.makeCtx(state, seat, card, link, fromArsenal));
@@ -763,6 +774,7 @@ export function finishWindowInstantPlay(
   // both players pass in succession (CR 5.3.2)
   if (isAttackActionData(instanceDataOf(state, card))) {
     pushAttackCardLayer(state, seat, card, origin);
+    runtime.dispatchFlow("triggerPlayedAttackSpectra", state, seat, card);
   } else {
     pushCardLayer(state, seat, card, { fromHand: origin === "hand", goAgain });
   }
@@ -813,6 +825,7 @@ export function announceCardPlayed(
   if (!alreadyResolving) state.resolving.push(card);
   try {
     consumeSingleUsePlayFromGroup(state, card, origin);
+    spendFriendlyPlayPermission(state, runtime, seat, card);
     for (const modifier of state.modifiers) {
       if (
         modifier.seat === seat &&
@@ -913,7 +926,7 @@ function undeclaredTargetLayer(state: GameStateInternal): {
 } | undefined {
   for (let index = state.stack.length - 1; index >= 0; index--) {
     const layer = state.stack[index]!;
-    if (layer.targetDeclared) continue;
+    if (layer.targetDeclared || layer.hiddenSource) continue;
     const spec = layerTargetSpec(state, layer);
     if (spec) return { layer, ...spec };
   }
@@ -994,6 +1007,70 @@ export function answerTriggerTarget(
   return undefined;
 }
 
+function hiddenTriggerSource(
+  state: GameStateInternal,
+  layer: StackLayer,
+): { source: CardInstance; def: TriggerDef } | undefined {
+  const source = findCardAnywhere(state, layer.sourceInstanceId)?.card;
+  const def = source ? scriptOf(state, source.cardId, source)?.triggers?.[layer.triggerIndex] : undefined;
+  return source && def ? { source, def } : undefined;
+}
+
+/** CR 5.4.7b: offer a hidden trigger privately as it is about to resolve, so
+ * earlier triggers have finished first. One that can no longer do anything
+ * ceases to exist unannounced. */
+function offerHiddenTrigger(state: GameStateInternal, runtime: EngineRuntime, layer: StackLayer): void {
+  const found = hiddenTriggerSource(state, layer);
+  if (
+    !found ||
+    (found.def.canAccept &&
+      !found.def.canAccept(runtime.makeCtx(state, layer.seat, found.source, currentLink(state))))
+  ) {
+    state.stack.shift();
+    continueStack(state, runtime, layer.seat);
+    return;
+  }
+  askTriggerChoice(state, layer, "hidden-trigger");
+}
+
+/** Answer a "hidden-trigger" offer. Accepting makes the source public until
+ * the layer resolves (CR 5.4.7b); declining leaves no public trace. */
+export function answerHiddenTrigger(
+  state: GameStateInternal,
+  runtime: EngineRuntime,
+  seat: number,
+  optionId: string,
+): string | undefined {
+  const pd = state.pendingDecision;
+  if (!pd || pd.chooseHook !== "hidden-trigger" || pd.player !== seat) return "not your decision";
+  if (!pd.options?.includes(optionId)) return "invalid option";
+  const layer = state.stack[0];
+  if (!layer?.hiddenSource || layer.sourceInstanceId !== pd.sourceInstanceId) return "no trigger to answer";
+  state.pendingDecision = null;
+  if (optionId !== "yes") {
+    state.stack.shift();
+    continueStack(state, runtime, layer.seat);
+    return undefined;
+  }
+  delete layer.hiddenSource;
+  const found = hiddenTriggerSource(state, layer);
+  if (found) {
+    const { source, def } = found;
+    const ctx = runtime.makeCtx(state, layer.seat, source, currentLink(state));
+    const occurrences = layer.triggerCount ?? 1;
+    for (let occurrence = 0; occurrence < occurrences; occurrence++) {
+      def.onTrigger?.(ctx, layer.triggerEventCard, triggerLayerEventContext(layer));
+    }
+    logTriggerAnnouncement(
+      state,
+      triggerAnnouncement(state, state.players[layer.seat] as PlayerState, source, def),
+      occurrences,
+    );
+  }
+  continueStack(state, runtime, layer.seat);
+  return undefined;
+}
+
 /** Consume one occurrence from the resolving trigger layer. Its effect may
  * have added triggered layers above it (an effect that makes a dagger hit),
  * so the layer is removed by identity rather than from the top. */
@@ -1055,8 +1132,12 @@ export function resolveAbilityLayer(state: GameStateInternal,
   return false;
 }
 
-/** Ask the controller whether an optional trigger fires (trigger resolution). */
-function askTriggerChoice(state: GameStateInternal, layer: StackLayer): void {
+/** Ask the controller whether an optional or hidden trigger fires (trigger resolution). */
+function askTriggerChoice(
+  state: GameStateInternal,
+  layer: StackLayer,
+  chooseHook: "trigger-choice" | "hidden-trigger" = "trigger-choice",
+): void {
   const found = findCardAnywhere(state, layer.sourceInstanceId);
   const name = found ? nameOf(state, found.card.cardId) : "Triggered ability";
   const labelMessage = triggerLabelMessage(state, layer);
@@ -1064,19 +1145,28 @@ function askTriggerChoice(state: GameStateInternal, layer: StackLayer): void {
     player: layer.seat,
     kind: "optional-effect",
     prompt: `${name}: ${layer.label}`,
-    promptMessage: labelMessage ?? (found
+    promptMessage: found && labelMessage
       ? {
-          id: "engine.decision.trigger.optional.card",
-          values: { card: { kind: "card", cardId: found.card.cardId } },
+          id: "engine.decision.trigger.source",
+          values: {
+            ...labelMessage.values,
+            triggerSource: logCardValue(found.card.cardId),
+            triggerEffect: logTermValue(labelMessage.id),
+          },
         }
-      : { id: "engine.decision.trigger.optional" }),
+      : labelMessage ?? (found
+        ? {
+            id: "engine.decision.trigger.optional.card",
+            values: { card: logCardValue(found.card.cardId) },
+          }
+        : { id: "engine.decision.trigger.optional" }),
     options: ["yes", "no"],
     optionMessages: [
       { id: "common.option.yes" },
       { id: "common.option.no" },
     ],
     sourceInstanceId: layer.sourceInstanceId,
-    chooseHook: "trigger-choice",
+    chooseHook,
     ...(layer.defaultOption ? { defaultOption: layer.defaultOption } : {}),
   };
 }
@@ -1204,6 +1294,10 @@ function advanceStack(state: GameStateInternal, runtime: EngineRuntime): void {
       if (layersRemain) continueStack(state, runtime, layer.seat);
       return;
     }
+    if (state.pendingDecision?.chooseHook) {
+      state.pendingDecision.resume ??= { kind: "continue-stack", seat: layer.seat };
+      return;
+    }
     continueStack(state, runtime, layer.seat);
     return;
   }
@@ -1285,6 +1379,10 @@ function advanceStack(state: GameStateInternal, runtime: EngineRuntime): void {
       return;
     }
     continueStack(state, runtime, layer.seat);
+    return;
+  }
+  if (layer.hiddenSource) {
+    offerHiddenTrigger(state, runtime, layer);
     return;
   }
   if (layer.optional && !layer.accepted) {
@@ -1457,11 +1555,8 @@ export function finishStackCardResolution(
     continueStack(state, runtime, state.activePlayer);
     return;
   }
-  if (layer?.card && scriptOf(state, layer.card.cardId, layer.card)?.meld) {
-    // The declared side(s) apply only to this stack object's existence. Once
-    // it leaves, the new split-card object again has both sides (CR 9.2.2).
-    delete layer.card.meldSide;
-  }
+  // Stage 2 narrowed the side for onPlay; the object itself had both sides.
+  if (layer?.meldStage === 2 && layer.card) layer.card.meldSide = "both";
   // A non-attack action card or ability with go again refunds its action point
   // only now that its layer resolves.
   const gainedGoAgain = layer?.goAgain === true && layer.seat === state.activePlayer &&
@@ -1528,6 +1623,9 @@ export function finishStackCardResolution(
     } else if (!remainsOnChain) {
       moveToGraveyard(state, runtime, resolvedCard, "stack");
     }
+    // The declared side(s) apply only to this stack object's existence. Once
+    // it leaves, the new split-card object again has both sides (CR 9.2.2).
+    delete resolvedCard.meldSide;
   }
   // Zone-entry hooks can queue new layers. Remove this exact resolved layer,
   // rather than blindly shifting the current top after those hooks run. The

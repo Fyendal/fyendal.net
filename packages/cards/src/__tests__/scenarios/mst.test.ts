@@ -903,18 +903,29 @@ describe("Murky Water", () => {
     g.play("murky water|1", { fromArsenal: true }).blockWith().settle().chooseOption("yes");
     expect(g.state.pendingDecision?.options?.map(Number).sort((a, b) => a - b))
       .toEqual([...chosen, tripwire].sort((a, b) => a - b));
-    g.doRaw({ kind: "choose-many", optionIds: chosen.map(String) }).settle();
+    g.chooseMany(chosen.map(String)).settle();
 
     const player = g.state.players[0]!;
     expect(player.arsenal).toHaveLength(1);
     expect(chosen).toContain(player.arsenal[0]!.instanceId);
-    expect(player.arsenal[0]!.faceDown).toBeUndefined();
+    expect(player.arsenal[0]!.faceDown).toBe(true);
     const banished = player.banish.filter((card) => chosen.includes(card.instanceId));
     expect(banished).toHaveLength(2);
     expect(banished.every((card) => card.faceDown === true)).toBe(true);
     for (const instanceId of [tripwire, ...ineligible]) {
       expect(player.graveyard.some((card) => card.instanceId === instanceId)).toBe(true);
     }
+  });
+
+  it("gets +1{p} and dominate only with an aim counter", () => {
+    const plain = riptide([]);
+    plain.play("murky water|1", { fromArsenal: true });
+    expect(projectStateFor(plain.state, 0).chain.at(-1)).toMatchObject({ attackValue: 6, dominate: false });
+
+    const aimed = riptide([]);
+    aimed.state.players[0]!.arsenal[0]!.counters = { aim: 1 };
+    aimed.play("murky water|1", { fromArsenal: true });
+    expect(projectStateFor(aimed.state, 0).chain.at(-1)).toMatchObject({ attackValue: 7, dominate: true });
   });
 
   it("may decline, and offers nothing with fewer than 3 traps", () => {

@@ -617,7 +617,7 @@ export const sar: Record<string, CardScript> = {
   "frailty trap|1": {
     // "When this defends an attack with go again, create a Frailty token
     //  under the attacking hero's control."
-    canTriggerOnDefend: (ctx) => ctx.link?.goAgain === true,
+    canTriggerOnDefend: (ctx) => ctx.currentAttackHasGoAgain(),
     onDefend(ctx) {
       const link = ctx.link;
       if (!link) return;
@@ -638,7 +638,7 @@ export const sar: Record<string, CardScript> = {
 
   "lair of the spider|1": {
     // "When this defends an attack with go again, mark the attacking hero."
-    canTriggerOnDefend: (ctx) => ctx.link?.goAgain === true,
+    canTriggerOnDefend: (ctx) => ctx.currentAttackHasGoAgain(),
     onDefend(ctx) {
       const link = ctx.link;
       if (!link) return;

@@ -237,6 +237,36 @@ describe("status action", () => {
     expect(html).not.toContain("20, marked");
   });
 
+  it("lights the awaited hero's portrait and recedes the other, from either seat", () => {
+    const base = {
+      dockRect: null,
+      oppHeroCardId: "MON001",
+      myHeroCardId: "WTR001",
+      oppLife: 18,
+      myLife: 20,
+      oppHeroName: "Rhinar",
+      myHeroName: "Briar",
+      log: [],
+      activeHeroName: "Briar",
+      actionPoints: 1,
+      myResources: 0,
+      primaryAction: null,
+      onPass: vi.fn(),
+    } as const;
+
+    const nobody = renderStatus(base);
+    expect(nobody).not.toContain("life-priority-");
+
+    const mine = renderStatus({ ...base, mySeat: 1, priorityHolderSeat: 1, priorityPulse: true });
+    expect(mine).toMatch(/class="life life-me life-priority-holder life-priority-pulse"/);
+    expect(mine).toMatch(/class="life life-opp life-priority-waiting"/);
+
+    const theirs = renderStatus({ ...base, mySeat: 1, priorityHolderSeat: 0 });
+    expect(theirs).toMatch(/class="life life-opp life-priority-holder"/);
+    expect(theirs).toMatch(/class="life life-me life-priority-waiting"/);
+    expect(theirs).not.toContain("life-priority-pulse");
+  });
+
   it("renders the primary game HUD in Simplified Chinese", () => {
     const html = renderStatus({
       dockRect: null,

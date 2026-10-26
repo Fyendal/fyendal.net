@@ -5,6 +5,7 @@ import {
   EMPTY_MOTION_BATCH_QUEUE,
   enqueueMotionBatch,
   motionQueueBlocksTurnStartUi,
+  motionQueueIsSettled,
   queuedSourceFlights,
 } from "./motionBatchQueue.js";
 
@@ -175,6 +176,15 @@ describe("motion batch queue", () => {
 
     expect(afterSecond.queue.pending).toEqual([secondResult]);
     expect(afterSecond.discardedBatchIds).toEqual([]);
+  });
+
+  it("is settled only while nothing is in flight or waiting to fly", () => {
+    expect(motionQueueIsSettled(EMPTY_MOTION_BATCH_QUEUE)).toBe(true);
+    const { queue: queued } = enqueueMotionBatch(EMPTY_MOTION_BATCH_QUEUE, batch(1));
+    expect(motionQueueIsSettled(queued)).toBe(false);
+    const { queue: twoDeep } = enqueueMotionBatch(queued, batch(2));
+    expect(motionQueueIsSettled(completeMotionBatch(twoDeep, "1"))).toBe(false);
+    expect(motionQueueIsSettled(completeMotionBatch(completeMotionBatch(twoDeep, "1"), "2"))).toBe(true);
   });
 
   it("blocks new-turn UI until the queued turn-start batch becomes active", () => {

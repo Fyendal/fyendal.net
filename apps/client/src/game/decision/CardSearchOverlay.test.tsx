@@ -72,7 +72,7 @@ describe("private card search overlay", () => {
     expect(html).not.toContain("card-dim");
     expect(html).not.toContain("card-board-square");
     expect(html).toContain('aria-label="Minimize card search"');
-    expect(html).toContain(">Done</button>");
+    expect(html).toMatch(/>Done<kbd class="shortcut-key"[^>]*><\/kbd><\/button>/);
   });
 
   it("toggles selections locally and refuses a fourth selection", () => {

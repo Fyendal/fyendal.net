@@ -18,7 +18,6 @@ describe("Classic Constructed shared decks", () => {
       "precon-asr",
       "precon-aps",
       "precon-arr",
-      "precon-aac",
       "precon-aha",
       "precon-azs",
       "precon-aol",
@@ -31,13 +30,14 @@ describe("Classic Constructed shared decks", () => {
       .filter((deck) => deck.format === "cc")
       .filter((deck) => formatLegalityIssues(cardData, deck.pool, deck.format).length > 0);
     expect(hidden.map((deck) => deck.id)).toEqual([
-      "precon-ako", "precon-aaz", "precon-aio", "precon-ast", "bot-starvo-boss",
+      "precon-ako", "precon-aaz", "precon-aio", "precon-ast", "precon-aac", "bot-starvo-boss",
     ]);
     expect(hidden.map((deck) => cardData[deck.pool.heroId]!.name)).toEqual([
       "Kayo, Armed and Dangerous",
       "Azalea, Ace in the Hole",
       "Dash I/O",
       "Aurora, Shooting Star",
+      "Arakni, 5L!p3d 7hRu 7h3 cR4X",
       "Bravo, Star of the Show",
     ]);
   });

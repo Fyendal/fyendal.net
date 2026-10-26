@@ -250,6 +250,33 @@ describe("game motion detection", () => {
     }]);
   });
 
+  it("flies a weapon-slot card destroyed as a cost from its slot once, despite a board-labelled transition", () => {
+    const quiver = face(42);
+    const previous = view([player(0, { weapons: [face(41), quiver] }), player(1)], {
+      stack: [{ card: quiver, seat: 0, label: "Quiver", optional: false }],
+    });
+    const current = view([player(0, { weapons: [face(41)], graveyard: [quiver] }), player(1)], {
+      stack: [{ card: quiver, seat: 0, label: "Quiver", optional: false }],
+    });
+    const events = transitionMotionEvents(previous, current, {
+      fromVersion: 1,
+      kind: "forward",
+      events: [{
+        kind: "move",
+        from: { kind: "board", seat: 0 },
+        to: { kind: "graveyard", seat: 0 },
+        count: 1,
+        instanceId: 42,
+      }],
+    }, "forward", { sourceIncludesPredictedTransition: true });
+    expect(events.filter((event) => event.kind === "move")).toEqual([expect.objectContaining({
+      source: { kind: "weapon", seat: 0, index: 1 },
+      destination: { kind: "graveyard", seat: 0 },
+      sourcePresentationKey: "0:weapon:1:42",
+      destinationPresentationKey: "0:graveyard:42",
+    })]);
+  });
+
   it("flies a hidden opponent card from hand to banish for intimidate", () => {
     const previous = view([player(0), player(1, { handCount: 4 })]);
     const current = view([player(0), player(1, {
@@ -1315,6 +1342,63 @@ describe("game motion detection", () => {
       sourcePresentationKey: `0:pitch:${pitched.instanceId}`,
       destinationCoverVisual: { kind: "face", card: deckTop },
     });
+  });
+
+  it("keeps a heave payment's pitched card face up into pitch and flips it only when bottomed", () => {
+    const heaved = face(7);
+    const pitched = face(8);
+    const drawn = [face(9), face(10)];
+    const previous = view([
+      player(0, { hand: [heaved, pitched], handCount: 2, deckCount: 10 }),
+      player(1),
+    ], { phase: "end" });
+    const current = view([
+      player(0, { hand: drawn, handCount: 2, deckCount: 9, arsenal: [heaved], arsenalCount: 1 }),
+      player(1),
+    ], { turn: 2, phase: "action" });
+
+    const events = transitionMotionEvents(previous, current, {
+      fromVersion: 8,
+      kind: "forward",
+      events: [
+        { kind: "move", from: { kind: "hand", seat: 0 }, to: { kind: "pitch", seat: 0 }, count: 1, instanceId: 8 },
+        { kind: "move", from: { kind: "hand", seat: 0 }, to: { kind: "arsenal", seat: 0 }, count: 1, instanceId: 7 },
+        {
+          kind: "move",
+          from: { kind: "pitch", seat: 0 },
+          to: { kind: "deck", seat: 0, position: "bottom" },
+          count: 1,
+          instanceId: 8,
+        },
+        ...drawn.map((card) => ({
+          kind: "move" as const,
+          from: { kind: "deck" as const, seat: 0, position: "top" as const },
+          to: { kind: "hand" as const, seat: 0 },
+          count: 1,
+          instanceId: card.instanceId,
+        })),
+      ],
+    }, "forward");
+
+    expect(events).toContainEqual(expect.objectContaining({
+      kind: "move",
+      source: { kind: "hand", seat: 0 },
+      destination: { kind: "pitch", seat: 0 },
+      visual: { kind: "face", card: pitched },
+      instanceId: pitched.instanceId,
+    }));
+    expect(events).toContainEqual(expect.objectContaining({
+      kind: "move",
+      source: { kind: "pitch", seat: 0 },
+      destination: { kind: "deck", seat: 0, position: "bottom" },
+      visual: { kind: "face-conceal", card: pitched },
+      instanceId: pitched.instanceId,
+    }));
+    expect(events).toContainEqual(expect.objectContaining({
+      source: { kind: "hand", seat: 0 },
+      destination: { kind: "arsenal", seat: 0 },
+      visual: { kind: "face", card: heaved },
+    }));
   });
 
   it("adds hand reflow motion alongside end-phase draw-up", () => {

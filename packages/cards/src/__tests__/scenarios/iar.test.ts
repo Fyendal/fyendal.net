@@ -869,6 +869,32 @@ describe("IAR cards", () => {
     expect(g.state.players[0]!.actionPoints).toBe(0);
   });
 
+  it("Blasmophet, the Insatiable Hunger keeps its banish play when a card uses its own permission", () => {
+    const banishPlayIds = (g: ReturnType<typeof scenario>) => new Set(legalIntents(g.state, 0).flatMap((i) =>
+      i.kind === "play-from-zone" && i.zone === "banish" ? [i.instanceId] : []));
+    const g = scenario({ seats: [
+      {
+        hero: "rhinar",
+        board: ["blasmophet, the insatiable hunger|0"],
+        banish: ["ghostly visit|1", "feeding frenzy|1", "feeding frenzy|1"],
+        resources: 20,
+      },
+      { hero: "dorinthea" },
+    ] });
+    const visit = g.state.players[0]!.banish.find((card) => cardData[card.cardId]?.name === "Ghostly Visit")!;
+    const playFromBanish = (instanceId: number) => {
+      const intent = legalIntents(g.state, 0).find((i) =>
+        i.kind === "play-from-zone" && i.zone === "banish" && i.instanceId === instanceId)!;
+      g.doRaw(intent).settle().blockWith().settle();
+      g.state.players[0]!.actionPoints = 1;
+    };
+
+    playFromBanish(visit.instanceId);
+    expect(banishPlayIds(g).size).toBe(2);
+    playFromBanish([...banishPlayIds(g)][0]!);
+    expect(banishPlayIds(g).size).toBe(0);
+  });
+
   it("Unique prevents a second Blasmophet token from entering", () => {
     const g = scenario({ seats: [
       {
@@ -2007,6 +2033,29 @@ describe("August 29–31 IAR and GEM Pack 6 spoilers", () => {
     }));
   });
 
+  it("Cleave the Heavens' activation log tags the activated printing, not a visible namesake", () => {
+    const g = scenario({ seats: [
+      {
+        hero: "rhinar",
+        hand: ["cleave the heavens|1"],
+        banish: ["cleave the heavens|3"],
+        equipment: NO_EQUIPMENT,
+      },
+      { hero: "dorinthea", life: 20, equipment: NO_EQUIPMENT },
+    ] });
+
+    g.activate("cleave the heavens|1");
+
+    const activation = g.state.log.find((entry) =>
+      entry.publicPayload?.message.id === "engine.log.card.activated"
+    );
+    expect(activation?.publicPayload?.message.values).toMatchObject({
+      card: { kind: "card", cardId: "IAR020" },
+    });
+    expect(activation?.publicPayload?.fallback).toMatch(/⟦IAR020⟧$/);
+    expect(activation?.publicText).toMatch(/⟦IAR020⟧$/);
+  });
+
   it("Consuming Lash gives the next attack go again", () => {
     const g = scenario({ seats: [
       {
@@ -3070,7 +3119,7 @@ describe("September 3 IAR spoilers", () => {
 
     g.activate("hoodwink|3");
     const other = g.state.players[0]!.hand[0]!;
-    g.doRaw({ kind: "choose-many", optionIds: [String(other.instanceId)] })
+    g.chooseMany([String(other.instanceId)])
       .settle()
       .expectInZone(0, "raging onslaught|1", "graveyard");
     expect(g.state.players[0]!.flags.preventNextArcaneDamage).toBe(6);

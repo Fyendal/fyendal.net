@@ -12,6 +12,7 @@ import {
 } from "./gameLog.js";
 import { enumeratePitchSequences } from "./pitchSequences.js";
 import { recordPitched } from "./turnRecords.js";
+import { transitionZone, transitionZoneFromEngineZone, transitionZoneIsPrivate } from "./transitions.js";
 import type { GameStateInternal } from "./runtimeState.js";
 
 import type { CardInstance, PlayerState } from "./state.js";
@@ -55,9 +56,18 @@ export function pitchIntoPool(
   player: PlayerState,
   card: CardInstance,
   pitch: number,
+  from = "hand",
 ): void {
   const chi = isChiCard(state, card);
   const activeCardId = instanceDataOf(state, card).id;
+  // Clients cannot infer a card pitched and bottomed in one edge from snapshots.
+  const source = transitionZoneFromEngineZone(from, player.seat, from === "deck" ? "top" : undefined);
+  runtime.transitions.move(
+    card,
+    source,
+    transitionZone("pitch", player.seat),
+    { from: source !== null && transitionZoneIsPrivate(source.kind, card.faceDown === true) },
+  );
   if (chi) {
     player.chi += pitch;
     logPublic(state, gameLogMessage(

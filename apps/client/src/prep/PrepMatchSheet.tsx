@@ -73,7 +73,7 @@ function PlayerMat({
   /** Undefined while the opponent's arena is still hidden. */
   arena?: RevealedArena;
   status?: ReactNode;
-  /** The opponent's half is flipped, as on the game board. */
+  /** The opponent's row is mirrored so both heroes face the VS mark. */
   side: "yours" | "theirs";
 }) {
   const hidden = arena === undefined;
@@ -82,28 +82,29 @@ function PlayerMat({
   );
   return (
     <div className={`prep-mat ${side}`}>
-      {zone("head", arena?.equipment.head, "at-head")}
-      {zone("chest", arena?.equipment.chest, "at-chest")}
-      {zone("arms", arena?.equipment.arms, "at-arms")}
-      {zone("legs", arena?.equipment.legs, "at-legs")}
-      {zone("weapon", arena?.weaponIds[0], "at-weapon-left")}
-      <span className="prep-mat-zone prep-mat-hero at-hero" data-cardid={heroId}>
-        <CardArtwork cardId={heroId} alt={heroName} />
-      </span>
-      {zone("weapon", arena?.weaponIds[1], "at-weapon-right")}
       <div className="prep-mat-player">
         <div className="prep-mat-hero-name">{heroName}</div>
         <div className="prep-mat-owner">{playerName}</div>
         {status}
+      </div>
+      <div className="prep-mat-cards">
+        <span className="prep-mat-zone prep-mat-hero at-hero" data-cardid={heroId}>
+          <CardArtwork cardId={heroId} alt={heroName} />
+        </span>
+        {zone("weapon", arena?.weaponIds[0], "at-weapon-left")}
+        {zone("weapon", arena?.weaponIds[1], "at-weapon-right")}
+        {zone("head", arena?.equipment.head, "at-head")}
+        {zone("chest", arena?.equipment.chest, "at-chest")}
+        {zone("arms", arena?.equipment.arms, "at-arms")}
+        {zone("legs", arena?.equipment.legs, "at-legs")}
       </div>
     </div>
   );
 }
 
 /**
- * Desktop preparation sidebar: both players' arenas laid out like their half
- * of the game board, facing each other, plus the single action that advances
- * preparation.
+ * Desktop preparation band: both players' arenas face each other across the
+ * VS mark, with the single action that advances preparation at the end.
  */
 export function PrepMatchSheet({
   phase,
@@ -155,9 +156,11 @@ export function PrepMatchSheet({
           arena={yourArena}
           side="yours"
         />
-        {notice}
       </div>
-      <div className="prep-sheet-action">{action}</div>
+      <div className="prep-sheet-action">
+        {notice}
+        {action}
+      </div>
     </section>
   );
 }

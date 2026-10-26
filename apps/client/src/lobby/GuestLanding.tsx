@@ -7,6 +7,9 @@ interface LandingStats {
 }
 
 const FAQ_KEYS = [
+  "howToPlay",
+  "formats",
+  "decks",
   "free",
   "download",
   "offline",

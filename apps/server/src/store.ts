@@ -56,7 +56,6 @@ import {
 } from "@fyendal/cards";
 import {
   decodePresentedArena,
-  decodeSeatStandingOrders,
   MAX_MATCHMAKING_AVOID_HEROES,
   MAX_MATCHMAKING_AVOID_ROOM_CODES,
   MAX_MATCHMAKING_AVOID_USERS,
@@ -65,11 +64,24 @@ import {
 import { recordGameCompletion, recordGamePlayers } from "./analytics.js";
 import { awardAchievements } from "./achievements.js";
 import { matchEndReason, recordMatch, type MatchSeatInput } from "./matches.js";
+import {
+  bindLeagueRoom,
+  claimLeagueRoom,
+  leagueRoomSeats,
+  leagueRoomsInUse,
+  resolveLeagueRoomGame,
+  startLeagueRoomGame,
+} from "./league/leagueMatches.js";
 import { decodeDeckPool, resolveDeck, validatePresentation } from "./decks.js";
 import { appendClusterEvent, type ClusterEvent } from "./clusterEvents.js";
 import { assertActiveRuleset } from "./rulesetFence.js";
 import { withTransaction, type Queryable } from "./db.js";
-import { CorruptRoomError, decodePersistedState, encodePersistedState } from "./persistedState.js";
+import {
+  CorruptRoomError,
+  decodePersistedState,
+  decodeStoredStandingOrders,
+  encodePersistedState,
+} from "./persistedState.js";
 import {
   appendReplayView,
   endReplayForRoom,
@@ -768,7 +780,7 @@ function decodeSeatRows(values: unknown[], code: string): [SeatRow | null, SeatR
     }
     const standingOrders = row.standing_orders == null
       ? undefined
-      : decodeSeatStandingOrders(parseJson(row.standing_orders));
+      : decodeStoredStandingOrders(parseJson(row.standing_orders));
     if (standingOrders === null) {
       throw new CorruptRoomError(code, `seats[${index}].standing_orders`, "expected standing orders");
     }
@@ -915,6 +927,11 @@ async function recordRoomMatch(
     startedAt,
     finishedAt: outcome.finishedAt,
     replayId: outcome.replayId,
+  });
+  await resolveLeagueRoomGame(db, room.code.toUpperCase(), {
+    winnerUserId: outcome.winner === null ? null : seats[outcome.winner]?.userId ?? null,
+    draw: outcome.endReason === "draw",
+    startedAt,
   });
 }
 
@@ -1512,6 +1529,7 @@ export class PgRoomStore {
             participants,
           });
           await recordGamePlayers(db, participants.map((participant) => participant.userId));
+          await startLeagueRoomGame(db, out.room.code);
         } else if (out.replay?.kind === "frame" && out.room.state) {
           const replayFrameAt = Date.now();
           replayFinalizationId = (await appendReplayView(
@@ -1612,6 +1630,35 @@ export class PgRoomStore {
         return { code, seat: 0, token, version: 0 };
       } catch (e) {
         // primary-key collision on the random code → try another one
+        if (!String((e as Error).message).includes("duplicate")) throw e;
+      }
+    }
+    throw new Error("could not allocate a room code");
+  }
+
+  /** A league match's room, created empty on first entry. Its seats belong to
+   * the two members, so either can take, leave, and retake theirs while the
+   * match is open. Throws `LeagueRoomUnavailable` when the user cannot enter. */
+  async ensureLeagueRoom(userId: number, matchId: string): Promise<string> {
+    for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
+      const code = newCode();
+      try {
+        return await withTransaction(this.db, async (db) => {
+          await assertActiveRuleset(db, this.rulesetVersion);
+          const claimed = await claimLeagueRoom(db, userId, matchId);
+          if (claimed.code !== null) return claimed.code;
+          const now = Date.now();
+          await db.query(
+            `INSERT INTO rooms
+              (code, format, spectators, state, prep, ruleset_version, version, created_at, gc_at, status, winner, is_private, card_pool_mode)
+             VALUES ($1, $2, '[]', NULL, NULL, $3, 0, $4, $5, 'open', NULL, TRUE, 'legal')`,
+            [code, claimed.format, this.rulesetVersion, now, now + GC_DELAY_MS],
+          );
+          await bindLeagueRoom(db, userId, matchId, code);
+          await appendClusterEvent(db, { type: "room", event: { code, kind: "sync", version: 0 } });
+          return code;
+        });
+      } catch (e) {
         if (!String((e as Error).message).includes("duplicate")) throw e;
       }
     }
@@ -3037,7 +3084,7 @@ export class PgRoomStore {
     },
   ): Promise<JoinResult> {
     const upperCode = code.toUpperCase();
-    const r = await this.withRetry<WithoutVersion<Extract<JoinResult, { ok: true }>>>(upperCode, async (room) => {
+    const r = await this.withRetry<WithoutVersion<Extract<JoinResult, { ok: true }>>>(upperCode, async (room, db) => {
       if (opts.spectate && opts.userId != null
         && room.seats.some((seat) => seat?.userId === opts.userId)) {
         return { error: "already a player in this room" };
@@ -3096,12 +3143,20 @@ export class PgRoomStore {
           };
         }
       }
-      const freeSeat = room.seats[0] === null ? 0 : room.seats[1] === null ? 1 : -1;
+      const openSeat = room.seats[0] === null ? 0 : room.seats[1] === null ? 1 : -1;
+      // A league room's seats belong to its two members, who may leave and
+      // retake their own seat while the match is open.
+      const leagueSeats = await leagueRoomSeats(db, upperCode);
+      const leagueSeat = leagueSeats && opts.userId != null ? leagueSeats.indexOf(opts.userId) : -1;
+      const freeSeat = !leagueSeats ? openSeat : leagueSeat !== -1 && room.seats[leagueSeat] === null ? leagueSeat : -1;
       // A reconnect credential that no longer owns any membership must not
       // fall through and silently claim the seat it just lost to a timeout.
       // Full rooms retain the longstanding behavior of admitting it as a
       // spectator instead.
-      if (token && freeSeat !== -1 && !opts.spectate) return { error: "room session expired" };
+      if (token && freeSeat !== -1 && leagueSeat === -1 && !opts.spectate) return { error: "room session expired" };
+      if (leagueSeats && leagueSeat === -1 && openSeat !== -1 && !opts.spectate) {
+        return { error: "this seat is reserved for a league opponent" };
+      }
       if (opts.spectate || freeSeat === -1) {
         // prune dead spectator rows (presence expired) so departed watchers
         // never fill the cap; rows at 0 are fresh joins not yet attach-stamped
@@ -3124,9 +3179,10 @@ export class PgRoomStore {
       // Keep an abandoned opener available for its owner to reconnect, but do
       // not let a new player revive it during the GC grace period. Account and
       // token reclaims returned above; the bot bypass is only for the
-      // connectionless seat installed while createBotRoom is composing.
+      // connectionless seat installed while createBotRoom is composing. A
+      // league room has no opener.
       const host = room.seats[1 - freeSeat];
-      if (opts.controller !== "bot" && (!host || !isPresent(host.lastSeenAt, Date.now()))) {
+      if (!leagueSeats && opts.controller !== "bot" && (!host || !isPresent(host.lastSeenAt, Date.now()))) {
         return { error: "room host is disconnected" };
       }
 
@@ -3855,8 +3911,8 @@ export class PgRoomStore {
    *  first because a Runechant skip can deliberately decline optional
    *  prevention; each token shortcut is expired before auto-pass is
    *  considered at any boundary outside its own run. Bot seats always
-   *  auto-pass empty windows; a seat's standing orders answer the repeating
-   *  questions they cover. Automatic steps write no undo snapshots. */
+   *  auto-pass empty windows; standing orders never pass. Automatic steps
+   *  write no undo snapshots. */
   private applyServerShortcuts(
     room: RoomRow,
     transitionEvents?: EngineTransitionMove[],
@@ -3893,7 +3949,7 @@ export class PgRoomStore {
           (member?.controller === "bot" && isEmptyBotActionWindow(state, seat)))
           ? { kind: "pass" }
           : member?.standingOrders
-            ? standingOrderIntent(state, seat, member.standingOrders, room.code)
+            ? standingOrderIntent(state, seat, member.standingOrders)
             : null;
       if (!intent) return;
       const res = engineApplyIntent(state, seat, intent);
@@ -3954,7 +4010,7 @@ export class PgRoomStore {
       const answers = !!room.state
         && room.state.phase !== "game-over"
         && !!member.standingOrders
-        && standingOrderIntent(room.state, seat, member.standingOrders, room.code) !== null;
+        && standingOrderIntent(room.state, seat, member.standingOrders) !== null;
       if (!answers) return { room, result: { advanced: false }, versionNeutral: true };
       const events: EngineTransitionMove[] = [];
       this.applyServerShortcuts(room, events);
@@ -4696,7 +4752,9 @@ export class PgRoomStore {
     const retainedSearchRooms = new Set(searches.rows.map((value) =>
       dbObject(value, "<matchmaking>", "retained search").retained_room_code
     ));
-    const candidates = armedRooms.filter((room) => Number(room.gc_at) <= now && !retainedSearchRooms.has(room.code));
+    const leagueRooms = new Set(await leagueRoomsInUse(this.db, now));
+    const candidates = armedRooms.filter((room) => Number(room.gc_at) <= now
+      && !retainedSearchRooms.has(room.code) && !leagueRooms.has(room.code));
     const deleted: { code: string; version: number }[] = [];
     for (const candidate of candidates) {
       // Re-check the deadline in the DELETE so a concurrent heartbeat that
@@ -4715,6 +4773,7 @@ export class PgRoomStore {
           [candidate.code],
         );
         if (protectedSearch.rows.length > 0) return null;
+        if ((await leagueRoomsInUse(db, now, candidate.code)).length > 0) return null;
         const sourceSearches = await db.query(
           `SELECT user_id, retained_room_code, pending_offer_room_code FROM matchmaking_entries
            WHERE source_room_code = $1 AND mode = 'background'`,

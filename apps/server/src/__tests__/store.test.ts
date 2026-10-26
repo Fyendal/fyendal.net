@@ -1780,44 +1780,135 @@ describe("PgRoomStore storage", () => {
     });
   });
 
-  it("passes a standing-order window in the commit that reaches it and persists the orders", async () => {
-    const { code, tokens } = await fullRoom();
-    await startGame(code, tokens);
+  const printingOf = (key: string): string =>
+    Object.keys(cardData).find((id) => functionalKeyOf(cardData[id]!) === key)!;
+
+  /** Seat 0 holds priority over its own arena card's start-of-turn trigger. */
+  async function forceTurnTriggerWindow(
+    code: string,
+    key: string,
+    zone: "board" | "chest",
+    counters: Record<string, number>,
+  ): Promise<number> {
     const room = await store.getRoom(code);
     const state = room!.state!;
-    const hero = state.players[0]!.hero;
-    const key = functionalKeyOf(cardData[hero.cardId]!);
-    state.stack = [{
-      sourceInstanceId: hero.instanceId,
-      seat: 0,
-      triggerIndex: 99,
-      label: "A turn trigger",
-      optional: false,
-    }];
+    for (const p of state.players) {
+      p.hand = [];
+      p.arsenal = [];
+      p.equipment = {};
+      p.weapons = [];
+      p.board = [];
+    }
+    const card = { instanceId: state.nextInstanceId++, cardId: printingOf(key), owner: 0, counters };
+    if (zone === "board") state.players[0]!.board.push(card);
+    else state.players[0]!.equipment.chest = card;
     state.phase = "layer";
     state.priorityPlayer = 0;
     state.stackPasses = 0;
-    state.pendingDecision = { player: 0, kind: "priority-window", prompt: "Respond or pass" };
+    state.stackResume = "begin-action";
+    state.stack = [{
+      sourceInstanceId: card.instanceId,
+      seat: 0,
+      triggerIndex: 0,
+      label: "A turn trigger",
+      optional: zone === "chest",
+    }];
+    state.pendingDecision = { player: 0, kind: "priority-window", prompt: "Triggers — play an instant or pass" };
     await db.query("UPDATE rooms SET state = $2 WHERE code = $1", [
       code,
       JSON.stringify(dehydrateState(state, "rules-a")),
     ]);
+    return card.instanceId;
+  }
 
-    expect(await store.setStandingOrders(code, { token: tokens[0] }, {})).toMatchObject({
-      ok: true,
-      advanced: false,
-    });
-    expect((await store.getRoom(code))!.state!.pendingDecision).toMatchObject({ player: 0 });
+  it("never passes a window over the seat's own ordered turn trigger", async () => {
+    const { code, tokens } = await fullRoom();
+    await startGame(code, tokens);
+    await forceTurnTriggerWindow(code, "copper cog|3", "board", { steam: 1 });
+    const versionBefore = (await store.getRoom(code))!.version;
 
-    expect(await store.setStandingOrders(code, { token: tokens[0] }, { [key]: { priorityWindow: "pass" } }))
-      .toMatchObject({ ok: true, advanced: true });
+    const orders = { "copper cog|3": { "sea-cog-maintenance": "remove" } };
+    expect(await store.setStandingOrders(code, { token: tokens[0] }, orders))
+      .toMatchObject({ ok: true, advanced: false, version: versionBefore });
     const after = (await store.getRoom(code))!;
-    expect(after.state!.pendingDecision).toMatchObject({ player: 1, kind: "priority-window" });
-    expect(after.seats[0]!.standingOrders).toEqual({ [key]: { priorityWindow: "pass" } });
+    expect(after.state!.pendingDecision).toMatchObject({ player: 0, kind: "priority-window" });
+    expect(after.seats[0]!.standingOrders).toEqual(orders);
     expect(after.seats[1]!.standingOrders).toBeUndefined();
 
     expect(await store.setStandingOrders(code, { token: tokens[0] }, {})).toMatchObject({ ok: true });
     expect((await store.getRoom(code))!.seats[0]!.standingOrders).toBeUndefined();
+  });
+
+  it("answers a crank choice raised by the seat's own turn trigger in the commit that raises it", async () => {
+    const { code, tokens } = await fullRoom();
+    await startGame(code, tokens);
+    const cogId = await forceTurnTriggerWindow(code, "copper cog|3", "board", { steam: 1 });
+    await store.setStandingOrders(code, { token: tokens[0] }, { "copper cog|3": { "sea-cog-maintenance": "remove" } });
+    // The opponent's identical order never answers seat 0's cog.
+    await store.setStandingOrders(code, { token: tokens[1] }, { "copper cog|3": { "sea-cog-maintenance": "destroy" } });
+
+    expect((await store.applyIntent(code, { token: tokens[0] }, { kind: "pass" })).ok).toBe(true);
+    expect((await store.getRoom(code))!.state!.pendingDecision).toMatchObject({ player: 1, kind: "priority-window" });
+    expect((await store.applyIntent(code, { token: tokens[1] }, { kind: "pass" })).ok).toBe(true);
+
+    const state = (await store.getRoom(code))!.state!;
+    const cog = state.players[0]!.board.find((card) => card.instanceId === cogId);
+    expect(cog?.counters?.steam ?? 0).toBe(0);
+    expect(state.pendingDecision?.chooseHook).not.toBe("sea-cog-maintenance");
+  });
+
+  it("answers an optional turn trigger yes and leaves an unordered one to ask", async () => {
+    const { code, tokens } = await fullRoom();
+    await startGame(code, tokens);
+    const tunicId = await forceTurnTriggerWindow(code, "fyendal's spring tunic|0", "chest", {});
+    await store.setStandingOrders(code, { token: tokens[0] }, { "fyendal's spring tunic|0": { "trigger-choice": "yes" } });
+    await store.applyIntent(code, { token: tokens[0] }, { kind: "pass" });
+    await store.applyIntent(code, { token: tokens[1] }, { kind: "pass" });
+    const answered = (await store.getRoom(code))!.state!;
+    expect(answered.players[0]!.equipment.chest).toMatchObject({ instanceId: tunicId, counters: { energy: 1 } });
+    expect(answered.pendingDecision?.chooseHook).not.toBe("trigger-choice");
+
+    const { code: other, tokens: otherTokens } = await fullRoom();
+    await startGame(other, otherTokens);
+    await forceTurnTriggerWindow(other, "fyendal's spring tunic|0", "chest", {});
+    await store.setStandingOrders(other, { token: otherTokens[0] }, { "copper cog|3": { "sea-cog-maintenance": "remove" } });
+    await store.applyIntent(other, { token: otherTokens[0] }, { kind: "pass" });
+    await store.applyIntent(other, { token: otherTokens[1] }, { kind: "pass" });
+    expect((await store.getRoom(other))!.state!.pendingDecision).toMatchObject({
+      player: 0,
+      chooseHook: "trigger-choice",
+      sourceInstanceId: expect.any(Number),
+    });
+  });
+
+  it("repairs legacy stored standing orders instead of treating the seat as corrupt", async () => {
+    const { code, tokens } = await fullRoom();
+    await startGame(code, tokens);
+    await forceTurnTriggerWindow(code, "copper cog|3", "board", { steam: 1 });
+    await db.query("UPDATE room_seats SET standing_orders = $3 WHERE room_code = $1 AND seat = $2", [
+      code,
+      0,
+      JSON.stringify({
+        "copper cog|3": { priorityWindow: "pass" },
+        "valiant dynamo|0": { priorityWindow: "pass", optionalTrigger: "no" },
+        "fyendal's spring tunic|0": { "trigger-choice": "yes" },
+      }),
+    ]);
+    const room = (await store.getRoom(code))!;
+    expect(room.seats[0]!.standingOrders).toEqual({
+      "valiant dynamo|0": { "trigger-choice": "no" },
+      "fyendal's spring tunic|0": { "trigger-choice": "yes" },
+    });
+    // The dropped legacy pass never fires, even on the next commit.
+    await store.setPriorityMode(code, { token: tokens[0] }, "always-pause");
+    expect((await store.getRoom(code))!.state!.pendingDecision).toMatchObject({ player: 0, kind: "priority-window" });
+
+    await db.query("UPDATE room_seats SET standing_orders = $3 WHERE room_code = $1 AND seat = $2", [
+      code,
+      0,
+      JSON.stringify({ "copper cog|3": { priorityWindow: "always" } }),
+    ]);
+    await expect(store.getRoom(code)).rejects.toThrow(/standing_orders/);
   });
 
   it("expires Runechant skipping at a non-Runechant trigger boundary", async () => {

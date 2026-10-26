@@ -59,54 +59,80 @@
     </style>
     <meta
       name="description"
-      content="Play Flesh and Blood online free in your browser. Practice against matchup-aware bots, find opponents, import Fabrary decks, spectate games, and share replays."
+      content="Play Flesh and Blood TCG online free in your browser. Classic Constructed and Silver Age, Fabrary deck import, matchmaking, and replays. No download."
     />
     <link rel="canonical" href="https://fyendal.net/" />
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="Fyendal" />
-    <meta property="og:title" content="Play Flesh and Blood Online | Fyendal" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:title" content="Play Flesh and Blood TCG Online Free | Fyendal" />
     <meta
       property="og:description"
-      content="Play Flesh and Blood online free. Practice against matchup-aware bots, find opponents, import Fabrary decks, spectate games, and share replays."
+      content="Play the Flesh and Blood trading card game online free in your browser. Import your Fabrary deck and play Classic Constructed or Silver Age."
     />
     <meta property="og:url" content="https://fyendal.net/" />
-    <meta property="og:image" content="https://fyendal.net/logo.png" />
-    <meta property="og:image:width" content="340" />
-    <meta property="og:image:height" content="340" />
-    <meta property="og:image:alt" content="Fyendal" />
-    <meta name="twitter:card" content="summary" />
-    <meta name="twitter:title" content="Play Flesh and Blood Online | Fyendal" />
+    <meta property="og:image" content="https://fyendal.net/fyendal-gameplay-cindra-home.jpg" />
+    <meta property="og:image:width" content="1600" />
+    <meta property="og:image:height" content="871" />
+    <meta property="og:image:alt" content="A Flesh and Blood match on Fyendal" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Play Flesh and Blood TCG Online Free | Fyendal" />
     <meta
       name="twitter:description"
-      content="Play Flesh and Blood online free. Practice against matchup-aware bots or play other people in your browser."
+      content="Play the Flesh and Blood trading card game online free in your browser. Import your Fabrary deck and play Classic Constructed or Silver Age."
     />
-    <meta name="twitter:image" content="https://fyendal.net/logo.png" />
+    <meta name="twitter:image" content="https://fyendal.net/fyendal-gameplay-cindra-home.jpg" />
     <link rel="preconnect" href="https://content.fabrary.net" crossorigin />
     <link rel="icon" type="image/png" href="/favicon.png" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-    <title>Play Flesh and Blood Online | Fyendal</title>
+    <title>Play Flesh and Blood TCG Online Free | Fyendal</title>
     <!-- fyendal-structured-data:start -->
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
         "@graph": [
           {
+            "@type": "Organization",
+            "@id": "https://fyendal.net/#organization",
+            "url": "https://fyendal.net/",
+            "name": "Fyendal",
+            "logo": "https://fyendal.net/logo.png",
+            "sameAs": [
+              "https://github.com/Fyendal/fyendal.net",
+              "https://discord.gg/DpTjVbfPVv"
+            ]
+          },
+          {
             "@type": "WebSite",
             "@id": "https://fyendal.net/#website",
             "url": "https://fyendal.net/",
             "name": "Fyendal",
             "alternateName": "Fyendal Online",
-            "description": "Play Flesh and Blood online free in your browser."
+            "description": "Play Flesh and Blood TCG online free in your browser.",
+            "inLanguage": "en",
+            "publisher": { "@id": "https://fyendal.net/#organization" }
           },
           {
-            "@type": "WebApplication",
+            "@type": ["VideoGame", "WebApplication"],
             "@id": "https://fyendal.net/#application",
             "url": "https://fyendal.net/",
             "name": "Fyendal",
-            "description": "A free browser-based platform for playing Flesh and Blood against other people or matchup-aware practice bots.",
+            "description": "A free, open-source, browser-based platform for playing the Flesh and Blood trading card game online in Classic Constructed and Silver Age.",
+            "about": {
+              "@type": "Game",
+              "name": "Flesh and Blood",
+              "alternateName": ["Flesh and Blood TCG", "Flesh & Blood", "FaB"],
+              "sameAs": "https://en.wikipedia.org/wiki/Flesh_and_Blood_(card_game)"
+            },
+            "genre": ["Trading card game", "Collectible card game"],
+            "gamePlatform": "Web browser",
+            "playMode": "MultiPlayer",
             "applicationCategory": "GameApplication",
             "operatingSystem": "Any",
+            "image": "https://fyendal.net/fyendal-gameplay-cindra-home.jpg",
+            "screenshot": "https://fyendal.net/fyendal-gameplay-cindra-play.jpg",
             "isAccessibleForFree": true,
+            "publisher": { "@id": "https://fyendal.net/#organization" },
             "offers": {
               "@type": "Offer",
               "price": "0",

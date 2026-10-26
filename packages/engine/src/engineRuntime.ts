@@ -5,7 +5,7 @@ import { setAttackActivationLimitKey } from "./abilityRules.js";
 import { additionalAttackTargetOptions, attackFromDeck, attackWithPermanent, declareAdditionalAttackTarget, replaceAttackFromBanish, replaceAttackFromHand } from "./attacks.js";
 import { arsenalCapacity, drawCards, entersArena, settlePlayedCard, settlesInArena, stampControlledName, tapPermanent } from "./cardLifecycle.js";
 import { crowdBoo, crowdCheer, requestClash } from "./clash.js";
-import { applyOneShotDefenseModifiers, attackBonusAboveBase, attackHasDominate, attackHasOverpower, basePowerOf, chainLinkNumber, chainLinksControlled, computeAttack, computeDefense, currentPowerOf, defendingDefenseOf, hitsThisCombatChain, linkAttackHasType, noteAttackDefendedBy, replaceTemporalPowerGain } from "./combatValues.js";
+import { applyOneShotDefenseModifiers, attackBonusAboveBase, attackHasDominate, attackHasGoAgain, attackHasOverpower, basePowerOf, chainLinkNumber, chainLinksControlled, computeAttack, computeDefense, currentPowerOf, defendingDefenseOf, hitsThisCombatChain, linkAttackHasType, noteAttackDefendedBy, replaceTemporalPowerGain } from "./combatValues.js";
 import { boundArcaneCardBonus, dealEffectDamage, effectDamageBonus, gainHeroLife } from "./damageResolution.js";
 import { queueDefendEventLayersAfterCurrent, resolveIntimidate } from "./defense.js";
 import { recordDieResult, recordDieRoll, rollIgnoringLowest } from "./dieRoll.js";
@@ -40,6 +40,7 @@ export function createEngineRuntime(
       attackBonusAboveBase: bind(attackBonusAboveBase, true),
       attackFromDeck: bind(attackFromDeck, true),
       attackHasDominate: bind(attackHasDominate, true),
+      attackHasGoAgain: bind(attackHasGoAgain, true),
       attackHasOverpower: bind(attackHasOverpower, true),
       attackWithPermanent: bind(attackWithPermanent, true),
       banishCard: bind(banishCard, true),

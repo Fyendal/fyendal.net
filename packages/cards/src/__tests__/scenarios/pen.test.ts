@@ -2043,3 +2043,63 @@ describe("PEN — Synapse Sparkcap", () => {
     expect(player.actionPoints).toBe(0);
   });
 });
+
+describe("PEN — multi-select choices", () => {
+  it("Put on Ice freezes up to its count of chosen allies on any board", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", hand: ["put on ice|2"], resources: 1, board: ["restless steed|1"] },
+        { hero: "dorinthea", board: ["restless commander|1", "corrupted corpse|0"] },
+      ],
+    });
+    const allyId = (seat: number, key: string) =>
+      String(g.state.players[seat]!.board.find((card) => card.cardId === printingId(key))!.instanceId);
+
+    g.play("put on ice|2");
+    const pd = g.state.pendingDecision!;
+    expect(pd.chooseHook).toBe("pen-freeze-ally");
+    expect(pd.options).toHaveLength(3);
+    expect([pd.minimumSelections, pd.maximumSelections]).toEqual([0, 2]);
+    g.chooseMany([allyId(0, "restless steed|1"), allyId(1, "corrupted corpse|0")]).settle();
+
+    const frozen = (seat: number, key: string) =>
+      g.state.players[seat]!.board.find((card) => card.cardId === printingId(key))!.scriptState?.frozenUntilTurn;
+    expect(frozen(0, "restless steed|1")).toBe(g.state.turn + 2);
+    expect(frozen(1, "corrupted corpse|0")).toBe(g.state.turn + 2);
+    expect(frozen(1, "restless commander|1")).toBeUndefined();
+  });
+
+  it("Recede to Mistform turns exactly X chosen face-up cloaked equipment face-down", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          hand: ["recede to mistform|3"],
+          resources: 2,
+          equipment: { ...NO_EQUIPMENT, head: "truths retold|0", arms: "uphold tradition|0", legs: "skywalker keikoi|0" },
+        },
+        { hero: "dorinthea", equipment: NO_EQUIPMENT },
+      ],
+    });
+    const equipment = g.state.players[0]!.equipment;
+    for (const card of [equipment.head!, equipment.arms!, equipment.legs!]) card.faceDown = false;
+
+    g.play("recede to mistform|3", { settle: false });
+    g.chooseOption("X = 2");
+    g.settle();
+    const pd = g.state.pendingDecision!;
+    expect(pd.chooseHook).toBe("recede-equipment");
+    expect(pd.options).toHaveLength(3);
+    expect([pd.minimumSelections, pd.maximumSelections]).toEqual([2, 2]);
+    expect(() =>
+      g.doRaw({ kind: "choose-many", optionIds: [String(equipment.head!.instanceId)] })
+    ).toThrow(/selection count/);
+    g.doRaw({
+      kind: "choose-many",
+      optionIds: [String(equipment.head!.instanceId), String(equipment.legs!.instanceId)],
+    }).settle();
+
+    const after = g.state.players[0]!.equipment;
+    expect([after.head?.faceDown, after.arms?.faceDown, after.legs?.faceDown]).toEqual([true, false, true]);
+  });
+});

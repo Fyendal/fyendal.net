@@ -3,6 +3,7 @@ import { engineRuntime } from "../engineRuntime.js";
 import type { TriggerEventContext } from "../index.js";
 import type { GameStateInternal } from "../runtimeState.js";
 import type { CardInstance } from "../state.js";
+import { destroyPermanent } from "../zoneMoves.js";
 import { makeGame, player } from "./fixtures.js";
 
 /** Give `cardId` a self leave-arena trigger whose condition records each event. */
@@ -115,5 +116,50 @@ describe("cards returned to hand leave the arena", () => {
 
     expect(player(s, 1).hand.some((card) => card.instanceId === blocker.instanceId)).toBe(true);
     expect(events).toEqual([]);
+  });
+});
+
+describe("sub-cards are cleared when their top-card leaves the arena", () => {
+  function stack(s: GameStateInternal, topCardId: string): CardInstance {
+    const top: CardInstance = {
+      instanceId: s.nextInstanceId++,
+      cardId: topCardId,
+      owner: 0,
+      subcards: [
+        {
+          instanceId: s.nextInstanceId++,
+          cardId: "HELM",
+          owner: 0,
+          subcards: [{ instanceId: s.nextInstanceId++, cardId: "SWORD", owner: 1 }],
+        },
+        { instanceId: s.nextInstanceId++, cardId: "TOKEN", owner: 0 },
+      ],
+    };
+    player(s, 0).board.push(top);
+    return top;
+  }
+  const ids = (cards: readonly CardInstance[]) => cards.map((card) => card.cardId);
+
+  it("a destroyed token top-card puts nested cards in their owners' graveyards", () => {
+    const s = makeGame();
+    const top = stack(s, "TOKEN");
+
+    expect(destroyPermanent(s, engineRuntime, 0, top)).toBe(true);
+
+    expect(player(s, 0).board).toEqual([]);
+    expect(ids(player(s, 0).graveyard)).toEqual(["HELM"]);
+    expect(ids(player(s, 1).graveyard)).toEqual(["SWORD"]);
+  });
+
+  it("a top-card returned to hand clears its sub-cards", () => {
+    const s = makeGame();
+    const top = stack(s, "AURA");
+
+    expect(engineRuntime.makeCtx(s, 0, top).returnSelfToHand()).toBe(true);
+
+    const returned = player(s, 0).hand.find((card) => card.instanceId === top.instanceId);
+    expect(returned?.subcards).toBeUndefined();
+    expect(ids(player(s, 0).graveyard)).toEqual(["HELM"]);
+    expect(ids(player(s, 1).graveyard)).toEqual(["SWORD"]);
   });
 });

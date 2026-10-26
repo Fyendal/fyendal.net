@@ -1,7 +1,7 @@
 import { BrowserBotNotice } from "../bot/BrowserBotNotice.js";
 import { useMatchAchievements } from "../achievements/useMatchAchievements.js";
 import { AchievementToast } from "../achievements/AchievementToast.js";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useIntl } from "react-intl";
 import { useShallow } from "zustand/react/shallow";
 import type { CardView, GameIntent, MeldSide } from "@fyendal/shared";
@@ -53,6 +53,8 @@ import {
   boundedHandCardChoiceOptions,
   cardChoiceLocationLabels,
   handCardChoiceOptions,
+  boundedCardChoiceKey,
+  boundedCardChoiceSelectable,
   toggleBoundedCardChoice,
 } from "./decisionPresentation.js";
 import { shouldHidePriorityGuidance } from "./decisionPass.js";
@@ -100,11 +102,21 @@ import { PitchFocus } from "./PitchFocus.js";
 import { postPaymentPitchFocus, usePitchFocus } from "./usePitchFocus.js";
 import { useOpponentPlayPresentation } from "./useOpponentPlayPresentation.js";
 
+/** Priority signals shown on the board, held at the last settled motion. */
+type PriorityPresentation = {
+  gameId: string;
+  /** Seat the game waits on: the pending decider, else the priority holder.
+   * Its half of the mat is tinted for players, spectators, and replays. */
+  holder: number | null;
+  priorityPlayer: number | null;
+  timingLabel: string;
+};
+
 const EMPTY_INSTANCE_IDS: ReadonlySet<number> = new Set();
 
 export function GameBoard() {
   const intl = useIntl();
-  const { view: authoritativeView, viewUpdate: authoritativeViewUpdate, playerProfiles, legal, actionCandidates, roomCommandPending, pendingInteraction, pendingDefenderStageIds, yourSeat, spectating, spectatorCount, spectatorUsernames, botGame, sendIntent, sendPriorityMode, sendStandingOrders, sendTokenSkip, sendEmote, kickSpectator, latestEmote, undo, error, leave, opponentConnected, connected, connectionIssueVisible, roomCode, screen, replayFrames, replayViews, replayStep, replayNotes, setLiveReplayNote, watchReplay, downloadReplay, closeReplay, getRecordedViews, lastActionAt, claimVictory, reportBug, reportOpponent, backgroundSearching, stopBackgroundMatchmaking, authUser, authToken, setLobbyRail, unreadMessageCount, setSocialOpen } = useStore(
+  const { view: authoritativeView, viewUpdate: authoritativeViewUpdate, playerProfiles, legal, actionCandidates, roomCommandPending, pendingInteraction, pendingDefenderStageIds, yourSeat, spectating, spectatorCount, spectatorUsernames, botGame, betaTester, sendIntent, sendPriorityMode, sendStandingOrders, sendTokenSkip, sendEmote, kickSpectator, latestEmote, undo, error, leave, opponentConnected, connected, connectionIssueVisible, roomCode, screen, replayFrames, replayViews, replayStep, replayNotes, setLiveReplayNote, watchReplay, downloadReplay, closeReplay, getRecordedViews, lastActionAt, claimVictory, reportBug, reportOpponent, backgroundSearching, stopBackgroundMatchmaking, authUser, authToken, setLobbyRail, unreadMessageCount, setSocialOpen } = useStore(
     useShallow((state) => ({
       view: state.view,
       viewUpdate: state.viewUpdate,
@@ -119,6 +131,7 @@ export function GameBoard() {
       spectatorCount: state.spectatorCount,
       spectatorUsernames: state.spectatorUsernames,
       botGame: state.botGame,
+      betaTester: state.betaTester,
       sendIntent: state.sendIntent,
       sendPriorityMode: state.sendPriorityMode,
       sendStandingOrders: state.sendStandingOrders,
@@ -246,6 +259,7 @@ export function GameBoard() {
     priorityWindowMode,
     skipPlayConfirmation,
     optionHotkeys,
+    skipBotDelay,
     soundEffectsEnabled,
     soundEffectsVolume,
     updatePriorityWindowMode,
@@ -255,6 +269,7 @@ export function GameBoard() {
     updatePlayabilityCuePreference,
     updateSkipPlayConfirmation,
     updateOptionHotkeys,
+    updateSkipBotDelay,
     updateSoundEffectsEnabled,
     updateSoundEffectsVolume,
     standingOrders: standingOrderSettings,
@@ -302,6 +317,14 @@ export function GameBoard() {
       interactionProjection.predictsSemanticTransition || presentedDefenderIds !== null,
   });
   const { combatPresentation } = gameMotion;
+  // A priority hand-off that arrives while a card is still in flight waits
+  // for it to land. Declared after useGameMotion so the effect runs after
+  // that hook's layout effect has enqueued this commit's batches.
+  const livePriorityRef = useRef<PriorityPresentation | null>(null);
+  const settledPriorityRef = useRef<PriorityPresentation | null>(null);
+  useLayoutEffect(() => {
+    if (gameMotion.isMotionSettled()) settledPriorityRef.current = livePriorityRef.current;
+  });
   // End-of-game popup can be dismissed to inspect the final board. Re-arm it
   // for a fresh result or after leaving and returning to the replay's last frame.
   const [gameOverDismissed, setGameOverDismissed] = useState(false);
@@ -459,8 +482,13 @@ export function GameBoard() {
 
   const skippableRun = skippableTokenRun(legal);
 
+  const boundedChoiceKey = boundedCardChoiceKey(view?.pendingDecision ?? null);
+  const boundedChoiceSelectedOptionIds =
+    boundedChoiceKey !== null && boundedChoiceSelection?.decisionKey === boundedChoiceKey
+      ? boundedChoiceSelection.optionIds
+      : [];
   const hotkeyIntent = sel.kind === "none"
-    ? passHotkeyIntent(legal, view?.pendingDecision ?? null, pitchSel)
+    ? passHotkeyIntent(legal, view?.pendingDecision ?? null, pitchSel, boundedChoiceSelectedOptionIds)
     : null;
   const passHotkeyEnabled =
     hotkeyIntent !== null &&
@@ -565,9 +593,33 @@ export function GameBoard() {
   const resourcePaymentRequired = resourcePayment
     ? Math.max(0, resourcePayment.cost - me.resources - (me.chi ?? 0))
     : 0;
+  const livePriority: PriorityPresentation = {
+    gameId: presentedView.gameId,
+    holder: presentedView.phase === "game-over"
+      ? null
+      : pd !== null
+        ? pd.player
+        : gameHasPriority(presentedView) ? presentedView.priorityPlayer : null,
+    priorityPlayer: gameHasPriority(view) ? view.priorityPlayer : null,
+    timingLabel: gameTimingLabel(view),
+  };
+  livePriorityRef.current = livePriority;
+  const settledPriority = settledPriorityRef.current;
+  const presentedPriority = settledPriority === null
+    || gameMotion.motionSettled
+    || settledPriority.gameId !== livePriority.gameId
+    ? livePriority
+    : settledPriority;
+  // Gate the viewer's affordances only while a hand-off to them is in flight;
+  // their own plays never wait.
+  const awaitingHandoff = presentedPriority !== livePriority
+    && presentedPriority.holder !== seat
+    && presentedPriority.priorityPlayer !== seat;
   // An open resource payment is a hand-card choice, rather than an invitation
   // to start another play or ability from the arena or inactive zones.
-  const boardActionState = choosingPitch ? deriveBoardLegalState([], legal, true) : derived;
+  const boardActionState = choosingPitch || awaitingHandoff
+    ? deriveBoardLegalState([], legal, true)
+    : derived;
   const myTurn = view.activePlayer === seat;
   const activeHeroName = view.players[view.activePlayer]?.heroName ?? "";
   const turnLabel = spectating
@@ -596,20 +648,14 @@ export function GameBoard() {
       rightWeapon: intl.formatMessage({ id: "game.zone.weapon.right" }),
     },
   );
-  const showPriorityFloat = !spectating && !replaying && gameHasPriority(view);
-  const hasOwnPriority = showPriorityFloat && view.priorityPlayer === seat;
-  /** Seat the game is waiting on — the pending decider, else the priority
-   * holder. Its half of the mat is tinted for players, spectators, and replays. */
-  const priorityHolder = presentedView.phase === "game-over"
-    ? null
-    : pd !== null
-      ? pd.player
-      : gameHasPriority(presentedView) ? presentedView.priorityPlayer : null;
+  const showPriorityFloat = !spectating && !replaying && presentedPriority.priorityPlayer !== null;
+  const hasOwnPriority = showPriorityFloat && presentedPriority.priorityPlayer === seat;
+  const priorityHolder = presentedPriority.holder;
   const priorityHolderName = priorityHolder === null
     ? ""
     : (presentedView.players[priorityHolder]?.heroName ?? "");
-  const priorityLabel = view.priorityPlayer === seat ? "YOUR PRIORITY" : "OPPONENT'S PRIORITY";
-  const priorityTimingLabel = gameTimingLabel(view);
+  const priorityLabel = presentedPriority.priorityPlayer === seat ? "YOUR PRIORITY" : "OPPONENT'S PRIORITY";
+  const priorityTimingLabel = presentedPriority.timingLabel;
   const showEndTurnPassToast =
     !spectating &&
     !replaying &&
@@ -701,24 +747,24 @@ export function GameBoard() {
   const boundedHandPick = replaying || !myDecision
     ? null
     : boundedHandCardChoiceOptions(pd, me.hand);
-  const boundedHandChoiceKey = boundedHandPick && pd
-    ? JSON.stringify([
-        pd.player,
-        pd.promptMessage ?? pd.prompt,
-        pd.options,
-        pd.minimumSelections,
-        pd.maximumSelections,
-      ])
-    : null;
-  const boundedChoiceSelectedOptionIds =
-    boundedHandChoiceKey !== null && boundedChoiceSelection?.decisionKey === boundedHandChoiceKey
-      ? boundedChoiceSelection.optionIds
-      : [];
+  const toggleBoundedChoice = (optionId: string) => {
+    if (!boundedCardChoice || boundedChoiceKey === null) return;
+    setBoundedChoiceSelection((current) => {
+      const selected = current?.decisionKey === boundedChoiceKey ? current.optionIds : [];
+      if (!boundedCardChoiceSelectable(boundedCardChoice, selected, optionId)) return current;
+      return {
+        decisionKey: boundedChoiceKey,
+        optionIds: toggleBoundedCardChoice(selected, optionId, boundedCardChoice.maximumSelections),
+      };
+    });
+  };
   const selectedBoundedChoiceOptionIds = new Set(boundedChoiceSelectedOptionIds);
   const stagedDefenders: CardView[] = pd?.kind === "defend" ? (pd.stagedCards ?? []) : [];
   const stagedIds = new Set(stagedDefenders.map((c) => c.instanceId));
   /** live defense total of the staged defenders (0 for the opponent) */
   const stagedDefense = pd?.kind === "defend" ? (pd.stagedDefense ?? 0) : 0;
+  const stagedAttack = pd?.kind === "defend" ? pd.stagedAttack : undefined;
+  const stagedAttackModifiers = pd?.kind === "defend" ? pd.stagedAttackModifiers : undefined;
   /** declarative staging: send the full staged set (the server validates) */
   const stage = (ids: Iterable<number>) =>
     sendIntent({ kind: "stage-defenders", instanceIds: [...ids] });
@@ -738,17 +784,9 @@ export function GameBoard() {
       if (optionId !== undefined) send({ kind: "choose", optionId });
       return;
     }
-    if (boundedHandPick && boundedHandChoiceKey && boundedCardChoice) {
+    if (boundedHandPick) {
       const optionId = boundedHandPick.get(c.instanceId);
-      if (optionId === undefined) return;
-      setBoundedChoiceSelection((current) => ({
-        decisionKey: boundedHandChoiceKey,
-        optionIds: toggleBoundedCardChoice(
-          current?.decisionKey === boundedHandChoiceKey ? current.optionIds : [],
-          optionId,
-          boundedCardChoice.maximumSelections,
-        ),
-      }));
+      if (optionId !== undefined) toggleBoundedChoice(optionId);
       return;
     }
     if (resourcePayment) {
@@ -895,6 +933,7 @@ export function GameBoard() {
       }
     }
     const combatCards = view.chain.flatMap((link) => [link.attackingCard, ...link.defendingCards]);
+    const stackCards = view.stack.flatMap((layer) => (layer.card ? [layer.card] : []));
     const publicZoneCards = view.players.flatMap((player) => [
       ...player.banish,
       ...player.graveyard,
@@ -903,7 +942,7 @@ export function GameBoard() {
       ...Object.values(player.equipment).filter((card): card is CardView => card !== undefined),
     ]);
     const choices = [...ids].flatMap((id) => {
-      const card = [...combatCards, ...publicZoneCards]
+      const card = [...stackCards, ...combatCards, ...publicZoneCards]
         .find((candidate) => candidate.instanceId === id);
       if (!card) return [];
       const playPermission = targetPlayPermissionNote(intl, card);
@@ -1007,6 +1046,7 @@ export function GameBoard() {
             : "pass";
   const primaryActionDisabled =
     roomCommandPending ||
+    awaitingHandoff ||
     !connected ||
     (defending ? defendIntent === null : !derived.canPass);
   const triggerPrimaryAction = defending
@@ -1256,7 +1296,6 @@ export function GameBoard() {
           onSendEmote={sendEmote}
           onOpenOverlay={setOverlay}
           onOpenEffects={openEffectLedger}
-          standingOrders={standingOrders}
         />
 
         {/* center divider: a brass-inlay strip marking the seam */}
@@ -1345,11 +1384,15 @@ export function GameBoard() {
       {/* Fixed HUD sibling: keeping this outside .board guarantees that
           waiting-state changes cannot affect board layout or motion anchors. */}
       <div
-        className={`waiting${waitingForOpponent && !replaying ? "" : " waiting-hidden"}`}
+        className={`waiting${spectating ? " waiting-spectating" : ""}${waitingForOpponent && !replaying ? "" : " waiting-hidden"}`}
         aria-hidden={waitingForOpponent && !replaying ? undefined : true}
       >
         {spectating
-          ? intl.formatMessage({ id: "game.waiting.spectating" }, { hero: activeHeroName })
+          // Phones have no room for the hero's name here; the lit HUD
+          // portrait already says whose action is awaited.
+          ? mobileFloatViewport
+            ? intl.formatMessage({ id: "game.waiting.spectating.short" })
+            : intl.formatMessage({ id: "game.waiting.spectating" }, { hero: activeHeroName })
           : intl.formatMessage({ id: "game.waiting.opponent" })}
       </div>
 
@@ -1377,6 +1420,8 @@ export function GameBoard() {
         oppMarked={(opp.heroCounters?.marked ?? 0) > 0}
         myMarked={(me.heroCounters?.marked ?? 0) > 0}
         mySeat={seat}
+        priorityHolderSeat={priorityHolder}
+        priorityPulse={hasOwnPriority}
         log={view.log}
         logEntries={view.logEntries}
         activeHeroName={activeHeroName}
@@ -1413,6 +1458,8 @@ export function GameBoard() {
         visibility={mobileCombatFloatVisibility}
         staged={stagedDefenders}
         stagedDefense={stagedDefense}
+        stagedAttack={stagedAttack}
+        stagedAttackModifiers={stagedAttackModifiers}
         onUnstage={defending ? unstage : undefined}
         onUnstageAll={defending && stagedIds.size > 0
           ? () => {
@@ -1445,7 +1492,9 @@ export function GameBoard() {
           : null}
         pitchFocused={choosingPitch || pitchSource !== null}
         pending={{
-          decision: hidePriorityGuidance || showCardSearchOverlay ? null : pd,
+          decision: hidePriorityGuidance || showCardSearchOverlay || (awaitingHandoff && myDecision)
+            ? null
+            : pd,
           isMine: myDecision,
           playerName: (playerSeat) => view.players[playerSeat]?.heroName ?? "",
           optionCardLabels,
@@ -1462,13 +1511,14 @@ export function GameBoard() {
           onDisableGuidance: () => updateLessGuidance(true),
           onConfirmSkipArsenal: () => send({ kind: "pass" }),
           onCancelSkipArsenal: () => setConfirmSkipArsenal(false),
-          ...(boundedHandPick
+          ...(boundedCardChoice
             ? {
                 boundedChoiceSelectedOptionIds,
                 onConfirmBoundedChoice: () => send({
                   kind: "choose-many",
                   optionIds: [...boundedChoiceSelectedOptionIds],
                 }),
+                ...(boundedHandPick ? {} : { onToggleBoundedChoice: toggleBoundedChoice }),
               }
             : {}),
           onSend: send,
@@ -1593,6 +1643,8 @@ export function GameBoard() {
         onSkipPlayConfirmationChange={updateSkipPlayConfirmation}
         optionHotkeys={optionHotkeys}
         onOptionHotkeysChange={updateOptionHotkeys}
+        skipBotDelay={skipBotDelay}
+        onSkipBotDelayChange={betaTester && botGame && !spectating ? updateSkipBotDelay : null}
         motionPreference={motionPreference}
         onMotionPreferenceChange={updateMotionPreference}
         cardDisplayPreference={cardDisplayPreference}
@@ -1633,6 +1685,14 @@ export function GameBoard() {
             deck: opp.deckCount,
             arsenal: opp.arsenalCount,
           }}
+          {...(boundedCardChoice
+            ? {
+                selectedOptionIds: boundedChoiceSelectedOptionIds,
+                canSelect: (optionId: string) =>
+                  boundedCardChoiceSelectable(boundedCardChoice, boundedChoiceSelectedOptionIds, optionId),
+                onToggle: toggleBoundedChoice,
+              }
+            : {})}
           onSubmit={(optionIds) => send({ kind: "choose-many", optionIds: [...optionIds] })}
         />
       ) : null}

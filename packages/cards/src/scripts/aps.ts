@@ -271,29 +271,25 @@ export const aps: Record<string, CardScript> = {
       );
     },
     onHit(ctx) {
-      const hand = ctx.player(opponentSeat(ctx)).hand;
-      if (hand.length)
-        ctx.requestCardChoice(
-          "aps-tear-first",
-          decisionPrompt("Discard a card", "card.aps.card.discard.first"),
+      const target = opponentSeat(ctx);
+      const hand = ctx.player(target).hand;
+      const n = Math.min(2, hand.length);
+      if (n > 0)
+        ctx.requestCardChoices(
+          "aps-tear-discard",
+          decisionPrompt(`Choose ${n} ${n === 1 ? "card" : "cards"} to discard`, "card.aps.card.discard.choose", {
+            values: { count: n },
+          }),
           hand.map((card) => card.instanceId),
-          opponentSeat(ctx),
+          n,
+          n,
+          target,
         );
     },
-    onChoose(ctx, hook, option) {
-      if (hook === "aps-tear-first") {
-        ctx.discardCard(opponentSeat(ctx), Number(option));
-        const hand = ctx.player(opponentSeat(ctx)).hand;
-        if (hand.length)
-          ctx.requestCardChoice(
-            "aps-tear-second",
-            decisionPrompt("Discard another card", "card.aps.card.discard.next"),
-            hand.map((card) => card.instanceId),
-            opponentSeat(ctx),
-          );
-      } else if (hook === "aps-tear-second") {
-        ctx.discardCard(opponentSeat(ctx), Number(option));
-      }
+    onChooseMany(ctx, hook, options) {
+      if (hook !== "aps-tear-discard") return;
+      const target = opponentSeat(ctx);
+      for (const option of options) ctx.discardCard(target, Number(option));
     },
   },
   "thespian charm|2": {

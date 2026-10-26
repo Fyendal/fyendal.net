@@ -1,13 +1,13 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
 import {
   buffNextAttack,
+  canHeave,
   cardNameContains,
   commonOptionMessages,
   decisionMessage,
   decisionPrompt,
   entersArenaTrigger,
   heroDamage,
-  logHeaveUnaffordable,
   ongoingLabel,
   opponentSeat,
   previousAttackHasName,
@@ -301,38 +301,33 @@ function requestKnickSearch(ctx: ScriptCtx): void {
 
 const knickKnack: CardScript = {
   additionalCost(ctx) {
-    ctx.requestCardChoice(
+    const money = knickMoney(ctx);
+    if (!money.length) return;
+    ctx.requestCardChoices(
       "knick-money",
-      decisionPrompt("Destroy money tokens?", "card.evr.money.destroy", {
-        optionMessages: commonOptionMessages("done"),
-      }),
-      ["done", ...knickMoney(ctx).map((card) => card.instanceId)],
+      decisionPrompt("Choose any number of Copper, Silver, and Gold to destroy", "card.evr.knick.money.choose"),
+      money.map((card) => card.instanceId),
+      0,
+      money.length,
     );
   },
   onPlay(ctx) {
     ctx.setState("knickSearches", 1 + Math.floor(ctx.getState("knickUnits") / 4));
     requestKnickSearch(ctx);
   },
-  onChoose(ctx, hook, option) {
-    if (hook === "knick-money") {
-      if (option === "done") return;
+  onChooseMany(ctx, hook, options) {
+    if (hook !== "knick-money") return;
+    for (const option of options) {
       const card = knickMoney(ctx).find((candidate) => candidate.instanceId === Number(option));
-      if (!card) return;
+      if (!card || !ctx.destroyPermanent(card.instanceId)) continue;
       ctx.setState("knickUnits", ctx.getState("knickUnits") + moneyValue(ctx, card));
-      if (ctx.destroyPermanent(card.instanceId)) {
-        ctx.requestCardChoice(
-          "knick-money",
-          decisionPrompt("Destroy another money token?", "card.evr.money.destroy.next", {
-            optionMessages: commonOptionMessages("done"),
-          }),
-          ["done", ...knickMoney(ctx).map((candidate) => candidate.instanceId)],
-        );
-      }
-    } else if (hook === "knick-search") {
-      ctx.settleCard(Number(option));
-      ctx.setState("knickSearches", ctx.getState("knickSearches") - 1);
-      requestKnickSearch(ctx);
     }
+  },
+  onChoose(ctx, hook, option) {
+    if (hook !== "knick-search") return;
+    ctx.settleCard(Number(option));
+    ctx.setState("knickSearches", ctx.getState("knickSearches") - 1);
+    requestKnickSearch(ctx);
   },
 };
 
@@ -433,11 +428,10 @@ export const evrHighRarity: Record<string, CardScript> = {
         event: "end-of-turn",
         sourceZone: "hand",
         label: "Heave 3",
-        condition: (ctx) => ctx.hasArsenalSpace(),
+        canAccept: (ctx) => canHeave(ctx, 3),
         effect(ctx) {
-          const player = ctx.player(ctx.seat);
-          if (!ctx.hasArsenalSpace() || !player.hand.some((card) => card.instanceId === ctx.self.instanceId)) return;
-          if (!ctx.requestPayment(
+          if (!canHeave(ctx, 3)) return;
+          ctx.requestPayment(
             "pulverize-heave",
             decisionPrompt("Pulverize: pay {r}{r}{r} to heave it?", "card.evr.pulverize.pay", {
               values: { amount: 3 },
@@ -446,7 +440,7 @@ export const evrHighRarity: Record<string, CardScript> = {
             3,
             undefined,
             [ctx.self.instanceId],
-          )) logHeaveUnaffordable(ctx, 3);
+          );
         },
       },
     ],

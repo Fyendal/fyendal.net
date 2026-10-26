@@ -270,7 +270,7 @@
    there carries no information, unlike the hero name across the top. */
 .effect-pins {
   position: absolute;
-  z-index: 13;
+  z-index: 4;
   top: 16%;
   left: -9px;
   display: flex;
@@ -301,7 +301,7 @@
 
 /* Phone heroes are short; smaller pins keep three inside the card. */
 @media (max-width: 700px) {
-  .effect-pins { top: 12%; gap: 2px; }
+  .effect-pins { top: 12%; left: 2px; gap: 2px; }
   .effect-pin { width: 20px; height: 17px; }
   .effect-pin .ui-icon { font-size: 12px; }
 }

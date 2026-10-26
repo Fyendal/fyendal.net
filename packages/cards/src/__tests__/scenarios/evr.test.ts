@@ -244,6 +244,7 @@ describe("EVR — registration and combat designs", () => {
     s.expectNotInZone(0, "frostbite|0", "board");
     expect(s.state.stack[0]?.engineEffect?.kind).toBe("on-defend-hook");
     expect(s.state.pendingDecision?.kind).toBe("priority-window");
+    expect(projectStateFor(s.state, 0).stackContext).toBe("DEFEND STEP · TRIGGERS");
 
     s.settle().expectInZone(0, "frostbite|0", "board");
   });
@@ -740,5 +741,31 @@ describe("EVR — Sigil of Parapets", () => {
       .react("sigil of brilliance|2", { settle: false })
       .settle();
     s.expectLife(1, 20 - (7 - (2 + 2 + 2)));
+  });
+});
+
+describe("EVR — Amulet of Echoes", () => {
+  it("makes the target hero choose exactly 2 cards to discard at once", () => {
+    const g = scenario({
+      active: 1,
+      seats: [
+        { hero: "rhinar", board: ["amulet of echoes|3"] },
+        { hero: "dorinthea", hand: ["nimblism|3", "nimblism|3", BLUE, RED_SIX, "head jab|1"] },
+      ],
+    });
+    g.play("nimblism|3").play("nimblism|3", { settle: false }).passPriority();
+    g.activate("amulet of echoes|3");
+    g.chooseOption("opposing hero");
+    const pd = g.state.pendingDecision!;
+    expect(pd.chooseHook).toBe("echoes-discard");
+    expect(pd.player).toBe(1);
+    expect([pd.minimumSelections, pd.maximumSelections]).toEqual([2, 2]);
+    const hand = g.state.players[1]!.hand;
+    const discarded = [BLUE, RED_SIX].map((key) =>
+      String(hand.find((card) => card.cardId === printingId(key))!.instanceId),
+    );
+    expect(() => g.doRaw({ kind: "choose-many", optionIds: discarded.slice(0, 1) })).toThrow(/selection count/);
+    g.chooseMany(discarded).settle();
+    g.expectInZone(1, BLUE, "graveyard").expectInZone(1, RED_SIX, "graveyard").expectInZone(1, "head jab|1", "hand");
   });
 });

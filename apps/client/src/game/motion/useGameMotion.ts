@@ -21,6 +21,7 @@ import {
   EMPTY_MOTION_BATCH_QUEUE,
   enqueueMotionBatch,
   motionQueueBlocksTurnStartUi,
+  motionQueueIsSettled,
   queuedSourceFlights,
   type MotionBatchQueue,
 } from "./motionBatchQueue.js";
@@ -73,6 +74,11 @@ export function useGameMotion({
   combatPresentation: ReturnType<typeof motionCombatPresentation>;
   queuedSources: readonly MotionFlight[];
   turnStartUiReady: boolean;
+  /** Nothing is in flight for the rendered view. */
+  motionSettled: boolean;
+  /** Same as `motionSettled`, read from the queue after this commit's
+   * layout effect has processed the latest view. */
+  isMotionSettled: () => boolean;
   arriveFlight: (batchId: string, destinationPresentationKey?: string) => boolean;
   departFlight: (batchId: string, flight: MotionDeparture) => void;
   completeBatch: (batchId: string) => void;
@@ -196,6 +202,8 @@ export function useGameMotion({
       batchId, destinationPresentationKey, maskedElementsRef.current,
     );
   }, []);
+
+  const isMotionSettled = useCallback(() => motionQueueIsSettled(batchQueueRef.current), []);
 
   const departFlight = useCallback((batchId: string, flight: MotionDeparture) => {
     if (batchQueueRef.current.active?.id !== batchId) return;
@@ -383,6 +391,8 @@ export function useGameMotion({
     ),
     queuedSources: queuedSourceFlights(queue),
     turnStartUiReady: !motionQueueBlocksTurnStartUi(queue),
+    motionSettled: motionQueueIsSettled(queue),
+    isMotionSettled,
     arriveFlight,
     departFlight,
     completeBatch,

@@ -403,6 +403,8 @@ const KEYWORD_OVERRIDES: Record<string, string[]> = {
   "breed anger|1": ["Combo"],
   "breed anger|2": ["Combo"],
   "breed anger|3": ["Combo"],
+  // Murky Water only gains dominate while it has an aim counter.
+  "murky water|1": ["Riptide Specialization"],
   // Spectral Rider only GAINS overpower if you control a Spectral Shield
   "spectral rider|3": ["Phantasm"],
   // Blaze Headlong only GAINS go again if you've played another red card this turn

@@ -18,8 +18,7 @@ afterEach(() => {
 });
 
 describe("BotOpponentModal", () => {
-  it("offers Ira, Hala, Cindra, Jarl, Levia, and Boltyn to beta testers in a focused opponent dialog", () => {
-    botModalStore.state = { betaTester: true } as StoreState;
+  it("offers Ira, Hala, Cindra, Jarl, Levia, and Boltyn in a focused opponent dialog", () => {
     const html = renderToStaticMarkup(
       <TestI18nProvider>
         <BotOpponentModal format="cc" onSelect={vi.fn()} onClose={vi.fn()} />
@@ -60,18 +59,6 @@ describe("BotOpponentModal", () => {
     expect(html.match(/aria-hidden="true"/g)).toHaveLength(1);
   });
 
-  it("hides the beta-only Boltyn bot from other players", () => {
-    const html = renderToStaticMarkup(
-      <TestI18nProvider>
-        <BotOpponentModal format="cc" onSelect={vi.fn()} onClose={vi.fn()} />
-      </TestI18nProvider>,
-    );
-
-    expect(html).toContain("Levia");
-    expect(html).not.toContain("Boltyn");
-    expect(html).not.toContain("Breaker of Dawn");
-  });
-
   it("offers Kayo, Briar, and Bravo for Silver Age", () => {
     const html = renderToStaticMarkup(
       <TestI18nProvider>
@@ -109,7 +96,7 @@ describe("BotOpponentModal", () => {
     expect(html).toContain("Bravo");
   });
 
-  it("starts with matchmaking checked even when the saved preference is disabled", () => {
+  it("restores a disabled matchmaking preference", () => {
     const getItem = vi.fn((key: string) => key === BOT_MATCHMAKING_PREFERENCE_STORAGE_KEY
       ? JSON.stringify({ version: 1, searchForPlayer: false })
       : null);
@@ -124,7 +111,7 @@ describe("BotOpponentModal", () => {
     );
 
     expect(html).toContain('type="checkbox"');
-    expect(html).toContain('type="checkbox" checked=""');
-    expect(getItem).not.toHaveBeenCalled();
+    expect(html).not.toContain('type="checkbox" checked=""');
+    expect(getItem).toHaveBeenCalledWith(BOT_MATCHMAKING_PREFERENCE_STORAGE_KEY);
   });
 });

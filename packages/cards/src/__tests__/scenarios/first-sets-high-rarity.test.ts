@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { functionalKeyOf } from "../../functional.js";
 import { cardData } from "../../index.js";
-import { scenario } from "../harness.js";
+import { printingId, scenario } from "../harness.js";
 
 const NO_EQUIPMENT = { head: null, chest: null, arms: null, legs: null } as const;
 
@@ -12,6 +12,63 @@ describe("WTR, ARC, and CRU high-rarity cards", () => {
       { hero: "dorinthea", life: 20, equipment: NO_EQUIPMENT },
     ] });
     g.play("blessing of deliverance|3", { pitch: ["heart of fyendal|3"] }).expectLife(0, 11);
+  });
+
+  it("Remembrance shuffles up to 3 chosen graveyard actions into the deck", () => {
+    const g = scenario({ seats: [
+      {
+        hero: "rhinar",
+        hand: ["remembrance|2"],
+        deck: ["raging onslaught|3"],
+        graveyard: ["snatch|1", "snatch|2", "snatch|3", "head jab|1", "ironrot gauntlet|0"],
+        equipment: NO_EQUIPMENT,
+      },
+      { hero: "dorinthea", equipment: NO_EQUIPMENT },
+    ] });
+    g.play("remembrance|2");
+    const pd = g.state.pendingDecision!;
+    expect(pd.chooseHook).toBe("remembrance-card");
+    expect([pd.minimumSelections, pd.maximumSelections]).toEqual([0, 3]);
+    expect(pd.options).toHaveLength(4);
+    const graveyardId = (key: string) =>
+      String(g.state.players[0]!.graveyard.find((c) => c.cardId === printingId(key))!.instanceId);
+    const all = ["snatch|1", "snatch|2", "snatch|3", "head jab|1"].map(graveyardId);
+    expect(() => g.doRaw({ kind: "choose-many", optionIds: all })).toThrow();
+    g.chooseMany(all.slice(1))
+      .settle()
+      .expectZoneSize(0, "deck", 4)
+      .expectInZone(0, "snatch|1", "graveyard")
+      .expectInZone(0, "ironrot gauntlet|0", "graveyard")
+      .expectInZone(0, "head jab|1", "deck")
+      .expectInZone(0, "remembrance|2", "banish");
+  });
+
+  it("Argh... Smash! destroys up to half the roll of chosen opposing items", () => {
+    const smash = (seed: number) => {
+      const g = scenario({ seed, seats: [
+        { hero: "rhinar", hand: ["argh... smash!|2"], resources: 3, equipment: NO_EQUIPMENT },
+        {
+          hero: "dorinthea",
+          board: ["cognition nodes|3", "aether sink|2", "convection amplifier|1"],
+          equipment: NO_EQUIPMENT,
+        },
+      ] });
+      g.play("argh... smash!|2");
+      return g;
+    };
+    let g = smash(1);
+    for (let seed = 2; seed <= 40 && g.state.pendingDecision?.maximumSelections !== 2; seed++) g = smash(seed);
+    const pd = g.state.pendingDecision!;
+    expect(pd.chooseHook).toBe("smash-item");
+    expect([pd.minimumSelections, pd.maximumSelections]).toEqual([0, 2]);
+    expect(pd.options).toHaveLength(3);
+    const boardId = (key: string) =>
+      String(g.state.players[1]!.board.find((c) => c.cardId === printingId(key))!.instanceId);
+    g.chooseMany([boardId("cognition nodes|3"), boardId("convection amplifier|1")])
+      .settle()
+      .expectInZone(1, "cognition nodes|3", "graveyard")
+      .expectInZone(1, "convection amplifier|1", "graveyard")
+      .expectInZone(1, "aether sink|2", "board");
   });
 
   it("Command and Conquer blocks defense reactions and destroys arsenal on hit", () => {

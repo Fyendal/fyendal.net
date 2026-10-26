@@ -220,6 +220,10 @@ export interface StackLayer {
   optional: boolean;
   /** Space default snapshotted from the trigger definition when queued. */
   defaultOption?: "yes" | "no";
+  /** A hidden triggered ability (CR 5.4.7b) whose private source's owner has
+   *  not yet decided to trigger it. It is offered as it resolves and is not
+   *  projected until then. */
+  hiddenSource?: true;
   /** Optional triggers: set once the controller accepted the trigger (the
    *  trigger itself has resolved; its effect still awaits stack resolution) */
   accepted?: boolean;
@@ -469,6 +473,8 @@ export interface Modifier {
    * Multiplication, division, and ordinary power adjustments apply later. */
   basePower?: number;
   attack?: number;
+  /** Set `attack` to the matching attack's base power when this attaches. */
+  attackFromBasePower?: boolean;
   /** Add this much to each matching positive power-gain event after other
    * replacements. With `once`, consume this modifier after the first event. */
   powerGainBonus?: number;
@@ -1015,6 +1021,18 @@ export interface PendingDecisionState extends PendingDecision {
         boost?: boolean;
         boostCount?: number;
         asInstant?: boolean;
+        alternativeCostCardInstanceIds?: number[];
+        targetCardInstanceId?: number;
+        declaredVariableX?: number;
+      }
+    | {
+        kind: "continue-reaction-after-declaration";
+        seat: number;
+        instanceId: number;
+        pitchInstanceIds: number[];
+        from: "hand" | "arsenal" | PlayableZone;
+        meldSide?: MeldSide;
+        targetAllyId?: number;
         alternativeCostCardInstanceIds?: number[];
         targetCardInstanceId?: number;
         declaredVariableX?: number;

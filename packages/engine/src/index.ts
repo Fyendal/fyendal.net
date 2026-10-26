@@ -33,6 +33,7 @@ import {
 } from "./project.js";
 import {
   anyWindowAction as anyWindowActionImpl,
+  answerHiddenTrigger,
   answerTriggerChoice,
   answerTriggerOrder,
   answerTriggerOrderList,
@@ -215,6 +216,7 @@ function dispatchPlay(
       undefined,
       undefined,
       alternativeCostCardInstanceIds,
+      targetAllyId,
     );
   }
   if (state.phase === "reaction") {
@@ -227,6 +229,9 @@ function dispatchPlay(
       meldSide,
       alternativeCostCardInstanceIds,
       targetCardInstanceId,
+      undefined,
+      undefined,
+      targetAllyId,
     );
   }
   return playCard(
@@ -331,6 +336,7 @@ function answerScriptedDecision(
         pending.targetCardInstanceId,
         pending.from === "hand" || pending.from === "arsenal" ? undefined : pending.from,
         pending.declaredX,
+        pending.targetAllyId,
       );
     }
     if (pending.mode === "window") {
@@ -345,6 +351,7 @@ function answerScriptedDecision(
         pending.from === "hand" || pending.from === "arsenal" ? undefined : pending.from,
         pending.declaredX,
         pending.alternativeCostCardInstanceIds,
+        pending.targetAllyId,
       );
     }
     return playCard(
@@ -465,6 +472,7 @@ function answerScriptedDecision(
   if (pd.chooseHook === "trigger-choice") return answerTriggerChoice(state, runtime, seat, optionId);
   if (pd.chooseHook === "trigger-order") return answerTriggerOrder(state, runtime, seat, optionId);
   if (pd.chooseHook === "trigger-target") return answerTriggerTarget(state, runtime, seat, optionId);
+  if (pd.chooseHook === "hidden-trigger") return answerHiddenTrigger(state, runtime, seat, optionId);
   if (pd.chooseHook === "engine-end-phase-pitch-order") {
     return answerEndPhasePitchOrder(state, runtime, seat, optionId);
   }
@@ -626,9 +634,10 @@ export function applyIntent(
           intent.zone,
           undefined,
           intent.alternativeCostCardInstanceIds,
+          intent.targetAllyId,
         );
       } else if (next.phase === "reaction") {
-        err = playReaction(next, runtime, seat, found.card, false, intent.pitchInstanceIds, intent.meldSide, intent.alternativeCostCardInstanceIds, intent.targetCardInstanceId, intent.zone);
+        err = playReaction(next, runtime, seat, found.card, false, intent.pitchInstanceIds, intent.meldSide, intent.alternativeCostCardInstanceIds, intent.targetCardInstanceId, intent.zone, undefined, intent.targetAllyId);
       } else {
         err = playCard(next, runtime, seat, intent.instanceId, intent.pitchInstanceIds, intent.zone, intent.meldSide, intent.targetAllyId, intent.boost, intent.boostCount, intent.asInstant, intent.alternativeCostCardInstanceIds, intent.targetCardInstanceId);
       }

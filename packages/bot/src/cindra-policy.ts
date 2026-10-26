@@ -3,6 +3,7 @@ import {
   attackIntentVariantKey,
   allyLethalThreshold,
   chooseScoredIntent,
+  canGainGoAgain,
   currentLink,
   enforceSpectraPolicy,
   functionalKey as key,
@@ -316,7 +317,7 @@ function flightPathHasPayoff(
   excludedIds: ReadonlySet<number> = new Set(),
 ): boolean {
   const link = currentLink(input);
-  if (!link || link.attackingCard.owner !== input.seat || link.goAgain === true ||
+  if (!link || link.attackingCard.owner !== input.seat || !canGainGoAgain(link) ||
     !isDraconicCard(link.attackingCard, input)) return false;
   const remainingHand = input.view.players[input.seat].hand.filter((card) =>
     !excludedIds.has(card.instanceId)

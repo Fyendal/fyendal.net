@@ -552,11 +552,10 @@ function defendedByClassToken(className: string, tokenId: string): CardScript {
   };
 }
 
-function pitchCondition(kind: "go" | "token" | "power", tokenId = VIGOR): CardScript {
+function pitchCondition(kind: "token" | "power", tokenId = VIGOR): CardScript {
   return {
     onAttackDeclared(ctx) {
       if (!hasSixPlusInPitch(ctx)) return;
-      if (kind === "go") ctx.grantGoAgain();
       if (kind === "token") ctx.createToken(tokenId);
       if (kind === "power") ctx.addModifier({ scope: "chain-link", attack: 1 });
     },
@@ -567,7 +566,7 @@ function flex(kind: "speed" | "strength"): CardScript {
   return kind === "speed"
     ? {
         onAttackDeclared(ctx) {
-          if (ctx.currentAttackPower() >= 6) ctx.grantGoAgain();
+          ctx.addModifier({ scope: "chain-link", goAgainIfAttackPowerAtLeast: 6 });
         },
       }
     : {
@@ -964,7 +963,7 @@ export const sup: Record<string, CardScript> = {
   },
   "bash guardian|1": bashHero("guardian"),
   "familiar stench|1": defendedByClassToken("brute", VIGOR),
-  "buckwild|2": pitchCondition("go"),
+  "buckwild|2": { hasConditionalGoAgain: hasSixPlusInPitch },
   ...pitches("flex speed", () => flex("speed")),
   ...pitches("flex strength", () => flex("strength")),
   ...pitches("give 'em a piece of your mind", () => missCreates(VIGOR)),
@@ -1231,7 +1230,7 @@ Object.assign(sup, {
     },
   },
   "numbskull charm|2": {
-    additionalCost(ctx: ScriptCtx) {
+    declareAdditionalCost(ctx: ScriptCtx) {
       ctx.setState("numbskull-modes", 0);
       requestNumbskullCharmMode(ctx);
     },
@@ -1310,8 +1309,12 @@ Object.assign(sup, {
     },
     onChoose(ctx: ScriptCtx, hook: string, option: string) {
       if (hook === "hero-alone-card") {
-        ctx.addCardTempPower(Number(option), -3);
-        ctx.addCardTempDefense(Number(option), -3);
+        const id = Number(option);
+        // A weapon stays in the arena, so its temporary power would outlive the link.
+        if (id === ctx.link?.attackingCard.instanceId)
+          ctx.addModifier({ scope: "chain-link", attack: -3, appliesToInstanceId: id });
+        else ctx.addCardTempPower(id, -3);
+        ctx.addCardTempDefense(id, -3);
       }
     },
   },
@@ -1938,14 +1941,7 @@ Object.assign(sup, {
   },
   "unwavering resolve|1": {
     modifyAttack: (ctx: ScriptCtx) => (ctx.player(ctx.seat).deck.length === 0 ? 4 : 0),
-    friendlyDefendedTrigger: {
-      label: "If this is defended by 3 or more cards",
-      condition: (ctx) =>
-        ctx.link?.attackingCard.instanceId === ctx.self.instanceId && (ctx.link?.defendingCards.length ?? 0) >= 3,
-    },
-    onFriendlyDefended(ctx: ScriptCtx) {
-      if ((ctx.link?.defendingCards.length ?? 0) >= 3) ctx.grantGoAgain();
-    },
+    hasConditionalGoAgain: (ctx: ScriptCtx) => (ctx.link?.defendingCards.length ?? 0) >= 3,
   },
   "beat the same drum|3": {
     onPlay(ctx: ScriptCtx) {
@@ -2014,7 +2010,7 @@ Object.assign(sup, {
       !ctx.link.resolved &&
       ctx.link.attacker === ctx.seat &&
       named(ctx, ctx.link.attackingCard, "dawnblade"),
-    additionalCost(ctx: ScriptCtx) {
+    declareAdditionalCost(ctx: ScriptCtx) {
       const counters = Math.max(0, Number(ctx.link?.attackingCard.counters?.power ?? 0));
       const count = Math.min(BEAT_OF_THE_IRONSONG_MODES.length, counters + 1);
       ctx.setState("beat-modes-remaining", count);

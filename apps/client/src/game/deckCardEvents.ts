@@ -1,4 +1,4 @@
-import type { CardView, GameView, PlayerView } from "@fyendal/shared";
+import type { CardView, GameView, PendingDecision, PlayerView } from "@fyendal/shared";
 import { cardData } from "@fyendal/cards/client";
 
 export type DeckCardEventKind = "banish" | "graveyard" | "reveal" | "shuffle" | "roll" | "numbers";
@@ -189,6 +189,36 @@ function revealLabelFromLog(line: string): string {
     /\bis fused\b/i.test(visibleLine)
   ) return "Revealed from hand";
   return "Revealed from deck";
+}
+
+/** Revealed cards a pending choice carries only as context: none of them is a
+ * selectable option, so the reveal toast shows them rather than the panel. */
+export function contextRevealedCards(decision: PendingDecision | null | undefined): CardView[] {
+  const revealed = decision?.revealedCards ?? [];
+  const options = new Set(decision?.options ?? []);
+  return revealed.some((card) => options.has(String(card.instanceId))) ? [] : revealed;
+}
+
+/** The reveal toast for a choice's context cards, rebuilt from authoritative
+ * state so undo, reload, and reconnect bring it back with the choice. */
+export function decisionRevealEvent(view: GameView): DeckCardEvent | null {
+  const cards = contextRevealedCards(view.pendingDecision);
+  if (cards.length === 0) return null;
+  const cardIds = cards.map((card) => card.cardId);
+  let fromHand = false;
+  for (const entry of view.logEntries ?? []) {
+    const event = "event" in entry ? entry.event : undefined;
+    if (event?.kind !== "cards-revealed") continue;
+    const logged = new Set(event.cards.map((logCard) => logCard.cardId));
+    if (cardIds.every((cardId) => logged.has(cardId))) fromHand = event.sourceZone === "hand";
+  }
+  return {
+    kind: "reveal",
+    cardIds,
+    label: fromHand ? "Revealed from hand" : "Revealed from deck",
+    sourceZone: fromHand ? "hand" : "deck",
+    cardSeats: cards.map((card) => card.owner),
+  };
 }
 
 /** Compare consecutive authoritative public views and return card movements

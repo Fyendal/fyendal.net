@@ -94,8 +94,11 @@ describe("Monarch, Tales of Aria, and Everfest rules regression coverage", () =>
       { hero: "rhinar", hand: ["head jab|1", "beacon of victory|2"], soul: ["soul food|2", "tome of divinity|2"], equipment: NO_EQUIPMENT },
       { hero: "dorinthea", equipment: NO_EQUIPMENT },
     ] });
-    g.play("head jab|1").blockWith().react("beacon of victory|2")
-      .chooseOption("x:2").chooseCard("soul food|2").chooseCard("tome of divinity|2").settle();
+    g.play("head jab|1").blockWith().react("beacon of victory|2").chooseOption("x:2");
+    const pd = g.state.pendingDecision!;
+    expect(pd.chooseHook).toBe("beacon-soul");
+    expect([pd.minimumSelections, pd.maximumSelections]).toEqual([2, 2]);
+    g.chooseMany(g.state.players[0]!.soul.map((card) => String(card.instanceId))).settle();
     expect(g.state.players[0]!.soul).toHaveLength(0);
     expect(g.state.players[0]!.banish).toHaveLength(2);
     expect(g.state.chain.at(-1)?.finalAttack).toBe(5);
@@ -106,8 +109,12 @@ describe("Monarch, Tales of Aria, and Everfest rules regression coverage", () =>
       { hero: "rhinar", hand: ["celestial cataclysm|2"], soul: ["soul food|2", "tome of divinity|2", "beacon of victory|2"], equipment: NO_EQUIPMENT },
       { hero: "dorinthea", equipment: NO_EQUIPMENT },
     ] });
-    g.play("celestial cataclysm|2").chooseCard("soul food|2").chooseCard("tome of divinity|2")
-      .chooseCard("beacon of victory|2").blockWith().settle();
+    g.play("celestial cataclysm|2");
+    const pd = g.state.pendingDecision!;
+    expect(pd.chooseHook).toBe("cataclysm-soul");
+    expect([pd.minimumSelections, pd.maximumSelections]).toEqual([3, 3]);
+    g.chooseMany(g.state.players[0]!.soul.map((card) => String(card.instanceId)))
+      .settle().blockWith().settle();
     expect(g.state.players[0]!.soul).toHaveLength(0);
     expect(g.state.players[0]!.banish).toHaveLength(3);
   });
@@ -323,9 +330,12 @@ describe("Monarch, Tales of Aria, and Everfest rules regression coverage", () =>
       { hero: "rhinar", board: ["copper|0", "copper|0", "copper|0", "copper|0"], hand: ["knick knack bric-a-brac|1"], deck: ["amulet of assertiveness|2", "healing potion|3", "head jab|1"], resources: 3, equipment: NO_EQUIPMENT },
       { hero: "dorinthea", equipment: NO_EQUIPMENT },
     ] });
-    g.play("knick knack bric-a-brac|1")
-      .chooseCard("copper|0").chooseCard("copper|0").chooseCard("copper|0").chooseCard("copper|0")
-      .chooseOption("done").chooseCard("amulet of assertiveness|2").chooseCard("healing potion|3");
+    g.play("knick knack bric-a-brac|1");
+    const pd = g.state.pendingDecision!;
+    expect(pd.chooseHook).toBe("knick-money");
+    expect([pd.minimumSelections, pd.maximumSelections]).toEqual([0, 4]);
+    g.chooseMany(pd.options!).settle()
+      .chooseCard("amulet of assertiveness|2").chooseCard("healing potion|3");
     expect(g.state.players[0]!.board.map((card) => cardData[card.cardId]?.name)).toEqual(
       expect.arrayContaining(["Amulet of Assertiveness", "Healing Potion"]),
     );

@@ -13,6 +13,8 @@ export const PONDER_TOKEN_VALUE = 3;
 export const SPIRIT_OF_EIRINA_VALUE = 3;
 /** A Tunic energy counter: a third of the resource that funds V of the Vanguard. */
 export const TUNIC_COUNTER_VALUE = 0.4;
+/** An uncracked Energy Potion: two resources at the Tunic's rate. */
+export const ENERGY_POTION_VALUE = 6 * TUNIC_COUNTER_VALUE;
 /** A drawn card, matching the on-hit draw value in value.ts. */
 export const CARD_DRAW_VALUE = 3;
 /** Beacon of Victory's search: a chosen power card in hand. */
@@ -118,15 +120,23 @@ export function solverChargeCost(card: SolverCard): number {
   return Math.max(explicit ?? 0, offense, card.heldValue);
 }
 
-/** Hand cards other than `selfId`, cheapest charge first, yellow on ties. */
+/** Hand cards other than `selfId`, cheapest charge first, yellow on ties.
+ * Yellow leads while a held Duty Bound Blitz still waits on one: a cheaper
+ * red charge would strand every Blitz. */
 export function chargeCandidates(view: SolverView, selfId: number): SolverCard[] {
-  return view.held
-    .filter((card) => card.zone === "hand" && card.instanceId !== selfId && !isCharged(view, card.instanceId))
-    .sort((left, right) =>
-      solverChargeCost(left) - solverChargeCost(right) ||
-      (right.pitch === 2 ? 1 : 0) - (left.pitch === 2 ? 1 : 0) ||
-      left.instanceId - right.instanceId
-    );
+  const candidates = view.held
+    .filter((card) => card.zone === "hand" && card.instanceId !== selfId && !isCharged(view, card.instanceId));
+  const yellowFirst = view.flag("soulYellow") === 0 && view.held.some((card) =>
+    card.instanceId !== selfId && !isCharged(view, card.instanceId) &&
+    card.name.toLowerCase() === "duty bound blitz"
+  );
+  const yellow = (card: SolverCard) => card.pitch === 2 ? 1 : 0;
+  return candidates.sort((left, right) =>
+    (yellowFirst ? yellow(right) - yellow(left) : 0) ||
+    solverChargeCost(left) - solverChargeCost(right) ||
+    yellow(right) - yellow(left) ||
+    left.instanceId - right.instanceId
+  );
 }
 
 /** Charged cards stay in the solver's hand, so a flag keeps them out of the line. */
@@ -346,6 +356,8 @@ export function boltynSolverRules(input: BotPolicyInput): HeroSolverRules {
           return patch;
         case LUMINA_ASCENSION:
           if (spiritInArena) patch.kind = "instant";
+          // The policy plays an action Lumina only once charged.
+          else patch.canPlay = charged;
           patch.uses = { pump: 5 };
           patch.replaceAfter = true;
           patch.after = (view) => ({
@@ -385,8 +397,9 @@ export function boltynSolverRules(input: BotPolicyInput): HeroSolverRules {
           return patch;
         case BEACON_OF_VICTORY:
           patch.reactionPower = 1;
-          patch.canPlay = (view) => soulLeft(view) >= 1;
-          patch.bonusIn = (view) => charged(view) ? BEACON_SEARCH_VALUE : 0;
+          // The policy holds it until a charge enables the search.
+          patch.canPlay = (view) => charged(view) && soulLeft(view) >= 1;
+          patch.bonusIn = () => BEACON_SEARCH_VALUE;
           patch.after = (view) => ({
             flags: {
               soulSpent: view.flag("soulSpent") + 1,
@@ -420,6 +433,8 @@ export function boltynSolverRules(input: BotPolicyInput): HeroSolverRules {
           patch.after = () => ({ flags: { suraya: 1 } });
           return patch;
         case SPIRIT_OF_EIRINA:
+          // Charged from hand it enters the arena for free; from arsenal it costs the action point.
+          patch.uses = { handOnly: true };
           patch.bonusIn = (view) => view.flag("spirit") > 0 ? 0 : SPIRIT_OF_EIRINA_VALUE;
           patch.after = () => ({ flags: { spirit: 1 } });
           return patch;
@@ -505,16 +520,19 @@ export function boltynSolverRules(input: BotPolicyInput): HeroSolverRules {
 /** Later-turn value is uncertain and credited at this share. */
 export const POSITION_DISCOUNT = 0.6;
 
-/** Discounted board value the planner credits at the end of a line. */
-export function boltynPositionValue(input: BotPolicyInput): number {
+/** Discounted board value the planner credits at the end of a line.
+ * `offenseRate` is the planner's response weighting for a later swing. */
+export function boltynPositionValue(input: BotPolicyInput, offenseRate = 1): number {
   const me = input.view.players[input.seat];
   const board = (name: string) => boardCount(input, name);
   const tunicCounters = Number(me.equipment.chest?.counters?.energy ?? 0);
   return POSITION_DISCOUNT * (me.soul.length * SOUL_VALUE +
     tunicCounters * TUNIC_COUNTER_VALUE +
+    board("energy potion") * ENERGY_POTION_VALUE +
     board("courage") * COURAGE_TOKEN_VALUE +
     board("quicken") * QUICKEN_TOKEN_VALUE +
-    board("flurry") * FLURRY_TOKEN_VALUE +
+    // One weapon attack destroys every Flurry for a single extra swing.
+    (board("flurry") > 0 ? FLURRY_TOKEN_VALUE * offenseRate : 0) +
     board("ponder") * PONDER_TOKEN_VALUE +
     (board("spirit of eirina") > 0 ? SPIRIT_OF_EIRINA_VALUE : 0) +
     board("blessing of bellona") * (SOUL_VALUE + COURAGE_TOKEN_VALUE) +

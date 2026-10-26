@@ -30,7 +30,7 @@ function poxedJarl(life: number): GameState {
 function playOutTurn(state: GameState): GameState {
   let current = state;
   for (let step = 0; step < 40 && current.turn === state.turn && current.phase !== "game-over"; step++) {
-    const seat = current.pendingDecision?.player ?? current.priority ?? current.activePlayer;
+    const seat = current.pendingDecision?.player ?? current.priorityPlayer ?? current.activePlayer;
     const intent = seat === 0
       ? BOT_DEFINITIONS.jarl.chooseIntent(inputFor(current, 0))
       : legalIntents(current, 1).find((candidate) => candidate.kind === "pass") ?? legalIntents(current, 1)[0]!;

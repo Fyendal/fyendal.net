@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { legalIntents } from "@fyendal/engine";
 import { cardData, isImplemented } from "../../index.js";
 import { functionalKeyOf } from "../../functional.js";
-import { scenario } from "../harness.js";
+import { printingId, scenario } from "../harness.js";
 
 const NO_EQUIPMENT = { head: null, chest: null, arms: null, legs: null } as const;
 
@@ -275,5 +275,42 @@ describe("MPW — import and Warrior mastery", () => {
       .blockWith("raging onslaught|1", "raging onslaught|1")
       .settle()
       .expectWinner(1);
+  });
+});
+
+describe("MPW — Lessons Learned", () => {
+  it("shuffles up to 3 chosen attack reactions with different names into the deck", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          hand: ["lessons learned|3"],
+          deck: ["raging onslaught|1"],
+          graveyard: ["run through|1", "run through|3", "quicksilver dance|3", "raging onslaught|2"],
+        },
+        { hero: "dorinthea" },
+      ],
+    });
+    const graveyardId = (key: string) =>
+      String(g.state.players[0]!.graveyard.find((card) => card.cardId === printingId(key))!.instanceId);
+
+    g.play("lessons learned|3", { settle: false });
+    while (g.state.pendingDecision?.chooseHook !== "lessons-learned") g.passPriority();
+    const pd = g.state.pendingDecision!;
+    expect(pd.distinctCardNames).toBe(true);
+    expect([pd.minimumSelections, pd.maximumSelections]).toEqual([0, 3]);
+    expect(pd.options).toHaveLength(3);
+
+    expect(() =>
+      g.doRaw({ kind: "choose-many", optionIds: [graveyardId("run through|1"), graveyardId("run through|3")] })
+    ).toThrow(/different names/);
+    g.chooseMany([graveyardId("quicksilver dance|3"), graveyardId("run through|3")])
+      .settle();
+
+    g.expectZoneSize(0, "deck", 3)
+      .expectInZone(0, "run through|3", "deck")
+      .expectInZone(0, "quicksilver dance|3", "deck")
+      .expectInZone(0, "run through|1", "graveyard")
+      .expectInZone(0, "raging onslaught|2", "graveyard");
   });
 });

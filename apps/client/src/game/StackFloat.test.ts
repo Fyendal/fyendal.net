@@ -100,7 +100,7 @@ describe("stack context", () => {
       context: "DAMAGE STEP · ON-HIT TRIGGERS",
     });
 
-    expect(html).toContain("The Stack");
+    expect(html).toContain('stack-title">Stack</span>');
     expect(html).toContain("stack-context");
     expect(html).toContain("DAMAGE STEP · ON-HIT TRIGGERS");
     expect(html).toContain('aria-label="Minimize stack"');
@@ -166,7 +166,7 @@ describe("stack context", () => {
       layers: [{ card: null, seat: 0, label: "Create an Eloquence token", optional: true }],
     });
 
-    expect(html).toContain("The Stack");
+    expect(html).toContain('stack-title">Stack</span>');
     expect(html).toContain("Trigger");
     expect(html).toContain("Create an Eloquence token");
     expect(html).toContain("(may)");

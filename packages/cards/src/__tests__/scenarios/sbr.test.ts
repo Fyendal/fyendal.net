@@ -88,7 +88,7 @@ describe("SBR — Bravo and equipment", () => {
         { hero: "dorinthea", hand: [] },
       ],
     });
-    g.settle().doRaw({ kind: "pass" }).settle();
+    g.settle().doRaw({ kind: "pass" }).settle().chooseOption("yes");
     g.chooseOption("pitch Edge of Their Seats");
     g.expectInZone(0, "thunder quake|3", "arsenal").expectZoneSize(0, "board", 3);
     expect(g.state.players[0]!.arsenal[0]?.faceDown).not.toBe(true);

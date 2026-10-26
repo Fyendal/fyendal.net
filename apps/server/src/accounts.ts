@@ -16,6 +16,7 @@ import {
 import { exportSocialData } from "./social.js";
 import { accountEmail } from "./recovery.js";
 import { listUserAchievements } from "./achievements.js";
+import { detachLeaguesForUser, exportLeagueData } from "./league/leagueStore.js";
 import {
   detachMatchesForUser, listMatches, loadMatchRecords, MAX_EXPORTED_MATCHES, sweepOrphanedMatches,
 } from "./matches.js";
@@ -151,6 +152,7 @@ export interface AccountExport {
   friends: Array<{ username: string; friendsSince: number }>;
   friendRequests: Array<{ username: string; direction: "incoming" | "outgoing"; createdAt: number }>;
   friendMessages: import("@fyendal/shared").ChatMessage[];
+  leagues: import("@fyendal/protocol").LeagueExport[];
 }
 
 export type DeleteAccountResult =
@@ -416,6 +418,7 @@ export async function exportAccount(db: Queryable, userId: number): Promise<Acco
     heroRecords: matchRecords.heroes,
     matchupRecords: matchRecords.matchups,
     ...social,
+    leagues: await exportLeagueData(db, userId),
   };
 }
 
@@ -449,6 +452,7 @@ export async function deleteAccount(
       deletedRooms.push({ code, version: version + 1 });
     }
     await detachMatchesForUser(tx, userId);
+    await detachLeaguesForUser(tx, userId);
     const result = await tx.query("DELETE FROM users WHERE id = $1", [userId]);
     if (result.rowCount) {
       await tx.query(

@@ -1136,7 +1136,7 @@
   "card.aaz.pitch.color.prohibit": [
     {
       "type": 0,
-      "value": "选择一种防守英雄不能扣置的颜色"
+      "value": "选择一种防守英雄不能 pitch 的颜色"
     }
   ],
   "card.aaz.reload.arsenal": [
@@ -1287,16 +1287,18 @@
       "value": "在 Symbiosis Shot 上放置一个蒸汽指示物？"
     }
   ],
-  "card.ajv.channel.ice.choose": [
+  "card.ajv.channel.ice.many": [
     {
       "type": 0,
-      "value": "从资源区选择一张 Ice 牌用于 Channel Ice，或摧毁此牌"
-    }
-  ],
-  "card.ajv.channel.ice.next": [
+      "value": "从资源区选择 "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
     {
       "type": 0,
-      "value": "再选择一张 Ice 牌用于 Channel Ice，或摧毁此牌"
+      "value": " 张 Ice 牌用于 Channel Ice，选择更少则摧毁此牌"
     }
   ],
   "card.ajv.equipment.counter": [
@@ -1445,16 +1447,10 @@
       "value": "将一个 zombie 放入你的墓地？"
     }
   ],
-  "card.amg.revere.shuffle": [
+  "card.amg.revere.shuffle.choose": [
     {
       "type": 0,
-      "value": "将你放逐区中的一张 Mechanologist 行动牌洗入牌库？"
-    }
-  ],
-  "card.amg.revere.shuffle.next": [
-    {
-      "type": 0,
-      "value": "再将一张不同牌名的 Mechanologist 行动牌洗入牌库？"
+      "value": "选择至多 3 张名称各不相同的 Mechanologist 行动牌洗入你的牌库"
     }
   ],
   "card.amo.mortimer.disease.choose": [
@@ -1617,16 +1613,18 @@
       "value": "将一个你操控的灵气 (Aura)返回其拥有者手牌？"
     }
   ],
-  "card.aps.card.discard.first": [
+  "card.aps.card.discard.choose": [
     {
       "type": 0,
-      "value": "弃置一张牌"
-    }
-  ],
-  "card.aps.card.discard.next": [
+      "value": "选择 "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
     {
       "type": 0,
-      "value": "再弃置一张牌"
+      "value": " 张牌弃置"
     }
   ],
   "card.aps.crowd.cheer": [
@@ -2745,10 +2743,18 @@
       "value": "Shiyana：选择一名要复制的英雄"
     }
   ],
-  "card.cru.smash.item.destroy": [
+  "card.cru.smash.items.destroy": [
     {
       "type": 0,
-      "value": "Argh... Smash!：摧毁一个物品？"
+      "value": "Argh... Smash!：选择至多 "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " 个物品摧毁"
     }
   ],
   "card.cru.tripwire.pay": [
@@ -2997,12 +3003,6 @@
       "value": "支付 1 点生命，使下一个 Runechant 无法被阻止？"
     }
   ],
-  "card.dtd.soul.banish.next": [
-    {
-      "type": 0,
-      "value": "再从 soul 中放逐一张牌？"
-    }
-  ],
   "card.dtd.soul.banish.shields": [
     {
       "type": 0,
@@ -3141,16 +3141,18 @@
       "value": "没有已展示的牌可以防守"
     }
   ],
-  "card.dyn.harpoon.reveal.choose": [
+  "card.dyn.harpoon.reveal.cards.choose": [
     {
       "type": 0,
-      "value": "选择一张要展示的牌"
-    }
-  ],
-  "card.dyn.harpoon.reveal.next": [
+      "value": "选择 "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
     {
       "type": 0,
-      "value": "选择另一张要展示的牌"
+      "value": " 张要展示的牌"
     }
   ],
   "card.dyn.hornet.target.choose": [
@@ -4928,16 +4930,18 @@
       "value": "选择一件必须防守的装备"
     }
   ],
-  "card.evo.equipment.offer": [
+  "card.evo.equipment.offer.many": [
     {
       "type": 0,
-      "value": "选择一件装备交出"
-    }
-  ],
-  "card.evo.equipment.offer.next": [
+      "value": "选择 "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
     {
       "type": 0,
-      "value": "再选择一件装备交出"
+      "value": " 件装备交出"
     }
   ],
   "card.evo.equipment.zone.choose": [
@@ -5002,16 +5006,18 @@
       "value": " 防御？"
     }
   ],
-  "card.evo.graveyard.item.banish": [
+  "card.evo.graveyard.items.banish": [
     {
       "type": 0,
-      "value": "放逐你墓地中的一个物品"
-    }
-  ],
-  "card.evo.graveyard.item.banish.next": [
+      "value": "放逐你墓地中的 "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
     {
       "type": 0,
-      "value": "再放逐你墓地中的一个物品"
+      "value": " 个物品"
     }
   ],
   "card.evo.hand.card.banish.draw": [
@@ -5032,22 +5038,18 @@
       "value": "将一个 Hyper Driver 放入竞技场？"
     }
   ],
-  "card.evo.hyperdriver.destroy": [
+  "card.evo.hyperdrivers.destroy": [
     {
       "type": 0,
-      "value": "摧毁一个 Hyper Driver"
-    }
-  ],
-  "card.evo.hyperdriver.destroy.next": [
+      "value": "摧毁 "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
     {
       "type": 0,
-      "value": "再摧毁一个 Hyper Driver"
-    }
-  ],
-  "card.evo.hyperdriver.transform.next": [
-    {
-      "type": 0,
-      "value": "再选择一个 Hyper Driver？"
+      "value": " 个 Hyper Driver"
     }
   ],
   "card.evo.hyperdrivers.transform": [
@@ -5062,18 +5064,6 @@
       "value": "将一个物品放入竞技场"
     }
   ],
-  "card.evo.item.reset": [
-    {
-      "type": 0,
-      "value": "选择一个要重置的物品"
-    }
-  ],
-  "card.evo.item.reset.next": [
-    {
-      "type": 0,
-      "value": "再选择一个要重置的物品"
-    }
-  ],
   "card.evo.item.small.arena": [
     {
       "type": 0,
@@ -5084,6 +5074,20 @@
     {
       "type": 0,
       "value": "将一个费用为 0 或 1 的物品放入竞技场？"
+    }
+  ],
+  "card.evo.items.reset": [
+    {
+      "type": 0,
+      "value": "选择 "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " 个要重置的物品"
     }
   ],
   "card.evo.maintenance.choose": [
@@ -5116,22 +5120,16 @@
       "value": "移除一个永久物上的所有蒸汽指示物"
     }
   ],
-  "card.evo.permanent.steam.remove.next": [
-    {
-      "type": 0,
-      "value": "移除另一个永久物上的蒸汽指示物？"
-    }
-  ],
   "card.evo.permanent.steam.remove.uptox": [
     {
       "type": 0,
       "value": "移除至多 X 个永久物上的蒸汽指示物"
     }
   ],
-  "card.evo.red.pitch.first": [
+  "card.evo.red.pitch.choose": [
     {
       "type": 0,
-      "value": "将 "
+      "value": "选择 "
     },
     {
       "type": 1,
@@ -5139,13 +5137,21 @@
     },
     {
       "type": 0,
-      "value": " 张红色牌中的第一张置入扣置区？"
+      "value": " 张红色牌进行 pitch"
     }
   ],
-  "card.evo.red.pitch.second": [
+  "card.evo.red.pitch.optional": [
     {
       "type": 0,
-      "value": "将第二张红色牌置入扣置区？"
+      "value": "Pitch "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " 张红色牌？"
     }
   ],
   "card.evo.revealed.card.defend": [
@@ -5166,10 +5172,18 @@
       "value": "放逐你墓地中的一个物品或装备来拆解 (scrap)？"
     }
   ],
-  "card.evo.scrap.choose.next": [
+  "card.evo.scrap.choose.many": [
     {
       "type": 0,
-      "value": "再放逐你墓地中的一个物品或装备来拆解 (scrap)？"
+      "value": "选择你墓地中至多 "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " 个物品或装备来拆解 (scrap)"
     }
   ],
   "card.evo.soul.charge": [
@@ -5178,10 +5192,18 @@
       "value": "为你的英雄 soul 充能？"
     }
   ],
-  "card.evo.ticktock.item.destroy": [
+  "card.evo.ticktock.items.destroy": [
     {
       "type": 0,
-      "value": "摧毁另一个 item？"
+      "value": "选择至多 "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " 个其他物品摧毁"
     }
   ],
   "card.evo.weapon.attackagain.choose": [
@@ -5508,16 +5530,24 @@
       "value": "：选择一张要弃置的牌"
     }
   ],
-  "card.evr.discard.next": [
-    {
-      "type": 0,
-      "value": "再选择一张要弃置的牌"
-    }
-  ],
   "card.evr.dreadbore.arrow.load": [
     {
       "type": 0,
       "value": "将一张手牌中的箭矢面朝上放入 arsenal？"
+    }
+  ],
+  "card.evr.echoes.discard.choose": [
+    {
+      "type": 0,
+      "value": "选择 "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " 张牌弃置"
     }
   ],
   "card.evr.echoes.hero.choose": [
@@ -5602,6 +5632,12 @@
       "value": " 的物品？"
     }
   ],
+  "card.evr.knick.money.choose": [
+    {
+      "type": 0,
+      "value": "选择任意数量的 Copper、Silver 和 Gold 摧毁"
+    }
+  ],
   "card.evr.knick.search": [
     {
       "type": 0,
@@ -5612,18 +5648,6 @@
     {
       "type": 0,
       "value": "摧毁 Mask of the Pouncing Lynx 以搜寻牌库？"
-    }
-  ],
-  "card.evr.money.destroy": [
-    {
-      "type": 0,
-      "value": "摧毁金钱衍生物？"
-    }
-  ],
-  "card.evr.money.destroy.next": [
-    {
-      "type": 0,
-      "value": "再摧毁一个金钱衍生物？"
     }
   ],
   "card.evr.nonattack.bottom": [
@@ -5722,32 +5746,18 @@
       "value": "将 arsenal 中的一张非攻击行动牌翻至正面"
     }
   ],
-  "card.hnt.banished.facedown.first": [
+  "card.hnt.banished.facedown.choose": [
     {
       "type": 0,
-      "value": "选择第 1 张要翻至背面的放逐牌（共 "
+      "value": "选择 "
     },
     {
       "type": 1,
-      "value": "total"
+      "value": "count"
     },
     {
       "type": 0,
-      "value": " 张）"
-    }
-  ],
-  "card.hnt.banished.facedown.next": [
-    {
-      "type": 0,
-      "value": "再选择一张放逐牌（还需 "
-    },
-    {
-      "type": 1,
-      "value": "remaining"
-    },
-    {
-      "type": 0,
-      "value": " 张）"
+      "value": " 张要翻至背面的放逐牌"
     }
   ],
   "card.hnt.card.choose": [
@@ -5816,12 +5826,6 @@
     {
       "type": 0,
       "value": "Dragonscaler Flight Path：选择一次 Draconic 攻击"
-    }
-  ],
-  "card.hnt.draconicdagger.equip.next": [
-    {
-      "type": 0,
-      "value": "再装备一把 Draconic 匕首？"
     }
   ],
   "card.hnt.draconicdagger.equip.upto": [
@@ -6144,10 +6148,10 @@
       "value": " 的 Runeblade 灵气 (Aura)"
     }
   ],
-  "card.hvy.six.banish": [
+  "card.hvy.six.banish.choose": [
     {
       "type": 0,
-      "value": "放逐一张力量为 "
+      "value": "放逐任意数量力量为 "
     },
     {
       "type": 1,
@@ -6155,13 +6159,7 @@
     },
     {
       "type": 0,
-      "value": " 的牌？"
-    }
-  ],
-  "card.hvy.six.banish.next": [
-    {
-      "type": 0,
-      "value": "再放逐一张？"
+      "value": " 或以上的牌"
     }
   ],
   "card.hvy.vigor.pay": [
@@ -7066,24 +7064,6 @@
     {
       "type": 0,
       "value": "：将一张手牌置于牌库底部，然后抽一张牌"
-    }
-  ],
-  "card.log.common.heave.unaffordable": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": "：无法支付 "
-    },
-    {
-      "type": 1,
-      "value": "amount"
-    },
-    {
-      "type": 0,
-      "value": " 点资源进行 heave"
     }
   ],
   "card.log.common.hero.life.lost": [
@@ -9722,50 +9702,6 @@
       "value": "：没有找到暴露的装备区域"
     }
   ],
-  "card.log.siy.hero.paid": [
-    {
-      "type": 1,
-      "value": "target"
-    },
-    {
-      "type": 0,
-      "value": " 为 "
-    },
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": " 支付资源费用"
-    }
-  ],
-  "card.log.siy.hero.paid.amount": [
-    {
-      "type": 1,
-      "value": "target"
-    },
-    {
-      "type": 0,
-      "value": " 为 "
-    },
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": " 支付 "
-    },
-    {
-      "type": 1,
-      "value": "amount"
-    },
-    {
-      "type": 0,
-      "value": " 点资源"
-    }
-  ],
   "card.log.ska.barefangs.attack": [
     {
       "type": 1,
@@ -10846,24 +10782,6 @@
       "value": " 张牌放逐"
     }
   ],
-  "card.mon.graveyard.cards.banish.more": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": "：再选择 "
-    },
-    {
-      "type": 1,
-      "value": "count"
-    },
-    {
-      "type": 0,
-      "value": " 张牌放逐"
-    }
-  ],
   "card.mon.hand.card.banish": [
     {
       "type": 1,
@@ -10918,16 +10836,6 @@
     {
       "type": 0,
       "value": "：从你的牌库中选择一张 Minnowism"
-    }
-  ],
-  "card.mon.opposing.graveyard.banish.next": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": "：再选择一张对方英雄墓地中的牌放逐，或结束选择"
     }
   ],
   "card.mon.opposing.graveyard.banish.upto": [
@@ -11012,16 +10920,18 @@
       "value": "Shadow Puppetry：你可以放逐牌库顶牌"
     }
   ],
-  "card.mon.soul.banish.choose": [
+  "card.mon.soul.banish.count": [
     {
       "type": 0,
-      "value": "选择 soul 中的一张牌放逐"
-    }
-  ],
-  "card.mon.soul.banish.next": [
+      "value": "选择 soul 中的 "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
     {
       "type": 0,
-      "value": "再选择 soul 中的一张牌放逐"
+      "value": " 张牌放逐"
     }
   ],
   "card.mon.soul.card.choose": [
@@ -11112,16 +11022,10 @@
       "value": "Call for Backup：选择一张要放逐的攻击行动牌"
     }
   ],
-  "card.mpg.backup.first": [
+  "card.mpg.backup.pair.choose": [
     {
       "type": 0,
-      "value": "Call for Backup：选择第一张攻击行动牌"
-    }
-  ],
-  "card.mpg.backup.second": [
-    {
-      "type": 0,
-      "value": "Call for Backup：选择一张名称不同的攻击行动牌"
+      "value": "Call for Backup：选择 2 张名称不同的攻击行动牌"
     }
   ],
   "card.mpg.card.discard": [
@@ -11252,16 +11156,10 @@
       "value": "将一张攻击反应牌加入防守"
     }
   ],
-  "card.mpw.reaction.shuffle": [
+  "card.mpw.reaction.shuffle.choose": [
     {
       "type": 0,
-      "value": "将一张攻击反应牌洗入牌库？"
-    }
-  ],
-  "card.mpw.reaction.shuffle.next": [
-    {
-      "type": 0,
-      "value": "再将一张不同牌名的攻击反应牌洗入牌库？"
+      "value": "选择至多 3 张名称各不相同的攻击反应牌洗入你的牌库"
     }
   ],
   "card.mpw.reaction.top": [
@@ -11926,6 +11824,12 @@
       "value": "选择一个衍生物"
     }
   ],
+  "card.out.abyssal.arrow.choose": [
+    {
+      "type": 0,
+      "value": "选择至多 3 张名称各不相同的箭洗入你的牌库"
+    }
+  ],
   "card.out.arsenal.attack.choose": [
     {
       "type": 0,
@@ -12104,16 +12008,10 @@
       "value": "：弃置一名盟友？"
     }
   ],
-  "card.pen.ally.freeze.next": [
+  "card.pen.ally.freeze.choose": [
     {
       "type": 0,
-      "value": "再冻结一名盟友？"
-    }
-  ],
-  "card.pen.ally.freeze.upto": [
-    {
-      "type": 0,
-      "value": "冻结至多 "
+      "value": "选择至多 "
     },
     {
       "type": 1,
@@ -12121,7 +12019,7 @@
     },
     {
       "type": 0,
-      "value": " 名盟友"
+      "value": " 名盟友冻结"
     }
   ],
   "card.pen.ally.return": [
@@ -12262,16 +12160,18 @@
       "value": "说出一个牌名"
     }
   ],
-  "card.pen.cloaked.equipment.facedown": [
+  "card.pen.cloaked.equipment.facedown.choose": [
     {
       "type": 0,
-      "value": "选择一件具有隐匿 (cloaked) 的装备并将其翻至面朝下"
-    }
-  ],
-  "card.pen.cloaked.equipment.facedown.next": [
+      "value": "选择 "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
     {
       "type": 0,
-      "value": "再选择一件具有隐匿 (cloaked) 的装备"
+      "value": " 件具有隐匿 (cloaked) 的装备并将其翻至面朝下"
     }
   ],
   "card.pen.color.choose": [
@@ -12401,7 +12301,7 @@
   "card.pen.graveyard.blue.pitch": [
     {
       "type": 0,
-      "value": "将墓地中的一张蓝色牌置入扣置区？"
+      "value": "从墓地 pitch 一张蓝色牌？"
     }
   ],
   "card.pen.graveyard.card.banish": [
@@ -12702,12 +12602,6 @@
     {
       "type": 0,
       "value": "将一张攻击行动牌返回其拥有者手牌"
-    }
-  ],
-  "card.ros.attack.return.next": [
-    {
-      "type": 0,
-      "value": "再选择一张攻击行动牌，或完成选择"
     }
   ],
   "card.ros.attack.return.upto": [
@@ -13076,16 +12970,10 @@
       "value": "Edict of Steel：强化一把你操控的目标剑"
     }
   ],
-  "card.sbl.v.charge.first": [
+  "card.sbl.v.charge.choose": [
     {
       "type": 0,
-      "value": "V of the Vanguard：选择一张手牌进行充能，或停止"
-    }
-  ],
-  "card.sbl.v.charge.next": [
-    {
-      "type": 0,
-      "value": "V of the Vanguard：再选择一张牌进行充能，或停止"
+      "value": "V of the Vanguard：选择任意数量的手牌进行充能"
     }
   ],
   "card.sbl.weapon.counters.distribute": [
@@ -13456,16 +13344,10 @@
       "value": "弃置一张牌，或失去 2 点生命"
     }
   ],
-  "card.sea.lubricate.cog.choose": [
+  "card.sea.lubricate.cogs.choose": [
     {
       "type": 0,
-      "value": "依次重置至多 3 个 cog"
-    }
-  ],
-  "card.sea.lubricate.cog.next": [
-    {
-      "type": 0,
-      "value": "再重置一个 cog？"
+      "value": "重置至多 3 个 cog"
     }
   ],
   "card.sea.marlynn.arrow.arsenal": [
@@ -15453,7 +15335,7 @@
   "card.trigger.common.decktop.pitch": [
     {
       "type": 0,
-      "value": "将你的牌库顶牌置入扣置区"
+      "value": "Pitch 你的牌库顶牌"
     }
   ],
   "card.trigger.common.decktop.reveal": [
@@ -16049,7 +15931,7 @@
   "card.trigger.common.heave": [
     {
       "type": 0,
-      "value": "heave "
+      "value": "Heave "
     },
     {
       "type": 1,
@@ -17452,10 +17334,18 @@
       "value": "在 Alluvion Constellas 上放置一个能量指示物？"
     }
   ],
-  "card.upr.arcane.ally.choose": [
+  "card.upr.arcane.allies.upto": [
     {
       "type": 0,
-      "value": "对一名盟友造成 "
+      "value": "对至多 "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " 名盟友各造成 "
     },
     {
       "type": 1,
@@ -17463,21 +17353,7 @@
     },
     {
       "type": 0,
-      "value": " 点奥术伤害？"
-    }
-  ],
-  "card.upr.arcane.ally.next": [
-    {
-      "type": 0,
-      "value": "对另一名盟友造成 "
-    },
-    {
-      "type": 1,
-      "value": "amount"
-    },
-    {
-      "type": 0,
-      "value": " 点奥术伤害？"
+      "value": " 点奥术伤害"
     }
   ],
   "card.upr.arcane.hero.choose": [
@@ -17536,20 +17412,6 @@
     {
       "type": 0,
       "value": "：放逐一张符合条件的攻击牌？"
-    }
-  ],
-  "card.upr.azvolai.target.next": [
-    {
-      "type": 0,
-      "value": "Azvolai：对另一个目标造成 "
-    },
-    {
-      "type": 1,
-      "value": "amount"
-    },
-    {
-      "type": 0,
-      "value": " 点奥术伤害？"
     }
   ],
   "card.upr.azvolai.targets": [
@@ -17684,16 +17546,18 @@
       "value": "选择一名英雄"
     }
   ],
-  "card.upr.ice.bottom": [
+  "card.upr.ice.bottom.count": [
     {
       "type": 0,
-      "value": "将一张 Ice 牌置于牌库底部"
-    }
-  ],
-  "card.upr.ice.bottom.next": [
+      "value": "将 "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
     {
       "type": 0,
-      "value": "再将一张 Ice 牌置于牌库底部"
+      "value": " 张 Ice 牌置于牌库底部"
     }
   ],
   "card.upr.ice.fusion.reveal": [
@@ -17880,16 +17744,10 @@
       "value": "将一张手牌置于你的牌库底部？"
     }
   ],
-  "card.wtr.hood.shuffle": [
+  "card.wtr.hood.shuffle.choose": [
     {
       "type": 0,
-      "value": "Hope Merchant's Hood：将一张手牌洗入你的牌库？"
-    }
-  ],
-  "card.wtr.hood.shuffle.next": [
-    {
-      "type": 0,
-      "value": "Hope Merchant's Hood：再将一张手牌洗入你的牌库？"
+      "value": "Hope Merchant's Hood：选择任意数量的手牌洗入你的牌库"
     }
   ],
   "card.wtr.katsu.combo.choose": [
@@ -17904,16 +17762,18 @@
       "value": "Katsu：弃置一张费用为 0 的牌以搜寻 combo 牌？"
     }
   ],
-  "card.wtr.lordwind.card.choose": [
+  "card.wtr.lordwind.cards.choose": [
     {
       "type": 0,
-      "value": "Lord of Wind：选择一张 combo 线路牌洗入牌库"
-    }
-  ],
-  "card.wtr.lordwind.card.next": [
+      "value": "Lord of Wind：选择至多 "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
     {
       "type": 0,
-      "value": "Lord of Wind：再选择一张牌"
+      "value": " 张 combo 线路牌洗入牌库"
     }
   ],
   "card.wtr.lordwind.x": [
@@ -17958,10 +17818,18 @@
       "value": "Dagger 或 sword 武器"
     }
   ],
-  "card.wtr.remembrance.action.choose": [
+  "card.wtr.remembrance.actions.choose": [
     {
       "type": 0,
-      "value": "Remembrance：选择一张行动牌"
+      "value": "Remembrance：选择至多 "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " 张行动牌洗入你的牌库"
     }
   ],
   "card.wtr.rout.defender.return": [
@@ -18952,6 +18820,20 @@
       "value": "：是否使用此触发能力？"
     }
   ],
+  "engine.decision.trigger.source": [
+    {
+      "type": 1,
+      "value": "triggerSource"
+    },
+    {
+      "type": 0,
+      "value": "："
+    },
+    {
+      "type": 1,
+      "value": "triggerEffect"
+    }
+  ],
   "engine.decision.triggers.order": [
     {
       "type": 0,
@@ -19907,6 +19789,12 @@
     {
       "type": 0,
       "value": " 力量"
+    }
+  ],
+  "engine.effect.part.attack.base.power": [
+    {
+      "type": 0,
+      "value": "+X 力量，X 为其基础力量"
     }
   ],
   "engine.effect.part.attack.gain.bonus": [
@@ -22327,6 +22215,16 @@
     {
       "type": 0,
       "value": " 面朝上的 arsenal，持续至其下回合结束"
+    }
+  ],
+  "engine.log.attack.cleared.no.target": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 因没有合法的攻击目标而被移出攻击队列"
     }
   ],
   "engine.log.attack.queued": [
@@ -24962,6 +24860,50 @@
       "value": " 的生命领先时无法恢复生命"
     }
   ],
+  "engine.log.payment.paid": [
+    {
+      "type": 1,
+      "value": "player"
+    },
+    {
+      "type": 0,
+      "value": " 支付 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点资源"
+    }
+  ],
+  "engine.log.payment.paid.card": [
+    {
+      "type": 1,
+      "value": "player"
+    },
+    {
+      "type": 0,
+      "value": " 为 "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 支付 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点资源"
+    }
+  ],
   "engine.log.phantasm.fizzles.condition.failed": [
     {
       "type": 0,
@@ -25340,6 +25282,46 @@
     {
       "type": 1,
       "value": "card"
+    }
+  ],
+  "engine.log.token.creation.reduced": [
+    {
+      "type": 1,
+      "value": "source"
+    },
+    {
+      "type": 0,
+      "value": " 将 "
+    },
+    {
+      "type": 1,
+      "value": "player"
+    },
+    {
+      "type": 0,
+      "value": " 生成 "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 的数量从 "
+    },
+    {
+      "type": 2,
+      "value": "from",
+      "style": null
+    },
+    {
+      "type": 0,
+      "value": " 减少为 "
+    },
+    {
+      "type": 2,
+      "value": "to",
+      "style": null
     }
   ],
   "engine.log.trigger.attack.defended": [
@@ -26939,7 +26921,7 @@
   "game.decision.choosePitch": [
     {
       "type": 0,
-      "value": "选择要扣置以支付资源的手牌。"
+      "value": "选择要 pitch 以支付资源的手牌。"
     }
   ],
   "game.decision.chooseTarget": [
@@ -27003,13 +26985,13 @@
   "game.decision.defensePitch": [
     {
       "type": 0,
-      "value": "扣置卡牌以支付此次防御费用"
+      "value": "Pitch 卡牌以支付此次防御费用"
     }
   ],
   "game.decision.defensePitchList": [
     {
       "type": 0,
-      "value": "扣置卡牌以支付此次防御费用："
+      "value": "Pitch 卡牌以支付此次防御费用："
     }
   ],
   "game.decision.effectChoice.apply": [
@@ -27200,6 +27182,24 @@
     {
       "type": 1,
       "value": "card"
+    }
+  ],
+  "game.decision.selection.count": [
+    {
+      "type": 0,
+      "value": "已选择 "
+    },
+    {
+      "type": 1,
+      "value": "selected"
+    },
+    {
+      "type": 0,
+      "value": "/"
+    },
+    {
+      "type": 1,
+      "value": "maximum"
     }
   ],
   "game.decision.target.opponent": [
@@ -28625,46 +28625,10 @@
       "value": "触发效果"
     }
   ],
-  "game.standingOrder.optional.ask": [
+  "game.standingOrder.ask": [
     {
       "type": 0,
       "value": "总是询问"
-    }
-  ],
-  "game.standingOrder.optional.deny": [
-    {
-      "type": 0,
-      "value": "总是拒绝"
-    }
-  ],
-  "game.standingOrder.optional.generic": [
-    {
-      "type": 0,
-      "value": "当它询问是否使用其触发时"
-    }
-  ],
-  "game.standingOrder.optional.use": [
-    {
-      "type": 0,
-      "value": "总是使用"
-    }
-  ],
-  "game.standingOrder.priority.ask": [
-    {
-      "type": 0,
-      "value": "总是询问"
-    }
-  ],
-  "game.standingOrder.priority.generic": [
-    {
-      "type": 0,
-      "value": "当它的触发位于堆叠上时"
-    }
-  ],
-  "game.standingOrder.priority.pass": [
-    {
-      "type": 0,
-      "value": "总是让过"
     }
   ],
   "game.standingOrder.timing.actionPhase": [
@@ -28705,6 +28669,20 @@
     {
       "type": 0,
       "value": " 的常设指令"
+    }
+  ],
+  "game.standingOrder.titleSet": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 的常设指令："
+    },
+    {
+      "type": 1,
+      "value": "orders"
     }
   ],
   "game.stats.allies": [
@@ -29199,6 +29177,12 @@
       "value": " 行动"
     }
   ],
+  "game.waiting.spectating.short": [
+    {
+      "type": 0,
+      "value": "观战中"
+    }
+  ],
   "game.zone.arms": [
     {
       "type": 0,
@@ -29320,7 +29304,7 @@
   "game.zone.pitch": [
     {
       "type": 0,
-      "value": "扣置区"
+      "value": "Pitch"
     }
   ],
   "game.zone.sort.cardName": [
@@ -29338,7 +29322,7 @@
   "game.zone.sort.pitch": [
     {
       "type": 0,
-      "value": "扣置"
+      "value": "Pitch"
     }
   ],
   "game.zone.sort.zoneOrder": [
@@ -29401,6 +29385,30 @@
     {
       "type": 0,
       "value": "英雄"
+    }
+  ],
+  "history.filter.opponent": [
+    {
+      "type": 0,
+      "value": "对手"
+    }
+  ],
+  "history.filter.opponent.all": [
+    {
+      "type": 0,
+      "value": "所有对手"
+    }
+  ],
+  "history.filter.opponent.bots": [
+    {
+      "type": 0,
+      "value": "仅机器人"
+    }
+  ],
+  "history.filter.opponent.players": [
+    {
+      "type": 0,
+      "value": "仅玩家"
     }
   ],
   "history.heroes.games": [
@@ -29801,6 +29809,18 @@
       "value": "如何成为贡献者？"
     }
   ],
+  "landing.faq.decks.answer": [
+    {
+      "type": 0,
+      "value": "可以。粘贴从 Fabrary 导出的牌组，Fyendal 会检查每张卡牌是否已支持。你也可以直接使用预构筑牌组开始游戏。"
+    }
+  ],
+  "landing.faq.decks.question": [
+    {
+      "type": 0,
+      "value": "可以使用我自己的赤魂战纪牌组吗？"
+    }
+  ],
   "landing.faq.download.answer": [
     {
       "type": 0,
@@ -29813,6 +29833,18 @@
       "value": "我需要下载或安装什么吗？"
     }
   ],
+  "landing.faq.formats.answer": [
+    {
+      "type": 0,
+      "value": "Fyendal 支持经典构筑和白银时代。每副牌组都会经过赛制合法性检查，每场对局开始前你都可以为英雄选择武器和装备。"
+    }
+  ],
+  "landing.faq.formats.question": [
+    {
+      "type": 0,
+      "value": "可以玩哪些赤魂战纪赛制？"
+    }
+  ],
   "landing.faq.free.answer": [
     {
       "type": 0,
@@ -29823,6 +29855,18 @@
     {
       "type": 0,
       "value": "Fyendal 可以免费游玩吗？"
+    }
+  ],
+  "landing.faq.howToPlay.answer": [
+    {
+      "type": 0,
+      "value": "注册免费账号，导入牌组或选择一副预构筑牌组，然后进入匹配队列、加入开放房间，或邀请好友对局。规则引擎会处理回合、combat chain 和隐藏信息，让你专注于游戏本身。"
+    }
+  ],
+  "landing.faq.howToPlay.question": [
+    {
+      "type": 0,
+      "value": "如何在线玩赤魂战纪 (Flesh and Blood)？"
     }
   ],
   "landing.faq.inPerson.answer": [
@@ -29904,7 +29948,7 @@
   "landing.faq.title": [
     {
       "type": 0,
-      "value": "关于在 Fyendal 上游玩"
+      "value": "关于在线玩赤魂战纪"
     }
   ],
   "landing.inGame": [
@@ -29984,13 +30028,13 @@
   "landing.subtitle": [
     {
       "type": 0,
-      "value": "免费、开源，由社区共同打造。使用 Fabrary 牌组，在浏览器中与其他玩家或实力强劲的英雄专属机器人对战。"
+      "value": "免费、开源，由社区共同打造。使用 Fabrary 牌组，在浏览器中畅玩赤魂战纪 (Flesh and Blood) 集换式卡牌游戏，与其他玩家或实力强劲的英雄专属机器人对战。"
     }
   ],
   "landing.title": [
     {
       "type": 0,
-      "value": "在线畅玩赤魂战纪 (Flesh & Blood)"
+      "value": "在线畅玩赤魂战纪 (Flesh and Blood TCG)"
     }
   ],
   "landing.ways.title": [
@@ -30003,6 +30047,808 @@
     {
       "type": 0,
       "value": "语言"
+    }
+  ],
+  "league.availability.cell": [
+    {
+      "type": 1,
+      "value": "day"
+    },
+    {
+      "type": 0,
+      "value": "，"
+    },
+    {
+      "type": 1,
+      "value": "start"
+    },
+    {
+      "type": 0,
+      "value": " 至 "
+    },
+    {
+      "type": 1,
+      "value": "end"
+    }
+  ],
+  "league.availability.clear": [
+    {
+      "type": 0,
+      "value": "清除"
+    }
+  ],
+  "league.availability.failed": [
+    {
+      "type": 0,
+      "value": "无法保存空闲时间，请重试。"
+    }
+  ],
+  "league.availability.help": [
+    {
+      "type": 0,
+      "value": "按你的时区标出你通常可以对战的时间。配对会优先选择与你空闲时间重叠的对手。"
+    }
+  ],
+  "league.availability.hint.pointer": [
+    {
+      "type": 0,
+      "value": "在网格上拖动以标出半小时时段。"
+    }
+  ],
+  "league.availability.hint.touch": [
+    {
+      "type": 0,
+      "value": "点按一个半小时时段，或长按后拖动。"
+    }
+  ],
+  "league.availability.save": [
+    {
+      "type": 0,
+      "value": "保存空闲时间"
+    }
+  ],
+  "league.availability.saved": [
+    {
+      "type": 0,
+      "value": "空闲时间已保存。"
+    }
+  ],
+  "league.availability.saving": [
+    {
+      "type": 0,
+      "value": "保存中…"
+    }
+  ],
+  "league.availability.title": [
+    {
+      "type": 0,
+      "value": "每周空闲时间"
+    }
+  ],
+  "league.availability.total": [
+    {
+      "type": 0,
+      "value": "每周 "
+    },
+    {
+      "type": 1,
+      "value": "hours"
+    },
+    {
+      "type": 0,
+      "value": " 小时"
+    }
+  ],
+  "league.bracket.champion": [
+    {
+      "type": 0,
+      "value": "冠军："
+    },
+    {
+      "type": 1,
+      "value": "name"
+    }
+  ],
+  "league.empty": [
+    {
+      "type": 0,
+      "value": "你还没有加入联赛。请向组织者索取报名链接。"
+    }
+  ],
+  "league.error.closed": [
+    {
+      "type": 0,
+      "value": "联赛已开始，无法再更改。"
+    }
+  ],
+  "league.error.full": [
+    {
+      "type": 0,
+      "value": "该联赛已满员。"
+    }
+  ],
+  "league.error.notFound": [
+    {
+      "type": 0,
+      "value": "此报名链接已失效。请向组织者索取新链接。"
+    }
+  ],
+  "league.join.alreadyJoined": [
+    {
+      "type": 0,
+      "value": "你已加入此联赛。"
+    }
+  ],
+  "league.join.availabilityHelp": [
+    {
+      "type": 0,
+      "value": "你通常什么时候可以对战？按你的时区标出。配对会优先选择与你空闲时间重叠的对手，之后也可以修改。"
+    }
+  ],
+  "league.join.failed": [
+    {
+      "type": 0,
+      "value": "无法加入联赛，请重试。"
+    }
+  ],
+  "league.join.goHome": [
+    {
+      "type": 0,
+      "value": "返回 Fyendal"
+    }
+  ],
+  "league.join.joining": [
+    {
+      "type": 0,
+      "value": "加入中…"
+    }
+  ],
+  "league.join.loadFailed": [
+    {
+      "type": 0,
+      "value": "无法加载此联赛，请重试。"
+    }
+  ],
+  "league.join.open": [
+    {
+      "type": 0,
+      "value": "打开联赛"
+    }
+  ],
+  "league.join.seats": [
+    {
+      "type": 0,
+      "value": "已报名 "
+    },
+    {
+      "type": 1,
+      "value": "members"
+    },
+    {
+      "type": 0,
+      "value": "/"
+    },
+    {
+      "type": 1,
+      "value": "max"
+    }
+  ],
+  "league.join.signIn": [
+    {
+      "type": 0,
+      "value": "登录或注册账号以加入此联赛。"
+    }
+  ],
+  "league.join.submit": [
+    {
+      "type": 0,
+      "value": "加入联赛"
+    }
+  ],
+  "league.join.title": [
+    {
+      "type": 0,
+      "value": "加入 "
+    },
+    {
+      "type": 1,
+      "value": "name"
+    }
+  ],
+  "league.join.unavailableTitle": [
+    {
+      "type": 0,
+      "value": "联赛报名"
+    }
+  ],
+  "league.leave": [
+    {
+      "type": 0,
+      "value": "退出联赛"
+    }
+  ],
+  "league.leave.confirm": [
+    {
+      "type": 0,
+      "value": "退出 "
+    },
+    {
+      "type": 1,
+      "value": "name"
+    },
+    {
+      "type": 0,
+      "value": "？报名开放期间可以通过报名链接重新加入。"
+    }
+  ],
+  "league.leave.failed": [
+    {
+      "type": 0,
+      "value": "无法退出联赛，请重试。"
+    }
+  ],
+  "league.match.accept": [
+    {
+      "type": 0,
+      "value": "接受时间"
+    }
+  ],
+  "league.match.bye": [
+    {
+      "type": 0,
+      "value": "轮空：计为一胜。"
+    }
+  ],
+  "league.match.claim": [
+    {
+      "type": 0,
+      "value": "申请对手弃权"
+    }
+  ],
+  "league.match.deadline": [
+    {
+      "type": 0,
+      "value": "请在 "
+    },
+    {
+      "type": 1,
+      "value": "time"
+    },
+    {
+      "type": 0,
+      "value": " 前完成"
+    }
+  ],
+  "league.match.failed": [
+    {
+      "type": 0,
+      "value": "无法更新对局，请重试。"
+    }
+  ],
+  "league.match.join": [
+    {
+      "type": 0,
+      "value": "加入对局"
+    }
+  ],
+  "league.match.propose": [
+    {
+      "type": 0,
+      "value": "提议时间"
+    }
+  ],
+  "league.match.propose.again": [
+    {
+      "type": 0,
+      "value": "提议新时间"
+    }
+  ],
+  "league.match.propose.choose": [
+    {
+      "type": 0,
+      "value": "选择双方都有空的时间"
+    }
+  ],
+  "league.match.propose.label": [
+    {
+      "type": 0,
+      "value": "开始时间"
+    }
+  ],
+  "league.match.propose.noOverlap": [
+    {
+      "type": 0,
+      "value": "截止前你们没有共同的空闲时间。请按你设备的时钟任选一个时间，并在聊天中商定。"
+    }
+  ],
+  "league.match.propose.submit": [
+    {
+      "type": 0,
+      "value": "发送提议"
+    }
+  ],
+  "league.match.ready": [
+    {
+      "type": 0,
+      "value": "就位"
+    }
+  ],
+  "league.match.ready.opponent": [
+    {
+      "type": 1,
+      "value": "opponent"
+    },
+    {
+      "type": 0,
+      "value": " 已就位。"
+    }
+  ],
+  "league.match.ready.you": [
+    {
+      "type": 0,
+      "value": "你已就位。"
+    }
+  ],
+  "league.match.result.doubleForfeit": [
+    {
+      "type": 0,
+      "value": "未进行：双方均判负。"
+    }
+  ],
+  "league.match.result.draw": [
+    {
+      "type": 0,
+      "value": "平局。"
+    }
+  ],
+  "league.match.result.lost": [
+    {
+      "type": 0,
+      "value": "你输了。"
+    }
+  ],
+  "league.match.result.lostForfeit": [
+    {
+      "type": 0,
+      "value": "你因弃权落败。"
+    }
+  ],
+  "league.match.result.won": [
+    {
+      "type": 0,
+      "value": "你赢了。"
+    }
+  ],
+  "league.match.result.wonForfeit": [
+    {
+      "type": 0,
+      "value": "对手弃权，你获胜。"
+    }
+  ],
+  "league.match.stage.final": [
+    {
+      "type": 0,
+      "value": "决赛"
+    }
+  ],
+  "league.match.stage.quarterfinal": [
+    {
+      "type": 0,
+      "value": "八强赛"
+    }
+  ],
+  "league.match.stage.semifinal": [
+    {
+      "type": 0,
+      "value": "半决赛"
+    }
+  ],
+  "league.match.start": [
+    {
+      "type": 0,
+      "value": "开始对局"
+    }
+  ],
+  "league.match.status.inRoom": [
+    {
+      "type": 0,
+      "value": "对局进行中。"
+    }
+  ],
+  "league.match.status.unscheduled": [
+    {
+      "type": 0,
+      "value": "尚未约定时间。"
+    }
+  ],
+  "league.match.theirTime": [
+    {
+      "type": 1,
+      "value": "opponent"
+    },
+    {
+      "type": 0,
+      "value": " 的时间："
+    },
+    {
+      "type": 1,
+      "value": "time"
+    }
+  ],
+  "league.match.time.missed": [
+    {
+      "type": 0,
+      "value": "该时间已过，对局未进行。双方都在时可直接开始，或另约新时间。"
+    }
+  ],
+  "league.match.time.scheduled": [
+    {
+      "type": 0,
+      "value": "已与 "
+    },
+    {
+      "type": 1,
+      "value": "opponent"
+    },
+    {
+      "type": 0,
+      "value": " 约定"
+    }
+  ],
+  "league.match.time.suggested": [
+    {
+      "type": 0,
+      "value": "联赛建议的时间"
+    }
+  ],
+  "league.match.time.theyProposed": [
+    {
+      "type": 1,
+      "value": "opponent"
+    },
+    {
+      "type": 0,
+      "value": " 提议的时间"
+    }
+  ],
+  "league.match.time.youProposed": [
+    {
+      "type": 0,
+      "value": "等待 "
+    },
+    {
+      "type": 1,
+      "value": "opponent"
+    },
+    {
+      "type": 0,
+      "value": " 接受"
+    }
+  ],
+  "league.match.week": [
+    {
+      "type": 0,
+      "value": "第 "
+    },
+    {
+      "type": 1,
+      "value": "week"
+    },
+    {
+      "type": 0,
+      "value": " 周"
+    }
+  ],
+  "league.matches.empty": [
+    {
+      "type": 0,
+      "value": "暂无对局。每周开始时会生成配对。"
+    }
+  ],
+  "league.picker.label": [
+    {
+      "type": 0,
+      "value": "联赛"
+    }
+  ],
+  "league.room.description": [
+    {
+      "type": 0,
+      "value": "选择一副 "
+    },
+    {
+      "type": 1,
+      "value": "format"
+    },
+    {
+      "type": 0,
+      "value": " 牌组。只有 "
+    },
+    {
+      "type": 1,
+      "value": "opponent"
+    },
+    {
+      "type": 0,
+      "value": " 能占据另一个座位。"
+    }
+  ],
+  "league.room.noDeck": [
+    {
+      "type": 0,
+      "value": "你还没有合法的 "
+    },
+    {
+      "type": 1,
+      "value": "format"
+    },
+    {
+      "type": 0,
+      "value": " 牌组。请在牌组页添加。"
+    }
+  ],
+  "league.room.submit": [
+    {
+      "type": 0,
+      "value": "入座"
+    }
+  ],
+  "league.room.title": [
+    {
+      "type": 0,
+      "value": "开始联赛对局"
+    }
+  ],
+  "league.roster.deleted": [
+    {
+      "type": 0,
+      "value": "已删除的账号"
+    }
+  ],
+  "league.roster.you": [
+    {
+      "type": 1,
+      "value": "username"
+    },
+    {
+      "type": 0,
+      "value": "（你）"
+    }
+  ],
+  "league.signup.next": [
+    {
+      "type": 0,
+      "value": "组织者开始赛季后才会进行配对。在此之前请保持你的空闲时间为最新。"
+    }
+  ],
+  "league.standings.byes": [
+    {
+      "type": 0,
+      "value": "轮空"
+    }
+  ],
+  "league.standings.dropped": [
+    {
+      "type": 0,
+      "value": "（已退出）"
+    }
+  ],
+  "league.standings.omw": [
+    {
+      "type": 0,
+      "value": "对手胜率"
+    }
+  ],
+  "league.standings.player": [
+    {
+      "type": 0,
+      "value": "玩家"
+    }
+  ],
+  "league.standings.points": [
+    {
+      "type": 0,
+      "value": "积分"
+    }
+  ],
+  "league.standings.rank": [
+    {
+      "type": 0,
+      "value": "#"
+    }
+  ],
+  "league.standings.record": [
+    {
+      "type": 0,
+      "value": "胜–负–平"
+    }
+  ],
+  "league.standings.recordValue": [
+    {
+      "type": 1,
+      "value": "wins"
+    },
+    {
+      "type": 0,
+      "value": "–"
+    },
+    {
+      "type": 1,
+      "value": "losses"
+    },
+    {
+      "type": 0,
+      "value": "–"
+    },
+    {
+      "type": 1,
+      "value": "draws"
+    }
+  ],
+  "league.standings.seed": [
+    {
+      "type": 0,
+      "value": "种子"
+    }
+  ],
+  "league.starts": [
+    {
+      "type": 0,
+      "value": "计划开始时间："
+    },
+    {
+      "type": 1,
+      "value": "date"
+    }
+  ],
+  "league.stat.rank": [
+    {
+      "type": 0,
+      "value": "排名"
+    }
+  ],
+  "league.stat.rankValue": [
+    {
+      "type": 1,
+      "value": "rank"
+    },
+    {
+      "type": 0,
+      "value": "/"
+    },
+    {
+      "type": 1,
+      "value": "total"
+    }
+  ],
+  "league.stat.round": [
+    {
+      "type": 0,
+      "value": "轮次"
+    }
+  ],
+  "league.stat.week": [
+    {
+      "type": 0,
+      "value": "周次"
+    }
+  ],
+  "league.stat.weekValue": [
+    {
+      "type": 1,
+      "value": "week"
+    },
+    {
+      "type": 0,
+      "value": "/"
+    },
+    {
+      "type": 1,
+      "value": "weeks"
+    }
+  ],
+  "league.status.cancelled": [
+    {
+      "type": 0,
+      "value": "已取消"
+    }
+  ],
+  "league.status.complete": [
+    {
+      "type": 0,
+      "value": "已结束"
+    }
+  ],
+  "league.status.playoffs": [
+    {
+      "type": 0,
+      "value": "季后赛"
+    }
+  ],
+  "league.status.season": [
+    {
+      "type": 0,
+      "value": "赛季进行中"
+    }
+  ],
+  "league.status.signupClosed": [
+    {
+      "type": 0,
+      "value": "报名已截止"
+    }
+  ],
+  "league.status.signupOpen": [
+    {
+      "type": 0,
+      "value": "报名中"
+    }
+  ],
+  "league.summary": [
+    {
+      "type": 1,
+      "value": "format"
+    },
+    {
+      "type": 0,
+      "value": " · "
+    },
+    {
+      "type": 1,
+      "value": "weeks"
+    },
+    {
+      "type": 0,
+      "value": " 周 · 每周 "
+    },
+    {
+      "type": 1,
+      "value": "matches"
+    },
+    {
+      "type": 0,
+      "value": " 场"
+    }
+  ],
+  "league.tab.availability": [
+    {
+      "type": 0,
+      "value": "空闲时间"
+    }
+  ],
+  "league.tab.matches": [
+    {
+      "type": 0,
+      "value": "对局"
+    }
+  ],
+  "league.tab.players": [
+    {
+      "type": 0,
+      "value": "玩家"
+    }
+  ],
+  "league.tab.playoffs": [
+    {
+      "type": 0,
+      "value": "季后赛"
+    }
+  ],
+  "league.tab.standings": [
+    {
+      "type": 0,
+      "value": "积分榜"
+    }
+  ],
+  "league.timeZone.label": [
+    {
+      "type": 0,
+      "value": "你的时区"
+    }
+  ],
+  "league.title": [
+    {
+      "type": 0,
+      "value": "联赛"
     }
   ],
   "lobby.action.accept": [
@@ -30261,6 +31107,16 @@
     {
       "type": 0,
       "value": "卡牌范围"
+    }
+  ],
+  "lobby.count.leagueActions": [
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " 项待处理"
     }
   ],
   "lobby.count.live": [
@@ -31097,6 +31953,12 @@
       "value": "首页"
     }
   ],
+  "lobby.nav.league": [
+    {
+      "type": 0,
+      "value": "联赛"
+    }
+  ],
   "lobby.nav.more": [
     {
       "type": 0,
@@ -31119,12 +31981,6 @@
     {
       "type": 0,
       "value": "此房间允许所有已实现卡牌，包括禁用卡牌和传奇殿堂英雄。"
-    }
-  ],
-  "lobby.room.fullHint": [
-    {
-      "type": 0,
-      "value": "房间已满——可进入观战"
     }
   ],
   "lobby.room.loadingState": [
@@ -31903,6 +32759,36 @@
       "value": "order"
     }
   ],
+  "prep.presentation.column.card": [
+    {
+      "type": 0,
+      "value": "卡牌"
+    }
+  ],
+  "prep.presentation.column.copies": [
+    {
+      "type": 0,
+      "value": "数量"
+    }
+  ],
+  "prep.presentation.column.cost": [
+    {
+      "type": 0,
+      "value": "费用"
+    }
+  ],
+  "prep.presentation.column.defense": [
+    {
+      "type": 0,
+      "value": "防御"
+    }
+  ],
+  "prep.presentation.column.power": [
+    {
+      "type": 0,
+      "value": "力量"
+    }
+  ],
   "prep.presentation.emptyInventory": [
     {
       "type": 0,
@@ -31917,6 +32803,12 @@
     {
       "type": 0,
       "value": " 张"
+    }
+  ],
+  "prep.presentation.fixedInventory": [
+    {
+      "type": 0,
+      "value": "固定在备牌区"
     }
   ],
   "prep.presentation.hero": [
@@ -31993,22 +32885,78 @@
       "value": "destination"
     }
   ],
-  "prep.presentation.moveToInventoryHint": [
-    {
-      "type": 0,
-      "value": "点击卡牌，将一张移至备牌区。"
-    }
-  ],
-  "prep.presentation.moveToMainHint": [
-    {
-      "type": 0,
-      "value": "点击卡牌，将一张移至主牌组。"
-    }
-  ],
   "prep.presentation.noneRegistered": [
     {
       "type": 0,
       "value": "未登记武器"
+    }
+  ],
+  "prep.presentation.pitch.blue": [
+    {
+      "type": 0,
+      "value": "蓝色 "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " 张"
+    }
+  ],
+  "prep.presentation.pitch.red": [
+    {
+      "type": 0,
+      "value": "红色 "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " 张"
+    }
+  ],
+  "prep.presentation.pitch.yellow": [
+    {
+      "type": 0,
+      "value": "黄色 "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " 张"
+    }
+  ],
+  "prep.presentation.pitchSplit": [
+    {
+      "type": 0,
+      "value": "Pitch 分布："
+    },
+    {
+      "type": 1,
+      "value": "red"
+    },
+    {
+      "type": 0,
+      "value": "，"
+    },
+    {
+      "type": 1,
+      "value": "yellow"
+    },
+    {
+      "type": 0,
+      "value": "，"
+    },
+    {
+      "type": 1,
+      "value": "blue"
     }
   ],
   "prep.presentation.removeCard": [
@@ -32039,6 +32987,12 @@
       "value": "card"
     }
   ],
+  "prep.presentation.restore": [
+    {
+      "type": 0,
+      "value": "恢复已登记的牌组"
+    }
+  ],
   "prep.presentation.selectCard": [
     {
       "type": 0,
@@ -32067,10 +33021,68 @@
       "value": "card"
     }
   ],
+  "prep.presentation.showCard": [
+    {
+      "type": 0,
+      "value": "查看 "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    }
+  ],
   "prep.presentation.title": [
     {
       "type": 0,
       "value": "对局配置"
+    }
+  ],
+  "prep.presentation.type.action": [
+    {
+      "type": 0,
+      "value": "行动"
+    }
+  ],
+  "prep.presentation.type.attackReaction": [
+    {
+      "type": 0,
+      "value": "攻击反应"
+    }
+  ],
+  "prep.presentation.type.block": [
+    {
+      "type": 0,
+      "value": "格挡"
+    }
+  ],
+  "prep.presentation.type.defenseReaction": [
+    {
+      "type": 0,
+      "value": "防御反应"
+    }
+  ],
+  "prep.presentation.type.instant": [
+    {
+      "type": 0,
+      "value": "瞬间"
+    }
+  ],
+  "prep.presentation.type.item": [
+    {
+      "type": 0,
+      "value": "物品"
+    }
+  ],
+  "prep.presentation.type.mentor": [
+    {
+      "type": 0,
+      "value": "导师"
+    }
+  ],
+  "prep.presentation.type.resource": [
+    {
+      "type": 0,
+      "value": "资源"
     }
   ],
   "prep.presentation.weapons": [
@@ -33196,6 +34208,24 @@
     {
       "type": 0,
       "value": "显示优先权窗口和响应窗口提示。"
+    }
+  ],
+  "settings.skipBotDelay": [
+    {
+      "type": 0,
+      "value": "机器人即时行动"
+    }
+  ],
+  "settings.skipBotDelay.aria": [
+    {
+      "type": 0,
+      "value": "跳过练习机器人的一秒停顿"
+    }
+  ],
+  "settings.skipBotDelay.tooltip": [
+    {
+      "type": 0,
+      "value": "测试版：练习机器人决定后立即行动，不再等待一秒。"
     }
   ],
   "settings.soundEffects": [

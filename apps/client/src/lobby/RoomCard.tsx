@@ -44,15 +44,12 @@ export function RoomCard({
           </button>
         ) : (
           <>
-            <button
-              className="btn-primary"
-              disabled={full}
-              title={full ? intl.formatMessage({ id: "lobby.room.fullHint" }) : undefined}
-              onClick={() => onJoin?.(room)}
-            >
-              {intl.formatMessage({ id: "lobby.action.join" })}
-            </button>
-            <button onClick={() => onSpectate?.(room.code)}>
+            {full ? null : (
+              <button className="btn-primary" onClick={() => onJoin?.(room)}>
+                {intl.formatMessage({ id: "lobby.action.join" })}
+              </button>
+            )}
+            <button className="room-card-spectate" onClick={() => onSpectate?.(room.code)}>
               {intl.formatMessage({ id: "lobby.action.spectate" })}
             </button>
           </>

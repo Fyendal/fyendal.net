@@ -364,7 +364,8 @@ function resolveMurkyWater(ctx: ScriptCtx, instanceIds: readonly number[]): void
   if (new Set(instanceIds).size !== 3 || !instanceIds.every((instanceId) => legal.has(instanceId))) return;
   const banished = instanceIds.filter((instanceId) => ctx.banish(instanceId, { faceDown: true }));
   if (banished.length !== 3) return;
-  ctx.putIntoArsenal(banished[ctx.randomInt(banished.length)]!, "banish");
+  // A face-down banished card stays private in the arsenal (CR 3.0.4c).
+  ctx.putIntoArsenal(banished[ctx.randomInt(banished.length)]!, "banish", { faceUp: false });
 }
 
 function bonds(kind: "pitch" | "name"): CardScript {

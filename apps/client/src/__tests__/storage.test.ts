@@ -135,7 +135,7 @@ describe("client storage keys", () => {
     };
 
     expect(loadGameSettings(storage)).toEqual({
-      version: 8,
+      version: 9,
       cardDisplayPreference: "square",
       priorityWindowMode: "always-pause",
       lessGuidance: true,
@@ -145,10 +145,11 @@ describe("client storage keys", () => {
       soundEffectsEnabled: true,
       soundEffectsVolume: 35,
       optionHotkeys: false,
+      skipBotDelay: false,
       standingOrders: {},
     });
     saveGameSettings(storage, {
-      version: 8,
+      version: 9,
       cardDisplayPreference: "full",
       priorityWindowMode: "auto-pass",
       lessGuidance: false,
@@ -158,10 +159,11 @@ describe("client storage keys", () => {
       soundEffectsEnabled: false,
       soundEffectsVolume: 60,
       optionHotkeys: true,
+      skipBotDelay: true,
       standingOrders: {},
     });
     expect(loadGameSettings(storage)).toEqual({
-      version: 8,
+      version: 9,
       cardDisplayPreference: "full",
       priorityWindowMode: "auto-pass",
       lessGuidance: false,
@@ -171,6 +173,7 @@ describe("client storage keys", () => {
       soundEffectsEnabled: false,
       soundEffectsVolume: 60,
       optionHotkeys: true,
+      skipBotDelay: true,
       standingOrders: {},
     });
   });
@@ -184,7 +187,7 @@ describe("client storage keys", () => {
         skipPlayConfirmation: false,
       }),
     })).toEqual({
-      version: 8,
+      version: 9,
       cardDisplayPreference: "square",
       priorityWindowMode: "auto-pass",
       lessGuidance: true,
@@ -194,6 +197,7 @@ describe("client storage keys", () => {
       soundEffectsEnabled: true,
       soundEffectsVolume: 35,
       optionHotkeys: false,
+      skipBotDelay: false,
       standingOrders: {},
     });
   });
@@ -208,7 +212,7 @@ describe("client storage keys", () => {
         motionPreference: "reduced",
       }),
     })).toEqual({
-      version: 8,
+      version: 9,
       cardDisplayPreference: "square",
       priorityWindowMode: "auto-pass",
       lessGuidance: true,
@@ -218,6 +222,7 @@ describe("client storage keys", () => {
       soundEffectsEnabled: true,
       soundEffectsVolume: 35,
       optionHotkeys: false,
+      skipBotDelay: false,
       standingOrders: {},
     });
   });
@@ -234,7 +239,7 @@ describe("client storage keys", () => {
         soundEffectsVolume: 60,
       }),
     })).toEqual({
-      version: 8,
+      version: 9,
       cardDisplayPreference: "square",
       priorityWindowMode: "auto-pass",
       lessGuidance: true,
@@ -244,6 +249,7 @@ describe("client storage keys", () => {
       soundEffectsEnabled: false,
       soundEffectsVolume: 60,
       optionHotkeys: false,
+      skipBotDelay: false,
       standingOrders: {},
     });
   });
@@ -277,7 +283,7 @@ describe("client storage keys", () => {
   it("falls back safely for invalid or future settings", () => {
     expect(loadGameSettings({ getItem: () => "not json" })).toEqual(DEFAULT_GAME_SETTINGS);
     expect(loadGameSettings({
-      getItem: () => JSON.stringify({ version: 8, priorityWindowMode: "auto-pass" }),
+      getItem: () => JSON.stringify({ version: 9, priorityWindowMode: "auto-pass" }),
     })).toEqual(DEFAULT_GAME_SETTINGS);
     expect(loadGameSettings({
       getItem: () => JSON.stringify({
@@ -302,6 +308,17 @@ describe("client storage keys", () => {
     }).optionHotkeys).toBe(false);
   });
 
+  it("leaves the bot delay on unless a boolean opt-out was saved", () => {
+    const { skipBotDelay: _absent, ...previous } = DEFAULT_GAME_SETTINGS;
+    expect(loadGameSettings({ getItem: () => JSON.stringify(previous) }).skipBotDelay).toBe(false);
+    expect(loadGameSettings({
+      getItem: () => JSON.stringify({ ...previous, skipBotDelay: "yes" }),
+    }).skipBotDelay).toBe(false);
+    expect(loadGameSettings({
+      getItem: () => JSON.stringify({ ...previous, skipBotDelay: true }),
+    }).skipBotDelay).toBe(true);
+  });
+
   it("adds square cards to version 6 settings without resetting existing choices", () => {
     const previous = {
       version: 6,
@@ -315,14 +332,15 @@ describe("client storage keys", () => {
     };
     expect(loadGameSettings({ getItem: () => JSON.stringify(previous) })).toEqual({
       ...previous,
-      version: 8,
+      version: 9,
       cardDisplayPreference: "square",
       optionHotkeys: false,
+      skipBotDelay: false,
       standingOrders: {},
     });
   });
 
-  it("round-trips standing orders keyed by functional card identity", () => {
+  it("round-trips standing orders keyed by functional card identity and hook", () => {
     let stored: string | null = null;
     const storage = {
       getItem: (key: string) => key === GAME_SETTINGS_STORAGE_KEY ? stored : null,
@@ -330,17 +348,12 @@ describe("client storage keys", () => {
         if (key === GAME_SETTINGS_STORAGE_KEY) stored = value;
       },
     };
-    saveGameSettings(storage, {
-      ...DEFAULT_GAME_SETTINGS,
-      standingOrders: {
-        "fealty|0": { priorityWindow: "pass" },
-        "valiant dynamo|0": { priorityWindow: "ask", optionalTrigger: "yes" },
-      },
-    });
-    expect(loadGameSettings(storage).standingOrders).toEqual({
-      "fealty|0": { priorityWindow: "pass" },
-      "valiant dynamo|0": { priorityWindow: "ask", optionalTrigger: "yes" },
-    });
+    const standingOrders = {
+      "golden cog|0": { "sea-cog-maintenance": "remove" },
+      "valiant dynamo|0": { "trigger-choice": "yes" },
+    };
+    saveGameSettings(storage, { ...DEFAULT_GAME_SETTINGS, standingOrders });
+    expect(loadGameSettings(storage).standingOrders).toEqual(standingOrders);
   });
 
   it("migrates version 7 settings without standing orders", () => {
@@ -349,14 +362,38 @@ describe("client storage keys", () => {
     expect(loadGameSettings({ getItem: () => JSON.stringify(previous) })).toEqual(DEFAULT_GAME_SETTINGS);
   });
 
+  it("migrates version 8 orders: drops priority windows and keeps decided optional triggers", () => {
+    const previous = {
+      ...DEFAULT_GAME_SETTINGS,
+      version: 8,
+      priorityWindowMode: "auto-pass",
+      standingOrders: {
+        "fealty|0": { priorityWindow: "pass" },
+        "valiant dynamo|0": { priorityWindow: "ask", optionalTrigger: "yes" },
+        "fyendal's spring tunic|0": { optionalTrigger: "no" },
+        "carrion crown|0": { optionalTrigger: "ask" },
+      },
+    };
+    expect(loadGameSettings({ getItem: () => JSON.stringify(previous) })).toEqual({
+      ...DEFAULT_GAME_SETTINGS,
+      priorityWindowMode: "auto-pass",
+      standingOrders: {
+        "valiant dynamo|0": { "trigger-choice": "yes" },
+        "fyendal's spring tunic|0": { "trigger-choice": "no" },
+      },
+    });
+    expect(loadGameSettings({
+      getItem: () => JSON.stringify({ ...previous, standingOrders: { "fealty|0": { priorityWindow: "always" } } }),
+    })).toEqual(DEFAULT_GAME_SETTINGS);
+  });
+
   it.each([
     ["an array", []],
-    ["a printing id key", { SFA037: { priorityWindow: "pass" } }],
-    ["an unknown field", { "fealty|0": { priorityWindow: "pass", extra: 1 } }],
-    ["an unknown priority order", { "fealty|0": { priorityWindow: "always" } }],
-    ["an unknown trigger order", { "valiant dynamo|0": { optionalTrigger: "maybe" } }],
-    ["an empty entry", { "fealty|0": {} }],
-    ["a non-object entry", { "fealty|0": "pass" }],
+    ["a printing id key", { SFA037: { "trigger-choice": "yes" } }],
+    ["the legacy shape", { "valiant dynamo|0": { optionalTrigger: "yes" } }],
+    ["a non-string answer", { "golden cog|0": { "sea-cog-maintenance": 1 } }],
+    ["a translated answer", { "golden cog|0": { "sea-cog-maintenance": "Entfernen" } }],
+    ["a non-object entry", { "golden cog|0": "remove" }],
   ])("rejects standing orders with %s", (_, standingOrders) => {
     expect(decodeStandingOrders(standingOrders)).toBeNull();
     expect(loadGameSettings({
@@ -367,36 +404,34 @@ describe("client storage keys", () => {
   it("bounds the number of standing-order cards", () => {
     const orders = Object.fromEntries(Array.from(
       { length: MAX_STANDING_ORDER_CARDS + 1 },
-      (_, index) => [`card ${index}|0`, { priorityWindow: "pass" }],
+      (_, index) => [`card ${index}|0`, { "trigger-choice": "yes" }],
     ));
     expect(decodeStandingOrders(orders)).toBeNull();
     delete orders[`card ${MAX_STANDING_ORDER_CARDS}|0`];
     expect(decodeStandingOrders(orders)).not.toBeNull();
   });
 
-  it("keeps an explicit \"ask\" so the card's row survives into later games", () => {
-    const orders = { "valiant dynamo|0": { priorityWindow: "pass", optionalTrigger: "yes" } } as const;
-    expect(applyStandingOrder(orders, "valiant dynamo|0", { kind: "optional-trigger", value: "ask" }))
-      .toEqual({ "valiant dynamo|0": { priorityWindow: "pass", optionalTrigger: "ask" } });
-    expect(applyStandingOrder({}, "fealty|0", { kind: "priority-window", value: "ask" }))
-      .toEqual({ "fealty|0": { priorityWindow: "ask" } });
+  it("stores asking as the absence of an answer", () => {
+    const orders = { "golden cog|0": { "sea-cog-maintenance": "remove" } };
+    expect(applyStandingOrder(orders, "golden cog|0", { hook: "sea-cog-maintenance", value: null })).toEqual({});
+    expect(applyStandingOrder(orders, "golden cog|0", { hook: "sea-cog-maintenance", value: "destroy" }))
+      .toEqual({ "golden cog|0": { "sea-cog-maintenance": "destroy" } });
   });
 
   it("returns the same orders when nothing changes", () => {
-    const orders = { "fealty|0": { priorityWindow: "pass" } } as const;
-    expect(applyStandingOrder(orders, "fealty|0", { kind: "priority-window", value: "pass" })).toBe(orders);
-    const asked = applyStandingOrder(orders, "fealty|0", { kind: "optional-trigger", value: "ask" });
-    expect(applyStandingOrder(asked, "fealty|0", { kind: "optional-trigger", value: "ask" })).toBe(asked);
+    const orders = { "golden cog|0": { "sea-cog-maintenance": "remove" } };
+    expect(applyStandingOrder(orders, "golden cog|0", { hook: "sea-cog-maintenance", value: "remove" })).toBe(orders);
+    expect(applyStandingOrder(orders, "valiant dynamo|0", { hook: "trigger-choice", value: null })).toBe(orders);
   });
 
   it("forgets the oldest card rather than exceeding the decoder's bound", () => {
-    let orders: Record<string, { priorityWindow: "pass" }> = {};
+    let orders: Record<string, Record<string, string>> = {};
     for (let index = 0; index <= MAX_STANDING_ORDER_CARDS; index += 1) {
-      orders = applyStandingOrder(orders, `card ${index}|0`, { kind: "priority-window", value: "pass" }) as typeof orders;
+      orders = applyStandingOrder(orders, `card ${index}|0`, { hook: "trigger-choice", value: "yes" });
     }
     expect(Object.keys(orders)).toHaveLength(MAX_STANDING_ORDER_CARDS);
     expect(orders["card 0|0"]).toBeUndefined();
-    expect(orders[`card ${MAX_STANDING_ORDER_CARDS}|0`]).toEqual({ priorityWindow: "pass" });
+    expect(orders[`card ${MAX_STANDING_ORDER_CARDS}|0`]).toEqual({ "trigger-choice": "yes" });
     expect(decodeStandingOrders(orders)).not.toBeNull();
   });
 

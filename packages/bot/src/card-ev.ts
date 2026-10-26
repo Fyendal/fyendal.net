@@ -56,6 +56,9 @@ export interface CardUses {
   /** A blue card that is still worth playing out of arsenal: printed
    * "played from arsenal" bonuses, or set by hero rules. */
   arsenalPlay?: boolean;
+  /** Worth playing only from hand, such as a card whose payoff is being
+   * charged: face down in arsenal it only wastes the slot. Set by hero rules. */
+  handOnly?: boolean;
   /** Damage-equivalent value of a mode usable only from hand, outside its
    * attack, block or pitch: printed damage prevention, or a hero-rule effect
    * such as banishing the card for a lasting one. */
@@ -91,8 +94,8 @@ function blockValue(uses: CardUses): number {
 /** Arsenal value for the next turn: go-again attacks at full attack value,
  * terminal attacks discounted, pumps at their pump value, defense reactions
  * (and Ambush cards, if better) at the damage they stop; all reduced by the
- * disruption discount. A card that cannot be played from arsenal only blocks
- * the slot, and a blue card that cannot defend from there pays
+ * disruption discount. A card that cannot be played from arsenal, or is
+ * marked `handOnly`, only blocks the slot, and a blue card that cannot defend from there pays
  * BLUE_ARSENAL_COST. */
 export function arsenalValue(
   uses: CardUses,
@@ -100,6 +103,7 @@ export function arsenalValue(
   hitChance = DEFAULT_HIT_CHANCE,
   offenseRate = 1,
 ): number {
+  if (uses.handOnly) return -DEAD_ARSENAL_COST;
   let value: number;
   switch (uses.kind) {
     case "attack":

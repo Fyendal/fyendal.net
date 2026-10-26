@@ -387,6 +387,7 @@ interface ScriptedChoiceDetails {
   defaultOption?: string;
   minimumSelections?: number;
   maximumSelections?: number;
+  distinctCardNames?: boolean;
   revealedCardIds?: number[];
   lookedCardIds?: number[];
 }
@@ -409,6 +410,8 @@ export function makeCtx(
   // `ctx.cardData(id).name`. Remember those exact definitions so log-only
   // metadata can preserve pitch without making rule-facing names impure.
   const referencedLogCardIds = new Set<string>([self.cardId]);
+  // cards this effect revealed stay public beside the choice it asks next
+  const revealedByEffect = new Set<number>();
   const deckSearchAllowed = (): boolean => !state.players.some((candidate) =>
     controlledPermanents(state, candidate.seat, { faceDownEquipment: false })
       .some((source) => scriptOf(state, source.cardId, source)?.prohibitsDeckSearches === true),
@@ -485,10 +488,13 @@ export function makeCtx(
         : {
             minimumSelections: details.minimumSelections,
             maximumSelections: details.maximumSelections,
+            ...(details.distinctCardNames ? { distinctCardNames: true } : {}),
           }),
       ...(details.revealedCardIds?.length
         ? { revealedCardIds: [...new Set(details.revealedCardIds)] }
-        : {}),
+        : revealedByEffect.size
+          ? { revealedCardIds: [...revealedByEffect] }
+          : {}),
       ...(details.lookedCardIds?.length
         ? { lookedCardIds: [...new Set(details.lookedCardIds)] }
         : {}),
@@ -509,6 +515,11 @@ export function makeCtx(
         "engine.log.decision.duplicate.skipped",
         { prompt: presentation.fallback },
       ));
+      return;
+    }
+    if (look && decision.lookedCardIds?.length) {
+      // A choice with its own private view would hide the look; show the look first.
+      (look.followUpDecisions ??= []).push(decision);
       return;
     }
     state.pendingDecision = decision;
@@ -845,7 +856,11 @@ export function makeCtx(
       };
     },
     revealCards(instanceIds, revealingSeat = seat) {
-      return revealCards(state, runtime, revealingSeat, instanceIds);
+      if (!revealCards(state, runtime, revealingSeat, instanceIds)) return false;
+      for (const instanceId of instanceIds) {
+        if (findCardAnywhere(state, instanceId)) revealedByEffect.add(instanceId);
+      }
+      return true;
     },
     canSearchDeck: deckSearchAllowed,
     shuffleDeck(targetSeat = seat) {
@@ -944,7 +959,8 @@ export function makeCtx(
       if (index < 0) return false;
       const [card] = found.card.subcards.splice(index, 1);
       if (!card) return false;
-      (state.players[card.owner] as PlayerState).banish.push(card);
+      // Tokens exist only in the arena or as sub-cards (CR 8.1.8a).
+      if (!cardHasType(state, card, "token")) (state.players[card.owner] as PlayerState).banish.push(card);
       logPublic(state, gameLogMessage(
         `${nameOf(state, card.cardId)} is banished from under ${nameOf(state, found.card.cardId)}`,
         "engine.log.card.banished.from.under",
@@ -1117,7 +1133,7 @@ export function makeCtx(
       runtime.commands.notePitch(state, found.owner, found.card);
       clearPrivateZonePlacement(found.card);
       found.owner.pitch.push(found.card);
-      runtime.commands.pitchIntoPool(state, found.owner, found.card, pitch);
+      runtime.commands.pitchIntoPool(state, found.owner, found.card, pitch, found.fromZone);
       if (found.fromZone === "graveyard") {
         runtime.events.fireCardLeavesGraveyard(state, found.owner.seat, found.card, "pitch");
       }
@@ -1445,6 +1461,9 @@ export function makeCtx(
     },
     currentAttackHasDominate() {
       return link ? runtime.commands.attackHasDominate(state, link) : false;
+    },
+    currentAttackHasGoAgain() {
+      return link ? runtime.commands.attackHasGoAgain(state, link) : false;
     },
     currentAttackHasOverpower() {
       return link ? runtime.commands.attackHasOverpower(state, link) : false;
@@ -2452,6 +2471,7 @@ export function makeCtx(
       choiceSeat,
       revealedCardIds,
       lookedCardIds,
+      distinctCardNames,
     ) {
       const maximum = Math.min(maximumSelections, options.length);
       if (
@@ -2464,6 +2484,7 @@ export function makeCtx(
         maximumSelections: maximum,
         revealedCardIds,
         lookedCardIds,
+        distinctCardNames,
       });
     },
     requestNameChoice(hook, prompt, choiceSeat) {
@@ -2475,6 +2496,7 @@ export function makeCtx(
         ...(presentation.promptMessage ? { promptMessage: presentation.promptMessage } : {}),
         sourceInstanceId: self.instanceId,
         chooseHook: hook,
+        ...(revealedByEffect.size ? { revealedCardIds: [...revealedByEffect] } : {}),
       };
       if (state.pendingDecision?.chooseHook) {
         if (!queueDecisionBehindCrank(state, decision)) {
@@ -2516,6 +2538,15 @@ export function makeCtx(
         }
       }
       return true;
+    },
+    canPayResources(cost, excludeInstanceIds = []) {
+      return Object.keys(runtime.commands.scriptedPaymentOptions(
+        state,
+        state.players[seat] as PlayerState,
+        cost,
+        "paid",
+        excludeInstanceIds,
+      )).length > 0;
     },
     requestPaymentFrom(sourceInstanceId, hook, prompt, cost, choiceSeat) {
       const found = findCardAnywhere(state, sourceInstanceId);

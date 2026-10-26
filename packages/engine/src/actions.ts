@@ -7,6 +7,7 @@ import { activateFromHandAbility } from "./activation.js";
 import {
   activatedAbilitiesSuppressed,
   cardHasType,
+  cardNamesOf,
   cardTypesOf,
   dataOf,
   instanceDataOf,
@@ -40,7 +41,7 @@ import {
   removeFromArray,
 } from "./zoneQueries.js";
 import { closeChain } from "./combatChain.js";
-import { finishReactionPlay } from "./reactions.js";
+import { finishReactionPlay, playReaction } from "./reactions.js";
 import { answerWagerLossReplacementOrder } from "./wagers.js";
 import {
   isValidVariableX,
@@ -80,7 +81,7 @@ import { consumeNextActionGoAgain, noteActionPlayedOrActivated } from "./cardLif
 import { answerArcaneBarrier } from "./damageResolution.js";
 import { answerAttackTargetDamageOrder } from "./damage.js";
 import { answerDieRollReplacement } from "./dieRoll.js";
-import { boostCountForCardPlay, cardPlayRestrictedByModifier, playOriginRestricted, cardPlayCost, cardPlayReductionForSeat, payAlternativePlayCost, preparePlayTarget, canPlayAsInstant, canRuneGate, consumeAttackCostReductions, mayPlayFromArsenal, mayPlayFromZone, playFromZoneRequiresInstant } from "./playRules.js";
+import { boostCountForCardPlay, cardPlayRestrictedByModifier, playOriginRestricted, cardPlayCost, cardPlayReductionForSeat, payAlternativePlayCost, preparePlayTarget, canPlayAsInstant, canRuneGate, consumeAttackCostReductions, mayPlayFromArsenal, mayPlayFromZone, notePlayPermissionSource, playFromZoneRequiresInstant } from "./playRules.js";
 import { canPayRequiredHandCardsForAdditionalCost, scriptedPaymentOptions } from "./resources.js";
 import { heroAbilitiesDisabled } from "./stateQueries.js";
 import { actionLimitReached, consumeFirstActionExtraCost, controlsBow, firstActionExtraCost, firstAttackExtraCost, consumeFirstAttackExtraCost, isFrozen, opposingInstantsProhibited } from "./ruleQueries.js";
@@ -215,7 +216,7 @@ export function playCard(
   // before increases and decreases. The side announcement was validated and
   // stamped above so it could also determine the play method and AP cost.
   const isAttackAction = data.cardType === "action" && (data.subtypes ?? []).includes("attack");
-  if (targetAllyId !== undefined && !isAttackAction) return "only attacks can target an ally";
+  if (targetAllyId !== undefined && !isAttackAction) return "only attacks declare an attack target";
   if (isAttackAction && !attackTargetIsLegal(state, runtime, seat, targetAllyId)) return "not a legal attack target";
   const targetErr = preparePlayTarget(
     state, runtime,
@@ -389,6 +390,7 @@ export function playCard(
   if (guardianAttackReduction > 0) player.flags.nextGuardianAttackCostReduction = 0;
   // the card leaves its zone before additional costs are paid, so a random
   // discard (Wrecker Romp, Alpha Rampage) can never hit the card being played
+  notePlayPermissionSource(state, runtime, card, from, seat);
   removeFromArray(source, instanceId);
   delete card.faceDown;
   if (runeGated) (card.scriptState ??= {}).runeGated = 1;
@@ -910,7 +912,7 @@ export function activateAbility(
     );
     return undefined;
   }
-  if (targetAllyId !== undefined) return "only attacks can target an ally";
+  if (targetAllyId !== undefined) return "only attacks declare an attack target";
   // Like playing a non-attack action card, activating a non-attack action
   // ability ends the current combat chain before its layer is added. Instant
   // abilities use this same path but do not close the chain.
@@ -1061,6 +1063,25 @@ function continueAfterScriptedChoice(
       true,
     );
   }
+  if (resume?.kind === "continue-reaction-after-declaration") {
+    const found = findCardAnywhere(state, resume.instanceId);
+    if (!found) return "card not found";
+    return playReaction(
+      state,
+      runtime,
+      resume.seat,
+      found.card,
+      resume.from === "arsenal",
+      resume.pitchInstanceIds,
+      resume.meldSide,
+      resume.alternativeCostCardInstanceIds,
+      resume.targetCardInstanceId,
+      resume.from === "hand" || resume.from === "arsenal" ? undefined : resume.from,
+      resume.declaredVariableX,
+      resume.targetAllyId,
+      true,
+    );
+  }
   if (resume?.kind === "finish-play") {
     const idx = state.resolving.findIndex((c) => c.instanceId === resume.card.instanceId);
     // The resolving copy is authoritative: the callback may have written
@@ -1114,6 +1135,13 @@ export function answerChoices(
   const options = pd.options;
   if (!options || optionIds.some((optionId) => !options.includes(optionId))) {
     return "invalid option";
+  }
+  if (pd.distinctCardNames) {
+    const names = optionIds.flatMap((optionId) => {
+      const card = findCardAnywhere(state, Number(optionId))?.card;
+      return card ? [...new Set(cardNamesOf(state, card))] : [];
+    });
+    if (new Set(names).size !== names.length) return "selected cards must have different names";
   }
 
   const srcId = pd.sourceInstanceId;
@@ -1288,8 +1316,22 @@ export function answerChoice(
     const picked = payment.pitchOptions[optionId];
     if (optionId !== "no" && !picked) return "invalid payment option";
     if (picked) {
-      const err = payCost(state, runtime, state.players[seat] as PlayerState, picked.cost, picked.pitchIds);
+      const payer = state.players[seat] as PlayerState;
+      const err = payCost(state, runtime, payer, picked.cost, picked.pitchIds);
       if (err) return err;
+      // Without this, paying an "unless they pay" cost from floating resources leaves no trace.
+      const source = (srcId === undefined ? undefined : findCardAnywhere(state, srcId)?.card) ??
+        scriptSourceSnapshot?.card;
+      logPublic(state, gameLogMessage(
+        `${nameOf(state, payer.heroCardId)} pays ${picked.cost} resource(s)` +
+          (source ? ` for ${logNameOf(state, source.cardId)}` : ""),
+        source ? "engine.log.payment.paid.card" : "engine.log.payment.paid",
+        {
+          player: logPlayerValue(seat),
+          amount: picked.cost,
+          ...(source ? { card: logCardValue(source.cardId) } : {}),
+        },
+      ));
     }
     state.pendingDecision = null;
     resolveScriptChoice(

@@ -138,3 +138,36 @@ describe("AJV — Jarl", () => {
     g.play("AJV011", { fromZone: "banish", pitch: ["SIY033", "SIY033"] });
   });
 });
+
+describe("AJV — Channel Mount Isen", () => {
+  const channel = (choose: "all" | "none") => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          board: ["channel mount isen|3"],
+          pitch: ["winter's grasp|3"],
+          deck: ["wrecker romp|3", "wrecker romp|3", "wrecker romp|3", "wrecker romp|3"],
+        },
+        { hero: "dorinthea", hand: [] },
+      ],
+    });
+    const ice = String(g.state.players[0]!.pitch[0]!.instanceId);
+    g.passActionPhase().settle();
+    const pd = g.state.pendingDecision!;
+    expect(pd.chooseHook).toBe("channel-ice");
+    expect([pd.minimumSelections, pd.maximumSelections]).toEqual([0, 1]);
+    g.chooseMany(choose === "all" ? [ice] : []);
+    return { g, ice };
+  };
+
+  it("stays when an Ice card is bottomed for each flow counter", () => {
+    const { g, ice } = channel("all");
+    expect(String(g.state.players[0]!.deck.at(-1)?.instanceId)).toBe(ice);
+    g.expectInZone(0, "channel mount isen|3", "board");
+  });
+
+  it("is destroyed when fewer Ice cards are chosen", () => {
+    channel("none").g.expectInZone(0, "channel mount isen|3", "graveyard");
+  });
+});

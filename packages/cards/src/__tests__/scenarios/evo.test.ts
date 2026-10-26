@@ -416,6 +416,42 @@ describe("EVO — registration and core mechanics", () => {
       .expectEquipped(0, "arms", "evo steel soul controller|3");
   });
 
+  it("Temper skips a defending Evo that another Evo covered before the chain closed", () => {
+    const s = scenario({
+      active: 1,
+      seats: [
+        {
+          hero: "rhinar",
+          heroKey: "teklovossen, esteemed magnate|0",
+          resources: 3,
+          hand: ["evo beta base arms|3"],
+          equipment: { arms: "evo steel soul controller|3" },
+        },
+        { hero: "dorinthea", hand: ["head jab|1"] },
+      ],
+    });
+    const controller = s.state.players[0]!.equipment.arms!;
+    controller.defCounters = 2;
+
+    s.play("head jab|1")
+      .blockWith("evo steel soul controller|3")
+      .passPriority()
+      .activate("teklovossen, esteemed magnate|0")
+      .passPriority()
+      .react("evo beta base arms|3")
+      .expectEquipped(0, "arms", "evo beta base arms|3");
+    s.endTurn();
+
+    const arms = s.state.players[0]!.equipment.arms!;
+    expect(arms.cardId).toBe(printingId("evo beta base arms|3"));
+    expect(arms.subcards?.map((card) => card.instanceId)).toEqual([controller.instanceId]);
+    expect(arms.subcards?.[0]?.defCounters).toBe(2);
+    expect(arms.defCounters ?? 0).toBe(0);
+    expect(s.state.players[0]!.graveyard).not.toEqual(expect.arrayContaining([
+      expect.objectContaining({ cardId: printingId("evo steel soul controller|3") }),
+    ]));
+  });
+
   it("does not spend an action point when Evo Face Breaker is played with Teklovossen's instant permission", () => {
     const s = scenario({
       seats: [
@@ -726,9 +762,12 @@ describe("EVO — registration and core mechanics", () => {
       ],
     });
 
-    s.play("scrap trader|1")
-      .chooseCard("medkit|3")
-      .chooseCard("ironrot helm|0")
+    s.play("scrap trader|1");
+    const pd = s.state.pendingDecision!;
+    expect(pd.chooseHook).toBe("evo-scrap");
+    expect([pd.minimumSelections, pd.maximumSelections]).toEqual([0, 2]);
+    s.chooseMany(s.state.players[0]!.graveyard.map((card) => String(card.instanceId)))
+      .settle()
       .expectResources(0, 4)
       .expectZoneSize(0, "banish", 2);
   });
@@ -853,11 +892,13 @@ describe("EVO — registration and core mechanics", () => {
         { hero: "dorinthea" },
       ],
     });
-    three.play("hyper scrapper|3")
-      .chooseOption("= 3")
-      .chooseCard("hyper driver|1")
-      .chooseCard("hyper driver|1")
-      .chooseCard("hyper driver|1")
+    three.play("hyper scrapper|3").chooseOption("= 3");
+    const pd = three.state.pendingDecision!;
+    expect(pd.chooseHook).toBe("hyper-scrapper-item");
+    expect([pd.minimumSelections, pd.maximumSelections]).toEqual([3, 3]);
+    three
+      .chooseMany(three.state.players[0]!.graveyard.map((card) => String(card.instanceId)))
+      .settle()
       .expectResources(0, 6)
       .blockWith()
       .settle()
@@ -1096,5 +1137,131 @@ describe("EVO — rules regression coverage", () => {
     s.state.players[0]!.flags.boostCountThisTurn = 2;
     s.play("smash and grab|1").blockWith().settle().chooseCard("medkit|3").endTurn();
     expect(s.state.players[0]!.board.some((card) => card.cardId === printingId("medkit|3"))).toBe(true);
+  });
+});
+
+describe("EVO — bounded multi-card choices", () => {
+  const ids = (cards: readonly { instanceId: number }[]) => cards.map((card) => String(card.instanceId));
+
+  it("Evo Atom Breaker transforms any chosen number of Hyper Drivers", () => {
+    const s = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          resources: 10,
+          hand: ["evo atom breaker|1"],
+          board: ["hyper driver|1", "hyper driver|2", "hyper driver|3"],
+          equipment: { chest: "proto base chest|0" },
+        },
+        { hero: "dorinthea" },
+      ],
+    });
+    const [kept, ...chosen] = s.state.players[0]!.board;
+
+    s.play("evo atom breaker|1");
+    const pd = s.state.pendingDecision!;
+    expect(pd.chooseHook).toBe("breaker-driver");
+    expect([pd.minimumSelections, pd.maximumSelections]).toEqual([0, 3]);
+    s.chooseMany(ids(chosen)).settle().expectEquipped(0, "chest", "evo atom breaker|1");
+    expect(s.state.players[0]!.board.map((card) => card.instanceId)).toEqual([kept!.instanceId]);
+  });
+
+  it("Demolition Protocol removes steam from up to X chosen permanents", () => {
+    const s = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          resources: 10,
+          hand: ["demolition protocol|1"],
+          equipment: { head: "evo circuit breaker|1", chest: "evo atom breaker|1" },
+        },
+        { hero: "dorinthea", board: ["hyper driver|1", "hyper driver|2", "hyper driver|3"] },
+      ],
+    });
+    const board = s.state.players[1]!.board;
+    for (const card of board) card.counters = { steam: 1 };
+    const [first, kept, third] = board;
+
+    s.play("demolition protocol|1");
+    const pd = s.state.pendingDecision!;
+    expect(pd.chooseHook).toBe("demolition");
+    expect([pd.minimumSelections, pd.maximumSelections]).toEqual([0, 2]);
+    s.chooseMany(ids([first!, third!]));
+    // Hyper Drivers without steam are destroyed.
+    expect(s.state.players[1]!.board).toEqual([expect.objectContaining({ instanceId: kept!.instanceId, counters: { steam: 1 } })]);
+  });
+
+  it("Moonshot destroys exactly X chosen Hyper Drivers for +3 power each", () => {
+    const s = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          resources: 10,
+          hand: ["moonshot|2"],
+          board: ["hyper driver|1", "hyper driver|2", "hyper driver|3"],
+        },
+        { hero: "dorinthea" },
+      ],
+    });
+    s.state.players[0]!.flags.boostedThisTurn = true;
+    const [first, kept, third] = s.state.players[0]!.board;
+
+    s.play("moonshot|2").chooseOption("= 2");
+    const pd = s.state.pendingDecision!;
+    expect(pd.chooseHook).toBe("moonshot");
+    expect([pd.minimumSelections, pd.maximumSelections]).toEqual([2, 2]);
+    s.chooseMany(ids([first!, third!])).settle().expectAttackValue(9);
+    expect(s.state.players[0]!.board.map((card) => card.instanceId)).toEqual([kept!.instanceId]);
+  });
+
+  it("Meganetic Lockwave has the target hero offer exactly X equipment before the attacker picks one", () => {
+    const s = scenario({
+      seats: [
+        { hero: "rhinar", resources: 10, hand: ["meganetic lockwave|3"] },
+        {
+          hero: "dorinthea",
+          equipment: { head: "ironrot helm|0", chest: "proto base chest|0", arms: "proto base arms|0", legs: null },
+        },
+      ],
+    });
+    const { head, chest } = s.state.players[1]!.equipment;
+
+    s.play("meganetic lockwave|3").chooseOption("= 2");
+    const offer = s.state.pendingDecision!;
+    expect(offer.chooseHook).toBe("lockwave-offer");
+    expect(offer.player).toBe(1);
+    expect([offer.minimumSelections, offer.maximumSelections]).toEqual([2, 2]);
+    expect(offer.options).toHaveLength(3);
+    s.chooseMany(ids([head!, chest!]));
+
+    const pick = s.state.pendingDecision!;
+    expect(pick.chooseHook).toBe("lockwave-pick");
+    expect(pick.player).toBe(0);
+    expect(pick.options).toEqual(ids([head!, chest!]));
+    s.doRaw({ kind: "choose", optionId: String(chest!.instanceId) });
+    expect(s.state.players[1]!.flags[`mustDefend:${chest!.instanceId}`]).toBe(true);
+  });
+
+  it("System Reset banishes exactly X chosen items and returns them together", () => {
+    const s = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          resources: 10,
+          hand: ["system reset|2"],
+          board: ["hyper driver|1", "hyper driver|2", "hyper driver|3"],
+        },
+        { hero: "dorinthea" },
+      ],
+    });
+    const [first, kept, third] = s.state.players[0]!.board;
+
+    s.play("system reset|2").chooseOption("= 2");
+    const pd = s.state.pendingDecision!;
+    expect(pd.chooseHook).toBe("system-reset");
+    expect([pd.minimumSelections, pd.maximumSelections]).toEqual([2, 2]);
+    s.chooseMany(ids([first!, third!]));
+    s.expectZoneSize(0, "board", 3).expectZoneSize(0, "banish", 0);
+    expect(s.state.players[0]!.board.map((card) => card.instanceId)).toContain(kept!.instanceId);
   });
 });

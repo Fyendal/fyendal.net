@@ -4,8 +4,14 @@ import { gunzip as gunzipCallback, gzip as gzipCallback } from "node:zlib";
 import type { DeckPool, Format } from "@fyendal/shared";
 import { cardData, findPrinting, formatLegalityIssues } from "@fyendal/cards";
 import {
+  decodeLeagueAvailabilityRequest,
+  decodeLeagueIdRequest,
+  decodeLeagueJoinRequest,
+  decodeLeagueMatchRequest,
+  decodeLeagueProposeRequest,
   decodeReplayNoteInput,
   decodeReplayShareInput,
+  LEAGUE_TOKEN_RE,
   MATCH_OPPONENT_FILTERS,
   REPLAY_SHARE_TOKEN_RE,
   type MatchListFilters,
@@ -43,6 +49,14 @@ import { getVersionUpdateNotice } from "./versionUpdateNotice.js";
 import { getAchievements } from "./achievements.js";
 import { isMatchFormat, listMatches, loadMatchRecords, parseMatchCursor } from "./matches.js";
 import { asRecord } from "./validation.js";
+import { joinLeague, leaguePreview, leaveLeague, listMemberLeagues, setLeagueAvailability } from "./league/leagueStore.js";
+import {
+  acceptLeagueTime,
+  claimLeagueForfeit,
+  markLeagueReady,
+  proposeLeagueTime,
+  type LeagueMatchUpdateResult,
+} from "./league/leagueMatches.js";
 import {
   deleteReplay,
   getReplayPayload,
@@ -286,6 +300,12 @@ function readBody(req: http.IncomingMessage): Promise<unknown> {
     });
     req.on("error", reject);
   });
+}
+
+function leagueMatchResponse(result: LeagueMatchUpdateResult): { status: number; body: Record<string, unknown> } {
+  if (result === "not-found") return { status: 404, body: { ok: false, error: "league match not found", code: "LEAGUE_NOT_FOUND" } };
+  if (result === "closed") return { status: 409, body: { ok: false, error: "this match cannot change now", code: "LEAGUE_CLOSED" } };
+  return { status: 200, body: { ok: true } };
 }
 
 /** Errors whose message is safe/intended for the client (bad input). Anything
@@ -715,6 +735,57 @@ export function createApiServer(deps: ApiDeps): http.Server {
       await removeReplayShare(deps.db, user.id, field(body, "id"));
       return { status: 200, body: { ok: true } };
     },
+    "/api/leagues/join": async (body, user) => {
+      if (!user) return { status: 401, body: { ok: false, error: "not logged in" } };
+      const input = decodeLeagueJoinRequest(body);
+      if (!input) return { status: 400, body: { ok: false, error: "invalid league sign-up" } };
+      const result = await joinLeague(deps.db, user.id, input);
+      if (result === "not-found") return { status: 404, body: { ok: false, error: "league sign-up not found", code: "LEAGUE_NOT_FOUND" } };
+      if (result === "full") return { status: 409, body: { ok: false, error: "league is full", code: "LEAGUE_FULL" } };
+      return { status: 200, body: { ok: true } };
+    },
+    "/api/leagues/availability": async (body, user) => {
+      if (!user) return { status: 401, body: { ok: false, error: "not logged in" } };
+      const input = decodeLeagueAvailabilityRequest(body);
+      if (!input) return { status: 400, body: { ok: false, error: "invalid availability" } };
+      const result = await setLeagueAvailability(deps.db, user.id, input);
+      if (result === "not-found") return { status: 404, body: { ok: false, error: "league not found", code: "LEAGUE_NOT_FOUND" } };
+      if (result === "closed") return { status: 409, body: { ok: false, error: "availability is closed", code: "LEAGUE_CLOSED" } };
+      return { status: 200, body: { ok: true } };
+    },
+    "/api/leagues/leave": async (body, user) => {
+      if (!user) return { status: 401, body: { ok: false, error: "not logged in" } };
+      const input = decodeLeagueIdRequest(body);
+      if (!input) return { status: 400, body: { ok: false, error: "invalid league" } };
+      const result = await leaveLeague(deps.db, user.id, input.leagueId);
+      if (result === "not-found") return { status: 404, body: { ok: false, error: "league not found", code: "LEAGUE_NOT_FOUND" } };
+      if (result === "closed") return { status: 409, body: { ok: false, error: "the league has started", code: "LEAGUE_CLOSED" } };
+      return { status: 200, body: { ok: true } };
+    },
+    "/api/leagues/propose": async (body, user) => {
+      if (!user) return { status: 401, body: { ok: false, error: "not logged in" } };
+      const input = decodeLeagueProposeRequest(body);
+      if (!input) return { status: 400, body: { ok: false, error: "invalid proposal" } };
+      return leagueMatchResponse(await proposeLeagueTime(deps.db, user.id, input));
+    },
+    "/api/leagues/accept": async (body, user) => {
+      if (!user) return { status: 401, body: { ok: false, error: "not logged in" } };
+      const input = decodeLeagueMatchRequest(body);
+      if (!input) return { status: 400, body: { ok: false, error: "invalid league match" } };
+      return leagueMatchResponse(await acceptLeagueTime(deps.db, user.id, input.matchId));
+    },
+    "/api/leagues/ready": async (body, user) => {
+      if (!user) return { status: 401, body: { ok: false, error: "not logged in" } };
+      const input = decodeLeagueMatchRequest(body);
+      if (!input) return { status: 400, body: { ok: false, error: "invalid league match" } };
+      return leagueMatchResponse(await markLeagueReady(deps.db, user.id, input.matchId));
+    },
+    "/api/leagues/claim": async (body, user) => {
+      if (!user) return { status: 401, body: { ok: false, error: "not logged in" } };
+      const input = decodeLeagueMatchRequest(body);
+      if (!input) return { status: 400, body: { ok: false, error: "invalid league match" } };
+      return leagueMatchResponse(await claimLeagueForfeit(deps.db, user.id, input.matchId));
+    },
     "/api/replay-notes": async (body, user) => {
       if (!user) return { status: 401, body: { ok: false, error: "not logged in" } };
       const input = decodeReplayNoteInput(body);
@@ -879,6 +950,35 @@ export function createApiServer(deps: ApiDeps): http.Server {
         .then(async (user) => {
           if (!user) return sendJson(res, 401, { ok: false, error: "not logged in" });
           sendJson(res, 200, { ok: true, ...await listMatches(deps.db, user.id, filters, { cursor }) });
+        })
+        .catch((e) => internalError(res, e));
+      return;
+    }
+    if (req.method === "GET" && url.pathname === "/api/leagues") {
+      authUser(req)
+        .then(async (user) => {
+          if (!user) return sendJson(res, 401, { ok: false, error: "not logged in" });
+          sendJson(res, 200, { ok: true, leagues: await listMemberLeagues(deps.db, user.id) });
+        })
+        .catch((e) => internalError(res, e));
+      return;
+    }
+    const leagueJoinMatch = req.method === "GET" ? /^\/api\/leagues\/join\/([^/]+)$/.exec(url.pathname) : null;
+    if (leagueJoinMatch) {
+      const token = leagueJoinMatch[1]!;
+      if (!LEAGUE_TOKEN_RE.test(token)) {
+        sendJson(res, 404, { ok: false, error: "league sign-up not found", code: "LEAGUE_NOT_FOUND" });
+        return;
+      }
+      const ip = clientIp(req.headers, req.socket.remoteAddress, trustedProxyHops);
+      Promise.resolve(limiter.allow(ip, "/api/leagues/join"))
+        .then(async (allowed) => {
+          if (!allowed) return sendJson(res, 429, { ok: false, error: "too many attempts, try again later" });
+          const user = await authUser(req);
+          const league = await leaguePreview(deps.db, token, user?.id ?? null);
+          return league
+            ? sendJson(res, 200, { ok: true, league })
+            : sendJson(res, 404, { ok: false, error: "league sign-up not found", code: "LEAGUE_NOT_FOUND" });
         })
         .catch((e) => internalError(res, e));
       return;

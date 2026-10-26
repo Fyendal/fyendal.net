@@ -5,6 +5,7 @@ import {
   commonOptionMessages,
   consumeDelayedEffect,
   decisionPrompt,
+  grantEndPhaseIntellect,
   ongoingLabel,
   opponentSeat,
   pendingDelayedEffect,
@@ -302,9 +303,7 @@ export const aol: Record<string, CardScript> = {
     alternativePlayCost: alternativeGold(),
     ...nextWager(3, "sword", false, "Winner gets +1 intellect during their next end phase", (ctx, winner) => {
       if (winner < 0) return;
-      const target = ctx.player(winner);
-      const targetTurn = winner === ctx.state.activePlayer ? ctx.state.turn : ctx.state.turn + 1;
-      ctx.setCardState(target.hero.instanceId, "bonusIntellectAtEndPhaseTurn", targetTurn);
+      grantEndPhaseIntellect(ctx, winner, winner === ctx.state.activePlayer ? ctx.state.turn : ctx.state.turn + 1);
     }),
   },
   "donkey|3": wagerReaction(1, "Winner destroys a card in their arsenal", (ctx, winner) => {

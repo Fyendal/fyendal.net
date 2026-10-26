@@ -3,7 +3,8 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import { TestI18nProvider } from "../../i18n/TestI18nProvider.js";
 import { SquareCardPresentation } from "../Card.js";
-import { ZoneOverlay, sortZoneCards } from "./ZoneOverlay.js";
+import { sortCards, type CardSortOrder } from "../CardSort.js";
+import { ZoneOverlay } from "./ZoneOverlay.js";
 
 const cards: CardView[] = [
   { instanceId: 1, cardId: "UNKNOWN-Z", name: "Zulu", owner: 0 },
@@ -19,6 +20,9 @@ const pitchedCards: CardView[] = [
   { instanceId: 15, cardId: "WTR216", owner: 0 }, // Sink Below (yellow)
   { instanceId: 16, cardId: "WTR218", owner: 0 }, // Nimblism (red)
 ];
+
+const sortZoneCards = (zoneCards: readonly CardView[], order: CardSortOrder) =>
+  sortCards(zoneCards, order, (card) => card);
 
 describe("shared zone overlay sorting", () => {
   it("preserves zone order unless card-name sorting is selected", () => {
@@ -56,7 +60,7 @@ describe("shared zone overlay sorting", () => {
     expect(html).toContain('role="group" aria-label="Sort by"');
     expect(html).toContain('aria-pressed="true">Zone order</button>');
     expect(html).toContain(
-      'aria-pressed="false"><span class="zone-viewer-pips" aria-hidden="true"><i></i><i></i><i></i></span>Pitch</button>',
+      'aria-pressed="false"><span class="card-sort-pips" aria-hidden="true"><i></i><i></i><i></i></span>Pitch</button>',
     );
     expect(html).toContain('aria-pressed="false">Name</button>');
     expect(html).toContain("3 cards");

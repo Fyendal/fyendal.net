@@ -347,6 +347,26 @@ describe("DTD — registration and core mechanics", () => {
     expect(projected(nimblism!.instanceId)).toBe(link.attackValue);
   });
 
+  it("prices a staged hand attack defender into Boltyn's power only for the defender", () => {
+    const s = scenario({
+      seats: [
+        { hero: "rhinar", heroKey: "boltyn|0", hand: ["beaming bravado|3", "banneret of vigor|2"] },
+        { hero: "dorinthea", hand: ["head jab|1"] },
+      ],
+    });
+    s.play("beaming bravado|3").chooseCard("banneret of vigor|2");
+    const attack = projectStateFor(s.state, 0).chain.at(-1)!.attackValue;
+    s.doRaw({ kind: "stage-defenders", instanceIds: [s.state.players[1]!.hand[0]!.instanceId] });
+    const boltynModifier = { sourceCardId: s.state.players[0]!.hero.cardId, amount: 1 };
+    const defender = projectStateFor(s.state, 1).pendingDecision;
+    expect(defender?.stagedAttack).toBe(attack + 1);
+    expect(defender?.stagedAttackModifiers).toContainEqual(boltynModifier);
+    const attacker = projectStateFor(s.state, 0).pendingDecision;
+    expect(attacker?.stagedAttack).toBe(attack);
+    expect(attacker?.stagedAttackModifiers).not.toContainEqual(boltynModifier);
+    expect(projectStateFor(s.state, 0).chain.at(-1)!.attackValue).toBe(attack);
+  });
+
   it("random-banish attacks recognize a six-power card banished for their own cost", () => {
     const s = scenario({
       seats: [
@@ -881,6 +901,95 @@ describe("DTD — registration and core mechanics", () => {
       ],
     });
     expect(banishPlays(faceDown)).toEqual([]);
+  });
+
+  it("Blasmophet's banish play never offers a banished card's from-hand instant", () => {
+    const cleaveIntents = (s: ReturnType<typeof scenario>, zone: "banish" | "hand") => {
+      const cleave = s.state.players[0]![zone].find((card) => card.cardId === printingId("cleave the heavens|3"))!;
+      return legalIntents(s.state, 0).filter((i) =>
+        (i.kind === "play-from-zone" && i.instanceId === cleave.instanceId) ||
+        (i.kind === "activate-ability" && i.sourceInstanceId === cleave.instanceId));
+    };
+    for (const zoneKey of ["banish", "banishFaceDown"] as const) {
+      const s = scenario({
+        seats: [
+          { hero: "rhinar", heroKey: "blasmophet, levia consumed|0", resources: 6, [zoneKey]: ["cleave the heavens|3"] },
+          { hero: "dorinthea" },
+        ],
+      });
+      const offered = cleaveIntents(s, "banish");
+      expect(offered.every((i) => i.kind === "play-from-zone" && i.zone === "banish")).toBe(true);
+      expect(offered.length).toBe(zoneKey === "banish" ? 1 : 0);
+      const banished = s.state.players[0]!.banish[0]!;
+      expect(applyIntent(s.state, 0, {
+        kind: "activate-ability",
+        sourceInstanceId: banished.instanceId,
+        pitchInstanceIds: [],
+      }).ok).toBe(false);
+    }
+
+    const held = scenario({
+      seats: [
+        { hero: "rhinar", heroKey: "blasmophet, levia consumed|0", hand: ["cleave the heavens|3"] },
+        { hero: "dorinthea" },
+      ],
+    });
+    expect(cleaveIntents(held, "hand").some((i) => i.kind === "activate-ability")).toBe(true);
+    held.activate("cleave the heavens|3").settle()
+      .expectInZone(0, "gate to i'arathael|0", "board");
+    expect(held.state.players[0]!.banish.find((card) => card.cardId === printingId("cleave the heavens|3"))?.faceDown)
+      .toBe(true);
+  });
+
+  it("Blasmophet plays a Blood Debt card from the banished zone only once each turn", () => {
+    const banishPlays = (s: ReturnType<typeof scenario>) =>
+      legalIntents(s.state, 0).filter((i) => i.kind === "play-from-zone" && i.zone === "banish");
+    const s = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          heroKey: "blasmophet, levia consumed|0",
+          resources: 12,
+          banish: ["shaden death hydra|2", "shaden death hydra|2"],
+        },
+        { hero: "dorinthea" },
+      ],
+    });
+    const [first] = banishPlays(s);
+    expect(banishPlays(s)).toHaveLength(2);
+
+    s.doRaw(first!).settle().blockWith().settle();
+    s.state.players[0]!.actionPoints = 1;
+    expect(s.state.players[0]!.banish.filter((card) => !card.faceDown)).toHaveLength(1);
+    expect(banishPlays(s)).toEqual([]);
+  });
+
+  it("Blasmophet, Levia Consumed keeps its banish play when a card uses its own permission", () => {
+    const banishPlayIds = (s: ReturnType<typeof scenario>) => new Set(legalIntents(s.state, 0).flatMap((i) =>
+      i.kind === "play-from-zone" && i.zone === "banish" ? [i.instanceId] : []));
+    const s = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          heroKey: "blasmophet, levia consumed|0",
+          resources: 20,
+          banish: ["ghostly visit|1", "feeding frenzy|1", "feeding frenzy|1"],
+        },
+        { hero: "dorinthea" },
+      ],
+    });
+    const visit = s.state.players[0]!.banish.find((card) => card.cardId === printingId("ghostly visit|1"))!;
+    const playFromBanish = (instanceId: number) => {
+      const intent = legalIntents(s.state, 0).find((i) =>
+        i.kind === "play-from-zone" && i.zone === "banish" && i.instanceId === instanceId)!;
+      s.doRaw(intent).settle().blockWith().settle();
+      s.state.players[0]!.actionPoints = 1;
+    };
+
+    playFromBanish(visit.instanceId);
+    expect(banishPlayIds(s).size).toBe(2);
+    playFromBanish([...banishPlayIds(s)][0]!);
+    expect(banishPlayIds(s).size).toBe(0);
   });
 
   it("a face-down banished Funeral Moon cannot be played — face-down cards have no properties", () => {

@@ -23,6 +23,7 @@ export const CLASSIC_CONSTRUCTED_LEGALITY_CHECKED_ON = "2026-10-26";
 export const SILVER_AGE_LEGALITY_CHECKED_ON = "2026-10-26";
 
 const LIVING_LEGEND_HEROES = new Set([
+  "arakni, marionette",
   "aurora, shooting star",
   "azalea, ace in the hole",
   "bravo, star of the show",
@@ -32,6 +33,7 @@ const LIVING_LEGEND_HEROES = new Set([
   "dash, inventor extraordinaire",
   "dromai, ash artist",
   "enigma, ledger of ancestry",
+  "fai, rising rebellion",
   "florian, rotwood harbinger",
   "iyslander, stormbind",
   "kano, dracai of aether",
@@ -72,6 +74,8 @@ const LIVING_LEGEND_WEAPONS = new Set([
   "nebula blade",
   "tiger taming khakkara",
   "symbiosis shot",
+  "hunter's klaive",
+  "searing emberblade",
 ]);
 
 /** Classic Constructed cards banned at every pitch. */

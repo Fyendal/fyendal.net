@@ -6,6 +6,7 @@ import { controlledPermanents } from "./sourceQueries.js";
 import {
   gameLogMessage,
   logCardValue,
+  logNameOf,
   logPublic,
   nameOf,
 } from "./gameLog.js";
@@ -717,7 +718,7 @@ export function payActivatedAbilityCost(
     ));
   }
   logPublic(state, gameLogMessage(
-    `${nameOf(state, player.heroCardId)} activates ${nameOf(state, card.cardId)}`,
+    `${nameOf(state, player.heroCardId)} activates ${logNameOf(state, card.cardId)}`,
     "engine.log.card.activated",
     {
       hero: logCardValue(player.heroCardId),

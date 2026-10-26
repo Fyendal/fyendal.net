@@ -338,17 +338,11 @@ export function localizedCardLog(
   );
 }
 
-/** Log that a resolving Heave trigger offered no prompt because its cost
- * could not be paid. The trigger itself already named the card publicly. */
-export function logHeaveUnaffordable(ctx: ScriptCtx, amount: number): void {
-  ctx.logPublic(
-    localizedCardLog(
-      ctx,
-      `${ctx.data.name}: can't pay ${amount} to heave it`,
-      "card.log.common.heave.unaffordable",
-      { amount },
-    ),
-  );
+/** Heave N can be paid and this card can still move from hand to arsenal. */
+export function canHeave(ctx: ScriptCtx, amount: number): boolean {
+  return ctx.hasArsenalSpace() &&
+    ctx.player(ctx.seat).hand.some((card) => card.instanceId === ctx.self.instanceId) &&
+    ctx.canPayResources(amount, [ctx.self.instanceId]);
 }
 
 const HYPER_DRIVER_STEAM_FROM_BOOST_HOOK = "common-hyper-driver-steam-from-boost";
@@ -469,6 +463,16 @@ export function mergeSetScripts(
 
 export function opponentSeat(ctx: ScriptCtx): number {
   return ctx.seat === 0 ? 1 : 0;
+}
+
+/** Grant `seat` +1 intellect during the end phase of `turn`; repeated grants for that turn stack. */
+export function grantEndPhaseIntellect(ctx: ScriptCtx, seat: number, turn: number): void {
+  const hero = ctx.player(seat).hero;
+  const pending = Number(hero.scriptState?.bonusIntellectAtEndPhaseTurn ?? 0) === turn
+    ? Number(hero.scriptState?.bonusIntellectAtEndPhaseCount ?? 1)
+    : 0;
+  ctx.setCardState(hero.instanceId, "bonusIntellectAtEndPhaseTurn", turn);
+  ctx.setCardState(hero.instanceId, "bonusIntellectAtEndPhaseCount", pending + 1);
 }
 
 export type HeroChoiceOption = "opposing hero" | "your hero";
@@ -902,6 +906,14 @@ const BLOOD_DEBT = {
   redeemedName: "levia, redeemed",
 } as const;
 
+/** Printed Blood Debt, unless the owner is Levia, Redeemed (her cards lose it). */
+export function hasBloodDebt(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
+  if (!(ctx.cardData(card.cardId).keywords ?? []).some((keyword) => keyword.trim().toLowerCase() === "blood debt"))
+    return false;
+  const ownerHero = ctx.cardData(ctx.player(card.owner).hero.cardId).name.toLowerCase();
+  return ownerHero !== BLOOD_DEBT.redeemedName || ctx.heroAbilitiesDisabled(card.owner);
+}
+
 function activeHeroName(ctx: ScriptCtx): string {
   return ctx.cardData(ctx.player(ctx.seat).hero.cardId).name.toLowerCase();
 }
@@ -943,7 +955,7 @@ export const leviaRedeemedAbility: ActivatedAbility = {
       leviaTwinFace(ctx, BLOOD_DEBT.redeemedName) !== undefined &&
       ctx
         .player(ctx.seat)
-        .banish.filter((card) => !card.faceDown && ctx.cardData(card.cardId).text.includes("Blood Debt")).length >= 13
+        .banish.filter((card) => !card.faceDown && hasBloodDebt(ctx, card)).length >= 13
     );
   },
   onCostPaid(ctx) {
@@ -964,11 +976,12 @@ export function bloodDebtScript(extra: CardScript = {}, playableFromBanish = fal
     ...extra,
     ...(playableFromBanish ? { staticPlayableFrom: ["banish" as const] } : {}),
     onPlay(ctx) {
-      ctx.setFlag(
-        "player",
-        "bloodDebtCardsPlayedThisTurn",
-        Number(ctx.getFlag("player", "bloodDebtCardsPlayedThisTurn")) + 1,
-      );
+      if (hasBloodDebt(ctx, ctx.self))
+        ctx.setFlag(
+          "player",
+          "bloodDebtCardsPlayedThisTurn",
+          Number(ctx.getFlag("player", "bloodDebtCardsPlayedThisTurn")) + 1,
+        );
       extra.onPlay?.(ctx);
     },
     onChoose(ctx, hook, option) {

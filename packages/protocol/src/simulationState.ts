@@ -389,7 +389,7 @@ function validateDamageEvent(value: unknown, code: string, path: string): void {
 }
 
 const STACK_REQUIRED = ["sourceInstanceId", "seat", "triggerIndex", "label", "optional"] as const;
-const STACK_OPTIONAL = ["triggerCount", "triggerBatchStarted", "triggerSource", "triggerEventCard", "triggerDamage", "defaultOption", "accepted", "card", "goAgain", "ability", "abilityCard", "abilityIndex", "targetCardInstanceId", "targetDeclared", "resolvedReactionAbility", "fromHand", "meldStage", "engineEffect"] as const;
+const STACK_OPTIONAL = ["triggerCount", "triggerBatchStarted", "triggerSource", "triggerEventCard", "triggerDamage", "defaultOption", "hiddenSource", "accepted", "card", "goAgain", "ability", "abilityCard", "abilityIndex", "targetCardInstanceId", "targetDeclared", "resolvedReactionAbility", "fromHand", "meldStage", "engineEffect"] as const;
 function validateStackLayer(value: unknown, code: string, path: string): void {
   const layer = exact(value, code, path, STACK_REQUIRED, STACK_OPTIONAL);
   for (const key of ["sourceInstanceId", "seat", "triggerIndex"] as const) integer(layer[key], code, `${path}.${key}`);
@@ -414,9 +414,11 @@ function validateStackLayer(value: unknown, code: string, path: string): void {
   for (const key of ["accepted", "goAgain", "ability", "resolvedReactionAbility", "fromHand"] as const) optional(layer, key, (v, p) => { bool(v, code, p); }, path);
   optional(layer, "abilityIndex", (v, p) => { integer(v, code, p); }, path);
   optional(layer, "targetCardInstanceId", (v, p) => { integer(v, code, p); }, path);
-  optional(layer, "targetDeclared", (v, p) => {
-    if (v !== true) fail(code, p, "expected true");
-  }, path);
+  for (const key of ["targetDeclared", "hiddenSource"] as const) {
+    optional(layer, key, (v, p) => {
+      if (v !== true) fail(code, p, "expected true");
+    }, path);
+  }
   optional(layer, "meldStage", (v, p) => { if (v !== 1 && v !== 2) fail(code, p, "expected 1 or 2"); }, path);
   optional(layer, "card", (v, p) => validateCard(v, code, p), path);
   optional(layer, "abilityCard", (v, p) => validateCard(v, code, p), path);
@@ -548,7 +550,7 @@ function validateChainLink(value: unknown, code: string, path: string): void {
 
 const MODIFIER_REQUIRED = ["id", "sourceInstanceId", "seat", "scope"] as const;
 const MODIFIER_NUMBERS = ["expiresAtStartOfTurn", "expiresAtEndOfTurn", "expiresAtStartOfSeatTurn", "expiresAtEndOfSeatTurn", "createdTurn", "basePower", "attack", "powerGainBonus", "attackActivationCostReduction", "activationCostReduction", "attackCostReduction", "piercing", "defense", "damage", "intimidate", "preventNextDamageAmount", "preventNextDamagePool", "preventDamagePerEvent", "preventDamageEventsRemaining", "discardDamagePreventionAmount", "discardDamagePreventionDraw", "preventNextDamageFromPitch", "maxDamageEventAmount", "reflectPreventedDamageToSeat", "redirectDamageFromSeat", "redirectDamageToSeat", "redirectDamagePrevent", "onHitGainLife", "onHitGainResources", "onHitDraw", "attackActionCardCap", "nonAttackActionCardCap", "goAgainIfAttackPowerAtLeast", "onDefendedDealDamage", "onHitLoseLife", "onDestroyedDraw", "onBoostAttack", "onActionPlayedGainActionPoints", "extraDiceIgnoreLowest", "onHitDealDamage", "defendedLessThanNonEquip", "minCost", "maxCost", "maxBasePower", "minBasePower", "minimumAttackBasePower", "appliesToInstanceId", "suppressesActivatedAbilitiesOfInstanceId", "cannotDefendWithInstanceId", "appliesToPitch", "playCostReduction", "playBaseCostOverride", "remainingCostUses", "maxNonBlockDefenders", "onDefendedByAttackActionPowerCounters", "swapsNextClashWithSeat"] as const satisfies readonly (keyof Modifier)[];
-const MODIFIER_BOOLEANS = ["appliesToEquipment", "appliesToFirstDefenderOnly", "damageArcaneOnly", "damageUnpreventable", "goAgain", "dominate", "overpower", "preventAllDamageFromSource", "reflectPreventedDamageUnpreventable", "onHitGoAgain", "suppressesHeroAbilities", "suppressesHeroAbilitiesDuringActionPhase", "suppressesOwnedNames", "suppressesOwnedClassTalentTypes", "restrictActionsToWeaponOrAttack", "restrictActionsToNonWeaponNonAttack", "prohibitsDefenseReactionNamesInGraveyard", "goAgainIfDefendedByAttackAction", "suppressHitEffects", "suppressHitEffectsThisTurn", "onHitToSoul", "onHitBottomDeck", "onHitReenableAttacker", "onHitReenableAttackerIfMarked", "onHitMark", "onBoostDominate", "onHitClearHandAndArsenalAtEndPhase", "replaceCombatDamageWithDefendingEquipment", "appliesToMarkedHero", "appliesToFromArsenal", "appliesToRuneGated", "appliesToCharged", "noDefenseReactionsFromArsenal", "noDefenseReactionsFromHand", "once", "expiresOnChainClose", "consumed"] as const satisfies readonly (keyof Modifier)[];
+const MODIFIER_BOOLEANS = ["attackFromBasePower", "appliesToEquipment", "appliesToFirstDefenderOnly", "damageArcaneOnly", "damageUnpreventable", "goAgain", "dominate", "overpower", "preventAllDamageFromSource", "reflectPreventedDamageUnpreventable", "onHitGoAgain", "suppressesHeroAbilities", "suppressesHeroAbilitiesDuringActionPhase", "suppressesOwnedNames", "suppressesOwnedClassTalentTypes", "restrictActionsToWeaponOrAttack", "restrictActionsToNonWeaponNonAttack", "prohibitsDefenseReactionNamesInGraveyard", "goAgainIfDefendedByAttackAction", "suppressHitEffects", "suppressHitEffectsThisTurn", "onHitToSoul", "onHitBottomDeck", "onHitReenableAttacker", "onHitReenableAttackerIfMarked", "onHitMark", "onBoostDominate", "onHitClearHandAndArsenalAtEndPhase", "replaceCombatDamageWithDefendingEquipment", "appliesToMarkedHero", "appliesToFromArsenal", "appliesToRuneGated", "appliesToCharged", "noDefenseReactionsFromArsenal", "noDefenseReactionsFromHand", "once", "expiresOnChainClose", "consumed"] as const satisfies readonly (keyof Modifier)[];
 const MODIFIER_STRINGS = ["sourceCardId", "grantType", "grantName", "discardDamagePreventionCardType", "preventLethalDamageByBanishingNamedCard", "banishPreventedDamageSourceFaceDownIfType", "appliesToDamageSourceType", "appliesToDamageRecipientType", "grantKeyword", "suppressKeyword", "prohibitsName", "grantsTypeToName", "grantsType", "onFriendlyActivateCreateToken", "onDamageDealtCreateTokenPerPoint", "onPreventCreateToken", "appliesToClass", "appliesToKeyword", "appliesToName", "appliesToTargetType", "appliesToTargetNamePrefix", "excludesSubtype", "appliesToCardType", "restrictCardPlaysToType", "ongoingLabel", "grantsPlayFromNameContains", "goAgainIfPlayedOrCreatedSubtype", "overpowerIfNameContains"] as const satisfies readonly (keyof Modifier)[];
 const MODIFIER_COUNTER_KINDS = ["appliesToCounter"] as const satisfies readonly (keyof Modifier)[];
 const MODIFIER_OBJECTS = ["onHitCreateToken", "onAttackActionPlayedFromBanishCreateToken", "onHitDestroyTopDeckCards", "onHitScriptHook", "ongoingLabelMessage", "defendingPitchDefenseAdjustment", "appliesTo", "appliesToSubtype", "appliesToType", "grantsPlayFromZone", "grantsPlayFromZoneOwner"] as const satisfies readonly (keyof Modifier)[];
@@ -637,12 +639,14 @@ function validateArcane(value: unknown, code: string, path: string, depth: numbe
 
 function validateResume(value: unknown, code: string, path: string): void {
   const resume = object(value, code, path);
-  const kind = oneOf(resume.kind, ["stack-card", "continue-play-after-declaration", "finish-play", "finish-reaction", "finish-window-instant", "after-declare", "start-reaction-step", "after-resolution", "continue-stack", "finish-wager-result", "continue-wager-loss-replacements", "continue-wager-prizes", "reopen-reaction", "game-setup"] as const, code, `${path}.kind`);
+  const kind = oneOf(resume.kind, ["stack-card", "continue-play-after-declaration", "continue-reaction-after-declaration", "finish-play", "finish-reaction", "finish-window-instant", "after-declare", "start-reaction-step", "after-resolution", "continue-stack", "finish-wager-result", "continue-wager-loss-replacements", "continue-wager-prizes", "reopen-reaction", "game-setup"] as const, code, `${path}.kind`);
   if (kind === "stack-card") {
     const entry = exact(value, code, path, ["kind", "seat", "card"]);
     integer(entry.seat, code, `${path}.seat`); validateCard(entry.card, code, `${path}.card`);
-  } else if (kind === "continue-play-after-declaration") {
-    const entry = exact(value, code, path, ["kind", "seat", "instanceId", "pitchInstanceIds", "from"], ["meldSide", "targetAllyId", "boost", "boostCount", "asInstant", "alternativeCostCardInstanceIds", "targetCardInstanceId", "declaredVariableX"]);
+  } else if (kind === "continue-play-after-declaration" || kind === "continue-reaction-after-declaration") {
+    // Only an action-speed play carries boost and play-method declarations.
+    const playOnly = kind === "continue-play-after-declaration" ? ["boost", "boostCount", "asInstant"] : [];
+    const entry = exact(value, code, path, ["kind", "seat", "instanceId", "pitchInstanceIds", "from"], ["meldSide", "targetAllyId", ...playOnly, "alternativeCostCardInstanceIds", "targetCardInstanceId", "declaredVariableX"]);
     integer(entry.seat, code, `${path}.seat`);
     integer(entry.instanceId, code, `${path}.instanceId`);
     validateIntegerArray(entry.pitchInstanceIds, code, `${path}.pitchInstanceIds`);
@@ -696,7 +700,7 @@ function validateResume(value: unknown, code: string, path: string): void {
 
 function validateDecision(value: unknown, code: string, path: string, depth = 0): void {
   if (depth > 16) fail(code, path, "follow-up decision nesting is too deep");
-  const decision = exact(value, code, path, ["player", "kind", "prompt"], ["promptMessage", "options", "minimumSelections", "maximumSelections", "defaultOption", "optionLabels", "optionMessages", "chosenOptions", "chosenOptionMessages", "optionCounts", "sourceInstanceId", "scriptSourceSnapshot", "chooseHook", "followUpDecisions", "tokenCreationCause", "cardOptions", "revealedCardIds", "lookedCardIds", "payment", "resourcePayment", "xPayment", "variablePlayCost", "variableActivationCost", "tokenCreationReplacement", "tokenCreationReplacementOrder", "wagerLossReplacementOrder", "activationCost", "clash", "arcane", "triggerOrder", "deckBottomOrder", "dieRoll", "staged", "resume"]);
+  const decision = exact(value, code, path, ["player", "kind", "prompt"], ["promptMessage", "options", "minimumSelections", "maximumSelections", "distinctCardNames", "defaultOption", "optionLabels", "optionMessages", "chosenOptions", "chosenOptionMessages", "optionCounts", "sourceInstanceId", "scriptSourceSnapshot", "chooseHook", "followUpDecisions", "tokenCreationCause", "cardOptions", "revealedCardIds", "lookedCardIds", "payment", "resourcePayment", "xPayment", "variablePlayCost", "variableActivationCost", "tokenCreationReplacement", "tokenCreationReplacementOrder", "wagerLossReplacementOrder", "activationCost", "clash", "arcane", "triggerOrder", "deckBottomOrder", "dieRoll", "staged", "resume"]);
   integer(decision.player, code, `${path}.player`);
   oneOf(decision.kind, ["defend", "attack-reaction", "defense-reaction", "priority-window", "arsenal", "choose-target", "choose-name", "order-triggers", "optional-effect"] as const, code, `${path}.kind`);
   string(decision.prompt, code, `${path}.prompt`);
@@ -704,6 +708,10 @@ function validateDecision(value: unknown, code: string, path: string, depth = 0)
   optional(decision, "options", (v, p) => validateStringArray(v, code, p), path);
   optional(decision, "minimumSelections", (v, p) => { integer(v, code, p); }, path);
   optional(decision, "maximumSelections", (v, p) => { integer(v, code, p); }, path);
+  optional(decision, "distinctCardNames", (v, p) => { bool(v, code, p); }, path);
+  if (decision.distinctCardNames !== undefined && decision.maximumSelections === undefined) {
+    fail(code, path, "distinct card names require selection bounds");
+  }
   if ((decision.minimumSelections === undefined) !== (decision.maximumSelections === undefined)) {
     fail(code, path, "selection bounds must be present together");
   }

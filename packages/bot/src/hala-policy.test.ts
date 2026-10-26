@@ -1076,6 +1076,43 @@ describe("Hala policy", () => {
       .toEqual({ kind: "defend", instanceIds: [] });
   });
 
+  it("survives a lethal Command and Conquer without counting on its defense reactions", () => {
+    let state = createGame({
+      decklists: [halaDeck(), decklists.dorinthea],
+      cards: cardData,
+      scripts,
+      seed: 9327,
+      startPlayer: 1,
+    });
+    // As reported: the bot planned Sink Below and took lethal with three blockers in hand.
+    state.turn = 4;
+    state.players[0]!.life = 6;
+    const { legs } = state.players[0]!.equipment;
+    state.players[0]!.equipment = { legs: { ...legs!, defCounters: 1 } };
+    replaceHand(state, 0, ["MPW028", "MPW028", "ASB016", "ARC159"]);
+    state.players[0]!.arsenal = [{ instanceId: state.nextInstanceId++, cardId: "AHA012", owner: 0 }];
+    replaceHand(state, 1, ["ARC159"]);
+    state.players[1]!.resources = 3;
+    state = apply(state, 1, legalIntents(state, 1).find((intent) =>
+      intent.kind === "play-card" && intent.instanceId === state.players[1]!.hand[0]!.instanceId
+    )!);
+    for (let step = 0; step < 30 && !state.chain.at(-1)!.resolved; step++) {
+      const actor = (state.pendingDecision?.player ?? state.priorityPlayer) as 0 | 1;
+      state = apply(state, actor, actor === 0
+        ? chooseHalaIntent({
+          seat: 0,
+          view: projectStateFor(state, 0),
+          legal: legalIntents(state, 0),
+          cards: cardData,
+          state,
+          decklists: decklistsFromState(state, 0),
+        })
+        : { kind: "pass" });
+    }
+
+    expect(state.players[0]!.life).toBeGreaterThan(0);
+  });
+
   it.each([
     ["arcane", null, "Destroy Runechant: 1 arcane damage to the opposing hero"],
     ["physical", { instanceId: 93_281, cardId: "OUT139", owner: 1 }, "Flick Knives"],

@@ -1283,16 +1283,44 @@
       "value": "Put a steam counter on Symbiosis Shot?"
     }
   ],
-  "card.ajv.channel.ice.choose": [
+  "card.ajv.channel.ice.many": [
     {
       "type": 0,
-      "value": "Choose an Ice card from pitch for Channel Ice, or destroy this"
-    }
-  ],
-  "card.ajv.channel.ice.next": [
+      "value": "Choose "
+    },
+    {
+      "type": 6,
+      "value": "count",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " Ice card"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " Ice cards"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    },
     {
       "type": 0,
-      "value": "Choose another Ice card for Channel Ice, or destroy this"
+      "value": " from pitch for Channel Ice, or fewer to destroy this"
     }
   ],
   "card.ajv.equipment.counter": [
@@ -1441,16 +1469,10 @@
       "value": "Put a zombie into your graveyard?"
     }
   ],
-  "card.amg.revere.shuffle": [
+  "card.amg.revere.shuffle.choose": [
     {
       "type": 0,
-      "value": "Shuffle a Mechanologist action card from your banished zone into your deck?"
-    }
-  ],
-  "card.amg.revere.shuffle.next": [
-    {
-      "type": 0,
-      "value": "Shuffle another differently named Mechanologist action card?"
+      "value": "Choose up to 3 Mechanologist action cards with different names to shuffle into your deck"
     }
   ],
   "card.amo.mortimer.disease.choose": [
@@ -1609,16 +1631,41 @@
       "value": "Return an aura you control to its owner's hand?"
     }
   ],
-  "card.aps.card.discard.first": [
+  "card.aps.card.discard.choose": [
     {
       "type": 0,
-      "value": "Discard a card"
-    }
-  ],
-  "card.aps.card.discard.next": [
+      "value": "Choose "
+    },
+    {
+      "type": 6,
+      "value": "count",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 0,
+              "value": "a card"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " cards"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    },
     {
       "type": 0,
-      "value": "Discard another card"
+      "value": " to discard"
     }
   ],
   "card.aps.crowd.cheer": [
@@ -2737,10 +2784,44 @@
       "value": "Shiyana: choose a hero to copy"
     }
   ],
-  "card.cru.smash.item.destroy": [
+  "card.cru.smash.items.destroy": [
     {
       "type": 0,
-      "value": "Argh... Smash!: destroy an item?"
+      "value": "Argh... Smash!: choose up to "
+    },
+    {
+      "type": 6,
+      "value": "count",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " item"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " items"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    },
+    {
+      "type": 0,
+      "value": " to destroy"
     }
   ],
   "card.cru.tripwire.pay": [
@@ -2989,12 +3070,6 @@
       "value": "Pay 1 life to make the next Runechant unpreventable?"
     }
   ],
-  "card.dtd.soul.banish.next": [
-    {
-      "type": 0,
-      "value": "Banish another soul card?"
-    }
-  ],
   "card.dtd.soul.banish.shields": [
     {
       "type": 0,
@@ -3133,16 +3208,41 @@
       "value": "No revealed cards can defend"
     }
   ],
-  "card.dyn.harpoon.reveal.choose": [
+  "card.dyn.harpoon.reveal.cards.choose": [
     {
       "type": 0,
-      "value": "Choose a card to reveal"
-    }
-  ],
-  "card.dyn.harpoon.reveal.next": [
+      "value": "Choose "
+    },
+    {
+      "type": 6,
+      "value": "count",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 0,
+              "value": "a card"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " cards"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    },
     {
       "type": 0,
-      "value": "Choose another card to reveal"
+      "value": " to reveal"
     }
   ],
   "card.dyn.hornet.target.choose": [
@@ -5051,16 +5151,18 @@
       "value": "Choose equipment that must defend"
     }
   ],
-  "card.evo.equipment.offer": [
+  "card.evo.equipment.offer.many": [
     {
       "type": 0,
-      "value": "Choose equipment to offer"
-    }
-  ],
-  "card.evo.equipment.offer.next": [
+      "value": "Choose "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
     {
       "type": 0,
-      "value": "Choose another equipment to offer"
+      "value": " equipment to offer"
     }
   ],
   "card.evo.equipment.zone.choose": [
@@ -5125,16 +5227,44 @@
       "value": " defense?"
     }
   ],
-  "card.evo.graveyard.item.banish": [
+  "card.evo.graveyard.items.banish": [
     {
       "type": 0,
-      "value": "Banish an item from your graveyard"
-    }
-  ],
-  "card.evo.graveyard.item.banish.next": [
+      "value": "Banish "
+    },
+    {
+      "type": 6,
+      "value": "count",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " item"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " items"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    },
     {
       "type": 0,
-      "value": "Banish another item from your graveyard"
+      "value": " from your graveyard"
     }
   ],
   "card.evo.hand.card.banish.draw": [
@@ -5155,22 +5285,40 @@
       "value": "Put a Hyper Driver into the arena?"
     }
   ],
-  "card.evo.hyperdriver.destroy": [
+  "card.evo.hyperdrivers.destroy": [
     {
       "type": 0,
-      "value": "Destroy a Hyper Driver"
-    }
-  ],
-  "card.evo.hyperdriver.destroy.next": [
+      "value": "Destroy "
+    },
     {
-      "type": 0,
-      "value": "Destroy another Hyper Driver"
-    }
-  ],
-  "card.evo.hyperdriver.transform.next": [
-    {
-      "type": 0,
-      "value": "Choose another Hyper Driver?"
+      "type": 6,
+      "value": "count",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " Hyper Driver"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " Hyper Drivers"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
     }
   ],
   "card.evo.hyperdrivers.transform": [
@@ -5185,18 +5333,6 @@
       "value": "Put an item into the arena"
     }
   ],
-  "card.evo.item.reset": [
-    {
-      "type": 0,
-      "value": "Choose an item to reset"
-    }
-  ],
-  "card.evo.item.reset.next": [
-    {
-      "type": 0,
-      "value": "Choose another item to reset"
-    }
-  ],
   "card.evo.item.small.arena": [
     {
       "type": 0,
@@ -5207,6 +5343,46 @@
     {
       "type": 0,
       "value": "Put an item with cost 0 or 1 into the arena?"
+    }
+  ],
+  "card.evo.items.reset": [
+    {
+      "type": 0,
+      "value": "Choose "
+    },
+    {
+      "type": 6,
+      "value": "count",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " item"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " items"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    },
+    {
+      "type": 0,
+      "value": " to reset"
     }
   ],
   "card.evo.maintenance.choose": [
@@ -5239,22 +5415,30 @@
       "value": "Remove all steam counters from a permanent"
     }
   ],
-  "card.evo.permanent.steam.remove.next": [
-    {
-      "type": 0,
-      "value": "Remove steam from another permanent?"
-    }
-  ],
   "card.evo.permanent.steam.remove.uptox": [
     {
       "type": 0,
       "value": "Remove steam counters from up to X permanents"
     }
   ],
-  "card.evo.red.pitch.first": [
+  "card.evo.red.pitch.choose": [
     {
       "type": 0,
-      "value": "Pitch the first of "
+      "value": "Choose "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " red cards to pitch"
+    }
+  ],
+  "card.evo.red.pitch.optional": [
+    {
+      "type": 0,
+      "value": "Pitch "
     },
     {
       "type": 1,
@@ -5263,12 +5447,6 @@
     {
       "type": 0,
       "value": " red cards?"
-    }
-  ],
-  "card.evo.red.pitch.second": [
-    {
-      "type": 0,
-      "value": "Pitch the second red card?"
     }
   ],
   "card.evo.revealed.card.defend": [
@@ -5289,10 +5467,44 @@
       "value": "Scrap an item or equipment from your graveyard?"
     }
   ],
-  "card.evo.scrap.choose.next": [
+  "card.evo.scrap.choose.many": [
     {
       "type": 0,
-      "value": "Scrap another item or equipment from your graveyard?"
+      "value": "Choose up to "
+    },
+    {
+      "type": 6,
+      "value": "count",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " item or equipment"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " items or equipment"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    },
+    {
+      "type": 0,
+      "value": " in your graveyard to scrap"
     }
   ],
   "card.evo.soul.charge": [
@@ -5301,10 +5513,18 @@
       "value": "Charge your hero's soul?"
     }
   ],
-  "card.evo.ticktock.item.destroy": [
+  "card.evo.ticktock.items.destroy": [
     {
       "type": 0,
-      "value": "Destroy another item?"
+      "value": "Choose up to "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " other items to destroy"
     }
   ],
   "card.evo.weapon.attackagain.choose": [
@@ -5655,16 +5875,47 @@
       "value": ": choose a card to discard"
     }
   ],
-  "card.evr.discard.next": [
-    {
-      "type": 0,
-      "value": "Choose another card to discard"
-    }
-  ],
   "card.evr.dreadbore.arrow.load": [
     {
       "type": 0,
       "value": "Put an arrow from your hand face up into arsenal?"
+    }
+  ],
+  "card.evr.echoes.discard.choose": [
+    {
+      "type": 0,
+      "value": "Choose "
+    },
+    {
+      "type": 6,
+      "value": "count",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 0,
+              "value": "a card"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " cards"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    },
+    {
+      "type": 0,
+      "value": " to discard"
     }
   ],
   "card.evr.echoes.hero.choose": [
@@ -5749,6 +6000,12 @@
       "value": " or less?"
     }
   ],
+  "card.evr.knick.money.choose": [
+    {
+      "type": 0,
+      "value": "Choose any number of Copper, Silver, and Gold to destroy"
+    }
+  ],
   "card.evr.knick.search": [
     {
       "type": 0,
@@ -5759,18 +6016,6 @@
     {
       "type": 0,
       "value": "Destroy Mask of the Pouncing Lynx to search your deck?"
-    }
-  ],
-  "card.evr.money.destroy": [
-    {
-      "type": 0,
-      "value": "Destroy money tokens?"
-    }
-  ],
-  "card.evr.money.destroy.next": [
-    {
-      "type": 0,
-      "value": "Destroy another money token?"
     }
   ],
   "card.evr.nonattack.bottom": [
@@ -5869,32 +6114,44 @@
       "value": "Turn a non-attack action in arsenal face-up"
     }
   ],
-  "card.hnt.banished.facedown.first": [
+  "card.hnt.banished.facedown.choose": [
     {
       "type": 0,
-      "value": "Choose banished card 1 of "
+      "value": "Choose "
     },
     {
-      "type": 1,
-      "value": "total"
+      "type": 6,
+      "value": "count",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " banished card"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " banished cards"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
     },
     {
       "type": 0,
       "value": " to turn face-down"
-    }
-  ],
-  "card.hnt.banished.facedown.next": [
-    {
-      "type": 0,
-      "value": "Choose another banished card ("
-    },
-    {
-      "type": 1,
-      "value": "remaining"
-    },
-    {
-      "type": 0,
-      "value": " remaining)"
     }
   ],
   "card.hnt.card.choose": [
@@ -5967,12 +6224,6 @@
     {
       "type": 0,
       "value": "Dragonscaler Flight Path: choose a Draconic attack"
-    }
-  ],
-  "card.hnt.draconicdagger.equip.next": [
-    {
-      "type": 0,
-      "value": "Equip one more Draconic dagger?"
     }
   ],
   "card.hnt.draconicdagger.equip.upto": [
@@ -6339,10 +6590,10 @@
       "value": " or less"
     }
   ],
-  "card.hvy.six.banish": [
+  "card.hvy.six.banish.choose": [
     {
       "type": 0,
-      "value": "Banish a "
+      "value": "Banish any number of cards with "
     },
     {
       "type": 1,
@@ -6350,13 +6601,7 @@
     },
     {
       "type": 0,
-      "value": "-power card?"
-    }
-  ],
-  "card.hvy.six.banish.next": [
-    {
-      "type": 0,
-      "value": "Banish another?"
+      "value": " or more power"
     }
   ],
   "card.hvy.vigor.pay": [
@@ -7375,24 +7620,6 @@
     {
       "type": 0,
       "value": ": put a card on the bottom and drew a card"
-    }
-  ],
-  "card.log.common.heave.unaffordable": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": ": can't pay "
-    },
-    {
-      "type": 1,
-      "value": "amount"
-    },
-    {
-      "type": 0,
-      "value": " resources to heave it"
     }
   ],
   "card.log.common.hero.life.lost": [
@@ -10150,42 +10377,6 @@
       "value": ": no exposed equipment zone was found"
     }
   ],
-  "card.log.siy.hero.paid": [
-    {
-      "type": 1,
-      "value": "target"
-    },
-    {
-      "type": 0,
-      "value": " pays the resource cost for "
-    },
-    {
-      "type": 1,
-      "value": "card"
-    }
-  ],
-  "card.log.siy.hero.paid.amount": [
-    {
-      "type": 1,
-      "value": "target"
-    },
-    {
-      "type": 0,
-      "value": " pays "
-    },
-    {
-      "type": 1,
-      "value": "amount"
-    },
-    {
-      "type": 0,
-      "value": " resource for "
-    },
-    {
-      "type": 1,
-      "value": "card"
-    }
-  ],
   "card.log.ska.barefangs.attack": [
     {
       "type": 1,
@@ -11310,52 +11501,6 @@
       "value": " graveyard cards to banish"
     }
   ],
-  "card.mon.graveyard.cards.banish.more": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": ": choose "
-    },
-    {
-      "type": 1,
-      "value": "count"
-    },
-    {
-      "type": 0,
-      "value": " more "
-    },
-    {
-      "type": 6,
-      "value": "count",
-      "options": {
-        "one": {
-          "value": [
-            {
-              "type": 0,
-              "value": "card"
-            }
-          ]
-        },
-        "other": {
-          "value": [
-            {
-              "type": 0,
-              "value": "cards"
-            }
-          ]
-        }
-      },
-      "offset": 0,
-      "pluralType": "cardinal"
-    },
-    {
-      "type": 0,
-      "value": " to banish"
-    }
-  ],
   "card.mon.hand.card.banish": [
     {
       "type": 1,
@@ -11410,16 +11555,6 @@
     {
       "type": 0,
       "value": ": choose a Minnowism from your deck"
-    }
-  ],
-  "card.mon.opposing.graveyard.banish.next": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": ": choose another card in the opposing hero's graveyard to banish, or finish"
     }
   ],
   "card.mon.opposing.graveyard.banish.upto": [
@@ -11528,16 +11663,44 @@
       "value": "Shadow Puppetry: you may banish the top card"
     }
   ],
-  "card.mon.soul.banish.choose": [
+  "card.mon.soul.banish.count": [
     {
       "type": 0,
-      "value": "Choose a soul card to banish"
-    }
-  ],
-  "card.mon.soul.banish.next": [
+      "value": "Choose "
+    },
+    {
+      "type": 6,
+      "value": "count",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " soul card"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " soul cards"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    },
     {
       "type": 0,
-      "value": "Choose another soul card to banish"
+      "value": " to banish"
     }
   ],
   "card.mon.soul.card.choose": [
@@ -11624,16 +11787,10 @@
       "value": "Call for Backup: choose an attack action card to banish"
     }
   ],
-  "card.mpg.backup.first": [
+  "card.mpg.backup.pair.choose": [
     {
       "type": 0,
-      "value": "Call for Backup: choose the first attack action card"
-    }
-  ],
-  "card.mpg.backup.second": [
-    {
-      "type": 0,
-      "value": "Call for Backup: choose an attack action card with a different name"
+      "value": "Call for Backup: choose 2 attack action cards with different names"
     }
   ],
   "card.mpg.card.discard": [
@@ -11764,16 +11921,10 @@
       "value": "Add an attack reaction as a defender"
     }
   ],
-  "card.mpw.reaction.shuffle": [
+  "card.mpw.reaction.shuffle.choose": [
     {
       "type": 0,
-      "value": "Shuffle an attack reaction into your deck?"
-    }
-  ],
-  "card.mpw.reaction.shuffle.next": [
-    {
-      "type": 0,
-      "value": "Shuffle another differently named attack reaction?"
+      "value": "Choose up to 3 attack reactions with different names to shuffle into your deck"
     }
   ],
   "card.mpw.reaction.top": [
@@ -12460,6 +12611,12 @@
       "value": "Choose a token"
     }
   ],
+  "card.out.abyssal.arrow.choose": [
+    {
+      "type": 0,
+      "value": "Choose up to 3 arrows with different names to shuffle into your deck"
+    }
+  ],
   "card.out.arsenal.attack.choose": [
     {
       "type": 0,
@@ -12654,24 +12811,44 @@
       "value": ": discard an ally?"
     }
   ],
-  "card.pen.ally.freeze.next": [
+  "card.pen.ally.freeze.choose": [
     {
       "type": 0,
-      "value": "Freeze another ally?"
-    }
-  ],
-  "card.pen.ally.freeze.upto": [
-    {
-      "type": 0,
-      "value": "Freeze up to "
+      "value": "Choose up to "
     },
     {
-      "type": 1,
-      "value": "count"
+      "type": 6,
+      "value": "count",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " ally"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " allies"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
     },
     {
       "type": 0,
-      "value": " allies"
+      "value": " to freeze"
     }
   ],
   "card.pen.ally.return": [
@@ -12808,16 +12985,18 @@
       "value": "Name a card"
     }
   ],
-  "card.pen.cloaked.equipment.facedown": [
+  "card.pen.cloaked.equipment.facedown.choose": [
     {
       "type": 0,
-      "value": "Choose equipment with cloaked to turn face-down"
-    }
-  ],
-  "card.pen.cloaked.equipment.facedown.next": [
+      "value": "Choose "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
     {
       "type": 0,
-      "value": "Choose another equipment with cloaked"
+      "value": " equipment with cloaked to turn face-down"
     }
   ],
   "card.pen.color.choose": [
@@ -13246,12 +13425,6 @@
       "value": "Return an attack action to its owner's hand"
     }
   ],
-  "card.ros.attack.return.next": [
-    {
-      "type": 0,
-      "value": "Choose another attack action, or finish"
-    }
-  ],
   "card.ros.attack.return.upto": [
     {
       "type": 0,
@@ -13646,16 +13819,10 @@
       "value": "Edict of Steel: sharpen target sword you control"
     }
   ],
-  "card.sbl.v.charge.first": [
+  "card.sbl.v.charge.choose": [
     {
       "type": 0,
-      "value": "V of the Vanguard: choose a card from your hand to charge, or stop"
-    }
-  ],
-  "card.sbl.v.charge.next": [
-    {
-      "type": 0,
-      "value": "V of the Vanguard: choose another card to charge, or stop"
+      "value": "V of the Vanguard: choose any number of cards from your hand to charge"
     }
   ],
   "card.sbl.weapon.counters.distribute": [
@@ -14026,16 +14193,10 @@
       "value": "Discard a card or lose 2 life"
     }
   ],
-  "card.sea.lubricate.cog.choose": [
+  "card.sea.lubricate.cogs.choose": [
     {
       "type": 0,
-      "value": "Untap up to 3 cogs, one at a time"
-    }
-  ],
-  "card.sea.lubricate.cog.next": [
-    {
-      "type": 0,
-      "value": "Untap another cog?"
+      "value": "Untap up to 3 cogs"
     }
   ],
   "card.sea.marlynn.arrow.arsenal": [
@@ -18192,7 +18353,7 @@
       "value": "Put an energy counter on Alluvion Constellas?"
     }
   ],
-  "card.upr.arcane.ally.choose": [
+  "card.upr.arcane.allies.upto": [
     {
       "type": 0,
       "value": "Deal "
@@ -18203,21 +18364,37 @@
     },
     {
       "type": 0,
-      "value": " arcane damage to an ally?"
-    }
-  ],
-  "card.upr.arcane.ally.next": [
-    {
-      "type": 0,
-      "value": "Deal "
+      "value": " arcane damage to up to "
     },
     {
-      "type": 1,
-      "value": "amount"
-    },
-    {
-      "type": 0,
-      "value": " arcane damage to another ally?"
+      "type": 6,
+      "value": "count",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " ally"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " allies"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
     }
   ],
   "card.upr.arcane.hero.choose": [
@@ -18276,20 +18453,6 @@
     {
       "type": 0,
       "value": ": banish an eligible attack?"
-    }
-  ],
-  "card.upr.azvolai.target.next": [
-    {
-      "type": 0,
-      "value": "Azvolai: deal "
-    },
-    {
-      "type": 1,
-      "value": "amount"
-    },
-    {
-      "type": 0,
-      "value": " arcane damage to another target?"
     }
   ],
   "card.upr.azvolai.targets": [
@@ -18424,16 +18587,41 @@
       "value": "Choose a hero"
     }
   ],
-  "card.upr.ice.bottom": [
+  "card.upr.ice.bottom.count": [
     {
       "type": 0,
-      "value": "Put an Ice card on the bottom of your deck"
-    }
-  ],
-  "card.upr.ice.bottom.next": [
+      "value": "Put "
+    },
+    {
+      "type": 6,
+      "value": "count",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 0,
+              "value": "an Ice card"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " Ice cards"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    },
     {
       "type": 0,
-      "value": "Put another Ice card on the bottom of your deck"
+      "value": " on the bottom of your deck"
     }
   ],
   "card.upr.ice.fusion.reveal": [
@@ -18620,16 +18808,10 @@
       "value": "Put a card from hand on the bottom of your deck?"
     }
   ],
-  "card.wtr.hood.shuffle": [
+  "card.wtr.hood.shuffle.choose": [
     {
       "type": 0,
-      "value": "Hope Merchant's Hood: shuffle a card from your hand into your deck?"
-    }
-  ],
-  "card.wtr.hood.shuffle.next": [
-    {
-      "type": 0,
-      "value": "Hope Merchant's Hood: shuffle another card into your deck?"
+      "value": "Hope Merchant's Hood: choose any number of cards from your hand to shuffle into your deck"
     }
   ],
   "card.wtr.katsu.combo.choose": [
@@ -18644,16 +18826,44 @@
       "value": "Katsu: discard a card with cost 0 to search for a combo card?"
     }
   ],
-  "card.wtr.lordwind.card.choose": [
+  "card.wtr.lordwind.cards.choose": [
     {
       "type": 0,
-      "value": "Lord of Wind: choose a combo-line card to shuffle in"
-    }
-  ],
-  "card.wtr.lordwind.card.next": [
+      "value": "Lord of Wind: choose up to "
+    },
+    {
+      "type": 6,
+      "value": "count",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " combo-line card"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " combo-line cards"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    },
     {
       "type": 0,
-      "value": "Lord of Wind: choose another card"
+      "value": " to shuffle in"
     }
   ],
   "card.wtr.lordwind.x": [
@@ -18698,10 +18908,18 @@
       "value": "Dagger or sword weapon"
     }
   ],
-  "card.wtr.remembrance.action.choose": [
+  "card.wtr.remembrance.actions.choose": [
     {
       "type": 0,
-      "value": "Remembrance: choose an action card"
+      "value": "Remembrance: choose up to "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " action cards to shuffle into your deck"
     }
   ],
   "card.wtr.rout.defender.return": [
@@ -19688,6 +19906,20 @@
       "value": ": use this triggered ability?"
     }
   ],
+  "engine.decision.trigger.source": [
+    {
+      "type": 1,
+      "value": "triggerSource"
+    },
+    {
+      "type": 0,
+      "value": ": "
+    },
+    {
+      "type": 1,
+      "value": "triggerEffect"
+    }
+  ],
   "engine.decision.triggers.order": [
     {
       "type": 0,
@@ -20442,6 +20674,12 @@
     {
       "type": 0,
       "value": " power"
+    }
+  ],
+  "engine.effect.part.attack.base.power": [
+    {
+      "type": 0,
+      "value": "+X power, where X is its base power"
     }
   ],
   "engine.effect.part.attack.gain.bonus": [
@@ -22672,6 +22910,16 @@
     {
       "type": 0,
       "value": "'s face-up arsenal through their next turn"
+    }
+  ],
+  "engine.log.attack.cleared.no.target": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " is cleared from the attack queue because it has no legal attack target"
     }
   ],
   "engine.log.attack.queued": [
@@ -25345,6 +25593,94 @@
       "value": " can't gain life while ahead on life"
     }
   ],
+  "engine.log.payment.paid": [
+    {
+      "type": 1,
+      "value": "player"
+    },
+    {
+      "type": 0,
+      "value": " pays "
+    },
+    {
+      "type": 6,
+      "value": "amount",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " resource"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " resources"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    }
+  ],
+  "engine.log.payment.paid.card": [
+    {
+      "type": 1,
+      "value": "player"
+    },
+    {
+      "type": 0,
+      "value": " pays "
+    },
+    {
+      "type": 6,
+      "value": "amount",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " resource"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " resources"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    },
+    {
+      "type": 0,
+      "value": " for "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    }
+  ],
   "engine.log.phantasm.fizzles.condition.failed": [
     {
       "type": 0,
@@ -25807,6 +26143,46 @@
     {
       "type": 1,
       "value": "card"
+    }
+  ],
+  "engine.log.token.creation.reduced": [
+    {
+      "type": 1,
+      "value": "source"
+    },
+    {
+      "type": 0,
+      "value": " reduces "
+    },
+    {
+      "type": 1,
+      "value": "player"
+    },
+    {
+      "type": 0,
+      "value": "'s "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " creation from "
+    },
+    {
+      "type": 2,
+      "value": "from",
+      "style": null
+    },
+    {
+      "type": 0,
+      "value": " to "
+    },
+    {
+      "type": 2,
+      "value": "to",
+      "style": null
     }
   ],
   "engine.log.trigger.attack.defended": [
@@ -27855,6 +28231,24 @@
       "value": "card"
     }
   ],
+  "game.decision.selection.count": [
+    {
+      "type": 1,
+      "value": "selected"
+    },
+    {
+      "type": 0,
+      "value": " of "
+    },
+    {
+      "type": 1,
+      "value": "maximum"
+    },
+    {
+      "type": 0,
+      "value": " selected"
+    }
+  ],
   "game.decision.target.opponent": [
     {
       "type": 0,
@@ -29380,46 +29774,10 @@
       "value": "Trigger"
     }
   ],
-  "game.standingOrder.optional.ask": [
+  "game.standingOrder.ask": [
     {
       "type": 0,
       "value": "Always ask"
-    }
-  ],
-  "game.standingOrder.optional.deny": [
-    {
-      "type": 0,
-      "value": "Always deny"
-    }
-  ],
-  "game.standingOrder.optional.generic": [
-    {
-      "type": 0,
-      "value": "When it asks whether to use its trigger"
-    }
-  ],
-  "game.standingOrder.optional.use": [
-    {
-      "type": 0,
-      "value": "Always use"
-    }
-  ],
-  "game.standingOrder.priority.ask": [
-    {
-      "type": 0,
-      "value": "Always ask"
-    }
-  ],
-  "game.standingOrder.priority.generic": [
-    {
-      "type": 0,
-      "value": "When its trigger is on the stack"
-    }
-  ],
-  "game.standingOrder.priority.pass": [
-    {
-      "type": 0,
-      "value": "Always pass"
     }
   ],
   "game.standingOrder.timing.actionPhase": [
@@ -29460,6 +29818,24 @@
     {
       "type": 1,
       "value": "card"
+    }
+  ],
+  "game.standingOrder.titleSet": [
+    {
+      "type": 0,
+      "value": "Standing orders for "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": "
+    },
+    {
+      "type": 1,
+      "value": "orders"
     }
   ],
   "game.stats.allies": [
@@ -29968,6 +30344,12 @@
       "value": " to act"
     }
   ],
+  "game.waiting.spectating.short": [
+    {
+      "type": 0,
+      "value": "Spectating"
+    }
+  ],
   "game.zone.arms": [
     {
       "type": 0,
@@ -30210,6 +30592,30 @@
     {
       "type": 0,
       "value": "Hero"
+    }
+  ],
+  "history.filter.opponent": [
+    {
+      "type": 0,
+      "value": "Opponent"
+    }
+  ],
+  "history.filter.opponent.all": [
+    {
+      "type": 0,
+      "value": "All opponents"
+    }
+  ],
+  "history.filter.opponent.bots": [
+    {
+      "type": 0,
+      "value": "Bots only"
+    }
+  ],
+  "history.filter.opponent.players": [
+    {
+      "type": 0,
+      "value": "Players only"
     }
   ],
   "history.heroes.games": [
@@ -30684,6 +31090,18 @@
       "value": "How can I become a contributor?"
     }
   ],
+  "landing.faq.decks.answer": [
+    {
+      "type": 0,
+      "value": "Yes. Paste a deck export from Fabrary and Fyendal checks that every card is supported. You can also start right away with a preconstructed deck."
+    }
+  ],
+  "landing.faq.decks.question": [
+    {
+      "type": 0,
+      "value": "Can I use my own Flesh and Blood deck?"
+    }
+  ],
   "landing.faq.download.answer": [
     {
       "type": 0,
@@ -30696,6 +31114,18 @@
       "value": "Do I need to download anything?"
     }
   ],
+  "landing.faq.formats.answer": [
+    {
+      "type": 0,
+      "value": "Fyendal supports Classic Constructed and Silver Age. Every deck is checked for format legality, and you choose your hero's weapons and equipment before each match."
+    }
+  ],
+  "landing.faq.formats.question": [
+    {
+      "type": 0,
+      "value": "Which Flesh and Blood formats can I play?"
+    }
+  ],
   "landing.faq.free.answer": [
     {
       "type": 0,
@@ -30706,6 +31136,18 @@
     {
       "type": 0,
       "value": "Is Fyendal free to play?"
+    }
+  ],
+  "landing.faq.howToPlay.answer": [
+    {
+      "type": 0,
+      "value": "Create a free account, import a deck or pick a preconstructed one, then queue for a match, join an open room, or invite a friend. The rules engine handles turns, the combat chain, and hidden information, so you can focus on playing."
+    }
+  ],
+  "landing.faq.howToPlay.question": [
+    {
+      "type": 0,
+      "value": "How do I play Flesh and Blood online?"
     }
   ],
   "landing.faq.inPerson.answer": [
@@ -30787,7 +31229,7 @@
   "landing.faq.title": [
     {
       "type": 0,
-      "value": "About Playing on Fyendal"
+      "value": "Playing Flesh and Blood Online"
     }
   ],
   "landing.inGame": [
@@ -30891,13 +31333,13 @@
   "landing.subtitle": [
     {
       "type": 0,
-      "value": "Free, open source, and built by the community. Play in your browser against other players or competitive, hero-specific bots with your Fabrary decks."
+      "value": "Free, open source, and built by the community. Play the Flesh and Blood trading card game in your browser against other players or competitive, hero-specific bots with your Fabrary decks."
     }
   ],
   "landing.title": [
     {
       "type": 0,
-      "value": "Play Flesh and Blood Online"
+      "value": "Play Flesh and Blood TCG Online"
     }
   ],
   "landing.ways.title": [
@@ -30910,6 +31352,870 @@
     {
       "type": 0,
       "value": "Language"
+    }
+  ],
+  "league.availability.cell": [
+    {
+      "type": 1,
+      "value": "day"
+    },
+    {
+      "type": 0,
+      "value": ", "
+    },
+    {
+      "type": 1,
+      "value": "start"
+    },
+    {
+      "type": 0,
+      "value": " to "
+    },
+    {
+      "type": 1,
+      "value": "end"
+    }
+  ],
+  "league.availability.clear": [
+    {
+      "type": 0,
+      "value": "Clear"
+    }
+  ],
+  "league.availability.failed": [
+    {
+      "type": 0,
+      "value": "Could not save your availability. Try again."
+    }
+  ],
+  "league.availability.help": [
+    {
+      "type": 0,
+      "value": "Mark when you can usually play, in your time zone. Pairings favor opponents whose free time overlaps yours."
+    }
+  ],
+  "league.availability.hint.pointer": [
+    {
+      "type": 0,
+      "value": "Drag across the grid to mark half hours."
+    }
+  ],
+  "league.availability.hint.touch": [
+    {
+      "type": 0,
+      "value": "Tap a half hour, or press and hold, then drag."
+    }
+  ],
+  "league.availability.save": [
+    {
+      "type": 0,
+      "value": "Save availability"
+    }
+  ],
+  "league.availability.saved": [
+    {
+      "type": 0,
+      "value": "Availability saved."
+    }
+  ],
+  "league.availability.saving": [
+    {
+      "type": 0,
+      "value": "Saving…"
+    }
+  ],
+  "league.availability.title": [
+    {
+      "type": 0,
+      "value": "Weekly availability"
+    }
+  ],
+  "league.availability.total": [
+    {
+      "type": 6,
+      "value": "hours",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " hour"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " hours"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    },
+    {
+      "type": 0,
+      "value": " a week"
+    }
+  ],
+  "league.bracket.champion": [
+    {
+      "type": 0,
+      "value": "Champion: "
+    },
+    {
+      "type": 1,
+      "value": "name"
+    }
+  ],
+  "league.empty": [
+    {
+      "type": 0,
+      "value": "You are not in a league. Ask an organizer for a sign-up link."
+    }
+  ],
+  "league.error.closed": [
+    {
+      "type": 0,
+      "value": "This league has started, so this can no longer be changed."
+    }
+  ],
+  "league.error.full": [
+    {
+      "type": 0,
+      "value": "This league is full."
+    }
+  ],
+  "league.error.notFound": [
+    {
+      "type": 0,
+      "value": "This sign-up link is no longer active. Ask the organizer for a new one."
+    }
+  ],
+  "league.join.alreadyJoined": [
+    {
+      "type": 0,
+      "value": "You are already in this league."
+    }
+  ],
+  "league.join.availabilityHelp": [
+    {
+      "type": 0,
+      "value": "When can you usually play? Mark it in your time zone. Pairings favor opponents whose free time overlaps yours, and you can change this later."
+    }
+  ],
+  "league.join.failed": [
+    {
+      "type": 0,
+      "value": "Could not join the league. Try again."
+    }
+  ],
+  "league.join.goHome": [
+    {
+      "type": 0,
+      "value": "Back to Fyendal"
+    }
+  ],
+  "league.join.joining": [
+    {
+      "type": 0,
+      "value": "Joining…"
+    }
+  ],
+  "league.join.loadFailed": [
+    {
+      "type": 0,
+      "value": "Could not load this league. Try again."
+    }
+  ],
+  "league.join.open": [
+    {
+      "type": 0,
+      "value": "Open league"
+    }
+  ],
+  "league.join.seats": [
+    {
+      "type": 1,
+      "value": "members"
+    },
+    {
+      "type": 0,
+      "value": " of "
+    },
+    {
+      "type": 1,
+      "value": "max"
+    },
+    {
+      "type": 0,
+      "value": " spots taken"
+    }
+  ],
+  "league.join.signIn": [
+    {
+      "type": 0,
+      "value": "Sign in or create an account to join this league."
+    }
+  ],
+  "league.join.submit": [
+    {
+      "type": 0,
+      "value": "Join league"
+    }
+  ],
+  "league.join.title": [
+    {
+      "type": 0,
+      "value": "Join "
+    },
+    {
+      "type": 1,
+      "value": "name"
+    }
+  ],
+  "league.join.unavailableTitle": [
+    {
+      "type": 0,
+      "value": "League sign-up"
+    }
+  ],
+  "league.leave": [
+    {
+      "type": 0,
+      "value": "Leave league"
+    }
+  ],
+  "league.leave.confirm": [
+    {
+      "type": 0,
+      "value": "Leave "
+    },
+    {
+      "type": 1,
+      "value": "name"
+    },
+    {
+      "type": 0,
+      "value": "? You can rejoin with the sign-up link while sign-up is open."
+    }
+  ],
+  "league.leave.failed": [
+    {
+      "type": 0,
+      "value": "Could not leave the league. Try again."
+    }
+  ],
+  "league.match.accept": [
+    {
+      "type": 0,
+      "value": "Accept time"
+    }
+  ],
+  "league.match.bye": [
+    {
+      "type": 0,
+      "value": "Bye: counts as a win."
+    }
+  ],
+  "league.match.claim": [
+    {
+      "type": 0,
+      "value": "Claim forfeit win"
+    }
+  ],
+  "league.match.deadline": [
+    {
+      "type": 0,
+      "value": "Play by "
+    },
+    {
+      "type": 1,
+      "value": "time"
+    }
+  ],
+  "league.match.failed": [
+    {
+      "type": 0,
+      "value": "Could not update the match. Try again."
+    }
+  ],
+  "league.match.join": [
+    {
+      "type": 0,
+      "value": "Join game"
+    }
+  ],
+  "league.match.propose": [
+    {
+      "type": 0,
+      "value": "Propose a time"
+    }
+  ],
+  "league.match.propose.again": [
+    {
+      "type": 0,
+      "value": "Propose a new time"
+    }
+  ],
+  "league.match.propose.choose": [
+    {
+      "type": 0,
+      "value": "Choose a time you are both free"
+    }
+  ],
+  "league.match.propose.label": [
+    {
+      "type": 0,
+      "value": "Start time"
+    }
+  ],
+  "league.match.propose.noOverlap": [
+    {
+      "type": 0,
+      "value": "You have no shared free time left before the deadline. Pick any time on your device's clock and agree on it in chat."
+    }
+  ],
+  "league.match.propose.submit": [
+    {
+      "type": 0,
+      "value": "Send proposal"
+    }
+  ],
+  "league.match.ready": [
+    {
+      "type": 0,
+      "value": "Check in"
+    }
+  ],
+  "league.match.ready.opponent": [
+    {
+      "type": 1,
+      "value": "opponent"
+    },
+    {
+      "type": 0,
+      "value": " checked in."
+    }
+  ],
+  "league.match.ready.you": [
+    {
+      "type": 0,
+      "value": "You checked in."
+    }
+  ],
+  "league.match.result.doubleForfeit": [
+    {
+      "type": 0,
+      "value": "Not played: a loss for both players."
+    }
+  ],
+  "league.match.result.draw": [
+    {
+      "type": 0,
+      "value": "Draw."
+    }
+  ],
+  "league.match.result.lost": [
+    {
+      "type": 0,
+      "value": "You lost."
+    }
+  ],
+  "league.match.result.lostForfeit": [
+    {
+      "type": 0,
+      "value": "You lost by forfeit."
+    }
+  ],
+  "league.match.result.won": [
+    {
+      "type": 0,
+      "value": "You won."
+    }
+  ],
+  "league.match.result.wonForfeit": [
+    {
+      "type": 0,
+      "value": "You won by forfeit."
+    }
+  ],
+  "league.match.stage.final": [
+    {
+      "type": 0,
+      "value": "Final"
+    }
+  ],
+  "league.match.stage.quarterfinal": [
+    {
+      "type": 0,
+      "value": "Quarterfinal"
+    }
+  ],
+  "league.match.stage.semifinal": [
+    {
+      "type": 0,
+      "value": "Semifinal"
+    }
+  ],
+  "league.match.start": [
+    {
+      "type": 0,
+      "value": "Start game"
+    }
+  ],
+  "league.match.status.inRoom": [
+    {
+      "type": 0,
+      "value": "Game in progress."
+    }
+  ],
+  "league.match.status.unscheduled": [
+    {
+      "type": 0,
+      "value": "No time agreed yet."
+    }
+  ],
+  "league.match.theirTime": [
+    {
+      "type": 1,
+      "value": "time"
+    },
+    {
+      "type": 0,
+      "value": " for "
+    },
+    {
+      "type": 1,
+      "value": "opponent"
+    }
+  ],
+  "league.match.time.missed": [
+    {
+      "type": 0,
+      "value": "This time passed without a game. Start it when you are both here, or agree on a new time."
+    }
+  ],
+  "league.match.time.scheduled": [
+    {
+      "type": 0,
+      "value": "Agreed with "
+    },
+    {
+      "type": 1,
+      "value": "opponent"
+    }
+  ],
+  "league.match.time.suggested": [
+    {
+      "type": 0,
+      "value": "Suggested by the league"
+    }
+  ],
+  "league.match.time.theyProposed": [
+    {
+      "type": 0,
+      "value": "Proposed by "
+    },
+    {
+      "type": 1,
+      "value": "opponent"
+    }
+  ],
+  "league.match.time.youProposed": [
+    {
+      "type": 0,
+      "value": "Waiting for "
+    },
+    {
+      "type": 1,
+      "value": "opponent"
+    },
+    {
+      "type": 0,
+      "value": " to accept"
+    }
+  ],
+  "league.match.week": [
+    {
+      "type": 0,
+      "value": "Week "
+    },
+    {
+      "type": 1,
+      "value": "week"
+    }
+  ],
+  "league.matches.empty": [
+    {
+      "type": 0,
+      "value": "No matches yet. Pairings appear when each week starts."
+    }
+  ],
+  "league.picker.label": [
+    {
+      "type": 0,
+      "value": "League"
+    }
+  ],
+  "league.room.description": [
+    {
+      "type": 0,
+      "value": "Choose a "
+    },
+    {
+      "type": 1,
+      "value": "format"
+    },
+    {
+      "type": 0,
+      "value": " deck. Only "
+    },
+    {
+      "type": 1,
+      "value": "opponent"
+    },
+    {
+      "type": 0,
+      "value": " can take the other seat."
+    }
+  ],
+  "league.room.noDeck": [
+    {
+      "type": 0,
+      "value": "You have no legal "
+    },
+    {
+      "type": 1,
+      "value": "format"
+    },
+    {
+      "type": 0,
+      "value": " deck yet. Add one in Decks."
+    }
+  ],
+  "league.room.submit": [
+    {
+      "type": 0,
+      "value": "Take your seat"
+    }
+  ],
+  "league.room.title": [
+    {
+      "type": 0,
+      "value": "Start your league game"
+    }
+  ],
+  "league.roster.deleted": [
+    {
+      "type": 0,
+      "value": "Deleted account"
+    }
+  ],
+  "league.roster.you": [
+    {
+      "type": 1,
+      "value": "username"
+    },
+    {
+      "type": 0,
+      "value": " (you)"
+    }
+  ],
+  "league.signup.next": [
+    {
+      "type": 0,
+      "value": "Pairings begin when the organizer starts the season. Keep your availability up to date until then."
+    }
+  ],
+  "league.standings.byes": [
+    {
+      "type": 0,
+      "value": "Byes"
+    }
+  ],
+  "league.standings.dropped": [
+    {
+      "type": 0,
+      "value": "(dropped)"
+    }
+  ],
+  "league.standings.omw": [
+    {
+      "type": 0,
+      "value": "Opp. win %"
+    }
+  ],
+  "league.standings.player": [
+    {
+      "type": 0,
+      "value": "Player"
+    }
+  ],
+  "league.standings.points": [
+    {
+      "type": 0,
+      "value": "Points"
+    }
+  ],
+  "league.standings.rank": [
+    {
+      "type": 0,
+      "value": "#"
+    }
+  ],
+  "league.standings.record": [
+    {
+      "type": 0,
+      "value": "W–L–D"
+    }
+  ],
+  "league.standings.recordValue": [
+    {
+      "type": 1,
+      "value": "wins"
+    },
+    {
+      "type": 0,
+      "value": "–"
+    },
+    {
+      "type": 1,
+      "value": "losses"
+    },
+    {
+      "type": 0,
+      "value": "–"
+    },
+    {
+      "type": 1,
+      "value": "draws"
+    }
+  ],
+  "league.standings.seed": [
+    {
+      "type": 0,
+      "value": "Seed"
+    }
+  ],
+  "league.starts": [
+    {
+      "type": 0,
+      "value": "Planned start: "
+    },
+    {
+      "type": 1,
+      "value": "date"
+    }
+  ],
+  "league.stat.rank": [
+    {
+      "type": 0,
+      "value": "Rank"
+    }
+  ],
+  "league.stat.rankValue": [
+    {
+      "type": 1,
+      "value": "rank"
+    },
+    {
+      "type": 0,
+      "value": " of "
+    },
+    {
+      "type": 1,
+      "value": "total"
+    }
+  ],
+  "league.stat.round": [
+    {
+      "type": 0,
+      "value": "Round"
+    }
+  ],
+  "league.stat.week": [
+    {
+      "type": 0,
+      "value": "Week"
+    }
+  ],
+  "league.stat.weekValue": [
+    {
+      "type": 1,
+      "value": "week"
+    },
+    {
+      "type": 0,
+      "value": " of "
+    },
+    {
+      "type": 1,
+      "value": "weeks"
+    }
+  ],
+  "league.status.cancelled": [
+    {
+      "type": 0,
+      "value": "Cancelled"
+    }
+  ],
+  "league.status.complete": [
+    {
+      "type": 0,
+      "value": "Complete"
+    }
+  ],
+  "league.status.playoffs": [
+    {
+      "type": 0,
+      "value": "Playoffs"
+    }
+  ],
+  "league.status.season": [
+    {
+      "type": 0,
+      "value": "Season in progress"
+    }
+  ],
+  "league.status.signupClosed": [
+    {
+      "type": 0,
+      "value": "Sign-up closed"
+    }
+  ],
+  "league.status.signupOpen": [
+    {
+      "type": 0,
+      "value": "Sign-up open"
+    }
+  ],
+  "league.summary": [
+    {
+      "type": 1,
+      "value": "format"
+    },
+    {
+      "type": 0,
+      "value": " · "
+    },
+    {
+      "type": 6,
+      "value": "weeks",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " week"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " weeks"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    },
+    {
+      "type": 0,
+      "value": " · "
+    },
+    {
+      "type": 6,
+      "value": "matches",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " match"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " matches"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    },
+    {
+      "type": 0,
+      "value": " a week"
+    }
+  ],
+  "league.tab.availability": [
+    {
+      "type": 0,
+      "value": "Availability"
+    }
+  ],
+  "league.tab.matches": [
+    {
+      "type": 0,
+      "value": "Matches"
+    }
+  ],
+  "league.tab.players": [
+    {
+      "type": 0,
+      "value": "Players"
+    }
+  ],
+  "league.tab.playoffs": [
+    {
+      "type": 0,
+      "value": "Playoffs"
+    }
+  ],
+  "league.tab.standings": [
+    {
+      "type": 0,
+      "value": "Standings"
+    }
+  ],
+  "league.timeZone.label": [
+    {
+      "type": 0,
+      "value": "Your time zone"
+    }
+  ],
+  "league.title": [
+    {
+      "type": 0,
+      "value": "Leagues"
     }
   ],
   "lobby.action.accept": [
@@ -31168,6 +32474,38 @@
     {
       "type": 0,
       "value": "Card pool"
+    }
+  ],
+  "lobby.count.leagueActions": [
+    {
+      "type": 6,
+      "value": "count",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " to do"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " to do"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
     }
   ],
   "lobby.count.live": [
@@ -32204,6 +33542,12 @@
       "value": "Home"
     }
   ],
+  "lobby.nav.league": [
+    {
+      "type": 0,
+      "value": "League"
+    }
+  ],
   "lobby.nav.more": [
     {
       "type": 0,
@@ -32226,12 +33570,6 @@
     {
       "type": 0,
       "value": "This room allows all implemented cards, including banned cards and Living Legend heroes."
-    }
-  ],
-  "lobby.room.fullHint": [
-    {
-      "type": 0,
-      "value": "Room is full — spectate to watch"
     }
   ],
   "lobby.room.loadingState": [
@@ -33120,6 +34458,36 @@
       "value": "order"
     }
   ],
+  "prep.presentation.column.card": [
+    {
+      "type": 0,
+      "value": "Card"
+    }
+  ],
+  "prep.presentation.column.copies": [
+    {
+      "type": 0,
+      "value": "Copies"
+    }
+  ],
+  "prep.presentation.column.cost": [
+    {
+      "type": 0,
+      "value": "Cost"
+    }
+  ],
+  "prep.presentation.column.defense": [
+    {
+      "type": 0,
+      "value": "Defense"
+    }
+  ],
+  "prep.presentation.column.power": [
+    {
+      "type": 0,
+      "value": "Power"
+    }
+  ],
   "prep.presentation.emptyInventory": [
     {
       "type": 0,
@@ -33134,6 +34502,12 @@
     {
       "type": 0,
       "value": " exact"
+    }
+  ],
+  "prep.presentation.fixedInventory": [
+    {
+      "type": 0,
+      "value": "Stays in inventory"
     }
   ],
   "prep.presentation.hero": [
@@ -33206,22 +34580,66 @@
       "value": "destination"
     }
   ],
-  "prep.presentation.moveToInventoryHint": [
-    {
-      "type": 0,
-      "value": "Click a card to move one copy to Inventory."
-    }
-  ],
-  "prep.presentation.moveToMainHint": [
-    {
-      "type": 0,
-      "value": "Click a card to move one copy to the main deck."
-    }
-  ],
   "prep.presentation.noneRegistered": [
     {
       "type": 0,
       "value": "none registered"
+    }
+  ],
+  "prep.presentation.pitch.blue": [
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " blue"
+    }
+  ],
+  "prep.presentation.pitch.red": [
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " red"
+    }
+  ],
+  "prep.presentation.pitch.yellow": [
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " yellow"
+    }
+  ],
+  "prep.presentation.pitchSplit": [
+    {
+      "type": 0,
+      "value": "Pitch split: "
+    },
+    {
+      "type": 1,
+      "value": "red"
+    },
+    {
+      "type": 0,
+      "value": ", "
+    },
+    {
+      "type": 1,
+      "value": "yellow"
+    },
+    {
+      "type": 0,
+      "value": ", "
+    },
+    {
+      "type": 1,
+      "value": "blue"
     }
   ],
   "prep.presentation.removeCard": [
@@ -33252,6 +34670,12 @@
       "value": "slot"
     }
   ],
+  "prep.presentation.restore": [
+    {
+      "type": 0,
+      "value": "Restore registered deck"
+    }
+  ],
   "prep.presentation.selectCard": [
     {
       "type": 0,
@@ -33280,10 +34704,68 @@
       "value": "slot"
     }
   ],
+  "prep.presentation.showCard": [
+    {
+      "type": 0,
+      "value": "Show "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    }
+  ],
   "prep.presentation.title": [
     {
       "type": 0,
       "value": "Your Presentation"
+    }
+  ],
+  "prep.presentation.type.action": [
+    {
+      "type": 0,
+      "value": "Action"
+    }
+  ],
+  "prep.presentation.type.attackReaction": [
+    {
+      "type": 0,
+      "value": "Attack reaction"
+    }
+  ],
+  "prep.presentation.type.block": [
+    {
+      "type": 0,
+      "value": "Block"
+    }
+  ],
+  "prep.presentation.type.defenseReaction": [
+    {
+      "type": 0,
+      "value": "Defense reaction"
+    }
+  ],
+  "prep.presentation.type.instant": [
+    {
+      "type": 0,
+      "value": "Instant"
+    }
+  ],
+  "prep.presentation.type.item": [
+    {
+      "type": 0,
+      "value": "Item"
+    }
+  ],
+  "prep.presentation.type.mentor": [
+    {
+      "type": 0,
+      "value": "Mentor"
+    }
+  ],
+  "prep.presentation.type.resource": [
+    {
+      "type": 0,
+      "value": "Resource"
     }
   ],
   "prep.presentation.weapons": [
@@ -34465,6 +35947,24 @@
     {
       "type": 0,
       "value": "Shows priority and reaction window prompts."
+    }
+  ],
+  "settings.skipBotDelay": [
+    {
+      "type": 0,
+      "value": "Instant bot moves"
+    }
+  ],
+  "settings.skipBotDelay.aria": [
+    {
+      "type": 0,
+      "value": "Skip the practice bot's one-second pause"
+    }
+  ],
+  "settings.skipBotDelay.tooltip": [
+    {
+      "type": 0,
+      "value": "Beta: the practice bot acts as soon as it decides, without the one-second pause."
     }
   ],
   "settings.soundEffects": [

@@ -16,6 +16,7 @@ import type {
   PlayerView,
   StackLayerView,
   TurnFactsView,
+  TurnTriggerChoiceView,
   TurnTriggerEvent,
 } from "@fyendal/shared";
 import type { CardInstance, CombatValueModifier, Modifier, PendingDecisionState, PlayerState } from "./state.js";
@@ -23,6 +24,7 @@ import { arsenalCapacity, arsenalZoneCount } from "./cardLifecycle.js";
 import { attackHasVeil, cardColorOf, cardTypesOf, dataOf, instanceDataOf, scriptOf } from "./cardProperties.js";
 import type { TriggerEvent } from "./eventTypes.js";
 import { pendingOnHitEffects } from "./hits.js";
+import { linkGoAgainBlocked } from "./ruleQueries.js";
 import {
   conditionalModifierGrantsGoAgain,
   conditionalScriptGrantsGoAgain,
@@ -45,11 +47,13 @@ import {
   abilityList,
   activatedFlagKey,
   ONCE_PER_TURN_EFFECT_FLAG_PREFIX,
+  type TriggerDef,
 } from "./scripts.js";
 import { additionalTargetsAroundPrimary, currentLink, findCardAnywhere } from "./zoneQueries.js";
 import { queuedAttackObjects } from "./attackQueue.js";
 import { controlledPermanents } from "./sourceQueries.js";
 import { activatedAbilityUsage } from "./abilityRules.js";
+import { defenseReactionRestriction, weaponAttacksProhibited } from "./combatRestrictions.js";
 import { legalDefenderCards } from "./defense.js";
 import { wardPieces } from "./damageResolution.js";
 import { playFromSourceCardId } from "./playRules.js";
@@ -146,6 +150,31 @@ function isTurnTriggerEvent(event: TriggerEvent): event is TriggerEvent & TurnTr
   return TURN_TRIGGER_EVENTS.has(event);
 }
 
+const TRIGGER_CHOICE: TurnTriggerChoiceView = {
+  hook: "trigger-choice",
+  options: [
+    { value: "yes", message: { id: "common.option.yes" } },
+    { value: "no", message: { id: "common.option.no" } },
+  ],
+};
+
+function turnTriggerChoices(trigger: TriggerDef): { choices?: TurnTriggerChoiceView[] } {
+  const declared = trigger.standingChoice;
+  const choices: TurnTriggerChoiceView[] = [
+    ...(trigger.optional ? [TRIGGER_CHOICE] : []),
+    ...(declared
+      ? [{
+          hook: declared.hook,
+          options: declared.options.flatMap((value) => {
+            const message = declared.optionMessages[value];
+            return message ? [{ value, message }] : [];
+          }),
+        }]
+      : []),
+  ];
+  return choices.length > 0 ? { choices } : {};
+}
+
 function cardView(state: GameStateInternal,
   runtime: EngineRuntime, c: CardInstance, opts: CardViewOptions = {}): CardView {
   const d = instanceDataOf(state, c);
@@ -163,6 +192,7 @@ function cardView(state: GameStateInternal,
             label: trigger.label,
             ...(trigger.labelMessage ? { labelMessage: trigger.labelMessage } : {}),
             ...(trigger.optional ? { optional: true } : {}),
+            ...turnTriggerChoices(trigger),
           }]
         : [])
     : [];
@@ -756,6 +786,7 @@ function projectedStackContext(state: GameStateInternal): string | undefined {
   const attackOnStack = state.stackResume === "start-attack-step";
   const attackStepEffects = !!link && !link.resolved &&
     state.phase === "layer" &&
+    state.stackResume !== "start-reaction-step" &&
     (link.flags.attackStepBegan === true || state.stackResume === "continue-attack");
   if (state.stackResume === "finish-link-resolution") {
     if (currentLink(state)?.flags.resolutionStepBegan === true) {
@@ -863,6 +894,7 @@ function projectedPreStackSource(
 
   const resume = pd.resume;
   const play = pd.variablePlayCost ?? (resume?.kind === "continue-play-after-declaration"
+    || resume?.kind === "continue-reaction-after-declaration"
     ? resume
     : resume?.kind === "finish-play" || resume?.kind === "finish-reaction" || resume?.kind === "finish-window-instant"
       ? { instanceId: resume.card.instanceId, from: resume.from }
@@ -1026,6 +1058,7 @@ function projectState(
     const maxNonBlockDefenders = link.resolved
       ? undefined
       : attackMaxNonBlockDefenders(state, link);
+    const reactionRestriction = link.resolved ? undefined : defenseReactionRestriction(state, link);
     return {
       // Per-turn usage of the attacking card's own abilities is public combat
       // information, exactly as it is for permanents in the arena.
@@ -1077,6 +1110,13 @@ function projectState(
           conditionalModifierGrantsGoAgain(state, link, attack) ||
           conditionalScriptGrantsGoAgain(state, runtime, link)
         )),
+      ...(!link.resolved && linkGoAgainBlocked(state, link) ? { goAgainBlocked: true as const } : {}),
+      ...(reactionRestriction && (reactionRestriction.all || reactionRestriction.fromHand)
+        ? { defenseReactionsBlockedFromHand: true as const }
+        : {}),
+      ...(reactionRestriction && (reactionRestriction.all || reactionRestriction.fromArsenal)
+        ? { defenseReactionsBlockedFromArsenal: true as const }
+        : {}),
       wagered: link.flags.wagered === true,
       ...(link.wagerRewards?.length ? { wagerRewards: [...link.wagerRewards] } : {}),
       dominate: link.resolved
@@ -1135,6 +1175,7 @@ function projectState(
       ...(Number(player.flags.soulBanishedThisChain) > 0
         ? { soulBanishedThisChain: Number(player.flags.soulBanishedThisChain) }
         : {}),
+      ...(weaponAttacksProhibited(player) ? { weaponAttacksProhibited: true } : {}),
       playedSubtypes: Object.keys(player.flags)
         .filter((flag) => flag.startsWith("playedSubtype:") && player.flags[flag] === true)
         .map((flag) => flag.slice("playedSubtype:".length))
@@ -1187,6 +1228,8 @@ function projectState(
             stagedCards: CardView[];
             stagedHandCount: number;
             stagedDefense: number;
+            stagedAttack?: number;
+            stagedAttackModifiers?: CombatValueModifierView[];
           } | undefined;
           const stagedInstances: CardInstance[] = [];
           if (pd.kind === "defend" && pd.staged && pd.staged.length > 0) {
@@ -1194,6 +1237,8 @@ function projectState(
             const mine = revealAll || pd.player === seat;
             const cards: CardView[] = [];
             let stagedHandCount = 0;
+            // Only staged defenders whose identity this viewer knows price the attack.
+            const visibleStaged: CardInstance[] = [];
             for (const id of pd.staged) {
               const hc = defender.hand.find((c) => c.instanceId === id);
               const ac = defender.arsenal.find((c) => c.instanceId === id);
@@ -1205,16 +1250,29 @@ function projectState(
               if (!c) continue;
               if (hc) stagedHandCount += 1;
               stagedInstances.push(c);
-              if (mine) {
-                cards.push(cardView(state, runtime, c));
-              } else {
-                const hidden = hc !== undefined || (ac?.faceDown ?? false);
-                cards.push(hidden ? hiddenView(c, -(cards.length + 1)) : cardView(state, runtime, c));
-              }
+              const hidden = !mine && (hc !== undefined || (ac?.faceDown ?? false));
+              cards.push(hidden ? hiddenView(c, -(cards.length + 1)) : cardView(state, runtime, c));
+              if (!hidden) visibleStaged.push(c);
             }
             const link = currentLink(state);
             const total = mine && link ? stagedDefenseTotal(state, runtime, link, stagedInstances) : 0;
-            staged = { stagedCards: cards, stagedHandCount, stagedDefense: mine ? total : 0 };
+            const stagedLink = link ? linkWithStagedDefenders(state, link, visibleStaged) : undefined;
+            staged = {
+              stagedCards: cards,
+              stagedHandCount,
+              stagedDefense: mine ? total : 0,
+              ...(stagedLink
+                ? {
+                    stagedAttack: computeAttack(state, runtime, stagedLink),
+                    stagedAttackModifiers: projectedCombatValueModifiers(
+                      state,
+                      attackValueModifiers(state, runtime, stagedLink),
+                      seat,
+                      revealAll,
+                    ),
+                  }
+                : {}),
+            };
           }
           const defenderDefense = pd.kind === "defend" && (revealAll || pd.player === seat)
             ? projectedDefenderDefense(state, runtime, pd.player, stagedInstances)
@@ -1246,6 +1304,7 @@ function projectState(
               ? {
                   minimumSelections: pd.minimumSelections,
                   maximumSelections: pd.maximumSelections,
+                  ...(pd.distinctCardNames ? { distinctCardNames: true } : {}),
                 }
               : {}),
             ...((revealAll || pd.player === seat) && pd.defaultOption
@@ -1301,7 +1360,8 @@ function projectState(
                 }
               : {}),
             ...(preStackSource ? { preStackSource } : {}),
-            ...(privateDecision && pd.chooseHook === "trigger-choice" && pd.sourceInstanceId !== undefined
+            ...(privateDecision && (pd.chooseHook === "trigger-choice" || pd.chooseHook === "hidden-trigger") &&
+              pd.sourceInstanceId !== undefined
               ? { sourceInstanceId: pd.sourceInstanceId }
               : {}),
             ...(privateDecision && pd.chooseHook === "engine-token-replacement-order"

@@ -139,3 +139,27 @@ describe("Tear Asunder's dominate", () => {
     expect(s.state.chain[0]!.defendingCards).toHaveLength(2);
   });
 });
+
+describe("Tear Asunder's hit", () => {
+  it("makes the defender choose exactly 2 cards to discard at once", () => {
+    const s = scenario({ seats: [
+      { hero: "rhinar", heroKey: "bravo, showstopper|0", resources: 7, weapons: ["anothos|0"], hand: ["tear asunder|3"] },
+      { hero: "dorinthea", equipment: NO_EQUIPMENT, hand: ["wounding blow|1", "wounding blow|2", "wounding blow|3"] },
+    ] });
+    const handId = (key: string) =>
+      String(s.state.players[1]!.hand.find((c) => c.cardId === printingId(key))!.instanceId);
+
+    s.play("tear asunder|3").attackWithWeapon("anothos|0").blockWith().settle();
+    const pd = s.state.pendingDecision!;
+    expect(pd.chooseHook).toBe("aps-tear-discard");
+    expect(pd.player).toBe(1);
+    expect(pd.options).toHaveLength(3);
+    expect([pd.minimumSelections, pd.maximumSelections]).toEqual([2, 2]);
+    s.chooseMany([handId("wounding blow|3"), handId("wounding blow|1")]).settle();
+
+    expect(s.state.players[1]!.hand.map((c) => c.cardId)).toEqual([printingId("wounding blow|2")]);
+    expect(s.state.players[1]!.graveyard.map((c) => c.cardId)).toEqual(
+      expect.arrayContaining([printingId("wounding blow|1"), printingId("wounding blow|3")]),
+    );
+  });
+});

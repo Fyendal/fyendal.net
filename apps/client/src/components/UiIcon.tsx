@@ -25,6 +25,7 @@ export type UiIconName =
   | "invite-game"
   | "lock"
   | "message"
+  | "minus"
   | "more"
   | "nav-decks"
   | "nav-history"

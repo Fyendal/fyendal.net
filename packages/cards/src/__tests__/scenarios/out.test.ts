@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { projectStateFor } from "@fyendal/engine";
+import { legalIntents, projectStateFor } from "@fyendal/engine";
 import { cardData, scripts } from "../../index.js";
 import { printingId, scenario } from "../harness.js";
 
@@ -477,6 +477,48 @@ describe("OUT — registration and core mechanics", () => {
 });
 
 describe("OUT — rules regression coverage", () => {
+  it("Quiver of Abyssal Depths shuffles in up to 3 chosen arrows with different names", () => {
+    const s = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          resources: 3,
+          deck: [BLUE],
+          weapons: ["sandscour greatbow|0", "quiver of abyssal depths|0"],
+          graveyard: ["infecting shot|1", "infecting shot|2", "falcon wing|1", "barbed undertow|1", NON_ATTACK],
+        },
+        { hero: "dorinthea", hand: [] },
+      ],
+    });
+    const graveyardId = (key: string) =>
+      String(s.state.players[0]!.graveyard.find((c) => c.cardId === printingId(key))!.instanceId);
+
+    s.activate("quiver of abyssal depths|0");
+    while (s.state.pendingDecision?.chooseHook !== "abyssal-depths") s.passPriority();
+    const pd = s.state.pendingDecision!;
+    expect(pd.distinctCardNames).toBe(true);
+    expect([pd.minimumSelections, pd.maximumSelections]).toEqual([0, 3]);
+    expect(pd.options).toHaveLength(4);
+
+    const offered = legalIntents(s.state, 0).flatMap((intent) => intent.kind === "choose-many" ? [intent.optionIds] : []);
+    const infecting = [graveyardId("infecting shot|1"), graveyardId("infecting shot|2")];
+    expect(offered[0]).toEqual([]);
+    expect(offered.some((ids) => ids.length === 3)).toBe(true);
+    expect(offered.every((ids) => ids.length <= 3 && !infecting.every((id) => ids.includes(id)))).toBe(true);
+
+    expect(() =>
+      s.doRaw({ kind: "choose-many", optionIds: infecting })
+    ).toThrow(/different names/);
+    s.chooseMany([graveyardId("infecting shot|2"), graveyardId("falcon wing|1")]);
+
+    s.expectZoneSize(0, "deck", 3)
+      .expectInZone(0, "infecting shot|2", "deck")
+      .expectInZone(0, "falcon wing|1", "deck")
+      .expectInZone(0, "infecting shot|1", "graveyard")
+      .expectInZone(0, "barbed undertow|1", "graveyard")
+      .expectInZone(0, NON_ATTACK, "graveyard");
+  });
+
   it("Infiltrate's banished card stays playable until the end of the attacker's next turn", () => {
     const g = scenario({
       seats: [
@@ -683,6 +725,48 @@ describe("OUT — rules regression coverage", () => {
     },
   );
 
+  describe("Riptide, Lurker of the Deep's arsenal trigger", () => {
+    const lurker = (spec: { arsenal?: string[]; arsenalFaceDown?: string[]; head?: string } = {}) =>
+      scenario({
+        seats: [
+          {
+            hero: "rhinar",
+            heroKey: "riptide, lurker of the deep|0",
+            hand: ["wounded bull|1", BLUE, BLUE],
+            resources: 3,
+            ...(spec.arsenal ? { arsenal: spec.arsenal } : {}),
+            ...(spec.arsenalFaceDown ? { arsenalFaceDown: spec.arsenalFaceDown } : {}),
+            ...(spec.head ? { equipment: { head: spec.head } } : {}),
+          },
+          { hero: "dorinthea" },
+        ],
+      });
+
+    it("offers hand cards directly and arsenals the picked one face down", () => {
+      const g = lurker();
+      g.play("wounded bull|1", { pitch: [] });
+      const hand = g.state.players[0]!.hand;
+      const blue = hand.find((card) => card.cardId === printingId(BLUE))!.instanceId;
+      expect(g.state.pendingDecision).toMatchObject({ chooseHook: "riptide-arsenal", defaultOption: "pass" });
+      expect(g.state.pendingDecision?.options).toEqual(["pass", ...hand.map((card) => String(card.instanceId))]);
+      g.chooseOption(String(blue));
+      expect(g.state.players[0]!.arsenal).toMatchObject([{ instanceId: blue, faceDown: true }]);
+    });
+
+    it("does not trigger with a full arsenal", () => {
+      const g = lurker({ arsenalFaceDown: [BLUE] });
+      g.play("wounded bull|1", { pitch: [] });
+      expect(g.state.pendingDecision?.chooseHook).not.toBe("riptide-arsenal");
+      expect(g.state.log.some((entry) => entry.publicText?.includes("face down into arsenal?"))).toBe(false);
+    });
+
+    it("triggers when New Horizon adds a second arsenal zone", () => {
+      const g = lurker({ arsenal: ["falcon wing|1"], head: "new horizon|0" });
+      g.play("wounded bull|1", { pitch: [] });
+      expect(g.state.pendingDecision?.chooseHook).toBe("riptide-arsenal");
+    });
+  });
+
   it("Be Like Water's chosen name enables the matching Combo condition", () => {
     const s = scenario({
       seats: [
@@ -740,6 +824,20 @@ describe("OUT — rules regression coverage", () => {
     expect(s.state.players[0]!.banish).toHaveLength(0);
     expect(s.state.log.find((entry) => entry.publicText?.includes("banished"))?.publicText)
       .toBe("A face-down card is banished");
+  });
+
+  it("Uzuri's replacement attack counts as not played from hand or arsenal", () => {
+    const s = scenario({
+      seats: [
+        { hero: "rhinar", heroKey: "uzuri|0", hand: ["infect|1", "remember the mists|3"] },
+        { hero: "dorinthea" },
+      ],
+    });
+    s.play("infect|1").blockWith()
+      .activate("uzuri|0")
+      .chooseCard("remember the mists|3");
+    expect(cardData[s.state.chain.at(-1)!.attackingCard.cardId]!.name).toBe("Remember the Mists");
+    expect(s.state.chain.at(-1)!.damage).toBe(6);
   });
 
   it("Uzuri turns an ineligible cost card face up without replacing the attack", () => {

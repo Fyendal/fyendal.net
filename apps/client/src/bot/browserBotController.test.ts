@@ -9,13 +9,13 @@ function player(seat: 0 | 1): PlayerView {
 const view: GameView = { gameId: "ABC123", turn: 2, phase: "action", activePlayer: 1, priorityPlayer: 1, players: [player(0), player(1)], chain: [], stack: [], ongoing: [], pendingDecision: null, winner: null, log: [] };
 function task(version = 1): ClientBotTask { return { type: "bot-task", code: "ABC123", version, runtimeId, botId: "bravo", seat: 1, view, legal: [{ kind: "pass" }], delayMs: 1_000 }; }
 
-function fixture() {
+function fixture(skipPacing = false) {
   const messages: BotSubmission[] = [];
   const workers: BotWorkerPort[] = [];
   const status = vi.fn();
   const resync = vi.fn();
   const controller = new BrowserBotController({
-    runtimeId, status, resync,
+    runtimeId, status, resync, skipPacing: () => skipPacing,
     send: (message) => { if (message.type === "bot-intent") messages.push(message); return true; },
     createWorker: () => {
       const worker: BotWorkerPort = { postMessage: vi.fn(), terminate: vi.fn(), onmessage: null, onerror: null, onmessageerror: null };
@@ -71,6 +71,12 @@ describe("BrowserBotController", () => {
     vi.advanceTimersByTime(999); expect(messages).toEqual([]);
     vi.advanceTimersByTime(1); expect(messages).toHaveLength(1);
     expect(messages[0]).toMatchObject({ intent: { kind: "pass" }, expectedVersion: 1, computeMs: 20 });
+  });
+
+  it("submits immediately when pacing is skipped", () => {
+    const { controller, workers, messages } = fixture(true);
+    controller.receive(task()); ready(workers[0]!); decide(workers[0]!);
+    vi.advanceTimersByTime(0); expect(messages).toHaveLength(1);
   });
 
   it.each(["loading", "timeout", "crash", "invalid-result"])("falls back on %s and terminates the failed worker", (failure) => {

@@ -26,6 +26,24 @@ import type {
   GameTurnStatsView,
   GameView,
   GlobalNotice,
+  LeagueAction,
+  LeagueAvailabilityRequest,
+  LeagueAvailabilityWindow,
+  LeagueJoinPreview,
+  LeagueJoinRequest,
+  LeagueMatchRequest,
+  LeagueMatchResult,
+  LeagueMatchStatus,
+  LeagueMatchView,
+  LeagueMembership,
+  LeagueBracketPlayer,
+  LeagueBracketView,
+  LeagueStandingView,
+  LeaguePairingNote,
+  LeagueProposeRequest,
+  LeagueTimeRange,
+  LeagueStage,
+  LeagueStatus,
   VersionUpdateNotice,
   FriendGameInvite,
   FriendRequestSummary,
@@ -49,6 +67,8 @@ import type {
   StateMessage,
   PlayerTurnFactsView,
   TurnFactsView,
+  TurnTriggerChoiceOption,
+  TurnTriggerChoiceView,
   TurnTriggerView,
 } from "@fyendal/shared";
 
@@ -468,6 +488,29 @@ export interface AccountExport {
   friends: Array<{ username: string; friendsSince: number }>;
   friendRequests: FriendRequestSummary[];
   friendMessages: ChatMessage[];
+  leagues: LeagueExport[];
+}
+export interface LeagueExport {
+  name: string;
+  format: Format;
+  leagueStatus: LeagueStatus;
+  memberStatus: "active" | "dropped";
+  joinedAt: number;
+  timeZone: string;
+  availability: LeagueAvailabilityWindow[];
+  availabilityWeeks: Array<{ week: number; availability: LeagueAvailabilityWindow[] }>;
+  matches: Array<{
+    stage: LeagueStage;
+    week: number | null;
+    bracketSlot: number | null;
+    /** Null for a bye or a deleted opponent account. */
+    opponent: string | null;
+    status: LeagueMatchStatus;
+    scheduledAt: number | null;
+    result: LeagueMatchResult | null;
+    /** Null while unresolved or after a draw. */
+    won: boolean | null;
+  }>;
 }
 export interface AccountExportResponse { ok: true; export: AccountExport }
 
@@ -507,7 +550,7 @@ const PHASES = new Set(["start", "action", "layer", "reaction", "defend", "end",
 const MELD_SIDES = new Set(["left", "right", "both"]);
 const BOT_OPPONENTS = new Set(["bravo", "briar", "kayo", "cindra", "ira", "hala", "jarl", "levia", "starvo", "boltyn"]);
 /** Practice bots offered only to operator-allowlisted beta testers. */
-export const BETA_BOT_OPPONENTS: ReadonlySet<BotOpponent> = new Set<BotOpponent>(["boltyn"]);
+export const BETA_BOT_OPPONENTS: ReadonlySet<BotOpponent> = new Set<BotOpponent>();
 const PLAYABLE_ZONES = new Set(["banish", "graveyard", "deck"]);
 const EQUIPMENT_SLOTS = new Set(["head", "chest", "arms", "legs"]);
 const DECISION_KINDS = new Set([
@@ -867,8 +910,19 @@ const commandId = (value: unknown): value is string =>
 
 const MAX_STANDING_ORDER_KEYS = 256;
 const MAX_STANDING_ORDER_KEY_LENGTH = 120;
+const MAX_STANDING_ORDER_HOOKS = 8;
+const MAX_STANDING_CHOICE_OPTIONS = 8;
 
-/** Decode a seat's standing orders: bounded, exact keys. */
+function standingChoiceToken(value: unknown): value is string {
+  return typeof value === "string" && value.length <= 64 && /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(value);
+}
+
+function defineEntry<T>(record: Record<string, T>, key: string, value: T): void {
+  // Keeps a key such as "__proto__" an ordinary entry.
+  Object.defineProperty(record, key, { value, enumerable: true, writable: true, configurable: true });
+}
+
+/** Empty cards are dropped. */
 export function decodeSeatStandingOrders(value: unknown): SeatStandingOrders | null {
   const record = object(value);
   if (!record) return null;
@@ -878,22 +932,31 @@ export function decodeSeatStandingOrders(value: unknown): SeatStandingOrders | n
   for (const key of keys) {
     if (key.length === 0 || key.length > MAX_STANDING_ORDER_KEY_LENGTH) return null;
     const entry = object(record[key]);
-    if (!entry || !exactKeys(entry, ["priorityWindow", "optionalTrigger"], [])) return null;
+    if (!entry) return null;
+    const hooks = Object.keys(entry);
+    if (hooks.length > MAX_STANDING_ORDER_HOOKS) return null;
     const order: SeatStandingOrder = {};
-    if ("priorityWindow" in entry) {
-      if (entry.priorityWindow !== "pass") return null;
-      order.priorityWindow = "pass";
+    for (const hook of hooks) {
+      const option = entry[hook];
+      if (!standingChoiceToken(hook) || !standingChoiceToken(option)) return null;
+      defineEntry(order, hook, option);
     }
-    if ("optionalTrigger" in entry) {
-      if (entry.optionalTrigger !== "yes" && entry.optionalTrigger !== "no") return null;
-      order.optionalTrigger = entry.optionalTrigger;
-    }
-    if (order.priorityWindow !== undefined || order.optionalTrigger !== undefined) {
-      // Keeps a key such as "__proto__" an ordinary entry.
-      Object.defineProperty(orders, key, { value: order, enumerable: true, writable: true, configurable: true });
-    }
+    if (hooks.length > 0) defineEntry(orders, key, order);
   }
   return orders;
+}
+
+function turnTriggerChoice(value: unknown): value is TurnTriggerChoiceView {
+  const choice = object(value);
+  return !!choice && exactKeys(choice, ["hook", "options"], ["hook", "options"])
+    && standingChoiceToken(choice.hook)
+    && Array.isArray(choice.options) && choice.options.length > 0
+    && array(choice.options, (entry): entry is TurnTriggerChoiceOption => {
+      const option = object(entry);
+      return !!option && exactKeys(option, ["value", "message"], ["value", "message"])
+        && standingChoiceToken(option.value)
+        && decodeGameMessage(option.message) !== null;
+    }, MAX_STANDING_CHOICE_OPTIONS);
 }
 
 function commandFields(message: Record<string, unknown>): boolean {
@@ -1004,6 +1067,9 @@ export function decodeClientMessage(value: unknown): ClientMessage | null {
       break;
     case "friend-game-invite-dismiss":
       valid = exactKeys(message, ["type", "inviteId"]) && requestId(message.inviteId);
+      break;
+    case "enter-league-room":
+      valid = exactKeys(message, ["type", "matchId", "deckId"]) && leagueRecordId(message.matchId) && id(message.deckId);
       break;
     case "create-room":
       valid = exactKeys(message, ["type", "format", "deckId", "private", "cardPoolMode"], ["type", "format", "deckId"])
@@ -1153,11 +1219,12 @@ function cardView(value: unknown, depth = 0): value is CardView {
       array(v, (label): label is string => string(label, MAX_SHORT_TEXT, false), 33))
     && optional(card.turnTriggers, (v): v is TurnTriggerView[] => array(v, (entry): entry is TurnTriggerView => {
       const trigger = object(entry);
-      return !!trigger && exactKeys(trigger, ["event", "label", "labelMessage", "optional"], ["event", "label"])
+      return !!trigger && exactKeys(trigger, ["event", "label", "labelMessage", "optional", "choices"], ["event", "label"])
         && (trigger.event === "start-of-turn" || trigger.event === "begin-action-phase" || trigger.event === "end-of-turn")
         && string(trigger.label, MAX_SHORT_TEXT, false)
         && optional(trigger.labelMessage, (value): value is GameMessage => decodeGameMessage(value) !== null)
-        && optional(trigger.optional, (value): value is boolean => typeof value === "boolean");
+        && optional(trigger.optional, (value): value is boolean => typeof value === "boolean")
+        && optional(trigger.choices, (value): value is TurnTriggerChoiceView[] => array(value, turnTriggerChoice, 4));
     }, 16))
     && optional(card.attackAbilityIndexes, abilityIndexes)
     && optional(card.subcards, (v): v is CardView[] => array(v, (entry) => cardView(entry, depth + 1), 16))
@@ -1250,7 +1317,7 @@ function chainLink(value: unknown): boolean {
   const link = object(value);
   return !!link && exactKeys(link, [
     "attackingCard", "defendingCards", "attackValue", "defenseValue", "damage", "resolved",
-    "attackModifiers", "defenseModifiers", "onHitEffects", "damageToPrevent", "preventionModifiers", "onStack", "hit", "goAgain", "wagered", "wagerRewards", "dominate", "overpower", "veil", "maxNonBlockDefenders", "reactions", "targetAllyName", "targetAlly", "additionalTargets",
+    "attackModifiers", "defenseModifiers", "onHitEffects", "damageToPrevent", "preventionModifiers", "onStack", "hit", "goAgain", "goAgainBlocked", "defenseReactionsBlockedFromHand", "defenseReactionsBlockedFromArsenal", "wagered", "wagerRewards", "dominate", "overpower", "veil", "maxNonBlockDefenders", "reactions", "targetAllyName", "targetAlly", "additionalTargets",
   ], ["attackingCard", "defendingCards", "attackValue", "defenseValue", "damage", "resolved", "reactions"])
     && cardView(link.attackingCard) && cardViews(link.defendingCards) && finite(link.attackValue)
     && finite(link.defenseValue) && finite(link.damage) && typeof link.resolved === "boolean"
@@ -1262,6 +1329,9 @@ function chainLink(value: unknown): boolean {
     && optional(link.onStack, (v): v is boolean => typeof v === "boolean")
     && optional(link.hit, (v): v is boolean => typeof v === "boolean")
     && optional(link.goAgain, (v): v is boolean => typeof v === "boolean")
+    && optional(link.goAgainBlocked, (v): v is true => v === true)
+    && optional(link.defenseReactionsBlockedFromHand, (v): v is true => v === true)
+    && optional(link.defenseReactionsBlockedFromArsenal, (v): v is true => v === true)
     && optional(link.wagered, (v): v is boolean => typeof v === "boolean")
     && optional(link.wagerRewards, (v): v is string[] => shortStrings(v, 32))
     && optional(link.dominate, (v): v is boolean => typeof v === "boolean")
@@ -1433,7 +1503,7 @@ function playerTurnFacts(value: unknown): value is PlayerTurnFactsView {
     "attacks", "weaponAttacks", "playedSubtypes", "usedOncePerTurnEffectSourceIds", "dealtDamage",
     "physicalDamageDealt", "arcaneDamageDealt", "damageTaken",
     "physicalDamageTaken", "arcaneDamageTaken", "banishedSixPlusThisTurn",
-    "chargesThisTurn", "yellowSoulThisTurn", "soulBanishedThisChain",
+    "chargesThisTurn", "yellowSoulThisTurn", "soulBanishedThisChain", "weaponAttacksProhibited",
   ], [
     "attacks", "weaponAttacks", "playedSubtypes", "usedOncePerTurnEffectSourceIds", "dealtDamage",
     "physicalDamageDealt", "arcaneDamageDealt", "damageTaken",
@@ -1445,6 +1515,7 @@ function playerTurnFacts(value: unknown): value is PlayerTurnFactsView {
     && optional(facts.chargesThisTurn, nonNegativeInteger)
     && optional(facts.yellowSoulThisTurn, (value): value is boolean => typeof value === "boolean")
     && optional(facts.soulBanishedThisChain, nonNegativeInteger)
+    && optional(facts.weaponAttacksProhibited, (value): value is boolean => typeof value === "boolean")
     && shortStrings(facts.playedSubtypes)
     && array(facts.usedOncePerTurnEffectSourceIds, instanceId, MAX_CARDS)
     && typeof facts.dealtDamage === "boolean"
@@ -1465,7 +1536,7 @@ function turnFacts(value: unknown): value is TurnFactsView {
 function pendingDecision(value: unknown): boolean {
   const decision = object(value);
   return !!decision && exactKeys(decision, [
-    "player", "kind", "prompt", "promptMessage", "options", "minimumSelections", "maximumSelections", "defaultOption", "optionLabels", "optionMessages", "chosenOptions", "chosenOptionMessages", "optionCounts", "optionCards", "revealedCards", "lookedCards", "stagedCards", "stagedHandCount", "stagedDefense", "defenderDefense",
+    "player", "kind", "prompt", "promptMessage", "options", "minimumSelections", "maximumSelections", "distinctCardNames", "defaultOption", "optionLabels", "optionMessages", "chosenOptions", "chosenOptionMessages", "optionCounts", "optionCards", "revealedCards", "lookedCards", "stagedCards", "stagedHandCount", "stagedDefense", "stagedAttack", "stagedAttackModifiers", "defenderDefense",
     "resourcePayment", "preStackSource", "optionLayout", "sourceInstanceId",
   ], ["player", "kind", "prompt"])
     && seat(decision.player) && DECISION_KINDS.has(String(decision.kind))
@@ -1474,6 +1545,7 @@ function pendingDecision(value: unknown): boolean {
     && optional(decision.options, (v): v is string[] => shortStrings(v))
     && optional(decision.minimumSelections, nonNegativeInteger)
     && optional(decision.maximumSelections, nonNegativeInteger)
+    && optional(decision.distinctCardNames, (v): v is boolean => typeof v === "boolean")
     && optional(decision.defaultOption, (v): v is string => string(v, MAX_SHORT_TEXT, false))
     && optional(decision.optionLabels, (v): v is string[] => shortStrings(v))
     && optional(decision.optionMessages, (v): v is Array<GameMessage | null> =>
@@ -1492,6 +1564,8 @@ function pendingDecision(value: unknown): boolean {
     && optional(decision.stagedHandCount, (value): value is number =>
       nonNegativeInteger(value) && value <= MAX_CARDS)
     && optional(decision.stagedDefense, finite)
+    && optional(decision.stagedAttack, nonNegativeInteger)
+    && optional(decision.stagedAttackModifiers, combatValueModifiers)
     && optional(decision.defenderDefense, (value): value is DefenderDefenseView[] =>
       array(value, (entry): entry is DefenderDefenseView => {
         const item = object(entry);
@@ -1541,6 +1615,7 @@ function pendingDecision(value: unknown): boolean {
       && Number(decision.minimumSelections) <= Number(decision.maximumSelections)
       && Number(decision.maximumSelections) <= decision.options.length
     ))
+    && (decision.distinctCardNames === undefined || decision.maximumSelections !== undefined)
     && (typeof decision.defaultOption !== "string"
       || (Array.isArray(decision.options) && decision.options.includes(decision.defaultOption)));
 }
@@ -1801,7 +1876,7 @@ function decodeServerEvent(value: unknown): Exclude<ServerMessage, StateMessage>
     case "friend-game-invite-dismissed":
       valid = exactKeys(message, ["type", "inviteId"]) && requestId(message.inviteId);
       break;
-    case "auth-failed": case "queue-left": case "left": case "match-timeout": case "spectator-kicked":
+    case "auth-failed": case "queue-left": case "left": case "match-timeout": case "spectator-kicked": case "league-updated":
       valid = exactKeys(message, ["type"]);
       break;
     case "background-matchmaking":
@@ -2112,6 +2187,298 @@ export const decodeMatchRecordsResponse: Decoder<MatchRecordsResponse> = (value)
     ? value as MatchRecordsResponse
     : null;
 };
+
+/** Availability grid granularity; every window edge falls on this boundary. */
+export const LEAGUE_SLOT_MINUTES = 30;
+const MAX_LEAGUE_WINDOWS = 7 * (24 * 60 / LEAGUE_SLOT_MINUTES);
+const MAX_LEAGUE_WEEK = 16;
+const MAX_LEAGUE_NAME = 80;
+const MAX_LEAGUE_PLAYERS = 20;
+const MAX_TIMESTAMP = 8_640_000_000_000_000;
+const LEAGUE_STATUSES = new Set(["signup", "season", "playoffs", "complete", "cancelled"]);
+const LEAGUE_OUTCOMES = new Set(["a", "b", "draw", "double-forfeit", "void"]);
+
+export interface LeagueJoinPreviewResponse { ok: true; league: LeagueJoinPreview }
+
+/** IANA zones only; the runtime's Intl database is authoritative. */
+export function decodeLeagueTimeZone(value: unknown): string | null {
+  if (!string(value, 64, false) || !/^[A-Za-z0-9_+\-/]+$/.test(value)) return null;
+  try {
+    new Intl.DateTimeFormat("en-US", { timeZone: value });
+    return value;
+  } catch {
+    return null;
+  }
+}
+
+function leagueWindow(value: unknown): value is LeagueAvailabilityWindow {
+  const window = object(value);
+  return !!window && exactKeys(window, ["weekday", "start", "end"])
+    && nonNegativeInteger(window.weekday) && window.weekday <= 6
+    && nonNegativeInteger(window.start) && nonNegativeInteger(window.end)
+    && window.start < window.end && window.end <= 24 * 60
+    && window.start % LEAGUE_SLOT_MINUTES === 0 && window.end % LEAGUE_SLOT_MINUTES === 0;
+}
+
+export function decodeLeagueAvailability(value: unknown): LeagueAvailabilityWindow[] | null {
+  return array(value, leagueWindow, MAX_LEAGUE_WINDOWS)
+    ? value.map(({ weekday, start, end }) => ({ weekday, start, end }))
+    : null;
+}
+
+/** Sign-up links carry a 32-byte base64url capability. */
+export const LEAGUE_TOKEN_RE = /^[A-Za-z0-9_-]{43}$/;
+/** League and league-match ids are both 12 random bytes in hex. */
+const leagueRecordId = (value: unknown): value is string => typeof value === "string" && /^[a-f0-9]{24}$/.test(value);
+const leagueId = leagueRecordId;
+
+export function decodeLeagueJoinRequest(value: unknown): LeagueJoinRequest | null {
+  const data = object(value);
+  if (!data || !exactKeys(data, ["token", "timeZone", "availability"])
+    || typeof data.token !== "string" || !LEAGUE_TOKEN_RE.test(data.token)) return null;
+  const timeZone = decodeLeagueTimeZone(data.timeZone);
+  const availability = decodeLeagueAvailability(data.availability);
+  return timeZone && availability ? { token: data.token, timeZone, availability } : null;
+}
+
+export function decodeLeagueAvailabilityRequest(value: unknown): LeagueAvailabilityRequest | null {
+  const data = object(value);
+  if (!data || !exactKeys(data, ["leagueId", "timeZone", "availability", "week"], ["leagueId", "timeZone", "availability"])
+    || !leagueId(data.leagueId)) return null;
+  const timeZone = decodeLeagueTimeZone(data.timeZone);
+  const availability = decodeLeagueAvailability(data.availability);
+  if (!timeZone || !availability) return null;
+  const request = { leagueId: data.leagueId, timeZone, availability };
+  if (data.week === undefined) return request;
+  return positiveInteger(data.week) && data.week <= MAX_LEAGUE_WEEK ? { ...request, week: data.week } : null;
+}
+
+export function decodeLeagueIdRequest(value: unknown): { leagueId: string } | null {
+  const data = object(value);
+  return data && exactKeys(data, ["leagueId"]) && leagueId(data.leagueId) ? { leagueId: data.leagueId } : null;
+}
+
+export function decodeLeagueMatchRequest(value: unknown): LeagueMatchRequest | null {
+  const data = object(value);
+  return data && exactKeys(data, ["matchId"]) && leagueRecordId(data.matchId) ? { matchId: data.matchId } : null;
+}
+
+export function decodeLeagueProposeRequest(value: unknown): LeagueProposeRequest | null {
+  const data = object(value);
+  return data && exactKeys(data, ["matchId", "at"]) && leagueRecordId(data.matchId)
+    && nonNegativeInteger(data.at) && data.at <= MAX_TIMESTAMP
+    ? { matchId: data.matchId, at: data.at }
+    : null;
+}
+
+export function decodeLeaguePairingNote(value: unknown): LeaguePairingNote | null {
+  const note = object(value);
+  if (!note || !exactKeys(note, ["overlapMinutes", "scoreGap", "rematches", "cost"])
+    || !nonNegativeInteger(note.overlapMinutes) || note.overlapMinutes > 7 * 24 * 60
+    || !finite(note.scoreGap) || note.scoreGap < 0 || note.scoreGap > 3
+    || !nonNegativeInteger(note.rematches) || !finite(note.cost)) return null;
+  return { overlapMinutes: note.overlapMinutes, scoreGap: note.scoreGap, rematches: note.rematches, cost: note.cost };
+}
+
+export function decodeLeagueAction(value: unknown): LeagueAction | null {
+  const action = object(value);
+  if (!action) return null;
+  switch (action.kind) {
+    case "close-signup":
+    case "start":
+    case "cancel":
+      return exactKeys(action, ["kind"]) ? { kind: action.kind } : null;
+    case "drop":
+      return exactKeys(action, ["kind", "memberId"]) && positiveInteger(action.memberId)
+        ? { kind: "drop", memberId: action.memberId }
+        : null;
+    case "set-result":
+      return exactKeys(action, ["kind", "matchId", "outcome"]) && id(action.matchId)
+        && LEAGUE_OUTCOMES.has(String(action.outcome))
+        ? { kind: "set-result", matchId: action.matchId, outcome: action.outcome as "a" | "b" | "draw" | "double-forfeit" | "void" }
+        : null;
+    case "extend-deadline":
+      return exactKeys(action, ["kind", "matchId", "deadlineAt"]) && id(action.matchId)
+        && nonNegativeInteger(action.deadlineAt) && action.deadlineAt <= MAX_TIMESTAMP
+        ? { kind: "extend-deadline", matchId: action.matchId, deadlineAt: action.deadlineAt }
+        : null;
+    default:
+      return null;
+  }
+}
+
+export const decodeLeagueJoinPreviewResponse: Decoder<LeagueJoinPreviewResponse> = (value) => {
+  const data = object(value);
+  if (!data || !exactKeys(data, ["ok", "league"]) || data.ok !== true) return null;
+  const league = object(data.league);
+  if (!league || !exactKeys(league, [
+    "name", "format", "status", "startsAt", "members", "maxPlayers", "matchesPerWeek", "seasonWeeks", "joined",
+  ]) || !string(league.name, MAX_LEAGUE_NAME, false) || !FORMATS.has(String(league.format))
+    || !LEAGUE_STATUSES.has(String(league.status))
+    || !(league.startsAt === null || (nonNegativeInteger(league.startsAt) && league.startsAt <= MAX_TIMESTAMP))
+    || !positiveInteger(league.maxPlayers) || league.maxPlayers > MAX_LEAGUE_PLAYERS
+    || !nonNegativeInteger(league.members) || league.members > league.maxPlayers
+    || !positiveInteger(league.matchesPerWeek) || league.matchesPerWeek > 7
+    || !positiveInteger(league.seasonWeeks) || league.seasonWeeks > MAX_LEAGUE_WEEK
+    || typeof league.joined !== "boolean") return null;
+  return {
+    ok: true,
+    league: {
+      name: league.name,
+      format: league.format as Format,
+      status: league.status as LeagueStatus,
+      startsAt: league.startsAt,
+      members: league.members,
+      maxPlayers: league.maxPlayers,
+      matchesPerWeek: league.matchesPerWeek,
+      seasonWeeks: league.seasonWeeks,
+      joined: league.joined,
+    },
+  };
+};
+
+export interface LeaguesResponse { ok: true; leagues: LeagueMembership[] }
+export type LeagueErrorCode = "LEAGUE_NOT_FOUND" | "LEAGUE_FULL" | "LEAGUE_CLOSED";
+export interface LeagueErrorResponse { ok: false; error: string; code: LeagueErrorCode }
+const LEAGUE_ERROR_CODES = new Set(["LEAGUE_NOT_FOUND", "LEAGUE_FULL", "LEAGUE_CLOSED"]);
+
+export const decodeLeagueErrorResponse: Decoder<LeagueErrorResponse> = (value) => {
+  const data = object(value);
+  return data && exactKeys(data, ["ok", "error", "code"]) && data.ok === false && string(data.error, MAX_TEXT)
+    && LEAGUE_ERROR_CODES.has(String(data.code))
+    ? { ok: false, error: data.error, code: data.code as LeagueErrorCode }
+    : null;
+};
+
+const LEAGUE_STAGES = new Set(["season", "quarterfinal", "semifinal", "final"]);
+const LEAGUE_MATCH_STATUSES = new Set(["unscheduled", "proposed", "scheduled", "in-room", "complete", "cancelled"]);
+const LEAGUE_MATCH_RESULTS = new Set(["played", "draw", "forfeit", "double-forfeit", "bye", "operator"]);
+const MAX_LEAGUES = 50;
+const MAX_LEAGUE_MATCHES = 200;
+const nullableTimestamp = (value: unknown): value is number | null =>
+  value === null || (nonNegativeInteger(value) && value <= MAX_TIMESTAMP);
+const leagueWindows = (value: unknown): value is LeagueAvailabilityWindow[] => decodeLeagueAvailability(value) !== null;
+
+const MAX_LEAGUE_OVERLAPS = 7 * 48;
+const LEAGUE_PROPOSERS = new Set(["you", "opponent", "league"]);
+
+function leagueTimeRange(value: unknown): value is LeagueTimeRange {
+  const range = object(value);
+  return !!range && exactKeys(range, ["start", "end"]) && nonNegativeInteger(range.start)
+    && nonNegativeInteger(range.end) && range.start < range.end && range.end <= MAX_TIMESTAMP;
+}
+
+function leagueMatchView(value: unknown): value is LeagueMatchView {
+  const match = object(value);
+  if (!match || !exactKeys(match, [
+    "id", "stage", "week", "opponent", "status", "scheduledAt", "proposedBy", "deadlineAt",
+    "youReady", "opponentReady", "roomCode", "result", "won", "overlap",
+  ])) return false;
+  const opponent = match.opponent === null ? null : object(match.opponent);
+  return leagueRecordId(match.id) && LEAGUE_STAGES.has(String(match.stage))
+    && (match.week === null || (positiveInteger(match.week) && match.week <= MAX_LEAGUE_WEEK))
+    && (match.opponent === null || (!!opponent && exactKeys(opponent, ["username", "timeZone"])
+      && (opponent.username === null || username(opponent.username)) && decodeLeagueTimeZone(opponent.timeZone) !== null))
+    && LEAGUE_MATCH_STATUSES.has(String(match.status)) && nullableTimestamp(match.scheduledAt)
+    && (match.proposedBy === null || LEAGUE_PROPOSERS.has(String(match.proposedBy)))
+    && nonNegativeInteger(match.deadlineAt) && match.deadlineAt <= MAX_TIMESTAMP
+    && typeof match.youReady === "boolean" && typeof match.opponentReady === "boolean"
+    && (match.roomCode === null || roomCode(match.roomCode))
+    && (match.result === null || LEAGUE_MATCH_RESULTS.has(String(match.result)))
+    && (match.won === null || typeof match.won === "boolean")
+    && array(match.overlap, leagueTimeRange, MAX_LEAGUE_OVERLAPS);
+}
+
+const LEAGUE_PLAYOFF_STAGES = new Set(["quarterfinal", "semifinal", "final"]);
+const MAX_LEAGUE_COUNT = 1_000;
+const leagueCount = (value: unknown): value is number => nonNegativeInteger(value) && value <= MAX_LEAGUE_COUNT;
+
+function leagueStanding(value: unknown): value is LeagueStandingView {
+  const row = object(value);
+  return !!row && exactKeys(row, [
+    "rank", "username", "you", "points", "wins", "losses", "draws", "byes", "opponentMatchWinRate", "dropped", "playoffSeed",
+  ]) && positiveInteger(row.rank) && row.rank <= MAX_LEAGUE_PLAYERS
+    && (row.username === null || username(row.username)) && typeof row.you === "boolean"
+    && leagueCount(row.points) && leagueCount(row.wins) && leagueCount(row.losses) && leagueCount(row.draws) && leagueCount(row.byes)
+    && finite(row.opponentMatchWinRate) && row.opponentMatchWinRate >= 0 && row.opponentMatchWinRate <= 1
+    && typeof row.dropped === "boolean"
+    && (row.playoffSeed === null || (positiveInteger(row.playoffSeed) && row.playoffSeed <= 8));
+}
+
+function leagueBracketPlayer(value: unknown): value is LeagueBracketPlayer {
+  const player = object(value);
+  return !!player && exactKeys(player, ["username", "seed", "you"])
+    && (player.username === null || username(player.username))
+    && nonNegativeInteger(player.seed) && player.seed <= 8 && typeof player.you === "boolean";
+}
+
+function leagueBracket(value: unknown): value is LeagueBracketView {
+  const match = object(value);
+  return !!match && exactKeys(match, ["stage", "slot", "a", "b", "status", "result", "advancer"])
+    && LEAGUE_PLAYOFF_STAGES.has(String(match.stage)) && nonNegativeInteger(match.slot) && match.slot < 4
+    && leagueBracketPlayer(match.a) && leagueBracketPlayer(match.b)
+    && LEAGUE_MATCH_STATUSES.has(String(match.status))
+    && (match.result === null || LEAGUE_MATCH_RESULTS.has(String(match.result)))
+    && (match.advancer === null || match.advancer === "a" || match.advancer === "b");
+}
+
+function leagueMembership(value: unknown): value is LeagueMembership {
+  const league = object(value);
+  return !!league && exactKeys(league, [
+    "id", "name", "format", "status", "startsAt", "seasonWeeks", "matchesPerWeek", "matchMinutes",
+    "maxPlayers", "signupOpen", "roster", "timeZone", "availability", "matches", "standings", "bracket",
+  ]) && leagueId(league.id) && string(league.name, MAX_LEAGUE_NAME, false) && FORMATS.has(String(league.format))
+    && LEAGUE_STATUSES.has(String(league.status)) && nullableTimestamp(league.startsAt)
+    && positiveInteger(league.seasonWeeks) && league.seasonWeeks <= MAX_LEAGUE_WEEK
+    && positiveInteger(league.matchesPerWeek) && league.matchesPerWeek <= 7
+    && positiveInteger(league.matchMinutes) && league.matchMinutes <= 180
+    && positiveInteger(league.maxPlayers) && league.maxPlayers <= MAX_LEAGUE_PLAYERS
+    && typeof league.signupOpen === "boolean"
+    && array(league.roster, (item): item is LeagueMembership["roster"][number] => {
+      const member = object(item);
+      return !!member && exactKeys(member, ["username", "you"])
+        && (member.username === null || username(member.username)) && typeof member.you === "boolean";
+    }, MAX_LEAGUE_PLAYERS)
+    && decodeLeagueTimeZone(league.timeZone) !== null && leagueWindows(league.availability)
+    && array(league.matches, leagueMatchView, MAX_LEAGUE_MATCHES)
+    && array(league.standings, leagueStanding, MAX_LEAGUE_PLAYERS)
+    && array(league.bracket, leagueBracket, 8);
+}
+
+export const decodeLeaguesResponse: Decoder<LeaguesResponse> = (value) => {
+  const data = object(value);
+  return data && exactKeys(data, ["ok", "leagues"]) && data.ok === true && array(data.leagues, leagueMembership, MAX_LEAGUES)
+    ? value as LeaguesResponse
+    : null;
+};
+
+function exportLeague(value: unknown): value is LeagueExport {
+  const league = object(value);
+  return !!league && exactKeys(league, [
+    "name", "format", "leagueStatus", "memberStatus", "joinedAt", "timeZone", "availability",
+    "availabilityWeeks", "matches",
+  ]) && string(league.name, MAX_LEAGUE_NAME, false) && FORMATS.has(String(league.format))
+    && LEAGUE_STATUSES.has(String(league.leagueStatus))
+    && (league.memberStatus === "active" || league.memberStatus === "dropped")
+    && nonNegativeInteger(league.joinedAt) && decodeLeagueTimeZone(league.timeZone) !== null
+    && leagueWindows(league.availability)
+    && array(league.availabilityWeeks, (item): item is LeagueExport["availabilityWeeks"][number] => {
+      const week = object(item);
+      return !!week && exactKeys(week, ["week", "availability"])
+        && positiveInteger(week.week) && week.week <= MAX_LEAGUE_WEEK && leagueWindows(week.availability);
+    }, MAX_LEAGUE_WEEK)
+    && array(league.matches, (item): item is LeagueExport["matches"][number] => {
+      const match = object(item);
+      return !!match && exactKeys(match, ["stage", "week", "bracketSlot", "opponent", "status", "scheduledAt", "result", "won"])
+        && LEAGUE_STAGES.has(String(match.stage))
+        && (match.week === null || (positiveInteger(match.week) && match.week <= MAX_LEAGUE_WEEK))
+        && (match.bracketSlot === null || (nonNegativeInteger(match.bracketSlot) && match.bracketSlot < 8))
+        && (match.opponent === null || username(match.opponent))
+        && LEAGUE_MATCH_STATUSES.has(String(match.status)) && nullableTimestamp(match.scheduledAt)
+        && (match.result === null || LEAGUE_MATCH_RESULTS.has(String(match.result)))
+        && (match.won === null || typeof match.won === "boolean");
+    }, MAX_LEAGUE_MATCHES);
+}
 
 export const decodeReplayResponse: Decoder<ReplayResponse> = (value) => {
   const data = object(value);
@@ -2508,7 +2875,7 @@ export const decodeAccountExportResponse: Decoder<AccountExportResponse> = (valu
       exported,
       ["exportedAt", "account", "decks", "deckPlays", "rooms", "matchmaking", "bugReports",
         "playerReports", "gameDays", "achievements", "replays", "matches", "heroRecords", "matchupRecords",
-        "friends", "friendRequests", "friendMessages"],
+        "friends", "friendRequests", "friendMessages", "leagues"],
     ) && !!account
     && exactKeys(account, ["username", "createdAt", "earlyTester", "selectedBadge", "betaTester", "email", "pendingEmail"])
     && typeof account.betaTester === "boolean"
@@ -2539,7 +2906,8 @@ export const decodeAccountExportResponse: Decoder<AccountExportResponse> = (valu
         && username(friend.username) && nonNegativeInteger(friend.friendsSince);
     }, MAX_SOCIAL_ITEMS)
     && array(exported.friendRequests, friendRequestSummary, MAX_SOCIAL_ITEMS)
-    && array(exported.friendMessages, chatMessage, MAX_SOCIAL_ITEMS);
+    && array(exported.friendMessages, chatMessage, MAX_SOCIAL_ITEMS)
+    && array(exported.leagues, exportLeague, MAX_LEAGUES);
   return valid ? value as AccountExportResponse : null;
 };
 

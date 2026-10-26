@@ -1,6 +1,7 @@
 export type FlowStepName =
   | "announceCardPlayed"
   | "attackAllowsDefender"
+  | "attackTargetIsLegal"
   | "auraAttackGoAgain"
   | "beginAttackStep"
   | "beginHeroDamage"
@@ -42,7 +43,8 @@ export type FlowStepName =
   | "resolveTopStackLayer"
   | "resolveWagerLayer"
   | "resumeCombatDamage"
-  | "startNextQueuedAttack";
+  | "startNextQueuedAttack"
+  | "triggerPlayedAttackSpectra";
 
 /** Ephemeral orchestration request. Persisted pauses continue using StackResume. */
 export interface FlowStep {

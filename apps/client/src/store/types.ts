@@ -25,6 +25,7 @@ import type {
   UndoTarget,
   EmoteMessage,
   SeatStandingOrders,
+  LeagueMembership,
 } from "@fyendal/shared";
 import type {
   AccountExport,
@@ -67,7 +68,7 @@ export interface PendingFabraryPlay {
 }
 
 export type Screen = "lobby" | "room-loading" | "waiting" | "prep" | "game" | "replay";
-export type LobbyRail = "home" | "decks" | "all" | "history" | "achievements" | "account";
+export type LobbyRail = "home" | "decks" | "all" | "history" | "league" | "achievements" | "account";
 export type MatchAcceptanceRole = "existing" | "joining";
 export interface MatchListState {
   filters: MatchListFilters;
@@ -173,6 +174,8 @@ export interface StoreState {
   beginFriendInvite: (username: string) => void;
   cancelFriendInvite: () => void;
   createFriendRoom: (username: string, format: Format, deckId: string) => void;
+  /** Takes your seat in a league match's room; the server creates it on first entry. */
+  enterLeagueRoom: (matchId: string, deckId: string) => void;
   dismissFriendGameInvite: (inviteId: string) => void;
   acceptFriendGameInvite: (inviteId: string) => void;
 
@@ -242,6 +245,8 @@ export interface StoreState {
    * skip that hero for the rest of the search. */
   declinedBackgroundHero: { heroId: string; heroName: string } | null;
   pendingBotStart: boolean;
+  /** A create request awaits its room while the server refreshes the deck. */
+  roomStartPending: boolean;
   /** Keep an accepted PvP offer distinct from its fallback to bot practice. */
   botMatchTransition: "accepted" | "fallback" | null;
   acknowledgeBotMatchFallback: () => void;
@@ -299,6 +304,9 @@ export interface StoreState {
   matchRecordsLoading: boolean;
   matchRecordsError: boolean;
   matchList: MatchListState;
+  /** Active league memberships; null until loaded for this account. */
+  leagues: LeagueMembership[] | null;
+  refreshLeagues: () => Promise<void>;
   refreshMatchRecords: () => Promise<void>;
   loadMatches: (filters: MatchListFilters, cursor?: string | null) => Promise<void>;
   setMatchReplayFavorite: (matchId: string, replayId: string, favorite: boolean) => Promise<FavoriteReplayResult>;

@@ -2,6 +2,7 @@ import type { CardInstance, CardScript, DeepReadonly, ScriptCtx, TriggerDef } fr
 import { evrHighRarity } from "./evr/high-rarity.js";
 import {
   buffNextAttack,
+  canHeave,
   cardNamed,
   commonOptionMessages,
   decisionMessage,
@@ -17,14 +18,12 @@ import {
   optN,
   optOnChoose,
   previousAttackHasName,
-  requestDiscardChoice,
   requestHeroChoice,
   resolveDiscardChoice,
   wizardActionAsInstant,
   weaponAttackCount,
   opposingHeroDamage,
   ongoingLabel,
-  logHeaveUnaffordable,
 } from "./shared-helpers.js";
 
 const COPPER = "EVR194";
@@ -108,11 +107,10 @@ function heaveThree(): CardScript {
         event: "end-of-turn",
         sourceZone: "hand",
         label: "Heave 3",
-        condition: (ctx) => ctx.hasArsenalSpace(),
+        canAccept: (ctx) => canHeave(ctx, 3),
         effect(ctx) {
-          const player = ctx.player(ctx.seat);
-          if (!ctx.hasArsenalSpace() || !player.hand.some((card) => card.instanceId === ctx.self.instanceId)) return;
-          if (!ctx.requestPayment(
+          if (!canHeave(ctx, 3)) return;
+          ctx.requestPayment(
             "heave-three",
             decisionPrompt(`${ctx.data.name}: pay {r}{r}{r} to put it face up into arsenal?`, "card.evr.heave.pay", {
               values: { card: { kind: "card", cardId: ctx.self.cardId }, amount: 3 },
@@ -121,7 +119,7 @@ function heaveThree(): CardScript {
             3,
             undefined,
             [ctx.self.instanceId],
-          )) logHeaveUnaffordable(ctx, 3);
+          );
         },
       },
     ],
@@ -951,31 +949,30 @@ const amuletEchoes: CardScript = {
     },
   },
   onChoose(ctx, hook, option) {
-    if (hook === "echoes-target") {
-      const target = heroChoiceSeat(ctx, option);
-      if (target === undefined) return;
-      ctx.setState("echoes-target-seat", target);
-      ctx.setState("echoes-discards-left", 2);
-      requestDiscardChoice(
-        ctx,
-        "echoes-discard",
-        decisionPrompt("Choose a card to discard", "card.common.card.discard.choose"),
-        target,
-      );
-      return;
-    }
+    if (hook !== "echoes-target") return;
+    const target = heroChoiceSeat(ctx, option);
+    if (target === undefined) return;
+    const hand = ctx.player(target).hand;
+    const count = Math.min(2, hand.length);
+    if (!count) return;
+    ctx.setState("echoes-target-seat", target);
+    ctx.requestCardChoices(
+      "echoes-discard",
+      decisionPrompt(
+        count === 1 ? "Choose a card to discard" : `Choose ${count} cards to discard`,
+        "card.evr.echoes.discard.choose",
+        { values: { count } },
+      ),
+      hand.map((card) => card.instanceId),
+      count,
+      count,
+      target,
+    );
+  },
+  onChooseMany(ctx, hook, options) {
     if (hook !== "echoes-discard") return;
     const targetSeat = ctx.getState("echoes-target-seat");
-    if (!resolveDiscardChoice(ctx, option, targetSeat)) return;
-    const left = ctx.getState("echoes-discards-left") - 1;
-    ctx.setState("echoes-discards-left", left);
-    if (left > 0)
-      requestDiscardChoice(
-        ctx,
-        "echoes-discard",
-        decisionPrompt("Choose another card to discard", "card.evr.discard.next"),
-        targetSeat,
-      );
+    for (const option of options) resolveDiscardChoice(ctx, option, targetSeat);
   },
 };
 

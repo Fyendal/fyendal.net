@@ -1,6 +1,6 @@
 import { cardData } from "@fyendal/cards/client";
-import type { CardView } from "@fyendal/shared";
-import { useEffect, useId, useRef, useState } from "react";
+import type { CardView, PendingDecision } from "@fyendal/shared";
+import { useEffect, useId, useRef, useState, type CSSProperties } from "react";
 import { createPortal } from "react-dom";
 import { useIntl } from "react-intl";
 import { formatGameMessage, GameMessageText } from "../../i18n/GameMessage.js";
@@ -15,8 +15,11 @@ import {
   handCardChoiceOptions,
   heroTargetSide,
   optDecisionCards,
+  boundedCardChoiceKey,
+  boundedCardChoiceSelectable,
   toggleBoundedCardChoice,
 } from "../decisionPresentation.js";
+import { contextRevealedCards } from "../deckCardEvents.js";
 import { decisionSpaceOption } from "../passHotkey.js";
 import { ArsenalSkipConfirmation, OptDecisionInstructions } from "./ActionConfirmations.js";
 import { BloodModeDecision } from "./BloodModeDecision.js";
@@ -62,11 +65,12 @@ function BoundedCardChoiceConfirm({
   const canConfirm = selectedOptionIds.length >= minimumSelections &&
     selectedOptionIds.length <= maximumSelections;
   return (
-    <div className="decision-buttons">
+    <div className="decision-buttons bounded-choice-footer">
       <button
         type="button"
-        className="btn-primary"
+        className="btn-primary shortcut-button"
         disabled={!canConfirm}
+        aria-keyshortcuts={canConfirm ? "Space" : undefined}
         onClick={() => onConfirm(selectedOptionIds)}
       >
         {selectedOptionIds.length === 0
@@ -75,28 +79,64 @@ function BoundedCardChoiceConfirm({
               { id: "game.search.submit" },
               { count: selectedOptionIds.length },
             )}
+        {canConfirm
+          ? <kbd className="shortcut-key" aria-label={intl.formatMessage({ id: "common.spaceKey" })} />
+          : null}
       </button>
     </div>
   );
 }
 
+/** Small limits read as slots that fill; larger ones as a plain count. */
+function BoundedChoiceTally({ selected, maximum }: { selected: number; maximum: number }) {
+  const intl = useIntl();
+  const label = intl.formatMessage({ id: "game.decision.selection.count" }, { selected, maximum });
+  return (
+    <div className="bounded-choice-tally" role="img" aria-label={label}>
+      {maximum <= 6 ? (
+        <span className="bounded-choice-slots" aria-hidden="true">
+          {Array.from({ length: maximum }, (_, index) => (
+            <span key={index} className={`bounded-choice-slot${index < selected ? " bounded-choice-slot-filled" : ""}`} />
+          ))}
+        </span>
+      ) : null}
+      <span className="bounded-choice-count" aria-hidden="true">{selected}/{maximum}</span>
+    </div>
+  );
+}
+
+/** Balanced rows: six cards lay out 3 + 3 rather than 5 + 1. */
+function boundedChoiceColumns(count: number): number {
+  return count <= 5 ? count : Math.ceil(count / Math.ceil(count / 5));
+}
+
 function BoundedCardChoiceDecision({
   choice,
   viewerSeat,
+  selectedOptionIds: controlledSelection,
+  onToggle,
   onConfirm,
 }: {
   choice: NonNullable<ReturnType<typeof boundedCardChoiceModel>>;
   viewerSeat: number;
+  /** Board-owned selection, so Space can submit it. */
+  selectedOptionIds?: readonly string[];
+  onToggle?: (optionId: string) => void;
   onConfirm: (optionIds: readonly string[]) => void;
 }) {
-  const [selectedOptionIds, setSelectedOptionIds] = useState<readonly string[]>([]);
+  const [localSelection, setLocalSelection] = useState<readonly string[]>([]);
+  const selectedOptionIds = controlledSelection ?? localSelection;
+  const toggle = onToggle ?? ((optionId: string) => setLocalSelection((current) =>
+    toggleBoundedCardChoice(current, optionId, choice.maximumSelections)
+  ));
 
   return (
     <>
-      <div className="decision-cards">
+      <BoundedChoiceTally selected={selectedOptionIds.length} maximum={choice.maximumSelections} />
+      <div className="decision-cards bounded-choice-cards">
         {choice.choices.map(({ optionId, card }) => {
           const selected = selectedOptionIds.includes(optionId);
-          const canSelect = selected || selectedOptionIds.length < choice.maximumSelections;
+          const canSelect = boundedCardChoiceSelectable(choice, selectedOptionIds, optionId);
           return (
             <CardFace
               key={optionId}
@@ -106,11 +146,7 @@ function BoundedCardChoiceDecision({
               highlighted={canSelect && !selected}
               dimmed={!canSelect}
               affiliation={cardAffiliation(card, viewerSeat)}
-              onClick={canSelect
-                ? () => setSelectedOptionIds((current) =>
-                    toggleBoundedCardChoice(current, optionId, choice.maximumSelections)
-                  )
-                : undefined}
+              onClick={canSelect ? () => toggle(optionId) : undefined}
             />
           );
         })}
@@ -247,12 +283,17 @@ function GuidanceSettingsInfo({
   );
 }
 
+/** A reveal offered only as context shows in the reveal toast instead. */
+function panelRevealedCards(decision: PendingDecision): CardView[] {
+  return contextRevealedCards(decision).length > 0 ? [] : decision.revealedCards ?? [];
+}
+
 /** The tinted mat half shows who is deciding, so another player's decision needs
  * a panel only to show the cards it reveals. */
 export function pendingDecisionPanelShown(model: PendingDecisionModel): boolean {
   const decision = model.decision;
   if (!decision) return false;
-  return model.isMine || (decision.revealedCards?.length ?? 0) > 0;
+  return model.isMine || panelRevealedCards(decision).length > 0;
 }
 
 export function PendingDecisionPanel({
@@ -283,6 +324,7 @@ export function PendingDecisionPanel({
     onCancelSkipArsenal,
     boundedChoiceSelectedOptionIds,
     onConfirmBoundedChoice,
+    onToggleBoundedChoice,
     onSend,
   } = model;
   if (!pd || !pendingDecisionPanelShown(model)) return null;
@@ -296,7 +338,7 @@ export function PendingDecisionPanel({
   const bloodAllocation = bloodModeAllocation(pd);
   const boundedCardChoice = boundedCardChoiceModel(pd);
   const handPickDecision = handCardChoiceOptions(pd, hand) !== null;
-  const revealedCards = pd.revealedCards ?? [];
+  const revealedCards = panelRevealedCards(pd);
   const revealedChoice = revealedCards.length > 0;
   const lookedCards = pd.lookedCards ?? [];
   const offeredCardIds = new Set<number>();
@@ -457,12 +499,25 @@ export function PendingDecisionPanel({
     pd.kind !== "order-triggers" &&
     !effectList;
 
+  // A hand-staged choice keeps its cards in the hand row; the float only confirms.
+  const boundedInHand = boundedCardChoice !== null &&
+    boundedChoiceSelectedOptionIds !== undefined &&
+    onConfirmBoundedChoice !== undefined &&
+    !onToggleBoundedChoice;
+  const boundedFloat = boundedCardChoice && !boundedInHand ? boundedCardChoice : null;
+
   return (
     <div className={`decision decision-options${
       priorityGuidanceDecision ? " decision-priority-guidance" : ""
     }${choiceModal ? " decision-choice" : ""}${pd.kind === "choose-name" ? " decision-name-choice" : ""}${
       pd.kind === "order-triggers" || effectList ? " decision-trigger-order" : ""
-    }${effectList ? " decision-effect-list" : ""}`}>
+    }${effectList ? " decision-effect-list" : ""}${
+      boundedFloat ? " decision-bounded" : ""
+    }`}
+    style={boundedFloat
+      ? { "--bounded-choice-columns": boundedChoiceColumns(boundedFloat.choices.length) } as CSSProperties
+      : undefined}
+    >
       <DecisionPrompt
         prompt={pd.kind === "arsenal"
           ? intl.formatMessage({ id: "game.decision.arsenal.choosePrompt" })
@@ -543,26 +598,21 @@ export function PendingDecisionPanel({
           onChoose={(optionId) => onSend({ kind: "choose", optionId })}
         />
       ) : null}
-      {boundedCardChoice &&
-      boundedChoiceSelectedOptionIds !== undefined &&
-      onConfirmBoundedChoice ? (
+      {boundedInHand ? (
         <BoundedCardChoiceConfirm
           selectedOptionIds={boundedChoiceSelectedOptionIds}
           minimumSelections={boundedCardChoice.minimumSelections}
           maximumSelections={boundedCardChoice.maximumSelections}
           onConfirm={onConfirmBoundedChoice}
         />
-      ) : boundedCardChoice ? (
+      ) : boundedFloat ? (
         <BoundedCardChoiceDecision
-          key={JSON.stringify([
-            pd.player,
-            pd.promptMessage ?? pd.prompt,
-            pd.options,
-            pd.minimumSelections,
-            pd.maximumSelections,
-          ])}
-          choice={boundedCardChoice}
+          key={boundedCardChoiceKey(pd) ?? undefined}
+          choice={boundedFloat}
           viewerSeat={viewerSeat}
+          {...(onToggleBoundedChoice
+            ? { selectedOptionIds: boundedChoiceSelectedOptionIds, onToggle: onToggleBoundedChoice }
+            : {})}
           onConfirm={(optionIds) => onSend({ kind: "choose-many", optionIds: [...optionIds] })}
         />
       ) : null}

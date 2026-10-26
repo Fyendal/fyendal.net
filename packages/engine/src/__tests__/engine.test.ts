@@ -79,12 +79,45 @@ describe("game setup & turn structure", () => {
         triggers: [
           { event: "end-of-turn", optional: true, label: "Recover", labelMessage: { id: "test.recover" }, effect() {} },
           { event: "damage-dealt", label: "Sting", effect() {} },
+          {
+            event: "start-of-turn",
+            label: "Maintain",
+            standingChoice: {
+              hook: "test-maintain",
+              options: ["keep", "drop"],
+              optionMessages: { keep: { id: "test.keep" }, drop: { id: "test.drop" } },
+            },
+            effect() {},
+          },
         ],
       },
     };
 
     expect(projectStateFor(state, 0).players[0]?.weapons[0]?.turnTriggers).toEqual([
-      { event: "end-of-turn", label: "Recover", labelMessage: { id: "test.recover" }, optional: true },
+      {
+        event: "end-of-turn",
+        label: "Recover",
+        labelMessage: { id: "test.recover" },
+        optional: true,
+        choices: [{
+          hook: "trigger-choice",
+          options: [
+            { value: "yes", message: { id: "common.option.yes" } },
+            { value: "no", message: { id: "common.option.no" } },
+          ],
+        }],
+      },
+      {
+        event: "start-of-turn",
+        label: "Maintain",
+        choices: [{
+          hook: "test-maintain",
+          options: [
+            { value: "keep", message: { id: "test.keep" } },
+            { value: "drop", message: { id: "test.drop" } },
+          ],
+        }],
+      },
     ]);
     expect(projectStateFor(state, 0).players[0]?.hand[0]?.turnTriggers).toBeUndefined();
   });
@@ -802,6 +835,34 @@ describe("game setup & turn structure", () => {
     expect(drawn).toBeDefined();
     expect(drawn).not.toHaveProperty("faceDown");
     expect(drawn).not.toHaveProperty("arsenalSlot");
+  });
+
+  it("logs publicly when a replacement cancels token creation", () => {
+    const s = makeGame(102);
+    const p = player(s, 0);
+    s.scriptsRef = {
+      ...s.scriptsRef,
+      HERO_B: {
+        globalTokenCreationReplacement: {
+          label: "Create one fewer token",
+          replace: (_ctx, _seat, _cardId, count) => Math.max(0, count - 1),
+        },
+      },
+    };
+
+    makeCtx(s, engineRuntime, 0, p.hand[0]!).createToken("TOKEN");
+
+    expect(p.board.some((card) => card.cardId === "TOKEN")).toBe(false);
+    expect(s.log.at(-1)?.publicPayload?.message).toEqual({
+      id: "engine.log.token.creation.reduced",
+      values: {
+        source: { kind: "card", cardId: "HERO_B" },
+        player: { kind: "player", seat: 0 },
+        card: { kind: "card", cardId: "TOKEN" },
+        from: 1,
+        to: 0,
+      },
+    });
   });
 
   it("orders global and optional-friendly token replacements together", () => {

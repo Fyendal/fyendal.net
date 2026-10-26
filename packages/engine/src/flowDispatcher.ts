@@ -1,7 +1,7 @@
 import type { FlowStepName } from "./flowTypes.js";
 import type { EngineRuntime } from "./runtimePorts.js";
 import type { GameStateInternal } from "./runtimeState.js";
-import { auraAttackGoAgain, beginAttackStep, clearAttackQueue, queueAttackCard, startNextQueuedAttack } from "./attacks.js";
+import { attackTargetIsLegal, auraAttackGoAgain, beginAttackStep, clearAttackQueue, queueAttackCard, startNextQueuedAttack, triggerPlayedAttackSpectra } from "./attacks.js";
 import { closeChain, finishLinkResolution } from "./combatChain.js";
 import { resolveLink, resumeCombatDamage } from "./damage.js";
 import { beginHeroDamage, dealAllyDamage, gainHeroLife } from "./damageResolution.js";
@@ -17,6 +17,7 @@ type FlowHandler = (...args: any[]) => any;
 const handlers: Readonly<Record<FlowStepName, { fn: FlowHandler; injectRuntime: boolean }>> = Object.freeze({
   announceCardPlayed: { fn: announceCardPlayed, injectRuntime: true },
   attackAllowsDefender: { fn: attackAllowsDefender, injectRuntime: true },
+  attackTargetIsLegal: { fn: attackTargetIsLegal, injectRuntime: true },
   auraAttackGoAgain: { fn: auraAttackGoAgain, injectRuntime: false },
   beginAttackStep: { fn: beginAttackStep, injectRuntime: true },
   beginHeroDamage: { fn: beginHeroDamage, injectRuntime: true },
@@ -59,6 +60,7 @@ const handlers: Readonly<Record<FlowStepName, { fn: FlowHandler; injectRuntime: 
   resolveWagerLayer: { fn: resolveWagerLayer, injectRuntime: true },
   resumeCombatDamage: { fn: resumeCombatDamage, injectRuntime: true },
   startNextQueuedAttack: { fn: startNextQueuedAttack, injectRuntime: true },
+  triggerPlayedAttackSpectra: { fn: triggerPlayedAttackSpectra, injectRuntime: false },
 });
 
 export function dispatchFlow<T = any>(

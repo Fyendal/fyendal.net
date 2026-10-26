@@ -5,10 +5,12 @@ import type { CardInstance, PlayerState } from "./state.js";
 import {
   activatedAbilitiesSuppressed,
   cardHasType,
+  cardNamesOf,
   cardTypesOf,
   dataOf,
   instanceDataOf,
   isArrowData,
+  isAttackActionData,
   isChiCard,
   meldSideHasType,
   scriptOf,
@@ -27,7 +29,6 @@ import {
   defenderSelectionError,
   legalDefenderCards,
 } from "./defense.js";
-import { defenseReactionRestriction } from "./reactions.js";
 import {
   attackHasDominate,
   attackMaxNonBlockDefenders,
@@ -35,7 +36,7 @@ import {
   grantsAuraAttackMarker,
 } from "./combatValues.js";
 import { abilityList } from "./scripts.js";
-import type { ActivatedAbility } from "./scripts.js";
+import type { ActivatedAbility, CardScript } from "./scripts.js";
 import { windowInstantPlays } from "./triggers.js";
 import { TOKEN_SKIP_INTENTS, currentTokenSkip } from "./tokenSkip.js";
 import { controlledPermanents } from "./sourceQueries.js";
@@ -46,7 +47,47 @@ import { resolveVariableAbilityCost, variableResourceChoices } from "./costs.js"
 import { heroAbilitiesDisabled } from "./stateQueries.js";
 import { actionLimitReached, controlsBow, firstAttackExtraCost, isFrozen, opposingInstantsProhibited } from "./ruleQueries.js";
 import { nonAttackActionCardLimitReached, opposingActionsProhibited, ownedCardActionProhibited } from "./restrictions.js";
-import { attackActionPlayRestricted, defendingHeroCannotRespondBelowPower, weaponAttacksProhibited } from "./combatRestrictions.js";
+import { attackActionPlayRestricted, defendingHeroCannotRespondBelowPower, defenseReactionRestriction, weaponAttacksProhibited } from "./combatRestrictions.js";
+
+/** Valid subsets, smallest first, capped for search and the wire; the greedy
+ *  largest set survives the cap. */
+const MAX_CHOICE_SUBSETS = 64;
+function boundedChoiceIntents(
+  state: GameStateInternal,
+  options: readonly string[],
+  minimum: number,
+  maximum: number,
+  distinctCardNames: boolean,
+): GameIntent[] {
+  const names = distinctCardNames
+    ? options.map((option) => {
+        const card = findCardAnywhere(state, Number(option))?.card;
+        return new Set(card ? cardNamesOf(state, card) : []);
+      })
+    : null;
+  const clashes = (a: number, b: number) => names !== null && [...names[a]!].some((name) => names[b]!.has(name));
+  const subsets: number[][] = [];
+  const visit = (start: number, chosen: number[], size: number): void => {
+    if (chosen.length === size) {
+      subsets.push([...chosen]);
+      return;
+    }
+    for (let index = start; index < options.length && subsets.length < MAX_CHOICE_SUBSETS; index++) {
+      if (chosen.some((other) => clashes(index, other))) continue;
+      chosen.push(index);
+      visit(index + 1, chosen, size);
+      chosen.pop();
+    }
+  };
+  for (let size = minimum; size <= maximum && subsets.length < MAX_CHOICE_SUBSETS; size++) visit(0, [], size);
+  const greedy: number[] = [];
+  for (let index = 0; index < options.length && greedy.length < maximum; index++) {
+    if (!greedy.some((other) => clashes(index, other))) greedy.push(index);
+  }
+  const greedyKey = greedy.join(",");
+  if (greedy.length >= minimum && !subsets.some((subset) => subset.join(",") === greedyKey)) subsets.push(greedy);
+  return subsets.map((subset) => ({ kind: "choose-many", optionIds: subset.map((index) => options[index]!) }));
+}
 
 function filterOwnedCardActions(
   state: GameStateInternal,
@@ -362,6 +403,15 @@ function markInstantPlayMethod(
   ));
 }
 
+/** A variable declaration or scripted additional cost can pause before the
+ * card becomes a stack layer. The hint is deliberately conservative:
+ * synchronous additional costs merely skip an optimistic animation. */
+function withPreStackPresentation(script: CardScript | undefined, intents: GameIntent[]): GameIntent[] {
+  return script?.variablePlayCost || script?.declareAdditionalCost || script?.additionalCost
+    ? intents.map((intent) => ({ ...intent, deferPlayPresentation: true as const }))
+    : intents;
+}
+
 function playIntentsForCard(
   state: GameStateInternal,
   runtime: EngineRuntime,
@@ -393,12 +443,7 @@ function playIntentsForCard(
   // Heartened Cross Strap, ...); Meld "both" doubles the base cost first
   const isAttackAction = data.cardType === "action" && (data.subtypes ?? []).includes("attack");
   const withPlayMethods = (intents: GameIntent[]): GameIntent[] => {
-    // A variable declaration or scripted additional cost can pause before the
-    // card becomes a stack layer. The hint is deliberately conservative:
-    // synchronous additional costs merely skip an optimistic animation.
-    const presented = script?.variablePlayCost || script?.declareAdditionalCost || script?.additionalCost
-      ? intents.map((intent) => ({ ...intent, deferPlayPresentation: true as const }))
-      : intents;
+    const presented = withPreStackPresentation(script, intents);
     if (data.cardType === "instant") return presented;
     if (!canPlayAsInstant(state, runtime, player.seat, card, undefined, from)) return presented;
     const instantIntents = presented.flatMap((intent): GameIntent[] => {
@@ -974,11 +1019,13 @@ function reactionIntents(
       const cardTargets: Array<number | undefined> = script?.playTargetOptions
         ? playTargetOptions(state, runtime, player.seat, card, link, fromArsenal)
         : [undefined];
+      const allyTargets = isAttackActionData(data) ? attackTargets(state, runtime, player) : [undefined];
       const markInstantMethod = (candidates: GameIntent[]): GameIntent[] =>
         markInstantPlayMethod(candidates, data.cardType === "action" && asInstant);
+      const firstCardIntent = intents.length;
       for (const meldSide of meldSides) {
-        for (const targetCardInstanceId of cardTargets) {
-          const regularIntents = markInstantMethod(playIntentsWithPitches(
+        for (const targetAllyId of allyTargets) for (const targetCardInstanceId of cardTargets) {
+          const regularIntents = announceAttackTarget(markInstantMethod(playIntentsWithPitches(
             state,
             player,
             card,
@@ -991,6 +1038,7 @@ function reactionIntents(
                 : {}),
               meldSide,
               targetCardInstanceId,
+              targetAllyId,
             }),
             meldSide,
             undefined,
@@ -998,7 +1046,7 @@ function reactionIntents(
             undefined,
             targetCardInstanceId,
             includeUnaffordable,
-          ));
+          )), targetAllyId);
           if (script?.variablePlayCost) {
             const first = regularIntents[0];
             if (first && (
@@ -1010,7 +1058,7 @@ function reactionIntents(
             intents.push(...regularIntents);
           }
           for (const alternativeCostCardInstanceIds of alternativeCosts) {
-            intents.push(...markInstantMethod(playIntentsWithPitches(
+            intents.push(...announceAttackTarget(markInstantMethod(playIntentsWithPitches(
               state,
               player,
               card,
@@ -1020,6 +1068,7 @@ function reactionIntents(
                 meldSide,
                 alternativeCost: true,
                 targetCardInstanceId,
+                targetAllyId,
               }),
               meldSide,
               undefined,
@@ -1027,10 +1076,11 @@ function reactionIntents(
               alternativeCostCardInstanceIds,
               targetCardInstanceId,
               includeUnaffordable,
-            )));
+            )), targetAllyId));
           }
         }
       }
+      intents.push(...withPreStackPresentation(script, intents.splice(firstCardIntent)));
     }
   }
   // "Attack Reaction" / "Instant" abilities of permanents (Breaking Scales,
@@ -1361,10 +1411,13 @@ function enumerateIntents(
           pd.maximumSelections !== undefined
         ) {
           return [
-            {
-              kind: "choose-many",
-              optionIds: (pd.options ?? []).slice(0, pd.minimumSelections),
-            },
+            ...boundedChoiceIntents(
+              state,
+              pd.options ?? [],
+              pd.minimumSelections,
+              pd.maximumSelections,
+              pd.distinctCardNames === true,
+            ),
             ...intents,
           ];
         }
@@ -1428,9 +1481,12 @@ function enumerateIntents(
           const cardTargets: Array<number | undefined> = script?.playTargetOptions
             ? playTargetOptions(state, runtime, seat, card, currentLink(state), fromArsenal)
             : [undefined];
+          const allyTargets = isAttackActionData(instanceDataOf(state, card))
+            ? attackTargets(state, runtime, player)
+            : [undefined];
           for (const meldSide of meldSides) {
-            for (const targetCardInstanceId of cardTargets) {
-              const regularIntents = markInstantMethod(playIntentsWithPitches(
+            for (const targetAllyId of allyTargets) for (const targetCardInstanceId of cardTargets) {
+              const regularIntents = announceAttackTarget(markInstantMethod(playIntentsWithPitches(
                 state,
                 player,
                 card,
@@ -1443,6 +1499,7 @@ function enumerateIntents(
                     : {}),
                   meldSide,
                   targetCardInstanceId,
+                  targetAllyId,
                   perCardReduction: cardPlayReductionForSeat(card, seat),
                 }),
                 meldSide,
@@ -1451,7 +1508,7 @@ function enumerateIntents(
                 undefined,
                 targetCardInstanceId,
                 includeUnaffordable,
-              ));
+              )), targetAllyId);
               if (script?.variablePlayCost) {
                 const first = regularIntents[0];
                 if (first && (
@@ -1463,7 +1520,7 @@ function enumerateIntents(
                 intentsOut.push(...regularIntents);
               }
               for (const alternativeCostCardInstanceIds of alternativeCosts) {
-                intentsOut.push(...markInstantMethod(playIntentsWithPitches(
+                intentsOut.push(...announceAttackTarget(markInstantMethod(playIntentsWithPitches(
                   state,
                   player,
                   card,
@@ -1473,6 +1530,7 @@ function enumerateIntents(
                     meldSide,
                     alternativeCost: true,
                     targetCardInstanceId,
+                    targetAllyId,
                     perCardReduction: cardPlayReductionForSeat(card, seat),
                   }),
                   meldSide,
@@ -1481,7 +1539,7 @@ function enumerateIntents(
                   alternativeCostCardInstanceIds,
                   targetCardInstanceId,
                   includeUnaffordable,
-                )));
+                )), targetAllyId));
               }
             }
           }

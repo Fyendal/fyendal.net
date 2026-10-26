@@ -9,7 +9,7 @@ import {
   dataOf,
   scriptOf,
 } from "./cardProperties.js";
-import { basePowerOf } from "./combatValues.js";
+import { basePowerOf, computeAttack, currentPowerOf } from "./combatValues.js";
 import {
   cardCeasesToExistLogMessage,
   cardDestroyedLogMessage,
@@ -28,6 +28,7 @@ import {
   currentLink,
   findPermanent,
   removeFromArray,
+  severDefendingEquipment,
 } from "./zoneQueries.js";
 import { controlledPermanents, hookSources } from "./sourceQueries.js";
 import { snapshotSerializable } from "./ruleQueries.js";
@@ -142,7 +143,15 @@ function enterGraveyard(
   owner.flags.graveThisTurn = true;
   const d = dataOf(state, card.cardId);
   for (const name of cardNameKeysOf(state, card)) owner.flags[`graveName:${name}`] = true;
-  owner.flags[`graveCardType:${d.cardType.toLowerCase()}`] = true;
+  // CR 3.0.7a: a meld card moving from the stack has only its declared side(s).
+  const meld = from === "stack" && card.meldSide ? scriptOf(state, card.cardId, card)?.meld : undefined;
+  const movedTypes = meld
+    ? [
+        ...(card.meldSide !== "right" ? [meld.leftCardType] : []),
+        ...(card.meldSide !== "left" ? [meld.rightCardType] : []),
+      ]
+    : [d.cardType];
+  for (const type of movedTypes) owner.flags[`graveCardType:${type.toLowerCase()}`] = true;
   for (const s of d.subtypes ?? []) {
     owner.flags[`graveSubtype:${s.toLowerCase()}`] = true;
   }
@@ -274,11 +283,24 @@ export function fireLeaveArena(
   }
   // A non-permanent defending card's own abilities are non-functional
   // (CR 1.7.4a), so an aura that defended runs no permanent leave hook.
-  if (combatRole === "defending") return;
-  scriptOf(state, card.cardId, card)?.onLeaveArena?.(
-    runtime.makeCtx(state, seat, card, currentLink(state), undefined, undefined, asActivationCost),
-    to,
-  );
+  if (combatRole !== "defending") {
+    scriptOf(state, card.cardId, card)?.onLeaveArena?.(
+      runtime.makeCtx(state, seat, card, currentLink(state), undefined, undefined, asActivationCost),
+      to,
+    );
+  }
+  // A top-card that becomes a sub-card (transform, soul) keeps its sub-cards
+  // (CR 3.0.14c, 3.11.5); any other exit clears them (CR 3.0.14e).
+  if (to !== "subcard" && to !== "soul") clearSubcards(state, runtime, card);
+}
+
+function clearSubcards(state: GameStateInternal, runtime: EngineRuntime, card: CardInstance): void {
+  const subcards = card.subcards ?? [];
+  delete card.subcards;
+  for (const subcard of subcards) {
+    clearSubcards(state, runtime, subcard);
+    moveToGraveyard(state, runtime, subcard, "under");
+  }
 }
 
 /** A non-permanent attacking or defending card leaving the combat chain leaves
@@ -362,21 +384,17 @@ function removePermanentFromArena(
   removeFromArray(p.board, card.instanceId);
   // weapons are permanents too (self-destroying daggers, "destroy target weapon")
   removeFromArray(p.weapons, card.instanceId);
-  // Equipment remains represented in its arena slot while it defends. If it
-  // is destroyed before combat damage, remove that separate chain copy at
-  // once so it no longer contributes defense or settles a second time when
-  // the combat chain closes.
-  for (const link of state.chain) {
-    if (removeFromArray(link.defendingEquipment, card.instanceId)) {
-      link.flags[`equipmentGone:${card.instanceId}`] = true;
-    }
-  }
+  severDefendingEquipment(state, card.instanceId);
   return sourceKind;
 }
 
 export function destroyPermanent(state: GameStateInternal,
   runtime: EngineRuntime, seat: number, card: CardInstance): boolean {
-  const controllerSeat = findPermanent(state, card.instanceId)?.seat ?? seat;
+  // Only a live arena object can be destroyed; moving anything else (a stale
+  // chain copy, a card retained under an Evo) would duplicate it.
+  const permanent = findPermanent(state, card.instanceId);
+  if (!permanent) return false;
+  const controllerSeat = permanent.seat;
   if (seat !== controllerSeat) {
     const protectedBy = hookSources(state, controllerSeat, {
       board: true,
@@ -615,6 +633,25 @@ function findAndRemoveCard(
   return undefined;
 }
 
+/** CR 3.0.7a: a card leaving the combat chain moves with its power there. */
+function powerAtOrigin(
+  state: GameStateInternal,
+  runtime: EngineRuntime,
+  card: CardInstance,
+  from: string,
+): number {
+  if (from === "chain") {
+    const attacking = state.chain.find((link) =>
+      link.flags.attackGone !== true && link.attackingCard.instanceId === card.instanceId);
+    // Chain-link modifiers expire at resolution; a resolved link keeps its snapshot.
+    if (attacking) return attacking.finalAttack ?? computeAttack(state, runtime, attacking);
+    const defending = state.chain.find((link) =>
+      link.defendingCards.some((candidate) => candidate.instanceId === card.instanceId));
+    if (defending) return currentPowerOf(state, runtime, card, defending);
+  }
+  return basePowerOf(state, runtime, card.owner, card, dataOf(state, card.cardId).attack ?? 0);
+}
+
 /** Put an already removed card into its owner's banished zone and record all
  * public, per-turn, and observer consequences of the move. */
 export function enterBanish(
@@ -626,6 +663,7 @@ export function enterBanish(
 ): void {
   const owner = state.players[card.owner] as PlayerState;
   const causedBy = state.players[causedBySeat] as PlayerState | undefined;
+  const power = powerAtOrigin(state, runtime, card, from);
   // A card in banish is a new object (CR 3.0.9), so arena-only tap state and
   // effects on its previous object must not follow it or survive a later
   // play from this zone.
@@ -662,7 +700,7 @@ export function enterBanish(
     causedBy.flags.banishedBloodDebtThisTurn = true;
   }
   owner.flags.banishedThisTurn = (Number(owner.flags.banishedThisTurn) || 0) + 1;
-  if (basePowerOf(state, runtime, owner.seat, card, dataOf(state, card.cardId).attack ?? 0) >= 6) {
+  if (power >= 6) {
     owner.flags.banishedSixPlusThisTurn = true;
   }
   // Observers historically see ordinary cards already present in banish.

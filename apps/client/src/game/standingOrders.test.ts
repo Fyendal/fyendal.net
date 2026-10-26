@@ -1,16 +1,15 @@
 import { describe, expect, it } from "vitest";
-import type { GameView, PlayerView } from "@fyendal/shared";
+import type { CardView, GameView, PlayerView, TurnTriggerView } from "@fyendal/shared";
 import {
-  activeOrderValues,
-  currentStandingOrderQuestion,
+  activeOrderMessages,
   standingOrderCardModels,
   standingOrderKey,
-  type ObservedStandingOrderQuestion,
 } from "./standingOrders.js";
 
 const FEALTY_SFA = "SFA037";
 const FEALTY_HNT = "HNT167";
 const DYNAMO = "MON107";
+const COG = "SEA042";
 
 function player(seat: number, overrides: Partial<PlayerView> = {}): PlayerView {
   return {
@@ -65,30 +64,53 @@ function view(overrides: Partial<GameView> = {}): GameView {
   };
 }
 
-function fealtyWindow(instanceId: number, seat: number, player: number): GameView {
-  return view({
-    stack: [{
-      card: { instanceId, cardId: instanceId === 12 ? FEALTY_HNT : FEALTY_SFA, owner: seat },
-      seat,
-      label: "Destroy Fealty",
-      labelMessage: { id: "engine.term.card.destroy", values: { card: { kind: "card", cardId: FEALTY_SFA } } },
-      optional: false,
-    }],
-    pendingDecision: { player, kind: "priority-window", prompt: "Respond?" },
-  });
-}
+const YES_NO = {
+  hook: "trigger-choice",
+  options: [
+    { value: "yes", message: { id: "common.option.yes" } },
+    { value: "no", message: { id: "common.option.no" } },
+  ],
+};
 
-function dynamoChoice(player: number): GameView {
+const dynamoTrigger: TurnTriggerView = {
+  event: "end-of-turn",
+  label: "Recover Valiant Dynamo",
+  labelMessage: { id: "card.trigger.common.valiantdynamo.recover" },
+  optional: true,
+  choices: [YES_NO],
+};
+
+const cogTrigger: TurnTriggerView = {
+  event: "start-of-turn",
+  label: "Remove a steam counter or destroy this",
+  labelMessage: { id: "card.trigger.steam.maintain" },
+  choices: [{
+    hook: "sea-cog-maintenance",
+    options: [
+      { value: "remove", message: { id: "common.option.remove" } },
+      { value: "destroy", message: { id: "common.option.destroy" } },
+    ],
+  }],
+};
+
+const fealtyTrigger: TurnTriggerView = { event: "end-of-turn", label: "Destroy Fealty" };
+
+function withTriggers(): GameView {
+  const dynamo: CardView = { instanceId: 13, cardId: DYNAMO, owner: 0, turnTriggers: [dynamoTrigger] };
   return view({
-    pendingDecision: {
-      player,
-      kind: "optional-effect",
-      prompt: "Valiant Dynamo: Recover Valiant Dynamo",
-      promptMessage: { id: "card.trigger.common.valiantdynamo.recover" },
-      options: ["yes", "no"],
-      defaultOption: "yes",
-      sourceInstanceId: 13,
-    },
+    players: [
+      player(0, {
+        board: [
+          { instanceId: 11, cardId: FEALTY_SFA, owner: 0, turnTriggers: [fealtyTrigger] },
+          { instanceId: 14, cardId: COG, owner: 0, turnTriggers: [cogTrigger] },
+        ],
+        equipment: { chest: dynamo },
+      }),
+      player(1, {
+        board: [{ instanceId: 24, cardId: COG, owner: 1, turnTriggers: [cogTrigger] }],
+        equipment: { chest: { ...dynamo, instanceId: 23, owner: 1 } },
+      }),
+    ],
   });
 }
 
@@ -101,174 +123,50 @@ describe("standing order keys", () => {
   });
 });
 
-describe("currentStandingOrderQuestion", () => {
-  it("finds the viewer's priority window on a Fealty trigger from either seat", () => {
-    expect(currentStandingOrderQuestion(fealtyWindow(11, 0, 0), 0)).toMatchObject({
-      kind: "priority-window",
-      key: "fealty|0",
-      card: { instanceId: 11 },
-      label: { id: "engine.term.card.destroy" },
-    });
-    expect(currentStandingOrderQuestion(fealtyWindow(21, 1, 0), 0)).toMatchObject({
-      kind: "priority-window",
-      key: "fealty|0",
-      card: { instanceId: 21 },
-    });
-  });
-
-  it("is not a question when the window belongs to the other seat", () => {
-    expect(currentStandingOrderQuestion(fealtyWindow(11, 0, 1), 0)).toBeNull();
-  });
-
-  it("ignores windows whose top layer is not an arena permanent", () => {
-    const played = view({
-      stack: [{ card: { instanceId: 77, cardId: "WTR160", owner: 0 }, seat: 0, label: "Played card", optional: false }],
-      pendingDecision: { player: 0, kind: "priority-window", prompt: "Respond?" },
-    });
-    expect(currentStandingOrderQuestion(played, 0)).toBeNull();
-  });
-
-  it("finds the viewer's own optional trigger choice by its source", () => {
-    expect(currentStandingOrderQuestion(dynamoChoice(0), 0)).toMatchObject({
-      kind: "optional-trigger",
-      key: "valiant dynamo|0",
-      card: { instanceId: 13 },
-      label: { id: "card.trigger.common.valiantdynamo.recover" },
-    });
-  });
-
-  it("never treats the opponent's choice, a non yes/no choice, or an unsourced choice as a question", () => {
-    expect(currentStandingOrderQuestion(dynamoChoice(1), 0)).toBeNull();
-    expect(currentStandingOrderQuestion(dynamoChoice(1), 1)).toBeNull();
-    const choice = dynamoChoice(0);
-    expect(currentStandingOrderQuestion(view({
-      pendingDecision: { ...choice.pendingDecision!, options: ["yes", "no", "later"] },
-    }), 0)).toBeNull();
-    expect(currentStandingOrderQuestion(view({
-      pendingDecision: { ...choice.pendingDecision!, sourceInstanceId: undefined },
-    }), 0)).toBeNull();
-  });
-});
-
 describe("standingOrderCardModels", () => {
-  const observed = new Map<string, ObservedStandingOrderQuestion[]>([
-    ["fealty|0", [{ kind: "priority-window", label: null, fallback: "Destroy Fealty" }]],
-    ["valiant dynamo|0", [
-      { kind: "priority-window", label: null, fallback: "Recover Valiant Dynamo" },
-      { kind: "optional-trigger", label: { id: "card.trigger.common.valiantdynamo.recover" }, fallback: "Recover" },
-    ]],
-  ]);
-
-  it("gives a chip to every card with a seen or remembered question, once per identity", () => {
-    const models = standingOrderCardModels(view(), 0, {}, observed);
-    expect([...models.keys()]).toEqual(["valiant dynamo|0", "fealty|0"]);
-    expect(models.get("fealty|0")?.rows).toEqual([
-      { kind: "priority-window", timing: null, label: null, fallback: "Destroy Fealty", order: "ask" },
-    ]);
-    expect(models.get("valiant dynamo|0")?.rows.map((row) => row.kind)).toEqual(["optional-trigger"]);
-  });
-
-  it("builds rows from remembered orders when nothing was seen this game", () => {
-    const models = standingOrderCardModels(view(), 0, { "fealty|0": { priorityWindow: "pass" } }, new Map());
-    expect(models.get("fealty|0")?.rows).toEqual([
-      { kind: "priority-window", timing: null, label: null, fallback: null, order: "pass" },
-    ]);
-    expect(models.has("valiant dynamo|0")).toBe(false);
-  });
-
-  it("offers rows for printed turn triggers before they first fire", () => {
-    const printed = view({
-      players: [
-        player(0, {
-          equipment: {
-            chest: {
-              instanceId: 13,
-              cardId: DYNAMO,
-              owner: 0,
-              turnTriggers: [{
-                event: "end-of-turn",
-                label: "Recover Valiant Dynamo",
-                labelMessage: { id: "card.trigger.common.valiantdynamo.recover" },
-                optional: true,
-              }],
-            },
-          },
-        }),
-        player(1),
-      ],
-    });
-    expect(standingOrderCardModels(printed, 0, {}, new Map()).get("valiant dynamo|0")?.rows).toEqual([
-      {
-        kind: "optional-trigger",
-        timing: "end-of-turn",
-        label: { id: "card.trigger.common.valiantdynamo.recover" },
-        fallback: "Recover Valiant Dynamo",
-        order: "ask",
-      },
+  it("offers a row for every declared turn-trigger choice before it first fires", () => {
+    const models = standingOrderCardModels(withTriggers(), 0, {});
+    expect([...models.keys()]).toEqual(["valiant dynamo|0", "golden cog|0"]);
+    expect(models.get("valiant dynamo|0")?.rows).toEqual([{
+      hook: "trigger-choice",
+      timing: "end-of-turn",
+      label: { id: "card.trigger.common.valiantdynamo.recover" },
+      fallback: "Recover Valiant Dynamo",
+      options: YES_NO.options,
+      order: null,
+    }]);
+    expect(models.get("golden cog|0")?.rows).toMatchObject([
+      { hook: "sea-cog-maintenance", timing: "start-of-turn", order: null },
     ]);
   });
 
-  it("gives no chip to a mandatory printed trigger until it asks to be ordered", () => {
-    const mandatory = view({
-      players: [
-        player(0, {
-          equipment: {
-            chest: {
-              instanceId: 13,
-              cardId: DYNAMO,
-              owner: 0,
-              turnTriggers: [{ event: "end-of-turn", label: "Gain a Might token" }],
-            },
-          },
-        }),
-        player(1),
-      ],
-    });
-    expect(standingOrderCardModels(mandatory, 0, {}, new Map()).has("valiant dynamo|0")).toBe(false);
+  it("gives no chip to a mandatory trigger without a choice", () => {
+    expect(standingOrderCardModels(withTriggers(), 0, {}).has("fealty|0")).toBe(false);
   });
 
-  it("shows only priority windows on the opponent's permanents", () => {
-    const opponentDynamo = view({
-      players: [
-        player(0),
-        player(1, { equipment: { chest: { instanceId: 23, cardId: DYNAMO, owner: 1 } } }),
-      ],
-    });
-    const models = standingOrderCardModels(opponentDynamo, 0, {
-      "valiant dynamo|0": { priorityWindow: "pass", optionalTrigger: "yes" },
-    }, new Map());
-    expect(models.get("valiant dynamo|0")?.rows.map((row) => row.kind)).toEqual(["priority-window"]);
+  it("never offers rows on the opponent's permanents, even with stored orders", () => {
+    const opponentOnly = withTriggers();
+    opponentOnly.players[0] = player(0);
+    expect(standingOrderCardModels(opponentOnly, 0, {
+      "golden cog|0": { "sea-cog-maintenance": "remove" },
+    }).size).toBe(0);
   });
 
-  it("gives no chip to the opponent's turn-structure triggers", () => {
-    const opponentDynamo = view({
-      players: [
-        player(0),
-        player(1, {
-          equipment: {
-            chest: {
-              instanceId: 23,
-              cardId: DYNAMO,
-              owner: 1,
-              turnTriggers: [{ event: "end-of-turn", label: "Recover Valiant Dynamo", optional: true }],
-            },
-          },
-        }),
-      ],
+  it("reads stored answers by hook and ignores values the choice does not offer", () => {
+    const models = standingOrderCardModels(withTriggers(), 0, {
+      "golden cog|0": { "sea-cog-maintenance": "remove" },
+      "valiant dynamo|0": { "trigger-choice": "later" },
     });
-    const orders = { "valiant dynamo|0": { priorityWindow: "pass" as const } };
-    expect(standingOrderCardModels(opponentDynamo, 0, orders, new Map()).size).toBe(0);
-    const observed = new Map([["valiant dynamo|0", [
-      { kind: "priority-window" as const, label: null, fallback: "Some other trigger" },
-    ]]]);
-    expect(standingOrderCardModels(opponentDynamo, 0, orders, observed).get("valiant dynamo|0")?.rows)
-      .toHaveLength(1);
+    expect(models.get("golden cog|0")?.rows[0]?.order).toBe("remove");
+    expect(models.get("valiant dynamo|0")?.rows[0]?.order).toBeNull();
   });
 
-  it("lists the set orders for the chip text", () => {
-    expect(activeOrderValues([
-      { kind: "priority-window", timing: null, label: null, fallback: null, order: "pass" },
-      { kind: "optional-trigger", timing: null, label: null, fallback: null, order: "ask" },
-    ])).toEqual(["pass"]);
+  it("lists the set orders' option labels for the chip", () => {
+    const rows = standingOrderCardModels(withTriggers(), 0, {
+      "golden cog|0": { "sea-cog-maintenance": "destroy" },
+    }).get("golden cog|0")!.rows;
+    expect(activeOrderMessages(rows)).toEqual([{ id: "common.option.destroy" }]);
+    expect(activeOrderMessages(standingOrderCardModels(withTriggers(), 0, {}).get("golden cog|0")!.rows))
+      .toEqual([]);
   });
 });
