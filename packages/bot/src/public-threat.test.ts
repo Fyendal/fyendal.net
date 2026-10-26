@@ -15,6 +15,7 @@ const CONCEALED_OBJECT = "SLY031";
 const AMETHYST_AMULET = "SEA189";
 const FLICK_KNIVES = "OUT139";
 const DAGGER = "AAC002";
+const SPARK_SPRAY = "AST015";
 
 let nextId = 70_000;
 
@@ -122,6 +123,20 @@ describe("public combat threat", () => {
     expect(publicCombatThreat(pitched).attackBonus).toBe(2);
     const empty = threatFixture({ attacking: card(VOLTIC_IMPACT) });
     expect(publicCombatThreat(empty).attackBonus).toBe(0);
+  });
+
+  it("counts Spark Spray's paid pump only for a block that defends it", () => {
+    const input = threatFixture({ attacking: card(SPARK_SPRAY), resources: 1 });
+    expect(publicCombatThreat(input).attackBonus).toBe(0);
+    expect(publicCombatThreat(input, true).attackBonus).toBe(1);
+    const broke = threatFixture({ attacking: card(SPARK_SPRAY) });
+    expect(publicCombatThreat(broke, true).attackBonus).toBe(0);
+    const defended = threatFixture({
+      attacking: card(SPARK_SPRAY),
+      resources: 1,
+      link: { defendingCards: [card(DAGGER)] },
+    });
+    expect(publicCombatThreat(defended, true).attackBonus).toBe(0);
   });
 
   it("counts an unused Flick Knives with a dagger off the active chain link", () => {

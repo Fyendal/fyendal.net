@@ -30,22 +30,25 @@ const MAX_UNITS_PER_ABILITY = 6;
 
 const cache = new WeakMap<object, PublicCombatThreat[]>();
 
-/** Worst-case public follow-up to the current opposing attack. */
-export function publicCombatThreat(input: BotPolicyInput): PublicCombatThreat {
-  const cached = cache.get(input.view)?.[input.seat];
+/** Worst-case public follow-up to the current opposing attack. `defended`
+ * adds the attack's own paid "when this is defended" pumps (Spark Spray),
+ * which only a block that defends a not-yet-defended attack triggers. */
+export function publicCombatThreat(input: BotPolicyInput, defended = false): PublicCombatThreat {
+  const key = input.seat * 2 + Number(defended);
+  const cached = cache.get(input.view)?.[key];
   if (cached) return cached;
-  const threat = computeThreat(input);
+  const threat = computeThreat(input, defended);
   const entry = cache.get(input.view) ?? [];
-  entry[input.seat] = threat;
+  entry[key] = threat;
   cache.set(input.view, entry);
   return threat;
 }
 
 /** Combat damage the current opposing attack deals before new blocks once the
  * attacker spends every public pump. */
-export function threatenedCombatDamage(input: BotPolicyInput): number {
+export function threatenedCombatDamage(input: BotPolicyInput, defended = false): number {
   const link = opposingLink(input);
-  return link ? pumpedDamage(link, publicCombatThreat(input).attackBonus) : 0;
+  return link ? pumpedDamage(link, publicCombatThreat(input, defended).attackBonus) : 0;
 }
 
 /** Combat damage plus public direct damage the current opposing attack can
@@ -218,6 +221,13 @@ function arsenalUnits(context: Context, card: CardView): Unit[] {
   return [{ gain, direct: false, resources: Math.max(0, data.cost ?? 0), pools: [] }];
 }
 
+/** Spark Spray, the only attack that pays for power when defended. */
+function defendedUnits(context: Context): Unit[] {
+  if (context.link.defendingCards.length > 0) return [];
+  if (context.input.cards[context.link.attackingCard.cardId]?.name !== "Spark Spray") return [];
+  return [{ gain: 1, direct: false, resources: 1, pools: [] }];
+}
+
 function resourceBudget(input: BotPolicyInput, attacker: PlayerView): number {
   const counts = unseenCounts(input, "opponent");
   let maxPitch = counts ? 0 : DEFAULT_MAX_PITCH;
@@ -243,7 +253,7 @@ function poolSizes(context: Context): Map<string, number> {
   return sizes;
 }
 
-function computeThreat(input: BotPolicyInput): PublicCombatThreat {
+function computeThreat(input: BotPolicyInput, defended: boolean): PublicCombatThreat {
   const link = opposingLink(input);
   if (!link || link.targetAlly || link.targetAllyName) return NO_THREAT;
   const attacker = input.view.players[1 - input.seat]!;
@@ -267,6 +277,7 @@ function computeThreat(input: BotPolicyInput): PublicCombatThreat {
   const units = [
     ...sources.flatMap((source) => abilityUnits(context, source)),
     ...attacker.arsenal.flatMap((card) => arsenalUnits(context, card)),
+    ...(defended ? defendedUnits(context) : []),
   ];
   if (units.length === 0) return NO_THREAT;
 

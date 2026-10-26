@@ -1463,7 +1463,7 @@ export function scoreDefenseIntentWithTrace(
   // Survival is planned against every public pump the attacker can still
   // spend after blocks. Direct damage ignores blocks, so it lowers the life
   // the combat damage must stay under instead.
-  const threatenedCombat = Math.max(incoming, threatenedCombatDamage(input) + pump, 0);
+  const threatenedCombat = Math.max(incoming, threatenedCombatDamage(input, chosen.length > 0) + pump, 0);
   const survivableLife = me.life - publicCombatThreat(input).directDamage;
   const lethal = threatenedCombat >= survivableLife;
   if (model.canUseDefender && chosen.some((card) => !model.canUseDefender!(card, input))) {

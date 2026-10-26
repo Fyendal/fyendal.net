@@ -1385,6 +1385,29 @@ describe("public pump lethal", () => {
     expect(usedStage.kind === "stage-defenders" && usedStage.instanceIds).toHaveLength(1);
   });
 
+  it("blocks out Spark Spray's paid pump when it is defended", () => {
+    // 4 power at 2 life: one 3-defense block leaves 1, and paying {r} adds 1.
+    const sparkSpray = (resources: number) => {
+      const fixture = pumpFixture();
+      fixture.input.view.chain[0]!.attackingCard = { instanceId: 95_101, cardId: "AST015", owner: 1 };
+      fixture.input.view.players[1].resources = resources;
+      return fixture;
+    };
+    const funded = sparkSpray(1);
+    const single = scoreDefenseIntentWithTrace(
+      { kind: "defend", instanceIds: [funded.held[0]!.instanceId] },
+      funded.input,
+      funded.own,
+      funded.model,
+    );
+    expect(single.survives).toBe(false);
+    const staged = stagedBlock(funded);
+    expect(staged.kind === "stage-defenders" && [...staged.instanceIds].sort()).toEqual(allIds(funded));
+
+    const broke = stagedBlock(sparkSpray(0));
+    expect(broke.kind === "stage-defenders" && broke.instanceIds).toHaveLength(1);
+  });
+
   it("plans defense reactions against the pumped total", () => {
     const fixture = pumpFixture({ cogs: 2 });
     for (const id of ["FIRST_BLOCKER", "SECOND_BLOCKER"]) {

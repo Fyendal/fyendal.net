@@ -924,12 +924,12 @@ Object.assign(mpg, {
       const count = single ? 1 : 2;
       ctx.requestCardChoices(
         "backup-pair",
-        single
-          ? decisionPrompt("Call for Backup: choose an attack action card to banish", "card.mpg.backup.banish")
-          : decisionPrompt(
-            "Call for Backup: choose 2 attack action cards with different names",
-            "card.mpg.backup.pair.choose",
-          ),
+        decisionPrompt(
+          single
+            ? "Call for Backup: choose an attack action card to banish"
+            : "Call for Backup: choose 2 attack action cards with different names",
+          single ? "card.mpg.backup.banish" : "card.mpg.backup.pair.choose",
+        ),
         attacks.map((card) => card.instanceId),
         count,
         count,
