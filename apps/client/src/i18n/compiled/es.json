@@ -28023,6 +28023,18 @@
       "value": "Boca arriba"
     }
   ],
+  "game.card.badge.frozen": [
+    {
+      "type": 0,
+      "value": "Frozen"
+    }
+  ],
+  "game.card.badge.frozen.detail": [
+    {
+      "type": 0,
+      "value": "No se puede jugar ni activar"
+    }
+  ],
   "game.card.badge.fused": [
     {
       "type": 0,

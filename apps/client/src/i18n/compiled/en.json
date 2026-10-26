@@ -27129,6 +27129,18 @@
       "value": "Face up"
     }
   ],
+  "game.card.badge.frozen": [
+    {
+      "type": 0,
+      "value": "Frozen"
+    }
+  ],
+  "game.card.badge.frozen.detail": [
+    {
+      "type": 0,
+      "value": "Can't be played or activated"
+    }
+  ],
   "game.card.badge.fused": [
     {
       "type": 0,

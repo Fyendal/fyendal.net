@@ -2246,6 +2246,8 @@
   "game.card.badge.faceup": "Face up",
   "game.card.badge.intimidated": "Intimidated",
   "game.card.badge.intimidated.detail": "Returns to hand at the beginning of the end phase",
+  "game.card.badge.frozen": "Frozen",
+  "game.card.badge.frozen.detail": "Can't be played or activated",
   "game.card.badge.wagered": "Wagered",
   "game.card.badge.life": "{count} life",
   "game.card.badge.life.detail": "Resets during the end phase",

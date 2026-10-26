@@ -661,6 +661,19 @@ describe("CardFace counter icons", () => {
     expect(html).not.toContain("1 storm</div>");
   });
 
+  it("renders bind counters over their icon and frozen cards with the frozen icon", () => {
+    const html = renderToStaticMarkup(createElement(CardFace, {
+      card: { instanceId: 54, cardId: "ELE111", owner: 0, counters: { bind: 2 }, frozen: true },
+    }));
+
+    expect(html).toContain("/icons/bind.png");
+    expect(html).toContain("2 bind counters");
+    expect(html).toContain("card-counter-54-bindc");
+    expect(html).not.toContain("2 bind</div>");
+    expect(html).toContain('class="c-ovl c-frozen"');
+    expect(html).toContain("/icons/frozen.svg");
+  });
+
   it("renders Holo as a binary icon without a number", () => {
     const html = renderToStaticMarkup(createElement(CardFace, {
       card: {

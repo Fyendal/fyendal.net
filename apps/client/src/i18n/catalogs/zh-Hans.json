@@ -2246,6 +2246,8 @@
   "game.card.badge.faceup": "正面朝上",
   "game.card.badge.intimidated": "被 intimidate",
   "game.card.badge.intimidated.detail": "在结束阶段开始时返回手牌",
+  "game.card.badge.frozen": "被冻结",
+  "game.card.badge.frozen.detail": "不能被打出或启动",
   "game.card.badge.wagered": "已进行 wager",
   "game.card.badge.life": "{count} 点生命",
   "game.card.badge.life.detail": "在结束阶段重置",

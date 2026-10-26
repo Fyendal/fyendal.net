@@ -2246,6 +2246,8 @@
   "game.card.badge.faceup": "Virada para cima",
   "game.card.badge.intimidated": "Intimidated",
   "game.card.badge.intimidated.detail": "Volta para a mão no início da end phase",
+  "game.card.badge.frozen": "Frozen",
+  "game.card.badge.frozen.detail": "Não pode ser jogado nem ativado",
   "game.card.badge.wagered": "Wagered",
   "game.card.badge.life": "{count} de vida",
   "game.card.badge.life.detail": "É redefinida durante a end phase",

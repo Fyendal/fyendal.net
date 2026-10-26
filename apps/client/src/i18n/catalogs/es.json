@@ -2246,6 +2246,8 @@
   "game.card.badge.faceup": "Boca arriba",
   "game.card.badge.intimidated": "Intimidated",
   "game.card.badge.intimidated.detail": "Vuelve a la mano al principio de la end phase",
+  "game.card.badge.frozen": "Frozen",
+  "game.card.badge.frozen.detail": "No se puede jugar ni activar",
   "game.card.badge.wagered": "Wagered",
   "game.card.badge.life": "{count} de vida",
   "game.card.badge.life.detail": "Se reinicia durante la end phase",

@@ -44,7 +44,6 @@ export interface CardBadgeContext {
  * not become player-facing labels. */
 const NAMED_COUNTER_KEYS = new Set([
   "balance",
-  "bind",
   "doom",
   "frost",
   "haunt",
@@ -61,6 +60,7 @@ const ICON_COUNTERS = [
   { key: "stain", kind: "stainc", icon: "/icons/stain.png" },
   { key: "storm", kind: "stormc", icon: "/icons/storm.png" },
   { key: "aim", kind: "aimc", icon: "/icons/aim.png" },
+  { key: "bind", kind: "bindc", icon: "/icons/bind.png" },
 ] as const;
 
 function signedCounter(value: number): string {
@@ -120,6 +120,15 @@ export function cardBadges(card: CardView, context: CardBadgeContext = {}): Card
       "Intimidated — returns to hand at the beginning of the end phase",
       "game.card.badge.intimidated",
       "game.card.badge.intimidated.detail",
+    );
+  }
+  if (card.frozen === true) {
+    flag(
+      "frozen",
+      "/icons/frozen.svg",
+      "Frozen — can't be played or activated",
+      "game.card.badge.frozen",
+      "game.card.badge.frozen.detail",
     );
   }
   if (context.wagered) {

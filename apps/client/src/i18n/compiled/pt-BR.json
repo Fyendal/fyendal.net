@@ -28621,6 +28621,18 @@
       "value": "Virada para cima"
     }
   ],
+  "game.card.badge.frozen": [
+    {
+      "type": 0,
+      "value": "Frozen"
+    }
+  ],
+  "game.card.badge.frozen.detail": [
+    {
+      "type": 0,
+      "value": "Não pode ser jogado nem ativado"
+    }
+  ],
   "game.card.badge.fused": [
     {
       "type": 0,

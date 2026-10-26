@@ -26144,6 +26144,18 @@
       "value": "正面朝上"
     }
   ],
+  "game.card.badge.frozen": [
+    {
+      "type": 0,
+      "value": "被冻结"
+    }
+  ],
+  "game.card.badge.frozen.detail": [
+    {
+      "type": 0,
+      "value": "不能被打出或启动"
+    }
+  ],
   "game.card.badge.fused": [
     {
       "type": 0,
