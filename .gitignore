@@ -11,10 +11,7 @@ dist/
 
 packages/bot/src/generated-runtime-id.ts
 apps/server/.manual-room/
-/.agents/
 
-# Local agent config
-/AGENTS.md
-/CLAUDE.md
-/CLAUDE.local.md
-/.claude/
+# Local agent config; CLAUDE.md, AGENTS.md and skills are shared
+/.claude/*
+!/.claude/skills/
