@@ -763,6 +763,8 @@ export function GameBoard() {
   const stagedIds = new Set(stagedDefenders.map((c) => c.instanceId));
   /** live defense total of the staged defenders (0 for the opponent) */
   const stagedDefense = pd?.kind === "defend" ? (pd.stagedDefense ?? 0) : 0;
+  const stagedAttack = pd?.kind === "defend" ? pd.stagedAttack : undefined;
+  const stagedAttackModifiers = pd?.kind === "defend" ? pd.stagedAttackModifiers : undefined;
   /** declarative staging: send the full staged set (the server validates) */
   const stage = (ids: Iterable<number>) =>
     sendIntent({ kind: "stage-defenders", instanceIds: [...ids] });
@@ -1456,6 +1458,8 @@ export function GameBoard() {
         visibility={mobileCombatFloatVisibility}
         staged={stagedDefenders}
         stagedDefense={stagedDefense}
+        stagedAttack={stagedAttack}
+        stagedAttackModifiers={stagedAttackModifiers}
         onUnstage={defending ? unstage : undefined}
         onUnstageAll={defending && stagedIds.size > 0
           ? () => {

@@ -347,6 +347,26 @@ describe("DTD — registration and core mechanics", () => {
     expect(projected(nimblism!.instanceId)).toBe(link.attackValue);
   });
 
+  it("prices a staged hand attack defender into Boltyn's power only for the defender", () => {
+    const s = scenario({
+      seats: [
+        { hero: "rhinar", heroKey: "boltyn|0", hand: ["beaming bravado|3", "banneret of vigor|2"] },
+        { hero: "dorinthea", hand: ["head jab|1"] },
+      ],
+    });
+    s.play("beaming bravado|3").chooseCard("banneret of vigor|2");
+    const attack = projectStateFor(s.state, 0).chain.at(-1)!.attackValue;
+    s.doRaw({ kind: "stage-defenders", instanceIds: [s.state.players[1]!.hand[0]!.instanceId] });
+    const boltynModifier = { sourceCardId: s.state.players[0]!.hero.cardId, amount: 1 };
+    const defender = projectStateFor(s.state, 1).pendingDecision;
+    expect(defender?.stagedAttack).toBe(attack + 1);
+    expect(defender?.stagedAttackModifiers).toContainEqual(boltynModifier);
+    const attacker = projectStateFor(s.state, 0).pendingDecision;
+    expect(attacker?.stagedAttack).toBe(attack);
+    expect(attacker?.stagedAttackModifiers).not.toContainEqual(boltynModifier);
+    expect(projectStateFor(s.state, 0).chain.at(-1)!.attackValue).toBe(attack);
+  });
+
   it("random-banish attacks recognize a six-power card banished for their own cost", () => {
     const s = scenario({
       seats: [

@@ -1536,7 +1536,7 @@ function turnFacts(value: unknown): value is TurnFactsView {
 function pendingDecision(value: unknown): boolean {
   const decision = object(value);
   return !!decision && exactKeys(decision, [
-    "player", "kind", "prompt", "promptMessage", "options", "minimumSelections", "maximumSelections", "distinctCardNames", "defaultOption", "optionLabels", "optionMessages", "chosenOptions", "chosenOptionMessages", "optionCounts", "optionCards", "revealedCards", "lookedCards", "stagedCards", "stagedHandCount", "stagedDefense", "defenderDefense",
+    "player", "kind", "prompt", "promptMessage", "options", "minimumSelections", "maximumSelections", "distinctCardNames", "defaultOption", "optionLabels", "optionMessages", "chosenOptions", "chosenOptionMessages", "optionCounts", "optionCards", "revealedCards", "lookedCards", "stagedCards", "stagedHandCount", "stagedDefense", "stagedAttack", "stagedAttackModifiers", "defenderDefense",
     "resourcePayment", "preStackSource", "optionLayout", "sourceInstanceId",
   ], ["player", "kind", "prompt"])
     && seat(decision.player) && DECISION_KINDS.has(String(decision.kind))
@@ -1564,6 +1564,8 @@ function pendingDecision(value: unknown): boolean {
     && optional(decision.stagedHandCount, (value): value is number =>
       nonNegativeInteger(value) && value <= MAX_CARDS)
     && optional(decision.stagedDefense, finite)
+    && optional(decision.stagedAttack, nonNegativeInteger)
+    && optional(decision.stagedAttackModifiers, combatValueModifiers)
     && optional(decision.defenderDefense, (value): value is DefenderDefenseView[] =>
       array(value, (entry): entry is DefenderDefenseView => {
         const item = object(entry);

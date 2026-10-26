@@ -371,6 +371,8 @@ const gameView = () => ({
     stagedCards: [card],
     stagedHandCount: 1,
     stagedDefense: 3,
+    stagedAttack: 5,
+    stagedAttackModifiers: [{ sourceCardId: "WTR001", amount: 1 }],
   },
   winner: null,
   log: ["started"],

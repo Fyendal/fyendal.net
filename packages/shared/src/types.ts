@@ -580,6 +580,12 @@ export interface PendingDecision {
   /** Combined defense of the staged cards — projected as 0 to anyone but the
    *  defender so face-down hand cards leak nothing before the commit */
   stagedDefense?: number;
+  /** Attack value of the current link with the staged defenders this viewer
+   *  can identify declared beside it; face-down hand or arsenal defenders are
+   *  excluded for everyone but the defender */
+  stagedAttack?: number;
+  /** Attack modifiers of the current link priced with the same staged set */
+  stagedAttackModifiers?: CombatValueModifierView[];
   /** Defend decisions, projected only to the defender: the defense each legal
    *  defender adds to the staged set (for a staged card, the defense unstaging
    *  it removes). Unlike `CardView.defense`, it includes delayed "next time

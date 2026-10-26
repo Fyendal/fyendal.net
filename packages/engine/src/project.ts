@@ -1228,6 +1228,8 @@ function projectState(
             stagedCards: CardView[];
             stagedHandCount: number;
             stagedDefense: number;
+            stagedAttack?: number;
+            stagedAttackModifiers?: CombatValueModifierView[];
           } | undefined;
           const stagedInstances: CardInstance[] = [];
           if (pd.kind === "defend" && pd.staged && pd.staged.length > 0) {
@@ -1235,6 +1237,8 @@ function projectState(
             const mine = revealAll || pd.player === seat;
             const cards: CardView[] = [];
             let stagedHandCount = 0;
+            // Only staged defenders whose identity this viewer knows price the attack.
+            const visibleStaged: CardInstance[] = [];
             for (const id of pd.staged) {
               const hc = defender.hand.find((c) => c.instanceId === id);
               const ac = defender.arsenal.find((c) => c.instanceId === id);
@@ -1246,16 +1250,29 @@ function projectState(
               if (!c) continue;
               if (hc) stagedHandCount += 1;
               stagedInstances.push(c);
-              if (mine) {
-                cards.push(cardView(state, runtime, c));
-              } else {
-                const hidden = hc !== undefined || (ac?.faceDown ?? false);
-                cards.push(hidden ? hiddenView(c, -(cards.length + 1)) : cardView(state, runtime, c));
-              }
+              const hidden = !mine && (hc !== undefined || (ac?.faceDown ?? false));
+              cards.push(hidden ? hiddenView(c, -(cards.length + 1)) : cardView(state, runtime, c));
+              if (!hidden) visibleStaged.push(c);
             }
             const link = currentLink(state);
             const total = mine && link ? stagedDefenseTotal(state, runtime, link, stagedInstances) : 0;
-            staged = { stagedCards: cards, stagedHandCount, stagedDefense: mine ? total : 0 };
+            const stagedLink = link ? linkWithStagedDefenders(state, link, visibleStaged) : undefined;
+            staged = {
+              stagedCards: cards,
+              stagedHandCount,
+              stagedDefense: mine ? total : 0,
+              ...(stagedLink
+                ? {
+                    stagedAttack: computeAttack(state, runtime, stagedLink),
+                    stagedAttackModifiers: projectedCombatValueModifiers(
+                      state,
+                      attackValueModifiers(state, runtime, stagedLink),
+                      seat,
+                      revealAll,
+                    ),
+                  }
+                : {}),
+            };
           }
           const defenderDefense = pd.kind === "defend" && (revealAll || pd.player === seat)
             ? projectedDefenderDefense(state, runtime, pd.player, stagedInstances)

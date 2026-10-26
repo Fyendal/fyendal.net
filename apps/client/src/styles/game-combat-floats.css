@@ -935,7 +935,8 @@
 }
 .chain-breakdown {
   position: absolute;
-  z-index: 2;
+  /* above the staged defender's remove cue */
+  z-index: 6;
   top: calc(100% + 8px);
   left: 50%;
   width: min(310px, 72vw);

@@ -164,6 +164,27 @@ describe("DYN — registration and heroes", () => {
     expect(s.state.players[0]!.weapons[0]!.grantedKeywords).toBeUndefined();
   });
 
+  it("prices staged equipment into Piercing for both players", () => {
+    const s = scenario({
+      seats: [
+        { hero: "rhinar", resources: 2, weapons: ["spider's bite|0"] },
+        { hero: "dorinthea", equipment: { head: "ironrot helm|0" } },
+      ],
+    });
+    s.attackWithWeapon("spider's bite|0");
+    const helm = s.state.players[1]!.equipment.head!;
+    s.doRaw({ kind: "stage-defenders", instanceIds: [helm.instanceId] });
+    for (const seat of [0, 1]) {
+      const view = projectStateFor(s.state, seat);
+      expect(view.chain.at(-1)!.attackValue).toBe(1);
+      expect(view.pendingDecision?.stagedAttack).toBe(2);
+      expect(view.pendingDecision?.stagedAttackModifiers).toContainEqual({
+        sourceCardId: s.state.players[0]!.weapons[0]!.cardId,
+        amount: 1,
+      });
+    }
+  });
+
   it("Piercing is a power gain and is suppressed when attacks can't gain power", () => {
     const s = scenario({
       seats: [
