@@ -364,6 +364,9 @@ export function PlayerHalf({
             cards,
             inactiveZone: true,
             showOwnedFaceDownIdentities: mine,
+            usableIds: new Set(cards
+              .map((card) => card.instanceId)
+              .filter((id) => interaction.legal.playableZones.has(id) || interaction.legal.activatable.has(id))),
           })
         : undefined}
     >

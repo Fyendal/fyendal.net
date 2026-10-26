@@ -91,6 +91,23 @@ describe("shared zone overlay sorting", () => {
     expect(html).not.toContain("card-board-square");
   });
 
+  it("highlights only the cards usable from the opened zone", () => {
+    const html = renderToStaticMarkup(
+      <TestI18nProvider>
+        <ZoneOverlay
+          overlay={{ title: "Your Graveyard", cards, inactiveZone: true, usableIds: new Set([2]) }}
+          yourSeat={0}
+          onClose={() => undefined}
+          onInspectCard={() => undefined}
+        />
+      </TestI18nProvider>,
+    );
+
+    const highlighted = [...html.matchAll(/<div class="[^"]*card-highlight[^"]*"[^>]*data-cardid="([^"]+)"/g)]
+      .map((match) => match[1]);
+    expect(highlighted).toEqual(["UNKNOWN-A-1"]);
+  });
+
   it("keeps face-down banished cards full-sized without revealing their identity", () => {
     const html = renderToStaticMarkup(
       <TestI18nProvider>

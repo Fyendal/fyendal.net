@@ -91,6 +91,7 @@ export function ZoneOverlay({
                 card.owner === yourSeat
               }
               revealOwnerIntimidated={yourSeat !== null && card.owner === yourSeat}
+              highlighted={overlay.usableIds?.has(card.instanceId) === true}
             />
           ) : <CardFace key={card.instanceId} card={card} size="zone" squareArt={false} />)}
         </div>

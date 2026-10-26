@@ -588,6 +588,7 @@ export function InactiveZoneCard({
   squareArt,
   showFaceDownIdentity = false,
   revealOwnerIntimidated = false,
+  highlighted = false,
   motionKey,
 }: {
   card: CardView;
@@ -596,6 +597,7 @@ export function InactiveZoneCard({
   /** Privately show a known face-down card while preserving its face-down state visually. */
   showFaceDownIdentity?: boolean;
   revealOwnerIntimidated?: boolean;
+  highlighted?: boolean;
   motionKey?: string;
 }) {
   const showKnownFaceDown = showFaceDownIdentity &&
@@ -614,6 +616,7 @@ export function InactiveZoneCard({
         showOverlays={showOverlays}
         showTapped={false}
         dimmed={showKnownFaceDown}
+        highlighted={highlighted}
         motionKey={motionKey}
       />
     );
@@ -629,6 +632,7 @@ export function InactiveZoneCard({
       squareArt={squareArt}
       showOverlays={showOverlays}
       showTapped={false}
+      highlighted={highlighted}
       motionKey={motionKey}
     />
   );

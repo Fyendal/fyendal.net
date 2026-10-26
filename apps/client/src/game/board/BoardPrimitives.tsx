@@ -6,6 +6,8 @@ export interface BoardOverlay {
   inactiveZone?: boolean;
   /** Allow the owner to inspect known face-down cards in this zone. */
   showOwnedFaceDownIdentities?: boolean;
+  /** Cards the viewer could play or activate from this zone when it was opened. */
+  usableIds?: ReadonlySet<number>;
 }
 
 export function MatZone({
