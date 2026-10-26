@@ -209,9 +209,51 @@ function abilityUnits(context: Context, source: CardView): Unit[] {
   });
 }
 
-/** A face-up arsenal attack reaction that pumps the current attack. */
+interface InstantPump {
+  gain: number;
+  /** Lightning Flow tokens the attacker may destroy instead of paying. */
+  flowAlternative?: boolean;
+  targets(attack: CardData, context: Context): boolean;
+}
+
+const anyAttack = () => true;
+const lightningAttack = (attack: CardData, context: Context) =>
+  hasType(context.link.attackingCard, attack, "lightning");
+const cheapAttackAction = (attack: CardData, context: Context) =>
+  context.attackIsAction && (attack.cost ?? 0) <= 1;
+const heraldAttackAction = (attack: CardData, context: Context) =>
+  context.attackIsAction && /herald/i.test(attack.name);
+
+/** Instants that pump the current attack, keyed `name lowercase|pitch`. */
+const INSTANT_PUMPS: Readonly<Record<string, InstantPump>> = {
+  "lightning press|1": { gain: 3, targets: cheapAttackAction },
+  "lightning press|2": { gain: 2, targets: cheapAttackAction },
+  "lightning press|3": { gain: 1, targets: cheapAttackAction },
+  "flow through|3": { gain: 1, targets: lightningAttack },
+  "stormshard|1": { gain: 3, flowAlternative: true, targets: lightningAttack },
+  // The +4 rider needs a destroyed aura this turn, which the view does not expose.
+  "ominous aggression|1": { gain: 2, targets: (_, context) => context.attackIsAction },
+  "crackle from afar|3": { gain: 1, targets: anyAttack },
+  "the grain that tips the scale|3": { gain: 1, targets: anyAttack },
+  "angelic wrath|1": { gain: 4, targets: heraldAttackAction },
+  "angelic wrath|2": { gain: 3, targets: heraldAttackAction },
+  "angelic wrath|3": { gain: 2, targets: heraldAttackAction },
+};
+
+function instantUnits(context: Context, data: CardData): Unit[] {
+  const pump = INSTANT_PUMPS[`${data.name.toLowerCase()}|${data.pitch ?? 0}`];
+  const attack = context.input.cards[context.link.attackingCard.cardId];
+  if (!pump || !attack || !pump.targets(attack, context)) return [];
+  const flow = pump.flowAlternative && context.permanents.some((card) =>
+    context.input.cards[card.cardId]?.name === "Lightning Flow"
+  );
+  return [{ gain: pump.gain, direct: false, resources: flow ? 0 : Math.max(0, data.cost ?? 0), pools: [] }];
+}
+
+/** A face-up arsenal instant or attack reaction that pumps the current attack. */
 function arsenalUnits(context: Context, card: CardView): Unit[] {
   const data = context.input.cards[card.cardId];
+  if (data?.cardType === "instant") return instantUnits(context, data);
   if (data?.cardType !== "attack-reaction") return [];
   const sentence = (data.text ?? "").toLowerCase().split(/[.\n]/).find((part) =>
     /attack[^.]*\b(?:gets|gains) \+\d+\{p\}/.test(part) && !/next attack|counter/.test(part)

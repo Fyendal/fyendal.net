@@ -16,6 +16,11 @@ const AMETHYST_AMULET = "SEA189";
 const FLICK_KNIVES = "OUT139";
 const DAGGER = "AAC002";
 const SPARK_SPRAY = "AST015";
+const FLOWING_STORMSTRIKE = "AZS009";
+const LIGHTNING_PRESS_RED = "AST021";
+const FLOW_THROUGH = "OMN158";
+const STORMSHARD = "FAB478";
+const LIGHTNING_FLOW = "FAB470";
 
 let nextId = 70_000;
 
@@ -123,6 +128,45 @@ describe("public combat threat", () => {
     expect(publicCombatThreat(pitched).attackBonus).toBe(2);
     const empty = threatFixture({ attacking: card(VOLTIC_IMPACT) });
     expect(publicCombatThreat(empty).attackBonus).toBe(0);
+  });
+
+  it("counts the attack's own twice-per-turn resource pump", () => {
+    const funded = threatFixture({ attacking: card(FLOWING_STORMSTRIKE), resources: 1, handCount: 1 });
+    expect(publicCombatThreat(funded).attackBonus).toBe(2);
+    const once = threatFixture({
+      attacking: card(FLOWING_STORMSTRIKE, { remainingAbilityActivations: [1] }),
+      handCount: 2,
+    });
+    expect(publicCombatThreat(once).attackBonus).toBe(1);
+    const broke = threatFixture({ attacking: card(FLOWING_STORMSTRIKE), resources: 1 });
+    expect(publicCombatThreat(broke).attackBonus).toBe(1);
+  });
+
+  it("counts face-up arsenal instants that can target the attack", () => {
+    const withArsenal = (input: BotPolicyInput, cardId: string) => {
+      input.view.players[1].arsenal = [card(cardId)];
+      input.view.players[1].arsenalCount = 1;
+      return input;
+    };
+    const press = withArsenal(threatFixture({ attacking: card(SPARK_SPRAY) }), LIGHTNING_PRESS_RED);
+    expect(publicCombatThreat(press).attackBonus).toBe(3);
+    const pressOnWeapon = withArsenal(threatFixture({ attacking: card(DAGGER) }), LIGHTNING_PRESS_RED);
+    expect(publicCombatThreat(pressOnWeapon).attackBonus).toBe(0);
+
+    const flow = withArsenal(threatFixture({ attacking: card(SPARK_SPRAY) }), FLOW_THROUGH);
+    expect(publicCombatThreat(flow).attackBonus).toBe(1);
+    const flowOffType = withArsenal(threatFixture({ attacking: card(ZEPPELIN_BLUE) }), FLOW_THROUGH);
+    expect(publicCombatThreat(flowOffType).attackBonus).toBe(0);
+
+    const broke = withArsenal(threatFixture({ attacking: card(SPARK_SPRAY) }), STORMSHARD);
+    expect(publicCombatThreat(broke).attackBonus).toBe(0);
+    const funded = withArsenal(threatFixture({ attacking: card(SPARK_SPRAY), resources: 1 }), STORMSHARD);
+    expect(publicCombatThreat(funded).attackBonus).toBe(3);
+    const flowToken = withArsenal(
+      threatFixture({ attacking: card(SPARK_SPRAY), board: [card(LIGHTNING_FLOW)] }),
+      STORMSHARD,
+    );
+    expect(publicCombatThreat(flowToken).attackBonus).toBe(3);
   });
 
   it("counts Spark Spray's paid pump only for a block that defends it", () => {
