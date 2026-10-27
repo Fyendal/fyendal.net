@@ -679,6 +679,7 @@ export function ChainFloat({
                           size="zone"
                           squareArt={false}
                           showTapped={false}
+                          undefendable={!chain.resolved}
                           motionKey={motionPresentationKey(
                             { kind: "chain-target", link: chainIdx },
                             chain.targetAlly.instanceId,

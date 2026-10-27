@@ -26304,6 +26304,18 @@
       "value": " 个蒸汽指示物"
     }
   ],
+  "game.card.badge.undefendable": [
+    {
+      "type": 0,
+      "value": "无法防御"
+    }
+  ],
+  "game.card.badge.undefendable.detail": [
+    {
+      "type": 0,
+      "value": "不能用防御牌或防御反应"
+    }
+  ],
   "game.card.badge.veil": [
     {
       "type": 0,

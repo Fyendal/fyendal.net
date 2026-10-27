@@ -2249,6 +2249,8 @@
   "game.card.badge.overpower": "overpower",
   "game.card.badge.veil": "veil",
   "game.card.badge.veil.detail": "每种颜色至多只能用 1 张牌防御",
+  "game.card.badge.undefendable": "无法防御",
+  "game.card.badge.undefendable.detail": "不能用防御牌或防御反应",
   "game.card.badge.faceup": "正面朝上",
   "game.card.badge.intimidated": "被 intimidate",
   "game.card.badge.intimidated.detail": "在结束阶段开始时返回手牌",

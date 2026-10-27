@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="#000000">
+<defs>
+<clipPath id="near"><path d="M0 0H25.5L0 25.5Z"/></clipPath>
+<clipPath id="far"><path d="M32 2.5V32H2.5Z"/></clipPath>
+<path id="shield" d="M16 2 4 6.4v8.4c0 6.6 4.9 12.7 12 15.2 7.1-2.5 12-8.6 12-15.2V6.4Z"/>
+</defs>
+<use href="#shield" clip-path="url(#near)"/>
+<use href="#shield" clip-path="url(#far)"/>
+<path d="M3.5 26.5 26.5 3.5" stroke="#000000" stroke-width="3.2" stroke-linecap="round"/>
+</svg>

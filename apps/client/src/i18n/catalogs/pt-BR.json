@@ -2249,6 +2249,8 @@
   "game.card.badge.overpower": "Overpower",
   "game.card.badge.veil": "Veil",
   "game.card.badge.veil.detail": "Não pode ser defendido por mais de 1 carta de cada cor",
+  "game.card.badge.undefendable": "Não pode ser defendido",
+  "game.card.badge.undefendable.detail": "Sem cartas defensoras nem defense reactions",
   "game.card.badge.faceup": "Virada para cima",
   "game.card.badge.intimidated": "Intimidated",
   "game.card.badge.intimidated.detail": "Volta para a mão no início da end phase",

@@ -194,6 +194,7 @@ export function CardFace({
   dominate,
   overpower,
   veil,
+  undefendable,
   showFaceUp,
   wagered,
   wagerRewards,
@@ -227,6 +228,8 @@ export function CardFace({
   overpower?: boolean;
   /** Effective veil on this card while it is an attack. */
   veil?: boolean;
+  /** Unresolved non-hero attack target, which can't be defended. */
+  undefendable?: boolean;
   /** Show an explicit face-up status hint for a zone where face-down is the default. */
   showFaceUp?: boolean;
   /** Whether this attack has wagered on its current chain link. */
@@ -273,7 +276,7 @@ export function CardFace({
   const squareCard = size === "zone" && (squareArt ?? squarePresentationEnabled);
   // Try temporary Fabrary variants before falling back to the text layout.
   const [imageFailure, setImageFailure] = useState<{ cardId: string; attempts: number } | null>(null);
-  const badges = cardBadges(card, { goAgain, dominate, overpower, veil, showFaceUp, wagered, wagerRewards });
+  const badges = cardBadges(card, { goAgain, dominate, overpower, veil, undefendable, showFaceUp, wagered, wagerRewards });
   const marked = badges.some((badge) => badge.placement === "token");
   const overlays = badges.flatMap((badge) => badge.placement === "overlay" ? [badge] : []);
   const rootRef = useRef<HTMLDivElement>(null);

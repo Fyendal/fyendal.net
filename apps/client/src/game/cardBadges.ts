@@ -34,6 +34,8 @@ export interface CardBadgeContext {
   dominate?: boolean;
   overpower?: boolean;
   veil?: boolean;
+  /** Non-hero attack target: no defending cards or defense reactions (CR 8.2.8d). */
+  undefendable?: boolean;
   showFaceUp?: boolean;
   wagered?: boolean;
   wagerRewards?: readonly string[];
@@ -114,6 +116,15 @@ export function cardBadges(card: CardView, context: CardBadgeContext = {}): Card
       "Veil: can't be defended by more than 1 card of each color",
       "game.card.badge.veil",
       "game.card.badge.veil.detail",
+    );
+  }
+  if (context.undefendable) {
+    flag(
+      "undefendable",
+      "/icons/undefendable.svg",
+      "Can't be defended — no defending cards or defense reactions",
+      "game.card.badge.undefendable",
+      "game.card.badge.undefendable.detail",
     );
   }
   if (context.showFaceUp) flag("faceup", "/icons/face-up.png", "Face up", "game.card.badge.faceup");

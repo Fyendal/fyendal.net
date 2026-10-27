@@ -524,6 +524,26 @@ describe("combat-chain browsing", () => {
     expect(html).toContain("2 suspense counters");
     expect(html).not.toContain(">vs<");
     expect(html).not.toContain("chain-def");
+    expect(html).toContain("/icons/undefendable.svg");
+  });
+
+  it("drops the undefendable badge once the link resolves", () => {
+    const html = renderChain({
+      links: [{
+        attackingCard: { instanceId: 42, cardId: "SBA016", owner: 0 },
+        defendingCards: [],
+        reactions: [],
+        attackValue: 3,
+        defenseValue: 0,
+        damage: 3,
+        resolved: true,
+        targetAllyName: "Anka, Drag Under",
+        targetAlly: { instanceId: 84, cardId: "SEA262", owner: 1 },
+      }],
+      onRect: vi.fn(),
+    });
+
+    expect(html).not.toContain("/icons/undefendable.svg");
   });
 
   it("renders per-card modifiers as a hover and focus explanation", () => {

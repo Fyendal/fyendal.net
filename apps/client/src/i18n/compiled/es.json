@@ -28251,6 +28251,18 @@
       "pluralType": "cardinal"
     }
   ],
+  "game.card.badge.undefendable": [
+    {
+      "type": 0,
+      "value": "No se puede defender"
+    }
+  ],
+  "game.card.badge.undefendable.detail": [
+    {
+      "type": 0,
+      "value": "Sin cartas defensoras ni defense reactions"
+    }
+  ],
   "game.card.badge.veil": [
     {
       "type": 0,
