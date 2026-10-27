@@ -58,6 +58,7 @@ import {
   deckPoolCardIds,
   PrepDeckLoading,
   PrepImageLoading,
+  useDeckImageArt,
 } from "./PrepImageLoading.js";
 
 const WEAPON_TOAST_MS = 3_500;
@@ -184,13 +185,15 @@ export function PrepRoom() {
   const nextStep = nextPrepStep(prep);
   const nudgeActive = useStepNudge(nextStep ? `${roomCode ?? "queue"}:${nextStep}` : null);
   const nudge = nudgeActive ? nextStep : null;
-  // One gate per room and deck: matchup changes later reuse the cache rather
-  // than sending the player back to the loading screen.
+  // One gate per room and deck: later matchup or art changes never send the
+  // player back to the loading screen.
   const deckImageKey = prepDeck ? `${roomCode ?? "queue"}:${prepDeck.id}` : null;
+  const deckImageArt = useDeckImageArt(prepDeck, betaTester);
   const deckImages = useCardImagePreload(
-    deckImageKey,
+    deckImageKey && `${deckImageKey}:${deckImageArt ? "art" : "pending"}`,
     prepDeck ? deckPoolCardIds(prepDeck.decklist) : [],
     DECK_IMAGE_TIMEOUT_MS,
+    deckImageArt ?? undefined,
   );
   const opponentSeat = prep ? prep.seats[1 - prep.yourSeat] : null;
   const opponentArenaIds = opponentSeat?.arena ? revealedArenaCardIds(opponentSeat.arena) : [];
@@ -270,13 +273,14 @@ export function PrepRoom() {
   if (!prepDeck) return <PrepDeckLoading onCancel={leave} />;
   // The match-accept dialog lives in this room, so never hide it behind loading.
   if (
-    !deckImages.done
+    (!deckImages.done || !deckImageArt)
     && imageWaitSkippedFor !== deckImageKey
     && prep?.phase !== "accept"
   ) {
     return (
       <PrepImageLoading
         heroId={prepDeck.decklist.heroId}
+        art={deckImageArt}
         progress={deckImages}
         onSkip={() => setImageWaitSkippedFor(deckImageKey)}
         onCancel={leave}

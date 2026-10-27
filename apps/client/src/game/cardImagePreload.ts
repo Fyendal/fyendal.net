@@ -5,8 +5,8 @@ import { resolveCardImageUrls } from "./cardImageUrl.js";
 const PRELOAD_CONCURRENCY = 8;
 const URL_TIMEOUT_MS = 15_000;
 
-/** Settled outcome per card id; a card resolves once any of its fallback
- * objects loads, so later renders hit the browser cache. */
+/** Settled outcome per card and chosen art; a card resolves once any of its
+ * fallback objects loads, so later renders hit the browser cache. */
 const cardResults = new Map<string, Promise<boolean>>();
 const loadedCards = new Set<string>();
 
@@ -27,22 +27,28 @@ function loadUrl(url: string): Promise<boolean> {
   });
 }
 
+/** Image id per card for cards a deck shows in non-standard art. */
+export type CardImageArt = Readonly<Record<string, string>>;
+
+const resultKey = (cardId: string, artImage: string | undefined) => `${cardId}|${artImage ?? ""}`;
+
 /** Walk the same fallback chain `CardArtwork` uses until one object loads. */
-export function preloadCardImage(cardId: string): Promise<boolean> {
-  const existing = cardResults.get(cardId);
+export function preloadCardImage(cardId: string, artImage?: string): Promise<boolean> {
+  const key = resultKey(cardId, artImage);
+  const existing = cardResults.get(key);
   if (existing) return existing;
   const result = (async () => {
-    for (const url of resolveCardImageUrls(cardId, cardData[cardId])) {
+    for (const url of resolveCardImageUrls(cardId, cardData[cardId], false, artImage)) {
       if (await loadUrl(url)) {
-        loadedCards.add(cardId);
+        loadedCards.add(key);
         return true;
       }
     }
     // Let a later screen retry a card that failed or timed out.
-    cardResults.delete(cardId);
+    cardResults.delete(key);
     return false;
   })();
-  cardResults.set(cardId, result);
+  cardResults.set(key, result);
   return result;
 }
 
@@ -59,6 +65,7 @@ function uniqueCardIds(cardIds: readonly string[]): string[] {
 export async function preloadCardImages(
   cardIds: readonly string[],
   onProgress?: (settled: number, total: number) => void,
+  art: CardImageArt = {},
 ): Promise<void> {
   const ids = uniqueCardIds(cardIds);
   let next = 0;
@@ -67,7 +74,7 @@ export async function preloadCardImages(
   const worker = async () => {
     while (next < ids.length) {
       const id = ids[next++]!;
-      await preloadCardImage(id);
+      await preloadCardImage(id, art[id]);
       settled += 1;
       onProgress?.(settled, ids.length);
     }
@@ -81,9 +88,13 @@ export interface CardImagePreload {
   total: number;
 }
 
-function initialPreload(key: string | null, cardIds: readonly string[]): CardImagePreload {
+function initialPreload(
+  key: string | null,
+  cardIds: readonly string[],
+  art: CardImageArt,
+): CardImagePreload {
   const ids = uniqueCardIds(cardIds);
-  const cached = ids.filter((id) => loadedCards.has(id)).length;
+  const cached = ids.filter((id) => loadedCards.has(resultKey(id, art[id]))).length;
   const done = key === null || !canPreloadCardImages() || cached === ids.length;
   return { done, settled: done ? ids.length : cached, total: ids.length };
 }
@@ -91,39 +102,42 @@ function initialPreload(key: string | null, cardIds: readonly string[]): CardIma
 /**
  * Preload `cardIds` once per `key`. A screen may gate on `done`, which also
  * becomes true after `timeoutMs` so a slow CDN never blocks play. The id list
- * is captured when the key changes; later edits under the same key are ignored.
+ * and art are captured when the key changes; later edits under the same key are
+ * ignored.
  */
 export function useCardImagePreload(
   key: string | null,
   cardIds: readonly string[],
   timeoutMs: number,
+  art: CardImageArt = {},
 ): CardImagePreload {
-  const idsRef = useRef(cardIds);
-  idsRef.current = cardIds;
+  const inputRef = useRef({ cardIds, art });
+  inputRef.current = { cardIds, art };
   const [state, setState] = useState<{ key: string | null } & CardImagePreload>(
-    () => ({ key, ...initialPreload(key, cardIds) }),
+    () => ({ key, ...initialPreload(key, cardIds, art) }),
   );
 
   useEffect(() => {
-    const initial = initialPreload(key, idsRef.current);
+    const { cardIds: ids, art: images } = inputRef.current;
+    const initial = initialPreload(key, ids, images);
     setState({ key, ...initial });
     if (initial.done) return;
     let active = true;
     const timer = window.setTimeout(() => {
       if (active) setState((current) => current.key === key ? { ...current, done: true } : current);
     }, timeoutMs);
-    void preloadCardImages(idsRef.current, (settled, total) => {
+    void preloadCardImages(ids, (settled, total) => {
       if (!active) return;
       setState((current) => current.key === key
         ? { key, settled, total, done: current.done || settled === total }
         : current);
-    });
+    }, images);
     return () => {
       active = false;
       window.clearTimeout(timer);
     };
   }, [key, timeoutMs]);
 
-  if (state.key !== key) return initialPreload(key, cardIds);
+  if (state.key !== key) return initialPreload(key, cardIds, art);
   return { done: state.done, settled: state.settled, total: state.total };
 }

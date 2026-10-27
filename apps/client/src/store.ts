@@ -1293,27 +1293,12 @@ export const useStore = create<StoreState>((set, get) => {
         if (failPendingRoomEntry(msg.message)) break;
         resetRoomCommandPipeline();
         if (msg.code === "RESYNC_REQUIRED") {
-          // Keep only the current room credential needed for an authoritative
-          // rejoin. All room projections and version assumptions are stale.
+          // Routine command races land here: keep the board and rejoin at once.
           resetRoomVersionState();
-          set({
-            connected: false,
-            screen: "room-loading",
-            view: null,
-            legal: [],
-            actionCandidates: [],
-            playerProfiles: null,
-            cardArt: null,
-            lastActionAt: null,
-            prep: null,
-            prepDeck: null,
-            spectatorCount: 0,
-            opponentConnected: true,
-          });
+          set({ connected: false });
           closeCurrentSocket();
-          reconnectWithBackoff();
-          // Recovery is automatic. Keep both expected stale-version reloads
-          // and post-commit resyncs quiet unless the reconnect grace expires.
+          scheduleReconnectNotice();
+          restoreConnection();
           errors.clear();
           break;
         }

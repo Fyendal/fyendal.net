@@ -33,6 +33,14 @@ describe("card image preloading", () => {
     expect(FakeImage.requested).toEqual([first, second]);
   });
 
+  it("preloads a chosen art separately from the standard image", async () => {
+    const { preloadCardImage, preloadCardImages } = await load();
+    await preloadCardImages(["WTR001"], undefined, { WTR001: "WTR001-RF" });
+    expect(FakeImage.requested).toEqual([resolveCardImageUrls("WTR001", undefined, false, "WTR001-RF")[0]]);
+    await preloadCardImage("WTR001");
+    expect(FakeImage.requested.at(-1)).toBe(resolveCardImageUrls("WTR001")[0]);
+  });
+
   it("reports settled progress for unique cards, failures included", async () => {
     const { preloadCardImages } = await load();
     for (const url of resolveCardImageUrls("WTR001")) FakeImage.failing.add(url);

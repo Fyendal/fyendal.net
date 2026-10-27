@@ -6,6 +6,7 @@ import {
   deckPoolCardIds,
   PrepDeckLoading,
   PrepImageLoading,
+  useDeckImageArt,
 } from "./PrepImageLoading.js";
 
 /**
@@ -14,15 +15,18 @@ import {
  * and the prep room's own image gate resumes from the warmed cache.
  */
 export function RoomStartLoading() {
-  const { prepDeck, leave } = useStore(useShallow((state) => ({
+  const { prepDeck, leave, betaTester } = useStore(useShallow((state) => ({
     prepDeck: state.prepDeck,
     leave: state.leave,
+    betaTester: state.betaTester,
   })));
+  const art = useDeckImageArt(prepDeck, betaTester);
   const images = useCardImagePreload(
-    prepDeck ? `start:${prepDeck.id}` : null,
+    prepDeck ? `start:${prepDeck.id}:${art ? "art" : "pending"}` : null,
     prepDeck ? deckPoolCardIds(prepDeck.decklist) : [],
     DECK_IMAGE_TIMEOUT_MS,
+    art ?? undefined,
   );
   if (!prepDeck) return <PrepDeckLoading onCancel={leave} />;
-  return <PrepImageLoading heroId={prepDeck.decklist.heroId} progress={images} onCancel={leave} />;
+  return <PrepImageLoading heroId={prepDeck.decklist.heroId} art={art} progress={images} onCancel={leave} />;
 }

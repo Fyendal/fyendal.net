@@ -1,9 +1,10 @@
-import type { CSSProperties } from "react";
+import { useMemo, type CSSProperties } from "react";
 import { useIntl } from "react-intl";
-import type { DeckPool } from "@fyendal/shared";
+import type { DeckArt, DeckPool } from "@fyendal/shared";
 import { cardData } from "@fyendal/cards/client";
 import { CardArtwork } from "../game/Card.js";
-import type { CardImagePreload } from "../game/cardImagePreload.js";
+import { deckArtIsCustom, useCardArtCatalog } from "../game/cardArtCatalog.js";
+import type { CardImageArt, CardImagePreload } from "../game/cardImagePreload.js";
 
 /** Card art gates entry to the room, but a slow CDN must not eat the deadlines. */
 export const DECK_IMAGE_TIMEOUT_MS = 12_000;
@@ -17,6 +18,23 @@ export function deckPoolCardIds(pool: DeckPool): string[] {
     ...pool.deck,
     ...(pool.sideboard ?? []),
   ];
+}
+
+const NO_ART: CardImageArt = {};
+
+/** The deck's chosen art for preloading, or null while the art catalog loads. */
+export function useDeckImageArt(
+  deck: { id: string; decklist: DeckPool; art?: DeckArt } | null,
+  enabled: boolean,
+): CardImageArt | null {
+  const custom = enabled && !!deck && !deck.id.startsWith("precon-") && deckArtIsCustom(deck.art);
+  const catalog = useCardArtCatalog(custom);
+  const pool = deck?.decklist;
+  const art = deck?.art;
+  return useMemo(() => {
+    if (!custom || !pool || !art) return NO_ART;
+    return catalog ? catalog.resolveDeckArt(pool, art) : null;
+  }, [custom, catalog, pool, art]);
 }
 
 export function PrepDeckLoading({ onCancel }: { onCancel: () => void }) {
@@ -37,11 +55,14 @@ export function PrepDeckLoading({ onCancel }: { onCancel: () => void }) {
  */
 export function PrepImageLoading({
   heroId,
+  art,
   progress,
   onSkip,
   onCancel,
 }: {
   heroId: string;
+  /** Null hides the hero until its chosen art is known. */
+  art: CardImageArt | null;
   progress: CardImagePreload;
   onSkip?: () => void;
   onCancel: () => void;
@@ -60,8 +81,12 @@ export function PrepImageLoading({
           style={{ "--prep-load-ratio": ratio } as CSSProperties}
           aria-hidden="true"
         >
-          <CardArtwork className="prep-image-loading-base" cardId={heroId} alt="" />
-          <CardArtwork className="prep-image-loading-fill" cardId={heroId} alt="" />
+          {art ? (
+            <>
+              <CardArtwork className="prep-image-loading-base" cardId={heroId} artImage={art[heroId]} alt="" />
+              <CardArtwork className="prep-image-loading-fill" cardId={heroId} artImage={art[heroId]} alt="" />
+            </>
+          ) : null}
         </div>
         <h2 className="panel-title" id="prep-image-loading-title">
           {intl.formatMessage({ id: "prep.imageLoading.title" })}

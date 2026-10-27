@@ -2093,14 +2093,13 @@ describe("client connection and account race fences", () => {
     expect(localStorage.getItem("fyendal-room-session")).toBeNull();
   });
 
-  it("drops stale room projections and reconnects normally on RESYNC_REQUIRED", async () => {
+  it("keeps the board and rejoins immediately on RESYNC_REQUIRED", async () => {
     const { useStore } = await import("../store.js");
     useStore.getState().joinRoom("AAAAAA");
     const socket = FakeWebSocket.instances[0]!;
     socket.open();
     socket.message({ type: "joined", code: "AAAAAA", seat: 0, token: "seat-token", version: 1 });
-    socket.message({ ...staleState, version: 2 });
-    expect(useStore.getState().view).not.toBeNull();
+    socket.message({ ...staleState, version: 5 });
 
     socket.message({
       type: "error",
@@ -2112,13 +2111,20 @@ describe("client connection and account race fences", () => {
       roomCode: "AAAAAA",
       connected: false,
       connectionIssueVisible: false,
-      screen: "room-loading",
-      view: null,
-      legal: [],
-      prep: null,
+      screen: "game",
+      view: staleState.view,
       error: null,
     });
-    expect(localStorage.getItem("fyendal-room-session:AAAAAA")).toContain("seat-token");
+    expect(socket.readyState).not.toBe(FakeWebSocket.OPEN);
+    expect(FakeWebSocket.instances).toHaveLength(2);
+    const rejoin = FakeWebSocket.instances[1]!;
+    rejoin.open();
+    expect(rejoin.sent.map((value) => JSON.parse(value))).toContainEqual(
+      expect.objectContaining({ type: "join-room", code: "AAAAAA", token: "seat-token" }),
+    );
+    rejoin.message({ type: "joined", code: "AAAAAA", seat: 0, token: "seat-token", version: 3 });
+    rejoin.message({ ...staleState, version: 3, legal: [{ kind: "pass" }] });
+    expect(useStore.getState()).toMatchObject({ connected: true, legal: [{ kind: "pass" }] });
     useStore.getState().leave();
   });
 
@@ -2429,11 +2435,10 @@ describe("client connection and account race fences", () => {
     expect(useStore.getState()).toMatchObject({
       roomCode: "AAAAAA",
       connected: false,
-      screen: "room-loading",
-      view: null,
-      legal: [],
+      view: staleState.view,
       error: null,
     });
+    expect(FakeWebSocket.instances).toHaveLength(2);
     expect(localStorage.getItem("fyendal-room-session:AAAAAA")).toContain("seat-token");
     useStore.getState().leave();
   });
