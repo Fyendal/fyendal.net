@@ -244,6 +244,9 @@ function weaponSwingPair(input: BotPolicyInput, cards: readonly CardView[]): boo
   });
 }
 
+/** A Gate spends a resource and its token, so an equal attack already in hand goes first. */
+const GATE_ACCESS_COST = 2;
+
 function gateTargetValue(intent: GameIntent, input: BotPolicyInput, own: ReadonlyMap<number, CardView>): number {
   if (intent.kind !== "activate-ability" || intent.targetCardInstanceId === undefined) return -500;
   const me = input.view.players[input.seat];
@@ -266,20 +269,12 @@ function gateTargetValue(intent: GameIntent, input: BotPolicyInput, own: Readonl
   if (leviaAttackCost(targetData, leviaEffectActive(input, "savage sash")) > afterActivation + remainingPitch) {
     return -500;
   }
-  const bloodrushActive = leviaEffectActive(input, "bloodrush bellow");
-  // Rank targets by the attack they will make, not by their value in hand.
-  const power = (targetData.attack ?? 0) + (bloodrushActive && targetData.classes?.includes("brute") ? 2 : 0);
   // Banked for the Bellow turn while one waits, unless nothing else attacks.
-  if (!bloodrushActive && leviaHoldsBellow(input) && hasDirectAttack(input, own)) return -20;
-  const reserve = [...me.hand, ...me.arsenal].filter((card) => !pitched.has(card.instanceId));
-  if (!leviaAttackPair(input, reserve) &&
-    leviaAttackPair(input, [...reserve, target], { resources: afterActivation })) {
-    return (bloodrushActive ? 95 : 66) + power * 0.1;
+  if (!leviaEffectActive(input, "bloodrush bellow") && leviaHoldsBellow(input) && hasDirectAttack(input, own)) {
+    return -20;
   }
-  // A Gate costs a resource and an attack permission. Prefer an attack already
-  // available, especially while Bloodrush is running, before paying for access.
-  if (hasDirectAttack(input, own)) return (leviaAttackContinues(target, input) ? 42 : 24) + power * 0.1;
-  return 54 + Math.min(30, power * 3);
+  // Scored as the attack it unlocks, so the Gate opens only when that attack plays next.
+  return attackScore(target, input, own, new Set([target.instanceId, ...pitched])) - GATE_ACCESS_COST;
 }
 
 function hasDirectAttack(input: BotPolicyInput, own: ReadonlyMap<number, CardView>): boolean {
@@ -613,8 +608,34 @@ function leviaPlannedPrevention(
 }
 
 const BLOOD_HARVEST_RESOURCES = 3;
-const EXPIRING_ACCESS_BONUS = 24;
 const PITCH_OPPORTUNITY_WEIGHT = 0.7;
+/** Outranks any terminal attack's power, so go-again attacks always lead. */
+const GO_AGAIN_FIRST_BONUS = 30;
+
+/** Play score of an attack or weapon swing before its payment. */
+function attackScore(
+  card: CardView,
+  input: BotPolicyInput,
+  own: ReadonlyMap<number, CardView>,
+  spent: ReadonlySet<number>,
+): number {
+  const data = input.cards[card.cardId]!;
+  const named = name(data);
+  const me = input.view.players[input.seat];
+  let followupCount: number | undefined;
+  const followups = (): number => followupCount ??= attackReserve(input, spent).length;
+  let score = 22 + (data.attack ?? 0) * 2;
+  if (leviaEffectActive(input, "bloodrush bellow") && data.classes?.includes("brute")) score += 30;
+  if (leviaAttackContinues(card, input) && followups() > 0) score += GO_AGAIN_FIRST_BONUS;
+  if (named === "hexagore, the death hydra") {
+    const selfDamage = hexagoreSelfDamage(input);
+    score -= selfDamage * (me.life <= 9 ? 15 : 5);
+    if (selfDamage >= me.life) score -= 1_000;
+    else if ((data.attack ?? 0) >= input.view.players[1 - input.seat]!.life && !hasDirectAttack(input, own)) score += 120;
+  }
+  if (named === "ravenous meataxe" && followups() > 0) score -= 12;
+  return score;
+}
 
 /** Score given up by spending a card as payment. */
 function pitchPenalty(card: CardView, input: BotPolicyInput): number {
@@ -784,22 +805,7 @@ function scorePlay(intent: GameIntent, input: BotPolicyInput, own: ReadonlyMap<n
     // Zero power until a six is banished this turn.
     score = -30;
   } else if (isAttack(data) || data.cardType === "weapon") {
-    score = 22 + (data.attack ?? 0) * 2;
-    // A Gate or Blasmophet permission already paid for expires with the turn
-    // and spends no hand card; play it before a hand attack competing for the
-    // same resources.
-    if (intent.kind === "play-from-zone" && card.playableFromSourceCardId !== undefined) score += EXPIRING_ACCESS_BONUS;
-    if (bloodrushActive && data.classes?.includes("brute")) score += 30;
-    if (["feeding frenzy", "dread screamer", "shadowrealm horror"].includes(named) && followups() > 0) {
-      score += 20;
-    }
-    if (named === "hexagore, the death hydra") {
-      const selfDamage = hexagoreSelfDamage(input);
-      score -= selfDamage * (me.life <= 9 ? 15 : 5);
-      if (selfDamage >= me.life) score -= 1_000;
-      else if ((data.attack ?? 0) >= input.view.players[1 - input.seat]!.life && !hasDirectAttack(input, own)) score += 120;
-    }
-    if (named === "ravenous meataxe" && followups() > 0) score -= 12;
+    score = attackScore(card, input, own, new Set([card.instanceId, ...pitchIds(intent)]));
   } else {
     score = -30;
   }

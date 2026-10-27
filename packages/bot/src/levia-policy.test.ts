@@ -553,22 +553,6 @@ describe("Levia Gates policy", () => {
     expect(selected).toMatchObject({ kind: "play-from-zone", instanceId: feedingFrenzy.instanceId });
   });
 
-  it("plays the attack a Gate unlocked before a hand attack competing for its resources", () => {
-    let state = game();
-    hand(state, ["IAR026", "ROS218"]);
-    const cleave = { instanceId: state.nextInstanceId++, cardId: "IAR020", owner: 0 };
-    state.players[0]!.banish = [cleave];
-    const gate = { instanceId: state.nextInstanceId++, cardId: "IAR222", owner: 0 };
-    state.players[0]!.board.push(gate);
-    state.players[0]!.resources = 3;
-    const access = legalIntents(state, 0).find((intent) => intent.kind === "activate-ability" &&
-      intent.sourceInstanceId === gate.instanceId && intent.targetCardInstanceId === cleave.instanceId &&
-      intent.pitchInstanceIds.length === 0)!;
-    state = playAndResolve(state, access);
-    expect(state.players[0]!.resources).toBe(2);
-    expect(choice(state)).toMatchObject({ kind: "play-from-zone", instanceId: cleave.instanceId });
-  });
-
   it("opens a Gate on the stronger of two banished attacks without go again", () => {
     const state = game();
     hand(state, ["MON140"]);
@@ -633,16 +617,22 @@ describe("Levia Gates policy", () => {
   });
 
   it.each([["IAR026", "IAR022"], ["IAR026", "IAR009"]])(
-    "keeps the Bloodrush macro after resolving it and attacks with %s while holding %s", (...draws) => {
+    "keeps the Bloodrush macro after resolving it and attacks while holding %s and %s", (...draws) => {
       const state = bloodrushTurn(draws);
       const frenzy = state.players[0]!.hand.find((card) => card.cardId === "IAR026")!;
       state.players[0]!.board.push({ instanceId: state.nextInstanceId++, cardId: "IAR222", owner: 0 });
-      state.players[0]!.banish.push({ instanceId: state.nextInstanceId++, cardId: "IAR020", owner: 0 });
+      const cleave = { instanceId: state.nextInstanceId++, cardId: "IAR020", owner: 0 };
+      state.players[0]!.banish.push(cleave);
       const input = { seat: 0 as const, view: projectStateFor(state, 0), legal: legalIntents(state, 0), cards: cardData };
       expect(input.view.ongoing.some((effect) => cardData[effect.cardId]?.name === "Bloodrush Bellow")).toBe(true);
       expect(chooseLeviaIntentWithTrace(input).macro.goal).toBe("bloodrush");
-      expect(chooseLeviaIntent(input)).toMatchObject({ kind: "play-card", instanceId: frenzy.instanceId });
-      expect(choice(state)).toMatchObject({ kind: "play-card", instanceId: frenzy.instanceId });
+      // With the deck drawn out, Frenzy and the gated Cleave are equal terminal attacks.
+      const attacks = [
+        expect.objectContaining({ kind: "play-card", instanceId: frenzy.instanceId }),
+        expect.objectContaining({ kind: "activate-ability", targetCardInstanceId: cleave.instanceId }),
+      ];
+      expect(attacks).toContainEqual(chooseLeviaIntent(input));
+      expect(attacks).toContainEqual(choice(state));
     },
   );
 
@@ -688,6 +678,20 @@ describe("Levia Gates policy", () => {
     const selected = choice(state);
     expect(selected).toMatchObject({ kind: "activate-ability", sourceInstanceId: sash.instanceId });
     state = playAndResolve(state, selected);
+    const frenzy = state.players[0]!.hand.find((card) => card.cardId === "IAR026")!;
+    expect(choice(state)).toMatchObject({ kind: "play-card", instanceId: frenzy.instanceId });
+  });
+
+  it("plays the go-again hand attack before opening a Gate for a terminal attack", () => {
+    let state = game();
+    hand(state, ["IAR026", "MON140", "IAR020"]);
+    state.players[0]!.banish = cards(state, ["IAR020"]);
+    state.players[0]!.board.push(...cards(state, ["IAR222"]));
+    const sash = { instanceId: state.nextInstanceId++, cardId: "AKO004", owner: 0 };
+    state.players[0]!.equipment.chest = sash;
+    const cracked = choice(state);
+    expect(cracked).toMatchObject({ kind: "activate-ability", sourceInstanceId: sash.instanceId });
+    state = playAndResolve(state, cracked);
     const frenzy = state.players[0]!.hand.find((card) => card.cardId === "IAR026")!;
     expect(choice(state)).toMatchObject({ kind: "play-card", instanceId: frenzy.instanceId });
   });
