@@ -354,13 +354,6 @@ function worthwhileTwoCostAttack(input: BotPolicyInput): CardView | undefined {
   });
 }
 
-function twoCostAttackFloatingReserve(input: BotPolicyInput): number {
-  const attack = worthwhileTwoCostAttack(input);
-  if (!attack) return 0;
-  const pitch = remainingPitchValue(input, new Set([attack.instanceId]));
-  return Math.max(0, Number(input.cards[attack.cardId]?.cost ?? 0) - pitch);
-}
-
 /** With a meaningful two-cost attack available, establish sword go again
  * with a red or yellow sharpen before committing resources to either attack. */
 function setupForSwordThenTwoCostAttackIntent(input: BotPolicyInput): GameIntent | undefined {
@@ -1618,6 +1611,8 @@ function rerebraceThresholdNeeded(input: BotPolicyInput): boolean {
     return threshold === undefined ? [] : [threshold];
   })[0];
   if (resolvingThreshold !== undefined) {
+    // Flurry's go-again-less second swing would only replace the held attack.
+    if (weaponAttacksThisTurn(input) === 0 && worthwhileTwoCostAttack(input)) return false;
     return counters < resolvingThreshold && counters + 1 >= resolvingThreshold;
   }
   // A held threshold card is not a secured payoff: paying Rerebrace can pitch
@@ -1732,6 +1727,17 @@ function heldEdictShineRerebraceTurn(input: BotPolicyInput): boolean {
   );
 }
 
+function cardsToPitch(need: number, pitchValues: readonly number[]): number {
+  let remaining = need;
+  let cards = 0;
+  for (const value of [...pitchValues].sort((left, right) => right - left)) {
+    if (remaining <= 0) break;
+    remaining -= value;
+    cards += 1;
+  }
+  return remaining <= 0 ? cards : Number.POSITIVE_INFINITY;
+}
+
 function scoreChoice(intent: Extract<GameIntent, { kind: "choose" }>, input: BotPolicyInput): number {
   const decision = input.view.pendingDecision;
   if (!decision) return 0;
@@ -1757,18 +1763,33 @@ function scoreChoice(intent: Extract<GameIntent, { kind: "choose" }>, input: Bot
     return rerebraceShouldPay(input) ? 10 : 20;
   }
   if (prompt.includes("create vigor")) {
-    const reserve = Math.max(
-      zenithCanAttackAgain(input) ? 1 : 0,
-      twoCostAttackFloatingReserve(input),
-    );
     const resources = input.view.players[input.seat].resources;
     const pay = !["no", "decline", "pass"].includes(intent.optionId);
-    if (!pay) return resources > reserve ? 0 : 80;
-    const pitched = (resourcePaymentPitchIds(intent, input) ?? []).reduce((total, id) => {
+    const pitchedIds = resourcePaymentPitchIds(intent, input) ?? [];
+    const pitched = pitchedIds.reduce((total, id) => {
       const card = input.view.players[input.seat].hand.find((candidate) => candidate.instanceId === id);
       return total + Number(input.cards[card?.cardId ?? ""]?.pitch ?? 0);
     }, 0);
     const floatingAfter = resources + pitched - (decision.resourcePayment?.cost ?? 1);
+    const heldAttack = zenithCanAttackAgain(input) ? undefined : worthwhileTwoCostAttack(input);
+    if (heldAttack) {
+      if (!pay) return 40;
+      // Pay only if the held attack then pitches no extra card; that card is
+      // worth more held or arsenaled than next turn's resource.
+      const cost = Number(input.cards[heldAttack.cardId]?.cost ?? 0);
+      const others = input.view.players[input.seat].hand
+        .filter((card) => card.instanceId !== heldAttack.instanceId);
+      const pitchValues = (cards: readonly CardView[]) =>
+        cards.map((card) => Number(input.cards[card.cardId]?.pitch ?? 0));
+      const cardsBefore = cardsToPitch(cost - resources, pitchValues(others));
+      const cardsAfter = pitchedIds.length + cardsToPitch(
+        cost - floatingAfter,
+        pitchValues(others.filter((card) => !pitchedIds.includes(card.instanceId))),
+      );
+      return cardsAfter <= cardsBefore ? 80 + pitched : 0;
+    }
+    const reserve = zenithCanAttackAgain(input) ? 1 : 0;
+    if (!pay) return resources > reserve ? 0 : 80;
     // Pitch only a card the next attack would pitch anyway, and only if it covers both.
     const canSpare = floatingAfter >= reserve && (pitched === 0 || resources < reserve);
     return canSpare ? 80 + pitched : 0;

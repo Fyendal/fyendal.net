@@ -1882,6 +1882,46 @@ describe("Hala policy", () => {
       .toEqual({ kind: "choose", optionId: "paid" });
   });
 
+  it("keeps Reverent when a held two-cost attack already follows the first swing", () => {
+    expect(chooseRerebracePayment({ counters: 1, resolvingCardId: "MPW104", heldCardId: "PEN319" }))
+      .toEqual({ kind: "choose", optionId: "no" });
+    expect(chooseRerebracePayment({ counters: 1, resolvingCardId: "MPW104" }))
+      .toEqual({ kind: "choose", optionId: "paid" });
+  });
+
+  it("follows a yellow Edict Zenith swing with Command and Conquer, keeping Reverent and an arsenal card", () => {
+    let state = createGame({
+      decklists: [halaDeck(), decklists.dorinthea],
+      cards: cardData,
+      scripts,
+      seed: 777,
+      startPlayer: 0,
+    });
+    state.turn = 2;
+    state.players[0]!.resources = 0;
+    replaceHand(state, 0, ["MPW104", "MPW105", "HNT117", "PEN319"]);
+    const commandId = state.players[0]!.hand.find((card) => card.cardId === "PEN319")!.instanceId;
+    const botIntents: GameIntent[] = [];
+    for (let step = 0; step < 60 && state.turn === 2; step++) {
+      const actor = (state.pendingDecision?.player ?? state.priorityPlayer) as 0 | 1;
+      const legal = legalIntents(state, actor);
+      const intent = actor === 0
+        ? chooseHalaIntent({ seat: 0, view: projectStateFor(state, 0), legal, cards: cardData, state })
+        : state.pendingDecision?.kind === "defend"
+        ? legal.find((candidate) => candidate.kind === "defend" && candidate.instanceIds.length === 0)
+        : legal.find((candidate) => candidate.kind === "pass");
+      if (!intent) throw new Error(`no test rollout intent for ${state.phase}`);
+      if (actor === 0) botIntents.push(intent);
+      state = apply(state, actor, intent);
+    }
+
+    expect(state.players[0]!.equipment.arms?.cardId).toBe("AHA005");
+    expect(botIntents.some((intent) =>
+      intent.kind === "play-card" && intent.instanceId === commandId
+    )).toBe(true);
+    expect(state.players[0]!.arsenal).toHaveLength(1);
+  }, 10_000);
+
   it("declines an already-satisfied yellow Edict from the opponent seat", () => {
     expect(chooseRerebracePayment({ counters: 2, resolvingCardId: "MPW104", seat: 1 }))
       .toEqual({ kind: "choose", optionId: "no" });
