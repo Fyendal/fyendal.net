@@ -101,6 +101,17 @@ export interface DeckPool {
   sideboard?: string[];
 }
 
+/** A pick that keeps a card's standard art while highest rarity is on. */
+export const STANDARD_CARD_ART = "standard";
+
+/** Cosmetic art choices for a saved deck. Opponents and spectators see them. */
+export interface DeckArt {
+  /** Show each card's highest-rarity image unless it has its own pick. */
+  highestRarity: boolean;
+  /** printing id -> Fabrary image id, or STANDARD_CARD_ART */
+  picks: Record<string, string>;
+}
+
 /** The cards a player brings into one game, chosen from their `DeckPool`. */
 export interface PresentedArena {
   /** Weapon-zone cards selected from pool.weaponIds (at most two objects). */
@@ -1189,7 +1200,7 @@ export type ServerMessage =
   | { type: "joined"; code: string; seat: number | null; token: string; spectator?: boolean; resumed?: true; version: number }
   | { type: "room-info"; room: RoomInvite }
   | { type: "game-started"; version: number }
-  | { type: "state"; version: number; view: GameView; transition?: GameTransitionView; playerProfiles: [PlayerProfileView, PlayerProfileView]; yourSeat: number | null; legal: GameIntent[]; /** Structurally available plays/activations, including unaffordable ones. */ actionCandidates?: GameIntent[]; spectators?: number; lastActionAt: [number, number]; botGame?: boolean }
+  | { type: "state"; version: number; view: GameView; transition?: GameTransitionView; playerProfiles: [PlayerProfileView, PlayerProfileView]; yourSeat: number | null; legal: GameIntent[]; /** Structurally available plays/activations, including unaffordable ones. */ actionCandidates?: GameIntent[]; spectators?: number; lastActionAt: [number, number]; botGame?: boolean; /** Per-seat printing id -> image id, limited to cards this viewer can see. */ cardArt?: [Record<string, string>, Record<string, string>] }
   | { type: "spectators"; count: number; version: number }
   /** Additive companion to the legacy count message; null identifies a guest. */
   | { type: "spectator-list"; usernames: Array<string | null>; version: number }

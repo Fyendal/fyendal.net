@@ -1,0 +1,8 @@
+{
+  "note": "Printings missing from the community dataset. Sources: Card Vault product-cards records (https://api.cardvault.fabtcg.com/carddb/api/v1/product-cards/<product>/). Regeneration always merges this file.",
+  "artByCard": {
+    "hero|malice, domina of the dead|0": [
+      { "image": "KO_HER172-RF", "set": "HER", "rarity": "P", "foil": "R", "language": "ko" }
+    ]
+  }
+}
