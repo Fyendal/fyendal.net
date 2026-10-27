@@ -16,6 +16,7 @@ import {
 } from "../store.js";
 import { freshDb } from "./testdb.js";
 import { getAchievements } from "../achievements.js";
+import { cardArtVariants } from "@fyendal/cards/art";
 
 /** Per-format searcher totals across every queued and deck card pool. */
 function queueTotals(counts: Record<Format, QueuePoolCounts>): Record<Format, number> {
@@ -3480,6 +3481,64 @@ describe("PgRoomStore storage", () => {
         })).resolves.toMatchObject({ ok: true, kind: "opened", version: 0 });
         expect(await store.leaveMatchmaking(userId)).toBe(true);
       }
+    }
+  });
+});
+
+describe("card art", () => {
+  it("resolves art when a seat readies and shows opponents only visible cards", async () => {
+    const users = await db.query(
+      `INSERT INTO users (username, username_lc, pass_hash, created_at)
+       VALUES ('ArtOwner','artowner','hash',1) RETURNING id`,
+    );
+    const userId = Number(users.rows[0]!.id);
+    const pool = precon("precon-asb")!.pool;
+    const heroImage = cardArtVariants(pool.heroId)[0]?.image;
+    const deckCard = pool.deck.find((id) => cardArtVariants(id).length > 0)!;
+    const deckImage = cardArtVariants(deckCard)[0]!.image;
+    expect(heroImage).toBeDefined();
+    await db.query(
+      `INSERT INTO decks (id, user_id, name, format, fabrary_url, decklist, hero_name, art, created_at, updated_at)
+       VALUES ('art-deck', $1, 'Art', 'cc', NULL, $2, 'Hero', $3, 1, 1)`,
+      [userId, JSON.stringify(pool), JSON.stringify({
+        highestRarity: false,
+        picks: { [pool.heroId]: heroImage, [deckCard]: deckImage },
+      })],
+    );
+    const host = await store.createRoom("cc", { deckId: "art-deck", userId });
+    await markStoredSeatPresent(host.code, 0);
+    const joined = await store.joinRoom(host.code, undefined, { allowPlayer: true, deckId: "precon-asr" });
+    if (!joined.ok || joined.kind !== "player") throw new Error("join failed");
+    const tokens = [host.token, joined.token] as const;
+    const credentials = [{ token: tokens[0], userId }, { token: tokens[1] }] as const;
+    const room = (await store.getRoom(host.code))!;
+    const chosen = await store.chooseFirst(host.code, credentials[room.prep!.dieWinner], true);
+    if (!chosen.ok) throw new Error(chosen.error);
+    const pools = [pool, precon("precon-asr")!.pool];
+    for (const seat of [0, 1] as const) {
+      const arena = { weaponIds: pools[seat]!.weaponIds, equipment: {} };
+      const locked = await store.presentArena(host.code, credentials[seat], arena);
+      if (!locked.ok) throw new Error(locked.error);
+    }
+    for (const seat of [0, 1] as const) {
+      const ready = await store.presentDeck(host.code, credentials[seat], {
+        weaponIds: pools[seat]!.weaponIds, equipment: {}, deck: pools[seat]!.deck,
+      });
+      if (!ready.ok) throw new Error(ready.error);
+    }
+    const started = (await store.getRoom(host.code))!;
+    expect(started.state).not.toBeNull();
+    expect(started.seats[0]!.cardArt).toEqual({ [pool.heroId]: heroImage, [deckCard]: deckImage });
+    expect(started.seats[1]!.cardArt).toBeUndefined();
+
+    const own = stateMessage(started, 0);
+    const opponent = stateMessage(started, 1);
+    const spectator = stateMessage(started, null);
+    expect(own).toMatchObject({ cardArt: [{ [pool.heroId]: heroImage, [deckCard]: deckImage }, {}] });
+    for (const message of [opponent, spectator]) {
+      if (message?.type !== "state") throw new Error("missing state");
+      expect(message.cardArt?.[0]).toEqual({ [pool.heroId]: heroImage });
+      expect(decodeServerMessage(JSON.parse(JSON.stringify(message)))).not.toBeNull();
     }
   });
 });

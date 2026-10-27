@@ -362,6 +362,7 @@ export async function exportAccount(db: Queryable, userId: number): Promise<Acco
       format: deck.format,
       fabraryUrl: deck.fabraryUrl,
       decklist: deck.decklist,
+      art: deck.art,
       heroName: deck.heroName,
       createdAt: deck.createdAt,
       updatedAt: deck.updatedAt,

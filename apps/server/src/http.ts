@@ -1,9 +1,10 @@
 import http from "node:http";
 import { promisify } from "node:util";
 import { gunzip as gunzipCallback, gzip as gzipCallback } from "node:zlib";
-import type { DeckPool, Format } from "@fyendal/shared";
+import type { DeckArt, DeckPool, Format } from "@fyendal/shared";
 import { cardData, findPrinting, formatLegalityIssues } from "@fyendal/cards";
 import {
+  decodeDeckArtRequest,
   decodeLeagueAvailabilityRequest,
   decodeLeagueIdRequest,
   decodeLeagueJoinRequest,
@@ -27,7 +28,7 @@ import {
 } from "./auth.js";
 import {
   deleteDeck, getDeck, importDeck, listDeckPlays, listDecks, parseDecklistText,
-  resolveFabraryPlayDeck, resolveFreshDeck, updateDeck,
+  resolveFabraryPlayDeck, resolveFreshDeck, setDeckArt, updateDeck,
 } from "./decks.js";
 import { clientIp, configuredTrustedProxyHops } from "./network.js";
 import {
@@ -332,7 +333,7 @@ const DECK_FORMATS: Format[] = ["cc", "silver-age"];
 
 function deckOut(d: {
   id: string; name: string; format: Format; fabraryUrl: string | null;
-  heroName: string; decklist: DeckPool; updatedAt: number;
+  heroName: string; decklist: DeckPool; updatedAt: number; art: DeckArt;
 }): Record<string, unknown> {
   const legality = formatLegalityIssues(cardData, d.decklist, d.format);
   const bannedCards = [...new Set(
@@ -357,6 +358,7 @@ function deckOut(d: {
     updatedAt: d.updatedAt,
     ...(bannedCards.length > 0 ? { bannedCards } : {}),
     ...(futureCards.length > 0 ? { futureCards } : {}),
+    art: d.art,
   };
 }
 
@@ -685,6 +687,15 @@ export function createApiServer(deps: ApiDeps): http.Server {
         return { status, body: { ok: false, errors: r.errors, missing: r.missing, unimplemented: r.unimplemented } };
       }
       return { status: 200, body: { ok: true, deck: deckOut(r.deck) } };
+    },
+    "/api/decks/art": async (body, user) => {
+      if (!user) return { status: 401, body: { ok: false, error: "not logged in" } };
+      const input = decodeDeckArtRequest(body);
+      if (!input) return { status: 400, body: { ok: false, error: "invalid card art" } };
+      const r = await setDeckArt(deps.db, user.id, input.id, input.art);
+      return r.ok
+        ? { status: 200, body: { ok: true, deck: deckOut(r.deck) } }
+        : { status: r.status, body: { ok: false, error: r.error } };
     },
     "/api/decks/delete": async (body, user) => {
       if (!user) return { status: 401, body: { ok: false, error: "not logged in" } };

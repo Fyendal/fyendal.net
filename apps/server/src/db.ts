@@ -1143,6 +1143,12 @@ export const MIGRATIONS: Migration[] = [
     // holds every frame, instead of scanning frames inside the game-over commit.
     sql: "ALTER TABLE replay_games ADD COLUMN pending_achievements JSONB;",
   },
+  {
+    version: 59,
+    // Cosmetic card art: per-deck choices, and the images a seat resolved at ready.
+    sql: `ALTER TABLE decks ADD COLUMN art JSONB NOT NULL DEFAULT '{"highestRarity":false,"picks":{}}';
+    ALTER TABLE room_seats ADD COLUMN card_art JSONB;`,
+  },
 ];
 
 async function publicTables(db: Queryable): Promise<string[]> {

@@ -10,6 +10,7 @@ import {
   type EquipmentSlot,
   type Format,
   type GameLogPayload,
+  type GameView,
   type GameIntent,
   type MatchPrepPhase,
   type PendingDecision,
@@ -54,8 +55,10 @@ import {
   scripts,
   validateArena,
 } from "@fyendal/cards";
+import { resolveDeckArt } from "@fyendal/cards/art";
 import {
   decodePresentedArena,
+  resolvedCardArt,
   MAX_MATCHMAKING_AVOID_HEROES,
   MAX_MATCHMAKING_AVOID_ROOM_CODES,
   MAX_MATCHMAKING_AVOID_USERS,
@@ -121,6 +124,8 @@ export interface SeatRow {
   heroId?: string;
   /** the deck presented in the prep room (validated subset of the seat's pool) */
   presented?: Decklist;
+  /** Cosmetic printing id -> image id, resolved from the deck when the seat readies. */
+  cardArt?: Record<string, string>;
   /** prep room: player locked in their presentation */
   ready?: boolean;
   /** matchmade prep room: player acknowledged this pairing */
@@ -787,6 +792,11 @@ function decodeSeatRows(values: unknown[], code: string): [SeatRow | null, SeatR
     const presented = row.presented == null
       ? undefined
       : decodeDecklist(row.presented, code, `seats[${index}].presented`);
+    const cardArt = row.card_art == null ? undefined
+      : typeof row.card_art === "string" ? parseJson(row.card_art) : row.card_art;
+    if (cardArt !== undefined && !resolvedCardArt(cardArt)) {
+      throw new CorruptRoomError(code, `seats[${index}].card_art`, "expected card art");
+    }
     seats[seat] = {
       tokenHash: row.token_hash,
       ...(row.controller === "bot" ? { controller: "bot" as const } : {}),
@@ -797,6 +807,7 @@ function decodeSeatRows(values: unknown[], code: string): [SeatRow | null, SeatR
       ...(row.selected_badge === "early-tester" ? { badge: row.selected_badge } : {}),
       ...(typeof row.hero_id === "string" ? { heroId: row.hero_id } : {}),
       ...(presented ? { presented } : {}),
+      ...(cardArt && Object.keys(cardArt).length > 0 ? { cardArt } : {}),
       ready: row.ready === true,
       accepted: row.accepted,
       fromQueue: row.from_queue === true,
@@ -1147,6 +1158,7 @@ export class PgRoomStore {
       member.accepted ?? false,
       member.queueCardPoolMode ?? null,
       encodeStandingOrders(member.standingOrders),
+      member.cardArt ? JSON.stringify(member.cardArt) : null,
     ];
   }
 
@@ -1187,8 +1199,8 @@ export class PgRoomStore {
             `INSERT INTO room_seats
               (room_code, seat, user_id, token_hash, username, hero_id, deck_id, deck_name,
                from_queue, ready, presented, last_action_at, controller, priority_mode, token_skip, accepted,
-               queue_card_pool_mode, standing_orders)
-             VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18)`,
+               queue_card_pool_mode, standing_orders, card_art)
+             VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19)`,
             values,
           )
         : await db.query(
@@ -1208,7 +1220,8 @@ export class PgRoomStore {
                token_skip = $15,
                accepted = $16,
                queue_card_pool_mode = $17,
-               standing_orders = $18
+               standing_orders = $18,
+               card_art = $19
              WHERE room_code = $1 AND seat = $2`,
             values,
           );
@@ -3312,8 +3325,9 @@ export class PgRoomStore {
       const sameEquipment = (["head", "chest", "arms", "legs"] as const)
         .every((slot) => arena.equipment[slot] === presented.equipment[slot]);
       if (!sameWeapons || !sameEquipment) return { error: "arena cards cannot change after locking" };
-      const pool = (seat.deckId ? await resolveDeck(this.db, seat.deckId) : null)?.decklist;
-      if (!pool) return { error: "your deck is no longer available" };
+      const deck = seat.deckId ? await resolveDeck(this.db, seat.deckId) : null;
+      if (!deck) return { error: "your deck is no longer available" };
+      const pool = deck.decklist;
       if (pool.heroId !== seat.heroId) {
         return { error: "your registered hero changed; leave and rejoin the room" };
       }
@@ -3323,6 +3337,10 @@ export class PgRoomStore {
       if (!v.ok) return { error: v.error };
       seat.presented = v.decklist;
       seat.ready = true;
+      // Art locks at ready, so later deck edits apply from the next game.
+      const cardArt = resolveDeckArt(pool, deck.art);
+      if (Object.keys(cardArt).length > 0) seat.cardArt = cardArt;
+      else delete seat.cardArt;
       const fullSeats = new Set<SeatIndex>([seatIdx]);
       const botSeat = room.seats.findIndex((candidate) => candidate?.controller === "bot");
       if (botSeat !== -1 && botSeat !== seatIdx) {
@@ -4844,6 +4862,7 @@ export function spectatorListMessage(room: RoomRow): ServerMessage {
 
 export function stateMessage(room: RoomRow, seat: number | null): ServerMessage | null {
   if (!room.state) return null;
+  const view = projectStateFor(room.state, seat, room.code);
   const profile = (member: SeatRow | null) => ({
     username: member?.username ?? "Unknown player",
     badge: member?.badge ?? null,
@@ -4852,7 +4871,7 @@ export function stateMessage(room: RoomRow, seat: number | null): ServerMessage 
     type: "state",
     version: room.version,
     // seat null = spectator: both hands/hidden zones projected as counts only
-    view: projectStateFor(room.state, seat, room.code),
+    view,
     ...(room.lastTransition?.fromVersion === room.version - 1
       ? {
           transition: {
@@ -4872,7 +4891,41 @@ export function stateMessage(room: RoomRow, seat: number | null): ServerMessage 
     spectators: spectatorCount(room),
     lastActionAt: [room.seats[0]?.lastActionAt ?? 0, room.seats[1]?.lastActionAt ?? 0],
     ...(room.seats.some((member) => member?.controller === "bot") ? { botGame: true } : {}),
+    ...visibleCardArt(room, view, seat),
   };
+}
+
+/** A seat sees its own art in full and others' only for cards visible to it,
+ * so art never reveals a hidden hand, deck, or sideboard. */
+function visibleCardArt(
+  room: RoomRow,
+  view: GameView,
+  seat: number | null,
+): { cardArt?: [Record<string, string>, Record<string, string>] } {
+  if (!room.seats.some((member) => member?.cardArt)) return {};
+  const visible = [new Set<string>(), new Set<string>()];
+  const visit = (value: unknown): void => {
+    if (Array.isArray(value)) {
+      for (const item of value) visit(item);
+      return;
+    }
+    if (typeof value !== "object" || value === null) return;
+    const record = value as Record<string, unknown>;
+    if (typeof record.cardId === "string" && (record.owner === 0 || record.owner === 1)) {
+      visible[record.owner]!.add(record.cardId);
+    }
+    for (const child of Object.values(record)) visit(child);
+  };
+  visit(view);
+  for (const player of view.players) {
+    if (player.seat === 0 || player.seat === 1) visible[player.seat]!.add(player.heroCardId);
+  }
+  const forSeat = (index: 0 | 1): Record<string, string> => {
+    const art = room.seats[index]?.cardArt ?? {};
+    if (index === seat) return art;
+    return Object.fromEntries(Object.entries(art).filter(([cardId]) => visible[index]!.has(cardId)));
+  };
+  return { cardArt: [forSeat(0), forSeat(1)] };
 }
 
 /** Per-player prep-room projection (game not started). */

@@ -9,12 +9,15 @@ import {
   parseDecklistText,
   recordDeckPlay,
   resolveFreshDeck,
+  setDeckArt,
   updateDeck,
   validateDeck,
   validatePresentation,
 } from "../decks.js";
 import { register } from "../auth.js";
 import { freshDb } from "./testdb.js";
+import { cardArtVariants } from "@fyendal/cards/art";
+import { STANDARD_CARD_ART } from "@fyendal/shared";
 
 const printings = Object.values(cardData) as CardData[];
 const hero = printings.find((c) => c.cardType === "hero" && c.name.includes("Rhinar"))!;
@@ -752,6 +755,42 @@ describe("deck storage", () => {
     const { rows } = await db.query("SELECT id FROM users WHERE username_lc = $1", [username]);
     return { db, userId: Number(rows[0]!.id) };
   }
+
+  it("saves card art only for catalog images of cards in the deck", async () => {
+    const { db, userId } = await freshUser();
+    const imp = await importDeck(db, userId, { name: "Art", format: "cc", text: ccExportText() });
+    if (!imp.ok) throw new Error("import failed");
+    expect(imp.deck.art).toEqual({ highestRarity: false, picks: {} });
+    const card = [...new Set(imp.deck.decklist.deck)].find((id) => cardArtVariants(id).length > 0)!;
+    const image = cardArtVariants(card)[0]!.image;
+    const other = Object.keys(cardData).find((id) =>
+      !imp.deck.decklist.deck.includes(id) && cardArtVariants(id).length > 0)!;
+
+    expect(await setDeckArt(db, userId, imp.deck.id, {
+      highestRarity: true, picks: { [card]: cardArtVariants(other)[0]!.image },
+    })).toMatchObject({ ok: false, status: 422 });
+    expect(await setDeckArt(db, userId, imp.deck.id, {
+      highestRarity: true, picks: { [other]: cardArtVariants(other)[0]!.image },
+    })).toMatchObject({ ok: false, status: 422 });
+    expect(await setDeckArt(db, userId + 1, imp.deck.id, { highestRarity: true, picks: {} }))
+      .toMatchObject({ ok: false, status: 404 });
+
+    const saved = await setDeckArt(db, userId, imp.deck.id, {
+      highestRarity: true, picks: { [card]: image, [imp.deck.decklist.heroId]: STANDARD_CARD_ART },
+    });
+    expect(saved).toMatchObject({ ok: true, deck: { art: {
+      highestRarity: true, picks: { [card]: image, [imp.deck.decklist.heroId]: STANDARD_CARD_ART },
+    } } });
+
+    // A replacement list without the card stops applying its pick.
+    const replaced = await updateDeck(db, userId, imp.deck.id, {
+      text: ccExportText().split("\n").filter((line) => !line.includes(cardData[card]!.name)).join("\n")
+        + `\n${deckLine(uniqueLegalDeckCards[25]!)}`,
+    });
+    if (!replaced.ok) throw new Error(replaced.errors.join(", "));
+    expect(replaced.deck.art.picks).not.toHaveProperty(card);
+    expect(replaced.deck.art.highestRarity).toBe(true);
+  });
 
   it("imports, lists, updates and deletes decks", async () => {
     const { db, userId } = await freshUser();

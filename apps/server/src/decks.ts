@@ -1,5 +1,5 @@
 import { randomBytes } from "node:crypto";
-import type { DeckPool, EquipmentSlot, Format } from "@fyendal/shared";
+import type { DeckArt, DeckPool, EquipmentSlot, Format } from "@fyendal/shared";
 import {
   cardData,
   equipmentFitsSlot,
@@ -10,7 +10,8 @@ import {
   normalizeCardName,
   precon,
 } from "@fyendal/cards";
-import type { FabraryMatchup } from "@fyendal/protocol";
+import { normalizeDeckArt } from "@fyendal/cards/art";
+import { deckArt, type FabraryMatchup } from "@fyendal/protocol";
 export { validatePresentation } from "@fyendal/cards";
 import { withTransaction, type Queryable } from "./db.js";
 import { parseFabraryDeckUrl, type FabraryClient, type FabraryDeckResult } from "./fabrary.js";
@@ -32,9 +33,13 @@ export interface DeckRow {
   decklist: DeckPool;
   /** display-only, derived from the hero printing */
   heroName: string;
+  /** Cosmetic art choices, limited to cards still in the deck. */
+  art: DeckArt;
   createdAt: number;
   updatedAt: number;
 }
+
+const DEFAULT_DECK_ART: DeckArt = { highestRarity: false, picks: {} };
 
 // ── Parsing ─────────────────────────────────────────────────────────────────
 
@@ -333,6 +338,14 @@ function normalizeDeckPoolCardZones(pool: DeckPool): DeckPool {
   };
 }
 
+function parseDbJson(text: string): unknown {
+  try {
+    return JSON.parse(text);
+  } catch {
+    return null;
+  }
+}
+
 function dbSafeInteger(value: unknown, path: string): number {
   const number = typeof value === "number" ? value : Number(value);
   if (!Number.isSafeInteger(number) || number < 0) {
@@ -349,14 +362,20 @@ function toDeck(value: unknown): DeckRow {
   if (!(r.fabrary_url === null || typeof r.fabrary_url === "string" && r.fabrary_url.length <= MAX_DB_URL)) {
     return corruptDeck("fabrary_url", `expected null or a string of at most ${MAX_DB_URL} characters`);
   }
+  // pg-mem returns a JSONB column default as text.
+  const art: unknown = typeof r.art === "string" ? parseDbJson(r.art) : r.art;
+  if (!deckArt(art)) return corruptDeck("art", "expected deck art");
+  const decklist = decodeDeckPool(r.decklist);
   return {
     id: dbString(r.id, "id"),
     userId: dbSafeInteger(r.user_id, "user_id"),
     name: dbString(r.name, "name"),
     format: r.format,
     fabraryUrl: r.fabrary_url,
-    decklist: decodeDeckPool(r.decklist),
+    decklist,
     heroName: dbString(r.hero_name, "hero_name"),
+    // Refreshes and replacement lists can drop cards; their picks stop applying.
+    art: normalizeDeckArt(decklist, art),
     createdAt: dbSafeInteger(r.created_at, "created_at"),
     updatedAt: dbSafeInteger(r.updated_at, "updated_at"),
   };
@@ -385,6 +404,7 @@ export async function resolveDeck(db: Queryable, id: string): Promise<DeckRow | 
       fabraryUrl: null,
       decklist: fixed.pool,
       heroName: cardData[fixed.pool.heroId]?.name ?? fixed.name,
+      art: DEFAULT_DECK_ART,
       createdAt: 0,
       updatedAt: 0,
     };
@@ -629,6 +649,26 @@ export async function updateDeck(
     "UPDATE decks SET name=$2, fabrary_url=$3, decklist=$4, hero_name=$5, updated_at=$6 WHERE id=$1",
     [id, input.name ?? existing.name, input.fabraryUrl ?? existing.fabraryUrl,
      JSON.stringify(decklist), heroName, Date.now()],
+  );
+  return { ok: true, deck: (await getDeck(db, id))! };
+}
+
+/** Save art choices; picks must name a catalog image for a card in the deck. */
+export async function setDeckArt(
+  db: Queryable,
+  userId: number,
+  id: string,
+  art: DeckArt,
+): Promise<{ ok: true; deck: DeckRow } | { ok: false; status: 404 | 422; error: string }> {
+  const existing = await getDeck(db, id);
+  if (!existing || existing.userId !== userId) return { ok: false, status: 404, error: "deck not found" };
+  const normalized = normalizeDeckArt(existing.decklist, art);
+  if (Object.keys(normalized.picks).length !== Object.keys(art.picks).length) {
+    return { ok: false, status: 422, error: "invalid card art" };
+  }
+  await db.query(
+    "UPDATE decks SET art=$2 WHERE id=$1 AND user_id=$3",
+    [id, JSON.stringify(normalized), userId],
   );
   return { ok: true, deck: (await getDeck(db, id))! };
 }
