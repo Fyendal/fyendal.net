@@ -45,6 +45,7 @@ export function DeckDetailModal(props: {
   const intl = useIntl();
   const {
     authUser,
+    betaTester,
     cardPoolModes,
     createBotRoom,
     createRoom,
@@ -55,6 +56,7 @@ export function DeckDetailModal(props: {
     setLobbyRail,
   } = useStore(useShallow((state) => ({
     authUser: state.authUser,
+    betaTester: state.betaTester,
     cardPoolModes: state.cardPoolModes,
     createBotRoom: state.createBotRoom,
     createRoom: state.createRoom,
@@ -79,7 +81,7 @@ export function DeckDetailModal(props: {
   const queued = queuedFormat !== null;
   const heroCard = findPrinting(deck.heroName);
   const showArt = heroCard !== undefined && artOk;
-  const artCatalog = useCardArtCatalog(deckArtIsCustom(deck.art));
+  const artCatalog = useCardArtCatalog(betaTester && deckArtIsCustom(deck.art));
   const heroArt = artCatalog && heroCard ? shownCardArt(artCatalog, heroCard.id, deck.art) : undefined;
 
   if (choosingBot) {
@@ -145,10 +147,12 @@ export function DeckDetailModal(props: {
               <UiIcon name="edit" />
               {intl.formatMessage({ id: "lobby.deck.edit" })}
             </button>
-            <button type="button" onClick={props.onEditArt}>
-              <UiIcon name="image" />
-              {intl.formatMessage({ id: "lobby.deck.art.title" })}
-            </button>
+            {betaTester ? (
+              <button type="button" onClick={props.onEditArt}>
+                <UiIcon name="image" />
+                {intl.formatMessage({ id: "lobby.deck.art.title" })}
+              </button>
+            ) : null}
             <button type="button" className="deck-detail-delete" onClick={props.onDelete}>
               <UiIcon name="trash" />
               {intl.formatMessage({ id: "lobby.deck.delete" })}

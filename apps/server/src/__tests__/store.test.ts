@@ -3,7 +3,7 @@ import { cardData, functionalKeyOf, precon, preconsForFormat, silverAgePrecon } 
 import { legalIntents } from "@fyendal/engine";
 import { decodeServerMessage, replayFileViews } from "@fyendal/protocol";
 import type { Format, GameIntent, PresentedDeck, QueuePoolCounts } from "@fyendal/shared";
-import type { SeatCredentials } from "../store.js";
+import type { RoomRow, SeatCredentials } from "../store.js";
 import type { Queryable } from "../db.js";
 import { finalizeReplay, getReplay, listReplays } from "../replays.js";
 import {
@@ -3486,17 +3486,19 @@ describe("PgRoomStore storage", () => {
 });
 
 describe("card art", () => {
-  it("resolves art when a seat readies and shows opponents only visible cards", async () => {
+  const pool = precon("precon-asb")!.pool;
+  const heroImage = cardArtVariants(pool.heroId)[0]?.image;
+  const deckCard = pool.deck.find((id) => cardArtVariants(id).length > 0)!;
+  const deckImage = cardArtVariants(deckCard)[0]!.image;
+
+  /** Starts a game for a saved deck with hero and deck-card picks. */
+  async function startArtGame(betaTester: boolean): Promise<RoomRow> {
     const users = await db.query(
       `INSERT INTO users (username, username_lc, pass_hash, created_at)
        VALUES ('ArtOwner','artowner','hash',1) RETURNING id`,
     );
     const userId = Number(users.rows[0]!.id);
-    const pool = precon("precon-asb")!.pool;
-    const heroImage = cardArtVariants(pool.heroId)[0]?.image;
-    const deckCard = pool.deck.find((id) => cardArtVariants(id).length > 0)!;
-    const deckImage = cardArtVariants(deckCard)[0]!.image;
-    expect(heroImage).toBeDefined();
+    if (betaTester) await db.query("INSERT INTO beta_testers (user_id, added_at) VALUES ($1, 1)", [userId]);
     await db.query(
       `INSERT INTO decks (id, user_id, name, format, fabrary_url, decklist, hero_name, art, created_at, updated_at)
        VALUES ('art-deck', $1, 'Art', 'cc', NULL, $2, 'Hero', $3, 1, 1)`,
@@ -3509,8 +3511,7 @@ describe("card art", () => {
     await markStoredSeatPresent(host.code, 0);
     const joined = await store.joinRoom(host.code, undefined, { allowPlayer: true, deckId: "precon-asr" });
     if (!joined.ok || joined.kind !== "player") throw new Error("join failed");
-    const tokens = [host.token, joined.token] as const;
-    const credentials = [{ token: tokens[0], userId }, { token: tokens[1] }] as const;
+    const credentials = [{ token: host.token, userId }, { token: joined.token }] as const;
     const room = (await store.getRoom(host.code))!;
     const chosen = await store.chooseFirst(host.code, credentials[room.prep!.dieWinner], true);
     if (!chosen.ok) throw new Error(chosen.error);
@@ -3528,6 +3529,12 @@ describe("card art", () => {
     }
     const started = (await store.getRoom(host.code))!;
     expect(started.state).not.toBeNull();
+    return started;
+  }
+
+  it("resolves art when a seat readies and shows opponents only visible cards", async () => {
+    expect(heroImage).toBeDefined();
+    const started = await startArtGame(true);
     expect(started.seats[0]!.cardArt).toEqual({ [pool.heroId]: heroImage, [deckCard]: deckImage });
     expect(started.seats[1]!.cardArt).toBeUndefined();
 
@@ -3540,5 +3547,11 @@ describe("card art", () => {
       expect(message.cardArt?.[0]).toEqual({ [pool.heroId]: heroImage });
       expect(decodeServerMessage(JSON.parse(JSON.stringify(message)))).not.toBeNull();
     }
+  });
+
+  it("shows standard art for players outside the beta", async () => {
+    const started = await startArtGame(false);
+    expect(started.seats[0]!.cardArt).toBeUndefined();
+    expect(stateMessage(started, 0)).not.toHaveProperty("cardArt");
   });
 });

@@ -690,6 +690,9 @@ export function createApiServer(deps: ApiDeps): http.Server {
     },
     "/api/decks/art": async (body, user) => {
       if (!user) return { status: 401, body: { ok: false, error: "not logged in" } };
+      if (!await isBetaTester(deps.db, user.id)) {
+        return { status: 403, body: { ok: false, error: "card art is available to beta testers only" } };
+      }
       const input = decodeDeckArtRequest(body);
       if (!input) return { status: 400, body: { ok: false, error: "invalid card art" } };
       const r = await setDeckArt(deps.db, user.id, input.id, input.art);

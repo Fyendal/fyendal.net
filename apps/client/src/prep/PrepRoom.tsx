@@ -127,7 +127,7 @@ export function PrepRoom() {
   const {
     prepDeck, prep, roomCode, queueCounts, matchmakingActive, matchAcceptanceRole,
     acceptMatch, declineMatch, playBotFromPrep, presentArena, presentDeck, prepUnready,
-    chooseFirst, leave, selectPrepMatchup, setDeckArt,
+    chooseFirst, leave, selectPrepMatchup, setDeckArt, betaTester,
   } = useStore(useShallow((state) => ({
     prepDeck: state.prepDeck,
     prep: state.prep,
@@ -145,6 +145,7 @@ export function PrepRoom() {
     leave: state.leave,
     selectPrepMatchup: state.selectPrepMatchup,
     setDeckArt: state.setDeckArt,
+    betaTester: state.betaTester,
   })));
   const [sel, setSel] = useState<PrepSelection | null>(null);
   const [restoredPresentationRoom, setRestoredPresentationRoom] = useState<string | null>(null);
@@ -163,7 +164,7 @@ export function PrepRoom() {
   const [botNudgeBusyFor, setBotNudgeBusyFor] = useState<string | null>(null);
   const [imageWaitSkippedFor, setImageWaitSkippedFor] = useState<string | null>(null);
   // Precons have no saved deck to hold art choices.
-  const artEnabled = !!prepDeck && !prepDeck.id.startsWith("precon-");
+  const artEnabled = betaTester && !!prepDeck && !prepDeck.id.startsWith("precon-");
   const artCatalog = useCardArtCatalog(artEnabled);
   const [artTarget, setArtTarget] = useState<{ cardId: string; anchor: HTMLElement } | null>(null);
   // Shown while a save is in flight so picks feel immediate.

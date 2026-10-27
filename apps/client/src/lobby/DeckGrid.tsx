@@ -103,7 +103,8 @@ export function DeckTile(props: {
   const d = props.deck;
   const heroCard = props.banner ? findPrinting(d.heroName) : undefined;
   const showArt = heroCard !== undefined && artOk;
-  const artCatalog = useCardArtCatalog(showArt && deckArtIsCustom(d.art));
+  const betaTester = useStore((state) => state.betaTester);
+  const artCatalog = useCardArtCatalog(betaTester && showArt && deckArtIsCustom(d.art));
   const heroArt = artCatalog && heroCard ? shownCardArt(artCatalog, heroCard.id, d.art) : undefined;
   const bannedCards = d.bannedCards ?? [];
   const futureCards = d.futureCards ?? [];

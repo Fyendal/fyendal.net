@@ -1023,6 +1023,24 @@ describe("account rights", () => {
     expect((await db.query("SELECT user_id FROM beta_testers")).rows).toEqual([]);
   });
 
+  it("saves card art only for beta testers", async () => {
+    await register(db, "ArtUser", "password1");
+    const session = await login(db, "artuser", "password1");
+    if (!session.ok) throw new Error("login failed");
+    const user = await sessionForToken(db, session.token);
+    if (!user) throw new Error("session missing");
+    const url = await startApi();
+    const save = () => fetch(`${url}/api/decks/art`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${session.token}`, "Content-Type": "application/json" },
+      body: JSON.stringify({ id: "missing-deck", art: { highestRarity: true, picks: {} } }),
+    });
+
+    expect((await save()).status).toBe(403);
+    await db.query("INSERT INTO beta_testers (user_id, added_at) VALUES ($1, 123)", [user.id]);
+    expect((await save()).status).toBe(404);
+  });
+
   it("exports account data and password-confirmed deletion removes account-bound data", async () => {
     await register(db, "PrivacyUser", "password1");
     const session = await login(db, "privacyuser", "password1");
