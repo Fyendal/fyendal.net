@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { legalIntents, projectStateFor } from "@fyendal/engine";
-import { scenario } from "../harness.js";
+import { printingId, scenario } from "../harness.js";
 
 const NO_EQUIPMENT = { head: null, chest: null, arms: null, legs: null } as const;
 
@@ -79,6 +79,13 @@ describe("CRU — Brute", () => {
       expect(rollLog).toBeDefined();
       const roll = Number(/rolled ([1-6])/.exec(rollLog!.publicText ?? "")?.[1]);
       expect(link!.attackValue).toBe(roll <= 4 ? 6 : 17);
+
+      s.blockWith().endTurn();
+      const { graveyard, soul } = s.state.players[0]!;
+      const herald = [...graveyard, ...soul].find((card) => card.cardId === printingId("wartune herald|1"));
+      expect(herald).toBeDefined();
+      expect(herald).not.toHaveProperty("basePowerDoublings");
+      expect(herald).not.toHaveProperty("basePowerHalvingsRoundDown");
     }
     expect(outcomes).toEqual(new Set([6, 17]));
   });

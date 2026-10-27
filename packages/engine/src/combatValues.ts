@@ -820,8 +820,7 @@ function applyBaseModifier(
         base = heroMultiply(runtime.makeCtx(state, seat, player.hero), card, base);
       }
     }
-    const doublings = Math.max(0, Number(card.scriptState?.doubleBasePower ?? 0));
-    for (let i = 0; i < doublings; i++) base *= 2;
+    for (let i = 0; i < (card.basePowerDoublings ?? 0); i++) base *= 2;
 
     // Numeric-property stage 4: division. Kayo's low roll is the round-down
     // division; other halving effects below explicitly round up.
@@ -837,16 +836,10 @@ function applyBaseModifier(
         base = heroDivide(runtime.makeCtx(state, seat, player.hero), card, base);
       }
     }
-    const roundDownHalvings = Math.max(
-      0,
-      Number(card.scriptState?.halveBasePowerRoundDown ?? 0),
-    );
-    for (let i = 0; i < roundDownHalvings; i++) base = Math.floor(base / 2);
+    for (let i = 0; i < (card.basePowerHalvingsRoundDown ?? 0); i++) base = Math.floor(base / 2);
+    for (let i = 0; i < (card.basePowerHalvingsRoundUp ?? 0); i++) base = Math.ceil(base / 2);
   }
   if (halveAttackActionBase(state, player, card)) {
-    base = Math.ceil(base / 2);
-  }
-  if (Number(card.scriptState?.halveBasePower ?? 0) > 0) {
     base = Math.ceil(base / 2);
   }
   return base;

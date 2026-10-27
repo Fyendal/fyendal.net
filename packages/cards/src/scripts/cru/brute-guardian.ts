@@ -162,13 +162,8 @@ export const cruBruteGuardian: Record<string, CardScript> = {
       ].find((card) => card.instanceId === playedId);
       if (!played) return;
       const data = ctx.cardData(played.cardId);
-      ctx.setCardState(played.instanceId, "halveBasePowerRoundDown", 0);
-      ctx.setCardState(played.instanceId, "doubleBasePower", 0);
-      if (roll <= 4) {
-        ctx.setCardState(played.instanceId, "halveBasePowerRoundDown", 1);
-      } else {
-        ctx.setCardState(played.instanceId, "doubleBasePower", 1);
-      }
+      if (roll <= 4) ctx.halveCardBasePowerRoundDown(played.instanceId);
+      else ctx.doubleCardBasePower(played.instanceId);
       ctx.logPublic(
         localizedCardLog(
           ctx,

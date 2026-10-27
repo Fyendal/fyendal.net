@@ -482,7 +482,7 @@ export function noteCardPlayed(
     (d.subtypes ?? []).includes("attack") &&
     Number(player.hero.scriptState?.halveNextAttackActionOnTurn ?? 0) === state.turn
   ) {
-    (card.scriptState ??= {}).halveBasePower = 1;
+    card.basePowerHalvingsRoundUp = (card.basePowerHalvingsRoundUp ?? 0) + 1;
     (player.hero.scriptState ??= {}).halveNextAttackActionOnTurn = 0;
   }
   const nonAttackAction =

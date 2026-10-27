@@ -2077,6 +2077,16 @@ export function makeCtx(
         card.basePowerOverride = power;
       });
     },
+    doubleCardBasePower(instanceId) {
+      updateCardCopies(state, runtime, self, instanceId, (card) => {
+        card.basePowerDoublings = (card.basePowerDoublings ?? 0) + 1;
+      });
+    },
+    halveCardBasePowerRoundDown(instanceId) {
+      updateCardCopies(state, runtime, self, instanceId, (card) => {
+        card.basePowerHalvingsRoundDown = (card.basePowerHalvingsRoundDown ?? 0) + 1;
+      });
+    },
     setCardState(instanceId, key, value) {
       updateCardCopies(state, runtime, self, instanceId, (card) => {
         (card.scriptState ??= {})[key] = value;

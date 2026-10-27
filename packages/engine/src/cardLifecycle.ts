@@ -79,6 +79,9 @@ const ARENA_STATUS_KEYS = ["attacked", "frozenUntilTurn", "marked"];
 export function clearTemporaryObjectEffects(card: CardInstance): void {
   delete card.tempPower;
   delete card.basePowerOverride;
+  delete card.basePowerDoublings;
+  delete card.basePowerHalvingsRoundDown;
+  delete card.basePowerHalvingsRoundUp;
   delete card.tempDefense;
   delete card.grantedKeywords;
   delete card.suppressedKeywords;

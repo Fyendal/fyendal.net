@@ -167,6 +167,8 @@ export interface ScriptCtx {
   setCardFaceDown(instanceId: number, faceDown: boolean): boolean;
   addCardTempPower(instanceId: number, delta: number): boolean;
   setCardBasePower(instanceId: number, power: number): void;
+  doubleCardBasePower(instanceId: number): void;
+  halveCardBasePowerRoundDown(instanceId: number): void;
   /** Grant an additional name to a card object for subsequent name checks. */
   grantCardName(instanceId: number, name: string): boolean;
   /** Store a public name chosen for this source's continuous effect. */

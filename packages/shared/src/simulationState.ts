@@ -44,6 +44,9 @@ export interface PersistedCardInstanceV1 {
   suppressedKeywords?: string[];
   tempPower?: number;
   basePowerOverride?: number;
+  basePowerDoublings?: number;
+  basePowerHalvingsRoundDown?: number;
+  basePowerHalvingsRoundUp?: number;
   tempDefense?: number;
   temporaryAlly?: { power: number; life: number };
   meldSide?: "left" | "right" | "both";

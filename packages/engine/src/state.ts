@@ -126,6 +126,13 @@ export interface CardInstance {
   /** Base power set on this object ("has 6 base {p}"). Cleared when the
    *  card changes zones. */
   basePowerOverride?: number;
+  /** Times this object's base power is doubled. Cleared when the card
+   *  changes zones, like the halvings below. */
+  basePowerDoublings?: number;
+  /** Times its base power is halved rounding down, after doubling. */
+  basePowerHalvingsRoundDown?: number;
+  /** Times its base power is halved rounding up. */
+  basePowerHalvingsRoundUp?: number;
   /** Defense granted to this card until the combat chain closes ("target
    *  card defending … gets -2{d} this combat chain" — per-instance). Cleared
    *  when the chain closes, at end of turn, or when the card changes zones. */
