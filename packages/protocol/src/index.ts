@@ -1,4 +1,5 @@
 import type { ClientBotTask, BotWorkerResponse } from "@fyendal/shared";
+import { STANDARD_CARD_ART } from "@fyendal/shared";
 import { decodeSerializedStateEnvelope } from "./simulationState.js";
 import type {
   AttackQueueEntryView,
@@ -11,6 +12,7 @@ import type {
   ClientMessage,
   SeatStandingOrder,
   SeatStandingOrders,
+  DeckArt,
   DeckPool,
   DefenderDefenseView,
   EffectLifetime,
@@ -168,10 +170,12 @@ export interface DeckSummary {
   /** Current legality hints; omitted when the corresponding list is empty. */
   bannedCards?: string[];
   futureCards?: string[];
+  art: DeckArt;
 }
 export interface DeckPlay { deckId: string; playedAt: number }
 export interface DecksResponse { ok: true; decks: DeckSummary[]; plays: DeckPlay[] }
 export interface DeckResponse { ok: true; deck: DeckSummary }
+export interface DeckArtRequest { id: string; art: DeckArt }
 export interface FabraryMatchup {
   id: string;
   name: string;
@@ -413,6 +417,7 @@ export interface AccountExport {
     format: Format;
     fabraryUrl: string | null;
     decklist: DeckPool;
+    art: DeckArt;
     heroName: string;
     createdAt: number;
     updatedAt: number;
@@ -1807,8 +1812,10 @@ function decodeStateMessage(value: unknown): StateMessage | null {
   if (!message || message.type !== "state") return null;
   const valid = exactKeys(message, [
     "type", "version", "view", "transition", "playerProfiles", "yourSeat", "legal", "actionCandidates",
-    "spectators", "lastActionAt", "botGame",
+    "spectators", "lastActionAt", "botGame", "cardArt",
   ], ["type", "version", "view", "playerProfiles", "yourSeat", "legal", "lastActionAt"])
+    && optional(message.cardArt, (v): v is [Record<string, string>, Record<string, string>] =>
+      Array.isArray(v) && v.length === 2 && v.every((map) => cardArtMap(map, false, MAX_CARDS)))
     && nonNegativeInteger(message.version) && decodeGameView(message.view) !== null && nullableSeat(message.yourSeat)
     && optional(message.transition, gameTransitionView)
     && Array.isArray(message.playerProfiles) && message.playerProfiles.length === 2
@@ -2654,13 +2661,44 @@ export const decodeAchievementsResponse: Decoder<AchievementsResponse> = (value)
   return { ok: true, unlocks: data.unlocks, percentages };
 };
 
+/** Fabrary image object ids, e.g. "DYN234-CF", "UPR007-MV_BACK", or "KO_HER172-RF". */
+const CARD_ART_IMAGE_RE = /^(?:[A-Z]{2}_)?[A-Z0-9]{6}(?:[-_][A-Z0-9_]+)*$/;
+const MAX_DECK_ART_PICKS = 100;
+
+/** printing id -> Fabrary image id. */
+function cardArtMap(value: unknown, allowStandard: boolean, max: number): value is Record<string, string> {
+  const map = object(value);
+  if (!map) return false;
+  const entries = Object.entries(map);
+  return entries.length <= max && entries.every(([cardId, image]) => string(cardId, MAX_ID, false)
+    && typeof image === "string" && image.length <= MAX_ID
+    && (CARD_ART_IMAGE_RE.test(image) || allowStandard && image === STANDARD_CARD_ART));
+}
+
+/** A seat's resolved images; picks never resolve to the standard sentinel. */
+export function resolvedCardArt(value: unknown): value is Record<string, string> {
+  return cardArtMap(value, false, MAX_CARDS);
+}
+
+export function deckArt(value: unknown): value is DeckArt {
+  const art = object(value);
+  return !!art && exactKeys(art, ["highestRarity", "picks"])
+    && typeof art.highestRarity === "boolean" && cardArtMap(art.picks, true, MAX_DECK_ART_PICKS);
+}
+
+export const decodeDeckArtRequest: Decoder<DeckArtRequest> = (value) => {
+  const data = object(value);
+  return data && exactKeys(data, ["id", "art"]) && id(data.id) && deckArt(data.art) ? value as DeckArtRequest : null;
+};
+
 function decodeDeckSummary(value: unknown): DeckSummary | null {
   const deck = object(value);
   return deck && exactKeys(
     deck,
-    ["id", "name", "format", "fabraryUrl", "heroName", "deckSize", "updatedAt", "bannedCards", "futureCards"],
-    ["id", "name", "format", "fabraryUrl", "heroName", "deckSize", "updatedAt"],
+    ["id", "name", "format", "fabraryUrl", "heroName", "deckSize", "updatedAt", "bannedCards", "futureCards", "art"],
+    ["id", "name", "format", "fabraryUrl", "heroName", "deckSize", "updatedAt", "art"],
   )
+    && deckArt(deck.art)
     && id(deck.id) && string(deck.name, MAX_SHORT_TEXT, false) && FORMATS.has(String(deck.format))
     && (deck.fabraryUrl === null || string(deck.fabraryUrl, 2048))
     && string(deck.heroName, MAX_SHORT_TEXT, false) && nonNegativeInteger(deck.deckSize)
@@ -2715,8 +2753,8 @@ export const decodeDeckDetailResponse: Decoder<DeckDetailResponse> = (value) => 
   if (!data || !exactKeys(data, ["ok", "deck"]) || !rawDeck
     || !exactKeys(
       rawDeck,
-      ["id", "name", "format", "fabraryUrl", "heroName", "deckSize", "updatedAt", "bannedCards", "futureCards", "decklist", "matchups", "selectedMatchupId"],
-      ["id", "name", "format", "fabraryUrl", "heroName", "deckSize", "updatedAt", "decklist"],
+      ["id", "name", "format", "fabraryUrl", "heroName", "deckSize", "updatedAt", "bannedCards", "futureCards", "art", "decklist", "matchups", "selectedMatchupId"],
+      ["id", "name", "format", "fabraryUrl", "heroName", "deckSize", "updatedAt", "art", "decklist"],
     )) return null;
   const { decklist: rawPool, matchups: rawMatchups, selectedMatchupId, ...summaryValue } = rawDeck;
   const summary = decodeDeckSummary(summaryValue);
@@ -2756,8 +2794,8 @@ export const decodeDeckInvalidResponse: Decoder<DeckInvalidResponse> = (value) =
 
 function exportDeck(value: unknown): boolean {
   const deck = object(value);
-  return !!deck && exactKeys(deck, ["id", "name", "format", "fabraryUrl", "decklist", "heroName", "createdAt", "updatedAt"])
-    && id(deck.id) && string(deck.name, MAX_SHORT_TEXT, false) && FORMATS.has(String(deck.format))
+  return !!deck && exactKeys(deck, ["id", "name", "format", "fabraryUrl", "decklist", "art", "heroName", "createdAt", "updatedAt"])
+    && deckArt(deck.art) && id(deck.id) && string(deck.name, MAX_SHORT_TEXT, false) && FORMATS.has(String(deck.format))
     && (deck.fabraryUrl === null || string(deck.fabraryUrl, 2048)) && decodeDeckPoolValue(deck.decklist)
     && string(deck.heroName, MAX_SHORT_TEXT, false) && nonNegativeInteger(deck.createdAt)
     && nonNegativeInteger(deck.updatedAt);

@@ -13,6 +13,7 @@ import {
   decodeClientMessage,
   decodeDeckDetailResponse,
   decodeDeckInvalidResponse,
+  decodeDeckArtRequest,
   decodeDeckResponse,
   decodeDecksResponse,
   decodeFabraryDeckPreviewResponse,
@@ -365,6 +366,7 @@ const summary = {
   heroName: "Hero",
   deckSize: 80,
   updatedAt: 1,
+  art: { highestRarity: false, picks: {} },
 };
 
 const pool = {
@@ -1364,6 +1366,14 @@ describe("replays and HTTP responses", () => {
     })).not.toBeNull();
     expect(decodeDecksResponse({ ok: true, decks: [], plays: [{ deckId: "precon-sba", playedAt: -1 }] })).toBeNull();
     expect(decodeDecksResponse({ ok: true, decks: [] })).toBeNull();
+    const withArt = (art: unknown) => decodeDeckResponse({ ok: true, deck: { ...summary, art } });
+    expect(withArt({ highestRarity: true, picks: { WTR159: "ANQ000-MV", DYN234: "standard" } })).not.toBeNull();
+    expect(withArt({ highestRarity: true, picks: { WTR159: "../evil" } })).toBeNull();
+    expect(withArt({ highestRarity: "yes", picks: {} })).toBeNull();
+    expect(withArt({ highestRarity: false })).toBeNull();
+    expect(decodeDeckResponse({ ok: true, deck: { ...summary, art: undefined } })).toBeNull();
+    expect(decodeDeckArtRequest({ id: "deck-id", art: { highestRarity: false, picks: {} } })).not.toBeNull();
+    expect(decodeDeckArtRequest({ id: "deck-id", art: { highestRarity: false, picks: {} }, extra: 1 })).toBeNull();
     expect(decodeDeckResponse({ ok: true, deck: summary })).not.toBeNull();
     expect(decodeDeckDetailResponse({
       ok: true,
@@ -1439,6 +1449,7 @@ describe("replays and HTTP responses", () => {
           format: summary.format,
           fabraryUrl: summary.fabraryUrl,
           decklist: pool,
+          art: summary.art,
           heroName: summary.heroName,
           createdAt: 1,
           updatedAt: summary.updatedAt,
