@@ -69,15 +69,16 @@ const ARENA_STATUS_KEYS = ["attacked", "frozenUntilTurn", "marked"];
 
 /** A card that changes zones becomes a new object (CR 3.0.9). Effects scoped
  * to its previous object (this-chain defense, this-turn power, granted or
- * suppressed keywords and names, freezes lasting while a source is in the
- * arena, every counter, arena-only statuses) do not follow it to hand, deck,
- * graveyard, banish, or soul, so a card returned and defending again later in
- * the same chain starts from its printed values. The departing counters are
- * kept only as `lastKnownCounters` for the card's own abilities that resolve
- * after the move; callers needing other last-known information keep a
- * snapshot of the previous object. */
+ * suppressed keywords and names, base power overrides, freezes lasting while
+ * a source is in the arena, every counter, arena-only statuses) do not follow
+ * it to hand, deck, graveyard, banish, or soul, so a card returned and
+ * defending again later in the same chain starts from its printed values.
+ * The departing counters are kept only as `lastKnownCounters` for the card's
+ * own abilities that resolve after the move; callers needing other last-known
+ * information keep a snapshot of the previous object. */
 export function clearTemporaryObjectEffects(card: CardInstance): void {
   delete card.tempPower;
+  delete card.basePowerOverride;
   delete card.tempDefense;
   delete card.grantedKeywords;
   delete card.suppressedKeywords;
@@ -367,15 +368,17 @@ export function settlePlayedCard(
   opts?: { allowCrank?: boolean },
 ): void {
   const data = dataOf(state, card.cardId);
-  if (data.cardType === "equipment" && scriptOf(state, card.cardId, card)?.playableEquipment === true) {
+  const script = scriptOf(state, card.cardId, card);
+  if (data.cardType === "equipment" && script?.playableEquipment === true) {
     const slot = (["head", "chest", "arms", "legs"] as const).find((candidate) =>
       (data.subtypes ?? []).includes(candidate),
     );
-    if (!slot) {
+    const base = slot ? player.equipment[slot] : undefined;
+    // CR 8.5.41c: equipping into a zone it cannot transform the occupant of fails.
+    if (!slot || (base && !script.transformsEquipment?.(runtime.makeCtx(state, player.seat, card), base))) {
       runtime.commands.moveToGraveyard(state, card, "stack");
       return;
     }
-    const base = player.equipment[slot];
     if (base) {
       severDefendingEquipment(state, base.instanceId);
       runtime.commands.fireLeaveArena(state, player.seat, base, "subcard");

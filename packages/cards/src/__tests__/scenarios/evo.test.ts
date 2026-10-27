@@ -333,6 +333,47 @@ describe("EVO — registration and core mechanics", () => {
     s.settle().expectEquipped(0, "head", "evo circuit breaker|1");
   });
 
+  it("Teklovossen plays a banished Evo over an equipped Evo; equip fails because the zone is occupied", () => {
+    const s = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          heroKey: "teklovossen, esteemed magnate|0",
+          resources: 4,
+          banish: ["evo steel soul tower|3"],
+          equipment: { legs: "evo speedslip|3" },
+        },
+        { hero: "dorinthea" },
+      ],
+    });
+    const tower = s.state.players[0]!.banish[0]!;
+    const intent = legalIntents(s.state, 0).find((candidate) =>
+      candidate.kind === "play-from-zone" && candidate.zone === "banish" && candidate.instanceId === tower.instanceId,
+    );
+    expect(intent).toBeDefined();
+
+    s.doRaw(intent!).settle()
+      .expectEquipped(0, "legs", "evo speedslip|3")
+      .expectInZone(0, "evo steel soul tower|3", "graveyard");
+  });
+
+  it("an Evo played with no base equips to its empty zone without transforming", () => {
+    const s = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          heroKey: "teklovossen|0",
+          hand: ["evo sentry base head|1", BLUE],
+          equipment: { head: null },
+        },
+        { hero: "dorinthea" },
+      ],
+    });
+    s.play("evo sentry base head|1", { pitch: [BLUE] })
+      .expectEquipped(0, "head", "evo sentry base head|1");
+    expect(s.state.players[0]!.equipment.head!.subcards ?? []).toHaveLength(0);
+  });
+
   it("offers a banished Evo Beta Base Legs after Teklovossen resolves before defense", () => {
     const s = scenario({
       active: 1,

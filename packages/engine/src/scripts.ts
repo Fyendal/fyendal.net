@@ -166,6 +166,7 @@ export interface ScriptCtx {
   ): boolean;
   setCardFaceDown(instanceId: number, faceDown: boolean): boolean;
   addCardTempPower(instanceId: number, delta: number): boolean;
+  setCardBasePower(instanceId: number, power: number): void;
   /** Grant an additional name to a card object for subsequent name checks. */
   grantCardName(instanceId: number, name: string): boolean;
   /** Store a public name chosen for this source's continuous effect. */
@@ -1117,8 +1118,11 @@ export interface CardScript {
    * it remains there (Mentor and similar cards). */
   activeWhileFaceUpInArsenal?: boolean;
   /** This equipment is a deck-playable action object (Evo, CR 8.3.26). On
-   * resolution it replaces matching base equipment and retains it underneath. */
+   * resolution it equips to its empty zone or transforms the occupant. */
   playableEquipment?: boolean;
+  /** Whether resolving playable equipment transforms `equipped` and retains it
+   * underneath; otherwise equipping into the occupied zone fails. */
+  transformsEquipment?(ctx: ScriptCtx, equipped: DeepReadonly<CardInstance>): boolean;
   /** A live source may grant matching friendly cards permission to be played
    * from an otherwise inaccessible zone. */
   allowsFriendlyCardPlayFrom?(

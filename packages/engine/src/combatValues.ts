@@ -801,12 +801,10 @@ function applyBaseModifier(
     if (hook) base = hook(runtime.makeCtx(state, seat, player.hero), card, base);
   }
 
-  // Numeric-property stage 2: layer effects stamped onto a card when it was
-  // played set its base power before any multiplication.
+  // Numeric-property stage 2: an override set on this object replaces its
+  // base power before any multiplication.
   if (kind === "power") {
-    if (Number(card.scriptState?.setBasePowerUntilTurn ?? 0) === state.turn) {
-      base = Number(card.scriptState?.setBasePower ?? base);
-    }
+    if (card.basePowerOverride !== undefined) base = card.basePowerOverride;
 
     // Numeric-property stage 3: multiplication. Card and hero hooks model
     // live static effects; counters model effects stamped onto this object.

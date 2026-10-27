@@ -413,9 +413,7 @@ function gravenEquipment(): CardScript {
 function evoBeta(slot: "head" | "chest" | "arms" | "legs"): CardScript {
   return {
     playableEquipment: true,
-    canPlay(ctx) {
-      return !!ctx.player(ctx.seat).equipment[slot] && hasTag(ctx, ctx.player(ctx.seat).equipment[slot]!, "base");
-    },
+    transformsEquipment: (ctx, equipped) => hasTag(ctx, equipped, "base"),
     playAsInstant(ctx) {
       return ctx.getPlayerFlag(ctx.seat, "nextEvoAsInstant") === true;
     },

@@ -123,6 +123,9 @@ export interface CardInstance {
    *  +2{p} this turn" — per-instance, unlike a +1{p} counter). Cleared at end
    *  of turn or when the card changes zones. */
   tempPower?: number;
+  /** Base power set on this object ("has 6 base {p}"). Cleared when the
+   *  card changes zones. */
+  basePowerOverride?: number;
   /** Defense granted to this card until the combat chain closes ("target
    *  card defending … gets -2{d} this combat chain" — per-instance). Cleared
    *  when the chain closes, at end of turn, or when the card changes zones. */

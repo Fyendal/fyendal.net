@@ -721,6 +721,28 @@ describe("SLY — attacks and defense", () => {
     g.blockWith().settle().expectLife(0, 18); // 4 damage, all prevented
   });
 
+  it("Oasis Respite's unspent shield on an attack card expires at end of turn", () => {
+    const g = scenario({
+      seats: [
+        lyath({ hand: ["oasis respite|1", "mocking blow|3"] }),
+        foe({ hand: ["head jab|2"] }),
+      ],
+      active: 1,
+    });
+    g.play("head jab|2");
+    g.blockWith();
+    g.passPriority();
+    g.react("oasis respite|1", { pitch: ["mocking blow|3"] });
+    g.chooseOption("your hero").chooseCard("head jab|2");
+    g.settle().expectLife(0, 20);
+    const preventions = () =>
+      projectStateFor(g.state, 0).ongoing.filter((effect) => JSON.stringify(effect).includes("prevent"));
+    expect(preventions()).not.toHaveLength(0);
+    g.endTurn().expectInZone(1, "head jab|2", "graveyard");
+    expect(g.state.players[1]!.graveyard.find((card) => card.damagePrevented)).toBeUndefined();
+    expect(preventions()).toHaveLength(0);
+  });
+
   it("Oasis Respite's shield prevents before Ward asks for the remainder", () => {
     const g = scenario({
       seats: [

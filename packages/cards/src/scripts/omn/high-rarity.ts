@@ -609,6 +609,7 @@ export const omnHighRarity: Record<string, CardScript> = {
   },
   "arcbane grasp|3": {
     playableEquipment: true,
+    transformsEquipment: (ctx, equipped) => has(ctx, equipped, "base"),
     playAsInstant: (ctx) => ctx.getPlayerFlag(ctx.seat, "nextEvoAsInstant") === true,
     triggers: [
       entersArenaTrigger(

@@ -43,6 +43,7 @@ export interface PersistedCardInstanceV1 {
   grantedKeywords?: string[];
   suppressedKeywords?: string[];
   tempPower?: number;
+  basePowerOverride?: number;
   tempDefense?: number;
   temporaryAlly?: { power: number; life: number };
   meldSide?: "left" | "right" | "both";

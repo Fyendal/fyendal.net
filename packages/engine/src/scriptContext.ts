@@ -2072,6 +2072,11 @@ export function makeCtx(
         if (Object.keys(values).length === 0) delete card.scriptState;
       });
     },
+    setCardBasePower(instanceId, power) {
+      updateCardCopies(state, runtime, self, instanceId, (card) => {
+        card.basePowerOverride = power;
+      });
+    },
     setCardState(instanceId, key, value) {
       updateCardCopies(state, runtime, self, instanceId, (card) => {
         (card.scriptState ??= {})[key] = value;

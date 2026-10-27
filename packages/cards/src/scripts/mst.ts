@@ -94,11 +94,7 @@ function instantEvoEquipment(extra: CardScript = {}): CardScript {
     ...extra,
     additionalCardTypes: ["instant"],
     playableEquipment: true,
-    canPlay(ctx) {
-      const slot = (["head", "chest", "arms", "legs"] as const).find((candidate) => hasType(ctx, ctx.self, candidate));
-      const base = slot ? ctx.player(ctx.seat).equipment[slot] : undefined;
-      return !!base && hasType(ctx, base, "base") && (extra.canPlay?.(ctx) ?? true);
-    },
+    transformsEquipment: (ctx, equipped) => hasType(ctx, equipped, "base"),
     playAsInstant: () => true,
   };
 }

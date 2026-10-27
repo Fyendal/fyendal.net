@@ -597,8 +597,7 @@ export function noteCardPlayed(
     if (mod.scope !== "next-play" || mod.seat !== player.seat || !modifierMatchesPlayedCard(state, mod, card)) continue;
     consumedNextPlay.add(mod.id);
     if (mod.basePower !== undefined) {
-      (card.scriptState ??= {}).setBasePower = mod.basePower;
-      card.scriptState.setBasePowerUntilTurn = state.turn;
+      card.basePowerOverride = mod.basePower;
     }
     if (mod.grantType) {
       const tag = mod.grantType.toLowerCase();

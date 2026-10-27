@@ -81,18 +81,11 @@ function applyFabricateHandMode(ctx: ScriptCtx): void {
   const evo = ctx.player(ctx.seat).hand.find((card) => has(ctx, card, "evo"));
   if (evo && ctx.banish(evo.instanceId)) ctx.drawCards(ctx.seat, 1);
 }
-function baseSlot(ctx: ScriptCtx): "head" | "chest" | "arms" | "legs" | undefined {
-  return (["head", "chest", "arms", "legs"] as const).find((slot) => ctx.cardTypes(ctx.self).includes(slot));
-}
 function evoEquipment(extra: CardScript = {}): CardScript {
   return {
     ...extra,
     playableEquipment: true,
-    canPlay(ctx) {
-      const slot = baseSlot(ctx);
-      const base = slot ? ctx.player(ctx.seat).equipment[slot] : undefined;
-      return !!base && has(ctx, base, "base") && (extra.canPlay?.(ctx) ?? true);
-    },
+    transformsEquipment: (ctx, equipped) => has(ctx, equipped, "base"),
     playAsInstant(ctx) {
       return ctx.getPlayerFlag(ctx.seat, "nextEvoAsInstant") === true || (extra.playAsInstant?.(ctx) ?? false);
     },

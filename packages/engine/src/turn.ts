@@ -455,11 +455,8 @@ function completeEndPhase(state: GameStateInternal, runtime: EngineRuntime): voi
       delete p.hero.scriptState?.loseLifeOnActionSource;
     }
     // source-side prevention shields (Oasis Respite's damagePrevented) expire
-    for (const c of controlledPermanents(state, p.seat, {
-      includeDisabledHero: true,
-    })) {
-      delete c.damagePrevented;
-    }
+    // wherever the source is now, including an attack card in the graveyard
+    delete p.hero.damagePrevented;
     // card-scoped play-from-zone permissions (e.g. Katsu's searched card) and
     // their attached cost discounts expire too — unless they were granted
     // "until the start of your next turn" (playableFromExpiry); so do
@@ -500,6 +497,7 @@ function completeEndPhase(state: GameStateInternal, runtime: EngineRuntime): voi
         }
         delete c.temporaryGraveyardReplacement;
         delete c.playableAsInstant;
+        delete c.damagePrevented;
       }
     }
   }

@@ -52,6 +52,37 @@ describe("OUT — registration and core mechanics", () => {
       .expectAP(0, 1);
   });
 
+  it("Looking for a Scrap can banish a 1 power card that Kayo set to 6 base power on the chain", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          heroKey: "kayo, strong-arm|0",
+          weapons: [],
+          resources: 4,
+          hand: ["insult to injury|3", "looking for a scrap|1"],
+          deck: [BLUE, BLUE, BLUE, BLUE, BLUE, BLUE],
+        },
+        { hero: "dorinthea" },
+      ],
+    });
+    g.play("insult to injury|3")
+      .blockWith()
+      .activate("kayo, strong-arm|0", { settle: false })
+      .passPriority()
+      .passPriority()
+      .expectAttackValue(6)
+      .endTurn()
+      .endTurn()
+      .expectInZone(0, "insult to injury|3", "graveyard");
+
+    const base = cardData[printingId("looking for a scrap|1")]!.attack ?? 0;
+    g.play("looking for a scrap|1", { pitch: [BLUE] })
+      .chooseCard("insult to injury|3")
+      .expectAttackValue(base + 1)
+      .expectInZone(0, "insult to injury|3", "banish");
+  });
+
   it("Arakni gives only the first stealth attack go again and Prowl buffs the next one", () => {
     const s = scenario({
       seats: [

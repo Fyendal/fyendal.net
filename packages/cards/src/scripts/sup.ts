@@ -875,9 +875,6 @@ export const sup: Record<string, CardScript> = {
   "not so mighty|3": destroyOpposingToken(TOUGHNESS, "Might", "reviled"),
 
   "kayo, strong-arm|0": {
-    modifyBasePower(_ctx, card, base) {
-      return card.scriptState?.kayoBaseSix ? 6 : base;
-    },
     activated: {
       cost: 4,
       isAttack: false,
@@ -886,7 +883,7 @@ export const sup: Record<string, CardScript> = {
       timing: "instant",
       canActivate: (ctx) => !!ctx.link && ctx.link.attacker === ctx.seat && ctx.link.attackCardType === "action",
       onActivate(ctx) {
-        if (ctx.link) ctx.setCardState(ctx.link.attackingCard.instanceId, "kayoBaseSix", 1);
+        if (ctx.link) ctx.setCardBasePower(ctx.link.attackingCard.instanceId, 6);
       },
     },
     onBooed(ctx) {

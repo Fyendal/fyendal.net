@@ -82,13 +82,7 @@ function evoEquipment(extra: CardScript = {}): CardScript {
   return {
     ...extra,
     playableEquipment: true,
-    canPlay(ctx) {
-      const slot = ctx
-        .cardTypes(ctx.self)
-        .find((type): type is "head" | "chest" | "arms" | "legs" => ["head", "chest", "arms", "legs"].includes(type));
-      const base = slot ? ctx.player(ctx.seat).equipment[slot] : undefined;
-      return !!base && has(ctx, base, "base");
-    },
+    transformsEquipment: (ctx, equipped) => has(ctx, equipped, "base"),
     playAsInstant(ctx) {
       return ctx.getPlayerFlag(ctx.seat, "nextEvoAsInstant") === true || (extra.playAsInstant?.(ctx) ?? false);
     },

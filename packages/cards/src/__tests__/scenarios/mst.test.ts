@@ -337,7 +337,7 @@ describe("MST — Mechanologist", () => {
     expect(g.state.players[0]!.deck[0]?.cardId).toBe(printingId("zero to sixty|1"));
   });
 
-  it("MST instant Evos require matching base equipment", () => {
+  it("MST instant Evos transform matching base equipment or equip to an empty zone", () => {
     for (const [evo, equipment] of [
       ["evo recall|3", { head: "cogwerx base head|0" }],
       ["evo heartdrive|3", { chest: "cogwerx base chest|0" }],
@@ -363,10 +363,15 @@ describe("MST — Mechanologist", () => {
           { hero: "dorinthea" },
         ],
       });
-      const blockedCard = withoutBase.state.players[0]!.hand[0]!;
-      expect(legalIntents(withoutBase.state, 0).some(
-        (intent) => intent.kind === "play-card" && intent.instanceId === blockedCard.instanceId,
-      ), evo).toBe(false);
+      const unbasedCard = withoutBase.state.players[0]!.hand[0]!;
+      expect(legalIntents(withoutBase.state, 0), evo).toContainEqual(expect.objectContaining({
+        kind: "play-card",
+        instanceId: unbasedCard.instanceId,
+        asInstant: true,
+      }));
+      const slot = Object.keys(equipment)[0] as keyof typeof equipment;
+      withoutBase.play(evo).expectEquipped(0, slot, evo);
+      expect(withoutBase.state.players[0]!.equipment[slot]!.subcards ?? [], evo).toHaveLength(0);
     }
   });
 
