@@ -962,6 +962,15 @@ export class Scenario {
     return this;
   }
 
+  /** The open chain link lists a modifier of `amount` from `sourceKey`. */
+  expectAttackModifier(sourceKey: string, amount: number): this {
+    const view = projectStateFor(this.state, this.state.activePlayer);
+    const link = [...view.chain].reverse().find((l) => !l.resolved);
+    expect(link, "no open chain link").toBeTruthy();
+    expect(link!.attackModifiers).toContainEqual({ sourceCardId: printingId(sourceKey), amount });
+    return this;
+  }
+
   /** Prevention already established for the open attack, as projected beside
    *  total defense in the combat-chain window. */
   expectDamageToPrevent(n: number, sourceKeys: string[] = []): this {

@@ -124,15 +124,14 @@ export interface CardInstance {
    *  of turn or when the card changes zones. */
   tempPower?: number;
   /** Base power set on this object ("has 6 base {p}"). Cleared when the
-   *  card changes zones. */
-  basePowerOverride?: number;
-  /** Times this object's base power is doubled. Cleared when the card
-   *  changes zones, like the halvings below. */
-  basePowerDoublings?: number;
-  /** Times its base power is halved rounding down, after doubling. */
-  basePowerHalvingsRoundDown?: number;
-  /** Times its base power is halved rounding up. */
-  basePowerHalvingsRoundUp?: number;
+   *  card changes zones, like the doublings and halvings below. */
+  basePowerOverride?: BasePowerSource & { power: number };
+  /** One entry per doubling of this object's base power. */
+  basePowerDoublings?: BasePowerSource[];
+  /** One entry per halving rounded down, applied after doubling. */
+  basePowerHalvingsRoundDown?: BasePowerSource[];
+  /** One entry per halving rounded up. */
+  basePowerHalvingsRoundUp?: BasePowerSource[];
   /** Defense granted to this card until the combat chain closes ("target
    *  card defending … gets -2{d} this combat chain" — per-instance). Cleared
    *  when the chain closes, at end of turn, or when the card changes zones. */
@@ -445,6 +444,12 @@ interface PendingWager {
   opposingSeat: number;
   rewardCardIds: string[];
   rewardLabel: string;
+}
+
+/** The card whose effect changed another card's base power. */
+export interface BasePowerSource {
+  sourceInstanceId: number;
+  sourceCardId: string;
 }
 
 export interface CombatValueModifier {

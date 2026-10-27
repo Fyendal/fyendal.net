@@ -349,6 +349,7 @@ export const sly: Record<string, CardScript> = {
     // flag cleanup and covers the rest of this turn plus their next turn
     const hero = ctx.player(opponentSeat(ctx)).hero;
     ctx.setCardState(hero.instanceId, "halveBaseAttackActionUntil", ctx.state.turn + 1);
+    ctx.setCardState(hero.instanceId, "halveBaseAttackActionSource", ctx.self.instanceId);
     ctx.logPublic(
       localizedCardLog(
         ctx,

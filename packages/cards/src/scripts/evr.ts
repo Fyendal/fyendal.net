@@ -398,6 +398,7 @@ function fatigueShot(): CardScript {
     onHit(ctx) {
       const hero = ctx.player(opponentSeat(ctx)).hero;
       ctx.setCardState(hero.instanceId, "halveNextAttackActionOnTurn", ctx.state.turn + 1);
+      ctx.setCardState(hero.instanceId, "halveNextAttackActionSource", ctx.self.instanceId);
     },
   };
 }

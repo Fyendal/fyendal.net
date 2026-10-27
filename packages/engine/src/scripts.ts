@@ -166,6 +166,7 @@ export interface ScriptCtx {
   ): boolean;
   setCardFaceDown(instanceId: number, faceDown: boolean): boolean;
   addCardTempPower(instanceId: number, delta: number): boolean;
+  /** Base power changes on a card object, attributed to this source. */
   setCardBasePower(instanceId: number, power: number): void;
   doubleCardBasePower(instanceId: number): void;
   halveCardBasePowerRoundDown(instanceId: number): void;

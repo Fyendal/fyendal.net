@@ -726,7 +726,8 @@ describe("SUP — heroes and the crowd", () => {
       .activate("kayo, strong-arm|0", { pitch: ["prime the crowd|3", "prime the crowd|3"], settle: false })
       .passPriority()
       .passPriority()
-      .expectAttackValue(6);
+      .expectAttackValue(6)
+      .expectAttackModifier("kayo, strong-arm|0", 6 - cardData[printingId("offensive behavior|3")]!.attack!);
   });
 
   it("Gauntlets of Tyrannical Rex recognizes an active Diabolic Offering in pitch", () => {

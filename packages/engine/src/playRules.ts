@@ -482,8 +482,11 @@ export function noteCardPlayed(
     (d.subtypes ?? []).includes("attack") &&
     Number(player.hero.scriptState?.halveNextAttackActionOnTurn ?? 0) === state.turn
   ) {
-    card.basePowerHalvingsRoundUp = (card.basePowerHalvingsRoundUp ?? 0) + 1;
+    const sourceId = Number(player.hero.scriptState?.halveNextAttackActionSource ?? 0);
+    const source = findCardAnywhere(state, sourceId)?.card ?? card;
+    (card.basePowerHalvingsRoundUp ??= []).push({ sourceInstanceId: source.instanceId, sourceCardId: source.cardId });
     (player.hero.scriptState ??= {}).halveNextAttackActionOnTurn = 0;
+    delete player.hero.scriptState.halveNextAttackActionSource;
   }
   const nonAttackAction =
     isAction && !(d.subtypes ?? []).includes("attack");
@@ -597,7 +600,11 @@ export function noteCardPlayed(
     if (mod.scope !== "next-play" || mod.seat !== player.seat || !modifierMatchesPlayedCard(state, mod, card)) continue;
     consumedNextPlay.add(mod.id);
     if (mod.basePower !== undefined) {
-      card.basePowerOverride = mod.basePower;
+      card.basePowerOverride = {
+        power: mod.basePower,
+        sourceInstanceId: mod.sourceInstanceId,
+        sourceCardId: mod.sourceCardId ?? findCardAnywhere(state, mod.sourceInstanceId)?.card.cardId ?? card.cardId,
+      };
     }
     if (mod.grantType) {
       const tag = mod.grantType.toLowerCase();

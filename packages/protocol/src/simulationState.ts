@@ -320,6 +320,11 @@ const CARD_OPTIONAL = ["subcards", "pitchCount", "faceDown", "intimidated", "ret
 type _CardValidatorIsExhaustive = Assert<
   SameKeys<CardInstance, Record<(typeof CARD_REQUIRED)[number] | (typeof CARD_OPTIONAL)[number], unknown>>
 >;
+function validateBasePowerSource(source: JsonObject, code: string, path: string): void {
+  integer(source.sourceInstanceId, code, `${path}.sourceInstanceId`);
+  string(source.sourceCardId, code, `${path}.sourceCardId`, 128);
+}
+
 function validateCard(value: unknown, code: string, path: string, depth = 0): void {
   if (depth > 8) fail(code, path, "card nesting is too deep");
   const card = exact(value, code, path, CARD_REQUIRED, CARD_OPTIONAL);
@@ -327,10 +332,10 @@ function validateCard(value: unknown, code: string, path: string, depth = 0): vo
   string(card.cardId, code, `${path}.cardId`, 128);
   integer(card.owner, code, `${path}.owner`);
   for (const key of ["faceDown", "intimidated", "tapped", "flipped", "playableFromUntilChainClose", "playableAsInstant"] as const) optional(card, key, (v, p) => { bool(v, code, p); }, path);
-  for (const key of ["pitchCount", "basePowerDoublings", "basePowerHalvingsRoundDown", "basePowerHalvingsRoundUp"] as const) optional(card, key, (v, p) => {
+  optional(card, "pitchCount", (v, p) => {
     if (integer(v, code, p) < 0) fail(code, p, "expected a non-negative safe integer");
   }, path);
-  for (const key of ["returnToHandAtTurn", "defCounters", "playableBySeat", "playableFromExpiry", "playableFromEndTurnExpiry", "playableFromUntilStartOfSeatTurn", "playableFromUntilEndOfSeatTurn", "playableFromGrantedTurn", "playCostReduction", "playCostReductionSeat", "playTargetInstanceId", "boundToInstanceId", "temporaryHeroUntilTurn", "tempPower", "basePowerOverride", "tempDefense", "life", "arsenalSlot"] as const) optional(card, key, (v, p) => { integer(v, code, p); }, path);
+  for (const key of ["returnToHandAtTurn", "defCounters", "playableBySeat", "playableFromExpiry", "playableFromEndTurnExpiry", "playableFromUntilStartOfSeatTurn", "playableFromUntilEndOfSeatTurn", "playableFromGrantedTurn", "playCostReduction", "playCostReductionSeat", "playTargetInstanceId", "boundToInstanceId", "temporaryHeroUntilTurn", "tempPower", "tempDefense", "life", "arsenalSlot"] as const) optional(card, key, (v, p) => { integer(v, code, p); }, path);
   optional(card, "counters", (v, p) => validateCounters(v, code, p), path);
   optional(card, "lastKnownCounters", (v, p) => validateCounters(v, code, p), path);
   optional(card, "scriptState", (v, p) => validateFlags(v, code, p, true), path);
@@ -356,6 +361,17 @@ function validateCard(value: unknown, code: string, path: string, depth = 0): vo
   optional(card, "suppressedKeywords", (v, p) => validateStringArray(v, code, p), path);
   optional(card, "meldSide", (v, p) => { oneOf(v, ["left", "right", "both"] as const, code, p); }, path);
   optional(card, "attackTargetIds", (v, p) => validateIntegerArray(v, code, p), path);
+  optional(card, "basePowerOverride", (v, p) => {
+    const override = exact(v, code, p, ["power", "sourceInstanceId", "sourceCardId"]);
+    integer(override.power, code, `${p}.power`);
+    validateBasePowerSource(override, code, p);
+  }, path);
+  for (const key of ["basePowerDoublings", "basePowerHalvingsRoundDown", "basePowerHalvingsRoundUp"] as const) {
+    optional(card, key, (v, p) => array(v, code, p).forEach((entry, index) => {
+      const entryPath = `${p}[${index}]`;
+      validateBasePowerSource(exact(entry, code, entryPath, ["sourceInstanceId", "sourceCardId"]), code, entryPath);
+    }), path);
+  }
   optional(card, "temporaryAlly", (v, p) => {
     const ally = exact(v, code, p, ["power", "life"]);
     integer(ally.power, code, `${p}.power`);

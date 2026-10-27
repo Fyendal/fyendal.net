@@ -21,7 +21,7 @@ import {
   modifierApplies,
   modifierAppliesToDefense,
 } from "./combatModifiers.js";
-import type { CardInstance, ChainLinkState, CombatValueModifier, Modifier, PlayerState } from "./state.js";
+import type { BasePowerSource, CardInstance, ChainLinkState, CombatValueModifier, Modifier, PlayerState } from "./state.js";
 import { findCardAnywhere, opponent } from "./zoneQueries.js";
 import { controlledPermanents, hookSources, lingeringModifierSources } from "./sourceQueries.js";
 import { heroAbilitiesDisabled } from "./stateQueries.js";
@@ -502,7 +502,7 @@ export function attackValueModifiers(
   runtime: EngineRuntime,
   link: ChainLinkState,
 ): CombatValueModifier[] {
-  const out: CombatValueModifier[] = [];
+  const out = basePowerModifiers(state, runtime, link.attacker, link.attackingCard, rawAttackPower(state, link));
   for (const adjustment of attackValueAdjustments(state, runtime, link)) {
     valueModifier(out, adjustment.source, adjustment.amount);
   }
@@ -775,6 +775,20 @@ function baseDefenseOf(
   return applyBaseModifier(state, runtime, seat, card, raw, "defense");
 }
 
+/** Each change to a card's base power, attributed to its source. */
+export function basePowerModifiers(
+  state: GameStateInternal,
+  runtime: EngineRuntime,
+  seat: number,
+  card: CardInstance,
+  raw: number,
+): CombatValueModifier[] {
+  if (scriptOf(state, card.cardId, card)?.unmodifiableCharacteristics?.includes("power")) return [];
+  const steps: CombatValueModifier[] = [];
+  applyBaseModifier(state, runtime, seat, card, card.temporaryAlly?.power ?? raw, "power", steps);
+  return steps;
+}
+
 function applyBaseModifier(
   state: GameStateInternal,
   runtime: EngineRuntime,
@@ -782,9 +796,20 @@ function applyBaseModifier(
   card: CardInstance,
   raw: number,
   kind: "power" | "defense",
+  steps?: CombatValueModifier[],
 ): number {
   let base = raw;
   const player = state.players[seat] as PlayerState;
+  // Records each change against its source for the chain window.
+  const set = (source: CardInstance | BasePowerSource | undefined, next: number): void => {
+    if (steps && source && next !== base) {
+      const [sourceInstanceId, sourceCardId] = "instanceId" in source
+        ? [source.instanceId, source.cardId]
+        : [source.sourceInstanceId, source.sourceCardId];
+      steps.push({ sourceInstanceId, sourceCardId, amount: next - base });
+    }
+    base = next;
+  };
 
   // Characteristic-defining abilities, such as Rockyard Rodeo's */power,
   // function in every zone. Apply the card's own definition before effects
@@ -792,19 +817,19 @@ function applyBaseModifier(
   if (card.instanceId !== player.hero.instanceId) {
     const ownKey = kind === "power" ? "modifyBasePower" : "modifyBaseDefense";
     const ownHook = scriptOf(state, card.cardId, card)?.[ownKey];
-    if (ownHook) base = ownHook(runtime.makeCtx(state, seat, card), card, base);
+    if (ownHook) set(card, ownHook(runtime.makeCtx(state, seat, card), card, base));
   }
 
   if (!heroAbilitiesDisabled(state, seat)) {
     const key = kind === "power" ? "modifyBasePower" : "modifyBaseDefense";
     const hook = scriptOf(state, player.hero.cardId, player.hero)?.[key];
-    if (hook) base = hook(runtime.makeCtx(state, seat, player.hero), card, base);
+    if (hook) set(player.hero, hook(runtime.makeCtx(state, seat, player.hero), card, base));
   }
 
   // Numeric-property stage 2: an override set on this object replaces its
   // base power before any multiplication.
   if (kind === "power") {
-    if (card.basePowerOverride !== undefined) base = card.basePowerOverride;
+    if (card.basePowerOverride) set(card.basePowerOverride, card.basePowerOverride.power);
 
     // Numeric-property stage 3: multiplication. Card and hero hooks model
     // live static effects; counters model effects stamped onto this object.
@@ -812,15 +837,15 @@ function applyBaseModifier(
       ? undefined
       : scriptOf(state, card.cardId, card)?.multiplyBasePower;
     if (ownMultiply) {
-      base = ownMultiply(runtime.makeCtx(state, seat, card), card, base);
+      set(card, ownMultiply(runtime.makeCtx(state, seat, card), card, base));
     }
     if (!heroAbilitiesDisabled(state, seat)) {
       const heroMultiply = scriptOf(state, player.hero.cardId, player.hero)?.multiplyBasePower;
       if (heroMultiply) {
-        base = heroMultiply(runtime.makeCtx(state, seat, player.hero), card, base);
+        set(player.hero, heroMultiply(runtime.makeCtx(state, seat, player.hero), card, base));
       }
     }
-    for (let i = 0; i < (card.basePowerDoublings ?? 0); i++) base *= 2;
+    for (const source of card.basePowerDoublings ?? []) set(source, base * 2);
 
     // Numeric-property stage 4: division. Kayo's low roll is the round-down
     // division; other halving effects below explicitly round up.
@@ -828,19 +853,20 @@ function applyBaseModifier(
       ? undefined
       : scriptOf(state, card.cardId, card)?.divideBasePower;
     if (ownDivide) {
-      base = ownDivide(runtime.makeCtx(state, seat, card), card, base);
+      set(card, ownDivide(runtime.makeCtx(state, seat, card), card, base));
     }
     if (!heroAbilitiesDisabled(state, seat)) {
       const heroDivide = scriptOf(state, player.hero.cardId, player.hero)?.divideBasePower;
       if (heroDivide) {
-        base = heroDivide(runtime.makeCtx(state, seat, player.hero), card, base);
+        set(player.hero, heroDivide(runtime.makeCtx(state, seat, player.hero), card, base));
       }
     }
-    for (let i = 0; i < (card.basePowerHalvingsRoundDown ?? 0); i++) base = Math.floor(base / 2);
-    for (let i = 0; i < (card.basePowerHalvingsRoundUp ?? 0); i++) base = Math.ceil(base / 2);
+    for (const source of card.basePowerHalvingsRoundDown ?? []) set(source, Math.floor(base / 2));
+    for (const source of card.basePowerHalvingsRoundUp ?? []) set(source, Math.ceil(base / 2));
   }
   if (halveAttackActionBase(state, player, card)) {
-    base = Math.ceil(base / 2);
+    const sourceId = Number(player.hero.scriptState?.halveBaseAttackActionSource ?? 0);
+    set(findCardAnywhere(state, sourceId)?.card, Math.ceil(base / 2));
   }
   return base;
 }
@@ -854,11 +880,7 @@ function halveAttackActionBase(
   return until >= state.turn && isAttackActionData(dataOf(state, card.cardId));
 }
 
-export function computeAttack(
-  state: GameStateInternal,
-  runtime: EngineRuntime,
-  link: ChainLinkState,
-): number {
+function rawAttackPower(state: GameStateInternal, link: ChainLinkState): number {
   const data = dataOf(state, link.attackingCard.cardId);
   // Granted aura attacks use an explicit base when supplied (Reality
   // Refractor), otherwise their Ward value (Cosmo).
@@ -869,7 +891,15 @@ export function computeAttack(
         link.attackingCard,
       )
     : undefined;
-  const rawAttack = data.attack ?? auraMarker?.basePower ?? wardValueOf(data) ?? 0;
+  return data.attack ?? auraMarker?.basePower ?? wardValueOf(data) ?? 0;
+}
+
+export function computeAttack(
+  state: GameStateInternal,
+  runtime: EngineRuntime,
+  link: ChainLinkState,
+): number {
+  const rawAttack = rawAttackPower(state, link);
   if (scriptOf(state, link.attackingCard.cardId, link.attackingCard)
     ?.unmodifiableCharacteristics?.includes("power")) {
     return Math.max(0, rawAttack);

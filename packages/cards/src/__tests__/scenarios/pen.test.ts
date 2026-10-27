@@ -868,7 +868,9 @@ describe("PEN — import and set mechanics", () => {
       basePower: 6,
     }));
 
-    g.play("big bully|1").expectAttackValue(12);
+    g.play("big bully|1")
+      .expectAttackValue(12)
+      .expectAttackModifier("chain of brutality|1", 6 - cardData[printingId("big bully|1")]!.attack!);
     expect(g.state.modifiers).not.toContainEqual(expect.objectContaining({
       scope: "next-play",
       basePower: 6,

@@ -79,6 +79,7 @@ describe("CRU — Brute", () => {
       expect(rollLog).toBeDefined();
       const roll = Number(/rolled ([1-6])/.exec(rollLog!.publicText ?? "")?.[1]);
       expect(link!.attackValue).toBe(roll <= 4 ? 6 : 17);
+      s.expectAttackModifier("kayo, berserker runt|0", roll <= 4 ? -4 : 7);
 
       s.blockWith().endTurn();
       const { graveyard, soul } = s.state.players[0]!;

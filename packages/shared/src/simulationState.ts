@@ -2,6 +2,11 @@ import type { CardCounters, CounterKind, GameLogEvent, GameLogPayload, GameMessa
 
 type FlagValue = number | boolean;
 export type PlayFromZoneOwner = "own" | "opponent" | "both";
+export interface PersistedBasePowerSourceV1 {
+  sourceInstanceId: number;
+  sourceCardId: string;
+}
+
 export interface PersistedCardInstanceV1 {
   instanceId: number;
   cardId: string;
@@ -43,10 +48,10 @@ export interface PersistedCardInstanceV1 {
   grantedKeywords?: string[];
   suppressedKeywords?: string[];
   tempPower?: number;
-  basePowerOverride?: number;
-  basePowerDoublings?: number;
-  basePowerHalvingsRoundDown?: number;
-  basePowerHalvingsRoundUp?: number;
+  basePowerOverride?: PersistedBasePowerSourceV1 & { power: number };
+  basePowerDoublings?: PersistedBasePowerSourceV1[];
+  basePowerHalvingsRoundDown?: PersistedBasePowerSourceV1[];
+  basePowerHalvingsRoundUp?: PersistedBasePowerSourceV1[];
   tempDefense?: number;
   temporaryAlly?: { power: number; life: number };
   meldSide?: "left" | "right" | "both";

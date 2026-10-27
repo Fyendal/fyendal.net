@@ -869,7 +869,9 @@ describe("SLY — crush cycle", () => {
     g.play("walk in my shoes|2");
     g.blockWith().settle(); // 7 damage ≥ 4 → crush
     g.endTurn(); // the debuff survives the turn boundary
-    g.play("raging onslaught|2").expectAttackValue(3); // 6 halved (opponent has no Lyath)
+    g.play("raging onslaught|2")
+      .expectAttackValue(3) // 6 halved (opponent has no Lyath)
+      .expectAttackModifier("walk in my shoes|2", -3);
   });
 
   it("Wee Wrecking Ball crush destroys a card in their arsenal", () => {

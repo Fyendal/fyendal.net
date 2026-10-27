@@ -286,7 +286,8 @@ describe("EVR — registration and combat designs", () => {
       ],
     });
     s.play("fatigue shot|3", { pitch: [BLUE], fromArsenal: true }).blockWith().settle().endTurn()
-      .play("raging onslaught|1", { pitch: [BLUE] }).expectAttackValue(4);
+      .play("raging onslaught|1", { pitch: [BLUE] }).expectAttackValue(4)
+      .expectAttackModifier("fatigue shot|3", -3);
   });
 
   it("Valda creates one Seismic Surge for a card an opponent draws in the action phase", () => {
