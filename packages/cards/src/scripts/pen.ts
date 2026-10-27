@@ -32,6 +32,7 @@ import {
 import { SHARPEN_FOLLOWUP, sharpenSword } from "./aha/warrior-sharpen.js";
 import { penHighRarity } from "./pen/high-rarity.js";
 import { concoctDisorder } from "./sar.js";
+import { LIVING_LEGEND_HEROES } from "../formatLegality.js";
 
 // Compendium of Rathe (PEN) — complete set and required tokens.
 
@@ -55,29 +56,6 @@ const SLITHER = "MST024";
 const SPELLBANE_AEGIS = "DTD235";
 const SPECTRAL_SHIELD = "DTD220";
 const VIGOR = "SBR036";
-
-// CR 9.4 delegates Living Legend status to the official resource. Keep the
-// names here so newly imported printings become available automatically.
-// Snapshot: official Classic Constructed list, 2026-01-20.
-const LIVING_LEGEND_HERO_NAMES = [
-  "Aurora, Shooting Star",
-  "Azalea, Ace in the Hole",
-  "Bravo, Star of the Show",
-  "Briar, Warden of Thorns",
-  "Chane, Bound by Shadow",
-  "Dash, Inventor Extraordinaire",
-  "Dromai, Ash Artist",
-  "Enigma, Ledger of Ancestry",
-  "Florian, Rotwood Harbinger",
-  "Iyslander, Stormbind",
-  "Kano, Dracai of Aether",
-  "Lexi, Livewire",
-  "Nuu, Alluring Desire",
-  "Oldhim, Grandfather of Eternity",
-  "Prism, Sculptor of Arc Light",
-  "Viserai, Rune Blood",
-  "Zen, Tamer of Purpose",
-] as const;
 
 type Card = DeepReadonly<CardInstance>;
 
@@ -1153,9 +1131,10 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
   },
   "embody greatness|2": {
     additionalCost(ctx) {
-      const available = LIVING_LEGEND_HERO_NAMES.filter((name) =>
-        ctx.cardIdsNamed(name).some((cardId) => ctx.cardData(cardId).cardType === "hero"),
-      );
+      const available = [...LIVING_LEGEND_HEROES].flatMap((name) => {
+        const heroId = ctx.cardIdsNamed(name).find((cardId) => ctx.cardData(cardId).cardType === "hero");
+        return heroId ? [ctx.cardData(heroId).name] : [];
+      });
       if (available.length) {
         ctx.requestChoice(
           "pen-embody-hero",

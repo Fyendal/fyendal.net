@@ -22,13 +22,15 @@ export const CLASSIC_CONSTRUCTED_LEGALITY_CHECKED_ON = "2026-10-26";
  */
 export const SILVER_AGE_LEGALITY_CHECKED_ON = "2026-10-26";
 
-const LIVING_LEGEND_HEROES = new Set([
+/** Lowercase Classic Constructed Living Legend hero names. */
+export const LIVING_LEGEND_HEROES: ReadonlySet<string> = new Set([
   "arakni, marionette",
   "aurora, shooting star",
   "azalea, ace in the hole",
   "bravo, star of the show",
   "briar, warden of thorns",
   "chane, bound by shadow",
+  "cindra, dracai of retribution",
   "dash i/o",
   "dash, inventor extraordinaire",
   "dromai, ash artist",
@@ -76,6 +78,7 @@ const LIVING_LEGEND_WEAPONS = new Set([
   "symbiosis shot",
   "hunter's klaive",
   "searing emberblade",
+  "kunai of retribution",
 ]);
 
 /** Classic Constructed cards banned at every pitch. */

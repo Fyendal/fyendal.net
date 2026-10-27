@@ -277,6 +277,30 @@ export const mpa: Record<string, CardScript> = {
     },
   },
 
+  "demoralize the dracai|1": {
+    ...contractWithSilver((ctx, card) => card.owner === opponentSeat(ctx) && ctx.cardColor(card) === 1),
+    onAttackDeclared(ctx) {
+      // Keeps its hit trigger observable for later links while it stays on the chain.
+      ctx.addModifier({ scope: "combat-chain" });
+    },
+    canTriggerOnHit(ctx) {
+      const link = ctx.link;
+      return (
+        !!link &&
+        link.attacker === ctx.seat &&
+        link.attackCardType === "action" &&
+        link.targetAllyId === undefined &&
+        ctx.state.chain.some(
+          (chainLink) => chainLink.attackingCard.instanceId === ctx.self.instanceId && chainLink.flags.attackGone !== true,
+        )
+      );
+    },
+    onHit(ctx) {
+      const top = ctx.player(opponentSeat(ctx)).deck[0];
+      if (top) ctx.banish(top.instanceId);
+    },
+  },
+
   "mutually assured destruction|1": {
     ...contractWithSilver((ctx, card) => card.owner === opponentSeat(ctx) && isInfected(ctx, card.owner)),
     onAttackDeclared(ctx) {

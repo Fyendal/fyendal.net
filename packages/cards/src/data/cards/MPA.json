@@ -31,6 +31,20 @@
     "set": "MPA"
   },
   {
+    "id": "MPA020",
+    "name": "Demoralize the Dracai",
+    "cardType": "action",
+    "text": "Contract - You are contracted to banish opponents' red cards. Whenever you complete this contract, create a Silver token.\nWhenever an attack action card you control hits a hero, banish the top card of their deck.",
+    "pitch": 1,
+    "cost": 1,
+    "attack": 5,
+    "defense": 3,
+    "classes": ["assassin"],
+    "subtypes": ["attack"],
+    "keywords": ["Contract"],
+    "set": "MPA"
+  },
+  {
     "id": "MPA022",
     "name": "Mutually Assured Destruction",
     "cardType": "action",

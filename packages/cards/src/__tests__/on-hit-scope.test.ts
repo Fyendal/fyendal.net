@@ -28,6 +28,7 @@ describe("on-hit source scopes", () => {
       "blizzard bolt",
       "buzz bolt",
       "chilling icevein",
+      "demoralize the dracai",
       "poisoned blade",
     ]);
   });

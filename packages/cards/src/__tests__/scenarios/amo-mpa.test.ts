@@ -6,6 +6,7 @@ import { scenario } from "../harness.js";
 const DR_MORTIMER = "dr. mortimer, blight of the pits|0";
 const HUMOUR_PLUNGE = "humour plunge|0";
 const MAD = "mutually assured destruction|1";
+const DEMORALIZE = "demoralize the dracai|1";
 const PREY = "prey on insecurity|1";
 const REMEMBER = "remember the mists|3";
 const PROLONGED = "prolonged illness|3";
@@ -327,6 +328,34 @@ describe("Armory Deck Mortimer and Mastery Pack Assassin spoilers", () => {
     expect(boardNames(game, 0).filter((name) => name === "Bloodrot Pox")).toHaveLength(2);
     expect(boardNames(game, 1).filter((name) => name === "Bloodrot Pox")).toHaveLength(2);
     expect(boardNames(game, 0).filter((name) => name === "Silver")).toHaveLength(2);
+  });
+
+  it("Demoralize the Dracai banishes after friendly attack action hits and completes its contract on red cards", () => {
+    const game = scenario({ seats: [
+      {
+        hero: "rhinar",
+        hand: [DEMORALIZE, "wounding blow|3"],
+        resources: 3,
+        weapons: [],
+        equipment: NO_EQUIPMENT,
+      },
+      {
+        hero: "dorinthea",
+        deck: ["raging onslaught|1", "raging onslaught|3", "raging onslaught|2"],
+        weapons: [],
+        equipment: NO_EQUIPMENT,
+      },
+    ] });
+    game.state.players[0]!.actionPoints = 2;
+
+    game.play(DEMORALIZE).blockWith().settle();
+    game.play("wounding blow|3").blockWith().settle();
+
+    const banished = game.state.players[1]!.banish.map((card) => card.cardId);
+    expect(banished).toHaveLength(2);
+    expect(banished.map((cardId) => cardData[cardId]!.pitch)).toEqual([1, 3]);
+    expect(boardNames(game, 0).filter((name) => name === "Silver")).toHaveLength(1);
+    game.expectLife(1, 20 - 5 - 2);
   });
 
   it("Prey on Insecurity destroys itself to empower a later stealth attack", () => {

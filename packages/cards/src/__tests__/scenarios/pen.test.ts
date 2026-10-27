@@ -2105,3 +2105,23 @@ describe("PEN — multi-select choices", () => {
     expect([after.head?.faceDown, after.arms?.faceDown, after.legs?.faceDown]).toEqual([true, false, true]);
   });
 });
+
+describe("PEN — Embody Greatness", () => {
+  it("names any current Living Legend hero", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", hand: ["embody greatness|2"], resources: 3, equipment: NO_EQUIPMENT },
+        { hero: "dorinthea", equipment: NO_EQUIPMENT },
+      ],
+    });
+
+    g.play("embody greatness|2", { settle: false });
+    expect(g.state.pendingDecision?.options).toEqual(expect.arrayContaining([
+      "Arakni, Marionette",
+      "Cindra, Dracai of Retribution",
+      "Fai, Rising Rebellion",
+    ]));
+    g.chooseOption("Cindra, Dracai of Retribution").settle();
+    expect(cardData[g.state.players[0]!.heroCardId]?.name).toBe("Cindra, Dracai of Retribution");
+  });
+});
