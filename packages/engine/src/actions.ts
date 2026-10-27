@@ -76,7 +76,7 @@ import { answerUniqueChoice, UNIQUE_CHOICE_HOOK } from "./unique.js";
 import { lingeringModifierSources } from "./sourceQueries.js";
 import { continueFollowUpDecisions } from "./decisionQueue.js";
 
-import { abilitiesAsInstantForCard, abilityResourceCost, actionAbilityRestrictedByModifier, payActivatedAbilityCost, prepareActivatedAbilityTarget, prepareActivatedDiscardCost, prepareActivatedEffectCardCosts } from "./abilityRules.js";
+import { abilitiesAsInstantForCard, abilityResourceCost, actionAbilityRestrictedByModifier, payActivatedAbilityCost, prepareActivatedAbilityTarget, prepareActivatedDiscardCost, prepareActivatedEffectCardCosts, prepareDestroySubcardCost } from "./abilityRules.js";
 import { consumeNextActionGoAgain, noteActionPlayedOrActivated } from "./cardLifecycle.js";
 import { answerArcaneBarrier } from "./damageResolution.js";
 import { answerAttackTargetDamageOrder } from "./damage.js";
@@ -626,6 +626,7 @@ export function activateAbility(
   discardInstanceIds: number[] = [],
   declaredVariableX?: number,
   targetCardInstanceId?: number,
+  destroySubcardInstanceId?: number,
 ): string | undefined {
   if (state.phase !== "action" || (state.pendingDecision && !resumingActivationCost)) {
     return "cannot activate an ability now";
@@ -866,6 +867,21 @@ export function activateAbility(
     };
     return undefined;
   }
+  const subcardCostPrep = prepareDestroySubcardCost(state, card, costAbility, destroySubcardInstanceId, {
+    mode: "action",
+    seat,
+    sourceInstanceId,
+    abilityIndex,
+    pitchInstanceIds,
+    ...(targetAllyId !== undefined ? { targetAllyId } : {}),
+    ...(selectedSoulIds.length ? { soulInstanceIds: selectedSoulIds } : {}),
+    ...(discardInstanceIds.length ? { discardInstanceIds } : {}),
+    ...(ability.effectCardCosts?.length ? { effectCostInstanceIds } : {}),
+    ...(alternativeCostCardInstanceIds !== undefined ? { alternativeCostCardInstanceIds } : {}),
+    ...(declaredVariableX === undefined ? {} : { declaredVariableX }),
+  });
+  if (subcardCostPrep === "pending") return undefined;
+  if (subcardCostPrep) return subcardCostPrep;
   const resourceCost = ability.isAttack
     ? attackActivationCost(
         state,
@@ -882,6 +898,7 @@ export function activateAbility(
     soulInstanceIds: selectedSoulIds,
     effectCostInstanceIds: selectedEffectCostIds,
     discardInstanceIds,
+    destroySubcardInstanceId,
   });
   if (prepErr) return prepErr;
   // Cost payment notifies friendly observers, which may grant go again to

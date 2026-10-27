@@ -18228,6 +18228,20 @@
       "value": "加入 Fyendal Discord"
     }
   ],
+  "engine.decision.activation.destroysubcard": [
+    {
+      "type": 0,
+      "value": "选择一张 "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 下方的牌并摧毁"
+    }
+  ],
   "engine.decision.activation.discard": [
     {
       "type": 0,

@@ -116,6 +116,7 @@
   "engine.decision.deckbottom.first": "Choose the first card to put on the bottom of your deck",
   "engine.decision.deckbottom.next": "Choose the next card to put on the bottom of your deck",
   "engine.decision.activation.discard": "Choose a card to discard for {card}",
+  "engine.decision.activation.destroysubcard": "Choose a card under {card} to destroy",
   "engine.decision.attack.target": "{card}: choose an attack target",
   "engine.decision.token.playerorder": "Choose which player's token replacements apply first",
   "engine.decision.token.next": "Choose which replacement effect applies first to creating {card}",

@@ -66,9 +66,9 @@ describe("transformed permanent stacks", () => {
     g.play("singularity|1");
 
     expect(g.state.players[0]!.hero.cardId).toBe(printingId("teklovossen, the mechropotent|0"));
-    expect(g.state.players[0]!.hero.subcards).toHaveLength(6);
+    expect(g.state.players[0]!.hero.subcards).toHaveLength(7);
     for (const viewer of [0, 1]) {
-      expect(projectStateFor(g.state, viewer).players[0]!.heroSubcards).toHaveLength(6);
+      expect(projectStateFor(g.state, viewer).players[0]!.heroSubcards).toHaveLength(7);
     }
 
     const transformedHero = g.state.players[0]!.hero;
@@ -77,14 +77,13 @@ describe("transformed permanent stacks", () => {
       sourceInstanceId: transformedHero.instanceId,
       pitchRequired: 0,
     }));
-    const nestedBase = transformedHero.subcards!
-      .flatMap((card) => card.subcards ?? [])
+    const formerBase = transformedHero.subcards!
       .find((card) => card.cardId === printingId("wounding blow|1"))!;
     const formerWeapon = transformedHero.subcards!
       .find((card) => card.cardId === printingId("teklo leveler|0"))!;
     g.activate("teklovossen, the mechropotent|0", { settle: false });
     expect(g.state.pendingDecision?.chooseHook).toBe("engine-activation-soul");
-    g.chooseOption(String(nestedBase.instanceId));
+    g.chooseOption(String(formerBase.instanceId));
     expect(g.state.pendingDecision).toMatchObject({
       chooseHook: "engine-activation-soul",
       prompt: expect.stringContaining("2 of 2"),

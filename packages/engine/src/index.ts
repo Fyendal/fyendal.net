@@ -151,6 +151,7 @@ function resumeAbilityActivation(
     soulInstanceIds?: number[];
     effectCostInstanceIds?: number[];
     discardInstanceIds?: number[];
+    destroySubcardInstanceId?: number;
   } = {},
 ): string | undefined {
   const soulInstanceIds = selections.soulInstanceIds ?? resume.soulInstanceIds ?? [];
@@ -171,6 +172,8 @@ function resumeAbilityActivation(
         resume.alternativeCostCardInstanceIds,
         discardInstanceIds,
         resume.declaredVariableX,
+        undefined,
+        selections.destroySubcardInstanceId,
       )
     : activateAbility(
         state, runtime,
@@ -185,6 +188,8 @@ function resumeAbilityActivation(
         resume.alternativeCostCardInstanceIds,
         discardInstanceIds,
         resume.declaredVariableX,
+        undefined,
+        selections.destroySubcardInstanceId,
       );
 }
 
@@ -461,6 +466,12 @@ function answerScriptedDecision(
     const selected = [...(resume.soulInstanceIds ?? []), Number(optionId)];
     state.pendingDecision = null;
     return resumeAbilityActivation(state, runtime, resume, { soulInstanceIds: selected });
+  }
+  if (pd.chooseHook === "engine-activation-subcard" && pd.activationCost) {
+    if (!pd.options?.includes(optionId)) return "invalid option";
+    const resume = pd.activationCost;
+    state.pendingDecision = null;
+    return resumeAbilityActivation(state, runtime, resume, { destroySubcardInstanceId: Number(optionId) });
   }
   if (pd.activationCost?.effectCostInstanceIds !== undefined) {
     if (!pd.options?.includes(optionId)) return "invalid option";

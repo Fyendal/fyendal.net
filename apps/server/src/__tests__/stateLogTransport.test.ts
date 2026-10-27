@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { decodeServerMessage, decodeStateFrame, LiveServerMessageDecoder, StateStreamError } from "@fyendal/protocol";
+import {
+  decodeServerMessage, decodeStateFrame, IncompatibleStateFrameError, LiveServerMessageDecoder, StateStreamError,
+} from "@fyendal/protocol";
 import type { StateMessage } from "@fyendal/shared";
 import { StateLogTransport } from "../stateLogTransport.js";
 
@@ -119,6 +121,16 @@ describe("incremental log transport", () => {
       { ...frame, drop: 0.5 }, { ...frame, stream: "" }, { ...frame, stream: "a".repeat(65) }]) {
       expect(decodeStateFrame(invalid)).toBeNull();
     }
+  });
+
+  it("reports a frame from a newer view schema as incompatible, not a stream gap", () => {
+    const encoder = new StateLogTransport();
+    const decoder = new LiveServerMessageDecoder();
+    const full = encoder.encode(state(1, 20));
+    const players = full.state.view.players.map((player) => ({ ...player, futureField: [0] }));
+    const newer = { ...full, state: { ...full.state, view: { ...full.state.view, players } } };
+    expect(() => decoder.decode(newer)).toThrow(IncompatibleStateFrameError);
+    expect(decoder.decode(new StateLogTransport().encode(state(1, 20)))).toEqual(state(1, 20));
   });
 
   it("ignores unsupported messages without disturbing the state stream", () => {

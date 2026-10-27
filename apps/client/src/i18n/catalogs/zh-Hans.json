@@ -116,6 +116,7 @@
   "engine.decision.deckbottom.first": "选择第一张要放到牌库底部的卡牌",
   "engine.decision.deckbottom.next": "选择下一张要放到牌库底部的卡牌",
   "engine.decision.activation.discard": "选择一张要为 {card} 弃置的卡牌",
+  "engine.decision.activation.destroysubcard": "选择一张 {card} 下方的牌并摧毁",
   "engine.decision.attack.target": "{card}：选择攻击目标",
   "engine.decision.token.playerorder": "选择哪位玩家的衍生物替代效果先应用",
   "engine.decision.token.next": "选择先对生成 {card} 应用哪个替代效果",

@@ -83,6 +83,60 @@ describe("EVO — registration and core mechanics", () => {
     expect(evo.subcards![0]!.cardId).toBe(printingId("teklo base head|0"));
   });
 
+  it("an Evo over a transformed base keeps every card under it destroyable", () => {
+    const s = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          resources: 2,
+          hand: ["evo smoothbore|2"],
+          equipment: { arms: "evo beta base arms|3" },
+        },
+        { hero: "dorinthea" },
+      ],
+    });
+    const beta = s.state.players[0]!.equipment.arms!;
+    const cogwerx = { instanceId: s.state.nextInstanceId++, cardId: printingId("cogwerx base arms|0"), owner: 0 };
+    beta.subcards = [cogwerx];
+
+    s.play("evo smoothbore|2").expectEquipped(0, "arms", "evo smoothbore|2");
+    const smoothbore = s.state.players[0]!.equipment.arms!;
+    expect(smoothbore.subcards?.map((card) => card.cardId)).toEqual([
+      printingId("cogwerx base arms|0"),
+      printingId("evo beta base arms|3"),
+    ]);
+    expect(smoothbore.subcards?.every((card) => card.subcards === undefined)).toBe(true);
+
+    s.activate("evo smoothbore|2", { settle: false });
+    expect(s.state.pendingDecision).toMatchObject({
+      chooseHook: "engine-activation-subcard",
+      cardOptions: smoothbore.subcards!.map((card) => card.instanceId),
+    });
+    expect(s.state.stack).toHaveLength(0);
+    s.chooseOption(String(cogwerx.instanceId)).settle();
+    expect(s.state.players[0]!.equipment.arms!.subcards?.map((card) => card.cardId)).toEqual([
+      printingId("evo beta base arms|3"),
+    ]);
+    expect(s.state.players[0]!.graveyard.map((card) => card.cardId)).toContain(printingId("cogwerx base arms|0"));
+  });
+
+  it("an Evo with one card under it pays its destroy cost without asking", () => {
+    const s = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          resources: 3,
+          hand: ["evo smoothbore|2"],
+          equipment: { arms: "cogwerx base arms|0" },
+        },
+        { hero: "dorinthea" },
+      ],
+    });
+    s.play("evo smoothbore|2").activate("evo smoothbore|2");
+    expect(s.state.players[0]!.equipment.arms!.subcards ?? []).toHaveLength(0);
+    s.expectInZone(0, "cogwerx base arms|0", "graveyard");
+  });
+
   it("Hyper-X3 puts boosted Hyper Drivers under itself and draws at three", () => {
     const s = scenario({
       seats: [

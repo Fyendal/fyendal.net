@@ -107,6 +107,24 @@ describe("Fabrary response decoding", () => {
     ].join("\n"));
   });
 
+  it("resolves young and adult heroes that share a name prefix", () => {
+    const source = parseFabraryDeckUrl(DECK_URL);
+    if (!source) throw new Error("test URL should parse");
+    expect(decodeFabraryDeck({
+      name: "Mortimer test",
+      cards: [
+        { identifier: "dr-mortimer", total: 1, sideboardTotal: 0 },
+        { identifier: "dr-mortimer-blight-of-the-pits", total: 0, sideboardTotal: 1 },
+      ],
+    }, source)?.text).toBe([
+      "Name: Mortimer test",
+      "Deck cards",
+      "1x Dr. Mortimer",
+      "Sideboard cards",
+      "1x Dr. Mortimer, Blight of the Pits",
+    ].join("\n"));
+  });
+
   it("resolves current Levia IAR identifiers to their printed names", () => {
     const source = parseFabraryDeckUrl(DECK_URL);
     if (!source) throw new Error("test URL should parse");

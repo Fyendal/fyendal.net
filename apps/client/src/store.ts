@@ -19,6 +19,7 @@ import { fabraryPlayRoute } from "./play/route.js";
 import { RoomVersionGate } from "./versionGate.js";
 import { emptyQueueCounts } from "./matchmaking/pairableSearchers.js";
 import {
+  IncompatibleStateFrameError,
   LiveServerMessageDecoder,
   StateStreamError,
   liveWebSocketUrl,
@@ -196,6 +197,7 @@ export const useStore = create<StoreState>((set, get) => {
   let inFlightRoomCommand: { expectedVersion: number; defenderStageIds?: number[] } | null = null;
   let queuedDefenderStageIds: number[] | null = null;
   let liveBotParticipant = false;
+  let incompatibleStateFrames = 0;
 
   const browserBot = new BrowserBotController({
     runtimeId: BOT_RUNTIME_ID,
@@ -475,11 +477,8 @@ export const useStore = create<StoreState>((set, get) => {
       joiningRoomCode = null;
       resetRoomCommandPipeline();
       set({ connected: false });
-      if (event.code === CLIENT_UPDATE_CLOSE_CODE) {
-        cancelReconnect();
-        errors.clear();
-        reconnectOnActive = false;
-        set({ clientUpdateRequired: true, connectionIssueVisible: false });
+      if (event.code === CLIENT_UPDATE_CLOSE_CODE || get().clientUpdateRequired) {
+        requireClientUpdate();
         return;
       }
       const pendingPlay = get().pendingFabraryPlay;
@@ -512,10 +511,18 @@ export const useStore = create<StoreState>((set, get) => {
       if (ws !== socket || connectionEpoch !== epoch || streamFailed) return;
       try {
         const message = decoder.decode(JSON.parse(String(ev.data)));
+        if (message?.type === "state") incompatibleStateFrames = 0;
         if (message) handleMessage(message);
         else failPendingRoomEntry("room state could not be loaded");
       } catch (error) {
-        if (error instanceof StateStreamError) {
+        // A fresh socket repairs one bad state; a repeat means a newer server protocol.
+        if (error instanceof IncompatibleStateFrameError && ++incompatibleStateFrames > 1) {
+          streamFailed = true;
+          requireClientUpdate();
+          socket.close(4000, "client update required");
+          return;
+        }
+        if (error instanceof StateStreamError || error instanceof IncompatibleStateFrameError) {
           streamFailed = true;
           browserBot.reset();
           socket.close(4000, "log resync required");
@@ -526,6 +533,14 @@ export const useStore = create<StoreState>((set, get) => {
         failPendingRoomEntry("room state could not be loaded");
       }
     };
+  }
+
+  function requireClientUpdate(): void {
+    browserBot.reset();
+    cancelReconnect();
+    errors.clear();
+    reconnectOnActive = false;
+    set({ clientUpdateRequired: true, connectionIssueVisible: false });
   }
 
   /**

@@ -15,7 +15,7 @@ import type { GameStateInternal } from "./runtimeState.js";
 import { abilityList, activatedFlagKey } from "./scripts.js";
 import type { ActivatedAbility, ActivatedEffectCardCost, ScriptCtx } from "./scripts.js";
 import { scriptPromptParts } from "./scriptPresentation.js";
-import type { CardInstance, ChainLinkState, PlayerState } from "./state.js";
+import type { CardInstance, ChainLinkState, PendingDecisionState, PlayerState } from "./state.js";
 import { banishHeroSoulCard, destroyPermanent, putCardOnDeckBottom } from "./zoneMoves.js";
 import { currentLink, findCardAnywhere, heroSoulCards } from "./zoneQueries.js";
 import { tapPermanent } from "./cardLifecycle.js";
@@ -162,6 +162,40 @@ export function prepareActivatedDiscardCost(
         : {}),
       ...(declaredVariableX === undefined ? {} : { declaredVariableX }),
     },
+  };
+  return "pending";
+}
+
+/** Opens the choice of which card under the source pays a destroy-a-card-under
+ * cost; a single sub-card pays without asking. */
+export function prepareDestroySubcardCost(
+  state: GameStateInternal,
+  card: CardInstance,
+  ability: ActivatedAbility,
+  selectedId: number | undefined,
+  activationCost: NonNullable<PendingDecisionState["activationCost"]>,
+): string | "pending" | undefined {
+  if (!ability.destroySubcardCost) return undefined;
+  const subcards = card.subcards ?? [];
+  if (selectedId !== undefined) {
+    return subcards.some((candidate) => candidate.instanceId === selectedId)
+      ? undefined
+      : "card is not under the source";
+  }
+  if (subcards.length <= 1) return undefined;
+  state.pendingDecision = {
+    player: activationCost.seat,
+    kind: "choose-target",
+    prompt: `Choose a card under ${nameOf(state, card.cardId)} to destroy`,
+    promptMessage: {
+      id: "engine.decision.activation.destroysubcard",
+      values: { card: { kind: "card", cardId: card.cardId } },
+    },
+    options: subcards.map((candidate) => String(candidate.instanceId)),
+    cardOptions: subcards.map((candidate) => candidate.instanceId),
+    sourceInstanceId: card.instanceId,
+    chooseHook: "engine-activation-subcard",
+    activationCost,
   };
   return "pending";
 }
@@ -545,6 +579,7 @@ export function payActivatedAbilityCost(
     soulInstanceIds?: number[];
     effectCostInstanceIds?: number[];
     discardInstanceIds?: number[];
+    destroySubcardInstanceId?: number;
   },
 ): string | undefined {
   const player = state.players[seat] as PlayerState;
@@ -705,7 +740,9 @@ export function payActivatedAbilityCost(
   else if (ability.banishSelfCost) runtime.makeCtx(state, seat, card).banish(card.instanceId);
   else if (ability.putSelfOnDeckBottomCost) putCardOnDeckBottom(state, runtime, card.instanceId, true);
   else if (ability.returnSelfToHandCost) runtime.makeCtx(state, seat, card).moveToHand(card.instanceId);
-  if (ability.destroySubcardCost) runtime.makeCtx(state, seat, card).destroySubcard(card.instanceId);
+  if (ability.destroySubcardCost) {
+    runtime.makeCtx(state, seat, card).destroySubcard(card.instanceId, opts?.destroySubcardInstanceId);
+  }
   if (card.faceDown && ability.turnsFaceUp) {
     card.faceDown = false;
     logPublic(state, gameLogMessage(

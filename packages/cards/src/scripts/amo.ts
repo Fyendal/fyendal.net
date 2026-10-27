@@ -14,6 +14,57 @@ function opposingDiseases(ctx: ScriptCtx): readonly DeepReadonly<CardInstance>[]
   return ctx.player(opponentSeat(ctx)).board.filter((card) => isDisease(ctx, card));
 }
 
+const mortimer: CardScript = {
+  activated: [
+    {
+      cost: 0,
+      isAttack: false,
+      goAgain: false,
+      timing: "instant",
+      tap: true,
+      label: "Cure a disease",
+      canActivate: (ctx) => opposingDiseases(ctx).length > 0,
+      onActivate(ctx) {
+        ctx.requestCardChoice(
+          "amo-mortimer-cure",
+          decisionPrompt("Choose a disease to cure", "card.amo.mortimer.disease.choose"),
+          opposingDiseases(ctx).map((card) => card.instanceId),
+        );
+      },
+    },
+    {
+      cost: 0,
+      isAttack: false,
+      goAgain: false,
+      timing: "attack-reaction",
+      tap: true,
+      label: "Destroy 2 Silver: give go again",
+      effectCardCosts: [
+        {
+          zone: "arena",
+          move: "destroy",
+          count: 2,
+          name: "Silver",
+          prompt: decisionPrompt("Destroy 2 Silver", "card.common.cost.silver.destroy.two"),
+        },
+      ],
+      canActivate(ctx) {
+        return (
+          !!ctx.link && ctx.link.attacker === ctx.seat && ctx.cardTypes(ctx.link.attackingCard).includes("assassin")
+        );
+      },
+      onActivate(ctx) {
+        ctx.grantGoAgain();
+      },
+    },
+  ],
+  onChoose(ctx, hook, option) {
+    if (hook !== "amo-mortimer-cure") return;
+    const disease = opposingDiseases(ctx).find((card) => card.instanceId === Number(option));
+    if (disease && ctx.destroyPermanent(disease.instanceId)) ctx.createToken(SILVER);
+  },
+};
+
 export const amo: Record<string, CardScript> = {
   "humour plunge|0": {
     activated: attackAbility(2, {
@@ -26,56 +77,8 @@ export const amo: Record<string, CardScript> = {
     },
   },
 
-  "dr. mortimer, blight of the pits|0": {
-    activated: [
-      {
-        cost: 0,
-        isAttack: false,
-        goAgain: false,
-        timing: "instant",
-        tap: true,
-        label: "Cure a disease",
-        canActivate: (ctx) => opposingDiseases(ctx).length > 0,
-        onActivate(ctx) {
-          ctx.requestCardChoice(
-            "amo-mortimer-cure",
-            decisionPrompt("Choose a disease to cure", "card.amo.mortimer.disease.choose"),
-            opposingDiseases(ctx).map((card) => card.instanceId),
-          );
-        },
-      },
-      {
-        cost: 0,
-        isAttack: false,
-        goAgain: false,
-        timing: "attack-reaction",
-        tap: true,
-        label: "Destroy 2 Silver: give go again",
-        effectCardCosts: [
-          {
-            zone: "arena",
-            move: "destroy",
-            count: 2,
-            name: "Silver",
-            prompt: decisionPrompt("Destroy 2 Silver", "card.common.cost.silver.destroy.two"),
-          },
-        ],
-        canActivate(ctx) {
-          return (
-            !!ctx.link && ctx.link.attacker === ctx.seat && ctx.cardTypes(ctx.link.attackingCard).includes("assassin")
-          );
-        },
-        onActivate(ctx) {
-          ctx.grantGoAgain();
-        },
-      },
-    ],
-    onChoose(ctx, hook, option) {
-      if (hook !== "amo-mortimer-cure") return;
-      const disease = opposingDiseases(ctx).find((card) => card.instanceId === Number(option));
-      if (disease && ctx.destroyPermanent(disease.instanceId)) ctx.createToken(SILVER);
-    },
-  },
+  "dr. mortimer, blight of the pits|0": mortimer,
+  "dr. mortimer|0": mortimer,
 
   "viral diffusion|1": {
     onDefend(ctx) {

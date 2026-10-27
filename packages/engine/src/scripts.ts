@@ -140,8 +140,9 @@ export interface ScriptCtx {
   /** Destroy a card currently defending on the combat chain. Equipment is
    * destroyed as an arena permanent; non-equipment defenders leave the chain. */
   destroyDefendingCard(instanceId: number): boolean;
-  /** Destroy the top public sub-card retained under an arena permanent. */
-  destroySubcard(instanceId: number): boolean;
+  /** Destroy a sub-card retained under an arena permanent (the top one by
+   * default). */
+  destroySubcard(instanceId: number, subcardInstanceId?: number): boolean;
   /** Banish the top public sub-card retained under an arena permanent. */
   banishSubcard(instanceId: number, subcardInstanceId?: number): boolean;
   /** Move this resolving card from the stack under a permanent controlled by

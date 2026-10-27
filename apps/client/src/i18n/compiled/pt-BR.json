@@ -19949,6 +19949,20 @@
       "value": "Entre no Discord do Fyendal"
     }
   ],
+  "engine.decision.activation.destroysubcard": [
+    {
+      "type": 0,
+      "value": "Escolha uma carta sob "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " para destruir"
+    }
+  ],
   "engine.decision.activation.discard": [
     {
       "type": 0,

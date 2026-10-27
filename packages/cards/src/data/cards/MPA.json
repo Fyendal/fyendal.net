@@ -11,6 +11,17 @@
     "set": "MPA"
   },
   {
+    "id": "MPA003",
+    "name": "Dr. Mortimer",
+    "cardType": "hero",
+    "text": "Instant - {t}: Cure a disease an opponent controls. If you do, create a Silver token.\nAttack Reaction - {t}, destroy 2 Silver you control: Target Assassin attack gets go again.",
+    "classes": ["assassin"],
+    "keywords": ["Cure", "Go again"],
+    "life": 20,
+    "intellect": 4,
+    "set": "MPA"
+  },
+  {
     "id": "MPA006",
     "name": "Phial of Calamity",
     "cardType": "equipment",

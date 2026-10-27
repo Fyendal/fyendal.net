@@ -50,7 +50,7 @@ import {
   isPermanentSource,
   removeFromArray,
 } from "./zoneQueries.js";
-import { abilitiesAsInstantForCard, abilityResourceCost, actionAbilityRestrictedByModifier, payActivatedAbilityCost, prepareActivatedAbilityTarget, prepareActivatedDiscardCost, prepareActivatedEffectCardCosts } from "./abilityRules.js";
+import { abilitiesAsInstantForCard, abilityResourceCost, actionAbilityRestrictedByModifier, payActivatedAbilityCost, prepareActivatedAbilityTarget, prepareActivatedDiscardCost, prepareActivatedEffectCardCosts, prepareDestroySubcardCost } from "./abilityRules.js";
 import { consumeNextActionGoAgain, noteActionPlayedOrActivated } from "./cardLifecycle.js";
 import { canPlayAsInstant, cardPlayCost, cardPlayReductionForSeat, cardPlayRestrictedByModifier, playOriginRestricted, mayPlayFromArsenal, mayPlayFromZone, notePlayPermissionSource, payAlternativePlayCost, preparePlayTarget } from "./playRules.js";
 import { canPayRequiredHandCardsForAdditionalCost } from "./resources.js";
@@ -185,6 +185,7 @@ export function activateWindowAbility(
   discardInstanceIds: number[] = [],
   declaredVariableX?: number,
   targetCardInstanceId?: number,
+  destroySubcardInstanceId?: number,
 ): string | undefined {
   const link = currentLink(state);
   const inReaction = state.phase === "reaction" && !!link;
@@ -455,6 +456,20 @@ export function activateWindowAbility(
     };
     return undefined;
   }
+  const subcardCostPrep = prepareDestroySubcardCost(state, card, costAbility, destroySubcardInstanceId, {
+    mode: "window",
+    seat,
+    sourceInstanceId,
+    abilityIndex,
+    pitchInstanceIds,
+    ...(selectedSoulIds.length ? { soulInstanceIds: selectedSoulIds } : {}),
+    ...(discardInstanceIds.length ? { discardInstanceIds } : {}),
+    ...(ability.effectCardCosts?.length ? { effectCostInstanceIds } : {}),
+    ...(alternativeCostCardInstanceIds !== undefined ? { alternativeCostCardInstanceIds } : {}),
+    ...(declaredVariableX === undefined ? {} : { declaredVariableX }),
+  });
+  if (subcardCostPrep === "pending") return undefined;
+  if (subcardCostPrep) return subcardCostPrep;
   const nextActionGoAgain = timing === "action" && consumeNextActionGoAgain(player);
   const prepErr = payActivatedAbilityCost(
     state, runtime,
@@ -469,6 +484,7 @@ export function activateWindowAbility(
       soulInstanceIds: selectedSoulIds,
       effectCostInstanceIds: selectedEffectCostIds,
       discardInstanceIds,
+      destroySubcardInstanceId,
     },
   );
   if (prepErr) return prepErr;

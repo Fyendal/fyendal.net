@@ -19500,6 +19500,20 @@
       "value": "Únete al Discord de Fyendal"
     }
   ],
+  "engine.decision.activation.destroysubcard": [
+    {
+      "type": 0,
+      "value": "Elige una carta debajo de "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " para destruir"
+    }
+  ],
   "engine.decision.activation.discard": [
     {
       "type": 0,

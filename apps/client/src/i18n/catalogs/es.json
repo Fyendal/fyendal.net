@@ -116,6 +116,7 @@
   "engine.decision.deckbottom.first": "Elige la primera carta que pondrás en la parte inferior de tu mazo",
   "engine.decision.deckbottom.next": "Elige la siguiente carta que pondrás en la parte inferior de tu mazo",
   "engine.decision.activation.discard": "Elige una carta para descartar por {card}",
+  "engine.decision.activation.destroysubcard": "Elige una carta debajo de {card} para destruir",
   "engine.decision.attack.target": "{card}: elige un objetivo de ataque",
   "engine.decision.token.playerorder": "Elige de qué jugador se aplican primero las sustituciones de tokens",
   "engine.decision.token.next": "Elige qué efecto de sustitución se aplica primero al crear {card}",

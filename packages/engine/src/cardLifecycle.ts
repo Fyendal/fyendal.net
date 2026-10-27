@@ -385,7 +385,9 @@ export function settlePlayedCard(
     if (base) {
       severDefendingEquipment(state, base.instanceId);
       runtime.commands.fireLeaveArena(state, player.seat, base, "subcard");
-      card.subcards = [base];
+      // CR 3.0.14c: the base's own sub-cards go under the new top-card too.
+      card.subcards = [...(base.subcards ?? []), base];
+      delete base.subcards;
     }
     player.equipment[slot] = card;
     logPublic(state, gameLogMessage(

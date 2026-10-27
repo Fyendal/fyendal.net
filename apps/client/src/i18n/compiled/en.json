@@ -19342,6 +19342,20 @@
       "value": "Join the Fyendal Discord"
     }
   ],
+  "engine.decision.activation.destroysubcard": [
+    {
+      "type": 0,
+      "value": "Choose a card under "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " to destroy"
+    }
+  ],
   "engine.decision.activation.discard": [
     {
       "type": 0,

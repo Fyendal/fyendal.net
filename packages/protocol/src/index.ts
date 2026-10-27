@@ -3001,6 +3001,12 @@ export class StateStreamError extends Error {
   constructor() { super("Live log stream must be reloaded"); }
 }
 
+/** A state that fails to decode on its own; when it persists across
+ * reconnects, the server speaks a newer protocol. */
+export class IncompatibleStateFrameError extends Error {
+  constructor() { super("State frame does not match this client's protocol"); }
+}
+
 /** Socket-local delivery history, independent of room versions and replay UI.
  * Only projected logs are retained; callers always receive a complete state. */
 export class LiveServerMessageDecoder {
@@ -3019,7 +3025,10 @@ export class LiveServerMessageDecoder {
       return message;
     }
     const frame = decodeStateFrame(value);
-    if (!frame) { this.reset(); throw new StateStreamError(); }
+    if (!frame) {
+      this.reset();
+      throw decodeStateMessage(raw.state) ? new StateStreamError() : new IncompatibleStateFrameError();
+    }
     let state = frame.state;
     if (frame.drop !== null) {
       const previous = this.baseline;

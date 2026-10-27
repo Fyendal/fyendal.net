@@ -2489,6 +2489,26 @@ describe("client connection and account race fences", () => {
     expect(useStore.getState()).toMatchObject({ clientUpdateRequired: true, connectionIssueVisible: false });
   });
 
+  it("requires a refresh when every reconnect receives an undecodable state", async () => {
+    vi.useFakeTimers();
+    localStorage.setItem("fyendal-auth", JSON.stringify({ token: "token-a", username: "Alice" }));
+    const { useStore } = await import("../store.js");
+    useStore.getState().joinRoom("AAAAAA");
+    const socket = FakeWebSocket.instances[0]!;
+    socket.open();
+    socket.message({ type: "joined", code: "AAAAAA", seat: 0, token: "seat-token", version: 1 });
+    socket.message({ type: "state", version: 2, invalid: true });
+    await vi.advanceTimersByTimeAsync(1_500);
+    const replacement = FakeWebSocket.instances.at(-1)!;
+    expect(replacement).not.toBe(socket);
+    replacement.open();
+    replacement.message({ type: "joined", code: "AAAAAA", seat: 0, token: "seat-token", version: 2 });
+    replacement.message({ type: "state", version: 2, invalid: true });
+    await vi.advanceTimersByTimeAsync(30_000);
+    expect(FakeWebSocket.instances).toHaveLength(2);
+    expect(useStore.getState()).toMatchObject({ connected: false, clientUpdateRequired: true });
+  });
+
   it("reconstructs live logs while replay viewing and rejects a missing delta", async () => {
     vi.useFakeTimers();
     const { useStore } = await import("../store.js");

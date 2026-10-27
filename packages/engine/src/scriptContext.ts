@@ -934,9 +934,13 @@ export function makeCtx(
       }
       return false;
     },
-    destroySubcard(instanceId) {
+    destroySubcard(instanceId, subcardInstanceId) {
       const found = findPermanent(state, instanceId);
-      const card = found?.card.subcards?.pop();
+      const subcards = found?.card.subcards ?? [];
+      const index = subcardInstanceId === undefined
+        ? subcards.length - 1
+        : subcards.findIndex((candidate) => candidate.instanceId === subcardInstanceId);
+      const [card] = index < 0 ? [] : subcards.splice(index, 1);
       if (!found || !card) return false;
       runtime.commands.moveToGraveyard(state, card, "under", seat);
       logPublic(state, gameLogMessage(
@@ -2271,9 +2275,9 @@ export function makeCtx(
             instanceId: state.nextInstanceId++,
             cardId: entry.card.cardId,
             owner: entry.card.owner,
-            ...(entry.card.subcards ? { subcards: entry.card.subcards } : {}),
           };
-          subcards.push(subcard);
+          // CR 3.0.14c: its sub-cards go under the permanent beside it.
+          subcards.push(...(entry.card.subcards ?? []), subcard);
           transformEvents.push({ seat: entry.seat, from: subcard });
           continue;
         }
@@ -2289,9 +2293,8 @@ export function makeCtx(
           instanceId: state.nextInstanceId++,
           cardId: removed.cardId,
           owner: removed.owner,
-          ...(removed.subcards ? { subcards: removed.subcards } : {}),
         };
-        subcards.push(subcard);
+        subcards.push(...(removed.subcards ?? []), subcard);
         transformEvents.push({ seat: entry.seat, from: subcard });
       }
 
