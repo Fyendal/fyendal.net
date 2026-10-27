@@ -1629,7 +1629,7 @@ Object.assign(ros, {
     modifyDefense: (ctx: ScriptCtx) =>
       Object.values(ctx.player(ctx.seat).equipment).filter((card) => card && cardNameContains(ctx, card, "Arcanite"))
         .length,
-    wardValue: (ctx: ScriptCtx) =>
+    spellvoidValue: (ctx: ScriptCtx) =>
       Object.values(ctx.player(ctx.seat).equipment).filter((card) => card && cardNameContains(ctx, card, "Arcanite"))
         .length,
   },

@@ -24,6 +24,7 @@ import {
   cardNamesOf,
   cardTypesOf,
   dataOf,
+  hasWardKeyword,
   scriptOf,
   veilBlocksDefender,
 } from "./cardProperties.js";
@@ -2389,6 +2390,9 @@ export function makeCtx(
       const target = found?.card ?? card as CardInstance;
       const controller = state.players[found?.seat ?? seat] as PlayerState;
       return hasCrank(state, runtime, controller, target);
+    },
+    hasWard(card) {
+      return hasWardKeyword(state, findCardAnywhere(state, card.instanceId)?.card ?? card as CardInstance);
     },
     countEquipped(type, targetSeat = seat) {
       const target = state.players[targetSeat] as PlayerState | undefined;

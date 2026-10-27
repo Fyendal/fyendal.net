@@ -83,9 +83,7 @@ const scripts: Record<string, CardScript> = {
   },
   HERO_DISCOUNT: {
     modifyAttackActivationCost(ctx, attacker, baseCost) {
-      const data = ctx.cardData(attacker.cardId);
-      const isWardAura = (data.keywords ?? []).some((k) => /^ward \d+$/i.test(k.trim()));
-      return isWardAura ? baseCost - 1 : baseCost;
+      return ctx.hasWard(attacker) ? baseCost - 1 : baseCost;
     },
   },
   SCROLL: {

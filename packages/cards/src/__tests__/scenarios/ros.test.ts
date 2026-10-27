@@ -1623,3 +1623,17 @@ describe("Channel Lightning Valley", () => {
     g.endTurn().expectInZone(0, "channel lightning valley|2", "graveyard");
   });
 });
+
+describe("ROS — Arcanite Fortress", () => {
+  it("has Spellvoid X, not Ward, so physical damage isn't preventable by it", () => {
+    const s = scenario({
+      seats: [
+        { hero: "rhinar", hand: ["snatch|1"] },
+        { hero: "dorinthea", equipment: { head: null, chest: "arcanite fortress|0", arms: null, legs: null } },
+      ],
+    });
+    s.play("snatch|1").blockWith();
+    expect(s.state.pendingDecision?.chooseHook).not.toBe("ward");
+    s.settle().expectLife(1, 16);
+  });
+});

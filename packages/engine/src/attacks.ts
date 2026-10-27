@@ -6,9 +6,9 @@ import {
   cardNameKeysOf,
   cardTypesOf,
   dataOf,
+  hasWardKeyword,
   instanceHasKeyword,
   scriptOf,
-  wardValueOf,
 } from "./cardProperties.js";
 import {
   conditionalModifierGrantsGoAgain,
@@ -265,7 +265,7 @@ export function auraAttackGoAgain(state: GameStateInternal, link: ChainLinkState
   if (link.attackCardType !== "weapon") return false;
   const attacker = state.players[link.attacker] as PlayerState;
   const live = attacker.board.find((c) => c.instanceId === link.attackingCard.instanceId);
-  if (!live || wardValueOf(dataOf(state, live.cardId)) === undefined) return false;
+  if (!live || !hasWardKeyword(state, live)) return false;
   const marker = grantsAuraAttackMarker(state, attacker, live);
   if (marker?.goAgainWithPowerCounter !== true) return false;
   return (live.counters?.power ?? 0) >= 1;

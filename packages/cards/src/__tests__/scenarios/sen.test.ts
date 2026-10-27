@@ -153,6 +153,18 @@ describe("SEN — Cosmo aura attacks", () => {
     s.blockWith().settle();
     s.expectLife(1, 18).expectAP(0, 1); // go again refunded the action point
   });
+
+  it("a Ward X aura attacks for its current ward value", () => {
+    const s = scenario({
+      seats: [
+        { hero: "rhinar", weapons: [COSMO], board: ["corrosive space dust|1"], hand: [RED] },
+        { hero: "dorinthea" },
+      ],
+    });
+    (boardCard(s, 0, "corrosive space dust|1").counters ??= {}).holo = 1;
+    s.activate("corrosive space dust|1", { pitch: [RED] });
+    s.expectAttackValue(4);
+  });
 });
 
 describe("SEN — transcend", () => {
@@ -668,6 +680,18 @@ describe("SEN — Astral Etchings", () => {
     s.play("astral etchings|1", { pitch: [RED] }); // stops at the aura choice
     s.chooseCard(SHIELD);
     expect(boardCard(s, 0, SHIELD).counters?.power).toBe(3);
+  });
+
+  it("can target an aura with Ward X", () => {
+    const s = scenario({
+      seats: [
+        enigmaSeat({ board: ["corrosive space dust|1"], hand: ["astral etchings|1", RED] }),
+        { hero: "dorinthea" },
+      ],
+    });
+    s.play("astral etchings|1", { pitch: [RED] });
+    s.chooseCard("corrosive space dust|1");
+    expect(boardCard(s, 0, "corrosive space dust|1").counters?.power).toBe(3);
   });
 
   it("is playable as an instant while you control a Spectral Shield", () => {

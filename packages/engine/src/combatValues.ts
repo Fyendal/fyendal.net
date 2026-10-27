@@ -8,10 +8,12 @@ import {
   cardHasType,
   cardNamesOf,
   cardTypesOf,
+  currentWardValue,
   dataOf,
+  hasWardKeyword,
   instanceHasKeyword,
+  instanceKeywordValues,
   scriptOf,
-  wardValueOf,
 } from "./cardProperties.js";
 import {
   activeModifiers,
@@ -356,14 +358,8 @@ function piercingValueModifiers(
     (liveAttack.suppressedKeywords ?? []).map((keyword) => keyword.trim().toLowerCase()),
   );
   const out: CombatValueModifier[] = [];
-  for (const keyword of [
-    ...(dataOf(state, link.attackingCard.cardId).keywords ?? []),
-    ...(liveAttack.grantedKeywords ?? []),
-  ]) {
-    const normalized = keyword.trim().toLowerCase();
-    if (suppressed.has(normalized)) continue;
-    const match = /^piercing (\d+)$/.exec(normalized);
-    if (match) valueModifier(out, liveAttack, Number(match[1]));
+  for (const value of instanceKeywordValues(state, liveAttack, "piercing")) {
+    if (value !== "x") valueModifier(out, liveAttack, value);
   }
   for (const modifier of activeModifiers(state, link, [
     "chain-link",
@@ -502,7 +498,7 @@ export function attackValueModifiers(
   runtime: EngineRuntime,
   link: ChainLinkState,
 ): CombatValueModifier[] {
-  const out = basePowerModifiers(state, runtime, link.attacker, link.attackingCard, rawAttackPower(state, link));
+  const out = basePowerModifiers(state, runtime, link.attacker, link.attackingCard, rawAttackPower(state, runtime, link));
   for (const adjustment of attackValueAdjustments(state, runtime, link)) {
     valueModifier(out, adjustment.source, adjustment.amount);
   }
@@ -880,7 +876,7 @@ function halveAttackActionBase(
   return until >= state.turn && isAttackActionData(dataOf(state, card.cardId));
 }
 
-function rawAttackPower(state: GameStateInternal, link: ChainLinkState): number {
+function rawAttackPower(state: GameStateInternal, runtime: EngineRuntime, link: ChainLinkState): number {
   const data = dataOf(state, link.attackingCard.cardId);
   // Granted aura attacks use an explicit base when supplied (Reality
   // Refractor), otherwise their Ward value (Cosmo).
@@ -891,7 +887,8 @@ function rawAttackPower(state: GameStateInternal, link: ChainLinkState): number 
         link.attackingCard,
       )
     : undefined;
-  return data.attack ?? auraMarker?.basePower ?? wardValueOf(data) ?? 0;
+  return data.attack ?? auraMarker?.basePower ??
+    currentWardValue(state, runtime, link.attacker, link.attackingCard) ?? 0;
 }
 
 export function computeAttack(
@@ -899,7 +896,7 @@ export function computeAttack(
   runtime: EngineRuntime,
   link: ChainLinkState,
 ): number {
-  const rawAttack = rawAttackPower(state, link);
+  const rawAttack = rawAttackPower(state, runtime, link);
   if (scriptOf(state, link.attackingCard.cardId, link.attackingCard)
     ?.unmodifiableCharacteristics?.includes("power")) {
     return Math.max(0, rawAttack);
@@ -1196,7 +1193,7 @@ export function grantsAuraAttackMarker(
     if (!marker) continue;
     if (card) {
       const data = dataOf(state, card.cardId);
-      if (marker.requiresWard !== false && wardValueOf(data) === undefined) continue;
+      if (marker.requiresWard !== false && !hasWardKeyword(state, card)) continue;
       if (
         marker.requiresClass &&
         !cardTypesOf(state, card).includes(marker.requiresClass.toLowerCase())

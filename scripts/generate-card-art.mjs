@@ -23,6 +23,8 @@ const FOILS = new Set(["S", "R", "C", "G"]);
 const VARIATIONS = ["FA", "EA", "AA", "AB", "AT"];
 // White-border History Pack art duplicates the black-border originals.
 const EXCLUDED_SETS = new Set(["1HP"]);
+// Misprinted rules text; the client shows a correct printing instead.
+const EXCLUDED_IMAGES = new Set(["AKO015"]);
 
 function record(value, context) {
   if (!value || typeof value !== "object" || Array.isArray(value)) throw new Error(`${context}: expected object`);
@@ -89,7 +91,7 @@ for (const value of list(JSON.parse(readFileSync(source, "utf8")), source)) {
     const set = text(printing.set_id, name);
     const rarity = text(printing.rarity, name);
     const foil = text(printing.foiling, name);
-    if (EXCLUDED_SETS.has(set) || !RARITIES.has(rarity) || !FOILS.has(foil)) continue;
+    if (EXCLUDED_SETS.has(set) || EXCLUDED_IMAGES.has(id) || !RARITIES.has(rarity) || !FOILS.has(foil)) continue;
     if (printing.image_url == null) continue;
     const url = new URL(text(printing.image_url, name));
     const image = url.pathname.split("/").at(-1)?.replace(/\.webp$/, "");

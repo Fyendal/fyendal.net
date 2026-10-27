@@ -799,6 +799,7 @@ export function projectStateForReplay(state: GameStateInternal, publicGameId?: s
 export { TOKEN_SKIP_INTENTS, tokenSkipSequenceActive } from "./tokenSkip.js";
 export { damageStepPriorityAttacker } from "./triggers.js";
 export { rngNext } from "./rng.js";
+export { numberedKeywordValue } from "./cardProperties.js";
 export {
   chainLinkNumber,
   chainLinksControlled,

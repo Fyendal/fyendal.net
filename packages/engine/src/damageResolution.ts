@@ -1,5 +1,5 @@
 import type { EngineRuntime } from "./runtimePorts.js";
-import { cardAbilitiesSuppressed, cardColorOf, cardHasName, cardTypesOf, dataOf, instanceDataOf, scriptOf, wardValueOf } from "./cardProperties.js";
+import { cardAbilitiesSuppressed, cardColorOf, cardHasName, cardTypesOf, currentWardValue, dataOf, instanceDataOf, instanceKeywordValues, numberedKeywordValue, scriptOf } from "./cardProperties.js";
 
 import { controlledPermanents, hookSources, lingeringModifierSources } from "./sourceQueries.js";
 
@@ -373,8 +373,8 @@ function arcaneBarrierPieces(state: GameStateInternal,
     ];
     for (const kw of keywords) {
       if (suppressed.has(kw.toLowerCase())) continue;
-      const m = /^arcane barrier (\d+)$/i.exec(kw.trim());
-      if (m) out.push(Number(m[1]));
+      const value = numberedKeywordValue(kw, "arcane barrier");
+      if (typeof value === "number") out.push(value);
     }
     const dynamic = Number(
       script?.arcaneBarrierValue?.(
@@ -751,12 +751,10 @@ function spellvoidPieces(state: GameStateInternal,
   for (const eq of sources) {
     if (eq.faceDown || cardAbilitiesSuppressed(state, eq)) continue;
     let matched = false;
-    for (const kw of dataOf(state, eq.cardId).keywords ?? []) {
-      const m = /^spellvoid (\d+)$/i.exec(kw.trim());
-      if (m) {
-        out.push({ id: eq.instanceId, n: Number(m[1]) });
-        matched = true;
-      }
+    for (const value of instanceKeywordValues(state, eq, "spellvoid")) {
+      if (value === "x") continue;
+      out.push({ id: eq.instanceId, n: value });
+      matched = true;
     }
     if (matched) continue;
     if (
@@ -993,10 +991,7 @@ export function wardPieces(state: GameStateInternal,
   ];
   for (const c of sources) {
     if (cardAbilitiesSuppressed(state, c)) continue;
-    const dynamic = scriptOf(state, c.cardId, c)?.wardValue;
-    const n = dynamic
-      ? Math.max(0, dynamic(runtime.makeCtx(state, player.seat, c, currentLink(state))))
-      : wardValueOf(instanceDataOf(state, c), c);
+    const n = currentWardValue(state, runtime, player.seat, c);
     if (n !== undefined && n > 0) out.push({ id: c.instanceId, n });
   }
   return out;

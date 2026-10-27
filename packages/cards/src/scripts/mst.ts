@@ -426,14 +426,7 @@ function pickToPieces(): CardScript {
 
 function etchings(counters: number): CardScript {
   const wardAuras = (ctx: ScriptCtx) =>
-    ctx
-      .player(ctx.seat)
-      .board.filter(
-        (card) =>
-          isAura(ctx, card) &&
-          ((data(ctx, card).keywords ?? []).some((keyword) => /^ward /i.test(keyword)) ||
-            cardNamed(ctx, card, "Haze Shelter")),
-      );
+    ctx.player(ctx.seat).board.filter((card) => isAura(ctx, card) && ctx.hasWard(card));
   return {
     playAsInstant: (ctx) => ctx.player(ctx.seat).board.some((card) => isCard(ctx, card.cardId, "Spectral Shield")),
     onPlay(ctx) {
@@ -1302,7 +1295,7 @@ function enigmaNewMoon(): CardScript {
         (candidate) => candidate?.instanceId === Number(option),
       );
       if (!card || !ctx.setCardFaceDown(card.instanceId, false)) return;
-      if ((data(ctx, card).keywords ?? []).some((keyword) => /^ward(?:\s|$)/i.test(keyword))) {
+      if (ctx.hasWard(card)) {
         ctx.createTokens(SPECTRAL_SHIELD, 3);
       }
     },

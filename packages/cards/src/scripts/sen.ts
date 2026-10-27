@@ -38,17 +38,13 @@ import {
 const SPECTRAL_SHIELD = "SEN037";
 const GOLD = "SEN036";
 
-function hasWard(ctx: ScriptCtx, cardId: string): boolean {
-  return (ctx.cardData(cardId).keywords ?? []).some((k) => /^ward \d+$/i.test(k.trim()));
-}
-
 function isAura(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
   return ctx.cardTypes(card).includes("aura");
 }
 
 /** Auras with ward on the controller's board (Spectral Shield, Waning/Waxing, …). */
 function wardAuras(ctx: ScriptCtx) {
-  return ctx.player(ctx.seat).board.filter((c) => isAura(ctx, c) && hasWard(ctx, c.cardId));
+  return ctx.player(ctx.seat).board.filter((c) => isAura(ctx, c) && ctx.hasWard(c));
 }
 
 function controlsSpectralShield(ctx: ScriptCtx): boolean {

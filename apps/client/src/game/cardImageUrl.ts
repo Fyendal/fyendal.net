@@ -30,8 +30,10 @@ for (const card of cardList) {
 
 /** Fabrary has no plain image objects for some printings. Prefer an exact
  * foil object; where no exact object exists, use a verified printing of the
- * same functional card without changing card data. */
+ * same functional card without changing card data. Misprinted printings also
+ * use a correct printing of the same card. */
 const FABRARY_IMAGE_ID_OVERRIDES: Readonly<Record<string, string>> = {
+  AKO015: "OUT198",
   AOL004: "AOL004-RF",
   AOL005: "AOL005-RF",
   AOL006: "AOL006-RF",

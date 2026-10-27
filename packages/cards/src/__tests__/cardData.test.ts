@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest";
+import { numberedKeywordValue } from "@fyendal/engine";
 import { decodeCardDataList } from "../cardData.js";
 import { cardList } from "../catalog.js";
 import { functionalKeyOf } from "../functional.js";
+import { cardData, scripts } from "../index.js";
 
 describe("card data decoding", () => {
   it("accepts omitted variable numeric values", () => {
@@ -94,5 +96,16 @@ describe("conditional keyword overrides", () => {
       for (const keyword of forbidden) expect(card.keywords ?? [], `${card.id} ${card.name}`).not.toContain(keyword);
     }
     expect([...seen].sort()).toEqual(Object.keys(conditional).sort());
+  });
+});
+
+describe("dynamic keyword values", () => {
+  it("gives a dynamic Ward value only to cards that print Ward", () => {
+    const missing = Object.entries(scripts)
+      .filter(([, script]) => script.wardValue)
+      .map(([printingId]) => cardData[printingId]!)
+      .filter((card) => !(card.keywords ?? []).some((keyword) => numberedKeywordValue(keyword, "ward") !== undefined))
+      .map((card) => card.id);
+    expect(missing).toEqual([]);
   });
 });

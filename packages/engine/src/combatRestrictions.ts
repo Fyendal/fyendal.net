@@ -1,5 +1,5 @@
 import type { EngineRuntime } from "./runtimePorts.js";
-import { instanceDataOf, scriptOf, wardValueOf } from "./cardProperties.js";
+import { currentWardValue, instanceDataOf, scriptOf } from "./cardProperties.js";
 import { basePowerOf, computeAttack, currentPowerOf, grantsAuraAttackMarker } from "./combatValues.js";
 import type { GameStateInternal } from "./runtimeState.js";
 import { activeModifiers } from "./combatModifiers.js";
@@ -50,7 +50,7 @@ export function attackBasePowerRestricted(
   const player = state.players[seat] as PlayerState;
   const data = instanceDataOf(state, card);
   const auraAttack = grantsAuraAttackMarker(state, player, card);
-  const rawPower = data.attack ?? auraAttack?.basePower ?? wardValueOf(data) ?? 0;
+  const rawPower = data.attack ?? auraAttack?.basePower ?? currentWardValue(state, runtime, seat, card) ?? 0;
   return basePowerOf(state, runtime, seat, card, rawPower) < minimum;
 }
 

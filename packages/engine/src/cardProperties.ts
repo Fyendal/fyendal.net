@@ -1,3 +1,4 @@
+import type { EngineRuntime } from "./runtimePorts.js";
 import type { GameStateInternal } from "./runtimeState.js";
 import type { CardColor, CardData, CardType, MeldSide } from "@fyendal/shared";
 import type { CardScript } from "./scripts.js";
@@ -152,15 +153,10 @@ export function hasKeyword(
   );
 }
 
-/** Effective keyword presence on an instance. Explicit suppression takes
- * precedence over both printed and granted keywords. */
-export function instanceHasKeyword(
-  state: GameStateInternal,
-  card: CardInstance,
-  keyword: string,
-): boolean {
-  const normalized = keyword.toLowerCase();
-  if ((card.suppressedKeywords ?? []).includes(normalized)) return false;
+/** Effective keywords: printed, granted, granted-base, and sub-card material,
+ * minus suppressed ones. */
+export function instanceKeywords(state: GameStateInternal, card: CardInstance): string[] {
+  const suppressed = new Set((card.suppressedKeywords ?? []).map((keyword) => keyword.trim().toLowerCase()));
   const materialKeywords = (card.subcards ?? []).flatMap((subcard) =>
     scriptOf(state, subcard.cardId, subcard)?.materialKeywords ?? []
   );
@@ -168,14 +164,45 @@ export function instanceHasKeyword(
     ...(card.grantedBaseAbilitiesCardId ? [card.grantedBaseAbilitiesCardId] : []),
     ...(card.grantedBaseAbilitiesCardIds ?? []),
   ].flatMap((cardId) => dataOf(state, cardId).keywords ?? []);
-  return (
-    hasKeyword(state, card, keyword) ||
-    (card.grantedKeywords ?? []).some(
-      (candidate) => candidate.toLowerCase() === normalized,
-    ) ||
-    grantedBaseKeywords.some((candidate) => candidate.toLowerCase() === normalized) ||
-    materialKeywords.some((candidate) => candidate.toLowerCase() === normalized)
-  );
+  return [
+    ...(cardAbilitiesSuppressed(state, card) ? [] : state.cardsRef[card.cardId]?.keywords ?? []),
+    ...(card.grantedKeywords ?? []),
+    ...grantedBaseKeywords,
+    ...materialKeywords,
+  ].filter((keyword) => !suppressed.has(keyword.trim().toLowerCase()));
+}
+
+/** Effective keyword presence on an instance. */
+export function instanceHasKeyword(
+  state: GameStateInternal,
+  card: CardInstance,
+  keyword: string,
+): boolean {
+  const normalized = keyword.trim().toLowerCase();
+  return instanceKeywords(state, card).some((candidate) => candidate.trim().toLowerCase() === normalized);
+}
+
+/** The value of a numbered keyword such as "Ward 3" (3) or "Ward X" ("x"), or
+ * undefined when `keyword` is not `name` followed by a value. */
+export function numberedKeywordValue(keyword: string, name: string): number | "x" | undefined {
+  const normalized = keyword.trim().toLowerCase();
+  const prefix = `${name.toLowerCase()} `;
+  if (!normalized.startsWith(prefix)) return undefined;
+  const value = normalized.slice(prefix.length);
+  if (value === "x") return "x";
+  return /^\d+$/.test(value) ? Number(value) : undefined;
+}
+
+/** Values of a numbered keyword across an instance's effective keywords. */
+export function instanceKeywordValues(
+  state: GameStateInternal,
+  card: CardInstance,
+  name: string,
+): (number | "x")[] {
+  return instanceKeywords(state, card).flatMap((keyword) => {
+    const value = numberedKeywordValue(keyword, name);
+    return value === undefined ? [] : [value];
+  });
 }
 
 /** Whether a card object has a card-type keyword in its current declared form.
@@ -346,17 +373,23 @@ export function isArrowData(data: CardData): boolean {
   return (data.subtypes ?? []).includes("arrow");
 }
 
-/** Ward N of a card's printed or temporarily granted keywords (CR 8.3.20).
- * A permanent can be destroyed only once for a damage event, so use its
- * highest active Ward value when it has more than one. */
-export function wardValueOf(data: CardData, instance?: CardInstance): number | undefined {
-  let value: number | undefined;
-  for (const keyword of [...(data.keywords ?? []), ...(instance?.grantedKeywords ?? [])]) {
-    if (instance?.suppressedKeywords?.includes(keyword.toLowerCase())) continue;
-    const match = /^ward (\d+)$/i.exec(keyword.trim());
-    if (match) value = Math.max(value ?? 0, Number(match[1]));
-  }
-  return value;
+/** Whether a card currently has Ward N or Ward X. */
+export function hasWardKeyword(state: GameStateInternal, card: CardInstance): boolean {
+  return instanceKeywordValues(state, card, "ward").length > 0;
+}
+
+/** A permanent's current Ward value (CR 8.3.20): its script's dynamic value,
+ * else its highest Ward N, since it can be destroyed only once per event. */
+export function currentWardValue(
+  state: GameStateInternal,
+  runtime: EngineRuntime,
+  seat: number,
+  card: CardInstance,
+): number | undefined {
+  const dynamic = scriptOf(state, card.cardId, card)?.wardValue;
+  if (dynamic) return Math.max(0, dynamic(runtime.makeCtx(state, seat, card, currentLink(state))));
+  const fixed = instanceKeywordValues(state, card, "ward").filter((value) => value !== "x");
+  return fixed.length > 0 ? Math.max(...fixed) : undefined;
 }
 
 /** Whether the link's attack currently has veil, printed or granted. */
