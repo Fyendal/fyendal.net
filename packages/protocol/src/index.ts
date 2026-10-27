@@ -378,6 +378,14 @@ export type AchievementId = typeof ACHIEVEMENT_IDS[number];
 // Keep retired IDs decodable so existing unlocks and account exports remain valid.
 export const ACTIVE_ACHIEVEMENT_IDS: readonly AchievementId[] = ACHIEVEMENT_IDS
   .filter((id) => id !== "beat-starvo");
+/** Awards decided by the whole game's frames rather than its final state. */
+export const HISTORY_ACHIEVEMENT_IDS = ["full-hand", "against-the-odds"] as const;
+export type HistoryAchievementId = typeof HISTORY_ACHIEVEMENT_IDS[number];
+/** Per-seat history checks a replay's finalization still owes; stored on replay_games. */
+export interface ReplayPendingAchievements {
+  0?: HistoryAchievementId[];
+  1?: HistoryAchievementId[];
+}
 export interface AchievementUnlock {
   id: AchievementId;
   unlockedAt: number;
@@ -1477,27 +1485,21 @@ function gameStats(value: unknown): value is GameStatsView {
     && array(stats.turns, gameTurnStats, MAX_REPLAY_VIEWS);
 }
 
-/** Only the replay facts needed for historical achievements. Database JSON is
- * projected before decoding so full cards and logs never cross this boundary. */
-export function decodeAchievementReplaySnapshot(value: unknown): {
-  turn: number;
-  players: [{ life: number; handCount: number }, { life: number; handCount: number }];
-  gameStats?: GameStatsView;
-} | null {
-  const snapshot = object(value);
-  if (!snapshot || !exactKeys(snapshot, ["turn", "life0", "life1", "handCount0", "handCount1", "gameStats"])
-    || !nonNegativeInteger(snapshot.turn)
-    || !integer(snapshot.life0) || !integer(snapshot.life1)
-    || !nonNegativeInteger(snapshot.handCount0) || !nonNegativeInteger(snapshot.handCount1)
-    || !(snapshot.gameStats === null || gameStats(snapshot.gameStats))) return null;
-  return {
-    turn: snapshot.turn,
-    players: [
-      { life: snapshot.life0, handCount: snapshot.handCount0 },
-      { life: snapshot.life1, handCount: snapshot.handCount1 },
-    ],
-    ...(snapshot.gameStats === null ? {} : { gameStats: snapshot.gameStats }),
-  };
+const historyAchievementId = (value: unknown): value is HistoryAchievementId =>
+  typeof value === "string" && (HISTORY_ACHIEVEMENT_IDS as readonly string[]).includes(value);
+
+export function decodeReplayPendingAchievements(value: unknown): ReplayPendingAchievements | null {
+  const pending = object(value);
+  if (!pending || !exactKeys(pending, ["0", "1"], [])) return null;
+  const result: ReplayPendingAchievements = {};
+  for (const seat of ["0", "1"] as const) {
+    if (!(seat in pending)) continue;
+    const checks = pending[seat];
+    if (!array(checks, historyAchievementId, HISTORY_ACHIEVEMENT_IDS.length)
+      || checks.length === 0 || new Set(checks).size !== checks.length) return null;
+    result[seat] = checks;
+  }
+  return result;
 }
 
 function playerTurnFacts(value: unknown): value is PlayerTurnFactsView {

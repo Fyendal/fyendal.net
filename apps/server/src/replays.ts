@@ -8,6 +8,8 @@ import {
   type GameState,
 } from "@fyendal/engine";
 import {
+  decodeReplayPendingAchievements,
+  type ReplayPendingAchievements,
   decodeReplayFile,
   decodeReplayResponse,
   decodeGameView,
@@ -18,6 +20,7 @@ import {
   type ReplaySummary,
 } from "@fyendal/protocol";
 import type { Format, GameView, ReplayFile } from "@fyendal/shared";
+import { awardHistoryAchievements } from "./achievements.js";
 import { type Queryable, withTransaction } from "./db.js";
 import { tryAcquireLease } from "./leases.js";
 import { consoleError, type ErrorLogger } from "./logging.js";
@@ -121,6 +124,7 @@ export async function appendReplayView(
     events: readonly EngineTransitionMove[];
   } | null,
   now = Date.now(),
+  pendingAchievements: ReplayPendingAchievements | null = null,
 ): Promise<string | null> {
   let view: string;
   let projectedTransition: string | null;
@@ -166,9 +170,10 @@ export async function appendReplayView(
   const id = String(inserted.rows[0].replay_id);
   if (state.phase === "game-over") {
     const finalized = await db.query(
-      `UPDATE replay_games SET winner=$2, status='finalizing', finished_at=$3, expires_at=$4
+      `UPDATE replay_games
+       SET winner=$2, status='finalizing', finished_at=$3, expires_at=$4, pending_achievements=$5::jsonb
        WHERE id=$1 AND status='recording' RETURNING id`,
-      [id, winner, now, now + REPLAY_TTL_MS],
+      [id, winner, now, now + REPLAY_TTL_MS, pendingAchievements ? JSON.stringify(pendingAchievements) : null],
     );
     return finalized.rows.length ? id : null;
   }
@@ -300,7 +305,7 @@ export async function finalizeReplay(
 ): Promise<boolean> {
   await waitForCapacity();
   const { rows } = await db.query(
-    `SELECT id, winner
+    `SELECT id, winner, room_code, pending_achievements
      FROM replay_games WHERE id = $1 AND status = 'finalizing'`,
     [replayIdValue],
   );
@@ -308,6 +313,12 @@ export async function finalizeReplay(
   const replay = record(rows[0], "replay row");
   if (!(replay.winner === null || replay.winner === 0 || replay.winner === 1)) {
     throw new Error(`invalid replay winner ${String(replay.id)}`);
+  }
+  const pendingAchievements = replay.pending_achievements == null
+    ? null
+    : decodeReplayPendingAchievements(replay.pending_achievements);
+  if (replay.pending_achievements != null && !pendingAchievements) {
+    throw new Error(`replay ${String(replay.id)} has invalid pending achievements`);
   }
   await waitForCapacity();
   const participants = await db.query(
@@ -333,7 +344,8 @@ export async function finalizeReplay(
     waitForCapacity,
   );
   const firstFile = built.files.values().next().value;
-  const finalView = firstFile ? replayViews(firstFile).at(-1) : undefined;
+  if (!firstFile) throw new Error(`replay ${String(replay.id)} built no participant file`);
+  const finalView = replayViews(firstFile).at(-1);
   if (!finalView || finalView.winner !== replay.winner) {
     throw new Error(`replay ${String(replay.id)} winner mismatch`);
   }
@@ -363,10 +375,18 @@ export async function finalizeReplay(
     await tx.query(
       `UPDATE replay_games
        SET status='ready', frame_count=$2,
-           finalization_attempts=0, finalization_retry_at=NULL
+           finalization_attempts=0, finalization_retry_at=NULL, pending_achievements=NULL
        WHERE id=$1 AND status='finalizing'`,
       [replay.id, payloads[0]?.frames ?? 0],
     );
+    if (pendingAchievements) {
+      await awardHistoryAchievements(tx, {
+        roomCode: String(replay.room_code),
+        pending: pendingAchievements,
+        participants: decodedParticipants,
+        frames: replayViews(firstFile),
+      });
+    }
     const frameByRoomVersion = new Map(
       built.roomVersions.map((roomVersion, frame) => [roomVersion, frame]),
     );

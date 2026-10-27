@@ -8,6 +8,7 @@ import type { GameState } from "@fyendal/engine";
 import type { BotOpponent, Format } from "@fyendal/shared";
 import { createPool, defaultConnectionString, withTransaction } from "./db.js";
 import { decodePersistedState } from "./persistedState.js";
+import { appendReplayView, startReplay } from "./replays.js";
 import { assertSafeToSeed } from "./seedGuard.js";
 import { dehydrateState, hashReconnectToken } from "./store.js";
 
@@ -21,6 +22,8 @@ export interface ManualRoomFixture {
   format: Format;
   state: GameState;
   seats: [ManualSeat, ManualSeat];
+  /** Optional recording to seed as the room's replay; `state` continues it. */
+  replay?: { frames: readonly GameState[] };
 }
 
 const MANUAL_DECK_PREFIX = "[manual seed] ";
@@ -58,6 +61,11 @@ function validateFixture(value: unknown): asserts value is ManualRoomFixture {
   if (!state || !Array.isArray(state.players) || state.players.length !== 2 ||
     state.phase === "game-over" || state.players.some((player) => !player?.hero?.cardId)) {
     throw new Error("fixture needs an unfinished two-player game state");
+  }
+  const replay = fixture.replay as { frames?: unknown } | undefined;
+  if (replay !== undefined && (!Array.isArray(replay.frames) || replay.frames.length === 0
+    || replay.frames.some((frame: GameState | undefined) => !frame?.players || frame.phase === "game-over"))) {
+    throw new Error("fixture replay needs at least one unfinished frame");
   }
 }
 
@@ -101,7 +109,10 @@ try {
       if (presence.length > 0) throw new Error(`leave ${fixture.code} before replacing it`);
     }
 
-    const seatRows = [];
+    const seatRows: Array<{
+      seatNumber: number; userId: number | null; username: string; deckId: string | null;
+      deckName: string; heroId: string; controller: "human" | "bot";
+    }> = [];
     for (const [seatNumber, seat] of fixture.seats.entries()) {
       let userId: number | null = null;
       let username: string;
@@ -135,7 +146,7 @@ try {
       `INSERT INTO rooms
          (code, format, spectators, state, prep, ruleset_version, version, created_at, gc_at,
           status, winner, is_private)
-       VALUES ($1, $2, '[]', $3, $4, $5, 0, $6, NULL, 'active', NULL, TRUE)`,
+       VALUES ($1, $2, '[]', $3, $4, $5, $7, $6, NULL, 'active', NULL, TRUE)`,
       [
         fixture.code,
         fixture.format,
@@ -143,6 +154,9 @@ try {
         JSON.stringify({ rolls: [6, 1], dieWinner: 0, startPlayer: 0, arenas: [null, null] }),
         rulesetVersion,
         Date.now(),
+        // Recorded frames occupy the versions below the room's, so the next
+        // commit appends after them.
+        fixture.replay?.frames.length ?? 0,
       ],
     );
     for (const seat of seatRows) {
@@ -158,8 +172,29 @@ try {
         ],
       );
     }
+    if (fixture.replay) {
+      const frames = fixture.replay.frames;
+      const participant = (seat: 0 | 1) => ({
+        seat,
+        ...(seatRows[seat]!.userId == null ? {} : { userId: seatRows[seat]!.userId! }),
+        heroId: seatRows[seat]!.heroId,
+      });
+      await startReplay(tx, {
+        roomCode: fixture.code,
+        rulesetVersion,
+        format: fixture.format,
+        state: frames[0]!,
+        roomVersion: 1,
+        participants: [participant(0), participant(1)],
+      });
+      for (const [index, frame] of frames.slice(1).entries()) {
+        await appendReplayView(tx, fixture.code, index + 2, frame, null, null);
+      }
+    }
   });
-  console.log(`seeded ${fixture.code} — open /${fixture.code} as ${
+  console.log(`seeded ${fixture.code}${
+    fixture.replay ? ` with ${fixture.replay.frames.length} replay frames` : ""
+  } — open /${fixture.code} as ${
     fixture.seats.filter((seat) => seat.controller === "human").map((seat) => seat.username).join(" or ")
   }`);
 } finally {

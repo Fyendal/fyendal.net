@@ -1137,6 +1137,12 @@ export const MIGRATIONS: Migration[] = [
     );
     CREATE INDEX league_actions_pending_idx ON league_actions (applied_at, id);`,
   },
+  {
+    version: 58,
+    // History achievements are resolved by replay finalization, which already
+    // holds every frame, instead of scanning frames inside the game-over commit.
+    sql: "ALTER TABLE replay_games ADD COLUMN pending_achievements JSONB;",
+  },
 ];
 
 async function publicTables(db: Queryable): Promise<string[]> {

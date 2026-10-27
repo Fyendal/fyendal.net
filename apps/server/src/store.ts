@@ -1489,9 +1489,7 @@ export class PgRoomStore {
         if (!(await this.save(out.room, db))) throw VERSION_CONFLICT;
         await this.applySeatWrites(db, out.room, out.seatWrites ?? []);
         const gameJustEnded = !wasGameOver && out.room.state?.phase === "game-over";
-        if (gameJustEnded) {
-          await awardAchievements(db, out.room);
-        }
+        const pendingAchievements = gameJustEnded ? await awardAchievements(db, out.room) : null;
         if (out.releaseMatchmaking) {
           const released = out.releaseMatchmaking.joiningUserId === undefined
             ? await db.query(
@@ -1542,6 +1540,7 @@ export class PgRoomStore {
               ? out.room.lastTransition
               : null,
             replayFrameAt,
+            pendingAchievements,
           )) ?? undefined;
           if (replayFinalizationId) {
             await recordGameCompletion(db, {

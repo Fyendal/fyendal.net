@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
 import {
+  decodeReplayPendingAchievements,
   ACTIVE_ACHIEVEMENT_IDS,
   decodeAccountExportResponse,
   decodeAccountBadgesResponse,
   decodeAccountEmailResponse,
-  decodeAchievementReplaySnapshot,
   decodeAchievementsResponse,
   decodeBugReportNotificationsResponse,
   decodeBugReportResponse,
@@ -35,32 +35,6 @@ import {
   decodeServerMessage,
   decodeStatsResponse,
 } from "../index.js";
-
-describe("achievement replay projection", () => {
-  it("decodes only bounded life, hand, and turn facts", () => {
-    const snapshot = {
-      turn: 4, life0: -1, life1: 20, handCount0: 6, handCount1: 3,
-      gameStats: { turns: [{ turn: 2, activePlayer: 1, attacks: [0, 0],
-        threatened: [0, 0], blocked: [0, 0], damageDealt: [0, 0] }] },
-    };
-    expect(decodeAchievementReplaySnapshot(snapshot)).toEqual({
-      turn: 4, players: [{ life: -1, handCount: 6 }, { life: 20, handCount: 3 }], gameStats: snapshot.gameStats,
-    });
-    expect(decodeAchievementReplaySnapshot({ ...snapshot, gameStats: null })).toEqual({
-      turn: 4, players: [{ life: -1, handCount: 6 }, { life: 20, handCount: 3 }],
-    });
-    for (const invalid of [
-      { ...snapshot, life0: "-1" },
-      { ...snapshot, life1: Infinity },
-      { ...snapshot, turn: Number.MAX_SAFE_INTEGER + 1 },
-      { ...snapshot, handCount0: -1 },
-      { ...snapshot, handCount1: 1.5 },
-      { ...snapshot, gameStats: { turns: [{ ...snapshot.gameStats.turns[0], activePlayer: 3 }] } },
-      { ...snapshot, gameStats: { turns: Array(10_001).fill(snapshot.gameStats.turns[0]) } },
-      { ...snapshot, cards: [] },
-    ]) expect(decodeAchievementReplaySnapshot(invalid)).toBeNull();
-  });
-});
 
 describe("Fabrary deck previews", () => {
   it("decodes bounded public metadata, including a missing hero", () => {
@@ -1711,5 +1685,18 @@ describe("match history decoders", () => {
     expect(decodeMatchRecordsResponse({ ok: true, heroes: [], matchups: [{ ...matchup, wins: -1 }] })).toBeNull();
     expect(decodeMatchRecordsResponse({ ok: true, heroes: [], matchups: [{ ...matchup, games: 3 }] })).toBeNull();
     expect(decodeMatchRecordsResponse({ ok: true, heroes: [] })).toBeNull();
+  });
+});
+
+describe("replay pending achievements", () => {
+  it("decodes only known history checks per seat", () => {
+    expect(decodeReplayPendingAchievements({ "0": ["full-hand"], "1": ["against-the-odds", "full-hand"] }))
+      .toEqual({ 0: ["full-hand"], 1: ["against-the-odds", "full-hand"] });
+    for (const invalid of [
+      null, [], "full-hand", { "2": ["full-hand"] }, { "0": [] }, { "0": ["full-hand", "full-hand"] },
+      { "0": ["big-turn"] }, { "0": "full-hand" }, { "0": ["full-hand"], extra: true },
+    ]) {
+      expect(decodeReplayPendingAchievements(invalid)).toBeNull();
+    }
   });
 });
