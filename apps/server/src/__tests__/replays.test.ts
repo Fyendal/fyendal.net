@@ -406,6 +406,74 @@ describe("server replay retention", () => {
     expect(await listReplays(db, game.users[0])).toHaveLength(1);
   });
 
+  it("drops a frame transition the decoder rejects and still finalizes the replay", async () => {
+    const game = await startedGame();
+    const conceded = await store.applyIntent(
+      game.code,
+      { token: game.tokens[0], userId: game.users[0] },
+      { kind: "concede" },
+    );
+    if (!conceded.ok || !conceded.replayFinalizationId) throw new Error("concede failed");
+    const replayId = conceded.replayFinalizationId;
+    const { rows } = await db.query(
+      "SELECT MAX(room_version) AS version FROM replay_frames WHERE replay_id=$1", [replayId],
+    );
+    const lastVersion = Number(rows[0]!.version);
+    await db.query(
+      "UPDATE replay_frames SET transition=$3::jsonb WHERE replay_id=$1 AND room_version=$2",
+      [replayId, lastVersion, JSON.stringify({
+        kind: "replace", events: [{ kind: "move", from: null, to: null, count: 1 }],
+      })],
+    );
+    const warnings: string[] = [];
+    const warn = vi.spyOn(console, "warn").mockImplementation((line: unknown) => { warnings.push(String(line)); });
+    try {
+      const finalizer = new ReplayFinalizer(db);
+      finalizer.enqueue(replayId);
+      await finalizer.waitForIdle();
+    } finally {
+      warn.mockRestore();
+    }
+    expect((await db.query("SELECT status FROM replay_games WHERE id=$1", [replayId])).rows[0]!.status)
+      .toBe("ready");
+    expect(warnings.map((line) => JSON.parse(line))).toEqual([{
+      severity: "WARNING", event: "replay_transition_dropped", replayId, frameIndex: 1,
+      roomVersion: lastVersion, keys: "kind,events", kind: "replace", moves: 1, unplacedMoves: 1,
+    }]);
+    const file = await getReplay(db, game.users[0], (await listReplays(db, game.users[0]))[0]!.id);
+    expect(file?.version === 2 && file.frames.map((frame) => frame.transition)).toEqual([null, null]);
+  });
+
+  it("names the frame whose view fails validation", async () => {
+    const game = await startedGame();
+    const conceded = await store.applyIntent(
+      game.code,
+      { token: game.tokens[0], userId: game.users[0] },
+      { kind: "concede" },
+    );
+    if (!conceded.ok || !conceded.replayFinalizationId) throw new Error("concede failed");
+    const replayId = conceded.replayFinalizationId;
+    const { rows } = await db.query(
+      "SELECT MAX(room_version) AS version FROM replay_frames WHERE replay_id=$1", [replayId],
+    );
+    const lastVersion = Number(rows[0]!.version);
+    await db.query(
+      "UPDATE replay_frames SET view=$3::jsonb WHERE replay_id=$1 AND room_version=$2",
+      [replayId, lastVersion, JSON.stringify({ bogus: 1 })],
+    );
+    const errors: string[] = [];
+    const finalizer = new ReplayFinalizer(db, (message, error) => {
+      errors.push(`${message}: ${error instanceof Error ? error.message : String(error)}`);
+    });
+    finalizer.enqueue(replayId);
+    await finalizer.waitForIdle();
+    expect(errors).toEqual([
+      `replay finalization failed (${replayId}): replay ${replayId} frame 2 (room version ${lastVersion}) failed view validation: {"keys":"bogus"}`,
+    ]);
+    expect((await db.query("SELECT status FROM replay_games WHERE id=$1", [replayId])).rows[0]!.status)
+      .toBe("finalizing");
+  });
+
   it("loads large replay recordings in bounded frame batches", async () => {
     const game = await startedGame();
     const conceded = await store.applyIntent(

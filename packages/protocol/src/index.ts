@@ -1961,14 +1961,7 @@ export function decodeReplayFile(value: unknown): ReplayFile | null {
     const frame = object(value);
     if (!frame || !exactKeys(frame, ["view", "transition"]) || !("transition" in frame)) return null;
     const view = decodeGameView(frame.view);
-    const transition = frame.transition === null
-      ? null
-      : gameTransitionView({
-          ...object(frame.transition),
-          fromVersion: index === 0 ? 0 : index - 1,
-        })
-        ? frame.transition as Omit<GameTransitionView, "fromVersion">
-        : null;
+    const transition = frame.transition === null ? null : decodeReplayTransition(frame.transition, index);
     if (!view || (frame.transition !== null && transition === null)) return null;
     return { view, transition };
   });
@@ -1977,6 +1970,17 @@ export function decodeReplayFile(value: unknown): ReplayFile | null {
   const notes = decodeReplayNotes(replay.notes, frames.length);
   return notes
     ? { version: 3, seat: replay.seat, frames, notes }
+    : null;
+}
+
+/** One stored frame's transition, validated as it would be at `frameIndex` of a replay file. */
+export function decodeReplayTransition(
+  value: unknown,
+  frameIndex: number,
+): Omit<GameTransitionView, "fromVersion"> | null {
+  const transition = object(value);
+  return transition && gameTransitionView({ ...transition, fromVersion: frameIndex === 0 ? 0 : frameIndex - 1 })
+    ? value as Omit<GameTransitionView, "fromVersion">
     : null;
 }
 

@@ -10,8 +10,8 @@ import {
 import {
   decodeReplayPendingAchievements,
   type ReplayPendingAchievements,
-  decodeReplayFile,
   decodeReplayResponse,
+  decodeReplayTransition,
   decodeGameView,
   MAX_FAVORITE_REPLAYS,
   MAX_REPLAY_NOTE_LENGTH,
@@ -238,6 +238,28 @@ function yieldToEventLoop(): Promise<void> {
   return new Promise((resolve) => setImmediate(resolve));
 }
 
+type ReplayFrames = Extract<ReplayFile, { version: 2 }>["frames"];
+
+/** Structural facts about a rejected value: key names and counts, never card identities. */
+function describeRejected(value: unknown): Record<string, unknown> {
+  const record = value && typeof value === "object" && !Array.isArray(value)
+    ? value as Record<string, unknown>
+    : null;
+  if (!record) return { type: Array.isArray(value) ? "array" : typeof value };
+  const events = Array.isArray(record.events) ? record.events : null;
+  return {
+    keys: Object.keys(record).join(","),
+    ...(typeof record.kind === "string" ? { kind: record.kind } : {}),
+    ...(events ? {
+      moves: events.length,
+      unplacedMoves: events.filter((event) => {
+        const move = event as { from?: unknown; to?: unknown } | null;
+        return move?.from === null && move?.to === null;
+      }).length,
+    } : {}),
+  };
+}
+
 async function replayFiles(
   db: Queryable,
   replay: Record<string, unknown>,
@@ -247,7 +269,7 @@ async function replayFiles(
 ): Promise<GameViewBuild> {
   const id = String(replay.id);
   const uniqueSeats = [...new Set(seats)];
-  const frames: Array<{ view: GameView; transition: unknown }> = [];
+  const frames: ReplayFrames = [];
   const rowsRoomVersions: number[] = [];
   let yieldedAt = performance.now();
   let afterRoomVersion = -1;
@@ -265,9 +287,25 @@ async function replayFiles(
     for (const row of rows) {
       const roomVersion = safeInteger(row.room_version, "replay room version");
       if (roomVersion <= afterRoomVersion) throw new Error(`replay ${id} frames are out of order`);
+      const frameIndex = frames.length;
       const view = decodeGameView(row.view);
-      if (!view) throw new Error(`replay ${id} frame ${frames.length + 1} failed validation`);
-      frames.push({ view, transition: row.transition ?? null });
+      if (!view) {
+        throw new Error(`replay ${id} frame ${frameIndex + 1} (room version ${roomVersion}) failed view validation: ${
+          JSON.stringify(describeRejected(row.view))
+        }`);
+      }
+      let transition: ReplayFrames[number]["transition"] = null;
+      if (row.transition != null) {
+        transition = decodeReplayTransition(row.transition, frameIndex);
+        if (!transition) {
+          // A transition only drives playback animation; keep the replay.
+          console.warn(JSON.stringify({
+            severity: "WARNING", event: "replay_transition_dropped",
+            replayId: id, frameIndex, roomVersion, ...describeRejected(row.transition),
+          }));
+        }
+      }
+      frames.push({ view, transition });
       rowsRoomVersions.push(roomVersion);
       afterRoomVersion = roomVersion;
       if (performance.now() - yieldedAt >= REPLAY_YIELD_BUDGET_MS) {
@@ -277,14 +315,9 @@ async function replayFiles(
     }
     if (rows.length < REPLAY_FRAME_BATCH_SIZE) break;
   }
+  // Every frame is validated once above; the seat copies only differ in `seat`.
   return {
-    files: new Map(
-      uniqueSeats.map((seat) => {
-        const file = decodeReplayFile({ version: 2, seat, frames });
-        if (!file) throw new Error(`replay ${id} transition validation failed`);
-        return [seat, file];
-      }),
-    ),
+    files: new Map(uniqueSeats.map((seat) => [seat, { version: 2, seat, frames }])),
     roomVersions: rowsRoomVersions,
   };
 }
@@ -352,15 +385,13 @@ export async function finalizeReplay(
   const payloads = await Promise.all(decodedParticipants.map(async (participant) => {
     const file = built.files.get(participant.seat);
     if (!file) throw new Error(`replay ${String(replay.id)} is missing seat ${participant.seat}`);
-    const decoded = decodeReplayFile(file);
-    if (!decoded) throw new Error(`replay ${String(replay.id)} projection failed validation`);
-    const response = JSON.stringify({ ok: true, replay: decoded });
+    const response = JSON.stringify({ ok: true, replay: file });
     const payload = await gzip(Buffer.from(response));
     return {
       userId: participant.userId,
       seat: participant.seat,
       payload,
-      frames: replayViews(decoded).length,
+      frames: replayViews(file).length,
     };
   }));
   await waitForCapacity();
