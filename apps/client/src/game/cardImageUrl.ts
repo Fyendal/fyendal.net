@@ -204,7 +204,9 @@ export function resolveCardImageUrl(
   cardId: string,
   data?: CardImageData,
   preferMarvel = false,
+  artImage?: string,
 ): string {
+  if (artImage) return `${IMG_BASE}/${artImage}.webp`;
   return (preferMarvel ? marvelCardImageUrl(cardId, data) : undefined) ?? standardCardImageUrl(cardId, data);
 }
 
@@ -215,8 +217,9 @@ export function resolveCardImageUrls(
   cardId: string,
   data?: CardImageData,
   preferMarvel = false,
+  artImage?: string,
 ): string[] {
-  const primary = resolveCardImageUrl(cardId, data, preferMarvel);
+  const primary = resolveCardImageUrl(cardId, data, preferMarvel, artImage);
   const urls = [primary, standardCardImageUrl(cardId, data)];
   if (BLACK_BORDER_ART_FOR_1HP.has(cardId)) {
     urls.push(`${IMG_BASE}/${cardId}.webp`);

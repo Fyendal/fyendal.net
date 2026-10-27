@@ -3,6 +3,7 @@ import {
   apiAccountBeta,
   apiAccountEmail,
   apiBugReportNotifications,
+  apiDeck,
   apiDecks,
   apiDeleteAccount,
   apiDeleteDeck,
@@ -16,6 +17,7 @@ import {
   apiReportPlayer,
   apiSelectAccountBadge,
   apiSetAccountEmail,
+  apiSetDeckArt,
   apiUpdateDeck,
 } from "../auth/auth.js";
 import type { StoreState } from "./types.js";
@@ -32,6 +34,8 @@ type AccountActionKey =
   | "previewFabraryPlay"
   | "importDeck"
   | "updateDeck"
+  | "setDeckArt"
+  | "loadDeckDetail"
   | "deleteDeck"
   | "exportAccount"
   | "refreshBetaTester"
@@ -142,6 +146,29 @@ export function createAccountActions({
       if (result.ok) {
         deckMutationRevision += 1;
         set({ decks: get().decks.map((deck) => deck.id === result.deck.id ? result.deck : deck) });
+      }
+      return result;
+    },
+    loadDeckDetail: async (id) => {
+      const token = get().authToken;
+      if (!token) return { ok: false, error: "not logged in" };
+      const request = authRequest(token);
+      const result = await apiDeck(token, id, request.signal);
+      return isCurrentAuth(request) ? result : superseded;
+    },
+    setDeckArt: async (id, art) => {
+      const token = get().authToken;
+      if (!token) return { ok: false, error: "not logged in" };
+      const request = authRequest(token);
+      const result = await apiSetDeckArt(token, { id, art }, request.signal);
+      if (!isCurrentAuth(request)) return superseded;
+      if (result.ok) {
+        deckMutationRevision += 1;
+        const prepDeck = get().prepDeck;
+        set({
+          decks: get().decks.map((deck) => deck.id === result.deck.id ? result.deck : deck),
+          ...(prepDeck?.id === result.deck.id ? { prepDeck: { ...prepDeck, art: result.deck.art } } : {}),
+        });
       }
       return result;
     },

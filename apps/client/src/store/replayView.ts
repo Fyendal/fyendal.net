@@ -13,6 +13,7 @@ export function snapshotBeforeReplay(state: StoreState): PreReplaySnapshot | nul
     spectatorCount: state.spectatorCount,
     spectatorUsernames: state.spectatorUsernames,
     playerProfiles: state.playerProfiles,
+    cardArt: state.cardArt,
   };
 }
 
@@ -37,6 +38,7 @@ export function replayViewerProjection(
     spectatorCount: 0,
     spectatorUsernames: [],
     playerProfiles: null,
+    cardArt: null,
     botGame: false,
     error: null,
   };

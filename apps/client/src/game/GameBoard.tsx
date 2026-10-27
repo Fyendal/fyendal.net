@@ -7,7 +7,7 @@ import { useShallow } from "zustand/react/shallow";
 import type { CardView, GameIntent, MeldSide } from "@fyendal/shared";
 import { cardData } from "@fyendal/cards/client";
 import { useStore } from "../store.js";
-import { cardPreviewSize, CardBack, CardFace, SquareCardPresentation } from "./Card.js";
+import { cardPreviewSize, CardArtProvider, CardBack, CardFace, SquareCardPresentation } from "./Card.js";
 import { ChainFloat } from "./ChainFloat.js";
 import { EndTurnPassToast } from "./EndTurnPassToast.js";
 import { StatusFloat, type PrimaryAction } from "./StatusFloat.js";
@@ -116,11 +116,12 @@ const EMPTY_INSTANCE_IDS: ReadonlySet<number> = new Set();
 
 export function GameBoard() {
   const intl = useIntl();
-  const { view: authoritativeView, viewUpdate: authoritativeViewUpdate, playerProfiles, legal, actionCandidates, roomCommandPending, pendingInteraction, pendingDefenderStageIds, yourSeat, spectating, spectatorCount, spectatorUsernames, botGame, betaTester, sendIntent, sendPriorityMode, sendStandingOrders, sendTokenSkip, sendEmote, kickSpectator, latestEmote, undo, error, leave, opponentConnected, connected, connectionIssueVisible, roomCode, screen, replayFrames, replayViews, replayStep, replayNotes, setLiveReplayNote, watchReplay, downloadReplay, closeReplay, getRecordedViews, lastActionAt, claimVictory, reportBug, reportOpponent, backgroundSearching, stopBackgroundMatchmaking, authUser, authToken, setLobbyRail, unreadMessageCount, setSocialOpen } = useStore(
+  const { view: authoritativeView, viewUpdate: authoritativeViewUpdate, playerProfiles, cardArt, legal, actionCandidates, roomCommandPending, pendingInteraction, pendingDefenderStageIds, yourSeat, spectating, spectatorCount, spectatorUsernames, botGame, betaTester, sendIntent, sendPriorityMode, sendStandingOrders, sendTokenSkip, sendEmote, kickSpectator, latestEmote, undo, error, leave, opponentConnected, connected, connectionIssueVisible, roomCode, screen, replayFrames, replayViews, replayStep, replayNotes, setLiveReplayNote, watchReplay, downloadReplay, closeReplay, getRecordedViews, lastActionAt, claimVictory, reportBug, reportOpponent, backgroundSearching, stopBackgroundMatchmaking, authUser, authToken, setLobbyRail, unreadMessageCount, setSocialOpen } = useStore(
     useShallow((state) => ({
       view: state.view,
       viewUpdate: state.viewUpdate,
       playerProfiles: state.playerProfiles,
+      cardArt: state.cardArt,
       legal: state.legal,
       actionCandidates: state.actionCandidates,
       roomCommandPending: state.roomCommandPending,
@@ -1188,6 +1189,7 @@ export function GameBoard() {
 
   return (
     <EffectHeroesContext.Provider value={effectHeroList}>
+    <CardArtProvider art={cardArt}>
     <SquareCardPresentation enabled={squareCardsEnabled}>
     <div
       ref={tableRef}
@@ -1760,6 +1762,7 @@ export function GameBoard() {
       />
     </div>
     </SquareCardPresentation>
+    </CardArtProvider>
     </EffectHeroesContext.Provider>
   );
 }

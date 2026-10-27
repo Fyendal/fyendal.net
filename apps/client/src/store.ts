@@ -1109,6 +1109,7 @@ export const useStore = create<StoreState>((set, get) => {
             ? commandState.defenderStageIds
             : get().pendingDefenderStageIds,
           playerProfiles: msg.playerProfiles,
+          cardArt: msg.cardArt ?? null,
           yourSeat: msg.yourSeat,
           spectatorCount: msg.spectators ?? 0,
           botGame: msg.botGame === true,
@@ -1302,6 +1303,7 @@ export const useStore = create<StoreState>((set, get) => {
             legal: [],
             actionCandidates: [],
             playerProfiles: null,
+            cardArt: null,
             lastActionAt: null,
             prep: null,
             prepDeck: null,

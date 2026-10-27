@@ -16,8 +16,8 @@ describe("DeckLibrary", () => {
   it("opens every deck as a button and shows selection controls", () => {
     libraryStore.state = {
       decks: [
-        { id: "cc", name: "Bravo Deck", format: "cc", fabraryUrl: "https://www.fabrary.net/decks/01M1WZTPC64GDCMN2GX752E3R7?matchup=abc", heroName: "Bravo", deckSize: 80, updatedAt: 2 },
-        { id: "sa", name: "Briar Deck", format: "silver-age", fabraryUrl: null, heroName: "Briar", deckSize: 40, updatedAt: 1 },
+        { id: "cc", name: "Bravo Deck", format: "cc", fabraryUrl: "https://www.fabrary.net/decks/01M1WZTPC64GDCMN2GX752E3R7?matchup=abc", heroName: "Bravo", deckSize: 80, updatedAt: 2 , art: { highestRarity: false, picks: {} }},
+        { id: "sa", name: "Briar Deck", format: "silver-age", fabraryUrl: null, heroName: "Briar", deckSize: 40, updatedAt: 1 , art: { highestRarity: false, picks: {} }},
       ],
       decksLoading: false,
       cardPoolModes: { cc: "legal", "silver-age": "legal" },
@@ -56,7 +56,7 @@ describe("DeckLibrary", () => {
 
   it("does not turn an invalid saved URL into a link", () => {
     libraryStore.state = {
-      decks: [{ id: "bad", name: "Old Deck", format: "cc", fabraryUrl: "javascript:alert(1)", heroName: "Bravo", deckSize: 80, updatedAt: 1 }],
+      decks: [{ id: "bad", name: "Old Deck", format: "cc", fabraryUrl: "javascript:alert(1)", heroName: "Bravo", deckSize: 80, updatedAt: 1 , art: { highestRarity: false, picks: {} }}],
       decksLoading: false,
       cardPoolModes: { cc: "legal", "silver-age": "legal" },
     } as StoreState;
@@ -73,7 +73,7 @@ describe("DeckLibrary", () => {
 describe("DeckTile", () => {
   it("names the source of picker decks", () => {
     const precon = preconSummaries("cc")[0]!;
-    const saved: DeckSummary = { id: "mine", name: "Bravo Deck", format: "cc", fabraryUrl: null, heroName: "Bravo", deckSize: 80, updatedAt: 1 };
+    const saved: DeckSummary = { id: "mine", name: "Bravo Deck", format: "cc", fabraryUrl: null, heroName: "Bravo", deckSize: 80, updatedAt: 1 , art: { highestRarity: false, picks: {} }};
     const render = (deck: DeckSummary) => renderToStaticMarkup(
       <TestI18nProvider>
         <DeckTile deck={deck} onSelect={() => {}} />

@@ -2,7 +2,7 @@ import { Fragment, useCallback, useEffect, useLayoutEffect, useRef, useState } f
 import { useIntl } from "react-intl";
 import type { GameView } from "@fyendal/shared";
 import { cardData } from "@fyendal/cards/client";
-import { cardImageUrl } from "./Card.js";
+import { cardImageUrl, useCardArt } from "./Card.js";
 import { decisionRevealEvent, detectDeckCardEvents, type DeckCardEvent } from "./deckCardEvents.js";
 
 const DISPLAY_MS = 2_600;
@@ -214,6 +214,7 @@ export function DeckCardToast({
   onMouseLeave?: () => void;
 }) {
   const intl = useIntl();
+  const cardArt = useCardArt();
   if (!event) return null;
   const names = event.cardIds.map((cardId) => cardData[cardId]?.name ?? cardId);
   const localizedLabelId = localizedDeckCardEventLabel(event);
@@ -293,7 +294,7 @@ export function DeckCardToast({
                       ? "toast-card-mine"
                       : "toast-card-theirs"
                 }
-                src={cardImageUrl(cardId)}
+                src={cardImageUrl(cardId, cardArt(ownerSeat, cardId))}
                 alt={names[index]}
                 data-cardid={cardId}
                 draggable={false}

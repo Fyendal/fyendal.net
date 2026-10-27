@@ -65,6 +65,7 @@ import {
   type LeaguesResponse,
 } from "@fyendal/protocol";
 import type {
+  DeckArt,
   Format,
   LeagueAvailabilityRequest,
   LeagueJoinRequest,
@@ -520,6 +521,14 @@ export function apiUpdateDeck(
     (value) => decodeDeckResponse(value) ?? decodeDeckInvalidResponse(value),
     { token, signal },
   );
+}
+
+export function apiSetDeckArt(
+  token: string,
+  input: { id: string; art: DeckArt },
+  signal?: AbortSignal,
+): Promise<DeckOk | ApiError> {
+  return post("decks/art", input, decodeDeckResponse, { token, signal });
 }
 
 export type DeleteDeckResult = OkResponse | ApiError;

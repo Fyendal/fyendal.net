@@ -23,6 +23,7 @@ export function initialStoreProjection(
     spectatorKicked: false,
     botGame: false,
     playerProfiles: null,
+    cardArt: null,
     view: null,
     viewUpdate: { sequence: 0, source: "restore" as const, transition: "replace" as const },
     legal: [],
@@ -99,6 +100,7 @@ export function clearedRoomProjection(): Pick<
   | "spectatorKicked"
   | "botGame"
   | "playerProfiles"
+  | "cardArt"
   | "view"
   | "viewUpdate"
   | "legal"
@@ -141,6 +143,7 @@ export function clearedRoomProjection(): Pick<
     spectatorKicked: false,
     botGame: false,
     playerProfiles: null,
+    cardArt: null,
     view: null,
     viewUpdate: { sequence: 0, source: "restore", transition: "replace" },
     legal: [],

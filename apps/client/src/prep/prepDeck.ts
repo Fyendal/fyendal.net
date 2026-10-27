@@ -19,6 +19,7 @@ export function preconPrepDeck(id: string): PrepDeck | null {
       (pool.inventoryPool?.length ?? 0) +
       (pool.sideboard?.length ?? 0),
     updatedAt: 0,
+    art: { highestRarity: false, picks: {} },
     decklist: pool,
   };
 }

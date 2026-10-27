@@ -17,7 +17,7 @@ beforeEach(() => {
       route: { ok: true, request: { url: "https://fabrary.net/decks/01M1WZTPC64GDCMN2GX752E3R7", format: "cc" } },
       status: "ready", result: { ok: true, deck: {
         id: "deck", name: "My deck", format: "cc", fabraryUrl: null,
-        heroName: "Rhinar", deckSize: 80, updatedAt: 0,
+        heroName: "Rhinar", deckSize: 80, updatedAt: 0, art: { highestRarity: false, picks: {} },
         bannedCards: ["Art of War"], futureCards: ["Future card"],
       } },
     },
@@ -137,7 +137,7 @@ describe("Fabrary play entry page", () => {
   it("keeps a long future-card list collapsed and only asks for a mode change when needed", () => {
     store.state.pendingFabraryPlay!.result = { ok: true, deck: {
       id: "deck", name: "Domina on my Corpse until I'm Dead", format: "cc", fabraryUrl: null,
-      heroName: "Malice, Domina of the Dead", deckSize: 80, updatedAt: 0,
+      heroName: "Malice, Domina of the Dead", deckSize: 80, updatedAt: 0, art: { highestRarity: false, picks: {} },
       futureCards: Array.from({ length: 22 }, (_, index) => `Future card ${index}`),
     } };
     expect(render()).toContain("Choose Future or Open");

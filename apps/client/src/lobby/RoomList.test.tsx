@@ -162,8 +162,8 @@ describe("RoomList", () => {
     roomListStore.state = {
       ...roomListStore.state,
       decks: [
-        { id: "first", name: "First Briar", format: "silver-age", fabraryUrl: null, heroName: "Briar", deckSize: 40, updatedAt: 3 },
-        { id: "remembered", name: "Last Played Briar", format: "silver-age", fabraryUrl: null, heroName: "Briar", deckSize: 40, updatedAt: 2 },
+        { id: "first", name: "First Briar", format: "silver-age", fabraryUrl: null, heroName: "Briar", deckSize: 40, updatedAt: 3 , art: { highestRarity: false, picks: {} }},
+        { id: "remembered", name: "Last Played Briar", format: "silver-age", fabraryUrl: null, heroName: "Briar", deckSize: 40, updatedAt: 2 , art: { highestRarity: false, picks: {} }},
       ],
       deckPlayedAt: { remembered: 4 },
     };

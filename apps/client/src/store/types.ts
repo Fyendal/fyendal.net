@@ -1,4 +1,5 @@
 import type {
+  DeckArt,
   BotOpponent,
   BackgroundMatchmakingStatus,
   CardPoolMode,
@@ -34,6 +35,7 @@ import type {
   ApiError,
   FixedBugReportNotification,
   DeckDetailResponse,
+  DeckResponse,
   DeckSummary,
   FabraryDeckPreviewResponse,
   MatchListFilters,
@@ -194,6 +196,10 @@ export interface StoreState {
     text?: string;
   }) => Promise<DeckResult>;
   updateDeck: (input: { id: string; name: string; url?: string; text?: string }) => Promise<DeckResult>;
+  /** Saves the deck's card art; also updates the open prep deck. */
+  setDeckArt: (id: string, art: DeckArt) => Promise<DeckResponse | ApiError>;
+  /** The deck's full registered pool, for its card art picker. */
+  loadDeckDetail: (id: string) => Promise<DeckDetailResponse | ApiError>;
   deleteDeck: (id: string) => Promise<DeleteDeckResult>;
   exportAccount: () => Promise<{ ok: true; export: AccountExport } | ApiError>;
   getAccountBadges: () => Promise<AccountBadgesResponse | ApiError>;
@@ -221,6 +227,8 @@ export interface StoreState {
   retryBrowserBot: () => void;
   botGame: boolean;
   playerProfiles: [PlayerProfileView, PlayerProfileView] | null;
+  /** Per-seat printing id -> image id the server shared with this viewer. */
+  cardArt: [Record<string, string>, Record<string, string>] | null;
   view: GameView | null;
   viewUpdate: ViewUpdate;
   legal: GameIntent[];
@@ -343,4 +351,6 @@ export interface PreReplaySnapshot {
   spectatorCount: number;
   spectatorUsernames: Array<string | null>;
   playerProfiles: [PlayerProfileView, PlayerProfileView] | null;
+  /** Per-seat printing id -> image id the server shared with this viewer. */
+  cardArt: [Record<string, string>, Record<string, string>] | null;
 }

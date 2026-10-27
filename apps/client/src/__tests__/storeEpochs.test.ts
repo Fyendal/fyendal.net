@@ -62,7 +62,7 @@ function jsonResponse(value: unknown): Response {
 const fabraryUrl = "https://fabrary.net/decks/01M1WZTPC64GDCMN2GX752E3R7";
 const fabraryDeck = {
   id: "linked-deck", name: "Fabrary deck", format: "cc" as const, fabraryUrl,
-  heroName: "Rhinar, Reckless Rampage", deckSize: 80, updatedAt: 1,
+  heroName: "Rhinar, Reckless Rampage", deckSize: 80, updatedAt: 1, art: { highestRarity: false, picks: {} },
 };
 
 function stubPlayLocation(): void {
@@ -466,7 +466,7 @@ describe("client connection and account race fences", () => {
       localStorage.setItem("fyendal-auth", JSON.stringify({ token: "token-a", username: "Alice" }));
       const original = {
         id: "deck-1", name: "Original", format: "silver-age" as const, fabraryUrl: null,
-        heroName: "Briar", deckSize: 40, updatedAt: 1,
+        heroName: "Briar", deckSize: 40, updatedAt: 1, art: { highestRarity: false, picks: {} },
       };
       const changed = { ...original, id: mutation === "import" ? "deck-2" : original.id,
         name: "Changed", updatedAt: 2 };
@@ -1239,7 +1239,7 @@ describe("client connection and account race fences", () => {
     const { useStore } = await import("../store.js");
     const oldDeck = {
       id: "old", name: "Old", format: "silver-age" as const, fabraryUrl: null,
-      heroName: "Old Hero", deckSize: 40, updatedAt: 1,
+      heroName: "Old Hero", deckSize: 40, updatedAt: 1, art: { highestRarity: false, picks: {} },
     };
     useStore.setState({ decks: [oldDeck] });
 
@@ -1268,7 +1268,7 @@ describe("client connection and account race fences", () => {
     localStorage.setItem("fyendal-auth", JSON.stringify({ token: "token-a", username: "Alice" }));
     const original = {
       id: "deck-1", name: "Original", format: "silver-age" as const, fabraryUrl: null,
-      heroName: "Briar", deckSize: 40, updatedAt: 1,
+      heroName: "Briar", deckSize: 40, updatedAt: 1, art: { highestRarity: false, picks: {} },
     };
     const updated = {
       ...original,
@@ -1403,7 +1403,7 @@ describe("client connection and account race fences", () => {
       updatedAt += 1;
       return Promise.resolve(jsonResponse({ ok: true, deck: {
         id: "saved-deck", name: "Saved", format: "silver-age", fabraryUrl,
-        heroName: "Hero", deckSize: 40, updatedAt, decklist: pool,
+        heroName: "Hero", deckSize: 40, updatedAt, art: { highestRarity: false, picks: {} }, decklist: pool,
       } }));
     });
     vi.stubGlobal("fetch", fetchMock);
@@ -1729,7 +1729,7 @@ describe("client connection and account race fences", () => {
     const { useStore } = await import("../store.js");
     const deck = {
       id: "deck-1", name: "Deck", format: "cc" as const, fabraryUrl: null,
-      heroName: "Hero", deckSize: 60, updatedAt: 1,
+      heroName: "Hero", deckSize: 60, updatedAt: 1, art: { highestRarity: false, picks: {} },
     };
     useStore.setState({ decks: [deck] });
 
@@ -2065,7 +2065,7 @@ describe("client connection and account race fences", () => {
       yourSeat: 0,
       decks: [{
         id: "private", name: "Private", format: "cc", fabraryUrl: null,
-        heroName: "Hero", deckSize: 60, updatedAt: 1,
+        heroName: "Hero", deckSize: 60, updatedAt: 1, art: { highestRarity: false, picks: {} },
       }],
       queuedFormat: "cc",
       screen: "waiting",

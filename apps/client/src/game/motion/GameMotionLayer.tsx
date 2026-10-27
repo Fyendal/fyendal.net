@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState, type AnimationEvent, type CSSProperties, type ReactNode } from "react";
 import { createPortal } from "react-dom";
-import { CARD_BACK_IMAGE_URL, CardBack, CardFace, cardImageUrl } from "../Card.js";
+import { CARD_BACK_IMAGE_URL, CardBack, CardFace, cardImageUrl, useCardArt } from "../Card.js";
 import {
   MOTION_CONNECT_MS,
   motionFlightDurationMs,
@@ -23,10 +23,10 @@ function rectStyle(rect: MotionRect): CSSProperties {
   };
 }
 
-function visualFaceUrl(visual: MotionVisual): string | null {
+function visualFaceUrl(visual: MotionVisual, artImage: string | undefined): string | null {
   return visual.kind === "face" || visual.kind === "face-conceal"
     || visual.kind === "back-reveal"
-    ? cardImageUrl(visual.card.cardId)
+    ? cardImageUrl(visual.card.cardId, artImage)
     : null;
 }
 
@@ -130,7 +130,8 @@ export function MotionCardVisual({
   square?: boolean;
   morph?: MotionMorph | null;
 }) {
-  const faceUrl = visualFaceUrl(visual);
+  const cardArt = useCardArt();
+  const faceUrl = visualFaceUrl(visual, "card" in visual ? cardArt(visual.card.owner, visual.card.cardId) : undefined);
   const morphing = square && morph !== null && faceUrl !== null;
   return (
     <div

@@ -29,6 +29,7 @@ describe("deckChoicesFor", () => {
       heroName: "Briar",
       deckSize: 40,
       updatedAt: 1,
+      art: { highestRarity: false, picks: {} },
     };
 
     const choices = deckChoicesFor("silver-age", [ownDeck]);
@@ -47,6 +48,7 @@ describe("deckChoicesFor", () => {
       heroName: "Bravo",
       deckSize: 80,
       updatedAt: 1,
+      art: { highestRarity: false, picks: {} },
       bannedCards: ["Art of War"],
     };
 
@@ -76,6 +78,7 @@ describe("sortDecksForPicker", () => {
       heroName: "Briar",
       deckSize: 40,
       updatedAt,
+      art: { highestRarity: false, picks: {} },
     });
     const decks = [deck("older", 1), deck("newest", 9), deck("played", 2), deck("precon", 0)];
 
@@ -100,6 +103,7 @@ describe("filterAndSortDecks", () => {
         heroName: "Bravo",
         deckSize: 80,
         updatedAt: 1,
+        art: { highestRarity: false, picks: {} },
       },
       {
         id: "new",
@@ -109,6 +113,7 @@ describe("filterAndSortDecks", () => {
         heroName: "Bravo, Star of the Show",
         deckSize: 80,
         updatedAt: 9,
+        art: { highestRarity: false, picks: {} },
       },
       {
         id: "future",
@@ -118,6 +123,7 @@ describe("filterAndSortDecks", () => {
         heroName: "Aurora",
         deckSize: 80,
         updatedAt: 12,
+        art: { highestRarity: false, picks: {} },
         futureCards: ["Future Card"],
       },
     ];

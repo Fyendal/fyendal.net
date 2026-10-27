@@ -19,6 +19,24 @@ const PITCH_CLASS: Record<number, string> = {
   4: "pitch-purple",
 };
 const SquareCardPresentationContext = createContext(false);
+/** Per-seat printing id -> image id chosen by each card's owner. */
+const CardArtContext = createContext<readonly [Record<string, string>, Record<string, string>] | null>(null);
+
+export function CardArtProvider({
+  art,
+  children,
+}: {
+  art: readonly [Record<string, string>, Record<string, string>] | null;
+  children?: ReactNode;
+}) {
+  return <CardArtContext.Provider value={art}>{children}</CardArtContext.Provider>;
+}
+
+/** Image the owner chose for a card, for surfaces that render it outside CardFace. */
+export function useCardArt(): (owner: number | undefined, cardId: string) => string | undefined {
+  const art = useContext(CardArtContext);
+  return (owner, cardId) => owner === undefined ? undefined : art?.[owner]?.[cardId];
+}
 
 export function SquareCardPresentation({ enabled, children }: { enabled: boolean; children?: ReactNode }) {
   return (
@@ -100,8 +118,8 @@ function CounterOverlay({
 // Fabrary's CDN serves ~546px-wide images (vs 376px on the LSS bucket).
 export const CARD_BACK_IMAGE_URL = "https://content.fabrary.net/cards/cardback.webp";
 
-export function cardImageUrl(cardId: string): string {
-  return resolveCardImageUrl(cardId, cardData[cardId]);
+export function cardImageUrl(cardId: string, artImage?: string): string {
+  return resolveCardImageUrl(cardId, cardData[cardId], false, artImage);
 }
 
 /** A resilient card-art surface for screens that do not need the interactive
@@ -109,6 +127,7 @@ export function cardImageUrl(cardId: string): string {
  * CDN image never leaves the browser's broken-image icon visible. */
 export function CardArtwork({
   cardId,
+  artImage,
   className,
   alt,
   width,
@@ -116,6 +135,8 @@ export function CardArtwork({
   style,
 }: {
   cardId: string;
+  /** Alternate Fabrary image chosen for this card. */
+  artImage?: string;
   className?: string;
   alt: string;
   width?: number;
@@ -125,7 +146,7 @@ export function CardArtwork({
   const [imageFailure, setImageFailure] = useState<{ cardId: string; attempts: number } | null>(null);
   const data = cardData[cardId];
   const name = data?.name ?? cardId;
-  const imageUrls = resolveCardImageUrls(cardId, data);
+  const imageUrls = resolveCardImageUrls(cardId, data, false, artImage);
   const failedAttempts = imageFailure?.cardId === cardId ? imageFailure.attempts : 0;
   const showImg = cardId !== "" && failedAttempts < imageUrls.length;
 
@@ -248,6 +269,7 @@ export function CardFace({
   squareArt?: boolean;
 }) {
   const squarePresentationEnabled = useContext(SquareCardPresentationContext);
+  const cardArt = useContext(CardArtContext);
   const squareCard = size === "zone" && (squareArt ?? squarePresentationEnabled);
   // Try temporary Fabrary variants before falling back to the text layout.
   const [imageFailure, setImageFailure] = useState<{ cardId: string; attempts: number } | null>(null);
@@ -286,7 +308,7 @@ export function CardFace({
   }
   const data = cardData[card.cardId];
   const name = data?.name ?? card.name ?? card.cardId;
-  const imageUrls = resolveCardImageUrls(card.cardId, data);
+  const imageUrls = resolveCardImageUrls(card.cardId, data, false, cardArt?.[card.owner]?.[card.cardId]);
   const failedAttempts = imageFailure?.cardId === card.cardId ? imageFailure.attempts : 0;
   const imageUrl = card.cardId !== "" ? imageUrls[failedAttempts] : undefined;
   const showImg = imageUrl !== undefined;
