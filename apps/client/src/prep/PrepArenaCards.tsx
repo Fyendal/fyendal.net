@@ -3,10 +3,12 @@ import type { RevealedArena } from "@fyendal/shared";
 import { cardData } from "@fyendal/cards/client";
 import { CardArtwork } from "../game/Card.js";
 import { EQUIPMENT_SLOTS } from "../domain.js";
+import type { PrepCardArt } from "./PrepPresentation.js";
 
-export function PrepArenaCards({ arena, owner }: {
+export function PrepArenaCards({ arena, owner, cardArt }: {
   arena: RevealedArena;
   owner: "you" | "opponent";
+  cardArt?: PrepCardArt;
 }) {
   const intl = useIntl();
   const cards = [...arena.weaponIds, ...EQUIPMENT_SLOTS.flatMap((slot) => {
@@ -20,6 +22,7 @@ export function PrepArenaCards({ arena, owner }: {
         {cards.map((id, index) =>
           id ? <CardArtwork
             key={index} className="prep-card" cardId={id}
+            artImage={cardArt?.imageFor(id)}
             alt={cardData[id]?.name ?? id}
           /> : <span key={index} className="prep-card prep-cloaked-card">
             {intl.formatMessage({ id: "prep.arena.cloaked" })}

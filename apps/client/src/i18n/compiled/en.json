@@ -32732,6 +32732,344 @@
       "value": "All formats"
     }
   ],
+  "lobby.deck.art.auto": [
+    {
+      "type": 0,
+      "value": "Auto"
+    }
+  ],
+  "lobby.deck.art.chooseFor": [
+    {
+      "type": 0,
+      "value": "Choose art for "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    }
+  ],
+  "lobby.deck.art.empty": [
+    {
+      "type": 0,
+      "value": "No cards match. Clear the search or choose All."
+    }
+  ],
+  "lobby.deck.art.filter": [
+    {
+      "type": 0,
+      "value": "Show"
+    }
+  ],
+  "lobby.deck.art.filter.all": [
+    {
+      "type": 0,
+      "value": "All"
+    }
+  ],
+  "lobby.deck.art.filter.alternatives": [
+    {
+      "type": 0,
+      "value": "Has alternatives"
+    }
+  ],
+  "lobby.deck.art.filter.picked": [
+    {
+      "type": 0,
+      "value": "Picked"
+    }
+  ],
+  "lobby.deck.art.foil.c": [
+    {
+      "type": 0,
+      "value": "Cold Foil"
+    }
+  ],
+  "lobby.deck.art.foil.g": [
+    {
+      "type": 0,
+      "value": "Gold Foil"
+    }
+  ],
+  "lobby.deck.art.foil.r": [
+    {
+      "type": 0,
+      "value": "Rainbow Foil"
+    }
+  ],
+  "lobby.deck.art.group.arena": [
+    {
+      "type": 0,
+      "value": "Hero and arena"
+    }
+  ],
+  "lobby.deck.art.group.blue": [
+    {
+      "type": 0,
+      "value": "Blue"
+    }
+  ],
+  "lobby.deck.art.group.other": [
+    {
+      "type": 0,
+      "value": "Other"
+    }
+  ],
+  "lobby.deck.art.group.red": [
+    {
+      "type": 0,
+      "value": "Red"
+    }
+  ],
+  "lobby.deck.art.group.yellow": [
+    {
+      "type": 0,
+      "value": "Yellow"
+    }
+  ],
+  "lobby.deck.art.highestRarity": [
+    {
+      "type": 0,
+      "value": "Use highest-rarity art"
+    }
+  ],
+  "lobby.deck.art.highestRarityHint": [
+    {
+      "type": 0,
+      "value": "Shows Marvel, foil, and other special printings when one exists. Cards you pick yourself keep your pick."
+    }
+  ],
+  "lobby.deck.art.loadFailed": [
+    {
+      "type": 0,
+      "value": "Couldn't load this deck's cards: "
+    },
+    {
+      "type": 1,
+      "value": "error"
+    }
+  ],
+  "lobby.deck.art.loading": [
+    {
+      "type": 0,
+      "value": "Loading card art…"
+    }
+  ],
+  "lobby.deck.art.onlyOne": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ", only one printing"
+    }
+  ],
+  "lobby.deck.art.optionsFor": [
+    {
+      "type": 0,
+      "value": "Art for "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    }
+  ],
+  "lobby.deck.art.picked": [
+    {
+      "type": 0,
+      "value": "Picked"
+    }
+  ],
+  "lobby.deck.art.printings": [
+    {
+      "type": 6,
+      "value": "count",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " printing"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " printings"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    }
+  ],
+  "lobby.deck.art.rarity.b": [
+    {
+      "type": 0,
+      "value": "Basic"
+    }
+  ],
+  "lobby.deck.art.rarity.c": [
+    {
+      "type": 0,
+      "value": "Common"
+    }
+  ],
+  "lobby.deck.art.rarity.f": [
+    {
+      "type": 0,
+      "value": "Fabled"
+    }
+  ],
+  "lobby.deck.art.rarity.l": [
+    {
+      "type": 0,
+      "value": "Legendary"
+    }
+  ],
+  "lobby.deck.art.rarity.m": [
+    {
+      "type": 0,
+      "value": "Majestic"
+    }
+  ],
+  "lobby.deck.art.rarity.p": [
+    {
+      "type": 0,
+      "value": "Promo"
+    }
+  ],
+  "lobby.deck.art.rarity.r": [
+    {
+      "type": 0,
+      "value": "Rare"
+    }
+  ],
+  "lobby.deck.art.rarity.s": [
+    {
+      "type": 0,
+      "value": "Super Rare"
+    }
+  ],
+  "lobby.deck.art.rarity.t": [
+    {
+      "type": 0,
+      "value": "Token"
+    }
+  ],
+  "lobby.deck.art.rarity.v": [
+    {
+      "type": 0,
+      "value": "Marvel"
+    }
+  ],
+  "lobby.deck.art.rarityAndFinish": [
+    {
+      "type": 1,
+      "value": "rarity"
+    },
+    {
+      "type": 0,
+      "value": ", "
+    },
+    {
+      "type": 1,
+      "value": "finish"
+    }
+  ],
+  "lobby.deck.art.saveFailed": [
+    {
+      "type": 0,
+      "value": "Couldn't save card art: "
+    },
+    {
+      "type": 1,
+      "value": "error"
+    }
+  ],
+  "lobby.deck.art.search": [
+    {
+      "type": 0,
+      "value": "Search cards"
+    }
+  ],
+  "lobby.deck.art.setAndLanguage": [
+    {
+      "type": 1,
+      "value": "set"
+    },
+    {
+      "type": 0,
+      "value": ", "
+    },
+    {
+      "type": 1,
+      "value": "language"
+    }
+  ],
+  "lobby.deck.art.standard": [
+    {
+      "type": 0,
+      "value": "Standard"
+    }
+  ],
+  "lobby.deck.art.title": [
+    {
+      "type": 0,
+      "value": "Card art"
+    }
+  ],
+  "lobby.deck.art.unsaved": [
+    {
+      "type": 0,
+      "value": "Unsaved changes"
+    }
+  ],
+  "lobby.deck.art.useAuto": [
+    {
+      "type": 0,
+      "value": "Use auto"
+    }
+  ],
+  "lobby.deck.art.variation.aa": [
+    {
+      "type": 0,
+      "value": "Alternate Art"
+    }
+  ],
+  "lobby.deck.art.variation.ab": [
+    {
+      "type": 0,
+      "value": "Alternate Border"
+    }
+  ],
+  "lobby.deck.art.variation.at": [
+    {
+      "type": 0,
+      "value": "Alternate Text"
+    }
+  ],
+  "lobby.deck.art.variation.ea": [
+    {
+      "type": 0,
+      "value": "Extended Art"
+    }
+  ],
+  "lobby.deck.art.variation.fa": [
+    {
+      "type": 0,
+      "value": "Full Art"
+    }
+  ],
   "lobby.deck.bannedList": [
     {
       "type": 0,
@@ -34176,6 +34514,44 @@
     {
       "type": 0,
       "value": "Your arena cards"
+    }
+  ],
+  "prep.art.choose": [
+    {
+      "type": 0,
+      "value": "Choose art for "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    }
+  ],
+  "prep.art.dialog": [
+    {
+      "type": 0,
+      "value": "Card art"
+    }
+  ],
+  "prep.art.highestRarity": [
+    {
+      "type": 0,
+      "value": "Highest-rarity art"
+    }
+  ],
+  "prep.art.saved": [
+    {
+      "type": 0,
+      "value": "Saved to "
+    },
+    {
+      "type": 1,
+      "value": "deck"
+    }
+  ],
+  "prep.art.viewCard": [
+    {
+      "type": 0,
+      "value": "View card"
     }
   ],
   "prep.botNudge.description": [

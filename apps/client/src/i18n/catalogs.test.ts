@@ -248,6 +248,8 @@ describe("locale catalogs", () => {
       { id: "engine.log.card.destroyed" },
       { card: "Nimble Strike" },
     )).toBe("A carta Nimble Strike é destruída");
+    expect(intl.formatMessage({ id: "lobby.deck.art.rarity.v" })).toBe("Marvel");
+    expect(intl.formatMessage({ id: "lobby.deck.art.foil.c" })).toBe("Cold Foil");
   });
 
   it("keeps Flesh and Blood terms in English for Spanish", () => {
@@ -283,6 +285,8 @@ describe("locale catalogs", () => {
     )).toBe("La carta Nimble Strike es destruida");
     expect(intl.formatMessage({ id: "engine.log.hero.marked" }, { hero: "Arakni" }))
       .toBe("Arakni recibe mark");
+    expect(intl.formatMessage({ id: "lobby.deck.art.rarity.v" })).toBe("Marvel");
+    expect(intl.formatMessage({ id: "lobby.deck.art.foil.c" })).toBe("Cold Foil");
   });
 
   it("separates Chinese text from interpolated names with a space", () => {

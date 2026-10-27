@@ -19,6 +19,7 @@ const deck: DeckSummary = {
   heroName: "Bravo",
   deckSize: 80,
   updatedAt: 1,
+  art: { highestRarity: false, picks: {} },
 };
 
 function render(props: { deck?: DeckSummary; href?: string; queued?: boolean; pool?: "legal" | "future" | "open" }) {
@@ -30,7 +31,7 @@ function render(props: { deck?: DeckSummary; href?: string; queued?: boolean; po
   return renderToStaticMarkup(
     <TestI18nProvider>
       <DeckDetailModal deck={props.deck ?? deck} fabraryHref={props.href}
-        onEdit={() => {}} onDelete={() => {}} onClose={() => {}} />
+        onEdit={() => {}} onEditArt={() => {}} onDelete={() => {}} onClose={() => {}} />
     </TestI18nProvider>,
   );
 }

@@ -1,7 +1,7 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useIntl } from "react-intl";
 import { useShallow } from "zustand/react/shallow";
-import type { DeckPool, EquipmentSlot, RevealedArena } from "@fyendal/shared";
+import type { DeckArt, DeckPool, EquipmentSlot, RevealedArena } from "@fyendal/shared";
 import {
   arenaWeaponIssue,
   cardData,
@@ -16,6 +16,7 @@ import {
   CARD_PREVIEW_HEIGHT,
   CARD_PREVIEW_WIDTH,
   CardArtwork,
+  CardArtProvider,
   CardFace,
 } from "../game/Card.js";
 import { MobileCardInspect } from "../game/MobileCardInspect.js";
@@ -39,7 +40,10 @@ import {
   BotPracticeNudge,
   shouldOfferBotPractice,
 } from "./BotPracticeNudge.js";
-import { PrepPresentation } from "./PrepPresentation.js";
+import { PrepPresentation, type PrepCardArt } from "./PrepPresentation.js";
+import { PrepArtPopover } from "./PrepArtPopover.js";
+import { hasCardArtChoices, shownCardArt } from "../components/CardArtVariants.js";
+import { useCardArtCatalog } from "../game/cardArtCatalog.js";
 import { PrepArenaCards } from "./PrepArenaCards.js";
 import { opponentPrepState, PrepMatchSheet } from "./PrepMatchSheet.js";
 import { nextPrepStep, useStepNudge } from "./nextStepNudge.js";
@@ -123,7 +127,7 @@ export function PrepRoom() {
   const {
     prepDeck, prep, roomCode, queueCounts, matchmakingActive, matchAcceptanceRole,
     acceptMatch, declineMatch, playBotFromPrep, presentArena, presentDeck, prepUnready,
-    chooseFirst, leave, selectPrepMatchup,
+    chooseFirst, leave, selectPrepMatchup, setDeckArt,
   } = useStore(useShallow((state) => ({
     prepDeck: state.prepDeck,
     prep: state.prep,
@@ -140,6 +144,7 @@ export function PrepRoom() {
     chooseFirst: state.chooseFirst,
     leave: state.leave,
     selectPrepMatchup: state.selectPrepMatchup,
+    setDeckArt: state.setDeckArt,
   })));
   const [sel, setSel] = useState<PrepSelection | null>(null);
   const [restoredPresentationRoom, setRestoredPresentationRoom] = useState<string | null>(null);
@@ -157,6 +162,12 @@ export function PrepRoom() {
   const [botNudgeDismissedFor, setBotNudgeDismissedFor] = useState<string | null>(null);
   const [botNudgeBusyFor, setBotNudgeBusyFor] = useState<string | null>(null);
   const [imageWaitSkippedFor, setImageWaitSkippedFor] = useState<string | null>(null);
+  // Precons have no saved deck to hold art choices.
+  const artEnabled = !!prepDeck && !prepDeck.id.startsWith("precon-");
+  const artCatalog = useCardArtCatalog(artEnabled);
+  const [artTarget, setArtTarget] = useState<{ cardId: string; anchor: HTMLElement } | null>(null);
+  // Shown while a save is in flight so picks feel immediate.
+  const [pendingArt, setPendingArt] = useState<DeckArt | null>(null);
   const prepFormat = prep?.format ?? prepDeck?.format;
   const opponentPresent = prep
     ? prep.seats[1 - prep.yourSeat] !== null
@@ -222,6 +233,38 @@ export function PrepRoom() {
     );
     return () => window.clearTimeout(timer);
   }, [botNudgeKey]);
+
+  const deckArt = pendingArt ?? prepDeck?.art;
+  const artDeckId = prepDeck?.id;
+  const artDeckName = prepDeck?.name ?? "";
+  const artPool = prepDeck?.decklist;
+  const artLocked = prep ? prep.seats[prep.yourSeat]?.ready === true : false;
+  const artSeat = prep?.yourSeat ?? 0;
+  const prepArt = useMemo(() => {
+    if (!artEnabled || !artCatalog || !deckArt || !artDeckId || !artPool) return null;
+    const save = async (art: DeckArt) => {
+      setPendingArt(art);
+      const result = await setDeckArt(artDeckId, art);
+      setPendingArt(null);
+      setWeaponToast({
+        message: result.ok
+          ? intl.formatMessage({ id: "prep.art.saved" }, { deck: artDeckName })
+          : intl.formatMessage({ id: "lobby.deck.art.saveFailed" }, { error: result.error }),
+        shownAt: Date.now(),
+      });
+    };
+    const cardArt: PrepCardArt = {
+      imageFor: (id) => shownCardArt(artCatalog, id, deckArt),
+      hasChoices: (id) => hasCardArtChoices(artCatalog, id),
+      onChoose: (cardId, anchor) => setArtTarget((current) => current?.cardId === cardId ? null : { cardId, anchor }),
+      highestRarity: deckArt.highestRarity,
+      locked: artLocked,
+      onHighestRarityChange: (checked) => void save({ ...deckArt, highestRarity: checked }),
+    };
+    const own = artCatalog.resolveDeckArt(artPool, deckArt);
+    const preview: [Record<string, string>, Record<string, string>] = artSeat === 0 ? [own, {}] : [{}, own];
+    return { art: deckArt, cardArt, save, preview };
+  }, [artEnabled, artCatalog, deckArt, artDeckId, artDeckName, artPool, artLocked, artSeat, setDeckArt, intl]);
 
   if (!prepDeck) return <PrepDeckLoading onCancel={leave} />;
   // The match-accept dialog lives in this room, so never hide it behind loading.
@@ -453,6 +496,7 @@ export function PrepRoom() {
       onMoveMainCopy={moveMainCopy}
       onRestoreMain={restoreMain}
       onInspectCard={setInspectedCardId}
+      cardArt={prepArt?.cardArt}
     />
   );
   const arenaLockButton = (
@@ -658,6 +702,7 @@ export function PrepRoom() {
             opponentArena={shownOpponentArena}
             notice={pickPending ? dieNotice : null}
             action={sheetAction}
+            cardArt={prepArt?.cardArt}
           />
         ) : !mobilePrepLayout ? (
           <section className="panel prep-opponent">
@@ -682,7 +727,9 @@ export function PrepRoom() {
           >
             <h3 className="panel-title">{intl.formatMessage({ id: arenaHeading })}</h3>
             {arenaNote ? <p className="muted">{intl.formatMessage({ id: arenaNote })}</p> : null}
-            {mobilePrepLayout && prep?.yourArena ? <PrepArenaCards arena={prep.yourArena} owner="you" /> : null}
+            {mobilePrepLayout && prep?.yourArena
+              ? <PrepArenaCards arena={prep.yourArena} owner="you" cardArt={prepArt?.cardArt} />
+              : null}
             {mobilePrepLayout && shownOpponentArena
               ? <PrepArenaCards arena={shownOpponentArena} owner="opponent" />
               : null}
@@ -790,7 +837,23 @@ export function PrepRoom() {
         </div>
       ) : null}
 
-      {preview && cardData[preview.id] && (
+      {artTarget && artCatalog && prepArt && !prepArt.cardArt.locked ? (
+        <PrepArtPopover
+          catalog={artCatalog}
+          cardId={artTarget.cardId}
+          art={prepArt.art}
+          anchor={artTarget.anchor}
+          onChange={(art) => void prepArt.save(art)}
+          onInspect={(cardId) => {
+            setArtTarget(null);
+            setInspectedCardId(cardId);
+          }}
+          onClose={() => setArtTarget(null)}
+        />
+      ) : null}
+
+      <CardArtProvider art={prepArt?.preview ?? null}>
+      {preview && !artTarget && cardData[preview.id] && (
         <div
           className="card-preview"
           style={{
@@ -809,6 +872,7 @@ export function PrepRoom() {
         owner={yourSeat}
         onClose={() => setInspectedCardId(null)}
       />
+      </CardArtProvider>
     </div>
   );
 }

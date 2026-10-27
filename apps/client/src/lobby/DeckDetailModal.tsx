@@ -7,6 +7,8 @@ import type { CardPoolMode } from "@fyendal/shared";
 import { loadHomeGameMode, saveHomeFormat, saveHomeGameMode, type HomeGameMode } from "../storage.js";
 import { useStore } from "../store.js";
 import { cardImageUrl } from "../game/Card.js";
+import { deckArtIsCustom, useCardArtCatalog } from "../game/cardArtCatalog.js";
+import { shownCardArt } from "../components/CardArtVariants.js";
 import { ModalSurface } from "../components/ModalSurface.js";
 import { UiIcon, type UiIconName } from "../components/UiIcon.js";
 import { BotOpponentModal } from "./BotOpponentModal.js";
@@ -36,6 +38,7 @@ export function DeckDetailModal(props: {
   deck: DeckSummary;
   fabraryHref?: string;
   onEdit: () => void;
+  onEditArt: () => void;
   onDelete: () => void;
   onClose: () => void;
 }) {
@@ -76,6 +79,8 @@ export function DeckDetailModal(props: {
   const queued = queuedFormat !== null;
   const heroCard = findPrinting(deck.heroName);
   const showArt = heroCard !== undefined && artOk;
+  const artCatalog = useCardArtCatalog(deckArtIsCustom(deck.art));
+  const heroArt = artCatalog && heroCard ? shownCardArt(artCatalog, heroCard.id, deck.art) : undefined;
 
   if (choosingBot) {
     return (
@@ -117,7 +122,7 @@ export function DeckDetailModal(props: {
       <div className="deck-detail-banner">
         {showArt ? (
           <span className="deck-card-art">
-            <img src={cardImageUrl(heroCard.id)} alt="" onError={() => setArtOk(false)} />
+            <img src={cardImageUrl(heroCard.id, heroArt)} alt="" onError={() => setArtOk(false)} />
           </span>
         ) : headshotOk ? (
           <img className="deck-card-img" src={heroImageUrl(deck.heroName)} alt="" onError={() => setHeadshotOk(false)} />
@@ -139,6 +144,10 @@ export function DeckDetailModal(props: {
             <button type="button" onClick={props.onEdit}>
               <UiIcon name="edit" />
               {intl.formatMessage({ id: "lobby.deck.edit" })}
+            </button>
+            <button type="button" onClick={props.onEditArt}>
+              <UiIcon name="image" />
+              {intl.formatMessage({ id: "lobby.deck.art.title" })}
             </button>
             <button type="button" className="deck-detail-delete" onClick={props.onDelete}>
               <UiIcon name="trash" />

@@ -18,6 +18,7 @@ import {
   type DeckLegalityFilter,
 } from "./DeckGrid.js";
 import { DeckDetailModal } from "./DeckDetailModal.js";
+import { DeckArtModal } from "./DeckArtModal.js";
 
 export type DeckFormatFilter = "all" | Format;
 
@@ -50,6 +51,7 @@ export function DeckLibrary(props: {
   const [importing, setImporting] = useState(false);
   const [openDeck, setOpenDeck] = useState<DeckSummary | null>(null);
   const [editingDeck, setEditingDeck] = useState<DeckSummary | null>(null);
+  const [artDeck, setArtDeck] = useState<DeckSummary | null>(null);
   const [deletingDeck, setDeletingDeck] = useState<DeckSummary | null>(null);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(() => new Set());
   const [bulkDeletingDecks, setBulkDeletingDecks] = useState<DeckSummary[] | null>(null);
@@ -180,6 +182,10 @@ export function DeckLibrary(props: {
             setOpenDeck(null);
             setEditingDeck(openDeck);
           }}
+          onEditArt={() => {
+            setOpenDeck(null);
+            setArtDeck(openDeck);
+          }}
           onDelete={() => {
             setOpenDeck(null);
             setDeletingDeck(openDeck);
@@ -188,6 +194,7 @@ export function DeckLibrary(props: {
         />
       ) : null}
       {editingDeck ? <EditDeckModal deck={editingDeck} onClose={() => setEditingDeck(null)} /> : null}
+      {artDeck ? <DeckArtModal deck={artDeck} onClose={() => setArtDeck(null)} /> : null}
       {deletingDeck ? <DeleteDeckModal deck={deletingDeck} onClose={() => setDeletingDeck(null)} /> : null}
       {bulkDeletingDecks ? (
         <DeleteSelectedDecksModal decks={bulkDeletingDecks}

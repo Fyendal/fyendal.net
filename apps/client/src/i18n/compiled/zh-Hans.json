@@ -31253,6 +31253,337 @@
       "value": "所有赛制"
     }
   ],
+  "lobby.deck.art.auto": [
+    {
+      "type": 0,
+      "value": "自动"
+    }
+  ],
+  "lobby.deck.art.chooseFor": [
+    {
+      "type": 0,
+      "value": "选择 "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 的卡图"
+    }
+  ],
+  "lobby.deck.art.empty": [
+    {
+      "type": 0,
+      "value": "没有匹配的卡牌。清除搜索或选择“全部”。"
+    }
+  ],
+  "lobby.deck.art.filter": [
+    {
+      "type": 0,
+      "value": "显示"
+    }
+  ],
+  "lobby.deck.art.filter.all": [
+    {
+      "type": 0,
+      "value": "全部"
+    }
+  ],
+  "lobby.deck.art.filter.alternatives": [
+    {
+      "type": 0,
+      "value": "有其他版本"
+    }
+  ],
+  "lobby.deck.art.filter.picked": [
+    {
+      "type": 0,
+      "value": "已选择"
+    }
+  ],
+  "lobby.deck.art.foil.c": [
+    {
+      "type": 0,
+      "value": "Cold Foil"
+    }
+  ],
+  "lobby.deck.art.foil.g": [
+    {
+      "type": 0,
+      "value": "Gold Foil"
+    }
+  ],
+  "lobby.deck.art.foil.r": [
+    {
+      "type": 0,
+      "value": "Rainbow Foil"
+    }
+  ],
+  "lobby.deck.art.group.arena": [
+    {
+      "type": 0,
+      "value": "英雄与场地"
+    }
+  ],
+  "lobby.deck.art.group.blue": [
+    {
+      "type": 0,
+      "value": "蓝色"
+    }
+  ],
+  "lobby.deck.art.group.other": [
+    {
+      "type": 0,
+      "value": "其他"
+    }
+  ],
+  "lobby.deck.art.group.red": [
+    {
+      "type": 0,
+      "value": "红色"
+    }
+  ],
+  "lobby.deck.art.group.yellow": [
+    {
+      "type": 0,
+      "value": "黄色"
+    }
+  ],
+  "lobby.deck.art.highestRarity": [
+    {
+      "type": 0,
+      "value": "使用最高稀有度卡图"
+    }
+  ],
+  "lobby.deck.art.highestRarityHint": [
+    {
+      "type": 0,
+      "value": "有 Marvel、闪卡等特殊版本时显示该版本。你亲自选择的卡牌会保留你的选择。"
+    }
+  ],
+  "lobby.deck.art.loadFailed": [
+    {
+      "type": 0,
+      "value": "无法加载此牌组的卡牌："
+    },
+    {
+      "type": 1,
+      "value": "error"
+    }
+  ],
+  "lobby.deck.art.loading": [
+    {
+      "type": 0,
+      "value": "正在加载卡图…"
+    }
+  ],
+  "lobby.deck.art.onlyOne": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "，只有一个版本"
+    }
+  ],
+  "lobby.deck.art.optionsFor": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 的卡图"
+    }
+  ],
+  "lobby.deck.art.picked": [
+    {
+      "type": 0,
+      "value": "已选择"
+    }
+  ],
+  "lobby.deck.art.printings": [
+    {
+      "type": 6,
+      "value": "count",
+      "options": {
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " 个版本"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    }
+  ],
+  "lobby.deck.art.rarity.b": [
+    {
+      "type": 0,
+      "value": "Basic"
+    }
+  ],
+  "lobby.deck.art.rarity.c": [
+    {
+      "type": 0,
+      "value": "Common"
+    }
+  ],
+  "lobby.deck.art.rarity.f": [
+    {
+      "type": 0,
+      "value": "Fabled"
+    }
+  ],
+  "lobby.deck.art.rarity.l": [
+    {
+      "type": 0,
+      "value": "Legendary"
+    }
+  ],
+  "lobby.deck.art.rarity.m": [
+    {
+      "type": 0,
+      "value": "Majestic"
+    }
+  ],
+  "lobby.deck.art.rarity.p": [
+    {
+      "type": 0,
+      "value": "Promo"
+    }
+  ],
+  "lobby.deck.art.rarity.r": [
+    {
+      "type": 0,
+      "value": "Rare"
+    }
+  ],
+  "lobby.deck.art.rarity.s": [
+    {
+      "type": 0,
+      "value": "Super Rare"
+    }
+  ],
+  "lobby.deck.art.rarity.t": [
+    {
+      "type": 0,
+      "value": "Token"
+    }
+  ],
+  "lobby.deck.art.rarity.v": [
+    {
+      "type": 0,
+      "value": "Marvel"
+    }
+  ],
+  "lobby.deck.art.rarityAndFinish": [
+    {
+      "type": 1,
+      "value": "rarity"
+    },
+    {
+      "type": 0,
+      "value": "，"
+    },
+    {
+      "type": 1,
+      "value": "finish"
+    }
+  ],
+  "lobby.deck.art.saveFailed": [
+    {
+      "type": 0,
+      "value": "无法保存卡图："
+    },
+    {
+      "type": 1,
+      "value": "error"
+    }
+  ],
+  "lobby.deck.art.search": [
+    {
+      "type": 0,
+      "value": "搜索卡牌"
+    }
+  ],
+  "lobby.deck.art.setAndLanguage": [
+    {
+      "type": 1,
+      "value": "set"
+    },
+    {
+      "type": 0,
+      "value": "，"
+    },
+    {
+      "type": 1,
+      "value": "language"
+    }
+  ],
+  "lobby.deck.art.standard": [
+    {
+      "type": 0,
+      "value": "标准"
+    }
+  ],
+  "lobby.deck.art.title": [
+    {
+      "type": 0,
+      "value": "卡图"
+    }
+  ],
+  "lobby.deck.art.unsaved": [
+    {
+      "type": 0,
+      "value": "有未保存的更改"
+    }
+  ],
+  "lobby.deck.art.useAuto": [
+    {
+      "type": 0,
+      "value": "改用自动"
+    }
+  ],
+  "lobby.deck.art.variation.aa": [
+    {
+      "type": 0,
+      "value": "Alternate Art"
+    }
+  ],
+  "lobby.deck.art.variation.ab": [
+    {
+      "type": 0,
+      "value": "Alternate Border"
+    }
+  ],
+  "lobby.deck.art.variation.at": [
+    {
+      "type": 0,
+      "value": "Alternate Text"
+    }
+  ],
+  "lobby.deck.art.variation.ea": [
+    {
+      "type": 0,
+      "value": "Extended Art"
+    }
+  ],
+  "lobby.deck.art.variation.fa": [
+    {
+      "type": 0,
+      "value": "Full Art"
+    }
+  ],
   "lobby.deck.bannedList": [
     {
       "type": 0,
@@ -32519,6 +32850,48 @@
     {
       "type": 0,
       "value": "你的场上卡牌"
+    }
+  ],
+  "prep.art.choose": [
+    {
+      "type": 0,
+      "value": "选择 "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 的卡图"
+    }
+  ],
+  "prep.art.dialog": [
+    {
+      "type": 0,
+      "value": "卡图"
+    }
+  ],
+  "prep.art.highestRarity": [
+    {
+      "type": 0,
+      "value": "最高稀有度卡图"
+    }
+  ],
+  "prep.art.saved": [
+    {
+      "type": 0,
+      "value": "已保存到 "
+    },
+    {
+      "type": 1,
+      "value": "deck"
+    }
+  ],
+  "prep.art.viewCard": [
+    {
+      "type": 0,
+      "value": "查看卡牌"
     }
   ],
   "prep.botNudge.description": [

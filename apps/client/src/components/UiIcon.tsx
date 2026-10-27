@@ -22,6 +22,7 @@ export type UiIconName =
   | "flag"
   | "flag-filled"
   | "grip"
+  | "image"
   | "invite-game"
   | "lock"
   | "message"

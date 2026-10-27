@@ -1,0 +1,302 @@
+/* Card art picker: the deck hub modal and the prep ledger popover share the
+   variant strip. */
+.deck-art-modal { width: min(760px, calc(100vw - 32px)); }
+.deck-art-modal > :not(:last-child) { margin-bottom: 14px; }
+
+.card-art-checkbox {
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr);
+  column-gap: 10px;
+  align-items: start;
+  cursor: pointer;
+}
+.card-art-checkbox input { width: 18px; height: 18px; margin: 1px 0 0; accent-color: var(--gold); }
+.card-art-checkbox span { color: var(--text-primary); font: 600 14px var(--font-lobby-ui); }
+.card-art-checkbox small { grid-column: 2; color: var(--text-muted); font: 12.5px/1.45 var(--font-lobby-ui); }
+
+.deck-art-toolbar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.deck-art-toolbar input[type="search"] { flex: 1 1 200px; min-width: 0; }
+.deck-art-filters {
+  display: inline-flex;
+  gap: 2px;
+  padding: 3px;
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  background: #141009;
+}
+.deck-art-filters button {
+  min-height: 30px;
+  padding: 4px 10px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  clip-path: none;
+  color: var(--text-secondary);
+  font: 600 12.5px var(--font-lobby-ui);
+  letter-spacing: normal;
+  text-transform: none;
+  white-space: nowrap;
+}
+.deck-art-filters button:hover:not([aria-pressed="true"]) { background: #241b14; color: var(--text-primary); }
+.deck-art-filters button[aria-pressed="true"] {
+  background: linear-gradient(180deg, #4d3420, #3d2817);
+  box-shadow: 0 0 0 1px #b8933f99 inset;
+  color: var(--gold);
+}
+
+/* A fixed height keeps the modal still while cards load and filters change. */
+.deck-art-body {
+  display: grid;
+  align-content: start;
+  gap: 16px;
+  height: min(56vh, 560px);
+  overflow-y: auto;
+  padding-right: 4px;
+}
+.deck-art-loading { display: grid; height: 100%; place-items: center; }
+.deck-art-spinner {
+  width: 34px;
+  height: 34px;
+  border: 3px solid var(--border-subtle);
+  border-top-color: var(--gold);
+  border-radius: 50%;
+  animation: deck-art-spin 0.8s linear infinite;
+}
+.deck-art-loading-label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+@keyframes deck-art-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) {
+  .deck-art-spinner { animation-duration: 2.4s; }
+}
+.deck-art-group { display: grid; gap: 10px; }
+.deck-art-group-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  color: #9c8a6d;
+  font: 600 13px var(--font-lobby-ui);
+}
+/* Dense flow lets the rest of an open card's row fill in before its printings. */
+.deck-art-grid {
+  display: grid;
+  grid-auto-flow: dense;
+  grid-template-columns: repeat(auto-fill, minmax(92px, 1fr));
+  gap: 14px 12px;
+}
+.deck-art-tile {
+  display: grid;
+  align-content: start;
+  gap: 5px;
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  clip-path: none;
+  color: var(--text-primary);
+  letter-spacing: normal;
+  text-align: left;
+  text-transform: none;
+}
+.deck-art-tile:hover { background: none; }
+.deck-art-tile:disabled { opacity: 1; }
+.deck-art-tile:disabled .deck-art-tile-frame { opacity: .5; }
+.deck-art-tile-frame,
+.card-art-variant-frame {
+  position: relative;
+  display: block;
+  aspect-ratio: 546 / 762;
+  overflow: hidden;
+  border: 1px solid #3a2a17;
+  border-radius: 5px;
+  background: #000;
+}
+.deck-art-tile-frame .card-artwork,
+.card-art-variant-frame .card-artwork { width: 100%; height: 100%; }
+.deck-art-tile:not(:disabled):hover .deck-art-tile-frame,
+.card-art-variant:not(:disabled):hover .card-art-variant-frame { border-color: var(--border-strong); }
+.deck-art-tile[aria-expanded="true"] .deck-art-tile-frame { border-color: var(--gold); box-shadow: 0 0 0 1px var(--gold); }
+.deck-art-tile-count {
+  position: absolute;
+  z-index: 3;
+  right: 4px;
+  bottom: 4px;
+  padding: 2px 5px;
+  border: 1px solid var(--border-strong);
+  border-radius: 3px;
+  background: #0d0703d9;
+  color: var(--gold);
+  font: 700 10.5px var(--font-lobby-ui);
+}
+.deck-art-tile-name {
+  display: -webkit-box;
+  overflow: hidden;
+  font: 600 12px/1.3 var(--font-lobby-ui);
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+.card-art-tag {
+  justify-self: start;
+  padding: 2px 5px;
+  border: 1px solid var(--border-subtle);
+  border-radius: 3px;
+  background: #2b1e10;
+  color: var(--text-secondary);
+  font: 700 10px/1.2 var(--font-lobby-ui);
+}
+.card-art-tag.picked { border-color: var(--gold); background: var(--gold); color: #1c130a; }
+.deck-art-dirty { margin-right: auto; align-self: center; color: var(--text-muted); font: 12.5px var(--font-lobby-ui); }
+
+.deck-art-detail { position: relative; grid-column: 1 / -1; margin-top: 2px; }
+.deck-art-detail .card-art-strip { border-color: var(--bronze); }
+.deck-art-detail.has-caret::before,
+.deck-art-detail.has-caret::after {
+  content: "";
+  position: absolute;
+  left: var(--caret-x);
+  border: solid transparent;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+.deck-art-detail.has-caret::before { top: -9px; border-width: 0 9px 9px; border-bottom-color: var(--bronze); }
+.deck-art-detail.has-caret::after { top: -7px; border-width: 0 8px 8px; border-bottom-color: var(--surface-well); }
+.card-art-strip {
+  display: grid;
+  gap: 10px;
+  padding: 12px 14px 14px;
+  border: 1px solid var(--border-strong);
+  border-radius: 6px;
+  background: var(--surface-well);
+}
+.card-art-strip-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 12px; }
+.card-art-strip-head h4 { margin: 0; color: var(--text-primary); font: 500 17px var(--font-heading); }
+.card-art-strip-count { margin-right: auto; color: var(--text-muted); font: 12px var(--font-lobby-ui); }
+.card-art-reset {
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  clip-path: none;
+  color: var(--gold);
+  font: 600 12.5px var(--font-lobby-ui);
+  letter-spacing: normal;
+  text-decoration: underline;
+  text-transform: none;
+  text-underline-offset: 3px;
+}
+.card-art-reset:hover { background: none; }
+.card-art-variants { display: flex; gap: 12px; overflow-x: auto; padding: 3px 2px 6px; scroll-snap-type: x proximity; }
+.card-art-variant {
+  display: grid;
+  flex: 0 0 auto;
+  align-content: start;
+  gap: 5px;
+  width: 112px;
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  clip-path: none;
+  color: var(--text-primary);
+  letter-spacing: normal;
+  text-align: left;
+  text-transform: none;
+  scroll-snap-align: start;
+}
+.card-art-variant:hover { background: none; }
+.card-art-variant:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+.card-art-variant[aria-checked="true"] .card-art-variant-frame { border-color: var(--gold); box-shadow: 0 0 0 2px var(--gold); }
+.card-art-variant-check {
+  position: absolute;
+  z-index: 3;
+  top: 5px;
+  right: 5px;
+  display: grid;
+  width: 20px;
+  height: 20px;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--gold);
+  color: #1c130a;
+  font: 800 12px system-ui, sans-serif;
+}
+.card-art-variant-label { display: flex; flex-wrap: wrap; align-items: center; gap: 5px; font: 600 12px/1.3 var(--font-lobby-ui); }
+.card-art-variant-set { color: var(--text-muted); font: 11.5px var(--font-lobby-ui); }
+.card-art-strip.compact { padding: 10px 12px 8px; border: 0; background: none; }
+.card-art-strip.compact .card-art-variant { width: 88px; }
+
+.prep-art-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin-left: auto;
+  color: var(--text-secondary);
+  font: 600 12.5px var(--font-lobby-ui);
+  cursor: pointer;
+}
+.prep-art-toggle input { width: 16px; height: 16px; margin: 0; accent-color: var(--gold); }
+.prep-art-toggle:has(input:disabled) { opacity: .5; cursor: default; }
+/* A gold dot marks your cards that have other printings to choose from. */
+.has-art-choices { position: relative; }
+.has-art-choices::after {
+  content: "";
+  position: absolute;
+  z-index: 3;
+  top: 2px;
+  right: 2px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--gold);
+  box-shadow: 0 0 0 1.5px #0d0703;
+  pointer-events: none;
+}
+.prep-mat-art-choice {
+  min-height: 0;
+  padding: 0;
+  background: none;
+  clip-path: none;
+  cursor: pointer;
+}
+.prep-mat-art-choice:hover { background: none; border-color: var(--gold); }
+.prep-mat-art-choice:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+.prep-mat-art-choice::after { top: 4px; right: 4px; width: 8px; height: 8px; }
+.prep-art-popover {
+  position: fixed;
+  z-index: 60;
+  display: grid;
+  width: min(440px, calc(100vw - 16px));
+  border: 1px solid var(--border-strong);
+  border-radius: 6px;
+  background: var(--surface-raised);
+  box-shadow: var(--shadow-raised);
+}
+.prep-art-view {
+  justify-self: start;
+  min-height: 0;
+  margin: 0 12px 12px;
+  padding: 0;
+  border: 0;
+  background: none;
+  clip-path: none;
+  color: var(--gold);
+  font: 600 12.5px var(--font-lobby-ui);
+  letter-spacing: normal;
+  text-decoration: underline;
+  text-transform: none;
+  text-underline-offset: 3px;
+}
+.prep-art-view:hover { background: none; }
+
+@media (max-width: 620px) {
+  .deck-art-modal { width: 100%; }
+  .deck-art-grid { grid-template-columns: repeat(auto-fill, minmax(78px, 1fr)); }
+  .deck-art-body { height: 52dvh; }
+  .card-art-variant { width: 96px; }
+}

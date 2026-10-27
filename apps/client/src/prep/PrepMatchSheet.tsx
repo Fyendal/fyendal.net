@@ -3,6 +3,7 @@ import { useIntl } from "react-intl";
 import type { PrepPhase, PrepSeatView, RevealedArena } from "@fyendal/shared";
 import { cardData } from "@fyendal/cards/client";
 import { CardArtwork } from "../game/Card.js";
+import type { PrepCardArt } from "./PrepPresentation.js";
 
 type OpponentPrepState = "arena-locked" | "ready" | "disconnected";
 
@@ -19,6 +20,36 @@ export function opponentPrepState(phase: PrepPhase, opponent: PrepSeatView): Opp
 
 type MatSlot = "head" | "chest" | "arms" | "legs" | "weapon";
 
+/** A face-up mat card; the owner's cards with other printings open the art picker. */
+function MatCard({ id, label, className, cardArt }: {
+  id: string;
+  label: string;
+  className: string;
+  cardArt?: PrepCardArt;
+}) {
+  const intl = useIntl();
+  const artImage = cardArt?.imageFor(id);
+  if (cardArt && !cardArt.locked && cardArt.hasChoices(id)) {
+    return (
+      <button
+        type="button"
+        className={`prep-mat-zone prep-mat-art-choice has-art-choices ${className}`}
+        data-cardid={id}
+        aria-label={intl.formatMessage({ id: "prep.art.choose" }, { card: label })}
+        aria-haspopup="dialog"
+        onClick={(event) => cardArt.onChoose(id, event.currentTarget)}
+      >
+        <CardArtwork cardId={id} artImage={artImage} alt="" />
+      </button>
+    );
+  }
+  return (
+    <span className={`prep-mat-zone ${className}`} data-cardid={id}>
+      <CardArtwork cardId={id} artImage={artImage} alt={label} />
+    </span>
+  );
+}
+
 /**
  * One arena zone, placed where the game board puts it. `id` is a card id,
  * null for a Cloaked card, or undefined for an empty zone.
@@ -28,21 +59,19 @@ function MatZone({
   id,
   hidden,
   className,
+  cardArt,
 }: {
   slot: MatSlot;
   id: string | null | undefined;
   hidden: boolean;
   className: string;
+  cardArt?: PrepCardArt;
 }) {
   const intl = useIntl();
   const slotName = intl.formatMessage({ id: `prep.slot.${slot}` });
   if (!hidden && id) {
     const name = cardData[id]?.name ?? id;
-    return (
-      <span className={`prep-mat-zone ${className}`} data-cardid={id}>
-        <CardArtwork cardId={id} alt={`${slotName}: ${name}`} />
-      </span>
-    );
+    return <MatCard id={id} label={`${slotName}: ${name}`} className={className} cardArt={cardArt} />;
   }
   if (!hidden && id === null) {
     const label = `${slotName}: ${intl.formatMessage({ id: "prep.arena.cloaked" })}`;
@@ -66,6 +95,7 @@ function PlayerMat({
   arena,
   status,
   side,
+  cardArt,
 }: {
   heroId: string;
   heroName: string;
@@ -75,10 +105,11 @@ function PlayerMat({
   status?: ReactNode;
   /** The opponent's row is mirrored so both heroes face the VS mark. */
   side: "yours" | "theirs";
+  cardArt?: PrepCardArt;
 }) {
   const hidden = arena === undefined;
   const zone = (slot: MatSlot, id: string | null | undefined, className: string) => (
-    <MatZone slot={slot} id={id} hidden={hidden} className={className} />
+    <MatZone slot={slot} id={id} hidden={hidden} className={className} cardArt={cardArt} />
   );
   return (
     <div className={`prep-mat ${side}`}>
@@ -88,9 +119,7 @@ function PlayerMat({
         {status}
       </div>
       <div className="prep-mat-cards">
-        <span className="prep-mat-zone prep-mat-hero at-hero" data-cardid={heroId}>
-          <CardArtwork cardId={heroId} alt={heroName} />
-        </span>
+        <MatCard id={heroId} label={heroName} className="prep-mat-hero at-hero" cardArt={cardArt} />
         {zone("weapon", arena?.weaponIds[0], "at-weapon-left")}
         {zone("weapon", arena?.weaponIds[1], "at-weapon-right")}
         {zone("head", arena?.equipment.head, "at-head")}
@@ -115,6 +144,7 @@ export function PrepMatchSheet({
   opponentArena,
   notice,
   action,
+  cardArt,
 }: {
   phase: PrepPhase;
   yourHeroId: string;
@@ -124,6 +154,8 @@ export function PrepMatchSheet({
   opponentArena?: RevealedArena;
   notice: ReactNode;
   action: ReactNode;
+  /** Your deck's art; absent for precon decks. */
+  cardArt?: PrepCardArt;
 }) {
   const intl = useIntl();
   const state = opponentPrepState(phase, opponent);
@@ -155,6 +187,7 @@ export function PrepMatchSheet({
           playerName={intl.formatMessage({ id: "prep.you" })}
           arena={yourArena}
           side="yours"
+          cardArt={cardArt}
         />
       </div>
       <div className="prep-sheet-action">

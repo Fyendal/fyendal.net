@@ -139,23 +139,37 @@ function LedgerHead() {
   );
 }
 
+/** Deck art for the prep screen; absent for precon decks. */
+export interface PrepCardArt {
+  imageFor: (id: string) => string | undefined;
+  hasChoices: (id: string) => boolean;
+  onChoose: (id: string, anchor: HTMLElement) => void;
+  highestRarity: boolean;
+  /** Art locks at ready; reopening deck selection unlocks it. */
+  locked: boolean;
+  onHighestRarityChange: (checked: boolean) => void;
+}
+
 function LedgerRow({
   id,
   changed,
   fixed,
   onInspect,
+  cardArt,
   children,
 }: {
   id: string;
   changed: boolean;
   fixed: boolean;
   onInspect: (id: string) => void;
+  cardArt?: PrepCardArt;
   children: ReactNode;
 }) {
   const intl = useIntl();
   const data = cardData[id];
   const name = data?.name ?? id;
   const typeMessage = cardTypeMessage(data);
+  const choosesArt = !!cardArt && !cardArt.locked && cardArt.hasChoices(id);
   const stat = (value: number | undefined) => (
     <span className={`prep-row-stat${value === undefined ? " empty" : ""}`}>
       {value ?? "–"}
@@ -168,11 +182,19 @@ function LedgerRow({
     >
       <button
         type="button"
-        className="prep-row-art"
-        aria-label={intl.formatMessage({ id: "prep.presentation.showCard" }, { card: name })}
-        onClick={() => onInspect(id)}
+        className={`prep-row-art${choosesArt ? " has-art-choices" : ""}`}
+        aria-label={intl.formatMessage(
+          { id: choosesArt ? "prep.art.choose" : "prep.presentation.showCard" },
+          { card: name },
+        )}
+        aria-haspopup={choosesArt ? "dialog" : undefined}
+        onClick={(event) => {
+          if (choosesArt) cardArt.onChoose(id, event.currentTarget);
+          // A mouse already has the hover preview; touch and keyboard open the sheet.
+          else if (event.detail === 0 || !window.matchMedia("(hover: hover) and (pointer: fine)").matches) onInspect(id);
+        }}
       >
-        <CardArtwork className="prep-row-tile" cardId={id} alt="" />
+        <CardArtwork className="prep-row-tile" cardId={id} artImage={cardArt?.imageFor(id)} alt="" />
       </button>
       <span className="prep-row-name">
         <i className={`prep-pitch prep-pitch-${pitchGroup(id)}`} aria-hidden="true" />
@@ -209,6 +231,7 @@ export const PrepPresentation = memo(function PrepPresentation({
   onMoveMainCopy,
   onRestoreMain,
   onInspectCard,
+  cardArt,
 }: {
   pool: DeckPool;
   selection: PrepSelection;
@@ -230,6 +253,7 @@ export const PrepPresentation = memo(function PrepPresentation({
   onRestoreMain: () => void;
   /** Opens the full card from a ledger row's art. */
   onInspectCard: (id: string) => void;
+  cardArt?: PrepCardArt;
 }) {
   const intl = useIntl();
   const mainRequirement = exactMainCount === undefined
@@ -316,6 +340,17 @@ export const PrepPresentation = memo(function PrepPresentation({
       {sections === "deck" ? (
         <div className="prep-pool-heading">
           <h3 className="panel-title">{intl.formatMessage({ id: "prep.presentation.title" })}</h3>
+          {cardArt ? (
+            <label className="prep-art-toggle">
+              <input
+                type="checkbox"
+                checked={cardArt.highestRarity}
+                disabled={cardArt.locked}
+                onChange={(event) => cardArt.onHighestRarityChange(event.target.checked)}
+              />
+              <span>{intl.formatMessage({ id: "prep.art.highestRarity" })}</span>
+            </label>
+          ) : null}
           <CardSortToggle options={PREP_SORT_OPTIONS} value={sortOrder} onChange={changeSortOrder} />
         </div>
       ) : null}
@@ -325,6 +360,7 @@ export const PrepPresentation = memo(function PrepPresentation({
           <CardArtwork
             className="prep-card selected"
             cardId={pool.heroId}
+            artImage={cardArt?.imageFor(pool.heroId)}
             alt={cardData[pool.heroId]?.name ?? intl.formatMessage({ id: "prep.presentation.hero" })}
             width={PREP_CARD_WIDTH}
             height={PREP_CARD_HEIGHT}
@@ -360,6 +396,7 @@ export const PrepPresentation = memo(function PrepPresentation({
                     <CardArtwork
                       className="prep-card"
                       cardId={id}
+                      artImage={cardArt?.imageFor(id)}
                       alt=""
                       width={PREP_CARD_WIDTH}
                       height={PREP_CARD_HEIGHT}
@@ -404,6 +441,7 @@ export const PrepPresentation = memo(function PrepPresentation({
                       <CardArtwork
                         className="prep-card"
                         cardId={id}
+                        artImage={cardArt?.imageFor(id)}
                         alt=""
                         width={PREP_CARD_WIDTH}
                         height={PREP_CARD_HEIGHT}
@@ -468,7 +506,7 @@ export const PrepPresentation = memo(function PrepPresentation({
           </div>
           <ul className="prep-ledger">
             {renderGroups(mainGroups, ({ id, count }) => (
-              <LedgerRow key={id} id={id} changed={changed(id)} fixed={false} onInspect={onInspectCard}>
+              <LedgerRow key={id} id={id} changed={changed(id)} fixed={false} onInspect={onInspectCard} cardArt={cardArt}>
                 <TooltipButton
                   className="prep-step"
                   tooltip={moveLabel(id, "inventory")}
@@ -511,6 +549,7 @@ export const PrepPresentation = memo(function PrepPresentation({
                 changed={!fixed && changed(id)}
                 fixed={fixed}
                 onInspect={onInspectCard}
+                cardArt={cardArt}
               >
                 <span className="prep-copies">{count}</span>
                 {fixed ? (

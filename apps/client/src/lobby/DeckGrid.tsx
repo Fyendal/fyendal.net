@@ -8,6 +8,8 @@ import { preconPrepDeck } from "../prep/prepDeck.js";
 import { formatSelectLabel, shortFormatLabel } from "./FormatBadge.js";
 import { heroImageUrl } from "./heroImage.js";
 import { cardImageUrl } from "../game/Card.js";
+import { deckArtIsCustom, useCardArtCatalog } from "../game/cardArtCatalog.js";
+import { shownCardArt } from "../components/CardArtVariants.js";
 import { deckErrorMessages } from "./deckErrors.js";
 import { ModalSurface } from "../components/ModalSurface.js";
 
@@ -101,13 +103,15 @@ export function DeckTile(props: {
   const d = props.deck;
   const heroCard = props.banner ? findPrinting(d.heroName) : undefined;
   const showArt = heroCard !== undefined && artOk;
+  const artCatalog = useCardArtCatalog(showArt && deckArtIsCustom(d.art));
+  const heroArt = artCatalog && heroCard ? shownCardArt(artCatalog, heroCard.id, d.art) : undefined;
   const bannedCards = d.bannedCards ?? [];
   const futureCards = d.futureCards ?? [];
   const contents = (
     <>
       {showArt ? (
         <span className="deck-card-art">
-          <img src={cardImageUrl(heroCard.id)} alt="" loading="lazy" onError={() => setArtOk(false)} />
+          <img src={cardImageUrl(heroCard.id, heroArt)} alt="" loading="lazy" onError={() => setArtOk(false)} />
         </span>
       ) : null}
       {imgOk && (
