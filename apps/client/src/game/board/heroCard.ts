@@ -12,5 +12,6 @@ export function heroCard(player: PlayerView): CardView {
     ...(player.heroSubcards ? { subcards: player.heroSubcards } : {}),
     ...(player.heroAbilityLabels ? { activatedAbilityLabels: player.heroAbilityLabels } : {}),
     ...(player.heroAttackAbilityIndexes ? { attackAbilityIndexes: player.heroAttackAbilityIndexes } : {}),
+    ...(player.heroTapAbilityIndexes ? { tapAbilityIndexes: player.heroTapAbilityIndexes } : {}),
   };
 }

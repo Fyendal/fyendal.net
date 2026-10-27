@@ -189,8 +189,8 @@ function detectFromPresentations(
     if (destination.location.kind === "stack-layer") {
       const triggerSource = currentTriggerSource(destination, currentByInstance);
       if (triggerSource) {
-        const cardCopy = triggerSource.location.kind === "hero"
-          || triggerSource.location.kind === "chain-attack";
+        // The hero stays put and its card shape differs from the float, so it only connects.
+        const cardCopy = triggerSource.location.kind === "chain-attack";
         events.push({
           kind: "connect",
           source: triggerSource.location,

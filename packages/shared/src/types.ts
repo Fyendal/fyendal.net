@@ -258,6 +258,8 @@ export interface CardView {
   /** Zero-based activated abilities that declare an attack. Presentation data
    * for showing their pending attack in the combat chain. */
   attackAbilityIndexes?: number[];
+  /** Zero-based activated abilities that tap this card as a cost. */
+  tapAbilityIndexes?: number[];
   /** Additional names currently granted to this object. */
   grantedNames?: string[];
   /** Public card name chosen for this object by a resolving effect. */
@@ -442,6 +444,8 @@ export interface PlayerView {
   heroAbilityLabels?: string[];
   /** Attack ability indexes for the hero's arena presentation. */
   heroAttackAbilityIndexes?: number[];
+  /** Hero ability indexes that tap the hero as a cost. */
+  heroTapAbilityIndexes?: number[];
   /** Zero-based indexes of the hero's limited activated abilities with no
    * activation left this turn, like `CardView.usedAbilityIndexes`. */
   heroUsedAbilityIndexes?: number[];

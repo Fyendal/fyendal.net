@@ -150,6 +150,24 @@ describe("motion card presentation", () => {
     }, true)).toBeNull();
   });
 
+  it("flips a face-up arsenal card at full size before it morphs to the deck bottom", () => {
+    const flight = {
+      mode: "deck-bottom",
+      visual: { kind: "face-conceal", card },
+      start: { left: 100, top: 500, width: 140, height: 196 },
+      end: { left: 400, top: 200, width: 120, height: 106 },
+    } as MotionFlight;
+    const morph = motionFlightMorph(flight, true);
+
+    expect(morph?.flip).toBe(true);
+    const html = renderToStaticMarkup(createElement(MotionCardVisual, {
+      visual: flight.visual, count: 1, square: true, morph,
+    }));
+    expect(html).toContain("game-motion-morph-flip");
+    expect(html).not.toContain("data-cardid");
+    expect(motionFlightMorph({ ...flight, mode: "move" }, true)).toBeNull();
+  });
+
   it("sends charged cards beneath their own hero", () => {
     const flight = { destinationPresentationKey: "1:soul:42" } as MotionFlight;
     expect(motionFlightSoulSeat(flight)).toBe(1);

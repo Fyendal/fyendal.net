@@ -166,6 +166,20 @@ describe("optimistic interaction projection", () => {
     }));
   });
 
+  it("pays a tap cost before the stack copy appears", () => {
+    const equipment: CardView = { instanceId: 20, cardId: "WTR150", owner: 0, tapAbilityIndexes: [0] };
+    const view = game(player(0, { equipment: { head: equipment } }));
+
+    const projection = optimisticInteractionView(view, 0, pending({
+      kind: "activate-ability",
+      sourceInstanceId: 20,
+      pitchInstanceIds: [],
+    }));
+
+    expect(projection.view?.stack[0]?.card).toEqual({ ...equipment, tapped: true });
+    expect(projection.view?.players[0]?.equipment.head).toEqual({ ...equipment, tapped: true });
+  });
+
   it("presents an arena attack ability on the stack after payment", () => {
     const weapon: CardView = {
       instanceId: 20,

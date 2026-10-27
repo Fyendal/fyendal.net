@@ -79,6 +79,19 @@ function removeFromPlayer(player: PlayerView, instanceId: number): PlayerView {
   };
 }
 
+function tapInPlayer(player: PlayerView, instanceId: number): PlayerView {
+  const tap = (card: CardView) => card.instanceId === instanceId ? { ...card, tapped: true } : card;
+  if (player.heroInstanceId === instanceId) return { ...player, heroTapped: true };
+  return {
+    ...player,
+    weapons: player.weapons.map(tap),
+    equipment: Object.fromEntries(
+      Object.entries(player.equipment).map(([slot, card]) => [slot, card && tap(card)]),
+    ) as PlayerView["equipment"],
+    board: player.board.map(tap),
+  };
+}
+
 function removeCard(players: GameView["players"], instanceId: number): GameView["players"] {
   return players.map((player) => removeFromPlayer(player, instanceId)) as GameView["players"];
 }
@@ -220,8 +233,14 @@ function projectActivation(
     intent.pitchInstanceIds,
   );
   const abilityIndex = intent.abilityIndex ?? 0;
+  // Tap costs are paid on activation, so the stack copy must not flip to tapped on ack.
+  const tapsSource = source.tapAbilityIndexes?.includes(abilityIndex) === true;
+  const activated = tapsSource ? { ...source, tapped: true } : source;
+  const paidPlayers = tapsSource
+    ? players.map((player) => tapInPlayer(player, source.instanceId)) as GameView["players"]
+    : players;
   if (source.attackAbilityIndexes?.includes(abilityIndex)) {
-    return projectPendingAttack(view, players, source);
+    return projectPendingAttack(view, paidPlayers, activated);
   }
   const player = view.players.find((candidate) => candidate.seat === source.owner);
   const labels = source.instanceId === player?.heroInstanceId
@@ -229,9 +248,9 @@ function projectActivation(
     : source.activatedAbilityLabels;
   return {
     ...view,
-    players,
+    players: paidPlayers,
     stack: [{
-      card: source,
+      card: activated,
       seat,
       label: labels?.[abilityIndex] ?? cardData[source.cardId]?.name ?? source.name ?? "Activated ability",
       optional: false,

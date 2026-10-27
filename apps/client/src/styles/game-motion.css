@@ -16,6 +16,12 @@
   z-index: 4;
 }
 
+/* An arsenal card flipping to the deck bottom starts beneath the hand, as the
+   real arsenal card does. */
+.game-motion-layer-under-hand {
+  z-index: calc(var(--game-z-hand) - 1);
+}
+
 /* Flights clear both their source and destination combat surfaces. Stack
    departures use the stack layer even when landing on the lower chain float.
    Higher gameplay prompts remain readable throughout the transfer. */
@@ -122,6 +128,11 @@
   animation-name: game-motion-deck-bottom;
 }
 
+/* The inner full-size card does the flip, so the compact box only travels. */
+.game-motion-flight-morph-flip {
+  animation-name: game-motion-deck-bottom-morph;
+}
+
 .game-motion-flight-settle {
   transform-origin: center;
   animation-name: game-motion-settle-face;
@@ -179,7 +190,10 @@
   animation: game-motion-morph-in var(--motion-duration) ease-out var(--motion-delay) both;
 }
 
-.game-motion-image.game-motion-morph-full {
+.game-motion-image.game-motion-morph-full,
+.game-motion-morph-full.game-motion-morph-flip {
+  position: absolute;
+  display: block;
   z-index: 1;
   inset: auto;
   left: calc(50% - var(--motion-from-width) / 2);
@@ -216,6 +230,23 @@
 
 .game-motion-visual-face-conceal .game-motion-face {
   animation: game-motion-hide-face-early var(--motion-duration) step-end var(--motion-delay) both;
+}
+
+.game-motion-morph-full.game-motion-morph-flip {
+  overflow: hidden;
+  animation-name: game-motion-morph-flip;
+}
+
+.game-motion-morph-flip .game-motion-morph-face {
+  animation: game-motion-hide-face-early var(--motion-duration) step-end var(--motion-delay) both;
+}
+
+.game-motion-morph-flip .game-motion-morph-back {
+  animation: game-motion-reveal-back-early var(--motion-duration) step-end var(--motion-delay) both;
+}
+
+.game-motion-visual-morph-flip .game-motion-card-side {
+  animation: game-motion-morph-in-late var(--motion-duration) ease-out var(--motion-delay) both;
 }
 
 .game-motion-flight-settle-reveal .game-motion-back {
@@ -354,6 +385,48 @@
     transform: translate3d(var(--motion-x), var(--motion-y), 0)
       scale(var(--motion-scale-x), var(--motion-scale-y)) rotateY(0);
   }
+}
+
+@keyframes game-motion-deck-bottom-morph {
+  0%, 44% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1, 1);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(var(--motion-x), var(--motion-y), 0)
+      scale(var(--motion-scale-x), var(--motion-scale-y));
+  }
+}
+
+@keyframes game-motion-morph-flip {
+  0% {
+    opacity: 1;
+    transform: rotateY(0deg) scale(1);
+    clip-path: inset(0 round 6px);
+  }
+  21% { transform: rotateY(90deg) scale(1); }
+  22% { transform: rotateY(-90deg) scale(1); }
+  36% {
+    opacity: 1;
+    transform: rotateY(0deg) scale(1);
+    clip-path: inset(0 round 6px);
+  }
+  52% {
+    opacity: 1;
+    transform: rotateY(0deg) scale(var(--motion-morph-scale));
+    clip-path: inset(var(--motion-morph-crop) 0 round 5px);
+  }
+  60%, 100% {
+    opacity: 0;
+    transform: rotateY(0deg) scale(var(--motion-morph-scale));
+    clip-path: inset(var(--motion-morph-crop) 0 round 5px);
+  }
+}
+
+@keyframes game-motion-morph-in-late {
+  0%, 44% { opacity: 0; transform: scale(1.08); }
+  56%, 100% { opacity: 1; transform: scale(1); }
 }
 
 @keyframes game-motion-morph-out {

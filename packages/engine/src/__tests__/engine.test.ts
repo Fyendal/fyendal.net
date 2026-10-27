@@ -122,14 +122,14 @@ describe("game setup & turn structure", () => {
     expect(projectStateFor(state, 0).players[0]?.hand[0]?.turnTriggers).toBeUndefined();
   });
 
-  it("projects attack ability indexes for arena presentation", () => {
+  it("projects attack and tap ability indexes for arena presentation", () => {
     const state = makeGame(897);
     state.scriptsRef = {
       ...state.scriptsRef,
-      HERO_A: { activated: { cost: 0, isAttack: true, goAgain: false } },
+      HERO_A: { activated: { cost: 0, isAttack: true, tap: true, goAgain: false } },
       SWORD: {
         activated: [
-          { cost: 0, label: "Polish", isAttack: false, goAgain: false, onActivate() {} },
+          { cost: 0, label: "Polish", isAttack: false, tap: true, goAgain: false, onActivate() {} },
           { cost: 1, label: "Attack", isAttack: true, goAgain: false },
         ],
       },
@@ -138,8 +138,12 @@ describe("game setup & turn structure", () => {
     expect(projectStateFor(state, 0).players[0]?.weapons[0]).toMatchObject({
       activatedAbilityLabels: ["Polish", "Attack"],
       attackAbilityIndexes: [1],
+      tapAbilityIndexes: [0],
     });
-    expect(projectStateFor(state, 0).players[0]?.heroAttackAbilityIndexes).toEqual([0]);
+    expect(projectStateFor(state, 0).players[0]).toMatchObject({
+      heroAttackAbilityIndexes: [0],
+      heroTapAbilityIndexes: [0],
+    });
   });
 
   it("projects source-side combat damage modifiers before resolution", () => {

@@ -95,10 +95,13 @@ export interface MotionMorph {
   fromHeight: number;
   scale: number;
   crop: number;
+  /** A face-up card going to the deck bottom flips at full size before morphing. */
+  flip: boolean;
 }
 
 export function motionFlightMorph(flight: MotionFlight, squareCardsEnabled: boolean): MotionMorph | null {
-  if (flight.visual.kind !== "face" || !squareMotionFlight(flight, squareCardsEnabled)) return null;
+  const flip = flight.visual.kind === "face-conceal" && flight.mode === "deck-bottom";
+  if ((flight.visual.kind !== "face" && !flip) || !squareMotionFlight(flight, squareCardsEnabled)) return null;
   const { start, end } = flight;
   if (start.width / start.height >= .9) return null;
   const scale = end.width / start.width;
@@ -107,6 +110,7 @@ export function motionFlightMorph(flight: MotionFlight, squareCardsEnabled: bool
     fromHeight: start.height,
     scale,
     crop: Math.max(0, (start.height - end.height / scale) / 2),
+    flip,
   };
 }
 
@@ -133,12 +137,18 @@ export function MotionCardVisual({
   const cardArt = useCardArt();
   const faceUrl = visualFaceUrl(visual, "card" in visual ? cardArt(visual.card.owner, visual.card.cardId) : undefined);
   const morphing = square && morph !== null && faceUrl !== null;
+  const flipping = morphing && morph.flip;
   return (
     <div
-      className={`game-motion-visual game-motion-visual-${visual.kind}${square ? " game-motion-visual-square" : ""}${morphing ? " game-motion-visual-morph" : ""}`}
+      className={`game-motion-visual game-motion-visual-${visual.kind}${square ? " game-motion-visual-square" : ""}${morphing ? " game-motion-visual-morph" : ""}${flipping ? " game-motion-visual-morph-flip" : ""}`}
       style={morphing ? morphStyle(morph) : undefined}
     >
-      {morphing ? (
+      {flipping ? (
+        <span className="game-motion-morph-full game-motion-morph-flip">
+          <img className="game-motion-image game-motion-morph-face" src={faceUrl} alt="" />
+          <img className="game-motion-image game-motion-morph-back" src={CARD_BACK_IMAGE_URL} alt="" />
+        </span>
+      ) : morphing ? (
         <img className="game-motion-image game-motion-morph-full" src={faceUrl} alt="" />
       ) : null}
       {visual.kind !== "face" ? (
@@ -150,7 +160,7 @@ export function MotionCardVisual({
           <img className="game-motion-image game-motion-back" src={CARD_BACK_IMAGE_URL} alt="" />
         )
       ) : null}
-      {faceUrl ? (
+      {faceUrl && !flipping ? (
         square && visual.kind !== "back" ? (
           <span className="game-motion-card-side game-motion-face">
             <CardFace card={visual.card} size="zone" squareArt showOverlays={false} showTapped={false} />
@@ -230,11 +240,12 @@ function MotionFlightOverlay({
   useEffect(() => () => {
     if (lingerTimerRef.current !== null) window.clearTimeout(lingerTimerRef.current);
   }, []);
+  const morph = motionFlightMorph(flight, squareCardsEnabled);
   return (
     <div
       className={`game-motion-flight game-motion-flight-${flight.mode}${
         flight.holdAtSource ? " game-motion-flight-hold-source" : ""
-      }${flight.stackDepth ? " game-motion-stacked" : ""}`}
+      }${flight.stackDepth ? " game-motion-stacked" : ""}${morph?.flip ? " game-motion-flight-morph-flip" : ""}`}
       data-stack-depth={flight.stackDepth}
       style={flightStyle(flight, squareCardsEnabled)}
       onAnimationStart={(event: AnimationEvent<HTMLDivElement>) => {
@@ -267,7 +278,7 @@ function MotionFlightOverlay({
         visual={flight.visual}
         count={flight.showCount ? flight.count : 1}
         square={squareMotionFlight(flight, squareCardsEnabled)}
-        morph={motionFlightMorph(flight, squareCardsEnabled)}
+        morph={morph}
       />
     </div>
   );
@@ -356,6 +367,7 @@ export function GameMotionLayer({
   const boardFlights: MotionFlight[] = [];
   const chainFlights: MotionFlight[] = [];
   const stackFlights: MotionFlight[] = [];
+  const underHandFlights: MotionFlight[] = [];
   const soulFlights = new Map<number, MotionFlight[]>();
   for (const flight of batch.flights) {
     const layer = motionFlightLayer(flight);
@@ -363,6 +375,7 @@ export function GameMotionLayer({
     if (soulSeat !== null) soulFlights.set(soulSeat, [...(soulFlights.get(soulSeat) ?? []), flight]);
     else if (layer === "chain") chainFlights.push(flight);
     else if (layer === "stack") stackFlights.push(flight);
+    else if (motionFlightMorph(flight, squareCardsEnabled)?.flip) underHandFlights.push(flight);
     else if (flight.mode === "appear") appearanceFlights.push(flight);
     else boardFlights.push(flight);
   }
@@ -383,6 +396,27 @@ export function GameMotionLayer({
               onFlightDepart={onFlightDepart}
               onCueComplete={completeCue}
             />
+          ))}
+        </div>
+      ) : null}
+      {underHandFlights.length > 0 ? (
+        <div
+          className={`game-motion-layer game-motion-layer-under-hand${batch.reducedMotion ? " game-motion-layer-reduced" : ""}`}
+          aria-hidden="true"
+        >
+          {underHandFlights.map((flight) => (
+            <MotionFlightOverlay
+              batchId={batch.id}
+              flight={flight}
+              squareCardsEnabled={squareCardsEnabled}
+              key={flight.id}
+              onFlightArrive={onFlightArrive}
+              onFlightDepart={onFlightDepart}
+              onCueComplete={completeCue}
+            />
+          ))}
+          {underHandFlights.map((flight) => (
+            <MotionDeckCover flight={flight} squareCardsEnabled={squareCardsEnabled} key={`${flight.id}:deck-cover`} />
           ))}
         </div>
       ) : null}

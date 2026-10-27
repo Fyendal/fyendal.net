@@ -1206,7 +1206,7 @@ function cardView(value: unknown, depth = 0): value is CardView {
   const card = object(value);
   if (!card || !exactKeys(card, [
     "instanceId", "cardId", "name", "owner", "pitchCount", "attack", "defense", "faceDown", "arsenalSlot", "tapped",
-    "defCounters", "counters", "usedAbilityIndexes", "remainingAbilityActivations", "activatedAbilityLabels", "turnTriggers", "attackAbilityIndexes", "life", "hidden", "subcards", "grantedNames", "chosenName", "boundToInstanceId",
+    "defCounters", "counters", "usedAbilityIndexes", "remainingAbilityActivations", "activatedAbilityLabels", "turnTriggers", "attackAbilityIndexes", "tapAbilityIndexes", "life", "hidden", "subcards", "grantedNames", "chosenName", "boundToInstanceId",
     "grantedTypes", "grantedColor", "playableFromSourceCardId", "intimidated", "frozen", "frozenUntilTurn",
   ], ["instanceId", "cardId", "owner"])) return false;
   const validInstanceId = instanceId(card.instanceId)
@@ -1243,6 +1243,7 @@ function cardView(value: unknown, depth = 0): value is CardView {
         && optional(trigger.choices, (value): value is TurnTriggerChoiceView[] => array(value, turnTriggerChoice, 4));
     }, 16))
     && optional(card.attackAbilityIndexes, abilityIndexes)
+    && optional(card.tapAbilityIndexes, abilityIndexes)
     && optional(card.subcards, (v): v is CardView[] => array(v, (entry) => cardView(entry, depth + 1), 16))
     && optional(card.grantedNames, (v): v is string[] => array(v, (entry): entry is string => string(entry, MAX_ID), 16))
     && optional(card.chosenName, (v): v is string => string(v, MAX_SHORT_TEXT, false))
@@ -1298,7 +1299,7 @@ function playerView(value: unknown): value is PlayerView {
   const player = object(value);
   if (!player || !exactKeys(player, [
     "seat", "heroCardId", "heroInstanceId", "heroTapped", "heroCounters", "heroDefCounters", "heroSubcards",
-    "heroAbilityLabels", "heroAttackAbilityIndexes", "heroUsedAbilityIndexes", "heroName",
+    "heroAbilityLabels", "heroAttackAbilityIndexes", "heroTapAbilityIndexes", "heroUsedAbilityIndexes", "heroName",
     "life", "actionPoints", "resources", "chi", "hand", "handCount", "deckCount", "deck",
     "arsenal", "arsenalCount", "arsenalCapacity", "arsenalZones", "pitch", "pitchCount", "graveyard", "banish", "soul",
     "visibleDeckTop", "equipment", "weapons", "board",
@@ -1315,6 +1316,7 @@ function playerView(value: unknown): value is PlayerView {
     && optional(player.heroAbilityLabels, (v): v is string[] =>
       array(v, (label): label is string => string(label, MAX_SHORT_TEXT, false), 33))
     && optional(player.heroAttackAbilityIndexes, abilityIndexes)
+    && optional(player.heroTapAbilityIndexes, abilityIndexes)
     && optional(player.heroUsedAbilityIndexes, abilityIndexes)
     && finite(player.life) && finite(player.actionPoints) && finite(player.resources)
     && optional(player.chi, finite) && cardViews(player.hand) && nonNegativeInteger(player.handCount)

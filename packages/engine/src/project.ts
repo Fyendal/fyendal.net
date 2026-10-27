@@ -220,6 +220,7 @@ function cardView(state: GameStateInternal,
   const attackAbilityIndexes = abilities.flatMap((ability, index) =>
     ability.isAttack ? [index] : []);
   if (grantedAuraAttackIndex !== undefined) attackAbilityIndexes.push(grantedAuraAttackIndex);
+  const tapAbilityIndexes = abilities.flatMap((ability, index) => ability.tap ? [index] : []);
   const usedAbilityIndexes = grantedAuraAttackIndex !== undefined &&
     controller?.flags[activatedFlagKey(c.instanceId, grantedAuraAttackIndex)] === true
       ? [...nativeUsedAbilityIndexes, grantedAuraAttackIndex]
@@ -259,6 +260,7 @@ function cardView(state: GameStateInternal,
     ...(activatedAbilityLabels ? { activatedAbilityLabels } : {}),
     ...(turnTriggers.length > 0 ? { turnTriggers } : {}),
     ...(attackAbilityIndexes.length > 0 ? { attackAbilityIndexes } : {}),
+    ...(tapAbilityIndexes.length > 0 ? { tapAbilityIndexes } : {}),
     ...(c.grantedNames && c.grantedNames.length > 0 ? { grantedNames: c.grantedNames } : {}),
     ...(c.chosenName ? { chosenName: c.chosenName } : {}),
     ...(c.boundToInstanceId !== undefined ? { boundToInstanceId: c.boundToInstanceId } : {}),
@@ -365,6 +367,8 @@ function playerView(
   const heroAbilityLabels = projectedAbilityLabels(heroAbilities);
   const heroAttackAbilityIndexes = heroAbilities.flatMap((ability, index) =>
     ability.isAttack ? [index] : []);
+  const heroTapAbilityIndexes = heroAbilities.flatMap((ability, index) =>
+    ability.tap || ability.tapHeroCost ? [index] : []);
   const heroUsedAbilityIndexes = heroAbilities.flatMap((ability, index) =>
     activatedAbilityUsage(p, p.hero.instanceId, index, ability)?.remaining === 0 ? [index] : []);
   const heroSubcards = cardView(state, runtime, p.hero).subcards;
@@ -379,6 +383,7 @@ function playerView(
     ...(heroSubcards ? { heroSubcards } : {}),
     ...(heroAbilityLabels ? { heroAbilityLabels } : {}),
     ...(heroAttackAbilityIndexes.length > 0 ? { heroAttackAbilityIndexes } : {}),
+    ...(heroTapAbilityIndexes.length > 0 ? { heroTapAbilityIndexes } : {}),
     ...(heroUsedAbilityIndexes.length > 0 ? { heroUsedAbilityIndexes } : {}),
     heroName: dataOf(state, p.heroCardId).name,
     life: p.life,

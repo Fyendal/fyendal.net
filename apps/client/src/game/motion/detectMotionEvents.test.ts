@@ -382,7 +382,6 @@ describe("game motion detection", () => {
       kind: "connect",
       source: { kind: "hero", seat: 0 },
       destination: { kind: "stack-layer", index: 0 },
-      visual: { kind: "face", card: hero },
       instanceId: 100,
       sourcePresentationKey: "0:hero:100",
       destinationPresentationKey: "stack:layer:100",
