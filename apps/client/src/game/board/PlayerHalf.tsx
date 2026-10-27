@@ -376,7 +376,7 @@ export function PlayerHalf({
           data-stack-depth={cards.length > 1 ? Math.min(cards.length, 3) : undefined}
           data-motion-zone-anchor={motionLocationKey(location)}
         >
-          {/* Shows the previous top while an arriving card is masked for its flight. */}
+          {/* Shows the previous top, or the empty zone, while an arriving card is masked for its flight. */}
           {cards.length > 1 ? (
             <div className="zone-card-pile-under" aria-hidden="true">
               <InactiveZoneCard
@@ -385,6 +385,12 @@ export function PlayerHalf({
                 showOverlays={false}
                 motionKey={motionPresentationKey(location, cards[cards.length - 2]!.instanceId)}
               />
+            </div>
+          ) : squareBoard ? (
+            <div className="zone-card-pile-under" aria-hidden="true">
+              <span className="card-zone equipment-zone-empty zone-pile-empty">
+                <span className="mat-zone-label">{zoneLabel(kind)}</span>
+              </span>
             </div>
           ) : null}
           <InactiveZoneCard

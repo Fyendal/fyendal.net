@@ -120,6 +120,10 @@
   animation-name: game-motion-draw;
 }
 
+.game-motion-flight-from-under {
+  animation-name: game-motion-from-under;
+}
+
 .game-motion-flight-pitch-gather {
   animation-name: game-motion-travel;
 }
@@ -323,6 +327,25 @@
     opacity: 0;
     filter: brightness(2) saturate(.25) blur(4px);
     transform: scale(.78);
+  }
+}
+
+/* Slide clear of the covering card first, then travel. */
+@keyframes game-motion-from-under {
+  from {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1, 1);
+    animation-timing-function: cubic-bezier(.3, 0, .3, 1);
+  }
+  35% {
+    opacity: 1;
+    transform: translate3d(0, var(--motion-emerge-y), 0) scale(1, 1);
+    animation-timing-function: cubic-bezier(.4, 0, .2, 1);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(var(--motion-x), var(--motion-y), 0)
+      scale(var(--motion-scale-x), var(--motion-scale-y));
   }
 }
 

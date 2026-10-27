@@ -186,6 +186,8 @@ function detectFromPresentations(
 
   for (const destination of current.cards) {
     if (previousKeys.has(destination.key)) continue;
+    // A card going under a permanent (a transform) is already drawn there.
+    if (destination.location.kind === "subcard") continue;
     if (destination.location.kind === "stack-layer") {
       const triggerSource = currentTriggerSource(destination, currentByInstance);
       if (triggerSource) {

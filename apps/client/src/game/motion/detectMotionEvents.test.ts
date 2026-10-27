@@ -219,6 +219,43 @@ describe("game motion detection", () => {
     });
   });
 
+  it("moves a destroyed sub-card from under its equipment to the graveyard", () => {
+    const base = face(3);
+    const beta = face(4);
+    const previous = view([
+      player(0, { equipment: { arms: { ...face(5), subcards: [base, beta] } } }),
+      player(1),
+    ]);
+    const current = view([
+      player(0, { equipment: { arms: { ...face(5), subcards: [beta] } }, graveyard: [base] }),
+      player(1),
+    ]);
+    const under = { kind: "subcard", seat: 0, parentKey: "0:equipment:arms:5" } as const;
+
+    expect(detectGameMotionEvents(previous, current)).toEqual([{
+      kind: "move",
+      source: under,
+      destination: { kind: "graveyard", seat: 0 },
+      visual: { kind: "face", card: base },
+      instanceId: 3,
+      sourcePresentationKey: "0:subcard:0:equipment:arms:5:3",
+      destinationPresentationKey: "0:graveyard:3",
+      count: 1,
+      confidence: "exact",
+    }]);
+  });
+
+  it("does not fly equipment that transforms into a sub-card", () => {
+    const base = face(3);
+    const previous = view([player(0, { equipment: { arms: base } }), player(1)]);
+    const current = view([
+      player(0, { equipment: { arms: { ...face(5), subcards: [base] } } }),
+      player(1),
+    ]);
+
+    expect(detectGameMotionEvents(previous, current).filter((event) => event.kind === "move")).toEqual([]);
+  });
+
   it("moves a back from a hidden opponent hand and reveals on the attack layer", () => {
     const attack = face(3, 1);
     const previous = view([player(0), player(1, { handCount: 1 })]);

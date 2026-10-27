@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   measureMotionAnchors,
+  motionFlightDurationMs,
   reducedMotionBatch,
   resolveMotionBatch,
   resolveMotionBatches,
@@ -54,6 +55,25 @@ describe("motion geometry", () => {
     const focusedBatch = resolveMotionBatch([...pitched, ...reflows], previous, current, "focus");
     expect(focusedBatch?.flights.filter((flight) => flight.mode === "reflow")
       .map((flight) => flight.destinationPresentationKey)).toEqual(["0:hand:10"]);
+  });
+
+  it("slides a sub-card clear of its covering card before it travels", () => {
+    const parentKey = "0:equipment:arms:8";
+    const departure: GameMotionEvent = {
+      kind: "move", source: { kind: "subcard", seat: 0, parentKey }, destination: { kind: "graveyard", seat: 0 },
+      instanceId: 4, sourcePresentationKey: `0:subcard:${parentKey}:4`, destinationPresentationKey: "0:graveyard:4",
+      visual: { kind: "face", card: { instanceId: 4, cardId: "EVO016", owner: 0 } }, count: 1, confidence: "exact",
+    };
+    const previous = anchors({ cards: [[parentKey, rect(100, 532)], [`0:subcard:${parentKey}:4`, rect(100, 500)]] });
+    const current = anchors({ cards: [[parentKey, rect(100, 532)], ["0:graveyard:4", rect(900, 400)]] });
+    const [flight] = resolveMotionBatch([departure], previous, current, "under")!.flights;
+
+    expect(flight).toEqual(expect.objectContaining({
+      start: rect(100, 500),
+      sourceUnderPresentationKey: parentKey,
+      emergeY: 532 - 138 - 500,
+    }));
+    expect(motionFlightDurationMs(flight!)).toBe(560);
   });
 
   it("slides a stacked board group once, after the departing card reaches the graveyard", () => {

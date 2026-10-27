@@ -21,6 +21,7 @@ export const MOTION_DRAW_STAGGER_MS = 85;
 export const MOTION_SEQUENCE_GAP_MS = 70;
 export const MOTION_CONNECT_MS = 180;
 export const MOTION_DISAPPEAR_MS = 380;
+export const MOTION_FROM_UNDER_MS = 560;
 export const MAX_DETAILED_FLIGHTS = 24;
 
 export interface MotionRect {
@@ -83,18 +84,23 @@ export interface MotionFlight {
   /** Preserve the old source card while this batch is queued. */
   queueHoldSource?: true;
   destinationCoverVisual?: MotionVisual;
+  /** The arena card this flight slides out from beneath. */
+  sourceUnderPresentationKey?: string;
+  /** Vertical slide that clears the covering card before the flight travels. */
+  emergeY?: number;
   destinationLayer?: "chain" | "stack";
   /** The moving copy is an arena stack; draw its stacking edges while it slides. */
   stackDepth?: number;
 }
 
 export function motionFlightDurationMs(
-  flight: Pick<MotionFlight, "mode" | "durationMs">,
+  flight: Pick<MotionFlight, "mode" | "durationMs" | "emergeY">,
 ): number {
   if (flight.durationMs !== undefined) return flight.durationMs;
   if (flight.mode === "deck-bottom") return MOTION_DECK_BOTTOM_MS;
   if (flight.mode === "pitch-gather") return MOTION_PITCH_GATHER_MS;
   if (flight.mode === "disappear") return MOTION_DISAPPEAR_MS;
+  if (flight.emergeY !== undefined) return MOTION_FROM_UNDER_MS;
   return MOTION_TRAVEL_MS;
 }
 
@@ -195,6 +201,9 @@ function endpoint(
 ): { rect: MotionRect; exact: boolean } | null {
   const card = presentationKey ? anchors.cards.get(presentationKey) : undefined;
   if (card) return { rect: card, exact: true };
+  // Not every stack draws the cards beneath its top card.
+  const parent = location.kind === "subcard" ? anchors.cards.get(location.parentKey) : undefined;
+  if (parent) return { rect: parent, exact: true };
   const zoneKey = motionLocationKey(location);
   const zone = anchors.zones.get(zoneKey);
   return zone ? { rect: zone, exact: anchors.cardSizedZones?.has(zoneKey) === true } : null;
@@ -226,6 +235,15 @@ function sameRect(left: MotionRect, right: MotionRect): boolean {
 
 function rectKey(rect: MotionRect): string {
   return `${rect.left}:${rect.top}:${rect.width}:${rect.height}`;
+}
+
+/** Slide a card out past the edge of the card covering it, on the side it
+ * peeks from (upward when it is fully hidden). */
+function emergeFromUnder(card: MotionRect, cover: MotionRect | undefined): number {
+  if (!cover) return 0;
+  return card.top > cover.top
+    ? cover.top + cover.height - card.top
+    : cover.top - card.height - card.top;
 }
 
 function motionLayerForDestination(
@@ -569,6 +587,12 @@ export function resolveMotionBatch(
         : {}),
       ...(event.kind === "move" && event.destinationCoverVisual
         ? { destinationCoverVisual: event.destinationCoverVisual }
+        : {}),
+      ...(event.source.kind === "subcard"
+        ? {
+            sourceUnderPresentationKey: event.source.parentKey,
+            emergeY: emergeFromUnder(start, previous.cards.get(event.source.parentKey)),
+          }
         : {}),
       ...(destinationLayer !== undefined
         ? { destinationLayer }

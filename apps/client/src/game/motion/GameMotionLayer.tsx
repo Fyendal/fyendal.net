@@ -45,25 +45,27 @@ export function motionFlightSoulSeat(flight: MotionFlight): number | null {
   return match ? Number(match[1]) : null;
 }
 
-/** Clip everything but a hole over the hero so charged cards slide under it. */
-export function heroHoleClipPath(hero: MotionRect): string {
-  const { left, top, width, height } = hero;
+/** Clip everything but a hole over a card so flights slide under it. */
+export function cardHoleClipPath(card: MotionRect): string {
+  const { left, top, width, height } = card;
   const right = left + width;
   const bottom = top + height;
   return `polygon(evenodd, 0 0, 100% 0, 100% 100%, 0 100%, 0 0, ${left}px ${top}px, ${right}px ${top}px, ${right}px ${bottom}px, ${left}px ${bottom}px, ${left}px ${top}px)`;
 }
 
-function MotionUnderHeroLayer({ seat, reducedMotion, children }: {
-  seat: number;
+/** Flights clipped around the card matched by `coverSelector`, so they pass
+ * beneath it. */
+function MotionUnderCardLayer({ coverSelector, reducedMotion, children }: {
+  coverSelector: string;
   reducedMotion: boolean;
   children: ReactNode;
 }) {
   const [clipPath, setClipPath] = useState<string | undefined>(undefined);
   useLayoutEffect(() => {
-    const hero = document.querySelector<HTMLElement>(`[data-motion-card^="${seat}:hero:"]`);
-    const rect = hero?.getBoundingClientRect();
-    setClipPath(rect && rect.width > 0 ? heroHoleClipPath(rect) : undefined);
-  }, [seat]);
+    const cover = document.querySelector<HTMLElement>(coverSelector);
+    const rect = cover?.getBoundingClientRect();
+    setClipPath(rect && rect.width > 0 ? cardHoleClipPath(rect) : undefined);
+  }, [coverSelector]);
   return (
     <div
       className={`game-motion-layer${reducedMotion ? " game-motion-layer-reduced" : ""}`}
@@ -201,6 +203,7 @@ function flightStyle(flight: MotionFlight, squareCardsEnabled: boolean): MotionS
     "--motion-scale-y": String(flight.end.height / start.height),
     "--motion-delay": `${flight.delayMs}ms`,
     "--motion-duration": `${motionFlightDurationMs(flight)}ms`,
+    ...(flight.emergeY !== undefined ? { "--motion-emerge-y": `${flight.emergeY}px` } : {}),
   };
 }
 
@@ -245,6 +248,7 @@ function MotionFlightOverlay({
     <div
       className={`game-motion-flight game-motion-flight-${flight.mode}${
         flight.holdAtSource ? " game-motion-flight-hold-source" : ""
+      }${flight.emergeY !== undefined ? " game-motion-flight-from-under" : ""
       }${flight.stackDepth ? " game-motion-stacked" : ""}${morph?.flip ? " game-motion-flight-morph-flip" : ""}`}
       data-stack-depth={flight.stackDepth}
       style={flightStyle(flight, squareCardsEnabled)}
@@ -368,12 +372,18 @@ export function GameMotionLayer({
   const chainFlights: MotionFlight[] = [];
   const stackFlights: MotionFlight[] = [];
   const underHandFlights: MotionFlight[] = [];
-  const soulFlights = new Map<number, MotionFlight[]>();
+  const underCardFlights = new Map<string, MotionFlight[]>();
   for (const flight of batch.flights) {
     const layer = motionFlightLayer(flight);
     const soulSeat = layer === undefined && flight.mode !== "appear" ? motionFlightSoulSeat(flight) : null;
-    if (soulSeat !== null) soulFlights.set(soulSeat, [...(soulFlights.get(soulSeat) ?? []), flight]);
-    else if (layer === "chain") chainFlights.push(flight);
+    const coverSelector = soulSeat !== null
+      ? `[data-motion-card^="${soulSeat}:hero:"]`
+      : layer === undefined && flight.sourceUnderPresentationKey !== undefined
+        ? `[data-motion-card="${CSS.escape(flight.sourceUnderPresentationKey)}"]`
+        : null;
+    if (coverSelector !== null) {
+      underCardFlights.set(coverSelector, [...(underCardFlights.get(coverSelector) ?? []), flight]);
+    } else if (layer === "chain") chainFlights.push(flight);
     else if (layer === "stack") stackFlights.push(flight);
     else if (motionFlightMorph(flight, squareCardsEnabled)?.flip) underHandFlights.push(flight);
     else if (flight.mode === "appear") appearanceFlights.push(flight);
@@ -461,8 +471,12 @@ export function GameMotionLayer({
           <MotionDeckCover flight={flight} squareCardsEnabled={squareCardsEnabled} key={`${flight.id}:deck-cover`} />
         ))}
       </div>
-      {[...soulFlights].map(([seat, flights]) => (
-        <MotionUnderHeroLayer seat={seat} reducedMotion={batch.reducedMotion === true} key={`soul:${seat}`}>
+      {[...underCardFlights].map(([coverSelector, flights]) => (
+        <MotionUnderCardLayer
+          coverSelector={coverSelector}
+          reducedMotion={batch.reducedMotion === true}
+          key={coverSelector}
+        >
           {flights.map((flight) => (
             <MotionFlightOverlay
               batchId={batch.id}
@@ -474,7 +488,7 @@ export function GameMotionLayer({
               onCueComplete={completeCue}
             />
           ))}
-        </MotionUnderHeroLayer>
+        </MotionUnderCardLayer>
       ))}
       {chainFlights.length > 0 ? (
         <div

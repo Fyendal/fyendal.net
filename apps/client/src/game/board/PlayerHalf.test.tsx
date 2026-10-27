@@ -367,6 +367,17 @@ describe("PlayerHalf", () => {
     );
   });
 
+  it("keeps a lone pile card's empty zone beneath it for an arriving flight", () => {
+    const html = renderPlayerHalf({
+      ...player,
+      graveyard: [{ instanceId: 14, cardId: "WTR160", owner: 0 }],
+    });
+
+    expect(html).toMatch(
+      /zone-card-pile-under" aria-hidden="true"><span class="card-zone equipment-zone-empty zone-pile-empty"><span class="mat-zone-label">Graveyard<\/span>/,
+    );
+  });
+
   it("adds depth layers only to multi-card deck, graveyard, and banish piles", () => {
     const html = renderPlayerHalf({
       ...player,

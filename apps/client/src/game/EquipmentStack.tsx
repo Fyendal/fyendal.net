@@ -58,6 +58,9 @@ export function EquipmentStack({
   const visibleSoulCount = soulCount !== undefined && soulCount > 0 ? soulCount : null;
   const visibleBoundCount = boundCount !== undefined && boundCount > 0 ? boundCount : null;
   const explicitUnderCardIds = new Set(underCards.map((underCard) => underCard.instanceId));
+  const subcardMotionLocation: MotionLocation | undefined = motionLocation && "seat" in motionLocation
+    ? { kind: "subcard", seat: motionLocation.seat, parentKey: motionPresentationKey(motionLocation, card.instanceId) }
+    : undefined;
   const activationGroups = showActivationDots
     ? (card.remainingAbilityActivations ?? []).flatMap((remaining, abilityIndex) =>
         remaining >= 2 ? [{ abilityIndex, remaining }] : [])
@@ -93,7 +96,9 @@ export function EquipmentStack({
                   ? motionPresentationKey(motionLocation, stackCard.instanceId)
                   : isExplicitUnderCard && underCardMotionLocation
                     ? motionPresentationKey(underCardMotionLocation, stackCard.instanceId)
-                    : undefined
+                    : !isExplicitUnderCard && subcardMotionLocation
+                      ? motionPresentationKey(subcardMotionLocation, stackCard.instanceId)
+                      : undefined
               }
               highlighted={isTop ? highlighted : undefined}
               selected={isTop ? selected : undefined}

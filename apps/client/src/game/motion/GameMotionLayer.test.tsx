@@ -2,7 +2,7 @@ import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import {
-  heroHoleClipPath,
+  cardHoleClipPath,
   MotionCardVisual,
   motionFlightHandsOff,
   motionFlightLayer,
@@ -172,6 +172,6 @@ describe("motion card presentation", () => {
     const flight = { destinationPresentationKey: "1:soul:42" } as MotionFlight;
     expect(motionFlightSoulSeat(flight)).toBe(1);
     expect(motionFlightSoulSeat({ destinationPresentationKey: "1:graveyard:42" } as MotionFlight)).toBeNull();
-    expect(heroHoleClipPath({ left: 10, top: 20, width: 100, height: 50 })).toContain("polygon(evenodd");
+    expect(cardHoleClipPath({ left: 10, top: 20, width: 100, height: 50 })).toContain("polygon(evenodd");
   });
 });

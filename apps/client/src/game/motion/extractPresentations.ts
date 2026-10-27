@@ -1,6 +1,7 @@
 import type { CardView, GameView } from "@fyendal/shared";
 import { attackLayerPresentation } from "../attackLayerPresentation.js";
 import { heroCard } from "../board/heroCard.js";
+import { equipmentStackCards } from "../boardGroups.js";
 import {
   motionLocationKey,
   motionPresentationKey,
@@ -47,6 +48,19 @@ export function extractGamePresentations(view: GameView): GamePresentations {
     });
   };
 
+  // Public cards under an arena permanent are anchored to it, so one that
+  // leaves can travel out from beneath it.
+  const addPermanent = (card: CardView, location: Extract<MotionLocation, { seat: number }>) => {
+    add(card, location, "canonical");
+    if (!card.subcards?.length) return;
+    const under: MotionLocation = {
+      kind: "subcard",
+      seat: location.seat,
+      parentKey: motionPresentationKey(location, card.instanceId),
+    };
+    equipmentStackCards(card).slice(0, -1).forEach((subcard) => add(subcard, under, "canonical"));
+  };
+
   for (const player of view.players) {
     const seat = player.seat;
     add(heroCard(player), { kind: "hero", seat }, "canonical");
@@ -63,16 +77,10 @@ export function extractGamePresentations(view: GameView): GamePresentations {
     player.graveyard.forEach((card) => add(card, { kind: "graveyard", seat }, "canonical"));
     player.banish.forEach((card) => add(card, { kind: "banish", seat }, "canonical"));
     player.soul.forEach((card) => add(card, { kind: "soul", seat }, "canonical"));
-    player.board.forEach((card) => add(card, { kind: "board", seat }, "canonical"));
-    player.weapons.forEach((card, index) => (
-      add(card, { kind: "weapon", seat, index }, "canonical")
-    ));
+    player.board.forEach((card) => addPermanent(card, { kind: "board", seat }));
+    player.weapons.forEach((card, index) => addPermanent(card, { kind: "weapon", seat, index }));
     for (const [slot, card] of Object.entries(player.equipment)) {
-      add(card, {
-        kind: "equipment",
-        seat,
-        slot: slot as keyof typeof player.equipment,
-      }, "canonical");
+      if (card) addPermanent(card, { kind: "equipment", seat, slot: slot as keyof typeof player.equipment });
     }
     add(player.visibleDeckTop, { kind: "deck", seat }, "canonical");
     counts.push(

@@ -12,6 +12,8 @@ export type MotionLocation =
   | { kind: "hero"; seat: number }
   | { kind: "equipment"; seat: number; slot: EquipmentSlot }
   | { kind: "weapon"; seat: number; index: number }
+  /** A public card under the arena card whose presentation key is `parentKey`. */
+  | { kind: "subcard"; seat: number; parentKey: string }
   | { kind: "stack-layer"; index: number }
   | { kind: "attack-queue"; index: number }
   | { kind: "chain-attack"; link: number }
@@ -140,6 +142,8 @@ export function motionLocationKey(location: MotionLocation): string {
       return `${location.seat}:equipment:${location.slot}`;
     case "weapon":
       return `${location.seat}:weapon:${location.index}`;
+    case "subcard":
+      return `${location.seat}:subcard:${location.parentKey}`;
     case "stack-layer":
       return `stack:layer:${location.index}`;
     case "attack-queue":
