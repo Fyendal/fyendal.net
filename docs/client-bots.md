@@ -30,7 +30,9 @@ Three consecutive loading, computation, or submission failures open a
 connection-local circuit breaker.
 The recovery notice offers a retry, and reconnect also resets the circuit.
 Disconnected and incompatible clients pause bot play. An incompatible client
-must refresh; it does not trigger expensive server search.
+must refresh; it does not trigger expensive server search. The tab reloads
+itself once per runtime pair (guarded in `sessionStorage`) and shows the
+refresh notice if the reload still serves the stale bundle.
 
 During bot startup, accepting a PvP offer keeps the player on the acceptance
 screen until both players accept. If that offer falls through and startup

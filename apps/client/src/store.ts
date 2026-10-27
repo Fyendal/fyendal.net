@@ -1,5 +1,6 @@
 import { BOT_RUNTIME_ID } from "@fyendal/bot/runtime-id";
 import { BrowserBotController, type BotWorkerPort } from "./bot/browserBotController.js";
+import { reloadForBotRuntime } from "./bot/runtimeReload.js";
 import { create } from "zustand";
 import type {
   BotOpponent,
@@ -205,6 +206,8 @@ export const useStore = create<StoreState>((set, get) => {
     send,
     resync: () => ws?.close(1012, "bot resync"),
     status: (browserBotStatus) => set({ browserBotStatus }),
+    reload: (serverRuntimeId) =>
+      reloadForBotRuntime(sessionStorage, BOT_RUNTIME_ID, serverRuntimeId, () => window.location.reload()),
     skipPacing: () => get().betaTester && loadGameSettings(localStorage).skipBotDelay,
   });
   disposeBrowserBot = () => browserBot.reset();

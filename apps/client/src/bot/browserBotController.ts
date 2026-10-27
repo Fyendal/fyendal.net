@@ -23,6 +23,7 @@ interface Deps {
   send(message: BotSubmission | { type: "bot-ready"; runtimeId: string }): boolean;
   resync(): void;
   status(value: "fallback" | "refresh-required" | null): void;
+  reload(serverRuntimeId: string): void;
   skipPacing(): boolean;
 }
 
@@ -79,6 +80,8 @@ export class BrowserBotController {
       this.terminate();
       this.active = this.command = null;
       this.deps.status("refresh-required");
+      // The server never assigns bot work to a stale tab, so the game would stall.
+      this.deps.reload(runtimeId);
       return;
     }
     if (!wasCompatible) this.deps.status(null);

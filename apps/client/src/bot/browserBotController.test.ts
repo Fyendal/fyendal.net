@@ -14,8 +14,9 @@ function fixture(skipPacing = false) {
   const workers: BotWorkerPort[] = [];
   const status = vi.fn();
   const resync = vi.fn();
+  const reload = vi.fn();
   const controller = new BrowserBotController({
-    runtimeId, status, resync, skipPacing: () => skipPacing,
+    runtimeId, status, resync, reload, skipPacing: () => skipPacing,
     send: (message) => { if (message.type === "bot-intent") messages.push(message); return true; },
     createWorker: () => {
       const worker: BotWorkerPort = { postMessage: vi.fn(), terminate: vi.fn(), onmessage: null, onerror: null, onmessageerror: null };
@@ -23,7 +24,7 @@ function fixture(skipPacing = false) {
     },
   });
   controller.offer("ABC123", runtimeId);
-  return { controller, workers, messages, status, resync };
+  return { controller, workers, messages, status, resync, reload };
 }
 function ready(worker: BotWorkerPort): void { worker.onmessage?.({ data: { type: "ready" } }); }
 function decide(worker: BotWorkerPort, version = 1): void { worker.onmessage?.({ data: { type: "decision", code: "ABC123", version, intent: { kind: "pass" }, computeMs: 20 } }); }
@@ -153,6 +154,13 @@ describe("BrowserBotController", () => {
     expect(messages).toEqual([]);
     expect(workers[0]!.terminate).toHaveBeenCalledOnce();
     expect(status).toHaveBeenLastCalledWith("refresh-required");
+  });
+
+  it("requests a reload for a mismatched runtime only", () => {
+    const { controller, reload } = fixture();
+    expect(reload).not.toHaveBeenCalled();
+    controller.offer("ABC123", "b".repeat(64));
+    expect(reload).toHaveBeenCalledExactlyOnceWith("b".repeat(64));
   });
 
   it("replaces an idle worker that crashes after a completed decision", () => {
