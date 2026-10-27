@@ -14,6 +14,7 @@ const VIRAL_DIFFUSION = "viral diffusion|1";
 const WIDESPREAD_RUIN = "widespread ruin|1";
 const NO_EQUIPMENT = { head: null, chest: null, arms: null, legs: null } as const;
 const OUTBREAK = "outbreak|3";
+const TAILORED = "tailored targeting|1";
 const PHIAL = "phial of calamity|0";
 const CADAVER = "cadaver handlers|0";
 const WOUNDING_BLOW = "wounding blow|3";
@@ -689,4 +690,44 @@ describe("Armory Deck Mortimer and Mastery Pack Assassin spoilers", () => {
     expect(boardNames(game, 1)).toEqual(["Frailty"]);
     expect(boardNames(game, 0)).toEqual([]);
   });
+
+  it("Tailored Targeting banishes until a non-named card and completes its contract per named card", () => {
+    const game = scenario({ seats: [
+      { hero: "rhinar", hand: [TAILORED], weapons: [], equipment: NO_EQUIPMENT },
+      {
+        hero: "dorinthea",
+        deck: ["raging onslaught|1", "raging onslaught|3", "wounding blow|3", "raging onslaught|2"],
+        weapons: [],
+        equipment: NO_EQUIPMENT,
+      },
+    ] });
+
+    game.play(TAILORED).chooseName("Raging Onslaught").blockWith().settle();
+
+    game.expectLife(1, 16);
+    expect(game.state.players[1]!.banish.map((card) => card.cardId).map((id) => cardData[id]!.name)).toEqual([
+      "Raging Onslaught", "Raging Onslaught", "Wounding Blow",
+    ]);
+    expect(game.state.players[1]!.deck).toHaveLength(1);
+    expect(boardNames(game, 0).filter((name) => name === "Silver")).toHaveLength(2);
+  });
+
+  it("Tailored Targeting banishes nothing when its attack does not hit", () => {
+    const game = scenario({ seats: [
+      { hero: "rhinar", hand: [TAILORED], weapons: [], equipment: NO_EQUIPMENT },
+      {
+        hero: "dorinthea",
+        hand: ["wounding blow|3", "wounding blow|3"],
+        deck: ["raging onslaught|1"],
+        weapons: [],
+        equipment: NO_EQUIPMENT,
+      },
+    ] });
+
+    game.play(TAILORED).chooseName("Raging Onslaught").blockWith("wounding blow|3", "wounding blow|3").settle();
+
+    expect(game.state.players[1]!.banish).toHaveLength(0);
+    expect(boardNames(game, 0)).not.toContain("Silver");
+  });
 });
+

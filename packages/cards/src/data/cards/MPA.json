@@ -97,6 +97,20 @@
     "set": "MPA"
   },
   {
+    "id": "MPA029",
+    "name": "Tailored Targeting",
+    "cardType": "action",
+    "text": "When this attacks, name a card.\nContract - You are contracted to banish opponents' cards with the chosen name. Whenever you complete this contract, create a Silver token.\nWhenever you hit an opposing hero this chain link, banish the top card of their deck. If it's the named card, repeat this process.",
+    "pitch": 1,
+    "cost": 0,
+    "attack": 4,
+    "defense": 3,
+    "classes": ["assassin"],
+    "subtypes": ["attack"],
+    "keywords": ["Contract"],
+    "set": "MPA"
+  },
+  {
     "id": "MPA031",
     "name": "Outbreak",
     "cardType": "attack-reaction",

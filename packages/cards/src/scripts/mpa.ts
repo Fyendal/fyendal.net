@@ -1,6 +1,8 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
 import {
+  cardNamed,
   contractWithSilver,
+  decisionMessage,
   decisionPrompt,
   equipWithSilver,
   hitHookLabel,
@@ -330,5 +332,34 @@ export const mpa: Record<string, CardScript> = {
         },
       },
     ],
+  },
+
+  "tailored targeting|1": {
+    ...contractWithSilver((ctx, card) =>
+      card.owner === opponentSeat(ctx) && !!ctx.self.chosenName && cardNamed(ctx, card, ctx.self.chosenName),
+    ),
+    triggers: [
+      {
+        event: "attack-declared",
+        sourceZone: "self",
+        label: "Name a card",
+        labelMessage: decisionMessage("card.trigger.common.cardname.choose"),
+        effect(ctx) {
+          ctx.requestNameChoice("mpa-tailored-name", decisionPrompt("Name a card", "card.common.card.name"));
+        },
+      },
+    ],
+    onChoose(ctx, hook, option) {
+      if (hook === "mpa-tailored-name") ctx.setChosenName(option);
+    },
+    canTriggerOnHit: (ctx) => ctx.link?.targetAllyId === undefined,
+    onHit(ctx) {
+      const named = ctx.self.chosenName;
+      for (;;) {
+        const top = ctx.player(opponentSeat(ctx)).deck[0];
+        if (!top || !ctx.banish(top.instanceId)) return;
+        if (!named || !cardNamed(ctx, top, named)) return;
+      }
+    },
   },
 };
