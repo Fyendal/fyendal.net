@@ -687,6 +687,7 @@
   "card.evr.knick.money.choose": "选择任意数量的 Copper、Silver 和 Gold 摧毁",
   "card.evr.nonattack.bottom": "{card}：将墓地中的一张非攻击行动牌置于牌库底部？",
   "card.evr.pulverize.pay": "Pulverize：支付 {amount} 点资源进行 heave？",
+  "card.evr.reflection.aura.put": "{card}：将一个费用不高于 {cost} 的 Illusionist 灵气 (Aura)放入竞技场？",
   "card.evr.reveal.choose": "{card}：选择一张要展示的牌",
   "card.evr.revealed.bottom": "{card}：将一张展示的牌置于其拥有者的牌库底部？",
   "card.evr.seeing.hero.choose": "Potion of Seeing：选择一位英雄",

@@ -6222,6 +6222,24 @@
       "value": " recursos para fazer heave desta carta?"
     }
   ],
+  "card.evr.reflection.aura.put": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": colocar uma aura Illusionist de custo "
+    },
+    {
+      "type": 1,
+      "value": "cost"
+    },
+    {
+      "type": 0,
+      "value": " ou menos na arena?"
+    }
+  ],
   "card.evr.reveal.choose": [
     {
       "type": 1,

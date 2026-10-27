@@ -839,3 +839,36 @@ describe("EVR — Aether Wildfire", () => {
     s.react(SNAPBACK).chooseOption("opposing hero").expectLife(1, 13);
   });
 });
+
+describe("EVR — Crown of Reflection", () => {
+  const CROWN = "crown of reflection|0";
+  const SHIELD = "spectral shield|0";
+  const PIERCE = "pierce reality|3";
+
+  it("destroys the targeted aura and puts an aura of no greater cost from hand into the arena", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", hand: [PIERCE], board: [SHIELD], equipment: { head: CROWN } },
+        { hero: "dorinthea" },
+      ],
+    });
+
+    g.activate(CROWN, { targetCard: SHIELD }).expectInZone(0, CROWN, "graveyard");
+    expect(g.state.players[0]!.board).toHaveLength(0);
+    expect(g.state.pendingDecision?.options).toHaveLength(2);
+    g.chooseCard(PIERCE).expectInZone(0, PIERCE, "board");
+  });
+
+  it("can't be activated outside its controller's action phase", () => {
+    const g = scenario({
+      active: 1,
+      seats: [
+        { hero: "rhinar", board: [SHIELD], equipment: { head: CROWN } },
+        { hero: "rhinar", hand: ["wounding blow|1"] },
+      ],
+    });
+
+    g.play("wounding blow|1").blockWith().passPriority();
+    expect(() => g.activate(CROWN, { targetCard: SHIELD })).toThrow(/no legal intent/);
+  });
+});

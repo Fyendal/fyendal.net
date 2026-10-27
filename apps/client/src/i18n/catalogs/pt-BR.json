@@ -687,6 +687,7 @@
   "card.evr.knick.money.choose": "Escolha qualquer número de Copper, Silver e Gold para destruir",
   "card.evr.nonattack.bottom": "{card}: colocar uma carta de action que não é ataque do seu cemitério no fundo?",
   "card.evr.pulverize.pay": "Pulverize: pagar {amount} recursos para fazer heave desta carta?",
+  "card.evr.reflection.aura.put": "{card}: colocar uma aura Illusionist de custo {cost} ou menos na arena?",
   "card.evr.reveal.choose": "{card}: escolha uma carta para revelar",
   "card.evr.revealed.bottom": "{card}: colocar uma carta revelada no fundo do deck do dono dela?",
   "card.evr.seeing.hero.choose": "Potion of Seeing: escolha um herói",

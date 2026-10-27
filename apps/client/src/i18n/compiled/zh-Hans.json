@@ -5674,6 +5674,24 @@
       "value": " 点资源进行 heave？"
     }
   ],
+  "card.evr.reflection.aura.put": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：将一个费用不高于 "
+    },
+    {
+      "type": 1,
+      "value": "cost"
+    },
+    {
+      "type": 0,
+      "value": " 的 Illusionist 灵气 (Aura)放入竞技场？"
+    }
+  ],
   "card.evr.reveal.choose": [
     {
       "type": 1,

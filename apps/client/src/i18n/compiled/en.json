@@ -6042,6 +6042,24 @@
       "value": " resources to heave it?"
     }
   ],
+  "card.evr.reflection.aura.put": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": put an Illusionist aura with cost "
+    },
+    {
+      "type": 1,
+      "value": "cost"
+    },
+    {
+      "type": 0,
+      "value": " or less into the arena?"
+    }
+  ],
   "card.evr.reveal.choose": [
     {
       "type": 1,

@@ -69,6 +69,15 @@ function elementalRevealOptionMessages(ctx: ScriptCtx): Record<string, ReturnTyp
   );
 }
 
+function duringActionPhase(ctx: ScriptCtx): boolean {
+  if (ctx.state.phase === "action" || ctx.state.phase === "defend" || ctx.state.phase === "reaction") return true;
+  return (
+    ctx.state.phase === "layer" &&
+    ctx.state.stackResume !== "begin-action-phase" &&
+    ctx.state.stackResume !== "end-phase"
+  );
+}
+
 function illusionistAttacksOnChain(ctx: ScriptCtx): DeepReadonly<CardInstance>[] {
   return ctx.state.chain
     .flatMap((link) => [link.attackingCard, ...link.defendingCards])
@@ -919,15 +928,40 @@ export const evrHighRarity: Record<string, CardScript> = {
       timing: "instant",
       oncePerTurn: false,
       destroySelfCost: true,
+      targetCardOptions: (ctx) =>
+        ctx
+          .player(ctx.seat)
+          .board.filter((card) => hasType(ctx, card, "illusionist") && hasType(ctx, card, "aura"))
+          .map((card) => card.instanceId),
+      canActivate: (ctx) => ctx.state.activePlayer === ctx.seat && duringActionPhase(ctx),
       onActivate(ctx) {
-        const auras = ctx.player(ctx.seat).board.filter((card) => hasType(ctx, card, "aura"));
+        const target = ctx.player(ctx.seat).board.find((card) => card.instanceId === ctx.playTargetInstanceId);
+        if (!target) return;
+        const maxCost = ctx.cardCost(target) ?? 0;
+        if (!ctx.destroyPermanent(target.instanceId)) return;
+        const auras = ctx
+          .player(ctx.seat)
+          .hand.filter(
+            (card) =>
+              hasType(ctx, card, "illusionist") && hasType(ctx, card, "aura") && (ctx.cardCost(card) ?? 0) <= maxCost,
+          );
         if (auras.length)
           ctx.requestCardChoice(
             "reflection-aura",
-            decisionPrompt("Choose an aura to destroy", "card.evr.aura.destroy"),
-            auras.map((card) => card.instanceId),
+            decisionPrompt(
+              `${ctx.data.name}: put an Illusionist aura with cost ${maxCost} or less into the arena?`,
+              "card.evr.reflection.aura.put",
+              {
+                values: { card: { kind: "card", cardId: ctx.self.cardId }, cost: maxCost },
+                optionMessages: commonOptionMessages("pass"),
+              },
+            ),
+            ["pass", ...auras.map((card) => card.instanceId)],
           );
       },
+    },
+    onChoose(ctx, hook, option) {
+      if (hook === "reflection-aura" && option !== "pass") ctx.settleCard(Number(option));
     },
   },
   "fractal replication|1": fractalReplication,
