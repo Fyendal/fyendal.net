@@ -2,7 +2,7 @@ import type { CardData, CardView } from "@fyendal/shared";
 import { BLOCK_USE_RATE, DEFAULT_HIT_CHANCE } from "./card-ev.js";
 import { abilitySource, type HeroSolverRules, type ModelContext, type SolverCardPatch } from "./card-model.js";
 import type { SolverCard, SolverEffect, SolverView } from "./hand-solver.js";
-import { functionalKey as key, isAttack, type BotPolicyInput } from "./policy.js";
+import { currentLink, functionalKey as key, isAttack, type BotPolicyInput } from "./policy.js";
 
 /** Damage equivalents of effects that pay off on later turns. */
 export const SOUL_VALUE = 0.75;
@@ -256,6 +256,14 @@ export function boltynSolverRules(input: BotPolicyInput): HeroSolverRules {
         raydnSwung: nextTurn ? 0 : (current?.weaponAttacks ?? 0) > 0 ? 1 : 0,
         [`extraUse:${player.heroInstanceId}`]: HERO_ABILITY_USES - 1,
       };
+    },
+    startActionPoints(observed, nextTurn) {
+      // Go again on the open link, granted at resolution or by banishing a soul card once it is pumped.
+      const link = nextTurn ? undefined : currentLink(observed);
+      if (!link || link.attackingCard.owner !== observed.seat) return 0;
+      if (link.goAgain === true) return 1;
+      const pumped = link.attackValue > (observed.cards[link.attackingCard.cardId]?.attack ?? 0);
+      return pumped && !link.goAgainBlocked && observed.view.players[observed.seat].soul.length > 0 ? 1 : 0;
     },
     card(data, card) {
       const patch = cardPatch(data, card);

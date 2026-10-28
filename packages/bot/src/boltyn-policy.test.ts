@@ -569,6 +569,39 @@ describe("Boltyn policy", () => {
     expect(chooseBoltynIntent(observed)).toEqual({ kind: "pass" });
   });
 
+  it("does not swing a 0-power Raydn while holding Lumina Ascension for a charge turn", () => {
+    const state = settled(game());
+    // As reported: Raydn swung for 0 with Lumina and two locked Duty Bound Blitz.
+    hand(state, ["ASB026", "PEN183"]);
+    state.players[0]!.arsenal = cards(state, ["PEN183"]);
+    [state.players[0]!.equipment.head, state.players[0]!.equipment.arms] = cards(state, ["EVO247", "DTD207"]);
+    soul(state, 1);
+    const raydn = state.players[0]!.weapons[0]!.instanceId;
+    const intent = chooseBoltynIntent(input(state));
+    expect(intent.kind === "activate-ability" && intent.sourceInstanceId === raydn).toBe(false);
+  });
+
+  it("charges Lumina Ascension into Warband of Bellona to unlock Duty Bound Blitz behind a charged Raydn", () => {
+    const state = settled(game());
+    hand(state, ["ASB026", "PEN183"]);
+    state.players[0]!.arsenal = cards(state, ["PEN183"]);
+    const [warbandCard] = cards(state, ["EVO247"]);
+    state.players[0]!.equipment.head = warbandCard;
+    state.players[0]!.resources = 2;
+    soul(state, 1);
+    const before = state.players[1]!.life;
+    const warband = legalIntents(state, 0).find((intent) =>
+      intent.kind === "activate-ability" && intent.sourceInstanceId === warbandCard!.instanceId
+    );
+    const armed = applyIntent(state, 0, warband!);
+    if (!armed.ok) throw new Error(armed.error);
+    const { state: after, intents } = play(armed.state, turnOver);
+    expect(intents).toContain(RAYDN);
+    expect(after.players[0]!.soul.map((card) => card.cardId)).toContain("ASB026");
+    expect(intents).toContain("Duty Bound Blitz");
+    expect(before - after.players[1]!.life).toBeGreaterThanOrEqual(8);
+  });
+
   it("answers Warmonger's Diplomacy by what the hand can still do", () => {
     const diplomacy = (cardIds: string[], soulCards: number) => {
       const state = settled(game());

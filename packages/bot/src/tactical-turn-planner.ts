@@ -1,7 +1,7 @@
 import type { GameState } from "@fyendal/engine";
 import type { GameIntent } from "@fyendal/shared";
 import { handDamage, type HeroRulesFactory } from "./hand-value.js";
-import { isOpeningTurn, type BotPolicyInput } from "./policy.js";
+import { currentLink, isOpeningTurn, type BotPolicyInput } from "./policy.js";
 import {
   evaluateOpponentResponse,
   evaluateTurnFuture,
@@ -123,7 +123,16 @@ export function planTacticalTurn(
       const base = evaluateTacticalTurn(state, observed, root, config, false);
       const me = observed.view.players[root.seat];
       const remaining = handDamage([...me.hand, ...me.arsenal], observed, config.rules);
-      return { ...base, score: horizonScore(observed, root, base.score, base.futureValue, remaining), complete: false };
+      // A line cut short mid-attack, such as by a draw, still has that attack's damage to land.
+      const link = currentLink(observed);
+      const pending = link && link.attackingCard.owner === root.seat && link.hit === undefined
+        ? Math.max(0, link.attackValue - link.defenseValue)
+        : 0;
+      return {
+        ...base,
+        score: horizonScore(observed, root, base.score, base.futureValue, remaining, pending),
+        complete: false,
+      };
     },
   });
 }

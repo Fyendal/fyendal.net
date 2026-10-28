@@ -54,7 +54,11 @@ function handKey(input: BotPolicyInput, factory: HeroRulesFactory): string {
     ids(Object.values(me.equipment).flatMap((card) => card ? [card] : [])),
     nextTurn
       ? []
-      : [me.resources, me.actionPoints, ids(me.pitch), ids(input.view.chain.map((link) => link.attackingCard))],
+      : [
+        me.resources, me.actionPoints, ids(me.pitch), ids(me.soul),
+        ids(input.view.chain.map((link) => link.attackingCard)),
+        input.view.chain.map((link) => `${link.attackValue}:${link.goAgain ? 1 : 0}:${link.resolved ? 1 : 0}`),
+      ],
     nextTurn ? [] : input.view.ongoing.map((effect) => `${effect.seat}:${effect.cardId}:${effect.label}`),
     input.decklists?.own?.length ?? 0, input.decklists?.opponent?.length ?? 0,
   ]);

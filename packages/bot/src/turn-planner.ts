@@ -35,9 +35,13 @@ export function horizonScore(
   score: number,
   futureScore: number,
   remainingDamage: number,
+  committedDamage = 0,
 ): number {
-  return score - futureScore +
-    Math.max(futureScore, horizonDamage(input, root, remainingDamage) * HORIZON_DAMAGE_POINTS);
+  // An attack already on the chain is spent, not held, so it never trades against the future hand.
+  const committed = horizonDamage(input, root, committedDamage);
+  const held = horizonDamage(input, root, committedDamage + remainingDamage) - committed;
+  return score - futureScore + committed * HORIZON_DAMAGE_POINTS +
+    Math.max(futureScore, held * HORIZON_DAMAGE_POINTS);
 }
 
 export interface TurnEvaluation {

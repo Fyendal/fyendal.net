@@ -374,6 +374,7 @@ function promptSourceKey(input: BotPolicyInput): string {
   const decision = input.view.pendingDecision;
   const announced = decision?.preStackSource?.card;
   if (announced) return key(input.cards[announced.cardId]);
+  if (decision?.promptMessage?.id === "card.evo.soul.charge") return WARBAND_OF_BELLONA;
   const prompt = decision?.prompt.toLowerCase() ?? "";
   const sources = [HELM_OF_HALOS_GRACE, WARPATH_OF_WINGED_GRACE, SOULBOND_RESOLVE, WARBAND_OF_BELLONA, ROARING_BEAM];
   for (const candidate of sources) {
@@ -384,6 +385,8 @@ function promptSourceKey(input: BotPolicyInput): string {
 
 /** Raydn still swings after this charging attack. */
 function raydnReachableAfter(sourceKey: string, chargedCard: CardView, input: BotPolicyInput): boolean {
+  // A charge as Raydn attacks pumps this very swing.
+  if (raydnAttacking(input)) return true;
   if (!raydnAvailable(input)) return false;
   if (sourceKey === "bravery of the blade|1" || boardCount(input, "quicken") > 0) return true;
   if (!sourceKey.startsWith("beaming bravado|") && !sourceKey.startsWith("bolt of courage|") &&
@@ -597,21 +600,28 @@ function raydnSwingSecured(intent: GameIntent, input: BotPolicyInput, own: Reado
   return others.some(({ card, data }) => goAgainExpected(data, card, intent, input, own));
 }
 
+function raydnSwingPower(card: CardView, input: BotPolicyInput): number {
+  return (card.attack ?? 0) + (charged(input) ? 3 : 0) + (luminaActive(input) ? 1 : 0) +
+    (boardCount(input, "courage") > 0 ? 1 : 0);
+}
+
+/** A 0-power swing that opens no reaction window for Roaring Beam, a lethal Beacon or a Warband charge. */
+function emptyRaydnSwing(input: BotPolicyInput): boolean {
+  const sword = raydn(input);
+  if (!sword || raydnSwingPower(sword, input) > 0) return false;
+  return !holds(input, ROARING_BEAM) && !ongoingFrom(input, WARBAND_OF_BELLONA) &&
+    !(holds(input, BEACON_OF_VICTORY) && soulCount(input) >= input.view.players[1 - input.seat]!.life);
+}
+
 function scoreRaydn(
   card: CardView,
   intent: GameIntent,
   input: BotPolicyInput,
   own: ReadonlyMap<number, CardView>,
 ): number {
-  const power = (card.attack ?? 0) + (charged(input) ? 3 : 0) + (luminaActive(input) ? 1 : 0) +
-    (boardCount(input, "courage") > 0 ? 1 : 0);
+  const power = raydnSwingPower(card, input);
   const further = attackSourcesAfter(intent, input, own) > 0;
-  if (power === 0) {
-    // A 0-power swing only opens a reaction window for Roaring Beam or a lethal Beacon.
-    const window = holds(input, ROARING_BEAM) ||
-      (holds(input, BEACON_OF_VICTORY) && soulCount(input) >= input.view.players[1 - input.seat]!.life);
-    return window ? 3 : -5;
-  }
+  if (power === 0) return emptyRaydnSwing(input) ? -5 : 3;
   let score = power + (ongoingFrom(input, IRONSONG_VERSUS) ? 2 : 0);
   if (further && (boardCount(input, "quicken") > 0 || soulCount(input) > 0)) score += 10;
   // Set-up first: a charge, Lumina or Edict makes the swing bigger.
@@ -800,7 +810,8 @@ export function chooseBoltynIntentWithTrace(input: BotPolicyInput): BoltynIntent
       const own = ownCards(observed);
       const allowed = candidates.filter((intent) =>
         (!playsLumina(intent, observed) || luminaWindow(observed)) &&
-        (!playsCard(intent, observed, EDICT_OF_STEEL) || raydnSwingSecured(intent, observed, own))
+        (!playsCard(intent, observed, EDICT_OF_STEEL) || raydnSwingSecured(intent, observed, own)) &&
+        !(activatesRaydn(intent, observed) && emptyRaydnSwing(observed))
       );
       // Each Lumina before the first swing adds a swing and +1 to all of them.
       const luminaFirst = !luminaIsInstant(observed) && allowed.some((intent) => playsLumina(intent, observed));

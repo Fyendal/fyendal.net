@@ -71,6 +71,8 @@ export interface HeroSolverRules {
   startPending?(input: BotPolicyInput, nextTurn: boolean): readonly PendingEffect[];
   /** Extra resources at the start of the evaluated action phase (e.g. Vigor). */
   startResources?(input: BotPolicyInput, nextTurn: boolean): number;
+  /** Extra action points at the start of the evaluated action phase (e.g. go again the open link will grant). */
+  startActionPoints?(input: BotPolicyInput, nextTurn: boolean): number;
   /** Patch a hand/arsenal/weapon card's model. */
   card?(data: CardData, card: CardView, context: ModelContext): SolverCardPatch | undefined;
   /** Model an equipment activation; omit for passive or block-only pieces. */
@@ -301,7 +303,7 @@ export function buildHandSolver(context: ModelContext): HandSolver {
   sources.push(...(rules.abilities?.(context, nextTurn) ?? []));
   return new HandSolver(sources, {
     startResources: (nextTurn ? 0 : me.resources) + (rules.startResources?.(input, nextTurn) ?? 0),
-    startActionPoints: nextTurn ? 1 : me.actionPoints,
+    startActionPoints: nextTurn ? 1 : me.actionPoints + (rules.startActionPoints?.(input, nextTurn) ?? 0),
     hitChance: context.hitChance,
     ...(rules.trackedTraits ? { trackedTraits: rules.trackedTraits } : {}),
     startFlags: { ...(chain?.flags ?? {}), ...(rules.startFlags?.(input, nextTurn) ?? {}) },
