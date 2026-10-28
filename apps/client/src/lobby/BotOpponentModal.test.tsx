@@ -59,7 +59,7 @@ describe("BotOpponentModal", () => {
     expect(html.match(/aria-hidden="true"/g)).toHaveLength(1);
   });
 
-  it("offers Kayo, Briar, and Bravo for Silver Age", () => {
+  it("offers Kayo, Briar, Bravo, and Ira for Silver Age", () => {
     const html = renderToStaticMarkup(
       <TestI18nProvider>
         <BotOpponentModal format="silver-age" onSelect={vi.fn()} onClose={vi.fn()} />
@@ -73,6 +73,7 @@ describe("BotOpponentModal", () => {
     expect(html).toContain("Bravo");
     expect(html).toContain("Flattering Showman");
     expect(html).toContain("Defensive");
+    expect(html).toContain("Crimson Haze");
     expect(html).not.toContain("Scarlet Revenger");
   });
 

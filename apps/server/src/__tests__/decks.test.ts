@@ -51,6 +51,7 @@ it("does not expose internal bot decks through player deck resolution", async ()
     "bot-levia-gates",
     "bot-starvo-boss",
     "bot-boltyn-raydn",
+    "bot-ira-sage",
   ]) {
     const result = await resolveFreshDeck(db, 1, id, {
       fetchDeck: async () => { throw new Error("should not fetch"); },

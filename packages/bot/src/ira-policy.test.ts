@@ -5,7 +5,7 @@ import { describe, expect, it } from "vitest";
 import { ClientBotPolicy } from "./client-task.js";
 import { isAdvertisedBotIntent } from "./intents.js";
 import { chooseIraIntent, chooseIraIntentWithTrace } from "./ira-policy.js";
-import { iraPresentation } from "./sideboard.js";
+import { iraPresentation, iraSagePresentationFor, kayoPresentationFor } from "./sideboard.js";
 
 function iraDeck(): Decklist {
   const pool = precon("precon-asr")!.pool;
@@ -1131,5 +1131,76 @@ describe("Ira policy", () => {
     const legal = legalIntents(state, 0);
     expect(chooseIraIntent({ seat: 0, view: a, legal, cards: cardData }))
       .toEqual(chooseIraIntent({ seat: 0, view: b, legal, cards: cardData }));
+  });
+});
+
+describe("SAGE Ira policy", () => {
+  const kayo = (): Decklist => {
+    const pool = precon("bot-kayo-sage")!.pool;
+    return { heroId: pool.heroId, ...kayoPresentationFor({ heroId: "TCC077", weaponIds: [], equipment: {} }) };
+  };
+  const sageIra = (): Decklist => ({
+    heroId: precon("bot-ira-sage")!.pool.heroId,
+    ...iraSagePresentationFor({ heroId: "SKA001", weaponIds: [], equipment: {} }),
+  });
+
+  it("makes a Crouching Tiger with Pouncing Paws, attacks with it, then combos Pouncing Qi", () => {
+    let state = createGame({
+      decklists: [sageIra(), kayo()],
+      cards: cardData, scripts, seed: 9301, startPlayer: 0,
+    });
+    state.turn = 2;
+    state.players[0]!.weapons = [];
+    replaceHand(state, 0, ["MST182", "SEA228"]);
+    const input = () => ({
+      seat: 0 as const,
+      view: projectStateFor(state, 0),
+      legal: legalIntents(state, 0),
+      cards: cardData,
+      state,
+    });
+
+    const paws = state.players[0]!.equipment.legs!.instanceId;
+    const activate = chooseIraIntent(input());
+    expect(activate).toMatchObject({ kind: "activate-ability", sourceInstanceId: paws });
+    state = advanceUntil(apply(state, 0, activate), (current) =>
+      current.priorityPlayer === 0 && current.stack.length === 0 &&
+      legalIntents(current, 0).some((intent) => intent.kind === "play-from-zone")
+    );
+
+    const tiger = chooseIraIntent(input());
+    expect(tiger.kind).toBe("play-from-zone");
+    if (tiger.kind !== "play-from-zone") return;
+    expect(cardData[state.players[0]!.banish.find((card) => card.instanceId === tiger.instanceId)!.cardId]!.name)
+      .toBe("Crouching Tiger");
+    state = advanceUntil(apply(state, 0, tiger), (current) =>
+      current.priorityPlayer === 0 && current.stack.length === 0 && current.chain.at(-1)?.resolved === true
+    );
+
+    const combo = chooseIraIntent(input());
+    expect(combo.kind).toBe("play-card");
+    if (combo.kind !== "play-card") return;
+    expect(state.players[0]!.hand.find((card) => card.instanceId === combo.instanceId)?.cardId).toBe("MST182");
+  });
+
+  it("only returns authoritative legal intents during a seeded Silver Age playout", () => {
+    let state = createGame({
+      decklists: [sageIra(), sageIra()],
+      cards: cardData, scripts, seed: 9302, startPlayer: 0,
+    });
+    for (let step = 0; step < 300 && state.winner === null; step++) {
+      const actor = (state.pendingDecision?.player ?? state.priorityPlayer) as 0 | 1;
+      const legal = legalIntents(state, actor).filter((intent) => intent.kind !== "concede");
+      const intent = chooseIraIntent({ seat: actor, view: projectStateFor(state, actor), legal, cards: cardData });
+      const advertisedStageIds = new Set(legal.flatMap((candidate) =>
+        candidate.kind === "stage-defenders" ? candidate.instanceIds : []
+      ));
+      expect(
+        legal.some((candidate) => JSON.stringify(candidate) === JSON.stringify(intent)) ||
+        (intent.kind === "stage-defenders" &&
+          intent.instanceIds.every((id) => advertisedStageIds.has(id))),
+      ).toBe(true);
+      state = apply(state, actor, intent);
+    }
   });
 });

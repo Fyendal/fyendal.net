@@ -35,12 +35,16 @@ import {
   type TurnPlan,
   type TurnPlannerRoot,
 } from "./turn-planner.js";
-import { weaponCost, type HeroSolverRules, type SolverCardPatch } from "./card-model.js";
-import type { PendingEffect, SolverCard } from "./hand-solver.js";
+import { BLOCK_USE_RATE } from "./card-ev.js";
+import { abilitySource, weaponCost, type HeroSolverRules, type SolverCardPatch } from "./card-model.js";
+import type { PendingEffect, SolverCard, SolverFlags, SolverView } from "./hand-solver.js";
 import { arsenalValuer, handDamage, handResponse, opportunityValuer } from "./hand-value.js";
 import { iraPresentation } from "./sideboard.js";
 
 const BLOSSOM_KEY = "whirling mist blossom|2";
+const EDGE_KEY = "edge of autumn|0";
+const TIGER_KEY = "crouching tiger|0";
+const CROUCHING_TIGER_ID = "SFA036";
 const IRA_DECK = iraPresentation().deck;
 
 function irisHasSearchTarget(input: BotPolicyInput): boolean {
@@ -90,11 +94,25 @@ function attacksThisTurn(input: BotPolicyInput): number {
   return input.view.chain.filter((link) => link.attackingCard.owner === input.seat).length;
 }
 
-function previousAttackKey(input: BotPolicyInput): string {
+function previousAttack(input: BotPolicyInput): CardData | undefined {
   const previous = [...input.view.chain]
     .reverse()
     .find((link) => link.resolved && link.attackingCard.owner === input.seat);
-  return previous ? key(input.cards[previous.attackingCard.cardId]) : "";
+  return previous ? input.cards[previous.attackingCard.cardId] : undefined;
+}
+
+function previousAttackKey(input: BotPolicyInput): string {
+  const previous = previousAttack(input);
+  return previous ? key(previous) : "";
+}
+
+/** Aspect of Tiger's Combo: a red attack action card was the last attack. */
+function isRedAttackAction(data: CardData | undefined): boolean {
+  return data?.cardType === "action" && isAttack(data) && data.pitch === 1;
+}
+
+function isTigerCombo(functional: string): boolean {
+  return functional.startsWith("pouncing qi|") || functional === "qi unleashed|3";
 }
 
 function currentAttackHasOrWillGetGoAgain(input: BotPolicyInput): boolean {
@@ -127,8 +145,10 @@ function likelyGoAgain(functional: string, data: CardData, previous: string, inp
     return true;
   }
   if (functional.startsWith("seek vengeance|") || functional === "vengeance never rests|3") {
-    return previous === "edge of autumn|0";
+    return previous === EDGE_KEY;
   }
+  if (functional.startsWith("pouncing qi|")) return previous === TIGER_KEY;
+  if (functional === "aspect of tiger: body|1") return isRedAttackAction(previousAttack(input));
   return false;
 }
 
@@ -185,6 +205,14 @@ function alternativeAttackNow(
   );
 }
 
+function tigerInReserve(input: BotPolicyInput): boolean {
+  return reserveCards(input).some((card) => key(input.cards[card.cardId]) === TIGER_KEY);
+}
+
+function comboInReserve(input: BotPolicyInput): boolean {
+  return reserveCards(input).some((card) => isTigerCombo(key(input.cards[card.cardId])));
+}
+
 /** Cards Ira could still play this turn: hand, arsenal, and only those
  * banished cards an effect currently lets her play. */
 function reserveCards(input: BotPolicyInput): CardView[] {
@@ -214,12 +242,13 @@ function affordableAttackInReserve(
   intent: GameIntent,
   input: BotPolicyInput,
   own: ReadonlyMap<number, CardView>,
+  extraResources = 0,
 ): boolean {
   const used = intentCard(intent, own);
   const consumed = new Set([used?.instanceId, ...pitchIds(intent)]);
   const me = input.view.players[input.seat];
   const pitchable = me.hand.filter((card) => !consumed.has(card.instanceId));
-  const floating = me.resources + (me.chi ?? 0);
+  const floating = me.resources + (me.chi ?? 0) + extraResources;
   return reserveCards(input).some((card) => {
     const data = input.cards[card.cardId];
     if (consumed.has(card.instanceId) || !isAttack(data)) return false;
@@ -237,6 +266,8 @@ const cardOpportunity = opportunityValuer(iraSolverRules);
 /** Damage equivalents of Ira's non-damage on-hit riders. */
 const DESTROY_ARSENAL_VALUE = 4;
 const DRAW_TWO_VALUE = 6;
+/** Blessing of Qi's next-turn Crouching Tiger: +3{p} with go again. */
+const BLESSING_OF_QI_VALUE = 3;
 
 /** Ira: her second attack each turn gets +1{p}. */
 const IRA_SECOND_ATTACK: PendingEffect = {
@@ -246,31 +277,95 @@ const IRA_SECOND_ATTACK: PendingEffect = {
   appliesTo: (_card, view) => view.flag("attacks") === 1,
 };
 
+function nextTigerPump(source: string, power: number, uses = 1): PendingEffect {
+  return { key: source, uses, power, appliesTo: (card) => card.name === "Crouching Tiger" };
+}
+
 /** Hand-value rules: the second-attack bonus, on-hit go again (assumed to
  * connect, as the planner's public rollout does), Edge of Autumn combos,
- * Flying Kick, Bittering Thorns, Whirling Mist Blossom and Razor Reflex. */
+ * Flying Kick, Bittering Thorns, Whirling Mist Blossom, Razor Reflex, and the
+ * Crouching Tiger package. Tigers made mid-line are one reusable source gated
+ * by the `tigers` flag. */
 function iraSolverRules(input: BotPolicyInput): HeroSolverRules {
   const me = input.view.players[input.seat];
   const opponent = input.view.players[1 - input.seat]!;
   const behind = me.life < opponent.life;
-  const wieldsEdge = me.weapons.some((weapon) => key(input.cards[weapon.cardId]) === "edge of autumn|0");
+  const wieldsEdge = me.weapons.some((weapon) => key(input.cards[weapon.cardId]) === EDGE_KEY);
+  const tigerUses = `extraUse:${me.heroInstanceId}`;
+  const makeTigers = (view: SolverView, count: number): SolverFlags => ({
+    tigers: view.flag("tigers") + count,
+    [tigerUses]: view.flag(tigerUses) + count,
+  });
+  const comboFlags = (data: CardData): SolverFlags => {
+    const functional = key(data);
+    return {
+      lastEdge: functional === EDGE_KEY ? 1 : 0,
+      lastTiger: functional === TIGER_KEY ? 1 : 0,
+      lastRedAction: isRedAttackAction(data) ? 1 : 0,
+      ...(functional === TIGER_KEY ? { tigerAttacked: 1 } : {}),
+    };
+  };
+  const blessings = me.board.filter((card) => key(input.cards[card.cardId]) === "blessing of qi|1").length;
   return {
     name: "ira",
     trackedTraits: [],
     startFlags(observed, nextTurn): Record<string, number> {
-      return !nextTurn && previousAttackKey(observed) === "edge of autumn|0" ? { lastEdge: 1 } : {};
+      if (nextTurn) return blessings > 0 ? { tigers: blessings, [tigerUses]: blessings } : {};
+      const previous = previousAttack(observed);
+      return previous ? comboFlags(previous) : {};
     },
     startPending(observed, nextTurn) {
-      return nextTurn || attacksThisTurn(observed) < 2 ? [IRA_SECOND_ATTACK] : [];
+      const pending = nextTurn || attacksThisTurn(observed) < 2 ? [IRA_SECOND_ATTACK] : [];
+      return nextTurn && blessings > 0 ? [...pending, nextTigerPump("blessing-of-qi", 3, blessings)] : pending;
+    },
+    abilities() {
+      const tiger = input.cards[CROUCHING_TIGER_ID];
+      if (!tiger) return [];
+      return [abilitySource({
+        instanceId: me.heroInstanceId,
+        cardId: CROUCHING_TIGER_ID,
+        name: "Crouching Tiger",
+        cost: 0,
+        kind: "attack",
+        speed: undefined,
+        goAgain: true,
+        traits: ["ninja"],
+        canPlay: (view) => view.flag("tigers") > 0,
+        after: (view) => ({
+          flags: { ...comboFlags(tiger), tigers: view.flag("tigers") - 1 },
+        }),
+      })];
+    },
+    equipment(data, card) {
+      const functional = key(data);
+      const destroy: SolverCardPatch = {
+        kind: "equipment",
+        speed: "instant",
+        cost: 0,
+        consumeCost: Math.max(0, card.defense ?? data.defense ?? 0) * BLOCK_USE_RATE,
+      };
+      if (functional === "pouncing paws|0") {
+        return { ...destroy, after: (view) => ({ flags: makeTigers(view, 1) }) };
+      }
+      if (functional === "tearing shuko|0") {
+        return { ...destroy, after: () => ({ pending: [nextTigerPump(`shuko#${card.instanceId}`, 2)] }) };
+      }
+      if (functional === "blood scent|0") {
+        return {
+          ...destroy,
+          canPlay: (view) => view.flag("tigerAttacked") > 0,
+          after: () => ({ resources: 1 }),
+        };
+      }
+      return undefined;
     },
     card(data, card) {
       const functional = key(data);
       const power = card.attack ?? data.attack ?? 0;
       const patch: SolverCardPatch = {};
-      const isEdge = functional === "edge of autumn|0";
-      if (isAttack(data) || isEdge) {
-        // Combo cards check whether Edge of Autumn was the previous attack.
-        patch.after = () => ({ flags: { lastEdge: isEdge ? 1 : 0 } });
+      if (isAttack(data) || functional === EDGE_KEY) {
+        // Combo cards read the previous attack.
+        patch.after = () => ({ flags: comboFlags(data) });
       }
       if (functional.startsWith("soulbead strike|") || functional.startsWith("torrent of tempo|")) {
         patch.goAgainIn = () => true;
@@ -291,9 +386,30 @@ function iraSolverRules(input: BotPolicyInput): HeroSolverRules {
         patch.onHitIn = (view) => view.links >= 1 ? DRAW_TWO_VALUE : 0;
       } else if (functional.startsWith("bittering thorns|")) {
         patch.after = () => ({
-          flags: { lastEdge: 0 },
+          flags: comboFlags(data),
           pending: [{ key: `thorns#${card.instanceId}`, uses: 1, power: 1 }],
         });
+      } else if (functional.startsWith("pouncing qi|")) {
+        patch.powerIn = (view) => power + (view.flag("lastTiger") > 0 ? 1 : 0);
+        patch.goAgainIn = (view) => view.flag("lastTiger") > 0;
+      } else if (functional === "qi unleashed|3") {
+        patch.powerIn = (view) => power + (view.flag("lastTiger") > 0 ? 4 : 0);
+      } else if (functional === "aspect of tiger: body|1") {
+        patch.goAgainIn = (view) => view.flag("lastRedAction") > 0;
+        patch.after = (view) => ({
+          flags: { ...comboFlags(data), ...(view.flag("lastRedAction") > 0 ? makeTigers(view, 1) : {}) },
+        });
+      } else if (functional === "growl|1" || functional === "untamed|1") {
+        patch.replaceAfter = true;
+        patch.after = () => ({
+          flags: comboFlags(data),
+          pending: [nextTigerPump(`growl#${card.instanceId}`, 1)],
+        });
+      } else if (functional === "blessing of qi|1") {
+        patch.bonusIn = () => BLESSING_OF_QI_VALUE;
+      } else if (functional === "bluster buff|1") {
+        // Paying the extra {r} keeps its full power.
+        patch.cost = 2;
       } else if (functional.startsWith("razor reflex|")) {
         const lowCost = (attack: SolverCard) => attack.kind === "attack" && attack.cost <= 1;
         patch.reactionPower = 3;
@@ -361,7 +477,7 @@ function canFundBlossomAfterIris(
   return floatingAfterActivation + remainingPitch >= 1;
 }
 
-function canPlayActionAfterIris(input: BotPolicyInput): boolean {
+function canPlayActionNow(input: BotPolicyInput): boolean {
   if (input.view.activePlayer !== input.seat) return false;
   if (input.view.players[input.seat].actionPoints > 0) return true;
   return currentAttackIsOurs(input) && currentAttackHasOrWillGetGoAgain(input);
@@ -445,11 +561,21 @@ function scorePlay(
       // where the plan values the discard.
       const midCombat = input.view.stack.length > 0 || currentLink(input) !== undefined;
       score = alreadyHasBlossom || midCombat || !canFundBlossomAfterIris(intent, input) ||
-          !canPlayActionAfterIris(input)
+          !canPlayActionNow(input)
         ? -100
         : 12;
     } else if (functional === "energy potion|3") {
       score = me.resources < 2 ? 18 : -5;
+    } else if (functional === "pouncing paws|0") {
+      // The new tiger needs an action point and pays off through a Qi combo.
+      score = canPlayActionNow(input) && comboInReserve(input) ? 20 : -100;
+    } else if (functional === "tearing shuko|0") {
+      score = canPlayActionNow(input) && tigerInReserve(input) ? 6 : -100;
+    } else if (functional === "blood scent|0" || functional === "double cross strap|0") {
+      // Only worth destroying when the resource pays for a reserved attack.
+      score = !affordableAttackInReserve(intent, input, own) && affordableAttackInReserve(intent, input, own, 1)
+        ? 16
+        : -100;
     } else {
       score = 3;
     }
@@ -470,6 +596,16 @@ function scorePlay(
         score += 10 + input.view.players[1 - input.seat]!.arsenalCount * 8;
       }
     }
+    if (previous === TIGER_KEY) {
+      if (functional.startsWith("pouncing qi|")) score += 18;
+      if (functional === "qi unleashed|3") score += 14;
+    }
+    if (functional === TIGER_KEY) {
+      // Ephemeral and playable only this turn; it opens the Qi combos.
+      score += 12 + (comboInReserve(input) ? 8 : 0);
+    }
+    if (functional === "aspect of tiger: body|1" && isRedAttackAction(previousAttack(input))) score += 10;
+    if ((functional === "growl|1" || functional === "untamed|1") && tigerInReserve(input)) score += 4;
     if (functional.startsWith("bittering thorns|")) score += furtherAttack ? 7 : 0;
     if (functional === "whirling mist blossom|2") {
       const priorHit = [...input.view.chain].reverse().find((link) => link.resolved)?.hit === true;
@@ -496,6 +632,20 @@ function scorePlay(
     score = scoreDefenseReaction(data, input);
   } else if (functional === "energy potion|3") {
     score = furtherAttack ? -15 : 3;
+  } else if (functional === "blessing of qi|1") {
+    // An aura without go again ends the action phase.
+    score = furtherAttack ? -4 : 9;
+  } else if (functional === "arcane polarity|1") {
+    score = input.view.turnFacts?.players[input.seat].arcaneDamageTaken ? 28 : -100;
+  } else if (functional === "reinforce the line|1") {
+    const link = currentLink(input);
+    const target = link?.defendingCards.some((defender) => {
+      const defending = input.cards[defender.cardId];
+      return defender.owner === input.seat && defending?.cardType === "action" && isAttack(defending);
+    }) === true;
+    score = !currentAttackIsOurs(input) && target
+      ? scoreDefenseReaction({ ...data, defense: 4 }, input)
+      : -100;
   }
 
   for (const id of pitchIds(intent)) {

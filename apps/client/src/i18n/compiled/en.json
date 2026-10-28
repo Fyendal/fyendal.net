@@ -379,6 +379,18 @@
       "value": "Beat Ira Bot"
     }
   ],
+  "achievements.beatirasage.description": [
+    {
+      "type": 0,
+      "value": "Defeat SAGE Ira Bot in a practice game."
+    }
+  ],
+  "achievements.beatirasage.name": [
+    {
+      "type": 0,
+      "value": "Beat SAGE Ira Bot"
+    }
+  ],
   "achievements.beatjarl.description": [
     {
       "type": 0,
@@ -32564,6 +32576,12 @@
     {
       "type": 0,
       "value": "A straightforward Armory Deck that's great for beginners."
+    }
+  ],
+  "lobby.bot.irasage.description": [
+    {
+      "type": 0,
+      "value": "A value deck that chains Crouching Tiger combos with Edge of Autumn."
     }
   ],
   "lobby.bot.jarl.description": [

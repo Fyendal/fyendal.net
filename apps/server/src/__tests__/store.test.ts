@@ -523,6 +523,44 @@ describe("PgRoomStore storage", () => {
     expect(room!.state).not.toBeNull();
   });
 
+  it("seats SAGE Ira with its arcane plan against Briar", async () => {
+    const user = await db.query(
+      `INSERT INTO users (username, username_lc, pass_hash, created_at)
+       VALUES ('IraSageOwner','irasageowner','hash',1) RETURNING id`,
+    );
+    const userId = Number(user.rows[0]!.id);
+    const created = await store.createBotRoom("silver-age", {
+      deckId: "precon-sba",
+      username: "IraSageOwner",
+      userId,
+    }, "open", "ira-sage");
+    let room = await store.getRoom(created.code);
+    expect(room?.seats[1]).toMatchObject({
+      controller: "bot",
+      username: "SAGE Ira Bot",
+      deckId: "bot-ira-sage",
+    });
+    expect(prepViewFor(room!, 0).seats[1]).toMatchObject({ heroName: "Ira, Crimson Haze" });
+
+    const briar = silverAgePrecon("precon-sba")!.pool;
+    await chooseBotTurn(created.code, created.token, userId);
+    const ready = await presentBotDeck(store, created.code, { token: created.token, userId }, {
+      weaponIds: briar.weaponIds.slice(0, 1),
+      equipment: {},
+      deck: briar.deck.slice(0, 40),
+    });
+    expect(ready.ok).toBe(true);
+    room = await store.getRoom(created.code);
+    expect(room!.seats[1]!.presented).toMatchObject({
+      heroId: "TCC077",
+      weaponIds: ["ASR002"],
+      equipment: { head: "SFA005", chest: "SFA007", arms: "SFA008", legs: "SFA009" },
+    });
+    expect(room!.seats[1]!.presented!.deck).toHaveLength(40);
+    expect(room!.seats[1]!.presented!.deck.filter((id) => id === "SBW023")).toHaveLength(2);
+    expect(room!.state).not.toBeNull();
+  });
+
   it("seats the Boltyn bot and presents its warrior plan against Ira", async () => {
     const user = await db.query(
       `INSERT INTO users (username, username_lc, pass_hash, created_at)
@@ -2802,7 +2840,7 @@ describe("PgRoomStore storage", () => {
     ]);
   });
 
-  it.each(["starvo", "levia", "boltyn"] as const)("persists %s as a pending background-practice opponent", async (bot) => {
+  it.each(["starvo", "levia", "boltyn", "ira-sage"] as const)("persists %s as a pending background-practice opponent", async (bot) => {
     const user = await db.query(
       `INSERT INTO users (username, username_lc, pass_hash, created_at)
        VALUES ('StarvoPractice','starvopractice','hash',1) RETURNING id`,

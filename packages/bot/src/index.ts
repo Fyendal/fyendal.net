@@ -8,6 +8,8 @@ export {
   cindraPresentationFor,
   halaPresentationFor,
   iraPresentation,
+  iraSageMatchupForHeroName,
+  iraSagePresentationFor,
   jarlPresentationFor,
   leviaPresentationFor,
   leviaPreferredTurnOrderFor,

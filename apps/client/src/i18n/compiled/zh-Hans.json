@@ -379,6 +379,18 @@
       "value": "击败 Ira 机器人"
     }
   ],
+  "achievements.beatirasage.description": [
+    {
+      "type": 0,
+      "value": "在练习对局中击败 SAGE Ira 机器人。"
+    }
+  ],
+  "achievements.beatirasage.name": [
+    {
+      "type": 0,
+      "value": "击败 SAGE Ira 机器人"
+    }
+  ],
   "achievements.beatjarl.description": [
     {
       "type": 0,
@@ -31125,6 +31137,12 @@
     {
       "type": 0,
       "value": "直观易懂的 Armory 牌组，非常适合新手。"
+    }
+  ],
+  "lobby.bot.irasage.description": [
+    {
+      "type": 0,
+      "value": "以 Crouching Tiger 连击和 Edge of Autumn 积累优势的价值牌组。"
     }
   ],
   "lobby.bot.jarl.description": [

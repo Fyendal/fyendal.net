@@ -16,7 +16,7 @@ import type { Queryable } from "./db.js";
 export const MATCH_PAGE_SIZE = 50;
 export const MAX_EXPORTED_MATCHES = 10_000;
 
-const BOT_IDS = new Set<string>(["bravo", "briar", "kayo", "cindra", "ira", "hala", "jarl", "levia", "starvo", "boltyn"]);
+const BOT_IDS = new Set<string>(["bravo", "briar", "kayo", "cindra", "ira", "hala", "jarl", "levia", "starvo", "boltyn", "ira-sage"]);
 
 export interface MatchSeatInput {
   heroId: string;

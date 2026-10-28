@@ -12,6 +12,7 @@ const BRAVO_BOT_DECK_ID = "bot-bravo-flarvo";
 const CINDRA_BOT_DECK_ID = "bot-cindra-head-jabs";
 const HALA_MASTERCLASS_PRECON_ID = "precon-hala-masterclass";
 const IRA_PRECON_ID = "precon-asr";
+const IRA_SAGE_BOT_DECK_ID = "bot-ira-sage";
 const JARL_BOT_DECK_ID = "bot-jarl";
 const LEVIA_BOT_DECK_ID = "bot-levia-gates";
 const STARVO_BOT_DECK_ID = "bot-starvo-boss";
@@ -650,6 +651,62 @@ export function kayoPresentationFor(
         ? name.includes("iyslander") ? "Nullrune Gloves" : "Skera Strapping"
         : "Blade Beckoner Gauntlets"),
       legs: equipmentId(dominate ? "Unflinching Foothold" : "Flat Trackers"),
+    },
+    deck,
+  };
+}
+
+// ── Ira, Crimson Haze (Silver Age) ───────────────────────────────────────
+
+export type IraSageMatchup = "arcane" | "dominate" | "aggro" | "slow" | "default";
+
+const IRA_SAGE_FLEX: Readonly<Record<IraSageMatchup, string>> = {
+  arcane: "SBW023", // Arcane Polarity
+  dominate: "HVY219", // Reinforce the Line
+  aggro: "SIY017", // On the Horizon
+  slow: "AKO009", // Humble
+  default: "SUP221", // Bluster Buff
+};
+const IRA_SAGE_FLEX_IDS = new Set(Object.values(IRA_SAGE_FLEX));
+
+/** Opponent groups shared with the Kayo and Bravo Silver Age plans. */
+export function iraSageMatchupForHeroName(name: string, classes: readonly string[] = []): IraSageMatchup {
+  if (classes.includes("wizard") || classes.includes("runeblade") ||
+    /kano|blaze|iyslander|oscilio|briar|viserai|aurora/.test(name)) return "arcane";
+  if (/bravo|azalea|valda/.test(name)) return "dominate";
+  if (/oldhim|dorinthea|enigma|nuu|terra|riptide|dromai/.test(name)) return "slow";
+  if (/\b(?:kayo|rhinar|katsu|fai|ira|cindra|dash|boltyn|fang|kassai|levia)\b/.test(name)) return "aggro";
+  return "default";
+}
+
+/**
+ * Tatsuya Okanishi's Kyoto Sunday Showdown list. The source publishes no
+ * guide, so the forty is the 38-card core plus one flex pair per matchup:
+ * Arcane Polarity into arcane, Reinforce the Line into dominate, On the
+ * Horizon into aggro, Humble into slow heroes and Bluster Buff otherwise.
+ * Source: https://fabrary.net/decks/01M57QBBDFVVG0QW20JFCAEDDQ
+ */
+export function iraSagePresentationFor(
+  opponent: BotPrepOpponent,
+  cards: Readonly<Record<string, CardData>> = cardData,
+): PresentedDeck {
+  const registered = precon(IRA_SAGE_BOT_DECK_ID);
+  if (!registered || registered.format !== "silver-age" || registered.botOnly !== true) {
+    throw new Error("SAGE Ira bot deck is not registered");
+  }
+  const classes = cards[opponent.heroId]?.classes?.map((value) => value.toLowerCase()) ?? [];
+  const matchup = iraSageMatchupForHeroName(opponentHeroName(opponent, cards), classes);
+  const flex = IRA_SAGE_FLEX[matchup];
+  const deck = registered.pool.deck.filter((id) => id === flex || !IRA_SAGE_FLEX_IDS.has(id));
+  if (deck.length !== 40) throw new Error(`SAGE Ira presentation has ${deck.length} cards, expected 40`);
+  const arcane = matchup === "arcane";
+  return {
+    weaponIds: [...registered.pool.weaponIds],
+    equipment: {
+      head: arcane ? "SFA005" : "SLY005",
+      chest: arcane ? "SFA007" : "SFA006",
+      arms: "SFA008",
+      legs: "SFA009",
     },
     deck,
   };

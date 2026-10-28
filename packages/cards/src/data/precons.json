@@ -936,7 +936,52 @@
             "sideboard": []
         }
     },
-    "_comment_bot_boltyn": "User-supplied Raydn Boltyn list fetched through the Fabrary API. The registered sixty is the 53-card main deck plus the guide's default package (2 Edict of Steel, 2 Courageous Steelhand, 1 Tenacity, 2 Saving Grace); the other eight flex cards are sideboard. Printings are the latest reprints because the API reports identifiers only.",
+    "_comment_bot_ira_sage": "Source: https://fabrary.net/decks/01M57QBBDFVVG0QW20JFCAEDDQ (Tatsuya Okanishi, Sunday Showdown: Kyoto 1st). The complete 48-card deck and seven-card arena; matchup presentation selects forty and one head and chest.",
+    "bot-ira-sage": {
+        "name": "SAGE Ira",
+        "format": "silver-age",
+        "botOnly": true,
+        "pool": {
+            "heroId": "TCC077",
+            "weaponIds": ["ASR002"],
+            "equipmentPool": [
+                "SLY005",
+                "SFA005",
+                "SFA006",
+                "SFA007",
+                "SFA008",
+                "SFA009"
+            ],
+            "deck": [
+                "SBW023", "SBW023",
+                "MST164", "MST164",
+                "ASR007", "ASR007",
+                "MST170", "MST170",
+                "SUP221", "SUP221",
+                "ASR009", "ASR009",
+                "ASR021", "ASR021",
+                "TCC086", "TCC086",
+                "AKO009", "AKO009",
+                "SIY017", "SIY017",
+                "MST182", "MST182",
+                "MST184", "MST184",
+                "HVY219", "HVY219",
+                "SBA019", "SBA019",
+                "ASR012", "ASR012",
+                "ASR022", "ASR022",
+                "SEA226", "SEA226",
+                "SEA227", "SEA227",
+                "SEA228", "SEA228",
+                "MST185", "MST185",
+                "TCC098", "TCC098",
+                "PEN036", "PEN036",
+                "ASR026", "ASR026",
+                "MST169", "MST169"
+            ],
+            "sideboard": []
+        }
+    },
+    "_comment_bot_boltyn":"User-supplied Raydn Boltyn list fetched through the Fabrary API. The registered sixty is the 53-card main deck plus the guide's default package (2 Edict of Steel, 2 Courageous Steelhand, 1 Tenacity, 2 Saving Grace); the other eight flex cards are sideboard. Printings are the latest reprints because the API reports identifiers only.",
     "bot-boltyn-raydn": {
         "name": "Raydn Boltyn",
         "format": "cc",

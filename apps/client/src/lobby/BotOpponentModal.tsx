@@ -107,6 +107,15 @@ const BOTS: Readonly<Record<Format, readonly BotOption[]>> = {
       deckType: "guardian",
       descriptionId: "lobby.bot.bravo.description",
     },
+    {
+      id: "ira-sage",
+      name: "Ira",
+      title: "Crimson Haze",
+      heroName: "Ira, Crimson Haze",
+      deckId: "bot-ira-sage",
+      deckType: "midrange",
+      descriptionId: "lobby.bot.irasage.description",
+    },
   ],
 };
 

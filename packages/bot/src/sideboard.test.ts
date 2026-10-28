@@ -9,6 +9,8 @@ import {
   cindraPresentationFor,
   halaPresentationFor,
   iraPresentation,
+  iraSageMatchupForHeroName,
+  iraSagePresentationFor,
   jarlPresentationFor,
   leviaPresentationFor,
   leviaPreferredTurnOrderFor,
@@ -141,6 +143,51 @@ describe("Briar matchup presentation", () => {
         expect(validatePresentation(pool, presented, "silver-age", { cardPoolMode: "open" })).toMatchObject({ ok: true });
       }
     }
+  });
+});
+
+describe("SAGE Ira matchup presentation", () => {
+  const pool = precon("bot-ira-sage")!.pool;
+  const guide = (heroName: string, classes: string[] = ["brute"]) => {
+    const cards = { ...cardData, GUIDE_HERO: { ...cardData["MON119"]!, name: heroName, classes } };
+    return iraSagePresentationFor({ heroId: "GUIDE_HERO", weaponIds: [], equipment: {} }, cards);
+  };
+  const copies = (deck: readonly string[], id: string) => deck.filter((card) => card === id).length;
+
+  it("groups heroes like the other Silver Age plans", () => {
+    expect(iraSageMatchupForHeroName("oscilio, constella intelligence")).toBe("arcane");
+    expect(iraSageMatchupForHeroName("someone", ["runeblade"])).toBe("arcane");
+    expect(iraSageMatchupForHeroName("bravo, flattering showman")).toBe("dominate");
+    expect(iraSageMatchupForHeroName("oldhim")).toBe("slow");
+    expect(iraSageMatchupForHeroName("kayo")).toBe("aggro");
+    expect(iraSageMatchupForHeroName("puffin")).toBe("default");
+  });
+
+  it("adds exactly one flex pair to the 38-card core", () => {
+    const flex = ["SBW023", "HVY219", "SIY017", "AKO009", "SUP221"];
+    const plans: [string, string[], string][] = [
+      ["Kano", ["wizard"], "SBW023"],
+      ["Bravo, Flattering Showman", ["guardian"], "HVY219"],
+      ["Kayo", ["brute"], "SIY017"],
+      ["Oldhim", ["guardian"], "AKO009"],
+      ["Puffin", ["mechanologist"], "SUP221"],
+    ];
+    for (const [name, classes, added] of plans) {
+      const presented = guide(name, classes);
+      expect(presented.deck, name).toHaveLength(40);
+      for (const id of flex) expect(copies(presented.deck, id), `${name} ${id}`).toBe(id === added ? 2 : 0);
+      expect(validatePresentation(pool, presented, "silver-age", { cardPoolMode: "open" }), name)
+        .toMatchObject({ ok: true });
+    }
+  });
+
+  it("wears arcane barrier only against arcane heroes", () => {
+    expect(guide("Kano", ["wizard"]).equipment).toEqual({
+      head: "SFA005", chest: "SFA007", arms: "SFA008", legs: "SFA009",
+    });
+    expect(guide("Kayo").equipment).toEqual({
+      head: "SLY005", chest: "SFA006", arms: "SFA008", legs: "SFA009",
+    });
   });
 });
 

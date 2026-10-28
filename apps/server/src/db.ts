@@ -1149,6 +1149,15 @@ export const MIGRATIONS: Migration[] = [
     sql: `ALTER TABLE decks ADD COLUMN art JSONB NOT NULL DEFAULT '{"highestRarity":false,"picks":{}}';
     ALTER TABLE room_seats ADD COLUMN card_art JSONB;`,
   },
+  {
+    version: 60,
+    // Silver Age Ira joins the durable pending-practice bot ids.
+    sql: `ALTER TABLE pending_bot_starts
+      DROP CONSTRAINT IF EXISTS pending_bot_starts_bot_check;
+    ALTER TABLE pending_bot_starts
+      ADD CONSTRAINT pending_bot_starts_bot_check
+      CHECK (bot IN ('ira', 'hala', 'cindra', 'jarl', 'briar', 'bravo', 'starvo', 'kayo', 'levia', 'boltyn', 'ira-sage'));`,
+  },
 ];
 
 async function publicTables(db: Queryable): Promise<string[]> {

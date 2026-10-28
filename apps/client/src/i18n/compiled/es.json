@@ -379,6 +379,18 @@
       "value": "Vence a Ira Bot"
     }
   ],
+  "achievements.beatirasage.description": [
+    {
+      "type": 0,
+      "value": "Derrota a SAGE Ira Bot en una partida de práctica."
+    }
+  ],
+  "achievements.beatirasage.name": [
+    {
+      "type": 0,
+      "value": "Vence a SAGE Ira Bot"
+    }
+  ],
   "achievements.beatjarl.description": [
     {
       "type": 0,
@@ -33470,6 +33482,12 @@
     {
       "type": 0,
       "value": "Un Armory Deck sencillo, ideal para principiantes."
+    }
+  ],
+  "lobby.bot.irasage.description": [
+    {
+      "type": 0,
+      "value": "Un mazo de valor que encadena combos de Crouching Tiger con Edge of Autumn."
     }
   ],
   "lobby.bot.jarl.description": [
