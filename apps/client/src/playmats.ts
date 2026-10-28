@@ -44,6 +44,11 @@ export function isPlaymatId(value: unknown): value is PlaymatId {
   return typeof value === "string" && (PLAYMAT_IDS as readonly string[]).includes(value);
 }
 
+/** A stored or wire id, or leather when it names no mat this build knows. */
+export function resolvePlaymat(value: string | null | undefined): PlaymatId {
+  return isPlaymatId(value) ? value : DEFAULT_PLAYMAT;
+}
+
 export function playmatNameMessageId(id: PlaymatId): string {
   return `settings.playmat.name.${id}`;
 }

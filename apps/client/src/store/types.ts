@@ -19,7 +19,6 @@ import type {
   PrepView,
   PriorityWindowMode,
   TokenSkipKind,
-  PlayerBadge,
   PlayerReportReason,
   RoomInvite,
   RoomSummary,
@@ -30,7 +29,8 @@ import type {
 } from "@fyendal/shared";
 import type {
   AccountExport,
-  AccountBadgesResponse,
+  AccountCosmeticsResponse,
+  AccountCosmeticsUpdate,
   AccountEmailResponse,
   ApiError,
   FixedBugReportNotification,
@@ -202,8 +202,8 @@ export interface StoreState {
   loadDeckDetail: (id: string) => Promise<DeckDetailResponse | ApiError>;
   deleteDeck: (id: string) => Promise<DeleteDeckResult>;
   exportAccount: () => Promise<{ ok: true; export: AccountExport } | ApiError>;
-  getAccountBadges: () => Promise<AccountBadgesResponse | ApiError>;
-  selectAccountBadge: (badge: PlayerBadge | null) => Promise<AccountBadgesResponse | ApiError>;
+  getAccountCosmetics: () => Promise<AccountCosmeticsResponse | ApiError>;
+  updateAccountCosmetics: (changes: AccountCosmeticsUpdate) => Promise<AccountCosmeticsResponse | ApiError>;
   deleteAccount: (password: string) => Promise<{ ok: true } | ApiError>;
   getAccountEmail: () => Promise<AccountEmailResponse | ApiError>;
   setAccountEmail: (password: string, email: string) => Promise<AccountEmailResponse | ApiError>;

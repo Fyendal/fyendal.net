@@ -1432,12 +1432,11 @@
 /* The phone board scrolls over its pinned playmat; the tray and status bar
    carry their own scrims, so the cloth stays a little more open. */
 @media (max-width: 700px) {
-  .playmat-art { inset: 0; }
-  .playmat-art::after {
-    background:
-      linear-gradient(180deg, #0d070399 0%, #0d070352 16%, #0d070330 40%, #0d070330 62%, #0d070370 100%),
-      repeating-linear-gradient(115deg, #ffffff05 0 2px, transparent 2px 7px),
-      repeating-linear-gradient(25deg, #00000014 0 3px, transparent 3px 10px);
+  .playmat-art-opp::after {
+    --playmat-scrim: linear-gradient(180deg, #0d070399 0%, #0d070352 35%, #0d070330 100%);
+  }
+  .playmat-art-own::after {
+    --playmat-scrim: linear-gradient(180deg, #0d070330 0%, #0d070352 60%, #0d070370 100%);
   }
   .playmat-picker { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .playmat-hint {

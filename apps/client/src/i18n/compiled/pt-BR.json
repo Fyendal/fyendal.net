@@ -38355,6 +38355,18 @@
       "value": "Playmat"
     }
   ],
+  "settings.playmat.bots": [
+    {
+      "type": 0,
+      "value": "Bots de treino"
+    }
+  ],
+  "settings.playmat.botsNote": [
+    {
+      "type": 0,
+      "value": "O lado do bot em jogos de treino."
+    }
+  ],
   "settings.playmat.credit": [
     {
       "type": 0,
@@ -38449,6 +38461,24 @@
     {
       "type": 0,
       "value": "Welcome to Rathe"
+    }
+  ],
+  "settings.playmat.side": [
+    {
+      "type": 0,
+      "value": "Qual lado"
+    }
+  ],
+  "settings.playmat.yours": [
+    {
+      "type": 0,
+      "value": "Seu"
+    }
+  ],
+  "settings.playmat.yoursNote": [
+    {
+      "type": 0,
+      "value": "Seu lado da mesa. Oponentes também o veem."
     }
   ],
   "settings.priority": [

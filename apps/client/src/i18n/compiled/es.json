@@ -37457,6 +37457,18 @@
       "value": "Playmat"
     }
   ],
+  "settings.playmat.bots": [
+    {
+      "type": 0,
+      "value": "Bots de práctica"
+    }
+  ],
+  "settings.playmat.botsNote": [
+    {
+      "type": 0,
+      "value": "El lado del bot en partidas de práctica."
+    }
+  ],
   "settings.playmat.credit": [
     {
       "type": 0,
@@ -37551,6 +37563,24 @@
     {
       "type": 0,
       "value": "Welcome to Rathe"
+    }
+  ],
+  "settings.playmat.side": [
+    {
+      "type": 0,
+      "value": "Qué lado"
+    }
+  ],
+  "settings.playmat.yours": [
+    {
+      "type": 0,
+      "value": "Tuyo"
+    }
+  ],
+  "settings.playmat.yoursNote": [
+    {
+      "type": 0,
+      "value": "Tu lado de la mesa. Tus oponentes también lo ven."
     }
   ],
   "settings.priority": [

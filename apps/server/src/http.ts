@@ -34,8 +34,8 @@ import { clientIp, configuredTrustedProxyHops } from "./network.js";
 import {
   deleteAccount,
   exportAccount,
-  getAccountBadges,
-  selectAccountBadge,
+  getAccountCosmetics,
+  updateAccountCosmetics,
 } from "./accounts.js";
 import {
   createBugReport,
@@ -525,16 +525,20 @@ export function createApiServer(deps: ApiDeps): http.Server {
       await deps.onRoomsDeleted?.(result.deletedRooms);
       return { status: 200, body: { ok: true } };
     },
-    "/api/account/badge": async (body, user) => {
+    "/api/account/cosmetics": async (body, user) => {
       if (!user) return { status: 401, body: { ok: false, error: "not logged in" } };
-      const result = await selectAccountBadge(deps.db, user.id, valueField(body, "badge"));
+      const fields = asRecord(body) ?? {};
+      const result = await updateAccountCosmetics(deps.db, user.id, {
+        ...("badge" in fields ? { badge: fields.badge } : {}),
+        ...("playmat" in fields ? { playmat: fields.playmat } : {}),
+      });
       if (!result.ok) {
         return {
           status: result.error === "account not found" ? 404 : 400,
           body: { ok: false, error: result.error },
         };
       }
-      return { status: 200, body: { ok: true, ...result.preferences } };
+      return { status: 200, body: { ok: true, ...result.cosmetics } };
     },
     "/api/bug-reports": async (body, user) => {
       if (!user) return { status: 401, body: { ok: false, error: "not logged in" } };
@@ -865,13 +869,13 @@ export function createApiServer(deps: ApiDeps): http.Server {
         .catch((e) => internalError(res, e));
       return;
     }
-    if (req.method === "GET" && url.pathname === "/api/account/badges") {
+    if (req.method === "GET" && url.pathname === "/api/account/cosmetics") {
       authUser(req)
         .then(async (user) => {
           if (!user) return sendJson(res, 401, { ok: false, error: "not logged in" });
-          const preferences = await getAccountBadges(deps.db, user.id);
-          if (!preferences) return sendJson(res, 404, { ok: false, error: "account not found" });
-          sendJson(res, 200, { ok: true, ...preferences });
+          const cosmetics = await getAccountCosmetics(deps.db, user.id);
+          if (!cosmetics) return sendJson(res, 404, { ok: false, error: "account not found" });
+          sendJson(res, 200, { ok: true, ...cosmetics });
         })
         .catch((e) => internalError(res, e));
       return;

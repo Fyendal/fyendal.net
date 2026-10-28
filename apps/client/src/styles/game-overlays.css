@@ -1357,6 +1357,19 @@
   align-items: stretch;
   gap: 9px;
 }
+.settings-playmat-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.settings-playmat-head .settings-segmented button { min-width: 0; padding-inline: 12px; }
+.settings-playmat-note {
+  margin: -3px 0 0;
+  color: #8a7f6d;
+  font-size: 12px;
+  font-weight: 400;
+}
 .playmat-picker {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(72px, 1fr));

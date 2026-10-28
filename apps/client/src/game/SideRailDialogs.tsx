@@ -45,6 +45,8 @@ export function GameSettingsDialog({
   onCardDisplayPreferenceChange,
   playmat,
   onPlaymatChange,
+  botPlaymat,
+  onBotPlaymatChange,
   motionPreference,
   onMotionPreferenceChange,
   playabilityCuePreference,
@@ -76,6 +78,8 @@ export function GameSettingsDialog({
   onCardDisplayPreferenceChange: (preference: CardDisplayPreference) => void;
   playmat: PlaymatId;
   onPlaymatChange: (playmat: PlaymatId) => void;
+  botPlaymat: PlaymatId;
+  onBotPlaymatChange: (playmat: PlaymatId) => void;
   motionPreference: MotionPreference;
   onMotionPreferenceChange: (preference: MotionPreference) => void;
   playabilityCuePreference: PlayabilityCuePreference;
@@ -267,7 +271,12 @@ export function GameSettingsDialog({
                   </button>
                 </div>
               </div>
-              <PlaymatPicker playmat={playmat} onPlaymatChange={onPlaymatChange} />
+              <PlaymatPicker
+                playmat={playmat}
+                onPlaymatChange={onPlaymatChange}
+                botPlaymat={botPlaymat}
+                onBotPlaymatChange={onBotPlaymatChange}
+              />
               <div className="settings-control-row settings-motion-row">
                 <span className="settings-control-name">
                   {intl.formatMessage({ id: "settings.animations" })}

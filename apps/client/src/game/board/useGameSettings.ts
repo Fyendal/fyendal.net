@@ -114,6 +114,14 @@ export function useGameSettings({
     });
   };
 
+  const updateBotPlaymat = (botPlaymat: PlaymatId) => {
+    setSettings((current) => {
+      const next = { ...current, botPlaymat };
+      saveGameSettings(localStorage, next);
+      return next;
+    });
+  };
+
   const updateStandingOrder = (key: string, update: StandingOrderUpdate) => {
     setSettings((current) => {
       const standingOrders = applyStandingOrder(current.standingOrders, key, update);
@@ -137,6 +145,7 @@ export function useGameSettings({
     updateSoundEffectsEnabled,
     updateSoundEffectsVolume,
     updatePlaymat,
+    updateBotPlaymat,
     updateStandingOrder,
   };
 }

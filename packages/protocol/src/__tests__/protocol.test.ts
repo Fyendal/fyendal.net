@@ -3,7 +3,7 @@ import {
   decodeReplayPendingAchievements,
   ACTIVE_ACHIEVEMENT_IDS,
   decodeAccountExportResponse,
-  decodeAccountBadgesResponse,
+  decodeAccountCosmeticsResponse,
   decodeAccountEmailResponse,
   decodeAchievementsResponse,
   decodeBugReportNotificationsResponse,
@@ -35,6 +35,7 @@ import {
   decodeSharedReplayResponse,
   decodeServerMessage,
   decodeStatsResponse,
+  playmatRef,
 } from "../index.js";
 
 describe("Fabrary deck previews", () => {
@@ -1394,15 +1395,23 @@ describe("replays and HTTP responses", () => {
       },
     })).not.toBeNull();
     expect(decodeDeckInvalidResponse({ ok: false, errors: ["bad"], missing: [], unimplemented: [] })).not.toBeNull();
-    expect(decodeAccountBadgesResponse({
+    expect(decodeAccountCosmeticsResponse({
       ok: true,
       availableBadges: ["early-tester"],
       selectedBadge: "early-tester",
+      playmat: "monarch",
     })).not.toBeNull();
-    expect(decodeAccountBadgesResponse({
+    expect(decodeAccountCosmeticsResponse({
       ok: true,
       availableBadges: [],
       selectedBadge: "early-tester",
+      playmat: null,
+    })).toBeNull();
+    expect(decodeAccountCosmeticsResponse({
+      ok: true,
+      availableBadges: [],
+      selectedBadge: null,
+      playmat: "Bad Mat",
     })).toBeNull();
     expect(decodeAccountEmailResponse({ ok: true, available: true, email: null, pendingEmail: "a@b.io" }))
       .toEqual({ ok: true, available: true, email: null, pendingEmail: "a@b.io" });
@@ -1445,7 +1454,10 @@ describe("replays and HTTP responses", () => {
       ok: true,
       export: {
         exportedAt: "2026-01-01T00:00:00.000Z",
-        account: { username: "alice", createdAt: 1, earlyTester: true, selectedBadge: "early-tester", betaTester: false, email: null, pendingEmail: null },
+        account: {
+          username: "alice", createdAt: 1, earlyTester: true, selectedBadge: "early-tester", playmat: "monarch",
+          betaTester: false, email: null, pendingEmail: null,
+        },
         decks: [{
           id: summary.id,
           name: summary.name,
@@ -1608,10 +1620,11 @@ describe("replays and HTTP responses", () => {
       [decodeDeckResponse, { ok: true, deck: summary }],
       [decodeDeckDetailResponse, { ok: true, deck: { ...summary, decklist: pool } }],
       [decodeDeckInvalidResponse, { ok: false, errors: ["bad"], missing: [], unimplemented: [] }],
-      [decodeAccountBadgesResponse, {
+      [decodeAccountCosmeticsResponse, {
         ok: true,
         availableBadges: ["early-tester"],
         selectedBadge: "early-tester",
+        playmat: null,
       }],
       [decodeAccountEmailResponse, { ok: true, available: true, email: "a@b.io", pendingEmail: null }],
       [decodeAccountExportResponse, {
@@ -1712,5 +1725,15 @@ describe("replay pending achievements", () => {
     ]) {
       expect(decodeReplayPendingAchievements(invalid)).toBeNull();
     }
+  });
+});
+
+describe("account playmats", () => {
+  it("bounds playmat refs to short lowercase ids", () => {
+    expect(playmatRef("map-of-rathe")).toBe(true);
+    expect(playmatRef("Map of Rathe")).toBe(false);
+    expect(playmatRef("")).toBe(false);
+    expect(playmatRef("a".repeat(41))).toBe(false);
+    expect(playmatRef(null)).toBe(false);
   });
 });

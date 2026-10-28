@@ -514,7 +514,8 @@ describe("playmat", () => {
     const html = renderToStaticMarkup(<TestI18nProvider><GameBoard /></TestI18nProvider>);
 
     expect(html).toMatch(/class="table[^"]* has-playmat"/);
-    expect(html).toContain('<div class="board"><div class="playmat-art" aria-hidden="true" data-loaded="false">');
+    expect(html).toContain('<div class="board"><div class="playmat-art playmat-art-own" aria-hidden="true" data-loaded="false">');
+    expect(html).not.toContain("playmat-art-opp");
     expect(html).toContain('class="playmat-art-image" src="/playmats/volcor.jpg" alt=""');
   });
 

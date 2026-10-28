@@ -362,10 +362,18 @@ export interface AccountEmailResponse {
   /** Address awaiting its confirmation link. */
   pendingEmail: string | null;
 }
-export interface AccountBadgesResponse {
+/** The account's public presentation: badge entitlements with the chosen
+ * badge, and the arena mat shown on this player's half. */
+export interface AccountCosmeticsResponse {
   ok: true;
   availableBadges: PlayerBadge[];
   selectedBadge: PlayerBadge | null;
+  playmat: string | null;
+}
+/** Any subset of the cosmetics; an omitted field keeps its value. */
+export interface AccountCosmeticsUpdate {
+  badge?: PlayerBadge | null;
+  playmat?: string | null;
 }
 export interface AccountBetaResponse {
   ok: true;
@@ -408,6 +416,7 @@ export interface AccountExport {
     createdAt: number;
     earlyTester: boolean;
     selectedBadge: PlayerBadge | null;
+    playmat: string | null;
     betaTester: boolean;
     email: string | null;
     pendingEmail: string | null;
@@ -1677,11 +1686,17 @@ function roomSummary(value: unknown): value is RoomSummary {
     && optional(room.cardPoolMode, (v): v is "future" | "open" => v === "future" || v === "open");
 }
 
+/** A playmat id is client presentation data; the wire only bounds its shape. */
+export function playmatRef(value: unknown): value is string {
+  return string(value, 40, false) && /^[a-z0-9-]+$/.test(value);
+}
+
 function playerProfile(value: unknown): boolean {
   const profile = object(value);
-  return !!profile && exactKeys(profile, ["username", "badge"])
+  return !!profile && exactKeys(profile, ["username", "badge", "playmat"], ["username", "badge"])
     && string(profile.username, MAX_SHORT_TEXT, false)
-    && (profile.badge === null || playerBadge(profile.badge));
+    && (profile.badge === null || playerBadge(profile.badge))
+    && optional(profile.playmat, playmatRef);
 }
 
 function roomInvite(value: unknown): boolean {
@@ -2623,16 +2638,17 @@ export const decodeAccountBetaResponse: Decoder<AccountBetaResponse> = (value) =
     : null;
 };
 
-export const decodeAccountBadgesResponse: Decoder<AccountBadgesResponse> = (value) => {
+export const decodeAccountCosmeticsResponse: Decoder<AccountCosmeticsResponse> = (value) => {
   const data = object(value);
   return !!data
-    && exactKeys(data, ["ok", "availableBadges", "selectedBadge"])
+    && exactKeys(data, ["ok", "availableBadges", "selectedBadge", "playmat"])
     && data.ok === true
     && array(data.availableBadges, playerBadge, 32)
     && new Set(data.availableBadges).size === data.availableBadges.length
     && (data.selectedBadge === null || playerBadge(data.selectedBadge))
     && (data.selectedBadge === null || data.availableBadges.includes(data.selectedBadge))
-    ? value as AccountBadgesResponse
+    && (data.playmat === null || playmatRef(data.playmat))
+    ? value as AccountCosmeticsResponse
     : null;
 };
 
@@ -2927,7 +2943,8 @@ export const decodeAccountExportResponse: Decoder<AccountExportResponse> = (valu
         "playerReports", "gameDays", "achievements", "replays", "matches", "heroRecords", "matchupRecords",
         "friends", "friendRequests", "friendMessages", "leagues"],
     ) && !!account
-    && exactKeys(account, ["username", "createdAt", "earlyTester", "selectedBadge", "betaTester", "email", "pendingEmail"])
+    && exactKeys(account, ["username", "createdAt", "earlyTester", "selectedBadge", "playmat", "betaTester", "email", "pendingEmail"])
+    && (account.playmat === null || playmatRef(account.playmat))
     && typeof account.betaTester === "boolean"
     && nullableEmail(account.email) && nullableEmail(account.pendingEmail)
     && string(exported.exportedAt, 64, false) && string(account.username, MAX_SHORT_TEXT, false)

@@ -1,6 +1,6 @@
 /** HTTP auth API wrapper — thin fetch layer over the server's /api endpoints. */
 import {
-  decodeAccountBadgesResponse,
+  decodeAccountCosmeticsResponse,
   decodeAccountBetaResponse,
   decodeAccountEmailResponse,
   decodeAchievementsResponse,
@@ -32,7 +32,8 @@ import {
   decodeVersionUpdateNoticeResponse,
   type GlobalNoticeResponse,
   type VersionUpdateNoticeResponse,
-  type AccountBadgesResponse,
+  type AccountCosmeticsResponse,
+  type AccountCosmeticsUpdate,
   type AccountBetaResponse,
   type AccountEmailResponse,
   type AchievementsResponse,
@@ -69,7 +70,6 @@ import type {
   Format,
   LeagueAvailabilityRequest,
   LeagueJoinRequest,
-  PlayerBadge,
   PlayerReportReason,
 } from "@fyendal/shared";
 
@@ -209,11 +209,19 @@ export function apiDeleteAccount(
   return post("account/delete", { password }, okOnly, { token, signal });
 }
 
-export function apiAccountBadges(
+export function apiAccountCosmetics(
   token: string,
   signal?: AbortSignal,
-): Promise<AccountBadgesResponse | ApiError> {
-  return get("account/badges", decodeAccountBadgesResponse, { token, signal });
+): Promise<AccountCosmeticsResponse | ApiError> {
+  return get("account/cosmetics", decodeAccountCosmeticsResponse, { token, signal });
+}
+
+export function apiUpdateAccountCosmetics(
+  token: string,
+  changes: AccountCosmeticsUpdate,
+  signal?: AbortSignal,
+): Promise<AccountCosmeticsResponse | ApiError> {
+  return post("account/cosmetics", changes, decodeAccountCosmeticsResponse, { token, signal });
 }
 
 export function apiAccountBeta(
@@ -228,14 +236,6 @@ export function apiAchievements(
   signal?: AbortSignal,
 ): Promise<AchievementsResponse | ApiError> {
   return get("account/achievements", decodeAchievementsResponse, { token, signal });
-}
-
-export function apiSelectAccountBadge(
-  token: string,
-  badge: PlayerBadge | null,
-  signal?: AbortSignal,
-): Promise<AccountBadgesResponse | ApiError> {
-  return post("account/badge", { badge }, decodeAccountBadgesResponse, { token, signal });
 }
 
 export type BugReportResult = BugReportResponse | ApiError;

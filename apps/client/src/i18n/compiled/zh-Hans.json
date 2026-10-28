@@ -34739,6 +34739,18 @@
       "value": "桌垫"
     }
   ],
+  "settings.playmat.bots": [
+    {
+      "type": 0,
+      "value": "练习机器人"
+    }
+  ],
+  "settings.playmat.botsNote": [
+    {
+      "type": 0,
+      "value": "练习对局中机器人的一侧。"
+    }
+  ],
   "settings.playmat.credit": [
     {
       "type": 0,
@@ -34833,6 +34845,24 @@
     {
       "type": 0,
       "value": "Welcome to Rathe"
+    }
+  ],
+  "settings.playmat.side": [
+    {
+      "type": 0,
+      "value": "选择哪一侧"
+    }
+  ],
+  "settings.playmat.yours": [
+    {
+      "type": 0,
+      "value": "你的"
+    }
+  ],
+  "settings.playmat.yoursNote": [
+    {
+      "type": 0,
+      "value": "你这一侧的桌面，对手也能看到。"
     }
   ],
   "settings.priority": [

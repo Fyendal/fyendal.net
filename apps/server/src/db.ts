@@ -1158,6 +1158,11 @@ export const MIGRATIONS: Migration[] = [
       ADD CONSTRAINT pending_bot_starts_bot_check
       CHECK (bot IN ('ira', 'hala', 'cindra', 'jarl', 'briar', 'bravo', 'starvo', 'kayo', 'levia', 'boltyn', 'ira-sage'));`,
   },
+  {
+    version: 61,
+    // Cosmetic arena mat shown on this player's half of the table.
+    sql: "ALTER TABLE users ADD COLUMN playmat TEXT;",
+  },
 ];
 
 async function publicTables(db: Queryable): Promise<string[]> {

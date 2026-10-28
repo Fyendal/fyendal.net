@@ -939,7 +939,7 @@ describe("account rights", () => {
     ]));
   });
 
-  it("lets entitled accounts choose a displayed badge and rejects unearned badges", async () => {
+  it("lets entitled accounts choose a displayed badge through the cosmetics route", async () => {
     await register(db, "BadgeUser", "password1");
     const session = await login(db, "badgeuser", "password1");
     if (!session.ok) throw new Error("login failed");
@@ -951,10 +951,10 @@ describe("account rights", () => {
       "Content-Type": "application/json",
     };
 
-    const unearned = await fetch(`${url}/api/account/badges`, { headers });
-    expect(await unearned.json()).toEqual({ ok: true, availableBadges: [], selectedBadge: null });
+    const unearned = await fetch(`${url}/api/account/cosmetics`, { headers });
+    expect(await unearned.json()).toEqual({ ok: true, availableBadges: [], selectedBadge: null, playmat: null });
 
-    const unavailable = await fetch(`${url}/api/account/badge`, {
+    const unavailable = await fetch(`${url}/api/account/cosmetics`, {
       method: "POST",
       headers,
       body: JSON.stringify({ badge: "early-tester" }),
@@ -963,15 +963,16 @@ describe("account rights", () => {
     expect(await unavailable.json()).toEqual({ ok: false, error: "badge not available" });
 
     await db.query("UPDATE users SET early_tester = TRUE, selected_badge = 'early-tester' WHERE id = $1", [user.id]);
-    const initial = await fetch(`${url}/api/account/badges`, { headers });
+    const initial = await fetch(`${url}/api/account/cosmetics`, { headers });
     expect(initial.status).toBe(200);
     expect(await initial.json()).toEqual({
       ok: true,
       availableBadges: ["early-tester"],
       selectedBadge: "early-tester",
+      playmat: null,
     });
 
-    const hidden = await fetch(`${url}/api/account/badge`, {
+    const hidden = await fetch(`${url}/api/account/cosmetics`, {
       method: "POST",
       headers,
       body: JSON.stringify({ badge: null }),
@@ -981,7 +982,7 @@ describe("account rights", () => {
     expect((await db.query("SELECT selected_badge FROM users WHERE id = $1", [user.id])).rows)
       .toEqual([{ selected_badge: null }]);
 
-    const restored = await fetch(`${url}/api/account/badge`, {
+    const restored = await fetch(`${url}/api/account/cosmetics`, {
       method: "POST",
       headers,
       body: JSON.stringify({ badge: "early-tester" }),
@@ -989,7 +990,7 @@ describe("account rights", () => {
     expect(restored.status).toBe(200);
     expect(await restored.json()).toMatchObject({ ok: true, selectedBadge: "early-tester" });
 
-    const invalid = await fetch(`${url}/api/account/badge`, {
+    const invalid = await fetch(`${url}/api/account/cosmetics`, {
       method: "POST",
       headers,
       body: JSON.stringify({ badge: "founder" }),
@@ -1014,8 +1015,8 @@ describe("account rights", () => {
     await db.query("INSERT INTO beta_testers (user_id, added_at) VALUES ($1, 123)", [user.id]);
     expect(decodeAccountBetaResponse(await (await fetch(`${url}/api/account/beta`, { headers })).json()))
       .toEqual({ ok: true, betaTester: true });
-    expect(await (await fetch(`${url}/api/account/badges`, { headers })).json())
-      .toEqual({ ok: true, availableBadges: [], selectedBadge: null });
+    expect(await (await fetch(`${url}/api/account/cosmetics`, { headers })).json())
+      .toEqual({ ok: true, availableBadges: [], selectedBadge: null, playmat: null });
     const exported = await (await fetch(`${url}/api/account/export`, { headers })).json() as any;
     expect(exported.export.account).toMatchObject({ earlyTester: false, betaTester: true });
 
@@ -1039,6 +1040,47 @@ describe("account rights", () => {
     expect((await save()).status).toBe(403);
     await db.query("INSERT INTO beta_testers (user_id, added_at) VALUES ($1, 123)", [user.id]);
     expect((await save()).status).toBe(404);
+  });
+
+  it("keeps an account's chosen playmat through the cosmetics route and exports it", async () => {
+    await register(db, "MatUser", "password1");
+    const session = await login(db, "matuser", "password1");
+    if (!session.ok) throw new Error("login failed");
+    const user = await sessionForToken(db, session.token);
+    if (!user) throw new Error("session missing");
+    const url = await startApi();
+    const headers = {
+      Authorization: `Bearer ${session.token}`,
+      "Content-Type": "application/json",
+    };
+    const choose = (playmat: unknown) => fetch(`${url}/api/account/cosmetics`, {
+      method: "POST",
+      headers,
+      body: JSON.stringify({ playmat }),
+    });
+
+    const chosen = await choose("map-of-rathe");
+    expect(chosen.status).toBe(200);
+    expect(await chosen.json()).toMatchObject({ ok: true, playmat: "map-of-rathe" });
+    expect((await db.query("SELECT playmat FROM users WHERE id = $1", [user.id])).rows)
+      .toEqual([{ playmat: "map-of-rathe" }]);
+
+    const malformed = await choose("Map of Rathe");
+    expect(malformed.status).toBe(400);
+    expect(await malformed.json()).toEqual({ ok: false, error: "invalid playmat" });
+
+    const empty = await fetch(`${url}/api/account/cosmetics`, { method: "POST", headers, body: "{}" });
+    expect(empty.status).toBe(400);
+    expect(await empty.json()).toEqual({ ok: false, error: "nothing to change" });
+
+    const exported = await (await fetch(`${url}/api/account/export`, { headers })).json() as any;
+    expect(exported.export.account.playmat).toBe("map-of-rathe");
+
+    const cleared = await choose(null);
+    expect(cleared.status).toBe(200);
+    expect(await cleared.json()).toMatchObject({ ok: true, playmat: null });
+    expect((await db.query("SELECT playmat FROM users WHERE id = $1", [user.id])).rows)
+      .toEqual([{ playmat: null }]);
   });
 
   it("exports account data and password-confirmed deletion removes account-bound data", async () => {

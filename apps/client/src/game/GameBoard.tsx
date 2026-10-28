@@ -76,6 +76,8 @@ import { useGameSettings } from "./board/useGameSettings.js";
 import { PlaymatArt } from "./PlaymatArt.js";
 import { PlaymatHintToast } from "./PlaymatHintToast.js";
 import { usePlaymatHint } from "./board/usePlaymatHint.js";
+import { useMatSeam } from "./board/useMatSeam.js";
+import { resolvePlaymat, type PlaymatId } from "../playmats.js";
 import { PriorityArrivalFlash } from "./board/priorityArrival.js";
 import { useGameViewport } from "./board/useGameViewport.js";
 import { useHudReserve } from "./board/useHudReserve.js";
@@ -120,11 +122,12 @@ const EMPTY_INSTANCE_IDS: ReadonlySet<number> = new Set();
 
 export function GameBoard() {
   const intl = useIntl();
-  const { view: authoritativeView, viewUpdate: authoritativeViewUpdate, playerProfiles, cardArt, legal, actionCandidates, roomCommandPending, pendingInteraction, pendingDefenderStageIds, yourSeat, spectating, spectatorCount, spectatorUsernames, botGame, betaTester, sendIntent, sendPriorityMode, sendStandingOrders, sendTokenSkip, sendEmote, kickSpectator, latestEmote, undo, error, leave, opponentConnected, connected, connectionIssueVisible, roomCode, screen, replayFrames, replayViews, replayStep, replayNotes, setLiveReplayNote, watchReplay, downloadReplay, closeReplay, getRecordedViews, lastActionAt, claimVictory, reportBug, reportOpponent, backgroundSearching, stopBackgroundMatchmaking, authUser, authToken, setLobbyRail, unreadMessageCount, setSocialOpen } = useStore(
+  const { view: authoritativeView, viewUpdate: authoritativeViewUpdate, playerProfiles, updateAccountCosmetics, cardArt, legal, actionCandidates, roomCommandPending, pendingInteraction, pendingDefenderStageIds, yourSeat, spectating, spectatorCount, spectatorUsernames, botGame, betaTester, sendIntent, sendPriorityMode, sendStandingOrders, sendTokenSkip, sendEmote, kickSpectator, latestEmote, undo, error, leave, opponentConnected, connected, connectionIssueVisible, roomCode, screen, replayFrames, replayViews, replayStep, replayNotes, setLiveReplayNote, watchReplay, downloadReplay, closeReplay, getRecordedViews, lastActionAt, claimVictory, reportBug, reportOpponent, backgroundSearching, stopBackgroundMatchmaking, authUser, authToken, setLobbyRail, unreadMessageCount, setSocialOpen } = useStore(
     useShallow((state) => ({
       view: state.view,
       viewUpdate: state.viewUpdate,
       playerProfiles: state.playerProfiles,
+      updateAccountCosmetics: state.updateAccountCosmetics,
       cardArt: state.cardArt,
       legal: state.legal,
       actionCandidates: state.actionCandidates,
@@ -268,6 +271,7 @@ export function GameBoard() {
     soundEffectsEnabled,
     soundEffectsVolume,
     playmat,
+    botPlaymat,
     updatePriorityWindowMode,
     updateLessGuidance,
     updateCardDisplayPreference,
@@ -279,6 +283,7 @@ export function GameBoard() {
     updateSoundEffectsEnabled,
     updateSoundEffectsVolume,
     updatePlaymat,
+    updateBotPlaymat,
     standingOrders: standingOrderSettings,
     updateStandingOrder,
   } = useGameSettings({
@@ -533,9 +538,45 @@ export function GameBoard() {
 
   const replaying = screen === "replay";
   const [openSettingsSignal, setOpenSettingsSignal] = useState(0);
+  // The account copy of our mat is what opponents see; the local setting is
+  // what we see at once. A choice made here waits for the server to echo it
+  // before the account copy may override it again.
+  const ownsPlaymat = !spectating && !replaying && yourSeat !== null;
+  const matSeat: 0 | 1 = yourSeat === 1 ? 1 : 0;
+  const pendingPlaymatRef = useRef<PlaymatId | null>(null);
+  const carriedPlaymatRef = useRef(false);
+  const chooseOwnPlaymat = (next: PlaymatId) => {
+    pendingPlaymatRef.current = next;
+    updatePlaymat(next);
+    void updateAccountCosmetics({ playmat: next === "leather" ? null : next });
+  };
+  const accountPlaymat = ownsPlaymat && playerProfiles ? playerProfiles[matSeat]?.playmat ?? null : undefined;
+  useEffect(() => {
+    if (accountPlaymat === undefined) return;
+    const pending = pendingPlaymatRef.current;
+    if (pending !== null) {
+      if (accountPlaymat === (pending === "leather" ? null : pending)) pendingPlaymatRef.current = null;
+      return;
+    }
+    if (accountPlaymat === null) {
+      // A mat chosen before accounts kept one is carried over once.
+      if (playmat !== "leather" && !carriedPlaymatRef.current) {
+        carriedPlaymatRef.current = true;
+        void updateAccountCosmetics({ playmat });
+      }
+      return;
+    }
+    const resolved = resolvePlaymat(accountPlaymat);
+    if (resolved !== playmat) updatePlaymat(resolved);
+  }, [accountPlaymat, playmat, updateAccountCosmetics, updatePlaymat]);
+  const ownPlaymat = ownsPlaymat ? playmat : resolvePlaymat(playerProfiles?.[matSeat]?.playmat);
+  const oppPlaymat = botGame && ownsPlaymat
+    ? botPlaymat
+    : resolvePlaymat(playerProfiles?.[1 - matSeat]?.playmat);
+  const hasPlaymat = ownPlaymat !== "leather" || oppPlaymat !== "leather";
+  useMatSeam(boardRef, dividerRef, hasPlaymat);
   const playmatHint = usePlaymatHint({
-    eligible: !spectating && !replaying && yourSeat !== null
-      && playmat === "leather" && view?.phase !== "game-over",
+    eligible: ownsPlaymat && playmat === "leather" && view?.phase !== "game-over",
     resolved: playmat !== "leather",
     username: authUser,
     onChoose: () => setOpenSettingsSignal((count) => count + 1),
@@ -1208,7 +1249,7 @@ export function GameBoard() {
     <SquareCardPresentation enabled={squareCardsEnabled}>
     <div
       ref={tableRef}
-      className={`table${railCollapsed ? " rail-is-collapsed" : ""}${view.phase === "game-over" ? " game-is-over" : ""}${hasActiveCombatChain ? " has-active-combat-chain" : ""}${mobileHandIsHidden ? " mobile-hand-is-hidden" : ""}${compactHud ? " hud-is-compact" : ""}${playmat !== "leather" ? " has-playmat" : ""}`}
+      className={`table${railCollapsed ? " rail-is-collapsed" : ""}${view.phase === "game-over" ? " game-is-over" : ""}${hasActiveCombatChain ? " has-active-combat-chain" : ""}${mobileHandIsHidden ? " mobile-hand-is-hidden" : ""}${compactHud ? " hud-is-compact" : ""}${hasPlaymat ? " has-playmat" : ""}`}
       data-playability-cue={playabilityCuePreference}
       data-motion-preference={motionPreference}
       onMouseMove={onHoverCard}
@@ -1236,7 +1277,8 @@ export function GameBoard() {
         : null}
       {/* ── playmat board: opponent half on top, your half below ── */}
       <div ref={boardRef} className="board">
-        <PlaymatArt key={playmat} playmat={playmat} />
+        <PlaymatArt key={`opp:${oppPlaymat}`} side="opp" playmat={oppPlaymat} />
+        <PlaymatArt key={`own:${ownPlaymat}`} side="own" playmat={ownPlaymat} />
         {gameMotion.turnStartUiReady && pitchSource ? (
           <PitchFocus
             key={pitchSource.card.instanceId}
@@ -1671,7 +1713,9 @@ export function GameBoard() {
         cardDisplayPreference={cardDisplayPreference}
         onCardDisplayPreferenceChange={updateCardDisplayPreference}
         playmat={playmat}
-        onPlaymatChange={updatePlaymat}
+        onPlaymatChange={chooseOwnPlaymat}
+        botPlaymat={botPlaymat}
+        onBotPlaymatChange={updateBotPlaymat}
         openSettingsSignal={openSettingsSignal}
         playabilityCuePreference={playabilityCuePreference}
         onPlayabilityCuePreferenceChange={updatePlayabilityCuePreference}

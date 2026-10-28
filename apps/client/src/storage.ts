@@ -476,7 +476,7 @@ function migrateVersion8StandingOrders(value: unknown): StandingOrders | null {
 }
 
 export interface GameSettings {
-  version: 10;
+  version: 11;
   priorityWindowMode: PriorityWindowMode;
   lessGuidance: boolean;
   skipPlayConfirmation: boolean;
@@ -489,10 +489,11 @@ export interface GameSettings {
   skipBotDelay: boolean;
   standingOrders: StandingOrders;
   playmat: PlaymatId;
+  botPlaymat: PlaymatId;
 }
 
 export const DEFAULT_GAME_SETTINGS: GameSettings = {
-  version: 10,
+  version: 11,
   priorityWindowMode: "always-pause",
   lessGuidance: true,
   skipPlayConfirmation: true,
@@ -505,6 +506,7 @@ export const DEFAULT_GAME_SETTINGS: GameSettings = {
   skipBotDelay: false,
   standingOrders: {},
   playmat: DEFAULT_PLAYMAT,
+  botPlaymat: DEFAULT_PLAYMAT,
 };
 
 export function replayStorageKey(code: string): string {
@@ -536,6 +538,7 @@ export function loadGameSettings(storage: Pick<Storage, "getItem">): GameSetting
         && record.version !== 8
         && record.version !== 9
         && record.version !== 10
+        && record.version !== 11
       )
       || (
         record.priorityWindowMode !== "auto-pass"
@@ -550,7 +553,7 @@ export function loadGameSettings(storage: Pick<Storage, "getItem">): GameSetting
       || record.version === 7
       || record.version === 8
       || record.version === 9
-      || record.version === 10
+      || record.version === 10 || record.version === 11
     )
       && (
         record.motionPreference === "system"
@@ -560,7 +563,7 @@ export function loadGameSettings(storage: Pick<Storage, "getItem">): GameSetting
       ? record.motionPreference
       : "system";
     if (
-      (record.version === 4 || record.version === 5 || record.version === 6 || record.version === 7 || record.version === 8 || record.version === 9 || record.version === 10)
+      (record.version === 4 || record.version === 5 || record.version === 6 || record.version === 7 || record.version === 8 || record.version === 9 || record.version === 10 || record.version === 11)
       && (
         typeof record.soundEffectsEnabled !== "boolean"
         || typeof record.soundEffectsVolume !== "number"
@@ -569,30 +572,30 @@ export function loadGameSettings(storage: Pick<Storage, "getItem">): GameSetting
         || record.soundEffectsVolume > 100
       )
     ) return DEFAULT_GAME_SETTINGS;
-    const playabilityCuePreference = record.version === 5 || record.version === 6 || record.version === 7 || record.version === 8 || record.version === 9 || record.version === 10
+    const playabilityCuePreference = record.version === 5 || record.version === 6 || record.version === 7 || record.version === 8 || record.version === 9 || record.version === 10 || record.version === 11
       ? record.playabilityCuePreference
       : "glow";
     if (
       playabilityCuePreference !== "glow"
       && playabilityCuePreference !== "high-contrast"
     ) return DEFAULT_GAME_SETTINGS;
-    const cardDisplayPreference = record.version === 7 || record.version === 8 || record.version === 9 || record.version === 10
+    const cardDisplayPreference = record.version === 7 || record.version === 8 || record.version === 9 || record.version === 10 || record.version === 11
       ? record.cardDisplayPreference
       : "square";
     if (cardDisplayPreference !== "square" && cardDisplayPreference !== "full") {
       return DEFAULT_GAME_SETTINGS;
     }
-    const standingOrders = record.version === 9 || record.version === 10
+    const standingOrders = record.version === 9 || record.version === 10 || record.version === 11
       ? decodeStandingOrders(record.standingOrders)
       : record.version === 8
         ? migrateVersion8StandingOrders(record.standingOrders)
         : {};
     if (standingOrders === null) return DEFAULT_GAME_SETTINGS;
     return {
-      version: 10,
+      version: 11,
       cardDisplayPreference,
       priorityWindowMode: record.priorityWindowMode,
-      lessGuidance: (record.version === 6 || record.version === 7 || record.version === 8 || record.version === 9 || record.version === 10)
+      lessGuidance: (record.version === 6 || record.version === 7 || record.version === 8 || record.version === 9 || record.version === 10 || record.version === 11)
         && typeof record.lessGuidance === "boolean"
         ? record.lessGuidance
         : true,
@@ -601,10 +604,10 @@ export function loadGameSettings(storage: Pick<Storage, "getItem">): GameSetting
         : true,
       motionPreference,
       playabilityCuePreference,
-      soundEffectsEnabled: record.version === 4 || record.version === 5 || record.version === 6 || record.version === 7 || record.version === 8 || record.version === 9 || record.version === 10
+      soundEffectsEnabled: record.version === 4 || record.version === 5 || record.version === 6 || record.version === 7 || record.version === 8 || record.version === 9 || record.version === 10 || record.version === 11
         ? record.soundEffectsEnabled as boolean
         : true,
-      soundEffectsVolume: record.version === 4 || record.version === 5 || record.version === 6 || record.version === 7 || record.version === 8 || record.version === 9 || record.version === 10
+      soundEffectsVolume: record.version === 4 || record.version === 5 || record.version === 6 || record.version === 7 || record.version === 8 || record.version === 9 || record.version === 10 || record.version === 11
         ? record.soundEffectsVolume as number
         : 35,
       optionHotkeys: typeof record.optionHotkeys === "boolean" ? record.optionHotkeys : false,
@@ -612,6 +615,7 @@ export function loadGameSettings(storage: Pick<Storage, "getItem">): GameSetting
       standingOrders,
       // A mat retired from the catalog falls back alone instead of resetting everything.
       playmat: isPlaymatId(record.playmat) ? record.playmat : DEFAULT_PLAYMAT,
+      botPlaymat: isPlaymatId(record.botPlaymat) ? record.botPlaymat : DEFAULT_PLAYMAT,
     };
   } catch {
     return DEFAULT_GAME_SETTINGS;

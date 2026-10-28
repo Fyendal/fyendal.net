@@ -776,8 +776,8 @@ describe("PgRoomStore storage", () => {
 
   it("round-trips a bot-room state with Plasma Barrel Shot through the wire decoder", async () => {
     const user = await db.query(
-      `INSERT INTO users (username, username_lc, pass_hash, created_at, early_tester, selected_badge)
-       VALUES ('DashOwner','dashowner','hash',1,TRUE,'early-tester') RETURNING id`,
+      `INSERT INTO users (username, username_lc, pass_hash, created_at, early_tester, selected_badge, playmat)
+       VALUES ('DashOwner','dashowner','hash',1,TRUE,'early-tester','monarch') RETURNING id`,
     );
     const userId = Number(user.rows[0]!.id);
     const created = await store.createBotRoom("silver-age", {
@@ -814,7 +814,7 @@ describe("PgRoomStore storage", () => {
       type: "state",
       botGame: true,
       playerProfiles: [
-        { username: "DashOwner", badge: "early-tester" },
+        { username: "DashOwner", badge: "early-tester", playmat: "monarch" },
         { username: expect.stringContaining("Bot"), badge: null },
       ],
     });

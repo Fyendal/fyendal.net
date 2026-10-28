@@ -963,6 +963,7 @@ export type PlayerBadge = "early-tester";
 export interface PlayerProfileView {
   username: string;
   badge: PlayerBadge | null;
+  playmat?: string;
 }
 
 /** One player's side of the pre-game prep room. */

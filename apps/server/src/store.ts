@@ -63,6 +63,7 @@ import {
   MAX_MATCHMAKING_AVOID_ROOM_CODES,
   MAX_MATCHMAKING_AVOID_USERS,
   type MatchEndReason,
+  playmatRef,
 } from "@fyendal/protocol";
 import { recordGameCompletion, recordGamePlayers } from "./analytics.js";
 import { awardAchievements } from "./achievements.js";
@@ -119,6 +120,7 @@ export interface SeatRow {
   username?: string;
   /** Public cosmetic choice resolved from the owning account. */
   badge?: PlayerBadge;
+  playmat?: string;
   /** account id, for re-queueing after a pre-game leave */
   userId?: number;
   /** hero of the seat's saved deck (prep-room display, match history) */
@@ -784,6 +786,9 @@ function decodeSeatRows(values: unknown[], code: string): [SeatRow | null, SeatR
     if (!(row.selected_badge === null || row.selected_badge === "early-tester")) {
       throw new CorruptRoomError(code, `seats[${index}].selected_badge`, "expected a known badge or null");
     }
+    if (!(row.playmat == null || playmatRef(row.playmat))) {
+      throw new CorruptRoomError(code, `seats[${index}].playmat`, "expected a playmat ref or null");
+    }
     const standingOrders = row.standing_orders == null
       ? undefined
       : decodeStoredStandingOrders(parseJson(row.standing_orders));
@@ -806,6 +811,7 @@ function decodeSeatRows(values: unknown[], code: string): [SeatRow | null, SeatR
       ...(typeof row.username === "string" ? { username: row.username } : {}),
       ...(row.user_id == null ? {} : { userId: Number(row.user_id) }),
       ...(row.selected_badge === "early-tester" ? { badge: row.selected_badge } : {}),
+      ...(typeof row.playmat === "string" ? { playmat: row.playmat } : {}),
       ...(typeof row.hero_id === "string" ? { heroId: row.hero_id } : {}),
       ...(presented ? { presented } : {}),
       ...(cardArt && Object.keys(cardArt).length > 0 ? { cardArt } : {}),
@@ -1053,7 +1059,7 @@ export class PgRoomStore {
       `WITH seat_data AS (
          SELECT s.room_code, json_agg(s ORDER BY s.seat) AS seat_rows
          FROM (
-           SELECT rs.*, u.selected_badge
+           SELECT rs.*, u.selected_badge, u.playmat
            FROM room_seats AS rs
            LEFT JOIN users AS u ON u.id = rs.user_id
            WHERE rs.room_code = $1
@@ -4868,6 +4874,7 @@ export function stateMessage(room: RoomRow, seat: number | null): ServerMessage 
   const profile = (member: SeatRow | null) => ({
     username: member?.username ?? "Unknown player",
     badge: member?.badge ?? null,
+    ...(member?.playmat ? { playmat: member.playmat } : {}),
   });
   return {
     type: "state",

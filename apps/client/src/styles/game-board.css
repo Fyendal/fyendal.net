@@ -1310,15 +1310,26 @@
 }
 .browser-bot-notice button { flex-shrink: 0; }
 
-/* ── printed-cloth playmat: a painting fixed under the board. The scrim
-   darkens the hand and the opponent's band most and opens at the seam, so
-   the art shows where the chain is fought and the cards stay the brightest
-   thing on the table. The weave is kept so it reads as cloth, not a photo. ── */
+/* ── printed-cloth playmats: each player's painting lies under their half
+   and stops at the seam, whose edges the board measures into
+   --mat-seam-top/-bottom. The scrim darkens each mat's outer edge, under the
+   hand band and the hand, and opens toward the seam, so the cards stay the
+   brightest thing on the table. The weave keeps it reading as cloth. ── */
 .playmat-art {
-  position: fixed;
-  inset: 0 var(--rail-w) 0 0;
+  position: absolute;
+  right: 0;
+  left: 0;
+  overflow: hidden;
   background: #180c03;
   pointer-events: none;
+}
+.playmat-art-opp {
+  top: 0;
+  height: var(--mat-seam-top, 50%);
+}
+.playmat-art-own {
+  top: var(--mat-seam-bottom, 50%);
+  bottom: 0;
 }
 .playmat-art-image {
   display: block;
@@ -1334,18 +1345,18 @@
   position: absolute;
   inset: 0;
   background:
-    linear-gradient(
-      180deg,
-      #0d0703ad 0%,
-      #0d070366 18%,
-      #0d070330 42%,
-      #0d070330 58%,
-      #0d070370 80%,
-      #0d0703c2 100%
-    ),
-    radial-gradient(ellipse 70% 60% at 50% 50%, transparent 55%, #0d070359 100%),
+    var(--playmat-scrim),
+    radial-gradient(ellipse 70% 80% at 50% var(--playmat-seam-edge), transparent 55%, #0d070359 100%),
     repeating-linear-gradient(115deg, #ffffff05 0 2px, transparent 2px 7px),
     repeating-linear-gradient(25deg, #00000014 0 3px, transparent 3px 10px);
+}
+.playmat-art-opp::after {
+  --playmat-seam-edge: 100%;
+  --playmat-scrim: linear-gradient(180deg, #0d0703ad 0%, #0d070366 40%, #0d070330 100%);
+}
+.playmat-art-own::after {
+  --playmat-seam-edge: 0%;
+  --playmat-scrim: linear-gradient(180deg, #0d070330 0%, #0d070370 55%, #0d0703c2 100%);
 }
 @media (prefers-reduced-motion: reduce) {
   .playmat-art-image { transition: none; }

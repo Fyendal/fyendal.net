@@ -55,6 +55,8 @@ function sideRailProps(
     cardDisplayPreference: "square",
     playmat: "leather",
     onPlaymatChange: vi.fn(),
+    botPlaymat: "leather",
+    onBotPlaymatChange: vi.fn(),
     onCardDisplayPreferenceChange: vi.fn(),
     playabilityCuePreference: "glow",
     onPlayabilityCuePreferenceChange: vi.fn(),

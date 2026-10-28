@@ -240,6 +240,8 @@ export function SideRail({
   onCardDisplayPreferenceChange,
   playmat,
   onPlaymatChange,
+  botPlaymat,
+  onBotPlaymatChange,
   openSettingsSignal = 0,
   motionPreference,
   onMotionPreferenceChange,
@@ -315,6 +317,8 @@ export function SideRail({
   onCardDisplayPreferenceChange: (preference: CardDisplayPreference) => void;
   playmat: PlaymatId;
   onPlaymatChange: (playmat: PlaymatId) => void;
+  botPlaymat: PlaymatId;
+  onBotPlaymatChange: (playmat: PlaymatId) => void;
   /** Bumped by the board to open the settings dialog from outside the rail. */
   openSettingsSignal?: number;
   motionPreference: MotionPreference;
@@ -683,6 +687,8 @@ export function SideRail({
           onCardDisplayPreferenceChange={onCardDisplayPreferenceChange}
           playmat={playmat}
           onPlaymatChange={onPlaymatChange}
+          botPlaymat={botPlaymat}
+          onBotPlaymatChange={onBotPlaymatChange}
           motionPreference={motionPreference}
           onMotionPreferenceChange={onMotionPreferenceChange}
           playabilityCuePreference={playabilityCuePreference}

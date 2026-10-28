@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useIntl } from "react-intl";
 import type { PlayerBadge } from "@fyendal/shared";
-import type { AccountBadgesResponse } from "@fyendal/protocol";
+import type { AccountCosmeticsResponse } from "@fyendal/protocol";
 import { ModalSurface } from "../components/ModalSurface.js";
 import { PlayerBadgeMark } from "../game/PlayerBadge.js";
 import { useStore } from "../store.js";
@@ -15,12 +15,12 @@ export function AccountPanel() {
   const intl = useIntl();
   const authToken = useStore((state) => state.authToken);
   const authUser = useStore((state) => state.authUser);
-  const getAccountBadges = useStore((state) => state.getAccountBadges);
-  const selectAccountBadge = useStore((state) => state.selectAccountBadge);
+  const getAccountCosmetics = useStore((state) => state.getAccountCosmetics);
+  const updateAccountCosmetics = useStore((state) => state.updateAccountCosmetics);
   const exportAccount = useStore((state) => state.exportAccount);
   const deleteAccount = useStore((state) => state.deleteAccount);
   const [password, setPassword] = useState("");
-  const [badges, setBadges] = useState<AccountBadgesResponse | null>(null);
+  const [cosmetics, setCosmetics] = useState<AccountCosmeticsResponse | null>(null);
   const [busy, setBusy] = useState<AccountAction | null>(null);
   // Each failure renders beside the control that caused it.
   const [error, setError] = useState<{ action: AccountAction; message: string } | null>(null);
@@ -30,18 +30,18 @@ export function AccountPanel() {
 
   useEffect(() => {
     let active = true;
-    void getAccountBadges().then((result) => {
+    void getAccountCosmetics().then((result) => {
       if (!active) return;
-      if (result.ok) setBadges(result);
+      if (result.ok) setCosmetics(result);
       else setError({ action: "badges", message: result.error });
     });
     return () => { active = false; };
-  }, [getAccountBadges]);
+  }, [getAccountCosmetics]);
 
   const openBadgePicker = () => {
     setError(null);
     setNote(null);
-    setDraftBadge(badges?.selectedBadge ?? null);
+    setDraftBadge(cosmetics?.selectedBadge ?? null);
   };
 
   const closeBadgePicker = () => {
@@ -54,9 +54,9 @@ export function AccountPanel() {
     setBusy("badges");
     setError(null);
     setNote(null);
-    const result = await selectAccountBadge(badge);
+    const result = await updateAccountCosmetics({ badge });
     if (result.ok) {
-      setBadges(result);
+      setCosmetics(result);
       setDraftBadge(undefined);
       setNote(intl.formatMessage({ id: "account.badge.updated" }));
     } else {
@@ -103,7 +103,7 @@ export function AccountPanel() {
   const errorFor = (action: AccountAction) => error?.action === action
     ? <p className="account-feedback error" role="alert">{error.message}</p>
     : null;
-  const selectedBadge = badges?.selectedBadge ?? null;
+  const selectedBadge = cosmetics?.selectedBadge ?? null;
   const currentBadgeIds = badgeMessageIds(selectedBadge);
 
   return (
@@ -123,7 +123,7 @@ export function AccountPanel() {
           <p>{intl.formatMessage({ id: "account.badge.description" })}</p>
         </div>
         <div className="account-setting-control">
-          {badges ? (
+          {cosmetics ? (
             <div className="account-badge-current">
               <BadgeArt badge={selectedBadge} size={40} />
               <span className="account-badge-copy">
@@ -187,7 +187,7 @@ export function AccountPanel() {
           {errorFor("delete")}
         </div>
       </section>
-      {badges && draftBadge !== undefined ? (
+      {cosmetics && draftBadge !== undefined ? (
         <ModalSurface
           className="account-badge-modal"
           title={intl.formatMessage({ id: "account.badge.title" })}
@@ -199,7 +199,7 @@ export function AccountPanel() {
             <span>{authUser}</span>
           </div>
           <BadgePicker
-            availableBadges={badges.availableBadges}
+            availableBadges={cosmetics.availableBadges}
             selectedBadge={draftBadge}
             disabled={busy !== null}
             onSelect={setDraftBadge}

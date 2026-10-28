@@ -36553,6 +36553,18 @@
       "value": "Playmat"
     }
   ],
+  "settings.playmat.bots": [
+    {
+      "type": 0,
+      "value": "Practice bots"
+    }
+  ],
+  "settings.playmat.botsNote": [
+    {
+      "type": 0,
+      "value": "The bot's half in practice games."
+    }
+  ],
   "settings.playmat.credit": [
     {
       "type": 0,
@@ -36647,6 +36659,24 @@
     {
       "type": 0,
       "value": "Welcome to Rathe"
+    }
+  ],
+  "settings.playmat.side": [
+    {
+      "type": 0,
+      "value": "Which side"
+    }
+  ],
+  "settings.playmat.yours": [
+    {
+      "type": 0,
+      "value": "Yours"
+    }
+  ],
+  "settings.playmat.yoursNote": [
+    {
+      "type": 0,
+      "value": "Your half of the table. Opponents see it too."
     }
   ],
   "settings.priority": [

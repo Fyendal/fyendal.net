@@ -36,6 +36,8 @@ describe("game settings dialog", () => {
       onCardDisplayPreferenceChange: vi.fn(),
       playmat: "leather",
       onPlaymatChange: vi.fn(),
+      botPlaymat: "leather",
+      onBotPlaymatChange: vi.fn(),
       playabilityCuePreference: "high-contrast",
       onPlayabilityCuePreferenceChange: vi.fn(),
       soundEffectsEnabled: true,
@@ -96,6 +98,8 @@ describe("game settings dialog", () => {
       onCardDisplayPreferenceChange: vi.fn(),
       playmat: "leather",
       onPlaymatChange: vi.fn(),
+      botPlaymat: "leather",
+      onBotPlaymatChange: vi.fn(),
       playabilityCuePreference: "glow",
       onPlayabilityCuePreferenceChange: vi.fn(),
       soundEffectsEnabled: true,
@@ -127,6 +131,8 @@ describe("game settings dialog", () => {
       onCardDisplayPreferenceChange: vi.fn(),
       playmat: "leather",
       onPlaymatChange: vi.fn(),
+      botPlaymat: "leather",
+      onBotPlaymatChange: vi.fn(),
       playabilityCuePreference: "glow",
       onPlayabilityCuePreferenceChange: vi.fn(),
       soundEffectsEnabled: true,
@@ -167,6 +173,8 @@ describe("game settings dialog", () => {
       onCardDisplayPreferenceChange: vi.fn(),
       playmat: "monarch",
       onPlaymatChange,
+      botPlaymat: "leather",
+      onBotPlaymatChange: vi.fn(),
       playabilityCuePreference: "glow",
       onPlayabilityCuePreferenceChange: vi.fn(),
       soundEffectsEnabled: true,
@@ -177,9 +185,13 @@ describe("game settings dialog", () => {
     });
 
     expect(html).toContain('role="radiogroup" aria-labelledby="settings-playmat-label"');
-    expect(html.match(/type="radio" name="playmat"/g)).toHaveLength(PLAYMAT_IDS.length);
+    expect(html.match(/type="radio" name="playmat-own"/g)).toHaveLength(PLAYMAT_IDS.length);
     expect(html).toContain('class="playmat-swatch playmat-swatch-selected" data-playmat="monarch"');
-    expect(html).toContain('name="playmat" checked="" value="monarch"');
+    expect(html).toContain('name="playmat-own" checked="" value="monarch"');
+    expect(html).toContain('aria-label="Which side"');
+    expect(html).toContain('class="settings-selected" aria-pressed="true">Yours</button>');
+    expect(html).toContain('aria-pressed="false">Practice bots</button>');
+    expect(html).toContain(">Your half of the table. Opponents see it too.</p>");
     expect(html).toContain('src="/playmats/thumbs/monarch.jpg"');
     expect(html).toContain(">Map of Rathe</span>");
     expect(html).toContain(">Leather</span>");

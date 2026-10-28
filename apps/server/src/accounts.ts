@@ -12,6 +12,7 @@ import {
   type HeroRecord,
   type MatchSummary,
   type MatchupRecord,
+  playmatRef,
 } from "@fyendal/protocol";
 import { exportSocialData } from "./social.js";
 import { accountEmail } from "./recovery.js";
@@ -21,12 +22,19 @@ import {
   detachMatchesForUser, listMatches, loadMatchRecords, MAX_EXPORTED_MATCHES, sweepOrphanedMatches,
 } from "./matches.js";
 
-export interface AccountBadgePreferences {
+export interface AccountCosmetics {
   availableBadges: PlayerBadge[];
   selectedBadge: PlayerBadge | null;
+  playmat: string | null;
 }
 
-function badgePreferences(earlyTester: boolean, selectedBadge: unknown): AccountBadgePreferences {
+interface CosmeticRow {
+  early_tester: boolean;
+  selected_badge: unknown;
+  playmat: unknown;
+}
+
+function badgePreferences(earlyTester: boolean, selectedBadge: unknown): Pick<AccountCosmetics, "availableBadges" | "selectedBadge"> {
   const availableBadges: PlayerBadge[] = earlyTester ? ["early-tester"] : [];
   return {
     availableBadges,
@@ -34,31 +42,57 @@ function badgePreferences(earlyTester: boolean, selectedBadge: unknown): Account
   };
 }
 
-export async function getAccountBadges(
-  db: Queryable,
-  userId: number,
-): Promise<AccountBadgePreferences | null> {
-  const { rows } = await db.query(
-    "SELECT early_tester, selected_badge FROM users WHERE id = $1",
-    [userId],
-  );
-  const user = rows[0] as { early_tester: boolean; selected_badge: unknown } | undefined;
-  return user ? badgePreferences(user.early_tester, user.selected_badge) : null;
+function cosmetics(row: CosmeticRow): AccountCosmetics {
+  return {
+    ...badgePreferences(row.early_tester, row.selected_badge),
+    playmat: playmatRef(row.playmat) ? row.playmat : null,
+  };
 }
 
-export async function selectAccountBadge(
+export async function getAccountCosmetics(
   db: Queryable,
   userId: number,
-  badge: unknown,
-): Promise<{ ok: true; preferences: AccountBadgePreferences } | { ok: false; error: "invalid badge" | "badge not available" | "account not found" }> {
-  if (badge !== null && badge !== "early-tester") return { ok: false, error: "invalid badge" };
-  const current = await getAccountBadges(db, userId);
+): Promise<AccountCosmetics | null> {
+  const { rows } = await db.query(
+    "SELECT early_tester, selected_badge, playmat FROM users WHERE id = $1",
+    [userId],
+  );
+  const user = rows[0] as CosmeticRow | undefined;
+  return user ? cosmetics(user) : null;
+}
+
+export type AccountCosmeticsError =
+  | "nothing to change" | "invalid badge" | "badge not available" | "invalid playmat" | "account not found";
+
+/** Applies the fields present in `changes`; an absent field keeps its value. */
+export async function updateAccountCosmetics(
+  db: Queryable,
+  userId: number,
+  changes: { badge?: unknown; playmat?: unknown },
+): Promise<{ ok: true; cosmetics: AccountCosmetics } | { ok: false; error: AccountCosmeticsError }> {
+  const { badge, playmat } = changes;
+  if (badge === undefined && playmat === undefined) return { ok: false, error: "nothing to change" };
+  if (badge !== undefined && badge !== null && badge !== "early-tester") return { ok: false, error: "invalid badge" };
+  if (playmat !== undefined && playmat !== null && !playmatRef(playmat)) return { ok: false, error: "invalid playmat" };
+  const current = await getAccountCosmetics(db, userId);
   if (!current) return { ok: false, error: "account not found" };
-  if (badge !== null && !current.availableBadges.includes(badge)) {
+  if (badge !== undefined && badge !== null && !current.availableBadges.includes(badge)) {
     return { ok: false, error: "badge not available" };
   }
-  await db.query("UPDATE users SET selected_badge = $2 WHERE id = $1", [userId, badge]);
-  return { ok: true, preferences: { ...current, selectedBadge: badge } };
+  // push returns the new length, which is the placeholder's 1-based position
+  const assignments: string[] = [];
+  const params: unknown[] = [userId];
+  if (badge !== undefined) assignments.push(`selected_badge = $${params.push(badge)}`);
+  if (playmat !== undefined) assignments.push(`playmat = $${params.push(playmat)}`);
+  await db.query(`UPDATE users SET ${assignments.join(", ")} WHERE id = $1`, params);
+  return {
+    ok: true,
+    cosmetics: {
+      ...current,
+      ...(badge !== undefined ? { selectedBadge: badge } : {}),
+      ...(playmat !== undefined ? { playmat } : {}),
+    },
+  };
 }
 
 export interface AccountExport {
@@ -68,6 +102,7 @@ export interface AccountExport {
     createdAt: number;
     earlyTester: boolean;
     selectedBadge: PlayerBadge | null;
+    playmat: string | null;
     betaTester: boolean;
     email: string | null;
     pendingEmail: string | null;
@@ -204,7 +239,7 @@ export async function exportAccount(db: Queryable, userId: number): Promise<Acco
     social,
   ] = await Promise.all([
     db.query(
-      `SELECT u.username, u.created_at, u.early_tester, u.selected_badge,
+      `SELECT u.username, u.created_at, u.early_tester, u.selected_badge, u.playmat,
               b.user_id IS NOT NULL AS beta_tester
        FROM users u LEFT JOIN beta_testers b ON b.user_id = u.id
        WHERE u.id = $1`,
@@ -268,6 +303,7 @@ export async function exportAccount(db: Queryable, userId: number): Promise<Acco
     created_at: number;
     early_tester: boolean;
     selected_badge: unknown;
+    playmat: unknown;
     beta_tester: boolean;
   } | undefined;
   if (!user) return null;
@@ -352,6 +388,7 @@ export async function exportAccount(db: Queryable, userId: number): Promise<Acco
       createdAt: Number(user.created_at),
       earlyTester: user.early_tester,
       selectedBadge: badgePreferences(user.early_tester, user.selected_badge).selectedBadge,
+      playmat: playmatRef(user.playmat) ? user.playmat : null,
       betaTester: user.beta_tester,
       email: recoveryEmail?.email ?? null,
       pendingEmail: recoveryEmail?.pendingEmail ?? null,

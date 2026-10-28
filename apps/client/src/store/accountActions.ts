@@ -1,5 +1,5 @@
 import {
-  apiAccountBadges,
+  apiAccountCosmetics,
   apiAccountBeta,
   apiAccountEmail,
   apiBugReportNotifications,
@@ -15,7 +15,7 @@ import {
   apiReportBug,
   apiRemoveAccountEmail,
   apiReportPlayer,
-  apiSelectAccountBadge,
+  apiUpdateAccountCosmetics,
   apiSetAccountEmail,
   apiSetDeckArt,
   apiUpdateDeck,
@@ -39,8 +39,8 @@ type AccountActionKey =
   | "deleteDeck"
   | "exportAccount"
   | "refreshBetaTester"
-  | "getAccountBadges"
-  | "selectAccountBadge"
+  | "getAccountCosmetics"
+  | "updateAccountCosmetics"
   | "getAccountEmail"
   | "setAccountEmail"
   | "removeAccountEmail"
@@ -202,18 +202,18 @@ export function createAccountActions({
       const result = await apiAccountBeta(token, request.signal);
       if (isCurrentAuth(request) && result.ok) set({ betaTester: result.betaTester });
     },
-    getAccountBadges: async () => {
+    getAccountCosmetics: async () => {
       const token = get().authToken;
       if (!token) return { ok: false, error: "not logged in" };
       const request = authRequest(token);
-      const result = await apiAccountBadges(token, request.signal);
+      const result = await apiAccountCosmetics(token, request.signal);
       return isCurrentAuth(request) ? result : superseded;
     },
-    selectAccountBadge: async (badge) => {
+    updateAccountCosmetics: async (changes) => {
       const token = get().authToken;
       if (!token) return { ok: false, error: "not logged in" };
       const request = authRequest(token);
-      const result = await apiSelectAccountBadge(token, badge, request.signal);
+      const result = await apiUpdateAccountCosmetics(token, changes, request.signal);
       return isCurrentAuth(request) ? result : superseded;
     },
     getAccountEmail: async () => {
