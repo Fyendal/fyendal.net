@@ -3846,7 +3846,23 @@
   "card.effect.hvy.talkabiggame": [
     {
       "type": 0,
-      "value": "下次你对英雄造成不少于所选数字的伤害时，生成该数量的 Might 衍生物"
+      "value": "下次你对英雄造成不少于 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点伤害时，生成 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 个 Might 衍生物"
     }
   ],
   "card.effect.iar.embracesin": [
@@ -7860,6 +7876,28 @@
     {
       "type": 1,
       "value": "opponentNumber"
+    }
+  ],
+  "card.log.hvy.talkabiggame.number.chosen": [
+    {
+      "type": 1,
+      "value": "player"
+    },
+    {
+      "type": 0,
+      "value": " 为 "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 选择 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
     }
   ],
   "card.log.mon.minnowism.found": [

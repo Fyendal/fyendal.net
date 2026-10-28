@@ -3998,7 +3998,53 @@
   "card.effect.hvy.talkabiggame": [
     {
       "type": 0,
-      "value": "da próxima vez que você causar pelo menos a quantidade escolhida de dano a um herói, crie essa quantidade de tokens Might"
+      "value": "da próxima vez que você causar "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " ou mais de dano a um herói, crie "
+    },
+    {
+      "type": 6,
+      "value": "amount",
+      "options": {
+        "=0": {
+          "value": [
+            {
+              "type": 0,
+              "value": "nenhum token Might"
+            }
+          ]
+        },
+        "one": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " token Might"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " tokens Might"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
     }
   ],
   "card.effect.iar.embracesin": [
@@ -8759,6 +8805,28 @@
     {
       "type": 1,
       "value": "opponentNumber"
+    }
+  ],
+  "card.log.hvy.talkabiggame.number.chosen": [
+    {
+      "type": 1,
+      "value": "player"
+    },
+    {
+      "type": 0,
+      "value": " escolhe "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " para "
+    },
+    {
+      "type": 1,
+      "value": "card"
     }
   ],
   "card.log.mon.minnowism.found": [

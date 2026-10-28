@@ -81,7 +81,7 @@ describe("damage-dealt triggers use the stack", () => {
   it("Talk a Big Game creates Might for the chosen amount of physical damage", () => {
     const g = scenario({ seats: [seat({ hand: ["talk a big game|3", "wounding blow|1"] }), foe()] });
 
-    g.play("talk a big game|3").chooseOption("4");
+    g.play("talk a big game|3").chooseOption("4").expectLog("chooses 4 for Talk a Big Game");
     g.play("wounding blow|1").blockWith();
     passUntilTrigger(g, "talk a big game|3");
     expect(named(g, 0, "Might")).toBe(0);

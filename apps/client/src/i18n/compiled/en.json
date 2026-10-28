@@ -3955,7 +3955,45 @@
   "card.effect.hvy.talkabiggame": [
     {
       "type": 0,
-      "value": "the next time you deal at least the chosen amount of damage to a hero, create that many Might tokens"
+      "value": "the next time you deal "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " or more damage to a hero, create "
+    },
+    {
+      "type": 6,
+      "value": "amount",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " Might token"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " Might tokens"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
     }
   ],
   "card.effect.iar.embracesin": [
@@ -8448,6 +8486,28 @@
     {
       "type": 1,
       "value": "opponentNumber"
+    }
+  ],
+  "card.log.hvy.talkabiggame.number.chosen": [
+    {
+      "type": 1,
+      "value": "player"
+    },
+    {
+      "type": 0,
+      "value": " chooses "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " for "
+    },
+    {
+      "type": 1,
+      "value": "card"
     }
   ],
   "card.log.mon.minnowism.found": [

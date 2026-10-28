@@ -11,6 +11,7 @@ import {
   decisionPrompt,
   heroDamage,
   hitHookLabel,
+  localizedCardLog,
   ongoingLabel,
   opponentSeat,
   pendingDelayedEffect,
@@ -482,13 +483,6 @@ export const hvyHighRarity: Record<string, CardScript> = {
   },
   "talk a big game|3": {
     onPlay(ctx) {
-      ctx.addModifier({
-        scope: "until-end-of-turn",
-        ...ongoingLabel(
-          "the next time you deal at least the chosen amount of damage to a hero, create that many Might tokens",
-          "card.effect.hvy.talkabiggame",
-        ),
-      });
       ctx.requestChoice("big-number", decisionPrompt("Choose a number", "card.hvy.number.choose"), [
         "1",
         "2",
@@ -499,7 +493,25 @@ export const hvyHighRarity: Record<string, CardScript> = {
       ]);
     },
     onChoose(ctx, hook, option) {
-      if (hook === "big-number") ctx.setState("talk-threshold", Number(option));
+      if (hook !== "big-number") return;
+      const amount = Number(option);
+      ctx.setState("talk-threshold", amount);
+      ctx.logPublic(
+        localizedCardLog(
+          ctx,
+          `${ctx.cardData(ctx.player(ctx.seat).heroCardId).name} chooses ${amount} for ${ctx.data.name}`,
+          "card.log.hvy.talkabiggame.number.chosen",
+          { player: { kind: "player", seat: ctx.seat }, amount },
+        ),
+      );
+      ctx.addModifier({
+        scope: "until-end-of-turn",
+        ...ongoingLabel(
+          `the next time you deal ${amount} or more damage to a hero, create ${amount} Might token${amount === 1 ? "" : "s"}`,
+          "card.effect.hvy.talkabiggame",
+          { amount },
+        ),
+      });
     },
     triggers: [
       {
