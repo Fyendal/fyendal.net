@@ -353,10 +353,13 @@
   --mat-r: calc(232 - 219 * var(--mat-dim));
   --mat-g: calc(189 - 182 * var(--mat-dim));
   --mat-b: calc(74 - 71 * var(--mat-dim));
-  --mat-dim-alpha: calc(var(--mat-dim) * .26);
-  --mat-seam-0: rgb(var(--mat-r) var(--mat-g) var(--mat-b) / calc(var(--mat-light) * .5 + var(--mat-dim-alpha)));
-  --mat-seam-1: rgb(var(--mat-r) var(--mat-g) var(--mat-b) / calc(var(--mat-light) * .24 + var(--mat-dim-alpha)));
-  --mat-seam-2: rgb(var(--mat-r) var(--mat-g) var(--mat-b) / calc(var(--mat-light) * .06 + var(--mat-dim-alpha)));
+  /* gains step both cues up over a painting, which is brighter than leather */
+  --mat-light-gain: 1;
+  --mat-dim-gain: 1;
+  --mat-dim-alpha: calc(var(--mat-dim) * .26 * var(--mat-dim-gain));
+  --mat-seam-0: rgb(var(--mat-r) var(--mat-g) var(--mat-b) / calc(var(--mat-light) * .5 * var(--mat-light-gain) + var(--mat-dim-alpha)));
+  --mat-seam-1: rgb(var(--mat-r) var(--mat-g) var(--mat-b) / calc(var(--mat-light) * .24 * var(--mat-light-gain) + var(--mat-dim-alpha)));
+  --mat-seam-2: rgb(var(--mat-r) var(--mat-g) var(--mat-b) / calc(var(--mat-light) * .06 * var(--mat-light-gain) + var(--mat-dim-alpha)));
   --mat-rest: rgb(var(--mat-r) var(--mat-g) var(--mat-b) / var(--mat-dim-alpha));
   --mat-seam-side: to bottom;
   border-image-source: linear-gradient(
@@ -374,6 +377,10 @@
 .mat-half.mat-opp { --mat-seam-side: to top; }
 .mat-half.mat-priority-holder { --mat-light: 1; }
 .board:has(.mat-priority-holder) .mat-half:not(.mat-priority-holder) { --mat-dim: 1; }
+.table.has-playmat .mat-half {
+  --mat-light-gain: 1.4;
+  --mat-dim-gain: 1.6;
+}
 .mat-half.mat-priority-pulse {
   animation: mat-priority-breathe 3.6s ease-in-out infinite;
 }
@@ -381,13 +388,22 @@
   0%, 100% { --mat-light: 1; }
   50% { --mat-light: 1.4; }
 }
-/* The brass inlay throws its light onto the holder's side too. */
-.mat-divider { transition: box-shadow .34s ease-out; }
+/* The brass inlay throws its light onto the holder's side too, with a crisp
+   rule along that edge so the side reads over any painting. */
+.mat-divider {
+  --seam-glow: #ffd47966;
+  --seam-rule: #ffe9a8cc;
+  transition: box-shadow .34s ease-out;
+}
+.table.has-playmat .mat-divider {
+  --seam-glow: #ffd479a6;
+  --seam-rule: #fff1c4;
+}
 .board:has(.mat-opp.mat-priority-holder) .mat-divider {
-  box-shadow: 0 -5px 16px #ffd47966, 0 -1px 4px #ffd479a6;
+  box-shadow: 0 -2px 0 var(--seam-rule), 0 -6px 18px var(--seam-glow), 0 -1px 4px #ffd479a6;
 }
 .board:has(.mat-half:not(.mat-opp).mat-priority-holder) .mat-divider {
-  box-shadow: 0 5px 16px #ffd47966, 0 1px 4px #ffd479a6;
+  box-shadow: 0 2px 0 var(--seam-rule), 0 6px 18px var(--seam-glow), 0 1px 4px #ffd479a6;
 }
 .mat-priority-status {
   position: absolute;
