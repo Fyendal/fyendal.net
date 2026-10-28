@@ -15,6 +15,7 @@ import {
   loadRejectedMatchRooms,
   loadRejectedMatchRoomsForChoice,
   loadGameSettings,
+  loadPlaymatHintDismissed,
   loadBotMatchmakingPreference,
   loadHomeGameMode,
   loadHomeFormat,
@@ -25,6 +26,7 @@ import {
   pruneRejectedMatchRooms,
   ROOM_SESSION_STORAGE_KEY,
   saveGameSettings,
+  savePlaymatHintDismissed,
   saveBotMatchmakingPreference,
   saveHomeGameMode,
   saveHomeFormat,
@@ -440,6 +442,22 @@ describe("client storage keys", () => {
     expect(orders["card 0|0"]).toBeUndefined();
     expect(orders[`card ${MAX_STANDING_ORDER_CARDS}|0`]).toEqual({ "trigger-choice": "yes" });
     expect(decodeStandingOrders(orders)).not.toBeNull();
+  });
+
+  it("remembers the playmat hint dismissal per account", () => {
+    const values = new Map<string, string>();
+    const storage = {
+      getItem: (key: string) => values.get(key) ?? null,
+      setItem: (key: string, value: string) => { values.set(key, value); },
+    };
+    expect(loadPlaymatHintDismissed(storage, "Alice")).toBe(false);
+    savePlaymatHintDismissed(storage, "Alice");
+    expect(loadPlaymatHintDismissed(storage, "alice")).toBe(true);
+    expect(loadPlaymatHintDismissed(storage, "bob")).toBe(false);
+    expect(loadPlaymatHintDismissed(storage, null)).toBe(false);
+    savePlaymatHintDismissed(storage, null);
+    expect(loadPlaymatHintDismissed(storage, null)).toBe(true);
+    expect(loadPlaymatHintDismissed({ getItem: () => { throw new Error("blocked"); } }, "alice")).toBe(false);
   });
 
   it("keeps a known playmat and falls back to leather for an unknown one", () => {

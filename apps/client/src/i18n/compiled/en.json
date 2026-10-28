@@ -29322,6 +29322,54 @@
       "value": "number"
     }
   ],
+  "game.playmatHint.body": [
+    {
+      "type": 6,
+      "value": "count",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " playmat is"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " playmats are"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    },
+    {
+      "type": 0,
+      "value": " waiting to dress up your arena."
+    }
+  ],
+  "game.playmatHint.dismiss": [
+    {
+      "type": 0,
+      "value": "Not now"
+    }
+  ],
+  "game.playmatHint.title": [
+    {
+      "type": 0,
+      "value": "Try a playmat"
+    }
+  ],
   "game.rail.collapse": [
     {
       "type": 0,

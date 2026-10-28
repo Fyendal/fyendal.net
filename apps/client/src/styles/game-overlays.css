@@ -1423,3 +1423,107 @@
   font-size: 12px;
   font-weight: 400;
 }
+
+/* ── playmat hint: a brass plaque, like the nameplates, slid out of the
+   arena's top-right corner. The plaque itself is the offer. ── */
+.playmat-hint {
+  position: fixed;
+  z-index: 45;
+  top: 14px;
+  right: calc(var(--rail-w) + 14px);
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 4px 4px 4px 10px;
+  border: 1px solid #8a6a35;
+  border-radius: 4px;
+  background: #140d07f2;
+  box-shadow: 0 4px 16px #000b, inset 0 1px #f1c4751f;
+  animation: playmat-hint-in 320ms cubic-bezier(.2, .8, .2, 1) both;
+}
+@keyframes playmat-hint-in {
+  from { opacity: 0; transform: translateX(28px); }
+  to { opacity: 1; transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .playmat-hint { animation: none; }
+}
+.table[data-motion-preference="reduced"] .playmat-hint { animation: none; }
+.playmat-hint-offer,
+.playmat-hint-close {
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 3px;
+  clip-path: none;
+  background: transparent;
+  box-shadow: none;
+  transition: background-color 120ms ease;
+}
+.playmat-hint-offer {
+  display: flex;
+  width: auto;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 12px 6px 4px;
+  letter-spacing: normal;
+  text-align: left;
+  text-transform: none;
+}
+.playmat-hint-offer:hover { background: #ffd47914; }
+.playmat-hint-copy {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 3px;
+}
+.playmat-hint-title {
+  color: var(--gold);
+  font-family: var(--font-display);
+  font-size: 15px;
+  letter-spacing: .6px;
+  line-height: 1;
+  transition: color 120ms ease;
+}
+.playmat-hint-offer:hover .playmat-hint-title { color: #fff0c5; }
+.playmat-hint-body {
+  color: #cdbc9c;
+  font-family: var(--font-lobby-ui);
+  font-size: 12.5px;
+  line-height: 1.25;
+}
+.playmat-hint-offer:focus-visible,
+.playmat-hint-close:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 0; }
+.playmat-hint-fan {
+  position: relative;
+  flex: none;
+  width: 66px;
+  height: 44px;
+}
+.playmat-hint-fan img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 50px;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  border: 1px solid #0009;
+  border-radius: 2px;
+  box-shadow: 0 2px 6px #000a;
+}
+.playmat-hint-fan img:nth-child(1) { transform: translate(0, 13px) rotate(-10deg); }
+.playmat-hint-fan img:nth-child(2) { transform: translate(7px, 7px) rotate(-3deg); }
+.playmat-hint-fan img:nth-child(3) { transform: translate(15px, 0) rotate(5deg); }
+.playmat-hint-close {
+  display: grid;
+  transition: color 120ms ease, background-color 120ms ease;
+  width: 28px;
+  height: 36px;
+  place-items: center;
+  margin-left: 2px;
+  border-left: 1px solid #73582f80;
+  border-radius: 0 3px 3px 0;
+  color: #d9b866;
+}
+.playmat-hint-close .ui-icon { width: 13px; height: 13px; }
+.playmat-hint-close:hover { background: #ffd47914; color: var(--gold); }

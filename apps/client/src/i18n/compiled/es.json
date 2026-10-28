@@ -30228,6 +30228,54 @@
       "value": "number"
     }
   ],
+  "game.playmatHint.body": [
+    {
+      "type": 6,
+      "value": "count",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " playmat espera"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " playmats esperan"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    },
+    {
+      "type": 0,
+      "value": " para embellecer tu arena."
+    }
+  ],
+  "game.playmatHint.dismiss": [
+    {
+      "type": 0,
+      "value": "Ahora no"
+    }
+  ],
+  "game.playmatHint.title": [
+    {
+      "type": 0,
+      "value": "Prueba un playmat"
+    }
+  ],
   "game.rail.collapse": [
     {
       "type": 0,

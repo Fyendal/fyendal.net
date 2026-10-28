@@ -76,6 +76,34 @@ export function saveHomeGameMode(
   }
 }
 
+const PLAYMAT_HINT_STORAGE_PREFIX = "fyendal-playmat-hint-";
+
+function playmatHintStorageKey(username: string | null): string {
+  return `${PLAYMAT_HINT_STORAGE_PREFIX}${username ? username.toLowerCase() : "guest"}`;
+}
+
+export function loadPlaymatHintDismissed(
+  storage: Pick<Storage, "getItem">,
+  username: string | null,
+): boolean {
+  try {
+    return storage.getItem(playmatHintStorageKey(username)) === "1";
+  } catch {
+    return false;
+  }
+}
+
+export function savePlaymatHintDismissed(
+  storage: Pick<Storage, "setItem">,
+  username: string | null,
+): void {
+  try {
+    storage.setItem(playmatHintStorageKey(username), "1");
+  } catch {
+    // Session dismissal still works when storage is unavailable.
+  }
+}
+
 export type PrepSortOrder = "name" | "pitch";
 
 export function loadPrepSortOrder(storage: Pick<Storage, "getItem">): PrepSortOrder {

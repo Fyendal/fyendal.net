@@ -28219,6 +28219,28 @@
       "value": "number"
     }
   ],
+  "game.playmatHint.body": [
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " 款桌垫已就绪，为你的战场增色。"
+    }
+  ],
+  "game.playmatHint.dismiss": [
+    {
+      "type": 0,
+      "value": "暂不"
+    }
+  ],
+  "game.playmatHint.title": [
+    {
+      "type": 0,
+      "value": "试试桌垫"
+    }
+  ],
   "game.rail.collapse": [
     {
       "type": 0,

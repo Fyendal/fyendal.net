@@ -74,6 +74,8 @@ import { EffectHeroesContext, effectHeroes } from "./effects/effectHeroes.js";
 import { abilityLabelForSource, deriveBoardLegalState } from "./board/boardModel.js";
 import { useGameSettings } from "./board/useGameSettings.js";
 import { PlaymatArt } from "./PlaymatArt.js";
+import { PlaymatHintToast } from "./PlaymatHintToast.js";
+import { usePlaymatHint } from "./board/usePlaymatHint.js";
 import { useGameViewport } from "./board/useGameViewport.js";
 import { useHudReserve } from "./board/useHudReserve.js";
 import { useFullscreen } from "../components/useFullscreen.js";
@@ -532,6 +534,14 @@ export function GameBoard() {
   const causal = causalStatus(view, spectating ? null : yourSeat);
   const seat: 0 | 1 = yourSeat === 1 ? 1 : 0; // spectators watch from seat 0's side of the table
   const replaying = screen === "replay";
+  const [openSettingsSignal, setOpenSettingsSignal] = useState(0);
+  const playmatHint = usePlaymatHint({
+    eligible: !spectating && !replaying && yourSeat !== null
+      && playmat === "leather" && view.phase !== "game-over",
+    resolved: playmat !== "leather",
+    username: authUser,
+    onChoose: () => setOpenSettingsSignal((count) => count + 1),
+  });
   const liveNoteFrame = !replaying && replayFrames > 0 ? replayFrames - 1 : null;
   const liveNoteRoomVersion = !replaying && viewUpdate.source === "live"
     ? viewUpdate.roomVersion ?? null
@@ -1219,6 +1229,9 @@ export function GameBoard() {
         onViewAchievements={() => { leave(); setLobbyRail("achievements"); }}
       />
       {hasOwnPriority ? <div className="own-priority-arrival" aria-hidden="true" /> : null}
+      {playmatHint.visible
+        ? <PlaymatHintToast onChoose={playmatHint.choose} onDismiss={playmatHint.dismiss} />
+        : null}
       {/* ── playmat board: opponent half on top, your half below ── */}
       <div ref={boardRef} className="board">
         <PlaymatArt key={playmat} playmat={playmat} />
@@ -1657,6 +1670,7 @@ export function GameBoard() {
         onCardDisplayPreferenceChange={updateCardDisplayPreference}
         playmat={playmat}
         onPlaymatChange={updatePlaymat}
+        openSettingsSignal={openSettingsSignal}
         playabilityCuePreference={playabilityCuePreference}
         onPlayabilityCuePreferenceChange={updatePlayabilityCuePreference}
         soundEffectsEnabled={soundEffectsEnabled}

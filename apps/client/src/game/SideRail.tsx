@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useIntl } from "react-intl";
 import type { EmoteMessage, GameLogViewEntry, UndoTarget } from "@fyendal/shared";
 import { cardData } from "@fyendal/cards/client";
@@ -240,6 +240,7 @@ export function SideRail({
   onCardDisplayPreferenceChange,
   playmat,
   onPlaymatChange,
+  openSettingsSignal = 0,
   motionPreference,
   onMotionPreferenceChange,
   playabilityCuePreference,
@@ -314,6 +315,8 @@ export function SideRail({
   onCardDisplayPreferenceChange: (preference: CardDisplayPreference) => void;
   playmat: PlaymatId;
   onPlaymatChange: (playmat: PlaymatId) => void;
+  /** Bumped by the board to open the settings dialog from outside the rail. */
+  openSettingsSignal?: number;
   motionPreference: MotionPreference;
   onMotionPreferenceChange: (preference: MotionPreference) => void;
   playabilityCuePreference: PlayabilityCuePreference;
@@ -342,6 +345,11 @@ export function SideRail({
   const [showBugReport, setShowBugReport] = useState(false);
   const [showMobileLog, setShowMobileLog] = useState(false);
   const [showUtilities, setShowUtilities] = useState(false);
+  useEffect(() => {
+    if (!openSettingsSignal) return;
+    setShowUtilities(false);
+    setShowSettings(true);
+  }, [openSettingsSignal]);
   const [editingNote, setEditingNote] = useState<{
     roomVersion: number;
     frame: number;

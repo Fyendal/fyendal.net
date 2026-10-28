@@ -1440,4 +1440,9 @@
       repeating-linear-gradient(25deg, #00000014 0 3px, transparent 3px 10px);
   }
   .playmat-picker { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .playmat-hint {
+    top: calc(62px + env(safe-area-inset-top));
+    right: 10px;
+    max-width: calc(100vw - 20px);
+  }
 }
