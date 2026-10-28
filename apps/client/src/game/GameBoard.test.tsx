@@ -502,3 +502,28 @@ describe("card display preference", () => {
     expect(cardClasses(html, "TST-CHAIN")).not.toContain("card-board-square");
   });
 });
+
+describe("playmat", () => {
+  it("fixes the chosen painting under the board and marks the table", () => {
+    vi.stubGlobal("localStorage", {
+      getItem: (key: string) => key === GAME_SETTINGS_STORAGE_KEY
+        ? JSON.stringify({ ...DEFAULT_GAME_SETTINGS, playmat: "volcor" })
+        : null,
+    });
+    gameStore.state = liveState(false);
+    const html = renderToStaticMarkup(<TestI18nProvider><GameBoard /></TestI18nProvider>);
+
+    expect(html).toMatch(/class="table[^"]* has-playmat"/);
+    expect(html).toContain('<div class="board"><div class="playmat-art" aria-hidden="true" data-loaded="false">');
+    expect(html).toContain('class="playmat-art-image" src="/playmats/volcor.jpg" alt=""');
+  });
+
+  it("keeps the leather board free of an art layer", () => {
+    vi.stubGlobal("localStorage", { getItem: () => null });
+    gameStore.state = liveState(false);
+    const html = renderToStaticMarkup(<TestI18nProvider><GameBoard /></TestI18nProvider>);
+
+    expect(html).not.toContain("has-playmat");
+    expect(html).not.toContain("playmat-art");
+  });
+});

@@ -73,6 +73,7 @@ import { EffectLedger, type EffectLedgerTarget } from "./effects/EffectLedger.js
 import { EffectHeroesContext, effectHeroes } from "./effects/effectHeroes.js";
 import { abilityLabelForSource, deriveBoardLegalState } from "./board/boardModel.js";
 import { useGameSettings } from "./board/useGameSettings.js";
+import { PlaymatArt } from "./PlaymatArt.js";
 import { useGameViewport } from "./board/useGameViewport.js";
 import { useHudReserve } from "./board/useHudReserve.js";
 import { useFullscreen } from "../components/useFullscreen.js";
@@ -263,6 +264,7 @@ export function GameBoard() {
     skipBotDelay,
     soundEffectsEnabled,
     soundEffectsVolume,
+    playmat,
     updatePriorityWindowMode,
     updateLessGuidance,
     updateCardDisplayPreference,
@@ -273,6 +275,7 @@ export function GameBoard() {
     updateSkipBotDelay,
     updateSoundEffectsEnabled,
     updateSoundEffectsVolume,
+    updatePlaymat,
     standingOrders: standingOrderSettings,
     updateStandingOrder,
   } = useGameSettings({
@@ -1193,7 +1196,7 @@ export function GameBoard() {
     <SquareCardPresentation enabled={squareCardsEnabled}>
     <div
       ref={tableRef}
-      className={`table${railCollapsed ? " rail-is-collapsed" : ""}${view.phase === "game-over" ? " game-is-over" : ""}${hasActiveCombatChain ? " has-active-combat-chain" : ""}${mobileHandIsHidden ? " mobile-hand-is-hidden" : ""}${compactHud ? " hud-is-compact" : ""}`}
+      className={`table${railCollapsed ? " rail-is-collapsed" : ""}${view.phase === "game-over" ? " game-is-over" : ""}${hasActiveCombatChain ? " has-active-combat-chain" : ""}${mobileHandIsHidden ? " mobile-hand-is-hidden" : ""}${compactHud ? " hud-is-compact" : ""}${playmat !== "leather" ? " has-playmat" : ""}`}
       data-playability-cue={playabilityCuePreference}
       data-motion-preference={motionPreference}
       onMouseMove={onHoverCard}
@@ -1218,6 +1221,7 @@ export function GameBoard() {
       {hasOwnPriority ? <div className="own-priority-arrival" aria-hidden="true" /> : null}
       {/* ── playmat board: opponent half on top, your half below ── */}
       <div ref={boardRef} className="board">
+        <PlaymatArt key={playmat} playmat={playmat} />
         {gameMotion.turnStartUiReady && pitchSource ? (
           <PitchFocus
             key={pitchSource.card.instanceId}
@@ -1651,6 +1655,8 @@ export function GameBoard() {
         onMotionPreferenceChange={updateMotionPreference}
         cardDisplayPreference={cardDisplayPreference}
         onCardDisplayPreferenceChange={updateCardDisplayPreference}
+        playmat={playmat}
+        onPlaymatChange={updatePlaymat}
         playabilityCuePreference={playabilityCuePreference}
         onPlayabilityCuePreferenceChange={updatePlayabilityCuePreference}
         soundEffectsEnabled={soundEffectsEnabled}

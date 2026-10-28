@@ -3,6 +3,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
 import { GameSettingsDialog } from "./SideRailDialogs.js";
 import { TestI18nProvider } from "../i18n/TestI18nProvider.js";
+import { PLAYMAT_IDS } from "../playmats.js";
 
 function settingsDialog(
   props: ComponentProps<typeof GameSettingsDialog>,
@@ -33,6 +34,8 @@ describe("game settings dialog", () => {
       onMotionPreferenceChange: vi.fn(),
       cardDisplayPreference: "full",
       onCardDisplayPreferenceChange: vi.fn(),
+      playmat: "leather",
+      onPlaymatChange: vi.fn(),
       playabilityCuePreference: "high-contrast",
       onPlayabilityCuePreferenceChange: vi.fn(),
       soundEffectsEnabled: true,
@@ -91,6 +94,8 @@ describe("game settings dialog", () => {
       onMotionPreferenceChange: vi.fn(),
       cardDisplayPreference: "square",
       onCardDisplayPreferenceChange: vi.fn(),
+      playmat: "leather",
+      onPlaymatChange: vi.fn(),
       playabilityCuePreference: "glow",
       onPlayabilityCuePreferenceChange: vi.fn(),
       soundEffectsEnabled: true,
@@ -120,6 +125,8 @@ describe("game settings dialog", () => {
       onMotionPreferenceChange: vi.fn(),
       cardDisplayPreference: "square",
       onCardDisplayPreferenceChange: vi.fn(),
+      playmat: "leather",
+      onPlaymatChange: vi.fn(),
       playabilityCuePreference: "glow",
       onPlayabilityCuePreferenceChange: vi.fn(),
       soundEffectsEnabled: true,
@@ -138,5 +145,45 @@ describe("game settings dialog", () => {
     expect(html).toContain('aria-label="动画偏好"');
     expect(html).toContain(">对局历史</h3>");
     expect(html).toContain(">危险操作</h3>");
+  });
+
+  it("offers every playmat as a radio swatch and marks the chosen one", () => {
+    const onPlaymatChange = vi.fn();
+    const html = settingsDialog({
+      turn: 1,
+      onUndo: null,
+      onConcede: null,
+      priorityWindowMode: "always-pause",
+      onPriorityWindowModeChange: null,
+      lessGuidance: true,
+      onLessGuidanceChange: vi.fn(),
+      skipPlayConfirmation: true,
+      onSkipPlayConfirmationChange: vi.fn(),
+      optionHotkeys: false,
+      onOptionHotkeysChange: vi.fn(),
+      motionPreference: "system",
+      onMotionPreferenceChange: vi.fn(),
+      cardDisplayPreference: "square",
+      onCardDisplayPreferenceChange: vi.fn(),
+      playmat: "monarch",
+      onPlaymatChange,
+      playabilityCuePreference: "glow",
+      onPlayabilityCuePreferenceChange: vi.fn(),
+      soundEffectsEnabled: true,
+      onSoundEffectsEnabledChange: vi.fn(),
+      soundEffectsVolume: 35,
+      onSoundEffectsVolumeChange: vi.fn(),
+      onClose: vi.fn(),
+    });
+
+    expect(html).toContain('role="radiogroup" aria-labelledby="settings-playmat-label"');
+    expect(html.match(/type="radio" name="playmat"/g)).toHaveLength(PLAYMAT_IDS.length);
+    expect(html).toContain('class="playmat-swatch playmat-swatch-selected" data-playmat="monarch"');
+    expect(html).toContain('name="playmat" checked="" value="monarch"');
+    expect(html).toContain('src="/playmats/thumbs/monarch.jpg"');
+    expect(html).toContain(">Map of Rathe</span>");
+    expect(html).toContain(">Leather</span>");
+    expect(html).not.toContain('src="/playmats/thumbs/leather.jpg"');
+    expect(html).toContain(">Artwork by Legend Story Studios</p>");
   });
 });

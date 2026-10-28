@@ -8,6 +8,8 @@ import type {
   PlayabilityCuePreference,
   PriorityWindowMode,
 } from "../storage.js";
+import type { PlaymatId } from "../playmats.js";
+import { PlaymatPicker } from "./PlaymatPicker.js";
 
 const MOTION_PREFERENCES: readonly MotionPreference[] = ["system", "full", "reduced"];
 const MOTION_PREFERENCE_LABEL_ID: Readonly<Record<MotionPreference, string>> = {
@@ -41,6 +43,8 @@ export function GameSettingsDialog({
   onSkipBotDelayChange = null,
   cardDisplayPreference,
   onCardDisplayPreferenceChange,
+  playmat,
+  onPlaymatChange,
   motionPreference,
   onMotionPreferenceChange,
   playabilityCuePreference,
@@ -70,6 +74,8 @@ export function GameSettingsDialog({
   onSkipBotDelayChange?: ((enabled: boolean) => void) | null;
   cardDisplayPreference: CardDisplayPreference;
   onCardDisplayPreferenceChange: (preference: CardDisplayPreference) => void;
+  playmat: PlaymatId;
+  onPlaymatChange: (playmat: PlaymatId) => void;
   motionPreference: MotionPreference;
   onMotionPreferenceChange: (preference: MotionPreference) => void;
   playabilityCuePreference: PlayabilityCuePreference;
@@ -261,6 +267,7 @@ export function GameSettingsDialog({
                   </button>
                 </div>
               </div>
+              <PlaymatPicker playmat={playmat} onPlaymatChange={onPlaymatChange} />
               <div className="settings-control-row settings-motion-row">
                 <span className="settings-control-name">
                   {intl.formatMessage({ id: "settings.animations" })}

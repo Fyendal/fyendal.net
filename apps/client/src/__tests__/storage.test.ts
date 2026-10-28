@@ -135,8 +135,9 @@ describe("client storage keys", () => {
     };
 
     expect(loadGameSettings(storage)).toEqual({
-      version: 9,
+      version: 10,
       cardDisplayPreference: "square",
+      playmat: "leather",
       priorityWindowMode: "always-pause",
       lessGuidance: true,
       skipPlayConfirmation: true,
@@ -149,8 +150,9 @@ describe("client storage keys", () => {
       standingOrders: {},
     });
     saveGameSettings(storage, {
-      version: 9,
+      version: 10,
       cardDisplayPreference: "full",
+      playmat: "leather",
       priorityWindowMode: "auto-pass",
       lessGuidance: false,
       skipPlayConfirmation: false,
@@ -163,8 +165,9 @@ describe("client storage keys", () => {
       standingOrders: {},
     });
     expect(loadGameSettings(storage)).toEqual({
-      version: 9,
+      version: 10,
       cardDisplayPreference: "full",
+      playmat: "leather",
       priorityWindowMode: "auto-pass",
       lessGuidance: false,
       skipPlayConfirmation: false,
@@ -187,8 +190,9 @@ describe("client storage keys", () => {
         skipPlayConfirmation: false,
       }),
     })).toEqual({
-      version: 9,
+      version: 10,
       cardDisplayPreference: "square",
+      playmat: "leather",
       priorityWindowMode: "auto-pass",
       lessGuidance: true,
       skipPlayConfirmation: false,
@@ -212,8 +216,9 @@ describe("client storage keys", () => {
         motionPreference: "reduced",
       }),
     })).toEqual({
-      version: 9,
+      version: 10,
       cardDisplayPreference: "square",
+      playmat: "leather",
       priorityWindowMode: "auto-pass",
       lessGuidance: true,
       skipPlayConfirmation: false,
@@ -239,8 +244,9 @@ describe("client storage keys", () => {
         soundEffectsVolume: 60,
       }),
     })).toEqual({
-      version: 9,
+      version: 10,
       cardDisplayPreference: "square",
+      playmat: "leather",
       priorityWindowMode: "auto-pass",
       lessGuidance: true,
       skipPlayConfirmation: false,
@@ -283,7 +289,7 @@ describe("client storage keys", () => {
   it("falls back safely for invalid or future settings", () => {
     expect(loadGameSettings({ getItem: () => "not json" })).toEqual(DEFAULT_GAME_SETTINGS);
     expect(loadGameSettings({
-      getItem: () => JSON.stringify({ version: 9, priorityWindowMode: "auto-pass" }),
+      getItem: () => JSON.stringify({ version: 10, priorityWindowMode: "auto-pass" }),
     })).toEqual(DEFAULT_GAME_SETTINGS);
     expect(loadGameSettings({
       getItem: () => JSON.stringify({
@@ -332,8 +338,9 @@ describe("client storage keys", () => {
     };
     expect(loadGameSettings({ getItem: () => JSON.stringify(previous) })).toEqual({
       ...previous,
-      version: 9,
+      version: 10,
       cardDisplayPreference: "square",
+      playmat: "leather",
       optionHotkeys: false,
       skipBotDelay: false,
       standingOrders: {},
@@ -433,6 +440,18 @@ describe("client storage keys", () => {
     expect(orders["card 0|0"]).toBeUndefined();
     expect(orders[`card ${MAX_STANDING_ORDER_CARDS}|0`]).toEqual({ "trigger-choice": "yes" });
     expect(decodeStandingOrders(orders)).not.toBeNull();
+  });
+
+  it("keeps a known playmat and falls back to leather for an unknown one", () => {
+    expect(loadGameSettings({
+      getItem: () => JSON.stringify({ ...DEFAULT_GAME_SETTINGS, playmat: "monarch" }),
+    }).playmat).toBe("monarch");
+    expect(loadGameSettings({
+      getItem: () => JSON.stringify({ ...DEFAULT_GAME_SETTINGS, playmat: "retired-mat" }),
+    })).toEqual(DEFAULT_GAME_SETTINGS);
+    const { playmat: _absent, ...previous } = { ...DEFAULT_GAME_SETTINGS, version: 9 as const };
+    expect(loadGameSettings({ getItem: () => JSON.stringify(previous) }))
+      .toEqual({ ...DEFAULT_GAME_SETTINGS, playmat: "leather" });
   });
 
   it("rejects invalid card display preferences", () => {

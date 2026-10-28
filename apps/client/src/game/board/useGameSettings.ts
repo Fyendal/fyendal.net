@@ -10,6 +10,7 @@ import {
   type PriorityWindowMode,
   type StandingOrderUpdate,
 } from "../../storage.js";
+import type { PlaymatId } from "../../playmats.js";
 
 export function useGameSettings({
   syncPriorityMode,
@@ -105,6 +106,14 @@ export function useGameSettings({
     });
   };
 
+  const updatePlaymat = (playmat: PlaymatId) => {
+    setSettings((current) => {
+      const next = { ...current, playmat };
+      saveGameSettings(localStorage, next);
+      return next;
+    });
+  };
+
   const updateStandingOrder = (key: string, update: StandingOrderUpdate) => {
     setSettings((current) => {
       const standingOrders = applyStandingOrder(current.standingOrders, key, update);
@@ -127,6 +136,7 @@ export function useGameSettings({
     updatePlayabilityCuePreference,
     updateSoundEffectsEnabled,
     updateSoundEffectsVolume,
+    updatePlaymat,
     updateStandingOrder,
   };
 }

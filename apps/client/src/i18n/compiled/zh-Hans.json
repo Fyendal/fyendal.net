@@ -34655,6 +34655,108 @@
       "value": "发光会添加柔和的绿色光晕；高对比度会使用清晰轮廓。"
     }
   ],
+  "settings.playmat": [
+    {
+      "type": 0,
+      "value": "桌垫"
+    }
+  ],
+  "settings.playmat.credit": [
+    {
+      "type": 0,
+      "value": "美术：Legend Story Studios"
+    }
+  ],
+  "settings.playmat.name.candlehold": [
+    {
+      "type": 0,
+      "value": "Candlehold"
+    }
+  ],
+  "settings.playmat.name.crucible-of-war": [
+    {
+      "type": 0,
+      "value": "Crucible of War"
+    }
+  ],
+  "settings.playmat.name.demonastery": [
+    {
+      "type": 0,
+      "value": "Demonastery"
+    }
+  ],
+  "settings.playmat.name.isenloft": [
+    {
+      "type": 0,
+      "value": "Isenloft"
+    }
+  ],
+  "settings.playmat.name.leather": [
+    {
+      "type": 0,
+      "value": "皮革"
+    }
+  ],
+  "settings.playmat.name.map-of-rathe": [
+    {
+      "type": 0,
+      "value": "Rathe 地图"
+    }
+  ],
+  "settings.playmat.name.misteria": [
+    {
+      "type": 0,
+      "value": "Misteria"
+    }
+  ],
+  "settings.playmat.name.monarch": [
+    {
+      "type": 0,
+      "value": "Monarch"
+    }
+  ],
+  "settings.playmat.name.pits": [
+    {
+      "type": 0,
+      "value": "The Pits"
+    }
+  ],
+  "settings.playmat.name.savage-lands": [
+    {
+      "type": 0,
+      "value": "Savage Lands"
+    }
+  ],
+  "settings.playmat.name.solana": [
+    {
+      "type": 0,
+      "value": "Solana"
+    }
+  ],
+  "settings.playmat.name.tales-of-aria": [
+    {
+      "type": 0,
+      "value": "Tales of Aria"
+    }
+  ],
+  "settings.playmat.name.volcor": [
+    {
+      "type": 0,
+      "value": "Volcor"
+    }
+  ],
+  "settings.playmat.name.volthaven": [
+    {
+      "type": 0,
+      "value": "Volthaven"
+    }
+  ],
+  "settings.playmat.name.welcome-to-rathe": [
+    {
+      "type": 0,
+      "value": "Welcome to Rathe"
+    }
+  ],
   "settings.priority": [
     {
       "type": 0,

@@ -38207,6 +38207,108 @@
       "value": "Brilho adiciona um halo verde discreto. Alto contraste usa um contorno nítido."
     }
   ],
+  "settings.playmat": [
+    {
+      "type": 0,
+      "value": "Playmat"
+    }
+  ],
+  "settings.playmat.credit": [
+    {
+      "type": 0,
+      "value": "Arte de Legend Story Studios"
+    }
+  ],
+  "settings.playmat.name.candlehold": [
+    {
+      "type": 0,
+      "value": "Candlehold"
+    }
+  ],
+  "settings.playmat.name.crucible-of-war": [
+    {
+      "type": 0,
+      "value": "Crucible of War"
+    }
+  ],
+  "settings.playmat.name.demonastery": [
+    {
+      "type": 0,
+      "value": "Demonastery"
+    }
+  ],
+  "settings.playmat.name.isenloft": [
+    {
+      "type": 0,
+      "value": "Isenloft"
+    }
+  ],
+  "settings.playmat.name.leather": [
+    {
+      "type": 0,
+      "value": "Couro"
+    }
+  ],
+  "settings.playmat.name.map-of-rathe": [
+    {
+      "type": 0,
+      "value": "Mapa de Rathe"
+    }
+  ],
+  "settings.playmat.name.misteria": [
+    {
+      "type": 0,
+      "value": "Misteria"
+    }
+  ],
+  "settings.playmat.name.monarch": [
+    {
+      "type": 0,
+      "value": "Monarch"
+    }
+  ],
+  "settings.playmat.name.pits": [
+    {
+      "type": 0,
+      "value": "The Pits"
+    }
+  ],
+  "settings.playmat.name.savage-lands": [
+    {
+      "type": 0,
+      "value": "Savage Lands"
+    }
+  ],
+  "settings.playmat.name.solana": [
+    {
+      "type": 0,
+      "value": "Solana"
+    }
+  ],
+  "settings.playmat.name.tales-of-aria": [
+    {
+      "type": 0,
+      "value": "Tales of Aria"
+    }
+  ],
+  "settings.playmat.name.volcor": [
+    {
+      "type": 0,
+      "value": "Volcor"
+    }
+  ],
+  "settings.playmat.name.volthaven": [
+    {
+      "type": 0,
+      "value": "Volthaven"
+    }
+  ],
+  "settings.playmat.name.welcome-to-rathe": [
+    {
+      "type": 0,
+      "value": "Welcome to Rathe"
+    }
+  ],
   "settings.priority": [
     {
       "type": 0,

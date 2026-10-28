@@ -1336,3 +1336,76 @@
 @media (prefers-reduced-motion: no-preference) {
   .replay-bar button { transition: background-color .12s, border-color .12s, color .12s; }
 }
+
+/* ── playmat swatches: cloth samples laid out like a tailor's card ── */
+.settings-playmat-row {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 9px;
+}
+.playmat-picker {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(92px, 1fr));
+  gap: 8px 6px;
+}
+.playmat-swatch {
+  position: relative;
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 4px;
+  cursor: pointer;
+}
+.playmat-swatch input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+.playmat-swatch-art {
+  display: block;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border: 2px solid #3d2d19;
+  border-radius: 3px;
+  /* the leather swatch is the mat itself, drawn rather than photographed */
+  background:
+    repeating-linear-gradient(115deg, #ffffff07 0 2px, transparent 2px 7px),
+    radial-gradient(ellipse at 50% 50%, #38220f 0%, #251405 60%, #180c03 100%);
+  box-shadow: inset 0 0 0 1px #0008;
+  transition: border-color 120ms ease, box-shadow 120ms ease;
+}
+.playmat-swatch-art img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.playmat-swatch:hover .playmat-swatch-art { border-color: #7a5f30; }
+.playmat-swatch-selected .playmat-swatch-art {
+  border-color: #d4a958;
+  box-shadow: inset 0 0 0 1px #0008, 0 0 0 1px #d4a95866, 0 0 12px #d4a95833;
+}
+.playmat-swatch:has(input:focus-visible) .playmat-swatch-art {
+  outline: 2px solid #d4a958;
+  outline-offset: 2px;
+}
+.playmat-swatch-name {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  color: #b9aa92;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+.playmat-swatch-selected .playmat-swatch-name { color: #fff0c5; }
+.playmat-credit {
+  margin: 0;
+  color: #8a7f6d;
+  font-size: 12px;
+  font-weight: 400;
+}

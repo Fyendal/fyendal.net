@@ -53,6 +53,8 @@ function sideRailProps(
     motionPreference: "system",
     onMotionPreferenceChange: vi.fn(),
     cardDisplayPreference: "square",
+    playmat: "leather",
+    onPlaymatChange: vi.fn(),
     onCardDisplayPreferenceChange: vi.fn(),
     playabilityCuePreference: "glow",
     onPlayabilityCuePreferenceChange: vi.fn(),

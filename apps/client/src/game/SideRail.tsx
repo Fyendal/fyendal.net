@@ -8,6 +8,7 @@ import type {
   PlayabilityCuePreference,
   PriorityWindowMode,
 } from "../storage.js";
+import type { PlaymatId } from "../playmats.js";
 import {
   logTextSegments,
   parseTurnBoundaryLogLine,
@@ -237,6 +238,8 @@ export function SideRail({
   onSkipBotDelayChange = null,
   cardDisplayPreference,
   onCardDisplayPreferenceChange,
+  playmat,
+  onPlaymatChange,
   motionPreference,
   onMotionPreferenceChange,
   playabilityCuePreference,
@@ -309,6 +312,8 @@ export function SideRail({
   onSkipBotDelayChange?: ((enabled: boolean) => void) | null;
   cardDisplayPreference: CardDisplayPreference;
   onCardDisplayPreferenceChange: (preference: CardDisplayPreference) => void;
+  playmat: PlaymatId;
+  onPlaymatChange: (playmat: PlaymatId) => void;
   motionPreference: MotionPreference;
   onMotionPreferenceChange: (preference: MotionPreference) => void;
   playabilityCuePreference: PlayabilityCuePreference;
@@ -668,6 +673,8 @@ export function SideRail({
           onSkipBotDelayChange={onSkipBotDelayChange}
           cardDisplayPreference={cardDisplayPreference}
           onCardDisplayPreferenceChange={onCardDisplayPreferenceChange}
+          playmat={playmat}
+          onPlaymatChange={onPlaymatChange}
           motionPreference={motionPreference}
           onMotionPreferenceChange={onMotionPreferenceChange}
           playabilityCuePreference={playabilityCuePreference}

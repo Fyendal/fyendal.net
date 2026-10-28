@@ -333,43 +333,61 @@
 }
 .mat-half.mat-opp { align-content: end; }
 
-/* ── priority tint: the half the game waits on takes a flat brass hue that
-   runs to the board edges and fades out toward the player's outer edge.
-   It is painted as a filled border image so it bleeds past the card grid
-   without changing layout or stacking. A registered property lets the hue
-   cross the seam when priority changes hands. ── */
+/* ── priority light: a brass band from the divider into the holder's half,
+   while the waiting half's mat goes a step darker. Painted as a filled border
+   image so it bleeds past the card grid under the cards. One gradient serves
+   both states: light and dim never coexist on a half, so each stop resolves
+   to brass at the holder's alpha or to mat-dark at the waiting alpha.
+   Registered properties let the light cross the seam when priority moves. ── */
 @property --mat-light {
   syntax: "<number>";
   inherits: false;
   initial-value: 0;
 }
+@property --mat-dim {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 0;
+}
 .mat-half {
-  --mat-tint: rgb(232 189 74 / calc(var(--mat-light) * .13));
+  --mat-r: calc(232 - 219 * var(--mat-dim));
+  --mat-g: calc(189 - 182 * var(--mat-dim));
+  --mat-b: calc(74 - 71 * var(--mat-dim));
+  --mat-dim-alpha: calc(var(--mat-dim) * .26);
+  --mat-seam-0: rgb(var(--mat-r) var(--mat-g) var(--mat-b) / calc(var(--mat-light) * .5 + var(--mat-dim-alpha)));
+  --mat-seam-1: rgb(var(--mat-r) var(--mat-g) var(--mat-b) / calc(var(--mat-light) * .24 + var(--mat-dim-alpha)));
+  --mat-seam-2: rgb(var(--mat-r) var(--mat-g) var(--mat-b) / calc(var(--mat-light) * .06 + var(--mat-dim-alpha)));
+  --mat-rest: rgb(var(--mat-r) var(--mat-g) var(--mat-b) / var(--mat-dim-alpha));
+  --mat-seam-side: to bottom;
   border-image-source: linear-gradient(
-    to bottom,
-    var(--mat-tint) 0%,
-    var(--mat-tint) 55%,
-    rgb(232 189 74 / 0) 100%
+    var(--mat-seam-side),
+    var(--mat-seam-0) 0,
+    var(--mat-seam-1) 44px,
+    var(--mat-seam-2) 110px,
+    var(--mat-rest) 190px,
+    var(--mat-rest) 100%
   );
   border-image-slice: 0 fill;
   border-image-outset: 0 18px;
-  transition: --mat-light .34s ease-out;
+  transition: --mat-light .34s ease-out, --mat-dim .34s ease-out;
 }
-.mat-half.mat-opp {
-  border-image-source: linear-gradient(
-    to top,
-    var(--mat-tint) 0%,
-    var(--mat-tint) 55%,
-    rgb(232 189 74 / 0) 100%
-  );
-}
+.mat-half.mat-opp { --mat-seam-side: to top; }
 .mat-half.mat-priority-holder { --mat-light: 1; }
+.board:has(.mat-priority-holder) .mat-half:not(.mat-priority-holder) { --mat-dim: 1; }
 .mat-half.mat-priority-pulse {
   animation: mat-priority-breathe 3.6s ease-in-out infinite;
 }
 @keyframes mat-priority-breathe {
   0%, 100% { --mat-light: 1; }
-  50% { --mat-light: 1.45; }
+  50% { --mat-light: 1.4; }
+}
+/* The brass inlay throws its light onto the holder's side too. */
+.mat-divider { transition: box-shadow .34s ease-out; }
+.board:has(.mat-opp.mat-priority-holder) .mat-divider {
+  box-shadow: 0 -5px 16px #ffd47966, 0 -1px 4px #ffd479a6;
+}
+.board:has(.mat-half:not(.mat-opp).mat-priority-holder) .mat-divider {
+  box-shadow: 0 5px 16px #ffd47966, 0 1px 4px #ffd479a6;
 }
 .mat-priority-status {
   position: absolute;
@@ -380,10 +398,12 @@
   white-space: nowrap;
 }
 @media (prefers-reduced-motion: reduce) {
-  .mat-half { transition: none; }
+  .mat-half,
+  .mat-divider { transition: none; }
   .mat-half.mat-priority-pulse { animation: none; }
 }
-.table[data-motion-preference="reduced"] .mat-half { transition: none; }
+.table[data-motion-preference="reduced"] .mat-half,
+.table[data-motion-preference="reduced"] .mat-divider { transition: none; }
 .table[data-motion-preference="reduced"] .mat-half.mat-priority-pulse { animation: none; }
 
 /* Arena cards, backs, and empty zones fit within square grid rows. Keep
@@ -1289,3 +1309,60 @@
   font-size: 0.8rem;
 }
 .browser-bot-notice button { flex-shrink: 0; }
+
+/* ── printed-cloth playmat: a painting fixed under the board. The scrim
+   darkens the hand and the opponent's band most and opens at the seam, so
+   the art shows where the chain is fought and the cards stay the brightest
+   thing on the table. The weave is kept so it reads as cloth, not a photo. ── */
+.playmat-art {
+  position: fixed;
+  inset: 0 var(--rail-w) 0 0;
+  background: #180c03;
+  pointer-events: none;
+}
+.playmat-art-image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity .6s ease-out;
+}
+.playmat-art[data-loaded="true"] .playmat-art-image { opacity: 1; }
+.playmat-art::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(
+      180deg,
+      #0d0703ad 0%,
+      #0d070366 18%,
+      #0d070330 42%,
+      #0d070330 58%,
+      #0d070370 80%,
+      #0d0703c2 100%
+    ),
+    radial-gradient(ellipse 70% 60% at 50% 50%, transparent 55%, #0d070359 100%),
+    repeating-linear-gradient(115deg, #ffffff05 0 2px, transparent 2px 7px),
+    repeating-linear-gradient(25deg, #00000014 0 3px, transparent 3px 10px);
+}
+@media (prefers-reduced-motion: reduce) {
+  .playmat-art-image { transition: none; }
+}
+.table[data-motion-preference="reduced"] .playmat-art-image { transition: none; }
+/* Empty zones and labels get a touch more backing over a painting. */
+.table.has-playmat .equipment-zone-empty {
+  border-color: #e3cf9c80;
+  background: linear-gradient(160deg, #1a10087a, #0d07038f);
+  box-shadow: inset 0 0 0 1px #0008, inset 0 0 14px #0009;
+}
+.table.has-playmat .equipment-zone-icon {
+  filter: drop-shadow(0 1px 2px #000);
+}
+.table.has-playmat .mat-half .zone-arsenal .equipment-zone-empty.arsenal-zone-inactive {
+  background: #0d070352;
+}
+.table.has-playmat .mat-zone-label {
+  text-shadow: 0 1px 2px #000, 0 0 8px #000d;
+}
