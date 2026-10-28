@@ -292,18 +292,31 @@ function goAgainExpected(
   return soulCount(input) > 0 && attackWillBePumped(data, card, intent, input, own);
 }
 
+// Each damage per held card above a fair return weighs a block's lost offense more.
+const FAIR_DAMAGE_PER_CARD = 3;
+const CONVERSION_LOSS_WEIGHT = 0.5;
+const MAX_RESPONSE_LOSS_WEIGHT = 2;
+
+/** Boltyn keeps a hand that converts into a big turn rather than blocking with it. */
+function responseLossWeight(input: BotPolicyInput): number {
+  const base = aggressorStance(input) ? 1.25 : 1.2;
+  const held = reserve(input);
+  if (held.length === 0) return base;
+  const threat = handResponse(held, input, boltynSolverRules).damageThreatened;
+  const surplus = Math.max(0, threat / held.length - FAIR_DAMAGE_PER_CARD);
+  return Math.min(MAX_RESPONSE_LOSS_WEIGHT, base + CONVERSION_LOSS_WEIGHT * surplus);
+}
+
 const boltynResponse: ResponseModel = {
   offensiveCards: reserve,
   evaluateResponse: (cards, input) => handResponse(cards, input, boltynSolverRules),
 };
 
 function scoreDefend(intent: DefendIntent, input: BotPolicyInput, own: ReadonlyMap<number, CardView>): number {
-  const aggressor = aggressorStance(input);
   return scoreDefenseIntent(intent, input, own, {
     ...boltynResponse,
     cardOpportunity,
-    // Tunic stances take damage to keep pressure; Soulbond stances block and pivot.
-    responseLossWeight: aggressor ? 1 : 1.2,
+    responseLossWeight: responseLossWeight(input),
     equipmentUseIsFree(card, observed) {
       // Solforge Gauntlet settles into the soul when the chain closes.
       return key(observed.cards[card.cardId]) === SOLFORGE_GAUNTLET;
@@ -333,7 +346,12 @@ function scoreDefend(intent: DefendIntent, input: BotPolicyInput, own: ReadonlyM
       if (!candidate.lethal) {
         // The Tunic is the V of the Vanguard engine, not a one-point blocker.
         if (chosenKeys.includes(FYENDALS_SPRING_TUNIC)) adjustment -= 5;
-        adjustment -= chosenKeys.filter((functional) => POWER_CARDS.has(functional)).length * 1.5;
+        // A block spends a power card as surely as a charge, so it pays the charge price over its held value.
+        for (const card of candidate.chosen) {
+          if (!POWER_CARDS.has(key(observed.cards[card.cardId]))) continue;
+          const unpaid = cardChargeCost(card, observed, cardOpportunity) - cardOpportunity(card, observed);
+          adjustment -= Math.max(1.5, unpaid);
+        }
         adjustment -= chosenKeys.filter((functional) => functional.startsWith("beaming bravado|")).length * 0.5;
       }
       return adjustment === 0

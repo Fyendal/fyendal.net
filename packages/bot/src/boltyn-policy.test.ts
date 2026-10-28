@@ -169,6 +169,13 @@ function underAttack(state: GameState, attackId: string): GameState {
   throw new Error("attack did not reach defense");
 }
 
+/** The cards Boltyn's policy defends with at this defend decision. */
+function defenders(state: GameState): readonly number[] {
+  const intent = chooseBoltynIntent(input(state));
+  if (intent.kind !== "stage-defenders" && intent.kind !== "defend") throw new Error(`not a defense: ${intent.kind}`);
+  return intent.instanceIds;
+}
+
 function currentLinkPower(state: GameState): number | undefined {
   return projectStateFor(state, 0).chain.at(-1)?.attackValue;
 }
@@ -683,11 +690,36 @@ describe("Boltyn policy", () => {
     const defending = underAttack(state, PLAIN_ATTACK);
     const tunic = defending.players[0]!.equipment.chest!;
     expect(cardData[tunic.cardId]?.name).toBe("Fyendal's Spring Tunic");
-    const intent = chooseBoltynIntent(input(defending));
-    expect(intent.kind === "stage-defenders" || intent.kind === "defend").toBe(true);
-    if (intent.kind === "stage-defenders" || intent.kind === "defend") {
-      expect(intent.instanceIds).not.toContain(tunic.instanceId);
-    }
+    expect(defenders(defending)).not.toContain(tunic.instanceId);
+  });
+
+  it("does not block a survivable hit with Lumina Ascension", () => {
+    const state = settled(game());
+    // As reported: Lumina blocked a 7-power swing beside Spirit of Eirina, Saving Grace and Blessing of Suraya.
+    hand(state, ["DYN066", "ASB026", "ASB025", "IAR258"]);
+    const boltyn = state.players[0]!;
+    boltyn.arsenal = cards(state, ["MON032"]);
+    boltyn.board = cards(state, ["IAR258"]);
+    [boltyn.equipment.head, boltyn.equipment.arms, boltyn.equipment.legs] =
+      cards(state, ["EVO247", "DTD207", "ASB006"]);
+    boltyn.equipment.chest!.counters = { energy: 0 };
+    boltyn.life = 36;
+    soul(state, 0);
+    state.players[1]!.resources = 3;
+    const defending = underAttack(state, "ELE128");
+    const lumina = defending.players[0]!.hand.find((card) => card.cardId === "ASB026")!;
+    expect(defenders(defending)).not.toContain(lumina.instanceId);
+  });
+
+  it("takes a hit at high life instead of blocking with a hand that converts into a big turn", () => {
+    const state = settled(game());
+    hand(state, ["DTD052", "ASB021", "PEN183", "ASB016"]);
+    delete state.players[0]!.equipment.head;
+    soul(state, 1);
+    state.players[1]!.resources = 3;
+    const defending = underAttack(state, "ELE128");
+    const spirit = defending.players[0]!.hand.find((card) => card.cardId === "DTD052")!;
+    expect(defenders(defending)).not.toContain(spirit.instanceId);
   });
 
   it("keeps Beaming Bravado and its yellow charge when they unlock Duty Bound Blitz", () => {
