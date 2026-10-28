@@ -801,15 +801,29 @@ describe("CardFace counter icons", () => {
     expect(html).toContain(`card-counter-55-${key}c`);
   });
 
-  it("shows a counter's number only when it has two or more", () => {
+  it("shows a stackable counter's number even when it has only one", () => {
     const html = renderToStaticMarkup(createElement(CardFace, {
-      card: { instanceId: 56, cardId: "DYN090", owner: 0, counters: { rust: 1, sand: 2, steam: 1 } },
+      card: { instanceId: 56, cardId: "DYN090", owner: 0, counters: { rust: 1, sand: 2, steam: 1, energy: 1 } },
     }));
 
     expect(html).toContain("1 rust counter");
     expect(html).toContain("1 steam counter");
-    expect(html.match(/class="c-ovl-num"/g)).toHaveLength(1);
+    expect(html).toContain("1 energy counter");
+    expect(html.match(/class="c-ovl-num">1</g)).toHaveLength(3);
     expect(html).toContain('<span class="c-ovl-num">2</span>');
+  });
+
+  it("shows an aim counter's number only from two up", () => {
+    const one = renderToStaticMarkup(createElement(CardFace, {
+      card: { instanceId: 57, cardId: "DYN090", owner: 0, counters: { aim: 1 } },
+    }));
+    const two = renderToStaticMarkup(createElement(CardFace, {
+      card: { instanceId: 57, cardId: "DYN090", owner: 0, counters: { aim: 2 } },
+    }));
+
+    expect(one).toContain("1 aim counter");
+    expect(one).not.toContain("c-ovl-num");
+    expect(two).toContain('<span class="c-ovl-num">2</span>');
   });
 
   it("renders rules counters but hides card-script bookkeeping", () => {

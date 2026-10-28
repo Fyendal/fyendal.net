@@ -745,11 +745,16 @@
   position: absolute;
   inset: 0;
   transform: translateY(0);
-  transition: transform 120ms ease;
+  /* Stay painted while sliding back under the permanent. */
+  transition: transform 120ms ease, visibility 0s linear 120ms;
 }
 .equipment-stack-card:last-of-type {
   position: relative;
   inset: auto;
+}
+/* Unpainted until fanned: a hero's clear top edge shows the soul card's pitch strip. */
+.equipment-stack-card:not(:last-of-type) {
+  visibility: hidden;
 }
 /* A tapped ally is landscape, so its bindings use that same orientation. The
    wrapper still travels vertically on hover, exposing horizontal top edges. */
@@ -763,7 +768,9 @@
   .equipment-stack:focus-within .equipment-stack-card,
   .hero-emote:hover .equipment-stack-card,
   .hero-emote:focus-within .equipment-stack-card {
+    visibility: visible;
     transform: translateY(var(--equipment-stack-offset));
+    transition: transform 120ms ease, visibility 0s;
   }
 }
 @media (prefers-reduced-motion: reduce) {

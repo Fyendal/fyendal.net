@@ -68,9 +68,11 @@ function isFuseCounter(key: string): boolean {
   return key === "fused" || key === "fusedEarth" || key === "fusedIce" || key.startsWith("fused:");
 }
 
-/** A single counter shows only its icon; the number appears from 2 up. */
-function stackedCount(count: number): { value?: string } {
-  return count >= 2 ? { value: String(count) } : {};
+/** Counters that almost never stack read as a flag at 1; the number appears from 2 up. */
+const RARELY_STACKED_KEYS: ReadonlySet<string> = new Set(["aim"]);
+
+function counterValue(key: string, count: number): { value?: string } {
+  return RARELY_STACKED_KEYS.has(key) && count < 2 ? {} : { value: String(count) };
 }
 
 function counterTooltip(count: number, name: string): string {
@@ -82,7 +84,7 @@ function iconCounter(key: string, count: number): CardBadge {
     kind: `${key}c`,
     placement: "overlay",
     icon: `/icons/${key}.png`,
-    ...stackedCount(count),
+    ...counterValue(key, count),
     text: counterTooltip(count, key),
     title: { id: "game.card.badge.counter", values: { count, name: key } },
   };
@@ -204,7 +206,7 @@ export function cardBadges(card: CardView, context: CardBadgeContext = {}): Card
       kind: "steamc",
       placement: "overlay",
       icon: "/icons/gear.png",
-      ...stackedCount(steam),
+      value: String(steam),
       text: counterTooltip(steam, "steam"),
       title: { id: "game.card.badge.steam", values: { count: steam } },
     });
@@ -215,7 +217,7 @@ export function cardBadges(card: CardView, context: CardBadgeContext = {}): Card
       kind: "energyc",
       placement: "overlay",
       icon: "/icons/bolt.webp",
-      ...stackedCount(energy),
+      value: String(energy),
       text: counterTooltip(energy, "energy"),
       title: { id: "game.card.badge.energy", values: { count: energy } },
     });

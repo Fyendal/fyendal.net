@@ -238,11 +238,19 @@
   background: #382716;
   color: #f4e9d4;
 }
+/* Audio & visuals owns the right column; the other sections (four at most)
+   stack in the left one. The trailing flexible row absorbs the height the
+   taller column has over the other, so the shorter stack stays tight. */
 .settings-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-rows: repeat(4, auto) 1fr;
   gap: 12px;
-  align-items: stretch;
+  align-items: start;
+}
+.settings-presentation {
+  grid-column: 2;
+  grid-row: 1 / -1;
 }
 .settings-section {
   display: flex;
@@ -521,7 +529,6 @@
 .settings-action-list > button:hover { background: #352412; }
 .settings-action-list > button:disabled { opacity: .45; cursor: not-allowed; }
 .settings-danger {
-  align-self: start;
   border-color: #63362e;
   background: #1b100d;
 }
@@ -541,7 +548,14 @@
 }
 @media (max-width: 860px) {
   .settings-panel { width: min(440px, calc(100vw - 36px)); }
-  .settings-grid { grid-template-columns: minmax(0, 1fr); }
+  .settings-grid {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: none;
+  }
+  .settings-presentation {
+    grid-column: auto;
+    grid-row: auto;
+  }
 }
 
 /* ── bug reporting (bug icon in the side rail) ── */
@@ -1345,7 +1359,7 @@
 }
 .playmat-picker {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(92px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(72px, 1fr));
   gap: 8px 6px;
 }
 .playmat-swatch {
@@ -1398,7 +1412,7 @@
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
   color: #b9aa92;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 600;
   line-height: 1.2;
 }
