@@ -448,6 +448,7 @@
   "card.lss.drinking.buddy.search": "Drinking Buddy: ¿buscar un item Potion o Brew?",
   "card.lss.ruudi.draw": "Ruu'di: ¿robar una carta?",
   "card.mpa.remember.hand.banish": "Elige una carta de la mano del héroe defensor de la que hacer banish",
+  "card.mpa.flipscript.power": "Los ataques obtienen +1 de poder en este chain link",
   "card.mpa.prolonged.copy": "Crea una copia del primer token de enfermedad destruido con este nombre",
   "card.sda.dash.item.start": "Dash: ¿empezar con un item Mechanologist de coste 2 o menos en la arena?",
   "card.sdo.option.turn": "Poner boca arriba",

@@ -11028,6 +11028,12 @@
       "value": " 张"
     }
   ],
+  "card.mpa.flipscript.power": [
+    {
+      "type": 0,
+      "value": "本 chain link 中的攻击 +1 力量"
+    }
+  ],
   "card.mpa.prolonged.copy": [
     {
       "type": 0,

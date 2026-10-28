@@ -8,6 +8,7 @@ const HUMOUR_PLUNGE = "humour plunge|0";
 const MAD = "mutually assured destruction|1";
 const DEMORALIZE = "demoralize the dracai|1";
 const PREY = "prey on insecurity|1";
+const FLIP = "flip the script|3";
 const REMEMBER = "remember the mists|3";
 const PROLONGED = "prolonged illness|3";
 const VIRAL_DIFFUSION = "viral diffusion|1";
@@ -386,6 +387,34 @@ describe("Armory Deck Mortimer and Mastery Pack Assassin spoilers", () => {
     expect(game.state.players[0]!.graveyard.map((card) => cardData[card.cardId]!.name))
       .toContain("Prey on Insecurity");
     expect(cardData[game.state.players[0]!.deck.at(-1)!.cardId]!.name).toBe("Raging Onslaught");
+  });
+
+  it("Flip the Script gives Uzuri's replacement attack +1 power as it leaves the chain", () => {
+    const game = scenario({ seats: [
+      { hero: "rhinar", heroKey: "uzuri|0", hand: [FLIP, REMEMBER], weapons: [], equipment: NO_EQUIPMENT },
+      { hero: "dorinthea", weapons: [], equipment: NO_EQUIPMENT },
+    ] });
+
+    game.play(FLIP).blockWith().activate("uzuri|0").chooseCard(REMEMBER);
+
+    const link = game.state.chain.at(-1)!;
+    expect(cardData[link.attackingCard.cardId]!.name).toBe("Remember the Mists");
+    expect(cardData[game.state.players[0]!.deck.at(-1)!.cardId]!.name).toBe("Flip the Script");
+    expect(link.damage).toBe(4 + 2 + 1);
+  });
+
+  it("Flip the Script leaving at chain close empowers nothing", () => {
+    const game = scenario({ seats: [
+      { hero: "rhinar", hand: [FLIP], weapons: [], equipment: NO_EQUIPMENT },
+      { hero: "dorinthea", weapons: [], equipment: NO_EQUIPMENT },
+    ] });
+
+    game.play(FLIP).blockWith().settle().expectLife(1, 19);
+    while (game.state.chain.length > 0) game.passPriority();
+    game.settle();
+
+    expect(game.state.players[0]!.graveyard.map((card) => cardData[card.cardId]!.name)).toContain("Flip the Script");
+    expect(game.state.modifiers.filter((modifier) => modifier.attack)).toHaveLength(0);
   });
 
   it("Remember the Mists banishes a card on hit and lets its owner play it", () => {

@@ -6,6 +6,7 @@ import {
   decisionPrompt,
   equipWithSilver,
   hitHookLabel,
+  leavesArenaTrigger,
   ongoingLabel,
   opponentSeat,
   requestDiseaseTokenChoice,
@@ -249,6 +250,21 @@ export const mpa: Record<string, CardScript> = {
         });
       },
     },
+  },
+
+  "flip the script|3": {
+    triggers: [
+      leavesArenaTrigger(
+        "Attacks get +1 power this chain link",
+        decisionMessage("card.mpa.flipscript.power"),
+        (ctx) => {
+          // Leaving at chain close has no chain link left to empower.
+          if (!ctx.link || ctx.link.flags.attackGone === true) return;
+          ctx.addModifier({ scope: "chain-link", attack: 1, appliesTo: "attack" });
+        },
+        { condition: (_ctx, _card, event) => event?.combatRole === "attacking" },
+      ),
+    ],
   },
 
   "remember the mists|3": {

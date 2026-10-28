@@ -11845,6 +11845,12 @@
       "value": "count"
     }
   ],
+  "card.mpa.flipscript.power": [
+    {
+      "type": 0,
+      "value": "Los ataques obtienen +1 de poder en este chain link"
+    }
+  ],
   "card.mpa.prolonged.copy": [
     {
       "type": 0,

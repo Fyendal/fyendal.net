@@ -56,6 +56,20 @@
     "set": "MPA"
   },
   {
+    "id": "MPA021",
+    "name": "Flip the Script",
+    "cardType": "action",
+    "text": "Stealth\nWhen this leaves the combat chain, attacks get +1{p} this chain link.",
+    "pitch": 3,
+    "cost": 0,
+    "attack": 1,
+    "defense": 3,
+    "classes": ["assassin"],
+    "subtypes": ["attack"],
+    "keywords": ["Stealth"],
+    "set": "MPA"
+  },
+  {
     "id": "MPA022",
     "name": "Mutually Assured Destruction",
     "cardType": "action",

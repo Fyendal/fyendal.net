@@ -11815,6 +11815,12 @@
       "value": "count"
     }
   ],
+  "card.mpa.flipscript.power": [
+    {
+      "type": 0,
+      "value": "Attacks get +1 power this chain link"
+    }
+  ],
   "card.mpa.prolonged.copy": [
     {
       "type": 0,
