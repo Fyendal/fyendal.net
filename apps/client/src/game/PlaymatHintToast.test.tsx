@@ -15,7 +15,7 @@ describe("playmat hint toast", () => {
     expect(html).toContain('class="playmat-hint" role="status"');
     expect(html.match(/<img src="\/playmats\/thumbs\/[a-z-]+\.jpg" alt=""/g)).toHaveLength(3);
     expect(html).toContain('<span class="playmat-hint-title">Try a playmat</span>');
-    expect(html).toContain(`${PLAYMAT_IDS.length - 1} playmats are waiting to dress up your arena.`);
+    expect(html).toContain(`${PLAYMAT_IDS.length - 1} playmats are ready to battle on.`);
     expect(html).toContain('class="playmat-hint-close" aria-label="Not now"');
   });
 

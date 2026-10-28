@@ -2330,7 +2330,7 @@
   "game.controls.more": "Mais controles do jogo",
   "game.notes.add": "Marcar o estado atual",
   "game.playmatHint.title": "Experimente um playmat",
-  "game.playmatHint.body": "{count, plural, =0 {Nenhum playmat está} one {# playmat está} other {# playmats estão}} à espera para enfeitar sua arena.",
+  "game.playmatHint.body": "{count, plural, =0 {Nenhum playmat está pronto} one {# playmat está pronto} other {# playmats estão prontos}} para a batalha.",
   "game.playmatHint.dismiss": "Agora não",
   "game.notes.edit": "Editar a nota do estado atual",
   "game.notes.title": "Nota no quadro {frame} do replay",

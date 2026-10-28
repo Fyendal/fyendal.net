@@ -2330,7 +2330,7 @@
   "game.controls.more": "Más controles de la partida",
   "game.notes.add": "Marcar el estado actual",
   "game.playmatHint.title": "Prueba un playmat",
-  "game.playmatHint.body": "{count, plural, one {# playmat espera} other {# playmats esperan}} para embellecer tu arena.",
+  "game.playmatHint.body": "{count, plural, one {# playmat está listo} other {# playmats están listos}} para la batalla.",
   "game.playmatHint.dismiss": "Ahora no",
   "game.notes.edit": "Editar la nota del estado actual",
   "game.notes.title": "Nota en el fotograma {frame} de la repetición",

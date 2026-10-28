@@ -2330,7 +2330,7 @@
   "game.controls.more": "More game controls",
   "game.notes.add": "Bookmark current state",
   "game.playmatHint.title": "Try a playmat",
-  "game.playmatHint.body": "{count, plural, one {# playmat is} other {# playmats are}} waiting to dress up your arena.",
+  "game.playmatHint.body": "{count, plural, one {# playmat is} other {# playmats are}} ready to battle on.",
   "game.playmatHint.dismiss": "Not now",
   "game.notes.edit": "Edit note for current state",
   "game.notes.title": "Note on Replay Frame {frame}",

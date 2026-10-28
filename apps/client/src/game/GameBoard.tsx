@@ -530,18 +530,19 @@ export function GameBoard() {
     onConfirmChainClose: confirmChainClose,
   });
 
-  if (!view || !presentedView || (yourSeat === null && !spectating)) return null;
-  const causal = causalStatus(view, spectating ? null : yourSeat);
-  const seat: 0 | 1 = yourSeat === 1 ? 1 : 0; // spectators watch from seat 0's side of the table
   const replaying = screen === "replay";
   const [openSettingsSignal, setOpenSettingsSignal] = useState(0);
   const playmatHint = usePlaymatHint({
     eligible: !spectating && !replaying && yourSeat !== null
-      && playmat === "leather" && view.phase !== "game-over",
+      && playmat === "leather" && view?.phase !== "game-over",
     resolved: playmat !== "leather",
     username: authUser,
     onChoose: () => setOpenSettingsSignal((count) => count + 1),
   });
+
+  if (!view || !presentedView || (yourSeat === null && !spectating)) return null;
+  const causal = causalStatus(view, spectating ? null : yourSeat);
+  const seat: 0 | 1 = yourSeat === 1 ? 1 : 0; // spectators watch from seat 0's side of the table
   const liveNoteFrame = !replaying && replayFrames > 0 ? replayFrames - 1 : null;
   const liveNoteRoomVersion = !replaying && viewUpdate.source === "live"
     ? viewUpdate.roomVersion ?? null

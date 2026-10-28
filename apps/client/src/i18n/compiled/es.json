@@ -30240,7 +30240,7 @@
             },
             {
               "type": 0,
-              "value": " playmat espera"
+              "value": " playmat está listo"
             }
           ]
         },
@@ -30251,7 +30251,7 @@
             },
             {
               "type": 0,
-              "value": " playmats esperan"
+              "value": " playmats están listos"
             }
           ]
         }
@@ -30261,7 +30261,7 @@
     },
     {
       "type": 0,
-      "value": " para embellecer tu arena."
+      "value": " para la batalla."
     }
   ],
   "game.playmatHint.dismiss": [

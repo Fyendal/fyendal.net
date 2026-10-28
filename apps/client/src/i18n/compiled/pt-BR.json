@@ -30911,7 +30911,7 @@
           "value": [
             {
               "type": 0,
-              "value": "Nenhum playmat está"
+              "value": "Nenhum playmat está pronto"
             }
           ]
         },
@@ -30922,7 +30922,7 @@
             },
             {
               "type": 0,
-              "value": " playmat está"
+              "value": " playmat está pronto"
             }
           ]
         },
@@ -30933,7 +30933,7 @@
             },
             {
               "type": 0,
-              "value": " playmats estão"
+              "value": " playmats estão prontos"
             }
           ]
         }
@@ -30943,7 +30943,7 @@
     },
     {
       "type": 0,
-      "value": " à espera para enfeitar sua arena."
+      "value": " para a batalha."
     }
   ],
   "game.playmatHint.dismiss": [
