@@ -564,7 +564,7 @@ const PHASES = new Set(["start", "action", "layer", "reaction", "defend", "end",
 const MELD_SIDES = new Set(["left", "right", "both"]);
 const BOT_OPPONENTS = new Set(["bravo", "briar", "kayo", "cindra", "ira", "hala", "jarl", "levia", "starvo", "boltyn", "ira-sage"]);
 /** Practice bots offered only to operator-allowlisted beta testers. */
-export const BETA_BOT_OPPONENTS: ReadonlySet<BotOpponent> = new Set<BotOpponent>();
+export const BETA_BOT_OPPONENTS: ReadonlySet<BotOpponent> = new Set<BotOpponent>(["ira-sage"]);
 const PLAYABLE_ZONES = new Set(["banish", "graveyard", "deck"]);
 const EQUIPMENT_SLOTS = new Set(["head", "chest", "arms", "legs"]);
 const DECISION_KINDS = new Set([

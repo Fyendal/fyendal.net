@@ -753,6 +753,32 @@ describe("server rooms over websocket", () => {
     a.ws.close();
   });
 
+  it("creates the selected Silver Age Ira bot room only for beta testers", async () => {
+    const a = await authedClient();
+    a.sendMsg({ type: "create-bot-room", format: "silver-age", deckId: "precon-sly", bot: "ira-sage" });
+    expect(await a.next((message) => message.type === "error"))
+      .toMatchObject({ type: "error", message: "choose a silver-age bot" });
+    await db.query(
+      "INSERT INTO beta_testers (user_id, added_at) SELECT id, 1 FROM users WHERE username_lc = $1",
+      [a.username.toLowerCase()],
+    );
+    a.sendMsg({ type: "create-bot-room", format: "silver-age", deckId: "precon-sly", bot: "ira-sage" });
+    await a.next((message) => message.type === "room-created");
+    const prep = await a.next(
+      (message) => message.type === "prep-state" && message.prep.seats[1]?.username === "SAGE Ira Bot",
+    );
+    expect(prep).toMatchObject({
+      type: "prep-state",
+      prep: {
+        format: "silver-age", botGame: true,
+        seats: [expect.anything(), { username: "SAGE Ira Bot", heroName: "Ira, Crimson Haze", connected: true }],
+      },
+    });
+    a.sendMsg({ type: "leave-room", endGame: true });
+    expect(await a.next((message) => message.type === "left")).toEqual({ type: "left" });
+    a.ws.close();
+  });
+
   it("creates the selected open-pool Starvo boss in a Classic Constructed room", async () => {
     const a = await authedClient();
     a.sendMsg({
