@@ -198,6 +198,15 @@ describe("DTD — registration and core mechanics", () => {
       .expectInZone(0, "runechant|0", "board");
   });
 
+  it("Scepter of Pain's ability does not have go again", () => {
+    const s = scenario({
+      seats: [{ hero: "rhinar", weapons: ["scepter of pain|0"], resources: 2 }, { hero: "dorinthea" }],
+    });
+
+    s.activate("scepter of pain|0", { pitch: [] }).expectLife(1, 19);
+    expect(s.state.players[0]!.actionPoints).toBe(0);
+  });
+
   it("Scepter of Pain creates no Runechant when its damage is prevented", () => {
     const s = scenario({
       seats: [

@@ -553,7 +553,7 @@ export const dtd: Record<string, CardScript> = mergeSetScripts("DTD", dtdHighRar
     activated: {
       cost: 2,
       isAttack: false,
-      goAgain: true,
+      goAgain: false,
       oncePerTurn: true,
       label: "Deal 1 arcane damage",
       onActivate(ctx) {
