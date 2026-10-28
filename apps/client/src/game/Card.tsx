@@ -6,6 +6,7 @@ import {
   hasLegacySquareCardFrame,
   hasTallEquipmentCardFrame,
   isMarvelCardImageUrl,
+  marvelArtFaceUrl,
   resolveCardImageUrl,
   resolveCardImageUrls,
 } from "./cardImageUrl.js";
@@ -316,8 +317,10 @@ export function CardFace({
   const imageUrl = card.cardId !== "" ? imageUrls[failedAttempts] : undefined;
   const showImg = imageUrl !== undefined;
   const marvelArt = imageUrl !== undefined && isMarvelCardImageUrl(imageUrl);
-  const legacySquareFrame = imageUrl !== undefined && !marvelArt && hasLegacySquareCardFrame(imageUrl);
-  const tallEquipmentFrame = imageUrl !== undefined && !marvelArt && hasTallEquipmentCardFrame(imageUrl);
+  const artFaceUrl = imageUrl !== undefined ? marvelArtFaceUrl(imageUrl) : undefined;
+  const fullBleedArt = marvelArt || artFaceUrl !== undefined;
+  const legacySquareFrame = imageUrl !== undefined && !fullBleedArt && hasLegacySquareCardFrame(imageUrl);
+  const tallEquipmentFrame = imageUrl !== undefined && !fullBleedArt && hasTallEquipmentCardFrame(imageUrl);
   const attack = card.attack ?? data?.attack;
   const defense = card.defense ?? data?.defense;
   const squareHero = data?.cardType === "hero";
@@ -334,6 +337,7 @@ export function CardFace({
     size === "zone" ? "card-zone" : size === "preview" ? "card-preview-frame" : "card-hand",
     squareCard ? "card-board-square" : "",
     squareCard && marvelArt ? "card-board-square-marvel" : "",
+    squareCard && artFaceUrl !== undefined ? "card-board-square-face" : "",
     focusSourceHidden ? "pitch-focus-source-hidden" : "",
     showImg ? "card-hasimg" : "",
     selected ? "card-selected" : "",
@@ -389,7 +393,7 @@ export function CardFace({
             {showImg ? (
               <img
                 className="c-img board-square-art"
-                src={imageUrl}
+                src={artFaceUrl ?? imageUrl}
                 alt=""
                 draggable={false}
                 loading="eager"
@@ -399,7 +403,7 @@ export function CardFace({
                 }))}
               />
             ) : null}
-            {showImg && !marvelArt && printedArenaFrame ? (
+            {showImg && !fullBleedArt && printedArenaFrame ? (
               <svg
                 className="board-square-printed-frame"
                 viewBox={tallEquipmentFrame ? "48 170 904 922"
@@ -410,7 +414,7 @@ export function CardFace({
               >
                 <image href={imageUrl} width="1000" height="1395.6" />
               </svg>
-            ) : showImg && !marvelArt ? (
+            ) : showImg && !fullBleedArt ? (
               <>
                 <span className="board-square-frame-edge board-square-frame-left">
                   <img src={imageUrl} alt="" draggable={false} />
@@ -419,6 +423,10 @@ export function CardFace({
                   <img src={imageUrl} alt="" draggable={false} />
                 </span>
               </>
+            ) : showImg && marvelArt ? (
+              <span className="board-square-marvel-plate">
+                <img src={imageUrl} alt="" draggable={false} />
+              </span>
             ) : null}
           </span>
           {marvelArt ? (

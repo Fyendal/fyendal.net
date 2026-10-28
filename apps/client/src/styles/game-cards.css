@@ -551,18 +551,55 @@
   left: -17.5%;
   border-radius: 0;
 }
-/* Marvel faces keep the printed name near the top with a small margin above it.
-   A 546 x 762 card needs 143.3% width to fill a square from half its height. */
+/* Marvel faces keep their printed nameplate instead of the drawn name bar. The
+   plate is cropped at the zoom that keeps it legible; the art beneath it uses a
+   wider crop so the square shows the painting, not a detail of it. */
 .card-zone.card-board-square-marvel {
   --board-art-top: 0cqi;
   --board-art-bottom: 0cqi;
-}
-.card-board-square-marvel .board-square-media {
-  --board-square-image-top: -4cqi;
+  /* The plate stays opaque past the nameplate in both crops (16% of the card). */
+  --board-marvel-plate-height: 38cqi;
+  --board-marvel-plate-fade: 34cqi;
 }
 .card-board-square-marvel .board-square-art {
-  width: 143.3%;
+  /* Text frames on Marvel permanents start near 60% of the card. Anchor that
+     line to the bottom edge; at 110% width it sits 7.9cqi below the top. */
+  top: 7.9cqi;
+  width: 110%;
+  left: -5%;
+}
+.board-square-marvel-plate {
+  position: absolute;
+  inset: 0 0 auto;
+  height: var(--board-marvel-plate-height);
+  overflow: hidden;
+  mask-image: linear-gradient(#000 var(--board-marvel-plate-fade), transparent);
+}
+.board-square-marvel-plate img {
+  position: absolute;
+  top: -4cqi;
   left: -21.65%;
+  width: 143.3%;
+  height: auto;
+  max-width: none;
+}
+/* Heroes show their textless back face at full width, with no text frame to
+   avoid. Heads sit near a fifth of the way down the face; lift them to the name. */
+.card-board-square-face .board-square-art {
+  width: 100%;
+  left: 0;
+}
+/* Hero nameplates carry no subtype line, so the front's plate ends sooner. */
+.card-zone.card-board-square-marvel.card-board-square-face {
+  --board-marvel-plate-height: 26cqi;
+  --board-marvel-plate-fade: 22cqi;
+}
+.card-board-square-marvel.card-board-square-face .board-square-art {
+  top: -2cqi;
+}
+/* Under the drawn name bar of an ordinary-frame front, which rebuilds no rim. */
+.card-board-square-face:not(.card-board-square-marvel) .board-square-art {
+  top: -14cqi;
 }
 .card-board-square-marvel.card-chain-source::after {
   inset: 0;

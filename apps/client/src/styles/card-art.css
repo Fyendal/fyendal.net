@@ -107,11 +107,14 @@
 .deck-art-tile:hover { background: none; }
 .deck-art-tile:disabled { opacity: 1; }
 .deck-art-tile:disabled .deck-art-tile-frame { opacity: .5; }
+/* A tile is a window onto the card face. Printed objects carry a 28px black
+   rim on a 600 x 838 image and full-bleed objects none, so the window crops
+   that rim from every printing and the tile border frames them all alike. */
 .deck-art-tile-frame,
 .card-art-variant-frame {
   position: relative;
   display: block;
-  aspect-ratio: 546 / 762;
+  aspect-ratio: 544 / 782;
   overflow: hidden;
   border: 1px solid #3a2a17;
   border-radius: 5px;
@@ -119,6 +122,14 @@
 }
 .deck-art-tile-frame .card-artwork,
 .card-art-variant-frame .card-artwork { width: 100%; height: 100%; }
+.deck-art-tile-frame .card-artwork-image,
+.card-art-variant-frame .card-artwork-image {
+  inset: auto;
+  top: -3.58%;
+  left: -5.15%;
+  width: 110.3%;
+  height: auto;
+}
 .deck-art-tile:not(:disabled):hover .deck-art-tile-frame,
 .card-art-variant:not(:disabled):hover .card-art-variant-frame { border-color: var(--border-strong); }
 .deck-art-tile[aria-expanded="true"] .deck-art-tile-frame { border-color: var(--gold); box-shadow: 0 0 0 1px var(--gold); }

@@ -3,6 +3,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import { cardList } from "@fyendal/cards/client";
 import {
+  CardArtProvider,
   CardBack,
   CardFace,
   InactiveZoneCard,
@@ -10,7 +11,13 @@ import {
   cardImageUrl,
   cardPreviewSize,
 } from "./Card.js";
-import { hasLegacySquareCardFrame, hasTallEquipmentCardFrame, isMarvelCardImageUrl, resolveCardImageUrls } from "./cardImageUrl.js";
+import {
+  hasLegacySquareCardFrame,
+  hasTallEquipmentCardFrame,
+  isMarvelCardImageUrl,
+  marvelArtFaceUrl,
+  resolveCardImageUrls,
+} from "./cardImageUrl.js";
 
 describe("cardImageUrl", () => {
   it("uses matching black-border art for every History Pack 1 printing", () => {
@@ -127,6 +134,9 @@ describe("cardImageUrl", () => {
     expect(isMarvelCardImageUrl(cardImageUrl("FAB464"))).toBe(true);
     expect(isMarvelCardImageUrl("https://content.fabrary.net/cards/IAR084-MV.webp")).toBe(true);
     expect(isMarvelCardImageUrl(cardImageUrl("WTR160"))).toBe(false);
+    // Ordinary-frame Marvel printings take the regular square treatment.
+    expect(isMarvelCardImageUrl("https://content.fabrary.net/cards/MPG000-MV.webp")).toBe(false);
+    expect(isMarvelCardImageUrl("https://content.fabrary.net/cards/DYN234-MV.webp")).toBe(false);
   });
 
   it("recognizes the tall Stalagmite window without changing ordinary equipment crops", () => {
@@ -313,13 +323,48 @@ describe("CardFace payment state", () => {
     }));
 
     expect(marvel).toContain("board-square-art");
+    expect(marvel).toContain("board-square-marvel-plate");
     expect(marvel).not.toContain("board-square-frame-edge");
     expect(marvel).not.toContain("board-square-printed-frame");
     expect(marvel).not.toContain("board-square-name");
     expect(marvel).toContain("board-square-accessible-name");
     expect(marvel).toContain("card-board-square-marvel");
     expect(standard).toContain("board-square-frame-edge");
+    expect(standard).not.toContain("board-square-marvel-plate");
     expect(standard).toContain("board-square-name");
+  });
+
+  it("shows a hero Marvel printing's textless art face on a square card", () => {
+    const render = (cardId: string, image: string) => renderToStaticMarkup(createElement(
+      CardArtProvider,
+      { art: [{ [cardId]: image }, {}] },
+      createElement(CardFace, { card: { instanceId: 1, cardId, owner: 0 }, size: "zone", squareArt: true }),
+    ));
+    // A full-bleed front keeps its printed nameplate over the back face.
+    const plated = render("HNT002", "HNT002-MV");
+    expect(plated).toContain("card-board-square-marvel");
+    expect(plated).toContain("card-board-square-face");
+    expect(plated).toContain('class="c-img board-square-art" src="https://content.fabrary.net/cards/HNT002-MV_BACK.webp"');
+    expect(plated).toContain('<span class="board-square-marvel-plate"><img src="https://content.fabrary.net/cards/HNT002-MV.webp"');
+    expect(plated).toContain("board-square-accessible-name");
+    expect(plated).not.toContain("board-square-name-frame");
+    expect(plated).not.toContain("board-square-frame-edge");
+    expect(plated).not.toContain("board-square-printed-frame");
+    // An ordinary-frame front uses the drawn name bar over the back face.
+    const framed = render("MPG000", "MPG000-MV");
+    expect(framed).toContain("card-board-square-face");
+    expect(framed).not.toContain("card-board-square-marvel");
+    expect(framed).toContain('class="c-img board-square-art" src="https://content.fabrary.net/cards/MPG000-MV_BACK.webp"');
+    expect(framed).toContain("board-square-name-frame");
+    expect(framed).toContain("board-square-stat-intellect");
+    expect(framed).not.toContain("board-square-marvel-plate");
+    expect(framed).not.toContain("board-square-frame-edge");
+    expect(framed).not.toContain("board-square-printed-frame");
+    // Backs that are real card faces with rules text keep the printed front.
+    expect(marvelArtFaceUrl("https://content.fabrary.net/cards/GEM105-MV.webp")).toBeUndefined();
+    expect(marvelArtFaceUrl("https://content.fabrary.net/cards/FAB491-MV.webp")).toBeUndefined();
+    expect(marvelArtFaceUrl("https://content.fabrary.net/cards/HNT055-MV.webp"))
+      .toBe("https://content.fabrary.net/cards/HNT055-MV_BACK.webp");
   });
 
   it("uses the lower art divider on older square-card printings", () => {

@@ -1,5 +1,7 @@
 import { cardData, cardList } from "@fyendal/cards/client";
 import marvelArt from "./marvelArt.json" with { type: "json" };
+import marvelArtFaces from "./marvelArtFaces.json" with { type: "json" };
+import marvelFramedFronts from "./marvelFramedFronts.json" with { type: "json" };
 
 const IMG_BASE = "https://content.fabrary.net/cards";
 
@@ -11,6 +13,11 @@ const artKey = (card: CardImageData) =>
   `${card.cardType}|${card.name.trim().toLowerCase().replace(/\s+/g, " ")}|${card.pitch ?? 0}`;
 const MARVEL_ART_BY_CARD: Readonly<Record<string, string>> = marvelArt;
 const MARVEL_IMAGE_IDS = new Set(Object.values(MARVEL_ART_BY_CARD));
+/** Hero Marvel objects whose back is a textless art face (audited offline). */
+const MARVEL_ART_FACE_IDS: ReadonlySet<string> = new Set(marvelArtFaces);
+/** Marvel objects printed in the ordinary frame with a black rim and name bar
+ * (audited offline); they take the regular square treatment. */
+const MARVEL_FRAMED_FRONT_IDS: ReadonlySet<string> = new Set(marvelFramedFronts);
 for (const set of ["WTR", "ARC", "CRU"]) {
   for (const card of cardList) {
     if (card.set !== set) continue;
@@ -237,12 +244,25 @@ export function resolveCardImageUrls(
   return [...new Set(urls)];
 }
 
+function fabraryImageId(url: string): string | undefined {
+  return /\/cards\/([^/]+)\.webp(?:[?#]|$)/i.exec(url)?.[1];
+}
+
 /** The selected Fabrary object, rather than the card id, determines whether
  * the square presentation should use its full-bleed Marvel artwork. */
 export function isMarvelCardImageUrl(url: string): boolean {
-  const imageId = /\/cards\/([^/]+)\.webp(?:[?#]|$)/i.exec(url)?.[1];
-  return imageId !== undefined && (MARVEL_IMAGE_IDS.has(imageId)
-    || /-MV[A-Z]?(?:_BACK)?$/i.test(imageId));
+  const imageId = fabraryImageId(url);
+  return imageId !== undefined && !MARVEL_FRAMED_FRONT_IDS.has(imageId)
+    && (MARVEL_IMAGE_IDS.has(imageId) || /-MV[A-Z]?(?:_BACK)?$/i.test(imageId));
+}
+
+/** Square heroes show this textless back face under the front's nameplate or
+ * the drawn name bar; every other view keeps the printed front. */
+export function marvelArtFaceUrl(url: string): string | undefined {
+  const imageId = fabraryImageId(url);
+  return imageId !== undefined && MARVEL_ART_FACE_IDS.has(imageId)
+    ? `${IMG_BASE}/${imageId}_BACK.webp`
+    : undefined;
 }
 
 /** These equipment printings put the lower frame below the usual art window. */

@@ -5,6 +5,7 @@ import { cardData, cardList } from "@fyendal/cards/client";
 import { CardArtwork, CardFace } from "./Card.js";
 import { isMarvelCardImageUrl, resolveCardImageUrl, resolveCardImageUrls } from "./cardImageUrl.js";
 import marvelArt from "./marvelArt.json" with { type: "json" };
+import marvelFramedFronts from "./marvelFramedFronts.json" with { type: "json" };
 
 describe("internal Marvel artwork selection", () => {
   it.each([
@@ -29,7 +30,8 @@ describe("internal Marvel artwork selection", () => {
     ["IAR221", "IAR221-MV"],
   ])("uses the matching Marvel face for %s", (id, imageId) => {
     expect(resolveCardImageUrl(id, undefined, true)).toBe(`https://content.fabrary.net/cards/${imageId}.webp`);
-    expect(isMarvelCardImageUrl(resolveCardImageUrl(id, undefined, true))).toBe(true);
+    // Ordinary-frame Marvel objects take the regular square treatment instead.
+    expect(isMarvelCardImageUrl(resolveCardImageUrl(id, undefined, true))).toBe(!marvelFramedFronts.includes(imageId));
   });
 
   it("keeps ordinary artwork when disabled or no Marvel exists", () => {
