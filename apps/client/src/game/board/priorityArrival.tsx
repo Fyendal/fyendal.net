@@ -36,3 +36,9 @@ export function useColdPriorityArrival(hasOwnPriority: boolean): boolean {
   }, [hasOwnPriority]);
   return cold;
 }
+
+/** Owns the arrival hook so GameBoard's early return can't change its hook order. */
+export function PriorityArrivalFlash({ hasOwnPriority }: { hasOwnPriority: boolean }) {
+  const cold = useColdPriorityArrival(hasOwnPriority);
+  return cold ? <div className="own-priority-arrival" aria-hidden="true" /> : null;
+}

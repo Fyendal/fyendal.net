@@ -76,7 +76,7 @@ import { useGameSettings } from "./board/useGameSettings.js";
 import { PlaymatArt } from "./PlaymatArt.js";
 import { PlaymatHintToast } from "./PlaymatHintToast.js";
 import { usePlaymatHint } from "./board/usePlaymatHint.js";
-import { useColdPriorityArrival } from "./board/priorityArrival.js";
+import { PriorityArrivalFlash } from "./board/priorityArrival.js";
 import { useGameViewport } from "./board/useGameViewport.js";
 import { useHudReserve } from "./board/useHudReserve.js";
 import { useFullscreen } from "../components/useFullscreen.js";
@@ -666,7 +666,6 @@ export function GameBoard() {
   );
   const showPriorityFloat = !spectating && !replaying && presentedPriority.priorityPlayer !== null;
   const hasOwnPriority = showPriorityFloat && presentedPriority.priorityPlayer === seat;
-  const coldPriorityArrival = useColdPriorityArrival(hasOwnPriority);
   const priorityHolder = presentedPriority.holder;
   const priorityHolderName = priorityHolder === null
     ? ""
@@ -1231,7 +1230,7 @@ export function GameBoard() {
         exiting={matchAchievements.toastExiting}
         onViewAchievements={() => { leave(); setLobbyRail("achievements"); }}
       />
-      {coldPriorityArrival ? <div className="own-priority-arrival" aria-hidden="true" /> : null}
+      <PriorityArrivalFlash hasOwnPriority={hasOwnPriority} />
       {playmatHint.visible
         ? <PlaymatHintToast onChoose={playmatHint.choose} onDismiss={playmatHint.dismiss} />
         : null}
