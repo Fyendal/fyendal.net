@@ -126,7 +126,7 @@
 /* Fixed game HUD: one authoritative life/AP/action surface. */
 .status-float {
   /* Clear the mat's outer graveyard/deck/banish column instead of covering it. */
-  right: calc(var(--rail-w) + 30px + var(--mat-zone-col) + var(--mat-column-gap));
+  right: calc(var(--rail-w) + var(--mat-margin, 0px) + 30px + var(--mat-zone-col) + var(--mat-column-gap));
   top: 50%;
   transform: translateY(-50%);
   display: flex;
@@ -140,7 +140,18 @@
 /* Match the square board's pile column and leave space beside its graveyards. */
 @media (min-width: 701px) {
   .table:has(.mat-square-board) .status-float {
-    right: calc(var(--rail-w) + var(--arena-square-size) + 50px);
+    right: calc(var(--rail-w) + var(--mat-margin, 0px) + var(--arena-square-size) + 50px);
+  }
+}
+/* Once the mat is capped (just under 2:1 with the rail counted) the HUD
+   tucks in beside the graveyard column, over the pitch column's empty rows
+   at the seam; the laptop clearance then sits a few pixels further out. */
+@media (min-width: 701px) and (min-aspect-ratio: 2/1) {
+  .status-float {
+    right: calc(var(--rail-w) + var(--mat-margin, 0px) + var(--mat-zone-col) + var(--mat-column-gap) + 44px);
+  }
+  .table:has(.mat-square-board) .status-float {
+    right: calc(var(--rail-w) + var(--mat-margin, 0px) + var(--arena-square-size) + var(--mat-column-gap) + 44px);
   }
 }
 /* Smaller HUD controls for narrow desktop boards and the compact arena. */

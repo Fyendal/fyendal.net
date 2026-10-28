@@ -1362,6 +1362,25 @@
   .playmat-art-image { transition: none; }
 }
 .table[data-motion-preference="reduced"] .playmat-art-image { transition: none; }
+/* Wide screens: the mat keeps a 16:9 footprint centered on the table, so
+   the card zones stay on the painting and the leather runs on outside it.
+   The art bleeds the board's 18px padding like the priority light does. */
+@media (min-width: 701px) {
+  .table {
+    --mat-max-width: calc(var(--table-height) * 16 / 9);
+    /* leather on each side of the mat: the board's content width over the cap */
+    --mat-margin: max(0px, calc((100vw - var(--rail-w) - 36px - var(--mat-max-width)) / 2));
+  }
+  .mat-half {
+    width: 100%;
+    max-width: var(--mat-max-width);
+    margin-inline: auto;
+  }
+  .playmat-art {
+    max-width: calc(var(--mat-max-width) + 36px);
+    margin-inline: auto;
+  }
+}
 /* Empty zones and labels get a touch more backing over a painting. */
 .table.has-playmat .equipment-zone-empty {
   border-color: #e3cf9c80;
