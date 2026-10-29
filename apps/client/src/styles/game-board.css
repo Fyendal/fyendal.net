@@ -1190,6 +1190,10 @@
 /* Touch keeps :hover on the last tapped card, which would leave it raised. */
 @media (hover: hover) {
   .hand .card-hand:hover { z-index: 1; transform: none; }
+  /* A raised card reaches the prompt float, so lift it above; pitch focus stays on top. */
+  .table:not(:has(.pitch-focus)) .hand:has(.card-hand:hover) {
+    z-index: calc(var(--game-z-prompt) + 1);
+  }
 }
 /* On compact laptops, keep the resting hand clear of the enlarged leg card. */
 @media (min-width: 701px) and (max-width: 1100px) {
@@ -1244,6 +1248,14 @@
   border-color: #b7ac98;
   box-shadow: 0 12px 28px #000b;
 }
+.hand-drag-preview {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform: translate(var(--hand-drag-preview-x, 0px), var(--hand-drag-preview-y, 0px));
+  transition: opacity 120ms ease;
+}
+.hand-drag-card-returning .hand-drag-preview { opacity: 0; }
 .hand-drag-card-playable .card-hand {
   border-color: #ffdb7b;
   box-shadow: 0 0 0 2px #ffdb7b, 0 0 18px 5px #efb844b3, 0 12px 28px #000b;

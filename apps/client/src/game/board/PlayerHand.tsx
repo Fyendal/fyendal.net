@@ -274,6 +274,14 @@ export function PlayerHand({
           aria-hidden="true"
         >
           <CardFace card={draggedCard} showOverlays={false} />
+          {floatingCard.previewWidth > 0 ? (
+            <div
+              className="hand-drag-preview"
+              style={{ width: floatingCard.previewWidth, height: floatingCard.previewHeight }}
+            >
+              <CardFace card={draggedCard} size="preview" showOverlays={false} />
+            </div>
+          ) : null}
         </div>,
         document.body,
       ) : null}

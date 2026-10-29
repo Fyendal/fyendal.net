@@ -4,6 +4,8 @@ import {
   captureHandPositions,
   handCardSlotLeft,
   handCardSlotTop,
+  handDragPreviewOffset,
+  handDragPreviewSize,
   handDragTilt,
   handReturnDuration,
   HAND_REORDER_DURATION_MS,
@@ -111,5 +113,41 @@ describe("dragged card motion", () => {
     expect(left).toBeCloseTo(-right);
     expect(handDragTilt(right, 0, 80)).toBeLessThan(right);
     expect(handDragTilt(right, 0, 0)).toBe(right);
+  });
+
+  it("keeps the whole drag preview beside the card when it fits", () => {
+    const preview = { width: 296, height: 413 };
+    expect(handDragPreviewSize(preview, { width: 180, height: 250 }, { width: 1440, height: 900 }))
+      .toEqual(preview);
+  });
+
+  it("shrinks the drag preview to fit above or below a phone card", () => {
+    // (812 - 114) / 2 - 12 - 8 leaves 329px of height.
+    expect(handDragPreviewSize({ width: 296, height: 413 }, { width: 83, height: 114 }, { width: 375, height: 812 }))
+      .toEqual({ width: 236, height: 329 });
+  });
+
+  it("places the drag preview beside the card on the roomier side", () => {
+    const viewport = { width: 1440, height: 900 };
+    const preview = { width: 296, height: 413 };
+    const card = { width: 180, height: 250 };
+    expect(handDragPreviewOffset({ ...card, left: 200, top: 400 }, preview, viewport))
+      .toEqual({ x: 192, y: -81.5 });
+    expect(handDragPreviewOffset({ ...card, left: 1200, top: 400 }, preview, viewport))
+      .toEqual({ x: -308, y: -81.5 });
+    // Near the bottom edge the preview rises to stay visible.
+    expect(handDragPreviewOffset({ ...card, left: 200, top: 700 }, preview, viewport).y).toBe(900 - 8 - 413 - 700);
+  });
+
+  it("stacks the drag preview above or below a phone card", () => {
+    const viewport = { width: 375, height: 812 };
+    const preview = { width: 236, height: 329 };
+    const card = { width: 83, height: 114 };
+    // Low on screen: above, centred on the card.
+    expect(handDragPreviewOffset({ ...card, left: 146, top: 500 }, preview, viewport))
+      .toEqual({ x: -76.5, y: -341 });
+    // High on screen: below.
+    expect(handDragPreviewOffset({ ...card, left: 146, top: 200 }, preview, viewport))
+      .toEqual({ x: -76.5, y: 126 });
   });
 });

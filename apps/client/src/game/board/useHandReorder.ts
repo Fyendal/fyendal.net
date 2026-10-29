@@ -15,12 +15,15 @@ import {
   handCardOrigin,
   handCardSlotLeft,
   handCardSlotTop,
+  handDragPreviewOffset,
+  handDragPreviewSize,
   handDragTilt,
   HAND_MOTION_EASING,
   handReturnDuration,
   HAND_TOUCH_HOLD_MS,
 } from "./handMotion.js";
 import { isTouchBoardViewport } from "./viewportQueries.js";
+import { cardPreviewSize } from "../Card.js";
 
 interface HandDrag {
   pointerId: number;
@@ -42,6 +45,7 @@ interface HandDrag {
   /** Touch drags centre the card on the finger and pick up on hold. */
   touch: boolean;
   holdTimer: number;
+  preview: { width: number; height: number };
 }
 
 /** Pointer movement is cosmetic; an eligible arena release starts a play. */
@@ -67,6 +71,8 @@ export function useHandReorder(
     instanceId: number;
     width: number;
     height: number;
+    previewWidth: number;
+    previewHeight: number;
     returning: boolean;
   } | null>(null);
   const positionsBeforeReorderRef = useRef<ReadonlyMap<number, number> | null>(null);
@@ -184,8 +190,17 @@ export function useHandReorder(
     drag.element.classList.add("hand-card-dragging");
     const floating = floatingCardRef.current;
     if (floating) {
-      floating.style.transform = `translate(${drag.x - drag.grabOffset}px, ${drag.y - drag.grabOffsetY}px)`;
+      const left = drag.x - drag.grabOffset;
+      const top = drag.y - drag.grabOffsetY;
+      floating.style.transform = `translate(${left}px, ${top}px)`;
       floating.style.setProperty("--hand-drag-tilt", `${reducedMotion ? 0 : drag.tilt}deg`);
+      const offset = handDragPreviewOffset(
+        { left, top, width: drag.element.offsetWidth, height: drag.element.offsetHeight },
+        drag.preview,
+        { width: window.innerWidth, height: window.innerHeight },
+      );
+      floating.style.setProperty("--hand-drag-preview-x", `${offset.x}px`);
+      floating.style.setProperty("--hand-drag-preview-y", `${offset.y}px`);
     }
     setPlayOnRelease(canReleaseToPlay(drag));
   };
@@ -248,10 +263,17 @@ export function useHandReorder(
       drag.grabOffset = drag.element.offsetWidth / 2;
       drag.grabOffsetY = drag.element.offsetHeight / 2;
     }
+    drag.preview = handDragPreviewSize(
+      cardPreviewSize(window.innerHeight),
+      { width: drag.element.offsetWidth, height: drag.element.offsetHeight },
+      { width: window.innerWidth, height: window.innerHeight },
+    );
     setFloatingCard({
       instanceId: drag.instanceId,
       width: drag.element.offsetWidth,
       height: drag.element.offsetHeight,
+      previewWidth: drag.preview.width,
+      previewHeight: drag.preview.height,
       returning: false,
     });
   };
@@ -337,6 +359,7 @@ export function useHandReorder(
           tilt: 0,
           touch: event.pointerType === "touch" && isTouchBoardViewport(),
           holdTimer: 0,
+          preview: { width: 0, height: 0 },
         };
         const drag = dragRef.current;
         if (drag.touch) {
