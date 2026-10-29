@@ -1,7 +1,8 @@
 import { createElement, type ComponentProps } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
-import { SideRail, undoWithoutFocus } from "./SideRail.js";
+import { undoWithoutFocus } from "./gameControls.js";
+import { SideRail } from "./SideRail.js";
 import { TestI18nProvider } from "../i18n/TestI18nProvider.js";
 
 function renderSideRail(

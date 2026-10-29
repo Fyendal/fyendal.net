@@ -537,7 +537,7 @@ export function PlayerHalf({
           <HeroEmote
             seat={player.seat}
             event={replaying ? null : latestEmote}
-            canSend={mine && canSendEmote && !mobileFloatViewport}
+            canSend={mine && canSendEmote && !mobileFloatViewport && !mobileLandscapeViewport}
             onSend={onSendEmote}
           >
             {withStandingOrderChip(hero, (

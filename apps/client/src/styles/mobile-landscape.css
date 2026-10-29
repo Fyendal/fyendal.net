@@ -1,21 +1,24 @@
 /* ── phone landscape ─────────────────────────────────────────────────────
    A phone held sideways, or any landscape window too short for the desktop
-   board. The instruments (names, life, hand count, action points, primary
-   action) share one column on the left, the square arena takes the remaining
-   width, and the hand rests along the bottom with its name bars showing. The
-   log opens as a drawer over the board instead of narrowing it. */
+   board. The rail becomes one control bar on the right, under the thumb:
+   log and fullscreen toggles, emotes and social in a row at the top, the
+   opponent's name, life and hand count below them, and our life, action
+   points and undo beside the primary action at the bottom. The square arena
+   takes the remaining width and the hand rests along the bottom with its
+   name bars showing. The log opens as a drawer instead of widening the bar. */
 
 @media (orientation: landscape) and (max-height: 520px), (orientation: landscape) and (max-width: 700px) {
-  .table {
-    --rail-w: 40px;
+  .table,
+  .table.rail-is-collapsed {
+    --rail-w: 168px;
+    --ls-bar-x: calc(100vw - var(--rail-w));
     --table-height: 100dvh;
-    --ls-hud-col: 156px;
     --ls-hand-visible: 64px;
     --hand-card-height: 209px;
     --hand-rest-offset: calc(var(--hand-card-height) - var(--ls-hand-visible));
     --hand-selected-lift: 16px;
     --opp-hand-band: 4px;
-    --mat-cx: calc(var(--ls-hud-col) + (100vw - var(--rail-w) - var(--ls-hud-col)) / 2);
+    --mat-cx: calc((100vw - var(--rail-w)) / 2);
     --mat-max-width: calc(var(--table-height) * 16 / 9);
     grid-template-columns: 1fr var(--rail-w);
   }
@@ -26,7 +29,7 @@
     --arena-square-cap: 96px;
     /* Nine tracks, eight gaps and the two spacers must also fit the width. */
     --arena-square-width-fit: calc(
-      (100vw - var(--rail-w) - var(--ls-hud-col) - 16px - 8 * var(--mat-column-gap) - 12px) / 9
+      (100vw - var(--rail-w) - 16px - 8 * var(--mat-column-gap) - 12px) / 9
     );
     --arena-square-size: max(
       42px,
@@ -34,9 +37,9 @@
     );
   }
   .mat-half.mat-square-board { --mat-column-gap: 5px; }
-  /* The mat keeps its 16:9 cap, centred in the arena region beside the
-     column; its painting and priority light bleed the 8px board padding. */
-  .board { padding: 0 8px 0 calc(var(--ls-hud-col) + 8px); }
+  /* The mat keeps its 16:9 cap, centred before the bar; its painting and
+     priority light bleed the 8px board padding. */
+  .board { padding: 0 8px; }
   .mat-half {
     width: 100%;
     max-width: var(--mat-max-width);
@@ -45,12 +48,14 @@
   }
   .playmat-art {
     right: 0;
-    left: var(--ls-hud-col);
+    left: 0;
     max-width: calc(var(--mat-max-width) + 16px);
     margin-inline: auto;
+    /* The painting fades into the leather at the edge and under the bar. */
+    mask-image: linear-gradient(to right, #0000, #000 28px, #000 calc(100% - 64px), #0000);
   }
-  .mat-divider { margin-inline: calc(-1 * var(--ls-hud-col) - 8px) -8px; }
-  .mat-divider-center { left: calc(var(--ls-hud-col) + 8px); right: 8px; }
+  .mat-divider { margin-inline: -8px; }
+  .mat-divider-center { left: 8px; right: 8px; }
 
   .mat-half .mat-zone-label { font-size: 9px; letter-spacing: .75px; }
   .zone-pile-empty .mat-zone-label { font-size: 8px; }
@@ -84,7 +89,7 @@
   .hand,
   .table:has(.mat-square-board) .hand {
     right: 8px;
-    left: calc(var(--ls-hud-col) + 8px);
+    left: 8px;
     gap: 8px;
     padding-left: calc(var(--arena-square-size) + 10px);
   }
@@ -105,26 +110,101 @@
   .decision-cards .card-selected::before { top: 4px; right: 4px; width: 18px; height: 18px; font-size: 11px; }
   .decision-optcard button { min-width: 72px; }
 
-  /* Instrument column: names, opponent life and hand at the top, our HUD at
-     the bottom. Every chip shares the nameplate's chrome. */
+  /* ── control bar ── */
+  /* Collapsed, the rail is the bar: toggles and emotes in one row at the
+     top; the fixed chips below are positioned into its width. */
+  .rail-right.rail-collapsed {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    align-content: flex-start;
+    gap: 6px;
+    padding: 6px 8px;
+    overflow: visible; /* the emote picker opens beside the bar */
+  }
+  .rail-right.rail-collapsed > :not(.rail-header):not(.rail-strip-actions):not(.overlay) {
+    display: none;
+  }
+  .rail-right.rail-collapsed .rail-header { flex-direction: row; gap: 6px; }
+  .rail-right.rail-collapsed .rail-turn { display: none; }
+  .rail-strip-actions { display: flex; gap: 6px; }
+  .rail-strip-actions .emote-toolbar-button {
+    display: grid;
+    place-items: center;
+    width: 25px;
+    min-width: 0;
+    height: 25px;
+    min-height: 0;
+    padding: 0;
+    clip-path: none;
+    border: 1px solid #5a4426;
+    border-radius: 3px;
+    background: #00000033;
+    color: #cbb37a;
+  }
+  .rail-strip-actions .game-control-icon { width: 15px; height: 15px; }
+  /* The picker opens as a two-column sheet beside the bar. */
+  .rail-strip-actions .hero-emote-picker {
+    position: fixed;
+    top: 8px;
+    right: calc(var(--rail-w) + 8px);
+    bottom: auto;
+    left: auto;
+    width: min(320px, 60vw);
+    max-height: calc(100dvh - 16px);
+    overflow-y: auto;
+    transform: none;
+  }
+  .rail-strip-actions .hero-emote-picker::after { display: none; }
+  .rail-strip-actions .hero-emote-options { grid-template-columns: 1fr 1fr; gap: 2px 6px; }
+  /* Open, the log is a drawer over the board; the bar keeps its width. */
+  .rail-right:not(.rail-collapsed) {
+    position: fixed;
+    inset: 0 0 0 auto;
+    z-index: 60;
+    width: min(340px, 55vw);
+    box-shadow: -10px 0 30px #000a;
+  }
+  .rail-right { gap: 6px; padding: 8px; }
+  .rail-actions { margin-top: 2px; }
+  .log { min-height: 70px; }
+  /* Social closes the toggle row. */
+  #root:has(.table) .social-dock,
+  #root:has(.table.rail-is-collapsed) .social-dock {
+    --social-bubble-size: 25px;
+    top: 6px;
+    right: 8px;
+    bottom: auto;
+    left: auto;
+  }
+  #root:has(.table) .social-bubble { border-radius: 3px; box-shadow: none; }
+  #root:has(.table) .social-bubble svg { width: 16px; height: 16px; }
+  #root:has(.table) .social-panel {
+    top: calc(100% + 8px);
+    right: 0;
+    bottom: auto;
+    left: auto;
+  }
+
+  /* Names, life and hand count share the nameplate's chrome. */
   .player-nameplate {
     height: 28px;
-    max-width: calc(var(--ls-hud-col) - 16px);
+    max-width: calc(var(--rail-w) - 16px);
     padding: 3px 8px;
     font-size: 12px;
   }
   .player-nameplate-badge { width: 18px; height: 18px; }
   .player-nameplate:has(.nameplate-actions) { padding: 1px 1px 1px 8px; }
-  .player-nameplate-opponent { top: 6px; left: 8px; }
-  .player-nameplate-self { bottom: 6px; left: 8px; }
+  .player-nameplate-opponent { top: 40px; left: calc(var(--ls-bar-x) + 8px); }
+  .player-nameplate-self { bottom: 6px; left: calc(var(--ls-bar-x) + 8px); }
 
   .opp-hand {
     position: fixed;
-    top: 38px;
+    top: 72px;
     right: auto;
-    left: 88px;
+    left: calc(var(--ls-bar-x) + 88px);
     z-index: 20;
-    width: calc(var(--ls-hud-col) - 96px);
+    width: calc(var(--rail-w) - 96px);
     height: 30px;
     align-items: center;
     justify-content: flex-start;
@@ -163,16 +243,16 @@
   .status-float {
     right: auto !important;
     bottom: 40px !important;
-    left: 8px !important;
+    left: calc(var(--ls-bar-x) + 8px) !important;
     top: auto !important;
     transform: none !important;
     display: grid;
-    width: calc(var(--ls-hud-col) - 16px);
-    grid-template-columns: minmax(0, 1fr) auto;
+    width: calc(var(--rail-w) - 16px);
+    grid-template-columns: auto minmax(0, 1fr);
     grid-template-areas:
       "life life"
       "ap res"
-      "pass pass";
+      "undo pass";
     align-items: center;
     gap: 6px;
     padding: 6px 8px 8px;
@@ -183,12 +263,14 @@
   .status-float .life-me { grid-area: life; }
   .status-float .ap-pip { grid-area: ap; justify-self: start; }
   .status-float .hud-resources { grid-area: res; }
+  .status-float .hud-undo { grid-area: undo; }
   .status-float > .btn-pass { grid-area: pass; }
+  .status-float:not(:has(.hud-undo)) > .btn-pass { grid-column: 1 / -1; }
   /* The opponent's life sits with their name; fixed children leave the HUD box. */
   .status-float .life-opp {
     position: fixed;
-    top: 38px;
-    left: 8px;
+    top: 72px;
+    left: calc(var(--ls-bar-x) + 8px);
     box-sizing: border-box;
     width: 76px;
     flex-direction: row-reverse;
@@ -235,22 +317,39 @@
   }
   .status-float .hud-resources-empty .hud-resources-count { color: #8a7b66; }
   .status-float .hud-resources-empty .hud-resources-count::before { filter: grayscale(1) brightness(.6); }
+  /* Undo and the primary action share one thumb-sized row. */
+  .status-float .hud-undo {
+    display: grid;
+    place-items: center;
+    width: 40px;
+    min-width: 0;
+    height: 40px;
+    min-height: 0;
+    padding: 0;
+    clip-path: none;
+    border: 1px solid #5a4426;
+    border-radius: 4px;
+    background: #00000033;
+    color: #cbb37a;
+  }
+  .status-float .hud-undo .game-control-icon { width: 20px; height: 20px; }
   .status-float > .btn-pass {
     width: 100%;
-    min-height: 34px;
+    min-height: 40px;
     justify-content: center;
-    padding: 5px 10px;
+    padding: 5px 8px;
     font-size: 13px;
   }
   .status-float .shortcut-key { display: none; }
 
-  /* The stack reads in the column's free middle, above the HUD. */
+  /* The stack reads in the bar's free middle, growing over the arena. */
   .stack-float {
-    top: 74px;
-    left: 8px;
+    top: 108px;
+    right: 8px;
+    left: auto;
     transform: none;
-    max-width: calc(100vw - var(--rail-w) - 16px);
-    max-height: calc(100dvh - 74px - 40px - 118px);
+    max-width: calc(100vw - 16px);
+    max-height: calc(100dvh - 108px - 40px - 125px);
     gap: 4px;
     padding: 0 8px 6px;
     overflow-y: auto;
@@ -270,7 +369,7 @@
   .chain-float {
     top: 6px;
     transform: translateX(-50%);
-    max-width: calc(100vw - var(--rail-w) - var(--ls-hud-col) - 12px);
+    max-width: calc(100vw - var(--rail-w) - 12px);
     max-height: calc(100dvh - var(--ls-hand-visible) - 12px);
     gap: 5px;
     padding: 0 10px 8px;
@@ -280,8 +379,6 @@
   .chain-group .card-zone,
   .chain-group .card-hand,
   .chain-empty-slot { width: 56px; height: 78px; }
-  /* The always-visible touch emote button stays under the chain and stack. */
-  .hero-emote-button { z-index: 5; }
 
   /* Turn timing fits the seam on one line. */
   .mat-divider-center > .priority-float {
@@ -296,35 +393,6 @@
   .priority-timing { font-size: 10px; letter-spacing: .06em; }
   .table:has(.chain-float) .mat-divider-center > .priority-float { display: none; }
   .waiting { top: 6px; padding: 4px 12px; font-size: 12px; letter-spacing: 1.5px; }
-
-  /* The log is a drawer over the board; the collapsed strip keeps its width. */
-  .rail-right { gap: 6px; padding: 8px; }
-  .rail-right.rail-collapsed {
-    align-items: center;
-    padding-inline: 7px;
-    overflow: hidden;
-  }
-  .rail-right.rail-collapsed > :not(.rail-header):not(.overlay) { display: none; }
-  .rail-right.rail-collapsed .rail-header { flex-direction: column; }
-  .rail-right.rail-collapsed .rail-turn { display: none; }
-  .rail-right:not(.rail-collapsed) {
-    position: fixed;
-    inset: 0 0 0 auto;
-    z-index: 60;
-    width: min(340px, 55vw);
-    box-shadow: -10px 0 30px #000a;
-  }
-  .rail-actions { margin-top: 2px; }
-  .log { min-height: 70px; }
-  /* Social lives in the collapsed strip, under the rail toggles. */
-  #root:has(.table) .social-dock,
-  #root:has(.table.rail-is-collapsed) .social-dock {
-    --social-bubble-size: 34px;
-    right: 3px;
-    bottom: 8px;
-    left: auto;
-  }
-  #root:has(.table) .social-panel { right: 0; left: auto; }
 
   /* Card inspection keeps the whole card on screen. */
   .mobile-card-inspect-sheet {
@@ -341,12 +409,8 @@
   }
 }
 
-/* Narrow phones: a slimmer column, with the hand count under the life chip. */
+/* Narrow phones: a slimmer bar. */
 @media (orientation: landscape) and (max-width: 700px) {
-  .table { --ls-hud-col: 132px; }
-  .opp-hand { top: 72px; left: 8px; width: calc(var(--ls-hud-col) - 16px); }
-  .stack-float {
-    top: 106px;
-    max-height: calc(100dvh - 106px - 40px - 118px);
-  }
+  .table,
+  .table.rail-is-collapsed { --rail-w: 148px; }
 }

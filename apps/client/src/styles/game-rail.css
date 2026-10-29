@@ -50,6 +50,7 @@
   border-color: #5a4426;
   color: #cbb37a;
 }
+.rail-strip-actions { display: none; }
 .rail-actions {
   display: flex;
   gap: 5px;
@@ -593,7 +594,7 @@
     padding-inline: 7px;
     overflow: hidden;
   }
-  .rail-right.rail-collapsed > :not(.rail-header):not(.mobile-game-alerts):not(.overlay) {
+  .rail-right.rail-collapsed > :not(.rail-header):not(.rail-strip-actions):not(.mobile-game-alerts):not(.overlay) {
     display: none;
   }
   .rail-right.rail-collapsed .rail-header { flex-direction: column; }

@@ -1254,6 +1254,7 @@ export function GameBoard() {
     onSelect: setSel,
   };
 
+  const canUndo = !spectating && !replaying && view.phase !== "game-over";
   return (
     <EffectHeroesContext.Provider value={effectHeroList}>
     <CardArtProvider art={cardArt}>
@@ -1507,6 +1508,8 @@ export function GameBoard() {
         primaryAction={primaryAction}
         passDisabled={primaryActionDisabled}
         onPass={triggerPrimaryAction}
+        onUndo={mobileLandscapeViewport && canUndo ? () => undoAndDismissAnnouncement("last-action") : null}
+        undoDisabled={roomCommandPending}
       />
 
       {/* ── floating stack window: played cards and effects awaiting resolution,
@@ -1663,7 +1666,7 @@ export function GameBoard() {
         collapsed={railCollapsed}
         onToggleCollapsed={() => setRailCollapsed((collapsed) => !collapsed)}
         turn={view.turn}
-        onUndo={!spectating && !replaying && view.phase !== "game-over" ? undoAndDismissAnnouncement : null}
+        onUndo={canUndo ? undoAndDismissAnnouncement : null}
         undoDisabled={roomCommandPending}
         onLeave={leave}
         leaveAction={botGame && !spectating ? "end-game" : "leave"}
@@ -1696,8 +1699,8 @@ export function GameBoard() {
             : null
         }
         replaying={replaying}
-        emoteSeat={mobileFloatViewport && canSendEmote ? seat : null}
-        onSendEmote={mobileFloatViewport && canSendEmote ? sendEmote : null}
+        emoteSeat={(mobileFloatViewport || mobileLandscapeViewport) && canSendEmote ? seat : null}
+        onSendEmote={(mobileFloatViewport || mobileLandscapeViewport) && canSendEmote ? sendEmote : null}
         onReportBug={!spectating && !replaying ? reportBug : null}
         onShareReplay={savedReplayShare.replayId ? () => setReplayShareOpen(true) : null}
         replayShared={savedReplayShare.shared}

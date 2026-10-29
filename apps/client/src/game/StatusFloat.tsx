@@ -3,6 +3,7 @@ import { useIntl } from "react-intl";
 import type { GameLogViewEntry } from "@fyendal/shared";
 import { cardImageUrl } from "./Card.js";
 import { MARKED_TOKEN_ID } from "./cardBadges.js";
+import { ControlIcon, undoWithoutFocus } from "./gameControls.js";
 import { LifeHeroPortrait } from "./LifeHeroPortrait.js";
 
 export type PrimaryAction = "end-turn" | "confirm-blocks" | "confirm-no-blocks" | "pass";
@@ -279,8 +280,9 @@ export function PrimaryActionButton({
 
 /** Fixed responsive game HUD: life + remaining AP + the current primary action.
  *  Pass-only decisions, defend confirmation, and the arsenal skip action use
- *  this button instead of adding another floating control surface. The
- *  portrait HUD also shows the viewer's resources, since floats cover pitch. */
+ *  this button instead of adding another floating control surface. The phone
+ *  HUDs also show the viewer's resources, since floats cover pitch, and the
+ *  landscape bar seats undo beside the primary action. */
 export function StatusFloat({
   dockRect: _dockRect,
   hostRef,
@@ -303,6 +305,8 @@ export function StatusFloat({
   primaryAction,
   passDisabled = false,
   onPass,
+  onUndo = null,
+  undoDisabled = false,
 }: {
   dockRect: DOMRect | null;
   hostRef?: Ref<HTMLDivElement>;
@@ -327,6 +331,9 @@ export function StatusFloat({
   primaryAction: PrimaryAction | null;
   passDisabled?: boolean;
   onPass: () => void;
+  /** Undo in the HUD; only the landscape bar shows it. */
+  onUndo?: (() => void) | null;
+  undoDisabled?: boolean;
 }) {
   const intl = useIntl();
   const oppSeat = mySeat === 0 ? 1 : 0;
@@ -368,6 +375,17 @@ export function StatusFloat({
       >
         <span className="hud-resources-count" aria-hidden="true">{myResources}</span>
       </div>
+      {onUndo ? (
+        <button
+          className="hud-undo"
+          aria-label={intl.formatMessage({ id: "game.undoLast" })}
+          title={intl.formatMessage({ id: "game.undoDescription" })}
+          disabled={undoDisabled}
+          onClick={(event) => undoWithoutFocus(event.currentTarget, onUndo)}
+        >
+          <ControlIcon kind="undo" />
+        </button>
+      ) : null}
       {primaryAction ? (
         <PrimaryActionButton
           action={primaryAction}

@@ -238,8 +238,9 @@
     right: calc(var(--rail-w) + var(--compact-card-width) + 23px);
   }
 }
-/* Portrait HUD only. */
-.hud-resources { display: none; }
+/* Phone HUDs only. */
+.hud-resources,
+.hud-undo { display: none; }
 .ap-pip {
   font-size: 15px;
   font-weight: 700;
