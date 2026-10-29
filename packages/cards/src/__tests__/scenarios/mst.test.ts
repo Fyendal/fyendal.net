@@ -29,6 +29,24 @@ it("First Tenet of Chi: Wind gives the next blue action card go again", () => {
     .expectAP(0, 1);
 });
 
+it("Tiger Taming Khakkara buffs only the next Crouching Tiger after it attacks", () => {
+  const g = scenario({
+    seats: [
+      {
+        hero: "rhinar",
+        weapons: ["tiger taming khakkara|0"],
+        hand: ["crouching tiger|0", "crouching tiger|0"],
+        resources: 2,
+      },
+      { hero: "dorinthea" },
+    ],
+  });
+
+  g.attackWithWeapon().blockWith().settle();
+  g.play("crouching tiger|0").expectAttackValue(1).blockWith().settle();
+  g.play("crouching tiger|0").expectAttackValue(0);
+});
+
 describe("Beckoning Mistblade", () => {
   it.each([false, true])("buffs only the next blue attack, even when that attack hits: %s", (hits) => {
     const g = scenario({

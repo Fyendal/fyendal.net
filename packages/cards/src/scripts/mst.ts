@@ -993,8 +993,8 @@ export const mst: Record<string, CardScript> = {
   "vengeful apparition|3": vengeful(0),
   "tiger taming khakkara|0": {
     activated: attackAbility(2, { goAgain: true }),
-    onFriendlyAttackDeclared(ctx) {
-      ctx.addModifier({ scope: "combat-chain", attack: 1, appliesToName: "crouching tiger" });
+    onAttackDeclared(ctx) {
+      buffNextAttack(ctx, { attack: 1, appliesToName: "crouching tiger", expiresOnChainClose: true });
     },
   },
   "mask of wizened whiskers|0": maskWhiskers(),
