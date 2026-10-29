@@ -1704,6 +1704,45 @@ describe("client connection and account race fences", () => {
     expect(socket.readyState).toBe(FakeWebSocket.OPEN);
   });
 
+  it("ends a finished bot game and starts the bot the server names in its leave reply", async () => {
+    localStorage.setItem("fyendal-auth", JSON.stringify({ token: "token-a", username: "Alice" }));
+    const { useStore } = await import("../store.js");
+    useStore.getState().joinRoom("BOT001");
+    const socket = FakeWebSocket.instances[0]!;
+    socket.open();
+    socket.message({ type: "joined", code: "BOT001", seat: 0, token: "seat", version: 1 });
+    useStore.setState({ screen: "game", botGame: true, connected: true, view: { phase: "game-over" } as never });
+
+    useStore.getState().playBotAgain();
+    expect(JSON.parse(socket.sent.at(-1)!)).toEqual({ type: "leave-room", endGame: true });
+    expect(useStore.getState()).toMatchObject({ roomCode: null, roomStartPending: true });
+
+    socket.message({ type: "left", playAgain: { format: "cc", deckId: "precon-asb", bot: "ira" } });
+    expect(JSON.parse(socket.sent.at(-1)!)).toEqual({
+      type: "create-bot-room",
+      format: "cc",
+      deckId: "precon-asb",
+      bot: "ira",
+    });
+    expect(useStore.getState()).toMatchObject({ botGame: true, roomStartPending: true });
+  });
+
+  it("returns to the lobby when the ended bot game cannot be replayed", async () => {
+    localStorage.setItem("fyendal-auth", JSON.stringify({ token: "token-a", username: "Alice" }));
+    const { useStore } = await import("../store.js");
+    useStore.getState().joinRoom("BOT002");
+    const socket = FakeWebSocket.instances[0]!;
+    socket.open();
+    socket.message({ type: "joined", code: "BOT002", seat: 0, token: "seat", version: 1 });
+    useStore.setState({ screen: "game", botGame: true, connected: true, view: { phase: "game-over" } as never });
+
+    useStore.getState().playBotAgain();
+    const sent = socket.sent.length;
+    socket.message({ type: "left" });
+    expect(socket.sent).toHaveLength(sent);
+    expect(useStore.getState()).toMatchObject({ screen: "lobby", roomStartPending: false });
+  });
+
   it("does not carry disconnected-opponent state into the next game", async () => {
     const { useStore } = await import("../store.js");
     useStore.getState().joinRoom("AAAAAA");

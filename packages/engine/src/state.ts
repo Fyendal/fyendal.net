@@ -705,6 +705,9 @@ export interface Modifier {
   /** attack bonus applies only while defended by fewer than N non-equipment cards (Barraging Beatdown) */
   defendedLessThanNonEquip?: number;
   appliesTo?: "any" | "attack" | "weapon" | "sword" | "attack-action";
+  /** `attack` also changes matching cards' {p} while they defend ("while
+   *  attacking and defending"). */
+  powerWhileDefending?: boolean;
   /** class filter (e.g. "guardian") */
   appliesToClass?: string;
   /** printed cost filters */

@@ -314,6 +314,7 @@ export interface PersistedModifierV1 {
   onPreventCreateToken?: string;
   defendedLessThanNonEquip?: number;
   appliesTo?: "any" | "attack" | "weapon" | "sword" | "attack-action";
+  powerWhileDefending?: boolean;
   appliesToClass?: string;
   minCost?: number;
   maxCost?: number;

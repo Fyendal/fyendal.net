@@ -1261,7 +1261,7 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
           }
           if (ended.replayFinalizationId) replayFinalizer.enqueue(ended.replayFinalizationId);
           connections.detach(ctx);
-          send(ws, { type: "left" });
+          send(ws, { type: "left", ...(ended.playAgain ? { playAgain: ended.playAgain } : {}) });
           await publishRoomEvent({ code, kind: "deleted", version: ended.version });
           return;
         }

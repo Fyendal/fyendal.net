@@ -34,6 +34,7 @@ export function BoardOverlays({
   onWatchReplay,
   onDownloadReplay,
   onLeave,
+  onPlayAgain,
   onCloseReplay,
   onDismissGameOver,
   onCloseOverlay,
@@ -67,6 +68,7 @@ export function BoardOverlays({
   onWatchReplay: () => void;
   onDownloadReplay: () => void;
   onLeave: () => void;
+  onPlayAgain: (() => void) | null;
   onCloseReplay: () => void;
   onDismissGameOver: () => void;
   onCloseOverlay: () => void;
@@ -140,6 +142,7 @@ export function BoardOverlays({
           onWatchReplay={!replaying && replayAvailable ? onWatchReplay : null}
           onDownloadReplay={replaying || replayAvailable ? onDownloadReplay : null}
           onBackToLobby={replaying ? onCloseReplay : onLeave}
+          onPlayAgain={replaying ? null : onPlayAgain}
           replaying={replaying}
           onClose={onDismissGameOver}
           friendAction={!replaying && !botGame && !spectating && opponentUsername

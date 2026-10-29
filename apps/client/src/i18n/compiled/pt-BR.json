@@ -31021,6 +31021,12 @@
       "value": "Partida concluída"
     }
   ],
+  "game.over.playAgain": [
+    {
+      "type": 0,
+      "value": "Jogar de novo"
+    }
+  ],
   "game.over.playerStats": [
     {
       "type": 0,

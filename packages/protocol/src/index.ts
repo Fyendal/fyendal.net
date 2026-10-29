@@ -1795,6 +1795,12 @@ function prepView(value: unknown): value is PrepView {
     && (prep.deadlinePhase === undefined || prep.deadlinePhase === prep.phase);
 }
 
+function botRematch(value: unknown): boolean {
+  const rematch = object(value);
+  return !!rematch && exactKeys(rematch, ["format", "deckId", "bot"])
+    && FORMATS.has(String(rematch.format)) && id(rematch.deckId) && BOT_OPPONENTS.has(String(rematch.bot));
+}
+
 function backgroundMatchmakingStatus(value: unknown): boolean {
   const status = object(value);
   if (!status || typeof status.state !== "string") return false;
@@ -1907,8 +1913,12 @@ function decodeServerEvent(value: unknown): Exclude<ServerMessage, StateMessage>
     case "friend-game-invite-dismissed":
       valid = exactKeys(message, ["type", "inviteId"]) && requestId(message.inviteId);
       break;
-    case "auth-failed": case "queue-left": case "left": case "match-timeout": case "spectator-kicked": case "league-updated":
+    case "auth-failed": case "queue-left": case "match-timeout": case "spectator-kicked": case "league-updated":
       valid = exactKeys(message, ["type"]);
+      break;
+    case "left":
+      valid = exactKeys(message, ["type", "playAgain"], ["type"])
+        && (message.playAgain === undefined || botRematch(message.playAgain));
       break;
     case "background-matchmaking":
       valid = exactKeys(message, ["type", "status"])

@@ -434,7 +434,9 @@ describe("server rooms over websocket", () => {
     )) as Extract<ServerMessage, { type: "state" }>;
     expect(advanced.version).toBeGreaterThan(initial.version);
     a.sendMsg({ type: "leave-room", endGame: true });
-    expect(await a.next((m) => m.type === "left")).toEqual({ type: "left" });
+    expect(await a.next((m) => m.type === "left")).toEqual({
+      type: "left", playAgain: { format: "silver-age", deckId: "precon-sly", bot: "briar" },
+    });
     expect((await db.query("SELECT 1 FROM rooms WHERE code = $1", [created.code])).rows).toHaveLength(0);
     a.ws.close();
   });
@@ -483,7 +485,9 @@ describe("server rooms over websocket", () => {
     )) as Extract<ServerMessage, { type: "state" }>;
     expect(advanced.version).toBeGreaterThan(initial.version);
     a.sendMsg({ type: "leave-room", endGame: true });
-    expect(await a.next((m) => m.type === "left")).toEqual({ type: "left" });
+    expect(await a.next((m) => m.type === "left")).toEqual({
+      type: "left", playAgain: { format: "silver-age", deckId: "precon-sly", bot: "kayo" },
+    });
     expect((await db.query("SELECT 1 FROM rooms WHERE code = $1", [created.code])).rows).toHaveLength(0);
     a.ws.close();
   });
@@ -528,7 +532,9 @@ describe("server rooms over websocket", () => {
     )) as Extract<ServerMessage, { type: "state" }>;
     expect(advanced.version).toBeGreaterThan(initial.version);
     a.sendMsg({ type: "leave-room", endGame: true });
-    expect(await a.next((message) => message.type === "left")).toEqual({ type: "left" });
+    expect(await a.next((message) => message.type === "left")).toEqual({
+      type: "left", playAgain: { format: "cc", deckId: "precon-asb", bot: "hala" },
+    });
     a.ws.close();
   });
 
@@ -560,7 +566,9 @@ describe("server rooms over websocket", () => {
       },
     });
     a.sendMsg({ type: "leave-room", endGame: true });
-    expect(await a.next((message) => message.type === "left")).toEqual({ type: "left" });
+    expect(await a.next((message) => message.type === "left")).toEqual({
+      type: "left", playAgain: { format: "cc", deckId: "precon-asb", bot: "ira" },
+    });
     a.ws.close();
   });
 
@@ -646,7 +654,9 @@ describe("server rooms over websocket", () => {
       },
     });
     a.sendMsg({ type: "leave-room", endGame: true });
-    expect(await a.next((message) => message.type === "left")).toEqual({ type: "left" });
+    expect(await a.next((message) => message.type === "left")).toEqual({
+      type: "left", playAgain: { format: "cc", deckId: "precon-asb", bot: "cindra" },
+    });
     a.ws.close();
   });
 
@@ -678,7 +688,9 @@ describe("server rooms over websocket", () => {
       },
     });
     a.sendMsg({ type: "leave-room", endGame: true });
-    expect(await a.next((message) => message.type === "left")).toEqual({ type: "left" });
+    expect(await a.next((message) => message.type === "left")).toEqual({
+      type: "left", playAgain: { format: "cc", deckId: "precon-asb", bot: "jarl" },
+    });
     a.ws.close();
   });
 
@@ -701,7 +713,9 @@ describe("server rooms over websocket", () => {
       },
     });
     a.sendMsg({ type: "leave-room", endGame: true });
-    expect(await a.next((message) => message.type === "left")).toEqual({ type: "left" });
+    expect(await a.next((message) => message.type === "left")).toEqual({
+      type: "left", playAgain: { format: "cc", deckId: "precon-asb", bot: "levia" },
+    });
     a.ws.close();
   });
 
@@ -749,7 +763,9 @@ describe("server rooms over websocket", () => {
       },
     });
     a.sendMsg({ type: "leave-room", endGame: true });
-    expect(await a.next((message) => message.type === "left")).toEqual({ type: "left" });
+    expect(await a.next((message) => message.type === "left")).toEqual({
+      type: "left", playAgain: { format: "cc", deckId: "precon-asr", bot: "boltyn" },
+    });
     a.ws.close();
   });
 
@@ -775,7 +791,9 @@ describe("server rooms over websocket", () => {
       },
     });
     a.sendMsg({ type: "leave-room", endGame: true });
-    expect(await a.next((message) => message.type === "left")).toEqual({ type: "left" });
+    expect(await a.next((message) => message.type === "left")).toEqual({
+      type: "left", playAgain: { format: "silver-age", deckId: "precon-sly", bot: "ira-sage" },
+    });
     a.ws.close();
   });
 
@@ -858,7 +876,9 @@ describe("server rooms over websocket", () => {
       },
     });
     a.sendMsg({ type: "leave-room", endGame: true });
-    expect(await a.next((message) => message.type === "left")).toEqual({ type: "left" });
+    expect(await a.next((message) => message.type === "left")).toEqual({
+      type: "left", playAgain: { format: "silver-age", deckId: "precon-sly", bot: "bravo" },
+    });
     a.ws.close();
   });
 

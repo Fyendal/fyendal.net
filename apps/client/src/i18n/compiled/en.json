@@ -29422,6 +29422,12 @@
       "value": "Match complete"
     }
   ],
+  "game.over.playAgain": [
+    {
+      "type": 0,
+      "value": "Play again"
+    }
+  ],
   "game.over.playerStats": [
     {
       "type": 0,

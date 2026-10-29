@@ -179,6 +179,8 @@ export const useStore = create<StoreState>((set, get) => {
   /** A bot-room request waiting for the retained matchmaking room to release
    *  this socket. WebSocket commands stay ordered by waiting for `left`. */
   let pendingBotRoom: { format: Format; deckId: string; bot?: BotOpponent; searchForPlayer?: boolean } | null = null;
+  /** Play again ended the bot room and waits for "left" to name the rematch. */
+  let pendingPlayAgain = false;
   /** A declined matchmade room; the next pairing or opener replaces it. */
   let pendingMatchDecline: string | null = null;
   /** Choice associated with the current/most recent matchmaking request. */
@@ -1257,6 +1259,12 @@ export const useStore = create<StoreState>((set, get) => {
       case "left":
         // Normal exits reset optimistically in leave(). A queue-to-bot handoff
         // waits for this acknowledgement before reusing the socket.
+        if (pendingPlayAgain) {
+          pendingPlayAgain = false;
+          if (msg.playAgain) get().createBotRoom(msg.playAgain.format, msg.playAgain.deckId, msg.playAgain.bot);
+          else set({ roomStartPending: false });
+          break;
+        }
         launchPendingBotRoom();
         break;
       case "spectator-kicked":
@@ -1280,6 +1288,7 @@ export const useStore = create<StoreState>((set, get) => {
         break;
       case "error": {
         pendingBotRoom = null;
+        pendingPlayAgain = false;
         joiningRoomCode = null;
         if (SOCIAL_ERROR_CODES.has(msg.code)) {
           set({ socialError: msg.code });
@@ -1627,6 +1636,14 @@ export const useStore = create<StoreState>((set, get) => {
         send({ type: "leave-room" });
       }
     },
+    playBotAgain: () => {
+      if (!get().botGame || get().spectating || !get().roomCode || !get().connected
+        || get().view?.phase !== "game-over") return;
+      get().leave();
+      // The server names the deck and bot in its "left" reply.
+      pendingPlayAgain = true;
+      set({ roomStartPending: true });
+    },
     joinRoom: (code, deckId, spectate) => {
       pendingBotRoom = null;
       const upperCode = code.toUpperCase();
@@ -1853,6 +1870,7 @@ export const useStore = create<StoreState>((set, get) => {
     leave: () => {
       // An explicit Leave click wins over an in-flight practice handoff.
       pendingBotRoom = null;
+      pendingPlayAgain = false;
       pendingMatchDecline = null;
       cancelReconnect();
       roomEntryPending = false;

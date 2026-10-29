@@ -35,7 +35,12 @@ describe("suspense and crowd auras trigger through the stack", () => {
 
   // Start-phase layers resolve without priority, so these use Pleiades's
   // counter-removal cost to destroy the aura while players hold priority.
-  function pleiadesRemovesLastCounter(aura: string, hand: string[] = [], foeHand: string[] = []): Scenario {
+  function pleiadesRemovesLastCounter(
+    aura: string,
+    hand: string[] = [],
+    foeHand: string[] = [],
+    auraOwner = 0,
+  ): Scenario {
     const g = scenario({
       seats: [
         seat("rhinar", {
@@ -47,6 +52,7 @@ describe("suspense and crowd auras trigger through the stack", () => {
       ],
     });
     for (const card of g.state.players[0]!.board) card.counters = { suspense: 1 };
+    g.state.players[0]!.board[0]!.owner = auraOwner;
     g.activate("pleiades, superstar|0", { settle: false });
     const paid = g.state.players[0]!.board.find((card) => functionalKeyOf(cardData[card.cardId]!) === aura)!;
     g.doRaw({ kind: "choose", optionId: String(paid.instanceId) });
@@ -65,6 +71,17 @@ describe("suspense and crowd auras trigger through the stack", () => {
     expect(g.stackLabels()).toEqual(["Pleiades, Superstar"]);
     g.passPriority().passPriority().chooseOption("pass");
     g.play("head jab|1").expectAttackValue(5);
+  });
+
+  it("an opponent-owned aura's leave trigger goes to its last controller", () => {
+    const g = pleiadesRemovesLastCounter("edge of their seats|3", ["head jab|1"], [], 1);
+
+    expect(g.stackLabels()).toEqual(["Your next attack this turn gets +3 power", "Pleiades, Superstar"]);
+    g.expectInZone(1, "edge of their seats|3", "graveyard");
+
+    g.passPriority().passPriority();
+    g.passPriority().passPriority().chooseOption("pass");
+    g.play("head jab|1").expectAttackValue(6);
   });
 
   it("Leave Them Hanging leaves with only its attack buff, not another intimidate", () => {

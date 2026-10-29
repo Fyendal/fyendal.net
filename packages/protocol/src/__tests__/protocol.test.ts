@@ -1207,12 +1207,19 @@ describe("GameView and server messages", () => {
         die: { rolls: [3, 5], winner: 1 }, startPlayer: null,
         cardPoolMode: "open", deadlineAt: 30_000, deadlinePhase: "accept",
       } },
-      { type: "left" }, { type: "error", code: "ROOM_NOT_FOUND", message: "gone" },
+      { type: "left" }, { type: "left", playAgain: { format: "cc", deckId: "precon-asb", bot: "hala" } },
+      { type: "error", code: "ROOM_NOT_FOUND", message: "gone" },
     ];
     for (const message of variants) {
       expect(decodeServerMessage(message)).not.toBeNull();
       expect(decodeServerMessage({ ...message, unknown: true })).toBeNull();
     }
+    for (const playAgain of [
+      { format: "cc", deckId: "precon-asb", bot: "nobody" },
+      { format: "draft", deckId: "precon-asb", bot: "hala" },
+      { format: "cc", bot: "hala" },
+      { format: "cc", deckId: "precon-asb", bot: "hala", extra: true },
+    ]) expect(decodeServerMessage({ type: "left", playAgain })).toBeNull();
   });
 
   it("decodes arena stages and rejects premature reveals and malformed commitments", () => {

@@ -1369,6 +1369,7 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
           seat: opponentSeat(ctx),
           attack: -1,
           appliesTo: "attack-action",
+          powerWhileDefending: true,
         });
       },
     },

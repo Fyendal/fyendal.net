@@ -1988,6 +1988,28 @@ describe("PEN — generalized rules interactions", () => {
   });
 });
 
+describe("PEN — Herald of Victoria", () => {
+  it("lowers an opposing defending attack below the Phantasm threshold", () => {
+    const s = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          heroKey: "prism|0",
+          hand: ["herald of victoria|2", "wartune herald|1", "raging onslaught|3"],
+        },
+        { hero: "dorinthea", hand: ["raging onslaught|2"] },
+      ],
+    });
+
+    s.activate("herald of victoria|2")
+      .settle()
+      .play("wartune herald|1", { pitch: ["raging onslaught|3"] })
+      .blockWith("raging onslaught|2")
+      .settle()
+      .expectInZone(0, "wartune herald|1", "soul");
+  });
+});
+
 describe("PEN — Embalm", () => {
   it.each([
     ["hand", 0],

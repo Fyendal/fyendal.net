@@ -755,6 +755,18 @@ export function currentPowerOf(
       card,
     ) ?? 0;
   }
+  const data = dataOf(state, card.cardId);
+  const color = cardColorOf(state, card);
+  for (const modifier of state.modifiers) {
+    if (
+      modifier.powerWhileDefending &&
+      modifier.attack &&
+      !modifier.consumed &&
+      (modifier.scope === "until-end-of-turn" || modifier.scope === "static") &&
+      modifier.seat === card.owner &&
+      modifierAppliesToDefense(state, modifier, data, color, card)
+    ) power += modifier.attack;
+  }
   return power;
 }
 

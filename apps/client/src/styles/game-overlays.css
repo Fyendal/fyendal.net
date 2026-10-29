@@ -667,7 +667,7 @@
   color: #e1d4bb;
   font-size: 13px;
   line-height: 1.15;
-  white-space: normal;
+  white-space: nowrap;
 }
 .gameover-actions button:hover { background: #382918; border-color: #8b6d40; }
 .gameover-actions .btn-primary { background: #9e3028; border-color: #b84d3e; color: #fff0dc; }
@@ -939,7 +939,7 @@
   .gameover-player-tabs button { gap: 6px; padding-inline: 6px; font-size: 13px; }
   .gameover-player-tabs .gameover-tab-portrait { flex-basis: 22px; width: 22px; height: 22px; }
   .gameover-actions { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); width: 100%; }
-  .gameover-actions button { min-width: 0; min-height: 44px; padding: 7px; }
+  .gameover-actions button { min-width: 0; min-height: 44px; padding: 7px; white-space: normal; }
   .gameover-average-stat { min-height: 98px; padding: 11px; }
   .gameover-average-stat > span:not(.gameover-average-tooltip, .gameover-tooltip-mark) { font-size: 13px; }
   .gameover-match-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); }

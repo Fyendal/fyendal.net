@@ -30328,6 +30328,12 @@
       "value": "Partida terminada"
     }
   ],
+  "game.over.playAgain": [
+    {
+      "type": 0,
+      "value": "Jugar de nuevo"
+    }
+  ],
   "game.over.playerStats": [
     {
       "type": 0,

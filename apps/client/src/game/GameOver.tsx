@@ -23,6 +23,7 @@ export function GameOver({
   onWatchReplay,
   onDownloadReplay,
   onBackToLobby,
+  onPlayAgain = null,
   onClose,
   replaying = false,
   friendAction = null,
@@ -34,6 +35,7 @@ export function GameOver({
   onWatchReplay: (() => void) | null;
   onDownloadReplay: (() => void) | null;
   onBackToLobby: () => void;
+  onPlayAgain?: (() => void) | null;
   onClose: () => void;
   replaying?: boolean;
   friendAction?: ReactNode;
@@ -83,9 +85,14 @@ export function GameOver({
               <button onClick={onWatchReplay}>▶ {intl.formatMessage({ id: "game.over.watchReplay" })}</button>
             ) : null}
             <button onClick={onClose}>{intl.formatMessage({ id: "game.over.backToBoard" })}</button>
-            <button className="btn-primary" onClick={onBackToLobby}>
+            <button className={onPlayAgain ? undefined : "btn-primary"} onClick={onBackToLobby}>
               {intl.formatMessage({ id: replaying ? "replay.controls.exit" : "game.over.backToLobby" })}
             </button>
+            {onPlayAgain ? (
+              <button className="btn-primary" onClick={onPlayAgain}>
+                {intl.formatMessage({ id: "game.over.playAgain" })}
+              </button>
+            ) : null}
           </div>
         </header>
 

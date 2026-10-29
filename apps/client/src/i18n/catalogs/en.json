@@ -2706,6 +2706,7 @@
   "game.over.watchReplay": "Watch replay",
   "game.over.backToBoard": "Back to board",
   "game.over.backToLobby": "Back to lobby",
+  "game.over.playAgain": "Play again",
   "game.over.retention": "This replay will be available in My Replays for 7 days. Export it to keep it longer.",
   "game.over.viewStatsFor": "View statistics for",
   "game.over.playerStats": "Player stats",

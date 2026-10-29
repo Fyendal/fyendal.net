@@ -13,7 +13,8 @@ import { assertSafeToSeed } from "./seedGuard.js";
 import { dehydrateState, hashReconnectToken } from "./store.js";
 
 type ManualSeat =
-  | { controller: "human"; username: string }
+  /** A saved deck or precon id, so Play again can start a new bot game. */
+  | { controller: "human"; username: string; deckId?: string }
   | { controller: "bot"; opponent: BotOpponent };
 
 export interface ManualRoomFixture {
@@ -48,6 +49,9 @@ function validateFixture(value: unknown): asserts value is ManualRoomFixture {
     if (seat?.controller === "human" &&
       (typeof seat.username !== "string" || !/^[a-z0-9_-]+$/i.test(seat.username))) {
       throw new Error("human seat needs an existing local username");
+    }
+    if (seat?.controller === "human" && seat.deckId !== undefined && typeof seat.deckId !== "string") {
+      throw new Error("human seat deckId must be a string");
     }
     if (seat?.controller === "bot" &&
       (typeof seat.opponent !== "string" || !botDefinition(seat.opponent))) {
@@ -123,6 +127,7 @@ try {
         userId = Number(rows[0]?.id);
         if (!Number.isSafeInteger(userId)) throw new Error(`local user ${seat.username} is missing; run the base seed first`);
         username = String(rows[0]!.username);
+        deckId = seat.deckId ?? null;
       } else {
         const definition = botDefinition(seat.opponent);
         const pool = precon(definition?.deckId ?? "")?.pool;

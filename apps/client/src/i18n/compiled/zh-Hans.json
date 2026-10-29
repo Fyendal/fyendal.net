@@ -28275,6 +28275,12 @@
       "value": "对局结束"
     }
   ],
+  "game.over.playAgain": [
+    {
+      "type": 0,
+      "value": "再来一局"
+    }
+  ],
   "game.over.playerStats": [
     {
       "type": 0,

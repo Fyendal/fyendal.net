@@ -457,7 +457,10 @@ describe("PgRoomStore storage", () => {
       token: created.token,
       userId,
     });
-    expect(ended).toMatchObject({ ok: true });
+    expect(ended).toMatchObject({
+      ok: true,
+      playAgain: { format: "silver-age", deckId: "precon-svi", bot: "briar" },
+    });
     if (!ended.ok || !ended.replayFinalizationId) throw new Error("bot replay was not finalized");
     expect(ended.replayFinalizationId).toMatch(/^[0-9a-f]{24}$/);
     expect(await store.getRoom(created.code)).toBeNull();

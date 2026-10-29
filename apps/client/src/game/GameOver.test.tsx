@@ -47,6 +47,27 @@ describe("GameOver player statistics", () => {
     expect(html).not.toContain('class="gameover-hero-portrait gameover-result-portrait"');
   });
 
+  it("makes play again the primary action when a rematch is offered", () => {
+    const view = finishedView();
+    const html = renderToStaticMarkup(
+      <TestI18nProvider>
+        <GameOver
+          view={view}
+          seat={0}
+          spectating={false}
+          recordedViews={[view]}
+          onWatchReplay={null}
+          onDownloadReplay={null}
+          onBackToLobby={() => undefined}
+          onPlayAgain={() => undefined}
+          onClose={() => undefined}
+        />
+      </TestI18nProvider>,
+    );
+    expect(html).toContain("<button>Back to lobby</button>");
+    expect(html).toContain('<button class="btn-primary">Play again</button>');
+  });
+
   it("presents heroes as a switcher and labels the single selected stats panel", () => {
     const view = finishedView();
     view.gameStats = { turns: [

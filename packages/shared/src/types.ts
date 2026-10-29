@@ -16,6 +16,13 @@ export type QueuePoolCounts = Record<CardPoolMode, Record<CardPoolMode, number>>
 /** Stable identities for the supported practice opponents. */
 export type BotOpponent = "bravo" | "briar" | "kayo" | "cindra" | "ira" | "hala" | "jarl" | "levia" | "starvo" | "boltyn" | "ira-sage";
 
+/** What a finished bot game needs to start again with the same deck and bot. */
+export interface BotRematch {
+  format: Format;
+  deckId: string;
+  bot: BotOpponent;
+}
+
 /** Numeric resources produced when pitched. Colored cards use their red/
  * yellow/blue/purple color value (1/2/3/4). */
 export type Pitch = 1 | 2 | 3 | 4;
@@ -1225,8 +1232,8 @@ export type ServerMessage =
   | { type: "match-timeout" }
   /** pre-game prep room update */
   | { type: "prep-state"; prep: PrepView; version: number }
-  /** your leave-room went through; back to the lobby */
-  | { type: "left" }
+  /** your leave-room went through; an ended bot game names its deck and bot for Play again */
+  | { type: "left"; playAgain?: BotRematch }
   | { type: "error"; code: ErrorCode; message: string };
 
 /** Full application state after socket log reconstruction. */

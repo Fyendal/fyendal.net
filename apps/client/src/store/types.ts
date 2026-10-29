@@ -267,6 +267,8 @@ export interface StoreState {
   ) => void;
   createBotRoom: (format: Format, deckId: string, bot?: BotOpponent, searchForPlayer?: boolean) => void;
   playBotFromPrep: (format: Format, deckId: string, bot?: BotOpponent, searchForPlayer?: boolean) => void;
+  /** End the finished bot game and start a new one with the same deck and bot. */
+  playBotAgain: () => void;
   joinRoom: (code: string, deckId?: string, spectate?: boolean) => void;
   inspectRoom: (code: string) => void;
   dismissInvite: (resetUrl?: boolean) => void;

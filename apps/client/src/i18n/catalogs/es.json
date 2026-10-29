@@ -2706,6 +2706,7 @@
   "game.over.watchReplay": "Ver repetición",
   "game.over.backToBoard": "Volver al tablero",
   "game.over.backToLobby": "Volver al lobby",
+  "game.over.playAgain": "Jugar de nuevo",
   "game.over.retention": "Esta repetición estará disponible en Mis repeticiones durante 7 días. Expórtala para conservarla más tiempo.",
   "game.over.viewStatsFor": "Ver estadísticas de",
   "game.over.playerStats": "Estadísticas del jugador",

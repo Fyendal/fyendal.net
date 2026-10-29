@@ -2706,6 +2706,7 @@
   "game.over.watchReplay": "观看回放",
   "game.over.backToBoard": "返回对局界面",
   "game.over.backToLobby": "返回大厅",
+  "game.over.playAgain": "再来一局",
   "game.over.retention": "此回放将在“我的回放”中保留 7 天。如需长期保存，请将其导出。",
   "game.over.viewStatsFor": "查看统计数据",
   "game.over.playerStats": "玩家数据",

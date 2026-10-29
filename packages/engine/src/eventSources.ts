@@ -30,13 +30,15 @@ export function collectCardEventTriggerLayers(
   eventContext?: TriggerEventContext,
 ): { seat: number; layers: StackLayer[] }[] {
   const groups: { seat: number; layers: StackLayer[] }[] = [];
+  // A card leaving the arena triggers for its last controller, not its owner.
+  const eventCardSeat = eventContext?.controllerSeat ?? eventCard?.owner;
   for (const seat of [subject, opponent(subject)]) {
     const player = state.players[seat] as PlayerState;
     const layers: StackLayer[] = [];
     const announcements: { group?: string; announcement: TriggerAnnouncement; occurrences: number }[] = [];
     const sources = eventTriggerSources(state, player);
     if (
-      event !== "card-played" && eventCard?.owner === seat &&
+      event !== "card-played" && eventCard && eventCardSeat === seat &&
       !sources.some((source) => source.card.instanceId === eventCard.instanceId)
     ) {
       sources.push({ card: eventCard, physicalZone: "self", active: false });
@@ -44,8 +46,8 @@ export function collectCardEventTriggerLayers(
     for (const source of sources) {
       const { card } = source;
       const isEventCard = event !== "card-played" &&
-        eventCard?.owner === seat &&
-        card.instanceId === eventCard.instanceId;
+        eventCardSeat === seat &&
+        card.instanceId === eventCard?.instanceId;
       if (maxSourceId !== undefined && card.instanceId >= maxSourceId) continue;
       scriptOf(state, card.cardId, card)?.triggers?.forEach((trigger, triggerIndex) => {
         if (

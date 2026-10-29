@@ -5,6 +5,7 @@ import {
   IDLE_VICTORY_MS,
   type BackgroundMatchmakingStatus,
   type BotOpponent,
+  type BotRematch,
   type CardPoolMode,
   type Decklist,
   type EquipmentSlot,
@@ -3732,7 +3733,7 @@ export class PgRoomStore {
     code: string,
     credentials: SeatCredentials,
   ): Promise<
-    { ok: true; version: number; replayFinalizationId?: string }
+    { ok: true; version: number; replayFinalizationId?: string; playAgain?: BotRematch }
     | { ok: false; error: string }
   > {
     const upper = code.toUpperCase();
@@ -3771,10 +3772,16 @@ export class PgRoomStore {
           type: "room",
           event: { code: upper, kind: "deleted", version: room.version + 1 },
         });
+        const humanDeckId = room.seats[seat]?.deckId;
+        const bot = botDefinitionForDeckId(room.seats[1 - seat]?.deckId);
+        const playAgain: BotRematch | undefined = humanDeckId && bot?.format === room.format
+          ? { format: room.format, deckId: humanDeckId, bot: bot.id }
+          : undefined;
         return {
           ok: true as const,
           version: room.version + 1,
           ...(replayFinalizationId ? { replayFinalizationId } : {}),
+          ...(playAgain ? { playAgain } : {}),
         };
       }),
       () => ({ ok: false as const, error: "room is busy, try again" }),
