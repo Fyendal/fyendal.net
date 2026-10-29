@@ -1241,6 +1241,8 @@
   height: 100%;
   margin: 0;
   transform: rotate(var(--hand-drag-tilt, 0deg));
+  /* The tilt changes every frame; its own layer keeps that off the paint path. */
+  will-change: transform;
   scale: 1.04;
   /* The tilt is already smoothed per frame; a transform transition would lag it. */
   transition: scale 150ms cubic-bezier(.22, .8, .25, 1), box-shadow 140ms ease, border-color 140ms ease;
@@ -1252,13 +1254,27 @@
   position: absolute;
   top: 0;
   left: 0;
-  transform: translate(var(--hand-drag-preview-x, 0px), var(--hand-drag-preview-y, 0px));
+  will-change: transform, opacity;
   transition: opacity 120ms ease;
 }
-.hand-drag-card-returning .hand-drag-preview { opacity: 0; }
+.hand-drag-card-returning .hand-drag-preview,
+/* Stacked on phones it would hide the drop target, so it steps aside there. */
+.hand-drag-card-playable.hand-drag-card-stacked-preview .hand-drag-preview { opacity: 0; }
 .hand-drag-card-playable .card-hand {
   border-color: #ffdb7b;
   box-shadow: 0 0 0 2px #ffdb7b, 0 0 18px 5px #efb844b3, 0 12px 28px #000b;
+}
+/* While a hand card is dragged to block or arsenal, its destination glows
+   in the same gold as a card ready to be released. */
+.table[data-hand-drop="arsenal"] .mat-half:not(.mat-opp) .arsenal-slot > .card-zone,
+.table[data-hand-drop="block"] .chain-float {
+  box-shadow: 0 0 0 2px #ffdb7b, 0 0 18px 5px #efb844b3;
+}
+/* The arsenal prompt can cover the slot on phones; the drag answers it. */
+.table[data-hand-drop="arsenal"] .decision-float {
+  opacity: .25;
+  pointer-events: none;
+  transition: opacity 120ms ease;
 }
 .hand-drag-card-returning .card-hand {
   transform: none;

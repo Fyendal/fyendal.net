@@ -78,17 +78,37 @@ export function handDragLocation(
   return y < hand.top - HAND_PLAY_DROP_CLEARANCE ? "arena" : "buffer";
 }
 
-/** A playable-card drop cannot double as pitching, blocking or a decision. */
-export function canPlayHandDrop(
+/** What releasing a dragged hand card on the board does in this window. */
+export type HandDropAction = "play" | "block" | "arsenal";
+
+/** Blocking and arsenal follow their decisions; a play cannot double as
+ * pitching or another decision. */
+export function handDropAction(
   instanceId: number,
-  playableIds: ReadonlySet<number>,
-  selection: Sel,
-  decisionActive: boolean,
-): boolean {
-  if (decisionActive || !playableIds.has(instanceId)) return false;
+  state: {
+    defending: boolean;
+    stageableIds: ReadonlySet<number>;
+    choosingArsenal: boolean;
+    playableIds: ReadonlySet<number>;
+    selection: Sel;
+    otherDecisionActive: boolean;
+  },
+): HandDropAction | null {
+  if (state.defending) return state.stageableIds.has(instanceId) ? "block" : null;
+  if (state.choosingArsenal) return "arsenal";
+  if (state.otherDecisionActive || !state.playableIds.has(instanceId)) return null;
+  const selection = state.selection;
   return selection.kind === "none" ||
     ((selection.kind === "play-hand" || selection.kind === "choose-hand-action")
-      && selection.instanceId === instanceId);
+      && selection.instanceId === instanceId)
+    ? "play"
+    : null;
+}
+
+/** The arsenal slot itself accepts an arsenal drop, even where the resting
+ * hand overlaps it. */
+export function handDropOnOwnArsenal(target: Element | null, action: HandDropAction): boolean {
+  return action === "arsenal" && target?.closest(".mat-half:not(.mat-opp) .zone-arsenal") != null;
 }
 
 /** Arena HUD floats are siblings of the board, but still valid drop surfaces.

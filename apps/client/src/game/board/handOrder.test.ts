@@ -3,7 +3,8 @@ import {
   handDragScrollSpeed,
   handDragStarted,
   handDragLocation,
-  canPlayHandDrop,
+  handDropAction,
+  handDropOnOwnArsenal,
   handPlayDropTargetAllowed,
   moveHandCard,
   moveVisibleHandCard,
@@ -113,17 +114,45 @@ describe("arena hand drops", () => {
     expect(handDragLocation(400, 750, hand, arena)).toBe("outside");
   });
 
+  const dropWindow = {
+    defending: false,
+    stageableIds: new Set<number>(),
+    choosingArsenal: false,
+    playableIds: new Set([1, 2]),
+    selection: { kind: "none" } as const,
+    otherDecisionActive: false,
+  };
+
   it("allows a legal play or the selected card, but never a different payment card", () => {
-    const playable = new Set([1, 2]);
-    expect(canPlayHandDrop(1, playable, { kind: "none" }, false)).toBe(true);
-    expect(canPlayHandDrop(3, playable, { kind: "none" }, false)).toBe(false);
-    expect(canPlayHandDrop(1, playable, { kind: "play-hand", instanceId: 1 }, false)).toBe(true);
-    expect(canPlayHandDrop(2, playable, { kind: "play-hand", instanceId: 1 }, false)).toBe(false);
-    expect(canPlayHandDrop(1, playable, { kind: "activate", sourceInstanceId: 1 }, false)).toBe(false);
+    expect(handDropAction(1, dropWindow)).toBe("play");
+    expect(handDropAction(3, dropWindow)).toBeNull();
+    expect(handDropAction(1, { ...dropWindow, selection: { kind: "play-hand", instanceId: 1 } })).toBe("play");
+    expect(handDropAction(2, { ...dropWindow, selection: { kind: "play-hand", instanceId: 1 } })).toBeNull();
+    expect(handDropAction(1, { ...dropWindow, selection: { kind: "activate", sourceInstanceId: 1 } })).toBeNull();
   });
 
-  it("disables the play glow during decisions and when authoritative legality changes", () => {
-    expect(canPlayHandDrop(1, new Set([1]), { kind: "none" }, true)).toBe(false);
-    expect(canPlayHandDrop(1, new Set(), { kind: "none" }, false)).toBe(false);
+  it("disables the play glow during other decisions and when authoritative legality changes", () => {
+    expect(handDropAction(1, { ...dropWindow, otherDecisionActive: true })).toBeNull();
+    expect(handDropAction(1, { ...dropWindow, playableIds: new Set() })).toBeNull();
+  });
+
+  it("blocks with stageable cards while defending, even though a decision is open", () => {
+    const defending = { ...dropWindow, defending: true, stageableIds: new Set([4]), otherDecisionActive: true };
+    expect(handDropAction(4, defending)).toBe("block");
+    expect(handDropAction(1, defending)).toBeNull();
+  });
+
+  it("arsenals any hand card during the arsenal choice", () => {
+    expect(handDropAction(9, { ...dropWindow, choosingArsenal: true, otherDecisionActive: true })).toBe("arsenal");
+  });
+
+  it("accepts an arsenal drop on the player's own arsenal slot only", () => {
+    const over = (selector: string | null) => ({
+      closest: (query: string) => (query === selector ? {} : null),
+    }) as unknown as Element;
+    const own = ".mat-half:not(.mat-opp) .zone-arsenal";
+    expect(handDropOnOwnArsenal(over(own), "arsenal")).toBe(true);
+    expect(handDropOnOwnArsenal(over(null), "arsenal")).toBe(false);
+    expect(handDropOnOwnArsenal(over(own), "play")).toBe(false);
   });
 });

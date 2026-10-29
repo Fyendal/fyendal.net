@@ -3,6 +3,8 @@ export const HAND_MOTION_EASING = "cubic-bezier(0.22, 0.8, 0.25, 1)";
 /** A touch hold this long picks the card up without waiting for movement;
  * shorter presses stay taps. */
 export const HAND_TOUCH_HOLD_MS = 300;
+/** A rejected block or arsenal drop gives its card back after this long. */
+export const HAND_DROP_SETTLE_MS = 1500;
 
 const HAND_DRAG_PREVIEW_GAP = 12;
 const HAND_DRAG_PREVIEW_EDGE = 8;
@@ -12,14 +14,22 @@ interface Size { width: number; height: number }
 const clamp = (value: number, min: number, max: number) => Math.min(Math.max(value, min), max);
 
 /** Hover-preview size for a drag. Wide screens keep it whole beside the card;
- * narrow ones shrink it so it always fits above or below the card. */
-export function handDragPreviewSize(preview: Size, card: Size, viewport: Size): Size {
+ * narrow ones shrink it so it always fits stacked above or below the card. */
+export function handDragPreviewSize(
+  preview: Size,
+  card: Size,
+  viewport: Size,
+): Size & { stacked: boolean } {
   const gutter = HAND_DRAG_PREVIEW_GAP + 2 * HAND_DRAG_PREVIEW_EDGE;
-  if (viewport.width - card.width - gutter >= preview.width) return preview;
+  if (viewport.width - card.width - gutter >= preview.width) return { ...preview, stacked: false };
   const height = (viewport.height - card.height) / 2 - HAND_DRAG_PREVIEW_GAP - HAND_DRAG_PREVIEW_EDGE;
   const width = viewport.width - 2 * HAND_DRAG_PREVIEW_EDGE;
   const scale = Math.max(0, Math.min(1, height / preview.height, width / preview.width));
-  return { width: Math.round(preview.width * scale), height: Math.round(preview.height * scale) };
+  return {
+    width: Math.round(preview.width * scale),
+    height: Math.round(preview.height * scale),
+    stacked: true,
+  };
 }
 
 /** Preview offset from the dragged card's top-left: beside it when it fits,

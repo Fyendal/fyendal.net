@@ -26,7 +26,8 @@ import {
 import type { Sel } from "../useActionAnnouncement.js";
 import type { BoardLegalState } from "./boardModel.js";
 import { useHandReorder } from "./useHandReorder.js";
-import { canPlayHandDrop } from "./handOrder.js";
+import { handDropAction, type HandDropAction } from "./handOrder.js";
+import { handFanSlotStyle } from "./handFan.js";
 import type { MotionPreference } from "../../storage.js";
 import { useMotionPreference } from "../motion/useMotionPreference.js";
 
@@ -68,11 +69,6 @@ export function preservePreStackHandOrder(
     .map(({ card }) => card);
 }
 
-/** Per-card position in the arced hand; layout reads it from CSS. */
-export function handFanSlotStyle(slot: number): CSSProperties {
-  return { "--fan-slot": slot } as CSSProperties;
-}
-
 export function handScrollAvailability({
   scrollLeft,
   clientWidth,
@@ -111,8 +107,9 @@ export interface PlayerHandInteraction {
   onCardClick: (card: CardView) => void;
   onActivate: (instanceId: number) => void;
   onSelect: (selection: Sel) => void;
-  onPlayDrop?: (instanceId: number) => void;
-  onDragStart?: () => void;
+  onHandDrop?: (instanceId: number, action: HandDropAction) => void;
+  onDragStart?: (action: HandDropAction | null) => void;
+  onDragEnd?: () => void;
 }
 
 export function PlayerHand({
@@ -144,21 +141,24 @@ export function PlayerHand({
   );
   const reorderEnabled = !spectating && !replaying && !interaction.choosingPitch &&
     interaction.resourcePayment === undefined;
-  const { order, handlers: reorderHandlers, floatingCard, floatingCardRef, playOnRelease } = useHandReorder(
+  const { order, handlers: reorderHandlers, floatingCard, floatingCardRef, dropOnRelease } = useHandReorder(
     handRef,
     preStackCards.map((card) => card.instanceId),
     reorderEnabled,
-    interaction.onPlayDrop ? {
-      canPlay: (instanceId) => canPlayHandDrop(
-        instanceId,
-        interaction.legalState.playableHand,
-        interaction.selection,
-        view.pendingDecision !== null || interaction.defending || interaction.choosingArsenal ||
+    interaction.onHandDrop ? {
+      action: (instanceId) => handDropAction(instanceId, {
+        defending: interaction.defending,
+        stageableIds: interaction.legalState.stageableDefenders,
+        choosingArsenal: interaction.choosingArsenal,
+        playableIds: interaction.legalState.playableHand,
+        selection: interaction.selection,
+        otherDecisionActive: view.pendingDecision !== null ||
           interaction.handPick !== null || interaction.boundedHandPick != null ||
           interaction.resourcePayment !== undefined || interaction.preStackSelectedInstanceId !== null,
-      ),
-      onPlay: interaction.onPlayDrop,
+      }),
+      onDrop: interaction.onHandDrop,
       onDragStart: interaction.onDragStart,
+      onDragEnd: interaction.onDragEnd,
     } : undefined,
     reducedMotion,
   );
@@ -266,9 +266,9 @@ export function PlayerHand({
       {draggedCard && floatingCard ? createPortal(
         <div
           ref={floatingCardRef}
-          className={`hand-drag-card${playOnRelease ? " hand-drag-card-playable" : ""}${
+          className={`hand-drag-card${dropOnRelease ? " hand-drag-card-playable" : ""}${
             floatingCard.returning ? " hand-drag-card-returning" : ""
-          }`}
+          }${floatingCard.previewStacked ? " hand-drag-card-stacked-preview" : ""}`}
           data-reduced-motion={reducedMotion ? "true" : undefined}
           style={{ width: floatingCard.width, height: floatingCard.height }}
           aria-hidden="true"

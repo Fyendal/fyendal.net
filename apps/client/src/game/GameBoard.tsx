@@ -89,7 +89,8 @@ import { shouldWarnBeforeEndTurn } from "./endTurnWarning.js";
 import type { BoardOverlay } from "./board/BoardPrimitives.js";
 import { heroCard } from "./board/heroCard.js";
 import { PlayerHalf } from "./board/PlayerHalf.js";
-import { handFanSlotStyle, PlayerHand } from "./board/PlayerHand.js";
+import { PlayerHand } from "./board/PlayerHand.js";
+import { handFanSlotStyle } from "./board/handFan.js";
 import { BoardOverlays, type BoardPreview } from "./board/BoardOverlays.js";
 import { optimisticInteractionHiddenIds } from "./pendingInteraction.js";
 import { optimisticDefenderView } from "./optimisticDefenderStaging.js";
@@ -1469,8 +1470,23 @@ export function GameBoard() {
             onCardClick: onHandClick,
             onActivate: (instanceId) => clickActivate(instanceId)(),
             onSelect: setSel,
-            onPlayDrop: playHandFromDrop,
-            onDragStart: () => setPreview(null),
+            onHandDrop: (instanceId, action) => {
+              if (action === "play") {
+                playHandFromDrop(instanceId);
+                return;
+              }
+              // Blocking and arsenal drops act exactly like clicking the card.
+              const card = me.hand.find((candidate) => candidate.instanceId === instanceId);
+              if (card) onHandClick(card);
+            },
+            onDragStart: (action) => {
+              setPreview(null);
+              // Light up a block or arsenal destination without re-rendering the board.
+              if (action === "block" || action === "arsenal") {
+                tableRef.current?.setAttribute("data-hand-drop", action);
+              }
+            },
+            onDragEnd: () => tableRef.current?.removeAttribute("data-hand-drop"),
           }}
         />
       </div>

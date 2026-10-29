@@ -118,13 +118,13 @@ describe("dragged card motion", () => {
   it("keeps the whole drag preview beside the card when it fits", () => {
     const preview = { width: 296, height: 413 };
     expect(handDragPreviewSize(preview, { width: 180, height: 250 }, { width: 1440, height: 900 }))
-      .toEqual(preview);
+      .toEqual({ ...preview, stacked: false });
   });
 
   it("shrinks the drag preview to fit above or below a phone card", () => {
     // (812 - 114) / 2 - 12 - 8 leaves 329px of height.
     expect(handDragPreviewSize({ width: 296, height: 413 }, { width: 83, height: 114 }, { width: 375, height: 812 }))
-      .toEqual({ width: 236, height: 329 });
+      .toEqual({ width: 236, height: 329, stacked: true });
   });
 
   it("places the drag preview beside the card on the roomier side", () => {
