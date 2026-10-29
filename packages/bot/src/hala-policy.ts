@@ -27,6 +27,7 @@ import {
   ownCards,
   pitchIds,
   preferredPitchIntents,
+  preventableAttackDamage,
   remainingPitchValue,
   resourcePaymentPitchIds,
   resourcesAfterCost,
@@ -108,8 +109,10 @@ function hasFlurry(input: BotPolicyInput): boolean {
   );
 }
 
+const CREATES_FLURRY = /\bcreates? (?:a )?flurry token\b/i;
+
 function createsFlurry(data: CardData | undefined): boolean {
-  return /\bcreates? (?:a )?flurry token\b/i.test(data?.text ?? "");
+  return CREATES_FLURRY.test(data?.text ?? "");
 }
 
 function grantsDirectSwordAttack(data: CardData | undefined): boolean {
@@ -158,16 +161,39 @@ function plannedZenithSwings(
   return hasPotentialAdditionalSwordAttack(input, excludedIds) ? 2 : 1;
 }
 
+/** Zenith is attacking and can still be activated for another swing after
+ * this link. Attacks granted without activation (Beckon Steel) leave both the
+ * activation and any banked action point intact. */
 function zenithCanAttackAgain(input: BotPolicyInput): boolean {
   const weapon = zenithBlade(input);
   const link = currentLink(input);
-  const returnsActionPoint = link?.goAgain === true ||
-    Number(link?.attackingCard.counters?.sharpenedTurn ?? 0) === input.view.turn;
-  return weaponAttacksThisTurn(input) === 1 &&
-    weapon !== undefined &&
-    !weapon.usedAbilityIndexes?.includes(0) &&
-    link?.attackingCard.instanceId === weapon.instanceId &&
-    returnsActionPoint;
+  if (!weapon || link?.attackingCard.instanceId !== weapon.instanceId) return false;
+  if (input.view.turnFacts?.players[input.seat]?.weaponAttacksProhibited === true) return false;
+  const firstAttackGoAgain = weaponAttacksThisTurn(input) === 1 &&
+    Number(link.attackingCard.counters?.sharpenedTurn ?? 0) === input.view.turn;
+  const hasActionPoint = input.view.players[input.seat].actionPoints > 0 ||
+    link.goAgain === true || firstAttackGoAgain;
+  return hasActionPoint && !weapon.usedAbilityIndexes?.includes(0);
+}
+
+function reactionCreatesFlurry(data: CardData | undefined): boolean {
+  return data?.cardType === "attack-reaction" &&
+    data.text.split("\n").some((line) => !/^instant\b/i.test(line) && CREATES_FLURRY.test(line));
+}
+
+/** Zenith's next activation is already allowed, so it would destroy a Flurry
+ * created now without adding a swing; created on the last swing it carries
+ * into next turn instead. */
+function newFlurryWastedThisTurn(input: BotPolicyInput): boolean {
+  const remaining = zenithBlade(input)?.remainingAbilityActivations?.[0] ?? 0;
+  return zenithCanAttackAgain(input) && (remaining > 0 || hasFlurry(input));
+}
+
+function wastesFlurryReaction(data: CardData | undefined, input: BotPolicyInput): boolean {
+  const link = currentLink(input);
+  if (!data || !link || !reactionCreatesFlurry(data) || !newFlurryWastedThisTurn(input)) return false;
+  const margin = Math.max(0, link.attackValue - link.defenseValue);
+  return reactionPower(data, input) + margin < input.view.players[1 - input.seat]!.life;
 }
 
 function currentAttackIsOurWeapon(input: BotPolicyInput): boolean {
@@ -229,7 +255,7 @@ function shouldPlayToeTheLine(input: BotPolicyInput): boolean {
   const link = currentLink(input);
   if (link && link.attackingCard.owner !== input.seat) {
     return input.view.pendingDecision?.kind === "defense-reaction" &&
-      incomingAttackDamage(input) > committed;
+      preventableAttackDamage(input) > committed;
   }
   if (!opponentDamageEffectOnStack(input)) return false;
   if (committed === 0) return true;
@@ -1840,6 +1866,7 @@ function scoreAttackReaction(data: CardData, input: BotPolicyInput): number {
     margin >= allyLethalThreshold(link.targetAlly, input)
   ) return -100;
 
+  if (wastesFlurryReaction(data, input)) return -10;
   // Beckon Steel only pays off through its on-hit trigger, so a fully
   // defended attack wastes it outright.
   if (functional === "beckon steel|3") {
@@ -2149,10 +2176,9 @@ function chooseUnfinalizedHalaIntentWithTrace(input: BotPolicyInput): HalaIntent
     prepareCandidates: (candidates, observed) => prepareHalaCandidates(candidates, observed),
     scoreIntent(intent, observed) {
       const card = intentCard(intent, ownCards(observed));
-      const wastesToe = card !== undefined &&
-        key(observed.cards[card.cardId]) === "toe the line|1" &&
-        !shouldPlayToeTheLine(observed);
-      return wastesToe ? Number.NEGATIVE_INFINITY : 0;
+      const data = card ? observed.cards[card.cardId] : undefined;
+      const wastesToe = key(data) === "toe the line|1" && !shouldPlayToeTheLine(observed);
+      return wastesToe || wastesFlurryReaction(data, observed) ? Number.NEGATIVE_INFINITY : 0;
     },
     evaluateEnd: (state, observed, root, complete) =>
       evaluateHalaTurn(state, observed, root, complete, allyTargets),

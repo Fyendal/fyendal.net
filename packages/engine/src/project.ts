@@ -26,6 +26,7 @@ import type { TriggerEvent } from "./eventTypes.js";
 import { pendingOnHitEffects } from "./hits.js";
 import { freezeExpiry, linkGoAgainBlocked } from "./ruleQueries.js";
 import {
+  combatDamageUnpreventable,
   conditionalModifierGrantsGoAgain,
   conditionalScriptGrantsGoAgain,
 } from "./combatModifiers.js";
@@ -603,7 +604,7 @@ function projectedCombatPrevention(
     state.pendingDecision.arcane.sourceInstanceId === link.attackingCard.instanceId
     ? state.pendingDecision.arcane
     : undefined;
-  if (pendingPacket?.unpreventable || link.flags.unpreventable === true) return undefined;
+  if (pendingPacket?.unpreventable || combatDamageUnpreventable(state, link, calculatedDamage)) return undefined;
   const eventAmount = Math.max(0, pendingPacket?.amount ?? calculatedDamage);
   const targetSeat = pendingPacket?.targetSeat ?? (link.attacker === 0 ? 1 : 0);
   const target = state.players[targetSeat] as PlayerState;
@@ -1107,6 +1108,9 @@ function projectState(
               revealAll,
             ),
           }
+        : {}),
+      ...(!link.resolved && combatDamageUnpreventable(state, link, damage)
+        ? { damageUnpreventable: true as const }
         : {}),
       damage,
       resolved: link.resolved,

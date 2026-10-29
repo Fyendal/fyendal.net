@@ -1575,9 +1575,11 @@ describe("Hala policy", () => {
     }
 
     // The end phase removes sharpen counters; Cut n' Carve must pay for a
-    // Zenith swing rather than add a third counter that is never used.
+    // Zenith swing rather than add a third counter that is never used. Olé
+    // waits for the last swing so its Flurry survives and swing one keeps
+    // its counter.
     expect(swings).toBe(2);
-    expect(state.players[0]!.life).toBe(32);
+    expect(state.players[0]!.life).toBe(31);
   }, 10_000);
 
   it("plays free Edict before spending a blue on an existing-Flurry turn", () => {
@@ -2085,6 +2087,136 @@ describe("Hala policy", () => {
     weapon.usedAbilityIndexes = [0];
     expect(chooseHalaIntent({ seat: 0, view, legal, cards: cardData }))
       .toEqual({ kind: "choose", optionId: "no" });
+  });
+
+  it("does not play Toe the Line against unpreventable damage", () => {
+    const state = createGame({
+      decklists: [halaDeck(), decklists.dorinthea],
+      cards: cardData,
+      scripts,
+      seed: 9326,
+      startPlayer: 1,
+    });
+    replaceHand(state, 0, ["SBL022"]);
+    const toe = state.players[0]!.hand[0]!;
+    const view = projectStateFor(state, 0);
+    view.phase = "reaction";
+    view.priorityPlayer = 0;
+    view.pendingDecision = { player: 0, kind: "defense-reaction", prompt: "Play a defense reaction or pass" };
+    view.chain = [{
+      attackingCard: { instanceId: 93_270, cardId: "DYN005", owner: 1 },
+      defendingCards: [],
+      attackValue: 7,
+      defenseValue: 3,
+      damage: 4,
+      damageUnpreventable: true,
+      resolved: false,
+      reactions: [],
+    }];
+    const legal: GameIntent[] = [
+      { kind: "play-card", instanceId: toe.instanceId, pitchInstanceIds: [] },
+      { kind: "pass" },
+    ];
+
+    expect(chooseHalaIntent({ seat: 0, view, legal, cards: cardData })).toEqual({ kind: "pass" });
+
+    delete view.chain[0]!.damageUnpreventable;
+    expect(chooseHalaIntent({ seat: 0, view, legal, cards: cardData }))
+      .toEqual({ kind: "play-card", instanceId: toe.instanceId, pitchInstanceIds: [] });
+  });
+
+  it("keeps Grains of Bloodspill's resource for the Flurry swing after a Beckon Steel attack", () => {
+    const state = createGame({
+      decklists: [halaDeck(), decklists.dorinthea],
+      cards: cardData,
+      scripts,
+      seed: 9313,
+      startPlayer: 0,
+    });
+    state.turn = 2;
+    const view = projectStateFor(state, 0);
+    const weapon = view.players[0].weapons[0]!;
+    weapon.remainingAbilityActivations = [1];
+    view.phase = "layer";
+    view.priorityPlayer = 0;
+    view.players[0].resources = 1;
+    view.players[0].actionPoints = 1;
+    view.pendingDecision = {
+      player: 0,
+      kind: "optional-effect",
+      prompt: "Grains of Bloodspill: Pay 1 to create Vigor?",
+      options: ["decline", "pay 1"],
+      resourcePayment: { cost: 1, options: [{ optionId: "pay 1", pitchInstanceIds: [] }] },
+    };
+    view.chain = [{
+      attackingCard: weapon,
+      defendingCards: [],
+      attackValue: 7,
+      defenseValue: 0,
+      damage: 7,
+      resolved: false,
+      hit: true,
+      reactions: [],
+    }];
+    view.turnFacts!.players[0].weaponAttacks = 2;
+    const legal: GameIntent[] = [
+      { kind: "choose", optionId: "decline" },
+      { kind: "choose", optionId: "pay 1" },
+    ];
+
+    expect(chooseHalaIntent({ seat: 0, view, legal, cards: cardData }))
+      .toEqual({ kind: "choose", optionId: "decline" });
+
+    view.players[0].actionPoints = 0;
+    expect(chooseHalaIntent({ seat: 0, view, legal, cards: cardData }))
+      .toEqual({ kind: "choose", optionId: "pay 1" });
+  });
+
+  it("holds Big Blinder for the last Flurry swing so its Flurry is not destroyed unused", () => {
+    const state = createGame({
+      decklists: [halaDeck(), decklists.dorinthea],
+      cards: cardData,
+      scripts,
+      seed: 9313,
+      startPlayer: 0,
+    });
+    state.turn = 2;
+    replaceHand(state, 0, ["MPW076"]);
+    const blinder = state.players[0]!.hand[0]!;
+    const view = projectStateFor(state, 0);
+    const weapon = view.players[0].weapons[0]!;
+    weapon.counters = { ...weapon.counters, power: 3, sharpenedTurn: 2 };
+    weapon.remainingAbilityActivations = [1];
+    view.phase = "reaction";
+    view.priorityPlayer = 0;
+    view.players[0].resources = 3;
+    view.players[0].actionPoints = 0;
+    view.pendingDecision = { player: 0, kind: "attack-reaction", prompt: "Play an attack reaction or pass" };
+    view.chain = [{
+      attackingCard: weapon,
+      defendingCards: [],
+      attackValue: 6,
+      defenseValue: 6,
+      damage: 0,
+      resolved: false,
+      goAgain: true,
+      reactions: [],
+    }];
+    view.turnFacts!.players[0].weaponAttacks = 1;
+    const legal: GameIntent[] = [
+      { kind: "play-card", instanceId: blinder.instanceId, pitchInstanceIds: [] },
+      { kind: "pass" },
+    ];
+
+    expect(chooseHalaIntent({ seat: 0, view, legal, cards: cardData })).toEqual({ kind: "pass" });
+
+    // On the last swing the Flurry survives into next turn.
+    weapon.remainingAbilityActivations = undefined;
+    weapon.usedAbilityIndexes = [0];
+    view.turnFacts!.players[0].weaponAttacks = 2;
+    view.chain[0]!.goAgain = false;
+    expect(chooseHalaIntent({ seat: 0, view, legal, cards: cardData }))
+      .toEqual({ kind: "play-card", instanceId: blinder.instanceId, pitchInstanceIds: [] });
   });
 
   it("uses Beckon Steel when a sharpened hit will cross its three-counter threshold", () => {

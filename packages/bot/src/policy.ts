@@ -472,6 +472,11 @@ export function incomingAttackDamage(input: BotPolicyInput): number {
     : 0;
 }
 
+/** Incoming attack damage that prevention effects can still reduce. */
+export function preventableAttackDamage(input: BotPolicyInput): number {
+  return currentLink(input)?.damageUnpreventable ? 0 : incomingAttackDamage(input);
+}
+
 export function currentAttackIsOnStack(input: BotPolicyInput): boolean {
   const link = currentLink(input);
   if (!link?.onStack) return false;
@@ -1502,7 +1507,7 @@ export function scoreDefenseIntentWithTrace(
   }
   const spentIds = new Set([...intent.instanceIds, ...(intent.pitchInstanceIds ?? [])]);
   const reactionPlan = plannedDefenseReactionPlan(input, intent);
-  const plannedPrevention = model.plannedPrevention
+  const plannedPrevention = model.plannedPrevention && !currentLink(input)?.damageUnpreventable
     ? model.plannedPrevention(input, intent, spentIds, reactionPlan)
     : reactionPlan;
   if (plannedPrevention === null) {

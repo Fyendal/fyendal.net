@@ -217,6 +217,20 @@ export function activeModifiers(
   );
 }
 
+/** "Damage that would be dealt by this can't be prevented" for this link's
+ * combat damage of the given amount. */
+export function combatDamageUnpreventable(
+  state: GameStateInternal,
+  link: ChainLinkState,
+  damage: number,
+): boolean {
+  const threshold = scriptOf(state, link.attackingCard.cardId, link.attackingCard)?.combatDamageUnpreventableAtLeast;
+  return link.flags.unpreventable === true ||
+    activeModifiers(state, link, ["chain-link", "until-end-of-turn", "static"])
+      .some((modifier) => modifier.damageUnpreventable === true) ||
+    (threshold !== undefined && damage >= threshold);
+}
+
 /** Whether an attached modifier's live condition currently gives the active
  * attack go again. Conditions remain live until the link resolves. */
 export function conditionalModifierGrantsGoAgain(

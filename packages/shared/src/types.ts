@@ -320,6 +320,8 @@ export interface ChainLinkView {
   damageToPrevent?: number;
   /** Source-attributed contributions to `damageToPrevent`. */
   preventionModifiers?: CombatValueModifierView[];
+  /** The unresolved attack's damage can't be prevented. */
+  damageUnpreventable?: true;
   damage: number;
   resolved: boolean;
   /** The attack layer is waiting for priority to pass. The combat chain link

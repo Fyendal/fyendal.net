@@ -145,10 +145,10 @@ function GuestLandingDetailsView({ intl }: { intl: IntlShape }) {
         <div className="landing-demo">
           <img
             className="landing-demo-image"
-            src="/fyendal-gameplay-cindra-home.jpg"
+            src="/fyendal-gameplay-briar-home.jpg"
             alt={intl.formatMessage({ id: "landing.demoAlt" })}
             width={1600}
-            height={871}
+            height={868}
             loading="lazy"
             decoding="async"
           />

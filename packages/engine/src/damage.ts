@@ -2,7 +2,7 @@ import type { EngineRuntime } from "./runtimePorts.js";
 import type { GameStateInternal } from "./runtimeState.js";
 import { cardTypesOf, scriptOf } from "./cardProperties.js";
 
-import { activeModifiers, modifierApplies } from "./combatModifiers.js";
+import { activeModifiers, combatDamageUnpreventable, modifierApplies } from "./combatModifiers.js";
 import {
   computeAttack,
   computeCombatDamage,
@@ -429,7 +429,6 @@ export function resolveLink(state: GameStateInternal, runtime: EngineRuntime): v
   const defenderPlayer = state.players[opponent(link.attacker)] as PlayerState;
   const attack = computeAttack(state, runtime, link);
   const defense = computeDefense(state, runtime, link);
-  const damageScript = scriptOf(state, link.attackingCard.cardId, link.attackingCard);
   const damage = computeCombatDamage(state, runtime, link, attack, defense);
   const { before, after } = additionalTargetsAroundPrimary(state, link);
   dealAdditionalTargetDamage(state, runtime, link, before);
@@ -492,11 +491,7 @@ export function resolveLink(state: GameStateInternal, runtime: EngineRuntime): v
     // "damage that would be dealt by this can't be prevented": ordinary
     // shields remain untouched, while prevention replacements still apply so
     // their costs and additional modifications happen (CR 6.4.10h).
-    const threshold = damageScript?.combatDamageUnpreventableAtLeast;
-    const unpreventable = link.flags.unpreventable === true ||
-      activeModifiers(state, link, ["chain-link", "until-end-of-turn", "static"])
-        .some((modifier) => modifier.damageUnpreventable === true) ||
-      (threshold !== undefined && damage >= threshold);
+    const unpreventable = combatDamageUnpreventable(state, link, damage);
     const replacement = activeModifiers(state, link, ["chain-link", "until-end-of-turn"])
       .find((modifier) => modifier.replaceCombatDamageWithDefendingEquipment === true);
     const eligibleEquipment = damage > 0 && replacement

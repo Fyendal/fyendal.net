@@ -14,6 +14,7 @@ import {
   optionCard,
   ownCards,
   pitchIds,
+  preventableAttackDamage,
   resourcesAfterCost,
   scoreArsenalChoice,
   scoreBinaryChoice,
@@ -520,7 +521,7 @@ function scorePlay(intent: GameIntent, input: BotPolicyInput, own: ReadonlyMap<n
       score = input.view.pendingDecision?.kind === "attack-reaction" && ownAttack ? 18 : -20;
     } else if (functional === "cloud cover|1") {
       const link = [...input.view.chain].reverse().find((candidate) => !candidate.resolved);
-      const incoming = incomingAttackDamage(input);
+      const incoming = preventableAttackDamage(input);
       const threatened = threatenedAttackDamage(input);
       const alreadySurvivesLethalAttack = !!link && Math.max(link.attackValue, threatened) >= me.life &&
         threatened < me.life;

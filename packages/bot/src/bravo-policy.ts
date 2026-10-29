@@ -6,13 +6,13 @@ import {
   currentLink,
   enforceSpectraPolicy,
   functionalKey as key,
-  incomingAttackDamage,
   intentCard,
   isAttack,
   opponentDamageEffectOnStack,
   optionCard,
   ownCards,
   pitchIds,
+  preventableAttackDamage,
   resourcesAfterCost,
   scoreArsenalChoice,
   scoreBinaryChoice,
@@ -133,7 +133,7 @@ function committedOasisPrevention(input: BotPolicyInput): number {
 function damageWorthOasis(input: BotPolicyInput): number {
   const attack = Math.max(
     0,
-    incomingAttackDamage(input) - (currentLink(input)?.damageToPrevent ?? 0),
+    preventableAttackDamage(input) - (currentLink(input)?.damageToPrevent ?? 0),
   );
   const effect = opponentDamageEffectOnStack(input)
     ? Math.max(0, (visibleOpponentDamageAmount(input) ?? 0) - committedOasisPrevention(input))

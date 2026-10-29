@@ -293,6 +293,7 @@ describe("DYN — registration and heroes", () => {
       intent.kind === "activate-ability" && intent.sourceInstanceId === readyRok.instanceId,
     )).toBe(true);
     emptyHand.attackWithWeapon("rok|0").expectAttackValue(7);
+    expect(projectStateFor(emptyHand.state, 1).chain.at(-1)?.damageUnpreventable).toBe(true);
   });
 
   it("Arakni looks at the opponent's top card and a completed Contract creates Silver", () => {
