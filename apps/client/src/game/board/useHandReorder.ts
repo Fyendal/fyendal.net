@@ -106,6 +106,9 @@ export function useHandReorder(
     const returning = returningRef.current;
     if (!returning) return;
     returningRef.current = null;
+    // Cancelling drops the animation's hold on the slot; hide the copy so it
+    // cannot jump back to the release point before React unmounts it.
+    floatingCardRef.current?.style.setProperty("visibility", "hidden");
     returning.animation?.cancel();
     returning.drag.element.classList.remove("hand-card-dragging");
     setFloatingCard(null);
