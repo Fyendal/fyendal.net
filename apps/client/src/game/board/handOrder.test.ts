@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import type { PendingDecision } from "@fyendal/shared";
 import {
   handDragScrollSpeed,
   handDragStarted,
@@ -6,6 +7,7 @@ import {
   handDropAction,
   handDropOnOwnArsenal,
   handPlayDropTargetAllowed,
+  handPlayWindow,
   moveHandCard,
   moveVisibleHandCard,
   reconcileHandOrder,
@@ -144,6 +146,14 @@ describe("arena hand drops", () => {
 
   it("arsenals any hand card during the arsenal choice", () => {
     expect(handDropAction(9, { ...dropWindow, choosingArsenal: true, otherDecisionActive: true })).toBe("arsenal");
+  });
+
+  it("plays instants and reactions by drop in their windows, but not over other decisions", () => {
+    const playWindows: PendingDecision["kind"][] = ["priority-window", "attack-reaction", "defense-reaction"];
+    const otherDecisions: PendingDecision["kind"][] =
+      ["choose-target", "optional-effect", "order-triggers", "choose-name", "defend", "arsenal"];
+    expect(playWindows.every(handPlayWindow)).toBe(true);
+    expect(otherDecisions.some(handPlayWindow)).toBe(false);
   });
 
   it("accepts an arsenal drop on the player's own arsenal slot only", () => {

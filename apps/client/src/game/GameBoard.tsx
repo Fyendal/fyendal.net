@@ -91,6 +91,7 @@ import { heroCard } from "./board/heroCard.js";
 import { PlayerHalf } from "./board/PlayerHalf.js";
 import { PlayerHand } from "./board/PlayerHand.js";
 import { handFanSlotStyle } from "./board/handFan.js";
+import { handPlayWindow } from "./board/handOrder.js";
 import { BoardOverlays, type BoardPreview } from "./board/BoardOverlays.js";
 import { optimisticInteractionHiddenIds } from "./pendingInteraction.js";
 import { optimisticDefenderView } from "./optimisticDefenderStaging.js";
@@ -1088,10 +1089,7 @@ export function GameBoard() {
   const statusPassDecision =
     myDecision &&
     pd !== null &&
-    (pd.kind === "priority-window" ||
-      pd.kind === "attack-reaction" ||
-      pd.kind === "defense-reaction" ||
-      pd.kind === "arsenal");
+    (handPlayWindow(pd.kind) || pd.kind === "arsenal");
   // Priority/reaction cards remain highlighted and Pass stays exclusively in
   // the status float, so this guidance prompt can follow the preference. On a
   // mobile viewport, collapsing the hand also clears it off the battlefield.

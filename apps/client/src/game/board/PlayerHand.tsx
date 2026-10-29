@@ -26,7 +26,7 @@ import {
 import type { Sel } from "../useActionAnnouncement.js";
 import type { BoardLegalState } from "./boardModel.js";
 import { useHandReorder } from "./useHandReorder.js";
-import { handDropAction, type HandDropAction } from "./handOrder.js";
+import { handDropAction, handPlayWindow, type HandDropAction } from "./handOrder.js";
 import { handFanSlotStyle } from "./handFan.js";
 import type { MotionPreference } from "../../storage.js";
 import { useMotionPreference } from "../motion/useMotionPreference.js";
@@ -152,7 +152,8 @@ export function PlayerHand({
         choosingArsenal: interaction.choosingArsenal,
         playableIds: interaction.legalState.playableHand,
         selection: interaction.selection,
-        otherDecisionActive: view.pendingDecision !== null ||
+        otherDecisionActive:
+          (view.pendingDecision !== null && !handPlayWindow(view.pendingDecision.kind)) ||
           interaction.handPick !== null || interaction.boundedHandPick != null ||
           interaction.resourcePayment !== undefined || interaction.preStackSelectedInstanceId !== null,
       }),

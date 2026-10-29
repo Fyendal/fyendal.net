@@ -1,3 +1,4 @@
+import type { PendingDecision } from "@fyendal/shared";
 import type { Sel } from "../useActionAnnouncement.js";
 
 /** Keep surviving instances in the player's order and append newly drawn cards.
@@ -76,6 +77,12 @@ export function handDragLocation(
   if (!contains(arena)) return "outside";
   // Leave room to lift and fiddle with cards without committing a play.
   return y < hand.top - HAND_PLAY_DROP_CLEARANCE ? "arena" : "buffer";
+}
+
+/** Decision windows that exist to play a card (instants, reactions) or pass;
+ * a drop plays there exactly as a click does. */
+export function handPlayWindow(kind: PendingDecision["kind"]): boolean {
+  return kind === "priority-window" || kind === "attack-reaction" || kind === "defense-reaction";
 }
 
 /** What releasing a dragged hand card on the board does in this window. */
