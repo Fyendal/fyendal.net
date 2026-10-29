@@ -25,6 +25,7 @@ export type UiIconName =
   | "image"
   | "invite-game"
   | "lock"
+  | "menu"
   | "message"
   | "minus"
   | "more"

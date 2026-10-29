@@ -418,10 +418,7 @@ export function SideRail({
           })}
           onClick={onToggleCollapsed}
         >
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4"
-            strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false">
-            <path d={collapsed ? "m15 5-6 7 6 7" : "m9 5 6 7-6 7"} />
-          </svg>
+          <UiIcon name={collapsed ? "chevron-left" : "chevron-right"} />
         </button>
         <div className="rail-turn">
           <strong>{intl.formatMessage({ id: "game.log.title" })}</strong>
@@ -442,8 +439,17 @@ export function SideRail({
           </button>
         ) : null}
       </div>
+      {/* Phone landscape shows this toolbar in place of the collapsed header. */}
       {collapsed ? (
         <div className="rail-strip-actions">
+          <button
+            type="button"
+            className="rail-strip-log"
+            aria-label={intl.formatMessage({ id: "game.log.title" })}
+            onClick={onToggleCollapsed}
+          >
+            {intl.formatMessage({ id: "game.log.short" })}
+          </button>
           {onSendEmote && emoteSeat !== null ? (
             <HeroEmote
               seat={emoteSeat}
@@ -453,6 +459,15 @@ export function SideRail({
               placement="toolbar"
             />
           ) : null}
+          <button
+            type="button"
+            className="rail-strip-menu"
+            aria-label={intl.formatMessage({ id: "game.controls.more" })}
+            aria-expanded={showUtilities}
+            onClick={() => setShowUtilities(true)}
+          >
+            <UiIcon name="menu" />
+          </button>
         </div>
       ) : null}
       <div className="rail-actions">

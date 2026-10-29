@@ -1341,7 +1341,7 @@
 /* HUD portraits are shared by the phone HUD and the landscape column. */
 @media (max-width: 700px), (orientation: landscape) and (max-height: 520px) {
   /* Sized on the frame so the marked ring insets the art. */
-  .status-float .life-hero-frame {
+  .game-hud .life-hero-frame {
     position: relative;
     display: block;
     flex: 0 0 auto;
@@ -1352,7 +1352,7 @@
     border-radius: 50%;
     transition: border-color .34s ease-out, box-shadow .34s ease-out;
   }
-  .status-float .life-hero {
+  .game-hud .life-hero {
     display: block;
     width: 100%;
     height: 100%;
@@ -1361,42 +1361,42 @@
     transition: filter .34s ease-out;
   }
   /* LifeHeroPortrait hides an image with no headshot or card art. */
-  .status-float .life-hero[hidden] { display: none; }
-  .status-float .life-hero-frame:not(.life-hero-marked):has(> .life-hero[hidden]) { display: none; }
+  .game-hud .life-hero[hidden] { display: none; }
+  .game-hud .life-hero-frame:not(.life-hero-marked):has(> .life-hero[hidden]) { display: none; }
   /* Marked mirrors the board hero card, inside the circle. */
-  .status-float .life-hero-marked {
+  .game-hud .life-hero-marked {
     border: 2px solid #ff6a2a;
   }
-  .status-float .life-hero-marked .life-hero {
+  .game-hud .life-hero-marked .life-hero {
     filter: brightness(.6) saturate(.7);
   }
   /* The awaited hero's ring takes the mat's brass and casts light; the other
      portrait recedes. Marked keeps the ember border and the ring sits outside. */
-  .status-float .life-priority-holder .life-hero-frame {
+  .game-hud .life-priority-holder .life-hero-frame {
     border-color: #e8bd4a;
     box-shadow: 0 0 0 2px #e8bd4a, 0 0 14px #e8bd4a85;
   }
-  .status-float .life-priority-waiting .life-hero-frame { border-color: #b8933f40; }
-  .status-float .life-priority-waiting .life-hero { filter: saturate(.45) brightness(.55); }
-  .status-float .life-priority-waiting .life-hero-marked .life-hero {
+  .game-hud .life-priority-waiting .life-hero-frame { border-color: #b8933f40; }
+  .game-hud .life-priority-waiting .life-hero { filter: saturate(.45) brightness(.55); }
+  .game-hud .life-priority-waiting .life-hero-marked .life-hero {
     filter: saturate(.4) brightness(.4);
   }
-  .status-float .life-priority-pulse .life-hero-frame {
+  .game-hud .life-priority-pulse .life-hero-frame {
     animation: life-priority-breathe 3.6s ease-in-out infinite;
   }
   @keyframes life-priority-breathe {
     0%, 100% { box-shadow: 0 0 0 2px #e8bd4a, 0 0 14px #e8bd4a85; }
     50% { box-shadow: 0 0 0 2px #ffe19a, 0 0 24px #e8bd4ac0; }
   }
-  .table[data-motion-preference="reduced"] .status-float .life-priority-pulse .life-hero-frame {
+  .table[data-motion-preference="reduced"] .game-hud .life-priority-pulse .life-hero-frame {
     animation: none;
   }
   @media (prefers-reduced-motion: reduce) {
-    .table:not([data-motion-preference="full"]) .status-float .life-priority-pulse .life-hero-frame {
+    .table:not([data-motion-preference="full"]) .game-hud .life-priority-pulse .life-hero-frame {
       animation: none;
     }
-    .status-float .life-hero-frame,
-    .status-float .life-hero { transition: none; }
+    .game-hud .life-hero-frame,
+    .game-hud .life-hero { transition: none; }
   }
 }
 

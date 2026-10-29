@@ -1255,6 +1255,58 @@ export function GameBoard() {
   };
 
   const canUndo = !spectating && !replaying && view.phase !== "game-over";
+  const oppNameplate = playerProfiles ? (
+    <PlayerNameplate
+      placement="opponent"
+      profile={playerProfiles[1 - seat]!}
+      actions={authUser && roomCode && !spectating && !botGame && !replaying ? (
+        <OpponentActions
+          username={playerProfiles[1 - seat]!.username}
+          roomCode={roomCode}
+          onReport={reportOpponent}
+        />
+      ) : null}
+    />
+  ) : null;
+  const selfNameplate = playerProfiles ? (
+    <PlayerNameplate placement="self" profile={playerProfiles[seat]!} />
+  ) : null;
+  const oppHand = (
+    <div
+      className={`opp-hand${view.phase === "game-over" || replaying ? " opp-hand-revealed" : ""}`}
+      data-motion-zone={motionLocationKey({ kind: "hand", seat: opp.seat })}
+      role="group"
+      aria-label={intl.formatMessage({ id: "game.hand.opponentCount" }, { count: presentedOppHandCount })}
+    >
+      {view.phase === "game-over" || replaying
+        ? opp.hand.map((card) => (
+            <CardFace
+              key={card.instanceId}
+              card={card}
+              motionKey={motionPresentationKey(
+                { kind: "hand", seat: opp.seat },
+                card.instanceId,
+              )}
+            />
+          ))
+        : Array.from({ length: presentedOppHandCount }, (_, i) => (
+            <CardBack
+              key={i}
+              label=""
+              size="hand"
+              motionKey={opaqueMotionPresentationKey(
+                { kind: "hand", seat: opp.seat },
+                i,
+              )}
+              motionZoneAnchor={i === presentedOppHandCount - 1
+                ? motionLocationKey({ kind: "hand", seat: opp.seat })
+                : undefined}
+            />
+          ))}
+      {presentedOppHandCount === 0 && <span className="muted">opponent has no cards in hand</span>}
+      <span className="opp-hand-count" aria-hidden="true">{presentedOppHandCount}</span>
+    </div>
+  );
   return (
     <EffectHeroesContext.Provider value={effectHeroList}>
     <CardArtProvider art={cardArt}>
@@ -1302,56 +1354,14 @@ export function GameBoard() {
           />
         ) : null}
         <BrowserBotNotice />
-        {playerProfiles ? (
+        {/* Phone landscape seats these in the rail's player plates. */}
+        {mobileLandscapeViewport ? null : (
           <>
-            <PlayerNameplate
-              placement="opponent"
-              profile={playerProfiles[1 - seat]!}
-              actions={authUser && roomCode && !spectating && !botGame && !replaying ? (
-                <OpponentActions
-                  username={playerProfiles[1 - seat]!.username}
-                  roomCode={roomCode}
-                  onReport={reportOpponent}
-                />
-              ) : null}
-            />
-            <PlayerNameplate placement="self" profile={playerProfiles[seat]!} />
+            {oppNameplate}
+            {selfNameplate}
+            {oppHand}
           </>
-        ) : null}
-        <div
-          className={`opp-hand${view.phase === "game-over" || replaying ? " opp-hand-revealed" : ""}`}
-          data-motion-zone={motionLocationKey({ kind: "hand", seat: opp.seat })}
-          role="group"
-          aria-label={intl.formatMessage({ id: "game.hand.opponentCount" }, { count: presentedOppHandCount })}
-        >
-          {view.phase === "game-over" || replaying
-            ? opp.hand.map((card) => (
-                <CardFace
-                  key={card.instanceId}
-                  card={card}
-                  motionKey={motionPresentationKey(
-                    { kind: "hand", seat: opp.seat },
-                    card.instanceId,
-                  )}
-                />
-              ))
-            : Array.from({ length: presentedOppHandCount }, (_, i) => (
-                <CardBack
-                  key={i}
-                  label=""
-                  size="hand"
-                  motionKey={opaqueMotionPresentationKey(
-                    { kind: "hand", seat: opp.seat },
-                    i,
-                  )}
-                  motionZoneAnchor={i === presentedOppHandCount - 1
-                    ? motionLocationKey({ kind: "hand", seat: opp.seat })
-                    : undefined}
-                />
-              ))}
-          {presentedOppHandCount === 0 && <span className="muted">opponent has no cards in hand</span>}
-          <span className="opp-hand-count" aria-hidden="true">{presentedOppHandCount}</span>
-        </div>
+        )}
 
         {/* opponent half — mirrored vertically, same columns as yours */}
         <PlayerHalf
@@ -1510,6 +1520,14 @@ export function GameBoard() {
         onPass={triggerPrimaryAction}
         onUndo={mobileLandscapeViewport && canUndo ? () => undoAndDismissAnnouncement("last-action") : null}
         undoDisabled={roomCommandPending}
+        rail={mobileLandscapeViewport
+          ? {
+              oppIdentity: oppNameplate,
+              oppHand,
+              myIdentity: selfNameplate,
+              activeSeat: view.activePlayer,
+            }
+          : null}
       />
 
       {/* ── floating stack window: played cards and effects awaiting resolution,

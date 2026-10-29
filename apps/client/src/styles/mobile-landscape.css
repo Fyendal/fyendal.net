@@ -1,11 +1,11 @@
 /* ── phone landscape ─────────────────────────────────────────────────────
    A phone held sideways, or any landscape window too short for the desktop
    board. The rail becomes one control bar on the right, under the thumb:
-   log and fullscreen toggles, emotes and social in a row at the top, the
-   opponent's name, life and hand count below them, and our life, action
-   points and undo beside the primary action at the bottom. The square arena
-   takes the remaining width and the hand rests along the bottom with its
-   name bars showing. The log opens as a drawer instead of widening the bar. */
+   a toolbar (log, emotes, menu, social) above two mirrored player plates,
+   the opponent's under the toolbar and ours at the bottom with undo and the
+   primary action. The square arena takes the remaining width and the hand
+   rests along the bottom with its name bars showing. The log opens as a
+   drawer instead of widening the bar. */
 
 @media (orientation: landscape) and (max-height: 520px), (orientation: landscape) and (max-width: 700px) {
   .table,
@@ -111,38 +111,47 @@
   .decision-optcard button { min-width: 72px; }
 
   /* ── control bar ── */
-  /* Collapsed, the rail is the bar: toggles and emotes in one row at the
-     top; the fixed chips below are positioned into its width. */
+  /* Collapsed, the rail is a toolbar over the two player plates. */
   .rail-right.rail-collapsed {
     flex-direction: row;
-    flex-wrap: wrap;
     align-items: flex-start;
-    align-content: flex-start;
-    gap: 6px;
     padding: 6px 8px;
     overflow: visible; /* the emote picker opens beside the bar */
   }
-  .rail-right.rail-collapsed > :not(.rail-header):not(.rail-strip-actions):not(.overlay) {
+  .rail-right.rail-collapsed > :not(.rail-strip-actions):not(.overlay):not(.modal-backdrop) {
     display: none;
   }
-  .rail-right.rail-collapsed .rail-header { flex-direction: row; gap: 6px; }
-  .rail-right.rail-collapsed .rail-turn { display: none; }
-  .rail-strip-actions { display: flex; gap: 6px; }
+  .rail-strip-actions {
+    display: flex;
+    width: 100%;
+    gap: 5px;
+  }
+  /* Social closes the row from its own dock. */
+  #root:has(.social-dock) .rail-strip-actions { padding-right: 35px; }
+  .rail-strip-actions > button,
   .rail-strip-actions .emote-toolbar-button {
     display: grid;
     place-items: center;
-    width: 25px;
+    width: 30px;
     min-width: 0;
-    height: 25px;
+    height: 30px;
     min-height: 0;
     padding: 0;
     clip-path: none;
     border: 1px solid #5a4426;
-    border-radius: 3px;
+    border-radius: 4px;
     background: #00000033;
     color: #cbb37a;
   }
-  .rail-strip-actions .game-control-icon { width: 15px; height: 15px; }
+  .rail-strip-actions > .rail-strip-log {
+    flex: 1 1 auto;
+    width: auto;
+    font-family: var(--font-display);
+    font-size: 13px;
+    letter-spacing: .04em;
+  }
+  .rail-strip-actions .game-control-icon,
+  .rail-strip-actions .ui-icon { width: 17px; height: 17px; }
   /* The picker opens as a two-column sheet beside the bar. */
   .rail-strip-actions .hero-emote-picker {
     position: fixed;
@@ -163,22 +172,24 @@
     inset: 0 0 0 auto;
     z-index: 60;
     width: min(340px, 55vw);
+    background: #0d0805; /* the plates sit right under it */
     box-shadow: -10px 0 30px #000a;
   }
+  /* The drawer closes from its outer edge. */
+  .rail-right:not(.rail-collapsed) .rail-collapse-toggle { order: 1; }
   .rail-right { gap: 6px; padding: 8px; }
   .rail-actions { margin-top: 2px; }
   .log { min-height: 70px; }
-  /* Social closes the toggle row. */
   #root:has(.table) .social-dock,
   #root:has(.table.rail-is-collapsed) .social-dock {
-    --social-bubble-size: 25px;
+    --social-bubble-size: 30px;
     top: 6px;
     right: 8px;
     bottom: auto;
     left: auto;
   }
-  #root:has(.table) .social-bubble { border-radius: 3px; box-shadow: none; }
-  #root:has(.table) .social-bubble svg { width: 16px; height: 16px; }
+  #root:has(.table) .social-bubble { min-width: 0; min-height: 0; border-radius: 4px; box-shadow: none; }
+  #root:has(.table) .social-bubble svg { width: 17px; height: 17px; }
   #root:has(.table) .social-panel {
     top: calc(100% + 8px);
     right: 0;
@@ -186,35 +197,85 @@
     left: auto;
   }
 
-  /* Names, life and hand count share the nameplate's chrome. */
-  .player-nameplate {
-    height: 28px;
-    max-width: calc(var(--rail-w) - 16px);
-    padding: 3px 8px;
-    font-size: 12px;
-  }
-  .player-nameplate-badge { width: 18px; height: 18px; }
-  .player-nameplate:has(.nameplate-actions) { padding: 1px 1px 1px 8px; }
-  .player-nameplate-opponent { top: 40px; left: calc(var(--ls-bar-x) + 8px); }
-  .player-nameplate-self { bottom: 6px; left: calc(var(--ls-bar-x) + 8px); }
-
-  .opp-hand {
+  /* ── player plates: the opponent under the toolbar, you at the thumb ── */
+  .status-rail {
     position: fixed;
-    top: 72px;
-    right: auto;
-    left: calc(var(--ls-bar-x) + 88px);
+    top: 44px;
+    bottom: 6px;
+    left: calc(var(--ls-bar-x) + 8px);
     z-index: 20;
-    width: calc(var(--rail-w) - 96px);
-    height: 30px;
-    align-items: center;
-    justify-content: flex-start;
-    gap: 0;
-    padding: 0 6px 0 8px;
-    overflow: hidden;
+    display: flex;
+    width: calc(var(--rail-w) - 16px);
+    flex-direction: column;
+    justify-content: space-between;
+    pointer-events: none;
+  }
+  .hud-plate {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 7px 8px 8px;
     border: 1px solid #73582f99;
-    border-radius: 4px;
-    background: #140d07e8;
+    border-radius: 6px;
+    background: #140d07f0;
     box-shadow: 0 2px 10px #0008;
+    pointer-events: auto;
+    transition: border-color .34s ease-out, box-shadow .34s ease-out;
+  }
+  /* The plate the game waits on lights up, so turn order reads at a glance. */
+  .hud-plate-active {
+    border-color: #d9ad4c;
+    box-shadow: 0 0 0 1px #d9ad4c55, 0 0 16px #e8bd4a33, 0 2px 10px #0008;
+  }
+  .hud-plate-head {
+    display: flex;
+    min-height: 16px;
+    align-items: center;
+    gap: 6px;
+  }
+  .hud-plate .player-nameplate {
+    position: static;
+    flex: 1 1 auto;
+    min-width: 0;
+    height: auto;
+    max-width: none;
+    padding: 0;
+    border: 0;
+    background: none;
+    box-shadow: none;
+    color: #e6dcc6;
+    font-size: 12px;
+    letter-spacing: .04em;
+  }
+  .hud-plate .player-nameplate-badge { width: 16px; height: 16px; }
+  .hud-plate .nameplate-actions { margin-left: auto; }
+  .hud-plate .nameplate-action { width: 22px; height: 22px; }
+  .hud-plate-stats {
+    display: flex;
+    min-height: 30px;
+    align-items: center;
+    gap: 6px;
+  }
+  .hud-plate-stats > .life { flex: 1 1 auto; }
+  .status-rail .life { gap: 7px; font-size: 22px; }
+  .status-rail .life-opp { flex-direction: row-reverse; justify-content: flex-end; }
+  .status-rail .life-impact .ico { display: none; }
+  .status-rail .life-hero-frame { width: 28px; height: 28px; }
+  .status-rail .life-change-pop { font-size: 15px; }
+
+  .hud-plate .opp-hand {
+    position: static;
+    display: flex;
+    max-width: 64px;
+    height: 30px;
+    flex: 0 0 auto;
+    align-items: center;
+    gap: 0;
+    padding: 0 8px;
+    overflow: hidden;
+    border: 1px solid #b8933f44;
+    border-radius: 4px;
+    background: #00000033;
   }
   .opp-hand .card-back,
   .opp-hand-revealed .card-hand { width: 14px; height: 20px; border-radius: 2px; }
@@ -232,94 +293,67 @@
   .opp-hand-count {
     display: block;
     order: -1;
-    margin-right: 7px;
+    margin-right: 6px;
     color: #e6dcc6;
-    font-size: 13px;
+    font-size: 15px;
     font-weight: 700;
     line-height: 1;
     font-variant-numeric: tabular-nums;
   }
 
-  .status-float {
-    right: auto !important;
-    bottom: 40px !important;
-    left: calc(var(--ls-bar-x) + 8px) !important;
-    top: auto !important;
-    transform: none !important;
-    display: grid;
-    width: calc(var(--rail-w) - 16px);
-    grid-template-columns: auto minmax(0, 1fr);
-    grid-template-areas:
-      "life life"
-      "ap res"
-      "undo pass";
-    align-items: center;
-    gap: 6px;
-    padding: 6px 8px 8px;
-    border-color: #73582f99;
-    border-radius: 4px;
-    box-shadow: 0 2px 10px #0008;
-  }
-  .status-float .life-me { grid-area: life; }
-  .status-float .ap-pip { grid-area: ap; justify-self: start; }
-  .status-float .hud-resources { grid-area: res; }
-  .status-float .hud-undo { grid-area: undo; }
-  .status-float > .btn-pass { grid-area: pass; }
-  .status-float:not(:has(.hud-undo)) > .btn-pass { grid-column: 1 / -1; }
-  /* The opponent's life sits with their name; fixed children leave the HUD box. */
-  .status-float .life-opp {
-    position: fixed;
-    top: 72px;
-    left: calc(var(--ls-bar-x) + 8px);
-    box-sizing: border-box;
-    width: 76px;
-    flex-direction: row-reverse;
-    justify-content: flex-end;
-    padding: 2px 9px 2px 3px;
-    border: 1px solid #73582f99;
-    border-radius: 4px;
-    background: #140d07e8;
-    box-shadow: 0 2px 10px #0008;
-  }
-  .status-float .life { gap: 7px; font-size: 20px; }
-  .status-float .life-impact .ico { display: none; }
-  .status-float .life-hero-frame { width: 26px; height: 26px; }
-  .status-float .life-change-pop { font-size: 15px; }
-  .status-float .ap-pip { padding: 3px 7px; font-size: 12px; }
-  .status-float .ap-count { display: inline-flex; align-items: baseline; gap: 5px; }
-  .status-float .ap-abbr {
-    color: #cbbd9d;
-    font-family: var(--font-display);
-    font-size: 11px;
-    letter-spacing: .08em;
-  }
-  .status-float .ap-count strong { color: #ffd479; }
-  .status-float .hud-resources {
-    display: inline-flex;
-    align-items: center;
-    justify-self: end;
-    padding: 0 2px;
+  /* The turn player's action points read beside their name. */
+  .status-rail .ap-pip {
+    flex: 0 0 auto;
+    padding: 0;
+    border: 0;
+    background: none;
+    font-size: 14px;
     line-height: 1;
   }
-  .status-float .hud-resources-count {
-    display: inline-flex;
+  /* Pitch mirrors the opponent's hand chip. */
+  .status-rail .hud-resources {
+    display: flex;
+    height: 30px;
+    box-sizing: border-box;
+    flex: 0 0 auto;
     align-items: center;
-    gap: 5px;
-    color: #ff8a5c;
+    padding: 0 9px;
+    border: 1px solid #b8933f44;
+    border-radius: 4px;
+    background: #00000033;
     font-size: 15px;
     font-weight: 700;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
   }
-  .status-float .hud-resources-count::before {
+  .status-rail .ap-count { display: inline-flex; align-items: baseline; gap: 4px; }
+  .status-rail .ap-abbr {
+    color: #cbbd9d;
+    font-family: var(--font-display);
+    font-size: 10px;
+    letter-spacing: .08em;
+  }
+  .status-rail .ap-count strong { color: #ffd479; }
+  .status-rail .hud-resources-count {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    color: #ff8a5c;
+  }
+  .status-rail .hud-resources-count::before {
     content: "";
     width: 14px;
     height: 14px;
     background: url("/icons/resource.png") center / cover no-repeat;
   }
-  .status-float .hud-resources-empty .hud-resources-count { color: #8a7b66; }
-  .status-float .hud-resources-empty .hud-resources-count::before { filter: grayscale(1) brightness(.6); }
+  .status-rail .hud-resources-empty .hud-resources-count { color: #8a7b66; }
+  .status-rail .hud-resources-empty .hud-resources-count::before { filter: grayscale(1) brightness(.6); }
+
   /* Undo and the primary action share one thumb-sized row. */
-  .status-float .hud-undo {
+  .hud-plate-actions { display: flex; gap: 6px; }
+  .status-rail .hud-undo {
     display: grid;
+    flex: 0 0 40px;
     place-items: center;
     width: 40px;
     min-width: 0;
@@ -332,24 +366,21 @@
     background: #00000033;
     color: #cbb37a;
   }
-  .status-float .hud-undo .game-control-icon { width: 20px; height: 20px; }
-  .status-float > .btn-pass {
-    width: 100%;
+  .status-rail .hud-undo .game-control-icon { width: 20px; height: 20px; }
+  .status-rail .btn-pass {
+    flex: 1 1 auto;
+    min-width: 0;
     min-height: 40px;
     justify-content: center;
     padding: 5px 8px;
     font-size: 13px;
   }
-  .status-float .shortcut-key { display: none; }
+  .status-rail .shortcut-key { display: none; }
 
-  /* The stack reads in the bar's free middle, growing over the arena. */
+  /* The stack keeps its board position, sized to the short arena. */
   .stack-float {
-    top: 108px;
-    right: 8px;
-    left: auto;
-    transform: none;
-    max-width: calc(100vw - 16px);
-    max-height: calc(100dvh - 108px - 40px - 125px);
+    max-width: calc(100vw - var(--rail-w) - 16px);
+    max-height: calc(100dvh - var(--ls-hand-visible) - 16px);
     gap: 4px;
     padding: 0 8px 6px;
     overflow-y: auto;
@@ -413,4 +444,20 @@
 @media (orientation: landscape) and (max-width: 700px) {
   .table,
   .table.rail-is-collapsed { --rail-w: 148px; }
+  .hud-plate .opp-hand { max-width: 50px; padding-inline: 6px; }
+  .status-rail .life { gap: 6px; font-size: 20px; }
+  .status-rail .life-hero-frame { width: 26px; height: 26px; }
+  /* The portrait rule moves social into More; the bar keeps its bubble. */
+  #root:has(.table) .social-dock {
+    top: 6px !important;
+    right: 8px !important;
+    bottom: auto !important;
+    left: auto !important;
+  }
+  #root:has(.table) .social-bubble { display: grid; }
+  #root:has(.table) .social-panel,
+  #root:has(.table) .social-message-toast {
+    top: calc(100% + 8px);
+    bottom: auto;
+  }
 }

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type CSSProperties, type Ref } from "react";
+import { useEffect, useRef, useState, type CSSProperties, type ReactNode, type Ref } from "react";
 import { useIntl } from "react-intl";
 import type { GameLogViewEntry } from "@fyendal/shared";
 import { cardImageUrl } from "./Card.js";
@@ -281,8 +281,8 @@ export function PrimaryActionButton({
 /** Fixed responsive game HUD: life + remaining AP + the current primary action.
  *  Pass-only decisions, defend confirmation, and the arsenal skip action use
  *  this button instead of adding another floating control surface. The phone
- *  HUDs also show the viewer's resources, since floats cover pitch, and the
- *  landscape bar seats undo beside the primary action. */
+ *  HUDs also show the viewer's resources, since floats cover pitch; in phone
+ *  landscape the HUD becomes the side rail's two player plates. */
 export function StatusFloat({
   dockRect: _dockRect,
   hostRef,
@@ -307,6 +307,7 @@ export function StatusFloat({
   onPass,
   onUndo = null,
   undoDisabled = false,
+  rail = null,
 }: {
   dockRect: DOMRect | null;
   hostRef?: Ref<HTMLDivElement>;
@@ -334,77 +335,126 @@ export function StatusFloat({
   /** Undo in the HUD; only the landscape bar shows it. */
   onUndo?: (() => void) | null;
   undoDisabled?: boolean;
+  /** Phone landscape: mirrored player plates in the side rail instead of a float. */
+  rail?: {
+    oppIdentity: ReactNode;
+    oppHand: ReactNode;
+    myIdentity: ReactNode;
+    /** Action points belong to the turn player, so they head that plate. */
+    activeSeat: number;
+  } | null;
 }) {
   const intl = useIntl();
   const oppSeat = mySeat === 0 ? 1 : 0;
   const priorityFor = (seat: 0 | 1) => priorityHolderSeat === null
     ? null
     : priorityHolderSeat === seat ? "holder" : "waiting";
+  const oppLifeStatus = (
+    <LifeStatus
+      life={oppLife}
+      side="opp"
+      seat={oppSeat}
+      heroName={oppHeroName}
+      heroCardId={oppHeroCardId}
+      marked={oppMarked}
+      priority={priorityFor(oppSeat)}
+      priorityPulse={priorityPulse}
+      log={log}
+      logEntries={logEntries}
+    />
+  );
+  const myLifeStatus = (
+    <LifeStatus
+      life={myLife}
+      side="me"
+      seat={mySeat}
+      heroName={myHeroName}
+      heroCardId={myHeroCardId}
+      marked={myMarked}
+      priority={priorityFor(mySeat)}
+      priorityPulse={priorityPulse}
+      log={log}
+      logEntries={logEntries}
+    />
+  );
+  const actionPointsPip = (
+    <div
+      className="ap-pip"
+      title={intl.formatMessage({ id: "game.actionPoints.hero" }, { hero: activeHeroName })}
+      aria-label={intl.formatMessage({ id: "game.actionPoints.remaining" }, { count: actionPoints })}
+    >
+      <span className="ap-count" aria-hidden="true">
+        <span className="ap-abbr">AP</span>
+        <strong>{actionPoints}</strong>
+      </span>
+    </div>
+  );
+  const resourcesPip = (
+    <div
+      className={`hud-resources${myResources > 0 ? "" : " hud-resources-empty"}`}
+      role="img"
+      aria-label={intl.formatMessage({ id: "game.resources.yours" }, { count: myResources })}
+    >
+      <span className="hud-resources-count" aria-hidden="true">{myResources}</span>
+    </div>
+  );
+  const undoButton = onUndo ? (
+    <button
+      className="hud-undo"
+      aria-label={intl.formatMessage({ id: "game.undoLast" })}
+      title={intl.formatMessage({ id: "game.undoDescription" })}
+      disabled={undoDisabled}
+      onClick={(event) => undoWithoutFocus(event.currentTarget, onUndo)}
+    >
+      <ControlIcon kind="undo" />
+    </button>
+  ) : null;
+  const primaryButton = primaryAction ? (
+    <PrimaryActionButton
+      action={primaryAction}
+      disabled={passDisabled}
+      onSelect={onPass}
+    />
+  ) : null;
+  if (rail) {
+    const plate = (seat: 0 | 1, side: "opp" | "me", identity: ReactNode, stats: ReactNode) => (
+      <div className={`hud-plate hud-plate-${side}${priorityHolderSeat === seat ? " hud-plate-active" : ""}`}>
+        <div className="hud-plate-head">
+          {identity}
+          {rail.activeSeat === seat ? actionPointsPip : null}
+        </div>
+        <div className="hud-plate-stats">{stats}</div>
+        {side === "me" && (undoButton || primaryButton) ? (
+          <div className="hud-plate-actions">
+            {undoButton}
+            {primaryButton}
+          </div>
+        ) : null}
+      </div>
+    );
+    return (
+      <div
+        ref={hostRef}
+        className="status-rail game-hud"
+        aria-label={intl.formatMessage({ id: "game.hud.label" })}
+      >
+        {plate(oppSeat, "opp", rail.oppIdentity, <>{oppLifeStatus}{rail.oppHand}</>)}
+        {plate(mySeat, "me", rail.myIdentity, <>{myLifeStatus}{resourcesPip}</>)}
+      </div>
+    );
+  }
   return (
     <div
       ref={hostRef}
       className="float status-float game-hud"
       aria-label={intl.formatMessage({ id: "game.hud.label" })}
     >
-      <LifeStatus
-        life={oppLife}
-        side="opp"
-        seat={oppSeat}
-        heroName={oppHeroName}
-        heroCardId={oppHeroCardId}
-        marked={oppMarked}
-        priority={priorityFor(oppSeat)}
-        priorityPulse={priorityPulse}
-        log={log}
-        logEntries={logEntries}
-      />
-      <div
-        className="ap-pip"
-        title={intl.formatMessage({ id: "game.actionPoints.hero" }, { hero: activeHeroName })}
-        aria-label={intl.formatMessage({ id: "game.actionPoints.remaining" }, { count: actionPoints })}
-      >
-        <span className="ap-count" aria-hidden="true">
-          <span className="ap-abbr">AP</span>
-          <strong>{actionPoints}</strong>
-        </span>
-      </div>
-      <div
-        className={`hud-resources${myResources > 0 ? "" : " hud-resources-empty"}`}
-        role="img"
-        aria-label={intl.formatMessage({ id: "game.resources.yours" }, { count: myResources })}
-      >
-        <span className="hud-resources-count" aria-hidden="true">{myResources}</span>
-      </div>
-      {onUndo ? (
-        <button
-          className="hud-undo"
-          aria-label={intl.formatMessage({ id: "game.undoLast" })}
-          title={intl.formatMessage({ id: "game.undoDescription" })}
-          disabled={undoDisabled}
-          onClick={(event) => undoWithoutFocus(event.currentTarget, onUndo)}
-        >
-          <ControlIcon kind="undo" />
-        </button>
-      ) : null}
-      {primaryAction ? (
-        <PrimaryActionButton
-          action={primaryAction}
-          disabled={passDisabled}
-          onSelect={onPass}
-        />
-      ) : null}
-      <LifeStatus
-        life={myLife}
-        side="me"
-        seat={mySeat}
-        heroName={myHeroName}
-        heroCardId={myHeroCardId}
-        marked={myMarked}
-        priority={priorityFor(mySeat)}
-        priorityPulse={priorityPulse}
-        log={log}
-        logEntries={logEntries}
-      />
+      {oppLifeStatus}
+      {actionPointsPip}
+      {resourcesPip}
+      {undoButton}
+      {primaryButton}
+      {myLifeStatus}
     </div>
   );
 }
