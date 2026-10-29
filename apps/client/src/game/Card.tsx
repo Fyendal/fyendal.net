@@ -199,6 +199,7 @@ export function CardFace({
   showFaceUp,
   wagered,
   wagerRewards,
+  boundCardNames,
   showOverlays = true,
   showStats = true,
   showTapped = true,
@@ -237,6 +238,8 @@ export function CardFace({
   wagered?: boolean;
   /** Public reward description for each wager completed by this attack. */
   wagerRewards?: readonly string[];
+  /** Names of cards bound to this ally, listed in the hover preview. */
+  boundCardNames?: readonly string[];
   /** Whether status and counter icons should be rendered in this presentation. */
   showOverlays?: boolean;
   /** Whether card stats should be rendered outside the artwork. */
@@ -277,7 +280,9 @@ export function CardFace({
   const squareCard = size === "zone" && (squareArt ?? squarePresentationEnabled);
   // Try temporary Fabrary variants before falling back to the text layout.
   const [imageFailure, setImageFailure] = useState<{ cardId: string; attempts: number } | null>(null);
-  const badges = cardBadges(card, { goAgain, dominate, overpower, veil, undefendable, showFaceUp, wagered, wagerRewards });
+  const badges = cardBadges(card, {
+    goAgain, dominate, overpower, veil, undefendable, showFaceUp, wagered, wagerRewards, boundCardNames,
+  });
   const marked = badges.some((badge) => badge.placement === "token");
   const overlays = badges.flatMap((badge) => badge.placement === "overlay" ? [badge] : []);
   const rootRef = useRef<HTMLDivElement>(null);

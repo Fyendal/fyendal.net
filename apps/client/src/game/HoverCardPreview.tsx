@@ -45,8 +45,8 @@ function CardBadgePanel({ badges }: { badges: readonly CardBadge[] }) {
       className="card-badge-panel"
       aria-label={intl.formatMessage({ id: "game.card.badge.panel" })}
     >
-      {badges.map((badge) => (
-        <li key={badge.kind} className="card-badge-row">
+      {badges.map((badge, index) => (
+        <li key={`${badge.kind}:${index}`} className="card-badge-row">
           <span className={`card-badge-tile c-${badge.kind}`} aria-hidden="true">
             {badge.icon ? (
               <img className="c-ovl-icon" src={badge.icon} alt="" />
@@ -60,7 +60,9 @@ function CardBadgePanel({ badges }: { badges: readonly CardBadge[] }) {
           </span>
           <span className="card-badge-text">
             <span className="card-badge-title">
-              {intl.formatMessage({ id: badge.title.id }, badge.title.values)}
+              {"text" in badge.title
+                ? badge.title.text
+                : intl.formatMessage({ id: badge.title.id }, badge.title.values)}
             </span>
             {badge.detail ? (
               <span className="card-badge-detail">

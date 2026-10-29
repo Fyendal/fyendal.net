@@ -13,7 +13,8 @@ interface CardBadgeBase {
   value?: string;
   /** English on-card copy: the icon's tooltip. */
   text: string;
-  title: CardBadgeMessage;
+  /** Localized title, or untranslated text such as a card name. */
+  title: CardBadgeMessage | { text: string };
   /** Rules reminder, or public runtime text such as wager rewards. */
   detail?: CardBadgeMessage | { text: string };
 }
@@ -23,7 +24,9 @@ interface CardBadgeBase {
  * matching tile. */
 export type CardBadge =
   | (CardBadgeBase & { placement: "overlay"; icon: string })
-  | (CardBadgeBase & { placement: "token"; icon?: undefined });
+  | (CardBadgeBase & { placement: "token"; icon?: undefined })
+  /** Listed only in the hover preview; the face already shows its own marker. */
+  | (CardBadgeBase & { placement: "preview"; icon: string });
 
 export const MARKED_TOKEN_ID = "HNT244";
 
@@ -39,6 +42,8 @@ export interface CardBadgeContext {
   showFaceUp?: boolean;
   wagered?: boolean;
   wagerRewards?: readonly string[];
+  /** Names of the cards bound to this ally, which the board stacks beneath it. */
+  boundCardNames?: readonly string[];
 }
 
 /** Rules counters drawn over `/icons/<key>.png`. Other counter keys are
@@ -240,6 +245,15 @@ export function cardBadges(card: CardView, context: CardBadgeContext = {}): Card
   }
   if (Object.entries(counters).some(([key, value]) => isFuseCounter(key) && value > 0)) {
     flag("fusec", "/icons/fuse.png", "Fused", "game.card.badge.fused");
+  }
+  for (const name of context.boundCardNames ?? []) {
+    badges.push({
+      kind: "bound",
+      placement: "preview",
+      icon: "/icons/bound.png",
+      text: name,
+      title: { text: name },
+    });
   }
   return badges;
 }

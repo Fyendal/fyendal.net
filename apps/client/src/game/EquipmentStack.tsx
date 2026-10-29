@@ -1,10 +1,28 @@
 import type { CSSProperties } from "react";
 import type { CardView } from "@fyendal/shared";
+import { cardData } from "@fyendal/cards/client";
 import { CardFace } from "./Card.js";
 import { equipmentStackCards } from "./boardGroups.js";
 import { cardFrontFaceId } from "./cardPreviewFaces.js";
 import { motionPresentationKey, type MotionLocation } from "./motion/motionTypes.js";
 import { cardStackStep, squareCardStackOffset } from "./stackLayout.js";
+
+/** Count of cards bound to an ally, drawn on its top-right corner. */
+export function BoundPip({ className, count, label }: { className: string; count: number; label?: string }) {
+  return (
+    <span className={`pip pile-pip ${className} bound-pip`} role="img" aria-label={label} title={label}>
+      <img
+        className="bound-pip-icon"
+        src="/icons/bound.png"
+        width="24"
+        height="24"
+        alt=""
+        aria-hidden="true"
+      />
+      <span className="bound-pip-count">{count}</span>
+    </span>
+  );
+}
 
 /** Public arena sub-cards, oldest at the back and current permanent in front. */
 export function EquipmentStack({
@@ -58,6 +76,9 @@ export function EquipmentStack({
   const visibleSoulCount = soulCount !== undefined && soulCount > 0 ? soulCount : null;
   const visibleBoundCount = boundCount !== undefined && boundCount > 0 ? boundCount : null;
   const explicitUnderCardIds = new Set(underCards.map((underCard) => underCard.instanceId));
+  const boundCardNames = visibleBoundCount !== null
+    ? underCards.map((underCard) => cardData[underCard.cardId]?.name ?? underCard.cardId)
+    : undefined;
   const subcardMotionLocation: MotionLocation | undefined = motionLocation && "seat" in motionLocation
     ? { kind: "subcard", seat: motionLocation.seat, parentKey: motionPresentationKey(motionLocation, card.instanceId) }
     : undefined;
@@ -91,6 +112,7 @@ export function EquipmentStack({
               card={stackCard}
               size="zone"
               squareArt={squareArt}
+              boundCardNames={isTop ? boundCardNames : undefined}
               motionKey={
                 isTop && motionLocation
                   ? motionPresentationKey(motionLocation, stackCard.instanceId)
@@ -110,22 +132,7 @@ export function EquipmentStack({
         );
       })}
       {visibleBoundCount !== null ? (
-        <span
-          className="pip pile-pip equipment-stack-pip bound-pip"
-          role="img"
-          aria-label={boundCountLabel}
-          title={boundCountLabel}
-        >
-          <img
-            className="bound-pip-icon"
-            src="/icons/bound.png"
-            width="24"
-            height="24"
-            alt=""
-            aria-hidden="true"
-          />
-          <span className="bound-pip-count">{visibleBoundCount}</span>
-        </span>
+        <BoundPip className="equipment-stack-pip" count={visibleBoundCount} label={boundCountLabel} />
       ) : visibleSoulCount !== null ? (
         <span
           className="pip pile-pip equipment-stack-pip soul-pip"

@@ -1185,6 +1185,24 @@ describe("attack target choices", () => {
     expect(html).toContain("2 steam counters");
   });
 
+  it("shows which target has cards bound to it", () => {
+    const corpse = (instanceId: number) => ({ instanceId, cardId: "IAR090", owner: 0 });
+    const html = renderLocalized(createElement(ActionTargetCards, {
+      choices: [
+        { id: 1, label: "Corrupted Corpse", card: corpse(1), boundCardNames: ["Mark of Ushering"] },
+        { id: 2, label: "Corrupted Corpse", card: corpse(2) },
+      ],
+      viewerSeat: 0,
+      selectedId: null,
+      selectionMade: false,
+      onSelect: () => undefined,
+    }));
+
+    expect(html.match(/decision-target-bound-pip/g)).toHaveLength(1);
+    expect(html).toContain("aria-description=\"1 bound card\"");
+    expect(html).toContain("class=\"bound-pip-count\">1</span>");
+  });
+
   it("marks a banished target that an earlier Gate activation already made playable", () => {
     const intl = createTestIntl();
     const granted = { instanceId: 7, cardId: "IAR026", owner: 0, playableFromSourceCardId: "IAR222" };

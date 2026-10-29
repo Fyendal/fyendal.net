@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 import { type IntlShape, useIntl } from "react-intl";
 import { ViewportTooltip } from "../../components/ViewportTooltip.js";
 import { CardFace } from "../Card.js";
+import { BoundPip } from "../EquipmentStack.js";
 import { cardAffiliation, chooseWithoutFocus } from "./DecisionShared.js";
 
 export interface ActionTargetChoice {
@@ -13,6 +14,8 @@ export interface ActionTargetChoice {
   /** Set when an effect already lets this player play the card from its
    *  zone; the full sentence naming that effect. */
   playPermission?: string;
+  /** Names of cards (such as Marks) bound to this target, as the board's bound pip shows. */
+  boundCardNames?: readonly string[];
 }
 
 /** Flags a target this player may already play from a public zone (such as
@@ -98,6 +101,10 @@ function ActionTargetCard({
   const intl = useIntl();
   const ref = useRef<HTMLButtonElement>(null);
   const [hinted, setHinted] = useState(false);
+  const boundCount = choice.boundCardNames?.length ?? 0;
+  const boundLabel = boundCount > 0
+    ? intl.formatMessage({ id: "game.bound.count" }, { count: boundCount })
+    : undefined;
   return (
     <>
       <button
@@ -111,7 +118,7 @@ function ActionTargetCard({
           { id: "game.decision.targetNamed" },
           { target: choice.label },
         )}
-        aria-description={choice.playPermission}
+        aria-description={[boundLabel, choice.playPermission].filter(Boolean).join(". ") || undefined}
         aria-pressed={selected}
         // The face ignores the pointer so the whole button is the hit
         // target; this routes the board's hover preview to that face.
@@ -128,11 +135,15 @@ function ActionTargetCard({
             card={choice.card}
             size="hand"
             affiliation={cardAffiliation(choice.card, viewerSeat)}
+            boundCardNames={choice.boundCardNames}
           />
           {choice.playPermission !== undefined && (
             <span className="decision-target-band" aria-hidden="true">
               {intl.formatMessage({ id: "game.decision.targetAlreadyPlayable" })}
             </span>
+          )}
+          {boundLabel !== undefined && (
+            <BoundPip className="decision-target-bound-pip" count={boundCount} label={boundLabel} />
           )}
         </span>
         <span className="decision-target-name">{choice.label}</span>

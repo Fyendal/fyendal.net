@@ -111,9 +111,13 @@
       var(--mat-zone-col);
     padding-top: clamp(12px, 2dvh, 20px);
   }
+  /* The priority dim runs on through the hand and rail padding to the
+     board's edge, which clips it. */
+  .mat-half { border-image-outset: 0 18px 100dvh; }
   .mat-half.mat-opp {
     padding-top: 0;
     padding-bottom: clamp(12px, 2dvh, 20px);
+    border-image-outset: 100dvh 18px 0;
   }
   .mat-half .card-zone {
     width: var(--portrait-card-width);

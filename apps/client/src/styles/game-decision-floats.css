@@ -680,6 +680,7 @@
   display: block;
   line-height: 0;
 }
+.decision-target-bound-pip { z-index: 2; pointer-events: none; }
 /* A target an effect already made playable keeps its art legible but sits
    back, with a band across the lower art instead of an extra line of text. */
 .decision-target-granted .card-hand { filter: saturate(0.45) brightness(0.62); }

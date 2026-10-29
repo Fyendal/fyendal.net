@@ -35,6 +35,26 @@ describe("HoverCardPreview", () => {
     expect(html).toContain("width:100px;height:140px");
   });
 
+  it("names each card bound to the hovered ally above the preview", () => {
+    const badges = cardBadges(
+      { instanceId: 7, cardId: "IAR090", owner: 0, life: 3 },
+      { boundCardNames: ["Mark of Ushering"] },
+    );
+    expect(badges.find((badge) => badge.kind === "bound")?.placement).toBe("preview");
+    const html = renderToStaticMarkup(createElement(
+      IntlProvider,
+      { locale: "en", messages: en },
+      createElement(HoverCardPreview, {
+        preview: { id: "IAR090", x: 10, y: 20, size: { width: 100, height: 140 }, badges },
+        owner: 0,
+      }),
+    ));
+
+    expect(html.match(/class="card-badge-row"/g)).toHaveLength(2);
+    expect(html).toContain('<span class="card-badge-title">Mark of Ushering</span>');
+    expect(html).toContain("/icons/bound.png");
+  });
+
   it("spells out the hovered card's counters and statuses above the preview", () => {
     const badges = cardBadges(
       { instanceId: 7, cardId: "ARC069", owner: 0, counters: { aim: 1, rust: 2, harpoonX: 3 } },

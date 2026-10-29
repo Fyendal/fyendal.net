@@ -945,6 +945,14 @@ export function GameBoard() {
     ].filter((choice) => offered.has(choice.side));
   })();
 
+  const boundNamesByTarget = new Map<number, string[]>();
+  for (const card of view.players.flatMap((player) => player.board)) {
+    if (card.boundToInstanceId === undefined) continue;
+    const names = boundNamesByTarget.get(card.boundToInstanceId) ?? [];
+    names.push(cardData[card.cardId]?.name ?? card.cardId);
+    boundNamesByTarget.set(card.boundToInstanceId, names);
+  }
+
   /** Attack-target choices for the current selection (CR 8.2.8d): the opposing
    *  hero plus each opposing ally — the legal intents carry one variant per
    *  target. Empty when no ally variants are offered. */
@@ -969,6 +977,7 @@ export function GameBoard() {
               label: cardData[card.cardId]?.name ?? "an ally",
               card,
               life: card.life,
+              boundCardNames: boundNamesByTarget.get(id),
             }]
           : [];
       }),
@@ -1008,6 +1017,7 @@ export function GameBoard() {
         label: cardData[card.cardId]?.name ?? "card",
         card,
         life: card.life,
+        boundCardNames: boundNamesByTarget.get(id),
         ...(playPermission !== undefined ? { playPermission } : {}),
       }];
     });
