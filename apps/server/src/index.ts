@@ -30,7 +30,13 @@ import { consoleError } from "./logging.js";
 import { PgRateLimiter, sweepRateLimits } from "./rateLimits.js";
 import { sweepRecoveryTokens } from "./recovery.js";
 import type { EmailSender } from "./email.js";
-import { startGatewayRuntimeMetrics, type RuntimeMetricLogger } from "./runtimeMetrics.js";
+import {
+  createEventLoopLagSource,
+  instrumentPoolAcquireWait,
+  startGatewayRuntimeMetrics,
+  type InstrumentablePool,
+  type RuntimeMetricLogger,
+} from "./runtimeMetrics.js";
 import {
   cancelFriendRequest,
   chatHistory,
@@ -1735,6 +1741,11 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
               idle: pool.idleCount!,
               waiting: pool.waitingCount!,
             })
+          : undefined,
+        eventLoop: createEventLoopLagSource(),
+        // Only a real pg pool exposes counts; test doubles keep their connect untouched.
+        databaseAcquire: typeof pool.totalCount === "number" && typeof pool.connect === "function"
+          ? instrumentPoolAcquireWait(pool as unknown as InstrumentablePool)
           : undefined,
       },
       runtimeMetricsIntervalMs,

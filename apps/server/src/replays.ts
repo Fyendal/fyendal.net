@@ -19,7 +19,7 @@ import {
   type ReplayServerNote,
   type ReplaySummary,
 } from "@fyendal/protocol";
-import type { Format, GameView, ReplayFile } from "@fyendal/shared";
+import type { Format, ReplayFile } from "@fyendal/shared";
 import { awardHistoryAchievements } from "./achievements.js";
 import { type Queryable, withTransaction } from "./db.js";
 import { tryAcquireLease } from "./leases.js";
@@ -263,12 +263,10 @@ function describeRejected(value: unknown): Record<string, unknown> {
 async function replayFiles(
   db: Queryable,
   replay: Record<string, unknown>,
-  seats: readonly (0 | 1)[],
   yieldControl: () => Promise<void> = yieldToEventLoop,
   waitForCapacity: () => Promise<void> = async () => {},
 ): Promise<GameViewBuild> {
   const id = String(replay.id);
-  const uniqueSeats = [...new Set(seats)];
   const frames: ReplayFrames = [];
   const rowsRoomVersions: number[] = [];
   let yieldedAt = performance.now();
@@ -315,26 +313,52 @@ async function replayFiles(
     }
     if (rows.length < REPLAY_FRAME_BATCH_SIZE) break;
   }
-  // Every frame is validated once above; the seat copies only differ in `seat`.
-  return {
-    files: new Map(uniqueSeats.map((seat) => [seat, { version: 2, seat, frames }])),
-    roomVersions: rowsRoomVersions,
-  };
+  return { frames, roomVersions: rowsRoomVersions };
 }
 
 interface GameViewBuild {
-  files: Map<0 | 1, ReplayFile>;
+  frames: ReplayFrames;
   roomVersions: number[];
 }
 
-function replayViews(file: ReplayFile): GameView[] {
-  return file.version === 1 ? file.views : file.frames.map((frame) => frame.view);
+export interface ReplayParticipantSeat {
+  userId: number;
+  seat: 0 | 1;
+}
+
+interface ReplayParticipantPayload extends ReplayParticipantSeat {
+  payload: Buffer;
+  frames: number;
+}
+
+const REPLAY_RESPONSE_SUFFIX = Buffer.from("}}");
+
+/** Serialize the shared frames once; seat copies only differ in the small envelope prefix. */
+export async function encodeReplayPayloads(
+  frames: ReplayFrames,
+  participants: readonly ReplayParticipantSeat[],
+  yieldControl: () => Promise<void> = yieldToEventLoop,
+): Promise<ReplayParticipantPayload[]> {
+  const framesJson = Buffer.from(JSON.stringify(frames));
+  const payloads: ReplayParticipantPayload[] = [];
+  for (const participant of participants) {
+    if (payloads.length > 0) await yieldControl();
+    // Byte-identical to JSON.stringify({ ok: true, replay: { version: 2, seat, frames } }).
+    const response = Buffer.concat([
+      Buffer.from(`{"ok":true,"replay":{"version":2,"seat":${participant.seat},"frames":`),
+      framesJson,
+      REPLAY_RESPONSE_SUFFIX,
+    ]);
+    payloads.push({ ...participant, payload: await gzip(response), frames: frames.length });
+  }
+  return payloads;
 }
 
 export async function finalizeReplay(
   db: Queryable,
   replayIdValue: string,
   waitForCapacity: () => Promise<void> = async () => {},
+  yieldControl: () => Promise<void> = yieldToEventLoop,
 ): Promise<boolean> {
   await waitForCapacity();
   const { rows } = await db.query(
@@ -369,31 +393,14 @@ export async function finalizeReplay(
     };
   });
   if (!decodedParticipants.length) throw new Error(`replay ${String(replay.id)} has no participants`);
-  const built = await replayFiles(
-    db,
-    replay,
-    decodedParticipants.map(({ seat }) => seat),
-    yieldToEventLoop,
-    waitForCapacity,
-  );
-  const firstFile = built.files.values().next().value;
-  if (!firstFile) throw new Error(`replay ${String(replay.id)} built no participant file`);
-  const finalView = replayViews(firstFile).at(-1);
+  const built = await replayFiles(db, replay, yieldControl, waitForCapacity);
+  const views = built.frames.map((frame) => frame.view);
+  const finalView = views.at(-1);
   if (!finalView || finalView.winner !== replay.winner) {
     throw new Error(`replay ${String(replay.id)} winner mismatch`);
   }
-  const payloads = await Promise.all(decodedParticipants.map(async (participant) => {
-    const file = built.files.get(participant.seat);
-    if (!file) throw new Error(`replay ${String(replay.id)} is missing seat ${participant.seat}`);
-    const response = JSON.stringify({ ok: true, replay: file });
-    const payload = await gzip(Buffer.from(response));
-    return {
-      userId: participant.userId,
-      seat: participant.seat,
-      payload,
-      frames: replayViews(file).length,
-    };
-  }));
+  const payloads = await encodeReplayPayloads(built.frames, decodedParticipants, yieldControl);
+  await yieldControl();
   await waitForCapacity();
   await withTransaction(db, async (tx) => {
     for (const payload of payloads) {
@@ -415,7 +422,7 @@ export async function finalizeReplay(
         roomCode: String(replay.room_code),
         pending: pendingAchievements,
         participants: decodedParticipants,
-        frames: replayViews(firstFile),
+        frames: views,
       });
     }
     const frameByRoomVersion = new Map(

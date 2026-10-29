@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { gunzipSync } from "node:zlib";
+import { gunzipSync, gzipSync } from "node:zlib";
 import { precon } from "@fyendal/cards";
 import { legalIntents } from "@fyendal/engine";
 import {
@@ -12,8 +12,10 @@ import type { Queryable } from "../db.js";
 import {
   deleteReplay,
   discardUnfinishedReplaysOtherRulesets,
+  encodeReplayPayloads,
   MAX_FAVORITE_REPLAYS,
   REPLAY_FRAME_BATCH_SIZE,
+  finalizeReplay,
   finalizeReplayForRoom,
   getReplay,
   getReplayNotes,
@@ -472,6 +474,76 @@ describe("server replay retention", () => {
     ]);
     expect((await db.query("SELECT status FROM replay_games WHERE id=$1", [replayId])).rows[0]!.status)
       .toBe("finalizing");
+  });
+
+  it("encodes one seat payload per participant from a single frame serialization", async () => {
+    const game = await startedGame();
+    const conceded = await store.applyIntent(
+      game.code,
+      { token: game.tokens[0], userId: game.users[0] },
+      { kind: "concede" },
+    );
+    if (!conceded.ok || !conceded.replayFinalizationId) throw new Error("concede failed");
+    const frames = (await db.query(
+      "SELECT view, transition FROM replay_frames WHERE replay_id=$1 ORDER BY room_version",
+      [conceded.replayFinalizationId],
+    )).rows.map((row) => {
+      const view = decodeGameView(row.view);
+      if (!view) throw new Error("frame failed validation");
+      return { view, transition: null };
+    });
+    expect(frames.length).toBeGreaterThan(1);
+    const participants = [
+      { userId: game.users[0], seat: 0 as const },
+      { userId: game.users[1], seat: 1 as const },
+    ];
+    let yields = 0;
+    const payloads = await encodeReplayPayloads(frames, participants, async () => { yields += 1; });
+    expect(yields).toBe(1);
+    expect(payloads.map(({ userId, seat, frames }) => ({ userId, seat, frames })))
+      .toEqual(participants.map((participant) => ({ ...participant, frames: frames.length })));
+    for (const [index, { seat, payload }] of payloads.entries()) {
+      // The stored bytes must not drift from the historical per-seat stringify.
+      expect(payload.equals(gzipSync(Buffer.from(
+        JSON.stringify({ ok: true, replay: { version: 2, seat, frames } }),
+      )))).toBe(true);
+      const decoded = decodeReplayResponse(JSON.parse(gunzipSync(payload).toString("utf8")));
+      expect(decoded?.replay.seat).toBe(participants[index]!.seat);
+      expect(decoded && replayFileViews(decoded.replay)).toHaveLength(frames.length);
+    }
+  });
+
+  it("yields to the event loop between participants and before the final commit", async () => {
+    const game = await startedGame();
+    const conceded = await store.applyIntent(
+      game.code,
+      { token: game.tokens[0], userId: game.users[0] },
+      { kind: "concede" },
+    );
+    if (!conceded.ok || !conceded.replayFinalizationId) throw new Error("concede failed");
+    const trace: string[] = [];
+    const tracedDb: Queryable = {
+      query: async (text, params) => {
+        if (text === "BEGIN") trace.push("begin");
+        else if (text.includes("UPDATE replay_participants SET payload")) trace.push("store-seat");
+        return db.query(text, params);
+      },
+    };
+    expect(await finalizeReplay(tracedDb, conceded.replayFinalizationId, undefined, async () => {
+      trace.push("yield");
+    })).toBe(true);
+    const begin = trace.indexOf("begin");
+    expect(begin).toBeGreaterThan(0);
+    expect(trace[begin - 1]).toBe("yield");
+    expect(trace.slice(begin)).toEqual(["begin", "store-seat", "store-seat"]);
+    expect(trace.filter((step) => step === "yield").length).toBeGreaterThanOrEqual(2);
+    const seats = (await db.query(
+      "SELECT seat, payload FROM replay_participants WHERE replay_id=$1 ORDER BY seat",
+      [conceded.replayFinalizationId],
+    )).rows;
+    expect(seats.map((row) => decodeReplayResponse(
+      JSON.parse(gunzipSync(row.payload).toString("utf8")),
+    )?.replay.seat)).toEqual([0, 1]);
   });
 
   it("loads large replay recordings in bounded frame batches", async () => {

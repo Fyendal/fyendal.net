@@ -1,3 +1,5 @@
+import { monitorEventLoopDelay, performance } from "node:perf_hooks";
+
 export interface GatewayConnectionMetrics {
   webSockets: number;
   clients: number;
@@ -12,6 +14,19 @@ export interface DatabasePoolMetrics {
   total: number;
   idle: number;
   waiting: number;
+}
+
+export interface EventLoopMetrics {
+  lagP50Ms: number;
+  lagP99Ms: number;
+  lagMaxMs: number;
+}
+
+export interface DatabaseAcquireMetrics {
+  count: number;
+  waitMeanMs: number;
+  waitP99Ms: number;
+  waitMaxMs: number;
 }
 
 export interface GatewayRuntimeMetric {
@@ -29,12 +44,16 @@ export interface GatewayRuntimeMetric {
   };
   connections: GatewayConnectionMetrics;
   databasePool?: DatabasePoolMetrics;
+  eventLoop?: EventLoopMetrics;
+  databaseAcquire?: DatabaseAcquireMetrics;
 }
 
 interface RuntimeMetricSources {
   instanceId: string;
   connections: () => GatewayConnectionMetrics;
   databasePool?: () => DatabasePoolMetrics | undefined;
+  eventLoop?: () => EventLoopMetrics | undefined;
+  databaseAcquire?: () => DatabaseAcquireMetrics | undefined;
   memoryUsage?: () => NodeJS.MemoryUsage;
   uptime?: () => number;
 }
@@ -45,6 +64,8 @@ export type RuntimeMetricLogger = (metric: GatewayRuntimeMetric) => void;
 export function collectGatewayRuntimeMetric(sources: RuntimeMetricSources): GatewayRuntimeMetric {
   const memory = (sources.memoryUsage ?? process.memoryUsage)();
   const databasePool = sources.databasePool?.();
+  const eventLoop = sources.eventLoop?.();
+  const databaseAcquire = sources.databaseAcquire?.();
   return {
     severity: "INFO",
     message: "gateway runtime metrics",
@@ -60,6 +81,103 @@ export function collectGatewayRuntimeMetric(sources: RuntimeMetricSources): Gate
     },
     connections: sources.connections(),
     ...(databasePool ? { databasePool } : {}),
+    ...(eventLoop ? { eventLoop } : {}),
+    ...(databaseAcquire ? { databaseAcquire } : {}),
+  };
+}
+
+const EVENT_LOOP_RESOLUTION_MS = 20;
+const MAX_ACQUIRE_SAMPLES = 4096;
+
+function roundMs(value: number): number {
+  return Math.round(value * 10) / 10;
+}
+
+interface DelayHistogram {
+  enable(): boolean;
+  reset(): void;
+  percentile(percentile: number): number;
+  readonly max: number;
+}
+
+/** Lag is how late the sampling timer fired beyond its own resolution, in ms;
+ * the histogram holds nanoseconds and is reset on every read so each snapshot
+ * covers one interval. */
+export function createEventLoopLagSource(
+  histogram: DelayHistogram = monitorEventLoopDelay({ resolution: EVENT_LOOP_RESOLUTION_MS }),
+  resolutionMs = EVENT_LOOP_RESOLUTION_MS,
+): () => EventLoopMetrics {
+  histogram.enable();
+  const lag = (nanoseconds: number): number =>
+    roundMs(Math.max(0, nanoseconds / 1e6 - resolutionMs));
+  return () => {
+    const metrics = {
+      lagP50Ms: lag(histogram.percentile(50)),
+      lagP99Ms: lag(histogram.percentile(99)),
+      lagMaxMs: lag(histogram.max),
+    };
+    histogram.reset();
+    return metrics;
+  };
+}
+
+type AcquireCallback = (error: Error | undefined, client?: unknown, release?: unknown) => void;
+
+export interface InstrumentablePool {
+  connect(callback?: AcquireCallback): unknown;
+}
+
+/** Time every client checkout by wrapping `pool.connect`; pg-pool's `query`
+ * acquires through the same method, so timeouts and queueing both count. */
+export function instrumentPoolAcquireWait(
+  pool: InstrumentablePool,
+  now: () => number = () => performance.now(),
+): () => DatabaseAcquireMetrics {
+  let samples: number[] = [];
+  let count = 0;
+  let sum = 0;
+  let max = 0;
+  const record = (startedAt: number): void => {
+    const waited = now() - startedAt;
+    count += 1;
+    sum += waited;
+    if (waited > max) max = waited;
+    if (samples.length < MAX_ACQUIRE_SAMPLES) samples.push(waited);
+  };
+  const original = pool.connect;
+  pool.connect = function (this: InstrumentablePool, callback?: AcquireCallback): unknown {
+    const startedAt = now();
+    if (callback) {
+      return original.call(this, (error, client, release) => {
+        record(startedAt);
+        callback(error, client, release);
+      });
+    }
+    return (original.call(this) as Promise<unknown>).then(
+      (client) => {
+        record(startedAt);
+        return client;
+      },
+      (error: unknown) => {
+        record(startedAt);
+        throw error;
+      },
+    );
+  };
+  return () => {
+    const sorted = samples.sort((a, b) => a - b);
+    const p99 = sorted.length ? sorted[Math.min(sorted.length - 1, Math.floor(sorted.length * 0.99))]! : 0;
+    const metrics = {
+      count,
+      waitMeanMs: roundMs(count ? sum / count : 0),
+      waitP99Ms: roundMs(p99),
+      waitMaxMs: roundMs(max),
+    };
+    samples = [];
+    count = 0;
+    sum = 0;
+    max = 0;
+    return metrics;
   };
 }
 
