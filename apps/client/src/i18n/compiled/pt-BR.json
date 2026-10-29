@@ -30541,6 +30541,60 @@
       "value": "Virar carta"
     }
   ],
+  "game.fullscreen.homeScreen.body": [
+    {
+      "type": 0,
+      "value": "No iPhone, o Safari mantém as barras visíveis. Abra o Fyendal pela Tela de Início para jogar sem elas."
+    }
+  ],
+  "game.fullscreen.homeScreen.step.add": [
+    {
+      "type": 0,
+      "value": "Escolha Adicionar à Tela de Início."
+    }
+  ],
+  "game.fullscreen.homeScreen.step.open": [
+    {
+      "type": 0,
+      "value": "Abra o Fyendal pela Tela de Início."
+    }
+  ],
+  "game.fullscreen.homeScreen.step.share": [
+    {
+      "type": 0,
+      "value": "Toque em Compartilhar na barra do Safari."
+    }
+  ],
+  "game.fullscreen.homeScreen.title": [
+    {
+      "type": 0,
+      "value": "Jogue pela Tela de Início"
+    }
+  ],
+  "game.fullscreen.nudge.enter": [
+    {
+      "type": 0,
+      "value": "Tela cheia"
+    }
+  ],
+  "game.fullscreen.nudge.howTo": [
+    {
+      "type": 0,
+      "value": "Ver como"
+    }
+  ],
+  "game.fullscreen.nudge.later": [
+    {
+      "type": 0,
+      "value": "Agora não"
+    }
+  ],
+  "game.fullscreen.nudge.title": [
+    {
+      "type": 0,
+      "value": "Jogue em tela cheia"
+    }
+  ],
   "game.hand.empty": [
     {
       "type": 0,

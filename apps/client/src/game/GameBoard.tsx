@@ -83,6 +83,7 @@ import { useGameViewport } from "./board/useGameViewport.js";
 import { isTouchBoardViewport } from "./board/viewportQueries.js";
 import { useHudReserve } from "./board/useHudReserve.js";
 import { useFullscreen } from "../components/useFullscreen.js";
+import { FullscreenNudge } from "./FullscreenNudge.js";
 import { useIdleVictoryPrompt } from "./board/useIdleVictoryPrompt.js";
 import { useGameShortcuts } from "./board/useGameShortcuts.js";
 import { shouldWarnBeforeEndTurn } from "./endTurnWarning.js";
@@ -1546,6 +1547,7 @@ export function GameBoard() {
               oppHand,
               myIdentity: selfNameplate,
               activeSeat: view.activePlayer,
+              middle: <FullscreenNudge />,
             }
           : null}
       />

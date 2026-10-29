@@ -342,6 +342,8 @@ export function StatusFloat({
     myIdentity: ReactNode;
     /** Action points belong to the turn player, so they head that plate. */
     activeSeat: number;
+    /** Fills the gap between the plates. */
+    middle?: ReactNode;
   } | null;
 }) {
   const intl = useIntl();
@@ -439,6 +441,7 @@ export function StatusFloat({
         aria-label={intl.formatMessage({ id: "game.hud.label" })}
       >
         {plate(oppSeat, "opp", rail.oppIdentity, <>{oppLifeStatus}{rail.oppHand}</>)}
+        {rail.middle}
         {plate(mySeat, "me", rail.myIdentity, <>{myLifeStatus}{resourcesPip}</>)}
       </div>
     );

@@ -21,6 +21,7 @@ export type UiIconName =
   | "external-link"
   | "flag"
   | "flag-filled"
+  | "fullscreen"
   | "grip"
   | "image"
   | "invite-game"

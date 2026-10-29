@@ -29874,6 +29874,60 @@
       "value": "Voltear carta"
     }
   ],
+  "game.fullscreen.homeScreen.body": [
+    {
+      "type": 0,
+      "value": "En iPhone, Safari mantiene sus barras. Abre Fyendal desde tu pantalla de inicio para jugar sin ellas."
+    }
+  ],
+  "game.fullscreen.homeScreen.step.add": [
+    {
+      "type": 0,
+      "value": "Elige Añadir a pantalla de inicio."
+    }
+  ],
+  "game.fullscreen.homeScreen.step.open": [
+    {
+      "type": 0,
+      "value": "Abre Fyendal desde tu pantalla de inicio."
+    }
+  ],
+  "game.fullscreen.homeScreen.step.share": [
+    {
+      "type": 0,
+      "value": "Toca Compartir en la barra de Safari."
+    }
+  ],
+  "game.fullscreen.homeScreen.title": [
+    {
+      "type": 0,
+      "value": "Juega desde tu pantalla de inicio"
+    }
+  ],
+  "game.fullscreen.nudge.enter": [
+    {
+      "type": 0,
+      "value": "Pantalla completa"
+    }
+  ],
+  "game.fullscreen.nudge.howTo": [
+    {
+      "type": 0,
+      "value": "Ver cómo"
+    }
+  ],
+  "game.fullscreen.nudge.later": [
+    {
+      "type": 0,
+      "value": "Ahora no"
+    }
+  ],
+  "game.fullscreen.nudge.title": [
+    {
+      "type": 0,
+      "value": "Juega a pantalla completa"
+    }
+  ],
   "game.hand.empty": [
     {
       "type": 0,

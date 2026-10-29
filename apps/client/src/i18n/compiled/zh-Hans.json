@@ -27869,6 +27869,60 @@
       "value": "翻转卡牌"
     }
   ],
+  "game.fullscreen.homeScreen.body": [
+    {
+      "type": 0,
+      "value": "iPhone 上的 Safari 会一直显示浏览器栏。从主屏幕打开 Fyendal 即可隐藏它们。"
+    }
+  ],
+  "game.fullscreen.homeScreen.step.add": [
+    {
+      "type": 0,
+      "value": "选择“添加到主屏幕”。"
+    }
+  ],
+  "game.fullscreen.homeScreen.step.open": [
+    {
+      "type": 0,
+      "value": "从主屏幕打开 Fyendal。"
+    }
+  ],
+  "game.fullscreen.homeScreen.step.share": [
+    {
+      "type": 0,
+      "value": "点按 Safari 工具栏中的“共享”。"
+    }
+  ],
+  "game.fullscreen.homeScreen.title": [
+    {
+      "type": 0,
+      "value": "从主屏幕开始游戏"
+    }
+  ],
+  "game.fullscreen.nudge.enter": [
+    {
+      "type": 0,
+      "value": "全屏"
+    }
+  ],
+  "game.fullscreen.nudge.howTo": [
+    {
+      "type": 0,
+      "value": "查看方法"
+    }
+  ],
+  "game.fullscreen.nudge.later": [
+    {
+      "type": 0,
+      "value": "以后再说"
+    }
+  ],
+  "game.fullscreen.nudge.title": [
+    {
+      "type": 0,
+      "value": "全屏游戏"
+    }
+  ],
   "game.hand.empty": [
     {
       "type": 0,

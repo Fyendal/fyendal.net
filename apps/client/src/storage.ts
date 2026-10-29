@@ -76,6 +76,25 @@ export function saveHomeGameMode(
   }
 }
 
+const FULLSCREEN_NUDGE_STORAGE_KEY = "fyendal-fullscreen-nudge";
+
+/** Once answered, the landscape full-screen prompt shrinks to a single button. */
+export function loadFullscreenNudgeSeen(storage: Pick<Storage, "getItem">): boolean {
+  try {
+    return storage.getItem(FULLSCREEN_NUDGE_STORAGE_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
+export function saveFullscreenNudgeSeen(storage: Pick<Storage, "setItem">): void {
+  try {
+    storage.setItem(FULLSCREEN_NUDGE_STORAGE_KEY, "1");
+  } catch {
+    // Session dismissal still works when storage is unavailable.
+  }
+}
+
 const PLAYMAT_HINT_STORAGE_PREFIX = "fyendal-playmat-hint-";
 
 function playmatHintStorageKey(username: string | null): string {

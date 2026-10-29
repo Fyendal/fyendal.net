@@ -28980,6 +28980,60 @@
       "value": "Flip card"
     }
   ],
+  "game.fullscreen.homeScreen.body": [
+    {
+      "type": 0,
+      "value": "Safari keeps its bars on iPhone. Open Fyendal from your Home Screen to play without them."
+    }
+  ],
+  "game.fullscreen.homeScreen.step.add": [
+    {
+      "type": 0,
+      "value": "Choose Add to Home Screen."
+    }
+  ],
+  "game.fullscreen.homeScreen.step.open": [
+    {
+      "type": 0,
+      "value": "Open Fyendal from your Home Screen."
+    }
+  ],
+  "game.fullscreen.homeScreen.step.share": [
+    {
+      "type": 0,
+      "value": "Tap Share in Safari's toolbar."
+    }
+  ],
+  "game.fullscreen.homeScreen.title": [
+    {
+      "type": 0,
+      "value": "Play from your Home Screen"
+    }
+  ],
+  "game.fullscreen.nudge.enter": [
+    {
+      "type": 0,
+      "value": "Full screen"
+    }
+  ],
+  "game.fullscreen.nudge.howTo": [
+    {
+      "type": 0,
+      "value": "Show me how"
+    }
+  ],
+  "game.fullscreen.nudge.later": [
+    {
+      "type": 0,
+      "value": "Not now"
+    }
+  ],
+  "game.fullscreen.nudge.title": [
+    {
+      "type": 0,
+      "value": "Play full screen"
+    }
+  ],
   "game.hand.empty": [
     {
       "type": 0,
