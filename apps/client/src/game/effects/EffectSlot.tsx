@@ -4,7 +4,6 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useIntl } from "react-intl";
 import { TooltipButton } from "../../components/TooltipButton.js";
 import { UiIcon } from "../../components/UiIcon.js";
-import { CardBack, CardFace } from "../Card.js";
 import { hasLegacySquareCardFrame, isMarvelCardImageUrl, resolveCardImageUrls } from "../cardImageUrl.js";
 import {
   effectCount,
@@ -173,7 +172,7 @@ export function EffectSlot({
   /** Grid area on the mat half. */
   area: string;
   heroName: string;
-  /** Phone layouts show mat-sized card tiles instead of text chips. */
+  /** Phone layouts show small art tiles instead of text chips. */
   compact: boolean;
   /** Keep chips clear of the viewer's resting hand cards. */
   avoidHand?: boolean;
@@ -208,7 +207,7 @@ export function EffectSlot({
           <EffectCardTile key={stackKey(stack)} stack={stack} arriving={arrivals.has(stackKey(stack))} />
         ))}
         {more > 0 ? (
-          <span className="card-zone effect-card-more">
+          <span className="effect-card-more">
             <span className="effect-card-more-count">+{more}</span>
             <span className="effect-card-more-label">{intl.formatMessage({ id: "game.effects.moreLabel" })}</span>
           </span>
@@ -287,9 +286,9 @@ function useTileCapacity(slot: HTMLElement | null): number {
   return capacity;
 }
 
-/** A phone-sized effect: the source card at mat size with its lifetime badge,
- *  a card back for a face-down source, or the effect's text when there is no
- *  source card (a hero card face here would read as a second hero). */
+/** A phone-sized effect: a small square of its source's art with a lifetime
+ *  badge, so it never reads as a permanent; a face-down source shows the
+ *  hidden pattern, and an effect without a source card shows its text. */
 function EffectCardTile({ stack, arriving }: { stack: OngoingEffectStack; arriving: boolean }) {
   const intl = useIntl();
   const { effect, count } = stack;
@@ -303,18 +302,10 @@ function EffectCardTile({ stack, arriving }: { stack: OngoingEffectStack; arrivi
         arriving ? "effect-arrive" : "",
       ].filter(Boolean).join(" ")}
     >
-      {effect.cardId ? (
-        <CardFace
-          card={{ instanceId: -1, cardId: effect.cardId, owner: effect.seat }}
-          size="zone"
-          showOverlays={false}
-          showStats={false}
-          showTapped={false}
-        />
-      ) : effect.sourceHidden ? (
-        <CardBack label="" />
+      {effect.cardId || effect.sourceHidden ? (
+        <EffectArt effect={effect} />
       ) : (
-        <span className="card-zone effect-card-neutral">
+        <span className="effect-card-neutral">
           <span className="effect-card-neutral-text">{sentenceCase(effectText(intl, effect).summary)}</span>
         </span>
       )}

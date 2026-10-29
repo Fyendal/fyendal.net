@@ -170,14 +170,16 @@
   text-decoration-color: color-mix(in srgb, currentColor 60%, transparent);
 }
 .effect-inactive :is(.effect-life, .effect-ledger-duration) { color: var(--text-secondary); }
-.effect-card.effect-inactive > .card,
-.effect-card.effect-inactive > .card-zone { filter: grayscale(1) brightness(0.7); }
+.effect-card.effect-inactive > :is(.effect-art, .effect-card-neutral) { filter: grayscale(1) brightness(0.7); }
 
 /* ── phone tiles ──
-   Effects at the mat's own card size: the full source card face, a lifetime
-   badge on its bottom edge, and an explicit pile for whatever does not fit. */
+   Small art squares well under the mat's card size, so an effect never reads
+   as a permanent: a lifetime badge on the bottom edge, and an explicit pile
+   for whatever does not fit. */
 .effect-cards {
+  --effect-art-size: 38px;
   display: flex;
+  align-items: center;
   align-self: center;
   justify-self: start;
   width: 100%;
@@ -191,32 +193,34 @@
   flex: 0 0 auto;
   display: block;
 }
-.effect-card > .card,
-.effect-card > .card-zone {
+.effect-card > :is(.effect-art, .effect-card-neutral) {
+  border-radius: 4px;
   box-shadow: 0 0 0 1px var(--effect-edge);
 }
-.effect-card.effect-imposed > .card,
-.effect-card.effect-imposed > .card-zone { box-shadow: 0 0 0 1.5px var(--effect-imposed-edge); }
-.effect-card-stacked > .card,
-.effect-card-stacked > .card-zone {
+.effect-card.effect-imposed > :is(.effect-art, .effect-card-neutral) {
+  box-shadow: 0 0 0 1.5px var(--effect-imposed-edge);
+}
+.effect-card-stacked > :is(.effect-art, .effect-card-neutral) {
   box-shadow: 0 0 0 1px var(--effect-edge), 3px 3px 0 #20150d, 4px 4px 0 var(--effect-edge);
 }
 .effect-card-neutral {
   display: grid;
+  width: var(--effect-art-size);
+  height: var(--effect-art-size);
   box-sizing: border-box;
   place-items: center;
   overflow: hidden;
-  padding: 4px 4px 10px;
+  padding: 3px 3px 8px;
   background: var(--surface-panel);
 }
 .effect-card-neutral-text {
   display: -webkit-box;
   overflow: hidden;
   color: var(--text-secondary);
-  font: 500 9px/1.2 var(--font-lobby-ui);
+  font: 500 8px/1.15 var(--font-lobby-ui);
   text-align: center;
   -webkit-box-orient: vertical;
-  -webkit-line-clamp: 4;
+  -webkit-line-clamp: 3;
 }
 .effect-card-life {
   position: absolute;
@@ -249,6 +253,8 @@
 }
 .effect-card-more {
   display: grid;
+  width: var(--effect-art-size);
+  height: var(--effect-art-size);
   box-sizing: border-box;
   flex: 0 0 auto;
   align-content: center;
@@ -258,7 +264,7 @@
   border-radius: 4px;
   color: var(--gold);
 }
-.effect-card-more-count { font: 700 17px/1 var(--font-fantasy-meta); }
+.effect-card-more-count { font: 700 15px/1 var(--font-fantasy-meta); }
 .effect-card-more-label {
   color: var(--text-muted);
   font: 500 10px/1 var(--font-lobby-ui);

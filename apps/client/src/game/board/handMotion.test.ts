@@ -135,6 +135,11 @@ describe("dragged card motion", () => {
       .toEqual({ x: 192, y: -81.5 });
     expect(handDragPreviewOffset({ ...card, left: 1200, top: 400 }, preview, viewport))
       .toEqual({ x: -308, y: -81.5 });
+    // Touch prefers the left, clear of a right thumb, when it fits.
+    expect(handDragPreviewOffset({ ...card, left: 600, top: 400 }, preview, viewport, "left"))
+      .toEqual({ x: -308, y: -81.5 });
+    expect(handDragPreviewOffset({ ...card, left: 200, top: 400 }, preview, viewport, "left"))
+      .toEqual({ x: 192, y: -81.5 });
     // Near the bottom edge the preview rises to stay visible.
     expect(handDragPreviewOffset({ ...card, left: 200, top: 700 }, preview, viewport).y).toBe(900 - 8 - 413 - 700);
   });
@@ -146,6 +151,12 @@ describe("dragged card motion", () => {
     // Low on screen: above, centred on the card.
     expect(handDragPreviewOffset({ ...card, left: 146, top: 500 }, preview, viewport))
       .toEqual({ x: -76.5, y: -341 });
+    // An above preference stacks even when the side would fit.
+    const wide = { width: 430, height: 932 };
+    const above = handDragPreviewSize(preview, card, wide, "above");
+    expect(above.stacked).toBe(true);
+    expect(handDragPreviewOffset({ ...card, left: 146, top: 600 }, above, wide, "above").y)
+      .toBe(-12 - above.height);
     // High on screen: below.
     expect(handDragPreviewOffset({ ...card, left: 146, top: 200 }, preview, viewport))
       .toEqual({ x: -76.5, y: 126 });

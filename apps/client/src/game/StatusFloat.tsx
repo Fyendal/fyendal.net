@@ -338,7 +338,6 @@ export function StatusFloat({
   /** Phone landscape: mirrored player plates in the side rail instead of a float. */
   rail?: {
     oppIdentity: ReactNode;
-    oppHand: ReactNode;
     myIdentity: ReactNode;
     /** Action points belong to the turn player, so they head that plate. */
     activeSeat: number;
@@ -440,7 +439,7 @@ export function StatusFloat({
         className="status-rail game-hud"
         aria-label={intl.formatMessage({ id: "game.hud.label" })}
       >
-        {plate(oppSeat, "opp", rail.oppIdentity, <>{oppLifeStatus}{rail.oppHand}</>)}
+        {plate(oppSeat, "opp", rail.oppIdentity, oppLifeStatus)}
         {rail.middle}
         {plate(mySeat, "me", rail.myIdentity, <>{myLifeStatus}{resourcesPip}</>)}
       </div>

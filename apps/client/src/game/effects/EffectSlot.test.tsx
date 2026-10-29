@@ -96,11 +96,12 @@ describe("EffectSlot", () => {
     expect(html).toMatch(/<span class="effect-more">\+2<\/span><\/span><\/button>$/);
   });
 
-  it("shows phone effects as mat-sized card tiles with a lifetime badge", () => {
+  it("shows phone effects as small art tiles with a lifetime badge", () => {
     const html = slot([nextAttack, nextAttack, restriction], true);
 
     expect(html.match(/class="effect-card[ "]/g)).toHaveLength(2);
-    expect(html).toContain("card-zone");
+    expect(html).toContain("effect-art");
+    expect(html).not.toContain("card-zone");
     expect(html).toContain('<span class="effect-card-count">×2</span>');
     expect(html).toMatch(/class="effect-card effect-imposed".*Can&#x27;t draw cards/);
     expect(html).toContain("/icons/ui/effect-once.svg");

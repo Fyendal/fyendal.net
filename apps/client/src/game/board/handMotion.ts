@@ -10,18 +10,24 @@ const HAND_DRAG_PREVIEW_GAP = 12;
 const HAND_DRAG_PREVIEW_EDGE = 8;
 
 interface Size { width: number; height: number }
+/** Where a drag preview goes first: beside the card, or above it. */
+export type HandDragPreviewSide = "left" | "right" | "above";
 
 const clamp = (value: number, min: number, max: number) => Math.min(Math.max(value, min), max);
 
 /** Hover-preview size for a drag. Wide screens keep it whole beside the card;
- * narrow ones shrink it so it always fits stacked above or below the card. */
+ * narrow ones, or an above preference, shrink it so it always fits stacked
+ * above or below the card. */
 export function handDragPreviewSize(
   preview: Size,
   card: Size,
   viewport: Size,
+  preferredSide: HandDragPreviewSide = "right",
 ): Size & { stacked: boolean } {
   const gutter = HAND_DRAG_PREVIEW_GAP + 2 * HAND_DRAG_PREVIEW_EDGE;
-  if (viewport.width - card.width - gutter >= preview.width) return { ...preview, stacked: false };
+  if (preferredSide !== "above" && viewport.width - card.width - gutter >= preview.width) {
+    return { ...preview, stacked: false };
+  }
   const height = (viewport.height - card.height) / 2 - HAND_DRAG_PREVIEW_GAP - HAND_DRAG_PREVIEW_EDGE;
   const width = viewport.width - 2 * HAND_DRAG_PREVIEW_EDGE;
   const scale = Math.max(0, Math.min(1, height / preview.height, width / preview.width));
@@ -33,19 +39,22 @@ export function handDragPreviewSize(
 }
 
 /** Preview offset from the dragged card's top-left: beside it when it fits,
- * else above or below it, always on screen. */
+ * on the preferred side first, else above or below it, always on screen. */
 export function handDragPreviewOffset(
   card: { left: number; top: number } & Size,
   preview: Size,
   viewport: Size,
+  preferredSide: HandDragPreviewSide = "right",
 ): { x: number; y: number } {
   const maxX = viewport.width - HAND_DRAG_PREVIEW_EDGE - preview.width;
   const maxY = viewport.height - HAND_DRAG_PREVIEW_EDGE - preview.height;
   const right = card.left + card.width + HAND_DRAG_PREVIEW_GAP;
   const left = card.left - HAND_DRAG_PREVIEW_GAP - preview.width;
   const centredY = clamp(card.top + (card.height - preview.height) / 2, HAND_DRAG_PREVIEW_EDGE, maxY);
-  if (right <= maxX) return { x: right - card.left, y: centredY - card.top };
-  if (left >= HAND_DRAG_PREVIEW_EDGE) return { x: left - card.left, y: centredY - card.top };
+  const fitsRight = preferredSide !== "above" && right <= maxX;
+  const fitsLeft = preferredSide !== "above" && left >= HAND_DRAG_PREVIEW_EDGE;
+  if (fitsLeft && (preferredSide === "left" || !fitsRight)) return { x: left - card.left, y: centredY - card.top };
+  if (fitsRight) return { x: right - card.left, y: centredY - card.top };
   const centredX = clamp(card.left + (card.width - preview.width) / 2, HAND_DRAG_PREVIEW_EDGE, maxX);
   const above = card.top - HAND_DRAG_PREVIEW_GAP - preview.height;
   const y = above >= HAND_DRAG_PREVIEW_EDGE

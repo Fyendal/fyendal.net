@@ -20,12 +20,13 @@ import {
   handDragPreviewOffset,
   handDragPreviewSize,
   handDragTilt,
+  type HandDragPreviewSide,
   HAND_MOTION_EASING,
   handReturnDuration,
   HAND_DROP_SETTLE_MS,
   HAND_TOUCH_HOLD_MS,
 } from "./handMotion.js";
-import { isTouchBoardViewport } from "./viewportQueries.js";
+import { isTouchBoardViewport, MOBILE_FLOAT_QUERY } from "./viewportQueries.js";
 import { cardPreviewSize } from "../Card.js";
 
 interface HandDrag {
@@ -49,6 +50,7 @@ interface HandDrag {
   touch: boolean;
   holdTimer: number;
   preview: { width: number; height: number; stacked: boolean };
+  previewSide: HandDragPreviewSide;
   /** Geometry read once at pickup; per-frame reads after style writes force layout. */
   cardWidth: number;
   cardHeight: number;
@@ -225,6 +227,7 @@ export function useHandReorder(
         { left, top, width: drag.cardWidth, height: drag.cardHeight },
         drag.preview,
         { width: window.innerWidth, height: window.innerHeight },
+        drag.previewSide,
       );
       // A direct transform on its own layer moves the preview without a repaint.
       const preview = floating.querySelector<HTMLElement>(".hand-drag-preview");
@@ -296,10 +299,16 @@ export function useHandReorder(
       drag.grabOffset = drag.cardWidth / 2;
       drag.grabOffsetY = drag.cardHeight / 2;
     }
+    // Portrait phones preview above the thumb; other touch screens preview
+    // left, clear of a right thumb.
+    drag.previewSide = window.matchMedia(MOBILE_FLOAT_QUERY).matches
+      ? "above"
+      : drag.touch ? "left" : "right";
     drag.preview = handDragPreviewSize(
       cardPreviewSize(window.innerHeight),
       { width: drag.cardWidth, height: drag.cardHeight },
       { width: window.innerWidth, height: window.innerHeight },
+      drag.previewSide,
     );
     setFloatingCard({
       instanceId: drag.instanceId,
@@ -410,6 +419,7 @@ export function useHandReorder(
           touch: event.pointerType === "touch" && isTouchBoardViewport(),
           holdTimer: 0,
           preview: { width: 0, height: 0, stacked: false },
+          previewSide: "right",
           cardWidth: 0,
           cardHeight: 0,
           handBounds: null,

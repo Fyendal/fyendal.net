@@ -3,9 +3,9 @@
    board. The rail becomes one control bar on the right, under the thumb:
    a toolbar (log, emotes, menu, social) above two mirrored player plates,
    the opponent's under the toolbar and ours at the bottom with undo and the
-   primary action. The square arena takes the remaining width and the hand
-   rests along the bottom with its name bars showing. The log opens as a
-   drawer instead of widening the bar. */
+   primary action. The arena takes the remaining width with full cards, and
+   both hands rest over their far rows. The log opens as a drawer instead of
+   widening the bar. */
 
 @media (orientation: landscape) and (max-height: 520px), (orientation: landscape) and (max-width: 700px) {
   .table,
@@ -13,37 +13,61 @@
     --rail-w: 168px;
     --ls-bar-x: calc(100vw - var(--rail-w));
     --table-height: 100dvh;
-    --ls-hand-visible: 64px;
+    --ls-hand-visible: 54px;
     --hand-card-height: 209px;
     --hand-rest-offset: calc(var(--hand-card-height) - var(--ls-hand-visible));
     --hand-selected-lift: 16px;
-    --opp-hand-band: 4px;
     --mat-cx: calc((100vw - var(--rail-w)) / 2);
     --mat-max-width: calc(var(--table-height) * 16 / 9);
     grid-template-columns: 1fr var(--rail-w);
   }
-  .table:has(.mat-square-board) {
-    --arena-square-pad: 4px;
-    --arena-square-gap: 5px;
-    --arena-band-clearance: 0px;
-    --arena-square-cap: 96px;
-    /* Touch cannot raise a resting card, so the whole arsenal row clears the hand. */
-    --arena-square-fit: calc(
-      (
-        var(--table-height) - 7px - 2 * var(--arena-square-pad) - 4 * var(--arena-square-gap)
-        - var(--opp-hand-band) - var(--ls-hand-visible) - 4px
-      ) / 6
+  /* Full cards in the usual three rows. The far rows (our legs, arsenal and
+     banish; the opponent's mirror) tuck under the hands, but the top 40% of
+     our arsenal always clears the resting hand; hiding the hand shows it all. */
+  .table:has(.mat-landscape-board) {
+    --ls-row-gap: 3px;
+    --ls-card-height: calc(
+      (var(--table-height) - 7px - 6px - 4 * var(--ls-row-gap) - var(--ls-hand-visible)) / 5.4
     );
-    /* Nine tracks, eight gaps and the two spacers must also fit the width. */
-    --arena-square-width-fit: calc(
-      (100vw - var(--rail-w) - 16px - 8 * var(--mat-column-gap) - 12px) / 9
-    );
-    --arena-square-size: max(
-      42px,
-      min(var(--arena-square-cap), var(--arena-square-fit), var(--arena-square-width-fit))
-    );
+    --ls-card-width: calc(var(--ls-card-height) * .7165);
+    --mat-zone-col: var(--ls-card-width);
   }
-  .mat-half.mat-square-board { --mat-column-gap: 5px; }
+  .mat-half.mat-landscape-board {
+    --mat-column-gap: 5px;
+    --mat-outer-col: var(--ls-card-width);
+    --mat-arms-col: var(--ls-card-width);
+    --mat-weapon-0-col: var(--ls-card-width);
+    --mat-hero-col: var(--ls-card-width);
+    --mat-weapon-1-col: var(--ls-card-width);
+    --mat-tapped-col: var(--ls-card-height);
+    flex: none;
+    grid-template-columns:
+      var(--mat-outer-col)
+      var(--mat-arms-col)
+      minmax(6px, 1fr)
+      var(--mat-weapon-0-col)
+      var(--mat-hero-col)
+      var(--mat-weapon-1-col)
+      minmax(6px, 1fr)
+      var(--mat-zone-col)
+      var(--mat-zone-col);
+    grid-template-rows: repeat(3, var(--ls-card-height));
+    row-gap: var(--ls-row-gap);
+    padding: 3px 0 0;
+  }
+  .mat-half.mat-landscape-board.mat-opp { padding: 0 0 3px; }
+  .mat-landscape-board .card-zone {
+    width: var(--ls-card-width);
+    height: var(--ls-card-height);
+  }
+  .mat-landscape-board .board-card-stack-tapped {
+    width: var(--ls-card-height);
+    height: var(--ls-card-width);
+  }
+  .mat-landscape-board .board-cards { padding-left: 10px; }
+  .mat-landscape-board .card-zone .c-name { font-size: 8px; }
+  .mat-landscape-board .card-zone .c-atk,
+  .mat-landscape-board .card-zone .c-def { font-size: 12px; }
   /* The mat keeps its 16:9 cap, centred before the bar; its painting and
      priority light bleed the 8px board padding. */
   .board { padding: 0 8px; }
@@ -66,13 +90,13 @@
 
   .mat-half .mat-zone-label { font-size: 9px; letter-spacing: .75px; }
   .zone-pile-empty .mat-zone-label { font-size: 8px; }
-  /* Scales with the pile so the smallest squares keep the zone label clear. */
+  /* Scales with the pile so the smallest cards keep the zone label clear. */
   .mat-half .c-count {
     top: 2px;
     min-width: 2em;
     height: 2em;
     padding-inline: 3px;
-    font-size: min(14px, calc(var(--arena-square-size) * .27));
+    font-size: min(14px, calc(var(--ls-card-width) * .3));
   }
   .mat-half .card-back:has(> .c-count) .c-backlabel { bottom: 1px; }
   .mat-half .c-ovl {
@@ -99,22 +123,71 @@
   .under-pip-count { font-size: 9px; }
   .blood-debt-counter { right: -4px; bottom: -5px; width: 27px; height: 32px; font-size: 13px; }
   .blood-debt-counter > span { padding-top: 5px; }
-  /* A full-size arsenal card would spill into the hero row. */
-  .mat-half .zone-arsenal .card-zone {
-    width: calc(var(--arena-square-size) * .73);
-    height: var(--arena-square-size);
-  }
   .mat-half .zone-arsenal .c-backlabel { display: none; }
 
-  /* Hand strip under the arena, clear of the legs card. */
-  .hand,
-  .table:has(.mat-square-board) .hand {
+  /* The opponent's hand hangs as a shallow fan over their far row. */
+  .opp-hand {
+    --opp-fan-drop: 1px;
+    --opp-fan-max-drop: 4px;
+    position: absolute;
+    top: 0;
+    height: 22px;
+  }
+  .opp-hand .card-back,
+  .opp-hand-revealed .card-hand { width: 36px; height: 50px; }
+  .opp-hand .card-back + .card-back,
+  .opp-hand-revealed .card-hand + .card-hand { margin-left: -18px; }
+  .opp-hand .muted { display: none; }
+
+  /* Hand strip over our far row, clear of the legs card. */
+  .hand {
     --hand-card-width: calc(var(--hand-card-height) * .7165);
     right: 8px;
     left: 8px;
-    padding-left: calc(var(--arena-square-size) + 10px);
+    padding-left: calc(var(--ls-card-width) + 10px);
   }
   .hand .card-hand { height: var(--hand-card-height); }
+  /* The eye sits above the hand in the open track left of pitch. */
+  .mobile-hand-toggle {
+    position: fixed;
+    right: calc(var(--rail-w) + 8px + 2 * var(--ls-card-width) + 15px);
+    bottom: calc(var(--ls-hand-visible) + 6px);
+    z-index: 24;
+    display: grid;
+    width: 36px;
+    min-width: 0;
+    height: 30px;
+    min-height: 0;
+    place-items: center;
+    padding: 0;
+    clip-path: none;
+    border: 1px solid #b8933f88;
+    border-radius: 4px;
+    background: #050403e6;
+    touch-action: manipulation;
+  }
+  .mobile-hand-toggle-icon { width: 20px; height: 20px; filter: invert(1); }
+  .mobile-hand-toggle[aria-expanded="false"] {
+    bottom: 6px;
+    display: inline-flex;
+    width: auto;
+    gap: 6px;
+    padding: 0 10px;
+    color: #e6dcc6;
+    font-size: 12px;
+  }
+  .mobile-hand-count {
+    display: inline-grid;
+    min-width: 18px;
+    height: 18px;
+    place-items: center;
+    padding-inline: 4px;
+    border: 1px solid #b8933f66;
+    border-radius: 9px;
+    font-size: 11px;
+  }
+  .mobile-hand-is-hidden .hand,
+  .mobile-hand-is-hidden .hand-scroll-button { display: none; }
   .hand-scroll-button {
     bottom: 6px;
     min-width: 44px;
@@ -280,45 +353,6 @@
   .status-rail .life-hero-frame { width: 28px; height: 28px; }
   .status-rail .life-change-pop { font-size: 15px; }
 
-  .hud-plate .opp-hand {
-    position: static;
-    display: flex;
-    max-width: 64px;
-    height: 30px;
-    flex: 0 0 auto;
-    align-items: center;
-    gap: 0;
-    padding: 0 8px;
-    overflow: hidden;
-    border: 1px solid #b8933f44;
-    border-radius: 4px;
-    background: #00000033;
-  }
-  .opp-hand .card-back,
-  .opp-hand-revealed .card-hand { width: 14px; height: 20px; border-radius: 2px; }
-  .opp-hand .card-back + .card-back,
-  .opp-hand-revealed .card-hand + .card-hand { margin-left: -9px; }
-  .opp-hand .card-back,
-  .opp-hand-revealed .card-hand { transform: none; }
-  .opp-hand .muted { display: none; }
-  .opp-hand:has(.muted)::before {
-    content: "";
-    width: 14px;
-    height: 20px;
-    border: 1px dashed #b8933f66;
-    border-radius: 2px;
-  }
-  .opp-hand-count {
-    display: block;
-    order: -1;
-    margin-right: 6px;
-    color: #e6dcc6;
-    font-size: 15px;
-    font-weight: 700;
-    line-height: 1;
-    font-variant-numeric: tabular-nums;
-  }
-
   /* The turn player's action points read beside their name. */
   .status-rail .ap-pip {
     flex: 0 0 auto;
@@ -328,7 +362,7 @@
     font-size: 14px;
     line-height: 1;
   }
-  /* Pitch mirrors the opponent's hand chip. */
+  /* Pitch reads as a chip beside our life. */
   .status-rail .hud-resources {
     display: flex;
     height: 30px;
@@ -429,17 +463,34 @@
   .chain-group .card-hand,
   .chain-empty-slot { width: 56px; height: 78px; }
 
-  /* Turn timing fits the seam on one line. */
+  /* Turn timing stacks into a short plaque; it yields width to the docked minis. */
   .mat-divider-center > .priority-float {
-    flex-direction: row;
-    gap: 10px;
+    flex: 0 1 auto;
+    gap: 1px;
     min-width: 0;
     max-height: none;
     padding: 3px 12px;
     white-space: nowrap;
   }
-  .priority-turn { font-size: 12px; letter-spacing: .05em; }
-  .priority-timing { font-size: 10px; letter-spacing: .06em; }
+  .priority-turn,
+  .priority-timing { max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
+  .priority-turn { font-size: 11px; letter-spacing: .05em; }
+  .priority-timing { font-size: 9px; letter-spacing: .06em; }
+  .mat-divider-mini-dock { flex: 0 0 auto; gap: 5px; }
+  .chain-mini.chain-mini-anchored,
+  .mat-divider-mini-dock .stack-mini {
+    min-height: 0;
+    gap: 6px;
+    padding: 4px 9px;
+    white-space: nowrap;
+  }
+  .mat-divider-mini-dock .mini-title-long { display: none; }
+  .mat-divider-mini-dock .mini-title-short { display: inline; }
+  .chain-mini-title,
+  .stack-mini-title { font-size: 12px; }
+  .chain-mini-score { display: inline-flex; align-items: center; gap: 3px; font-size: 12px; }
+  .chain-mini-score .ico { width: 14px; height: 14px; }
+  .stack-mini-count { min-width: 20px; height: 20px; font-size: 12px; }
   .table:has(.chain-float) .mat-divider-center > .priority-float { display: none; }
   .waiting { top: 6px; padding: 4px 12px; font-size: 12px; letter-spacing: 1.5px; }
 
@@ -462,7 +513,6 @@
 @media (orientation: landscape) and (max-width: 700px) {
   .table,
   .table.rail-is-collapsed { --rail-w: 148px; }
-  .hud-plate .opp-hand { max-width: 50px; padding-inline: 6px; }
   .status-rail .life { gap: 6px; font-size: 20px; }
   .status-rail .life-hero-frame { width: 26px; height: 26px; }
   /* The portrait rule moves social into More; the bar keeps its bubble. */

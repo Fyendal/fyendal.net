@@ -305,8 +305,8 @@ export function GameBoard() {
   const inspectedStandingOrders = inspectedStandingOrderKey
     ? standingOrders.cards.get(inspectedStandingOrderKey)
     : undefined;
-  const squareCardsEnabled = (cardDisplayPreference === "square" || mobileLandscapeViewport)
-    && !mobileFloatViewport && !compactBoard;
+  const squareCardsEnabled = cardDisplayPreference === "square"
+    && !mobileLandscapeViewport && !mobileFloatViewport && !compactBoard;
   const presentedDefenderIds = screen === "replay" || spectating
     ? null
     : pendingDefenderStageIds;
@@ -1365,9 +1365,9 @@ export function GameBoard() {
           <>
             {oppNameplate}
             {selfNameplate}
-            {oppHand}
           </>
         )}
+        {oppHand}
 
         {/* opponent half — mirrored vertically, same columns as yours */}
         <PlayerHalf
@@ -1544,7 +1544,6 @@ export function GameBoard() {
         rail={mobileLandscapeViewport
           ? {
               oppIdentity: oppNameplate,
-              oppHand,
               myIdentity: selfNameplate,
               activeSeat: view.activePlayer,
               middle: <FullscreenNudge />,

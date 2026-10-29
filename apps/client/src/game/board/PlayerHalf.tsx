@@ -185,9 +185,11 @@ export function PlayerHalf({
     ? visibleDeckTop
     : undefined;
   const hero = heroCard(player);
-  // Phone landscape has no height for portrait rows; squares are forced.
-  const squareBoard = (cardDisplayPreference === "square" || mobileLandscapeViewport)
-    && !mobileFloatViewport && !compactBoard;
+  // Phone landscape shows full cards; its far rows tuck under the hands.
+  const landscapeBoard = mobileLandscapeViewport && !mobileFloatViewport;
+  const squareBoard = cardDisplayPreference === "square"
+    && !landscapeBoard && !mobileFloatViewport && !compactBoard;
+  const outlinedEmptyPiles = squareBoard || landscapeBoard;
   const deckTopPlayable =
     presentedDeckTop !== undefined && interaction.legal.playableZones.get(presentedDeckTop.instanceId) === "deck";
   // Arena costs stay until the server removes them so their exit animates in place.
@@ -387,7 +389,7 @@ export function PlayerHalf({
                 motionKey={motionPresentationKey(location, cards[cards.length - 2]!.instanceId)}
               />
             </div>
-          ) : squareBoard ? (
+          ) : outlinedEmptyPiles ? (
             <div className="zone-card-pile-under" aria-hidden="true">
               <span className="card-zone equipment-zone-empty zone-pile-empty">
                 <span className="mat-zone-label">{zoneLabel(kind)}</span>
@@ -402,7 +404,7 @@ export function PlayerHalf({
           />
           <span className="pip pile-pip">{cards.length}</span>
         </div>
-      ) : squareBoard ? (
+      ) : outlinedEmptyPiles ? (
         <span
           className="card-zone equipment-zone-empty zone-pile-empty"
           role="img"
@@ -418,7 +420,7 @@ export function PlayerHalf({
   };
 
   return (
-    <div className={`mat-half ${mirrored ? "mat-opp" : ""}${squareBoard ? " mat-square-board" : ""}${compactBoard ? " mat-compact-board" : ""}${holdsPriority ? " mat-priority-holder" : ""}${holdsPriority && priorityPulse ? " mat-priority-pulse" : ""}`}>
+    <div className={`mat-half ${mirrored ? "mat-opp" : ""}${squareBoard ? " mat-square-board" : ""}${landscapeBoard ? " mat-landscape-board" : ""}${compactBoard ? " mat-compact-board" : ""}${holdsPriority ? " mat-priority-holder" : ""}${holdsPriority && priorityPulse ? " mat-priority-pulse" : ""}`}>
       {equipmentZone("head", `${row(1)} / 1`)}
       <MatZone
         area={`${row(1)} / 2 / span 1 / span 7`}
@@ -580,7 +582,7 @@ export function PlayerHalf({
           ? () => onOpenOverlay({ title: ownedZoneTitle("pitch"), cards: player.pitch })
           : undefined}
       >
-        {squareBoard && player.pitch.length === 0 && player.resources === 0 ? (
+        {outlinedEmptyPiles && player.pitch.length === 0 && player.resources === 0 ? (
           <span className="card-zone equipment-zone-empty zone-pile-empty" role="img" aria-label={zoneLabel("pitch")}>
             <span className="mat-zone-label">{zoneLabel("pitch")}</span>
           </span>
@@ -639,7 +641,7 @@ export function PlayerHalf({
                   }
                 : undefined}
             />
-          ) : player.deckCount === 0 && squareBoard ? (
+          ) : player.deckCount === 0 && outlinedEmptyPiles ? (
             <span
               className="card-zone equipment-zone-empty zone-pile-empty"
               role="img"

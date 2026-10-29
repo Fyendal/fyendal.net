@@ -89,7 +89,7 @@ export function useGameViewport(boardRef: RefObject<HTMLDivElement | null>) {
     mobileFloatViewport,
     compactDesktopViewport,
     compactHudViewport,
-    mobileHandIsHidden: mobileFloatViewport && mobileHandHidden,
+    mobileHandIsHidden: (mobileFloatViewport || mobileLandscapeViewport) && mobileHandHidden,
     toggleMobileHand: () => setMobileHandHidden((hidden) => !hidden),
     mobileCombatFloatVisibility,
   };
