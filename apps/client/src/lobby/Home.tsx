@@ -121,8 +121,8 @@ export function Home() {
           <img
             src={playPoster}
             alt=""
-            width={2050}
-            height={780}
+            width={2000}
+            height={761}
           />
         </div>
 

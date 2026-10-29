@@ -9,6 +9,7 @@ const MAD = "mutually assured destruction|1";
 const DEMORALIZE = "demoralize the dracai|1";
 const PREY = "prey on insecurity|1";
 const FLIP = "flip the script|3";
+const BRIBE = "bribe the guards|3";
 const REMEMBER = "remember the mists|3";
 const PROLONGED = "prolonged illness|3";
 const VIRAL_DIFFUSION = "viral diffusion|1";
@@ -387,6 +388,43 @@ describe("Armory Deck Mortimer and Mastery Pack Assassin spoilers", () => {
     expect(game.state.players[0]!.graveyard.map((card) => cardData[card.cardId]!.name))
       .toContain("Prey on Insecurity");
     expect(cardData[game.state.players[0]!.deck.at(-1)!.cardId]!.name).toBe("Raging Onslaught");
+  });
+
+  it("Bribe the Guards destroys a Silver to give a card defending it -1 defense", () => {
+    const game = scenario({ seats: [
+      {
+        hero: "rhinar",
+        hand: [BRIBE],
+        board: ["silver|0", "silver|0"],
+        weapons: [],
+        equipment: NO_EQUIPMENT,
+      },
+      { hero: "dorinthea", weapons: [], equipment: { ...NO_EQUIPMENT, head: IRONROT_HELM } },
+    ] });
+
+    game.play(BRIBE).blockWith(IRONROT_HELM)
+      .activate(BRIBE, { targetCard: IRONROT_HELM })
+      .chooseCard("silver|0")
+      .settle();
+
+    game.expectLife(1, 19);
+    expect(boardNames(game, 0)).toEqual(["Silver"]);
+  });
+
+  it("Bribe the Guards can't be activated without Silver or a defending card", () => {
+    const withoutSilver = scenario({ seats: [
+      { hero: "rhinar", hand: [BRIBE], weapons: [], equipment: NO_EQUIPMENT },
+      { hero: "dorinthea", weapons: [], equipment: { ...NO_EQUIPMENT, head: IRONROT_HELM } },
+    ] });
+    withoutSilver.play(BRIBE).blockWith(IRONROT_HELM);
+    expect(() => withoutSilver.activate(BRIBE, { targetCard: IRONROT_HELM })).toThrow(/no legal intent/);
+
+    const undefended = scenario({ seats: [
+      { hero: "rhinar", hand: [BRIBE], board: ["silver|0"], weapons: [], equipment: NO_EQUIPMENT },
+      { hero: "dorinthea", weapons: [], equipment: NO_EQUIPMENT },
+    ] });
+    undefended.play(BRIBE).blockWith();
+    expect(() => undefended.activate(BRIBE)).toThrow(/no legal intent/);
   });
 
   it("Flip the Script gives Uzuri's replacement attack +1 power as it leaves the chain", () => {

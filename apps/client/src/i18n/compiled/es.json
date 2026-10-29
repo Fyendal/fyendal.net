@@ -2314,6 +2314,12 @@
       "value": "Haz banish de 2 cartas rojas"
     }
   ],
+  "card.common.cost.silver.destroy": [
+    {
+      "type": 0,
+      "value": "Destruye 1 Silver"
+    }
+  ],
   "card.common.cost.silver.destroy.two": [
     {
       "type": 0,

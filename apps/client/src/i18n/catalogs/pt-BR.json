@@ -178,6 +178,7 @@
   "card.common.cost.powercounter.remove": "Remova um marcador de poder",
   "card.common.cost.red.banish": "Escolha uma carta vermelha para fazer banish como custo",
   "card.common.cost.red.banish.two": "Faça banish de 2 cartas vermelhas",
+  "card.common.cost.silver.destroy": "Destrua 1 Silver",
   "card.common.cost.silver.destroy.two": "Destrua 2 Silver",
   "card.common.cost.soul.banishx": "Escolha X cartas da sua soul para fazer banish",
   "card.common.cost.spectralshield.tap": "Vire (tap) um Spectral Shield",

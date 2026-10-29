@@ -178,6 +178,7 @@
   "card.common.cost.powercounter.remove": "移除一个力量指示物",
   "card.common.cost.red.banish": "选择一张红色牌放逐作为费用",
   "card.common.cost.red.banish.two": "放逐 2 张红色牌",
+  "card.common.cost.silver.destroy": "摧毁 1 个 Silver",
   "card.common.cost.silver.destroy.two": "摧毁 2 个 Silver",
   "card.common.cost.soul.banishx": "选择 X 张 soul 中的牌放逐",
   "card.common.cost.spectralshield.tap": "横置一个 Spectral Shield",

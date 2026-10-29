@@ -261,6 +261,31 @@ export const mpa: Record<string, CardScript> = {
     },
   },
 
+  "bribe the guards|3": {
+    activated: {
+      cost: 0,
+      isAttack: false,
+      goAgain: false,
+      timing: "instant",
+      effectCardCosts: [
+        {
+          zone: "arena",
+          move: "destroy",
+          count: 1,
+          name: "Silver",
+          prompt: decisionPrompt("Destroy a Silver", "card.common.cost.silver.destroy"),
+        },
+      ],
+      targetCardOptions(ctx) {
+        const link = ctx.state.chain.find((candidate) => candidate.attackingCard.instanceId === ctx.self.instanceId);
+        return link ? [...link.defendingCards, ...link.defendingEquipment].map((card) => card.instanceId) : [];
+      },
+      onActivate(ctx) {
+        if (ctx.playTargetInstanceId !== undefined) ctx.addCardTempDefense(ctx.playTargetInstanceId, -1);
+      },
+    },
+  },
+
   "flip the script|3": {
     triggers: [
       leavesArenaTrigger(

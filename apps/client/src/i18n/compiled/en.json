@@ -2310,6 +2310,12 @@
       "value": "Banish 2 red cards"
     }
   ],
+  "card.common.cost.silver.destroy": [
+    {
+      "type": 0,
+      "value": "Destroy a Silver"
+    }
+  ],
   "card.common.cost.silver.destroy.two": [
     {
       "type": 0,

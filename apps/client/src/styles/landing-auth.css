@@ -49,7 +49,7 @@
 /* The poster keeps its own proportions so the logo and event text are never
    cut off, whatever width the column gets. */
 .intro-poster {
-  aspect-ratio: 2050 / 780;
+  aspect-ratio: 2000 / 761;
   background: #1b1512 url("../../../assets/play-poster.jpg") center / cover no-repeat;
 }
 .intro-copy {

@@ -2269,6 +2269,12 @@
       "value": "放逐 2 张红色牌"
     }
   ],
+  "card.common.cost.silver.destroy": [
+    {
+      "type": 0,
+      "value": "摧毁 1 个 Silver"
+    }
+  ],
   "card.common.cost.silver.destroy.two": [
     {
       "type": 0,

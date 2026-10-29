@@ -2326,6 +2326,12 @@
       "value": "Faça banish de 2 cartas vermelhas"
     }
   ],
+  "card.common.cost.silver.destroy": [
+    {
+      "type": 0,
+      "value": "Destrua 1 Silver"
+    }
+  ],
   "card.common.cost.silver.destroy.two": [
     {
       "type": 0,
