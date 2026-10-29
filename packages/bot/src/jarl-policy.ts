@@ -344,14 +344,12 @@ function hasEverbloomTarget(input: BotPolicyInput): boolean {
   );
 }
 
-function shouldGiveEnlightenedStrikeGoAgain(input: BotPolicyInput): boolean {
+/** True when an attack can still be paid for after `spent` cards leave hand
+ * or arsenal with `floating` resources left over. */
+function hasAffordableAttack(input: BotPolicyInput, spent: ReadonlySet<number>, floating: number): boolean {
   const me = input.view.players[input.seat];
-  // At this choice Enlightened Strike and its bottomed additional-cost card
-  // have both left the hand, so one or two cards means it began as a three-
-  // or four-card hand. Larger hands should take the efficient +2 mode.
-  if (me.hand.length < 1 || me.hand.length > 2) return false;
-
-  const pitchFromHand = (reservedId?: number): number => me.hand.reduce(
+  const hand = me.hand.filter((card) => !spent.has(card.instanceId));
+  const pitchFromHand = (reservedId?: number): number => hand.reduce(
     (total, card) => card.instanceId === reservedId
       ? total
       : total + Number(input.cards[card.cardId]?.pitch ?? 0),
@@ -359,18 +357,46 @@ function shouldGiveEnlightenedStrikeGoAgain(input: BotPolicyInput): boolean {
   );
   const canPay = (card: CardView, reserveFromHand: boolean): boolean => {
     const data = input.cards[card.cardId];
-    return !!data && me.resources + pitchFromHand(reserveFromHand ? card.instanceId : undefined) >=
+    return !!data && floating + pitchFromHand(reserveFromHand ? card.instanceId : undefined) >=
       attackCost(data);
   };
 
-  const handAttack = me.hand.some((card) => isAttack(input.cards[card.cardId]) && canPay(card, true));
-  const arsenalAttack = me.arsenal.some((card) => isAttack(input.cards[card.cardId]) && canPay(card, false));
+  const handAttack = hand.some((card) => isAttack(input.cards[card.cardId]) && canPay(card, true));
+  const arsenalAttack = me.arsenal.some((card) => !spent.has(card.instanceId) &&
+    isAttack(input.cards[card.cardId]) && canPay(card, false));
   const weaponAttack = me.weapons.some((card) => {
     const data = input.cards[card.cardId];
     return data?.cardType === "weapon" && (data.attack ?? 0) > 0 &&
       !(card.usedAbilityIndexes ?? []).includes(0) && canPay(card, false);
   });
   return handAttack || arsenalAttack || weaponAttack;
+}
+
+/** Whether an attack can still follow once this intent's card and pitch are spent. */
+function attackFollowsPlay(
+  intent: GameIntent,
+  input: BotPolicyInput,
+  own: ReadonlyMap<number, CardView>,
+): boolean {
+  const played = intentCard(intent, own);
+  const pitched = pitchIds(intent);
+  const spent = new Set(pitched);
+  if (played) spent.add(played.instanceId);
+  const pitchedValue = pitched.flatMap((id) => own.get(id) ?? []).reduce(
+    (total, card) => total + Number(input.cards[card.cardId]?.pitch ?? 0),
+    0,
+  );
+  const cost = played ? Math.max(0, input.cards[played.cardId]?.cost ?? 0) : 0;
+  return hasAffordableAttack(input, spent, input.view.players[input.seat].resources + pitchedValue - cost);
+}
+
+function shouldGiveEnlightenedStrikeGoAgain(input: BotPolicyInput): boolean {
+  const me = input.view.players[input.seat];
+  // At this choice Enlightened Strike and its bottomed additional-cost card
+  // have both left the hand, so one or two cards means it began as a three-
+  // or four-card hand. Larger hands should take the efficient +2 mode.
+  if (me.hand.length < 1 || me.hand.length > 2) return false;
+  return hasAffordableAttack(input, new Set(), me.resources);
 }
 
 function shouldActivateOmnisBoots(input: BotPolicyInput, boots: CardView): boolean {
@@ -555,6 +581,9 @@ function scorePlay(
     score = link?.attackingCard.owner === input.seat && deficit < 4
       ? 62 + Math.max(0, input.view.players[1 - input.seat]!.handCount) * 2
       : -100;
+  } else if (functional === "sprout strength|1") {
+    // Pump before the attack it buffs; with no affordable attack it stays put.
+    score = attackFollowsPlay(intent, input, own) ? 70 : -100;
   } else if (functional === "fruits of the forest|3") {
     score = 5;
   } else if (data.cardType === "defense-reaction") {

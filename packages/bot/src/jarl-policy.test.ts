@@ -1015,6 +1015,33 @@ describe("Jarl policy", () => {
     );
   });
 
+  it("keeps Sprout Strength in arsenal when no attack can follow it", () => {
+    const state = createGame({
+      decklists: [jarlDeck(), decklists.dorinthea], cards: cardData, scripts,
+      seed: 12_204, startPlayer: 0,
+    });
+    state.turn = 2;
+    replaceHand(state, []);
+    state.players[0]!.arsenal = [{ instanceId: state.nextInstanceId++, cardId: "SBA028", owner: 0 }];
+    const legal = legalIntents(state, 0);
+    expect(legal).toContainEqual(expect.objectContaining({ kind: "play-from-arsenal" }));
+    expect(chooseJarlIntent(inputFor(state, legal))).toEqual({ kind: "pass" });
+  });
+
+  it("plays Sprout Strength from arsenal ahead of an affordable hammer swing", () => {
+    const state = createGame({
+      decklists: [jarlDeck(), decklists.dorinthea], cards: cardData, scripts,
+      seed: 12_205, startPlayer: 0,
+    });
+    state.turn = 2;
+    replaceHand(state, ["AJV020"]);
+    const sprout = { instanceId: state.nextInstanceId++, cardId: "SBA028", owner: 0 };
+    state.players[0]!.arsenal = [sprout];
+    const chosen = chooseJarlIntent(inputFor(state));
+    expect(legalIntents(state, 0)).toContainEqual(chosen);
+    expect(chosen).toMatchObject({ kind: "play-from-arsenal", instanceId: sprout.instanceId });
+  });
+
   it("plays Plow Under after four Earth cards are banished", () => {
     const state = createGame({
       decklists: [jarlDeck(), decklists.dorinthea], cards: cardData, scripts,

@@ -1161,12 +1161,19 @@ describe("SAGE Ira policy", () => {
     });
 
     const paws = state.players[0]!.equipment.legs!.instanceId;
-    const activate = chooseIraIntent(input());
-    expect(activate).toMatchObject({ kind: "activate-ability", sourceInstanceId: paws });
-    state = advanceUntil(apply(state, 0, activate), (current) =>
-      current.priorityPlayer === 0 && current.stack.length === 0 &&
-      legalIntents(current, 0).some((intent) => intent.kind === "play-from-zone")
-    );
+    const shuko = state.players[0]!.equipment.arms!.instanceId;
+    const activated: number[] = [];
+    while (!activated.includes(paws)) {
+      const activate = chooseIraIntent(input());
+      expect(activate.kind).toBe("activate-ability");
+      if (activate.kind !== "activate-ability") return;
+      expect([paws, shuko]).toContain(activate.sourceInstanceId);
+      activated.push(activate.sourceInstanceId);
+      state = advanceUntil(apply(state, 0, activate), (current) =>
+        current.priorityPlayer === 0 && current.stack.length === 0
+      );
+      if (activated.length > 2) throw new Error("Ira did not make a Crouching Tiger");
+    }
 
     const tiger = chooseIraIntent(input());
     expect(tiger.kind).toBe("play-from-zone");
@@ -1181,6 +1188,41 @@ describe("SAGE Ira policy", () => {
     expect(combo.kind).toBe("play-card");
     if (combo.kind !== "play-card") return;
     expect(state.players[0]!.hand.find((card) => card.instanceId === combo.instanceId)?.cardId).toBe("MST182");
+  });
+
+  it("converts a Scar hand through its Crouching Tiger equipment instead of pitching Pouncing Qi to Edge", () => {
+    let state = createGame({
+      decklists: [sageIra(), kayo()],
+      cards: cardData, scripts, seed: 9303, startPlayer: 0,
+    });
+    state.turn = 3;
+    state.players[0]!.life = 18;
+    state.players[1]!.life = 20;
+    replaceHand(state, 0, ["MST182", "SBA019", "SBA019", "MST170"]);
+    state.players[1]!.hand = [];
+    const qi = state.players[0]!.hand[0]!.instanceId;
+    const played: string[] = [];
+    for (let step = 0; step < 80 && state.turn === 3; step++) {
+      const actor = (state.pendingDecision?.player ?? state.priorityPlayer) as 0 | 1;
+      const legal = legalIntents(state, actor);
+      const intent = actor === 0
+        ? chooseIraIntent({ seat: 0, view: projectStateFor(state, 0), legal, cards: cardData, state })
+        : legal.find((candidate) => candidate.kind === "defend" && candidate.instanceIds.length === 0) ??
+          legal.find((candidate) => candidate.kind === "pass")!;
+      if (actor === 0 && intent.kind === "activate-ability") {
+        expect(intent.pitchInstanceIds).not.toContain(qi);
+      }
+      if (actor === 0 && (intent.kind === "play-card" || intent.kind === "play-from-zone")) {
+        const card = [...state.players[0]!.hand, ...state.players[0]!.banish]
+          .find((candidate) => candidate.instanceId === intent.instanceId)!;
+        played.push(cardData[card.cardId]!.name);
+      }
+      state = apply(state, actor, intent);
+    }
+    expect(played.indexOf("Crouching Tiger")).toBeGreaterThanOrEqual(0);
+    expect(played.indexOf("Pouncing Qi")).toBe(played.indexOf("Crouching Tiger") + 1);
+    expect(played.filter((name) => name === "Scar for a Scar")).toHaveLength(2);
+    expect(state.players[1]!.life).toBeLessThanOrEqual(5);
   });
 
   it("only returns authoritative legal intents during a seeded Silver Age playout", () => {

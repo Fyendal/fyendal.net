@@ -37,8 +37,8 @@ import {
 } from "./turn-planner.js";
 import { BLOCK_USE_RATE } from "./card-ev.js";
 import { abilitySource, weaponCost, type HeroSolverRules, type SolverCardPatch } from "./card-model.js";
-import type { PendingEffect, SolverCard, SolverFlags, SolverView } from "./hand-solver.js";
-import { arsenalValuer, handDamage, handResponse, opportunityValuer } from "./hand-value.js";
+import type { PendingEffect, SolverCard, SolverFlags, SolverStep, SolverView } from "./hand-solver.js";
+import { arsenalValuer, handDamage, handResponse, opportunityValuer, solveHand } from "./hand-value.js";
 import { iraPresentation } from "./sideboard.js";
 
 const BLOSSOM_KEY = "whirling mist blossom|2";
@@ -666,6 +666,29 @@ function chooseIraReactiveIntent(input: BotPolicyInput): GameIntent {
   });
 }
 
+/** Root bonus for the hand solver's opening step, so the single searched root
+ * can be an equipment or Crouching Tiger line the heuristics rank below Edge. */
+const SOLVER_STEP_RANK = 1000;
+const SOLVER_PITCH_RANK = 50;
+
+/** Solves lazily: reactive windows never rank roots. */
+function solverStepRank(input: BotPolicyInput): (intent: GameIntent) => number {
+  let step: SolverStep | null | undefined;
+  return (intent) => {
+    step ??= solveHand(reserveCards(input), input, iraSolverRules).line
+      .find((candidate) => candidate.kind !== "react") ?? null;
+    if (!step) return 0;
+    const matches = step.kind === "play"
+      ? (intent.kind === "play-card" || intent.kind === "play-from-arsenal" || intent.kind === "play-from-zone") &&
+        intent.instanceId === step.instanceId
+      : intent.kind === "activate-ability" && intent.sourceInstanceId === step.instanceId;
+    if (!matches) return 0;
+    const pitched = pitchIds(intent);
+    const samePitch = pitched.length === step.pitchIds.length && pitched.every((id) => step!.pitchIds.includes(id));
+    return SOLVER_STEP_RANK + (samePitch ? SOLVER_PITCH_RANK : 0);
+  };
+}
+
 export interface IraTurnEvaluation {
   score: number;
   damage: number;
@@ -731,12 +754,13 @@ export function chooseIraIntentWithTrace(input: BotPolicyInput): IraIntentDecisi
       ),
     };
   }
+  const solverRank = solverStepRank(input);
   const plan = planTurn(input, {
     maxSearchNodes: IRA_MAX_SEARCH_NODES,
     maxTransitions: IRA_MAX_TRANSITIONS,
     maxRootCandidates: IRA_MAX_ROOT_CANDIDATES,
     chooseForced: (forced) => chooseIraReactiveIntent({ ...forced, state: undefined }),
-    rankCandidate: (intent, observed) => scorePlay(intent, observed, ownCards(observed)),
+    rankCandidate: (intent, observed) => solverRank(intent) + scorePlay(intent, observed, ownCards(observed)),
     evaluateEnd: evaluateIraTurn,
     evaluateHorizon(state, observed, root) {
       const base = evaluateIraTurn(state, observed, root, false);
