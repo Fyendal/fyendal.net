@@ -3,6 +3,7 @@ import {
   CARD_LONG_PRESS_MOVE_PX,
   cardLongPressMoved,
   mobileCardLongPressCardId,
+  snappedCardTap,
 } from "./mobileCardLongPress.js";
 
 describe("mobile card long press", () => {
@@ -56,5 +57,17 @@ describe("mobile card long press", () => {
     } as unknown as HTMLElement;
 
     expect(mobileCardLongPressCardId(target)).toBeNull();
+  });
+
+  it("rejects a tap the browser snapped onto a card from outside it", () => {
+    const board = { isConnected: true } as Element;
+    const art = { isConnected: true } as Element;
+    const card = { contains: (node: Element) => node === art } as Element;
+    const clickTarget = { closest: () => card } as unknown as Element;
+
+    expect(snappedCardTap(clickTarget, board)).toBe(true);
+    expect(snappedCardTap(clickTarget, art)).toBe(false);
+    expect(snappedCardTap(clickTarget, null)).toBe(false);
+    expect(snappedCardTap(clickTarget, { isConnected: false } as Element)).toBe(false);
   });
 });

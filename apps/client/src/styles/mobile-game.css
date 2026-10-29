@@ -1121,7 +1121,7 @@
 
   .overlay { padding-top: env(safe-area-inset-top); }
   .zone-overlay {
-    padding: 66px 10px calc(216px + env(safe-area-inset-bottom));
+    padding: 66px 10px calc(146px + env(safe-area-inset-bottom));
   }
   .overlay-panel.zone-overlay-panel {
     width: 100%;

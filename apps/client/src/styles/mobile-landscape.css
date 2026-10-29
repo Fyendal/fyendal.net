@@ -27,6 +27,13 @@
     --arena-square-gap: 5px;
     --arena-band-clearance: 0px;
     --arena-square-cap: 96px;
+    /* Touch cannot raise a resting card, so the whole arsenal row clears the hand. */
+    --arena-square-fit: calc(
+      (
+        var(--table-height) - 7px - 2 * var(--arena-square-pad) - 4 * var(--arena-square-gap)
+        - var(--opp-hand-band) - var(--ls-hand-visible) - 4px
+      ) / 6
+    );
     /* Nine tracks, eight gaps and the two spacers must also fit the width. */
     --arena-square-width-fit: calc(
       (100vw - var(--rail-w) - 16px - 8 * var(--mat-column-gap) - 12px) / 9
@@ -59,7 +66,15 @@
 
   .mat-half .mat-zone-label { font-size: 9px; letter-spacing: .75px; }
   .zone-pile-empty .mat-zone-label { font-size: 8px; }
-  .mat-half .c-count { font-size: 14px; }
+  /* Scales with the pile so the smallest squares keep the zone label clear. */
+  .mat-half .c-count {
+    top: 2px;
+    min-width: 2em;
+    height: 2em;
+    padding-inline: 3px;
+    font-size: min(14px, calc(var(--arena-square-size) * .27));
+  }
+  .mat-half .card-back:has(> .c-count) .c-backlabel { bottom: 1px; }
   .mat-half .c-ovl {
     --counter-box-size: 22px;
     --counter-icon-size: 15px;
@@ -84,6 +99,12 @@
   .under-pip-count { font-size: 9px; }
   .blood-debt-counter { right: -4px; bottom: -5px; width: 27px; height: 32px; font-size: 13px; }
   .blood-debt-counter > span { padding-top: 5px; }
+  /* A full-size arsenal card would spill into the hero row. */
+  .mat-half .zone-arsenal .card-zone {
+    width: calc(var(--arena-square-size) * .73);
+    height: var(--arena-square-size);
+  }
+  .mat-half .zone-arsenal .c-backlabel { display: none; }
 
   /* Hand strip under the arena, clear of the legs card. */
   .hand,

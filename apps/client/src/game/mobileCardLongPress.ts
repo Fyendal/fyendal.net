@@ -32,6 +32,13 @@ export function mobileCardLongPressCardId(target: HTMLElement): string | null {
   return target.closest<HTMLElement>("[data-cardid]")?.dataset.cardid ?? null;
 }
 
+/** Mobile browsers snap a tap that lands near a card onto it; a card only
+ * takes a tap whose touch began on it. */
+export function snappedCardTap(clickTarget: Element, pressTarget: Element | null): boolean {
+  const card = clickTarget.closest(".card");
+  return card !== null && pressTarget?.isConnected === true && !card.contains(pressTarget);
+}
+
 /** Delegated mobile card inspection gesture shared by every card surface. */
 export function useMobileCardLongPress(
   onLongPress: (cardId: string, target: HTMLElement) => void,
@@ -39,6 +46,7 @@ export function useMobileCardLongPress(
   const onLongPressRef = useRef(onLongPress);
   const activeRef = useRef<ActiveCardLongPress | null>(null);
   const suppressClickUntilRef = useRef(0);
+  const touchPressTargetRef = useRef<Element | null>(null);
 
   useEffect(() => {
     onLongPressRef.current = onLongPress;
@@ -50,6 +58,13 @@ export function useMobileCardLongPress(
     activeRef.current = null;
   }, []);
   useEffect(() => cancel, [cancel]);
+
+  // Capture sees the raw touch target even when a card surface stops the event.
+  const onPointerDownCapture = useCallback((event: React.PointerEvent) => {
+    touchPressTargetRef.current = event.pointerType === "touch" && event.target instanceof Element
+      ? event.target
+      : null;
+  }, []);
 
   const onPointerDown = useCallback((event: React.PointerEvent) => {
     if (
@@ -87,8 +102,15 @@ export function useMobileCardLongPress(
   }, [cancel]);
 
   const onClickCapture = useCallback((event: React.MouseEvent) => {
-    if (Date.now() >= suppressClickUntilRef.current) return;
-    suppressClickUntilRef.current = 0;
+    const pressTarget = touchPressTargetRef.current;
+    touchPressTargetRef.current = null;
+    // Keyboard activation (detail 0) has no touch behind it.
+    const snapped = event.detail > 0 && event.target instanceof Element
+      && snappedCardTap(event.target, pressTarget);
+    if (!snapped) {
+      if (Date.now() >= suppressClickUntilRef.current) return;
+      suppressClickUntilRef.current = 0;
+    }
     event.preventDefault();
     event.stopPropagation();
   }, []);
@@ -101,6 +123,7 @@ export function useMobileCardLongPress(
   }, []);
 
   return {
+    onPointerDownCapture,
     onPointerDown,
     onPointerMove,
     onPointerUp: cancel,

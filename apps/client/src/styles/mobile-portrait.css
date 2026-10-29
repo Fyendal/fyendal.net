@@ -27,7 +27,7 @@
     right: 0;
     bottom: 0;
     left: 0;
-    height: calc(max(8px, env(safe-area-inset-bottom)) + 216px);
+    height: calc(max(8px, env(safe-area-inset-bottom)) + 146px);
     pointer-events: none;
     background: linear-gradient(
       180deg,
@@ -165,11 +165,11 @@
 
   .board {
     padding-top: calc(54px + env(safe-area-inset-top));
-    padding-bottom: calc(max(8px, env(safe-area-inset-bottom)) + 220px);
+    padding-bottom: calc(max(8px, env(safe-area-inset-bottom)) + 150px);
   }
   #root:has(.table) {
     scroll-padding-top: calc(58px + env(safe-area-inset-top));
-    scroll-padding-bottom: calc(max(8px, env(safe-area-inset-bottom)) + 224px);
+    scroll-padding-bottom: calc(max(8px, env(safe-area-inset-bottom)) + 154px);
   }
   /* Always reserve the opponent-hand rail. Tying this padding to the first
      card back made draw-up resize the board underneath fixed motion flights. */
@@ -181,11 +181,19 @@
   }
   .opp-hand { top: calc(54px + env(safe-area-inset-top)); }
 
+  /* Resting cards tuck behind the bottom bar; selected or pitched ones rise clear. */
   .hand {
-    bottom: calc(max(8px, env(safe-area-inset-bottom)) + 72px);
+    --hand-tuck: 45px;
+    bottom: calc(64px + env(safe-area-inset-bottom) - 9px - var(--hand-tuck));
+    height: calc(144px + var(--hand-outline-clearance) + var(--hand-tuck));
+    padding-top: calc(9px + var(--hand-outline-clearance) + var(--hand-tuck));
   }
+  .hand .card-hand.card-selected,
+  .hand .card-hand.card-selected:hover,
+  .hand .card-hand.card-pitched,
+  .hand .card-hand.card-pitched:hover { transform: translateY(calc(-7px - var(--hand-tuck))); }
   .end-turn-pass-toast-mobile-hand {
-    bottom: calc(max(8px, env(safe-area-inset-bottom)) + 224px);
+    bottom: calc(max(8px, env(safe-area-inset-bottom)) + 154px);
   }
 
   .status-float {
@@ -287,11 +295,11 @@
 
   .decision-float,
   .idle-toast {
-    bottom: calc(max(8px, env(safe-area-inset-bottom)) + 224px) !important;
+    bottom: calc(max(8px, env(safe-area-inset-bottom)) + 154px) !important;
   }
   .mobile-game-alerts .toast,
   .mobile-game-alerts .winner {
-    bottom: calc(max(8px, env(safe-area-inset-bottom)) + 224px);
+    bottom: calc(max(8px, env(safe-area-inset-bottom)) + 154px);
   }
   .waiting:not(.waiting-spectating),
   .stack-float { top: calc(58px + env(safe-area-inset-top)) !important; }
@@ -304,6 +312,7 @@
     bottom: calc(max(8px, env(safe-area-inset-bottom)) + 72px);
   }
   #root:has(.replay-bar:not(.replay-bar-collapsed)) .hand {
+    --hand-tuck: 0px;
     bottom: calc(max(8px, env(safe-area-inset-bottom)) + 160px);
   }
   #root:has(.replay-bar:not(.replay-bar-collapsed)) .board {
@@ -325,7 +334,7 @@
   .hand-scroll-button,
   .mobile-hand-toggle {
     top: auto;
-    bottom: calc(max(8px, env(safe-area-inset-bottom)) + 216px);
+    bottom: calc(max(8px, env(safe-area-inset-bottom)) + 146px);
   }
   .mobile-hand-toggle[aria-expanded="false"] {
     top: auto;
