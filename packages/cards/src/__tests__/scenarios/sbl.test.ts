@@ -69,6 +69,26 @@ describe("SBL — Charge as an additional cost", () => {
     s.expectFinalAttack(4).expectAP(0, 1); // go again refunded the action point
   });
 
+  it.each(["take flight|1", "battlefield blitz|1"])(
+    "%s gains go again when you charge during the reaction step",
+    (attack) => {
+      const s = scenario({
+        seats: [
+          boltynSeat({ hand: [attack, "snatch|1", "roaring beam|2", YELLOW] }),
+          { hero: "dorinthea" },
+        ],
+      });
+      s.play(attack, { pitch: ["snatch|1"], settle: false });
+      if (attack.startsWith("take flight")) s.chooseOption("pass");
+      s.blockWith();
+      s.react("roaring beam|2");
+      s.chooseCard(YELLOW);
+      s.settle();
+      s.expectLog(`${attack.startsWith("take") ? "Take Flight" : "Battlefield Blitz"} has Go again`);
+      s.expectAP(0, 1);
+    },
+  );
+
   it("Bolt of Courage draws a card on hit when you've charged this turn", () => {
     const s = scenario({
       seats: [

@@ -354,9 +354,7 @@ function ritesOfLightning(): CardScript {
     arcaneDamageEffect: true,
     additionalCost: fusionAdditionalCost("lightning"),
     triggers: [attackArcaneHeroTrigger(1, isFused)],
-    onAttackDeclared(ctx) {
-      if (ctx.getFlag("player", "arcaneDamageDealtThisTurn") === true) ctx.grantGoAgain();
-    },
+    hasConditionalGoAgain: (ctx) => ctx.getFlag("player", "arcaneDamageDealtThisTurn") === true,
     onDamageDealt(ctx, _target, amount, arcane) {
       if (arcane && amount > 0) ctx.grantGoAgain();
     },

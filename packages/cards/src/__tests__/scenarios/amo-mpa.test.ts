@@ -758,5 +758,63 @@ describe("Armory Deck Mortimer and Mastery Pack Assassin spoilers", () => {
     expect(game.state.players[1]!.banish).toHaveLength(0);
     expect(boardNames(game, 0)).not.toContain("Silver");
   });
+
+  it("Tailored Targeting banishes when Flick Knives hits even if the attack is fully defended", () => {
+    const game = scenario({ seats: [
+      {
+        hero: "rhinar",
+        hand: [TAILORED],
+        weapons: [KUNAI],
+        equipment: { ...NO_EQUIPMENT, arms: "flick knives|0" },
+      },
+      {
+        hero: "dorinthea",
+        hand: ["wounding blow|3", "wounding blow|3"],
+        deck: ["raging onslaught|1", "wounding blow|3", "raging onslaught|2"],
+        weapons: [],
+        equipment: NO_EQUIPMENT,
+      },
+    ] });
+    const kunaiId = game.state.players[0]!.weapons[0]!.instanceId;
+
+    game.play(TAILORED).chooseName("Raging Onslaught").blockWith("wounding blow|3", "wounding blow|3")
+      .activate("flick knives|0")
+      .doRaw({ kind: "choose", optionId: String(kunaiId) })
+      .settle();
+
+    game.expectLife(1, 19);
+    expect(game.state.players[1]!.banish.map((card) => cardData[card.cardId]!.name)).toEqual([
+      "Raging Onslaught", "Wounding Blow",
+    ]);
+    expect(boardNames(game, 0).filter((name) => name === "Silver")).toHaveLength(1);
+  });
+
+  it("Tailored Targeting banishes once per hit when Flick Knives and the attack both hit", () => {
+    const game = scenario({ seats: [
+      {
+        hero: "rhinar",
+        hand: [TAILORED],
+        weapons: [KUNAI],
+        equipment: { ...NO_EQUIPMENT, arms: "flick knives|0" },
+      },
+      {
+        hero: "dorinthea",
+        deck: ["wounding blow|3", "wounding blow|3", "raging onslaught|2"],
+        weapons: [],
+        equipment: NO_EQUIPMENT,
+      },
+    ] });
+    const kunaiId = game.state.players[0]!.weapons[0]!.instanceId;
+
+    game.play(TAILORED).chooseName("Raging Onslaught").blockWith()
+      .activate("flick knives|0")
+      .doRaw({ kind: "choose", optionId: String(kunaiId) })
+      .settle();
+
+    game.expectLife(1, 15);
+    expect(game.state.players[1]!.banish.map((card) => cardData[card.cardId]!.name)).toEqual([
+      "Wounding Blow", "Wounding Blow",
+    ]);
+  });
 });
 

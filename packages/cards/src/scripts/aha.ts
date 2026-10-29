@@ -10,7 +10,13 @@ import {
   resourceAbility,
   yesNoPrompt,
 } from "./shared-helpers.js";
-import { addNextSharpenBonus, resolveSharpenFollowup, SHARPEN_FOLLOWUP, sharpenSword } from "./aha/warrior-sharpen.js";
+import {
+  addNextSharpenBonus,
+  resolveSharpenFollowup,
+  SHARPEN_FOLLOWUP,
+  SHARPEN_TOP_ATTACK_REACTION_HOOK,
+  sharpenSword,
+} from "./aha/warrior-sharpen.js";
 
 const FLURRY = "SBL036";
 
@@ -144,7 +150,7 @@ export const aha: Record<string, CardScript> = {
   },
   "reverent rerebrace|0": {
     onChoose(ctx, hook, option) {
-      if (hook === "rerebrace-honed-top") {
+      if (hook === SHARPEN_TOP_ATTACK_REACTION_HOOK) {
         if (option !== "no") ctx.putOnDeckTop(Number(option));
         return;
       }

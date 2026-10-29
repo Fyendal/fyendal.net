@@ -59,6 +59,15 @@ function activeAssassinAttack(ctx: ScriptCtx): number[] {
   return [link.attackingCard.instanceId];
 }
 
+function tailoredBanish(ctx: ScriptCtx): void {
+  const named = ctx.self.chosenName;
+  for (;;) {
+    const top = ctx.player(opponentSeat(ctx)).deck[0];
+    if (!top || !ctx.banish(top.instanceId)) return;
+    if (!named || !cardNamed(ctx, top, named)) return;
+  }
+}
+
 export const mpa: Record<string, CardScript> = {
   "phial of calamity|0": {
     triggers: [equipWithSilver(2)],
@@ -369,13 +378,9 @@ export const mpa: Record<string, CardScript> = {
       if (hook === "mpa-tailored-name") ctx.setChosenName(option);
     },
     canTriggerOnHit: (ctx) => ctx.link?.targetAllyId === undefined,
-    onHit(ctx) {
-      const named = ctx.self.chosenName;
-      for (;;) {
-        const top = ctx.player(opponentSeat(ctx)).deck[0];
-        if (!top || !ctx.banish(top.instanceId)) return;
-        if (!named || !cardNamed(ctx, top, named)) return;
-      }
-    },
+    onHit: tailoredBanish,
+    onFriendlyEffectHitCondition: (ctx, _source, targetSeat) =>
+      ctx.link?.attackingCard.instanceId === ctx.self.instanceId && targetSeat !== ctx.seat,
+    onFriendlyEffectHit: tailoredBanish,
   },
 };

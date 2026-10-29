@@ -550,9 +550,12 @@ function queueEffectHitTriggers(
     equipment: true,
     weapons: true,
   });
-  const observers = [...active, ...lingeringModifierSources(state, packet.sourceSeat).filter(
-    (candidate) => !active.some((source) => source.instanceId === candidate.instanceId),
-  )];
+  const link = currentLink(state);
+  // The active attack observes hits "this chain link" by its controller's other sources.
+  const attack = link?.attacker === packet.sourceSeat ? [link.attackingCard] : [];
+  const observers = [...active, ...lingeringModifierSources(state, packet.sourceSeat), ...attack].filter(
+    (candidate, index, all) => all.findIndex((source) => source.instanceId === candidate.instanceId) === index,
+  );
   for (const source of observers) {
     const observerScript = scriptOf(state, source.cardId, source);
     if (

@@ -12,7 +12,12 @@ import {
   resourceAbility,
   yesNoPrompt,
 } from "./shared-helpers.js";
-import { addNextSharpenBonus, SHARPEN_FOLLOWUP, sharpenSword } from "./aha/warrior-sharpen.js";
+import {
+  addNextSharpenBonus,
+  SHARPEN_FOLLOWUP,
+  SHARPEN_TOP_ATTACK_REACTION_HOOK,
+  sharpenSword,
+} from "./aha/warrior-sharpen.js";
 
 const BLADE_DANCE = "MPW134";
 const FLURRY = "MPW135";
@@ -440,7 +445,7 @@ export const mpw: Record<string, CardScript> = {
           threshold: 3,
           kind: SHARPEN_FOLLOWUP.TOP_ATTACK_REACTION,
         });
-      } else if (hook === "honed-top" && option !== "no") ctx.putOnDeckTop(Number(option));
+      } else if (hook === SHARPEN_TOP_ATTACK_REACTION_HOOK && option !== "no") ctx.putOnDeckTop(Number(option));
     },
   },
   "raise blades|1": {

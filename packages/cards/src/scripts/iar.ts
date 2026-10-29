@@ -1058,9 +1058,7 @@ function bloodfrenzyGloomblade(): CardScript {
   return bloodDebt(
     {
       ...usurp(),
-      onAttackDeclared(ctx) {
-        if (ctx.getFlag("player", "dealtDamageThisTurn") === true) ctx.grantGoAgain();
-      },
+      hasConditionalGoAgain: (ctx) => ctx.getFlag("player", "dealtDamageThisTurn") === true,
       canTriggerOnHit: selfHitsHero,
       onHit(ctx) {
         ctx.grantGoAgain();
@@ -2581,9 +2579,7 @@ export const iar: Record<string, CardScript> = {
         if (charged) ctx.setState("chargedPitch", ctx.cardColor(charged));
       }
     },
-    onAttackDeclared(ctx) {
-      if (ctx.getFlag("player", "chargedThisTurn") === true) ctx.grantGoAgain();
-    },
+    hasConditionalGoAgain: (ctx) => ctx.getFlag("player", "chargedThisTurn") === true,
     canTriggerOnHit: (ctx) => selfHits(ctx) && ctx.getFlag("player", "chargedThisTurn") === true,
     onHit(ctx) {
       ctx.createToken(COURAGE);

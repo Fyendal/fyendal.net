@@ -911,21 +911,9 @@ export const mon: Record<string, CardScript> = mergeSetScripts("MON", monHighRar
   "wartune herald|3": putAttackIntoSoulOnHit(),
 
   // ── Light Warrior / Light / Illusionist / Warrior ──────────────────────
-  "battlefield blitz|1": {
-    onAttackDeclared(ctx) {
-      if (chargedThisTurn(ctx)) ctx.grantGoAgain();
-    },
-  },
-  "battlefield blitz|2": {
-    onAttackDeclared(ctx) {
-      if (chargedThisTurn(ctx)) ctx.grantGoAgain();
-    },
-  },
-  "battlefield blitz|3": {
-    onAttackDeclared(ctx) {
-      if (chargedThisTurn(ctx)) ctx.grantGoAgain();
-    },
-  },
+  "battlefield blitz|1": { hasConditionalGoAgain: chargedThisTurn },
+  "battlefield blitz|2": { hasConditionalGoAgain: chargedThisTurn },
+  "battlefield blitz|3": { hasConditionalGoAgain: chargedThisTurn },
   "valiant thrust|1": { modifyAttack: (ctx) => (chargedThisTurn(ctx) ? 3 : 0) },
   "valiant thrust|3": { modifyAttack: (ctx) => (chargedThisTurn(ctx) ? 3 : 0) },
   "bolt of courage|3": chargeAttack({
@@ -946,11 +934,7 @@ export const mon: Record<string, CardScript> = mergeSetScripts("MON", monHighRar
   "express lightning|1": chargeAttack(),
   "express lightning|2": chargeAttack(),
   "express lightning|3": chargeAttack(),
-  "take flight|3": chargeAttack({
-    onAttackDeclared(ctx) {
-      if (chargedThisTurn(ctx)) ctx.grantGoAgain();
-    },
-  }),
+  "take flight|3": chargeAttack({ hasConditionalGoAgain: chargedThisTurn }),
   "courageous steelhand|2": {
     onPlay(ctx) {
       if (chargedThisTurn(ctx)) ctx.addModifier({ scope: "chain-link", attack: 2 });

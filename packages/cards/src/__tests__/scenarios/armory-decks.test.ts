@@ -1986,6 +1986,51 @@ describe("Armory Decks — rules regression coverage", () => {
     }));
   });
 
+  it("Honed for Honor puts the chosen attack reaction on top of the deck", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          weapons: ["zenith blade|0"],
+          hand: ["honed for honor|3"],
+          graveyard: ["swordmaster's shine|1"],
+          deck: ["snatch|1"],
+          resources: 1,
+          equipment: NO_EQUIPMENT,
+        },
+        { hero: "dorinthea", equipment: NO_EQUIPMENT },
+      ],
+    });
+    g.state.players[0]!.weapons[0]!.counters = { power: 2 };
+
+    g.play("honed for honor|3").chooseCard("swordmaster's shine|1");
+
+    expect(g.state.players[0]!.deck[0]!.cardId).toBe(printingId("swordmaster's shine|1"));
+    expect(g.state.players[0]!.graveyard.map((card) => card.cardId)).not.toContain(printingId("swordmaster's shine|1"));
+  });
+
+  it("Honed for Honor puts the chosen attack reaction on top after Reverent Rerebrace sharpens", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          weapons: ["zenith blade|0"],
+          hand: ["honed for honor|3"],
+          graveyard: ["swordmaster's shine|1"],
+          deck: ["snatch|1"],
+          resources: 1,
+          equipment: { ...NO_EQUIPMENT, arms: "reverent rerebrace|0" },
+        },
+        { hero: "dorinthea", equipment: NO_EQUIPMENT },
+      ],
+    });
+    g.state.players[0]!.weapons[0]!.counters = { power: 1 };
+
+    g.play("honed for honor|3").chooseOption("pay 1").chooseCard("swordmaster's shine|1");
+
+    expect(g.state.players[0]!.deck[0]!.cardId).toBe(printingId("swordmaster's shine|1"));
+  });
+
   it("Reverent Rerebrace replaces Sharpening Sparks and Zenith Blade gains go again", () => {
     const g = scenario({
       seats: [

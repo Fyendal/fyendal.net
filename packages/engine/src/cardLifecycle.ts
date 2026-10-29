@@ -404,9 +404,13 @@ export function settlePlayedCard(
     return;
   }
   if (entersArena(dataOf(state, card.cardId))) {
+    // CR 8.2.11c: an affliction enters the arena under an opponent's control.
+    const controller = (data.subtypes ?? []).includes("affliction")
+      ? state.players.find((candidate) => candidate.seat !== player.seat) ?? player
+      : player;
     stampEnteringLife(state, card);
-    player.board.push(card);
-    stampControlledName(state, player, card);
+    controller.board.push(card);
+    stampControlledName(state, controller, card);
     // CR 8.2.9b: entering a landmark clears every other landmark permanent.
     // Clearing is a zone move, not destruction.
     if ((data.subtypes ?? []).includes("landmark")) {
@@ -422,9 +426,9 @@ export function settlePlayedCard(
       }
     }
     logPublic(state, cardEntersArenaLogMessage(state, card.cardId));
-    runtime.events.runHook(state, player.seat, card, "onEnterArena", currentLink(state));
-    if (!offerCrankDecision(state, runtime, player, card, opts?.allowCrank !== false)) {
-      runtime.events.fireFriendlyEnterArena(state, player.seat, card);
+    runtime.events.runHook(state, controller.seat, card, "onEnterArena", currentLink(state));
+    if (!offerCrankDecision(state, runtime, controller, card, opts?.allowCrank !== false)) {
+      runtime.events.fireFriendlyEnterArena(state, controller.seat, card);
     }
   } else {
     runtime.commands.moveToGraveyard(state, card, "stack");

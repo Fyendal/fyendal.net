@@ -19,6 +19,9 @@ export const SHARPEN_FOLLOWUP = {
   DOMINATE: 9,
 } as const;
 
+/** Choice hook for the attack-reaction top-deck follow-up; every source of that follow-up must handle it. */
+export const SHARPEN_TOP_ATTACK_REACTION_HOOK = "sharpen-top-attack-reaction";
+
 export type SharpenFollowupKind = (typeof SHARPEN_FOLLOWUP)[keyof typeof SHARPEN_FOLLOWUP];
 
 export interface SharpenFollowup {
@@ -74,7 +77,7 @@ export function resolveSharpenFollowup(
         .graveyard.filter((card) => ctx.cardData(card.cardId).cardType === "attack-reaction");
       if (reactions.length) {
         ctx.requestCardChoice(
-          "rerebrace-honed-top",
+          SHARPEN_TOP_ATTACK_REACTION_HOOK,
           decisionPrompt("Put an attack reaction on top?", "card.aha.attackreaction.top", {
             optionMessages: commonOptionMessages("no"),
           }),

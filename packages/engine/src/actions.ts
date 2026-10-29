@@ -924,7 +924,7 @@ export function activateAbility(
       seat,
       card,
       isAlly ? "ally" : "weapon",
-      ability.goAgain || nextActionGoAgain,
+      ability.goAgain ? "inherent" : nextActionGoAgain,
       targetAllyId,
     );
     return undefined;

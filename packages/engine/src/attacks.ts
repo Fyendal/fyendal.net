@@ -252,8 +252,9 @@ export function activateAuraAttack(
   runtime.dispatchFlow("deferEventTriggers", state, "weapon-attack-activated", seat, state.nextInstanceId, card);
   const goAgain =
     marker.goAgain === true ||
-    (marker.goAgainWithPowerCounter === true && (card.counters?.power ?? 0) >= 1) ||
-    nextActionGoAgain;
+    (marker.goAgainWithPowerCounter === true && (card.counters?.power ?? 0) >= 1)
+      ? "inherent" as const
+      : nextActionGoAgain;
   declareAttack(state, runtime, seat, card, "weapon", goAgain, targetAllyId);
   return undefined;
 }
@@ -300,7 +301,7 @@ export function declareAttack(
   seat: number,
   card: CardInstance,
   cardType: "action" | "weapon" | "ally",
-  grantedGoAgain = false,
+  grantedGoAgain: boolean | "inherent" = false,
   targetAllyId?: number,
   fromArsenal = false,
   boosted = false,
@@ -324,7 +325,9 @@ export function declareAttack(
     flags: {
       ...(fromArsenal ? { fromArsenal: true } : {}),
       ...(boosted ? { boosted: true } : {}),
-      ...(grantedGoAgain ? { grantedGoAgainAtLayer: true } : {}),
+      ...(grantedGoAgain === "inherent"
+        ? { inherentGoAgainAtLayer: true }
+        : grantedGoAgain ? { grantedGoAgainAtLayer: true } : {}),
       ...(fromBanish ? { fromBanish: true } : {}),
       ...(fromOutsideHandOrArsenal ? { fromOutsideHandOrArsenal: true } : {}),
     },
@@ -349,7 +352,9 @@ export function beginAttackStep(state: GameStateInternal, runtime: EngineRuntime
   const cardType = link.attackCardType;
   const targetAllyId = link.targetAllyId;
   const grantedGoAgain = link.flags.grantedGoAgainAtLayer === true;
+  const inherentLayerGoAgain = link.flags.inherentGoAgainAtLayer === true;
   delete link.flags.grantedGoAgainAtLayer;
+  delete link.flags.inherentGoAgainAtLayer;
   const player = state.players[seat] as PlayerState;
   player.flags.attacksDeclaredThisTurn =
     (Number(player.flags.attacksDeclaredThisTurn) || 0) + 1;
@@ -369,6 +374,8 @@ export function beginAttackStep(state: GameStateInternal, runtime: EngineRuntime
   }
   // go again the attack is declared with (keyword / modifiers / ability-granted);
   // must be read before next-attack modifiers attach (they change scope)
+  const inherentGoAgain = !goAgainSuppressed(state, seat) &&
+    (inherentLayerGoAgain || instanceHasKeyword(state, card, "go again", { gained: false }));
   const innateGoAgain = !goAgainSuppressed(state, seat) &&
     (grantedGoAgain || attackGoAgain(state, card, cardType));
   // types granted to the card for this play ("the next card you play is
@@ -390,6 +397,7 @@ export function beginAttackStep(state: GameStateInternal, runtime: EngineRuntime
     (player.hero.scriptState ??= {}).nextAttackPowerPenalty = 0;
   }
   attachNextAttackModifiers(state, runtime, link);
+  if (inherentGoAgain) runtime.events.grantLinkGoAgain(state, link, true);
   if (
     innateGoAgain ||
     conditionalModifierGrantsGoAgain(state, link, computeAttack(state, runtime, link)) ||
@@ -819,7 +827,11 @@ function replaceAttackFromPlayerZone(
     transitionZone("chain", player.seat),
     { from: true },
   );
-  if (instanceHasKeyword(state, replacement, "go again")) runtime.events.grantLinkGoAgain(state, link);
+  if (instanceHasKeyword(state, replacement, "go again")) {
+    runtime.events.grantLinkGoAgain(
+      state, link, instanceHasKeyword(state, replacement, "go again", { gained: false }),
+    );
+  }
   if (!previousIsToken) {
     logPublic(
       state,

@@ -1189,6 +1189,8 @@ export interface CardScript {
   grantsSpellvoidToRunechants?: boolean;
   /** Non-attack action cards lose and cannot gain go again while active. */
   suppressesNonAttackActionGoAgain?: boolean;
+  /** Attacks this source's controller controls can't gain go again. */
+  attacksCannotGainGoAgain?: boolean;
   /** This card has a resolving effect that deals arcane damage. Used to bind
    *  "the next card you play with an arcane-damage effect gets +N" when the
    *  card is played, rather than when a later damage packet happens. */

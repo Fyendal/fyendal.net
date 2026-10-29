@@ -674,6 +674,59 @@ describe("UPR — rules regression coverage", () => {
     expect(yendurai.life).toBe(3);
     expect(yendurai.counters?.endurance).toBeUndefined();
   });
+
+  it("Hypothermia enters the opponent's arena and is destroyed in their end phase", () => {
+    const s = scenario({
+      seats: [
+        { hero: "rhinar", hand: ["hypothermia|3"], weapons: [] },
+        { hero: "dorinthea", weapons: [] },
+      ],
+    });
+    s.play("hypothermia|3")
+      .expectInZone(1, "hypothermia|3", "board")
+      .expectNotInZone(0, "hypothermia|3", "board");
+    expect(s.state.players[1]!.board.find((card) => card.cardId === printingId("hypothermia|3"))?.owner).toBe(0);
+    s.endTurn().expectInZone(1, "hypothermia|3", "board");
+    s.endTurn()
+      .expectNotInZone(1, "hypothermia|3", "board")
+      .expectInZone(0, "hypothermia|3", "graveyard");
+  });
+
+  it("Hypothermia stops its controller's attacks from gaining go again", () => {
+    const s = scenario({
+      seats: [
+        { hero: "rhinar", hand: ["hypothermia|3"], weapons: [] },
+        { hero: "dorinthea", arsenal: ["fervent forerunner|3"], weapons: [] },
+      ],
+    });
+    s.play("hypothermia|3").endTurn();
+    s.play("fervent forerunner|3", { fromArsenal: true, settle: false });
+    expect(s.state.chain.at(-1)?.goAgain).toBe(false);
+    s.blockWith().settle().expectAP(1, 0);
+  });
+
+  it("Hypothermia leaves printed go again intact", () => {
+    const s = scenario({
+      seats: [
+        { hero: "rhinar", hand: ["hypothermia|3"], weapons: [] },
+        { hero: "dorinthea", hand: ["head jab|1"], weapons: [] },
+      ],
+    });
+    s.play("hypothermia|3").endTurn();
+    s.play("head jab|1", { settle: false });
+    expect(s.state.chain.at(-1)?.goAgain).toBe(true);
+  });
+
+  it("Fervent Forerunner from arsenal still gains go again without Hypothermia", () => {
+    const s = scenario({
+      seats: [
+        { hero: "dorinthea", arsenal: ["fervent forerunner|3"], weapons: [] },
+        { hero: "rhinar", weapons: [] },
+      ],
+    });
+    s.play("fervent forerunner|3", { fromArsenal: true, settle: false });
+    expect(s.state.chain.at(-1)?.goAgain).toBe(true);
+  });
 });
 
 describe("UPR — look-at floats", () => {

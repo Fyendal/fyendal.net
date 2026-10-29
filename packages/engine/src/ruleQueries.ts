@@ -55,6 +55,12 @@ export function goAgainSuppressed(state: GameStateInternal, seat: number): boole
     Number(player.hero.scriptState?.goAgainSuppressedTurn ?? 0) === state.turn;
 }
 
+/** Attacks this seat controls can't gain go again; inherent go again still applies. */
+export function attacksCannotGainGoAgain(state: GameStateInternal, seat: number): boolean {
+  return controlledPermanents(state, seat, { faceDownEquipment: false })
+    .some((source) => scriptOf(state, source.cardId, source)?.attacksCannotGainGoAgain === true);
+}
+
 /** The attack can't gain go again, and loses any it would have. */
 export function linkGoAgainBlocked(state: GameStateInternal, link: ChainLinkState): boolean {
   return link.flags.attackAbilitiesSuppressed === true ||

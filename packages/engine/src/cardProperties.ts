@@ -155,7 +155,11 @@ export function hasKeyword(
 
 /** Effective keywords: printed, granted, granted-base, and sub-card material,
  * minus suppressed ones. */
-export function instanceKeywords(state: GameStateInternal, card: CardInstance): string[] {
+export function instanceKeywords(
+  state: GameStateInternal,
+  card: CardInstance,
+  opts?: { gained?: boolean },
+): string[] {
   const suppressed = new Set((card.suppressedKeywords ?? []).map((keyword) => keyword.trim().toLowerCase()));
   const materialKeywords = (card.subcards ?? []).flatMap((subcard) =>
     scriptOf(state, subcard.cardId, subcard)?.materialKeywords ?? []
@@ -166,7 +170,7 @@ export function instanceKeywords(state: GameStateInternal, card: CardInstance): 
   ].flatMap((cardId) => dataOf(state, cardId).keywords ?? []);
   return [
     ...(cardAbilitiesSuppressed(state, card) ? [] : state.cardsRef[card.cardId]?.keywords ?? []),
-    ...(card.grantedKeywords ?? []),
+    ...(opts?.gained === false ? [] : card.grantedKeywords ?? []),
     ...grantedBaseKeywords,
     ...materialKeywords,
   ].filter((keyword) => !suppressed.has(keyword.trim().toLowerCase()));
@@ -177,9 +181,10 @@ export function instanceHasKeyword(
   state: GameStateInternal,
   card: CardInstance,
   keyword: string,
+  opts?: { gained?: boolean },
 ): boolean {
   const normalized = keyword.trim().toLowerCase();
-  return instanceKeywords(state, card).some((candidate) => candidate.trim().toLowerCase() === normalized);
+  return instanceKeywords(state, card, opts).some((candidate) => candidate.trim().toLowerCase() === normalized);
 }
 
 /** The value of a numbered keyword such as "Ward 3" (3) or "Ward X" ("x"), or

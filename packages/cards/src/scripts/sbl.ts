@@ -322,16 +322,8 @@ export const sbl: Record<string, CardScript> = {
     },
   }),
 
-  "take flight|1": chargeAttack({
-    onAttackDeclared(ctx) {
-      if (chargedThisTurn(ctx)) ctx.grantGoAgain();
-    },
-  }),
-  "take flight|2": chargeAttack({
-    onAttackDeclared(ctx) {
-      if (chargedThisTurn(ctx)) ctx.grantGoAgain();
-    },
-  }),
+  "take flight|1": chargeAttack({ hasConditionalGoAgain: chargedThisTurn }),
+  "take flight|2": chargeAttack({ hasConditionalGoAgain: chargedThisTurn }),
 
   "v of the vanguard|2": {
     additionalCost(ctx) {

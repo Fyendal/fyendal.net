@@ -473,12 +473,7 @@ export const uprHighRarity: Record<string, CardScript> = {
     },
   },
   "hypothermia|3": {
-    onEnterArena(ctx) {
-      ctx.setPlayerFlag(opponentSeat(ctx), "cannotGainGoAgain", true);
-    },
-    onLeaveArena(ctx) {
-      ctx.setPlayerFlag(opponentSeat(ctx), "cannotGainGoAgain", false);
-    },
+    attacksCannotGainGoAgain: true,
     triggers: [{ event: "end-of-turn", label: "Destroy Hypothermia", effect: (ctx) => ctx.destroySelf() }],
   },
   "insidious chill|3": {
