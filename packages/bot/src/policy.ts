@@ -1,4 +1,13 @@
-import type { BotDecklists, CardData, CardView, GameIntent, GameView, OngoingEffectView } from "@fyendal/shared";
+import type {
+  BotDecklists,
+  CardData,
+  CardView,
+  ChainLinkView,
+  GameIntent,
+  GameView,
+  OngoingEffectView,
+  StackLayerView,
+} from "@fyendal/shared";
 import type { GameState } from "@fyendal/engine";
 import { requiredEquipmentStageIntent, unneededDefenseBoostIntent } from "./defense.js";
 import {
@@ -504,8 +513,10 @@ export function opponentDamageEffectOnStack(input: BotPolicyInput): boolean {
   return source !== undefined && /\bdeal(?:s)?\b[^.\n]{0,100}\bdamage\b/i.test(source.text);
 }
 
-export function visibleOpponentDamageAmount(input: BotPolicyInput): number | undefined {
-  const layer = input.view.stack[0];
+export function visibleOpponentDamageAmount(
+  input: BotPolicyInput,
+  layer: StackLayerView | undefined = input.view.stack[0],
+): number | undefined {
   if (!layer || layer.seat === input.seat) return undefined;
   const sourceText = layer.card ? input.cards[layer.card.cardId]?.text ?? "" : "";
   const match = /\b(\d+)\s+(?:arcane\s+|physical\s+)?damage\b/i.exec(`${layer.label}\n${sourceText}`);
@@ -946,6 +957,18 @@ function equipmentWearCost(card: CardView, input: BotPolicyInput): number {
   return defense > 0 ? 2 : 0;
 }
 
+/** Already Dead-style hits banish or destroy a defender, armor included. */
+function onHitRemovesDefender(link: ChainLinkView, attackText: string): boolean {
+  return [attackText, ...(link.onHitEffects ?? []).map((effect) => effect.text)].some((text) =>
+    /\bhits?\b[^.]*\b(?:banish|destroy)\b[^.]*\bdefending\b/i.test(text)
+  );
+}
+
+/** Losing armor outright costs at least what Blade Break wear does. */
+function removedEquipmentLoss(card: CardView, input: BotPolicyInput): number {
+  return Math.max(2, card.defense ?? input.cards[card.cardId]?.defense ?? 0);
+}
+
 function equipmentKeywords(card: CardView, input: BotPolicyInput): ReadonlySet<string> {
   return new Set((input.cards[card.cardId]?.keywords ?? []).map((keyword) => keyword.toLowerCase()));
 }
@@ -1097,6 +1120,8 @@ export interface DefenseCandidateContext {
   lethal: boolean;
   survives: boolean;
   stopsHit: boolean;
+  /** The landing hit banishes or destroys a defending card. */
+  removesDefenderOnHit: boolean;
   onHit: OnHitEvaluation;
 }
 
@@ -1576,6 +1601,7 @@ export function scoreDefenseIntentWithTrace(
   const survives = destroysAttack
     ? survivableLife > 0
     : Math.max(0, threatenedCombat - defense - plannedPrevention.amount) < survivableLife;
+  const removesDefenderOnHit = !stopsHit && incoming > 0 && onHitRemovesDefender(link, attackText);
   const candidate: DefenseCandidateContext = {
     input,
     intent,
@@ -1588,6 +1614,7 @@ export function scoreDefenseIntentWithTrace(
     lethal,
     survives,
     stopsHit,
+    removesDefenderOnHit,
     onHit,
   };
   // The defender's opening hand is replaced after turn one, so an offensive
@@ -1659,7 +1686,10 @@ export function scoreDefenseIntentWithTrace(
       onHit,
     };
   }
-  const equipmentCost = selectedEquipment.reduce(
+  const removedEquipmentCost = removesDefenderOnHit
+    ? Math.max(0, ...selectedEquipment.map((card) => removedEquipmentLoss(card, input)))
+    : 0;
+  const equipmentCost = removedEquipmentCost + selectedEquipment.reduce(
     (total, card) => total + (model.equipmentUseIsFree?.(card, input)
       ? 0
       : equipmentWearCost(card, input)) + weaponLockCost(card),

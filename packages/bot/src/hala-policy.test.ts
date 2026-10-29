@@ -1144,9 +1144,9 @@ describe("Hala policy", () => {
   });
 
   it.each([
-    ["Runechant", null, "Destroy Runechant: 1 arcane damage to the opposing hero"],
-    ["Flick Knives", { instanceId: 93_251, cardId: "OUT139", owner: 1 }, "Flick Knives"],
-  ] as const)("discards Shelter to prevent damage from %s", (_name, source, label) => {
+    ["two Runechants", null, "Destroy Runechant: 1 arcane damage to the opposing hero", 2],
+    ["Flick Knives", { instanceId: 93_251, cardId: "OUT139", owner: 1 }, "Flick Knives", undefined],
+  ] as const)("discards Shelter to prevent damage from %s", (_name, source, label, count) => {
     const state = createGame({
       decklists: [halaDeck(), decklists.dorinthea],
       cards: cardData,
@@ -1162,7 +1162,7 @@ describe("Hala policy", () => {
     view.pendingDecision = source
       ? { player: 0, kind: "defense-reaction", prompt: "Play a defense reaction or pass" }
       : { player: 0, kind: "priority-window", prompt: "Play an instant or pass" };
-    view.stack = [{ card: source, seat: 1, label, optional: false }];
+    view.stack = [{ card: source, seat: 1, label, optional: false, ...(count ? { count } : {}) }];
     const legal: GameIntent[] = [
       { kind: "activate-ability", sourceInstanceId: shelter.instanceId, pitchInstanceIds: [] },
       ...(source ? [{
@@ -1175,6 +1175,34 @@ describe("Hala policy", () => {
 
     expect(chooseHalaIntent({ seat: 0, view, legal, cards: cardData }))
       .toEqual({ kind: "activate-ability", sourceInstanceId: shelter.instanceId, pitchInstanceIds: [] });
+  });
+
+  it("keeps Shelter as a four-defense reaction against a single Runechant", () => {
+    const state = createGame({
+      decklists: [halaDeck(), decklists.dorinthea],
+      cards: cardData,
+      scripts,
+      seed: 9325,
+      startPlayer: 1,
+    });
+    replaceHand(state, 0, ["PEN321"]);
+    const shelter = state.players[0]!.hand[0]!;
+    const view = projectStateFor(state, 0);
+    view.phase = "layer";
+    view.priorityPlayer = 0;
+    view.pendingDecision = { player: 0, kind: "priority-window", prompt: "Play an instant or pass" };
+    view.stack = [{
+      card: null,
+      seat: 1,
+      label: "Destroy Runechant: 1 arcane damage to the opposing hero",
+      optional: false,
+    }];
+    const legal: GameIntent[] = [
+      { kind: "activate-ability", sourceInstanceId: shelter.instanceId, pitchInstanceIds: [] },
+      { kind: "pass" },
+    ];
+
+    expect(chooseHalaIntent({ seat: 0, view, legal, cards: cardData })).toEqual({ kind: "pass" });
   });
 
   it.each([false, true])(
@@ -2932,6 +2960,74 @@ describe("Hala policy", () => {
       expect(intent).toEqual({ kind: "stage-defenders", instanceIds: [dynamo.instanceId] });
     }
   });
+
+  it.each([
+    ["spends", "AOL002", "stage-defenders"],
+    ["preserves", "EVO236", "defend"],
+  ] as const)("%s Valiant Dynamo on a block that still lets %s hit", (_label, attackId, expectedKind) => {
+    const state = createGame({
+      decklists: [halaDeck(), decklists.dorinthea],
+      cards: cardData,
+      scripts,
+      seed: 9317,
+      startPlayer: 1,
+    });
+    state.turn = 2;
+    replaceHand(state, 0, ["MPW028", "HNT117", "MPW130", "MPW132"]);
+    const view = projectStateFor(state, 0);
+    const dynamo = view.players[0].equipment.legs!;
+    view.phase = "defend";
+    view.priorityPlayer = 0;
+    view.pendingDecision = { player: 0, kind: "defend", prompt: "Choose defenders" };
+    view.chain = [{
+      attackingCard: { instanceId: 90_518, cardId: attackId, owner: 1 },
+      defendingCards: [],
+      attackValue: 6,
+      defenseValue: 0,
+      damage: 6,
+      resolved: false,
+      reactions: [],
+    }];
+    const legal: GameIntent[] = [
+      { kind: "stage-defenders", instanceIds: [dynamo.instanceId] },
+      { kind: "defend", instanceIds: [] },
+    ];
+
+    // Already Dead banishes a defending card when it hits.
+    expect(chooseHalaIntent({ seat: 0, view, legal, cards: cardData }).kind).toBe(expectedKind);
+  });
+
+  it.each([
+    ["room 40E071: activates Zenith for the Flurry swing instead of spending And Again...", 3,
+      ["MPW030", "PEN056", "MPW103", "MPW028"], "plays And Again"],
+    ["room 3AB568: does not discard Shelter on its own turn", 2,
+      ["HVY209", "MPW105", "MPW028", "PEN321"], "activates Shelter from the Storm"],
+  ] as const)("%s", (_name, turn, hand, forbidden) => {
+    let state = createGame({
+      decklists: [halaDeck(), decklists.dorinthea],
+      cards: cardData,
+      scripts,
+      seed: 1,
+      startPlayer: 0,
+    });
+    state.turn = turn;
+    replaceHand(state, 0, hand);
+    replaceHand(state, 1, ["HVY209", "HVY209"]);
+    for (let step = 0; step < 120 && state.activePlayer === 0; step++) {
+      const actor = (state.pendingDecision?.player ?? state.priorityPlayer) as 0 | 1;
+      const legal = legalIntents(state, actor).filter((intent) => !intent.kind.endsWith("-draw"));
+      const intent = actor === 0
+        ? chooseHalaIntent({ seat: 0, view: projectStateFor(state, 0), legal, cards: cardData, state })
+        : state.pendingDecision?.kind === "defend"
+        ? { kind: "defend" as const, instanceIds: state.players[1]!.hand.map((card) => card.instanceId) }
+        : legal.find((candidate) => candidate.kind === "pass");
+      if (!intent) throw new Error(`no rollout intent for ${state.phase}`);
+      state = apply(state, actor, intent);
+    }
+    const log = state.log.map((entry) => entry.publicText ?? "");
+    expect(log.some((text) => text.includes(forbidden)), log.join("\n")).toBe(false);
+    expect(log.filter((text) => text.includes("attacks with Zenith Blade (6 power)"))).toHaveLength(2);
+  }, 20_000);
 
   it("never uses Ripple Away on a wager", () => {
     const state = createGame({

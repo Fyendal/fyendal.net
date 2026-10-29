@@ -169,11 +169,18 @@ function zenithCanAttackAgain(input: BotPolicyInput): boolean {
   const link = currentLink(input);
   if (!weapon || link?.attackingCard.instanceId !== weapon.instanceId) return false;
   if (input.view.turnFacts?.players[input.seat]?.weaponAttacksProhibited === true) return false;
-  const firstAttackGoAgain = weaponAttacksThisTurn(input) === 1 &&
+  return hasActionPointAfterCurrentLink(input) && !weapon.usedAbilityIndexes?.includes(0);
+}
+
+/** Hala holds an action point now or the open link will grant one. */
+function hasActionPointAfterCurrentLink(input: BotPolicyInput): boolean {
+  if (input.view.players[input.seat].actionPoints > 0) return true;
+  const link = currentLink(input);
+  if (!link || link.attackingCard.owner !== input.seat) return false;
+  const firstZenithGoAgain = link.attackingCard.instanceId === zenithBlade(input)?.instanceId &&
+    weaponAttacksThisTurn(input) === 1 &&
     Number(link.attackingCard.counters?.sharpenedTurn ?? 0) === input.view.turn;
-  const hasActionPoint = input.view.players[input.seat].actionPoints > 0 ||
-    link.goAgain === true || firstAttackGoAgain;
-  return hasActionPoint && !weapon.usedAbilityIndexes?.includes(0);
+  return link.goAgain === true || firstZenithGoAgain;
 }
 
 function reactionCreatesFlurry(data: CardData | undefined): boolean {
@@ -786,6 +793,23 @@ function halaCandidatePriority(intent: GameIntent, input: BotPolicyInput): numbe
   return score - pitchRoleCost(intent, input);
 }
 
+/** Shelter is otherwise a 4-block, so its discard is only for several 1-damage
+ * events (Runechants) or a ping whose hit depends on its damage (Flick Knives). */
+function shouldDiscardShelter(input: BotPolicyInput): boolean {
+  if (!opponentDamageEffectOnStack(input)) return false;
+  const opposing = input.view.stack.filter((layer) => layer.seat !== input.seat);
+  const pings = opposing.reduce((total, layer) =>
+    visibleOpponentDamageAmount(input, layer) === 1 ? total + (layer.count ?? 1) : total, 0);
+  return pings >= 2 || opposing.some((layer) =>
+    /\bif damage is dealt this way\b/i.test(input.cards[layer.card?.cardId ?? ""]?.text ?? "")
+  );
+}
+
+function wastesShelter(intent: GameIntent, input: BotPolicyInput): boolean {
+  const card = intent.kind === "activate-ability" ? sourceCardForIntent(intent, input) : undefined;
+  return !!card && key(input.cards[card.cardId]) === "shelter from the storm|1" && !shouldDiscardShelter(input);
+}
+
 /** Collapse payments with the same action and total pitch value. Fewer cards
  * win first (for example, one blue over yellow + red), then Hala's role cost
  * chooses among equivalent cards. Payments that leave a different amount of
@@ -811,10 +835,11 @@ function prepareHalaCandidates(
     ) bestByClass.set(paymentClass, intent);
   }
 
+  // Searching a wasted Shelter discard spends the budget other roots need.
+  const sufficient = [...bestByClass.values()].filter((intent) => !wastesShelter(intent, input));
   // Pitching a card the cost does not need only floats resources that a later
   // payment can pitch for on demand, so drop payments that strictly contain
   // another sufficient payment for the same action.
-  const sufficient = [...bestByClass.values()];
   let prepared = sufficient.filter((intent) => {
     const ids = pitchIds(intent);
     const action = JSON.stringify(actionWithoutPitch(intent));
@@ -1392,7 +1417,7 @@ function estimateHalaConversion(
     )) flurry = true;
 
     const desiredWeaponSwings = attacksMade > 0
-      ? (blade && !blade.usedAbilityIndexes?.includes(0) ? 1 : 0)
+      ? (blade && !blade.usedAbilityIndexes?.includes(0) && hasActionPointAfterCurrentLink(input) ? 1 : 0)
       : flurry
       ? 2
       : 1;
@@ -1567,7 +1592,7 @@ function scoreDefend(
       const selectedDynamo = candidate.chosen.some((card) =>
         key(candidate.input.cards[card.cardId]) === "valiant dynamo|0"
       );
-      return selectedDynamo && canRefreshValiantDynamo(candidate.input)
+      return selectedDynamo && !candidate.removesDefenderOnHit && canRefreshValiantDynamo(candidate.input)
         ? adjustValueBreakdown(value, {
           strategicAdjustment: value.strategicAdjustment + 6,
         })
@@ -1950,7 +1975,7 @@ function scorePlay(
     } else if (functional === "gleam of the blade|1") {
       score = hasFlurry(input) ? -20 : 58;
     } else if (functional === "shelter from the storm|1") {
-      score = opponentDamageEffectOnStack(input) ? 80 : -100;
+      score = shouldDiscardShelter(input) ? 80 : -100;
     } else if (functional === "paragon plate|0") {
       score = canUseExtraActionPoint(input) && me.resources === 0 ? 28 : -20;
     } else if (functional === "ripple away|3") {
