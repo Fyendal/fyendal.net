@@ -406,9 +406,12 @@ export function useHandReorder(
           y: event.clientY,
           grabOffset: event.clientX - rect.left,
           grabOffsetY: event.clientY - rect.top,
+          // A resting card tucked below the edge starts the play line where it
+          // shows, not at its untranslated slot.
           handTop: Math.max(
             event.currentTarget.getBoundingClientRect().top,
             handCardSlotTop(event.currentTarget, element),
+            rect.top,
           ),
           started: false,
           originalOrder: orderRef.current,
