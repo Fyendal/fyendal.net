@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { isTouchBoardViewport } from "./board/viewportQueries.js";
 
 /** Drag state for a floating window. Spread `dragProps` on the float's
  *  container; buttons and clickable cards inside are excluded so clicks still
@@ -32,7 +33,7 @@ export function useFloatDrag(opts?: {
   const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
     // Mobile floats are positioned as scrollable sheets. Let touch gestures
     // scroll their contents instead of capturing them as drag operations.
-    if (window.matchMedia("(max-width: 700px)").matches) return;
+    if (isTouchBoardViewport()) return;
     if ((e.target as HTMLElement).closest("button, .card-clickable, .decision-guidance-info")) return;
     const rect = e.currentTarget.getBoundingClientRect();
     drag.current = {

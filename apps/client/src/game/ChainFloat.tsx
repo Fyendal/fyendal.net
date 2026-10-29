@@ -9,6 +9,7 @@ import type {
   OnHitEffectView,
 } from "@fyendal/shared";
 import { cardData } from "@fyendal/cards/client";
+import { isTouchBoardViewport } from "./board/viewportQueries.js";
 import { CardFace } from "./Card.js";
 import { chainTimelineRevision } from "./chainTimeline.js";
 import type { FloatVisibilityController } from "./floatVisibility.js";
@@ -134,7 +135,7 @@ function OnHitBadge({
         aria-expanded={mobileOpen}
         title=""
         onClick={() => {
-          if (window.matchMedia("(max-width: 700px)").matches) setMobileOpen(true);
+          if (isTouchBoardViewport()) setMobileOpen(true);
         }}
       >
         <span className="chain-on-hit-label">{intl.formatMessage({ id: "game.chain.onHit" })}</span>
@@ -245,7 +246,7 @@ function AdditionalTargetsBadge({
         aria-haspopup="dialog"
         aria-expanded={mobileOpen}
         onClick={() => {
-          if (window.matchMedia("(max-width: 700px)").matches) setMobileOpen(true);
+          if (isTouchBoardViewport()) setMobileOpen(true);
         }}
       >
         {intl.formatMessage({ id: "game.chain.additionalTargets" }, { count: targets.length })}

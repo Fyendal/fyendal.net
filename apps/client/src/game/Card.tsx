@@ -51,9 +51,12 @@ export const CARD_PREVIEW_HEIGHT = 413;
 export const CARD_PREVIEW_WIDTH = Math.round(CARD_PREVIEW_HEIGHT * CARD_IMAGE_ASPECT_RATIO);
 
 /** Match Talishar's viewport-relative full-card preview. Small desktop windows
- * retain the established preview size. */
+ * retain the established preview size; short landscape windows fit it. */
 export function cardPreviewSize(viewportHeight: number): { width: number; height: number } {
-  const height = Math.max(CARD_PREVIEW_HEIGHT, Math.round(viewportHeight * 0.5));
+  const height = Math.max(
+    Math.min(CARD_PREVIEW_HEIGHT, viewportHeight - 16),
+    Math.round(viewportHeight * 0.5),
+  );
   return { width: Math.round(height * CARD_IMAGE_ASPECT_RATIO), height };
 }
 

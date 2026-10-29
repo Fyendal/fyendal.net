@@ -28992,6 +28992,42 @@
       "value": "Hide hand"
     }
   ],
+  "game.hand.opponentCount": [
+    {
+      "type": 0,
+      "value": "Opponent's hand: "
+    },
+    {
+      "type": 6,
+      "value": "count",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " card"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " cards"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    }
+  ],
   "game.hand.reorderHint": [
     {
       "type": 0,

@@ -2678,6 +2678,7 @@
   "game.hand.show": "Mostrar mão",
   "game.hand.showCount": "Mostrar mão, {count, plural, =0 {# cartas} one {# carta} other {# cartas}}",
   "game.hand.empty": "nenhuma carta na mão",
+  "game.hand.opponentCount": "Mão do oponente: {count, plural, =0 {# cartas} one {# carta} other {# cartas}}",
   "game.hand.scrollLeft": "Rolar a mão para a esquerda",
   "game.hand.scrollRight": "Rolar a mão para a direita",
   "game.hand.reorderHint": "Arraste para reordenar sua mão ou solte sobre a arena para jogar. Alt + seta para a esquerda ou direita reordena; Esc cancela o arraste.",

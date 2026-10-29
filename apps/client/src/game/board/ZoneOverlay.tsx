@@ -4,6 +4,7 @@ import { UiIcon } from "../../components/UiIcon.js";
 import { CardFace, InactiveZoneCard } from "../Card.js";
 import { CardSortToggle, sortCards, type CardSortOrder } from "../CardSort.js";
 import type { BoardOverlay } from "./BoardPrimitives.js";
+import { isTouchBoardViewport } from "./viewportQueries.js";
 
 const ZONE_SORT_OPTIONS: readonly CardSortOrder[] = ["zone", "pitch", "name"];
 
@@ -73,7 +74,7 @@ export function ZoneOverlay({
         <div
           className="overlay-cards zone-viewer-cards"
           onClick={(event) => {
-            if (!window.matchMedia("(max-width: 700px)").matches) return;
+            if (!isTouchBoardViewport()) return;
             const cardId = (event.target as HTMLElement)
               .closest<HTMLElement>("[data-cardid]")
               ?.dataset.cardid;

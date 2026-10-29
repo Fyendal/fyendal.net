@@ -95,7 +95,7 @@
   max-width: 100px;
   overflow-wrap: anywhere;
 }
-@media (max-width: 700px) {
+@media (max-width: 700px) and (orientation: portrait) {
   .table {
     --pitch-mobile-bottom: 260px;
     --pitch-mobile-top: 72px;

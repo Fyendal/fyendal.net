@@ -5,6 +5,7 @@ import { useMotionPreference } from "./motion/useMotionPreference.js";
 import type { MotionRect } from "./motion/motionGeometry.js";
 import { pitchFocusOrigin } from "./pitchFocusMotion.js";
 import type { PitchFocusSource } from "./pitchFocusSource.js";
+import { MOBILE_FLOAT_QUERY } from "./board/viewportQueries.js";
 
 export function PitchFocus({ source, seat, motionPreference, getStackFocusOrigin, getHandFocusOrigin }: {
   source: PitchFocusSource;
@@ -28,7 +29,7 @@ export function PitchFocus({ source, seat, motionPreference, getStackFocusOrigin
     const decision = table?.querySelector<HTMLElement>(".decision-float-pitch");
     if (!focusPosition || !decision) return;
     const alignMobileFocus = () => {
-      if (!window.matchMedia("(max-width: 700px)").matches) return;
+      if (!window.matchMedia(MOBILE_FLOAT_QUERY).matches) return;
       focusPosition.style.setProperty("--pitch-mobile-focus-top", `${decision.getBoundingClientRect().top + 12}px`);
     };
     alignMobileFocus();

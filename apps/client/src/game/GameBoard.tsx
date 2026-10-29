@@ -80,6 +80,7 @@ import { useMatSeam } from "./board/useMatSeam.js";
 import { resolvePlaymat, type PlaymatId } from "../playmats.js";
 import { PriorityArrivalFlash } from "./board/priorityArrival.js";
 import { useGameViewport } from "./board/useGameViewport.js";
+import { isTouchBoardViewport } from "./board/viewportQueries.js";
 import { useHudReserve } from "./board/useHudReserve.js";
 import { useFullscreen } from "../components/useFullscreen.js";
 import { useIdleVictoryPrompt } from "./board/useIdleVictoryPrompt.js";
@@ -301,8 +302,8 @@ export function GameBoard() {
   const inspectedStandingOrders = inspectedStandingOrderKey
     ? standingOrders.cards.get(inspectedStandingOrderKey)
     : undefined;
-  const squareCardsEnabled = cardDisplayPreference === "square"
-    && !mobileFloatViewport && !mobileLandscapeViewport && !compactBoard;
+  const squareCardsEnabled = (cardDisplayPreference === "square" || mobileLandscapeViewport)
+    && !mobileFloatViewport && !compactBoard;
   const presentedDefenderIds = screen === "replay" || spectating
     ? null
     : pendingDefenderStageIds;
@@ -1197,7 +1198,7 @@ export function GameBoard() {
   // Touch screens have no hover preview. Tapping an inert card or holding any
   // card opens the full-size sheet; a short tap on an actionable card acts.
   const onTableClick = (e: React.MouseEvent) => {
-    if (!window.matchMedia("(max-width: 700px)").matches) return;
+    if (!isTouchBoardViewport()) return;
     const target = e.target as HTMLElement;
     if (target.closest("button, .card-clickable, .overlay")) return;
     const card = target.closest<HTMLElement>("[data-cardid]");
@@ -1319,6 +1320,8 @@ export function GameBoard() {
         <div
           className={`opp-hand${view.phase === "game-over" || replaying ? " opp-hand-revealed" : ""}`}
           data-motion-zone={motionLocationKey({ kind: "hand", seat: opp.seat })}
+          role="group"
+          aria-label={intl.formatMessage({ id: "game.hand.opponentCount" }, { count: presentedOppHandCount })}
         >
           {view.phase === "game-over" || replaying
             ? opp.hand.map((card) => (
@@ -1346,6 +1349,7 @@ export function GameBoard() {
                 />
               ))}
           {presentedOppHandCount === 0 && <span className="muted">opponent has no cards in hand</span>}
+          <span className="opp-hand-count" aria-hidden="true">{presentedOppHandCount}</span>
         </div>
 
         {/* opponent half — mirrored vertically, same columns as yours */}

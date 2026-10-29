@@ -1,20 +1,24 @@
 import { useEffect, useLayoutEffect, useMemo, useState, type RefObject } from "react";
 import type { FloatVisibilityController } from "../floatVisibility.js";
 import { shouldUseCompactBoard, shouldUseCompactHud } from "./compactBoard.js";
+import {
+  MOBILE_FLOAT_QUERY,
+  PHONE_LANDSCAPE_QUERY,
+  TOUCH_LANDSCAPE_QUERY,
+} from "./viewportQueries.js";
 
-const MOBILE_LANDSCAPE_RAIL_QUERY =
-  "(min-width: 701px) and (orientation: landscape) and (pointer: coarse)";
-const MOBILE_FLOAT_QUERY = "(max-width: 700px)";
+const matches = (query: string) =>
+  typeof window !== "undefined" && window.matchMedia(query).matches;
 
 export function useGameViewport(boardRef: RefObject<HTMLDivElement | null>) {
   const [railCollapsed, setRailCollapsed] = useState(
-    () => typeof window !== "undefined" && window.matchMedia(MOBILE_LANDSCAPE_RAIL_QUERY).matches,
+    () => matches(TOUCH_LANDSCAPE_QUERY) || matches(PHONE_LANDSCAPE_QUERY),
   );
   const [mobileLandscapeViewport, setMobileLandscapeViewport] = useState(
-    () => typeof window !== "undefined" && window.matchMedia(MOBILE_LANDSCAPE_RAIL_QUERY).matches,
+    () => matches(PHONE_LANDSCAPE_QUERY),
   );
   const [mobileFloatViewport, setMobileFloatViewport] = useState(
-    () => typeof window !== "undefined" && window.matchMedia(MOBILE_FLOAT_QUERY).matches,
+    () => matches(MOBILE_FLOAT_QUERY),
   );
   const [compactDesktopViewport, setCompactDesktopViewport] = useState(false);
   const [compactHudViewport, setCompactHudViewport] = useState(false);
@@ -22,13 +26,18 @@ export function useGameViewport(boardRef: RefObject<HTMLDivElement | null>) {
   const [mobileCombatFloatsHidden, setMobileCombatFloatsHidden] = useState(false);
 
   useEffect(() => {
-    const mobileLandscape = window.matchMedia(MOBILE_LANDSCAPE_RAIL_QUERY);
-    const syncRailToViewport = (event: MediaQueryListEvent) => {
-      setRailCollapsed(event.matches);
-      setMobileLandscapeViewport(event.matches);
+    const touchLandscape = window.matchMedia(TOUCH_LANDSCAPE_QUERY);
+    const phoneLandscape = window.matchMedia(PHONE_LANDSCAPE_QUERY);
+    const syncRailToViewport = () => {
+      setRailCollapsed(touchLandscape.matches || phoneLandscape.matches);
+      setMobileLandscapeViewport(phoneLandscape.matches);
     };
-    mobileLandscape.addEventListener("change", syncRailToViewport);
-    return () => mobileLandscape.removeEventListener("change", syncRailToViewport);
+    touchLandscape.addEventListener("change", syncRailToViewport);
+    phoneLandscape.addEventListener("change", syncRailToViewport);
+    return () => {
+      touchLandscape.removeEventListener("change", syncRailToViewport);
+      phoneLandscape.removeEventListener("change", syncRailToViewport);
+    };
   }, []);
 
   useEffect(() => {

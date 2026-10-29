@@ -206,11 +206,11 @@ describe("PlayerHalf", () => {
     expect(html).toContain("https://content.fabrary.net/cards/SBA001.webp");
   });
 
-  it("keeps full portrait card art on a wide phone in landscape", () => {
+  it("uses square card art on a phone in landscape whatever the preference", () => {
     const html = renderPlayerHalf(player, true, undefined, undefined, "en", null, false, true);
 
-    expect(html).not.toContain("mat-square-board");
-    expect(html).not.toContain("card-board-square");
+    expect(html).toContain("mat-square-board");
+    expect(html).toContain("card-board-square");
   });
 
   it("uses full portrait cards in the compact seven-column desktop layout", () => {

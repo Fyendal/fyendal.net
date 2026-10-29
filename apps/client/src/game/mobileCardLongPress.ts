@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef } from "react";
+import { isTouchBoardViewport } from "./board/viewportQueries.js";
 
-export const MOBILE_CARD_INSPECT_QUERY = "(max-width: 700px) and (pointer: coarse)";
 export const CARD_LONG_PRESS_MS = 425;
 export const CARD_LONG_PRESS_MOVE_PX = 10;
 const CARD_CLICK_SUPPRESSION_MS = 750;
@@ -53,7 +53,7 @@ export function useMobileCardLongPress(
     if (
       event.pointerType !== "touch"
       || !event.isPrimary
-      || !window.matchMedia(MOBILE_CARD_INSPECT_QUERY).matches
+      || !isTouchBoardViewport()
     ) return;
     const target = event.target as HTMLElement;
     const cardId = mobileCardLongPressCardId(target);
@@ -93,7 +93,7 @@ export function useMobileCardLongPress(
 
   const onContextMenu = useCallback((event: React.MouseEvent) => {
     if (
-      window.matchMedia(MOBILE_CARD_INSPECT_QUERY).matches
+      isTouchBoardViewport()
       && (event.target as HTMLElement).closest("[data-cardid]")
     ) event.preventDefault();
   }, []);

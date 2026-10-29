@@ -29886,6 +29886,42 @@
       "value": "Ocultar mano"
     }
   ],
+  "game.hand.opponentCount": [
+    {
+      "type": 0,
+      "value": "Mano del oponente: "
+    },
+    {
+      "type": 6,
+      "value": "count",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " carta"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " cartas"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    }
+  ],
   "game.hand.reorderHint": [
     {
       "type": 0,

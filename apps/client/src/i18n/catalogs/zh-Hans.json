@@ -2678,6 +2678,7 @@
   "game.hand.show": "显示手牌",
   "game.hand.showCount": "显示手牌，共 {count} 张",
   "game.hand.empty": "手牌为空",
+  "game.hand.opponentCount": "对手手牌：{count} 张",
   "game.hand.scrollLeft": "向左滚动手牌",
   "game.hand.scrollRight": "向右滚动手牌",
   "game.hand.reorderHint": "拖动以调整手牌顺序，或在竞技场内松开以打出。Alt + 左右方向键调整顺序；Escape 取消拖动。",

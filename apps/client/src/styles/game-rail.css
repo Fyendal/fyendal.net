@@ -600,10 +600,10 @@
   .rail-right.rail-collapsed .rail-turn { display: none; }
 }
 
-/* A phone or small tablet in landscape can be wider than the mobile
-   breakpoint while still having very little vertical room. Keep the desktop
-   board topology, but shrink its cards and floating chrome to fit the height. */
-@media (min-width: 701px) and (max-height: 700px) and (orientation: landscape) {
+/* A small tablet or short laptop window in landscape keeps the desktop board
+   topology with smaller cards and chrome; phones (mobile-landscape.css) get
+   their own layout below 521px. */
+@media (min-width: 701px) and (min-height: 521px) and (max-height: 700px) and (orientation: landscape) {
   .table {
     --table-height: 100dvh;
     --hand-card-height: 149px;

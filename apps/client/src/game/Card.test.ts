@@ -162,6 +162,9 @@ describe("cardPreviewSize", () => {
     expect(cardPreviewSize(1440)).toEqual({ width: 516, height: 720 });
     expect(cardPreviewSize(2160)).toEqual({ width: 774, height: 1080 });
   });
+  it("fits a phone-landscape viewport", () => {
+    expect(cardPreviewSize(390)).toEqual({ width: 268, height: 374 });
+  });
 });
 
 describe("CardBack", () => {

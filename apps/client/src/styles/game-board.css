@@ -1087,6 +1087,7 @@
 }
 .opp-hand .card-back + .card-back { margin-left: clamp(-62px, -4.73vh, -35px); }
 .opp-hand .muted { align-self: flex-start; padding-top: 12px; }
+.opp-hand-count { display: none; }
 .opp-hand-revealed { pointer-events: auto; }
 .opp-hand-revealed .card-hand {
   width: clamp(68px, 9.45vh, 123px);

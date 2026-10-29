@@ -185,8 +185,9 @@ export function PlayerHalf({
     ? visibleDeckTop
     : undefined;
   const hero = heroCard(player);
-  const squareBoard = cardDisplayPreference === "square"
-    && !mobileFloatViewport && !mobileLandscapeViewport && !compactBoard;
+  // Phone landscape has no height for portrait rows; squares are forced.
+  const squareBoard = (cardDisplayPreference === "square" || mobileLandscapeViewport)
+    && !mobileFloatViewport && !compactBoard;
   const deckTopPlayable =
     presentedDeckTop !== undefined && interaction.legal.playableZones.get(presentedDeckTop.instanceId) === "deck";
   // Arena costs stay until the server removes them so their exit animates in place.

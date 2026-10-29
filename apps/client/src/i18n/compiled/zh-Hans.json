@@ -27881,6 +27881,20 @@
       "value": "收起手牌"
     }
   ],
+  "game.hand.opponentCount": [
+    {
+      "type": 0,
+      "value": "对手手牌："
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " 张"
+    }
+  ],
   "game.hand.reorderHint": [
     {
       "type": 0,

@@ -1,0 +1,352 @@
+/* ── phone landscape ─────────────────────────────────────────────────────
+   A phone held sideways, or any landscape window too short for the desktop
+   board. The instruments (names, life, hand count, action points, primary
+   action) share one column on the left, the square arena takes the remaining
+   width, and the hand rests along the bottom with its name bars showing. The
+   log opens as a drawer over the board instead of narrowing it. */
+
+@media (orientation: landscape) and (max-height: 520px), (orientation: landscape) and (max-width: 700px) {
+  .table {
+    --rail-w: 40px;
+    --table-height: 100dvh;
+    --ls-hud-col: 156px;
+    --ls-hand-visible: 64px;
+    --hand-card-height: 209px;
+    --hand-rest-offset: calc(var(--hand-card-height) - var(--ls-hand-visible));
+    --hand-selected-lift: 16px;
+    --opp-hand-band: 4px;
+    --mat-cx: calc(var(--ls-hud-col) + (100vw - var(--rail-w) - var(--ls-hud-col)) / 2);
+    --mat-max-width: calc(var(--table-height) * 16 / 9);
+    grid-template-columns: 1fr var(--rail-w);
+  }
+  .table:has(.mat-square-board) {
+    --arena-square-pad: 4px;
+    --arena-square-gap: 5px;
+    --arena-band-clearance: 0px;
+    --arena-square-cap: 96px;
+    /* Nine tracks, eight gaps and the two spacers must also fit the width. */
+    --arena-square-width-fit: calc(
+      (100vw - var(--rail-w) - var(--ls-hud-col) - 16px - 8 * var(--mat-column-gap) - 12px) / 9
+    );
+    --arena-square-size: max(
+      42px,
+      min(var(--arena-square-cap), var(--arena-square-fit), var(--arena-square-width-fit))
+    );
+  }
+  .mat-half.mat-square-board { --mat-column-gap: 5px; }
+  /* The mat keeps its 16:9 cap, centred in the arena region beside the
+     column; its painting and priority light bleed the 8px board padding. */
+  .board { padding: 0 8px 0 calc(var(--ls-hud-col) + 8px); }
+  .mat-half {
+    width: 100%;
+    max-width: var(--mat-max-width);
+    margin-inline: auto;
+    border-image-outset: 0 8px;
+  }
+  .playmat-art {
+    right: 0;
+    left: var(--ls-hud-col);
+    max-width: calc(var(--mat-max-width) + 16px);
+    margin-inline: auto;
+  }
+  .mat-divider { margin-inline: calc(-1 * var(--ls-hud-col) - 8px) -8px; }
+  .mat-divider-center { left: calc(var(--ls-hud-col) + 8px); right: 8px; }
+
+  .mat-half .mat-zone-label { font-size: 9px; letter-spacing: .75px; }
+  .zone-pile-empty .mat-zone-label { font-size: 8px; }
+  .mat-half .c-count { font-size: 14px; }
+  .mat-half .c-ovl {
+    --counter-box-size: 22px;
+    --counter-icon-size: 15px;
+    --counter-number-size: 10px;
+  }
+  .board-card-count {
+    top: 1px;
+    right: 1px;
+    min-width: 18px;
+    height: 18px;
+    padding-inline: 3px;
+    border-width: 1px;
+    font-size: 10px;
+  }
+  .pitch-pip { width: 24px; height: 24px; font-size: 12px; }
+  .pile-pip { width: 22px; height: 22px; font-size: 11px; }
+  .soul-pip,
+  .bound-pip,
+  .under-pip { top: -4px; right: -4px; }
+  .soul-pip-count,
+  .bound-pip-count { right: -4px; bottom: -4px; min-width: 15px; height: 15px; padding-inline: 3px; font-size: 9px; }
+  .under-pip-count { font-size: 9px; }
+  .blood-debt-counter { right: -4px; bottom: -5px; width: 27px; height: 32px; font-size: 13px; }
+  .blood-debt-counter > span { padding-top: 5px; }
+
+  /* Hand strip under the arena, clear of the legs card. */
+  .hand,
+  .table:has(.mat-square-board) .hand {
+    right: 8px;
+    left: calc(var(--ls-hud-col) + 8px);
+    gap: 8px;
+    padding-left: calc(var(--arena-square-size) + 10px);
+  }
+  .hand .card-hand {
+    width: calc(var(--hand-card-height) * .7165);
+    height: var(--hand-card-height);
+  }
+  .hand .card-hand:hover { transform: none; }
+  .hand-scroll-button {
+    bottom: 6px;
+    min-width: 44px;
+    min-height: 56px;
+    font-size: 28px;
+  }
+  .decision-float { bottom: calc(var(--ls-hand-visible) + 10px); }
+  .decision-cards .card-hand { width: 72px; height: 99px; }
+  .decision-cards { gap: 10px; padding: 8px; }
+  .decision-cards .card-selected::before { top: 4px; right: 4px; width: 18px; height: 18px; font-size: 11px; }
+  .decision-optcard button { min-width: 72px; }
+
+  /* Instrument column: names, opponent life and hand at the top, our HUD at
+     the bottom. Every chip shares the nameplate's chrome. */
+  .player-nameplate {
+    height: 28px;
+    max-width: calc(var(--ls-hud-col) - 16px);
+    padding: 3px 8px;
+    font-size: 12px;
+  }
+  .player-nameplate-badge { width: 18px; height: 18px; }
+  .player-nameplate:has(.nameplate-actions) { padding: 1px 1px 1px 8px; }
+  .player-nameplate-opponent { top: 6px; left: 8px; }
+  .player-nameplate-self { bottom: 6px; left: 8px; }
+
+  .opp-hand {
+    position: fixed;
+    top: 38px;
+    right: auto;
+    left: 88px;
+    z-index: 20;
+    width: calc(var(--ls-hud-col) - 96px);
+    height: 30px;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 0;
+    padding: 0 6px 0 8px;
+    overflow: hidden;
+    border: 1px solid #73582f99;
+    border-radius: 4px;
+    background: #140d07e8;
+    box-shadow: 0 2px 10px #0008;
+  }
+  .opp-hand .card-back,
+  .opp-hand-revealed .card-hand { width: 14px; height: 20px; border-radius: 2px; }
+  .opp-hand .card-back + .card-back,
+  .opp-hand-revealed .card-hand + .card-hand { margin-left: -9px; }
+  .opp-hand-revealed .card-hand { transform: none; }
+  .opp-hand .muted { display: none; }
+  .opp-hand:has(.muted)::before {
+    content: "";
+    width: 14px;
+    height: 20px;
+    border: 1px dashed #b8933f66;
+    border-radius: 2px;
+  }
+  .opp-hand-count {
+    display: block;
+    order: -1;
+    margin-right: 7px;
+    color: #e6dcc6;
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .status-float {
+    right: auto !important;
+    bottom: 40px !important;
+    left: 8px !important;
+    top: auto !important;
+    transform: none !important;
+    display: grid;
+    width: calc(var(--ls-hud-col) - 16px);
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      "life life"
+      "ap res"
+      "pass pass";
+    align-items: center;
+    gap: 6px;
+    padding: 6px 8px 8px;
+    border-color: #73582f99;
+    border-radius: 4px;
+    box-shadow: 0 2px 10px #0008;
+  }
+  .status-float .life-me { grid-area: life; }
+  .status-float .ap-pip { grid-area: ap; justify-self: start; }
+  .status-float .hud-resources { grid-area: res; }
+  .status-float > .btn-pass { grid-area: pass; }
+  /* The opponent's life sits with their name; fixed children leave the HUD box. */
+  .status-float .life-opp {
+    position: fixed;
+    top: 38px;
+    left: 8px;
+    box-sizing: border-box;
+    width: 76px;
+    flex-direction: row-reverse;
+    justify-content: flex-end;
+    padding: 2px 9px 2px 3px;
+    border: 1px solid #73582f99;
+    border-radius: 4px;
+    background: #140d07e8;
+    box-shadow: 0 2px 10px #0008;
+  }
+  .status-float .life { gap: 7px; font-size: 20px; }
+  .status-float .life-impact .ico { display: none; }
+  .status-float .life-hero-frame { width: 26px; height: 26px; }
+  .status-float .life-change-pop { font-size: 15px; }
+  .status-float .ap-pip { padding: 3px 7px; font-size: 12px; }
+  .status-float .ap-count { display: inline-flex; align-items: baseline; gap: 5px; }
+  .status-float .ap-abbr {
+    color: #cbbd9d;
+    font-family: var(--font-display);
+    font-size: 11px;
+    letter-spacing: .08em;
+  }
+  .status-float .ap-count strong { color: #ffd479; }
+  .status-float .hud-resources {
+    display: inline-flex;
+    align-items: center;
+    justify-self: end;
+    padding: 0 2px;
+    line-height: 1;
+  }
+  .status-float .hud-resources-count {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    color: #ff8a5c;
+    font-size: 15px;
+    font-weight: 700;
+  }
+  .status-float .hud-resources-count::before {
+    content: "";
+    width: 14px;
+    height: 14px;
+    background: url("/icons/resource.png") center / cover no-repeat;
+  }
+  .status-float .hud-resources-empty .hud-resources-count { color: #8a7b66; }
+  .status-float .hud-resources-empty .hud-resources-count::before { filter: grayscale(1) brightness(.6); }
+  .status-float > .btn-pass {
+    width: 100%;
+    min-height: 34px;
+    justify-content: center;
+    padding: 5px 10px;
+    font-size: 13px;
+  }
+  .status-float .shortcut-key { display: none; }
+
+  /* The stack reads in the column's free middle, above the HUD. */
+  .stack-float {
+    top: 74px;
+    left: 8px;
+    transform: none;
+    max-width: calc(100vw - var(--rail-w) - 16px);
+    max-height: calc(100dvh - 74px - 40px - 118px);
+    gap: 4px;
+    padding: 0 8px 6px;
+    overflow-y: auto;
+    border-color: #73582f99;
+    border-radius: 4px;
+  }
+  .stack-float .chain-float-bar { gap: 8px; padding: 5px 0; }
+  .stack-title { font-size: 12px; }
+  .stack-context { margin-top: -3px; font-size: 9px; }
+  .stack-layers { gap: 6px; padding: 2px; }
+  .stack-layer .card-zone,
+  .stack-layer .card-back,
+  .stack-layer .blood-debt-stack-tile { width: 52px; height: 72px; }
+  .stack-layer:has(.card-tapped) { width: 72px; }
+  .stack-label { max-width: 72px; font-size: 10px; }
+
+  .chain-float {
+    top: 6px;
+    transform: translateX(-50%);
+    max-width: calc(100vw - var(--rail-w) - var(--ls-hud-col) - 12px);
+    max-height: calc(100dvh - var(--ls-hand-visible) - 12px);
+    gap: 5px;
+    padding: 0 10px 8px;
+    overflow: hidden;
+  }
+  .chain-body { min-height: 0; flex: 1 1 auto; overflow-y: auto; }
+  .chain-group .card-zone,
+  .chain-group .card-hand,
+  .chain-empty-slot { width: 56px; height: 78px; }
+  /* The always-visible touch emote button stays under the chain and stack. */
+  .hero-emote-button { z-index: 5; }
+
+  /* Turn timing fits the seam on one line. */
+  .mat-divider-center > .priority-float {
+    flex-direction: row;
+    gap: 10px;
+    min-width: 0;
+    max-height: none;
+    padding: 3px 12px;
+    white-space: nowrap;
+  }
+  .priority-turn { font-size: 12px; letter-spacing: .05em; }
+  .priority-timing { font-size: 10px; letter-spacing: .06em; }
+  .table:has(.chain-float) .mat-divider-center > .priority-float { display: none; }
+  .waiting { top: 6px; padding: 4px 12px; font-size: 12px; letter-spacing: 1.5px; }
+
+  /* The log is a drawer over the board; the collapsed strip keeps its width. */
+  .rail-right { gap: 6px; padding: 8px; }
+  .rail-right.rail-collapsed {
+    align-items: center;
+    padding-inline: 7px;
+    overflow: hidden;
+  }
+  .rail-right.rail-collapsed > :not(.rail-header):not(.overlay) { display: none; }
+  .rail-right.rail-collapsed .rail-header { flex-direction: column; }
+  .rail-right.rail-collapsed .rail-turn { display: none; }
+  .rail-right:not(.rail-collapsed) {
+    position: fixed;
+    inset: 0 0 0 auto;
+    z-index: 60;
+    width: min(340px, 55vw);
+    box-shadow: -10px 0 30px #000a;
+  }
+  .rail-actions { margin-top: 2px; }
+  .log { min-height: 70px; }
+  /* Social lives in the collapsed strip, under the rail toggles. */
+  #root:has(.table) .social-dock,
+  #root:has(.table.rail-is-collapsed) .social-dock {
+    --social-bubble-size: 34px;
+    right: 3px;
+    bottom: 8px;
+    left: auto;
+  }
+  #root:has(.table) .social-panel { right: 0; left: auto; }
+
+  /* Card inspection keeps the whole card on screen. */
+  .mobile-card-inspect-sheet {
+    max-height: calc(100dvh - 20px);
+    padding: 10px 16px 14px;
+  }
+  .mobile-card-inspect-sheet .modal-surface-header { margin: -10px -16px 10px; padding: 8px 12px; }
+  .mobile-card-inspect-sheet .modal-surface-header h2 { font-size: 18px; }
+  .mobile-card-inspect-sheet .card-preview-frame {
+    width: auto;
+    height: min(413px, calc(100dvh - 110px));
+    margin-inline: auto;
+    aspect-ratio: 300 / 413;
+  }
+}
+
+/* Narrow phones: a slimmer column, with the hand count under the life chip. */
+@media (orientation: landscape) and (max-width: 700px) {
+  .table { --ls-hud-col: 132px; }
+  .opp-hand { top: 72px; left: 8px; width: calc(var(--ls-hud-col) - 16px); }
+  .stack-float {
+    top: 106px;
+    max-height: calc(100dvh - 106px - 40px - 118px);
+  }
+}

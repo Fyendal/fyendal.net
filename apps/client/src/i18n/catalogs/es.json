@@ -2678,6 +2678,7 @@
   "game.hand.show": "Mostrar mano",
   "game.hand.showCount": "Mostrar mano, {count, plural, one {# carta} other {# cartas}}",
   "game.hand.empty": "no hay cartas en la mano",
+  "game.hand.opponentCount": "Mano del oponente: {count, plural, one {# carta} other {# cartas}}",
   "game.hand.scrollLeft": "Desplazar la mano a la izquierda",
   "game.hand.scrollRight": "Desplazar la mano a la derecha",
   "game.hand.reorderHint": "Arrastra para reordenar tu mano o suelta sobre la arena para jugar. Alt + flecha izquierda o derecha reordena; Esc cancela el arrastre.",
