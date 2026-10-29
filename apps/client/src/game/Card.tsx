@@ -222,6 +222,7 @@ export function CardFace({
   handReorderHint,
   focusSourceHidden,
   squareArt,
+  style,
 }: {
   card: CardView;
   size?: "hand" | "zone" | "preview";
@@ -277,6 +278,7 @@ export function CardFace({
   focusSourceHidden?: boolean;
   /** Square presentation for cards in the desktop arena. */
   squareArt?: boolean;
+  style?: CSSProperties;
 }) {
   const squarePresentationEnabled = useContext(SquareCardPresentationContext);
   const cardArt = useContext(CardArtContext);
@@ -380,6 +382,7 @@ export function CardFace({
       aria-description={!onClick ? handReorderHint : undefined}
       aria-keyshortcuts={handReorderHint ? "Alt+ArrowLeft Alt+ArrowRight" : undefined}
       onClick={onClick}
+      style={style}
     >
       {onClick ? (
         <button
@@ -568,6 +571,7 @@ export function CardBack({
   onClick,
   ariaLabel,
   className,
+  style,
 }: {
   count?: number;
   /** Visible label over the back; an empty label shows the plain back. */
@@ -582,6 +586,7 @@ export function CardBack({
   ariaLabel?: string;
   /** Contextual state classes such as decision highlight and affiliation. */
   className?: string;
+  style?: CSSProperties;
 }) {
   const squarePresentationEnabled = useContext(SquareCardPresentationContext);
   const squareCard = size === "zone" && (square ?? squarePresentationEnabled);
@@ -597,6 +602,7 @@ export function CardBack({
       ].filter(Boolean).join(" ")}
       data-motion-card={motionKey}
       data-motion-zone-anchor={motionZoneAnchor}
+      style={style}
     >
       {onClick ? (
         <button

@@ -1,5 +1,8 @@
 export const HAND_REORDER_DURATION_MS = 220;
 export const HAND_MOTION_EASING = "cubic-bezier(0.22, 0.8, 0.25, 1)";
+/** A touch hold this long picks the card up without waiting for movement;
+ * shorter presses stay taps. */
+export const HAND_TOUCH_HOLD_MS = 300;
 
 /** Layout slots stay authoritative while their presentations animate. */
 export function handCardSlotLeft(
@@ -15,9 +18,19 @@ export function handCardSlotTop(hand: HTMLElement, card: HTMLElement): number {
   return hand.getBoundingClientRect().top + card.offsetTop - hand.scrollTop;
 }
 
+/** Top-left of the card's untilted box; a fanned card's bounding rect is
+ * wider than the card, but its centre stays put. */
+export function handCardOrigin(card: HTMLElement): { left: number; top: number } {
+  const rect = card.getBoundingClientRect();
+  return {
+    left: rect.left + (rect.width - card.offsetWidth) / 2,
+    top: rect.top + (rect.height - card.offsetHeight) / 2,
+  };
+}
+
 export function captureHandPositions(hand: HTMLElement): ReadonlyMap<number, number> {
   return new Map([...hand.querySelectorAll<HTMLElement>("[data-hand-instance-id]")]
-    .map((card) => [Number(card.dataset.handInstanceId), card.getBoundingClientRect().left]));
+    .map((card) => [Number(card.dataset.handInstanceId), handCardOrigin(card).left]));
 }
 
 export function cancelHandReorderAnimations(animations: Map<HTMLElement, Animation>): void {

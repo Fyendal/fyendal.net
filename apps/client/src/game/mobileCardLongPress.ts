@@ -27,6 +27,8 @@ export function cardLongPressMoved(
  * inspectable by long press. */
 export function mobileCardLongPressCardId(target: HTMLElement): string | null {
   if (target.closest(".overlay, .modal-surface-backdrop")) return null;
+  // Holding a hand card picks it up for dragging instead.
+  if (target.closest("#player-hand")) return null;
   return target.closest<HTMLElement>("[data-cardid]")?.dataset.cardid ?? null;
 }
 

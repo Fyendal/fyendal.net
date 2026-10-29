@@ -9,14 +9,20 @@ import {
   HAND_REORDER_DURATION_MS,
 } from "./handMotion.js";
 
-function card(id: number, slot: number, visualLeft: number) {
+function card(id: number, slot: number, visualLeft: number, tiltSpread = 0) {
   const animation = { cancel: vi.fn() };
   const animate = vi.fn(() => animation);
   const element = {
     dataset: { handInstanceId: String(id) },
     offsetLeft: slot,
     offsetWidth: 90,
-    getBoundingClientRect: () => ({ left: visualLeft }),
+    offsetHeight: 124,
+    getBoundingClientRect: () => ({
+      left: visualLeft - tiltSpread,
+      top: 0,
+      width: 90 + 2 * tiltSpread,
+      height: 124,
+    }),
     animate,
   } as unknown as HTMLElement;
   return { element, animate, animation };
@@ -69,6 +75,11 @@ describe("hand reorder motion", () => {
     expect(moving.animate).toHaveBeenCalledWith([
       { translate: "-70px 0px" }, { translate: "0px 0px" },
     ], expect.anything());
+  });
+
+  it("measures a fanned card from its untilted box", () => {
+    const tilted = card(3, 100, 100, 12);
+    expect(captureHandPositions(hand([tilted.element])).get(3)).toBe(100);
   });
 
   it("cancels motion and uses immediate slots when reduced motion is enabled", () => {

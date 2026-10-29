@@ -1,7 +1,7 @@
 import { BrowserBotNotice } from "../bot/BrowserBotNotice.js";
 import { useMatchAchievements } from "../achievements/useMatchAchievements.js";
 import { AchievementToast } from "../achievements/AchievementToast.js";
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { useIntl } from "react-intl";
 import { useShallow } from "zustand/react/shallow";
 import type { CardView, GameIntent, MeldSide } from "@fyendal/shared";
@@ -89,7 +89,7 @@ import { shouldWarnBeforeEndTurn } from "./endTurnWarning.js";
 import type { BoardOverlay } from "./board/BoardPrimitives.js";
 import { heroCard } from "./board/heroCard.js";
 import { PlayerHalf } from "./board/PlayerHalf.js";
-import { PlayerHand } from "./board/PlayerHand.js";
+import { handFanSlotStyle, PlayerHand } from "./board/PlayerHand.js";
 import { BoardOverlays, type BoardPreview } from "./board/BoardOverlays.js";
 import { optimisticInteractionHiddenIds } from "./pendingInteraction.js";
 import { optimisticDefenderView } from "./optimisticDefenderStaging.js";
@@ -1271,18 +1271,23 @@ export function GameBoard() {
   const selfNameplate = playerProfiles ? (
     <PlayerNameplate placement="self" profile={playerProfiles[seat]!} />
   ) : null;
+  const oppHandRevealed = view.phase === "game-over" || replaying;
   const oppHand = (
     <div
-      className={`opp-hand${view.phase === "game-over" || replaying ? " opp-hand-revealed" : ""}`}
+      className={`opp-hand${oppHandRevealed ? " opp-hand-revealed" : ""}`}
       data-motion-zone={motionLocationKey({ kind: "hand", seat: opp.seat })}
       role="group"
       aria-label={intl.formatMessage({ id: "game.hand.opponentCount" }, { count: presentedOppHandCount })}
+      style={{
+        "--fan-n": Math.max(1, oppHandRevealed ? opp.hand.length : presentedOppHandCount),
+      } as CSSProperties}
     >
-      {view.phase === "game-over" || replaying
-        ? opp.hand.map((card) => (
+      {oppHandRevealed
+        ? opp.hand.map((card, i) => (
             <CardFace
               key={card.instanceId}
               card={card}
+              style={handFanSlotStyle(i)}
               motionKey={motionPresentationKey(
                 { kind: "hand", seat: opp.seat },
                 card.instanceId,
@@ -1294,6 +1299,7 @@ export function GameBoard() {
               key={i}
               label=""
               size="hand"
+              style={handFanSlotStyle(i)}
               motionKey={opaqueMotionPresentationKey(
                 { kind: "hand", seat: opp.seat },
                 i,

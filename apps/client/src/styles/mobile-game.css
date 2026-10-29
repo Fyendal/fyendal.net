@@ -408,6 +408,12 @@
   .opp-hand .muted { display: none; }
 
   .hand {
+    --hand-card-width: 90px;
+    --fan-step: 2.5deg;
+    --fan-max-drop: .1;
+    --fan-overlap: .1;
+    /* Keep each card a comfortable tap target before scrolling. */
+    --fan-min-visible: .45;
     position: fixed;
     left: 0;
     right: 0;
@@ -418,7 +424,6 @@
        draw cannot pass under the other cards and jump forward on arrival. */
     z-index: var(--game-z-hand);
     justify-content: flex-start;
-    gap: 7px;
     overflow-x: auto;
     overflow-y: hidden;
     padding: calc(9px + var(--hand-outline-clearance)) 12px 9px;
@@ -433,15 +438,8 @@
     touch-action: pan-x pan-y;
     -webkit-overflow-scrolling: touch;
   }
-  /* Count visible slots: the focus source stays in the DOM without taking
-     hand space. Four or more visible cards remain horizontally scrollable. */
-  .hand > :nth-child(1 of :not(.pitch-focus-source-hidden)) { margin-left: 0; }
-  .hand > :nth-last-child(1 of :not(.pitch-focus-source-hidden)) { margin-right: 0; }
-  .hand > :nth-child(1 of :not(.pitch-focus-source-hidden)):nth-last-child(-n + 3 of :not(.pitch-focus-source-hidden)) { margin-left: auto; }
-  .hand > :nth-last-child(1 of :not(.pitch-focus-source-hidden)):nth-child(-n + 3 of :not(.pitch-focus-source-hidden)) { margin-right: auto; }
   .hand::-webkit-scrollbar { display: none; }
-  .hand .card-hand { width: 90px; height: 124px; transform: none; }
-  .hand .card-hand:hover { transform: none; }
+  .hand .card-hand { height: 124px; transform: translateY(var(--fan-y)) rotate(var(--fan-angle)); }
   .hand .card-hand.card-selected,
   .hand .card-hand.card-selected:hover,
   .hand .card-hand.card-pitched,

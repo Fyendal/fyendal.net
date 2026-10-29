@@ -1066,8 +1066,14 @@
   .hero-emote-toast { animation: none; }
 }
 
-/* ── hands: floating over the mat edges, with their inner halves visible ── */
+/* ── hands: floating over the mat edges, with their inner halves visible ──
+   Both hands fan on an arc. Each card's --fan-slot and the hand's --fan-n
+   derive its tilt and drop; the spread tightens as the hand grows. */
 .opp-hand {
+  --opp-fan-step: 3deg;
+  --opp-fan-arc: 22deg;
+  --opp-fan-drop: .45vh;
+  --opp-fan-max-drop: 2.6vh;
   position: absolute;
   top: 0;
   left: 9px;
@@ -1080,10 +1086,20 @@
   pointer-events: none;
   z-index: 3;
 }
+.opp-hand > .card {
+  --fan-offset: calc(var(--fan-slot, 0) - (var(--fan-n, 1) - 1) / 2);
+  /* Mirrored arc: the cards hang from the top edge. */
+  --fan-angle: calc(-1 * var(--fan-offset) * min(var(--opp-fan-step), var(--opp-fan-arc) / var(--fan-n, 1)));
+  --fan-y: calc(-1 * var(--fan-offset) * var(--fan-offset) * min(
+    var(--opp-fan-drop),
+    var(--opp-fan-max-drop) / max(1, (var(--fan-n, 1) - 1) * (var(--fan-n, 1) - 1) / 4)
+  ));
+}
 .opp-hand .card-back {
   width: clamp(68px, 9.45vh, 123px);
   height: clamp(95px, 13.2vh, 173px);
   flex-shrink: 0;
+  transform: translateY(var(--fan-y)) rotate(var(--fan-angle));
 }
 .opp-hand .card-back + .card-back { margin-left: clamp(-62px, -4.73vh, -35px); }
 .opp-hand .muted { align-self: flex-start; padding-top: 12px; }
@@ -1093,7 +1109,7 @@
   width: clamp(68px, 9.45vh, 123px);
   height: clamp(95px, 13.2vh, 173px);
   flex-shrink: 0;
-  transform: rotate(180deg);
+  transform: translateY(var(--fan-y)) rotate(calc(180deg + var(--fan-angle)));
 }
 .opp-hand-revealed .card-hand + .card-hand {
   margin-left: clamp(-62px, -4.73vh, -35px);
@@ -1104,6 +1120,20 @@
 
 .hand {
   --hand-outline-clearance: 5px;
+  --hand-card-width: clamp(131px, 19.65vh, 240px);
+  /* Tilt between neighbours, capped by the whole hand's spread. */
+  --fan-step: 3deg;
+  --fan-arc: 22deg;
+  /* Edge drop per squared slot from centre, capped for the outermost card;
+     both are shares of the card width. */
+  --fan-drop: .028;
+  --fan-max-drop: .16;
+  /* Cards always overlap a little, and squeeze to fit until only this much
+     of each stays visible; past that the hand scrolls. */
+  --fan-overlap: .16;
+  --fan-min-visible: .3;
+  /* Width kept free for the outer cards' tilt, so it never forces a scroll. */
+  --fan-spill: .28;
   position: absolute;
   left: 0;
   right: 0;
@@ -1113,7 +1143,7 @@
     var(--hand-card-height) + var(--hand-selected-lift) + var(--hand-outline-clearance)
   );
   display: flex;
-  gap: 10px;
+  gap: 0;
   justify-content: flex-start;
   overflow-x: auto;
   overflow-y: hidden;
@@ -1136,20 +1166,37 @@
   margin-right: auto;
 }
 .hand .card-hand {
-  width: clamp(131px, 19.65vh, 240px);
+  --fan-offset: calc(var(--fan-slot, 0) - (var(--fan-n, 1) - 1) / 2);
+  --fan-angle: calc(var(--fan-offset) * min(var(--fan-step), var(--fan-arc) / var(--fan-n, 1)));
+  --fan-y: calc(var(--fan-offset) * var(--fan-offset) * var(--hand-card-width) * min(
+    var(--fan-drop),
+    var(--fan-max-drop) / max(1, (var(--fan-n, 1) - 1) * (var(--fan-n, 1) - 1) / 4)
+  ));
+  width: var(--hand-card-width);
   height: var(--hand-card-height);
-  transform: translateY(var(--hand-rest-offset));
+  /* Percentages resolve against the strip, so the pitch fits the hand to it. */
+  margin-left: calc(min(1, var(--fan-slot, 0)) * (clamp(
+    var(--hand-card-width) * var(--fan-min-visible),
+    (100% - var(--hand-card-width) * (1 + var(--fan-spill))) / max(1, var(--fan-n, 1) - 1),
+    var(--hand-card-width) * (1 - var(--fan-overlap))
+  ) - var(--hand-card-width)));
+  /* Rotate inside the translation so the card's x centre stays on its slot. */
+  transform: translateY(calc(var(--hand-rest-offset) + var(--fan-y))) rotate(var(--fan-angle));
   transition: transform 0.12s ease;
   pointer-events: auto;
+}
+.hand .card-hand.card-selected,
+.hand .card-hand.card-pitched { z-index: 1; }
+/* Touch keeps :hover on the last tapped card, which would leave it raised. */
+@media (hover: hover) {
+  .hand .card-hand:hover { z-index: 1; transform: none; }
 }
 /* On compact laptops, keep the resting hand clear of the enlarged leg card. */
 @media (min-width: 701px) and (max-width: 1100px) {
   .table:has(.mat-square-board) .hand {
     padding-left: calc(clamp(86px, 13vh, 170px) + 18px);
-    gap: 6px;
   }
 }
-.hand .card-hand:hover { transform: none; }
 .hand .card-hand.hand-slot-probe {
   visibility: hidden;
   pointer-events: none;
@@ -1191,8 +1238,8 @@
   margin: 0;
   transform: rotate(var(--hand-drag-tilt, 0deg));
   scale: 1.04;
-  transition: transform 150ms cubic-bezier(.22, .8, .25, 1), scale 150ms cubic-bezier(.22, .8, .25, 1),
-    box-shadow 140ms ease, border-color 140ms ease;
+  /* The tilt is already smoothed per frame; a transform transition would lag it. */
+  transition: scale 150ms cubic-bezier(.22, .8, .25, 1), box-shadow 140ms ease, border-color 140ms ease;
   animation: hand-card-pickup 150ms cubic-bezier(.22, .8, .25, 1);
   border-color: #b7ac98;
   box-shadow: 0 12px 28px #000b;
@@ -1204,6 +1251,8 @@
 .hand-drag-card-returning .card-hand {
   transform: none;
   scale: 1;
+  transition: transform 150ms cubic-bezier(.22, .8, .25, 1), scale 150ms cubic-bezier(.22, .8, .25, 1),
+    box-shadow 140ms ease, border-color 140ms ease;
   animation: none;
 }
 @keyframes hand-card-pickup {
@@ -1303,8 +1352,8 @@
     --hand-selected-lift: 2.4vh;
     --opp-hand-band: 6.9vh;
   }
-  .hand .card-hand {
-    width: 19.35vh;
+  .hand {
+    --hand-card-width: 19.35vh;
   }
 }
 

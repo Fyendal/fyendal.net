@@ -390,11 +390,11 @@
 }
 
 @media (max-width: 420px) {
-  /* Four cards fill compact portrait widths exactly; larger hands retain the
-     same card size and scroll horizontally. The aspect ratio lets height
-     follow width instead of leaving oversized cards on narrower screens. */
+  /* Card width follows the viewport; larger hands overlap tighter before
+     they scroll. The aspect ratio lets height follow width instead of
+     leaving oversized cards on narrower screens. */
+  .hand { --hand-card-width: calc(25vw - 11.25px); }
   .hand .card-hand {
-    width: calc(25vw - 11.25px);
     height: auto;
     align-self: flex-start;
     aspect-ratio: 90 / 124;

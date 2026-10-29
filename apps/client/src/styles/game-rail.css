@@ -668,13 +668,12 @@
   .opp-hand .card-back + .card-back,
   .opp-hand-revealed .card-hand + .card-hand { margin-left: -29px; }
   .opp-hand .muted { padding-top: 5px; }
-  .hand { gap: 8px; }
-  .hand .card-hand { width: 108px; height: 149px; }
+  .hand { --hand-card-width: 108px; }
+  .hand .card-hand { height: 149px; }
   .decision-cards .card-hand { width: 72px; height: 99px; }
   .decision-cards { gap: 12px; padding: 8px; }
   .decision-cards .card-selected::before { top: 4px; right: 4px; width: 18px; height: 18px; font-size: 11px; }
   .decision-optcard button { min-width: 72px; }
-  .hand .card-hand:hover { transform: none; }
   .hand .card-hand.card-selected,
   .hand .card-hand.card-selected:hover,
   .hand .card-hand.card-pitched,

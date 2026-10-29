@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, type CSSProperties } from "react";
 import { createPortal } from "react-dom";
 import { useIntl } from "react-intl";
 import type {
@@ -66,6 +66,11 @@ export function preservePreStackHandOrder(
       return left.currentIndex - right.currentIndex;
     })
     .map(({ card }) => card);
+}
+
+/** Per-card position in the arced hand; layout reads it from CSS. */
+export function handFanSlotStyle(slot: number): CSSProperties {
+  return { "--fan-slot": slot } as CSSProperties;
 }
 
 export function handScrollAvailability({
@@ -243,6 +248,17 @@ export function PlayerHand({
     return card ? (cardData[card.cardId]?.pitch ?? 0) : 0;
   };
   const discardPayment = isDiscardPayment(interaction.selectedPaymentVariants);
+  const showBacks = spectating && view.phase !== "game-over" && !(replaying && player.hand.length > 0);
+  // A focused source keeps its DOM node but leaves the fan.
+  const fannedHandCards = visibleCards.filter((card) =>
+    interaction.focusedSourceInstanceId !== card.instanceId
+  );
+  const handSlots = showBacks ? player.handCount : fannedHandCards.length;
+  const fanCount = handSlots + playableZoneCards.length + activatableZoneCards.length;
+  const fanSlot = (card: CardView) => {
+    const index = fannedHandCards.indexOf(card);
+    return index < 0 ? undefined : handFanSlotStyle(index);
+  };
   const draggedCard = floatingCard ? handCards.get(floatingCard.instanceId) : undefined;
 
   return (
@@ -267,14 +283,16 @@ export function PlayerHand({
         ref={handRef}
         data-motion-zone={motionLocationKey(handMotionLocation)}
         data-reduced-motion={reducedMotion ? "true" : undefined}
+        style={{ "--fan-n": Math.max(1, fanCount) } as CSSProperties}
         {...reorderHandlers}
       >
-        {spectating && view.phase !== "game-over" && !(replaying && player.hand.length > 0)
+        {showBacks
           ? Array.from({ length: player.handCount }, (_, index) => (
               <CardBack
                 key={index}
                 label=""
                 size="hand"
+                style={handFanSlotStyle(index)}
                 motionKey={opaqueMotionPresentationKey(handMotionLocation, index)}
               />
             ))
@@ -331,6 +349,7 @@ export function PlayerHand({
               <CardFace
                 key={card.instanceId}
                 card={card}
+                style={fanSlot(card)}
                 motionKey={motionPresentationKey(handMotionLocation, card.instanceId)}
                 focusSourceHidden={interaction.focusedSourceInstanceId === card.instanceId}
                 handReorderHint={reorderEnabled && interaction.focusedSourceInstanceId !== card.instanceId
@@ -348,10 +367,11 @@ export function PlayerHand({
               />
             );
             })}
-        {playableZoneCards.map(({ card, zone }) => (
+        {playableZoneCards.map(({ card, zone }, index) => (
             <CardFace
               key={`${zone}-${card.instanceId}`}
               card={card}
+              style={handFanSlotStyle(handSlots + index)}
               ghost
               explanation={playableZoneTooltip(card, zone)}
               onClick={() => {
@@ -364,10 +384,11 @@ export function PlayerHand({
               highlighted
             />
         ))}
-        {activatableZoneCards.map((card) => (
+        {activatableZoneCards.map((card, index) => (
           <CardFace
             key={`activate-${card.instanceId}`}
             card={card}
+            style={handFanSlotStyle(handSlots + playableZoneCards.length + index)}
             ghost
             onClick={() => interaction.onActivate(card.instanceId)}
             selected={interaction.selection.kind === "activate" &&

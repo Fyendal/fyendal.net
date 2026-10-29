@@ -88,16 +88,12 @@
   /* Hand strip under the arena, clear of the legs card. */
   .hand,
   .table:has(.mat-square-board) .hand {
+    --hand-card-width: calc(var(--hand-card-height) * .7165);
     right: 8px;
     left: 8px;
-    gap: 8px;
     padding-left: calc(var(--arena-square-size) + 10px);
   }
-  .hand .card-hand {
-    width: calc(var(--hand-card-height) * .7165);
-    height: var(--hand-card-height);
-  }
-  .hand .card-hand:hover { transform: none; }
+  .hand .card-hand { height: var(--hand-card-height); }
   .hand-scroll-button {
     bottom: 6px;
     min-width: 44px;
@@ -281,6 +277,7 @@
   .opp-hand-revealed .card-hand { width: 14px; height: 20px; border-radius: 2px; }
   .opp-hand .card-back + .card-back,
   .opp-hand-revealed .card-hand + .card-hand { margin-left: -9px; }
+  .opp-hand .card-back,
   .opp-hand-revealed .card-hand { transform: none; }
   .opp-hand .muted { display: none; }
   .opp-hand:has(.muted)::before {

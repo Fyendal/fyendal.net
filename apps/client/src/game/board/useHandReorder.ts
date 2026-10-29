@@ -12,12 +12,15 @@ import {
   animateHandReorder,
   cancelHandReorderAnimations,
   captureHandPositions,
+  handCardOrigin,
   handCardSlotLeft,
   handCardSlotTop,
   handDragTilt,
   HAND_MOTION_EASING,
   handReturnDuration,
+  HAND_TOUCH_HOLD_MS,
 } from "./handMotion.js";
+import { isTouchBoardViewport } from "./viewportQueries.js";
 
 interface HandDrag {
   pointerId: number;
@@ -36,6 +39,9 @@ interface HandDrag {
   lastFrameTime: number;
   previousX: number;
   tilt: number;
+  /** Touch drags centre the card on the finger and pick up on hold. */
+  touch: boolean;
+  holdTimer: number;
 }
 
 /** Pointer movement is cosmetic; an eligible arena release starts a play. */
@@ -94,6 +100,7 @@ export function useHandReorder(
     if (!drag) return;
     dragRef.current = null;
     cancelAnimationFrame(drag.frame);
+    window.clearTimeout(drag.holdTimer);
     const returning = animateReturn && drag.started && !reducedMotion
       && drag.element.isConnected && floatingCardRef.current !== null;
     if (returning) {
@@ -131,7 +138,7 @@ export function useHandReorder(
       return;
     }
     if (returning.animation) return;
-    const rect = returning.drag.element.getBoundingClientRect();
+    const rect = handCardOrigin(returning.drag.element);
     const fromX = returning.drag.x - returning.drag.grabOffset;
     const fromY = returning.drag.y - returning.drag.grabOffsetY;
     floating.style.setProperty("--hand-drag-tilt", "0deg");
@@ -226,6 +233,29 @@ export function useHandReorder(
     };
   }, []);
 
+  const beginDrag = (drag: HandDrag) => {
+    drag.started = true;
+    window.clearTimeout(drag.holdTimer);
+    playDropRef.current?.onDragStart?.();
+    // The stable hand container keeps capture when React moves a card's
+    // DOM node into its new slot. Changing capture releases the card's
+    // initial click capture, which is not a gesture cancellation.
+    handRef.current?.setPointerCapture(drag.pointerId);
+    drag.element.classList.add("hand-card-dragging");
+    reorderAnimationsRef.current.get(drag.element)?.cancel();
+    reorderAnimationsRef.current.delete(drag.element);
+    if (drag.touch) {
+      drag.grabOffset = drag.element.offsetWidth / 2;
+      drag.grabOffsetY = drag.element.offsetHeight / 2;
+    }
+    setFloatingCard({
+      instanceId: drag.instanceId,
+      width: drag.element.offsetWidth,
+      height: drag.element.offsetHeight,
+      returning: false,
+    });
+  };
+
   const cardElement = (target: EventTarget) => target instanceof Element
     ? target.closest<HTMLElement>("[data-hand-instance-id]")
     : null;
@@ -281,7 +311,7 @@ export function useHandReorder(
         const instanceId = Number(element.dataset.handInstanceId);
         if (!orderRef.current.includes(instanceId)) return;
         suppressClickUntilRef.current = 0;
-        const rect = element.getBoundingClientRect();
+        const rect = handCardOrigin(element);
         // Capture on the card, so an ordinary click still reaches its action
         // while a drag continues outside the hand or across reordered siblings.
         element.setPointerCapture(event.pointerId);
@@ -305,7 +335,15 @@ export function useHandReorder(
           lastFrameTime: 0,
           previousX: event.clientX,
           tilt: 0,
+          touch: event.pointerType === "touch" && isTouchBoardViewport(),
+          holdTimer: 0,
         };
+        const drag = dragRef.current;
+        if (drag.touch) {
+          drag.holdTimer = window.setTimeout(() => {
+            if (dragRef.current === drag && !drag.started) beginDrag(drag);
+          }, HAND_TOUCH_HOLD_MS);
+        }
       },
       onPointerMove: (event: React.PointerEvent<HTMLDivElement>) => {
         const drag = dragRef.current;
@@ -314,17 +352,7 @@ export function useHandReorder(
         drag.y = event.clientY;
         if (!drag.started) {
           if (!handDragStarted(drag.startX, drag.startY, event.clientX, event.clientY)) return;
-          drag.started = true;
-          playDropRef.current?.onDragStart?.();
-          // The stable hand container keeps capture when React moves a card's
-          // DOM node into its new slot. Changing capture releases the card's
-          // initial click capture, which is not a gesture cancellation.
-          event.currentTarget.setPointerCapture(event.pointerId);
-          drag.element.classList.add("hand-card-dragging");
-          reorderAnimationsRef.current.get(drag.element)?.cancel();
-          reorderAnimationsRef.current.delete(drag.element);
-          const rect = drag.element.getBoundingClientRect();
-          setFloatingCard({ instanceId: drag.instanceId, width: rect.width, height: rect.height, returning: false });
+          beginDrag(drag);
         }
         event.preventDefault();
         // Apply the pointer position immediately: a quick flick can finish

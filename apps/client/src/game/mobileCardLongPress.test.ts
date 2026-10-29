@@ -36,6 +36,16 @@ describe("mobile card long press", () => {
     expect(mobileCardLongPressCardId(target)).toBeNull();
   });
 
+  it("leaves hand cards to the hold-to-drag gesture", () => {
+    const target = {
+      closest: (selector: string) => selector === "#player-hand"
+        ? { id: "player-hand" }
+        : selector === "[data-cardid]" ? { dataset: { cardid: "SEA225" } } : null,
+    } as unknown as HTMLElement;
+
+    expect(mobileCardLongPressCardId(target)).toBeNull();
+  });
+
   it("does not start another inspection from the enlarged card modal", () => {
     const target = {
       closest: (selector: string) => selector.split(", ").includes(".modal-surface-backdrop")
