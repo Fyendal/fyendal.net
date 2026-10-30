@@ -1868,6 +1868,62 @@ describe("PgRoomStore storage", () => {
     expect((await store.getRoom(code))!.seats[defender]!.passUntil).toBeUndefined();
   });
 
+  /** After a cancel, the attacker's passes reach a window the shortcut
+   * would have answered, and the seat is asked again. */
+  async function expectSeatAskedAfterCancel(code: string, tokens: [string, string], attacker: 0 | 1, defender: 0 | 1) {
+    expect(await store.setPassUntil(code, { token: tokens[defender] }, null))
+      .toMatchObject({ ok: true, advanced: false });
+    expect((await store.getRoom(code))!.seats[defender]!.passUntil).toBeUndefined();
+    const state = await attackerPassesUntil(code, tokens, attacker, () => false);
+    expect(state.pendingDecision?.player ?? state.priorityPlayer).toBe(defender);
+    expect(state.chain[0]?.resolved).toBe(false);
+    return state;
+  }
+
+  it("cancelling a chain-link shortcut mid-link hands its windows back", async () => {
+    const { code, tokens } = await fullRoom();
+    await startGame(code, tokens);
+    const { attacker, defender, blows } = await forceContestedAttacks(code);
+    expect((await store.setPassUntil(code, { token: tokens[defender] }, "chain-link")).ok).toBe(true);
+    const play: GameIntent = { kind: "play-card", instanceId: blows[0]!.instanceId, pitchInstanceIds: [] };
+    expect((await store.applyIntent(code, { token: tokens[attacker] }, play)).ok).toBe(true);
+    expect((await store.getRoom(code))!.seats[defender]!.passUntil)
+      .toMatchObject({ mode: "chain-link", link: { index: 0 } });
+
+    await expectSeatAskedAfterCancel(code, tokens, attacker, defender);
+  });
+
+  it("cancelling an end-of-turn shortcut before the turn ends hands its windows back", async () => {
+    const { code, tokens } = await fullRoom();
+    await startGame(code, tokens);
+    const { attacker, defender, blows } = await forceContestedAttacks(code);
+    expect((await store.setPassUntil(code, { token: tokens[defender] }, "turn")).ok).toBe(true);
+    const play: GameIntent = { kind: "play-card", instanceId: blows[0]!.instanceId, pitchInstanceIds: [] };
+    expect((await store.applyIntent(code, { token: tokens[attacker] }, play)).ok).toBe(true);
+
+    await expectSeatAskedAfterCancel(code, tokens, attacker, defender);
+  });
+
+  it("cancelling an opponent shortcut before their next play hands the reaction window back", async () => {
+    const { code, tokens } = await fullRoom();
+    await startGame(code, tokens);
+    const { attacker, defender, blows, sink } = await forceContestedAttacks(code);
+    const play: GameIntent = { kind: "play-card", instanceId: blows[0]!.instanceId, pitchInstanceIds: [] };
+    expect((await store.applyIntent(code, { token: tokens[attacker] }, play)).ok).toBe(true);
+    await attackerPassesUntil(code, tokens, attacker, () => false);
+    expect((await store.setPassUntil(code, { token: tokens[defender] }, "opponent")).ok).toBe(true);
+    expect((await store.getRoom(code))!.seats[defender]!.passUntil).toMatchObject({ mode: "opponent" });
+
+    const defending = await expectSeatAskedAfterCancel(code, tokens, attacker, defender);
+    expect(defending.pendingDecision).toMatchObject({ kind: "defend" });
+    expect((await store.applyIntent(code, { token: tokens[defender] }, { kind: "defend", instanceIds: [] })).ok)
+      .toBe(true);
+    const reacting = await attackerPassesUntil(code, tokens, attacker, () => false);
+    expect(reacting.pendingDecision?.player ?? reacting.priorityPlayer).toBe(defender);
+    expect(reacting.chain[0]?.resolved).toBe(false);
+    expect(reacting.players[defender]!.hand.map((card) => card.instanceId)).toEqual([sink.instanceId]);
+  });
+
   it("arming in the seat's own window passes it as one undoable step, and undo disarms", async () => {
     const { code, tokens } = await fullRoom();
     await startGame(code, tokens);

@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 import type { ChainLinkView, GameView, PendingDecision } from "@fyendal/shared";
 import { TestI18nProvider } from "../i18n/TestI18nProvider.js";
 import { passUntilHotkey } from "./passHotkey.js";
-import { chainLinkOpen, passUntilPaused } from "./passUntil.js";
+import { chainLinkOpen, passUntilChoice, passUntilPaused } from "./passUntil.js";
 import { PassUntilControl } from "./PassUntilControl.js";
 
 function link(overrides: Partial<ChainLinkView> = {}): ChainLinkView {
@@ -31,6 +31,14 @@ function key(overrides: Partial<KeyboardEvent>): KeyboardEvent {
 }
 
 describe("pass until", () => {
+  it("cancels when the armed mode is picked again, from any mode", () => {
+    for (const mode of ["opponent", "chain-link", "turn"] as const) {
+      expect(passUntilChoice(mode, mode)).toBeNull();
+      expect(passUntilChoice(null, mode)).toBe(mode);
+    }
+    expect(passUntilChoice("turn", "opponent")).toBe("opponent");
+  });
+
   it("distinguishes an open chain link from a resolved or empty chain", () => {
     expect(chainLinkOpen(view(null))).toBe(true);
     expect(chainLinkOpen(view(null, [link({ resolved: true })]))).toBe(false);

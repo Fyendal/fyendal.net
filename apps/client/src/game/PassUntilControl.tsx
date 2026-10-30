@@ -13,6 +13,7 @@ import type { PassUntilMode } from "@fyendal/shared";
 import { TooltipButton } from "../components/TooltipButton.js";
 import { UiIcon } from "../components/UiIcon.js";
 import { passUntilHotkey } from "./passHotkey.js";
+import { passUntilChoice } from "./passUntil.js";
 
 const MODES = ["opponent", "chain-link", "turn"] as const satisfies readonly PassUntilMode[];
 
@@ -117,10 +118,11 @@ export function PassUntilControl({
     return () => window.removeEventListener("resize", place);
   }, [open]);
 
-  const choose = (next: PassUntilMode) => {
+  const choose = (picked: PassUntilMode) => {
     setOpen(false);
-    if (next === mode) onCancel();
-    else onArm(next);
+    const next = passUntilChoice(mode, picked);
+    if (next) onArm(next);
+    else onCancel();
   };
 
   // Focus lands once on opening, not again when the mode changes while open.

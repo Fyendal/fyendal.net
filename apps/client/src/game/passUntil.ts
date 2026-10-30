@@ -2,6 +2,12 @@ import type { GameView, PassUntilMode } from "@fyendal/shared";
 
 const ANSWERED_KINDS = new Set(["priority-window", "attack-reaction", "defense-reaction", "defend"]);
 
+/** Picking the armed mode again, from the menu or its shortcut, cancels it
+ *  (`null`); picking another mode switches to it. */
+export function passUntilChoice(armed: PassUntilMode | null, picked: PassUntilMode): PassUntilMode | null {
+  return picked === armed ? null : picked;
+}
+
 /** A chain link is open: the chain-link shortcut covers it, not the next one. */
 export function chainLinkOpen(view: GameView): boolean {
   const link = view.chain.at(-1);
