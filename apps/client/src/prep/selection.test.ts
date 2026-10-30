@@ -70,7 +70,7 @@ describe("prep deck selection", () => {
   });
 
   it("defaults to the first two one-hand weapons", () => {
-    expect(defaultWeapons(["SAR002", "SAR002", "WTR003"])).toEqual([
+    expect(defaultWeapons(["SAR002", "SAR002", "WTR003"], pool.heroId)).toEqual([
       "SAR002",
       "SAR002",
     ]);
@@ -81,22 +81,26 @@ describe("prep deck selection", () => {
   });
 
   it("stops after the first two-hand weapon", () => {
-    expect(defaultWeapons(["WTR003", "SAR002", "SAR002"])).toEqual(["WTR003"]);
+    expect(defaultWeapons(["WTR003", "SAR002", "SAR002"], pool.heroId)).toEqual(["WTR003"]);
   });
 
   it("pairs a two-hand weapon with a Perched off-hand", () => {
-    expect(defaultWeapons(["WTR003", "SEA003", "SAR002"])).toEqual([
+    expect(defaultWeapons(["WTR003", "SEA003", "SAR002"], pool.heroId)).toEqual([
       "WTR003",
       "SEA003",
     ]);
-    expect(defaultWeapons(["SEA003", "WTR003", "SAR002"])).toEqual([
+    expect(defaultWeapons(["SEA003", "WTR003", "SAR002"], pool.heroId)).toEqual([
       "SEA003",
       "WTR003",
     ]);
   });
 
+  it("lets Zane default to two 2H swords", () => {
+    expect(defaultWeapons(["SPW004", "SPW002", "WTR003"], "SPW003")).toEqual(["SPW004", "SPW002"]);
+  });
+
   it("skips a two-hand weapon that cannot fit the remaining hand", () => {
-    expect(defaultWeapons(["SAR002", "WTR003", "SAR002"])).toEqual([
+    expect(defaultWeapons(["SAR002", "WTR003", "SAR002"], pool.heroId)).toEqual([
       "SAR002",
       "SAR002",
     ]);

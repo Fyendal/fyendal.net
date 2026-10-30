@@ -17,6 +17,8 @@ const card = (id: string, cardType: CardData["cardType"], subtypes: string[] = [
 const cards: Record<string, CardData> = {
   HERO: card("HERO", "hero"),
   KAYO: { ...card("KAYO", "hero"), name: "Kayo, Strong-arm" },
+  ZANE: { ...card("ZANE", "hero"), name: "Zane, Broadly Beloved" },
+  TWO_SWORD: card("TWO_SWORD", "weapon", ["sword", "2h"]),
   ONE: card("ONE", "weapon", ["sword", "1h"]),
   TWO: card("TWO", "weapon", ["bow", "2h"]),
   TWO_CLUB: card("TWO_CLUB", "weapon", ["club", "2h"]),
@@ -171,6 +173,10 @@ describe("arena weapon issues", () => {
     ["HERO", ["MAIN"], { code: "not-weapon-zone", cardId: "MAIN" }],
     ["KAYO", ["ONE", "ONE"], { code: "single-weapon-zone", cardId: "KAYO" }],
     ["HERO", ["TWO", "QUIVER"], null],
+    ["ZANE", ["TWO_SWORD", "TWO_SWORD"], null],
+    ["ZANE", ["TWO_SWORD", "ONE"], null],
+    ["ZANE", ["TWO_SWORD", "TWO_CLUB"], { code: "two-hander-pairing", cardId: "TWO_CLUB" }],
+    ["HERO", ["TWO_SWORD", "ONE"], { code: "two-hander-pairing", cardId: "TWO_SWORD" }],
   ] as const)("reports %s with %j", (heroId, ids, expected) => {
     expect(arenaWeaponIssue(cards, heroId, ids)).toEqual(expected);
   });

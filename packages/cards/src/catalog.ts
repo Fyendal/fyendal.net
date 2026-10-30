@@ -53,6 +53,7 @@ import cardsOBK from "./data/cards/OBK.json" with { type: "json" };
 import cardsOMN from "./data/cards/OMN.json" with { type: "json" };
 import cardsPEN from "./data/cards/PEN.json" with { type: "json" };
 import cardsPSM from "./data/cards/PSM.json" with { type: "json" };
+import cardsSPW from "./data/cards/SPW.json" with { type: "json" };
 import cardsSUP from "./data/cards/SUP.json" with { type: "json" };
 import cardsOUT from "./data/cards/OUT.json" with { type: "json" };
 import cardsRNR from "./data/cards/RNR.json" with { type: "json" };
@@ -139,7 +140,6 @@ export {
   arenaWeaponIssue,
   EXACT_DECK_SIZE,
   MIN_DECK_SIZE,
-  weaponSelectionError,
 } from "./presentation.js";
 export type { PresentationResult } from "./presentation.js";
 
@@ -610,9 +610,9 @@ const KEYWORD_OVERRIDES: Record<string, string[]> = {
   "rising speed|1": [],
   "rising speed|2": [],
   "rising speed|3": [],
-  // Jaws of Victory only GAINS go again after its controller has been cheered
-  // during the current turn.
+  // These only GAIN go again after their controller has been cheered this turn.
   "jaws of victory|1": ["The Crowd Cheers"],
+  "celebrant broadsword|0": [],
 };
 
 /** Functional text errata keyed by card identity so every printing is current. */
@@ -772,6 +772,7 @@ const rawCardList = decodeCardDataList([
   ...cardsMPW,
   ...cardsOMN,
   ...cardsPEN,
+  ...cardsSPW,
   ...cardsSUP,
   ...cardsAMX,
   ...cardsAMA,

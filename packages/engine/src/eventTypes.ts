@@ -33,7 +33,9 @@ export type TriggerEvent =
   /** A card the subject owns left their graveyard. */
   | "card-left-graveyard"
   /** The subject removed a steam counter from an item they control for Crank. */
-  | "card-cranked";
+  | "card-cranked"
+  /** The subject gained control of an opposing permanent by stealing it. */
+  | "card-stolen";
 
 /** Event-specific facts captured when a triggered ability is generated. */
 export interface TriggerEventContext {

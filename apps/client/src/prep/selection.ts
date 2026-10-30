@@ -1,4 +1,4 @@
-import { cardData, equipmentFitsSlot, weaponSelectionError } from "@fyendal/cards/client";
+import { arenaWeaponIssue, cardData, equipmentFitsSlot } from "@fyendal/cards/client";
 import type { DeckPool, EquipmentSlot, PresentedArena, PresentedDeck } from "@fyendal/shared";
 import { EQUIPMENT_SLOTS } from "../domain.js";
 
@@ -15,17 +15,17 @@ export interface PrepSelection {
 
 /** Select the earliest compatible weapon-zone cards, including a quiver or
  * Perched off-hand that can share the unoccupied side of a two-hander. */
-export function defaultWeapons(weaponIds: readonly string[]): string[] {
-  return defaultWeaponIndexes(weaponIds).map((index) => weaponIds[index]!);
+export function defaultWeapons(weaponIds: readonly string[], heroId: string): string[] {
+  return defaultWeaponIndexes(weaponIds, heroId).map((index) => weaponIds[index]!);
 }
 
-export function defaultWeaponIndexes(weaponIds: readonly string[]): number[] {
+export function defaultWeaponIndexes(weaponIds: readonly string[], heroId: string): number[] {
   const selected: string[] = [];
   const selectedIndexes: number[] = [];
 
   for (const [index, id] of weaponIds.entries()) {
     const candidate = [...selected, id];
-    if (weaponSelectionError(cardData, candidate) === null) {
+    if (arenaWeaponIssue(cardData, heroId, candidate) === null) {
       selected.push(id);
       selectedIndexes.push(index);
     }
@@ -50,7 +50,7 @@ export function defaultSelection(pool: DeckPool, forDeck: string): PrepSelection
 
   return {
     forDeck,
-    weaponIndexes: defaultWeaponIndexes(pool.weaponIds),
+    weaponIndexes: defaultWeaponIndexes(pool.weaponIds, pool.heroId),
     equipment,
     main,
   };

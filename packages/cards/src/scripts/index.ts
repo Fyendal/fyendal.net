@@ -72,6 +72,7 @@ import { sgb } from "./sgb.js";
 import { siy } from "./siy.js";
 import { ska } from "./ska.js";
 import { sly } from "./sly.js";
+import { spw } from "./spw.js";
 import { sup } from "./sup.js";
 import { svi } from "./svi.js";
 import { tcc } from "./tcc.js";
@@ -155,6 +156,7 @@ const setModules: Record<string, Record<string, CardScript>> = {
   SIY: siy,
   SKA: ska,
   SLY: sly,
+  SPW: spw,
   SUP: sup,
   SVI: svi,
   TCC: tcc,

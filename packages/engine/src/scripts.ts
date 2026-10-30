@@ -1123,6 +1123,8 @@ export interface CardScript {
   /** This face-up arsenal object supplies observer and continuous hooks while
    * it remains there (Mentor and similar cards). */
   activeWhileFaceUpInArsenal?: boolean;
+  /** Hero: 2H weapons with this subtype are equipped as though they were 1H. */
+  equipsTwoHandedAsOneHanded?: string;
   /** This equipment is a deck-playable action object (Evo, CR 8.3.26). On
    * resolution it equips to its empty zone or transforms the occupant. */
   playableEquipment?: boolean;

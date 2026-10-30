@@ -121,6 +121,16 @@ function revealCards(
   return true;
 }
 
+/** Weapon zones a weapon-zone card occupies for this player. */
+function weaponHands(state: GameStateInternal, player: PlayerState, cardId: string): number {
+  const subtypes = dataOf(state, cardId).subtypes ?? [];
+  if (!subtypes.includes("2h")) return 1;
+  const asOneHanded = heroAbilitiesDisabled(state, player.seat)
+    ? undefined
+    : scriptOf(state, player.heroCardId, player.hero)?.equipsTwoHandedAsOneHanded;
+  return asOneHanded && subtypes.includes(asOneHanded) ? 1 : 2;
+}
+
 function nextArsenalSlot(player: PlayerState): number {
   const used = new Set(player.arsenal.map((card, index) => card.arsenalSlot ?? index));
   let slot = 0;
@@ -1853,6 +1863,7 @@ export function makeCtx(
           },
         ));
       }
+      runtime.events.queueTriggeredEvent(state, "card-stolen", seat, card);
       return true;
     },
     giveControl(instanceId, targetSeat) {
@@ -3070,10 +3081,10 @@ export function makeCtx(
       const d = dataOf(state, cardId);
       if (d.cardType === "weapon") {
         const occupiedZones = target.weapons.reduce(
-          (total, weapon) => total + (cardTypesOf(state, weapon).includes("2h") ? 2 : 1),
+          (total, weapon) => total + weaponHands(state, target, weapon.cardId),
           0,
         );
-        const requiredZones = (d.subtypes ?? []).includes("2h") ? 2 : 1;
+        const requiredZones = weaponHands(state, target, cardId);
         if (occupiedZones + requiredZones > 2) {
           logPublic(state, gameLogMessage(
             `${d.name} can't be equipped (no empty weapon zone)`,
@@ -3132,9 +3143,9 @@ export function makeCtx(
       const d = dataOf(state, card.cardId);
       // Off-hands are equipment permanents equipped in a weapon zone.
       if (d.cardType === "weapon" || (d.cardType === "equipment" && (d.subtypes ?? []).includes("off-hand"))) {
-        const hands = (d.subtypes ?? []).includes("2h") ? 2 : 1;
+        const hands = weaponHands(state, owner, card.cardId);
         const occupied = owner.weapons.reduce((total, weapon) =>
-          total + ((dataOf(state, weapon.cardId).subtypes ?? []).includes("2h") ? 2 : 1), 0);
+          total + weaponHands(state, owner, weapon.cardId), 0);
         if (occupied + hands > 2) return false;
         removeFromArray(owner.graveyard, instanceId);
         owner.weapons.push(card);
@@ -3174,9 +3185,9 @@ export function makeCtx(
       if (!card) return false;
       const d = dataOf(state, card.cardId);
       if (d.cardType === "weapon") {
-        const hands = (d.subtypes ?? []).includes("2h") ? 2 : 1;
+        const hands = weaponHands(state, player, card.cardId);
         const occupied = player.weapons.reduce((total, weapon) =>
-          total + ((dataOf(state, weapon.cardId).subtypes ?? []).includes("2h") ? 2 : 1), 0);
+          total + weaponHands(state, player, weapon.cardId), 0);
         if (occupied + hands > 2) return false;
         removeFromArray(player.banish, instanceId);
         player.weapons.push(card);
@@ -3205,9 +3216,9 @@ export function makeCtx(
       if (!card) return false;
       const d = dataOf(state, card.cardId);
       if (d.cardType === "weapon") {
-        const hands = (d.subtypes ?? []).includes("2h") ? 2 : 1;
+        const hands = weaponHands(state, player, card.cardId);
         const occupied = player.weapons.reduce((total, weapon) =>
-          total + ((dataOf(state, weapon.cardId).subtypes ?? []).includes("2h") ? 2 : 1), 0);
+          total + weaponHands(state, player, weapon.cardId), 0);
         if (occupied + hands > 2) return false;
         removeFromArray(inventory, instanceId);
         player.weapons.push(card);
@@ -3260,9 +3271,9 @@ export function makeCtx(
       const card = opposing.weapons[weaponIndex] as CardInstance;
       const d = dataOf(state, card.cardId);
       if (d.cardType !== "equipment") return false;
-      const hands = (d.subtypes ?? []).includes("2h") ? 2 : 1;
+      const hands = weaponHands(state, player, card.cardId);
       const occupiedHands = player.weapons.reduce((total, weapon) =>
-        total + ((dataOf(state, weapon.cardId).subtypes ?? []).includes("2h") ? 2 : 1), 0);
+        total + weaponHands(state, player, weapon.cardId), 0);
       if (occupiedHands + hands > 2) return false;
       opposing.weapons.splice(weaponIndex, 1);
       player.weapons.push(card);

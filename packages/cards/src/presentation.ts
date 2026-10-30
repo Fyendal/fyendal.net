@@ -64,6 +64,8 @@ export interface WeaponSelectionIssue {
 }
 
 const SINGLE_WEAPON_ZONE_HEROES = ["kayo, strong-arm", "kayo, armed and dangerous"];
+/** Heroes that equip 2H weapons of a subtype as though they were 1H. */
+const ONE_HANDED_SUBTYPE_HEROES: Record<string, string> = { "zane, broadly beloved": "sword" };
 
 /** Find why cards can't share the two weapon zones. A two-hander only
  * occupies one of the zones it is equipped to, allowing a quiver with a 2H bow
@@ -71,6 +73,7 @@ const SINGLE_WEAPON_ZONE_HEROES = ["kayo, strong-arm", "kayo, armed and dangerou
 function weaponZoneIssue(
   cards: Record<string, CardData>,
   ids: readonly string[],
+  oneHandedSubtype?: string,
 ): WeaponSelectionIssue | null {
   const invalid = ids.find((id) => !isWeaponZoneCard(cards[id]));
   if (invalid) return { code: "not-weapon-zone", cardId: invalid };
@@ -80,7 +83,8 @@ function weaponZoneIssue(
   if (offHands.length > 1) return { code: "multiple-off-hands" };
   if (ids.length > MAX_PRESENTED_WEAPONS) return { code: "too-many" };
 
-  const twoHanders = ids.filter((id) => cards[id]?.subtypes?.includes("2h"));
+  const twoHanders = ids.filter((id) => cards[id]?.subtypes?.includes("2h") &&
+    !(oneHandedSubtype && cards[id]?.subtypes?.includes(oneHandedSubtype)));
   if (twoHanders.length === 0 || ids.length === 1) return null;
   if (twoHanders.length > 1) return { code: "multiple-two-handers", cardId: twoHanders[0] };
 
@@ -101,10 +105,11 @@ export function arenaWeaponIssue(
   heroId: string,
   ids: readonly string[],
 ): WeaponSelectionIssue | null {
-  if (SINGLE_WEAPON_ZONE_HEROES.includes(cards[heroId]?.name.toLowerCase() ?? "") && ids.length > 1) {
+  const heroName = cards[heroId]?.name.toLowerCase() ?? "";
+  if (SINGLE_WEAPON_ZONE_HEROES.includes(heroName) && ids.length > 1) {
     return { code: "single-weapon-zone", cardId: heroId };
   }
-  return weaponZoneIssue(cards, ids);
+  return weaponZoneIssue(cards, ids, ONE_HANDED_SUBTYPE_HEROES[heroName]);
 }
 
 function weaponIssueMessage(
@@ -123,15 +128,6 @@ function weaponIssueMessage(
     case "two-hander-pairing":
       return "a two-hand weapon can only be paired with a compatible quiver or Perched card";
   }
-}
-
-/** English validation error for a weapon-zone selection, ignoring hero limits. */
-export function weaponSelectionError(
-  cards: Record<string, CardData>,
-  ids: readonly string[],
-): string | null {
-  const issue = weaponZoneIssue(cards, ids);
-  return issue ? weaponIssueMessage(cards, ids, issue) : null;
 }
 
 /** Pure presentation validator shared by browser and server. */
