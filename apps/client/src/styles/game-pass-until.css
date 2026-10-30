@@ -1,0 +1,237 @@
+/* Pass until: a fast-forward segment on Pass that also shows the armed state. */
+.hud-pass-row {
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+}
+.pass-until { display: contents; }
+
+.hud-pass-row > .btn-pass:has(+ .pass-until),
+.mobile-primary-action > .btn-pass:has(+ .pass-until) {
+  border-start-end-radius: 0;
+  border-end-end-radius: 0;
+}
+.pass-until-toggle {
+  position: relative;
+  display: grid;
+  flex: 0 0 30px;
+  place-items: center;
+  width: 30px;
+  height: auto;
+  min-height: 0;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid #c4483b99;
+  border-inline-start-color: #c4483b40;
+  border-radius: 0 6px 6px 0;
+  background: #9e2b2524;
+  clip-path: none;
+  color: #ffd8c8b3;
+  transition: background-color 120ms ease, border-color 120ms ease, color 120ms ease;
+}
+.pass-until-toggle:hover { background: #b0322855; border-color: #e0684a; color: #fff1e8; }
+.pass-until-toggle:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+:where(.hud-pass-row, .mobile-primary-action, .hud-plate-actions):not(:has(> .btn-pass)) .pass-until-toggle {
+  border-inline-start-color: #c4483b99;
+  border-radius: 6px;
+}
+.pass-until-toggle-icon { width: 15px; height: 15px; }
+
+/* Armed: the segment turns gold and a thin run of chevrons moves along its
+   foot while the server passes; it stills when a choice is waiting. */
+.pass-until-toggle-armed,
+.pass-until-toggle-armed:hover {
+  border-color: #ffd47999;
+  background: #ffd4791a;
+  color: var(--gold);
+}
+.pass-until-run {
+  position: absolute;
+  inset: auto 3px 3px;
+  height: 4px;
+  background:
+    linear-gradient(45deg, transparent 40%, currentColor 40% 65%, transparent 65%) 0 0 / 6px 50% repeat-x,
+    linear-gradient(135deg, transparent 40%, currentColor 40% 65%, transparent 65%) 0 100% / 6px 50% repeat-x;
+  opacity: .55;
+  animation: pass-until-run 700ms linear infinite;
+}
+@keyframes pass-until-run {
+  to { background-position: 6px 0, 6px 100%; }
+}
+.pass-until-toggle-armed:has(.pass-until-run) .pass-until-toggle-icon { transform: translateY(-2px); }
+
+.pass-until-live {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* The menu is portalled to the body, fixed under the toggle. Rows are one
+   line each: icon, name, then the shortcut as keycaps. */
+.pass-until-menu {
+  position: fixed;
+  z-index: 1000;
+  width: max-content;
+  min-width: 212px;
+  padding: 4px;
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+  background: var(--surface-panel);
+  box-shadow: 0 16px 40px #000c, inset 0 1px 0 #ffd4791a;
+  color: var(--text-primary);
+  font-family: var(--font-lobby-ui);
+  text-align: start;
+  animation: pass-until-menu-in 120ms ease-out;
+}
+.pass-until-menu-above { animation-name: pass-until-menu-up; }
+.pass-until-tooltip { max-width: 240px; text-align: start; }
+@keyframes pass-until-menu-in {
+  from { opacity: 0; transform: translateY(-4px); }
+}
+.pass-until-heading {
+  margin: 0;
+  padding: 6px 10px 4px;
+  color: var(--text-muted);
+  font-size: 11.5px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+.pass-until-heading-armed { display: grid; gap: 1px; color: var(--gold); }
+.pass-until-heading-paused { color: var(--text-muted); font-weight: 400; }
+.pass-until-option {
+  position: relative;
+  display: grid;
+  grid-template-columns: 16px 1fr auto;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 34px;
+  padding: 0 8px 0 10px;
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  clip-path: none;
+  color: var(--text-secondary);
+  font: inherit;
+  letter-spacing: normal;
+  text-align: start;
+  text-transform: none;
+}
+.pass-until-option:hover,
+.pass-until-option:focus-visible {
+  background: #ffd47912;
+  color: var(--text-primary);
+  outline: none;
+}
+.pass-until-option:focus-visible { box-shadow: inset 0 0 0 1px #ffd47980; }
+/* The armed mode carries a gold notch on its leading edge. */
+.pass-until-option[aria-checked="true"] { background: #ffd47917; color: var(--gold); }
+.pass-until-option[aria-checked="true"]::before {
+  content: "";
+  position: absolute;
+  inset: 8px auto 8px 0;
+  width: 2px;
+  border-radius: 1px;
+  background: var(--gold);
+}
+.pass-until-option-icon {
+  width: 16px;
+  height: 16px;
+  color: var(--bronze);
+}
+.pass-until-option[aria-checked="true"] .pass-until-option-icon { color: var(--gold); }
+.pass-until-option-name { font-size: 13px; font-weight: 600; line-height: 1.3; white-space: nowrap; }
+.pass-until-keys {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  margin-inline-start: 14px;
+}
+/* Text keycaps match the Space keycap's border, height, and ink. */
+.pass-until-keycap {
+  display: grid;
+  place-items: center;
+  min-width: 20px;
+  height: 16px;
+  padding: 0 3px;
+  border: 1.5px solid #e1d5be88;
+  border-bottom-color: #e1d5bebb;
+  border-radius: 3px;
+  background: #fff1;
+  box-shadow: inset 0 -1px 0 #0004;
+  color: #cfc3adcc;
+  font: 700 10px/1 var(--font-lobby-ui);
+}
+.pass-until-option-stop {
+  display: block;
+  margin-top: 4px;
+  color: #ff9a8f;
+  font-size: 13px;
+  font-weight: 600;
+}
+.pass-until-option-stop::after {
+  content: "";
+  position: absolute;
+  inset: -3px 6px auto;
+  border-top: 1px solid var(--border-subtle);
+}
+
+/* Phones: a sheet above the gamebar, without keyboard hints. */
+.pass-until-menu-sheet {
+  right: 12px;
+  bottom: calc(76px + env(safe-area-inset-bottom));
+  left: 12px;
+  width: auto;
+  animation-name: pass-until-menu-up;
+}
+.pass-until-menu-sheet .pass-until-keys { display: none; }
+@media (pointer: coarse) {
+  .pass-until-keys { display: none; }
+}
+@keyframes pass-until-menu-up {
+  from { opacity: 0; transform: translateY(6px); }
+}
+
+/* The gamebar gives the split primary action the width its label needs. */
+.mobile-gamebar-actions > .mobile-primary-action:has(.pass-until-toggle) { display: flex; flex-grow: 2.6; }
+.mobile-gamebar-actions .mobile-primary-action:has(.pass-until-toggle) > .btn-pass {
+  flex: 1 1 auto;
+  width: auto;
+  min-width: 0;
+  font-size: 12.5px;
+  letter-spacing: .4px;
+}
+.mobile-primary-action .pass-until-toggle { flex-basis: 36px; width: 36px; }
+
+/* Phone landscape plate: rewind and fast-forward pair up above a
+   full-width primary action, which keeps the thumb target large. */
+.hud-plate-actions:has(.pass-until-toggle) {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+.hud-plate-actions:has(.pass-until-toggle) > .btn-pass { grid-column: 1 / -1; order: 1; }
+.status-rail .hud-plate-actions:has(.pass-until-toggle) > .hud-undo { width: auto; height: 32px; }
+.hud-plate-actions .pass-until-toggle {
+  width: auto;
+  height: 32px;
+  border: 1px solid #5a4426;
+  border-radius: 4px;
+  background: #00000033;
+  color: #cbb37a;
+}
+.hud-plate-actions:not(:has(.hud-undo)) .pass-until-toggle { grid-column: 1 / -1; }
+.hud-plate-actions .pass-until-toggle-armed {
+  border-color: #ffd47999;
+  background: #ffd4791a;
+  color: var(--gold);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pass-until-run,
+  .pass-until-menu { animation: none; }
+}
+.table[data-motion-preference="reduced"] .pass-until-run { animation: none; }

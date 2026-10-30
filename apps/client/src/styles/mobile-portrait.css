@@ -218,7 +218,7 @@
   .status-float .ap-pip { order: 2; }
   .status-float .hud-resources { order: 3; }
   .status-float .life-opp { order: 4; justify-self: end; }
-  .status-float > .btn-pass { display: none; }
+  .status-float .hud-pass-row { display: none; }
   .status-float .life {
     gap: 10px;
     font-size: 29px;

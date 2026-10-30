@@ -305,6 +305,7 @@ export function StatusFloat({
   primaryAction,
   passDisabled = false,
   onPass,
+  passUntil = null,
   onUndo = null,
   undoDisabled = false,
   rail = null,
@@ -332,6 +333,8 @@ export function StatusFloat({
   primaryAction: PrimaryAction | null;
   passDisabled?: boolean;
   onPass: () => void;
+  /** The pass-until control, attached to the primary action. */
+  passUntil?: ReactNode;
   /** Undo in the HUD; only the landscape bar shows it. */
   onUndo?: (() => void) | null;
   undoDisabled?: boolean;
@@ -425,10 +428,11 @@ export function StatusFloat({
           {rail.activeSeat === seat ? actionPointsPip : null}
         </div>
         <div className="hud-plate-stats">{stats}</div>
-        {side === "me" && (undoButton || primaryButton) ? (
+        {side === "me" && (undoButton || primaryButton || passUntil) ? (
           <div className="hud-plate-actions">
             {undoButton}
             {primaryButton}
+            {passUntil}
           </div>
         ) : null}
       </div>
@@ -455,7 +459,12 @@ export function StatusFloat({
       {actionPointsPip}
       {resourcesPip}
       {undoButton}
-      {primaryButton}
+      {primaryButton || passUntil ? (
+        <div className="hud-pass-row">
+          {primaryButton}
+          {passUntil}
+        </div>
+      ) : null}
       {myLifeStatus}
     </div>
   );

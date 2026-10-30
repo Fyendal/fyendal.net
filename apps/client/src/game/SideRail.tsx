@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { useIntl } from "react-intl";
 import type { EmoteMessage, GameLogViewEntry, UndoTarget } from "@fyendal/shared";
 import { cardData } from "@fyendal/cards/client";
@@ -201,6 +201,7 @@ export function SideRail({
   onInspectCard,
   mobilePrimaryAction,
   mobilePrimaryActionDisabled = false,
+  mobilePassUntil = null,
   onMobilePrimaryAction,
   backgroundSearching,
   onStopBackgroundSearch,
@@ -279,6 +280,7 @@ export function SideRail({
   onInspectCard: (cardId: string) => void;
   mobilePrimaryAction: PrimaryAction | null;
   mobilePrimaryActionDisabled?: boolean;
+  mobilePassUntil?: ReactNode;
   onMobilePrimaryAction: () => void;
   backgroundSearching: boolean;
   onStopBackgroundSearch: () => void;
@@ -364,13 +366,16 @@ export function SideRail({
           >
             {intl.formatMessage({ id: "game.log.short" })}
           </button>
-          {mobilePrimaryAction ? (
+          {mobilePrimaryAction || mobilePassUntil ? (
             <div className="mobile-primary-action">
-              <PrimaryActionButton
-                action={mobilePrimaryAction}
-                disabled={mobilePrimaryActionDisabled}
-                onSelect={onMobilePrimaryAction}
-              />
+              {mobilePrimaryAction ? (
+                <PrimaryActionButton
+                  action={mobilePrimaryAction}
+                  disabled={mobilePrimaryActionDisabled}
+                  onSelect={onMobilePrimaryAction}
+                />
+              ) : null}
+              {mobilePassUntil}
             </div>
           ) : null}
           {onSendEmote && emoteSeat !== null ? (

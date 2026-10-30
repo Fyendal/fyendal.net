@@ -4,7 +4,7 @@ import { AchievementToast } from "../achievements/AchievementToast.js";
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { useIntl } from "react-intl";
 import { useShallow } from "zustand/react/shallow";
-import type { CardView, GameIntent, MeldSide } from "@fyendal/shared";
+import type { CardView, GameIntent, MeldSide, PassUntilMode } from "@fyendal/shared";
 import { cardData } from "@fyendal/cards/client";
 import { useStore } from "../store.js";
 import { cardPreviewSize, CardArtProvider, CardBack, CardFace, SquareCardPresentation } from "./Card.js";
@@ -62,6 +62,8 @@ import { hoverSurfaceLayout } from "./hoverSurfaceLayout.js";
 import { readEffectHint, sameEffectHint } from "./effects/effectHint.js";
 import { cardPreviewSurfaceSize } from "./cardPreviewFaces.js";
 import { skippableTokenRun } from "./tokenSkip.js";
+import { PassUntilControl } from "./PassUntilControl.js";
+import { chainLinkOpen, passUntilPaused } from "./passUntil.js";
 import { useStandingOrders } from "./useStandingOrders.js";
 import { standingOrderKey } from "./standingOrders.js";
 import { PlayerNameplate } from "./PlayerNameplate.js";
@@ -126,7 +128,7 @@ const EMPTY_INSTANCE_IDS: ReadonlySet<number> = new Set();
 
 export function GameBoard() {
   const intl = useIntl();
-  const { view: authoritativeView, viewUpdate: authoritativeViewUpdate, playerProfiles, updateAccountCosmetics, cardArt, legal, actionCandidates, roomCommandPending, pendingInteraction, pendingDefenderStageIds, yourSeat, spectating, spectatorCount, spectatorUsernames, botGame, betaTester, sendIntent, sendPriorityMode, sendStandingOrders, sendTokenSkip, sendEmote, kickSpectator, latestEmote, undo, error, leave, playBotAgain, opponentConnected, connected, connectionIssueVisible, roomCode, screen, replayFrames, replayViews, replayStep, replayNotes, setLiveReplayNote, watchReplay, downloadReplay, closeReplay, getRecordedViews, lastActionAt, claimVictory, reportBug, reportOpponent, backgroundSearching, stopBackgroundMatchmaking, authUser, authToken, setLobbyRail, unreadMessageCount, setSocialOpen } = useStore(
+  const { view: authoritativeView, viewUpdate: authoritativeViewUpdate, playerProfiles, updateAccountCosmetics, cardArt, legal, actionCandidates, roomCommandPending, pendingInteraction, pendingDefenderStageIds, yourSeat, spectating, spectatorCount, spectatorUsernames, botGame, betaTester, sendIntent, sendPriorityMode, sendStandingOrders, sendTokenSkip, passUntil, sendPassUntil, sendEmote, kickSpectator, latestEmote, undo, error, leave, playBotAgain, opponentConnected, connected, connectionIssueVisible, roomCode, screen, replayFrames, replayViews, replayStep, replayNotes, setLiveReplayNote, watchReplay, downloadReplay, closeReplay, getRecordedViews, lastActionAt, claimVictory, reportBug, reportOpponent, backgroundSearching, stopBackgroundMatchmaking, authUser, authToken, setLobbyRail, unreadMessageCount, setSocialOpen } = useStore(
     useShallow((state) => ({
       view: state.view,
       viewUpdate: state.viewUpdate,
@@ -148,6 +150,8 @@ export function GameBoard() {
       sendPriorityMode: state.sendPriorityMode,
       sendStandingOrders: state.sendStandingOrders,
       sendTokenSkip: state.sendTokenSkip,
+      passUntil: state.passUntil,
+      sendPassUntil: state.sendPassUntil,
       sendEmote: state.sendEmote,
       kickSpectator: state.kickSpectator,
       latestEmote: state.latestEmote,
@@ -347,6 +351,8 @@ export function GameBoard() {
   const [gameOverDismissed, setGameOverDismissed] = useState(false);
   const [confirmSkipArsenal, setConfirmSkipArsenal] = useState(false);
   const [confirmEndTurn, setConfirmEndTurn] = useState(false);
+  // Arming a turn-wide shortcut on the seat's own action phase ends it, so it shares the warning.
+  const [confirmPassUntil, setConfirmPassUntil] = useState<PassUntilMode | null>(null);
   const [boundedChoiceSelection, setBoundedChoiceSelection] = useState<{
     decisionKey: string;
     optionIds: readonly string[];
@@ -380,7 +386,10 @@ export function GameBoard() {
   useEffect(() => setGameOverDismissed(false), [winnerNow]);
   useEffect(() => setConfirmSkipArsenal(false), [arsenalDecisionKey]);
   // Any authoritative update (including undo) dismisses a pending end-turn warning.
-  useEffect(() => setConfirmEndTurn(false), [authoritativeView]);
+  useEffect(() => {
+    setConfirmEndTurn(false);
+    setConfirmPassUntil(null);
+  }, [authoritativeView]);
   // the combat chain window's on-screen rect, reported by ChainFloat so the
   // status window can dock to its right edge
   const [chainRect, setChainRect] = useState<DOMRect | null>(null);
@@ -521,10 +530,12 @@ export function GameBoard() {
     shouldWarnBeforeEndTurn(authoritativeView, yourSeat, actionCandidates);
   // Choosing a card or ability instead also dismisses it.
   useEffect(() => {
-    if (sel.kind !== "none") setConfirmEndTurn(false);
+    if (sel.kind === "none") return;
+    setConfirmEndTurn(false);
+    setConfirmPassUntil(null);
   }, [sel.kind]);
   useGameShortcuts({
-    passEnabled: passHotkeyEnabled && !confirmEndTurn,
+    passEnabled: passHotkeyEnabled && !confirmEndTurn && confirmPassUntil === null,
     hotkeyIntent,
     pendingDecision: view?.pendingDecision ?? null,
     setConfirmArsenalSkip: setConfirmSkipArsenal,
@@ -1118,6 +1129,25 @@ export function GameBoard() {
     awaitingHandoff ||
     !connected ||
     (defending ? defendIntent === null : !derived.canPass);
+  const passUntilAvailable = connected && !spectating && !replaying && view.phase !== "game-over";
+  const armPassUntil = (mode: PassUntilMode) => {
+    if (mode !== "chain-link" && warnBeforeEndTurn) {
+      setConfirmPassUntil(mode);
+      return;
+    }
+    sendPassUntil(mode);
+  };
+  const passUntilControl = (placement: "hud" | "toolbar") => passUntilAvailable ? (
+    <PassUntilControl
+      mode={passUntil}
+      linkOpen={chainLinkOpen(view)}
+      paused={passUntilPaused(view, seat, passUntil)}
+      hotkeys={placement === "hud"}
+      placement={placement}
+      onArm={armPassUntil}
+      onCancel={() => sendPassUntil(null)}
+    />
+  ) : null;
   const triggerPrimaryAction = defending
     ? () => {
         if (defendIntent) send(defendIntent);
@@ -1540,6 +1570,7 @@ export function GameBoard() {
         primaryAction={primaryAction}
         passDisabled={primaryActionDisabled}
         onPass={triggerPrimaryAction}
+        passUntil={passUntilControl("hud")}
         onUndo={mobileLandscapeViewport && canUndo ? () => undoAndDismissAnnouncement("last-action") : null}
         undoDisabled={roomCommandPending}
         rail={mobileLandscapeViewport
@@ -1601,13 +1632,18 @@ export function GameBoard() {
       {gameMotion.turnStartUiReady ? <DecisionFloat
         viewerSeat={seat}
         optionHotkeys={optionHotkeys}
-        endTurnConfirmation={confirmEndTurn && warnBeforeEndTurn
+        endTurnConfirmation={(confirmEndTurn || confirmPassUntil !== null) && warnBeforeEndTurn
           ? {
               onConfirm: () => {
                 setConfirmEndTurn(false);
-                send({ kind: "pass" });
+                setConfirmPassUntil(null);
+                if (confirmPassUntil) sendPassUntil(confirmPassUntil);
+                else send({ kind: "pass" });
               },
-              onCancel: () => setConfirmEndTurn(false),
+              onCancel: () => {
+                setConfirmEndTurn(false);
+                setConfirmPassUntil(null);
+              },
             }
           : null}
         pitchFocused={choosingPitch || pitchSource !== null}
@@ -1790,6 +1826,7 @@ export function GameBoard() {
         mobilePrimaryAction={primaryAction}
         mobilePrimaryActionDisabled={primaryActionDisabled}
         onMobilePrimaryAction={triggerPrimaryAction}
+        mobilePassUntil={passUntilControl("toolbar")}
         backgroundSearching={backgroundSearching}
         onStopBackgroundSearch={stopBackgroundMatchmaking}
       />

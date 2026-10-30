@@ -1,4 +1,4 @@
-import type { GameIntent, PendingDecision } from "@fyendal/shared";
+import type { GameIntent, PassUntilMode, PendingDecision } from "@fyendal/shared";
 import { explicitDeclineOption } from "./decisionPass.js";
 
 type KeyboardTarget = {
@@ -82,6 +82,20 @@ export function shouldPassOnSpace(
   return !target?.closest?.(
     "input, textarea, select, [contenteditable='true']",
   );
+}
+
+/** Shift+Space passes until the opponent acts, F4 the chain link, and F6
+ *  the turn, outside text entry. */
+export function passUntilHotkey(
+  event: Pick<KeyboardEvent, "code" | "key" | "repeat" | "altKey" | "ctrlKey" | "metaKey" | "shiftKey" | "target">,
+): PassUntilMode | null {
+  if (event.repeat || event.altKey || event.ctrlKey || event.metaKey) return null;
+  const target = event.target as KeyboardTarget | null;
+  if (target?.closest?.("input, textarea, select, [contenteditable='true']")) return null;
+  if (event.code === "Space" && event.shiftKey) return "opponent";
+  if (event.key === "F4" && !event.shiftKey) return "chain-link";
+  if (event.key === "F6" && !event.shiftKey) return "turn";
+  return null;
 }
 
 /** Resolve Space to the primary action in a local card announcement. */
