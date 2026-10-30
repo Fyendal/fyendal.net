@@ -554,33 +554,32 @@ html:not(:lang(en)) :is(
 .end-turn-pass-toast {
   position: absolute;
   z-index: 20;
-  left: 50%;
-  top: calc(100% + 8px);
-  bottom: auto;
-  transform: translateX(-50%);
   width: max-content;
-  max-width: calc(100vw - var(--rail-w) - 32px);
-  padding: 11px 18px;
+  padding: 9px 18px;
   border: 1px solid #d6b44f;
   border-radius: 5px;
   background: #21170df2;
   box-shadow: 0 7px 24px #000c, 0 0 12px #d6b44f55;
-  color: #f2dda0;
-  font-family: var(--font-fantasy-meta);
-  font-size: 18px;
-  font-weight: 700;
-  letter-spacing: .035em;
-  line-height: 1.25;
+  color: var(--text-primary);
+  font: 600 16px/1.4 var(--font-lobby-ui);
   text-align: center;
+  text-wrap: balance;
   pointer-events: none;
   animation: end-turn-pass-blink 1.15s ease-in-out infinite;
+}
+/* Centered under the turn plaque but clamped left of the HUD (--hud-reserve). */
+.end-turn-pass-toast-divider {
+  --toast-room: calc(100% - var(--hud-reserve, 0px) - 24px);
+  --toast-w: min(30rem, var(--toast-room));
+  top: calc(100% + 8px);
+  left: clamp(12px, 50% - var(--toast-w) / 2, var(--toast-room) + 12px - var(--toast-w));
+  width: var(--toast-w);
 }
 .end-turn-pass-toast-mobile-hand { display: none; }
 @keyframes end-turn-pass-blink {
   50% {
     border-color: #fff0a6;
     box-shadow: 0 7px 24px #000c, 0 0 24px #e5c75cbb;
-    opacity: .62;
   }
 }
 
