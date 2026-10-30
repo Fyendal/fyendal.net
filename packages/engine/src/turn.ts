@@ -8,7 +8,7 @@ import { gameLogMessage, logCardValue, logPlayerValue, logPublic, nameOf } from 
 import { beginStatsTurn } from "./stats.js";
 import { opponent } from "./zoneQueries.js";
 import { controlledPermanents } from "./sourceQueries.js";
-import { arsenalCapacity, canUntapPermanent, drawCards, stampControlledName } from "./cardLifecycle.js";
+import { arsenalCapacity, canUntapPermanent, clearMovedCardPlayPermissions, drawCards, stampControlledName } from "./cardLifecycle.js";
 import { transitionZone } from "./transitions.js";
 
 /** Draw cards until the player's hand reaches their intellect. */
@@ -217,6 +217,7 @@ export function endTurn(state: GameStateInternal, runtime: EngineRuntime): void 
       c.faceDown = undefined;
       delete c.intimidated;
       delete c.returnToHandAtTurn;
+      clearMovedCardPlayPermissions(c);
       pl.hand.push(c);
       runtime.transitions.move(
         c,
@@ -272,6 +273,7 @@ export function answerArsenal(
     let slot = 0;
     while (used.has(slot)) slot++;
     card.arsenalSlot = slot;
+    clearMovedCardPlayPermissions(card);
     player.arsenal.push(card);
     runtime.transitions.move(
       card,
@@ -300,6 +302,7 @@ function continuePitchBottoming(state: GameStateInternal, runtime: EngineRuntime
     if (player.pitch.length === 0) continue;
     if (player.pitch.length === 1) {
       const card = player.pitch.shift() as CardInstance;
+      clearMovedCardPlayPermissions(card);
       player.deck.push(card);
       runtime.transitions.move(
         card,
@@ -370,6 +373,7 @@ export function answerEndPhasePitchOrder(
   player.pitch = [];
   for (const instanceId of finalOrder) {
     const card = cardsById.get(instanceId) as CardInstance;
+    clearMovedCardPlayPermissions(card);
     player.deck.push(card);
     runtime.transitions.move(
       card,

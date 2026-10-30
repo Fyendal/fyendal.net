@@ -47,7 +47,7 @@ import {
 } from "./combatValues.js";
 
 import { abilityResourceCost, activatedAbilityAvailable, canPayAbilityLifeCost, canPayActivatedEffectCardCosts, discardCostOptions, effectiveAbilityList } from "./abilityRules.js";
-import { settlesInArena, settlePlayedCard } from "./cardLifecycle.js";
+import { clearPlayFromZoneGrant, settlesInArena, settlePlayedCard } from "./cardLifecycle.js";
 import { alternativePlayCostOptions, canPlayAsInstant, cardPlayCost, cardPlayReductionForSeat, cardPlayRestrictedByModifier, playOriginRestricted, cardsPlayableFromArsenal, cardsPlayableFromZone, cardLayerGoAgain, consumeSingleUsePlayFromGroup, mayPlayFromArsenal, mayPlayFromZone, modifierMatchesPlayedCard, noteCardPlayed, notePlayPermissionSource, payAlternativePlayCost, playFromZoneOwnerMatches, playTargetOptions, preparePlayTarget, spendFriendlyPlayPermission } from "./playRules.js";
 import { canPayRequiredHandCardsForAdditionalCost, pitchValueOfInstance } from "./resources.js";
 import { heroAbilitiesDisabled } from "./stateQueries.js";
@@ -825,6 +825,8 @@ export function announceCardPlayed(
   if (!alreadyResolving) state.resolving.push(card);
   try {
     consumeSingleUsePlayFromGroup(state, card, origin);
+    // a played card becomes a new object (CR 3.0.9), so its play grant is spent
+    clearPlayFromZoneGrant(card);
     spendFriendlyPlayPermission(state, runtime, seat, card);
     for (const modifier of state.modifiers) {
       if (

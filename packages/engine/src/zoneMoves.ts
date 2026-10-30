@@ -45,27 +45,6 @@ import {
   transitionZoneIsPrivate,
 } from "./transitions.js";
 
-/** A card entering the graveyard is a new object (CR 3.0.9). Temporary
- * permission to play its previous object from an extra zone, together with
- * the permission's provenance, duration, and discount, does not survive that
- * reset. Effects that grant permission to the new graveyard object do so
- * after moving it there. */
-export function clearPlayFromZoneGrant(card: CardInstance): void {
-  delete card.playableFrom;
-  delete card.playableFromSourceCardId;
-  delete card.playableFromSingleUseGroup;
-  delete card.playableBySeat;
-  delete card.playableFromExpiry;
-  delete card.playableFromEndTurnExpiry;
-  delete card.playableFromUntilStartOfSeatTurn;
-  delete card.playableFromUntilEndOfSeatTurn;
-  delete card.playableFromGrantedTurn;
-  delete card.playableFromUntilChainClose;
-  delete card.playCostReduction;
-  delete card.playCostReductionSeat;
-  delete card.playableAsInstant;
-}
-
 /**
  * Put a card into its owner's graveyard: record per-turn facts in the owner's
  * flags (`graveName:<name>` / `graveCardType:<type>` /
@@ -97,7 +76,6 @@ function enterGraveyard(
     ));
     return;
   }
-  clearPlayFromZoneGrant(card);
   clearTemporaryObjectEffects(card);
   owner.graveyard.push(card);
   if (from === "deck") {

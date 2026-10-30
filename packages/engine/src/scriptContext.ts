@@ -56,7 +56,7 @@ import {
 
 import { contractObserverSources, controlledPermanents, hookSources } from "./sourceQueries.js";
 import { FROZEN_WHILE_SOURCE_IN_ARENA, isFrozen } from "./ruleQueries.js";
-import { arsenalCapacity, clearPrivateZonePlacement, clearTemporaryObjectEffects, hasCrank, resetActivatedAbilityUsage, stampEnteringLife } from "./cardLifecycle.js";
+import { arsenalCapacity, clearMovedCardPlayPermissions, clearPrivateZonePlacement, clearTemporaryObjectEffects, hasCrank, resetActivatedAbilityUsage, stampEnteringLife } from "./cardLifecycle.js";
 import {
   transitionZone,
   transitionZoneFromEngineZone,
@@ -968,6 +968,7 @@ export function makeCtx(
       if (index < 0) return false;
       const [card] = found.card.subcards.splice(index, 1);
       if (!card) return false;
+      clearMovedCardPlayPermissions(card);
       // Tokens exist only in the arena or as sub-cards (CR 8.1.8a).
       if (!cardHasType(state, card, "token")) (state.players[card.owner] as PlayerState).banish.push(card);
       logPublic(state, gameLogMessage(
@@ -1122,6 +1123,7 @@ export function makeCtx(
       if (!inventory) return false;
       const card = removeFromArray(inventory, instanceId);
       if (!card) return false;
+      clearMovedCardPlayPermissions(card);
       player.hand.push(card);
       logPublic(state, gameLogMessage(
         `${nameOf(state, card.cardId)} is revealed from inventory and put into hand`,
@@ -1602,6 +1604,7 @@ export function makeCtx(
       const card = target.hand.splice(rngInt(state, target.hand.length), 1)[0] as CardInstance;
       card.faceDown = true;
       card.returnToHandAtTurn = returnTurn;
+      clearMovedCardPlayPermissions(card);
       target.banish.push(card);
       logPublic(state, gameLogMessage(
         `${nameOf(state, target.heroCardId)} banishes a random card face down`,
@@ -2664,6 +2667,7 @@ export function makeCtx(
       const sourceFaceDown = card.faceDown === true;
       card.faceDown = opts?.faceUp === false ? true : undefined;
       card.arsenalSlot = nextArsenalSlot(owner);
+      clearMovedCardPlayPermissions(card);
       owner.arsenal.push(card);
       runtime.transitions.move(
         card,

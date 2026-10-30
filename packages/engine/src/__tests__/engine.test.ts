@@ -1331,6 +1331,32 @@ describe("game setup & turn structure", () => {
     expect(resetCard.playableAsInstant).toBeUndefined();
   });
 
+  it("clears a banished card's play grant and graveyard replacement when it leaves and returns", () => {
+    const s = makeGame(105);
+    const card = player(s, 0).hand[0]!;
+    const ctx = makeCtx(s, engineRuntime, 0, player(s, 0).hero);
+    expect(ctx.banish(card.instanceId)).toBe(true);
+    ctx.allowPlayFrom(card.instanceId, "banish", { graveyardReplacement: "banish" });
+
+    expect(ctx.moveToHand(card.instanceId)).toBe(true);
+    expect(ctx.banish(card.instanceId)).toBe(true);
+
+    expect(card.playableFrom).toBeUndefined();
+    expect(card.temporaryGraveyardReplacement).toBeUndefined();
+  });
+
+  it("clears a deck card's play grant when it is drawn", () => {
+    const s = makeGame(106);
+    const card = player(s, 0).deck[0]!;
+    const ctx = makeCtx(s, engineRuntime, 0, player(s, 0).hero);
+    ctx.allowPlayFrom(card.instanceId, "deck");
+
+    ctx.drawCards(0, 1);
+
+    expect(player(s, 0).hand.at(-1)).toBe(card);
+    expect(card.playableFrom).toBeUndefined();
+  });
+
   it("grants matching cards play permission from a zone for the modifier duration", () => {
     const s = makeGame(107);
     s.cardsRef = {

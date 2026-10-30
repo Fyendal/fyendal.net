@@ -11,10 +11,10 @@ import {
 import type { GameStateInternal } from "./runtimeState.js";
 
 import type { CardInstance, ChainLinkState, Modifier, PlayerState, StackLayer } from "./state.js";
-import { clearPlayFromZoneGrant, destroyControlledCard, destroyPermanent, enterBanish } from "./zoneMoves.js";
+import { destroyControlledCard, destroyPermanent, enterBanish } from "./zoneMoves.js";
 import { currentLink, findCardAnywhere, opponent, removeFromArray } from "./zoneQueries.js";
 import type { MeldSide, PlayableZone } from "@fyendal/shared";
-import { noteActionPlayedOrActivated } from "./cardLifecycle.js";
+import { clearPlayFromZoneGrant, noteActionPlayedOrActivated } from "./cardLifecycle.js";
 import {
   actionKindRestrictionApplies, actionLimitReached, firstActionExtraCost, goAgainSuppressed,
 } from "./ruleQueries.js";
@@ -102,7 +102,6 @@ export function consumeSingleUsePlayFromGroup(
       if (candidate.playableFromSingleUseGroup === group) clearPlayFromZoneGrant(candidate);
     }
   }
-  clearPlayFromZoneGrant(card);
 }
 
 /** Whether the only active permission to play `card` from `zone` requires the

@@ -2277,3 +2277,23 @@ describe("HNT — Spur Locked", () => {
     expect(g.state.pendingDecision?.chooseHook).not.toBe("spur-search");
   });
 });
+
+describe("HNT — Under the Trap-Door", () => {
+  it("lets the banished trap be played only once", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", hand: ["under the trap-door|3"], graveyard: ["rune snare|1"] },
+        { hero: "dorinthea" },
+      ],
+    });
+
+    g.activate("under the trap-door|3").chooseCard("rune snare|1");
+    g.play("rune snare|1", { fromZone: "banish" });
+
+    const snare = g.state.players[0]!.banish.find((card) => card.cardId === printingId("rune snare|1"));
+    expect(snare).toBeDefined();
+    expect(legalIntents(g.state, 0).some((intent) =>
+      intent.kind === "play-from-zone" && intent.instanceId === snare!.instanceId,
+    )).toBe(false);
+  });
+});

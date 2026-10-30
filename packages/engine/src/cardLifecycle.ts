@@ -67,6 +67,30 @@ export function clearPrivateZonePlacement(card: CardInstance): void {
  * a resolving layer and its lingering effects can still read it. */
 const ARENA_STATUS_KEYS = ["attacked", "frozenUntilTurn", "marked"];
 
+/** A card-scoped play permission ends when the card is played or changes zones
+ * (CR 3.0.9); effects that grant one to the new object do so after moving it. */
+export function clearPlayFromZoneGrant(card: CardInstance): void {
+  delete card.playableFrom;
+  delete card.playableFromSourceCardId;
+  delete card.playableFromSingleUseGroup;
+  delete card.playableBySeat;
+  delete card.playableFromExpiry;
+  delete card.playableFromEndTurnExpiry;
+  delete card.playableFromUntilStartOfSeatTurn;
+  delete card.playableFromUntilEndOfSeatTurn;
+  delete card.playableFromGrantedTurn;
+  delete card.playableFromUntilChainClose;
+  delete card.playCostReduction;
+  delete card.playCostReductionSeat;
+  delete card.playableAsInstant;
+}
+
+/** Zone-move reset for moves that skip `clearTemporaryObjectEffects`. */
+export function clearMovedCardPlayPermissions(card: CardInstance): void {
+  clearPlayFromZoneGrant(card);
+  delete card.temporaryGraveyardReplacement;
+}
+
 /** A card that changes zones becomes a new object (CR 3.0.9). Effects scoped
  * to its previous object (this-chain defense, this-turn power, granted or
  * suppressed keywords and names, base power overrides, freezes lasting while
@@ -87,6 +111,7 @@ export function clearTemporaryObjectEffects(card: CardInstance): void {
   delete card.suppressedKeywords;
   delete card.grantedNames;
   delete card.defCounters;
+  clearMovedCardPlayPermissions(card);
   if (card.counters) card.lastKnownCounters = card.counters;
   delete card.counters;
   const values = card.scriptState;
@@ -164,6 +189,7 @@ export function drawCards(
   for (let i = 0; i < count && player.deck.length > 0; i++) {
     const card = player.deck.shift() as CardInstance;
     clearPrivateZonePlacement(card);
+    clearMovedCardPlayPermissions(card);
     player.hand.push(card);
     drawnCards.push(card);
     runtime.transitions.move(

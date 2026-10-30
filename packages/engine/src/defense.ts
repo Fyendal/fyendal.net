@@ -45,7 +45,7 @@ import {
 import { destroyPermanent, fireLeaveCombatChain, moveToGraveyard } from "./zoneMoves.js";
 import { hookSources } from "./sourceQueries.js";
 
-import { drawCards } from "./cardLifecycle.js";
+import { clearMovedCardPlayPermissions, drawCards } from "./cardLifecycle.js";
 import { snapshotSerializable } from "./ruleQueries.js";
 import { declaredLayerTargetLegal } from "./layerTargets.js";
 import { cardProhibitedByChosenName } from "./restrictions.js";
@@ -124,6 +124,7 @@ export function resolveIntimidate(
     const card = defender.hand.splice(idx, 1)[0] as CardInstance;
     card.faceDown = true;
     card.intimidated = true;
+    clearMovedCardPlayPermissions(card);
     defender.banish.push(card);
     runtime.transitions.move(
       card,
