@@ -46,8 +46,14 @@ function daggerTargets(ctx: ScriptCtx): number[] {
     .filter((instanceId, index, ids) => ids.indexOf(instanceId) === index);
 }
 
-function chooseDisease(ctx: ScriptCtx): void {
-  requestDiseaseTokenChoice(ctx, "mpa-phial-disease", [FRAILTY, INERTIA, BLOODROT_POX]);
+const DISEASES: readonly string[] = [FRAILTY, INERTIA, BLOODROT_POX];
+
+function chooseDisease(ctx: ScriptCtx, hook: string): void {
+  requestDiseaseTokenChoice(ctx, hook, DISEASES);
+}
+
+function createChosenDisease(ctx: ScriptCtx, option: string): void {
+  if (DISEASES.includes(option)) ctx.createToken(option, opponentSeat(ctx));
 }
 
 function isInfected(ctx: ScriptCtx, seat: number): boolean {
@@ -97,7 +103,7 @@ export const mpa: Record<string, CardScript> = {
       },
     },
     onGrantedHit(ctx, hook) {
-      if (hook === "mpa-phial-hit") chooseDisease(ctx);
+      if (hook === "mpa-phial-hit") chooseDisease(ctx, "mpa-phial-disease");
     },
     // A thrown dagger hits through effect damage, which never reaches the
     // combat on-hit hook, so its live grant is matched here instead.
@@ -113,13 +119,10 @@ export const mpa: Record<string, CardScript> = {
       );
     },
     onFriendlyEffectHit(ctx) {
-      chooseDisease(ctx);
+      chooseDisease(ctx, "mpa-phial-disease");
     },
     onChoose(ctx, hook, option) {
-      if (hook !== "mpa-phial-disease") return;
-      if (option === FRAILTY || option === INERTIA || option === BLOODROT_POX) {
-        ctx.createToken(option, opponentSeat(ctx));
-      }
+      if (hook === "mpa-phial-disease") createChosenDisease(ctx, option);
     },
   },
 
@@ -177,7 +180,7 @@ export const mpa: Record<string, CardScript> = {
     },
     onGrantedHit(ctx, hook) {
       if (hook !== "mpa-outbreak-hit") return;
-      for (const tokenId of [FRAILTY, INERTIA, BLOODROT_POX]) {
+      for (const tokenId of DISEASES) {
         ctx.createToken(tokenId, opponentSeat(ctx));
       }
     },
@@ -389,13 +392,10 @@ export const mpa: Record<string, CardScript> = {
     ...tokenContractWithSilver((ctx, token) => ctx.cardTypes(token).includes("disease")),
     canTriggerOnHit: (ctx) => ctx.link?.targetAllyId === undefined,
     onHit(ctx) {
-      requestDiseaseTokenChoice(ctx, "mpa-sick-intent-disease", [FRAILTY, INERTIA, BLOODROT_POX]);
+      chooseDisease(ctx, "mpa-sick-intent-disease");
     },
     onChoose(ctx, hook, option) {
-      if (hook !== "mpa-sick-intent-disease") return;
-      if (option === FRAILTY || option === INERTIA || option === BLOODROT_POX) {
-        ctx.createToken(option, opponentSeat(ctx));
-      }
+      if (hook === "mpa-sick-intent-disease") createChosenDisease(ctx, option);
     },
   },
 

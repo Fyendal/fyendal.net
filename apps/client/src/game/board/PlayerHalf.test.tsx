@@ -409,7 +409,7 @@ describe("PlayerHalf", () => {
     });
 
     expect(html).toMatch(
-      /class="board-card-stack board-card-stack-multiple" data-stack-depth="2"[^>]*data-motion-card="0:board:2"[^>]*data-motion-card-aliases="0:board:4"[^>]*>.*board-card-count" aria-label="2 stacked cards">×2</,
+      /class="board-card-stack board-card-stack-multiple" data-stack-depth="2"[^>]*data-motion-card="0:board:2"[^>]*data-motion-card-aliases="0:board:4"[^>]*>.*board-card-count" data-motion-stack-count="" aria-label="2 stacked cards">×2</,
     );
     expect(html.match(/data-motion-card="0:board:/g)).toHaveLength(1);
   });

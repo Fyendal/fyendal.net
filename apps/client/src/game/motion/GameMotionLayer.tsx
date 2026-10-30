@@ -288,6 +288,27 @@ function MotionFlightOverlay({
   );
 }
 
+/** The arena stack's ×N badge crossfades on the flight's own timeline. */
+function MotionStackCount({ flight }: { flight: MotionFlight }) {
+  const change = flight.stackCountChange;
+  if (!change) return null;
+  const style: MotionStyle = {
+    ...rectStyle(change.rect),
+    "--motion-delay": `${flight.delayMs}ms`,
+    "--motion-duration": `${motionFlightDurationMs(flight)}ms`,
+  };
+  return (
+    <div className="game-motion-stack-count" style={style}>
+      {change.from > 1 ? (
+        <span className="board-card-count game-motion-stack-count-from">×{change.from}</span>
+      ) : null}
+      {change.to > 1 ? (
+        <span className="board-card-count game-motion-stack-count-to">×{change.to}</span>
+      ) : null}
+    </div>
+  );
+}
+
 function MotionDeckCover({ flight, squareCardsEnabled }: { flight: MotionFlight; squareCardsEnabled: boolean }) {
   if (!flight.destinationCoverVisual) return null;
   return (
@@ -393,7 +414,7 @@ export function GameMotionLayer({
     <>
       {appearanceFlights.length > 0 ? (
         <div
-          className="game-motion-layer game-motion-layer-under-floats"
+          className={`game-motion-layer game-motion-layer-under-floats${batch.reducedMotion ? " game-motion-layer-reduced" : ""}`}
           aria-hidden="true"
         >
           {appearanceFlights.map((flight) => (
@@ -406,6 +427,9 @@ export function GameMotionLayer({
               onFlightDepart={onFlightDepart}
               onCueComplete={completeCue}
             />
+          ))}
+          {appearanceFlights.map((flight) => (
+            <MotionStackCount flight={flight} key={`${flight.id}:count`} />
           ))}
         </div>
       ) : null}
@@ -469,6 +493,9 @@ export function GameMotionLayer({
         ))}
         {boardFlights.map((flight) => (
           <MotionDeckCover flight={flight} squareCardsEnabled={squareCardsEnabled} key={`${flight.id}:deck-cover`} />
+        ))}
+        {boardFlights.map((flight) => (
+          <MotionStackCount flight={flight} key={`${flight.id}:count`} />
         ))}
       </div>
       {[...underCardFlights].map(([coverSelector, flights]) => (

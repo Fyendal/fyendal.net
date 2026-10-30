@@ -112,6 +112,18 @@
   animation-fill-mode: both;
 }
 
+.game-motion-stack-count {
+  position: absolute;
+  z-index: 3;
+  pointer-events: none;
+}
+.game-motion-stack-count-from {
+  animation: game-motion-count-out var(--motion-duration) ease-in var(--motion-delay) both;
+}
+.game-motion-stack-count-to {
+  animation: game-motion-count-in var(--motion-duration) cubic-bezier(.2, .8, .3, 1.25) var(--motion-delay) both;
+}
+
 .game-motion-flight-arsenal {
   animation-name: game-motion-arsenal;
 }
@@ -302,6 +314,16 @@
 @keyframes game-motion-hold {
   from { opacity: 1; transform: translate3d(0, 0, 0); }
   to { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+
+@keyframes game-motion-count-out {
+  from { opacity: 1; transform: scale(1); }
+  to { opacity: 0; transform: scale(.6); }
+}
+
+@keyframes game-motion-count-in {
+  from { opacity: 0; transform: scale(1.45); }
+  to { opacity: 1; transform: scale(1); }
 }
 
 @keyframes game-motion-appear {
@@ -547,6 +569,14 @@
 
 .game-motion-layer-reduced .game-motion-flight-disappear {
   animation-name: game-motion-disappear-reduced;
+}
+
+.game-motion-layer-reduced .game-motion-stack-count-from {
+  animation-name: game-motion-disappear-reduced;
+}
+
+.game-motion-layer-reduced .game-motion-stack-count-to {
+  animation-name: game-motion-appear;
 }
 
 @keyframes game-motion-disappear-reduced {

@@ -40,6 +40,8 @@ export interface MotionAnchorSnapshot {
   focusSources?: ReadonlyMap<number, MotionRect>;
   /** Visual depth (2 or 3) of arena stacks, keyed like `cards`. */
   stackDepths?: ReadonlyMap<string, number>;
+  /** Every presentation key merged into the same arena stack, keyed by each member. */
+  stackMembers?: ReadonlyMap<string, readonly string[]>;
 }
 
 export interface MeasuredMotionAnchors {
@@ -91,6 +93,8 @@ export interface MotionFlight {
   destinationLayer?: "chain" | "stack";
   /** The moving copy is an arena stack; draw its stacking edges while it slides. */
   stackDepth?: number;
+  /** An arena stack's ×N count changes with this flight and animates beside it. */
+  stackCountChange?: { from: number; to: number; rect: MotionRect };
 }
 
 export function motionFlightDurationMs(
@@ -138,10 +142,34 @@ function motionRect(element: Element): MotionRect | null {
   return { left: rect.left, top: rect.top, width: rect.width, height: rect.height };
 }
 
+/** The ×N change of the arena stack an arriving or departing `key` belongs
+ * to, drawn over the stack wherever it remains. Each stack animates once. */
+function stackCountChange(
+  key: string,
+  previous: MotionAnchorSnapshot,
+  current: MotionAnchorSnapshot,
+  fallbackRect: MotionRect,
+  countedStacks: Set<string>,
+): MotionFlight["stackCountChange"] {
+  const members = current.stackMembers?.get(key) ?? previous.stackMembers?.get(key) ?? [key];
+  if (countedStacks.has(members[0]!)) return undefined;
+  countedStacks.add(members[0]!);
+  const countIn = (snapshot: MotionAnchorSnapshot) => {
+    const present = members.find((member) => snapshot.cards.has(member));
+    return present === undefined ? 0 : snapshot.stackMembers?.get(present)?.length ?? 1;
+  };
+  const from = countIn(previous);
+  const to = countIn(current);
+  if (from === to || Math.max(from, to) < 2) return undefined;
+  const remaining = members.find((member) => current.cards.has(member));
+  return { from, to, rect: (remaining ? current.cards.get(remaining) : undefined) ?? fallbackRect };
+}
+
 /** Read all geometry before the coordinator performs any masking/class writes. */
 export function measureMotionAnchors(root: ParentNode): MeasuredMotionAnchors {
   const cards = new Map<string, MotionRect>();
   const stackDepths = new Map<string, number>();
+  const stackMembers = new Map<string, readonly string[]>();
   const zones = new Map<string, MotionRect>();
   const cardSizedZones = new Set<string>();
   const cardElements = new Map<string, HTMLElement>();
@@ -156,14 +184,17 @@ export function measureMotionAnchors(root: ParentNode): MeasuredMotionAnchors {
       ...(element.dataset.motionCardAliases?.split(/\s+/).filter(Boolean) ?? []),
     ];
     const stackDepth = Number(element.dataset.stackDepth);
+    const stackCount = keys.length > 1 ? element.querySelector<HTMLElement>("[data-motion-stack-count]") : null;
     for (const presentationKey of keys) {
       if (cards.has(presentationKey)) continue;
       cards.set(presentationKey, rect);
       if (stackDepth >= 2) stackDepths.set(presentationKey, stackDepth);
-      // An alias is a card merged into a multi-card arena stack. Its element is
-      // the whole stack, so masking it would hide the cards already there and
-      // their stacking effect until the arrival lands.
+      if (keys.length > 1) stackMembers.set(presentationKey, keys);
+      // An alias is a card merged into a multi-card arena stack. Masking the
+      // whole stack would hide the cards already there, so an arrival masks
+      // only the count that already includes it.
       if (presentationKey === key) cardElements.set(presentationKey, element);
+      else if (stackCount) cardElements.set(presentationKey, stackCount);
     }
   }
   for (const element of root.querySelectorAll<HTMLElement>("[data-motion-zone]")) {
@@ -191,7 +222,7 @@ export function measureMotionAnchors(root: ParentNode): MeasuredMotionAnchors {
     const rect = motionRect(element);
     if (Number.isSafeInteger(instanceId) && instanceId >= 0 && rect) focusSources.set(instanceId, rect);
   }
-  return { snapshot: { cards, zones, cardSizedZones, focusSources, stackDepths }, cardElements };
+  return { snapshot: { cards, zones, cardSizedZones, focusSources, stackDepths, stackMembers }, cardElements };
 }
 
 function endpoint(
@@ -371,6 +402,7 @@ export function resolveMotionBatch(
   const transitLinks: Array<{ arrival: MotionFlight; departure: MotionFlight }> = [];
   const connectors: MotionConnector[] = [];
   const boardAppearances = new Map<string, MotionFlight>();
+  const countedStacks = new Set<string>();
   const effectDraws: Array<{ event: MoveMotionEvent; flight: MotionFlight }> = [];
   const effectDiscards: Array<{ event: MoveMotionEvent; flight: MotionFlight }> = [];
   const handDepartures: Array<{ seat: number; flight: MotionFlight }> = [];
@@ -438,6 +470,10 @@ export function resolveMotionBatch(
         // The live card is already gone; keep a copy while this batch is queued.
         queueHoldSource: true,
       };
+      const countChange = event.source.kind === "board"
+        ? stackCountChange(event.sourcePresentationKey, previous, current, rect, countedStacks)
+        : undefined;
+      if (countChange) flight.stackCountChange = countChange;
       flights.push(flight);
       if (event.source.kind === "board") boardDepartures.push({ seat: event.source.seat, flight });
       continue;
@@ -486,6 +522,11 @@ export function resolveMotionBatch(
             ? { destinationLayer }
             : {}),
         };
+        const countChange = event.kind === "appear" && event.destination.kind === "board"
+          && event.destinationPresentationKey
+          ? stackCountChange(event.destinationPresentationKey, previous, current, rect, countedStacks)
+          : undefined;
+        if (countChange) flight.stackCountChange = countChange;
         flights.push(flight);
         if (groupedAppearanceKey) boardAppearances.set(groupedAppearanceKey, flight);
       }

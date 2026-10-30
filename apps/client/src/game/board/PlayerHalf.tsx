@@ -507,6 +507,7 @@ export function PlayerHalf({
                   {group.count > 1 ? (
                     <span
                       className="board-card-count"
+                      data-motion-stack-count=""
                       aria-label={intl.formatMessage(
                         { id: "game.zone.stackedCards" },
                         { count: group.count },

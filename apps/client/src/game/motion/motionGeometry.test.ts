@@ -1000,6 +1000,54 @@ describe("motion geometry", () => {
     expect(batch?.connectors).toEqual([]);
   });
 
+  it("crossfades an arena stack's count as a token joins it", () => {
+    const stack = rect(300, 400);
+    const stackOf = (keys: string[]): MotionAnchorSnapshot => ({
+      cards: new Map(keys.map((key) => [key, stack])),
+      zones: new Map(),
+      stackMembers: new Map(keys.map((key) => [key, keys])),
+    });
+    const batch = resolveMotionBatch(
+      [{
+        kind: "appear",
+        destination: { kind: "board", seat: 0 },
+        visual: { kind: "face", card: { instanceId: 9, cardId: "EVR195", owner: 0 } },
+        instanceId: 9,
+        destinationPresentationKey: "0:board:9",
+      }],
+      stackOf(["0:board:7", "0:board:8"]),
+      stackOf(["0:board:7", "0:board:8", "0:board:9"]),
+      14,
+    );
+
+    expect(batch?.flights[0]?.stackCountChange).toEqual({ from: 2, to: 3, rect: stack });
+  });
+
+  it("fades out an arena stack's count as it drops to a single card", () => {
+    const stack = rect(300, 400);
+    const batch = resolveMotionBatch(
+      [{
+        kind: "disappear",
+        source: { kind: "board", seat: 0 },
+        visual: { kind: "face", card: { instanceId: 7, cardId: "EVR195", owner: 0 } },
+        instanceId: 7,
+        sourcePresentationKey: "0:board:7",
+      }],
+      {
+        cards: new Map([["0:board:7", stack], ["0:board:8", stack]]),
+        zones: new Map(),
+        stackMembers: new Map([
+          ["0:board:7", ["0:board:7", "0:board:8"]],
+          ["0:board:8", ["0:board:7", "0:board:8"]],
+        ]),
+      },
+      anchors({ cards: [["0:board:8", stack]] }),
+      15,
+    );
+
+    expect(batch?.flights[0]?.stackCountChange).toEqual({ from: 2, to: 1, rect: stack });
+  });
+
   it("flies a visible copy of a hero trigger from the hero to its stack layer", () => {
     const heroSource = rect(120, 280, 100, 138);
     const stackDestination = rect(460, 330, 100, 138);
@@ -1244,6 +1292,7 @@ describe("motion geometry", () => {
         motionCardAliases: "0:board:8 0:board:9",
       },
       getBoundingClientRect: () => rect(10, 20),
+      querySelector: () => null,
     } as unknown as HTMLElement;
     const zoneElement = {
       dataset: { motionZone: "0:hand" },
@@ -1265,6 +1314,24 @@ describe("motion geometry", () => {
     expect(measured.cardElements.has("0:board:8")).toBe(false);
   });
 
+  it("masks only a stack's count for a card merged into it", () => {
+    const countElement = { dataset: {} } as unknown as HTMLElement;
+    const stackElement = {
+      dataset: { motionCard: "0:board:7", motionCardAliases: "0:board:8 0:board:9" },
+      getBoundingClientRect: () => rect(10, 20),
+      querySelector: (selector: string) => (selector === "[data-motion-stack-count]" ? countElement : null),
+    } as unknown as HTMLElement;
+    const root = {
+      querySelectorAll: (selector: string) => (selector === "[data-motion-card]" ? [stackElement] : []),
+    } as unknown as ParentNode;
+
+    const { cardElements } = measureMotionAnchors(root);
+
+    expect(cardElements.get("0:board:7")).toBe(stackElement);
+    expect(cardElements.get("0:board:8")).toBe(countElement);
+    expect(cardElements.get("0:board:9")).toBe(countElement);
+  });
+
   it("records the stack depth for a grouped board card and its aliases", () => {
     const stackElement = {
       dataset: {
@@ -1273,6 +1340,7 @@ describe("motion geometry", () => {
         stackDepth: "3",
       },
       getBoundingClientRect: () => rect(10, 20),
+      querySelector: () => null,
     } as unknown as HTMLElement;
     const single = {
       dataset: { motionCard: "0:board:9" },

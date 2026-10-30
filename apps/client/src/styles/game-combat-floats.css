@@ -757,8 +757,7 @@
   position: absolute;
   inset: 0;
   transform: translateY(0);
-  /* Stay painted while sliding back under the permanent. */
-  transition: transform 120ms ease, visibility 0s linear 120ms;
+  transition: transform 120ms ease;
 }
 .equipment-stack-card:last-of-type {
   position: relative;
@@ -767,6 +766,8 @@
 /* Unpainted until fanned: a hero's clear top edge shows the soul card's pitch strip. */
 .equipment-stack-card:not(:last-of-type) {
   visibility: hidden;
+  /* Stay painted while sliding back; a delayed top card would blink after a motion reveal. */
+  transition: transform 120ms ease, visibility 0s linear 120ms;
 }
 /* A tapped ally is landscape, so its bindings use that same orientation. The
    wrapper still travels vertically on hover, exposing horizontal top edges. */
@@ -786,7 +787,8 @@
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .equipment-stack-card { transition: none; }
+  .equipment-stack-card,
+  .equipment-stack-card:not(:last-of-type) { transition: none; }
 }
 /* centered circular counter pip — pitch pips and pile counts share the base */
 .pip {
